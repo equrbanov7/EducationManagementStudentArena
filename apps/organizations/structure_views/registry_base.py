@@ -20,7 +20,7 @@ from core.constants import OrgUnitType
 from core.search_text import tolerant_q
 
 from ..models import OrgUnit
-from ..views import _has_org_permission, _visible_units_queryset
+from ..views import _visible_units_queryset
 from ._shared import _teacher_memberships_qs, _unit_permission_flags
 from .constants import KAFEDRA_UNIT_TYPES
 
@@ -68,12 +68,13 @@ def unit_type_label(unit_type: str) -> str:
 
 
 def registry_flags(request, organization) -> dict:
-    """Struktur yazma bayraqları + rəhbər təyini (`unit.assign_head` VƏ YA `member.edit`)."""
-    flags = _unit_permission_flags(request, organization)
-    # `can_assign_members` superadmin/sahibi artıq əhatə edir (bax `_unit_permission_flags`) —
-    # `org_admin` ALİASI burada da açar sayılmır.
-    flags["can_assign_head"] = flags["can_assign_members"] or _has_org_permission(request, "unit.assign_head")
-    return flags
+    """Struktur yazma bayraqları — bax `_unit_permission_flags`.
+
+    2026-10-13 (rol auditi B9): rəhbər təyini artıq `member.edit` ilə AÇILMIR — `role.assign` VƏ YA
+    `unit.assign_head`; müavin/koordinator `role.assign` (`can_assign_roles`); müəllim köçürmə
+    `member.edit` (`can_assign_members`). Superadmin/sahib hamısını alır, `org_admin` aliası heç birini.
+    """
+    return _unit_permission_flags(request, organization)
 
 
 # ─── Alt-ağac köməkçiləri ───────────────────────────────────────────────────

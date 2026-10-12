@@ -106,9 +106,13 @@ class HeadAssignmentNeedsRealKeyTest(_OrgUnitsBase):
         )
 
     def test_member_edit_key_still_assigns_head(self):
-        """Açar verilərsə (icazə redaktoru) təyinat işləyir — qapı rol adına yox, açara baxır."""
+        """Açar verilərsə (icazə redaktoru) təyinat işləyir — qapı rol adına yox, açara baxır.
+
+        2026-10-13 (rol auditi B9): rəhbər təyinatının açarı artıq `member.edit` deyil, `role.assign`
+        (və ya `unit.assign_head`) — `member.edit` tək açmır (bax `test_role_audit_b_struct_2026_10_13`).
+        """
         role = self.roles["chair_head"]
-        role.permissions = list(role.permissions) + ["member.edit"]
+        role.permissions = list(role.permissions) + ["role.assign"]
         role.save(update_fields=["permissions"])
         specialty = OrgUnit.objects.get(pk=self.specialty.pk)
         response = self._action(

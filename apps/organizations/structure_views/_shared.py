@@ -51,15 +51,34 @@ def _unit_permission_flags(request, organization):
     prorektor `member.*`, dekan, HR) və ya superadmin/sahib. Əvvəl alias bunu da açırdı və
     `member.edit` daşımayan dekan müavini / kafedra müdiri öz alt-ağacında dekan və ya kafedra
     müdiri təyin edə bilirdi (köhnə rəhbərin üzvlüyü deaktiv olurdu).
+
+    2026-10-13 (rol auditi B9): `member.edit` ROL VERMƏK demək deyil. Dekanın `member.edit`-i var
+    (müəllimi kafedraya köçürür), amma `role.assign`-i yoxdur — əvvəl o, öz fakültəsində kafedra
+    müdiri / dekan müavini / koordinator təyin edirdi. İndi bayraqlar ayrıdır:
+
+    * ``can_assign_members`` — ÜZVLÜK baxımı (müəllim köçürmə / kafedradan ayırma): `member.edit`;
+    * ``can_assign_roles`` — ROL VERMƏK/ALMAQ (müavin, koordinator, rəhbər üzvlüyünün silinməsi):
+      `role.assign` (və ya rol-idarə qapısı ilə eyni `org.manage_members`, bax `roles/_gates.py`);
+    * ``can_assign_head`` — dekan/müdir təyini: `role.assign` VƏ YA `unit.assign_head` (Tədris
+      şöbəsi rəhbəri yalnız rəhbər təyin edir, müavin/koordinator yox).
+
+    Superadmin/sahib hər üçünü alır. `org_admin` aliası heç birini açmır.
     """
     can_manage = _can_manage_organization(request.user, organization)
+    is_superuser = _is_structure_superuser(request.user, organization)
+    can_assign_roles = (
+        is_superuser
+        or _has_org_permission(request, "role.assign")
+        or _has_org_permission(request, "org.manage_members")
+    )
     return {
         "can_create": can_manage or _has_org_permission(request, "unit.create"),
         "can_edit": can_manage or _has_org_permission(request, "unit.edit"),
         "can_delete": can_manage or _has_org_permission(request, "unit.delete"),
-        # Müəllim/rəhbər təyinatı üzv redaktəsidir (HR-ın `member.edit` icazəsi var).
-        "can_assign_members": _is_structure_superuser(request.user, organization)
-        or _has_org_permission(request, "member.edit"),
+        # Müəllim köçürmə/ayırma üzv redaktəsidir (HR və dekanın `member.edit` icazəsi var).
+        "can_assign_members": is_superuser or _has_org_permission(request, "member.edit"),
+        "can_assign_roles": can_assign_roles,
+        "can_assign_head": can_assign_roles or _has_org_permission(request, "unit.assign_head"),
     }
 
 
@@ -309,8 +328,9 @@ def _handle_faculty_action(request, organization, scope, flags):
         return {}, f"“{unit.name}” fakültəsi silindi."
 
     if action == "assign_head":
-        if not flags["can_assign_members"]:
-            return {"general": "Rəhbər təyin etmək üçün `member.edit` icazəsi lazımdır."}, ""
+        # 2026-10-13 (rol auditi B9): rəhbər təyini rol verməkdir — `member.edit` yox.
+        if not flags["can_assign_head"]:
+            return {"general": "Rəhbər təyin etmək üçün `role.assign` və ya `unit.assign_head` icazəsi lazımdır."}, ""
         return _assign_unit_head(request, organization, unit)
 
     return {"general": "Naməlum əməliyyat."}, ""
@@ -387,8 +407,11 @@ def _handle_kafedra_action(request, organization, scope, flags):
         return {}, f"“{unit.name}” kafedrası silindi."
 
     if action == "assign_head":
-        if not flags["can_assign_members"]:
-            return {"general": "Kafedra müdiri təyin etmək üçün `member.edit` icazəsi lazımdır."}, ""
+        # 2026-10-13 (rol auditi B9): müdir təyini rol verməkdir — `member.edit` yox.
+        if not flags["can_assign_head"]:
+            return {
+                "general": "Kafedra müdiri təyin etmək üçün `role.assign` və ya `unit.assign_head` icazəsi lazımdır."
+            }, ""
         return _assign_unit_head(request, organization, unit)
 
     if action == "assign_teacher":

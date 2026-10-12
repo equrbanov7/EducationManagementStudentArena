@@ -8,7 +8,7 @@ from django.utils import timezone
 from apps.notifications.models import MembershipRequestRoleType, StudentOrganizationRequestStatus
 from apps.notifications.public import notify_user_invited_to_organization
 from apps.organizations.models import Membership
-from apps.organizations.public import create_audit_log
+from apps.organizations.public import create_audit_log, get_permission_scope
 
 from ....models import UserProfile
 from ..._helpers import (
@@ -24,9 +24,57 @@ from ..._helpers import (
 
 logger = logging.getLogger(__name__)
 
+# 2026-10-13 (rol auditi B8): dəvət / müraciət təsdiqi əvvəl YALNIZ `user_level ≥ 65` ilə açılırdı —
+# `member.invite` yoxlanmırdı, dekan / dekan müavini / kafedra müdiri / imtahan mərkəzi rəhbəri təşkilata
+# BÖLMƏSİZ (org-wide) üzv dəvət edir, tələbə/müəllim müraciətini təsdiqləyirdi. İndi açar real qapıdır və
+# ƏHATƏ yoxlanılır: bu axın üzvlüyü həmişə `scope_unit=None` ilə yaradır (org-wide), ona görə yalnız
+# org-wide `member.invite` əhatəsi (HR, rektor, prorektor, sahib) keçir; UNIT əhatəli aktor (dekan) rədd
+# edilir. Uzaqlaşdırma ayrıca `member.remove` ilə qapılıdır (`_members.py`) — bu dəstdə deyil.
+INVITE_PERMISSION = "member.invite"
+INVITE_GATED_ACTIONS = frozenset(
+    {
+        "invite_student",
+        "bulk_invite_students",
+        "invite_teacher_staff",
+        "bulk_invite_teacher_staff",
+        "revoke_sent_invites",
+        "revoke_teacher_staff_invites",
+        "approve_requested_student",
+        "add_student",
+        "bulk_approve_requested_students",
+        "approve_teacher_staff_request",
+        "reject_teacher_staff_request",
+    }
+)
+_INVITE_DENIED_MESSAGE = "Dəvət və müraciət təsdiqi üçün «member.invite» icazəsi tələb olunur."
+_INVITE_OUT_OF_SCOPE_MESSAGE = (
+    "Dəvət təşkilata bölməsiz üzvlük yaradır — bunun üçün bütün təşkilat əhatəli «member.invite» icazəsi lazımdır."
+)
+
 
 class _InvitesMixin:
     """dəvət göndər/geri al (StudentOrgManagementFlow MRO ilə istifadə edir)."""
+
+    def _invite_gate_error(self):
+        """`None` = əməl icazəlidir; əks halda istifadəçiyə göstəriləcək mesaj (B8, fail-closed).
+
+        * superadmin / təşkilat sahibi → icazəli;
+        * `member.invite` əhatəsi ORG-WIDE (ORGANIZATION rolu) → icazəli;
+        * UNIT əhatəli `member.invite` (dekan öz fakültəsi) → RƏDD: bu axında vahid yoxdur, dəvət org-wide-dır;
+        * açar yalnız COURSE rolundan gəlirsə (müəllimə delegasiya, `teacher_student_only`) → köhnə dar qayda
+          qalır: əməllər `run()`-da açara görə süzülüb və rol tipi TƏLƏBƏyə məcburi çevrilib.
+        """
+        actor = self.request.user
+        if self.is_superadmin or getattr(self.org, "owner_id", None) == actor.id:
+            return None
+        scope = get_permission_scope(actor, self.org, INVITE_PERMISSION, request=self.request)
+        if scope.is_org_wide:
+            return None
+        if scope.is_unit_scoped:
+            return _INVITE_OUT_OF_SCOPE_MESSAGE
+        if getattr(self, "teacher_student_only", False):
+            return None
+        return _INVITE_DENIED_MESSAGE
 
     def _invite_user_for_role(self, target_user, role_type):
         from core.rls import bypass_rls as _bypass_rls

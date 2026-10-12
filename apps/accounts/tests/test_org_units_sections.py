@@ -28,12 +28,16 @@ class _OrgUnitsBase(Stage2BaseTest):
     def setUpTestData(cls):
         super().setUpTestData()
         head = cls.roles["teaching_office_head"]
+        # 2026-10-13 (rol auditi B9): reyestrin bütün əməllərini sınayan aktor — müavin/koordinator
+        # təyini artıq `member.edit` ilə deyil, `role.assign` ilə açılır (əvvəl `member.edit` bunu da
+        # «rol vermək» kimi açırdı). `member.edit` müəllim köçürmə/ayırma üçün qalır.
         head.permissions = list(head.permissions) + [
             "unit.create",
             "unit.edit",
             "unit.delete",
             "unit.assign_head",
             "member.edit",
+            "role.assign",
         ]
         head.save(update_fields=["permissions"])
         for name, level in (("vice_dean", 65), ("program_coordinator", 45)):
