@@ -26,7 +26,6 @@ DEFAULT_ROLES = {
             "level": 90,
             "scope_type": RoleScopeType.ORGANIZATION,
             "permissions": [
-                "org.view",
                 "org.edit",
                 "unit.*",
                 "member.*",

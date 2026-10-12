@@ -96123,3 +96123,51 @@ msgstr "Просмотр академических записей (средни
 msgctxt "organizations.permission.label"
 msgid "Müəllim/heyət hesablarının toplu idxalı"
 msgstr "Массовый импорт учётных записей преподавателей/сотрудников"
+
+msgctxt "accounts.my_group"
+msgid "Qrup yoldaşlarının yalnız adı və tələbə nömrəsi görünür; davamiyyət şəxsi məlumatdır və yalnız özünüzə göstərilir."
+msgstr "Показаны только имена и номера студентов группы; посещаемость — личные данные и видна только вам."
+
+msgctxt "accounts.my_group"
+msgid "Mənim davamiyyətim"
+msgstr "Моя посещаемость"
+
+msgctxt "accounts.my_group"
+msgid "%(period)s %(year)s — qayıb saatı və dərs saatına nisbəti (faiz)."
+msgstr "%(period)s %(year)s — часы пропусков и их доля от учебных часов (процент)."
+
+msgctxt "accounts.my_group"
+msgid "Fənn üzrə davamiyyətim"
+msgstr "Моя посещаемость по предметам"
+
+msgctxt "accounts.my_group"
+msgid "Fənn"
+msgstr "Предмет"
+
+msgctxt "accounts.my_group"
+msgid "Qayıb (saat)"
+msgstr "Пропуски (часы)"
+
+msgctxt "accounts.my_group"
+msgid "Faiz"
+msgstr "Процент"
+
+msgctxt "accounts.my_group"
+msgid "Ümumi"
+msgstr "Итого"
+
+msgctxt "accounts.my_group"
+msgid "Cari tədris dövrü müəyyən edilməyib."
+msgstr "Текущий учебный период не определён."
+
+msgctxt "accounts.my_group"
+msgid "Qrup yoldaşları"
+msgstr "Одногруппники"
+
+msgctxt "accounts.my_group"
+msgid "%(group)s qrupunun tələbələri"
+msgstr "Студенты группы %(group)s"
+
+msgctxt "accounts.my_group"
+msgid "siz"
+msgstr "вы"

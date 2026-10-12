@@ -46,7 +46,8 @@ from .permissions_system import merge_system_permissions
 # yalnız-oxu jurnal girişi, `analytics.view_own` → «Statistika» şəxsi profili.
 PERMISSION_CATEGORIES = {
     "organization": [
-        "org.view",
+        # `org.view` 2026-10-13-də ÇIXARILDI (sahib: «lazım deyilsə çıxar»): heç bir kod onu yoxlamırdı —
+        # təşkilata baxış üzvlüklə verilir. Mövcud rollardan: miqrasiya 0063.
         "org.edit",
         "org.settings",
         "org.manage_members",
@@ -338,7 +339,6 @@ _PERM_CTX = "organizations.permission.label"
 
 PERMISSION_LABELS = {
     # organization
-    "org.view": pgettext_lazy(_PERM_CTX, "Təşkilat məlumatına baxış"),
     "org.edit": pgettext_lazy(_PERM_CTX, "Təşkilat məlumatını redaktə etmək"),
     "org.settings": pgettext_lazy(_PERM_CTX, "Təşkilat ayarlarını idarə etmək"),
     "org.manage_members": pgettext_lazy(_PERM_CTX, "Təşkilat üzvlərini idarə etmək"),

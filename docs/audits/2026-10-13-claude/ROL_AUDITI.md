@@ -25,7 +25,21 @@ admin-ekvivalent ad — dekan, dekan müavini, kafedra müdiri) bəzi yerlərdə
 | A5 | **HR-ın «Rol təyin et» / «Rolları idarə et» menyusu rol ADI ilə açılırdı** — redaktorda `role.assign` alınsa menyu qalırdı, əməl 403 verirdi. | `rbac.py`: `_can_manage_roles` ilə (şablonda HR-da `role.assign` var — prod-da görünüş dəyişmir). |
 | A6 | Ölçmə skripti çoxrollu nümunə götürürdü («teacher» = müəllim+müdir, 49 bölmə), müəllimin `/jurnal/` linkini görmürdü, dashboard vidcetlərindəki açarları sayırdı, RLS altında «0 rol» ilə uğurlu çıxırdı. | `role_open_all.py`: tək-rollu nümunə, yalnız sidebar, jurnal linki, exit 2. |
 
-## B. Sahibin qərarı lazımdır (tövsiyə olunan variant birinci)
+## B. Qərarlar — HAMISI tövsiyə olunan variantla TƏTBİQ OLUNDU (sahib 2026-10-13: «tövsiyə olunan variantlarla et»)
+
+Commit-lər: `f1801cec` (açar verilişi + miqrasiya 0061), `742d7872` (B1), `0dc45f94` (B8/B9/B15), `5f56b570`
+(B12/B13/B17/B18/B19), `234487b3` (B2/B3/B5/B7/B10/B11/B14/B16/B21, miqrasiya 0062), sonrakı düzəliş commit-i
+(miqrasiya 0063). Əlavə sahib qərarları (2026-10-13 axşam):
+
+* **«Qrupum» — yalnız şəxsi:** qrup yoldaşları üçün yalnız ad + tələbə nömrəsi; davamiyyət (fənn üzrə qayıb)
+  YALNIZ baxanın özünə («Mənim davamiyyətim»).
+* **`org.view` çıxarıldı** (heç nəyi qapılamırdı) — kataloq, bütün şablonlar, miqrasiya 0063.
+* **Başqa tövsiyələr:** RİM əməkdaşına `workload.report` / `plan.view` / `semester.view`, qəyyuma
+  `workload.report` (yalnız-oxu icmallar; şablon vədləri) — miqrasiya 0063.
+* B9-un genişlənməsi: rol daşıyanı (müavin/koordinator/rəhbər) SİLMƏK də onu verən açarı tələb edir.
+* Diqqət: HR artıq tələbə idxal etmir — prod-da tələbə qəbulunu Tələbə xidmətləri rolu aparmalıdır.
+
+Aşağıdakı siyahı tarixi qeyd kimi saxlanılır (nə tapılmışdı):
 
 ### Yüksək
 

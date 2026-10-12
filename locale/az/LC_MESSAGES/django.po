@@ -95499,3 +95499,51 @@ msgstr "Akademik qeydlərə baxış (ÜOMG, transkript)"
 msgctxt "organizations.permission.label"
 msgid "Müəllim/heyət hesablarının toplu idxalı"
 msgstr "Müəllim/heyət hesablarının toplu idxalı"
+
+msgctxt "accounts.my_group"
+msgid "Qrup yoldaşlarının yalnız adı və tələbə nömrəsi görünür; davamiyyət şəxsi məlumatdır və yalnız özünüzə göstərilir."
+msgstr "Qrup yoldaşlarının yalnız adı və tələbə nömrəsi görünür; davamiyyət şəxsi məlumatdır və yalnız özünüzə göstərilir."
+
+msgctxt "accounts.my_group"
+msgid "Mənim davamiyyətim"
+msgstr "Mənim davamiyyətim"
+
+msgctxt "accounts.my_group"
+msgid "%(period)s %(year)s — qayıb saatı və dərs saatına nisbəti (faiz)."
+msgstr "%(period)s %(year)s — qayıb saatı və dərs saatına nisbəti (faiz)."
+
+msgctxt "accounts.my_group"
+msgid "Fənn üzrə davamiyyətim"
+msgstr "Fənn üzrə davamiyyətim"
+
+msgctxt "accounts.my_group"
+msgid "Fənn"
+msgstr "Fənn"
+
+msgctxt "accounts.my_group"
+msgid "Qayıb (saat)"
+msgstr "Qayıb (saat)"
+
+msgctxt "accounts.my_group"
+msgid "Faiz"
+msgstr "Faiz"
+
+msgctxt "accounts.my_group"
+msgid "Ümumi"
+msgstr "Ümumi"
+
+msgctxt "accounts.my_group"
+msgid "Cari tədris dövrü müəyyən edilməyib."
+msgstr "Cari tədris dövrü müəyyən edilməyib."
+
+msgctxt "accounts.my_group"
+msgid "Qrup yoldaşları"
+msgstr "Qrup yoldaşları"
+
+msgctxt "accounts.my_group"
+msgid "%(group)s qrupunun tələbələri"
+msgstr "%(group)s qrupunun tələbələri"
+
+msgctxt "accounts.my_group"
+msgid "siz"
+msgstr "siz"

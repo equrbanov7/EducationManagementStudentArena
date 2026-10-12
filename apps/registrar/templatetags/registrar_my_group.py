@@ -14,7 +14,8 @@ register = template.Library()
 
 
 @register.simple_tag
-def my_group_overview(unit):
+def my_group_overview(unit, viewer=None):
+    """``viewer`` — baxan istifadəçi: davamiyyət YALNIZ onun özü üçün (sahib 2026-10-13 «ancaq şəxsi»)."""
     if unit is None:
-        return {"group": None, "period": None, "subjects": [], "students": [], "has_attendance": False}
-    return group_overview(unit)
+        return {"group": None, "period": None, "students": [], "me": None, "has_attendance": False}
+    return group_overview(unit, viewer_id=getattr(viewer, "pk", None))

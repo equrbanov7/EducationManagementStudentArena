@@ -3156,6 +3156,8 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, reverse("accounts:pending_review"))
 
+    # Rol auditi B12 (2026-10-13): «Sərbəst iş»/«Kurs işi» sətirləri yalnız açar yanılı olanda görünür.
+    @override_settings(ACADEMIC_SELFWORK_ENABLED=True, ACADEMIC_COURSEWORK_ENABLED=True)
     def test_assigned_tasks_section_lists_exam_assignment_lab_and_project(self):
         from datetime import timedelta
 
@@ -3331,6 +3333,8 @@ class ProfileViewTest(TestCase):
         self.assertEqual(second_response.status_code, 200)
         self.assertEqual(second_response.json()["badges"]["assigned_tasks_count"], 0)
 
+    # Rol auditi B12 (2026-10-13): «Sərbəst iş»/«Kurs işi» sətirləri yalnız açar yanılı olanda görünür.
+    @override_settings(ACADEMIC_SELFWORK_ENABLED=True, ACADEMIC_COURSEWORK_ENABLED=True)
     def test_assigned_tasks_search_filters_items(self):
         from datetime import timedelta
 

@@ -28,7 +28,6 @@ from core.constants import RoleScopeType
 #: Tələbə Xidmətləri Mərkəzinin səthi — qəbul (08), reyestr (09), tələbə
 #: kataloqu (people-students) və müraciətlərin «telebe» şöbəsi (11).
 _STUDENT_SERVICES_PERMISSIONS = [
-    "org.view",
     # Struktur/kataloq — YALNIZ OXU (qrup, ixtisas, fakültə adları lazımdır).
     "unit.view",
     "catalog.view",

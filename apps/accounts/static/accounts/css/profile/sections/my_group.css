@@ -42,11 +42,38 @@
     line-height: 1.5;
 }
 
-.mg-table__subject {
-    max-width: 10rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+/* Bölmə başlıqları: «Mənim davamiyyətim» / «Qrup yoldaşları» (sahib 2026-10-13: davamiyyət yalnız şəxsi). */
+.mg-subtitle {
+    margin: var(--ems-sp-2) 0 0;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+}
+
+.mg-table__index {
+    width: 3rem;
+    color: var(--ems-text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.mg-table__total-row th,
+.mg-table__total-row td {
+    border-top: 2px solid var(--ems-border);
+}
+
+.mg-row--me th,
+.mg-row--me td {
+    background: var(--ems-primary-50);
+}
+
+.mg-me-badge {
+    margin-left: var(--ems-sp-2);
+    padding: 0 var(--ems-sp-2);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+    font-size: var(--ems-fs-xs);
+    font-weight: 600;
 }
 
 .mg-table__name {

@@ -95399,3 +95399,51 @@ msgstr "Akademik kayıtları görüntüleme (GNO, transkript)"
 msgctxt "organizations.permission.label"
 msgid "Müəllim/heyət hesablarının toplu idxalı"
 msgstr "Öğretmen/personel hesaplarının toplu içe aktarımı"
+
+msgctxt "accounts.my_group"
+msgid "Qrup yoldaşlarının yalnız adı və tələbə nömrəsi görünür; davamiyyət şəxsi məlumatdır və yalnız özünüzə göstərilir."
+msgstr "Grup arkadaşlarının yalnızca adı ve öğrenci numarası görünür; devamsızlık kişisel bilgidir ve yalnızca size gösterilir."
+
+msgctxt "accounts.my_group"
+msgid "Mənim davamiyyətim"
+msgstr "Devamsızlığım"
+
+msgctxt "accounts.my_group"
+msgid "%(period)s %(year)s — qayıb saatı və dərs saatına nisbəti (faiz)."
+msgstr "%(period)s %(year)s — devamsızlık saati ve ders saatine oranı (yüzde)."
+
+msgctxt "accounts.my_group"
+msgid "Fənn üzrə davamiyyətim"
+msgstr "Ders bazında devamsızlığım"
+
+msgctxt "accounts.my_group"
+msgid "Fənn"
+msgstr "Ders"
+
+msgctxt "accounts.my_group"
+msgid "Qayıb (saat)"
+msgstr "Devamsızlık (saat)"
+
+msgctxt "accounts.my_group"
+msgid "Faiz"
+msgstr "Yüzde"
+
+msgctxt "accounts.my_group"
+msgid "Ümumi"
+msgstr "Toplam"
+
+msgctxt "accounts.my_group"
+msgid "Cari tədris dövrü müəyyən edilməyib."
+msgstr "Geçerli öğretim dönemi belirlenmemiş."
+
+msgctxt "accounts.my_group"
+msgid "Qrup yoldaşları"
+msgstr "Grup arkadaşları"
+
+msgctxt "accounts.my_group"
+msgid "%(group)s qrupunun tələbələri"
+msgstr "%(group)s grubunun öğrencileri"
+
+msgctxt "accounts.my_group"
+msgid "siz"
+msgstr "siz"

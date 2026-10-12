@@ -62,7 +62,11 @@ ROLE_AUDIT_GRANTS: dict[str, tuple[str, ...]] = {
     "dean": ("student.records_view", "notification.publish"),
     "vice_dean": ("student.records_view", "notification.publish"),
     "chair_head": ("student.records_view", "notification.publish"),
-    "rim_staff": ("student.records_view", "notification.publish"),
+    # 2026-10-13 axşam (sahib: «başqa tövsiyə olunan nə varsa et»): RİM əməkdaşı şablonu «bütün akademik
+    # səthlərin OXUSU (… dərs yükü)» vəd edir, amma `workload.view` yalnız şəxsi «Dərs yüküm»ü açırdı;
+    # qəyyum «ümumi mənzərə»ni görməlidir. Hamısı YALNIZ-OXU: icmal / plan / semestr hazırlığı (miqrasiya 0063).
+    "rim_staff": ("student.records_view", "notification.publish", "workload.report", "plan.view", "semester.view"),
+    "trustee": ("workload.report",),
 }
 
 #: Rol adı → ALINAN açarlar (B6: HR-ın tələbə tərəfi Tələbə xidmətlərinə keçib).
@@ -71,7 +75,8 @@ ROLE_AUDIT_REVOKES: dict[str, tuple[str, ...]] = {
 }
 
 #: Heç nəyi qapılamayan açarlar (B13) — kataloqdan və bütün rollardan çıxarılır.
-DEAD_PERMISSION_KEYS: tuple[str, ...] = ("grade.publish", "assignment.edit")
+#: 2026-10-13 axşam: `org.view` də (sahib «lazım deyilsə çıxar»; miqrasiya 0063).
+DEAD_PERMISSION_KEYS: tuple[str, ...] = ("grade.publish", "assignment.edit", "org.view")
 
 
 def _covered(permissions, key) -> bool:

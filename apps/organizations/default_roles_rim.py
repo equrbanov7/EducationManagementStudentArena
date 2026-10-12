@@ -31,7 +31,6 @@ from .default_roles_shared import PEOPLE_DIRECTORY_READ
 
 #: RİM əməkdaşının səthi — «görür və köməklik edir», «dəyişdirmir».
 _RIM_STAFF_PERMISSIONS = [
-    "org.view",
     # Struktur və kataloq — yalnız oxu (fakültə/kafedra/qrup/fənn adları lazımdır).
     "unit.view",
     "catalog.view",

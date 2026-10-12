@@ -63,7 +63,6 @@ UNIVERSITY_ROLES = [
         "level": 90,
         "scope_type": RoleScopeType.ORGANIZATION,
         "permissions": [
-            "org.view",
             "org.edit",
             "unit.*",
             "member.*",
@@ -111,7 +110,6 @@ UNIVERSITY_ROLES = [
         "level": 85,
         "scope_type": RoleScopeType.ORGANIZATION,
         "permissions": [
-            "org.view",
             "unit.view",
             "member.view",
             "course.view",
@@ -163,7 +161,6 @@ UNIVERSITY_ROLES = [
         "level": 60,
         "scope_type": RoleScopeType.ORGANIZATION,
         "permissions": [
-            "org.view",
             "unit.view",
             "member.view",
             "course.view",
@@ -183,7 +180,6 @@ UNIVERSITY_ROLES = [
         "level": 65,
         "scope_type": RoleScopeType.ORGANIZATION,
         "permissions": [
-            "org.view",
             "unit.view",
             "member.view",
             "member.invite",

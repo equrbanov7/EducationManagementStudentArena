@@ -44,7 +44,6 @@ from ._seed_helpers import UsersSeedMixin
 User = get_user_model()
 
 _HEAD_PERMS = [
-    "org.view",
     "unit.view",
     "member.view",
     "course.view",
@@ -58,7 +57,6 @@ _HEAD_PERMS = [
     "audit.view",
 ]
 _STAFF_PERMS = [
-    "org.view",
     "unit.view",
     "member.view",
     "course.view",

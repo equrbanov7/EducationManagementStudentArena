@@ -240,11 +240,9 @@ _CONSTANT_NAME = re.compile(r"^_*[A-Z][A-Z0-9_]*$")
 # `assignments/<pk>/remove-student/` — silindi; açar rol şablonlarında qalır (rol redaktoru göstərir).
 # 2026-10-13 (rol auditi B13): `assignment.edit` və `grade.publish` kataloqdan və rollardan ÇIXARILDI
 # (miqrasiya organizations.0061) → siyahı yenə BOŞDUR.
-# 2026-10-13 (rol auditi B13, sərtləşdirilmiş skan): `org.view` yalnız rol şablonlarında və
-# `seed_demo_hierarchy` komandasında yazılıb — heç bir qapı onu yoxlamır (təşkilat məlumatı
-# üzvlüklə açılır). Audit «ölü açarlar» siyahısındadır; qapıya bağlamaq və ya kataloqdan çıxarmaq
-# sahibin qərarıdır — o vaxta qədər pin.
-KNOWN_UNREFERENCED_PERMISSION_KEYS = frozenset({"org.view"})
+# 2026-10-13 (rol auditi B13, sərtləşdirilmiş skan) `org.view`-i tapdı — sahibin qərarı ilə («lazım deyilsə
+# çıxar») kataloqdan və rollardan ÇIXARILDI (miqrasiya organizations.0063) → siyahı yenə BOŞDUR.
+KNOWN_UNREFERENCED_PERMISSION_KEYS = frozenset()
 
 
 def _iter_source_files(root):
@@ -435,7 +433,7 @@ class AssignmentEditKeyTest(_Base):
         from apps.organizations.default_roles import DEFAULT_ROLES
         from apps.organizations.permissions import PERMISSION_LABELS, get_all_permissions
 
-        for key in ("assignment.edit", "grade.publish"):
+        for key in ("assignment.edit", "grade.publish", "org.view"):
             self.assertNotIn(key, get_all_permissions(), key)
             self.assertNotIn(key, PERMISSION_LABELS, key)
             for org_type, roles in DEFAULT_ROLES.items():

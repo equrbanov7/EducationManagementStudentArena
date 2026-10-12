@@ -95938,3 +95938,51 @@ msgstr "View academic records (GPA, transcript)"
 msgctxt "organizations.permission.label"
 msgid "Müəllim/heyət hesablarının toplu idxalı"
 msgstr "Bulk import of teacher/staff accounts"
+
+msgctxt "accounts.my_group"
+msgid "Qrup yoldaşlarının yalnız adı və tələbə nömrəsi görünür; davamiyyət şəxsi məlumatdır və yalnız özünüzə göstərilir."
+msgstr "Only classmates' names and student numbers are shown; attendance is personal and shown only to you."
+
+msgctxt "accounts.my_group"
+msgid "Mənim davamiyyətim"
+msgstr "My attendance"
+
+msgctxt "accounts.my_group"
+msgid "%(period)s %(year)s — qayıb saatı və dərs saatına nisbəti (faiz)."
+msgstr "%(period)s %(year)s — absence hours and their share of lesson hours (percent)."
+
+msgctxt "accounts.my_group"
+msgid "Fənn üzrə davamiyyətim"
+msgstr "My attendance by subject"
+
+msgctxt "accounts.my_group"
+msgid "Fənn"
+msgstr "Subject"
+
+msgctxt "accounts.my_group"
+msgid "Qayıb (saat)"
+msgstr "Absence (hours)"
+
+msgctxt "accounts.my_group"
+msgid "Faiz"
+msgstr "Percent"
+
+msgctxt "accounts.my_group"
+msgid "Ümumi"
+msgstr "Total"
+
+msgctxt "accounts.my_group"
+msgid "Cari tədris dövrü müəyyən edilməyib."
+msgstr "The current academic period is not set."
+
+msgctxt "accounts.my_group"
+msgid "Qrup yoldaşları"
+msgstr "Classmates"
+
+msgctxt "accounts.my_group"
+msgid "%(group)s qrupunun tələbələri"
+msgstr "Students of group %(group)s"
+
+msgctxt "accounts.my_group"
+msgid "siz"
+msgstr "you"

@@ -3,8 +3,9 @@
 YALNIZ-OXU baxışı. Qapı: `member.view` açarının UNIT əhatəsi akademik qrup olmalıdır
 (`views/_helpers/rbac_my_group.py`); `{% my_group_unit %}` eyni qapını render vaxtı yenidən yoxlayır.
 
-Göstərilən: qrup adı, qrup yoldaşlarının adı + tələbə nömrəsi, cari dövrün fənn üzrə qayıb saatı və
-faizi. GÖSTƏRİLMƏYƏN: e-poçt / telefon / demoqrafiya / bal / imtahan buraxılışı / profil linkləri.
+Göstərilən: qrup adı, qrup yoldaşlarının adı + tələbə nömrəsi; davamiyyət (fənn üzrə qayıb saatı/faizi)
+YALNIZ baxanın ÖZÜ üçün — sahib 2026-10-13 «ancaq şəxsi görünsün». Başqasının qayıbı / balı / e-poçtu /
+telefonu / demoqrafiyası / imtahan buraxılışı / profil linki GÖSTƏRİLMİR.
 
 Qabıq qaydası: `<h1>` BURADA YOXDUR (başlıq qabıqdan gəlir). CSP: inline CSS/JS yoxdur — üslub
 xarici fayldadır və panelin İÇİNDƏ yüklənir (AJAX swap-dan sonra da). JS lazım deyil.{% endcomment %}
@@ -12,14 +13,14 @@ xarici fayldadır və panelin İÇİNDƏ yüklənir (AJAX swap-dan sonra da). JS
 <section class="profile-section-panel profile-section--my-group {% if active_section == 'my-group' %}is-active{% endif %}"
          data-profile-section-panel="my-group"
          data-source-url="{{ profile_base_url }}?section=my-group">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_group.css' %}?v=20261013-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_group.css' %}?v=20261013-2">
     {% my_group_unit as mg_unit %}
     {% if mg_unit is None %}
         {% trans "Sizə təyin olunmuş akademik qrup tapılmadı." context "accounts.my_group" as mg_none_title %}
         {% trans "Qrup nümayəndəsi rolu qrupa bağlanmayıb. Dekanlığa müraciət edin." context "accounts.my_group" as mg_none_body %}
         {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_title=mg_none_title state_body=mg_none_body state_icon="fa-users-slash" %}
     {% else %}
-    {% my_group_overview mg_unit as mg %}
+    {% my_group_overview mg_unit request.user as mg %}
     <div class="mg" data-my-group-root>
         <header class="mg-head">
             <p class="mg-head__group">
@@ -27,15 +28,55 @@ xarici fayldadır və panelin İÇİNDƏ yüklənir (AJAX swap-dan sonra da). JS
                 <span class="mg-head__name">{{ mg.group.name }}</span>
                 <span class="mg-head__count">{% blocktrans with total=mg.students|length context "accounts.my_group" %}Tələbə sayı: {{ total }}{% endblocktrans %}</span>
             </p>
-            <p class="mg-head__note">
-                {% if mg.period %}
-                    {% blocktrans with period=mg.period.name year=mg.period.year_display context "accounts.my_group" %}Davamiyyət: {{ period }} {{ year }} — qayıb saatı və dərs saatına nisbəti (faiz). Yalnız baxış üçündür.{% endblocktrans %}
-                {% else %}
-                    {% trans "Cari tədris dövrü müəyyən edilməyib — yalnız qrup siyahısı göstərilir." context "accounts.my_group" %}
-                {% endif %}
-            </p>
+            <p class="mg-head__note">{% trans "Qrup yoldaşlarının yalnız adı və tələbə nömrəsi görünür; davamiyyət şəxsi məlumatdır və yalnız özünüzə göstərilir." context "accounts.my_group" %}</p>
         </header>
 
+        {% if mg.me %}
+        <h2 class="mg-subtitle">{% trans "Mənim davamiyyətim" context "accounts.my_group" %}</h2>
+        {% if mg.period %}
+            <p class="mg-note">{% blocktrans with period=mg.period.name year=mg.period.year_display context "accounts.my_group" %}{{ period }} {{ year }} — qayıb saatı və dərs saatına nisbəti (faiz).{% endblocktrans %}</p>
+        {% endif %}
+        {% if mg.has_attendance %}
+        <div class="ems-tablewrap mg-tablewrap">
+            <div class="ems-tablescroll">
+                <table class="ems-table ems-table--zebra mg-table">
+                    <caption class="sr-only">{% trans "Fənn üzrə davamiyyətim" context "accounts.my_group" %}</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">{% trans "Fənn" context "accounts.my_group" %}</th>
+                            <th scope="col">{% trans "Qayıb (saat)" context "accounts.my_group" %}</th>
+                            <th scope="col">{% trans "Faiz" context "accounts.my_group" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for subject in mg.me.subjects %}
+                        <tr>
+                            <th scope="row" class="mg-table__name">{{ subject.name }}</th>
+                            <td class="mg-cell mg-cell--{{ subject.level }}" title="{% blocktrans with absence=subject.absence_hours|floatformat:'-1' hours=subject.lesson_hours|floatformat:'-1' context 'accounts.my_group' %}{{ absence }} / {{ hours }} saat{% endblocktrans %}">{{ subject.absence_hours|floatformat:"-1" }}</td>
+                            <td class="mg-cell mg-cell--{{ subject.level }}">{% if subject.percent is not None %}{{ subject.percent }}%{% else %}—{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="mg-table__total-row">
+                            <th scope="row" class="mg-table__name">{% trans "Ümumi" context "accounts.my_group" %}</th>
+                            <td class="mg-cell mg-cell--total mg-cell--{{ mg.me.level }}">{{ mg.me.absence_hours|floatformat:"-1" }}</td>
+                            <td class="mg-cell mg-cell--total mg-cell--{{ mg.me.level }}">{% if mg.me.percent is not None %}{{ mg.me.percent }}%{% else %}—{% endif %}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <ul class="mg-legend" aria-label="{% trans 'Rəng izahı' context 'accounts.my_group' %}">
+            <li class="mg-legend__item mg-legend__item--near">{% trans "Qayıb həddinə yaxındır" context "accounts.my_group" %}</li>
+            <li class="mg-legend__item mg-legend__item--over">{% trans "Qayıb həddi aşılıb" context "accounts.my_group" %}</li>
+        </ul>
+        {% elif mg.period %}
+            <p class="mg-note">{% trans "Bu dövr üçün fənn yazılışı hələ yoxdur." context "accounts.my_group" %}</p>
+        {% else %}
+            <p class="mg-note">{% trans "Cari tədris dövrü müəyyən edilməyib." context "accounts.my_group" %}</p>
+        {% endif %}
+        {% endif %}
+
+        <h2 class="mg-subtitle">{% trans "Qrup yoldaşları" context "accounts.my_group" %}</h2>
         {% if not mg.students %}
             {% trans "Qrupda qeydiyyatlı tələbə yoxdur." context "accounts.my_group" as mg_empty_title %}
             {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_title=mg_empty_title state_icon="fa-user-group" %}
@@ -43,52 +84,26 @@ xarici fayldadır və panelin İÇİNDƏ yüklənir (AJAX swap-dan sonra da). JS
         <div class="ems-tablewrap mg-tablewrap">
             <div class="ems-tablescroll">
                 <table class="ems-table ems-table--zebra ems-table--sticky mg-table">
-                    <caption class="sr-only">{% blocktrans with group=mg.group.name context "accounts.my_group" %}{{ group }} qrupunun tələbələri və fənn üzrə davamiyyəti{% endblocktrans %}</caption>
+                    <caption class="sr-only">{% blocktrans with group=mg.group.name context "accounts.my_group" %}{{ group }} qrupunun tələbələri{% endblocktrans %}</caption>
                     <thead>
                         <tr>
+                            <th scope="col" class="mg-table__index">#</th>
                             <th scope="col">{% trans "Tələbə" context "accounts.my_group" %}</th>
                             <th scope="col">{% trans "Tələbə nömrəsi" context "accounts.my_group" %}</th>
-                            {% for subject in mg.subjects %}
-                                <th scope="col" class="mg-table__subject" title="{{ subject.name }}">{{ subject.name }}</th>
-                            {% endfor %}
-                            {% if mg.has_attendance %}
-                                <th scope="col" class="mg-table__total">{% trans "Ümumi qayıb" context "accounts.my_group" %}</th>
-                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
                         {% for student in mg.students %}
-                        <tr>
-                            <th scope="row" class="mg-table__name">{{ student.name }}</th>
+                        <tr{% if student.is_me %} class="mg-row--me"{% endif %}>
+                            <td class="mg-table__index">{{ forloop.counter }}</td>
+                            <th scope="row" class="mg-table__name">{{ student.name }}{% if student.is_me %} <span class="mg-me-badge">{% trans "siz" context "accounts.my_group" %}</span>{% endif %}</th>
                             <td class="mg-table__number">{{ student.student_number|default:"—" }}</td>
-                            {% for cell in student.cells %}
-                                {% if cell %}
-                                <td class="mg-cell mg-cell--{{ cell.level }}" title="{% blocktrans with absence=cell.absence_hours|floatformat:'-1' hours=cell.lesson_hours|floatformat:'-1' context 'accounts.my_group' %}{{ absence }} / {{ hours }} saat{% endblocktrans %}">
-                                    <span class="mg-cell__hours">{{ cell.absence_hours|floatformat:"-1" }}</span>{% if cell.percent is not None %}<span class="mg-cell__pct">{{ cell.percent }}%</span>{% endif %}
-                                </td>
-                                {% else %}
-                                <td class="mg-cell mg-cell--na"><span class="sr-only">{% trans "Bu fənnə yazılmayıb" context "accounts.my_group" %}</span><span aria-hidden="true">—</span></td>
-                                {% endif %}
-                            {% endfor %}
-                            {% if mg.has_attendance %}
-                                <td class="mg-cell mg-cell--total mg-cell--{{ student.level }}">
-                                    <span class="mg-cell__hours">{{ student.absence_hours|floatformat:"-1" }}</span>{% if student.percent is not None %}<span class="mg-cell__pct">{{ student.percent }}%</span>{% endif %}
-                                </td>
-                            {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
-        {% if mg.has_attendance %}
-        <ul class="mg-legend" aria-label="{% trans 'Rəng izahı' context 'accounts.my_group' %}">
-            <li class="mg-legend__item mg-legend__item--near">{% trans "Qayıb həddinə yaxındır" context "accounts.my_group" %}</li>
-            <li class="mg-legend__item mg-legend__item--over">{% trans "Qayıb həddi aşılıb" context "accounts.my_group" %}</li>
-        </ul>
-        {% elif mg.period %}
-            <p class="mg-note">{% trans "Bu dövr üçün fənn yazılışı hələ yoxdur." context "accounts.my_group" %}</p>
-        {% endif %}
         {% endif %}
     </div>
     {% endif %}

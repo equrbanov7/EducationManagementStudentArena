@@ -174,3 +174,21 @@ class HrRoleMenusFollowKeyTest(_TinyOrg):
         self.assertNotIn("role-assignment", sections)
         self.assertNotIn("manage-roles", sections)
         self.assertIn("publish-notification", sections)
+
+
+class FollowupTemplateGrantsTest(TestCase):
+    """2026-10-13 axşam: `org.view` heç bir şablonda yoxdur; RİM əməkdaşı / qəyyum oxu icmallarını alır."""
+
+    def test_templates(self):
+        from apps.organizations.default_roles import get_default_roles_for_org_type
+        from core.permissions import has_permission
+
+        roles = {role["name"]: role["permissions"] for role in get_default_roles_for_org_type("university")}
+        for name, permissions in roles.items():
+            self.assertNotIn("org.view", permissions, name)
+        for key in ("workload.report", "plan.view", "semester.view"):
+            self.assertTrue(has_permission(roles["rim_staff"], key), key)
+        self.assertTrue(has_permission(roles["trustee"], "workload.report"))
+        # Yazı açarları VERİLMİR.
+        for key in ("workload.manage", "plan.edit", "semester.open"):
+            self.assertFalse(has_permission(roles["rim_staff"], key), key)

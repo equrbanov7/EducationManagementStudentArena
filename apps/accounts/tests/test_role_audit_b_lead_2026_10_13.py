@@ -240,9 +240,11 @@ class MyGroupSectionTest(TestCase):
         self.assertNotIn("@qku.edu.az", html)
         self.assertNotIn("Gizli fənn", html)
         self.assertIn("Riyaziyyat", html)
-        # Murad: 9 / 30 saat → 30% (25% həddi aşılıb).
-        self.assertIn("30%", html)
-        self.assertIn("mg-cell--over", html)
+        # Sahib 2026-10-13 «ancaq şəxsi görünsün»: baş tələbə ÖZ qayıbını görür (2 / 30 → 7%), qrup
+        # yoldaşınınkını YOX (Murad: 9 / 30 → 30%, həddi aşılıb — heç bir iz qalmamalıdır).
+        self.assertIn("7%", html)
+        self.assertNotIn("30%", html)
+        self.assertNotIn("mg-cell--over", html)
 
     def test_full_page_section_renders_panel(self):
         response = self.client_for(self.lead).get(reverse("accounts:profile"), {"section": "my-group"})
@@ -251,20 +253,27 @@ class MyGroupSectionTest(TestCase):
         self.assertContains(response, "accounts/css/profile/sections/my_group.css")
         self.assertContains(response, "Murad Babayev")
 
-    def test_overview_matrix_values(self):
-        data = group_overview(self.group, period=self.period)
-        self.assertEqual([s["name"] for s in data["subjects"]], ["Riyaziyyat"])
+    def test_overview_values_are_personal_only(self):
+        data = group_overview(self.group, viewer_id=self.lead.pk, period=self.period)
         rows = {row["name"]: row for row in data["students"]}
         self.assertEqual(set(rows), {"Leyla Aliyeva", "Murad Babayev"})
-        self.assertEqual(rows["Leyla Aliyeva"]["cells"][0]["percent"], 7)
-        self.assertEqual(rows["Leyla Aliyeva"]["cells"][0]["level"], "ok")
-        self.assertEqual(rows["Murad Babayev"]["cells"][0]["level"], "over")
+        # Qrup yoldaşı sətrində YALNIZ ad + nömrə (+ «mən» bayrağı) — davamiyyət açarı yoxdur.
+        self.assertEqual(set(rows["Murad Babayev"]), {"name", "student_number", "is_me"})
         self.assertEqual(rows["Murad Babayev"]["student_number"], "10002")
+        self.assertTrue(rows["Leyla Aliyeva"]["is_me"])
+        self.assertEqual([s["name"] for s in data["me"]["subjects"]], ["Riyaziyyat"])
+        self.assertEqual(data["me"]["subjects"][0]["percent"], 7)
+        self.assertEqual(data["me"]["subjects"][0]["level"], "ok")
+
+    def test_overview_without_viewer_has_no_attendance(self):
+        data = group_overview(self.group, period=self.period)
+        self.assertIsNone(data["me"])
+        self.assertFalse(data["has_attendance"])
 
     def test_overview_query_count_does_not_grow_with_students(self):
         def count():
             with CaptureQueriesContext(connection) as ctx:
-                group_overview(self.group, period=self.period)
+                group_overview(self.group, viewer_id=self.lead.pk, period=self.period)
             return len(ctx.captured_queries)
 
         before = count()
