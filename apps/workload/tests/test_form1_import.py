@@ -17,7 +17,7 @@ from django.test import SimpleTestCase, TestCase
 from docx import Document
 from openpyxl import Workbook
 
-from apps.organizations.models import OrgUnit
+from apps.organizations.models import Membership, OrgUnit
 from apps.registrar.models import CourseOffering, Subject
 from apps.workload.models import TeacherAssignment, TeachingTask
 from apps.workload.services.task_form1_parsing import group_key, group_tokens, hours_value, name_words
@@ -212,3 +212,25 @@ class Form1ImportTests(TestCase):
         self.assertEqual(
             {r["line"]: r["teacher_action"] for r in self._report()}[report and min(report)], "outside_chair"
         )
+
+    def test_outside_chair_teacher_is_assigned_with_a_secondary_chair_membership(self):
+        other_chair = OrgUnit.objects.create(
+            organization=self.org, name="Ekologiya kafedrası", unit_type=OrgUnitType.CHAIR
+        )
+        outsider = User.objects.create_user("lamiye.a", "l@x.test", "pw", first_name="Lamiyə", last_name="Abasova")
+        activate_member(
+            self.org, outsider, "teacher", permissions=TEACHER_PERMS, scope_unit=other_chair,
+            scope_type=RoleScopeType.COURSE,
+        )  # fmt: skip
+        rows = [
+            ["1. Abasova Lamiyə Vidadi q. (Ştat)", "235 EKO", "Veb texnologiyalar", "20", "30", "30", "", "", "", ""]
+        ]
+        out = self._run(self._docx(rows), "--apply", "--allow-outside-chair")
+        self.assertIn("chair_membership_added=1", out)
+        veb = self.task.rows.get(subject__name="Veb texnologiyalar")
+        self.assertEqual(
+            set(TeacherAssignment.objects.filter(row=veb).values_list("teacher__username", flat=True)), {"lamiye.a"}
+        )
+        memberships = Membership.objects.filter(user=outsider, organization=self.org, is_active=True)
+        self.assertEqual({m.scope_unit_id for m in memberships}, {other_chair.pk, self.chair.pk})
+        self.assertFalse(memberships.get(scope_unit=self.chair).is_primary)
