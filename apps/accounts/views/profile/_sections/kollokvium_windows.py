@@ -149,8 +149,13 @@ def build_kollokvium_windows_section(
         org_options = []
         selected_org = active_organization
 
+    from apps.accounts.services.exam_center_decide import can_exam_center_decide
+
     section["is_superadmin"] = is_superadmin
-    section["is_head"] = bool(
+    # 2026-10-13 (rol auditi B1): bütün yazma düymələri `exam_center.decide` açarı ilə (POST da eyni qapı);
+    # əlavə gün bundan əlavə rəhbərə məxsus qalır. İşçi / RİM əməkdaşı pəncərələri yalnız GÖRÜR.
+    section["can_decide"] = can_exam_center_decide(request)
+    section["is_head"] = section["can_decide"] and bool(
         getattr(request.user, "is_superadmin", False)
         or request.user.is_superuser
         or getattr(request.user, "is_exam_center_head", False)

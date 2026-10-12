@@ -6,6 +6,7 @@ from .permissions import (
     appeal_block_reason,
     can_create_appeal,
     can_decide_appeal,
+    can_respond_appeal,
     can_review_appeal,
     can_view_appeal,
 )
@@ -53,6 +54,7 @@ __all__ = [
     "appeal_applicable",
     "can_create_appeal",
     "can_decide_appeal",
+    "can_respond_appeal",
     "can_review_appeal",
     "can_transition",
     "can_view_appeal",

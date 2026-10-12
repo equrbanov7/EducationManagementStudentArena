@@ -162,6 +162,13 @@ dövrlərdə K1/K2/K3 əvvəlki kimi.
   </div>
   {% endif %}
 
+  {% if not s.can_decide %}
+  {# 2026-10-13 (rol auditi B1): işçi / RİM əməkdaşı yalnız görür — yazma `exam_center.decide` açarı ilədir. #}
+  <div class="ems-banner kw-pastbanner"><i class="fas fa-eye" aria-hidden="true"></i>
+    <span>{% trans "Yalnız baxış: pəncərələri «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) təyin edir və dəyişir." context "registrar.kollokvium_window" %}</span>
+  </div>
+  {% endif %}
+
   {% if not s.interim.is_midterm %}
   {# Keçmiş dövr: niyə «Midterm pəncərələri» başlığı altında K1–K3 göründüyünü izah et. #}
   <div class="ems-banner kw-modebanner"><i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
@@ -179,7 +186,7 @@ dövrlərdə K1/K2/K3 əvvəlki kimi.
         {% for sr in s.stale_rows %}
         <li class="kw-stale__item">
           <span><b>{{ sr.label }}</b> · {{ sr.window.opens_on|date:"d.m.Y" }} – {{ sr.window.closes_on|date:"d.m.Y" }}</span>
-          {% if not s.period_is_past %}
+          {% if s.can_decide and not s.period_is_past %}
           <form method="post" action="{% url 'accounts:kollokvium_windows' %}{% if s.is_superadmin and s.selected_org %}?win_org={{ s.selected_org.id }}{% endif %}"
                 data-confirm data-confirm-variant="danger"
                 data-confirm-title="{% trans 'Köhnə pəncərəni sil' context 'registrar.kollokvium_window' %}"
@@ -233,11 +240,11 @@ dövrlərdə K1/K2/K3 əvvəlki kimi.
           {% trans "Bitmiş semestr — tarix dəyişmək mümkün deyil" context "registrar.kollokvium_window" as kw_locked_title %}
           <div class="ems-field">
             <label class="ems-field__label" for="kw-opens-{{ kr.k_index }}">{% trans "Açılış" context "registrar.kollokvium_window" %}</label>
-            <input type="date" class="ems-input" id="kw-opens-{{ kr.k_index }}" name="opens_on" value="{% if kr.window %}{{ kr.window.opens_on|date:'Y-m-d' }}{% endif %}" required {% if s.period_is_past %}disabled title="{{ kw_locked_title }}"{% endif %}>
+            <input type="date" class="ems-input" id="kw-opens-{{ kr.k_index }}" name="opens_on" value="{% if kr.window %}{{ kr.window.opens_on|date:'Y-m-d' }}{% endif %}" required {% if s.period_is_past %}disabled title="{{ kw_locked_title }}"{% elif not s.can_decide %}disabled{% endif %}>
           </div>
           <div class="ems-field">
             <label class="ems-field__label" for="kw-closes-{{ kr.k_index }}">{% trans "Bağlanış" context "registrar.kollokvium_window" %}</label>
-            <input type="date" class="ems-input" id="kw-closes-{{ kr.k_index }}" name="closes_on" value="{% if kr.window %}{{ kr.window.closes_on|date:'Y-m-d' }}{% endif %}" required {% if s.period_is_past %}disabled title="{{ kw_locked_title }}"{% endif %}>
+            <input type="date" class="ems-input" id="kw-closes-{{ kr.k_index }}" name="closes_on" value="{% if kr.window %}{{ kr.window.closes_on|date:'Y-m-d' }}{% endif %}" required {% if s.period_is_past %}disabled title="{{ kw_locked_title }}"{% elif not s.can_decide %}disabled{% endif %}>
           </div>
         </div>
       </form>
@@ -255,7 +262,7 @@ dövrlərdə K1/K2/K3 əvvəlki kimi.
       {% endif %}
 
       {# Yadda saxla + Deaktiv/Aktiv — yan-yana (form= ilə uyğun forma bağlanır) #}
-      {% if not s.period_is_past %}
+      {% if s.can_decide and not s.period_is_past %}
       <div class="kw-cardbtns">
         <button type="submit" form="kw-save-{{ kr.k_index }}" class="ems-btn ems-btn--primary"><i class="fas fa-floppy-disk"></i> {% trans "Yadda saxla" context "registrar.journal" %}</button>
         {% if kr.window %}

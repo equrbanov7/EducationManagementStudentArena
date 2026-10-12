@@ -118,6 +118,12 @@ boş vəziyyət `ems-state`. CSP: inline yoxdur.
     {% trans "Bu şərtlərə uyğun final/midterm imtahanı tapılmadı." context "accounts.exam_chance" as exch_no_exam %}
     {% trans "Süzgəcləri genişləndirin — tədris ilini, semestri və ya fakültəni dəyişin." context "accounts.exam_chance" as exch_no_exam_body %}
     {% include "partials/ems_ui/_empty.html" with state_icon="fa-folder-open" state_title=exch_no_exam state_body=exch_no_exam_body %}
+  {% elif not s.can_decide %}
+    {# 2026-10-13 (rol auditi B1): işçi / RİM əməkdaşı yalnız görür — şans vermək `exam_center.decide` açarı ilədir. #}
+    <div class="ems-msg ems-msg--info exch-note" role="status">
+      <i class="fas fa-eye ems-msg__icon" aria-hidden="true"></i>
+      <div>{% trans "Yalnız baxış: imtahan şansını «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir." context "accounts.exam_chance" %}</div>
+    </div>
   {% else %}
 
   <section class="ems-card exch-card">
