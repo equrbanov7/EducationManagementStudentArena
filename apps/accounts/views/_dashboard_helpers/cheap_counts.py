@@ -34,6 +34,7 @@ from .._helpers import (
     _tenant_scoped_courses,
     _tenant_scoped_exams,
 )
+from .._helpers.task_kind_visibility import coursework_tasks_visible, selfwork_tasks_visible
 from .academic_results import count_academic_items
 
 User = get_user_model()
@@ -217,10 +218,13 @@ def count_my_results(request, user) -> int:
         .count()
     )
 
+    # 2026-10-13 (rol auditi B12): söndürülmüş «Sərbəst iş» / «Kurs işi» badge-ə düşmür (kolleksiyaçı kimi).
     courses = (
         Submission.objects.filter(user=user, assignment__course_id__in=scoped_course_ids)
         .exclude(status="graded", graded_at__gt=review_cutoff)
         .count()
+        if selfwork_tasks_visible()
+        else 0
     )
 
     labs = (
@@ -233,6 +237,8 @@ def count_my_results(request, user) -> int:
         ProjectSubmission.objects.filter(student=user, project__course_id__in=scoped_course_ids)
         .exclude(status="graded", graded_at__gt=review_cutoff)
         .count()
+        if coursework_tasks_visible()
+        else 0
     )
 
     academic = count_academic_items(request)
@@ -263,10 +269,13 @@ def count_pending_answers(request, user) -> int:
         .count()
     )
 
+    # 2026-10-13 (rol auditi B12): söndürülmüş «Sərbəst iş» / «Kurs işi» badge-ə düşmür (kolleksiyaçı kimi).
     courses = (
         Submission.objects.filter(user=user, assignment__course_id__in=scoped_course_ids)
         .filter(~Q(status="graded") | Q(status="graded", graded_at__gt=review_cutoff))
         .count()
+        if selfwork_tasks_visible()
+        else 0
     )
 
     labs = (
@@ -279,6 +288,8 @@ def count_pending_answers(request, user) -> int:
         ProjectSubmission.objects.filter(student=user, project__course_id__in=scoped_course_ids)
         .filter(~Q(status="graded") | Q(status="graded", graded_at__gt=review_cutoff))
         .count()
+        if coursework_tasks_visible()
+        else 0
     )
 
     return exams + courses + labs + independent
@@ -385,7 +396,14 @@ def compute_review_badge_counts(*, my_exams_qs, teacher_courses) -> tuple[int, i
         ),
     )
 
-    submission_counts = Submission.objects.filter(assignment__course__in=teacher_courses).aggregate(
+    # 2026-10-13 (rol auditi B12): söndürülmüş «Sərbəst iş» / «Kurs işi» müəllim badge-inə də düşmür.
+    submission_qs = Submission.objects.filter(assignment__course__in=teacher_courses)
+    if not selfwork_tasks_visible():
+        submission_qs = submission_qs.none()
+    project_qs = ProjectSubmission.objects.filter(project__course__in=teacher_courses)
+    if not coursework_tasks_visible():
+        project_qs = project_qs.none()
+    submission_counts = submission_qs.aggregate(
         pending=Count(
             "id",
             filter=(Q(status="submitted") | Q(status="graded", graded_at__gte=review_cutoff)),
@@ -396,7 +414,7 @@ def compute_review_badge_counts(*, my_exams_qs, teacher_courses) -> tuple[int, i
         ),
     )
 
-    project_counts = ProjectSubmission.objects.filter(project__course__in=teacher_courses).aggregate(
+    project_counts = project_qs.aggregate(
         pending=Count(
             "id",
             filter=(Q(status="pending") | Q(status="graded", graded_at__gte=review_cutoff)),

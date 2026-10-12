@@ -1,4 +1,6 @@
-{% load i18n static ems_ui %}
+{% load i18n static ems_ui task_kinds %}
+{# 2026-10-13 (rol auditi B12): söndürülmüş «Sərbəst iş» / «Kurs işi» tabı göstərilmir (RİM tənzimləməsi). #}
+{% task_kind_visibility as tkv %}
 {% comment %}«Gözləmədə olan cavablar» — tələbə kabineti (redizayn 2026-09-12, audit bəndi 7/2).
 
 Nə səhv idi: kart başlığı bölmə adını (qabıq `#profileSectionTitle`) təkrarlayırdı,
@@ -36,6 +38,7 @@ Kontekst: `pending_answer_items`, `pending_answer_counts`, `pending_answers_acti
             <span class="ems-kpi__value">{{ counts.exams|default:0 }}</span>
             <span class="ems-kpi__note">{% trans "filter_written" context "accounts.pending_answers" %} {{ counts.written_exams|default:0 }} · {% trans "filter_practical" context "accounts.pending_answers" %} {{ counts.practical_exams|default:0 }}</span>
         </a>
+        {% if tkv.selfwork %}
         <a class="ems-kpi pax-kpi{% if active == 'courses' %} is-active{% endif %}"
            href="{{ profile_base_url }}?section=pending-answers&amp;pending_type=courses{% if pending_answers_search_query %}&amp;pending_search={{ pending_answers_search_query|urlencode }}{% endif %}"
            {% if active == 'courses' %}aria-current="true"{% endif %}>
@@ -43,6 +46,7 @@ Kontekst: `pending_answer_items`, `pending_answer_counts`, `pending_answers_acti
             <span class="ems-kpi__value">{{ counts.courses|default:0 }}</span>
             <span class="ems-kpi__note">{% trans "kpi_free_work_note" context "accounts.pending_answers" %}</span>
         </a>
+        {% endif %}
         <a class="ems-kpi pax-kpi{% if active == 'labs' %} is-active{% endif %}"
            href="{{ profile_base_url }}?section=pending-answers&amp;pending_type=labs{% if pending_answers_search_query %}&amp;pending_search={{ pending_answers_search_query|urlencode }}{% endif %}"
            {% if active == 'labs' %}aria-current="true"{% endif %}>
@@ -50,6 +54,7 @@ Kontekst: `pending_answer_items`, `pending_answer_counts`, `pending_answers_acti
             <span class="ems-kpi__value">{{ counts.labs|default:0 }}</span>
             <span class="ems-kpi__note">{% trans "kpi_lab_note" context "accounts.pending_answers" %}</span>
         </a>
+        {% if tkv.coursework %}
         <a class="ems-kpi pax-kpi{% if active == 'independent' %} is-active{% endif %}"
            href="{{ profile_base_url }}?section=pending-answers&amp;pending_type=independent{% if pending_answers_search_query %}&amp;pending_search={{ pending_answers_search_query|urlencode }}{% endif %}"
            {% if active == 'independent' %}aria-current="true"{% endif %}>
@@ -57,6 +62,7 @@ Kontekst: `pending_answer_items`, `pending_answer_counts`, `pending_answers_acti
             <span class="ems-kpi__value">{{ counts.independent|default:0 }}</span>
             <span class="ems-kpi__note">{% trans "kpi_coursework_note" context "accounts.pending_answers" %}</span>
         </a>
+        {% endif %}
     </nav>
 
     {# ── Avto filtr paneli — `ems_ui/_filter_bar.html` markup müqaviləsi ────── #}
@@ -83,9 +89,9 @@ Kontekst: `pending_answer_items`, `pending_answer_counts`, `pending_answers_acti
                     <option value="exams" {% if active == 'exams' %}selected{% endif %}>{% trans "filter_all_exams" context "accounts.pending_answers" %}</option>
                     <option value="written_exams" {% if active == 'written_exams' %}selected{% endif %}>{% trans "filter_written" context "accounts.pending_answers" %}</option>
                     <option value="practical_exams" {% if active == 'practical_exams' %}selected{% endif %}>{% trans "filter_practical" context "accounts.pending_answers" %}</option>
-                    <option value="courses" {% if active == 'courses' %}selected{% endif %}>{% trans "filter_free_work" context "accounts.pending_answers" %}</option>
+                    {% if tkv.selfwork %}<option value="courses" {% if active == 'courses' %}selected{% endif %}>{% trans "filter_free_work" context "accounts.pending_answers" %}</option>{% endif %}
                     <option value="labs" {% if active == 'labs' %}selected{% endif %}>{% trans "filter_lab_work" context "accounts.pending_answers" %}</option>
-                    <option value="independent" {% if active == 'independent' %}selected{% endif %}>{% trans "filter_coursework" context "accounts.pending_answers" %}</option>
+                    {% if tkv.coursework %}<option value="independent" {% if active == 'independent' %}selected{% endif %}>{% trans "filter_coursework" context "accounts.pending_answers" %}</option>{% endif %}
                 </select>
             </div>
         </div>

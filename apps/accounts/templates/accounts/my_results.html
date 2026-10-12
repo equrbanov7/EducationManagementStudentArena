@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n task_kinds %}
+{# 2026-10-13 (rol auditi B12): söndürülmüş «Sərbəst iş» / «Kurs işi» tabı göstərilmir (RİM tənzimləməsi). #}
 
 {% block title %}{% trans "title" context "accounts.my_results_page" %} - {{ site_brand_name }}{% endblock %}
 
@@ -33,18 +34,23 @@
                    class="results-tab {% if active_filter == 'exams' %}active{% endif %}">
                     {% trans "tab_exams" context "accounts.my_results_page" %} ({{ counts.exams|default:0 }})
                 </a>
+                {% task_kind_visibility as tkv %}
+                {% if tkv.selfwork %}
                 <a href="{% url 'accounts:my_results' %}?type=courses{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
                    class="results-tab {% if active_filter == 'courses' %}active{% endif %}">
                     {% trans "tab_courses" context "accounts.my_results_page" %} ({{ counts.courses|default:0 }})
                 </a>
+                {% endif %}
                 <a href="{% url 'accounts:my_results' %}?type=labs{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
                    class="results-tab {% if active_filter == 'labs' %}active{% endif %}">
                     {% trans "tab_labs" context "accounts.my_results_page" %} ({{ counts.labs|default:0 }})
                 </a>
+                {% if tkv.coursework %}
                 <a href="{% url 'accounts:my_results' %}?type=independent{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
                    class="results-tab {% if active_filter == 'independent' %}active{% endif %}">
                     {% trans "tab_independent" context "accounts.my_results_page" %} ({{ counts.independent|default:0 }})
                 </a>
+                {% endif %}
             </div>
 
             <form method="get" class="results-search-form" data-my-results-filter-form>

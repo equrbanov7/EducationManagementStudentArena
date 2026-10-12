@@ -24,6 +24,7 @@ from .._helpers import (
     _tenant_scoped_courses,
     _tenant_scoped_exams,
 )
+from .._helpers.task_kind_visibility import hidden_task_filters, visible_task_filter
 from .academic_results import collect_academic_items, count_academic_items
 from .formatters import _standard_item_type_meta
 
@@ -41,7 +42,10 @@ def _collect_my_results(request, filter_type=None, search=None, year=None, seaso
     """
     user = request.user
     selected_filter = filter_type if filter_type is not None else request.GET.get("type")
-    filter_type = _normalize_results_filter(selected_filter)
+    # 2026-10-13 (rol auditi B12): söndürülmüş «Sərbəst iş» (``courses``) / «Kurs işi» (``independent``)
+    # tabı seçilə bilməz, sətirləri və sayğacları yığılmır (data qalır — RİM bayrağı geri açır).
+    hidden_types = hidden_task_filters("my-results")
+    filter_type = visible_task_filter("my-results", _normalize_results_filter(selected_filter))
     year = (year or "").strip()
     season = (season or "").strip()
     # Semestr süzgəci aktivdirsə yalnız akademik sətirlər mənalıdır: imtahan
@@ -147,7 +151,7 @@ def _collect_my_results(request, filter_type=None, search=None, year=None, seaso
             )
             counts["exams"] += 1
 
-    if filter_type in {"all", "courses"} and not academic_only:
+    if filter_type in {"all", "courses"} and not academic_only and "courses" not in hidden_types:
         assignment_submissions = (
             Submission.objects.filter(
                 user=user,
@@ -233,7 +237,7 @@ def _collect_my_results(request, filter_type=None, search=None, year=None, seaso
             )
             counts["labs"] += 1
 
-    if filter_type in {"all", "independent"} and not academic_only:
+    if filter_type in {"all", "independent"} and not academic_only and "independent" not in hidden_types:
         project_submissions = (
             ProjectSubmission.objects.filter(
                 student=user,
@@ -334,6 +338,8 @@ def _collect_my_results(request, filter_type=None, search=None, year=None, seaso
             .exclude(status="graded", graded_at__gt=review_cutoff)
             .count(),
         }
+    for hidden_type in hidden_types:
+        counts[hidden_type] = 0
     counts["all"] = counts["exams"] + counts["courses"] + counts["labs"] + counts["independent"] + counts["academic"]
 
     return items, counts, filter_type
