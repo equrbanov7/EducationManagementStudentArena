@@ -138,6 +138,7 @@ class Form1Importer:
                 result = (None, "ambiguous")
             elif self.allow_outside_chair and (outside := self._outside_users(words)) and len(outside) == 1:
                 result = (outside[0], "matched_outside_chair")
+                self._join_chair(outside[0])
             elif self._outside_chair(words):
                 result = (None, "outside_chair")
         self.counters[f"teacher_{result[1]}"] += 1
@@ -148,6 +149,42 @@ class Form1Importer:
     def _name_match(user, words) -> bool:
         first, last = slug_name(user.first_name), slug_name(user.last_name)
         return bool(first and last) and first in words and last in words
+
+    def _join_chair(self, user) -> None:
+        """Başqa kafedranın müəllimi bu kafedranın yükünü alır → kafedrada ƏLAVƏ müəllim üzvlüyü (əsas deyil).
+
+        Yük servisi müəllimi yalnız kafedra üzvü olanda təyin edir (`workload.teacher_not_in_chair`). Sahib
+        2026-10-12 «hamısını bağla» qərarı ilə açıq əlavə; öz kafedrası dəyişmir; audit jurnalına yazılır."""
+        if not self.importer.apply:
+            return
+        from apps.organizations.models import Role
+        from core.audit import log_action
+        from core.constants import AuditAction
+
+        role = Role.objects.get(organization=self.org, name="teacher")
+        membership, created = Membership.objects.get_or_create(
+            organization=self.org,
+            user=user,
+            role=role,
+            scope_unit=self.chair,
+            defaults={"is_active": True, "is_primary": False, "assigned_by": self.importer.actor_user},
+        )
+        if not created and not membership.is_active:
+            membership.is_active = True
+            membership.save(update_fields=["is_active", "updated_at"])
+            created = True
+        if created:
+            self.counters["chair_membership_added"] += 1
+            log_action(
+                AuditAction.CREATE,
+                user=self.importer.actor_user,
+                organization=self.org,
+                obj=membership,
+                reason="workload.form1_import: başqa kafedranın müəllimi bu kafedranın yükünü alır (sahib qərarı)",
+                new_values={"user": user.username, "chair": self.chair.name, "role": "teacher"},
+            )
+        if user not in self._chair_users:
+            self._chair_users.append(user)
 
     def _outside_users(self, words) -> list:
         """Təşkilatın İSTƏNİLƏN aktiv qeyri-tələbə üzvü (ad + soyad) — unikal istifadəçilər."""
