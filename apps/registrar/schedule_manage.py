@@ -41,7 +41,10 @@ from apps.registrar.models import CourseOffering, ScheduleSlot, SlotKind, WeekTy
 #: Cədvəl slotlarını idarə etmək icazəsi (kataloq: organizations.permissions).
 SCHEDULE_PERMISSION = "schedule.manage"
 
-#: Yalnız-baxış açarı (kataloq bütövlüyü; şəxsi cədvəl onsuz da hər kəsə açıqdır).
+#: Yalnız-baxış açarı. 2026-10-13 (rol auditi B11): əvvəl heç nəyi açmırdı; indi «Cədvəl idarəetməsi»
+#: bölməsini YALNIZ-OXU açır (prorektor, Tədris şöbəsi, RİM əməkdaşı, qəyyum, inzibati bölmə). Bütün
+#: yazı səthləri (``can_manage_offering`` / ``scoped_groups`` / ``scoped_offerings`` default-u) yenə
+#: ``schedule.manage`` tələb edir — oxu funksiyaları ayrıca ``permission=`` ilə çağırılır.
 SCHEDULE_VIEW_PERMISSION = "schedule.view"
 
 _CTX = "registrar.schedule_manage"
@@ -54,9 +57,9 @@ def _org_unit_model():
 # ── İcazə + əhatə ────────────────────────────────────────────────────────────
 
 
-def actor_scope(user, organization):
-    """Aktorun ``schedule.manage`` struktur əhatəsi (``UnitScope``)."""
-    return _org_unit_model().user_permission_scope(user, organization, SCHEDULE_PERMISSION)
+def actor_scope(user, organization, permission=SCHEDULE_PERMISSION):
+    """Aktorun ``schedule.manage`` (və ya verilən açarın) struktur əhatəsi (``UnitScope``)."""
+    return _org_unit_model().user_permission_scope(user, organization, permission)
 
 
 def can_manage(user, organization) -> bool:
@@ -68,6 +71,22 @@ def can_manage(user, organization) -> bool:
     if getattr(organization, "owner_id", None) == getattr(user, "pk", None):
         return True
     return actor_scope(user, organization).has_structure_access
+
+
+def can_view(user, organization) -> bool:
+    """«Cədvəl idarəetməsi»ni ən azı YALNIZ-OXU açmaq hüququ (B11): ``schedule.manage`` və ya
+    ``schedule.view`` struktur əhatəsi. Yazma hüququ VERMİR — o, :func:`can_manage`-dədir."""
+    if can_manage(user, organization):
+        return True
+    return actor_scope(user, organization, SCHEDULE_VIEW_PERMISSION).has_structure_access
+
+
+def read_permission(user, organization) -> str:
+    """Oxu siyahılarının əhatə açarı: redaktor ``schedule.manage``, qalanı ``schedule.view`` əhatəsi.
+
+    Redaktə hüququ olan aktor öz REDAKTƏ əhatəsini görür (siyahıda redaktə edə bilmədiyi qrup
+    çıxmasın); yalnız-oxu aktor ``schedule.view`` əhatəsini."""
+    return SCHEDULE_PERMISSION if can_manage(user, organization) else SCHEDULE_VIEW_PERMISSION
 
 
 def can_manage_offering(user, organization, offering) -> bool:
@@ -90,8 +109,8 @@ def can_manage_offering(user, organization, offering) -> bool:
     return journal_scope.offering_in_actor_scope(user, organization, offering, permission=SCHEDULE_PERMISSION)
 
 
-def scoped_groups(user, organization):
-    """Aktorun cədvəlini qura biləcəyi QRUP bölmələri (fail-closed queryset)."""
+def scoped_groups(user, organization, *, permission=SCHEDULE_PERMISSION):
+    """Aktorun cədvəlini qura (``permission=schedule.view`` ilə: görə) biləcəyi QRUP bölmələri (fail-closed)."""
     from core.constants import OrgUnitType
 
     org_unit_model = _org_unit_model()
@@ -100,7 +119,7 @@ def scoped_groups(user, organization):
     base = org_unit_model.objects.filter(organization=organization, is_active=True, unit_type=OrgUnitType.GROUP)
     if getattr(user, "is_superuser", False) or getattr(organization, "owner_id", None) == getattr(user, "pk", None):
         return base.order_by("name")
-    scope = actor_scope(user, organization)
+    scope = actor_scope(user, organization, permission)
     if not scope.has_structure_access:
         return org_unit_model.objects.none()
     if scope.is_org_wide:
@@ -108,8 +127,8 @@ def scoped_groups(user, organization):
     return base.filter(scope.unit_subtree_q()).order_by("name")
 
 
-def scoped_offerings(user, organization, *, period=None, group=None):
-    """Aktorun cədvəlinə slot yaza biləcəyi açılışlar (fail-closed queryset)."""
+def scoped_offerings(user, organization, *, period=None, group=None, permission=SCHEDULE_PERMISSION):
+    """Aktorun cədvəlinə slot yaza (``permission=schedule.view`` ilə: görə) biləcəyi açılışlar (fail-closed)."""
     if organization is None:
         return CourseOffering.objects.none()
     queryset = CourseOffering.objects.filter(organization=organization, is_active=True)
@@ -119,7 +138,7 @@ def scoped_offerings(user, organization, *, period=None, group=None):
         queryset = queryset.filter(group=group)
     if getattr(user, "is_superuser", False) or getattr(organization, "owner_id", None) == getattr(user, "pk", None):
         return queryset
-    scope = actor_scope(user, organization)
+    scope = actor_scope(user, organization, permission)
     if not scope.has_structure_access:
         return CourseOffering.objects.none()
     if scope.is_org_wide:
@@ -327,12 +346,14 @@ __all__ = [
     "actor_scope",
     "can_manage",
     "can_manage_offering",
+    "can_view",
     "check_slot",
     "conflict_reason",
     "describe_conflict",
     "duplicate_slot",
     "parse_payload",
     "period_window_error",
+    "read_permission",
     "scoped_groups",
     "scoped_offerings",
     "scoped_teacher_rows",

@@ -1,8 +1,11 @@
-"""«Müəllim idxalı» bölməsinin JSON/fayl endpoint-ləri (`user.import`, 2026-09-08).
+"""«Müəllim idxalı» bölməsinin JSON/fayl endpoint-ləri (`user.import_staff`, 2026-09-08).
 
-Tələbə idxalı ilə EYNİ qapı və eyni «quru icra = tətbiq» müqaviləsi
-(bax `views/student_intake.py`); fərq yalnız sütun müqaviləsi və planların
-qurulmasıdır (`services/intake/teachers.py`). Serverdə state saxlanılmır.
+Tələbə idxalı ilə eyni «quru icra = tətbiq» müqaviləsi (bax `views/student_intake.py`); fərq sütun
+müqaviləsi və planların qurulmasıdır (`services/intake/teachers.py`). Serverdə state saxlanılmır.
+
+QAPI — 2026-10-13 (rol auditi B3): tələbə qəbulunun `user.import` açarı DEYİL, ayrıca `user.import_staff`
+(HR). Əvvəl eyni açar idi və tələbə qəbulu üçün onu alan Tələbə xidmətləri toplu MÜƏLLİM hesabı yarada bilirdi.
+Hər üç endpoint (şablon / quru icra / tətbiq) eyni `_gate`-dən keçir.
 """
 
 from __future__ import annotations
@@ -27,7 +30,7 @@ def _organization(request):
 
 def _gate(request):
     organization = _organization(request)
-    if organization is None or not intake.can_import(request.user, organization):
+    if organization is None or not intake.can_import_staff(request.user, organization):
         return None, JsonResponse(
             {
                 "ok": False,

@@ -11,11 +11,15 @@ _PERM_CTX = "organizations.permission.label"
 PERM_EXAM_CENTER_DECIDE = "exam_center.decide"
 PERM_STUDENT_RECORDS_VIEW = "student.records_view"
 PERM_USER_IMPORT_STAFF = "user.import_staff"
+#: B14 — «Bildiriş göndər» (əvvəl rol bayraqları ilə açılırdı, redaktordan idarə olunmurdu).
+PERM_NOTIFICATION_PUBLISH = "notification.publish"
 
 ROLE_AUDIT_PERMISSION_CATEGORIES = {
     "exams": [PERM_EXAM_CENTER_DECIDE],
     "grading": [PERM_STUDENT_RECORDS_VIEW],
     "users": [PERM_USER_IMPORT_STAFF],
+    # «Elanlar» kateqoriyası (`permissions_announcements.py`) — kütləvi bildiriş də auditoriyaya müraciətdir.
+    "announcement": [PERM_NOTIFICATION_PUBLISH],
 }
 
 ROLE_AUDIT_PERMISSION_LABELS = {
@@ -24,6 +28,7 @@ ROLE_AUDIT_PERMISSION_LABELS = {
     ),
     PERM_STUDENT_RECORDS_VIEW: pgettext_lazy(_PERM_CTX, "Akademik qeydlərə baxış (ÜOMG, transkript)"),
     PERM_USER_IMPORT_STAFF: pgettext_lazy(_PERM_CTX, "Müəllim/heyət hesablarının toplu idxalı"),
+    PERM_NOTIFICATION_PUBLISH: pgettext_lazy(_PERM_CTX, "Bildiriş göndərmək (alıcılar öz əhatəsində)"),
 }
 
 
@@ -39,6 +44,7 @@ def merge_role_audit_permissions(categories: dict, category_labels: dict, permis
 
 __all__ = [
     "PERM_EXAM_CENTER_DECIDE",
+    "PERM_NOTIFICATION_PUBLISH",
     "PERM_STUDENT_RECORDS_VIEW",
     "PERM_USER_IMPORT_STAFF",
     "ROLE_AUDIT_PERMISSION_CATEGORIES",

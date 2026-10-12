@@ -17,7 +17,7 @@ akkordeonu ilə ORTAQ). Bölmə etiketinin şərti içindəki bəndlərin şərt
 birləşməsidir — boş başlıq qalmır.{% endcomment %}
 {% include "accounts/profile/sidebar/_home_menu_item.html" %}
 
-{% if "my-subjects" in allowed_sections or "my-schedule" in allowed_sections or "my-journal" in allowed_sections or can_view_student_assignments or "my-transcript" in allowed_sections or "overall-academic" in allowed_sections or "academic-calendar" in allowed_sections %}
+{% if "my-subjects" in allowed_sections or "my-schedule" in allowed_sections or "my-journal" in allowed_sections or can_view_student_assignments or "my-transcript" in allowed_sections or "overall-academic" in allowed_sections or "academic-calendar" in allowed_sections or "my-group" in allowed_sections %}
 <li class="sidebar-section" data-sidebar-section="education">
     <div class="sidebar-section-label sidebar-menu-group-label" id="sidebarSectionEducation"><span class="sidebar-menu-group-title">{% trans "group_education" context "profile.sidebar" %}</span></div>
     <ul class="sidebar-section-items" aria-labelledby="sidebarSectionEducation">
@@ -28,6 +28,7 @@ birləşməsidir — boş başlıq qalmır.{% endcomment %}
         {% include "accounts/profile/sidebar/items/_my_transcript.html" %}
         {% include "accounts/profile/sidebar/items/_overall_academic.html" %}
         {% include "accounts/profile/sidebar/items/_academic_calendar.html" %}
+        {% include "accounts/profile/sidebar/items/_my_group.html" %}
     </ul>
 </li>
 {% endif %}

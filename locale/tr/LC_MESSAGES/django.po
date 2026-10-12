@@ -95255,3 +95255,147 @@ msgstr ""
 " (ör. laboratuvar yoksa) haftalık planda görünmez ve ona saat yazılamaz. "
 "Yükte satır yoksa öğretim elemanı saati kendisi seçer. Kapalıyken önceki "
 "kural: önce onaylı öğretim planı, sonra yük; fazla türler de gösterilir."
+
+msgctxt "appeals.template"
+msgid "Apellyasiyaya baxa bilərsiniz, amma qərarı yalnız «Apellyasiya qərarı vermək» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
+msgstr "İtirazı görüntüleyebilirsiniz, ancak kararı yalnızca «İtiraz kararı verme» yetkisine sahip kullanıcı (sınav merkezi başkanı) verir."
+
+msgctxt "appeals.view.message"
+msgid "Apellyasiya qərarı vermək icazəniz yoxdur."
+msgstr "İtiraz kararı verme yetkiniz yok."
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan şansı vermək üçün qərar səlahiyyətiniz yoxdur."
+msgstr "Sınav hakkı vermek için karar yetkiniz yok."
+
+msgctxt "accounts.exam_chance"
+msgid "Yalnız baxış: imtahan şansını «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
+msgstr "Yalnızca görüntüleme: sınav hakkını «Sınav merkezi kararları» yetkisine sahip kullanıcı (sınav merkezi başkanı) verir."
+
+msgctxt "accounts.kollokvium_windows"
+msgid "Pəncərələri dəyişmək üçün qərar səlahiyyətiniz yoxdur."
+msgstr "Pencereleri değiştirmek için karar yetkiniz yok."
+
+msgctxt "registrar.kollokvium_window"
+msgid "Yalnız baxış: pəncərələri «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) təyin edir və dəyişir."
+msgstr "Yalnızca görüntüleme: pencereleri «Sınav merkezi kararları» yetkisine sahip kullanıcı (sınav merkezi başkanı) belirler ve değiştirir."
+
+msgctxt "exams.view.question_submission.permission"
+msgid "Göndərişə qərar vermək səlahiyyətiniz yoxdur."
+msgstr "Bu gönderim hakkında karar verme yetkiniz yok."
+
+msgctxt "exams.template.question_submission"
+msgid "Yalnız baxış: göndərişə qərarı «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
+msgstr "Yalnızca görüntüleme: gönderim hakkındaki kararı «Sınav merkezi kararları» yetkisine sahip kullanıcı (sınav merkezi başkanı) verir."
+
+msgctxt "organizations.registry"
+msgid "Rəhbər təyini üçün `role.assign` və ya `unit.assign_head` lazımdır."
+msgstr "Yönetici atamak için `role.assign` veya `unit.assign_head` yetkisi gerekir."
+
+msgctxt "organizations.registry"
+msgid "Rol təyinatı üçün `role.assign` səlahiyyəti lazımdır."
+msgstr "Rol atamak için `role.assign` yetkisi gerekir."
+
+msgctxt "organizations.registry"
+msgid "Bu rol təyinatını silmək üçün `role.assign` səlahiyyəti lazımdır."
+msgstr "Bu rol atamasını kaldırmak için `role.assign` yetkisi gerekir."
+
+msgctxt "organizations.roles_registry"
+msgid "Rol kataloquna baxmaq üçün «role.view» icazəsi lazımdır."
+msgstr "Rol kataloğunu görüntülemek için «role.view» yetkisi gerekir."
+
+msgctxt "accounts.schedule_manage"
+msgid "Cədvələ yalnız baxış icazəniz var — qrup və ya müəllim seçib həftəlik cədvələ baxın."
+msgstr "Ders programına yalnızca görüntüleme yetkiniz var — haftayı görmek için bir grup veya öğretim elemanı seçin."
+
+msgctxt "accounts.schedule_manage"
+msgid "Yalnız baxış rejimi — cədvəli dəyişmək üçün «Cədvəl idarəetməsi» (schedule.manage) icazəsi lazımdır."
+msgstr "Yalnızca görüntüleme modu — programı değiştirmek için «Ders programı yönetimi» (schedule.manage) yetkisi gerekir."
+
+msgctxt "organizations.permission.label"
+msgid "Bildiriş göndərmək (alıcılar öz əhatəsində)"
+msgstr "Bildirim göndermek (alıcılar kendi kapsamında)"
+
+msgctxt "teacher_intake"
+msgid "Toplu müəllim əlavəsi üçün icazəniz yoxdur — bu bölmə yalnız `user.import_staff` açarı olan rollar üçündür."
+msgstr "Toplu öğretmen ekleme yetkiniz yok — bu bölüm yalnızca `user.import_staff` anahtarına sahip roller içindir."
+
+msgctxt "profile.sidebar"
+msgid "Qrupum"
+msgstr "Grubum"
+
+msgctxt "accounts.my_group"
+msgid "Sizə təyin olunmuş akademik qrup tapılmadı."
+msgstr "Size atanmış bir akademik grup bulunamadı."
+
+msgctxt "accounts.my_group"
+msgid "Qrup nümayəndəsi rolu qrupa bağlanmayıb. Dekanlığa müraciət edin."
+msgstr "Grup temsilcisi rolünüz bir gruba bağlı değil. Lütfen dekanlığa başvurun."
+
+msgctxt "accounts.my_group"
+msgid "Tələbə sayı: %(total)s"
+msgstr "Öğrenci sayısı: %(total)s"
+
+msgctxt "accounts.my_group"
+msgid "Davamiyyət: %(period)s %(year)s — qayıb saatı və dərs saatına nisbəti (faiz). Yalnız baxış üçündür."
+msgstr "Devam durumu: %(period)s %(year)s — devamsızlık saatleri ve ders saatine oranı (yüzde). Yalnızca görüntüleme."
+
+msgctxt "accounts.my_group"
+msgid "Cari tədris dövrü müəyyən edilməyib — yalnız qrup siyahısı göstərilir."
+msgstr "Geçerli akademik dönem belirlenmemiş — yalnızca grup listesi gösteriliyor."
+
+msgctxt "accounts.my_group"
+msgid "Qrupda qeydiyyatlı tələbə yoxdur."
+msgstr "Grupta kayıtlı öğrenci yok."
+
+msgctxt "accounts.my_group"
+msgid "%(group)s qrupunun tələbələri və fənn üzrə davamiyyəti"
+msgstr "%(group)s grubunun öğrencileri ve derslere göre devam durumu"
+
+msgctxt "accounts.my_group"
+msgid "Tələbə"
+msgstr "Öğrenci"
+
+msgctxt "accounts.my_group"
+msgid "Tələbə nömrəsi"
+msgstr "Öğrenci numarası"
+
+msgctxt "accounts.my_group"
+msgid "Ümumi qayıb"
+msgstr "Toplam devamsızlık"
+
+msgctxt "accounts.my_group"
+msgid "%(absence)s / %(hours)s saat"
+msgstr "%(absence)s / %(hours)s saat"
+
+msgctxt "accounts.my_group"
+msgid "Bu fənnə yazılmayıb"
+msgstr "Bu derse kayıtlı değil"
+
+msgctxt "accounts.my_group"
+msgid "Rəng izahı"
+msgstr "Renk açıklaması"
+
+msgctxt "accounts.my_group"
+msgid "Qayıb həddinə yaxındır"
+msgstr "Devamsızlık sınırına yakın"
+
+msgctxt "accounts.my_group"
+msgid "Qayıb həddi aşılıb"
+msgstr "Devamsızlık sınırı aşıldı"
+
+msgctxt "accounts.my_group"
+msgid "Bu dövr üçün fənn yazılışı hələ yoxdur."
+msgstr "Bu dönem için henüz ders kaydı yok."
+
+msgctxt "organizations.permission.label"
+msgid "İmtahan mərkəzinin qərarları (ikinci şans, kollokvium pəncərəsi, sual göndərişi)"
+msgstr "Sınav merkezi kararları (ikinci hak, kolokyum penceresi, soru gönderimleri)"
+
+msgctxt "organizations.permission.label"
+msgid "Akademik qeydlərə baxış (ÜOMG, transkript)"
+msgstr "Akademik kayıtları görüntüleme (GNO, transkript)"
+
+msgctxt "organizations.permission.label"
+msgid "Müəllim/heyət hesablarının toplu idxalı"
+msgstr "Öğretmen/personel hesaplarının toplu içe aktarımı"

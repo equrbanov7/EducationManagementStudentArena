@@ -95979,3 +95979,147 @@ msgstr ""
 " нет строки, преподаватель выбирает часы сам. Если выключено — прежнее "
 "правило: сначала утверждённый учебный план, затем нагрузка; лишние виды тоже"
 " показываются."
+
+msgctxt "appeals.template"
+msgid "Apellyasiyaya baxa bilərsiniz, amma qərarı yalnız «Apellyasiya qərarı vermək» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
+msgstr "Вы можете просматривать апелляцию, но решение принимает только пользователь с правом «Принимать решение по апелляции» (руководитель экзаменационного центра)."
+
+msgctxt "appeals.view.message"
+msgid "Apellyasiya qərarı vermək icazəniz yoxdur."
+msgstr "У вас нет права принимать решения по апелляциям."
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan şansı vermək üçün qərar səlahiyyətiniz yoxdur."
+msgstr "У вас нет права принимать решения, чтобы предоставлять дополнительную попытку."
+
+msgctxt "accounts.exam_chance"
+msgid "Yalnız baxış: imtahan şansını «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
+msgstr "Только просмотр: дополнительную попытку предоставляет пользователь с правом «Решения экзаменационного центра» (руководитель экзаменационного центра)."
+
+msgctxt "accounts.kollokvium_windows"
+msgid "Pəncərələri dəyişmək üçün qərar səlahiyyətiniz yoxdur."
+msgstr "У вас нет права принимать решения, чтобы изменять окна."
+
+msgctxt "registrar.kollokvium_window"
+msgid "Yalnız baxış: pəncərələri «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) təyin edir və dəyişir."
+msgstr "Только просмотр: окна назначает и изменяет пользователь с правом «Решения экзаменационного центра» (руководитель экзаменационного центра)."
+
+msgctxt "exams.view.question_submission.permission"
+msgid "Göndərişə qərar vermək səlahiyyətiniz yoxdur."
+msgstr "У вас нет права принимать решение по этой отправке."
+
+msgctxt "exams.template.question_submission"
+msgid "Yalnız baxış: göndərişə qərarı «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
+msgstr "Только просмотр: решение по отправке принимает пользователь с правом «Решения экзаменационного центра» (руководитель экзаменационного центра)."
+
+msgctxt "organizations.registry"
+msgid "Rəhbər təyini üçün `role.assign` və ya `unit.assign_head` lazımdır."
+msgstr "Для назначения руководителя нужно право `role.assign` или `unit.assign_head`."
+
+msgctxt "organizations.registry"
+msgid "Rol təyinatı üçün `role.assign` səlahiyyəti lazımdır."
+msgstr "Для назначения роли нужно право `role.assign`."
+
+msgctxt "organizations.registry"
+msgid "Bu rol təyinatını silmək üçün `role.assign` səlahiyyəti lazımdır."
+msgstr "Чтобы снять это назначение роли, нужно право `role.assign`."
+
+msgctxt "organizations.roles_registry"
+msgid "Rol kataloquna baxmaq üçün «role.view» icazəsi lazımdır."
+msgstr "Для просмотра каталога ролей нужно право «role.view»."
+
+msgctxt "accounts.schedule_manage"
+msgid "Cədvələ yalnız baxış icazəniz var — qrup və ya müəllim seçib həftəlik cədvələ baxın."
+msgstr "У вас доступ к расписанию только для просмотра — выберите группу или преподавателя, чтобы увидеть неделю."
+
+msgctxt "accounts.schedule_manage"
+msgid "Yalnız baxış rejimi — cədvəli dəyişmək üçün «Cədvəl idarəetməsi» (schedule.manage) icazəsi lazımdır."
+msgstr "Режим только для просмотра — для изменения расписания нужно право «Управление расписанием» (schedule.manage)."
+
+msgctxt "organizations.permission.label"
+msgid "Bildiriş göndərmək (alıcılar öz əhatəsində)"
+msgstr "Отправка уведомлений (получатели в пределах своей области)"
+
+msgctxt "teacher_intake"
+msgid "Toplu müəllim əlavəsi üçün icazəniz yoxdur — bu bölmə yalnız `user.import_staff` açarı olan rollar üçündür."
+msgstr "У вас нет права на массовое добавление преподавателей — этот раздел только для ролей с ключом `user.import_staff`."
+
+msgctxt "profile.sidebar"
+msgid "Qrupum"
+msgstr "Моя группа"
+
+msgctxt "accounts.my_group"
+msgid "Sizə təyin olunmuş akademik qrup tapılmadı."
+msgstr "Закреплённая за вами академическая группа не найдена."
+
+msgctxt "accounts.my_group"
+msgid "Qrup nümayəndəsi rolu qrupa bağlanmayıb. Dekanlığa müraciət edin."
+msgstr "Роль старосты не привязана к группе. Обратитесь в деканат."
+
+msgctxt "accounts.my_group"
+msgid "Tələbə sayı: %(total)s"
+msgstr "Студентов: %(total)s"
+
+msgctxt "accounts.my_group"
+msgid "Davamiyyət: %(period)s %(year)s — qayıb saatı və dərs saatına nisbəti (faiz). Yalnız baxış üçündür."
+msgstr "Посещаемость: %(period)s %(year)s — часы пропусков и их доля от учебных часов (процент). Только просмотр."
+
+msgctxt "accounts.my_group"
+msgid "Cari tədris dövrü müəyyən edilməyib — yalnız qrup siyahısı göstərilir."
+msgstr "Текущий учебный период не определён — показан только список группы."
+
+msgctxt "accounts.my_group"
+msgid "Qrupda qeydiyyatlı tələbə yoxdur."
+msgstr "В группе нет зачисленных студентов."
+
+msgctxt "accounts.my_group"
+msgid "%(group)s qrupunun tələbələri və fənn üzrə davamiyyəti"
+msgstr "Студенты группы %(group)s и их посещаемость по предметам"
+
+msgctxt "accounts.my_group"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "accounts.my_group"
+msgid "Tələbə nömrəsi"
+msgstr "Номер студента"
+
+msgctxt "accounts.my_group"
+msgid "Ümumi qayıb"
+msgstr "Всего пропусков"
+
+msgctxt "accounts.my_group"
+msgid "%(absence)s / %(hours)s saat"
+msgstr "%(absence)s / %(hours)s ч"
+
+msgctxt "accounts.my_group"
+msgid "Bu fənnə yazılmayıb"
+msgstr "Не записан на этот предмет"
+
+msgctxt "accounts.my_group"
+msgid "Rəng izahı"
+msgstr "Обозначения цветов"
+
+msgctxt "accounts.my_group"
+msgid "Qayıb həddinə yaxındır"
+msgstr "Близко к лимиту пропусков"
+
+msgctxt "accounts.my_group"
+msgid "Qayıb həddi aşılıb"
+msgstr "Лимит пропусков превышен"
+
+msgctxt "accounts.my_group"
+msgid "Bu dövr üçün fənn yazılışı hələ yoxdur."
+msgstr "Записей на предметы в этом периоде пока нет."
+
+msgctxt "organizations.permission.label"
+msgid "İmtahan mərkəzinin qərarları (ikinci şans, kollokvium pəncərəsi, sual göndərişi)"
+msgstr "Решения экзаменационного центра (вторая попытка, окно коллоквиума, заявки вопросов)"
+
+msgctxt "organizations.permission.label"
+msgid "Akademik qeydlərə baxış (ÜOMG, transkript)"
+msgstr "Просмотр академических записей (средний балл, транскрипт)"
+
+msgctxt "organizations.permission.label"
+msgid "Müəllim/heyət hesablarının toplu idxalı"
+msgstr "Массовый импорт учётных записей преподавателей/сотрудников"

@@ -125,8 +125,14 @@ class RimCreatePermissionTest(RimCreateBase):
                 self.create(user, "teacher")
 
     def test_importers_can_create(self):
-        for user in (self.rim, self.hr):
-            self.assertTrue(rim_create.can_create(self.actor_for(user)), user.username)
+        # Rol auditi 2026-10-13 B3: qapı NÖVƏ görədir — RİM rəhbəri (`*`) hər ikisini, HR yalnız müəllim
+        # (`user.import_staff`; `user.import` HR-dan alınıb — B6). Əvvəl HR tələbə hesabı da yaradırdı.
+        self.assertEqual(rim_create.creatable_kinds(self.actor_for(self.rim)), ("student", "teacher"))
+        hr_actor = self.actor_for(self.hr)
+        self.assertTrue(rim_create.can_create(hr_actor), self.hr.username)
+        self.assertEqual(rim_create.creatable_kinds(hr_actor), ("teacher",))
+        self.assertTrue(rim_create.can_create(hr_actor, "teacher"))
+        self.assertFalse(rim_create.can_create(hr_actor, "student"))
 
 
 class RimCreateStudentTest(RimCreateBase):

@@ -1,4 +1,4 @@
-"""Profil «teacher-intake» bölməsi — Müəllim idxalı (`user.import`, 2026-09-08).
+"""Profil «teacher-intake» bölməsi — Müəllim idxalı (`user.import_staff`; 2026-10-13 rol auditi B3-ə qədər `user.import`).
 
 Tələbə idxalı ilə eyni çərçivə müqaviləsi (`teacher_intake_section`): icazə
 bayrağı, endpoint URL-ləri, sütun kataloqu, hədd rəqəmləri. Fayl və parollar
@@ -18,9 +18,10 @@ def build_teacher_intake_section(request, section, *, active_organization, allow
     if "teacher-intake" not in allowed_sections or active_section != "teacher-intake":
         return
     section["access_denied_message"] = pgettext(
-        _CTX, "Toplu müəllim əlavəsi üçün icazəniz yoxdur — bu bölmə yalnız `user.import` açarı olan rollar üçündür."
+        _CTX,
+        "Toplu müəllim əlavəsi üçün icazəniz yoxdur — bu bölmə yalnız `user.import_staff` açarı olan rollar üçündür.",
     )
-    has_access = bool(active_organization is not None and intake.can_import(request.user, active_organization))
+    has_access = bool(active_organization is not None and intake.can_import_staff(request.user, active_organization))
     section["has_access"] = has_access
     if not has_access:
         return

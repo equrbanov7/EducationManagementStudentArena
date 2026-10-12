@@ -46,7 +46,9 @@ ROLE_LEVELS = {
 
 #: Menyusu açarla qapılı rollar üçün real şablon açarları (`default_roles_university` HR):
 #: 2026-10-13-dən HR-ın rol menyuları AD ilə yox, `role.assign` ilə açılır.
-ROLE_PERMISSIONS = {"hr": ["role.view", "role.assign"]}
+#: 2026-10-13 (rol auditi B2): «Akademik qeydlər» də rol adı ilə yox, `student.records_view` ilə açılır
+#: (imtahan mərkəzi rəhbərinin real şablonunda var — miqrasiya 0061).
+ROLE_PERMISSIONS = {"hr": ["role.view", "role.assign"], "exam_center_head": ["student.records_view"]}
 
 #: TƏLƏBƏ səthləri — yalnız tələbədə olmalıdır.
 #:
@@ -103,10 +105,16 @@ class SidebarRoleMatrixTest(TestCase):
     # ── Tələbə səthləri sızmamalıdır ────────────────────────────────────────
 
     def test_staff_roles_do_not_get_student_surfaces(self):
-        """«Mənə təyin edilmiş imtahanlar» əməkdaş menyusunda yeri yoxdur."""
-        for role in ("hr", "exam_center_head", "dean", "department_head", "tutor", "ikt_rehber"):
+        """«Mənə təyin edilmiş imtahanlar» əməkdaş menyusunda yeri yoxdur.
+
+        Rol auditi 2026-10-13 B7: universitetdə ``member`` = xəritələnməmiş ofis heyəti (mühasib, kitabxanaçı …)
+        — o da tələbə / imtahan verən səthlərini (``my-results``, ``pending-answers``, ``my-appeals``, ``courses``
+        daxil) ALMIR. Məktəb tenantında ``member`` öyrənən olaraq qalır (``test_role_audit_b_access_2026_10_13``).
+        """
+        learner = STUDENT_ONLY | {"courses", "my-results", "pending-answers", "my-appeals"}
+        for role in ("hr", "exam_center_head", "dean", "department_head", "tutor", "ikt_rehber", "member"):
             with self.subTest(role=role):
-                leaked = self._sections(role) & STUDENT_ONLY
+                leaked = self._sections(role) & (learner if role == "member" else STUDENT_ONLY)
                 self.assertEqual(leaked, set(), f"{role} tələbə bölməsi alır: {sorted(leaked)}")
 
     def test_student_keeps_its_own_surfaces(self):

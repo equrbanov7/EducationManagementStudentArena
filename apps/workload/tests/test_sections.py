@@ -61,11 +61,13 @@ class SectionAccessTest(TestCase):
             scope_type=RoleScopeType.UNIT,
         )
         self.teacher = User.objects.create_user("wle_teacher", "wle_teacher@x.test", "pw")
+        # 2026-10-13 (rol auditi B16): «Dərs yüküm» menyusu `workload.object` (real müəllim şablonu)
+        # VƏ YA faktiki bölgü sətri istəyir — yalnız `workload.view` artıq kifayət etmir.
         activate_member(
             self.org,
             self.teacher,
             "teacher",
-            permissions=TEACHER_PERMS,
+            permissions=TEACHER_PERMS + ["workload.object"],
             scope_unit=self.stack["chair"],
             level=50,
             scope_type=RoleScopeType.COURSE,

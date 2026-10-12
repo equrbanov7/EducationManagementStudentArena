@@ -4,8 +4,10 @@ Ailələr (``apps/surveys/services/audience.py`` ilə EYNİ qayda, rol adına g�
 
 * ``students`` — ``student`` / ``lead_student``;
 * ``teachers`` — tədris rolları (``teacher``, ``instructor``, ``assistant`` …);
-* ``staff`` — qalan hər rol (rektorluq, dekanlıq, kafedra, RİM, tədris şöbəsi …);
-* neytral rollar (``member``, ``alumni``, ``parent`` …) heç bir ailəyə düşmür.
+* ``staff`` — qalan hər rol (rektorluq, dekanlıq, kafedra, RİM, tədris şöbəsi …) — ``member`` DAXİL
+  (rol auditi 2026-10-13 B7: universitetdə ``member`` vəzifəsi xəritələnməmiş ofis işçisidir — mühasib,
+  kitabxanaçı …, ``accounts/services/staff_roster.py`` — əvvəl heyət elanlarından kənarda qalırdı);
+* neytral rollar (``alumni``, ``parent`` …) heç bir ailəyə düşmür.
 
 Struktur daraltması (``Announcement.audience_units``): boş → bütün təşkilat; doludursa
 istifadəçinin bölməsi seçilmiş bölmələrdən birinin ÖZÜ və ya ALT-AĞACI olmalıdır.
@@ -42,7 +44,7 @@ TEACHER_ROLE_NAMES = frozenset(
         "lab_assistant",
     }
 )
-NEUTRAL_ROLE_NAMES = frozenset({"member", "alumni", "parent", "trustee", "collaborator", "owner", ""})
+NEUTRAL_ROLE_NAMES = frozenset({"alumni", "parent", "trustee", "collaborator", "owner", ""})  # B7: `member` → staff
 
 _MEMO_ATTR = "_announcements_viewer"
 

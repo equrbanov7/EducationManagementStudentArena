@@ -202,10 +202,10 @@ SECTION_PARTIALS: dict[str, str] = {
     "subject-folder-review": "accounts/profile/sections/_subject_folder_review.html",
     "my-subject-folders": "accounts/profile/sections/_my_subject_folders.html",
     "announcements": "accounts/profile/sections/_announcements.html",  # «Elanlar» (apps.announcements)
+    "my-group": "accounts/profile/sections/_my_group.html",  # «Qrupum» — baş tələbə (rol auditi 2026-10-13 B10)
 }
 
-# AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin
-# bölmələri normal full-page naviqasiyada qalır.
+# AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin bölmələri normal full-page naviqasiyada qalır.
 AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
     {
         # «Ana səhifə» tam server-render, YALNIZ-OXU xülasədir → AJAX-safe.
@@ -336,10 +336,9 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         # olmadan avto filtr paneli (qrup → fənn, müəllim, axtarış), vəziyyət /
         # növ çipləri, görünüş açarı və səhifələmə brauzerdə SƏSSİZ işləmirdi.
         "exam-score-entry",
-        # «Sorğu nəticələri» (apps.surveys F2, 2026-09-25) — tam OXU-ONLY analitika
-        # paneli (mutasiya yoxdur; ixrac/müəllim kartı ayrıca GET uclarıdır). Avto
-        # filtr paneli və tab linkləri paneli yerində yeniləyir → AJAX-safe OLMALIDIR
-        # (`test_section_registry_consistency` fraqment-naviqasiya skaneri).
+        # «Sorğu nəticələri» (apps.surveys F2, 2026-09-25) — tam OXU-ONLY analitika paneli (mutasiya yoxdur;
+        # ixrac/müəllim kartı ayrıca GET uclarıdır). Avto filtr paneli və tab linkləri paneli yerində
+        # yeniləyir → AJAX-safe OLMALIDIR (`test_section_registry_consistency` fraqment-naviqasiya skaneri).
         "evaluation-results",
         # «Fənn qovluğu» (2026-09-25) — üç bölmə də server-render panelidir; filtr paneli,
         # qovluq/tapşırıq linkləri (`sf_*`) və tab-lar paneli yerində yeniləyir, bütün
@@ -348,6 +347,7 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "subject-folder-review",
         "my-subject-folders",
         "announcements",  # «Elanlar» — panel oxu-only; mutasiyalar `/elanlar/api/` JSON uclarına gedir
+        "my-group",  # «Qrupum» (B10) — tam OXU-ONLY siyahı + davamiyyət, mutasiya yoxdur
     }
 )
 

@@ -138,6 +138,8 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_surveys_inbox.html" %}
             {% elif active_section == "announcements" and 'announcements' in allowed_sections %}
                 {% include "accounts/profile/sections/_announcements.html" %}
+            {% elif active_section == "my-group" and 'my-group' in allowed_sections %}
+                {% include "accounts/profile/sections/_my_group.html" %}
             {% elif active_section == "surveys-builder" and 'surveys-builder' in allowed_sections %}
                 {% include "accounts/profile/sections/_surveys_builder.html" %}
             {% elif active_section == "subject-folders" and 'subject-folders' in allowed_sections %}

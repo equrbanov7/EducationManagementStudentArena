@@ -13,17 +13,25 @@ Yeni açarlar (kataloq: ``permissions_role_audit.py``):
   əhatəli laborant və müəllimdə də var — GPA reyestri onlara açılardı.
 * ``user.import_staff`` — «Müəllim idxalı» (toplu heyət hesabı) (B3). Əvvəl tələbə qəbulu ilə eyni
   ``user.import`` açarında idi və Tələbə xidmətləri müəllim hesabı yarada bilirdi.
+* ``notification.publish`` — «Bildiriş göndər» (B14). Əvvəl rol BAYRAQLARI ilə açılırdı (org_admin aliası, müəllim,
+  imtahan mərkəzi, HR); bu gün bölməni görən HƏR rol açarı alır (görünüş dəyişmir, indi redaktordan idarə olunur).
+  Qeyri-universitet şablonları ``default_roles.py``-dadır; mövcud tenantlar — miqrasiya ``organizations/0062``.
 """
 
 #: Rol adı → VERİLƏN açarlar. Açar, onun ``<prefiks>.*`` wildcard-ı və ya ``*`` artıq varsa atlanır.
 ROLE_AUDIT_GRANTS: dict[str, tuple[str, ...]] = {
     # B1 — qərar yalnız rəhbərdə; işçi və RİM əməkdaşı görür.
-    "exam_center_head": ("exam_center.decide", "student.records_view"),
-    "exam_center": ("exam_center.decide", "student.records_view"),
+    "exam_center_head": ("exam_center.decide", "student.records_view", "notification.publish"),
+    "exam_center": ("exam_center.decide", "student.records_view", "notification.publish"),
     # B20 — kataloq kontaktsız (`people.view_contacts` verilmir); B2 — akademik qeydlər əvvəlki kimi.
-    "exam_center_staff": ("people.view_students", "people.view_teachers", "student.records_view"),
+    "exam_center_staff": (
+        "people.view_students",
+        "people.view_teachers",
+        "student.records_view",
+        "notification.publish",
+    ),
     # B3 — müəllim idxalı HR-dadır.
-    "hr": ("user.import_staff",),
+    "hr": ("user.import_staff", "notification.publish"),
     # B4 — «assistent» QKU-da elmi-pedaqoji vəzifədir: fənnin müəllimi ola bilsin (`grade.input`
     # olmadan yük sinxronu onu `instructor_blocked` sayırdı), sillabus yazsın, imtahan yaratsın.
     "assistant": (
@@ -34,7 +42,11 @@ ROLE_AUDIT_GRANTS: dict[str, tuple[str, ...]] = {
         "exam.create",
         "exam.edit",
         "exam.host",
+        "notification.publish",
     ),
+    # B14 — bölməni bu gün müəllim bayrağı ilə görən digər tədris rolları.
+    "teacher": ("notification.publish",),
+    "lab_assistant": ("notification.publish",),
     # B5 — Tədris şöbəsi: jurnal/qeyd/cədvəl OXUSU; rəhbər tələbə reyestrini də görür (xaric axını).
     "teaching_office_head": (
         "student.records_view",
@@ -45,12 +57,12 @@ ROLE_AUDIT_GRANTS: dict[str, tuple[str, ...]] = {
     ),
     "teaching_office_staff": ("student.records_view", "journal.view", "journal.lessons_unit", "schedule.view"),
     # B11 — prorektor cədvəli YALNIZ-OXU görür; B2 — akademik qeydlər əvvəlki kimi.
-    "vice_rector": ("schedule.view", "student.records_view"),
+    "vice_rector": ("schedule.view", "student.records_view", "notification.publish"),
     # B2 — bu gün «Akademik qeydlər»i görən rollar açarı alır (görünüş dəyişmir, indi redaktordan idarə olunur).
-    "dean": ("student.records_view",),
-    "vice_dean": ("student.records_view",),
-    "chair_head": ("student.records_view",),
-    "rim_staff": ("student.records_view",),
+    "dean": ("student.records_view", "notification.publish"),
+    "vice_dean": ("student.records_view", "notification.publish"),
+    "chair_head": ("student.records_view", "notification.publish"),
+    "rim_staff": ("student.records_view", "notification.publish"),
 }
 
 #: Rol adı → ALINAN açarlar (B6: HR-ın tələbə tərəfi Tələbə xidmətlərinə keçib).

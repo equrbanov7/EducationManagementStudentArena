@@ -647,23 +647,23 @@ class RecordsRoleGateTest(_RecordsBase):
         self.assertTrue(payload["has_access"])
         self.assertEqual(payload["total"], 3)  # yalnız fakültə A
 
-    def test_role_gate_matches_the_sidebar_section_grant(self):
-        """Endpoint UI-dan geniş olmamalıdır.
+    def test_gate_is_the_records_permission_not_a_role_name(self):
+        """Endpoint UI-dan geniş olmamalıdır — və hər ikisi EYNİ açara baxır.
 
-        Sidebar `academic-records` bölməsini superadmin / org_admin /
-        unit_manager (dekan, kafedra müdiri) / imtahan mərkəzinə verir — rol
-        qapısı da eyni dəsti tanımalıdır.
+        2026-10-13 (rol auditi B2): əvvəl burada rol ADLARI dəsti (`ACADEMIC_RECORDS_ROLES`) yoxlanırdı;
+        indi menyu (`rbac_scope_sections`) və data (`academic_records._scope`) yalnız
+        `student.records_view` əhatəsinə baxır. Default şablonlarda dekan / kafedra müdiri / imtahan
+        mərkəzi / İKT açarı daşıyır, müəllim / tələbə / tyutor daşımır.
         """
-        from apps.accounts.views.academic_records import ACADEMIC_RECORDS_ROLES
+        from apps.accounts.views._helpers.rbac_scope_sections import RECORDS_PERMISSION
+        from apps.accounts.views.academic_records import RECORDS_SCOPE_PERMISSION, can_view_academic_records
 
-        self.assertIn("dean", ACADEMIC_RECORDS_ROLES)
-        self.assertIn("department_head", ACADEMIC_RECORDS_ROLES)
-        self.assertIn("exam_center_head", ACADEMIC_RECORDS_ROLES)
-        self.assertIn("ikt_rehber", ACADEMIC_RECORDS_ROLES)
-        self.assertNotIn("teacher", ACADEMIC_RECORDS_ROLES)
-        self.assertNotIn("assistant_teacher", ACADEMIC_RECORDS_ROLES)
-        self.assertNotIn("student", ACADEMIC_RECORDS_ROLES)
-        self.assertNotIn("tutor", ACADEMIC_RECORDS_ROLES)
+        self.assertEqual(RECORDS_SCOPE_PERMISSION, "student.records_view")
+        self.assertEqual(RECORDS_PERMISSION, RECORDS_SCOPE_PERMISSION)
+        self.assertTrue(can_view_academic_records(self.dean, self.org))
+        self.assertTrue(can_view_academic_records(self.exam_center, self.org))
+        self.assertFalse(can_view_academic_records(self.teacher, self.org))
+        self.assertFalse(can_view_academic_records(self.students_a[0], self.org))
 
 
 class UngradedEnrollmentTest(_RecordsBase):

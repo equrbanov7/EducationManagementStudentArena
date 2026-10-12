@@ -166,7 +166,10 @@ class HrRoleMenusFollowKeyTest(_TinyOrg):
         self.assertNotIn("permission-editor", sections)
 
     def test_hr_without_role_assign_loses_role_menus(self):
-        Role.objects.filter(organization=self.org, name="hr").update(permissions=["member.view", "member.edit"])
+        # B14 (2026-10-13): «Bildiriş göndər» rol bayrağı ilə yox, `notification.publish` (HR şablonunda var).
+        Role.objects.filter(organization=self.org, name="hr").update(
+            permissions=["member.view", "member.edit", "notification.publish"]
+        )
         sections = self._sections()
         self.assertNotIn("role-assignment", sections)
         self.assertNotIn("manage-roles", sections)
