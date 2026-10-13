@@ -8,7 +8,7 @@
  *   </div>
  *
  * Xüsusiyyətlər (best-practice UX):
- *   • Server-side axtarış — DEBOUNCE (250ms), heç vaxt bütün datanı yükləmir.
+ *   • Server-side axtarış — vahid EMSSearchInput (1500 ms, ≥ 2 simvol), heç vaxt bütün datanı yükləmir.
  *   • LAZY / infinite-scroll səhifələmə (offset/limit + has_more) — menyu aşağı
  *     sürüşəndə növbəti səhifə gətirilir.
  *   • single / multi seçim (chip-lərlə). single-də seçim əvəzlənir.
@@ -129,7 +129,6 @@
     var loading = false;
     var pending = null; // sorğu gedərkən yazılan son axtarış (trailing re-fetch)
     var reqSeq = 0;
-    var debounceTimer = null;
 
     function emit() {
       listeners.change.forEach(function (cb) {
@@ -506,15 +505,11 @@
     }
 
     // ------- hadisələr -------
-    search.addEventListener("input", function () {
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
-      }
-      debounceTimer = setTimeout(function () {
-        lastTerm = search.value.trim();
-        fetchOpts(lastTerm, false);
-      }, 250);
-    });
+    // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, IME; Enter seçimdir → enter:false).
+    window.EMSSearchInput.bind(search, { enter: false, onSearch: function (value) {
+      lastTerm = value;
+      fetchOpts(lastTerm, false);
+    } });
     search.addEventListener("focus", function () {
       lastTerm = search.value.trim();
       fetchOpts(lastTerm, false);

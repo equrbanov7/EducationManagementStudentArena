@@ -252,11 +252,10 @@
     });
 
     /* ── Yazdıqca təklif (sahib 2026-09-30) ──────────────────────────────
-     * Yüngül siyahı (ən çoxu 8 nəfər) — 250 ms dayanmadan sonra BİR sorğu; köhnə
+     * Yüngül siyahı (ən çoxu 8 nəfər) — yazı dayananda (vahid EMSSearchInput, 1500 ms;
+     * Enter burada siyahıdan SEÇİMDİR, ona görə `enter: false`) BİR sorğu; köhnə
      * sorğu AbortController ilə ləğv olunur, gecikmiş cavab (seq) atılır. Seçim
      * istifadəçi adını xanaya yazıb adi axtarışı (tam kart + «sıfırla») işə salır. */
-    var SUGGEST_DELAY_MS = 250;
-    var suggestTimer = null;
     var suggestController = null;
     var suggestSeq = 0;
 
@@ -269,9 +268,9 @@
     }
 
     function closeSuggest(scope) {
-        if (suggestTimer) {
-            window.clearTimeout(suggestTimer);
-            suggestTimer = null;
+        var pending = scope && scope.querySelector("[data-pwr-query]");
+        if (pending) {
+            window.EMSSearchInput.cancel(pending); // Esc / seçim — gözləyən sorğu da düşür
         }
         if (suggestController) {
             suggestController.abort();
@@ -410,15 +409,21 @@
         if (!scope || !scope.getAttribute("data-suggest-url")) {
             return;
         }
-        var query = (input.value || "").trim();
-        closeSuggest(scope);
-        if (query.length < 2) {
-            return;
+        if ((input.value || "").trim().length < 2) {
+            closeSuggest(scope); // köhnə təkliflər yarımçıq sorğuya aid deyil
         }
-        suggestTimer = window.setTimeout(function () {
-            suggestTimer = null;
-            requestSuggest(scope, query);
-        }, SUGGEST_DELAY_MS);
+    });
+
+    window.EMSSearchInput.delegate("[data-pwr-query]", {
+        enter: false,
+        onSearch: function (value, meta) {
+            var scope = meta.input.closest("[data-pwr-root]");
+            if (scope && scope.getAttribute("data-suggest-url") && value.length >= 2) {
+                requestSuggest(scope, value);
+            } else if (scope) {
+                closeSuggest(scope);
+            }
+        },
     });
 
     window.EMSDelegate.on("keydown", "[data-pwr-query]", function (event, input) {

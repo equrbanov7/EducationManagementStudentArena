@@ -115,8 +115,9 @@ class ProfileRole:
         IKT_REHBER: {IKT_REHBER, EXAM_CENTER_HEAD},
         # Əməkdaş imtahan mərkəzinin İŞÇİ səthini alır (nəzarətçi təyini rəhbərdədir).
         RIM_STAFF: {RIM_STAFF, EXAM_CENTER_STAFF},
-        "tutor": {"tutor"},
-        # Proqram koordinatoru tyutor-ekvivalentdir (eyni akademik kurasiya işi).
+        # Proqram koordinatoru tyutor-ekvivalentdir (eyni akademik kurasiya işi). 2026-10-14 (sahib: «eyni
+        # roldur demək olar») — alias İKİ TƏRƏFLİDİR: tyutor da koordinator bayrağını alır (açar dəsti də eynidir).
+        "tutor": {"tutor", "program_coordinator"},
         "program_coordinator": {"program_coordinator", "tutor"},
     }
 

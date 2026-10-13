@@ -1,4 +1,5 @@
-{% load i18n %}
+{% load i18n task_kinds %}
+{% task_kind_visibility as tkv %}
 {% if can_view_student_assignments %}
 <section class="profile-section-panel profile-section--assigned-exams {% if active_section == 'assigned-exams' %}is-active{% endif %}" data-profile-section-panel="assigned-exams" data-source-url="{% url 'accounts:assigned_exams' %}">
     <div class="section-card">
@@ -13,18 +14,22 @@
                class="modern-tab {% if assigned_tasks_active_filter == 'exams' %}active{% endif %}">
                 {% trans "tab_exams" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.exams|default:0 }}</span>
             </a>
+            {% if tkv.selfwork %}{# rol auditi B12 (2026-10-14): «Sərbəst iş» bağlıdırsa tab da yoxdur #}
             <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=assignments"
                class="modern-tab {% if assigned_tasks_active_filter == 'assignments' %}active{% endif %}">
                 {% trans "tab_assignments" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.assignments|default:0 }}</span>
             </a>
+            {% endif %}
             <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=labs"
                class="modern-tab {% if assigned_tasks_active_filter == 'labs' %}active{% endif %}">
                 {% trans "tab_labs" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.labs|default:0 }}</span>
             </a>
+            {% if tkv.coursework %}
             <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=independent"
                class="modern-tab {% if assigned_tasks_active_filter == 'independent' %}active{% endif %}">
                 {% trans "tab_independent" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.independent|default:0 }}</span>
             </a>
+            {% endif %}
         </div>
 
         <form method="get" class="assigned-task-search-form js-profile-debounce-search" data-debounce-ms="1000">

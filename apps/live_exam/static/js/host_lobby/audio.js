@@ -1,4 +1,4 @@
-import { state } from './state.js?v=lx20261008';
+import { state } from './state.js?v=lx20261014';
 
 /* ═══════════════════════════════════════════════════════════════════
  *  SƏS MÜHƏRRİKİ (2026-09-29 LX-FE-STAGE) — yalnız WebAudio sintezi, fayl yoxdur.

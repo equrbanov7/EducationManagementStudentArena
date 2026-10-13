@@ -3,7 +3,9 @@
  * NƏ EDİR
  *   1) boş xanaya klik  → hüceyrə dialoqu (yeni dərs);
  *   2) dərs kartına klik → eyni dialoq (redaktə + silmə);
- *   3) sürüklə-burax     → təsdiq dialoqu, sonra köçürmə (POST);
+ *   3) sürüklə-burax     → AYRI modul `schedule_editor_move.js` (pointer hadisələri,
+ *      toxunma, klaviatura «M» rejimi, optimist UI + geri qaytarma) — bu fayl ona
+ *      `window.EMSScheduleEditor` API-ni verir;
  *   4) toqquşmalar SERVERDƏN gəlir və olduğu kimi göstərilir — klient heç nə
  *      hesablamır (mühərrik: apps/registrar/schedule_conflicts.py);
  *   5) məcburi dəyişiklik səbəblə göndərilir; toqquşan dərs SİLİNMİR, parklanır;
@@ -18,7 +20,13 @@
  *     yenidən doldurulsaydı `refresh` lazım olardı).
  *
  * ƏLÇATANLIQ: sürüklə-buraxın klaviatura qarşılığı dialoqdakı «Gün» + «Dərs
- * saatı» seçiciləridir — kart Enter/Space ilə açılır, yeni yer orada seçilir.
+ * saatı» seçiciləridir — kart Enter/Space ilə açılır, yeni yer orada seçilir
+ * (əlavə olaraq «M» köçürmə rejimi — `schedule_editor_move.js`).
+ *
+ * MÜƏLLİM GÖRÜNÜŞÜ (2026-10-14): kök `data-view="teacher"` olanda dialoqda «Qrup»
+ * sahəsi var (`data-sedit-field="group_id"`) — payload-un `group_id`-i ondan gəlir
+ * (redaktədə kartın `data-group-id`-i), yeni xanada «Müəllim» kökün
+ * `data-teacher-id`-i ilə doldurulur. Server qrupu əhatəyə görə yenidən yoxlayır.
  */
 (function (window, document) {
     "use strict";
@@ -29,8 +37,6 @@
     }
 
     var DIALOG_ID = "seditCell";
-    var MOVE_ID = "seditMove";
-    var pendingMove = null;
 
     function root() {
         return document.querySelector("[data-sedit-root]");
@@ -113,10 +119,25 @@
 
     /* ── Payload ────────────────────────────────────────────────────────── */
 
+    function isTeacherView() {
+        var host = root();
+        return Boolean(host && host.getAttribute("data-view") === "teacher");
+    }
+
+    /* Qrup: müəllim görünüşündə dialoqun «Qrup» sahəsi, qrup görünüşündə kökün qrupu. */
+    function groupId() {
+        var picked = field("group_id");
+        if (picked) {
+            return picked.value || "";
+        }
+        var host = root();
+        return host ? host.getAttribute("data-group-id") || "" : "";
+    }
+
     function basePayload() {
         var host = root();
         return {
-            group_id: host ? host.getAttribute("data-group-id") : "",
+            group_id: groupId(),
             period_id: host ? host.getAttribute("data-period-id") : "",
         };
     }
@@ -152,6 +173,18 @@
         box.classList.add(state);
         box.textContent = message || "";
         box.hidden = false;
+    }
+
+    /* «Yenə də yerləşdir» icazəsi SERVERDƏN gəlir (`force_allowed`); köhnə cavab
+     * formasında (409 gövdəsi) toqquşmaların `can_force` bayraqlarından oxunur. */
+    function forceAllowed(result) {
+        if (result && typeof result.force_allowed === "boolean") {
+            return result.force_allowed;
+        }
+        var list = (result && result.conflicts) || [];
+        return list.length > 0 && list.every(function (row) {
+            return row.can_force !== false && row.kind !== "group";
+        });
     }
 
     function renderConflicts(list, target) {
@@ -220,6 +253,7 @@
 
     function resetDialog() {
         setField("slot_id", "");
+        setField("group_id", "");
         setField("force", "");
         setField("reason", "");
         setField("room", "");
@@ -245,6 +279,10 @@
 
     function openNew(button) {
         resetDialog();
+        if (isTeacherView()) {
+            /* Dərs bu müəllimə qoyulur; fənn siyahısı qrup seçiləndə yenilənir. */
+            setField("instructor_id", root().getAttribute("data-teacher-id"));
+        }
         setField("weekday", button.getAttribute("data-weekday"));
         setField("time_slot", button.getAttribute("data-time-slot"));
         title(texts().newTitle);
@@ -256,6 +294,7 @@
         resetDialog();
         var d = card.dataset;
         setField("slot_id", d.seditSlot);
+        setField("group_id", d.groupId);
         setField("subject_id", d.subjectId);
         setField("instructor_id", d.instructorId);
         setField("slot_kind", d.slotKind);
@@ -305,7 +344,7 @@
             renderSuggestions(result.suggestions, suggest.querySelector("[data-sedit-suggest-list]"), pickCell);
         }
         var hasConflict = Boolean(result.conflicts && result.conflicts.length);
-        showForce(hasConflict);
+        showForce(hasConflict && forceAllowed(result));
         if (hasConflict) {
             verdict("is-clash", result.conflicts[0].message || "");
         } else if (result.errors && Object.keys(result.errors).length) {
@@ -325,8 +364,16 @@
         return "";
     }
 
+    function needsGroup() {
+        if (field("group_id") && !getField("group_id")) {
+            verdict("is-clash", texts().pickGroup || "");
+            return true;
+        }
+        return false;
+    }
+
     function runCheck() {
-        if (!getField("subject_id") || !getField("time_slot")) {
+        if (needsGroup() || !getField("subject_id") || !getField("time_slot")) {
             return;
         }
         verdict("is-busy", texts().checking || "");
@@ -345,6 +392,9 @@
     }
 
     function save(force) {
+        if (needsGroup()) {
+            return;
+        }
         askConfirm(cellSummary(), confirmTexts().tSave, function () {
             postSave(force);
         });
@@ -366,80 +416,6 @@
                     return;
                 }
                 verdict("is-clash", firstError(body && body.errors) || (body && body.message) || texts().error || "");
-            });
-    }
-
-    /* ── Sürüklə-burax ──────────────────────────────────────────────────── */
-
-    function moveSummary(card, cell) {
-        var name = card.getAttribute("data-name") || card.getAttribute("data-code") || "";
-        var day = cell.closest("tr");
-        var time = day ? (day.querySelector(".smtx__hours b") || {}).textContent || "" : "";
-        return (texts().moveSummary || "") + " " + name + " → " + time;
-    }
-
-    function openMove(card, cell) {
-        pendingMove = {
-            slot_id: card.getAttribute("data-sedit-slot"),
-            weekday: cell.getAttribute("data-weekday"),
-            time_slot: cell.getAttribute("data-time-slot"),
-        };
-        var box = document.getElementById(MOVE_ID);
-        if (!box) {
-            return;
-        }
-        var summary = box.querySelector("[data-sedit-move-summary]");
-        if (summary) {
-            summary.textContent = moveSummary(card, cell);
-        }
-        renderConflicts([], box.querySelector("[data-sedit-move-conflicts]"));
-        var force = box.querySelector("[data-sedit-move-force]");
-        if (force) {
-            force.hidden = true;
-        }
-        var reason = box.querySelector("[data-sedit-move-reason]");
-        if (reason) {
-            reason.value = "";
-        }
-        var error = box.querySelector("[data-sedit-move-error]");
-        if (error) {
-            error.hidden = true;
-            error.textContent = "";
-        }
-        overlayOpen(MOVE_ID);
-    }
-
-    function confirmMove() {
-        if (!pendingMove) {
-            return;
-        }
-        var box = document.getElementById(MOVE_ID);
-        var reason = box && box.querySelector("[data-sedit-move-reason]");
-        var forceBox = box && box.querySelector("[data-sedit-move-force]");
-        var payload = basePayload();
-        payload.action = "move";
-        payload.slot_id = pendingMove.slot_id;
-        payload.weekday = pendingMove.weekday;
-        payload.time_slot = pendingMove.time_slot;
-        payload.force = forceBox && !forceBox.hidden ? "1" : "";
-        payload.reason = reason ? reason.value : "";
-        post(payload)
-            .then(function () {
-                pendingMove = null;
-                overlayClose(MOVE_ID);
-                reload();
-            })
-            .catch(function (err) {
-                var body = err && err.payload;
-                renderConflicts(body && body.conflicts, box && box.querySelector("[data-sedit-move-conflicts]"));
-                if (forceBox && body && body.conflicts && body.conflicts.length) {
-                    forceBox.hidden = false;
-                }
-                var error = box && box.querySelector("[data-sedit-move-error]");
-                if (error) {
-                    error.textContent = (body && body.message) || texts().error || "";
-                    error.hidden = false;
-                }
             });
     }
 
@@ -544,52 +520,19 @@
         });
     });
 
-    DELEGATE.on("click", "[data-sedit-move-confirm]", function (event) {
-        event.preventDefault();
-        confirmMove();
-    });
-
     DELEGATE.on("click", "[data-sedit-place]", function (event, button) {
         event.preventDefault();
         parkedSuggest(button);
     });
 
-    DELEGATE.on("dragstart", "[data-sedit-slot]", function (event, card) {
-        card.classList.add("is-dragging");
-        if (event.dataTransfer) {
-            event.dataTransfer.effectAllowed = "move";
-            event.dataTransfer.setData("text/plain", card.getAttribute("data-sedit-slot") || "");
-        }
-    });
-
-    DELEGATE.on("dragend", "[data-sedit-slot]", function (event, card) {
-        card.classList.remove("is-dragging");
-    });
-
-    DELEGATE.on("dragover", "[data-sedit-drop]", function (event, cell) {
-        event.preventDefault();
-        if (event.dataTransfer) {
-            event.dataTransfer.dropEffect = "move";
-        }
-        cell.classList.add("is-drop-target");
-    });
-
-    DELEGATE.on("dragleave", "[data-sedit-drop]", function (event, cell) {
-        cell.classList.remove("is-drop-target");
-    });
-
-    DELEGATE.on("drop", "[data-sedit-drop]", function (event, cell) {
-        event.preventDefault();
-        cell.classList.remove("is-drop-target");
-        var slotId = event.dataTransfer ? event.dataTransfer.getData("text/plain") : "";
-        var card = slotId ? document.querySelector('[data-sedit-slot="' + slotId + '"]') : null;
-        if (!card || !root()) {
-            return;
-        }
-        if (card.getAttribute("data-weekday") === cell.getAttribute("data-weekday")
-            && card.getAttribute("data-time-slot") === cell.getAttribute("data-time-slot")) {
-            return;
-        }
-        openMove(card, cell);
-    });
+    /* Köçürmə modulu (`schedule_editor_move.js`) üçün ortaq səth. */
+    window.EMSScheduleEditor = {
+        root: root,
+        texts: texts,
+        post: post,
+        reload: reload,
+        basePayload: basePayload,
+        renderConflicts: renderConflicts,
+        forceAllowed: forceAllowed,
+    };
 })(window, document);

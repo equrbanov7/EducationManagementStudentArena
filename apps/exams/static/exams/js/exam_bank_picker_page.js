@@ -11,7 +11,6 @@
 (function () {
     "use strict";
 
-    var searchTimer = null;
 
     function attachForm(node) {
         return (node && node.closest && node.closest("[data-ebp-attach]")) || document.querySelector("[data-ebp-attach]");
@@ -136,11 +135,16 @@
         window.EMSDelegate.on("change", "[data-ebp-auto]", function (event, control) {
             submitFilters(control);
         });
-        window.EMSDelegate.on("input", "[data-ebp-search]", function (event, input) {
-            window.clearTimeout(searchTimer);
-            searchTimer = window.setTimeout(function () {
-                submitFilters(input);
-            }, 500);
+    }
+    // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter dərhal, IME); yeni
+    // səhifədə fokus + kursor axtarış sahəsinə qayıdır.
+    if (window.EMSSearchInput) {
+        window.EMSSearchInput.delegate("[data-ebp-search]", {
+            onSearch: function (value, meta) {
+                if (meta.input.form) {
+                    window.EMSSearchInput.submitForm(meta.input.form, { input: meta.input });
+                }
+            },
         });
     }
 

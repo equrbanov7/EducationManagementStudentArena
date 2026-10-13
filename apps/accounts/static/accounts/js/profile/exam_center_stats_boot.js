@@ -30,7 +30,7 @@
     if (!el) { return {}; }
     try { return JSON.parse(el.textContent) || {}; } catch (e) { return {}; }
   })();
-  var page = 1, sort = "-date", timer = null;
+  var page = 1, sort = "-date";
   function esc(s){ var d=document.createElement("div"); d.textContent=(s==null?"":s); return d.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
   function viewUrl(slug, id){ return U.view ? U.view.replace("__SLUG__", encodeURIComponent(slug)).replace("/attempt/0/", "/attempt/"+id+"/") : ""; }
 
@@ -108,16 +108,25 @@
     var tr=""; for(var i=0;i<8;i++){ tr+='<tr>'; for(var c=0;c<13;c++){ tr+='<td><div class="ecs-skel"></div></td>'; } tr+='</tr>'; }
     rows.innerHTML=tr;
   }
-  function load(){
-    skeletonRows();
+  var loadSeq = 0; // köhnə (yavaş) cavab yeni nəticənin üstünə yazılmır
+  function load(opts){
+    var mine = (loadSeq += 1), SI = window.EMSSearchInput;
+    // Yazdıqca axtarış (2026-10-14): skelet yox — köhnə sətirlər sakitcə solur + «Axtarılır…».
+    var quiet = !!(opts && opts.quiet && rows.children.length);
+    rows.classList.toggle("ems-search-pending", quiet); SI.busy(q, quiet);
+    if (!quiet) { skeletonRows(); }
     renderArrows();
     // Qrafik modulu (exam_center_stats_charts.js) cari filtrlərlə sinxronlaşır.
     try { document.dispatchEvent(new CustomEvent("ecs:filters", { detail: { query: params().toString() } })); } catch (e) {}
     fetch(U.data + "?" + params({page:page}).toString(), {headers:{"X-Requested-With":"XMLHttpRequest"}})
       .then(function(r){ return r.ok?r.json():null; })
-      .then(function(d){ if(!d) return; renderCards(d.summary); renderRows(d); });
+      .then(function(d){
+        if (mine !== loadSeq) return;
+        rows.classList.remove("ems-search-pending"); SI.busy(q, false);
+        if(!d) return; renderCards(d.summary); renderRows(d);
+      });
   }
-  function reload(){ page = 1; load(); }
+  function reload(opts){ page = 1; load(opts && opts.quiet ? opts : null); }
 
   thead.querySelectorAll("th.is-sortable").forEach(function(th){
     th.addEventListener("click", function(){
@@ -126,7 +135,8 @@
       reload();
     });
   });
-  q.addEventListener("input", function(){ if(timer) clearTimeout(timer); timer=setTimeout(reload, 300); });
+  // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter dərhal, IME).
+  window.EMSSearchInput.bind(q, { onSearch: function(){ reload({ quiet: true }); } });
   [typeSel, yearSel, formatSel, statusSel, semesterSel].forEach(function(s){
     if (s) { s.addEventListener("change", reload); }
   });
@@ -140,7 +150,7 @@
   var resetBtn = scope.querySelector(".js-ecs-reset");
   if (resetBtn) {
     resetBtn.addEventListener("click", function(){
-      q.value = "";
+      q.value = ""; window.EMSSearchInput.sync(q, "");
       subjectMS.clear(); groupMS.clear();
       facultyPick.reset(); deptPick.reset(); teacherPick.reset();
       [typeSel, yearSel, formatSel, statusSel, semesterSel].forEach(function(s){

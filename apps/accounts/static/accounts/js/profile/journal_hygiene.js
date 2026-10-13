@@ -16,7 +16,6 @@
 
     var STATE = "__emsJournalHygiene";
     var DIALOG_ID = "jh-dialog";
-    var SEARCH_DELAY_MS = 350;
     /* «not_held» — keçirilməyən fənlər (sahib 2026-10-11). */
     var TABS = ["left", "empty", "not_held", "history"];
 
@@ -275,16 +274,14 @@
         }
     });
 
-    window.EMSDelegate.on("input", "[data-jh-root] #jh-q", function (event, input) {
-        var root = rootOf(input);
-        if (!root) {
-            return;
-        }
-        var st = state(root);
-        window.clearTimeout(st.timer);
-        st.timer = window.setTimeout(function () {
-            reset(root);
-        }, SEARCH_DELAY_MS);
+    // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter dərhal, IME).
+    window.EMSSearchInput.delegate("[data-jh-root] #jh-q", {
+        onSearch: function (value, meta) {
+            var root = rootOf(meta.input);
+            if (root) {
+                reset(root);
+            }
+        },
     });
 
     window.EMSDelegate.on("click", "[data-jh-root] [data-jh-chip]", function (event, chip) {

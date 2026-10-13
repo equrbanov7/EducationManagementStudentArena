@@ -18,7 +18,8 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal_guest.css' %}?v=20260926-close">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_history.css' %}?v=20260925-hist2">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_activation.css' %}?v=20260925-act">
-    <link rel="stylesheet" href="{% static 'registrar/css/journal_cell_hint.css' %}?v=20261010-hint">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_cell_hint.css' %}?v=20261014-notip">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_autosave.css' %}?v=20261014-auto">
     {% comment %}Sakit düzüm qatı — HƏMİŞƏ SONUNCU yüklənir ki, yuxarıdakı
     fayllardakı düzüm fərqlərini üstələsin; rəng palitrasına toxunmur.{% endcomment %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal_layout.css' %}?v=20261005-touch">
@@ -202,7 +203,8 @@
         (journal_detail.js panel yoxdursa naviqasiya edir).{% endcomment %}
         {% if active_tab == "grid" %}
         <section class="jd-panel is-active" data-jtab-panel="grid" id="jd-panel-grid" role="tabpanel" aria-labelledby="jd-tab-grid">
-            {# «Bu günün cədvəl dərsləri» + «Aktivləşdir» (UNEC P1-1) — grid formasından KƏNAR (iç-içə form yox). #}
+            {% comment %}«Bu günün cədvəl dərsləri» + «Aktivləşdir» (UNEC P1-1) — YALNIZ «Aktivləşdir» RİM-də
+            yandırılanda; defoltda zolaq yoxdur (sahib 2026-10-14). Grid formasından KƏNAR (iç-içə form yox).{% endcomment %}
             {% if today_strip %}{% include "registrar/partials/_jd_today_strip.html" %}{% endif %}
             {% include "registrar/partials/_jd_grid.html" %}
         </section>
@@ -317,12 +319,14 @@
     <script src="{% static 'registrar/js/journal_lesson_room.js' %}?v=20260927-memory"></script>
     <script src="{% static 'registrar/js/journal_lesson_modal_guard.js' %}?v=20260920-guard"></script>
     {# journal_grid 2 hissədə, SIRA VACİBDİR: çiplər/qaralama/təsdiq → dərs modalı (2026-09-21 bölgüsü). #}
-    <script src="{% static 'registrar/js/journal_grid.js' %}?v=20261003-bulk"></script>
+    <script src="{% static 'registrar/js/journal_grid.js' %}?v=20261014-auto"></script>
     <script src="{% static 'registrar/js/journal_grid_lesson_modal.js' %}?v=20260921-split"></script>
     <script src="{% static 'registrar/js/journal_lesson_prefill.js' %}?v=20261010-wp4lesson"></script>{# «Yeni dərs» dolu açılır (sahib 2026-10-10) #}
     {# Sağdakı «N q/b» sayğacı davamiyyət dəyişəndə canlı yenilənir (UX2 2026-10-05). #}
     <script src="{% static 'registrar/js/journal_grid_absence.js' %}?v=20261005-live2"></script>
-    <script src="{% static 'registrar/js/journal_cell_hint.js' %}?v=20261010-hint"></script>
+    <script src="{% static 'registrar/js/journal_cell_hint.js' %}?v=20261014-notip"></script>
+    {# Avtomatik yadda saxlama — journal_grid.js-dən SONRA (qaralama bərpası + `EMSJournalGrid.clearDraft`), sahib 2026-10-14. #}
+    <script src="{% static 'registrar/js/journal_grid_autosave.js' %}?v=20261014-auto"></script>
     {# İkiqat göndəriş qapısı — ayrı fayl (QA P3-11). #}
     <script src="{% static 'registrar/js/journal_submit_guard.js' %}?v=20260906-1"></script>
     <script src="{% static 'registrar/js/correction_history.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>

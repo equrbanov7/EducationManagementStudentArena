@@ -218,7 +218,8 @@ DEFAULT_UNIT_SEED = (
         "code": "koordinator",
         "name": "Proqram koordinatoru",
         "note": "ixtisas, qrup, fərdi tədris planı",
-        "handler_role_names": ["program_coordinator"],
+        # 2026-10-14 (sahib): tyutor = proqram koordinatoru — eyni şöbənin emalçısıdır (mövcud: organizations/0064).
+        "handler_role_names": ["program_coordinator", "tutor"],
         "resolve_by": ResolveBy.SPECIALTY.value,
         "default_sla_days": 3,
     },

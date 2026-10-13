@@ -110,13 +110,33 @@
         }
 
         // ── Cədvəl ──────────────────────────────────────────────────────────
-        function load() {
+        var loadSeq = 0; // köhnə (yavaş) cavab yeni nəticənin üstünə yazılmır
+
+        function load(opts) {
             if (!rowsBody) {
                 return;
             }
-            R.skeleton(rowsBody, COLUMNS);
+            var mine = (loadSeq += 1);
+            // Yazdıqca axtarış (2026-10-14): skelet yox — köhnə sətirlər sakitcə solur.
+            var quiet = !!(opts && opts.quiet && rowsBody.children.length);
+            rowsBody.classList.toggle("ems-search-pending", quiet);
+            window.EMSSearchInput.busy(opts && opts.input, quiet);
+            if (!quiet) {
+                R.skeleton(rowsBody, COLUMNS);
+            }
+            function current() {
+                if (mine !== loadSeq) {
+                    return false;
+                }
+                rowsBody.classList.remove("ems-search-pending");
+                window.EMSSearchInput.busy(opts && opts.input, false);
+                return true;
+            }
             fetchJSON(root.dataset.queueUrl + "?" + queryParams().toString())
                 .then(function (data) {
+                    if (!current()) {
+                        return;
+                    }
                     if (!data || !data.has_access) {
                         R.message(rowsBody, COLUMNS, labels.empty);
                         R.pager(pagerHost, null, labels, function () {});
@@ -136,13 +156,15 @@
                     });
                 })
                 .catch(function () {
-                    R.message(rowsBody, COLUMNS, labels.error);
+                    if (current()) {
+                        R.message(rowsBody, COLUMNS, labels.error);
+                    }
                 });
         }
 
-        function reload() {
+        function reload(opts) {
             state.page = 1;
-            load();
+            load(opts && opts.quiet ? opts : null);
         }
 
         function toggleCategory(code) {
@@ -254,10 +276,11 @@
         if (filters) {
             var search = filters.querySelector('[name="q"]');
             if (search) {
-                var timer = null;
-                search.addEventListener("input", function () {
-                    window.clearTimeout(timer);
-                    timer = window.setTimeout(reload, 300);
+                // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter dərhal, IME).
+                window.EMSSearchInput.bind(search, {
+                    onSearch: function () {
+                        reload({ quiet: true, input: search });
+                    }
                 });
             }
             ["year", "period", "severity", "status"].forEach(function (name) {

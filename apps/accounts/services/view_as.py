@@ -61,9 +61,10 @@ MODE_READONLY = "readonly"
 #: FULL rejim — hədəfin adından hər şeyi etmək olar (audit ilə).
 FULL_ACCESS_ROLE_NAMES = {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN}
 #: READONLY rejim — yalnız baxış (tyutor/dekan/kafedra müdürü/HR).
-READONLY_ROLE_NAMES = {"tutor", "dean", "vice_dean", "department_head", ProfileRole.HR}
-#: Bu rollar üçün hədəflər öz unit alt-ağacı ilə məhdudlaşır.
-UNIT_SCOPED_ROLE_NAMES = {"tutor", "dean", "vice_dean", "department_head"}
+READONLY_ROLE_NAMES = {"tutor", "program_coordinator", "dean", "vice_dean", "department_head", ProfileRole.HR}
+#: Bu rollar üçün hədəflər öz unit alt-ağacı ilə məhdudlaşır. 2026-10-14: `program_coordinator` tyutorla eyni
+#: roldur (sahib) — əvvəl siyahıda yox idi və koordinator READONLY rejimdə əhatəsiz (bütün təşkilat) hədəf alırdı.
+UNIT_SCOPED_ROLE_NAMES = {"tutor", "program_coordinator", "dean", "vice_dean", "department_head"}
 
 #: Rol → rejim. AÇIQ xəritə; səviyyə-əsaslı geri düşmə QƏSDƏN yoxdur.
 #:

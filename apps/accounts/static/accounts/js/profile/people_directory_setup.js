@@ -343,13 +343,31 @@
             tbody.innerHTML = html;
         }
 
-        function load() {
+        var loadSeq = 0; // köhnə (yavaş) cavab yeni nəticənin üstünə yazılmır
+
+        function load(opts) {
             publishFilters();
             syncMoreBadge();
-            setBusy(true);
+            var mine = (loadSeq += 1);
+            // Yazdıqca axtarış (2026-10-14): cədvəl skeletə çevrilmir — köhnə sətirlər
+            // sakitcə solur, input-un altında «Axtarılır…».
+            var quiet = !!(opts && opts.quiet && tbody.children.length);
+            tbody.classList.toggle("ems-search-pending", quiet);
+            window.EMSSearchInput.busy(opts && opts.input, quiet);
+            if (!quiet) {
+                setBusy(true);
+            }
+            function settle() {
+                tbody.classList.remove("ems-search-pending");
+                window.EMSSearchInput.busy(opts && opts.input, false);
+                setBusy(false);
+            }
             window.EMSCore.fetchJSON(urls.list + "?" + params().toString())
                 .then(function (payload) {
-                    setBusy(false);
+                    if (mine !== loadSeq) {
+                        return;
+                    }
+                    settle();
                     if (!payload || !payload.has_access) {
                         tbody.textContent = "";
                         if (empty) {
@@ -360,7 +378,10 @@
                     render(payload);
                 })
                 .catch(function () {
-                    setBusy(false);
+                    if (mine !== loadSeq) {
+                        return;
+                    }
+                    settle();
                     tbody.textContent = "";
                 });
         }
@@ -374,11 +395,34 @@
         }
 
         if (form) {
-            form.addEventListener("input", function () {
+            /* 2026-10-14 (sahib: «yazarkən search gedir, render olur, axtardığım itir»):
+               əvvəl formadakı HƏR `input` (o cümlədən select menyusunun öz axtarış
+               sətri) 250 ms-dən sonra cədvəli yenidən yükləyirdi. İndi: ad axtarışı
+               vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter dərhal, IME); yaş
+               sahələri eyni gecikmə ilə; adsız (menyu daxili) input-lar nəzərə alınmır. */
+            var qInput = form.querySelector('input[name="q"]');
+            if (qInput) {
+                window.EMSSearchInput.bind(qInput, {
+                    onSearch: function () {
+                        state.page = 1;
+                        window.clearTimeout(timer);
+                        load({ quiet: true, input: qInput });
+                    },
+                });
+            }
+            var ageLater = window.EMSSearchInput.debounce(function () {
                 reload(true);
             });
+            form.addEventListener("input", function (event) {
+                if (event.target && event.target.type === "number" && event.target.name) {
+                    ageLater();
+                }
+            });
             form.addEventListener("change", function (event) {
-                if (event.target && event.target.name === "faculty") {
+                if (!event.target || !event.target.name || event.target === qInput) {
+                    return; // axtarış sahəsinin blur-u yarımçıq sorğu atmasın
+                }
+                if (event.target.name === "faculty") {
                     loadOptions();
                 }
                 reload(true);
@@ -389,6 +433,9 @@
             });
             form.addEventListener("reset", function () {
                 window.setTimeout(function () {
+                    if (qInput) {
+                        window.EMSSearchInput.sync(qInput, ""); // sıfırlanmış = tətbiq olunmuş
+                    }
                     Array.prototype.forEach.call(form.querySelectorAll("select"), function (select) {
                         if (window.EMSBootstrapSelect) {
                             window.EMSBootstrapSelect.sync(select);

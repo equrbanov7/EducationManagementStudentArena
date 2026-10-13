@@ -3180,3 +3180,7 @@ msgstr "Die Anzahl der Fragen darf nicht negativ sein (0 = alle Fragen)."
 
 msgid "Köhnə kohortlar"
 msgstr "Alte Kohorten"
+
+msgctxt "ui.search"
+msgid "Axtarılır…"
+msgstr "Suche läuft…"

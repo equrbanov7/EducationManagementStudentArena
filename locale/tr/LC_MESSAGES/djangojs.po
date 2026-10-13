@@ -3116,3 +3116,7 @@ msgstr "Soru sayısı negatif olamaz (0 = tüm sorular)."
 
 msgid "Köhnə kohortlar"
 msgstr "Eski kohortlar"
+
+msgctxt "ui.search"
+msgid "Axtarılır…"
+msgstr "Aranıyor…"

@@ -7,7 +7,6 @@
 (function (ns, document) {
     "use strict";
 
-    var DEBOUNCE_MS = 300;
     var PAGE_SIZE = 10;
 
     function initSubjectSelect(form) {
@@ -33,7 +32,6 @@
         var loading = false;
         var query = "";
         var requestSeq = 0;
-        var debounceTimer = null;
 
         // İlkin seçim (redaktə rejimi).
         var preselected = nativeSelect.querySelector("option[value]");
@@ -93,14 +91,24 @@
             }
         }
 
-        function loadPage(reset) {
-            if (!searchUrl || loading) {
+        function loadPage(reset, quiet) {
+            // 2026-10-14: yeni axtarış (reset) gedən sorğunu GÖZLƏMİR — əvvəl `loading`
+            // olanda axtarış sakitcə atılırdı və nəticə köhnə mətnə aid qalırdı.
+            if (!searchUrl || (loading && !reset)) {
                 return;
             }
+            // Yazdıqca axtarış: köhnə sətirlər cavab gələnə qədər qalır (sakitcə solur).
+            quiet = Boolean(quiet && reset && results.children.length);
             if (reset) {
                 offset = 0;
                 hasMore = true;
-                results.innerHTML = "";
+                if (!quiet) {
+                    results.innerHTML = "";
+                }
+            }
+            results.classList.toggle("ems-search-pending", quiet);
+            if (window.EMSSearchInput) {
+                window.EMSSearchInput.busy(searchInput, quiet);
             }
             if (!hasMore) {
                 return;
@@ -117,6 +125,11 @@
                     if (seq !== requestSeq) {
                         return;
                     }
+                    if (quiet) {
+                        results.innerHTML = "";
+                        results.classList.remove("ems-search-pending");
+                        window.EMSSearchInput.busy(searchInput, false);
+                    }
                     var items = (data && data.results) || [];
                     items.forEach(function (item) {
                         if (results.querySelector('[data-value="' + String(item.id).replace(/"/g, '\\"') + '"]')) {
@@ -132,19 +145,24 @@
                 .catch(function () {
                     if (seq === requestSeq) {
                         loading = false;
+                        results.classList.remove("ems-search-pending");
+                        if (quiet) {
+                            window.EMSSearchInput.busy(searchInput, false);
+                        }
                     }
                 });
         }
 
-        searchInput.addEventListener("input", function () {
-            if (debounceTimer) {
-                clearTimeout(debounceTimer);
-            }
-            query = searchInput.value.trim();
-            debounceTimer = setTimeout(function () {
-                loadPage(true);
-            }, DEBOUNCE_MS);
-        });
+        // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter dərhal — forma
+        // göndərilmir, IME); `query` yalnız sorğu gedəndə yenilənir.
+        if (window.EMSSearchInput) {
+            window.EMSSearchInput.bind(searchInput, {
+                onSearch: function (value) {
+                    query = value;
+                    loadPage(true, true);
+                }
+            });
+        }
 
         results.addEventListener("scroll", function () {
             if (loading || !hasMore) {

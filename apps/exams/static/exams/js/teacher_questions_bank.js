@@ -17,7 +17,6 @@
 (function () {
   "use strict";
 
-  var SEARCH_DEBOUNCE_MS = 420;
   var SCROLL_FLAG = "qb_scroll_to_top";
   var INTERACTIVE_SELECTOR = "a,button,input,textarea,select,details,summary,label";
 
@@ -98,7 +97,6 @@
   function bindFilters(root) {
     var form = document.getElementById("questionSearchForm");
     var input = document.getElementById("questionSearchInput");
-    var timer = null;
     if (!form) return;
 
     function normalizeInput() {
@@ -119,10 +117,14 @@
     form.addEventListener("change", function (event) {
       if (event.target && event.target.tagName === "SELECT") submitSearch();
     });
-    if (input) {
-      input.addEventListener("input", function () {
-        if (timer) clearTimeout(timer);
-        timer = setTimeout(submitSearch, SEARCH_DEBOUNCE_MS);
+    if (input && window.EMSSearchInput) {
+      // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter dərhal, IME);
+      // yeni səhifədə fokus + kursor axtarış sahəsinə qayıdır.
+      window.EMSSearchInput.bind(input, {
+        onSearch: function () {
+          normalizeInput();
+          window.EMSSearchInput.submitForm(form, { input: input });
+        }
       });
     }
 

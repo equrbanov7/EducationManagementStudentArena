@@ -131,7 +131,7 @@ def members_covering_unit(organization, unit, *, role_names, permission=None):
 
 def coordinator_memberships_for_student(organization, student_user):
     """``student_user``-in AKTİV ``StudentAcademicRecord.group``-unu əhatə
-    edən aktiv ``program_coordinator`` üzvlükləri.
+    edən aktiv ``program_coordinator`` / ``tutor`` üzvlükləri.
 
     MODUL SƏRHƏDİ: ``organizations`` ``registrar``-ı statik idxal etmir
     (``scripts/module_deps_baseline.json`` — organizations yalnız ``audit``
@@ -158,7 +158,8 @@ def coordinator_memberships_for_student(organization, student_user):
     if record is None or record.group_id is None:
         return Membership.objects.none()
 
-    return members_covering_unit(organization, record.group, role_names=["program_coordinator"])
+    # Tyutor = proqram koordinatoru (sahib 2026-10-14) — eyni ixtisas kurasiyası.
+    return members_covering_unit(organization, record.group, role_names=["program_coordinator", "tutor"])
 
 
 def chair_head_memberships_for_unit(organization, unit):

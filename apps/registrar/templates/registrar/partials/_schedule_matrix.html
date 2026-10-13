@@ -14,6 +14,8 @@ KONTEKST MÜQAVİLƏSİ
   matrix_role      — "student" | "teacher" | "manage" (kart məzmunu)
   matrix_editable  — True: boş xana «+» düyməsi, kartlar sürüklənə bilir
   week             — həftə konteksti (üst/alt paritet, tarixlər)
+  matrix_empty_text — (opsional) slot yoxdursa göstərilən mətn (məs. müəllim görünüşü)
+  matrix_show_group — (opsional) kartın alt sətrində müəllim yox, QRUP (redaktorun müəllim görünüşü)
 
 CSP: inline CSS/JS yoxdur; davranış `accounts/js/schedule_editor.js` və
 `registrar/js/schedule_grid.js` xarici fayllarındadır.{% endcomment %}
@@ -58,7 +60,9 @@ CSP: inline CSS/JS yoxdur; davranış `accounts/js/schedule_editor.js` və
     </div>
     {% if not matrix.has_slots %}
     <p class="smtx__hint" role="status">
-        {% if matrix_editable %}
+        {% if matrix_empty_text %}
+        {{ matrix_empty_text }}
+        {% elif matrix_editable %}
         {% trans "Bu qrupun bu semestrdə hələ dərsi yoxdur — boş xanaya klikləyib ilk dərsi qoyun." context "registrar.schedule_grid" %}
         {% else %}
         {% trans "Bu semestr üçün hələ dərs qeyd edilməyib — cədvəl boş görünür." context "registrar.schedule_grid" %}

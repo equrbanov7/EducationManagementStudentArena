@@ -95,14 +95,17 @@
             return target.pathname + target.search;
         }
 
-        function pushSectionUrl(section, sourceUrl) {
+        function pushSectionUrl(section, sourceUrl, replace) {
             if (!window.history || !window.history.pushState) {
                 return;
             }
             try {
                 var nextUrl = new URL(ctx.profileBaseUrl, window.location.origin);
                 copySourceQueryToTarget(sourceUrl, nextUrl, section);
-                window.history.pushState({ section: section, ajax: true }, "", nextUrl.pathname + nextUrl.search);
+                // Yazdıqca axtarış (quiet) tarixçəni hər hərflə doldurmasın.
+                window.history[replace ? "replaceState" : "pushState"](
+                    { section: section, ajax: true }, "", nextUrl.pathname + nextUrl.search
+                );
             } catch (e) { /* ignore */ }
         }
 
@@ -246,6 +249,20 @@
             } catch (e) { /* ignore */ }
         }
 
+        /* 2026-10-14 (sahib: «yazarkən search gedir, render olur, axtardığım itir»):
+           `quiet` yükləmə (yazdıqca axtarış) fokuslu input-u ƏVƏZLƏMİR —
+           EMSSearchInput.morph sahəni + valideyn zəncirini saxlayıb ətrafı yeniləyir;
+           alınmasa tam əvəzləmədən sonra fokus/dəyər/kursor bərpa olunur. */
+        function quietSwap(section, node) {
+            var SI = window.EMSSearchInput;
+            var old = ctx.sectionsHost.querySelector('[data-profile-section-panel="' + section + '"]');
+            var snap = SI && old ? SI.snapshot(old) : null;
+            if (snap && SI.morph(old, node, snap.el)) {
+                return { panel: old, snap: null };
+            }
+            return { panel: null, snap: snap };
+        }
+
         function replaceSectionHtml(section, html, options) {
             options = options || {};
             var node = extractSectionFromHtml(html, section);
@@ -253,13 +270,17 @@
                 return false;
             }
             node.classList.add("is-active");
-            var oldPanels = ctx.sectionsHost.querySelectorAll("[data-profile-section-panel]");
-            oldPanels.forEach(function (p) {
-                if (p.parentNode) {
-                    p.parentNode.removeChild(p);
-                }
-            });
-            ctx.sectionsHost.appendChild(node);
+            var quiet = options.quiet ? quietSwap(section, node) : { panel: null, snap: null };
+            if (quiet.panel) {
+                node = quiet.panel;
+            } else {
+                ctx.sectionsHost.querySelectorAll("[data-profile-section-panel]").forEach(function (p) {
+                    if (p.parentNode) {
+                        p.parentNode.removeChild(p);
+                    }
+                });
+                ctx.sectionsHost.appendChild(node);
+            }
 
             var responseDoc = (function () {
                 try {
@@ -286,12 +307,16 @@
             try { executeInlineScripts(node); } catch (e) { /* ignore */ }
             try { notifySectionLoaded(section, node); } catch (e) { /* ignore */ }
             ctx.updateSidebarActiveState(section);
-            focusSectionTitle();
+            if (!options.quiet) {
+                focusSectionTitle();
+            } else if (quiet.snap) {
+                window.EMSSearchInput.restore(quiet.snap, node);
+            }
             if (options.updateUrl !== false) {
-                pushSectionUrl(section, options.sourceUrl);
+                pushSectionUrl(section, options.sourceUrl, !!options.quiet);
             }
             ctx.sectionPanels = document.querySelectorAll("[data-profile-section-panel]");
-            if (ctx.isMobileViewport()) {
+            if (!options.quiet && ctx.isMobileViewport()) {
                 ctx.setSidebarCollapsed(true);
             }
             try { refreshBadges(); } catch (e) { /* ignore */ }
@@ -375,8 +400,10 @@
             }
             var controller = (typeof AbortController === "function") ? new AbortController() : null;
             ctx.ajaxLoadInFlight = controller;
-            showSectionLoading();
-            showSectionSkeleton(section);
+            if (!options.quiet) {
+                showSectionLoading();
+                showSectionSkeleton(section);
+            }
 
             var fetchOpts = {
                 credentials: "same-origin",
@@ -423,7 +450,8 @@
                         }
                         if (!replaceSectionHtml(section, payload.html, {
                             updateUrl: options.updateUrl,
-                            sourceUrl: options.sourceUrl
+                            sourceUrl: options.sourceUrl,
+                            quiet: !!options.quiet
                         })) {
                             throw new Error("section_not_in_response");
                         }
@@ -440,7 +468,9 @@
                     if (ctx.ajaxLoadInFlight === controller) {
                         dropSectionSkeleton(result !== true);
                     }
-                    clearSectionLoading();
+                    if (!options.quiet) {
+                        clearSectionLoading();
+                    }
                     if (ctx.ajaxLoadInFlight === controller) {
                         ctx.ajaxLoadInFlight = null;
                     }

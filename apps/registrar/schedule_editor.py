@@ -366,15 +366,41 @@ def slot_teacher_options(*, organization, group, period, subject_id, instructor_
 # ── Yoxlama (heç nə yazmır) ──────────────────────────────────────────────────
 
 
-def check_cell(*, organization, offering, cleaned, exclude_id=None, slot_instructor_id=None) -> dict:
+def scope_filter(actor, organization):
+    """Toqquşan slotun redaktorun ``schedule.manage`` əhatəsində olub-olmadığı (açılış üzrə keşlə).
+
+    ``actor`` yoxdursa ``None`` — mühərrik bütün slotları əhatədə sayır (köhnə davranış)."""
+    if actor is None:
+        return None
+    cache: dict = {}
+
+    def visible(slot) -> bool:
+        key = slot.offering_id
+        if key not in cache:
+            cache[key] = schedule_manage.can_manage_offering(actor, organization, slot.offering)
+        return cache[key]
+
+    return visible
+
+
+def check_cell(*, organization, offering, cleaned, exclude_id=None, slot_instructor_id=None, actor=None) -> dict:
     """Saxlama-öncəsi tam yoxlama: dövr pəncərəsi + konfliktlər + tövsiyələr.
 
     Müəllim toqquşması slotun EFFEKTİV müəllimi ilə yoxlanır: ``slot_instructor_id`` (dialoqda
     seçilmiş «Dərsi aparan müəllim»), verilməyibsə açılışın müəllimi. Yalnız açılışın SEMESTRİNİN
     slotları sayılır və birləşmiş mühazirə (axın) toqquşma deyil — ``schedule.find_conflict`` ilə
-    eyni qaydalar (bax ``schedule_conflicts`` modul başlığı)."""
+    eyni qaydalar (bax ``schedule_conflicts`` modul başlığı).
+
+    ``actor`` (2026-10-14) — redaktor: onun əhatəsindən KƏNAR toqquşma minimal açıqlama ilə və
+    ``can_force=False`` qayıdır (başqa fakültənin dərsi parklanmır, detalı sızmır)."""
     teacher_id = slot_instructor_id or offering.instructor_id
-    rules = {"period_id": offering.period_id, "subject_id": offering.subject_id, "kind": cleaned["kind"]}
+    rules = {
+        "period_id": offering.period_id,
+        "subject_id": offering.subject_id,
+        "kind": cleaned["kind"],
+        # Yaddaşdakı (hələ yazılmamış) açılışın paralel alt qrupu ola bilməz.
+        "offering_id": None if offering._state.adding else offering.pk,
+    }
     errors: dict = {}
     window = schedule_manage.period_window_error(offering)
     if window:
@@ -411,6 +437,7 @@ def check_cell(*, organization, offering, cleaned, exclude_id=None, slot_instruc
         group_id=offering.group_id,
         instructor_id=teacher_id,
         exclude_ids=(exclude_id,) if exclude_id else (),
+        visible=scope_filter(actor, organization),
         **rules,
     )
     suggestions = []
@@ -426,7 +453,15 @@ def check_cell(*, organization, offering, cleaned, exclude_id=None, slot_instruc
             limit=6,
             **rules,
         )
-    return {"ok": not conflicts, "errors": errors, "conflicts": conflicts, "suggestions": suggestions}
+    return {
+        "ok": not conflicts,
+        "errors": errors,
+        "conflicts": conflicts,
+        "suggestions": suggestions,
+        # UI yalnız bunu oxuyur: «Yenə də yerləşdir» düyməsi göstərilsinmi (qrup / əhatədən kənar
+        # toqquşmada YOX). Server `save`/`move`-da eyni qaydanı yenidən tətbiq edir.
+        "force_allowed": bool(conflicts) and all(row.get("can_force") for row in conflicts),
+    }
 
 
 __all__ = [
@@ -437,6 +472,7 @@ __all__ = [
     "parse_cell",
     "resolve_offering",
     "resolve_slot_instructor",
+    "scope_filter",
     "slot_teacher_options",
     "teacher_choices",
 ]

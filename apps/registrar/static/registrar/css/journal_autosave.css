@@ -1,0 +1,29 @@
+/* Jurnalın avtomatik yadda saxlanması — «Yadda saxla» düyməsinin yanındakı kiçik vəziyyət mətni
+   (journal_grid_autosave.js, sahib 2026-10-14). Modal YOX; yalnız `--ems-*` tokenləri. */
+.jd2-savebar { align-items: center; gap: 10px; flex-wrap: wrap; }
+.jd2-autosave {
+    display: inline-flex; align-items: center; gap: 6px; min-height: 28px;
+    font-size: 0.78rem; font-weight: 600; color: var(--ems-text-muted);
+}
+.jd2-autosave::before {
+    content: ""; flex: 0 0 auto; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--ems-neutral-300);
+}
+.jd2-autosave.is-saving::before { background: var(--ems-primary-400); }
+.jd2-autosave.is-saved { color: var(--ems-success-700); }
+.jd2-autosave.is-saved::before { background: var(--ems-success-600); }
+.jd2-autosave.is-warning { color: var(--ems-warning-800); }
+.jd2-autosave.is-warning::before { background: var(--ems-warning-500); }
+.jd2-autosave.is-error { color: var(--ems-danger-700, #b91c1c); }
+.jd2-autosave.is-error::before { background: var(--ems-danger-600, #dc2626); }
+.jd2-autosave-retry {
+    display: inline-flex; align-items: center; gap: 5px; min-height: 28px; padding: 0 10px;
+    border: 1px solid var(--ems-border); border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-0); color: var(--ems-text); font-size: 0.76rem; font-weight: 700; cursor: pointer;
+}
+.jd2-autosave-retry:hover { background: var(--ems-neutral-100); }
+.jd2-autosave-retry:focus-visible { outline: 2px solid var(--ems-primary-300); outline-offset: 2px; }
+.jd2-autosave-retry[hidden] { display: none; }
+@media (max-width: 640px) {
+    .jd2-savebar { justify-content: space-between; }
+}

@@ -298,18 +298,24 @@ def kollokvium_save(request, offering_id):
             continue  # pəncərə bağlı / aktiv deyil — bu K-ya yazma qadağandır
         entries.append({"component_id": parts[1], "enrollment_id": parts[2], "score": raw})
 
+    from apps.registrar import journal_autosave  # sahib 2026-10-14: eyni yazı yolu, JSON cavab
+
+    autosave = journal_autosave.requested(request)
     if not entries:
-        messages.error(
-            request,
-            _("%(title)s bal-yazma pəncərəsi açıq deyil — İmtahan Mərkəzi aralığı aktivləşdirməlidir.")
-            % {"title": title},
-        )
+        closed = _("%(title)s bal-yazma pəncərəsi açıq deyil — İmtahan Mərkəzi aralığı aktivləşdirməlidir.") % {
+            "title": title
+        }
+        if autosave:
+            return journal_autosave.refused(closed, code="window_closed")
+        messages.error(request, closed)
         return _back(offering, "kollokvium")
 
     result = gradebook.save_component_scores(
         offering=offering, entries=entries, by_user=request.user, bypass_edit_window=True, report=True
     )
     written = result["written"]
+    if autosave:
+        return journal_autosave.saved(sent=len(entries), written=written, rejected=result["rejected"], blocked=blocked)
     from .journal_finals import warn_rejected_scores
 
     warn_rejected_scores(request, result["rejected"])  # J-03: rəqəm olmayan xana 0-a çevrilmir

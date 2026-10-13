@@ -8,8 +8,7 @@
  * pilləsi, sıfırla, səhifələmə, Enter ilə göndəriş) skeleti açır, ona görə
  * server cavabını gözləyərkən boş ekran və ya sıçrayan düzüm görünmür.
  *
- * AJAX-safe: `EMSReady` (kabinet qabığında bölmə swap olunanda yenidən qurulur,
- * null-safe, idempotent — `data-jl-auto` bayrağı ilə təkrar bağlanmır).
+ * AJAX-safe: yalnız document səviyyəli delegasiya (EMSDelegate / EMSSearchInput).
  */
 window.jlShowLoading = function () {
     var page = document.querySelector(".jl-page");
@@ -23,34 +22,31 @@ window.jlShowLoading = function () {
     }
 };
 
-window.EMSReady(function () {
-    var form = document.querySelector("[data-jd-filterform]");
-    if (!form || form.dataset.jlAuto === "1") { return; }
-    form.dataset.jlAuto = "1";
+/* 2026-10-14 (sahib: «yazarkən search gedir, render olur, axtardığım itir»):
+ * dinləyicilər delegasiyalıdır (form/select-ə bağlanmır). AXTARIŞ qutusu vahid
+ * EMSSearchInput qaydası ilə — yazı DAYANANDAN 1500 ms sonra, ≥ 2 simvol,
+ * Enter dərhal, IME gözlənilir. Göndəriş «soft»-dur: səhifə yenilənmir,
+ * filtr sətri (input + axtarışlı seçicilər) YERİNDƏ qalır, yalnız siyahı
+ * `.jl-page` daxilində yenilənir (köhnə yavaş cavab atılır). */
+var JL_FORM = "[data-jd-filterform]";
 
-    // Hər göndəriş yolu (Enter, düymə, JS submit) — tək lövbər.
-    form.addEventListener("submit", function () { window.jlShowLoading(); });
+// Hər tam göndəriş yolu (düymə, dərs tipi pilləsi, JS submit) — tək lövbər.
+window.EMSDelegate.on("submit", JL_FORM, function () { window.jlShowLoading(); });
 
-    // Select-lər: bootstrap-select vidcetində dəyişiklik proqramla olur, ona
-    // görə inline onchange yox, açıq `change` dinləyicisi.
-    form.querySelectorAll("[data-jl-autosubmit]").forEach(function (sel) {
-        sel.addEventListener("change", function () { window.jlShowLoading(); form.submit(); });
-    });
+// Select-lər: bootstrap-select vidcetində dəyişiklik proqramla olur → `change`.
+window.EMSDelegate.on("change", JL_FORM + " [data-jl-autosubmit]", function (event, sel) {
+    if (sel.form) { window.jlShowLoading(); sel.form.submit(); }
+});
 
-    // Dərs tipi pilləri submit düymələridir → `submit` hadisəsi tutur; sıfırla
-    // isə adi keçiddir, onu ayrıca bağlayırıq.
-    var reset = form.querySelector(".jd2-filter-reset");
-    if (reset) { reset.addEventListener("click", function () { window.jlShowLoading(); }); }
+// Sıfırla adi keçiddir.
+window.EMSDelegate.on("click", JL_FORM + " .jd2-filter-reset", function () { window.jlShowLoading(); });
 
-    // AXTARIŞ qutusu: yazdıqca 350ms debounce ilə göndər (hər hərfdə yox).
-    var searchBox = form.querySelector("[data-jl-search-debounce]");
-    if (searchBox) {
-        var searchTimer = null;
-        searchBox.addEventListener("input", function () {
-            if (searchTimer) { clearTimeout(searchTimer); }
-            searchTimer = setTimeout(function () { form.submit(); }, 350);
-        });
-    }
+window.EMSSearchInput.delegate(JL_FORM + " [data-jl-search-debounce]", {
+    onSearch: function (value, meta) {
+        if (meta.input.form) {
+            window.EMSSearchInput.submitForm(meta.input.form, { input: meta.input, soft: ".jl-page" });
+        }
+    },
 });
 
 // Səhifələmə keçidləri (paylaşılan `_pagination.html`) — `document`-ə bir dəfə

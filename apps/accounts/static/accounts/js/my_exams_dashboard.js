@@ -104,7 +104,7 @@
         return root && root.getAttribute("data-tx-paginated") === "1";
     }
 
-    function submitToolbar(root) {
+    function submitToolbar(root, input) {
         var form = root.querySelector("[data-tx-toolbar]");
         if (!form) {
             return false;
@@ -114,7 +114,8 @@
             statusField.value = root.dataset.txStatus || "";
         }
         // `exam_page` ötürülmür: filtr dəyişəndə 1-ci səhifəyə qayıtmaq düzgündür.
-        form.submit();
+        // 2026-10-14: «quiet» bölmə yükləməsi — səhifə yenilənmir, input qalır.
+        window.EMSSearchInput.submitForm(form, { input: input || null });
         return true;
     }
 
@@ -201,24 +202,6 @@
                 }
             }
         });
-    }
-
-    // Axtarış zamanı qısa skeleton (debounce ilə) — UX üçün "yüklənir" hissi.
-    function showSkeleton(root, on) {
-        var skeleton = root.querySelector("[data-tx-skeleton]");
-        var sections = root.querySelector("[data-tx-sections]");
-        if (skeleton) {
-            skeleton.hidden = !on;
-        }
-        if (sections) {
-            sections.style.display = on ? "none" : "";
-        }
-        if (on) {
-            var noResult = root.querySelector("[data-tx-noresult]");
-            if (noResult) {
-                noResult.hidden = true;
-            }
-        }
     }
 
     function closeAllMenus(scope) {
@@ -314,22 +297,31 @@
             applyFilters(root);
         });
 
+        /* 2026-10-14 (sahib: «yazarkən search gedir, render olur, axtardığım itir»):
+           klient rejimi (bir səhifə) — kartlar yerində süzülür, skelet yoxdur
+           (hər hərfdə bölmələri gizlətmək «yanıb-sönmə» idi); səhifələnmiş
+           rejim — server axtarışı vahid EMSSearchInput qaydası ilə (1500 ms,
+           ≥ 2 simvol, Enter dərhal, IME), input əvəzlənmir. */
         var searchTimer = null;
         D.on("input", "[data-tx-search]", function (event, input) {
             var root = input.closest("[data-my-exams-root]");
-            if (!root) {
+            if (!root || isPaginated(root)) {
                 return;
             }
-            root.dataset.txSearch = input.value || "";
-            showSkeleton(root, true);
             clearTimeout(searchTimer);
             searchTimer = setTimeout(function () {
-                if (isPaginated(root) && submitToolbar(root)) {
-                    return;  // skeleton qalır — səhifə yenilənir
-                }
+                root.dataset.txSearch = input.value || "";
                 applyFilters(root);
-                showSkeleton(root, false);
-            }, 400);
+            }, 200);
+        });
+        window.EMSSearchInput.delegate("[data-my-exams-root] [data-tx-search]", {
+            onSearch: function (value, meta) {
+                var root = meta.input.closest("[data-my-exams-root]");
+                if (root && isPaginated(root)) {
+                    root.dataset.txSearch = value;
+                    submitToolbar(root, meta.input);
+                }
+            }
         });
 
         // növ filtri (seqment) — klient-tərəf instant + gizli select sinxron

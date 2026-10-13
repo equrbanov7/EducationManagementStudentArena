@@ -15,16 +15,33 @@
 
     /* ── Axtarış ────────────────────────────────────────────────────────── */
 
-    actions.search = function search() {
+    actions.search = function search(opts) {
         var cfg = ns.config();
         var fetchJSON = http();
         if (!cfg || !fetchJSON) {
             return;
         }
         var query = ns.state.query;
+        // Yazdıqca axtarış (2026-10-14): köhnə nəticə yerində sakitcə solur + «Axtarılır…»
+        // — siyahı spinner-ə çevrilmir (yanıb-sönmə yoxdur).
+        var quiet = opts && opts.quiet;
+        var results = document.querySelector("[data-rim-results]");
+        var SI = window.EMSSearchInput;
+        function settle() {
+            if (quiet && token === ns.state.requestToken) {
+                if (results) { results.classList.remove("ems-search-pending"); }
+                if (SI) { SI.busy(opts.input, false); }
+            }
+        }
         // Sahib 2026-10-11: «ilk daxil olanda boş görünməsin» — boş sorğu da çəkilir (server
         // səhifələyir, defolt «ən yeni hesablar»). Tab sayları yalnız 1-ci səhifədə istənir.
-        ns.render.state("loading", "fa-spinner fa-spin");
+        if (quiet && results && results.children.length) {
+            results.classList.add("ems-search-pending");
+            if (SI) { SI.busy(opts.input, true); }
+        } else {
+            quiet = false;
+            ns.render.state("loading", "fa-spinner fa-spin");
+        }
         var token = (ns.state.requestToken = (ns.state.requestToken || 0) + 1);
         var params = [
             "q=" + encodeURIComponent(query),
@@ -45,6 +62,7 @@
                 if (token !== ns.state.requestToken) {
                     return;
                 }
+                settle();
                 ns.render.list(payload);
                 ns.render.pager(payload);
                 if (payload && payload.counts) {
@@ -52,6 +70,10 @@
                 }
             })
             .catch(function (err) {
+                if (token !== ns.state.requestToken) {
+                    return; // köhnə sorğunun xətası yeni nəticəni silməsin
+                }
+                settle();
                 var container = document.querySelector("[data-rim-results]");
                 if (container) {
                     container.innerHTML =

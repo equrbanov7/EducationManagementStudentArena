@@ -1,0 +1,12 @@
+{% load i18n %}
+{% comment %}«Struktur ağacı» → «Starostanı götür» dialoqunun gövdəsi (2026-10-14) — reyestrdəki
+`_group_lead_remove_fields.html` ilə eyni məna; ad serverdə yazılır (JS doldurmur).{% endcomment %}
+<div class="tof-students__target">
+    <span class="tof-students__target-label">{% trans "Starosta" context "accounts.group_lead" %}</span>
+    <strong>{{ panel.lead.name }}</strong>
+</div>
+<p class="ems-field__hint">{% trans "Tələbə qrupda qalır, yalnız starostalıq və «Starosta» bölməsi bağlanır. Sonra yeni starosta təyin edə bilərsiniz." context "accounts.group_lead" %}</p>
+<div class="ems-field">
+    <label class="ems-field__label" for="{{ form_dialog_id }}-reason">{% trans "Qeyd (istəyə bağlı)" context "accounts.group_lead" %}</label>
+    <textarea class="ems-textarea" id="{{ form_dialog_id }}-reason" name="reason" rows="2" maxlength="500"></textarea>
+</div>

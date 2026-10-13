@@ -20,7 +20,6 @@
 (function () {
     "use strict";
 
-    var DEBOUNCE_MS = 160;
     // Skelet yalnız sorğu «hiss olunacaq qədər» uzanarsa göstərilir — əks halda
     // hər hərfdə yanıb-sönmə yaranır.
     var LOADING_DELAY_MS = 140;
@@ -201,7 +200,6 @@
         var options = []; // düz siyahı: <a role="option">
         var activeIndex = -1;
         var lastQuery = "";
-        var debounceTimer = null;
         var loadingTimer = null;
         var requestToken = 0;
         var lastFocused = null;
@@ -391,6 +389,7 @@
             root.removeAttribute("hidden");
             document.body.classList.add("gsearch-open");
             input.value = "";
+            window.EMSSearchInput.sync(input, "");
             syncClearButton();
             input.focus();
             runQuery(""); // sürətli keçidlər dərhal görünsün
@@ -418,7 +417,7 @@
             }
             requestToken++; // uçuşdakı cavablar panelə toxunmasın
             window.clearTimeout(loadingTimer);
-            window.clearTimeout(debounceTimer);
+            window.EMSSearchInput.cancel(input); // bağlanandan sonra gec sorğu getməsin
             root.setAttribute("hidden", "");
             document.body.classList.remove("gsearch-open");
             showLoading(false);
@@ -481,6 +480,7 @@
             });
             delegate.on("click", "[data-global-search-clear]", function () {
                 input.value = "";
+                window.EMSSearchInput.sync(input, "");
                 syncClearButton();
                 input.focus();
                 runQuery("");
@@ -511,15 +511,17 @@
             }
         });
 
-        input.addEventListener("input", function () {
-            syncClearButton();
-            var query = input.value.trim();
-            window.clearTimeout(debounceTimer);
-            debounceTimer = window.setTimeout(function () {
+        input.addEventListener("input", syncClearButton);
+        // 2026-10-14 (sahib: «debounce çox sürətli olur»): vahid EMSSearchInput —
+        // yazı dayananda 1500 ms, ≥ 2 simvol, boşaldanda dərhal, IME; Enter aşağıda
+        // (aktiv sətir varsa onu açır, yoxsa gözləmədən axtarır).
+        window.EMSSearchInput.bind(input, {
+            enter: false,
+            onSearch: function (query) {
                 if (query !== lastQuery) {
                     runQuery(query);
                 }
-            }, DEBOUNCE_MS);
+            }
         });
 
         input.addEventListener("keydown", function (event) {
@@ -542,6 +544,9 @@
             } else if (key === "enter" && activeIndex >= 0 && options[activeIndex]) {
                 event.preventDefault();
                 activate(options[activeIndex], event);
+            } else if (key === "enter" && !event.isComposing) {
+                event.preventDefault();
+                window.EMSSearchInput.flush(input);
             }
         });
 

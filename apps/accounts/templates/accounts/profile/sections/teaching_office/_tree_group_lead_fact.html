@@ -1,0 +1,37 @@
+{% load i18n %}
+{% comment %}«Struktur ağacı» → qrup → STAROSTA kartı (2026-10-14). Kontekst: `panel` = `detail.group_panel`
+(`structure_tree_group.build_group_panel`). Düymələr yalnız `panel.can_assign_lead` olanda — server
+(`accounts:group_lead_action`) qapını yenidən yoxlayır (`unit.group_manage` / `role.assign` əhatəsi).
+Dialoqlar `_tree_group_students.html`-dədir (detal panelinin içində).{% endcomment %}
+<div class="tof-fact tof-fact--head tof-st-lead{% if panel.lead.warning %} has-warning{% endif %}">
+    <span class="tof-fact__label"><i class="fas fa-user-tie" aria-hidden="true"></i> {% trans "Starosta" context "accounts.group_lead" %}</span>
+    {% if panel.lead %}
+        <span class="tof-fact__value tof-fact__value--name">{{ panel.lead.name }}</span>
+        {% if panel.lead.warning == "not_in_group" %}
+            <span class="tof-st-lead__warn" role="note">{% trans "Bu qrupun qeydiyyatlı tələbəsi deyil — bölmə ona açılmır. Yenisini təyin edin." context "accounts.group_lead" %}</span>
+        {% elif panel.lead.warning == "multiple" %}
+            <span class="tof-st-lead__warn" role="note">{% trans "Qrupda bir neçə aktiv starosta var — birini təyin edin, digərləri avtomatik götürüləcək." context "accounts.group_lead" %}</span>
+        {% endif %}
+    {% else %}
+        <span class="tof-fact__value tof-fact__value--muted">{% trans "Təyin edilməyib" context "accounts.structure_tree" %}</span>
+    {% endif %}
+    {% if panel.can_assign_lead %}
+    <span class="tof-st-lead__actions">
+        <button type="button" class="ems-btn ems-btn--sm ems-btn--primary" data-tof-open="tofTreeLeadDialog">
+            <i class="fas fa-user-check" aria-hidden="true"></i>
+            {% if panel.lead %}{% trans "Starostanı dəyiş" context "accounts.group_lead" %}{% else %}{% trans "Starosta təyin et" context "accounts.group_lead" %}{% endif %}
+        </button>
+        {% if panel.lead %}
+        <button type="button" class="ems-btn ems-btn--sm ems-btn--ghost" data-tof-open="tofTreeLeadRemoveDialog">
+            {% trans "Götür" context "accounts.group_lead" %}
+        </button>
+        {% endif %}
+    </span>
+    {% endif %}
+</div>
+{% if unit.head %}
+<div class="tof-fact">
+    <span class="tof-fact__label"><i class="fas fa-chalkboard-user" aria-hidden="true"></i> {% trans "Tyutor" context "accounts.structure_tree" %}</span>
+    <span class="tof-fact__value tof-fact__value--name">{{ unit.head.get_full_name|default:unit.head.username }}</span>
+</div>
+{% endif %}

@@ -37,7 +37,7 @@
   facultyPick.on("change", function(){ deptPick.reset(); });
   var cards = root.querySelector(".js-aps-cards"), rows = root.querySelector(".js-aps-rows"),
       pager = root.querySelector(".js-aps-pager"), thead = root.querySelector(".js-aps-thead");
-  var page = 1, sort = "-date", timer = null, charts = {};
+  var page = 1, sort = "-date", charts = {};
   function esc(s){ var d=document.createElement("div"); d.textContent=(s==null?"":s); return d.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
   function detailUrl(id){ return U.detail ? U.detail.replace(/\/0\/?$/, "/"+id+"/") : "#"; }
   function reviewUrl(id){ return U.review ? U.review.replace(/\/0\/?$/, "/"+id+"/") : "#"; }
@@ -122,24 +122,35 @@
     });
   }
 
-  function load(){
-    skeletonRows(); renderArrows();
+  var loadSeq = 0; // köhnə (yavaş) cavab yeni nəticənin üstünə yazılmır
+  function load(opts){
+    var mine = (loadSeq += 1), SI = window.EMSSearchInput;
+    // Yazdıqca axtarış (2026-10-14): skelet yox — köhnə sətirlər sakitcə solur + «Axtarılır…».
+    var quiet = !!(opts && opts.quiet && rows.children.length);
+    rows.classList.toggle("ems-search-pending", quiet); SI.busy(q, quiet);
+    if (!quiet) { skeletonRows(); }
+    renderArrows();
     fetch(U.data+"?"+params({page:page}).toString(), {headers:{"X-Requested-With":"XMLHttpRequest"}})
       .then(function(r){ return r.ok?r.json():null; })
-      .then(function(d){ if(!d) return; renderCards(d.summary); renderRows(d); });
+      .then(function(d){
+        if (mine !== loadSeq) return;
+        rows.classList.remove("ems-search-pending"); SI.busy(q, false);
+        if(!d) return; renderCards(d.summary); renderRows(d);
+      });
     fetch(U.charts+"?"+params().toString(), {headers:{"X-Requested-With":"XMLHttpRequest"}})
       .then(function(r){ return r.ok?r.json():null; })
-      .then(function(d){ if(d) renderCharts(d); });
+      .then(function(d){ if(d && mine === loadSeq) renderCharts(d); });
   }
-  function reload(){ page=1; load(); }
+  function reload(opts){ page=1; load(opts && opts.quiet ? opts : null); }
 
   thead.querySelectorAll("th.is-sortable").forEach(function(th){
     th.addEventListener("click", function(){ var key=th.getAttribute("data-sort"); sort=(sort===key)?("-"+key):key; reload(); });
   });
-  q.addEventListener("input", function(){ if(timer) clearTimeout(timer); timer=setTimeout(reload, 300); });
+  // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter dərhal, IME).
+  window.EMSSearchInput.bind(q, { onSearch: function(){ reload({ quiet: true }); } });
   Object.keys(sel).forEach(function(k){ sel[k].addEventListener("change", reload); });
   root.querySelector(".js-aps-reset").addEventListener("click", function(){
-    q.value=""; subjectMS.clear(); groupMS.clear();
+    q.value=""; window.EMSSearchInput.sync(q, ""); subjectMS.clear(); groupMS.clear();
     facultyPick.reset(); deptPick.reset(); teacherPick.reset();
     Object.keys(sel).forEach(function(k){ sel[k].value=""; if(typeof sel[k]._refreshBootstrapSelect==="function") sel[k]._refreshBootstrapSelect(); });
     sort="-date"; reload();

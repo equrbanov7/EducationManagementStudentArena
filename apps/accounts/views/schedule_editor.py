@@ -5,6 +5,7 @@ burada YALNIZ redaktorun interaktiv əməlləri var:
 
 * ``check``    — saxlamadan əvvəl konflikt + tövsiyə (heç nə yazmır);
 * ``save``     — boş hüceyrədə yeni slot / mövcud slotun redaktəsi;
+* ``check_move`` — sürüklə-buraxın quru yoxlaması (təsdiq dialoqu toqquşmanı əvvəlcədən göstərir);
 * ``move``     — sürüklə-burax köçürməsi (təsdiqdən sonra);
 * ``place``    — parklanmış slotun yenidən yerləşdirilməsi;
 * ``delete``   — YUMŞAQ silmə (sətir bazada qalır);
@@ -36,7 +37,9 @@ from core.http_ids import parse_uuid
 
 _CTX = "accounts.schedule_editor"
 
-ALLOWED_ACTIONS = frozenset({"check", "save", "move", "place", "delete", "suggest", "options", "slot_teachers"})
+ALLOWED_ACTIONS = frozenset(
+    {"check", "check_move", "save", "move", "place", "delete", "suggest", "options", "slot_teachers"}
+)
 
 
 def _organization(request):
@@ -137,6 +140,7 @@ def _check(request, organization, data):
         cleaned=cleaned,
         exclude_id=str(data.get("slot_id") or "").strip() or None,
         slot_instructor_id=getattr(slot_teacher, "pk", None),
+        actor=request.user,
     )
     return JsonResponse(verdict)
 
@@ -258,6 +262,11 @@ def schedule_editor_action(request):
             return _slot_teachers(request, organization, data)
         if action == "suggest":
             return _suggest(request, organization, data)
+        if action == "check_move":
+            slot = _slot(request, organization, data)
+            if slot is None:
+                return _denied()
+            return JsonResponse(editor.check_move(actor=request.user, organization=organization, slot=slot, data=data))
         return _write(request, organization, action, data)
     except schedule_editor.CellError as exc:
         return _error(exc)

@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n static %}
 {% comment %}
 Ekran 01 «Universitet strukturu» — OrgUnit ağacı (dizayn handoff Mərhələ 1).
 
@@ -38,6 +38,8 @@ CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur) — `teaching_office.css` /
 <section class="profile-section-panel profile-section--tof {% if active_section == 'org-structure-tree' %}is-active{% endif %}"
          data-profile-section-panel="org-structure-tree"
          data-source-url="{{ profile_base_url }}?section=org-structure-tree">
+{% comment %}Qrup paneli (starosta kartı + tələbə siyahısı) — YALNIZ düzüm; panelin içində (AJAX swap-safe).{% endcomment %}
+<link rel="stylesheet" href="{% static 'accounts/css/profile/structure_tree_group.css' %}?v=20261014-st">
 
 {% if not structure_tree_section.has_access %}
     {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=structure_tree_section.access_denied_message %}
@@ -127,6 +129,10 @@ CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur) — `teaching_office.css` /
                 {% endif %}
 
                 <div class="tof-facts">
+                    {% if detail.is_group %}
+                    {% comment %}2026-10-14 (sahib): qrupun «rəhbəri» STAROSTADIR — kart + «Təyin et / Dəyiş / Götür».{% endcomment %}
+                    {% include "accounts/profile/sections/teaching_office/_tree_group_lead_fact.html" with panel=detail.group_panel %}
+                    {% else %}
                     <div class="tof-fact tof-fact--head">
                         <span class="tof-fact__label"><i class="fas fa-user-tie" aria-hidden="true"></i> {% trans "Rəhbər" context "accounts.structure_tree" %}</span>
                         {% if unit.head %}
@@ -135,6 +141,7 @@ CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur) — `teaching_office.css` /
                             <span class="tof-fact__value tof-fact__value--muted">{% trans "Təyin edilməyib" context "accounts.structure_tree" %}</span>
                         {% endif %}
                     </div>
+                    {% endif %}
                     {% if not detail.is_light %}
                     <div class="tof-fact">
                         <span class="tof-fact__label"><i class="fas fa-chalkboard-user" aria-hidden="true"></i> {% trans "Müəllim" context "accounts.structure_tree" %}</span>
@@ -173,7 +180,7 @@ CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur) — `teaching_office.css` /
                         {% trans "Adını dəyiş" context "accounts.structure_tree" %}
                     </button>
                     {% endif %}
-                    {% if structure_tree_section.can_assign_head %}
+                    {% if structure_tree_section.can_assign_head and not detail.is_group %}
                     <button type="button" class="ems-btn"
                             data-tof-open="tofHeadDialog"
                             data-tof-prefill='{"action": "assign_head", "unit": "{{ unit.id }}", "head": "{{ unit.head_id|default_if_none:'' }}", "head_label": "{% if unit.head %}{{ unit.head.get_full_name|default:unit.head.username|escapejs }}{% endif %}"}'>
@@ -189,6 +196,11 @@ CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur) — `teaching_office.css` /
                     </button>
                     {% endif %}
                 </div>
+                {% if detail.is_group %}
+                {% comment %}Qrupun tələbələri + starosta dialoqları — detal panelinin İÇİNDƏ: fraqment swap-ı seçimi
+                (qrupun öz tələbələri) yeniləsin. Qapılar `structure_tree_group.py`-dadır.{% endcomment %}
+                {% include "accounts/profile/sections/teaching_office/_tree_group_students.html" with panel=detail.group_panel %}
+                {% endif %}
             </div>
             {% endwith %}
             {% endif %}

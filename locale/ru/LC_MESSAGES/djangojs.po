@@ -3127,3 +3127,7 @@ msgstr "Количество вопросов не может быть отри�
 
 msgid "Köhnə kohortlar"
 msgstr "Старые когорты"
+
+msgctxt "ui.search"
+msgid "Axtarılır…"
+msgstr "Поиск…"

@@ -34,7 +34,6 @@
     var selectAllMatching = false;
     var currentTotal = 0;
 
-    var searchTimer = null;
     var modalToken = 0;
     var contentToken = 0;
     var loadingMore = false;
@@ -101,7 +100,7 @@
     }
 
     // ── Yalnız content (filtr/bank dəyişimi) ──
-    function reloadContent() {
+    function reloadContent(input) {
       var holder = body.querySelector("[data-picker-content]");
       if (!holder) return;
       // Filtr dəyişdi → seçim sıfırlanır (uyğun çoxluq dəyişir).
@@ -113,16 +112,28 @@
       var params = currentControls();
       params.content = "1";
       params.page = "1";
-      holder.innerHTML = '<div class="bankpicker-skeleton" aria-hidden="true">' + skeletonItems(4) + "</div>";
+      // Yazdıqca axtarış (2026-10-14): köhnə siyahı sakitcə solur, skeletə çevrilmir.
+      var quiet = !!(input && input.nodeType === 1 && holder.children.length);
+      var SI = window.EMSSearchInput;
+      if (quiet) {
+        holder.classList.add("ems-search-pending");
+        SI.busy(input, true);
+      } else {
+        holder.innerHTML = '<div class="bankpicker-skeleton" aria-hidden="true">' + skeletonItems(4) + "</div>";
+      }
       fetch(buildUrl(params), { headers: { "X-Requested-With": "XMLHttpRequest" }, credentials: "same-origin" })
         .then(function (r) { return r.text(); })
         .then(function (html) {
           if (token !== contentToken) return;
+          holder.classList.remove("ems-search-pending");
+          if (quiet) SI.busy(input, false);
           holder.innerHTML = html;
           afterContentRendered(true);
         })
         .catch(function () {
           if (token !== contentToken) return;
+          holder.classList.remove("ems-search-pending");
+          if (quiet) SI.busy(input, false);
           holder.innerHTML =
             gettext('<div class="bankpicker-empty"><i class="fas fa-triangle-exclamation"></i><p>Yüklənmə xətası.</p></div>');
         });
@@ -240,6 +251,7 @@
 
     // ── Delegasiya: change ──
     body.addEventListener("change", function (e) {
+      if (e.target.closest('[data-picker-control="q"]')) return; // blur yarımçıq sorğu atmasın
       if (e.target.closest("[data-picker-control]")) {
         reloadContent();
         return;
@@ -257,11 +269,11 @@
       }
     });
 
-    // ── Delegasiya: input (axtarış debounce) ──
-    body.addEventListener("input", function (e) {
-      if (!e.target.closest('[data-picker-control="q"]')) return;
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(reloadContent, 300);
+    // ── Axtarış: vahid EMSSearchInput (2026-10-14: 1500 ms, ≥ 2 simvol, Enter, IME) ──
+    window.EMSSearchInput.delegate('[data-picker-control="q"]', {
+      onSearch: function (value, meta) {
+        if (body.contains(meta.input)) reloadContent(meta.input);
+      },
     });
 
     // ── Delegasiya: click ──

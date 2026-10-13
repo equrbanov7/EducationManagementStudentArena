@@ -310,7 +310,13 @@ def build_schedule_manage_section(request, section, *, active_organization, allo
         if (period is not None and can_manage)
         else []
     )
-    section["subjects"] = schedule_editor.allowed_subjects(organization=organization, group=group, period=period)
+    # Müəllim görünüşündə dialoqun ilk fənn siyahısı MÜƏLLİMİN fənləridir (qrup dialoqda seçilir;
+    # seçiləndə siyahı `action=options` ilə qrup + müəllimə görə yenilənir).
+    section["subjects"] = (
+        schedule_editor.allowed_subjects(organization=organization, group=None, period=period, instructor=teacher)
+        if view_mode == "teacher" and teacher is not None
+        else schedule_editor.allowed_subjects(organization=organization, group=group, period=period)
+    )
     section["teachers"] = schedule_editor.teacher_choices(organization)
     section["rooms"] = _rooms(organization)
     section["lesson_periods"] = schedule_grid.lesson_periods(organization)
@@ -342,8 +348,27 @@ def build_schedule_manage_section(request, section, *, active_organization, allo
     section["owner_label"] = (
         _person_name(teacher) if (view_mode == "teacher" and teacher is not None) else getattr(group, "name", "")
     )
-    section["can_edit"] = can_manage and view_mode == "group" and group is not None and period is not None
+    # 2026-10-14 (sahib: «müəllim seçiləndə də yerini dəyişmək olmalıdır»): müəllim görünüşü də
+    # REDAKTORDUR — yalnız `schedule.manage` daşıyana; hər kartın redaktəsi ayrıca öz qrupunun
+    # əhatəsinə bağlıdır (müəllimin başqa fakültədəki dərsi detal modalında açılır, sürüklənmir).
+    owner_ready = (group is not None) if view_mode == "group" else (teacher is not None)
+    section["can_edit"] = bool(can_manage and period is not None and owner_ready)
+    section["teacher_pick_needed"] = view_mode == "teacher" and teacher is None
+    _mark_editable(section["matrix"], {str(row["id"]) for row in section["groups"]}, enabled=section["can_edit"])
     _dialog_labels(section)
+
+
+def _mark_editable(matrix, group_ids, *, enabled):
+    """Hər matris elementinə ``editable`` — redaktor yalnız ÖZ əhatəsindəki qrupun dərsini dəyişir.
+
+    Müəllim görünüşündə müəllimin başqa fakültə/kafedradakı dərsi də görünür; o kart detal
+    modalında açılır (``data-sgx-slot``), sürüklənmir. Server bunu ayrıca yoxlayır
+    (``can_manage_offering``) — bu, yalnız UI-nın düzgün idarə göstərməsi üçündür."""
+    for rows in (matrix.get("rows") or [], matrix.get("extra_rows") or []):
+        for row in rows:
+            for cell in row["cells"]:
+                for item in cell["items"]:
+                    item["editable"] = bool(enabled and str(item["slot"].offering.group_id) in group_ids)
 
 
 def _dialog_labels(section):

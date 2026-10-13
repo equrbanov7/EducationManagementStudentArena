@@ -540,15 +540,22 @@ def _handle_save_marks(request, offering):
                 }
             )
 
+    from apps.registrar import journal_autosave  # sahib 2026-10-14: eyni yazı yolu, JSON cavab
+
+    autosave = journal_autosave.requested(request)
     if gradebook.journal_is_locked(offering):
         # Əvvəl «Jurnal yadda saxlanıldı (0 xana)» UĞUR mesajı gedirdi (QA 2026-09-05
         # JOURNAL-TEACHER-04) — kilidli jurnala yazı səssiz atılmamalıdır.
+        if autosave:
+            return journal_autosave.refused(_("Jurnal bağlıdır — dəyişikliklər yazılmadı."), code="locked")
         messages.error(request, _("Jurnal bağlıdır — dəyişikliklər yazılmadı."))
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
     result = gradebook.save_marks(
         offering=offering, entries=entries, by_user=request.user, report=True, request=request
     )
     written, rejected = result["written"], result["rejected"]
+    if autosave:
+        return journal_autosave.saved(sent=len(entries), written=written, rejected=rejected)
     if entries and not written:
         messages.warning(request, _("Heç bir xana yazılmadı — dərs günü qaydası və ya xana kilidi buna imkan vermədi."))
     else:

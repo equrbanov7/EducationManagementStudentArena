@@ -214,7 +214,7 @@ def _notify(record, movement, *, organization) -> None:
 
 
 def _programme_watchers(organization, record) -> list:
-    """İxtisasın koordinatoru + fakültənin dekanı (aktiv üzvlüklər)."""
+    """İxtisasın koordinatoru / tyutoru + fakültənin dekanı (aktiv üzvlüklər)."""
     from django.contrib.auth import get_user_model
 
     from apps.organizations.models import Membership
@@ -230,7 +230,8 @@ def _programme_watchers(organization, record) -> list:
             organization=organization,
             is_active=True,
             role__is_active=True,
-            role__name__in=("program_coordinator", "dean"),
+            # Tyutor = proqram koordinatoru (sahib 2026-10-14).
+            role__name__in=("program_coordinator", "tutor", "dean"),
             scope_unit_id__in=unit_ids,
         )
         .values_list("user_id", flat=True)

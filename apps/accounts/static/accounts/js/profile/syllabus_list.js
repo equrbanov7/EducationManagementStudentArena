@@ -18,11 +18,9 @@
 
     var SECTION = "syllabus-list";
     var EDITOR_SECTION = "syllabus-editor";
-    var SEARCH_DEBOUNCE = 240;
     var MIN_REASON = 20;
     var VIEW_STORAGE_KEY = "ems.syllabus.view";
 
-    var searchTimer = null;
     var toastTimer = null;
     var modalState = null;
     var lastFocused = null;
@@ -74,7 +72,7 @@
         return params;
     }
 
-    function reload(el, overrides) {
+    function reload(el, overrides, quiet) {
         if (typeof window.EMSProfileLoadSection !== "function") {
             return;
         }
@@ -85,7 +83,8 @@
         Object.keys(params).forEach(function (key) {
             url.searchParams.set(key, params[key]);
         });
-        window.EMSProfileLoadSection(SECTION, url.pathname + url.search);
+        // quiet (yazdıqca axtarış): skelet/fokus oğurluğu yoxdur, input əvəzlənmir.
+        window.EMSProfileLoadSection(SECTION, url.pathname + url.search, quiet ? { quiet: true } : undefined);
     }
 
     function openEditor(el, versionId) {
@@ -445,11 +444,12 @@
         window.EMSDelegate.on("change", "[data-syllabus-list] select[data-syl-filter]", function () {
             reload(root(), { page: null });
         });
-        window.EMSDelegate.on("input", "[data-syllabus-list] [data-syl-search]", function () {
-            window.clearTimeout(searchTimer);
-            searchTimer = window.setTimeout(function () {
-                reload(root(), { page: null });
-            }, SEARCH_DEBOUNCE);
+        // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter dərhal, IME).
+        window.EMSSearchInput.delegate("[data-syllabus-list] [data-syl-search]", {
+            onSearch: function (value, meta) {
+                window.EMSSearchInput.busy(meta.input, true);
+                reload(root(), { page: null }, true);
+            }
         });
         window.EMSDelegate.on("click", "[data-syllabus-list] [data-syl-drawer-close]", function () {
             closeDrawer(root());
