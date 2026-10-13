@@ -7,6 +7,7 @@ from .endpoints import (
     manage_appeals,
     review_appeal,
 )
+from .key_corrections import key_correction_apply, key_correction_revoke
 from .statistics import (
     appeal_stats_ai,
     appeal_stats_charts,
@@ -15,6 +16,8 @@ from .statistics import (
 )
 
 __all__ = [
+    "key_correction_apply",
+    "key_correction_revoke",
     "build_manage_appeals_context",
     "count_pending_manage_appeals",
     "manage_appeals",

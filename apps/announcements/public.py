@@ -40,6 +40,8 @@ KABİNET (accounts) ÜÇÜN
 * ``section_visible(user, organization)`` — menyu görünürlüyü (sıfır sorğu).
 * ``badge_payload(user, organization, allowed_sections)`` → ``{"announcements_unread": n}``
   (badges API; aktiv elan yoxdursa sıfır sorğu, varsa Redis keşi 120 s).
+* ``group_announcements(organization, group, limit=5)`` — qrupa (və ya əcdadına) ÜNVANLANMIŞ tələbə
+  elanları (təşkilat-geniş elanlar xaric) — kabinetin «Starosta» bölməsi (2026-10-13 (gecə)).
 * Şablon tag-ları (``{% load announcements_tags %}``): ``announcements_panel``,
   ``announcements_unread_count``, ``announcements_popup``.
 """
@@ -48,6 +50,7 @@ from __future__ import annotations
 
 from .constants import PERM_MANAGE, PROFILE_SECTION
 from .services.access import can_manage
+from .services.group_feed import group_announcements
 from .services.popup import badge_count, pending_popups
 
 BADGE_KEY = "announcements_unread"
@@ -78,6 +81,7 @@ __all__ = [
     "badge_count",
     "badge_payload",
     "can_manage",
+    "group_announcements",
     "pending_popups",
     "section_visible",
 ]

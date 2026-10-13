@@ -11,6 +11,13 @@ urlpatterns = [
     # ── Teacher / reviewer ───────────────────────────────────────────────
     path("manage/", views.manage_appeals, name="manage_appeals"),
     path("manage/<int:appeal_id>/", views.review_appeal, name="review_appeal"),
+    # 2026-10-13 (gecə): cavab açarı düzəlişi — sualı cavablayan BÜTÜN tələbələr üçün (audit olunur).
+    path("manage/item/<int:item_id>/key-correction/", views.key_correction_apply, name="key_correction_apply"),
+    path(
+        "manage/key-correction/<int:correction_id>/revoke/",
+        views.key_correction_revoke,
+        name="key_correction_revoke",
+    ),
     # ── İmtahan mərkəzi — apellyasiya statistikası ───────────────────────
     path("stats/data/", views.appeal_stats_data, name="appeal_stats_data"),
     path("stats/charts/", views.appeal_stats_charts, name="appeal_stats_charts"),

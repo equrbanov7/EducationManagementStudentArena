@@ -243,8 +243,89 @@ class ScoreAdjustment(models.Model):
         return f"ScoreAdjustment#{self.pk} · item={self.appeal_item_id} · Δ{self.delta_points}"
 
 
+class AnswerKeyCorrection(models.Model):
+    """Test sualının CAVAB AÇARININ düzəlişi — sualı cavablayan BÜTÜN tələbələr üçün (2026-10-13, gecə).
+
+    Sahib: «cavabın düzəldilməsi». Fərdi apellyasiya qəbulu (``ScoreAdjustment``) yalnız müraciət
+    edən tələbəyə +1 verir; açar özü səhv olanda eyni sualı cavablayan hər kəs zərər çəkir. Bu
+    model həmin qərarın AUDİT başlığıdır: kim, nə vaxt, hansı apellyasiyadan, köhnə → yeni açar,
+    səbəb. Tələbə üzrə təsir ``KeyCorrectionCredit`` sətirlərindədir.
+
+    Çatdırılan snapshot (``ExamAnswer.question_snapshot``) DƏYİŞDİRİLMİR — baza bal tarixçəsi
+    olduğu kimi qalır, düzəliş additiv kreditdir (``ScoreAdjustment`` ilə eyni dizayn). Geri alma
+    sətri silmir: ``revoked_at`` doldurulur, kreditlər ``reverted`` olur.
+    """
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="answer_key_corrections"
+    )
+    exam = models.ForeignKey("exams.Exam", on_delete=models.CASCADE, related_name="answer_key_corrections")
+    question = models.ForeignKey("exams.ExamQuestion", on_delete=models.CASCADE, related_name="answer_key_corrections")
+    source_item = models.ForeignKey(
+        "appeals.AppealItem",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="key_corrections",
+    )
+    previous_option_ids = models.JSONField(default=list, blank=True)
+    corrected_option_ids = models.JSONField(default=list)
+    reason = models.TextField()
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="answer_key_corrections"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    affected_count = models.PositiveIntegerField(default=0)
+    credited_count = models.PositiveIntegerField(default=0)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+    revoked_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="revoked_answer_key_corrections"
+    )
+    revoke_reason = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-created_at", "id"]
+        constraints = [
+            # Bir sual üçün eyni anda yalnız BİR aktiv açar düzəlişi (ikiqat kredit olmasın).
+            models.UniqueConstraint(
+                fields=["question"],
+                condition=models.Q(revoked_at__isnull=True),
+                name="appeal_key_fix_one_active_per_q",
+            ),
+        ]
+        indexes = [models.Index(fields=["exam", "-created_at"], name="appeal_key_fix_exam_idx")]
+
+    def __str__(self):
+        return f"AnswerKeyCorrection#{self.pk} · q={self.question_id}"
+
+
+class KeyCorrectionCredit(models.Model):
+    """Açar düzəlişinin BİR cəhdə təsiri — append-only kredit sətri (geri alma ``reverted`` ilə)."""
+
+    correction = models.ForeignKey("appeals.AnswerKeyCorrection", on_delete=models.CASCADE, related_name="credits")
+    attempt = models.ForeignKey("exams.ExamAttempt", on_delete=models.CASCADE, related_name="key_correction_credits")
+    question = models.ForeignKey("exams.ExamQuestion", on_delete=models.CASCADE, related_name="key_correction_credits")
+    delta_points = models.DecimalField(max_digits=7, decimal_places=2, default=0)
+    previous_score = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    new_score = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    reverted = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["id"]
+        constraints = [
+            models.UniqueConstraint(fields=["correction", "attempt"], name="appeal_key_credit_unique_attempt"),
+        ]
+        indexes = [models.Index(fields=["attempt", "reverted"], name="appeal_key_credit_attempt_idx")]
+
+    def __str__(self):
+        return f"KeyCorrectionCredit#{self.pk} · attempt={self.attempt_id} · Δ{self.delta_points}"
+
+
 __all__ = [
+    "AnswerKeyCorrection",
     "Appeal",
     "AppealItem",
+    "KeyCorrectionCredit",
     "ScoreAdjustment",
 ]

@@ -59,6 +59,10 @@ def _default_is_applicable(attempt):
     return False
 
 
+def _default_deadline(attempt):
+    return None
+
+
 _HOOKS = {
     "bonus_map": _default_bonus_map,
     "apply_bonus": _default_apply_bonus,
@@ -71,6 +75,7 @@ _HOOKS = {
     "can_create": _default_can_create,
     "remaining_window_seconds": _default_remaining_window_seconds,
     "is_applicable": _default_is_applicable,
+    "deadline": _default_deadline,
 }
 
 
@@ -124,3 +129,8 @@ def remaining_window_seconds(attempt):
 def is_applicable(attempt):
     """Bu cəhd növü ümumiyyətlə apellyasiya olunurmu (kateqoriya + sınaq deyil) — pəncərədən asılı deyil."""
     return _HOOKS["is_applicable"](attempt)
+
+
+def deadline(attempt):
+    """Apellyasiya son tarixi (aware datetime) və ya ``None`` — nəticə səhifəsində göstərmək üçün (2026-10-13)."""
+    return _HOOKS["deadline"](attempt)

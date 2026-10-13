@@ -9,7 +9,7 @@ fəaliyyətini görür.
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.http import JsonResponse
+from django.http import HttpResponseNotModified, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import pgettext
@@ -25,18 +25,26 @@ from apps.exams.services.final_center import (
     end_room,
     open_entry,
     room_live_sessions,
-    room_monitor_snapshot,
     start_room,
+    supervision_scope,
+)
+from apps.exams.services.final_center.duties import (
+    DUTY_GRACE_MINUTES,
+    DUTY_LEAD_MINUTES,
+    duty_cards,
+    duty_rows_for_room,
+)
+from apps.exams.services.final_center.duty_admin import default_duty_form
+from apps.exams.services.final_center.snapshot_cache import (
+    cached_room_snapshot,
+    etag_matches,
+    invalidate_room_snapshot,
 )
 from core.audit import log_action
 from core.constants import AuditAction
+from core.rate_limit import record_rate_limit_hit
 
 from ._shared import center_staff_queryset, supervisor_org_or_403
-
-
-def _user_is_room_invigilator(user, room) -> bool:
-    """İstifadəçi bu zala (zal-səviyyəsində) nəzarətçi kimi təyin olunubmu?"""
-    return room.invigilators.filter(id=user.id).exists()
 
 
 def _get_room_and_sessions(request, room_id):
@@ -44,13 +52,18 @@ def _get_room_and_sessions(request, room_id):
     Zalı tenant daxilində tapır və istifadəçinin nəzarət edə bildiyi canlı
     oturumları qaytarır.
 
-    Giriş: imtahan mərkəzi HƏMİŞƏ; zala təyin olunmuş nəzarətçi canlı oturum
-    olmasa da (zalı boşkən də) daxil olub kompüter xəritəsinə baxa bilər.
+    Giriş: imtahan mərkəzi HƏMİŞƏ; nəzarətçi yalnız bu zalda İNDİ aktiv növbəsi
+    (``InvigilatorDuty`` pəncərəsi və ya köhnə təyinatın canlı oturumu) olanda —
+    2026-10-13 (gecə): əvvəl ``ExamRoom.invigilators`` üzvlüyü DAİMİ çıxış verirdi.
+    Əhatə bir dəfə hesablanır (hər oturum üçün təkrar sorğu yox).
     """
     organization = supervisor_org_or_403(request)
     room = get_object_or_404(ExamRoom, pk=room_id, organization=organization)
-    sessions = [s for s in room_live_sessions(room) if can_supervise_session(request.user, s)]
-    if not sessions and not can_manage_final_center(request.user) and not _user_is_room_invigilator(request.user, room):
+    if can_manage_final_center(request.user):
+        return organization, room, room_live_sessions(room)
+    scope = supervision_scope(request.user, organization_id=organization.pk)
+    sessions = [s for s in room_live_sessions(room) if scope.allows_session(s)]
+    if not sessions and not scope.allows_room(room.pk):
         raise PermissionDenied(pgettext("exams.final_center.permission", "Bu zala təyin olunmamısınız."))
     return organization, room, sessions
 
@@ -93,6 +106,7 @@ def _monitor_labels():
         "confirmEndAll": _("Zaldakı bütün aktiv imtahanlar bitirilsin? Bu əməliyyat geri qaytarıla bilməz."),
         "live": _("Canlı"),
         "disconnected": _("Bağlantı kəsildi"),
+        "expired": pgettext("exams.final_center.duty", "Nəzarət müddəti bitdi"),
         "updatedAt": _("Yeniləndi"),
         "start": {
             "title": _("İmtahanı başlat"),
@@ -118,6 +132,24 @@ def _monitor_labels():
             "loadError": _("Məlumat yüklənmədi."),
         },
         "loading": _("Yüklənir…"),
+    }
+
+
+def _room_live_labels():
+    """``room_live.js`` etiketləri (``#fxc-room-live-i18n``) — 2026-10-13."""
+    ctx = "exams.final_center.duty"
+    return {
+        "h": pgettext(ctx, "s"),
+        "m": pgettext(ctx, "dəq"),
+        "s": pgettext(ctx, "san"),
+        "left": pgettext(ctx, "Qalan vaxt"),
+        "newFlagged": pgettext(ctx, "Yeni şübhəli"),
+        "close": pgettext(ctx, "Bağla"),
+        "noteLabel": pgettext(ctx, "Nəzarətçi qeydi"),
+        "notePlaceholder": pgettext(ctx, "Məs.: telefonla danışırdı, xəbərdarlıq edildi"),
+        "noteSave": pgettext(ctx, "Qeydi yaz"),
+        "noteSaved": pgettext(ctx, "Qeyd yazıldı — xronologiyada görünəcək."),
+        "noteFailed": pgettext(ctx, "Qeyd yazılmadı."),
     }
 
 
@@ -152,14 +184,18 @@ def _room_computer_grid(room, snapshot):
 @login_required
 def exam_center_room_monitor(request, room_id):
     """Zal monitoru — bütün canlı oturumların birləşmiş görüntüsü + kompüter xəritəsi."""
-    _organization, room, _sessions = _get_room_and_sessions(request, room_id)
-    snapshot = room_monitor_snapshot(room)
+    organization, room, _sessions = _get_room_and_sessions(request, room_id)
+    snapshot, snapshot_etag = cached_room_snapshot(room)
     can_manage = can_manage_final_center(request.user)
 
     room = ExamRoom.objects.prefetch_related("computers", "invigilators").get(pk=room.pk)
     invigilators = list(room.invigilators.all())
     # Nəzarətçi təyini YALNIZ imtahan mərkəzi RƏHBƏRİ üçün (işçi görmür).
     can_assign = can_assign_invigilators(request.user)
+    # 2026-10-13 (gecə): vaxtla məhdud növbələr — rəhbər paneli + nəzarətçinin öz zolağı.
+    my_duty = None
+    if not can_manage:
+        my_duty = next((card for card in duty_cards(request.user, organization) if card["room"].pk == room.pk), None)
 
     return render(
         request,
@@ -167,12 +203,19 @@ def exam_center_room_monitor(request, room_id):
         {
             "room": room,
             "snapshot": snapshot,
+            "snapshot_etag": snapshot_etag,
             "heartbeat_seconds": HEARTBEAT_INTERVAL_SECONDS,
             "can_manage": can_manage,
             "can_assign_invigilators": can_assign,
             "monitor_labels": _monitor_labels(),
             "room_computers": _room_computer_grid(room, snapshot),
             "room_invigilators": invigilators,
+            "duty_rows": duty_rows_for_room(room) if can_assign else [],
+            "duty_form": default_duty_form() if can_assign else None,
+            "duty_lead_minutes": DUTY_LEAD_MINUTES,
+            "duty_grace_minutes": DUTY_GRACE_MINUTES,
+            "my_duty_cards": [my_duty] if my_duty else [],
+            "room_live_labels": _room_live_labels(),
             # Namizədlər AJAX ilə yüklənir (sistemi yükləməmək üçün) — səhifə
             # açılışında bütün istifadəçilər render olunmur; bax user_search lookup.
             "invigilator_search_url": reverse("exams:invigilator_search"),
@@ -222,11 +265,33 @@ def exam_center_room_assign_invigilators(request, room_id):
     return redirect("exams:exam_center_room_monitor", room_id=room.pk)
 
 
+#: (istifadəçi, zal) başına snapshot limiti: 10 s polling = 6/dəq + əməldən sonrakı «fresh» sorğular
+#: (bir neçə zalı ayrı tablarda izləyən rəhbər bir-birinin limitini yemir).
+_SNAPSHOT_RATE = "40/1m"
+
+
 @login_required
 def exam_center_room_snapshot(request, room_id):
-    """Zal monitorunun JSON snapshot-u (aşağı tezlikli polling)."""
+    """Zal monitorunun JSON snapshot-u (aşağı tezlikli polling).
+
+    2026-10-13 (gecə): icazə HƏR sorğuda yoxlanır (növbə bitəndə 403 → JS polling-i
+    dayandırır); nəticə zal üzrə qısa paylaşılan keşdədir; ``If-None-Match`` uyğun
+    gələrsə 304 (gövdəsiz); istifadəçi başına rate-limit (qaçaq dövrə serveri boğmasın).
+    """
     _organization, room, _sessions = _get_room_and_sessions(request, room_id)
-    return JsonResponse(room_monitor_snapshot(room))
+    exceeded, retry_after = record_rate_limit_hit("fxc_room_snapshot", _SNAPSHOT_RATE, request.user.id, room.pk)
+    if exceeded:
+        response = JsonResponse({"error": "rate_limited"}, status=429)
+        response["Retry-After"] = str(retry_after or 10)
+        return response
+    snapshot, etag = cached_room_snapshot(room, fresh=request.GET.get("fresh") == "1")
+    if etag_matches(request, etag):
+        response = HttpResponseNotModified()
+    else:
+        response = JsonResponse(snapshot)
+    response["ETag"] = etag
+    response["Cache-Control"] = "private, no-cache"
+    return response
 
 
 @login_required
@@ -250,6 +315,7 @@ def exam_center_attempt_violations(request, room_id, attempt_id):
     intervention = get_attempt_intervention(attempt)
     return JsonResponse(
         {
+            "attempt_id": attempt.pk,
             "student": attempt.user.get_full_name() or attempt.user.username,
             "username": attempt.user.username,
             # 2026-10-01 (PROC): şəkil/qrup + risk + qayda+siqnal xronologiyası.
@@ -299,6 +365,8 @@ def exam_center_room_start_all(request, room_id):
             except RoomSessionStateError as exc:
                 # State yarışı (paralel idarə) — 500 vermə, mesaj göstər.
                 last_error = str(exc)
+    if started:
+        invalidate_room_snapshot(room.pk)
     if is_ajax:
         payload = {"success": started > 0, "started": started}
         if last_error and not started:
@@ -340,6 +408,8 @@ def exam_center_room_end_all(request, room_id):
     for session in sessions:
         if session.state == "active" and end_room(session, request.user, request=request):
             ended += 1
+    if ended:
+        invalidate_room_snapshot(room.pk)
     if is_ajax:
         payload = {"success": ended > 0, "ended": ended}
         if not ended:
@@ -368,6 +438,8 @@ def exam_center_room_open_all(request, room_id):
     for session in ExamRoomSession.objects.filter(room=room, state="prepared"):
         if can_supervise_session(request.user, session) and open_entry(session, request.user, request=request):
             opened += 1
+    if opened:
+        invalidate_room_snapshot(room.pk)
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({"success": True, "opened": opened})
     if opened:

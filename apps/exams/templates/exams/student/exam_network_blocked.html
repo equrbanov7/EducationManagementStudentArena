@@ -1,0 +1,30 @@
+{% extends "errors/_base.html" %}
+{% load i18n %}
+{% comment %}
+2026-10-13 (gecə): final/midterm imtahanı yalnız universitet şəbəkəsindən verilir
+(apps/exams/services/exam_network.py). Kənar şəbəkədən açılanda bu səhifə göstərilir —
+sual məzmunu YOXDUR. Cavablar serverdədir; daxili şəbəkədən «Səhifəni yenilə» davam etdirir.
+{% endcomment %}
+{% block page_title %}{% trans 'Yalnız universitet şəbəkəsindən' context 'exams.network' %}{% endblock %}
+{% block code %}403{% endblock %}
+{% block code_label %}403{% endblock %}
+{% block kicker_icon %}fa-network-wired{% endblock %}
+{% block kicker %}{% trans 'Final və midterm imtahanı' context 'exams.network' %}{% endblock %}
+{% block title %}{% trans 'Yalnız universitet şəbəkəsindən' context 'exams.network' %}{% endblock %}
+{% block description %}
+    <p>{{ message }}</p>
+    {% if has_attempt %}<p>{% trans 'Cavablarınız serverdə saxlanılıb — daxili şəbəkədən imtahan qaldığı yerdən davam edəcək.' context 'exams.network' %}</p>{% endif %}
+{% endblock %}
+{% block pills %}
+    {% if exam %}<span class="error-pill"><i class="fas fa-file-pen" aria-hidden="true"></i> {{ exam.title }}</span>{% endif %}
+    <span class="error-pill"><i class="fas fa-building-columns" aria-hidden="true"></i> {% trans 'Universitet şəbəkəsi' context 'exams.network' %}</span>
+{% endblock %}
+{% block actions %}
+    {% if retry_url %}
+    <a href="{{ retry_url }}" class="error-btn error-btn-primary">
+        <i class="fas fa-rotate-right" aria-hidden="true"></i>
+        {% trans 'Səhifəni yenilə' context 'exams.network' %}
+    </a>
+    {% endif %}
+{% endblock %}
+{% block footer_note %}{% trans 'Şəbəkə yoxlaması serverdə aparılır və rəd hadisəsi jurnalda qeyd olunur.' context 'exams.network' %}{% endblock %}

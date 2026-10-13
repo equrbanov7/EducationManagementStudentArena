@@ -77,9 +77,45 @@ def exam_requires_student_pins(exam) -> bool:
 
 def _assigned_student_ids(exam) -> set[int]:
     # İmtahana təyin olunmuş bütün tələbələr (fərdi + qrup + kurs üzvləri).
+    from apps.exams.domain.unit_assignment import unit_assigned_student_ids
     from apps.notifications.public import get_exam_assigned_user_ids
 
-    return set(get_exam_assigned_user_ids(exam))
+    ids = set(get_exam_assigned_user_ids(exam))
+    # 2026-10-13 (gecə): ANA qrupa («234 K az») təyin olunmuş imtahan alt qrupun («234 K-1») tələbəsinə
+    # də açıqdır (``user_in_allowed_units`` — sahib 2026-09-21), amma bildiriş sayğacı alt qrupları
+    # genişləndirmir → alt qrup tələbəsinə PIN YARANMIRDI və o, imtahanı görüb verə bilmirdi.
+    # Giriş siyasəti ilə eyni mənbə: ``unit_assigned_student_ids`` (alt qruplar daxil).
+    unit_ids = unit_assigned_student_ids(exam)
+    if unit_ids - ids:
+        excluded = set(exam.excluded_users.values_list("id", flat=True))
+        ids |= unit_ids - excluded
+    return ids
+
+
+def ensure_student_pin(exam, user) -> bool:
+    """Təyin olunmuş tələbənin PIN sətri YOXDURSA yaradır (idempotent) — True: yaratma cəhd edildi.
+
+    2026-10-13 (gecə): PIN-lər imtahan/təyinat dəyişəndə (siqnallar) provizion olunur; tələbə
+    sonradan qrupa köçürüləndə (reyestr transferi) heç bir siqnal işləmir və onun PIN-i
+    olmurdu — kabinet «PIN hələ təyin olunmayıb» göstərirdi. Kabinet bu funksiyanı yalnız
+    PIN sətri tapılmayanda çağırır; təyinat çağıranda (kabinet siyahısı) artıq yoxlanıb.
+    """
+    if not exam_requires_student_pins(exam) or user is None or not getattr(user, "pk", None):
+        return False
+    # ignore_conflicts: paralel sorğu sətri artıq yaradıbsa unikal açar (exam, student) onu qoruyur.
+    ExamStudentPin.objects.bulk_create(
+        [
+            ExamStudentPin(
+                exam=exam,
+                student_id=user.pk,
+                pin_hash=PIN_HASH_PENDING,
+                pin_cipher=_fernet().encrypt(generate_pin_value().encode()).decode(),
+            )
+        ],
+        ignore_conflicts=True,
+    )
+    schedule_student_pin_hashing(exam)
+    return True
 
 
 def provision_exam_student_pins(exam) -> int:
@@ -150,17 +186,28 @@ def provision_exam_student_pins(exam) -> int:
     return pending
 
 
-def student_visible_pin(exam, user) -> str | None:
-    """Tələbənin öz PIN-i (kabinetdə göstərmək üçün). İcazə view qatında yoxlanır."""
-    if user is None or not getattr(user, "id", None):
-        return None
-    pin = ExamStudentPin.objects.filter(exam=exam, student=user).only("pin_cipher").first()
+def decrypt_student_pin_row(pin) -> str | None:
+    """Artıq yüklənmiş ``ExamStudentPin`` sətrinin açıq PIN-i (əlavə sorğu YOXDUR)."""
     if pin is None or not pin.pin_cipher:
         return None
     try:
         return _fernet().decrypt(pin.pin_cipher.encode()).decode()
     except (InvalidToken, ValueError):
         return None
+
+
+def student_visible_pin(exam, user, *, provision_missing: bool = False) -> str | None:
+    """Tələbənin öz PIN-i (kabinetdə göstərmək üçün). İcazə view qatında yoxlanır.
+
+    ``provision_missing=True`` — sətir yoxdursa (təyinatdan SONRA qrupa düşmüş tələbə) yaradılır;
+    çağıran tələbənin imtahana təyin olunduğunu artıq yoxlamış olmalıdır (kabinet siyahısı).
+    """
+    if user is None or not getattr(user, "id", None):
+        return None
+    pin = ExamStudentPin.objects.filter(exam=exam, student=user).only("pin_cipher").first()
+    if pin is None and provision_missing and ensure_student_pin(exam, user):
+        pin = ExamStudentPin.objects.filter(exam=exam, student=user).only("pin_cipher").first()
+    return decrypt_student_pin_row(pin)
 
 
 def verify_student_pin_row(pin, raw_pin: str) -> bool:

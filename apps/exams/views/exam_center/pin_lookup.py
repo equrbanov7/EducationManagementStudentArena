@@ -22,7 +22,7 @@ from django.views.decorators.http import require_GET
 from apps.exams.domain.final_center import TICKET_STATUS_ASSIGNED
 from apps.exams.models import ExamStudentPin, FinalExamTicket
 from apps.exams.services.final_center import decrypt_ticket_pin
-from apps.exams.services.student_pins import student_visible_pin
+from apps.exams.services.student_pins import decrypt_student_pin_row
 from apps.organizations.public import organization_role_user_queryset
 from core.audit import log_action
 from core.constants import AuditAction
@@ -224,7 +224,8 @@ def exam_center_student_pins(request, student_id):
     )
     for student_pin in student_pins:
         exam = student_pin.exam
-        pin = student_visible_pin(exam, student)
+        # 2026-10-13 (gecə): sətir artıq yüklənib — imtahan başına ayrıca PIN sorğusu (N+1) yoxdur.
+        pin = decrypt_student_pin_row(student_pin)
         if pin:
             revealed += 1
         subject = getattr(exam, "subject", None)

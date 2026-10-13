@@ -26,6 +26,7 @@ Sıra: komponentlər → apellyasiya düzümü (part1 → part2 → part3).{% en
 <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2.css' %}?v=20260908-calm">
 <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2b.css' %}?v=20260908-calm">
 <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part3.css' %}?v=20260908-calm">
+<link rel="stylesheet" href="{% static 'appeals/css/appeals/_part4.css' %}?v=20261013-keyfix">
 {% endblock %}
 
 {% block content %}
@@ -133,6 +134,25 @@ Sıra: komponentlər → apellyasiya düzümü (part1 → part2 → part3).{% en
             <span class="appeal-step__text">{% trans "Göndərin" context "appeals.template" %}</span>
         </li>
     </ol>
+
+    {% if appeal_deadline %}
+    {# 2026-10-13 (gecə): son tarix — tələbə evdən də müraciət edə bilir; sonra düymə gizlənir, server qəbul etmir. #}
+    <div class="ems-banner ems-banner--warning appeal-banner" role="note">
+        <i class="fas fa-hourglass-half appeal-banner__icon" aria-hidden="true"></i>
+        <div>
+            <div class="ems-banner__title appeal-deadline-note">
+                {% blocktrans trimmed context "appeals.template" with deadline=appeal_deadline|date:"d.m.Y H:i" %}
+                    Apellyasiya son tarixi: {{ deadline }}
+                {% endblocktrans %}
+            </div>
+            <div class="ems-banner__body">
+                {% blocktrans trimmed context "appeals.template" with days=appeal_window_days %}
+                    Nəticə açıqlandıqdan sonra {{ days }} təqvim günü ərzində (son günün sonunadək, Bakı vaxtı) müraciət edə bilərsiniz.
+                {% endblocktrans %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <div class="ems-banner ems-banner--info appeal-banner" role="note">
         <i class="fas fa-circle-info appeal-banner__icon" aria-hidden="true"></i>

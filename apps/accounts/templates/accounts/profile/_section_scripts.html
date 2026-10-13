@@ -29,7 +29,7 @@ MÜQAVİLƏ:
 {% comment %}Tələbə detalı çekməcəsi — cədvəl modulundan MÜSTƏQİLDİR (paylaşılan
 vəziyyət yoxdur, yalnız sətir düyməsinin `data-*`-larından asılıdır); ayrı fayl
 həm modul ölçü büdcəsini, həm də məsuliyyət ayrımını saxlayır.{% endcomment %}
-<script src="{% static 'accounts/js/profile/academic_records_detail.js' %}?v=20260910-1"></script>
+<script src="{% static 'accounts/js/profile/academic_records_detail.js' %}?v=20261013-xh"></script>
 {% endif %}
 {% if 'people-teachers' in asset_sections or 'people-students' in asset_sections or 'student-registry' in asset_sections %}
 {% comment %}2026-10-03: hesabı dayandırma — səbəb seçimi + «kimə yaxınlaşsın» (kataloq və reyestr dialoqları).{% endcomment %}
@@ -145,7 +145,8 @@ qurulub, panel swap-da yenidən qoşulmağa ehtiyac yoxdur.{% endcomment %}
 {% endif %}
 {% if 'permission-editor' in asset_sections %}
 <script src="{% static 'accounts/js/permission_editor/namespace.js' %}"></script>
-<script src="{% static 'accounts/js/permission_editor/labels.js' %}"></script>
+<script src="{% static 'accounts/js/permission_editor/labels_de.js' %}?v=20261013-de"></script>
+<script src="{% static 'accounts/js/permission_editor/labels.js' %}?v=20261013-de"></script>
 <script src="{% static 'accounts/js/permission_editor/matrix.js' %}"></script>
 <script src="{% static 'accounts/js/permission_editor/interactions.js' %}"></script>
 <script src="{% static 'accounts/js/permission_editor/save_state.js' %}"></script>
@@ -204,6 +205,7 @@ yaratma/redaktə dialoqunu aça bilmirdi.{% endcomment %}
 {% if 'my-appeals' in asset_sections or 'appeal-stats' in asset_sections %}
 <script src="{% static 'appeals/js/appeals_review.js' %}?v=20260715-appeal-batch"></script>
 <script src="{% static 'appeals/js/appeals_sections.js' %}?v=20260715-appeal-batch"></script>
+<script src="{% static 'appeals/js/appeals_key_fix.js' %}?v=20261013-keyfix2"></script>
 {% endif %}
 {% if 'org-faculties' in asset_sections or 'org-kafedras' in asset_sections %}
 <script src="{% static 'js/org_structure.js' %}?v=20260926-search"></script>
@@ -237,7 +239,7 @@ gizli sahələrə yazılması; dialoq/POST ORTAQ `teaching_office.js`-dədir.{% 
 <script src="{% static 'accounts/js/profile/teaching_office_bulk.js' %}?v=20260903-2"></script>
 {% comment %}Ekran 06 — qrupun tələbə çekmecəsi (siyahı JSON-dan, hərəkət dialoqları
 `data-tof-open` ilə). Göndəriş yenə `teaching_office.js`-dədir.{% endcomment %}
-<script src="{% static 'accounts/js/profile/teaching_office_groups.js' %}?v=20260926-search"></script>
+<script src="{% static 'accounts/js/profile/teaching_office_groups.js' %}?v=20261013-lead"></script>
 <script src="{% static 'accounts/js/profile/teaching_office_group_split.js' %}?v=20260920-split"></script>
 {% endif %}
 {% comment %}Mərhələ 4 — YALNIZ Excel idxalının multipart yüklənməsi (ortaq

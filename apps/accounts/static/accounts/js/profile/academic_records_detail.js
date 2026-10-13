@@ -165,15 +165,42 @@
             return;
         }
         var semesters = data.semesters || [];
+        var history = examHistoryBlock(T, data.exam_history || []);
         if (!semesters.length) {
-            body.innerHTML = stateBox("fa-folder-open", T.no_record);
+            body.innerHTML = stateBox("fa-folder-open", T.no_record) + history;
             return;
         }
         body.innerHTML = semesters
             .map(function (sem) {
                 return semesterBlock(T, sem);
             })
-            .join("");
+            .join("") + history;
+    }
+
+    /* 2026-10-13 (gecə): imtahan cəhdləri + apellyasiya izi — YALNIZ-OXU (sahibin 2026-09-07 memo-su:
+     * «əsas imtahan → apellyasiya → təkrar cəhd» koordinator/dekanlıqda görünsün). Data serverdən
+     * hazır gəlir (apps/appeals/services/history.py::student_exam_history). */
+    function examHistoryBlock(T, rows) {
+        if (!rows.length) {
+            return "";
+        }
+        var items = rows.map(function (row) {
+            var appeals = (row.appeals || []).map(function (ap) {
+                return '<li class="acr-xh__appeal"><i class="fas fa-gavel" aria-hidden="true"></i> ' +
+                    esc(ap.status_label) + (ap.delta ? " · <b>" + esc(ap.delta) + "</b>" : "") +
+                    (ap.reviewer ? " · " + esc(ap.reviewer) : "") + (ap.at ? " · " + esc(ap.at) : "") + "</li>";
+            }).join("");
+            var state = row.is_official ? T.xh_official : T.xh_superseded;
+            return '<li class="acr-xh__row' + (row.is_official ? " is-official" : " is-superseded") + '">' +
+                '<div class="acr-xh__main"><b>' + esc(row.subject) + "</b> · " + esc(row.category_label) +
+                " · " + esc(row.number) + " " + esc(T.xh_attempt) + "</div>" +
+                '<div class="acr-xh__meta">' + esc(row.percent == null ? "—" : row.percent + "%") + " · " +
+                esc(state) + (row.is_expelled ? " · " + esc(T.xh_expelled) : "") +
+                (row.finished_at ? " · " + esc(row.finished_at) : "") + "</div>" +
+                (appeals ? '<ul class="acr-xh__appeals">' + appeals + "</ul>" : "") + "</li>";
+        }).join("");
+        return '<section class="acr-xh"><h3 class="acr-xh__title"><i class="fas fa-clock-rotate-left" ' +
+            'aria-hidden="true"></i> ' + esc(T.xh_title) + '</h3><ul class="acr-xh__list">' + items + "</ul></section>";
     }
 
     /* Sətir düyməsi → çekməcə. Deleqasiya SƏNƏD səviyyəsindədir: cədvəl hər

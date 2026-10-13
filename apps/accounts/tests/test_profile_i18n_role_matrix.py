@@ -29,7 +29,7 @@ User = get_user_model()
 
 PASSWORD = "StrongPass123!"
 
-LANGUAGES = ("az", "en", "ru", "tr")
+LANGUAGES = ("az", "en", "ru", "tr", "de")  # 2026-10-13 (gecə): alman dili
 
 ROLE_LEVELS = {
     "org_admin": 80,
@@ -139,7 +139,7 @@ class ProfileI18nRoleMatrixTest(TestCase):
         olunmur.
         """
         for role in ROLE_LEVELS:
-            for language in ("en", "ru", "tr"):
+            for language in ("en", "ru", "tr", "de"):
                 with self.subTest(role=role, language=language):
                     text = self._strip_data_noise(_visible_text(self._render(role, language)))
                     words = {word for word in text.split() if AZ_ONLY_CHARS.search(word)}

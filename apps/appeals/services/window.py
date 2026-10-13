@@ -3,7 +3,9 @@ Apellyasiya pəncərəsi — imtahan bitdikdən sonra yalnız N gün ərzində.
 """
 
 from datetime import datetime, time, timedelta
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
+from django.conf import settings
 from django.utils import timezone
 
 from apps.appeals.constants import APPEAL_WINDOW_DAYS
@@ -12,6 +14,28 @@ from apps.exams.public import ATTEMPT_FINISHED_STATUSES, exam_answers_release_lo
 # Apellyasiyaya icazə verilən attempt statusları (bitmiş cəhdlər) — exams
 # fasadındakı tək mənbədən törədilir.
 APPEAL_ELIGIBLE_ATTEMPT_STATUSES = frozenset(ATTEMPT_FINISHED_STATUSES)
+
+
+def appeal_window_days():
+    """Pəncərənin uzunluğu (təqvim günü) — «Sistem tənzimləmələri» → ``settings.APPEAL_WINDOW_DAYS`` → 3.
+
+    2026-10-13 (gecə): sahib «3 gün ərzində» dedi; rəqəm koddan çıxarılıb tənzimlənən edildi ki,
+    qayda dəyişəndə deploy lazım olmasın. Yararsız dəyər heç vaxt tətbiq olunmur (defolta düşür)."""
+    try:
+        from core import runtime_settings
+
+        days = int(runtime_settings.get_int("exam.appeal_window_days"))
+    except Exception:  # noqa: BLE001 — tənzimləmə oxunmasa da pəncərə işləməlidir
+        days = int(getattr(settings, "APPEAL_WINDOW_DAYS", APPEAL_WINDOW_DAYS) or APPEAL_WINDOW_DAYS)
+    return max(1, days)
+
+
+def appeal_window_timezone():
+    """Son günün «sonu» hansı vaxt qurşağı ilə sayılır — defolt Asia/Baku (istifadəçinin aktiv tz-indən asılı deyil)."""
+    try:
+        return ZoneInfo(getattr(settings, "APPEAL_WINDOW_TIMEZONE", "Asia/Baku") or "Asia/Baku")
+    except (ZoneInfoNotFoundError, ValueError):
+        return ZoneInfo("Asia/Baku")
 
 
 def _finished_at(attempt):
@@ -43,11 +67,24 @@ def appeal_window_start(attempt):
     finished = _finished_at(attempt)
     if not finished:
         return None
-    if _is_auto_graded(attempt):
-        return None if exam_answers_release_locked(attempt.exam) else finished
-    if not getattr(attempt, "checked_by_teacher", False):
+    exam = getattr(attempt, "exam", None)
+    # 2026-10-13 (gecə): müəllim nəticəni tələbədən GİZLƏDİBSƏ tələbə nəyə etiraz edəcəyini görmür —
+    # pəncərə açılmır (əvvəl 3 gün gizli nəticə dövründə «yanırdı»).
+    if getattr(exam, "results_hidden_from_students", False):
         return None
-    return getattr(attempt, "teacher_checked_at", None) or finished
+    if _is_auto_graded(attempt):
+        if exam_answers_release_locked(exam):
+            return None
+        start = finished
+    elif not getattr(attempt, "checked_by_teacher", False):
+        return None
+    else:
+        start = getattr(attempt, "teacher_checked_at", None) or finished
+    # Nəticə sonradan açılıbsa (gizli → görünən) pəncərə AÇILMA anından sayılır, bitmə anından yox.
+    published = getattr(exam, "results_published_at", None)
+    if published and published > start:
+        start = published
+    return start
 
 
 def appeal_deadline(attempt):
@@ -60,12 +97,11 @@ def appeal_deadline(attempt):
     start = appeal_window_start(attempt)
     if not start:
         return None
-    local_start = timezone.localtime(start)
-    deadline_date = local_start.date() + timedelta(days=APPEAL_WINDOW_DAYS)
-    return timezone.make_aware(
-        datetime.combine(deadline_date, time.max),
-        timezone.get_current_timezone(),
-    )
+    # 2026-10-13 (gecə): gün sərhədi HƏMİŞƏ Bakı vaxtı ilə (əvvəl aktiv tz — istifadəçi tz-i
+    # aktivləşəndə son tarix sürüşə bilirdi).
+    tz = appeal_window_timezone()
+    deadline_date = timezone.localtime(start, tz).date() + timedelta(days=appeal_window_days())
+    return datetime.combine(deadline_date, time.max).replace(tzinfo=tz)
 
 
 def is_within_appeal_window(attempt, *, at_time=None):
@@ -90,7 +126,9 @@ def remaining_window_seconds(attempt, *, at_time=None):
 __all__ = [
     "APPEAL_ELIGIBLE_ATTEMPT_STATUSES",
     "appeal_deadline",
+    "appeal_window_days",
     "appeal_window_start",
+    "appeal_window_timezone",
     "attempt_awaiting_grading",
     "is_within_appeal_window",
     "remaining_window_seconds",

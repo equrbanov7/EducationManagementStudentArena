@@ -390,7 +390,7 @@ def ensure_open_room_sitting(room):
         )
 
 
-def ensure_pin_ticket(exam, student, room, computer=None):
+def ensure_pin_ticket(exam, student, room, computer=None, *, move_attempt=True):
     """
     ExamStudentPin girişi üçün bileti tapır/yaradır və otağın oturumuna qoşur.
 
@@ -399,6 +399,10 @@ def ensure_pin_ticket(exam, student, room, computer=None):
     biletin öz PIN sahələri istifadə olunmur/doldurulmur.
 
     Qaytarır: ``(ticket, None)`` uğurda, ``(None, error_message)`` rədd halında.
+
+    ``move_attempt=False`` (2026-10-13, gecə) — davam edən cəhd kabinet PIN-i ilə yenidən girişdə
+    yerindən TƏRPƏNMİR (bax ``reentry.cabinet_pin_resume_denial``); köçürmə yalnız nəzarətçinin
+    yeni PIN-i / «cihaz dəyişikliyi» təsdiqi ilə olur.
     """
     from django.utils.translation import pgettext
 
@@ -418,7 +422,7 @@ def ensure_pin_ticket(exam, student, room, computer=None):
             "İmtahana girişiniz bağlanıb — imtahan mərkəzinə müraciət edin.",
         )
     ensure_open_room_sitting(room)
-    sitting = attach_ticket_to_room_sitting(ticket, room, computer)
+    sitting = attach_ticket_to_room_sitting(ticket, room, computer, move_attempt=move_attempt)
     if sitting is None:  # yarış halı — oturum elə indicə bağlandı
         return None, pgettext(
             "exams.final_center.entry",
@@ -427,7 +431,7 @@ def ensure_pin_ticket(exam, student, room, computer=None):
     return ticket, None
 
 
-def attach_ticket_to_room_sitting(ticket, room, computer=None):
+def attach_ticket_to_room_sitting(ticket, room, computer=None, *, move_attempt=True):
     """
     Bileti otağın AÇIQ zal oturumuna qoşur (giriş anında — oturum sisteminin
     ləğvindən sonra).
@@ -496,7 +500,7 @@ def attach_ticket_to_room_sitting(ticket, room, computer=None):
 
         # Kompüter dəyişəndə yeni attempt YARATMA: mövcud attempt-i yeni
         # zal/kompüterlə möhürlə və DB-dəki cavabları olduğu kimi saxla.
-        if ticket.attempt_id:
+        if ticket.attempt_id and move_attempt:
             from apps.exams.models import ExamAttempt
 
             ExamAttempt.objects.filter(pk=ticket.attempt_id).update(

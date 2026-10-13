@@ -12,6 +12,7 @@ _AZERBAIJAN_DISPLAY_NAMES = {
     "az": "Azərbaycan",
     "tr": "Azerbaycan",
     "ru": "Азербайджан",
+    "de": "Aserbaidschan",  # 2026-10-13 (gecə): alman dili
 }
 
 

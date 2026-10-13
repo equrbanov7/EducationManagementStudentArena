@@ -1,0 +1,48 @@
+/* «Akademik qeydlər» çekməcəsi — imtahan cəhdləri + apellyasiya izi (ayrı fayl: academic_records.css 600 sətir
+   büdcəsindədir). JS: academic_records_detail.js::examHistoryBlock. */
+/* ── 2026-10-13 (gecə): çekməcədə imtahan cəhdləri + apellyasiya izi (yalnız-oxu) ── */
+.acr-xh {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--ems-border, #e5e7eb);
+}
+
+.acr-xh__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.acr-xh__list,
+.acr-xh__appeals {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.acr-xh__row {
+    padding: 8px 10px;
+    border-left: 3px solid var(--ems-neutral-300, #cbd5e1);
+}
+
+.acr-xh__row + .acr-xh__row {
+    margin-top: 6px;
+}
+
+.acr-xh__row.is-official {
+    border-left-color: var(--ems-success-700, #15803d);
+}
+
+.acr-xh__meta,
+.acr-xh__appeal {
+    font-size: 0.85rem;
+    color: var(--ems-neutral-700, #475569);
+}
+
+.acr-xh__appeals {
+    margin-top: 4px;
+    padding-left: 12px;
+}

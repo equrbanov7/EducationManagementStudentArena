@@ -21,6 +21,8 @@ from .navigation import current_return_to  # noqa: F401
 from .services.access_policy import SECURE_EXAM_CATEGORIES  # noqa: F401
 from .services.access_policy import is_exam_center_user  # noqa: F401
 from .services.ai_summary import generate_appeal_statistics_summary  # noqa: F401
+from .services.exam_network import exam_network_allowed  # noqa: F401
+from .services.exam_network import exam_network_denied_message  # noqa: F401
 from .services.final_center import clear_entry_session  # noqa: F401
 from .services.question_chair_review import chair_queue_queryset  # noqa: F401
 from .services.question_chair_review import pending_chair_review_count  # noqa: F401
@@ -45,6 +47,8 @@ __all__ = [
     "current_return_to",
     "delivered_question_render",
     "ensure_student_exam_tenant_context",
+    "exam_network_allowed",
+    "exam_network_denied_message",
     "generate_appeal_statistics_summary",
     "is_exam_center_user",
     "pending_chair_review_count",
