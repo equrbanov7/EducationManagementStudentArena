@@ -1,14 +1,14 @@
 // LX-FE-PLAYER (2026-09-29): iştirakçı ekranının giriş nöqtəsi.
-import { SESSION_SETTINGS } from './config.js?v=lx20261008';
-import { fetchState, setSnapshotHandlers } from './api.js?v=lx20261008';
-import { bindPlayerEvents } from './events.js?v=lx20261008';
-import { bindCopyGuard } from './guard.js?v=lx20261008';
-import { handleAuthLost, handleSnapshot, handleSocketMessage } from './flow.js?v=lx20261008';
-import { resetWatchdog, startStatePolling } from './polling.js?v=lx20261008';
-import { renderBoot } from './render_status.js?v=lx20261008';
-import { applySessionSettings } from './settings.js?v=lx20261008';
-import { openPlayerSocket } from './sockets.js?v=lx20261008';
-import { renderPlayerIdentity, renderSoundToggle, setNetSignal, setNetStatus } from './ui.js?v=lx20261008';
+import { SESSION_SETTINGS } from './config.js?v=lx20261014';
+import { fetchState, setSnapshotHandlers } from './api.js?v=lx20261014';
+import { bindPlayerEvents } from './events.js?v=lx20261014';
+import { bindCopyGuard } from './guard.js?v=lx20261014';
+import { handleAuthLost, handleSnapshot, handleSocketMessage } from './flow.js?v=lx20261014';
+import { resetWatchdog, startStatePolling } from './polling.js?v=lx20261014';
+import { renderBoot } from './render_status.js?v=lx20261014';
+import { applySessionSettings } from './settings.js?v=lx20261014';
+import { openPlayerSocket } from './sockets.js?v=lx20261014';
+import { renderPlayerIdentity, renderSoundToggle, setNetSignal, setNetStatus } from './ui.js?v=lx20261014';
 
 applySessionSettings(SESSION_SETTINGS);
 renderPlayerIdentity();

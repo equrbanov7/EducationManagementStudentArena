@@ -1,6 +1,6 @@
-import { finishGame, nextQuestion, post, postJson, revealQuestion, skipQuestionIntro, startGame, syncState } from './api.js?v=lx20261008';
-import { replayStage } from './stage.js?v=lx20261008';
-import { hostShellSubscribers, publicHostState } from './utils.js?v=lx20261008';
+import { finishGame, nextQuestion, post, postJson, revealQuestion, skipQuestionIntro, startGame, syncState } from './api.js?v=lx20261014';
+import { replayStage } from './stage.js?v=lx20261014';
+import { hostShellSubscribers, publicHostState } from './utils.js?v=lx20261014';
 
 export function installHostController() {
     window.LiveHostLobbyController = {
