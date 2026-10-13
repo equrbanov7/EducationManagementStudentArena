@@ -32,14 +32,23 @@ QAYDALAR
   köhnə davranış); (2) birləşmiş mühazirə (axın): eyni effektiv müəllim + eyni fənn +
   hər ikisi mühazirə + eyni (və ya boş) otaq, qruplar FƏRQLİ → toqquşma deyil
   (generatorun dərc etdiyi axınlar redaktorda «müəllim toqquşması» görünürdü);
-  qrup toqquşması HƏMİŞƏ toqquşmadır (``schedule.is_joint_lecture``).
+  qrup toqquşması HƏMİŞƏ toqquşmadır (``schedule.is_joint_lecture``);
+* PARALEL ALT QRUP (2026-10-14): EYNİ açılışın iki məşğələ/laboratoriya slotu eyni saatda,
+  FƏRQLİ effektiv müəllimlərlə — qrup yarıya bölünüb (alt qruplar) paralel oturur; bu, qrup
+  toqquşması deyil (müəllim və otaq yoxlaması yenə işləyir). ``offering_id`` verilməyibsə qayda
+  işləmir (köhnə davranış);
+* ƏHATƏDƏN KƏNAR toqquşma (2026-10-14): ``visible(slot)`` False qaytaran slot (redaktorun
+  ``schedule.manage`` əhatəsindən kənar — başqa fakültə/kafedra) MİNİMAL açıqlama ilə qaytarılır:
+  yalnız «fənn · qrup» (müəllim adı, otaq, slot id-si YOX) və ``can_force=False`` — onu parklamaq
+  olmaz. Qrup toqquşması heç vaxt məcburi keçilmir (``can_force=False``): əvvəlcə həmin dərs
+  köçürülməlidir.
 """
 
 from __future__ import annotations
 
 from django.utils.translation import pgettext
 
-from apps.registrar.models import ScheduleSlot, WeekType
+from apps.registrar.models import ScheduleSlot, SlotKind, WeekType
 from apps.registrar.schedule import effective_instructor, effective_instructor_id, is_joint_lecture, same_id
 
 _CTX = "registrar.schedule_conflicts"
@@ -85,9 +94,20 @@ def _person_name(user) -> str:
     return full or str(getattr(user, "username", "") or "")
 
 
-def _message(kind, slot) -> str:
-    """İstifadəçiyə göstərilən açıq cümlə (sahibin nümunəsi ilə eyni forma)."""
+def _message(kind, slot, *, redacted=False) -> str:
+    """İstifadəçiyə göstərilən açıq cümlə (sahibin nümunəsi ilə eyni forma).
+
+    ``redacted`` — əhatədən kənar slot: yalnız «fənn · qrup» açılır."""
     offering = slot.offering
+    if redacted:
+        short = {
+            "subject": getattr(offering.subject, "code", "") or getattr(offering.subject, "name", "") or "",
+            "group": getattr(offering.group, "name", "") or pgettext(_CTX, "təyin edilməmiş qrup"),
+            "room": slot.room or "",
+        }
+        if kind == KIND_ROOM:
+            return pgettext(_CTX, "%(room)s auditoriyası bu saatda tutulub: %(subject)s · %(group)s.") % short
+        return pgettext(_CTX, "Müəllimin bu saatda başqa dərsi var: %(subject)s · %(group)s.") % short
     params = {
         "day": _weekday_label(slot.weekday),
         "time": slot.start_time.strftime("%H:%M"),
@@ -112,9 +132,32 @@ def kind_label(kind) -> str:
     return pgettext(_CTX, "auditoriya")
 
 
-def describe(slot, kind) -> dict:
-    """Konflikt slotunun JSON müqaviləsi — UI açar adları DƏYİŞMƏZ."""
+def describe(slot, kind, *, in_scope=True) -> dict:
+    """Konflikt slotunun JSON müqaviləsi — UI açar adları DƏYİŞMƏZ.
+
+    ``in_scope=False`` — redaktorun əhatəsindən kənar slot: minimal açıqlama (bax modul başlığı)."""
     offering = slot.offering
+    can_force = bool(in_scope and kind != KIND_GROUP)
+    if not in_scope:
+        return {
+            "kind": kind,
+            "kind_label": kind_label(kind),
+            "slot_id": "",
+            "message": _message(kind, slot, redacted=True),
+            "subject_code": getattr(offering.subject, "code", "") or "",
+            "subject_name": getattr(offering.subject, "name", "") or "",
+            "group": getattr(offering.group, "name", "") or "",
+            "instructor": "",
+            "room": slot.room if kind == KIND_ROOM else "",
+            "weekday": slot.weekday,
+            "weekday_label": _weekday_label(slot.weekday),
+            "start_time": slot.start_time.strftime("%H:%M"),
+            "end_time": slot.end_time.strftime("%H:%M"),
+            "week_type": slot.week_type,
+            "week_type_label": _week_type_label(slot.week_type),
+            "in_scope": False,
+            "can_force": False,
+        }
     return {
         "kind": kind,
         "kind_label": kind_label(kind),
@@ -131,7 +174,22 @@ def describe(slot, kind) -> dict:
         "end_time": slot.end_time.strftime("%H:%M"),
         "week_type": slot.week_type,
         "week_type_label": _week_type_label(slot.week_type),
+        "in_scope": True,
+        "can_force": can_force,
     }
+
+
+def is_parallel_subgroup(*, offering_id, kind, teacher_id, slot) -> bool:
+    """EYNİ açılışın paralel məşğələ/laboratoriyası (alt qruplar), FƏRQLİ müəllimlə — qrup toqquşması deyil."""
+    return bool(
+        offering_id
+        and same_id(offering_id, slot.offering_id)
+        and kind
+        and kind != SlotKind.LECTURE
+        and slot.kind != SlotKind.LECTURE
+        and teacher_id
+        and not same_id(teacher_id, effective_instructor_id(slot))
+    )
 
 
 def live_slots(organization, *, weekday=None, period_id=None):
@@ -161,6 +219,8 @@ def detect(
     period_id=None,
     subject_id=None,
     kind=None,
+    offering_id=None,
+    visible=None,
 ) -> list[dict]:
     """Bu yerləşdirmənin BÜTÜN toqquşmaları — növ + açıq mətn ilə.
 
@@ -169,7 +229,8 @@ def detect(
 
     ``period_id`` — yerləşdirilən açılışın semestri (yalnız o semestrin slotları; boşdursa
     köhnə davranış); ``subject_id`` + ``kind`` — axın qaydası üçün (verilməyibsə qayda
-    işləmir, köhnə davranış). Bax modul başlığı.
+    işləmir, köhnə davranış); ``offering_id`` — paralel alt qrup qaydası üçün; ``visible`` —
+    ``callable(slot) -> bool`` (redaktorun əhatəsi; False = minimal açıqlama). Bax modul başlığı.
     """
     excluded = {str(value) for value in (exclude_ids or ()) if value}
     room_norm = (room or "").strip().lower()
@@ -185,7 +246,9 @@ def detect(
             continue
         if not week_types_overlap(week_type, slot.week_type):
             continue
-        same_group = same_id(group_id, slot.offering.group_id)
+        same_group = same_id(group_id, slot.offering.group_id) and not is_parallel_subgroup(
+            offering_id=offering_id, kind=kind, teacher_id=instructor_id, slot=slot
+        )
         if not same_group and is_joint_lecture(
             kind=kind, subject_id=subject_id, teacher_id=instructor_id, room=room_norm, slot=slot
         ):
@@ -196,7 +259,11 @@ def detect(
             found.setdefault(KIND_GROUP, slot)
         if room_norm and room_norm == (slot.room or "").strip().lower():
             found.setdefault(KIND_ROOM, slot)
-    return [describe(found[kind], kind) for kind in KIND_ORDER if kind in found]
+    return [
+        describe(found[key], key, in_scope=visible is None or bool(visible(found[key])))
+        for key in KIND_ORDER
+        if key in found
+    ]
 
 
 # ── Tövsiyə: hara boşdur ─────────────────────────────────────────────────────
@@ -227,6 +294,7 @@ def suggest(
     period_id=None,
     subject_id=None,
     kind=None,
+    offering_id=None,
 ) -> list[dict]:
     """Həm müəllimin, həm qrupun BOŞ olduğu hüceyrələr — sıralanmış.
 
@@ -262,6 +330,7 @@ def suggest(
                 period_id=period_id,
                 subject_id=subject_id,
                 kind=kind,
+                offering_id=offering_id,
             )
             if clashes:
                 continue
@@ -293,6 +362,7 @@ __all__ = [
     "KIND_TEACHER",
     "describe",
     "detect",
+    "is_parallel_subgroup",
     "live_slots",
     "suggest",
     "time_ranges_overlap",

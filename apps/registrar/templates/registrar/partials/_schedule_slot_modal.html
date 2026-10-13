@@ -1,0 +1,49 @@
+{% load i18n %}
+{% comment %}Dərs kartının DETAL modalı (klik) — `registrar/js/schedule_grid.js` kartın `data-*`
+sahələrindən doldurur (fənn, növ, vaxt, həftə, otaq, müəllim, qrup).
+
+ORTAQ (2026-10-14): «Dərs cədvəli» (`_schedule_content.html`) və «Cədvəl idarəetməsi»
+(`_schedule_manage.html` — yalnız-oxu kartlar və redaktorun əhatəsindən kənar dərslər) eyni
+markup-ı işlədir. Modal kartın ƏN YAXIN kökündə (`[data-schedule-root]` / `[data-sedit-root]`)
+axtarılır — profil qabığında bir neçə bölmə DOM-da qala bilər.
+
+KONTEKST: ``modal_role`` — "student" | "teacher" | "manage" (statistika / «Jurnalı aç»).{% endcomment %}
+    <div class="sgx-modal" data-sgx-modal hidden>
+        <div class="sgx-modal-backdrop" data-sgx-close></div>
+        <div class="sgx-modal-card" role="dialog" aria-modal="true" aria-labelledby="sgx-modal-title-{{ modal_role }}">
+            <div class="sgx-modal-head" data-sgx-modal-head>
+                <div class="sgx-modal-kind" data-sgx-f="kind_label"></div>
+                <h3 class="sgx-modal-title" id="sgx-modal-title-{{ modal_role }}"><span data-sgx-f="code"></span> <span data-sgx-f="name"></span></h3>
+                <button type="button" class="sgx-modal-close" data-sgx-close aria-label="{% trans 'Bağla' context 'registrar.schedule' %}">&times;</button>
+            </div>
+            <div class="sgx-modal-body">
+                <div class="sgx-modal-rows">
+                    <div class="sgx-mrow"><span class="sgx-mlabel">{% trans "Vaxt" context "registrar.schedule" %}</span><span data-sgx-f="when"></span></div>
+                    <div class="sgx-mrow"><span class="sgx-mlabel">{% trans "Həftə" context "registrar.schedule" %}</span><span data-sgx-f="parity_label"></span></div>
+                    <div class="sgx-mrow" data-sgx-row="room"><span class="sgx-mlabel">{% trans "Auditoriya" context "registrar.schedule" %}</span><span data-sgx-f="room"></span></div>
+                    <div class="sgx-mrow" data-sgx-row="teacher"><span class="sgx-mlabel">{% trans "Müəllim" context "registrar.schedule" %}</span><span data-sgx-f="teacher"></span></div>
+                    <div class="sgx-mrow" data-sgx-row="group"><span class="sgx-mlabel">{% trans "Qrup" context "registrar.schedule" %}</span><span data-sgx-f="group"></span></div>
+                    <div class="sgx-mrow" data-sgx-row="count"><span class="sgx-mlabel">{% trans "Tələbə sayı" context "registrar.schedule" %}</span><span data-sgx-f="count"></span></div>
+                    <div class="sgx-mrow" data-sgx-row="ects"><span class="sgx-mlabel">ECTS</span><span data-sgx-f="ects"></span></div>
+                </div>
+                {% if modal_role == 'student' %}
+                <div class="sgx-modal-stats" data-sgx-row="stats"
+                     data-barred-label="{% trans 'Kəsilir' context 'registrar.schedule' %}"
+                     data-ok-label="{% trans 'Normal' context 'registrar.schedule' %}">
+                    <div class="sgx-stat-card"><b data-sgx-f="abs"></b><small>{% trans "qayıb saatı" context "registrar.schedule" %}</small></div>
+                    <div class="sgx-stat-card"><b data-sgx-f="entry"></b><small>{% trans "giriş balı" context "registrar.schedule" %}</small></div>
+                    <div class="sgx-stat-card sgx-stat-card--status"><b data-sgx-f="status"></b><small>{% trans "status" context "registrar.schedule" %}</small></div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="sgx-modal-foot">
+                {% if modal_role == 'teacher' %}
+                <a class="sgx-primary-btn" data-sgx-f="journal_link" href="#" target="_blank" rel="noopener"><i class="fas fa-book-open"></i> {% trans "Jurnalı aç" context "registrar.schedule" %}</a>
+                {% endif %}
+                {% comment %}URL auditi A11 (2026-10-10): ölü «Slotu sil» forması (kart heç vaxt
+                `data-delete-url` vermirdi) və `cedvel/slot/<uuid>/sil/` marşrutu silindi —
+                slot redaktəsi «Dərs cədvəli redaktoru»ndadır (`accounts/schedule-manage/editor/`).{% endcomment %}
+                <button type="button" class="sgx-ghost-btn" data-sgx-close>{% trans "Bağla" context "registrar.schedule" %}</button>
+            </div>
+        </div>
+    </div>

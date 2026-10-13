@@ -18,6 +18,26 @@ Seçimlər JS ilə yenilənəndə `EMSBootstrapSelect.refresh(select)` çağır�
 <input type="hidden" name="force" value="" data-sedit-field="force">
 
 <div class="sedit-form">
+  {% if sec.view_mode == 'teacher' %}
+  {% comment %}Müəllim görünüşü (2026-10-14): dərsin QRUPU dialoqda seçilir — siyahı yalnız
+  redaktorun `schedule.manage` əhatəsindəki qruplardır; server `group_id`-ni yenə əhatəyə görə
+  yoxlayır (`_group`, fail-closed). Redaktədə kartın öz qrupu yazılır.{% endcomment %}
+  <div class="ems-field ems-field--wide">
+    <label class="ems-field__label" for="sedit-group">{% trans "Qrup" context "accounts.schedule_manage" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+      <select class="ems-select bootstrap-single-select__native" id="sedit-group" name="group_id"
+              data-sedit-field="group_id" data-bootstrap-select data-live-search="true"
+              data-live-search-placeholder="{% trans 'Qrup axtar…' context 'accounts.schedule_manage' %}"
+              data-live-search-empty="{% trans 'Uyğun qrup yoxdur' context 'accounts.schedule_manage' %}" required>
+        <option value="">{% trans "Seçin…" context "accounts.schedule_manage" %}</option>
+        {% for row in sec.groups %}
+        <option value="{{ row.id }}">{{ row.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% endif %}
+
   <div class="ems-field ems-field--wide">
     <label class="ems-field__label" for="sedit-teacher">{% trans "Müəllim (jurnal sahibi)" context "accounts.schedule_manage" %}</label>
     <div class="bootstrap-single-select bootstrap-single-select--ems">
