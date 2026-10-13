@@ -259,6 +259,82 @@ def get_permission_scope(user, organization, permission: str, request=None) -> U
     return scope
 
 
+#: Kafedra → valideyn fakültə genişlənməsinin tipləri (``faculty_read_scope``).
+_CHAIR_UNIT_TYPE = "chair"
+_FACULTY_UNIT_TYPE = "faculty"
+
+
+def widen_chair_scope_to_faculty(organization, scope: UnitScope, request=None) -> UnitScope:
+    """Unit əhatəsindəki KAFEDRA köklərini valideyn FAKÜLTƏ ilə əvəz edir (TƏK sorğu, request-ə yaddaş).
+
+    Valideyni fakültə olmayan kafedra və digər tip vahidlər olduğu kimi qalır; nəticə ilkin əhatəni
+    həmişə ƏHATƏ EDİR (yalnız genişlənir). Org-wide / boş əhatə dəyişmir.
+    """
+    if not scope.is_unit_scoped or organization is None:
+        return scope
+    cache_key = ("faculty_read", getattr(organization, "pk", None), scope.unit_ids)
+    cache = getattr(request, "_unit_scope_cache", None) if request is not None else None
+    if cache is not None and cache_key in cache:
+        return cache[cache_key]
+    from apps.organizations.models import OrgUnit
+
+    roots = {}
+    units = OrgUnit.objects.filter(organization=organization, pk__in=list(scope.unit_ids)).select_related("parent")
+    for unit in units:
+        parent = unit.parent
+        if (
+            unit.unit_type == _CHAIR_UNIT_TYPE
+            and parent is not None
+            and parent.is_active
+            and parent.unit_type == _FACULTY_UNIT_TYPE
+        ):
+            roots[parent.pk] = parent.path
+        else:
+            roots[unit.pk] = unit.path
+    widened = UnitScope(
+        scope_type="unit", unit_ids=frozenset(roots), unit_paths=tuple(path for path in roots.values() if path)
+    )
+    if cache is not None:
+        cache[cache_key] = widened
+    return widened
+
+
+def faculty_read_scope(user, organization, permission: str, request=None) -> UnitScope:
+    """OXU əhatəsi: ``get_permission_scope`` + kafedra kökləri valideyn FAKÜLTƏYƏ genişlənir.
+
+    Sahib (2026-10-14, kafedra müdiri kimi baxış): «kafedra müdiri də öz fakültəsi daxilindəki
+    tələbələri görə bilsin», «Qruplar / İxtisaslar — ancaq öz fakültəmizə aid olanı». Bu
+    universitetdə ixtisas və qruplar KAFEDRANIN deyil, FAKÜLTƏNİN altındadır — kafedra alt-ağacında
+    nə qrup, nə ixtisas, nə tələbə var. Ona görə YALNIZ oxu səthləri (tələbə kataloqu, qrup reyestri,
+    ixtisaslar, fənn kataloqu) bu helper-i işlədir; YAZI əməlləri (``unit.group_manage``,
+    ``catalog.manage``, ``people.manage_*``) həmişə dar ``get_permission_scope`` ilə qalır.
+    """
+    scope = get_permission_scope(user, organization, permission, request=request)
+    return widen_chair_scope_to_faculty(organization, scope, request=request)
+
+
+def permission_scope_unit_types(user, organization, permission: str) -> frozenset:
+    """``permission`` açarını daşıyan UNIT üzvlüklərinin ``scope_unit`` TİPLƏRİ (sorğusuz).
+
+    2026-10-14 (sahib: «kafedra müdiri səhifəsində Fakültələrə ehtiyac yoxdur»): bölmə görünürlüyü
+    əhatənin NÖVÜNƏ baxır. Üzvlük sətirləri ``get_permission_scope``-un memoizasiya etdiyi
+    (``scope_unit`` yüklü) siyahıdandır — kabinet qabığına əlavə sorğu YOXDUR.
+    """
+    if not permission or organization is None or not getattr(user, "is_authenticated", False):
+        return frozenset()
+    types = set()
+    for membership in _permission_scope_memberships(user, organization):
+        role = membership.role
+        if role.scope_type != RoleScopeType.UNIT or not membership.scope_unit_id:
+            continue
+        if not has_permission(list(role.permissions or []), permission):
+            continue
+        unit = membership.scope_unit
+        if unit is not None and unit.is_active:
+            types.add(unit.unit_type)
+    return frozenset(types)
+
+
 def scope_org_units(queryset: QuerySet, scope: UnitScope) -> QuerySet:
     """OrgUnit queryset-ini scope-a görə məhdudlaşdırır."""
     if scope.is_org_wide:
@@ -291,15 +367,18 @@ def scope_memberships_by_unit(queryset: QuerySet, scope: UnitScope, organization
 
 __all__ = [
     "EMPTY_SCOPE",
+    "faculty_read_scope",
     "ORG_WIDE_SCOPE",
     "ORG_WIDE_MIN_LEVEL",
     "UnitScope",
     "get_permission_scope",
     "invalidate_permission_scope_cache",
+    "permission_scope_unit_types",
     "scope_memberships_by_unit",
     "scope_org_units",
     "user_scope_covers_unit",
     "user_scope_subtree_q",
+    "widen_chair_scope_to_faculty",
 ]
 
 

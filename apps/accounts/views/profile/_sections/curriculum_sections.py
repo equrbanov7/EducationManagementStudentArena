@@ -270,7 +270,8 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
     section["state_body"] = pgettext(_CTX_GROUPS, "Süzgəcləri dəyişin və ya yeni qrup əlavə edin.")
     section["kpi_tiles"] = [
         {"label": pgettext(_CTX_GROUPS, "QRUP"), "value": payload["filtered_count"]},
-        {"label": pgettext(_CTX_GROUPS, "TƏLƏBƏ (SƏHİFƏDƏ)"), "value": payload["student_total"]},
+        # 2026-10-14: say SƏHİFƏ deyil, əhatədəki süzülmüş qrupların hamısı üzrədir (dekan → öz fakültəsi).
+        {"label": pgettext(_CTX_GROUPS, "TƏLƏBƏ"), "value": payload["student_total"]},
         {
             "label": pgettext(_CTX_GROUPS, "KURATORSUZ"),
             "value": payload["no_tutor_total"],

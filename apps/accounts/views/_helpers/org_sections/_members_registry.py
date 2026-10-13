@@ -38,6 +38,7 @@ from core.staff_position import visible_role_label
 
 from ....models import ProfileRole, UserProfile
 from ..constants import PROFILE_ROLE_LABELS
+from . import _members_scope as member_scope
 from ._members_ui import (
     DEFAULT_SORT,
     KIND_LEADERS,
@@ -224,13 +225,9 @@ class _UnitIndex:
             stack.extend(self.children.get(current, ()))
         return out
 
-    def options(self):
-        """Fakültə/kafedra seçiciləri — ad sırası ilə (axtarışlı select)."""
-        rows = sorted(
-            ((unit_id, data[0]) for unit_id, data in self.units.items()),
-            key=lambda item: item[1].lower(),
-        )
-        return [{"value": str(unit_id), "label": name} for unit_id, name in rows]
+    def find(self, raw_id):
+        """Seçimdə olan vahidin real açarı (UUID) — yoxdursa ``None``."""
+        return next((unit_id for unit_id in self.units if str(unit_id) == raw_id), None)
 
 
 # ─── Üzvlük yığımı ──────────────────────────────────────────────────────────
@@ -243,13 +240,13 @@ class _MemberIndex:
     "kind": str, "is_leader": bool, "profile_role": str}``
     """
 
-    def __init__(self, *, organization, scoped_unit_ids, superadmin_user_ids, unit_index):
+    def __init__(self, *, organization, scope_q, superadmin_user_ids, unit_index):
         self.by_user = {}
         membership_rows = Membership.objects.filter(
             organization=organization, is_active=True, user__is_active=True
         ).exclude(user_id__in=superadmin_user_ids)
-        if scoped_unit_ids is not None:
-            membership_rows = membership_rows.filter(scope_unit_id__in=scoped_unit_ids)
+        if scope_q is not None:
+            membership_rows = membership_rows.filter(scope_q)
         for user_id, role_name, role_level, unit_id in membership_rows.order_by().values_list(
             "user_id", "role__name", "role__level", "scope_unit_id"
         ):
@@ -274,7 +271,7 @@ class _MemberIndex:
 
         # Üzvlüyü olmayan, amma profili təşkilata bağlı şəxslər (köhnə axınlardan
         # qalan hesablar) da üzv sayılır — əks halda «tələbə» sayğacı azalırdı.
-        if scoped_unit_ids is None:
+        if scope_q is None:
             profile_rows = (
                 UserProfile.objects.filter(organization=organization, user__is_active=True)
                 .exclude(user_id__in=superadmin_user_ids)
@@ -324,7 +321,7 @@ class _MemberIndex:
         options.sort(key=lambda item: item["_sort"])
         return [{"value": item["value"], "label": item["label"]} for item in options]
 
-    def matching_user_ids(self, *, kind, role, unit_ids) -> list:
+    def matching_user_ids(self, *, kind, role, unit_ids, user_ids=None) -> list:
         out = []
         for user_id, entry in self.by_user.items():
             if kind == KIND_LEADERS:
@@ -336,6 +333,8 @@ class _MemberIndex:
                 continue
             if unit_ids is not None and not any(unit in unit_ids for _name, _level, unit in entry["roles"]):
                 continue
+            if user_ids is not None and user_id not in user_ids:
+                continue
             out.append(user_id)
         return out
 
@@ -343,7 +342,7 @@ class _MemberIndex:
 # ─── Sətirlər ───────────────────────────────────────────────────────────────
 
 
-def _page_membership_map(*, organization, user_ids, scoped_unit_ids):
+def _page_membership_map(*, organization, user_ids, scope_q):
     """Səhifədəki şəxslərin üzvlükləri — TƏK sorğu (`select_related`)."""
     if not user_ids:
         return {}
@@ -352,15 +351,17 @@ def _page_membership_map(*, organization, user_ids, scoped_unit_ids):
         .select_related("role", "scope_unit")
         .order_by("user_id", "-is_primary", "-role__level", "role__name")
     )
-    if scoped_unit_ids is not None:
-        queryset = queryset.filter(scope_unit_id__in=scoped_unit_ids)
+    if scope_q is not None:
+        queryset = queryset.filter(scope_q)
     out = defaultdict(list)
     for membership in queryset:
         out[membership.user_id].append(membership)
     return out
 
 
-def _build_row(*, user, memberships, unit_index, entry, actor_level, is_superadmin, owner_id, can_remove_members):
+def _build_row(
+    *, user, memberships, unit_index, entry, actor_level, is_superadmin, owner_id, can_remove_members, group_id=None
+):
     name = _display_name(user)
     profile = getattr(user, "profile", None)
     roles, position, joined_at, unit_name, unit_chain = [], "", None, "", ""
@@ -382,6 +383,9 @@ def _build_row(*, user, memberships, unit_index, entry, actor_level, is_superadm
         if not unit_name and scope_unit is not None:
             unit_name = scope_unit.name
             unit_chain = unit_index.chain(scope_unit.id)
+    if not unit_name and group_id is not None:
+        # Tələbə üzvlüyünün `scope_unit`-i boşdur — «Bölmə» sütununda akademik qrupu (2026-10-14).
+        unit_name, unit_chain = unit_index.name_of(group_id), unit_index.chain(group_id)
     if not position:
         position = (getattr(profile, "staff_position", "") or "").strip()
 
@@ -476,18 +480,30 @@ def build_members_registry(
     kind = kind if kind in KINDS else ""
     role = (request.GET.get(f"{PREFIX}role") or "").strip().lower()[:100]
     raw_unit = (request.GET.get(f"{PREFIX}unit") or "").strip()
+    raw_group = (request.GET.get(f"{PREFIX}group") or "").strip()
     sort = (request.GET.get(f"{PREFIX}sort") or "").strip()
     sort = sort if sort in SORTS else DEFAULT_SORT
 
     with bypass_rls():
+        # 2026-10-14: unit-əhatəli aktor (dekan) öz alt-ağacındakı TƏLƏBƏLƏRİ də görür (akademik qeyd üzrə).
+        scope_q = None
+        if scoped_unit_ids is not None:
+            scope_q = member_scope.membership_scope_q(
+                scoped_unit_ids=scoped_unit_ids,
+                scoped_student_ids=member_scope.scoped_student_user_ids(organization, unit_scope),
+                student_role_names=STUDENT_ROLE_NAMES,
+            )
         unit_index = _UnitIndex(organization)
         member_index = _MemberIndex(
             organization=organization,
-            scoped_unit_ids=scoped_unit_ids,
+            scope_q=scope_q,
             superadmin_user_ids=superadmin_user_ids,
             unit_index=unit_index,
         )
-        unit_options = unit_index.options()
+        # «Struktur bölməsi» və «Qrup» seçimləri AYRI və əhatə ilə (2026-10-14).
+        unit_options, group_options = member_scope.split_unit_options(
+            unit_index, None if scoped_unit_ids is None else set(scoped_unit_ids)
+        )
         role_labels = {
             (name or "").strip().lower(): _role_text(name, display or "")
             for name, display in organization.roles.filter(is_active=True).values_list("name", "display_name")
@@ -495,19 +511,15 @@ def build_members_registry(
         role_options = member_index.role_options(role_labels)
         if role and not any(option["value"] == role for option in role_options):
             role = ""
-        unit_ids = None
-        unit_id = ""
-        for option in unit_options:
-            if option["value"] == raw_unit:
-                unit_id = raw_unit
-                break
+        unit_ids, group_user_ids = None, None
+        unit_id = raw_unit if any(option["value"] == raw_unit for option in unit_options) else ""
         if unit_id:
-            for candidate in unit_index.units:
-                if str(candidate) == unit_id:
-                    unit_ids = unit_index.subtree_ids(candidate)
-                    break
+            unit_ids = unit_index.subtree_ids(unit_index.find(unit_id))
+        group_id = raw_group if any(option["value"] == raw_group for option in group_options) else ""
+        if group_id:
+            group_user_ids = member_scope.group_student_user_ids(organization, unit_index.find(group_id))
 
-        matching_ids = member_index.matching_user_ids(kind=kind, role=role, unit_ids=unit_ids)
+        matching_ids = member_index.matching_user_ids(kind=kind, role=role, unit_ids=unit_ids, user_ids=group_user_ids)
         users = User.objects.filter(id__in=matching_ids).select_related("profile")
         search_q = tolerant_q(search, ("first_name", "last_name", "username", "email", "profile__staff_position"))
         if search_q is not None:
@@ -523,8 +535,9 @@ def build_members_registry(
         membership_map = _page_membership_map(
             organization=organization,
             user_ids=[user.id for user in page_users],
-            scoped_unit_ids=scoped_unit_ids,
+            scope_q=scope_q,
         )
+        student_groups = member_scope.page_student_groups(organization, [user.id for user in page_users])
 
     owner_id = getattr(organization, "owner_id", None)
     rows = [
@@ -540,6 +553,7 @@ def build_members_registry(
             is_superadmin=is_superadmin,
             owner_id=owner_id,
             can_remove_members=can_remove_members,
+            group_id=student_groups.get(user.id),
         )
         for user in page_users
     ]
@@ -553,10 +567,12 @@ def build_members_registry(
             "kind": kind,
             "role": role,
             "unit_id": unit_id,
+            "group_id": group_id,
+            "group_options": group_options,
             "sort": sort,
             "role_options": role_options,
             "unit_options": unit_options,
-            "is_filtered": bool(search or kind or role or unit_id),
+            "is_filtered": bool(search or kind or role or unit_id or group_id),
         },
         "scope_active": scoped_unit_ids is not None,
     }

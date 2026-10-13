@@ -23,7 +23,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from apps.organizations.public import EMPTY_SCOPE, ORG_WIDE_SCOPE, UnitScope, get_permission_scope
+from apps.organizations.public import (
+    EMPTY_SCOPE,
+    ORG_WIDE_SCOPE,
+    UnitScope,
+    faculty_read_scope,
+    get_permission_scope,
+)
 from core.permissions import has_permission
 
 # ── İcazə açarları (kataloq: apps/organizations/permissions.py → "people") ────
@@ -153,6 +159,12 @@ class PeopleActor:
             return ORG_WIDE_SCOPE
         if self.organization is None:
             return EMPTY_SCOPE
+        if permission == PERM_VIEW_STUDENTS:
+            # Sahib (2026-10-14, kafedra müdiri kimi baxış): «kafedra müdiri də öz fakültəsi daxilindəki
+            # tələbələri görə bilsin» — ixtisas/qruplar FAKÜLTƏNİN altındadır, kafedra alt-ağacında tələbə
+            # yoxdur. YALNIZ tələbə kataloqunun OXU əhatəsi valideyn fakültəyə genişlənir; əlaqə
+            # (`people.view_contacts`) ayrıca qapıdır, yazı açarlarının əhatəsi dar qalır.
+            return faculty_read_scope(self.user, self.organization, permission, request=request)
         return get_permission_scope(self.user, self.organization, permission, request=request)
 
 

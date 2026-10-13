@@ -31,6 +31,7 @@ from core.audit import log_action
 from core.constants import AuditAction
 
 from .catalog_registry import can_manage_catalog, can_view_catalog
+from .catalog_scope import program_visible
 from .models import Program, Subject
 from .models.academic import DegreeLevel
 from .models.catalog_meta import ARCHIVE_REASON_MIN_LENGTH, EducationForm, SubjectKind
@@ -303,7 +304,11 @@ def program_detail(request):
     if not can_view_catalog(request):
         return _error(pgettext(_CTX, "Kataloqu görmək səlahiyyətiniz yoxdur."), status=403, code="forbidden")
 
-    payload = build_program_detail(organization, (request.GET.get("id") or "").strip())
+    program_id = (request.GET.get("id") or "").strip()
+    # Əhatə (2026-10-14): birbaşa `id` ilə başqa fakültənin ixtisası (qrupları, tələbələri) açılmır.
+    payload = (
+        build_program_detail(organization, program_id) if program_visible(request, organization, program_id) else None
+    )
     if payload is None:
         return _error(pgettext(_CTX, "İxtisas tapılmadı."), status=404, code="not_found")
     return JsonResponse({"ok": True, "program": payload})
