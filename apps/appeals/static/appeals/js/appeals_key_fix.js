@@ -20,10 +20,11 @@
             body: el.getAttribute("data-i18n-confirm-body") || "",
             danger: !!danger
         };
+        // EMSConfirm base.html-də hər səhifəyə yüklənir; yoxdursa (fail-closed) əməliyyat icra olunmur.
         if (window.EMSConfirm && typeof window.EMSConfirm.open === "function") {
             return window.EMSConfirm.open(opts);
         }
-        return Promise.resolve(window.confirm(opts.body || opts.title));
+        return Promise.resolve(false);
     }
 
     function toast(type, message) {
