@@ -97340,3 +97340,372 @@ msgstr "В этой группе пока нет студентов."
 msgctxt "accounts.structure_tree"
 msgid "Bu qrupda seçilə bilən qeydiyyatlı tələbə yoxdur."
 msgstr "В этой группе нет зачисленных студентов, которых можно выбрать."
+
+msgctxt "accounts.staff_management"
+msgid "Struktur bölməsi"
+msgstr "Структурное подразделение"
+
+msgctxt "accounts.staff_management"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "accounts.staff_management"
+msgid "Bütün qruplar"
+msgstr "Все группы"
+
+msgctxt "accounts.groups"
+msgid "TƏLƏBƏ"
+msgstr "СТУДЕНТЫ"
+
+msgctxt "accounts.unit_exams"
+msgid "Aktiv"
+msgstr "Активен"
+
+msgctxt "accounts.unit_exams"
+msgid "Planlaşdırılıb"
+msgstr "Запланирован"
+
+msgctxt "accounts.unit_exams"
+msgid "Bitib"
+msgstr "Завершён"
+
+msgctxt "accounts.unit_exams"
+msgid "Qaralama"
+msgstr "Черновик"
+
+msgctxt "accounts.unit_exams"
+msgid "İMTAHAN"
+msgstr "ЭКЗАМЕНЫ"
+
+msgctxt "accounts.unit_exams"
+msgid "Bölmədə cəmi"
+msgstr "Всего в подразделении"
+
+msgctxt "accounts.unit_exams"
+msgid "AKTİV"
+msgstr "АКТИВНЫЕ"
+
+#, python-format
+msgctxt "accounts.unit_exams"
+msgid "Planlaşdırılıb: %(n)d"
+msgstr "Запланировано: %(n)d"
+
+msgctxt "accounts.unit_exams"
+msgid "BİTMİŞ"
+msgstr "ЗАВЕРШЁННЫЕ"
+
+#, python-format
+msgctxt "accounts.unit_exams"
+msgid "Qaralama: %(n)d"
+msgstr "Черновики: %(n)d"
+
+msgctxt "accounts.unit_exams"
+msgid "FİNAL / MİDTERM"
+msgstr "ИТОГОВЫЕ / ПРОМЕЖУТОЧНЫЕ"
+
+msgctxt "accounts.unit_exams"
+msgid "İmtahan növünə görə"
+msgstr "По виду экзамена"
+
+msgctxt "accounts.unit_exams"
+msgid "İŞTİRAKÇI"
+msgstr "УЧАСТНИКИ"
+
+#, python-format
+msgctxt "accounts.unit_exams"
+msgid "Orta nəticə: %(avg)s"
+msgstr "Средний результат: %(avg)s"
+
+msgctxt "accounts.unit_exams"
+msgid "Orta nəticə hələ yoxdur"
+msgstr "Среднего результата пока нет"
+
+msgctxt "accounts.unit_exams"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "accounts.unit_exams"
+msgid "Axtarış"
+msgstr "Поиск"
+
+msgctxt "accounts.unit_exams"
+msgid "İmtahan, fənn və ya müəllif"
+msgstr "Экзамен, предмет или автор"
+
+msgctxt "accounts.unit_exams"
+msgid "Kafedra"
+msgstr "Кафедра"
+
+msgctxt "accounts.unit_exams"
+msgid "İmtahan növü"
+msgstr "Вид экзамена"
+
+msgctxt "accounts.unit_exams"
+msgid "Forma"
+msgstr "Формат"
+
+msgctxt "accounts.unit_exams"
+msgid "Status"
+msgstr "Статус"
+
+msgctxt "accounts.unit_exams"
+msgid "Dövr"
+msgstr "Период"
+
+msgctxt "accounts.unit_exams"
+msgid "Tarixdən"
+msgstr "С даты"
+
+msgctxt "accounts.unit_exams"
+msgid "Tarixədək"
+msgstr "По дату"
+
+#, python-format
+msgctxt "accounts.unit_exams"
+msgid "Nəticə: %(count)d imtahan"
+msgstr "Найдено: %(count)d экзаменов"
+
+msgctxt "accounts.unit_exams"
+msgid "İmtahan"
+msgstr "Экзамен"
+
+msgctxt "accounts.unit_exams"
+msgid "Fənn"
+msgstr "Предмет"
+
+msgctxt "accounts.unit_exams"
+msgid "Qrup(lar)"
+msgstr "Группа(ы)"
+
+msgctxt "accounts.unit_exams"
+msgid "Müəllif"
+msgstr "Автор"
+
+msgctxt "accounts.unit_exams"
+msgid "Növ"
+msgstr "Вид"
+
+msgctxt "accounts.unit_exams"
+msgid "Tarix"
+msgstr "Дата"
+
+msgctxt "accounts.unit_exams"
+msgid "İştirakçı / bitirən"
+msgstr "Участники / завершили"
+
+msgctxt "accounts.unit_exams"
+msgid "Orta nəticə"
+msgstr "Средний результат"
+
+msgctxt "accounts.unit_exams"
+msgid "Ətraflı: cədvəl, qruplar, nəticələr"
+msgstr "Подробнее: расписание, группы, результаты"
+
+msgctxt "accounts.unit_exams"
+msgid "Süzgəcə uyğun imtahan tapılmadı"
+msgstr "Нет экзаменов, соответствующих фильтрам"
+
+msgctxt "accounts.unit_exams"
+msgid "Süzgəcləri dəyişin və ya «Sıfırla» düyməsini basın."
+msgstr "Измените фильтры или нажмите «Сбросить»."
+
+msgctxt "accounts.unit_exams"
+msgid "Bölmənizə aid imtahan hələ yoxdur"
+msgstr "В вашем подразделении пока нет экзаменов"
+
+msgctxt "accounts.unit_exams"
+msgid "Əhatəniz təyin olunub. Fakültə/kafedra müəllimləri imtahan yaradıb onu fənnə, qrupa və ya kafedraya bağladıqda burada görünəcək."
+msgstr "Ваша область назначена. Экзамены появятся здесь, когда преподаватели факультета/кафедры создадут их и привяжут к предмету, группе или кафедре."
+
+msgctxt "accounts.unit_exams"
+msgid "Üzvlüyünüzə fakültə/kafedra əhatəsi təyin edilməyib"
+msgstr "Вашему членству не назначена область факультета/кафедры"
+
+msgctxt "accounts.unit_exams"
+msgid "Bölmə imtahanları yalnız dekan, dekan müavini və ya kafedra müdiri rolu konkret fakültəyə/kafedraya bağlı olduqda görünür. Rolunuzun vahidini təyin etmək üçün İKT və ya kadr şöbəsinə müraciət edin."
+msgstr "Экзамены подразделения отображаются, только если роль декана, заместителя декана или заведующего кафедрой привязана к конкретному факультету/кафедре. Чтобы назначить подразделение вашей роли, обратитесь в отдел ИКТ или кадров."
+
+#, python-format
+msgctxt "accounts.unit_exams"
+msgid "Əhatənizdəki imtahanlar — yalnız baxış. Əhatə: %(scope)s"
+msgstr "Экзамены в вашей области — только просмотр. Область: %(scope)s"
+
+msgctxt "accounts.unit_exams"
+msgid "İmtahan haqqında"
+msgstr "Об экзамене"
+
+msgctxt "accounts.unit_exams"
+msgid "Cədvəl, qruplar, suallar və nəticələrin xülasəsi — yalnız baxış."
+msgstr "Расписание, группы, вопросы и сводка результатов — только просмотр."
+
+msgctxt "accounts.unit_exams"
+msgid "Kurs"
+msgstr "Курс"
+
+msgctxt "accounts.unit_exams"
+msgid "Keçirilmə"
+msgstr "Проведение"
+
+msgctxt "accounts.unit_exams"
+msgid "Cədvəl"
+msgstr "Расписание"
+
+msgctxt "accounts.unit_exams"
+msgid "Başlama"
+msgstr "Начало"
+
+msgctxt "accounts.unit_exams"
+msgid "Bitmə"
+msgstr "Окончание"
+
+msgctxt "accounts.unit_exams"
+msgid "Yaradılıb"
+msgstr "Создан"
+
+msgctxt "accounts.unit_exams"
+msgid "Müddət"
+msgstr "Длительность"
+
+msgctxt "accounts.unit_exams"
+msgid "{n} dəq"
+msgstr "{n} мин"
+
+msgctxt "accounts.unit_exams"
+msgid "Limitsiz"
+msgstr "Без ограничения"
+
+msgctxt "accounts.unit_exams"
+msgid "Qruplar"
+msgstr "Группы"
+
+msgctxt "accounts.unit_exams"
+msgid "Qrup təyin edilməyib (fərdi və ya açıq imtahan)."
+msgstr "Группа не назначена (индивидуальный или открытый экзамен)."
+
+msgctxt "accounts.unit_exams"
+msgid "Sual"
+msgstr "Вопросы"
+
+msgctxt "accounts.unit_exams"
+msgid "İştirakçı"
+msgstr "Участники"
+
+msgctxt "accounts.unit_exams"
+msgid "Bitirən"
+msgstr "Завершили"
+
+msgctxt "accounts.unit_exams"
+msgid "Bitmiş cəhd"
+msgstr "Завершённые попытки"
+
+msgctxt "accounts.unit_exams"
+msgid "Keçənlərin payı (≥ 50)"
+msgstr "Доля сдавших (≥ 50)"
+
+msgctxt "accounts.unit_exams"
+msgid "Nəticələrin xülasəsi"
+msgstr "Сводка результатов"
+
+msgctxt "accounts.unit_exams"
+msgid "Bitirən 3-dən azdır — məxfilik üçün orta nəticə göstərilmir."
+msgstr "Завершили меньше 3 — средний результат скрыт ради конфиденциальности."
+
+msgctxt "accounts.unit_exams"
+msgid "Hələ bitmiş cəhd yoxdur."
+msgstr "Завершённых попыток пока нет."
+
+msgctxt "accounts.unit_exams"
+msgid "İmtahan səhifəsi"
+msgstr "Страница экзамена"
+
+msgctxt "accounts.unit_exams"
+msgid "Nəticələr"
+msgstr "Результаты"
+
+msgctxt "accounts.unit_exams"
+msgid "Bu baxış yalnız oxumaq üçündür; fərdi tələbə balları göstərilmir."
+msgstr "Этот вид только для чтения; индивидуальные баллы студентов не показываются."
+
+msgctxt "accounts.unit_exams"
+msgid "Məlumat tapılmadı — siyahını yeniləyin."
+msgstr "Данные не найдены — обновите список."
+
+msgctxt "core.runtime_settings"
+msgid "Dərs yükü norması və ştat"
+msgstr "Норма учебной нагрузки и ставки"
+
+msgctxt "core.runtime_settings"
+msgid "İllik norma — 1 ştat"
+msgstr "Годовая норма — 1 ставка"
+
+msgctxt "core.runtime_settings"
+msgid "NK №215: bir ştat üzrə illik dərs yükü norması. 0,25 / 0,75 / 1,25 / 1,5 ştat üçün norma bu dəyərin ştat payına hasilidir (məs. 0,75 ştat → 0,75 × norma). Yük profili olmayan müəllimə də bu norma tətbiq olunur."
+msgstr "Постановление КМ №215: годовая норма учебной нагрузки на одну ставку. Для 0,25 / 0,75 / 1,25 / 1,5 ставки норма равна этому значению, умноженному на долю ставки (напр. 0,75 ставки → 0,75 × норма). Эта норма применяется и к преподавателю без профиля нагрузки."
+
+msgctxt "core.runtime_settings"
+msgid "İllik norma — 0,5 ştat"
+msgstr "Годовая норма — 0,5 ставки"
+
+msgctxt "core.runtime_settings"
+msgid "Yarım ştatda işləyən müəllimin illik norması — 1 ştat normasından avtomatik hesablanmır, ayrıca qeyd olunur."
+msgstr "Годовая норма преподавателя на полставки — не вычисляется автоматически из нормы на 1 ставку, задаётся отдельно."
+
+msgctxt "core.runtime_settings"
+msgid "İllik norma — inzibati vəzifəli müəllim"
+msgstr "Годовая норма — преподаватель с административной должностью"
+
+msgctxt "core.runtime_settings"
+msgid "Dərs deməklə yanaşı inzibati vəzifə tutan müəllim (rektor, prorektor, dekan, dekan müavini, kafedra müdiri, şöbə müdiri, mərkəz rəhbəri, tyutor və s. — müəllimlikdən başqa aktiv rolu olan) üçün illik norma; ştat payından asılı deyil."
+msgstr "Годовая норма для преподавателя, занимающего также административную должность (ректор, проректор, декан, заместитель декана, заведующий кафедрой, начальник отдела, руководитель центра, тьютор и т. п. — с активной ролью помимо преподавательской); не зависит от доли ставки."
+
+msgctxt "core.runtime_settings"
+msgid "Bir müəllimə ən az ştat vahidi"
+msgstr "Минимальная доля ставки на преподавателя"
+
+msgctxt "core.runtime_settings"
+msgid "Forma 7 siyahısından və ya başqa idxaldan gələn ştat payı bundan azdırsa yük profilinə yazılmır (hesabatda göstərilir). Saathesabı müəllimə (ştatsız) aid deyil."
+msgstr "Доля ставки из списка Формы 7 или другого импорта ниже этого значения не записывается в профиль нагрузки (показывается в отчёте). Не относится к почасовикам (без ставки)."
+
+msgctxt "core.runtime_settings"
+msgid "ştat"
+msgstr "ставки"
+
+msgctxt "core.runtime_settings"
+msgid "Bir müəllimə ən çox ştat vahidi"
+msgstr "Максимальная доля ставки на преподавателя"
+
+msgctxt "core.runtime_settings"
+msgid "KQ-12: bir müəllim ən çox 1,5 ştat tuta bilər. Bundan çox ştat payı yük profilinə yazılmır (hesabatda göstərilir)."
+msgstr "KQ-12: преподаватель может занимать не более 1,5 ставки. Большая доля не записывается в профиль нагрузки (показывается в отчёте)."
+
+msgctxt "accounts.runtime_settings"
+msgid "Ən az dəyər ən çox dəyərdən böyük ola bilməz."
+msgstr "Минимальное значение не может быть больше максимального."
+
+msgctxt "workload.norms"
+msgid "Norma: 1 ştat — %(full)s saat, 0,5 ştat — %(half)s saat, inzibati vəzifəli — %(admin)s saat; digər ştat payları 1 ştat normasına mütənasibdir. Ştat həddi %(min)s–%(max)s (Sistem tənzimləmələri)."
+msgstr "Норма: 1 ставка — %(full)s ч, 0,5 ставки — %(half)s ч, с административной должностью — %(admin)s ч; другие доли пропорциональны норме на 1 ставку. Пределы ставки %(min)s–%(max)s (Системные настройки)."
+
+msgctxt "workload.norms"
+msgid "Ştat payı %(value)s icazə verilən %(min)s–%(max)s aralığından kənardır (Sistem tənzimləmələri)."
+msgstr "Доля ставки %(value)s вне допустимого диапазона %(min)s–%(max)s (Системные настройки)."
+
+msgctxt "workload.norms"
+msgid "Ştat payı rəqəm olmalıdır."
+msgstr "Доля ставки должна быть числом."
+
+msgctxt "accounts.chair_profile"
+msgid "Kafedranın ştat cədvəli, müəllim heyəti və illik yük riski. Norma ştat payına və inzibati vəzifəyə görə hesablanır."
+msgstr "Штатное расписание кафедры, преподавательский состав и риск годовой нагрузки. Норма рассчитывается по доле ставки и административной должности."
+
+msgctxt "accounts.hr_analytics"
+msgid "Yük — dərs yükü bölgüsündə (paylanmış / düzəlişli tapşırıqlar) müəllimə yazılmış illik saat; norma — ştat payına və inzibati vəzifəyə görə illik norma. Doluluq kafedra cəmindən hesablanır."
+msgstr "Нагрузка — годовые часы, закреплённые за преподавателем в распределении нагрузки (распределённые / изменённые задания); норма — годовая норма по доле ставки и административной должности. Заполненность считается по итогу кафедры."
+
+msgctxt "accounts.workload_overview"
+msgid "Tapşırıqdan müəllim təsdiqinə qədər bütün mərhələlərin kafedranız üzrə vəziyyəti."
+msgstr "Состояние всех этапов по вашей кафедре — от учебного задания до подтверждения преподавателем."
+
+msgctxt "accounts.workload_overview"
+msgid "Tapşırıqdan müəllim təsdiqinə qədər bütün mərhələlərin fakültəniz üzrə vəziyyəti."
+msgstr "Состояние всех этапов по вашему факультету — от учебного задания до подтверждения преподавателем."

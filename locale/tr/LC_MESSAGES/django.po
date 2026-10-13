@@ -96607,3 +96607,372 @@ msgstr "Bu grupta henüz öğrenci yok."
 msgctxt "accounts.structure_tree"
 msgid "Bu qrupda seçilə bilən qeydiyyatlı tələbə yoxdur."
 msgstr "Bu grupta seçilebilecek kayıtlı öğrenci yok."
+
+msgctxt "accounts.staff_management"
+msgid "Struktur bölməsi"
+msgstr "Yapısal birim"
+
+msgctxt "accounts.staff_management"
+msgid "Qrup"
+msgstr "Grup"
+
+msgctxt "accounts.staff_management"
+msgid "Bütün qruplar"
+msgstr "Tüm gruplar"
+
+msgctxt "accounts.groups"
+msgid "TƏLƏBƏ"
+msgstr "ÖĞRENCİ"
+
+msgctxt "accounts.unit_exams"
+msgid "Aktiv"
+msgstr "Aktif"
+
+msgctxt "accounts.unit_exams"
+msgid "Planlaşdırılıb"
+msgstr "Planlandı"
+
+msgctxt "accounts.unit_exams"
+msgid "Bitib"
+msgstr "Bitti"
+
+msgctxt "accounts.unit_exams"
+msgid "Qaralama"
+msgstr "Taslak"
+
+msgctxt "accounts.unit_exams"
+msgid "İMTAHAN"
+msgstr "SINAVLAR"
+
+msgctxt "accounts.unit_exams"
+msgid "Bölmədə cəmi"
+msgstr "Biriminizde toplam"
+
+msgctxt "accounts.unit_exams"
+msgid "AKTİV"
+msgstr "AKTİF"
+
+#, python-format
+msgctxt "accounts.unit_exams"
+msgid "Planlaşdırılıb: %(n)d"
+msgstr "Planlanan: %(n)d"
+
+msgctxt "accounts.unit_exams"
+msgid "BİTMİŞ"
+msgstr "TAMAMLANAN"
+
+#, python-format
+msgctxt "accounts.unit_exams"
+msgid "Qaralama: %(n)d"
+msgstr "Taslaklar: %(n)d"
+
+msgctxt "accounts.unit_exams"
+msgid "FİNAL / MİDTERM"
+msgstr "FİNAL / VİZE"
+
+msgctxt "accounts.unit_exams"
+msgid "İmtahan növünə görə"
+msgstr "Sınav türüne göre"
+
+msgctxt "accounts.unit_exams"
+msgid "İŞTİRAKÇI"
+msgstr "KATILIMCILAR"
+
+#, python-format
+msgctxt "accounts.unit_exams"
+msgid "Orta nəticə: %(avg)s"
+msgstr "Ortalama sonuç: %(avg)s"
+
+msgctxt "accounts.unit_exams"
+msgid "Orta nəticə hələ yoxdur"
+msgstr "Henüz ortalama sonuç yok"
+
+msgctxt "accounts.unit_exams"
+msgid "Hamısı"
+msgstr "Tümü"
+
+msgctxt "accounts.unit_exams"
+msgid "Axtarış"
+msgstr "Arama"
+
+msgctxt "accounts.unit_exams"
+msgid "İmtahan, fənn və ya müəllif"
+msgstr "Sınav, ders veya yazar"
+
+msgctxt "accounts.unit_exams"
+msgid "Kafedra"
+msgstr "Bölüm"
+
+msgctxt "accounts.unit_exams"
+msgid "İmtahan növü"
+msgstr "Sınav türü"
+
+msgctxt "accounts.unit_exams"
+msgid "Forma"
+msgstr "Biçim"
+
+msgctxt "accounts.unit_exams"
+msgid "Status"
+msgstr "Durum"
+
+msgctxt "accounts.unit_exams"
+msgid "Dövr"
+msgstr "Dönem"
+
+msgctxt "accounts.unit_exams"
+msgid "Tarixdən"
+msgstr "Başlangıç tarihi"
+
+msgctxt "accounts.unit_exams"
+msgid "Tarixədək"
+msgstr "Bitiş tarihi"
+
+#, python-format
+msgctxt "accounts.unit_exams"
+msgid "Nəticə: %(count)d imtahan"
+msgstr "Sonuç: %(count)d sınav"
+
+msgctxt "accounts.unit_exams"
+msgid "İmtahan"
+msgstr "Sınav"
+
+msgctxt "accounts.unit_exams"
+msgid "Fənn"
+msgstr "Ders"
+
+msgctxt "accounts.unit_exams"
+msgid "Qrup(lar)"
+msgstr "Grup(lar)"
+
+msgctxt "accounts.unit_exams"
+msgid "Müəllif"
+msgstr "Yazar"
+
+msgctxt "accounts.unit_exams"
+msgid "Növ"
+msgstr "Tür"
+
+msgctxt "accounts.unit_exams"
+msgid "Tarix"
+msgstr "Tarih"
+
+msgctxt "accounts.unit_exams"
+msgid "İştirakçı / bitirən"
+msgstr "Katılan / bitiren"
+
+msgctxt "accounts.unit_exams"
+msgid "Orta nəticə"
+msgstr "Ortalama sonuç"
+
+msgctxt "accounts.unit_exams"
+msgid "Ətraflı: cədvəl, qruplar, nəticələr"
+msgstr "Ayrıntılar: takvim, gruplar, sonuçlar"
+
+msgctxt "accounts.unit_exams"
+msgid "Süzgəcə uyğun imtahan tapılmadı"
+msgstr "Filtrelere uyan sınav bulunamadı"
+
+msgctxt "accounts.unit_exams"
+msgid "Süzgəcləri dəyişin və ya «Sıfırla» düyməsini basın."
+msgstr "Filtreleri değiştirin veya “Sıfırla” düğmesine basın."
+
+msgctxt "accounts.unit_exams"
+msgid "Bölmənizə aid imtahan hələ yoxdur"
+msgstr "Biriminize ait henüz sınav yok"
+
+msgctxt "accounts.unit_exams"
+msgid "Əhatəniz təyin olunub. Fakültə/kafedra müəllimləri imtahan yaradıb onu fənnə, qrupa və ya kafedraya bağladıqda burada görünəcək."
+msgstr "Kapsamınız tanımlı. Fakülte/bölüm öğretim elemanları sınav oluşturup onu bir derse, gruba veya bölüme bağladığında burada görünecek."
+
+msgctxt "accounts.unit_exams"
+msgid "Üzvlüyünüzə fakültə/kafedra əhatəsi təyin edilməyib"
+msgstr "Üyeliğinize fakülte/bölüm kapsamı atanmamış"
+
+msgctxt "accounts.unit_exams"
+msgid "Bölmə imtahanları yalnız dekan, dekan müavini və ya kafedra müdiri rolu konkret fakültəyə/kafedraya bağlı olduqda görünür. Rolunuzun vahidini təyin etmək üçün İKT və ya kadr şöbəsinə müraciət edin."
+msgstr "Birim sınavları yalnızca dekan, dekan yardımcısı veya bölüm başkanı rolü belirli bir fakülteye/bölüme bağlı olduğunda görünür. Rolünüzün birimini atamak için BİT veya personel birimine başvurun."
+
+#, python-format
+msgctxt "accounts.unit_exams"
+msgid "Əhatənizdəki imtahanlar — yalnız baxış. Əhatə: %(scope)s"
+msgstr "Kapsamınızdaki sınavlar — yalnızca görüntüleme. Kapsam: %(scope)s"
+
+msgctxt "accounts.unit_exams"
+msgid "İmtahan haqqında"
+msgstr "Sınav hakkında"
+
+msgctxt "accounts.unit_exams"
+msgid "Cədvəl, qruplar, suallar və nəticələrin xülasəsi — yalnız baxış."
+msgstr "Takvim, gruplar, sorular ve sonuç özeti — yalnızca görüntüleme."
+
+msgctxt "accounts.unit_exams"
+msgid "Kurs"
+msgstr "Eğitim kursu"
+
+msgctxt "accounts.unit_exams"
+msgid "Keçirilmə"
+msgstr "Uygulama şekli"
+
+msgctxt "accounts.unit_exams"
+msgid "Cədvəl"
+msgstr "Takvim"
+
+msgctxt "accounts.unit_exams"
+msgid "Başlama"
+msgstr "Başlangıç"
+
+msgctxt "accounts.unit_exams"
+msgid "Bitmə"
+msgstr "Bitiş"
+
+msgctxt "accounts.unit_exams"
+msgid "Yaradılıb"
+msgstr "Oluşturuldu"
+
+msgctxt "accounts.unit_exams"
+msgid "Müddət"
+msgstr "Süre"
+
+msgctxt "accounts.unit_exams"
+msgid "{n} dəq"
+msgstr "{n} dk"
+
+msgctxt "accounts.unit_exams"
+msgid "Limitsiz"
+msgstr "Sınırsız"
+
+msgctxt "accounts.unit_exams"
+msgid "Qruplar"
+msgstr "Gruplar"
+
+msgctxt "accounts.unit_exams"
+msgid "Qrup təyin edilməyib (fərdi və ya açıq imtahan)."
+msgstr "Grup atanmamış (bireysel veya açık sınav)."
+
+msgctxt "accounts.unit_exams"
+msgid "Sual"
+msgstr "Soru"
+
+msgctxt "accounts.unit_exams"
+msgid "İştirakçı"
+msgstr "Katılımcı"
+
+msgctxt "accounts.unit_exams"
+msgid "Bitirən"
+msgstr "Bitiren"
+
+msgctxt "accounts.unit_exams"
+msgid "Bitmiş cəhd"
+msgstr "Biten deneme"
+
+msgctxt "accounts.unit_exams"
+msgid "Keçənlərin payı (≥ 50)"
+msgstr "Geçenlerin oranı (≥ 50)"
+
+msgctxt "accounts.unit_exams"
+msgid "Nəticələrin xülasəsi"
+msgstr "Sonuç özeti"
+
+msgctxt "accounts.unit_exams"
+msgid "Bitirən 3-dən azdır — məxfilik üçün orta nəticə göstərilmir."
+msgstr "Bitiren sayısı 3'ten az — gizlilik için ortalama gösterilmiyor."
+
+msgctxt "accounts.unit_exams"
+msgid "Hələ bitmiş cəhd yoxdur."
+msgstr "Henüz biten deneme yok."
+
+msgctxt "accounts.unit_exams"
+msgid "İmtahan səhifəsi"
+msgstr "Sınav sayfası"
+
+msgctxt "accounts.unit_exams"
+msgid "Nəticələr"
+msgstr "Sonuçlar"
+
+msgctxt "accounts.unit_exams"
+msgid "Bu baxış yalnız oxumaq üçündür; fərdi tələbə balları göstərilmir."
+msgstr "Bu görünüm yalnızca okunur; öğrencilerin bireysel puanları gösterilmez."
+
+msgctxt "accounts.unit_exams"
+msgid "Məlumat tapılmadı — siyahını yeniləyin."
+msgstr "Veri bulunamadı — listeyi yenileyin."
+
+msgctxt "core.runtime_settings"
+msgid "Dərs yükü norması və ştat"
+msgstr "Ders yükü normu ve kadro oranı"
+
+msgctxt "core.runtime_settings"
+msgid "İllik norma — 1 ştat"
+msgstr "Yıllık norm — 1 kadro"
+
+msgctxt "core.runtime_settings"
+msgid "NK №215: bir ştat üzrə illik dərs yükü norması. 0,25 / 0,75 / 1,25 / 1,5 ştat üçün norma bu dəyərin ştat payına hasilidir (məs. 0,75 ştat → 0,75 × norma). Yük profili olmayan müəllimə də bu norma tətbiq olunur."
+msgstr "BK 215 sayılı karar: bir tam kadro için yıllık ders yükü normu. 0,25 / 0,75 / 1,25 / 1,5 kadro için norm bu değerin kadro oranıyla çarpımıdır (örn. 0,75 kadro → 0,75 × norm). Yük profili olmayan öğretmene de bu norm uygulanır."
+
+msgctxt "core.runtime_settings"
+msgid "İllik norma — 0,5 ştat"
+msgstr "Yıllık norm — 0,5 kadro"
+
+msgctxt "core.runtime_settings"
+msgid "Yarım ştatda işləyən müəllimin illik norması — 1 ştat normasından avtomatik hesablanmır, ayrıca qeyd olunur."
+msgstr "Yarım kadroda çalışan öğretmenin yıllık normu — tam kadro normundan otomatik hesaplanmaz, ayrıca belirlenir."
+
+msgctxt "core.runtime_settings"
+msgid "İllik norma — inzibati vəzifəli müəllim"
+msgstr "Yıllık norm — idari görevli öğretmen"
+
+msgctxt "core.runtime_settings"
+msgid "Dərs deməklə yanaşı inzibati vəzifə tutan müəllim (rektor, prorektor, dekan, dekan müavini, kafedra müdiri, şöbə müdiri, mərkəz rəhbəri, tyutor və s. — müəllimlikdən başqa aktiv rolu olan) üçün illik norma; ştat payından asılı deyil."
+msgstr "Ders vermenin yanında idari görev de yürüten öğretmen (rektör, rektör yardımcısı, dekan, dekan yardımcısı, bölüm başkanı, birim müdürü, merkez müdürü, tutor vb. — öğretmenlik dışında aktif rolü olan) için yıllık norm; kadro oranına bağlı değildir."
+
+msgctxt "core.runtime_settings"
+msgid "Bir müəllimə ən az ştat vahidi"
+msgstr "Öğretmen başına en az kadro oranı"
+
+msgctxt "core.runtime_settings"
+msgid "Forma 7 siyahısından və ya başqa idxaldan gələn ştat payı bundan azdırsa yük profilinə yazılmır (hesabatda göstərilir). Saathesabı müəllimə (ştatsız) aid deyil."
+msgstr "Form 7 listesinden veya başka bir içe aktarımdan gelen kadro oranı bundan azsa yük profiline yazılmaz (raporda gösterilir). Saat ücretli (kadrosuz) öğretmene uygulanmaz."
+
+msgctxt "core.runtime_settings"
+msgid "ştat"
+msgstr "kadro"
+
+msgctxt "core.runtime_settings"
+msgid "Bir müəllimə ən çox ştat vahidi"
+msgstr "Öğretmen başına en çok kadro oranı"
+
+msgctxt "core.runtime_settings"
+msgid "KQ-12: bir müəllim ən çox 1,5 ştat tuta bilər. Bundan çox ştat payı yük profilinə yazılmır (hesabatda göstərilir)."
+msgstr "KQ-12: bir öğretmen en fazla 1,5 kadro tutabilir. Daha yüksek oran yük profiline yazılmaz (raporda gösterilir)."
+
+msgctxt "accounts.runtime_settings"
+msgid "Ən az dəyər ən çox dəyərdən böyük ola bilməz."
+msgstr "En küçük değer en büyük değerden büyük olamaz."
+
+msgctxt "workload.norms"
+msgid "Norma: 1 ştat — %(full)s saat, 0,5 ştat — %(half)s saat, inzibati vəzifəli — %(admin)s saat; digər ştat payları 1 ştat normasına mütənasibdir. Ştat həddi %(min)s–%(max)s (Sistem tənzimləmələri)."
+msgstr "Norm: 1 kadro — %(full)s saat, 0,5 kadro — %(half)s saat, idari görevli — %(admin)s saat; diğer kadro oranları 1 kadro normuyla orantılıdır. Kadro sınırı %(min)s–%(max)s (Sistem ayarları)."
+
+msgctxt "workload.norms"
+msgid "Ştat payı %(value)s icazə verilən %(min)s–%(max)s aralığından kənardır (Sistem tənzimləmələri)."
+msgstr "Kadro oranı %(value)s izin verilen %(min)s–%(max)s aralığının dışında (Sistem ayarları)."
+
+msgctxt "workload.norms"
+msgid "Ştat payı rəqəm olmalıdır."
+msgstr "Kadro oranı bir sayı olmalıdır."
+
+msgctxt "accounts.chair_profile"
+msgid "Kafedranın ştat cədvəli, müəllim heyəti və illik yük riski. Norma ştat payına və inzibati vəzifəyə görə hesablanır."
+msgstr "Bölümün kadro tablosu, öğretim kadrosu ve yıllık yük riski. Norm, kadro oranına ve idari göreve göre hesaplanır."
+
+msgctxt "accounts.hr_analytics"
+msgid "Yük — dərs yükü bölgüsündə (paylanmış / düzəlişli tapşırıqlar) müəllimə yazılmış illik saat; norma — ştat payına və inzibati vəzifəyə görə illik norma. Doluluq kafedra cəmindən hesablanır."
+msgstr "Yük — ders yükü dağılımında (dağıtılmış / düzeltilmiş görevler) öğretmene yazılan yıllık saat; norm — kadro oranına ve idari göreve göre yıllık norm. Doluluk bölüm toplamından hesaplanır."
+
+msgctxt "accounts.workload_overview"
+msgid "Tapşırıqdan müəllim təsdiqinə qədər bütün mərhələlərin kafedranız üzrə vəziyyəti."
+msgstr "Görevlendirmeden öğretim elemanı onayına kadar tüm aşamaların bölümünüzdeki durumu."
+
+msgctxt "accounts.workload_overview"
+msgid "Tapşırıqdan müəllim təsdiqinə qədər bütün mərhələlərin fakültəniz üzrə vəziyyəti."
+msgstr "Görevlendirmeden öğretim elemanı onayına kadar tüm aşamaların fakültenizdeki durumu."
