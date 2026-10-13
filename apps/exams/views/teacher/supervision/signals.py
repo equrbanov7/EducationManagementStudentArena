@@ -26,6 +26,8 @@ from apps.exams.services.supervision.heartbeat import HEARTBEAT_INTERVAL_SECONDS
 from apps.exams.services.supervision.signals import CLIENT_SIGNAL_KINDS, log_proctoring_signal, signal_throttle
 from core.rate_limit import record_rate_limit_hit
 
+from ._attempt_gate import attempt_api_gate
+
 _BODY_MAX_BYTES = 4 * 1024
 _HEARTBEAT_RATE = "12/1m"
 # DB-dən əvvəlki istifadəçi səviyyəli qoruyucu (başqasının cəhd id-si ilə sel → 404 sorğuları).
@@ -71,6 +73,10 @@ def _supervised_attempt_or_response(request, attempt_id):
         return None, JsonResponse({"supervised": False})
     if attempt.is_finished:
         return None, JsonResponse({"supervised": True, "finished": True}, status=409)
+    # 2026-10-13 (gecə): final/midterm kənar şəbəkə + köhnəlmiş final giriş sessiyası (köhnə tab).
+    denied = attempt_api_gate(request, attempt, where="supervision_api")
+    if denied is not None:
+        return None, denied
     return attempt, None
 
 

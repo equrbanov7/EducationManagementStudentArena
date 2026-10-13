@@ -12,7 +12,13 @@ from django.utils.translation import pgettext
 from apps.assignments.models import Assignment
 from apps.courses.models import CourseMembership
 from apps.exams.models import ExamAttempt, StudentExamAttemptGrant
-from apps.exams.public import ATTEMPT_FINISHED_STATUSES, start_intent_token, student_final_exam_context
+from apps.exams.public import (
+    ATTEMPT_FINISHED_STATUSES,
+    exam_network_allowed,
+    exam_network_denied_message,
+    start_intent_token,
+    student_final_exam_context,
+)
 from apps.labs.models import Lab
 from apps.projects.models import Project
 from core.search_text import tolerant_match
@@ -177,6 +183,10 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
 
     def _schedule_block_reason(exam):
         """Bu imtahan üçün cədvəl-blok səbəbi (yoxdursa boş sətir)."""
+        # 2026-10-13 (gecə): final/midterm yalnız universitet şəbəkəsindən — kabinet «başla» əvəzinə
+        # izah göstərir (qapının özü serverdədir: start/kod/cəhd endpoint-ləri, bax exams.exam_network).
+        if not exam_network_allowed(request, exam):
+            return exam_network_denied_message()
         if _active_exam_ids - {exam.id}:
             return pgettext("exams.model.access", "other_exam_in_progress")
         if (
@@ -214,7 +224,8 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
             if category in {"final", "midterm"}:
                 from apps.exams.public import student_visible_pin
 
-                student_pin = student_visible_pin(exam, user)
+                # 2026-10-13 (gecə): təyinatdan SONRA qrupa düşmüş tələbənin PIN sətri yoxdursa yaradılır.
+                student_pin = student_visible_pin(exam, user, provision_missing=True)
 
             # Final imtahanının kabinetdə göstərilən giriş PIN-i: imtahan mərkəzi
             # bileti varsa onun (zaman-pəncərəli) PIN-i, yoxdursa təyin olunmuş

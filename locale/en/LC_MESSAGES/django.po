@@ -95794,3 +95794,39 @@ msgstr ""
 " hours can be entered for it. If the load has no row, the teacher chooses "
 "the hours. When off, the previous rule applies: the approved curriculum "
 "first, then the load; extra types are shown too."
+
+msgctxt "exams.network"
+msgid "Final və midterm imtahanları yalnız universitet şəbəkəsindən verilir. Universitetin daxili şəbəkəsinə (imtahan zalı kompüterinə) qoşulun və səhifəni yeniləyin."
+msgstr "Final and midterm exams can only be taken from the university network. Connect to the university's internal network (an exam hall computer) and reload the page."
+
+msgctxt "exams.network"
+msgid "Yalnız universitet şəbəkəsindən"
+msgstr "University network only"
+
+msgctxt "exams.network"
+msgid "Final və midterm imtahanı"
+msgstr "Final and midterm exam"
+
+msgctxt "exams.network"
+msgid "Cavablarınız serverdə saxlanılıb — daxili şəbəkədən imtahan qaldığı yerdən davam edəcək."
+msgstr "Your answers are saved on the server — from the internal network the exam continues where you left off."
+
+msgctxt "exams.network"
+msgid "Universitet şəbəkəsi"
+msgstr "University network"
+
+msgctxt "exams.network"
+msgid "Səhifəni yenilə"
+msgstr "Reload the page"
+
+msgctxt "exams.network"
+msgid "Şəbəkə yoxlaması serverdə aparılır və rəd hadisəsi jurnalda qeyd olunur."
+msgstr "The network check runs on the server and every refusal is recorded in the log."
+
+msgctxt "exams.final_center.entry"
+msgid "Sizə nəzarətçi tərəfindən yeni PIN verilib — köhnə PIN artıq etibarsızdır. Yeni PIN ilə daxil olun."
+msgstr "The invigilator has issued you a new PIN — the old PIN is no longer valid. Sign in with the new PIN."
+
+msgctxt "exams.final_center.entry"
+msgid "İmtahanınız başqa kompüterdə davam edir. Kompüteri dəyişmək üçün nəzarətçidən yeni PIN istəyin — imtahan qaldığı yerdən davam edəcək."
+msgstr "Your exam is in progress on another computer. To switch computers, ask the invigilator for a new PIN — the exam will continue where you left off."

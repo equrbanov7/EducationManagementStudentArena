@@ -95255,3 +95255,39 @@ msgstr ""
 " (ör. laboratuvar yoksa) haftalık planda görünmez ve ona saat yazılamaz. "
 "Yükte satır yoksa öğretim elemanı saati kendisi seçer. Kapalıyken önceki "
 "kural: önce onaylı öğretim planı, sonra yük; fazla türler de gösterilir."
+
+msgctxt "exams.network"
+msgid "Final və midterm imtahanları yalnız universitet şəbəkəsindən verilir. Universitetin daxili şəbəkəsinə (imtahan zalı kompüterinə) qoşulun və səhifəni yeniləyin."
+msgstr "Final ve ara sınavlar yalnızca üniversite ağından verilebilir. Üniversitenin iç ağına (sınav salonu bilgisayarına) bağlanın ve sayfayı yenileyin."
+
+msgctxt "exams.network"
+msgid "Yalnız universitet şəbəkəsindən"
+msgstr "Yalnızca üniversite ağından"
+
+msgctxt "exams.network"
+msgid "Final və midterm imtahanı"
+msgstr "Final ve ara sınav"
+
+msgctxt "exams.network"
+msgid "Cavablarınız serverdə saxlanılıb — daxili şəbəkədən imtahan qaldığı yerdən davam edəcək."
+msgstr "Cevaplarınız sunucuda kayıtlı — iç ağdan sınav kaldığınız yerden devam edecek."
+
+msgctxt "exams.network"
+msgid "Universitet şəbəkəsi"
+msgstr "Üniversite ağı"
+
+msgctxt "exams.network"
+msgid "Səhifəni yenilə"
+msgstr "Sayfayı yenile"
+
+msgctxt "exams.network"
+msgid "Şəbəkə yoxlaması serverdə aparılır və rəd hadisəsi jurnalda qeyd olunur."
+msgstr "Ağ denetimi sunucuda yapılır ve her ret kayda geçer."
+
+msgctxt "exams.final_center.entry"
+msgid "Sizə nəzarətçi tərəfindən yeni PIN verilib — köhnə PIN artıq etibarsızdır. Yeni PIN ilə daxil olun."
+msgstr "Gözetmen size yeni bir PIN verdi — eski PIN artık geçersiz. Yeni PIN ile giriş yapın."
+
+msgctxt "exams.final_center.entry"
+msgid "İmtahanınız başqa kompüterdə davam edir. Kompüteri dəyişmək üçün nəzarətçidən yeni PIN istəyin — imtahan qaldığı yerdən davam edəcək."
+msgstr "Sınavınız başka bir bilgisayarda devam ediyor. Bilgisayar değiştirmek için gözetmenden yeni PIN isteyin — sınav kaldığınız yerden devam edecek."

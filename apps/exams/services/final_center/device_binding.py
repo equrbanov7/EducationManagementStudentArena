@@ -250,7 +250,10 @@ def enforce_final_device(request, attempt) -> None:
             source = SOURCE_PROCTOR
         if source is not None:
             device_id = candidates[0] if candidates else secrets.token_urlsafe(32)
-            if _rebind(binding, device_id, consume_approval=source == SOURCE_PROCTOR):
+            # 2026-10-13 (gecə): təsdiq HƏR köçürmədə sərf olunur. Əvvəl yalnız «proctor» mənbəyi
+            # sərf edirdi: yenidən giriş PIN-i cəhdi yeni zal kompüterinə köçürəndə köçürmə
+            # «hall_computer» kimi keçir və açıq qalan 15 dəqiqəlik təsdiq üçüncü cihaza da yol verirdi.
+            if _rebind(binding, device_id, consume_approval=True):
                 _remember_device(request, device_id, cookie_id)
                 _audit(
                     attempt,
@@ -261,6 +264,28 @@ def enforce_final_device(request, attempt) -> None:
                 )
                 return
     raise FinalDeviceMismatch(attempt)
+
+
+def request_matches_bound_device(request, attempt) -> bool | None:
+    """Sorğu cəhdin bağlı olduğu cihazdandırmı (cookie/sessiya) — DB yazısı YOXDUR.
+
+    ``None`` — cəhd hələ heç bir cihaza bağlanmayıb. Kabinet PIN-i ilə yenidən girişdə
+    (``reentry.cabinet_pin_resume_denial``) eyni brauzeri tanımaq üçündür (2026-10-13, gecə).
+    """
+    with bypass_rls():
+        binding = FinalAttemptDevice.objects.filter(attempt_id=attempt.pk).only("token_hash").first()
+    if binding is None:
+        return None
+    cookie_id, session_id = _request_device_ids(request)
+    for candidate in (cookie_id, session_id, _session_device_id(request)):
+        if candidate and secrets.compare_digest(_token_hash(attempt.pk, candidate), binding.token_hash):
+            return True
+    return False
+
+
+def device_change_approval_open(attempt) -> bool:
+    """Nəzarətçinin «cihaz dəyişikliyi» təsdiq pəncərəsi bu cəhd üçün açıqdırmı."""
+    return bool(device_change_states([attempt.pk]).get(attempt.pk))
 
 
 def record_device_mismatch(request, attempt) -> None:
@@ -320,9 +345,11 @@ __all__ = [
     "approve_device_change",
     "device_binding_applies",
     "device_blocked_message",
+    "device_change_approval_open",
     "device_change_states",
     "device_window_minutes",
     "enforce_final_device",
     "issue_device_cookie",
     "record_device_mismatch",
+    "request_matches_bound_device",
 ]

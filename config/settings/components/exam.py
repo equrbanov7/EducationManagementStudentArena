@@ -99,6 +99,14 @@ EXAM_EXTRACTION_JOB_RETENTION_DAYS = _env_int_setting("EXAM_EXTRACTION_JOB_RETEN
 # şlüzü/agenti vasitəsilə tətbiq oluna bilər; server tərəfi IP/CIDR yoxlayır.
 FINAL_EXAM_ALLOWED_IPS = [item.strip() for item in os.getenv("FINAL_EXAM_ALLOWED_IPS", "").split(",") if item.strip()]
 
+# --- Final/midterm yalnız universitet şəbəkəsindən (2026-10-13, gecə) ---------
+# Sahibin tələbi: «ancaq universitet şəbəkəsinə qoşulu olarkən ... final və midterm
+# imtahanını verə bilər». True → final/midterm imtahanının giriş (/exams/final/), start,
+# cavab yazısı, təhvil və nəzarət heartbeat-i YALNIZ daxili zonadan (``core.network_zone``:
+# nginx ``X-EMS-Zone`` / ``INTERNAL_NETWORKS``) qəbul olunur — ``NETWORK_ZONE_ENFORCED``-dən
+# ASILI DEYİL. Test ayarları bunu import etmir (kod defoltu False); testlər override edir.
+EXAM_FINAL_INTERNAL_ONLY = _env_bool_setting("EXAM_FINAL_INTERNAL_ONLY", True)
+
 # --- İmtahan zalı MAC yoxlaması (ARP agenti) ---------------------------------
 # "off" → köhnə IP-əsaslı kompüter yoxlaması (dev/test default).
 # "arp_agent" → müştəri MAC-ı host-un ARP cədvəlindən (docker/arp-agent

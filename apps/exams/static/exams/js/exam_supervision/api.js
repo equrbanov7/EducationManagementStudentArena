@@ -43,6 +43,13 @@ Object.assign(ExamSupervision, {
                     });
                 })
                 .then(function (data) {
+                    // 2026-10-13 (gecə): final/midterm kənar şəbəkədən — səhifə yenilənir və server
+                    // izah səhifəsini göstərir (cavablar serverdə + lokal qaralamada qalır).
+                    if (data && data.network_blocked === true) {
+                        ExamSupervision.destroy();
+                        window.location.reload();
+                        return;
+                    }
                     if (data && data.entry_session_valid === false) {
                         ExamSupervision.destroy();
                         window.location.replace(data.redirect_url || "/exams/final/");

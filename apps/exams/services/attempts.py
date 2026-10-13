@@ -25,6 +25,7 @@ from apps.exams.services.language_variants import (
     get_active_variant,
     resolve_requested_language,
 )
+from apps.exams.services.official_start import OfficialStartBlocked, lock_and_check_official_start
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.services.start_intent import exam_start_url
 from apps.exams.services.utils import _attempt_has_any_answer
@@ -359,6 +360,10 @@ def _create_attempt_or_get_active(exam, user, **extra_fields):
     """
     try:
         with transaction.atomic():
+            # 2026-10-13 (gecə): rəsmi (final/midterm) yeni cəhd — tələbə sətri kilidi altında
+            # «eyni anda bir / gündə bir» qaydası (bax services/official_start.py). Bloklanıbsa
+            # ``OfficialStartBlocked`` çağırana qalxır (IntegrityError deyil — cəhd yaranmır).
+            lock_and_check_official_start(exam, user, is_trial=bool(extra_fields.get("is_trial")))
             return (
                 ExamAttempt.objects.create(
                     user=user,
@@ -525,13 +530,17 @@ def _start_or_resume_attempt(request, exam: Exam):
                 )
                 return redirect(attempt_limit_result_url)
 
-            attempt, created = _create_attempt_or_get_active(
-                exam,
-                user,
-                language=chosen_language,
-                language_variant=get_active_variant(exam, chosen_language) if chosen_language else None,
-                is_trial=is_trial,
-            )
+            try:
+                attempt, created = _create_attempt_or_get_active(
+                    exam,
+                    user,
+                    language=chosen_language,
+                    language_variant=get_active_variant(exam, chosen_language) if chosen_language else None,
+                    is_trial=is_trial,
+                )
+            except OfficialStartBlocked as blocked:
+                messages.error(request, blocked.reason)
+                return redirect(_append_return_to(student_exams_home_url(request.user), return_to))
             if not created:
                 # A parallel request already created the attempt (DB constraint
                 # caught the race) — just resume it.
