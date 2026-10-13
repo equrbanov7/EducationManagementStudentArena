@@ -3,7 +3,7 @@ import "./ui.js?v=20260914-w4r3";
 import "./trial_notice.js?v=20260914-w4r3";
 import "./event_capture.js?v=20260914-w4r3";
 import "./scoring.js?v=20260914-w4r3";
-import "./api.js?v=20260914-w4r3";
+import "./api.js?v=20261013-net";
 import "./intervention.js?v=20260914-w4r3";
 import "./websocket.js?v=20260914-w4r3";
 

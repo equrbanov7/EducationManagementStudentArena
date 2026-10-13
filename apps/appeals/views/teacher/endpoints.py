@@ -42,6 +42,7 @@ from ...services import (
     revert_item_adjustment,
 )
 from ..shared._helpers import _marked_question_map
+from ._review_context import KEY_CORRECTION_MIN_REASON, appeal_timeline, attach_item_comparison
 
 
 def _format_seconds(seconds):
@@ -279,7 +280,9 @@ def review_appeal(request, appeal_id):
         raise PermissionDenied
 
     items = list(
-        appeal.items.select_related("question", "answer", "score_adjustment")
+        appeal.items.select_related(
+            "question", "answer", "score_adjustment", "resolved_by", "score_adjustment__applied_by"
+        )
         .prefetch_related("question__options", "answer__selected_options")
         .all()
     )
@@ -426,11 +429,10 @@ def review_appeal(request, appeal_id):
                 item.awarded_value = item.max_points
         else:
             item.awarded_value = item.max_points
-        # Test: tələbənin seçdiyi variant id-ləri (variant analizi üçün).
-        if is_test and item.answer_id:
-            item.selected_option_ids = {opt.id for opt in item.answer.selected_options.all()}
-        else:
-            item.selected_option_ids = set()
+
+    # 2026-10-13 (gecə): tələbə cavabı ↔ açar müqayisəsi ÇATDIRILMA snapshot-undan (canlı sual yox),
+    # açar düzəlişi məlumatı + apellyasiya tarixçəsi — toplu sorğularla (bax _review_context).
+    attach_item_comparison(items, is_test=is_test, can_decide=review_can_decide)
 
     # Redaktə oluna bilən (kilidlənməmiş) item qalmayıbsa → qərar formu artıq
     # final-dır: "yadda saxla" düyməsi və ümumi qeyd sahəsi gizlədilir.
@@ -446,5 +448,7 @@ def review_appeal(request, appeal_id):
         "review_has_editable": review_has_editable,
         "review_can_decide": review_can_decide,
         "marked_question_by_qid": _marked_question_map(appeal.attempt),
+        "review_timeline": appeal_timeline(appeal, items),
+        "key_min_reason": KEY_CORRECTION_MIN_REASON,
     }
     return render(request, "appeals/partials/_review_appeal_body.html", context)

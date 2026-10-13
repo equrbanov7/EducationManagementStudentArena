@@ -14,6 +14,7 @@ from apps.exams.services.attempts import (
     get_attempt_limit_result_redirect_url,
     get_effective_max_attempts,
 )
+from apps.exams.services.exam_network import exam_network_allowed, exam_network_denied_message, record_network_denial
 from apps.exams.services.final_center import admission_block_reason
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 from apps.exams.views.student._helpers import ensure_student_exam_tenant_context
@@ -74,6 +75,12 @@ def exam_code_check(request):
     code = (request.POST.get("access_code") or "").strip()
 
     exam = get_object_or_404(tenant_scoped_exams(request, Exam.objects.filter(is_active=True)), slug=slug)
+
+    # 2026-10-13 (gecə): midterm (kabinet PIN yolu) və final yalnız universitet şəbəkəsindən —
+    # PIN yoxlamasından ƏVVƏL (kənardan PIN brute-force səthi də bağlanır).
+    if not exam_network_allowed(request, exam):
+        record_network_denial(request, exam, where="exam_code_check")
+        return _code_check_failure(request, exam_network_denied_message(), status=403)
 
     # Audit 2026-09-13 EX-03 (P1): PIN/kod brute-force — `/exams/final/`-dəki
     # istifadəçi-adı əsaslı sürüşən pəncərə limiti (EXAM-SEC-002) bu yolda

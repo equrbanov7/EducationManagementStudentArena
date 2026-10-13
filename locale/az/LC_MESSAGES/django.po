@@ -95357,8 +95357,12 @@ msgstr ""
 "təsdiqlənmiş tədris planı, sonra yük; artıq növlər də göstərilir."
 
 msgctxt "appeals.template"
-msgid "Apellyasiyaya baxa bilərsiniz, amma qərarı yalnız «Apellyasiya qərarı vermək» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
-msgstr "Apellyasiyaya baxa bilərsiniz, amma qərarı yalnız «Apellyasiya qərarı vermək» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
+msgid ""
+"Apellyasiyaya baxa bilərsiniz, amma qərarı yalnız «Apellyasiya qərarı "
+"vermək» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
+msgstr ""
+"Apellyasiyaya baxa bilərsiniz, amma qərarı yalnız «Apellyasiya qərarı "
+"vermək» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
 
 msgctxt "appeals.view.message"
 msgid "Apellyasiya qərarı vermək icazəniz yoxdur."
@@ -95369,24 +95373,36 @@ msgid "İmtahan şansı vermək üçün qərar səlahiyyətiniz yoxdur."
 msgstr "İmtahan şansı vermək üçün qərar səlahiyyətiniz yoxdur."
 
 msgctxt "accounts.exam_chance"
-msgid "Yalnız baxış: imtahan şansını «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
-msgstr "Yalnız baxış: imtahan şansını «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
+msgid ""
+"Yalnız baxış: imtahan şansını «İmtahan mərkəzinin qərarları» səlahiyyəti "
+"olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
+msgstr ""
+"Yalnız baxış: imtahan şansını «İmtahan mərkəzinin qərarları» səlahiyyəti "
+"olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
 
 msgctxt "accounts.kollokvium_windows"
 msgid "Pəncərələri dəyişmək üçün qərar səlahiyyətiniz yoxdur."
 msgstr "Pəncərələri dəyişmək üçün qərar səlahiyyətiniz yoxdur."
 
 msgctxt "registrar.kollokvium_window"
-msgid "Yalnız baxış: pəncərələri «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) təyin edir və dəyişir."
-msgstr "Yalnız baxış: pəncərələri «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) təyin edir və dəyişir."
+msgid ""
+"Yalnız baxış: pəncərələri «İmtahan mərkəzinin qərarları» səlahiyyəti olan "
+"istifadəçi (imtahan mərkəzi rəhbəri) təyin edir və dəyişir."
+msgstr ""
+"Yalnız baxış: pəncərələri «İmtahan mərkəzinin qərarları» səlahiyyəti olan "
+"istifadəçi (imtahan mərkəzi rəhbəri) təyin edir və dəyişir."
 
 msgctxt "exams.view.question_submission.permission"
 msgid "Göndərişə qərar vermək səlahiyyətiniz yoxdur."
 msgstr "Göndərişə qərar vermək səlahiyyətiniz yoxdur."
 
 msgctxt "exams.template.question_submission"
-msgid "Yalnız baxış: göndərişə qərarı «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
-msgstr "Yalnız baxış: göndərişə qərarı «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
+msgid ""
+"Yalnız baxış: göndərişə qərarı «İmtahan mərkəzinin qərarları» səlahiyyəti "
+"olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
+msgstr ""
+"Yalnız baxış: göndərişə qərarı «İmtahan mərkəzinin qərarları» səlahiyyəti "
+"olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
 
 msgctxt "organizations.registry"
 msgid "Rəhbər təyini üçün `role.assign` və ya `unit.assign_head` lazımdır."
@@ -95405,20 +95421,32 @@ msgid "Rol kataloquna baxmaq üçün «role.view» icazəsi lazımdır."
 msgstr "Rol kataloquna baxmaq üçün «role.view» icazəsi lazımdır."
 
 msgctxt "accounts.schedule_manage"
-msgid "Cədvələ yalnız baxış icazəniz var — qrup və ya müəllim seçib həftəlik cədvələ baxın."
-msgstr "Cədvələ yalnız baxış icazəniz var — qrup və ya müəllim seçib həftəlik cədvələ baxın."
+msgid ""
+"Cədvələ yalnız baxış icazəniz var — qrup və ya müəllim seçib həftəlik "
+"cədvələ baxın."
+msgstr ""
+"Cədvələ yalnız baxış icazəniz var — qrup və ya müəllim seçib həftəlik "
+"cədvələ baxın."
 
 msgctxt "accounts.schedule_manage"
-msgid "Yalnız baxış rejimi — cədvəli dəyişmək üçün «Cədvəl idarəetməsi» (schedule.manage) icazəsi lazımdır."
-msgstr "Yalnız baxış rejimi — cədvəli dəyişmək üçün «Cədvəl idarəetməsi» (schedule.manage) icazəsi lazımdır."
+msgid ""
+"Yalnız baxış rejimi — cədvəli dəyişmək üçün «Cədvəl idarəetməsi» "
+"(schedule.manage) icazəsi lazımdır."
+msgstr ""
+"Yalnız baxış rejimi — cədvəli dəyişmək üçün «Cədvəl idarəetməsi» "
+"(schedule.manage) icazəsi lazımdır."
 
 msgctxt "organizations.permission.label"
 msgid "Bildiriş göndərmək (alıcılar öz əhatəsində)"
 msgstr "Bildiriş göndərmək (alıcılar öz əhatəsində)"
 
 msgctxt "teacher_intake"
-msgid "Toplu müəllim əlavəsi üçün icazəniz yoxdur — bu bölmə yalnız `user.import_staff` açarı olan rollar üçündür."
-msgstr "Toplu müəllim əlavəsi üçün icazəniz yoxdur — bu bölmə yalnız `user.import_staff` açarı olan rollar üçündür."
+msgid ""
+"Toplu müəllim əlavəsi üçün icazəniz yoxdur — bu bölmə yalnız "
+"`user.import_staff` açarı olan rollar üçündür."
+msgstr ""
+"Toplu müəllim əlavəsi üçün icazəniz yoxdur — bu bölmə yalnız "
+"`user.import_staff` açarı olan rollar üçündür."
 
 msgctxt "profile.sidebar"
 msgid "Qrupum"
@@ -95437,12 +95465,17 @@ msgid "Tələbə sayı: %(total)s"
 msgstr "Tələbə sayı: %(total)s"
 
 msgctxt "accounts.my_group"
-msgid "Davamiyyət: %(period)s %(year)s — qayıb saatı və dərs saatına nisbəti (faiz). Yalnız baxış üçündür."
-msgstr "Davamiyyət: %(period)s %(year)s — qayıb saatı və dərs saatına nisbəti (faiz). Yalnız baxış üçündür."
+msgid ""
+"Davamiyyət: %(period)s %(year)s — qayıb saatı və dərs saatına nisbəti "
+"(faiz). Yalnız baxış üçündür."
+msgstr ""
+"Davamiyyət: %(period)s %(year)s — qayıb saatı və dərs saatına nisbəti "
+"(faiz). Yalnız baxış üçündür."
 
 msgctxt "accounts.my_group"
 msgid "Cari tədris dövrü müəyyən edilməyib — yalnız qrup siyahısı göstərilir."
-msgstr "Cari tədris dövrü müəyyən edilməyib — yalnız qrup siyahısı göstərilir."
+msgstr ""
+"Cari tədris dövrü müəyyən edilməyib — yalnız qrup siyahısı göstərilir."
 
 msgctxt "accounts.my_group"
 msgid "Qrupda qeydiyyatlı tələbə yoxdur."
@@ -95489,8 +95522,12 @@ msgid "Bu dövr üçün fənn yazılışı hələ yoxdur."
 msgstr "Bu dövr üçün fənn yazılışı hələ yoxdur."
 
 msgctxt "organizations.permission.label"
-msgid "İmtahan mərkəzinin qərarları (ikinci şans, kollokvium pəncərəsi, sual göndərişi)"
-msgstr "İmtahan mərkəzinin qərarları (ikinci şans, kollokvium pəncərəsi, sual göndərişi)"
+msgid ""
+"İmtahan mərkəzinin qərarları (ikinci şans, kollokvium pəncərəsi, sual "
+"göndərişi)"
+msgstr ""
+"İmtahan mərkəzinin qərarları (ikinci şans, kollokvium pəncərəsi, sual "
+"göndərişi)"
 
 msgctxt "organizations.permission.label"
 msgid "Akademik qeydlərə baxış (ÜOMG, transkript)"
@@ -95501,8 +95538,12 @@ msgid "Müəllim/heyət hesablarının toplu idxalı"
 msgstr "Müəllim/heyət hesablarının toplu idxalı"
 
 msgctxt "accounts.my_group"
-msgid "Qrup yoldaşlarının yalnız adı və tələbə nömrəsi görünür; davamiyyət şəxsi məlumatdır və yalnız özünüzə göstərilir."
-msgstr "Qrup yoldaşlarının yalnız adı və tələbə nömrəsi görünür; davamiyyət şəxsi məlumatdır və yalnız özünüzə göstərilir."
+msgid ""
+"Qrup yoldaşlarının yalnız adı və tələbə nömrəsi görünür; davamiyyət şəxsi "
+"məlumatdır və yalnız özünüzə göstərilir."
+msgstr ""
+"Qrup yoldaşlarının yalnız adı və tələbə nömrəsi görünür; davamiyyət şəxsi "
+"məlumatdır və yalnız özünüzə göstərilir."
 
 msgctxt "accounts.my_group"
 msgid "Mənim davamiyyətim"
@@ -95547,3 +95588,1003 @@ msgstr "%(group)s qrupunun tələbələri"
 msgctxt "accounts.my_group"
 msgid "siz"
 msgstr "siz"
+
+msgctxt "exams.proctoring.identity"
+msgid "Tələbənin kimliyi"
+msgstr "Tələbənin kimliyi"
+
+msgctxt "exams.proctoring.identity"
+msgid "Kimlik yoxlaması"
+msgstr "Kimlik yoxlaması"
+
+msgctxt "exams.proctoring.identity"
+msgid "İstifadəçi adı"
+msgstr "İstifadəçi adı"
+
+msgctxt "exams.proctoring.identity"
+msgid "Şəkil yüklənməyib — nəzarətçiyə şəxsiyyət vəsiqənizi göstərin."
+msgstr "Şəkil yüklənməyib — nəzarətçiyə şəxsiyyət vəsiqənizi göstərin."
+
+msgctxt "language"
+msgid "name_de"
+msgstr "Alman dili"
+
+msgctxt "exams.network"
+msgid ""
+"Final və midterm imtahanları yalnız universitet şəbəkəsindən verilir. "
+"Universitetin daxili şəbəkəsinə (imtahan zalı kompüterinə) qoşulun və "
+"səhifəni yeniləyin."
+msgstr ""
+"Final və midterm imtahanları yalnız universitet şəbəkəsindən verilir. "
+"Universitetin daxili şəbəkəsinə (imtahan zalı kompüterinə) qoşulun və "
+"səhifəni yeniləyin."
+
+msgctxt "exams.network"
+msgid "Yalnız universitet şəbəkəsindən"
+msgstr "Yalnız universitet şəbəkəsindən"
+
+msgctxt "exams.network"
+msgid "Final və midterm imtahanı"
+msgstr "Final və midterm imtahanı"
+
+msgctxt "exams.network"
+msgid ""
+"Cavablarınız serverdə saxlanılıb — daxili şəbəkədən imtahan qaldığı yerdən "
+"davam edəcək."
+msgstr ""
+"Cavablarınız serverdə saxlanılıb — daxili şəbəkədən imtahan qaldığı yerdən "
+"davam edəcək."
+
+msgctxt "exams.network"
+msgid "Universitet şəbəkəsi"
+msgstr "Universitet şəbəkəsi"
+
+msgctxt "exams.network"
+msgid "Səhifəni yenilə"
+msgstr "Səhifəni yenilə"
+
+msgctxt "exams.network"
+msgid ""
+"Şəbəkə yoxlaması serverdə aparılır və rəd hadisəsi jurnalda qeyd olunur."
+msgstr ""
+"Şəbəkə yoxlaması serverdə aparılır və rəd hadisəsi jurnalda qeyd olunur."
+
+msgctxt "exams.final_center.entry"
+msgid ""
+"Sizə nəzarətçi tərəfindən yeni PIN verilib — köhnə PIN artıq etibarsızdır. "
+"Yeni PIN ilə daxil olun."
+msgstr ""
+"Sizə nəzarətçi tərəfindən yeni PIN verilib — köhnə PIN artıq etibarsızdır. "
+"Yeni PIN ilə daxil olun."
+
+msgctxt "exams.final_center.entry"
+msgid ""
+"İmtahanınız başqa kompüterdə davam edir. Kompüteri dəyişmək üçün "
+"nəzarətçidən yeni PIN istəyin — imtahan qaldığı yerdən davam edəcək."
+msgstr ""
+"İmtahanınız başqa kompüterdə davam edir. Kompüteri dəyişmək üçün "
+"nəzarətçidən yeni PIN istəyin — imtahan qaldığı yerdən davam edəcək."
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarət növbələriniz"
+msgstr "Nəzarət növbələriniz"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "İmtahan davam edir — çıxış ən gec %(t)s-a qədər açıqdır"
+msgstr "İmtahan davam edir — çıxış ən gec %(t)s-a qədər açıqdır"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "Çıxış %(t)s-da avtomatik bağlanır"
+msgstr "Çıxış %(t)s-da avtomatik bağlanır"
+
+msgctxt "exams.final_center.duty"
+msgid "Hazırda aktiv nəzarət növbəniz yoxdur."
+msgstr "Hazırda aktiv nəzarət növbəniz yoxdur."
+
+msgctxt "exams.final_center.duty"
+msgid ""
+"Növbəni imtahan mərkəzi rəhbəri yazır; çıxış növbədən 30 dəqiqə əvvəl açılır"
+" və imtahan/gün bitəndə avtomatik bağlanır."
+msgstr ""
+"Növbəni imtahan mərkəzi rəhbəri yazır; çıxış növbədən 30 dəqiqə əvvəl açılır"
+" və imtahan/gün bitəndə avtomatik bağlanır."
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarət növbəniz bitdi — bu zala çıxış bağlandı."
+msgstr "Nəzarət növbəniz bitdi — bu zala çıxış bağlandı."
+
+msgctxt "exams.final_center.duty"
+msgid "Zallara qayıt"
+msgstr "Zallara qayıt"
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarətçi növbələri"
+msgstr "Nəzarətçi növbələri"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid ""
+"Nəzarətçinin çıxışı növbədən %(lead)s dəqiqə əvvəl açılır; imtahan bitəndə "
+"(son saatdan %(grace)s dəqiqə sonra, zalda canlı imtahan qalmayıbsa) və ya "
+"gün sonunda avtomatik bağlanır."
+msgstr ""
+"Nəzarətçinin çıxışı növbədən %(lead)s dəqiqə əvvəl açılır; imtahan bitəndə "
+"(son saatdan %(grace)s dəqiqə sonra, zalda canlı imtahan qalmayıbsa) və ya "
+"gün sonunda avtomatik bağlanır."
+
+msgctxt "exams.final_center.duty"
+msgid "Aktiv"
+msgstr "Aktiv"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "%(t)s-da açılır"
+msgstr "%(t)s-da açılır"
+
+msgctxt "exams.final_center.duty"
+msgid "Ləğv edilib"
+msgstr "Ləğv edilib"
+
+msgctxt "exams.final_center.duty"
+msgid "Bitib"
+msgstr "Bitib"
+
+msgctxt "exams.final_center.duty"
+msgid "Növbə ləğv edilsin? Nəzarətçinin çıxışı dərhal bağlanacaq."
+msgstr "Növbə ləğv edilsin? Nəzarətçinin çıxışı dərhal bağlanacaq."
+
+msgctxt "exams.final_center.duty"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "exams.final_center.duty"
+msgid "Bu zal üçün bu gün və sonrakı günlərə növbə yazılmayıb."
+msgstr "Bu zal üçün bu gün və sonrakı günlərə növbə yazılmayıb."
+
+msgctxt "exams.final_center.duty"
+msgid "Yeni növbə"
+msgstr "Yeni növbə"
+
+msgctxt "exams.final_center.duty"
+msgid "Gün"
+msgstr "Gün"
+
+msgctxt "exams.final_center.duty"
+msgid "Başlanğıc"
+msgstr "Başlanğıc"
+
+msgctxt "exams.final_center.duty"
+msgid "Son"
+msgstr "Son"
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd (istəyə bağlı)"
+msgstr "Qeyd (istəyə bağlı)"
+
+msgctxt "exams.final_center.duty"
+msgid "Növbəni yaz"
+msgstr "Növbəni yaz"
+
+msgctxt "exams.final_center.duty"
+msgid "Köhnə daimi təyinatlar silinsin?"
+msgstr "Köhnə daimi təyinatlar silinsin?"
+
+msgctxt "exams.final_center.duty"
+msgid "Köhnə daimi təyinatlar (yalnız canlı imtahan zamanı işləyir):"
+msgstr "Köhnə daimi təyinatlar (yalnız canlı imtahan zamanı işləyir):"
+
+msgctxt "exams.final_center.duty"
+msgid "Təmizlə"
+msgstr "Təmizlə"
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarət müddəti bitdi"
+msgstr "Nəzarət müddəti bitdi"
+
+msgctxt "exams.final_center.duty"
+msgid "s"
+msgstr "s"
+
+msgctxt "exams.final_center.duty"
+msgid "dəq"
+msgstr "dəq"
+
+msgctxt "exams.final_center.duty"
+msgid "san"
+msgstr "san"
+
+msgctxt "exams.final_center.duty"
+msgid "Qalan vaxt"
+msgstr "Qalan vaxt"
+
+msgctxt "exams.final_center.duty"
+msgid "Yeni şübhəli"
+msgstr "Yeni şübhəli"
+
+msgctxt "exams.final_center.duty"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarətçi qeydi"
+msgstr "Nəzarətçi qeydi"
+
+msgctxt "exams.final_center.duty"
+msgid "Məs.: telefonla danışırdı, xəbərdarlıq edildi"
+msgstr "Məs.: telefonla danışırdı, xəbərdarlıq edildi"
+
+msgctxt "exams.final_center.duty"
+msgid "Qeydi yaz"
+msgstr "Qeydi yaz"
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd yazıldı — xronologiyada görünəcək."
+msgstr "Qeyd yazıldı — xronologiyada görünəcək."
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd yazılmadı."
+msgstr "Qeyd yazılmadı."
+
+msgctxt "exams.final_center.duty"
+msgid "Tarix və ya saat formatı yanlışdır."
+msgstr "Tarix və ya saat formatı yanlışdır."
+
+msgctxt "exams.final_center.duty"
+msgid "Keçmiş gün üçün növbə yazmaq olmaz."
+msgstr "Keçmiş gün üçün növbə yazmaq olmaz."
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "Növbəni ən çox %(days)d gün irəli yazmaq olar."
+msgstr "Növbəni ən çox %(days)d gün irəli yazmaq olar."
+
+msgctxt "exams.final_center.duty"
+msgid "Bitmə saatı başlama saatından sonra olmalıdır."
+msgstr "Bitmə saatı başlama saatından sonra olmalıdır."
+
+msgctxt "exams.final_center.duty"
+msgid "Bu vaxt aralığı artıq bitib."
+msgstr "Bu vaxt aralığı artıq bitib."
+
+msgctxt "exams.final_center.duty"
+msgid "Ən azı bir nəzarətçi seçin."
+msgstr "Ən azı bir nəzarətçi seçin."
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "Bir növbəyə ən çox %(n)d nəzarətçi təyin etmək olar."
+msgstr "Bir növbəyə ən çox %(n)d nəzarətçi təyin etmək olar."
+
+msgctxt "exams.final_center.duty"
+msgid ""
+"Seçilənlərdən bəziləri nəzarətçi ola bilməz (tələbə və ya kənar istifadəçi)."
+msgstr ""
+"Seçilənlərdən bəziləri nəzarətçi ola bilməz (tələbə və ya kənar istifadəçi)."
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "%(count)d nəzarətçi növbəsi yazıldı."
+msgstr "%(count)d nəzarətçi növbəsi yazıldı."
+
+msgctxt "exams.final_center.duty"
+msgid "Növbə ləğv edildi — nəzarətçinin çıxışı bağlandı."
+msgstr "Növbə ləğv edildi — nəzarətçinin çıxışı bağlandı."
+
+msgctxt "exams.final_center.duty"
+msgid "Növbə artıq ləğv olunub."
+msgstr "Növbə artıq ləğv olunub."
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd boşdur."
+msgstr "Qeyd boşdur."
+
+msgctxt "exams.final_center.duty"
+msgid "Çox sayda qeyd — bir az gözləyin."
+msgstr "Çox sayda qeyd — bir az gözləyin."
+
+msgctxt "exams.proctoring.signal"
+msgid "İmtahan eyni anda iki səhifədə/cihazda açıqdır"
+msgstr "İmtahan eyni anda iki səhifədə/cihazda açıqdır"
+
+msgctxt "exams.proctoring.signal"
+msgid "İmtahan zamanı IP ünvanı dəyişdi"
+msgstr "İmtahan zamanı IP ünvanı dəyişdi"
+
+msgctxt "exams.proctoring.signal"
+msgid "Nəzarətçi qeydi"
+msgstr "Nəzarətçi qeydi"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Nəzarətçi qeydi"
+msgstr "Nəzarətçi qeydi"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "organization"
+msgstr "Təşkilat"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "room"
+msgstr "Zal"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "user"
+msgstr "Nəzarətçi"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "starts_at"
+msgstr "Başlanğıc"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "ends_at"
+msgstr "Son"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "note"
+msgstr "Qeyd"
+
+msgctxt "exams.model.invigilator_duty.meta"
+msgid "singular"
+msgstr "Nəzarətçi növbəsi"
+
+msgctxt "exams.model.invigilator_duty.meta"
+msgid "plural"
+msgstr "Nəzarətçi növbələri"
+
+msgctxt "core.runtime_settings"
+msgid "Apellyasiya müddəti"
+msgstr "Apellyasiya müddəti"
+
+msgctxt "core.runtime_settings"
+msgid "Nəticə tələbəyə açıldıqdan sonra neçə təqvim günü apellyasiya vermək olar (son günün sonunadək, Bakı vaxtı). Tələbə evdən də müraciət edə bilir; müddət bitəndə düymə gizlənir və server qəbul etmir."
+msgstr "Nəticə tələbəyə açıldıqdan sonra neçə təqvim günü apellyasiya vermək olar (son günün sonunadək, Bakı vaxtı). Tələbə evdən də müraciət edə bilir; müddət bitəndə düymə gizlənir və server qəbul etmir."
+
+msgctxt "core.runtime_settings"
+msgid "gün"
+msgstr "gün"
+
+msgctxt "appeals.notification"
+msgid "Midterm balını elektron jurnalda özünüz yeniləyin (midterm jurnala avtomatik yazılmır)."
+msgstr "Midterm balını elektron jurnalda özünüz yeniləyin (midterm jurnala avtomatik yazılmır)."
+
+msgctxt "appeals.notification"
+msgid "Elektron jurnalda imtahan balı avtomatik yeniləndi."
+msgstr "Elektron jurnalda imtahan balı avtomatik yeniləndi."
+
+msgctxt "appeals.notification"
+msgid "Apellyasiya nəticəsində bal dəyişdi"
+msgstr "Apellyasiya nəticəsində bal dəyişdi"
+
+msgctxt "appeals.notification"
+msgid "{student} — \"{exam}\": apellyasiya qəbul olundu, bal {delta} dəyişdi. {hint}"
+msgstr "{student} — \"{exam}\": apellyasiya qəbul olundu, bal {delta} dəyişdi. {hint}"
+
+msgctxt "appeals.notification"
+msgid "Cavab açarı düzəlişi geri alındı"
+msgstr "Cavab açarı düzəlişi geri alındı"
+
+msgctxt "appeals.notification"
+msgid "\"{exam}\" imtahanının {no}-ci sualı üzrə açar düzəlişi geri alındı — əlavə bal çıxarıldı."
+msgstr "\"{exam}\" imtahanının {no}-ci sualı üzrə açar düzəlişi geri alındı — əlavə bal çıxarıldı."
+
+msgctxt "appeals.notification"
+msgid "Cavab açarı düzəldildi"
+msgstr "Cavab açarı düzəldildi"
+
+msgctxt "appeals.notification"
+msgid "\"{exam}\" imtahanının {no}-ci sualının cavab açarı düzəldildi — balınız artırıldı."
+msgstr "\"{exam}\" imtahanının {no}-ci sualının cavab açarı düzəldildi — balınız artırıldı."
+
+msgctxt "appeals.notification"
+msgid "Cavab açarı düzəlişi"
+msgstr "Cavab açarı düzəlişi"
+
+msgctxt "appeals.notification"
+msgid "\"{exam}\" imtahanının {no}-ci sualı üzrə açar {action}: {count} tələbənin balı dəyişdi. {hint}"
+msgstr "\"{exam}\" imtahanının {no}-ci sualı üzrə açar {action}: {count} tələbənin balı dəyişdi. {hint}"
+
+msgctxt "appeals.notification"
+msgid "düzəlişi geri alındı"
+msgstr "düzəlişi geri alındı"
+
+msgctxt "appeals.notification"
+msgid "düzəldildi"
+msgstr "düzəldildi"
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Düzgün variant seçimi yanlışdır."
+msgstr "Düzgün variant seçimi yanlışdır."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Ən azı bir düzgün variant seçin."
+msgstr "Ən azı bir düzgün variant seçin."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Seçilən variant bu suala aid deyil."
+msgstr "Seçilən variant bu suala aid deyil."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Açar düzəlişinin səbəbini yazın (ən azı {n} simvol)."
+msgstr "Açar düzəlişinin səbəbini yazın (ən azı {n} simvol)."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Səbəb {n} simvoldan uzun ola bilməz."
+msgstr "Səbəb {n} simvoldan uzun ola bilməz."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Açar düzəlişi yalnız test (variantlı) suallar üçündür."
+msgstr "Açar düzəlişi yalnız test (variantlı) suallar üçündür."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Bu sual üçün aktiv açar düzəlişi artıq var — əvvəlcə onu geri alın."
+msgstr "Bu sual üçün aktiv açar düzəlişi artıq var — əvvəlcə onu geri alın."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Yeni açar köhnə açarla eynidir — düzəliş lazım deyil."
+msgstr "Yeni açar köhnə açarla eynidir — düzəliş lazım deyil."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Bu açar düzəlişi artıq geri alınıb."
+msgstr "Bu açar düzəlişi artıq geri alınıb."
+
+msgctxt "appeals.view.message"
+msgid "Apellyasiya tapılmadı."
+msgstr "Apellyasiya tapılmadı."
+
+msgctxt "appeals.view.message"
+msgid "Cavab açarı düzəldildi: sualı cavablayan {affected} tələbədən {credited} nəfərin balı artırıldı."
+msgstr "Cavab açarı düzəldildi: sualı cavablayan {affected} tələbədən {credited} nəfərin balı artırıldı."
+
+msgctxt "appeals.view.message"
+msgid "Açar düzəlişi geri alındı."
+msgstr "Açar düzəlişi geri alındı."
+
+msgctxt "appeals.history"
+msgid "Cavab açarı düzəlişi geri alındı"
+msgstr "Cavab açarı düzəlişi geri alındı"
+
+msgctxt "appeals.history"
+msgid "Cavab açarı düzəldildi (hamı üçün)"
+msgstr "Cavab açarı düzəldildi (hamı üçün)"
+
+msgctxt "appeals.history"
+msgid "Yekun (final)"
+msgstr "Yekun (final)"
+
+msgctxt "appeals.history"
+msgid "Aralıq (midterm)"
+msgstr "Aralıq (midterm)"
+
+msgctxt "appeals.history"
+msgid "Apellyasiya göndərildi ({count} sual)"
+msgstr "Apellyasiya göndərildi ({count} sual)"
+
+msgctxt "appeals.history"
+msgid "{no}-ci sual: {status}"
+msgstr "{no}-ci sual: {status}"
+
+msgctxt "appeals.history"
+msgid "{no}-ci sual: bal düzəlişi geri alındı"
+msgstr "{no}-ci sual: bal düzəlişi geri alındı"
+
+msgctxt "appeals.history"
+msgid "{no}-ci sual: +{delta} bal"
+msgstr "{no}-ci sual: +{delta} bal"
+
+msgctxt "appeals.history"
+msgid "{no}-ci sual: cavab açarı düzəldildi — {credited}/{affected} tələbəyə kredit"
+msgstr "{no}-ci sual: cavab açarı düzəldildi — {credited}/{affected} tələbəyə kredit"
+
+msgctxt "appeals.history"
+msgid "{no}-ci sual: açar düzəlişi geri alındı"
+msgstr "{no}-ci sual: açar düzəlişi geri alındı"
+
+msgctxt "appeals.template"
+msgid "Variantlar — tələbənin gördüyü kimi"
+msgstr "Variantlar — tələbənin gördüyü kimi"
+
+msgctxt "appeals.template"
+msgid "Açar (imtahan anında)"
+msgstr "Açar (imtahan anında)"
+
+msgctxt "appeals.template"
+msgid "Düzəldilmiş açar"
+msgstr "Düzəldilmiş açar"
+
+msgctxt "appeals.template"
+msgid "Yoxlayanın balı"
+msgstr "Yoxlayanın balı"
+
+msgctxt "appeals.template"
+msgid "İdeal cavab (imtahan anında)"
+msgstr "İdeal cavab (imtahan anında)"
+
+msgctxt "appeals.template"
+msgid "Cavab açarı düzəldilib (bütün tələbələr üçün)"
+msgstr "Cavab açarı düzəldilib (bütün tələbələr üçün)"
+
+#, python-format
+msgctxt "appeals.template"
+msgid "Sualı cavablayan %(affected)s tələbədən %(credited)s nəfərə kredit verildi."
+msgstr "Sualı cavablayan %(affected)s tələbədən %(credited)s nəfərə kredit verildi."
+
+msgctxt "appeals.template"
+msgid "Geri alma səbəbi"
+msgstr "Geri alma səbəbi"
+
+msgctxt "appeals.template"
+msgid "Açar düzəlişini geri almaq?"
+msgstr "Açar düzəlişini geri almaq?"
+
+msgctxt "appeals.template"
+msgid "Bu düzəlişlə verilmiş bütün əlavə ballar geri götürüləcək və tələbələrə bildiriş gedəcək. Qeyd tarixçədə qalır."
+msgstr "Bu düzəlişlə verilmiş bütün əlavə ballar geri götürüləcək və tələbələrə bildiriş gedəcək. Qeyd tarixçədə qalır."
+
+msgctxt "appeals.template"
+msgid "Düzəlişi geri al"
+msgstr "Düzəlişi geri al"
+
+msgctxt "appeals.template"
+msgid "Ən azı bir düzgün variant seçin."
+msgstr "Ən azı bir düzgün variant seçin."
+
+msgctxt "appeals.template"
+msgid "Açar düzəlişinin səbəbini yazın."
+msgstr "Açar düzəlişinin səbəbini yazın."
+
+msgctxt "appeals.template"
+msgid "Cavab açarını hamı üçün düzəltmək?"
+msgstr "Cavab açarını hamı üçün düzəltmək?"
+
+msgctxt "appeals.template"
+msgid "Bu imtahanda bu sualı yeni açara uyğun cavablayan HƏR tələbənin balı artırılacaq, jurnal yenilənəcək və bildiriş gedəcək. Heç kimin balı azalmır. Əməliyyat audit olunur."
+msgstr "Bu imtahanda bu sualı yeni açara uyğun cavablayan HƏR tələbənin balı artırılacaq, jurnal yenilənəcək və bildiriş gedəcək. Heç kimin balı azalmır. Əməliyyat audit olunur."
+
+msgctxt "appeals.template"
+msgid "Açar səhvdir? Bütün tələbələr üçün düzəlt"
+msgstr "Açar səhvdir? Bütün tələbələr üçün düzəlt"
+
+msgctxt "appeals.template"
+msgid "«Qəbul et» yalnız bu tələbəyə +1 verir. Açar özü səhvdirsə, düzgün variant(lar)ı seçin — sualı həmin variantla cavablayan hər kəs eyni krediti alır."
+msgstr "«Qəbul et» yalnız bu tələbəyə +1 verir. Açar özü səhvdirsə, düzgün variant(lar)ı seçin — sualı həmin variantla cavablayan hər kəs eyni krediti alır."
+
+msgctxt "appeals.template"
+msgid "Düzgün variant(lar)"
+msgstr "Düzgün variant(lar)"
+
+msgctxt "appeals.template"
+msgid "köhnə açar"
+msgstr "köhnə açar"
+
+msgctxt "appeals.template"
+msgid "Səbəb (audit üçün)"
+msgstr "Səbəb (audit üçün)"
+
+msgctxt "appeals.template"
+msgid "Məs.: B variantı da düzgündür — mənbə: dərslik, 4.2"
+msgstr "Məs.: B variantı da düzgündür — mənbə: dərslik, 4.2"
+
+msgctxt "appeals.template"
+msgid "Açarı düzəlt və balları yenilə"
+msgstr "Açarı düzəlt və balları yenilə"
+
+msgctxt "appeals.template"
+msgid "Tarixçə"
+msgstr "Tarixçə"
+
+#, python-format
+msgctxt "appeals.template"
+msgid "Apellyasiya son tarixi: %(deadline)s"
+msgstr "Apellyasiya son tarixi: %(deadline)s"
+
+#, python-format
+msgctxt "appeals.template"
+msgid "Nəticə açıqlandıqdan sonra %(days)s təqvim günü ərzində (son günün sonunadək, Bakı vaxtı) müraciət edə bilərsiniz."
+msgstr "Nəticə açıqlandıqdan sonra %(days)s təqvim günü ərzində (son günün sonunadək, Bakı vaxtı) müraciət edə bilərsiniz."
+
+#, python-format
+msgctxt "appeals.template"
+msgid "Nəticə açıqlandıqdan sonra %(days)s təqvim günü ərzində (son günün sonunadək, Bakı vaxtı) müraciət edə bilərsiniz — evdən də."
+msgstr "Nəticə açıqlandıqdan sonra %(days)s təqvim günü ərzində (son günün sonunadək, Bakı vaxtı) müraciət edə bilərsiniz — evdən də."
+
+#, python-format
+msgctxt "exams.template.student_exam_result"
+msgid "Apellyasiya son tarixi: %(deadline)s"
+msgstr "Apellyasiya son tarixi: %(deadline)s"
+
+msgctxt "registrar.records"
+msgid "İmtahan cəhdləri və apellyasiyalar"
+msgstr "İmtahan cəhdləri və apellyasiyalar"
+
+msgctxt "registrar.records"
+msgid "cəhd"
+msgstr "cəhd"
+
+msgctxt "registrar.records"
+msgid "rəsmi"
+msgstr "rəsmi"
+
+msgctxt "registrar.records"
+msgid "ləğv olundu"
+msgstr "ləğv olundu"
+
+msgctxt "registrar.records"
+msgid "nəzarətçi tərəfindən çıxarılıb"
+msgstr "nəzarətçi tərəfindən çıxarılıb"
+
+msgctxt "profile.sidebar"
+msgid "Starosta"
+msgstr "Starosta"
+
+msgctxt "accounts.groups"
+msgid "Starosta"
+msgstr "Starosta"
+
+msgctxt "accounts.group_lead"
+msgid "Starosta"
+msgstr "Starosta"
+
+msgctxt "accounts.group_lead"
+msgid "Qrup tapılmadı və ya arxivdədir."
+msgstr "Qrup tapılmadı və ya arxivdədir."
+
+msgctxt "accounts.group_lead"
+msgid "«Baş tələbə» (lead_student) rolu bu təşkilatda yoxdur — standart rollar yüklənməlidir."
+msgstr "«Baş tələbə» (lead_student) rolu bu təşkilatda yoxdur — standart rollar yüklənməlidir."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta yalnız bu qrupun qeydiyyatlı tələbəsi ola bilər."
+msgstr "Starosta yalnız bu qrupun qeydiyyatlı tələbəsi ola bilər."
+
+msgctxt "accounts.group_lead"
+msgid "Özünüzü starosta təyin edə bilməzsiniz."
+msgstr "Özünüzü starosta təyin edə bilməzsiniz."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "%(name)s artıq bu qrupun starostasıdır."
+msgstr "%(name)s artıq bu qrupun starostasıdır."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta vəzifəniz başa çatdı"
+msgstr "Starosta vəzifəniz başa çatdı"
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "«%(group)s» qrupunun starostası artıq %(name)s-dir."
+msgstr "«%(group)s» qrupunun starostası artıq %(name)s-dir."
+
+msgctxt "accounts.group_lead"
+msgid "Siz qrupun starostası təyin olundunuz"
+msgstr "Siz qrupun starostası təyin olundunuz"
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "«%(group)s» qrupunun starostası təyin olundunuz. Kabinetdə «Starosta» bölməsi açıldı: qrupun fənləri, seçmə fənlər, birləşmiş dərslər, cədvəl, imtahanlar və elanlar."
+msgstr "«%(group)s» qrupunun starostası təyin olundunuz. Kabinetdə «Starosta» bölməsi açıldı: qrupun fənləri, seçmə fənlər, birləşmiş dərslər, cədvəl, imtahanlar və elanlar."
+
+msgctxt "accounts.group_lead"
+msgid "Bu qrupun starostası yoxdur."
+msgstr "Bu qrupun starostası yoxdur."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "«%(group)s» qrupunun starostası vəzifəsindən götürüldünüz."
+msgstr "«%(group)s» qrupunun starostası vəzifəsindən götürüldünüz."
+
+msgctxt "accounts.group_lead"
+msgid "Qrupun starostası"
+msgstr "Qrupun starostası"
+
+msgctxt "accounts.group_lead"
+msgid "Starosta qrupun qeydiyyatlı tələbələrindən seçilir və kabinetində «Starosta» bölməsi açılır: qrupun fənləri, seçmə fənlər, birləşmiş dərslər, cədvəl, imtahanlar, elanlar."
+msgstr "Starosta qrupun qeydiyyatlı tələbələrindən seçilir və kabinetində «Starosta» bölməsi açılır: qrupun fənləri, seçmə fənlər, birləşmiş dərslər, cədvəl, imtahanlar, elanlar."
+
+msgctxt "accounts.group_lead"
+msgid "Təyin et"
+msgstr "Təyin et"
+
+msgctxt "accounts.group_lead"
+msgid "Starostanı götür"
+msgstr "Starostanı götür"
+
+msgctxt "accounts.group_lead"
+msgid "Əməl audit jurnalına yazılır, tələbəyə bildiriş gedir."
+msgstr "Əməl audit jurnalına yazılır, tələbəyə bildiriş gedir."
+
+msgctxt "accounts.group_lead"
+msgid "Götür"
+msgstr "Götür"
+
+msgctxt "accounts.group_lead"
+msgid "qrupda deyil"
+msgstr "qrupda deyil"
+
+msgctxt "accounts.group_lead"
+msgid "bir neçə starosta"
+msgstr "bir neçə starosta"
+
+msgctxt "accounts.group_lead"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "accounts.group_lead"
+msgid "Hazırkı starosta:"
+msgstr "Hazırkı starosta:"
+
+msgctxt "accounts.group_lead"
+msgid "Yeni starosta"
+msgstr "Yeni starosta"
+
+msgctxt "accounts.group_lead"
+msgid "Tələbə adı ilə axtar…"
+msgstr "Tələbə adı ilə axtar…"
+
+msgctxt "accounts.group_lead"
+msgid "Uyğun tələbə tapılmadı"
+msgstr "Uyğun tələbə tapılmadı"
+
+msgctxt "accounts.group_lead"
+msgid "Tələbə seçin"
+msgstr "Tələbə seçin"
+
+msgctxt "accounts.group_lead"
+msgid "Yalnız bu qrupun qeydiyyatlı tələbələri. Yeni starosta təyin olunanda əvvəlki avtomatik götürülür; hər ikisinə bildiriş gedir."
+msgstr "Yalnız bu qrupun qeydiyyatlı tələbələri. Yeni starosta təyin olunanda əvvəlki avtomatik götürülür; hər ikisinə bildiriş gedir."
+
+msgctxt "accounts.group_lead"
+msgid "Qeyd (istəyə bağlı)"
+msgstr "Qeyd (istəyə bağlı)"
+
+msgctxt "accounts.group_lead"
+msgid "Məs.: qrup yığıncağının qərarı ilə"
+msgstr "Məs.: qrup yığıncağının qərarı ilə"
+
+msgctxt "accounts.group_lead"
+msgid "Tələbə qrupda qalır, yalnız starostalıq və «Starosta» bölməsi bağlanır. Sonra yeni starosta təyin edə bilərsiniz."
+msgstr "Tələbə qrupda qalır, yalnız starostalıq və «Starosta» bölməsi bağlanır. Sonra yeni starosta təyin edə bilərsiniz."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta təyin olunmayıb"
+msgstr "Starosta təyin olunmayıb"
+
+msgctxt "accounts.group_lead"
+msgid "Bu qrupun qeydiyyatlı tələbəsi deyil — bölmə ona açılmır. Yenisini təyin edin."
+msgstr "Bu qrupun qeydiyyatlı tələbəsi deyil — bölmə ona açılmır. Yenisini təyin edin."
+
+msgctxt "accounts.group_lead"
+msgid "Qrupda bir neçə aktiv starosta var — birini təyin edin, digərləri avtomatik götürüləcək."
+msgstr "Qrupda bir neçə aktiv starosta var — birini təyin edin, digərləri avtomatik götürüləcək."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta təyin et"
+msgstr "Starosta təyin et"
+
+msgctxt "accounts.group_lead"
+msgid "Starostanı dəyiş"
+msgstr "Starostanı dəyiş"
+
+msgctxt "accounts.group_lead"
+msgid "Aktiv təşkilat tapılmadı."
+msgstr "Aktiv təşkilat tapılmadı."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta təyin etmək üçün `unit.group_manage` və ya `role.assign` səlahiyyəti lazımdır."
+msgstr "Starosta təyin etmək üçün `unit.group_manage` və ya `role.assign` səlahiyyəti lazımdır."
+
+msgctxt "accounts.group_lead"
+msgid "Qrup tapılmadı və ya əhatənizdə deyil."
+msgstr "Qrup tapılmadı və ya əhatənizdə deyil."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "«%(group)s» qrupunun starostası dəyişdi: %(old)s → %(new)s."
+msgstr "«%(group)s» qrupunun starostası dəyişdi: %(old)s → %(new)s."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "%(name)s «%(group)s» qrupunun starostası təyin edildi."
+msgstr "%(name)s «%(group)s» qrupunun starostası təyin edildi."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "%(name)s «%(group)s» qrupunun starostası vəzifəsindən götürüldü."
+msgstr "%(name)s «%(group)s» qrupunun starostası vəzifəsindən götürüldü."
+
+msgctxt "accounts.group_lead"
+msgid "Naməlum əməl."
+msgstr "Naməlum əməl."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta «Qruplar» reyestrindən təyin olunur: qrupun tələbələri → «Starosta təyin et»."
+msgstr "Starosta «Qruplar» reyestrindən təyin olunur: qrupun tələbələri → «Starosta təyin et»."
+
+msgctxt "accounts.my_group"
+msgid "Siz bu qrupun starostasısınız: qrupun fənləri, seçmə fənlər, başqa qruplarla birləşmiş dərslər, cədvəl, imtahanlar və elanlar burada bir yerdədir. Qrup yoldaşlarının balı və davamiyyəti göstərilmir — davamiyyət yalnız özünüzə aiddir."
+msgstr "Siz bu qrupun starostasısınız: qrupun fənləri, seçmə fənlər, başqa qruplarla birləşmiş dərslər, cədvəl, imtahanlar və elanlar burada bir yerdədir. Qrup yoldaşlarının balı və davamiyyəti göstərilmir — davamiyyət yalnız özünüzə aiddir."
+
+msgctxt "accounts.my_group"
+msgid "Seçmə fənn"
+msgstr "Seçmə fənn"
+
+msgctxt "accounts.my_group"
+msgid "Birləşmiş dərs"
+msgstr "Birləşmiş dərs"
+
+msgctxt "accounts.my_group"
+msgid "Yaxın imtahan"
+msgstr "Yaxın imtahan"
+
+msgctxt "accounts.my_group"
+msgid "Starosta bölmələri"
+msgstr "Starosta bölmələri"
+
+msgctxt "accounts.my_group"
+msgid "Fənlər"
+msgstr "Fənlər"
+
+msgctxt "accounts.my_group"
+msgid "Seçmə fənlər"
+msgstr "Seçmə fənlər"
+
+msgctxt "accounts.my_group"
+msgid "Birləşmiş dərslər"
+msgstr "Birləşmiş dərslər"
+
+msgctxt "accounts.my_group"
+msgid "Cədvəl"
+msgstr "Cədvəl"
+
+msgctxt "accounts.my_group"
+msgid "İmtahanlar"
+msgstr "İmtahanlar"
+
+msgctxt "accounts.my_group"
+msgid "Elanlar"
+msgstr "Elanlar"
+
+msgctxt "accounts.my_group"
+msgid "Davamiyyətim"
+msgstr "Davamiyyətim"
+
+msgctxt "accounts.my_group"
+msgid "Bu dövr üçün qrupun fənni hələ açılmayıb."
+msgstr "Bu dövr üçün qrupun fənni hələ açılmayıb."
+
+msgctxt "accounts.my_group"
+msgid "Növ"
+msgstr "Növ"
+
+msgctxt "accounts.my_group"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "accounts.my_group"
+msgid "Kimlərlə"
+msgstr "Kimlərlə"
+
+msgctxt "accounts.my_group"
+msgid "Qrupdan"
+msgstr "Qrupdan"
+
+msgctxt "accounts.my_group"
+msgid "seçmə"
+msgstr "seçmə"
+
+msgctxt "accounts.my_group"
+msgid "məcburi"
+msgstr "məcburi"
+
+msgctxt "accounts.my_group"
+msgid "yalnız öz qrupu"
+msgstr "yalnız öz qrupu"
+
+msgctxt "accounts.my_group"
+msgid "hamısı"
+msgstr "hamısı"
+
+msgctxt "accounts.my_group"
+msgid "Bu dövrdə qrupun seçmə fənni yoxdur."
+msgstr "Bu dövrdə qrupun seçmə fənni yoxdur."
+
+msgctxt "accounts.my_group"
+msgid "Hər seçmə fənni qrupdan kimin götürdüyü — yalnız adlar (bal və davamiyyət göstərilmir)."
+msgstr "Hər seçmə fənni qrupdan kimin götürdüyü — yalnız adlar (bal və davamiyyət göstərilmir)."
+
+msgctxt "accounts.my_group"
+msgid "siz də"
+msgstr "siz də"
+
+msgctxt "accounts.my_group"
+msgid "bütün qrup"
+msgstr "bütün qrup"
+
+msgctxt "accounts.my_group"
+msgid "Götürənlər"
+msgstr "Götürənlər"
+
+msgctxt "accounts.my_group"
+msgid "Qrup başqa qruplarla birləşmiş dərsdə oxumur və alt qruplara bölünməyib."
+msgstr "Qrup başqa qruplarla birləşmiş dərsdə oxumur və alt qruplara bölünməyib."
+
+msgctxt "accounts.my_group"
+msgid "Bu fənlərdə qrupunuz başqa qrup(lar)la birlikdə oxuyur: ya dərs başqa qrupun jurnalındadır, ya da jurnala başqa qrupdan tələbə əlavə olunub."
+msgstr "Bu fənlərdə qrupunuz başqa qrup(lar)la birlikdə oxuyur: ya dərs başqa qrupun jurnalındadır, ya da jurnala başqa qrupdan tələbə əlavə olunub."
+
+msgctxt "accounts.my_group"
+msgid "Jurnal: öz qrupunuz"
+msgstr "Jurnal: öz qrupunuz"
+
+msgctxt "accounts.my_group"
+msgid "Qrupdan gedənlər"
+msgstr "Qrupdan gedənlər"
+
+msgctxt "accounts.my_group"
+msgid "Alt qruplar"
+msgstr "Alt qruplar"
+
+msgctxt "accounts.my_group"
+msgid "Tələbələr"
+msgstr "Tələbələr"
+
+msgctxt "accounts.my_group"
+msgid "Qrupun dərs cədvəli hələ dərc olunmayıb."
+msgstr "Qrupun dərs cədvəli hələ dərc olunmayıb."
+
+msgctxt "accounts.my_group"
+msgid "Yaxın 90 gündə qrupa təyin olunmuş imtahan yoxdur."
+msgstr "Yaxın 90 gündə qrupa təyin olunmuş imtahan yoxdur."
+
+msgctxt "accounts.my_group"
+msgid "Qrupa, ixtisasa və ya fakültəyə ünvanlanmış aktiv elan yoxdur."
+msgstr "Qrupa, ixtisasa və ya fakültəyə ünvanlanmış aktiv elan yoxdur."
+
+msgctxt "accounts.my_group"
+msgid "Bütün elanlar"
+msgstr "Bütün elanlar"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "%(group)s qrupunun cari dövr fənləri"
+msgstr "%(group)s qrupunun cari dövr fənləri"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "%(n)s / %(total)s tələbə"
+msgstr "%(n)s / %(total)s tələbə"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "birgə: %(groups)s"
+msgstr "birgə: %(groups)s"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "Birgə qruplar: %(groups)s"
+msgstr "Birgə qruplar: %(groups)s"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "Jurnal: %(journal)s"
+msgstr "Jurnal: %(journal)s"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "Qrupunuz «%(parent)s» qrupunun alt qrupudur — ümumi dərslər ana qrupun jurnalında keçə bilər."
+msgstr "Qrupunuz «%(parent)s» qrupunun alt qrupudur — ümumi dərslər ana qrupun jurnalında keçə bilər."
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "%(n)s tələbə"
+msgstr "%(n)s tələbə"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "qrupdan %(n)s tələbə"
+msgstr "qrupdan %(n)s tələbə"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "Son tarix: %(date)s"
+msgstr "Son tarix: %(date)s"

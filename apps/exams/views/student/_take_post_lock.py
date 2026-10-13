@@ -33,6 +33,7 @@ from django.utils.translation import pgettext
 
 from apps.exams.features import exam_supervision_enabled
 from apps.exams.models import ExamAttempt
+from apps.exams.services.exam_network import enforce_attempt_network
 from apps.exams.services.final_center.device_binding import enforce_final_device
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 
@@ -124,6 +125,10 @@ def _run_locked(request, *, slug, attempt_id, write_answers):
         )
         if reason:
             raise PermissionDenied(reason)
+        # 2026-10-13 (gecə): final/midterm yazısı (autosave/finish) yalnız universitet şəbəkəsindən —
+        # ``ExamNetworkDenied`` tranzaksiyanı geri qaytarır, 403 view qatında (``final_device_guarded``).
+        if not attempt.is_finished:
+            enforce_attempt_network(request, attempt)
         if final_entry_session_revoked(request, attempt):
             raise _EntrySessionRevoked
         # 2026-10-08: final cəhdi başladığı cihaza bağlıdır (başqa cihaz → FinalDeviceMismatch,

@@ -14,7 +14,8 @@ from contextlib import nullcontext
 
 from django.utils import translation
 
-SESSION_LANGUAGES = frozenset({"az", "en", "ru", "tr"})
+# 2026-10-13 (gecə): «de» əlavə olundu — aparıcı oyunçu səhifələrini almanca da aça bilər.
+SESSION_LANGUAGES = frozenset({"az", "en", "ru", "tr", "de"})
 
 
 def session_language(session) -> str | None:

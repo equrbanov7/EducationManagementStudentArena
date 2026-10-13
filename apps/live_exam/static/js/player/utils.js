@@ -180,15 +180,17 @@ export function ordinal(value) {
         if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
         return `${n}${{ 1: "st", 2: "nd", 3: "rd" }[n % 10] || "th"}`;
     }
-    if (LANG === "tr") return `${n}.`;
+    // 2026-10-13 (gecə): alman dili də «1.» formasındadır.
+    if (LANG === "tr" || LANG === "de") return `${n}.`;
     if (LANG === "ru") return `${n}-е`;
     return `${n}-${azOrdinalSuffix(n)}`;
 }
 
-// Rəqəm formatı: az/ru/tr — «9 100» (dar boşluq), en — «9,100»; onluq ayırıcı az/ru/tr-də vergül.
+// Rəqəm formatı: az/ru/tr — «9 100» (dar boşluq), en — «9,100», de — «9.100»; onluq ayırıcı en-dən başqa vergül.
+const THOUSANDS_SEPARATOR = { en: ",", de: "." };
 export function formatNumber(value) {
     const n = toInt(value, 0);
-    const digits = String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g, LANG === "en" ? "," : "\u202f");
+    const digits = String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g, THOUSANDS_SEPARATOR[LANG] || "\u202f");
     return n < 0 ? `-${digits}` : digits;
 }
 

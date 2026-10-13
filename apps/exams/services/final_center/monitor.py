@@ -72,6 +72,13 @@ def _visible_grid_tickets(tickets):
     return visible
 
 
+def _deadline_iso(attempt):
+    if attempt is None or attempt.is_finished:
+        return None
+    deadline = attempt.deadline_at
+    return deadline.isoformat() if deadline else None
+
+
 def _ticket_row(ticket, presence, exam_title=None):
     """Yalnız əməliyyat üçün lazım olan kompakt sahələr — cavablar/ballar YOX.
     ``exam_title`` biletin öz imtahanından götürülür (hər tələbə öz imtahanı) —
@@ -103,6 +110,8 @@ def _ticket_row(ticket, presence, exam_title=None):
         "started_at": ticket.started_at.isoformat() if ticket.started_at else None,
         "completed_at": ticket.completed_at.isoformat() if ticket.completed_at else None,
         "remaining_seconds": remaining_seconds,
+        # Mütləq son an (ETag-sabit; JS server saatı ilə geri sayır) — 2026-10-13.
+        "deadline_at": _deadline_iso(attempt),
         "supervision_status": attempt.supervision_status if attempt else None,
         "violation_count": attempt.supervision_violation_count if attempt else 0,
         "removal_action": ticket.removal_action,
@@ -235,6 +244,7 @@ def _room_attempt_rows(room):
                 "started_at": attempt.started_at.isoformat() if attempt.started_at else None,
                 "completed_at": attempt.finished_at.isoformat() if attempt.finished_at else None,
                 "remaining_seconds": remaining_seconds,
+                "deadline_at": _deadline_iso(attempt),
                 "supervision_status": attempt.supervision_status,
                 "violation_count": attempt.supervision_violation_count,
                 "removal_action": "",

@@ -16,6 +16,8 @@ from .teacher import (
     appeal_stats_filters,
     build_manage_appeals_context,
     count_pending_manage_appeals,
+    key_correction_apply,
+    key_correction_revoke,
     manage_appeals,
     review_appeal,
 )
@@ -26,6 +28,8 @@ __all__ = [
     "appeal_detail",
     "manage_appeals",
     "review_appeal",
+    "key_correction_apply",
+    "key_correction_revoke",
     "build_my_appeals_context",
     "build_manage_appeals_context",
     "count_pending_manage_appeals",

@@ -154,28 +154,10 @@ def create_appeal(*, attempt, student, items, org_unit=None):
 
 
 def _exam_center_recipients(appeal):
-    """Apellyasiyanın təşkilatındakı aktiv imtahan mərkəzi istifadəçiləri."""
-    if not appeal.organization_id:
-        return []
+    """Apellyasiyaya cavab verə bilən üzvlər — 2026-10-13 (gecə): rol ADI yox, ``appeal.respond`` AÇARI."""
+    from apps.appeals.services.notify import exam_center_recipients
 
-    from django.apps import apps as django_apps
-
-    Membership = django_apps.get_model("organizations", "Membership")
-    memberships = (
-        Membership.objects.select_related("user", "role")
-        .filter(
-            organization_id=appeal.organization_id,
-            is_active=True,
-            # İmtahan Mərkəzi TƏK roldur (2026-09-06 birləşməsi, miqrasiya 0046);
-            # köhnə ad hələ də sətirlərdə qala bilər — hər ikisi qəbul olunur.
-            role__name__in=("exam_center_head", "exam_center"),
-            role__is_active=True,
-            user__is_active=True,
-        )
-        .exclude(user_id=appeal.student_id)
-        .order_by("user_id")
-    )
-    return [membership.user for membership in memberships]
+    return exam_center_recipients(appeal)
 
 
 def _notify_exam_center_new_appeal(appeal, *, item_count):

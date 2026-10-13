@@ -22,12 +22,13 @@ from apps.exams.services.attempts import (
     get_attempt_limit_result_redirect_url,
     get_effective_max_attempts,
 )
+from apps.exams.services.exam_network import exam_network_allowed
 from apps.exams.services.question_timer import question_timer_expired
 from apps.exams.services.start_intent import has_valid_start_intent
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 
 from ._answer_writes import TestAnswerWriteBatch, _save_test_answer_if_changed, _save_written_answer_if_changed
-from ._final_device import final_device_guarded
+from ._final_device import exam_network_blocked_response, final_device_guarded
 from ._helpers import (
     annotate_attempt_result_visibility,
     append_return_to,
@@ -170,6 +171,10 @@ def start_exam(request, slug):
     # əvəzinə səbəbi izah edən mesaj almalıdır. Tenant scope-u və soft-delete
     # filtri `tenant_scoped_exams`-də olduğu kimi qalır.
     exam = get_object_or_404(tenant_scoped_exams(request, Exam.objects.all()), slug=slug)
+    # 2026-10-13 (gecə): final/midterm yalnız universitet şəbəkəsindən (müəllif azaddır) — start
+    # niyyəti/təsdiq səhifəsi də kənardan açılmır (bax services/exam_network.py).
+    if not exam_network_allowed(request, exam):
+        return exam_network_blocked_response(request, exam, where="start_exam", has_attempt=False)
     if not exam.is_active:
         if exam.author_id != request.user.id:
             raise Http404("Exam is not active.")

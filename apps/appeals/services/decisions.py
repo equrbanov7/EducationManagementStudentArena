@@ -134,6 +134,15 @@ def _write_grade_event(attempt, *, question, grader, old_score, new_score, max_p
     )
 
 
+def _has_active_key_credit(attempt, question):
+    """Bu (cəhd, sual) cütü aktiv açar düzəlişi krediti alıbmı (2026-10-13, gecə)."""
+    from apps.appeals.models import KeyCorrectionCredit
+
+    return KeyCorrectionCredit.objects.filter(
+        attempt=attempt, question=question, reverted=False, correction__revoked_at__isnull=True, delta_points__gt=0
+    ).exists()
+
+
 def _lock_appeal(appeal_id):
     """Apellyasiya başlığını ``FOR UPDATE`` ilə kilidlə (Audit 2026-09-28 EXA-06).
 
@@ -237,17 +246,22 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarde
         # Artıq düzgün sayılırsa və ya sual artıq kreditlənibsə ikiqat kredit olmasın.
         delta = Decimal("0") if (prev_is_correct or already_credited) else bonus
         new_is_correct = True if delta > 0 else None
-        new_score = previous_score + delta
+        # 2026-10-13 (gecə): sual artıq AÇAR DÜZƏLİŞİ ilə kreditlənibsə effektiv bal dəyişmir
+        # (oxuma anında dedup — scoring._score_state_from_sources). Delta yenə yazılır ki, açar
+        # düzəlişi sonradan geri alınsa fərdi qərarın krediti qalsın.
+        key_credited = _has_active_key_credit(attempt, question)
+        new_score = previous_score if key_credited else previous_score + delta
         # Ledger: sualın tələbəyə verdiyi kredit 0 → +delta (bax _write_grade_event).
         event_old = _question_credit(is_correct=prev_is_correct, question_points=question_points)
-        _write_grade_event(
-            attempt,
-            question=question,
-            grader=reviewer,
-            old_score=event_old,
-            new_score=event_old + int(delta),
-            max_points=int(question_points),
-        )
+        if not key_credited:
+            _write_grade_event(
+                attempt,
+                question=question,
+                grader=reviewer,
+                old_score=event_old,
+                new_score=event_old + int(delta),
+                max_points=int(question_points),
+            )
     else:
         # Yazılı/praktiki: cavabın balına +1 (sualın maksimumu ilə clamp),
         # sonra attempt.teacher_score cavablardan yenidən hesablanır.
@@ -460,7 +474,20 @@ def recompute_appeal_status(appeal, *, reviewer=None):
     final_statuses = {APPEAL_STATUS_ACCEPTED, APPEAL_STATUS_REJECTED, APPEAL_STATUS_PARTIALLY_ACCEPTED}
     if fully_resolved and previous_status not in final_statuses:
         _notify_student_appeal_resolved(locked)
+        # 2026-10-13 (gecə): bal dəyişibsə fənn müəllimi də bilsin (final → jurnal avtomatik, midterm → əl ilə).
+        _notify_teachers_resolved(locked)
     return appeal
+
+
+def _notify_teachers_resolved(appeal):
+    from django.db.models import Sum
+
+    from .notify import notify_teachers_appeal_resolved
+
+    delta = ScoreAdjustment.objects.filter(appeal_item__appeal=appeal, reverted=False).aggregate(
+        total=Sum("delta_points")
+    )["total"]
+    notify_teachers_appeal_resolved(appeal, delta_points=delta)
 
 
 def _assert_derived_transition(previous_status, new_status):

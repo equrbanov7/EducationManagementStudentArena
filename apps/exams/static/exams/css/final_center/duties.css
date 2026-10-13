@@ -1,0 +1,165 @@
+/* Nəzarətçi növbələri + zal monitorunun canlı əlavələri (2026-10-13, gecə).
+ *
+ * · `.fxc-duty-strip` — nəzarətçinin «növbə zolağı» (zal siyahısı + zal monitoru);
+ * · `.fxc-duty-panel` — rəhbərin növbə paneli (siyahı + yeni növbə forması);
+ * · `.fxc-room-expired` / `.fxc-room-alert` — növbə bitdi / yeni şübhəli elanı;
+ * · `.fxc-cell-meta` — xəritə hücrəsində qalan vaxt + irəliləyiş;
+ * · `.fxc-note-form` — pozuntu modalında nəzarətçi qeydi.
+ * Planşet (≥ 44px toxunma hədəfi) və telefon eni üçün uyğunlaşdırılıb.
+ */
+
+.fxc-duty-strip {
+    margin: 0 0 16px;
+    padding: 14px 16px;
+    border: 1px solid #BFDBFE;
+    border-radius: 14px;
+    background: #EFF6FF;
+}
+.fxc-duty-strip__title {
+    margin: 0 0 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1E3A8A;
+}
+.fxc-duty-strip__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.fxc-duty-card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px;
+    border: 1px solid #DBEAFE;
+    border-radius: 12px;
+    background: #FFFFFF;
+}
+.fxc-duty-card--overtime { border-color: #FCD34D; background: #FFFBEB; }
+.fxc-duty-card__room { font-size: .98rem; color: #0F172A; }
+.fxc-duty-card__time { font-variant-numeric: tabular-nums; color: #334155; }
+.fxc-duty-card__until { font-size: .85rem; color: #475569; }
+.fxc-duty-card__go { align-self: flex-start; min-height: 44px; margin-top: 6px; }
+
+.fxc-room-expired,
+.fxc-room-alert {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+.fxc-room-expired[hidden],
+.fxc-room-alert[hidden] { display: none; }
+.fxc-room-expired { border: 1px solid #FCA5A5; background: #FEF2F2; color: #991B1B; }
+.fxc-room-alert { border: 1px solid #F59E0B; background: #FFFBEB; color: #92400E; }
+.fxc-room-alert__x {
+    margin-left: auto;
+    min-width: 44px;
+    min-height: 44px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+}
+/* Növbə bitdikdən sonra idarə düymələri işləməyəcək — vizual olaraq söndürülür (server də rədd edir). */
+.fxc-room-is-expired .fxc-head-actions,
+.fxc-room-is-expired .fxc-vio-actions { opacity: .45; pointer-events: none; }
+
+.fxc-duty-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 8px 0 14px;
+    padding: 0;
+    list-style: none;
+}
+.fxc-duty-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 8px 10px;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    background: #FFFFFF;
+}
+.fxc-duty-row--expired,
+.fxc-duty-row--revoked { opacity: .65; }
+.fxc-duty-row__who { font-weight: 600; color: #0F172A; min-width: 160px; }
+.fxc-duty-row__when { font-variant-numeric: tabular-nums; color: #334155; }
+.fxc-duty-row__act { margin-left: auto; }
+.fxc-duty-row__act .fxc-btn { min-height: 36px; }
+.fxc-duty-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: .78rem;
+    font-weight: 700;
+    background: #F1F5F9;
+    color: #334155;
+}
+.fxc-duty-badge--active { background: #DCFCE7; color: #166534; }
+.fxc-duty-badge--upcoming { background: #E0F2FE; color: #075985; }
+.fxc-duty-badge--revoked { background: #FEE2E2; color: #991B1B; }
+
+.fxc-duty-form__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px 12px;
+    margin: 0 0 10px;
+    padding: 0;
+    border: 0;
+}
+.fxc-duty-form__grid .ems-field--wide { grid-column: 1 / -1; }
+.fxc-duty-form__grid .ems-input { min-height: 44px; }
+.fxc-duty-form__legend { margin-bottom: 6px; font-size: .95rem; font-weight: 700; color: #0F172A; }
+.fxc-duty-legacy {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px dashed #CBD5E1;
+}
+
+.fxc-cell-meta {
+    max-width: 100%;
+    padding: 0 3px;
+    overflow: hidden;
+    font-size: .58rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #334155;
+    font-variant-numeric: tabular-nums;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fxc-note-form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #E2E8F0;
+}
+.fxc-note-form__label { font-weight: 700; color: #0F172A; }
+.fxc-note-form__foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.fxc-note-form__msg { font-size: .85rem; color: #475569; }
+
+@media (max-width: 720px) {
+    .fxc-duty-form__grid { grid-template-columns: 1fr 1fr; }
+    .fxc-duty-form__grid .ems-field:first-of-type { grid-column: 1 / -1; }
+    .fxc-duty-row__act { margin-left: 0; width: 100%; }
+    .fxc-duty-row__act .fxc-btn { width: 100%; min-height: 44px; }
+}

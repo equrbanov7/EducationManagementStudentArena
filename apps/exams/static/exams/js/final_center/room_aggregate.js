@@ -67,9 +67,7 @@
         return tpl.replace("sessions/0/", "sessions/" + sid + "/").replace("tickets/0/", "tickets/" + tid + "/");
     }
 
-    var POLL_MS = 10000;
     var snapshot = null;
-    var pollTimer = null;
     var refreshTimer = null;
     var examOptionsKey = "";
 
@@ -132,7 +130,8 @@
                 vioModalBody.innerHTML = P.identityCardHtml(d.proctor.identity, d.proctor) +
                     '<div class="fxc-vio-modal__count">' + esc(d.violation_count || 0) + " " +
                         esc(t("violations.word", gettext("pozuntu"))) + "</div>" +
-                    P.timelineSection(d.proctor.timeline);
+                    P.timelineSection(d.proctor.timeline) +
+                    (window.FXCRoomLive ? window.FXCRoomLive.noteFormHtml(d.attempt_id) : "");
             }
             return;
         }
@@ -350,6 +349,7 @@
                 '<span class="fxc-cell-ini">' + esc(subj) + "</span>" +
                 "</button>";
         }).join("");
+        if (window.FXCRoomLive) window.FXCRoomLive.decorate(mapEl, snapshot);
     }
 
     function renderViolations() {
@@ -433,7 +433,10 @@
         renderViolations();
     }
 
-    function setConn(ok) {
+    function setConn(state) {
+        // 2026-10-13: nəqliyyat FXCRoomLive-dadır (ETag/304, gizli tabda pauza, 403 = növbə bitib).
+        if (state === "expired") { if (wsEl) { wsEl.dataset.state = "offline"; wsEl.textContent = t("expired", "—"); } return; }
+        var ok = state === true || state === "online";
         if (wsEl) {
             wsEl.dataset.state = ok ? "online" : "offline";
             wsEl.textContent = ok ? t("live", gettext("Canlı")) : t("disconnected", gettext("Bağlantı kəsildi"));
@@ -443,12 +446,11 @@
         }
     }
 
-    function fetchSnapshot() {
-        return fetch(snapshotUrl, { credentials: "same-origin" })
-            .then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); })
-            .then(function (d) { snapshot = d; renderAll(); setConn(true); })
-            .catch(function () { setConn(false); /* növbəti tsiklde yenidən */ });
-    }
+    var live = window.FXCRoomLive ? window.FXCRoomLive.create({
+        url: snapshotUrl, etag: root.dataset.snapshotEtag || "",
+        onData: function (d) { snapshot = d; renderAll(); }, onState: setConn
+    }) : null;
+    function fetchSnapshot() { return live ? live.refresh(true) : Promise.resolve(); }
 
     function scheduleRefresh() {
         if (refreshTimer) return;
@@ -593,6 +595,5 @@
     if (examFilter) examFilter.addEventListener("change", renderMap);
 
     renderAll();
-    pollTimer = window.setInterval(fetchSnapshot, POLL_MS);
-    void pollTimer;
+    if (live) live.start(snapshot);
 })();

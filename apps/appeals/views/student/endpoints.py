@@ -27,7 +27,6 @@ from ...constants import (
     APPEAL_STATUS_UNDER_REVIEW,
     APPEAL_STATUS_VALUES,
     APPEAL_TYPE_CHOICES,
-    APPEAL_WINDOW_DAYS,
 )
 from ...models import AppealItem
 from ...selectors import filter_student_appeals, paginate_student_appeals, student_appeals_queryset
@@ -35,6 +34,7 @@ from ...services import (
     appeal_block_reason,
     appeal_deadline,
     appeal_item_result_visible_to_student,
+    appeal_window_days,
     can_create_appeal,
     create_appeal,
     is_within_appeal_window,
@@ -136,7 +136,7 @@ def _render_appeal_window_closed(request, exam, attempt, *, window_closed, block
         "attempt": attempt,
         "appeal_window_closed": True,
         "appeal_block_reason": block_reason or "",
-        "appeal_window_days": APPEAL_WINDOW_DAYS,
+        "appeal_window_days": appeal_window_days(),
         "appeal_deadline": appeal_deadline(attempt),
         "window_expired": window_closed,
         "attempt_appeals": _attempt_appeals_for_student(attempt),
@@ -236,6 +236,9 @@ def appeal_create(request, attempt_id):
         "min_comment_length": APPEAL_MIN_COMMENT_LENGTH,
         "max_comment_length": APPEAL_MAX_COMMENT_LENGTH,
         "remaining_seconds": remaining_window_seconds(attempt),
+        # 2026-10-13 (gecə): «Apellyasiya son tarixi: …» — tələbə evdən müraciət edəndə də aydın görsün.
+        "appeal_deadline": appeal_deadline(attempt),
+        "appeal_window_days": appeal_window_days(),
         "result_url": _result_url(exam, attempt, request),
         "marked_question_by_qid": marked_map,
         "appealed_question_by_qid": {question_id: True for question_id in appealed_question_ids},
@@ -329,7 +332,7 @@ def build_my_appeals_context(request, *, list_action, section=""):
         "appeal_list_action": list_action,
         "appeal_section": section,
         "appeal_eligible_attempts": eligible_attempts,
-        "appeal_window_days": APPEAL_WINDOW_DAYS,
+        "appeal_window_days": appeal_window_days(),
     }
 
 

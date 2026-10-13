@@ -38,7 +38,7 @@ from core.rls import bypass_rls
 
 User = get_user_model()
 
-TARGET_LANGUAGES = ("en", "ru", "tr")
+TARGET_LANGUAGES = ("en", "ru", "tr", "de")  # 2026-10-13 (gecə): alman dili
 #: test rolu → universitet sistem rolu (`default_roles`). `org_admin` sistem rolu
 #: deyil — təşkilat SAHİBİ + profil rolu `ORG_ADMIN` (bax `rbac.is_org_admin`).
 ROLES = {

@@ -34,6 +34,22 @@ urlpatterns = [
         views.exam_center_room_assign_invigilators,
         name="exam_center_room_assign_invigilators",
     ),
+    # 2026-10-13 (gecə): vaxtla məhdud nəzarətçi növbələri (rəhbər) + nəzarətçi qeydi.
+    path(
+        "center/rooms/<int:room_id>/duties/",
+        views.exam_center_room_duty_create,
+        name="exam_center_room_duty_create",
+    ),
+    path(
+        "center/rooms/<int:room_id>/duties/<int:duty_id>/revoke/",
+        views.exam_center_room_duty_revoke,
+        name="exam_center_room_duty_revoke",
+    ),
+    path(
+        "center/rooms/<int:room_id>/api/attempts/<int:attempt_id>/note/",
+        views.exam_center_attempt_note,
+        name="exam_center_attempt_note",
+    ),
     path(
         "center/rooms/<int:room_id>/api/snapshot/",
         views.exam_center_room_snapshot,

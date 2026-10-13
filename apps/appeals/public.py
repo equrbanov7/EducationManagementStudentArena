@@ -10,6 +10,7 @@ from apps.appeals.services import (  # noqa: F401
     apply_bonus_to_test_result,
     student_visible_appeal_bonus_map,
 )
+from apps.appeals.services.history import student_exam_history  # noqa: F401
 from apps.appeals.views import _can_open_appeal_management as can_open_appeal_management  # noqa: F401
 from apps.appeals.views import (  # noqa: F401
     build_manage_appeals_context,
@@ -25,6 +26,7 @@ __all__ = [
     "build_my_appeals_context",
     "count_pending_manage_appeals",
     "student_visible_appeal_bonus_map",
+    "student_exam_history",
 ]
 
 

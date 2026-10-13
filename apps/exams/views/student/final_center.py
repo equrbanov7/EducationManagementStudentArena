@@ -41,6 +41,7 @@ from apps.exams.services.exam_center_gate import (
     resolve_room_computer,
     room_ip_access_allowed,
 )
+from apps.exams.services.exam_network import ExamNetworkDenied, final_entry_network_allowed
 from apps.exams.services.final_center import (
     ERROR_LOCKED,
     ERROR_RATE_LIMITED,
@@ -61,7 +62,9 @@ from apps.exams.services.final_center import (
     sync_ticket_completion,
     validate_entry,
 )
+from apps.exams.services.final_center.reentry import cabinet_pin_resume_denial
 from apps.exams.services.language_variants import available_language_options
+from apps.exams.views.student._final_device import final_entry_network_guarded
 from core.rls import bypass_rls
 
 logger = logging.getLogger("exams.final_center.student")
@@ -81,7 +84,13 @@ _TICKET_SELECT_RELATED = (
 
 
 def _ensure_hall_access(request):
-    """İmtahan zalı IP/CIDR qapısı (mövcud exam_center_gate xidməti)."""
+    """İmtahan zalı IP/CIDR qapısı (mövcud exam_center_gate xidməti).
+
+    2026-10-13 (gecə): əvvəlcə universitet şəbəkəsi (``EXAM_FINAL_INTERNAL_ONLY``) — kənar zona
+    ``ExamNetworkDenied`` alır, ``final_entry_network_guarded`` onu aydın 403 səhifəsinə/JSON-a çevirir.
+    """
+    if not final_entry_network_allowed(request):
+        raise ExamNetworkDenied()
     if not final_exam_access_allowed(request):
         raise PermissionDenied(pgettext("exams.view.final_center.permission", "final_center_ip_not_allowed"))
 
@@ -212,6 +221,7 @@ def _validated_session_ticket(request):
 
 
 @require_http_methods(["GET", "POST"])
+@final_entry_network_guarded
 def final_exam_entry(request):
     """
     `/exams/final/` — fərdi PIN ilə imtahan girişi (imtahan siyahısı YOX).
@@ -372,7 +382,13 @@ def _handle_student_pin_login(request, username, raw_pin, budget=None):
     # login OLUNMUR, _handle_login ilə eyni davranış).
     pin_ticket = None
     if entry_room is not None:
-        pin_ticket, ticket_error = ensure_pin_ticket(exam, student, entry_room, entry_computer)
+        # 2026-10-13 (gecə): davam edən cəhd — köhnə PIN (yeni PIN verilib) / başqa kompüter rədd olunur.
+        resume_denial, move_attempt = cabinet_pin_resume_denial(request, exam, student, entry_computer)
+        if resume_denial:
+            return _render_login(request, error=resume_denial, username=uname)
+        pin_ticket, ticket_error = ensure_pin_ticket(
+            exam, student, entry_room, entry_computer, move_attempt=move_attempt
+        )
         if pin_ticket is None:
             return _render_login(request, error=ticket_error, username=(username or "").strip())
         # W4 R7: claim + giriş audit hadisəsi (tarixçə «Girişlər» KPI-ı).
@@ -444,6 +460,7 @@ def _resolve_own_ticket(request, ticket_id):
 
 
 @login_required
+@final_entry_network_guarded
 def final_exam_waiting(request, ticket_id):
     """
     Gözləmə otağı. Real vaxt WS ilə işləyir (yüksək tezlikli polling YOX);
@@ -485,6 +502,7 @@ def final_exam_waiting(request, ticket_id):
 
 @login_required
 @require_POST
+@final_entry_network_guarded
 def final_exam_cancel(request, ticket_id):
     """Start-dan əvvəl gözləmə otağından imtina — cəhd haqqı yanmır."""
     _ensure_hall_access(request)
@@ -499,6 +517,7 @@ def final_exam_cancel(request, ticket_id):
 
 @login_required
 @require_POST
+@final_entry_network_guarded
 def final_exam_begin(request, ticket_id):
     """
     Oturum AKTİV olduqdan sonra attempt-in yaradılması. Sinxron startda hər
@@ -530,11 +549,14 @@ def final_exam_begin(request, ticket_id):
 
 @login_required
 @never_cache
+@final_entry_network_guarded
 def final_ticket_state(request, ticket_id):
     """
     Aşağı tezlikli fallback poll (WS kəsiləndə). Kompakt payload — sual/cavab
     məlumatı YOXDUR.
     """
+    if not final_entry_network_allowed(request):
+        raise ExamNetworkDenied()
     ticket, deny = _resolve_own_ticket(request, ticket_id)
     if deny is not None:
         return JsonResponse({"error": "entry_required"}, status=403)

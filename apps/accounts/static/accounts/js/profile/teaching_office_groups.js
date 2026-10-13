@@ -28,10 +28,14 @@
     var DRAWER_ID = "tofGroupStudentsDrawer";
     var ADD_DIALOG_ID = "tofGroupAddStudentsDialog";
     var MOVE_DIALOG_ID = "tofGroupMoveDialog";
-    var DIALOG_IDS = ["tofStudentTransferDialog", "tofStudentFreezeDialog", "tofStudentExpelDialog", ADD_DIALOG_ID, MOVE_DIALOG_ID];
+    // 2026-10-13 (gecə): «Starosta təyin et / dəyiş / götür» dialoqları — göndərişdən sonra çekmecə qayıdır.
+    var LEAD_DIALOG_ID = "tofGroupLeadDialog";
+    var LEAD_REMOVE_DIALOG_ID = "tofGroupLeadRemoveDialog";
+    var DIALOG_IDS = ["tofStudentTransferDialog", "tofStudentFreezeDialog", "tofStudentExpelDialog", ADD_DIALOG_ID, MOVE_DIALOG_ID, LEAD_DIALOG_ID, LEAD_REMOVE_DIALOG_ID];
     var state = {
         url: "", name: "", planUrl: "", candidatesUrl: "", groupActive: true,
-        rows: [], canManage: false, canMove: false, status: "", reopen: ""
+        rows: [], canManage: false, canMove: false, status: "", reopen: "",
+        lead: { name: "", username: "", warning: "" }
     };
 
     function drawer() { return document.getElementById(DRAWER_ID); }
@@ -68,6 +72,8 @@
         return out.join("");
     }
 
+    function isLead(row) { return !!state.lead.username && row.username === state.lead.username; }
+
     function rowHtml(row) {
         // Sahib (2026-09-07): «qeydiyyat qrupu» yox — ixtisas ŞİFRİ + qısa adı vacibdir.
         var meta = ["@" + row.username];
@@ -83,7 +89,9 @@
             (row.profile_url
                 ? '<a class="tof-students__link" href="' + esc(row.profile_url) + '" target="_blank" rel="noopener" title="' + esc(t("profile")) + '">' + esc(row.name) + "</a>"
                 : esc(row.name)) +
-            ' <span class="ems-badge ems-badge--' + esc(row.status) + '">' + esc(statusLabel(row.status)) + "</span></div>" +
+            ' <span class="ems-badge ems-badge--' + esc(row.status) + '">' + esc(statusLabel(row.status)) + "</span>" +
+            (isLead(row) ? ' <span class="ems-badge ems-badge--primary tof-lead-badge"><i class="fas fa-user-tie" aria-hidden="true"></i> ' + esc(leadText("badge")) + "</span>" : "") +
+            "</div>" +
             '<div class="tof-students__sub">' + esc(meta.join(" · ")) + "</div>" +
             "</div>" +
             '<div class="tof-students__actions">' + actionButtons(row) + "</div>" +
@@ -112,6 +120,70 @@
         }
     }
 
+    /* ---- Starosta paneli (2026-10-13 (gecə)) -------------------------------
+       Ad / xəbərdarlıq sətrin data-atributlarından gəlir (reyestr səhifəsi 2 sorğu ilə hesablayır);
+       «Starosta təyin et» dialoqunun variantları çekmecənin YÜKLƏNMİŞ siyahısından — yalnız qeydiyyatlı
+       tələbələr (server də yalnız onları qəbul edir). Düymələr JSON gələnə qədər gizlidir. */
+    function leadRoot() { var d = drawer(); return d ? d.querySelector("[data-tof-lead]") : null; }
+    function leadText(key) { var l = leadRoot(); return l ? (l.getAttribute("data-t-" + key) || "") : ""; }
+
+    function renderLead(ready) {
+        var box = leadRoot();
+        if (!box) { return; }
+        var lead = state.lead;
+        var nameEl = box.querySelector("[data-tof-lead-name]");
+        if (nameEl) {
+            nameEl.textContent = lead.name || leadText("none");
+            nameEl.classList.toggle("is-empty", !lead.name);
+        }
+        var warn = box.querySelector("[data-tof-lead-warn]");
+        if (warn) {
+            var warnText = lead.warning === "not_in_group" ? leadText("not-in-group") : (lead.warning === "multiple" ? leadText("multiple") : "");
+            warn.textContent = warnText;
+            warn.hidden = !warnText;
+        }
+        box.classList.toggle("has-warning", !!lead.warning);
+        var actions = box.querySelector("[data-tof-lead-actions]");
+        // Düymə bloku yalnız `can_assign_lead` olanda render olunur; qrup əhatəsini server yoxlayır (404).
+        var canLead = ready && state.groupActive;
+        if (actions) { actions.hidden = !canLead; }
+        var assign = box.querySelector("[data-tof-lead-assign]");
+        if (assign) {
+            var label = lead.name ? leadText("change") : leadText("assign");
+            var labelEl = assign.querySelector("[data-tof-lead-assign-label]");
+            if (labelEl) { labelEl.textContent = label; }
+            assign.setAttribute("data-tof-title", label);
+            assign.setAttribute("data-tof-prefill", prefill({ group_id: state.groupId || "" }));
+        }
+        var remove = box.querySelector("[data-tof-lead-remove]");
+        if (remove) {
+            remove.hidden = !lead.name;
+            remove.setAttribute("data-tof-prefill", prefill({ group_id: state.groupId || "" }));
+        }
+    }
+
+    function fillLeadDialog(dialogId) {
+        var dialog = document.getElementById(dialogId);
+        if (!dialog) { return; }
+        Array.prototype.forEach.call(dialog.querySelectorAll("[data-tof-lead-group-name]"), function (el) { el.textContent = state.name || ""; });
+        Array.prototype.forEach.call(dialog.querySelectorAll("[data-tof-lead-current-name]"), function (el) { el.textContent = state.lead.name || ""; });
+        var current = dialog.querySelector("[data-tof-lead-current]");
+        if (current) { current.hidden = !state.lead.name; }
+        var select = dialog.querySelector("[data-tof-lead-select]");
+        if (!select) { return; }
+        var placeholder = select.getAttribute("data-t-placeholder") || "";
+        var options = ['<option value="">' + esc(placeholder) + "</option>"];
+        state.rows.forEach(function (row) {
+            if (row.status !== "enrolled" || isLead(row)) { return; }
+            options.push('<option value="' + esc(row.id) + '">' + esc(row.name + " · @" + row.username) + "</option>");
+        });
+        select.innerHTML = options.join("");
+        select.value = "";
+        if (window.EMSBootstrapSelect && typeof window.EMSBootstrapSelect.refresh === "function") {
+            window.EMSBootstrapSelect.refresh(select);
+        }
+    }
+
     function render() {
         var r = root();
         if (!r) { return; }
@@ -126,6 +198,7 @@
             empty.hidden = state.rows.length > 0;
             if (emptyText) { emptyText.textContent = t("empty"); }
         }
+        renderLead(true);
         applyFilter();
     }
 
@@ -251,8 +324,15 @@
         state.candidatesUrl = button.getAttribute("data-candidates-url") || "";
         state.groupActive = button.getAttribute("data-group-active") !== "0";
         state.groupId = button.getAttribute("data-group-id") || "";
+        state.lead = {
+            name: button.getAttribute("data-lead-name") || "",
+            username: button.getAttribute("data-lead-username") || "",
+            warning: button.getAttribute("data-lead-warning") || ""
+        };
         state.rows = [];
+        state.canManage = false;
         resetDrawer(state.name);
+        renderLead(false);
         window.EMSOverlay.open(d, button);
         if (!state.url) { return; }
         var requestUrl = state.url;
@@ -300,6 +380,24 @@
             var target = dialog ? dialog.querySelector("[data-tof-movement-name]") : null;
             if (target) { target.textContent = button.getAttribute("data-tof-student-name") || ""; }
         });
+        // Starosta dialoqları — ortaq prefill-dən SONRA variantlar/adlar yazılır (2026-10-13 (gecə)).
+        window.EMSDelegate.on("click", "[data-tof-lead-assign]", function () { fillLeadDialog(LEAD_DIALOG_ID); });
+        window.EMSDelegate.on("click", "[data-tof-lead-remove]", function () { fillLeadDialog(LEAD_REMOVE_DIALOG_ID); });
+        // Starosta seçilməyibsə göndərmə (server də `record_id` tələb edir) — ortaq handler-dən ƏVVƏL.
+        document.addEventListener("submit", function (event) {
+            var form = event.target;
+            if (!form || !form.closest || !form.closest("#" + LEAD_DIALOG_ID)) { return; }
+            var select = form.querySelector("[data-tof-lead-select]");
+            if (!select || select.value) { return; }
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            var box = form.querySelector("[data-ems-form-error]");
+            if (box) {
+                box.textContent = select.getAttribute("data-t-placeholder") || "";
+                box.hidden = false;
+            }
+            select.focus();
+        }, true);
         // «Tələbə əlavə et» — ortaq prefill-dən SONRA (bubble sırası) seçici qurulur.
         window.EMSDelegate.on("click", "[data-tof-add-students]", function (event, button) {
             buildAddPicker(button);

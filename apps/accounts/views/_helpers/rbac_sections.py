@@ -364,7 +364,7 @@ def apply_permission_section_gates(
             allowed_sections.add(section)
     # «Akademik qeydlər» (B2) + `journal.view` ilə jurnal linki (B5) — açar + struktur əhatəsi (2026-10-13).
     allowed_sections |= scope_gated_sections(user, organization, permissions, privileged=privileged)
-    # «Qrupum» (B10, 2026-10-13): `member.view` əhatəsi AKADEMİK QRUP olan aktor (baş tələbə) — sorğusuz.
+    # «Starosta» (B10, 2026-10-13): `member.view` əhatəsi AKADEMİK QRUP olan aktor (baş tələbə) — sorğusuz.
     allowed_sections |= my_group_sections(user, organization)
     # «Rollar» (`org-roles`, B15): menyu alias ilə açılır (`rbac_university_sections`), data isə
     # `role.view` istəyir (`org_admin/context.py`) — açarsız aktor boş panel görməsin.

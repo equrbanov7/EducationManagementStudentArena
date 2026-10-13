@@ -222,13 +222,21 @@ def records_student_detail(request):
 
     data = transcript.build_student_overall_record(student=student, organization=organization)
     student_name = (student.get_full_name() or "").strip() or student.username
+    # 2026-10-13 (gecə): imtahan cəhdləri + apellyasiya izi (sahibin 2026-09-07 memo-su — koordinator/dekanlıq
+    # görməlidir). YALNIZ-OXU; scope yuxarıdakı ``student_in_scope`` ilə artıq yoxlanıb.
+    from apps.appeals.public import student_exam_history
+
+    exam_history = student_exam_history(student=student, organization=organization)
     if not data["has_record"]:
-        return JsonResponse({"has_access": True, "student_name": student_name, "semesters": []})
+        return JsonResponse(
+            {"has_access": True, "student_name": student_name, "semesters": [], "exam_history": exam_history}
+        )
     return JsonResponse(
         {
             "has_access": True,
             "student_name": student_name,
             "semesters": [_serialize_semester(sem) for sem in data["semesters"]],
+            "exam_history": exam_history,
         }
     )
 

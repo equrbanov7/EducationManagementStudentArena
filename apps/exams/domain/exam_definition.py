@@ -87,6 +87,10 @@ class Exam(ExamAccessPolicyMixin, models.Model):
         default=False,
         help_text=pgettext_lazy("exams.model.exam.help", "results_hidden_from_students"),
     )
+    # 2026-10-13 (gecə): nəticə gizli → görünən edildiyi SON an. Apellyasiya pəncərəsi
+    # (apps/appeals/services/window.py) nəticə tələbəyə AÇILAN andan sayılır; NULL = heç
+    # gizlədilməyib (pəncərə cəhdin bitmə / yoxlanma anından sayılır — köhnə davranış).
+    results_published_at = models.DateTimeField(null=True, blank=True, editable=False)
     total_duration_minutes = models.PositiveIntegerField(
         pgettext_lazy("exams.model.exam.field", "total_duration_minutes"),
         blank=True,

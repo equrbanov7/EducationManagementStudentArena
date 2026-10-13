@@ -440,7 +440,16 @@
             return "az";
         }
         var shortCode = normalized.slice(0, 2);
+        if (extraLanguage(shortCode)) {
+            return shortCode;
+        }
         return ["az", "en", "ru", "tr"].indexOf(shortCode) !== -1 ? shortCode : "az";
+    }
+
+    // 2026-10-13 (gecə): əlavə dillər (məs. «de» — labels_de.js) ayrıca fayldan gəlir.
+    function extraLanguage(code) {
+        var extras = ns.extraLabelLanguages || {};
+        return Object.prototype.hasOwnProperty.call(extras, code) ? extras[code] : null;
     }
 
     function titleCase(rawText) {
@@ -455,6 +464,17 @@
 
     function createContext() {
         var uiLang = normalizeLang(document.documentElement ? document.documentElement.lang : "az");
+        var extra = extraLanguage(uiLang);
+        if (extra) {
+            return {
+                uiLang: uiLang,
+                text: extra.uiText,
+                moduleLabels: extra.moduleLabels,
+                moduleSubtitles: extra.moduleSubtitles,
+                actionWordMap: extra.actionWordMap,
+                describe: extra.describe
+            };
+        }
         return {
             uiLang: uiLang,
             text: UI_TEXT[uiLang] || UI_TEXT.az,
@@ -528,6 +548,9 @@
         var moduleLabel = getModuleLabel(ctx, prefix);
         var actionLabel = getActionLabelFromPermission(ctx, value) || ctx.text.genericAction;
 
+        if (typeof ctx.describe === "function") {
+            return ctx.describe(moduleLabel, actionLabel);
+        }
         if (ctx.uiLang === "en") {
             return 'Allows "' + actionLabel + '" in the "' + moduleLabel + '" module.';
         }

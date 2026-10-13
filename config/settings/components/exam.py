@@ -99,6 +99,14 @@ EXAM_EXTRACTION_JOB_RETENTION_DAYS = _env_int_setting("EXAM_EXTRACTION_JOB_RETEN
 # şlüzü/agenti vasitəsilə tətbiq oluna bilər; server tərəfi IP/CIDR yoxlayır.
 FINAL_EXAM_ALLOWED_IPS = [item.strip() for item in os.getenv("FINAL_EXAM_ALLOWED_IPS", "").split(",") if item.strip()]
 
+# --- Final/midterm yalnız universitet şəbəkəsindən (2026-10-13, gecə) ---------
+# Sahibin tələbi: «ancaq universitet şəbəkəsinə qoşulu olarkən ... final və midterm
+# imtahanını verə bilər». True → final/midterm imtahanının giriş (/exams/final/), start,
+# cavab yazısı, təhvil və nəzarət heartbeat-i YALNIZ daxili zonadan (``core.network_zone``:
+# nginx ``X-EMS-Zone`` / ``INTERNAL_NETWORKS``) qəbul olunur — ``NETWORK_ZONE_ENFORCED``-dən
+# ASILI DEYİL. Test ayarları bunu import etmir (kod defoltu False); testlər override edir.
+EXAM_FINAL_INTERNAL_ONLY = _env_bool_setting("EXAM_FINAL_INTERNAL_ONLY", True)
+
 # --- İmtahan zalı MAC yoxlaması (ARP agenti) ---------------------------------
 # "off" → köhnə IP-əsaslı kompüter yoxlaması (dev/test default).
 # "arp_agent" → müştəri MAC-ı host-un ARP cədvəlindən (docker/arp-agent
@@ -220,3 +228,10 @@ AUTH_OTP_RESEND_COOLDOWN_SECONDS = int(os.getenv("AUTH_OTP_RESEND_COOLDOWN_SECON
 AUTH_OTP_MAX_ATTEMPTS = int(os.getenv("AUTH_OTP_MAX_ATTEMPTS", "5"))
 AUTH_OTP_MAX_SENDS_PER_HOUR = int(os.getenv("AUTH_OTP_MAX_SENDS_PER_HOUR", "5"))
 AUTH_PENDING_SIGNUP_TTL_SECONDS = int(os.getenv("AUTH_PENDING_SIGNUP_TTL_SECONDS", "86400"))
+
+# --- Apellyasiya pəncərəsi (2026-10-13 gecə, sahib: «evdən 3 gün ərzində apellyasiya verilə») ---
+# Nəticə tələbəyə AÇILDIĞI gündən sonra neçə TƏQVİM günü müraciət etmək olar (son günün sonuna
+# qədər, ``APPEAL_WINDOW_TIMEZONE`` vaxtı ilə). İşləmə vaxtı «Sistem tənzimləmələri»ndən
+# (``exam.appeal_window_days``) də dəyişir; bu dəyər onun defoltudur.
+APPEAL_WINDOW_DAYS = _env_int_setting("APPEAL_WINDOW_DAYS", 3, minimum=1)
+APPEAL_WINDOW_TIMEZONE = os.getenv("APPEAL_WINDOW_TIMEZONE", "Asia/Baku").strip() or "Asia/Baku"

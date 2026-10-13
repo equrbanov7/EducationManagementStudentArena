@@ -18,7 +18,7 @@ from urllib.parse import urlencode
 from django.urls import reverse
 from django.utils.translation import pgettext
 
-from . import semester_readiness
+from . import groups_leads, semester_readiness
 
 _CTX_PLAN = "accounts.curriculum"
 _CTX_GROUPS = "accounts.groups"
@@ -200,6 +200,8 @@ def _group_row(row, *, can_manage):
             {"text": row["admission_year"] or "—", "num": True},
             {"text": row["students"], "num": True},
             {"text": row["tutor"] or "—"},
+            # 2026-10-13 (gecə): starosta sütunu — ad / «—» / xəbərdarlıq (bax groups_leads.py).
+            groups_leads.lead_cell(row),
             {"badge_family": "catalog_entry", "badge_key": row["status_key"]},
         ],
         # Əməl sütunu HƏR KƏSƏ görünür: «Tələbələr» çekmecəsi və DOCX oxu
@@ -248,6 +250,7 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
         ("", pgettext(_CTX_GROUPS, "Qəbul")),
         ("", pgettext(_CTX_GROUPS, "Tələbə")),
         ("", pgettext(_CTX_GROUPS, "Kurator")),
+        ("", pgettext(_CTX_GROUPS, "Starosta")),
         ("", pgettext(_CTX_GROUPS, "Vəziyyət")),
         ("", pgettext(_CTX_GROUPS, "Əməllər")),
     ]
@@ -260,6 +263,8 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
     # keçid yoxdur — reyestr TƏK qrup səthidir.
     section["current_year"] = payload["current_year"]
     section["default_education_form"] = "full_time"
+    groups_leads.attach_group_leads(active_organization, payload["rows"])
+    section.update(groups_leads.lead_dialog_context(request, active_organization))
     section["table_rows"] = [_group_row(row, can_manage=payload["can_manage"]) for row in payload["rows"]]
     section["state_title"] = pgettext(_CTX_GROUPS, "Qrup tapılmadı")
     section["state_body"] = pgettext(_CTX_GROUPS, "Süzgəcləri dəyişin və ya yeni qrup əlavə edin.")
