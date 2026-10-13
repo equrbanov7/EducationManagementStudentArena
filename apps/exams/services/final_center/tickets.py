@@ -224,6 +224,15 @@ def enter_waiting(ticket, *, language, request=None) -> bool:
     now = timezone.now()
     if ticket.status in (TICKET_STATUS_WAITING, TICKET_STATUS_READY):
         return True  # yenidən qoşulma — status qorunur
+    # 2026-10-13 (gecə): «gündə bir final» / «eyni anda bir imtahan» — gözləmə otağına girişdə ERKƏN
+    # (aydın mesaj modalda); həlledici yoxlama cəhd yaradılanda kilid altındadır (official_start).
+    if not ticket.attempt_id:
+        from apps.exams.services.official_start import official_day_rule_applies
+
+        if official_day_rule_applies(ticket.exam, ticket.student):
+            blocked, reason = ticket.exam._concurrent_or_same_day_block(ticket.student)
+            if blocked:
+                raise TicketStateError(reason)
     ok = transition_ticket(
         ticket,
         TICKET_STATUS_WAITING,
@@ -317,37 +326,13 @@ def begin_attempt_for_ticket(ticket):
         )
     _ensure_exam_start_policy(ticket)
 
-    with transaction.atomic():
-        attempt, _created = _create_attempt_or_get_active(
-            ticket.exam,
-            ticket.student,
-            language=ticket.language or None,
-            language_variant=(get_active_variant(ticket.exam, ticket.language) if ticket.language else None),
-        )
-        # Cəhdi zal/kompüterlə möhürlə — otaq izolyasiyası (exam_center_gate)
-        # və zal monitoru bu sahələrə əsaslanır.
-        room = session.room
-        computer = None
-        if ticket.seat_number is not None:
-            computer = room.computers.filter(seat_number=ticket.seat_number, is_active=True).first()
-        if attempt.room_id != room.pk or attempt.room_computer_id != (computer.pk if computer else None):
-            attempt.room = room
-            attempt.room_computer = computer
-            attempt.save(update_fields=["room", "room_computer"])
-        transition_ticket(
-            ticket,
-            TICKET_STATUS_ACTIVE,
-            extra_updates={"attempt": attempt, "started_at": timezone.now()},
-        )
-        # QEYD (2026-07 dəyişikliyi): ExamStudentPin attempt başlayanda ARTIQ
-        # ləğv EDİLMİR. Tələbə eyni imtahanı bir neçə otaqda / kompüterdə davam
-        # etdirə bilməlidir (kompüter dəyişməsi, texniki fasilə) — öz fərdi PIN-i
-        # ilə istənilən QEYDLİ kompüterdən yenidən girib aktiv cəhdinə qayıtsın.
-        # Təkrar-giriş riski onsuz da qorunur: MAC/IP gate yalnız qeydli
-        # kompüterlərə icazə verir, cəhd limiti YENİ cəhdi bloklayır (PIN yalnız
-        # mövcud aktiv cəhdə qaytarır), imtahan bitəndə isə limit girişi kəsir.
-        # Ticket PIN (nəzarətçinin verdiyi) yenə birdəfəlikdir.
-        revoke_ticket_pin(ticket)
+    from apps.exams.services.official_start import OfficialStartBlocked
+
+    try:
+        with transaction.atomic():
+            attempt = _begin_locked(ticket, session, _create_attempt_or_get_active)
+    except OfficialStartBlocked as blocked:
+        raise TicketStateError(blocked.reason) from blocked
     if not attempt.answers.exists():
         generate_random_questions_for_attempt(attempt)
 
@@ -355,6 +340,49 @@ def begin_attempt_for_ticket(ticket):
         session.pk,
         {"event": "student_started", "ticket_id": ticket.pk, "status": TICKET_STATUS_ACTIVE},
     )
+    return attempt
+
+
+def _begin_locked(ticket, session, create_attempt):
+    """``begin_attempt_for_ticket``-in tranzaksiya hissəsi: cəhd + zal möhürü + bilet keçidi.
+
+    2026-10-13 (gecə): ``create_attempt`` (``_create_attempt_or_get_active``) rəsmi imtahanda
+    tələbə sətri kilidi altında «gündə bir final» qaydasını yoxlayır — bilet axını əvvəl bu
+    qaydanı ümumiyyətlə keçirirdi (``OfficialStartBlocked`` → ``TicketStateError``).
+    """
+    attempt, _created = create_attempt(
+        ticket.exam,
+        ticket.student,
+        language=ticket.language or None,
+        language_variant=(get_active_variant(ticket.exam, ticket.language) if ticket.language else None),
+    )
+    # Cəhdi zal/kompüterlə möhürlə — otaq izolyasiyası (exam_center_gate)
+    # və zal monitoru bu sahələrə əsaslanır.
+    room = session.room
+    computer = None
+    if ticket.seat_number is not None:
+        computer = room.computers.filter(seat_number=ticket.seat_number, is_active=True).first()
+    if attempt.room_id != room.pk or attempt.room_computer_id != (computer.pk if computer else None):
+        attempt.room = room
+        attempt.room_computer = computer
+        attempt.save(update_fields=["room", "room_computer"])
+    transition_ticket(
+        ticket,
+        TICKET_STATUS_ACTIVE,
+        extra_updates={"attempt": attempt, "started_at": timezone.now()},
+    )
+    # QEYD (2026-07 dəyişikliyi): ExamStudentPin attempt başlayanda ARTIQ
+    # ləğv EDİLMİR. Tələbə eyni imtahanı bir neçə otaqda / kompüterdə davam
+    # etdirə bilməlidir (kompüter dəyişməsi, texniki fasilə) — öz fərdi PIN-i
+    # ilə istənilən QEYDLİ kompüterdən yenidən girib aktiv cəhdinə qayıtsın.
+    # Təkrar-giriş riski onsuz da qorunur: MAC/IP gate yalnız qeydli
+    # kompüterlərə icazə verir, cəhd limiti YENİ cəhdi bloklayır (PIN yalnız
+    # mövcud aktiv cəhdə qaytarır), imtahan bitəndə isə limit girişi kəsir.
+    # Ticket PIN (nəzarətçinin verdiyi) yenə birdəfəlikdir.
+    # 2026-10-13 (gecə): davam edən cəhdə kabinet PIN-i ilə yenidən giriş artıq yalnız EYNİ
+    # kompüter/brauzerdən (və ya nəzarətçi təsdiqi ilə) mümkündür; yeni PIN verilibsə köhnə
+    # kabinet PIN-i etibarsızdır — bax ``reentry.cabinet_pin_resume_denial``.
+    revoke_ticket_pin(ticket)
     return attempt
 
 

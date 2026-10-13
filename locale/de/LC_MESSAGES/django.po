@@ -96994,3 +96994,39 @@ msgstr "Kein Foto hochgeladen — zeigen Sie der Aufsicht Ihren Ausweis."
 msgctxt "language"
 msgid "name_de"
 msgstr "Deutsch"
+
+msgctxt "exams.network"
+msgid "Final və midterm imtahanları yalnız universitet şəbəkəsindən verilir. Universitetin daxili şəbəkəsinə (imtahan zalı kompüterinə) qoşulun və səhifəni yeniləyin."
+msgstr "Abschluss- und Zwischenprüfungen können nur aus dem Universitätsnetz abgelegt werden. Verbinden Sie sich mit dem internen Netz der Universität (Prüfungsraum-Computer) und laden Sie die Seite neu."
+
+msgctxt "exams.network"
+msgid "Yalnız universitet şəbəkəsindən"
+msgstr "Nur aus dem Universitätsnetz"
+
+msgctxt "exams.network"
+msgid "Final və midterm imtahanı"
+msgstr "Abschluss- und Zwischenprüfung"
+
+msgctxt "exams.network"
+msgid "Cavablarınız serverdə saxlanılıb — daxili şəbəkədən imtahan qaldığı yerdən davam edəcək."
+msgstr "Ihre Antworten sind auf dem Server gespeichert — im internen Netz geht die Prüfung dort weiter, wo Sie aufgehört haben."
+
+msgctxt "exams.network"
+msgid "Universitet şəbəkəsi"
+msgstr "Universitätsnetz"
+
+msgctxt "exams.network"
+msgid "Səhifəni yenilə"
+msgstr "Seite neu laden"
+
+msgctxt "exams.network"
+msgid "Şəbəkə yoxlaması serverdə aparılır və rəd hadisəsi jurnalda qeyd olunur."
+msgstr "Die Netzprüfung erfolgt auf dem Server, jede Ablehnung wird protokolliert."
+
+msgctxt "exams.final_center.entry"
+msgid "Sizə nəzarətçi tərəfindən yeni PIN verilib — köhnə PIN artıq etibarsızdır. Yeni PIN ilə daxil olun."
+msgstr "Die Aufsicht hat Ihnen eine neue PIN ausgestellt — die alte PIN ist ungültig. Melden Sie sich mit der neuen PIN an."
+
+msgctxt "exams.final_center.entry"
+msgid "İmtahanınız başqa kompüterdə davam edir. Kompüteri dəyişmək üçün nəzarətçidən yeni PIN istəyin — imtahan qaldığı yerdən davam edəcək."
+msgstr "Ihre Prüfung läuft auf einem anderen Computer. Um den Computer zu wechseln, bitten Sie die Aufsicht um eine neue PIN — die Prüfung geht dort weiter, wo Sie aufgehört haben."

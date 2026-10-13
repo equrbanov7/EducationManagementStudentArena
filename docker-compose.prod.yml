@@ -176,6 +176,8 @@ x-app-env: &app-env
   FINAL_EXAM_PIN_MAX_FAILURES: ${FINAL_EXAM_PIN_MAX_FAILURES:-5}
   FINAL_EXAM_PIN_LOCK_MINUTES: ${FINAL_EXAM_PIN_LOCK_MINUTES:-10}
   FINAL_EXAM_ENTRY_RATE_PER_MINUTE: ${FINAL_EXAM_ENTRY_RATE_PER_MINUTE:-10}
+  # 2026-10-13 (gecə): final/midterm yalnız universitet şəbəkəsindən (daxili zona); False → söndürülür.
+  EXAM_FINAL_INTERNAL_ONLY: ${EXAM_FINAL_INTERNAL_ONLY:-True}
   LIVE_EXAM_PUBLIC_HOST: ${LIVE_EXAM_PUBLIC_HOST:-}
   # Audit 2026-09-28 SA-03 / EX28-10: hesab səviyyəli login limiti və live-quiz IP limitləri.
   LOGIN_ACCOUNT_RATE_LIMIT: ${LOGIN_ACCOUNT_RATE_LIMIT:-20/1h}

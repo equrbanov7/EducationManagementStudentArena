@@ -34,7 +34,6 @@ Kənar qat (nginx) eyni iki qaydanı IP-yə görə TƏKRAR tətbiq edir (defense
 
 from __future__ import annotations
 
-import ipaddress
 import logging
 
 from django.conf import settings
@@ -44,15 +43,23 @@ from django.urls import reverse
 
 from core.audit import log_action
 from core.constants import AuditAction
+
+# 2026-10-13 (gecə): zona hesabı shared kernel-ə (``core.network_zone``) köçürüldü — final/midterm
+# imtahan qapısı (exams) da eyni qaydanı işlədir; adlar geriyə-uyğunluq üçün buradan ixrac olunur.
+from core.network_zone import (  # noqa: F401
+    ZONE_EXTERNAL,
+    ZONE_HEADER,
+    ZONE_INTERNAL,
+    _internal_networks,
+    request_network_zone,
+    resolve_zone,
+    zone_for_ip,
+)
 from core.utils import get_client_ip
 
 from .models import ProfileRole
 
 logger = logging.getLogger(__name__)
-
-ZONE_INTERNAL = "internal"
-ZONE_EXTERNAL = "external"
-ZONE_HEADER = "HTTP_X_EMS_ZONE"
 
 #: Kənardan da işləyən rollar. Qalan HƏR ŞEY inzibati sayılır (fail-closed).
 STUDENT_ROLE_NAMES = frozenset({ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT, "alumni"})
@@ -72,40 +79,6 @@ NEUTRAL_ROLE_NAMES = frozenset({ProfileRole.MEMBER})
 
 #: Kənar zonada inzibati hesab üçün də açıq qalan yollar (prefiks).
 _ALWAYS_OPEN_PREFIXES = ("/static/", "/media/", "/health/", "/ping/", "/i18n/", "/jsi18n/")
-
-
-def _internal_networks():
-    out = []
-    for raw in getattr(settings, "INTERNAL_NETWORKS", None) or []:
-        raw = str(raw or "").strip()
-        if not raw:
-            continue
-        try:
-            out.append(ipaddress.ip_network(raw, strict=False))
-        except ValueError:
-            logger.warning("INTERNAL_NETWORKS girişi yanlış formatdadır, ötürülür: %r", raw)
-    return out
-
-
-def zone_for_ip(ip_text) -> str:
-    """IP → zona. Oxunmayan IP fail-closed = external."""
-    try:
-        ip = ipaddress.ip_address(str(ip_text or "").strip())
-    except ValueError:
-        return ZONE_EXTERNAL
-    for network in _internal_networks():
-        if ip in network:
-            return ZONE_INTERNAL
-    return ZONE_EXTERNAL
-
-
-def resolve_zone(request) -> str:
-    """Sorğunun zonası — etibarlı nginx başlığı (opsional) və ya IP hesablaması."""
-    if getattr(settings, "NETWORK_ZONE_TRUST_HEADER", False):
-        header = (request.META.get(ZONE_HEADER) or "").strip().lower()
-        if header in (ZONE_INTERNAL, ZONE_EXTERNAL):
-            return header
-    return zone_for_ip(get_client_ip(request) or request.META.get("REMOTE_ADDR"))
 
 
 def _is_view_as(request) -> bool:

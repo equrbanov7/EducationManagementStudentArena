@@ -96237,3 +96237,39 @@ msgstr "Фото не загружено — покажите удостовер
 msgctxt "language"
 msgid "name_de"
 msgstr "Немецкий"
+
+msgctxt "exams.network"
+msgid "Final və midterm imtahanları yalnız universitet şəbəkəsindən verilir. Universitetin daxili şəbəkəsinə (imtahan zalı kompüterinə) qoşulun və səhifəni yeniləyin."
+msgstr "Финальные и промежуточные экзамены сдаются только из сети университета. Подключитесь к внутренней сети университета (компьютер экзаменационного зала) и обновите страницу."
+
+msgctxt "exams.network"
+msgid "Yalnız universitet şəbəkəsindən"
+msgstr "Только из сети университета"
+
+msgctxt "exams.network"
+msgid "Final və midterm imtahanı"
+msgstr "Финальный и промежуточный экзамен"
+
+msgctxt "exams.network"
+msgid "Cavablarınız serverdə saxlanılıb — daxili şəbəkədən imtahan qaldığı yerdən davam edəcək."
+msgstr "Ваши ответы сохранены на сервере — из внутренней сети экзамен продолжится с того же места."
+
+msgctxt "exams.network"
+msgid "Universitet şəbəkəsi"
+msgstr "Сеть университета"
+
+msgctxt "exams.network"
+msgid "Səhifəni yenilə"
+msgstr "Обновить страницу"
+
+msgctxt "exams.network"
+msgid "Şəbəkə yoxlaması serverdə aparılır və rəd hadisəsi jurnalda qeyd olunur."
+msgstr "Проверка сети выполняется на сервере, каждый отказ записывается в журнал."
+
+msgctxt "exams.final_center.entry"
+msgid "Sizə nəzarətçi tərəfindən yeni PIN verilib — köhnə PIN artıq etibarsızdır. Yeni PIN ilə daxil olun."
+msgstr "Наблюдатель выдал вам новый PIN — старый PIN больше не действует. Войдите с новым PIN."
+
+msgctxt "exams.final_center.entry"
+msgid "İmtahanınız başqa kompüterdə davam edir. Kompüteri dəyişmək üçün nəzarətçidən yeni PIN istəyin — imtahan qaldığı yerdən davam edəcək."
+msgstr "Ваш экзамен продолжается на другом компьютере. Чтобы сменить компьютер, попросите у наблюдателя новый PIN — экзамен продолжится с того же места."

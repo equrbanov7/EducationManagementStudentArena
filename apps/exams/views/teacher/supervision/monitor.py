@@ -25,6 +25,8 @@ from apps.exams.services.supervision import (
 )
 from core.rate_limit import record_rate_limit_hit
 
+from ._attempt_gate import attempt_api_gate
+
 # EXAM-P1-10: tələbə brauzerindən gələn supervision incident POST-u
 # etibarsızdır — payload sərt validasiya olunur və per-attempt throttle
 # tətbiq edilir ki, saxta/spam hadisələr audit sayını şişirdə bilməsin.
@@ -108,6 +110,11 @@ def log_incident_api(request, attempt_id):
         attempt.expire_if_time_limit_reached()
     if attempt.is_finished:
         return JsonResponse({"error": "Attempt is already finished."}, status=400)
+    # 2026-10-13 (gecə): köhnə kompüterdəki tab (yeni PIN verilib) / kənar şəbəkə hadisə yaza bilməz —
+    # əks halda pozuntu sayğacı ilə yeni kompüterdəki cəhdi kilidləyə bilərdi.
+    denied = attempt_api_gate(request, attempt, where="supervision_incident")
+    if denied is not None:
+        return denied
 
     body, error_response = _parse_incident_body(request)
     if error_response is not None:
@@ -198,6 +205,9 @@ def supervision_status_api(request, attempt_id):
     )
     from apps.exams.services.final_center import clear_entry_session, final_attempt_entry_session_valid
 
+    network_denied = attempt_api_gate(request, attempt, where="supervision_status", check_entry_session=False)
+    if network_denied is not None:
+        return network_denied
     if not final_attempt_entry_session_valid(request, attempt):
         clear_entry_session(request)
         logout(request)
