@@ -15,6 +15,7 @@ bir dəfə yazır ki, tarixçədə iz qalsın.
 
 from __future__ import annotations
 
+import re
 import time
 
 from django.core.cache import caches
@@ -60,27 +61,81 @@ def _clean_state(state) -> dict:
     return clean
 
 
-def record_heartbeat(attempt_id: int, state=None, *, now: float | None = None) -> dict:
-    """Heartbeat-i yazır; ``{"gap_seconds": int|None}`` qaytarır.
+#: Bir səhifə yükləməsinin təsadüfi id-si (``proctor_signals.js``) — yalnız bu format qəbul olunur.
+_CLIENT_ID_RE = re.compile(r"^[A-Za-z0-9_-]{8,40}$")
+#: İki səhifənin «eyni anda canlı» sayılması üçün maks. fasilə (2 interval + ehtiyat).
+CONCURRENT_WINDOW_SECONDS = 2 * HEARTBEAT_INTERVAL_SECONDS + 10
+#: Yaddaşda saxlanan son səhifə id-ləri (köhnələri atılır).
+_MAX_PEERS = 4
+_PEER_TTL_SECONDS = 10 * 60
 
-    ``gap_seconds`` — əvvəlki heartbeat ``HEARTBEAT_STALE_SECONDS``-dan köhnədirsə
-    fasilənin uzunluğu (çağıran onu ``heartbeat_gap`` siqnalı kimi qeyd edir).
+
+def _clean_client_id(value):
+    if isinstance(value, str) and _CLIENT_ID_RE.match(value):
+        return value
+    return None
+
+
+def _concurrent_peer(peers: dict, client_id: str, now: float) -> bool:
+    """Bu səhifənin ƏVVƏLKİ heartbeat-indən sonra BAŞQA səhifə də heartbeat göndəribmi?
+
+    Səhv-müsbətdən qorunma (2026-10-13, gecə): səhifəni yeniləmək (reload) yeni id
+    yaradır, köhnə id isə bir daha göndərmir — «növbələşmə» (A → B → A) yalnız iki
+    səhifə EYNİ ANDA açıq olanda baş verir (iki cihaz və ya iki tab).
+    """
+    previous_self = peers.get(client_id)
+    if previous_self is None:
+        return False
+    for other, ts in peers.items():
+        if other == client_id or not isinstance(ts, (int, float)):
+            continue
+        if ts > previous_self and now - ts <= CONCURRENT_WINDOW_SECONDS:
+            return True
+    return False
+
+
+def record_heartbeat(attempt_id: int, state=None, *, now: float | None = None, ip: str | None = None) -> dict:
+    """Heartbeat-i yazır; ``{"gap_seconds", "concurrent", "ip_change"}`` qaytarır.
+
+    * ``gap_seconds`` — əvvəlki heartbeat ``HEARTBEAT_STALE_SECONDS``-dan köhnədirsə
+      fasilənin uzunluğu (çağıran onu ``heartbeat_gap`` siqnalı kimi qeyd edir);
+    * ``concurrent`` — eyni cəhd iki canlı səhifədən gəlir (``state.cid`` növbələşməsi);
+    * ``ip_change`` — ``(köhnə, yeni)`` IP cütü, cəhd ortasında dəyişibsə.
     """
     now = time.time() if now is None else now
-    payload = _clean_state(state)
+    raw_state = state if isinstance(state, dict) else {}
+    payload = _clean_state(raw_state)
     payload["ts"] = now
-    gap = None
+    client_id = _clean_client_id(raw_state.get("cid"))
+    result = {"gap_seconds": None, "concurrent": False, "ip_change": None}
     try:
         cache = _cache()
         previous = cache.get(_key(attempt_id))
-        if isinstance(previous, dict) and isinstance(previous.get("ts"), (int, float)):
+        previous = previous if isinstance(previous, dict) else {}
+        if isinstance(previous.get("ts"), (int, float)):
             delta = now - previous["ts"]
             if delta > HEARTBEAT_STALE_SECONDS:
-                gap = int(delta)
+                result["gap_seconds"] = int(delta)
+        peers = previous.get("peers") if isinstance(previous.get("peers"), dict) else {}
+        peers = {k: v for k, v in peers.items() if isinstance(v, (int, float)) and now - v <= _PEER_TTL_SECONDS}
+        if client_id:
+            result["concurrent"] = _concurrent_peer(peers, client_id, now)
+            peers[client_id] = now
+            if len(peers) > _MAX_PEERS:
+                peers = dict(sorted(peers.items(), key=lambda item: item[1], reverse=True)[:_MAX_PEERS])
+        payload["peers"] = peers
+        previous_ip = previous.get("ip") if isinstance(previous.get("ip"), str) else None
+        if ip:
+            ip = str(ip)[:45]
+            if previous_ip and previous_ip != ip:
+                result["ip_change"] = (previous_ip, ip)
+            payload["ip"] = ip
+        elif previous_ip:
+            payload["ip"] = previous_ip
         cache.set(_key(attempt_id), payload, _TTL_SECONDS)
     except Exception:  # noqa: BLE001 — cache nasazlığı imtahanı dayandırmamalıdır
-        return {"gap_seconds": None}
-    return {"gap_seconds": gap}
+        return {"gap_seconds": None, "concurrent": False, "ip_change": None}
+    return result
 
 
 def heartbeat_map(attempt_ids) -> dict:
@@ -124,6 +179,7 @@ __all__ = [
     "HEARTBEAT_GRACE_SECONDS",
     "HEARTBEAT_INTERVAL_SECONDS",
     "HEARTBEAT_STALE_SECONDS",
+    "CONCURRENT_WINDOW_SECONDS",
     "clear_heartbeat",
     "heartbeat_map",
     "heartbeat_state",

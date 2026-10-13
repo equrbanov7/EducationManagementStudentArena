@@ -4,11 +4,14 @@
 # SHARED VIEWS (bütün user-lər üçün ortaq)
 # ═══════════════════════════════════════════════════════════════
 from .exam_center import (
+    exam_center_attempt_note,
     exam_center_attempt_violations,
     exam_center_final_device_change,
     exam_center_pin_search,
     exam_center_reports,
     exam_center_room_assign_invigilators,
+    exam_center_room_duty_create,
+    exam_center_room_duty_revoke,
     exam_center_room_end_all,
     exam_center_room_exam_hall,
     exam_center_room_list,
@@ -278,7 +281,10 @@ __all__ = [
     "stats_teacher_search",
     "exam_center_student_pins",
     "exam_center_reports",
+    "exam_center_attempt_note",
     "exam_center_room_assign_invigilators",
+    "exam_center_room_duty_create",
+    "exam_center_room_duty_revoke",
     "exam_center_room_exam_hall",
     "exam_center_room_list",
     "exam_center_room_monitor",

@@ -1,0 +1,37 @@
+{% load i18n %}
+{% comment %}
+  Nəzarətçinin «növbə zolağı» (2026-10-13, gecə) — vaxtla məhdud çıxışı açıq göstərir:
+  hansı zal, hansı aralıq və çıxışın NƏ VAXT avtomatik bağlanacağı. `cards` —
+  `duties.duty_cards()` nəticəsi; `link` — True olarsa zal monitoruna keçid.
+{% endcomment %}
+{% if cards %}
+<section class="fxc-duty-strip" aria-label="{% trans 'Nəzarət növbələriniz' context 'exams.final_center.duty' %}">
+  <h2 class="fxc-duty-strip__title">
+    <i class="fas fa-user-shield" aria-hidden="true"></i>
+    {% trans "Nəzarət növbələriniz" context "exams.final_center.duty" %}
+  </h2>
+  <ul class="fxc-duty-strip__list">
+    {% for card in cards %}
+    <li class="fxc-duty-card{% if card.overtime %} fxc-duty-card--overtime{% endif %}">
+      <div class="fxc-duty-card__room">
+        <i class="fas fa-door-open" aria-hidden="true"></i>
+        <b>{{ card.room.name }}</b> <code>{{ card.room.code }}</code>
+      </div>
+      <div class="fxc-duty-card__time">{{ card.starts_at|date:"d.m H:i" }} – {{ card.ends_at|date:"H:i" }}</div>
+      <div class="fxc-duty-card__until">
+        {% if card.overtime %}
+          {% blocktrans with t=card.until|date:"H:i" context "exams.final_center.duty" %}İmtahan davam edir — çıxış ən gec {{ t }}-a qədər açıqdır{% endblocktrans %}
+        {% else %}
+          {% blocktrans with t=card.until|date:"H:i" context "exams.final_center.duty" %}Çıxış {{ t }}-da avtomatik bağlanır{% endblocktrans %}
+        {% endif %}
+      </div>
+      {% if link %}
+      <a class="ems-btn ems-btn--primary fxc-duty-card__go" href="{% url 'exams:exam_center_room_monitor' room_id=card.room.pk %}">
+        <i class="fas fa-right-to-bracket" aria-hidden="true"></i> {% trans "Zala daxil ol" %}
+      </a>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}

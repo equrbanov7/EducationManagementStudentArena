@@ -14,7 +14,8 @@
     <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor.css' %}?v=20260717-vio-modal">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/vio_modal.css' %}?v=20260717-vio-modal">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/room_monitor.css' %}?v=20260729-cscroll">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/proctor_identity.css' %}?v=20261001-proc">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/proctor_identity.css' %}?v=20261013-note">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/duties.css' %}?v=20261013-duty">
 {% endblock %}
 
 {% block content %}
@@ -26,6 +27,8 @@
      data-open-all-url="{% url 'exams:exam_center_room_open_all' room_id=room.pk %}"
      data-snapshot-url-template="{% url 'exams:exam_center_ticket_snapshot' session_id=0 ticket_id=0 %}"
      data-violations-url-template="{% url 'exams:exam_center_attempt_violations' room_id=room.pk attempt_id=0 %}"
+     data-note-url-template="{% url 'exams:exam_center_attempt_note' room_id=room.pk attempt_id=0 %}"
+     data-snapshot-etag="{{ snapshot_etag }}"
      data-heartbeat-seconds="{{ heartbeat_seconds }}">
 
   {% csrf_token %}
@@ -56,14 +59,26 @@
     </div>
   </header>
 
+  {# 2026-10-13 (gecə): nəzarətçinin öz növbə zolağı — çıxışın nə vaxt bağlanacağı. #}
+  {% include "exams/exam_center/_duty_strip.html" with cards=my_duty_cards link=False %}
+
+  {# Növbə bitəndə (snapshot 403) JS bu bildirişi açır və polling-i dayandırır. #}
+  <div class="fxc-room-expired" id="fxc-room-expired" role="alert" hidden>
+    <i class="fas fa-lock" aria-hidden="true"></i>
+    {% trans "Nəzarət növbəniz bitdi — bu zala çıxış bağlandı." context "exams.final_center.duty" %}
+    <a href="{% url 'exams:exam_center_room_list' %}">{% trans "Zallara qayıt" context "exams.final_center.duty" %}</a>
+  </div>
+  {# Yeni «şübhəli» tələbə elanı (room_live.js) — ekran oxuyucusu üçün assertive. #}
+  <div class="fxc-room-alert" id="fxc-room-alert" role="status" aria-live="assertive" hidden></div>
+
   {% if can_assign_invigilators %}
   {% comment %}
-    Zala nəzarətçi təyini (yalnız imtahan mərkəzi RƏHBƏRİ) — AJAX axtarış.
-    Davranış `room_invigilators.js`-dədir. Xarici JS Django template engine-dən
-    keçmir, ona görə URL-lər və tərcümə mətnləri data-atributla ötürülür
-    (CLAUDE.md). `data-rma-invigilators` paneli sənəd sırasına güvənmədən seçir.
+    2026-10-13 (gecə): «Zal nəzarətçiləri» (daimi M2M) → «Nəzarətçi növbələri» (vaxtla
+    məhdud). Rəhbər gün + saat aralığı + nəzarətçiləri seçir; çıxış başlanğıcdan əvvəl
+    açılır, imtahan bitəndə (zalda canlı oturum qalmayıbsa) və ya gün sonunda avtomatik
+    bağlanır. Axtarış/çip davranışı `room_invigilators.js`-dədir (dəyişməyib).
   {% endcomment %}
-  <details class="rma-panel"
+  <details class="rma-panel fxc-duty-panel"{% if not duty_rows %} open{% endif %}
            data-rma-invigilators
            data-search-url="{{ invigilator_search_url }}"
            data-profile-url-template="{% url 'accounts:public_profile' username='__U__' %}"
@@ -72,11 +87,11 @@
            data-i18n-view-profile="{% trans 'Profili aç' %}"
            data-i18n-add="{% trans 'Nəzarətçi əlavə et' %}">
     <summary class="rma-panel__summary">
-      <span class="rma-panel__label"><i class="fas fa-user-shield"></i> {% trans "Zal nəzarətçiləri" %}
-        <span class="rma-chip js-rma-count">{{ room_invigilators|length }}</span></span>
+      <span class="rma-panel__label"><i class="fas fa-user-shield" aria-hidden="true"></i> {% trans "Nəzarətçi növbələri" context "exams.final_center.duty" %}
+        <span class="rma-chip">{{ duty_rows|length }}</span></span>
       <span class="rma-panel__right">
         <span class="rma-current">
-          {% for u in room_invigilators %}<span class="rma-tag">{{ u.get_full_name|default:u.username }}</span>{% empty %}<span class="rma-muted">{% trans "Təyin olunmayıb" %}</span>{% endfor %}
+          {% for row in duty_rows %}{% if row.status == "active" %}<span class="rma-tag">{{ row.duty.user.get_full_name|default:row.duty.user.username }}</span>{% endif %}{% endfor %}
         </span>
         <span class="rma-toggle">
           <span class="rma-toggle__open">{% trans "Aç" %}</span>
@@ -85,32 +100,87 @@
         </span>
       </span>
     </summary>
-    <form method="post" action="{% url 'exams:exam_center_room_assign_invigilators' room_id=room.pk %}" class="rma-form js-rma-form">
-      {% csrf_token %}
-      <p class="rma-muted">{% trans "Zala təyin olunan nəzarətçilər zaldakı bütün imtahanları idarə edə bilər. Ad, soyad və ya kafedra üzrə axtarın." %}</p>
+    <div class="rma-form">
+      <p class="rma-muted">{% blocktrans with lead=duty_lead_minutes grace=duty_grace_minutes context "exams.final_center.duty" %}Nəzarətçinin çıxışı növbədən {{ lead }} dəqiqə əvvəl açılır; imtahan bitəndə (son saatdan {{ grace }} dəqiqə sonra, zalda canlı imtahan qalmayıbsa) və ya gün sonunda avtomatik bağlanır.{% endblocktrans %}</p>
 
-      {# Seçilmişlər (çip) — ada klik profil səhifəsini açır; POST üçün gizli input #}
-      <div class="rma-chips js-rma-chips">
-        {% for u in room_invigilators %}
-        <span class="rma-chip-sel" data-id="{{ u.id }}">
-          <a class="rma-chip-sel__name" href="{% url 'accounts:public_profile' username=u.username %}" target="_blank" rel="noopener" title="{% trans 'Profili aç' %}">{{ u.get_full_name|default:u.username }}</a>
-          <button type="button" class="rma-chip-sel__x js-rma-remove" data-id="{{ u.id }}" aria-label="{% trans 'Çıxar' %}">&times;</button>
-          <input type="hidden" name="invigilators" value="{{ u.id }}">
-        </span>
+      {% if duty_rows %}
+      <ul class="fxc-duty-list">
+        {% for row in duty_rows %}
+        <li class="fxc-duty-row fxc-duty-row--{{ row.status }}">
+          <span class="fxc-duty-row__who">{{ row.duty.user.get_full_name|default:row.duty.user.username }}</span>
+          <span class="fxc-duty-row__when">{{ row.duty.starts_at|date:"d.m.Y H:i" }}–{{ row.duty.ends_at|date:"H:i" }}</span>
+          <span class="fxc-duty-badge fxc-duty-badge--{{ row.status }}">
+            {% if row.status == "active" %}{% trans "Aktiv" context "exams.final_center.duty" %}
+            {% elif row.status == "upcoming" %}{% blocktrans with t=row.opens_at|date:"H:i" context "exams.final_center.duty" %}{{ t }}-da açılır{% endblocktrans %}
+            {% elif row.status == "revoked" %}{% trans "Ləğv edilib" context "exams.final_center.duty" %}
+            {% else %}{% trans "Bitib" context "exams.final_center.duty" %}{% endif %}
+          </span>
+          {% if row.status == "active" or row.status == "upcoming" %}
+          <form method="post" class="fxc-duty-row__act"
+                action="{% url 'exams:exam_center_room_duty_revoke' room_id=room.pk duty_id=row.duty.pk %}"
+                data-confirm="{% trans 'Növbə ləğv edilsin? Nəzarətçinin çıxışı dərhal bağlanacaq.' context 'exams.final_center.duty' %}">
+            {% csrf_token %}
+            <button type="submit" class="fxc-btn fxc-btn-sm fxc-btn-danger-ghost">
+              <i class="fas fa-user-xmark" aria-hidden="true"></i> {% trans "Ləğv et" context "exams.final_center.duty" %}
+            </button>
+          </form>
+          {% endif %}
+        </li>
         {% endfor %}
-      </div>
+      </ul>
+      {% else %}
+      <p class="rma-muted">{% trans "Bu zal üçün bu gün və sonrakı günlərə növbə yazılmayıb." context "exams.final_center.duty" %}</p>
+      {% endif %}
 
-      <div class="rma-search">
-        <i class="fas fa-search"></i>
-        <input type="search" class="rma-search__input js-rma-search" placeholder="{% trans 'Müəllim / işçi / kafedra axtar…' %}" aria-label="{% trans 'Nəzarətçi axtarışı' %}" autocomplete="off">
-      </div>
-      <div class="rma-list js-rma-results" role="listbox" aria-label="{% trans 'Namizədlər' %}"></div>
+      <form method="post" action="{% url 'exams:exam_center_room_duty_create' room_id=room.pk %}" class="js-rma-form fxc-duty-form">
+        {% csrf_token %}
+        <fieldset class="fxc-duty-form__grid">
+          <legend class="fxc-duty-form__legend">{% trans "Yeni növbə" context "exams.final_center.duty" %}</legend>
+          <div class="ems-field">
+            <label class="ems-field__label" for="fxc-duty-date">{% trans "Gün" context "exams.final_center.duty" %}</label>
+            <input type="date" id="fxc-duty-date" name="duty_date" class="ems-input" value="{{ duty_form.date }}" min="{{ duty_form.date }}" required>
+          </div>
+          <div class="ems-field">
+            <label class="ems-field__label" for="fxc-duty-start">{% trans "Başlanğıc" context "exams.final_center.duty" %}</label>
+            <input type="time" id="fxc-duty-start" name="start_time" class="ems-input" value="{{ duty_form.start }}" step="300" required>
+          </div>
+          <div class="ems-field">
+            <label class="ems-field__label" for="fxc-duty-end">{% trans "Son" context "exams.final_center.duty" %}</label>
+            <input type="time" id="fxc-duty-end" name="end_time" class="ems-input" value="{{ duty_form.end }}" step="300" required>
+          </div>
+          <div class="ems-field ems-field--wide">
+            <label class="ems-field__label" for="fxc-duty-note">{% trans "Qeyd (istəyə bağlı)" context "exams.final_center.duty" %}</label>
+            <input type="text" id="fxc-duty-note" name="note" class="ems-input" maxlength="200" autocomplete="off">
+          </div>
+        </fieldset>
 
-      <div class="rma-form__foot">
-        <span class="rma-muted">{% trans "Seçilmiş nəzarətçi:" context "exams.final_center.invigilators" %} <b class="js-rma-total">{{ room_invigilators|length }}</b></span>
-        <button type="submit" class="fxc-btn fxc-btn-primary"><i class="fas fa-check"></i> {% trans "Nəzarətçiləri yadda saxla" %}</button>
-      </div>
-    </form>
+        {# Seçilmişlər (çip) — room_invigilators.js hər çipə gizli `invigilators` input qoyur. #}
+        <div class="rma-chips js-rma-chips" aria-live="polite"></div>
+        <div class="rma-search">
+          <i class="fas fa-search" aria-hidden="true"></i>
+          <input type="search" class="rma-search__input js-rma-search" placeholder="{% trans 'Müəllim / işçi / kafedra axtar…' %}" aria-label="{% trans 'Nəzarətçi axtarışı' %}" autocomplete="off">
+        </div>
+        <div class="rma-list js-rma-results" role="listbox" aria-label="{% trans 'Namizədlər' %}"></div>
+
+        <div class="rma-form__foot">
+          <span class="rma-muted">{% trans "Seçilmiş nəzarətçi:" context "exams.final_center.invigilators" %} <b class="js-rma-total">0</b></span>
+          <button type="submit" class="fxc-btn fxc-btn-primary"><i class="fas fa-calendar-plus" aria-hidden="true"></i> {% trans "Növbəni yaz" context "exams.final_center.duty" %}</button>
+        </div>
+      </form>
+
+      {% if room_invigilators %}
+      {# Köhnə daimi təyinatlar: artıq yalnız zalda canlı imtahan olanda işləyir. #}
+      <form method="post" action="{% url 'exams:exam_center_room_assign_invigilators' room_id=room.pk %}" class="fxc-duty-legacy"
+            data-confirm="{% trans 'Köhnə daimi təyinatlar silinsin?' context 'exams.final_center.duty' %}">
+        {% csrf_token %}
+        <span class="rma-muted">
+          {% trans "Köhnə daimi təyinatlar (yalnız canlı imtahan zamanı işləyir):" context "exams.final_center.duty" %}
+          {% for u in room_invigilators %}<span class="rma-tag">{{ u.get_full_name|default:u.username }}</span>{% endfor %}
+        </span>
+        <button type="submit" class="fxc-btn fxc-btn-sm fxc-btn-ghost">{% trans "Təmizlə" context "exams.final_center.duty" %}</button>
+      </form>
+      {% endif %}
+    </div>
   </details>
   {% endif %}
 
@@ -258,13 +328,16 @@
 {{ snapshot|json_script:"fxc-initial-room-snapshot" }}
 {{ monitor_labels|json_script:"fxc-monitor-i18n" }}
 {% proctoring_ui_labels as proctor_labels %}{{ proctor_labels|json_script:"fxc-proctor-i18n" }}
+{{ room_live_labels|json_script:"fxc-room-live-i18n" }}
 {% endblock %}
 
 {% block extraJs %}
     <script src="{% static 'exams/js/final_center/confirm_modal.js' %}" defer></script>
-    <script src="{% static 'exams/js/final_center/proctor_identity.js' %}?v=20261001-proc" defer></script>
+    <script src="{% static 'exams/js/final_center/confirm_forms.js' %}" defer></script>
+    <script src="{% static 'exams/js/final_center/proctor_identity.js' %}?v=20261013-note" defer></script>
     <script src="{% static 'exams/js/final_center/snapshot_modal.js' %}?v=20261001-proc" defer></script>
-    <script src="{% static 'exams/js/final_center/room_aggregate.js' %}?v=20261001-proc" defer></script>
+    <script src="{% static 'exams/js/final_center/room_live.js' %}?v=20261013-duty" defer></script>
+    <script src="{% static 'exams/js/final_center/room_aggregate.js' %}?v=20261013-duty" defer></script>
     <script src="{% static 'exams/js/final_center/panel_search.js' %}?v=20260926-search" defer></script>
     <script src="{% static 'exams/js/final_center/room_invigilators.js' %}?v=20260730-extract" defer></script>
 {% endblock %}

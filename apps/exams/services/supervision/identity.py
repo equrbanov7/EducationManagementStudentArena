@@ -116,7 +116,7 @@ def can_view_student_photo(user, organization, student_id: int) -> bool:
 
     * tələbənin özü → bəli;
     * imtahan mərkəzi → yalnız aktiv təşkilatın üzvü olan tələbə;
-    * zal/oturum nəzarətçisi → yalnız nəzarət etdiyi zalda/oturumda bu tələbənin
+    * zal/oturum nəzarətçisi → yalnız İNDİ aktiv növbəsinin zalında/oturumunda bu tələbənin
       CANLI (və ya son 12 saatda bitmiş) cəhdi/bileti varsa;
     * qalan hamı (digər tələbələr daxil) → xeyr.
     """
@@ -135,17 +135,26 @@ def can_view_student_photo(user, organization, student_id: int) -> bool:
         membership_model = django_apps.get_model("organizations", "Membership")
         return membership_model.objects.filter(user_id=student_id, organization=organization, is_active=True).exists()
 
+    # 2026-10-13 (gecə): nəzarətçi əhatəsi vaxtla məhdud növbədən gəlir — növbə bitəndə
+    # tələbə şəkilləri də bağlanır (əvvəl ``room__invigilators`` daimi idi).
+    from apps.exams.services.final_center import supervision_scope
+
+    scope = supervision_scope(user, organization_id=organization.pk)
+    if scope.is_empty:
+        return False
     attempt_model = django_apps.get_model("exams", "ExamAttempt")
     since = timezone.now() - _FINISHED_PHOTO_WINDOW
     live_or_recent = Q(status="in_progress") | Q(finished_at__gte=since)
-    if (
-        attempt_model.objects.filter(user_id=student_id, exam__organization=organization, room__invigilators=user)
+    if scope.room_ids and (
+        attempt_model.objects.filter(
+            user_id=student_id, exam__organization=organization, room_id__in=list(scope.room_ids)
+        )
         .filter(live_or_recent)
         .exists()
     ):
         return True
     ticket_model = django_apps.get_model("exams", "FinalExamTicket")
-    supervised = Q(session__room__invigilators=user) | Q(session__invigilator=user) | Q(session__staff=user)
+    supervised = Q(session__room_id__in=list(scope.room_ids)) | Q(session_id__in=list(scope.session_ids))
     return (
         ticket_model.objects.filter(student_id=student_id, organization=organization)
         .filter(supervised)

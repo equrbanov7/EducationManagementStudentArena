@@ -95794,3 +95794,272 @@ msgstr ""
 " hours can be entered for it. If the load has no row, the teacher chooses "
 "the hours. When off, the previous rule applies: the approved curriculum "
 "first, then the load; extra types are shown too."
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarət növbələriniz"
+msgstr "Your invigilation duties"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "İmtahan davam edir — çıxış ən gec %(t)s-a qədər açıqdır"
+msgstr ""
+"The exam is still running — access stays open until %(t)s at the latest"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "Çıxış %(t)s-da avtomatik bağlanır"
+msgstr "Access closes automatically at %(t)s"
+
+msgctxt "exams.final_center.duty"
+msgid "Hazırda aktiv nəzarət növbəniz yoxdur."
+msgstr "You have no active invigilation duty right now."
+
+msgctxt "exams.final_center.duty"
+msgid ""
+"Növbəni imtahan mərkəzi rəhbəri yazır; çıxış növbədən 30 dəqiqə əvvəl açılır"
+" və imtahan/gün bitəndə avtomatik bağlanır."
+msgstr ""
+"Duties are assigned by the exam centre head; access opens 30 minutes before "
+"the duty and closes automatically when the exam or the day ends."
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarət növbəniz bitdi — bu zala çıxış bağlandı."
+msgstr "Your invigilation duty has ended — access to this hall is closed."
+
+msgctxt "exams.final_center.duty"
+msgid "Zallara qayıt"
+msgstr "Back to halls"
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarətçi növbələri"
+msgstr "Invigilator duties"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid ""
+"Nəzarətçinin çıxışı növbədən %(lead)s dəqiqə əvvəl açılır; imtahan bitəndə "
+"(son saatdan %(grace)s dəqiqə sonra, zalda canlı imtahan qalmayıbsa) və ya "
+"gün sonunda avtomatik bağlanır."
+msgstr ""
+"Invigilator access opens %(lead)s minutes before the duty and closes "
+"automatically when the exam ends (%(grace)s minutes after the end time, if "
+"no live exam remains in the hall) or at the end of the day."
+
+msgctxt "exams.final_center.duty"
+msgid "Aktiv"
+msgstr "Active"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "%(t)s-da açılır"
+msgstr "Opens at %(t)s"
+
+msgctxt "exams.final_center.duty"
+msgid "Ləğv edilib"
+msgstr "Revoked"
+
+msgctxt "exams.final_center.duty"
+msgid "Bitib"
+msgstr "Ended"
+
+msgctxt "exams.final_center.duty"
+msgid "Növbə ləğv edilsin? Nəzarətçinin çıxışı dərhal bağlanacaq."
+msgstr "Revoke this duty? The invigilator's access will close immediately."
+
+msgctxt "exams.final_center.duty"
+msgid "Ləğv et"
+msgstr "Revoke"
+
+msgctxt "exams.final_center.duty"
+msgid "Bu zal üçün bu gün və sonrakı günlərə növbə yazılmayıb."
+msgstr "No duties are scheduled for this hall today or later."
+
+msgctxt "exams.final_center.duty"
+msgid "Yeni növbə"
+msgstr "New duty"
+
+msgctxt "exams.final_center.duty"
+msgid "Gün"
+msgstr "Date"
+
+msgctxt "exams.final_center.duty"
+msgid "Başlanğıc"
+msgstr "Start"
+
+msgctxt "exams.final_center.duty"
+msgid "Son"
+msgstr "End"
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd (istəyə bağlı)"
+msgstr "Note (optional)"
+
+msgctxt "exams.final_center.duty"
+msgid "Növbəni yaz"
+msgstr "Assign duty"
+
+msgctxt "exams.final_center.duty"
+msgid "Köhnə daimi təyinatlar silinsin?"
+msgstr "Remove the old permanent assignments?"
+
+msgctxt "exams.final_center.duty"
+msgid "Köhnə daimi təyinatlar (yalnız canlı imtahan zamanı işləyir):"
+msgstr "Old permanent assignments (only work while an exam is live):"
+
+msgctxt "exams.final_center.duty"
+msgid "Təmizlə"
+msgstr "Clear"
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarət müddəti bitdi"
+msgstr "Invigilation period ended"
+
+msgctxt "exams.final_center.duty"
+msgid "s"
+msgstr "h"
+
+msgctxt "exams.final_center.duty"
+msgid "dəq"
+msgstr "min"
+
+msgctxt "exams.final_center.duty"
+msgid "san"
+msgstr "sec"
+
+msgctxt "exams.final_center.duty"
+msgid "Qalan vaxt"
+msgstr "Time left"
+
+msgctxt "exams.final_center.duty"
+msgid "Yeni şübhəli"
+msgstr "New suspicious"
+
+msgctxt "exams.final_center.duty"
+msgid "Bağla"
+msgstr "Close"
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarətçi qeydi"
+msgstr "Invigilator note"
+
+msgctxt "exams.final_center.duty"
+msgid "Məs.: telefonla danışırdı, xəbərdarlıq edildi"
+msgstr "E.g.: was on the phone, warned"
+
+msgctxt "exams.final_center.duty"
+msgid "Qeydi yaz"
+msgstr "Save note"
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd yazıldı — xronologiyada görünəcək."
+msgstr "Note saved — it will appear in the timeline."
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd yazılmadı."
+msgstr "The note was not saved."
+
+msgctxt "exams.final_center.duty"
+msgid "Tarix və ya saat formatı yanlışdır."
+msgstr "Invalid date or time format."
+
+msgctxt "exams.final_center.duty"
+msgid "Keçmiş gün üçün növbə yazmaq olmaz."
+msgstr "A duty cannot be assigned for a past day."
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "Növbəni ən çox %(days)d gün irəli yazmaq olar."
+msgstr "A duty can be scheduled at most %(days)d days ahead."
+
+msgctxt "exams.final_center.duty"
+msgid "Bitmə saatı başlama saatından sonra olmalıdır."
+msgstr "The end time must be after the start time."
+
+msgctxt "exams.final_center.duty"
+msgid "Bu vaxt aralığı artıq bitib."
+msgstr "This time range has already ended."
+
+msgctxt "exams.final_center.duty"
+msgid "Ən azı bir nəzarətçi seçin."
+msgstr "Select at least one invigilator."
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "Bir növbəyə ən çox %(n)d nəzarətçi təyin etmək olar."
+msgstr "At most %(n)d invigilators can be assigned to one duty."
+
+msgctxt "exams.final_center.duty"
+msgid ""
+"Seçilənlərdən bəziləri nəzarətçi ola bilməz (tələbə və ya kənar istifadəçi)."
+msgstr ""
+"Some of the selected people cannot be invigilators (student or outside "
+"user)."
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "%(count)d nəzarətçi növbəsi yazıldı."
+msgstr "%(count)d invigilator duties assigned."
+
+msgctxt "exams.final_center.duty"
+msgid "Növbə ləğv edildi — nəzarətçinin çıxışı bağlandı."
+msgstr "Duty revoked — the invigilator's access is closed."
+
+msgctxt "exams.final_center.duty"
+msgid "Növbə artıq ləğv olunub."
+msgstr "The duty is already revoked."
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd boşdur."
+msgstr "The note is empty."
+
+msgctxt "exams.final_center.duty"
+msgid "Çox sayda qeyd — bir az gözləyin."
+msgstr "Too many notes — please wait a moment."
+
+msgctxt "exams.proctoring.signal"
+msgid "İmtahan eyni anda iki səhifədə/cihazda açıqdır"
+msgstr "The exam is open in two pages/devices at the same time"
+
+msgctxt "exams.proctoring.signal"
+msgid "İmtahan zamanı IP ünvanı dəyişdi"
+msgstr "The IP address changed during the exam"
+
+msgctxt "exams.proctoring.signal"
+msgid "Nəzarətçi qeydi"
+msgstr "Invigilator note"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Nəzarətçi qeydi"
+msgstr "Invigilator note"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "organization"
+msgstr "Organization"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "room"
+msgstr "Hall"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "user"
+msgstr "Invigilator"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "starts_at"
+msgstr "Starts at"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "ends_at"
+msgstr "Ends at"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "note"
+msgstr "Note"
+
+msgctxt "exams.model.invigilator_duty.meta"
+msgid "singular"
+msgstr "Invigilator duty"
+
+msgctxt "exams.model.invigilator_duty.meta"
+msgid "plural"
+msgstr "Invigilator duties"

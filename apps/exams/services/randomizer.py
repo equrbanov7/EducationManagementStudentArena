@@ -396,6 +396,13 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
                     use_difficulty_balance=use_difficulty_balance,
                 )
 
+        # 2026-10-13 (gecə, köçürmə riskini azaltmaq): təqdim SIRASI hər tələbə üçün
+        # təsadüfi olmalıdır. Əvvəl yalnız blok yolu sonda qarışdırırdı; «hamısı» və
+        # bloksuz yolda sıra ``_question_rank``-dan (az istifadə olunan → çətinlik balansı)
+        # gəlirdi — yan-yana oturan tələbələr sualları demək olar EYNİ sırada görürdü.
+        # Seçim (hansı suallar) dəyişmir, yalnız sıra; sıra ExamAnswer yaradılışında sabitlənir.
+        random.shuffle(selected_qs)  # nosec B311 — kriptoqrafik deyil, sıra qarışdırma
+
         # ExamAnswer-ları bulk yarat — hər birinə immutable sual snapshot-u ilə
         # (EXAM-INTEGRITY-001): çatdırılan variant/düzgünlük dondurulur ki,
         # sonradan sualın redaktəsi keçmiş nəticələri geriyə dönük dəyişməsin.

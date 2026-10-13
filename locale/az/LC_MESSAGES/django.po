@@ -95355,3 +95355,270 @@ msgstr ""
 "(məs. lab yoxdursa) həftəlik planda görünmür və ona saat yazılmır. Yükdə "
 "sətir yoxdursa müəllim saatı özü seçir. Söndürülüdə əvvəlki qayda: əvvəl "
 "təsdiqlənmiş tədris planı, sonra yük; artıq növlər də göstərilir."
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarət növbələriniz"
+msgstr "Nəzarət növbələriniz"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "İmtahan davam edir — çıxış ən gec %(t)s-a qədər açıqdır"
+msgstr "İmtahan davam edir — çıxış ən gec %(t)s-a qədər açıqdır"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "Çıxış %(t)s-da avtomatik bağlanır"
+msgstr "Çıxış %(t)s-da avtomatik bağlanır"
+
+msgctxt "exams.final_center.duty"
+msgid "Hazırda aktiv nəzarət növbəniz yoxdur."
+msgstr "Hazırda aktiv nəzarət növbəniz yoxdur."
+
+msgctxt "exams.final_center.duty"
+msgid ""
+"Növbəni imtahan mərkəzi rəhbəri yazır; çıxış növbədən 30 dəqiqə əvvəl açılır"
+" və imtahan/gün bitəndə avtomatik bağlanır."
+msgstr ""
+"Növbəni imtahan mərkəzi rəhbəri yazır; çıxış növbədən 30 dəqiqə əvvəl açılır"
+" və imtahan/gün bitəndə avtomatik bağlanır."
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarət növbəniz bitdi — bu zala çıxış bağlandı."
+msgstr "Nəzarət növbəniz bitdi — bu zala çıxış bağlandı."
+
+msgctxt "exams.final_center.duty"
+msgid "Zallara qayıt"
+msgstr "Zallara qayıt"
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarətçi növbələri"
+msgstr "Nəzarətçi növbələri"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid ""
+"Nəzarətçinin çıxışı növbədən %(lead)s dəqiqə əvvəl açılır; imtahan bitəndə "
+"(son saatdan %(grace)s dəqiqə sonra, zalda canlı imtahan qalmayıbsa) və ya "
+"gün sonunda avtomatik bağlanır."
+msgstr ""
+"Nəzarətçinin çıxışı növbədən %(lead)s dəqiqə əvvəl açılır; imtahan bitəndə "
+"(son saatdan %(grace)s dəqiqə sonra, zalda canlı imtahan qalmayıbsa) və ya "
+"gün sonunda avtomatik bağlanır."
+
+msgctxt "exams.final_center.duty"
+msgid "Aktiv"
+msgstr "Aktiv"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "%(t)s-da açılır"
+msgstr "%(t)s-da açılır"
+
+msgctxt "exams.final_center.duty"
+msgid "Ləğv edilib"
+msgstr "Ləğv edilib"
+
+msgctxt "exams.final_center.duty"
+msgid "Bitib"
+msgstr "Bitib"
+
+msgctxt "exams.final_center.duty"
+msgid "Növbə ləğv edilsin? Nəzarətçinin çıxışı dərhal bağlanacaq."
+msgstr "Növbə ləğv edilsin? Nəzarətçinin çıxışı dərhal bağlanacaq."
+
+msgctxt "exams.final_center.duty"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "exams.final_center.duty"
+msgid "Bu zal üçün bu gün və sonrakı günlərə növbə yazılmayıb."
+msgstr "Bu zal üçün bu gün və sonrakı günlərə növbə yazılmayıb."
+
+msgctxt "exams.final_center.duty"
+msgid "Yeni növbə"
+msgstr "Yeni növbə"
+
+msgctxt "exams.final_center.duty"
+msgid "Gün"
+msgstr "Gün"
+
+msgctxt "exams.final_center.duty"
+msgid "Başlanğıc"
+msgstr "Başlanğıc"
+
+msgctxt "exams.final_center.duty"
+msgid "Son"
+msgstr "Son"
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd (istəyə bağlı)"
+msgstr "Qeyd (istəyə bağlı)"
+
+msgctxt "exams.final_center.duty"
+msgid "Növbəni yaz"
+msgstr "Növbəni yaz"
+
+msgctxt "exams.final_center.duty"
+msgid "Köhnə daimi təyinatlar silinsin?"
+msgstr "Köhnə daimi təyinatlar silinsin?"
+
+msgctxt "exams.final_center.duty"
+msgid "Köhnə daimi təyinatlar (yalnız canlı imtahan zamanı işləyir):"
+msgstr "Köhnə daimi təyinatlar (yalnız canlı imtahan zamanı işləyir):"
+
+msgctxt "exams.final_center.duty"
+msgid "Təmizlə"
+msgstr "Təmizlə"
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarət müddəti bitdi"
+msgstr "Nəzarət müddəti bitdi"
+
+msgctxt "exams.final_center.duty"
+msgid "s"
+msgstr "s"
+
+msgctxt "exams.final_center.duty"
+msgid "dəq"
+msgstr "dəq"
+
+msgctxt "exams.final_center.duty"
+msgid "san"
+msgstr "san"
+
+msgctxt "exams.final_center.duty"
+msgid "Qalan vaxt"
+msgstr "Qalan vaxt"
+
+msgctxt "exams.final_center.duty"
+msgid "Yeni şübhəli"
+msgstr "Yeni şübhəli"
+
+msgctxt "exams.final_center.duty"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarətçi qeydi"
+msgstr "Nəzarətçi qeydi"
+
+msgctxt "exams.final_center.duty"
+msgid "Məs.: telefonla danışırdı, xəbərdarlıq edildi"
+msgstr "Məs.: telefonla danışırdı, xəbərdarlıq edildi"
+
+msgctxt "exams.final_center.duty"
+msgid "Qeydi yaz"
+msgstr "Qeydi yaz"
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd yazıldı — xronologiyada görünəcək."
+msgstr "Qeyd yazıldı — xronologiyada görünəcək."
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd yazılmadı."
+msgstr "Qeyd yazılmadı."
+
+msgctxt "exams.final_center.duty"
+msgid "Tarix və ya saat formatı yanlışdır."
+msgstr "Tarix və ya saat formatı yanlışdır."
+
+msgctxt "exams.final_center.duty"
+msgid "Keçmiş gün üçün növbə yazmaq olmaz."
+msgstr "Keçmiş gün üçün növbə yazmaq olmaz."
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "Növbəni ən çox %(days)d gün irəli yazmaq olar."
+msgstr "Növbəni ən çox %(days)d gün irəli yazmaq olar."
+
+msgctxt "exams.final_center.duty"
+msgid "Bitmə saatı başlama saatından sonra olmalıdır."
+msgstr "Bitmə saatı başlama saatından sonra olmalıdır."
+
+msgctxt "exams.final_center.duty"
+msgid "Bu vaxt aralığı artıq bitib."
+msgstr "Bu vaxt aralığı artıq bitib."
+
+msgctxt "exams.final_center.duty"
+msgid "Ən azı bir nəzarətçi seçin."
+msgstr "Ən azı bir nəzarətçi seçin."
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "Bir növbəyə ən çox %(n)d nəzarətçi təyin etmək olar."
+msgstr "Bir növbəyə ən çox %(n)d nəzarətçi təyin etmək olar."
+
+msgctxt "exams.final_center.duty"
+msgid ""
+"Seçilənlərdən bəziləri nəzarətçi ola bilməz (tələbə və ya kənar istifadəçi)."
+msgstr ""
+"Seçilənlərdən bəziləri nəzarətçi ola bilməz (tələbə və ya kənar istifadəçi)."
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "%(count)d nəzarətçi növbəsi yazıldı."
+msgstr "%(count)d nəzarətçi növbəsi yazıldı."
+
+msgctxt "exams.final_center.duty"
+msgid "Növbə ləğv edildi — nəzarətçinin çıxışı bağlandı."
+msgstr "Növbə ləğv edildi — nəzarətçinin çıxışı bağlandı."
+
+msgctxt "exams.final_center.duty"
+msgid "Növbə artıq ləğv olunub."
+msgstr "Növbə artıq ləğv olunub."
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd boşdur."
+msgstr "Qeyd boşdur."
+
+msgctxt "exams.final_center.duty"
+msgid "Çox sayda qeyd — bir az gözləyin."
+msgstr "Çox sayda qeyd — bir az gözləyin."
+
+msgctxt "exams.proctoring.signal"
+msgid "İmtahan eyni anda iki səhifədə/cihazda açıqdır"
+msgstr "İmtahan eyni anda iki səhifədə/cihazda açıqdır"
+
+msgctxt "exams.proctoring.signal"
+msgid "İmtahan zamanı IP ünvanı dəyişdi"
+msgstr "İmtahan zamanı IP ünvanı dəyişdi"
+
+msgctxt "exams.proctoring.signal"
+msgid "Nəzarətçi qeydi"
+msgstr "Nəzarətçi qeydi"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Nəzarətçi qeydi"
+msgstr "Nəzarətçi qeydi"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "organization"
+msgstr "Təşkilat"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "room"
+msgstr "Zal"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "user"
+msgstr "Nəzarətçi"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "starts_at"
+msgstr "Başlanğıc"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "ends_at"
+msgstr "Son"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "note"
+msgstr "Qeyd"
+
+msgctxt "exams.model.invigilator_duty.meta"
+msgid "singular"
+msgstr "Nəzarətçi növbəsi"
+
+msgctxt "exams.model.invigilator_duty.meta"
+msgid "plural"
+msgstr "Nəzarətçi növbələri"

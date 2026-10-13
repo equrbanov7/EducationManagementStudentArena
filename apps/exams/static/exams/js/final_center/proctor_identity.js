@@ -145,10 +145,14 @@
             var when = row.at || "";
             try { when = new Date(row.at).toLocaleTimeString(); } catch (err) { when = row.at || ""; }
             var sev = SEVERITIES.indexOf(row.severity) === -1 ? "low" : row.severity;
-            var source = row.source === "signal" ? t("sourceSignal", "") : t("sourceRule", "");
+            var source = row.source === "signal" ? t("sourceSignal", "") :
+                (row.source === "note" ? t("sourceNote", "") : t("sourceRule", ""));
+            // 2026-10-13: nəzarətçi qeydinin mətni (server 200 simvola kəsir; esc ilə).
+            var note = row.note ? '<span class="fxc-tl__note">' + esc(row.note) +
+                (row.by ? " — " + esc(row.by) : "") + "</span>" : "";
             return '<li class="fxc-tl__item fxc-tl__item--' + esc(sev) + '">' +
                 '<span class="fxc-tl__time">' + esc(when) + "</span>" +
-                '<span class="fxc-tl__label">' + esc(row.label || row.code || "") + "</span>" +
+                '<span class="fxc-tl__label">' + esc(row.label || row.code || "") + note + "</span>" +
                 '<span class="fxc-tl__tags"><span class="fxc-tl__src fxc-tl__src--' + esc(row.source || "rule") + '">' +
                     esc(source) + "</span>" +
                     '<span class="fxc-tl__sev">' + esc(severityLabel(sev)) + "</span>" +

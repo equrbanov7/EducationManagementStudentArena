@@ -148,6 +148,7 @@ class FinalExamRoomConsumer(AsyncJsonWebsocketConsumer):
         from apps.exams.services.final_center import staff_group
 
         self.group_name = staff_group(self.session_id)
+        self._auth_checked_at = time.monotonic()
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
 
@@ -166,12 +167,34 @@ class FinalExamRoomConsumer(AsyncJsonWebsocketConsumer):
         if group_name:
             await self.channel_layer.group_discard(group_name, self.channel_name)
 
+    #: Açıq bağlantıda icazənin təkrar yoxlanma intervalı (saniyə).
+    REAUTH_INTERVAL = 60.0
+
+    async def _still_authorized(self) -> bool:
+        """2026-10-13 (gecə): nəzarətçi növbəsi vaxtla məhduddur — növbə bitəndə AÇIQ
+        qalmış WS də bağlanmalıdır (yalnız connect-də yoxlamaq kifayət etmir).
+        Ping başına yox, ən çox dəqiqədə bir dəfə DB yoxlaması."""
+        now = time.monotonic()
+        if now - getattr(self, "_auth_checked_at", 0.0) < self.REAUTH_INTERVAL:
+            return True
+        self._auth_checked_at = now
+        user = self.scope.get("user")
+        return bool(await self._can_supervise(user, self.session_id))
+
     async def receive_json(self, content, **kwargs):
         # Monitor kanalı oxu-yönümlüdür; yalnız ping-ə cavab verilir.
         if isinstance(content, dict) and content.get("action") == "ping":
+            if not await self._still_authorized():
+                await self.send_json({"event": "access_expired"})
+                await self.close(code=4403)
+                return
             await self.send_json({"event": "pong"})
 
     async def final_event(self, event):
+        if not await self._still_authorized():
+            await self.send_json({"event": "access_expired"})
+            await self.close(code=4403)
+            return
         await self.send_json(event.get("data") or {})
 
 

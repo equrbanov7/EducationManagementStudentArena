@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="{% static 'exams/css/final_center/panel.css' %}?v=20260730-shared">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/room_list.css' %}?v=20260910-1">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/exam_halls.css' %}?v=20261001-1">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/duties.css' %}?v=20261013-duty">
 {% endblock %}
 
 {% block content %}
@@ -45,6 +46,9 @@
       {% endif %}
     </div>
   </header>
+
+  {# 2026-10-13 (gecə): nəzarətçinin vaxtla məhdud növbələri — çıxışın nə vaxt bağlanacağı açıq görünür. #}
+  {% include "exams/exam_center/_duty_strip.html" with cards=my_duties link=True %}
 
   {% comment %}KPI — canlı mənzərə (süzgəcdən asılı deyil, `live_scope` əhatəsi).{% endcomment %}
   <div class="ems-kpis ems-kpis--4 fxc-kpis">
@@ -224,8 +228,8 @@
     {% trans "Zallar superadmin tərəfindən yaradılır." as fxc_e3b %}
     {% include "partials/ems_ui/_empty.html" with state_icon="fa-door-closed" state_title=fxc_e3 state_body=fxc_e3b %}
   {% else %}
-    {% trans "Sizə hələ zal təyin edilməyib." as fxc_e4 %}
-    {% trans "Zal təyinatı imtahan mərkəzi tərəfindən verilir." as fxc_e4b %}
+    {% trans "Hazırda aktiv nəzarət növbəniz yoxdur." context "exams.final_center.duty" as fxc_e4 %}
+    {% trans "Növbəni imtahan mərkəzi rəhbəri yazır; çıxış növbədən 30 dəqiqə əvvəl açılır və imtahan/gün bitəndə avtomatik bağlanır." context "exams.final_center.duty" as fxc_e4b %}
     {% include "partials/ems_ui/_empty.html" with state_icon="fa-door-closed" state_title=fxc_e4 state_body=fxc_e4b %}
   {% endif %}
   {% endif %}

@@ -392,8 +392,25 @@
     });
 
     // ── Heartbeat ───────────────────────────────────────────────────────────
+    // 2026-10-13 (gecə): səhifə yükləməsinin təsadüfi id-si. Server eyni cəhdin iki
+    // CANLI səhifədən (iki cihaz / iki tab) növbələşən heartbeat-lərini görüb
+    // «concurrent_session» siqnalı yazır; reload yeni id verir, köhnəsi susur — səhv-müsbət yox.
+    function makeClientId() {
+        var out = "";
+        try {
+            var bytes = new Uint8Array(12);
+            window.crypto.getRandomValues(bytes);
+            for (var i = 0; i < bytes.length; i++) out += ("0" + bytes[i].toString(16)).slice(-2);
+        } catch (err) {
+            out = (Date.now().toString(36) + Math.random().toString(36).slice(2)).slice(0, 24);
+        }
+        return out;
+    }
+    api.clientId = makeClientId();
+
     api.heartbeatState = function () {
         var state = {
+            cid: api.clientId,
             fs: !!(document.fullscreenElement || document.webkitFullscreenElement),
             vis: document.visibilityState !== "hidden",
             foc: typeof document.hasFocus === "function" ? document.hasFocus() : true,

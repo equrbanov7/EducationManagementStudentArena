@@ -27,6 +27,8 @@ SEVERITY_ORDER = ("critical", "high", "medium", "low", "info")
 RISK_INCIDENT_TYPES = frozenset(VIOLATION_EVENT_TYPES | NON_COUNTING_EVENT_TYPES)
 
 TIMELINE_LIMIT = 200
+#: Nəzarətçinin əl ilə yazdığı qeyd (``ProctoringLog.details.kind``) — xala/sayğaca düşmür.
+NOTE_KIND = "invigilator_note"
 
 
 def _empty_counts() -> dict:
@@ -60,6 +62,8 @@ def attempts_risk(attempt_ids, thresholds=None) -> dict:
             rules[row["attempt_id"]][severity] += row["n"]
         signal_rows = (
             ProctoringLog.objects.filter(exam_attempt_id__in=ids)
+            # Nəzarətçi qeydi siqnal deyil — «diqqət tələb edir» sayğacını şişirtməsin (2026-10-13).
+            .exclude(details__contains={"kind": NOTE_KIND})
             .values("exam_attempt_id", "details__severity")
             .annotate(n=Count("id"))
         )
@@ -130,16 +134,19 @@ def attempt_timeline(attempt, *, limit: int = TIMELINE_LIMIT) -> list:
     for log in logs:
         details = log.details if isinstance(log.details, dict) else {}
         kind = str(details.get("kind") or log.event_type)
-        rows.append(
-            {
-                "source": "signal",
-                "code": kind,
-                "label": signal_label(kind) if details.get("kind") else str(log.get_event_type_display()),
-                "severity": details.get("severity") if details.get("severity") in SEVERITY_POINTS else "low",
-                "at": log.timestamp,
-                "counts": False,
-            }
-        )
+        row = {
+            "source": "note" if kind == NOTE_KIND else "signal",
+            "code": kind,
+            "label": signal_label(kind) if details.get("kind") else str(log.get_event_type_display()),
+            "severity": details.get("severity") if details.get("severity") in SEVERITY_POINTS else "low",
+            "at": log.timestamp,
+            "counts": False,
+        }
+        if kind == NOTE_KIND:
+            # Mətn nəzarətçinin özünündür (server sanitasiyası: 200 simvol) — JS esc() ilə göstərir.
+            row["note"] = str(details.get("text") or "")[:200]
+            row["by"] = str(details.get("by") or "")[:120]
+        rows.append(row)
     rows.sort(key=lambda row: row["at"], reverse=True)
     return rows[:limit]
 
@@ -149,6 +156,7 @@ def timeline_as_json(rows) -> list:
 
 
 __all__ = [
+    "NOTE_KIND",
     "RISK_INCIDENT_TYPES",
     "SEVERITY_POINTS",
     "attempt_risk",

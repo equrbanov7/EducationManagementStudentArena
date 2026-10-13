@@ -6,6 +6,14 @@ etməlidir (AGENTS §1/§5 pattern-i).
 """
 
 from .cabinet import student_final_exam_context
+from .duties import (
+    DUTY_GRACE_MINUTES,
+    DUTY_LEAD_MINUTES,
+    SupervisionScope,
+    active_duties,
+    duty_rows_for_room,
+    supervision_scope,
+)
 from .eligibility import admission_block_reason
 from .entry import (
     ENTRY_SESSION_KEY,
@@ -105,6 +113,12 @@ from .tickets import (
 from .xlsx_build import build_final_report_workbook
 
 __all__ = [
+    "DUTY_GRACE_MINUTES",
+    "DUTY_LEAD_MINUTES",
+    "SupervisionScope",
+    "active_duties",
+    "duty_rows_for_room",
+    "supervision_scope",
     "ENTRY_SESSION_KEY",
     "ERROR_INVALID",
     "ERROR_LOCKED",

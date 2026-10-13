@@ -16,7 +16,8 @@ from django.utils.translation import pgettext
 
 from apps.exams.models import ExamAttempt, ExamRoom, ExamRoomSession, FinalExamTicket
 from apps.exams.services.access_policy import can_manage_exam_rooms
-from apps.exams.services.final_center import can_manage_final_center, sessions_visible_to
+from apps.exams.services.final_center import can_manage_final_center, supervision_scope
+from apps.exams.services.final_center.duties import duty_cards
 from apps.exams.services.final_center.halls import (
     can_designate_exam_halls,
     exam_hall_scope_q,
@@ -122,18 +123,17 @@ def exam_center_room_list(request):
         .prefetch_related(live_prefetch)
     )
 
-    # Nəzarətçi (idarəçi deyil) YALNIZ özünə aid zalları görür: zala təyin
-    # olunduğu (ExamRoom.invigilators — oturum olmasa belə) və ya təyinatlı
-    # oturumu olan zallar. Təyinatsız istifadəçi heç bir zal görmür.
-    # Alt-sorğu ilə süzürük ki, annotasiya sayğacları JOIN-dən təsirlənməsin.
+    # Nəzarətçi (idarəçi deyil) YALNIZ İNDİ aktiv növbəsi olan zalları görür
+    # (2026-10-13, gecə: əvvəl ``ExamRoom.invigilators`` daimi idi — imtahandan aylar
+    # sonra da zal görünürdü). Növbə bitəndə zal siyahıdan özü düşür.
+    my_duties = []
     if not can_manage:
-        visible_room_ids = set(
-            sessions_visible_to(request.user, ExamRoomSession.objects.filter(organization=organization)).values_list(
-                "room_id", flat=True
-            )
-        ) | set(request.user.invigilated_rooms.filter(organization=organization).values_list("pk", flat=True))
+        duty_scope = supervision_scope(request.user, organization_id=organization.pk)
+        visible_room_ids = set(duty_scope.visible_room_ids)
         rooms = rooms.filter(pk__in=visible_room_ids)
-    if scope == "halls":
+        my_duties = duty_cards(request.user, organization)
+    # Nəzarətçinin növbə zalı bayraqsız otaq olsa da görünməlidir (o, yalnız öz zallarını görür).
+    if scope == "halls" and can_manage:
         rooms = rooms.filter(exam_hall_scope_q())
 
     query = (request.GET.get("q") or "").strip()
@@ -211,6 +211,7 @@ def exam_center_room_list(request):
             "kpi_live_rooms": kpi_live_rooms,
             "kpi_live_exams": len(live_exams),
             "kpi_live_students": sum(row["students"] for row in live_exams),
+            "my_duties": my_duties,
         },
     )
 

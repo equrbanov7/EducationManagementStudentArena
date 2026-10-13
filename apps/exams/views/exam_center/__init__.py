@@ -1,6 +1,7 @@
 """exam_center view paketi — FASAD (AGENTS §6 rol-qovluq konvensiyası)."""
 
 from .device_change import exam_center_final_device_change
+from .duties import exam_center_attempt_note, exam_center_room_duty_create, exam_center_room_duty_revoke
 from .halls import exam_center_room_exam_hall
 from .monitor import (
     exam_center_session_cancel,
@@ -43,6 +44,9 @@ from .statistics import (
 from .statistics_charts import exam_center_stats_ai, exam_center_stats_charts
 
 __all__ = [
+    "exam_center_attempt_note",
+    "exam_center_room_duty_create",
+    "exam_center_room_duty_revoke",
     "exam_center_final_device_change",
     "exam_center_pin_search",
     "exam_center_student_pins",

@@ -65,6 +65,23 @@ class SupervisionSurfaceGateTests(TestCase):
         self.assertNotEqual(response.status_code, 200)
 
     def test_assigned_invigilator_can_open_it(self):
+        # 2026-10-13 (gecə): daimi zal təyinatı tək başına kifayət deyil — aktiv növbə lazımdır.
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from apps.exams.models import InvigilatorDuty
+
+        response = self._client_for(self.invigilator).get(self.url)
+        self.assertEqual(response.status_code, 403)
+        now = timezone.now()
+        InvigilatorDuty.objects.create(
+            organization=self.org,
+            room=self.room,
+            user=self.invigilator,
+            starts_at=now,
+            ends_at=now + timedelta(hours=2),
+        )
         response = self._client_for(self.invigilator).get(self.url)
         self.assertEqual(response.status_code, 200)
 

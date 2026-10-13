@@ -17,6 +17,7 @@ from apps.exams.domain.final_center import (
     ExamRoomSession,
     FinalAttemptDevice,
     FinalExamTicket,
+    InvigilatorDuty,
 )
 from apps.exams.domain.import_jobs import TextExtractionJob, extraction_job_upload_path
 from apps.exams.domain.language import ExamLanguageVariant
@@ -62,6 +63,7 @@ __all__ = [
     "ExamSupervisionConfig",
     "FinalAttemptDevice",
     "FinalExamTicket",
+    "InvigilatorDuty",
     "ProctoringLog",
     "QuestionBank",
     "QuestionBlock",

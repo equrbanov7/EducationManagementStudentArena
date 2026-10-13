@@ -25,6 +25,7 @@ from apps.exams.services.supervision import get_supervision_config
 from apps.exams.services.supervision.heartbeat import HEARTBEAT_INTERVAL_SECONDS, record_heartbeat
 from apps.exams.services.supervision.signals import CLIENT_SIGNAL_KINDS, log_proctoring_signal, signal_throttle
 from core.rate_limit import record_rate_limit_hit
+from core.utils import get_client_ip
 
 _BODY_MAX_BYTES = 4 * 1024
 _HEARTBEAT_RATE = "12/1m"
@@ -131,10 +132,17 @@ def heartbeat_api(request, attempt_id):
     if response is not None:
         return response
 
-    result = record_heartbeat(attempt.pk, state)
+    result = record_heartbeat(attempt.pk, state, ip=get_client_ip(request))
     if result.get("gap_seconds"):
         if signal_throttle(attempt.pk, "heartbeat_gap") == "ok":
             log_proctoring_signal(attempt, "heartbeat_gap", {"gap_seconds": result["gap_seconds"]})
+    # 2026-10-13 (gecə): serverin öz müşahidələri — iki canlı səhifə / IP dəyişməsi.
+    # Klient bunları «söndürə» bilməz (cid göndərməmək = heartbeat-siz qalmaq → «siqnal yoxdur»).
+    if result.get("concurrent") and signal_throttle(attempt.pk, "concurrent_session") == "ok":
+        log_proctoring_signal(attempt, "concurrent_session", {})
+    ip_change = result.get("ip_change")
+    if ip_change and signal_throttle(attempt.pk, "ip_changed") == "ok":
+        log_proctoring_signal(attempt, "ip_changed", {"from": ip_change[0], "to": ip_change[1]})
     return JsonResponse({"supervised": True, "interval": HEARTBEAT_INTERVAL_SECONDS})
 
 
