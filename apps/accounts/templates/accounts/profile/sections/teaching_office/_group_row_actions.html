@@ -22,6 +22,9 @@ yazır (səbəb məcburi) — bax `_group_add_students_fields.html`.{% endcommen
         data-candidates-url="{{ row.data.candidates_url }}"
         data-group-id="{{ row.data.id }}"
         data-group-active="{% if row.data.is_active %}1{% else %}0{% endif %}"
+        data-lead-name="{{ row.data.lead_name }}"
+        data-lead-username="{{ row.data.lead_username }}"
+        data-lead-warning="{{ row.data.lead_warning }}"
         data-name="{{ row.data.name }}">
     <i class="fas fa-users" aria-hidden="true"></i>
     {% trans "Tələbələr" context "accounts.groups" %}

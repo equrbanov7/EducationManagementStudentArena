@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   «Qrupum» (rol auditi 2026-10-13 B10) — şablon: sections/_my_group.html.
+   «Starosta» (`my-group`; rol auditi 2026-10-13 B10) — şablon: sections/_my_group.html.
    Cədvəlin əsası ems_ui/table.css-dədir (sticky ad sütunu, zebra); burada yalnız
    bölməyə xas düzülüş və qayıb hüceyrələrinin rəngləri. Rənglər YALNIZ --ems-* tokenləri ilə.
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -154,4 +154,322 @@
 .mg-legend__item--over::before {
     background: var(--ems-danger-bg);
     border-color: var(--ems-danger);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   «Starosta» qrup mənzərəsi — 2026-10-13 (gecə). Tab-lar ortaq ems_ui/nav.js-dədir; burada yalnız
+   göstərici kartları, fənn/seçmə/birləşmiş kartları, gün kartları (cədvəl) və siyahılar.
+   Mobil (≤640px): tab zolağı üfüqi sürüşür, kartlar tək sütun — səhifədə üfüqi sürüşmə yoxdur.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.mg-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--ems-sp-3);
+    margin: 0;
+}
+
+.mg-stat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-1);
+    padding: var(--ems-sp-3) var(--ems-sp-4);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg);
+}
+
+.mg-stat dt {
+    margin: 0;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-xs);
+    font-weight: 600;
+}
+
+.mg-stat dd {
+    margin: 0;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-xl);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.mg-stat--accent {
+    border-color: var(--ems-primary-300);
+    background: var(--ems-primary-50);
+}
+
+.mg-tabs {
+    margin-bottom: 0;
+}
+
+.mg-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+}
+
+.mg-panel[hidden] {
+    display: none;
+}
+
+.mg-muted,
+.mg-code {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-xs);
+    font-weight: 500;
+}
+
+.mg-code {
+    margin-left: var(--ems-sp-1);
+    font-family: var(--ems-font-mono, ui-monospace, monospace);
+}
+
+.mg-joint-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-1);
+    color: var(--ems-primary-800);
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+}
+
+.mg-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--ems-sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mg-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+    padding: var(--ems-sp-3) var(--ems-sp-4);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg);
+    min-width: 0;
+}
+
+.mg-card--joint {
+    border-left: 3px solid var(--ems-primary-500);
+}
+
+.mg-card__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+}
+
+.mg-card__title {
+    margin: 0;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.mg-card__meta {
+    margin: 0;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    line-height: 1.45;
+}
+
+.mg-card__people summary {
+    cursor: pointer;
+    color: var(--ems-primary-800);
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+    min-height: 24px;
+}
+
+.mg-names {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-1) var(--ems-sp-2);
+    margin: var(--ems-sp-2) 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text);
+}
+
+.mg-names li {
+    padding: 2px var(--ems-sp-2);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-bg-subtle);
+}
+
+/* Cədvəl: gün kartları (sütunlu grid mobil üçün ağırdır — kartlar sarılır). */
+.mg-days {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--ems-sp-3);
+}
+
+.mg-day {
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg);
+    overflow: hidden;
+}
+
+.mg-day__title {
+    margin: 0;
+    padding: var(--ems-sp-2) var(--ems-sp-4);
+    border-bottom: 1px solid var(--ems-border);
+    background: var(--ems-bg-subtle);
+    color: var(--ems-text);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+}
+
+.mg-slots {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mg-slot {
+    display: grid;
+    grid-template-columns: 6.5rem 1fr;
+    gap: var(--ems-sp-3);
+    padding: var(--ems-sp-2) var(--ems-sp-4);
+    border-left: 3px solid var(--ems-neutral-300);
+}
+
+.mg-slot + .mg-slot {
+    border-top: 1px solid var(--ems-border);
+}
+
+.mg-slot--lecture {
+    border-left-color: var(--ems-primary-500);
+}
+
+.mg-slot--seminar {
+    border-left-color: var(--ems-success-600);
+}
+
+.mg-slot--lab {
+    border-left-color: var(--ems-warning-600);
+}
+
+.mg-slot__time {
+    color: var(--ems-text);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.mg-slot__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.mg-slot__subject {
+    color: var(--ems-text);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.mg-slot__meta,
+.mg-slot__partial {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-xs);
+}
+
+/* İmtahan və elan siyahısı: tarix sütunu + mətn. */
+.mg-list {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg);
+}
+
+.mg-list__item {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: var(--ems-sp-3);
+    padding: var(--ems-sp-3) var(--ems-sp-4);
+}
+
+.mg-list__item + .mg-list__item {
+    border-top: 1px solid var(--ems-border);
+}
+
+.mg-list__date {
+    display: flex;
+    flex-direction: column;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.mg-list__date span {
+    color: var(--ems-text-muted);
+    font-weight: 500;
+}
+
+.mg-list__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.mg-list__title {
+    color: var(--ems-text);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.mg-list__meta {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.mg-list__deadline {
+    color: var(--ems-warning-800);
+    font-size: var(--ems-fs-xs);
+    font-weight: 600;
+}
+
+.mg-link {
+    color: var(--ems-primary-800);
+    font-weight: 600;
+}
+
+@media (max-width: 640px) {
+    .mg-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: thin;
+    }
+
+    .mg-tabs .ems-tabs__btn {
+        flex: none;
+        white-space: nowrap;
+    }
+
+    .mg-table__name {
+        white-space: normal;
+    }
+
+    .mg-slot,
+    .mg-list__item {
+        grid-template-columns: 1fr;
+        gap: var(--ems-sp-1);
+    }
 }

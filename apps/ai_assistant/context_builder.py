@@ -277,10 +277,13 @@ def _navigation_section(user, organization, memberships, permissions) -> str:
 
     if request_has_permission_from_list(permissions, "member.view"):
         # Rol auditi 2026-10-13 B10: `member.view` əhatəsi AKADEMİK QRUP olan aktor (baş tələbə) «Üzvlər»
-        # bölməsini aça bilmir (rol bayrağı ilə qapalıdır) — ona kabinetin «Qrupum» bölməsi təklif olunur.
+        # bölməsini aça bilmir (rol bayrağı ilə qapalıdır) — ona kabinetin «Starosta» (`my-group`) bölməsi təklif olunur.
         group_scoped, other_scoped = _member_view_scopes(memberships)
         if group_scoped:
-            lines.append("- My group (classmates + attendance, read-only): /accounts/profile/?section=my-group")
+            lines.append(
+                "- Starosta (group lead panel: subjects incl. electives, joint lessons, timetable, exams, "
+                "announcements; read-only): /accounts/profile/?section=my-group"
+            )
         if other_scoped or not group_scoped:
             lines.append("- Members: /accounts/profile/?section=org-members")
 
@@ -418,7 +421,7 @@ def _has_teacher_role(memberships) -> bool:
 def _member_view_scopes(memberships) -> tuple[bool, bool]:
     """``(qrup əhatəli, başqa əhatəli)`` — `member.view` daşıyan üzvlüklərin əhatə növü (B10, 2026-10-13).
 
-    Kabinetin «Qrupum» qapısı (``accounts/views/_helpers/rbac_my_group.py``) ilə eyni qayda: UNIT rolu +
+    Kabinetin «Starosta» (`my-group`) qapısı (``accounts/views/_helpers/rbac_my_group.py``) ilə eyni qayda: UNIT rolu +
     ``scope_unit`` akademik qrupdur. Modul sərhədi səbəbindən burada təkrarlanır; üzvlük sətirləri
     middleware-dən ``scope_unit`` yüklü gəlir (əlavə sorğu yoxdur).
     """

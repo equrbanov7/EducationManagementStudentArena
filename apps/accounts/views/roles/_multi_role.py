@@ -40,6 +40,7 @@ from ...services.role_catalog import (
     role_label,
     sync_profile_primary_role,
 )
+from ...services.group_lead import LEAD_ROLE_NAME as GROUP_LEAD_ROLE_NAME
 from .._helpers.rbac import _collect_actor_permissions
 from ._gates import actor_is_unit_scoped, manage_roles_gate_error
 
@@ -157,6 +158,18 @@ def _grant(request, *, organization, is_superadmin, actor_level, next_url):
     ).first()
     if target_role is None:
         return _deny(request, next_url, pgettext(_CTX, "Rol tapılmadı və ya deaktivdir."))
+    if target_role.name == GROUP_LEAD_ROLE_NAME:
+        # 2026-10-13 (gecə): burada `scope_unit` istənilən bölmə ola bilirdi (fakültə, başqa qrup) və
+        # eyni qrupa iki starosta düşürdü. Starosta yalnız qrup reyestrinin xüsusi əməli ilə verilir —
+        # qrupun qeydiyyatlı tələbəsi, bir qrupda bir starosta, audit + bildiriş (services/group_lead.py).
+        return _deny(
+            request,
+            next_url,
+            pgettext(
+                "accounts.group_lead",
+                "Starosta «Qruplar» reyestrindən təyin olunur: qrupun tələbələri → «Starosta təyin et».",
+            ),
+        )
 
     denial = _guard(
         request,

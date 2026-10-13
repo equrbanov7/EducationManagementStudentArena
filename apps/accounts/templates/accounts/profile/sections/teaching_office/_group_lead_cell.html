@@ -1,0 +1,18 @@
+{% load i18n %}
+{% comment %}«Qruplar» reyestri — STAROSTA xanası (2026-10-13 (gecə)). Kontekst: `cell.lead` = reyestr sətri
+(`lead_name`, `lead_warning`). Xəbərdarlıq: `not_in_group` — starosta artıq bu qrupun qeydiyyatlı tələbəsi
+deyil (köçürülüb/xaric), bölmə ona AÇILMIR; `multiple` — köhnə axından qalmış ikinci aktiv starosta.
+Hər iki halda çekmecədən «Starosta təyin et» ilə düzəldilir (yeni təyinat köhnəni götürür).{% endcomment %}
+{% if cell.lead.lead_name %}
+    <span class="tof-lead-cell">
+        <i class="fas fa-user-tie tof-lead-cell__icon" aria-hidden="true"></i>
+        <span class="tof-lead-cell__name">{{ cell.lead.lead_name }}</span>
+        {% if cell.lead.lead_warning == "not_in_group" %}
+            <span class="ems-badge ems-badge--warning">{% trans "qrupda deyil" context "accounts.group_lead" %}</span>
+        {% elif cell.lead.lead_warning == "multiple" %}
+            <span class="ems-badge ems-badge--warning">{% trans "bir neçə starosta" context "accounts.group_lead" %}</span>
+        {% endif %}
+    </span>
+{% else %}
+    <span class="ems-table__muted">—</span>
+{% endif %}

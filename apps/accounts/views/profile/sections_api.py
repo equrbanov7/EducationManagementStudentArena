@@ -202,7 +202,7 @@ SECTION_PARTIALS: dict[str, str] = {
     "subject-folder-review": "accounts/profile/sections/_subject_folder_review.html",
     "my-subject-folders": "accounts/profile/sections/_my_subject_folders.html",
     "announcements": "accounts/profile/sections/_announcements.html",  # «Elanlar» (apps.announcements)
-    "my-group": "accounts/profile/sections/_my_group.html",  # «Qrupum» — baş tələbə (rol auditi 2026-10-13 B10)
+    "my-group": "accounts/profile/sections/_my_group.html",  # «Starosta» — baş tələbə (B10)
 }
 
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin bölmələri normal full-page naviqasiyada qalır.
@@ -347,7 +347,7 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "subject-folder-review",
         "my-subject-folders",
         "announcements",  # «Elanlar» — panel oxu-only; mutasiyalar `/elanlar/api/` JSON uclarına gedir
-        "my-group",  # «Qrupum» (B10) — tam OXU-ONLY siyahı + davamiyyət, mutasiya yoxdur
+        "my-group",  # «Starosta» (B10) — OXU-ONLY qrup mənzərəsi + şəxsi davamiyyət, mutasiya yoxdur
     }
 )
 
