@@ -1,0 +1,50 @@
+{% load i18n proctoring %}
+{% comment %}
+  2026-10-13 (gecə, examphoto): sahib — «test imtahanı zamanı solda ya da sağda tələbənin öz şəklinin
+  görünməsi». Başlıqdakı 44 px çip zalda gəzən İM nəzarətçisi üçün kiçikdir və başlıq sürüşəndə
+  ekrandan çıxır; bu kart masaüstündə sağ sütunda (≥1280 px, ekranda SABİT qalır), 1025–1279 px-də
+  sual paletinin üstündə görünür; telefonda/planşetdə yalnız başlıq çipi qalır (sual sahəsini örtmür).
+
+  * Şəkil yalnız icazəli marşrutdan (exams:proctor_student_photo — tələbə yalnız ÖZ şəklini alır),
+    başlıq çipi ilə EYNİ URL → brauzer keşindən, ikinci sorğu yoxdur.
+  * Şəkil yoxdursa / yüklənməsə baş hərflər + «vəsiqəni göstərin» qeydi (identity_photo.js, inline
+    onerror YOX — CSP).
+  * Şəklin alt-ı boşdur: ad dərhal altında mətn kimi var (ekran oxuyucu iki dəfə oxumasın).
+  * ``ident`` valideyn şablonda bir dəfə hesablanır (2 sorğu); yoxdursa burada hesablanır.
+{% endcomment %}
+{% if not ident %}{% proctor_identity attempt as ident %}{% endif %}
+<div class="exam-id-rail">
+  <section class="exam-id-card" data-exam-id-card
+           aria-label="{% trans 'Tələbənin kimliyi' context 'exams.proctoring.identity' %}">
+    <p class="exam-id-card__kicker">
+      <i class="fas fa-id-badge" aria-hidden="true"></i>
+      {% trans "Kimlik yoxlaması" context "exams.proctoring.identity" %}
+    </p>
+    <div class="exam-id-card__photo{% if ident.photo_url %} has-photo{% endif %}" data-id-photo-holder>
+      <span class="exam-id-card__ini" aria-hidden="true">{{ ident.initials|default:"?" }}</span>
+      {% if ident.photo_url %}<img class="exam-id-card__img" src="{{ ident.photo_url }}" alt="" width="160" height="200" decoding="async" draggable="false" referrerpolicy="no-referrer" data-id-photo>{% endif %}
+    </div>
+    <p class="exam-id-card__name">{{ ident.name|default:request.user.username }}</p>
+    <dl class="exam-id-card__facts">
+      {% if ident.group %}
+      <div class="exam-id-card__fact">
+        <dt>{% trans "Qrup" context "exams.proctoring.identity" %}</dt>
+        <dd>{{ ident.group }}</dd>
+      </div>
+      {% endif %}
+      {% if ident.student_number %}
+      <div class="exam-id-card__fact">
+        <dt>{% trans "Tələbə №" context "exams.proctoring.identity" %}</dt>
+        <dd>{{ ident.student_number }}</dd>
+      </div>
+      {% endif %}
+      <div class="exam-id-card__fact">
+        <dt>{% trans "İstifadəçi adı" context "exams.proctoring.identity" %}</dt>
+        <dd>{{ ident.username|default:request.user.username }}</dd>
+      </div>
+    </dl>
+    <p class="exam-id-card__nophoto" data-id-nophoto{% if ident.photo_url %} hidden{% endif %}>
+      {% trans "Şəkil yüklənməyib — nəzarətçiyə şəxsiyyət vəsiqənizi göstərin." context "exams.proctoring.identity" %}
+    </p>
+  </section>
+</div>

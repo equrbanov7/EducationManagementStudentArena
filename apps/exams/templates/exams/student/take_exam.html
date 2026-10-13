@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load get_item i18n exam_filters %}
-{% load static %}
+{% load static proctoring %}
 
 {% block title %}{{ exam.title }} - {% trans "title_exam" context "exams.template.take_exam" %}{% endblock %}
 
@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="{% static 'exams/css/take_exam/_inline_extras.css' %}?v=20260519-1">
     <link rel="stylesheet" href="{% static 'exams/css/take_exam/proctor.css' %}?v=20261001-proc">
     <link rel="stylesheet" href="{% static 'exams/css/take_exam/ux.css' %}?v=20261005-pill">
+    <link rel="stylesheet" href="{% static 'exams/css/take_exam/id_card.css' %}?v=20261013-idcard2">
 {% endblock %}
 
 {% block content %}
@@ -59,7 +60,10 @@
     </span>
 </div>
 
-<div class="exam-shell page-enter">
+{% comment %}2026-10-13 (gecə, examphoto): kimlik bir dəfə hesablanır (2 sorğu) — başlıq çipi və yan kart
+   eyni `ident`-i işlədir.{% endcomment %}
+{% proctor_identity attempt as ident %}
+<div class="exam-shell exam-shell--id page-enter">
     <header class="exam-topbar">
         <div class="exam-topbar__inner">
             <div class="exam-meta">
@@ -116,7 +120,7 @@
                data-autosave-revision
                value="{{ autosave_revision|default:0 }}">
 
-        <div class="exam-workspace">
+        <div class="exam-workspace exam-workspace--id">
             <aside class="question-sidebar" aria-label="{% trans 'Questions' context 'exams.template.take_exam' %}">
                 <div class="exam-card question-map-card">
                     <h2>{% trans "Questions" context "exams.template.take_exam" %}</h2>
@@ -160,6 +164,8 @@
                     <i class="far fa-flag" aria-hidden="true"></i> {% trans "action_finish_exam" context "exams.template.take_exam" %}
                 </button>
             </aside>
+
+            {% include "exams/student/partials/_proctor_id_card.html" %}
 
             <section class="question-stage">
                 <div class="slides-wrapper">
@@ -226,7 +232,9 @@
 
                         {% if q.image %}
                             <div class="question-media">
-                            <img src="{{ q.image|protected_media_url }}" alt="{% if q.image_replaces_text %}{{ q.text }}{% else %}{% trans 'alt_question_image' context 'exams.template.take_exam' %}{% endif %}"{% if q.image_replaces_text %} class="source-rendered-image"{% endif %}>
+                            {% comment %}2026-10-13 (gecə, perf): gizli slaydların şəkilləri ilk açılışda HAMISI yüklənirdi
+                               (100 şəkilli sual = 100 sorğu). `lazy` — slayd göstəriləndə yüklənir; ilk slayd dərhal.{% endcomment %}
+                            <img src="{{ q.image|protected_media_url }}"{% if not forloop.first %} loading="lazy"{% endif %} decoding="async" alt="{% if q.image_replaces_text %}{{ q.text }}{% else %}{% trans 'alt_question_image' context 'exams.template.take_exam' %}{% endif %}"{% if q.image_replaces_text %} class="source-rendered-image"{% endif %}>
                             </div>
                         {% endif %}
                       
@@ -253,7 +261,7 @@
                                                data-question-id="{{ q.id }}"
                                                {% if ans_data and opt.id in ans_data.selected_option_ids %}checked{% endif %}>
                                         <span class="option-letter circle-mark">{{ opt.label }}</span>
-                                        <span class="opt-text">{% if not opt.image_replaces_text or not opt.image %}{{ opt.text }}{% endif %}{% if opt.image %}<img src="{{ opt.image }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="opt-text__img">{% endif %}</span>
+                                        <span class="opt-text">{% if not opt.image_replaces_text or not opt.image %}{{ opt.text }}{% endif %}{% if opt.image %}<img src="{{ opt.image }}"{% if not forloop.parentloop.first %} loading="lazy"{% endif %} decoding="async" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="opt-text__img">{% endif %}</span>
                                     </label>
                                 {% endfor %}
                             </div>
@@ -268,7 +276,7 @@
                                                 data-question-id="{{ q.id }}"
                                                 {% if ans_data and opt.id in ans_data.selected_option_ids %}checked{% endif %}>
                                             <span class="option-letter box-mark">{{ opt.label }}</span>
-                                            <span class="opt-text">{% if not opt.image_replaces_text or not opt.image %}{{ opt.text }}{% endif %}{% if opt.image %}<img src="{{ opt.image }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="opt-text__img">{% endif %}</span>
+                                            <span class="opt-text">{% if not opt.image_replaces_text or not opt.image %}{{ opt.text }}{% endif %}{% if opt.image %}<img src="{{ opt.image }}"{% if not forloop.parentloop.first %} loading="lazy"{% endif %} decoding="async" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="opt-text__img">{% endif %}</span>
                                         </label>
                                     {% endfor %}
                                 </div>
