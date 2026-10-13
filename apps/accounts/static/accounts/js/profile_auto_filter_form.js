@@ -3,51 +3,42 @@
  * Source: extracted verbatim from the inline <script> shared by
  *   _pending_review_content.html, _review_results_content.html and
  *   _pending_answers_content.html (CSP inline-removal, 2026-07).
- * Auto-submits any [data-auto-filter-form] on text input (debounced),
- * Enter, or select change. Idempotent via the form.dataset.autoFilterBound
- * guard, and re-runs on every profile AJAX section swap via EMSReady.
+ * Auto-submits any [data-auto-filter-form] on text input, Enter, or select change.
+ *
+ * 2026-10-14 (sahib: «yazarkən search gedir, render olur, axtardığım itir»):
+ * mətn sahəsi vahid EMSSearchInput qaydası ilə — yazı dayananda 1500 ms,
+ * ≥ 2 simvol, Enter dərhal, IME gözlənilir; göndəriş `submitForm` ilədir
+ * (kabinetdə «quiet» bölmə yükləməsi — input əvəzlənmir, fokus qalır).
+ * Dinləyicilər delegasiyalıdır (element-ə bağlanmır) → AJAX swap-dan sonra da
+ * işləyir və yığılmır.
  */
 (function () {
     "use strict";
 
-    function setupAutoFilterForm(form) {
-        if (!form || form.dataset.autoFilterBound === "1") {
-            return;
-        }
-        form.dataset.autoFilterBound = "1";
+    var FORM = "form[data-auto-filter-form]";
+    var TEXT = FORM + ' input[type="text"], ' + FORM + ' input[type="search"]';
 
-        var debounceHandle = null;
-        var textFields = form.querySelectorAll('input[type="text"], input[type="search"]');
-        var selects = form.querySelectorAll("select");
-
-        function submitForm() {
-            if (typeof form.requestSubmit === "function") {
-                form.requestSubmit();
-                return;
-            }
+    function submit(form, input) {
+        if (window.EMSSearchInput && window.EMSSearchInput.submitForm) {
+            window.EMSSearchInput.submitForm(form, { input: input || null });
+        } else if (typeof form.requestSubmit === "function") {
+            form.requestSubmit();
+        } else {
             form.submit();
         }
-
-        textFields.forEach(function (field) {
-            field.addEventListener("input", function () {
-                window.clearTimeout(debounceHandle);
-                debounceHandle = window.setTimeout(submitForm, 350);
-            });
-            field.addEventListener("keydown", function (event) {
-                if (event.key === "Enter") {
-                    event.preventDefault();
-                    window.clearTimeout(debounceHandle);
-                    submitForm();
-                }
-            });
-        });
-
-        selects.forEach(function (select) {
-            select.addEventListener("change", submitForm);
-        });
     }
 
-    window.EMSReady(function () {
-        document.querySelectorAll("[data-auto-filter-form]").forEach(setupAutoFilterForm);
+    window.EMSSearchInput.delegate(TEXT, {
+        onSearch: function (value, meta) {
+            if (meta.input.form) {
+                submit(meta.input.form, meta.input);
+            }
+        },
+    });
+
+    window.EMSDelegate.on("change", FORM + " select", function (event, select) {
+        if (select.form) {
+            submit(select.form, null);
+        }
     });
 })();

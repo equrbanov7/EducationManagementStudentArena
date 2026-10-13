@@ -48,6 +48,9 @@ document.addEventListener("DOMContentLoaded", function () {
             ) {
                 return;
             }
+            if (window.EMSSearchInput && window.EMSSearchInput.handles(input)) {
+                return; // Enter-i vahid EMSSearchInput qatı emal edir (iki dəfə göndərilməsin)
+            }
             event.preventDefault();
             submitForm();
         });
@@ -56,6 +59,11 @@ document.addEventListener("DOMContentLoaded", function () {
             clearButton.addEventListener("click", function () {
                 if (!input.value.trim()) {
                     return;
+                }
+                if (window.EMSSearchInput && window.EMSSearchInput.clear(input)) {
+                    syncClearButton();
+                    input.focus();
+                    return; // səhifə yenilənmədən sıfırlanır (2026-10-14)
                 }
                 input.value = "";
                 syncClearButton();

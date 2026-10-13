@@ -98126,3 +98126,123 @@ msgstr "%(n)s Studierende aus der Gruppe"
 msgctxt "accounts.my_group"
 msgid "Son tarix: %(date)s"
 msgstr "Frist: %(date)s"
+
+msgctxt "registrar.journal_autosave"
+msgid "Dəyişikliklər avtomatik yadda saxlanılır."
+msgstr "Änderungen werden automatisch gespeichert."
+
+msgctxt "registrar.journal_autosave"
+msgid "Yadda saxlanılır…"
+msgstr "Wird gespeichert…"
+
+msgctxt "registrar.journal_autosave"
+msgid "Yadda saxlanıldı"
+msgstr "Gespeichert"
+
+msgctxt "registrar.journal_autosave"
+msgid "Yadda saxlanıldı — {n} xana yazılmadı (kilid, dərs günü və ya bal qaydası)."
+msgstr "Gespeichert — {n} Zelle(n) nicht übernommen (Sperre, Unterrichtstag- oder Punkteregel)."
+
+msgctxt "registrar.journal_autosave"
+msgid "Xəta — yenidən cəhd edilir…"
+msgstr "Fehler — neuer Versuch läuft…"
+
+msgctxt "registrar.journal_autosave"
+msgid "Yadda saxlanılmadı — səhifəni yeniləyin. Dəyişikliklər brauzerdə qaralama kimi qalır."
+msgstr "Nicht gespeichert — bitte die Seite neu laden. Die Änderungen bleiben als Entwurf im Browser."
+
+msgctxt "registrar.journal_autosave"
+msgid "Yenidən cəhd et"
+msgstr "Erneut versuchen"
+
+msgctxt "registrar.schedule_conflicts"
+msgid "Müəllimin bu saatda başqa dərsi var: %(subject)s · %(group)s."
+msgstr "Die Lehrkraft hat zu dieser Zeit bereits eine andere Lehrveranstaltung: %(subject)s · %(group)s."
+
+msgctxt "registrar.schedule_conflicts"
+msgid "%(room)s auditoriyası bu saatda tutulub: %(subject)s · %(group)s."
+msgstr "Raum %(room)s ist zu dieser Zeit belegt: %(subject)s · %(group)s."
+
+msgctxt "registrar.schedule_editor"
+msgid "Qrupun bu saatda artıq dərsi var — qrup eyni anda iki dərsdə ola bilməz. Əvvəlcə həmin dərsi başqa xanaya köçürün və ya boş xana seçin."
+msgstr "Die Gruppe hat zu dieser Zeit bereits eine Lehrveranstaltung — eine Gruppe kann nicht zwei Veranstaltungen gleichzeitig besuchen. Verschieben Sie zuerst diese Veranstaltung in ein anderes Feld oder wählen Sie ein freies Feld."
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllimi seçin — onun həftəlik cədvəli açılacaq; dərsləri buradan da qoymaq və yerini dəyişmək olar."
+msgstr "Wählen Sie eine Lehrkraft — ihr Wochenplan wird geöffnet; auch hier können Sie Lehrveranstaltungen eintragen und verschieben."
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu müəllimin bu semestrdə hələ dərsi yoxdur — boş xanaya klikləyib qrup və fənn seçərək dərs qoyun."
+msgstr "Diese Lehrkraft hat in diesem Semester noch keine Lehrveranstaltungen — klicken Sie auf ein freies Feld und wählen Sie Gruppe und Fach."
+
+msgctxt "accounts.schedule_manage"
+msgid "Enter — redaktə et. M — köçürmə rejimi: oxlarla xana seçin, Enter — burax, Esc — ləğv."
+msgstr "Enter — bearbeiten. M — Verschiebemodus: Feld mit den Pfeiltasten wählen, Enter — ablegen, Esc — abbrechen."
+
+msgctxt "accounts.schedule_manage"
+msgid "Dərsi sürüşdürüb başqa xanaya buraxın (toxunma ekranında — basıb saxlayın); klaviaturada kartı seçib «M». Toqquşma varsa təsdiqdən əvvəl göstərilir."
+msgstr "Ziehen Sie eine Lehrveranstaltung in ein anderes Feld (auf Touchscreens — gedrückt halten); per Tastatur die Karte wählen und „M“ drücken. Kollisionen werden vor der Bestätigung angezeigt."
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrup axtar…"
+msgstr "Gruppe suchen…"
+
+msgctxt "accounts.schedule_manage"
+msgid "Uyğun qrup yoxdur"
+msgstr "Keine passende Gruppe"
+
+msgctxt "accounts.schedule_manage"
+msgid "Əvvəlcə qrupu seçin."
+msgstr "Wählen Sie zuerst die Gruppe."
+
+msgctxt "accounts.schedule_manage"
+msgid "Köçürülür…"
+msgstr "Wird verschoben…"
+
+msgctxt "accounts.schedule_manage"
+msgid "Dərs köçürüldü."
+msgstr "Die Lehrveranstaltung wurde verschoben."
+
+msgctxt "accounts.schedule_manage"
+msgid "Dərs köçürülmədi — əvvəlki yerinə qaytarıldı."
+msgstr "Die Lehrveranstaltung wurde nicht verschoben — sie steht wieder an ihrem bisherigen Platz."
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu xanaya köçürmək olmaz — əvvəlcə toqquşmanı aradan qaldırın."
+msgstr "In dieses Feld kann nicht verschoben werden — lösen Sie zuerst die Kollision."
+
+msgctxt "accounts.schedule_manage"
+msgid "Toqquşma var. Yenə də köçürmək üçün səbəb yazın — toqquşan dərs silinmir, «Yenidən yerləşdirilməli» siyahısına düşür."
+msgstr "Es gibt eine Kollision. Um trotzdem zu verschieben, geben Sie einen Grund an — die kollidierende Lehrveranstaltung wird nicht gelöscht, sondern landet in der Liste „Neu einzuplanen“."
+
+msgctxt "accounts.schedule_manage"
+msgid "Köçürmə rejimi: oxlarla xana seçin, Enter — burax, Esc — ləğv."
+msgstr "Verschiebemodus: Feld mit den Pfeiltasten wählen, Enter — ablegen, Esc — abbrechen."
+
+msgctxt "accounts.schedule_manage"
+msgid "Köçürmə ləğv edildi."
+msgstr "Verschieben abgebrochen."
+
+msgctxt "accounts.schedule_manage"
+msgid "Məcburi köçürmə üçün ən azı 10 simvolluq səbəb yazın (auditə düşür)."
+msgstr "Für ein erzwungenes Verschieben ist ein Grund mit mindestens 10 Zeichen nötig (er wird im Audit-Protokoll gespeichert)."
+
+msgctxt "appeals.template"
+msgid "«Qəbul et» yalnız bu tələbəyə +1 verir. Açar özü səhvdirsə, düzgün variant(lar)ı seçin — sualı həmin variantla cavablayan hər kəs sualın tam balını alır."
+msgstr "„Annehmen“ gibt nur dieser/diesem Studierenden +1. Ist der Schlüssel selbst falsch, wählen Sie die richtige(n) Option(en) — alle, die mit dieser Option geantwortet haben, erhalten die volle Punktzahl der Frage."
+
+msgctxt "accounts.structure_tree"
+msgid "Tyutor"
+msgstr "Tutor/in"
+
+msgctxt "accounts.structure_tree"
+msgid "Qrupun tələbələri"
+msgstr "Studierende der Gruppe"
+
+msgctxt "accounts.structure_tree"
+msgid "Bu qrupda hələ tələbə yoxdur."
+msgstr "Diese Gruppe hat noch keine Studierenden."
+
+msgctxt "accounts.structure_tree"
+msgid "Bu qrupda seçilə bilən qeydiyyatlı tələbə yoxdur."
+msgstr "In dieser Gruppe gibt es keine eingeschriebenen Studierenden zur Auswahl."

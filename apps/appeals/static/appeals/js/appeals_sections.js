@@ -184,7 +184,16 @@
                 return r.text();
             })
             .then(function (html) {
-                bodyHost.innerHTML = html;
+                // 2026-10-14: filtr forması bu fraqmentin İÇİNDƏDİR — yazarkən gələn
+                // cavab input-u əvəzləməsin (fokus/kursor/hərflər itirdi): morph.
+                var SI = window.EMSSearchInput;
+                var snap = SI.snapshot(bodyHost);
+                var fresh = bodyHost.cloneNode(false); // eyni qabıq — atributları qorunur
+                fresh.innerHTML = html;
+                if (!(snap && SI.morph(bodyHost, fresh, snap.el))) {
+                    bodyHost.innerHTML = html;
+                    SI.restore(snap, bodyHost);
+                }
                 if (window.EMSBootstrapSelect && window.EMSBootstrapSelect.init) {
                     window.EMSBootstrapSelect.init(bodyHost);
                 }
@@ -241,7 +250,7 @@
 
     /* ── Filtr formları: manage → AJAX reload; tələbə → profil AJAX form ── */
 
-    function submitFilterForm(form) {
+    function submitFilterForm(form, input) {
         if (!form) { return; }
         if (filterTimer) {
             window.clearTimeout(filterTimer);
@@ -252,8 +261,11 @@
             submitManageFilter(form, managePanel);
             return;
         }
-        // Tələbə formu (data-profile-ajax-form): submit-i profil AJAX qatı tutur.
-        if (form.requestSubmit) {
+        // Tələbə formu: axtarışdan gəlirsə «quiet» bölmə yükləməsi (input qalır),
+        // əks halda submit-i profil AJAX qatı (data-profile-ajax-form) tutur.
+        if (input) {
+            window.EMSSearchInput.submitForm(form, { input: input });
+        } else if (form.requestSubmit) {
             form.requestSubmit();
         } else {
             HTMLFormElement.prototype.submit.call(form);
@@ -273,14 +285,11 @@
         submitFilterForm(form);
     });
 
-    window.EMSDelegate.on("input", "[data-appeal-auto-search]", function (event, field) {
-        if (field.form) { scheduleFilterSubmit(field.form, 350); }
-    });
-
-    window.EMSDelegate.on("keydown", "[data-appeal-auto-search]", function (event, field) {
-        if (event.key !== "Enter" || !field.form) { return; }
-        event.preventDefault();
-        submitFilterForm(field.form);
+    // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter dərhal, IME).
+    window.EMSSearchInput.delegate("[data-appeal-auto-search]", {
+        onSearch: function (value, meta) {
+            if (meta.input.form) { submitFilterForm(meta.input.form, meta.input); }
+        }
     });
 
     window.EMSDelegate.on("change", "[data-appeal-auto-field]", function (event, field) {

@@ -209,27 +209,26 @@
     };
 
     /* ── Yükləmə ────────────────────────────────────────────────────────── */
+    var listSeq = 0; // köhnə (yavaş) cavab yeni siyahının üstünə yazılmasın
     function loadList(options) {
         options = options || {};
         var host = NS.root && NS.root.querySelector("[data-apx-list]");
         if (!host) {
             return Promise.resolve();
         }
-        if (!options.append) {
-            host.innerHTML = skeletonHtml();
-        }
+        var mine = (listSeq += 1);
+        var quiet = !options.append && options.quiet && host.children.length > 0; // yazdıqca: skelet yox
+        if (!quiet && !options.append) { host.innerHTML = skeletonHtml(); }
+        host.classList.toggle("ems-search-pending", !!quiet);
+        window.EMSSearchInput.busy(options.input, quiet);
         NS.state.loading = true;
         return NS.api
             .list({
-                tab: NS.state.tab,
-                stat: NS.state.stat,
-                kind: NS.state.kind,
-                q: NS.state.q,
-                from: NS.state.from,
-                to: NS.state.to,
-                page: NS.state.page,
+                tab: NS.state.tab, stat: NS.state.stat, kind: NS.state.kind, q: NS.state.q,
+                from: NS.state.from, to: NS.state.to, page: NS.state.page,
             })
             .then(function (payload) {
+                if (mine !== listSeq) { return; }
                 NS.state.rows = options.append ? NS.state.rows.concat(payload.results) : payload.results;
                 NS.state.pages = payload.pages;
                 NS.state.total = payload.total;
@@ -241,11 +240,15 @@
                 }
             })
             .catch(function () {
+                if (mine !== listSeq) { return; }
                 host.innerHTML = emptyHtml();
                 NS.toast(NS.t("loadError"), "error");
             })
             .then(function () {
+                if (mine !== listSeq) { return; }
                 NS.state.loading = false;
+                host.classList.remove("ems-search-pending");
+                window.EMSSearchInput.busy(options.input, false);
             });
     }
 
@@ -507,14 +510,12 @@
             setKind("");
         });
 
-        window.EMSDelegate.on("input", "[data-apx-q]", function (event, node) {
-            window.clearTimeout(NS.__searchTimer);
-            NS.__searchTimer = window.setTimeout(function () {
-                NS.state.q = node.value.trim();
-                NS.state.page = 1;
-                NS.loadList();
-            }, 260);
-        });
+        // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter, IME).
+        window.EMSSearchInput.delegate("[data-apx-q]", { onSearch: function (value, meta) {
+            NS.state.q = value;
+            NS.state.page = 1;
+            NS.loadList({ quiet: true, input: meta.input });
+        } });
 
         window.EMSDelegate.on("click", "[data-apx-kind-toggle]", function (event, node) {
             var panel = NS.root.querySelector("[data-apx-kind-panel]");

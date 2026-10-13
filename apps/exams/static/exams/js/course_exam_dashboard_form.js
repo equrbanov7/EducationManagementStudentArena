@@ -137,7 +137,6 @@
     // endpoint-indən (data-search-url) debounce ilə gətirilir.
     var lazyContainer = form.querySelector('[data-target-select-name="' + options.selectName + '"]');
     var lazySearchUrl = lazyContainer ? lazyContainer.getAttribute("data-search-url") : "";
-    var lazyDebounce = null;
     var lazySeq = 0;
 
     function mergeResults(results) {
@@ -177,19 +176,14 @@
     }
 
     if (searchInputElement) {
+      // Artıq yüklənmiş siyahı yazdıqca YERİNDƏ süzülür; server (lazy) axtarışı vahid
+      // EMSSearchInput qaydası ilə (2026-10-14: 1500 ms, ≥ 2 simvol, Enter dərhal, IME).
       searchInputElement.addEventListener("input", function () {
-        var q = searchInputElement.value.trim();
-        if (lazySearchUrl) {
-          if (lazyDebounce) {
-            clearTimeout(lazyDebounce);
-          }
-          lazyDebounce = setTimeout(function () {
-            lazyFetch(q);
-          }, 300);
-        } else {
-          filterList(q);
-        }
+        filterList(searchInputElement.value.trim());
       });
+      if (lazySearchUrl) {
+        window.EMSSearchInput.bind(searchInputElement, { onSearch: lazyFetch });
+      }
       searchInputElement.addEventListener("focus", function () {
         if (lazySearchUrl && hiddenSelect.options.length <= hiddenSelect.selectedOptions.length) {
           lazyFetch(searchInputElement.value.trim());

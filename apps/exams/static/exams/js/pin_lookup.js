@@ -14,7 +14,7 @@
   var input = root.querySelector(".js-pl2-search");
   var results = root.querySelector(".js-pl2-results");
   var detail = root.querySelector(".js-pl2-detail");
-  var DEBOUNCE = 280, timer = null, seq = 0, dseq = 0;
+  var seq = 0, dseq = 0;
   var PAGE_SIZE = 15, offset = 0, hasMore = false, loadingMore = false, currentQuery = "";
   var i18nEl = document.getElementById("pl2-i18n");
   var T = i18nEl ? JSON.parse(i18nEl.textContent) : {};
@@ -61,15 +61,19 @@
   // `reset`=true → yeni axtarış (səhifə 1-dən); `reset`=false → aşağı
   // sürüşdürdükcə növbəti səhifə (lazy, bütün PIN-li tələbələr bir dəfəyə
   // yüklənmir).
-  function doSearch(q, reset){
+  function doSearch(q, reset, quiet){
     if (reset) { offset=0; hasMore=false; currentQuery=q; }
     if (!reset) { if (loadingMore || !hasMore) return; loadingMore=true; }
-    var mine = reset ? ++seq : seq;
-    if (reset) { skeletonRows(results, 3); }
+    var mine = reset ? ++seq : seq, SI = window.EMSSearchInput;
+    // Yazdıqca axtarış (2026-10-14): siyahı skeletə çevrilmir — sakitcə solur + «Axtarılır…».
+    quiet = !!(quiet && reset && results.children.length);
+    results.classList.toggle("ems-search-pending", quiet); SI.busy(input, quiet);
+    if (reset && !quiet) { skeletonRows(results, 3); }
     fetch(searchUrl+"?q="+encodeURIComponent(q)+"&offset="+offset+"&limit="+PAGE_SIZE, {headers:{"X-Requested-With":"XMLHttpRequest"}})
       .then(function(r){ return r.ok?r.json():{results:[], has_more:false}; })
       .then(function(d){
         if (reset && mine!==seq) return;
+        if (reset) { results.classList.remove("ems-search-pending"); SI.busy(input, false); }
         var items=(d&&d.results)||[];
         renderResults(items, !reset);
         offset+=items.length;
@@ -77,7 +81,7 @@
         if (!reset) loadingMore=false;
       })
       .catch(function(){
-        if (reset) { if(mine===seq) state(results,"fa-triangle-exclamation","—"); }
+        if (reset) { if(mine===seq) { results.classList.remove("ems-search-pending"); SI.busy(input, false); state(results,"fa-triangle-exclamation","—"); } }
         else { loadingMore=false; }
       });
   }
@@ -152,10 +156,7 @@
       })
       .catch(function(){ btn.disabled=false; });
   });
-  input.addEventListener("input", function(){
-    if (timer) clearTimeout(timer);
-    var q=input.value.trim();
-    timer=setTimeout(function(){ doSearch(q, true); }, DEBOUNCE);
-  });
+  // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter dərhal, IME).
+  window.EMSSearchInput.bind(input, { onSearch: function(q){ doSearch(q, true, true); } });
   doSearch("", true); // ilk səhifə (biletli tələbələr)
 })();

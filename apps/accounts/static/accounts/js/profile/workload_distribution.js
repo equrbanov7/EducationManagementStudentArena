@@ -137,8 +137,10 @@
             "&q=" +
             encodeURIComponent(params.q);
         setBusy(true);
+        var mine = (STATE.rowsSeq = (STATE.rowsSeq || 0) + 1); // köhnə cavab atılır
         window.EMSCore.fetchJSON(url)
             .then(function (payload) {
+                if (mine !== STATE.rowsSeq) return;
                 STATE.rows = payload.rows || [];
                 STATE.task = payload.task || null;
                 STATE.readiness = payload.readiness || null;
@@ -154,10 +156,10 @@
             })
             .catch(function () {
                 var empty = q("[data-wl-empty]");
-                if (empty) empty.hidden = false;
+                if (empty && mine === STATE.rowsSeq) empty.hidden = false;
             })
             .then(function () {
-                setBusy(false);
+                if (mine === STATE.rowsSeq) setBusy(false);
             });
     }
 
@@ -293,10 +295,7 @@
             loadOptions();
         });
         EMSDelegate.on("change", "[data-wl-year]", loadRows);
-        EMSDelegate.on("input", "[data-wl-search]", function () {
-            window.clearTimeout(STATE.searchTimer);
-            STATE.searchTimer = window.setTimeout(loadRows, 300);
-        });
+        window.EMSSearchInput.delegate("[data-wl-search]", { onSearch: loadRows }); // 2026-10-14: 1500 ms, ≥2, Enter, IME
 
         EMSDelegate.on("click", "[data-wl-create-task]", function () {
             var host = root();

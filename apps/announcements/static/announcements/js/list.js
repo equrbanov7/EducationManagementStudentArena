@@ -1,4 +1,4 @@
-/* «Elanlar» siyahısı — axtarış (300 ms debounce), filtr, sıralama, səhifələmə, skeleton.
+/* «Elanlar» siyahısı — axtarış (vahid EMSSearchInput: 1500 ms, ≥ 2 simvol), filtr, sıralama, səhifələmə, skeleton.
  *
  * AJAX-safe: bütün hadisələr `EMSDelegate.on` ilə document səviyyəsindədir, ona görə panel
  * AJAX ilə yenidən yüklənəndə heç nə yenidən bağlanmır; skript təkrar icra olunsa da qoruyucu
@@ -13,7 +13,6 @@
     }
     window.__emsAnnouncementsList = true;
 
-    var DEBOUNCE_MS = 300;
     var FIELDS = ["q", "category", "state", "sort", "unread", "deadline", "pending"];
 
     function rootOf(node) {
@@ -56,7 +55,7 @@
         }
     }
 
-    function load(root, page) {
+    function load(root, page, input) {
         var results = root.querySelector("[data-ann-results]");
         var url = root.getAttribute("data-list-url");
         if (!results || !url || !window.EMSCore || typeof window.EMSCore.fetchJSON !== "function") { return; }
@@ -67,7 +66,11 @@
         root.__annController = controller;
         var data = params(root, page);
         results.setAttribute("aria-busy", "true");
-        showSkeleton(root, results);
+        // Yazdıqca axtarış (2026-10-14): skelet yox — köhnə kartlar sakitcə solur.
+        var quiet = !!input && results.children.length > 0;
+        results.classList.toggle("ems-search-pending", quiet);
+        window.EMSSearchInput.busy(input, quiet);
+        if (!quiet) { showSkeleton(root, results); }
         window.EMSCore.fetchJSON(url + "?" + data.toString(), { signal: controller ? controller.signal : undefined })
             .then(function (payload) {
                 if (root.__annController !== controller) { return; }
@@ -89,16 +92,19 @@
             .then(function () {
                 if (root.__annController === controller) {
                     results.setAttribute("aria-busy", "false");
+                    results.classList.remove("ems-search-pending");
+                    window.EMSSearchInput.busy(input, false);
                     root.__annController = null;
                 }
             });
     }
 
-    window.EMSDelegate.on("input", "[data-ann-root] [data-ann-search]", function (event, input) {
-        var root = rootOf(input);
-        if (!root) { return; }
-        window.clearTimeout(root.__annTimer);
-        root.__annTimer = window.setTimeout(function () { load(root, 1); }, DEBOUNCE_MS);
+    // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter dərhal, IME).
+    window.EMSSearchInput.delegate("[data-ann-root] [data-ann-search]", {
+        onSearch: function (value, meta) {
+            var root = rootOf(meta.input);
+            if (root) { load(root, 1, meta.input); }
+        },
     });
 
     window.EMSDelegate.on("change", "[data-ann-root] [data-ann-filters] select, [data-ann-root] [data-ann-filters] input[type=checkbox]", function (event, field) {
@@ -110,7 +116,8 @@
         event.preventDefault();
         var root = rootOf(form);
         if (root) {
-            window.clearTimeout(root.__annTimer);
+            var search = form.querySelector("[data-ann-search]");
+            if (search) { window.EMSSearchInput.sync(search); }
             load(root, 1);
         }
     });

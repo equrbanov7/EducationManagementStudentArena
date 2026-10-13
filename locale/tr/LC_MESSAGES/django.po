@@ -96487,3 +96487,123 @@ msgstr "gruptan %(n)s öğrenci"
 msgctxt "accounts.my_group"
 msgid "Son tarix: %(date)s"
 msgstr "Son tarih: %(date)s"
+
+msgctxt "registrar.journal_autosave"
+msgid "Dəyişikliklər avtomatik yadda saxlanılır."
+msgstr "Değişiklikler otomatik olarak kaydedilir."
+
+msgctxt "registrar.journal_autosave"
+msgid "Yadda saxlanılır…"
+msgstr "Kaydediliyor…"
+
+msgctxt "registrar.journal_autosave"
+msgid "Yadda saxlanıldı"
+msgstr "Kaydedildi"
+
+msgctxt "registrar.journal_autosave"
+msgid "Yadda saxlanıldı — {n} xana yazılmadı (kilid, dərs günü və ya bal qaydası)."
+msgstr "Kaydedildi — {n} hücre yazılmadı (kilit, ders günü veya puan kuralı)."
+
+msgctxt "registrar.journal_autosave"
+msgid "Xəta — yenidən cəhd edilir…"
+msgstr "Hata — yeniden deneniyor…"
+
+msgctxt "registrar.journal_autosave"
+msgid "Yadda saxlanılmadı — səhifəni yeniləyin. Dəyişikliklər brauzerdə qaralama kimi qalır."
+msgstr "Kaydedilmedi — sayfayı yenileyin. Değişiklikler tarayıcıda taslak olarak kalır."
+
+msgctxt "registrar.journal_autosave"
+msgid "Yenidən cəhd et"
+msgstr "Tekrar dene"
+
+msgctxt "registrar.schedule_conflicts"
+msgid "Müəllimin bu saatda başqa dərsi var: %(subject)s · %(group)s."
+msgstr "Öğretmenin bu saatte başka bir dersi var: %(subject)s · %(group)s."
+
+msgctxt "registrar.schedule_conflicts"
+msgid "%(room)s auditoriyası bu saatda tutulub: %(subject)s · %(group)s."
+msgstr "%(room)s dersliği bu saatte dolu: %(subject)s · %(group)s."
+
+msgctxt "registrar.schedule_editor"
+msgid "Qrupun bu saatda artıq dərsi var — qrup eyni anda iki dərsdə ola bilməz. Əvvəlcə həmin dərsi başqa xanaya köçürün və ya boş xana seçin."
+msgstr "Grubun bu saatte zaten dersi var — bir grup aynı anda iki derste olamaz. Önce o dersi başka bir hücreye taşıyın ya da boş bir hücre seçin."
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllimi seçin — onun həftəlik cədvəli açılacaq; dərsləri buradan da qoymaq və yerini dəyişmək olar."
+msgstr "Öğretmeni seçin — haftalık programı açılır; dersleri buradan da ekleyip taşıyabilirsiniz."
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu müəllimin bu semestrdə hələ dərsi yoxdur — boş xanaya klikləyib qrup və fənn seçərək dərs qoyun."
+msgstr "Bu öğretmenin bu dönemde henüz dersi yok — boş bir hücreye tıklayıp grup ve ders seçerek ders ekleyin."
+
+msgctxt "accounts.schedule_manage"
+msgid "Enter — redaktə et. M — köçürmə rejimi: oxlarla xana seçin, Enter — burax, Esc — ləğv."
+msgstr "Enter — düzenle. M — taşıma modu: ok tuşlarıyla hücre seçin, Enter — bırak, Esc — iptal."
+
+msgctxt "accounts.schedule_manage"
+msgid "Dərsi sürüşdürüb başqa xanaya buraxın (toxunma ekranında — basıb saxlayın); klaviaturada kartı seçib «M». Toqquşma varsa təsdiqdən əvvəl göstərilir."
+msgstr "Dersi sürükleyip başka bir hücreye bırakın (dokunmatik ekranda — basılı tutun); klavyede kartı seçip «M»ye basın. Çakışma varsa onaydan önce gösterilir."
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrup axtar…"
+msgstr "Grup ara…"
+
+msgctxt "accounts.schedule_manage"
+msgid "Uyğun qrup yoxdur"
+msgstr "Uygun grup yok"
+
+msgctxt "accounts.schedule_manage"
+msgid "Əvvəlcə qrupu seçin."
+msgstr "Önce grubu seçin."
+
+msgctxt "accounts.schedule_manage"
+msgid "Köçürülür…"
+msgstr "Taşınıyor…"
+
+msgctxt "accounts.schedule_manage"
+msgid "Dərs köçürüldü."
+msgstr "Ders taşındı."
+
+msgctxt "accounts.schedule_manage"
+msgid "Dərs köçürülmədi — əvvəlki yerinə qaytarıldı."
+msgstr "Ders taşınamadı — eski yerine geri alındı."
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu xanaya köçürmək olmaz — əvvəlcə toqquşmanı aradan qaldırın."
+msgstr "Bu hücreye taşınamaz — önce çakışmayı giderin."
+
+msgctxt "accounts.schedule_manage"
+msgid "Toqquşma var. Yenə də köçürmək üçün səbəb yazın — toqquşan dərs silinmir, «Yenidən yerləşdirilməli» siyahısına düşür."
+msgstr "Çakışma var. Yine de taşımak için bir gerekçe yazın — çakışan ders silinmez, «Yeniden yerleştirilmeli» listesine düşer."
+
+msgctxt "accounts.schedule_manage"
+msgid "Köçürmə rejimi: oxlarla xana seçin, Enter — burax, Esc — ləğv."
+msgstr "Taşıma modu: ok tuşlarıyla hücre seçin, Enter — bırak, Esc — iptal."
+
+msgctxt "accounts.schedule_manage"
+msgid "Köçürmə ləğv edildi."
+msgstr "Taşıma iptal edildi."
+
+msgctxt "accounts.schedule_manage"
+msgid "Məcburi köçürmə üçün ən azı 10 simvolluq səbəb yazın (auditə düşür)."
+msgstr "Zorunlu taşıma için en az 10 karakterlik bir gerekçe yazın (denetim kaydına düşer)."
+
+msgctxt "appeals.template"
+msgid "«Qəbul et» yalnız bu tələbəyə +1 verir. Açar özü səhvdirsə, düzgün variant(lar)ı seçin — sualı həmin variantla cavablayan hər kəs sualın tam balını alır."
+msgstr "«Kabul et» yalnızca bu öğrenciye +1 verir. Anahtarın kendisi yanlışsa doğru seçenek(ler)i işaretleyin — soruyu o seçenekle yanıtlayan herkes sorunun tam puanını alır."
+
+msgctxt "accounts.structure_tree"
+msgid "Tyutor"
+msgstr "Danışman"
+
+msgctxt "accounts.structure_tree"
+msgid "Qrupun tələbələri"
+msgstr "Grubun öğrencileri"
+
+msgctxt "accounts.structure_tree"
+msgid "Bu qrupda hələ tələbə yoxdur."
+msgstr "Bu grupta henüz öğrenci yok."
+
+msgctxt "accounts.structure_tree"
+msgid "Bu qrupda seçilə bilən qeydiyyatlı tələbə yoxdur."
+msgstr "Bu grupta seçilebilecek kayıtlı öğrenci yok."

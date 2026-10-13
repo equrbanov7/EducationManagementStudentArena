@@ -155,19 +155,20 @@
         }
 
         var input = document.querySelector("[data-rim-search]");
-        // Eyni input-a təkrar listener yığmamaq üçün idempotent bayraq.
-        if (input && !input.dataset.rimBound) {
-            input.dataset.rimBound = "1";
-            var onType = ns.debounce(function () {
-                ns.state.query = input.value.trim();
-                ns.state.page = 1;
-                var clearBtn = document.querySelector("[data-rim-search-clear]");
-                if (clearBtn) {
-                    clearBtn.hidden = !ns.state.query;
+        // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter dərhal, IME,
+        // dəyişməyən dəyər göndərilmir); bind() idempotentdir — yığılmır.
+        if (input) {
+            window.EMSSearchInput.bind(input, {
+                onSearch: function (value) {
+                    ns.state.query = value;
+                    ns.state.page = 1;
+                    var clearBtn = document.querySelector("[data-rim-search-clear]");
+                    if (clearBtn) {
+                        clearBtn.hidden = !ns.state.query;
+                    }
+                    ns.actions.search({ quiet: true, input: input });
                 }
-                ns.actions.search();
-            }, 350);
-            input.addEventListener("input", onType);
+            });
         }
 
         // Panel yenidən açılanda vəziyyəti sıfırla (köhnə nəticə qalmasın).

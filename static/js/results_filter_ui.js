@@ -55,16 +55,23 @@
             const autoControls = form.querySelectorAll(".js-auto-filter");
             const clearBtn = form.querySelector(".js-clear-results-filters");
             const resettableFields = form.querySelectorAll(".js-filter-resettable");
-            let debounceTimer = null;
-
             const triggerSubmit = function () {
                 submitForm(form);
             };
 
-            if (searchInput) {
-                searchInput.addEventListener("input", function () {
-                    clearTimeout(debounceTimer);
-                    debounceTimer = setTimeout(triggerSubmit, 500);
+            // 2026-10-14 (sahib: «debounce çox sürətli olur, axtardığım itir»): vahid
+            // EMSSearchInput — yazı dayananda 1500 ms, ≥ 2 simvol, Enter dərhal, IME.
+            // Səhifə yenilənir, amma nəticə kartı skeletə çevrilmir (sakitcə solur) və
+            // yeni səhifədə fokus + kursor axtarış sahəsinə qayıdır.
+            if (searchInput && window.EMSSearchInput) {
+                window.EMSSearchInput.bind(searchInput, {
+                    onSearch: function () {
+                        var target = document.querySelector("[data-results-skeleton-target]");
+                        if (target) {
+                            target.classList.add("ems-search-pending");
+                        }
+                        window.EMSSearchInput.submitForm(form, { input: searchInput });
+                    },
                 });
             }
 

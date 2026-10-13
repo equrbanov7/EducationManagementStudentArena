@@ -9,12 +9,10 @@
 (function () {
     "use strict";
 
-    var DEBOUNCE_MS = 300;
     var state = {
         page: 1,
         hasMore: false,
         controller: null,
-        debounceTimer: null,
         appending: false
     };
 
@@ -152,9 +150,15 @@
         state.page = options.append ? state.page + 1 : 1;
         state.appending = Boolean(options.append);
 
-        if (!options.append) {
+        // Yazdıqca axtarış (2026-10-14): köhnə nəticələr sakitcə solur, siyahı
+        // «yüklənir» mətninə çevrilmir; input-un altında «Axtarılır…».
+        var quiet = Boolean(options.quiet && !options.append && box.children.length);
+        var mine = state.controller;
+        if (!options.append && !quiet) {
             box.innerHTML = statusHtml(launcher.getAttribute("data-text-loading"));
         }
+        box.classList.toggle("ems-search-pending", quiet);
+        window.EMSSearchInput.busy(searchInput, quiet);
         box.setAttribute("aria-busy", "true");
 
         var params = new URLSearchParams({
@@ -183,7 +187,10 @@
                 box.innerHTML = statusHtml(launcher.getAttribute("data-text-error"));
             })
             .finally(function () {
+                if (state.controller !== mine) return; // daha yeni sorğu davam edir
                 box.setAttribute("aria-busy", "false");
+                box.classList.remove("ems-search-pending");
+                window.EMSSearchInput.busy(searchInput, false);
             });
     }
 
@@ -302,13 +309,12 @@
         if (event.key === "Escape") toggleDropdown(false);
     });
 
-    window.EMSDelegate.on("input", "#viewAsUserSearch", function () {
-        var launcher = root();
-        if (!launcher) return;
-        clearTimeout(state.debounceTimer);
-        state.debounceTimer = setTimeout(function () {
-            fetchUsers(launcher);
-        }, DEBOUNCE_MS);
+    // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter dərhal, IME).
+    window.EMSSearchInput.delegate("#viewAsUserSearch", {
+        onSearch: function () {
+            var launcher = root();
+            if (launcher) fetchUsers(launcher, { quiet: true });
+        }
     });
 
     window.EMSDelegate.on("change", "#viewAsRoleFilter", function () {

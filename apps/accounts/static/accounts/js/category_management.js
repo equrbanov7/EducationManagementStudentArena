@@ -125,40 +125,10 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    var searchForms = document.querySelectorAll(".js-category-management-search-form");
-    searchForms.forEach(function (form) {
-        if (!form || form.dataset.categorySearchBound === "1") {
-            return;
-        }
-        form.dataset.categorySearchBound = "1";
-
-        var searchField = form.querySelector('input[name="category_search"]');
-        var submitTimer = null;
-
-        function submitForm() {
-            if (typeof form.requestSubmit === "function") {
-                form.requestSubmit();
-                return;
-            }
-            form.submit();
-        }
-
-        if (searchField) {
-            searchField.addEventListener("input", function () {
-                window.clearTimeout(submitTimer);
-                submitTimer = window.setTimeout(submitForm, 350);
-            });
-
-            searchField.addEventListener("keydown", function (event) {
-                if (event.key !== "Enter") {
-                    return;
-                }
-                event.preventDefault();
-                window.clearTimeout(submitTimer);
-                submitForm();
-            });
-        }
-    });
+    // 2026-10-14: `.js-category-management-search-form`-un öz 350 ms taymeri
+    // silindi — `category_search` sahəsini qlobal debounced_search_forms.js
+    // (EMSSearchInput: 1500 ms, ≥ 2 simvol, Enter, quiet bölmə yükləməsi) idarə
+    // edir; əvvəl ikisi birlikdə işləyib eyni axtarışı iki dəfə göndərirdi.
 
     var toggleButtons = document.querySelectorAll("[data-category-subcategory-toggle]");
     toggleButtons.forEach(function (button) {

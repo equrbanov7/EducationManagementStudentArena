@@ -8,7 +8,6 @@
 (function (ns, document) {
     "use strict";
 
-    var DEBOUNCE_MS = 300;
     var PAGE_SIZE = 10;
 
     function initSearchableSelect(form, config) {
@@ -67,7 +66,6 @@
         var loading = false;
         var query = "";
         var requestSeq = 0;
-        var debounceTimer = null;
         // Əlavə query fraqmenti (məs. sağ tələbə siyahısı üçün seçilmiş qrup
         // ID-ləri) və seçim dəyişəndə çağırılan callback (qrup→tələbə sinxronu).
         var extraParamsProvider = null;
@@ -257,17 +255,26 @@
             }
         }
 
-        function loadPage(reset) {
+        function loadPage(reset, quiet) {
             if (!searchUrl) {
                 return;
             }
             if (loading && !reset) {
                 return;
             }
+            // Yazdıqca axtarış (2026-10-14): köhnə sətirlər cavab gələnə qədər qalır
+            // (sakitcə solur) — siyahı hər axtarışda boşalıb «yanıb-sönmür».
+            quiet = Boolean(quiet && reset && resultsWrap.children.length);
             if (reset) {
                 offset = 0;
                 hasMore = true;
-                resultsWrap.innerHTML = "";
+                if (!quiet) {
+                    resultsWrap.innerHTML = "";
+                }
+            }
+            resultsWrap.classList.toggle("ems-search-pending", quiet);
+            if (window.EMSSearchInput) {
+                window.EMSSearchInput.busy(searchInput, quiet);
             }
             if (!hasMore) {
                 return;
@@ -285,6 +292,11 @@
                     if (seq !== requestSeq) {
                         return;
                     }
+                    if (quiet) {
+                        resultsWrap.innerHTML = "";
+                        resultsWrap.classList.remove("ems-search-pending");
+                        window.EMSSearchInput.busy(searchInput, false);
+                    }
                     var results = (data && data.results) || [];
                     appendResults(results);
                     offset += results.length;
@@ -295,19 +307,24 @@
                 .catch(function () {
                     if (seq === requestSeq) {
                         loading = false;
+                        resultsWrap.classList.remove("ems-search-pending");
+                        if (quiet) {
+                            window.EMSSearchInput.busy(searchInput, false);
+                        }
                     }
                 });
         }
 
-        if (searchInput) {
-            searchInput.addEventListener("input", function () {
-                if (debounceTimer) {
-                    clearTimeout(debounceTimer);
+        // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter dərhal — forma
+        // göndərilmir, IME). `query` yalnız sorğu GEDƏNDƏ yenilənir: əvvəl hər hərfdə
+        // dəyişirdi və gözləmə vaxtı sürüşdürmə köhnə siyahıya yeni sorğunun
+        // səhifəsini qatırdı.
+        if (searchInput && window.EMSSearchInput) {
+            window.EMSSearchInput.bind(searchInput, {
+                onSearch: function (value) {
+                    query = value;
+                    loadPage(true, true);
                 }
-                query = searchInput.value.trim();
-                debounceTimer = setTimeout(function () {
-                    loadPage(true);
-                }, DEBOUNCE_MS);
             });
         }
 

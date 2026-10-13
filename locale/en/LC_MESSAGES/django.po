@@ -97036,3 +97036,123 @@ msgstr "%(n)s students from the group"
 msgctxt "accounts.my_group"
 msgid "Son tarix: %(date)s"
 msgstr "Deadline: %(date)s"
+
+msgctxt "registrar.journal_autosave"
+msgid "Dəyişikliklər avtomatik yadda saxlanılır."
+msgstr "Changes are saved automatically."
+
+msgctxt "registrar.journal_autosave"
+msgid "Yadda saxlanılır…"
+msgstr "Saving…"
+
+msgctxt "registrar.journal_autosave"
+msgid "Yadda saxlanıldı"
+msgstr "Saved"
+
+msgctxt "registrar.journal_autosave"
+msgid "Yadda saxlanıldı — {n} xana yazılmadı (kilid, dərs günü və ya bal qaydası)."
+msgstr "Saved — {n} cell(s) were not written (lock, lesson-day or score rule)."
+
+msgctxt "registrar.journal_autosave"
+msgid "Xəta — yenidən cəhd edilir…"
+msgstr "Error — retrying…"
+
+msgctxt "registrar.journal_autosave"
+msgid "Yadda saxlanılmadı — səhifəni yeniləyin. Dəyişikliklər brauzerdə qaralama kimi qalır."
+msgstr "Not saved — please reload the page. Your changes are kept in the browser as a draft."
+
+msgctxt "registrar.journal_autosave"
+msgid "Yenidən cəhd et"
+msgstr "Try again"
+
+msgctxt "registrar.schedule_conflicts"
+msgid "Müəllimin bu saatda başqa dərsi var: %(subject)s · %(group)s."
+msgstr "The teacher already has another lesson at this time: %(subject)s · %(group)s."
+
+msgctxt "registrar.schedule_conflicts"
+msgid "%(room)s auditoriyası bu saatda tutulub: %(subject)s · %(group)s."
+msgstr "Room %(room)s is taken at this time: %(subject)s · %(group)s."
+
+msgctxt "registrar.schedule_editor"
+msgid "Qrupun bu saatda artıq dərsi var — qrup eyni anda iki dərsdə ola bilməz. Əvvəlcə həmin dərsi başqa xanaya köçürün və ya boş xana seçin."
+msgstr "The group already has a lesson at this time — a group cannot attend two lessons at once. Move that lesson to another cell first, or pick a free cell."
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllimi seçin — onun həftəlik cədvəli açılacaq; dərsləri buradan da qoymaq və yerini dəyişmək olar."
+msgstr "Select a teacher — their weekly timetable opens; you can add and move lessons here as well."
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu müəllimin bu semestrdə hələ dərsi yoxdur — boş xanaya klikləyib qrup və fənn seçərək dərs qoyun."
+msgstr "This teacher has no lessons this semester yet — click an empty cell and choose a group and subject to add one."
+
+msgctxt "accounts.schedule_manage"
+msgid "Enter — redaktə et. M — köçürmə rejimi: oxlarla xana seçin, Enter — burax, Esc — ləğv."
+msgstr "Enter — edit. M — move mode: choose a cell with the arrow keys, Enter — drop, Esc — cancel."
+
+msgctxt "accounts.schedule_manage"
+msgid "Dərsi sürüşdürüb başqa xanaya buraxın (toxunma ekranında — basıb saxlayın); klaviaturada kartı seçib «M». Toqquşma varsa təsdiqdən əvvəl göstərilir."
+msgstr "Drag a lesson to another cell (on touch screens — press and hold); with the keyboard, focus the card and press “M”. Any clash is shown before you confirm."
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrup axtar…"
+msgstr "Search group…"
+
+msgctxt "accounts.schedule_manage"
+msgid "Uyğun qrup yoxdur"
+msgstr "No matching group"
+
+msgctxt "accounts.schedule_manage"
+msgid "Əvvəlcə qrupu seçin."
+msgstr "Select the group first."
+
+msgctxt "accounts.schedule_manage"
+msgid "Köçürülür…"
+msgstr "Moving…"
+
+msgctxt "accounts.schedule_manage"
+msgid "Dərs köçürüldü."
+msgstr "The lesson has been moved."
+
+msgctxt "accounts.schedule_manage"
+msgid "Dərs köçürülmədi — əvvəlki yerinə qaytarıldı."
+msgstr "The lesson was not moved — it is back in its previous place."
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu xanaya köçürmək olmaz — əvvəlcə toqquşmanı aradan qaldırın."
+msgstr "The lesson cannot be moved to this cell — resolve the clash first."
+
+msgctxt "accounts.schedule_manage"
+msgid "Toqquşma var. Yenə də köçürmək üçün səbəb yazın — toqquşan dərs silinmir, «Yenidən yerləşdirilməli» siyahısına düşür."
+msgstr "There is a clash. To move anyway, give a reason — the conflicting lesson is not deleted, it goes to the “Needs re-placing” list."
+
+msgctxt "accounts.schedule_manage"
+msgid "Köçürmə rejimi: oxlarla xana seçin, Enter — burax, Esc — ləğv."
+msgstr "Move mode: choose a cell with the arrow keys, Enter — drop, Esc — cancel."
+
+msgctxt "accounts.schedule_manage"
+msgid "Köçürmə ləğv edildi."
+msgstr "Move cancelled."
+
+msgctxt "accounts.schedule_manage"
+msgid "Məcburi köçürmə üçün ən azı 10 simvolluq səbəb yazın (auditə düşür)."
+msgstr "A forced move needs a reason of at least 10 characters (it goes to the audit log)."
+
+msgctxt "appeals.template"
+msgid "«Qəbul et» yalnız bu tələbəyə +1 verir. Açar özü səhvdirsə, düzgün variant(lar)ı seçin — sualı həmin variantla cavablayan hər kəs sualın tam balını alır."
+msgstr "“Accept” gives +1 only to this student. If the key itself is wrong, select the correct option(s) — everyone who answered with that option gets the question's full points."
+
+msgctxt "accounts.structure_tree"
+msgid "Tyutor"
+msgstr "Tutor"
+
+msgctxt "accounts.structure_tree"
+msgid "Qrupun tələbələri"
+msgstr "Students of the group"
+
+msgctxt "accounts.structure_tree"
+msgid "Bu qrupda hələ tələbə yoxdur."
+msgstr "This group has no students yet."
+
+msgctxt "accounts.structure_tree"
+msgid "Bu qrupda seçilə bilən qeydiyyatlı tələbə yoxdur."
+msgstr "This group has no enrolled student who can be selected."

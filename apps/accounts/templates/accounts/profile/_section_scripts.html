@@ -45,7 +45,7 @@ hadisəsinə qulaq asır və kataloqun ilk yüklənməsini ötürməməlidir (ye
 setup/boot (2026-09-21 bölgüsü, modul ölçü büdcəsi).{% endcomment %}
 <script src="{% static 'accounts/js/profile/people_directory.js' %}?v=20260921-split"></script>
 <script src="{% static 'accounts/js/profile/people_directory_actions.js' %}?v=20261003-block"></script>
-<script src="{% static 'accounts/js/profile/people_directory_setup.js' %}?v=20260921-split"></script>
+<script src="{% static 'accounts/js/profile/people_directory_setup.js' %}?v=20261014-searchux"></script>
 {% endif %}
 {% if 'people-students' in asset_sections %}
 {% comment %}Tələbə idarəetmə çekməcəsi. Saf render alt modulu (ön baxış cədvəli)
@@ -61,9 +61,13 @@ istifadəçidə markup onsuz da render olunmur.{% endcomment %}
 {% comment %}Cədvəl idarəetməsi — panel server-render-lidir; JS yalnız seçici
 yenidən yükləməsini, saxlama-öncəsi konflikt yoxlamasını və silmə təsdiqini
 idarə edir (EMSReady/EMSDelegate, `[data-smx-root]` yoxdursa heç nə etmir).{% endcomment %}
+{% comment %}2026-10-14: köçürmə (pointer sürüklə-burax, toxunma, klaviatura «M», optimist UI)
+AYRI moduldur və redaktordan SONRA yüklənir — `window.EMSScheduleEditor`-i işlədir.{% endcomment %}
 <script src="{% static 'accounts/js/schedule_editor_confirm.js' %}?v=20260909-confirm"></script>
-<script src="{% static 'accounts/js/schedule_editor.js' %}?v=20260925-slotinst"></script>
-<script src="{% static 'accounts/js/schedule_editor_subjects.js' %}?v=20260925-slotinst"></script>
+<script src="{% static 'accounts/js/schedule_editor.js' %}?v=20261014-schedux"></script>
+<script src="{% static 'accounts/js/schedule_editor_subjects.js' %}?v=20261014-schedux"></script>
+<script src="{% static 'accounts/js/schedule_editor_move.js' %}?v=20261014-schedux"></script>
+<script src="{% static 'accounts/js/schedule_editor_move_keys.js' %}?v=20261014-schedux"></script>
 {% endif %}
 {% if 'student-intake' in asset_sections or 'student-admission' in asset_sections or 'teacher-intake' in asset_sections %}
 {% comment %}Tələbə idxalı / qəbulu — panel server-render-lidir; JS yalnız fayl
@@ -95,13 +99,13 @@ xülasə və çekmecə məntiqi qalır. Göndəriş ortaq `teaching_office.js`-d
 `window.EMSWorkloadRender` üzərindən null-safe oxuyur (sıra pozulsa səhifə
 çökmür — sadəcə bölmə init olunmur).{% endcomment %}
 <script src="{% static 'accounts/js/profile/workload_distribution_render.js' %}?v=20260913-1"></script>
-<script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20260913-1"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20261014-searchux"></script>
 {% endif %}
 {% if 'my-workload' in asset_sections %}
 <script src="{% static 'accounts/js/profile/workload_my.js' %}?v=20261008-1"></script>
 {% endif %}
 {% if 'syllabus-list' in asset_sections %}
-<script src="{% static 'accounts/js/profile/syllabus_list.js' %}?v=20261008-prev"></script>
+<script src="{% static 'accounts/js/profile/syllabus_list.js' %}?v=20261014-searchux"></script>
 <script src="{% static 'accounts/js/profile/syllabus_reuse.js' %}?v=20261008-prev"></script>
 {% comment %}Sahə toplayıcıları redaktor mühərrikindən ƏVVƏL yüklənməlidir —
 mühərrik `window.EMSSyllabusFields`-i init anında oxuyur.{% endcomment %}
@@ -113,7 +117,7 @@ mühərrik `window.EMSSyllabusFields`-i init anında oxuyur.{% endcomment %}
 {% comment %}Panel render-i mühərrikdən ƏVVƏL yüklənir — mühərrik init anında
 `window.EMSSyllabusReviewPanel`-i oxuyur.{% endcomment %}
 <script src="{% static 'accounts/js/profile/syllabus_review_panel.js' %}?v=20260830-3"></script>
-<script src="{% static 'accounts/js/profile/syllabus_review.js' %}?v=20260830-3"></script>
+<script src="{% static 'accounts/js/profile/syllabus_review.js' %}?v=20261014-searchux"></script>
 {% endif %}
 {% endif %}
 {% if asset_phase == "post" %}
@@ -128,10 +132,10 @@ paketi (STATS_DATA verilmədiyi üçün) heç nə etmirdi və çıxarıldı. İs
 <script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
 {% endif %}
 {% if 'category-management' in allowed_sections or 'create-category' in allowed_sections %}
-<script src="{% static 'accounts/js/category_management.js' %}"></script>
+<script src="{% static 'accounts/js/category_management.js' %}?v=20261014-searchux"></script>
 {% endif %}
 {% if 'my-journal' in asset_sections or 'my-schedule' in asset_sections or 'journal-close' in asset_sections or 'schedule-manage' in asset_sections %}
-<script src="{% static 'registrar/js/schedule_grid.js' %}?v=20261010-wp9b"></script>
+<script src="{% static 'registrar/js/schedule_grid.js' %}?v=20261014-schedux"></script>
 <script src="{% static 'registrar/js/journal_student.js' %}?v=20260712-3"></script>
 <script src="{% static 'registrar/js/correction_history.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>
 <script src="{% static 'registrar/js/sjx_journal.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>
@@ -169,10 +173,10 @@ qurulub, panel swap-da yenidən qoşulmağa ehtiyac yoxdur.{% endcomment %}
 <script src="{% static 'accounts/js/rim_center/namespace.js' %}?v=20261011-rimlist"></script>
 <script src="{% static 'accounts/js/rim_center/modals.js' %}?v=20260826-1"></script>
 <script src="{% static 'accounts/js/rim_center/render.js' %}?v=20261011-rimpos"></script>
-<script src="{% static 'accounts/js/rim_center/actions.js' %}?v=20261011-rimlist"></script>
-<script src="{% static 'accounts/js/rim_center/entry.js' %}?v=20261011-rimlist"></script>
+<script src="{% static 'accounts/js/rim_center/actions.js' %}?v=20261014-searchux"></script>
+<script src="{% static 'accounts/js/rim_center/entry.js' %}?v=20261014-searchux"></script>
     {# «Yeni hesab» axini — combo seciciden SONRA form, sonra toplu idxal #}
-<script src="{% static 'accounts/js/rim_center/create_combo.js' %}?v=20260914-a11y"></script>
+<script src="{% static 'accounts/js/rim_center/create_combo.js' %}?v=20261014-searchux"></script>
 <script src="{% static 'accounts/js/rim_center/create.js' %}?v=20260906-1"></script>
 <script src="{% static 'accounts/js/rim_center/create_bulk.js' %}?v=20260906-1"></script>
     {# Inzibati bolme (sobe/merkez) — mevcud struktur agaci endpoint-ine gedir #}
@@ -186,15 +190,16 @@ qurulub, panel swap-da yenidən qoşulmağa ehtiyac yoxdur.{% endcomment %}
 {% if 'my-exams' in allowed_sections %}
 <script src="{% static 'exams/js/exam_create_edit_modal/namespace.js' %}?v=20260911-1"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/markup.js' %}?v=20260911-1"></script>
-<script src="{% static 'exams/js/exam_create_edit_modal/searchable_select.js' %}?v=20261001-examqa"></script>
-<script src="{% static 'exams/js/exam_create_edit_modal/subject_select.js' %}?v=20260911-1"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal/searchable_select.js' %}?v=20261014-searchux"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal/subject_select.js' %}?v=20261014-searchux"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/toggles.js' %}?v=20260911-1"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/form.js' %}?v=20261008-1"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/entry.js' %}?v=20260914-1"></script>
 <script src="{% static 'js/ems_datetime.js' %}?v=20261008-1"></script>
 <script src="{% static 'js/ems_datetime_picker.js' %}?v=20261008-1"></script>
 <script src="{% static 'exams/js/exam_wizard.js' %}?v=20261011-1"></script>
-<script src="{% static 'accounts/js/my_exams_dashboard.js' %}?v=20260926-search"></script>
+<script src="{% static 'exams/js/exam_wizard_viewport.js' %}?v=20261014-modalux"></script>
+<script src="{% static 'accounts/js/my_exams_dashboard.js' %}?v=20261014-searchux"></script>
 {% endif %}
 {% if 'question-bank' in asset_sections %}
 {% comment %}«Sual Bankı» bölməsinin dialoqları — əvvəl SƏHVƏN `my-exams`
@@ -204,7 +209,7 @@ yaratma/redaktə dialoqunu aça bilmirdi.{% endcomment %}
 {% endif %}
 {% if 'my-appeals' in asset_sections or 'appeal-stats' in asset_sections %}
 <script src="{% static 'appeals/js/appeals_review.js' %}?v=20260715-appeal-batch"></script>
-<script src="{% static 'appeals/js/appeals_sections.js' %}?v=20260715-appeal-batch"></script>
+<script src="{% static 'appeals/js/appeals_sections.js' %}?v=20261014-searchux"></script>
 <script src="{% static 'appeals/js/appeals_key_fix.js' %}?v=20261013-keyfix2"></script>
 {% endif %}
 {% if 'org-faculties' in asset_sections or 'org-kafedras' in asset_sections %}

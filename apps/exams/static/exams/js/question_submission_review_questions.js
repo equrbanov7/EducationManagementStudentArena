@@ -10,7 +10,6 @@
 (function () {
     "use strict";
 
-    var DEBOUNCE_MS = 350;
 
     function init() {
         var root = document.querySelector(".js-qsubq");
@@ -134,19 +133,15 @@
         });
 
         if (searchInput) {
-            var timer = null;
-            searchInput.addEventListener("input", function () {
-                if (timer) {
-                    clearTimeout(timer);
-                }
-                timer = setTimeout(function () {
-                    var value = searchInput.value.trim();
+            // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter dərhal, IME).
+            window.EMSSearchInput.bind(searchInput, {
+                onSearch: function (value) {
                     if (value === state.q) {
                         return;
                     }
                     state.q = value;
                     reload();
-                }, DEBOUNCE_MS);
+                }
             });
         }
 

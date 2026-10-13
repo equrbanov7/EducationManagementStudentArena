@@ -338,6 +338,6 @@
 {% if exam.exam_type == 'written' %}
 {% url 'exams:exam_bank_picker' exam.slug as picker_url %}
 {% include "exams/teacher/partials/_bank_picker_shell.html" with picker_url=picker_url %}
-<script src="{% static 'exams/js/examBankPicker.js' %}?v=20260607-picker-modal"></script>
+<script src="{% static 'exams/js/examBankPicker.js' %}?v=20261014-searchux"></script>
 {% endif %}
 {% endblock %}

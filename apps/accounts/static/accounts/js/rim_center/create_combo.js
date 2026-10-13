@@ -19,9 +19,7 @@
         return;
     }
 
-    var SEARCH_DEBOUNCE_MS = 250;
     var combo = (ns.combo = {});
-    var timers = {};
 
     function root() {
         return document.querySelector("[data-rimc-root]");
@@ -235,11 +233,18 @@
         }
         // Mətn dəyişdi → əvvəlki seçim ETİBARSIZDIR (id ilə ad uyğunsuz qalmasın).
         clearValue(node);
-        var name = node.getAttribute("data-rimc-combo") || "combo";
-        window.clearTimeout(timers[name]);
-        timers[name] = window.setTimeout(function () {
-            search(node);
-        }, SEARCH_DEBOUNCE_MS);
+    });
+
+    // 2026-10-14: kataloq axtarışı vahid EMSSearchInput qaydası ilə (1500 ms, ≥ 2 simvol,
+    // IME); Enter burada siyahıdan SEÇİMDİR (aşağıdakı keydown) → `enter: false`.
+    window.EMSSearchInput.delegate("[data-rimc-combo-input]", {
+        enter: false,
+        onSearch: function (value, meta) {
+            var node = box(meta.input);
+            if (node) {
+                search(node);
+            }
+        },
     });
 
     window.EMSDelegate.on("keydown", "[data-rimc-combo-input]", function (event, input) {
