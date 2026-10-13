@@ -311,3 +311,106 @@
         flex: 1 1 auto;
     }
 }
+
+/* ── Telefon: tam ekran vərəq + toxunma ölçüləri (2026-10-14) ───────────────
+   ≤575px və ya qısa landşaft: dialoq bütün ekranı tutur (kənar boşluq/radius yox),
+   baş + yapışqan alt əməllər həmişə əlçatan; gövdə daxildə sürüşür. Virtual
+   klaviatura açıqkən exam_wizard_viewport.js `--ems-vvh/--ems-vvt` yazır → vərəq
+   yalnız görünən sahəni tutur. Sahə şrifti 16px (iOS fokus-zoom olmasın), hədəf ≥44px. */
+@media (max-width: 575.98px), (max-height: 520px) and (orientation: landscape) {
+    .qf-modal.modal {
+        top: var(--ems-vvt, 0px);
+        height: var(--ems-vvh, 100%);
+        padding: 0 !important;
+    }
+
+    .qf-modal .modal-dialog {
+        max-width: none;
+        height: 100%;
+        margin: 0;
+        padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left);
+    }
+
+    .qf-modal .modal-content {
+        height: 100%;
+        max-height: none;
+        border: 0;
+        border-radius: 0;
+    }
+
+    .qf-modal__head {
+        padding: 6px 8px 6px 16px;
+    }
+}
+
+@media (pointer: coarse), (max-width: 860px) {
+    .qf-modal__close {
+        width: 44px;
+        height: 44px;
+    }
+
+    .qf .form-control,
+    .qf input[type="text"],
+    .qf input[type="number"],
+    .qf .bootstrap-single-select__toggle {
+        min-height: 44px;
+        font-size: 16px;
+    }
+
+    .qf textarea,
+    .qf textarea.form-control {
+        min-height: 104px;
+        font-size: 16px;
+    }
+
+    .qf--modal .qf-actions {
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    }
+
+    .qf .bootstrap-single-select__option {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        font-size: 16px;
+    }
+
+    /* `.qf ` önü — question_form_answers.css (sonra yüklənir) eyni spesifiklikdə 34px yazır. */
+    .qf .qf-correct {
+        min-height: 44px;
+        font-size: var(--ems-fs-base);
+    }
+
+    .qf .qf-correct input {
+        width: 22px;
+        height: 22px;
+    }
+
+    .qf .qf-option__remove {
+        width: 44px;
+        height: 44px;
+    }
+
+    .qf .qf-add-option,
+    .qf-actions .ems-btn,
+    .qf-actions .btn,
+    .qf-actions button {
+        min-height: 44px;
+    }
+}
+
+/* Qısa landşaft (telefon yan): başlıq və alt əməllər sıxılır — sahəyə daha çox yer. */
+@media (max-height: 520px) and (orientation: landscape) {
+    .qf-modal__head {
+        padding-top: 2px;
+        padding-bottom: 2px;
+    }
+
+    .qf--modal {
+        padding-top: 10px;
+    }
+
+    .qf--modal .qf-actions {
+        padding-top: 8px;
+        padding-bottom: max(8px, env(safe-area-inset-bottom));
+    }
+}
