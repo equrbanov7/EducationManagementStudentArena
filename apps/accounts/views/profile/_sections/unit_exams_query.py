@@ -109,8 +109,12 @@ def _home_authors(org, unit_ids):
 
 def exam_subtree_q(org, subtree_ids) -> Q:
     """İmtahan ``subtree_ids`` (OrgUnit pk subquery) alt-ağacına aiddirmi."""
+    from django.apps import apps as django_apps
+
     from apps.exams.models import Exam
-    from apps.registrar.models import CourseOffering
+
+    # registrar modellərinə birbaşa import yoxdur (kontekst qapısı) — model registr ilə alınır.
+    CourseOffering = django_apps.get_model("registrar", "CourseOffering")
 
     group_link = Exam.allowed_units.through.objects.filter(exam_id=OuterRef("pk"), orgunit_id__in=subtree_ids)
     cohort_link = Exam.allowed_groups.through.objects.filter(
