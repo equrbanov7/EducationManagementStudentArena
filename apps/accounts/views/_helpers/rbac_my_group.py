@@ -1,4 +1,4 @@
-"""«Qrupum» (`my-group`) bölməsinin qapısı — rol auditi 2026-10-13 B10.
+"""«Starosta» (`my-group`, əvvəl «Qrupum») bölməsinin qapısı — rol auditi 2026-10-13 B10.
 
 NİYƏ? ``lead_student`` (baş tələbə / starosta) şablonu «öz qrupuna aid məhdud üzv siyahısı və qrup
 səviyyəli statistika» vəd edir və ``member.view`` daşıyır, amma kabinetdə bu açarı oxuyan heç bir
@@ -11,7 +11,9 @@ QAYDA (rol ADI ilə yox, AÇAR + ƏHATƏ ilə — «hər rol öz səlahiyyəti q
   olmalıdır — həll ``get_permission_scope(user, org, "member.view")`` ilə aparılır;
 * təşkilat-geniş əhatə (HR, imtahan mərkəzi, superadmin, sahib) «qrupum» DEYİL → bölmə yoxdur;
 * fakültə/kafedra əhatəsi (dekan, kafedra müdiri) qrup deyil → bölmə yoxdur (onların öz səthləri var);
-* ``scope_unit``-siz baş tələbə → əhatə boşdur → bölmə yoxdur (fail-closed).
+* ``scope_unit``-siz baş tələbə → əhatə boşdur → bölmə yoxdur (fail-closed);
+* 2026-10-13 (gecə): baxan HƏMİN qrupun AKTİV + QEYDİYYATLI tələbəsi olmalıdır (starosta = qrupun tələbəsi;
+  köçürülmüş starostanın köhnə sətri köhnə qrupu açmır, qrupa bağlı kurator bu tələbə bölməsini almır).
 
 SORĞU BÜDCƏSİ: kabinet qabığı sorğu-büdcəlidir (``test_rbac_permission_cache``). ``get_permission_scope``
 üzvlük sətirlərini ``user``-də memoizasiya edir; qrup növü isə middleware/``roles.py``-in artıq
@@ -65,7 +67,38 @@ def my_group_unit(user, organization):
             groups.append(unit)
     if not groups:
         return None
+    # 2026-10-13 (gecə): starosta HƏMİN qrupun qeydiyyatlı tələbəsi olmalıdır. Köçürülmüş / xaric edilmiş
+    # tələbənin köhnə qrupa bağlı starosta sətri qalsa belə, köhnə qrupun panelini GÖRMƏMƏLİDİR; qrupa bağlı
+    # `member.view` daşıyan heyət rolu (kurator) da bu tələbə bölməsini almır. Sorğu yalnız qrup əhatəli
+    # aktorda (baş tələbə) və request ömründə BİR dəfə atılır (memo istifadəçi obyektində).
+    enrolled = _enrolled_group_ids(user, organization, [unit.pk for unit in groups])
+    groups = [unit for unit in groups if unit.pk in enrolled]
+    if not groups:
+        return None
     return min(groups, key=lambda unit: ((unit.name or "").lower(), str(unit.pk)))
+
+
+_ENROLLED_MEMO_ATTR = "_my_group_enrolled_memo"
+
+
+def _enrolled_group_ids(user, organization, group_ids) -> set:
+    key = (organization.pk, tuple(sorted(str(pk) for pk in group_ids)))
+    memo = getattr(user, _ENROLLED_MEMO_ATTR, None)
+    if isinstance(memo, tuple) and memo[0] == key:
+        return memo[1]
+    from django.apps import apps as django_apps
+
+    StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
+    result = set(
+        StudentAcademicRecord.objects.filter(
+            organization=organization, student=user, is_active=True, status="enrolled", group_id__in=group_ids
+        ).values_list("group_id", flat=True)
+    )
+    try:
+        setattr(user, _ENROLLED_MEMO_ATTR, (key, result))
+    except Exception:  # noqa: BLE001 — dəyişməz istifadəçi obyekti (nadir)
+        pass
+    return result
 
 
 def my_group_sections(user, organization) -> set:

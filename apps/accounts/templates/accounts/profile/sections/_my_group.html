@@ -1,19 +1,26 @@
 {% load i18n static my_group_tags registrar_my_group %}
-{% comment %}«Qrupum» (`my-group`) — rol auditi 2026-10-13 B10: baş tələbənin (starosta) öz akademik qrupuna
-YALNIZ-OXU baxışı. Qapı: `member.view` açarının UNIT əhatəsi akademik qrup olmalıdır
+{% comment %}«Starosta» (`my-group`) — qrup nümayəndəsinin (starosta, `lead_student`) öz akademik qrupuna
+YALNIZ-OXU baxışı. Rol auditi 2026-10-13 B10; 2026-10-13 (gecə) sahib: «Qrupum yerinə Starosta bilinsin»,
+«starosta kabinetdə əsas üstünlüyü o olmalıdır ki, seçmə fənn ya da başqa qrupun nə işi olarsa görünsün».
+Bölmə açarı `my-group` URL uyğunluğu üçün saxlanılıb.
+
+Qapı: `member.view` açarının UNIT əhatəsi akademik qrup VƏ baxan həmin qrupun qeydiyyatlı tələbəsi
 (`views/_helpers/rbac_my_group.py`); `{% my_group_unit %}` eyni qapını render vaxtı yenidən yoxlayır.
 
-Göstərilən: qrup adı, qrup yoldaşlarının adı + tələbə nömrəsi; davamiyyət (fənn üzrə qayıb saatı/faizi)
-YALNIZ baxanın ÖZÜ üçün — sahib 2026-10-13 «ancaq şəxsi görünsün». Başqasının qayıbı / balı / e-poçtu /
-telefonu / demoqrafiyası / imtahan buraxılışı / profil linki GÖSTƏRİLMİR.
+Göstərilən (qrup mənzərəsi): fənlər (məcburi + SEÇMƏ, kim hansı seçməni götürür — yalnız AD), BİRLƏŞMİŞ
+dərslər (başqa qrupun jurnalı / jurnala başqa qrupdan əlavə / axın mühazirəsi), alt qruplar, həftəlik cədvəl,
+yaxın imtahanlar, qrupa ünvanlanmış elanlar, qrup yoldaşlarının adı + tələbə nömrəsi.
+Davamiyyət YALNIZ baxanın ÖZÜ üçün — sahib 2026-10-13 «ancaq şəxsi görünsün». Başqasının qayıbı / balı /
+təkrar fənni / e-poçtu / telefonu / imtahan buraxılışı GÖSTƏRİLMİR.
 
-Qabıq qaydası: `<h1>` BURADA YOXDUR (başlıq qabıqdan gəlir). CSP: inline CSS/JS yoxdur — üslub
-xarici fayldadır və panelin İÇİNDƏ yüklənir (AJAX swap-dan sonra da). JS lazım deyil.{% endcomment %}
+Qabıq qaydası: `<h1>` BURADA YOXDUR (başlıq qabıqdan gəlir). CSP: inline CSS/JS yoxdur — üslub xarici
+fayldadır və panelin İÇİNDƏ yüklənir (AJAX swap-dan sonra da). Tab-lar ortaq `ems_ui/nav.js`-dədir
+(`data-ems-tabs` / `data-ems-tabpanel`) — bölməyə xas JS yoxdur.{% endcomment %}
 {% if 'my-group' in allowed_sections %}
 <section class="profile-section-panel profile-section--my-group {% if active_section == 'my-group' %}is-active{% endif %}"
          data-profile-section-panel="my-group"
          data-source-url="{{ profile_base_url }}?section=my-group">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_group.css' %}?v=20261013-2">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_group.css' %}?v=20261013-starosta">
     {% my_group_unit as mg_unit %}
     {% if mg_unit is None %}
         {% trans "Sizə təyin olunmuş akademik qrup tapılmadı." context "accounts.my_group" as mg_none_title %}
@@ -21,88 +28,315 @@ xarici fayldadır və panelin İÇİNDƏ yüklənir (AJAX swap-dan sonra da). JS
         {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_title=mg_none_title state_body=mg_none_body state_icon="fa-users-slash" %}
     {% else %}
     {% my_group_overview mg_unit request.user as mg %}
+    {% my_group_academic mg_unit request.user mg.period as ga %}
+    {% my_group_announcements mg_unit as mg_news %}
     <div class="mg" data-my-group-root>
         <header class="mg-head">
             <p class="mg-head__group">
-                <i class="fas fa-users" aria-hidden="true"></i>
+                <i class="fas fa-user-tie" aria-hidden="true"></i>
                 <span class="mg-head__name">{{ mg.group.name }}</span>
                 <span class="mg-head__count">{% blocktrans with total=mg.students|length context "accounts.my_group" %}Tələbə sayı: {{ total }}{% endblocktrans %}</span>
+                {% if mg.period %}<span class="mg-head__count">· {{ mg.period.name }} {{ mg.period.year_display }}</span>{% endif %}
             </p>
-            <p class="mg-head__note">{% trans "Qrup yoldaşlarının yalnız adı və tələbə nömrəsi görünür; davamiyyət şəxsi məlumatdır və yalnız özünüzə göstərilir." context "accounts.my_group" %}</p>
+            <p class="mg-head__note">{% trans "Siz bu qrupun starostasısınız: qrupun fənləri, seçmə fənlər, başqa qruplarla birləşmiş dərslər, cədvəl, imtahanlar və elanlar burada bir yerdədir. Qrup yoldaşlarının balı və davamiyyəti göstərilmir — davamiyyət yalnız özünüzə aiddir." context "accounts.my_group" %}</p>
         </header>
 
-        {% if mg.me %}
-        <h2 class="mg-subtitle">{% trans "Mənim davamiyyətim" context "accounts.my_group" %}</h2>
-        {% if mg.period %}
-            <p class="mg-note">{% blocktrans with period=mg.period.name year=mg.period.year_display context "accounts.my_group" %}{{ period }} {{ year }} — qayıb saatı və dərs saatına nisbəti (faiz).{% endblocktrans %}</p>
-        {% endif %}
-        {% if mg.has_attendance %}
-        <div class="ems-tablewrap mg-tablewrap">
-            <div class="ems-tablescroll">
-                <table class="ems-table ems-table--zebra mg-table">
-                    <caption class="sr-only">{% trans "Fənn üzrə davamiyyətim" context "accounts.my_group" %}</caption>
-                    <thead>
-                        <tr>
-                            <th scope="col">{% trans "Fənn" context "accounts.my_group" %}</th>
-                            <th scope="col">{% trans "Qayıb (saat)" context "accounts.my_group" %}</th>
-                            <th scope="col">{% trans "Faiz" context "accounts.my_group" %}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for subject in mg.me.subjects %}
-                        <tr>
-                            <th scope="row" class="mg-table__name">{{ subject.name }}</th>
-                            <td class="mg-cell mg-cell--{{ subject.level }}" title="{% blocktrans with absence=subject.absence_hours|floatformat:'-1' hours=subject.lesson_hours|floatformat:'-1' context 'accounts.my_group' %}{{ absence }} / {{ hours }} saat{% endblocktrans %}">{{ subject.absence_hours|floatformat:"-1" }}</td>
-                            <td class="mg-cell mg-cell--{{ subject.level }}">{% if subject.percent is not None %}{{ subject.percent }}%{% else %}—{% endif %}</td>
-                        </tr>
-                        {% endfor %}
-                        <tr class="mg-table__total-row">
-                            <th scope="row" class="mg-table__name">{% trans "Ümumi" context "accounts.my_group" %}</th>
-                            <td class="mg-cell mg-cell--total mg-cell--{{ mg.me.level }}">{{ mg.me.absence_hours|floatformat:"-1" }}</td>
-                            <td class="mg-cell mg-cell--total mg-cell--{{ mg.me.level }}">{% if mg.me.percent is not None %}{{ mg.me.percent }}%{% else %}—{% endif %}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <ul class="mg-legend" aria-label="{% trans 'Rəng izahı' context 'accounts.my_group' %}">
-            <li class="mg-legend__item mg-legend__item--near">{% trans "Qayıb həddinə yaxındır" context "accounts.my_group" %}</li>
-            <li class="mg-legend__item mg-legend__item--over">{% trans "Qayıb həddi aşılıb" context "accounts.my_group" %}</li>
-        </ul>
-        {% elif mg.period %}
-            <p class="mg-note">{% trans "Bu dövr üçün fənn yazılışı hələ yoxdur." context "accounts.my_group" %}</p>
-        {% else %}
-            <p class="mg-note">{% trans "Cari tədris dövrü müəyyən edilməyib." context "accounts.my_group" %}</p>
-        {% endif %}
-        {% endif %}
+        <dl class="mg-stats">
+            <div class="mg-stat"><dt>{% trans "Fənn" context "accounts.my_group" %}</dt><dd>{{ ga.subjects|length }}</dd></div>
+            <div class="mg-stat"><dt>{% trans "Seçmə fənn" context "accounts.my_group" %}</dt><dd>{{ ga.electives|length }}</dd></div>
+            <div class="mg-stat{% if ga.joint %} mg-stat--accent{% endif %}"><dt>{% trans "Birləşmiş dərs" context "accounts.my_group" %}</dt><dd>{{ ga.joint|length }}</dd></div>
+            <div class="mg-stat"><dt>{% trans "Yaxın imtahan" context "accounts.my_group" %}</dt><dd>{{ ga.exams|length }}</dd></div>
+        </dl>
 
-        <h2 class="mg-subtitle">{% trans "Qrup yoldaşları" context "accounts.my_group" %}</h2>
-        {% if not mg.students %}
-            {% trans "Qrupda qeydiyyatlı tələbə yoxdur." context "accounts.my_group" as mg_empty_title %}
-            {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_title=mg_empty_title state_icon="fa-user-group" %}
-        {% else %}
-        <div class="ems-tablewrap mg-tablewrap">
-            <div class="ems-tablescroll">
-                <table class="ems-table ems-table--zebra ems-table--sticky mg-table">
-                    <caption class="sr-only">{% blocktrans with group=mg.group.name context "accounts.my_group" %}{{ group }} qrupunun tələbələri{% endblocktrans %}</caption>
-                    <thead>
-                        <tr>
-                            <th scope="col" class="mg-table__index">#</th>
-                            <th scope="col">{% trans "Tələbə" context "accounts.my_group" %}</th>
-                            <th scope="col">{% trans "Tələbə nömrəsi" context "accounts.my_group" %}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for student in mg.students %}
-                        <tr{% if student.is_me %} class="mg-row--me"{% endif %}>
-                            <td class="mg-table__index">{{ forloop.counter }}</td>
-                            <th scope="row" class="mg-table__name">{{ student.name }}{% if student.is_me %} <span class="mg-me-badge">{% trans "siz" context "accounts.my_group" %}</span>{% endif %}</th>
-                            <td class="mg-table__number">{{ student.student_number|default:"—" }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        {% trans "Starosta bölmələri" context "accounts.my_group" as mg_tabs_label %}
+        <nav class="ems-tabs mg-tabs" data-ems-tabs aria-label="{{ mg_tabs_label }}">
+            <button type="button" class="ems-tabs__btn" data-ems-tab="mg-subjects" aria-current="page">{% trans "Fənlər" context "accounts.my_group" %}{% if ga.subjects %} <span class="ems-tabs__count">{{ ga.subjects|length }}</span>{% endif %}</button>
+            <button type="button" class="ems-tabs__btn" data-ems-tab="mg-electives" tabindex="-1">{% trans "Seçmə fənlər" context "accounts.my_group" %}{% if ga.electives %} <span class="ems-tabs__count">{{ ga.electives|length }}</span>{% endif %}</button>
+            <button type="button" class="ems-tabs__btn" data-ems-tab="mg-joint" tabindex="-1">{% trans "Birləşmiş dərslər" context "accounts.my_group" %}{% if ga.joint %} <span class="ems-tabs__count">{{ ga.joint|length }}</span>{% endif %}</button>
+            <button type="button" class="ems-tabs__btn" data-ems-tab="mg-timetable" tabindex="-1">{% trans "Cədvəl" context "accounts.my_group" %}</button>
+            <button type="button" class="ems-tabs__btn" data-ems-tab="mg-exams" tabindex="-1">{% trans "İmtahanlar" context "accounts.my_group" %}{% if ga.exams %} <span class="ems-tabs__count">{{ ga.exams|length }}</span>{% endif %}</button>
+            <button type="button" class="ems-tabs__btn" data-ems-tab="mg-news" tabindex="-1">{% trans "Elanlar" context "accounts.my_group" %}{% if mg_news %} <span class="ems-tabs__count">{{ mg_news|length }}</span>{% endif %}</button>
+            <button type="button" class="ems-tabs__btn" data-ems-tab="mg-classmates" tabindex="-1">{% trans "Qrup yoldaşları" context "accounts.my_group" %} <span class="ems-tabs__count">{{ mg.students|length }}</span></button>
+            {% if mg.me %}<button type="button" class="ems-tabs__btn" data-ems-tab="mg-attendance" tabindex="-1">{% trans "Davamiyyətim" context "accounts.my_group" %}</button>{% endif %}
+        </nav>
+
+        {# ── Fənlər ─────────────────────────────────────────────────────────── #}
+        <div class="mg-panel" data-ems-tabpanel="mg-subjects">
+            {% if not mg.period %}
+                <p class="mg-note">{% trans "Cari tədris dövrü müəyyən edilməyib." context "accounts.my_group" %}</p>
+            {% elif not ga.subjects %}
+                {% trans "Bu dövr üçün qrupun fənni hələ açılmayıb." context "accounts.my_group" as mg_no_subjects %}
+                {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_title=mg_no_subjects state_icon="fa-book" %}
+            {% else %}
+            <div class="ems-tablewrap mg-tablewrap">
+                <div class="ems-tablescroll">
+                    <table class="ems-table ems-table--zebra mg-table">
+                        <caption class="sr-only">{% blocktrans with group=mg.group.name context "accounts.my_group" %}{{ group }} qrupunun cari dövr fənləri{% endblocktrans %}</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">{% trans "Fənn" context "accounts.my_group" %}</th>
+                                <th scope="col">{% trans "Növ" context "accounts.my_group" %}</th>
+                                <th scope="col">{% trans "Müəllim" context "accounts.my_group" %}</th>
+                                <th scope="col">{% trans "Kimlərlə" context "accounts.my_group" %}</th>
+                                <th scope="col">{% trans "Qrupdan" context "accounts.my_group" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for subject in ga.subjects %}
+                            <tr>
+                                <th scope="row" class="mg-table__name">{{ subject.name }}{% if subject.code %} <span class="mg-code">{{ subject.code }}</span>{% endif %}</th>
+                                <td>{% if subject.kind == "elective" %}<span class="ems-badge ems-badge--info">{% trans "seçmə" context "accounts.my_group" %}</span>{% if subject.elective_block %} <span class="mg-muted">{{ subject.elective_block }}</span>{% endif %}{% else %}<span class="ems-badge ems-badge--neutral">{% trans "məcburi" context "accounts.my_group" %}</span>{% endif %}</td>
+                                <td>{{ subject.instructor|default:"—" }}</td>
+                                <td>{% if subject.other_groups %}<span class="mg-joint-tag"><i class="fas fa-link" aria-hidden="true"></i> {{ subject.other_groups|join:", " }}</span>{% else %}<span class="mg-muted">{% trans "yalnız öz qrupu" context "accounts.my_group" %}</span>{% endif %}</td>
+                                <td class="mg-table__number">{% if subject.partial %}{{ subject.takers }} / {{ subject.group_size }}{% elif subject.takers %}{% trans "hamısı" context "accounts.my_group" %}{% else %}—{% endif %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
+            {% endif %}
+        </div>
+
+        {# ── Seçmə fənlər: kim hansını götürür (yalnız ad) ──────────────────── #}
+        <div class="mg-panel" data-ems-tabpanel="mg-electives" hidden>
+            {% if not ga.electives %}
+                {% trans "Bu dövrdə qrupun seçmə fənni yoxdur." context "accounts.my_group" as mg_no_electives %}
+                {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_title=mg_no_electives state_icon="fa-list-check" %}
+            {% else %}
+            <p class="mg-note">{% trans "Hər seçmə fənni qrupdan kimin götürdüyü — yalnız adlar (bal və davamiyyət göstərilmir)." context "accounts.my_group" %}</p>
+            <ul class="mg-cards">
+                {% for subject in ga.electives %}
+                <li class="mg-card">
+                    <div class="mg-card__head">
+                        <h3 class="mg-card__title">{{ subject.name }}</h3>
+                        {% if subject.elective_block %}<span class="ems-badge ems-badge--info">{{ subject.elective_block }}</span>{% endif %}
+                        {% if subject.viewer_takes %}<span class="ems-badge ems-badge--primary">{% trans "siz də" context "accounts.my_group" %}</span>{% endif %}
+                    </div>
+                    <p class="mg-card__meta">
+                        {% if subject.instructor %}{{ subject.instructor }} · {% endif %}
+                        {% if subject.partial %}{% blocktrans with n=subject.takers total=subject.group_size context "accounts.my_group" %}{{ n }} / {{ total }} tələbə{% endblocktrans %}{% else %}{% trans "bütün qrup" context "accounts.my_group" %}{% endif %}
+                        {% if subject.other_groups %} · {% blocktrans with groups=subject.other_groups|join:", " context "accounts.my_group" %}birgə: {{ groups }}{% endblocktrans %}{% endif %}
+                    </p>
+                    {% if subject.taker_names %}
+                    <details class="mg-card__people">
+                        <summary>{% trans "Götürənlər" context "accounts.my_group" %} ({{ subject.taker_names|length }})</summary>
+                        <ul class="mg-names">{% for name in subject.taker_names %}<li>{{ name }}</li>{% endfor %}</ul>
+                    </details>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+
+        {# ── Birləşmiş dərslər + alt qruplar ──────────────────────────────────── #}
+        <div class="mg-panel" data-ems-tabpanel="mg-joint" hidden>
+            {% if not ga.joint and not ga.subgroups %}
+                {% trans "Qrup başqa qruplarla birləşmiş dərsdə oxumur və alt qruplara bölünməyib." context "accounts.my_group" as mg_no_joint %}
+                {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_title=mg_no_joint state_icon="fa-link-slash" %}
+            {% endif %}
+            {% if ga.joint %}
+            <p class="mg-note">{% trans "Bu fənlərdə qrupunuz başqa qrup(lar)la birlikdə oxuyur: ya dərs başqa qrupun jurnalındadır, ya da jurnala başqa qrupdan tələbə əlavə olunub." context "accounts.my_group" %}</p>
+            <ul class="mg-cards">
+                {% for subject in ga.joint %}
+                <li class="mg-card mg-card--joint">
+                    <div class="mg-card__head">
+                        <h3 class="mg-card__title">{{ subject.name }}</h3>
+                        {% if subject.kind == "elective" %}<span class="ems-badge ems-badge--info">{% trans "seçmə" context "accounts.my_group" %}</span>{% endif %}
+                    </div>
+                    <p class="mg-card__meta">
+                        <i class="fas fa-link" aria-hidden="true"></i>
+                        {% blocktrans with groups=subject.other_groups|join:", " context "accounts.my_group" %}Birgə qruplar: {{ groups }}{% endblocktrans %}
+                    </p>
+                    <p class="mg-card__meta">
+                        {% if subject.is_own_journal %}{% trans "Jurnal: öz qrupunuz" context "accounts.my_group" %}{% else %}{% blocktrans with journal=subject.journal_group context "accounts.my_group" %}Jurnal: {{ journal }}{% endblocktrans %}{% endif %}
+                        {% if subject.instructor %} · {{ subject.instructor }}{% endif %}
+                        {% if subject.partial %} · {% blocktrans with n=subject.takers total=subject.group_size context "accounts.my_group" %}{{ n }} / {{ total }} tələbə{% endblocktrans %}{% endif %}
+                    </p>
+                    {% if subject.taker_names %}
+                    <details class="mg-card__people">
+                        <summary>{% trans "Qrupdan gedənlər" context "accounts.my_group" %} ({{ subject.taker_names|length }})</summary>
+                        <ul class="mg-names">{% for name in subject.taker_names %}<li>{{ name }}</li>{% endfor %}</ul>
+                    </details>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% if ga.subgroups %}
+            <h2 class="mg-subtitle">{% trans "Alt qruplar" context "accounts.my_group" %}</h2>
+            {% if ga.subgroups.parent %}
+                <p class="mg-note">{% blocktrans with parent=ga.subgroups.parent.name context "accounts.my_group" %}Qrupunuz «{{ parent }}» qrupunun alt qrupudur — ümumi dərslər ana qrupun jurnalında keçə bilər.{% endblocktrans %}</p>
+            {% endif %}
+            {% if ga.subgroups.children %}
+            <ul class="mg-cards">
+                {% for child in ga.subgroups.children %}
+                <li class="mg-card">
+                    <div class="mg-card__head">
+                        <h3 class="mg-card__title">{{ child.name }}</h3>
+                        <span class="mg-muted">{% blocktrans with n=child.count context "accounts.my_group" %}{{ n }} tələbə{% endblocktrans %}</span>
+                    </div>
+                    {% if child.students %}
+                    <details class="mg-card__people">
+                        <summary>{% trans "Tələbələr" context "accounts.my_group" %}</summary>
+                        <ul class="mg-names">{% for name in child.students %}<li>{{ name }}</li>{% endfor %}</ul>
+                    </details>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endif %}
+        </div>
+
+        {# ── Həftəlik cədvəl (birləşmiş dərslər daxil) ───────────────────────── #}
+        <div class="mg-panel" data-ems-tabpanel="mg-timetable" hidden>
+            {% if not ga.timetable %}
+                {% trans "Qrupun dərs cədvəli hələ dərc olunmayıb." context "accounts.my_group" as mg_no_tt %}
+                {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_title=mg_no_tt state_icon="fa-calendar-xmark" %}
+            {% else %}
+            <div class="mg-days">
+                {% for day in ga.timetable %}
+                <section class="mg-day" aria-labelledby="mg-day-{{ day.weekday }}">
+                    <h3 class="mg-day__title" id="mg-day-{{ day.weekday }}">{{ day.label }}</h3>
+                    <ol class="mg-slots">
+                        {% for slot in day.slots %}
+                        <li class="mg-slot mg-slot--{{ slot.kind }}">
+                            <span class="mg-slot__time">{{ slot.start|time:"H:i" }}–{{ slot.end|time:"H:i" }}</span>
+                            <div class="mg-slot__body">
+                                <span class="mg-slot__subject">{{ slot.subject }}</span>
+                                <span class="mg-slot__meta">{{ slot.kind_label }}{% if slot.week_type_label %} · {{ slot.week_type_label }}{% endif %}{% if slot.room %} · {{ slot.room }}{% endif %}{% if slot.teacher %} · {{ slot.teacher }}{% endif %}</span>
+                                {% if slot.other_groups %}<span class="mg-joint-tag"><i class="fas fa-link" aria-hidden="true"></i> {% blocktrans with groups=slot.other_groups|join:", " context "accounts.my_group" %}birgə: {{ groups }}{% endblocktrans %}</span>{% endif %}
+                                {% if slot.partial %}<span class="mg-slot__partial">{% if slot.is_elective %}{% trans "seçmə" context "accounts.my_group" %} · {% endif %}{% blocktrans with n=slot.takers context "accounts.my_group" %}qrupdan {{ n }} tələbə{% endblocktrans %}</span>{% endif %}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ol>
+                </section>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        {# ── Yaxın imtahanlar ─────────────────────────────────────────────────── #}
+        <div class="mg-panel" data-ems-tabpanel="mg-exams" hidden>
+            {% if not ga.exams %}
+                {% trans "Yaxın 90 gündə qrupa təyin olunmuş imtahan yoxdur." context "accounts.my_group" as mg_no_exams %}
+                {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_title=mg_no_exams state_icon="fa-file-pen" %}
+            {% else %}
+            <ul class="mg-list">
+                {% for exam in ga.exams %}
+                <li class="mg-list__item">
+                    <time class="mg-list__date" datetime="{{ exam.start|date:'c' }}">{{ exam.start|date:"d.m.Y" }}<span>{{ exam.start|time:"H:i" }}{% if exam.end %}–{{ exam.end|time:"H:i" }}{% endif %}</span></time>
+                    <div class="mg-list__body">
+                        <span class="mg-list__title">{{ exam.title }}</span>
+                        <span class="mg-list__meta">{% if exam.subject %}{{ exam.subject }}{% endif %}{% if exam.kind_label %}{% if exam.subject %} · {% endif %}{{ exam.kind_label }}{% endif %}</span>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+
+        {# ── Qrupa ünvanlanmış elanlar ────────────────────────────────────────── #}
+        <div class="mg-panel" data-ems-tabpanel="mg-news" hidden>
+            {% if not mg_news %}
+                {% trans "Qrupa, ixtisasa və ya fakültəyə ünvanlanmış aktiv elan yoxdur." context "accounts.my_group" as mg_no_news %}
+                {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_title=mg_no_news state_icon="fa-bullhorn" %}
+            {% else %}
+            <ul class="mg-list">
+                {% for item in mg_news %}
+                <li class="mg-list__item">
+                    <time class="mg-list__date" datetime="{{ item.publish_at|date:'c' }}">{{ item.publish_at|date:"d.m.Y" }}</time>
+                    <div class="mg-list__body">
+                        <span class="mg-list__title">{% if item.is_pinned %}<i class="fas fa-thumbtack" aria-hidden="true"></i> {% endif %}{{ item.title }}</span>
+                        {% if item.summary %}<span class="mg-list__meta">{{ item.summary }}</span>{% endif %}
+                        {% if item.deadline_at %}<span class="mg-list__deadline">{% blocktrans with date=item.deadline_at|date:"d.m.Y H:i" context "accounts.my_group" %}Son tarix: {{ date }}{% endblocktrans %}</span>{% endif %}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            <p class="mg-note"><a class="mg-link" href="{{ profile_base_url }}?section=announcements">{% trans "Bütün elanlar" context "accounts.my_group" %} →</a></p>
+        </div>
+
+        {# ── Qrup yoldaşları (ad + tələbə nömrəsi) ────────────────────────────── #}
+        <div class="mg-panel" data-ems-tabpanel="mg-classmates" hidden>
+            {% if not mg.students %}
+                {% trans "Qrupda qeydiyyatlı tələbə yoxdur." context "accounts.my_group" as mg_empty_title %}
+                {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_title=mg_empty_title state_icon="fa-user-group" %}
+            {% else %}
+            <div class="ems-tablewrap mg-tablewrap">
+                <div class="ems-tablescroll">
+                    <table class="ems-table ems-table--zebra ems-table--sticky mg-table">
+                        <caption class="sr-only">{% blocktrans with group=mg.group.name context "accounts.my_group" %}{{ group }} qrupunun tələbələri{% endblocktrans %}</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col" class="mg-table__index">#</th>
+                                <th scope="col">{% trans "Tələbə" context "accounts.my_group" %}</th>
+                                <th scope="col">{% trans "Tələbə nömrəsi" context "accounts.my_group" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in mg.students %}
+                            <tr{% if student.is_me %} class="mg-row--me"{% endif %}>
+                                <td class="mg-table__index">{{ forloop.counter }}</td>
+                                <th scope="row" class="mg-table__name">{{ student.name }}{% if student.is_me %} <span class="mg-me-badge">{% trans "siz" context "accounts.my_group" %}</span>{% endif %}</th>
+                                <td class="mg-table__number">{{ student.student_number|default:"—" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        {# ── Mənim davamiyyətim (YALNIZ şəxsi) ────────────────────────────────── #}
+        {% if mg.me %}
+        <div class="mg-panel" data-ems-tabpanel="mg-attendance" hidden>
+            {% if mg.period %}
+                <p class="mg-note">{% blocktrans with period=mg.period.name year=mg.period.year_display context "accounts.my_group" %}{{ period }} {{ year }} — qayıb saatı və dərs saatına nisbəti (faiz).{% endblocktrans %}</p>
+            {% endif %}
+            {% if mg.has_attendance %}
+            <div class="ems-tablewrap mg-tablewrap">
+                <div class="ems-tablescroll">
+                    <table class="ems-table ems-table--zebra mg-table">
+                        <caption class="sr-only">{% trans "Fənn üzrə davamiyyətim" context "accounts.my_group" %}</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">{% trans "Fənn" context "accounts.my_group" %}</th>
+                                <th scope="col">{% trans "Qayıb (saat)" context "accounts.my_group" %}</th>
+                                <th scope="col">{% trans "Faiz" context "accounts.my_group" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for subject in mg.me.subjects %}
+                            <tr>
+                                <th scope="row" class="mg-table__name">{{ subject.name }}</th>
+                                <td class="mg-cell mg-cell--{{ subject.level }}" title="{% blocktrans with absence=subject.absence_hours|floatformat:'-1' hours=subject.lesson_hours|floatformat:'-1' context 'accounts.my_group' %}{{ absence }} / {{ hours }} saat{% endblocktrans %}">{{ subject.absence_hours|floatformat:"-1" }}</td>
+                                <td class="mg-cell mg-cell--{{ subject.level }}">{% if subject.percent is not None %}{{ subject.percent }}%{% else %}—{% endif %}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="mg-table__total-row">
+                                <th scope="row" class="mg-table__name">{% trans "Ümumi" context "accounts.my_group" %}</th>
+                                <td class="mg-cell mg-cell--total mg-cell--{{ mg.me.level }}">{{ mg.me.absence_hours|floatformat:"-1" }}</td>
+                                <td class="mg-cell mg-cell--total mg-cell--{{ mg.me.level }}">{% if mg.me.percent is not None %}{{ mg.me.percent }}%{% else %}—{% endif %}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <ul class="mg-legend" aria-label="{% trans 'Rəng izahı' context 'accounts.my_group' %}">
+                <li class="mg-legend__item mg-legend__item--near">{% trans "Qayıb həddinə yaxındır" context "accounts.my_group" %}</li>
+                <li class="mg-legend__item mg-legend__item--over">{% trans "Qayıb həddi aşılıb" context "accounts.my_group" %}</li>
+            </ul>
+            {% elif mg.period %}
+                <p class="mg-note">{% trans "Bu dövr üçün fənn yazılışı hələ yoxdur." context "accounts.my_group" %}</p>
+            {% else %}
+                <p class="mg-note">{% trans "Cari tədris dövrü müəyyən edilməyib." context "accounts.my_group" %}</p>
+            {% endif %}
         </div>
         {% endif %}
     </div>

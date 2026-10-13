@@ -77,7 +77,10 @@ def _sync_user_role_memberships(
 
     desired = set(desired_role_names or []) & PROFILE_ROLE_NAMES
     editable = set(editable_role_names or PROFILE_ROLE_NAMES) & PROFILE_ROLE_NAMES
-    editable -= {ProfileRole.SUPERADMIN, ProfileRole.ORG_OWNER}
+    # 2026-10-13 (gecə): starosta (`lead_student`) bu checkbox axınında NƏ verilir, NƏ götürülür — burada
+    # `scope_unit` həmişə boşdur (bölmə açılmırdı) və qrupa bağlı starosta sətri səssiz söndürülürdü.
+    # Yeganə yol: qrup reyestrinin «Starosta təyin et» əməli (services/group_lead.py).
+    editable -= {ProfileRole.SUPERADMIN, ProfileRole.ORG_OWNER, ProfileRole.LEAD_STUDENT}
 
     desired_membership_roles = {}
     for role_name in sorted(desired & editable, key=lambda item: ProfileRole.LEVELS.get(item, 0), reverse=True):

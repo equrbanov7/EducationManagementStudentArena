@@ -1150,7 +1150,7 @@ msgstr "Meine Ergebnisse"
 #: apps/accounts/templates/accounts/my_result_detail.html:30
 msgctxt "accounts.my_result_detail_page"
 msgid "label_type"
-msgstr "Typ"
+msgstr "Art"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:34
 msgctxt "accounts.my_result_detail_page"
@@ -3653,7 +3653,7 @@ msgstr "Aufgabe"
 #: apps/accounts/templates/accounts/profile/sections/_unit_exams.html:40
 #: apps/accounts/templates/accounts/profile/sections/superadmin/_superadmin_org_inspector.html:78
 msgid "Növ"
-msgstr "Typ"
+msgstr "Art"
 
 #: apps/accounts/templates/accounts/partials/_review_results_content.html:79
 #: apps/accounts/templates/accounts/profile/sections/_appeal_stats.html:67
@@ -4317,7 +4317,7 @@ msgstr "Organisation"
 #: apps/accounts/templates/accounts/partials/_student_org_request_content.html:181
 msgctxt "profile.join_org"
 msgid "type"
-msgstr "Typ"
+msgstr "Art"
 
 #: apps/accounts/templates/accounts/partials/_student_org_request_content.html:182
 msgctxt "profile.join_org"
@@ -4836,7 +4836,7 @@ msgstr "Organisation"
 #: apps/accounts/templates/accounts/partials/_superadmin_org_features_content.html:20
 msgctxt "accounts.superadmin_org_features"
 msgid "col_type"
-msgstr "Typ"
+msgstr "Art"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_org_features_content.html:21
 msgctxt "accounts.superadmin_org_features"
@@ -5977,7 +5977,7 @@ msgstr "Anwenden"
 #: apps/accounts/templates/accounts/partials/staff_management/_superadmin_section.html:61
 msgctxt "staff.management"
 msgid "Type"
-msgstr "Typ"
+msgstr "Art"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_superadmin_section.html:62
 msgctxt "staff.management"
@@ -10054,7 +10054,7 @@ msgstr "Gelesen"
 #: apps/accounts/templates/accounts/profile/sections/_notifications.html:109
 #: apps/notifications/templates/notifications/notification_list.html:55
 msgid "Type"
-msgstr "Typ"
+msgstr "Art"
 
 #: apps/accounts/templates/accounts/profile/sections/_notifications.html:116
 #: apps/notifications/templates/notifications/notification_list.html:60
@@ -29623,7 +29623,7 @@ msgstr "Die Fragen werden nur in der von Ihnen gewählten Sprache angezeigt."
 #: apps/exams/templates/exams/teacher/exam_section.html:340
 msgctxt "exams.partial.exam_section"
 msgid "modal_label_type"
-msgstr "Typ"
+msgstr "Art"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:397
 #: apps/exams/templates/exams/teacher/exam_section.html:344
@@ -34011,7 +34011,7 @@ msgstr "Keine Antwort zum Bewerten"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:31
 msgctxt "exams.template.teacher_exam_detail"
 msgid "label_type"
-msgstr "Typ"
+msgstr "Art"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:35
 msgctxt "exams.template.teacher_exam_detail"
@@ -38148,7 +38148,7 @@ msgstr "Für diesen Studierenden wurden keine auswählbaren Fragen gefunden."
 #: apps/labs/templates/labs/preview_randomization.html:127
 msgctxt "labs.template.preview_randomization"
 msgid "empty_select_student_title"
-msgstr "Studierende auswählen"
+msgstr "Studierende/n auswählen"
 
 #: apps/labs/templates/labs/preview_randomization.html:128
 msgctxt "labs.template.preview_randomization"
@@ -41701,7 +41701,7 @@ msgstr "Datum"
 #: apps/registrar/corrections.py:341
 msgctxt "registrar.correction"
 msgid "Type"
-msgstr "Typ"
+msgstr "Art"
 
 #: apps/registrar/corrections.py:348
 msgctxt "registrar.correction"
@@ -50019,7 +50019,7 @@ msgstr "Datum"
 #. saxlanılıb.
 msgctxt "registrar.journal"
 msgid "Növ"
-msgstr "Typ"
+msgstr "Art"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -56752,7 +56752,7 @@ msgstr "Fach"
 
 msgctxt "accounts.schedule_manage"
 msgid "Növ"
-msgstr "Typ"
+msgstr "Art"
 
 msgctxt "accounts.schedule_manage"
 msgid "Otaq"
@@ -60111,7 +60111,7 @@ msgstr "Unbekannte Aktion."
 
 msgctxt "accounts.catalog"
 msgid "Növ"
-msgstr "Typ"
+msgstr "Art"
 
 msgctxt "accounts.catalog"
 msgid "Nəticə: %(count)d sətir"
@@ -63528,7 +63528,7 @@ msgstr "Bleibt als Text erhalten"
 
 msgctxt "accounts.workload_center"
 msgid "Növ"
-msgstr "Typ"
+msgstr "Art"
 
 msgctxt "accounts.workload_center"
 msgid "Nəticə"
@@ -66421,7 +66421,7 @@ msgstr "Lehrkräfte"
 
 msgctxt "accounts.staff_management"
 msgid "Növ"
-msgstr "Typ"
+msgstr "Art"
 
 msgctxt "accounts.staff_management"
 msgid ""
@@ -71785,7 +71785,7 @@ msgstr "Keine Abgaben entsprechen dem Filter"
 
 msgctxt "accounts.pending_answers"
 msgid "filter_label_type"
-msgstr "Typ"
+msgstr "Art"
 
 msgctxt "accounts.pending_answers"
 msgid "kpi_coursework_note"
@@ -73487,7 +73487,7 @@ msgstr "Zentrumsleitung"
 
 msgctxt "organizations.members"
 msgid "Növ"
-msgstr "Typ"
+msgstr "Art"
 
 msgctxt "organizations.members"
 msgid "Nəticə: %(n)d üzvlük"
@@ -79631,7 +79631,7 @@ msgstr "Seminar"
 
 msgctxt "timetable.review"
 msgid "Növ"
-msgstr "Typ"
+msgstr "Art"
 
 msgctxt "timetable.review"
 msgid "Otaq"
@@ -82705,7 +82705,7 @@ msgstr "Navigation"
 
 msgctxt "subject_folder.ui"
 msgid "Növ"
-msgstr "Typ"
+msgstr "Art"
 
 msgctxt "subject_folder.ui"
 msgid "Nəticə: %(count)d göndəriş"
@@ -87231,7 +87231,7 @@ msgstr "Beschreibung (wird den Teilnehmenden angezeigt)"
 
 msgctxt "surveys.builder"
 msgid "Növ"
-msgstr "Typ"
+msgstr "Art"
 
 msgctxt "surveys.builder"
 msgid "Anonim sorğu"
@@ -95255,7 +95255,7 @@ msgstr "Quelle"
 
 msgctxt "accounts.journal_hygiene"
 msgid "Növ"
-msgstr "Typ"
+msgstr "Art"
 
 msgctxt "accounts.journal_hygiene"
 msgid "Vəziyyət"
@@ -97673,3 +97673,456 @@ msgstr "ersetzt"
 msgctxt "registrar.records"
 msgid "nəzarətçi tərəfindən çıxarılıb"
 msgstr "von der Aufsicht entfernt"
+
+msgctxt "profile.sidebar"
+msgid "Starosta"
+msgstr "Gruppensprecher/in"
+
+msgctxt "accounts.groups"
+msgid "Starosta"
+msgstr "Gruppensprecher/in"
+
+msgctxt "accounts.group_lead"
+msgid "Starosta"
+msgstr "Gruppensprecher/in"
+
+msgctxt "accounts.group_lead"
+msgid "Qrup tapılmadı və ya arxivdədir."
+msgstr "Gruppe nicht gefunden oder archiviert."
+
+msgctxt "accounts.group_lead"
+msgid ""
+"«Baş tələbə» (lead_student) rolu bu təşkilatda yoxdur — standart rollar "
+"yüklənməlidir."
+msgstr ""
+"Die Rolle „Gruppensprecher/in“ (lead_student) existiert in dieser "
+"Organisation nicht — laden Sie die Standardrollen."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta yalnız bu qrupun qeydiyyatlı tələbəsi ola bilər."
+msgstr ""
+"Nur eine/ein eingeschriebene/r Studierende/r dieser Gruppe kann "
+"Gruppensprecher/in sein."
+
+msgctxt "accounts.group_lead"
+msgid "Özünüzü starosta təyin edə bilməzsiniz."
+msgstr "Sie können sich nicht selbst zur/zum Gruppensprecher/in ernennen."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "%(name)s artıq bu qrupun starostasıdır."
+msgstr "%(name)s ist bereits Gruppensprecher/in dieser Gruppe."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta vəzifəniz başa çatdı"
+msgstr "Ihre Rolle als Gruppensprecher/in ist beendet"
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "«%(group)s» qrupunun starostası artıq %(name)s-dir."
+msgstr "Gruppensprecher/in der Gruppe „%(group)s“ ist jetzt %(name)s."
+
+msgctxt "accounts.group_lead"
+msgid "Siz qrupun starostası təyin olundunuz"
+msgstr "Sie wurden zur/zum Gruppensprecher/in ernannt"
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid ""
+"«%(group)s» qrupunun starostası təyin olundunuz. Kabinetdə «Starosta» "
+"bölməsi açıldı: qrupun fənləri, seçmə fənlər, birləşmiş dərslər, cədvəl, "
+"imtahanlar və elanlar."
+msgstr ""
+"Sie wurden zur/zum Gruppensprecher/in der Gruppe „%(group)s“ ernannt. In "
+"Ihrem Bereich ist jetzt der Abschnitt „Gruppensprecher/in“ geöffnet: Fächer,"
+" Wahlfächer, gemeinsame Lehrveranstaltungen, Stundenplan, Prüfungen und "
+"Ankündigungen der Gruppe."
+
+msgctxt "accounts.group_lead"
+msgid "Bu qrupun starostası yoxdur."
+msgstr "Diese Gruppe hat keine/n Gruppensprecher/in."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "«%(group)s» qrupunun starostası vəzifəsindən götürüldünüz."
+msgstr "Sie wurden als Gruppensprecher/in der Gruppe „%(group)s“ abberufen."
+
+msgctxt "accounts.group_lead"
+msgid "Qrupun starostası"
+msgstr "Gruppensprecher/in"
+
+msgctxt "accounts.group_lead"
+msgid ""
+"Starosta qrupun qeydiyyatlı tələbələrindən seçilir və kabinetində «Starosta»"
+" bölməsi açılır: qrupun fənləri, seçmə fənlər, birləşmiş dərslər, cədvəl, "
+"imtahanlar, elanlar."
+msgstr ""
+"Die/der Gruppensprecher/in wird aus den eingeschriebenen Studierenden der "
+"Gruppe gewählt und erhält im Bereich den Abschnitt „Gruppensprecher/in“: "
+"Fächer, Wahlfächer, gemeinsame Lehrveranstaltungen, Stundenplan, Prüfungen, "
+"Ankündigungen."
+
+msgctxt "accounts.group_lead"
+msgid "Təyin et"
+msgstr "Ernennen"
+
+msgctxt "accounts.group_lead"
+msgid "Starostanı götür"
+msgstr "Gruppensprecher/in abberufen"
+
+msgctxt "accounts.group_lead"
+msgid "Əməl audit jurnalına yazılır, tələbəyə bildiriş gedir."
+msgstr ""
+"Die Aktion wird im Prüfprotokoll erfasst und die/der Studierende "
+"benachrichtigt."
+
+msgctxt "accounts.group_lead"
+msgid "Götür"
+msgstr "Abberufen"
+
+msgctxt "accounts.group_lead"
+msgid "qrupda deyil"
+msgstr "nicht in der Gruppe"
+
+msgctxt "accounts.group_lead"
+msgid "bir neçə starosta"
+msgstr "mehrere Sprecher/innen"
+
+msgctxt "accounts.group_lead"
+msgid "Qrup"
+msgstr "Gruppe"
+
+msgctxt "accounts.group_lead"
+msgid "Hazırkı starosta:"
+msgstr "Aktuelle/r Sprecher/in:"
+
+msgctxt "accounts.group_lead"
+msgid "Yeni starosta"
+msgstr "Neue/r Gruppensprecher/in"
+
+msgctxt "accounts.group_lead"
+msgid "Tələbə adı ilə axtar…"
+msgstr "Nach Name der/des Studierenden suchen…"
+
+msgctxt "accounts.group_lead"
+msgid "Uyğun tələbə tapılmadı"
+msgstr "Keine passende Person"
+
+msgctxt "accounts.group_lead"
+msgid "Tələbə seçin"
+msgstr "Studierende/n auswählen"
+
+msgctxt "accounts.group_lead"
+msgid ""
+"Yalnız bu qrupun qeydiyyatlı tələbələri. Yeni starosta təyin olunanda "
+"əvvəlki avtomatik götürülür; hər ikisinə bildiriş gedir."
+msgstr ""
+"Nur eingeschriebene Studierende dieser Gruppe. Die Ernennung einer neuen "
+"Person beruft die bisherige automatisch ab; beide werden benachrichtigt."
+
+msgctxt "accounts.group_lead"
+msgid "Qeyd (istəyə bağlı)"
+msgstr "Notiz (optional)"
+
+msgctxt "accounts.group_lead"
+msgid "Məs.: qrup yığıncağının qərarı ilə"
+msgstr "Z. B.: laut Beschluss der Gruppenversammlung"
+
+msgctxt "accounts.group_lead"
+msgid ""
+"Tələbə qrupda qalır, yalnız starostalıq və «Starosta» bölməsi bağlanır. "
+"Sonra yeni starosta təyin edə bilərsiniz."
+msgstr ""
+"Die/der Studierende bleibt in der Gruppe; nur die Sprecherrolle und der "
+"Abschnitt „Gruppensprecher/in“ werden geschlossen. Sie können danach eine "
+"neue Person ernennen."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta təyin olunmayıb"
+msgstr "Keine/r Gruppensprecher/in ernannt"
+
+msgctxt "accounts.group_lead"
+msgid ""
+"Bu qrupun qeydiyyatlı tələbəsi deyil — bölmə ona açılmır. Yenisini təyin "
+"edin."
+msgstr ""
+"Nicht als Studierende/r dieser Gruppe eingeschrieben — der Abschnitt ist für"
+" sie/ihn geschlossen. Ernennen Sie eine neue Person."
+
+msgctxt "accounts.group_lead"
+msgid ""
+"Qrupda bir neçə aktiv starosta var — birini təyin edin, digərləri avtomatik "
+"götürüləcək."
+msgstr ""
+"Die Gruppe hat mehrere aktive Sprecher/innen — ernennen Sie eine Person, die"
+" anderen werden automatisch abberufen."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta təyin et"
+msgstr "Gruppensprecher/in ernennen"
+
+msgctxt "accounts.group_lead"
+msgid "Starostanı dəyiş"
+msgstr "Gruppensprecher/in wechseln"
+
+msgctxt "accounts.group_lead"
+msgid "Aktiv təşkilat tapılmadı."
+msgstr "Aktive Organisation nicht gefunden."
+
+msgctxt "accounts.group_lead"
+msgid ""
+"Starosta təyin etmək üçün `unit.group_manage` və ya `role.assign` "
+"səlahiyyəti lazımdır."
+msgstr ""
+"Für die Ernennung einer/eines Gruppensprecher/in ist die Berechtigung "
+"`unit.group_manage` oder `role.assign` erforderlich."
+
+msgctxt "accounts.group_lead"
+msgid "Qrup tapılmadı və ya əhatənizdə deyil."
+msgstr "Gruppe nicht gefunden oder außerhalb Ihres Zuständigkeitsbereichs."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "«%(group)s» qrupunun starostası dəyişdi: %(old)s → %(new)s."
+msgstr ""
+"Gruppensprecher/in der Gruppe „%(group)s“ gewechselt: %(old)s → %(new)s."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "%(name)s «%(group)s» qrupunun starostası təyin edildi."
+msgstr ""
+"%(name)s wurde zur/zum Gruppensprecher/in der Gruppe „%(group)s“ ernannt."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "%(name)s «%(group)s» qrupunun starostası vəzifəsindən götürüldü."
+msgstr ""
+"%(name)s wurde als Gruppensprecher/in der Gruppe „%(group)s“ abberufen."
+
+msgctxt "accounts.group_lead"
+msgid "Naməlum əməl."
+msgstr "Unbekannte Aktion."
+
+msgctxt "accounts.group_lead"
+msgid ""
+"Starosta «Qruplar» reyestrindən təyin olunur: qrupun tələbələri → «Starosta "
+"təyin et»."
+msgstr ""
+"Gruppensprecher/innen werden im Register „Gruppen“ ernannt: Studierende der "
+"Gruppe → „Gruppensprecher/in ernennen“."
+
+msgctxt "accounts.my_group"
+msgid ""
+"Siz bu qrupun starostasısınız: qrupun fənləri, seçmə fənlər, başqa qruplarla"
+" birləşmiş dərslər, cədvəl, imtahanlar və elanlar burada bir yerdədir. Qrup "
+"yoldaşlarının balı və davamiyyəti göstərilmir — davamiyyət yalnız özünüzə "
+"aiddir."
+msgstr ""
+"Sie sind Gruppensprecher/in dieser Gruppe: Fächer, Wahlfächer, mit anderen "
+"Gruppen gemeinsame Lehrveranstaltungen, Stundenplan, Prüfungen und "
+"Ankündigungen der Gruppe finden Sie hier. Noten und Anwesenheit der "
+"Mitstudierenden werden nicht angezeigt — nur Ihre eigene Anwesenheit."
+
+msgctxt "accounts.my_group"
+msgid "Seçmə fənn"
+msgstr "Wahlfach"
+
+msgctxt "accounts.my_group"
+msgid "Birləşmiş dərs"
+msgstr "Gemeinsame Lehrveranstaltung"
+
+msgctxt "accounts.my_group"
+msgid "Yaxın imtahan"
+msgstr "Bevorstehende Prüfung"
+
+msgctxt "accounts.my_group"
+msgid "Starosta bölmələri"
+msgstr "Abschnitte der/des Gruppensprecher/in"
+
+msgctxt "accounts.my_group"
+msgid "Fənlər"
+msgstr "Fächer"
+
+msgctxt "accounts.my_group"
+msgid "Seçmə fənlər"
+msgstr "Wahlfächer"
+
+msgctxt "accounts.my_group"
+msgid "Birləşmiş dərslər"
+msgstr "Gemeinsame Lehrveranstaltungen"
+
+msgctxt "accounts.my_group"
+msgid "Cədvəl"
+msgstr "Stundenplan"
+
+msgctxt "accounts.my_group"
+msgid "İmtahanlar"
+msgstr "Prüfungen"
+
+msgctxt "accounts.my_group"
+msgid "Elanlar"
+msgstr "Ankündigungen"
+
+msgctxt "accounts.my_group"
+msgid "Davamiyyətim"
+msgstr "Meine Anwesenheit"
+
+msgctxt "accounts.my_group"
+msgid "Bu dövr üçün qrupun fənni hələ açılmayıb."
+msgstr "Für die Gruppe wurden in diesem Semester noch keine Fächer eröffnet."
+
+msgctxt "accounts.my_group"
+msgid "Növ"
+msgstr "Art"
+
+msgctxt "accounts.my_group"
+msgid "Müəllim"
+msgstr "Lehrkraft"
+
+msgctxt "accounts.my_group"
+msgid "Kimlərlə"
+msgstr "Zusammen mit"
+
+msgctxt "accounts.my_group"
+msgid "Qrupdan"
+msgstr "Aus der Gruppe"
+
+msgctxt "accounts.my_group"
+msgid "seçmə"
+msgstr "Wahlfach"
+
+msgctxt "accounts.my_group"
+msgid "məcburi"
+msgstr "Pflichtfach"
+
+msgctxt "accounts.my_group"
+msgid "yalnız öz qrupu"
+msgstr "nur eigene Gruppe"
+
+msgctxt "accounts.my_group"
+msgid "hamısı"
+msgstr "alle"
+
+msgctxt "accounts.my_group"
+msgid "Bu dövrdə qrupun seçmə fənni yoxdur."
+msgstr "Die Gruppe hat in diesem Semester keine Wahlfächer."
+
+msgctxt "accounts.my_group"
+msgid ""
+"Hər seçmə fənni qrupdan kimin götürdüyü — yalnız adlar (bal və davamiyyət "
+"göstərilmir)."
+msgstr ""
+"Wer in der Gruppe welches Wahlfach belegt — nur Namen (Noten und Anwesenheit"
+" werden nicht angezeigt)."
+
+msgctxt "accounts.my_group"
+msgid "siz də"
+msgstr "auch Sie"
+
+msgctxt "accounts.my_group"
+msgid "bütün qrup"
+msgstr "ganze Gruppe"
+
+msgctxt "accounts.my_group"
+msgid "Götürənlər"
+msgstr "Belegt von"
+
+msgctxt "accounts.my_group"
+msgid ""
+"Qrup başqa qruplarla birləşmiş dərsdə oxumur və alt qruplara bölünməyib."
+msgstr ""
+"Die Gruppe hat keine gemeinsamen Lehrveranstaltungen mit anderen Gruppen und"
+" ist nicht in Untergruppen geteilt."
+
+msgctxt "accounts.my_group"
+msgid ""
+"Bu fənlərdə qrupunuz başqa qrup(lar)la birlikdə oxuyur: ya dərs başqa qrupun"
+" jurnalındadır, ya da jurnala başqa qrupdan tələbə əlavə olunub."
+msgstr ""
+"In diesen Fächern lernt Ihre Gruppe gemeinsam mit anderen Gruppe(n): "
+"Entweder findet die Lehrveranstaltung im Journal einer anderen Gruppe statt,"
+" oder Studierende einer anderen Gruppe wurden in das Journal aufgenommen."
+
+msgctxt "accounts.my_group"
+msgid "Jurnal: öz qrupunuz"
+msgstr "Journal: Ihre Gruppe"
+
+msgctxt "accounts.my_group"
+msgid "Qrupdan gedənlər"
+msgstr "Teilnehmende aus der Gruppe"
+
+msgctxt "accounts.my_group"
+msgid "Alt qruplar"
+msgstr "Untergruppen"
+
+msgctxt "accounts.my_group"
+msgid "Tələbələr"
+msgstr "Studierende"
+
+msgctxt "accounts.my_group"
+msgid "Qrupun dərs cədvəli hələ dərc olunmayıb."
+msgstr "Der Stundenplan der Gruppe wurde noch nicht veröffentlicht."
+
+msgctxt "accounts.my_group"
+msgid "Yaxın 90 gündə qrupa təyin olunmuş imtahan yoxdur."
+msgstr "In den nächsten 90 Tagen sind der Gruppe keine Prüfungen zugewiesen."
+
+msgctxt "accounts.my_group"
+msgid "Qrupa, ixtisasa və ya fakültəyə ünvanlanmış aktiv elan yoxdur."
+msgstr ""
+"Keine aktiven Ankündigungen an die Gruppe, den Studiengang oder die "
+"Fakultät."
+
+msgctxt "accounts.my_group"
+msgid "Bütün elanlar"
+msgstr "Alle Ankündigungen"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "%(group)s qrupunun cari dövr fənləri"
+msgstr "Fächer des aktuellen Semesters der Gruppe %(group)s"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "%(n)s / %(total)s tələbə"
+msgstr "%(n)s / %(total)s Studierende"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "birgə: %(groups)s"
+msgstr "gemeinsam: %(groups)s"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "Birgə qruplar: %(groups)s"
+msgstr "Gemeinsame Gruppen: %(groups)s"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "Jurnal: %(journal)s"
+msgstr "Journal: %(journal)s"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid ""
+"Qrupunuz «%(parent)s» qrupunun alt qrupudur — ümumi dərslər ana qrupun "
+"jurnalında keçə bilər."
+msgstr ""
+"Ihre Gruppe ist eine Untergruppe von „%(parent)s“ — gemeinsame "
+"Lehrveranstaltungen können im Journal der übergeordneten Gruppe geführt "
+"werden."
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "%(n)s tələbə"
+msgstr "%(n)s Studierende"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "qrupdan %(n)s tələbə"
+msgstr "%(n)s Studierende aus der Gruppe"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "Son tarix: %(date)s"
+msgstr "Frist: %(date)s"

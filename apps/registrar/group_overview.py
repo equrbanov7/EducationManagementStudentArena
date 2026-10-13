@@ -1,4 +1,4 @@
-"""«Qrupum» paneli — akademik qrupun siyahısı + BAXANIN ÖZ davamiyyəti (OXU-YALNIZ).
+"""«Starosta» (`my-group`) paneli — akademik qrupun siyahısı + BAXANIN ÖZ davamiyyəti (OXU-YALNIZ).
 
 Rol auditi 2026-10-13 B10: baş tələbə (``lead_student``) «qrup səviyyəli» ``member.view`` daşıyırdı, amma
 heç bir səth onu oxumurdu. Bu modul həmin səthin DATASIDIR.

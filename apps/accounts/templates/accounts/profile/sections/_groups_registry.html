@@ -44,6 +44,12 @@ səhifələmə SERVER tərəfdədir (handoff §8/14). SİLMƏ YOXDUR — arxivl�
 {% trans "Ana qrupu alt qruplara böl" context "accounts.groups" as gr_split_title %}
 {% trans "Tələbələr əvvəlcə bərabər bölünür; siyahılar arasında keçirə, alt qrupları adlandıra bilərsiniz. Seçilməyənlər ana qrupda qalır. Hər köçürmə rəsmi xidmətlə yazılır — tarixçə silinmir." context "accounts.groups" as gr_split_sub %}
 {% trans "Alt qrupları yarat" context "accounts.groups" as gr_split_btn %}
+{% trans "Qrupun starostası" context "accounts.group_lead" as gr_lead_title %}
+{% trans "Starosta qrupun qeydiyyatlı tələbələrindən seçilir və kabinetində «Starosta» bölməsi açılır: qrupun fənləri, seçmə fənlər, birləşmiş dərslər, cədvəl, imtahanlar, elanlar." context "accounts.group_lead" as gr_lead_sub %}
+{% trans "Təyin et" context "accounts.group_lead" as gr_lead_btn %}
+{% trans "Starostanı götür" context "accounts.group_lead" as gr_lead_remove_title %}
+{% trans "Əməl audit jurnalına yazılır, tələbəyə bildiriş gedir." context "accounts.group_lead" as gr_lead_remove_sub %}
+{% trans "Götür" context "accounts.group_lead" as gr_lead_remove_btn %}
 <section class="profile-section-panel profile-section--tof {% if active_section == 'groups-registry' %}is-active{% endif %}"
          data-profile-section-panel="groups-registry"
          data-source-url="{{ profile_base_url }}?section=groups-registry">
@@ -97,6 +103,13 @@ səhifələmə SERVER tərəfdədir (handoff §8/14). SİLMƏ YOXDUR — arxivl�
         {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofStudentTransferDialog" reason_title=gr_detach_title reason_subtitle=gr_detach_sub reason_submit_label=gr_detach_btn reason_submit_tone="warning" reason_action=groups_registry_section.movement_action_url reason_hidden=groups_registry_section.movement_hidden reason_form_data=groups_registry_section.movement_form_data reason_extra_include="accounts/profile/sections/teaching_office/_movement_extra_fields.html" movement_target_group=True %}
         {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofStudentFreezeDialog" reason_title=gr_freeze_title reason_subtitle=gr_freeze_sub reason_submit_label=gr_freeze_btn reason_submit_tone="warning" reason_action=groups_registry_section.movement_action_url reason_hidden=groups_registry_section.movement_hidden reason_form_data=groups_registry_section.movement_form_data reason_extra_include="accounts/profile/sections/teaching_office/_movement_extra_fields.html" movement_until=True %}
         {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofStudentExpelDialog" reason_title=gr_expel_title reason_subtitle=gr_expel_sub reason_submit_label=gr_expel_btn reason_submit_tone="danger" reason_action=groups_registry_section.movement_action_url reason_hidden=groups_registry_section.movement_hidden reason_form_data=groups_registry_section.movement_form_data reason_extra_include="accounts/profile/sections/teaching_office/_movement_extra_fields.html" movement_until=False %}
+    {% endif %}
+
+    {% if groups_registry_section.can_assign_lead %}
+        {% comment %}2026-10-13 (gecə): «Starosta təyin et / dəyiş / götür» — `accounts:group_lead_action`
+        (qapı: `unit.group_manage` və ya `role.assign` əhatəsi; qaydalar services/group_lead.py-da).{% endcomment %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofGroupLeadDialog" form_dialog_title=gr_lead_title form_dialog_subtitle=gr_lead_sub form_dialog_submit_label=gr_lead_btn form_dialog_body_include="accounts/profile/sections/teaching_office/_group_lead_fields.html" form_dialog_action=groups_registry_section.lead_action_url form_dialog_hidden=groups_registry_section.lead_assign_hidden form_dialog_data=groups_registry_section.lead_form_data %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofGroupLeadRemoveDialog" form_dialog_title=gr_lead_remove_title form_dialog_subtitle=gr_lead_remove_sub form_dialog_submit_label=gr_lead_remove_btn form_dialog_submit_tone="danger" form_dialog_body_include="accounts/profile/sections/teaching_office/_group_lead_remove_fields.html" form_dialog_action=groups_registry_section.lead_action_url form_dialog_hidden=groups_registry_section.lead_remove_hidden form_dialog_data=groups_registry_section.lead_form_data %}
     {% endif %}
 
     {% if groups_registry_section.can_manage %}

@@ -43,6 +43,41 @@ səbəb dialoqlarını açır — səbəb ≥20 simvol və təsdiq MƏCBURİDİR
             </button>
             {% endif %}
         </div>
+        {% comment %}2026-10-13 (gecə): STAROSTA paneli — ad/«təyin olunmayıb» + «Starosta təyin et / dəyiş /
+        götür». Dəyərlər çekmecə açılanda sətrin data-atributlarından JS ilə yazılır; düymələr yalnız
+        `unit.group_manage` / `role.assign` səlahiyyətində görünür (server hər halda yenidən yoxlayır).{% endcomment %}
+        <div class="tof-lead" data-tof-lead
+             data-t-none="{% trans 'Starosta təyin olunmayıb' context 'accounts.group_lead' %}"
+             data-t-not-in-group="{% trans 'Bu qrupun qeydiyyatlı tələbəsi deyil — bölmə ona açılmır. Yenisini təyin edin.' context 'accounts.group_lead' %}"
+             data-t-multiple="{% trans 'Qrupda bir neçə aktiv starosta var — birini təyin edin, digərləri avtomatik götürüləcək.' context 'accounts.group_lead' %}"
+             data-t-assign="{% trans 'Starosta təyin et' context 'accounts.group_lead' %}"
+             data-t-change="{% trans 'Starostanı dəyiş' context 'accounts.group_lead' %}"
+             data-t-badge="{% trans 'Starosta' context 'accounts.group_lead' %}">
+            <span class="tof-lead__icon" aria-hidden="true"><i class="fas fa-user-tie"></i></span>
+            <div class="tof-lead__info">
+                <span class="tof-lead__label">{% trans "Qrupun starostası" context "accounts.group_lead" %}</span>
+                <strong class="tof-lead__name" data-tof-lead-name></strong>
+                <span class="tof-lead__warn" data-tof-lead-warn role="note" hidden></span>
+            </div>
+            {% if groups_registry_section.can_assign_lead %}
+            <div class="tof-lead__actions" data-tof-lead-actions hidden>
+                <button type="button" class="ems-btn ems-btn--sm ems-btn--primary"
+                        data-tof-open="tofGroupLeadDialog"
+                        data-tof-lead-assign
+                        data-tof-prefill='{"group_id": ""}'>
+                    <i class="fas fa-user-check" aria-hidden="true"></i>
+                    <span data-tof-lead-assign-label>{% trans "Starosta təyin et" context "accounts.group_lead" %}</span>
+                </button>
+                <button type="button" class="ems-btn ems-btn--sm ems-btn--danger"
+                        data-tof-open="tofGroupLeadRemoveDialog"
+                        data-tof-lead-remove
+                        data-tof-prefill='{"group_id": ""}'
+                        hidden>
+                    {% trans "Götür" context "accounts.group_lead" %}
+                </button>
+            </div>
+            {% endif %}
+        </div>
         <label class="tof-students__search">
             <i class="fas fa-search" aria-hidden="true"></i>
             <input type="search" class="ems-input" data-tof-students-search

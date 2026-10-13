@@ -10,6 +10,7 @@ from .views import academic_records as academic_records_views
 from .views import account_password_reset as password_reset_views
 from .views import exam_score_entry_changes as exam_score_changes_views
 from .views import exam_score_import as exam_score_import_views
+from .views import group_lead as group_lead_views
 from .views import hr_analytics as hr_analytics_views
 from .views import journal_hygiene as journal_hygiene_views
 from .views import network_zone_page
@@ -325,6 +326,8 @@ urlpatterns = [
     path("student-registry/programs/", views.student_registry_programs, name="student_registry_programs"),
     path("student-registry/action/", views.student_registry_action, name="student_registry_action"),
     path("student-registry/export/", views.student_registry_export, name="student_registry_export"),
+    # 2026-10-13 (gecə): «Starosta təyin et / dəyiş / götür» — qrup reyestri çekmecəsi (JSON POST).
+    path("groups/lead/", group_lead_views.group_lead_action, name="group_lead_action"),
     # 2026-10-03: «Sistem tənzimləmələri» — saxlama (yalnız RİM rəhbəri / superadmin).
     path("system-settings/save/", views.system_settings_save, name="system_settings_save"),
     # 2026-10-10: «Jurnal təmizliyi» — siyahı (GET) + önizləmə/tətbiq/bərpa (tək JSON POST); RİM rəhbəri.

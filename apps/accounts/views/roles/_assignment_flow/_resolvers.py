@@ -3,11 +3,12 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.shortcuts import redirect
-from django.utils.translation import pgettext_lazy
+from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.notifications.models import StudentOrganizationRequestStatus
 
 from ....models import UserProfile
+from ....services.group_lead import LEAD_ROLE_NAME as GROUP_LEAD_ROLE_NAME
 from ..._helpers import _normalized_org_name, _pending_student_request_queryset
 
 User = get_user_model()
@@ -99,6 +100,23 @@ class _ResolversMixin:
                 self._deny_assignment(
                     "role_outside_active_organization",
                     "Rol yalnız aktiv təşkilat scope-u daxilində təyin oluna bilər.",
+                    action_name=action_name,
+                    target_role=target_role,
+                ),
+            )
+        if target_role.name == GROUP_LEAD_ROLE_NAME:
+            # 2026-10-13 (gecə): bu axın tələbənin YEGANƏ üzvlüyünün rolunu yerində dəyişirdi —
+            # `scope_unit` boş qalırdı və «Starosta» bölməsi açılmırdı; qrup/qeydiyyat yoxlaması da yox idi.
+            # Starosta yalnız qrup reyestrinin xüsusi əməli ilə (services/group_lead.py) təyin olunur.
+            return (
+                None,
+                self._deny_assignment(
+                    "group_lead_via_groups_registry",
+                    pgettext(
+                        "accounts.group_lead",
+                        "Starosta «Qruplar» reyestrindən təyin olunur: qrupun tələbələri → «Starosta təyin et».",
+                    ),
+                    status=409,
                     action_name=action_name,
                     target_role=target_role,
                 ),
