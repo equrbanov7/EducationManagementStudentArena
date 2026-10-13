@@ -97077,3 +97077,7 @@ msgstr "Tapşırıqdan müəllim təsdiqinə qədər bütün mərhələlərin ka
 msgctxt "accounts.workload_overview"
 msgid "Tapşırıqdan müəllim təsdiqinə qədər bütün mərhələlərin fakültəniz üzrə vəziyyəti."
 msgstr "Tapşırıqdan müəllim təsdiqinə qədər bütün mərhələlərin fakültəniz üzrə vəziyyəti."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Sizin səlahiyyətinizlə yalnız Sınaq imtahanı yaradılır — kateqoriya avtomatik təyin olunur."
+msgstr "Sizin səlahiyyətinizlə yalnız Sınaq imtahanı yaradılır — kateqoriya avtomatik təyin olunur."

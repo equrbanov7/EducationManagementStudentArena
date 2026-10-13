@@ -1,0 +1,34 @@
+{% load i18n %}
+{% comment %}
+  İmtahan kateqoriyası (Final / Midterm / Sınaq) — sehrbazın «Əsaslar» addımı
+  (yaratma və redaktə eyni partialdır: _create_exam_modal_form.html).
+
+  2026-10-14 (sahib: «ancaq sınaq imtahanı yaradılması olan yerlərdə select
+  option yox, avtomatik ancaq Sınaq yazsın»). Aktorun seçə biləcəyi YEGANƏ real
+  kateqoriya qalırsa (`form.exam_category_locked`, bax ExamForm._lock_single_category)
+  select çəkilmir: oxunan həb + gizli input. Server həmin dəyəri onsuz da məcburi
+  edir — gizli input yalnız JS-in (addım validasiyası, «Yoxla» xülasəsi) oxuması
+  üçündür; `data-ew-display` xülasədə xam dəyər («quiz») yerinə etiketi göstərir.
+  Bir neçə real kateqoriya varsa (imtahan mərkəzi) adi select qalır.
+{% endcomment %}
+<div class="form-group form-group-full">
+    {% if form.exam_category_locked %}
+        <span class="ew-label" id="{{ form.exam_type_extended.auto_id }}_label">{{ form.exam_type_extended.label }}</span>
+        <div class="ew-category-locked" role="group" aria-labelledby="{{ form.exam_type_extended.auto_id }}_label" aria-describedby="{{ form.exam_type_extended.auto_id }}_hint">
+            <span class="ew-category-pill">
+                <i class="fas fa-flask" aria-hidden="true"></i>
+                {{ form.exam_category_locked.label }}
+            </span>
+            <input type="hidden" name="{{ form.exam_type_extended.html_name }}" id="{{ form.exam_type_extended.auto_id }}"
+                   value="{{ form.exam_category_locked.value }}" data-ew-display="{{ form.exam_category_locked.label }}">
+        </div>
+        <small class="form-text" id="{{ form.exam_type_extended.auto_id }}_hint">{% trans "Sizin səlahiyyətinizlə yalnız Sınaq imtahanı yaradılır — kateqoriya avtomatik təyin olunur." context "exams.template.create_exam_modal_form" %}</small>
+    {% else %}
+        <label class="ew-label" for="{{ form.exam_type_extended.id_for_label }}">{{ form.exam_type_extended.label }} <span class="ew-req" aria-hidden="true">*</span></label>
+        <div class="bootstrap-single-select">
+            {{ form.exam_type_extended }}
+        </div>
+        <small class="form-text">{% trans "İmtahanın kateqoriyasını seçin: Sınaq, Midterm və ya Final." context "exams.template.create_exam_modal_form" %}</small>
+    {% endif %}
+    {% if form.exam_type_extended.errors %}<div class="field-error">{{ form.exam_type_extended.errors.0 }}</div>{% endif %}
+</div>

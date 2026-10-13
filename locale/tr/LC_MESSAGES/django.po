@@ -96976,3 +96976,7 @@ msgstr "Görevlendirmeden öğretim elemanı onayına kadar tüm aşamaların b�
 msgctxt "accounts.workload_overview"
 msgid "Tapşırıqdan müəllim təsdiqinə qədər bütün mərhələlərin fakültəniz üzrə vəziyyəti."
 msgstr "Görevlendirmeden öğretim elemanı onayına kadar tüm aşamaların fakültenizdeki durumu."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Sizin səlahiyyətinizlə yalnız Sınaq imtahanı yaradılır — kateqoriya avtomatik təyin olunur."
+msgstr "Yetkinizle yalnızca Quiz sınavı oluşturulabilir — kategori otomatik olarak atanır."

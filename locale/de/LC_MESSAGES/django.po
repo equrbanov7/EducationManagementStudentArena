@@ -98615,3 +98615,7 @@ msgstr "Stand aller Phasen für Ihren Lehrstuhl – vom Lehrauftrag bis zur Best
 msgctxt "accounts.workload_overview"
 msgid "Tapşırıqdan müəllim təsdiqinə qədər bütün mərhələlərin fakültəniz üzrə vəziyyəti."
 msgstr "Stand aller Phasen für Ihre Fakultät – vom Lehrauftrag bis zur Bestätigung durch die Lehrkraft."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Sizin səlahiyyətinizlə yalnız Sınaq imtahanı yaradılır — kateqoriya avtomatik təyin olunur."
+msgstr "Mit Ihren Berechtigungen können nur Quiz-Prüfungen erstellt werden — die Kategorie wird automatisch festgelegt."

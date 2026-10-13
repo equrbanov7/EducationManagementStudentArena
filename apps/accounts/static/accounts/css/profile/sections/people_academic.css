@@ -428,7 +428,14 @@
     font-size: 0.68rem;
     font-weight: 800;
 }
-.psm__field input[type="text"] {
+/* ⚠️ 2026-10-14 (sahib: «burdakı göy border-i sil»). Əvvəl selektor
+   `.psm__field input[type="text"]` idi və «Yeni qrup» axtarış-seçicisinin
+   DAXİLİ input-unu da (`.ems-ss__search`) tuturdu: sarğının konturunun içində
+   ikinci border + fokusda 2px göy outline → «iki qat göy çərçivə». İndi qayda
+   yalnız sahənin BİRBAŞA uşağı olan adi input-lara (səbəb sahələri) aiddir;
+   seçicinin çərçivəsini və fokusunu komponentin özü çəkir
+   (static/css/searchable_select.css). */
+.psm__field > input[type="text"] {
     min-height: 42px;
     border: 1px solid var(--ems-border, #d5dbe5);
     border-radius: 9px;
@@ -438,9 +445,18 @@
     font: inherit;
     max-width: 100%;
 }
-.psm__field input[type="text"]:focus-visible {
-    outline: 2px solid var(--ems-primary-600, #2563eb);
-    outline-offset: 1px;
+/* Səbəb sahələri — yanındakı axtarış-seçici ilə EYNİ fokus dili
+   (`.ems-ss:focus-within`): TƏK kontur tündləşir (neutral-500, ağ fonda
+   4.7:1 — WCAG 1.4.11 ≥ 3:1), ikinci göy halqa yoxdur. */
+.psm__field > input[type="text"]:focus,
+.psm__field > input[type="text"]:focus-visible {
+    outline: none;
+    border-color: var(--ems-neutral-500, #64748b);
+    box-shadow: none;
+}
+.psm__field .ems-ss {
+    min-height: 42px;
+    border-radius: 9px;
 }
 
 /* ── Kiçik ekran: çekməcə tam enə keçir ──────────────────────────────────── */

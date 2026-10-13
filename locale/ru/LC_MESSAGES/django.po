@@ -97709,3 +97709,7 @@ msgstr "Состояние всех этапов по вашей кафедре 
 msgctxt "accounts.workload_overview"
 msgid "Tapşırıqdan müəllim təsdiqinə qədər bütün mərhələlərin fakültəniz üzrə vəziyyəti."
 msgstr "Состояние всех этапов по вашему факультету — от учебного задания до подтверждения преподавателем."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Sizin səlahiyyətinizlə yalnız Sınaq imtahanı yaradılır — kateqoriya avtomatik təyin olunur."
+msgstr "С вашими правами можно создавать только контрольные опросы — категория назначается автоматически."

@@ -97525,3 +97525,7 @@ msgstr "Status of every stage for your department, from the teaching task to tea
 msgctxt "accounts.workload_overview"
 msgid "Tapşırıqdan müəllim təsdiqinə qədər bütün mərhələlərin fakültəniz üzrə vəziyyəti."
 msgstr "Status of every stage for your faculty, from the teaching task to teacher confirmation."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Sizin səlahiyyətinizlə yalnız Sınaq imtahanı yaradılır — kateqoriya avtomatik təyin olunur."
+msgstr "With your permissions only Quiz exams can be created — the category is set automatically."
