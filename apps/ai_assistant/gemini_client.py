@@ -133,12 +133,12 @@ def _get_api_key() -> str | None:
 
 
 def _ui_language_name() -> str:
-    mapping = {"az": "Azerbaijani", "en": "English", "ru": "Russian", "tr": "Turkish"}
+    mapping = {"az": "Azerbaijani", "en": "English", "ru": "Russian", "tr": "Turkish", "de": "German"}
     return mapping.get(get_language() or "az", "Azerbaijani")
 
 
 def _detect_message_language(message: str) -> str:
-    """Best-effort language detection for the four supported UI languages."""
+    """Best-effort language detection for the supported UI languages (az/en/ru/tr/de)."""
     normalized = f" {message.strip().lower()} "
     if re.search(r"[\u0400-\u04ff]", normalized):
         return "Russian"
@@ -149,6 +149,9 @@ def _detect_message_language(message: str) -> str:
         return "Azerbaijani"
     if any(char in message for char in tr_chars):
         return "Turkish"
+    # 2026-10-13 (gecə): alman dili. «ö/ü» türk/azərbaycan dilində də var — yalnız «ä/ß» qəti işarədir.
+    if any(char in message for char in "äÄß"):
+        return "German"
 
     word_matches = {
         "Azerbaijani": [
@@ -193,6 +196,18 @@ def _detect_message_language(message: str) -> str:
             r"\bhakkinda\b|\bhakkında\b",
             r"\bnedir\b",
             r"\bnerede\b",
+        ],
+        "German": [
+            r"\bhallo\b",
+            r"\bbitte\b",
+            r"\bwie\b",
+            r"\bwo\b",
+            r"\bwas\b",
+            r"\bich\b",
+            r"\bfrage\b",
+            r"\bantwort\b",
+            r"\bprüfung\b|\bpruefung\b",
+            r"\bsprache\b",
         ],
         "English": [
             r"\bhello\b",

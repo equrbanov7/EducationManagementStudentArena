@@ -41,7 +41,10 @@ import re
 import sys
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LOCALES = ("az", "en", "ru", "tr")
+#: 2026-10-13 (gecə): «de» (alman dili) tr/ru ilə EYNİ qaydada qapıdadır. Başqa agentlərin
+#: az/en/ru/tr doldurma skriptləri «de»-ni tanımır — birləşmədə əskik qalan mətnlər
+#: `scripts/i18n_locale_sync.py export/apply --lang de` ilə tamamlanır.
+LOCALES = ("az", "en", "ru", "tr", "de")
 SOURCE_LANG = "az"
 CATALOGS = ("django", "djangojs")
 BASELINE_PATH = os.path.join(BASE, "scripts", "i18n_baseline.json")

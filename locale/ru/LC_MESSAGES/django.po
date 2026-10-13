@@ -96233,3 +96233,7 @@ msgstr "Имя пользователя"
 msgctxt "exams.proctoring.identity"
 msgid "Şəkil yüklənməyib — nəzarətçiyə şəxsiyyət vəsiqənizi göstərin."
 msgstr "Фото не загружено — покажите удостоверение личности наблюдателю."
+
+msgctxt "language"
+msgid "name_de"
+msgstr "Немецкий"

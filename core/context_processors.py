@@ -60,6 +60,11 @@ DEFAULT_DESCRIPTIONS = {
         "онлайн-экзаменов для университетов, школ и учебных центров."
     ),
     "tr": (f"{ORG_NAME}; üniversiteler, okullar ve kurs merkezleri için LMS, online sınav ve e-günlük platformudur."),
+    # 2026-10-13 (gecə): alman dili.
+    "de": (
+        f"{ORG_NAME} — moderne Plattform für LMS, Bildungsverwaltung und Online-Prüfungen "
+        "für Universitäten, Schulen und Bildungszentren."
+    ),
 }
 
 DEFAULT_KEYWORDS = (

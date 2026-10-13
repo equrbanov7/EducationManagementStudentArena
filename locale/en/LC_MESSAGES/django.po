@@ -96049,3 +96049,7 @@ msgstr "Username"
 msgctxt "exams.proctoring.identity"
 msgid "Şəkil yüklənməyib — nəzarətçiyə şəxsiyyət vəsiqənizi göstərin."
 msgstr "No photo uploaded — show your ID card to the invigilator."
+
+msgctxt "language"
+msgid "name_de"
+msgstr "German"

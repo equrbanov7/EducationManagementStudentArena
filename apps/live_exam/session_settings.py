@@ -24,7 +24,8 @@ from apps.live_exam.text_safety import sanitize_player_text
 from apps.live_exam.typed_answers import ACCEPTED_MAX_ITEMS, TEXT_MAX_LENGTH, dedupe_accepted, typed_eligibility
 
 THEME_KEYS = {"standard", "winter", "aurora", "sweet"}
-LANGUAGE_KEYS = {"system", "az", "en", "ru", "tr"}
+# 2026-10-13 (gecə): «de» (alman dili) — `apps/live_exam/i18n.py` SESSION_LANGUAGES ilə eyni.
+LANGUAGE_KEYS = {"system", "az", "en", "ru", "tr", "de"}
 LOBBY_MUSIC_KEYS = {"original", "focus", "silent"}
 MULTI_SCORING_PARTIAL = "partial"
 MULTI_SCORING_STRICT = "strict"

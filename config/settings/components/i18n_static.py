@@ -16,6 +16,9 @@ LANGUAGES = [
     ("en", "English"),
     ("ru", "Русский"),
     ("tr", "Türkçe"),
+    # 2026-10-13 (gecə): sahibin istəyi ilə alman dili — ad dilin ÖZ adıdır (giriş səhifəsinin
+    # select-i məhz bu siyahını göstərir). Kataloq: locale/de/, qapı: scripts/check_i18n_catalogs.py.
+    ("de", "Deutsch"),
 ]
 LOCALE_PATHS = [
     BASE_DIR / "locale",

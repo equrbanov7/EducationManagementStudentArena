@@ -95506,3 +95506,7 @@ msgstr "Kullanıcı adı"
 msgctxt "exams.proctoring.identity"
 msgid "Şəkil yüklənməyib — nəzarətçiyə şəxsiyyət vəsiqənizi göstərin."
 msgstr "Fotoğraf yüklenmemiş — gözetmene kimlik kartınızı gösterin."
+
+msgctxt "language"
+msgid "name_de"
+msgstr "Almanca"

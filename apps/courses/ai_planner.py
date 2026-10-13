@@ -33,7 +33,8 @@ MAX_PROMPT_CHARS = 1500
 _TITLE_MAX = 255
 _DESC_MAX = 1200
 
-_LANGUAGE_NAMES = {"az": "Azerbaijani", "en": "English", "ru": "Russian", "tr": "Turkish"}
+# 2026-10-13 (gecə): «de» — alman dili interfeysi.
+_LANGUAGE_NAMES = {"az": "Azerbaijani", "en": "English", "ru": "Russian", "tr": "Turkish", "de": "German"}
 _url_validator = URLValidator(schemes=["http", "https"])
 
 
