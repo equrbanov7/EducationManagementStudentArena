@@ -1,7 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    Sahib 2026-10-10: jurnal xanasının üstünə gələndə (və ya fokusda) onun KİMƏ aid olduğu
-   görünür — «Soyad Ad Ata adı» + sütun etiketi. journal_cell_hint.js ƏSL DOM-da (jsdom).
-   Ad sətirdə (`[data-jd-hint-name]`), etiket başlıqdadır (`th[data-jd-hint-col]`).
+   bilinir. Sahib 2026-10-14: üzən tooltip və qalın göy çərçivə YOXDUR — yalnız sətir/sütun fon işığı;
+   «Soyad Ad Ata adı · sütun etiketi» ekran oxuyucusu üçün görünməz təsvir (aria-describedby) kimi qalır.
+   journal_cell_hint.js ƏSL DOM-da (jsdom). Ad sətirdə (`[data-jd-hint-name]`), etiket başlıqdadır
+   (`th[data-jd-hint-col]`).
    ═══════════════════════════════════════════════════════════════════════════ */
 "use strict";
 
@@ -49,13 +51,15 @@ function tip(window) {
     return window.document.getElementById("jd-cell-hint");
 }
 
-test("hovering a mark cell shows that row's full name and the lesson label", () => {
+test("hovering a mark cell highlights the row/column and fills the screen-reader description", () => {
     const window = page();
     over(window, cell(window, 1, 1).querySelector("button"));
     const box = tip(window);
     assert.ok(box && !box.hidden);
+    assert.equal(box.getAttribute("role"), null); // vizual tooltip deyil
+    assert.equal(box.style.top, ""); // mövqeləndirilmir — üzən qutu YOXDUR
     assert.equal(box.querySelector(".jd-hint__name").textContent, "Vəliyev Əli Rəşid");
-    assert.equal(box.querySelector(".jd-hint__meta").textContent, "09.10.2026 · Seminar");
+    assert.equal(box.querySelector(".jd-hint__meta").textContent, " · 09.10.2026 · Seminar");
     assert.ok(window.document.querySelectorAll("tbody tr")[1].classList.contains("is-hint-row"));
     assert.ok(cell(window, 1, 1).classList.contains("is-hint-cell"));
     assert.ok(window.document.querySelectorAll("thead th")[1].classList.contains("is-hint-col"));
@@ -103,32 +107,11 @@ test("the name is written as text, never as markup", () => {
     assert.equal(tip(window).querySelector(".jd-hint__name").textContent, "<img src=x onerror=alert(1)>");
 });
 
-function rect(top, bottom) {
-    return { top, bottom, left: 100, right: 180, width: 80, height: bottom - top, x: 100, y: top };
-}
-
-function withMenu(window, menuTop, menuBottom) {
-    const td = cell(window, 1, 1);
-    const menu = window.document.createElement("div");
-    menu.className = "dropdown-menu show";
-    td.appendChild(menu);
-    td.getBoundingClientRect = () => rect(300, 340);
-    menu.getBoundingClientRect = () => rect(menuTop, menuBottom);
-    over(window, td);
-    Object.defineProperty(tip(window), "offsetHeight", { value: 40, configurable: true });
-    Object.defineProperty(tip(window), "offsetWidth", { value: 160, configurable: true });
-    td.dispatchEvent(new window.Event("shown.bs.dropdown", { bubbles: true }));
-    return tip(window);
-}
-
-test("menu opened upward (overlapping the cell edge) → hint goes below the cell", () => {
-    const box = withMenu(page(), 90, 304);
-    assert.ok(!box.hidden);
-    assert.equal(box.style.top, "348px");
-});
-
-test("menu opened downward → hint stays above the cell", () => {
-    const box = withMenu(page(), 336, 600);
-    assert.ok(!box.hidden);
-    assert.equal(box.style.top, "252px");
+test("the visual tooltip and the cell frame are gone (CSS: description is visually hidden, no outline)", () => {
+    const css = fs.readFileSync(path.join(ROOT, "apps/registrar/static/registrar/css/journal_cell_hint.css"), "utf8");
+    assert.doesNotMatch(css, /outline\s*:/);
+    assert.doesNotMatch(css, /position:\s*fixed/);
+    assert.match(css, /\.jd-hint\s*\{[^}]*clip-path:\s*inset\(50%\)/);
+    assert.match(css, /tr\.is-hint-row[^{]*>\s*td\s*\{\s*background-color/);
+    assert.doesNotMatch(SCRIPT, /shown\.bs\.dropdown/);
 });

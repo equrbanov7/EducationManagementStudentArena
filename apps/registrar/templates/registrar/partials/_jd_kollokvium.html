@@ -7,7 +7,7 @@ tam bal seçə/dəyişə bilər (bootstrap-select); boş = 0 sayılır. Pəncər
 kilidlənir — burada 2 saat kilidi YOXDUR. Midterm dövründə balı olan köhnə «Kollokvium N»
 qalığı (nəzəri hal) oxu-rejimli əlavə sütun kimi görünür.
 {% endcomment %}
-<form method="post" action="{% url 'registrar:journal_kollokvium_save' offering.id %}" class="jd-kollokvium-form" data-jd-draft="kollokvium">
+<form method="post" action="{% url 'registrar:journal_kollokvium_save' offering.id %}" class="jd-kollokvium-form" data-jd-draft="kollokvium"{% if can_edit and kollokvium_grid.any_open and not correction_mode %} data-jd-autosave data-jd-autosave-url="{% url 'registrar:journal_kollokvium_save' offering.id %}"{% endif %}>
     {% csrf_token %}
     <p class="jd2-panel-hint">
         {% if kollokvium_grid.spec.is_midterm %}
@@ -92,6 +92,7 @@ qalığı (nəzəri hal) oxu-rejimli əlavə sütun kimi görünür.
 
     {% if can_edit and kollokvium_grid.any_open %}
     <div class="jd2-savebar">
+        {% if not correction_mode %}{% include "registrar/partials/_jd_autosave_status.html" %}{% endif %}
         <button type="submit" class="jd2-save-btn"><i class="fas fa-floppy-disk"></i> {% trans "Yadda saxla" context "registrar.journal" %}</button>
     </div>
     {% elif can_edit %}

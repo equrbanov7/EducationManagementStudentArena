@@ -1,0 +1,14 @@
+{% load i18n %}
+{% comment %}Avtomatik yadda saxlamanın kiçik vəziyyət mətni (sahib 2026-10-14) — modal YOX, düymənin yanında.
+Mətnlər JS-ə data-atributla ötürülür (xarici .js şablondan keçmir; CSP — inline yoxdur).
+`{n}` — yazılmayan xana sayı (journal_grid_autosave.js əvəz edir).{% endcomment %}
+<span class="jd2-autosave" data-jd-autosave-status role="status" aria-live="polite"
+      data-msg-idle="{% trans 'Dəyişikliklər avtomatik yadda saxlanılır.' context 'registrar.journal_autosave' %}"
+      data-msg-saving="{% trans 'Yadda saxlanılır…' context 'registrar.journal_autosave' %}"
+      data-msg-saved="{% trans 'Yadda saxlanıldı' context 'registrar.journal_autosave' %}"
+      data-msg-partial="{% trans 'Yadda saxlanıldı — {n} xana yazılmadı (kilid, dərs günü və ya bal qaydası).' context 'registrar.journal_autosave' %}"
+      data-msg-retrying="{% trans 'Xəta — yenidən cəhd edilir…' context 'registrar.journal_autosave' %}"
+      data-msg-failed="{% trans 'Yadda saxlanılmadı — səhifəni yeniləyin. Dəyişikliklər brauzerdə qaralama kimi qalır.' context 'registrar.journal_autosave' %}">{% trans "Dəyişikliklər avtomatik yadda saxlanılır." context "registrar.journal_autosave" %}</span>
+<button type="button" class="jd2-autosave-retry" data-jd-autosave-retry hidden>
+    <i class="fas fa-rotate-right" aria-hidden="true"></i> {% trans "Yenidən cəhd et" context "registrar.journal_autosave" %}
+</button>

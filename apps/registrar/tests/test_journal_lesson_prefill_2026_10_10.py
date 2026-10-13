@@ -2,15 +2,15 @@
 
 Nəyi qoruyur
 ------------
-* bayraq söndürülü (defolt): zolaqda aktivləşdirmə forması/ünvanı yoxdur, slot kartında «Yeni dərs»
-  (``data-jd-prefill-slot``), aktivləşdirmə POST-u 404, mətnlər «Aktivləşdir»-ə yönləndirmir;
+* bayraq söndürülü (defolt): «Bu günün cədvəl dərsləri» zolağı ümumiyyətlə yoxdur (sahib 2026-10-14),
+  aktivləşdirmə POST-u 404, mətnlər «Aktivləşdir»-ə yönləndirmir;
   yandırılı (``JOURNAL_LESSON_ACTIVATION=True``) — köhnə davranış (geri dönüş yolu);
 * doldurmanın slot seçimi: indi gedən → 30 dəq. içində bitən → növbəti → ən son keçmiş; slot yoxdursa
   tip kilidi → son dərs → tədris planı; dərs saatı son dərsdən yalnız cədvəlsiz açılışda;
 * slot yolu (gizli ``slot_id``): təşkilatın öz zəng saatı qəbul olunur, səbəb tələb olunmur; yad /
   parklanmış / başqa günün slotu rədd olunur; saat dəyişibsə əl ilə dərs qaydaları;
 * redaktə: slot dərsinin öz zəng saatı silinmir; redaktə çipi üçün dərs müəllimlərinin adları adadadır;
-* sorğu büdcəsi: grid tabında dərs sətirləri zolaqla paylaşılır (≤ 2 əlavə sorğu).
+* sorğu büdcəsi: doldurma ≤ 2 sorğu; «Aktivləşdir» yandırılanda dərs sətirləri zolaqla paylaşılır.
 """
 
 from __future__ import annotations
@@ -352,6 +352,18 @@ class PrefillBuildTest(LessonPrefillBase):
             data = self._prefill("10:30", self.plain)
         self.assertEqual((data["kind"], data["source"], data["hours"]), (LessonKind.LECTURE, "", 2))
 
+    def test_prefill_query_budget(self):
+        # Sahib 2026-10-14: «Aktivləşdir» söndürülüdə (defolt) zolaq qurulmur — doldurma dərs sətirlərini
+        # özü oxuyur: dərs sətirləri + otaq axtarışı, grid tabında da, digər tablarda da.
+        for tab in ("grid", "yekun"):
+            offering = self._fresh()
+            context = self._context(offering, active_tab=tab)
+            with bypass_rls():
+                journal_activation.strip_context(offering, context)
+                with self.assertNumQueries(2):
+                    journal_lesson_prefill.modal_context(offering, context)
+
+    @override_settings(JOURNAL_LESSON_ACTIVATION=True)
     def test_prefill_shares_the_lesson_query_with_the_strip(self):
         offering = self._fresh()
         context = self._context(offering)
@@ -360,12 +372,6 @@ class PrefillBuildTest(LessonPrefillBase):
             with self.assertNumQueries(1):  # yalnız slot otaqlarının reyestr axtarışı («305»)
                 extra = journal_lesson_prefill.modal_context(offering, context)
         self.assertIn("lesson_prefill", extra)
-        other_tab = self._fresh()
-        context = self._context(other_tab, active_tab="yekun")
-        with bypass_rls():
-            journal_activation.strip_context(other_tab, context)
-            with self.assertNumQueries(2):  # dərs sətirləri + otaq axtarışı
-                journal_lesson_prefill.modal_context(other_tab, context)
 
     def test_read_only_page_gets_no_prefill(self):
         offering = self._fresh()
@@ -448,24 +454,25 @@ class ActivationFlagTest(LessonPrefillBase):
     def _activate(self, slot):
         return self._client().post(reverse("registrar:journal_activate_slot", args=[self.offering.id, slot.id]))
 
-    def test_default_off_strip_offers_new_lesson_instead_of_activation(self):
+    def test_default_off_has_no_today_strip_but_new_lesson_stays_prefilled(self):
+        # Sahib 2026-10-14: «Bu günün cədvəl dərsləri» zolağı (yaşıl kart) defoltda jurnalda YOXDUR —
+        # «Yeni dərs» modalı bu günün slotundan yenə dolu açılır.
         resp = self._journal()
-        strip = resp.context["today_strip"]
-        self.assertFalse(strip["activation"])
-        self.assertFalse(strip["can_activate"])
-        self.assertTrue(strip["can_add"])
-        self.assertTrue(all(item["activate_url"] == "" for item in strip["items"]))
+        self.assertNotIn("today_strip", resp.context)
+        self.assertNotContains(resp, 'class="jd2-today"')
+        self.assertNotContains(resp, "Bu günün cədvəl dərsləri")
         self.assertNotContains(resp, "data-jd-activate-form")
+        self.assertNotContains(resp, "data-jd-prefill-slot")
         self.assertNotContains(
             resp, reverse("registrar:journal_activate_slot", args=[self.offering.id, self.seminar.id])
         )
-        self.assertContains(resp, f'data-jd-prefill-slot="{self.seminar.pk}"')
         self.assertContains(resp, 'id="jdLessonPrefill"')
         self.assertContains(resp, "registrar/js/journal_lesson_prefill.js")
         self.assertContains(resp, 'name="slot_id"')
         self.assertContains(resp, '<option value="4">4</option>')  # akademik saat 1..4
         self.assertNotContains(resp, "«Aktivləşdir» düyməsini işlədin")
         self.assertIn(str(self.seminar.pk), resp.context["lesson_prefill"]["slots"])
+        self.assertTrue(resp.context["lesson_prefill"]["slot_id"])
 
     def test_default_off_activation_post_is_404(self):
         self.assertEqual(self._activate(self.seminar).status_code, 404)
@@ -494,7 +501,7 @@ class ActivationFlagTest(LessonPrefillBase):
         resp = self._journal()
         strip = resp.context["today_strip"]
         self.assertTrue(strip["can_activate"])
-        self.assertFalse(strip["can_add"])
+        self.assertNotIn("can_add", strip)
         self.assertContains(resp, "data-jd-activate-form")
         self.assertNotContains(resp, "data-jd-prefill-slot")
         self.assertContains(resp, "«Aktivləşdir» düyməsini işlədin")
@@ -502,7 +509,7 @@ class ActivationFlagTest(LessonPrefillBase):
         (lesson,) = self._lessons()
         self.assertEqual(lesson.start_time, _t("10:10"))
 
-    def test_read_only_strip_says_not_opened_without_activation_wording(self):
+    def test_read_only_journal_has_no_today_strip_either(self):
         from apps.registrar import gradebook
         from apps.registrar.models import ApprovalStatus, AssessmentScheme
 
@@ -512,10 +519,8 @@ class ActivationFlagTest(LessonPrefillBase):
                 is_published=True, approval_status=ApprovalStatus.APPROVED
             )
         resp = self._journal()
-        strip = resp.context["today_strip"]
-        self.assertFalse(strip["can_add"])
-        self.assertFalse(strip["can_activate"])
+        self.assertNotIn("today_strip", resp.context)
         self.assertNotIn("lesson_prefill", resp.context)
-        self.assertContains(resp, "Dərs açılmayıb")
+        self.assertNotContains(resp, 'class="jd2-today"')
         self.assertNotContains(resp, "Aktivləşdirilməyib")
         self.assertNotContains(resp, "data-jd-prefill-slot")

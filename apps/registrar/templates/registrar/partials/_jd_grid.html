@@ -4,7 +4,10 @@ keçirilmə tarixi), sağda davamiyyət/bal grid-i. Başlıqlar sadədir (yalnı
 + BU GÜN). Lecture xanası: i/e·q/b çipi. Seminar/lab xanası: bal (0-10) + q/b —
 bal yazılıbsa iştirak avtomatik i/e sayılır. Ən yeni dərs adların yanındadır.
 Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcomment %}
-<form method="post" class="journal-form" data-jd-marks-form data-jd-draft="grid">
+{% comment %}AVTOMATİK YADDA SAXLAMA (sahib 2026-10-14): `data-jd-autosave` — dəyişən xanalar ~0.8 san.
+sonra eyni ünvana (`action=save_marks`, `autosave=1` → JSON) gedir; «Yadda saxla» düyməsi ehtiyat
+yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.py.{% endcomment %}
+<form method="post" class="journal-form" data-jd-marks-form data-jd-draft="grid"{% if can_edit and journal.lessons and not correction_mode %} data-jd-autosave data-jd-autosave-url="{% url 'registrar:journal_detail' offering.id %}"{% endif %}>
     {% csrf_token %}
     <input type="hidden" name="action" value="save_marks">
 
@@ -253,6 +256,7 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
             </div>
             {% if can_edit and journal.lessons %}
             <div class="jd2-savebar">
+                {% if not correction_mode %}{% include "registrar/partials/_jd_autosave_status.html" %}{% endif %}
                 <button type="submit" class="jd2-save-btn"><i class="fas fa-floppy-disk"></i> {% trans "Yadda saxla" context "registrar.journal" %}</button>
             </div>
             {% endif %}
