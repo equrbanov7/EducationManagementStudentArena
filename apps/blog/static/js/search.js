@@ -1,15 +1,6 @@
 (function () {
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
+    // 2026-10-14: köhnə (yavaş) cavab yeni siyahının üstünə yazılmasın.
+    let listingSeq = 0;
 
     function sanitizeContent(element) {
         const clone = element.cloneNode(true);
@@ -74,14 +65,21 @@
         if (pushHistory) {
             window.history.pushState({}, "", url);
         }
+        const mine = ++listingSeq;
 
         fetch(url)
             .then((response) => response.text())
             .then((html) => {
+                if (mine !== listingSeq) {
+                    return;
+                }
                 updateListing(html);
                 setLoadingState(false);
             })
             .catch((error) => {
+                if (mine !== listingSeq) {
+                    return;
+                }
                 console.error(gettext("Xəta:"), error);
                 setLoadingState(false);
             });
@@ -106,16 +104,17 @@
         return;
     }
 
-    searchInput.addEventListener(
-        "input",
-        debounce(() => {
+    // Vahid EMSSearchInput qaydası: yazı dayananda 1500 ms, ≥ 2 simvol, Enter dərhal, IME.
+    window.EMSSearchInput.bind(searchInput, {
+        onSearch: () => {
             loadListing(buildSearchUrl(searchInput), { pushHistory: true });
-        }, 1000)
-    );
+        },
+    });
 
     window.addEventListener("popstate", () => {
         const url = new URL(window.location.href);
         searchInput.value = url.searchParams.get("q") || "";
+        window.EMSSearchInput.sync(searchInput);
         loadListing(url);
     });
 })();

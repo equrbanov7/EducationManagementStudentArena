@@ -37,7 +37,8 @@ _KIND_TEACHER = "teacher"
 
 #: Bu rollar tədris heyətidir — profil rolu «müəllim» qalır. Qalanlarda profil
 #: rolu `member`-ə endirilir (kabinetdə müəllim səthləri açılmasın).
-_TEACHING_ROLES = {"teacher", "dean", "vice_dean", "chair_head", "tutor", "lab_assistant"}
+#: `program_coordinator` — tyutorla eyni rol (sahib 2026-10-14).
+_TEACHING_ROLES = {"teacher", "dean", "vice_dean", "chair_head", "tutor", "program_coordinator", "lab_assistant"}
 
 
 def _split_patronymic(full_name: str) -> tuple[str, str]:

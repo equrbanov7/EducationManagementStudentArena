@@ -20,9 +20,9 @@ Bu modul:
   Cədvəli ümumiyyətlə olmayan açılışda heç nə dəyişmir (müqayisə ediləcək cədvəl yoxdur).
 
 BAYRAQ (sahib 2026-10-10): «Aktivləşdir» RİM «Sistem tənzimləmələri»ndən açılıb-söndürülür
-(``core.academic_rules.lesson_activation_enabled``, defolt SÖNDÜRÜLÜ). Söndürülüdə POST 404-dür,
-zolaq isə məlumat verir: hər açılmamış slotun yanında «Yeni dərs» — modal həmin slotdan dolu
-açılır (``journal_lesson_prefill``). Yandırılanda davranış əvvəlki kimidir.
+(``core.academic_rules.lesson_activation_enabled``, defolt SÖNDÜRÜLÜ). Söndürülüdə POST 404-dür və
+zolaq jurnalda GÖSTƏRİLMİR (sahib 2026-10-14); dərs «Yeni dərs» ilə açılır — modal bu günün slotundan
+dolu açılır (``journal_lesson_prefill``). Yandırılanda davranış əvvəlki kimidir (zolaq + «Aktivləşdir»).
 
 Sorğu profili (grid tabı): slotlar 1 + açılışın dərs faktları 1 (mövzu əhatəsi, bu günün
 dərsləri, növ üzrə son müəllim — hamısı bir sorğudan). Slot siyahısı və dərs sətirləri
@@ -330,15 +330,21 @@ def _state(slot, lesson, now) -> str:
 def strip_context(offering, context) -> dict:
     """``journal_detail`` kontekstinə: ``lesson_slot_pattern`` (modal, hər tab) + ``today_strip`` (grid tabı).
 
-    Cədvəli olmayan açılışda heç biri yoxdur — səhifə köhnə kimi qalır. «Aktivləşdir» söndürülüdə
-    (defolt, sahib 2026-10-10) zolaq yalnız məlumat verir: aktivləşdirmə ünvanı/forması YOXDUR, açılmamış
-    slotun yanında «Yeni dərs» düyməsi modalı həmin slotdan dolu açır (``can_add``)."""
+    Cədvəli olmayan açılışda heç biri yoxdur — səhifə köhnə kimi qalır.
+
+    Sahib 2026-10-14: «Bu günün cədvəl dərsləri» zolağı (böyük yaşıl kart) jurnaldan GÖTÜRÜLDÜ — «o
+    olmasa da olar». «Aktivləşdir» söndürülüdə (defolt) ``today_strip`` ümumiyyətlə qurulmur (sorğu da
+    yoxdur); «Yeni dərs» modalı bu günün slotundan yenə dolu açılır (``journal_lesson_prefill`` öz
+    hesabını aparır). Zolaq yalnız RİM «Aktivləşdir»i YANDIRANDA qalır — bir kliklik aktivləşdirmənin
+    yeganə girişi odur."""
     if not offering_slots(offering):
         return {}
     extra = {"lesson_slot_pattern": slot_pattern(offering) if context.get("can_edit") else []}
     if context.get("active_tab") != "grid" or context.get("correction_mode"):
         return extra
     activation = academic_rules.lesson_activation_enabled()
+    if not activation:
+        return extra
     today = timezone.localdate()
     now = timezone.localtime().time()
     todays_slots = slots_on(offering, today)
@@ -368,9 +374,7 @@ def strip_context(offering, context) -> dict:
                 "lesson_id": str(lesson.pk) if lesson is not None else "",
                 "lesson_topic": lesson.topic if lesson is not None else "",
                 "state": _state(slot, lesson, now),
-                "activate_url": (
-                    reverse("registrar:journal_activate_slot", args=[offering.pk, slot.pk]) if activation else ""
-                ),
+                "activate_url": reverse("registrar:journal_activate_slot", args=[offering.pk, slot.pk]),
             }
         )
     next_day, next_slots = (None, [])
@@ -383,9 +387,7 @@ def strip_context(offering, context) -> dict:
         "parity": dashboard_data.week_parity(offering.period, today),
         "items": items,
         "activation": activation,
-        "can_activate": activation and bool(context.get("can_edit")),
-        # «Aktivləşdir» söndürülüdə: slotun yanında modalı həmin slotdan dolu açan «Yeni dərs».
-        "can_add": not activation and bool(context.get("can_edit")),
+        "can_activate": bool(context.get("can_edit")),
         "next_day": next_day,
         "next_times": ", ".join(slot.start_time.strftime("%H:%M") for slot in next_slots),
         "extra_lessons": [

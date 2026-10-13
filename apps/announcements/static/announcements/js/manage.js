@@ -52,7 +52,6 @@
     }
 
     var SUMMARY_DEBOUNCE_MS = 350;
-    var SEARCH_DEBOUNCE_MS = 300;
 
     /* ── «Kim görəcək» xülasəsi ─────────────────────────────────────────── */
     function loadSummary(root) {
@@ -132,11 +131,12 @@
             });
     }
 
-    window.EMSDelegate.on("input", "[data-annm-ack] [data-annm-ack-search]", function (event, input) {
-        var root = input.closest("[data-annm-ack]");
-        if (!root) { return; }
-        window.clearTimeout(root.__annmAckTimer);
-        root.__annmAckTimer = window.setTimeout(function () { loadRecipients(root, 1); }, SEARCH_DEBOUNCE_MS);
+    // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter dərhal, IME).
+    window.EMSSearchInput.delegate("[data-annm-ack] [data-annm-ack-search]", {
+        onSearch: function (value, meta) {
+            var root = meta.input.closest("[data-annm-ack]");
+            if (root) { loadRecipients(root, 1); }
+        },
     });
 
     window.EMSDelegate.on("change", "[data-annm-ack] [data-annm-ack-status]", function (event, input) {
@@ -148,7 +148,8 @@
         event.preventDefault();
         var root = form.closest("[data-annm-ack]");
         if (root) {
-            window.clearTimeout(root.__annmAckTimer);
+            var search = form.querySelector("[data-annm-ack-search]");
+            if (search) { window.EMSSearchInput.sync(search); }
             loadRecipients(root, 1);
         }
     });

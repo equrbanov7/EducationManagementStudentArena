@@ -11,8 +11,6 @@
 (function () {
     "use strict";
 
-    var TEXT_DEBOUNCE_MS = 450;
-
     function init() {
         var form = document.querySelector("[data-rpt-filter]");
         if (!form || form.dataset.rptBound === "1") return;
@@ -48,15 +46,25 @@
             if (el.tagName === "SELECT" || el.type === "date") scheduleSubmit(0);
         });
 
-        // Mətn axtarışı: yazı dayananda.
-        form.addEventListener("input", function (event) {
-            var el = event.target;
-            if (el && (el.type === "search" || el.type === "text")) scheduleSubmit(TEXT_DEBOUNCE_MS);
+        // Mətn axtarışı: vahid EMSSearchInput (2026-10-14: yazı dayananda 1500 ms,
+        // ≥ 2 simvol, Enter dərhal, IME). Nəticə bloku skeletə çevrilmir (sakitcə
+        // solur); yeni səhifədə fokus + kursor axtarış sahəsinə qayıdır.
+        Array.prototype.forEach.call(form.querySelectorAll('input[type="search"], input[type="text"]'), function (el) {
+            window.EMSSearchInput.bind(el, {
+                onSearch: function () {
+                    if (submitting) return;
+                    submitting = true;
+                    if (results) results.classList.add("ems-search-pending");
+                    window.EMSSearchInput.submitForm(form, { input: el });
+                }
+            });
         });
 
-        // Enter ilə dərhal (debounce gözlətməsin).
+        // Enter ilə dərhal (mətn sahələrində Enter-i EMSSearchInput idarə edir).
         form.addEventListener("keydown", function (event) {
-            if (event.key === "Enter" && event.target && event.target.tagName === "INPUT") {
+            var t = event.target;
+            if (t && window.EMSSearchInput.isTextField(t)) return;
+            if (event.key === "Enter" && t && t.tagName === "INPUT") {
                 event.preventDefault();
                 if (timer) clearTimeout(timer);
                 submitNow();

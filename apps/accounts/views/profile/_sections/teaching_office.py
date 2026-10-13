@@ -19,6 +19,8 @@ from django.utils.translation import pgettext
 from apps.organizations.public import build_structure_tree_context, chair_detail_context, visible_chairs
 from apps.workload.public import chair_staff_load
 
+from .structure_tree_group import attach_group_panel
+
 _CTX = "accounts.chair_profile"
 
 
@@ -30,6 +32,8 @@ def build_structure_tree_section(request, section, *, active_organization, allow
         section["has_access"] = False
         return
     section.update(build_structure_tree_context(request, active_organization))
+    # Qrup seçilibsə: «Starosta» kartı + tələbə siyahısı (2026-10-14) — glue accounts-dadır (group_lead xidməti).
+    attach_group_panel(request, active_organization, section)
 
 
 def _syllabus_coverage(organization, chair, teacher_ids) -> dict:

@@ -4,12 +4,17 @@
 İKİ İSTEHLAKÇI, BİR MARKUP:
   · yalnız-oxu «Dərs cədvəli» — `data-sgx-slot` + `data-*` sahələri detal
     modalını doldurur (`registrar/js/schedule_grid.js`, dəyişmir);
-  · redaktor — `data-sedit-slot` + `draggable` (`accounts/js/schedule_editor.js`).
-    Redaktorda `data-sgx-slot` QƏSDƏN YAZILMIR: əks halda bir klik həm detal
-    modalını, həm redaktə dialoqunu açardı. Inline handler YOXDUR (CSP).
+  · redaktor — `data-sedit-slot` (`accounts/js/schedule_editor.js` — klik = redaktə dialoqu;
+    `accounts/js/schedule_editor_move.js` — POINTER sürüklə-burax: siçan, toxunma (uzun basış),
+    qələm). Redaktə edilə bilən kartda `data-sgx-slot` QƏSDƏN YAZILMIR: əks halda bir klik həm
+    detal modalını, həm redaktə dialoqunu açardı. Inline handler YOXDUR (CSP).
+    2026-10-14: HTML5 `draggable` ÇIXARILDI — `<button>` Firefox-da sürüklənmirdi, toxunma
+    ekranında isə HTML5 DnD ümumiyyətlə işləmir; köçürmə pointer hadisələri ilədir.
+  · redaktor, amma kart REDAKTƏ EDİLƏ BİLMİR (`item.editable` yox — məs. müəllim görünüşündə
+    müəllimin başqa fakültədəki dərsi) — detal modalı (`data-sgx-slot`).
 
-Klaviatura ilə köçürmə: kart Enter/Space ilə açılan dialoqda «Yerini dəyiş»
-sahələri var — sürüklə-buraxın əlçatan qarşılığı.
+Klaviatura ilə köçürmə: kart Enter/Space ilə redaktə dialoqunu açır («Gün» + «Dərs saatı»
+sahələri), «M» düyməsi isə köçürmə rejimini (oxlarla xana seç, Enter — burax, Esc — ləğv).
 
 MÜƏLLİM = slotun EFFEKTİV müəllimi (2026-09-25, bölünmüş tədris): slotun öz müəllimi
 (`slot.instructor`), yoxdursa jurnal sahibi (`off.instructor`) — `schedule.effective_instructor`
@@ -19,11 +24,13 @@ müəllimə «Jurnalı aç» keçidi verilmir (jurnal sahibinindir; modal keçid
 {% with slot=item.slot off=item.slot.offering %}
 {% with teacher=slot.instructor|default:off.instructor %}
 <button type="button"
-        class="smtx-card smtx-card--{{ slot.kind }}{% if not item.this_week %} is-offweek{% endif %}"
-        {% if not matrix_editable %}data-sgx-slot{% endif %}
-        {% if matrix_editable %}
+        class="smtx-card smtx-card--{{ slot.kind }}{% if not item.this_week %} is-offweek{% endif %}{% if matrix_editable and item.editable %} is-editable{% endif %}"
+        {% if not matrix_editable or not item.editable %}data-sgx-slot{% endif %}
+        {% if matrix_editable and item.editable %}
         data-sedit-slot="{{ slot.id }}"
-        draggable="true"
+        aria-keyshortcuts="M"
+        aria-describedby="sedit-card-hint"
+        data-group-id="{{ off.group_id|default_if_none:'' }}"
         data-subject-id="{{ off.subject_id }}"
         data-instructor-id="{{ off.instructor_id|default_if_none:'' }}"
         data-slot-instructor-id="{{ slot.instructor_id|default_if_none:'' }}"
@@ -64,7 +71,7 @@ müəllimə «Jurnalı aç» keçidi verilmir (jurnal sahibinindir; modal keçid
         {% elif slot.week_type == 'even' %}<span class="smtx-chip smtx-chip--even">{% trans "ALT" context "registrar.schedule_grid" %}</span>{% endif %}
         <span class="smtx-card__title">{{ off.subject.name|default:off.subject.code }}</span>
     </span>
-    <span class="smtx-card__meta">{{ slot.get_kind_display }}{% if matrix_role == 'teacher' and off.group %} · {{ off.group.name }}{% elif teacher %} · {{ teacher.get_full_name|default:teacher.username }}{% endif %}</span>
+    <span class="smtx-card__meta">{{ slot.get_kind_display }}{% if matrix_role == 'teacher' or matrix_show_group %}{% if off.group %} · {{ off.group.name }}{% endif %}{% elif teacher %} · {{ teacher.get_full_name|default:teacher.username }}{% endif %}</span>
     {% if slot.room %}<span class="smtx-card__room"><i class="fas fa-location-dot" aria-hidden="true"></i> {{ slot.room }}</span>{% endif %}
 </button>
 {% endwith %}

@@ -1,0 +1,73 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   EMSSearchInput — «Axtarılır…» vəziyyəti (static/js/ems_search_input.js).
+   Panel yanıb-sönmür: yalnız input-un çərçivəsi yumşaq rənglənir və sağ-alt
+   küncündə kiçik nişan görünür (layout-u itələmir — mütləq mövqe).
+   ═══════════════════════════════════════════════════════════════════════════ */
+.is-searching {
+    border-color: var(--ems-primary-300, #93c5fd) !important;
+}
+
+.ems-search-status {
+    position: absolute;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--ems-bg, #fff);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+    color: var(--ems-text-muted, #64748b);
+    font-size: 0.72rem;
+    font-weight: 500;
+    line-height: 1.5;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.ems-search-status::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border: 1.5px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: ems-search-spin 0.7s linear infinite;
+}
+
+.ems-search-status[hidden] {
+    display: none;
+}
+
+/* Valideyn mövqeli deyilsə nişan yalnız ekran oxuyucusu üçündür. */
+.ems-search-status--sr {
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    box-shadow: none;
+}
+
+/* Nəticə konteyneri yenilənərkən — məzmun silinmir, yalnız sakitcə solur. */
+.ems-search-pending {
+    opacity: 0.55;
+    transition: opacity 0.15s ease;
+}
+
+@keyframes ems-search-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ems-search-status::before {
+        animation: none;
+    }
+
+    .ems-search-pending {
+        transition: none;
+    }
+}

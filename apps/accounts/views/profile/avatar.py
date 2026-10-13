@@ -19,7 +19,7 @@ from django.http import FileResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.utils.http import http_date
 
-from core.people_visibility import can_view_person
+from core.people_visibility import can_view_avatar
 
 from ...models import UserProfile
 from .search import _validate_profile_avatar_version
@@ -36,7 +36,7 @@ def profile_avatar(request, user_id):
         return HttpResponseBadRequest("Invalid avatar version parameter.")
 
     target_user = get_object_or_404(User, id=user_id, is_active=True)
-    if not can_view_person(request.user, target_user.pk):
+    if not can_view_avatar(request.user, target_user.pk):
         raise Http404("Avatar tapılmadı.")
     target_profile = UserProfile.objects.filter(user=target_user).only("avatar", "updated_at").first()
     if not target_profile or not target_profile.avatar:

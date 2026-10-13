@@ -39,8 +39,11 @@ html.ems-modal-open .exam-wizard-modal.modal { overflow-y: hidden; }
   overflow: hidden;
 }
 
+/* padding:0 — profil sehifəsinin `@media(≤768px){.modal-content{padding:1rem}}` (posts/_part2.css)
+   qlobal qaydası sehrbazı 16px sıxıb altında ölü zolaq qoyurdu. */
 .exam-wizard-modal .modal-content {
   position: relative;
+  padding: 0;
   border: none;
   border-radius: var(--ems-r-2xl);
   overflow: hidden;
@@ -384,7 +387,7 @@ html.exam-modal-open, html.exam-modal-open body { overflow: hidden !important; }
 .exam-wizard .ew-panel .create-exam-list-item { padding: 8px 12px; border-bottom: 1px solid var(--ems-border); }
 .exam-wizard .ew-panel .create-exam-list-item:hover,
 .exam-wizard .ew-panel .create-exam-list-item.is-active { background: var(--ems-primary-50); }
-.exam-wizard .ew-panel .create-exam-item-label { font-size: var(--ems-fs-base); color: var(--ems-text); }
+.exam-wizard .ew-panel .create-exam-item-label { flex: 1; min-width: 0; font-size: var(--ems-fs-base); color: var(--ems-text); overflow-wrap: anywhere; }
 .exam-wizard .ew-panel .create-exam-search-empty { padding: 10px 12px; font-size: var(--ems-fs-sm); color: var(--ems-text-muted); }
 .exam-wizard .ew-panel .create-exam-selection-counter { margin-top: 5px; font-size: var(--ems-fs-sm); color: var(--ems-text-muted); }
 .exam-wizard .ew-panel .create-exam-access-grid { gap: 14px 16px; }
@@ -401,7 +404,9 @@ html.exam-modal-open, html.exam-modal-open body { overflow: hidden !important; }
 @keyframes ewSpin { to { transform: rotate(360deg); } }
 
 /* ── Təsdiq overlay-ləri (yadda saxlanmamış dəyişiklik / yaratma icmalı) ── */
-.ew-confirm { position: absolute; inset: 0; z-index: 20; display: grid; place-items: center; padding: 24px; background: rgba(15, 23, 42, 0.45); }
+/* grid-template-rows: minmax(0,1fr) — sətir konteynerin hündürlüyü ilə məhdudlanır; əks halda qısa ekranda
+   icmal qutusu (max-height %) məzmuna görə uzanıb düymələri ekrandan kənara atırdı. */
+.ew-confirm { position: absolute; inset: 0; z-index: 20; display: grid; grid-template-rows: minmax(0, 1fr); place-items: center; padding: 24px; background: rgba(15, 23, 42, 0.45); }
 .ew-confirm-box { width: 100%; max-width: 430px; padding: 24px 24px 20px; border-radius: var(--ems-r-2xl); background: var(--ems-bg); text-align: center; box-shadow: var(--ems-sh-dialog); animation: ewFade 0.18s ease; }
 .ew-confirm-ic { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: 0 auto 12px; border-radius: var(--ems-r-xl); background: var(--ems-warning-bg); color: var(--ems-warning-700); font-size: 18px; }
 .ew-confirm-ic--ok { background: var(--ems-success-bg); color: var(--ems-success-700); }
@@ -413,13 +418,16 @@ html.exam-modal-open, html.exam-modal-open body { overflow: hidden !important; }
 .exam-wizard-modal .ew-confirm .ew-confirm-discardbtn:hover:not(:disabled) { background: var(--ems-danger-bg); }
 /* İcmal qutusu: düymələr HƏMİŞƏ görünür — yalnız cədvəl (dl) daxildə sürüşür. */
 .ew-confirm-box--review { display: flex; flex-direction: column; max-width: 520px; max-height: 92%; }
-.ew-confirm-box--review .ew-confirm-actions { flex: none; }
+.ew-confirm-box--review .ew-confirm-actions,
+.ew-confirm-box--review .ew-confirm-ic { flex: none; }
 .ew-confirm-summary { display: grid; grid-template-columns: minmax(110px, auto) 1fr; gap: 7px 14px; flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 2px 0 16px; padding: 12px 14px; border: 1px solid var(--ems-border); border-radius: var(--ems-r-xl); background: var(--ems-bg-subtle); text-align: left; font-size: var(--ems-fs-base); }
 .ew-confirm-summary dt { color: var(--ems-text-muted); font-weight: 600; }
 .ew-confirm-summary dd { margin: 0; color: var(--ems-text); font-weight: 700; word-break: break-word; }
 
-/* ── Responsiv: rel → üst proqres zolağı; telefonda tam ekran ─────────── */
-@media (max-width: 860px) {
+/* ── Responsiv: rel → üst proqres zolağı; telefonda tam ekran ───────────
+   «Qısa landşaft» (telefon yan: hündürlük ≤ 520px) də eyni sxemdədir — əks halda
+   86vh-lik dialoq yuxarıdan kəsilir və sahə üçün ~120px qalırdı (2026-10-14). */
+@media (max-width: 860px), (max-height: 520px) and (orientation: landscape) {
   .exam-wizard { grid-template-columns: 1fr; height: min(760px, 92vh); height: min(760px, 92vh, calc(100dvh - 3.5rem)); }
   .exam-wizard .ew-rail { display: none; }
   .exam-wizard .ew-mstep { display: flex; align-items: center; gap: 6px; padding: 12px 18px 0; }
@@ -437,14 +445,15 @@ html.exam-modal-open, html.exam-modal-open body { overflow: hidden !important; }
   .exam-wizard .ew-grid2,
   .exam-wizard .ew-panel .create-exam-access-grid { grid-template-columns: 1fr; }
 }
-@media (max-width: 575.98px) {
+@media (max-width: 575.98px), (max-height: 520px) and (orientation: landscape) {
   /* Telefonda: «Addım n/4» öz sətrində, düymələr bir sətirdə (əsas əməl uzanır). */
   .exam-wizard .ew-pane-foot { gap: 8px; }
   .exam-wizard .ew-pane-foot .ew-btn { padding: 0 12px; }
   .exam-wizard .ew-pane-foot .ew-foot-right { flex: 1 1 auto; min-width: 0; }
   .exam-wizard .ew-pane-foot .ew-foot-right .ew-btn { flex: 1; }
   .exam-wizard-modal { padding: 0 !important; overflow: hidden; }
-  .exam-wizard-modal .modal-dialog { position: fixed; inset: 0; margin: 0; max-width: none; width: 100%; height: auto; min-height: 0; transform: none !important; }
+  /* --ems-vvt/--ems-vvh: virtual klaviatura açıqkən exam_wizard_viewport.js yazır (görünən sahə). */
+  .exam-wizard-modal .modal-dialog { position: fixed; inset: 0; top: var(--ems-vvt, 0px); margin: 0; max-width: none; width: 100%; height: var(--ems-vvh, auto); min-height: 0; padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left); transform: none !important; }
   .exam-wizard-modal .modal-content { display: flex; flex-direction: column; width: 100%; height: 100%; max-height: none; border-radius: 0; }
   .exam-create-edit-modal.exam-wizard-modal .modal-body { display: flex; flex: 1 1 auto; min-height: 0; max-height: none; overflow: hidden; }
   .exam-create-edit-modal.exam-wizard-modal .modal-body > #createExamModalForm { flex: 1 1 auto; height: 100%; }
@@ -467,6 +476,65 @@ html.exam-modal-open, html.exam-modal-open body { overflow: hidden !important; }
   #createExamModal .modal-header { flex: 0 0 auto; margin: 0; padding: 12px 16px; }
   #createExamModal .create-exam-modal-body { display: flex; flex: 1 1 auto; min-height: 0; overflow: hidden; }
   #createExamModal .create-exam-modal-body > #createExamModalForm { flex: 1 1 auto; height: 100%; }
+}
+/* ── Toxunma ergonomikası (telefon/planşet): hədəf ≥44px, sahə şrifti 16px ─────
+   16px-dən kiçik input iOS-da fokusda səhifəni böyüdür (zoom). Yalnız ≤860px VƏ ya
+   kobud göstərici (barmaq); masaüstü sıx 40px/13px ritmi toxunulmaz qalır. */
+@media (pointer: coarse), (max-width: 860px) {
+  .exam-wizard .ew-panel .form-control,
+  .exam-wizard .ew-panel .create-exam-search-input,
+  .exam-wizard .ew-panel .bootstrap-single-select__toggle { min-height: 44px; font-size: 16px; }
+  .exam-wizard .ew-panel .bootstrap-single-select__option { min-height: 44px; display: flex; align-items: center; font-size: 16px; }
+  .exam-wizard .ew-btn,
+  .exam-wizard .ew-btn--primary,
+  .exam-wizard-modal .ew-confirm .ew-btn,
+  .exam-wizard-modal .ew-confirm .ew-btn--primary { min-height: 44px; }
+  .exam-wizard .ew-x { width: 44px; height: 44px; margin: -6px -8px 0 0; }
+  .exam-wizard .ew-panel .create-exam-list-item { min-height: 44px; gap: 12px; }
+  .exam-wizard .ew-panel .create-exam-item-checkbox { width: 20px; height: 20px; flex: none; }
+  .exam-wizard .ew-panel .modal-check-label { min-height: 44px; align-items: center; }
+  .exam-wizard .ew-panel .ew-checks .modal-check-label input[type="checkbox"] { width: 22px; height: 22px; }
+  .exam-wizard .ew-panel .ew-checks .modal-check-label input[type="checkbox"]::after { top: 2px; left: 6px; }
+  .exam-wizard .ew-panel .ew-typecard { min-height: 64px; }
+  /* Tarix-saat: təqvim düyməsi 44px, sahənin sağ boşluğu ona görə */
+  .exam-wizard-modal .ems-dt input.form-control.ems-dt__input { padding-right: 52px; }
+  .exam-wizard-modal .ems-dt__toggle { right: 0; width: 48px; height: 44px; }
+  .exam-wizard-modal .ems-dt__tinput { width: 56px; height: 44px; font-size: 16px; }
+  .exam-wizard-modal .ems-dt__nav { width: 44px; height: 44px; }
+  .exam-wizard-modal .ems-dt__btn { min-height: 44px; padding: 4px 16px; font-size: 16px; }
+}
+
+/* Təqvim dialoqu telefonda alt vərəq (bottom sheet): `.ew-pane-body` overflow-u absolute
+   dialoqu kəsir, «Təmizlə/Hazırdır» düymələri görünmürdü. `position:fixed` — modal
+   dialoqunda transform YOXDUR (yuxarıda `transform:none !important`). */
+@media (max-width: 575.98px), (max-height: 520px) and (orientation: landscape) {
+  .exam-wizard-modal .ems-dt__pop,
+  .exam-wizard-modal .ems-dt__pop--up {
+    position: fixed; inset: auto 0 0 0; z-index: 30; width: auto; max-width: none; max-height: calc(100dvh - 16px); overflow-y: auto;
+    padding: 14px 16px calc(16px + env(safe-area-inset-bottom)); border-width: 1px 0 0; border-radius: var(--ems-r-2xl) var(--ems-r-2xl) 0 0;
+    transform: none; box-shadow: 0 -16px 40px rgba(15, 23, 42, 0.28); overscroll-behavior: contain;
+  }
+  .exam-wizard-modal .ems-dt__day { height: 44px; font-size: 16px; }
+}
+
+/* Qısa landşaft: başlıq izahı və proqres nöqtələri gizlənir, altlıq tək sətir —
+   sahələrə maksimum yer. Klaviatura açıqkən (`.is-kbd`) portretdə də eyni. */
+@media (max-height: 520px) and (orientation: landscape) {
+  .exam-wizard .ew-mstep { padding-top: 8px; }
+  .exam-wizard .ew-pane-head { padding: 8px 18px; }
+  .exam-wizard .ew-pane-head-tx p { display: none; }
+  .exam-wizard .ew-pane-foot { flex-wrap: nowrap; padding-top: 8px; padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+  .exam-wizard .ew-prog { width: auto; order: 0; margin-left: auto; }
+  .exam-wizard .ew-pane-foot .ew-foot-right { flex: 0 0 auto; margin-left: 0; }
+  .exam-wizard .ew-pane-foot .ew-foot-right .ew-btn { flex: none; min-width: 140px; }
+  .exam-wizard-modal .ems-dt__day { height: 38px; }
+  .ew-confirm-box--review { max-height: 100%; padding: 16px 20px; }
+}
+@media (max-width: 575.98px) {
+  .exam-wizard-modal.is-kbd .ew-mstep,
+  .exam-wizard-modal.is-kbd .ew-pane-head-tx p,
+  .exam-wizard-modal.is-kbd .ew-prog { display: none; }
+  .exam-wizard-modal.is-kbd .ew-pane-head { padding-top: 10px; padding-bottom: 8px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .exam-wizard .ew-panel.is-active,

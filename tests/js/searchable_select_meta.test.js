@@ -14,6 +14,8 @@ const { JSDOM } = require("jsdom");
 
 const ROOT = path.resolve(__dirname, "..", "..");
 const SCRIPT = fs.readFileSync(path.join(ROOT, "static/js/searchable_select.js"), "utf8");
+// 2026-10-14: komponentin axtarışı vahid EMSSearchInput qatındadır (base.html <head>).
+const SEARCH_INPUT = fs.readFileSync(path.join(ROOT, "static/js/ems_search_input.js"), "utf8");
 
 async function open(results) {
     const dom = new JSDOM(
@@ -23,13 +25,15 @@ async function open(results) {
     const { window } = dom;
     window.fetch = () =>
         Promise.resolve({ ok: true, json: () => Promise.resolve({ results: results, has_more: false }) });
+    window.eval(SEARCH_INPUT);
     window.eval(SCRIPT);
     const pick = window.EMSSearchableSelect.create(window.document.getElementById("pick"), { url: "/lookups/" });
     const input = window.document.querySelector("#pick input");
     input.dispatchEvent(new window.Event("focus"));
     input.value = "kom";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
-    await new Promise((resolve) => setTimeout(resolve, 400));
+    window.EMSSearchInput.flush(input); // 1500 ms gözləmədən (debounce özü ems_search_input.test.js-dədir)
+    await new Promise((resolve) => setTimeout(resolve, 50));
     return { window, pick };
 }
 

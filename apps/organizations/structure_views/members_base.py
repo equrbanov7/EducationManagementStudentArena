@@ -49,6 +49,8 @@ LEADERSHIP_ROLE_NAMES = frozenset(
         "department_head",
         "section_head",
         "program_coordinator",
+        # Tyutor = proqram koordinatoru (sahib 2026-10-14).
+        "tutor",
         "teaching_office_head",
         "exam_center_head",
         "ikt_rehber",

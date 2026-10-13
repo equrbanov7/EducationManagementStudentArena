@@ -21,7 +21,7 @@
          data-section="workload-center"           ← ?section= dəyəri
          data-param-prefix="wl_">                  ← parametr ad fəzası
      <div class="ems-field"><select name="wl_year" data-ems-filter>…</select></div>
-     <input name="wl_q" data-ems-filter data-ems-filter-search>   ← 240ms debounce
+     <input name="wl_q" data-ems-filter data-ems-filter-search>   ← 240ms debounce (avto: 1500ms)
      <button type="submit" class="ems-filters__apply">Tətbiq et</button>
      <button type="button" data-ems-filters-reset>Sıfırla</button>
    </form>
@@ -202,16 +202,14 @@
     }
 
     /* ---- AVTO rejim (`data-ems-filters-auto`) ---------------------------
-       «Tətbiq et» düyməsi yoxdur: select dəyişən kimi, axtarış isə debounce-dan
-       sonra tətbiq olunur. Panel SPA ilə yenidən yükləndiyi üçün (a) cədvəl
-       yerində skeleton-a çevrilir, (b) axtarış sahəsinin fokusu və kursor
-       mövqeyi swap-dan sonra bərpa olunur, (c) yükləmə gedərkən yazılmış
-       hərflər itmir — yeni panel gələndə fərq varsa təkrar tətbiq olunur. */
-    var AUTO_SEARCH_DEBOUNCE_MS = 350;
-    var autoFocus = null; // {section, name, value, caret}
-    // Bərpa YALNIZ bizim avto-tətbiqin yaratdığı yükləmədən sonra işləyir —
-    // başqa bölmədən sidebar ilə qayıdanda köhnə axtarış dəyəri geri yazılmasın.
-    var autoPending = false;
+       «Tətbiq et» düyməsi yoxdur: select dəyişən kimi (cədvəl skeleton-a
+       çevrilir), axtarış isə EMSSearchInput qaydası ilə — yazı DAYANANDAN
+       1500 ms sonra, ≥ 2 simvol, Enter dərhal, IME gözlənilir (sahib
+       2026-10-14: «çox sürətli olur, axtardığım itir»). Axtarış yükləməsi
+       «quiet»-dir: skelet yoxdur (yalnız cədvəl solur + «Axtarılır…»), input
+       əvəzlənmir (section_loader.js → EMSSearchInput.morph) — fokus, kursor
+       və yükləmə gedərkən yazılan hərflər yerində qalır. */
+    var AUTO_SEARCH_DEBOUNCE_MS = (window.EMSSearchInput && window.EMSSearchInput.DELAY_MS) || 1500;
 
     function isAuto(form) {
         return form.getAttribute("data-ems-filters-auto") === "1";
@@ -264,83 +262,27 @@
         }
     }
 
-    function rememberFocus(form) {
-        var active = document.activeElement;
-        if (!active || !form.contains(active) || !active.name || !active.hasAttribute("data-ems-filter-search")) {
-            autoFocus = null;
-            return;
+    /** Yazdıqca axtarış: məzmun silinmir, yalnız sakitcə solur. */
+    function pendingFor(form, field) {
+        var host = form.closest("[data-tof-root]") || form.parentElement || document;
+        var nodes = host.querySelectorAll(".ems-tablewrap, [data-ems-filter-target]");
+        for (var i = 0; i < nodes.length; i += 1) {
+            nodes[i].classList.add("ems-search-pending");
+            nodes[i].setAttribute("aria-busy", "true");
         }
-        autoFocus = {
-            section: form.dataset.section || "",
-            name: active.name,
-            value: active.value || "",
-            caret: typeof active.selectionStart === "number" ? active.selectionStart : (active.value || "").length,
-        };
-    }
-
-    function restoreFocus(panel) {
-        if (!autoPending || !autoFocus) {
-            return;
-        }
-        autoPending = false;
-        var saved = autoFocus;
-        autoFocus = null;
-        var form = (panel || document).querySelector('[data-ems-filters-auto="1"]');
-        if (!form || (saved.section && form.dataset.section !== saved.section)) {
-            return;
-        }
-        var field = form.querySelector('[name="' + saved.name + '"]');
-        if (!field) {
-            return;
-        }
-        var rendered = field.value || "";
-        try {
-            field.focus({ preventScroll: true });
-        } catch (err) {
-            field.focus();
-        }
-        if (rendered !== saved.value) {
-            // Yükləmə gedərkən istifadəçi yazmağa davam edib — itirmirik.
-            field.value = saved.value;
-            try {
-                field.setSelectionRange(saved.value.length, saved.value.length);
-            } catch (err) { /* type=search bəzi brauzerlərdə dəstəkləmir */ }
-            scheduleAuto(form, field);
-            return;
-        }
-        var caret = Math.min(saved.caret, rendered.length);
-        try {
-            field.setSelectionRange(caret, caret);
-        } catch (err) { /* ignore */ }
-    }
-
-    function scheduleAuto(form, field) {
-        var key = "auto:" + (form.dataset.section || form.id || "ems-filters");
-        window.clearTimeout(timers[key]);
-        timers[key] = window.setTimeout(function () {
-            if (!document.contains(form)) {
-                return;
-            }
-            if (!isDirty(form)) {
-                return;
-            }
-            apply(form);
-        }, AUTO_SEARCH_DEBOUNCE_MS);
-        if (field) {
-            autoFocus = {
-                section: form.dataset.section || "",
-                name: field.name,
-                value: field.value || "",
-                caret: typeof field.selectionStart === "number" ? field.selectionStart : (field.value || "").length,
-            };
+        if (field && window.EMSSearchInput) {
+            window.EMSSearchInput.busy(field, true);
         }
     }
 
-    function apply(form) {
+    function apply(form, opts) {
+        var quiet = !!(opts && opts.quiet);
         if (isAuto(form)) {
-            rememberFocus(form);
-            skeletonFor(form);
-            autoPending = true;
+            if (quiet) {
+                pendingFor(form, opts.field);
+            } else {
+                skeletonFor(form);
+            }
         }
         commit(form);
         var url = buildUrl(form);
@@ -349,7 +291,7 @@
             // İMZA: (section, sourceUrl, options) — ikinci arqument SƏTİRDİR.
             // Obyekt ötürülsəydi loader onu `options.sourceUrl` kimi saxlayır və
             // URL «[object Object]» olurdu (Mərhələ 1-də tapılıb düzəldilib).
-            window.EMSProfileLoadSection(form.dataset.section, url);
+            window.EMSProfileLoadSection(form.dataset.section, url, quiet ? { quiet: true } : undefined);
         } else {
             window.location.assign(url);
         }
@@ -367,10 +309,7 @@
      *  index-0 ilə doldurub göndərmək default olmayan seçimi (məs. ən köhnə ili)
      *  URL-ə yazardı — «Sıfırla işləmir» şikayətinin kökü bu idi. */
     function resetToDefaults(form) {
-        rememberFocus(form);
-        autoFocus = null;
         skeletonFor(form);
-        autoPending = true;
         var base = form.dataset.baseUrl || window.location.pathname;
         var url = new URL(base, window.location.origin);
         var current = new URLSearchParams(window.location.search);
@@ -426,9 +365,10 @@
             return;
         }
         markDirty(form);
-        // Avto rejimdə select/checkbox dəyişən kimi tətbiq olunur; axtarış
-        // sahəsinin `change`-i (blur/Enter) isə debounce-u gözləmədən göndərir.
-        if (isAuto(form) && isDirty(form)) {
+        // Avto rejimdə select/checkbox dəyişən kimi tətbiq olunur. Axtarış
+        // sahəsinin `change`-i (blur) GÖNDƏRMİR — onu EMSSearchInput idarə edir
+        // (1500 ms / Enter); əks halda sahədən çıxmaq yarımçıq sorğu atırdı.
+        if (isAuto(form) && isDirty(form) && !el.hasAttribute("data-ems-filter-search")) {
             apply(form);
         }
     });
@@ -439,8 +379,7 @@
             return;
         }
         if (isAuto(form)) {
-            markDirty(form);
-            scheduleAuto(form, el);
+            markDirty(form); // sorğunu EMSSearchInput.delegate (aşağıda) göndərir
             return;
         }
         var key = form.id || "ems-filters";
@@ -450,11 +389,18 @@
         }, SEARCH_DEBOUNCE_MS);
     });
 
-    // Avto rejimdə Enter — debounce-u gözləmədən dərhal tətbiq (submit onsuz da apply edir).
-    document.addEventListener("profile:section:loaded", function (event) {
-        var panel = event && event.detail ? event.detail.panel : null;
-        restoreFocus(panel);
-    });
+    // Avto rejim: 1500 ms / ≥ 2 simvol / Enter dərhal / IME — vahid qayda.
+    if (window.EMSSearchInput) {
+        window.EMSSearchInput.delegate('[data-ems-filters-auto="1"] [data-ems-filter-search]', {
+            delay: AUTO_SEARCH_DEBOUNCE_MS,
+            onSearch: function (value, meta) {
+                var form = meta.input.closest("[data-ems-filters]");
+                if (form && document.contains(form) && isDirty(form)) {
+                    apply(form, { quiet: true, field: meta.input });
+                }
+            },
+        });
+    }
 
     // Tətbiq olunmuş filtr çipinin «×»-i — həmin sahəni boşaldıb dərhal tətbiq edir.
     window.EMSDelegate.on("click", "[data-ems-filter-remove]", function (event, btn) {

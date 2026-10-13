@@ -13,7 +13,11 @@
    data-group-id, data-period-id) və sahələr `[data-sedit-field]` DOM-dan
    oxunur, sorğular `EMSCore.fetchJSON` ilə gedir, dəyər dəyişəndə seçiciyə
    `change` hadisəsi göndərilir ki, əsas skriptin delegasiyalı `runCheck`-i işə
-   düşsün.  AJAX-safe: `EMSDelegate` ilə bağlanır, kök yoxdursa heç nə etmir. */
+   düşsün.  AJAX-safe: `EMSDelegate` ilə bağlanır, kök yoxdursa heç nə etmir.
+
+   MÜƏLLİM GÖRÜNÜŞÜ (2026-10-14): qrup dialoqun «Qrup» sahəsindən oxunur (`group_id`);
+   qrup dəyişəndə fənn + «Dərsi aparan müəllim» siyahıları yenilənir, dialoq açılanda
+   fənn siyahısı kartın fənnini SAXLAYARAQ (qrup + jurnal sahibi ilə) yenidən qurulur. */
 (function () {
     "use strict";
 
@@ -33,8 +37,13 @@
         return dialog ? dialog.querySelector("[data-sedit-field='" + name + "']") : null;
     }
 
+    function groupId(host) {
+        var picked = field("group_id");
+        return picked ? picked.value || "" : host.getAttribute("data-group-id") || "";
+    }
+
     function post(host, payload) {
-        payload.group_id = host.getAttribute("data-group-id") || "";
+        payload.group_id = groupId(host);
         payload.period_id = host.getAttribute("data-period-id") || "";
         return window.EMSCore.fetchJSON(host.getAttribute("data-editor-url"), { method: "POST", data: payload });
     }
@@ -52,7 +61,9 @@
         select.appendChild(option);
     }
 
-    function reloadSubjects() {
+    /* `silent` — dialoq açılışında: «Dərsi aparan müəllim»i sıfırlamamaq üçün fənnin
+       `change`-i göndərilmir; yalnız yoxlama (runCheck) üçün saat sahəsi «dəyişir». */
+    function reloadSubjects(want, silent) {
         var host = root();
         var select = field("subject_id");
         var teacher = field("instructor_id");
@@ -64,7 +75,7 @@
                 if (!data || !data.ok || !Array.isArray(data.subjects)) {
                     return;
                 }
-                var current = select.value;
+                var current = want || select.value;
                 select.textContent = "";
                 data.subjects.forEach(function (row) {
                     addOption(select, row.id, row.code + " — " + row.name);
@@ -74,7 +85,10 @@
                     select.value = current;
                 }
                 refreshSelect(select);
-                select.dispatchEvent(new Event("change", { bubbles: true }));
+                var target = silent ? field("time_slot") : select;
+                if (target) {
+                    target.dispatchEvent(new Event("change", { bubbles: true }));
+                }
             })
             .catch(function () {});
     }
@@ -147,7 +161,18 @@
         var value = card ? card.getAttribute("data-slot-instructor-id") || "" : "";
         var label = card ? card.getAttribute("data-slot-instructor-name") || "" : "";
         fillSlotTeachers(select, "", [], value ? { value: value, label: label } : null);
+        if (root().getAttribute("data-view") === "teacher" && field("group_id")) {
+            /* Fənn siyahısı qrup + jurnal sahibinə görə; kartın fənni itməsin. */
+            reloadSubjects(card ? card.getAttribute("data-subject-id") || "" : "", true);
+        }
         reloadSlotTeachers(true);
+    });
+
+    DELEGATE.on("change", "[data-sedit-field='group_id']", function () {
+        if (root()) {
+            reloadSubjects();
+            reloadSlotTeachers(false);
+        }
     });
 
     DELEGATE.on("change", "[data-sedit-field='instructor_id']", function () {

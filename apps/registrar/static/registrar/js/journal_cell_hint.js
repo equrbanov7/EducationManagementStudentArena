@@ -1,20 +1,22 @@
-/* Jurnal cədvəli: xananın üstünə gələndə (və ya klaviatura ilə fokuslananda) onun KİMƏ aid
-   olduğu görünür — «Soyad Ad Ata adı» + sütunun qısa etiketi («09.10.2026 · Seminar»).
-   Sahib 2026-10-10: «q/b, i/e nə yazırsansa, kimin üzərində olduğun bilinsin».
+/* Jurnal cədvəli: xananın üstünə gələndə (və ya klaviatura ilə fokuslananda) SƏTİR və SÜTUN başlığı
+   yüngül fon rəngi ilə işıqlanır — müəllim kimin üzərində olduğunu sətrin rəngindən görür.
+
+   Sahib 2026-10-10: «q/b, i/e nə yazırsansa, kimin üzərində olduğun bilinsin» — əvvəl xananın üstündə
+   ad + tarix + dərs tipi olan TOOLTIP çıxırdı, xananın özü isə qalın göy çərçivə alırdı.
+   Sahib 2026-10-14: «ehtiyac yoxdu border və üstə çıxan ad olmasın, hover-dəki background rəng olsa
+   bəs edir» — tooltip VİZUAL olaraq yoxdur, çərçivə yoxdur (journal_cell_hint.css). Ekran oxuyucusu
+   üçün eyni mətn («Soyad Ad Ata adı · 09.10.2026 · Seminar») GÖRÜNMƏZ təsvir kimi qalır
+   (`aria-describedby`) — klaviatura/ekran oxuyucusu istifadəçisi kontekstini itirmir.
 
    Ad sətirdə BİR dəfə saxlanılır (`[data-jd-hint-name]`), sütun etiketi başlıqdadır
    (`th[data-jd-hint-col]`) — xanaya atribut yazılmır: 555 × 20 xanalı jurnalda hər xanaya
    mətn əlavə etmək HTML-i yüzlərlə KB böyüdərdi (bax `_jd_grid.html`-dəki `spaceless` qeydi).
-
-   Tooltip `position: fixed`-dir və `<body>`-yə qoşulur — cədvəlin `overflow:auto` qabı onu
-   kəsmir. Xananın seçim menyusu açıqdırsa tooltip menyunun ƏKS tərəfinə keçir.
    Mətn yalnız `textContent` ilə yazılır. AJAX-safe: sənəd səviyyəli dinləyicilər bir dəfə
    (`EMSReady.once`); cədvəl yerində yenilənəndə (journal_guest.js) köhnə xana atılır. */
 (function () {
     "use strict";
 
     var CELL = "table[data-jd-hint] > tbody > tr > td";
-    var GAP = 8;
 
     var tip = null;
     var current = null;
@@ -22,13 +24,13 @@
     function ensureTip() {
         if (tip && document.body.contains(tip)) return tip;
         tip = document.createElement("div");
+        // Görünməz (yalnız ekran oxuyucusu üçün) təsvir — üzən tooltip YOX (sahib 2026-10-14).
         tip.className = "jd-hint";
         tip.id = "jd-cell-hint";
-        tip.setAttribute("role", "tooltip");
         tip.hidden = true;
-        var name = document.createElement("div");
+        var name = document.createElement("span");
         name.className = "jd-hint__name";
-        var meta = document.createElement("div");
+        var meta = document.createElement("span");
         meta.className = "jd-hint__meta";
         tip.appendChild(name);
         tip.appendChild(meta);
@@ -46,7 +48,7 @@
     function nameFor(td) {
         var row = td.parentElement;
         var el = row && row.querySelector("[data-jd-hint-name]");
-        // Ad xanasının özündə tooltip lazım deyil — ad onsuz da oradadır.
+        // Ad xanasının özündə təsvir lazım deyil — ad onsuz da oradadır.
         if (!el || td.contains(el)) return "";
         return (el.textContent || "").replace(/\s+/g, " ").trim();
     }
@@ -68,48 +70,9 @@
         if (tip) tip.hidden = true;
     }
 
-    function openMenu(td) {
-        return td.querySelector(".dropdown-menu.show");
-    }
-
-    function place() {
-        if (!current || !tip || tip.hidden) return;
-        if (!document.contains(current)) {
-            hide();
-            return;
-        }
-        var cell = current.getBoundingClientRect();
-        var width = tip.offsetWidth;
-        var height = tip.offsetHeight;
-        var viewportW = document.documentElement.clientWidth || window.innerWidth;
-        var viewportH = document.documentElement.clientHeight || window.innerHeight;
-        var left = Math.min(Math.max(GAP, cell.left + cell.width / 2 - width / 2), Math.max(GAP, viewportW - width - GAP));
-        var above = cell.top - height - GAP;
-        var below = cell.bottom + GAP;
-        var fitsAbove = above >= GAP;
-        var fitsBelow = below + height <= viewportH - GAP;
-        // Menyu düyməyə 4 px yapışır, düymə isə xananın içindədir — tərəf xananın ORTASINA görə təyin olunur.
-        var menu = openMenu(current);
-        var menuRect = menu ? menu.getBoundingClientRect() : null;
-        var middle = cell.top + cell.height / 2;
-        var top;
-        if (menuRect && menuRect.bottom <= middle) top = fitsBelow ? below : null;
-        else if (menuRect && menuRect.top >= middle) top = fitsAbove ? above : null;
-        else top = fitsAbove ? above : below;
-        if (top === null) {
-            // Menyunun əks tərəfində yer yoxdur — tooltip menyunun üstünə düşməsin.
-            tip.hidden = true;
-            return;
-        }
-        tip.style.left = Math.round(left) + "px";
-        tip.style.top = Math.round(top) + "px";
-        tip.classList.toggle("is-below", top === below);
-    }
-
     function show(td, focused) {
         if (td === current) {
             if (focused) focused.setAttribute("aria-describedby", "jd-cell-hint");
-            place();
             return;
         }
         var name = nameFor(td);
@@ -119,7 +82,7 @@
         var th = headerFor(td);
         var label = th ? (th.getAttribute("data-jd-hint-col") || "").trim() : "";
         box.firstChild.textContent = name;
-        box.lastChild.textContent = label;
+        box.lastChild.textContent = label ? " · " + label : "";
         box.lastChild.hidden = !label;
         current = td;
         td.classList.add("is-hint-cell");
@@ -127,7 +90,6 @@
         if (th) th.classList.add("is-hint-col");
         if (focused) focused.setAttribute("aria-describedby", "jd-cell-hint");
         box.hidden = false;
-        place();
     }
 
     function onPointer(event) {
@@ -138,7 +100,7 @@
             show(td, null);
             return;
         }
-        // Fokus hələ xanadadırsa (klaviatura ilə seçim) siçan çıxanda gizlətmə.
+        // Fokus hələ xanadadırsa (klaviatura ilə seçim) siçan çıxanda işığı söndürmə.
         if (current && current.contains(document.activeElement)) return;
         hide();
     }
@@ -162,16 +124,6 @@
         document.addEventListener("mouseover", onPointer);
         document.addEventListener("focusin", onFocusIn);
         document.addEventListener("focusout", onFocusOut);
-        // Seçim menyusu açılanda tooltip onun əks tərəfinə keçir (Bootstrap hadisəsi baloncuklanır).
-        document.addEventListener("shown.bs.dropdown", place);
-        document.addEventListener("hidden.bs.dropdown", function () {
-            if (current && tip) {
-                tip.hidden = false;
-                place();
-            }
-        });
-        window.addEventListener("scroll", hide, true);
-        window.addEventListener("resize", hide);
         document.addEventListener("keydown", function (event) {
             if (event.key === "Escape") hide();
         });

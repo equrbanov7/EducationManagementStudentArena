@@ -18,7 +18,7 @@
 
 {% block extraJs %}
 {% include "exams/teacher/partials/_bulk_workbench_scripts.html" %}
-<script src="{% static 'exams/js/examBankPicker.js' %}?v=20260607-picker-modal"></script>
+<script src="{% static 'exams/js/examBankPicker.js' %}?v=20261014-searchux"></script>
 
 {{ rq_value|default:10|json_script:"bankRqDefault" }}
 {{ dp_value|default:1|json_script:"bankDpDefault" }}

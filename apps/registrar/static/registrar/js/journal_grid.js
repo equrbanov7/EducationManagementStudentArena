@@ -530,4 +530,7 @@
     G.setSelectValue = setSelectValue;
     G.lockPageScroll = lockPageScroll;
     G.unlockPageScroll = unlockPageScroll;
+    // Avtomatik yadda saxlama (journal_grid_autosave.js, 2026-10-14) uğurdan sonra qaralamanı silir.
+    G.clearDraft = clearDraft;
+    G.isDirty = isDirty;
 })();

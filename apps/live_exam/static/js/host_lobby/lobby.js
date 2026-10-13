@@ -1,10 +1,10 @@
-import { UI } from './dom.js?v=lx20261008';
-import { LOBBY_MAX_BUBBLES, PHASES } from './constants.js?v=lx20261008';
-import { state } from './state.js?v=lx20261008';
-import { playJoin } from './audio.js?v=lx20261008';
-import { icon } from './icons.js?v=lx20261008';
-import { setPresentationMarkup } from './presentation.js?v=lx20261008';
-import { renderTimeSettings } from './time_setting.js?v=lx20261008';
+import { UI } from './dom.js?v=lx20261014';
+import { LOBBY_MAX_BUBBLES, PHASES } from './constants.js?v=lx20261014';
+import { state } from './state.js?v=lx20261014';
+import { playJoin } from './audio.js?v=lx20261014';
+import { icon } from './icons.js?v=lx20261014';
+import { setPresentationMarkup } from './presentation.js?v=lx20261014';
+import { renderTimeSettings } from './time_setting.js?v=lx20261014';
 import {
     avatarImageMarkup,
     buildJoinUrl,
@@ -17,7 +17,7 @@ import {
     notifyHostShell,
     pinMarkup,
     tr,
-} from './utils.js?v=lx20261008';
+} from './utils.js?v=lx20261014';
 
 /* Lobbi: «qabıq» (qoşulma kartı, PIN, QR, başlıq) yalnız öz imzası dəyişəndə
  * yenidən çəkilir; oyunçu buludu isə id ilə fərq (diff) edilir — yeni gələn

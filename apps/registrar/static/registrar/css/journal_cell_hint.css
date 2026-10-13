@@ -1,22 +1,18 @@
-/* Jurnal xanası «kimindir» göstəricisi (journal_cell_hint.js) — tooltip + sətir/sütun işığı.
-   Sətrin xəbərdarlıq/buraxılmama rəngi (is-warning / is-barred) hover-də ƏZİLMİR: belə
-   sətirlərdə yalnız ad xanasının sol zolağı və aktiv xananın çərçivəsi görünür. */
+/* Jurnal xanası «kimindir» göstəricisi (journal_cell_hint.js) — YALNIZ sətir/sütun fon işığı.
+   Sahib 2026-10-14: «border və üstə çıxan ad olmasın, hover-dəki background rəng olsa bəs edir» —
+   üzən tooltip və aktiv xananın qalın göy çərçivəsi götürüldü. Klaviatura fokusu da eyni fon rəngini
+   alır (JS `focusin`-də eyni sinifləri qoyur), xananın öz düyməsi isə neytral fokus konturunu saxlayır
+   (static/css/bootstrap-select.css). Sətrin xəbərdarlıq/buraxılmama rəngi (is-warning / is-barred)
+   hover-də ƏZİLMİR. */
+
+/* Ekran oxuyucusu üçün görünməz təsvir (`aria-describedby`) — vizual tooltip YOXDUR. */
 .jd-hint {
-    position: fixed; z-index: 1090; max-width: 320px;
-    padding: 6px 10px; border-radius: 8px;
-    background: #0f2a5c; color: #fff;
-    font-size: 12px; line-height: 1.35; text-align: left;
-    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.28);
-    pointer-events: none;
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+    overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
 }
 .jd-hint[hidden], .jd-hint__meta[hidden] { display: none; }
-.jd-hint__name { font-weight: 800; overflow-wrap: anywhere; }
-.jd-hint__meta { margin-top: 2px; color: #c7d7f5; font-size: 11px; font-weight: 600; }
 
 table[data-jd-hint] tr.is-hint-row:not(.is-barred):not(.is-warning) > td { background-color: #f3f7ff; }
-table[data-jd-hint] tr.is-hint-row > td.jd2-td-student {
-    box-shadow: inset 3px 0 0 #2563eb, 6px 0 8px -6px rgba(15, 23, 42, 0.12);
-}
 table[data-jd-hint] tr.is-hint-row [data-jd-hint-name] { color: #1d4ed8; }
-table[data-jd-hint] td.is-hint-cell { outline: 2px solid #2563eb; outline-offset: -2px; }
+table[data-jd-hint] tr.is-hint-row:not(.is-barred):not(.is-warning) > td.is-hint-cell { background-color: #e8f0ff; }
 table[data-jd-hint] th.is-hint-col { background: #dbeafe; color: #1d4ed8; }

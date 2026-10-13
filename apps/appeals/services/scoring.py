@@ -117,16 +117,19 @@ def _score_state_from_sources(attempt, *, adjustments_qs, fallback_items_qs, key
         fallback_bonus += item_bonus
         fallback_credited_question_ids.add(item.question_id)
         bonus_by_question_id[item.question_id] = bonus_by_question_id.get(item.question_id, Decimal("0")) + item_bonus
-    # Açar düzəlişi krediti: eyni sual artıq fərdi apellyasiya ilə kreditlənibsə İKİNCİ dəfə sayılmır
-    # (oxuma anında dedup — qərarların sırasından asılı deyil; biri geri alınsa digəri qalır).
+    # Açar düzəlişi krediti: eyni sual artıq fərdi apellyasiya ilə kreditlənibsə İKİNCİ dəfə sayılmır, yalnız
+    # TAM bala qədər tamamlanır (oxuma anında — qərarların sırasından asılı deyil; biri geri alınsa digəri qalır).
     key_bonus = Decimal("0")
     key_credited_question_ids = set()
     for credit in (key_credits_qs if key_credits_qs is not None else _active_key_credits()).filter(attempt=attempt):
-        if credit.question_id in bonus_by_question_id or credit.question_id in key_credited_question_ids:
+        # 2026-10-14: açar düzəlişi TAM bal verir — fərdi krediti olan sual fərq qədər tamamlanır (ikiqat yox).
+        already = bonus_by_question_id.get(credit.question_id, Decimal("0"))
+        extra = credit.delta_points - already
+        if extra <= 0:
             continue
-        key_bonus += credit.delta_points
+        key_bonus += extra
         key_credited_question_ids.add(credit.question_id)
-        bonus_by_question_id[credit.question_id] = credit.delta_points
+        bonus_by_question_id[credit.question_id] = already + extra
     return {
         "bonus_points": bonus + fallback_bonus + key_bonus,
         "adjustment_count": len(adjustments) + len(fallback_credited_question_ids) + len(key_credited_question_ids),
@@ -240,13 +243,13 @@ def _bonus_map_from_sources(attempt_ids, *, adjustments_qs, fallback_items_qs, k
         .annotate(total=Sum("delta_points"))
     )
     bonus_by_attempt = {}
-    credited_pairs = set()  # (attempt_id, question_id) — artıq kredit alan suallar
+    credited_pairs = {}  # (attempt_id, question_id) → artıq verilmiş kredit (açar düzəlişi «üstünə tamamlayır»)
     for row in rows:
         attempt_id = row["attempt_id"]
         total = row["total"] or Decimal("0")
         bonus_by_attempt[attempt_id] = bonus_by_attempt.get(attempt_id, Decimal("0")) + total
         if total > 0 and row["question_id"]:
-            credited_pairs.add((attempt_id, row["question_id"]))
+            credited_pairs[(attempt_id, row["question_id"])] = total
     fallback_items = (
         fallback_items_qs.filter(appeal__attempt_id__in=ids)
         .select_related("appeal", "question", "answer")
@@ -261,19 +264,22 @@ def _bonus_map_from_sources(attempt_ids, *, adjustments_qs, fallback_items_qs, k
         item_bonus = _accepted_item_bonus(item)
         if item_bonus <= 0:
             continue
-        credited_pairs.add((attempt_id, item.question_id))
+        credited_pairs[(attempt_id, item.question_id)] = item_bonus
         bonus_by_attempt[attempt_id] = bonus_by_attempt.get(attempt_id, Decimal("0")) + item_bonus
-    # Açar düzəlişi kreditləri — eyni (cəhd, sual) cütü artıq kreditlənibsə sayılmır (bax yuxarı).
+    # Açar düzəlişi kreditləri — sahib 2026-10-14: açar düzəlişi sualın TAM balını verir. Eyni (cəhd, sual)
+    # artıq fərdi apellyasiya ilə kreditlənibsə ikiqat SAYILMIR, yalnız fərq qədər TAMAMLANIR (max).
     key_rows = (
         (key_credits_qs if key_credits_qs is not None else _active_key_credits())
         .filter(attempt_id__in=ids)
         .values_list("attempt_id", "question_id", "delta_points")
     )
     for attempt_id, question_id, delta in key_rows:
-        if (attempt_id, question_id) in credited_pairs:
+        already = credited_pairs.get((attempt_id, question_id), Decimal("0"))
+        extra = (delta or Decimal("0")) - already
+        if extra <= 0:
             continue
-        credited_pairs.add((attempt_id, question_id))
-        bonus_by_attempt[attempt_id] = bonus_by_attempt.get(attempt_id, Decimal("0")) + delta
+        credited_pairs[(attempt_id, question_id)] = already + extra
+        bonus_by_attempt[attempt_id] = bonus_by_attempt.get(attempt_id, Decimal("0")) + extra
     return bonus_by_attempt
 
 

@@ -74,6 +74,15 @@ ROLE_AUDIT_REVOKES: dict[str, tuple[str, ...]] = {
     "hr": ("user.import", "people.view_students"),
 }
 
+#: Eyni AÇAR DƏSTİNİ daşımalı rol qrupları (2026-10-14, sahib: «tyutor və proqram koordinatoru eyni roldur
+#: demək olar, hər 2-si eyni şeyləri edə bilsin»). Qrupun hər üzvü digərlərinin açarlarının BİRLƏŞMƏSİNİ alır —
+#: əvvəl yalnız baza dəsti (`_COORDINATOR_PERMISSIONS`) ortaq idi, sonrakı modullar (stage2/stage4/TXM/tədris
+#: şöbəsi/müraciət) açarları yalnız koordinatora əkirdi: `plan.view`, `semester.view`, `unit.group_manage`,
+#: `student.assign_group`, `student.registry_view`, `catalog.view`, `workload.view`, `workload.review`,
+#: `application.handle`. Hamısı UNIT əhatəlidir (`Membership.scope_unit` alt-ağacı) — koordinatorda artıq belə
+#: işləyirdi. `level` / ad / göstərilən ad DƏYİŞMİR. Mövcud tenantlar: miqrasiya ``organizations/0064``.
+ROLE_PARITY_GROUPS: tuple[tuple[str, ...], ...] = (("tutor", "program_coordinator"),)
+
 #: Heç nəyi qapılamayan açarlar (B13) — kataloqdan və bütün rollardan çıxarılır.
 #: 2026-10-13 axşam: `org.view` də (sahib «lazım deyilsə çıxar»; miqrasiya 0063).
 DEAD_PERMISSION_KEYS: tuple[str, ...] = ("grade.publish", "assignment.edit", "org.view")
@@ -96,7 +105,38 @@ def apply_role_audit_grants(roles):
         for key in ROLE_AUDIT_GRANTS.get(name, ()):
             if not _covered(permissions, key):
                 permissions.append(key)
+    return apply_role_parity(roles)
+
+
+def apply_role_parity(roles):
+    """``ROLE_PARITY_GROUPS`` — qrupdakı rollara açarlarının birləşməsini yazır (yerində, idempotent).
+
+    Sıra qorunur: hər rolun öz açarları əvvəl, digərindən gələnlər ardınca. ``*`` daşıyan rol toxunulmur;
+    açar wildcard-la (``<prefiks>.*``) artıq əhatəlidirsə təkrar yazılmır.
+    """
+    by_name = {role.get("name"): role for role in roles}
+    for group in ROLE_PARITY_GROUPS:
+        members = [by_name[name] for name in group if name in by_name]
+        union: list[str] = []
+        for role in members:
+            for key in role.get("permissions") or []:
+                if key not in union:
+                    union.append(key)
+        for role in members:
+            permissions = role.setdefault("permissions", [])
+            if "*" in permissions:
+                continue
+            for key in union:
+                if not _covered(permissions, key):
+                    permissions.append(key)
     return roles
 
 
-__all__ = ["DEAD_PERMISSION_KEYS", "ROLE_AUDIT_GRANTS", "ROLE_AUDIT_REVOKES", "apply_role_audit_grants"]
+__all__ = [
+    "DEAD_PERMISSION_KEYS",
+    "ROLE_AUDIT_GRANTS",
+    "ROLE_AUDIT_REVOKES",
+    "ROLE_PARITY_GROUPS",
+    "apply_role_audit_grants",
+    "apply_role_parity",
+]

@@ -215,7 +215,8 @@ def _role_capabilities(user, profile):
     is_lead_student = _user_has_any_role(user, {ProfileRole.LEAD_STUDENT})
     # Tyutor — qrup kurasiyası: öz unit alt-ağacındakı tələbə/kurs/statistika
     # görünüşü; imtahan-qiymətləndirmə-üzv idarəetməsi yoxdur. Proqram
-    # koordinatoru eyni işi görür (tyutor-ekvivalent) — hər ikisi is_tutor ilə.
+    # koordinatoru eyni işi görür (tyutor-ekvivalent) — hər ikisi is_tutor ilə (2026-10-14: alias iki
+    # tərəflidir, `core/roles.py` — tyutor da is_program_coordinator alır; açar dəsti də eynidir).
     is_program_coordinator = _user_has_any_role(user, {"program_coordinator"})
     is_tutor = _user_has_any_role(user, {"tutor"}) or is_program_coordinator
     # Dekan / kafedra müdürü — unit-scoped idarəetmə rolları.

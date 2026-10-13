@@ -141,6 +141,18 @@ class SelfworkHiddenByDefaultTest(_CourseWorld):
         self.assertNotContains(response, 'value="assignments"')
         self.assertNotContains(response, 'value="projects"')
 
+    def test_assigned_exams_hides_selfwork_and_coursework_tabs(self):
+        """2026-10-14: «Mənə təyin edilmiş tapşırıqlar» — sətirlər süzülürdü, «0»-lı tablar qalırdı."""
+        client = self._client(self.student)
+        response = client.get(reverse("accounts:profile") + "?section=assigned-exams")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "assigned_type=assignments")
+        self.assertNotContains(response, "assigned_type=independent")
+        self.assertContains(response, "assigned_type=labs")
+        # Köhnə link: gizli tab «hamısı»na düşür (URL səhifədə əks olunduğu üçün HTML yox, kontekst yoxlanır).
+        stale = client.get(reverse("accounts:profile") + "?section=assigned-exams&assigned_type=assignments")
+        self.assertEqual(stale.context["assigned_tasks_active_filter"], "all")
+
     def test_badge_counters_skip_hidden_kinds(self):
         from apps.accounts.views._dashboard_helpers.cheap_counts import compute_review_badge_counts
         from apps.courses.models import Course
@@ -163,6 +175,11 @@ class SelfworkShownWhenEnabledTest(_CourseWorld):
         self.assertTrue({"RAB12 Tapshiriq", "RAB12 Layihe", "RAB12 Lab"} <= titles)
         self.assertContains(response, "?type=courses")
         self.assertContains(response, "?type=independent")
+
+    def test_assigned_exams_shows_all_tabs(self):
+        response = self._client(self.student).get(reverse("accounts:profile") + "?section=assigned-exams")
+        self.assertContains(response, "assigned_type=assignments")
+        self.assertContains(response, "assigned_type=independent")
 
     def test_pending_review_shows_everything(self):
         response = self._client(self.teacher).get(reverse("accounts:pending_review"))

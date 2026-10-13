@@ -66,6 +66,7 @@
     {% if request.user.is_authenticated %}
     <link rel="stylesheet" href="{% static 'css/global_search.css' %}?v=20261001-1">
     {% endif %}
+    <link rel="stylesheet" href="{% static 'css/ems_search_input.css' %}?v=20261014-1">
 
     {% comment %}  Courses app CSS köçürüldü: yalnız courses səhifələrində
        `apps/courses/templates/courses/partials/_courses_assets_css.html`
@@ -94,8 +95,11 @@
     <script src="{% static 'js/ems_early.js' %}?v=20260905-1"></script>
     {# search_fold.js — EMSSearch (az/ing hərf qatlama + kod rejimi): bütün klient süzgəcləri ondan istifadə edir. #}
     <script src="{% static 'js/search_fold.js' %}?v=20260926-1"></script>
+    {# ems_search_input.js — EMSSearchInput: yazdıqca axtarışın vahid debounce qatı (1500 ms, ≥2 simvol, Enter, IME, köhnə cavab atılır). #}
+    <script src="{% static 'js/ems_search_input.js' %}?v=20261014-1"></script>
+    <script src="{% static 'js/ems_search_swap.js' %}?v=20261014-1"></script>
     <script src="{% static 'js/searchable_select_keys.js' %}?v=20260831-1"></script>
-    <script src="{% static 'js/searchable_select.js' %}?v=20261008-1"></script>
+    <script src="{% static 'js/searchable_select.js' %}?v=20261014-searchux"></script>
 </head>
 
 {% comment %}`data-toast-close-label` — proqram yolu ilə yaradılan toast-ların
@@ -186,21 +190,21 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
     <script src="{% static 'js/modal_scroll_lock.js' %}?v=20260926-3"></script>
     <script src="{% static 'js/burgerMenu.js' %}?v=20260911-1"></script>
     <script defer src="{% static 'js/pagination.js' %}?v=20260909-spa"></script>
-    <script src="{% static 'js/debounced_search_forms.js' %}?v=20260604-ajaxhook"></script>
-    <script src="{% static 'js/search_controls.js' %}"></script>
+    <script src="{% static 'js/debounced_search_forms.js' %}?v=20261014-searchux"></script>
+    <script src="{% static 'js/search_controls.js' %}?v=20261014-searchux"></script>
     <script src="{% static 'js/ems_table.js' %}?v=20260926-search"></script>
     <script src="{% static 'js/bootstrap_select.js' %}?v=20260926-1"></script>
-    <script src="{% static 'js/search_field.js' %}?v=20260708-1"></script>
+    <script src="{% static 'js/search_field.js' %}?v=20261014-searchux"></script>
     <script src="{% static 'js/csp_event_handlers.js' %}?v=20260914-a11y"></script>
     <script src="{% static 'js/footer_year.js' %}"></script>
     <script src="{% static 'js/route_loading.js' %}?v=20260713-spa-progress"></script>
     {% block global_search_js %}
         {% if request.user.is_authenticated %}
-        <script src="{% static 'js/global_search.js' %}?v=20261001-1"></script>
+        <script src="{% static 'js/global_search.js' %}?v=20261014-searchux"></script>
         {% endif %}
     {% endblock %}
     {% if view_as.can_use and not view_as.active %}
-    <script src="{% static 'js/view_as.js' %}?v=20260618-3"></script>
+    <script src="{% static 'js/view_as.js' %}?v=20261014-searchux"></script>
     {% endif %}
 
    

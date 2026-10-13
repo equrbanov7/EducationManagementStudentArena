@@ -2,7 +2,9 @@
  *
  * Select dəyişən kimi forma göndərilir (fakültə dəyişəndə kafedra sıfırlanır —
  * server onsuz da yad kafedranı rədd edir, URL təmiz qalsın); axtarış
- * inputları (imtahan + tələbə) 500ms debounce ilə göndərilir.
+ * inputları (imtahan + tələbə) vahid EMSSearchInput qaydası ilə (2026-10-14:
+ * yazı dayananda 1500 ms, ≥ 2 simvol, Enter dərhal, IME) — göndəriş «quiet»
+ * bölmə yükləməsidir: input əvəzlənmir, fokus və yazılan hərflər qalır.
  *
  * QEYD: profil SPA-sı bölmə swap-ında paneldəki <script> taqlarını yenidən
  * icra edir — dinləyicilər document səviyyəsində DELEGATED qoşulur və qlobal
@@ -16,14 +18,8 @@
     }
     window.__exchInit = true;
 
-    var timers = new WeakMap();
-
-    function submitForm(form) {
-        if (typeof form.requestSubmit === "function") {
-            form.requestSubmit();
-        } else {
-            form.submit();
-        }
+    function submitForm(form, input) {
+        window.EMSSearchInput.submitForm(form, { input: input || null });
     }
 
     document.addEventListener("change", function (event) {
@@ -44,30 +40,9 @@
         submitForm(form);
     });
 
-    document.addEventListener("input", function (event) {
-        var input = event.target;
-        if (!input || !input.matches || !input.matches("form.js-exch-filter input[data-exch-debounce]")) {
-            return;
-        }
-        var form = input.closest("form.js-exch-filter");
-        window.clearTimeout(timers.get(input));
-        timers.set(
-            input,
-            window.setTimeout(function () {
-                submitForm(form);
-            }, 500)
-        );
-    });
-
-    document.addEventListener("keydown", function (event) {
-        if (event.key !== "Enter") {
-            return;
-        }
-        var input = event.target;
-        if (input && input.matches && input.matches("form.js-exch-filter input[data-exch-debounce]")) {
-            event.preventDefault();
-            window.clearTimeout(timers.get(input));
-            submitForm(input.closest("form.js-exch-filter"));
-        }
+    window.EMSSearchInput.delegate("form.js-exch-filter input[data-exch-debounce]", {
+        onSearch: function (value, meta) {
+            submitForm(meta.input.closest("form.js-exch-filter"), meta.input);
+        },
     });
 })();

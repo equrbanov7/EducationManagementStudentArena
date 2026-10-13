@@ -35,6 +35,8 @@ yoxdur), dinamik dəyərlər `data-*` atributları ilə ötürülür.{% endcomme
      data-reload-url="{{ sec.reload_url }}"
      data-group-id="{% if sec.group %}{{ sec.group.id }}{% endif %}"
      data-period-id="{% if sec.period %}{{ sec.period.id }}{% endif %}"
+     data-view="{{ sec.view_mode }}"
+     data-teacher-id="{% if sec.teacher %}{{ sec.teacher.pk }}{% endif %}"
      data-can-edit="{{ sec.can_edit|yesno:'1,0' }}">
 
   {% include "partials/ems_ui/_content_header.html" with header_subtitle=sec.header_subtitle header_note=sec.scope_label %}
@@ -84,21 +86,35 @@ yoxdur), dinamik dəyərlər `data-*` atributları ilə ötürülür.{% endcomme
   <p class="sedit__note" role="status" data-sedit-read-only>
     {% trans "Yalnız baxış rejimi — cədvəli dəyişmək üçün «Cədvəl idarəetməsi» (schedule.manage) icazəsi lazımdır." context "accounts.schedule_manage" %}
   </p>
-  {% elif not sec.can_edit %}
+  {% elif sec.teacher_pick_needed %}
   <p class="sedit__note" role="status">
-    {% trans "Müəllim görünüşü yalnız-oxudur — dərs qoymaq üçün «Qrup cədvəli» görünüşünə keçin." context "accounts.schedule_manage" %}
+    {% trans "Müəllimi seçin — onun həftəlik cədvəli açılacaq; dərsləri buradan da qoymaq və yerini dəyişmək olar." context "accounts.schedule_manage" %}
   </p>
   {% endif %}
 
+  {% if sec.view_mode == 'teacher' %}
+  {% trans "Bu müəllimin bu semestrdə hələ dərsi yoxdur — boş xanaya klikləyib qrup və fənn seçərək dərs qoyun." context "accounts.schedule_manage" as sedit_teacher_empty %}
+  {% include "registrar/partials/_schedule_matrix.html" with matrix=sec.matrix matrix_role="manage" matrix_editable=sec.can_edit week=sec.week matrix_empty_text=sedit_teacher_empty matrix_show_group=True %}
+  {% else %}
   {% include "registrar/partials/_schedule_matrix.html" with matrix=sec.matrix matrix_role="manage" matrix_editable=sec.can_edit week=sec.week %}
+  {% endif %}
+
+  {# Kart klaviatura ipucu (aria-describedby) + köçürmə elanları (ekran oxuyucu). #}
+  <p class="smtx__sr" id="sedit-card-hint">{% trans "Enter — redaktə et. M — köçürmə rejimi: oxlarla xana seçin, Enter — burax, Esc — ləğv." context "accounts.schedule_manage" %}</p>
+  <p class="smtx__sr" data-sedit-live aria-live="polite"></p>
 
   <div class="sedit__legend">
     <span class="sedit__legend-item"><span class="sedit__swatch sedit__swatch--lecture"></span> {% trans "Mühazirə" context "accounts.schedule_manage" %}</span>
     <span class="sedit__legend-item"><span class="sedit__swatch sedit__swatch--seminar"></span> {% trans "Məşğələ" context "accounts.schedule_manage" %}</span>
     <span class="sedit__legend-item"><span class="sedit__swatch sedit__swatch--lab"></span> {% trans "Laboratoriya" context "accounts.schedule_manage" %}</span>
-    {% if not sec.read_only %}<span class="sedit__legend-item">{% trans "Dərsi sürüşdürüb başqa xanaya buraxın — təsdiq soruşulacaq." context "accounts.schedule_manage" %}</span>{% endif %}
+    {% if sec.can_edit %}<span class="sedit__legend-item sedit__legend-item--hint"><i class="fas fa-up-down-left-right" aria-hidden="true"></i> {% trans "Dərsi sürüşdürüb başqa xanaya buraxın (toxunma ekranında — basıb saxlayın); klaviaturada kartı seçib «M». Toqquşma varsa təsdiqdən əvvəl göstərilir." context "accounts.schedule_manage" %}</span>{% endif %}
   </div>
   {% endif %}
+
+  {# Detal modalı — yalnız-oxu kartlar və əhatədən kənar dərslər (`data-sgx-slot`). #}
+  <div class="sgx">
+    {% include "registrar/partials/_schedule_slot_modal.html" with modal_role="manage" %}
+  </div>
 
   {# ── JS mətn kataloqu (xarici fayl Django template-dən keçmir) ─────────── #}
   <div class="sedit__i18n" data-sedit-i18n hidden
@@ -109,7 +125,16 @@ yoxdur), dinamik dəyərlər `data-*` atributları ilə ötürülür.{% endcomme
        data-edit-title="{% trans 'Dərsi redaktə et' context 'accounts.schedule_manage' %}"
        data-move-summary="{% trans 'Dərs bu xanaya köçürülsün?' context 'accounts.schedule_manage' %}"
        data-no-suggestions="{% trans 'Uyğun boş xana tapılmadı.' context 'accounts.schedule_manage' %}"
-       data-place-here="{% trans 'Bura qoy' context 'accounts.schedule_manage' %}"></div>
+       data-place-here="{% trans 'Bura qoy' context 'accounts.schedule_manage' %}"
+       data-pick-group="{% trans 'Əvvəlcə qrupu seçin.' context 'accounts.schedule_manage' %}"
+       data-moving="{% trans 'Köçürülür…' context 'accounts.schedule_manage' %}"
+       data-moved="{% trans 'Dərs köçürüldü.' context 'accounts.schedule_manage' %}"
+       data-move-failed="{% trans 'Dərs köçürülmədi — əvvəlki yerinə qaytarıldı.' context 'accounts.schedule_manage' %}"
+       data-move-blocked="{% trans 'Bu xanaya köçürmək olmaz — əvvəlcə toqquşmanı aradan qaldırın.' context 'accounts.schedule_manage' %}"
+       data-move-force-hint="{% trans 'Toqquşma var. Yenə də köçürmək üçün səbəb yazın — toqquşan dərs silinmir, «Yenidən yerləşdirilməli» siyahısına düşür.' context 'accounts.schedule_manage' %}"
+       data-pick-mode="{% trans 'Köçürmə rejimi: oxlarla xana seçin, Enter — burax, Esc — ləğv.' context 'accounts.schedule_manage' %}"
+       data-reason-short="{% trans 'Məcburi köçürmə üçün ən azı 10 simvolluq səbəb yazın (auditə düşür).' context 'accounts.schedule_manage' %}"
+       data-pick-cancel="{% trans 'Köçürmə ləğv edildi.' context 'accounts.schedule_manage' %}"></div>
 </div>
 
 {% if not sec.read_only %}

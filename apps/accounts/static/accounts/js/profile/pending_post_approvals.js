@@ -1,7 +1,7 @@
 /*
  * pending_post_approvals.js
  * Source: apps/accounts/templates/accounts/profile/sections/_pending_post_approvals.html
- * Pending-post-approvals section: debounced auto-filter form, content show-more/less
+ * Pending-post-approvals section: content show-more/less
  * toggle, shared confirmation modal + action buttons (approve/reject/needs-changes).
  * i18n strings read from #pending-post-approvals-config data-*; CSRF not needed (form
  * submit). AJAX-safe: EMSReady-wrapped, null-safe, per-element/window idempotency guards.
@@ -19,31 +19,10 @@
             reasonRequired: (cfgEl && cfgEl.dataset.i18nReasonRequired) || ""
         };
 
-        /* ---- Auto-filter form ---- */
-        panel.querySelectorAll("[data-auto-filter-form]").forEach(function (form) {
-            if (!form || form.dataset.autoFilterBound === "1") { return; }
-            form.dataset.autoFilterBound = "1";
-
-            var debounceHandle = null;
-            var textFields = form.querySelectorAll('input[type="text"], input[type="search"]');
-            var selects = form.querySelectorAll("select");
-
-            function submitForm() {
-                if (typeof form.requestSubmit === "function") { form.requestSubmit(); return; }
-                form.submit();
-            }
-
-            textFields.forEach(function (field) {
-                field.addEventListener("input", function () {
-                    window.clearTimeout(debounceHandle);
-                    debounceHandle = window.setTimeout(submitForm, 350);
-                });
-                field.addEventListener("keydown", function (event) {
-                    if (event.key === "Enter") { event.preventDefault(); window.clearTimeout(debounceHandle); submitForm(); }
-                });
-            });
-            selects.forEach(function (select) { select.addEventListener("change", submitForm); });
-        });
+        /* ---- Auto-filter form ----
+           2026-10-14: öz 350 ms debounce-u silindi — `[data-auto-filter-form]`
+           vahid `profile_auto_filter_form.js` (EMSSearchInput: 1500 ms, ≥ 2 simvol,
+           Enter, IME, quiet bölmə yükləməsi) ilə işləyir; şablon onu yükləyir. */
 
         /* ---- Content toggle ---- */
         panel.querySelectorAll("[data-pending-post-toggle]").forEach(function (button) {

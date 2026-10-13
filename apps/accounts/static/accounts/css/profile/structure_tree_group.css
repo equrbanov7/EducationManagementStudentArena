@@ -1,0 +1,133 @@
+/* «Struktur ağacı» → QRUP detalı: starosta kartı + tələbə siyahısı (2026-10-14).
+   YALNIZ düzüm — kart/badge/düymə ortaq `ems_ui` + teaching_office.css qatındadır.
+   Şablon: accounts/profile/sections/teaching_office/_tree_group_*.html */
+
+.tof-st-lead {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 12px;
+}
+
+.tof-st-lead > .tof-fact__label,
+.tof-st-lead > .tof-fact__value,
+.tof-st-lead > .tof-st-lead__warn {
+    grid-column: 1;
+}
+
+.tof-st-lead__actions {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.tof-st-lead.has-warning {
+    border-color: var(--ems-warning-500, #f59e0b);
+    background: var(--ems-warning-100, #fef3c7);
+}
+
+.tof-st-lead__warn {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.8rem;
+    color: var(--ems-warning-800, #92400e);
+}
+
+.tof-st-students {
+    margin-top: 16px;
+    border-top: 1px solid var(--ems-border);
+    padding-top: 12px;
+}
+
+.tof-st-students__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px;
+}
+
+.tof-st-students__title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.tof-st-students__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 420px;
+    overflow: auto;
+}
+
+.tof-st-students__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    padding: 7px 4px;
+    border-bottom: 1px solid var(--ems-border);
+}
+
+.tof-st-students__row:last-child {
+    border-bottom: 0;
+}
+
+.tof-st-students__row.is-inactive .tof-st-students__name {
+    color: var(--ems-text-muted, #64748b);
+}
+
+.tof-st-students__num {
+    min-width: 72px;
+    font-size: 0.8rem;
+    color: var(--ems-text-muted, #64748b);
+}
+
+.tof-st-students__name {
+    flex: 1 1 160px;
+    min-width: 0;
+    font-weight: 600;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+    text-decoration: none;
+}
+
+.tof-st-students__name:hover,
+.tof-st-students__name:focus-visible {
+    text-decoration: underline;
+}
+
+.tof-st-students__mail {
+    flex-basis: 100%;
+    padding-left: 82px;
+    font-size: 0.8rem;
+    color: var(--ems-text-muted, #64748b);
+    overflow-wrap: anywhere;
+}
+
+.tof-st-students__empty {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--ems-text-muted, #64748b);
+}
+
+@media (max-width: 560px) {
+    .tof-st-lead {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .tof-st-lead__actions {
+        grid-column: 1;
+        grid-row: auto;
+        justify-content: flex-start;
+        margin-top: 8px;
+    }
+
+    .tof-st-students__mail {
+        padding-left: 0;
+    }
+}

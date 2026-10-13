@@ -15,8 +15,6 @@
         return;
     }
 
-    var SEARCH_DEBOUNCE_MS = 250;
-
     function searchMatcher(query) {
         var q = String(query || "").trim();
         var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
@@ -223,7 +221,7 @@
         list.appendChild(frag);
     }
 
-    function loadGroups() {
+    function loadGroups(input) {
         var root = groupRoot();
         var list = byId("group_list_container");
         if (!root || !list) {
@@ -235,9 +233,12 @@
         }
         groups.controller = window.AbortController ? new window.AbortController() : null;
         list.setAttribute("aria-busy", "true");
-        if (!groups.mine.length || groups.q) {
+        // 2026-10-14: axtarışda siyahı skeletə çevrilmir (öz qruplar yerində süzülüb
+        // qalır) — yalnız input-un altında «Axtarılır…»; skelet ilk yükləmədədir.
+        if (!groups.mine.length) {
             groupSkeleton(list);
         }
+        window.EMSSearchInput.busy(input, true);
         var url = root.getAttribute("data-available-url");
         var params = new URLSearchParams({ q: groups.q });
         window.EMSCore
@@ -249,6 +250,7 @@
                 groups.mine = (payload && payload.mine) || [];
                 groups.others = (payload && payload.others) || [];
                 list.setAttribute("aria-busy", "false");
+                window.EMSSearchInput.busy(input, false);
                 renderGroups();
             })
             .catch(function (error) {
@@ -259,6 +261,7 @@
                     return;
                 }
                 list.setAttribute("aria-busy", "false");
+                window.EMSSearchInput.busy(input, false);
                 list.textContent = "";
                 list.appendChild(groupNote(root.getAttribute("data-i18n-error") || "", true));
             });
@@ -267,17 +270,24 @@
     window.EMSDelegate.on("show.bs.modal", "#addGroupModal", function () {
         var input = byId("group_search_input");
         groups.q = input ? input.value.trim() : "";
+        if (input) {
+            window.EMSSearchInput.sync(input);
+        }
         loadGroups();
         updateGroupCount();
     });
 
+    // Öz qruplar yazdıqca YERİNDƏ süzülür (yerli məlumat); digər qruplar üçün server
+    // axtarışı vahid EMSSearchInput qaydası ilə (1500 ms, ≥ 2 simvol, Enter, IME).
     window.EMSDelegate.on("input", "#group_search_input", function (event, input) {
         groups.q = (input.value || "").trim();
-        if (groups.timer) {
-            window.clearTimeout(groups.timer);
-        }
         renderGroups();
-        groups.timer = window.setTimeout(loadGroups, SEARCH_DEBOUNCE_MS);
+    });
+    window.EMSSearchInput.delegate("#group_search_input", {
+        onSearch: function (value, meta) {
+            groups.q = value;
+            loadGroups(meta.input);
+        },
     });
 
     window.EMSDelegate.on("change", "#group_list_container .custom-item-checkbox", function (event, box) {

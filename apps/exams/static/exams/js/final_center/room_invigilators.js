@@ -18,7 +18,6 @@
 (function () {
     "use strict";
 
-    var DEBOUNCE_MS = 300;
     var PAGE_SIZE = 10;
 
     function init() {
@@ -44,7 +43,6 @@
             add: panel.getAttribute("data-i18n-add") || ""
         };
 
-        var timer = null;
         var seq = 0;
         var offset = 0;
         var hasMore = false;
@@ -166,7 +164,7 @@
         // `reset`=true → yeni axtarış (panel açılanda da ilk səhifə); `reset`=false
         // → aşağı sürüşdürdükcə növbəti səhifə (bütün namizədlər bir dəfəyə
         // yüklənmir).
-        function doSearch(query, reset) {
+        function doSearch(query, reset, quiet) {
             if (!searchUrl) return;
             if (reset) {
                 offset = 0;
@@ -179,7 +177,11 @@
             }
 
             var mine = reset ? ++seq : seq;
-            if (reset) {
+            // Yazdıqca axtarış (2026-10-14): siyahı silinmir — sakitcə solur + «Axtarılır…».
+            quiet = Boolean(quiet && reset && results.children.length);
+            results.classList.toggle("ems-search-pending", quiet);
+            window.EMSSearchInput.busy(search, quiet);
+            if (reset && !quiet) {
                 results.textContent = "";
                 var loading = document.createElement("div");
                 loading.className = "rma-loading";
@@ -200,6 +202,8 @@
                 })
                 .then(function (data) {
                     if (reset && mine !== seq) return; // köhnəlmiş sorğu
+                    results.classList.remove("ems-search-pending");
+                    window.EMSSearchInput.busy(search, false);
                     var items = (data && data.results) || [];
                     loadedItems = loadedItems.concat(items);
                     offset += items.length;
@@ -209,7 +213,11 @@
                 })
                 .catch(function () {
                     if (reset) {
-                        if (mine === seq) results.textContent = "";
+                        if (mine === seq) {
+                            results.classList.remove("ems-search-pending");
+                            window.EMSSearchInput.busy(search, false);
+                            results.textContent = "";
+                        }
                     } else {
                         loadingMore = false;
                     }
@@ -241,12 +249,11 @@
             }
         });
 
-        search.addEventListener("input", function () {
-            if (timer) clearTimeout(timer);
-            var query = search.value.trim();
-            timer = setTimeout(function () {
-                doSearch(query, true);
-            }, DEBOUNCE_MS);
+        // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter dərhal, IME).
+        window.EMSSearchInput.bind(search, {
+            onSearch: function (query) {
+                doSearch(query, true, true);
+            }
         });
 
         panel.addEventListener("toggle", function () {

@@ -33,7 +33,6 @@
         return;
     }
 
-    var SEARCH_DEBOUNCE_MS = 250;
 
     // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
     // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
@@ -280,7 +279,7 @@
      * Cari `picker.q` / `picker.page` ilə endpoint-i çağırır.
      * append=false → siyahı sıfırlanır (yeni axtarış), append=true → növbəti səhifə.
      */
-    function load(append) {
+    function load(append, input) {
         var root = pickerRoot();
         var list = listEl();
         if (!root || !list) {
@@ -310,10 +309,15 @@
         if (more) {
             more.disabled = true;
         }
-        if (!append) {
+        // 2026-10-14: yazdıqca axtarışda köhnə sətirlər cavab gələnə qədər sakitcə
+        // solur (siyahı skeletə çevrilmir) + input-un altında «Axtarılır…».
+        var quiet = !append && !!input && !!list.querySelector(".list-item-row");
+        if (!append && !quiet) {
             clearRows();
             showSkeleton(list);
         }
+        list.classList.toggle("ems-search-pending", quiet);
+        window.EMSSearchInput.busy(input, quiet);
 
         window.EMSCore
             .fetchJSON(url + (url.indexOf("?") === -1 ? "?" : "&") + params.toString(), {
@@ -322,6 +326,9 @@
             .then(function (payload) {
                 if (seq !== picker.seq) {
                     return; // köhnə cavab — daha yeni sorğu var
+                }
+                if (quiet) {
+                    clearRows();
                 }
                 var users = (payload && payload.users) || [];
                 setStatus("", false);
@@ -356,6 +363,8 @@
                 }
                 picker.loading = false;
                 list.setAttribute("aria-busy", "false");
+                list.classList.remove("ems-search-pending");
+                window.EMSSearchInput.busy(input, false);
                 if (more) {
                     more.disabled = false;
                 }
@@ -365,15 +374,12 @@
     function resetPicker() {
         var input = byId("student_search_input");
         var more = moreBtn();
-        if (picker.timer) {
-            window.clearTimeout(picker.timer);
-            picker.timer = null;
-        }
         picker.q = "";
         picker.page = 1;
         picker.hasMore = false;
         if (input) {
             input.value = "";
+            window.EMSSearchInput.sync(input, "");
         }
         if (more) {
             more.hidden = true;
@@ -389,23 +395,13 @@
         resetPicker();
     });
 
-    window.EMSDelegate.on("input", "#student_search_input", function (event, input) {
-        var value = (input.value || "").trim();
-        if (picker.timer) {
-            window.clearTimeout(picker.timer);
-        }
-        picker.timer = window.setTimeout(function () {
-            picker.timer = null;
+    // 2026-10-14: vahid EMSSearchInput (1500 ms, ≥ 2 simvol, Enter dərhal — forma
+    // göndərilmir, IME); dəyişməyən dəyər üçün sorğu yoxdur.
+    window.EMSSearchInput.delegate("#student_search_input", {
+        onSearch: function (value, meta) {
             picker.q = value;
             picker.page = 1;
-            load(false);
-        }, SEARCH_DEBOUNCE_MS);
-    });
-
-    // Enter axtarış sahəsində formanı göndərməməlidir.
-    window.EMSDelegate.on("keydown", "#student_search_input", function (event) {
-        if (event.key === "Enter") {
-            event.preventDefault();
+            load(false, meta.input);
         }
     });
 

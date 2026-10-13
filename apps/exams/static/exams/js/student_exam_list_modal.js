@@ -483,22 +483,16 @@
             });
         }
 
-        // --- B) LIVE SEARCH (DEBOUNCE 1 saniyə) ---
+        // --- B) LIVE SEARCH — vahid EMSSearchInput (2026-10-14: 1500 ms, ≥ 2 simvol,
+        // Enter dərhal, IME); yeni səhifədə fokus + kursor axtarış sahəsinə qayıdır.
         const searchInput = document.querySelector('input[name="q"]');
         const searchForm = document.querySelector('.exam-toolbar');
 
-        if (searchInput && searchForm) {
-            let debounceTimer;
-
-            searchInput.addEventListener('input', function() {
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => {
-                    searchForm.submit();
-                }, 1000);
-            });
-
-            searchForm.addEventListener('submit', function() {
-                clearTimeout(debounceTimer);
+        if (searchInput && searchForm && window.EMSSearchInput) {
+            window.EMSSearchInput.bind(searchInput, {
+                onSearch: function () {
+                    window.EMSSearchInput.submitForm(searchForm, { input: searchInput });
+                }
             });
 
             if(searchInput.value) {

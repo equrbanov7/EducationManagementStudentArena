@@ -57,6 +57,8 @@ def test_handler_roles_hold_the_handle_key():
         "dean",
         "chair_head",
         "program_coordinator",
+        # 2026-10-14 (sahib): tyutor = proqram koordinatoru — eyni şöbənin emalçısı.
+        "tutor",
         "hr",
         "vice_rector",
         "exam_center_head",
@@ -68,7 +70,7 @@ def test_handler_roles_hold_the_handle_key():
 
 
 def test_teachers_and_students_never_decide():
-    for name in ("student", "lead_student", "teacher", "assistant", "tutor", "lab_assistant"):
+    for name in ("student", "lead_student", "teacher", "assistant", "lab_assistant"):
         assert not has_permission(_role(name)["permissions"], PERM_HANDLE), name
         assert not has_permission(_role(name)["permissions"], PERM_MANAGE), name
 

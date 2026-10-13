@@ -1,8 +1,13 @@
 {% load i18n %}
 {% comment %}Sürüklə-burax köçürməsinin TƏSDİQİ (sahibin tələbi: «başqa yerə
 keçəndə xanaya dərs təsdiq istəsin»). Xülasə mətni və toqquşma siyahısı JS ilə
-doldurulur — inline script YOXDUR.{% endcomment %}
+doldurulur — inline script YOXDUR.
+
+2026-10-14: dialoq açılan kimi QURU yoxlama (`action=check_move`) gedir — hökm
+(`data-sedit-move-verdict`) və toqquşmalar «Köçür»-dən ƏVVƏL görünür; qrup və ya
+əhatədən kənar toqquşmada «Köçür» bağlıdır (`accounts/js/schedule_editor_move.js`).{% endcomment %}
 <p class="sedit-move__summary" data-sedit-move-summary></p>
+<div class="sedit-verdict" data-sedit-move-verdict role="status" hidden></div>
 <ul class="sedit-conflicts" data-sedit-move-conflicts hidden></ul>
 <div class="sedit-force" data-sedit-move-force hidden>
   <label class="ems-field__label" for="sedit-move-reason">{% trans "Məcburi dəyişikliyin səbəbi" context "accounts.schedule_manage" %}</label>

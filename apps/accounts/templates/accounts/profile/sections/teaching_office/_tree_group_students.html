@@ -1,0 +1,46 @@
+{% load i18n %}
+{% comment %}«Struktur ağacı» → qrup → TƏLƏBƏ SİYAHISI + starosta dialoqları (2026-10-14).
+
+Kontekst: `panel` (`structure_tree_group.build_group_panel`), `unit` (seçilmiş qrup).
+* Siyahı yalnız `people.view_students` əhatəsi qrupu əhatə edəndə (`panel.can_view_students`); e-poçt yalnız
+  `people.view_contacts` ilə (`panel.show_contacts`). Telefon/şəxsi data göstərilmir.
+* Seçici variantları SERVERDƏ qurulur — yalnız qrupun QEYDİYYATLI tələbələri (hazırkı starosta xaric); server
+  eyni qaydanı yenidən yoxlayır (`services/group_lead.py`). Göndəriş ortaq `teaching_office.js`-dədir
+  (`data-tof-form` → JSON POST → bölmə yenilənir, `st_unit` URL-də qalır).
+* Dialoqlar detal panelinin İÇİNDƏDİR — fraqment swap-ında qrupla birlikdə yenilənir.{% endcomment %}
+{% if panel.can_view_students %}
+<div class="tof-st-students">
+    <div class="tof-st-students__head">
+        <h3 class="tof-st-students__title">{% trans "Qrupun tələbələri" context "accounts.structure_tree" %}</h3>
+        <span class="ems-badge">{{ panel.student_total }}</span>
+    </div>
+    {% if panel.students %}
+    <ul class="tof-st-students__list">
+        {% for row in panel.students %}
+        <li class="tof-st-students__row{% if row.status != 'enrolled' %} is-inactive{% endif %}">
+            <span class="tof-st-students__num ems-mono">{{ row.number|default:"—" }}</span>
+            <a class="tof-st-students__name" href="{{ row.profile_url }}">{{ row.name }}</a>
+            {% if row.is_lead %}<span class="ems-badge ems-badge--primary"><i class="fas fa-user-tie" aria-hidden="true"></i> {% trans "Starosta" context "accounts.group_lead" %}</span>{% endif %}
+            {% if row.status != "enrolled" %}<span class="ems-badge ems-badge--warning">{{ row.status_label }}</span>{% endif %}
+            {% if panel.show_contacts and row.email %}<span class="tof-st-students__mail">{{ row.email }}</span>{% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="tof-st-students__empty">{% trans "Bu qrupda hələ tələbə yoxdur." context "accounts.structure_tree" %}</p>
+    {% endif %}
+</div>
+{% endif %}
+
+{% if panel.can_assign_lead %}
+{% trans "Qrupun starostası" context "accounts.group_lead" as st_lead_title %}
+{% trans "Starosta qrupun qeydiyyatlı tələbələrindən seçilir və kabinetində «Starosta» bölməsi açılır: qrupun fənləri, seçmə fənlər, birləşmiş dərslər, cədvəl, imtahanlar, elanlar." context "accounts.group_lead" as st_lead_sub %}
+{% trans "Təyin et" context "accounts.group_lead" as st_lead_btn %}
+{% trans "Starostanı götür" context "accounts.group_lead" as st_lead_remove_title %}
+{% trans "Əməl audit jurnalına yazılır, tələbəyə bildiriş gedir." context "accounts.group_lead" as st_lead_remove_sub %}
+{% trans "Götür" context "accounts.group_lead" as st_lead_remove_btn %}
+{% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofTreeLeadDialog" form_dialog_title=st_lead_title form_dialog_subtitle=st_lead_sub form_dialog_submit_label=st_lead_btn form_dialog_body_include="accounts/profile/sections/teaching_office/_tree_group_lead_fields.html" form_dialog_action=panel.lead_action_url form_dialog_hidden=panel.lead_assign_hidden form_dialog_data=panel.lead_form_data %}
+{% if panel.lead %}
+{% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofTreeLeadRemoveDialog" form_dialog_title=st_lead_remove_title form_dialog_subtitle=st_lead_remove_sub form_dialog_submit_label=st_lead_remove_btn form_dialog_submit_tone="danger" form_dialog_body_include="accounts/profile/sections/teaching_office/_tree_group_lead_remove_fields.html" form_dialog_action=panel.lead_action_url form_dialog_hidden=panel.lead_remove_hidden form_dialog_data=panel.lead_form_data %}
+{% endif %}
+{% endif %}

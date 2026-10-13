@@ -198,6 +198,24 @@ def admission_year_options(organization, *, current_year: int) -> list:
     return [{"value": str(year), "label": str(year)} for year in sorted(years, reverse=True)]
 
 
+def scoped_filter_options(organization, scope, unit_type, *, limit=None) -> list:
+    """Süzgəc seçimləri (`{value, label}`) — YALNIZ aktorun əhatəsindəki ``unit_type`` vahidləri.
+
+    Əhatə alt-ağacı + əhatə köklərinin ƏCDADLARI (məs. ixtisas koordinatoru öz fakültəsini seçə bilsin —
+    süzgəc sətirləri yenə əhatə ilə məhdudlaşır). Org əhatəsi → hamısı; əhatəsiz → boş (fail-closed).
+    """
+    queryset = OrgUnit.objects.filter(organization=organization, is_active=True, unit_type=unit_type)
+    if not scope.is_org_wide:
+        if not scope.is_unit_scoped:
+            return []
+        ancestor_ids = {part for path in scope.unit_paths for part in str(path or "").split("/") if part}
+        queryset = queryset.filter(scope.unit_subtree_q() | Q(pk__in=list(ancestor_ids)))
+    queryset = queryset.order_by("name")
+    if limit:
+        queryset = queryset[:limit]
+    return [{"value": str(unit.id), "label": unit.name} for unit in queryset]
+
+
 def build_groups_registry(request, organization) -> dict:
     """«Qruplar» reyestri: filtr + sıralama + səhifələmə (hamısı serverdə)."""
     if not can_view_groups(request):
@@ -346,18 +364,10 @@ def build_groups_registry(request, organization) -> dict:
             "show_archived": show_archived,
             "sort": sort,
         },
-        "faculty_options": [
-            {"value": str(unit.id), "label": unit.name}
-            for unit in OrgUnit.objects.filter(organization=organization, is_active=True, unit_type="faculty").order_by(
-                "name"
-            )
-        ],
-        "specialty_options": [
-            {"value": str(unit.id), "label": unit.name}
-            for unit in OrgUnit.objects.filter(
-                organization=organization, is_active=True, unit_type="specialty"
-            ).order_by("name")[:500]
-        ],
+        # 2026-10-14 (sahib: «fakültə başqa fakültənin qruplarını görməsin»): seçimlər ƏHATƏ ilə — əvvəl
+        # bütün təşkilatın fakültə/ixtisasları siyahıda görünürdü (qrup sətirləri onsuz da süzülürdü).
+        "faculty_options": scoped_filter_options(organization, scope, OrgUnitType.FACULTY),
+        "specialty_options": scoped_filter_options(organization, scope, OrgUnitType.SPECIALTY, limit=500),
         "language_options": language_options(organization),
         "language_form_options": language_form_options(organization),
         "education_form_options": education_form_choices(),
@@ -393,6 +403,7 @@ __all__ = [
     "group_scope",
     "language_form_options",
     "language_options",
+    "scoped_filter_options",
     "student_record_scope_q",
 ]
 

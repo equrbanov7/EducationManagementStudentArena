@@ -425,57 +425,17 @@
             }
         }
 
+        /* `form.js-profile-debounce-search` — 2026-10-14: vahid EMSSearchInput
+           (1500 ms, ≥ 2 simvol, Enter, IME, dəyişməyən dəyər göndərilmir);
+           göndəriş quiet bölmə yükləməsidir — input əvəzlənmir, fokus qalır.
+           `data-debounce-ms` artıq nəzərə alınmır (hər yerdə eyni qayda). */
         function initDebouncedSearchForms() {
-            var forms = document.querySelectorAll("form.js-profile-debounce-search");
-            forms.forEach(function (form) {
-                if (form.getAttribute("data-debounce-ready") === "1") {
-                    return;
-                }
-
-                var input = form.querySelector('input[type="search"]');
-                if (!input) {
-                    return;
-                }
-
-                var rawDebounceMs = parseInt(form.getAttribute("data-debounce-ms"), 10);
-                var debounceMs = Number.isFinite(rawDebounceMs) && rawDebounceMs >= 0 ? rawDebounceMs : 1000;
-                var timerId = null;
-                var lastSubmittedValue = (input.value || "").trim();
-
-                function submitSearch() {
-                    var currentValue = (input.value || "").trim();
-                    if (currentValue === lastSubmittedValue) {
-                        return;
+            window.EMSSearchInput.delegate('form.js-profile-debounce-search input[type="search"]', {
+                onSearch: function (value, meta) {
+                    if (meta.input.form) {
+                        window.EMSSearchInput.submitForm(meta.input.form, { input: meta.input });
                     }
-                    lastSubmittedValue = currentValue;
-
-                    if (typeof form.requestSubmit === "function") {
-                        form.requestSubmit();
-                        return;
-                    }
-                    form.submit();
                 }
-
-                input.addEventListener("input", function () {
-                    window.clearTimeout(timerId);
-                    timerId = window.setTimeout(submitSearch, debounceMs);
-                });
-
-                input.addEventListener("keydown", function (event) {
-                    if (event.key !== "Enter") {
-                        return;
-                    }
-                    event.preventDefault();
-                    window.clearTimeout(timerId);
-                    submitSearch();
-                });
-
-                form.addEventListener("submit", function () {
-                    window.clearTimeout(timerId);
-                    lastSubmittedValue = (input.value || "").trim();
-                });
-
-                form.setAttribute("data-debounce-ready", "1");
             });
         }
 

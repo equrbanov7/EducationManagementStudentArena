@@ -158,13 +158,24 @@ def _apply(slot, cleaned):
 def _guarded_check(
     *, organization, offering, cleaned, exclude_id, force, actor, reason, request, slot_instructor_id=None
 ):
-    """Konflikt yoxlaması (slotun EFFEKTİV müəllimi ilə) + (force olduqda) toqquşanların parklanması."""
+    """Konflikt yoxlaması (slotun EFFEKTİV müəllimi ilə) + (force olduqda) toqquşanların parklanması.
+
+    SİYASƏT (2026-10-14, sahibin «müəllimin dərsləri üst-üstə düşərsə xəbərdarlıq» tələbi):
+    * toqquşma YOXDUR → yazılır;
+    * yalnız MÜƏLLİM və/və ya AUDİTORİYA toqquşması (redaktorun əhatəsində) → ``force=1`` +
+      səbəb (≥ ``MIN_REASON``) ilə təsdiq; toqquşan dərs SİLİNMİR, parklanır, audit səbəblə;
+    * QRUP toqquşması → HEÇ VAXT məcburi keçilmir (409 ``group_conflict``): qrup eyni anda iki
+      dərsdə otura bilməz — əvvəlcə həmin dərs köçürülməlidir;
+    * ƏHATƏDƏN KƏNAR toqquşma (başqa fakültənin dərsi) → ``force`` 403: onu bu redaktor parklaya
+      bilməz; cavab yalnız «fənn · qrup» açır (``schedule_conflicts`` modul başlığı).
+    """
     verdict = schedule_editor.check_cell(
         organization=organization,
         offering=offering,
         cleaned=cleaned,
         exclude_id=exclude_id,
         slot_instructor_id=slot_instructor_id,
+        actor=actor,
     )
     if verdict["errors"]:
         raise schedule_editor.CellError(
@@ -172,22 +183,48 @@ def _guarded_check(
             pgettext(_CTX, "Slot yadda saxlanılmadı — məlumatları yoxlayın."),
             errors=verdict["errors"],
         )
-    if not verdict["conflicts"]:
+    conflicts = verdict["conflicts"]
+    if not conflicts:
         return []
-    if not force:
+    extra = {"conflicts": conflicts, "suggestions": verdict["suggestions"]}
+    if any(row["kind"] == schedule_conflicts.KIND_GROUP for row in conflicts):
         raise schedule_editor.CellError(
-            "conflict",
-            verdict["conflicts"][0]["message"],
+            "group_conflict",
+            pgettext(
+                _CTX,
+                "Qrupun bu saatda artıq dərsi var — qrup eyni anda iki dərsdə ola bilməz. "
+                "Əvvəlcə həmin dərsi başqa xanaya köçürün və ya boş xana seçin.",
+            ),
             status=409,
-            extra={"conflicts": verdict["conflicts"], "suggestions": verdict["suggestions"]},
+            extra=extra,
+        )
+    if not force:
+        raise schedule_editor.CellError("conflict", conflicts[0]["message"], status=409, extra=extra)
+    if not all(row.get("can_force") for row in conflicts):
+        raise schedule_editor.CellError(
+            "permission_denied",
+            pgettext(_CTX, "Toqquşan dərs sizin səlahiyyət sahənizdən kənardadır — məcburi dəyişiklik mümkün deyil."),
+            status=403,
+            extra=extra,
         )
     return _force_park(
         actor=actor,
         organization=organization,
-        conflicts=verdict["conflicts"],
+        conflicts=conflicts,
         reason=_require_reason(reason),
         request=request,
     )
+
+
+def _forced(row, parked):
+    """Audit ``new_values``: məcburi yazıda parklanan dərslərin id-ləri də qeyd olunur."""
+    if not parked:
+        return row
+    return {**row, "forced": True, "parked_slot_ids": [item["id"] for item in parked]}
+
+
+def _forced_reason(parked, data) -> str:
+    return (str(data.get("reason") or "").strip()) if parked else ""
 
 
 # ── Yarat / redaktə et ───────────────────────────────────────────────────────
@@ -271,7 +308,15 @@ def save_cell(*, actor, organization, group, period, data, request=None) -> dict
             _apply(slot, cleaned)
             slot.save()
             row = base.slot_row(slot)
-            _audit("create", actor=actor, organization=organization, slot=slot, request=request, new=row)
+            _audit(
+                "create",
+                actor=actor,
+                organization=organization,
+                slot=slot,
+                request=request,
+                new=_forced(row, parked),
+                reason=_forced_reason(parked, data),
+            )
         else:
             old = base.slot_row(slot)
             slot.offering = offering
@@ -282,14 +327,23 @@ def save_cell(*, actor, organization, group, period, data, request=None) -> dict
             slot.park_reason = ""
             slot.save()
             row = base.slot_row(slot)
-            _audit("update", actor=actor, organization=organization, slot=slot, request=request, old=old, new=row)
+            _audit(
+                "update",
+                actor=actor,
+                organization=organization,
+                slot=slot,
+                request=request,
+                old=old,
+                new=_forced(row, parked),
+                reason=_forced_reason(parked, data),
+            )
         base.notify_schedule_change(offering=offering, row=row, removed=False, old_row=old)
     return {"slot": row, "parked": parked}
 
 
-def move_slot(*, actor, organization, slot, data, request=None) -> dict:
-    """Sürüklə-burax köçürməsi — yalnız YER dəyişir (fənn/müəllim/slotun müəllimi toxunulmur)."""
-    payload = {
+def move_payload(slot, data) -> dict:
+    """Köçürmənin hüceyrə payload-u — yalnız YER (və istəyə görə həftə/otaq) dəyişir."""
+    return {
         "slot_id": str(slot.pk),
         "subject_id": str(slot.offering.subject_id),
         "instructor_id": str(slot.offering.instructor_id or ""),
@@ -302,12 +356,32 @@ def move_slot(*, actor, organization, slot, data, request=None) -> dict:
         "force": data.get("force"),
         "reason": data.get("reason"),
     }
+
+
+def check_move(*, actor, organization, slot, data) -> dict:
+    """Sürüklə-buraxın QURU yoxlaması (heç nə yazmır) — təsdiq dialoqu toqquşmanı ƏVVƏLCƏDƏN göstərsin."""
+    payload = move_payload(slot, data)
+    cleaned, errors = schedule_editor.parse_cell(payload, organization=organization)
+    if errors:
+        return {"ok": False, "errors": errors, "conflicts": [], "suggestions": [], "force_allowed": False}
+    return schedule_editor.check_cell(
+        organization=organization,
+        offering=slot.offering,
+        cleaned=cleaned,
+        exclude_id=str(slot.pk),
+        slot_instructor_id=slot.instructor_id,
+        actor=actor,
+    )
+
+
+def move_slot(*, actor, organization, slot, data, request=None) -> dict:
+    """Sürüklə-burax köçürməsi — yalnız YER dəyişir (fənn/müəllim/slotun müəllimi toxunulmur)."""
     return save_cell(
         actor=actor,
         organization=organization,
         group=slot.offering.group,
         period=slot.offering.period,
-        data=payload,
+        data=move_payload(slot, data),
         request=request,
     )
 
@@ -363,7 +437,9 @@ def suggestions_for(
 
 __all__ = [
     "MIN_REASON",
+    "check_move",
     "get_slot",
+    "move_payload",
     "move_slot",
     "park_slot",
     "parked_rows",

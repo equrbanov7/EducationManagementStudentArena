@@ -3,22 +3,39 @@
 (function () {
     "use strict";
 
-    function root() {
-        return document.querySelector("[data-schedule-root]");
+    /* 2026-10-14: modal kartın ƏN YAXIN kökündə axtarılır. Əvvəl həmişə səhifənin
+       BİRİNCİ `[data-schedule-root]`-u götürülürdü — «Cədvəl idarəetməsi»ndə (yalnız-oxu
+       kartlar, müəllim görünüşü) belə kök yox idi və klik heç nə açmırdı; profil
+       qabığında gizli bölmə DOM-da qalanda isə modal görünməyən paneldə açılırdı. */
+    function root(from) {
+        var near = from && from.closest ? from.closest("[data-schedule-root], [data-sedit-root]") : null;
+        return near || document.querySelector(".profile-section-panel.is-active [data-schedule-root]")
+            || document.querySelector("[data-schedule-root]");
     }
 
-    function openModal(modal) {
+    var returnFocus = null;
+
+    function openModal(modal, opener) {
         if (modal) {
+            returnFocus = opener || document.activeElement;
             modal.hidden = false;
             document.body.style.overflow = "hidden";
+            var close = modal.querySelector(".sgx-modal-close");
+            if (close && close.focus) close.focus();
         }
     }
 
     function closeModals() {
+        var wasOpen = false;
         document.querySelectorAll(".sgx-modal").forEach(function (m) {
+            if (!m.hidden) wasOpen = true;
             m.hidden = true;
         });
         document.body.style.overflow = "";
+        if (wasOpen && returnFocus && document.contains(returnFocus) && returnFocus.focus) {
+            returnFocus.focus();
+        }
+        returnFocus = null;
     }
 
     function setField(modal, name, value) {
@@ -33,7 +50,7 @@
     }
 
     function fillSlotModal(card) {
-        var host = root();
+        var host = root(card);
         if (!host) return;
         var modal = host.querySelector("[data-sgx-modal]");
         if (!modal) return;
@@ -91,7 +108,7 @@
                 journalLink.hidden = true;
             }
         }
-        openModal(modal);
+        openModal(modal, card);
     }
 
     document.addEventListener("click", function (event) {
@@ -101,7 +118,7 @@
             return;
         }
         if (event.target.closest("[data-sgx-open-add]")) {
-            var host = root();
+            var host = root(event.target);
             openModal(host && host.querySelector("[data-sgx-add-modal]"));
             return;
         }
@@ -111,7 +128,7 @@
     });
 
     document.addEventListener("keydown", function (event) {
-        if (event.key === "Escape") closeModals();
+        if (event.key === "Escape" && document.querySelector(".sgx-modal:not([hidden])")) closeModals();
     });
 
     // ── Tədris ili + yarım il seçicisi (R-4) ───────────────────────────────

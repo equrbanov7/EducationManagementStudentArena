@@ -25,7 +25,8 @@ from .permissions_hr import apply_hr_grants
 #: göstərilən addır; əhatə hər ikisində UNIT (`Membership.scope_unit` alt-ağacı).
 #: Bir yerdə saxlanılır ki, dəyişiklik bir blokda edilib digərində unudulmasın
 #: (parity testi: `test_unit_scoping.py`). MÖVCUD tenantlar üçün eyni dəsti
-#: `0050_tutor_coordinator_parity` migrasiyası əkir.
+#: `0050_tutor_coordinator_parity` migrasiyası əkir. 2026-10-14: sonrakı modulların koordinatora əkdiyi açarlar
+#: da tyutora keçir (YEKUN dəst eyni) — `default_roles_role_audit.apply_role_parity`, mövcud: `0064`.
 _COORDINATOR_PERMISSIONS = (
     "member.view",
     "course.view",

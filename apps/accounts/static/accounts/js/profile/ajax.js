@@ -112,8 +112,13 @@
             });
             actionUrl.searchParams.set("section", section);
 
+            // EMSSearchInput.submitForm yazdıqca axtarışı «quiet» işarələyir:
+            // skelet/fokus oğurluğu yoxdur, input yerində qalır (section_loader.js).
+            var quiet = form.getAttribute("data-ems-quiet-submit") === "1";
+            form.removeAttribute("data-ems-quiet-submit");
             ctx.tryAjaxLoadSection(section, {
                 updateUrl: true,
+                quiet: quiet,
                 sourceUrl: actionUrl.pathname + actionUrl.search
             }).then(function (ok) {
                 if (!ok) {

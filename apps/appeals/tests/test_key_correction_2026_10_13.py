@@ -315,3 +315,32 @@ class KeyCorrectionEndpointTests(_KeyFixSetup):
         self.assertEqual(response.status_code, 200)
         correction.refresh_from_db()
         self.assertIsNotNone(correction.revoked_at)
+
+
+class KeyCorrectionFullPointsTests(_KeyFixSetup):
+    """Sahib 2026-10-14: «tam bal verilsin» — açar düzəlişi sualın TAM balını verir (əvvəl sabit +1)."""
+
+    Q1_POINTS = 3
+
+    def _snapshot(self, question, options):
+        snapshot = super()._snapshot(question, options)
+        if question.pk == self.q1.pk:
+            snapshot["points"] = self.Q1_POINTS
+        return snapshot
+
+    def test_key_correction_gives_the_full_question_points(self):
+        before = self._score(self.attempt)
+        self._apply()
+        self.assertEqual(self._score(self.attempt), before + Decimal(self.Q1_POINTS))
+        self.assertEqual(
+            KeyCorrectionCredit.objects.get(attempt=self.peer_attempt).delta_points, Decimal(self.Q1_POINTS)
+        )
+
+    def test_individual_plus_one_is_topped_up_not_doubled(self):
+        before = self._score(self.attempt)
+        with self.captureOnCommitCallbacks(execute=True):
+            accept_appeal_item(self.item, reviewer=self.head, response_text="Haqlıdır.")
+        self.assertEqual(self._score(self.attempt), before + Decimal("1"))
+        self._apply()
+        # +1 (fərdi) + 2 (tamamlama) = sualın tam balı; ikiqat (+1 +3) YOX.
+        self.assertEqual(self._score(self.attempt), before + Decimal(self.Q1_POINTS))
