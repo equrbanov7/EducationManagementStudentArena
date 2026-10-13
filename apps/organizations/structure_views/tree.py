@@ -162,6 +162,28 @@ def _expand_to(units, target_id):
     return expanded
 
 
+def _detail_extras(unit, units, labels) -> dict:
+    """Detal panelinin ortaq sahələri — YALNIZ görünən vahidlərdən (əhatədən kənar əcdad adı sızmır).
+
+    ``breadcrumbs`` — kökdən seçilmiş vahidə qədər GÖRÜNƏN zəncir (dekan üçün öz fakültəsindən başlayır);
+    ``is_group`` — qrup panelində «Rəhbər» əvəzinə «Starosta» kartı (accounts qatı doldurur).
+    """
+    by_id = {str(item.id): item for item in units}
+    chain = []
+    node = unit
+    while node is not None:
+        chain.append({"id": str(node.id), "label": node.name})
+        node = by_id.get(str(node.parent_id)) if node.parent_id else None
+    chain.reverse()
+    return {
+        "breadcrumbs": chain,
+        "code": unit.code or "",
+        "unit_type": unit.unit_type,
+        "children_count": sum(1 for item in units if item.parent_id == unit.id),
+        "is_group": unit.unit_type == OrgUnitType.GROUP,
+    }
+
+
 def build_structure_tree_context(request, organization) -> dict:
     """«Universitet strukturu» bölməsinin konteksti."""
     scope = tree_scope(request, organization)
@@ -236,6 +258,7 @@ def build_structure_tree_context(request, organization) -> dict:
                 "unit_type_label": labels.get(selected_unit.unit_type, selected_unit.unit_type),
                 "is_light": True,
             }
+        detail.update(_detail_extras(selected_unit, units, labels))
 
     kpi_tiles = [
         {"label": pgettext(_CTX, "BÖLMƏ"), "value": len(units)},

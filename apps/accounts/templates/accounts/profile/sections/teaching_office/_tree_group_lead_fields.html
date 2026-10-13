@@ -1,0 +1,36 @@
+{% load i18n %}
+{% comment %}«Struktur ağacı» → «Starosta təyin et / dəyiş» dialoqunun gövdəsi (2026-10-14). «Qruplar» reyestrinin
+`_group_lead_fields.html`-i ilə EYNİ sahələr (`record_id`, `reason`), amma variantlar SERVERDƏ qurulur
+(`panel.lead_options` — qrupun qeydiyyatlı tələbələri, hazırkı starosta xaric). Stilli axtarışlı seçici
+(`data-bootstrap-select`); detal fraqmenti swap olunanda `EMSBootstrapSelect.init(pane)` onu yenidən qurur.{% endcomment %}
+<div class="tof-students__target">
+    <span class="tof-students__target-label">{% trans "Qrup" context "accounts.group_lead" %}</span>
+    <strong>{{ unit.name }}</strong>
+</div>
+{% if panel.lead %}
+<p class="tof-lead-dialog__current">
+    {% trans "Hazırkı starosta:" context "accounts.group_lead" %} <strong>{{ panel.lead.name }}</strong>
+</p>
+{% endif %}
+<div class="ems-field">
+    <label class="ems-field__label" for="{{ form_dialog_id }}-student">{% trans "Yeni starosta" context "accounts.group_lead" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="{{ form_dialog_id }}-student" name="record_id"
+                data-bootstrap-select data-live-search="true"
+                data-live-search-placeholder="{% trans 'Tələbə adı ilə axtar…' context 'accounts.group_lead' %}"
+                data-live-search-empty="{% trans 'Uyğun tələbə tapılmadı' context 'accounts.group_lead' %}"
+                aria-required="true"
+                aria-describedby="{{ form_dialog_id }}-student-hint">
+            <option value="">{% trans "Tələbə seçin" context "accounts.group_lead" %}</option>
+            {% for option in panel.lead_options %}
+            <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <p class="ems-field__hint" id="{{ form_dialog_id }}-student-hint">{% if panel.lead_options %}{% trans "Yalnız bu qrupun qeydiyyatlı tələbələri. Yeni starosta təyin olunanda əvvəlki avtomatik götürülür; hər ikisinə bildiriş gedir." context "accounts.group_lead" %}{% else %}{% trans "Bu qrupda seçilə bilən qeydiyyatlı tələbə yoxdur." context "accounts.structure_tree" %}{% endif %}</p>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="{{ form_dialog_id }}-reason">{% trans "Qeyd (istəyə bağlı)" context "accounts.group_lead" %}</label>
+    <textarea class="ems-textarea" id="{{ form_dialog_id }}-reason" name="reason" rows="2" maxlength="500"
+              placeholder="{% trans 'Məs.: qrup yığıncağının qərarı ilə' context 'accounts.group_lead' %}"></textarea>
+</div>
