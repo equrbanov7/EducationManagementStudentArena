@@ -228,3 +228,10 @@ AUTH_OTP_RESEND_COOLDOWN_SECONDS = int(os.getenv("AUTH_OTP_RESEND_COOLDOWN_SECON
 AUTH_OTP_MAX_ATTEMPTS = int(os.getenv("AUTH_OTP_MAX_ATTEMPTS", "5"))
 AUTH_OTP_MAX_SENDS_PER_HOUR = int(os.getenv("AUTH_OTP_MAX_SENDS_PER_HOUR", "5"))
 AUTH_PENDING_SIGNUP_TTL_SECONDS = int(os.getenv("AUTH_PENDING_SIGNUP_TTL_SECONDS", "86400"))
+
+# --- Apellyasiya pəncərəsi (2026-10-13 gecə, sahib: «evdən 3 gün ərzində apellyasiya verilə») ---
+# Nəticə tələbəyə AÇILDIĞI gündən sonra neçə TƏQVİM günü müraciət etmək olar (son günün sonuna
+# qədər, ``APPEAL_WINDOW_TIMEZONE`` vaxtı ilə). İşləmə vaxtı «Sistem tənzimləmələri»ndən
+# (``exam.appeal_window_days``) də dəyişir; bu dəyər onun defoltudur.
+APPEAL_WINDOW_DAYS = _env_int_setting("APPEAL_WINDOW_DAYS", 3, minimum=1)
+APPEAL_WINDOW_TIMEZONE = os.getenv("APPEAL_WINDOW_TIMEZONE", "Asia/Baku").strip() or "Asia/Baku"

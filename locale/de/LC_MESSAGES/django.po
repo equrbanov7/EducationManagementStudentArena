@@ -97325,3 +97325,351 @@ msgstr "Aufsichtsdienst"
 msgctxt "exams.model.invigilator_duty.meta"
 msgid "plural"
 msgstr "Aufsichtsdienste"
+
+msgctxt "core.runtime_settings"
+msgid "Apellyasiya müddəti"
+msgstr "Einspruchsfrist"
+
+msgctxt "core.runtime_settings"
+msgid ""
+"Nəticə tələbəyə açıldıqdan sonra neçə təqvim günü apellyasiya vermək olar "
+"(son günün sonunadək, Bakı vaxtı). Tələbə evdən də müraciət edə bilir; "
+"müddət bitəndə düymə gizlənir və server qəbul etmir."
+msgstr ""
+"Wie viele Kalendertage nach Veröffentlichung des Ergebnisses Studierende "
+"Einspruch einlegen dürfen (bis zum Ende des letzten Tages, Bakuer Zeit). "
+"Einspruch ist auch von zu Hause möglich; nach Fristende verschwindet die "
+"Schaltfläche und der Server lehnt ab."
+
+msgctxt "core.runtime_settings"
+msgid "gün"
+msgstr "Tage"
+
+msgctxt "appeals.notification"
+msgid ""
+"Midterm balını elektron jurnalda özünüz yeniləyin (midterm jurnala avtomatik"
+" yazılmır)."
+msgstr ""
+"Bitte tragen Sie die Zwischenprüfungsnote selbst in das E-Journal ein (die "
+"Zwischenprüfung wird nicht automatisch übertragen)."
+
+msgctxt "appeals.notification"
+msgid "Elektron jurnalda imtahan balı avtomatik yeniləndi."
+msgstr "Die Prüfungsnote im E-Journal wurde automatisch aktualisiert."
+
+msgctxt "appeals.notification"
+msgid "Apellyasiya nəticəsində bal dəyişdi"
+msgstr "Note nach Einspruch geändert"
+
+msgctxt "appeals.notification"
+msgid ""
+"{student} — \"{exam}\": apellyasiya qəbul olundu, bal {delta} dəyişdi. "
+"{hint}"
+msgstr ""
+"{student} — „{exam}“: Der Einspruch wurde angenommen, die Note änderte sich "
+"um {delta}. {hint}"
+
+msgctxt "appeals.notification"
+msgid "Cavab açarı düzəlişi geri alındı"
+msgstr "Korrektur des Lösungsschlüssels widerrufen"
+
+msgctxt "appeals.notification"
+msgid ""
+"\"{exam}\" imtahanının {no}-ci sualı üzrə açar düzəlişi geri alındı — əlavə "
+"bal çıxarıldı."
+msgstr ""
+"Die Schlüsselkorrektur für Frage {no} von „{exam}“ wurde widerrufen — der "
+"Zusatzpunkt wurde entfernt."
+
+msgctxt "appeals.notification"
+msgid "Cavab açarı düzəldildi"
+msgstr "Lösungsschlüssel korrigiert"
+
+msgctxt "appeals.notification"
+msgid ""
+"\"{exam}\" imtahanının {no}-ci sualının cavab açarı düzəldildi — balınız "
+"artırıldı."
+msgstr ""
+"Der Lösungsschlüssel für Frage {no} von „{exam}“ wurde korrigiert — Ihre "
+"Punktzahl wurde erhöht."
+
+msgctxt "appeals.notification"
+msgid "Cavab açarı düzəlişi"
+msgstr "Korrektur des Lösungsschlüssels"
+
+msgctxt "appeals.notification"
+msgid ""
+"\"{exam}\" imtahanının {no}-ci sualı üzrə açar {action}: {count} tələbənin "
+"balı dəyişdi. {hint}"
+msgstr ""
+"Lösungsschlüssel für Frage {no} von „{exam}“ {action}: Punktzahl von {count}"
+" Studierenden geändert. {hint}"
+
+msgctxt "appeals.notification"
+msgid "düzəlişi geri alındı"
+msgstr "Korrektur widerrufen"
+
+msgctxt "appeals.notification"
+msgid "düzəldildi"
+msgstr "korrigiert"
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Düzgün variant seçimi yanlışdır."
+msgstr "Die Auswahl der richtigen Option ist ungültig."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Ən azı bir düzgün variant seçin."
+msgstr "Wählen Sie mindestens eine richtige Option."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Seçilən variant bu suala aid deyil."
+msgstr "Die gewählte Option gehört nicht zu dieser Frage."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Açar düzəlişinin səbəbini yazın (ən azı {n} simvol)."
+msgstr "Begründen Sie die Schlüsselkorrektur (mindestens {n} Zeichen)."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Səbəb {n} simvoldan uzun ola bilməz."
+msgstr "Die Begründung darf höchstens {n} Zeichen lang sein."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Açar düzəlişi yalnız test (variantlı) suallar üçündür."
+msgstr ""
+"Die Schlüsselkorrektur ist nur für Multiple-Choice-Fragen (Test) möglich."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Bu sual üçün aktiv açar düzəlişi artıq var — əvvəlcə onu geri alın."
+msgstr ""
+"Für diese Frage gibt es bereits eine aktive Schlüsselkorrektur — widerrufen "
+"Sie diese zuerst."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Yeni açar köhnə açarla eynidir — düzəliş lazım deyil."
+msgstr "Der neue Schlüssel entspricht dem alten — keine Korrektur nötig."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Bu açar düzəlişi artıq geri alınıb."
+msgstr "Diese Schlüsselkorrektur wurde bereits widerrufen."
+
+msgctxt "appeals.view.message"
+msgid "Apellyasiya tapılmadı."
+msgstr "Einspruch nicht gefunden."
+
+msgctxt "appeals.view.message"
+msgid ""
+"Cavab açarı düzəldildi: sualı cavablayan {affected} tələbədən {credited} "
+"nəfərin balı artırıldı."
+msgstr ""
+"Lösungsschlüssel korrigiert: {credited} von {affected} Studierenden, die die"
+" Frage beantwortet haben, erhielten Zusatzpunkte."
+
+msgctxt "appeals.view.message"
+msgid "Açar düzəlişi geri alındı."
+msgstr "Schlüsselkorrektur widerrufen."
+
+msgctxt "appeals.history"
+msgid "Cavab açarı düzəlişi geri alındı"
+msgstr "Korrektur des Lösungsschlüssels widerrufen"
+
+msgctxt "appeals.history"
+msgid "Cavab açarı düzəldildi (hamı üçün)"
+msgstr "Lösungsschlüssel korrigiert (für alle)"
+
+msgctxt "appeals.history"
+msgid "Yekun (final)"
+msgstr "Abschlussprüfung"
+
+msgctxt "appeals.history"
+msgid "Aralıq (midterm)"
+msgstr "Zwischenprüfung"
+
+msgctxt "appeals.history"
+msgid "Apellyasiya göndərildi ({count} sual)"
+msgstr "Einspruch eingereicht ({count} Fragen)"
+
+msgctxt "appeals.history"
+msgid "{no}-ci sual: {status}"
+msgstr "Frage {no}: {status}"
+
+msgctxt "appeals.history"
+msgid "{no}-ci sual: bal düzəlişi geri alındı"
+msgstr "Frage {no}: Punktanpassung widerrufen"
+
+msgctxt "appeals.history"
+msgid "{no}-ci sual: +{delta} bal"
+msgstr "Frage {no}: +{delta} Pkt."
+
+msgctxt "appeals.history"
+msgid ""
+"{no}-ci sual: cavab açarı düzəldildi — {credited}/{affected} tələbəyə kredit"
+msgstr ""
+"Frage {no}: Lösungsschlüssel korrigiert — Punkte für {credited}/{affected} "
+"Studierende"
+
+msgctxt "appeals.history"
+msgid "{no}-ci sual: açar düzəlişi geri alındı"
+msgstr "Frage {no}: Schlüsselkorrektur widerrufen"
+
+msgctxt "appeals.template"
+msgid "Variantlar — tələbənin gördüyü kimi"
+msgstr "Optionen — so, wie die/der Studierende sie sah"
+
+msgctxt "appeals.template"
+msgid "Açar (imtahan anında)"
+msgstr "Schlüssel (zum Prüfungszeitpunkt)"
+
+msgctxt "appeals.template"
+msgid "Düzəldilmiş açar"
+msgstr "Korrigierter Schlüssel"
+
+msgctxt "appeals.template"
+msgid "Yoxlayanın balı"
+msgstr "Bewertung der Prüferin/des Prüfers"
+
+msgctxt "appeals.template"
+msgid "İdeal cavab (imtahan anında)"
+msgstr "Musterantwort (zum Prüfungszeitpunkt)"
+
+msgctxt "appeals.template"
+msgid "Cavab açarı düzəldilib (bütün tələbələr üçün)"
+msgstr "Der Lösungsschlüssel wurde korrigiert (für alle Studierenden)"
+
+#, python-format
+msgctxt "appeals.template"
+msgid ""
+"Sualı cavablayan %(affected)s tələbədən %(credited)s nəfərə kredit verildi."
+msgstr ""
+"%(credited)s von %(affected)s Studierenden, die die Frage beantwortet haben,"
+" erhielten Punkte."
+
+msgctxt "appeals.template"
+msgid "Geri alma səbəbi"
+msgstr "Grund für den Widerruf"
+
+msgctxt "appeals.template"
+msgid "Açar düzəlişini geri almaq?"
+msgstr "Schlüsselkorrektur widerrufen?"
+
+msgctxt "appeals.template"
+msgid ""
+"Bu düzəlişlə verilmiş bütün əlavə ballar geri götürüləcək və tələbələrə "
+"bildiriş gedəcək. Qeyd tarixçədə qalır."
+msgstr ""
+"Alle durch diese Korrektur vergebenen Zusatzpunkte werden entfernt und die "
+"Studierenden benachrichtigt. Der Eintrag bleibt im Verlauf."
+
+msgctxt "appeals.template"
+msgid "Düzəlişi geri al"
+msgstr "Korrektur widerrufen"
+
+msgctxt "appeals.template"
+msgid "Ən azı bir düzgün variant seçin."
+msgstr "Wählen Sie mindestens eine richtige Option."
+
+msgctxt "appeals.template"
+msgid "Açar düzəlişinin səbəbini yazın."
+msgstr "Begründen Sie die Schlüsselkorrektur."
+
+msgctxt "appeals.template"
+msgid "Cavab açarını hamı üçün düzəltmək?"
+msgstr "Lösungsschlüssel für alle korrigieren?"
+
+msgctxt "appeals.template"
+msgid ""
+"Bu imtahanda bu sualı yeni açara uyğun cavablayan HƏR tələbənin balı "
+"artırılacaq, jurnal yenilənəcək və bildiriş gedəcək. Heç kimin balı azalmır."
+" Əməliyyat audit olunur."
+msgstr ""
+"JEDE/R Studierende dieser Prüfung, deren Antwort auf diese Frage dem neuen "
+"Schlüssel entspricht, erhält Zusatzpunkte; das Journal wird aktualisiert und"
+" Benachrichtigungen werden versendet. Niemandes Punktzahl sinkt. Die Aktion "
+"wird protokolliert."
+
+msgctxt "appeals.template"
+msgid "Açar səhvdir? Bütün tələbələr üçün düzəlt"
+msgstr "Schlüssel falsch? Für alle Studierenden korrigieren"
+
+msgctxt "appeals.template"
+msgid ""
+"«Qəbul et» yalnız bu tələbəyə +1 verir. Açar özü səhvdirsə, düzgün "
+"variant(lar)ı seçin — sualı həmin variantla cavablayan hər kəs eyni krediti "
+"alır."
+msgstr ""
+"„Annehmen“ gibt nur dieser/diesem Studierenden +1. Ist der Schlüssel selbst "
+"falsch, wählen Sie die richtige(n) Option(en) — alle, die diese Option "
+"gewählt haben, erhalten dieselben Punkte."
+
+msgctxt "appeals.template"
+msgid "Düzgün variant(lar)"
+msgstr "Richtige Option(en)"
+
+msgctxt "appeals.template"
+msgid "köhnə açar"
+msgstr "alter Schlüssel"
+
+msgctxt "appeals.template"
+msgid "Səbəb (audit üçün)"
+msgstr "Begründung (für das Protokoll)"
+
+msgctxt "appeals.template"
+msgid "Məs.: B variantı da düzgündür — mənbə: dərslik, 4.2"
+msgstr "Z. B.: Option B ist ebenfalls richtig — Quelle: Lehrbuch, 4.2"
+
+msgctxt "appeals.template"
+msgid "Açarı düzəlt və balları yenilə"
+msgstr "Schlüssel korrigieren und Punkte aktualisieren"
+
+msgctxt "appeals.template"
+msgid "Tarixçə"
+msgstr "Verlauf"
+
+#, python-format
+msgctxt "appeals.template"
+msgid "Apellyasiya son tarixi: %(deadline)s"
+msgstr "Einspruchsfrist: %(deadline)s"
+
+#, python-format
+msgctxt "appeals.template"
+msgid ""
+"Nəticə açıqlandıqdan sonra %(days)s təqvim günü ərzində (son günün "
+"sonunadək, Bakı vaxtı) müraciət edə bilərsiniz."
+msgstr ""
+"Sie können innerhalb von %(days)s Kalendertagen nach Veröffentlichung des "
+"Ergebnisses Einspruch einlegen (bis zum Ende des letzten Tages, Bakuer "
+"Zeit)."
+
+#, python-format
+msgctxt "appeals.template"
+msgid ""
+"Nəticə açıqlandıqdan sonra %(days)s təqvim günü ərzində (son günün "
+"sonunadək, Bakı vaxtı) müraciət edə bilərsiniz — evdən də."
+msgstr ""
+"Sie können innerhalb von %(days)s Kalendertagen nach Veröffentlichung des "
+"Ergebnisses Einspruch einlegen (bis zum Ende des letzten Tages, Bakuer Zeit)"
+" — auch von zu Hause."
+
+#, python-format
+msgctxt "exams.template.student_exam_result"
+msgid "Apellyasiya son tarixi: %(deadline)s"
+msgstr "Einspruchsfrist: %(deadline)s"
+
+msgctxt "registrar.records"
+msgid "İmtahan cəhdləri və apellyasiyalar"
+msgstr "Prüfungsversuche und Einsprüche"
+
+msgctxt "registrar.records"
+msgid "cəhd"
+msgstr "Versuch"
+
+msgctxt "registrar.records"
+msgid "rəsmi"
+msgstr "offiziell"
+
+msgctxt "registrar.records"
+msgid "ləğv olundu"
+msgstr "ersetzt"
+
+msgctxt "registrar.records"
+msgid "nəzarətçi tərəfindən çıxarılıb"
+msgstr "von der Aufsicht entfernt"

@@ -1,0 +1,159 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   appeals/_part4.css — 2026-10-13 (gecə): cavab açarı düzəlişi kartı/formu,
+   yazılı cavab ↔ ideal cavab müqayisəsi, apellyasiya tarixçəsi, son tarix qeydi.
+   Tokenlər _part1.css-dəki `--appeal-*` və ems_ui dəyişənləridir.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Yazılı/praktiki: tələbənin cavabı ↔ ideal cavab yan-yana ─────────────── */
+.appeal-answer-review--compare {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--ems-sp-5);
+}
+
+.appeal-answer-review__score {
+    margin-top: 8px;
+    font-size: var(--ems-fs-sm);
+    color: var(--appeal-muted);
+}
+
+/* ── Düzəldilmiş açar variantı ────────────────────────────────────────────── */
+.appeal-option.is-key-fixed {
+    border-color: var(--ems-warning-bd);
+    box-shadow: inset 3px 0 0 var(--ems-warning-500);
+}
+
+.appeal-option__tag--fixed {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+/* ── Açar düzəlişi: aktiv kart + forma ────────────────────────────────────── */
+.appeal-key-fix {
+    margin-top: var(--ems-sp-5);
+    padding: 12px 14px;
+    border: 1px dashed var(--ems-warning-bd);
+    border-radius: var(--appeal-radius);
+    background: var(--ems-warning-bg);
+}
+
+.appeal-key-fix__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ems-warning-800);
+}
+
+.appeal-key-fix__meta,
+.appeal-key-fix__hint {
+    margin: 6px 0 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--appeal-muted);
+}
+
+.appeal-key-fix__reason {
+    margin: 8px 0 0;
+    color: var(--appeal-ink);
+    overflow-wrap: anywhere;
+}
+
+.appeal-key-fix__summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--ems-warning-800);
+}
+
+.appeal-key-fix--form[open] .appeal-key-fix__summary {
+    margin-bottom: 8px;
+}
+
+.appeal-key-fix__options {
+    display: grid;
+    gap: 6px;
+    margin: 10px 0;
+    padding: 0;
+    border: 0;
+}
+
+.appeal-key-fix__option {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 10px;
+    border: 1px solid var(--appeal-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--appeal-surface);
+    cursor: pointer;
+}
+
+.appeal-key-fix__option input {
+    margin-top: 3px;
+}
+
+.appeal-key-fix__old {
+    color: var(--appeal-muted);
+    font-style: normal;
+    font-size: var(--ems-fs-xs);
+}
+
+.appeal-key-fix .ems-btn {
+    margin-top: 10px;
+}
+
+.appeal-key-fix.has-error {
+    border-color: var(--ems-danger-bd);
+}
+
+.appeal-key-fix__revoke {
+    margin-top: 10px;
+}
+
+/* ── Tarixçə ──────────────────────────────────────────────────────────────── */
+.appeal-timeline {
+    margin-top: var(--ems-sp-6);
+}
+
+.appeal-timeline__list {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.appeal-timeline__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 10px;
+    padding: 6px 10px;
+    border-left: 2px solid var(--appeal-border);
+}
+
+.appeal-timeline__icon {
+    width: 1em;
+    color: var(--appeal-muted);
+}
+
+.appeal-timeline__text {
+    flex: 1 1 200px;
+    color: var(--appeal-ink);
+}
+
+.appeal-timeline__meta {
+    font-size: var(--ems-fs-xs);
+    color: var(--appeal-muted);
+}
+
+/* ── Tələbə: son tarix qeydi ──────────────────────────────────────────────── */
+.appeal-deadline-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: var(--ems-warning-800);
+}

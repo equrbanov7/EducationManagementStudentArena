@@ -7,7 +7,6 @@ from django.test import TransactionTestCase
 
 import pytest
 
-from apps.exams.models import Exam
 from apps.exams.services.access_code_crypto import decrypt_access_code
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
@@ -59,10 +58,16 @@ class AccessCodeMigrationRollbackTests(TransactionTestCase):
             status="active",
             is_active=True,
         )
-        exam = Exam.objects.create(
+        # 2026-10-13 (gecə): CARİ ``Exam`` modeli 0050-dən sonra əlavə olunan sütunları (məs.
+        # ``results_published_at``) INSERT edir — bu sxemdə həmin sütun yoxdur. Miqrasiya testi
+        # həmin andakı TARİXİ modeli işlətməlidir (sahə sinfi eynidir → şifrələmə də eynidir).
+        historical_exam = (
+            MigrationExecutor(connection).loader.project_state([self.migrate_from]).apps.get_model("exams", "Exam")
+        )
+        exam = historical_exam.objects.create(
             title="Encrypted rollback exam",
-            author=teacher,
-            organization=org,
+            author_id=teacher.pk,
+            organization_id=org.pk,
             access_code="135790",
         )
 

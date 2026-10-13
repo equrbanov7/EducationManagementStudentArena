@@ -93,12 +93,14 @@ def set_results_hidden(exam, hidden, *, by_user=None, request=None):
     Qaytarır ``changed`` — başqa tab artıq eyni vəziyyətə keçiribsə False.
     """
     locked_exam = type(exam).objects.select_for_update().get(pk=exam.pk)
-    updated = (
-        type(exam)
-        .objects.filter(pk=locked_exam.pk, results_hidden_from_students=not hidden)
-        .update(results_hidden_from_students=hidden)
-    )
-    exam.refresh_from_db(fields=["results_hidden_from_students"])
+    changes = {"results_hidden_from_students": hidden}
+    if not hidden:
+        # 2026-10-13 (gecə): apellyasiya pəncərəsi nəticənin AÇILDIĞI andan sayılır (appeals/services/window.py).
+        from django.utils import timezone
+
+        changes["results_published_at"] = timezone.now()
+    updated = type(exam).objects.filter(pk=locked_exam.pk, results_hidden_from_students=not hidden).update(**changes)
+    exam.refresh_from_db(fields=["results_hidden_from_students", "results_published_at"])
     if not updated:
         return False
     _log_lifecycle(

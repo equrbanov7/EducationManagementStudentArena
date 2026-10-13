@@ -1,6 +1,7 @@
 """Appeals servis qatı."""
 
 from .creation import create_appeal
+from .key_corrections import apply_key_correction, revoke_key_correction
 from .permissions import (
     appeal_applicable,
     appeal_block_reason,
@@ -31,6 +32,7 @@ from .state_machine import InvalidAppealTransition, assert_transition, can_trans
 from .window import (
     APPEAL_ELIGIBLE_ATTEMPT_STATUSES,
     appeal_deadline,
+    appeal_window_days,
     appeal_window_start,
     attempt_awaiting_grading,
     is_within_appeal_window,
@@ -41,12 +43,15 @@ __all__ = [
     "APPEAL_ELIGIBLE_ATTEMPT_STATUSES",
     "InvalidAppealTransition",
     "accept_appeal_item",
+    "apply_key_correction",
+    "revoke_key_correction",
     "appeal_block_reason",
     "appeal_bonus_map",
     "appeal_item_result_visible_to_student",
     "appeal_result_hidden_from_student",
     "appeal_deadline",
     "appeal_score_state",
+    "appeal_window_days",
     "appeal_window_start",
     "apply_bonus_to_test_result",
     "assert_transition",

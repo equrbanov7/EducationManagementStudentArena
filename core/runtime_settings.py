@@ -241,6 +241,17 @@ SPECS: dict[str, Spec] = {
             "exam.pin_lock_minutes", "exam", "int", _setting("FINAL_EXAM_PIN_LOCK_MINUTES", 10),
             pgettext_lazy(_CTX, "PIN səhvlərindən sonra kilid müddəti"), "", pgettext_lazy(_CTX, "dəqiqə"), min=1, max=120,
         ),
+        # 2026-10-13 (gecə): apellyasiya pəncərəsi — sahib «3 gün ərzində»; oxu nöqtəsi apps/appeals/services/window.py.
+        Spec(
+            "exam.appeal_window_days", "exam", "int", _setting("APPEAL_WINDOW_DAYS", 3),
+            pgettext_lazy(_CTX, "Apellyasiya müddəti"),
+            pgettext_lazy(
+                _CTX,
+                "Nəticə tələbəyə açıldıqdan sonra neçə təqvim günü apellyasiya vermək olar (son günün sonunadək, "
+                "Bakı vaxtı). Tələbə evdən də müraciət edə bilir; müddət bitəndə düymə gizlənir və server qəbul etmir.",
+            ),
+            pgettext_lazy(_CTX, "gün"), min=1, max=14,
+        ),
     )
 }  # fmt: skip
 

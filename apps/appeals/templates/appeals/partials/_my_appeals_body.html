@@ -102,7 +102,9 @@
                 <div>
                     <h5 class="modal-title" id="newAppealModalLabel">{% trans "Yeni apellyasiya müraciəti" context "appeals.template" %}</h5>
                     <p class="appeal-modal__sub">
-                        {% blocktrans context "appeals.template" with days=appeal_window_days %}İmtahan bitdikdən sonra {{ days }} gün ərzində apellyasiya verə bilərsiniz.{% endblocktrans %}
+                        {% blocktrans trimmed context "appeals.template" with days=appeal_window_days %}
+                            Nəticə açıqlandıqdan sonra {{ days }} təqvim günü ərzində (son günün sonunadək, Bakı vaxtı) müraciət edə bilərsiniz — evdən də.
+                        {% endblocktrans %}
                     </p>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'appeals.template' %}"></button>
@@ -118,7 +120,7 @@
                                 <span><i class="far fa-calendar" aria-hidden="true"></i> {{ attempt.finished_at|date:"d.m.Y H:i" }}</span>
                                 <span class="ems-badge ems-badge--warning">
                                     <i class="fas fa-hourglass-half" aria-hidden="true"></i>
-                                    {% blocktrans context "appeals.template" with deadline=attempt.appeal_deadline|date:"d.m.Y" %}son tarix: {{ deadline }}{% endblocktrans %}
+                                    {% blocktrans context "appeals.template" with deadline=attempt.appeal_deadline|date:"d.m.Y H:i" %}Apellyasiya son tarixi: {{ deadline }}{% endblocktrans %}
                                 </span>
                             </span>
                         </div>

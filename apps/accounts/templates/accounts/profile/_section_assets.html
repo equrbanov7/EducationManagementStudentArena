@@ -161,6 +161,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% endif %}
     {% if 'academic-records' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/academic_records.css' %}?v=20260910-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/academic_records_history.css' %}?v=20261013-xh">
     {% endif %}
     {% if 'people-teachers' in asset_sections or 'people-students' in asset_sections %}
     {% comment %}Kataloq üslubu modul ölçüsü qaydasına (SOFT_CAP=600) görə üçə
@@ -227,6 +228,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2.css' %}?v=20260908-calm">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2b.css' %}?v=20260908-calm">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part3.css' %}?v=20260908-calm">
+    <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part4.css' %}?v=20261013-keyfix">
     {% endif %}
     {# U12 — registrar kabinet bölmələri (statik, keşlənən): jurnal/cədvəl/təqvim/analitika #}
     {% comment %}2026-10-11: analitika artıq `journal-grid` İŞLƏTMİR (ortaq `ems-table` +

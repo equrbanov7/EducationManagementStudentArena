@@ -196,6 +196,14 @@
             <strong>{% trans "appeal_center_title" context "exams.template.student_exam_result" %}</strong>
             {% if not can_appeal %}
             <small>{% trans "appeal_center_desc_closed" context "exams.template.student_exam_result" %}</small>
+            {% elif appeal_deadline %}
+            {# 2026-10-13 (gecə): son tarix aydın görünsün — tələbə evdən də müraciət edə bilir. #}
+            <small class="result-action-panel__deadline">
+                <i class="fas fa-hourglass-half" aria-hidden="true"></i>
+                {% blocktrans trimmed context "exams.template.student_exam_result" with deadline=appeal_deadline|date:"d.m.Y H:i" %}
+                    Apellyasiya son tarixi: {{ deadline }}
+                {% endblocktrans %}
+            </small>
             {% endif %}
         </div>
         <div class="result-action-panel__actions">

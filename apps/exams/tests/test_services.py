@@ -2049,8 +2049,9 @@ class AttachTestResultSummariesQueryTests(TestCase):
         with CaptureQueriesContext(connection) as ctx:
             attach_test_result_summaries(attempts)
 
-        # 1 answers + 2 prefetch + ≤2 bonus-map sorğusu — attempt sayına görə BÖYÜMÜR.
-        self.assertLessEqual(len(ctx), 5, f"Gözləniləndən çox sorğu: {len(ctx)}")
+        # 1 answers + 2 prefetch + ≤3 bonus-map sorğusu (bal düzəlişi, köhnə fallback, 2026-10-13: cavab açarı
+        # düzəlişi krediti) — attempt sayına görə BÖYÜMÜR.
+        self.assertLessEqual(len(ctx), 6, f"Gözləniləndən çox sorğu: {len(ctx)}")
 
         for attempt in attempts:
             self.assertEqual(attempt.test_result.correct_count, 2)
