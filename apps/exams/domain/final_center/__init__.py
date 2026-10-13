@@ -19,10 +19,12 @@ MODUL BÖLGÜSÜ (2026-09-21, modul-ölçü qapısı): tək ``final_center.py`` 
 ``ExamRoomComputer``), ``sessions.py`` (``ExamRoomSession``), ``tickets.py``
 (``FinalExamTicket``). Bütün adlar buradan yenidən ixrac olunur;
 ``from apps.exams.domain.final_center import …`` yolu dəyişmir. 2026-10-08: ``devices.py``
-(``FinalAttemptDevice`` — davam edən final cəhdinin cihaz bağlantısı).
+(``FinalAttemptDevice`` — davam edən final cəhdinin cihaz bağlantısı). 2026-10-13:
+``duties.py`` (``InvigilatorDuty`` — vaxtla məhdud zal nəzarətçisi növbəsi).
 """
 
 from .devices import FinalAttemptDevice
+from .duties import InvigilatorDuty
 from .rooms import ExamRoom, ExamRoomComputer
 from .sessions import ExamRoomSession
 from .states import (
@@ -52,6 +54,7 @@ __all__ = [
     "ExamRoomSession",
     "FinalAttemptDevice",
     "FinalExamTicket",
+    "InvigilatorDuty",
     "ROOM_SESSION_STATES",
     "ROOM_SESSION_STATE_PREPARED",
     "ROOM_SESSION_STATE_ENTRY_OPEN",

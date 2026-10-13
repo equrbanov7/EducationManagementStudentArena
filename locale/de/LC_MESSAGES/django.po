@@ -1889,7 +1889,7 @@ msgstr "Suchen"
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:202
 msgctxt "profile.groups"
 msgid "clear_search"
-msgstr "Leeren"
+msgstr "Entfernen"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:49
 #, python-format
@@ -11947,7 +11947,7 @@ msgstr "z. B. Əliyev Elvin Səməd — oder E-Mail / FIN / Benutzername"
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:70
 msgctxt "profile.rim"
 msgid "Təmizlə"
-msgstr "Leeren"
+msgstr "Entfernen"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:75
 msgctxt "profile.rim"
@@ -12861,7 +12861,7 @@ msgstr "Name oder Benutzername der Lehrkraft"
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:84
 msgctxt "accounts.handover"
 msgid "Təmizlə"
-msgstr "Leeren"
+msgstr "Entfernen"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:94
 msgctxt "accounts.handover"
@@ -14269,7 +14269,7 @@ msgstr "Archivieren"
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html:90
 msgctxt "accounts.syllabus"
 msgid "Təmizlə"
-msgstr "Leeren"
+msgstr "Entfernen"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html:102
 msgctxt "accounts.syllabus"
@@ -23631,7 +23631,7 @@ msgstr "Probeversuch"
 #: apps/exams/domain/attempts.py:87
 msgctxt "exams.model.attempt.field"
 msgid "room"
-msgstr "Prüfungsraum"
+msgstr "Saal"
 
 #: apps/exams/domain/attempts.py:95
 msgctxt "exams.model.attempt.field"
@@ -27706,7 +27706,7 @@ msgstr "Zeichenfläche leeren"
 #: apps/exams/templates/exams/components/_paint_answer.html:49
 msgctxt "exams.partial.paint_answer"
 msgid "action_clear"
-msgstr "Leeren"
+msgstr "Entfernen"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:53
 msgctxt "exams.partial.paint_answer"
@@ -27980,7 +27980,7 @@ msgstr "Nicht erschienen"
 #: apps/exams/templates/exams/exam_center/reports.html:196
 #: apps/exams/templates/exams/exam_center/session_monitor.html:154
 msgid "Zal"
-msgstr "Prüfungsraum"
+msgstr "Saal"
 
 #: apps/exams/templates/exams/exam_center/reports.html:99
 msgid "Tarixə"
@@ -29047,7 +29047,7 @@ msgstr "Minuten"
 #: apps/exams/templates/exams/student/final_entry.html:104
 msgctxt "exams.template.final_gate"
 msgid "Zal"
-msgstr "Prüfungsraum"
+msgstr "Saal"
 
 #: apps/exams/templates/exams/student/final_entry.html:109
 msgctxt "exams.template.final_gate"
@@ -32083,7 +32083,7 @@ msgstr "Fragen gefunden"
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:155
 #: templates/partials/_search_input.html:25
 msgid "Təmizlə"
-msgstr "Leeren"
+msgstr "Entfernen"
 
 #: apps/exams/templates/exams/teacher/partials/_exam_bank_picker_items.html:10
 msgid "Sualı seç"
@@ -35523,7 +35523,7 @@ msgstr "Alle Daten"
 #: apps/exams/views/exam_center/reports.py:103
 msgctxt "exams.final_center.report"
 msgid "Zal"
-msgstr "Prüfungsraum"
+msgstr "Saal"
 
 #: apps/exams/views/exam_center/reports.py:109
 msgctxt "exams.final_center.report"
@@ -52475,7 +52475,7 @@ msgstr ""
 #. saxlanılıb.
 msgctxt "exams.template.create_exam_modal_form"
 msgid "clear"
-msgstr "Leeren"
+msgstr "Entfernen"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -59348,7 +59348,7 @@ msgstr "Fragensätze durchsuchen"
 
 msgctxt "accounts.profile.question_chair_review"
 msgid "Təmizlə"
-msgstr "Leeren"
+msgstr "Entfernen"
 
 msgctxt "accounts.profile.question_chair_review"
 msgid "Təsdiq gözləyir"
@@ -94187,7 +94187,7 @@ msgstr "Testfrage"
 
 msgctxt "exams.template.bank_picker"
 msgid "Təmizlə"
-msgstr "Leeren"
+msgstr "Entfernen"
 
 msgctxt "exams.template.bank_picker"
 msgid "Uyğun bank yoxdur"
@@ -96996,8 +96996,14 @@ msgid "name_de"
 msgstr "Deutsch"
 
 msgctxt "exams.network"
-msgid "Final və midterm imtahanları yalnız universitet şəbəkəsindən verilir. Universitetin daxili şəbəkəsinə (imtahan zalı kompüterinə) qoşulun və səhifəni yeniləyin."
-msgstr "Abschluss- und Zwischenprüfungen können nur aus dem Universitätsnetz abgelegt werden. Verbinden Sie sich mit dem internen Netz der Universität (Prüfungsraum-Computer) und laden Sie die Seite neu."
+msgid ""
+"Final və midterm imtahanları yalnız universitet şəbəkəsindən verilir. "
+"Universitetin daxili şəbəkəsinə (imtahan zalı kompüterinə) qoşulun və "
+"səhifəni yeniləyin."
+msgstr ""
+"Abschluss- und Zwischenprüfungen können nur aus dem Universitätsnetz "
+"abgelegt werden. Verbinden Sie sich mit dem internen Netz der Universität "
+"(Prüfungsraum-Computer) und laden Sie die Seite neu."
 
 msgctxt "exams.network"
 msgid "Yalnız universitet şəbəkəsindən"
@@ -97008,8 +97014,12 @@ msgid "Final və midterm imtahanı"
 msgstr "Abschluss- und Zwischenprüfung"
 
 msgctxt "exams.network"
-msgid "Cavablarınız serverdə saxlanılıb — daxili şəbəkədən imtahan qaldığı yerdən davam edəcək."
-msgstr "Ihre Antworten sind auf dem Server gespeichert — im internen Netz geht die Prüfung dort weiter, wo Sie aufgehört haben."
+msgid ""
+"Cavablarınız serverdə saxlanılıb — daxili şəbəkədən imtahan qaldığı yerdən "
+"davam edəcək."
+msgstr ""
+"Ihre Antworten sind auf dem Server gespeichert — im internen Netz geht die "
+"Prüfung dort weiter, wo Sie aufgehört haben."
 
 msgctxt "exams.network"
 msgid "Universitet şəbəkəsi"
@@ -97020,13 +97030,298 @@ msgid "Səhifəni yenilə"
 msgstr "Seite neu laden"
 
 msgctxt "exams.network"
-msgid "Şəbəkə yoxlaması serverdə aparılır və rəd hadisəsi jurnalda qeyd olunur."
-msgstr "Die Netzprüfung erfolgt auf dem Server, jede Ablehnung wird protokolliert."
+msgid ""
+"Şəbəkə yoxlaması serverdə aparılır və rəd hadisəsi jurnalda qeyd olunur."
+msgstr ""
+"Die Netzprüfung erfolgt auf dem Server, jede Ablehnung wird protokolliert."
 
 msgctxt "exams.final_center.entry"
-msgid "Sizə nəzarətçi tərəfindən yeni PIN verilib — köhnə PIN artıq etibarsızdır. Yeni PIN ilə daxil olun."
-msgstr "Die Aufsicht hat Ihnen eine neue PIN ausgestellt — die alte PIN ist ungültig. Melden Sie sich mit der neuen PIN an."
+msgid ""
+"Sizə nəzarətçi tərəfindən yeni PIN verilib — köhnə PIN artıq etibarsızdır. "
+"Yeni PIN ilə daxil olun."
+msgstr ""
+"Die Aufsicht hat Ihnen eine neue PIN ausgestellt — die alte PIN ist "
+"ungültig. Melden Sie sich mit der neuen PIN an."
 
 msgctxt "exams.final_center.entry"
-msgid "İmtahanınız başqa kompüterdə davam edir. Kompüteri dəyişmək üçün nəzarətçidən yeni PIN istəyin — imtahan qaldığı yerdən davam edəcək."
-msgstr "Ihre Prüfung läuft auf einem anderen Computer. Um den Computer zu wechseln, bitten Sie die Aufsicht um eine neue PIN — die Prüfung geht dort weiter, wo Sie aufgehört haben."
+msgid ""
+"İmtahanınız başqa kompüterdə davam edir. Kompüteri dəyişmək üçün "
+"nəzarətçidən yeni PIN istəyin — imtahan qaldığı yerdən davam edəcək."
+msgstr ""
+"Ihre Prüfung läuft auf einem anderen Computer. Um den Computer zu wechseln, "
+"bitten Sie die Aufsicht um eine neue PIN — die Prüfung geht dort weiter, wo "
+"Sie aufgehört haben."
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarət növbələriniz"
+msgstr "Ihre Aufsichtsdienste"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "İmtahan davam edir — çıxış ən gec %(t)s-a qədər açıqdır"
+msgstr ""
+"Die Prüfung läuft noch — der Zugang bleibt spätestens bis %(t)s geöffnet"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "Çıxış %(t)s-da avtomatik bağlanır"
+msgstr "Der Zugang schließt automatisch um %(t)s"
+
+msgctxt "exams.final_center.duty"
+msgid "Hazırda aktiv nəzarət növbəniz yoxdur."
+msgstr "Sie haben derzeit keinen aktiven Aufsichtsdienst."
+
+msgctxt "exams.final_center.duty"
+msgid ""
+"Növbəni imtahan mərkəzi rəhbəri yazır; çıxış növbədən 30 dəqiqə əvvəl açılır"
+" və imtahan/gün bitəndə avtomatik bağlanır."
+msgstr ""
+"Dienste werden von der Leitung des Prüfungszentrums zugewiesen; der Zugang "
+"öffnet 30 Minuten vor dem Dienst und schließt automatisch, wenn die Prüfung "
+"oder der Tag endet."
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarət növbəniz bitdi — bu zala çıxış bağlandı."
+msgstr ""
+"Ihr Aufsichtsdienst ist beendet — der Zugang zu diesem Saal ist geschlossen."
+
+msgctxt "exams.final_center.duty"
+msgid "Zallara qayıt"
+msgstr "Zurück zu den Sälen"
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarətçi növbələri"
+msgstr "Aufsichtsdienste"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid ""
+"Nəzarətçinin çıxışı növbədən %(lead)s dəqiqə əvvəl açılır; imtahan bitəndə "
+"(son saatdan %(grace)s dəqiqə sonra, zalda canlı imtahan qalmayıbsa) və ya "
+"gün sonunda avtomatik bağlanır."
+msgstr ""
+"Der Zugang der Aufsicht öffnet %(lead)s Minuten vor dem Dienst und schließt "
+"automatisch, wenn die Prüfung endet (%(grace)s Minuten nach Ende, falls im "
+"Saal keine laufende Prüfung mehr ist), oder am Ende des Tages."
+
+msgctxt "exams.final_center.duty"
+msgid "Aktiv"
+msgstr "Laufend"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "%(t)s-da açılır"
+msgstr "Öffnet um %(t)s"
+
+msgctxt "exams.final_center.duty"
+msgid "Ləğv edilib"
+msgstr "Widerrufen"
+
+msgctxt "exams.final_center.duty"
+msgid "Bitib"
+msgstr "Beendet"
+
+msgctxt "exams.final_center.duty"
+msgid "Növbə ləğv edilsin? Nəzarətçinin çıxışı dərhal bağlanacaq."
+msgstr ""
+"Diesen Dienst widerrufen? Der Zugang der Aufsicht wird sofort geschlossen."
+
+msgctxt "exams.final_center.duty"
+msgid "Ləğv et"
+msgstr "Widerrufen"
+
+msgctxt "exams.final_center.duty"
+msgid "Bu zal üçün bu gün və sonrakı günlərə növbə yazılmayıb."
+msgstr "Für diesen Saal sind heute oder später keine Dienste geplant."
+
+msgctxt "exams.final_center.duty"
+msgid "Yeni növbə"
+msgstr "Neuer Dienst"
+
+msgctxt "exams.final_center.duty"
+msgid "Gün"
+msgstr "Datum"
+
+msgctxt "exams.final_center.duty"
+msgid "Başlanğıc"
+msgstr "Beginn"
+
+msgctxt "exams.final_center.duty"
+msgid "Son"
+msgstr "Ende"
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd (istəyə bağlı)"
+msgstr "Notiz (optional)"
+
+msgctxt "exams.final_center.duty"
+msgid "Növbəni yaz"
+msgstr "Dienst zuweisen"
+
+msgctxt "exams.final_center.duty"
+msgid "Köhnə daimi təyinatlar silinsin?"
+msgstr "Die alten dauerhaften Zuweisungen entfernen?"
+
+msgctxt "exams.final_center.duty"
+msgid "Köhnə daimi təyinatlar (yalnız canlı imtahan zamanı işləyir):"
+msgstr ""
+"Alte dauerhafte Zuweisungen (gelten nur während einer laufenden Prüfung):"
+
+msgctxt "exams.final_center.duty"
+msgid "Təmizlə"
+msgstr "Entfernen"
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarət müddəti bitdi"
+msgstr "Aufsichtszeit beendet"
+
+msgctxt "exams.final_center.duty"
+msgid "s"
+msgstr "Std."
+
+msgctxt "exams.final_center.duty"
+msgid "dəq"
+msgstr "Min."
+
+msgctxt "exams.final_center.duty"
+msgid "san"
+msgstr "Sek."
+
+msgctxt "exams.final_center.duty"
+msgid "Qalan vaxt"
+msgstr "Verbleibende Zeit"
+
+msgctxt "exams.final_center.duty"
+msgid "Yeni şübhəli"
+msgstr "Neu verdächtig"
+
+msgctxt "exams.final_center.duty"
+msgid "Bağla"
+msgstr "Schließen"
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarətçi qeydi"
+msgstr "Notiz der Aufsicht"
+
+msgctxt "exams.final_center.duty"
+msgid "Məs.: telefonla danışırdı, xəbərdarlıq edildi"
+msgstr "Z. B.: hat telefoniert, verwarnt"
+
+msgctxt "exams.final_center.duty"
+msgid "Qeydi yaz"
+msgstr "Notiz speichern"
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd yazıldı — xronologiyada görünəcək."
+msgstr "Notiz gespeichert — sie erscheint im Verlauf."
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd yazılmadı."
+msgstr "Die Notiz wurde nicht gespeichert."
+
+msgctxt "exams.final_center.duty"
+msgid "Tarix və ya saat formatı yanlışdır."
+msgstr "Ungültiges Datums- oder Zeitformat."
+
+msgctxt "exams.final_center.duty"
+msgid "Keçmiş gün üçün növbə yazmaq olmaz."
+msgstr "Ein Dienst kann nicht für einen vergangenen Tag zugewiesen werden."
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "Növbəni ən çox %(days)d gün irəli yazmaq olar."
+msgstr "Ein Dienst kann höchstens %(days)d Tage im Voraus geplant werden."
+
+msgctxt "exams.final_center.duty"
+msgid "Bitmə saatı başlama saatından sonra olmalıdır."
+msgstr "Die Endzeit muss nach der Startzeit liegen."
+
+msgctxt "exams.final_center.duty"
+msgid "Bu vaxt aralığı artıq bitib."
+msgstr "Dieser Zeitraum ist bereits vorbei."
+
+msgctxt "exams.final_center.duty"
+msgid "Ən azı bir nəzarətçi seçin."
+msgstr "Wählen Sie mindestens eine Aufsichtsperson."
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "Bir növbəyə ən çox %(n)d nəzarətçi təyin etmək olar."
+msgstr ""
+"Einem Dienst können höchstens %(n)d Aufsichtspersonen zugewiesen werden."
+
+msgctxt "exams.final_center.duty"
+msgid ""
+"Seçilənlərdən bəziləri nəzarətçi ola bilməz (tələbə və ya kənar istifadəçi)."
+msgstr ""
+"Einige der ausgewählten Personen können keine Aufsicht sein (Studierende "
+"oder externe Benutzer)."
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "%(count)d nəzarətçi növbəsi yazıldı."
+msgstr "%(count)d Aufsichtsdienste zugewiesen."
+
+msgctxt "exams.final_center.duty"
+msgid "Növbə ləğv edildi — nəzarətçinin çıxışı bağlandı."
+msgstr "Dienst widerrufen — der Zugang der Aufsicht ist geschlossen."
+
+msgctxt "exams.final_center.duty"
+msgid "Növbə artıq ləğv olunub."
+msgstr "Der Dienst ist bereits widerrufen."
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd boşdur."
+msgstr "Die Notiz ist leer."
+
+msgctxt "exams.final_center.duty"
+msgid "Çox sayda qeyd — bir az gözləyin."
+msgstr "Zu viele Notizen — bitte warten Sie einen Moment."
+
+msgctxt "exams.proctoring.signal"
+msgid "İmtahan eyni anda iki səhifədə/cihazda açıqdır"
+msgstr "Die Prüfung ist gleichzeitig auf zwei Seiten/Geräten geöffnet"
+
+msgctxt "exams.proctoring.signal"
+msgid "İmtahan zamanı IP ünvanı dəyişdi"
+msgstr "Die IP-Adresse hat sich während der Prüfung geändert"
+
+msgctxt "exams.proctoring.signal"
+msgid "Nəzarətçi qeydi"
+msgstr "Notiz der Aufsicht"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Nəzarətçi qeydi"
+msgstr "Notiz der Aufsicht"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "organization"
+msgstr "Organisation"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "room"
+msgstr "Saal"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "user"
+msgstr "Aufsichtsperson"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "starts_at"
+msgstr "Beginnt um"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "ends_at"
+msgstr "Endet um"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "note"
+msgstr "Notiz"
+
+msgctxt "exams.model.invigilator_duty.meta"
+msgid "singular"
+msgstr "Aufsichtsdienst"
+
+msgctxt "exams.model.invigilator_duty.meta"
+msgid "plural"
+msgstr "Aufsichtsdienste"

@@ -34,7 +34,21 @@ class RoomAttemptViolationsApiTests(TestCase):
         _assign_user_to_org(self.student, self.org, ProfileRole.STUDENT, "student")
 
         self.room = ExamRoom.objects.create(organization=self.org, name="Zal V", code="ZV", capacity=20)
-        self.room.invigilators.add(self.staff)  # zala təyin olunmuş nəzarətçi
+        # Zala AKTİV növbə ilə təyin olunmuş nəzarətçi (2026-10-13: daimi M2M artıq çıxış vermir).
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from apps.exams.models import InvigilatorDuty
+
+        now = timezone.now()
+        InvigilatorDuty.objects.create(
+            organization=self.org,
+            room=self.room,
+            user=self.staff,
+            starts_at=now,
+            ends_at=now + timedelta(hours=2),
+        )
 
         self.exam = Exam.objects.create(
             title="RVIO Exam", author=self.owner, organization=self.org, exam_type="test", is_active=True

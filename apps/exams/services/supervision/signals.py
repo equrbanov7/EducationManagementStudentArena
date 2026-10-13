@@ -39,6 +39,13 @@ CLIENT_SIGNAL_KINDS = {
 #: Yalnız serverin özünün yazdığı siqnallar (klientdən qəbul OLUNMUR).
 SERVER_SIGNAL_KINDS = {
     "heartbeat_gap": ("network_disconnect", "low"),
+    # 2026-10-13 (gecə) — serverin öz müşahidələri (klient saxtalaşdıra bilməz):
+    # eyni cəhd İKİ canlı səhifədən (iki cihaz / iki tab) eyni vaxtda heartbeat göndərir.
+    "concurrent_session": ("multiple_windows", "high"),
+    # cəhd ortasında tələbənin IP ünvanı dəyişdi (başqa cihaz/şəbəkə ehtimalı).
+    "ip_changed": ("suspicious_activity", "medium"),
+    # nəzarətçinin əl ilə yazdığı hadisə qeydi — risk xalına TƏSİR ETMİR (info = 0 bal).
+    "invigilator_note": ("other", "info"),
 }
 
 ALL_SIGNAL_KINDS = {**CLIENT_SIGNAL_KINDS, **SERVER_SIGNAL_KINDS}
@@ -57,6 +64,9 @@ SIGNAL_LABELS = {
     "fast_input": pgettext_lazy(_CTX, "Qeyri-adi sürətli yazı"),
     "print_attempt": pgettext_lazy(_CTX, "Çap cəhdi"),
     "heartbeat_gap": pgettext_lazy(_CTX, "Nəzarət siqnalı müvəqqəti kəsilmişdi"),
+    "concurrent_session": pgettext_lazy(_CTX, "İmtahan eyni anda iki səhifədə/cihazda açıqdır"),
+    "ip_changed": pgettext_lazy(_CTX, "İmtahan zamanı IP ünvanı dəyişdi"),
+    "invigilator_note": pgettext_lazy(_CTX, "Nəzarətçi qeydi"),
 }
 
 # Limitlər: cəhd başına ümumi axın + növ başına pəncərə + ömürlük tavan.

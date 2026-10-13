@@ -18,7 +18,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from apps.exams.models import ExamAttempt, FinalExamTicket
-from apps.exams.services.final_center import can_manage_final_center, can_supervise_session
+from apps.exams.services.final_center import can_manage_final_center, can_supervise_session, supervision_scope
 from apps.exams.services.final_center.device_binding import approve_device_change, device_window_minutes
 
 from ._shared import supervisor_org_or_403
@@ -29,8 +29,13 @@ _CTX = "exams.final_center.device"
 def _ensure_can_approve(user, attempt) -> None:
     if can_manage_final_center(user):
         return
+    # 2026-10-13 (gecə): biletsiz (PIN) cəhd zal kompüterinə möhürlənir (``attempt.room``) —
+    # HƏMİN zalda İNDİ növbəsi olan nəzarətçi də təsdiq verə bilər (əvvəl yalnız bilet axını).
+    scope = supervision_scope(user, organization_id=attempt.exam.organization_id)
+    if attempt.room_id and scope.allows_room(attempt.room_id):
+        return
     ticket = FinalExamTicket.objects.select_related("session", "session__room").filter(attempt=attempt).first()
-    if ticket is None or ticket.session is None or not can_supervise_session(user, ticket.session):
+    if ticket is None or ticket.session is None or not can_supervise_session(user, ticket.session, scope=scope):
         raise PermissionDenied(
             pgettext(_CTX, "Cihaz dəyişikliyini yalnız nəzarətçi və ya imtahan mərkəzi təsdiqləyə bilər.")
         )

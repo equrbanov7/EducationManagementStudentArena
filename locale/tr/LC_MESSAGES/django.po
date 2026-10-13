@@ -95512,8 +95512,13 @@ msgid "name_de"
 msgstr "Almanca"
 
 msgctxt "exams.network"
-msgid "Final və midterm imtahanları yalnız universitet şəbəkəsindən verilir. Universitetin daxili şəbəkəsinə (imtahan zalı kompüterinə) qoşulun və səhifəni yeniləyin."
-msgstr "Final ve ara sınavlar yalnızca üniversite ağından verilebilir. Üniversitenin iç ağına (sınav salonu bilgisayarına) bağlanın ve sayfayı yenileyin."
+msgid ""
+"Final və midterm imtahanları yalnız universitet şəbəkəsindən verilir. "
+"Universitetin daxili şəbəkəsinə (imtahan zalı kompüterinə) qoşulun və "
+"səhifəni yeniləyin."
+msgstr ""
+"Final ve ara sınavlar yalnızca üniversite ağından verilebilir. Üniversitenin"
+" iç ağına (sınav salonu bilgisayarına) bağlanın ve sayfayı yenileyin."
 
 msgctxt "exams.network"
 msgid "Yalnız universitet şəbəkəsindən"
@@ -95524,8 +95529,12 @@ msgid "Final və midterm imtahanı"
 msgstr "Final ve ara sınav"
 
 msgctxt "exams.network"
-msgid "Cavablarınız serverdə saxlanılıb — daxili şəbəkədən imtahan qaldığı yerdən davam edəcək."
-msgstr "Cevaplarınız sunucuda kayıtlı — iç ağdan sınav kaldığınız yerden devam edecek."
+msgid ""
+"Cavablarınız serverdə saxlanılıb — daxili şəbəkədən imtahan qaldığı yerdən "
+"davam edəcək."
+msgstr ""
+"Cevaplarınız sunucuda kayıtlı — iç ağdan sınav kaldığınız yerden devam "
+"edecek."
 
 msgctxt "exams.network"
 msgid "Universitet şəbəkəsi"
@@ -95536,13 +95545,288 @@ msgid "Səhifəni yenilə"
 msgstr "Sayfayı yenile"
 
 msgctxt "exams.network"
-msgid "Şəbəkə yoxlaması serverdə aparılır və rəd hadisəsi jurnalda qeyd olunur."
+msgid ""
+"Şəbəkə yoxlaması serverdə aparılır və rəd hadisəsi jurnalda qeyd olunur."
 msgstr "Ağ denetimi sunucuda yapılır ve her ret kayda geçer."
 
 msgctxt "exams.final_center.entry"
-msgid "Sizə nəzarətçi tərəfindən yeni PIN verilib — köhnə PIN artıq etibarsızdır. Yeni PIN ilə daxil olun."
-msgstr "Gözetmen size yeni bir PIN verdi — eski PIN artık geçersiz. Yeni PIN ile giriş yapın."
+msgid ""
+"Sizə nəzarətçi tərəfindən yeni PIN verilib — köhnə PIN artıq etibarsızdır. "
+"Yeni PIN ilə daxil olun."
+msgstr ""
+"Gözetmen size yeni bir PIN verdi — eski PIN artık geçersiz. Yeni PIN ile "
+"giriş yapın."
 
 msgctxt "exams.final_center.entry"
-msgid "İmtahanınız başqa kompüterdə davam edir. Kompüteri dəyişmək üçün nəzarətçidən yeni PIN istəyin — imtahan qaldığı yerdən davam edəcək."
-msgstr "Sınavınız başka bir bilgisayarda devam ediyor. Bilgisayar değiştirmek için gözetmenden yeni PIN isteyin — sınav kaldığınız yerden devam edecek."
+msgid ""
+"İmtahanınız başqa kompüterdə davam edir. Kompüteri dəyişmək üçün "
+"nəzarətçidən yeni PIN istəyin — imtahan qaldığı yerdən davam edəcək."
+msgstr ""
+"Sınavınız başka bir bilgisayarda devam ediyor. Bilgisayar değiştirmek için "
+"gözetmenden yeni PIN isteyin — sınav kaldığınız yerden devam edecek."
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarət növbələriniz"
+msgstr "Gözetmenlik görevleriniz"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "İmtahan davam edir — çıxış ən gec %(t)s-a qədər açıqdır"
+msgstr "Sınav sürüyor — erişim en geç %(t)s saatine kadar açık"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "Çıxış %(t)s-da avtomatik bağlanır"
+msgstr "Erişim %(t)s saatinde otomatik kapanır"
+
+msgctxt "exams.final_center.duty"
+msgid "Hazırda aktiv nəzarət növbəniz yoxdur."
+msgstr "Şu anda aktif gözetmenlik göreviniz yok."
+
+msgctxt "exams.final_center.duty"
+msgid ""
+"Növbəni imtahan mərkəzi rəhbəri yazır; çıxış növbədən 30 dəqiqə əvvəl açılır"
+" və imtahan/gün bitəndə avtomatik bağlanır."
+msgstr ""
+"Görevi sınav merkezi başkanı atar; erişim görevden 30 dakika önce açılır ve "
+"sınav ya da gün bitince otomatik kapanır."
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarət növbəniz bitdi — bu zala çıxış bağlandı."
+msgstr "Gözetmenlik göreviniz bitti — bu salona erişim kapandı."
+
+msgctxt "exams.final_center.duty"
+msgid "Zallara qayıt"
+msgstr "Salonlara dön"
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarətçi növbələri"
+msgstr "Gözetmen görevleri"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid ""
+"Nəzarətçinin çıxışı növbədən %(lead)s dəqiqə əvvəl açılır; imtahan bitəndə "
+"(son saatdan %(grace)s dəqiqə sonra, zalda canlı imtahan qalmayıbsa) və ya "
+"gün sonunda avtomatik bağlanır."
+msgstr ""
+"Gözetmen erişimi görevden %(lead)s dakika önce açılır; sınav bitince (bitiş "
+"saatinden %(grace)s dakika sonra, salonda canlı sınav kalmadıysa) veya gün "
+"sonunda otomatik kapanır."
+
+msgctxt "exams.final_center.duty"
+msgid "Aktiv"
+msgstr "Aktif"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "%(t)s-da açılır"
+msgstr "%(t)s saatinde açılır"
+
+msgctxt "exams.final_center.duty"
+msgid "Ləğv edilib"
+msgstr "İptal edildi"
+
+msgctxt "exams.final_center.duty"
+msgid "Bitib"
+msgstr "Bitti"
+
+msgctxt "exams.final_center.duty"
+msgid "Növbə ləğv edilsin? Nəzarətçinin çıxışı dərhal bağlanacaq."
+msgstr "Görev iptal edilsin mi? Gözetmenin erişimi hemen kapanacak."
+
+msgctxt "exams.final_center.duty"
+msgid "Ləğv et"
+msgstr "İptal et"
+
+msgctxt "exams.final_center.duty"
+msgid "Bu zal üçün bu gün və sonrakı günlərə növbə yazılmayıb."
+msgstr "Bu salon için bugün ve sonraki günlere görev atanmadı."
+
+msgctxt "exams.final_center.duty"
+msgid "Yeni növbə"
+msgstr "Yeni görev"
+
+msgctxt "exams.final_center.duty"
+msgid "Gün"
+msgstr "Tarih"
+
+msgctxt "exams.final_center.duty"
+msgid "Başlanğıc"
+msgstr "Başlangıç"
+
+msgctxt "exams.final_center.duty"
+msgid "Son"
+msgstr "Bitiş"
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd (istəyə bağlı)"
+msgstr "Not (isteğe bağlı)"
+
+msgctxt "exams.final_center.duty"
+msgid "Növbəni yaz"
+msgstr "Görevi ata"
+
+msgctxt "exams.final_center.duty"
+msgid "Köhnə daimi təyinatlar silinsin?"
+msgstr "Eski kalıcı atamalar silinsin mi?"
+
+msgctxt "exams.final_center.duty"
+msgid "Köhnə daimi təyinatlar (yalnız canlı imtahan zamanı işləyir):"
+msgstr "Eski kalıcı atamalar (yalnızca canlı sınav sırasında geçerli):"
+
+msgctxt "exams.final_center.duty"
+msgid "Təmizlə"
+msgstr "Temizle"
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarət müddəti bitdi"
+msgstr "Gözetim süresi bitti"
+
+msgctxt "exams.final_center.duty"
+msgid "s"
+msgstr "sa"
+
+msgctxt "exams.final_center.duty"
+msgid "dəq"
+msgstr "dk"
+
+msgctxt "exams.final_center.duty"
+msgid "san"
+msgstr "sn"
+
+msgctxt "exams.final_center.duty"
+msgid "Qalan vaxt"
+msgstr "Kalan süre"
+
+msgctxt "exams.final_center.duty"
+msgid "Yeni şübhəli"
+msgstr "Yeni şüpheli"
+
+msgctxt "exams.final_center.duty"
+msgid "Bağla"
+msgstr "Kapat"
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarətçi qeydi"
+msgstr "Gözetmen notu"
+
+msgctxt "exams.final_center.duty"
+msgid "Məs.: telefonla danışırdı, xəbərdarlıq edildi"
+msgstr "Örn.: telefonla konuşuyordu, uyarıldı"
+
+msgctxt "exams.final_center.duty"
+msgid "Qeydi yaz"
+msgstr "Notu kaydet"
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd yazıldı — xronologiyada görünəcək."
+msgstr "Not kaydedildi — zaman çizelgesinde görünecek."
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd yazılmadı."
+msgstr "Not kaydedilmedi."
+
+msgctxt "exams.final_center.duty"
+msgid "Tarix və ya saat formatı yanlışdır."
+msgstr "Tarih veya saat biçimi hatalı."
+
+msgctxt "exams.final_center.duty"
+msgid "Keçmiş gün üçün növbə yazmaq olmaz."
+msgstr "Geçmiş bir gün için görev atanamaz."
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "Növbəni ən çox %(days)d gün irəli yazmaq olar."
+msgstr "Görev en fazla %(days)d gün ileriye atanabilir."
+
+msgctxt "exams.final_center.duty"
+msgid "Bitmə saatı başlama saatından sonra olmalıdır."
+msgstr "Bitiş saati başlangıç saatinden sonra olmalıdır."
+
+msgctxt "exams.final_center.duty"
+msgid "Bu vaxt aralığı artıq bitib."
+msgstr "Bu zaman aralığı zaten sona erdi."
+
+msgctxt "exams.final_center.duty"
+msgid "Ən azı bir nəzarətçi seçin."
+msgstr "En az bir gözetmen seçin."
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "Bir növbəyə ən çox %(n)d nəzarətçi təyin etmək olar."
+msgstr "Bir göreve en fazla %(n)d gözetmen atanabilir."
+
+msgctxt "exams.final_center.duty"
+msgid ""
+"Seçilənlərdən bəziləri nəzarətçi ola bilməz (tələbə və ya kənar istifadəçi)."
+msgstr "Seçilenlerden bazıları gözetmen olamaz (öğrenci veya dış kullanıcı)."
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "%(count)d nəzarətçi növbəsi yazıldı."
+msgstr "%(count)d gözetmen görevi atandı."
+
+msgctxt "exams.final_center.duty"
+msgid "Növbə ləğv edildi — nəzarətçinin çıxışı bağlandı."
+msgstr "Görev iptal edildi — gözetmenin erişimi kapandı."
+
+msgctxt "exams.final_center.duty"
+msgid "Növbə artıq ləğv olunub."
+msgstr "Görev zaten iptal edildi."
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd boşdur."
+msgstr "Not boş."
+
+msgctxt "exams.final_center.duty"
+msgid "Çox sayda qeyd — bir az gözləyin."
+msgstr "Çok fazla not — biraz bekleyin."
+
+msgctxt "exams.proctoring.signal"
+msgid "İmtahan eyni anda iki səhifədə/cihazda açıqdır"
+msgstr "Sınav aynı anda iki sayfada/cihazda açık"
+
+msgctxt "exams.proctoring.signal"
+msgid "İmtahan zamanı IP ünvanı dəyişdi"
+msgstr "Sınav sırasında IP adresi değişti"
+
+msgctxt "exams.proctoring.signal"
+msgid "Nəzarətçi qeydi"
+msgstr "Gözetmen notu"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Nəzarətçi qeydi"
+msgstr "Gözetmen notu"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "organization"
+msgstr "Kurum"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "room"
+msgstr "Salon"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "user"
+msgstr "Gözetmen"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "starts_at"
+msgstr "Başlangıç"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "ends_at"
+msgstr "Bitiş"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "note"
+msgstr "Not"
+
+msgctxt "exams.model.invigilator_duty.meta"
+msgid "singular"
+msgstr "Gözetmen görevi"
+
+msgctxt "exams.model.invigilator_duty.meta"
+msgid "plural"
+msgstr "Gözetmen görevleri"

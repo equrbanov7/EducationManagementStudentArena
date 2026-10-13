@@ -1017,8 +1017,8 @@ class CenterPageRenderTests(_FlowBase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "PC-01")
         self.assertContains(response, "AA:BB:CC:DD:EE:01")
-        # İmtahan mərkəzi üçün nəzarətçi təyin paneli görünür.
-        self.assertContains(response, reverse("exams:exam_center_room_assign_invigilators", args=[self.room.pk]))
+        # İmtahan mərkəzi üçün nəzarətçi NÖVBƏ paneli görünür (2026-10-13: vaxtla məhdud növbə).
+        self.assertContains(response, reverse("exams:exam_center_room_duty_create", args=[self.room.pk]))
 
     def test_room_monitor_computer_list_is_scrollable_and_searchable(self):
         """Çoxlu kompüterdə siyahı öz sahəsində sürüşür + debounce-lu axtarış."""

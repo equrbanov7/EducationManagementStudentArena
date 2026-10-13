@@ -82,6 +82,7 @@ def proctoring_ui_labels():
         "timeline": pgettext(ctx, "Hadisə xronologiyası"),
         "sourceRule": pgettext(ctx, "Qayda"),
         "sourceSignal": pgettext(ctx, "Siqnal"),
+        "sourceNote": pgettext(ctx, "Nəzarətçi qeydi"),
         "counts": pgettext(ctx, "pozuntu sayılır"),
         "noEvents": pgettext(ctx, "Hadisə qeydə alınmayıb."),
         "severity": {

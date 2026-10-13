@@ -10,7 +10,8 @@ ayrılmasın. Əlavə olunan sahələr (yalnız nəzarətçi view-larında qayta
 * canlılıq: ``supervised`` · ``heartbeat`` ({"status", "age", …}).
 
 Sorğu büdcəsi sabitdir (sətir sayından asılı deyil): profil + qrup + imtahan
-seçimləri + nəzarət konfiqi + 2 risk aqreqatı + 1 cache ``get_many``.
+seçimləri + nəzarət konfiqi + 2 risk aqreqatı + 1 cache ``get_many`` + 1 irəliləyiş
+aqreqatı (``answered`` / ``question_total``, 2026-10-13).
 """
 
 from __future__ import annotations
@@ -34,6 +35,34 @@ def _supervised_exam_ids(exam_ids) -> set:
     return set(
         ExamSupervisionConfig.objects.filter(exam_id__in=exam_ids, enabled=True).values_list("exam_id", flat=True)
     )
+
+
+def attempts_progress(attempt_ids) -> dict:
+    """{attempt_id: (cavablanmış, cəmi)} — TƏK aqreqat sorğu (2026-10-13, gecə).
+
+    Nəzarətçi zalda kimin «ilişib qaldığını» (uzun müddət 0 cavab) və ya qeyri-adi
+    sürətlə irəlilədiyini görsün. «Cavablanmış» = mətn / rəsm / dondurulmuş variant
+    seçimi olan cavab (``_answer_writes`` hər yazıda ``selected_option_ids_snapshot``-u
+    doldurur). Kodlaşdırma cəhdlərinin ExamAnswer sətri yoxdursa nəticə boş qalır.
+    """
+    from django.db.models import Count, Q
+
+    from apps.exams.models import ExamAnswer
+
+    ids = [attempt_id for attempt_id in set(attempt_ids) if attempt_id]
+    if not ids:
+        return {}
+    answered_q = (
+        ~Q(text_answer="")
+        | Q(has_paint=True)
+        | (Q(selected_option_ids_snapshot__isnull=False) & ~Q(selected_option_ids_snapshot=[]))
+    )
+    rows = (
+        ExamAnswer.objects.filter(attempt_id__in=ids)
+        .values("attempt_id")
+        .annotate(total=Count("id"), answered=Count("id", filter=answered_q))
+    )
+    return {row["attempt_id"]: (row["answered"], row["total"]) for row in rows}
 
 
 def enrich_monitor_rows(rows, organization, users_by_id) -> list:
@@ -61,6 +90,7 @@ def enrich_monitor_rows(rows, organization, users_by_id) -> list:
     risk = attempts_risk(attempt_ids, thresholds)
     beats = heartbeat_map(live_attempt_ids)
     live = set(live_attempt_ids)
+    progress = attempts_progress([row.get("attempt_id") for row in rows if row.get("status") == "active"])
 
     for row in rows:
         attempt_id = row.get("attempt_id")
@@ -71,6 +101,9 @@ def enrich_monitor_rows(rows, organization, users_by_id) -> list:
         row["flagged"] = bool(info.get("flagged"))
         row["signal_count"] = info.get("signals", 0)
         row["max_severity"] = info.get("max_severity", "")
+        answered, total = progress.get(attempt_id, (None, None))
+        row["answered"] = answered
+        row["question_total"] = total
         if attempt_id in live:
             started = parse_datetime(row.get("started_at") or "") if row.get("started_at") else None
             row["heartbeat"] = heartbeat_state(beats.get(attempt_id), started_at=started)
@@ -98,4 +131,4 @@ def attempt_proctor_detail(attempt, organization_id, *, timeline_limit: int = 10
     }
 
 
-__all__ = ["attempt_proctor_detail", "enrich_monitor_rows"]
+__all__ = ["attempt_proctor_detail", "attempts_progress", "enrich_monitor_rows"]

@@ -96239,8 +96239,14 @@ msgid "name_de"
 msgstr "Немецкий"
 
 msgctxt "exams.network"
-msgid "Final və midterm imtahanları yalnız universitet şəbəkəsindən verilir. Universitetin daxili şəbəkəsinə (imtahan zalı kompüterinə) qoşulun və səhifəni yeniləyin."
-msgstr "Финальные и промежуточные экзамены сдаются только из сети университета. Подключитесь к внутренней сети университета (компьютер экзаменационного зала) и обновите страницу."
+msgid ""
+"Final və midterm imtahanları yalnız universitet şəbəkəsindən verilir. "
+"Universitetin daxili şəbəkəsinə (imtahan zalı kompüterinə) qoşulun və "
+"səhifəni yeniləyin."
+msgstr ""
+"Финальные и промежуточные экзамены сдаются только из сети университета. "
+"Подключитесь к внутренней сети университета (компьютер экзаменационного "
+"зала) и обновите страницу."
 
 msgctxt "exams.network"
 msgid "Yalnız universitet şəbəkəsindən"
@@ -96251,8 +96257,12 @@ msgid "Final və midterm imtahanı"
 msgstr "Финальный и промежуточный экзамен"
 
 msgctxt "exams.network"
-msgid "Cavablarınız serverdə saxlanılıb — daxili şəbəkədən imtahan qaldığı yerdən davam edəcək."
-msgstr "Ваши ответы сохранены на сервере — из внутренней сети экзамен продолжится с того же места."
+msgid ""
+"Cavablarınız serverdə saxlanılıb — daxili şəbəkədən imtahan qaldığı yerdən "
+"davam edəcək."
+msgstr ""
+"Ваши ответы сохранены на сервере — из внутренней сети экзамен продолжится с "
+"того же места."
 
 msgctxt "exams.network"
 msgid "Universitet şəbəkəsi"
@@ -96263,13 +96273,293 @@ msgid "Səhifəni yenilə"
 msgstr "Обновить страницу"
 
 msgctxt "exams.network"
-msgid "Şəbəkə yoxlaması serverdə aparılır və rəd hadisəsi jurnalda qeyd olunur."
-msgstr "Проверка сети выполняется на сервере, каждый отказ записывается в журнал."
+msgid ""
+"Şəbəkə yoxlaması serverdə aparılır və rəd hadisəsi jurnalda qeyd olunur."
+msgstr ""
+"Проверка сети выполняется на сервере, каждый отказ записывается в журнал."
 
 msgctxt "exams.final_center.entry"
-msgid "Sizə nəzarətçi tərəfindən yeni PIN verilib — köhnə PIN artıq etibarsızdır. Yeni PIN ilə daxil olun."
-msgstr "Наблюдатель выдал вам новый PIN — старый PIN больше не действует. Войдите с новым PIN."
+msgid ""
+"Sizə nəzarətçi tərəfindən yeni PIN verilib — köhnə PIN artıq etibarsızdır. "
+"Yeni PIN ilə daxil olun."
+msgstr ""
+"Наблюдатель выдал вам новый PIN — старый PIN больше не действует. Войдите с "
+"новым PIN."
 
 msgctxt "exams.final_center.entry"
-msgid "İmtahanınız başqa kompüterdə davam edir. Kompüteri dəyişmək üçün nəzarətçidən yeni PIN istəyin — imtahan qaldığı yerdən davam edəcək."
-msgstr "Ваш экзамен продолжается на другом компьютере. Чтобы сменить компьютер, попросите у наблюдателя новый PIN — экзамен продолжится с того же места."
+msgid ""
+"İmtahanınız başqa kompüterdə davam edir. Kompüteri dəyişmək üçün "
+"nəzarətçidən yeni PIN istəyin — imtahan qaldığı yerdən davam edəcək."
+msgstr ""
+"Ваш экзамен продолжается на другом компьютере. Чтобы сменить компьютер, "
+"попросите у наблюдателя новый PIN — экзамен продолжится с того же места."
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarət növbələriniz"
+msgstr "Ваши дежурства наблюдателя"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "İmtahan davam edir — çıxış ən gec %(t)s-a qədər açıqdır"
+msgstr "Экзамен продолжается — доступ открыт не позднее чем до %(t)s"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "Çıxış %(t)s-da avtomatik bağlanır"
+msgstr "Доступ автоматически закроется в %(t)s"
+
+msgctxt "exams.final_center.duty"
+msgid "Hazırda aktiv nəzarət növbəniz yoxdur."
+msgstr "Сейчас у вас нет активного дежурства."
+
+msgctxt "exams.final_center.duty"
+msgid ""
+"Növbəni imtahan mərkəzi rəhbəri yazır; çıxış növbədən 30 dəqiqə əvvəl açılır"
+" və imtahan/gün bitəndə avtomatik bağlanır."
+msgstr ""
+"Дежурство назначает руководитель экзаменационного центра; доступ открывается"
+" за 30 минут до начала и автоматически закрывается по окончании экзамена или"
+" дня."
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarət növbəniz bitdi — bu zala çıxış bağlandı."
+msgstr "Ваше дежурство закончилось — доступ к этому залу закрыт."
+
+msgctxt "exams.final_center.duty"
+msgid "Zallara qayıt"
+msgstr "Вернуться к залам"
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarətçi növbələri"
+msgstr "Дежурства наблюдателей"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid ""
+"Nəzarətçinin çıxışı növbədən %(lead)s dəqiqə əvvəl açılır; imtahan bitəndə "
+"(son saatdan %(grace)s dəqiqə sonra, zalda canlı imtahan qalmayıbsa) və ya "
+"gün sonunda avtomatik bağlanır."
+msgstr ""
+"Доступ наблюдателя открывается за %(lead)s минут до дежурства и "
+"автоматически закрывается по окончании экзамена (через %(grace)s минут после"
+" времени окончания, если в зале нет идущего экзамена) или в конце дня."
+
+msgctxt "exams.final_center.duty"
+msgid "Aktiv"
+msgstr "Активно"
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "%(t)s-da açılır"
+msgstr "Откроется в %(t)s"
+
+msgctxt "exams.final_center.duty"
+msgid "Ləğv edilib"
+msgstr "Отменено"
+
+msgctxt "exams.final_center.duty"
+msgid "Bitib"
+msgstr "Завершено"
+
+msgctxt "exams.final_center.duty"
+msgid "Növbə ləğv edilsin? Nəzarətçinin çıxışı dərhal bağlanacaq."
+msgstr "Отменить дежурство? Доступ наблюдателя будет закрыт немедленно."
+
+msgctxt "exams.final_center.duty"
+msgid "Ləğv et"
+msgstr "Отменить"
+
+msgctxt "exams.final_center.duty"
+msgid "Bu zal üçün bu gün və sonrakı günlərə növbə yazılmayıb."
+msgstr "Для этого зала на сегодня и последующие дни дежурств нет."
+
+msgctxt "exams.final_center.duty"
+msgid "Yeni növbə"
+msgstr "Новое дежурство"
+
+msgctxt "exams.final_center.duty"
+msgid "Gün"
+msgstr "Дата"
+
+msgctxt "exams.final_center.duty"
+msgid "Başlanğıc"
+msgstr "Начало"
+
+msgctxt "exams.final_center.duty"
+msgid "Son"
+msgstr "Конец"
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd (istəyə bağlı)"
+msgstr "Примечание (необязательно)"
+
+msgctxt "exams.final_center.duty"
+msgid "Növbəni yaz"
+msgstr "Назначить дежурство"
+
+msgctxt "exams.final_center.duty"
+msgid "Köhnə daimi təyinatlar silinsin?"
+msgstr "Удалить старые постоянные назначения?"
+
+msgctxt "exams.final_center.duty"
+msgid "Köhnə daimi təyinatlar (yalnız canlı imtahan zamanı işləyir):"
+msgstr ""
+"Старые постоянные назначения (действуют только во время идущего экзамена):"
+
+msgctxt "exams.final_center.duty"
+msgid "Təmizlə"
+msgstr "Очистить"
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarət müddəti bitdi"
+msgstr "Время наблюдения истекло"
+
+msgctxt "exams.final_center.duty"
+msgid "s"
+msgstr "ч"
+
+msgctxt "exams.final_center.duty"
+msgid "dəq"
+msgstr "мин"
+
+msgctxt "exams.final_center.duty"
+msgid "san"
+msgstr "с"
+
+msgctxt "exams.final_center.duty"
+msgid "Qalan vaxt"
+msgstr "Осталось времени"
+
+msgctxt "exams.final_center.duty"
+msgid "Yeni şübhəli"
+msgstr "Новый подозрительный"
+
+msgctxt "exams.final_center.duty"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "exams.final_center.duty"
+msgid "Nəzarətçi qeydi"
+msgstr "Заметка наблюдателя"
+
+msgctxt "exams.final_center.duty"
+msgid "Məs.: telefonla danışırdı, xəbərdarlıq edildi"
+msgstr "Напр.: говорил по телефону, сделано предупреждение"
+
+msgctxt "exams.final_center.duty"
+msgid "Qeydi yaz"
+msgstr "Сохранить заметку"
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd yazıldı — xronologiyada görünəcək."
+msgstr "Заметка сохранена — она появится в хронологии."
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd yazılmadı."
+msgstr "Заметка не сохранена."
+
+msgctxt "exams.final_center.duty"
+msgid "Tarix və ya saat formatı yanlışdır."
+msgstr "Неверный формат даты или времени."
+
+msgctxt "exams.final_center.duty"
+msgid "Keçmiş gün üçün növbə yazmaq olmaz."
+msgstr "Нельзя назначить дежурство на прошедший день."
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "Növbəni ən çox %(days)d gün irəli yazmaq olar."
+msgstr "Дежурство можно назначить не более чем на %(days)d дней вперёд."
+
+msgctxt "exams.final_center.duty"
+msgid "Bitmə saatı başlama saatından sonra olmalıdır."
+msgstr "Время окончания должно быть позже времени начала."
+
+msgctxt "exams.final_center.duty"
+msgid "Bu vaxt aralığı artıq bitib."
+msgstr "Этот интервал времени уже закончился."
+
+msgctxt "exams.final_center.duty"
+msgid "Ən azı bir nəzarətçi seçin."
+msgstr "Выберите хотя бы одного наблюдателя."
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "Bir növbəyə ən çox %(n)d nəzarətçi təyin etmək olar."
+msgstr "На одно дежурство можно назначить не более %(n)d наблюдателей."
+
+msgctxt "exams.final_center.duty"
+msgid ""
+"Seçilənlərdən bəziləri nəzarətçi ola bilməz (tələbə və ya kənar istifadəçi)."
+msgstr ""
+"Некоторые из выбранных не могут быть наблюдателями (студент или посторонний "
+"пользователь)."
+
+#, python-format
+msgctxt "exams.final_center.duty"
+msgid "%(count)d nəzarətçi növbəsi yazıldı."
+msgstr "Назначено дежурств наблюдателей: %(count)d."
+
+msgctxt "exams.final_center.duty"
+msgid "Növbə ləğv edildi — nəzarətçinin çıxışı bağlandı."
+msgstr "Дежурство отменено — доступ наблюдателя закрыт."
+
+msgctxt "exams.final_center.duty"
+msgid "Növbə artıq ləğv olunub."
+msgstr "Дежурство уже отменено."
+
+msgctxt "exams.final_center.duty"
+msgid "Qeyd boşdur."
+msgstr "Заметка пуста."
+
+msgctxt "exams.final_center.duty"
+msgid "Çox sayda qeyd — bir az gözləyin."
+msgstr "Слишком много заметок — подождите немного."
+
+msgctxt "exams.proctoring.signal"
+msgid "İmtahan eyni anda iki səhifədə/cihazda açıqdır"
+msgstr "Экзамен открыт одновременно на двух страницах/устройствах"
+
+msgctxt "exams.proctoring.signal"
+msgid "İmtahan zamanı IP ünvanı dəyişdi"
+msgstr "IP-адрес изменился во время экзамена"
+
+msgctxt "exams.proctoring.signal"
+msgid "Nəzarətçi qeydi"
+msgstr "Заметка наблюдателя"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Nəzarətçi qeydi"
+msgstr "Заметка наблюдателя"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "organization"
+msgstr "Организация"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "room"
+msgstr "Зал"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "user"
+msgstr "Наблюдатель"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "starts_at"
+msgstr "Начало"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "ends_at"
+msgstr "Окончание"
+
+msgctxt "exams.model.invigilator_duty.field"
+msgid "note"
+msgstr "Примечание"
+
+msgctxt "exams.model.invigilator_duty.meta"
+msgid "singular"
+msgstr "Дежурство наблюдателя"
+
+msgctxt "exams.model.invigilator_duty.meta"
+msgid "plural"
+msgstr "Дежурства наблюдателей"

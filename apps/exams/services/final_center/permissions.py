@@ -29,21 +29,22 @@ def ensure_can_manage_final_center(user) -> None:
     raise PermissionDenied(pgettext("exams.final_center.permission", "Bu əməliyyat yalnız imtahan mərkəzi üçündür."))
 
 
-def can_supervise_session(user, session) -> bool:
-    """Oturumun canlı idarəsi: mərkəz + ZALA təyin olunmuş nəzarətçi.
+def can_supervise_session(user, session, *, scope=None) -> bool:
+    """Oturumun canlı idarəsi: mərkəz + İNDİ aktiv növbəsi olan nəzarətçi.
 
-    Nəzarətçi artıq oturuma yox, ZALA təyin olunur (``ExamRoom.invigilators``) və
-    zaldakı bütün oturumları idarə edir. Köhnə oturum-səviyyəli
-    ``invigilator``/``staff`` təyinatları geriyə-uyğunluq üçün hələ də qəbul edilir.
+    2026-10-13 (gecə): nəzarətçi çıxışı artıq DAİMİ deyil — ``duties.supervision_scope``
+    sorğu anında hesablayır (``InvigilatorDuty`` pəncərəsi; köhnə zal M2M və
+    oturum-səviyyəli ``invigilator``/``staff`` yalnız oturum canlı olanda). Növbə
+    bitən kimi bu funksiya False qaytarır — monitor, snapshot, WS, şəkil hamısı bağlanır.
+    ``scope`` — eyni sorğuda çoxlu oturum yoxlanırsa bir dəfə hesablanmış əhatə.
     """
     if can_manage_final_center(user):
         return True
-    if session.room.invigilators.filter(id=user.id).exists():
-        return True
-    # Köhnə (deprecated) oturum-səviyyəli təyinatlar — geriyə-uyğunluq.
-    if session.invigilator_id == user.id:
-        return True
-    return session.staff.filter(id=user.id).exists()
+    if scope is None:
+        from .duties import supervision_scope
+
+        scope = supervision_scope(user, organization_id=session.organization_id)
+    return scope.allows_session(session)
 
 
 def ensure_can_supervise_session(user, session) -> None:
@@ -53,19 +54,17 @@ def ensure_can_supervise_session(user, session) -> None:
 
 
 def supervised_sessions_q(user) -> Q:
-    """İstifadəçinin nəzarətçi kimi göründüyü oturumlar üçün Q filtri.
+    """İstifadəçinin nəzarətçi kimi İNDİ göründüyü oturumlar üçün Q filtri (vaxtla məhdud)."""
+    from .duties import supervision_scope
 
-    Əsas mənbə: ZALA təyin olunmuş nəzarətçilər (``room__invigilators``).
-    Köhnə oturum-səviyyəli ``invigilator``/``staff`` da geriyə-uyğunluq üçün.
-    """
-    return Q(room__invigilators=user) | Q(invigilator=user) | Q(staff=user)
+    return supervision_scope(user).sessions_q()
 
 
 def sessions_visible_to(user, base_queryset):
     """
     İstifadəçinin görə biləcəyi oturumlar: mərkəz → hamısı (tenant daxilində),
-    nəzarətçi/heyət → yalnız təyin olunduqları. Queryset artıq org-scoped
-    gəlməlidir.
+    nəzarətçi → yalnız İNDİ aktiv növbəsinin zalları/oturumları. Queryset artıq
+    org-scoped gəlməlidir.
     """
     if can_manage_final_center(user):
         return base_queryset
@@ -78,11 +77,10 @@ def can_enter_supervision_surface(user, organization) -> bool:
     2026-09-02 audit, P2-1: ``supervisor_org_or_403`` yalnız «aktiv təşkilat
     varmı» deyə soruşurdu, rol/təyinat yoxlamırdı — nəticədə İSTƏNİLƏN
     autentifikasiya olunmuş üzv, hətta TƏLƏBƏ, ``GET /exams/center/rooms/``
-    səhifəsini 200 ilə alırdı (data sızmırdı, çünki queryset sonra boşalırdı,
-    amma səth ümumiyyətlə açılmamalıdır).
+    səhifəsini 200 ilə alırdı.
 
-    İcazə: imtahan mərkəzi VƏ YA bu tenantda ən azı bir zala/oturuma təyin
-    olunmuş nəzarətçi/heyət üzvü.
+    İcazə: imtahan mərkəzi VƏ YA bu tenantda İNDİ aktiv nəzarət növbəsi olan istifadəçi
+    (2026-10-13: köhnə «ən azı bir dəfə təyin olunub» qaydası daimi çıxış verirdi).
     """
     if organization is None:
         return False
@@ -90,14 +88,9 @@ def can_enter_supervision_surface(user, organization) -> bool:
         return True
     if not getattr(user, "is_authenticated", False):
         return False
+    from .duties import supervision_scope
 
-    from django.apps import apps as django_apps
-
-    ExamRoom = django_apps.get_model("exams", "ExamRoom")
-    if ExamRoom.objects.filter(organization=organization, invigilators=user).exists():
-        return True
-    ExamRoomSession = django_apps.get_model("exams", "ExamRoomSession")
-    return ExamRoomSession.objects.filter(organization=organization).filter(supervised_sessions_q(user)).exists()
+    return not supervision_scope(user, organization_id=organization.pk).is_empty
 
 
 def ensure_can_enter_supervision_surface(user, organization) -> None:
@@ -164,15 +157,16 @@ def ensure_can_view_final_history(user, organization) -> None:
 
 def user_supervises_final_sessions(user) -> bool:
     """
-    Bu istifadəçi (nəzarətçi/heyət kimi) ən azı bir ləğv olunmamış final
-    oturumuna təyin olunubmu? Naviqasiya görünürlüyü üçün yüngül .exists()
-    yoxlaması (imtahan mərkəzi rolu ayrıca yoxlanır).
+    Bu istifadəçinin İNDİ aktiv nəzarət növbəsi varmı? Kabinet naviqasiyasının
+    («İmtahan Nəzarət Sistemi» bəndi) görünürlüyü üçün — növbə bitəndə bənd özü itir
+    (2026-10-13; əvvəl istənilən ləğv olunmamış keçmiş oturum bəndi daimi saxlayırdı).
+    İmtahan mərkəzi rolu ayrıca yoxlanır.
     """
     if not getattr(user, "is_authenticated", False):
         return False
-    from apps.exams.models import ExamRoomSession
+    from .duties import supervision_scope
 
-    return ExamRoomSession.objects.filter(supervised_sessions_q(user)).exclude(state="cancelled").exists()
+    return not supervision_scope(user).is_empty
 
 
 __all__ = [

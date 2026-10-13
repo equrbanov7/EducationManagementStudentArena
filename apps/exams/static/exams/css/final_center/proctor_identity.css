@@ -135,3 +135,6 @@
     .fxc-tl__item { grid-template-columns: 1fr; }
     .fxc-tl__tags { grid-column: 1; }
 }
+
+/* 2026-10-13: nəzarətçi qeydinin mətni xronologiyada (proctor_identity.js timelineHtml). */
+.fxc-tl__note { display: block; margin-top: 2px; font-style: italic; color: #334155; }

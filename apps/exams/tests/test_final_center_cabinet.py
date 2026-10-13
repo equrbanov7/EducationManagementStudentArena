@@ -170,7 +170,15 @@ class SupervisorNavFlagTests(_CabinetBase):
         session = self._session(start_delta=timedelta(hours=1), end_delta=timedelta(hours=3))
         session.invigilator = teacher
         session.save(update_fields=["invigilator"])
+        # 2026-10-13 (gecə): köhnə oturum təyinatı DAİMİ deyil — 1 saat sonra başlayan hazır
+        # oturum hələ çıxış vermir (ön pəncərə 30 dəq.), canlı oturum isə verir.
+        self.assertFalse(user_supervises_final_sessions(teacher))
+        session.state = "entry_open"
+        session.save(update_fields=["state"])
         self.assertTrue(user_supervises_final_sessions(teacher))
+        session.state = "ended"
+        session.save(update_fields=["state"])
+        self.assertFalse(user_supervises_final_sessions(teacher))
 
     def test_cancelled_session_does_not_count(self):
         from apps.exams.domain.final_center import ROOM_SESSION_STATE_CANCELLED
