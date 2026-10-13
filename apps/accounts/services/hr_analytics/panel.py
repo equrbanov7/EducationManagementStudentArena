@@ -310,7 +310,9 @@ def build_panel(request, *, profile_base_url: str = "") -> dict:
     elif filters.tab == C.TAB_COMPOSITION:
         panel["composition"] = agg.composition(rows, demographics=actor.can_view_demographics)
     elif filters.tab == C.TAB_WORKLOAD:
-        panel["workload"] = agg.workload(rows)
+        from apps.workload.public import norm_rule_note
+
+        panel["workload"] = {**agg.workload(rows), "norm_note": norm_rule_note()}
     elif filters.tab == C.TAB_ACTIVITY:
         panel["activity"] = agg.tree(rows, agg.activity_metrics)
     elif filters.tab == C.TAB_QUALITY:

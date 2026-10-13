@@ -15,6 +15,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass, field
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any, Callable
 
 from django.conf import settings
@@ -38,13 +39,13 @@ def _setting(name: str, fallback):
 class Spec:
     key: str
     group: str
-    kind: str  # "int" | "rate" | "choice" | "bool"
+    kind: str  # "int" | "decimal" | "rate" | "choice" | "bool"
     default: Callable[[], Any]
     label: Any
     help: Any = ""
     unit: Any = ""
-    min: int = 0
-    max: int = 0
+    min: int | float = 0
+    max: int | float = 0
     choices: Callable[[], list] | None = field(default=None, compare=False)
 
 
@@ -60,6 +61,7 @@ def _ai_model_choices() -> list:
 
 GROUPS = (
     ("academic", pgettext_lazy(_CTX, "Akademik qaydalar")),
+    ("workload", pgettext_lazy(_CTX, "Dərs yükü norması və ştat")),
     ("login", pgettext_lazy(_CTX, "Giriş və parol cəhdləri")),
     ("otp", pgettext_lazy(_CTX, "E-poçt kodu (OTP)")),
     ("session", pgettext_lazy(_CTX, "Sessiya")),
@@ -117,6 +119,62 @@ SPECS: dict[str, Spec] = {
                 "saat yazılmır. Yükdə sətir yoxdursa müəllim saatı özü seçir. Söndürülüdə əvvəlki qayda: əvvəl "
                 "təsdiqlənmiş tədris planı, sonra yük; artıq növlər də göstərilir.",
             ),
+        ),
+        # ── Dərs yükü norması və ştat (sahib 2026-10-14) ─────────────────────────────────────────
+        # Oxu nöqtəsi YALNIZ ``apps.workload.services.norms`` — çağıranlar açarı birbaşa oxumur.
+        # Qayda: inzibati vəzifəli → «inzibati» norma; 0,5 ştat → «0,5 ştat» norma; 1 ştat və profil yoxdursa →
+        # «1 ştat» norma; digər paylar (0,25 / 0,75 / 1,25 / 1,5) → «1 ştat» norma × ştat payı.
+        Spec(
+            "workload.norm_hours_full", "workload", "int", lambda: 500,
+            pgettext_lazy(_CTX, "İllik norma — 1 ştat"),
+            pgettext_lazy(
+                _CTX,
+                "NK №215: bir ştat üzrə illik dərs yükü norması. 0,25 / 0,75 / 1,25 / 1,5 ştat üçün norma bu "
+                "dəyərin ştat payına hasilidir (məs. 0,75 ştat → 0,75 × norma). Yük profili olmayan müəllimə də bu "
+                "norma tətbiq olunur.",
+            ),
+            pgettext_lazy(_CTX, "saat"), min=100, max=1500,
+        ),
+        Spec(
+            "workload.norm_hours_half", "workload", "int", lambda: 250,
+            pgettext_lazy(_CTX, "İllik norma — 0,5 ştat"),
+            pgettext_lazy(
+                _CTX,
+                "Yarım ştatda işləyən müəllimin illik norması — 1 ştat normasından avtomatik hesablanmır, ayrıca "
+                "qeyd olunur.",
+            ),
+            pgettext_lazy(_CTX, "saat"), min=50, max=1000,
+        ),
+        Spec(
+            "workload.norm_hours_admin", "workload", "int", lambda: 500,
+            pgettext_lazy(_CTX, "İllik norma — inzibati vəzifəli müəllim"),
+            pgettext_lazy(
+                _CTX,
+                "Dərs deməklə yanaşı inzibati vəzifə tutan müəllim (rektor, prorektor, dekan, dekan müavini, "
+                "kafedra müdiri, şöbə müdiri, mərkəz rəhbəri, tyutor və s. — müəllimlikdən başqa aktiv rolu olan) "
+                "üçün illik norma; ştat payından asılı deyil.",
+            ),
+            pgettext_lazy(_CTX, "saat"), min=50, max=1500,
+        ),
+        Spec(
+            "workload.staff_rate_min", "workload", "decimal", lambda: Decimal("0.25"),
+            pgettext_lazy(_CTX, "Bir müəllimə ən az ştat vahidi"),
+            pgettext_lazy(
+                _CTX,
+                "Forma 7 siyahısından və ya başqa idxaldan gələn ştat payı bundan azdırsa yük profilinə yazılmır "
+                "(hesabatda göstərilir). Saathesabı müəllimə (ştatsız) aid deyil.",
+            ),
+            pgettext_lazy(_CTX, "ştat"), min=0.05, max=1.0,
+        ),
+        Spec(
+            "workload.staff_rate_max", "workload", "decimal", lambda: Decimal("1.5"),
+            pgettext_lazy(_CTX, "Bir müəllimə ən çox ştat vahidi"),
+            pgettext_lazy(
+                _CTX,
+                "KQ-12: bir müəllim ən çox 1,5 ştat tuta bilər. Bundan çox ştat payı yük profilinə yazılmır "
+                "(hesabatda göstərilir).",
+            ),
+            pgettext_lazy(_CTX, "ştat"), min=0.5, max=3.0,
         ),
         Spec(
             "login.device_rate", "login", "rate", _setting("LOGIN_RATE_LIMIT", "5/10m"),
@@ -322,6 +380,37 @@ def _rate_parts(raw) -> tuple[int, int] | None:
     return parsed.limit, parsed.window_seconds // 60
 
 
+_CENT = Decimal("0.01")
+
+
+def _decimal(raw) -> Decimal | None:
+    """«1,5» / «1.50» / 1.5 → ``Decimal("1.50")`` (2 onluq); tanınmırsa ``None``. ``bool`` qəbul olunmur."""
+    if raw is None or isinstance(raw, bool):
+        return None
+    try:
+        value = Decimal(str(raw).strip().replace(",", "."))
+    except (InvalidOperation, ValueError):
+        return None
+    if not value.is_finite():
+        return None
+    return value.quantize(_CENT, rounding=ROUND_HALF_UP)
+
+
+def decimal_text(value) -> str:
+    """``Decimal("1.50")`` → «1.5», ``Decimal("1.00")`` → «1» (forma / müqayisə / JSON üçün)."""
+    parsed = _decimal(value)
+    if parsed is None:
+        return ""
+    return format(parsed.normalize(), "f")
+
+
+def storable(spec: Spec, value):
+    """Bazaya (JSONField) / audit-ə yazılan şəkil — ``Decimal`` JSON-a sığmır, mətn kimi saxlanır."""
+    if spec.kind == "decimal" and value is not None:
+        return decimal_text(value)
+    return value
+
+
 def coerce(spec: Spec, raw):
     """Saxlanmış / göndərilmiş dəyəri tipə və hədlərə uyğunlaşdırır; yararsızdırsa ``None``."""
     if spec.kind == "int":
@@ -330,6 +419,11 @@ def coerce(spec: Spec, raw):
         except (TypeError, ValueError):
             return None
         return value if spec.min <= value <= spec.max else None
+    if spec.kind == "decimal":
+        value = _decimal(raw)
+        if value is None:
+            return None
+        return value if Decimal(str(spec.min)) <= value <= Decimal(str(spec.max)) else None
     if spec.kind == "rate":
         parts = _rate_parts(raw)
         if parts is None or not (spec.min <= parts[0] <= spec.max) or not (1 <= parts[1] <= 24 * 60):
@@ -373,6 +467,10 @@ def get_int(key: str) -> int:
     return int(get(key))
 
 
+def get_decimal(key: str) -> Decimal:
+    return _decimal(get(key)) or Decimal("0")
+
+
 def get_bool(key: str) -> bool:
     """Bayraq oxusu. ⚠️ ``override(key) or fallback`` bayraqda İŞLƏMİR (``False`` atılır) — bunu çağırın."""
     return bool(get(key))
@@ -384,10 +482,14 @@ __all__ = [
     "SPECS",
     "Spec",
     "coerce",
+    "decimal_text",
     "enabled",
     "get",
+    "get_bool",
+    "get_decimal",
     "get_int",
     "invalidate",
     "override",
     "overrides",
+    "storable",
 ]

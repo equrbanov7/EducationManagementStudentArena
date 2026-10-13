@@ -170,7 +170,7 @@ def _population(organization, academic_year: str):
     profiles = {
         row["teacher_id"]: row
         for row in TeacherWorkloadProfile.objects.filter(organization=organization, academic_year=academic_year).values(
-            "teacher_id", "position", "staff_fraction", "is_external", "annual_norm_hours"
+            "teacher_id", "position", "staff_fraction", "is_external"
         )
     }
     profile_teachers = TeacherWorkloadProfile.objects.filter(
@@ -413,13 +413,21 @@ def profile_history(organization, teacher_ids) -> dict:
             "position",
             "staff_fraction",
             "is_external",
-            "annual_norm_hours",
             "load_confirmed_at",
         )
         .order_by("academic_year")
     )
     for row in rows:
         by_teacher[row["teacher_id"]].append(row)
+    # Norma — «Sistem tənzimləmələri» qaydası (ştat payı + inzibati vəzifə), saxlanmış sahə deyil.
+    from apps.workload.public import admin_teacher_ids, current_rule
+
+    rule = current_rule()
+    # Üzvlük sorğusu yalnız inzibati norma fərq yaradanda (defoltda 1 ştatdan fərqli paylar) — sorğu büdcəsi.
+    admins = admin_teacher_ids(
+        organization,
+        [tid for tid, items in by_teacher.items() if any(rule.base(i["staff_fraction"]) != rule.admin for i in items)],
+    )
     out = {}
     for teacher_id, items in by_teacher.items():
         timeline = []
@@ -432,7 +440,7 @@ def profile_history(organization, teacher_ids) -> dict:
                 "staff_type": kind,
                 "staff_fraction": float(item["staff_fraction"] or 0),
                 "is_external": bool(item["is_external"]),
-                "norm": int(item["annual_norm_hours"] or 0),
+                "norm": rule.norm(item["staff_fraction"], is_admin=teacher_id in admins),
                 "confirmed": item["load_confirmed_at"] is not None,
                 "changed": bool(
                     previous
