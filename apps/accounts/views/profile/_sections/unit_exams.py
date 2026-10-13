@@ -1,15 +1,23 @@
-"""Profil "unit-exams" bölməsi üçün context-fragment qurucusu.
+"""Profil "unit-exams" («Bölmə imtahanları») bölməsi üçün context qurucusu.
 
-Dekan/kafedra müdürü üçün öz alt-ağacının imtahanlarına oxu-only baxış. Data
-scope-u ``organizations.scoping`` ilə.
+Dekan / dekan müavini / kafedra müdiri üçün öz alt-ağacının imtahanlarına OXU-ONLY baxış:
+KPI sırası + avto filtr paneli + sıralanan cədvəl + «Ətraflı» çekmecəsi (2026-10-14 redizayn).
+Sorğular ``unit_exams_query``-də, etiket/sətir forması ``unit_exams_ui``-dədir.
+
+Köhnə açarlar (``unit_exams_page_obj`` — ``Exam`` obyektləri, ``unit_exams_total_count`` …)
+testlər və geriyə-uyğunluq üçün saxlanılır; şablon ``unit_exams_section``-u işlədir.
 """
 
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Prefetch
+from django.utils.translation import pgettext
 
-from apps.accounts.views._helpers.formatting import _query_string
 from apps.accounts.views._helpers.tenant import _get_active_organization
-from core.search_text import tolerant_q
+
+from . import unit_exams_query as q
+from . import unit_exams_ui as ui
+
+PAGE_SIZE = 20
 
 
 def _defaults() -> dict:
@@ -18,82 +26,115 @@ def _defaults() -> dict:
         "unit_exams_search_query": "",
         "unit_exams_total_count": 0,
         "unit_exams_pagination_query": "",
+        "unit_exams_section": {"has_scope": False},
     }
 
 
-def _subtree_exam_q(Exam, Membership, org, subtree_ids):
-    """İmtahan alt-ağaca aiddirmi — əvvəl imtahanın ÖZ bağlantısı, yoxdursa müəllifin ƏSAS üzvlüyü.
+def _scope_roots(subtree) -> list[str]:
+    """Əhatənin kök vahidlərinin adları (alt başlıq üçün) — valideyni alt-ağacda olmayanlar."""
+    rows = list(subtree.values_list("pk", "parent_id", "name"))
+    inside = {pk for pk, _parent, _name in rows}
+    return sorted(name for _pk, parent, name in rows if parent not in inside)
 
-    2026-10-13 (rol auditi B19): əvvəl müəllifin alt-ağacda İSTƏNİLƏN üzvlüyü kifayət edirdi — başqa
-    kafedranın yükünü alan müəllimə verilən ƏLAVƏ müəllim üzvlüyü (``is_primary=False``, workload Forma 1
-    importu) həmin müəllimin bütün imtahanlarını (başqa fakültənin fənləri daxil) bu dekana/müdirə açırdı.
 
-    * Öz bağlantı (dəqiq): fənnin kafedrası (``subject.chair_unit``), kursun vahidi (``course.unit``) və ya
-      təyin olunmuş reyestr qrupu (``allowed_units``) alt-ağacdadır.
-    * Bağlantısız imtahan (fənn/kurs/qrup yoxdur) — müəllifin «ev» üzvlüyü alt-ağacdadırsa: vahidli ƏSAS
-      üzvlüyü varsa yalnız o sayılır; yoxdursa (əsas işarəsiz köhnə hesablar) hər aktiv üzvlüyü (köhnə qayda).
-    """
-    from django.db.models import Exists, OuterRef
+def _options(org, subtree):
+    from apps.organizations.models import AcademicPeriod
 
-    group_link = Exam.allowed_units.through.objects.filter(exam_id=OuterRef("pk"))
-    own_link = (
-        Q(subject__chair_unit__in=subtree_ids)
-        | Q(course__unit__in=subtree_ids)
-        | Exists(group_link.filter(orgunit_id__in=subtree_ids))
-    )
-    unlinked = (
-        Q(subject__chair_unit__isnull=True)
-        & (Q(course__isnull=True) | Q(course__unit__isnull=True))
-        & ~Exists(group_link)
-    )
-    active = Membership.objects.filter(organization=org, is_active=True)
-    with_unit_primary = active.filter(is_primary=True, scope_unit__isnull=False).values("user_id")
-    home_authors = (
-        active.filter(scope_unit__in=subtree_ids)
-        .filter(Q(is_primary=True) | ~Q(user_id__in=with_unit_primary))
-        .values("user_id")
-    )
-    return own_link | (unlinked & Q(author_id__in=home_authors))
+    chairs = [
+        {"value": str(pk), "label": name}
+        for pk, name in subtree.filter(unit_type__in=q.CHAIR_TYPES).order_by("name").values_list("pk", "name")
+    ]
+    periods = {
+        str(period.pk): period
+        for period in AcademicPeriod.objects.filter(organization=org, is_active=True).order_by("-start_date")[:12]
+    }
+    period_options = [{"value": key, "label": f"{p.name} · {p.academic_year}"} for key, p in periods.items()]
+    return chairs, periods, period_options
 
 
 def build_unit_exams_context(request, *, allowed_sections, active_section) -> dict:
-    """Unit imtahanları bölməsi üçün ``context`` açarlarını qaytarır. Bölmə aktiv
-    deyil / org yoxdur / istifadəçi unit-scoped deyilsə default dəyərlər (davranış
-    köhnə inline blokla eyni)."""
+    """Unit imtahanları bölməsi üçün ``context`` açarları. Bölmə aktiv deyil / org yoxdur → default.
+
+    Əhatə yoxdursa ``unit_exams_section.has_scope`` False olur (şablon «əhatə təyin edilməyib»
+    deyir) — «imtahan yoxdur» halından AYRI (2026-10-14: iki hal eyni boş mesajı göstərirdi).
+    """
     if not (active_section == "unit-exams" and "unit-exams" in allowed_sections):
         return _defaults()
 
     from apps.exams.models import Exam
-    from apps.organizations.models import Membership, OrgUnit
-    from apps.organizations.public import get_permission_scope
 
     org = _get_active_organization(request)
     if org is None:
         return _defaults()
-    # Bölmə qapısı `is_unit_manager`-dir (dekan / dekan müavini / kafedra
-    # müdiri — bax rbac_university_sections.py); əhatə isə `exam.view` açarını
-    # DAŞIYAN üzvlüyün alt-ağacıdır (P1-11, 2026-09-12). Köhnə `get_unit_scope`
-    # dekanın əlaqəsiz müəllim təyinatının kafedrasını da bura qatırdı; sərt
-    # resolverdə `scope_unit`-siz dekan `EMPTY_SCOPE` alır → bölmə boş qalır.
-    scope = get_permission_scope(request.user, org, "exam.view", request=request)
-    if not scope.is_unit_scoped:
+    subtree = q.resolve_unit_subtree(request, org)
+    if subtree is None:
         return _defaults()
 
-    unit_ids = OrgUnit.objects.filter(organization=org).filter(scope.unit_subtree_q())
-    qs = (
-        Exam.objects.filter(organization=org, is_deleted=False)
-        .filter(_subtree_exam_q(Exam, Membership, org, unit_ids.values("pk")))
-        .select_related("author", "course")
-        .annotate(attempts_total=Count("attempts", distinct=True))
-        .order_by("-created_at")
+    filters = q.read_filters(request)
+    chair_options, periods, period_options = _options(org, subtree)
+    scoped = q.scoped_exams(org, subtree)
+    kpi = q.kpi_counts(scoped)
+
+    rows_qs = q.apply_filters(scoped, org, filters, chair_ids={opt["value"] for opt in chair_options}, periods=periods)
+    rows_qs = q.order_rows(q.annotate_rows(rows_qs), filters["sort"]).select_related(
+        "author", "subject", "subject__chair_unit", "course"
     )
-    search_query = (request.GET.get("unit_exam_q") or "").strip()[:120]
-    search_q = tolerant_q(search_query, ("title", "author__username", "course__title"))
-    if search_q is not None:
-        qs = qs.filter(search_q)
+    from apps.organizations.models import OrgUnit
+
+    rows_qs = rows_qs.prefetch_related(
+        Prefetch("allowed_units", queryset=OrgUnit.objects.only("pk", "name").order_by("name")),
+        "allowed_groups",
+    )
+    page = Paginator(rows_qs, PAGE_SIZE).get_page(request.GET.get("ue_page") or request.GET.get("unit_exam_page"))
+    exams = list(page.object_list)
+    page.object_list = exams
+
+    kind_labels = ui._choice_labels(Exam.EXAM_TYPE_EXTENDED_CHOICES)
+    form_labels = ui._choice_labels(Exam.EXAM_TYPE_CHOICES)
+    statuses = ui.status_labels()
+    params = ui.base_params(filters)
+    filtered = any(value for key, value in params.items() if key != "section")
+    count = page.paginator.count
+    section = {
+        "has_scope": True,
+        "scope_label": ", ".join(_scope_roots(subtree)),
+        "kpi_tiles": ui.kpi_tiles(kpi, filters),
+        "filter_fields": ui.filter_fields(
+            filters,
+            chair_options=chair_options,
+            period_options=period_options,
+            kind_labels=kind_labels,
+            form_labels=form_labels,
+        ),
+        "filter_count_label": pgettext(ui.CTX, "Nəticə: %(count)d imtahan") % {"count": count},
+        "columns": ui.columns(params, filters["sort"]),
+        "table_rows": [
+            ui.table_row(exam, kind_labels=kind_labels, form_labels=form_labels, statuses=statuses) for exam in exams
+        ],
+        "table_state": "ready" if exams else "empty",
+        "drawer_rows": [
+            ui.drawer_row(exam, user=request.user, kind_labels=kind_labels, form_labels=form_labels, statuses=statuses)
+            for exam in exams
+        ],
+        "page_obj": page,
+        "pagination_query": ui.pagination_query(params, filters["sort"]),
+        "is_filtered": filtered,
+        "total_count": kpi["total"],
+    }
+    if filtered:
+        section["state_title"] = pgettext(ui.CTX, "Süzgəcə uyğun imtahan tapılmadı")
+        section["state_body"] = pgettext(ui.CTX, "Süzgəcləri dəyişin və ya «Sıfırla» düyməsini basın.")
+    else:
+        section["state_title"] = pgettext(ui.CTX, "Bölmənizə aid imtahan hələ yoxdur")
+        section["state_body"] = pgettext(
+            ui.CTX,
+            "Əhatəniz təyin olunub. Fakültə/kafedra müəllimləri imtahan yaradıb onu fənnə, "
+            "qrupa və ya kafedraya bağladıqda burada görünəcək.",
+        )
     return {
-        "unit_exams_total_count": qs.count(),
-        "unit_exams_page_obj": Paginator(qs, 10).get_page(request.GET.get("unit_exam_page")),
-        "unit_exams_search_query": search_query,
-        "unit_exams_pagination_query": _query_string(section="unit-exams", unit_exam_q=search_query),
+        "unit_exams_page_obj": page,
+        "unit_exams_search_query": filters["search"],
+        "unit_exams_total_count": kpi["total"],
+        "unit_exams_pagination_query": section["pagination_query"],
+        "unit_exams_section": section,
     }

@@ -1,0 +1,4 @@
+{% load i18n %}
+{% comment %}İmtahanın adı — DÜYMƏDİR (naviqasiya etmir): «İmtahan haqqında» çekmecəsini açır.{% endcomment %}
+<button type="button" class="ue-title" data-ue-open="{{ row.exam_id }}" aria-haspopup="dialog" aria-controls="ueDetail"
+        title="{% trans 'Ətraflı: cədvəl, qruplar, nəticələr' context 'accounts.unit_exams' %}">{{ row.title }}</button>

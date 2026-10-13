@@ -1,0 +1,34 @@
+{% load i18n %}
+{% comment %}«İmtahan haqqında» çekmecəsinin gövdəsi — məzmunu `unit_exams.js` cari səhifənin
+`#ueRowsData` JSON-undan `textContent` ilə doldurur. Sabit mətnlər burada tərcümə olunub
+`data-t-*` ilə ötürülür (xarici JS Django şablon mühərrikindən keçmir). Fərdi bal YOXDUR.{% endcomment %}
+<div class="ue-detail" data-ue-body aria-live="polite"
+     data-t-subject="{% trans 'Fənn' context 'accounts.unit_exams' %}"
+     data-t-chair="{% trans 'Kafedra' context 'accounts.unit_exams' %}"
+     data-t-course="{% trans 'Kurs' context 'accounts.unit_exams' %}"
+     data-t-author="{% trans 'Müəllif' context 'accounts.unit_exams' %}"
+     data-t-kind="{% trans 'Növ' context 'accounts.unit_exams' %}"
+     data-t-mode="{% trans 'Keçirilmə' context 'accounts.unit_exams' %}"
+     data-t-schedule="{% trans 'Cədvəl' context 'accounts.unit_exams' %}"
+     data-t-start="{% trans 'Başlama' context 'accounts.unit_exams' %}"
+     data-t-end="{% trans 'Bitmə' context 'accounts.unit_exams' %}"
+     data-t-created="{% trans 'Yaradılıb' context 'accounts.unit_exams' %}"
+     data-t-duration="{% trans 'Müddət' context 'accounts.unit_exams' %}"
+     data-t-minutes="{% trans '{n} dəq' context 'accounts.unit_exams' %}"
+     data-t-nolimit="{% trans 'Limitsiz' context 'accounts.unit_exams' %}"
+     data-t-groups="{% trans 'Qruplar' context 'accounts.unit_exams' %}"
+     data-t-nogroups="{% trans 'Qrup təyin edilməyib (fərdi və ya açıq imtahan).' context 'accounts.unit_exams' %}"
+     data-t-questions="{% trans 'Sual' context 'accounts.unit_exams' %}"
+     data-t-participants="{% trans 'İştirakçı' context 'accounts.unit_exams' %}"
+     data-t-finished="{% trans 'Bitirən' context 'accounts.unit_exams' %}"
+     data-t-attempts="{% trans 'Bitmiş cəhd' context 'accounts.unit_exams' %}"
+     data-t-avg="{% trans 'Orta nəticə' context 'accounts.unit_exams' %}"
+     data-t-pass="{% trans 'Keçənlərin payı (≥ 50)' context 'accounts.unit_exams' %}"
+     data-t-results="{% trans 'Nəticələrin xülasəsi' context 'accounts.unit_exams' %}"
+     data-t-small="{% trans 'Bitirən 3-dən azdır — məxfilik üçün orta nəticə göstərilmir.' context 'accounts.unit_exams' %}"
+     data-t-noresults="{% trans 'Hələ bitmiş cəhd yoxdur.' context 'accounts.unit_exams' %}"
+     data-t-open="{% trans 'İmtahan səhifəsi' context 'accounts.unit_exams' %}"
+     data-t-openresults="{% trans 'Nəticələr' context 'accounts.unit_exams' %}"
+     data-t-readonly="{% trans 'Bu baxış yalnız oxumaq üçündür; fərdi tələbə balları göstərilmir.' context 'accounts.unit_exams' %}"
+     data-t-missing="{% trans 'Məlumat tapılmadı — siyahını yeniləyin.' context 'accounts.unit_exams' %}">
+</div>
