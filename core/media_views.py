@@ -409,11 +409,11 @@ def _check_avatar_access(user, path: str) -> bool:
     Əvvəl istənilən daxil olmuş istifadəçiyə açıq idi; qayda ``accounts:profile_avatar``
     ilə eynidir (``core.people_visibility``). Sahibi tapılmayan fayl → rədd.
     """
-    from core.people_visibility import can_view_person
+    from core.people_visibility import can_view_avatar
 
     profile_model = django_apps.get_model("accounts", "UserProfile")
     owner_id = profile_model.objects.filter(avatar=path.lstrip("/")).values_list("user_id", flat=True).first()
-    return owner_id is not None and can_view_person(user, owner_id)
+    return owner_id is not None and can_view_avatar(user, owner_id)
 
 
 def _check_trial_exam_access(user, path: str) -> bool:
