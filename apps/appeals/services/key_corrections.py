@@ -6,8 +6,8 @@ iki variant var:
 1. **Yalnız bu tələbə** — mövcud qərar (``decisions.accept_appeal_item``): sabit +1 bal;
 2. **Açar səhvdir → hamı üçün** — bu modul: düzgün variant(lar) seçilir, səbəb yazılır və
    həmin imtahanın bu sualını cavablayan hər bitmiş (sınaq olmayan) cəhd yoxlanılır. Yeni
-   açara UYĞUN cavab verib köhnə açarla səhv sayılan tələbəyə eyni qayda ilə kredit verilir
-   (``APPEAL_ACCEPT_BONUS_POINTS``, sualın çatdırılan balı ilə məhdud).
+   açara UYĞUN cavab verib köhnə açarla səhv sayılan tələbəyə sualın TAM (çatdırılma anındakı) balı
+   verilir — sahib 2026-10-14: «tam bal verilsin» (əvvəl sabit +1 idi).
 
 Dizayn qərarları (tövsiyə olunan variant):
 
@@ -39,7 +39,7 @@ from apps.appeals.constants import APPEAL_MAX_COMMENT_LENGTH
 from apps.appeals.models import AnswerKeyCorrection, AppealItem, KeyCorrectionCredit
 from apps.exams.public import ATTEMPT_FINISHED_STATUSES, calculate_test_attempt_result
 
-from .scoring import _accept_bonus_points, appeal_bonus_map, delivered_question_points
+from .scoring import appeal_bonus_map, delivered_question_points
 
 logger = logging.getLogger(__name__)
 
@@ -273,11 +273,11 @@ def apply_key_correction(item, *, reviewer, corrected_option_ids, reason, reques
         affected_count=len(answers),
         credited_count=len(eligible),
     )
-    bonus = _accept_bonus_points()
     credits = []
     for answer in eligible:
+        # Sahib 2026-10-14: açar səhvi tələbənin günahı deyil — sualın TAM balı (fərdi «Qəbul et» +1 qalır).
         points = Decimal(delivered_question_points(answer, question))
-        delta = min(bonus, points)
+        delta = points
         credits.append(
             KeyCorrectionCredit(
                 correction=correction,
