@@ -11,12 +11,18 @@ import mimetypes
 
 from django.apps import apps as django_apps
 from django.contrib.auth.decorators import login_required
-from django.http import FileResponse, Http404, HttpResponseBadRequest
-from django.utils.http import http_date
+from django.http import FileResponse, Http404, HttpResponseBadRequest, HttpResponseNotModified
+from django.utils.cache import patch_vary_headers
+from django.utils.http import http_date, parse_http_date_safe
 from django.views.decorators.http import require_GET
 
 from apps.exams.services.supervision.identity import can_view_student_photo
 from apps.exams.views.shared.tenant import get_active_organization
+
+# 2026-10-13 (gecə, examphoto): yalnız raster şəkil növləri. SVG (və ya ad uzantısı dəyişdirilmiş
+# fayl) öz origin-imizdən `inline` verilsəydi skript daşıya bilərdi (saxlanan XSS) — ImageField
+# Pillow ilə yoxlasa da, yükləmə yolundan asılı olmayan ikinci qat burada.
+_ALLOWED_TYPES = frozenset({"image/jpeg", "image/png", "image/webp", "image/gif"})
 
 
 @login_required
@@ -36,21 +42,39 @@ def proctor_student_photo(request, user_id):
         raise Http404("Photo not found.")
 
     avatar = profile.avatar
+    content_type = mimetypes.guess_type(avatar.name or "")[0] or ""
+    if content_type not in _ALLOWED_TYPES:
+        raise Http404("Photo not found.")
+
+    # 2026-10-13 (gecə, perf): imtahan səhifəsi şəkli başlıq çipi + yan kartda göstərir, hər
+    # reload-da 5 dəqiqəlik keş bitəndə fayl yenidən axıdılırdı. İcazə YOXLANANDAN SONRA
+    # If-Modified-Since → 304 (fayl açılmır, bayt göndərilmir).
+    last_modified = int(profile.updated_at.timestamp())
+    since = parse_http_date_safe(request.headers.get("If-Modified-Since", ""))
+    if since is not None and since >= last_modified:
+        not_modified = HttpResponseNotModified()
+        _private_cache_headers(not_modified, last_modified)
+        return not_modified
+
     try:
         stream = avatar.storage.open(avatar.name, "rb")
     except Exception as exc:  # noqa: BLE001
         raise Http404("Photo not found.") from exc
 
-    content_type = mimetypes.guess_type(avatar.name or "")[0] or "application/octet-stream"
-    if not content_type.startswith("image/"):
-        stream.close()
-        raise Http404("Photo not found.")
     response = FileResponse(stream, content_type=content_type)
-    response["Cache-Control"] = "private, max-age=300"
-    response["Last-Modified"] = http_date(profile.updated_at.timestamp())
+    _private_cache_headers(response, last_modified)
     response["X-Content-Type-Options"] = "nosniff"
     response["Content-Disposition"] = "inline"
+    # Birbaşa açılsa belə sənəd kimi heç nə icra olunmasın.
+    response["Content-Security-Policy"] = "default-src 'none'; img-src 'self'; sandbox"
     return response
+
+
+def _private_cache_headers(response, last_modified):
+    """Yalnız brauzer keşi (paylaşılan proxy/CDN YOX) — şəkil sessiyaya bağlıdır."""
+    response["Cache-Control"] = "private, max-age=300"
+    response["Last-Modified"] = http_date(last_modified)
+    patch_vary_headers(response, ("Cookie",))
 
 
 __all__ = ["proctor_student_photo"]

@@ -95255,3 +95255,19 @@ msgstr ""
 " (ör. laboratuvar yoksa) haftalık planda görünmez ve ona saat yazılamaz. "
 "Yükte satır yoksa öğretim elemanı saati kendisi seçer. Kapalıyken önceki "
 "kural: önce onaylı öğretim planı, sonra yük; fazla türler de gösterilir."
+
+msgctxt "exams.proctoring.identity"
+msgid "Tələbənin kimliyi"
+msgstr "Öğrenci kimliği"
+
+msgctxt "exams.proctoring.identity"
+msgid "Kimlik yoxlaması"
+msgstr "Kimlik kontrolü"
+
+msgctxt "exams.proctoring.identity"
+msgid "İstifadəçi adı"
+msgstr "Kullanıcı adı"
+
+msgctxt "exams.proctoring.identity"
+msgid "Şəkil yüklənməyib — nəzarətçiyə şəxsiyyət vəsiqənizi göstərin."
+msgstr "Fotoğraf yüklenmemiş — gözetmene kimlik kartınızı gösterin."

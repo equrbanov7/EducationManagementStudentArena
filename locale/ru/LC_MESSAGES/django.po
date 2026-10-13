@@ -95979,3 +95979,19 @@ msgstr ""
 " нет строки, преподаватель выбирает часы сам. Если выключено — прежнее "
 "правило: сначала утверждённый учебный план, затем нагрузка; лишние виды тоже"
 " показываются."
+
+msgctxt "exams.proctoring.identity"
+msgid "Tələbənin kimliyi"
+msgstr "Личность студента"
+
+msgctxt "exams.proctoring.identity"
+msgid "Kimlik yoxlaması"
+msgstr "Проверка личности"
+
+msgctxt "exams.proctoring.identity"
+msgid "İstifadəçi adı"
+msgstr "Имя пользователя"
+
+msgctxt "exams.proctoring.identity"
+msgid "Şəkil yüklənməyib — nəzarətçiyə şəxsiyyət vəsiqənizi göstərin."
+msgstr "Фото не загружено — покажите удостоверение личности наблюдателю."

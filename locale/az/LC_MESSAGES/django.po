@@ -95355,3 +95355,19 @@ msgstr ""
 "(məs. lab yoxdursa) həftəlik planda görünmür və ona saat yazılmır. Yükdə "
 "sətir yoxdursa müəllim saatı özü seçir. Söndürülüdə əvvəlki qayda: əvvəl "
 "təsdiqlənmiş tədris planı, sonra yük; artıq növlər də göstərilir."
+
+msgctxt "exams.proctoring.identity"
+msgid "Tələbənin kimliyi"
+msgstr "Tələbənin kimliyi"
+
+msgctxt "exams.proctoring.identity"
+msgid "Kimlik yoxlaması"
+msgstr "Kimlik yoxlaması"
+
+msgctxt "exams.proctoring.identity"
+msgid "İstifadəçi adı"
+msgstr "İstifadəçi adı"
+
+msgctxt "exams.proctoring.identity"
+msgid "Şəkil yüklənməyib — nəzarətçiyə şəxsiyyət vəsiqənizi göstərin."
+msgstr "Şəkil yüklənməyib — nəzarətçiyə şəxsiyyət vəsiqənizi göstərin."

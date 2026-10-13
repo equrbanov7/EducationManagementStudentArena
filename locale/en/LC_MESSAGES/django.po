@@ -95794,3 +95794,19 @@ msgstr ""
 " hours can be entered for it. If the load has no row, the teacher chooses "
 "the hours. When off, the previous rule applies: the approved curriculum "
 "first, then the load; extra types are shown too."
+
+msgctxt "exams.proctoring.identity"
+msgid "Tələbənin kimliyi"
+msgstr "Student identity"
+
+msgctxt "exams.proctoring.identity"
+msgid "Kimlik yoxlaması"
+msgstr "Identity check"
+
+msgctxt "exams.proctoring.identity"
+msgid "İstifadəçi adı"
+msgstr "Username"
+
+msgctxt "exams.proctoring.identity"
+msgid "Şəkil yüklənməyib — nəzarətçiyə şəxsiyyət vəsiqənizi göstərin."
+msgstr "No photo uploaded — show your ID card to the invigilator."
