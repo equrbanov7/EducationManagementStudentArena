@@ -60,8 +60,8 @@ REASON_MAX_LENGTH = 500
 class GroupLeadError(Exception):
     """İstifadəçiyə göstərilən rədd (``code`` — maşın üçün, ``status`` — HTTP)."""
 
-    def __init__(self, message, *, code="invalid", status=400, field=""):
-        super().__init__(message)
+    def __init__(self, message, code="invalid", status=400, field=""):
+        super().__init__(message, code, status, field)
         self.message = str(message)
         self.code = code
         self.status = status
@@ -193,8 +193,10 @@ def _audit(actor, organization, membership, *, request, reason, old_values, new_
         organization=organization,
         obj=membership,
         request=request,
-        reason=f"group lead: {new_values.get('event', '')} — {reason}" if reason else (
-            f"group lead: {new_values.get('event', '')}"
+        reason=(
+            f"group lead: {new_values.get('event', '')} — {reason}"
+            if reason
+            else (f"group lead: {new_values.get('event', '')}")
         ),
         old_values=old_values,
         new_values=new_values,
@@ -284,8 +286,13 @@ def assign_group_lead(*, organization, group, record_id, actor, reason="", reque
                 request=request,
                 reason=reason,
                 old_values={"group": group.name, "lead": old.user.username},
-                new_values={"event": "replaced", "group": group.name, "group_id": str(group.pk),
-                            "lead": "", "replaced_by": student.username},
+                new_values={
+                    "event": "replaced",
+                    "group": group.name,
+                    "group_id": str(group.pk),
+                    "lead": "",
+                    "replaced_by": student.username,
+                },
                 created=False,
             )
         _audit(
@@ -299,8 +306,13 @@ def assign_group_lead(*, organization, group, record_id, actor, reason="", reque
                 "lead": ", ".join(old.user.username for old in replaced),
                 "stale_scopes": [str(m.scope_unit_id or "") for m in stale],
             },
-            new_values={"event": "assigned", "group": group.name, "group_id": str(group.pk),
-                        "lead": student.username, "reason": reason},
+            new_values={
+                "event": "assigned",
+                "group": group.name,
+                "group_id": str(group.pk),
+                "lead": student.username,
+                "reason": reason,
+            },
             created=created,
         )
 
@@ -359,8 +371,13 @@ def remove_group_lead(*, organization, group, actor, reason="", request=None) ->
                 request=request,
                 reason=reason,
                 old_values={"group": group.name, "lead": membership.user.username},
-                new_values={"event": "removed", "group": group.name, "group_id": str(group.pk), "lead": "",
-                            "reason": reason},
+                new_values={
+                    "event": "removed",
+                    "group": group.name,
+                    "group_id": str(group.pk),
+                    "lead": "",
+                    "reason": reason,
+                },
                 created=False,
             )
             _sync_profile(membership.user, organization)

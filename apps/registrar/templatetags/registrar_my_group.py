@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from django import template
 
-from apps.registrar.group_academic import group_students, group_subgroups, group_subjects, exam_unit_ids
+from apps.registrar.group_academic import exam_unit_ids, group_students, group_subgroups, group_subjects
 from apps.registrar.group_overview import group_overview
 from apps.registrar.group_timetable import group_timetable, group_upcoming_exams
 

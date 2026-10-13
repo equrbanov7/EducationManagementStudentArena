@@ -95547,3 +95547,379 @@ msgstr "%(group)s qrupunun tələbələri"
 msgctxt "accounts.my_group"
 msgid "siz"
 msgstr "siz"
+
+msgctxt "profile.sidebar"
+msgid "Starosta"
+msgstr "Starosta"
+
+msgctxt "accounts.groups"
+msgid "Starosta"
+msgstr "Starosta"
+
+msgctxt "accounts.group_lead"
+msgid "Starosta"
+msgstr "Starosta"
+
+msgctxt "accounts.group_lead"
+msgid "Qrup tapılmadı və ya arxivdədir."
+msgstr "Qrup tapılmadı və ya arxivdədir."
+
+msgctxt "accounts.group_lead"
+msgid "«Baş tələbə» (lead_student) rolu bu təşkilatda yoxdur — standart rollar yüklənməlidir."
+msgstr "«Baş tələbə» (lead_student) rolu bu təşkilatda yoxdur — standart rollar yüklənməlidir."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta yalnız bu qrupun qeydiyyatlı tələbəsi ola bilər."
+msgstr "Starosta yalnız bu qrupun qeydiyyatlı tələbəsi ola bilər."
+
+msgctxt "accounts.group_lead"
+msgid "Özünüzü starosta təyin edə bilməzsiniz."
+msgstr "Özünüzü starosta təyin edə bilməzsiniz."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "%(name)s artıq bu qrupun starostasıdır."
+msgstr "%(name)s artıq bu qrupun starostasıdır."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta vəzifəniz başa çatdı"
+msgstr "Starosta vəzifəniz başa çatdı"
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "«%(group)s» qrupunun starostası artıq %(name)s-dir."
+msgstr "«%(group)s» qrupunun starostası artıq %(name)s-dir."
+
+msgctxt "accounts.group_lead"
+msgid "Siz qrupun starostası təyin olundunuz"
+msgstr "Siz qrupun starostası təyin olundunuz"
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "«%(group)s» qrupunun starostası təyin olundunuz. Kabinetdə «Starosta» bölməsi açıldı: qrupun fənləri, seçmə fənlər, birləşmiş dərslər, cədvəl, imtahanlar və elanlar."
+msgstr "«%(group)s» qrupunun starostası təyin olundunuz. Kabinetdə «Starosta» bölməsi açıldı: qrupun fənləri, seçmə fənlər, birləşmiş dərslər, cədvəl, imtahanlar və elanlar."
+
+msgctxt "accounts.group_lead"
+msgid "Bu qrupun starostası yoxdur."
+msgstr "Bu qrupun starostası yoxdur."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "«%(group)s» qrupunun starostası vəzifəsindən götürüldünüz."
+msgstr "«%(group)s» qrupunun starostası vəzifəsindən götürüldünüz."
+
+msgctxt "accounts.group_lead"
+msgid "Qrupun starostası"
+msgstr "Qrupun starostası"
+
+msgctxt "accounts.group_lead"
+msgid "Starosta qrupun qeydiyyatlı tələbələrindən seçilir və kabinetində «Starosta» bölməsi açılır: qrupun fənləri, seçmə fənlər, birləşmiş dərslər, cədvəl, imtahanlar, elanlar."
+msgstr "Starosta qrupun qeydiyyatlı tələbələrindən seçilir və kabinetində «Starosta» bölməsi açılır: qrupun fənləri, seçmə fənlər, birləşmiş dərslər, cədvəl, imtahanlar, elanlar."
+
+msgctxt "accounts.group_lead"
+msgid "Təyin et"
+msgstr "Təyin et"
+
+msgctxt "accounts.group_lead"
+msgid "Starostanı götür"
+msgstr "Starostanı götür"
+
+msgctxt "accounts.group_lead"
+msgid "Əməl audit jurnalına yazılır, tələbəyə bildiriş gedir."
+msgstr "Əməl audit jurnalına yazılır, tələbəyə bildiriş gedir."
+
+msgctxt "accounts.group_lead"
+msgid "Götür"
+msgstr "Götür"
+
+msgctxt "accounts.group_lead"
+msgid "qrupda deyil"
+msgstr "qrupda deyil"
+
+msgctxt "accounts.group_lead"
+msgid "bir neçə starosta"
+msgstr "bir neçə starosta"
+
+msgctxt "accounts.group_lead"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "accounts.group_lead"
+msgid "Hazırkı starosta:"
+msgstr "Hazırkı starosta:"
+
+msgctxt "accounts.group_lead"
+msgid "Yeni starosta"
+msgstr "Yeni starosta"
+
+msgctxt "accounts.group_lead"
+msgid "Tələbə adı ilə axtar…"
+msgstr "Tələbə adı ilə axtar…"
+
+msgctxt "accounts.group_lead"
+msgid "Uyğun tələbə tapılmadı"
+msgstr "Uyğun tələbə tapılmadı"
+
+msgctxt "accounts.group_lead"
+msgid "Tələbə seçin"
+msgstr "Tələbə seçin"
+
+msgctxt "accounts.group_lead"
+msgid "Yalnız bu qrupun qeydiyyatlı tələbələri. Yeni starosta təyin olunanda əvvəlki avtomatik götürülür; hər ikisinə bildiriş gedir."
+msgstr "Yalnız bu qrupun qeydiyyatlı tələbələri. Yeni starosta təyin olunanda əvvəlki avtomatik götürülür; hər ikisinə bildiriş gedir."
+
+msgctxt "accounts.group_lead"
+msgid "Qeyd (istəyə bağlı)"
+msgstr "Qeyd (istəyə bağlı)"
+
+msgctxt "accounts.group_lead"
+msgid "Məs.: qrup yığıncağının qərarı ilə"
+msgstr "Məs.: qrup yığıncağının qərarı ilə"
+
+msgctxt "accounts.group_lead"
+msgid "Tələbə qrupda qalır, yalnız starostalıq və «Starosta» bölməsi bağlanır. Sonra yeni starosta təyin edə bilərsiniz."
+msgstr "Tələbə qrupda qalır, yalnız starostalıq və «Starosta» bölməsi bağlanır. Sonra yeni starosta təyin edə bilərsiniz."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta təyin olunmayıb"
+msgstr "Starosta təyin olunmayıb"
+
+msgctxt "accounts.group_lead"
+msgid "Bu qrupun qeydiyyatlı tələbəsi deyil — bölmə ona açılmır. Yenisini təyin edin."
+msgstr "Bu qrupun qeydiyyatlı tələbəsi deyil — bölmə ona açılmır. Yenisini təyin edin."
+
+msgctxt "accounts.group_lead"
+msgid "Qrupda bir neçə aktiv starosta var — birini təyin edin, digərləri avtomatik götürüləcək."
+msgstr "Qrupda bir neçə aktiv starosta var — birini təyin edin, digərləri avtomatik götürüləcək."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta təyin et"
+msgstr "Starosta təyin et"
+
+msgctxt "accounts.group_lead"
+msgid "Starostanı dəyiş"
+msgstr "Starostanı dəyiş"
+
+msgctxt "accounts.group_lead"
+msgid "Aktiv təşkilat tapılmadı."
+msgstr "Aktiv təşkilat tapılmadı."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta təyin etmək üçün `unit.group_manage` və ya `role.assign` səlahiyyəti lazımdır."
+msgstr "Starosta təyin etmək üçün `unit.group_manage` və ya `role.assign` səlahiyyəti lazımdır."
+
+msgctxt "accounts.group_lead"
+msgid "Qrup tapılmadı və ya əhatənizdə deyil."
+msgstr "Qrup tapılmadı və ya əhatənizdə deyil."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "«%(group)s» qrupunun starostası dəyişdi: %(old)s → %(new)s."
+msgstr "«%(group)s» qrupunun starostası dəyişdi: %(old)s → %(new)s."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "%(name)s «%(group)s» qrupunun starostası təyin edildi."
+msgstr "%(name)s «%(group)s» qrupunun starostası təyin edildi."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "%(name)s «%(group)s» qrupunun starostası vəzifəsindən götürüldü."
+msgstr "%(name)s «%(group)s» qrupunun starostası vəzifəsindən götürüldü."
+
+msgctxt "accounts.group_lead"
+msgid "Naməlum əməl."
+msgstr "Naməlum əməl."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta «Qruplar» reyestrindən təyin olunur: qrupun tələbələri → «Starosta təyin et»."
+msgstr "Starosta «Qruplar» reyestrindən təyin olunur: qrupun tələbələri → «Starosta təyin et»."
+
+msgctxt "accounts.my_group"
+msgid "Siz bu qrupun starostasısınız: qrupun fənləri, seçmə fənlər, başqa qruplarla birləşmiş dərslər, cədvəl, imtahanlar və elanlar burada bir yerdədir. Qrup yoldaşlarının balı və davamiyyəti göstərilmir — davamiyyət yalnız özünüzə aiddir."
+msgstr "Siz bu qrupun starostasısınız: qrupun fənləri, seçmə fənlər, başqa qruplarla birləşmiş dərslər, cədvəl, imtahanlar və elanlar burada bir yerdədir. Qrup yoldaşlarının balı və davamiyyəti göstərilmir — davamiyyət yalnız özünüzə aiddir."
+
+msgctxt "accounts.my_group"
+msgid "Seçmə fənn"
+msgstr "Seçmə fənn"
+
+msgctxt "accounts.my_group"
+msgid "Birləşmiş dərs"
+msgstr "Birləşmiş dərs"
+
+msgctxt "accounts.my_group"
+msgid "Yaxın imtahan"
+msgstr "Yaxın imtahan"
+
+msgctxt "accounts.my_group"
+msgid "Starosta bölmələri"
+msgstr "Starosta bölmələri"
+
+msgctxt "accounts.my_group"
+msgid "Fənlər"
+msgstr "Fənlər"
+
+msgctxt "accounts.my_group"
+msgid "Seçmə fənlər"
+msgstr "Seçmə fənlər"
+
+msgctxt "accounts.my_group"
+msgid "Birləşmiş dərslər"
+msgstr "Birləşmiş dərslər"
+
+msgctxt "accounts.my_group"
+msgid "Cədvəl"
+msgstr "Cədvəl"
+
+msgctxt "accounts.my_group"
+msgid "İmtahanlar"
+msgstr "İmtahanlar"
+
+msgctxt "accounts.my_group"
+msgid "Elanlar"
+msgstr "Elanlar"
+
+msgctxt "accounts.my_group"
+msgid "Davamiyyətim"
+msgstr "Davamiyyətim"
+
+msgctxt "accounts.my_group"
+msgid "Bu dövr üçün qrupun fənni hələ açılmayıb."
+msgstr "Bu dövr üçün qrupun fənni hələ açılmayıb."
+
+msgctxt "accounts.my_group"
+msgid "Növ"
+msgstr "Növ"
+
+msgctxt "accounts.my_group"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "accounts.my_group"
+msgid "Kimlərlə"
+msgstr "Kimlərlə"
+
+msgctxt "accounts.my_group"
+msgid "Qrupdan"
+msgstr "Qrupdan"
+
+msgctxt "accounts.my_group"
+msgid "seçmə"
+msgstr "seçmə"
+
+msgctxt "accounts.my_group"
+msgid "məcburi"
+msgstr "məcburi"
+
+msgctxt "accounts.my_group"
+msgid "yalnız öz qrupu"
+msgstr "yalnız öz qrupu"
+
+msgctxt "accounts.my_group"
+msgid "hamısı"
+msgstr "hamısı"
+
+msgctxt "accounts.my_group"
+msgid "Bu dövrdə qrupun seçmə fənni yoxdur."
+msgstr "Bu dövrdə qrupun seçmə fənni yoxdur."
+
+msgctxt "accounts.my_group"
+msgid "Hər seçmə fənni qrupdan kimin götürdüyü — yalnız adlar (bal və davamiyyət göstərilmir)."
+msgstr "Hər seçmə fənni qrupdan kimin götürdüyü — yalnız adlar (bal və davamiyyət göstərilmir)."
+
+msgctxt "accounts.my_group"
+msgid "siz də"
+msgstr "siz də"
+
+msgctxt "accounts.my_group"
+msgid "bütün qrup"
+msgstr "bütün qrup"
+
+msgctxt "accounts.my_group"
+msgid "Götürənlər"
+msgstr "Götürənlər"
+
+msgctxt "accounts.my_group"
+msgid "Qrup başqa qruplarla birləşmiş dərsdə oxumur və alt qruplara bölünməyib."
+msgstr "Qrup başqa qruplarla birləşmiş dərsdə oxumur və alt qruplara bölünməyib."
+
+msgctxt "accounts.my_group"
+msgid "Bu fənlərdə qrupunuz başqa qrup(lar)la birlikdə oxuyur: ya dərs başqa qrupun jurnalındadır, ya da jurnala başqa qrupdan tələbə əlavə olunub."
+msgstr "Bu fənlərdə qrupunuz başqa qrup(lar)la birlikdə oxuyur: ya dərs başqa qrupun jurnalındadır, ya da jurnala başqa qrupdan tələbə əlavə olunub."
+
+msgctxt "accounts.my_group"
+msgid "Jurnal: öz qrupunuz"
+msgstr "Jurnal: öz qrupunuz"
+
+msgctxt "accounts.my_group"
+msgid "Qrupdan gedənlər"
+msgstr "Qrupdan gedənlər"
+
+msgctxt "accounts.my_group"
+msgid "Alt qruplar"
+msgstr "Alt qruplar"
+
+msgctxt "accounts.my_group"
+msgid "Tələbələr"
+msgstr "Tələbələr"
+
+msgctxt "accounts.my_group"
+msgid "Qrupun dərs cədvəli hələ dərc olunmayıb."
+msgstr "Qrupun dərs cədvəli hələ dərc olunmayıb."
+
+msgctxt "accounts.my_group"
+msgid "Yaxın 90 gündə qrupa təyin olunmuş imtahan yoxdur."
+msgstr "Yaxın 90 gündə qrupa təyin olunmuş imtahan yoxdur."
+
+msgctxt "accounts.my_group"
+msgid "Qrupa, ixtisasa və ya fakültəyə ünvanlanmış aktiv elan yoxdur."
+msgstr "Qrupa, ixtisasa və ya fakültəyə ünvanlanmış aktiv elan yoxdur."
+
+msgctxt "accounts.my_group"
+msgid "Bütün elanlar"
+msgstr "Bütün elanlar"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "%(group)s qrupunun cari dövr fənləri"
+msgstr "%(group)s qrupunun cari dövr fənləri"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "%(n)s / %(total)s tələbə"
+msgstr "%(n)s / %(total)s tələbə"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "birgə: %(groups)s"
+msgstr "birgə: %(groups)s"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "Birgə qruplar: %(groups)s"
+msgstr "Birgə qruplar: %(groups)s"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "Jurnal: %(journal)s"
+msgstr "Jurnal: %(journal)s"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "Qrupunuz «%(parent)s» qrupunun alt qrupudur — ümumi dərslər ana qrupun jurnalında keçə bilər."
+msgstr "Qrupunuz «%(parent)s» qrupunun alt qrupudur — ümumi dərslər ana qrupun jurnalında keçə bilər."
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "%(n)s tələbə"
+msgstr "%(n)s tələbə"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "qrupdan %(n)s tələbə"
+msgstr "qrupdan %(n)s tələbə"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "Son tarix: %(date)s"
+msgstr "Son tarix: %(date)s"

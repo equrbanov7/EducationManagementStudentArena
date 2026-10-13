@@ -171,9 +171,9 @@ def group_subjects(group, *, period, students, viewer_id=None) -> dict:
 
     # 4) Qrupun seçmə blok qərarları (``GroupElectiveChoice``) — blok adı.
     blocks = dict(
-        GroupElectiveChoice.objects.filter(
-            organization_id=organization_id, group=group, period=period
-        ).values_list("chosen_subject_id", "elective_group")
+        GroupElectiveChoice.objects.filter(organization_id=organization_id, group=group, period=period).values_list(
+            "chosen_subject_id", "elective_group"
+        )
     )
 
     group_size = len(student_ids)

@@ -95986,3 +95986,379 @@ msgstr "Students of group %(group)s"
 msgctxt "accounts.my_group"
 msgid "siz"
 msgstr "you"
+
+msgctxt "profile.sidebar"
+msgid "Starosta"
+msgstr "Group lead"
+
+msgctxt "accounts.groups"
+msgid "Starosta"
+msgstr "Group lead"
+
+msgctxt "accounts.group_lead"
+msgid "Starosta"
+msgstr "Group lead"
+
+msgctxt "accounts.group_lead"
+msgid "Qrup tapılmadı və ya arxivdədir."
+msgstr "Group not found or archived."
+
+msgctxt "accounts.group_lead"
+msgid "«Baş tələbə» (lead_student) rolu bu təşkilatda yoxdur — standart rollar yüklənməlidir."
+msgstr "The «Lead student» (lead_student) role does not exist in this organization — load the default roles."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta yalnız bu qrupun qeydiyyatlı tələbəsi ola bilər."
+msgstr "Only an enrolled student of this group can be the group lead."
+
+msgctxt "accounts.group_lead"
+msgid "Özünüzü starosta təyin edə bilməzsiniz."
+msgstr "You cannot appoint yourself as group lead."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "%(name)s artıq bu qrupun starostasıdır."
+msgstr "%(name)s is already the lead of this group."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta vəzifəniz başa çatdı"
+msgstr "Your group lead role has ended"
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "«%(group)s» qrupunun starostası artıq %(name)s-dir."
+msgstr "The lead of group «%(group)s» is now %(name)s."
+
+msgctxt "accounts.group_lead"
+msgid "Siz qrupun starostası təyin olundunuz"
+msgstr "You have been appointed group lead"
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "«%(group)s» qrupunun starostası təyin olundunuz. Kabinetdə «Starosta» bölməsi açıldı: qrupun fənləri, seçmə fənlər, birləşmiş dərslər, cədvəl, imtahanlar və elanlar."
+msgstr "You have been appointed lead of group «%(group)s». A «Group lead» section is now open in your cabinet: the group's subjects, electives, joint lessons, timetable, exams and announcements."
+
+msgctxt "accounts.group_lead"
+msgid "Bu qrupun starostası yoxdur."
+msgstr "This group has no lead."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "«%(group)s» qrupunun starostası vəzifəsindən götürüldünüz."
+msgstr "You have been removed as lead of group «%(group)s»."
+
+msgctxt "accounts.group_lead"
+msgid "Qrupun starostası"
+msgstr "Group lead"
+
+msgctxt "accounts.group_lead"
+msgid "Starosta qrupun qeydiyyatlı tələbələrindən seçilir və kabinetində «Starosta» bölməsi açılır: qrupun fənləri, seçmə fənlər, birləşmiş dərslər, cədvəl, imtahanlar, elanlar."
+msgstr "The group lead is chosen from the group's enrolled students and gets a «Group lead» section in the cabinet: subjects, electives, joint lessons, timetable, exams, announcements."
+
+msgctxt "accounts.group_lead"
+msgid "Təyin et"
+msgstr "Appoint"
+
+msgctxt "accounts.group_lead"
+msgid "Starostanı götür"
+msgstr "Remove group lead"
+
+msgctxt "accounts.group_lead"
+msgid "Əməl audit jurnalına yazılır, tələbəyə bildiriş gedir."
+msgstr "The action is recorded in the audit log and the student is notified."
+
+msgctxt "accounts.group_lead"
+msgid "Götür"
+msgstr "Remove"
+
+msgctxt "accounts.group_lead"
+msgid "qrupda deyil"
+msgstr "not in group"
+
+msgctxt "accounts.group_lead"
+msgid "bir neçə starosta"
+msgstr "several leads"
+
+msgctxt "accounts.group_lead"
+msgid "Qrup"
+msgstr "Group"
+
+msgctxt "accounts.group_lead"
+msgid "Hazırkı starosta:"
+msgstr "Current lead:"
+
+msgctxt "accounts.group_lead"
+msgid "Yeni starosta"
+msgstr "New group lead"
+
+msgctxt "accounts.group_lead"
+msgid "Tələbə adı ilə axtar…"
+msgstr "Search by student name…"
+
+msgctxt "accounts.group_lead"
+msgid "Uyğun tələbə tapılmadı"
+msgstr "No matching student"
+
+msgctxt "accounts.group_lead"
+msgid "Tələbə seçin"
+msgstr "Select a student"
+
+msgctxt "accounts.group_lead"
+msgid "Yalnız bu qrupun qeydiyyatlı tələbələri. Yeni starosta təyin olunanda əvvəlki avtomatik götürülür; hər ikisinə bildiriş gedir."
+msgstr "Only enrolled students of this group. Appointing a new lead removes the previous one automatically; both are notified."
+
+msgctxt "accounts.group_lead"
+msgid "Qeyd (istəyə bağlı)"
+msgstr "Note (optional)"
+
+msgctxt "accounts.group_lead"
+msgid "Məs.: qrup yığıncağının qərarı ilə"
+msgstr "E.g.: by decision of the group meeting"
+
+msgctxt "accounts.group_lead"
+msgid "Tələbə qrupda qalır, yalnız starostalıq və «Starosta» bölməsi bağlanır. Sonra yeni starosta təyin edə bilərsiniz."
+msgstr "The student stays in the group; only the lead role and the «Group lead» section are closed. You can appoint a new lead afterwards."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta təyin olunmayıb"
+msgstr "No group lead appointed"
+
+msgctxt "accounts.group_lead"
+msgid "Bu qrupun qeydiyyatlı tələbəsi deyil — bölmə ona açılmır. Yenisini təyin edin."
+msgstr "Not an enrolled student of this group — the section is closed for them. Appoint a new lead."
+
+msgctxt "accounts.group_lead"
+msgid "Qrupda bir neçə aktiv starosta var — birini təyin edin, digərləri avtomatik götürüləcək."
+msgstr "The group has several active leads — appoint one, the others will be removed automatically."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta təyin et"
+msgstr "Appoint group lead"
+
+msgctxt "accounts.group_lead"
+msgid "Starostanı dəyiş"
+msgstr "Change group lead"
+
+msgctxt "accounts.group_lead"
+msgid "Aktiv təşkilat tapılmadı."
+msgstr "Active organization not found."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta təyin etmək üçün `unit.group_manage` və ya `role.assign` səlahiyyəti lazımdır."
+msgstr "Appointing a group lead requires the `unit.group_manage` or `role.assign` permission."
+
+msgctxt "accounts.group_lead"
+msgid "Qrup tapılmadı və ya əhatənizdə deyil."
+msgstr "Group not found or outside your scope."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "«%(group)s» qrupunun starostası dəyişdi: %(old)s → %(new)s."
+msgstr "Lead of group «%(group)s» changed: %(old)s → %(new)s."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "%(name)s «%(group)s» qrupunun starostası təyin edildi."
+msgstr "%(name)s appointed lead of group «%(group)s»."
+
+#, python-format
+msgctxt "accounts.group_lead"
+msgid "%(name)s «%(group)s» qrupunun starostası vəzifəsindən götürüldü."
+msgstr "%(name)s removed as lead of group «%(group)s»."
+
+msgctxt "accounts.group_lead"
+msgid "Naməlum əməl."
+msgstr "Unknown action."
+
+msgctxt "accounts.group_lead"
+msgid "Starosta «Qruplar» reyestrindən təyin olunur: qrupun tələbələri → «Starosta təyin et»."
+msgstr "Group leads are appointed in the «Groups» registry: group students → «Appoint group lead»."
+
+msgctxt "accounts.my_group"
+msgid "Siz bu qrupun starostasısınız: qrupun fənləri, seçmə fənlər, başqa qruplarla birləşmiş dərslər, cədvəl, imtahanlar və elanlar burada bir yerdədir. Qrup yoldaşlarının balı və davamiyyəti göstərilmir — davamiyyət yalnız özünüzə aiddir."
+msgstr "You are this group's lead: the group's subjects, electives, lessons joint with other groups, timetable, exams and announcements are all here. Classmates' grades and attendance are not shown — attendance is only your own."
+
+msgctxt "accounts.my_group"
+msgid "Seçmə fənn"
+msgstr "Elective"
+
+msgctxt "accounts.my_group"
+msgid "Birləşmiş dərs"
+msgstr "Joint lesson"
+
+msgctxt "accounts.my_group"
+msgid "Yaxın imtahan"
+msgstr "Upcoming exam"
+
+msgctxt "accounts.my_group"
+msgid "Starosta bölmələri"
+msgstr "Group lead sections"
+
+msgctxt "accounts.my_group"
+msgid "Fənlər"
+msgstr "Subjects"
+
+msgctxt "accounts.my_group"
+msgid "Seçmə fənlər"
+msgstr "Electives"
+
+msgctxt "accounts.my_group"
+msgid "Birləşmiş dərslər"
+msgstr "Joint lessons"
+
+msgctxt "accounts.my_group"
+msgid "Cədvəl"
+msgstr "Timetable"
+
+msgctxt "accounts.my_group"
+msgid "İmtahanlar"
+msgstr "Exams"
+
+msgctxt "accounts.my_group"
+msgid "Elanlar"
+msgstr "Announcements"
+
+msgctxt "accounts.my_group"
+msgid "Davamiyyətim"
+msgstr "My attendance"
+
+msgctxt "accounts.my_group"
+msgid "Bu dövr üçün qrupun fənni hələ açılmayıb."
+msgstr "No subjects have been opened for the group this term yet."
+
+msgctxt "accounts.my_group"
+msgid "Növ"
+msgstr "Type"
+
+msgctxt "accounts.my_group"
+msgid "Müəllim"
+msgstr "Teacher"
+
+msgctxt "accounts.my_group"
+msgid "Kimlərlə"
+msgstr "Together with"
+
+msgctxt "accounts.my_group"
+msgid "Qrupdan"
+msgstr "From group"
+
+msgctxt "accounts.my_group"
+msgid "seçmə"
+msgstr "elective"
+
+msgctxt "accounts.my_group"
+msgid "məcburi"
+msgstr "mandatory"
+
+msgctxt "accounts.my_group"
+msgid "yalnız öz qrupu"
+msgstr "own group only"
+
+msgctxt "accounts.my_group"
+msgid "hamısı"
+msgstr "all"
+
+msgctxt "accounts.my_group"
+msgid "Bu dövrdə qrupun seçmə fənni yoxdur."
+msgstr "The group has no electives this term."
+
+msgctxt "accounts.my_group"
+msgid "Hər seçmə fənni qrupdan kimin götürdüyü — yalnız adlar (bal və davamiyyət göstərilmir)."
+msgstr "Who in the group takes each elective — names only (grades and attendance are not shown)."
+
+msgctxt "accounts.my_group"
+msgid "siz də"
+msgstr "you too"
+
+msgctxt "accounts.my_group"
+msgid "bütün qrup"
+msgstr "whole group"
+
+msgctxt "accounts.my_group"
+msgid "Götürənlər"
+msgstr "Taken by"
+
+msgctxt "accounts.my_group"
+msgid "Qrup başqa qruplarla birləşmiş dərsdə oxumur və alt qruplara bölünməyib."
+msgstr "The group has no lessons joint with other groups and is not split into subgroups."
+
+msgctxt "accounts.my_group"
+msgid "Bu fənlərdə qrupunuz başqa qrup(lar)la birlikdə oxuyur: ya dərs başqa qrupun jurnalındadır, ya da jurnala başqa qrupdan tələbə əlavə olunub."
+msgstr "In these subjects your group studies together with other group(s): either the lesson is in another group's journal, or students from another group were added to the journal."
+
+msgctxt "accounts.my_group"
+msgid "Jurnal: öz qrupunuz"
+msgstr "Journal: your group"
+
+msgctxt "accounts.my_group"
+msgid "Qrupdan gedənlər"
+msgstr "Attending from the group"
+
+msgctxt "accounts.my_group"
+msgid "Alt qruplar"
+msgstr "Subgroups"
+
+msgctxt "accounts.my_group"
+msgid "Tələbələr"
+msgstr "Students"
+
+msgctxt "accounts.my_group"
+msgid "Qrupun dərs cədvəli hələ dərc olunmayıb."
+msgstr "The group's timetable has not been published yet."
+
+msgctxt "accounts.my_group"
+msgid "Yaxın 90 gündə qrupa təyin olunmuş imtahan yoxdur."
+msgstr "No exams assigned to the group in the next 90 days."
+
+msgctxt "accounts.my_group"
+msgid "Qrupa, ixtisasa və ya fakültəyə ünvanlanmış aktiv elan yoxdur."
+msgstr "No active announcements addressed to the group, specialty or faculty."
+
+msgctxt "accounts.my_group"
+msgid "Bütün elanlar"
+msgstr "All announcements"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "%(group)s qrupunun cari dövr fənləri"
+msgstr "Current term subjects of group %(group)s"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "%(n)s / %(total)s tələbə"
+msgstr "%(n)s / %(total)s students"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "birgə: %(groups)s"
+msgstr "joint: %(groups)s"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "Birgə qruplar: %(groups)s"
+msgstr "Joint groups: %(groups)s"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "Jurnal: %(journal)s"
+msgstr "Journal: %(journal)s"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "Qrupunuz «%(parent)s» qrupunun alt qrupudur — ümumi dərslər ana qrupun jurnalında keçə bilər."
+msgstr "Your group is a subgroup of «%(parent)s» — shared lessons may be held in the parent group's journal."
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "%(n)s tələbə"
+msgstr "%(n)s students"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "qrupdan %(n)s tələbə"
+msgstr "%(n)s students from the group"
+
+#, python-format
+msgctxt "accounts.my_group"
+msgid "Son tarix: %(date)s"
+msgstr "Deadline: %(date)s"

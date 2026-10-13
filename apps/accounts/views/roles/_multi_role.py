@@ -31,6 +31,7 @@ from django.utils.translation import pgettext
 
 from apps.organizations.models import Membership, OrgUnit, Role
 
+from ...services.group_lead import LEAD_ROLE_NAME as GROUP_LEAD_ROLE_NAME
 from ...services.role_catalog import (
     effective_level,
     is_admin_role,
@@ -40,7 +41,6 @@ from ...services.role_catalog import (
     role_label,
     sync_profile_primary_role,
 )
-from ...services.group_lead import LEAD_ROLE_NAME as GROUP_LEAD_ROLE_NAME
 from .._helpers.rbac import _collect_actor_permissions
 from ._gates import actor_is_unit_scoped, manage_roles_gate_error
 

@@ -473,3 +473,10 @@
         gap: var(--ems-sp-1);
     }
 }
+
+/* A11y (WCAG 2.5.5): toxunma ekranında açılan «Götürənlər / Tələbələr» xülasəsi ≥44px hədəf. */
+@media (pointer: coarse) {
+    .mg-card__people summary {
+        padding: 12px 0;
+    }
+}

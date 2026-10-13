@@ -34,6 +34,7 @@ from apps.accounts.services.group_lead import (
 from core.audit import log_action
 from core.constants import AuditAction
 from core.rls import bypass_rls
+from core.rls_pooling import rls_worker_atomic
 
 
 class Command(BaseCommand):
@@ -46,7 +47,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         from apps.organizations.models import Organization
 
-        with bypass_rls():
+        with rls_worker_atomic(), bypass_rls():
             organization = Organization.objects.filter(slug=options["org"]).first()
             if organization is None:
                 raise CommandError(f"Təşkilat tapılmadı: {options['org']}")
@@ -58,14 +59,20 @@ class Command(BaseCommand):
             fixed = manual = 0
             for membership, problem in problems:
                 label = f"{membership.user.username} [{problem}] scope={getattr(membership.scope_unit, 'name', '—')}"
-                action = self._fix(organization, membership, problem) if apply else self._plan(organization, membership, problem)
+                action = (
+                    self._fix(organization, membership, problem)
+                    if apply
+                    else self._plan(organization, membership, problem)
+                )
                 if action.startswith("manual"):
                     manual += 1
                 else:
                     fixed += 1 if apply else 0
                 self.stdout.write(f"{label} → {action}")
             mode = "DÜZƏLİŞ" if apply else "QURU QAÇIŞ"
-            self.stdout.write(self.style.SUCCESS(f"{mode}: {len(problems)} problem, düzəldilib {fixed}, əl ilə {manual}."))
+            self.stdout.write(
+                self.style.SUCCESS(f"{mode}: {len(problems)} problem, düzəldilib {fixed}, əl ilə {manual}.")
+            )
 
     # ── qərar ─────────────────────────────────────────────────────────────
     def _target(self, organization, membership):
@@ -73,8 +80,11 @@ class Command(BaseCommand):
         if len(records) != 1:
             return None, "manual: tələbənin tək aktiv qrupu yoxdur"
         record = records[0]
-        valid = [lead for lead in group_lead_map(organization, [record.group_id]).get(record.group_id, [])
-                 if not lead.not_in_group and lead.user_id != membership.user_id]
+        valid = [
+            lead
+            for lead in group_lead_map(organization, [record.group_id]).get(record.group_id, [])
+            if not lead.not_in_group and lead.user_id != membership.user_id
+        ]
         if valid:
             return None, f"manual: «{record.group.name}» qrupunun artıq starostası var ({valid[0].username})"
         return record, ""
