@@ -6,10 +6,11 @@ Seçim xanası burada saxlanılır ki, ortaq `_data_table.html` komponentinə s�
 
 «Tələbələr» qrupun tələbə çekmecəsini açır (siyahı JSON-dan gəlir), DOCX isə
 bütöv qrupun rəsmi «Fərdi tədris planı» sənədini yükləyir — hər ikisi OXU
-səlahiyyəti (`unit.view`) ilə görünür; idarə düymələri `can_manage` ilə.
+səlahiyyəti (`unit.view`) ilə görünür; idarə düymələri SƏTRİN `can_manage`-i ilə (2026-10-14: oxu
+əhatəsi fakültəyə genişləndi, yazı əhatəsi dar qaldı — kənar qrupda düymə yoxdur; server də 404 verir).
 «Tələbə əlavə et» qrupsuz tələbələri axtarışla seçib RƏSMİ köçürmə ilə qrupa
 yazır (səbəb məcburi) — bax `_group_add_students_fields.html`.{% endcomment %}
-{% if groups_registry_section.can_manage %}
+{% if row.data.can_manage %}
 <label class="tof-bulk__check">
     <input type="checkbox" data-tof-bulk-item="{{ row.data.id }}"
            aria-label="{% blocktrans context 'accounts.groups' with name=row.data.name %}{{ name }} qrupunu seç{% endblocktrans %}">
@@ -22,6 +23,8 @@ yazır (səbəb məcburi) — bax `_group_add_students_fields.html`.{% endcommen
         data-candidates-url="{{ row.data.candidates_url }}"
         data-group-id="{{ row.data.id }}"
         data-group-active="{% if row.data.is_active %}1{% else %}0{% endif %}"
+        data-can-manage="{% if row.data.can_manage %}1{% else %}0{% endif %}"
+        data-can-lead="{% if row.data.can_lead %}1{% else %}0{% endif %}"
         data-lead-name="{{ row.data.lead_name }}"
         data-lead-username="{{ row.data.lead_username }}"
         data-lead-warning="{{ row.data.lead_warning }}"
@@ -30,7 +33,7 @@ yazır (səbəb məcburi) — bax `_group_add_students_fields.html`.{% endcommen
     {% trans "Tələbələr" context "accounts.groups" %}
     <span class="tof-row-students__count">{{ row.data.students }}</span>
 </button>
-{% if groups_registry_section.can_manage and row.data.is_active %}
+{% if row.data.can_manage and row.data.is_active %}
 <button type="button" class="ems-btn ems-btn--sm ems-btn--icon tof-row-add"
         data-tof-open="tofGroupAddStudentsDialog"
         data-tof-add-students
@@ -42,7 +45,7 @@ yazır (səbəb məcburi) — bax `_group_add_students_fields.html`.{% endcommen
     <i class="fas fa-user-plus" aria-hidden="true"></i>
 </button>
 {% endif %}
-{% if groups_registry_section.can_manage and row.data.is_active and row.data.students %}
+{% if row.data.can_manage and row.data.is_active and row.data.students %}
 {% comment %}Sahib 2026-09-20: ana qrupu alt qruplara bölmə (bax _group_split_fields.html).{% endcomment %}
 <button type="button" class="ems-btn ems-btn--sm ems-btn--icon tof-row-split"
         data-tof-split-open
@@ -59,7 +62,7 @@ yazır (səbəb məcburi) — bax `_group_add_students_fields.html`.{% endcommen
    aria-label="{% trans 'Fərdi tədris planı (DOCX) — bütöv qrup' context 'accounts.groups' %}">
     <i class="fas fa-file-word" aria-hidden="true"></i>
 </a>
-{% if groups_registry_section.can_manage %}
+{% if row.data.can_manage %}
 <button type="button" class="ems-btn ems-btn--sm"
         data-tof-open="tofGroupDialog"
         data-tof-prefill='{"action": "save_group", "id": "{{ row.data.id }}", "name": "{{ row.data.name|escapejs }}", "code": "{{ row.data.code|escapejs }}", "specialty": "{{ row.data.specialty_id }}", "course_year": "{{ row.data.course_year }}", "language_sector": "{{ row.data.language_sector|escapejs }}", "education_form": "{{ row.data.education_form|escapejs }}", "admission_year": "{{ row.data.admission_year }}", "capacity": "{{ row.data.capacity }}", "tutor": "{{ row.data.tutor_id }}"}'>

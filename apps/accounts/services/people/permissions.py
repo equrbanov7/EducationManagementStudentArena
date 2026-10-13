@@ -73,6 +73,9 @@ STUDENT_SERVICE_PERMISSIONS = (
     PERM_ASSIGN_GROUP,
 )
 
+#: OXU əhatəsi ana FAKÜLTƏYƏ genişlənən açarlar (`faculty_read_scope`) — yalnız baxış; yazı açarları dar.
+_FACULTY_READ_PERMISSIONS = frozenset({PERM_VIEW_STUDENTS, PERM_REGISTRY_VIEW})
+
 #: Bölmə açarı → onu açan «baxış» icazəsi.
 SECTION_VIEW_PERMISSION = {
     "people-teachers": PERM_VIEW_TEACHERS,
@@ -159,11 +162,13 @@ class PeopleActor:
             return ORG_WIDE_SCOPE
         if self.organization is None:
             return EMPTY_SCOPE
-        if permission == PERM_VIEW_STUDENTS:
+        if permission in _FACULTY_READ_PERMISSIONS:
             # Sahib (2026-10-14, kafedra müdiri kimi baxış): «kafedra müdiri də öz fakültəsi daxilindəki
             # tələbələri görə bilsin» — ixtisas/qruplar FAKÜLTƏNİN altındadır, kafedra alt-ağacında tələbə
-            # yoxdur. YALNIZ tələbə kataloqunun OXU əhatəsi valideyn fakültəyə genişlənir; əlaqə
-            # (`people.view_contacts`) ayrıca qapıdır, yazı açarlarının əhatəsi dar qalır.
+            # yoxdur. Axşam (tyutor kimi baxış): «tyutor ancaq özünün aid olduğu fakültəni görsün» — «Tələbə
+            # reyestri»nin OXUSU da (`student.registry_view`) eyni qayda ilə. YALNIZ oxu əhatələri genişlənir;
+            # əlaqə (`people.view_contacts`) ayrıca qapıdır, yazı açarlarının (`people.manage_academic`,
+            # `student.movement`) əhatəsi dar qalır.
             return faculty_read_scope(self.user, self.organization, permission, request=request)
         return get_permission_scope(self.user, self.organization, permission, request=request)
 

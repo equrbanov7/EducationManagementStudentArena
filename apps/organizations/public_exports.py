@@ -23,6 +23,7 @@ from .scoping import get_permission_scope  # noqa: F401
 from .scoping import permission_scope_unit_types  # noqa: F401
 from .scoping import scope_memberships_by_unit  # noqa: F401
 from .scoping import scope_org_units  # noqa: F401
+from .scoping import unit_in_scope  # noqa: F401
 from .scoping import user_scope_covers_unit  # noqa: F401
 from .services import get_active_memberships  # noqa: F401
 from .settings_store import REMOVE as REMOVE_SETTINGS_KEY  # noqa: F401
@@ -89,6 +90,7 @@ __all__ = [
     "save_review_identity_reveal",
     "scope_memberships_by_unit",
     "scope_org_units",
+    "unit_in_scope",
     "set_module_enabled",
     "set_settings_keys",
     "student_record_scope_q",

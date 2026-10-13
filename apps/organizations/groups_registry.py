@@ -35,7 +35,7 @@ from core.constants import OrgUnitType
 from core.search_text import tolerant_q
 
 from .models import OrgUnit
-from .scoping import faculty_read_scope, get_permission_scope, scope_org_units
+from .scoping import EMPTY_SCOPE, faculty_read_scope, get_permission_scope, scope_org_units, unit_in_scope
 from .views.shared._helpers import _has_org_permission, _visible_units_queryset
 
 _CTX = "accounts.groups"
@@ -317,6 +317,11 @@ def build_groups_registry(request, organization) -> dict:
     )
 
     form_labels = {option["value"]: option["label"] for option in education_form_choices()}
+    # 2026-10-14: OXU əhatəsi fakültəyə genişləndi (kafedra/ixtisas tyutoru bütün fakültənin qruplarını görür),
+    # YAZI isə dar `unit.group_manage` əhatəsindədir — sətir düymələri yalnız yazı əhatəsindəki qrupa (server
+    # kənar qrupa onsuz da 404 qaytarır). Sorğusuz: əhatə bir dəfə, yoxlama yol üzrə.
+    can_manage = can_manage_groups(request)
+    manage_scope = group_manage_scope(request, organization) if can_manage else EMPTY_SCOPE
     rows = []
     for unit in page_obj.object_list:
         meta = group_meta(unit)
@@ -343,6 +348,8 @@ def build_groups_registry(request, organization) -> dict:
                 "tutor": (unit.head.get_full_name() or unit.head.username) if unit.head_id else "",
                 "tutor_id": str(unit.head_id) if unit.head_id else "",
                 "is_active": unit.is_active,
+                "path": unit.path or "",
+                "can_manage": can_manage and unit_in_scope(manage_scope, unit),
                 # Tələbə çekmecəsi (JSON) və rəsmi «Fərdi tədris planı» DOCX-u.
                 "students_url": reverse("organizations:group_students", args=[organization.slug, unit.id]),
                 "plan_url": reverse("registrar:group_individual_plan", args=[unit.id]),
@@ -398,7 +405,7 @@ def build_groups_registry(request, organization) -> dict:
             {"value": str(unit.id), "label": unit.name}
             for unit in _visible_units_queryset(organization, scope).filter(unit_type="group").order_by("name")[:1000]
         ],
-        "can_manage": can_manage_groups(request),
+        "can_manage": can_manage,
         "can_move_students": can_move_students(request),
     }
 

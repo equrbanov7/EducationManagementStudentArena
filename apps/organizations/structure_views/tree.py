@@ -25,7 +25,7 @@ from django.utils.translation import pgettext, pgettext_lazy
 from core.constants import OrgUnitType
 from core.search_text import tolerant_match
 
-from ..scoping import get_permission_scope
+from ..scoping import faculty_read_scope, get_permission_scope
 from ..unit_types import UNIT_TYPES_BY_ORG
 from ..views import _has_org_permission, _visible_units_queryset
 from ._shared import _unit_permission_flags
@@ -78,6 +78,17 @@ def tree_scope(request, organization):
     alt-ağacı, açarı olmayan → ``EMPTY_SCOPE`` (fail-closed).
     """
     return get_permission_scope(request.user, organization, "unit.view", request=request)
+
+
+def tree_read_scope(request, organization):
+    """Ağac EKRANININ oxu əhatəsi — ``tree_scope`` + fakültə-daxili köklər ana FAKÜLTƏYƏ (``faculty_read_scope``).
+
+    2026-10-14 (sahib, tyutor kimi baxış): «tyutor ancaq özünün aid olduğu fakültəni görsün … fakültəyə aid
+    ixtisaslar görünsün». Kafedra/ixtisas/qrupa təyin olunmuş tyutor/koordinator (və kafedra müdiri) ağacda
+    öz fakültəsini görür. YALNIZ ``build_structure_tree_context`` işlədir — struktur YAZI əməlləri, «Kafedralar»
+    bölməsi və axtarış endpoint-ləri dar ``tree_scope``-da qalır; ağacın idarə düymələri açar bayraqlarıdır.
+    """
+    return faculty_read_scope(request.user, organization, "unit.view", request=request)
 
 
 def _type_labels(organization) -> dict:
@@ -186,7 +197,7 @@ def _detail_extras(unit, units, labels) -> dict:
 
 def build_structure_tree_context(request, organization) -> dict:
     """«Universitet strukturu» bölməsinin konteksti."""
-    scope = tree_scope(request, organization)
+    scope = tree_read_scope(request, organization)
     can_view = scope.has_structure_access
     flags = _unit_permission_flags(request, organization)
     can_manage_tree = flags["can_edit"] or _has_org_permission(request, "unit.tree_manage")
@@ -375,6 +386,7 @@ def chair_detail_context(request, organization, chair) -> dict:
 
 __all__ = [
     "HEAD_EXPECTED_TYPES",
+    "tree_read_scope",
     "tree_scope",
     "TREE_TYPE_ORDER",
     "build_structure_tree_context",

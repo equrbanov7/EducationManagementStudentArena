@@ -259,16 +259,41 @@ def get_permission_scope(user, organization, permission: str, request=None) -> U
     return scope
 
 
-#: Kafedra → valideyn fakültə genişlənməsinin tipləri (``faculty_read_scope``).
-_CHAIR_UNIT_TYPE = "chair"
+#: Oxu genişlənməsinin tipləri (``faculty_read_scope``). Fakültə DAXİLİNDƏKİ akademik vahidlər — kafedra
+#: (``department`` da kafedradır), ixtisas, qrup, dekanlıq — ən yaxın aktiv FAKÜLTƏ əcdadına genişlənir.
+#: Digər tiplər (inzibati bölmə, mərkəz …) QƏSDƏN siyahıda deyil: onların əhatəsi olduğu kimi qalır.
 _FACULTY_UNIT_TYPE = "faculty"
+_WIDEN_TO_FACULTY_TYPES = frozenset({"chair", "department", "specialty", "group", "deanery"})
+
+
+def unit_in_scope(scope: UnitScope, unit) -> bool:
+    """Vahid (``pk`` + ``path`` yüklü) əhatənin içindədirmi — SORĞUSUZ (sətir səviyyəli UI bayraqları üçün).
+
+    ``unit_subtree_q`` ilə eyni qayda: org-wide → bəli; unit əhatəsi → kök özü və ya ``<kök yolu>/`` ilə
+    başlayan yol; əhatəsiz / ``None`` → yox (fail-closed).
+    """
+    if unit is None:
+        return False
+    if scope.is_org_wide:
+        return True
+    if not scope.is_unit_scoped:
+        return False
+    if getattr(unit, "pk", None) in scope.unit_ids:
+        return True
+    path = str(getattr(unit, "path", "") or "")
+    if not path:
+        return False
+    return any(path == root or path.startswith(f"{root}/") for root in scope.unit_paths if root)
 
 
 def widen_chair_scope_to_faculty(organization, scope: UnitScope, request=None) -> UnitScope:
-    """Unit əhatəsindəki KAFEDRA köklərini valideyn FAKÜLTƏ ilə əvəz edir (TƏK sorğu, request-ə yaddaş).
+    """Unit əhatəsindəki fakültə-daxili kökləri (kafedra / ixtisas / qrup / dekanlıq) ən yaxın FAKÜLTƏ ilə əvəz edir.
 
-    Valideyni fakültə olmayan kafedra və digər tip vahidlər olduğu kimi qalır; nəticə ilkin əhatəni
-    həmişə ƏHATƏ EDİR (yalnız genişlənir). Org-wide / boş əhatə dəyişmir.
+    2026-10-14 (sahib, tyutor kimi baxış): «tyutor ancaq özünün aid olduğu fakültəni görsün … tyutor və proqram
+    koordinatoru eyni vəzifədir, adətən fakültə dekanlığı tərkibində olur». Qayda ROL ADINA deyil, üzvlüyün
+    ``scope_unit`` TİPİNƏ baxır — kafedra müdiri, tyutor, koordinator eyni cür genişlənir. Fakültə əcdadı
+    olmayan (və ya fakültəsi passiv) vahid və siyahıda olmayan tiplər olduğu kimi qalır; nəticə ilkin əhatəni
+    həmişə ƏHATƏ EDİR (yalnız genişlənir). Org-wide / boş əhatə dəyişmir. Ən çoxu İKİ sorğu, request-ə yaddaş.
     """
     if not scope.is_unit_scoped or organization is None:
         return scope
@@ -278,17 +303,35 @@ def widen_chair_scope_to_faculty(organization, scope: UnitScope, request=None) -
         return cache[cache_key]
     from apps.organizations.models import OrgUnit
 
+    units = list(
+        OrgUnit.objects.filter(organization=organization, pk__in=list(scope.unit_ids)).only("id", "path", "unit_type")
+    )
+    ancestor_ids = {
+        part
+        for unit in units
+        if unit.unit_type in _WIDEN_TO_FACULTY_TYPES
+        for part in str(unit.path or "").split("/")[:-1]
+        if part
+    }
+    faculties = {}
+    if ancestor_ids:
+        faculties = {
+            str(pk): (pk, path)
+            for pk, path in OrgUnit.objects.filter(
+                organization=organization, pk__in=list(ancestor_ids), unit_type=_FACULTY_UNIT_TYPE, is_active=True
+            ).values_list("pk", "path")
+        }
     roots = {}
-    units = OrgUnit.objects.filter(organization=organization, pk__in=list(scope.unit_ids)).select_related("parent")
     for unit in units:
-        parent = unit.parent
-        if (
-            unit.unit_type == _CHAIR_UNIT_TYPE
-            and parent is not None
-            and parent.is_active
-            and parent.unit_type == _FACULTY_UNIT_TYPE
-        ):
-            roots[parent.pk] = parent.path
+        faculty = None
+        if unit.unit_type in _WIDEN_TO_FACULTY_TYPES:
+            # Ən YAXIN fakültə əcdadı (yol kökdən aşağı gedir — tərsinə axtarılır).
+            for part in reversed(str(unit.path or "").split("/")[:-1]):
+                if part in faculties:
+                    faculty = faculties[part]
+                    break
+        if faculty is not None:
+            roots[faculty[0]] = faculty[1]
         else:
             roots[unit.pk] = unit.path
     widened = UnitScope(
@@ -300,14 +343,16 @@ def widen_chair_scope_to_faculty(organization, scope: UnitScope, request=None) -
 
 
 def faculty_read_scope(user, organization, permission: str, request=None) -> UnitScope:
-    """OXU əhatəsi: ``get_permission_scope`` + kafedra kökləri valideyn FAKÜLTƏYƏ genişlənir.
+    """OXU əhatəsi: ``get_permission_scope`` + fakültə-daxili köklər (kafedra/ixtisas/qrup) FAKÜLTƏYƏ genişlənir.
 
     Sahib (2026-10-14, kafedra müdiri kimi baxış): «kafedra müdiri də öz fakültəsi daxilindəki
     tələbələri görə bilsin», «Qruplar / İxtisaslar — ancaq öz fakültəmizə aid olanı». Bu
     universitetdə ixtisas və qruplar KAFEDRANIN deyil, FAKÜLTƏNİN altındadır — kafedra alt-ağacında
-    nə qrup, nə ixtisas, nə tələbə var. Ona görə YALNIZ oxu səthləri (tələbə kataloqu, qrup reyestri,
-    ixtisaslar, fənn kataloqu) bu helper-i işlədir; YAZI əməlləri (``unit.group_manage``,
-    ``catalog.manage``, ``people.manage_*``) həmişə dar ``get_permission_scope`` ilə qalır.
+    nə qrup, nə ixtisas, nə tələbə var. 2026-10-14 (axşam): tyutor / proqram koordinatoru da (fakültə,
+    kafedra, ixtisas və ya qrupa təyin olunsa belə) öz FAKÜLTƏSİNİ görür. YALNIZ oxu səthləri (tələbə
+    kataloqu, «Tələbə reyestri», qrup reyestri, struktur ağacı, ixtisaslar, fənn kataloqu) bu helper-i
+    işlədir; YAZI əməlləri (``unit.group_manage``, ``catalog.manage``, ``people.manage_*``,
+    ``student.movement``) həmişə dar ``get_permission_scope`` ilə qalır.
     """
     scope = get_permission_scope(user, organization, permission, request=request)
     return widen_chair_scope_to_faculty(organization, scope, request=request)
@@ -376,6 +421,7 @@ __all__ = [
     "permission_scope_unit_types",
     "scope_memberships_by_unit",
     "scope_org_units",
+    "unit_in_scope",
     "user_scope_covers_unit",
     "user_scope_subtree_q",
     "widen_chair_scope_to_faculty",

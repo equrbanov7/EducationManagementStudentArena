@@ -264,6 +264,7 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
     section["current_year"] = payload["current_year"]
     section["default_education_form"] = "full_time"
     groups_leads.attach_group_leads(active_organization, payload["rows"])
+    groups_leads.attach_lead_rights(request, active_organization, payload["rows"])
     section.update(groups_leads.lead_dialog_context(request, active_organization))
     section["table_rows"] = [_group_row(row, can_manage=payload["can_manage"]) for row in payload["rows"]]
     section["state_title"] = pgettext(_CTX_GROUPS, "Qrup tapılmadı")
