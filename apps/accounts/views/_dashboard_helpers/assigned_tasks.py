@@ -32,7 +32,7 @@ from .._helpers import (
     _normalize_assigned_tasks_filter,
     _task_state_badge_data,
 )
-from .._helpers.task_kind_visibility import coursework_tasks_visible, selfwork_tasks_visible
+from .._helpers.task_kind_visibility import coursework_tasks_visible, selfwork_tasks_visible, visible_task_filter
 from .formatters import _standard_item_type_meta
 
 User = get_user_model()
@@ -44,7 +44,8 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
     """
     user = request.user
     selected_filter = filter_type if filter_type is not None else request.GET.get("assigned_type")
-    filter_type = _normalize_assigned_tasks_filter(selected_filter)
+    # Gizli (bağlı) tab URL-də qalıbsa «hamısı»na düşür — digər kurs bölmələri ilə eyni qayda (B12).
+    filter_type = visible_task_filter("assigned-exams", _normalize_assigned_tasks_filter(selected_filter))
     search_query = (search if search is not None else request.GET.get("assigned_search", "")).strip()
     now = timezone.now()
 

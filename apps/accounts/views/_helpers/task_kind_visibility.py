@@ -26,6 +26,8 @@ _SECTION_TASK_KEYS = {
     "review-results": {"selfwork": "assignments", "coursework": "projects"},
     "my-results": {"selfwork": "courses", "coursework": "independent"},
     "pending-answers": {"selfwork": "courses", "coursework": "independent"},
+    # «Mənə təyin edilmiş tapşırıqlar» (2026-10-14): sətirlər `assigned_tasks.py`-da süzülür, tab burada.
+    "assigned-exams": {"selfwork": "assignments", "coursework": "independent"},
 }
 
 
