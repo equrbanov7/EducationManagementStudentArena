@@ -29,7 +29,7 @@ MÜQAVİLƏ:
 {% comment %}Tələbə detalı çekməcəsi — cədvəl modulundan MÜSTƏQİLDİR (paylaşılan
 vəziyyət yoxdur, yalnız sətir düyməsinin `data-*`-larından asılıdır); ayrı fayl
 həm modul ölçü büdcəsini, həm də məsuliyyət ayrımını saxlayır.{% endcomment %}
-<script src="{% static 'accounts/js/profile/academic_records_detail.js' %}?v=20260910-1"></script>
+<script src="{% static 'accounts/js/profile/academic_records_detail.js' %}?v=20261013-xh"></script>
 {% endif %}
 {% if 'people-teachers' in asset_sections or 'people-students' in asset_sections or 'student-registry' in asset_sections %}
 {% comment %}2026-10-03: hesabı dayandırma — səbəb seçimi + «kimə yaxınlaşsın» (kataloq və reyestr dialoqları).{% endcomment %}
@@ -204,6 +204,7 @@ yaratma/redaktə dialoqunu aça bilmirdi.{% endcomment %}
 {% if 'my-appeals' in asset_sections or 'appeal-stats' in asset_sections %}
 <script src="{% static 'appeals/js/appeals_review.js' %}?v=20260715-appeal-batch"></script>
 <script src="{% static 'appeals/js/appeals_sections.js' %}?v=20260715-appeal-batch"></script>
+<script src="{% static 'appeals/js/appeals_key_fix.js' %}?v=20261013-keyfix"></script>
 {% endif %}
 {% if 'org-faculties' in asset_sections or 'org-kafedras' in asset_sections %}
 <script src="{% static 'js/org_structure.js' %}?v=20260926-search"></script>

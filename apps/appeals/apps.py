@@ -26,6 +26,7 @@ class AppealsConfig(AppConfig):
         from .services import (
             appeal_applicable,
             appeal_bonus_map,
+            appeal_deadline,
             appeal_score_state,
             apply_bonus_to_test_result,
             can_create_appeal,
@@ -48,3 +49,4 @@ class AppealsConfig(AppConfig):
         score_adjustments.register("can_create", can_create_appeal)
         score_adjustments.register("remaining_window_seconds", remaining_window_seconds)
         score_adjustments.register("is_applicable", appeal_applicable)
+        score_adjustments.register("deadline", appeal_deadline)

@@ -134,7 +134,13 @@ class AppealPageAnswerKeyTests(TestCase):
         self.assertNotContains(response, IDEAL_ANSWER)
 
     def test_results_hidden_exam_shows_no_per_question_verdict(self):
-        response = self._get(self._test_attempt("midterm", results_hidden=True))
+        # 2026-10-13 (gecə): nəticə gizlidirsə pəncərə AÇILMIR (nəticə açılandan sayılır) — səhifə
+        # oxu-rejimindədir; açar/verdikt sızmaması zəmanəti əvvəlki kimi yoxlanılır.
+        response = self.client.get(
+            reverse("appeals:appeal_create", args=[self._test_attempt("midterm", results_hidden=True).id])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "data-appeals-form", html=False)
         self.assertNotContains(response, KEY_OPTION)
         self.assertNotContains(response, "appeal-chip--bad", html=False)
         self.assertNotContains(response, "appeal-chip--ok", html=False)

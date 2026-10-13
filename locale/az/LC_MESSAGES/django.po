@@ -95547,3 +95547,284 @@ msgstr "%(group)s qrupunun tələbələri"
 msgctxt "accounts.my_group"
 msgid "siz"
 msgstr "siz"
+
+msgctxt "core.runtime_settings"
+msgid "Apellyasiya müddəti"
+msgstr "Apellyasiya müddəti"
+
+msgctxt "core.runtime_settings"
+msgid "Nəticə tələbəyə açıldıqdan sonra neçə təqvim günü apellyasiya vermək olar (son günün sonunadək, Bakı vaxtı). Tələbə evdən də müraciət edə bilir; müddət bitəndə düymə gizlənir və server qəbul etmir."
+msgstr "Nəticə tələbəyə açıldıqdan sonra neçə təqvim günü apellyasiya vermək olar (son günün sonunadək, Bakı vaxtı). Tələbə evdən də müraciət edə bilir; müddət bitəndə düymə gizlənir və server qəbul etmir."
+
+msgctxt "core.runtime_settings"
+msgid "gün"
+msgstr "gün"
+
+msgctxt "appeals.notification"
+msgid "Midterm balını elektron jurnalda özünüz yeniləyin (midterm jurnala avtomatik yazılmır)."
+msgstr "Midterm balını elektron jurnalda özünüz yeniləyin (midterm jurnala avtomatik yazılmır)."
+
+msgctxt "appeals.notification"
+msgid "Elektron jurnalda imtahan balı avtomatik yeniləndi."
+msgstr "Elektron jurnalda imtahan balı avtomatik yeniləndi."
+
+msgctxt "appeals.notification"
+msgid "Apellyasiya nəticəsində bal dəyişdi"
+msgstr "Apellyasiya nəticəsində bal dəyişdi"
+
+msgctxt "appeals.notification"
+msgid "{student} — \"{exam}\": apellyasiya qəbul olundu, bal {delta} dəyişdi. {hint}"
+msgstr "{student} — \"{exam}\": apellyasiya qəbul olundu, bal {delta} dəyişdi. {hint}"
+
+msgctxt "appeals.notification"
+msgid "Cavab açarı düzəlişi geri alındı"
+msgstr "Cavab açarı düzəlişi geri alındı"
+
+msgctxt "appeals.notification"
+msgid "\"{exam}\" imtahanının {no}-ci sualı üzrə açar düzəlişi geri alındı — əlavə bal çıxarıldı."
+msgstr "\"{exam}\" imtahanının {no}-ci sualı üzrə açar düzəlişi geri alındı — əlavə bal çıxarıldı."
+
+msgctxt "appeals.notification"
+msgid "Cavab açarı düzəldildi"
+msgstr "Cavab açarı düzəldildi"
+
+msgctxt "appeals.notification"
+msgid "\"{exam}\" imtahanının {no}-ci sualının cavab açarı düzəldildi — balınız artırıldı."
+msgstr "\"{exam}\" imtahanının {no}-ci sualının cavab açarı düzəldildi — balınız artırıldı."
+
+msgctxt "appeals.notification"
+msgid "Cavab açarı düzəlişi"
+msgstr "Cavab açarı düzəlişi"
+
+msgctxt "appeals.notification"
+msgid "\"{exam}\" imtahanının {no}-ci sualı üzrə açar {action}: {count} tələbənin balı dəyişdi. {hint}"
+msgstr "\"{exam}\" imtahanının {no}-ci sualı üzrə açar {action}: {count} tələbənin balı dəyişdi. {hint}"
+
+msgctxt "appeals.notification"
+msgid "düzəlişi geri alındı"
+msgstr "düzəlişi geri alındı"
+
+msgctxt "appeals.notification"
+msgid "düzəldildi"
+msgstr "düzəldildi"
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Düzgün variant seçimi yanlışdır."
+msgstr "Düzgün variant seçimi yanlışdır."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Ən azı bir düzgün variant seçin."
+msgstr "Ən azı bir düzgün variant seçin."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Seçilən variant bu suala aid deyil."
+msgstr "Seçilən variant bu suala aid deyil."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Açar düzəlişinin səbəbini yazın (ən azı {n} simvol)."
+msgstr "Açar düzəlişinin səbəbini yazın (ən azı {n} simvol)."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Səbəb {n} simvoldan uzun ola bilməz."
+msgstr "Səbəb {n} simvoldan uzun ola bilməz."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Açar düzəlişi yalnız test (variantlı) suallar üçündür."
+msgstr "Açar düzəlişi yalnız test (variantlı) suallar üçündür."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Bu sual üçün aktiv açar düzəlişi artıq var — əvvəlcə onu geri alın."
+msgstr "Bu sual üçün aktiv açar düzəlişi artıq var — əvvəlcə onu geri alın."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Yeni açar köhnə açarla eynidir — düzəliş lazım deyil."
+msgstr "Yeni açar köhnə açarla eynidir — düzəliş lazım deyil."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Bu açar düzəlişi artıq geri alınıb."
+msgstr "Bu açar düzəlişi artıq geri alınıb."
+
+msgctxt "appeals.view.message"
+msgid "Apellyasiya tapılmadı."
+msgstr "Apellyasiya tapılmadı."
+
+msgctxt "appeals.view.message"
+msgid "Cavab açarı düzəldildi: sualı cavablayan {affected} tələbədən {credited} nəfərin balı artırıldı."
+msgstr "Cavab açarı düzəldildi: sualı cavablayan {affected} tələbədən {credited} nəfərin balı artırıldı."
+
+msgctxt "appeals.view.message"
+msgid "Açar düzəlişi geri alındı."
+msgstr "Açar düzəlişi geri alındı."
+
+msgctxt "appeals.history"
+msgid "Cavab açarı düzəlişi geri alındı"
+msgstr "Cavab açarı düzəlişi geri alındı"
+
+msgctxt "appeals.history"
+msgid "Cavab açarı düzəldildi (hamı üçün)"
+msgstr "Cavab açarı düzəldildi (hamı üçün)"
+
+msgctxt "appeals.history"
+msgid "Yekun (final)"
+msgstr "Yekun (final)"
+
+msgctxt "appeals.history"
+msgid "Aralıq (midterm)"
+msgstr "Aralıq (midterm)"
+
+msgctxt "appeals.history"
+msgid "Apellyasiya göndərildi ({count} sual)"
+msgstr "Apellyasiya göndərildi ({count} sual)"
+
+msgctxt "appeals.history"
+msgid "{no}-ci sual: {status}"
+msgstr "{no}-ci sual: {status}"
+
+msgctxt "appeals.history"
+msgid "{no}-ci sual: bal düzəlişi geri alındı"
+msgstr "{no}-ci sual: bal düzəlişi geri alındı"
+
+msgctxt "appeals.history"
+msgid "{no}-ci sual: +{delta} bal"
+msgstr "{no}-ci sual: +{delta} bal"
+
+msgctxt "appeals.history"
+msgid "{no}-ci sual: cavab açarı düzəldildi — {credited}/{affected} tələbəyə kredit"
+msgstr "{no}-ci sual: cavab açarı düzəldildi — {credited}/{affected} tələbəyə kredit"
+
+msgctxt "appeals.history"
+msgid "{no}-ci sual: açar düzəlişi geri alındı"
+msgstr "{no}-ci sual: açar düzəlişi geri alındı"
+
+msgctxt "appeals.template"
+msgid "Variantlar — tələbənin gördüyü kimi"
+msgstr "Variantlar — tələbənin gördüyü kimi"
+
+msgctxt "appeals.template"
+msgid "Açar (imtahan anında)"
+msgstr "Açar (imtahan anında)"
+
+msgctxt "appeals.template"
+msgid "Düzəldilmiş açar"
+msgstr "Düzəldilmiş açar"
+
+msgctxt "appeals.template"
+msgid "Yoxlayanın balı"
+msgstr "Yoxlayanın balı"
+
+msgctxt "appeals.template"
+msgid "İdeal cavab (imtahan anında)"
+msgstr "İdeal cavab (imtahan anında)"
+
+msgctxt "appeals.template"
+msgid "Cavab açarı düzəldilib (bütün tələbələr üçün)"
+msgstr "Cavab açarı düzəldilib (bütün tələbələr üçün)"
+
+#, python-format
+msgctxt "appeals.template"
+msgid "Sualı cavablayan %(affected)s tələbədən %(credited)s nəfərə kredit verildi."
+msgstr "Sualı cavablayan %(affected)s tələbədən %(credited)s nəfərə kredit verildi."
+
+msgctxt "appeals.template"
+msgid "Geri alma səbəbi"
+msgstr "Geri alma səbəbi"
+
+msgctxt "appeals.template"
+msgid "Açar düzəlişini geri almaq?"
+msgstr "Açar düzəlişini geri almaq?"
+
+msgctxt "appeals.template"
+msgid "Bu düzəlişlə verilmiş bütün əlavə ballar geri götürüləcək və tələbələrə bildiriş gedəcək. Qeyd tarixçədə qalır."
+msgstr "Bu düzəlişlə verilmiş bütün əlavə ballar geri götürüləcək və tələbələrə bildiriş gedəcək. Qeyd tarixçədə qalır."
+
+msgctxt "appeals.template"
+msgid "Düzəlişi geri al"
+msgstr "Düzəlişi geri al"
+
+msgctxt "appeals.template"
+msgid "Ən azı bir düzgün variant seçin."
+msgstr "Ən azı bir düzgün variant seçin."
+
+msgctxt "appeals.template"
+msgid "Açar düzəlişinin səbəbini yazın."
+msgstr "Açar düzəlişinin səbəbini yazın."
+
+msgctxt "appeals.template"
+msgid "Cavab açarını hamı üçün düzəltmək?"
+msgstr "Cavab açarını hamı üçün düzəltmək?"
+
+msgctxt "appeals.template"
+msgid "Bu imtahanda bu sualı yeni açara uyğun cavablayan HƏR tələbənin balı artırılacaq, jurnal yenilənəcək və bildiriş gedəcək. Heç kimin balı azalmır. Əməliyyat audit olunur."
+msgstr "Bu imtahanda bu sualı yeni açara uyğun cavablayan HƏR tələbənin balı artırılacaq, jurnal yenilənəcək və bildiriş gedəcək. Heç kimin balı azalmır. Əməliyyat audit olunur."
+
+msgctxt "appeals.template"
+msgid "Açar səhvdir? Bütün tələbələr üçün düzəlt"
+msgstr "Açar səhvdir? Bütün tələbələr üçün düzəlt"
+
+msgctxt "appeals.template"
+msgid "«Qəbul et» yalnız bu tələbəyə +1 verir. Açar özü səhvdirsə, düzgün variant(lar)ı seçin — sualı həmin variantla cavablayan hər kəs eyni krediti alır."
+msgstr "«Qəbul et» yalnız bu tələbəyə +1 verir. Açar özü səhvdirsə, düzgün variant(lar)ı seçin — sualı həmin variantla cavablayan hər kəs eyni krediti alır."
+
+msgctxt "appeals.template"
+msgid "Düzgün variant(lar)"
+msgstr "Düzgün variant(lar)"
+
+msgctxt "appeals.template"
+msgid "köhnə açar"
+msgstr "köhnə açar"
+
+msgctxt "appeals.template"
+msgid "Səbəb (audit üçün)"
+msgstr "Səbəb (audit üçün)"
+
+msgctxt "appeals.template"
+msgid "Məs.: B variantı da düzgündür — mənbə: dərslik, 4.2"
+msgstr "Məs.: B variantı da düzgündür — mənbə: dərslik, 4.2"
+
+msgctxt "appeals.template"
+msgid "Açarı düzəlt və balları yenilə"
+msgstr "Açarı düzəlt və balları yenilə"
+
+msgctxt "appeals.template"
+msgid "Tarixçə"
+msgstr "Tarixçə"
+
+#, python-format
+msgctxt "appeals.template"
+msgid "Apellyasiya son tarixi: %(deadline)s"
+msgstr "Apellyasiya son tarixi: %(deadline)s"
+
+#, python-format
+msgctxt "appeals.template"
+msgid "Nəticə açıqlandıqdan sonra %(days)s təqvim günü ərzində (son günün sonunadək, Bakı vaxtı) müraciət edə bilərsiniz."
+msgstr "Nəticə açıqlandıqdan sonra %(days)s təqvim günü ərzində (son günün sonunadək, Bakı vaxtı) müraciət edə bilərsiniz."
+
+#, python-format
+msgctxt "appeals.template"
+msgid "Nəticə açıqlandıqdan sonra %(days)s təqvim günü ərzində (son günün sonunadək, Bakı vaxtı) müraciət edə bilərsiniz — evdən də."
+msgstr "Nəticə açıqlandıqdan sonra %(days)s təqvim günü ərzində (son günün sonunadək, Bakı vaxtı) müraciət edə bilərsiniz — evdən də."
+
+#, python-format
+msgctxt "exams.template.student_exam_result"
+msgid "Apellyasiya son tarixi: %(deadline)s"
+msgstr "Apellyasiya son tarixi: %(deadline)s"
+
+msgctxt "registrar.records"
+msgid "İmtahan cəhdləri və apellyasiyalar"
+msgstr "İmtahan cəhdləri və apellyasiyalar"
+
+msgctxt "registrar.records"
+msgid "cəhd"
+msgstr "cəhd"
+
+msgctxt "registrar.records"
+msgid "rəsmi"
+msgstr "rəsmi"
+
+msgctxt "registrar.records"
+msgid "ləğv olundu"
+msgstr "ləğv olundu"
+
+msgctxt "registrar.records"
+msgid "nəzarətçi tərəfindən çıxarılıb"
+msgstr "nəzarətçi tərəfindən çıxarılıb"

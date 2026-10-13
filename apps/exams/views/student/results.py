@@ -296,6 +296,8 @@ def exam_result(request, slug, attempt_id):
             return_to=return_to or f"{reverse('accounts:profile')}?section=my-results",
         )
     appeal_remaining_seconds = score_adjustments.remaining_window_seconds(attempt)
+    # 2026-10-13 (gecə): «Apellyasiya son tarixi: …» — pəncərə açıq olanda nəticə panelində göstərilir.
+    appeal_deadline = score_adjustments.deadline(attempt) if can_appeal else None
     # Qəbul olunmuş apellyasiya bonusları tələbəyə yalnız 5 dəqiqəlik redaktə
     # pəncərəsi bağlanandan sonra görünür.
     effective_score_info = (
@@ -372,6 +374,7 @@ def exam_result(request, slug, attempt_id):
             "appeal_applicable": appeal_applicable,
             "appeal_create_url": appeal_create_url,
             "appeal_remaining_seconds": appeal_remaining_seconds,
+            "appeal_deadline": appeal_deadline,
             # "Apellyasiyalarım" keçidi yalnız profildən (my-results) baxılan
             # nəticədə görünür — imtahan yenicə bitəndə (midterm/final) yox.
             "my_appeals_url": (reverse("accounts:profile") + "?section=my-appeals") if is_profile_results else "",

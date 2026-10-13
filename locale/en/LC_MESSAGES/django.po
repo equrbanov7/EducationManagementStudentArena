@@ -95986,3 +95986,284 @@ msgstr "Students of group %(group)s"
 msgctxt "accounts.my_group"
 msgid "siz"
 msgstr "you"
+
+msgctxt "core.runtime_settings"
+msgid "Apellyasiya müddəti"
+msgstr "Appeal period"
+
+msgctxt "core.runtime_settings"
+msgid "Nəticə tələbəyə açıldıqdan sonra neçə təqvim günü apellyasiya vermək olar (son günün sonunadək, Bakı vaxtı). Tələbə evdən də müraciət edə bilir; müddət bitəndə düymə gizlənir və server qəbul etmir."
+msgstr "How many calendar days after the result is released a student may appeal (until the end of the last day, Baku time). Students can also appeal from home; when the period ends the button disappears and the server refuses."
+
+msgctxt "core.runtime_settings"
+msgid "gün"
+msgstr "days"
+
+msgctxt "appeals.notification"
+msgid "Midterm balını elektron jurnalda özünüz yeniləyin (midterm jurnala avtomatik yazılmır)."
+msgstr "Please update the midterm score in the e-journal yourself (midterm is not written automatically)."
+
+msgctxt "appeals.notification"
+msgid "Elektron jurnalda imtahan balı avtomatik yeniləndi."
+msgstr "The exam score in the e-journal was updated automatically."
+
+msgctxt "appeals.notification"
+msgid "Apellyasiya nəticəsində bal dəyişdi"
+msgstr "Score changed after an appeal"
+
+msgctxt "appeals.notification"
+msgid "{student} — \"{exam}\": apellyasiya qəbul olundu, bal {delta} dəyişdi. {hint}"
+msgstr "{student} — \"{exam}\": the appeal was accepted, score changed by {delta}. {hint}"
+
+msgctxt "appeals.notification"
+msgid "Cavab açarı düzəlişi geri alındı"
+msgstr "Answer key correction revoked"
+
+msgctxt "appeals.notification"
+msgid "\"{exam}\" imtahanının {no}-ci sualı üzrə açar düzəlişi geri alındı — əlavə bal çıxarıldı."
+msgstr "The key correction for question {no} of \"{exam}\" was revoked — the extra point was removed."
+
+msgctxt "appeals.notification"
+msgid "Cavab açarı düzəldildi"
+msgstr "Answer key corrected"
+
+msgctxt "appeals.notification"
+msgid "\"{exam}\" imtahanının {no}-ci sualının cavab açarı düzəldildi — balınız artırıldı."
+msgstr "The answer key for question {no} of \"{exam}\" was corrected — your score was increased."
+
+msgctxt "appeals.notification"
+msgid "Cavab açarı düzəlişi"
+msgstr "Answer key correction"
+
+msgctxt "appeals.notification"
+msgid "\"{exam}\" imtahanının {no}-ci sualı üzrə açar {action}: {count} tələbənin balı dəyişdi. {hint}"
+msgstr "Answer key for question {no} of \"{exam}\" {action}: {count} students' scores changed. {hint}"
+
+msgctxt "appeals.notification"
+msgid "düzəlişi geri alındı"
+msgstr "correction revoked"
+
+msgctxt "appeals.notification"
+msgid "düzəldildi"
+msgstr "corrected"
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Düzgün variant seçimi yanlışdır."
+msgstr "The correct-option selection is invalid."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Ən azı bir düzgün variant seçin."
+msgstr "Select at least one correct option."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Seçilən variant bu suala aid deyil."
+msgstr "The selected option does not belong to this question."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Açar düzəlişinin səbəbini yazın (ən azı {n} simvol)."
+msgstr "Write the reason for the key correction (at least {n} characters)."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Səbəb {n} simvoldan uzun ola bilməz."
+msgstr "The reason cannot be longer than {n} characters."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Açar düzəlişi yalnız test (variantlı) suallar üçündür."
+msgstr "Key correction is only for multiple-choice (test) questions."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Bu sual üçün aktiv açar düzəlişi artıq var — əvvəlcə onu geri alın."
+msgstr "This question already has an active key correction — revoke it first."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Yeni açar köhnə açarla eynidir — düzəliş lazım deyil."
+msgstr "The new key is the same as the old one — no correction needed."
+
+msgctxt "appeals.service.key_correction.error"
+msgid "Bu açar düzəlişi artıq geri alınıb."
+msgstr "This key correction has already been revoked."
+
+msgctxt "appeals.view.message"
+msgid "Apellyasiya tapılmadı."
+msgstr "Appeal not found."
+
+msgctxt "appeals.view.message"
+msgid "Cavab açarı düzəldildi: sualı cavablayan {affected} tələbədən {credited} nəfərin balı artırıldı."
+msgstr "Answer key corrected: {credited} of {affected} students who answered the question got extra credit."
+
+msgctxt "appeals.view.message"
+msgid "Açar düzəlişi geri alındı."
+msgstr "Key correction revoked."
+
+msgctxt "appeals.history"
+msgid "Cavab açarı düzəlişi geri alındı"
+msgstr "Answer key correction revoked"
+
+msgctxt "appeals.history"
+msgid "Cavab açarı düzəldildi (hamı üçün)"
+msgstr "Answer key corrected (for everyone)"
+
+msgctxt "appeals.history"
+msgid "Yekun (final)"
+msgstr "Final"
+
+msgctxt "appeals.history"
+msgid "Aralıq (midterm)"
+msgstr "Midterm"
+
+msgctxt "appeals.history"
+msgid "Apellyasiya göndərildi ({count} sual)"
+msgstr "Appeal submitted ({count} questions)"
+
+msgctxt "appeals.history"
+msgid "{no}-ci sual: {status}"
+msgstr "Question {no}: {status}"
+
+msgctxt "appeals.history"
+msgid "{no}-ci sual: bal düzəlişi geri alındı"
+msgstr "Question {no}: score adjustment revoked"
+
+msgctxt "appeals.history"
+msgid "{no}-ci sual: +{delta} bal"
+msgstr "Question {no}: +{delta} pt"
+
+msgctxt "appeals.history"
+msgid "{no}-ci sual: cavab açarı düzəldildi — {credited}/{affected} tələbəyə kredit"
+msgstr "Question {no}: answer key corrected — credit to {credited}/{affected} students"
+
+msgctxt "appeals.history"
+msgid "{no}-ci sual: açar düzəlişi geri alındı"
+msgstr "Question {no}: key correction revoked"
+
+msgctxt "appeals.template"
+msgid "Variantlar — tələbənin gördüyü kimi"
+msgstr "Options — as the student saw them"
+
+msgctxt "appeals.template"
+msgid "Açar (imtahan anında)"
+msgstr "Key (at exam time)"
+
+msgctxt "appeals.template"
+msgid "Düzəldilmiş açar"
+msgstr "Corrected key"
+
+msgctxt "appeals.template"
+msgid "Yoxlayanın balı"
+msgstr "Grader's score"
+
+msgctxt "appeals.template"
+msgid "İdeal cavab (imtahan anında)"
+msgstr "Model answer (at exam time)"
+
+msgctxt "appeals.template"
+msgid "Cavab açarı düzəldilib (bütün tələbələr üçün)"
+msgstr "Answer key has been corrected (for all students)"
+
+#, python-format
+msgctxt "appeals.template"
+msgid "Sualı cavablayan %(affected)s tələbədən %(credited)s nəfərə kredit verildi."
+msgstr "%(credited)s of %(affected)s students who answered the question received credit."
+
+msgctxt "appeals.template"
+msgid "Geri alma səbəbi"
+msgstr "Reason for revoking"
+
+msgctxt "appeals.template"
+msgid "Açar düzəlişini geri almaq?"
+msgstr "Revoke the key correction?"
+
+msgctxt "appeals.template"
+msgid "Bu düzəlişlə verilmiş bütün əlavə ballar geri götürüləcək və tələbələrə bildiriş gedəcək. Qeyd tarixçədə qalır."
+msgstr "All extra points granted by this correction will be removed and students will be notified. The record stays in the history."
+
+msgctxt "appeals.template"
+msgid "Düzəlişi geri al"
+msgstr "Revoke correction"
+
+msgctxt "appeals.template"
+msgid "Ən azı bir düzgün variant seçin."
+msgstr "Select at least one correct option."
+
+msgctxt "appeals.template"
+msgid "Açar düzəlişinin səbəbini yazın."
+msgstr "Write the reason for the key correction."
+
+msgctxt "appeals.template"
+msgid "Cavab açarını hamı üçün düzəltmək?"
+msgstr "Correct the answer key for everyone?"
+
+msgctxt "appeals.template"
+msgid "Bu imtahanda bu sualı yeni açara uyğun cavablayan HƏR tələbənin balı artırılacaq, jurnal yenilənəcək və bildiriş gedəcək. Heç kimin balı azalmır. Əməliyyat audit olunur."
+msgstr "EVERY student in this exam whose answer to this question matches the new key will get extra credit, the journal will be updated and notifications sent. Nobody's score goes down. The action is audited."
+
+msgctxt "appeals.template"
+msgid "Açar səhvdir? Bütün tələbələr üçün düzəlt"
+msgstr "Key is wrong? Correct it for all students"
+
+msgctxt "appeals.template"
+msgid "«Qəbul et» yalnız bu tələbəyə +1 verir. Açar özü səhvdirsə, düzgün variant(lar)ı seçin — sualı həmin variantla cavablayan hər kəs eyni krediti alır."
+msgstr "\"Accept\" gives +1 only to this student. If the key itself is wrong, select the correct option(s) — everyone who chose that option gets the same credit."
+
+msgctxt "appeals.template"
+msgid "Düzgün variant(lar)"
+msgstr "Correct option(s)"
+
+msgctxt "appeals.template"
+msgid "köhnə açar"
+msgstr "old key"
+
+msgctxt "appeals.template"
+msgid "Səbəb (audit üçün)"
+msgstr "Reason (for the audit)"
+
+msgctxt "appeals.template"
+msgid "Məs.: B variantı da düzgündür — mənbə: dərslik, 4.2"
+msgstr "E.g.: option B is also correct — source: textbook, 4.2"
+
+msgctxt "appeals.template"
+msgid "Açarı düzəlt və balları yenilə"
+msgstr "Correct the key and update scores"
+
+msgctxt "appeals.template"
+msgid "Tarixçə"
+msgstr "History"
+
+#, python-format
+msgctxt "appeals.template"
+msgid "Apellyasiya son tarixi: %(deadline)s"
+msgstr "Appeal deadline: %(deadline)s"
+
+#, python-format
+msgctxt "appeals.template"
+msgid "Nəticə açıqlandıqdan sonra %(days)s təqvim günü ərzində (son günün sonunadək, Bakı vaxtı) müraciət edə bilərsiniz."
+msgstr "You can appeal within %(days)s calendar days after the result is released (until the end of the last day, Baku time)."
+
+#, python-format
+msgctxt "appeals.template"
+msgid "Nəticə açıqlandıqdan sonra %(days)s təqvim günü ərzində (son günün sonunadək, Bakı vaxtı) müraciət edə bilərsiniz — evdən də."
+msgstr "You can appeal within %(days)s calendar days after the result is released (until the end of the last day, Baku time) — from home too."
+
+#, python-format
+msgctxt "exams.template.student_exam_result"
+msgid "Apellyasiya son tarixi: %(deadline)s"
+msgstr "Appeal deadline: %(deadline)s"
+
+msgctxt "registrar.records"
+msgid "İmtahan cəhdləri və apellyasiyalar"
+msgstr "Exam attempts and appeals"
+
+msgctxt "registrar.records"
+msgid "cəhd"
+msgstr "attempt"
+
+msgctxt "registrar.records"
+msgid "rəsmi"
+msgstr "official"
+
+msgctxt "registrar.records"
+msgid "ləğv olundu"
+msgstr "superseded"
+
+msgctxt "registrar.records"
+msgid "nəzarətçi tərəfindən çıxarılıb"
+msgstr "removed by the invigilator"
