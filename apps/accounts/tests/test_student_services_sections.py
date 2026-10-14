@@ -411,11 +411,18 @@ class MovementStateMachineTest(StudentServicesBase):
         self.assertEqual(movement.to_label, "QA-DS3 102")
         self.assertEqual(movement.actor, self.users["student_services"])
 
-    def test_reason_shorter_than_twenty_chars_is_rejected(self):
+    def test_reason_is_optional_when_order_is_given(self):
+        """Sahib 2026-10-15: rəsmi əsas əmrdir — səbəb ≥20 simvol tələb olunmur."""
         response = self._post_movement(reason="qısa")
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()["error"], "reason_too_short")
-        self.assertFalse(StudentMovement.objects.exists())
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(StudentMovement.objects.get(record=self.record).reason, "qısa")
+
+    def test_empty_reason_is_filled_from_order(self):
+        response = self._post_movement(reason="   ")
+        self.assertEqual(response.status_code, 200, response.content)
+        movement = StudentMovement.objects.get(record=self.record)
+        self.assertIn("R-140", movement.reason)
+        self.assertIn("01.09.2026", movement.reason)
 
     def test_order_number_is_required(self):
         response = self._post_movement(order_number="  ")

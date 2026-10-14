@@ -53,6 +53,8 @@ SHEET_TO_CHAIR = {
     "proqramlasdirma": "Proqramlaşdırma və informasiya təhlükəsizliyi",
     "informasiya texnolog": "İnformasiya texnologiyaları",
 }
+#: Struktur planından (2026-09-27) sonra adı dəyişən kafedralar: vərəq adı köhnə qalır.
+SHEET_CHAIR_RENAMES = {"Ekologiya": ("Yer kadastrı və meşəçilik",)}
 #: İxtisas sütunundakı qısaltmalar → ixtisas (OrgUnit specialty) adı.
 SPECIALTY_ALIASES = {
     "psixologiya": "Psixologiya",

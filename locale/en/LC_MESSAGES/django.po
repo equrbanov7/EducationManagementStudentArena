@@ -97529,3 +97529,63 @@ msgstr "Status of every stage for your faculty, from the teaching task to teache
 msgctxt "exams.template.create_exam_modal_form"
 msgid "Sizin səlahiyyətinizlə yalnız Sınaq imtahanı yaradılır — kateqoriya avtomatik təyin olunur."
 msgstr "With your permissions only Quiz exams can be created — the category is set automatically."
+
+msgctxt "ui.dialog"
+msgid "(istəyə bağlı)"
+msgstr "(optional)"
+
+msgctxt "accounts.student_registry"
+msgid "Universitetin bütün tələbələri: ixtisas, qrup, kurs, forma, maliyyələşmə və akademik status. Hərəkət əmr nömrəsi və tarixi ilə yazılır; səbəb istəyə bağlıdır."
+msgstr "All students of the university: specialty, group, year, form, funding and academic status. A movement is recorded with the order number and date; the reason is optional."
+
+msgctxt "accounts.student_registry"
+msgid "Rəsmi əsas əmrdir (nömrə + tarix). Səbəb istəyə bağlıdır — boş qalsa audit sətrinə əmrin növü və nömrəsi yazılır."
+msgstr "The official basis is the order (number + date). The reason is optional — if left empty, the order type and number are written to the audit record."
+
+msgctxt "accounts.groups"
+msgid "Rəsmi əsas əmrdir (nömrə + tarix). Səbəb istəyə bağlıdır — boş qalsa audit sətrinə əmrin növü və nömrəsi yazılır."
+msgstr "The official basis is the order (number + date). The reason is optional — if left empty, the order type and number are written to the audit record."
+
+msgctxt "accounts.groups"
+msgid "Qrupun tələbələri. Akademik məzuniyyətdə və xaric edilmiş tələbələr də burada qalır (süzgəc) və «Bərpa et» ilə qrupa qaytarıla bilər. Hər hərəkət əmr nömrəsi və tarixi ilə yazılır; tarixçə silinmir."
+msgstr "Students of the group. Students on academic leave or expelled also stay here (filter) and can be returned to the group with «Reinstate». Every movement is recorded with the order number and date; history is never deleted."
+
+msgctxt "accounts.groups"
+msgid "Tələbə hədəf qrupa köçürülür: bu qrupun siyahısından çıxır və hədəf qrupun çekmecəsində görünür. Köhnə qrupdakı jurnal qeydiyyatı tarixçəyə keçir, silinmir. Əmr nömrəsi və tarixi məcburidir."
+msgstr "The student is transferred to the target group: they leave this group's list and appear in the target group's drawer. Journal enrolment in the old group moves to history and is not deleted. The order number and date are required."
+
+msgctxt "accounts.groups"
+msgid "Status «akademik məzuniyyət» olur: tələbə qrupun aktiv siyahısından və cari semestrin açıq jurnallarından çıxır (qeydiyyatı dondurulur), girişi açıq qalır. Bu çekmecədə «Məzuniyyətdə» süzgəcində və «Tələbə reyestri»ndə görünür; «Bərpa et» ilə qrupa qaytarılır. Əmr nömrəsi, tarixi və bitmə tarixi məcburidir."
+msgstr "The status becomes «academic leave»: the student leaves the group's active list and the open journals of the current semester (enrolment is suspended); sign-in stays open. They are shown in this drawer under the «On leave» filter and in the «Student registry»; «Reinstate» returns them to the group. The order number, date and end date are required."
+
+msgctxt "accounts.groups"
+msgid "Status «xaric edilib» olur: tələbə qrupun aktiv siyahısından və cari semestrin açıq jurnallarından çıxır, hesabının girişi bağlanır. Akademik qeyd və qiymət tarixçəsi silinmir — bu çekmecədə «Xaric edilib» süzgəcində və «Tələbə reyestri»ndə «Rəsmi status» süzgəci ilə tapılır; «Bərpa et» ilə geri qaytarıla bilər. Əmr nömrəsi və tarixi məcburidir."
+msgstr "The status becomes «expelled»: the student leaves the group's active list and the open journals of the current semester, and the account's sign-in is closed. The academic record and grade history are not deleted — find them in this drawer under the «Expelled» filter and in the «Student registry» with the «Official status» filter; «Reinstate» can bring them back. The order number and date are required."
+
+msgctxt "accounts.groups"
+msgid "Tələbəni bərpa et (qrupa qaytar)"
+msgstr "Reinstate the student (return to the group)"
+
+msgctxt "accounts.groups"
+msgid "Status yenidən «qeydiyyatlı» olur və tələbə bu qrupun aktiv siyahısına qayıdır: cari semestrin dondurulmuş jurnal qeydiyyatları bərpa olunur, bağlanmış giriş yenidən açılır. Əmr nömrəsi və tarixi məcburidir."
+msgstr "The status becomes «enrolled» again and the student returns to this group's active list: suspended journal enrolments of the current semester are restored and a closed sign-in is reopened. The order number and date are required."
+
+msgctxt "accounts.groups"
+msgid "Bərpa et"
+msgstr "Reinstate"
+
+msgctxt "accounts.groups"
+msgid "Əmr №"
+msgstr "Order No."
+
+msgctxt "accounts.groups"
+msgid "Məzuniyyətdə və xaric edilmiş tələbələr qrupun aktiv siyahısında sayılmır, akademik qeydləri və qiymət tarixçəsi silinmir. «Bərpa et» əmri ilə bu qrupa qaytarılır; «Tələbə reyestri»ndə «Rəsmi status» süzgəci ilə də tapılır."
+msgstr "Students on leave or expelled are not counted in the group's active list; their academic records and grade history are not deleted. A «Reinstate» order returns them to this group; they can also be found in the «Student registry» with the «Official status» filter."
+
+msgctxt "accounts.groups"
+msgid "Bu tarixə qədər tələbənin statusu «akademik məzuniyyət» olur; qayıdanda çekmecədəki «Bərpa et» ilə qrupa qaytarılır."
+msgstr "Until this date the student's status is «academic leave»; on return, «Reinstate» in the drawer brings them back to the group."
+
+msgctxt "accounts.groups"
+msgid "%%d qrupdan çıxıb (məzuniyyət / xaric)"
+msgstr "%%d left the group (leave / expelled)"

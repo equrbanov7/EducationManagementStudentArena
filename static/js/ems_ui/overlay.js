@@ -9,7 +9,8 @@
    * bağlananda fokus AÇAN elementə qayıdır
    * `aria-modal="true"` + `aria-labelledby` overlay markup-ından gəlir
    * arxa fon sürüşməsi kilidlənir (mövcud `modal_scroll_lock.css` class-ı)
-   * səbəb dialoqu: textarea ≥ MIN_REASON simvol olmadan OK disabled qalır
+   * səbəb dialoqu: textarea ≥ MIN_REASON simvol (`data-ems-min-length`, 0 = istəyə
+     bağlı) və `data-ems-required` sahələri dolmadan OK disabled qalır
 
    AJAX-SAFE
    ---------
@@ -141,8 +142,23 @@
         }
     }
 
+    function requiredFilled(box) {
+        // `data-ems-required` (məs. əmr nömrəsi + tarixi) — boşdursa təsdiq disabled qalır.
+        var fields = box.querySelectorAll("[data-ems-required]");
+        for (var k = 0; k < fields.length; k += 1) {
+            if (!String(fields[k].value || "").trim()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     function syncOneReason(box) {
-        var field = box.querySelector(".ems-textarea, .ems-input");
+        // ⚠️ Səbəb sahəsi AÇIQ işarələnir (`data-ems-reason-field`). Əvvəl ilk
+        // `.ems-textarea, .ems-input` götürülürdü — `reason_extra_include` sahələri
+        // (əmr nömrəsi) textarea-dan ƏVVƏL gəldiyi üçün ≥20 qaydası ƏMR NÖMRƏSİNƏ
+        // tətbiq olunurdu (sahib 2026-10-15: «əmr yazma yerində 20 simvol səhvdir»).
+        var field = box.querySelector("[data-ems-reason-field]") || box.querySelector(".ems-textarea, .ems-input");
         if (!field) {
             return;
         }
@@ -151,10 +167,11 @@
             min = MIN_REASON;
         }
         var length = field.value.trim().length;
-        var ok = length >= min;
+        var reasonOk = length >= min;
+        var ok = reasonOk && requiredFilled(box);
 
-        box.classList.toggle("is-invalid", !ok && length > 0);
-        field.setAttribute("aria-invalid", ok ? "false" : "true");
+        box.classList.toggle("is-invalid", !reasonOk && length > 0);
+        field.setAttribute("aria-invalid", reasonOk ? "false" : "true");
 
         // ⚠️ Sayğac dialoqun FOOTER-indədir, `.ems-reason` gövdəsinin İÇİNDƏ
         // DEYİL — ona görə axtarış overlay səviyyəsində aparılır. (Əvvəl
@@ -172,7 +189,7 @@
             var normal = hint.dataset.hint || "";
             var invalid = hint.dataset.hintInvalid || "";
             if (normal || invalid) {
-                hint.textContent = ok || !length ? normal : invalid || normal;
+                hint.textContent = reasonOk || !length ? normal : invalid || normal;
             }
         }
 
@@ -221,6 +238,14 @@
     });
 
     window.EMSDelegate.on("input", ".ems-reason .ems-textarea, .ems-reason .ems-input", function (event, field) {
+        var box = field.closest(".ems-reason");
+        if (box) {
+            syncOneReason(box);
+        }
+    });
+
+    // Tarix seçicisi bəzi brauzerlərdə yalnız `change` atır — məcburi sahə dərhal yoxlansın.
+    window.EMSDelegate.on("change", ".ems-reason [data-ems-required]", function (event, field) {
         var box = field.closest(".ems-reason");
         if (box) {
             syncOneReason(box);

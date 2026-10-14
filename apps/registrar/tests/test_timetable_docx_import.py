@@ -35,7 +35,13 @@ from apps.registrar.models import (
     WeekType,
 )
 from apps.registrar.schedule_docx_import import build_plan, run_import
-from apps.registrar.schedule_docx_parse import parse_docx, parse_group_label, parse_subject_text, parse_tables
+from apps.registrar.schedule_docx_parse import (
+    is_room,
+    parse_docx,
+    parse_group_label,
+    parse_subject_text,
+    parse_tables,
+)
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
@@ -145,6 +151,21 @@ class ParsingTests(SimpleTestCase):
         self.assertEqual(parse_subject_text("Təcrubə").special, "practice")
         self.assertEqual(parse_subject_text("LEVEL").special, "level")
 
+    def test_subject_cells_2026_10_15_formats(self):
+        # Təbiət elmləri cədvəlləri: «lab1.», «lab 2.», «Soyad.İ», hüceyrədə alt qrup, «1 yarımqrup».
+        cases = {
+            "Ümumi kimya /  lab1.  Seyidova X .": ("Ümumi kimya", "lab", "Seyidova X.", ""),
+            "Ümumi kimya  / lab 2.  Seyidova X.": ("Ümumi kimya", "lab", "Seyidova X.", ""),
+            "Mikrobiologiya sem. Hacıyeva S. 1 yarımqrup": ("Mikrobiologiya", "seminar", "Hacıyeva S.", ""),
+            "Azərbaycan dili müh.   Məmmədova.S / 236 SBİO-1": ("Azərbaycan dili", "lecture", "Məmmədova S.", "1"),
+        }
+        for raw, (subject, kind, teacher, sub) in cases.items():
+            parsed = parse_subject_text(raw)
+            self.assertEqual(
+                (parsed.subject, parsed.kind, parsed.teacher, parsed.sub_group), (subject, kind, teacher, sub)
+            )
+        self.assertTrue(is_room("-106"))
+
     def test_group_labels(self):
         expected = {
             "IV KURS  233 İTex  ing 12": ("233", "İTex", "ing", ""),
@@ -154,6 +175,8 @@ class ParsingTests(SimpleTestCase):
             "II KURS  235 KE az-20+19": ("235", "KE", "az", ""),
             "235 K İNG": ("235", "K", "ing", ""),
             "235 İT-1 az": ("235", "İT", "az", "1"),
+            "I KURS  236 B/T  17": ("236", "BT", "az", ""),
+            "II KURS  235 SBİO-1-23": ("235", "SBİO", "az", "1"),
         }
         for raw, values in expected.items():
             label = parse_group_label(raw)

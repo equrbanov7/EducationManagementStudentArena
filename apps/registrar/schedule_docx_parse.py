@@ -63,13 +63,21 @@ _AZ_ASCII = str.maketrans(
 )
 
 _TIME_RE = re.compile(r"(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})")
-_ROOM_RE = re.compile(r"^(\(?\d{1,4}\)?\s?\d{0,4}|akt zal[ıi](?: [a-zA-Z])?)$", re.IGNORECASE)
+# «-106» (2026-10-15 Təbiət cədvəli: mənfi işarəli zirzəmi otağı) da otaqdır.
+_ROOM_RE = re.compile(r"^(-?\(?\d{1,4}\)?\s?\d{0,4}|akt zal[ıi](?: [a-zA-Z])?)$", re.IGNORECASE)
 _WORD = r"[0-9A-Za-zƏəÖöÜüĞğŞşÇçİıI]"
 #: Növ işarəsi — tam söz kimi («mühəndis» UYĞUN GƏLMİR); «(müh.)», «müh/sem», «l+sem», «lab/sem».
 _KIND_RE = re.compile(
-    rf"(?<!{_WORD})\(?(müh|muh|sem|lab|l(?=\s*[/+]))(?:\s*[/+]\s*(müh|muh|sem|lab))?\)?(?:\s*\.)?\)?(?!{_WORD})",
+    # «lab1.» / «lab 2.» — alt qrup nömrəsi növə yapışıq gəlir (2026-10-15); nömrə növlə birlikdə udulur.
+    rf"(?<!{_WORD})\(?(müh|muh|sem|lab|l(?=\s*[/+]))(?:\s*[/+]\s*(müh|muh|sem|lab))?(?:\s*\d(?!\d))?\)?(?:\s*\.)?\)?"
+    rf"(?!{_WORD})",
     re.IGNORECASE,
 )
+#: «1 yarımqrup» / «2-ci yarımqrup» — müəllim nişanından sonra gələn alt qrup qeydi (mətndən atılır).
+_HALF_GROUP_RE = re.compile(r"\b\d\s*(?:-?\s*c[iıuü])?\s*yar[ıi]m\s*qrup\b", re.IGNORECASE)
+_SUB_GROUP_TAIL_RE = re.compile(r"(?:^|[\s/])(\d{3,4})\s*[^\W\d_]+\s*-\s*(\d)\s*$")
+#: «Məmmədova.S» / «Həsənov.R.» — soyad və inisial nöqtə ilə yapışıq.
+_DOTTED_INITIAL_RE = re.compile(r"([a-zəöüğşçı])\.([A-ZƏÖÜĞŞÇİ])\.?(?=[\s/]|$)")
 _WEEK_MARKER_RE = re.compile(rf"(?<!{_WORD})(üst|ust|alt)(?:\s+h[əe]ft[əe])?(?!{_WORD})", re.IGNORECASE)
 _INITIAL_RE = re.compile(r"^[A-ZƏÖÜĞŞÇİI]\.?$")
 _SURNAME_RE = re.compile(r"^[A-ZƏÖÜĞŞÇİ][a-zəöüğşçı-]+$")
@@ -139,6 +147,7 @@ def parse_group_label(text) -> GroupLabel | None:
     """Başlıq/qrup adı → :class:`GroupLabel` («IV KURS» prefiksi və tələbə sayı atılır)."""
     raw = squash(text)
     body = re.sub(r"^[IVX]+\s*KURS\s*", "", raw, flags=re.IGNORECASE).strip()
+    body = re.sub(r"(?<=[^\W\d_])/(?=[^\W\d_])", "", body)  # «236 B/T 17» → «236 BT 17»
     for pattern, word in _SECTOR_WORDS:
         body = pattern.sub(word, body)
     match = _GROUP_RE.match(body)
@@ -158,6 +167,8 @@ class SubjectText:
     teacher: str = ""
     week_marker: str = ""
     special: str = ""
+    #: Hüceyrənin sonunda yazılmış alt qrup («… Məmmədova S. 236 SBİO-1» → «1»), 2026-10-15.
+    sub_group: str = ""
 
 
 def _clean_teacher(text: str) -> str:
@@ -231,6 +242,12 @@ def parse_subject_text(text) -> SubjectText:
     if len(folded.replace(" ", "")) < 3:
         result.special = SPECIAL_JUNK
         return result
+    raw = _HALF_GROUP_RE.sub(" ", raw)
+    tail = _SUB_GROUP_TAIL_RE.search(raw.rstrip())
+    if tail:
+        result.sub_group = tail.group(2)
+        raw = raw.rstrip()[: tail.start()].rstrip(" /")
+    raw = _DOTTED_INITIAL_RE.sub(r"\1 \2.", raw)
     markers = list(_WEEK_MARKER_RE.finditer(raw))
     if markers:
         result.week_marker = WEEK_ODD if fold(markers[-1].group(1)) == "ust" else WEEK_EVEN
@@ -239,7 +256,7 @@ def parse_subject_text(text) -> SubjectText:
     if kinds:
         match = kinds[-1]
         result.kind, result.kind_note = _kind_of(match.group(1), match.group(2))
-        result.subject = squash(raw[: match.start()]).strip(" .,(")
+        result.subject = squash(raw[: match.start()]).strip(" .,(/")
         result.teacher = _clean_teacher(raw[match.end() :])
         if not result.teacher and squash(raw[match.end() :]):
             result.kind_note = (result.kind_note + " teacher_unparsed").strip()
@@ -283,6 +300,11 @@ class ParseResult:
 
 def _header_rows(rows) -> tuple[int, int]:
     header = next((i for i, row in enumerate(rows) if fold(row[0].text) == "qruplar"), -1)
+    if header < 0:
+        # 2026-10-15: «Qruplar» xanası boş qala bilər — «… KURS …» başlıqlı ilk sətir qrup sətridir.
+        header = next(
+            (i for i, row in enumerate(rows[:6]) if any(re.search(r"\bkurs\b", fold(c.text)) for c in row)), -1
+        )
     hours = next((i for i, row in enumerate(rows) if i > header and fold(row[0].text) == "saatlar"), -1)
     return header, hours
 
@@ -299,6 +321,8 @@ def _groups(rows, header: int, hours: int, table_index: int, result: ParseResult
         text = squash(cells[span[0]].text)
         if not text:
             pending.extend(span)
+        elif fold(text) in ("qruplar", "saatlar"):
+            pass  # birləşmiş «Qruplar» xanası 3-cü sütuna da yayıla bilər (2026-10-15)
         else:
             label = parse_group_label(text)
             if label is None:
@@ -405,6 +429,14 @@ def _week_entries(table_index, slot_rows, group, foreign_aud_tcs, weekday, start
             notes = []
             if len(per_row) > 2:
                 notes.append("more_than_two_rows")
+            entry_label = label
+            if text.sub_group and not label.sub:
+                # Hüceyrə öz alt qrupunu adlandırır → üst/alt həftə deyil, alt qrupların PARALEL dərsidir.
+                entry_label = GroupLabel(
+                    raw=label.raw, digits=label.digits, code=label.code, sector=label.sector, sub=text.sub_group
+                )
+                notes.append("sub_group_in_cell")
+                week_type = WEEK_ALL
             if text.week_marker and text.week_marker != week_type:
                 notes.append(f"week_marker:{week_type}->{text.week_marker}")
                 week_type = text.week_marker
@@ -412,7 +444,7 @@ def _week_entries(table_index, slot_rows, group, foreign_aud_tcs, weekday, start
                 Entry(
                     table=table_index,
                     row=row_index,
-                    group=label,
+                    group=entry_label,
                     weekday=weekday,
                     start=start,
                     end=end,

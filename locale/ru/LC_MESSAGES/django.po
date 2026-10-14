@@ -97713,3 +97713,63 @@ msgstr "Состояние всех этапов по вашему факуль�
 msgctxt "exams.template.create_exam_modal_form"
 msgid "Sizin səlahiyyətinizlə yalnız Sınaq imtahanı yaradılır — kateqoriya avtomatik təyin olunur."
 msgstr "С вашими правами можно создавать только контрольные опросы — категория назначается автоматически."
+
+msgctxt "ui.dialog"
+msgid "(istəyə bağlı)"
+msgstr "(необязательно)"
+
+msgctxt "accounts.student_registry"
+msgid "Universitetin bütün tələbələri: ixtisas, qrup, kurs, forma, maliyyələşmə və akademik status. Hərəkət əmr nömrəsi və tarixi ilə yazılır; səbəb istəyə bağlıdır."
+msgstr "Все студенты университета: специальность, группа, курс, форма, финансирование и академический статус. Движение записывается с номером и датой приказа; причина необязательна."
+
+msgctxt "accounts.student_registry"
+msgid "Rəsmi əsas əmrdir (nömrə + tarix). Səbəb istəyə bağlıdır — boş qalsa audit sətrinə əmrin növü və nömrəsi yazılır."
+msgstr "Официальное основание — приказ (номер + дата). Причина необязательна — если оставить пустой, в журнал аудита записываются тип и номер приказа."
+
+msgctxt "accounts.groups"
+msgid "Rəsmi əsas əmrdir (nömrə + tarix). Səbəb istəyə bağlıdır — boş qalsa audit sətrinə əmrin növü və nömrəsi yazılır."
+msgstr "Официальное основание — приказ (номер + дата). Причина необязательна — если оставить пустой, в журнал аудита записываются тип и номер приказа."
+
+msgctxt "accounts.groups"
+msgid "Qrupun tələbələri. Akademik məzuniyyətdə və xaric edilmiş tələbələr də burada qalır (süzgəc) və «Bərpa et» ilə qrupa qaytarıla bilər. Hər hərəkət əmr nömrəsi və tarixi ilə yazılır; tarixçə silinmir."
+msgstr "Студенты группы. Студенты в академическом отпуске и отчисленные тоже остаются здесь (фильтр) и могут быть возвращены в группу кнопкой «Восстановить». Каждое движение записывается с номером и датой приказа; история не удаляется."
+
+msgctxt "accounts.groups"
+msgid "Tələbə hədəf qrupa köçürülür: bu qrupun siyahısından çıxır və hədəf qrupun çekmecəsində görünür. Köhnə qrupdakı jurnal qeydiyyatı tarixçəyə keçir, silinmir. Əmr nömrəsi və tarixi məcburidir."
+msgstr "Студент переводится в целевую группу: он исчезает из списка этой группы и появляется в панели целевой группы. Записи журнала в старой группе переходят в историю и не удаляются. Номер и дата приказа обязательны."
+
+msgctxt "accounts.groups"
+msgid "Status «akademik məzuniyyət» olur: tələbə qrupun aktiv siyahısından və cari semestrin açıq jurnallarından çıxır (qeydiyyatı dondurulur), girişi açıq qalır. Bu çekmecədə «Məzuniyyətdə» süzgəcində və «Tələbə reyestri»ndə görünür; «Bərpa et» ilə qrupa qaytarılır. Əmr nömrəsi, tarixi və bitmə tarixi məcburidir."
+msgstr "Статус становится «академический отпуск»: студент выходит из активного списка группы и открытых журналов текущего семестра (запись приостанавливается), вход остаётся открытым. Он виден в этой панели в фильтре «В отпуске» и в «Реестре студентов»; кнопка «Восстановить» возвращает его в группу. Номер, дата приказа и дата окончания обязательны."
+
+msgctxt "accounts.groups"
+msgid "Status «xaric edilib» olur: tələbə qrupun aktiv siyahısından və cari semestrin açıq jurnallarından çıxır, hesabının girişi bağlanır. Akademik qeyd və qiymət tarixçəsi silinmir — bu çekmecədə «Xaric edilib» süzgəcində və «Tələbə reyestri»ndə «Rəsmi status» süzgəci ilə tapılır; «Bərpa et» ilə geri qaytarıla bilər. Əmr nömrəsi və tarixi məcburidir."
+msgstr "Статус становится «отчислен»: студент выходит из активного списка группы и открытых журналов текущего семестра, вход в аккаунт закрывается. Академическая запись и история оценок не удаляются — его можно найти в этой панели в фильтре «Отчислен» и в «Реестре студентов» по фильтру «Официальный статус»; кнопка «Восстановить» может вернуть его. Номер и дата приказа обязательны."
+
+msgctxt "accounts.groups"
+msgid "Tələbəni bərpa et (qrupa qaytar)"
+msgstr "Восстановить студента (вернуть в группу)"
+
+msgctxt "accounts.groups"
+msgid "Status yenidən «qeydiyyatlı» olur və tələbə bu qrupun aktiv siyahısına qayıdır: cari semestrin dondurulmuş jurnal qeydiyyatları bərpa olunur, bağlanmış giriş yenidən açılır. Əmr nömrəsi və tarixi məcburidir."
+msgstr "Статус снова становится «зачислен», и студент возвращается в активный список этой группы: приостановленные записи журналов текущего семестра восстанавливаются, закрытый вход снова открывается. Номер и дата приказа обязательны."
+
+msgctxt "accounts.groups"
+msgid "Bərpa et"
+msgstr "Восстановить"
+
+msgctxt "accounts.groups"
+msgid "Əmr №"
+msgstr "Приказ №"
+
+msgctxt "accounts.groups"
+msgid "Məzuniyyətdə və xaric edilmiş tələbələr qrupun aktiv siyahısında sayılmır, akademik qeydləri və qiymət tarixçəsi silinmir. «Bərpa et» əmri ilə bu qrupa qaytarılır; «Tələbə reyestri»ndə «Rəsmi status» süzgəci ilə də tapılır."
+msgstr "Студенты в отпуске и отчисленные не учитываются в активном списке группы, их академические записи и история оценок не удаляются. Приказ «Восстановить» возвращает их в эту группу; их также можно найти в «Реестре студентов» по фильтру «Официальный статус»."
+
+msgctxt "accounts.groups"
+msgid "Bu tarixə qədər tələbənin statusu «akademik məzuniyyət» olur; qayıdanda çekmecədəki «Bərpa et» ilə qrupa qaytarılır."
+msgstr "До этой даты статус студента — «академический отпуск»; по возвращении кнопка «Восстановить» в панели возвращает его в группу."
+
+msgctxt "accounts.groups"
+msgid "%%d qrupdan çıxıb (məzuniyyət / xaric)"
+msgstr "%%d вышли из группы (отпуск / отчисление)"
