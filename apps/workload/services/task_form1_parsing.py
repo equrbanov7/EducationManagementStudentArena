@@ -145,9 +145,16 @@ def _columns(table) -> dict:
 
 
 def _is_total(*texts) -> bool:
+    # «Ümumi:», «Ştat ümumi:», «Saat hesabı ümumi:», «Ümumi yük» yekundur; «Ümumi kimya» / «Ümumi biologiya»
+    # isə FƏNNDİR (2026-10-15: əvvəlki «"umumi" in s» belə fənləri səssizcə atırdı).
     slugs = [slug_name(text) for text in texts]
     return any(
-        s.startswith("cemi") or s.endswith("cemi") or "universitet" in s or "umumi" in s or "netice" in s
+        s.startswith("cemi")
+        or s.endswith("cemi")
+        or "universitet" in s
+        or s.endswith("umumi")
+        or s.startswith("umumiyuk")
+        or "netice" in s
         for s in slugs
         if s
     )
