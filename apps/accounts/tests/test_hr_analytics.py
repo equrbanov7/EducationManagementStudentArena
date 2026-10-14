@@ -244,7 +244,9 @@ class HrAnalyticsTest(TestCase):
         self.assertEqual(
             (by["t1"]["planned_load"], by["t1"]["fill_percent"], by["t1"]["load_band"]), (600, 120, "loaded")
         )
-        self.assertEqual((by["t2"]["fill_percent"], by["t2"]["load_band"]), (40, "free"))
+        # t2 0,5 ştatdır: norma «0,5 ştat» tənzimləməsindən (defolt 250) — 200/250 = 80% (sahib 2026-10-14;
+        # əvvəl hər kəsə 500 tətbiq olunurdu → 40%).
+        self.assertEqual((by["t2"]["norm_hours"], by["t2"]["fill_percent"], by["t2"]["load_band"]), (250, 80, "normal"))
         self.assertEqual((by["t1"]["journals"], by["t1"]["lessons"], by["t1"]["held_hours"]), (1, 2, 4))
         self.assertEqual(by["t1"]["planned_hours"], 30)
 

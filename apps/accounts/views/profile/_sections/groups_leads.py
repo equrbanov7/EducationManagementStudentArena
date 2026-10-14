@@ -10,10 +10,12 @@ Sorğu büdcəsi: səhifə üzrə 2 sorğu (``group_lead_map``) — qrup sayınd
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 from django.urls import reverse
 
 from ....services.group_lead import group_lead_map
-from ...group_lead import can_manage_group_leads
+from ...group_lead import LEAD_MANAGE_PERMISSIONS, can_manage_group_leads
 
 LEAD_CELL_INCLUDE = "accounts/profile/sections/teaching_office/_group_lead_cell.html"
 
@@ -35,6 +37,25 @@ def attach_group_leads(organization, rows) -> None:
             row["lead_warning"] = ""
 
 
+def attach_lead_rights(request, organization, rows) -> None:
+    """Hər sətrə ``can_lead`` — qrup starosta açarlarından BİRİNİN (öz) əhatəsindədirmi (yerində).
+
+    2026-10-14: reyestrin OXU əhatəsi fakültəyə genişləndi; starosta düymələri isə yalnız ``manageable_group``
+    qapısından keçən qrupda görünür (server kənar qrupa 404). Əhatələr bir dəfə həll olunur — sətir başına
+    sorğu YOXDUR; aktiv olmayan (arxiv) qrupda starosta təyin edilmir.
+    """
+    from apps.organizations.public import get_permission_scope, unit_in_scope
+
+    scopes = [
+        get_permission_scope(request.user, organization, permission, request=request)
+        for permission in LEAD_MANAGE_PERMISSIONS
+    ]
+    scopes = [scope for scope in scopes if scope.has_structure_access]
+    for row in rows:
+        unit = SimpleNamespace(pk=None, path=row.get("path", ""))
+        row["can_lead"] = bool(row.get("is_active")) and any(unit_in_scope(scope, unit) for scope in scopes)
+
+
 def lead_cell(row) -> dict:
     return {"include": LEAD_CELL_INCLUDE, "lead": row}
 
@@ -51,4 +72,4 @@ def lead_dialog_context(request, organization) -> dict:
     }
 
 
-__all__ = ["attach_group_leads", "lead_cell", "lead_dialog_context"]
+__all__ = ["attach_group_leads", "attach_lead_rights", "lead_cell", "lead_dialog_context"]

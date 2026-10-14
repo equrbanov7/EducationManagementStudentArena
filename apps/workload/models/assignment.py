@@ -78,11 +78,11 @@ class TeacherAssignment(UUIDModel, TimeStampedModel):
 
 
 class TeacherWorkloadProfile(UUIDModel, TimeStampedModel):
-    """Müəllimin illik yük profili — norma müqayisəsinin YEGANƏ mənbəyi.
+    """Müəllimin illik yük profili — vəzifə, ştat payı, kənar bayrağı, yük təsdiqi.
 
-    Profil yoxdursa norma ``DEFAULT_ANNUAL_NORM_HOURS`` (NK №215: 500 saat)
-    sayılır; universitet-daxili vəzifə differensiasiyası RƏSMİ DEYİL, ona görə
-    hardcode edilmir — tenant profillə konfiqurasiya edir (spec §8).
+    NORMA burada SAXLANMIR, hesablanır (sahib 2026-10-14): ``services.norms`` —
+    «Sistem tənzimləmələri»ndəki 1 ştat / 0,5 ştat / inzibati normaları ştat
+    payına tətbiq edir. ``annual_norm_hours`` tarixi sahədir (oxunmur).
     """
 
     organization = models.ForeignKey(

@@ -68,6 +68,7 @@ on:
           - import_teaching_load_form1
           - import_timetable_docx
           - repair_group_leads
+          - retire_qa_accounts
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -331,6 +332,12 @@ jobs:
             repair_group_leads)
               # Starosta (lead_student) üzvlüklərinin təmiri — gecə 2026-10-13: köhnə rol axınları starostanı
               # scope_unit-siz yaradırdı. Defolt QURU QAÇIŞ; apply → konservativ düzəliş (ehtiyat nüsxədən sonra).
+              args=(--org "$ORG")
+              ;;
+            retire_qa_accounts)
+              # QA test hesablarını (qa.*, @qa.local) üzvlük reyestrindən çıxarır — silmir, geri qaytarıla bilər
+              # (`manage.py retire_qa_accounts --undo`). Defolt QURU QAÇIŞ; apply → ehtiyat nüsxədən sonra.
+              # Hesablar sintetikdir (şəxsi data yox) → istifadəçi adlarının loga düşməsi icazəlidir.
               args=(--org "$ORG")
               ;;
             *)

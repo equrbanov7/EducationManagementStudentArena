@@ -1,0 +1,6 @@
+{% if cell.groups %}
+<span class="ue-groups"{% if cell.more %} title="{{ cell.all }}"{% endif %}>
+    {% for name in cell.groups %}<span class="ue-chip">{{ name }}</span>{% endfor %}
+    {% if cell.more %}<span class="ue-chip ue-chip--more">+{{ cell.more }}</span>{% endif %}
+</span>
+{% else %}<span class="ems-table__muted">—</span>{% endif %}

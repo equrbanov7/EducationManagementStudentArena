@@ -265,6 +265,16 @@ html.exam-modal-open, html.exam-modal-open body { overflow: hidden !important; }
 .exam-wizard .ew-panel .bootstrap-single-select__menu { padding: 6px; border: 1px solid var(--ems-border); border-radius: var(--ems-r-xl); box-shadow: var(--ems-sh-raised); }
 .exam-wizard .ew-panel .bootstrap-single-select__option { padding: 8px 10px; border-radius: var(--ems-r-md); font-size: var(--ems-fs-base); }
 
+/* Kilidli kateqoriya (yalnız «Sınaq», 2026-10-14): select yerinə oxunan həb —
+   sahə hündürlüyü ritmində, interaktiv görünmür (kursor/hover/caret yoxdur). */
+.exam-wizard .ew-panel .ew-category-locked { display: flex; align-items: center; min-height: var(--ems-h-field); }
+.exam-wizard .ew-panel .ew-category-pill {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border: 1px solid var(--ems-primary-200);
+  border-radius: var(--ems-r-pill); background: var(--ems-primary-50); color: var(--ems-primary-800);
+  font-size: var(--ems-fs-base); font-weight: 700; line-height: 1.3;
+}
+.exam-wizard .ew-panel .ew-category-pill i { color: var(--ems-primary-600); font-size: var(--ems-fs-sm); }
+
 /* İmtahan tipi → seçilə bilən kartlar (bərabər hündürlük: grid stretch +
    ikon və ad bir sətirdə, izah altda — «Praktiki imtahan» iki sətrə düşmür). */
 .exam-wizard .ew-panel .ew-typesel { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }

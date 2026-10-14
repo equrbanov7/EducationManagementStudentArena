@@ -11,7 +11,7 @@ QAPILAR (açar + əhatə, rol adı YOX — «hər rol öz səlahiyyəti qədər�
   * panel özü: ağacın ``unit.view`` əhatəsindən keçmiş qrup (tree.py — kənar ``st_unit`` detal almır);
   * «Təyin et / Dəyiş / Götür»: ``views/group_lead.manageable_group`` (``unit.group_manage`` və ya
     ``role.assign`` əhatəsində görünən qrup) — seçici yalnız bu halda qurulur;
-  * tələbə siyahısı: ``people.view_students`` əhatəsi qrupu əhatə edirsə; e-poçt yalnız
+  * tələbə siyahısı: ``people.view_students`` OXU əhatəsi (``faculty_read_scope``) qrupu əhatə edirsə; e-poçt yalnız
     ``people.view_contacts`` əhatəsi ilə (B20: kataloq kontaktsız).
 
 MODUL SƏRHƏDİ: registrar modeli ``django_apps.get_model`` ilə açılır. Sorğu büdcəsi: qrup başına sabit
@@ -23,7 +23,7 @@ from __future__ import annotations
 from django.apps import apps as django_apps
 from django.urls import reverse
 
-from apps.organizations.public import get_permission_scope
+from apps.organizations.public import faculty_read_scope, get_permission_scope
 
 from ....services.group_lead import group_lead_map
 from ...group_lead import manageable_group
@@ -70,8 +70,9 @@ def build_group_panel(request, organization, group) -> dict:
         warning = "not_in_group"
 
     can_assign = manageable_group(request, organization, str(group.pk)) is not None
+    # Tələbə kataloqu ilə EYNİ oxu əhatəsi (fakültəyə genişlənən `people.view_students`); kontakt dar qalır.
     can_view_students = _covers(
-        get_permission_scope(request.user, organization, PERM_VIEW_STUDENTS, request=request), group
+        faculty_read_scope(request.user, organization, PERM_VIEW_STUDENTS, request=request), group
     )
     show_contacts = can_view_students and _covers(
         get_permission_scope(request.user, organization, PERM_VIEW_CONTACTS, request=request), group

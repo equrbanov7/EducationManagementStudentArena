@@ -57,6 +57,9 @@ STAGE2_ROLE_GRANTS: dict[str, tuple[str, ...]] = {
         "plan.approve_council",
         "semester.view",
     ),
+    # ⚠️ `semester.view` 2026-10-14-dən koordinatorda/tyutorda QALMIR — şablonun sonunda
+    # `default_roles_role_audit.ROLE_POST_PARITY_REVOKES` götürür (mövcud tenantlar: 0065). Burada saxlanılır,
+    # çünki ``0041`` bu xəritəni CANLI oxuyur (tarixi miqrasiyanın davranışı dəyişməsin).
     "program_coordinator": (
         "plan.view",
         "semester.view",

@@ -101,10 +101,7 @@ class _Stage4Mixin:
             "question_bank_section": self.question_bank_section,
             **self._qsub_ctx,
             **self._qchair_ctx,
-            "unit_exams_page_obj": self.unit_exams_page_obj,
-            "unit_exams_search_query": self.unit_exams_search_query,
-            "unit_exams_total_count": self.unit_exams_total_count,
-            "unit_exams_pagination_query": self.unit_exams_pagination_query,
+            **self._unit_exams_ctx,  # unit_exams_* + unit_exams_section («Bölmə imtahanları»)
             "my_created_courses": self.my_created_courses,
             "my_created_courses_count": self.my_created_courses_count,
             "assigned_exams_count": self.assigned_exams_count,

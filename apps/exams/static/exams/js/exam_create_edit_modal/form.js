@@ -92,6 +92,11 @@
             if (!el) {
                 return "";
             }
+            /* Kilidli kateqoriya (yalnız «Sınaq»): gizli input xam dəyəri («quiz») daşıyır,
+               xülasədə isə oxunan etiket görünməlidir (2026-10-14). */
+            if (el.dataset && el.dataset.ewDisplay) {
+                return el.dataset.ewDisplay.trim();
+            }
             if (el.tagName === "SELECT") {
                 var opt = el.options[el.selectedIndex];
                 return opt ? (opt.textContent || "").trim() : "";

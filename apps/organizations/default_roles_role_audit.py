@@ -83,6 +83,16 @@ ROLE_AUDIT_REVOKES: dict[str, tuple[str, ...]] = {
 #: işləyirdi. `level` / ad / göstərilən ad DƏYİŞMİR. Mövcud tenantlar: miqrasiya ``organizations/0064``.
 ROLE_PARITY_GROUPS: tuple[tuple[str, ...], ...] = (("tutor", "program_coordinator"),)
 
+#: PARİTETDƏN SONRA alınan açarlar — qrupun birləşməsi onları geri gətirməsin deyə ayrıca addım.
+#: 2026-10-14 axşam (sahib, tyutor kimi baxış): «Semestr açılışını yığışdır buradan — ancaq dekan və kafedra
+#: müdiri görə bilsin». Akademik UNIT rollarından `semester.view` yalnız dekan + kafedra müdirində qalır; açılışı
+#: aparan org-wide operatorlar (Tədris şöbəsi, prorektor, RİM, RİM əməkdaşı) toxunulmur. Qrupun iki üzvündən
+#: EYNİ açar alındığı üçün dəstlər yenə bərabərdir. Mövcud tenantlar: miqrasiya ``organizations/0065``.
+ROLE_POST_PARITY_REVOKES: dict[str, tuple[str, ...]] = {
+    "tutor": ("semester.view",),
+    "program_coordinator": ("semester.view",),
+}
+
 #: Heç nəyi qapılamayan açarlar (B13) — kataloqdan və bütün rollardan çıxarılır.
 #: 2026-10-13 axşam: `org.view` də (sahib «lazım deyilsə çıxar»; miqrasiya 0063).
 DEAD_PERMISSION_KEYS: tuple[str, ...] = ("grade.publish", "assignment.edit", "org.view")
@@ -105,7 +115,21 @@ def apply_role_audit_grants(roles):
         for key in ROLE_AUDIT_GRANTS.get(name, ()):
             if not _covered(permissions, key):
                 permissions.append(key)
-    return apply_role_parity(roles)
+    apply_role_parity(roles)
+    return apply_post_parity_revokes(roles)
+
+
+def apply_post_parity_revokes(roles):
+    """``ROLE_POST_PARITY_REVOKES`` — paritetdən sonra açarları götürür (yerində, idempotent).
+
+    Yalnız DƏQİQ açar silinir: ``<prefiks>.*`` / ``*`` daşıyan rol (tenantın öz qərarı) toxunulmur.
+    """
+    for role in roles:
+        for key in ROLE_POST_PARITY_REVOKES.get(role.get("name"), ()):
+            permissions = role.get("permissions") or []
+            while key in permissions:
+                permissions.remove(key)
+    return roles
 
 
 def apply_role_parity(roles):
@@ -137,6 +161,8 @@ __all__ = [
     "ROLE_AUDIT_GRANTS",
     "ROLE_AUDIT_REVOKES",
     "ROLE_PARITY_GROUPS",
+    "ROLE_POST_PARITY_REVOKES",
+    "apply_post_parity_revokes",
     "apply_role_audit_grants",
     "apply_role_parity",
 ]

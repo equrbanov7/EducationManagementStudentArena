@@ -85,6 +85,7 @@ from .services import (
     teacher_workload_summary,
     teacher_years,
 )
+from .services.norms import norm_rule_note
 from .services.offering_teachers import teachers_for_offering, teachers_for_offerings
 
 STATUS_LABELS = {str(value): str(label) for value, label in TaskStatus.choices}
@@ -127,6 +128,7 @@ def build_distribution_context(request, *, organization, chair_id=None, academic
         "degree_levels": _choice_payload(DegreeLevel.choices),
         "row_kinds": _choice_payload(RowKind.choices),
         "amendment_reasons": _choice_payload(AmendmentReason.choices),
+        "norm_note": norm_rule_note(),
     }
     # Xarici JS Django template engine-dən KEÇMİR (bax CLAUDE.md) — kataloqlar
     # JSON blokla ötürülür, JS onu `JSON.parse` ilə oxuyur.
@@ -302,10 +304,9 @@ def chair_staff_load(*, organization, teacher_ids, academic_year: str = "") -> d
 
     NİYƏ BURADA? «Kafedra profili» ekranı ``apps.accounts``-dadır və dərs yükü
     modulunun DAXİLİNƏ girməməlidir. Fasad yalnız hazır aqreqat qaytarır:
-    saat, norma, doluluq faizi, ştat növü. Norma dəyəri POLICY cədvəlindən
-    (``TeacherWorkloadProfile.annual_norm_hours``) gəlir — kodda hardcode YOX;
-    profil yoxdursa NK №215 default-u (``DEFAULT_ANNUAL_NORM_HOURS``) tətbiq
-    olunur (spec §8).
+    saat, norma, doluluq faizi, ştat növü. Norma «Sistem tənzimləmələri»ndəki
+    qayda ilə hesablanır (``services.norms``: 1 ştat / 0,5 ştat / inzibati
+    vəzifəli ayrıca, digər paylar 1 ştata mütənasib; sahib 2026-10-14).
 
     ``dept_load`` status ailəsi (``core/ui/status_catalog.py``) üçün hər müəllimə
     bant açarı da verilir: `free` (<70%), `normal` (70–100%), `loaded` (100–120%),

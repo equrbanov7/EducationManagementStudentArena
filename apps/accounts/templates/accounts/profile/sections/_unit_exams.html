@@ -1,97 +1,42 @@
-{% load i18n %}
+{% load i18n static %}
 {% comment %}
-Bölmə imtahanları (Faza 3) — dekan/kafedra müdürü üçün öz fakültə/kafedra
-alt-ağacındakı imtahanların oxu-only siyahısı. Data backend-də
-organizations.scoping ilə məhdudlaşdırılır; bu template yalnız göstərir.
+«Bölmə imtahanları» — dekan / dekan müavini / kafedra müdiri üçün öz fakültə/kafedra
+alt-ağacının imtahanlarına OXU-ONLY baxış (2026-10-14 redizayn: KPI · avto filtr ·
+sıralanan cədvəl · «Ətraflı» çekmecəsi). Data və əhatə backend-dədir
+(`_sections/unit_exams*.py`); bu şablon yalnız göstərir. Yazı əməli YOXDUR.
+
+⚠️ `<h1>` burada yoxdur — başlığı qabıq (`#profileSectionTitle`) verir.
+CSS/JS xarici fayldadır və panelin İÇİNDƏDİR (CSP + AJAX swap). Çekmecə məzmunu
+cari səhifənin sətirlərindən `json_script` blokuna yazılır — əlavə sorğu yoxdur.
 {% endcomment %}
 <section class="profile-section-panel profile-section--unit-exams {% if active_section == 'unit-exams' %}is-active{% endif %}"
-         data-profile-section-panel="unit-exams">
-    {% comment %}2026-09-12 (audit P2-1): «Bölmə imtahanları» başlığı qabıqdan
-    (`#profileSectionTitle`) gəlir — köhnə `.section-title` onu təkrarlayırdı.
-    İzah altbaşlıqdır; ümumi say (sol menyuda nişanı yoxdur) başlığın əməl
-    yuvasında neytral badge kimi qalır.{% endcomment %}
-    {% trans 'Bu siyahı yalnız sizin fakültə/kafedra alt-ağacınıza aid imtahanları göstərir (oxu-only baxış).' as ue_subtitle %}
-    {% include "partials/ems_ui/_content_header.html" with header_subtitle=ue_subtitle header_actions_include="accounts/profile/sections/_unit_exams_header_actions.html" %}
-    <div class="section-card">
-        <form method="get" action="{{ profile_base_url }}" class="d-flex gap-2 mb-3">
-            <input type="hidden" name="section" value="unit-exams">
-            <input type="search"
-                   name="unit_exam_q"
-                   class="form-control"
-                   value="{{ unit_exams_search_query }}"
-                   placeholder="{% trans 'İmtahan, müəllif və ya kurs axtar' %}" aria-label="{% trans 'İmtahan, müəllif və ya kurs axtar' %}">
-            <button type="submit" class="btn btn-primary btn-sm">
-                <i class="fas fa-search"></i> Axtar
-            </button>
-        </form>
+         data-profile-section-panel="unit-exams"
+         data-source-url="{{ profile_base_url }}?section=unit-exams">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/unit_exams.css' %}?v=20261014-3">
+{% with ue=unit_exams_section %}
+{% if not ue.has_scope %}
+    {% trans "Üzvlüyünüzə fakültə/kafedra əhatəsi təyin edilməyib" context "accounts.unit_exams" as ue_noscope_title %}
+    {% trans "Bölmə imtahanları yalnız dekan, dekan müavini və ya kafedra müdiri rolu konkret fakültəyə/kafedraya bağlı olduqda görünür. Rolunuzun vahidini təyin etmək üçün İKT və ya kadr şöbəsinə müraciət edin." context "accounts.unit_exams" as ue_noscope_body %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-sitemap" state_title=ue_noscope_title state_body=ue_noscope_body %}
+{% else %}
+<div class="ue" data-ue-root>
+    {% blocktrans asvar ue_subtitle context "accounts.unit_exams" with scope=ue.scope_label %}Əhatənizdəki imtahanlar — yalnız baxış. Əhatə: {{ scope }}{% endblocktrans %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=ue_subtitle %}
 
-        {% if unit_exams_page_obj and unit_exams_page_obj.object_list %}
-        <div class="table-responsive">
-            <table class="table align-middle">
-                <thead>
-                    <tr>
-                        <th>{% trans 'İmtahan' %}</th>
-                        <th>{% trans 'Növ' %}</th>
-                        <th>{% trans 'Müəllif' %}</th>
-                        <th>Kurs</th>
-                        <th>{% trans 'Başlama' %}</th>
-                        <th>{% trans 'Cəhdlər' %}</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for exam in unit_exams_page_obj.object_list %}
-                    <tr>
-                        <td>{{ exam.title }}</td>
-                        <td>{{ exam.get_exam_type_display }}</td>
-                        <td>{{ exam.author.get_full_name|default:exam.author.username }}</td>
-                        <td>{{ exam.course.title|default:"—" }}</td>
-                        <td>{% if exam.start_datetime %}{{ exam.start_datetime|date:"d.m.Y H:i" }}{% else %}—{% endif %}</td>
-                        <td>{{ exam.attempts_total }}</td>
-                        <td>
-                            {% if exam.is_active %}
-                            <span class="role-badge admin">Aktiv</span>
-                            {% else %}
-                            <span class="role-badge student">Deaktiv</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=ue.kpi_tiles kpi_variant="5" %}
 
-        {% if unit_exams_page_obj.paginator.num_pages > 1 %}
-        <nav class="pagination-wrap" aria-label="{% trans 'Səhifələmə' %}">
-            <ul class="pagination">
-                {% if unit_exams_page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="{{ profile_base_url }}?{{ unit_exams_pagination_query }}&unit_exam_page={{ unit_exams_page_obj.previous_page_number }}">&laquo;</a>
-                </li>
-                {% endif %}
-                <li class="page-item disabled">
-                    <span class="page-link">{{ unit_exams_page_obj.number }} / {{ unit_exams_page_obj.paginator.num_pages }}</span>
-                </li>
-                {% if unit_exams_page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="{{ profile_base_url }}?{{ unit_exams_pagination_query }}&unit_exam_page={{ unit_exams_page_obj.next_page_number }}">&raquo;</a>
-                </li>
-                {% endif %}
-            </ul>
-        </nav>
-        {% endif %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="unit-exams" filter_prefix="ue_" filter_fields=ue.filter_fields filter_count_label=ue.filter_count_label filter_auto=True filter_bootstrap=True %}
 
-        {% else %}
-        <div class="empty-state">
-            <i class="fas fa-file-alt"></i>
-            <p>
-                {% if unit_exams_search_query %}
-                {% trans 'Axtarışa uyğun imtahan tapılmadı.' %}
-                {% else %}
-                {% trans 'Bölmənizə aid imtahan hələ yoxdur və ya üzvlüyünüzə fakültə/kafedra (scope) təyin edilməyib.' %}
-                {% endif %}
-            </p>
-        </div>
-        {% endif %}
-    </div>
+    {% include "partials/ems_ui/_data_table.html" with table_columns=ue.columns table_rows=ue.table_rows table_state=ue.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-file-alt" state_title=ue.state_title state_body=ue.state_body %}
+
+    {% include "partials/_pagination.html" with page_obj=ue.page_obj page_param="ue_page" extra_query=ue.pagination_query %}
+
+    {% trans "İmtahan haqqında" context "accounts.unit_exams" as ue_drawer_title %}
+    {% trans "Cədvəl, qruplar, suallar və nəticələrin xülasəsi — yalnız baxış." context "accounts.unit_exams" as ue_drawer_sub %}
+    {% include "partials/ems_ui/_drawer.html" with drawer_id="ueDetail" drawer_title=ue_drawer_title drawer_subtitle=ue_drawer_sub drawer_body_include="accounts/profile/sections/unit_exams/_drawer_body.html" %}
+    {{ ue.drawer_rows|json_script:"ueRowsData" }}
+</div>
+<script src="{% static 'accounts/js/profile/unit_exams.js' %}?v=20261014-1" defer></script>
+{% endif %}
+{% endwith %}
 </section>

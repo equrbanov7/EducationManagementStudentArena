@@ -50,8 +50,10 @@ def _field(spec, stored: dict, meta: dict) -> dict:
         "unit": str(spec.unit or ""),
         "min": spec.min,
         "max": spec.max,
-        "value": current,
-        "default": default,
+        "step": "0.01" if spec.kind == "decimal" else "1",
+        # Onluq dəyər mətn kimi (lokal «1,5» number input-u sındırır): forma «1.5» göstərir.
+        "value": rs.decimal_text(current) if spec.kind == "decimal" else current,
+        "default": rs.decimal_text(default) if spec.kind == "decimal" else default,
         "overridden": spec.key in stored and rs.coerce(spec, stored[spec.key]) is not None,
         "updated_by": meta.get(spec.key, {}).get("by", ""),
         "updated_at": meta.get(spec.key, {}).get("at"),
@@ -98,6 +100,8 @@ def _as_text(spec, value) -> str:
         # Forma bayrağı «1»/«0» göndərir; ``str(True)`` («True») ilə müqayisə «dəyişib» sanardı.
         coerced = rs.coerce(spec, value)
         return "" if coerced is None else ("1" if coerced else "0")
+    if spec.kind == "decimal":
+        return rs.decimal_text(value)
     return str(value if value is not None else "")
 
 
@@ -113,7 +117,32 @@ def _incoming_value(spec, data):
             return None
         return f"{str(count or '').strip()}/{str(window or '').strip()}m"
     raw = data.get(spec.key)
-    return None if raw is None else str(raw).strip()
+    if raw is None:
+        return None
+    text = str(raw).strip()
+    if spec.kind == "decimal":
+        # «1.50» ilə «1.5» eyni dəyərdir — müqayisə normallaşmış mətnlə gedir.
+        return rs.decimal_text(text) or text
+    return text
+
+
+#: Bir-biri ilə uyğun olmalı cütlər: (aşağı hədd, yuxarı hədd) — aşağı yuxarıdan böyük ola bilməz.
+_ORDERED_PAIRS = (("workload.staff_rate_min", "workload.staff_rate_max"),)
+
+
+def _pair_errors(planned: dict) -> dict:
+    errors = {}
+    for low_key, high_key in _ORDERED_PAIRS:
+        if low_key not in planned and high_key not in planned:
+            continue
+        low = planned.get(low_key, rs.get(low_key))
+        high = planned.get(high_key, rs.get(high_key))
+        low = rs.SPECS[low_key].default() if low is _RESET else low
+        high = rs.SPECS[high_key].default() if high is _RESET else high
+        if low is not None and high is not None and low > high:
+            message = pgettext(_CTX, "Ən az dəyər ən çox dəyərdən böyük ola bilməz.")
+            errors.update({key: message for key in (low_key, high_key) if key in planned})
+    return errors
 
 
 def save_values(*, actor, data, request=None) -> dict:
@@ -142,6 +171,8 @@ def save_values(*, actor, data, request=None) -> dict:
                 }
             continue
         planned[spec.key] = value
+    if not errors:
+        errors = _pair_errors(planned)
     if errors:
         raise RuntimeSettingsError(errors)
 
@@ -155,12 +186,28 @@ def save_values(*, actor, data, request=None) -> dict:
             if value is _RESET or value == rs.coerce(spec, default):
                 if key in existing:
                     existing[key].delete()
-                    changed.append({"key": key, "old": old, "new": default, "reset": True})
+                    changed.append(
+                        {
+                            "key": key,
+                            "old": rs.storable(spec, old),
+                            "new": rs.storable(spec, default),
+                            "reset": True,
+                        }
+                    )
                 continue
             if old == value:
                 continue
-            RuntimeSetting.objects.update_or_create(key=key, defaults={"value": value, "updated_by": actor})
-            changed.append({"key": key, "old": old if old is not None else default, "new": value, "reset": False})
+            RuntimeSetting.objects.update_or_create(
+                key=key, defaults={"value": rs.storable(spec, value), "updated_by": actor}
+            )
+            changed.append(
+                {
+                    "key": key,
+                    "old": rs.storable(spec, old if old is not None else default),
+                    "new": rs.storable(spec, value),
+                    "reset": False,
+                }
+            )
         if changed:
             log_action(
                 AuditAction.UPDATE,

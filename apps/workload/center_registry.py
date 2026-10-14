@@ -103,6 +103,23 @@ def _faculty_of(unit, faculty_paths):
     return None
 
 
+def _faculty_choices(actor, faculties, chair_faculty) -> tuple[list, bool]:
+    """«Fakültə» filtrinin seçimləri + kilid (sahib, 2026-10-14).
+
+    Org-wide aktor (tədris şöbəsi, RİM) bütün fakültələri görür. Struktur əhatəli aktor
+    (kafedra müdiri) YALNIZ idarə etdiyi kafedraların fakültələrini görür; tək fakültə qalırsa
+    filtr avtomatik seçilir və gizlənir (``locked``) — başqa məktəblərin adları siyahıya düşmür.
+    """
+    if actor.scope_for(PERM_MANAGE).is_org_wide:
+        return [{"value": str(unit.pk), "label": unit.name} for unit in faculties], False
+    own = {unit.pk: unit for unit in chair_faculty.values() if unit is not None}
+    options = [
+        {"value": str(unit.pk), "label": unit.name}
+        for unit in sorted(own.values(), key=lambda item: (item.name or "").casefold())
+    ]
+    return options, len(options) <= 1
+
+
 def build_center(request, organization) -> dict:
     """«Dərs yükü mərkəzi» konteksti (yalnız oxu; mutasiyalar `actions.py`-da)."""
     from core.constants import OrgUnitType
@@ -155,13 +172,18 @@ def build_center(request, organization) -> dict:
         )
     }
 
+    chair_faculty = {chair.pk: _faculty_of(chair, faculty_paths) for chair in chairs}
+    faculty_options, faculty_locked = _faculty_choices(actor, faculties, chair_faculty)
     faculty_filter = safe_uuid(params.get("wc_faculty"))
+    if faculty_locked:
+        # Əhatədə tək fakültə (kafedra müdiri): avtomatik seçilir, URL-dəki başqa id nəzərə alınmır.
+        faculty_filter = faculty_options[0]["value"] if faculty_options else ""
     status_filter = params.get("wc_status") or ""
     cards = []
     for chair in chairs:
         task = tasks.get(chair.pk)
         stats = hours.get(getattr(task, "pk", None), {})
-        faculty = _faculty_of(chair, faculty_paths)
+        faculty = chair_faculty[chair.pk]
         card = {
             "chair_id": str(chair.pk),
             "name": chair.name,
@@ -193,7 +215,8 @@ def build_center(request, organization) -> dict:
         "years": years,
         "is_archive": is_archive_year(organization, year),
         "cards": cards,
-        "faculty_options": [{"value": str(unit.pk), "label": unit.name} for unit in faculties],
+        "faculty_options": faculty_options,
+        "faculty_locked": faculty_locked,
         "filters": {"faculty": faculty_filter, "status": status_filter},
         "kpi": {
             "chairs": len(cards),

@@ -39,7 +39,7 @@ from ...identity import PLACEHOLDER_EMAIL_DOMAIN
 from ..staff_roster import username_seed
 from .matching import STATUS_NOT_FOUND
 from .parsing import DEGREE_RANK, TITLE_RANK
-from .plan import TITLE_TO_POSITION, aggregate_rate, best_value
+from .plan import TITLE_TO_POSITION, best_value, checked_rate
 
 EMAIL_PREFIX = "roster"
 #: Yaradılmış hesabın «öz» sətirləri — undo zamanı bunlardan başqa bağlı sətir varsa hesab SİLİNMİR.
@@ -61,6 +61,7 @@ class NewAccount:
     staff_fraction: object = None
     is_external: bool | None = None
     username: str = ""  # önizləmə (dry-run) / yaradılan ad (apply)
+    rate_error: str = ""  # ştat payı həddən kənardır — profilə yazılmır (``plan.checked_rate``)
 
     @property
     def display(self) -> str:
@@ -107,7 +108,7 @@ def plan_new_accounts(plan) -> list:
         item.title = best_value([row.title for row in item.rows], TITLE_RANK)
         item.degree = best_value([row.degree for row in item.rows], DEGREE_RANK)
         item.position = TITLE_TO_POSITION.get(item.title or "")
-        item.staff_fraction, item.is_external = aggregate_rate(item.rows)
+        item.staff_fraction, item.is_external, item.rate_error = checked_rate(item.rows)
         item.username = claim_name_username(username_seed(f"{item.last} {item.first}"), taken=taken)
         taken.add(item.username)
     return list(grouped.values())

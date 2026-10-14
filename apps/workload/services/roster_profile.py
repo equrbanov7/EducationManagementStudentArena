@@ -2,7 +2,8 @@
 
 ``TeacherWorkloadProfile`` (təşkilat × müəllim × tədris ili) üçün YALNIZ üç sahə yazılır: ``position``,
 ``staff_fraction``, ``is_external``. Norma (``annual_norm_hours``) və təsdiq bayrağına TOXUNULMUR —
-norma tenant siyasətidir (spec §8), təsdiq isə müəllimin öz əməlidir.
+norma «Sistem tənzimləmələri»ndən hesablanır (``services.norms``), təsdiq isə müəllimin öz əməlidir.
+Ştat payı həddən kənardırsa (``workload.staff_rate_min/max``) ``norms.StaffRateError`` qaldırılır.
 
 * ``sync_roster_profile(..., dry_run=True)`` — fərqi hesablayır; ``dry_run=False`` ilə yazır və audit edir;
 * ``restore_roster_profile(...)`` — geri qaytarma: yalnız HƏLƏ də bizim yazdığımız dəyərdə qalan sahələri
@@ -19,6 +20,7 @@ from core.constants import AuditAction
 
 from ..constants import DEFAULT_ANNUAL_NORM_HOURS, TeacherPosition
 from ..models import TeacherWorkloadProfile
+from .norms import ensure_staff_rate
 
 FIELDS = ("position", "staff_fraction", "is_external")
 _AUDIT_RESOURCE = "workload.TeacherWorkloadProfile"
@@ -52,6 +54,9 @@ def sync_roster_profile(
     """
     if position is not None and position not in TeacherPosition.values:
         raise ValueError(f"workload.position_invalid: {position!r}")
+    if staff_fraction is not None:
+        # «Sistem tənzimləmələri» ştat həddi (defolt 0,25–1,5; 0 = saathesabı) — ``norms.StaffRateError``.
+        ensure_staff_rate(staff_fraction)
     wanted = {"position": position, "staff_fraction": staff_fraction, "is_external": is_external}
     wanted = {field: _plain(field, value) for field, value in wanted.items() if value is not None}
     profile = TeacherWorkloadProfile.objects.filter(

@@ -179,10 +179,66 @@ class LessonsLogUnitFiltersTest(TestCase):
     def test_options_respect_the_supervisors_scope(self):
         section = self._section(self.dean)
         self.assertEqual(self._codes(section), ["LLF-A", "LLF-C"])  # dekan yalnız öz fakültəsinin qruplarını görür
-        self.assertEqual({o["value"] for o in self._field(section, "faculty")["options"]}, {"", str(self.f1.pk)})
+        # Əhatədə tək fakültə — avtomatik seçilib, sahə gizlidir (sahib, 2026-10-14).
+        faculty = self._field(section, "faculty")
+        self.assertEqual((faculty["kind"], faculty["value"]), ("hidden", str(self.f1.pk)))
         self.assertEqual(
             {o["value"] for o in self._field(section, "kafedra")["options"]}, {"", str(self.c1.pk), str(self.c2.pk)}
         )
+
+    # ── Əhatədə tək seçim → avtomatik seçim + gizli sahə (sahib, 2026-10-14) ──
+
+    def test_dean_ignores_an_out_of_scope_faculty_param(self):
+        section = self._section(self.dean, ll_faculty=str(self.f2.pk))
+        self.assertEqual(self._codes(section), ["LLF-A", "LLF-C"])
+        self.assertEqual(self._field(section, "faculty")["value"], str(self.f1.pk))
+        self.assertNotIn("ll_faculty", {chip["name"] for chip in section["filters"]["applied"]})
+        self.assertIn(f"ll_faculty={self.f1.pk}", section["export_url"])
+
+    def test_teacher_single_faculty_and_kafedra_are_preselected_and_hidden(self):
+        section = self._section(self.t2)
+        self.assertEqual(self._codes(section), ["LLF-B"])
+        faculty, kafedra = self._field(section, "faculty"), self._field(section, "kafedra")
+        self.assertEqual((faculty["kind"], faculty["value"]), ("hidden", str(self.f2.pk)))
+        self.assertEqual((kafedra["kind"], kafedra["value"]), ("hidden", str(self.c3.pk)))
+        self.assertFalse({"ll_faculty", "ll_kafedra"} & {chip["name"] for chip in section["filters"]["applied"]})
+        # Kənar fakültə / kafedra id-si nəzərə alınmır — nəticə dəyişmir, ad sızmır.
+        section = self._section(self.t2, ll_faculty=str(self.f1.pk), ll_kafedra=str(self.c1.pk))
+        self.assertEqual(self._codes(section), ["LLF-B"])
+        self.assertEqual(self._field(section, "faculty")["value"], str(self.f2.pk))
+        self.assertEqual(self._field(section, "kafedra")["value"], str(self.c3.pk))
+
+    def test_teacher_with_two_kafedra_options_keeps_the_select(self):
+        section = self._section(self.t1)
+        self.assertEqual(self._field(section, "faculty")["kind"], "hidden")
+        kafedra = self._field(section, "kafedra")
+        self.assertEqual(kafedra["kind"], "select")
+        self.assertEqual({o["value"] for o in kafedra["options"]}, {"", str(self.c1.pk), str(self.c2.pk)})
+        # Kilidli fakültəyə aid olmayan (əhatədən kənar) kafedra atılır — nəticə öz dərsləridir, ad sızmır.
+        section = self._section(self.t1, ll_kafedra=str(self.c3.pk))
+        self.assertEqual(self._codes(section), ["LLF-A"])
+        self.assertEqual(self._field(section, "kafedra")["value"], "")
+        chips = {chip["name"]: chip["value_label"] for chip in section["filters"]["applied"]}
+        self.assertNotEqual(chips.get("ll_kafedra"), "Maliyyə kafedrası")
+
+    def test_org_wide_supervisor_is_never_locked(self):
+        section = self._section(self.rim, ll_faculty=str(self.f2.pk))
+        self.assertEqual(self._field(section, "faculty")["kind"], "select")
+        self.assertEqual(self._field(section, "kafedra")["kind"], "select")
+
+    def test_locked_field_renders_as_hidden_input(self):
+        url = reverse("accounts:profile_section_fragment", kwargs={"section": SECTION})
+        response = self._client(self.t2).get(url, WINDOW)
+        html = response.json()["html"] if "json" in response.get("Content-Type", "") else response.content.decode()
+        self.assertIn(f'<input type="hidden" name="ll_faculty" value="{self.f2.pk}"', html)
+        self.assertNotIn('<select class="ems-select bootstrap-single-select__native" id="f-ll_faculty"', html)
+
+    def test_csv_export_uses_the_same_lock(self):
+        response = self._client(self.t2).get(
+            reverse("registrar:lessons_log_csv"), dict(WINDOW, ll_faculty=str(self.f1.pk))
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("LLF-B", response.content.decode("utf-8"))
 
     def test_unknown_unit_returns_nothing(self):
         section = self._section(self.rim, ll_kafedra=str(uuid.uuid4()))

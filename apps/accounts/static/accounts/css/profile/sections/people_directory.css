@@ -372,3 +372,46 @@
     border-color: var(--ems-danger, #dc2626);
 }
 
+
+/* ⚠️ 2026-10-14 (sahib: «css hover problemi var»). Zolaq tünd göy fondadır,
+   amma düymələrin vəziyyətləri ümumi `.ems-btn` (açıq fon) qaydalarından
+   gəlirdi və hamısı (0,4,0) spesifikliklə yuxarıdakıları üstələyirdi:
+     • «Qrupa köçür» hover → fon primary-700, mətn primary-800 = göy üstündə göy (itirdi);
+     • «Seçimi təmizlə» hover → fon neutral-50, mətn ağ = ağ üstündə ağ;
+     • disabled → zolağın ağ düymə üslubu disabled-i örtürdü (fərq görünmürdü);
+     • fokus halqası primary-500 tünd göy fonda ≈ 2.4:1 (AA-dan aşağı).
+   Hər vəziyyət zolağın öz palitrası ilə (bütün mətnlər primary-800 fonda ≥ 4.5:1). */
+.people__bulkbar .ems-btn:hover:not(:disabled):not([aria-disabled="true"]) {
+    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--ems-neutral-0, #ffffff);
+}
+
+.people__bulkbar .ems-btn--primary:hover:not(:disabled):not([aria-disabled="true"]) {
+    border-color: var(--ems-neutral-0, #ffffff);
+    background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-800, #1e40af);
+}
+
+.people__bulkbar .ems-btn--danger:hover:not(:disabled):not([aria-disabled="true"]) {
+    border-color: var(--ems-danger-strong, #b91c1c);
+    background: var(--ems-danger-strong, #b91c1c);
+    color: var(--ems-neutral-0, #ffffff);
+}
+
+/* Disabled: gizlədilmir, «sönük» görünür — şəffaf fon, qırıq kontur, açıq-göy
+   mətn (primary-200 / primary-800 ≈ 6.6:1, oxunaqlı qalır). */
+.people__bulkbar .ems-btn:disabled,
+.people__bulkbar .ems-btn[aria-disabled="true"] {
+    border-color: var(--ems-primary-300, #93c5fd);
+    border-style: dashed;
+    background: transparent;
+    color: var(--ems-primary-200, #bfdbfe);
+    cursor: not-allowed;
+}
+
+/* Klaviatura fokusu tünd fonda AĞ halqa ilə (qlobal göy halqa burada görünmür). */
+.people__bulkbar .ems-btn:focus-visible {
+    outline: 2px solid var(--ems-neutral-0, #ffffff);
+    outline-offset: 2px;
+}

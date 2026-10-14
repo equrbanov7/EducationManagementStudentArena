@@ -34,6 +34,7 @@
     var DIALOG_IDS = ["tofStudentTransferDialog", "tofStudentFreezeDialog", "tofStudentExpelDialog", ADD_DIALOG_ID, MOVE_DIALOG_ID, LEAD_DIALOG_ID, LEAD_REMOVE_DIALOG_ID];
     var state = {
         url: "", name: "", planUrl: "", candidatesUrl: "", groupActive: true,
+        rowManage: false, rowLead: false,
         rows: [], canManage: false, canMove: false, status: "", reopen: "",
         lead: { name: "", username: "", warning: "" }
     };
@@ -144,8 +145,9 @@
         }
         box.classList.toggle("has-warning", !!lead.warning);
         var actions = box.querySelector("[data-tof-lead-actions]");
-        // Düymə bloku yalnız `can_assign_lead` olanda render olunur; qrup əhatəsini server yoxlayır (404).
-        var canLead = ready && state.groupActive;
+        // Düymə bloku yalnız `can_assign_lead` olanda render olunur; 2026-10-14: üstəlik SƏTRİN `can_lead`-i
+        // (qrup starosta açarının ÖZ əhatəsindədir) — oxu əhatəsi fakültəyə genişlənib, server kənar qrupa 404.
+        var canLead = ready && state.groupActive && state.rowLead;
         if (actions) { actions.hidden = !canLead; }
         var assign = box.querySelector("[data-tof-lead-assign]");
         if (assign) {
@@ -241,7 +243,7 @@
         // arxiv qrupa əlavə yoxdur (server də rədd edir).
         var add = d.querySelector("[data-tof-students-add]");
         if (add) {
-            add.hidden = !(state.groupActive && state.candidatesUrl);
+            add.hidden = !(state.rowManage && state.groupActive && state.candidatesUrl);
             add.setAttribute("data-candidates-url", state.candidatesUrl || "");
             add.setAttribute("data-group-name", state.name || "");
             add.setAttribute("data-tof-prefill", prefill({ action: "add_students", id: state.groupId || "" }));
@@ -323,6 +325,9 @@
         state.planUrl = button.getAttribute("data-plan-url") || "";
         state.candidatesUrl = button.getAttribute("data-candidates-url") || "";
         state.groupActive = button.getAttribute("data-group-active") !== "0";
+        // Sətir səviyyəli yazı bayraqları (server şablonda yazır; atribut yoxdursa — bağlı, fail-closed).
+        state.rowManage = button.getAttribute("data-can-manage") === "1";
+        state.rowLead = button.getAttribute("data-can-lead") === "1";
         state.groupId = button.getAttribute("data-group-id") || "";
         state.lead = {
             name: button.getAttribute("data-lead-name") || "",

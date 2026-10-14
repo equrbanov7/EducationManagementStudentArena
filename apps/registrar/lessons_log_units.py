@@ -103,12 +103,8 @@ def _in_scopes(path, unit_id, scopes) -> bool:
     return False
 
 
-def unit_options(option_source, organization, *, faculty=None, scopes=None) -> tuple[list, list]:
-    """``(fakültə seçimləri, kafedra seçimləri)`` — dörd sabit sorğu, sətir sayından asılı deyil.
-
-    ``scopes`` — struktur əhatəli nəzarətçinin ``UnitScope`` siyahısı (org-wide / müəllim → ``None``)."""
-    if scopes is not None and any(scope.is_org_wide for scope in scopes):
-        scopes = None
+def _unit_candidates(option_source, organization) -> tuple[dict, dict]:
+    """``({fakültə_id: (ad, yol)}, {kafedra_id: (ad, yol)})`` — dörd sabit sorğu, sətir sayından asılı deyil."""
     paths = [
         path
         for path in option_source.order_by()
@@ -153,56 +149,109 @@ def unit_options(option_source, organization, *, faculty=None, scopes=None) -> t
         .distinct()[:OPTION_CAP]
     ):
         chairs.setdefault(str(uid), (name, path))
+    return faculties, chairs
 
-    def _options(units, *, under=None):
-        rows = []
-        for uid, (name, path) in units.items():
-            if scopes is not None and not _in_scopes(path, uid, scopes):
-                continue
-            if under is not None and not (uid == str(under.pk) or (path or "").startswith(f"{under.path}/")):
-                continue
-            rows.append({"value": uid, "label": name or uid})
-        rows.sort(key=lambda row: (row["label"].casefold(), row["value"]))
-        return rows[:OPTION_CAP]
 
-    return _options(faculties), _options(chairs, under=faculty)
+def _options(units, *, scopes=None, under=None) -> list:
+    rows = []
+    for uid, (name, path) in units.items():
+        if scopes is not None and not _in_scopes(path, uid, scopes):
+            continue
+        if under is not None and not (uid == str(under.pk) or (path or "").startswith(f"{under.path}/")):
+            continue
+        rows.append({"value": uid, "label": name or uid})
+    rows.sort(key=lambda row: (row["label"].casefold(), row["value"]))
+    return rows[:OPTION_CAP]
+
+
+def unit_options(option_source, organization, *, faculty=None, scopes=None) -> tuple[list, list]:
+    """``(fakültə seçimləri, kafedra seçimləri)`` — dörd sabit sorğu, sətir sayından asılı deyil.
+
+    ``scopes`` — struktur əhatəli nəzarətçinin ``UnitScope`` siyahısı (org-wide / müəllim → ``None``)."""
+    if scopes is not None and any(scope.is_org_wide for scope in scopes):
+        scopes = None
+    faculties, chairs = _unit_candidates(option_source, organization)
+    return _options(faculties, scopes=scopes), _options(chairs, scopes=scopes, under=faculty)
+
+
+def _settle(organization, unit, raw, options, types, *, scoped) -> tuple:
+    """Bir seçicinin effektiv bölməsi: ``(bölmə, kilidli?, etibarsız?)`` (sahib, 2026-10-14).
+
+    Əhatəli aktorda (kafedra müdiri, dekan, müəllim) TƏK seçim varsa o, avtomatik seçilir və
+    sahə gizlənir — URL-dəki başqa id SƏSSİZ nəzərə alınmır. Əhatədən kənar id (siyahıda yoxdur)
+    «etibarsız» sayılır → nəticə boşdur və bölmənin adı açılmır. Org-wide aktorda dəyişiklik yoxdur.
+    """
+    if not scoped:
+        return unit, False, bool(raw and unit is None)
+    if len(options) == 1:
+        if unit is not None and str(unit.pk) == options[0]["value"]:
+            return unit, True, False
+        return resolve_unit(organization, options[0]["value"], types), True, False
+    if unit is not None and str(unit.pk) not in {option["value"] for option in options}:
+        return None, False, True
+    return unit, False, bool(raw and unit is None)
 
 
 def filter_state(user, organization, option_source, *, supervisor, faculty_raw="", kafedra_raw="", with_options=True):
     """Seçilmiş fakültə/kafedra + (istəyə görə) seçim siyahıları — bölmə VƏ CSV üçün TƏK qayda.
 
     Qaytarır: ``faculty``/``kafedra`` (bölmə və ya ``None``), ``faculty_value``/``kafedra_value``
-    (effektiv query dəyəri), ``invalid`` (seçilib, amma tapılmayıb → nəticə boş olmalıdır),
-    ``faculty_options``/``kafedra_options``."""
+    (effektiv query dəyəri), ``invalid`` (seçilib, amma tapılmayıb və ya əhatədən kənardır → nəticə
+    boş olmalıdır), ``faculty_locked``/``kafedra_locked`` (əhatədə tək seçim — avtomatik seçilib,
+    sahə gizlədilir), ``faculty_options``/``kafedra_options``.
+
+    Əhatəli aktorda siyahılar ``with_options=False`` (CSV) olsa da qurulur — kilid və əhatə
+    yoxlaması bölmə ilə EYNİ olsun."""
     faculty = resolve_unit(organization, faculty_raw, FACULTY_TYPES) if faculty_raw else None
     kafedra = resolve_unit(organization, kafedra_raw, CHAIR_TYPES) if kafedra_raw else None
-    invalid = bool((faculty_raw and faculty is None) or (kafedra_raw and kafedra is None))
+    scopes = None
+    if supervisor:
+        from apps.registrar.lessons_log import _supervision_scopes
+
+        scopes = _supervision_scopes(user, organization)
+        if any(scope.is_org_wide for scope in scopes):
+            scopes = None
+    scoped = not supervisor or scopes is not None
+    faculty_options: list = []
+    kafedra_options: list = []
+    faculty_locked = kafedra_locked = False
+    faculty_invalid = bool(faculty_raw and faculty is None)
+    kafedra_invalid = bool(kafedra_raw and kafedra is None)
+    candidates = _unit_candidates(option_source, organization) if (with_options or scoped) else None
+    if candidates is not None:
+        faculty_options = _options(candidates[0], scopes=scopes)
+        faculty, faculty_locked, faculty_invalid = _settle(
+            organization, faculty, faculty_raw, faculty_options, FACULTY_TYPES, scoped=scoped
+        )
     dropped = False
     if faculty is not None and kafedra is not None and not is_within(kafedra, faculty):
         # Kaskad: fakültə dəyişəndə ona aid olmayan köhnə kafedra seçimi atılır (boş nəticə olmasın).
-        kafedra, dropped = None, True
-    state = {
+        kafedra, dropped, kafedra_invalid = None, True, False
+    if candidates is not None:
+        kafedra_options = _options(candidates[1], scopes=scopes, under=faculty)
+        if not dropped:
+            kafedra, kafedra_locked, kafedra_invalid = _settle(
+                organization, kafedra, kafedra_raw, kafedra_options, CHAIR_TYPES, scoped=scoped
+            )
+        elif scoped and len(kafedra_options) == 1:
+            kafedra = resolve_unit(organization, kafedra_options[0]["value"], CHAIR_TYPES)
+            kafedra_locked = True
+
+    def _value(unit, raw, invalid):
+        return str(unit.pk) if unit is not None else (raw if invalid else "")
+
+    return {
         "faculty": faculty,
         "kafedra": kafedra,
-        "faculty_value": str(faculty.pk) if faculty is not None else ("" if not faculty_raw else faculty_raw),
-        "kafedra_value": (
-            str(kafedra.pk) if kafedra is not None else ("" if dropped or not kafedra_raw else kafedra_raw)
-        ),
-        "invalid": invalid,
+        "faculty_value": _value(faculty, faculty_raw, faculty_invalid),
+        "kafedra_value": _value(kafedra, kafedra_raw, kafedra_invalid),
+        "invalid": bool(faculty_invalid or kafedra_invalid),
         "dropped": dropped,
-        "faculty_options": [],
-        "kafedra_options": [],
+        "faculty_locked": faculty_locked,
+        "kafedra_locked": kafedra_locked,
+        "faculty_options": faculty_options if with_options else [],
+        "kafedra_options": kafedra_options if with_options else [],
     }
-    if with_options:
-        scopes = None
-        if supervisor:
-            from apps.registrar.lessons_log import _supervision_scopes
-
-            scopes = _supervision_scopes(user, organization)
-        state["faculty_options"], state["kafedra_options"] = unit_options(
-            option_source, organization, faculty=faculty, scopes=scopes
-        )
-    return state
 
 
 __all__ = [

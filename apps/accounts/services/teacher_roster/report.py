@@ -37,6 +37,7 @@ FLAG_LABELS = {
     "patronymic_unverified": "ata adı bir tərəfdə boşdur",
     "patronymic_spelling": "ata adının yazılışı fərqlidir (məs. Rəhim/Rahim)",
     "typo": "ad/soyadda yazılış fərqi və ya tərs sıra",
+    "staff_rate_out_of_range": "ştat payı Sistem tənzimləmələrindəki həddən kənardır (profilə yazılmır)",
 }
 
 
@@ -165,6 +166,9 @@ def render_markdown(plan, *, max_names: int = 10, title: str = "") -> str:
         if user.profile_changes
     ]
     out.append(f"* profil fərqləri ({len(diffs)}): {_names(diffs, max_names)}")
+    rate_errors = [f"{user.account.display}: {user.rate_error}" for user in plan.users.values() if user.rate_error]
+    rate_errors += [f"{item.display}: {item.rate_error}" for item in plan.new_accounts or () if item.rate_error]
+    out.append(f"* ştat həddindən kənar ({len(rate_errors)}): {_names(rate_errors, max_names)}")
     if plan.new_accounts:
         out += ["", "### Yaradılacaq hesablar (istifadəçi adı önizləməsi)", ""]
         units = {mapped["unit"][0]: mapped["unit"][1] for mapped in plan.chair_map.values() if mapped.get("unit")}

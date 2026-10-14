@@ -147,7 +147,8 @@ class RuntimeSettingsTest(TestCase):
         self.assertEqual(fragment.status_code, 200)
         groups = fragment.context["system_settings_section"]["groups"]
         self.assertEqual(
-            {group["key"] for group in groups}, {"academic", "login", "otp", "session", "journal", "ai", "exam"}
+            {group["key"] for group in groups},
+            {"academic", "workload", "login", "otp", "session", "journal", "ai", "exam"},
         )
 
     def test_mark_trigger_reads_the_same_key(self):

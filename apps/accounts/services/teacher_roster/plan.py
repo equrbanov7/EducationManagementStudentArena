@@ -30,7 +30,6 @@ TITLE_TO_POSITION = {
     "teacher": "muellim",
     "assistant": "assistent",
 }
-MAX_STAFF_FRACTION = Decimal("1.5")
 
 
 @dataclass
@@ -46,6 +45,7 @@ class UserPlan:
     is_external: bool | None = None
     workload: dict | None = None  # sync_roster_profile(dry_run=True) nəticəsi
     flags: list = field(default_factory=list)
+    rate_error: str = ""  # ştat payı «Sistem tənzimləmələri» həddindən kənardır — profilə yazılmır
 
 
 @dataclass
@@ -70,7 +70,19 @@ def aggregate_rate(rows):
     if all(rate.kind == RATE_HOURLY for rate in rates):
         return Decimal("0"), True
     total = sum((rate.fraction or Decimal("0")) for rate in rates if rate.kind != RATE_HOURLY)
-    return min(total, MAX_STAFF_FRACTION), False
+    return total, False
+
+
+def checked_rate(rows):
+    """(pay, kənar, xəta). Pay «Sistem tənzimləmələri»ndəki ştat həddindən (defolt 0,25–1,5) kənardırsa
+    profilə YAZILMIR (``None``) və səbəb qaytarılır — əvvəlki səssiz «1,5-ə kəsmə» yoxdur (sahib 2026-10-14)."""
+    from apps.workload.public import staff_rate_error
+
+    fraction, is_external = aggregate_rate(rows)
+    if fraction is None:
+        return None, None, ""
+    error = staff_rate_error(fraction)
+    return (None, is_external, error) if error else (fraction, is_external, "")
 
 
 def best_value(values, rank):
@@ -87,7 +99,9 @@ def _user_plan(user_plan: UserPlan, chair_ids_by_row) -> None:
     if user_plan.degree and user_plan.degree != account.degree:
         user_plan.profile_changes["academic_degree"] = (account.degree, user_plan.degree)
     user_plan.position = TITLE_TO_POSITION.get(user_plan.title or "")
-    user_plan.staff_fraction, user_plan.is_external = aggregate_rate(user_plan.rows)
+    user_plan.staff_fraction, user_plan.is_external, user_plan.rate_error = checked_rate(user_plan.rows)
+    if user_plan.rate_error:
+        user_plan.flags.append("staff_rate_out_of_range")
 
     file_chairs = {chair_ids_by_row[row.row_no] for row in user_plan.rows if chair_ids_by_row.get(row.row_no)}
     if not account.chairs:
@@ -196,4 +210,4 @@ def build_plan(organization, roster, *, academic_year: str, chair_overrides=None
     )
 
 
-__all__ = ["TITLE_TO_POSITION", "Plan", "UserPlan", "aggregate_rate", "best_value", "build_plan"]
+__all__ = ["TITLE_TO_POSITION", "Plan", "UserPlan", "aggregate_rate", "best_value", "build_plan", "checked_rate"]
