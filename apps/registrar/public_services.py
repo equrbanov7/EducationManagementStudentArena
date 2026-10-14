@@ -26,6 +26,8 @@ from . import lessons_log  # noqa: F401
 from . import movements  # noqa: F401
 from . import schedule  # noqa: F401
 from . import schedule_conflicts  # noqa: F401
+from . import schedule_docx_match  # noqa: F401 — cədvəl → tapşırıq sətri (workload, 2026-10-15)
+from . import schedule_docx_parse  # noqa: F401
 from . import schedule_editor  # noqa: F401
 from . import schedule_editor_actions  # noqa: F401
 from . import schedule_grid  # noqa: F401
@@ -116,6 +118,8 @@ __all__ = [
     "render_syllabus_pdf",
     "schedule",
     "schedule_conflicts",
+    "schedule_docx_match",
+    "schedule_docx_parse",
     "schedule_editor",
     "schedule_editor_actions",
     "schedule_grid",

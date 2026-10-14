@@ -97,6 +97,40 @@ def ensure_assignable_teacher(organization, chair, teacher) -> None:
         )
 
 
+def join_chair_as_teacher(*, organization, user, chair, actor_user, reason: str) -> bool:
+    """Başqa kafedranın (və ya bağlanmamış) müəllimi bu kafedranın yükünü alır → kafedrada ƏLAVƏ
+    (``is_primary=False``) ``teacher`` üzvlüyü; öz kafedrası dəyişmir, audit jurnalına yazılır.
+
+    Yük servisi müəllimi yalnız kafedra üzvü olanda təyin edir (``workload.teacher_not_in_chair``) —
+    sahib 2026-10-12 «hamısını bağla» qərarı. Qaytarır: üzvlük yaradıldı/aktivləşdirildimi."""
+    from core.audit import log_action
+    from core.constants import AuditAction
+
+    Role = django_apps.get_model("organizations", "Role")
+    role = Role.objects.get(organization=organization, name="teacher")
+    membership, created = _membership_model().objects.get_or_create(
+        organization=organization,
+        user=user,
+        role=role,
+        scope_unit=chair,
+        defaults={"is_active": True, "is_primary": False, "assigned_by": actor_user},
+    )
+    if not created and not membership.is_active:
+        membership.is_active = True
+        membership.save(update_fields=["is_active", "updated_at"])
+        created = True
+    if created:
+        log_action(
+            AuditAction.CREATE,
+            user=actor_user,
+            organization=organization,
+            obj=membership,
+            reason=reason,
+            new_values={"user": user.username, "chair": chair.name, "role": "teacher"},
+        )
+    return created
+
+
 def parse_uuid(raw):
     """Qeyri-UUID id `filter(pk=...)`-də ValidationError → 500 verirdi (QA 2026-09-05 WORKLOAD-SCHEDULE-01)."""
     import uuid
@@ -133,6 +167,7 @@ __all__ = [
     "chair_teacher_memberships",
     "ensure_assignable_teacher",
     "is_assignable_teacher",
+    "join_chair_as_teacher",
     "resolve_chair",
     "teacher_pool",
 ]
