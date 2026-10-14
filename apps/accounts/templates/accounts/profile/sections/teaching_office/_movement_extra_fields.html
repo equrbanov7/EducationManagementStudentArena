@@ -1,20 +1,22 @@
 {% load i18n %}
-{% comment %}Tələbə hərəkəti (DONDUR = akademik məzuniyyət / UZAQLAŞDIR = xaric) —
-səbəb dialoqunun ƏLAVƏ sahələri (`reason_extra_include`).
+{% comment %}Tələbə hərəkəti (QRUPDAN ÇIXAR = köçürmə / DONDUR = akademik məzuniyyət /
+UZAQLAŞDIR = xaric / BƏRPA ET) — səbəb dialoqunun ƏLAVƏ sahələri (`reason_extra_include`).
 
 Qayda `apps.accounts.services.people.movements.create_movement` ilə eynidir:
-əmr nömrəsi + əmr tarixi MƏCBURİDİR, akademik məzuniyyətdə bitmə tarixi də
-(`effective_until`). Səbəb ≥20 simvol — dialoqun öz qaydası. Kim və nə vaxt
-etdiyi audit + `StudentMovement` sətrində qalır (silinmir).{% endcomment %}
+əmr nömrəsi + əmr tarixi MƏCBURİDİR (`data-ems-required` — boş olanda təsdiq
+düyməsi disabled), akademik məzuniyyətdə bitmə tarixi də (`effective_until`).
+Səbəb İSTƏYƏ BAĞLIDIR (sahib 2026-10-15; dialoq `reason_optional=True`) — boş
+qalsa ledger/audit sətrinə əmrdən qurulan mətn yazılır. Kim və nə vaxt etdiyi
+audit + `StudentMovement` sətrində qalır (silinmir).{% endcomment %}
 <div class="ems-grid ems-grid--2">
     <div class="ems-field">
         <label class="ems-field__label" for="{{ reason_id }}-order-number">{% trans "Əmr nömrəsi" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-        <input type="text" class="ems-input" id="{{ reason_id }}-order-number" name="order_number" maxlength="64" autocomplete="off"
+        <input type="text" class="ems-input" id="{{ reason_id }}-order-number" name="order_number" maxlength="64" autocomplete="off" data-ems-required
                placeholder="{% trans 'Məs.: 12/T' context 'accounts.groups' %}">
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="{{ reason_id }}-order-date">{% trans "Əmr tarixi" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-        <input type="date" class="ems-input" id="{{ reason_id }}-order-date" name="order_date">
+        <input type="date" class="ems-input" id="{{ reason_id }}-order-date" name="order_date" data-ems-required>
     </div>
 </div>
 {% if movement_target_group %}
@@ -37,8 +39,8 @@ etdiyi audit + `StudentMovement` sətrində qalır (silinmir).{% endcomment %}
 {% if movement_until %}
 <div class="ems-field">
     <label class="ems-field__label" for="{{ reason_id }}-until">{% trans "Məzuniyyətin bitmə tarixi" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-    <input type="date" class="ems-input" id="{{ reason_id }}-until" name="effective_until">
-    <p class="ems-field__hint">{% trans "Bu tarixə qədər tələbənin statusu «akademik məzuniyyət» olur; bərpa ayrıca əməldir." context "accounts.groups" %}</p>
+    <input type="date" class="ems-input" id="{{ reason_id }}-until" name="effective_until" data-ems-required>
+    <p class="ems-field__hint">{% trans "Bu tarixə qədər tələbənin statusu «akademik məzuniyyət» olur; qayıdanda çekmecədəki «Bərpa et» ilə qrupa qaytarılır." context "accounts.groups" %}</p>
 </div>
 {% endif %}
 <div class="tof-students__target" data-tof-movement-target>

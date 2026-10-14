@@ -42,7 +42,9 @@ _MAX_DOCUMENT_MB = 10
 #: İcazəli sənəd uzantıları: ərizə/arayış/protokol (skan və ya PDF).
 MOVEMENT_DOCUMENT_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png", ".webp"}
 
-#: Səbəbin minimum uzunluğu — handoff §8/6 («≥20 simvol»).
+#: Səbəbin köhnə minimum uzunluğu — handoff §8/6 («≥20 simvol»). 2026-10-15-dən (sahib)
+#: hərəkətdə TƏTBİQ OLUNMUR: rəsmi əsas əmrdir (nömrə + tarix məcburi), səbəb istəyə bağlıdır
+#: (bax ``apps.registrar.movements.normalize_reason``). Sabit geri uyğunluq üçün qalır.
 MOVEMENT_REASON_MIN_LENGTH = 20
 
 

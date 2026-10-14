@@ -365,12 +365,14 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
     # «Qrupu dəyiş» — tələbə qeydi (`record_id`) + hədəf qrup (`id`) + səbəb.
     section["move_hidden"] = [{"name": "action"}, {"name": "record_id"}]
     # Tələbə çekmecəsinin dialoqları («qrupdan çıxar» = başqa qrupa köçür, «dondur»,
-    # «uzaqlaşdır») tələbə-hərəkət endpoint-inə gedir (əmr № + tarix + səbəb ≥20).
+    # «uzaqlaşdır», «bərpa et») tələbə-hərəkət endpoint-inə gedir (əmr № + tarix; səbəb istəyə bağlı).
     # Qrup dəyişikliyi DB qapısı ilə yalnız rəsmi köçürmə xidmətinə buraxılır.
     section["movement_action_url"] = reverse("accounts:student_registry_action")
     section["group_options"] = payload.get("group_options", [])
     section["movement_form_data"] = {"data-tof-form": "1", "data-tof-url": section["movement_action_url"]}
     section["movement_hidden"] = [{"name": "record_id"}, {"name": "kind"}]
+    # «Bərpa et» (2026-10-15): hədəf qrup = çekmecədə açıq qrup (JS prefill), əmr № + tarix məcburi.
+    section["reinstate_hidden"] = [{"name": "record_id"}, {"name": "kind"}, {"name": "target_group"}]
     # Toplu əməlin formu AYRICA işarələnir: seçilmiş sətir id-ləri ora GÖNDƏRMƏ
     # anında əlavə olunur (dialoq doldurulması gizli sahələri sıfırlayır, ona
     # görə açılışda yazmaq işləmir) — bax `teaching_office_bulk.js`.

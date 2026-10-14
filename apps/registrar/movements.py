@@ -37,7 +37,6 @@ from django.utils import timezone
 
 from apps.registrar.enrollment_suspension import sync_enrollments_for_status
 from apps.registrar.models import (
-    MOVEMENT_REASON_MIN_LENGTH,
     AcademicStatus,
     MovementKind,
     StudentAcademicRecord,
@@ -126,13 +125,20 @@ def rule_for(kind: str) -> MovementRule:
         raise MovementError("unknown_kind", "Naməlum hərəkət növü.") from exc
 
 
-def normalize_reason(reason) -> str:
+def normalize_reason(reason, *, kind: str = "", order_number: str = "", order_date=None) -> str:
+    """Səbəb İSTƏYƏ BAĞLIDIR — hərəkətin rəsmi əsası ƏMRDİR (sahib 2026-10-15).
+
+    Əvvəl ≥20 simvol (``MOVEMENT_REASON_MIN_LENGTH``) məcburi idi; sahib: «əmr
+    yazma yerində 20 simvol lazım deyil». Əmr nömrəsi + tarixi hər növdə
+    məcburidir (``normalize_order_number`` / ``create_movement``), ona görə boş
+    səbəb ledger/audit sətrini BOŞ qoymur — əmrdən qurulan mətn yazılır.
+    """
     text = str(reason or "").strip()
-    if len(text) < MOVEMENT_REASON_MIN_LENGTH:
-        raise MovementError(
-            "reason_too_short",
-            f"Əsaslandırma ən azı {MOVEMENT_REASON_MIN_LENGTH} simvol olmalıdır.",
-        )
+    if not text:
+        label = str(status_catalog.label("student_movement", kind)) if kind else ""
+        when = order_date.strftime("%d.%m.%Y") if hasattr(order_date, "strftime") else str(order_date or "")
+        parts = [label, f"Əmr № {order_number}" if order_number else "", when]
+        text = " · ".join(part for part in parts if part)
     return text[:REASON_MAX_LENGTH]
 
 
@@ -340,10 +346,10 @@ def create_movement(
     ⚠️ Sətir ƏVVƏLCƏ deyil, SONRA yazılır: domen dəyişikliyi uğursuz olarsa
     tarixçədə «olmuş» kimi görünən əmr qalmamalıdır. İkisi eyni atomik blokdadır.
     """
-    reason = normalize_reason(reason)
     order_number = normalize_order_number(order_number)
     if order_date is None:
         raise MovementError("order_date_required", "Əmrin tarixi məcburidir.")
+    reason = normalize_reason(reason, kind=kind, order_number=order_number, order_date=order_date)
 
     record = (
         StudentAcademicRecord.objects.select_for_update(of=("self",))
