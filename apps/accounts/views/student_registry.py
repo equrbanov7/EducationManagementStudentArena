@@ -158,7 +158,7 @@ def student_registry_programs(request):
 @require_POST
 @score_write_rate_limited("student_registry_action")  # F-15 (2026-09-14)
 def student_registry_action(request):
-    """Hərəkət əmri — səbəb ≥20 simvol, əmr nömrəsi + tarix məcburi."""
+    """Hərəkət əmri — əmr nömrəsi + tarix məcburi, səbəb istəyə bağlı (sahib 2026-10-15)."""
     actor = people.resolve_actor(request)
     try:
         row = movement_service.create_movement(

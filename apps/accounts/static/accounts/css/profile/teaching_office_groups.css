@@ -14,6 +14,11 @@
 .tof-students__search .ems-input { padding-left: 34px; }
 
 .tof-students__chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.tof-students__removed-note {
+    margin: 0; padding: 8px 12px; border-radius: 10px; font-size: 12px; line-height: 1.45;
+    background: var(--ems-neutral-50, #f8fafc); color: var(--ems-text-muted, #64748b);
+    border: 1px solid var(--ems-border, #e2e8f0);
+}
 
 
 .tof-students__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
@@ -24,7 +29,9 @@
     background: var(--ems-surface, #fff);
 }
 .tof-students__row--academic_leave { background: #fffbeb; }
-.tof-students__row--expelled { opacity: .7; }
+/* Xaric edilmiş sətir solğun — amma «Bərpa et» düyməsi tam görünür (2026-10-15). */
+.tof-students__row--expelled .tof-students__avatar,
+.tof-students__row--expelled .tof-students__main { opacity: .7; }
 
 .tof-students__avatar {
     width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;

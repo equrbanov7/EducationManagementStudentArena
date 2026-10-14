@@ -5,8 +5,10 @@
  * müştəri tərəfindədir (qrup ≤ bir neçə yüz tələbədir). Hərəkət düymələri
  * («Qrupdan çıxar» = başqa qrupa köçür / «Dondur» / «Uzaqlaşdır») səbəb dialoqlarını
  * `data-tof-open` + `data-tof-prefill` ilə açır — göndərişi `teaching_office.js`
- * edir (səbəb ≥20 + təsdiq məcburidir), uğurda bölmə yenilənir və çekmecə
- * eyni qrup üçün YENİDƏN açılır ki, istifadəçi nəticəni görsün.
+ * edir (əmr № + tarix + təsdiq məcburi, səbəb istəyə bağlı — sahib 2026-10-15),
+ * uğurda bölmə yenilənir və çekmecə eyni qrup üçün YENİDƏN açılır ki, istifadəçi
+ * nəticəni görsün. Məzuniyyətdə / xaric edilmiş tələbələr (`removed_rows`) qrupun
+ * FK-sını saxlayır — siyahıda solğun görünür və «Bərpa et» (reinstatement) ilə qayıdır.
  *
  * AJAX-safe: EMSDelegate (bölmə swap-dan sonra da işləyir), null-safe.
  * CSP: xarici fayl; dinamik mətnlər data-atributdan oxunur. */
@@ -31,11 +33,12 @@
     // 2026-10-13 (gecə): «Starosta təyin et / dəyiş / götür» dialoqları — göndərişdən sonra çekmecə qayıdır.
     var LEAD_DIALOG_ID = "tofGroupLeadDialog";
     var LEAD_REMOVE_DIALOG_ID = "tofGroupLeadRemoveDialog";
-    var DIALOG_IDS = ["tofStudentTransferDialog", "tofStudentFreezeDialog", "tofStudentExpelDialog", ADD_DIALOG_ID, MOVE_DIALOG_ID, LEAD_DIALOG_ID, LEAD_REMOVE_DIALOG_ID];
+    var REINSTATE_DIALOG_ID = "tofStudentReinstateDialog";
+    var DIALOG_IDS = ["tofStudentTransferDialog", "tofStudentFreezeDialog", "tofStudentExpelDialog", REINSTATE_DIALOG_ID, ADD_DIALOG_ID, MOVE_DIALOG_ID, LEAD_DIALOG_ID, LEAD_REMOVE_DIALOG_ID];
     var state = {
         url: "", name: "", planUrl: "", candidatesUrl: "", groupActive: true,
         rowManage: false, rowLead: false,
-        rows: [], canManage: false, canMove: false, status: "", reopen: "",
+        rows: [], removed: [], canManage: false, canMove: false, status: "", reopen: "",
         lead: { name: "", username: "", warning: "" }
     };
 
@@ -68,9 +71,18 @@
         }
         if (state.canMove && row.status === "enrolled") {
             out.push('<button type="button" class="ems-btn ems-btn--sm ems-btn--warning" data-tof-open="tofStudentFreezeDialog" data-tof-student-name="' + esc(row.name) + '" data-tof-prefill=\'' + esc(prefill({ record_id: row.id, kind: "academic_leave" })) + '\'>' + esc(t("freeze")) + "</button>");
-            out.push('<button type="button" class="ems-btn ems-btn--sm ems-btn--danger" data-tof-open="tofStudentExpelDialog" data-tof-student-name="' + esc(row.name) + '" data-tof-prefill=\'' + esc(prefill({ record_id: row.id, kind: "expulsion" })) + '\'>' + esc(t("expel")) + "</button>");
+            out.push(expelButton(row));
+        }
+        // «Bərpa et» (2026-10-15): bu qrupa qaytarır — arxiv qrupa yox (server də hədəfi əhatədə yoxlayır).
+        if (state.canMove && state.groupActive && (row.status === "academic_leave" || row.status === "expelled")) {
+            out.push('<button type="button" class="ems-btn ems-btn--sm ems-btn--primary" data-tof-open="' + REINSTATE_DIALOG_ID + '" data-tof-student-name="' + esc(row.name) + '" data-tof-prefill=\'' + esc(prefill({ record_id: row.id, kind: "reinstatement", target_group: state.groupId || "" })) + '\'><i class="fas fa-rotate-left" aria-hidden="true"></i> ' + esc(t("reinstate")) + "</button>");
+            if (row.status === "academic_leave") { out.push(expelButton(row)); }
         }
         return out.join("");
+    }
+
+    function expelButton(row) {
+        return '<button type="button" class="ems-btn ems-btn--sm ems-btn--danger" data-tof-open="tofStudentExpelDialog" data-tof-student-name="' + esc(row.name) + '" data-tof-prefill=\'' + esc(prefill({ record_id: row.id, kind: "expulsion" })) + '\'>' + esc(t("expel")) + "</button>";
     }
 
     function isLead(row) { return !!state.lead.username && row.username === state.lead.username; }
@@ -82,6 +94,9 @@
         if (program) { meta.push(program); }
         if (row.education_form_label) { meta.push(row.education_form_label); }
         if (row.admission_year) { meta.push(t("admission") + " " + row.admission_year); }
+        // Qrupdan çıxmış tələbə: onu çıxaran əmr (+ məzuniyyətin bitmə tarixi).
+        if (row.order_number) { meta.push(t("order") + " " + row.order_number + (row.order_date ? " (" + row.order_date + ")" : "")); }
+        if (row.until) { meta.push(t("until") + ": " + row.until); }
         return (
             '<li class="tof-students__row tof-students__row--' + esc(row.status) + '" data-tof-student-row data-status="' + esc(row.status) + '" data-search="' + esc((row.name + " " + row.username).toLowerCase()) + '">' +
             '<span class="tof-students__avatar" aria-hidden="true">' + esc(initials(row.name)) + "</span>" +
@@ -116,7 +131,7 @@
         var empty = r.querySelector("[data-tof-students-empty]");
         var emptyText = r.querySelector("[data-tof-students-empty-text]");
         if (empty) {
-            empty.hidden = !(state.rows.length && !visible);
+            empty.hidden = !((state.rows.length + state.removed.length) && !visible);
             if (emptyText) { emptyText.textContent = t("no-match"); }
         }
     }
@@ -194,10 +209,16 @@
         var empty = r.querySelector("[data-tof-students-empty]");
         var emptyText = r.querySelector("[data-tof-students-empty-text]");
         list.setAttribute("aria-busy", "false");
-        list.innerHTML = state.rows.map(rowHtml).join("");
-        if (meta) { meta.textContent = t("count").replace("%d", String(state.rows.length)); }
+        list.innerHTML = state.rows.concat(state.removed).map(rowHtml).join("");
+        if (meta) {
+            var text = t("count").replace("%d", String(state.rows.length));
+            if (state.removed.length) { text += " · " + t("removed").replace("%d", String(state.removed.length)); }
+            meta.textContent = text;
+        }
+        var note = r.querySelector("[data-tof-students-removed-note]");
+        if (note) { note.hidden = !state.removed.length; }
         if (empty) {
-            empty.hidden = state.rows.length > 0;
+            empty.hidden = state.rows.length + state.removed.length > 0;
             if (emptyText) { emptyText.textContent = t("empty"); }
         }
         renderLead(true);
@@ -221,6 +242,8 @@
         if (title) { title.textContent = name; }
         var box = r.querySelector("[data-tof-students-error]");
         if (box) { box.hidden = true; }
+        var note = r.querySelector("[data-tof-students-removed-note]");
+        if (note) { note.hidden = true; }
         var search = r.querySelector("[data-tof-students-search]");
         if (search) { search.value = ""; }
         state.status = "";
@@ -335,6 +358,7 @@
             warning: button.getAttribute("data-lead-warning") || ""
         };
         state.rows = [];
+        state.removed = [];
         state.canManage = false;
         resetDrawer(state.name);
         renderLead(false);
@@ -345,6 +369,8 @@
             .then(function (payload) {
                 if (state.url !== requestUrl) { return; }
                 state.rows = payload.rows || [];
+                state.removed = payload.removed_rows || [];
+                if (payload.group && payload.group.id) { state.groupId = String(payload.group.id); }
                 state.canManage = !!payload.can_manage;
                 state.canMove = !!payload.can_move_students;
                 render();

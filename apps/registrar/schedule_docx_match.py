@@ -183,6 +183,16 @@ class Resolver:
             tiers.append(("subgroup", sorted(subs, key=lambda unit: unit.name)))
         return tiers
 
+    def group_units(self, label: GroupLabel) -> list:
+        """Başlığın həll olunduğu BÜTÜN qrup vahidləri (öz qrupu, eyni adlı ana qrup(lar), alt qruplar) —
+        açılışdan asılı olmayan oxu (``workload.assign_task_rows_from_timetable`` tapşırıq sətirlərini
+        bu qruplar üzrə axtarır). Sıra :meth:`_unit_tiers` ilə eynidir, təkrarlar atılır."""
+        seen: dict = {}
+        for _via, units in self._unit_tiers(label):
+            for unit in units:
+                seen.setdefault(unit.pk, unit)
+        return list(seen.values())
+
     def _best(self, offerings, name):
         scored = sorted(((subject_score(name, o.subject.name), o) for o in offerings), key=lambda item: -item[0])
         if not scored or scored[0][0] < SUBJECT_MIN_SCORE:
@@ -324,4 +334,17 @@ class Resolver:
         return own + guests
 
 
-__all__ = ["CODE_ALIASES", "Resolution", "Resolver", "Target", "code_key", "split_teacher", "subject_score"]
+__all__ = [
+    "CODE_ALIASES",
+    "SUBJECT_MARGIN",
+    "SUBJECT_MIN_SCORE",
+    "TEACHER_FUZZY",
+    "Resolution",
+    "Resolver",
+    "Target",
+    "code_key",
+    "split_teacher",
+    "subject_contains",
+    "subject_score",
+    "surname_key",
+]

@@ -20,7 +20,7 @@ from openpyxl import Workbook
 from apps.organizations.models import Membership, OrgUnit
 from apps.registrar.models import CourseOffering, Subject
 from apps.workload.models import TeacherAssignment, TeachingTask
-from apps.workload.services.task_form1_parsing import group_key, group_tokens, hours_value, name_words
+from apps.workload.services.task_form1_parsing import _is_total, group_key, group_tokens, hours_value, name_words
 from core.constants import OrgUnitType, RoleScopeType
 
 from .factories import TEACHER_PERMS, activate_member, make_org
@@ -44,6 +44,14 @@ class Form1HelperTests(SimpleTestCase):
             ("haciyeva", "rena", "cavadxan"),
         )
         self.assertEqual(name_words("b.ü.f.dMahmud Hümbətov Fərzəli Ştat"), ("mahmud", "humbetov", "ferzeli"))
+
+    def test_umumi_subjects_are_not_totals(self):
+        # 2026-10-15: «Ümumi kimya» / «Ümumi biologiya» fənləri yekun sətri kimi atılırdı.
+        for subject in ("Ümumi kimya", "Ümumi biologiya BT/QM", "ATMF II blok\n2. Ümumi mikrobiologiya"):
+            self.assertFalse(_is_total("236 QM", subject), subject)
+        for total in ("Ümumi:", "Ştat ümumi:", "Saat hesabı ümumi:", "CƏMİ", "UNİVERSİTET ÜZRƏ CƏMİ"):
+            self.assertTrue(_is_total("", total), total)
+        self.assertEqual(hours_value("30x3"), 90)
 
 
 class Form1ImportTests(TestCase):

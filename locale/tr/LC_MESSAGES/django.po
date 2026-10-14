@@ -96980,3 +96980,63 @@ msgstr "Görevlendirmeden öğretim elemanı onayına kadar tüm aşamaların fa
 msgctxt "exams.template.create_exam_modal_form"
 msgid "Sizin səlahiyyətinizlə yalnız Sınaq imtahanı yaradılır — kateqoriya avtomatik təyin olunur."
 msgstr "Yetkinizle yalnızca Quiz sınavı oluşturulabilir — kategori otomatik olarak atanır."
+
+msgctxt "ui.dialog"
+msgid "(istəyə bağlı)"
+msgstr "(isteğe bağlı)"
+
+msgctxt "accounts.student_registry"
+msgid "Universitetin bütün tələbələri: ixtisas, qrup, kurs, forma, maliyyələşmə və akademik status. Hərəkət əmr nömrəsi və tarixi ilə yazılır; səbəb istəyə bağlıdır."
+msgstr "Üniversitenin tüm öğrencileri: bölüm, grup, sınıf, öğrenim şekli, finansman ve akademik durum. Hareket emir numarası ve tarihiyle kaydedilir; gerekçe isteğe bağlıdır."
+
+msgctxt "accounts.student_registry"
+msgid "Rəsmi əsas əmrdir (nömrə + tarix). Səbəb istəyə bağlıdır — boş qalsa audit sətrinə əmrin növü və nömrəsi yazılır."
+msgstr "Resmî dayanak emirdir (numara + tarih). Gerekçe isteğe bağlıdır — boş bırakılırsa denetim kaydına emrin türü ve numarası yazılır."
+
+msgctxt "accounts.groups"
+msgid "Rəsmi əsas əmrdir (nömrə + tarix). Səbəb istəyə bağlıdır — boş qalsa audit sətrinə əmrin növü və nömrəsi yazılır."
+msgstr "Resmî dayanak emirdir (numara + tarih). Gerekçe isteğe bağlıdır — boş bırakılırsa denetim kaydına emrin türü ve numarası yazılır."
+
+msgctxt "accounts.groups"
+msgid "Qrupun tələbələri. Akademik məzuniyyətdə və xaric edilmiş tələbələr də burada qalır (süzgəc) və «Bərpa et» ilə qrupa qaytarıla bilər. Hər hərəkət əmr nömrəsi və tarixi ilə yazılır; tarixçə silinmir."
+msgstr "Grubun öğrencileri. Akademik izindeki ve kaydı silinen öğrenciler de burada kalır (filtre) ve «Geri al» ile gruba döndürülebilir. Her hareket emir numarası ve tarihiyle kaydedilir; geçmiş silinmez."
+
+msgctxt "accounts.groups"
+msgid "Tələbə hədəf qrupa köçürülür: bu qrupun siyahısından çıxır və hədəf qrupun çekmecəsində görünür. Köhnə qrupdakı jurnal qeydiyyatı tarixçəyə keçir, silinmir. Əmr nömrəsi və tarixi məcburidir."
+msgstr "Öğrenci hedef gruba nakledilir: bu grubun listesinden çıkar ve hedef grubun panelinde görünür. Eski gruptaki yoklama defteri kaydı geçmişe aktarılır, silinmez. Emir numarası ve tarihi zorunludur."
+
+msgctxt "accounts.groups"
+msgid "Status «akademik məzuniyyət» olur: tələbə qrupun aktiv siyahısından və cari semestrin açıq jurnallarından çıxır (qeydiyyatı dondurulur), girişi açıq qalır. Bu çekmecədə «Məzuniyyətdə» süzgəcində və «Tələbə reyestri»ndə görünür; «Bərpa et» ilə qrupa qaytarılır. Əmr nömrəsi, tarixi və bitmə tarixi məcburidir."
+msgstr "Durum «akademik izin» olur: öğrenci grubun aktif listesinden ve cari dönemin açık yoklama defterlerinden çıkar (kaydı dondurulur), girişi açık kalır. Bu panelde «İzinde» filtresinde ve «Öğrenci sicili»nde görünür; «Geri al» ile gruba döndürülür. Emir numarası, tarihi ve bitiş tarihi zorunludur."
+
+msgctxt "accounts.groups"
+msgid "Status «xaric edilib» olur: tələbə qrupun aktiv siyahısından və cari semestrin açıq jurnallarından çıxır, hesabının girişi bağlanır. Akademik qeyd və qiymət tarixçəsi silinmir — bu çekmecədə «Xaric edilib» süzgəcində və «Tələbə reyestri»ndə «Rəsmi status» süzgəci ilə tapılır; «Bərpa et» ilə geri qaytarıla bilər. Əmr nömrəsi və tarixi məcburidir."
+msgstr "Durum «kaydı silindi» olur: öğrenci grubun aktif listesinden ve cari dönemin açık yoklama defterlerinden çıkar, hesabın girişi kapatılır. Akademik kayıt ve not geçmişi silinmez — bu panelde «Kaydı silindi» filtresinde ve «Öğrenci sicili»nde «Resmî durum» filtresiyle bulunur; «Geri al» ile geri döndürülebilir. Emir numarası ve tarihi zorunludur."
+
+msgctxt "accounts.groups"
+msgid "Tələbəni bərpa et (qrupa qaytar)"
+msgstr "Öğrenciyi geri al (gruba döndür)"
+
+msgctxt "accounts.groups"
+msgid "Status yenidən «qeydiyyatlı» olur və tələbə bu qrupun aktiv siyahısına qayıdır: cari semestrin dondurulmuş jurnal qeydiyyatları bərpa olunur, bağlanmış giriş yenidən açılır. Əmr nömrəsi və tarixi məcburidir."
+msgstr "Durum yeniden «kayıtlı» olur ve öğrenci bu grubun aktif listesine döner: cari dönemin dondurulmuş yoklama defteri kayıtları geri yüklenir, kapatılmış giriş yeniden açılır. Emir numarası ve tarihi zorunludur."
+
+msgctxt "accounts.groups"
+msgid "Bərpa et"
+msgstr "Geri al"
+
+msgctxt "accounts.groups"
+msgid "Əmr №"
+msgstr "Emir No."
+
+msgctxt "accounts.groups"
+msgid "Məzuniyyətdə və xaric edilmiş tələbələr qrupun aktiv siyahısında sayılmır, akademik qeydləri və qiymət tarixçəsi silinmir. «Bərpa et» əmri ilə bu qrupa qaytarılır; «Tələbə reyestri»ndə «Rəsmi status» süzgəci ilə də tapılır."
+msgstr "İzindeki ve kaydı silinen öğrenciler grubun aktif listesinde sayılmaz, akademik kayıtları ve not geçmişi silinmez. «Geri al» emriyle bu gruba döndürülür; «Öğrenci sicili»nde «Resmî durum» filtresiyle de bulunur."
+
+msgctxt "accounts.groups"
+msgid "Bu tarixə qədər tələbənin statusu «akademik məzuniyyət» olur; qayıdanda çekmecədəki «Bərpa et» ilə qrupa qaytarılır."
+msgstr "Bu tarihe kadar öğrencinin durumu «akademik izin» olur; dönüşte paneldeki «Geri al» ile gruba döndürülür."
+
+msgctxt "accounts.groups"
+msgid "%%d qrupdan çıxıb (məzuniyyət / xaric)"
+msgstr "%%d gruptan ayrıldı (izin / kayıt silme)"

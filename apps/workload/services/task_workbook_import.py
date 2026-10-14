@@ -43,6 +43,7 @@ from apps.workload.services.task_workbook_parsing import (
     _SPLIT_RE,
     GROUP_CODE_SPECIALTY,
     PERIODS,
+    SHEET_CHAIR_RENAMES,
     SHEET_TO_CHAIR,
     SPECIALTY_ALIASES,
     _int,
@@ -149,7 +150,11 @@ class Importer(TeacherResolverMixin):
             if slug.startswith(slug_name(prefix)):
                 # Prod 2026-10-12: struktur planından sonra adlar «… kafedrası» sonluğu ilə yazılır
                 # («Proqramlaşdırma və informasiya təhlükəsizliyi kafedrası») — hər iki forma qəbul olunur.
-                return self.chairs.get(normalize(chair_name)) or self.chairs.get(normalize(f"{chair_name} kafedrası"))
+                for name in (chair_name, *SHEET_CHAIR_RENAMES.get(chair_name, ())):
+                    chair = self.chairs.get(normalize(name)) or self.chairs.get(normalize(f"{name} kafedrası"))
+                    if chair is not None:
+                        return chair
+                return None
         return None
 
     def resolve_specialty(self, text: str, group_token: str, chair=None):

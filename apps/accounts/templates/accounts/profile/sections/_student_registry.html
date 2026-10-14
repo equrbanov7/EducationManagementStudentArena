@@ -12,12 +12,13 @@ SİLMƏ YOXDUR — status dəyişikliyi TARİXÇƏ YAZISIDIR (§8/5): hər əmr
 ⚠️ `<h1>` yazılmır (qabıq verir). CSS/JS xarici fayldadır (CSP: SELF+NONCE).
 {% endcomment %}
 {% if 'student-registry' in allowed_sections %}
-{% trans "Universitetin bütün tələbələri: ixtisas, qrup, kurs, forma, maliyyələşmə və akademik status. Hərəkət yalnız əmr nömrəsi, tarix və əsaslandırma ilə yazılır." context "accounts.student_registry" as sr_subtitle %}
+{% trans "Universitetin bütün tələbələri: ixtisas, qrup, kurs, forma, maliyyələşmə və akademik status. Hərəkət əmr nömrəsi və tarixi ilə yazılır; səbəb istəyə bağlıdır." context "accounts.student_registry" as sr_subtitle %}
 {% trans "Tələbə hərəkəti — əmr" context "accounts.student_registry" as sr_move_title %}
 {% trans "Əmr yazıldıqdan sonra silinmir və dəyişdirilmir; tələbənin statusu dərhal dəyişir və tarixçəyə bir sətir əlavə olunur." context "accounts.student_registry" as sr_move_sub %}
 {% trans "Əmri yaz" context "accounts.student_registry" as sr_move_btn %}
 {% trans "Əsas və əsaslandırma" context "accounts.student_registry" as sr_reason_label %}
 {% trans "Tələbə kartı" context "accounts.student_registry" as sr_card_title %}
+{% trans "Rəsmi əsas əmrdir (nömrə + tarix). Səbəb istəyə bağlıdır — boş qalsa audit sətrinə əmrin növü və nömrəsi yazılır." context "accounts.student_registry" as sr_reason_hint %}
 <section class="profile-section-panel profile-section--stsvc {% if active_section == 'student-registry' %}is-active{% endif %}"
          data-profile-section-panel="student-registry"
          data-source-url="{{ profile_base_url }}?section=student-registry">
@@ -62,7 +63,7 @@ SİLMƏ YOXDUR — status dəyişikliyi TARİXÇƏ YAZISIDIR (§8/5): hər əmr
     {% endif %}
 
     {% if student_registry_section.can_move %}
-        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="srMovementDialog" reason_title=sr_move_title reason_subtitle=sr_move_sub reason_label=sr_reason_label reason_submit_label=sr_move_btn reason_submit_tone="primary" reason_hidden=student_registry_section.movement_hidden reason_extra_include="accounts/profile/sections/student_services/_movement_fields.html" reason_form_data=student_registry_section.movement_form_data %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="srMovementDialog" reason_title=sr_move_title reason_subtitle=sr_move_sub reason_label=sr_reason_label reason_optional=True reason_hint=sr_reason_hint reason_submit_label=sr_move_btn reason_submit_tone="primary" reason_hidden=student_registry_section.movement_hidden reason_extra_include="accounts/profile/sections/student_services/_movement_fields.html" reason_form_data=student_registry_section.movement_form_data %}
     {% endif %}
 </div>
 {% endif %}

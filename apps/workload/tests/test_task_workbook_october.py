@@ -253,3 +253,16 @@ class OctoberWorkbookTests(TestCase):
         self._run("--apply", "--no-create-teachers", "--reassign", "--teacher", "NAMƏLUM=minaye.a")
         self.assertEqual(TeacherAssignment.objects.get(row=row, activity="seminar").teacher, self.teachers["minaye.a"])
         self.assertEqual(User.objects.count(), users_before)
+
+
+class RenamedChairSheetTest(SimpleTestCase):
+    """2026-10-15: «Ekologiya» vərəqi struktur planından sonrakı «Yer kadastrı və meşəçilik kafedrası»na düşür."""
+
+    def test_old_sheet_name_maps_to_renamed_chair(self):
+        from apps.workload.services.task_workbook_import import Importer, normalize
+
+        chair = object()
+        importer = Importer.__new__(Importer)
+        importer.chairs = {normalize("Yer kadastrı və meşəçilik kafedrası"): chair}
+        self.assertIs(importer.chair_for_sheet("Ekologiya"), chair)
+        self.assertIsNone(importer.chair_for_sheet("Mexanika və riyaziyyat"))

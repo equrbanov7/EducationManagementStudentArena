@@ -1,8 +1,9 @@
 {% load i18n %}
 {% comment %}
 Ekran 09 — «Tələbə hərəkəti» dialoqunun sahələri (`_reason_dialog.html`-in
-`reason_extra_include`-u). Səbəb məcburiyyəti (≥20 simvol) dialoqun ÖZ
-qatındadır — burada TƏKRARLANMIR.
+`reason_extra_include`-u). Səbəb İSTƏYƏ BAĞLIDIR (sahib 2026-10-15: rəsmi
+əsas əmrdir) — dialoq `reason_optional=True`; əmr nömrəsi + tarixi
+`data-ems-required` ilə məcburidir (boş olanda təsdiq düyməsi disabled).
 
 Hansı hədəf sahəsinin görünəcəyi SEÇİLƏN NÖVDƏN asılıdır; qayda serverdən
 `data-sr-kinds` JSON-u ilə gəlir (`movement_kinds()` → `RULES`), yəni state
@@ -32,14 +33,14 @@ məcburiyyət serverdə (`registrar.movements.validate`) yoxlanılır.
             {% trans "Əmr nömrəsi" context "accounts.student_registry" %}
             <span class="ems-field__req" aria-hidden="true">*</span>
         </label>
-        <input class="ems-input" type="text" id="srOrderNumber" name="order_number" maxlength="64" required>
+        <input class="ems-input" type="text" id="srOrderNumber" name="order_number" maxlength="64" required data-ems-required>
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="srOrderDate">
             {% trans "Əmrin tarixi" context "accounts.student_registry" %}
             <span class="ems-field__req" aria-hidden="true">*</span>
         </label>
-        <input class="ems-input" type="date" id="srOrderDate" name="order_date" required>
+        <input class="ems-input" type="date" id="srOrderDate" name="order_date" required data-ems-required>
     </div>
 </div>
 

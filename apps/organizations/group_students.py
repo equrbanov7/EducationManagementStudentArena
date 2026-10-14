@@ -103,6 +103,7 @@ def group_students(request, slug, unit_id):
         .select_related("student", "program", "group")
         .order_by("student__last_name", "student__first_name", "student__username")
     )
+    removed = _removed_rows(organization, unit, StudentAcademicRecord)
     # Audit 2026-09-28 S4: idarə düymələri yalnız qrup `unit.group_manage`
     # əhatəsindədirsə (server yazıda onsuz da bu əhatəni yoxlayır).
     manage_scope = group_manage_scope(request, organization)
@@ -114,10 +115,54 @@ def group_students(request, slug, unit_id):
             "ok": True,
             "group": {"id": str(unit.pk), "name": unit.name, "is_active": unit.is_active},
             "rows": [_row(record) for record in records],
+            # 2026-10-15 (sahib): «çıxardığım birini sonra əlavə edə bilim» — məzuniyyətdə / xaric
+            # edilmiş tələbələr qrupun FK-sını saxlayır (status dəyişir, qrup yox); çekmecədə ayrıca
+            # görünür və «Bərpa et» (reinstatement əmri) ilə bu qrupa qaytarılır.
+            "removed_rows": removed,
             "can_manage": can_manage,
             "can_move_students": can_move_students(request),
         }
     )
+
+
+#: Qrupun aktiv siyahısından ÇIXMIŞ, amma qeydi bu qrupda qalan statuslar (bərpa oluna bilər).
+REMOVED_STATUSES = ("academic_leave", "expelled")
+_REMOVING_KINDS = ("academic_leave", "expulsion")
+
+
+def _removed_rows(organization, unit, record_model) -> list:
+    """Məzuniyyətdə / xaric edilmiş tələbələr + onları çıxaran SON əmr (bir əlavə sorğu).
+
+    Akademik məzuniyyət və xaric etmə yalnız STATUSU dəyişir (``registrar.movements``):
+    ``group`` FK-sı qalır, ``is_active`` isə ``False`` olur — ona görə aktiv siyahıda
+    görünmürdülər və «hara düşdülər?» sualı yaranırdı.
+    """
+    records = list(
+        record_model.objects.filter(organization=organization, group=unit, status__in=REMOVED_STATUSES)
+        .select_related("student", "program", "group")
+        .order_by("student__last_name", "student__first_name", "student__username")
+    )
+    if not records:
+        return []
+    movement_model = django_apps.get_model("registrar", "StudentMovement")
+    last = {}
+    for movement in (
+        movement_model.objects.filter(
+            organization=organization, record_id__in=[r.pk for r in records], kind__in=_REMOVING_KINDS
+        )
+        .only("record_id", "kind", "order_number", "order_date", "effective_until", "created_at")
+        .order_by("-created_at")
+    ):
+        last.setdefault(movement.record_id, movement)
+    rows = []
+    for record in records:
+        row = _row(record)
+        movement = last.get(record.pk)
+        row["order_number"] = movement.order_number if movement else ""
+        row["order_date"] = movement.order_date.strftime("%d.%m.%Y") if movement and movement.order_date else ""
+        row["until"] = movement.effective_until.strftime("%d.%m.%Y") if movement and movement.effective_until else ""
+        rows.append(row)
+    return rows
 
 
 #: Namizəd axtarışının səhifə ölçüsü (searchable-select lazy scroll ilə uzanır).

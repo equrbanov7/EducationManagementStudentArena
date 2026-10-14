@@ -5,7 +5,9 @@ Siyahı JSON-dan (`organizations:group_students`) gəlir və
 `teaching_office_groups.js` render edir — burada yalnız karkas, skeleton,
 axtarış və boş vəziyyət var. Bütün mətnlər data-atributla JS-ə ötürülür
 (xarici JS Django şablonundan keçmir). Düymələr `data-tof-open` ilə mövcud
-səbəb dialoqlarını açır — səbəb ≥20 simvol və təsdiq MƏCBURİDİR.{% endcomment %}
+səbəb dialoqlarını açır — əmr nömrəsi + tarixi və təsdiq MƏCBURİDİR, səbəb
+istəyə bağlıdır (sahib 2026-10-15). Məzuniyyətdə / xaric edilmiş tələbələr
+(`removed_rows`) də siyahıdadır — «Bərpa et» ilə qrupa qaytarılır.{% endcomment %}
 <div class="tof-students"
      data-tof-students
      data-t-loading="{% trans 'Tələbələr yüklənir…' context 'accounts.groups' %}"
@@ -21,6 +23,10 @@ səbəb dialoqlarını açır — səbəb ≥20 simvol və təsdiq MƏCBURİDİR
      data-t-profile="{% trans 'Profilə bax' context 'accounts.groups' %}"
      data-t-freeze="{% trans 'Dondur' context 'accounts.groups' %}"
      data-t-expel="{% trans 'Uzaqlaşdır' context 'accounts.groups' %}"
+     data-t-reinstate="{% trans 'Bərpa et' context 'accounts.groups' %}"
+     data-t-removed="{% trans '%d qrupdan çıxıb (məzuniyyət / xaric)' context 'accounts.groups' %}"
+     data-t-order="{% trans 'Əmr №' context 'accounts.groups' %}"
+     data-t-until="{% trans 'Məzuniyyətin bitmə tarixi' context 'accounts.groups' %}"
      data-t-status-enrolled="{% trans 'Qeydiyyatlı' context 'accounts.groups' %}"
      data-t-status-academic_leave="{% trans 'Akademik məzuniyyət' context 'accounts.groups' %}"
      data-t-status-expelled="{% trans 'Xaric edilib' context 'accounts.groups' %}"
@@ -88,7 +94,9 @@ səbəb dialoqlarını açır — səbəb ≥20 simvol və təsdiq MƏCBURİDİR
             <button type="button" class="tof-chip is-active" data-tof-students-status="">{% trans "Hamısı" context "accounts.groups" %}</button>
             <button type="button" class="tof-chip" data-tof-students-status="enrolled">{% trans "Qeydiyyatlı" context "accounts.groups" %}</button>
             <button type="button" class="tof-chip" data-tof-students-status="academic_leave">{% trans "Məzuniyyətdə" context "accounts.groups" %}</button>
+            <button type="button" class="tof-chip" data-tof-students-status="expelled">{% trans "Xaric edilib" context "accounts.groups" %}</button>
         </div>
+        <p class="tof-students__removed-note" data-tof-students-removed-note role="note" hidden>{% trans "Məzuniyyətdə və xaric edilmiş tələbələr qrupun aktiv siyahısında sayılmır, akademik qeydləri və qiymət tarixçəsi silinmir. «Bərpa et» əmri ilə bu qrupa qaytarılır; «Tələbə reyestri»ndə «Rəsmi status» süzgəci ilə də tapılır." context "accounts.groups" %}</p>
     </div>
 
     <p class="ems-msg ems-msg--error" data-tof-students-error role="alert" hidden></p>

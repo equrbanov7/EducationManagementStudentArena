@@ -30,7 +30,7 @@ from core.constants import OrgUnitType
 from ..constants import ACTIVITY_TOTAL_FIELD, TaskStatus
 from ..models import TeachingTask
 from .imports import normalize
-from .people import chair_teacher_memberships
+from .people import chair_teacher_memberships, join_chair_as_teacher
 from .task_form1_parsing import group_key, group_tokens, name_words
 from .task_load_reassign import ASSIGNED, REASSIGNED
 from .task_workbook_choice import CHOSEN_NONE, block_options, rich_lines
@@ -157,32 +157,14 @@ class Form1Importer:
         2026-10-12 «hamısını bağla» qərarı ilə açıq əlavə; öz kafedrası dəyişmir; audit jurnalına yazılır."""
         if not self.importer.apply:
             return
-        from apps.organizations.models import Role
-        from core.audit import log_action
-        from core.constants import AuditAction
-
-        role = Role.objects.get(organization=self.org, name="teacher")
-        membership, created = Membership.objects.get_or_create(
+        if join_chair_as_teacher(
             organization=self.org,
             user=user,
-            role=role,
-            scope_unit=self.chair,
-            defaults={"is_active": True, "is_primary": False, "assigned_by": self.importer.actor_user},
-        )
-        if not created and not membership.is_active:
-            membership.is_active = True
-            membership.save(update_fields=["is_active", "updated_at"])
-            created = True
-        if created:
+            chair=self.chair,
+            actor_user=self.importer.actor_user,
+            reason="workload.form1_import: başqa kafedranın müəllimi bu kafedranın yükünü alır (sahib qərarı)",
+        ):
             self.counters["chair_membership_added"] += 1
-            log_action(
-                AuditAction.CREATE,
-                user=self.importer.actor_user,
-                organization=self.org,
-                obj=membership,
-                reason="workload.form1_import: başqa kafedranın müəllimi bu kafedranın yükünü alır (sahib qərarı)",
-                new_values={"user": user.username, "chair": self.chair.name, "role": "teacher"},
-            )
         if user not in self._chair_users:
             self._chair_users.append(user)
 

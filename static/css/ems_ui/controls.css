@@ -157,6 +157,14 @@
     color: var(--ems-danger);
 }
 
+/* «(istəyə bağlı)» — səbəbi məcburi olmayan dialoq sahəsi (2026-10-15). */
+.ems-field__opt {
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ems-neutral-500);
+}
+
 .ems-input,
 .ems-select,
 .ems-textarea {

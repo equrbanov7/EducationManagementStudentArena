@@ -14,6 +14,10 @@ KONTEKST MÜQAVİLƏSİ
   reason_hint        — normal ipucu
   reason_hint_invalid— qısa olduqda görünən ipucu
   reason_min         — minimum simvol (default 20)
+  reason_optional    — True: səbəb İSTƏYƏ BAĞLIDIR (min 0, ulduz/sayğac yox, etiketə
+                       «(istəyə bağlı)»). Əmrlə yazılan tələbə hərəkəti üçün (sahib
+                       2026-10-15: rəsmi əsas əmrdir). Məcburi sahələr `data-ems-required`
+                       ilə işarələnir — boş olanda təsdiq düyməsi yenə disabled qalır.
   reason_field_name  — POST sahəsinin adı (default "reason")
   reason_submit_label, reason_submit_tone (primary|warning|danger)
   reason_action      — form action URL (verilməsə JS özü göndərir)
@@ -23,7 +27,9 @@ KONTEKST MÜQAVİLƏSİ
                        şablonundan gəlir (məs. `data-tof-form`)
   reason_extra_include — opsional şablon: səbəb sahəsindən ƏVVƏL render olunan
                        əlavə sahələr (məs. «rəhbər» seçicisi). Səbəb məcburiyyəti
-                       DƏYİŞMİR — təsdiq düyməsi yenə ≥20 simvola bağlıdır.
+                       DƏYİŞMİR — təsdiq düyməsi yenə ≥20 simvola bağlıdır. Yoxlanan
+                       sahə HƏMİŞƏ `data-ems-reason-field` textarea-dır (əlavə sahədəki
+                       `.ems-input` deyil — 2026-10-15 düzəlişi).
 {% endcomment %}
 {% load i18n %}
 <div class="ems-overlay ems-overlay--dialog" id="{{ reason_id }}" hidden>
@@ -42,16 +48,16 @@ KONTEKST MÜQAVİLƏSİ
                         aria-label="{% trans 'Bağla' context 'ui.dialog' %}">×</button>
             </div>
 
-            <div class="ems-dialog__body ems-reason" data-ems-min-length="{{ reason_min|default:20 }}">
+            <div class="ems-dialog__body ems-reason" data-ems-min-length="{% if reason_optional %}0{% else %}{{ reason_min|default:20 }}{% endif %}">
                 <p class="ems-msg ems-msg--error" data-ems-form-error role="alert" hidden></p>
                 {% if reason_extra_include %}{% include reason_extra_include %}{% endif %}
                 <div class="ems-field">
                     <label class="ems-field__label" for="{{ reason_id }}-text">
-                        {% if reason_label %}{{ reason_label }}{% else %}{% trans "Səbəb" context "ui.dialog" %}{% endif %} <span class="ems-field__req" aria-hidden="true">*</span>
+                        {% if reason_label %}{{ reason_label }}{% else %}{% trans "Səbəb" context "ui.dialog" %}{% endif %}{% if reason_optional %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "ui.dialog" %}</span>{% else %} <span class="ems-field__req" aria-hidden="true">*</span>{% endif %}
                     </label>
-                    <textarea class="ems-textarea" id="{{ reason_id }}-text"
-                              name="{{ reason_field_name|default:'reason' }}" rows="4" required
-                              minlength="{{ reason_min|default:20 }}"
+                    <textarea class="ems-textarea" id="{{ reason_id }}-text" data-ems-reason-field
+                              name="{{ reason_field_name|default:'reason' }}" rows="4"{% if not reason_optional %} required
+                              minlength="{{ reason_min|default:20 }}"{% endif %}
                               aria-describedby="{{ reason_id }}-hint"
                               placeholder="{{ reason_placeholder|default_if_none:'' }}"></textarea>
                 </div>
@@ -61,7 +67,7 @@ KONTEKST MÜQAVİLƏSİ
             </div>
 
             <div class="ems-dialog__foot">
-                <span class="ems-dialog__foot-note ems-reason__counter" aria-hidden="true">0 / {{ reason_min|default:20 }}</span>
+                {% if not reason_optional %}<span class="ems-dialog__foot-note ems-reason__counter" aria-hidden="true">0 / {{ reason_min|default:20 }}</span>{% endif %}
                 <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Ləğv et" context "ui.dialog" %}</button>
                 <button type="submit" class="ems-btn ems-btn--{{ reason_submit_tone|default:'primary' }}"
                         data-ems-reason-submit disabled aria-disabled="true">{% if reason_submit_label %}{{ reason_submit_label }}{% else %}{% trans "Göndər" context "ui.dialog" %}{% endif %}</button>
