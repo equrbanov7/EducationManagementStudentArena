@@ -13,8 +13,8 @@ KONTEKST MÜQAVİLƏSİ
                        eyni prefiksli olsalar da TOXUNULMUR (filter_bar.js);
                        əks halda axtarış istifadəçini birinci taba atırdı.
   filter_base_url    — opsional; boşdursa cari yol
-  filter_fields      — [{name, label, kind: select|search|text, options, value,
-                        wide, placeholder}]
+  filter_fields      — [{name, label, kind: select|search|text|hidden, options, value,
+                        wide, placeholder}] — `hidden`: əhatədə tək seçim, sahə göstərilmir
   filter_count_label — opsional «Nəticə: N sətir» mətni
   filter_applied     — opsional [{name, label, value_label}] — tətbiq olunmuş çiplər
   filter_dirty_note  — opsional xəbərdarlıq mətni
@@ -38,6 +38,11 @@ KONTEKST MÜQAVİLƏSİ
       {% if filter_auto %}data-ems-filters-auto="1"{% endif %}
       role="search">
     {% for field in filter_fields %}
+        {% if field.kind == "hidden" %}
+        {% comment %}Əhatədə TƏK seçim (sahib, 2026-10-14): dəyər server tərəfindən seçilib, sahə
+        göstərilmir; gizli input tətbiq zamanı URL-ə eyni dəyəri yazır (server onu yenə yoxlayır).{% endcomment %}
+        <input type="hidden" name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}" data-ems-filter data-ems-filter-locked>
+        {% else %}
         <div class="ems-field{% if field.wide %} ems-field--wide{% endif %}">
             <label class="ems-field__label" for="f-{{ field.name }}">{{ field.label }}</label>
             {% if field.kind == "select" %}
@@ -63,6 +68,7 @@ KONTEKST MÜQAVİLƏSİ
                        data-ems-filter{% if field.kind == "search" %} data-ems-filter-search{% endif %}>
             {% endif %}
         </div>
+        {% endif %}
     {% endfor %}
 
     <div class="ems-filters__actions">

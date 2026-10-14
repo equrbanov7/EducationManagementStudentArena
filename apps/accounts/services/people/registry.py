@@ -389,38 +389,51 @@ def registry_options(actor, *, request=None) -> dict:
         for row in records.values("admission_year").distinct().order_by("-admission_year")[:OPTION_LIMIT]
         if row["admission_year"]
     ]
+    # 2026-10-14 (sahib, tyutor kimi baxış: «Fakültə» süzgəcində BÜTÜN məktəblər idi): fakültə və sektor
+    # seçimləri də reyestrin OXU əhatəsi ilə — əhatə alt-ağacı + köklərin əcdadları; org əhatəsi → hamısı.
+    scope = actor.scope_for(PERM_REGISTRY_VIEW, request=request)
     return {
         "programs": programs,
         "groups": groups,
         "years": years,
-        "faculties": _faculty_options(actor.organization),
-        "sectors": _sector_options(actor.organization),
+        "faculties": _faculty_options(actor.organization, scope),
+        "sectors": _sector_options(actor.organization, scope),
     }
 
 
-def _faculty_options(organization) -> list:
+def _scoped_units(queryset, scope, *, with_ancestors=False):
+    """OrgUnit queryset-i əhatə ilə (fail-closed); ``with_ancestors`` — əhatə köklərinin əcdadları da."""
+    if scope.is_org_wide:
+        return queryset
+    if not scope.is_unit_scoped:
+        return queryset.none()
+    allowed = scope.unit_subtree_q()
+    if with_ancestors:
+        allowed |= Q(pk__in=[part for path in scope.unit_paths for part in str(path or "").split("/") if part])
+    return queryset.filter(allowed)
+
+
+def _faculty_options(organization, scope) -> list:
     from apps.organizations.models import OrgUnit
 
     from .constants import FACULTY_UNIT_TYPES
 
+    units = OrgUnit.objects.filter(organization=organization, unit_type__in=list(FACULTY_UNIT_TYPES), is_active=True)
     return [
         {"value": str(unit.pk), "label": unit.name}
-        for unit in OrgUnit.objects.filter(
-            organization=organization, unit_type__in=list(FACULTY_UNIT_TYPES), is_active=True
-        ).order_by("name")[:OPTION_LIMIT]
+        for unit in _scoped_units(units, scope, with_ancestors=True).order_by("name")[:OPTION_LIMIT]
     ]
 
 
-def _sector_options(organization) -> list:
+def _sector_options(organization, scope) -> list:
     from apps.organizations.models import OrgUnit
     from core.constants import OrgUnitType
 
     from ..student_groups import normalize_sector
 
     seen: dict = {}
-    for unit in OrgUnit.objects.filter(organization=organization, unit_type=OrgUnitType.GROUP, is_active=True).values(
-        "settings"
-    ):
+    groups = OrgUnit.objects.filter(organization=organization, unit_type=OrgUnitType.GROUP, is_active=True)
+    for unit in _scoped_units(groups, scope).values("settings"):
         raw = str((unit["settings"] or {}).get("language_sector") or "").strip()
         if not raw:
             continue

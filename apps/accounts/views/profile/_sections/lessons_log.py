@@ -295,8 +295,13 @@ def _kpi_tiles(totals) -> list:
     ]
 
 
-def _unit_field(name, label, all_label, value, options) -> dict:
-    """Fakültə / Kafedra seçicisi — layihə komponenti (bootstrap select + menyuda axtarış)."""
+def _unit_field(name, label, all_label, value, options, *, locked=False) -> dict:
+    """Fakültə / Kafedra seçicisi — layihə komponenti (bootstrap select + menyuda axtarış).
+
+    ``locked`` (sahib, 2026-10-14): aktorun əhatəsində TƏK seçim var — dəyər server tərəfindən
+    seçilib, sahə göstərilmir (gizli input URL-i ardıcıl saxlayır)."""
+    if locked:
+        return {"name": PREFIX + name, "label": label, "kind": "hidden", "value": value}
     return {
         "name": PREFIX + name,
         "label": label,
@@ -412,6 +417,7 @@ def _filter_fields(option_source, *, selection, current, supervisor, values, uni
             pgettext(_CTX, "Bütün fakültələr"),
             values.get("faculty", ""),
             (units or {}).get("faculty_options", []),
+            locked=bool((units or {}).get("faculty_locked")),
         ),
         _unit_field(
             "kafedra",
@@ -419,6 +425,7 @@ def _filter_fields(option_source, *, selection, current, supervisor, values, uni
             pgettext(_CTX, "Bütün kafedralar"),
             values.get("kafedra", ""),
             (units or {}).get("kafedra_options", []),
+            locked=bool((units or {}).get("kafedra_locked")),
         ),
         {
             "name": PREFIX + "offering",
@@ -538,7 +545,7 @@ def _filter_fields(option_source, *, selection, current, supervisor, values, uni
         ("teacher", pgettext(_CTX, "Müəllim"), teacher_labels.get(values["teacher"], values["teacher"])),
         ("q", pgettext(_CTX, "Axtarış"), values["q"]),
     ):
-        if values[key]:
+        if values[key] and not (units or {}).get(f"{key}_locked"):
             applied.append({"name": PREFIX + key, "label": label, "value_label": value_label or values[key]})
 
     return {"fields": fields, "applied": applied, "section": "lessons-log", "prefix": PREFIX}

@@ -9,6 +9,7 @@ from .cabinet_modules import module_items  # noqa: F401
 from .cabinet_modules import set_module_enabled  # noqa: F401
 from .default_roles import get_default_roles_for_org_type  # noqa: F401
 from .groups_registry import build_groups_registry  # noqa: F401
+from .groups_registry import student_record_scope_q  # noqa: F401
 from .overview import build_overview_data  # noqa: F401
 from .permissions import get_permission_label  # noqa: F401
 from .request_memberships import drop_request_memberships  # noqa: F401
@@ -17,9 +18,12 @@ from .review_visibility import save_review_identity_reveal  # noqa: F401
 from .scoping import EMPTY_SCOPE  # noqa: F401
 from .scoping import ORG_WIDE_SCOPE  # noqa: F401
 from .scoping import UnitScope  # noqa: F401
+from .scoping import faculty_read_scope  # noqa: F401
 from .scoping import get_permission_scope  # noqa: F401
+from .scoping import permission_scope_unit_types  # noqa: F401
 from .scoping import scope_memberships_by_unit  # noqa: F401
 from .scoping import scope_org_units  # noqa: F401
+from .scoping import unit_in_scope  # noqa: F401
 from .scoping import user_scope_covers_unit  # noqa: F401
 from .services import get_active_memberships  # noqa: F401
 from .settings_store import REMOVE as REMOVE_SETTINGS_KEY  # noqa: F401
@@ -68,6 +72,7 @@ __all__ = [
     "default_disabled_sections",
     "disabled_sections",
     "drop_request_memberships",
+    "faculty_read_scope",
     "get_active_memberships",
     "get_default_roles_for_org_type",
     "get_permission_label",
@@ -76,6 +81,7 @@ __all__ = [
     "is_module_enabled",
     "members_covering_unit",
     "module_items",
+    "permission_scope_unit_types",
     "register_cabinet_section_resolver",
     "register_managed_settings_key",
     "request_active_memberships",
@@ -84,8 +90,10 @@ __all__ = [
     "save_review_identity_reveal",
     "scope_memberships_by_unit",
     "scope_org_units",
+    "unit_in_scope",
     "set_module_enabled",
     "set_settings_keys",
+    "student_record_scope_q",
     "unit_type_label",
     "update_settings_key",
     "user_scope_covers_unit",

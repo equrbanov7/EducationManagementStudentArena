@@ -23,7 +23,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from apps.organizations.public import EMPTY_SCOPE, ORG_WIDE_SCOPE, UnitScope, get_permission_scope
+from apps.organizations.public import (
+    EMPTY_SCOPE,
+    ORG_WIDE_SCOPE,
+    UnitScope,
+    faculty_read_scope,
+    get_permission_scope,
+)
 from core.permissions import has_permission
 
 # ── İcazə açarları (kataloq: apps/organizations/permissions.py → "people") ────
@@ -66,6 +72,9 @@ STUDENT_SERVICE_PERMISSIONS = (
     PERM_MOVEMENT,
     PERM_ASSIGN_GROUP,
 )
+
+#: OXU əhatəsi ana FAKÜLTƏYƏ genişlənən açarlar (`faculty_read_scope`) — yalnız baxış; yazı açarları dar.
+_FACULTY_READ_PERMISSIONS = frozenset({PERM_VIEW_STUDENTS, PERM_REGISTRY_VIEW})
 
 #: Bölmə açarı → onu açan «baxış» icazəsi.
 SECTION_VIEW_PERMISSION = {
@@ -153,6 +162,14 @@ class PeopleActor:
             return ORG_WIDE_SCOPE
         if self.organization is None:
             return EMPTY_SCOPE
+        if permission in _FACULTY_READ_PERMISSIONS:
+            # Sahib (2026-10-14, kafedra müdiri kimi baxış): «kafedra müdiri də öz fakültəsi daxilindəki
+            # tələbələri görə bilsin» — ixtisas/qruplar FAKÜLTƏNİN altındadır, kafedra alt-ağacında tələbə
+            # yoxdur. Axşam (tyutor kimi baxış): «tyutor ancaq özünün aid olduğu fakültəni görsün» — «Tələbə
+            # reyestri»nin OXUSU da (`student.registry_view`) eyni qayda ilə. YALNIZ oxu əhatələri genişlənir;
+            # əlaqə (`people.view_contacts`) ayrıca qapıdır, yazı açarlarının (`people.manage_academic`,
+            # `student.movement`) əhatəsi dar qalır.
+            return faculty_read_scope(self.user, self.organization, permission, request=request)
         return get_permission_scope(self.user, self.organization, permission, request=request)
 
 

@@ -348,6 +348,8 @@ def build_workload_overview_section(request, section, *, active_organization, al
             ("dep", pgettext(_CTX_OVERVIEW, "Kafedralar")),
             ("rep", pgettext(_CTX_OVERVIEW, "Hesabatlar")),
         )
+        # Kafedra müdirinin əhatəsində fakültə səviyyəsi yoxdur — «Fakültələr» görünüşü gizlədilir.
+        if key != "fac" or payload.get("show_faculties", True)
     ]
     section["kpi_tiles"] = [
         {
@@ -380,15 +382,25 @@ def build_workload_overview_section(request, section, *, active_organization, al
     ]
     section["filter_fields"] = [
         _year_field("wo_year", pgettext(_CTX_OVERVIEW, "Tədris ili"), payload["year"], payload["years"]),
-        {
-            "name": "wo_faculty",
-            "searchable": True,
-            "label": pgettext(_CTX_OVERVIEW, "Fakültə"),
-            "kind": "select",
-            "value": payload["faculty_id"],
-            "options": [{"value": "", "label": pgettext(_CTX_OVERVIEW, "Hamısı")}] + payload["faculty_options"],
-            "wide": True,
-        },
+        (
+            # Əhatədə tək fakültə (dekan, kafedra müdiri) — avtomatik seçilib, sahə göstərilmir.
+            {
+                "name": "wo_faculty",
+                "label": pgettext(_CTX_OVERVIEW, "Fakültə"),
+                "kind": "hidden",
+                "value": payload["faculty_id"],
+            }
+            if payload.get("faculty_locked")
+            else {
+                "name": "wo_faculty",
+                "searchable": True,
+                "label": pgettext(_CTX_OVERVIEW, "Fakültə"),
+                "kind": "select",
+                "value": payload["faculty_id"],
+                "options": [{"value": "", "label": pgettext(_CTX_OVERVIEW, "Hamısı")}] + payload["faculty_options"],
+                "wide": True,
+            }
+        ),
     ]
     section["filter_count_label"] = pgettext(_CTX_OVERVIEW, "Nəticə: %(count)d kafedra") % {
         "count": len(payload["chairs"])

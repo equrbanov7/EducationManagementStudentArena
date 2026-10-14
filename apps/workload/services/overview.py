@@ -27,8 +27,9 @@ from django.db.models import Count, Q, Sum
 
 from core.constants import OrgUnitType
 
-from ..constants import DEFAULT_ANNUAL_NORM_HOURS, PERM_REPORT, TaskStatus
+from ..constants import PERM_REPORT, TaskStatus
 from ..models import TeacherAssignment, TeacherWorkloadProfile, TeachingTask, TeachingTaskRow
+from .norms import norms_for
 
 #: Bölgüyə açıq sayılan (yəni «tapşırıq verilmiş») statuslar.
 LIVE_STATUSES = (
@@ -137,16 +138,19 @@ def build_overview(*, actor, academic_year: str) -> dict:
         .values("row__task__chair_id", "teacher_id")
         .annotate(teacher_sum=Sum("hours"))
     }
-    norms = {
-        profile.teacher_id: int(profile.annual_norm_hours or DEFAULT_ANNUAL_NORM_HOURS)
+    teacher_ids = {teacher_id for _chair_id, teacher_id in teacher_totals}
+    profiles = {
+        profile.teacher_id: profile
         for profile in TeacherWorkloadProfile.objects.filter(
-            organization=organization, academic_year=academic_year
-        ).only("teacher_id", "annual_norm_hours")
+            organization=organization, academic_year=academic_year, teacher_id__in=teacher_ids
+        ).only("teacher_id", "staff_fraction")
     }
+    # Norma — «Sistem tənzimləmələri» qaydası (``services.norms``): ştat payı + inzibati vəzifə.
+    norms = norms_for(organization, list(teacher_ids), profiles)
 
     over_norm: dict = {}
     for (chair_id, teacher_id), hours in teacher_totals.items():
-        norm = norms.get(teacher_id, DEFAULT_ANNUAL_NORM_HOURS)
+        norm = norms.get(teacher_id, 0)
         if norm and hours > norm:
             over_norm[chair_id] = over_norm.get(chair_id, 0) + 1
 

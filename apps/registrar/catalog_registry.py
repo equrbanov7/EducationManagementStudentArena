@@ -30,6 +30,14 @@ from django.utils.translation import pgettext
 from core.permissions import has_permission
 from core.search_text import tolerant_q
 
+from .catalog_scope import (
+    catalog_owner_scope,
+    catalog_scope,
+    scope_programs,
+    scope_subjects,
+    scoped_chair_options,
+    subject_scope_q,
+)
 from .models import Curriculum, CurriculumSubject, Program, Subject
 from .models.academic import DegreeLevel
 from .models.catalog_meta import EducationForm, SubjectKind
@@ -160,9 +168,11 @@ def build_programs_registry(request, organization) -> dict:
     show_archived = (request.GET.get("pg_arch") or "") == "1"
     sort = _clean_sort((request.GET.get("pg_sort") or "").strip(), PROGRAM_SORTS)
 
-    queryset = Program.objects.filter(organization=organization).select_related(
-        "specialty_unit", "specialty_unit__parent", "specialty_unit__parent__parent"
-    )
+    # Əhatə (2026-10-14): dekan/kafedra müdiri yalnız öz alt-ağacının ixtisaslarını görür —
+    # sətirlər, KPI-lər və «Kafedra» seçimləri eyni əhatədən (bax `catalog_scope`).
+    scope = catalog_scope(request, organization)
+    scoped = scope_programs(Program.objects.filter(organization=organization), scope)
+    queryset = scoped.select_related("specialty_unit", "specialty_unit__parent", "specialty_unit__parent__parent")
     total_count = queryset.count()
     queryset = queryset.filter(is_archived=show_archived) if show_archived else queryset.filter(is_archived=False)
 
@@ -221,10 +231,8 @@ def build_programs_registry(request, organization) -> dict:
             }
         )
 
-    no_plan_total = (
-        Program.objects.filter(organization=organization, is_archived=False).exclude(pk__in=planned_ids).count()
-    )
-    archived_total = Program.objects.filter(organization=organization, is_archived=True).count()
+    no_plan_total = scoped.filter(is_archived=False).exclude(pk__in=planned_ids).count()
+    archived_total = scoped.filter(is_archived=True).count()
 
     return {
         "has_access": True,
@@ -246,7 +254,7 @@ def build_programs_registry(request, organization) -> dict:
         },
         "degree_options": [{"value": value, "label": str(label)} for value, label in DegreeLevel.choices],
         "form_options": [{"value": value, "label": str(label)} for value, label in EducationForm.choices],
-        "chair_options": chair_options(organization),
+        "chair_options": scoped_chair_options(organization, scope),
         "can_manage": can_manage_catalog(request),
     }
 
@@ -261,7 +269,7 @@ def _normalized_subject_name(name) -> str:
     return " ".join((name or "").split()).casefold()
 
 
-def subject_name_index(organization) -> tuple[dict, dict]:
+def subject_name_index(organization, subject_q=None) -> tuple[dict, dict]:
     """Arxivlənməmiş fənn adları — TƏK ``GROUP BY name`` sorğusu ilə dublikat indeksi.
 
     Audit 2026-09-10 P1-8 (düzəliş 2026-09-12): əvvəl BÜTÜN fənn adları sətir-sətir
@@ -276,15 +284,16 @@ def subject_name_index(organization) -> tuple[dict, dict]:
 
     Qaytarır: ``(duplicates, variants)`` — ``duplicates``: normallaşdırılmış ad →
     say (yalnız >1); ``variants``: həmin açar → DB-dəki xam ad variantları.
+
+    ``subject_q`` (2026-10-14): aktorun əhatə filtri — dekan yalnız ÖZ fənləri
+    arasındakı dublikatları görür (əhatədən kənar adlar indeksə düşmür).
     """
     counter: dict[str, int] = {}
     variants: dict[str, list] = {}
-    grouped = (
-        Subject.objects.filter(organization=organization, is_archived=False)
-        .values("name")
-        .annotate(n=Count("id"))
-        .order_by()  # Meta.ordering (`code`) GROUP BY-a düşməsin
-    )
+    base = Subject.objects.filter(organization=organization, is_archived=False)
+    if subject_q is not None:
+        base = base.filter(subject_q)
+    grouped = base.values("name").annotate(n=Count("id")).order_by()  # Meta.ordering (`code`) GROUP BY-a düşməsin
     for item in grouped:
         key = _normalized_subject_name(item["name"])
         if not key:
@@ -323,10 +332,16 @@ def build_subject_catalog(request, organization) -> dict:
     show_archived = (request.GET.get("sb_arch") or "") == "1"
     sort = _clean_sort((request.GET.get("sb_sort") or "").strip(), SUBJECT_SORTS)
 
-    # Sorğu başına BİR dəfə: həm KPI, həm sətir bayrağı, həm `sb_dup=1` süzgəci buradan.
-    duplicates, duplicate_variants = subject_name_index(organization)
+    # Əhatə (2026-10-14): unit-əhatəli aktor (dekan) yalnız öz alt-ağacının fənlərini görür —
+    # sahibi kafedra alt-ağacda VƏ YA alt-ağacın planında/qrup təklifində işlənən fənlər.
+    scope, owner_scope = catalog_scope(request, organization), catalog_owner_scope(request, organization)
+    scope_q = subject_scope_q(organization, scope, owner_scope)
+    scoped = scope_subjects(Subject.objects.filter(organization=organization), organization, scope, owner_scope)
 
-    queryset = Subject.objects.filter(organization=organization).select_related("chair_unit")
+    # Sorğu başına BİR dəfə: həm KPI, həm sətir bayrağı, həm `sb_dup=1` süzgəci buradan.
+    duplicates, duplicate_variants = subject_name_index(organization, scope_q)
+
+    queryset = scoped.select_related("chair_unit")
     total_count = queryset.count()
     queryset = queryset.filter(is_archived=show_archived) if show_archived else queryset.filter(is_archived=False)
 
@@ -368,8 +383,15 @@ def build_subject_catalog(request, organization) -> dict:
             }
         )
 
-    archived_total = Subject.objects.filter(organization=organization, is_archived=True).count()
-    in_use_total = CurriculumSubject.objects.filter(organization=organization).values("subject_id").distinct().count()
+    archived_total = scoped.filter(is_archived=True).count()
+    in_use = CurriculumSubject.objects.filter(organization=organization)
+    if scope_q is not None:
+        in_use = in_use.filter(subject_id__in=scoped.values("pk"))
+    in_use_total = in_use.values("subject_id").distinct().count()
+    # «Sahibi kafedra» seçimləri: əhatədəki kafedralar + görünən fənlərin sahibi kafedraları.
+    owner_chair_ids = None
+    if scope_q is not None:
+        owner_chair_ids = scoped.exclude(chair_unit__isnull=True).values("chair_unit_id")
 
     return {
         "has_access": True,
@@ -391,7 +413,7 @@ def build_subject_catalog(request, organization) -> dict:
             "sort": sort,
         },
         "kind_options": [{"value": value, "label": str(label)} for value, label in SubjectKind.choices],
-        "chair_options": chair_options(organization),
+        "chair_options": scoped_chair_options(organization, owner_scope, extra_unit_ids=owner_chair_ids),
         "can_manage": can_manage_catalog(request),
     }
 

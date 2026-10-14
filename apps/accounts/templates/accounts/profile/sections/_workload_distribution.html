@@ -146,7 +146,7 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
     {# ── Sağ: müəllim yük paneli ────────────────────────────────────── #}
     <aside class="wl__aside" aria-label="{% trans 'Müəllim yükü' context 'accounts.workload' %}">
       <h3 class="wl-aside__title">{% trans "Müəllim yükü" context "accounts.workload" %}</h3>
-      <p class="wl-aside__hint">{% trans "Norma NK №215-ə görə bir ştat üçün 500 saatdır (təşkilat konfiqurasiyası ilə dəyişir)." context "accounts.workload" %}</p>
+      <p class="wl-aside__hint">{{ workload_distribution_section.norm_note }}</p>
       <div class="wl-teachers" data-wl-teacher-panel></div>
     </aside>
   </div>

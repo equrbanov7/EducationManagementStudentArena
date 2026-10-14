@@ -41,9 +41,12 @@
 }
 .ems-ss:focus-within {
     /* 2026-09-09 (sahib): «inputların içində göy border olmasın». 3px açıq-göy
-       halqa daxili haşiyə kimi oxunurdu — nazik neytral kontur qalır. */
+       halqa daxili haşiyə kimi oxunurdu — nazik neytral kontur qalır.
+       Bu, komponentin YEGANƏ fokus göstəricisidir (neutral-500 ağ fonda 4.7:1 —
+       WCAG 1.4.11/2.4.7); daxili input öz konturunu çəkmir (bax aşağıdakı qoruyucu). */
     border-color: var(--ems-neutral-500, #64748b);
     box-shadow: none;
+    outline: none;
 }
 
 /* ── Çip zolağı ─────────────────────────────────────────────────────────── */
@@ -132,6 +135,24 @@
 }
 .ems-ss__search::placeholder {
     color: var(--ems-neutral-500);
+}
+/* ⚠️ 2026-10-14 QORUYUCU (sahib: «burdakı göy border-i sil» — tələbə çekməcəsi,
+   «Yeni qrup»). Səhifə CSS-ləri tez-tez `.<host> input[type="text"]` /
+   `.<host> input:focus` kimi GENİŞ selektorlar yazır və onlar sinif-yalnız
+   `.ems-ss__search`-i (0,1,0) üstələyib daxili input-a İKİNCİ border + göy
+   fokus outline-ı qaytarır («input içində input», iki qat göy çərçivə).
+   Fokus göstəricisi TƏKDİR və sarğınındır (`.ems-ss:focus-within`); daxili
+   input heç bir vəziyyətdə öz konturunu çəkmir. (0,2,1)/(0,3,1) spesifiklik
+   tipik host qaydalarını (`.x input`, `.x input:focus`) üstələyir. */
+.ems-ss input.ems-ss__search,
+.ems-ss input.ems-ss__search:hover,
+.ems-ss input.ems-ss__search:focus,
+.ems-ss input.ems-ss__search:focus-visible {
+    border: 0;
+    border-radius: 0;
+    outline: none;
+    box-shadow: none;
+    background: transparent;
 }
 /* Seçim EDİLİB: input artıq yer tələb etmir — əks halda çip + 90px input
    çərçivəyə sığmayıb sətri sındırırdı. Fokusda yenidən genişlənir ki,

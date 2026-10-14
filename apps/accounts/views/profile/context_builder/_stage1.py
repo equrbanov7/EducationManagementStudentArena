@@ -287,10 +287,8 @@ class _Stage1Mixin:
         self._unit_exams_ctx = build_unit_exams_context(
             self.request, allowed_sections=self.allowed_sections, active_section=self.active_section
         )
-        self.unit_exams_page_obj = self._unit_exams_ctx["unit_exams_page_obj"]
-        self.unit_exams_search_query = self._unit_exams_ctx["unit_exams_search_query"]
-        self.unit_exams_total_count = self._unit_exams_ctx["unit_exams_total_count"]
-        self.unit_exams_pagination_query = self._unit_exams_ctx["unit_exams_pagination_query"]
+        for _ue_key, _ue_value in self._unit_exams_ctx.items():  # unit_exams_* (+ unit_exams_section)
+            setattr(self, _ue_key, _ue_value)
         self._qb_ctx = build_question_bank_context(
             self.request, allowed_sections=self.allowed_sections, active_section=self.active_section
         )

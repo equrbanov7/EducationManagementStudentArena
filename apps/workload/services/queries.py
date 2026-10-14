@@ -8,13 +8,13 @@ from django.db.models import Q, Sum
 from core.search_text import tolerant_q
 
 from ..constants import (
-    DEFAULT_ANNUAL_NORM_HOURS,
     Activity,
     Season,
     TaskStatus,
 )
 from ..models import TeacherAssignment, TeacherWorkloadProfile, TeachingTask, TeachingTaskRow
 from .assignments import balance_for_rows
+from .norms import norm_hours_for, norms_for
 
 _ACTIVITY_LABELS = {str(value): str(label) for value, label in Activity.choices}
 _SEASON_LABELS = {str(value): str(label) for value, label in Season.choices}
@@ -89,11 +89,6 @@ def serialize_rows(task, *, season: str = "", search: str = "") -> list[dict]:
     return payload
 
 
-def _norm_for(organization, teacher_id, academic_year, profiles) -> int:
-    profile = profiles.get(teacher_id)
-    return int(profile.annual_norm_hours if profile else DEFAULT_ANNUAL_NORM_HOURS)
-
-
 def teacher_load_panel(task) -> list[dict]:
     """Sağ paneldəki müəllim kartları: cəmi saat / norma / doluluq %."""
     assignments = (
@@ -130,9 +125,11 @@ def teacher_load_panel(task) -> list[dict]:
         if assignment.is_hourly_paid:
             bucket["hourly_paid_hours"] += int(assignment.hours or 0)
 
+    # Norma — «Sistem tənzimləmələri» qaydası (``services.norms``), bütün kartlar üçün bir dəfə.
+    norms = norms_for(task.organization, [key for key in buckets if key], profiles)
     cards = []
     for key, bucket in buckets.items():
-        norm = _norm_for(task.organization, key, task.academic_year, profiles) if key else 0
+        norm = norms.get(key, 0) if key else 0
         bucket["norm_hours"] = norm
         bucket["fill_percent"] = int(round(bucket["hours"] * 100 / norm)) if norm else 0
         bucket["is_over_norm"] = bool(norm and bucket["hours"] > norm)
@@ -244,7 +241,7 @@ def teacher_workload_summary(*, organization, teacher, academic_year: str = "", 
     profile = TeacherWorkloadProfile.objects.filter(
         organization=organization, teacher=teacher, academic_year=academic_year
     ).first()
-    norm = int(profile.annual_norm_hours if profile else DEFAULT_ANNUAL_NORM_HOURS)
+    norm = norm_hours_for(organization, getattr(teacher, "pk", None), profile)
     return {
         "total_hours": total,
         "fall_hours": fall,
@@ -295,12 +292,13 @@ def teacher_workload_summaries(*, organization, teacher_ids, academic_year: str 
             organization=organization, teacher_id__in=ids, academic_year=academic_year
         )
     }
+    norms = norms_for(organization, ids, profiles)
     out = {}
     for teacher_id in ids:
         row = sums.get(teacher_id, {})
         profile = profiles.get(teacher_id)
         total = int(row.get("total") or 0)
-        norm = int(profile.annual_norm_hours if profile else DEFAULT_ANNUAL_NORM_HOURS)
+        norm = norms[teacher_id]
         out[teacher_id] = {
             "total_hours": total,
             "fall_hours": int(row.get("fall") or 0),

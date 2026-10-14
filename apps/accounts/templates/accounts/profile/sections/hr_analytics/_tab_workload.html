@@ -1,7 +1,7 @@
 {% load i18n %}
 {% comment %}Dərs yükü — kafedra üzrə norma vs bölgü saatı, doluluq, bant sayları (workload.public.chair_staff_load)
 və ən çox / ən az yüklənmiş müəllimlər. Kontekst: `hr.workload`.{% endcomment %}
-<p class="hr-help">{% trans "Yük — dərs yükü bölgüsündə (paylanmış / düzəlişli tapşırıqlar) müəllimə yazılmış illik saat; norma — yük profilindəki illik norma (profil yoxdursa 500 saat). Doluluq kafedra cəmindən hesablanır." context "accounts.hr_analytics" %}</p>
+<p class="hr-help">{% trans "Yük — dərs yükü bölgüsündə (paylanmış / düzəlişli tapşırıqlar) müəllimə yazılmış illik saat; norma — ştat payına və inzibati vəzifəyə görə illik norma. Doluluq kafedra cəmindən hesablanır." context "accounts.hr_analytics" %}{% if hr.workload.norm_note %} {{ hr.workload.norm_note }}{% endif %}</p>
 <div class="ems-tablewrap">
     <div class="ems-tablescroll">
         <table class="ems-table hr-table">

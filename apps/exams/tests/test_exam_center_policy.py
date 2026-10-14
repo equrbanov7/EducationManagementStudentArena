@@ -294,8 +294,12 @@ class ExamFormFinalCategoryTests(_Base):
         return data
 
     def test_subject_bound_exam_requires_a_category(self):
-        """H-1 (2026-09-25): fənnə bağlı kateqoriyasız imtahan qəbul olunmur (jurnala yalnız final yazılır)."""
-        form = ExamForm(self._form_data(exam_type_extended=""), user=self.teacher, organization=self.org)
+        """H-1 (2026-09-25): fənnə bağlı kateqoriyasız imtahan qəbul olunmur (jurnala yalnız final yazılır).
+
+        2026-10-14: müəllim üçün kateqoriya artıq avtomatik «Sınaq»dır (boş POST → quiz),
+        ona görə qayda «Kateqoriya yoxdur» seçə bilən aktorla (imtahan mərkəzi) yoxlanılır.
+        """
+        form = ExamForm(self._form_data(exam_type_extended=""), user=self.exam_center, organization=self.org)
         self.assertFalse(form.is_valid())
         self.assertIn("exam_type_extended", form.errors)
 

@@ -82,7 +82,7 @@ def apply_permission_section_gates(
     from core.permissions import has_permission
 
     from .rbac_my_group import my_group_sections
-    from .rbac_scope_sections import scope_gated_sections, teaches_workload
+    from .rbac_scope_sections import faculties_section_visible, scope_gated_sections, teaches_workload
 
     # RİM rəhbəri (`ikt_rehber`) — SAHİBİN QƏRARI (2026-09-14 «hər şeyin icazəsi»,
     # 2026-09-21 «hər roldakı bütün özəllikləri görsün»): bölmə görünürlüyü üçün
@@ -362,6 +362,9 @@ def apply_permission_section_gates(
     ):
         if enabled:
             allowed_sections.add(section)
+    # «Fakültələr» — yalnız əhatəsində fakültə olan aktora (kafedra müdirinə yox; 2026-10-14).
+    if "org-faculties" in allowed_sections and not faculties_section_visible(user, organization, privileged=privileged):
+        allowed_sections.discard("org-faculties")
     # «Akademik qeydlər» (B2) + `journal.view` ilə jurnal linki (B5) — açar + struktur əhatəsi (2026-10-13).
     allowed_sections |= scope_gated_sections(user, organization, permissions, privileged=privileged)
     # «Starosta» (B10, 2026-10-13): `member.view` əhatəsi AKADEMİK QRUP olan aktor (baş tələbə) — sorğusuz.

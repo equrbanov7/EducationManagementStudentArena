@@ -45,11 +45,12 @@ class TemplateParityTest(TestCase):
             "unit.group_manage",
             "student.assign_group",
             "plan.view",
-            "semester.view",
             "workload.review",
             "application.handle",
         ):
             self.assertIn(key, tutor, key)
+        # 2026-10-14 axşam: «Semestr açılışı» yalnız dekan + kafedra müdiri (paritetdən sonra götürülür, 0065).
+        self.assertNotIn("semester.view", tutor)
 
     def test_levels_names_scope_unchanged(self):
         tutor, coordinator = _seed("tutor"), _seed("program_coordinator")

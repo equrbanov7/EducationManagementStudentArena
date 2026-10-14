@@ -258,6 +258,7 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
             self.fields["exam_type_extended"].choices = [
                 ("", pgettext_lazy("exams.form.exam.placeholder", "exam_type_extended_none"))
             ] + extended_choices
+            self._lock_single_category(extended_choices)
 
         if allow_organization_selection:
             from apps.organizations.models import Organization
@@ -434,8 +435,31 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
             visibility=CodingTestCase.VISIBILITY_HIDDEN,
         )
 
+    def _lock_single_category(self, extended_choices):
+        """2026-10-14 (sahib): «yalnız Sınaq yaradıla bilən yerdə select yox, avtomatik Sınaq».
+
+        Final/midterm səlahiyyəti olmayan aktor üçün seçilə bilən YEGANƏ real kateqoriya
+        qalırsa (adətən «Sınaq»; «Kateqoriya yoxdur» real seçim sayılmır) — sahə seçimdən
+        çıxır: şablon select əvəzinə oxunan həb + gizli input çəkir, server isə həmin
+        dəyəri MƏCBURİ edir (boş POST → bu dəyər; başqa dəyər → `invalid_choice`).
+        """
+        self.exam_category_locked = None
+        if getattr(self, "_can_manage_final_exams", True) or len(extended_choices) != 1:
+            return
+        value, label = extended_choices[0]
+        field = self.fields["exam_type_extended"]
+        field.choices = [(value, label)]
+        field.widget = forms.HiddenInput()
+        field.initial = value
+        self.initial["exam_type_extended"] = value
+        self.exam_category_locked = {"value": value, "label": label}
+
     def clean_exam_type_extended(self):
         value = self.cleaned_data.get("exam_type_extended") or None
+        locked = getattr(self, "exam_category_locked", None)
+        if locked and not value:
+            # Gizli input silinib/boşaldılıbsa da kateqoriya avtomatik «Sınaq»dır.
+            value = locked["value"]
         from apps.exams.services.access_policy import SECURE_EXAM_CATEGORIES
 
         if value in SECURE_EXAM_CATEGORIES and not getattr(self, "_can_manage_final_exams", True):

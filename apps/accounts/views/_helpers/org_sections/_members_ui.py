@@ -117,7 +117,7 @@ def kpi_tiles(*, totals, kind):
     ]
 
 
-def filter_fields(*, search, kind, role, unit_id, sort, role_options, unit_options):
+def filter_fields(*, search, kind, role, unit_id, sort, role_options, unit_options, group_id="", group_options=()):
     return [
         {
             "name": f"{PREFIX}q",
@@ -142,12 +142,22 @@ def filter_fields(*, search, kind, role, unit_id, sort, role_options, unit_optio
             "value": role,
             "searchable": True,
         },
+        # 2026-10-14 (sahib): köhnə «Bölmə» seçicisi qrupları da qarışıq verirdi — indi İKİ süzgəc:
+        # struktur bölməsi (fakültə/kafedra/şöbə, üzvlüyün bölməsi) və akademik qrup (tələbənin qrupu).
         {
             "name": f"{PREFIX}unit",
-            "label": pgettext(CTX, "Bölmə"),
+            "label": pgettext(CTX, "Struktur bölməsi"),
             "kind": "select",
             "options": [{"value": "", "label": pgettext(CTX, "Bütün bölmələr")}] + unit_options,
             "value": unit_id,
+            "searchable": True,
+        },
+        {
+            "name": f"{PREFIX}group",
+            "label": pgettext(CTX, "Qrup"),
+            "kind": "select",
+            "options": [{"value": "", "label": pgettext(CTX, "Bütün qruplar")}] + list(group_options),
+            "value": group_id,
             "searchable": True,
         },
         {

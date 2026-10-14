@@ -196,6 +196,7 @@ def _build_student_org_management_section(
         f"{ui.PREFIX}kind": filters["kind"],
         f"{ui.PREFIX}role": filters["role"],
         f"{ui.PREFIX}unit": filters["unit_id"],
+        f"{ui.PREFIX}group": filters["group_id"],
         f"{ui.PREFIX}sort": filters["sort"] if filters["sort"] != ui.DEFAULT_SORT else "",
     }
     # Uzaqlaşdırma adi POST-dur (JSON deyil) — server `next` ilə eyni filtrli
@@ -216,6 +217,8 @@ def _build_student_org_management_section(
                 sort=filters["sort"],
                 role_options=filters["role_options"],
                 unit_options=filters["unit_options"],
+                group_id=filters["group_id"],
+                group_options=filters["group_options"],
             ),
             "filter_count_label": ui.count_label(page_obj.paginator.count),
             "columns": ui.columns(),

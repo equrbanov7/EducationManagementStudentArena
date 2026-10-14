@@ -70,6 +70,47 @@ def scope_gated_sections(user, organization, permissions, *, privileged: bool) -
     return sections
 
 
+#: «Fakültələr» bölməsinin əhatə açarı (struktur ağacı ilə eyni).
+STRUCTURE_PERMISSION = "unit.view"
+#: Bu tiplərin alt-ağacında fakültə OLMUR — kafedra/ixtisas/qrup/şöbə əhatəli aktor bölməni görmür.
+BELOW_FACULTY_UNIT_TYPES = frozenset({"chair", "department", "specialty", "group", "lab", "center", "section"})
+
+
+def faculties_section_visible(user, organization, *, privileged: bool) -> bool:
+    """«Fakültələr» (`org-faculties`) — yalnız əhatəsində FAKÜLTƏ ola bilən aktora (2026-10-14).
+
+    Sahib (kafedra müdiri kimi baxış): «kafedra müdiri səhifəsində buna ehtiyac yoxdur» — bölmə bütün
+    KPI-ləri sıfır və «Hələ fakültə yaradılmayıb» göstərirdi. Qayda: org-wide `unit.view` (Tədris
+    şöbəsi, RİM, prorektor, rektor) və fakültə əhatəli (dekan, dekan müavini) → görünür; əhatəsi
+    YALNIZ kafedra/ixtisas/qrup/şöbə olan aktor (kafedra müdiri, koordinator, tyutor) → gizli.
+    Sorğu büdcəsi: tiplər memoizasiya olunmuş üzvlük sətirlərindən; naməlum yuxarı tip (rektorluq,
+    prorektorluq) olduqda YALNIZ onda alt-ağacda fakültə üçün tək ``EXISTS``.
+    """
+    if privileged:
+        return True
+    if organization is None:
+        return False
+    from apps.organizations.public import get_permission_scope, permission_scope_unit_types
+
+    scope = get_permission_scope(user, organization, STRUCTURE_PERMISSION)
+    if scope.is_org_wide:
+        return True
+    if not scope.is_unit_scoped:
+        return False
+    types = permission_scope_unit_types(user, organization, STRUCTURE_PERMISSION)
+    if "faculty" in types:
+        return True
+    if types <= BELOW_FACULTY_UNIT_TYPES:
+        return False
+    from apps.organizations.models import OrgUnit
+
+    return (
+        OrgUnit.objects.filter(organization=organization, unit_type="faculty", is_active=True)
+        .filter(scope.unit_subtree_q())
+        .exists()
+    )
+
+
 def teaches_workload(user, organization) -> bool:
     """Aktorun bu təşkilatda MÜƏLLİM kimi yük bölgüsü sətri varmı (tək ``EXISTS``).
 
@@ -86,4 +127,12 @@ def teaches_workload(user, organization) -> bool:
     return TeacherAssignment.objects.filter(organization=organization, teacher=user).exists()
 
 
-__all__ = ["JOURNAL_VIEW_PERMISSION", "RECORDS_PERMISSION", "scope_gated_sections", "teaches_workload"]
+__all__ = [
+    "BELOW_FACULTY_UNIT_TYPES",
+    "JOURNAL_VIEW_PERMISSION",
+    "RECORDS_PERMISSION",
+    "STRUCTURE_PERMISSION",
+    "faculties_section_visible",
+    "scope_gated_sections",
+    "teaches_workload",
+]

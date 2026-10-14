@@ -35,7 +35,7 @@ from core.constants import OrgUnitType
 from core.search_text import tolerant_q
 
 from .models import OrgUnit
-from .scoping import get_permission_scope, scope_org_units
+from .scoping import EMPTY_SCOPE, faculty_read_scope, get_permission_scope, scope_org_units, unit_in_scope
 from .views.shared._helpers import _has_org_permission, _visible_units_queryset
 
 _CTX = "accounts.groups"
@@ -68,8 +68,14 @@ GROUP_SORTS: dict[str, tuple[str, ...]] = {
 
 
 def group_scope(request, organization):
-    """Qrup reyestrinin əhatəsi — `unit.view` açarını daşıyan üzvlükdən."""
-    return get_permission_scope(request.user, organization, PERM_VIEW, request=request)
+    """Qrup reyestrinin OXU əhatəsi — `unit.view` açarını daşıyan üzvlükdən.
+
+    2026-10-14 (sahib, kafedra müdiri kimi baxış: «ancaq öz fakültəsi daxilindəki qrupları»): kafedra
+    kökü valideyn FAKÜLTƏYƏ genişlənir (`faculty_read_scope`) — qruplar fakültənin altındadır. Sətirlər,
+    KPI-lər, süzgəclər, tələbə çekmecəsi və fərdi plan DOCX-u bu oxu əhatəsini işlədir; YAZI həmişə
+    dar `group_manage_scope` ilə qalır.
+    """
+    return faculty_read_scope(request.user, organization, PERM_VIEW, request=request)
 
 
 def group_manage_scope(request, organization):
@@ -155,15 +161,22 @@ def _specialty_chain(unit):
     )
 
 
-def language_options(organization) -> list:
+def _group_settings(organization, scope=None):
+    """Qrupların `settings` JSON-ları — ``scope`` verilərsə YALNIZ əhatədəki qruplar (2026-10-14)."""
+    queryset = OrgUnit.objects.filter(organization=organization, unit_type="group")
+    if scope is not None:
+        queryset = scope_org_units(queryset, scope)
+    return queryset.values_list("settings", flat=True)
+
+
+def language_options(organization, scope=None) -> list:
     """Dil sektoru seçiciləri — TENANT DATASINDAN, hardcode YOX.
 
     Layihə yaddaşı: sektor tenant-konfiqurasiya olunandır; universitetdə hansı
     sektorlar varsa, süzgəcdə də onlar görünür.
     """
-    OrgUnit = django_apps.get_model("organizations", "OrgUnit")
     values = set()
-    for raw in OrgUnit.objects.filter(organization=organization, unit_type="group").values_list("settings", flat=True):
+    for raw in _group_settings(organization, scope):
         if isinstance(raw, dict):
             value = (raw.get("language_sector") or "").strip()
             if value:
@@ -182,12 +195,11 @@ def language_form_options(organization) -> list:
     return [{"value": value, "label": value} for value in seen]
 
 
-def admission_year_options(organization, *, current_year: int) -> list:
+def admission_year_options(organization, *, current_year: int, scope=None) -> list:
     """Qəbul ili seçimləri — cari il + geriyə `ADMISSION_YEAR_SPAN` il, tenant
     datasındakı kənar illər də (məs. köçürülmüş köhnə qruplar) əlavə olunur."""
-    OrgUnit = django_apps.get_model("organizations", "OrgUnit")
     years = set(range(current_year + 1, current_year - ADMISSION_YEAR_SPAN, -1))
-    for raw in OrgUnit.objects.filter(organization=organization, unit_type="group").values_list("settings", flat=True):
+    for raw in _group_settings(organization, scope):
         if isinstance(raw, dict):
             try:
                 year = int(raw.get("admission_year") or 0)
@@ -305,6 +317,11 @@ def build_groups_registry(request, organization) -> dict:
     )
 
     form_labels = {option["value"]: option["label"] for option in education_form_choices()}
+    # 2026-10-14: OXU əhatəsi fakültəyə genişləndi (kafedra/ixtisas tyutoru bütün fakültənin qruplarını görür),
+    # YAZI isə dar `unit.group_manage` əhatəsindədir — sətir düymələri yalnız yazı əhatəsindəki qrupa (server
+    # kənar qrupa onsuz da 404 qaytarır). Sorğusuz: əhatə bir dəfə, yoxlama yol üzrə.
+    can_manage = can_manage_groups(request)
+    manage_scope = group_manage_scope(request, organization) if can_manage else EMPTY_SCOPE
     rows = []
     for unit in page_obj.object_list:
         meta = group_meta(unit)
@@ -331,6 +348,8 @@ def build_groups_registry(request, organization) -> dict:
                 "tutor": (unit.head.get_full_name() or unit.head.username) if unit.head_id else "",
                 "tutor_id": str(unit.head_id) if unit.head_id else "",
                 "is_active": unit.is_active,
+                "path": unit.path or "",
+                "can_manage": can_manage and unit_in_scope(manage_scope, unit),
                 # Tələbə çekmecəsi (JSON) və rəsmi «Fərdi tədris planı» DOCX-u.
                 "students_url": reverse("organizations:group_students", args=[organization.slug, unit.id]),
                 "plan_url": reverse("registrar:group_individual_plan", args=[unit.id]),
@@ -350,9 +369,17 @@ def build_groups_registry(request, organization) -> dict:
         "table_state": "ready" if rows else "empty",
         "total_count": total_count,
         "filtered_count": page_obj.paginator.count,
-        "student_total": sum(row["students"] for row in rows),
-        "no_tutor_total": sum(1 for row in rows if not row["tutor"]),
-        "no_plan_total": sum(1 for row in rows if row["status_key"] == "no_plan"),
+        # KPI-lər SƏHİFƏ deyil, ƏHATƏDƏKİ süzülmüş qrupların hamısı üzrə (2026-10-14, sahib: dekan öz
+        # fakültəsinin tələbə sayını görsün) — `units` artıq `unit.view` əhatəsi ilə süzülüb.
+        "student_total": (
+            StudentAcademicRecord.objects.filter(
+                organization=organization, is_active=True, group_id__in=[unit.id for unit in units]
+            ).count()
+            if units
+            else 0
+        ),
+        "no_tutor_total": sum(1 for unit in units if not unit.head_id),
+        "no_plan_total": sum(1 for unit in units if unit.is_active and unit.parent_id not in planned_specialty_ids),
         "filters": {
             "search": search,
             "faculty": faculty,
@@ -368,17 +395,17 @@ def build_groups_registry(request, organization) -> dict:
         # bütün təşkilatın fakültə/ixtisasları siyahıda görünürdü (qrup sətirləri onsuz da süzülürdü).
         "faculty_options": scoped_filter_options(organization, scope, OrgUnitType.FACULTY),
         "specialty_options": scoped_filter_options(organization, scope, OrgUnitType.SPECIALTY, limit=500),
-        "language_options": language_options(organization),
+        "language_options": language_options(organization, scope),
         "language_form_options": language_form_options(organization),
         "education_form_options": education_form_choices(),
         "current_year": current_year,
-        "admission_year_options": admission_year_options(organization, current_year=current_year),
+        "admission_year_options": admission_year_options(organization, current_year=current_year, scope=scope),
         # Köçürmə dialoqunun hədəf qrupları — əhatədəki AKTİV qruplar (səhifədən asılı deyil).
         "group_options": [
             {"value": str(unit.id), "label": unit.name}
             for unit in _visible_units_queryset(organization, scope).filter(unit_type="group").order_by("name")[:1000]
         ],
-        "can_manage": can_manage_groups(request),
+        "can_manage": can_manage,
         "can_move_students": can_move_students(request),
     }
 

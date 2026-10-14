@@ -43,13 +43,32 @@
     transition: background-color 0.12s ease;
 }
 
+/* ⚠️ 2026-10-14 (sahib: «css hover problemi var»). Hover və «seçilib» EYNİ
+   fon (primary-50) idi: seçilmiş sətrin üstünə gələndə heç nə dəyişmir,
+   seçilməmiş sətrin hover-i isə seçilmiş kimi görünürdü. Vəziyyətlər indi
+   ayrıdır və bir-birini üstələmir:
+     hover            → neytral açıq fon (yalnız «siçan buradadır»);
+     seçilib          → primary-50 + solda 3px zolaq (rəngdən başqa işarə — 1.4.1);
+     seçilib + hover  → bir pillə tünd primary-100 (zolaq qalır);
+     klaviatura fokusu sətirdə → zolaq + daxili nazik halqa (2.4.7), xananın
+       öz kvadrat outline-ı yox (aşağıda). */
 .people__table tbody tr:hover {
-    background: var(--ems-primary-50, #f3f7ff);
+    background: var(--ems-bg-subtle, #f8fafc);
 }
 
 .people__table tbody tr.is-selected {
     background: var(--ems-primary-50, #eef4ff);
     box-shadow: inset 3px 0 0 var(--ems-primary-600, #2563eb);
+}
+
+.people__table tbody tr.is-selected:hover {
+    background: var(--ems-primary-100, #dbe7ff);
+}
+
+.people__table tbody tr:has(.people__cell-check input:focus-visible) {
+    box-shadow:
+        inset 3px 0 0 var(--ems-primary-600, #2563eb),
+        inset 0 0 0 1px var(--ems-primary-300, #9dbaf5);
 }
 
 .people__table tbody tr:last-child td {
@@ -73,6 +92,21 @@
     margin: 3px; /* 2026-09-14 (FE-F11): 24 px hədəf dairəsi boş — 2.5.8 aralıq istisnası; xana JS-də sarğısız */
     accent-color: var(--ems-primary-600, #2563eb);
     cursor: pointer;
+}
+
+/* Xananın fokusu: siçanla klikdə (`:focus`, amma `:focus-visible` yox) heç bir
+   kvadrat çərçivə qalmır — əvvəl ikinci sətirdə görünən «göy kvadrat» məhz bu
+   idi. Klaviatura fokusunda dairəvi künclü, xanaya yapışıq tək halqa. */
+.people__th-check input:focus:not(:focus-visible),
+.people__cell-check input:focus:not(:focus-visible) {
+    outline: none;
+}
+
+.people__th-check input:focus-visible,
+.people__cell-check input:focus-visible {
+    outline: 2px solid var(--ems-primary-600, #2563eb);
+    outline-offset: 1px;
+    border-radius: 4px;
 }
 
 .people__th-actions {
@@ -116,11 +150,23 @@ th[aria-sort="descending"] .people__th-sort-icon::after {
     color: var(--ems-primary-600, #2563eb);
 }
 
+/* ⚠️ 2026-10-14 (sətir vəziyyətləri): bu üç sinif `<td>`-nin ÖZÜNDƏDİR
+   (people_directory.js). Əvvəl onlara `display: flex` verilmişdi — xana cədvəl
+   xanası olmaqdan çıxırdı: hündürlüyü sətirdən qısa qalır (89 ↔ 97 px), alt
+   xətti sürüşür və hover/seçim fonunun ortasında «ağ qutu» görünürdü. İndi
+   xana `table-cell` qalır, düzülüşü uşaqlar verir. */
 .people__cell-person {
-    display: flex;
-    align-items: center;
-    gap: 12px;
     min-width: 220px;
+}
+
+.people__cell-person > .people__avatar {
+    vertical-align: middle;
+}
+
+.people__cell-person > .people__name-stack {
+    display: inline-flex;
+    vertical-align: middle;
+    margin-inline-start: 12px;
 }
 
 .people__avatar {
@@ -177,10 +223,13 @@ th[aria-sort="descending"] .people__th-sort-icon::after {
     color: var(--ems-text-muted, #5b6472);
 }
 
-.people__cell-contact {
+.people__cell-contact > .people__contact {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    width: fit-content;
+}
+
+.people__cell-contact > .people__contact + .people__contact {
+    margin-top: 2px;
 }
 
 .people__contact {
@@ -201,10 +250,8 @@ th[aria-sort="descending"] .people__th-sort-icon::after {
     color: var(--ems-primary-700, #1d4ed8);
 }
 
-.people__cell-status {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
+.people__cell-status > * + * {
+    margin-inline-start: 4px;
 }
 
 .people__cell-status .ems-badge,

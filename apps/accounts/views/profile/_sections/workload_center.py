@@ -163,15 +163,7 @@ def build_workload_center_section(request, section, *, active_organization, allo
             "options": [{"value": year, "label": year} for year in payload["years"]]
             or [{"value": payload["year"], "label": payload["year"] or "—"}],
         },
-        {
-            "name": "wc_faculty",
-            "searchable": True,
-            "label": pgettext(_CTX, "Fakültə"),
-            "kind": "select",
-            "value": payload["filters"]["faculty"],
-            "options": [{"value": "", "label": pgettext(_CTX, "Hamısı")}] + payload["faculty_options"],
-            "wide": True,
-        },
+        _faculty_field(payload),
         {
             "name": "wc_status",
             "label": pgettext(_CTX, "Status"),
@@ -228,6 +220,26 @@ def build_workload_center_section(request, section, *, active_organization, allo
         },
         {"label": pgettext(_CTX, "Nəticə"), "state": "todo"},
     ]
+
+
+def _faculty_field(payload) -> dict:
+    """«Fakültə» seçicisi; əhatədə tək fakültə varsa gizli (avtomatik seçilmiş) sahə — 2026-10-14."""
+    if payload.get("faculty_locked"):
+        return {
+            "name": "wc_faculty",
+            "label": pgettext(_CTX, "Fakültə"),
+            "kind": "hidden",
+            "value": payload["filters"]["faculty"],
+        }
+    return {
+        "name": "wc_faculty",
+        "searchable": True,
+        "label": pgettext(_CTX, "Fakültə"),
+        "kind": "select",
+        "value": payload["filters"]["faculty"],
+        "options": [{"value": "", "label": pgettext(_CTX, "Hamısı")}] + payload["faculty_options"],
+        "wide": True,
+    }
 
 
 def _pager(base, payload) -> list[dict]:

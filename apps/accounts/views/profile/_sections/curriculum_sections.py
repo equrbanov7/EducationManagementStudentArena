@@ -264,13 +264,15 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
     section["current_year"] = payload["current_year"]
     section["default_education_form"] = "full_time"
     groups_leads.attach_group_leads(active_organization, payload["rows"])
+    groups_leads.attach_lead_rights(request, active_organization, payload["rows"])
     section.update(groups_leads.lead_dialog_context(request, active_organization))
     section["table_rows"] = [_group_row(row, can_manage=payload["can_manage"]) for row in payload["rows"]]
     section["state_title"] = pgettext(_CTX_GROUPS, "Qrup tapılmadı")
     section["state_body"] = pgettext(_CTX_GROUPS, "Süzgəcləri dəyişin və ya yeni qrup əlavə edin.")
     section["kpi_tiles"] = [
         {"label": pgettext(_CTX_GROUPS, "QRUP"), "value": payload["filtered_count"]},
-        {"label": pgettext(_CTX_GROUPS, "TƏLƏBƏ (SƏHİFƏDƏ)"), "value": payload["student_total"]},
+        # 2026-10-14: say SƏHİFƏ deyil, əhatədəki süzülmüş qrupların hamısı üzrədir (dekan → öz fakültəsi).
+        {"label": pgettext(_CTX_GROUPS, "TƏLƏBƏ"), "value": payload["student_total"]},
         {
             "label": pgettext(_CTX_GROUPS, "KURATORSUZ"),
             "value": payload["no_tutor_total"],

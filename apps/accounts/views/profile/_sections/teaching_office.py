@@ -17,7 +17,7 @@ from __future__ import annotations
 from django.utils.translation import pgettext
 
 from apps.organizations.public import build_structure_tree_context, chair_detail_context, visible_chairs
-from apps.workload.public import chair_staff_load
+from apps.workload.public import chair_staff_load, norm_rule_note
 
 from .structure_tree_group import attach_group_panel
 
@@ -114,8 +114,8 @@ def build_chair_profile_section(request, section, *, active_organization, allowe
         summary = load["by_teacher"].get(membership.user_id, {})
         syllabus_bucket = coverage["by_teacher"].get(membership.user_id, {"total": 0, "approved": 0})
         # Ştat növü: `staff_fraction` < 1 → əvəzçilik, saathesabı saatı varsa
-        # saathesabı; əks halda tam ştat. Dəyərlər POLICY cədvəlindən
-        # (`TeacherWorkloadProfile`) gəlir — kodda hardcode norma YOXDUR.
+        # saathesabı; əks halda tam ştat. Ştat payı `TeacherWorkloadProfile`-dən,
+        # norma «Sistem tənzimləmələri» qaydasından gəlir — kodda hardcode norma YOXDUR.
         try:
             fraction = float(summary.get("staff_fraction") or 0)
         except (TypeError, ValueError):
@@ -210,14 +210,9 @@ def build_chair_profile_section(request, section, *, active_organization, allowe
             "tone": "success" if coverage["percent"] >= 80 else "warning",
         },
     ]
-    # Norma dəyərləri POLICY cədvəlindədir (`TeacherWorkloadProfile.annual_norm_hours`);
-    # handoff-un iki `normSet` variantı (Nazirlik ↔ Universitet) SAHİB QƏRARI
-    # gözləyir — dəyərlər verilməyib, ona görə ekran tək (mövcud) dəsti göstərir.
-    section["norm_source_note"] = pgettext(
-        _CTX,
-        "Norma dəyərləri müəllim yük profilindən oxunur (NK №215 default: 500 saat). "
-        "Nazirlik/Universitet norma dəstlərinin ayrılması sahib qərarını gözləyir.",
-    )
+    # Norma «Sistem tənzimləmələri»ndən (sahib 2026-10-14): 1 ştat / 0,5 ştat / inzibati ayrıca,
+    # digər paylar mütənasib — hesablama və qeyd mətni `apps.workload.public`-dədir.
+    section["norm_source_note"] = norm_rule_note()
 
 
 __all__ = ["build_chair_profile_section", "build_structure_tree_section"]

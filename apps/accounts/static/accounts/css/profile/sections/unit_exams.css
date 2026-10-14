@@ -1,0 +1,219 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   unit_exams.css — «Bölmə imtahanları» (2026-10-14 redizayn)
+
+   YALNIZ düzüm + bölməyə xas kiçik elementlər (ad düyməsi, qrup çipləri,
+   çekmecə gövdəsi). KPI / filtr / cədvəl / çekmecə qabığı ORTAQ `ems_ui`
+   qatındadır. Yalnız `--ems-*` tokenləri (açıq/tünd mövzu tokenlərdən gəlir).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ue {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/* İmtahanın adı cədvəldə düymədir — link kimi görünür, naviqasiya etmir. */
+.ue-title {
+    display: inline;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    color: var(--ems-fg);
+    text-align: start;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.ue-title:hover,
+.ue-title:focus-visible {
+    color: var(--ems-primary);
+    text-decoration: underline;
+}
+
+.ue-title:focus-visible {
+    outline: none;
+    box-shadow: var(--ems-sh-focus);
+    border-radius: var(--ems-r-xs);
+}
+
+/* Qrup çipləri (cədvəl + çekmecə) */
+.ue-groups {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.ue-groups--wrap {
+    display: flex;
+    gap: 6px;
+}
+
+.ue-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    padding: 0 8px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-bg-subtle);
+    color: var(--ems-fg);
+    font-size: var(--ems-fs-xs);
+    white-space: nowrap;
+}
+
+.ue-chip--more {
+    color: var(--ems-fg-muted);
+    font-weight: 600;
+}
+
+/* ── Çekmecə gövdəsi ────────────────────────────────────────────────────── */
+.ue-detail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4);
+}
+
+.ue-detail__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    color: var(--ems-fg-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.ue-detail__dot {
+    opacity: 0.5;
+}
+
+.ue-detail__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--ems-sp-3);
+    margin-top: var(--ems-sp-2);
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--ems-border);
+}
+
+.ue-detail__heading {
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--ems-fg-muted);
+}
+
+.ue-detail__count {
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-fg);
+}
+
+.ue-detail__empty,
+.ue-detail__note {
+    margin: 0;
+    color: var(--ems-fg-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.ue-detail__note {
+    font-size: var(--ems-fs-xs);
+}
+
+.ue-detail__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3);
+    margin-top: var(--ems-sp-2);
+}
+
+.ue-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--ems-sp-3) var(--ems-sp-5);
+    margin: 0;
+}
+
+.ue-facts__item {
+    min-width: 0;
+}
+
+.ue-facts__label {
+    font-size: var(--ems-fs-xs);
+    font-weight: 600;
+    color: var(--ems-fg-muted);
+}
+
+.ue-facts__value {
+    margin: 2px 0 0;
+    color: var(--ems-fg);
+    overflow-wrap: anywhere;
+}
+
+.ue-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: var(--ems-sp-3);
+}
+
+.ue-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--ems-sp-3) var(--ems-sp-4);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle);
+}
+
+.ue-stat__label {
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--ems-fg-muted);
+}
+
+.ue-stat__value {
+    font-size: var(--ems-fs-lg);
+    font-weight: 700;
+    color: var(--ems-fg);
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 768px) {
+    /* Telefonda 5 KPI kartı tək sütunda ekranı 3 dəfə uzadırdı — iki sütun. */
+    .ue .ems-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--ems-sp-3);
+    }
+
+    .ue .ems-kpi {
+        padding: 12px 14px;
+    }
+
+    .ue .ems-kpi:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+    }
+
+    .ue-facts {
+        grid-template-columns: 1fr;
+    }
+
+    .ue-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* Toxunma hədəfi ≥ 44px (ad düyməsi cədvəldə) */
+    .ue-title {
+        display: inline-block;
+        min-height: 44px;
+        line-height: 1.35;
+        padding: 10px 0;
+    }
+}
