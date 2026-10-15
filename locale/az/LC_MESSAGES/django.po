@@ -97411,3 +97411,31 @@ msgstr "Azad edilib"
 msgctxt "profile.subjects"
 msgid "Bu fənlər üzrə jurnal, davamiyyət və imtahan tələbi sizə aid deyil; qrupunuz dəyişmir. Sual yaranarsa dekanlığa müraciət edin."
 msgstr "Bu fənlər üzrə jurnal, davamiyyət və imtahan tələbi sizə aid deyil; qrupunuz dəyişmir. Sual yaranarsa dekanlığa müraciət edin."
+
+msgctxt "email.layout"
+msgid "Bu məktub avtomatik göndərilib, cavab yazmayın."
+msgstr "Bu məktub avtomatik göndərilib, cavab yazmayın."
+
+msgctxt "email.layout"
+msgid "Sualınız varsa, yazın:"
+msgstr "Sualınız varsa, yazın:"
+
+msgctxt "email.layout"
+msgid "Düymə işləmirsə, bu linki brauzerinizə köçürün:"
+msgstr "Düymə işləmirsə, bu linki brauzerinizə köçürün:"
+
+msgctxt "email.layout"
+msgid "Kodunuz: %(code)s · %(minutes)s dəqiqə etibarlıdır"
+msgstr "Kodunuz: %(code)s · %(minutes)s dəqiqə etibarlıdır"
+
+msgctxt "email.layout"
+msgid "Etibarlılıq müddəti: %(minutes)s dəqiqə"
+msgstr "Etibarlılıq müddəti: %(minutes)s dəqiqə"
+
+msgctxt "email.layout"
+msgid "Salam <strong>%(name)s</strong>, %(action)s üçün aşağıdakı kodu daxil edin."
+msgstr "Salam <strong>%(name)s</strong>, %(action)s üçün aşağıdakı kodu daxil edin."
+
+msgctxt "email.layout"
+msgid "Postu oxu"
+msgstr "Postu oxu"

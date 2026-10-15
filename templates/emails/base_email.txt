@@ -1,0 +1,12 @@
+{% load i18n email_layout %}{% email_chrome as chrome %}{% autoescape off %}{{ brand|default:chrome.brand }} · {{ chrome.product }}
+============================================================
+
+{% block heading %}{% endblock %}
+
+{% block content %}{% endblock %}
+
+------------------------------------------------------------
+{% block footer_note %}{% trans "Bu məktub avtomatik göndərilib, cavab yazmayın." context "email.layout" %}{% endblock %}
+{% if chrome.support_email %}{% trans "Sualınız varsa, yazın:" context "email.layout" %} {{ chrome.support_email }}
+{% endif %}© {% now "Y" %} {{ brand|default:chrome.brand }} · {{ chrome.product }}
+{% endautoescape %}

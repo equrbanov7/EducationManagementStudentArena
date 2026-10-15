@@ -97859,3 +97859,31 @@ msgstr "Exempt"
 msgctxt "profile.subjects"
 msgid "Bu fənlər üzrə jurnal, davamiyyət və imtahan tələbi sizə aid deyil; qrupunuz dəyişmir. Sual yaranarsa dekanlığa müraciət edin."
 msgstr "Journal, attendance and exam requirements for these subjects do not apply to you; your group does not change. If you have questions, contact the dean's office."
+
+msgctxt "email.layout"
+msgid "Bu məktub avtomatik göndərilib, cavab yazmayın."
+msgstr "This email was sent automatically; please do not reply."
+
+msgctxt "email.layout"
+msgid "Sualınız varsa, yazın:"
+msgstr "Questions? Write to:"
+
+msgctxt "email.layout"
+msgid "Düymə işləmirsə, bu linki brauzerinizə köçürün:"
+msgstr "If the button does not work, copy this link into your browser:"
+
+msgctxt "email.layout"
+msgid "Kodunuz: %(code)s · %(minutes)s dəqiqə etibarlıdır"
+msgstr "Your code: %(code)s · valid for %(minutes)s minutes"
+
+msgctxt "email.layout"
+msgid "Etibarlılıq müddəti: %(minutes)s dəqiqə"
+msgstr "Valid for %(minutes)s minutes"
+
+msgctxt "email.layout"
+msgid "Salam <strong>%(name)s</strong>, %(action)s üçün aşağıdakı kodu daxil edin."
+msgstr "Hello <strong>%(name)s</strong>, enter the code below for %(action)s."
+
+msgctxt "email.layout"
+msgid "Postu oxu"
+msgstr "Read the post"

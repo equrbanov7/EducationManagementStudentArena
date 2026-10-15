@@ -98043,3 +98043,31 @@ msgstr "Освобождён"
 msgctxt "profile.subjects"
 msgid "Bu fənlər üzrə jurnal, davamiyyət və imtahan tələbi sizə aid deyil; qrupunuz dəyişmir. Sual yaranarsa dekanlığa müraciət edin."
 msgstr "Требования журнала, посещаемости и экзамена по этим предметам к вам не относятся; ваша группа не меняется. По вопросам обращайтесь в деканат."
+
+msgctxt "email.layout"
+msgid "Bu məktub avtomatik göndərilib, cavab yazmayın."
+msgstr "Это письмо отправлено автоматически, пожалуйста, не отвечайте на него."
+
+msgctxt "email.layout"
+msgid "Sualınız varsa, yazın:"
+msgstr "Есть вопросы? Пишите:"
+
+msgctxt "email.layout"
+msgid "Düymə işləmirsə, bu linki brauzerinizə köçürün:"
+msgstr "Если кнопка не работает, скопируйте эту ссылку в браузер:"
+
+msgctxt "email.layout"
+msgid "Kodunuz: %(code)s · %(minutes)s dəqiqə etibarlıdır"
+msgstr "Ваш код: %(code)s · действует %(minutes)s мин."
+
+msgctxt "email.layout"
+msgid "Etibarlılıq müddəti: %(minutes)s dəqiqə"
+msgstr "Срок действия: %(minutes)s мин."
+
+msgctxt "email.layout"
+msgid "Salam <strong>%(name)s</strong>, %(action)s üçün aşağıdakı kodu daxil edin."
+msgstr "Здравствуйте, <strong>%(name)s</strong>, введите приведённый ниже код для %(action)s."
+
+msgctxt "email.layout"
+msgid "Postu oxu"
+msgstr "Читать публикацию"

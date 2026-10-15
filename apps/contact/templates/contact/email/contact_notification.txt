@@ -1,0 +1,17 @@
+{% extends "emails/base_email.txt" %}{% load i18n %}
+{% block heading %}{% trans "Yeni əlaqə mesajı" %}{% endblock %}
+{% block content %}{% blocktrans %}{{ brand }} saytındakı əlaqə formasından yeni bir mesaj göndərildi. Mesaj saxlanılıb və admin panelindən baxa bilərsiniz.{% endblocktrans %}
+
+{% trans "Ad Soyad" %}: {{ message.name }}
+{% trans "Email" %}: {{ message.email }}
+{% if message.phone %}{% trans "Telefon" %}: {{ message.phone }}
+{% endif %}{% trans "Mövzu" %}: {{ subject_display }}
+{% trans "Tarix" %}: {{ message.created_at|date:"d.m.Y H:i" }}
+
+{% trans "Mesaj" %}:
+{{ message.message }}
+{% if reply_url %}
+{% trans "Admin paneldə cavablandır" %}: {{ reply_url }}
+{% trans "Mesaj detalları" %}: {{ detail_url }}{% else %}
+{% blocktrans %}Bu mesaja cavab vermək üçün {{ brand }} admin panelinə keçin.{% endblocktrans %}{% endif %}{% endblock %}
+{% block footer_note %}{% trans "Avtomatik göndərilmiş bildiriş" %}{% endblock %}

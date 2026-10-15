@@ -97310,3 +97310,31 @@ msgstr "Muaf"
 msgctxt "profile.subjects"
 msgid "Bu fənlər üzrə jurnal, davamiyyət və imtahan tələbi sizə aid deyil; qrupunuz dəyişmir. Sual yaranarsa dekanlığa müraciət edin."
 msgstr "Bu dersler için defter, devam ve sınav şartları size uygulanmaz; grubunuz değişmez. Sorularınız için dekanlığa başvurun."
+
+msgctxt "email.layout"
+msgid "Bu məktub avtomatik göndərilib, cavab yazmayın."
+msgstr "Bu e-posta otomatik olarak gönderildi, lütfen yanıtlamayın."
+
+msgctxt "email.layout"
+msgid "Sualınız varsa, yazın:"
+msgstr "Sorunuz varsa yazın:"
+
+msgctxt "email.layout"
+msgid "Düymə işləmirsə, bu linki brauzerinizə köçürün:"
+msgstr "Düğme çalışmıyorsa bu bağlantıyı tarayıcınıza kopyalayın:"
+
+msgctxt "email.layout"
+msgid "Kodunuz: %(code)s · %(minutes)s dəqiqə etibarlıdır"
+msgstr "Kodunuz: %(code)s · %(minutes)s dakika geçerlidir"
+
+msgctxt "email.layout"
+msgid "Etibarlılıq müddəti: %(minutes)s dəqiqə"
+msgstr "Geçerlilik süresi: %(minutes)s dakika"
+
+msgctxt "email.layout"
+msgid "Salam <strong>%(name)s</strong>, %(action)s üçün aşağıdakı kodu daxil edin."
+msgstr "Merhaba <strong>%(name)s</strong>, %(action)s için aşağıdaki kodu girin."
+
+msgctxt "email.layout"
+msgid "Postu oxu"
+msgstr "Yazıyı oku"

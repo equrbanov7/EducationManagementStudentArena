@@ -98949,3 +98949,31 @@ msgstr "Befreit"
 msgctxt "profile.subjects"
 msgid "Bu fənlər üzrə jurnal, davamiyyət və imtahan tələbi sizə aid deyil; qrupunuz dəyişmir. Sual yaranarsa dekanlığa müraciət edin."
 msgstr "Journal-, Anwesenheits- und Prüfungsanforderungen dieser Fächer gelten nicht für Sie; Ihre Gruppe ändert sich nicht. Bei Fragen wenden Sie sich an das Dekanat."
+
+msgctxt "email.layout"
+msgid "Bu məktub avtomatik göndərilib, cavab yazmayın."
+msgstr "Diese E-Mail wurde automatisch versendet, bitte antworten Sie nicht darauf."
+
+msgctxt "email.layout"
+msgid "Sualınız varsa, yazın:"
+msgstr "Fragen? Schreiben Sie an:"
+
+msgctxt "email.layout"
+msgid "Düymə işləmirsə, bu linki brauzerinizə köçürün:"
+msgstr "Falls die Schaltfläche nicht funktioniert, kopieren Sie diesen Link in Ihren Browser:"
+
+msgctxt "email.layout"
+msgid "Kodunuz: %(code)s · %(minutes)s dəqiqə etibarlıdır"
+msgstr "Ihr Code: %(code)s · %(minutes)s Minuten gültig"
+
+msgctxt "email.layout"
+msgid "Etibarlılıq müddəti: %(minutes)s dəqiqə"
+msgstr "Gültigkeit: %(minutes)s Minuten"
+
+msgctxt "email.layout"
+msgid "Salam <strong>%(name)s</strong>, %(action)s üçün aşağıdakı kodu daxil edin."
+msgstr "Hallo <strong>%(name)s</strong>, geben Sie für %(action)s den folgenden Code ein."
+
+msgctxt "email.layout"
+msgid "Postu oxu"
+msgstr "Beitrag lesen"

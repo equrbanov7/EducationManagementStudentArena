@@ -1,52 +1,17 @@
-{% load i18n %}
-{% trans 'Email təsdiqi' as default_headline %}
-{% trans 'hesabınızı aktivləşdirmək' as default_intro_action %}
-{% trans 'Emaili təsdiqlə' as default_cta_label %}
-<!DOCTYPE html>
-<html lang="az">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ brand }} | {{ headline|default:default_headline }}</title>
-  </head>
-  <body style="margin:0;padding:0;background:#f4f7fb;font-family:Arial,sans-serif;color:#172033;">
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f7fb;padding:32px 16px;">
-      <tr>
-        <td align="center">
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 18px 40px rgba(15,23,42,0.10);">
-            <tr>
-              <td style="background:linear-gradient(135deg,#1e293b,#0ea5e9);padding:28px 32px;color:#ffffff;">
-                <div style="font-size:13px;letter-spacing:0.14em;text-transform:uppercase;opacity:0.82;">{{ brand }}</div>
-                <h1 style="margin:10px 0 0;font-size:28px;line-height:1.25;">{{ headline|default:default_headline }}</h1>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:32px;">
-                <p style="margin:0 0 16px;font-size:16px;line-height:1.7;">{% blocktrans with name=recipient_name action=otp_intro_action|default:default_intro_action %}Salam <strong>{{ name }}</strong>, {{ action }} üçün aşağıdakı addımlardan birini istifadə edin.{% endblocktrans %}</p>
-
-                {% if verification_link %}
-                <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 24px;">
-                  <tr>
-                    <td align="center" style="border-radius:12px;background:#0f766e;">
-                      <a href="{{ verification_link }}" style="display:inline-block;padding:14px 24px;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;">{{ cta_label|default:default_cta_label }}</a>
-                    </td>
-                  </tr>
-                </table>
-                {% endif %}
-
-                <div style="margin:0 0 24px;padding:18px 20px;border:1px solid #bae6fd;border-radius:16px;background:#f0f9ff;">
-                  <div style="font-size:13px;text-transform:uppercase;letter-spacing:0.08em;color:#0284c7;margin-bottom:8px;">{% trans 'OTP kodu' %}</div>
-                  <div style="font-size:32px;font-weight:800;letter-spacing:0.32em;color:#0f172a;">{{ code }}</div>
-                </div>
-
-                <div style="padding:16px 18px;border-radius:16px;background:#ecfeff;border:1px solid #a5f3fc;color:#155e75;font-size:14px;line-height:1.7;">
-                  {% blocktrans with minutes=otp_expiry_minutes %}Link və OTP kodu <strong>{{ minutes }} dəqiqə</strong> etibarlıdır.{% endblocktrans %}
-                </div>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  </body>
-</html>
+{% extends "emails/base_email.html" %}{% load i18n %}
+{% block title %}{% trans 'Email təsdiqi' as default_headline %}{{ brand }} | {{ headline|default:default_headline }}{% endblock %}
+{% block preheader %}{% blocktrans with code=code minutes=otp_expiry_minutes context "email.layout" %}Kodunuz: {{ code }} · {{ minutes }} dəqiqə etibarlıdır{% endblocktrans %}{% endblock %}
+{% block heading %}{% trans 'Email təsdiqi' as default_headline %}{{ headline|default:default_headline }}{% endblock %}
+{% block content %}
+{% trans 'hesabınızı aktivləşdirmək' as default_intro_action %}{% trans 'Emaili təsdiqlə' as default_cta_label %}
+{% if verification_link %}
+<p class="em-text" style="margin:0 0 20px;font-size:16px;line-height:1.6;color:#334155;">{% blocktrans with name=recipient_name action=otp_intro_action|default:default_intro_action %}Salam <strong>{{ name }}</strong>, {{ action }} üçün aşağıdakı addımlardan birini istifadə edin.{% endblocktrans %}</p>
+{% include "emails/_button.html" with url=verification_link label=cta_label|default:default_cta_label %}
+{% else %}
+<p class="em-text" style="margin:0 0 20px;font-size:16px;line-height:1.6;color:#334155;">{% blocktrans with name=recipient_name action=otp_intro_action|default:default_intro_action context "email.layout" %}Salam <strong>{{ name }}</strong>, {{ action }} üçün aşağıdakı kodu daxil edin.{% endblocktrans %}</p>
+{% endif %}
+{% trans 'OTP kodu' as code_label %}{% blocktrans asvar code_note with minutes=otp_expiry_minutes context "email.layout" %}Etibarlılıq müddəti: {{ minutes }} dəqiqə{% endblocktrans %}
+{% include "emails/_code_box.html" with code=code label=code_label note=code_note %}
+{% trans 'Əgər bu sorğunu siz etməmisinizsə, bu e-maili nəzərə almayın.' as safety_note %}
+{% include "emails/_panel.html" with text=safety_note tone="notice" %}
+{% endblock %}

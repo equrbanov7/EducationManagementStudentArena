@@ -24,12 +24,16 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import urllib.error
 import urllib.request
 from typing import Sequence
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, get_connection
+from django.template import TemplateDoesNotExist
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +53,28 @@ def system_reply_to() -> list[str]:
 
 
 RECOVERY_PURPOSES = frozenset({"password_reset"})
+
+_HEAD_OR_STYLE = re.compile(r"<(head|style)\b.*?</\1\s*>", re.I | re.S)
+_PREHEADER = re.compile(r"<div class=\"em-preheader\".*?</div>", re.I | re.S)
+_BLANK_LINES = re.compile(r"\n\s*\n\s*\n+")
+
+
+def plain_text_body(html_template_name: str, context: dict, html_body: str = "") -> str:
+    """HTML məktubun mətn (text/plain) variantı — 2026-10-15 vahid e-poçt şablonu.
+
+    ``foo.html`` üçün yanındakı ``foo.txt`` şablonu varsa o render olunur (bütün
+    məktublar ``templates/emails/base_email.txt``-dən törəyir). Yoxdursa — köhnə
+    davranış: HTML-dən teqlər atılır, amma ``<head>``/``<style>`` və gizli önbaxış
+    mətni əvvəlcə çıxarılır ki, CSS mətnə düşməsin.
+    """
+    if html_template_name.endswith(".html"):
+        try:
+            return render_to_string(f"{html_template_name[:-5]}.txt", context).strip() + "\n"
+        except TemplateDoesNotExist:
+            pass
+    html = html_body or render_to_string(html_template_name, context)
+    text = strip_tags(_PREHEADER.sub("", _HEAD_OR_STYLE.sub("", html)))
+    return _BLANK_LINES.sub("\n\n", text).strip() + "\n"
 
 
 def sender_for(purpose: str | None = None) -> str:
