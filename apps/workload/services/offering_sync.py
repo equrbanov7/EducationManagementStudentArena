@@ -15,6 +15,10 @@ Burada əlavə olaraq:
   ``registrar.services.choose_group_elective`` açılışı yaradır və qrupu ELECTIVE
   kimi yazır. Açılış artıq varsa (qərar verilib) sinxron yalnız müəllim/saatı
   yeniləyir, qeydiyyata toxunmur. Planda izi olmayan fənn məcburi sayılır.
+  ISTISNA (2026-10-15, :mod:`.offering_electives`): sətir RƏSMİ seçmə blok sətridir
+  (blok mətni + sənəddən seçilmiş fənn) → bu, qrupun qərarıdır: qərar yazılır,
+  açılış yaranır, qrup ``elective`` kimi yazılır (``elective_from_task``); qrupun
+  həmin blok üçün BAŞQA qərarı əzilmir (``elective_choice_conflict``).
 * LƏĞV edilmiş (``is_active=False``) açılışa və KİLİDLİ semestrə toxunulmur;
   bağlı jurnalın saatı dəyişmir.
 * QEYDİYYAT: yeni və ya hələ BOŞ açılışa qrupun aktiv tələbələri
@@ -29,6 +33,7 @@ from __future__ import annotations
 import logging
 
 from django.apps import apps as django_apps
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.db.models import Prefetch
 
@@ -36,6 +41,7 @@ from core.audit import log_action
 from core.constants import AuditAction
 
 from ..models import TeacherAssignment, TeachingTaskRow
+from .offering_electives import BlockIndex, is_official_choice, record_group_choice
 from .offering_rules import (
     OUTCOME_COUNTERS,
     UNKNOWN,
@@ -63,6 +69,11 @@ COUNTER_KEYS = (
     "not_created",
     "inactive_skipped",
     "elective_pending",
+    # 2026-10-15: tapşırıqdakı rəsmi seçmə blok seçimi (bax :mod:`.offering_electives`).
+    "elective_from_task",
+    "elective_choice_recorded",
+    "elective_choice_conflict",
+    "elective_choice_failed",
     "hours_updated",
     "instructor_set",
     "instructor_replaced",
@@ -205,6 +216,8 @@ class _Sync:
         self.previous = previous
         self.counters = dict.fromkeys(COUNTER_KEYS, 0)
         self.offering_ids: list[str] = []
+        # Qrupun «öz» açılışları (qeydiyyat növü üzrə) — ``resync_task_offerings`` tam qeydiyyat keçidi üçün.
+        self.group_offering_ids: dict = {"mandatory": [], "elective": []}
         self.missing_seasons: dict = {}
         self.schedule_conflicts: list[dict] = []
         self._closed = None
@@ -231,6 +244,7 @@ class _Sync:
         return {
             **self.counters,
             "offering_ids": self.offering_ids,
+            "group_offering_ids": self.group_offering_ids,
             "missing_seasons": self.missing_seasons,
             "schedule_conflict_details": self.schedule_conflicts,
         }
@@ -329,21 +343,34 @@ class _Sync:
         ]
         handover_pairs = self._handover_pairs(differing)
         populated = self._populated([offering for key, offering in existing.items() if key in targets])
-        to_enroll = []
+        official = {key for key, entry in targets.items() if is_official_choice(entry["rows"])}
+        official_electives = {key for key in official if (targets[key]["group"].parent_id, key[0]) in electives}
+        blocks = (
+            BlockIndex(self.org_id, {key: targets[key] for key in official_electives}) if official_electives else None
+        )
+        to_enroll, to_enroll_elective = [], []
         for key, entry in targets.items():
             offering = existing.get(key)
             is_elective = (entry["group"].parent_id, key[0]) in electives
             lesson_hours = sum(merge_hours(entry["rows"] + foreign_rows.get(key, [])).values())
             desired_id = getattr(owners[key], "pk", None)
             decision = {"desired_id": desired_id, "eligible": desired_id in eligible}
+            if is_elective and key in official and blocks.block_for(entry["group"], key[0]) is None:
+                is_elective = False  # blok adı yoxdur — tapşırıq rəsmi mənbədir, məcburi kimi açılır
             if offering is None:
-                if is_elective:
+                if is_elective and key in official and self.create:
+                    chosen = self._official_elective(key, entry, None, blocks, lesson_hours=lesson_hours, **decision)
+                    to_enroll_elective += [chosen] if chosen is not None else []
+                    self._own(chosen, "elective")
+                elif is_elective:
                     self.counters["elective_pending"] += 1
                 elif not self.create:
                     self.counters["not_created"] += 1
                 else:
                     created = self._create(key, lesson_hours=lesson_hours, **decision)
                     to_enroll += [created] if created is not None else []
+                    self.counters["elective_from_task"] += int(created is not None and key in official)
+                    self._own(created, "mandatory")
                 continue
             if not offering.is_active:
                 self.counters["inactive_skipped"] += 1
@@ -360,10 +387,58 @@ class _Sync:
                 handover_owned=handover_owned,
                 **decision,
             )
-            if not is_elective and offering.pk not in populated:
-                to_enroll.append(offering)
+            if is_elective and key in official and self.create:
+                chosen = self._official_elective(key, entry, offering, blocks, lesson_hours=lesson_hours, **decision)
+                if chosen is not None and offering.pk not in populated:
+                    to_enroll_elective.append(chosen)
+                self._own(chosen, "elective")
+            elif not is_elective:
+                to_enroll += [offering] if offering.pk not in populated else []
+                self._own(offering, "mandatory")
         if to_enroll:
             self._enroll(to_enroll)
+        if to_enroll_elective:
+            # Qrupun qərarı = qrupun HƏR aktiv üzvü (başqa plan versiyasında olanlar da) — idempotent.
+            self._enroll(to_enroll_elective, kind="elective")
+
+    def _own(self, offering, kind) -> None:
+        if offering is not None:
+            self.group_offering_ids[kind].append(str(offering.pk))
+
+    def _official_elective(self, key, entry, offering, blocks, *, lesson_hours, desired_id, eligible):
+        """Rəsmi blok seçimi → qrupun qərarı (+ yoxdursa açılış). Qaytarır: qeydiyyata düşən açılış və ya ``None``."""
+        group, period = entry["group"], entry["rows"][0].period
+        option = blocks.block_for(group, key[0])
+        chosen = blocks.existing_choice(group.pk, key[1], option.elective_group)
+        if chosen is not None and chosen != key[0]:
+            self.counters["elective_choice_conflict"] += 1
+            return None
+        snapshot = (dict(self.counters), len(self.offering_ids))
+        try:
+            with transaction.atomic():
+                if offering is None:
+                    offering = self._create(key, lesson_hours=lesson_hours, desired_id=desired_id, eligible=eligible)
+                    if offering is None:
+                        return None
+                    self.counters["elective_from_task"] += 1
+                if chosen is None:
+                    self.counters["enrolled"] += record_group_choice(
+                        organization=self.task.organization,
+                        group=group,
+                        period=period,
+                        option=option,
+                        subject=blocks.subjects[key[0]],
+                        decided_by=self.actor_user,
+                    )
+                    self.counters["elective_choice_recorded"] += 1
+                    blocks.choices[(group.pk, key[1], option.elective_group)] = key[0]
+        except (ValidationError, IntegrityError):
+            logger.warning("workload: official elective choice rejected %s", key, exc_info=True)
+            self.counters = snapshot[0]
+            del self.offering_ids[snapshot[1] :]
+            self.counters["elective_choice_failed"] += 1
+            return None
+        return offering
 
     def _count(self, outcome) -> None:
         for counter in OUTCOME_COUNTERS[outcome]:
@@ -456,11 +531,12 @@ class _Sync:
             resource_repr=f"{offering.subject_id} · {offering.group_id}",
         )
 
-    def _enroll(self, offerings) -> None:
+    def _enroll(self, offerings, *, kind="mandatory") -> None:
         from apps.registrar.public import services as registrar_services
 
         report = registrar_services.enroll_group_students(
             offerings=offerings,
+            kind=kind,
             by_user=self.actor_user,
             reason=f"Tədris tapşırığı {self.task.academic_year}: plan qruplara düşdü — birləşik qrupun açılışı",
         )

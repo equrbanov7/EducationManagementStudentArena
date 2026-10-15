@@ -1,0 +1,74 @@
+{% load journal_names i18n %}
+{% comment %}«Fəndən azad et» + «Azad edilənlər» (sahib 2026-10-15): tələbə qrupda qalır, yalnız BU fənnin
+jurnalından çıxır. Siyahını jurnalı açan hər kəs görür; «Bərpa et» və modal yalnız səlahiyyətliyə
+(`can_exempt` — journal.correct org-wide və ya əhatəli journal.roster, açıq siyahı). URL-lər data-atributla
+ötürülür (CSP: inline JS yoxdur) — məntiq registrar/js/journal_subject_exempt.js-dədir.{% endcomment %}
+{% if exempt_rows %}
+<details class="jse-list" data-jse-list{% if not journal.rows %} open{% endif %}>
+    <summary class="jse-list__head">
+        <i class="fas fa-user-slash" aria-hidden="true"></i>
+        {% trans "Azad edilənlər" context "registrar.subject_exempt" %}
+        <span class="jse-list__count">{{ exempt_rows|length }}</span>
+        <span class="jse-list__hint">{% trans "qrupda qalırlar — yalnız bu fənnin jurnalında görünmürlər" context "registrar.subject_exempt" %}</span>
+    </summary>
+    <ul class="jse-list__items">
+        {% for item in exempt_rows %}
+        <li class="jse-item">
+            <span class="jse-item__name">{{ item.student|journal_name }}</span>
+            <span class="jse-item__meta">{{ item.reason }} · {{ item.decided_by|default:"—" }} · {{ item.decided_at|date:"d.m.Y H:i" }}</span>
+            {% if can_exempt %}
+            <button type="button" class="jse-restore" data-jse-restore="{{ item.decision_id }}">
+                <i class="fas fa-rotate-left" aria-hidden="true"></i>
+                <span data-jse-restore-label>{% trans "Bərpa et" context "registrar.subject_exempt" %}</span>
+            </button>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+</details>
+{% endif %}
+{% if can_exempt %}
+<div class="jd-modal jse-modal" data-jse-modal hidden
+     data-apply-url="{% url 'registrar:journal_subject_exempt' offering.id %}"
+     data-restore-url="{% url 'registrar:journal_subject_exempt_restore' offering.id %}"
+     data-generic-error="{% trans 'Əməliyyat alınmadı — yenidən cəhd edin.' context 'registrar.subject_exempt' %}"
+     data-confirm-label="{% trans 'Təsdiq üçün yenidən klikləyin' context 'registrar.subject_exempt' %}">
+    <div class="jd-modal-backdrop" data-jse-close></div>
+    <div class="jd-modal-card jse-card" role="dialog" aria-modal="true" aria-labelledby="jse-title">
+        <div class="jd-modal-head jd2-modal-head jse-head">
+            <div class="jse-head-main">
+                <h3 id="jse-title">{% trans "Fəndən azad et" context "registrar.subject_exempt" %}</h3>
+                <p class="jse-head-sub">{% trans "Tələbə qrupda qalır — yalnız bu fənnin jurnalından, imtahan siyahısından və hesablamalarından çıxır. Digər fənlərə toxunulmur; «Bərpa et» ilə geri qaytarılır." context "registrar.subject_exempt" %}</p>
+            </div>
+            <button type="button" class="jd-modal-close jd2-modal-close" data-jse-close aria-label="{% trans 'Bağla' context 'registrar.subject_exempt' %}">✕</button>
+        </div>
+        <div class="jd-modal-body jse-body">
+            <div class="jse-context">
+                <span class="jse-ctx-chip"><i class="fas fa-user" aria-hidden="true"></i> <b data-jse-student-name></b></span>
+                <span class="jse-ctx-chip jse-ctx-chip--muted"><i class="fas fa-book" aria-hidden="true"></i> {{ offering.subject.name }}</span>
+            </div>
+            <label class="jd2-field jse-field">
+                <span class="jd2-field-label">{% trans "Səbəb" context "registrar.subject_exempt" %} <small>{% trans "(istəyə bağlı)" context "registrar.subject_exempt" %}</small></span>
+                <textarea name="reason" rows="2" maxlength="2000" data-jse-reason></textarea>
+            </label>
+            <div class="jse-doc">
+                <label class="jd2-field jse-field">
+                    <span class="jd2-field-label">{% trans "Sənəd №" context "registrar.subject_exempt" %} <small>{% trans "(istəyə bağlı)" context "registrar.subject_exempt" %}</small></span>
+                    <input type="text" name="doc_number" maxlength="64" autocomplete="off" data-jse-doc-number>
+                </label>
+                <label class="jd2-field jse-field">
+                    <span class="jd2-field-label">{% trans "Sənəd tarixi" context "registrar.subject_exempt" %}</span>
+                    <input type="date" name="doc_date" data-jse-doc-date>
+                </label>
+            </div>
+            <p class="jse-error" data-jse-error hidden role="alert"></p>
+        </div>
+        <div class="jd-modal-foot jse-foot">
+            <button type="button" class="jd2-cancel-btn" data-jse-close>{% trans "Ləğv et" context "registrar.subject_exempt" %}</button>
+            <button type="button" class="jd2-apply-btn jse-submit" data-jse-submit>
+                <i class="fas fa-user-minus" aria-hidden="true"></i> {% trans "Fəndən azad et" context "registrar.subject_exempt" %}
+            </button>
+        </div>
+    </div>
+</div>
+{% endif %}

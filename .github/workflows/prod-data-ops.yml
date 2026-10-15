@@ -45,6 +45,10 @@
 #       neçə işarə, hər biri fənn + qrup üzrə DƏQİQ bir sətir) + `row_subject` + `row_activity` + `row_hours`. UI ilə
 #       EYNİ yol — düzəliş axını (səbəb «Texniki səhvin düzəlişi»), bölgü sığdırılır (0 → silinir), cəm yenidən
 #       hesablanır, əvvəl təsdiqlənmiş sənəd yenidən təsdiqlənir (təkrar bildiriş yoxdur). Loga yalnız saylar.
+#   resync_task_offerings — kafedraya ÇATMIŞ tapşırıqların açılış + qeydiyyat təkrar keçidi (2026-10-15): rəsmi
+#       seçmə blok seçimi («ATMF … blok» sətrinin fənni) qrupun seçimi kimi yazılır (GroupElectiveChoice), açılış +
+#       qrupun «elective» qeydiyyatı; qrupun BAŞQA qərarı əzilmir. `task_chair` boş → bütün kafedralar. Təyinata
+#       toxunmur, «Vakant» yazmır, bildiriş yoxdur. Loga YALNIZ saylar.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
 #       (backfill; `--include-drafts` BURADA YOXDUR — qaralama planlar sahibin qərarıdır).
 #   apply_org_structure — struktur planı (scripts/data/qku_structure_2026_09_27.json, yalnız vahid
@@ -86,6 +90,7 @@ on:
           - assign_task_rows_from_timetable
           - backfill_teacher_lessons
           - fix_task_row_hours
+          - resync_task_offerings
           - repair_group_leads
           - retire_qa_accounts
       apply:
@@ -98,7 +103,7 @@ on:
         required: false
         default: ""
       year:
-        description: "sync_plan_offerings: tədris ili (məs. 2026/2027)"
+        description: "sync_plan_offerings / resync_task_offerings / import_teaching_*: tədris ili (məs. 2026/2027)"
         required: false
         default: "2026/2027"
       roster_tag:
@@ -133,7 +138,7 @@ on:
         required: false
         default: "Proqramlaşdırma"
       task_chair:
-        description: "import_teaching_load_form1 / fix_task_row_hours: kafedra adı"
+        description: "import_teaching_load_form1 / fix_task_row_hours: kafedra adı · resync_task_offerings: boş = bütün kafedralar"
         required: false
         default: ""
       row_group:
@@ -409,6 +414,20 @@ jobs:
                     --activity "$ROW_ACTIVITY" --hours "$ROW_HOURS" --actor "$actor"
                     --reason "TAPŞIRIQ kitabçasında fəaliyyət xanası səhvdir (sətrin cəmi yazılıb) — sahibin 2026-10-15 tapşırığı")
               ;;
+            resync_task_offerings)
+              # 2026-10-15: rəsmi seçmə blok seçimi → qrupun seçimi + açılış + qeydiyyat (offering_electives).
+              # Arqumentlər massivlə ötürülür (shell şərhi yoxdur); format yoxlaması yalnız ağlabatanlıq üçündür.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --year "$YEAR" --actor "$actor")
+              if [ -n "$TASK_CHAIR" ]; then
+                [ "${#TASK_CHAIR}" -le 120 ] || { echo "task_chair uzundur (≤120)" >&2; exit 2; }
+                printf '%s' "$TASK_CHAIR" | grep -Eq '^[^[:cntrl:]"`$\\;|&<>]+$' || { echo "task_chair icazəsiz simvol" >&2; exit 2; }
+                args+=(--chair "$TASK_CHAIR")
+              else
+                args+=(--all-chairs)
+              fi
+              ;;
             sync_plan_offerings)
               actor="$(superadmin_actor)"
               test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -474,6 +493,18 @@ jobs:
             grep -E '^(Şəxs:|Yaradılacaq|✓|Vahidi tapılmayan|Təşkilatda OLMAYAN|DRY-RUN|   [a-z_]+ +[0-9]+$)' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             test "${status:-0}" = 0 || { tail -n 5 "$RUNNER_TEMP/out.log" | grep -E 'Error|Exception' || true; exit "$status"; }
+          elif [ "$COMMAND" = "resync_task_offerings" ]; then
+            # Loga YALNIZ saylar: əmr yalnız say çap edir; xəbərdarlıq/traceback sətirləri süzülür.
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^(tasks=[0-9]+ · tasks_not_reached_chair=[0-9]+|(APPLY|DRY-RUN \(heç nə yazılmadı\)): [a-z_]+=[0-9]+( · [a-z_]+=[0-9]+)*)$' \
+              "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
           elif [ "$COMMAND" = "repair_group_leads" ]; then
             # Hər sətir istifadəçi adı (ad.soyad) ilə başlayır → loga adsız düşür (problem növü, qrup, əməl).
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?

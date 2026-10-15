@@ -16,7 +16,7 @@ or a caller that manages tenant scope; they do not open their own transaction.
 
 from __future__ import annotations
 
-from django.db import transaction
+from django.db import IntegrityError, transaction
 
 from . import exam_eligibility, journal_hygiene_guard
 from .integrity import (
@@ -164,12 +164,18 @@ def choose_group_elective(
         organization=organization, offering=offering, student_ids={rec.student_id for rec in records}, actor=decided_by
     )
     for rec in records:
-        _, created = Enrollment.objects.get_or_create(
-            organization=organization,
-            student=rec.student,
-            offering=offering,
-            defaults={"kind": EnrollmentKind.ELECTIVE},
-        )
+        try:
+            # DB qapısı (``registrar_guard_active_member``): aktiv üzvlüyü olmayan tələbə ötürülür —
+            # qrupun qərarı bütövlükdə dayanmır (``enroll_group_students``-dakı ``not_member`` ilə eyni).
+            with transaction.atomic():
+                _, created = Enrollment.objects.get_or_create(
+                    organization=organization,
+                    student=rec.student,
+                    offering=offering,
+                    defaults={"kind": EnrollmentKind.ELECTIVE},
+                )
+        except IntegrityError:
+            continue
         enrolled += int(created)
     # Sahib 2026-10-10: köhnə seçimin BOŞ qeydiyyatları nəticələrdən çıxır (məlumatlı sətir toxunulmur).
     journal_hygiene_guard.drop_replaced_elective(
@@ -405,7 +411,6 @@ def group_course_year(group, academic_year) -> int:
 
 def _insert_enrollments(rows, report) -> None:
     """Toplu INSERT; bir sətir DB qapısına dəysə — sətir-sətir (savepoint ilə)."""
-    from django.db import IntegrityError
 
     try:
         with transaction.atomic():
@@ -492,7 +497,6 @@ def _rollup_combined_groups(org_id, offerings, *, by_user, reason, report) -> No
     """
     from django.apps import apps as django_apps
     from django.core.exceptions import ValidationError
-    from django.db import IntegrityError
 
     from . import guest_roster, subgroup_rollup
 

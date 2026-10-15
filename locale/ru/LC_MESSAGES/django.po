@@ -97922,3 +97922,124 @@ msgstr "Окно редактирования (%(w)s) закрыто"
 msgctxt "registrar.journal"
 msgid "Kurs işi balı yekun cədvəldə ayrıca sütunda göstərilir. Yazılan qeyd %(w)s sonra kilidlənir."
 msgstr "Балл курсовой работы показывается в отдельной колонке итоговой таблицы. Запись блокируется через %(w)s."
+
+msgctxt "registrar.journal_hygiene"
+msgid "Fəndən azad"
+msgstr "Освобождён от предмета"
+
+msgctxt "registrar.subject_exempt"
+msgid "Sənəd tarixi düzgün deyil."
+msgstr "Неверная дата документа."
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azad edildi"
+msgstr "Освобождён от предмета"
+
+#, python-format
+msgctxt "registrar.subject_exempt"
+msgid "sənəd: %(doc)s"
+msgstr "документ: %(doc)s"
+
+msgctxt "registrar.subject_exempt"
+msgid "Qeydiyyat tapılmadı."
+msgstr "Запись не найдена."
+
+msgctxt "registrar.subject_exempt"
+msgid "Bu tələbə artıq jurnalda deyil."
+msgstr "Этого студента уже нет в журнале."
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azadlıq geri alındı"
+msgstr "Освобождение от предмета отменено"
+
+msgctxt "registrar.subject_exempt"
+msgid "Qərar tapılmadı və ya artıq geri qaytarılıb."
+msgstr "Решение не найдено или уже отменено."
+
+msgctxt "registrar.subject_exempt"
+msgid "Qeydiyyatın statusu o vaxtdan dəyişib — bərpa olunmur."
+msgstr "Статус записи с тех пор изменился — восстановление невозможно."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə bu fənn üzrə başqa jurnalda aktivdir — əvvəlcə oradan çıxarın."
+msgstr "Студент активен в другом журнале по этому предмету — сначала уберите его оттуда."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbəni fəndən azad etmək üçün səlahiyyətiniz yoxdur."
+msgstr "У вас нет прав освобождать студентов от предмета."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə bu fəndən azad edildi — qrupda qalır, digər fənlərə toxunulmadı."
+msgstr "Студент освобождён от этого предмета — остаётся в группе, другие предметы не затронуты."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə jurnala qaytarıldı."
+msgstr "Студент возвращён в журнал."
+
+msgctxt "registrar.subject_exempt"
+msgid "Azad edilənlər"
+msgstr "Освобождённые"
+
+msgctxt "registrar.subject_exempt"
+msgid "qrupda qalırlar — yalnız bu fənnin jurnalında görünmürlər"
+msgstr "остаются в группе — не отображаются только в журнале этого предмета"
+
+msgctxt "registrar.subject_exempt"
+msgid "Bərpa et"
+msgstr "Восстановить"
+
+msgctxt "registrar.subject_exempt"
+msgid "Əməliyyat alınmadı — yenidən cəhd edin."
+msgstr "Операция не удалась — попробуйте снова."
+
+msgctxt "registrar.subject_exempt"
+msgid "Təsdiq üçün yenidən klikləyin"
+msgstr "Нажмите ещё раз для подтверждения"
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azad et"
+msgstr "Освободить от предмета"
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə qrupda qalır — yalnız bu fənnin jurnalından, imtahan siyahısından və hesablamalarından çıxır. Digər fənlərə toxunulmur; «Bərpa et» ilə geri qaytarılır."
+msgstr "Студент остаётся в группе — он убирается только из журнала, экзаменационного списка и расчётов этого предмета. Другие предметы не затрагиваются; «Восстановить» возвращает его."
+
+msgctxt "registrar.subject_exempt"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "registrar.subject_exempt"
+msgid "Səbəb"
+msgstr "Причина"
+
+msgctxt "registrar.subject_exempt"
+msgid "(istəyə bağlı)"
+msgstr "(необязательно)"
+
+msgctxt "registrar.subject_exempt"
+msgid "Sənəd №"
+msgstr "Документ №"
+
+msgctxt "registrar.subject_exempt"
+msgid "Sənəd tarixi"
+msgstr "Дата документа"
+
+msgctxt "registrar.subject_exempt"
+msgid "Ləğv et"
+msgstr "Отмена"
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azad et — tələbə qrupda qalır, yalnız bu jurnaldan çıxır"
+msgstr "Освободить от предмета — студент остаётся в группе и убирается только из этого журнала"
+
+msgctxt "profile.subjects"
+msgid "Azad edildiyiniz fənlər"
+msgstr "Предметы, от которых вы освобождены"
+
+msgctxt "profile.subjects"
+msgid "Azad edilib"
+msgstr "Освобождён"
+
+msgctxt "profile.subjects"
+msgid "Bu fənlər üzrə jurnal, davamiyyət və imtahan tələbi sizə aid deyil; qrupunuz dəyişmir. Sual yaranarsa dekanlığa müraciət edin."
+msgstr "Требования журнала, посещаемости и экзамена по этим предметам к вам не относятся; ваша группа не меняется. По вопросам обращайтесь в деканат."

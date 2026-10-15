@@ -98828,3 +98828,124 @@ msgstr "Die Bearbeitungsfrist (%(w)s) ist abgelaufen"
 msgctxt "registrar.journal"
 msgid "Kurs işi balı yekun cədvəldə ayrıca sütunda göstərilir. Yazılan qeyd %(w)s sonra kilidlənir."
 msgstr "Die Punktzahl der Kursarbeit wird in einer eigenen Spalte der Abschlusstabelle angezeigt. Ein Eintrag wird nach %(w)s gesperrt."
+
+msgctxt "registrar.journal_hygiene"
+msgid "Fəndən azad"
+msgstr "Vom Fach befreit"
+
+msgctxt "registrar.subject_exempt"
+msgid "Sənəd tarixi düzgün deyil."
+msgstr "Das Dokumentdatum ist ungültig."
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azad edildi"
+msgstr "Vom Fach befreit"
+
+#, python-format
+msgctxt "registrar.subject_exempt"
+msgid "sənəd: %(doc)s"
+msgstr "Dokument: %(doc)s"
+
+msgctxt "registrar.subject_exempt"
+msgid "Qeydiyyat tapılmadı."
+msgstr "Einschreibung nicht gefunden."
+
+msgctxt "registrar.subject_exempt"
+msgid "Bu tələbə artıq jurnalda deyil."
+msgstr "Diese Person steht nicht mehr im Journal."
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azadlıq geri alındı"
+msgstr "Befreiung vom Fach aufgehoben"
+
+msgctxt "registrar.subject_exempt"
+msgid "Qərar tapılmadı və ya artıq geri qaytarılıb."
+msgstr "Entscheidung nicht gefunden oder bereits zurückgenommen."
+
+msgctxt "registrar.subject_exempt"
+msgid "Qeydiyyatın statusu o vaxtdan dəyişib — bərpa olunmur."
+msgstr "Der Status der Einschreibung hat sich seitdem geändert — keine Wiederherstellung möglich."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə bu fənn üzrə başqa jurnalda aktivdir — əvvəlcə oradan çıxarın."
+msgstr "Die Person ist in einem anderen Journal dieses Fachs aktiv — zuerst dort entfernen."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbəni fəndən azad etmək üçün səlahiyyətiniz yoxdur."
+msgstr "Sie dürfen Studierende nicht von einem Fach befreien."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə bu fəndən azad edildi — qrupda qalır, digər fənlərə toxunulmadı."
+msgstr "Die Person wurde von diesem Fach befreit — sie bleibt in der Gruppe, andere Fächer bleiben unberührt."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə jurnala qaytarıldı."
+msgstr "Die Person wurde ins Journal zurückgeholt."
+
+msgctxt "registrar.subject_exempt"
+msgid "Azad edilənlər"
+msgstr "Befreite"
+
+msgctxt "registrar.subject_exempt"
+msgid "qrupda qalırlar — yalnız bu fənnin jurnalında görünmürlər"
+msgstr "sie bleiben in der Gruppe — nur im Journal dieses Fachs ausgeblendet"
+
+msgctxt "registrar.subject_exempt"
+msgid "Bərpa et"
+msgstr "Wiederherstellen"
+
+msgctxt "registrar.subject_exempt"
+msgid "Əməliyyat alınmadı — yenidən cəhd edin."
+msgstr "Die Aktion ist fehlgeschlagen — bitte erneut versuchen."
+
+msgctxt "registrar.subject_exempt"
+msgid "Təsdiq üçün yenidən klikləyin"
+msgstr "Zum Bestätigen erneut klicken"
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azad et"
+msgstr "Vom Fach befreien"
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə qrupda qalır — yalnız bu fənnin jurnalından, imtahan siyahısından və hesablamalarından çıxır. Digər fənlərə toxunulmur; «Bərpa et» ilə geri qaytarılır."
+msgstr "Die Person bleibt in der Gruppe — sie wird nur aus Journal, Prüfungsliste und Berechnungen dieses Fachs entfernt. Andere Fächer bleiben unberührt; «Wiederherstellen» holt sie zurück."
+
+msgctxt "registrar.subject_exempt"
+msgid "Bağla"
+msgstr "Schließen"
+
+msgctxt "registrar.subject_exempt"
+msgid "Səbəb"
+msgstr "Begründung"
+
+msgctxt "registrar.subject_exempt"
+msgid "(istəyə bağlı)"
+msgstr "(optional)"
+
+msgctxt "registrar.subject_exempt"
+msgid "Sənəd №"
+msgstr "Dokument Nr."
+
+msgctxt "registrar.subject_exempt"
+msgid "Sənəd tarixi"
+msgstr "Dokumentdatum"
+
+msgctxt "registrar.subject_exempt"
+msgid "Ləğv et"
+msgstr "Abbrechen"
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azad et — tələbə qrupda qalır, yalnız bu jurnaldan çıxır"
+msgstr "Vom Fach befreien — die Person bleibt in der Gruppe und verlässt nur dieses Journal"
+
+msgctxt "profile.subjects"
+msgid "Azad edildiyiniz fənlər"
+msgstr "Fächer, von denen Sie befreit sind"
+
+msgctxt "profile.subjects"
+msgid "Azad edilib"
+msgstr "Befreit"
+
+msgctxt "profile.subjects"
+msgid "Bu fənlər üzrə jurnal, davamiyyət və imtahan tələbi sizə aid deyil; qrupunuz dəyişmir. Sual yaranarsa dekanlığa müraciət edin."
+msgstr "Journal-, Anwesenheits- und Prüfungsanforderungen dieser Fächer gelten nicht für Sie; Ihre Gruppe ändert sich nicht. Bei Fragen wenden Sie sich an das Dekanat."
