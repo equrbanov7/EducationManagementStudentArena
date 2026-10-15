@@ -17,6 +17,7 @@
 {% trans "Sorğuya bax və faylı yüklə" as cta_label %}
 {% include "emails/_button.html" with url=profile_detail_url label=cta_label fallback=False %}
 <p class="em-text" style="margin:0;font-size:14px;line-height:1.8;">{% if file_download_url %}<a class="em-link" href="{{ file_download_url }}" style="color:#0f766e;text-decoration:underline;font-weight:600;">{% trans "PDF-i birbaşa yüklə" %}</a><br>{% endif %}<a class="em-link" href="{{ reply_url }}" style="color:#1d4ed8;text-decoration:underline;">{% trans "Suallar əlavə olunduqda təsdiq göndər" %} &rarr;</a></p>
+<p class="em-muted" style="margin:16px 0 0;font-size:13px;line-height:1.6;color:#64748b;">{% trans "Cavab sistemin rəsmi poçt qutusundan gedəcək." %}</p>
 {% endif %}
 {% endblock %}
 {% block footer_note %}{% trans "Avtomatik göndərilmiş bildiriş" %}{% endblock %}

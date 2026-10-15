@@ -29,31 +29,30 @@ from django.utils.translation import gettext as _
 from core.mailing import plain_text_body
 from core.mailing import send_email_with_fallback as _send_email_with_fallback
 from core.mailing import send_via_brevo_api as _send_via_brevo_api  # noqa: F401  (kept for backwards compat)
+from core.mailing import sender_address, staff_notify_recipients
 from core.utils import build_absolute_url
 
 from .models import ContactMessage
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_OWNER_EMAIL = "info@emsarena.com"
 
-_REPLY_FROM_EMAILS = {
-    "info": "info@emsarena.com",
-    "support": "support@emsarena.com",
-}
+def _resolve_notify_recipients() -> list[str]:
+    """Bildiriş alıcıları: ``CONTACT_NOTIFY_EMAIL`` doludursa o, yoxsa aktiv superuser-lər.
 
-
-def _resolve_notify_address() -> str:
-    """Return the address that should receive contact form notifications."""
-    return getattr(settings, "CONTACT_NOTIFY_EMAIL", "") or _DEFAULT_OWNER_EMAIL
+    Sahib 2026-10-16: info@/support@ qutuları mövcud deyil — sabit «sahib ünvanı» yoxdur.
+    """
+    return staff_notify_recipients("CONTACT_NOTIFY_EMAIL")
 
 
 # ---------------------------------------------------------------------------
 # Internal notification (to staff inbox)
 # ---------------------------------------------------------------------------
 def _send_internal_notification(message: ContactMessage) -> bool:
-    """Send the new-message alert to the configured staff mailbox."""
-    recipient = _resolve_notify_address()
+    """Send the new-message alert to the configured staff mailbox (or the superusers)."""
+    recipients = _resolve_notify_recipients()
+    if not recipients:
+        return False
     brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
     subject = _("[%(brand)s Contact] %(subject)s — %(name)s") % {
         "brand": brand,
@@ -75,14 +74,13 @@ def _send_internal_notification(message: ContactMessage) -> bool:
     html_body = render_to_string("contact/email/contact_notification.html", context)
     text_body = plain_text_body("contact/email/contact_notification.html", context, html_body)
 
-    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@emsarena.com")
     ok, _reason = _send_email_with_fallback(
         subject=subject,
         html_body=html_body,
         text_body=text_body,
-        from_email=from_email,
+        from_email=sender_address(),
         from_name=brand,
-        to=[recipient],
+        to=recipients,
         reply_to=[message.email],
     )
     return ok
@@ -104,11 +102,14 @@ def dispatch_contact_notification(message: ContactMessage) -> None:
 # ---------------------------------------------------------------------------
 # Reply to customer
 # ---------------------------------------------------------------------------
-def _send_reply_email(message: ContactMessage, reply_body: str, reply_from: str) -> tuple[bool, str]:
-    """Render and dispatch the reply email. Caller MUST persist already."""
+def _send_reply_email(message: ContactMessage, reply_body: str) -> tuple[bool, str]:
+    """Render and dispatch the reply email. Caller MUST persist already.
+
+    Göndərici həmişə sistemin real poçt qutusudur (``core.mailing.sender_address``).
+    """
     brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
-    from_email = _REPLY_FROM_EMAILS[reply_from]
-    from_name = f"{brand} Support" if reply_from == "support" else brand
+    from_email = sender_address()
+    from_name = brand
 
     subject = _("Re: [%(brand)s] %(subject)s") % {"brand": brand, "subject": message.get_subject_display()}
     context = {
@@ -136,7 +137,6 @@ def send_reply_to_contact(
     *,
     message: ContactMessage,
     reply_body: str,
-    reply_from: str,
     sent_by,
 ) -> bool:
     """Persist the reply and dispatch it asynchronously.
@@ -150,12 +150,10 @@ def send_reply_to_contact(
     """
     from django.utils import timezone
 
-    if reply_from not in _REPLY_FROM_EMAILS:
-        raise ValueError(f"Unknown reply_from inbox: {reply_from!r}")
-
     # ---- Persist FIRST (cheap, transactional) ----
+    # «Hansı maildən» seçimi yoxdur (2026-10-16) — sahə tarixçə üçün qalır, yeni cavab əsas qutudur.
     message.reply_body = reply_body
-    message.reply_from = reply_from
+    message.reply_from = ContactMessage.REPLY_FROM_DEFAULT
     message.reply_sent_by = sent_by
     message.reply_delivery_status = ContactMessage.REPLY_DELIVERY_PENDING
     message.reply_delivery_error = ""
@@ -178,7 +176,7 @@ def send_reply_to_contact(
     # ---- Dispatch in background (never blocks the request) ----
     def _runner() -> None:
         try:
-            ok, reason = _send_reply_email(message, reply_body, reply_from)
+            ok, reason = _send_reply_email(message, reply_body)
             sent_at = timezone.now()
             if not ok:
                 ContactMessage.objects.filter(pk=message.pk).update(

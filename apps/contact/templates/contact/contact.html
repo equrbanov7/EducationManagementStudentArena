@@ -31,13 +31,15 @@
 
         {# Info cards #}
         <aside class="ems-contact__info">
+            {% if contact_public_email or contact_support_email %}
             <div class="ems-contact__info-card">
                 <span class="ems-contact__info-icon"><i class="fas fa-envelope-open-text" aria-hidden="true"></i></span>
                 <h3 class="ems-contact__info-title">{% trans "Email" %}</h3>
                 {% if contact_public_email %}<a href="mailto:{{ contact_public_email }}" class="ems-contact__info-link">{{ contact_public_email }}</a>{% endif %}
                 {% if contact_support_email %}<a href="mailto:{{ contact_support_email }}" class="ems-contact__info-link">{{ contact_support_email }}</a>{% endif %}
-                <p class="ems-contact__info-hint">{% trans "info – ümumi, support – texniki dəstək" %}</p>
+                {% if contact_public_email and contact_support_email %}<p class="ems-contact__info-hint">{% trans "info – ümumi, support – texniki dəstək" %}</p>{% endif %}
             </div>
+            {% endif %}
 
             <div class="ems-contact__info-card">
                 <span class="ems-contact__info-icon"><i class="fab fa-whatsapp" aria-hidden="true"></i></span>

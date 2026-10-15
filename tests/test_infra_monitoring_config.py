@@ -266,7 +266,7 @@ _ALERTMANAGER_VARS = {
     "SMTP_HOST": "smtp-relay.brevo.com",
     "SMTP_PORT": "587",
     "SMTP_USER": "user@example.com",
-    "ALERT_FROM": "no-reply@emsarena.com",
+    "ALERT_FROM": "verification@wcu.edu.az",
     "ALERT_TO": "ops@example.com",
     "WATCHDOG_REPEAT": "6h",
 }

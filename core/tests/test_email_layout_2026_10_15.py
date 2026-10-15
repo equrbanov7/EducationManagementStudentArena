@@ -112,10 +112,10 @@ CASES = {
         lambda: {
             "message": _contact_message(),
             "reply_body": "Sənədləri sabah gətirin.",
-            "from_email": "info@qku.edu.az",
+            "from_email": "verification@uni.example",
             "brand": "Qərbi Kaspi Universiteti",
         },
-        ("Sənədləri sabah gətirin.", "info@qku.edu.az"),
+        ("Sənədləri sabah gətirin.", "verification@uni.example"),
     ),
     "trial_exams/email/trial_notification": (
         lambda: {
@@ -133,7 +133,7 @@ CASES = {
         lambda: {
             "request_obj": _trial_request(),
             "reply_body": "Suallar əlavə olundu.",
-            "from_email": "info@qku.edu.az",
+            "from_email": "verification@uni.example",
             "brand": "Qərbi Kaspi Universiteti",
         },
         ("Riyaziyyat", "Suallar əlavə olundu."),
@@ -141,7 +141,7 @@ CASES = {
 }
 
 
-@override_settings(SITE_URL="http://testserver", CONTACT_SUPPORT_EMAIL="support@qku.edu.az")
+@override_settings(SITE_URL="http://testserver", CONTACT_SUPPORT_EMAIL="help@uni.example")
 class EmailTemplatesRenderTest(SimpleTestCase):
     def test_every_html_mail_uses_the_shared_layout_and_keeps_its_variables(self):
         for name, (make_context, needles) in CASES.items():
@@ -153,7 +153,7 @@ class EmailTemplatesRenderTest(SimpleTestCase):
                 self.assertNotIn("EMS Arena", html)
                 self.assertIn("max-width:600px", html)
                 self.assertIn(f"&copy; {timezone.now().year}", html)
-                self.assertIn("mailto:support@qku.edu.az", html)
+                self.assertIn("mailto:help@uni.example", html)
                 for needle in needles:
                     self.assertIn(needle, html)
 
@@ -212,14 +212,14 @@ class EmailTemplatesRenderTest(SimpleTestCase):
 
 
 class EmailChromeTest(SimpleTestCase):
-    @override_settings(SITE_URL="https://ems.qku.edu.az/", CONTACT_SUPPORT_EMAIL="support@qku.edu.az")
+    @override_settings(SITE_URL="https://ems.qku.edu.az/", CONTACT_SUPPORT_EMAIL="help@uni.example")
     def test_public_https_site_gets_an_absolute_logo(self):
         chrome = email_chrome()
         self.assertEqual(chrome["site_url"], "https://ems.qku.edu.az")
         self.assertTrue(chrome["logo_url"].startswith("https://ems.qku.edu.az/"))
         # Universitetin rəsmi emblemi (köhnə məhsul işarəsi yox — sahib 2026-10-15).
         self.assertTrue(chrome["logo_url"].endswith("brand/favicon-192x192.png"))
-        self.assertEqual(chrome["support_email"], "support@qku.edu.az")
+        self.assertEqual(chrome["support_email"], "help@uni.example")
 
     def test_private_or_plain_http_site_has_no_logo(self):
         for site_url in ("http://ems.qku.edu.az", "https://127.0.0.1", "https://10.0.0.5:8443", "https://localhost"):
@@ -231,6 +231,34 @@ class EmailChromeTest(SimpleTestCase):
         self.assertEqual(email_chrome()["support_email"], "")
         html = render_to_string("admin/emails/admin_otp_email.html", {"user": _user(), "code": CODE})
         self.assertNotIn("Sualınız varsa", html)
+        self.assertNotIn("mailto:", html)
+        text = render_to_string("admin/emails/admin_otp_email.txt", {"user": _user(), "code": CODE})
+        self.assertNotIn("Sualınız varsa", text)
+
+    def test_mail_settings_defaults_have_no_fake_mailboxes(self):
+        """2026-10-16: info@/support@/no-reply@ qutuları yoxdur — env boşdursa ünvanlar boş, From = EMAIL_HOST_USER."""
+        import os
+        from pathlib import Path
+
+        component = Path(__file__).resolve().parents[2] / "config" / "settings" / "components" / "email.py"
+        names = (
+            "CONTACT_NOTIFY_EMAIL",
+            "CONTACT_SUPPORT_EMAIL",
+            "CONTACT_PUBLIC_EMAIL",
+            "TRIAL_NOTIFY_EMAIL",
+            "DEFAULT_FROM_EMAIL",
+            "BREVO_FROM_EMAIL",
+            "BREVO_SMTP_LOGIN",
+            "BREVO_EMAIL",
+        )
+        env = {key: value for key, value in os.environ.items() if key not in names}
+        env["EMAIL_HOST_USER"] = "verification@uni.example"
+        namespace = {"os": os}
+        with mock.patch.dict(os.environ, env, clear=True):
+            exec(compile(component.read_text(encoding="utf-8"), str(component), "exec"), namespace)
+        for name in ("CONTACT_NOTIFY_EMAIL", "CONTACT_SUPPORT_EMAIL", "CONTACT_PUBLIC_EMAIL", "TRIAL_NOTIFY_EMAIL"):
+            self.assertEqual(namespace[name], "", name)
+        self.assertEqual(namespace["DEFAULT_FROM_EMAIL"], "verification@uni.example")
 
     @override_settings(SITE_URL="https://ems.qku.edu.az")
     def test_absolute_url_filter(self):
@@ -255,7 +283,10 @@ class SendersAttachBothPartsTest(SimpleTestCase):
     def test_contact_notification_text_part_comes_from_the_txt_template(self):
         from apps.contact import services
 
-        with mock.patch.object(services, "_send_email_with_fallback", return_value=(True, "")) as send:
+        with (
+            override_settings(CONTACT_NOTIFY_EMAIL="desk@uni.example"),
+            mock.patch.object(services, "_send_email_with_fallback", return_value=(True, "")) as send,
+        ):
             services._send_internal_notification(_contact_message())
         kwargs = send.call_args.kwargs
         self.assertIn("Aysel Məmmədova", kwargs["text_body"])
@@ -267,7 +298,7 @@ class SendersAttachBothPartsTest(SimpleTestCase):
         from apps.trial_exams import services
 
         with mock.patch.object(services, "send_email_with_fallback", return_value=(True, "")) as send:
-            services._send_reply_email(_trial_request(), "Suallar əlavə olundu.", "info")
+            services._send_reply_email(_trial_request(), "Suallar əlavə olundu.")
         kwargs = send.call_args.kwargs
         self.assertIn("Suallar əlavə olundu.", kwargs["text_body"])
         self.assertNotIn("<", kwargs["text_body"])

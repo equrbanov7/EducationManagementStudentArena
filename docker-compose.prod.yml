@@ -151,7 +151,8 @@ x-app-env: &app-env
   BREVO_FROM_EMAIL: ${BREVO_FROM_EMAIL:-}
   BREVO_SMTP_KEY: ${BREVO_SMTP_KEY:-}
   BREVO_API_KEY: ${BREVO_API_KEY:-}
-  DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-no-reply@emsarena.com}
+  # 2026-10-16: no-reply@ qutusu yoxdur — boşdursa Django EMAIL_HOST_USER (real M365 qutusu) götürür.
+  DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-}
   # 2026-09-15: Reply-To — From təsdiqlənmiş domen qalır, cavab ünvanı universitetin (boş = başlıq yoxdur).
   EMAIL_REPLY_TO: ${EMAIL_REPLY_TO:-}
   GEMINI_API_KEY: ${GEMINI_API_KEY:-}
@@ -956,7 +957,8 @@ services:
       ALERT_SMTP_PASS: ${ALERT_SMTP_PASS:-}
       BREVO_SMTP_LOGIN: ${BREVO_SMTP_LOGIN:-}
       BREVO_SMTP_KEY: ${BREVO_SMTP_KEY:-}
-      ALERT_FROM: ${ALERT_EMAIL_FROM:-no-reply@emsarena.com}
+      # 2026-10-16: boşdursa From = SMTP_USER (giriş edən real qutu; aşağıdakı `export`).
+      ALERT_FROM: ${ALERT_EMAIL_FROM:-}
       ALERT_TO: ${ALERT_EMAIL_TO:-ops@example.invalid}
       WEBHOOK_TOKEN: ${ALERTMANAGER_WEBHOOK_TOKEN:-}
       # 2026-09-13 infra auditi P1-3: Watchdog «hələ sağam» e-poçtunun
@@ -971,6 +973,7 @@ services:
       - >-
         export SMTP_USER="$${ALERT_SMTP_USER:-$${BREVO_SMTP_LOGIN:-}}"
         SMTP_PASS="$${ALERT_SMTP_PASS:-$${BREVO_SMTP_KEY:-}}"
+        && export ALERT_FROM="$${ALERT_FROM:-$${SMTP_USER}}"
         && /bin/sh /etc/alertmanager/render-template.sh
         /etc/alertmanager/alertmanager.tmpl.yml /tmp/alertmanager.yml
         SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASS ALERT_FROM ALERT_TO

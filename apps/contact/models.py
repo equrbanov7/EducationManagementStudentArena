@@ -27,9 +27,12 @@ class ContactMessage(models.Model):
         ("other", _("Digər")),
     ]
 
+    # Sahib 2026-10-16: info@/support@ qutuları mövcud deyil — cavab həmişə sistemin real poçt
+    # qutusundan gedir (core.mailing.sender_address). Açarlar köhnə cavabların tarixçəsi üçün qalır.
+    REPLY_FROM_DEFAULT = "info"
     REPLY_FROM_CHOICES = [
-        ("info", _("info@emsarena.com")),
-        ("support", _("support@emsarena.com")),
+        (REPLY_FROM_DEFAULT, _("Əsas poçt qutusu")),
+        ("support", _("Köhnə dəstək ünvanı")),
     ]
 
     REPLY_DELIVERY_PENDING = "pending"

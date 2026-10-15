@@ -21785,14 +21785,6 @@ msgstr "Rəy və təklif"
 msgid "Digər"
 msgstr "Digər"
 
-#: apps/contact/models.py:31 apps/trial_exams/models.py:52
-msgid "info@emsarena.com"
-msgstr "info@emsarena.com"
-
-#: apps/contact/models.py:32 apps/trial_exams/models.py:53
-msgid "support@emsarena.com"
-msgstr "support@emsarena.com"
-
 #: apps/contact/models.py:41
 #: apps/contact/templates/admin/contact/contactmessage/reply.html:97
 #: apps/trial_exams/models.py:62
@@ -22090,16 +22082,6 @@ msgstr "Admin paneldə cavablandır"
 #: apps/contact/templates/contact/email/contact_notification.html:65
 msgid "Mesaj detalları"
 msgstr "Mesaj detalları"
-
-#: apps/contact/templates/contact/email/contact_notification.html:71
-msgid ""
-"Cavab müştəriyə <strong>info@</strong> və ya "
-"<strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz "
-"görünməyəcək."
-msgstr ""
-"Cavab müştəriyə <strong>info@</strong> və ya "
-"<strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz "
-"görünməyəcək."
 
 #: apps/contact/templates/contact/email/contact_notification.html:77
 #, python-format
@@ -52467,17 +52449,6 @@ msgstr "Testin {ratio} faizində düzgün cavab digər variantlardan uzundur."
 msgctxt "exams.view.question_bank.warning"
 msgid "bulk_correct_too_short"
 msgstr "Testin {ratio} faizində düzgün cavab digər variantlardan qısadır."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid ""
-"\n"
-"                                Cavab müştəriyə <strong>info@</strong> və ya <strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz görünməyəcək.\n"
-"                                "
-msgstr ""
-"\n"
-"                                Cavab müştəriyə <strong>info@</strong> və ya <strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz görünməyəcək.\n"
-"                                "
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -97253,3 +97224,12 @@ msgstr "Ən azı 1 təlim nəticəsi tələb olunur — silinmə mümkün deyil.
 msgctxt "accounts.syllabus"
 msgid "(istəyə bağlı)"
 msgstr "(istəyə bağlı)"
+
+msgid "Cavab sistemin rəsmi poçt qutusundan gedəcək."
+msgstr "Cavab sistemin rəsmi poçt qutusundan gedəcək."
+
+msgid "Əsas poçt qutusu"
+msgstr "Əsas poçt qutusu"
+
+msgid "Köhnə dəstək ünvanı"
+msgstr "Köhnə dəstək ünvanı"
