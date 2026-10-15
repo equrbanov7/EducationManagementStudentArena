@@ -9,7 +9,6 @@ import string
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
-from django.utils.html import strip_tags
 
 
 def generate_otp(length=6):
@@ -45,8 +44,10 @@ def send_template_email(subject, template_name, context, recipient_list, from_em
         recipient_list: List of recipient email addresses
         from_email: Sender email (optional)
     """
+    from core.mailing import plain_text_body
+
     html_message = render_to_string(template_name, context)
-    plain_message = strip_tags(html_message)
+    plain_message = plain_text_body(template_name, context, html_message)
 
     send_mail(
         subject=subject,

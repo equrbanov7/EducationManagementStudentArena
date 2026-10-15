@@ -5,7 +5,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-07-04 03:05+0400\n"
 "PO-Revision-Date: 2026-10-13 03:00+0400\n"
-"Last-Translator: EMS Arena i18n <noreply@example.com>\n"
+"Last-Translator: i18n <noreply@example.com>\n"
 "Language-Team: German\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
@@ -2187,14 +2187,6 @@ msgstr "Anfragen"
 #: static/js/ai_assistant.js:28
 msgid "yüklənir..."
 msgstr "wird geladen..."
-
-#: static/js/ai_assistant.js:30
-msgid ""
-"Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə"
-" bilərəm?"
-msgstr ""
-"Hallo! Ich bin EMSArena AI. Ich bin bereit, Ihre Fragen zu beantworten. Wie "
-"kann ich Ihnen helfen?"
 
 #: static/js/ai_assistant.js:31
 msgid "AI sorğu limiti hazırda aktiv deyil."

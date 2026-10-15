@@ -9,13 +9,18 @@ from django import forms
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import SetPasswordForm
 from django.utils import timezone
+from django.utils.functional import lazy
 from django.utils.translation import pgettext_lazy
 
 from apps.accounts.identity import user_access_is_login_blocked
 from apps.accounts.models import EmailOTP
 from core.utils import get_auth_otp_max_attempts
 
+from ..password_policy import help_text as _password_help_text
 from ..services import verify_otp_code
+
+# Sahib 2026-10-15 «sadə parol»: yeni parol sahəsinin altındakı ipucu siyasətin özündən (hədd işləmə vaxtında oxunur).
+_PASSWORD_HELP = lazy(_password_help_text, str)()
 
 
 def _password_reset_password_attrs(placeholder):
@@ -83,6 +88,7 @@ class OTPPasswordResetConfirmForm(SetPasswordForm):
     new_password1 = forms.CharField(
         label=pgettext_lazy("accounts.form.password_reset_otp.label", "new_password"),
         strip=False,
+        help_text=_PASSWORD_HELP,
         widget=forms.PasswordInput(
             attrs=_password_reset_password_attrs(
                 pgettext_lazy("accounts.form.password_reset_otp.placeholder", "new_password")
@@ -149,6 +155,7 @@ class OTPPasswordResetCodeForm(forms.Form):
     new_password1 = forms.CharField(
         label=pgettext_lazy("accounts.form.password_reset_otp.label", "new_password"),
         strip=False,
+        help_text=_PASSWORD_HELP,
         widget=forms.PasswordInput(
             attrs=_password_reset_password_attrs(
                 pgettext_lazy("accounts.form.password_reset_otp.placeholder", "new_password")

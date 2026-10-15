@@ -1,9 +1,11 @@
-Salam {{ user.get_username }},
+{% extends "emails/base_email.txt" %}{% load i18n %}
+{% block heading %}{% trans 'Admin giriş təsdiqi' context 'accounts.email_otp' %}{% endblock %}
+{% block content %}{% blocktrans with name=user.get_username %}Salam {{ name }},{% endblocktrans %}
 
-{{ brand }} admin panelinə giriş üçün OTP kodunuz:
+{% blocktrans %}{{ brand }} admin panelinə giriş üçün OTP kodunuz:{% endblocktrans %}
 
-{{ code }}
+    {{ code }}
 
-Kod {{ otp_expiry_minutes }} dəqiqə etibarlıdır.
+{% blocktrans with minutes=otp_expiry_minutes %}Kod {{ minutes }} dəqiqə etibarlıdır.{% endblocktrans %}
 
-Əgər bu cəhdi siz etməmisinizsə, hesab parolunuzu dərhal dəyişin.
+{% trans 'Əgər bu cəhdi siz etməmisinizsə, hesab parolunuzu dərhal dəyişin.' %}{% endblock %}

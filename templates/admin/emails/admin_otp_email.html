@@ -1,10 +1,12 @@
-{% load i18n %}
-<p>Salam {{ user.get_username }},</p>
-
-<p>{% blocktrans %}{{ brand }} admin panelinə giriş üçün OTP kodunuz:{% endblocktrans %}</p>
-
-<p style="font-size: 32px; font-weight: 700; letter-spacing: 0.25em;">{{ code }}</p>
-
-<p>{% blocktrans with minutes=otp_expiry_minutes %}Kod {{ minutes }} dəqiqə etibarlıdır.{% endblocktrans %}</p>
-
-<p>{% trans 'Əgər bu cəhdi siz etməmisinizsə, hesab parolunuzu dərhal dəyişin.' %}</p>
+{% extends "emails/base_email.html" %}{% load i18n %}
+{% block title %}{{ brand }} | {% trans 'Admin giriş təsdiqi' context 'accounts.email_otp' %}{% endblock %}
+{% block preheader %}{% blocktrans with code=code minutes=otp_expiry_minutes context "email.layout" %}Kodunuz: {{ code }} · {{ minutes }} dəqiqə etibarlıdır{% endblocktrans %}{% endblock %}
+{% block heading %}{% trans 'Admin giriş təsdiqi' context 'accounts.email_otp' %}{% endblock %}
+{% block content %}
+<p class="em-text" style="margin:0 0 8px;font-size:16px;line-height:1.6;color:#334155;">{% blocktrans with name=user.get_username %}Salam {{ name }},{% endblocktrans %}</p>
+<p class="em-text" style="margin:0 0 20px;font-size:16px;line-height:1.6;color:#334155;">{% blocktrans %}{{ brand }} admin panelinə giriş üçün OTP kodunuz:{% endblocktrans %}</p>
+{% trans 'OTP kodu' as code_label %}{% blocktrans asvar code_note with minutes=otp_expiry_minutes %}Kod {{ minutes }} dəqiqə etibarlıdır.{% endblocktrans %}
+{% include "emails/_code_box.html" with code=code label=code_label note=code_note %}
+{% trans 'Əgər bu cəhdi siz etməmisinizsə, hesab parolunuzu dərhal dəyişin.' as safety_note %}
+{% include "emails/_panel.html" with text=safety_note tone="notice" %}
+{% endblock %}

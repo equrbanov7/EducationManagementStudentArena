@@ -12,19 +12,11 @@ idarə olunur (asılılıqlar: bax base.py).
 # flake8: noqa: F821  (paylaşılan namespace: adlar base.py-dən gəlir)
 
 # Password validation
+# Sadə parol siyasəti (sahib 2026-10-15): ən azı 8 simvol («Sistem tənzimləmələri» → password.min_length),
+# tərkib tələbi YOX, yalnız qısa qadağa siyahısı + istifadəçi adı. Bax apps/accounts/password_policy.py.
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "apps.accounts.password_policy.MinimumLengthValidator"},
+    {"NAME": "apps.accounts.password_policy.TrivialPasswordValidator"},
 ]
 
 # Login / logout settings

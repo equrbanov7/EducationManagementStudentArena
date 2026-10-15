@@ -1,8 +1,11 @@
-{% load i18n %}{% blocktrans with name=recipient_name %}Salam {{ name }},{% endblocktrans %}
+{% extends "emails/base_email.txt" %}{% load i18n %}
+{% block heading %}{{ headline }}{% endblock %}
+{% block content %}{% blocktrans with name=recipient_name %}Salam {{ name }},{% endblocktrans %}
 
 {% blocktrans with action=otp_intro_action %}Aşağıdakı OTP kodu {{ action }} üçündür:{% endblocktrans %}
-{{ code }}
+
+    {{ code }}
 
 {% blocktrans with minutes=otp_expiry_minutes %}Kod {{ minutes }} dəqiqə etibarlıdır.{% endblocktrans %}
 
-{% trans 'Bu əməliyyatı siz etməmisinizsə, bu emaili nəzərə almayın.' %}
+{% trans 'Bu əməliyyatı siz etməmisinizsə, bu emaili nəzərə almayın.' %}{% endblock %}

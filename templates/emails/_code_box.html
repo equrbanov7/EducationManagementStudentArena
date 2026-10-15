@@ -1,0 +1,12 @@
+{% comment %}
+OTP / kod qutusu: iri monospace, hərf aralığı, toxunanda bütöv seçilir (user-select:all).
+Parametrlər: code, label, note (məs. etibarlılıq müddəti).
+{% endcomment %}<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;margin:0 0 24px;">
+<tr>
+<td class="em-codebox" align="center" bgcolor="#f1f5f9" style="background-color:#f1f5f9;border:1px dashed #94a3b8;border-radius:10px;padding:20px 16px;">
+{% if label %}<div class="em-muted" style="margin:0 0 8px;font-size:12px;line-height:16px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#475569;">{{ label }}</div>{% endif %}
+<div class="em-code" style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono','Courier New',monospace;font-size:34px;line-height:1.2;font-weight:700;letter-spacing:8px;padding-left:8px;color:#0f172a;-webkit-user-select:all;user-select:all;">{{ code }}</div>
+{% if note %}<div class="em-muted" style="margin:10px 0 0;font-size:13px;line-height:18px;color:#475569;">{{ note }}</div>{% endif %}
+</td>
+</tr>
+</table>

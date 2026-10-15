@@ -27,11 +27,10 @@ import logging
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
-from django.utils.html import strip_tags
 
 from celery import shared_task
 
-from core.mailing import sender_for
+from core.mailing import plain_text_body, sender_for
 from core.rls_pooling import rls_worker_atomic
 
 logger = logging.getLogger(__name__)
@@ -40,7 +39,7 @@ logger = logging.getLogger(__name__)
 def _otp_subject_for_purpose(purpose: str) -> str:
     # Brand-driven so OTP emails carry the configured institution name
     # (Qərbi Kaspi Universiteti) instead of a hard-coded product name.
-    brand = getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena"
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
     return {
         "signup": f"{brand} email təsdiqi",
         "login": f"{brand} giriş OTP kodu",
@@ -123,7 +122,7 @@ def send_account_otp_email(
             # White-label brand for the email chrome (title + header). Emails are
             # rendered without request context processors, so it must be injected
             # here explicitly (same source as the OTP subject line above).
-            "brand": getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena",
+            "brand": getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti",
             "user": user,
             "recipient_name": resolved_name or recipient_email,
             "email": recipient_email,
@@ -220,7 +219,7 @@ def send_template_email_async(
     """
     with rls_worker_atomic():
         html_message = render_to_string(template_name, context)
-        plain_message = strip_tags(html_message)
+        plain_message = plain_text_body(template_name, context, html_message)
         sender = from_email or settings.DEFAULT_FROM_EMAIL
 
         try:
@@ -273,10 +272,10 @@ def send_new_post_notification_email(
 
         context = {
             "post": post,
-            "brand": getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena",
+            "brand": getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti",
         }
         html_message = render_to_string("blog/emails/new_post_notification.html", context)
-        plain_message = strip_tags(html_message)
+        plain_message = plain_text_body("blog/emails/new_post_notification.html", context, html_message)
 
         try:
             message = EmailMultiAlternatives(

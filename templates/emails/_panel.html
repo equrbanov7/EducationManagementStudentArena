@@ -1,0 +1,9 @@
+{% comment %}
+Mətn paneli (sitat / cavab / qeyd). Parametrlər: text; label (istəyə bağlı başlıq);
+tone="accent" — sol tərəfdə yaşıl xətt, "notice" — sarımtıl xəbərdarlıq, əks halda neytral.
+Mətndəki sətir keçidləri saxlanılır (white-space:pre-wrap).
+{% endcomment %}{% if label %}<p class="em-strong" style="margin:0 0 8px;font-size:14px;line-height:1.4;font-weight:700;color:#0f172a;">{{ label }}</p>{% endif %}<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;margin:0 0 24px;">
+<tr>
+{% if tone == "notice" %}<td class="em-panel em-panel-text" bgcolor="#fffbeb" style="background-color:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px 16px;font-size:14px;line-height:1.6;color:#78350f;">{{ text }}</td>{% elif tone == "accent" %}<td class="em-panel em-panel-text" bgcolor="#f8fafc" style="background-color:#f8fafc;border-left:4px solid #0f766e;border-radius:6px;padding:16px 18px;font-size:15px;line-height:1.65;color:#1f2937;white-space:pre-wrap;">{{ text }}</td>{% else %}<td class="em-panel em-panel-text" bgcolor="#f1f5f9" style="background-color:#f1f5f9;border-radius:6px;padding:14px 16px;font-size:14px;line-height:1.6;color:#475569;white-space:pre-wrap;">{{ text }}</td>{% endif %}
+</tr>
+</table>

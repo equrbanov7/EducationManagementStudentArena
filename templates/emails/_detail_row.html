@@ -1,0 +1,7 @@
+{% comment %}
+Açar–dəyər cədvəlinin bir sətri (məs. «Ad Soyad: …»). `<table>` içində include edilir.
+Parametrlər: label, value; href — dəyər link olsun; last=True — alt xətt olmasın.
+{% endcomment %}<tr>
+<td class="em-label{% if not last %} em-row{% endif %}" width="150" valign="top" style="width:150px;padding:10px 12px 10px 0;{% if not last %}border-bottom:1px solid #e2e8f0;{% endif %}font-size:14px;line-height:1.5;font-weight:600;color:#475569;">{{ label }}</td>
+<td class="em-value{% if not last %} em-row{% endif %}" valign="top" style="padding:10px 0;{% if not last %}border-bottom:1px solid #e2e8f0;{% endif %}font-size:14px;line-height:1.5;color:#0f172a;word-break:break-word;">{% if href %}<a class="em-link" href="{{ href }}" style="color:#1d4ed8;text-decoration:underline;">{{ value }}</a>{% else %}{{ value }}{% endif %}</td>
+</tr>

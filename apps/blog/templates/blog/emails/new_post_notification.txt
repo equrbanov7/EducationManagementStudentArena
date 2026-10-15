@@ -1,0 +1,10 @@
+{% extends "emails/base_email.txt" %}{% load i18n email_layout %}
+{% block heading %}{% trans 'Yeni post yayımlandı' %}{% endblock %}
+{% block content %}{% blocktrans %}{{ brand }} blogunda yeni bir post yayımlandı:{% endblocktrans %}
+
+{{ post.title }}
+{% if post.excerpt %}{{ post.excerpt }}
+{% endif %}
+{% trans 'Postu oxu' context 'email.layout' %}: {{ post.get_absolute_url|email_absolute_url }}
+
+{% blocktrans %}Bu emaili aldınızsa, {{ brand }} bloguna abunə olmusunuz. Abunəliyi ləğv etmək üçün sayta daxil olun.{% endblocktrans %}{% endblock %}

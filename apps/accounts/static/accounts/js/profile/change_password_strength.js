@@ -12,11 +12,12 @@
    4. Uyğunluq — «təkrarla» sahəsi ilə fərq göndərməmişdən ƏVVƏL bildirilir.
    5. Caps Lock xəbərdarlığı — səhv şifrənin ən çox rast gəlinən səbəbi.
 
-   ⚠️ Tələblər Django validatorlarının EYNİSİdir (bax
-   `config/settings/components/security.py`): MinimumLength(8), Numeric,
-   UserAttributeSimilarity. `CommonPasswordValidator` brauzerdə yoxlanıla
-   bilməz (siyahı serverdədir) — o, şablonda mətnlə xəbərdarlıq kimi verilir.
-   Bu qat serveri ƏVƏZ ETMİR, sadəcə səhvi bir addım əvvəl göstərir.
+   ⚠️ Sahib 2026-10-15 «sadə parol»: tələblər serverin EYNİSİdir
+   (`apps/accounts/password_policy.py`) — ən azı `data-pw-min` simvol (defolt 8)
+   və qısa qadağa siyahısı (`data-pw-trivial`) + istifadəçi adı (`data-pw-username`).
+   Tərkib tələbi (böyük hərf / rəqəm / simvol) YOXDUR. Göstərici yalnız
+   MƏLUMATDIR: heç vaxt göndərməni bağlamır, qırmızı xəbərdarlıq vermir.
+   Bu qat serveri ƏVƏZ ETMİR.
 
    AJAX-safe: `EMSDelegate` + `EMSReady.once` — bölmə swap olunandan sonra da
    işləyir, təkrar qeydiyyatda dinləyici yığılmır.
@@ -28,9 +29,7 @@
     var UPPER = /[A-ZƏÖÜĞİŞÇ]/;
     var DIGIT = /\d/;
     var SYMBOL = /[^0-9A-Za-zƏÖÜĞİŞÇəöüğışç]/;
-
-    /* Tam rəqəm — Django `NumericPasswordValidator`. */
-    var ALL_DIGITS = /^\d+$/;
+    var DEFAULT_MIN = 8;
 
     /* Səviyyə → `data-label-*` açarı. ⚠️ Rəqəmli ad (`data-label-1`) İŞLƏMİR:
        DOM `dataset` yalnız hərfdən əvvəlki defisi silir, ona görə açar
@@ -45,10 +44,32 @@
         return document.querySelector("[data-pw-rules]");
     }
 
-    /* ── 1. Güc ─────────────────────────────────────────────────────────── */
-    function strengthOf(value) {
+    function policy() {
+        var card = rulesCard();
+        var min = card ? parseInt(card.getAttribute("data-pw-min") || "", 10) : NaN;
+        var trivial = card ? (card.getAttribute("data-pw-trivial") || "").toLowerCase().split(/\s+/) : [];
+        return {
+            min: min > 0 ? min : DEFAULT_MIN,
+            trivial: trivial.filter(Boolean),
+            username: card ? (card.getAttribute("data-pw-username") || "").trim().toLowerCase() : ""
+        };
+    }
+
+    function isTrivial(value, rules) {
+        var lowered = value.trim().toLowerCase();
+        return rules.trivial.indexOf(lowered) !== -1 || (!!rules.username && lowered === rules.username);
+    }
+
+    /* ── 1. Güc (yalnız məlumat) ───────────────────────────────────────────
+       0 — boş, 1 — hələ qısadır, 2 — uyğundur, 3 — yaxşı, 4 — güclü.
+       Minimumu keçən HƏR parol ən azı «uyğundur» (2) alır. */
+    function strengthOf(value, rules) {
         if (!value) {
             return 0;
+        }
+        rules = rules || policy();
+        if (value.length < rules.min) {
+            return 1;
         }
         var classes = 0;
         [LOWER, UPPER, DIGIT, SYMBOL].forEach(function (pattern) {
@@ -56,17 +77,11 @@
                 classes += 1;
             }
         });
-        if (value.length < 8) {
-            return 1; // Server onsuz da rədd edir — «zəif»dən yuxarı qalxmır.
-        }
-        var score = 1;
-        if (value.length >= 12) {
+        var score = 2;
+        if (value.length >= 12 || classes >= 3) {
             score += 1;
         }
-        if (classes >= 3) {
-            score += 1;
-        }
-        if (classes >= 4 || value.length >= 16) {
+        if (value.length >= 16 || (value.length >= 12 && classes >= 3)) {
             score += 1;
         }
         return Math.min(score, 4);
@@ -90,32 +105,6 @@
     }
 
     /* ── 2. Tələblər ────────────────────────────────────────────────────── */
-    function identityTokens(card) {
-        return (card.getAttribute("data-pw-identity") || "")
-            .toLowerCase()
-            .split(/[\s@._-]+/)
-            .filter(function (token) {
-                return token.length >= 3;
-            });
-    }
-
-    function looksLikeIdentity(value, tokens) {
-        var lowered = value.toLowerCase();
-        return tokens.some(function (token) {
-            return lowered.indexOf(token) !== -1 || token.indexOf(lowered) !== -1;
-        });
-    }
-
-    function varietyOk(value) {
-        var classes = 0;
-        [LOWER, UPPER, DIGIT, SYMBOL].forEach(function (pattern) {
-            if (pattern.test(value)) {
-                classes += 1;
-            }
-        });
-        return classes >= 3;
-    }
-
     function setRule(card, name, state) {
         var row = card.querySelector('[data-pw-rule="' + name + '"]');
         if (!row) {
@@ -127,26 +116,25 @@
             return;
         }
         icon.className = "pwrule__icon fas " + (
-            state === "ok" ? "fa-circle-check" : (state === "bad" ? "fa-circle-xmark" : "fa-circle")
+            state === "ok" ? "fa-circle-check" : (state === "bad" ? "fa-circle-exclamation" : "fa-circle")
         );
     }
 
+    /* Qısa parol «idle» qalır (yazmağa davam edir — xəbərdarlıq yox); yalnız
+       qadağa siyahısındakı parol «bad» olur, çünki server onu rədd edəcək. */
     function paintRules(value) {
         var card = rulesCard();
         if (!card) {
             return;
         }
         if (!value) {
-            ["length", "numeric", "identity", "variety"].forEach(function (name) {
-                setRule(card, name, "idle");
-            });
+            setRule(card, "length", "idle");
+            setRule(card, "trivial", "idle");
             return;
         }
-        var tokens = identityTokens(card);
-        setRule(card, "length", value.length >= 8 ? "ok" : "bad");
-        setRule(card, "numeric", ALL_DIGITS.test(value) ? "bad" : "ok");
-        setRule(card, "identity", looksLikeIdentity(value, tokens) ? "bad" : "ok");
-        setRule(card, "variety", varietyOk(value) ? "ok" : "bad");
+        var rules = policy();
+        setRule(card, "length", value.length >= rules.min ? "ok" : "idle");
+        setRule(card, "trivial", isTrivial(value, rules) ? "bad" : "ok");
     }
 
     /* ── 3. Uyğunluq ────────────────────────────────────────────────────── */
@@ -227,6 +215,8 @@
             paintCaps(input, event);
         });
     });
+
+    window.EMSPasswordStrength = { strengthOf: strengthOf, isTrivial: isTrivial, policy: policy };
 
     window.EMSReady(function () {
         // Bound forma ilə qayıdanda (server validasiyası) vəziyyət bərpa olunur.

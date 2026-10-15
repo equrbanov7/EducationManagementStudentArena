@@ -1,0 +1,11 @@
+{% load i18n %}{% comment %}
+Bulletproof (cədvəl əsaslı) düymə + altında link ehtiyatı.
+Parametrlər: url, label; fallback=False — ehtiyat linki göstərmə.
+{% endcomment %}<table role="presentation" class="em-btn" cellspacing="0" cellpadding="0" border="0" style="margin:4px 0 16px;">
+<tr>
+<td align="center" bgcolor="#1d4ed8" style="background-color:#1d4ed8;border-radius:8px;">
+<a href="{{ url }}" target="_blank" rel="noopener" style="display:inline-block;padding:14px 28px;font-size:16px;line-height:20px;font-weight:600;color:#ffffff;text-decoration:none;border:1px solid #1d4ed8;border-radius:8px;">{{ label }}</a>
+</td>
+</tr>
+</table>
+{% if fallback is not False %}<p class="em-muted" style="margin:0 0 24px;font-size:13px;line-height:1.5;color:#64748b;">{% trans "Düymə işləmirsə, bu linki brauzerinizə köçürün:" context "email.layout" %}<br><a class="em-link" href="{{ url }}" style="color:#1d4ed8;text-decoration:underline;word-break:break-all;">{{ url }}</a></p>{% endif %}

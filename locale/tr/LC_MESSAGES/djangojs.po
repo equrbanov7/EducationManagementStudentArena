@@ -2152,14 +2152,6 @@ msgstr "Sorgular"
 msgid "yüklənir..."
 msgstr "yükleniyor..."
 
-#: static/js/ai_assistant.js:30
-msgid ""
-"Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə"
-" bilərəm?"
-msgstr ""
-"Merhaba! Ben EMSArena AI. Sorularınızı yanıtlamaya hazırım. Nasıl yardımcı "
-"olabilirim?"
-
 #: static/js/ai_assistant.js:31
 msgid "AI sorğu limiti hazırda aktiv deyil."
 msgstr "AI sorgu limiti şu anda aktif değil."

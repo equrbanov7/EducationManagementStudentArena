@@ -21,12 +21,12 @@ import threading
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils.html import strip_tags
 from django.utils.translation import gettext as _
 
 # Outbound mail (SMTP → Brevo HTTP API fallback) lives in ``core.mailing`` so
 # every app shares one delivery path. Re-exported with the historical private
 # names to preserve this module's internal call-sites unchanged.
+from core.mailing import plain_text_body
 from core.mailing import send_email_with_fallback as _send_email_with_fallback
 from core.mailing import send_via_brevo_api as _send_via_brevo_api  # noqa: F401  (kept for backwards compat)
 from core.utils import build_absolute_url
@@ -73,7 +73,7 @@ def _send_internal_notification(message: ContactMessage) -> bool:
         "detail_url": detail_url,
     }
     html_body = render_to_string("contact/email/contact_notification.html", context)
-    text_body = strip_tags(html_body)
+    text_body = plain_text_body("contact/email/contact_notification.html", context, html_body)
 
     from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@emsarena.com")
     ok, _reason = _send_email_with_fallback(
@@ -118,7 +118,7 @@ def _send_reply_email(message: ContactMessage, reply_body: str, reply_from: str)
         "brand": brand,
     }
     html_body = render_to_string("contact/email/contact_reply.html", context)
-    text_body = strip_tags(html_body)
+    text_body = plain_text_body("contact/email/contact_reply.html", context, html_body)
 
     return _send_email_with_fallback(
         subject=subject,
