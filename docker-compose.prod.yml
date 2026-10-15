@@ -957,7 +957,8 @@ services:
       ALERT_SMTP_PASS: ${ALERT_SMTP_PASS:-}
       BREVO_SMTP_LOGIN: ${BREVO_SMTP_LOGIN:-}
       BREVO_SMTP_KEY: ${BREVO_SMTP_KEY:-}
-      # 2026-10-16: boşdursa From = SMTP_USER (giriş edən real qutu; aşağıdakı `export`).
+      # 2026-10-16: boşdursa From = SMTP_USER (giriş edən real qutu; aşağıdakı `export`); o da boşdursa
+      # (CI smoke, SMTP sirri yoxdur) `alertmanager@localhost` — Alertmanager boş `smtp_from` ilə QALXMIR.
       ALERT_FROM: ${ALERT_EMAIL_FROM:-}
       ALERT_TO: ${ALERT_EMAIL_TO:-ops@example.invalid}
       WEBHOOK_TOKEN: ${ALERTMANAGER_WEBHOOK_TOKEN:-}
@@ -973,7 +974,7 @@ services:
       - >-
         export SMTP_USER="$${ALERT_SMTP_USER:-$${BREVO_SMTP_LOGIN:-}}"
         SMTP_PASS="$${ALERT_SMTP_PASS:-$${BREVO_SMTP_KEY:-}}"
-        && export ALERT_FROM="$${ALERT_FROM:-$${SMTP_USER}}"
+        && export ALERT_FROM="$${ALERT_FROM:-$${SMTP_USER:-alertmanager@localhost}}"
         && /bin/sh /etc/alertmanager/render-template.sh
         /etc/alertmanager/alertmanager.tmpl.yml /tmp/alertmanager.yml
         SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASS ALERT_FROM ALERT_TO
