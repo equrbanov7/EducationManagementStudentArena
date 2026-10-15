@@ -35,6 +35,11 @@
 #       qeydiyyat) — sonra import_timetable_docx slotları yarada bilir. Real müəllimə toxunmur; qeyri-müəyyən /
 #       toqquşan hüceyrə yazılmır; `allow_outside_chair` → təşkilatda TƏK hesab kafedraya ƏLAVƏ müəllim üzvü.
 #       Hesab/fənn/sətir YARADILMIR; idempotent. Loga yalnız saylar; CSV hesabat şifrəli artifaktdadır.
+#   backfill_teacher_lessons — müəllimin (`teacher`, ad.soyad) keçmiş dərsləri [`date_from`, `date_to`] aralığında
+#       cədvəl slotlarından yaranır (həftə günü + üst/alt paritet; mövcud dərs təkrarlanmır) və aktiv tələbələrə
+#       «iə» yazılır (mövcud işarəyə toxunulmur). Slotlar: canlı cədvəl, və ya ŞİFRƏLİ spesifikasiya
+#       (`roster_tag` = `lesson-slots-…` → slots.json.enc); `replace_teacher_slots` → müəllimin digər slotları
+#       yumşaq silinir. Loga yalnız saylar (açılış = fənn · qrup); CSV hesabat şifrəli artifaktdadır.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
 #       (backfill; `--include-drafts` BURADA YOXDUR — qaralama planlar sahibin qərarıdır).
 #   apply_org_structure — struktur planı (scripts/data/qku_structure_2026_09_27.json, yalnız vahid
@@ -74,6 +79,7 @@ on:
           - import_teaching_load_form1
           - import_timetable_docx
           - assign_task_rows_from_timetable
+          - backfill_teacher_lessons
           - repair_group_leads
           - retire_qa_accounts
       apply:
@@ -90,7 +96,7 @@ on:
         required: false
         default: "2026/2027"
       roster_tag:
-        description: "seed_staff_roster / reconcile_teacher_roster / import_teaching_* / *timetable*: şifrəli faylın release tag-ı"
+        description: "seed_staff_roster / reconcile_teacher_roster / import_teaching_* / *timetable* / backfill_teacher_lessons (lesson-slots-…): şifrəli faylın release tag-ı"
         required: false
         default: ""
       hygiene_category:
@@ -143,11 +149,28 @@ on:
         type: boolean
         default: false
       period:
-        description: "import_timetable_docx / assign_task_rows_from_timetable: semestr (məs. Payız 2026/2027)"
+        description: "import_timetable_docx / assign_task_rows_from_timetable / backfill_teacher_lessons: semestr (məs. Payız 2026/2027)"
         required: false
         default: "Payız 2026/2027"
       replace_group_slots:
         description: "import_timetable_docx: fayldakı qrupların DİGƏR slotlarını yumşaq sil"
+        required: false
+        type: boolean
+        default: false
+      teacher:
+        description: "backfill_teacher_lessons: müəllimin istifadəçi adı (ad.soyad)"
+        required: false
+        default: ""
+      date_from:
+        description: "backfill_teacher_lessons: başlanğıc tarix (YYYY-MM-DD)"
+        required: false
+        default: ""
+      date_to:
+        description: "backfill_teacher_lessons: son tarix (YYYY-MM-DD, bu gündən sonra yox)"
+        required: false
+        default: ""
+      replace_teacher_slots:
+        description: "backfill_teacher_lessons: (spesifikasiya ilə) müəllimin DİGƏR slotlarını yumşaq sil"
         required: false
         type: boolean
         default: false
@@ -185,6 +208,10 @@ jobs:
       ALLOW_OUTSIDE_CHAIR: ${{ github.event.inputs.allow_outside_chair }}
       PERIOD: ${{ github.event.inputs.period }}
       REPLACE_GROUP_SLOTS: ${{ github.event.inputs.replace_group_slots }}
+      TEACHER: ${{ github.event.inputs.teacher }}
+      DATE_FROM: ${{ github.event.inputs.date_from }}
+      DATE_TO: ${{ github.event.inputs.date_to }}
+      REPLACE_TEACHER_SLOTS: ${{ github.event.inputs.replace_teacher_slots }}
     steps:
       - name: 📥 Checkout (struktur planı)
         if: github.event.inputs.command == 'apply_org_structure'
@@ -224,7 +251,7 @@ jobs:
           # reconcile_teacher_roster eyni faylı oxuyur (ad fərqi yalnız aydınlıq üçün deyil — təmizlik eyni qlobdur).
           rm -f "$RUNNER_TEMP/input.bin" "$RUNNER_TEMP/input.enc"
       - name: 🧰 Run
-        if: github.event.inputs.command != 'import_timetable_docx' && github.event.inputs.command != 'assign_task_rows_from_timetable'
+        if: github.event.inputs.command != 'import_timetable_docx' && github.event.inputs.command != 'assign_task_rows_from_timetable' && github.event.inputs.command != 'backfill_teacher_lessons'
         run: |
           set -euo pipefail
           case "$YEAR" in (20[0-9][0-9]/20[0-9][0-9]) ;; (*) echo "year formatı YYYY/YYYY olmalıdır" >&2; exit 1;; esac
@@ -540,3 +567,93 @@ jobs:
         run: |
           docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/timetable_*.docx; rm -rf /tmp/timetable_report_*' || true
           rm -rf "$RUNNER_TEMP/tt-out" "$RUNNER_TEMP/timetable.enc" "$RUNNER_TEMP/timetable.docx" || true
+      # ── backfill_teacher_lessons (keçmiş dərslər + «iə»; öz addımları — digər əmrlərin axınına toxunmur).
+      #    Spesifikasiya (istəyə bağlı) ŞİFRƏLİ release asset-dir: `lesson-slots-…` → slots.json.enc. ─────────
+      - name: 📚 Keçmiş dərslər — cədvəldən bərpa
+        if: github.event.inputs.command == 'backfill_teacher_lessons'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$TEACHER" | grep -Eq '^[A-Za-z0-9._-]{1,150}$' || { echo "teacher formatı: ^[A-Za-z0-9._-]+$" >&2; exit 2; }
+          echo "::add-mask::$TEACHER"
+          printf '%s' "$DATE_FROM" | grep -Eq '^20[0-9]{2}-[01][0-9]-[0-3][0-9]$' || { echo "date_from formatı: YYYY-MM-DD" >&2; exit 2; }
+          printf '%s' "$DATE_TO" | grep -Eq '^20[0-9]{2}-[01][0-9]-[0-3][0-9]$' || { echo "date_to formatı: YYYY-MM-DD" >&2; exit 2; }
+          printf '%s' "$PERIOD" | grep -Eq '^(Payız|Yaz|Yay) 20[0-9]{2}/20[0-9]{2}$' || { echo "period formatı: «Payız 2026/2027»" >&2; exit 2; }
+          umask 077
+          spec_args=()
+          if [ -n "$ROSTER_TAG" ]; then
+            printf '%s' "$ROSTER_TAG" | grep -Eq '^lesson-slots-[0-9a-z-]+$' || { echo "roster_tag formatı: lesson-slots-…" >&2; exit 2; }
+            test -n "$STAFF_PLAN_KEY" || { echo "STAFF_PLAN_KEY sirri yoxdur" >&2; exit 1; }
+            curl -sSfL -H "Authorization: Bearer $GH_TOKEN" \
+              "https://github.com/${GITHUB_REPOSITORY}/releases/download/${ROSTER_TAG}/slots.json.enc" \
+              -o "$RUNNER_TEMP/slots.enc"
+            openssl enc -d -aes-256-cbc -md sha256 -pbkdf2 -iter 200000 -pass env:STAFF_PLAN_KEY \
+              -in "$RUNNER_TEMP/slots.enc" -out "$RUNNER_TEMP/slots.json"
+            docker exec -i "$APP_CONTAINER" sh -c "umask 077; cat > /tmp/lesson_slots_${GITHUB_RUN_ID}.json" < "$RUNNER_TEMP/slots.json"
+            rm -f "$RUNNER_TEMP/slots.json" "$RUNNER_TEMP/slots.enc"
+            spec_args=(--slots-file "/tmp/lesson_slots_${GITHUB_RUN_ID}.json")
+            test "$REPLACE_TEACHER_SLOTS" != "true" || spec_args+=(--replace-teacher-slots)
+          else
+            test "$REPLACE_TEACHER_SLOTS" != "true" || { echo "replace_teacher_slots yalnız spesifikasiya (roster_tag=lesson-slots-…) ilə" >&2; exit 2; }
+          fi
+          actor="$(docker exec -i "$APP_CONTAINER" python manage.py shell -c \
+            "from django.contrib.auth import get_user_model as g; u=g().objects.filter(is_superuser=True, is_active=True).order_by('date_joined').first(); print(u.username if u else '')" | tail -n1)"
+          test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+          echo "::add-mask::$actor"
+          args=(--org "$ORG" --teacher "$TEACHER" --period "$PERIOD" --from "$DATE_FROM" --to "$DATE_TO" --mark present
+                --actor "$actor" --report "/tmp/lesson_backfill_report_${GITHUB_RUN_ID}" "${spec_args[@]}")
+          if [ "$APPLY" = "true" ]; then
+            echo "::group::💾 Ehtiyat nüsxə (postgres-backup /backup.sh)"
+            docker exec "$BACKUP_CONTAINER" /backup.sh
+            echo "::endgroup::"
+            args+=(--apply --i-know-this-is-production)
+          fi
+          # Loga YALNIZ saylar + açılış (fənn · qrup) sayları; tam hesabat şifrəli artifaktdadır.
+          docker exec -i "$APP_CONTAINER" python manage.py backfill_teacher_lessons "${args[@]}" > "$RUNNER_TEMP/bf_out.log" 2>&1 || status=$?
+          for f in lesson_backfill_lessons.csv lesson_backfill_slots.csv; do
+            if docker exec "$APP_CONTAINER" test -s "/tmp/lesson_backfill_report_${GITHUB_RUN_ID}/$f"; then
+              docker exec "$APP_CONTAINER" cat "/tmp/lesson_backfill_report_${GITHUB_RUN_ID}/$f" > "$RUNNER_TEMP/$f"
+            fi
+          done
+          grep -E '^(DRY-RUN|YAZILDI): |^  (slot|dərs|işarə iə|səbəb\[skipped\]): |^  açılış \[|^Hesabat: ' \
+            "$RUNNER_TEMP/bf_out.log" | cut -c1-400 > "$RUNNER_TEMP/bf_summary.log" || true
+          cat "$RUNNER_TEMP/bf_summary.log"
+          {
+            echo "## 📚 backfill_teacher_lessons — $([ "$APPLY" = "true" ] && echo APPLY || echo dry-run)"
+            echo '```'
+            cat "$RUNNER_TEMP/bf_summary.log"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          test "${status:-0}" = 0 || { tail -n 5 "$RUNNER_TEMP/bf_out.log" | grep -E 'CommandError|Error|Exception' | cut -c1-200 || true; exit "$status"; }
+      - name: 🔑 Keçmiş dərslər hesabatı (şifrəli)
+        id: bf_report
+        if: always() && github.event.inputs.command == 'backfill_teacher_lessons'
+        env:
+          STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
+        run: |
+          set -euo pipefail
+          enc() { openssl enc -aes-256-cbc -md sha256 -pbkdf2 -iter 200000 -salt -pass env:STAFF_PLAN_KEY -in "$1" -out "$2"; }
+          mkdir -p "$RUNNER_TEMP/bf-out"
+          if [ -n "$STAFF_PLAN_KEY" ]; then
+            for f in bf_out.log lesson_backfill_lessons.csv lesson_backfill_slots.csv; do
+              if [ -s "$RUNNER_TEMP/$f" ]; then
+                enc "$RUNNER_TEMP/$f" "$RUNNER_TEMP/bf-out/$f.enc"
+                echo "saved=1" >> "$GITHUB_OUTPUT"
+              fi
+            done
+          fi
+          rm -f "$RUNNER_TEMP/bf_out.log" "$RUNNER_TEMP/bf_summary.log" "$RUNNER_TEMP/lesson_backfill_lessons.csv" "$RUNNER_TEMP/lesson_backfill_slots.csv"
+      - name: 📦 Şifrəli keçmiş dərslər hesabatı
+        if: always() && steps.bf_report.outputs.saved != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: lesson-backfill-encrypted
+          path: ${{ runner.temp }}/bf-out/
+          retention-days: 1
+      - name: 🧹 Keçmiş dərslər — müvəqqəti faylları sil
+        if: always() && github.event.inputs.command == 'backfill_teacher_lessons'
+        run: |
+          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/lesson_slots_*.json; rm -rf /tmp/lesson_backfill_report_*' || true
+          rm -rf "$RUNNER_TEMP/bf-out" "$RUNNER_TEMP/slots.enc" "$RUNNER_TEMP/slots.json" || true
