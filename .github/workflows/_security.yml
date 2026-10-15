@@ -77,7 +77,10 @@ jobs:
           echo "::group::🔐 Pip Audit (known vulnerable dependencies — blocks merge)"
           for lock in requirements/production.lock requirements/test.lock; do
             echo "── ${lock}"
-            pip-audit -r "$lock" --require-hashes --disable-pip --desc on || {
+            # İstisna (2026-10-15): CVE-2026-106454 — twisted.mail.imap4 `wildcardToRegexp` ReDoS. Düzəlmiş
+            # versiya hələ YOXDUR (26.4.0 sonuncudur); Twisted bizdə yalnız daphne/channels üçündür, IMAP serveri
+            # (twisted.mail) heç yerdə işlədilmir. Twisted düzəliş buraxan kimi bu istisnanı silib versiyanı qaldırın.
+            pip-audit -r "$lock" --require-hashes --disable-pip --desc on --ignore-vuln CVE-2026-106454 || {
               echo "::error::❌ pip-audit found vulnerable dependencies in ${lock}! Fix them before merging."
               exit 1
             }
