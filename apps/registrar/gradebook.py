@@ -3,8 +3,10 @@
 Müəllim hər dərs günü iştirak/qayıbı (iə/qb), seminar/lab-da isə balı (``LessonMark``)
 yazır; sistem keçirilmiş dərsləri, qayıb saatını və "giriş balı"nı avtomatik hesablayır.
 Kilid qaydaları (geriyə-dönük dəyişiklik olmasın): dərs sətri + yazılmış xana yaranışdan
-2 saat (``LESSON/MARK_EDIT_WINDOW``, DB trigger + servis) sonra dondurulur; keçmiş tarixə
-dərs qadağan; yeni işarə yalnız dərsin günündə; bal 0-10 clamp. Qayıb saatı proqramın
+``journal.*_edit_minutes`` (defolt 120 dəqiqə; xana üçün DB trigger + servis) sonra dondurulur;
+keçmiş tarixə dərs və yeni işarə yalnız ``journal.late_entry_days`` (defolt 0 = yalnız dərs günü)
+həddində; «Aktivləşdir» yanılıdırsa yeni işarə aktivləşdirmədən sonrakı pəncərədə (bax
+:mod:`apps.registrar.journal_edit_windows`); bal 0-10 clamp. Qayıb saatı proqramın
 ``absence_limit_percent``-i × fənn saatını keçirsə tələbə "kəsilir" (imtahana buraxılmır).
 """
 
@@ -27,8 +29,8 @@ from apps.registrar.models import (
     LessonMark,
 )
 
-# Redaktə pəncərələri (defolt 2 saat; RİM rəhbəri «Sistem tənzimləmələri»ndən dəyişir; DB trigger də qoruyur).
-from .journal_edit_windows import LESSON_EDIT_WINDOW, lesson_edit_window, mark_edit_window  # noqa: E402,F401
+# Redaktə pəncərələri (defolt 120 dəqiqə; RİM rəhbəri «Sistem tənzimləmələri»ndən dəyişir; DB trigger də qoruyur).
+from .journal_edit_windows import LESSON_EDIT_WINDOW, EntryRule, lesson_edit_window, mark_edit_window  # noqa: E402,F401
 
 DEFAULT_LESSON_HOURS = 2
 
@@ -95,7 +97,7 @@ def lesson_allows_score(lesson) -> bool:
 
 
 def can_edit_lesson(lesson, *, now=None) -> bool:
-    """Dərs sətri (tarix/növ/mövzu/saat/silmə) yalnız yaranışdan sonra pəncərə (defolt 2 saat) içində."""
+    """Dərs sətri (tarix/növ/mövzu/saat/silmə) yalnız yaranışdan sonra pəncərə (defolt 120 dəqiqə) içində."""
     now = now or timezone.now()
     return (now - lesson.created_at) <= lesson_edit_window()
 
@@ -227,12 +229,15 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
     total_students = len(enrollments)
     lesson_summary = journal_window.lesson_summaries(lessons, enrollments, mark_map, total_students)
 
+    # Yeni işarə: dərs günü (+ gecikmiş yazı günləri) və aktivləşdirmə pəncərəsi — servis qaydası ilə EYNİ.
+    entry_rule = EntryRule.current(now=now)
+    markable = {lesson.id: entry_rule.allows(lesson) for lesson in lessons}
     lesson_meta = [
         {
             "lesson": lesson,
             "is_today": lesson.date == today,
-            "editable": can_edit_lesson(lesson, now=now),  # sütun redaktə/silmə (2 saat)
-            "markable": lesson.date == today,  # yeni işarə yalnız bu gün
+            "editable": can_edit_lesson(lesson, now=now),  # sütun redaktə/silmə (lesson_edit_window)
+            "markable": markable[lesson.id],
             # xronoloji nömrə (köhnədən yeniyə) — sıra tərs olsa da nömrə sabitdir
             "seq": (total_lessons - (window_offset + idx)) if newest_first else (window_offset + idx + 1),
             "parity": _lesson_parity(offering, lesson),  # Ü/A başlıq etiketi
@@ -264,9 +269,9 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
                     "locked": locked,
                     # Rəsmi düzəlişli xana müəllim üçün kilidli (yalnız admin düzəlişi dəyişir).
                     "corrected": corrected,
-                    # yazıla bilən: mövcud işarə pəncərə içində, YA boş xana bu günün dərsində
+                    # yazıla bilən: mövcud işarə pəncərə içində, YA boş xana yeni qeyd qəbul edən dərsdə
                     "writable": (not corrected)
-                    and ((mark is not None and not locked) or (mark is None and lesson.date == today)),
+                    and ((mark is not None and not locked) or (mark is None and markable[lesson.id])),
                 }
             )
         # Birləşmədən gələn qayıb saatı buraxılış həddinə DAXİLDİR (bax

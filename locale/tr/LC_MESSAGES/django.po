@@ -97040,3 +97040,124 @@ msgstr "Bu tarihe kadar öğrencinin durumu «akademik izin» olur; dönüşte p
 msgctxt "accounts.groups"
 msgid "%%d qrupdan çıxıb (məzuniyyət / xaric)"
 msgstr "%%d gruptan ayrıldı (izin / kayıt silme)"
+
+msgctxt "core.runtime_settings"
+msgid "Müəllim dərsi yaratdıqdan sonra bu qədər dəqiqə ərzində onun tarixini, növünü, mövzusunu, saatını dəyişə və ya dərsi silə bilər (120 dəqiqə = 2 saat). Sonra yalnız rəsmi düzəliş yolu."
+msgstr "Öğretmen dersi oluşturduktan sonra bu kadar dakika içinde tarihini, türünü, konusunu, saatini değiştirebilir veya dersi silebilir (120 dakika = 2 saat). Sonrasında yalnızca resmî düzeltme yolu."
+
+msgctxt "core.runtime_settings"
+msgid "Müəllimin yazdığı q/b, i/e və bal yazıldıqdan bu qədər dəqiqə sonra donur — sonra yalnız rəsmi düzəliş yolu. Verilənlər bazası da eyni müddəti yoxlayır (120 dəqiqə = 2 saat)."
+msgstr "Öğretmenin girdiği devamsızlık, katılım ve puan, girildikten bu kadar dakika sonra kilitlenir — sonrasında yalnızca resmî düzeltme yolu. Veritabanı da aynı süreyi denetler (120 dakika = 2 saat)."
+
+msgctxt "core.runtime_settings"
+msgid "Dərs tarixindən sonra gecikmiş yazı müddəti"
+msgstr "Ders tarihinden sonra gecikmeli giriş süresi"
+
+msgctxt "core.runtime_settings"
+msgid "0 — dərs və yeni q/b, i/e, bal yalnız dərsin öz günündə yazılır. N — müəllim dərs tarixindən ən çox N gün sonra həmin tarixə dərs aça və yeni qeyd yaza bilər; müddət bitəndə yazı bağlanır. RİM rəhbərinin rəsmi düzəliş yolu bu həddə tabe deyil."
+msgstr "0 — ders ve yeni devamsızlık, katılım, puan yalnızca dersin kendi gününde girilir. N — öğretmen ders tarihinden en fazla N gün sonrasına kadar o tarihe ders açabilir ve yeni kayıt girebilir; süre dolunca giriş kapanır. Kayıt Ofisi başkanının resmî düzeltme yolu bu sınıra tabi değildir."
+
+msgctxt "core.runtime_settings"
+msgid "Aktivləşdirmədən sonra yazı müddəti"
+msgstr "Etkinleştirmeden sonra giriş süresi"
+
+msgctxt "core.runtime_settings"
+msgid "Yalnız «Aktivləşdir» yanılıdırsa: müəllim dərsi aktivləşdirdikdən (jurnalda açdıqdan) sonra q/b, i/e və balı bu qədər dəqiqə ərzində yazmalıdır; sonra həmin dərsə yeni qeyd yazılmır. Əvvəlcədən açılmış dərsdə müddət dərsin başlama saatından sayılır."
+msgstr "Yalnızca «Etkinleştir» açıksa: öğretmen dersi yoklama defterinde etkinleştirdikten (açtıktan) sonra devamsızlık, katılım ve puanı bu kadar dakika içinde girmelidir; sonrasında o derse yeni kayıt girilmez. Önceden açılmış derste süre dersin başlama saatinden sayılır."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "%(n)s saat"
+msgstr "%(n)s sa."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "%(h)s saat %(m)s dəqiqə"
+msgstr "%(h)s saat %(m)s dakika"
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "%(n)s dəqiqə"
+msgstr "%(n)s dakika"
+
+msgctxt "registrar.journal_timing"
+msgid "Keçmiş tarixə dərs əlavə etmək olmaz."
+msgstr "Geçmiş bir tarihe ders eklenemez."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Dərs tarixi ən çox %(d)s gün geriyə ola bilər — ən erkən %(date)s. Daha köhnə tarix üçün RİM-ə müraciət edin."
+msgstr "Ders tarihi en fazla %(d)s gün geriye olabilir — en erken %(date)s. Daha eski bir tarih için Kayıt Ofisine başvurun."
+
+msgctxt "registrar.journal_timing"
+msgid "Gələcək tarixli dərsə qeyd hələ yazıla bilməz."
+msgstr "İleri tarihli bir derse henüz kayıt girilemez."
+
+msgctxt "registrar.journal_timing"
+msgid "Yeni qeyd yalnız dərsin öz günündə yazılır — keçmiş dərsə yazmaq olmaz."
+msgstr "Yeni kayıt yalnızca dersin kendi gününde girilir — geçmiş bir derse girilemez."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Dərs tarixindən %(d)s gündən çox keçib — %(date)s tarixli dərsə yeni qeyd yazmaq olmaz."
+msgstr "Ders tarihinden bu yana %(d)s günden fazla geçti — %(date)s tarihli derse yeni kayıt girilemez."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Dərs aktivləşdiriləndən %(w)s keçib — q/b, i/e və bal yalnız aktivləşdirmədən sonrakı %(w)s ərzində yazılır."
+msgstr "Dersin etkinleştirilmesinden bu yana %(w)s geçti — devamsızlık, katılım ve puan yalnızca etkinleştirmeden sonraki %(w)s içinde girilir."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Redaktə / sil (pəncərə: %(w)s)"
+msgstr "Düzenle / sil (süre: %(w)s)"
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Davamiyyət dərs günü və ondan sonra ən çox %(d)s gün ərzində qeyd edilə bilər · yazılmış qeyd %(w)s sonra kilidlənir — düzəliş üçün Tyutor xidmətinə yazılı müraciət edilir."
+msgstr "Devam, ders günü ve sonrasında en fazla %(d)s gün içinde kaydedilebilir · girilen kayıt %(w)s sonra kilitlenir — düzeltme için Tutor hizmetine yazılı başvuru yapılır."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Davamiyyət yalnız dərs günü qeyd edilə bilər · yazılmış qeyd %(w)s sonra kilidlənir — düzəliş üçün Tyutor xidmətinə yazılı müraciət edilir."
+msgstr "Devam yalnızca ders günü kaydedilebilir · girilen kayıt %(w)s sonra kilitlenir — düzeltme için Tutor hizmetine yazılı başvuru yapılır."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "aktivləşdirilmiş dərsə qeydlər aktivləşdirmədən sonra %(a)s ərzində yazılır."
+msgstr "etkinleştirilmiş derse kayıtlar etkinleştirmeden sonraki %(a)s içinde girilir."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Keçmiş tarixə dərs ən çox %(d)s gün geriyə açmaq olar."
+msgstr "Geçmiş bir tarihe en fazla %(d)s gün geriye ders açılabilir."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Bu dərs kilidlənib (%(w)s keçib). Tarix/tip/saat/mövzu/müəllim dəyişikliyi VƏ YA dərsin silinməsi rəsmi sənədlə (təqdimat) audit olunur."
+msgstr "Bu ders kilitlendi (%(w)s geçti). Tarih/tür/saat/konu/öğretmen değişikliği VEYA dersin silinmesi resmî belgeyle (dilekçe) denetlenir."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Dərs əlavə edildikdə davamiyyət cədvəlinə yeni tarix sütunu açılır; qeydlər dərs günü və ondan sonra ən çox %(d)s gün ərzində aparılır. Səhv açılmış dərsi %(w)s ərzində silmək/düzəltmək olar."
+msgstr "Ders eklendiğinde devam tablosunda yeni bir tarih sütunu açılır; kayıtlar ders günü ve sonrasında en fazla %(d)s gün içinde girilir. Yanlış açılan ders %(w)s içinde silinebilir/düzeltilebilir."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Dərs əlavə edildikdə davamiyyət cədvəlinə yeni tarix sütunu açılır və qeydlər həmin gün aparılır. Səhv açılmış dərsi %(w)s ərzində silmək/düzəltmək olar."
+msgstr "Ders eklendiğinde devam tablosunda yeni bir tarih sütunu açılır ve kayıtlar o gün girilir. Yanlış açılan ders %(w)s içinde silinebilir/düzeltilebilir."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Redaktə (pəncərə: %(w)s)"
+msgstr "Düzenle (süre: %(w)s)"
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Redaktə pəncərəsi (%(w)s) bağlanıb"
+msgstr "Düzenleme süresi (%(w)s) doldu"
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Kurs işi balı yekun cədvəldə ayrıca sütunda göstərilir. Yazılan qeyd %(w)s sonra kilidlənir."
+msgstr "Dönem ödevi puanı final tablosunda ayrı bir sütunda gösterilir. Girilen kayıt %(w)s sonra kilitlenir."

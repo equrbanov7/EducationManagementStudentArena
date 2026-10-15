@@ -18,7 +18,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from . import campus, finals, grade_audit, gradebook, legacy_excuse, lesson_rooms, schedule
+from . import campus, finals, grade_audit, gradebook, journal_edit_windows, legacy_excuse, lesson_rooms, schedule
 from .models import AttendanceStatus, CorrectionReason, LessonKind
 
 
@@ -228,9 +228,8 @@ def journal_detail(request, offering_id):
         "calendar_plan": journal_extras.calendar_plan(offering, journal["lessons"], today),
         "standard_times": schedule.STANDARD_LESSON_TIMES,
         "seminar_score_options": list(range(0, 11)),
-        # 2026-10-03: pəncərələr «Sistem tənzimləmələri»ndən — mətnlər faktiki saatı göstərsin.
-        "lesson_edit_hours": int(gradebook.lesson_edit_window().total_seconds() // 3600),
-        "mark_edit_hours": int(gradebook.mark_edit_window().total_seconds() // 3600),
+        # Vaxt qaydaları «Sistem tənzimləmələri»ndən (dəqiqə, gecikmiş yazı günü, aktivləşdirmə) — mətnlər faktiki.
+        **journal_edit_windows.template_context(today),
         "kollokvium_score_options": journal_extras.interim_score_options(offering),  # 0–10 / midterm 0–20
         "today_parity": today_parity,
         "active_main_nav": "journal",
@@ -556,10 +555,16 @@ def _handle_save_marks(request, offering):
     written, rejected = result["written"], result["rejected"]
     if autosave:
         return journal_autosave.saved(sent=len(entries), written=written, rejected=rejected)
+    blocked_reason = result.get("blocked_reason")  # dərs günü / gecikmiş yazı / aktivləşdirmə pəncərəsi
     if entries and not written:
-        messages.warning(request, _("Heç bir xana yazılmadı — dərs günü qaydası və ya xana kilidi buna imkan vermədi."))
+        messages.warning(
+            request,
+            blocked_reason or _("Heç bir xana yazılmadı — dərs günü qaydası və ya xana kilidi buna imkan vermədi."),
+        )
     else:
         messages.success(request, _("Jurnal yadda saxlanıldı (%(n)s xana).") % {"n": written})
+        if blocked_reason:
+            messages.warning(request, blocked_reason)
     if rejected:
         # QA 2026-09-05 (P3-10): səhv bal SƏSSİZ 0-a çevrilmirdi; xana yazılmır və
         # müəllim bunu görməlidir.

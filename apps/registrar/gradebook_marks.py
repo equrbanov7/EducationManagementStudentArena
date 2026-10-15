@@ -21,7 +21,7 @@ qeydiyyat üçün qayıb saatını ayrıca hesablayırdı (2 sorğu). 25 xanalı
 
 Qaydalar dəyişməyib: kilidli jurnal, açılış ``FOR UPDATE`` kilidi (yarış),
 rəsmi düzəlişli xana kilidi, xana pəncərəsi (DB trigger də qoruyur), yeni
-işarə yalnız dərs günündə, bal yalnız seminar/lab-da (0..10, səhv dəyər
+işarə yalnız dərs günündə (+ gecikmiş yazı günləri, aktivləşdirmə pəncərəsi), bal yalnız seminar/lab-da (0..10, səhv dəyər
 yazılmır), audit sətri, bildirişlər (``on_commit``), qayıb həddi keçidləri.
 """
 
@@ -34,7 +34,7 @@ from django.db import transaction
 from django.db.models import Sum
 from django.utils import timezone
 
-from apps.registrar import grade_audit
+from apps.registrar import grade_audit, journal_edit_windows
 from apps.registrar.models import AttendanceStatus, Enrollment, Lesson, LessonMark
 
 #: Toplu INSERT/UPDATE partiyası — 555 tələbəli açılışda «hamısını göstər»
@@ -116,9 +116,11 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
     (cross-offering/tenant injection rejected), honours the per-mark edit window
     (locked cells are skipped) and the lesson type (lecture cells never store a
     score). Blocked entirely when the journal is locked. Returns cells written.
-    ``enforce_day=False`` YALNIZ seed/test üçündür — HTTP qatı heç vaxt ötürmür.
+    ``enforce_day=False`` YALNIZ seed/test/backfill üçündür — HTTP qatı heç vaxt ötürmür; dərs günü,
+    gecikmiş yazı günləri (``journal.late_entry_days``) və aktivləşdirmə pəncərəsini keçir.
     ``report=True`` → ``{"written", "rejected"}`` (yazılmayan xanaların sayı ilə;
-    çağıran istifadəçiyə xəbərdarlıq göstərir — bax P3-10).
+    çağıran istifadəçiyə xəbərdarlıq göstərir — bax P3-10); vaxt qaydası xananı saxlayıbsa
+    əlavə ``blocked`` (say) + ``blocked_reason`` (istifadəçi mətni).
     """
     from apps.registrar import gradebook
     from apps.registrar import journal_notifications as jn
@@ -145,7 +147,10 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
     to_create = []
     to_update = []
     now = timezone.now()
-    today = timezone.localdate()
+    # Yeni qeyd qaydası (dərs günü + gecikmiş yazı günləri + aktivləşdirmə pəncərəsi) — bir dəfə qurulur.
+    entry_rule = journal_edit_windows.EntryRule.current(now=now) if enforce_day else None
+    blocked = 0
+    blocked_reason = ""
     by_user_id = getattr(by_user, "pk", None)
     for (lesson_id, enrollment_id), entry in cells.items():
         lesson = lessons.get(lesson_id)
@@ -157,8 +162,13 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
             continue  # rəsmi düzəlişli xana — müəllim üçün kilidli
         if not gradebook.can_edit_mark(mark, now=now):
             continue  # locked — no back-dated tampering
-        if enforce_day and mark is None and lesson.date != today:
-            continue  # YENİ işarə yalnız dərsin öz günündə yazılır
+        if entry_rule is not None and mark is None:
+            reason = entry_rule.block_reason(lesson)
+            if reason:
+                # YENİ işarə yalnız dərs günü (+ ``late_entry_days``) və aktivləşdirmə pəncərəsində yazılır.
+                blocked += 1
+                blocked_reason = blocked_reason or reason
+                continue
 
         status = entry.get("status")
         if status not in (AttendanceStatus.PRESENT, AttendanceStatus.ABSENT):
@@ -252,7 +262,13 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
 
     if notify_events:
         transaction.on_commit(lambda: jn.send_journal_events(offering=offering, events=notify_events))
-    return {"written": written, "rejected": rejected} if report else written
+    if not report:
+        return written
+    result = {"written": written, "rejected": rejected}
+    if blocked:
+        # Açar yalnız qayda xananı saxlayanda var (çağıranlar köhnə ``{"written", "rejected"}`` formasını gözləyir).
+        result.update(blocked=blocked, blocked_reason=blocked_reason)
+    return result
 
 
 def recompute_absence_hours_many(enrollments) -> dict:
