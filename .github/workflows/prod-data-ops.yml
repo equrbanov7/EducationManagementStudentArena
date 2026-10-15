@@ -164,7 +164,7 @@ on:
         required: false
         default: "0"
       reassign:
-        description: "import_teaching_*: fərqli müəllimi düzəliş axını ilə dəyiş"
+        description: "import_teaching_*: fərqli müəllimi düzəliş axını ilə dəyiş · backfill_teacher_lessons: sonradan qoşulanları da iə işarələ"
         required: false
         type: boolean
         default: false
@@ -657,6 +657,7 @@ jobs:
           echo "::add-mask::$actor"
           args=(--org "$ORG" --teacher "$TEACHER" --period "$PERIOD" --from "$DATE_FROM" --to "$DATE_TO" --mark present
                 --actor "$actor" --report "/tmp/lesson_backfill_report_${GITHUB_RUN_ID}" "${spec_args[@]}")
+          test "$REASSIGN" != "true" || args+=(--include-late-joiners)
           if [ "$APPLY" = "true" ]; then
             echo "::group::💾 Ehtiyat nüsxə (postgres-backup /backup.sh)"
             docker exec "$BACKUP_CONTAINER" /backup.sh
