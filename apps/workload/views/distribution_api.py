@@ -20,11 +20,13 @@ from ..constants import TaskStatus
 from ..models import TeacherAssignment, TeachingTask, TeachingTaskRow
 from ..public import STATUS_LABELS
 from ..services import (
+    AMENDMENT_REQUIRED,
     WorkloadDenied,
-    assign_teacher,
+    amend_from_payload,
+    assign_amended,
     confirm_distribution,
     curriculum_row_suggestions,
-    delete_row,
+    delete_row_amended,
     distribution_readiness,
     ensure_can_manage,
     ensure_can_view,
@@ -33,11 +35,11 @@ from ..services import (
     open_amendment,
     resolve_chair,
     row_warnings,
-    save_row,
+    save_row_amended,
     serialize_rows,
     teacher_load_panel,
     teacher_pool,
-    unassign,
+    unassign_amended,
 )
 from ..services.tasks import TOTAL_BELOW_ASSIGNED
 from ._base import active_organization, actor_for, denied, error, json_body, no_org
@@ -46,6 +48,18 @@ from ._base import active_organization, actor_for, denied, error, json_body, no_
 # ``task_id`` / ``assignment_id`` ``filter(pk=...)``-də ValidationError → 500
 # verirdi (sandbox: ``workload:assign``, ``workload:row_save``). İndi pk-lar
 # ortaq ``core.http_ids.parse_uuid`` ilə süzülür; pozuq dəyər = «tapılmadı».
+
+#: Vəziyyət toqquşması (409) kodları: bölünmüş saatdan az cəm (W2) və təsdiqlənmiş sənəddə səbəbsiz yazı
+#: (2026-10-15 — UI düzəliş dialoqunu açıb sorğunu ``amend_reason`` / ``amend_note`` ilə təkrarlayır).
+_CONFLICT_CODES = frozenset({TOTAL_BELOW_ASSIGNED, AMENDMENT_REQUIRED})
+
+
+def _write_denied(exc: WorkloadDenied) -> JsonResponse:
+    return denied(exc, status=409 if exc.code in _CONFLICT_CODES else 403)
+
+
+def _truthy(value) -> bool:
+    return str(value or "").lower() in ("1", "true", "on", "yes")
 
 
 def _task_payload(task) -> dict:
@@ -56,6 +70,8 @@ def _task_payload(task) -> dict:
         "revision": task.revision,
         "is_locked": task.is_locked,
         "is_editable": task.is_editable,
+        # 2026-10-15: təsdiqlənmiş sənəddə hər yazı düzəliş (səbəb + qeyd) ilə gedir.
+        "needs_amendment": task.status in (TaskStatus.DISTRIBUTED, TaskStatus.AMENDED),
         "academic_year": task.academic_year,
         "chair_id": str(task.chair_id),
     }
@@ -281,10 +297,18 @@ def row_save(request) -> JsonResponse:
             row = TeachingTaskRow.objects.filter(pk=row_pk, task=instance).first() if row_pk is not None else None
             if row is None:
                 return error("workload.row_not_found", "Sətir tapılmadı.", status=404)
-        saved = save_row(task=instance, actor=actor, data=payload, row=row, request=request)
+        saved = save_row_amended(
+            task=instance,
+            actor=actor,
+            data=payload,
+            row=row,
+            amend=amend_from_payload(payload),
+            shrink=_truthy(payload.get("shrink_assignments")),
+            request=request,
+        )
     except WorkloadDenied as exc:
         # Audit 2026-09-28 W2: bölünmüş saatdan az cəm — vəziyyət toqquşması (409).
-        return denied(exc, status=409 if exc.code == TOTAL_BELOW_ASSIGNED else 403)
+        return _write_denied(exc)
     return JsonResponse(
         {"ok": True, "row_id": str(saved.pk), "warnings": row_warnings(saved), "task": _task_payload(instance)}
     )
@@ -305,9 +329,9 @@ def row_delete(request) -> JsonResponse:
         row = TeachingTaskRow.objects.filter(pk=row_pk, task=instance).first() if row_pk is not None else None
         if row is None:
             return error("workload.row_not_found", "Sətir tapılmadı.", status=404)
-        delete_row(task=instance, row=row, actor=actor, request=request)
+        delete_row_amended(task=instance, row=row, actor=actor, amend=amend_from_payload(payload), request=request)
     except WorkloadDenied as exc:
-        return denied(exc)
+        return _write_denied(exc)
     return JsonResponse({"ok": True})
 
 
@@ -340,20 +364,21 @@ def assign(request) -> JsonResponse:
         if assignment is None:
             return error("workload.assignment_not_found", "Bölgü tapılmadı.", status=404)
     try:
-        saved = assign_teacher(
+        saved = assign_amended(
             row=row,
             actor=actor,
+            amend=amend_from_payload(payload),
             activity=payload.get("activity") or "",
             teacher_id=payload.get("teacher_id") or None,
             hours=payload.get("hours"),
             groups_note=payload.get("groups_note") or "",
-            is_hourly_paid=str(payload.get("is_hourly_paid") or "").lower() in ("1", "true", "on", "yes"),
+            is_hourly_paid=_truthy(payload.get("is_hourly_paid")),
             note=payload.get("note") or "",
             assignment=assignment,
             request=request,
         )
     except WorkloadDenied as exc:
-        return denied(exc)
+        return _write_denied(exc)
     body = {"ok": True, "assignment_id": str(saved.pk)}
     conflicts = int((getattr(saved, "offering_sync", None) or {}).get("schedule_conflicts") or 0)
     if conflicts:
@@ -387,9 +412,9 @@ def unassign_view(request) -> JsonResponse:
     if assignment is None:
         return error("workload.assignment_not_found", "Bölgü tapılmadı.", status=404)
     try:
-        unassign(assignment=assignment, actor=actor, request=request)
+        unassign_amended(assignment=assignment, actor=actor, amend=amend_from_payload(payload), request=request)
     except WorkloadDenied as exc:
-        return denied(exc)
+        return _write_denied(exc)
     return JsonResponse({"ok": True})
 
 

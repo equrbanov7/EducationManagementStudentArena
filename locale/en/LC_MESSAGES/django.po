@@ -97590,6 +97590,34 @@ msgctxt "accounts.groups"
 msgid "%%d qrupdan çıxıb (məzuniyyət / xaric)"
 msgstr "%%d left the group (leave / expelled)"
 
+msgctxt "accounts.workload"
+msgid "Redaktə"
+msgstr "Edit"
+
+msgctxt "accounts.workload"
+msgid "Redaktə et"
+msgstr "Edit"
+
+msgctxt "accounts.workload"
+msgid "Bölgü təsdiqlənib. Sətri, saatı və ya müəllimi dəyişə, fəaliyyəti çıxara, sətir əlavə edə bilərsiniz — hər dəyişiklikdə düzəliş səbəbi və qeydi soruşulur, tarixçə saxlanılır."
+msgstr "The distribution is confirmed. You can change a row, its hours or the teacher, remove an activity or add a row — each change asks for an amendment reason and note, and the history is kept."
+
+msgctxt "accounts.workload"
+msgid "Düzəliş açıqdır: dəyişikliklər müəllimə və jurnala dərhal düşür. Bitirəndə «Bölgünü təsdiqlə» ilə sənədi yenidən təsdiqləyin."
+msgstr "An amendment is open: changes reach the teacher and the journal immediately. When you are done, confirm the document again with «Confirm distribution»."
+
+msgctxt "accounts.workload_overview"
+msgid "Redaktə et"
+msgstr "Edit"
+
+msgctxt "accounts.workload_overview"
+msgid "Əməl"
+msgstr "Action"
+
+msgctxt "accounts.workload_center"
+msgid "Bölgünü redaktə et"
+msgstr "Edit distribution"
+
 msgctxt "core.runtime_settings"
 msgid "Müəllim dərsi yaratdıqdan sonra bu qədər dəqiqə ərzində onun tarixini, növünü, mövzusunu, saatını dəyişə və ya dərsi silə bilər (120 dəqiqə = 2 saat). Sonra yalnız rəsmi düzəliş yolu."
 msgstr "After creating a lesson, the teacher can change its date, type, topic and time or delete it within this many minutes (120 minutes = 2 hours). After that, only the official correction path."

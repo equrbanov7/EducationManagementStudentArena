@@ -97774,6 +97774,34 @@ msgctxt "accounts.groups"
 msgid "%%d qrupdan çıxıb (məzuniyyət / xaric)"
 msgstr "%%d вышли из группы (отпуск / отчисление)"
 
+msgctxt "accounts.workload"
+msgid "Redaktə"
+msgstr "Редактирование"
+
+msgctxt "accounts.workload"
+msgid "Redaktə et"
+msgstr "Изменить"
+
+msgctxt "accounts.workload"
+msgid "Bölgü təsdiqlənib. Sətri, saatı və ya müəllimi dəyişə, fəaliyyəti çıxara, sətir əlavə edə bilərsiniz — hər dəyişiklikdə düzəliş səbəbi və qeydi soruşulur, tarixçə saxlanılır."
+msgstr "Распределение утверждено. Можно изменить строку, часы или преподавателя, убрать вид занятий, добавить строку — при каждом изменении запрашиваются причина и примечание корректировки, история сохраняется."
+
+msgctxt "accounts.workload"
+msgid "Düzəliş açıqdır: dəyişikliklər müəllimə və jurnala dərhal düşür. Bitirəndə «Bölgünü təsdiqlə» ilə sənədi yenidən təsdiqləyin."
+msgstr "Корректировка открыта: изменения сразу доходят до преподавателя и журнала. По завершении снова утвердите документ кнопкой «Утвердить распределение»."
+
+msgctxt "accounts.workload_overview"
+msgid "Redaktə et"
+msgstr "Изменить"
+
+msgctxt "accounts.workload_overview"
+msgid "Əməl"
+msgstr "Действие"
+
+msgctxt "accounts.workload_center"
+msgid "Bölgünü redaktə et"
+msgstr "Изменить распределение"
+
 msgctxt "core.runtime_settings"
 msgid "Müəllim dərsi yaratdıqdan sonra bu qədər dəqiqə ərzində onun tarixini, növünü, mövzusunu, saatını dəyişə və ya dərsi silə bilər (120 dəqiqə = 2 saat). Sonra yalnız rəsmi düzəliş yolu."
 msgstr "После создания занятия преподаватель в течение стольких минут может изменить его дату, тип, тему, время или удалить его (120 минут = 2 часа). Затем — только официальная корректировка."

@@ -42,6 +42,18 @@ from .reviews import (
     row_remarks,
     set_row_review,
 )
+from .row_edit import (
+    AMENDMENT_REQUIRED,
+    amend_from_payload,
+    amendment_needed,
+    assign_amended,
+    delete_row_amended,
+    distributable_chair_ids,
+    distribution_edit_url,
+    save_row_amended,
+    set_activity_hours,
+    unassign_amended,
+)
 from .scoping import (
     WorkloadActor,
     WorkloadDenied,
@@ -81,12 +93,16 @@ from .workflow import (
 )
 
 __all__ = [
+    "AMENDMENT_REQUIRED",
     "ImportFileError",
     "WorkloadActor",
     "WorkloadDenied",
+    "amend_from_payload",
     "amendment_history",
+    "amendment_needed",
     "apply_import",
     "approve_slice",
+    "assign_amended",
     "assign_teacher",
     "balance_for_rows",
     "build_mapping",
@@ -105,6 +121,9 @@ __all__ = [
     "create_objection",
     "curriculum_row_suggestions",
     "delete_row",
+    "delete_row_amended",
+    "distributable_chair_ids",
+    "distribution_edit_url",
     "distribution_readiness",
     "ensure_assignable_teacher",
     "ensure_can_approve",
@@ -142,7 +161,9 @@ __all__ = [
     "row_remarks",
     "row_warnings",
     "save_row",
+    "save_row_amended",
     "serialize_rows",
+    "set_activity_hours",
     "set_row_review",
     "slice_progress",
     "submit_summary",
@@ -157,5 +178,6 @@ __all__ = [
     "teacher_workload_summary",
     "teacher_years",
     "unassign",
+    "unassign_amended",
     "unrouted_rows",
 ]

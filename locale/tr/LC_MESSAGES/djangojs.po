@@ -3120,3 +3120,24 @@ msgstr "Eski kohortlar"
 msgctxt "ui.search"
 msgid "Axtarılır…"
 msgstr "Aranıyor…"
+
+msgid "Redaktə et"
+msgstr "Düzenle"
+
+msgid "Bölgünü redaktə et"
+msgstr "Atamayı düzenle"
+
+msgid "Fəaliyyəti çıxar"
+msgstr "Etkinliği kaldır"
+
+msgid "Düzəliş açıqdır"
+msgstr "Düzeltme açık"
+
+msgid "Səbəb və qeyd məcburidir."
+msgstr "Gerekçe ve not zorunludur."
+
+msgid "Bölgü yeni cəmə uyğun azaldılsın (ən son təyinatdan başlayaraq)?"
+msgstr "Atamalar yeni toplama göre azaltılsın mı (en sonuncudan başlayarak)?"
+
+msgid "«%(activity)s» sətirdən çıxarılsın? Bu fəaliyyətin bölgüsü də silinəcək."
+msgstr "«%(activity)s» satırdan kaldırılsın mı? Bu etkinliğin atamaları da silinecek."

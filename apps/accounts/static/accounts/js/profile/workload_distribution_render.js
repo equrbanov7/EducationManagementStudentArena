@@ -58,6 +58,11 @@
                     '" data-activity="' +
                     esc(key) +
                     '">' + esc(gettext("Bölüşdür")) + "</button>" +
+                    // 2026-10-15: fəaliyyəti sətirdən çıxar (cəm 0, bölgüsü silinir; təsdiqlənmişdə — düzəliş ilə).
+                    '<button type="button" class="wl-act__remove" data-wl-activity-remove data-row-id="' +
+                    esc(row.id) + '" data-activity="' + esc(key) + '" data-activity-label="' +
+                    esc(labels[key] || key) + '" aria-label="' + esc(gettext("Fəaliyyəti çıxar")) +
+                    '" title="' + esc(gettext("Fəaliyyəti çıxar")) + '">&times;</button>' +
                     "</div>"
                 );
             })
@@ -80,6 +85,9 @@
                         " · " +
                         item.hours +
                         "s" +
+                        '<button type="button" class="wl-assign-chip__edit" aria-label="' + esc(gettext("Bölgünü redaktə et")) + '"' +
+                        ' data-wl-assign-edit data-row-id="' + esc(row.id) + '" data-assignment-id="' + esc(item.id) +
+                        '"><i class="fas fa-pen" aria-hidden="true"></i></button>' +
                         '<button type="button" class="wl-assign-chip__remove" aria-label="' + esc(gettext("Bölgünü sil")) + '"' +
                         ' data-wl-assign-remove data-assignment-id="' +
                         esc(item.id) +
@@ -114,10 +122,13 @@
                     '">' + esc(gettext("Redaktə")) + "</button>" +
                     '<button type="button" class="wl-btn wl-btn--danger" data-wl-row-remove data-row-id="' +
                     esc(row.id) +
-                    '">Sil</button>' +
+                    '">' + esc(gettext("Sil")) + "</button>" +
                     "</div>" +
                     "</div>" +
                     '<div class="wl-row__meta">' +
+                    (row.is_amend_target
+                        ? '<span class="wl-row__amend">' + esc(gettext("Düzəliş açıqdır")) + "</span>"
+                        : "") +
                     "<span>" +
                     esc(row.season_label) +
                     "</span>" +

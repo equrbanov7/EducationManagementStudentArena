@@ -22,6 +22,8 @@ from django.db.models import Count, Q, Sum
 from .constants import PERM_MANAGE, PERM_SUBMIT, Season, TaskStatus
 from .models import TaskFacultySlice, TeachingTask, TeachingTaskRow
 from .services import (
+    distributable_chair_ids,
+    distribution_edit_url,
     manageable_chairs,
     normalize_academic_year,
     resolve_actor,
@@ -179,6 +181,8 @@ def build_center(request, organization) -> dict:
         # Əhatədə tək fakültə (kafedra müdiri): avtomatik seçilir, URL-dəki başqa id nəzərə alınmır.
         faculty_filter = faculty_options[0]["value"] if faculty_options else ""
     status_filter = params.get("wc_status") or ""
+    # 2026-10-15: bölgü redaktoruna keçid — yalnız `workload.distribute` əhatəsindəki kafedranın kartında.
+    editable = distributable_chair_ids(actor)
     cards = []
     for chair in chairs:
         task = tasks.get(chair.pk)
@@ -198,6 +202,11 @@ def build_center(request, organization) -> dict:
             "credits": int(stats.get("credits") or 0),
             "row_count": int(stats.get("rows") or 0),
             "updated_at": task.updated_at if task else None,
+            "edit_url": (
+                distribution_edit_url(chair_id=chair.pk, academic_year=year)
+                if task is not None and str(chair.pk) in editable
+                else ""
+            ),
         }
         if faculty_filter and card["faculty_id"] != faculty_filter:
             continue

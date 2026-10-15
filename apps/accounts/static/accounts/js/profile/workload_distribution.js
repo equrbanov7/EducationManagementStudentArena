@@ -153,6 +153,7 @@
                 var empty = q("[data-wl-empty]");
                 if (empty) empty.hidden = STATE.rows.length > 0;
                 renderStatus();
+                if (window.EMSWorkloadAmend) window.EMSWorkloadAmend.afterRows();
             })
             .catch(function () {
                 var empty = q("[data-wl-empty]");
@@ -224,65 +225,24 @@
         return window.bootstrap.Modal.getOrCreateInstance(node);
     }
 
-    function formValues(form) {
-        if (!form) return {};
-        var data = {};
-        Array.prototype.forEach.call(form.elements, function (field) {
-            if (!field.name) return;
-            if (field.type === "checkbox") {
-                data[field.name] = field.checked ? "1" : "";
-                return;
-            }
-            if (field.multiple) {
-                data[field.name] = Array.prototype.filter
-                    .call(field.options, function (option) {
-                        return option.selected;
-                    })
-                    .map(function (option) {
-                        return option.value;
-                    });
-                return;
-            }
-            data[field.name] = field.value;
-        });
-        return data;
+    /** `workload_distribution_forms.js` — null-safe (fayl sırası pozulsa bölmə sadəcə yazmır). */
+    function forms() {
+        return window.EMSWorkloadForms || { values: function () { return {}; }, fillRow: function () {} };
     }
 
-    function fillForm(form, row) {
-        if (!form) return;
-        Array.prototype.forEach.call(form.elements, function (field) {
-            if (!field.name) return;
-            if (field.type === "checkbox") {
-                field.checked = false;
-                return;
-            }
-            if (field.multiple) {
-                Array.prototype.forEach.call(field.options, function (option) {
-                    option.selected = false;
-                });
-                return;
-            }
-            field.value = field.type === "number" ? "0" : "";
-        });
-        if (!row) return;
-        var mapping = {
-            row_id: row.id,
-            subject_id: row.subject_id,
-            subject_text: row.subject,
-            period_id: row.period_id,
-            season: row.season,
-            row_kind: row.row_kind,
-            education_form: row.education_form,
-            degree_level: row.degree_level,
-            student_count: row.student_count,
-            union_count: row.union_count,
-            subgroup_count: row.subgroup_count,
-            credits: row.credits,
-        };
-        Object.keys(mapping).forEach(function (name) {
-            var field = form.elements[name];
-            if (field && mapping[name] != null) field.value = mapping[name];
-        });
+    /** Təsdiqlənmiş sənəddə yazı düzəliş dialoqundan keçir (`workload_distribution_amend.js`). */
+    function write(opts) {
+        if (window.EMSWorkloadAmend) return window.EMSWorkloadAmend.write(opts);
+        return window.EMSCore.fetchJSON(opts.url, { method: "POST", data: opts.data })
+            .then(opts.done)
+            .catch(function (err) {
+                showError(q(opts.error), messageFor(err && err.payload));
+            });
+    }
+
+    function hideModal(selector) {
+        var instance = modal(selector);
+        if (instance) instance.hide();
     }
 
     // ── Delegated listener-lər (bir dəfə qoşulur) ───────────────────────────
@@ -311,22 +271,23 @@
                 });
         });
 
-        EMSDelegate.on("click", "[data-wl-open-row-modal]", function () {
+        // 2026-10-15: açılışlar YÜKLƏNƏNDƏN sonra doldurulur — əvvəl gec gələn siyahı fənn/semestri silirdi.
+        function openRowModal(row) {
             fillCatalogSelects();
-            loadOptions();
-            fillForm(q("[data-wl-row-form]"), null);
             showError(q("[data-wl-row-error]"), "");
+            loadOptions().then(function () {
+                forms().fillRow(q("[data-wl-row-form]"), row);
+            });
             var instance = modal("[data-wl-row-modal]");
             if (instance) instance.show();
+        }
+
+        EMSDelegate.on("click", "[data-wl-open-row-modal]", function () {
+            openRowModal(null);
         });
 
         EMSDelegate.on("click", "[data-wl-row-edit]", function (event, btn) {
-            fillCatalogSelects();
-            loadOptions();
-            fillForm(q("[data-wl-row-form]"), rowById(btn.dataset.rowId));
-            showError(q("[data-wl-row-error]"), "");
-            var instance = modal("[data-wl-row-modal]");
-            if (instance) instance.show();
+            openRowModal(rowById(btn.dataset.rowId));
         });
 
         EMSDelegate.on("click", "[data-wl-save-row]", function () {
@@ -335,18 +296,19 @@
                 showError(q("[data-wl-row-error]"), gettext("Əvvəlcə tapşırıq yaradılmalıdır."));
                 return;
             }
-            var payload = formValues(q("[data-wl-row-form]"));
+            var payload = forms().values(q("[data-wl-row-form]"));
             payload.task_id = STATE.task.id;
             payload.group_ids = payload.group_ids || [];
-            window.EMSCore.fetchJSON(host.dataset.saveRowUrl, { method: "POST", data: payload })
-                .then(function () {
-                    var instance = modal("[data-wl-row-modal]");
-                    if (instance) instance.hide();
+            write({
+                url: host.dataset.saveRowUrl,
+                data: payload,
+                modal: "[data-wl-row-modal]",
+                error: "[data-wl-row-error]",
+                done: function () {
+                    hideModal("[data-wl-row-modal]");
                     loadRows();
-                })
-                .catch(function (err) {
-                    showError(q("[data-wl-row-error]"), messageFor(err && err.payload));
-                });
+                },
+            });
         });
 
         EMSDelegate.on("click", "[data-wl-row-remove]", function (event, btn) {
@@ -355,45 +317,17 @@
             // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
             window.EMSConfirm.open({ body: gettext("Sətir silinsin?"), danger: true }).then(function (ok) {
                 if (!ok) return;
-                window.EMSCore.fetchJSON(host.dataset.deleteRowUrl, {
-                    method: "POST",
+                write({
+                    url: host.dataset.deleteRowUrl,
                     data: { task_id: STATE.task.id, row_id: btn.dataset.rowId },
-                })
-                    .then(loadRows)
-                    .catch(function (err) {
-                        window.alert(messageFor(err && err.payload));
-                    });
+                    done: loadRows,
+                });
             });
         });
 
         // ── Bölgü modalı ───────────────────────────────────────────────────
         EMSDelegate.on("click", "[data-wl-assign-open]", function (event, btn) {
-            var row = rowById(btn.dataset.rowId);
-            if (!row) return;
-            var Render = window.EMSWorkloadRender;
-            var label = q("[data-wl-assign-row-label]");
-            if (label) label.textContent = row.subject + " · " + row.season_label;
-            var rowIdField = q("[data-wl-assign-row-id]");
-            if (rowIdField) rowIdField.value = row.id;
-            var idField = q("[data-wl-assign-id]");
-            if (idField) idField.value = "";
-            var activitySelect = q("[data-wl-assign-activity]");
-            if (activitySelect && Render) {
-                Render.options(
-                    activitySelect,
-                    Object.keys(row.activities || {}).map(function (key) {
-                        return { key: key, label: activityLabels()[key] || key };
-                    }),
-                    {}
-                );
-                if (btn.dataset.activity) activitySelect.value = btn.dataset.activity;
-                if (window.EMSBootstrapSelect) window.EMSBootstrapSelect.refresh(activitySelect);
-            }
-            showError(q("[data-wl-assign-error]"), "");
-            renderRemaining();
-            loadTeacherPicker();
-            var instance = modal("[data-wl-assign-modal]");
-            if (instance) instance.show();
+            openAssignModal(rowById(btn.dataset.rowId), btn.dataset.activity, null);
         });
 
         EMSDelegate.on("change", "[data-wl-assign-activity]", renderRemaining);
@@ -401,20 +335,20 @@
         EMSDelegate.on("click", "[data-wl-save-assign]", function () {
             var host = root();
             if (!host) return;
-            var payload = formValues(q("[data-wl-assign-form]"));
-            window.EMSCore.fetchJSON(host.dataset.assignUrl, { method: "POST", data: payload })
-                .then(function (result) {
-                    var instance = modal("[data-wl-assign-modal]");
-                    if (instance) instance.hide();
+            write({
+                url: host.dataset.assignUrl,
+                data: forms().values(q("[data-wl-assign-form]")),
+                modal: "[data-wl-assign-modal]",
+                error: "[data-wl-assign-error]",
+                done: function (result) {
+                    hideModal("[data-wl-assign-modal]");
                     // Audit 2026-09-28 W4: müəllim dəyişikliyi cədvəldə toqquşma yaradıbsa xəbərdarlıq.
                     if (result && result.warning && window.EMSToast) {
                         window.EMSToast.show(result.warning, "warning");
                     }
                     loadRows();
-                })
-                .catch(function (err) {
-                    showError(q("[data-wl-assign-error]"), messageFor(err && err.payload));
-                });
+                },
+            });
         });
 
         EMSDelegate.on("click", "[data-wl-assign-remove]", function (event, btn) {
@@ -422,14 +356,11 @@
             if (!host) return;
             window.EMSConfirm.open({ body: gettext("Bölgü silinsin?"), danger: true }).then(function (ok) {
                 if (!ok) return;
-                window.EMSCore.fetchJSON(host.dataset.unassignUrl, {
-                    method: "POST",
+                write({
+                    url: host.dataset.unassignUrl,
                     data: { assignment_id: btn.dataset.assignmentId },
-                })
-                    .then(loadRows)
-                    .catch(function (err) {
-                        window.alert(messageFor(err && err.payload));
-                    });
+                    done: loadRows,
+                });
             });
         });
 
@@ -472,22 +403,7 @@
                 });
         });
 
-        // ── Düzəliş (amendment) ────────────────────────────────────────────
-        EMSDelegate.on("click", "[data-wl-do-amend]", function () {
-            var host = root();
-            if (!host || !STATE.task) return;
-            var payload = formValues(q("[data-wl-amend-form]"));
-            payload.task_id = STATE.task.id;
-            window.EMSCore.fetchJSON(host.dataset.amendUrl, { method: "POST", data: payload })
-                .then(function () {
-                    var instance = modal("[data-wl-amend-modal]");
-                    if (instance) instance.hide();
-                    loadRows();
-                })
-                .catch(function (err) {
-                    showError(q("[data-wl-amend-error]"), messageFor(err && err.payload));
-                });
-        });
+        // ── Düzəliş (amendment): dialoq və təkrar sorğu `workload_distribution_amend.js`-dədir ──
 
         // ── Tədris planından idxal ─────────────────────────────────────────
         EMSDelegate.on("click", "[data-wl-import-curriculum]", function () {
@@ -531,6 +447,72 @@
         });
     }
 
+    function assignmentById(row, id) {
+        if (!row || !id) return null;
+        return (row.assignments || []).filter(function (item) {
+            return item.id === id;
+        })[0] || null;
+    }
+
+    /** Bölgü modalı: yeni təyinat (`assignment=null`) və ya mövcudun redaktəsi (2026-10-15). */
+    function openAssignModal(row, activity, assignment) {
+        if (!row) return;
+        var Render = window.EMSWorkloadRender;
+        var form = q("[data-wl-assign-form]");
+        var label = q("[data-wl-assign-row-label]");
+        if (label) label.textContent = row.subject + " · " + row.season_label;
+        if (form) {
+            form.elements.row_id.value = row.id;
+            form.elements.assignment_id.value = assignment ? assignment.id : "";
+            form.elements.hours.value = assignment ? assignment.hours : 1;
+            form.elements.groups_note.value = assignment ? assignment.groups_note || "" : "";
+            form.elements.is_hourly_paid.checked = !!(assignment && assignment.is_hourly_paid);
+        }
+        var activitySelect = q("[data-wl-assign-activity]");
+        if (activitySelect && Render) {
+            Render.options(
+                activitySelect,
+                Object.keys(row.activities || {}).map(function (key) {
+                    return { key: key, label: activityLabels()[key] || key };
+                }),
+                {}
+            );
+            if (activity) activitySelect.value = activity;
+            if (window.EMSBootstrapSelect) window.EMSBootstrapSelect.refresh(activitySelect);
+        }
+        var save = q("[data-wl-save-assign]");
+        if (save) save.textContent = assignment ? gettext("Yadda saxla") : gettext("Əlavə et");
+        showError(q("[data-wl-assign-error]"), "");
+        renderRemaining();
+        loadTeacherPicker().then(function () {
+            var select = q("[data-wl-assign-teacher]");
+            if (!select || !assignment || !assignment.teacher_id) return;
+            if (forms().ensureOption) forms().ensureOption(select, assignment.teacher_id, assignment.teacher_name);
+            select.value = assignment.teacher_id;
+            if (window.EMSBootstrapSelect) window.EMSBootstrapSelect.refresh(select);
+        });
+        var instance = modal("[data-wl-assign-modal]");
+        if (instance) instance.show();
+    }
+
+    // Kiçik körpü: düzəliş / fəaliyyət / fokus əlavələri (`workload_distribution_amend.js`) əsas
+    // vəziyyəti buradan oxuyur — ikinci fetch/STATE yoxdur.
+    window.EMSWorkloadDist = {
+        state: STATE,
+        q: q,
+        root: root,
+        modal: modal,
+        rowById: rowById,
+        loadRows: loadRows,
+        showError: showError,
+        messageFor: messageFor,
+        openAssign: function (rowId, assignmentId) {
+            var row = rowById(rowId);
+            var assignment = assignmentById(row, assignmentId);
+            if (assignment) openAssignModal(row, assignment.activity, assignment);
+        },
+    };
+
     function renderRemaining() {
         var node = q("[data-wl-assign-remaining]");
         if (!node) return;
@@ -538,6 +520,10 @@
         var activity = (q("[data-wl-assign-activity]") || {}).value;
         var row = rowById(rowId);
         var info = row && row.activities ? row.activities[activity] : null;
+        var editing = assignmentById(row, (q("[data-wl-assign-id]") || {}).value);
+        if (info && editing && editing.activity === activity) {
+            info = { remaining: info.remaining + editing.hours, total: info.total };
+        }
         if (!info) {
             node.textContent = "";
             node.classList.remove("is-empty");
@@ -552,9 +538,9 @@
 
     function loadTeacherPicker() {
         var host = root();
-        if (!host) return;
+        if (!host) return Promise.resolve();
         var params = filters();
-        window.EMSCore.fetchJSON(
+        return window.EMSCore.fetchJSON(
             host.dataset.teachersUrl +
                 "?chair=" +
                 encodeURIComponent(params.chair) +
