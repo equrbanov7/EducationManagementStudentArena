@@ -230,8 +230,6 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     müəllim hələ 2 saatlıq düzəliş pəncərəsindədir; qeydlər sabah görünür."""
     from decimal import Decimal
 
-    from django.utils import timezone as _tz
-
     from apps.registrar import entry_standard, exam_eligibility, gradebook, gradebook_components, journal_extras
     from apps.registrar import student_journal_context as _jsc
     from apps.registrar.models import ComponentScore, Enrollment, LessonMark
@@ -318,14 +316,14 @@ def build_student_journal_context(request, *, organization) -> dict | None:
         return {"journal_student_section": _jsc.decorate(section)}
 
     offering = enrollment.offering
-    today = _tz.localdate()
-    # Tam şəxsi tarixçə — BU GÜN İSTİSNA (müəllimin düzəliş pəncərəsi bitməmiş).
+    # Tam şəxsi tarixçə — BU GÜN DAXİL (sahib 2026-10-15: «jurnala yazılış nəticə tələbənin kabinetində
+    # həmin vaxt görünsün, 1 gün sonra yox»). Müəllim 2 saatlıq pəncərədə düzəltsə tələbə yenisini görür.
     marks = list(
-        LessonMark.objects.filter(enrollment=enrollment, lesson__date__lt=today)
+        LessonMark.objects.filter(enrollment=enrollment)
         .select_related("lesson", "lesson__room")
         .order_by("-lesson__date", "-lesson__created_at")
     )
-    hidden_today = LessonMark.objects.filter(enrollment=enrollment, lesson__date=today).exists()
+    hidden_today = False
 
     kollokviums = []
     # Aralıq qiymətləndirmə: keçmiş dövrlərdə K1–K3, 2026/2027-dən tək Midterm (0–30; sərbəst iş açıqdırsa 0–20).

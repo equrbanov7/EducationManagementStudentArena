@@ -421,9 +421,9 @@ class StudentJournalViewTest(TestCase):
         request.user = self.student
         return public.build_student_journal_context(request, organization=self.org)
 
-    def test_today_marks_hidden_from_student(self):
+    def test_today_marks_visible_to_student_immediately(self):
         with bypass_rls():
-            # Dünənki dərs (seed) + bu günkü dərs — tələbə yalnız dünəni görür.
+            # Dünənki dərs + bu günkü dərs — 2026-10-15-dən tələbə hər ikisini DƏRHAL görür.
             past = gradebook.create_lesson(
                 offering=self.offering,
                 date=TODAY() - datetime.timedelta(days=1),
@@ -448,8 +448,8 @@ class StudentJournalViewTest(TestCase):
             self.assertIsNotNone(detail)
             dates = [m.lesson.date for m in detail["marks"]]
             self.assertIn(past.date, dates)
-            self.assertNotIn(TODAY(), dates)  # bu günün qeydi gizlidir
-            self.assertTrue(detail["hidden_today"])
+            self.assertIn(TODAY(), dates)  # bu günün qeydi dərhal görünür
+            self.assertFalse(detail["hidden_today"])
 
     def test_foreign_enrollment_rejected(self):
         with bypass_rls():

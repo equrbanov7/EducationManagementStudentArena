@@ -13,9 +13,8 @@ və s. — hamısını qaydasına qoy. Tələbə üçün aydın olsun.»  Buna g
 * status «Fənlərim» ilə EYNİ açar dəstindən (``exam_eligibility`` ailəsi) gəlir —
   iki bölmə bir fənnə fərqli rəng/etiket göstərmir;
 * «Köhnə sistemdən» nişanı legend-də izah olunur (köçürülmüş, bağlı semestr);
-* bu günün dərsinin gizlədilmə qaydası (müəllimin 2 saatlıq düzəliş pəncərəsi)
-  tələbəyə kiçik məlumat qeydi ilə deyilir — əvvəl yalnız gizli qeyd VARSA
-  bir sətir çıxırdı, qaydanın özü heç yerdə yazılmırdı.
+* 2026-10-15-dən bu günün dərs qeydləri də tələbəyə DƏRHAL görünür (sahib: «həmin vaxt
+  görünsün, 1 gün sonra yox») — əvvəlki «sabah görünəcək» qaydası götürülüb.
 """
 
 from __future__ import annotations
