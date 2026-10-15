@@ -59,9 +59,9 @@ AÇILMIR (fail-closed).
 ISSUE KODLARI (``completion.Issue.code``) — UI mətnini bu kodlara görə yazır:
 ``info.teacher_missing``, ``info.office_hours_missing``,
 ``desc.description_too_short``, ``desc.goal_too_short``,
-``out.too_few``, ``out.orphan_outcomes``,
+``out.too_few`` (sahib 2026-10-15: ``out.orphan_outcomes`` və ``week.outcome_not_linked`` ləğv edilib),
 ``week.too_few_topics``, ``week.hours_mismatch``, ``week.hours_without_topic``,
-``week.topic_without_hours``, ``week.outcome_not_linked``,
+``week.topic_without_hours``,
 ``method.too_few``, ``self.option_not_allowed``, ``self.topic_count_mismatch``,
 ``lit.primary_too_few``, ``lit.additional_too_few``.
 

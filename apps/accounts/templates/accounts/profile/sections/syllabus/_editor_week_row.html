@@ -59,7 +59,7 @@ atributu özü qoyur.{% endcomment %}
     <div class="bootstrap-single-select bootstrap-single-select--ems syl-outcomeselect">
       <select class="syl-select syl-select--sm bootstrap-single-select__native"
               data-bootstrap-select data-week="outcome" {% if se.readonly %}disabled{% endif %}
-              aria-label="{{ row.index }}. {% trans 'həftənin təlim nəticəsi' context 'accounts.syllabus' %}">
+              aria-label="{{ row.index }}. {% trans 'həftənin təlim nəticəsi' context 'accounts.syllabus' %} {% trans '(istəyə bağlı)' context 'accounts.syllabus' %}">
         <option value="">{% trans "Seçilməyib" context "accounts.syllabus" %}</option>
         {% for tag in row.outcome_choices %}
         <option value="{{ tag }}" {% if tag == row.outcome %}selected{% endif %}>{{ tag }}</option>
