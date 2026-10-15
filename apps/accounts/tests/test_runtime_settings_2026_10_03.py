@@ -96,15 +96,15 @@ class RuntimeSettingsTest(TestCase):
                 "login.account_rate.count": "40",
                 "login.account_rate.window": "60",
                 "otp.expiry_minutes": "10",
-                "journal.lesson_edit_hours": "4",
-                "journal.mark_edit_hours": "6",
+                "journal.lesson_edit_minutes": "240",
+                "journal.mark_edit_minutes": "90",
                 "ai.model": "gemini-3.5-flash-lite",
             },
         )
         self.assertEqual(_login_account_rate_limit(), "40/60m")
         self.assertEqual(get_auth_otp_expiry_seconds(), 600)
         self.assertEqual(gradebook.lesson_edit_window(), timedelta(hours=4))
-        self.assertEqual(gradebook.mark_edit_window(), timedelta(hours=6))
+        self.assertEqual(gradebook.mark_edit_window(), timedelta(minutes=90))
         self.assertEqual(preferred_model(), "gemini-3.5-flash-lite")
         self.assertEqual(resolve_chain(("gemini-3.8-flash",))[0], "gemini-3.5-flash-lite")
 
@@ -114,7 +114,7 @@ class RuntimeSettingsTest(TestCase):
         self.assertIn("otp.max_attempts", ctx.exception.errors)
 
         result = runtime_settings_admin.save_values(
-            actor=self.rim, data={"otp.max_attempts": "8", "journal.lesson_edit_hours": "2"}  # ikincisi dəyişməyib
+            actor=self.rim, data={"otp.max_attempts": "8", "journal.lesson_edit_minutes": "120"}  # ikincisi dəyişməyib
         )
         self.assertEqual([item["key"] for item in result["changed"]], ["otp.max_attempts"])
         self.assertTrue(RuntimeSetting.objects.filter(key="otp.max_attempts", value=8).exists())
@@ -126,15 +126,15 @@ class RuntimeSettingsTest(TestCase):
 
     def test_only_rim_head_sees_section_and_can_save(self):
         url = reverse("accounts:system_settings_save")
-        denied = self._client(self.dean).post(url, {"journal.lesson_edit_hours": "5"})
+        denied = self._client(self.dean).post(url, {"journal.lesson_edit_minutes": "300"})
         self.assertEqual(denied.status_code, 403)
         self.assertFalse(RuntimeSetting.objects.exists())
 
         allowed = self._client(self.rim).post(
-            url, data='{"journal.lesson_edit_hours": "5"}', content_type="application/json"
+            url, data='{"journal.lesson_edit_minutes": "300"}', content_type="application/json"
         )
         self.assertEqual(allowed.status_code, 200, allowed.content)
-        self.assertTrue(RuntimeSetting.objects.filter(key="journal.lesson_edit_hours", value=5).exists())
+        self.assertTrue(RuntimeSetting.objects.filter(key="journal.lesson_edit_minutes", value=300).exists())
 
         dean_sections = self._client(self.dean).get(reverse("accounts:profile")).context["allowed_sections"]
         rim_sections = self._client(self.rim).get(reverse("accounts:profile")).context["allowed_sections"]
@@ -157,5 +157,6 @@ class RuntimeSettingsTest(TestCase):
         with connection.cursor() as cursor:
             cursor.execute("SELECT prosrc FROM pg_proc WHERE proname = 'registrar_journal_mark_guard'")
             source = cursor.fetchone()[0]
-        self.assertIn("journal.mark_edit_hours", source)
+        self.assertIn("journal.mark_edit_minutes", source)
+        self.assertIn("journal.mark_edit_hours", source)  # köhnə açar fallback kimi (registrar 0089)
         self.assertIn("accounts_runtimesetting", source)

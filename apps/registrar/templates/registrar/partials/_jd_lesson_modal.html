@@ -54,14 +54,19 @@ varsa dərs tipi kilidlidir.
                 <div class="jd2-field">
                     <span class="jd2-field-label">{% trans "TARİX" context "registrar.journal" %}</span>
                     <span class="jd2-date-row">
-                        {# İKT Rəhbəri istənilən (keçmiş) tarixə dərs aça/dəyişə bilər — min qoyulmur. #}
+                        {# İKT Rəhbəri istənilən (keçmiş) tarixə dərs aça bilər — min qoyulmur. #}
+                        {# Müəllim üçün min = bu gün − journal.late_entry_days (servis eyni həddi yoxlayır). #}
                         <input type="date" name="lesson_date" required
-                               {% if not request.user.is_ikt_rehber %}min="{{ journal.today|date:'Y-m-d' }}"{% endif %}
+                               {% if not request.user.is_ikt_rehber %}min="{{ lesson_date_min|default:journal.today|date:'Y-m-d' }}"{% endif %}
                                value="{{ journal.today|date:'Y-m-d' }}" data-jd-lesson-date>
                         <span class="jd2-parity-badge" data-jd-parity-badge hidden></span>
                     </span>
                     {% if not request.user.is_ikt_rehber %}
+                    {% if late_entry_days %}
+                    <small class="jd-field-hint">{% blocktrans with d=late_entry_days context "registrar.journal" %}Keçmiş tarixə dərs ən çox {{ d }} gün geriyə açmaq olar.{% endblocktrans %}</small>
+                    {% else %}
                     <small class="jd-field-hint">{% trans "Keçmiş tarixə dərs açmaq olmaz." context "registrar.journal" %}</small>
+                    {% endif %}
                     {% else %}
                     <small class="jd-field-hint">{% trans "RİM rəhbəri: istənilən tarix/saat seçilə bilər." context "registrar.journal" %}</small>
                     {% endif %}
@@ -206,7 +211,7 @@ varsa dərs tipi kilidlidir.
                 <div class="jd2-corr-fields" data-jd-corr-fields hidden>
                     <p class="jd2-corr-banner">
                         <i class="fas fa-lock"></i>
-                        {% blocktrans with h=lesson_edit_hours|default:2 context "registrar.journal" %}Bu dərs kilidlənib ({{ h }} saat keçib). Tarix/tip/saat/mövzu/müəllim dəyişikliyi VƏ YA dərsin silinməsi rəsmi sənədlə (təqdimat) audit olunur.{% endblocktrans %}
+                        {% blocktrans with w=lesson_edit_window_label context "registrar.journal" %}Bu dərs kilidlənib ({{ w }} keçib). Tarix/tip/saat/mövzu/müəllim dəyişikliyi VƏ YA dərsin silinməsi rəsmi sənədlə (təqdimat) audit olunur.{% endblocktrans %}
                     </p>
                     <div class="jd2-field">
                         <span class="jd2-field-label">{% trans "DÜZƏLİŞ SƏBƏBİ" context "registrar.journal" %}</span>
@@ -228,7 +233,7 @@ varsa dərs tipi kilidlidir.
                 </div>
                 {% endif %}
                 <p class="jd-modal-note">
-                    {% blocktrans with h=lesson_edit_hours|default:2 context "registrar.journal" %}Dərs əlavə edildikdə davamiyyət cədvəlinə yeni tarix sütunu açılır və qeydlər həmin gün aparılır. Səhv açılmış dərsi {{ h }} saat içində silmək/düzəltmək olar.{% endblocktrans %}
+                    {% if late_entry_days %}{% blocktrans with w=lesson_edit_window_label d=late_entry_days context "registrar.journal" %}Dərs əlavə edildikdə davamiyyət cədvəlinə yeni tarix sütunu açılır; qeydlər dərs günü və ondan sonra ən çox {{ d }} gün ərzində aparılır. Səhv açılmış dərsi {{ w }} ərzində silmək/düzəltmək olar.{% endblocktrans %}{% else %}{% blocktrans with w=lesson_edit_window_label context "registrar.journal" %}Dərs əlavə edildikdə davamiyyət cədvəlinə yeni tarix sütunu açılır və qeydlər həmin gün aparılır. Səhv açılmış dərsi {{ w }} ərzində silmək/düzəltmək olar.{% endblocktrans %}{% endif %}
                 </p>
             </div>
             <div class="jd-modal-foot">

@@ -98679,3 +98679,124 @@ msgstr "Bis zu diesem Datum lautet der Status «Urlaubssemester»; bei Rückkehr
 msgctxt "accounts.groups"
 msgid "%%d qrupdan çıxıb (məzuniyyət / xaric)"
 msgstr "%%d haben die Gruppe verlassen (Urlaub / Exmatrikulation)"
+
+msgctxt "core.runtime_settings"
+msgid "Müəllim dərsi yaratdıqdan sonra bu qədər dəqiqə ərzində onun tarixini, növünü, mövzusunu, saatını dəyişə və ya dərsi silə bilər (120 dəqiqə = 2 saat). Sonra yalnız rəsmi düzəliş yolu."
+msgstr "Nach dem Anlegen einer Lehrveranstaltung kann die Lehrkraft innerhalb so vieler Minuten Datum, Art, Thema und Uhrzeit ändern oder sie löschen (120 Minuten = 2 Stunden). Danach nur noch über die offizielle Korrektur."
+
+msgctxt "core.runtime_settings"
+msgid "Müəllimin yazdığı q/b, i/e və bal yazıldıqdan bu qədər dəqiqə sonra donur — sonra yalnız rəsmi düzəliş yolu. Verilənlər bazası da eyni müddəti yoxlayır (120 dəqiqə = 2 saat)."
+msgstr "Von der Lehrkraft eingetragene Fehlzeiten, Anwesenheiten und Punkte werden so viele Minuten nach dem Eintrag eingefroren — danach nur noch über die offizielle Korrektur. Die Datenbank prüft dieselbe Frist (120 Minuten = 2 Stunden)."
+
+msgctxt "core.runtime_settings"
+msgid "Dərs tarixindən sonra gecikmiş yazı müddəti"
+msgstr "Frist für verspätete Einträge nach dem Unterrichtsdatum"
+
+msgctxt "core.runtime_settings"
+msgid "0 — dərs və yeni q/b, i/e, bal yalnız dərsin öz günündə yazılır. N — müəllim dərs tarixindən ən çox N gün sonra həmin tarixə dərs aça və yeni qeyd yaza bilər; müddət bitəndə yazı bağlanır. RİM rəhbərinin rəsmi düzəliş yolu bu həddə tabe deyil."
+msgstr "0 — die Lehrveranstaltung und neue Fehlzeiten, Anwesenheiten und Punkte werden nur am Unterrichtstag selbst eingetragen. N — die Lehrkraft kann bis zu N Tage nach dem Unterrichtsdatum eine Lehrveranstaltung für dieses Datum anlegen und neue Einträge vornehmen; danach ist die Eingabe geschlossen. Die offizielle Korrektur durch die Leitung des Studienbüros unterliegt dieser Grenze nicht."
+
+msgctxt "core.runtime_settings"
+msgid "Aktivləşdirmədən sonra yazı müddəti"
+msgstr "Eingabefrist nach der Aktivierung"
+
+msgctxt "core.runtime_settings"
+msgid "Yalnız «Aktivləşdir» yanılıdırsa: müəllim dərsi aktivləşdirdikdən (jurnalda açdıqdan) sonra q/b, i/e və balı bu qədər dəqiqə ərzində yazmalıdır; sonra həmin dərsə yeni qeyd yazılmır. Əvvəlcədən açılmış dərsdə müddət dərsin başlama saatından sayılır."
+msgstr "Nur wenn «Aktivieren» eingeschaltet ist: Nach dem Aktivieren (Öffnen) der Lehrveranstaltung im Journal muss die Lehrkraft Fehlzeiten, Anwesenheiten und Punkte innerhalb so vieler Minuten eintragen; danach sind für diese Lehrveranstaltung keine neuen Einträge möglich. Bei einer im Voraus angelegten Lehrveranstaltung zählt die Frist ab Beginn der Lehrveranstaltung."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "%(n)s saat"
+msgstr "%(n)s Std."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "%(h)s saat %(m)s dəqiqə"
+msgstr "%(h)s Std. %(m)s Min."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "%(n)s dəqiqə"
+msgstr "%(n)s Min."
+
+msgctxt "registrar.journal_timing"
+msgid "Keçmiş tarixə dərs əlavə etmək olmaz."
+msgstr "Für ein vergangenes Datum kann keine Lehrveranstaltung angelegt werden."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Dərs tarixi ən çox %(d)s gün geriyə ola bilər — ən erkən %(date)s. Daha köhnə tarix üçün RİM-ə müraciət edin."
+msgstr "Das Unterrichtsdatum darf höchstens %(d)s Tag(e) zurückliegen — frühestens %(date)s. Für ein älteres Datum wenden Sie sich an das Studienbüro."
+
+msgctxt "registrar.journal_timing"
+msgid "Gələcək tarixli dərsə qeyd hələ yazıla bilməz."
+msgstr "Für eine Lehrveranstaltung mit künftigem Datum können noch keine Einträge vorgenommen werden."
+
+msgctxt "registrar.journal_timing"
+msgid "Yeni qeyd yalnız dərsin öz günündə yazılır — keçmiş dərsə yazmaq olmaz."
+msgstr "Neue Einträge sind nur am Unterrichtstag selbst möglich — eine vergangene Lehrveranstaltung kann nicht nachgetragen werden."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Dərs tarixindən %(d)s gündən çox keçib — %(date)s tarixli dərsə yeni qeyd yazmaq olmaz."
+msgstr "Seit dem Unterrichtsdatum sind mehr als %(d)s Tag(e) vergangen — für die Lehrveranstaltung vom %(date)s sind keine neuen Einträge möglich."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Dərs aktivləşdiriləndən %(w)s keçib — q/b, i/e və bal yalnız aktivləşdirmədən sonrakı %(w)s ərzində yazılır."
+msgstr "Seit der Aktivierung der Lehrveranstaltung sind %(w)s vergangen — Fehlzeiten, Anwesenheiten und Punkte werden nur innerhalb von %(w)s nach der Aktivierung eingetragen."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Redaktə / sil (pəncərə: %(w)s)"
+msgstr "Bearbeiten / löschen (Frist: %(w)s)"
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Davamiyyət dərs günü və ondan sonra ən çox %(d)s gün ərzində qeyd edilə bilər · yazılmış qeyd %(w)s sonra kilidlənir — düzəliş üçün Tyutor xidmətinə yazılı müraciət edilir."
+msgstr "Die Anwesenheit kann am Unterrichtstag und bis zu %(d)s Tag(e) danach erfasst werden · ein Eintrag wird nach %(w)s gesperrt — für eine Korrektur ist ein schriftlicher Antrag beim Tutorendienst nötig."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Davamiyyət yalnız dərs günü qeyd edilə bilər · yazılmış qeyd %(w)s sonra kilidlənir — düzəliş üçün Tyutor xidmətinə yazılı müraciət edilir."
+msgstr "Die Anwesenheit kann nur am Unterrichtstag erfasst werden · ein Eintrag wird nach %(w)s gesperrt — für eine Korrektur ist ein schriftlicher Antrag beim Tutorendienst nötig."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "aktivləşdirilmiş dərsə qeydlər aktivləşdirmədən sonra %(a)s ərzində yazılır."
+msgstr "Einträge für eine aktivierte Lehrveranstaltung erfolgen innerhalb von %(a)s nach der Aktivierung."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Keçmiş tarixə dərs ən çox %(d)s gün geriyə açmaq olar."
+msgstr "Eine Lehrveranstaltung kann höchstens %(d)s Tag(e) rückwirkend angelegt werden."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Bu dərs kilidlənib (%(w)s keçib). Tarix/tip/saat/mövzu/müəllim dəyişikliyi VƏ YA dərsin silinməsi rəsmi sənədlə (təqdimat) audit olunur."
+msgstr "Diese Lehrveranstaltung ist gesperrt (%(w)s vergangen). Änderungen an Datum/Art/Uhrzeit/Thema/Lehrkraft ODER das Löschen werden mit einem offiziellen Dokument (Antrag) protokolliert."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Dərs əlavə edildikdə davamiyyət cədvəlinə yeni tarix sütunu açılır; qeydlər dərs günü və ondan sonra ən çox %(d)s gün ərzində aparılır. Səhv açılmış dərsi %(w)s ərzində silmək/düzəltmək olar."
+msgstr "Beim Hinzufügen einer Lehrveranstaltung wird in der Anwesenheitstabelle eine neue Datumsspalte geöffnet; Einträge erfolgen am Unterrichtstag und bis zu %(d)s Tag(e) danach. Eine versehentlich angelegte Lehrveranstaltung kann innerhalb von %(w)s gelöscht/korrigiert werden."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Dərs əlavə edildikdə davamiyyət cədvəlinə yeni tarix sütunu açılır və qeydlər həmin gün aparılır. Səhv açılmış dərsi %(w)s ərzində silmək/düzəltmək olar."
+msgstr "Beim Hinzufügen einer Lehrveranstaltung wird in der Anwesenheitstabelle eine neue Datumsspalte geöffnet, und die Einträge erfolgen an diesem Tag. Eine versehentlich angelegte Lehrveranstaltung kann innerhalb von %(w)s gelöscht/korrigiert werden."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Redaktə (pəncərə: %(w)s)"
+msgstr "Bearbeiten (Frist: %(w)s)"
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Redaktə pəncərəsi (%(w)s) bağlanıb"
+msgstr "Die Bearbeitungsfrist (%(w)s) ist abgelaufen"
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Kurs işi balı yekun cədvəldə ayrıca sütunda göstərilir. Yazılan qeyd %(w)s sonra kilidlənir."
+msgstr "Die Punktzahl der Kursarbeit wird in einer eigenen Spalte der Abschlusstabelle angezeigt. Ein Eintrag wird nach %(w)s gesperrt."

@@ -82,7 +82,10 @@ def describe() -> list:
     }
     groups = []
     for group_key, group_label in rs.GROUPS:
-        fields = [_field(spec, stored, meta) for spec in rs.SPECS.values() if spec.group == group_key]
+        # Gizli (köhnəlmiş) açarlar göstərilmir — bax ``Spec.hidden``.
+        fields = [
+            _field(spec, stored, meta) for spec in rs.SPECS.values() if spec.group == group_key and not spec.hidden
+        ]
         if fields:
             groups.append({"key": group_key, "label": str(group_label), "fields": fields})
     return groups
@@ -151,6 +154,8 @@ def save_values(*, actor, data, request=None) -> dict:
 
     errors, planned = {}, {}
     for spec in rs.SPECS.values():
+        if spec.hidden:
+            continue  # köhnəlmiş açar formadan yazılmır (bazadakı dəyər yalnız fallbackdır)
         incoming = _incoming_value(spec, data)
         if incoming is None or incoming == _current_text(spec):
             # Forma bütün sahələri göndərir — DƏYİŞMƏYƏN sahə yoxlanmır (məs. mühitin hədd xaricindəki defoltu).
@@ -179,6 +184,11 @@ def save_values(*, actor, data, request=None) -> dict:
     changed = []
     with transaction.atomic():
         existing = {row.key: row for row in RuntimeSetting.objects.select_for_update().filter(key__in=planned)}
+        # Yeni açar yazılanda / sıfırlananda onun əvəz etdiyi köhnə sətir silinir — sıfırlanmış dəqiqə
+        # pəncərəsinin arxasından köhnə saat dəyəri fallback kimi «dirilməsin» (2026-10-15).
+        legacy = [rs.SPECS[key].legacy_key for key in planned if rs.SPECS[key].legacy_key]
+        if legacy:
+            RuntimeSetting.objects.filter(key__in=legacy).delete()
         for key, value in planned.items():
             spec = rs.SPECS[key]
             old = rs.coerce(spec, existing[key].value) if key in existing else None

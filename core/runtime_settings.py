@@ -47,6 +47,12 @@ class Spec:
     min: int | float = 0
     max: int | float = 0
     choices: Callable[[], list] | None = field(default=None, compare=False)
+    #: Köhnəlmiş açar: «Sistem tənzimləmələri»ndə göstərilmir və saxlanmır, amma bazadakı dəyəri
+    #: oxu nöqtəsində FALLBACK kimi tanınır (məs. ``journal.*_hours`` → ``journal.*_minutes``, 2026-10-15).
+    hidden: bool = False
+    #: Bu açarın əvəz etdiyi köhnə açar — yeni dəyər yazılanda / sıfırlananda köhnə sətir silinir
+    #: (sıfırlanmış dəqiqə açarının arxasından köhnə saat dəyəri «dirilməsin»).
+    legacy_key: str = ""
 
 
 def _ai_model_choices() -> list:
@@ -232,17 +238,53 @@ SPECS: dict[str, Spec] = {
             pgettext_lazy(_CTX, "İstifadəçi bu qədər saat heç nə etməsə, sistemdən çıxarılır (sessiya ən çox 24 saat yaşayır)."),
             pgettext_lazy(_CTX, "saat"), min=1, max=24,
         ),
+        # 2026-10-15 (sahib «dəqiqə olaraq settings-ə əlavə et»): pəncərələr DƏQİQƏ ilə. Köhnə ``*_hours`` açarları
+        # gizlidir — bazada qalan dəyər fallback kimi oxunur (registrar 0089 onları dəqiqəyə köçürür; trigger da
+        # əvvəl dəqiqə, sonra saat açarını oxuyur). Oxu nöqtəsi YALNIZ ``apps.registrar.journal_edit_windows``.
+        Spec(
+            "journal.lesson_edit_minutes", "journal", "int", _setting("JOURNAL_LESSON_EDIT_MINUTES", 120),
+            pgettext_lazy(_CTX, "Dərs sətrini (tarix, mövzu, saat) düzəltmə / silmə müddəti"),
+            pgettext_lazy(
+                _CTX,
+                "Müəllim dərsi yaratdıqdan sonra bu qədər dəqiqə ərzində onun tarixini, növünü, mövzusunu, saatını "
+                "dəyişə və ya dərsi silə bilər (120 dəqiqə = 2 saat). Sonra yalnız rəsmi düzəliş yolu.",
+            ),
+            pgettext_lazy(_CTX, "dəqiqə"), min=1, max=4320, legacy_key="journal.lesson_edit_hours",
+        ),
+        Spec(
+            "journal.mark_edit_minutes", "journal", "int", _setting("JOURNAL_MARK_EDIT_MINUTES", 120),
+            pgettext_lazy(_CTX, "q/b, i/e və balı dəyişmə müddəti"),
+            pgettext_lazy(
+                _CTX,
+                "Müəllimin yazdığı q/b, i/e və bal yazıldıqdan bu qədər dəqiqə sonra donur — sonra yalnız rəsmi "
+                "düzəliş yolu. Verilənlər bazası da eyni müddəti yoxlayır (120 dəqiqə = 2 saat).",
+            ),
+            pgettext_lazy(_CTX, "dəqiqə"), min=1, max=4320, legacy_key="journal.mark_edit_hours",
+        ),
+        Spec(
+            "journal.late_entry_days", "journal", "int", _setting("JOURNAL_LATE_ENTRY_DAYS", 0),
+            pgettext_lazy(_CTX, "Dərs tarixindən sonra gecikmiş yazı müddəti"),
+            pgettext_lazy(
+                _CTX,
+                "0 — dərs və yeni q/b, i/e, bal yalnız dərsin öz günündə yazılır. N — müəllim dərs tarixindən ən "
+                "çox N gün sonra həmin tarixə dərs aça və yeni qeyd yaza bilər; müddət bitəndə yazı bağlanır. "
+                "RİM rəhbərinin rəsmi düzəliş yolu bu həddə tabe deyil.",
+            ),
+            pgettext_lazy(_CTX, "gün"), min=0, max=30,
+        ),
+        # ⚠️ Köhnə saat açarları — gizli (forma göstərmir/saxlamır), bazadakı dəyər fallbackdır. Adı DƏYİŞMƏYİN:
+        # trigger (registrar 0084/0089) ``journal.mark_edit_hours``-u da oxuyur.
         Spec(
             "journal.lesson_edit_hours", "journal", "int", lambda: 2,
             pgettext_lazy(_CTX, "Dərs sətrini (tarix, mövzu, saat) düzəltmə / silmə müddəti"),
             pgettext_lazy(_CTX, "Müəllim dərsi yaratdıqdan sonra bu qədər saat ərzində dəyişə bilər."),
-            pgettext_lazy(_CTX, "saat"), min=1, max=72,
+            pgettext_lazy(_CTX, "saat"), min=1, max=72, hidden=True,
         ),
         Spec(
             "journal.mark_edit_hours", "journal", "int", lambda: 2,
             pgettext_lazy(_CTX, "q/b, i/e və balı dəyişmə müddəti"),
             pgettext_lazy(_CTX, "Yazılmış qeyd bu qədər saatdan sonra donur (sonra yalnız rəsmi düzəliş yolu)."),
-            pgettext_lazy(_CTX, "saat"), min=1, max=72,
+            pgettext_lazy(_CTX, "saat"), min=1, max=72, hidden=True,
         ),
         Spec(
             "journal.lesson_activation", "journal", "bool", _setting("JOURNAL_LESSON_ACTIVATION", False),
@@ -252,6 +294,17 @@ SPECS: dict[str, Spec] = {
                 "Söndürülüdə jurnalda «Aktivləşdir» düyməsi yoxdur — müəllim «Yeni dərs» ilə dərsi özü yaradır, "
                 "forma dərs cədvəli və son dərsə görə əvvəlcədən doldurulur.",
             ),
+        ),
+        Spec(
+            "journal.activation_write_minutes", "journal", "int", _setting("JOURNAL_ACTIVATION_WRITE_MINUTES", 120),
+            pgettext_lazy(_CTX, "Aktivləşdirmədən sonra yazı müddəti"),
+            pgettext_lazy(
+                _CTX,
+                "Yalnız «Aktivləşdir» yanılıdırsa: müəllim dərsi aktivləşdirdikdən (jurnalda açdıqdan) sonra q/b, "
+                "i/e və balı bu qədər dəqiqə ərzində yazmalıdır; sonra həmin dərsə yeni qeyd yazılmır. Əvvəlcədən "
+                "açılmış dərsdə müddət dərsin başlama saatından sayılır.",
+            ),
+            pgettext_lazy(_CTX, "dəqiqə"), min=5, max=1440,
         ),
         Spec(
             "journal.hygiene_prevention", "journal", "bool", _setting("JOURNAL_HYGIENE_PREVENTION", True),
