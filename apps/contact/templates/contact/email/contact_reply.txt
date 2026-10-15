@@ -1,0 +1,13 @@
+{% extends "emails/base_email.txt" %}{% load i18n %}
+{% block heading %}{% trans "Mesajınıza cavab" %}{% endblock %}
+{% block content %}{% trans "Salam" %}, {{ message.name }}!
+
+{% blocktrans %}{{ brand }} saytındakı mesajınız üçün təşəkkür edirik. Aşağıda cavabımızı tapa bilərsiniz.{% endblocktrans %}
+
+{{ reply_body }}
+
+{% trans "Sizin orijinal mesajınız:" %}
+{{ message.message }}
+{% if from_email %}
+{{ brand }} · {{ from_email }}{% endif %}{% endblock %}
+{% block footer_note %}{% trans "Bu mesaja birbaşa cavab verə bilərsiniz — yenidən komandamıza gələcək." %}{% endblock %}

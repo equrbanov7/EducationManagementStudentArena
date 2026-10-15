@@ -1,0 +1,16 @@
+{% extends "emails/base_email.txt" %}{% load i18n %}
+{% block heading %}{% trans "Yeni sınaq imtahanı sorğusu" %}{% endblock %}
+{% block content %}{% trans "Tələbə pulsuz sınaq imtahanı üçün sual faylı göndərdi. Fayl saxlanıldı və admin panelindən baxa bilərsiniz." %}
+
+{% trans "Ad Soyad" %}: {{ request_obj.full_name }}
+{% trans "Email" %}: {{ request_obj.email }}
+{% trans "Fənnin adı" %}: {{ request_obj.subject_name }}
+{% trans "Fayl" %}: {{ request_obj.original_filename|default:"—" }}{% if file_download_url %} — {{ file_download_url }}{% endif %}
+{% trans "Tarix" %}: {{ request_obj.created_at|date:"d.m.Y H:i" }}
+{% if request_obj.note %}
+{% trans "Qeyd" %}:
+{{ request_obj.note }}
+{% endif %}{% if profile_detail_url %}
+{% trans "Sorğuya bax və faylı yüklə" %}: {{ profile_detail_url }}
+{% trans "Suallar əlavə olunduqda təsdiq göndər" %}: {{ reply_url }}{% endif %}{% endblock %}
+{% block footer_note %}{% trans "Avtomatik göndərilmiş bildiriş" %}{% endblock %}

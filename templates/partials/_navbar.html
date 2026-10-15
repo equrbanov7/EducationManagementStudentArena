@@ -32,7 +32,6 @@
             {% endcomment %}
             <a href="{% if university_mode and request.user.is_authenticated %}{% url 'accounts:profile' %}{% else %}{{ home_url }}{% endif %}"
                class="blog-header__logo" aria-label="{{ site_brand_name }}">
-                {% if university_mode %}
                 <span class="blog-header__logo-mark" aria-hidden="true">
                     <img src="{% static 'brand/wcu-official-mark.png' %}?v=20261001"
                          alt=""
@@ -42,14 +41,6 @@
                          decoding="async">
                 </span>
                 <span class="blog-header__logo-text">{{ site_brand_name }}</span>
-                {% else %}
-                <img src="{% static 'brand/logo-horizontal.png' %}"
-                     alt="{{ site_brand_name }}"
-                     class="blog-header__logo-img"
-                     width="160" height="44"
-                     loading="eager"
-                     decoding="async">
-                {% endif %}
             </a>
 
             {# --- Desktop primary navigation --- #}

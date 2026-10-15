@@ -12,8 +12,8 @@ Any view may override individual values by adding ``seo_*`` keys to its own
 template context, e.g.::
 
     return render(request, "blog/about.html", {
-        "seo_title": "Haqqımızda — EMSArena",
-        "seo_description": "EMSArena komandası və missiyamız.",
+        "seo_title": "Haqqımızda — Qərbi Kaspi Universiteti",
+        "seo_description": "Universitet və missiyamız.",
     })
 
 The processor merges those overrides on top of the site-wide defaults, so a
@@ -152,7 +152,7 @@ def seo_context(request):
         "twitter_card": "summary_large_image",
         "theme_color": "#0f766e",
         "hreflang": hreflang,
-        "logo_url": _abs(static("brand/logo-square.png")),
+        "logo_url": _abs(static("brand/favicon-512x512.png")),
         "social_profiles": SOCIAL_PROFILES,
         # Per-page JSON-LD breadcrumb: list of (name, absolute_url) tuples.
         "breadcrumbs": [],

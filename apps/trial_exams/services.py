@@ -23,10 +23,9 @@ import threading
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils.html import strip_tags
 from django.utils.translation import gettext as _
 
-from core.mailing import send_email_with_fallback
+from core.mailing import plain_text_body, send_email_with_fallback
 from core.upload_security import randomize_uploaded_filename
 from core.utils import build_absolute_url
 
@@ -105,7 +104,7 @@ def _send_owner_notification(request_obj: TrialExamRequest) -> bool:
         "file_download_url": _file_download_url(request_obj),
     }
     html_body = render_to_string("trial_exams/email/trial_notification.html", context)
-    text_body = strip_tags(html_body)
+    text_body = plain_text_body("trial_exams/email/trial_notification.html", context, html_body)
 
     from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@emsarena.com")
     ok, _reason = send_email_with_fallback(
@@ -189,7 +188,7 @@ def _send_reply_email(request_obj: TrialExamRequest, reply_body: str, reply_from
         "brand": brand,
     }
     html_body = render_to_string("trial_exams/email/trial_reply.html", context)
-    text_body = strip_tags(html_body)
+    text_body = plain_text_body("trial_exams/email/trial_reply.html", context, html_body)
 
     return send_email_with_fallback(
         subject=subject,

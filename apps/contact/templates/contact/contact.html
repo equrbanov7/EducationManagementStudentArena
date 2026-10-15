@@ -34,8 +34,8 @@
             <div class="ems-contact__info-card">
                 <span class="ems-contact__info-icon"><i class="fas fa-envelope-open-text" aria-hidden="true"></i></span>
                 <h3 class="ems-contact__info-title">{% trans "Email" %}</h3>
-                <a href="mailto:info@emsarena.com" class="ems-contact__info-link">info@emsarena.com</a>
-                <a href="mailto:support@emsarena.com" class="ems-contact__info-link">support@emsarena.com</a>
+                {% if contact_public_email %}<a href="mailto:{{ contact_public_email }}" class="ems-contact__info-link">{{ contact_public_email }}</a>{% endif %}
+                {% if contact_support_email %}<a href="mailto:{{ contact_support_email }}" class="ems-contact__info-link">{{ contact_support_email }}</a>{% endif %}
                 <p class="ems-contact__info-hint">{% trans "info – ümumi, support – texniki dəstək" %}</p>
             </div>
 
@@ -46,33 +46,22 @@
                 <p class="ems-contact__info-hint">{% trans "Tez cavab üçün ən sürətli kanal" %}</p>
             </div>
 
-            <div class="ems-contact__info-card">
-                <span class="ems-contact__info-icon"><i class="fab fa-instagram" aria-hidden="true"></i></span>
-                <h3 class="ems-contact__info-title">Instagram</h3>
-                <a href="https://instagram.com/emsarena_edtech" target="_blank" rel="noopener noreferrer" class="ems-contact__info-link">@emsarena_edtech</a>
-                <p class="ems-contact__info-hint">{% trans "Xəbərlər və yeniliklər" %}</p>
-            </div>
-
             <div class="ems-contact__info-card ems-contact__info-card--social">
                 <h3 class="ems-contact__info-title">{% trans "Bizi izləyin" %}</h3>
                 <div class="ems-contact__socials">
-                    <a href="https://instagram.com/emsarena_edtech"
-                       target="_blank" rel="noopener noreferrer"
-                       class="ems-contact__social"
-                       aria-label="Instagram">
-                        <i class="fab fa-instagram" aria-hidden="true"></i>
-                    </a>
                     <a href="https://wa.me/994000000000"
                        target="_blank" rel="noopener noreferrer"
                        class="ems-contact__social"
                        aria-label="WhatsApp">
                         <i class="fab fa-whatsapp" aria-hidden="true"></i>
                     </a>
-                    <a href="mailto:info@emsarena.com"
+                    {% if contact_public_email %}
+                    <a href="mailto:{{ contact_public_email }}"
                        class="ems-contact__social"
                        aria-label="Email">
                         <i class="fas fa-envelope" aria-hidden="true"></i>
                     </a>
+                    {% endif %}
                 </div>
             </div>
         </aside>

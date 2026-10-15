@@ -1,0 +1,98 @@
+{% load i18n email_layout %}{% get_current_language as EMAIL_LANG %}{% email_chrome as chrome %}{% comment %}
+Bütün HTML məktublarının vahid çərçivəsi (2026-10-15). Bloklar:
+  title, preheader (gizli önbaxış mətni), heading (kartın başlığı), content, footer_note.
+Poçt klientləri xarici CSS yükləmir: stillər inline + cədvəl düzümüdür; <style> yalnız
+mobil və qaranlıq rejim üçündür (dəstəkləməyən klientdə inline rənglər qalır).
+Bu fayl check_inline_assets.py-nin e-poçt istisnasındadır (templates/emails/).
+Mətn variantı: templates/emails/base_email.txt.
+{% endcomment %}<!DOCTYPE html>
+<html lang="{{ EMAIL_LANG|default:'az' }}" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+<title>{% block title %}{{ brand|default:chrome.brand }}{% endblock %}</title>
+<style>
+  body { margin:0 !important; padding:0 !important; width:100% !important; }
+  table, td { border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; }
+  img { border:0; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic; }
+  a { text-decoration:underline; }
+  .em-btn a { text-decoration:none !important; }
+  @media only screen and (max-width:620px) {
+    .em-outer { padding:12px 8px !important; }
+    .em-pad { padding-left:20px !important; padding-right:20px !important; }
+    .em-card { padding-top:24px !important; padding-bottom:24px !important; }
+    .em-h1 { font-size:21px !important; }
+    .em-code { font-size:28px !important; letter-spacing:6px !important; padding-left:6px !important; }
+    .em-btn { width:100% !important; }
+    .em-btn a { display:block !important; }
+    .em-label { display:block !important; width:auto !important; padding-bottom:0 !important; border-bottom:0 !important; }
+    .em-value { display:block !important; width:auto !important; padding-top:2px !important; }
+  }
+  @media (prefers-color-scheme: dark) {
+    .em-body, .em-bg { background-color:#0b1220 !important; }
+    .em-card { background-color:#111827 !important; border-color:#1f2937 !important; }
+    .em-h1, .em-strong { color:#f1f5f9 !important; }
+    .em-text { color:#d1d5db !important; }
+    .em-muted, .em-footer, .em-label { color:#9ca3af !important; }
+    .em-value { color:#e5e7eb !important; }
+    .em-row { border-color:#1f2937 !important; }
+    .em-codebox, .em-panel { background-color:#0f172a !important; border-color:#475569 !important; }
+    .em-code { color:#f8fafc !important; }
+    .em-panel-text { color:#e2e8f0 !important; }
+    .em-link { color:#93c5fd !important; }
+  }
+  [data-ogsc] .em-h1, [data-ogsc] .em-strong { color:#f1f5f9 !important; }
+  [data-ogsc] .em-text, [data-ogsc] .em-panel-text, [data-ogsc] .em-value { color:#e5e7eb !important; }
+  [data-ogsc] .em-muted, [data-ogsc] .em-footer, [data-ogsc] .em-label { color:#9ca3af !important; }
+  [data-ogsc] .em-code { color:#f8fafc !important; }
+  [data-ogsc] .em-link { color:#93c5fd !important; }
+</style>
+<!--[if mso]><style>table, td, div, p, a, h1 { font-family:Arial, sans-serif !important; }</style><![endif]-->
+</head>
+<body class="em-body" style="margin:0;padding:0;width:100%;background-color:#eef2f7;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+<div class="em-preheader" style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;color:#eef2f7;">{% block preheader %}{% endblock %}&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;</div>
+<table role="presentation" class="em-bg" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#eef2f7" style="width:100%;background-color:#eef2f7;">
+<tr>
+<td class="em-outer" align="center" style="padding:28px 12px;">
+<!--[if mso]><table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" align="center"><tr><td><![endif]-->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:600px;margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+<tr>
+<td class="em-pad" bgcolor="#1e3a8a" style="background-color:#1e3a8a;padding:20px 32px;border-radius:12px 12px 0 0;">
+<table role="presentation" cellspacing="0" cellpadding="0" border="0">
+<tr>
+{% if chrome.logo_url %}<td width="48" valign="middle" style="width:48px;padding-right:14px;"><img src="{{ chrome.logo_url }}" width="40" height="40" alt="" style="display:block;width:40px;height:40px;border-radius:8px;background-color:#ffffff;"></td>{% endif %}
+<td valign="middle">
+<div style="font-size:18px;line-height:24px;font-weight:700;color:#ffffff;">{{ brand|default:chrome.brand }}</div>
+<div style="font-size:12px;line-height:18px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#bfdbfe;">{{ chrome.product }}</div>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td height="4" bgcolor="#0f766e" style="height:4px;line-height:4px;font-size:4px;background-color:#0f766e;">&nbsp;</td>
+</tr>
+<tr>
+<td class="em-card em-pad" bgcolor="#ffffff" style="background-color:#ffffff;padding:32px;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 12px 12px;">
+<h1 class="em-h1" style="margin:0 0 20px;font-size:24px;line-height:1.3;font-weight:700;color:#0f172a;">{% block heading %}{% endblock %}</h1>
+{% block content %}{% endblock %}
+</td>
+</tr>
+<tr>
+<td class="em-pad em-footer" align="center" style="padding:20px 32px 8px;font-size:12px;line-height:1.6;color:#475569;">
+<p class="em-footer" style="margin:0 0 6px;color:#475569;">{% block footer_note %}{% trans "Bu məktub avtomatik göndərilib, cavab yazmayın." context "email.layout" %}{% endblock %}</p>
+{% if chrome.support_email %}<p class="em-footer" style="margin:0 0 6px;color:#475569;">{% trans "Sualınız varsa, yazın:" context "email.layout" %} <a class="em-link" href="mailto:{{ chrome.support_email }}" style="color:#1d4ed8;text-decoration:underline;">{{ chrome.support_email }}</a></p>{% endif %}
+<p class="em-footer" style="margin:0;color:#475569;">&copy; {% now "Y" %} {{ brand|default:chrome.brand }} &middot; {{ chrome.product }}</p>
+</td>
+</tr>
+</table>
+<!--[if mso]></td></tr></table><![endif]-->
+</td>
+</tr>
+</table>
+</body>
+</html>

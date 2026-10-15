@@ -48,6 +48,7 @@ from core.rate_limit import clear_rate_limit, record_rate_limit_hit
 from core.utils import get_client_ip
 
 from ..identity import login_rate_identity, user_access_is_login_blocked
+from ..password_policy import min_length as password_min_length
 from .rim.policy import (
     RimAccessError,
     RimActor,
@@ -282,7 +283,7 @@ def generate_temporary_password(length: int = TEMP_PASSWORD_LENGTH) -> str:
 def _valid_password(target) -> str:
     """Layihənin parol validatorlarından keçən parol (nadir ilişmədə təkrar cəhd)."""
     for _attempt in range(_MAX_GENERATION_ATTEMPTS):
-        candidate = generate_temporary_password()
+        candidate = generate_temporary_password(max(TEMP_PASSWORD_LENGTH, password_min_length()))
         try:
             validate_password(candidate, user=target)
         except ValidationError:  # noqa: PERF203 — nadir hal

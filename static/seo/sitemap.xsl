@@ -7,7 +7,7 @@
     <html lang="az">
       <head>
         <meta charset="UTF-8"/>
-        <title>EMSArena – Sayt xəritəsi</title>
+        <title>Qərbi Kaspi Universiteti – Sayt xəritəsi</title>
         <meta name="robots" content="noindex"/>
         <style>
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
@@ -32,7 +32,7 @@
       </head>
       <body>
         <div class="wrap">
-          <h1>EMSArena – Sayt xəritəsi</h1>
+          <h1>Qərbi Kaspi Universiteti – Sayt xəritəsi</h1>
           <p>Bu səhifə axtarış sistemləri üçündür. Cəmi <strong><xsl:value-of select="count(sm:urlset/sm:url)"/></strong> URL siyahıda.</p>
           <table>
             <thead>

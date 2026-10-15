@@ -1,0 +1,13 @@
+{% extends "emails/base_email.txt" %}{% load i18n %}
+{% block heading %}{% trans "Sınaq imtahanınız hazırdır" %}{% endblock %}
+{% block content %}{% trans "Salam" %}, {{ request_obj.full_name }}!
+
+{% trans "Göndərdiyiniz suallar sistemə əlavə olundu" %}: {{ request_obj.subject_name }}. {% trans "Aşağıdakı məlumatı oxuyun." %}
+
+{{ reply_body }}
+
+{% trans "İmtahan tamamilə pulsuz və limitsizdir — istədiyiniz qədər təkrar verə bilərsiniz." %}
+{% trans "Hesabınıza daxil olub “İmtahanlar” bölməsindən başlaya bilərsiniz." %}
+{% if from_email %}
+{{ brand }} · {{ from_email }}{% endif %}{% endblock %}
+{% block footer_note %}{% trans "Bu mesaja birbaşa cavab verə bilərsiniz — yenidən komandamıza gələcək." %}{% endblock %}

@@ -168,7 +168,7 @@ class CustomPasswordResetForm(PasswordResetForm):
                 request=request,
             )
             context = {
-                "brand": getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena",
+                "brand": getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti",
                 "email": user.email,
                 "user": user,
                 "uid": uid,

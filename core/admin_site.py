@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 
 # White-label admin chrome: derived from the configured institution brand so
 # the admin header/title carry the deployment's name, not the product name.
-_ADMIN_BRAND = getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena"
+_ADMIN_BRAND = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
 
 
 class EMSArenaAdminSite(admin.AdminSite):

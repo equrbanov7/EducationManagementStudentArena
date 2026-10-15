@@ -71,7 +71,7 @@ def subscribe_page(request):
                         "email_templates/welcome_email.html",
                         {
                             "email": email,
-                            "brand": getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena",
+                            "brand": getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti",
                         },
                     )
 

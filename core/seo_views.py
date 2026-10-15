@@ -1,6 +1,6 @@
 # core/seo_views.py
 """
-SEO infrastructure views for EMSArena.
+SEO infrastructure views (root brand assets, robots.txt, sitemap.xml).
 
 Responsibilities
 ----------------
@@ -61,20 +61,17 @@ ROOT_ASSET_MAP = {
     "favicon-192x192.png": "brand/favicon-192x192.png",
     "favicon-512x512.png": "brand/favicon-512x512.png",
     "apple-touch-icon.png": "brand/apple-touch-icon.png",
-    # Horizontal logo (mark + EMSArena wordmark).  PNG, transparent bg.
-    "logo.png": "brand/logo.png",
-    "logo-horizontal.png": "brand/logo-horizontal.png",
-    # Stacked variant (mark above wordmark) — used in hero / about visuals.
-    "logo-stacked.png": "brand/logo-stacked.png",
-    # Mark only (square icon, no wordmark) — favicons, app icons, avatars.
-    "logo-mark.png": "brand/logo-mark.png",
-    "logo-square.png": "brand/logo-square.png",
-    # Light (white-tinted) variants for dark backgrounds — footer,
-    # brand-coloured hero banners, etc.  Same artwork, alpha-preserving
-    # white pixels so the wordmark stays readable.
-    "logo-horizontal-light.png": "brand/logo-horizontal-light.png",
-    "logo-stacked-light.png": "brand/logo-stacked-light.png",
-    "logo-mark-light.png": "brand/logo-mark-light.png",
+    # Loqo ünvanları (köhnə kraulerlər/keşlər üçün saxlanılır) — sahib 2026-10-15:
+    # köhnə məhsul adı/söz-nişanı heç yerdə görünməməlidir, ona görə hamısı
+    # universitetin RƏSMİ emblemini verir (navbar/e-poçtla eyni fayllar).
+    "logo.png": "brand/wcu-official-mark.png",
+    "logo-horizontal.png": "brand/wcu-official-mark.png",
+    "logo-stacked.png": "brand/wcu-official-mark.png",
+    "logo-mark.png": "brand/favicon-512x512.png",
+    "logo-square.png": "brand/favicon-512x512.png",
+    "logo-horizontal-light.png": "brand/wcu-official-mark.png",
+    "logo-stacked-light.png": "brand/wcu-official-mark.png",
+    "logo-mark-light.png": "brand/favicon-512x512.png",
     "og-image.jpg": "brand/og-image.jpg",
 }
 
@@ -119,7 +116,7 @@ def site_webmanifest(request):
 
     # White-label PWA name: driven by the configured institution brand so the
     # installed app carries the deployment's name, not the product name.
-    brand = getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena"
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
     brand_short = getattr(settings, "SITE_BRAND_SHORT", "") or brand
     manifest = {
         "name": brand,
