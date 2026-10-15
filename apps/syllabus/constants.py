@@ -133,7 +133,9 @@ MAX_WEEK_ROWS = 40
 MIN_DESCRIPTION_CHARS = 120
 MIN_GOAL_CHARS = 60
 MIN_OUTCOME_CHARS = 15
-MIN_OUTCOMES = 3
+#: Sahib 2026-10-15: sillabus üzrə YALNIZ 1 təlim nəticəsi məcburidir (əvvəl 3); həftə sətrinin
+#: nəticəyə bağlanması istəyə bağlıdır — bax ``completion._check_out`` / ``_check_week``.
+MIN_OUTCOMES = 1
 MIN_TOPIC_CHARS = 4
 WEEK_ROWS = 16
 MIN_FILLED_WEEKS = 14

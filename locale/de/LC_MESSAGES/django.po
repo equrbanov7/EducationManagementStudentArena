@@ -98771,3 +98771,19 @@ msgstr "mindestens %(min_length)s Zeichen"
 msgctxt "email.layout"
 msgid "Elektron Universitet"
 msgstr "Elektronische Universität"
+
+msgctxt "accounts.syllabus"
+msgid "Tələbə fənni bitirəndə nə bacaracaq. Ən azı 1 təlim nəticəsi yazın; həftəlik mövzuları nəticə ilə əlaqələndirmək istəyə bağlıdır."
+msgstr "Was die Studierenden nach Abschluss des Fachs können. Geben Sie mindestens 1 Lernergebnis an; die Zuordnung der Wochenthemen zu einem Lernergebnis ist optional."
+
+msgctxt "accounts.syllabus"
+msgid "Ən azı 1 təlim nəticəsi yazın. Həftəlik mövzuları nəticə ilə əlaqələndirmək istəyə bağlıdır."
+msgstr "Geben Sie mindestens 1 Lernergebnis an. Die Zuordnung der Wochenthemen zu einem Lernergebnis ist optional."
+
+msgctxt "accounts.syllabus"
+msgid "Ən azı 1 təlim nəticəsi tələb olunur — silinmə mümkün deyil."
+msgstr "Mindestens 1 Lernergebnis ist erforderlich — Löschen ist nicht möglich."
+
+msgctxt "accounts.syllabus"
+msgid "(istəyə bağlı)"
+msgstr "(optional)"

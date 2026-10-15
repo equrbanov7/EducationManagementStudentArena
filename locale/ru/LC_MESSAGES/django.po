@@ -97870,3 +97870,19 @@ msgstr "не менее %(min_length)s символов"
 msgctxt "email.layout"
 msgid "Elektron Universitet"
 msgstr "Электронный университет"
+
+msgctxt "accounts.syllabus"
+msgid "Tələbə fənni bitirəndə nə bacaracaq. Ən azı 1 təlim nəticəsi yazın; həftəlik mövzuları nəticə ilə əlaqələndirmək istəyə bağlıdır."
+msgstr "Что студент будет уметь после завершения дисциплины. Укажите хотя бы 1 результат обучения; привязка недельных тем к результату необязательна."
+
+msgctxt "accounts.syllabus"
+msgid "Ən azı 1 təlim nəticəsi yazın. Həftəlik mövzuları nəticə ilə əlaqələndirmək istəyə bağlıdır."
+msgstr "Укажите хотя бы 1 результат обучения. Привязка недельных тем к результату необязательна."
+
+msgctxt "accounts.syllabus"
+msgid "Ən azı 1 təlim nəticəsi tələb olunur — silinmə mümkün deyil."
+msgstr "Требуется хотя бы 1 результат обучения — удаление невозможно."
+
+msgctxt "accounts.syllabus"
+msgid "(istəyə bağlı)"
+msgstr "(необязательно)"

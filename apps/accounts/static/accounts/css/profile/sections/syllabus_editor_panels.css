@@ -163,6 +163,13 @@
     border-bottom: 1px solid var(--ems-border);
 }
 
+/* Sahib 2026-10-15: həftənin təlim nəticəsi istəyə bağlıdır — başlıqdakı qeyd böyük hərflə yazılmır. */
+.syl-weeks__opt {
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
 .syl-weeks__h--lecture {
     color: var(--ems-primary-700);
 }

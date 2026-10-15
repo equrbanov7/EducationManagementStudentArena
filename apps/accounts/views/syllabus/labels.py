@@ -53,14 +53,12 @@ ISSUE_MESSAGES = {
     ),
     "desc.goal_too_short": pgettext_lazy(_CTX, "Fənnin məqsədi ən azı %(min)s simvol olmalıdır (hazırda %(have)s)"),
     "out.too_few": pgettext_lazy(_CTX, "Ən azı %(min)s təlim nəticəsi tələb olunur (hazırda %(have)s)"),
-    "out.orphan_outcomes": pgettext_lazy(_CTX, "%(count)s təlim nəticəsi heç bir həftə ilə əlaqələndirilməyib"),
     "week.too_few_topics": pgettext_lazy(_CTX, "Ən azı %(min)s həftənin mövzusu yazılmalıdır (hazırda %(have)s)"),
     "week.hours_mismatch": pgettext_lazy(
         _CTX, "%(kind)s saatı tədris planındakı %(expected)s saatla uyğun gəlmir (hazırda %(have)s)"
     ),
     "week.hours_without_topic": pgettext_lazy(_CTX, "%(count)s həftədə saat yazılıb, mövzu boşdur"),
     "week.topic_without_hours": pgettext_lazy(_CTX, "%(count)s mövzuya heç bir dərs növü üzrə saat verilməyib"),
-    "week.outcome_not_linked": pgettext_lazy(_CTX, "%(count)s həftədə təlim nəticəsi seçilməyib"),
     "assess.split_mismatch": pgettext_lazy(
         _CTX,
         "Sərbəst bölünən %(need)s bal tam paylanmayıb (hazırda %(have)s) — cəm 100 olmalıdır",

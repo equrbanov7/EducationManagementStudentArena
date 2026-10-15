@@ -60,12 +60,13 @@ def test_week_hours_must_match_the_study_plan():
     assert mismatch and mismatch[0].params["kind"] == "lecture"
 
 
-def test_orphan_learning_outcome_blocks_the_outcomes_section():
+def test_an_outcome_used_in_no_week_no_longer_blocks_the_outcomes_section():
+    """Sahib 2026-10-15: həftəyə bağlanma istəyə bağlıdır — «yetim» nəticə bölməni natamam saymır."""
     data = complete_section_data()
     data[SectionKey.OUT.value]["outcomes"].append("Dördüncü nəticə heç bir həftədə yoxdur")
     report = completion.evaluate(data, PLAN_HOURS)
-    assert report.sections[SectionKey.OUT.value] is False
-    assert any(issue.code == "out.orphan_outcomes" for issue in report.issues)
+    assert report.sections[SectionKey.OUT.value] is True
+    assert report.percent == 100
 
 
 def test_ghost_week_row_hours_without_topic_is_rejected():

@@ -124,22 +124,16 @@ def _outcome_labels(data) -> list:
     return [_text(item) for item in raw if len(_text(item)) >= MIN_OUTCOME_CHARS]
 
 
-def _check_out(data, week_data, issues) -> bool:
+def _check_out(data, issues) -> bool:
+    """Sahib 2026-10-15: ən azı ``MIN_OUTCOMES`` (1) dolu nəticə — həftəyə bağlanma TƏLƏB OLUNMUR.
+
+    Əvvəlki «hər nəticə ən azı bir həftədə istifadə olunsun» (``out.orphan_outcomes``) qaydası ləğv edilib.
+    """
     outcomes = _outcome_labels(data)
-    used = set()
-    for row in week_data.get("rows") or []:
-        link = _text(row.get("outcome") if isinstance(row, dict) else "")
-        if link:
-            used.add(link)
-    orphans = [index for index in range(1, len(outcomes) + 1) if f"TN{index}" not in used]
-    ok = True
     if len(outcomes) < MIN_OUTCOMES:
-        ok = False
         issues.append(Issue(SectionKey.OUT.value, "out.too_few", {"min": MIN_OUTCOMES, "have": len(outcomes)}))
-    if orphans:
-        ok = False
-        issues.append(Issue(SectionKey.OUT.value, "out.orphan_outcomes", {"count": len(orphans), "indexes": orphans}))
-    return ok
+        return False
+    return True
 
 
 def _check_week(data, plan_hours, issues) -> bool:
@@ -148,7 +142,8 @@ def _check_week(data, plan_hours, issues) -> bool:
     totals = {kind: sum(_int(row.get(kind)) for row in rows) for kind in LESSON_HOUR_KINDS}
     ghost = [row for row in rows if not _text(row.get("topic")) and sum(_int(row.get(k)) for k in LESSON_HOUR_KINDS)]
     no_hour = [row for row in filled if sum(_int(row.get(kind)) for kind in LESSON_HOUR_KINDS) == 0]
-    unlinked = [row for row in filled if not _text(row.get("outcome"))]
+    # Sahib 2026-10-15: həftə sətrinin təlim nəticəsi (``outcome``) İSTƏYƏ BAĞLIDIR — boş qalması
+    # bölməni natamam saymır (əvvəlki ``week.outcome_not_linked`` qaydası ləğv edilib).
 
     ok = True
     # Plan varsa minimum PLANDAN çıxarılan sətir sayıdır (15 saat → 8 mövzu);
@@ -190,9 +185,6 @@ def _check_week(data, plan_hours, issues) -> bool:
     if no_hour:
         ok = False
         issues.append(Issue(SectionKey.WEEK.value, "week.topic_without_hours", {"count": len(no_hour)}))
-    if unlinked:
-        ok = False
-        issues.append(Issue(SectionKey.WEEK.value, "week.outcome_not_linked", {"count": len(unlinked)}))
     return ok
 
 
@@ -314,7 +306,7 @@ def evaluate(
     results = {
         SectionKey.INFO.value: _check_info(data[SectionKey.INFO], issues),
         SectionKey.DESC.value: _check_desc(data[SectionKey.DESC], issues),
-        SectionKey.OUT.value: _check_out(data[SectionKey.OUT], data[SectionKey.WEEK], issues),
+        SectionKey.OUT.value: _check_out(data[SectionKey.OUT], issues),
         SectionKey.WEEK.value: _check_week(data[SectionKey.WEEK], plan_hours, issues),
         SectionKey.METHOD.value: _check_method(data[SectionKey.METHOD], issues),
         SectionKey.ASSESS.value: _check_assess(data[SectionKey.ASSESS], weights, issues, accepted_splits or ()),

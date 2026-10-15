@@ -100,7 +100,7 @@ gəlir; RİM `academic.selfwork_enabled` yandırılanda midterm 20 + sərbəst i
           {% for kind in se.hours.rows %}
           <th scope="col" class="syl-weeks__h syl-weeks__h--{{ kind.kind }}">{{ kind.label }}</th>
           {% endfor %}
-          <th scope="col">{% trans "Təlim nəticəsi" context "accounts.syllabus" %}</th>
+          <th scope="col">{% trans "Təlim nəticəsi" context "accounts.syllabus" %} <span class="syl-weeks__opt">{% trans "(istəyə bağlı)" context "accounts.syllabus" %}</span></th>
         </tr>
       </thead>
       <tbody data-syl-weeks>
