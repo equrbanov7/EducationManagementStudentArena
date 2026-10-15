@@ -20,6 +20,7 @@ from . import (
     pdf_views,
     schedule_views,
     semester_actions,
+    subject_exempt_views,
     syllabus_views,
     views,
 )
@@ -94,6 +95,13 @@ urlpatterns = [
     ),
     path("<uuid:offering_id>/alt-qrup/elave/", guest_roster_views.guest_add, name="journal_guest_add"),
     path("<uuid:offering_id>/alt-qrup/cixar/", guest_roster_views.guest_remove, name="journal_guest_remove"),
+    # «Fəndən azad et» / «Bərpa et» — tələbə qrupda qalır, yalnız bu jurnaldan çıxır (sahib 2026-10-15).
+    path("<uuid:offering_id>/fenden-azad/", subject_exempt_views.subject_exempt_apply, name="journal_subject_exempt"),
+    path(
+        "<uuid:offering_id>/fenden-azad/berpa/",
+        subject_exempt_views.subject_exempt_restore,
+        name="journal_subject_exempt_restore",
+    ),
     # Dərs modalının axtarışlı/lazy seçiciləri (QA 2026-09-05 P3-13) — uuid
     # catch-all-dan ƏVVƏL.
     path(

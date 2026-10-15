@@ -249,7 +249,7 @@ def history_queryset(organization, filters=None):
             Q(enrollment__offering__group_id=faculty) | Q(enrollment__offering__group__path__startswith=prefix)
         )
     category = str(filters.get("category") or "").strip()
-    if category in hygiene.CATEGORIES:
+    if category in HygieneCategory.values:  # «Fəndən azad» (jurnaldan yazılır) də tarixçədədir
         queryset = queryset.filter(category=category)
     state = str(filters.get("state") or "").strip()
     if state == "active":

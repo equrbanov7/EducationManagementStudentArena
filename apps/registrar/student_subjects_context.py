@@ -39,6 +39,7 @@ from apps.registrar import (
     interim_assessment,
     selfwork_points,
     services,
+    subject_exempt,
 )
 from apps.registrar.cabinet_policy import (
     approved_syllabus_offerings,
@@ -354,4 +355,6 @@ def build_section(*, request, organization, record, period, semester_number) -> 
         "kpis": kpis,
         "kpi_tiles": kpi_tiles(kpis) if data["subjects"] else [],
         "legend": LEGEND,
+        # «Fəndən azad» (sahib 2026-10-15): ``dropped`` sətir kartlardan düşür — tələbə səbəbini görsün.
+        "exempt_subjects": subject_exempt.student_exempt_subjects(record, period),
     }
