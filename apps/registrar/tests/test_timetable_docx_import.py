@@ -158,6 +158,9 @@ class ParsingTests(SimpleTestCase):
             "Ümumi kimya  / lab 2.  Seyidova X.": ("Ümumi kimya", "lab", "Seyidova X.", ""),
             "Mikrobiologiya sem. Hacıyeva S. 1 yarımqrup": ("Mikrobiologiya", "seminar", "Hacıyeva S.", ""),
             "Azərbaycan dili müh.   Məmmədova.S / 236 SBİO-1": ("Azərbaycan dili", "lecture", "Məmmədova S.", "1"),
+            "ATMF XI blok: / Insan genetikası müh. / Həsənova S.": ("Insan genetikası", "lecture", "Həsənova S.", ""),
+            "ÜFS I blok: / Fəlsəfə müh. / Əlizadə B.": ("Fəlsəfə", "lecture", "Əlizadə B.", ""),
+            "ATMF: Su bioehtiyyatları sem. Qazi S.": ("Su bioehtiyyatları", "seminar", "Qazi S.", ""),
         }
         for raw, (subject, kind, teacher, sub) in cases.items():
             parsed = parse_subject_text(raw)

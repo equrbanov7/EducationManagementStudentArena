@@ -31,6 +31,7 @@ DÖRD yerdə eyni olmalıdır: ``sections_api.SECTION_PARTIALS``,
     "has_access": bool, "years": [str], "academic_year": str,
     "summary": {...}, "rows": [...], "seasons": [...],
     "rows_url": str, "export_url": str, "journal_base_url": str,
+    "lines": [...],   # 2026-10-15: fənn + qrup üzrə birləşmiş xətlər (``services.my_workload_lines``)
     # Mərhələ 4 (ekran 16 §4) — təsdiq/etiraz bloku:
     "can_object": bool, "is_load_confirmed": bool, "action_url": str,
     "objection_reasons": [{"key", "label"}],   # 4 hərfi səbəb
@@ -76,6 +77,7 @@ from .constants import (
 )
 from .services import (
     can_manage_chair,
+    distributable_chair_ids,
     find_task,
     list_years,
     manageable_chairs,
@@ -85,6 +87,7 @@ from .services import (
     teacher_workload_summary,
     teacher_years,
 )
+from .services.my_workload_lines import group_workload_lines
 from .services.norms import norm_rule_note
 from .services.offering_teachers import teachers_for_offering, teachers_for_offerings
 
@@ -95,8 +98,15 @@ def _choice_payload(choices) -> list[dict]:
     return [{"key": str(value), "label": str(label)} for value, label in choices]
 
 
-def build_distribution_context(request, *, organization, chair_id=None, academic_year: str = "") -> dict:
-    """«Yük bölgüsü» bölməsinin çərçivə context-i (SPA: data JSON-la gəlir)."""
+def build_distribution_context(
+    request, *, organization, chair_id=None, academic_year: str = "", focus_row: str = ""
+) -> dict:
+    """«Yük bölgüsü» bölməsinin çərçivə context-i (SPA: data JSON-la gəlir).
+
+    ``focus_row`` — «Mənim dərs yüküm» / ümumi baxışdakı «Redaktə et» keçidinin sətri (UUID; JS ona sürüşür).
+    """
+    from core.http_ids import parse_uuid
+
     actor = resolve_actor(getattr(request, "user", None), organization, request=request)
     can_manage = actor.has(PERM_MANAGE)
     can_distribute = actor.has(PERM_DISTRIBUTE)
@@ -129,6 +139,7 @@ def build_distribution_context(request, *, organization, chair_id=None, academic
         "row_kinds": _choice_payload(RowKind.choices),
         "amendment_reasons": _choice_payload(AmendmentReason.choices),
         "norm_note": norm_rule_note(),
+        "focus_row": str(parse_uuid(focus_row) or "") if focus_row else "",
     }
     # Xarici JS Django template engine-dən KEÇMİR (bax CLAUDE.md) — kataloqlar
     # JSON blokla ötürülür, JS onu `JSON.parse` ilə oxuyur.
@@ -248,6 +259,11 @@ def build_my_workload_context(request, *, organization, academic_year: str = "")
     payload["academic_year"] = year
     payload["summary"] = teacher_workload_summary(organization=organization, teacher=user, academic_year=year)
     payload["rows"] = teacher_workload_rows(organization=organization, teacher=user, academic_year=year)
+    # 2026-10-15: cədvəl fənn + qrup üzrə birləşmiş xətləri göstərir; «Redaktə et» — yalnız aktorun
+    # `workload.distribute` əhatəsindəki kafedralar (müəllimin özündə açar yoxdur → yalnız oxu).
+    edit_chair_ids = distributable_chair_ids(actor)
+    payload["lines"] = group_workload_lines(payload["rows"], edit_chair_ids=edit_chair_ids)
+    payload["can_edit_any"] = bool(edit_chair_ids)
     payload.update(_confirmation_block(actor, organization, user, year, payload["rows"]))
     return payload
 

@@ -133,7 +133,7 @@ class BackfillTeacherLessonsTest(TestCase):
                 organization=cls.org, lesson=cls.existing, enrollment=cls.e_absent, status=AttendanceStatus.ABSENT
             )
 
-    def _run(self, *, apply, specs=None, replace=False, days=13):
+    def _run(self, *, apply, specs=None, replace=False, days=13, late=False):
         with bypass_rls():
             return lesson_backfill.run_backfill(
                 organization=self.org,
@@ -144,6 +144,7 @@ class BackfillTeacherLessonsTest(TestCase):
                 actor=self.actor,
                 specs=specs,
                 replace_slots=replace,
+                include_late_joiners=late,
                 apply=apply,
             )
 
@@ -196,6 +197,16 @@ class BackfillTeacherLessonsTest(TestCase):
         self.assertEqual(self._marks(self.e_dropped), {})
         self.assertEqual(self._marks(self.e_suspended), {})
         self.assertEqual(self._marks(self.e_guest), {self._day(9): AttendanceStatus.PRESENT})
+
+    def test_include_late_joiners_fills_earlier_lessons_too(self):
+        # Sahib 2026-10-15: «boş xanaları doldur» — sonradan qoşulan tələbənin əvvəlki dərsləri də iə.
+        result = self._run(apply=True)
+        self.assertEqual(result.late_skipped, 3)
+        result = self._run(apply=True, late=True)
+        self.assertEqual(result.late_skipped, 0)
+        dates = [self._day(offset) for offset in (1, 2, 8, 9)]
+        self.assertEqual(self._marks(self.e_guest), {day: AttendanceStatus.PRESENT for day in dates})
+        self.assertEqual(self._marks(self.e_dropped), {})
 
     def test_second_run_is_idempotent(self):
         self._run(apply=True)

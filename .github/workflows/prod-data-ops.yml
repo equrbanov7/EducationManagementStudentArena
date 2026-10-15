@@ -40,6 +40,11 @@
 #       «iə» yazılır (mövcud işarəyə toxunulmur). Slotlar: canlı cədvəl, və ya ŞİFRƏLİ spesifikasiya
 #       (`roster_tag` = `lesson-slots-…` → slots.json.enc); `replace_teacher_slots` → müəllimin digər slotları
 #       yumşaq silinir. Loga yalnız saylar (açılış = fənn · qrup); CSV hesabat şifrəli artifaktdadır.
+#   fix_task_row_hours — tapşırıq sətrində BİR fəaliyyətin saatını düzəldir (sahib 2026-10-15: TAPŞIRIQ kitabçasında
+#       «631/5K» / «631/5K ing» Laboratoriya xanasına sətrin cəmi yazılıb): `task_chair` + `row_group` (vergüllə bir
+#       neçə işarə, hər biri fənn + qrup üzrə DƏQİQ bir sətir) + `row_subject` + `row_activity` + `row_hours`. UI ilə
+#       EYNİ yol — düzəliş axını (səbəb «Texniki səhvin düzəlişi»), bölgü sığdırılır (0 → silinir), cəm yenidən
+#       hesablanır, əvvəl təsdiqlənmiş sənəd yenidən təsdiqlənir (təkrar bildiriş yoxdur). Loga yalnız saylar.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
 #       (backfill; `--include-drafts` BURADA YOXDUR — qaralama planlar sahibin qərarıdır).
 #   apply_org_structure — struktur planı (scripts/data/qku_structure_2026_09_27.json, yalnız vahid
@@ -80,6 +85,7 @@ on:
           - import_timetable_docx
           - assign_task_rows_from_timetable
           - backfill_teacher_lessons
+          - fix_task_row_hours
           - repair_group_leads
           - retire_qa_accounts
       apply:
@@ -127,11 +133,38 @@ on:
         required: false
         default: "Proqramlaşdırma"
       task_chair:
-        description: "import_teaching_load_form1: kafedra adı"
+        description: "import_teaching_load_form1 / fix_task_row_hours: kafedra adı"
         required: false
         default: ""
+      row_group:
+        description: "fix_task_row_hours: qrup işarə(lər)i, vergüllə (məs. 631/5K,631/5K ing)"
+        required: false
+        default: ""
+      row_subject:
+        description: "fix_task_row_hours: fənn adı (məs. Müasir proqramlaşdırma dilləri)"
+        required: false
+        default: ""
+      row_activity:
+        description: "fix_task_row_hours: fəaliyyət"
+        required: false
+        type: choice
+        default: lab
+        options:
+          - lecture
+          - seminar
+          - lab
+          - consult
+          - exam
+          - thesis
+          - postgrad
+          - practice_research
+          - practice_production
+      row_hours:
+        description: "fix_task_row_hours: yeni cəm saat (0 = fəaliyyəti çıxar)"
+        required: false
+        default: "0"
       reassign:
-        description: "import_teaching_*: fərqli müəllimi düzəliş axını ilə dəyiş"
+        description: "import_teaching_*: fərqli müəllimi düzəliş axını ilə dəyiş · backfill_teacher_lessons: sonradan qoşulanları da iə işarələ"
         required: false
         type: boolean
         default: false
@@ -202,6 +235,10 @@ jobs:
       CREATE_MISSING: ${{ github.event.inputs.create_missing }}
       TASK_SHEET: ${{ github.event.inputs.task_sheet }}
       TASK_CHAIR: ${{ github.event.inputs.task_chair }}
+      ROW_GROUP: ${{ github.event.inputs.row_group }}
+      ROW_SUBJECT: ${{ github.event.inputs.row_subject }}
+      ROW_ACTIVITY: ${{ github.event.inputs.row_activity }}
+      ROW_HOURS: ${{ github.event.inputs.row_hours }}
       REASSIGN: ${{ github.event.inputs.reassign }}
       CHOICES: ${{ github.event.inputs.choices }}
       TEACHER_MAP: ${{ github.event.inputs.teacher_map }}
@@ -355,6 +392,22 @@ jobs:
               test -z "$TEACHER_MAP" || args+=(--teacher "$TEACHER_MAP")
               test "$REASSIGN" != "true" || args+=(--reassign)
               test "$ALLOW_OUTSIDE_CHAIR" != "true" || args+=(--allow-outside-chair)
+              ;;
+            fix_task_row_hours)
+              # Sahib 2026-10-15: kitabçanın səhv fəaliyyət xanası (631/5K «Laboratoriya» = sətrin cəmi). Arqumentlər
+              # massivlə ötürülür (shell şərhi yoxdur); format yoxlaması yalnız ağlabatanlıq üçündür.
+              test -n "$TASK_CHAIR" && [ "${#TASK_CHAIR}" -le 120 ] || { echo "task_chair verilməlidir" >&2; exit 2; }
+              for value in "$ROW_GROUP" "$ROW_SUBJECT"; do
+                test -n "$value" && [ "${#value}" -le 200 ] || { echo "row_group / row_subject verilməlidir (≤200)" >&2; exit 2; }
+                printf '%s' "$value" | grep -Eq '^[^[:cntrl:]"`$\\;|&<>]+$' || { echo "row_group / row_subject icazəsiz simvol" >&2; exit 2; }
+              done
+              case "$ROW_ACTIVITY" in (lecture|seminar|lab|consult|exam|thesis|postgrad|practice_research|practice_production) ;; (*) echo "row_activity yanlışdır" >&2; exit 2;; esac
+              printf '%s' "$ROW_HOURS" | grep -Eq '^[0-9]{1,4}$' || { echo "row_hours 0..9999 tam ədəd olmalıdır" >&2; exit 2; }
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --year "$YEAR" --chair "$TASK_CHAIR" --group "$ROW_GROUP" --subject "$ROW_SUBJECT"
+                    --activity "$ROW_ACTIVITY" --hours "$ROW_HOURS" --actor "$actor"
+                    --reason "TAPŞIRIQ kitabçasında fəaliyyət xanası səhvdir (sətrin cəmi yazılıb) — sahibin 2026-10-15 tapşırığı")
               ;;
             sync_plan_offerings)
               actor="$(superadmin_actor)"
@@ -604,6 +657,7 @@ jobs:
           echo "::add-mask::$actor"
           args=(--org "$ORG" --teacher "$TEACHER" --period "$PERIOD" --from "$DATE_FROM" --to "$DATE_TO" --mark present
                 --actor "$actor" --report "/tmp/lesson_backfill_report_${GITHUB_RUN_ID}" "${spec_args[@]}")
+          test "$REASSIGN" != "true" || args+=(--include-late-joiners)
           if [ "$APPLY" = "true" ]; then
             echo "::group::💾 Ehtiyat nüsxə (postgres-backup /backup.sh)"
             docker exec "$BACKUP_CONTAINER" /backup.sh

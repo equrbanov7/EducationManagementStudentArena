@@ -12,7 +12,8 @@ from django.views.decorators.http import require_GET
 from core.export_safety import sheet_append
 
 from ..constants import PERM_VIEW
-from ..services import teacher_workload_rows, teacher_workload_summary, teacher_years
+from ..services import distributable_chair_ids, teacher_workload_rows, teacher_workload_summary, teacher_years
+from ..services.my_workload_lines import group_workload_lines
 from ._base import active_organization, actor_for, error, no_org
 
 _EXPORT_HEADERS = (
@@ -47,6 +48,8 @@ def my_rows(request) -> JsonResponse:
             "years": teacher_years(organization=organization, teacher=request.user),
             "academic_year": year,
             "rows": rows,
+            # 2026-10-15: cədvəl xətləri — fənn + qrup üzrə birləşmiş (redaktə keçidi əhatəyə görə).
+            "lines": group_workload_lines(rows, edit_chair_ids=distributable_chair_ids(actor)),
             # `season` — cədvəlin «CƏMİ» xanası görünən (semestr süzgəcli) sətirlərin cəmi olsun.
             "summary": teacher_workload_summary(
                 organization=organization, teacher=request.user, academic_year=year, season=season
@@ -81,26 +84,27 @@ def my_export(request):
     for cell in sheet[1]:
         cell.font = Font(bold=True)
     total = 0
-    for row in rows:
-        total += int(row["hours"] or 0)
+    # 2026-10-15: ixrac ekrandakı kimi fənn + qrup üzrə birləşmiş xətlərdir («Mühazirə 30 · Seminar 15», saat = cəm).
+    for line in group_workload_lines(rows):
+        total += int(line["hours"] or 0)
         sheet_append(
             sheet,
             [
-                row["academic_year"],
-                row["season_label"],
-                row["subject"],
-                row["groups"],
-                row["activity_label"],
-                row["hours"],
-                row["education_form"],
-                row["degree_level"],
-                "Bəli" if row["is_hourly_paid"] else "",
+                line["academic_year"],
+                line["season_label"],
+                line["subject"],
+                line["groups"],
+                line["activity_label"],
+                line["hours"],
+                line["education_form_label"],
+                line["degree_level_label"],
+                "Bəli" if line["is_hourly_paid"] else "",
             ],
         )
     sheet_append(sheet, ["", "", "", "", "CƏMİ", total, "", "", ""])
     sheet[sheet.max_row][4].font = Font(bold=True)
     sheet[sheet.max_row][5].font = Font(bold=True)
-    for column, width in zip("ABCDEFGHI", (12, 10, 40, 26, 20, 8, 12, 12, 12)):
+    for column, width in zip("ABCDEFGHI", (12, 10, 40, 26, 34, 8, 12, 12, 12)):
         sheet.column_dimensions[column].width = width
 
     buffer = BytesIO()

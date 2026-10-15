@@ -1,0 +1,3 @@
+{% load i18n %}{% comment %}«Yük — ümumi baxış» kafedra sətri: «Redaktə et» → «Yük bölgüsü» redaktoru (2026-10-15).
+Keçid yalnız `workload.distribute` əhatəsindəki kafedrada var (`overview_registry`); qalan sətirlərdə xana boşdur.{% endcomment %}
+{% if row.data.edit_url %}<a class="ems-btn ems-btn--sm" href="{{ row.data.edit_url }}">{% trans "Redaktə et" context "accounts.workload_overview" %}</a>{% endif %}

@@ -3,7 +3,8 @@
 Dörd görünüş (dizayn `state.view`): `overview` · `fac` (fakültələr) ·
 `dep` (kafedralar) · `rep` (hesabatlar — boş vəziyyət).
 
-⚠️ Sətir səviyyəsində REDAKTƏ YOXDUR. Bütün rəqəmlər
+⚠️ Sətir səviyyəsində REDAKTƏ YOXDUR (2026-10-15-dən kafedra sətrində yalnız «Yük bölgüsü»nə «Redaktə et»
+keçidi — ``workload.distribute`` əhatəsinə görə). Bütün rəqəmlər
 ``services.overview.build_overview`` ilə AŞAĞIDAN YUXARI hesablanır və heç
 bir yerdə saxlanılmır (§8/13).
 
@@ -24,7 +25,7 @@ from apps.organizations.public import permission_scope_unit_types
 
 from .center_registry import current_academic_year, known_years, safe_uuid
 from .constants import DEFAULT_HOURLY_PAID_CAP, PERM_REPORT
-from .services import build_overview, resolve_actor
+from .services import build_overview, distributable_chair_ids, distribution_edit_url, resolve_actor
 from .services.overview import _rollup, _rollup_all, _status_map
 
 VIEWS = ("overview", "fac", "dep", "rep")
@@ -82,6 +83,11 @@ def build_overview_section(request, organization) -> dict:
         faculty_id = safe_uuid(params.get("wo_faculty"))
 
     chairs = data["chairs"]
+    # 2026-10-15: «Redaktə et» — yalnız `workload.distribute` əhatəsindəki kafedralar (kafedra müdiri, RİM);
+    # rəqəmlər yenə də yalnız oxudur, keçid «Yük bölgüsü» redaktoruna aparır.
+    editable = distributable_chair_ids(actor)
+    for row in chairs:
+        row["edit_url"] = distribution_edit_url(chair_id=row["id"], academic_year=year) if row["id"] in editable else ""
     faculties, totals, risky, status_map = data["faculties"], data["totals"], data["risky"], data["status_map"]
     if faculty_id:
         chairs = [row for row in chairs if row["faculty_id"] == faculty_id]

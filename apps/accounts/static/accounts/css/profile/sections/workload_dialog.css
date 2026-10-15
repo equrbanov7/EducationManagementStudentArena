@@ -169,6 +169,62 @@
   }
 }
 
+/* ── 2026-10-15: təsdiqlənmiş bölgünün redaktəsi (düzəliş axını) ─────────── */
+.wl__amend-banner {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  background: var(--ems-primary-50, #eef4ff);
+  border: 1px solid var(--ems-primary-100, #d5e3fb);
+  color: var(--ems-primary-700, #1b4fa0);
+}
+
+.wl__amend-banner[data-state="amended"] {
+  background: var(--ems-warning-bg, #fdf6e3);
+  border-color: var(--ems-warning-bd, #f0c36d);
+  color: #8a5a00;
+}
+
+.wl-row.is-focus {
+  border-color: var(--ems-primary-500, #2f6fdb);
+  box-shadow: 0 0 0 3px var(--ems-primary-100, #d5e3fb);
+}
+
+.wl-row.is-focus:focus {
+  outline: none;
+}
+
+.wl-row__meta .wl-row__amend {
+  background: var(--ems-warning-bg, #fdf6e3);
+  color: #8a5a00;
+}
+
+.wl-act__remove,
+.wl-assign-chip__edit {
+  border: 0;
+  background: transparent;
+  color: var(--ems-neutral-600, #5b6b7c);
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 4px;
+}
+
+.wl-act__remove:hover,
+.wl-act__remove:focus-visible {
+  color: var(--ems-danger, #c0392b);
+}
+
+.wl-assign-chip__edit {
+  color: inherit;
+  font-size: 0.7rem;
+}
+
+.wlm-edit {
+  white-space: nowrap;
+}
+
 @media (max-width: 640px) {
   .wl-filters__actions {
     margin-left: 0;

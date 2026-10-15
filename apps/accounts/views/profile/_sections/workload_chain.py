@@ -448,6 +448,10 @@ def build_workload_overview_section(request, section, *, active_organization, al
             pgettext(_CTX_OVERVIEW, "Status"),
         )
     ]
+    # 2026-10-15: kafedra müdiri / RİM (`workload.distribute` əhatəsi) — sətirdə «Redaktə et» (bölgü redaktoru).
+    chair_actions = any(row.get("edit_url") for row in payload["chairs"])
+    if chair_actions:
+        section["chair_columns"].append({"key": "", "label": pgettext(_CTX_OVERVIEW, "Əməl"), "sr_only": True})
     section["chair_rows"] = [
         {
             "row_head": row["name"],
@@ -460,6 +464,7 @@ def build_workload_overview_section(request, section, *, active_organization, al
                 {"text": row["over_norm"], "num": True},
                 {"badge_family": "workload_task", "badge_key": row["status"] or "none"},
             ],
+            "actions_include": "accounts/profile/sections/workload/_overview_row_actions.html" if chair_actions else "",
             "data": row,
         }
         for row in payload["chairs"]

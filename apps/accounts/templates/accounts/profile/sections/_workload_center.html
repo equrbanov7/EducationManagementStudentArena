@@ -68,6 +68,7 @@ Arxiv: keçmiş tədris ili yalnız oxunuş — yazma düymələri render OLUNMU
                     <span>{% trans "Yaz" context "accounts.workload_center" %} {{ card.spring_hours }}</span>
                 </div>
                 <a class="ems-btn ems-btn--sm" href="{{ card.open_url }}">{% trans "Bax" context "accounts.workload_center" %}</a>
+                {% if card.edit_url %}<a class="ems-btn ems-btn--sm" href="{{ card.edit_url }}">{% trans "Bölgünü redaktə et" context "accounts.workload_center" %}</a>{% endif %}
             </article>
             {% empty %}
                 {% trans "Kafedra tapılmadı" context "accounts.workload_center" as wc_nocard %}

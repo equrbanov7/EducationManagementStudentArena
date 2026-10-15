@@ -68,6 +68,11 @@ class Command(BaseCommand):
             action="store_true",
             help="(--slots-file ilə) müəllimin bu semestrdəki DİGƏR slotlarını yumşaq sil",
         )
+        parser.add_argument(
+            "--include-late-joiners",
+            action="store_true",
+            help="Sonradan qoşulan (köçürmə / alt qrup) tələbələri qoşulmadan əvvəlki dərslərdə də «iə» işarələ",
+        )
         parser.add_argument("--actor", required=True, help="Aktor — aktiv superuser-in istifadəçi adı")
         parser.add_argument("--report", default="", help="Hesabat qovluğu (lesson_backfill_*.csv)")
         parser.add_argument("--apply", action="store_true", help="Faktiki yaz (defolt: dry-run)")
@@ -111,6 +116,7 @@ class Command(BaseCommand):
                 actor=actor,
                 specs=specs,
                 replace_slots=options["replace_teacher_slots"],
+                include_late_joiners=options["include_late_joiners"],
                 apply=options["apply"],
             )
         self._summary(result, options)
@@ -140,7 +146,10 @@ class Command(BaseCommand):
         reasons = result.skip_reasons
         if reasons:
             self.stdout.write("  səbəb[skipped]: " + ", ".join(f"{r}={n}" for r, n in reasons.most_common(12)))
-        self.stdout.write(f"  işarə iə: yazıldı={result.marks_written} yazılmadı={result.marks_rejected}")
+        self.stdout.write(
+            f"  işarə iə: yazıldı={result.marks_written} yazılmadı={result.marks_rejected}"
+            f" · qoşulmadan_əvvəl_buraxıldı={result.late_skipped}"
+        )
         for label, counter in result.per_offering():
             parts = " · ".join(f"{a}={counter.get(a, 0)}" for a in LESSON_ACTIONS)
             self.stdout.write(f"  açılış [{label[:90]}]: {parts} · iə={counter.get('marks', 0)}")

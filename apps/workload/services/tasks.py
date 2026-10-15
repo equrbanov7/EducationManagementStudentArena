@@ -240,16 +240,22 @@ def _amendment_target_row_ids(task: TeachingTask) -> set:
     return set(amendments.values_list("target_id", flat=True))
 
 
-def _ensure_editable(task: TeachingTask, row=None) -> None:
+def _ensure_editable(task: TeachingTask, row=None, *, new_row_in_amendment: bool = False) -> None:
     """Sətir yazısı (saat/struktur) icazəlidirmi.
 
     Təhlükəsizlik auditi 2026-10-05: ``distributing`` (dekan təsdiqindən sonra) artıq
     redaktəyə açıq deyil; ``amended`` yalnız açıq düzəlişin HƏDƏF sətrini açır — yeni
     sətir və digər sətirlər bağlıdır.
+
+    2026-10-15 (sahib: «RİM / kafedra müdiri əlavə edə bilsin»): təsdiqlənmiş sənədə YENİ sətir
+    yalnız ``services.row_edit.save_row_amended`` yolu ilə — o, sətri yaradan kimi həmin
+    tranzaksiyada onun üçün düzəliş açır (``new_row_in_amendment``; başqa çağıran bunu vermir).
     """
     allowed = task.status in EDITABLE_STATUSES
     if allowed and task.status in AMENDMENT_SCOPED_STATUSES:
         allowed = row is not None and row.pk is not None and row.pk in _amendment_target_row_ids(task)
+    if not allowed and new_row_in_amendment and row is None:
+        allowed = task.status in (TaskStatus.DISTRIBUTED, TaskStatus.AMENDED)
     if not allowed:
         raise WorkloadDenied(
             "workload.task_not_editable",
@@ -327,10 +333,12 @@ def _ensure_totals_cover_assigned(row) -> None:
 
 
 @transaction.atomic
-def save_row(*, task: TeachingTask, actor, data: dict, row=None, request=None) -> TeachingTaskRow:
+def save_row(
+    *, task: TeachingTask, actor, data: dict, row=None, request=None, new_row_in_amendment: bool = False
+) -> TeachingTaskRow:
     """Sətir yaradır və ya redaktə edir (draft/returned; amended — yalnız düzəlişin hədəf sətri)."""
     ensure_can_manage(actor, task.chair_id)
-    _ensure_editable(task, row)
+    _ensure_editable(task, row, new_row_in_amendment=new_row_in_amendment)
 
     row = row or TeachingTaskRow(organization=task.organization, task=task)
     if row.pk and row.task_id != task.pk:

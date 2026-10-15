@@ -23,6 +23,7 @@ def build_workload_distribution_section(request, section, *, active_organization
             organization=active_organization,
             chair_id=request.GET.get("chair") or None,
             academic_year=(request.GET.get("year") or "").strip(),
+            focus_row=(request.GET.get("row") or "").strip(),
         )
     )
 

@@ -3116,3 +3116,24 @@ msgstr "Köhnə kohortlar"
 msgctxt "ui.search"
 msgid "Axtarılır…"
 msgstr "Axtarılır…"
+
+msgid "Redaktə et"
+msgstr "Redaktə et"
+
+msgid "Bölgünü redaktə et"
+msgstr "Bölgünü redaktə et"
+
+msgid "Fəaliyyəti çıxar"
+msgstr "Fəaliyyəti çıxar"
+
+msgid "Düzəliş açıqdır"
+msgstr "Düzəliş açıqdır"
+
+msgid "Səbəb və qeyd məcburidir."
+msgstr "Səbəb və qeyd məcburidir."
+
+msgid "Bölgü yeni cəmə uyğun azaldılsın (ən son təyinatdan başlayaraq)?"
+msgstr "Bölgü yeni cəmə uyğun azaldılsın (ən son təyinatdan başlayaraq)?"
+
+msgid "«%(activity)s» sətirdən çıxarılsın? Bu fəaliyyətin bölgüsü də silinəcək."
+msgstr "«%(activity)s» sətirdən çıxarılsın? Bu fəaliyyətin bölgüsü də silinəcək."
