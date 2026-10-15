@@ -4,7 +4,8 @@ Bir sətir = bir açar (``core.runtime_settings.SPECS``). Sətir YOXDURSA kodun 
 sətir varsa onun ``value``-su. Tarixçə audit jurnalındadır (``runtime_settings.save_values``).
 Cədvəl tenant-sız (bütün sistemə aiddir) — RLS siyasəti yoxdur; yazmaq yalnız RİM rəhbəri / superadmin.
 
-⚠️ ``journal.mark_edit_hours`` açarını Postgres trigger-i də oxuyur (registrar 0084) — açar adını dəyişməyin.
+⚠️ ``journal.mark_edit_minutes`` (əsas) və köhnə ``journal.mark_edit_hours`` (fallback) açarlarını Postgres
+trigger-i də oxuyur (registrar 0089; əvvəl 0084) — açar adlarını dəyişməyin.
 """
 
 from __future__ import annotations

@@ -1,7 +1,7 @@
 {% load journal_names i18n %}
 {% comment %}Kurs işi tabı (mockup): solda qeydiyyat siyahısı, sağda "Yeni kurs işi"
-formu. Sətirdəki ✎ formu doldurur (yalnız 2 saat pəncərəsi içində); bal 0-100
-server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
+formu. Sətirdəki ✎ formu doldurur (yalnız mark_edit_window içində, defolt 120 dəq.); bal 0-100
+server tərəfdə clamp olunur, qeyd pəncərədən sonra dondurulur.{% endcomment %}
 <div class="jd2-split jd2-split--cw">
     <div class="jd2-cw-list">
         <div class="jd2-panel-label jd2-cw-listhead">
@@ -58,9 +58,9 @@ server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
                                 data-topic="{{ row.work.topic }}"
                                 data-score="{% if row.work.score is not None %}{{ row.work.score|floatformat:'-2' }}{% endif %}"
                                 data-date="{% if row.work.submitted_on %}{{ row.work.submitted_on|date:'Y-m-d' }}{% endif %}"
-                                title="{% blocktrans with h=mark_edit_hours|default:2 context 'registrar.journal' %}Redaktə ({{ h }} saat pəncərəsi){% endblocktrans %}">✎</button>
+                                title="{% blocktrans with w=mark_edit_window_label context 'registrar.journal' %}Redaktə (pəncərə: {{ w }}){% endblocktrans %}">✎</button>
                         {% else %}
-                        <i class="fas fa-lock jcell-lock" title="{% blocktrans with h=mark_edit_hours|default:2 context 'registrar.journal' %}{{ h }} saat pəncərəsi bağlanıb{% endblocktrans %}"></i>
+                        <i class="fas fa-lock jcell-lock" title="{% blocktrans with w=mark_edit_window_label context 'registrar.journal' %}Redaktə pəncərəsi ({{ w }}) bağlanıb{% endblocktrans %}"></i>
                         {% endif %}
                     </td>
                     {% endif %}
@@ -110,7 +110,7 @@ server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
                 <button type="submit" class="jd2-apply-btn">{% trans "Tətbiq et" context "registrar.journal" %}</button>
                 <button type="reset" class="jd2-cancel-btn" data-jd-cw-reset>{% trans "İmtina et" context "registrar.journal" %}</button>
             </div>
-            <div class="jd2-cw-note">{% blocktrans with h=mark_edit_hours|default:2 context "registrar.journal" %}Kurs işi balı yekun cədvəldə ayrıca sütunda göstərilir. Yazılan qeyd {{ h }} saat sonra kilidlənir.{% endblocktrans %}</div>
+            <div class="jd2-cw-note">{% blocktrans with w=mark_edit_window_label context "registrar.journal" %}Kurs işi balı yekun cədvəldə ayrıca sütunda göstərilir. Yazılan qeyd {{ w }} sonra kilidlənir.{% endblocktrans %}</div>
         </form>
     </div>
     {% endif %}

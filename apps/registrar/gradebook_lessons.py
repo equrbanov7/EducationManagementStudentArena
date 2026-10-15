@@ -19,7 +19,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import pgettext
 
-from apps.registrar import grade_audit
+from apps.registrar import grade_audit, journal_edit_windows
 from apps.registrar.models import CourseOffering, Lesson, LessonKind, LessonMark
 
 from .gradebook import (  # noqa: F401
@@ -127,7 +127,7 @@ def create_lesson(
 ):
     """Add a held session. ``instructor`` bu dərsin müəllimi (boşdursa açılışınkı);
     ``room`` dərsin otağı (opsional — köhnə dərslərdə yoxdur);
-    ``allow_past`` İKT rəhbəri/seed üçün keçmiş tarixi keçir.
+    ``allow_past`` İKT rəhbəri/seed/backfill üçün keçmiş tarixi (gecikmiş yazı həddini də) keçir.
 
     ``slot`` — cədvəl slotu yolu: «Aktivləşdir» (UNEC P1-1, bax ``journal_activation``) və slotdan
     doldurulmuş «Yeni dərs» modalı (gizli ``slot_id``, bax ``journal_lesson_prefill``): saat və
@@ -146,9 +146,11 @@ def create_lesson(
     parsed = _coerce_date(date)
     if parsed is None:
         raise LessonRuleError("Dərs tarixi düzgün deyil.")
-    if not allow_past and parsed < timezone.localdate():
-        raise LessonRuleError("Keçmiş tarixə dərs əlavə etmək olmaz.")
     if not allow_past:
+        # Gecikmiş yazı həddi (``journal.late_entry_days``, defolt 0 = yalnız bu gün və irəli).
+        error = journal_edit_windows.past_date_error(parsed)
+        if error:
+            raise LessonRuleError(error)
         ensure_date_within_period(offering, parsed)
     if slot is not None:
         from apps.registrar import journal_activation
@@ -217,7 +219,7 @@ def update_lesson(
     by_user=None,
     audit=True,
 ) -> bool:
-    """Səhv açılmış dərsi düzəlt (2 saat içində). ``allow_locked``/``allow_past``
+    """Səhv açılmış dərsi düzəlt (``lesson_edit_window`` içində, defolt 120 dəqiqə). ``allow_locked``/``allow_past``
     pəncərəni + keçmiş-tarixi keçir (İKT/superuser); yayımlanmış jurnal yenə kilidli.
 
     Audit 2026-09-28 J-02: ``create_lesson`` ilə EYNİ qaydalar — saat 1..``MAX_SLOT_HOURS``
@@ -237,9 +239,10 @@ def update_lesson(
         parsed = _coerce_date(date)
         if parsed is None:
             raise LessonRuleError("Dərs tarixi düzgün deyil.")
-        if parsed < timezone.localdate() and not allow_past:
-            raise LessonRuleError("Dərs tarixi bu gündən əvvəl ola bilməz.")
         if not allow_past:
+            error = journal_edit_windows.past_date_error(parsed)
+            if error:
+                raise LessonRuleError(error)
             ensure_date_within_period(lesson.offering, parsed)
         lesson.date = parsed
         fields.append("date")
@@ -320,7 +323,7 @@ def _audit_lesson_update(offering, lesson, before, by_user):
 
 @transaction.atomic
 def delete_lesson(*, lesson, by_user=None, allow_locked=False) -> bool:
-    """Səhv açılmış dərsi sil (2 saat içində; ``allow_locked`` İKT/superuser üçün keçir).
+    """Səhv açılmış dərsi sil (``lesson_edit_window`` içində; ``allow_locked`` İKT/superuser üçün keçir).
     İşarələr kaskadla silinir; əməliyyat audit tarixçəsinə düşür."""
     if journal_is_locked(lesson.offering) or (not can_edit_lesson(lesson) and not allow_locked):
         return False

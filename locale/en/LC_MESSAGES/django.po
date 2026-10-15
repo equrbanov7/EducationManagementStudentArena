@@ -97589,3 +97589,124 @@ msgstr "Until this date the student's status is «academic leave»; on return, �
 msgctxt "accounts.groups"
 msgid "%%d qrupdan çıxıb (məzuniyyət / xaric)"
 msgstr "%%d left the group (leave / expelled)"
+
+msgctxt "core.runtime_settings"
+msgid "Müəllim dərsi yaratdıqdan sonra bu qədər dəqiqə ərzində onun tarixini, növünü, mövzusunu, saatını dəyişə və ya dərsi silə bilər (120 dəqiqə = 2 saat). Sonra yalnız rəsmi düzəliş yolu."
+msgstr "After creating a lesson, the teacher can change its date, type, topic and time or delete it within this many minutes (120 minutes = 2 hours). After that, only the official correction path."
+
+msgctxt "core.runtime_settings"
+msgid "Müəllimin yazdığı q/b, i/e və bal yazıldıqdan bu qədər dəqiqə sonra donur — sonra yalnız rəsmi düzəliş yolu. Verilənlər bazası da eyni müddəti yoxlayır (120 dəqiqə = 2 saat)."
+msgstr "Absences, attendance marks and scores entered by the teacher freeze this many minutes after entry — after that, only the official correction path. The database checks the same window (120 minutes = 2 hours)."
+
+msgctxt "core.runtime_settings"
+msgid "Dərs tarixindən sonra gecikmiş yazı müddəti"
+msgstr "Late entry period after the lesson date"
+
+msgctxt "core.runtime_settings"
+msgid "0 — dərs və yeni q/b, i/e, bal yalnız dərsin öz günündə yazılır. N — müəllim dərs tarixindən ən çox N gün sonra həmin tarixə dərs aça və yeni qeyd yaza bilər; müddət bitəndə yazı bağlanır. RİM rəhbərinin rəsmi düzəliş yolu bu həddə tabe deyil."
+msgstr "0 — the lesson and new absences, attendance marks and scores are entered only on the lesson day itself. N — the teacher can open a lesson for that date and enter new marks up to N days after the lesson date; when the period ends, entry is closed. The official correction path of the head of the Registrar's Office is not bound by this limit."
+
+msgctxt "core.runtime_settings"
+msgid "Aktivləşdirmədən sonra yazı müddəti"
+msgstr "Entry period after activation"
+
+msgctxt "core.runtime_settings"
+msgid "Yalnız «Aktivləşdir» yanılıdırsa: müəllim dərsi aktivləşdirdikdən (jurnalda açdıqdan) sonra q/b, i/e və balı bu qədər dəqiqə ərzində yazmalıdır; sonra həmin dərsə yeni qeyd yazılmır. Əvvəlcədən açılmış dərsdə müddət dərsin başlama saatından sayılır."
+msgstr "Only when «Activate» is on: after activating (opening) the lesson in the journal, the teacher must enter absences, attendance marks and scores within this many minutes; after that, no new marks can be entered for that lesson. For a lesson opened in advance, the period counts from the lesson start time."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "%(n)s saat"
+msgstr "%(n)s h"
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "%(h)s saat %(m)s dəqiqə"
+msgstr "%(h)s h %(m)s min"
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "%(n)s dəqiqə"
+msgstr "%(n)s min"
+
+msgctxt "registrar.journal_timing"
+msgid "Keçmiş tarixə dərs əlavə etmək olmaz."
+msgstr "You cannot add a lesson for a past date."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Dərs tarixi ən çox %(d)s gün geriyə ola bilər — ən erkən %(date)s. Daha köhnə tarix üçün RİM-ə müraciət edin."
+msgstr "The lesson date can be at most %(d)s day(s) back — the earliest is %(date)s. For an older date, contact the Registrar's Office."
+
+msgctxt "registrar.journal_timing"
+msgid "Gələcək tarixli dərsə qeyd hələ yazıla bilməz."
+msgstr "Marks cannot be entered yet for a lesson with a future date."
+
+msgctxt "registrar.journal_timing"
+msgid "Yeni qeyd yalnız dərsin öz günündə yazılır — keçmiş dərsə yazmaq olmaz."
+msgstr "New marks are entered only on the lesson day itself — a past lesson cannot be filled in."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Dərs tarixindən %(d)s gündən çox keçib — %(date)s tarixli dərsə yeni qeyd yazmaq olmaz."
+msgstr "More than %(d)s day(s) have passed since the lesson date — new marks cannot be entered for the lesson of %(date)s."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Dərs aktivləşdiriləndən %(w)s keçib — q/b, i/e və bal yalnız aktivləşdirmədən sonrakı %(w)s ərzində yazılır."
+msgstr "%(w)s have passed since the lesson was activated — absences, attendance marks and scores are entered only within %(w)s after activation."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Redaktə / sil (pəncərə: %(w)s)"
+msgstr "Edit / delete (window: %(w)s)"
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Davamiyyət dərs günü və ondan sonra ən çox %(d)s gün ərzində qeyd edilə bilər · yazılmış qeyd %(w)s sonra kilidlənir — düzəliş üçün Tyutor xidmətinə yazılı müraciət edilir."
+msgstr "Attendance can be recorded on the lesson day and up to %(d)s day(s) after it · a recorded mark locks after %(w)s — for a correction, submit a written request to the Tutor service."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Davamiyyət yalnız dərs günü qeyd edilə bilər · yazılmış qeyd %(w)s sonra kilidlənir — düzəliş üçün Tyutor xidmətinə yazılı müraciət edilir."
+msgstr "Attendance can be recorded only on the lesson day · a recorded mark locks after %(w)s — for a correction, submit a written request to the Tutor service."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "aktivləşdirilmiş dərsə qeydlər aktivləşdirmədən sonra %(a)s ərzində yazılır."
+msgstr "marks for an activated lesson are entered within %(a)s after activation."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Keçmiş tarixə dərs ən çox %(d)s gün geriyə açmaq olar."
+msgstr "A lesson can be opened for a past date at most %(d)s day(s) back."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Bu dərs kilidlənib (%(w)s keçib). Tarix/tip/saat/mövzu/müəllim dəyişikliyi VƏ YA dərsin silinməsi rəsmi sənədlə (təqdimat) audit olunur."
+msgstr "This lesson is locked (%(w)s have passed). Changing the date/type/time/topic/teacher OR deleting the lesson is audited with an official document (submission)."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Dərs əlavə edildikdə davamiyyət cədvəlinə yeni tarix sütunu açılır; qeydlər dərs günü və ondan sonra ən çox %(d)s gün ərzində aparılır. Səhv açılmış dərsi %(w)s ərzində silmək/düzəltmək olar."
+msgstr "Adding a lesson opens a new date column in the attendance table; marks are entered on the lesson day and up to %(d)s day(s) after it. A lesson opened by mistake can be deleted/fixed within %(w)s."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Dərs əlavə edildikdə davamiyyət cədvəlinə yeni tarix sütunu açılır və qeydlər həmin gün aparılır. Səhv açılmış dərsi %(w)s ərzində silmək/düzəltmək olar."
+msgstr "Adding a lesson opens a new date column in the attendance table and marks are entered on that day. A lesson opened by mistake can be deleted/fixed within %(w)s."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Redaktə (pəncərə: %(w)s)"
+msgstr "Edit (window: %(w)s)"
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Redaktə pəncərəsi (%(w)s) bağlanıb"
+msgstr "The edit window (%(w)s) has closed"
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Kurs işi balı yekun cədvəldə ayrıca sütunda göstərilir. Yazılan qeyd %(w)s sonra kilidlənir."
+msgstr "The coursework score is shown in a separate column of the final table. A recorded entry locks after %(w)s."

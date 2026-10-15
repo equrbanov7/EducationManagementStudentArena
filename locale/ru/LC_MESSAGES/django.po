@@ -97773,3 +97773,124 @@ msgstr "До этой даты статус студента — «академ�
 msgctxt "accounts.groups"
 msgid "%%d qrupdan çıxıb (məzuniyyət / xaric)"
 msgstr "%%d вышли из группы (отпуск / отчисление)"
+
+msgctxt "core.runtime_settings"
+msgid "Müəllim dərsi yaratdıqdan sonra bu qədər dəqiqə ərzində onun tarixini, növünü, mövzusunu, saatını dəyişə və ya dərsi silə bilər (120 dəqiqə = 2 saat). Sonra yalnız rəsmi düzəliş yolu."
+msgstr "После создания занятия преподаватель в течение стольких минут может изменить его дату, тип, тему, время или удалить его (120 минут = 2 часа). Затем — только официальная корректировка."
+
+msgctxt "core.runtime_settings"
+msgid "Müəllimin yazdığı q/b, i/e və bal yazıldıqdan bu qədər dəqiqə sonra donur — sonra yalnız rəsmi düzəliş yolu. Verilənlər bazası da eyni müddəti yoxlayır (120 dəqiqə = 2 saat)."
+msgstr "Отметки о пропуске, присутствии и баллы, внесённые преподавателем, замораживаются через столько минут после записи — затем только официальная корректировка. База данных проверяет тот же срок (120 минут = 2 часа)."
+
+msgctxt "core.runtime_settings"
+msgid "Dərs tarixindən sonra gecikmiş yazı müddəti"
+msgstr "Срок поздней записи после даты занятия"
+
+msgctxt "core.runtime_settings"
+msgid "0 — dərs və yeni q/b, i/e, bal yalnız dərsin öz günündə yazılır. N — müəllim dərs tarixindən ən çox N gün sonra həmin tarixə dərs aça və yeni qeyd yaza bilər; müddət bitəndə yazı bağlanır. RİM rəhbərinin rəsmi düzəliş yolu bu həddə tabe deyil."
+msgstr "0 — занятие и новые отметки (пропуск, присутствие, балл) вносятся только в сам день занятия. N — преподаватель может открыть занятие на эту дату и внести новые отметки не позднее чем через N дней после даты занятия; по истечении срока запись закрывается. Официальная корректировка руководителя регистратуры этому лимиту не подчиняется."
+
+msgctxt "core.runtime_settings"
+msgid "Aktivləşdirmədən sonra yazı müddəti"
+msgstr "Срок записи после активации"
+
+msgctxt "core.runtime_settings"
+msgid "Yalnız «Aktivləşdir» yanılıdırsa: müəllim dərsi aktivləşdirdikdən (jurnalda açdıqdan) sonra q/b, i/e və balı bu qədər dəqiqə ərzində yazmalıdır; sonra həmin dərsə yeni qeyd yazılmır. Əvvəlcədən açılmış dərsdə müddət dərsin başlama saatından sayılır."
+msgstr "Только если включена «Активировать»: после активации (открытия) занятия в журнале преподаватель должен внести пропуски, присутствие и баллы в течение стольких минут; затем новые отметки по этому занятию не вносятся. Для занятия, открытого заранее, срок отсчитывается от времени начала занятия."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "%(n)s saat"
+msgstr "%(n)s ч"
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "%(h)s saat %(m)s dəqiqə"
+msgstr "%(h)s ч %(m)s мин"
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "%(n)s dəqiqə"
+msgstr "%(n)s мин"
+
+msgctxt "registrar.journal_timing"
+msgid "Keçmiş tarixə dərs əlavə etmək olmaz."
+msgstr "Нельзя добавить занятие на прошедшую дату."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Dərs tarixi ən çox %(d)s gün geriyə ola bilər — ən erkən %(date)s. Daha köhnə tarix üçün RİM-ə müraciət edin."
+msgstr "Дата занятия может быть не более чем на %(d)s дн. назад — самая ранняя %(date)s. Для более ранней даты обратитесь в регистратуру."
+
+msgctxt "registrar.journal_timing"
+msgid "Gələcək tarixli dərsə qeyd hələ yazıla bilməz."
+msgstr "Для занятия с будущей датой отметки пока вносить нельзя."
+
+msgctxt "registrar.journal_timing"
+msgid "Yeni qeyd yalnız dərsin öz günündə yazılır — keçmiş dərsə yazmaq olmaz."
+msgstr "Новые отметки вносятся только в сам день занятия — в прошедшее занятие вносить нельзя."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Dərs tarixindən %(d)s gündən çox keçib — %(date)s tarixli dərsə yeni qeyd yazmaq olmaz."
+msgstr "С даты занятия прошло более %(d)s дн. — в занятие от %(date)s новые отметки вносить нельзя."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Dərs aktivləşdiriləndən %(w)s keçib — q/b, i/e və bal yalnız aktivləşdirmədən sonrakı %(w)s ərzində yazılır."
+msgstr "С активации занятия прошло %(w)s — пропуски, присутствие и баллы вносятся только в течение %(w)s после активации."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Redaktə / sil (pəncərə: %(w)s)"
+msgstr "Изменить / удалить (окно: %(w)s)"
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Davamiyyət dərs günü və ondan sonra ən çox %(d)s gün ərzində qeyd edilə bilər · yazılmış qeyd %(w)s sonra kilidlənir — düzəliş üçün Tyutor xidmətinə yazılı müraciət edilir."
+msgstr "Посещаемость отмечается в день занятия и не позднее %(d)s дн. после него · запись блокируется через %(w)s — для исправления подаётся письменное обращение в службу тьюторов."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Davamiyyət yalnız dərs günü qeyd edilə bilər · yazılmış qeyd %(w)s sonra kilidlənir — düzəliş üçün Tyutor xidmətinə yazılı müraciət edilir."
+msgstr "Посещаемость отмечается только в день занятия · запись блокируется через %(w)s — для исправления подаётся письменное обращение в службу тьюторов."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "aktivləşdirilmiş dərsə qeydlər aktivləşdirmədən sonra %(a)s ərzində yazılır."
+msgstr "отметки в активированное занятие вносятся в течение %(a)s после активации."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Keçmiş tarixə dərs ən çox %(d)s gün geriyə açmaq olar."
+msgstr "Занятие на прошедшую дату можно открыть не более чем на %(d)s дн. назад."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Bu dərs kilidlənib (%(w)s keçib). Tarix/tip/saat/mövzu/müəllim dəyişikliyi VƏ YA dərsin silinməsi rəsmi sənədlə (təqdimat) audit olunur."
+msgstr "Занятие заблокировано (прошло %(w)s). Изменение даты/типа/времени/темы/преподавателя ИЛИ удаление занятия проводится с официальным документом (представлением) и фиксируется в аудите."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Dərs əlavə edildikdə davamiyyət cədvəlinə yeni tarix sütunu açılır; qeydlər dərs günü və ondan sonra ən çox %(d)s gün ərzində aparılır. Səhv açılmış dərsi %(w)s ərzində silmək/düzəltmək olar."
+msgstr "При добавлении занятия в таблице посещаемости открывается новый столбец даты; отметки вносятся в день занятия и не позднее %(d)s дн. после него. Ошибочно открытое занятие можно удалить/исправить в течение %(w)s."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Dərs əlavə edildikdə davamiyyət cədvəlinə yeni tarix sütunu açılır və qeydlər həmin gün aparılır. Səhv açılmış dərsi %(w)s ərzində silmək/düzəltmək olar."
+msgstr "При добавлении занятия в таблице посещаемости открывается новый столбец даты, и отметки вносятся в тот же день. Ошибочно открытое занятие можно удалить/исправить в течение %(w)s."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Redaktə (pəncərə: %(w)s)"
+msgstr "Изменить (окно: %(w)s)"
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Redaktə pəncərəsi (%(w)s) bağlanıb"
+msgstr "Окно редактирования (%(w)s) закрыто"
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Kurs işi balı yekun cədvəldə ayrıca sütunda göstərilir. Yazılan qeyd %(w)s sonra kilidlənir."
+msgstr "Балл курсовой работы показывается в отдельной колонке итоговой таблицы. Запись блокируется через %(w)s."
