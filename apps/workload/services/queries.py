@@ -35,15 +35,40 @@ def task_rows(task, *, season: str = "", search: str = ""):
     return queryset
 
 
+#: Sətir redaktə modalının saat sahələri (2026-10-15: modal əvvəl bunları DOLDURMURDU — «Redaktə»
+#: saatları 0, qrupları/ixtisası boş göndərirdi).
+_ROW_HOUR_FIELDS = (
+    "lecture_plan",
+    "lecture_total",
+    "seminar_plan",
+    "seminar_total",
+    "lab_plan",
+    "lab_total",
+    "consult_hours",
+    "exam_hours",
+    "thesis_hours",
+    "postgrad_hours",
+    "practice_research_hours",
+    "practice_production_hours",
+    "credits_value",
+)
+
+
 def serialize_rows(task, *, season: str = "", search: str = "") -> list[dict]:
+    from .tasks import _amendment_target_row_ids
+
     rows = list(task_rows(task, season=season, search=search))
     balance = balance_for_rows(rows)
+    amend_targets = _amendment_target_row_ids(task) if task.status == TaskStatus.AMENDED else set()
     payload = []
     for row in rows:
         info = balance.get(str(row.pk), {})
         payload.append(
             {
                 "id": str(row.pk),
+                "hours": {field: int(getattr(row, field, 0) or 0) for field in _ROW_HOUR_FIELDS},
+                "specialty_id": str(row.specialty_id) if row.specialty_id else "",
+                "is_amend_target": row.pk in amend_targets,
                 "season": row.season,
                 "season_label": _SEASON_LABELS.get(row.season, row.season),
                 "subject": row.subject_label,
@@ -175,9 +200,23 @@ def teacher_workload_rows(*, organization, teacher, academic_year: str = "", sea
     rows = []
     for assignment in queryset:
         row = assignment.row
+        group_ids = [group.pk for group in row.groups.all()] or [None]
+        offering_id = next(
+            (
+                offering_map[key]
+                for key in ((row.subject_id, row.period_id, gid) for gid in group_ids)
+                if key in offering_map
+            ),
+            "",
+        )
         rows.append(
             {
                 "id": str(assignment.pk),
+                # 2026-10-15: «Mənim dərs yüküm» fənn + qrup (tapşırıq sətri) üzrə birləşir və redaktə keçidi
+                # kafedraya görə qurulur (``services.my_workload_lines``).
+                "row_id": str(row.pk),
+                "task_id": str(row.task_id),
+                "chair_id": str(row.task.chair_id),
                 "academic_year": row.task.academic_year,
                 "season": row.season,
                 "season_label": _SEASON_LABELS.get(row.season, row.season),
@@ -190,14 +229,19 @@ def teacher_workload_rows(*, organization, teacher, academic_year: str = "", sea
                 "degree_level": row.degree_level,
                 "is_hourly_paid": assignment.is_hourly_paid,
                 "groups_note": assignment.groups_note,
-                "offering_id": offering_map.get((row.subject_id, row.period_id)) or "",
+                "offering_id": offering_id,
             }
         )
     return rows
 
 
 def _offering_links(organization, assignments) -> dict:
-    """(subject_id, period_id) → offering id — jurnal keçidi üçün."""
+    """(subject_id, period_id, group_id) → offering id — jurnal keçidi üçün.
+
+    2026-10-15: açar əvvəl (fənn, semestr) idi — eyni fənnin «631/5K» və «631/5K ing» sətirləri EYNİ
+    (təsadüfi) qrupun jurnalına aparırdı. İndi sətrin öz qrupunun açılışıdır; ``group_id=None`` —
+    qrupsuz açılış (qrupsuz sətir üçün köhnə davranış).
+    """
     pairs = {
         (assignment.row.subject_id, assignment.row.period_id)
         for assignment in assignments
@@ -210,9 +254,11 @@ def _offering_links(organization, assignments) -> dict:
     for subject_id, period_id in pairs:
         lookup |= Q(subject_id=subject_id, period_id=period_id)
     rows = (
-        CourseOffering.objects.filter(organization=organization).filter(lookup).values("id", "subject_id", "period_id")
+        CourseOffering.objects.filter(organization=organization)
+        .filter(lookup)
+        .values("id", "subject_id", "period_id", "group_id")
     )
-    return {(row["subject_id"], row["period_id"]): str(row["id"]) for row in rows}
+    return {(row["subject_id"], row["period_id"], row["group_id"]): str(row["id"]) for row in rows}
 
 
 def teacher_workload_summary(*, organization, teacher, academic_year: str = "", season: str = "") -> dict:

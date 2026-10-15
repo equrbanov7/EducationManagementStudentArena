@@ -145,8 +145,11 @@ def _notify_teachers(task) -> int:
 
 
 @transaction.atomic
-def confirm_distribution(*, task, actor, allow_vacant: bool = True, request=None) -> dict:
-    """Bölgünü təsdiqlə → ``distributed`` + offering sinxronu + bildirişlər."""
+def confirm_distribution(*, task, actor, allow_vacant: bool = True, request=None, notify: bool = True) -> dict:
+    """Bölgünü təsdiqlə → ``distributed`` + offering sinxronu + bildirişlər.
+
+    ``notify=False`` — yalnız operator məlumat düzəlişi (``fix_task_row_hours``): kafedranın bütün
+    müəllimlərinə təkrar «Dərs yükü təyin edildi» bildirişi getmir (UI yolu defoltla bildirir)."""
     ensure_can_distribute(actor, task.chair_id)
     # Audit 2026-09-13 tests F-T1: təsdiq də eyni zəncir qapısından keçir —
     # göndərilməmiş TŞ qaralaması burada da «distributed» ola bilməz.
@@ -178,7 +181,7 @@ def confirm_distribution(*, task, actor, allow_vacant: bool = True, request=None
     task.save(update_fields=["status", "distributed_by", "distributed_at", "updated_at"])
 
     sync = sync_offerings(task, actor=actor, request=request)
-    notified = _notify_teachers(task)
+    notified = _notify_teachers(task) if notify else 0
 
     log_action(
         AuditAction.UPDATE,

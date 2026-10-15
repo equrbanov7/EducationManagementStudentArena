@@ -98,6 +98,8 @@ class Result:
     slot_rows: list[SlotRow] = field(default_factory=list)
     lesson_rows: list[LessonRow] = field(default_factory=list)
     marks_rejected: int = 0
+    #: Qoşulmadan əvvəlki dərs üçün buraxılan (tələbə, dərs) cütləri (``include_late_joiners`` sönülü olanda).
+    late_skipped: int = 0
 
     @property
     def lesson_counts(self) -> Counter:
@@ -195,7 +197,7 @@ def _joined_on(enrollment):
     return None
 
 
-def _mark_present(offering, lesson_rows, actor, result: Result) -> None:
+def _mark_present(offering, lesson_rows, actor, result: Result, *, include_late_joiners: bool = False) -> None:
     from django.db.models import Exists, OuterRef
 
     from apps.registrar.gradebook import save_marks
@@ -219,8 +221,11 @@ def _mark_present(offering, lesson_rows, actor, result: Result) -> None:
         if lesson is None:
             continue
         for enrollment in enrollments:
+            if (lesson.pk, enrollment.pk) in marked:
+                continue
             joined = _joined_on(enrollment)
-            if (lesson.pk, enrollment.pk) in marked or (joined and joined > lesson.date):
+            if joined and joined > lesson.date and not include_late_joiners:
+                result.late_skipped += 1
                 continue
             entries.append(
                 {
@@ -246,7 +251,9 @@ def _mark_present(offering, lesson_rows, actor, result: Result) -> None:
     result.marks_rejected += max(0, len(entries) - int(outcome.get("written", 0)))
 
 
-def plan_lessons(*, organization, period, slots, actor, date_from, date_to, result: Result) -> None:
+def plan_lessons(
+    *, organization, period, slots, actor, date_from, date_to, result: Result, include_late_joiners: bool = False
+) -> None:
     """Hər gün × o gün keçirilən slot → mövcud dərsə bağla və ya yarat; sonra açılış üzrə «iə»."""
     from apps.registrar import gradebook, journal_topics
 
@@ -292,7 +299,7 @@ def plan_lessons(*, organization, period, slots, actor, date_from, date_to, resu
                     action = CREATE if lesson is not None else SKIPPED
                     rows.append(LessonRow(offering, day, slot, action, reason, lesson=lesson))
         if not locked:
-            _mark_present(offering, rows, actor, result)
+            _mark_present(offering, rows, actor, result, include_late_joiners=include_late_joiners)
         result.lesson_rows.extend(rows)
 
 
@@ -306,6 +313,7 @@ def run_backfill(
     actor,
     specs=None,
     replace_slots: bool = False,
+    include_late_joiners: bool = False,
     apply: bool = False,
 ) -> Result:
     """Bir tranzaksiya: ``apply=False`` (defolt) → hər şey hesablanır və GERİ QAYTARILIR (dry-run)."""
@@ -335,6 +343,7 @@ def run_backfill(
                 date_from=date_from,
                 date_to=date_to,
                 result=result,
+                include_late_joiners=include_late_joiners,
             )
         if not apply:
             transaction.set_rollback(True)

@@ -97142,6 +97142,34 @@ msgctxt "accounts.groups"
 msgid "%%d qrupdan çıxıb (məzuniyyət / xaric)"
 msgstr "%%d qrupdan çıxıb (məzuniyyət / xaric)"
 
+msgctxt "accounts.workload"
+msgid "Redaktə"
+msgstr "Redaktə"
+
+msgctxt "accounts.workload"
+msgid "Redaktə et"
+msgstr "Redaktə et"
+
+msgctxt "accounts.workload"
+msgid "Bölgü təsdiqlənib. Sətri, saatı və ya müəllimi dəyişə, fəaliyyəti çıxara, sətir əlavə edə bilərsiniz — hər dəyişiklikdə düzəliş səbəbi və qeydi soruşulur, tarixçə saxlanılır."
+msgstr "Bölgü təsdiqlənib. Sətri, saatı və ya müəllimi dəyişə, fəaliyyəti çıxara, sətir əlavə edə bilərsiniz — hər dəyişiklikdə düzəliş səbəbi və qeydi soruşulur, tarixçə saxlanılır."
+
+msgctxt "accounts.workload"
+msgid "Düzəliş açıqdır: dəyişikliklər müəllimə və jurnala dərhal düşür. Bitirəndə «Bölgünü təsdiqlə» ilə sənədi yenidən təsdiqləyin."
+msgstr "Düzəliş açıqdır: dəyişikliklər müəllimə və jurnala dərhal düşür. Bitirəndə «Bölgünü təsdiqlə» ilə sənədi yenidən təsdiqləyin."
+
+msgctxt "accounts.workload_overview"
+msgid "Redaktə et"
+msgstr "Redaktə et"
+
+msgctxt "accounts.workload_overview"
+msgid "Əməl"
+msgstr "Əməl"
+
+msgctxt "accounts.workload_center"
+msgid "Bölgünü redaktə et"
+msgstr "Bölgünü redaktə et"
+
 msgctxt "core.runtime_settings"
 msgid "Müəllim dərsi yaratdıqdan sonra bu qədər dəqiqə ərzində onun tarixini, növünü, mövzusunu, saatını dəyişə və ya dərsi silə bilər (120 dəqiqə = 2 saat). Sonra yalnız rəsmi düzəliş yolu."
 msgstr "Müəllim dərsi yaratdıqdan sonra bu qədər dəqiqə ərzində onun tarixini, növünü, mövzusunu, saatını dəyişə və ya dərsi silə bilər (120 dəqiqə = 2 saat). Sonra yalnız rəsmi düzəliş yolu."

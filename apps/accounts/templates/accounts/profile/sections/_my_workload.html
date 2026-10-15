@@ -28,7 +28,8 @@ CSS/JS XARİCİ fayllardadır və `profile.html`-dən yüklənir.
      data-rows-url="{{ my_workload_section.rows_url }}"
      data-export-url="{{ my_workload_section.export_url }}"
      data-academic-year="{{ my_workload_section.academic_year }}"
-     data-journal-base-url="{{ my_workload_section.journal_base_url }}">
+     data-journal-base-url="{{ my_workload_section.journal_base_url }}"
+     data-can-edit="{% if my_workload_section.can_edit_any %}1{% else %}0{% endif %}">
 
   <header class="wlm__head">
     <div>
@@ -133,18 +134,23 @@ CSS/JS XARİCİ fayllardadır və `profile.html`-dən yüklənir.
           <th scope="col">{% trans "Forma" context "accounts.workload" %}</th>
           <th scope="col">{% trans "Səviyyə" context "accounts.workload" %}</th>
           <th scope="col">{% trans "Jurnal" context "accounts.workload" %}</th>
+          {% if my_workload_section.can_edit_any %}<th scope="col"><span class="sr-only">{% trans "Redaktə" context "accounts.workload" %}</span></th>{% endif %}
         </tr>
       </thead>
+      {% comment %}2026-10-15 (sahib: «631/5K-nı birləşdir … məndə birlikdədir»): bir fənn + qrup = BİR xətt,
+      fəaliyyətlər açılışda («Mühazirə 30 · Seminar 15»), saat — cəm. «Redaktə et» yalnız `workload.distribute`
+      əhatəsindəki kafedranın xəttində (kafedra müdiri / RİM); müəllim üçün cədvəl yalnız-oxudur.{% endcomment %}
       <tbody data-wlm-rows>
-        {% for row in my_workload_section.rows %}
+        {% for line in my_workload_section.lines %}
         <tr>
-          <td>{{ row.subject }}</td>
-          <td>{{ row.groups }}</td>
-          <td>{{ row.activity_label }}</td>
-          <td class="wlm-table__num">{{ row.hours }}</td>
-          <td>{{ row.education_form }}</td>
-          <td>{{ row.degree_level }}</td>
-          <td>{% if row.offering_id %}<a href="{{ my_workload_section.journal_base_url }}{{ row.offering_id }}/">{% trans "Aç" context "accounts.workload" %}</a>{% endif %}</td>
+          <td>{{ line.subject }}</td>
+          <td>{{ line.groups }}</td>
+          <td>{{ line.activity_label }}</td>
+          <td class="wlm-table__num">{{ line.hours }}</td>
+          <td>{{ line.education_form_label }}</td>
+          <td>{{ line.degree_level_label }}</td>
+          <td>{% if line.offering_id %}<a href="{{ my_workload_section.journal_base_url }}{{ line.offering_id }}/">{% trans "Aç" context "accounts.workload" %}</a>{% endif %}</td>
+          {% if my_workload_section.can_edit_any %}<td>{% if line.edit_url %}<a class="wl-btn wl-btn--ghost wlm-edit" href="{{ line.edit_url }}">{% trans "Redaktə et" context "accounts.workload" %}</a>{% endif %}</td>{% endif %}
         </tr>
         {% endfor %}
       </tbody>
@@ -157,7 +163,7 @@ CSS/JS XARİCİ fayllardadır və `profile.html`-dən yüklənir.
               data-label-all="{% trans 'CƏMİ (bütün semestrlər)' context 'accounts.workload' %}"
               data-label-season="{% trans 'CƏMİ — {season} semestri' context 'accounts.workload' %}">{% trans "CƏMİ (bütün semestrlər)" context "accounts.workload" %}</th>
           <td class="wlm-table__num" data-wlm-total>{{ my_workload_section.summary.rows_total_hours|default:"0" }}</td>
-          <td colspan="3"></td>
+          <td colspan="{% if my_workload_section.can_edit_any %}4{% else %}3{% endif %}"></td>
         </tr>
       </tfoot>
     </table>

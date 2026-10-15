@@ -74,6 +74,11 @@ _KIND_RE = re.compile(
     re.IGNORECASE,
 )
 #: «1 yarımqrup» / «2-ci yarımqrup» — müəllim nişanından sonra gələn alt qrup qeydi (mətndən atılır).
+#: «ATMF XI blok:» / «ÜFS I blok:» / «SF II blok» / «ATMF:» — seçmə blokun prefiksi; açılışın fənni SEÇİLMİŞ
+#: fəndir («İnsan genetikası»), ona görə prefiks fənn adından atılır (2026-10-15: prefikslə oxşarlıq 0 idi).
+_BLOCK_PREFIX_RE = re.compile(
+    r"^\s*(?:ATMF|ÜFS|UFS|SF|SFB)\b\s*(?:[IVXL]+|\d+)?\s*\.?\s*(?:blok(?:u)?)?\s*[:.]?\s*", re.IGNORECASE
+)
 _HALF_GROUP_RE = re.compile(r"\b\d\s*(?:-?\s*c[iıuü])?\s*yar[ıi]m\s*qrup\b", re.IGNORECASE)
 _SUB_GROUP_TAIL_RE = re.compile(r"(?:^|[\s/])(\d{3,4})\s*[^\W\d_]+\s*-\s*(\d)\s*$")
 #: «Məmmədova.S» / «Həsənov.R.» — soyad və inisial nöqtə ilə yapışıq.
@@ -173,7 +178,7 @@ class SubjectText:
 
 def _clean_teacher(text: str) -> str:
     """«Əzizov  a S.» → «Əzizova S.»; «.Məmmədova L» → «Məmmədova L.»; «Yusifov A..» → «Yusifov A.»."""
-    tokens = [tok for tok in squash(text).strip(" .,").split(" ") if tok and tok != "."]
+    tokens = [tok for tok in squash(text).strip(" .,/").split(" ") if tok and tok not in (".", "/")]
     if not tokens:
         return ""
     initial = ""
@@ -225,6 +230,11 @@ def _kind_of(first: str, second: str) -> tuple[str, str]:
     return mapped[0], "combined"
 
 
+def _strip_block_prefix(subject: str) -> str:
+    stripped = _BLOCK_PREFIX_RE.sub("", subject, count=1).strip(" .,:/")
+    return stripped if len(stripped) >= 3 else subject
+
+
 def parse_subject_text(text) -> SubjectText:
     """Fənn hüceyrəsinin mətni → fənn adı + növ + müəllim nişanı + həftə işarəsi."""
     raw = str(text or "").replace("\t", " ")
@@ -256,13 +266,13 @@ def parse_subject_text(text) -> SubjectText:
     if kinds:
         match = kinds[-1]
         result.kind, result.kind_note = _kind_of(match.group(1), match.group(2))
-        result.subject = squash(raw[: match.start()]).strip(" .,(/")
+        result.subject = _strip_block_prefix(squash(raw[: match.start()]).strip(" .,(/"))
         result.teacher = _clean_teacher(raw[match.end() :])
         if not result.teacher and squash(raw[match.end() :]):
             result.kind_note = (result.kind_note + " teacher_unparsed").strip()
         return result
     result.subject, result.teacher = _split_trailing_teacher(raw)
-    result.subject = result.subject.strip(" .,")
+    result.subject = _strip_block_prefix(result.subject.strip(" .,"))
     return result
 
 

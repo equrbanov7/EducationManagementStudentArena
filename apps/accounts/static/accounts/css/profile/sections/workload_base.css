@@ -260,7 +260,7 @@
 /* Fəaliyyət qalıq zolağı */
 .wl-act {
   display: grid;
-  grid-template-columns: 130px minmax(80px, 1fr) auto auto;
+  grid-template-columns: 130px minmax(80px, 1fr) auto auto auto;
   gap: 10px;
   align-items: center;
   padding: 7px 0;

@@ -3131,3 +3131,24 @@ msgstr "Старые когорты"
 msgctxt "ui.search"
 msgid "Axtarılır…"
 msgstr "Поиск…"
+
+msgid "Redaktə et"
+msgstr "Изменить"
+
+msgid "Bölgünü redaktə et"
+msgstr "Изменить назначение"
+
+msgid "Fəaliyyəti çıxar"
+msgstr "Убрать вид занятий"
+
+msgid "Düzəliş açıqdır"
+msgstr "Корректировка открыта"
+
+msgid "Səbəb və qeyd məcburidir."
+msgstr "Причина и примечание обязательны."
+
+msgid "Bölgü yeni cəmə uyğun azaldılsın (ən son təyinatdan başlayaraq)?"
+msgstr "Уменьшить назначения до новой суммы (начиная с последнего)?"
+
+msgid "«%(activity)s» sətirdən çıxarılsın? Bu fəaliyyətin bölgüsü də silinəcək."
+msgstr "Убрать «%(activity)s» из строки? Назначения по этому виду занятий тоже будут удалены."

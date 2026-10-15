@@ -40,6 +40,7 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
      data-curriculum-url="{{ workload_distribution_section.curriculum_url }}"
      data-chair-id="{{ workload_distribution_section.chair_id }}"
      data-academic-year="{{ workload_distribution_section.academic_year }}"
+     data-focus-row="{{ workload_distribution_section.focus_row }}"
      data-can-manage="{% if workload_distribution_section.can_manage %}1{% else %}0{% endif %}"
      data-can-distribute="{% if workload_distribution_section.can_distribute %}1{% else %}0{% endif %}">
 
@@ -70,6 +71,12 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
     </div>
     <span class="wl__status" data-wl-status-chip hidden></span>
   </header>
+
+  {% comment %}2026-10-15: təsdiqlənmiş bölgünün redaktəsi — hər yazı düzəliş (səbəb + qeyd) ilə gedir;
+  mətni `workload_distribution_amend.js` statusa görə seçir (data-atributlar — xarici JS template-dən keçmir).{% endcomment %}
+  <p class="wl__amend-banner" role="status" data-wl-amend-banner hidden
+     data-text-distributed="{% trans 'Bölgü təsdiqlənib. Sətri, saatı və ya müəllimi dəyişə, fəaliyyəti çıxara, sətir əlavə edə bilərsiniz — hər dəyişiklikdə düzəliş səbəbi və qeydi soruşulur, tarixçə saxlanılır.' context 'accounts.workload' %}"
+     data-text-amended="{% trans 'Düzəliş açıqdır: dəyişikliklər müəllimə və jurnala dərhal düşür. Bitirəndə «Bölgünü təsdiqlə» ilə sənədi yenidən təsdiqləyin.' context 'accounts.workload' %}"></p>
 
   {# ── Süzgəc zolağı: kafedra + il + fəsil + axtarış ──────────────────── #}
   <form class="wl-filters" data-wl-filters novalidate>

@@ -75,14 +75,23 @@
         });
     }
 
-    function renderRows(rows) {
+    /* 2026-10-15 (sahib: «631/5K-nı birləşdir»): cədvəl `lines`-ı göstərir — bir fənn + qrup = bir xətt
+       («Mühazirə 30 · Seminar 15», saat = cəm). Köhnə cavabda (`lines` yoxdur) bölgü sətirləri olduğu kimi.
+       «Redaktə et» yalnız server `edit_url` veribsə (kafedra müdiri / RİM əhatəsi). */
+    function renderRows(rows, lines) {
         var body = q("[data-wlm-rows]");
         if (!body) return;
-        var base = (root() && root().dataset.journalBaseUrl) || "";
-        body.innerHTML = (rows || [])
+        var host = root();
+        var base = (host && host.dataset.journalBaseUrl) || "";
+        var canEdit = !!host && host.dataset.canEdit === "1";
+        body.innerHTML = (lines || rows || [])
             .map(function (row) {
                 var journal = row.offering_id
                     ? '<a href="' + esc(base + row.offering_id) + '/">' + esc(gettext("Aç")) + "</a>"
+                    : "";
+                var edit = row.edit_url
+                    ? '<a class="wl-btn wl-btn--ghost wlm-edit" href="' + esc(row.edit_url) + '">' +
+                      esc(gettext("Redaktə et")) + "</a>"
                     : "";
                 return (
                     "<tr>" +
@@ -90,9 +99,10 @@
                     "<td>" + esc(row.groups) + "</td>" +
                     "<td>" + esc(row.activity_label) + "</td>" +
                     '<td class="wlm-table__num">' + esc(row.hours) + "</td>" +
-                    "<td>" + esc(row.education_form) + "</td>" +
-                    "<td>" + esc(row.degree_level) + "</td>" +
+                    "<td>" + esc(row.education_form_label || row.education_form) + "</td>" +
+                    "<td>" + esc(row.degree_level_label || row.degree_level) + "</td>" +
                     "<td>" + journal + "</td>" +
+                    (canEdit ? "<td>" + edit + "</td>" : "") +
                     "</tr>"
                 );
             })
@@ -117,7 +127,7 @@
                 encodeURIComponent(activeSeason())
         )
             .then(function (payload) {
-                renderRows(payload.rows || []);
+                renderRows(payload.rows || [], payload.lines);
                 renderSummary(payload.summary);
                 renderTotal(payload.summary, payload.rows || []);
                 var exportLink = q("[data-wlm-export]");
