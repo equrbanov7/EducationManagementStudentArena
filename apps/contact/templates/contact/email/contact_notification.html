@@ -18,9 +18,7 @@
 {% trans "Admin paneldə cavablandır" as cta_label %}
 {% include "emails/_button.html" with url=reply_url label=cta_label fallback=False %}
 <p class="em-text" style="margin:0 0 16px;font-size:14px;line-height:1.6;"><a class="em-link" href="{{ detail_url }}" style="color:#1d4ed8;text-decoration:underline;">{% trans "Mesaj detalları" %} &rarr;</a></p>
-<p class="em-muted" style="margin:0;font-size:13px;line-height:1.6;color:#64748b;">{% blocktrans trimmed %}
-Cavab müştəriyə <strong>info@</strong> və ya <strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz görünməyəcək.
-{% endblocktrans %}</p>
+<p class="em-muted" style="margin:0;font-size:13px;line-height:1.6;color:#64748b;">{% trans "Cavab sistemin rəsmi poçt qutusundan gedəcək." %}</p>
 {% else %}
 <p class="em-muted" style="margin:0;font-size:13px;line-height:1.6;color:#64748b;">{% blocktrans %}Bu mesaja cavab vermək üçün {{ brand }} admin panelinə keçin.{% endblocktrans %}</p>
 {% endif %}

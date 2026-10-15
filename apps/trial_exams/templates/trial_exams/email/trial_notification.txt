@@ -12,5 +12,6 @@
 {{ request_obj.note }}
 {% endif %}{% if profile_detail_url %}
 {% trans "Sorğuya bax və faylı yüklə" %}: {{ profile_detail_url }}
-{% trans "Suallar əlavə olunduqda təsdiq göndər" %}: {{ reply_url }}{% endif %}{% endblock %}
+{% trans "Suallar əlavə olunduqda təsdiq göndər" %}: {{ reply_url }}
+{% trans "Cavab sistemin rəsmi poçt qutusundan gedəcək." %}{% endif %}{% endblock %}
 {% block footer_note %}{% trans "Avtomatik göndərilmiş bildiriş" %}{% endblock %}

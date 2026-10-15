@@ -55,7 +55,6 @@ def test_send_reply_marks_added(monkeypatch, create_user, valid_post_data, pdf_u
     ok = services.send_reply_to_trial_request(
         request_obj=obj,
         reply_body="Suallar əlavə olundu.",
-        reply_from="info",
         sent_by=admin,
     )
     assert ok is True
@@ -67,11 +66,59 @@ def test_send_reply_marks_added(monkeypatch, create_user, valid_post_data, pdf_u
     assert obj.reply_sent_by_id == admin.id
 
 
-def test_send_reply_rejects_unknown_inbox(monkeypatch, create_user, valid_post_data, pdf_upload):
+class _SyncThread:
+    def __init__(self, *, target, name=None, daemon=None):
+        self._target = target
+
+    def start(self):
+        self._target()
+
+
+def test_send_reply_goes_from_the_default_mailbox(monkeypatch, settings, create_user, valid_post_data, pdf_upload):
+    """2026-10-16: «Hansı maildən» seçimi yoxdur — təsdiq sistemin real qutusundan gedir."""
+    settings.DEFAULT_FROM_EMAIL = "Portal <verification@uni.example>"
     monkeypatch.setattr(services, "dispatch_trial_notifications", lambda obj: None)
+    monkeypatch.setattr(services.threading, "Thread", _SyncThread)
+    sent = {}
+    monkeypatch.setattr(services, "send_email_with_fallback", lambda **kw: sent.update(kw) or (True, ""))
     student = create_user()
     form = _bound_form(valid_post_data, pdf_upload())
     obj = services.create_trial_exam_request(form=form, request=_DummyRequest(student))
 
-    with pytest.raises(ValueError):
-        services.send_reply_to_trial_request(request_obj=obj, reply_body="x" * 20, reply_from="nope", sent_by=student)
+    services.send_reply_to_trial_request(request_obj=obj, reply_body="Suallar əlavə olundu.", sent_by=student)
+
+    assert sent["from_email"] == "verification@uni.example"
+    assert sent["reply_to"] == ["verification@uni.example"]
+    assert sent["to"] == ["student@example.com"]
+    assert "emsarena" not in sent["html_body"] + sent["text_body"]
+    obj.refresh_from_db()
+    assert obj.reply_delivery_status == TrialExamRequest.REPLY_DELIVERY_SENT
+
+
+def test_owner_notification_falls_back_to_superusers(monkeypatch, settings, create_user, valid_post_data, pdf_upload):
+    settings.TRIAL_NOTIFY_EMAIL = ""
+    settings.CONTACT_NOTIFY_EMAIL = ""
+    settings.DEFAULT_FROM_EMAIL = "verification@uni.example"
+    monkeypatch.setattr(services, "dispatch_trial_notifications", lambda obj: None)
+    sent = {}
+    monkeypatch.setattr(services, "send_email_with_fallback", lambda **kw: sent.update(kw) or (True, ""))
+    create_user(username="root", email="root@example.com", is_superuser=True, is_staff=True)
+    student = create_user()
+    form = _bound_form(valid_post_data, pdf_upload())
+    obj = services.create_trial_exam_request(form=form, request=_DummyRequest(student))
+
+    assert services._send_owner_notification(obj) is True
+    assert sent["to"] == ["root@example.com"]
+    assert sent["from_email"] == "verification@uni.example"
+    assert "Cavab sistemin rəsmi poçt qutusundan gedəcək." in sent["text_body"]
+    assert "emsarena" not in sent["html_body"] + sent["text_body"]
+
+
+def test_owner_notification_prefers_trial_then_contact_setting(monkeypatch, settings, create_user):
+    monkeypatch.setattr(services, "send_email_with_fallback", lambda **kw: (True, ""))
+    create_user(username="root", email="root@example.com", is_superuser=True, is_staff=True)
+    settings.TRIAL_NOTIFY_EMAIL = ""
+    settings.CONTACT_NOTIFY_EMAIL = "desk@uni.example"
+    assert services._resolve_notify_recipients() == ["desk@uni.example"]
+    settings.TRIAL_NOTIFY_EMAIL = "trial@uni.example"
+    assert services._resolve_notify_recipients() == ["trial@uni.example"]

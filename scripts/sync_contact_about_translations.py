@@ -662,12 +662,6 @@ TRANSLATIONS.update(
             "ru": "Детали сообщения",
             "tr": "Mesaj detayları",
         },
-        "Cavab müştəriyə <strong>info@</strong> və ya <strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz görünməyəcək.": {
-            "az": "Cavab müştəriyə <strong>info@</strong> və ya <strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz görünməyəcək.",
-            "en": "The reply will go to the customer from <strong>info@</strong> or <strong>support@emsarena.com</strong>; your personal Gmail will not be visible.",
-            "ru": "Ответ клиенту будет отправлен с <strong>info@</strong> или <strong>support@emsarena.com</strong>; ваш личный Gmail не будет виден.",
-            "tr": "Yanıt müşteriye <strong>info@</strong> veya <strong>support@emsarena.com</strong> üzerinden gidecek; kişisel Gmail adresiniz görünmeyecek.",
-        },
         "Bu mesaja cavab vermək üçün EMSArena admin panelinə keçin.": {
             "az": "Bu mesaja cavab vermək üçün EMSArena admin panelinə keçin.",
             "en": "Go to the EMSArena admin panel to reply to this message.",

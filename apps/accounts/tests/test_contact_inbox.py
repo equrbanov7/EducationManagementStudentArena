@@ -130,7 +130,6 @@ def test_contact_inbox_trial_reply_post_uses_trial_service(monkeypatch, settings
         {
             "action": "trial_reply",
             "trial_id": str(trial.pk),
-            "reply_from": "info",
             "reply_body": "Suallar sistemə əlavə olundu.",
         },
     )
@@ -144,4 +143,40 @@ def test_contact_inbox_trial_reply_post_uses_trial_service(monkeypatch, settings
     assert f"trial_id={trial.pk}" in response["Location"]
     assert called["request_obj"] == trial
     assert called["sent_by"] == user
-    assert called["reply_from"] == "info"
+    assert "reply_from" not in called  # 2026-10-16: «Hansı maildən» seçimi yoxdur
+
+
+def test_reply_forms_show_the_system_mailbox_instead_of_a_picker(settings, tmp_path, django_user_model):
+    """2026-10-16: info@/support@ qutuları yoxdur — «Hansı maildən» seçimi əvəzinə real qutu göstərilir."""
+    from django.template.loader import render_to_string
+
+    settings.MEDIA_ROOT = tmp_path
+    settings.DEFAULT_FROM_EMAIL = "verification@uni.example"
+    user = django_user_model.objects.create_user(
+        username="contact-inbox-admin-4", email="admin4@example.com", password="testpass123", is_superuser=True
+    )
+    message = ContactMessage.objects.create(
+        name="Contact Sender", email="contact@example.com", subject="support", message="Need support."
+    )
+    trial = TrialExamRequest.objects.create(
+        user=user,
+        full_name="Trial Student",
+        email="trial@example.com",
+        subject_name="Kimya",
+        questions_file=_pdf("chemistry.pdf"),
+        original_filename="chemistry.pdf",
+    )
+    for query in (f"message_id={message.pk}", f"trial_id={trial.pk}"):
+        ctx = contact_inbox.build_contact_inbox_context(
+            _request(f"/accounts/profile/?section=superadmin-contact-messages&{query}", user),
+            capabilities=_CAPABILITIES,
+            active_section="superadmin-contact-messages",
+        )
+        assert ctx["contact_reply_sender"] == "verification@uni.example"
+        html = render_to_string(
+            "accounts/profile/sections/superadmin/_superadmin_contact_messages.html",
+            {**ctx, "allowed_sections": {"superadmin-contact-messages"}, "profile_base_url": "/accounts/profile/"},
+        )
+        assert 'name="reply_from"' not in html
+        assert "emsarena" not in html.lower()
+        assert "verification@uni.example" in html

@@ -62,14 +62,9 @@
         <form method="post" class="reply-form" novalidate>
             {% csrf_token %}
 
-            <div class="reply-1">
-                <label for="{{ form.reply_from.id_for_label }}">{{ form.reply_from.label }}</label>
-                {{ form.reply_from }}
-                {{ form.reply_from.errors }}
-                <p class="help">
-                    {% trans "Müştəri bu ünvandan cavab gəldiyini görəcək. Onun cavabı da bu inboxa qayıdacaq." %}
-                </p>
-            </div>
+            <p class="help reply-1">
+                {% trans "Cavab sistemin rəsmi poçt qutusundan gedəcək." %}{% if reply_sender %} <strong>{{ reply_sender }}</strong>{% endif %}
+            </p>
 
             <div class="reply-1">
                 <label for="{{ form.reply_body.id_for_label }}">{{ form.reply_body.label }}</label>

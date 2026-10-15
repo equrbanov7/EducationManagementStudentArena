@@ -21738,14 +21738,6 @@ msgstr "Geri bildirim ve öneri"
 msgid "Digər"
 msgstr "Diğer"
 
-#: apps/contact/models.py:31 apps/trial_exams/models.py:52
-msgid "info@emsarena.com"
-msgstr "info@emsarena.com"
-
-#: apps/contact/models.py:32 apps/trial_exams/models.py:53
-msgid "support@emsarena.com"
-msgstr "support@emsarena.com"
-
 #: apps/contact/models.py:41
 #: apps/contact/templates/admin/contact/contactmessage/reply.html:97
 #: apps/trial_exams/models.py:62
@@ -22042,16 +22034,6 @@ msgstr "Admin panelde yanıtla"
 #: apps/contact/templates/contact/email/contact_notification.html:65
 msgid "Mesaj detalları"
 msgstr "Mesaj detayları"
-
-#: apps/contact/templates/contact/email/contact_notification.html:71
-msgid ""
-"Cavab müştəriyə <strong>info@</strong> və ya "
-"<strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz "
-"görünməyəcək."
-msgstr ""
-"Yanıt müşteriye <strong>info@</strong> veya "
-"<strong>support@emsarena.com</strong> üzerinden gidecek; kişisel Gmail "
-"adresiniz görünmeyecek."
 
 #: apps/contact/templates/contact/email/contact_notification.html:77
 #, python-format
@@ -52429,16 +52411,6 @@ msgstr "Testin yüzde {ratio} kadarında doğru cevap diğerlerinden uzun."
 msgctxt "exams.view.question_bank.warning"
 msgid "bulk_correct_too_short"
 msgstr "Testin yüzde {ratio} kadarında doğru cevap diğerlerinden kısa."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid ""
-"\n"
-"                                Cavab müştəriyə <strong>info@</strong> və ya <strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz görünməyəcək.\n"
-"                                "
-msgstr ""
-"\n"
-"Yanıt müşteriye <strong>info@</strong> veya <strong>support@emsarena.com</strong> üzerinden gönderilecek — kişisel Gmail adresiniz görünmeyecek."
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -97152,3 +97124,12 @@ msgstr "En az 1 öğrenme çıktısı gereklidir — silme mümkün değildir."
 msgctxt "accounts.syllabus"
 msgid "(istəyə bağlı)"
 msgstr "(isteğe bağlı)"
+
+msgid "Cavab sistemin rəsmi poçt qutusundan gedəcək."
+msgstr "Yanıt sistemin resmî e-posta kutusundan gönderilecek."
+
+msgid "Əsas poçt qutusu"
+msgstr "Ana e-posta kutusu"
+
+msgid "Köhnə dəstək ünvanı"
+msgstr "Eski destek adresi"

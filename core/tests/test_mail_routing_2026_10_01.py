@@ -31,10 +31,10 @@ class SenderForTests(SimpleTestCase):
         self.assertEqual(sender_for(None), "verification@wcu.edu.az")
 
     @override_settings(
-        DEFAULT_FROM_EMAIL="no-reply@emsarena.com", EMAIL_RECOVERY_HOST_USER="", EMAIL_RECOVERY_HOST_PASSWORD=""
+        DEFAULT_FROM_EMAIL="verification@wcu.edu.az", EMAIL_RECOVERY_HOST_USER="", EMAIL_RECOVERY_HOST_PASSWORD=""
     )
     def test_without_recovery_account_previous_behaviour(self):
-        self.assertEqual(sender_for("password_reset"), "no-reply@emsarena.com")
+        self.assertEqual(sender_for("password_reset"), "verification@wcu.edu.az")
 
     @override_settings(**{**M365, "EMAIL_RECOVERY_HOST_PASSWORD": ""})
     def test_recovery_user_without_password_is_ignored(self):
@@ -69,7 +69,7 @@ class RoutingBackendTests(SimpleTestCase):
         self.assertEqual(reset.from_email, "recovery@wcu.edu.az")
 
     def test_foreign_from_is_rewritten_to_default_mailbox_keeping_name(self):
-        legacy = EmailMessage("s", "b", "Portal <no-reply@emsarena.com>", ["c@x.az"])
+        legacy = EmailMessage("s", "b", "Portal <legacy-sender@example.com>", ["c@x.az"])
         bare = EmailMessage("s", "b", "verification@wcu.edu.az", ["d@x.az"])
         _sent, created = self._send(legacy, bare)
         self.assertEqual(len(created), 1)

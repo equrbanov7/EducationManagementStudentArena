@@ -19,6 +19,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
+from core.mailing import sender_address
+
 from .models import ContactMessage
 from .services import send_reply_to_contact
 
@@ -30,11 +32,6 @@ class ContactReplyForm(forms.Form):
     on the model are updated by the service layer (which also handles
     the audit trail and email dispatch)."""
 
-    reply_from = forms.ChoiceField(
-        label=_("Hansı maildən cavab göndərilsin"),
-        choices=ContactMessage.REPLY_FROM_CHOICES,
-        initial="info",
-    )
     reply_body = forms.CharField(
         label=_("Cavab mətni"),
         widget=forms.Textarea(attrs={"rows": 10, "style": "width:100%;"}),
@@ -62,7 +59,6 @@ def reply_to_contact_message(request: HttpRequest, pk: int) -> HttpResponse:
             send_reply_to_contact(
                 message=message,
                 reply_body=form.cleaned_data["reply_body"],
-                reply_from=form.cleaned_data["reply_from"],
                 sent_by=request.user,
             )
             messages.success(
@@ -71,14 +67,13 @@ def reply_to_contact_message(request: HttpRequest, pk: int) -> HttpResponse:
             )
             return redirect(reverse("admin:contact_contactmessage_change", args=[message.pk]))
     else:
-        # Pre-fill subject based on the message subject category.
-        initial_from = "support" if message.subject == "support" else "info"
-        form = ContactReplyForm(initial={"reply_from": initial_from})
+        form = ContactReplyForm()
 
     context = {
         "title": _("Cavablandır: %(name)s") % {"name": message.name},
         "message": message,
         "form": form,
+        "reply_sender": sender_address(),
         "opts": ContactMessage._meta,
         "has_view_permission": True,
         "original": message,

@@ -23,6 +23,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
+from core.mailing import sender_address
+
 from .models import TrialExamRequest
 from .services import send_reply_to_trial_request
 
@@ -45,11 +47,6 @@ class TrialReplyForm(forms.Form):
     """Lightweight reply form. NOT a ModelForm — the reply fields on the model
     are updated by the service layer (audit trail + email dispatch)."""
 
-    reply_from = forms.ChoiceField(
-        label=_("Hansı maildən cavab göndərilsin"),
-        choices=TrialExamRequest.REPLY_FROM_CHOICES,
-        initial="info",
-    )
     reply_body = forms.CharField(
         label=_("Cavab mətni"),
         widget=forms.Textarea(attrs={"rows": 10, "style": "width:100%;"}),
@@ -72,7 +69,6 @@ def reply_to_trial_request(request: HttpRequest, pk: int) -> HttpResponse:
             send_reply_to_trial_request(
                 request_obj=obj,
                 reply_body=form.cleaned_data["reply_body"],
-                reply_from=form.cleaned_data["reply_from"],
                 sent_by=request.user,
             )
             messages.success(
@@ -87,6 +83,7 @@ def reply_to_trial_request(request: HttpRequest, pk: int) -> HttpResponse:
         "title": _("Tələbəyə cavab"),
         "trial_request": obj,
         "form": form,
+        "reply_sender": sender_address(),
         "opts": TrialExamRequest._meta,
     }
     return render(request, "admin/trial_exams/trialexamrequest/reply.html", context)

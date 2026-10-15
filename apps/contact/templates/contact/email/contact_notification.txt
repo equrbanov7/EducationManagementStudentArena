@@ -12,6 +12,7 @@
 {{ message.message }}
 {% if reply_url %}
 {% trans "Admin paneldə cavablandır" %}: {{ reply_url }}
-{% trans "Mesaj detalları" %}: {{ detail_url }}{% else %}
+{% trans "Mesaj detalları" %}: {{ detail_url }}
+{% trans "Cavab sistemin rəsmi poçt qutusundan gedəcək." %}{% else %}
 {% blocktrans %}Bu mesaja cavab vermək üçün {{ brand }} admin panelinə keçin.{% endblocktrans %}{% endif %}{% endblock %}
 {% block footer_note %}{% trans "Avtomatik göndərilmiş bildiriş" %}{% endblock %}

@@ -17,7 +17,14 @@ EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() in {"1", "true", "yes
 EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False").lower() in {"1", "true", "yes", "on"}
 EMAIL_HOST_USER = os.getenv("BREVO_SMTP_LOGIN") or os.getenv("BREVO_EMAIL") or os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("BREVO_SMTP_KEY") or os.getenv("EMAIL_HOST_PASSWORD", "")
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL") or os.getenv("BREVO_FROM_EMAIL") or "no-reply@qku.edu.az"
+# Sahib 2026-10-16: info@/support@/no-reply@ qutuları YOXDUR. Env verilməyibsə göndərici — real
+# default M365 qutusu (EMAIL_HOST_USER, verification@); o da yoxdursa Django-nun öz defaultu.
+DEFAULT_FROM_EMAIL = (
+    os.getenv("DEFAULT_FROM_EMAIL")
+    or os.getenv("BREVO_FROM_EMAIL")
+    or (os.getenv("EMAIL_HOST_USER") or "").strip()
+    or "webmaster@localhost"
+)
 # Sahibin qərarı (2026-09-15): göndərici (From) Brevo-da təsdiqlənmiş domen qalır,
 # cavab ünvanı (Reply-To) isə universitetin ünvanı — domen təsdiqlənənə qədər.
 # Boşdursa Reply-To başlığı əlavə olunmur. Bütün sistem məktubları
@@ -39,17 +46,19 @@ SITE_URL = os.getenv("SITE_URL", "http://127.0.0.1:8000")
 # ---------------------------------------------------------------------------
 # Contact form notifications
 # ---------------------------------------------------------------------------
-# Inbound public contact form submissions are delivered to this address.
-# These are brand-neutral fallbacks; set the real verified-sender addresses per
-# deployment via the CONTACT_* / DEFAULT_FROM_EMAIL / BREVO_FROM_EMAIL env vars.
-CONTACT_NOTIFY_EMAIL = os.getenv("CONTACT_NOTIFY_EMAIL", "info@qku.edu.az")
-CONTACT_SUPPORT_EMAIL = os.getenv("CONTACT_SUPPORT_EMAIL", "support@qku.edu.az")
-CONTACT_PUBLIC_EMAIL = os.getenv("CONTACT_PUBLIC_EMAIL", "info@qku.edu.az")
+# Sahib 2026-10-16: təsdiqlənmiş ümumi qutu (info@/support@) yoxdur — default BOŞDUR.
+# * CONTACT_NOTIFY_EMAIL boşdursa əlaqə formu bildirişi aktiv superuser-lərin e-poçtlarına gedir
+#   (core.mailing.staff_notify_recipients); vergüllə bir neçə ünvan yazmaq olar.
+# * CONTACT_SUPPORT_EMAIL / CONTACT_PUBLIC_EMAIL boşdursa sayt altlığında, əlaqə səhifəsində və
+#   e-poçt altlığında həmin sətir/blok gizlənir.
+CONTACT_NOTIFY_EMAIL = (os.getenv("CONTACT_NOTIFY_EMAIL") or "").strip()
+CONTACT_SUPPORT_EMAIL = (os.getenv("CONTACT_SUPPORT_EMAIL") or "").strip()
+CONTACT_PUBLIC_EMAIL = (os.getenv("CONTACT_PUBLIC_EMAIL") or "").strip()
 
 # Trial-exam ("sınaq imtahanı") request submissions are emailed here.
-# Falls back to CONTACT_NOTIFY_EMAIL when unset. Max upload size (MB) caps
-# the uploaded questions PDF.
-TRIAL_NOTIFY_EMAIL = os.getenv("TRIAL_NOTIFY_EMAIL", "") or CONTACT_NOTIFY_EMAIL
+# Falls back to CONTACT_NOTIFY_EMAIL, then to the active superusers. Max upload
+# size (MB) caps the uploaded questions PDF.
+TRIAL_NOTIFY_EMAIL = (os.getenv("TRIAL_NOTIFY_EMAIL") or "").strip() or CONTACT_NOTIFY_EMAIL
 TRIAL_EXAM_MAX_UPLOAD_MB = int(os.getenv("TRIAL_EXAM_MAX_UPLOAD_MB", "25"))
 
 # Brevo (formerly Sendinblue) HTTP API key. Used as a fallback when SMTP

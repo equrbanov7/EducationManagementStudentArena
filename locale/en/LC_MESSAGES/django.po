@@ -21802,14 +21802,6 @@ msgstr "Feedback and suggestion"
 msgid "Digər"
 msgstr "Other"
 
-#: apps/contact/models.py:31 apps/trial_exams/models.py:52
-msgid "info@emsarena.com"
-msgstr "info@emsarena.com"
-
-#: apps/contact/models.py:32 apps/trial_exams/models.py:53
-msgid "support@emsarena.com"
-msgstr "support@emsarena.com"
-
 #: apps/contact/models.py:41
 #: apps/contact/templates/admin/contact/contactmessage/reply.html:97
 #: apps/trial_exams/models.py:62
@@ -22106,16 +22098,6 @@ msgstr "Reply in admin panel"
 #: apps/contact/templates/contact/email/contact_notification.html:65
 msgid "Mesaj detalları"
 msgstr "Message details"
-
-#: apps/contact/templates/contact/email/contact_notification.html:71
-msgid ""
-"Cavab müştəriyə <strong>info@</strong> və ya "
-"<strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz "
-"görünməyəcək."
-msgstr ""
-"The reply will go to the customer from <strong>info@</strong> or "
-"<strong>support@emsarena.com</strong>; your personal Gmail will not be "
-"visible."
 
 #: apps/contact/templates/contact/email/contact_notification.html:77
 #, python-format
@@ -52640,16 +52622,6 @@ msgid "bulk_correct_too_short"
 msgstr ""
 "In {ratio} percent of the test the correct answer is shorter than the "
 "others."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid ""
-"\n"
-"                                Cavab müştəriyə <strong>info@</strong> və ya <strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz görünməyəcək.\n"
-"                                "
-msgstr ""
-"\n"
-"The reply will be sent to the client from <strong>info@</strong> or <strong>support@emsarena.com</strong> — your personal Gmail will not be visible."
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -97701,3 +97673,12 @@ msgstr "At least 1 learning outcome is required — deletion is not possible."
 msgctxt "accounts.syllabus"
 msgid "(istəyə bağlı)"
 msgstr "(optional)"
+
+msgid "Cavab sistemin rəsmi poçt qutusundan gedəcək."
+msgstr "The reply will be sent from the system's official mailbox."
+
+msgid "Əsas poçt qutusu"
+msgstr "Main mailbox"
+
+msgid "Köhnə dəstək ünvanı"
+msgstr "Former support address"

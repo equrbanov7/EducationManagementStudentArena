@@ -4,8 +4,8 @@ Responsibilities
 ----------------
 1. Persist a submission (PDF stored with a randomised filename).
 2. Notify the team:
-   * an **email** to the configured owner inbox (``TRIAL_NOTIFY_EMAIL`` →
-     falls back to ``CONTACT_NOTIFY_EMAIL`` → ``info@emsarena.com``), and
+   * an **email** to the configured staff inbox (``TRIAL_NOTIFY_EMAIL`` →
+     falls back to ``CONTACT_NOTIFY_EMAIL`` → the active superusers' e-mails), and
    * an **in-app notification** to every active superadmin.
 3. Send the student an **email confirmation** once the questions are
    imported ("suallar sistemə əlavə olundu").
@@ -25,7 +25,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from core.mailing import plain_text_body, send_email_with_fallback
+from core.mailing import plain_text_body, send_email_with_fallback, sender_address, staff_notify_recipients
 from core.upload_security import randomize_uploaded_filename
 from core.utils import build_absolute_url
 
@@ -33,30 +33,10 @@ from .models import TrialExamRequest
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_OWNER_EMAIL = "info@emsarena.com"
 
-_REPLY_FROM_KEYS = frozenset({"info", "support"})
-
-
-def _reply_from_addresses(brand: str) -> dict[str, tuple[str, str]]:
-    """Return the ``reply_from`` -> (display name, address) mapping.
-
-    Display names carry the tenant brand; the mailbox addresses stay pinned
-    to the operator inboxes regardless of tenant.
-    """
-    return {
-        "info": (brand, "info@emsarena.com"),
-        "support": (f"{brand} Support", "support@emsarena.com"),
-    }
-
-
-def _resolve_notify_address() -> str:
-    """Return the address that should receive trial-request notifications."""
-    return (
-        getattr(settings, "TRIAL_NOTIFY_EMAIL", "")
-        or getattr(settings, "CONTACT_NOTIFY_EMAIL", "")
-        or _DEFAULT_OWNER_EMAIL
-    )
+def _resolve_notify_recipients() -> list[str]:
+    """``TRIAL_NOTIFY_EMAIL`` → ``CONTACT_NOTIFY_EMAIL`` → aktiv superuser-lər (sahib 2026-10-16)."""
+    return staff_notify_recipients("TRIAL_NOTIFY_EMAIL", "CONTACT_NOTIFY_EMAIL")
 
 
 def _admin_links(request_obj: TrialExamRequest) -> tuple[str, str]:
@@ -83,8 +63,10 @@ def _file_download_url(request_obj: TrialExamRequest) -> str:
 # Inbound notifications (team)
 # ---------------------------------------------------------------------------
 def _send_owner_notification(request_obj: TrialExamRequest) -> bool:
-    """Email the configured owner inbox about a new trial request."""
-    recipient = _resolve_notify_address()
+    """Email the configured staff inbox (or the superusers) about a new trial request."""
+    recipients = _resolve_notify_recipients()
+    if not recipients:
+        return False
     brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
     subject = _("[%(brand)s Sınaq] %(subject)s — %(name)s") % {
         "brand": brand,
@@ -106,14 +88,13 @@ def _send_owner_notification(request_obj: TrialExamRequest) -> bool:
     html_body = render_to_string("trial_exams/email/trial_notification.html", context)
     text_body = plain_text_body("trial_exams/email/trial_notification.html", context, html_body)
 
-    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@emsarena.com")
     ok, _reason = send_email_with_fallback(
         subject=subject,
         html_body=html_body,
         text_body=text_body,
-        from_email=from_email,
+        from_email=sender_address(),
         from_name=brand,
-        to=[recipient],
+        to=recipients,
         reply_to=[request_obj.email],
     )
     return ok
@@ -172,10 +153,10 @@ def dispatch_trial_notifications(request_obj: TrialExamRequest) -> None:
 # ---------------------------------------------------------------------------
 # Reply to the student ("questions added")
 # ---------------------------------------------------------------------------
-def _send_reply_email(request_obj: TrialExamRequest, reply_body: str, reply_from: str) -> tuple[bool, str]:
-    """Render and dispatch the confirmation email. Caller MUST persist first."""
+def _send_reply_email(request_obj: TrialExamRequest, reply_body: str) -> tuple[bool, str]:
+    """Render and dispatch the confirmation email (from the system mailbox). Caller MUST persist first."""
     brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
-    from_name, from_email = _reply_from_addresses(brand)[reply_from]
+    from_name, from_email = brand, sender_address()
 
     subject = _("%(brand)s — Sınaq imtahanınız hazırdır: %(subject)s") % {
         "brand": brand,
@@ -206,7 +187,6 @@ def send_reply_to_trial_request(
     *,
     request_obj: TrialExamRequest,
     reply_body: str,
-    reply_from: str,
     sent_by,
 ) -> bool:
     """Persist the reply, mark the request as ``added`` and dispatch the email.
@@ -218,11 +198,9 @@ def send_reply_to_trial_request(
     """
     from django.utils import timezone
 
-    if reply_from not in _REPLY_FROM_KEYS:
-        raise ValueError(f"Unknown reply_from inbox: {reply_from!r}")
-
     request_obj.reply_body = reply_body
-    request_obj.reply_from = reply_from
+    # «Hansı maildən» seçimi yoxdur (2026-10-16) — sahə tarixçə üçün qalır.
+    request_obj.reply_from = TrialExamRequest.REPLY_FROM_DEFAULT
     request_obj.reply_sent_by = sent_by
     request_obj.reply_delivery_status = TrialExamRequest.REPLY_DELIVERY_PENDING
     request_obj.reply_delivery_error = ""
@@ -246,7 +224,7 @@ def send_reply_to_trial_request(
 
     def _runner() -> None:
         try:
-            ok, reason = _send_reply_email(request_obj, reply_body, reply_from)
+            ok, reason = _send_reply_email(request_obj, reply_body)
             sent_at = timezone.now()
             if not ok:
                 TrialExamRequest.objects.filter(pk=request_obj.pk).update(

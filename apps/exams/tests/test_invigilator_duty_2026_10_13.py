@@ -143,12 +143,13 @@ class DutyWindowTests(_DutyBase):
         self.assertFalse(scope.allows_room(self.room2.pk))
 
     def test_expired_duty_gives_nothing(self):
-        start = timezone.now() - timedelta(hours=1)
-        if start.astimezone(BAKU_TZ).date() != timezone.now().astimezone(BAKU_TZ).date():
-            start = timezone.now()  # gecə yarısı sərhədi — yalnız qısa növbə yoxlanır
-            self._duty(start=start - timedelta(minutes=1), minutes=1)
-        else:
-            self._duty(start=start, minutes=30)  # son + 15 dəq. çoxdan keçib, canlı oturum yoxdur
+        # Növbə 1 saat əvvəl bitib (son + 15 dəq. çoxdan keçib), canlı oturum yoxdur. Növbə bir Bakı günü
+        # içində qalmalıdır — gecə yarısını kəsirsə hər ikisi bir saat geri çəkilir (CI 00:29 Bakı).
+        end = timezone.now() - timedelta(hours=1)
+        start = end - timedelta(minutes=30)
+        if start.astimezone(BAKU_TZ).date() != end.astimezone(BAKU_TZ).date():
+            start -= timedelta(hours=1)
+        self._duty(start=start, minutes=30)
         self.assertTrue(supervision_scope(self.invig, organization_id=self.org.pk).is_empty)
 
     def test_legacy_room_m2m_only_works_while_room_is_live(self):
