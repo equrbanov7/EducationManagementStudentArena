@@ -9,7 +9,7 @@ mənbəyi tapılmır → funksiya səssizcə qayıdır → **düymə heç nə et
 
 Miqyas (köçürmə mənbəyində ölçülüb): 8,247 başlığın 2,157-si (26.2%) məhz bu
 formadadır, üstəlik HƏR yeni qaralama da (``blank_section_data`` →
-``outcomes: []``).  ``out`` qayda bölməsi olduğuna görə (``MIN_OUTCOMES = 3``)
+``outcomes: []``).  ``out`` qayda bölməsi olduğuna görə (``MIN_OUTCOMES``; 2026-10-15-dən 1)
 tamamlanma 100%-ə çatmır, yəni həmin sillabuslar təsdiqə GÖNDƏRİLƏ BİLMİRDİ.
 
 Düzəliş: klon mənbəyi yoxdursa sətir ``EMSSyllabusFields.makeOutcomeRow`` ilə
@@ -36,7 +36,7 @@ from django.utils import timezone
 import pytest
 
 from apps.syllabus import services
-from apps.syllabus.constants import MIN_OUTCOMES, SectionKey
+from apps.syllabus.constants import SectionKey
 from apps.syllabus.models import ChangeKind
 from apps.syllabus.tests.editor_dom import render_editor_dom, shipped_js_path
 from apps.syllabus.tests.factories import (
@@ -128,7 +128,7 @@ def test_rendered_row_hooks_match_the_javascript_constructor(db):
     """Şablon sətri ilə JS qurucusu EYNİ çəngəlləri daşıyır."""
     root = _make_version(outcomes=["A" * 20, "B" * 20, "C" * 20])
     rows = root.xpath("//*[@data-syl-outcome]")
-    assert len(rows) == MIN_OUTCOMES
+    assert len(rows) == 3
     rendered = rows[0]
     for hook in ROW_HOOKS:
         assert rendered.xpath(f".//*[@{hook}]") or rendered.get(hook) is not None, hook

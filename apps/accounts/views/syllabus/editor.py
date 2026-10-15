@@ -94,8 +94,8 @@ SECTION_META = {
         pgettext_lazy(_CTX, "Təlim nəticələri"),
         pgettext_lazy(
             _CTX,
-            "Tələbə fənni bitirəndə nə bacaracaq. Ən azı 3 nəticə tələb olunur, hər biri həftəlik plandan ən azı "
-            "bir mövzu ilə əlaqələndirilməlidir.",
+            "Tələbə fənni bitirəndə nə bacaracaq. Ən azı 1 təlim nəticəsi yazın; həftəlik mövzuları nəticə ilə "
+            "əlaqələndirmək istəyə bağlıdır.",
         ),
     ),
     SectionKey.WEEK.value: (

@@ -5,7 +5,9 @@ Niyə lazımdır
 ``SyllabusVersion.completion_percent`` (və bölmə ``is_complete``) KEŞDİR. RİM «Sistem tənzimləmələri»
 sərbəst işi söndürəndə/yandıranda BÜTÜN semestrlərin (sahib 2026-10-11: köhnə 2025/2026 daxil)
 sillabusunda ``self`` bölməsi faizə daxil olmur/olur (8 ↔ 7 bölmə), qiymətləndirmə standartı isə
-dəyişir (midterm 30 ↔ 20). Redaktə
+dəyişir (midterm 30 ↔ 20). Sahib 2026-10-15: təlim nəticəsi qaydası yumşaldılıb (yalnız 1 nəticə
+məcburi, həftəyə bağlanma istəyə bağlı) — deploydan sonra bu əmr ``out``/``week`` bölmələrinin keşini
+də yeniləyir (``completion.evaluate`` cari qaydanı oxuyur). Redaktə
 və göndərmə yolları onsuz da CARİ qayda ilə yenidən hesablayır — bu əmr isə toxunulmamış qaralamaların
 və növbədəki versiyaların siyahıdakı faizini dərhal düzəldir.
 
@@ -137,7 +139,7 @@ class Command(BaseCommand):
                         "completion_percent": fresh.completion_percent,
                         "assess_split": _split(target) if target else old_split,
                     },
-                    reason="recompute_syllabus_completion (sahib 2026-10-10)",
+                    reason="recompute_syllabus_completion (cari qayda: sahib 2026-10-10 / 2026-10-15)",
                     resource_type="syllabus.version",
                     resource_id=str(version.pk),
                     resource_repr=f"{version.syllabus_id} {version.label}",
