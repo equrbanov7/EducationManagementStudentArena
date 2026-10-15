@@ -1,7 +1,7 @@
 {% load static i18n %}
 {% comment %}Tələbənin elektron jurnalı (mockup dizaynı, yalnız-oxu).
 Fənn pilləri → KPI kartlar → bal bölgüsü → dərs tarixçəsi (paritet çipləri +
-kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endcomment %}
+kollokvium markerləri). Bu günün qeydləri də DƏRHAL görünür (sahib 2026-10-15).{% endcomment %}
 {% with sec=journal_student_section d=journal_student_section.detail %}
 <div class="journal-page sjx jd2">
     {# ── Kimlik + fənn pilləri ─────────────────────────────────────────────── #}
@@ -293,9 +293,6 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
         <div class="sjx-foot-legend">
             <b class="jd2-ie">i/e</b> {% trans "iştirak edib" context "registrar.journal" %} · <b class="jd2-qb">q/b</b> {% trans "qayıb" context "registrar.journal" %} · {% trans "qayıb limiti" context "registrar.journal" %}: {{ d.journal.allowed_absence|floatformat:0 }} {% trans "saat" context "registrar.journal" %}
         </div>
-        {% if d.hidden_today %}
-        <div class="sjx-foot-info"><i class="fas fa-clock"></i> {% trans "Bu günün dərs qeydləri sabah görünəcək." context "registrar.journal" %}</div>
-        {% endif %}
         {% for w in sec.warnings %}
         {% if w.enrollment.id != d.enrollment.id %}
         <div class="sjx-foot-warn">
