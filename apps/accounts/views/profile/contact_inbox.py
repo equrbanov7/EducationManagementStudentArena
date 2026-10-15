@@ -21,6 +21,7 @@ from apps.contact.models import ContactMessage
 from apps.contact.public import send_reply_to_contact
 from apps.trial_exams.models import TrialExamRequest
 from apps.trial_exams.public import send_reply_to_trial_request
+from core.mailing import sender_address
 from core.search_text import tolerant_q
 
 logger = logging.getLogger(__name__)
@@ -169,6 +170,8 @@ def build_contact_inbox_context(
             + TrialExamRequest.objects.filter(reply_delivery_status=TrialExamRequest.REPLY_DELIVERY_RECORDED).count(),
             "contact_search_query": search_query,
             "default_trial_reply": _default_trial_reply(),
+            # Cavab həmişə sistemin real poçt qutusundan gedir (2026-10-16: «Hansı maildən» seçimi yoxdur).
+            "contact_reply_sender": sender_address(),
         }
     )
 
@@ -220,22 +223,16 @@ def _handle_contact_reply_post(request: HttpRequest) -> HttpResponse:
         return redirect(reverse("accounts:profile") + "?section=superadmin-contact-messages")
 
     reply_body = (request.POST.get("reply_body") or "").strip()
-    reply_from = (request.POST.get("reply_from") or "info").strip()
-
     if len(reply_body) < 10:
         django_messages.error(request, _("Cavab mətni ən azı 10 simvol olmalıdır."))
         return redirect(f"{reverse('accounts:profile')}?section=superadmin-contact-messages&message_id={message.pk}")
     if len(reply_body) > 10000:
         django_messages.error(request, _("Cavab mətni 10000 simvoldan uzun ola bilməz."))
         return redirect(f"{reverse('accounts:profile')}?section=superadmin-contact-messages&message_id={message.pk}")
-    if reply_from not in {"info", "support"}:
-        django_messages.error(request, _("Yanlış göndərən ünvanı."))
-        return redirect(f"{reverse('accounts:profile')}?section=superadmin-contact-messages&message_id={message.pk}")
 
     send_reply_to_contact(
         message=message,
         reply_body=reply_body,
-        reply_from=reply_from,
         sent_by=request.user,
     )
     django_messages.success(
@@ -257,7 +254,6 @@ def _handle_trial_reply_post(request: HttpRequest) -> HttpResponse:
         return redirect(reverse("accounts:profile") + "?section=superadmin-contact-messages")
 
     reply_body = (request.POST.get("reply_body") or "").strip()
-    reply_from = (request.POST.get("reply_from") or "info").strip()
     detail_url = f"{reverse('accounts:profile')}?section=superadmin-contact-messages&trial_id={trial_request.pk}"
 
     if len(reply_body) < 10:
@@ -266,14 +262,10 @@ def _handle_trial_reply_post(request: HttpRequest) -> HttpResponse:
     if len(reply_body) > 10000:
         django_messages.error(request, _("Cavab mətni 10000 simvoldan uzun ola bilməz."))
         return redirect(detail_url)
-    if reply_from not in {"info", "support"}:
-        django_messages.error(request, _("Yanlış göndərən ünvanı."))
-        return redirect(detail_url)
 
     send_reply_to_trial_request(
         request_obj=trial_request,
         reply_body=reply_body,
-        reply_from=reply_from,
         sent_by=request.user,
     )
     django_messages.success(

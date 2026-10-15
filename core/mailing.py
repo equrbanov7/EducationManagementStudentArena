@@ -27,6 +27,7 @@ import os
 import re
 import urllib.error
 import urllib.request
+from email.utils import parseaddr
 from typing import Sequence
 
 from django.conf import settings
@@ -45,8 +46,7 @@ _BREVO_API_ENDPOINT = "https://api.brevo.com/v3/smtp/email"
 def system_reply_to() -> list[str]:
     """`settings.EMAIL_REPLY_TO` doludursa `[ünvan]`, yoxsa `[]` — `EmailMultiAlternatives(reply_to=…)` üçün.
 
-    Sahibin qərarı (2026-09-15): From Brevo-da təsdiqlənmiş `emsarena.com`-da qalır,
-    Reply-To `no-reply@wcu.edu.az` — universitet domeni Brevo-da təsdiqlənənə qədər.
+    Boşdursa Reply-To başlığı əlavə olunmur (sahib 2026-09-15; From həmişə real M365 qutusudur).
     """
     value = (getattr(settings, "EMAIL_REPLY_TO", "") or "").strip()
     return [value] if value else []
@@ -90,6 +90,49 @@ def sender_for(purpose: str | None = None) -> str:
         if recovery:
             return recovery
     return settings.DEFAULT_FROM_EMAIL
+
+
+def sender_address(purpose: str | None = None) -> str:
+    """:func:`sender_for`-un yalnız ünvan hissəsi (görünən ad olmadan) — ``f"{ad} <{ünvan}>"`` üçün.
+
+    Sahib 2026-10-16: info@/support@/no-reply@ qutuları YOXDUR; bütün sistem məktubları (əlaqə və
+    sınaq cavabları da daxil) real M365 qutusundan — ``EMAIL_HOST_USER`` = ``DEFAULT_FROM_EMAIL`` — gedir.
+    """
+    return (parseaddr(sender_for(purpose) or "")[1] or "").strip()
+
+
+def staff_notify_recipients(*setting_names: str) -> list[str]:
+    """İşçi bildirişinin alıcıları: ilk dolu ``settings.<ad>`` (vergüllə bir neçə ünvan ola bilər).
+
+    Heç biri doldurulmayıbsa (default — sahib 2026-10-16: təsdiqlənmiş ümumi qutu yoxdur) aktiv
+    superuser-lərin e-poçtları qaytarılır. Onlar da yoxdursa ``[]`` + log xəbərdarlığı — çağıran göndərmir.
+    """
+    for name in setting_names:
+        raw = str(getattr(settings, name, "") or "")
+        found = [part.strip() for part in raw.split(",") if "@" in part]
+        if found:
+            return found
+
+    from django.contrib.auth import get_user_model
+
+    emails: list[str] = []
+    rows = (
+        get_user_model()
+        .objects.filter(is_superuser=True, is_active=True)
+        .exclude(email="")
+        .order_by("pk")
+        .values_list("email", flat=True)
+    )
+    for value in rows:
+        address = (value or "").strip()
+        if "@" in address and address.lower() not in {item.lower() for item in emails}:
+            emails.append(address)
+    if not emails:
+        logger.warning(
+            "Staff notification skipped: %s empty and no active superuser has an e-mail",
+            "/".join(setting_names) or "notify setting",
+        )
+    return emails
 
 
 def _brevo_api_key() -> str:

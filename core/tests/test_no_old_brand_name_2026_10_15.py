@@ -10,7 +10,8 @@ Qapı yoxlayır:
 * bütün ``locale/*/LC_MESSAGES/*.po`` kataloqlarının ``msgstr``-ləri;
 * ictimai sayt xəritəsi üslubu (``static/seo/*.xsl``) və köhnə loqo faylları.
 
-İstisna: ``…@emsarena.com`` poçt ÜNVANLARI — real qutulardır, məhsul adı deyil.
+``…@emsarena.com`` poçt ünvanlarına da istisna YOXDUR (sahib 2026-10-16: info@/support@/no-reply@
+qutuları mövcud deyil — yeganə real qutular M365 verification@/recovery@-dur).
 Daxili identifikatorlar (paket/konteyner/DB/kuki/keş adları, CSS/JS prefiksləri) yoxlanmır.
 """
 
@@ -25,7 +26,6 @@ import polib
 
 BASE = Path(__file__).resolve().parents[2]
 OLD_NAME_RE = re.compile(r"ems[ _-]?arena", re.IGNORECASE)
-ADDRESS_RE = re.compile(r"[\w.+-]*@emsarena\.com", re.IGNORECASE)
 COMMENT_RES = (
     re.compile(r"\{#.*?#\}", re.DOTALL),
     re.compile(r"\{%\s*comment\s*%\}.*?\{%\s*endcomment\s*%\}", re.DOTALL),
@@ -47,7 +47,7 @@ OLD_LOGO_FILES = (
 def _visible(text: str) -> str:
     for pattern in COMMENT_RES:
         text = pattern.sub("", text)
-    return ADDRESS_RE.sub("", text)
+    return text
 
 
 def _template_files():
@@ -74,7 +74,7 @@ class OldBrandNameGuardTest(SimpleTestCase):
                 if entry.obsolete:
                     continue
                 for value in (entry.msgstr, *entry.msgstr_plural.values()):
-                    if OLD_NAME_RE.search(ADDRESS_RE.sub("", value or "")):
+                    if OLD_NAME_RE.search(value or ""):
                         offenders.append(f"{path.relative_to(BASE)}: {entry.msgctxt or ''}|{entry.msgid[:60]}")
         self.assertEqual(offenders, [], "Köhnə məhsul adı tərcümədə qalıb:\n" + "\n".join(offenders))
 

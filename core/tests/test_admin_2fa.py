@@ -79,14 +79,14 @@ class AdminTwoFactorFlowTest(TestCase):
         self.assertRedirects(response, reverse("admin:verify-otp"))
 
     @override_settings(
-        DEFAULT_FROM_EMAIL="no-reply@emsarena.com",
+        DEFAULT_FROM_EMAIL="verification@wcu.edu.az",
         BREVO_FROM_EMAIL="",
         BREVO_EMAIL="equrbanov@gmail.com",
     )
     def test_admin_otp_uses_default_from_email_instead_of_brevo_login_email(self):
         self._login_with_password()
 
-        self.assertEqual(mail.outbox[-1].from_email, "no-reply@emsarena.com")
+        self.assertEqual(mail.outbox[-1].from_email, "verification@wcu.edu.az")
 
     def test_valid_otp_grants_admin_access(self):
         self._login_with_password()

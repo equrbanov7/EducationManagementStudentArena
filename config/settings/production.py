@@ -315,7 +315,13 @@ EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() in {"1", "true", "yes
 EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False").lower() in {"1", "true", "yes", "on"}
 EMAIL_HOST_USER = os.getenv("BREVO_SMTP_LOGIN") or os.getenv("BREVO_EMAIL") or os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("BREVO_SMTP_KEY") or os.environ.get("EMAIL_HOST_PASSWORD", "")
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL") or os.getenv("BREVO_FROM_EMAIL") or "no-reply@emsarena.com"
+# 2026-10-16: no-reply@ qutusu yoxdur — fallback real default M365 qutusu (EMAIL_HOST_USER env).
+DEFAULT_FROM_EMAIL = (
+    os.environ.get("DEFAULT_FROM_EMAIL")
+    or os.getenv("BREVO_FROM_EMAIL")
+    or (os.environ.get("EMAIL_HOST_USER") or "").strip()
+    or "webmaster@localhost"
+)
 EMAIL_REPLY_TO = (os.getenv("EMAIL_REPLY_TO") or "").strip()
 EMAIL_RECOVERY_HOST_USER = (os.getenv("EMAIL_RECOVERY_HOST_USER") or "").strip()
 EMAIL_RECOVERY_HOST_PASSWORD = os.getenv("EMAIL_RECOVERY_HOST_PASSWORD") or ""

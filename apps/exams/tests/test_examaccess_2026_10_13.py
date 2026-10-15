@@ -432,9 +432,11 @@ class OfficialDayRuleTests(TestCase):
         cls.room = ExamRoom.objects.create(organization=cls.org, name="Zal DR", code="ZDR", capacity=10)
 
     def _finish_today(self, exam):
-        return ExamAttempt.objects.create(
-            user=self.student, exam=exam, status="submitted", finished_at=timezone.now() - timedelta(minutes=30)
-        )
+        # Gecə yarısı sərhədi (CI 00:29 Bakı): «30 dəq əvvəl» dünənə düşməsin — Bakı gününün içində qalır.
+        now = timezone.now()
+        day_start = timezone.localtime(now).replace(hour=0, minute=0, second=0, microsecond=0)
+        finished_at = now - min(timedelta(minutes=30), (now - day_start) / 2)
+        return ExamAttempt.objects.create(user=self.student, exam=exam, status="submitted", finished_at=finished_at)
 
     def _ticket(self, exam, status=TICKET_STATUS_WAITING):
         now = timezone.now()

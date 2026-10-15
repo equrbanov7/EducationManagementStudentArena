@@ -1,4 +1,4 @@
-{% load i18n static %}
+{% load i18n %}
 {% comment %}
 Public contact-form inbox embedded in the user's profile sidebar.
 Only rendered when 'superadmin-contact-messages' is in allowed_sections.
@@ -89,56 +89,10 @@ Only rendered when 'superadmin-contact-messages' is in allowed_sections.
                 <input type="hidden" name="action" value="contact_reply">
                 <input type="hidden" name="message_id" value="{{ contact_selected_message.pk }}">
 
-                <div class="contact-form-row">
-                    <label for="id_reply_from">{% trans "Send from" %}</label>
-                    <input type="hidden"
-                           name="reply_from"
-                           id="id_reply_from"
-                           value="{% if contact_selected_message.subject == 'support' %}support{% else %}info{% endif %}"
-                           required
-                           data-contact-reply-from-input>
-                    <div class="dropdown language-switcher language-switcher--reply contact-mail-switcher"
-                         data-contact-reply-from>
-                        <button type="button"
-                                class="language-switcher__trigger dropdown-toggle"
-                                data-bs-toggle="dropdown"
-                                data-bs-display="static"
-                                aria-haspopup="listbox"
-                                aria-expanded="false">
-                            <span class="language-switcher__label">{% trans "Mailbox" %}</span>
-                            <span class="language-switcher__value" data-contact-reply-from-label>
-                                {% if contact_selected_message.subject == 'support' %}support@emsarena.com{% else %}info@emsarena.com{% endif %}
-                            </span>
-                            <i class="fas fa-chevron-down language-switcher__caret" aria-hidden="true"></i>
-                        </button>
-                        <div class="language-switcher__menu dropdown-menu"
-                             role="listbox"
-                             aria-label="{% trans 'Send from' %}">
-                            <button type="button"
-                                    class="language-switcher__option dropdown-item {% if contact_selected_message.subject != 'support' %}is-active{% endif %}"
-                                    role="option"
-                                    aria-selected="{% if contact_selected_message.subject != 'support' %}true{% else %}false{% endif %}"
-                                    data-contact-reply-from-option
-                                    data-value="info"
-                                    data-label="info@emsarena.com">
-                                <span class="language-switcher__option-code">INFO</span>
-                                <span class="language-switcher__option-label">info@emsarena.com</span>
-                                <span class="language-switcher__option-check" aria-hidden="true">✓</span>
-                            </button>
-                            <button type="button"
-                                    class="language-switcher__option dropdown-item {% if contact_selected_message.subject == 'support' %}is-active{% endif %}"
-                                    role="option"
-                                    aria-selected="{% if contact_selected_message.subject == 'support' %}true{% else %}false{% endif %}"
-                                    data-contact-reply-from-option
-                                    data-value="support"
-                                    data-label="support@emsarena.com">
-                                <span class="language-switcher__option-code">SUP</span>
-                                <span class="language-switcher__option-label">support@emsarena.com</span>
-                                <span class="language-switcher__option-check" aria-hidden="true">✓</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <p class="contact-msg-meta">
+                    <i class="fas fa-envelope" aria-hidden="true"></i>
+                    {% trans "Cavab sistemin rəsmi poçt qutusundan gedəcək." %}{% if contact_reply_sender %} <strong>{{ contact_reply_sender }}</strong>{% endif %}
+                </p>
 
                 <div class="contact-form-row">
                     <label for="id_reply_body">{% trans "Reply" %}</label>
@@ -260,54 +214,10 @@ Only rendered when 'superadmin-contact-messages' is in allowed_sections.
                 <input type="hidden" name="action" value="trial_reply">
                 <input type="hidden" name="trial_id" value="{{ trial_selected_request.pk }}">
 
-                <div class="contact-form-row">
-                    <label for="id_trial_reply_from">{% trans "Send from" %}</label>
-                    <input type="hidden"
-                           name="reply_from"
-                           id="id_trial_reply_from"
-                           value="info"
-                           required
-                           data-contact-reply-from-input>
-                    <div class="dropdown language-switcher language-switcher--reply contact-mail-switcher"
-                         data-contact-reply-from>
-                        <button type="button"
-                                class="language-switcher__trigger dropdown-toggle"
-                                data-bs-toggle="dropdown"
-                                data-bs-display="static"
-                                aria-haspopup="listbox"
-                                aria-expanded="false">
-                            <span class="language-switcher__label">{% trans "Mailbox" %}</span>
-                            <span class="language-switcher__value" data-contact-reply-from-label>info@emsarena.com</span>
-                            <i class="fas fa-chevron-down language-switcher__caret" aria-hidden="true"></i>
-                        </button>
-                        <div class="language-switcher__menu dropdown-menu"
-                             role="listbox"
-                             aria-label="{% trans 'Send from' %}">
-                            <button type="button"
-                                    class="language-switcher__option dropdown-item is-active"
-                                    role="option"
-                                    aria-selected="true"
-                                    data-contact-reply-from-option
-                                    data-value="info"
-                                    data-label="info@emsarena.com">
-                                <span class="language-switcher__option-code">INFO</span>
-                                <span class="language-switcher__option-label">info@emsarena.com</span>
-                                <span class="language-switcher__option-check" aria-hidden="true">✓</span>
-                            </button>
-                            <button type="button"
-                                    class="language-switcher__option dropdown-item"
-                                    role="option"
-                                    aria-selected="false"
-                                    data-contact-reply-from-option
-                                    data-value="support"
-                                    data-label="support@emsarena.com">
-                                <span class="language-switcher__option-code">SUP</span>
-                                <span class="language-switcher__option-label">support@emsarena.com</span>
-                                <span class="language-switcher__option-check" aria-hidden="true">✓</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <p class="contact-msg-meta">
+                    <i class="fas fa-envelope" aria-hidden="true"></i>
+                    {% trans "Cavab sistemin rəsmi poçt qutusundan gedəcək." %}{% if contact_reply_sender %} <strong>{{ contact_reply_sender }}</strong>{% endif %}
+                </p>
 
                 <div class="contact-form-row">
                     <label for="id_trial_reply_body">{% trans "Confirmation" %}</label>
@@ -413,6 +323,5 @@ Only rendered when 'superadmin-contact-messages' is in allowed_sections.
         {% endif %}
     {% endif %}
 
-    <script defer src="{% static 'accounts/js/profile/superadmin_contact_messages.js' %}"></script>
 </section>
 {% endif %}

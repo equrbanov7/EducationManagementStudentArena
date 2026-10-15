@@ -21853,14 +21853,6 @@ msgstr "Отзыв и предложение"
 msgid "Digər"
 msgstr "Другое"
 
-#: apps/contact/models.py:31 apps/trial_exams/models.py:52
-msgid "info@emsarena.com"
-msgstr "info@emsarena.com"
-
-#: apps/contact/models.py:32 apps/trial_exams/models.py:53
-msgid "support@emsarena.com"
-msgstr "support@emsarena.com"
-
 #: apps/contact/models.py:41
 #: apps/contact/templates/admin/contact/contactmessage/reply.html:97
 #: apps/trial_exams/models.py:62
@@ -22157,15 +22149,6 @@ msgstr "Ответить в админ-панели"
 #: apps/contact/templates/contact/email/contact_notification.html:65
 msgid "Mesaj detalları"
 msgstr "Детали сообщения"
-
-#: apps/contact/templates/contact/email/contact_notification.html:71
-msgid ""
-"Cavab müştəriyə <strong>info@</strong> və ya "
-"<strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz "
-"görünməyəcək."
-msgstr ""
-"Ответ клиенту будет отправлен с <strong>info@</strong> или "
-"<strong>support@emsarena.com</strong>; ваш личный Gmail не будет виден."
 
 #: apps/contact/templates/contact/email/contact_notification.html:77
 #, python-format
@@ -52797,16 +52780,6 @@ msgstr "В {ratio} процентах теста правильный ответ
 msgctxt "exams.view.question_bank.warning"
 msgid "bulk_correct_too_short"
 msgstr "В {ratio} процентах теста правильный ответ короче остальных."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid ""
-"\n"
-"                                Cavab müştəriyə <strong>info@</strong> və ya <strong>support@emsarena.com</strong>-dan gedəcək — şəxsi Gmail-iniz görünməyəcək.\n"
-"                                "
-msgstr ""
-"\n"
-"Ответ клиенту будет отправлен с <strong>info@</strong> или <strong>support@emsarena.com</strong> — ваш личный Gmail не будет виден."
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -97886,3 +97859,12 @@ msgstr "Требуется хотя бы 1 результат обучения �
 msgctxt "accounts.syllabus"
 msgid "(istəyə bağlı)"
 msgstr "(необязательно)"
+
+msgid "Cavab sistemin rəsmi poçt qutusundan gedəcək."
+msgstr "Ответ будет отправлен с официального почтового ящика системы."
+
+msgid "Əsas poçt qutusu"
+msgstr "Основной почтовый ящик"
+
+msgid "Köhnə dəstək ünvanı"
+msgstr "Прежний адрес поддержки"

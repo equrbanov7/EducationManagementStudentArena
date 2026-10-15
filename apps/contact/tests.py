@@ -9,11 +9,11 @@ thread with a synchronous runner so delivery status assertions are not racy.
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 
 from .forms import ContactForm
 from .models import ContactMessage
-from .services import _extract_client_ip, create_contact_message, send_reply_to_contact
+from .services import _extract_client_ip, _send_internal_notification, create_contact_message, send_reply_to_contact
 
 User = get_user_model()
 
@@ -147,14 +147,31 @@ class SendReplyToContactTest(TestCase):
             message="Salam, sualım var.",
         )
 
-    def test_invalid_reply_from_raises(self):
-        with self.assertRaises(ValueError):
-            send_reply_to_contact(
-                message=self.message,
-                reply_body="Cavab",
-                reply_from="unknown-inbox",
-                sent_by=self.admin,
-            )
+    @override_settings(DEFAULT_FROM_EMAIL="verification@uni.example", SITE_BRAND_NAME="Test Universiteti")
+    def test_reply_is_sent_from_the_default_mailbox(self):
+        """2026-10-16: info@/support@ yoxdur — cavab sistemin real (default) qutusundan gedir."""
+        with (
+            patch("apps.contact.services.threading.Thread", _SyncThread),
+            patch("apps.contact.services._send_email_with_fallback", return_value=(True, "")) as send,
+        ):
+            send_reply_to_contact(message=self.message, reply_body="Salam, cavabınız budur.", sent_by=self.admin)
+        kwargs = send.call_args.kwargs
+        self.assertEqual(kwargs["from_email"], "verification@uni.example")
+        self.assertEqual(kwargs["from_name"], "Test Universiteti")
+        self.assertEqual(kwargs["reply_to"], ["verification@uni.example"])
+        self.assertEqual(kwargs["to"], ["student@example.com"])
+        self.assertNotIn("emsarena", kwargs["html_body"] + kwargs["text_body"])
+        self.message.refresh_from_db()
+        self.assertEqual(self.message.reply_from, ContactMessage.REPLY_FROM_DEFAULT)
+
+    @override_settings(DEFAULT_FROM_EMAIL="Portal <verification@uni.example>")
+    def test_reply_sender_strips_the_display_name(self):
+        with (
+            patch("apps.contact.services.threading.Thread", _SyncThread),
+            patch("apps.contact.services._send_email_with_fallback", return_value=(True, "")) as send,
+        ):
+            send_reply_to_contact(message=self.message, reply_body="Salam, cavabınız budur.", sent_by=self.admin)
+        self.assertEqual(send.call_args.kwargs["from_email"], "verification@uni.example")
 
     def test_successful_delivery_marks_sent_and_handled(self):
         with (
@@ -164,7 +181,6 @@ class SendReplyToContactTest(TestCase):
             send_reply_to_contact(
                 message=self.message,
                 reply_body="Salam, cavabınız budur.",
-                reply_from="info",
                 sent_by=self.admin,
             )
         self.message.refresh_from_db()
@@ -182,10 +198,80 @@ class SendReplyToContactTest(TestCase):
             send_reply_to_contact(
                 message=self.message,
                 reply_body="Cavab mətnini yazırıq.",
-                reply_from="support",
                 sent_by=self.admin,
             )
         self.message.refresh_from_db()
         self.assertEqual(self.message.reply_delivery_status, ContactMessage.REPLY_DELIVERY_FAILED)
         self.assertEqual(self.message.reply_delivery_error, "smtp down")
         self.assertFalse(self.message.is_handled)
+
+
+# ---------------------------------------------------------------------------
+# İşçi bildirişi — alıcılar (2026-10-16: sabit info@ qutusu yoxdur)
+# ---------------------------------------------------------------------------
+@override_settings(DEFAULT_FROM_EMAIL="verification@uni.example")
+class ContactNotificationRecipientsTest(TestCase):
+    def setUp(self):
+        self.message = ContactMessage.objects.create(
+            name="Qonaq", email="guest@example.com", subject="general", message="Salam, sualım var."
+        )
+
+    def _send(self):
+        with patch("apps.contact.services._send_email_with_fallback", return_value=(True, "")) as send:
+            ok = _send_internal_notification(self.message)
+        return ok, send
+
+    @override_settings(CONTACT_NOTIFY_EMAIL="")
+    def test_empty_notify_email_falls_back_to_active_superusers(self):
+        User.objects.create_superuser(username="root1", email="root1@example.com", password="StrongPass123!")
+        User.objects.create_superuser(username="root2", email="root2@example.com", password="StrongPass123!")
+        User.objects.create_superuser(username="root3", email="", password="StrongPass123!")
+        gone = User.objects.create_superuser(username="root4", email="gone@example.com", password="StrongPass123!")
+        gone.is_active = False
+        gone.save(update_fields=["is_active"])
+        User.objects.create_user(username="plain", email="plain@example.com", password="StrongPass123!")
+
+        ok, send = self._send()
+
+        self.assertTrue(ok)
+        kwargs = send.call_args.kwargs
+        self.assertEqual(kwargs["to"], ["root1@example.com", "root2@example.com"])
+        self.assertEqual(kwargs["from_email"], "verification@uni.example")
+        self.assertEqual(kwargs["reply_to"], ["guest@example.com"])
+        self.assertNotIn("emsarena", kwargs["html_body"] + kwargs["text_body"])
+        self.assertIn("Cavab sistemin rəsmi poçt qutusundan gedəcək.", kwargs["text_body"])
+
+    @override_settings(CONTACT_NOTIFY_EMAIL="desk@uni.example, chief@uni.example")
+    def test_configured_notify_email_wins(self):
+        User.objects.create_superuser(username="root1", email="root1@example.com", password="StrongPass123!")
+        ok, send = self._send()
+        self.assertTrue(ok)
+        self.assertEqual(send.call_args.kwargs["to"], ["desk@uni.example", "chief@uni.example"])
+
+    @override_settings(CONTACT_NOTIFY_EMAIL="")
+    def test_no_recipient_skips_with_warning(self):
+        with self.assertLogs("core.mailing", level="WARNING"):
+            ok, send = self._send()
+        self.assertFalse(ok)
+        send.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# Görünən ünvanlar — boşdursa sətir/blok gizlənir (2026-10-16)
+# ---------------------------------------------------------------------------
+class ContactAddressVisibilityTest(TestCase):
+    @override_settings(CONTACT_PUBLIC_EMAIL="", CONTACT_SUPPORT_EMAIL="")
+    def test_contact_page_and_footer_hide_empty_addresses(self):
+        response = self.client.get("/contact/")
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+        self.assertNotIn("mailto:", html)
+        self.assertNotIn("info – ümumi, support – texniki dəstək", html)
+        self.assertNotIn("emsarena.com", html)
+        self.assertNotIn("fa-life-ring", html)
+
+    @override_settings(CONTACT_PUBLIC_EMAIL="desk@uni.example", CONTACT_SUPPORT_EMAIL="help@uni.example")
+    def test_configured_addresses_are_shown(self):
+        html = self.client.get("/contact/").content.decode()
+        self.assertIn("mailto:desk@uni.example", html)
+        self.assertIn("mailto:help@uni.example", html)

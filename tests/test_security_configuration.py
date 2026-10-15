@@ -263,19 +263,32 @@ class ProductionAdminAllowlistSettingsTest(TestCase):
         self.assertEqual(module.ADMIN_ALLOWED_IPS, [])
 
     def test_brevo_login_email_does_not_override_default_sender(self):
+        # 2026-10-16: no-reply@ qutusu yoxdur — fallback real default M365 qutusudur (EMAIL_HOST_USER).
         module = self._load_production_settings(
             ADMIN_ALLOWED_IPS="",
             BREVO_EMAIL="equrbanov@gmail.com",
             BREVO_FROM_EMAIL="",
             DEFAULT_FROM_EMAIL="",
+            EMAIL_HOST_USER="verification@wcu.edu.az",
         )
-        self.assertEqual(module.DEFAULT_FROM_EMAIL, "no-reply@emsarena.com")
+        self.assertEqual(module.DEFAULT_FROM_EMAIL, "verification@wcu.edu.az")
+
+    def test_contact_addresses_default_to_empty_in_production(self):
+        module = self._load_production_settings(
+            ADMIN_ALLOWED_IPS="",
+            CONTACT_NOTIFY_EMAIL="",
+            CONTACT_SUPPORT_EMAIL="",
+            CONTACT_PUBLIC_EMAIL="",
+            TRIAL_NOTIFY_EMAIL="",
+        )
+        for name in ("CONTACT_NOTIFY_EMAIL", "CONTACT_SUPPORT_EMAIL", "CONTACT_PUBLIC_EMAIL", "TRIAL_NOTIFY_EMAIL"):
+            self.assertEqual(getattr(module, name), "", name)
 
     def test_brevo_smtp_login_is_used_for_smtp_auth(self):
         module = self._load_production_settings(
             ADMIN_ALLOWED_IPS="",
             BREVO_SMTP_LOGIN="a7359d001@smtp-brevo.com",
-            BREVO_EMAIL="no-reply@emsarena.com",
+            BREVO_EMAIL="sender@example.com",
             EMAIL_HOST_USER="legacy-user@example.com",
         )
         self.assertEqual(module.EMAIL_HOST_USER, "a7359d001@smtp-brevo.com")
