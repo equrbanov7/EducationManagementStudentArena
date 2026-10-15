@@ -268,6 +268,9 @@ def journal_detail(request, offering_id):
 
         context.update(item_corrections.annotate_normal_view(offering, context))
     context.update(journal_activation.strip_context(offering, context))  # «Bu günün cədvəl dərsləri» (UNEC P1-1)
+    from apps.registrar import subject_exempt  # «Fəndən azad et» + «Azad edilənlər» (sahib 2026-10-15)
+
+    context.update(subject_exempt.page_context(request.user, offering))
     from apps.registrar.journal_lesson_prefill import modal_context as lesson_prefill  # «Yeni dərs» dolu (2026-10-10)
 
     context.update(lesson_prefill(offering, context))

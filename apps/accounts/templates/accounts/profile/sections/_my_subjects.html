@@ -123,6 +123,19 @@ yox; hədəf `style-src-attr`-dan tam çıxmaqdır, bax csp.py).{% endcomment %}
         {% include "partials/ems_ui/_empty.html" with state_icon="fa-book-open" state_title=msx_no_subjects state_body=msx_no_subjects_body %}
         {% endif %}
 
+        {# ── «Fəndən azad» fənlər (sahib 2026-10-15) — kartlarda yoxdur, səbəbi burada ── #}
+        {% if sec.exempt_subjects %}
+        <section class="msx-electives msx-exempt" aria-labelledby="msx-exempt-title" data-msx-exempt>
+            <h2 class="msx-electives__title" id="msx-exempt-title"><i class="fas fa-user-check" aria-hidden="true"></i> {% trans "Azad edildiyiniz fənlər" context "profile.subjects" %}</h2>
+            <ul class="msx-elective__options">
+                {% for item in sec.exempt_subjects %}
+                <li class="msx-elective__option">{{ item.name }} · <b>{% trans "Azad edilib" context "profile.subjects" %}</b></li>
+                {% endfor %}
+            </ul>
+            <p class="msx-elective__note"><i class="fas fa-circle-info" aria-hidden="true"></i> {% trans "Bu fənlər üzrə jurnal, davamiyyət və imtahan tələbi sizə aid deyil; qrupunuz dəyişmir. Sual yaranarsa dekanlığa müraciət edin." context "profile.subjects" %}</p>
+        </section>
+        {% endif %}
+
         {# ── Seçmə blokları (qrup qərarı) ─────────────────────────────────────── #}
         {% if sec.elective_blocks %}
         <section class="msx-electives" aria-labelledby="msx-electives-title">

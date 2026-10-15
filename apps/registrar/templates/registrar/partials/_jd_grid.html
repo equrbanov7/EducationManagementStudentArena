@@ -141,6 +141,13 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                                 <div class="jd2-stu-inner">
                                     <span class="jd2-stu-no">{{ forloop.counter }}</span>
                                     <span class="jd2-stu-name" data-jd-hint-name>{{ row.student|journal_name }}</span>
+                                    {% if can_exempt %}{# «Fəndən azad et» — yalnız bu jurnaldan (sahib 2026-10-15) #}
+                                    <button type="button" class="jse-row-btn" data-jse-open="{{ row.enrollment.id }}" data-jse-student="{{ row.student|journal_name }}"
+                                            title="{% trans 'Fəndən azad et — tələbə qrupda qalır, yalnız bu jurnaldan çıxır' context 'registrar.subject_exempt' %}"
+                                            aria-label="{% trans 'Fəndən azad et' context 'registrar.subject_exempt' %}">
+                                        <i class="fas fa-user-minus" aria-hidden="true"></i>
+                                    </button>
+                                    {% endif %}
                                     {% if row.is_guest %}
                                     {% comment %}«Alt qrupdan əlavə olunub» nişanı — tooltip-də mənbə qrup.
                                     Koordinator/dekanlıq üçün eyni çip geri götürmə düyməsi də olur.{% endcomment %}

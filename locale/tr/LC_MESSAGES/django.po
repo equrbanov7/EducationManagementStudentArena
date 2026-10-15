@@ -97189,3 +97189,124 @@ msgstr "Düzenleme süresi (%(w)s) doldu"
 msgctxt "registrar.journal"
 msgid "Kurs işi balı yekun cədvəldə ayrıca sütunda göstərilir. Yazılan qeyd %(w)s sonra kilidlənir."
 msgstr "Dönem ödevi puanı final tablosunda ayrı bir sütunda gösterilir. Girilen kayıt %(w)s sonra kilitlenir."
+
+msgctxt "registrar.journal_hygiene"
+msgid "Fəndən azad"
+msgstr "Dersten muaf"
+
+msgctxt "registrar.subject_exempt"
+msgid "Sənəd tarixi düzgün deyil."
+msgstr "Belge tarihi geçersiz."
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azad edildi"
+msgstr "Dersten muaf tutuldu"
+
+#, python-format
+msgctxt "registrar.subject_exempt"
+msgid "sənəd: %(doc)s"
+msgstr "belge: %(doc)s"
+
+msgctxt "registrar.subject_exempt"
+msgid "Qeydiyyat tapılmadı."
+msgstr "Kayıt bulunamadı."
+
+msgctxt "registrar.subject_exempt"
+msgid "Bu tələbə artıq jurnalda deyil."
+msgstr "Bu öğrenci artık defterde değil."
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azadlıq geri alındı"
+msgstr "Ders muafiyeti geri alındı"
+
+msgctxt "registrar.subject_exempt"
+msgid "Qərar tapılmadı və ya artıq geri qaytarılıb."
+msgstr "Karar bulunamadı veya zaten geri alındı."
+
+msgctxt "registrar.subject_exempt"
+msgid "Qeydiyyatın statusu o vaxtdan dəyişib — bərpa olunmur."
+msgstr "Kaydın durumu o zamandan beri değişti — geri yüklenemez."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə bu fənn üzrə başqa jurnalda aktivdir — əvvəlcə oradan çıxarın."
+msgstr "Öğrenci bu ders için başka bir defterde aktif — önce oradan çıkarın."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbəni fəndən azad etmək üçün səlahiyyətiniz yoxdur."
+msgstr "Öğrencileri dersten muaf tutma yetkiniz yok."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə bu fəndən azad edildi — qrupda qalır, digər fənlərə toxunulmadı."
+msgstr "Öğrenci bu dersten muaf tutuldu — grupta kalır, diğer derslere dokunulmadı."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə jurnala qaytarıldı."
+msgstr "Öğrenci deftere geri döndürüldü."
+
+msgctxt "registrar.subject_exempt"
+msgid "Azad edilənlər"
+msgstr "Muaf tutulanlar"
+
+msgctxt "registrar.subject_exempt"
+msgid "qrupda qalırlar — yalnız bu fənnin jurnalında görünmürlər"
+msgstr "grupta kalırlar — yalnızca bu dersin defterinde görünmezler"
+
+msgctxt "registrar.subject_exempt"
+msgid "Bərpa et"
+msgstr "Geri al"
+
+msgctxt "registrar.subject_exempt"
+msgid "Əməliyyat alınmadı — yenidən cəhd edin."
+msgstr "İşlem başarısız — tekrar deneyin."
+
+msgctxt "registrar.subject_exempt"
+msgid "Təsdiq üçün yenidən klikləyin"
+msgstr "Onaylamak için tekrar tıklayın"
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azad et"
+msgstr "Dersten muaf tut"
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə qrupda qalır — yalnız bu fənnin jurnalından, imtahan siyahısından və hesablamalarından çıxır. Digər fənlərə toxunulmur; «Bərpa et» ilə geri qaytarılır."
+msgstr "Öğrenci grupta kalır — yalnızca bu dersin defterinden, sınav listesinden ve hesaplamalarından çıkarılır. Diğer derslere dokunulmaz; «Geri al» ile geri döndürülür."
+
+msgctxt "registrar.subject_exempt"
+msgid "Bağla"
+msgstr "Kapat"
+
+msgctxt "registrar.subject_exempt"
+msgid "Səbəb"
+msgstr "Gerekçe"
+
+msgctxt "registrar.subject_exempt"
+msgid "(istəyə bağlı)"
+msgstr "(isteğe bağlı)"
+
+msgctxt "registrar.subject_exempt"
+msgid "Sənəd №"
+msgstr "Belge No."
+
+msgctxt "registrar.subject_exempt"
+msgid "Sənəd tarixi"
+msgstr "Belge tarihi"
+
+msgctxt "registrar.subject_exempt"
+msgid "Ləğv et"
+msgstr "İptal"
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azad et — tələbə qrupda qalır, yalnız bu jurnaldan çıxır"
+msgstr "Dersten muaf tut — öğrenci grupta kalır, yalnızca bu defterden çıkar"
+
+msgctxt "profile.subjects"
+msgid "Azad edildiyiniz fənlər"
+msgstr "Muaf olduğunuz dersler"
+
+msgctxt "profile.subjects"
+msgid "Azad edilib"
+msgstr "Muaf"
+
+msgctxt "profile.subjects"
+msgid "Bu fənlər üzrə jurnal, davamiyyət və imtahan tələbi sizə aid deyil; qrupunuz dəyişmir. Sual yaranarsa dekanlığa müraciət edin."
+msgstr "Bu dersler için defter, devam ve sınav şartları size uygulanmaz; grubunuz değişmez. Sorularınız için dekanlığa başvurun."

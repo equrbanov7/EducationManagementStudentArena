@@ -1,0 +1,78 @@
+/* ═══ «Fəndən azad et» + «Azad edilənlər» (jse-*, sahib 2026-10-15) ═══════════
+   Tələbə qrupda qalır, yalnız bu fənnin jurnalından çıxır. Dizayn dili jd2 / jgs-dən
+   gəlir — rənglər yalnız mövcud `--ems-*` tokenlərindəndir (yalnız-işıqlı tətbiq). */
+
+/* ── Sətirdəki kiçik düymə (ad sütunu) ───────────────────────────────────── */
+.jse-row-btn {
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    width: 22px; height: 22px; margin-left: 6px; padding: 0;
+    border: 1px solid var(--ems-neutral-200); border-radius: 999px; cursor: pointer;
+    background: var(--ems-neutral-0); color: var(--ems-neutral-500); font-size: 10px;
+    opacity: 0.55; transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+.jd2-row:hover .jse-row-btn,
+.jse-row-btn:focus-visible { opacity: 1; }
+.jse-row-btn:hover {
+    background: var(--ems-danger-100); border-color: var(--ems-danger-200); color: var(--ems-danger-strong);
+}
+.jse-row-btn:focus-visible { outline: 2px solid var(--ems-primary-600); outline-offset: 2px; }
+@media (hover: none) { .jse-row-btn { opacity: 1; } }
+
+/* ── «Azad edilənlər» — qatlanan siyahı (cədvəlin altında) ────────────────── */
+.jse-list {
+    margin: 14px 0 0; border: 1px solid var(--ems-neutral-200); border-radius: 12px;
+    background: var(--ems-neutral-0);
+}
+.jse-list__head {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+    padding: 10px 14px; cursor: pointer; list-style: none;
+    font-size: 13px; font-weight: 700; color: var(--ems-neutral-700);
+}
+.jse-list__head::-webkit-details-marker { display: none; }
+.jse-list__head:focus-visible { outline: 2px solid var(--ems-primary-600); outline-offset: 2px; border-radius: 12px; }
+.jse-list__count {
+    min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--ems-neutral-100); color: var(--ems-neutral-700); font-size: 11px; font-weight: 800;
+}
+.jse-list__hint { font-size: 12px; font-weight: 500; color: var(--ems-neutral-500); }
+.jse-list__items { margin: 0; padding: 0 14px 10px; list-style: none; }
+.jse-item {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px;
+    padding: 8px 0; border-top: 1px solid var(--ems-neutral-100);
+}
+.jse-item__name { font-weight: 700; color: var(--ems-neutral-800); }
+.jse-item__meta { flex: 1 1 240px; min-width: 0; font-size: 12px; color: var(--ems-neutral-500); overflow-wrap: anywhere; }
+.jse-restore {
+    display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-family: inherit;
+    border: 1px solid var(--ems-primary-200); border-radius: 8px; padding: 6px 10px;
+    background: var(--ems-primary-50); color: var(--ems-primary-700); font-size: 12px; font-weight: 700;
+}
+.jse-restore:hover { background: var(--ems-primary-100); border-color: var(--ems-primary-500); }
+.jse-restore:focus-visible { outline: 2px solid var(--ems-primary-600); outline-offset: 2px; }
+.jse-restore.is-confirm { background: var(--ems-danger-100); border-color: var(--ems-danger-200); color: var(--ems-danger-strong); }
+.jse-restore[disabled], .jse-submit[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Modal ────────────────────────────────────────────────────────────────── */
+.jse-card { width: min(560px, 100%); max-height: 88vh; display: flex; flex-direction: column; }
+.jse-head { display: flex; align-items: flex-start; gap: 12px; }
+.jse-head-main { flex: 1; min-width: 0; }
+.jse-head-sub { margin: 4px 0 0; font-size: 12px; font-weight: 600; line-height: 1.45; color: var(--ems-neutral-600); }
+.jse-body { overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.jse-context { display: flex; flex-wrap: wrap; gap: 8px; }
+.jse-ctx-chip {
+    display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px;
+    background: var(--ems-primary-50); color: var(--ems-primary-800); border: 1px solid var(--ems-primary-200);
+    font-size: 12px;
+}
+.jse-ctx-chip--muted { background: var(--ems-neutral-100); color: var(--ems-neutral-700); border-color: var(--ems-neutral-200); }
+.jse-field { display: flex; flex-direction: column; gap: 4px; }
+.jse-field small { font-weight: 500; text-transform: none; letter-spacing: 0; }
+.jse-doc { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 480px) { .jse-doc { grid-template-columns: 1fr; } }
+.jse-error {
+    margin: 0; padding: 8px 10px; border-radius: 8px; font-size: 12.5px;
+    background: var(--ems-danger-100); color: var(--ems-danger-strong); border: 1px solid var(--ems-danger-200);
+}
+.jse-foot { display: flex; justify-content: flex-end; gap: 10px; }
+.jse-submit { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }

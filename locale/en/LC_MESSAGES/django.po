@@ -97738,3 +97738,124 @@ msgstr "The edit window (%(w)s) has closed"
 msgctxt "registrar.journal"
 msgid "Kurs işi balı yekun cədvəldə ayrıca sütunda göstərilir. Yazılan qeyd %(w)s sonra kilidlənir."
 msgstr "The coursework score is shown in a separate column of the final table. A recorded entry locks after %(w)s."
+
+msgctxt "registrar.journal_hygiene"
+msgid "Fəndən azad"
+msgstr "Exempt from subject"
+
+msgctxt "registrar.subject_exempt"
+msgid "Sənəd tarixi düzgün deyil."
+msgstr "The document date is invalid."
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azad edildi"
+msgstr "Exempted from the subject"
+
+#, python-format
+msgctxt "registrar.subject_exempt"
+msgid "sənəd: %(doc)s"
+msgstr "document: %(doc)s"
+
+msgctxt "registrar.subject_exempt"
+msgid "Qeydiyyat tapılmadı."
+msgstr "Enrollment not found."
+
+msgctxt "registrar.subject_exempt"
+msgid "Bu tələbə artıq jurnalda deyil."
+msgstr "This student is no longer in the journal."
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azadlıq geri alındı"
+msgstr "Subject exemption withdrawn"
+
+msgctxt "registrar.subject_exempt"
+msgid "Qərar tapılmadı və ya artıq geri qaytarılıb."
+msgstr "Decision not found or already reverted."
+
+msgctxt "registrar.subject_exempt"
+msgid "Qeydiyyatın statusu o vaxtdan dəyişib — bərpa olunmur."
+msgstr "The enrollment status has changed since then — it cannot be restored."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə bu fənn üzrə başqa jurnalda aktivdir — əvvəlcə oradan çıxarın."
+msgstr "The student is active in another journal for this subject — remove them there first."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbəni fəndən azad etmək üçün səlahiyyətiniz yoxdur."
+msgstr "You are not allowed to exempt students from a subject."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə bu fəndən azad edildi — qrupda qalır, digər fənlərə toxunulmadı."
+msgstr "The student was exempted from this subject — they stay in the group; other subjects are untouched."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə jurnala qaytarıldı."
+msgstr "The student was returned to the journal."
+
+msgctxt "registrar.subject_exempt"
+msgid "Azad edilənlər"
+msgstr "Exempted"
+
+msgctxt "registrar.subject_exempt"
+msgid "qrupda qalırlar — yalnız bu fənnin jurnalında görünmürlər"
+msgstr "they stay in the group — they are only hidden from this subject's journal"
+
+msgctxt "registrar.subject_exempt"
+msgid "Bərpa et"
+msgstr "Restore"
+
+msgctxt "registrar.subject_exempt"
+msgid "Əməliyyat alınmadı — yenidən cəhd edin."
+msgstr "The action failed — please try again."
+
+msgctxt "registrar.subject_exempt"
+msgid "Təsdiq üçün yenidən klikləyin"
+msgstr "Click again to confirm"
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azad et"
+msgstr "Exempt from subject"
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə qrupda qalır — yalnız bu fənnin jurnalından, imtahan siyahısından və hesablamalarından çıxır. Digər fənlərə toxunulmur; «Bərpa et» ilə geri qaytarılır."
+msgstr "The student stays in the group — they are removed only from this subject's journal, exam list and calculations. Other subjects are untouched; «Restore» brings them back."
+
+msgctxt "registrar.subject_exempt"
+msgid "Bağla"
+msgstr "Close"
+
+msgctxt "registrar.subject_exempt"
+msgid "Səbəb"
+msgstr "Reason"
+
+msgctxt "registrar.subject_exempt"
+msgid "(istəyə bağlı)"
+msgstr "(optional)"
+
+msgctxt "registrar.subject_exempt"
+msgid "Sənəd №"
+msgstr "Document No."
+
+msgctxt "registrar.subject_exempt"
+msgid "Sənəd tarixi"
+msgstr "Document date"
+
+msgctxt "registrar.subject_exempt"
+msgid "Ləğv et"
+msgstr "Cancel"
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azad et — tələbə qrupda qalır, yalnız bu jurnaldan çıxır"
+msgstr "Exempt from subject — the student stays in the group and leaves only this journal"
+
+msgctxt "profile.subjects"
+msgid "Azad edildiyiniz fənlər"
+msgstr "Subjects you are exempt from"
+
+msgctxt "profile.subjects"
+msgid "Azad edilib"
+msgstr "Exempt"
+
+msgctxt "profile.subjects"
+msgid "Bu fənlər üzrə jurnal, davamiyyət və imtahan tələbi sizə aid deyil; qrupunuz dəyişmir. Sual yaranarsa dekanlığa müraciət edin."
+msgstr "Journal, attendance and exam requirements for these subjects do not apply to you; your group does not change. If you have questions, contact the dean's office."

@@ -97290,3 +97290,124 @@ msgstr "Redaktə pəncərəsi (%(w)s) bağlanıb"
 msgctxt "registrar.journal"
 msgid "Kurs işi balı yekun cədvəldə ayrıca sütunda göstərilir. Yazılan qeyd %(w)s sonra kilidlənir."
 msgstr "Kurs işi balı yekun cədvəldə ayrıca sütunda göstərilir. Yazılan qeyd %(w)s sonra kilidlənir."
+
+msgctxt "registrar.journal_hygiene"
+msgid "Fəndən azad"
+msgstr "Fəndən azad"
+
+msgctxt "registrar.subject_exempt"
+msgid "Sənəd tarixi düzgün deyil."
+msgstr "Sənəd tarixi düzgün deyil."
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azad edildi"
+msgstr "Fəndən azad edildi"
+
+#, python-format
+msgctxt "registrar.subject_exempt"
+msgid "sənəd: %(doc)s"
+msgstr "sənəd: %(doc)s"
+
+msgctxt "registrar.subject_exempt"
+msgid "Qeydiyyat tapılmadı."
+msgstr "Qeydiyyat tapılmadı."
+
+msgctxt "registrar.subject_exempt"
+msgid "Bu tələbə artıq jurnalda deyil."
+msgstr "Bu tələbə artıq jurnalda deyil."
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azadlıq geri alındı"
+msgstr "Fəndən azadlıq geri alındı"
+
+msgctxt "registrar.subject_exempt"
+msgid "Qərar tapılmadı və ya artıq geri qaytarılıb."
+msgstr "Qərar tapılmadı və ya artıq geri qaytarılıb."
+
+msgctxt "registrar.subject_exempt"
+msgid "Qeydiyyatın statusu o vaxtdan dəyişib — bərpa olunmur."
+msgstr "Qeydiyyatın statusu o vaxtdan dəyişib — bərpa olunmur."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə bu fənn üzrə başqa jurnalda aktivdir — əvvəlcə oradan çıxarın."
+msgstr "Tələbə bu fənn üzrə başqa jurnalda aktivdir — əvvəlcə oradan çıxarın."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbəni fəndən azad etmək üçün səlahiyyətiniz yoxdur."
+msgstr "Tələbəni fəndən azad etmək üçün səlahiyyətiniz yoxdur."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə bu fəndən azad edildi — qrupda qalır, digər fənlərə toxunulmadı."
+msgstr "Tələbə bu fəndən azad edildi — qrupda qalır, digər fənlərə toxunulmadı."
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə jurnala qaytarıldı."
+msgstr "Tələbə jurnala qaytarıldı."
+
+msgctxt "registrar.subject_exempt"
+msgid "Azad edilənlər"
+msgstr "Azad edilənlər"
+
+msgctxt "registrar.subject_exempt"
+msgid "qrupda qalırlar — yalnız bu fənnin jurnalında görünmürlər"
+msgstr "qrupda qalırlar — yalnız bu fənnin jurnalında görünmürlər"
+
+msgctxt "registrar.subject_exempt"
+msgid "Bərpa et"
+msgstr "Bərpa et"
+
+msgctxt "registrar.subject_exempt"
+msgid "Əməliyyat alınmadı — yenidən cəhd edin."
+msgstr "Əməliyyat alınmadı — yenidən cəhd edin."
+
+msgctxt "registrar.subject_exempt"
+msgid "Təsdiq üçün yenidən klikləyin"
+msgstr "Təsdiq üçün yenidən klikləyin"
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azad et"
+msgstr "Fəndən azad et"
+
+msgctxt "registrar.subject_exempt"
+msgid "Tələbə qrupda qalır — yalnız bu fənnin jurnalından, imtahan siyahısından və hesablamalarından çıxır. Digər fənlərə toxunulmur; «Bərpa et» ilə geri qaytarılır."
+msgstr "Tələbə qrupda qalır — yalnız bu fənnin jurnalından, imtahan siyahısından və hesablamalarından çıxır. Digər fənlərə toxunulmur; «Bərpa et» ilə geri qaytarılır."
+
+msgctxt "registrar.subject_exempt"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "registrar.subject_exempt"
+msgid "Səbəb"
+msgstr "Səbəb"
+
+msgctxt "registrar.subject_exempt"
+msgid "(istəyə bağlı)"
+msgstr "(istəyə bağlı)"
+
+msgctxt "registrar.subject_exempt"
+msgid "Sənəd №"
+msgstr "Sənəd №"
+
+msgctxt "registrar.subject_exempt"
+msgid "Sənəd tarixi"
+msgstr "Sənəd tarixi"
+
+msgctxt "registrar.subject_exempt"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "registrar.subject_exempt"
+msgid "Fəndən azad et — tələbə qrupda qalır, yalnız bu jurnaldan çıxır"
+msgstr "Fəndən azad et — tələbə qrupda qalır, yalnız bu jurnaldan çıxır"
+
+msgctxt "profile.subjects"
+msgid "Azad edildiyiniz fənlər"
+msgstr "Azad edildiyiniz fənlər"
+
+msgctxt "profile.subjects"
+msgid "Azad edilib"
+msgstr "Azad edilib"
+
+msgctxt "profile.subjects"
+msgid "Bu fənlər üzrə jurnal, davamiyyət və imtahan tələbi sizə aid deyil; qrupunuz dəyişmir. Sual yaranarsa dekanlığa müraciət edin."
+msgstr "Bu fənlər üzrə jurnal, davamiyyət və imtahan tələbi sizə aid deyil; qrupunuz dəyişmir. Sual yaranarsa dekanlığa müraciət edin."

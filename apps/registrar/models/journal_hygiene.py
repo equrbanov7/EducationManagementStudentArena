@@ -34,6 +34,8 @@ class HygieneCategory(models.TextChoices):
     EMPTY_SUBJECT = "empty_subject", pgettext_lazy("registrar.journal_hygiene", "Boş fənn")
     #: Qrupda heç kimin imtahan («çıxış») balı yoxdur — fənn keçirilməyib (sahib 2026-10-11).
     NOT_HELD = "not_held", pgettext_lazy("registrar.journal_hygiene", "Keçirilməyən fənn")
+    #: Tələbə qrupda qalır, amma BU fənndən azad edilib — yalnız həmin jurnaldan çıxır (sahib 2026-10-15).
+    SUBJECT_EXEMPT = "subject_exempt", pgettext_lazy("registrar.journal_hygiene", "Fəndən azad")
 
 
 class JournalHygieneDecision(UUIDModel, TimeStampedModel):
@@ -58,7 +60,7 @@ class JournalHygieneDecision(UUIDModel, TimeStampedModel):
     to_status = models.CharField(max_length=16)
     evidence = models.JSONField(default=dict, help_text="Qərar anındakı sübut snapshot-u (saylar, etiketlər).")
     evidence_digest = models.CharField(max_length=64, help_text="Sübut snapshot-unun sha256 izi.")
-    reason = models.TextField(help_text="Qərarın səbəbi — ən azı 20 simvol.")
+    reason = models.TextField(help_text="Qərarın səbəbi (təmizlik əməlində ≥20 simvol; «Fəndən azad»da istəyə bağlı).")
     decided_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
