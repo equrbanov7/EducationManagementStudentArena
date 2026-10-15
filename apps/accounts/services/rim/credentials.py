@@ -33,6 +33,7 @@ from apps.audit.public import log_action
 from core.constants import AuditAction
 from core.rate_limit import is_rate_limited, record_rate_limit_hit
 
+from ...password_policy import min_length as password_min_length
 from .lifecycle import normalize_reason
 from .policy import (
     PERM_CREDENTIALS,
@@ -75,12 +76,13 @@ def generate_temporary_password(length: int = TEMP_PASSWORD_LENGTH) -> str:
 def _generate_valid_password(target_user) -> str:
     """Django parol validatorlarından keçən parol istehsal edir.
 
-    Təsadüfi parol nadir hallarda `UserAttributeSimilarityValidator`-a ilişə
-    bilər (məs. istifadəçi adı parolun içinə düşəndə) — ona görə təkrar cəhd.
+    Siyasət (``apps.accounts.password_policy``) yalnız uzunluq + qısa qadağa
+    siyahısıdır — təsadüfi parol praktikada həmişə keçir; təkrar cəhd ehtiyat
+    üçündür (hədd «Sistem tənzimləmələri»ndə qaldırılarsa və s.).
     """
     last_error = None
     for _attempt in range(_MAX_GENERATION_ATTEMPTS):
-        candidate = generate_temporary_password()
+        candidate = generate_temporary_password(max(TEMP_PASSWORD_LENGTH, password_min_length()))
         try:
             validate_password(candidate, user=target_user)
         except ValidationError as exc:  # noqa: PERF203 — nadir hal

@@ -98977,3 +98977,59 @@ msgstr "Hallo <strong>%(name)s</strong>, geben Sie für %(action)s den folgenden
 msgctxt "email.layout"
 msgid "Postu oxu"
 msgstr "Beitrag lesen"
+
+#, python-format
+msgctxt "accounts.password_policy"
+msgid "Ən azı %(min_length)d simvol. Yadda saxlaya biləcəyiniz sadə parol da olar."
+msgstr "Mindestens %(min_length)d Zeichen. Ein einfaches Passwort, das Sie sich merken können, ist auch in Ordnung."
+
+#, python-format
+msgctxt "accounts.password_policy"
+msgid "Parol ən azı %(min_length)d simvol olmalıdır."
+msgstr "Das Passwort muss mindestens %(min_length)d Zeichen lang sein."
+
+msgctxt "accounts.password_policy"
+msgid "Bu parol çox asan təxmin olunur. Başqa birini seçin."
+msgstr "Dieses Passwort ist zu leicht zu erraten. Bitte wählen Sie ein anderes."
+
+msgctxt "accounts.password_policy"
+msgid "«12345678», «password» kimi çox yayılmış parollar və istifadəçi adınız olmaz."
+msgstr "Sehr verbreitete Passwörter wie «12345678» oder «password» sowie Ihr Benutzername sind nicht erlaubt."
+
+msgctxt "core.runtime_settings"
+msgid "Parolun minimum uzunluğu"
+msgstr "Mindestlänge des Passworts"
+
+msgctxt "core.runtime_settings"
+msgid "Yeni parol ən azı bu qədər simvol olmalıdır. Böyük hərf, rəqəm və ya simvol tələb olunmur — yalnız «12345678» kimi çox asan parollar və istifadəçi adı rədd edilir."
+msgstr "Ein neues Passwort muss mindestens so viele Zeichen haben. Großbuchstaben, Ziffern oder Symbole sind nicht nötig — abgelehnt werden nur sehr einfache Passwörter wie «12345678» und der Benutzername."
+
+msgctxt "core.runtime_settings"
+msgid "simvol"
+msgstr "Zeichen"
+
+msgctxt "profile.password"
+msgid "Hələ qısadır"
+msgstr "Noch zu kurz"
+
+msgctxt "profile.password"
+msgid "Uyğundur"
+msgstr "Passt"
+
+#, python-format
+msgctxt "profile.password"
+msgid "Ən azı %(min_length)s simvol"
+msgstr "Mindestens %(min_length)s Zeichen"
+
+msgctxt "profile.password"
+msgid "«12345678», «password» kimi çox asan parol və ya istifadəçi adınız olmasın"
+msgstr "Kein sehr einfaches Passwort wie «12345678» oder «password» und nicht Ihr Benutzername"
+
+msgctxt "profile.password"
+msgid "Böyük hərf, rəqəm və ya simvol məcburi deyil — yadda saxlaya biləcəyiniz sadə parol da olar."
+msgstr "Großbuchstaben, Ziffern oder Symbole sind nicht nötig — ein einfaches Passwort, das Sie sich merken können, ist auch in Ordnung."
+
+#, python-format
+msgctxt "accounts.first_login"
+msgid "ən azı %(min_length)s simvol"
+msgstr "mindestens %(min_length)s Zeichen"

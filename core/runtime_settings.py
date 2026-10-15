@@ -197,6 +197,17 @@ SPECS: dict[str, Spec] = {
             pgettext_lazy(_CTX, "Universitet Wi-Fi-ında yüzlərlə tələbə EYNİ İP-dən çıxır — çox aşağı saxlamayın."),
             min=20, max=5000,
         ),
+        # Sahib 2026-10-15: sadə parol — yalnız uzunluq + qısa qadağa siyahısı (apps/accounts/password_policy.py).
+        Spec(
+            "password.min_length", "login", "int", _setting("PASSWORD_MIN_LENGTH", 8),
+            pgettext_lazy(_CTX, "Parolun minimum uzunluğu"),
+            pgettext_lazy(
+                _CTX,
+                "Yeni parol ən azı bu qədər simvol olmalıdır. Böyük hərf, rəqəm və ya simvol tələb olunmur — "
+                "yalnız «12345678» kimi çox asan parollar və istifadəçi adı rədd edilir.",
+            ),
+            pgettext_lazy(_CTX, "simvol"), min=6, max=32,
+        ),
         Spec(
             "otp.expiry_minutes", "otp", "int", lambda: max(1, int(getattr(settings, "AUTH_OTP_EXPIRY_SECONDS", 300)) // 60),
             pgettext_lazy(_CTX, "Kodun etibarlılıq müddəti"),

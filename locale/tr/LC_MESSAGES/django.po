@@ -97338,3 +97338,59 @@ msgstr "Merhaba <strong>%(name)s</strong>, %(action)s için aşağıdaki kodu gi
 msgctxt "email.layout"
 msgid "Postu oxu"
 msgstr "Yazıyı oku"
+
+#, python-format
+msgctxt "accounts.password_policy"
+msgid "Ən azı %(min_length)d simvol. Yadda saxlaya biləcəyiniz sadə parol da olar."
+msgstr "En az %(min_length)d karakter. Hatırlayabileceğiniz basit bir parola da olur."
+
+#, python-format
+msgctxt "accounts.password_policy"
+msgid "Parol ən azı %(min_length)d simvol olmalıdır."
+msgstr "Parola en az %(min_length)d karakter olmalıdır."
+
+msgctxt "accounts.password_policy"
+msgid "Bu parol çox asan təxmin olunur. Başqa birini seçin."
+msgstr "Bu parola çok kolay tahmin edilir. Lütfen başka bir parola seçin."
+
+msgctxt "accounts.password_policy"
+msgid "«12345678», «password» kimi çox yayılmış parollar və istifadəçi adınız olmaz."
+msgstr "«12345678», «password» gibi çok yaygın parolalar ve kullanıcı adınız kullanılamaz."
+
+msgctxt "core.runtime_settings"
+msgid "Parolun minimum uzunluğu"
+msgstr "Minimum parola uzunluğu"
+
+msgctxt "core.runtime_settings"
+msgid "Yeni parol ən azı bu qədər simvol olmalıdır. Böyük hərf, rəqəm və ya simvol tələb olunmur — yalnız «12345678» kimi çox asan parollar və istifadəçi adı rədd edilir."
+msgstr "Yeni parola en az bu kadar karakter olmalıdır. Büyük harf, rakam veya sembol gerekmez — yalnızca «12345678» gibi çok kolay parolalar ve kullanıcı adı reddedilir."
+
+msgctxt "core.runtime_settings"
+msgid "simvol"
+msgstr "karakter"
+
+msgctxt "profile.password"
+msgid "Hələ qısadır"
+msgstr "Henüz kısa"
+
+msgctxt "profile.password"
+msgid "Uyğundur"
+msgstr "Uygun"
+
+#, python-format
+msgctxt "profile.password"
+msgid "Ən azı %(min_length)s simvol"
+msgstr "En az %(min_length)s karakter"
+
+msgctxt "profile.password"
+msgid "«12345678», «password» kimi çox asan parol və ya istifadəçi adınız olmasın"
+msgstr "«12345678», «password» gibi çok kolay bir parola veya kullanıcı adınız olmasın"
+
+msgctxt "profile.password"
+msgid "Böyük hərf, rəqəm və ya simvol məcburi deyil — yadda saxlaya biləcəyiniz sadə parol da olar."
+msgstr "Büyük harf, rakam veya sembol zorunlu değildir — hatırlayabileceğiniz basit bir parola da olur."
+
+#, python-format
+msgctxt "accounts.first_login"
+msgid "ən azı %(min_length)s simvol"
+msgstr "en az %(min_length)s karakter"
