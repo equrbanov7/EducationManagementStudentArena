@@ -23,15 +23,16 @@ from urllib.parse import urlsplit
 from django import template
 from django.conf import settings
 from django.templatetags.static import static
+from django.utils.translation import pgettext
 
 logger = logging.getLogger(__name__)
 
 register = template.Library()
 
 DEFAULT_BRAND = "Qərbi Kaspi Universiteti"
-PRODUCT_NAME = "EMS Arena"
-#: Kvadrat işarə — başlıq zolağında 40×40 göstərilir (429×429 PNG, şəffaf fon).
-LOGO_STATIC_PATH = "brand/logo-mark.png"
+#: Kvadrat işarə — başlıq zolağında 40×40 göstərilir: universitetin rəsmi emblemi
+#: (192×192 PNG, sayt favikonu ilə eyni fayl; köhnə məhsul işarəsi işlənmir).
+LOGO_STATIC_PATH = "brand/favicon-192x192.png"
 
 
 def _site_url() -> str:
@@ -76,7 +77,8 @@ def email_chrome() -> dict:
     site_url = _site_url()
     return {
         "brand": getattr(settings, "SITE_BRAND_NAME", "") or DEFAULT_BRAND,
-        "product": PRODUCT_NAME,
+        # Məhsul sözü (sahib 2026-10-15: köhnə məhsul adı istifadəçiyə görünmür) — aktiv dilə tərcümə olunur.
+        "product": pgettext("email.layout", "Elektron Universitet"),
         "site_url": site_url,
         "logo_url": _logo_url(site_url),
         "support_email": _support_email(),

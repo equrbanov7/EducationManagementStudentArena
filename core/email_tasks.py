@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 def _otp_subject_for_purpose(purpose: str) -> str:
     # Brand-driven so OTP emails carry the configured institution name
     # (Qərbi Kaspi Universiteti) instead of a hard-coded product name.
-    brand = getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena"
+    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
     return {
         "signup": f"{brand} email təsdiqi",
         "login": f"{brand} giriş OTP kodu",
@@ -122,7 +122,7 @@ def send_account_otp_email(
             # White-label brand for the email chrome (title + header). Emails are
             # rendered without request context processors, so it must be injected
             # here explicitly (same source as the OTP subject line above).
-            "brand": getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena",
+            "brand": getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti",
             "user": user,
             "recipient_name": resolved_name or recipient_email,
             "email": recipient_email,
@@ -272,7 +272,7 @@ def send_new_post_notification_email(
 
         context = {
             "post": post,
-            "brand": getattr(settings, "SITE_BRAND_NAME", "") or "EMSArena",
+            "brand": getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti",
         }
         html_message = render_to_string("blog/emails/new_post_notification.html", context)
         plain_message = plain_text_body("blog/emails/new_post_notification.html", context, html_message)

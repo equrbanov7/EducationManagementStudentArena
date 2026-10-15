@@ -149,7 +149,8 @@ class EmailTemplatesRenderTest(SimpleTestCase):
                 html = render_to_string(f"{name}.html", make_context())
                 self.assertIn('class="em-preheader"', html)
                 self.assertIn("Qərbi Kaspi Universiteti", html)
-                self.assertIn("EMS Arena", html)
+                self.assertIn("Elektron Universitet", html)
+                self.assertNotIn("EMS Arena", html)
                 self.assertIn("max-width:600px", html)
                 self.assertIn(f"&copy; {timezone.now().year}", html)
                 self.assertIn("mailto:support@qku.edu.az", html)
@@ -165,7 +166,8 @@ class EmailTemplatesRenderTest(SimpleTestCase):
                 self.assertNotIn("<", text.replace("<strong>", ""))
                 self.assertNotIn("{", text)
                 self.assertNotIn("&amp;", text)
-                self.assertIn("EMS Arena", text)
+                self.assertIn("Elektron Universitet", text)
+                self.assertNotIn("EMS Arena", text)
                 for needle in needles:
                     self.assertIn(needle, text)
 
@@ -205,6 +207,8 @@ class EmailTemplatesRenderTest(SimpleTestCase):
             for marker in ("cavab yazmayın", "Etibarlılıq", "Kodunuz", "Sualınız"):
                 self.assertNotIn(marker, body)
         self.assertIn("Valid for 5 minutes", html)
+        self.assertIn("e-University", html)
+        self.assertIn("e-University", text)
 
 
 class EmailChromeTest(SimpleTestCase):
@@ -213,7 +217,8 @@ class EmailChromeTest(SimpleTestCase):
         chrome = email_chrome()
         self.assertEqual(chrome["site_url"], "https://ems.qku.edu.az")
         self.assertTrue(chrome["logo_url"].startswith("https://ems.qku.edu.az/"))
-        self.assertTrue(chrome["logo_url"].endswith("brand/logo-mark.png"))
+        # Universitetin rəsmi emblemi (köhnə məhsul işarəsi yox — sahib 2026-10-15).
+        self.assertTrue(chrome["logo_url"].endswith("brand/favicon-192x192.png"))
         self.assertEqual(chrome["support_email"], "support@qku.edu.az")
 
     def test_private_or_plain_http_site_has_no_logo(self):

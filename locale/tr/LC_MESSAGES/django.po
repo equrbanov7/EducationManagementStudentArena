@@ -5541,13 +5541,6 @@ msgctxt "accounts.register"
 msgid "privacy_card_title"
 msgstr "Gizlilik ve veri işleme"
 
-#: apps/accounts/templates/accounts/partials/register_steps/_step4.html:178
-msgctxt "accounts.register"
-msgid "privacy_card_description"
-msgstr ""
-"Hesabınızı oluşturmadan önce EMSArena'nın kayıt ve eğitim sürecinde kişisel "
-"verileri nasıl kullandığını inceleyin."
-
 #: apps/accounts/templates/accounts/partials/register_steps/_step4.html:187
 msgctxt "accounts.register"
 msgid "privacy_open_button"
@@ -15445,23 +15438,10 @@ msgctxt "accounts.register"
 msgid "choose_country"
 msgstr "Ülkenizi seçin"
 
-#: apps/accounts/templates/accounts/register.html:99
-msgctxt "accounts.register"
-msgid "privacy_modal_eyebrow"
-msgstr "EMSArena kayıt politikası"
-
 #: apps/accounts/templates/accounts/register.html:102
 msgctxt "accounts.register"
 msgid "privacy_modal_title"
 msgstr "Gizlilik Politikası"
-
-#: apps/accounts/templates/accounts/register.html:105
-msgctxt "accounts.register"
-msgid "privacy_modal_intro"
-msgstr ""
-"Bu politika, hesap oluştururken, bir kuruma katılırken ve EMSArena içindeki "
-"ders, sınav, laboratuvar, ödev ve canlı oturum özelliklerini kullanırken "
-"bilgilerinizin nasıl işlendiğini açıklar."
 
 #: apps/accounts/templates/accounts/register.html:108
 #: apps/accounts/templates/accounts/register.html:211
@@ -29393,7 +29373,7 @@ msgstr "Izgara"
 #: apps/exams/templates/exams/student/student_exam_list.html:46
 msgctxt "exams.template.student_exam_list"
 msgid "live_kicker"
-msgstr "EMSARENA LIVE"
+msgstr "CANLI SINAV"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:46
 msgctxt "exams.template.student_exam_list"
@@ -31643,11 +31623,6 @@ msgstr "Kaydetme, çık"
 msgctxt "exams.wizard"
 msgid "unsaved_save"
 msgstr "Kaydet"
-
-#: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:21
-msgctxt "exams.wizard"
-msgid "rail_kicker"
-msgstr "EMSARENA · ÖĞRETMEN"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:29
 msgctxt "exams.wizard"
@@ -34165,7 +34140,7 @@ msgstr "Soru ekle"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:399
 msgctxt "exams.template.teacher_exam_detail"
 msgid "live_resume_modal_eyebrow"
-msgstr "EMSArena kayit politikasi"
+msgstr "Devam eden canlı oturum"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:400
 msgctxt "exams.template.teacher_exam_detail"
@@ -48098,30 +48073,10 @@ msgstr "Çık"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-msgid "EMSArena blogunda yeni bir post yayımlandı:"
-msgstr "EMSArena blogunda yeni bir gönderi yayımlandı:"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid ""
-"Bu emaili aldınızsa, EMSArena bloguna abunə olmusunuz. Abunəliyi ləğv etmək "
-"üçün sayta daxil olun."
-msgstr ""
-"Bu e-postayı aldıysanız, EMSArena bloguna abonesiniz. Aboneliği iptal etmek "
-"için siteye giriş yapın."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
 #, python-format
 msgctxt "accounts.first_login"
 msgid "Kod %(email)s ünvanına göndərildi."
 msgstr "Kod %(email)s adresine gönderildi."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-format
-msgid "Post İdarəetmə - %(org_name)s - EMSArena"
-msgstr "Gönderi Yönetimi - %(org_name)s - EMSArena"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -48134,11 +48089,6 @@ msgstr "Öğrenci ara..."
 msgctxt "accounts.student_org"
 msgid "no_active_org"
 msgstr "Aktif organizasyon bulunamadı."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "EMSArena | Şifrə sıfırlama"
-msgstr "EMSArena | Şifre sıfırlama"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -48387,21 +48337,6 @@ msgstr "Arşivle"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-msgid ""
-"Review public contact form messages and reply from the official EMSArena "
-"mailboxes."
-msgstr ""
-"Herkese açık iletişim formu mesajlarını inceleyin ve resmi EMSArena posta "
-"kutularından yanıtlayın."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-format
-msgid "%(item_type)s nəticəsi - EMSArena"
-msgstr "%(item_type)s sonucu - EMSArena"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
 msgctxt "accounts.teacher_dashboard"
 msgid "title"
 msgstr "Teacher dashboard"
@@ -48564,17 +48499,6 @@ msgstr "Empty at risk students"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-msgid ""
-"Salam! Göndərdiyiniz suallar əsasında sınaq imtahanınız EMSArena sistemində "
-"yaradıldı. Hesabınıza daxil olub “İmtahanlar” bölməsindən imtahanı pulsuz və"
-" limitsiz şəkildə verə bilərsiniz. Uğurlar!"
-msgstr ""
-"Merhaba! Gönderdiğiniz sorulara göre deneme sınavınız EMSArena’da "
-"oluşturuldu. Hesabınıza giriş yapıp “Sınavlar” bölümünden ücretsiz ve "
-"sınırsız şekilde girebilirsiniz. Başarılar!"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
 msgctxt "appeals.template"
 msgid "Apellyasiya nəticəsində balınız yeniləndi"
 msgstr "İtiraz sonucunda puanınız güncellendi"
@@ -48623,39 +48547,6 @@ msgstr "Denetim Günlüğü"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-msgid "EMSArena ilə tanış olun"
-msgstr "EMSArena ile tanışın"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "EMSArena loqo"
-msgstr "EMSArena logosu"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "EMSArena platform xüsusiyyətləri"
-msgstr "EMSArena platform özellikleri"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid ""
-"EMSArena təcrübəli mühəndis və pedaqoqların məhsuludur. İstifadəçi yönümlü "
-"dizayn və etibarlı texnologiya əsas prioritetlərimizdir."
-msgstr ""
-"EMSArena deneyimli mühendisler ve eğitimciler tarafından geliştirilmiştir. "
-"Kullanıcı odaklı tasarım ve güvenilir teknoloji temel önceliklerimizdir."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid ""
-"EMSArena-nın baş memarı və əsas mühəndisi. Django, React və paylaşılan "
-"sistemlər sahəsində mütəxəssis."
-msgstr ""
-"EMSArena'nın baş mimarı ve ana mühendisi; Django, React ve paylaşımlı "
-"sistemler konusunda uzmandır."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
 msgctxt "blog.login_page"
 msgid "title"
 msgstr "Giriş yap"
@@ -48695,78 +48586,6 @@ msgstr "Hesabın yok mu?"
 msgctxt "blog.login_page"
 msgid "register_now"
 msgstr "Kayıt ol"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Haqqımızda – EMSArena"
-msgstr "Hakkımızda – EMSArena"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid ""
-"EMSArena təhsil idarəetmə, LMS və onlayn imtahan platformasıdır. Komandamız,"
-" missiyamız və platformanın imkanları haqqında məlumat."
-msgstr ""
-"EMSArena bir eğitim yönetimi, LMS ve çevrimiçi sınav platformudur. Ekibimiz,"
-" misyonumuz ve platform özelliklerimiz hakkında bilgi alın."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-format
-msgid "[EMSArena Contact] %(subject)s — %(name)s"
-msgstr "[EMSArena İletişim] %(subject)s — %(name)s"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "EMSArena hansı təşkilatlar üçün uyğundur?"
-msgstr "EMSArena hangi kurumlar için uygundur?"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "EMSArena – Yeni əlaqə mesajı"
-msgstr "EMSArena – Yeni iletişim mesajı"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid ""
-"EMSArena saytındakı əlaqə formasından yeni bir mesaj göndərildi. Mesaj "
-"saxlanılıb və admin panelindən baxa bilərsiniz."
-msgstr ""
-"EMSArena iletişim formundan yeni bir mesaj gönderildi. Mesaj kaydedildi ve "
-"admin panelinden görüntülenebilir."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Bu mesaja cavab vermək üçün EMSArena admin panelinə keçin."
-msgstr "Bu mesaja yanıt vermek için EMSArena admin paneline gidin."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "EMSArena – Cavab"
-msgstr "EMSArena – Yanıt"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid ""
-"EMSArena saytındakı mesajınız üçün təşəkkür edirik. Aşağıda cavabımızı tapa "
-"bilərsiniz."
-msgstr ""
-"EMSArena sitesindeki mesajınız için teşekkür ederiz. Yanıtımızı aşağıda "
-"bulabilirsiniz."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Əlaqə – EMSArena"
-msgstr "İletişim – EMSArena"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid ""
-"EMSArena ilə əlaqə saxlayın. Suallarınız, təklifləriniz və əməkdaşlıq "
-"istəkləriniz üçün bizə yazın."
-msgstr ""
-"EMSArena ile iletişime geçin. Sorularınız, önerileriniz ve iş birliği "
-"talepleriniz için bize yazın."
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -50118,89 +49937,8 @@ msgstr "Yoklama defteri sonuçlandırıldı."
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
 #, python-format
-msgid "[EMSArena Sınaq] %(subject)s — %(name)s"
-msgstr "[EMSArena Deneme] %(subject)s — %(name)s"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-format
-msgid "EMSArena — Sınaq imtahanınız hazırdır: %(subject)s"
-msgstr "EMSArena — Deneme sınavınız hazır: %(subject)s"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "EMSArena – Yeni sınaq imtahanı sorğusu"
-msgstr "EMSArena – Yeni deneme sınavı talebi"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "EMSArena – Sınaq imtahanınız hazırdır"
-msgstr "EMSArena – Deneme sınavınız hazır"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Sınaq imtahanı – EMSArena"
-msgstr "Deneme sınavı – EMSArena"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "EMS Arena admin panelinə giriş üçün OTP kodunuz:"
-msgstr "EMS Arena yönetici paneline giriş için OTP kodunuz:"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "EMSArena | Xoş gəldiniz"
-msgstr "EMSArena | Hoş geldiniz"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid ""
-"EMSArena blogumuza abunə olduğunuz üçün təşəkkür edirik. Ən son məqalə və "
-"xəbərlərdən ilk siz xəbərdar olacaqsınız."
-msgstr ""
-"EMSArena blogumuza abone olduğunuz için teşekkür ederiz. En son makale ve "
-"haberlerden ilk siz haberdar olacaksınız."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "400 – Yanlış Sorğu | EMSArena"
-msgstr "400 – Hatalı İstek | EMSArena"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "403 – Giriş Qadağandır | EMSArena"
-msgstr "403 – Erişim Yasak | EMSArena"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "404 – Səhifə Tapılmadı | EMSArena"
-msgstr "404 – Sayfa Bulunamadı | EMSArena"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "500 – Server Xətası | EMSArena"
-msgstr "500 – Sunucu Hatası | EMSArena"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-format
 msgid "%(count)s müəllim"
 msgstr "%(count)s öğretmen"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgctxt "ai_assistant.greeting"
-msgid ""
-"Salam! Mən EMSArena AI. Suallarınızı cavablandırmağa hazıram. Necə kömək edə"
-" bilərəm?"
-msgstr ""
-"Merhaba! Ben EMSArena AI. Sorularınızı cevaplamaya hazırım. Size nasıl "
-"yardımcı olabilirim?"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "EMSArena ana səhifə"
-msgstr "Ana sayfa"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -97394,3 +97132,7 @@ msgstr "Büyük harf, rakam veya sembol zorunlu değildir — hatırlayabileceğ
 msgctxt "accounts.first_login"
 msgid "ən azı %(min_length)s simvol"
 msgstr "en az %(min_length)s karakter"
+
+msgctxt "email.layout"
+msgid "Elektron Universitet"
+msgstr "Elektronik Üniversite"
