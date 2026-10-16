@@ -1,0 +1,176 @@
+/* EMSMultiSelect (static/js/ems_multi_select.js) — stilli çoxseçimli seçici, 2026-10-16.
+   Toggle / menyu / axtarış vizualı `bootstrap-select.css`-in `bootstrap-single-select__*` klasslarından
+   gəlir (eyni dil); burada yalnız çoxseçimə xas hissələr: gizli native, menyu yerləşməsi, checkbox
+   qutusu, «Hamısı / Təmizlə» düymələri. Fokusda göy halqa/daxili haşiyə YOXDUR (sahib 2026-09-09). */
+
+.ems-multi-select {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+}
+
+/* Native `<select multiple>` dəyər anbarıdır — görünmür, yer tutmur (forma sahə qaydalarını da üstələyir). */
+.ems-multi-select__native.is-enhanced {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.ems-multi-select__menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    margin-top: 0.45rem;
+}
+
+.ems-multi-select__menu.is-fixed {
+    position: fixed;
+    z-index: 2000; /* modal overlay-lərdən (1080) yuxarı — tək seçici ilə eyni */
+    margin-top: 0;
+}
+
+.ems-multi-select__head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.ems-multi-select__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.ems-multi-select__action {
+    padding: 0.25rem 0.7rem;
+    border: 1px solid #d5e1f3;
+    border-radius: 999px;
+    background: var(--ems-neutral-0, #fff);
+    color: #2349a6;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.ems-multi-select__action:hover {
+    background: #eef4ff;
+}
+
+.ems-multi-select__action:focus,
+.ems-multi-select__action:focus-visible {
+    outline: none;
+    border-color: var(--ems-neutral-500, #64748b);
+    box-shadow: none;
+}
+
+.ems-multi-select__list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ems-multi-select__group {
+    padding: 0.45rem 0.9rem 0.2rem;
+    color: #6b7b97;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.ems-multi-select__option {
+    justify-content: flex-start;
+    align-items: center;
+}
+
+/* Fokus: yalnız fon dəyişir — brauzerin göy outline-ı və daxili halqa YOX. */
+.ems-multi-select__option:focus,
+.ems-multi-select__option:focus-visible {
+    outline: none;
+    box-shadow: none;
+    background: #eef4ff;
+    color: #2349a6;
+}
+
+/* Çoxseçimdə seçilmiş sətir yüngül fonlu qalır; əsas işarə checkbox qutusudur. */
+.ems-multi-select__option.is-selected {
+    background: #f3f7ff;
+    font-weight: 600;
+}
+
+.ems-multi-select__box {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 1.1rem;
+    height: 1.1rem;
+    border: 1.5px solid #9fb1cc;
+    border-radius: 0.3rem;
+    background: var(--ems-neutral-0, #fff);
+    color: transparent;
+    font-size: 0.66rem;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.ems-multi-select__option.is-selected .ems-multi-select__box {
+    border-color: #325dc4;
+    background: #325dc4;
+    color: #fff;
+}
+
+.ems-multi-select__option:disabled .ems-multi-select__box {
+    background: #f4f7fb;
+}
+
+/* Yığcam «ems» variantı — `.ems-select` dəstindəki formalar (bootstrap-single-select--ems ilə eyni ölçü). */
+.ems-multi-select--ems .bootstrap-single-select__toggle {
+    min-height: var(--ems-h-field, 42px);
+    padding: 7px 12px;
+    border: 1px solid var(--ems-neutral-300, #d5dbe5);
+    border-radius: var(--ems-r-lg, 12px);
+    background: var(--ems-bg, #fff);
+    font-size: var(--ems-fs-base, 14px);
+    font-weight: 500;
+    box-shadow: none;
+}
+
+.ems-multi-select--ems .bootstrap-single-select__toggle:hover {
+    border-color: var(--ems-primary-300, #9dbaf5);
+}
+
+.ems-multi-select--ems .bootstrap-single-select__toggle:focus,
+.ems-multi-select--ems .bootstrap-single-select__toggle.show {
+    border-color: var(--ems-neutral-500, #64748b);
+    box-shadow: none;
+}
+
+.ems-multi-select--ems .bootstrap-single-select__menu {
+    padding: 0.4rem;
+    border-radius: 0.85rem;
+}
+
+.ems-multi-select--ems .bootstrap-single-select__option {
+    padding: 0.55rem 0.7rem;
+    border-radius: 0.6rem;
+    font-size: 0.92rem;
+}
+
+.ems-multi-select--ems .bootstrap-single-select__search {
+    margin: -0.4rem -0.4rem 0.3rem;
+    top: -0.4rem;
+}
+
+@media (max-width: 767.98px) {
+    .ems-multi-select__action {
+        padding: 0.35rem 0.85rem; /* toxunma hədəfi */
+    }
+}

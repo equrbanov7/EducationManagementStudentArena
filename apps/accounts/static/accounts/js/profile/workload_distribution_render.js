@@ -218,7 +218,9 @@
             })
             .join("");
         select.innerHTML = html;
-        if (window.EMSBootstrapSelect && typeof window.EMSBootstrapSelect.refresh === "function") {
+        if (select.multiple && window.EMSMultiSelect) {
+            window.EMSMultiSelect.refresh(select); // qruplar — stilli çoxseçim
+        } else if (window.EMSBootstrapSelect && typeof window.EMSBootstrapSelect.refresh === "function") {
             window.EMSBootstrapSelect.refresh(select);
         }
     };

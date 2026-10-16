@@ -5,7 +5,10 @@ Boş seçim = kafedranın BÜTÜN ixtisasları. Planı təsdiqlənməmiş ixtisa
 vermir və nəticədə «blocked» siyahısında adla göstərilir.{% endcomment %}
 <div class="ems-field ems-field--wide">
     <label class="ems-field__label" for="wl-gen-programs">{% trans "İxtisaslar" context "accounts.workload_center" %}</label>
-    <select class="ems-select" id="wl-gen-programs" name="programs" multiple size="8">
+    <select class="ems-select" id="wl-gen-programs" name="programs" multiple data-ems-multi-select data-ms-search="true"
+            data-ms-placeholder="{% trans 'Kafedranın bütün ixtisasları' context 'accounts.workload_center' %}"
+            data-ms-count-format="{% trans '{count} ixtisas seçilib' context 'accounts.workload_center' %}"
+            data-ms-search-placeholder="{% trans 'İxtisas axtar…' context 'accounts.workload_center' %}">
         {% for option in workload_center_section.program_options %}
         <option value="{{ option.value }}">{{ option.label }}{% if not option.has_plan %} — {% trans "plan yoxdur" context "accounts.workload_center" %}{% endif %}</option>
         {% endfor %}

@@ -11,7 +11,10 @@ tərəfdə atlanır və nəticədə adları qaytarılır.{% endcomment %}
     </div>
     <div class="ems-field tof-form__full">
         <label class="ems-field__label" for="tof-gn-programs">{% trans "Hansı ixtisaslar üçün?" context "accounts.semester" %}</label>
-        <select class="ems-select" id="tof-gn-programs" name="programs" multiple size="8" data-live-search="true"
+        <select class="ems-select" id="tof-gn-programs" name="programs" multiple data-ems-multi-select data-ms-search="true"
+                data-ms-placeholder="{% trans 'Bütün aktiv ixtisaslar' context 'accounts.semester' %}"
+                data-ms-count-format="{% trans '{count} ixtisas seçilib' context 'accounts.semester' %}"
+                data-ms-search-placeholder="{% trans 'İxtisas axtar…' context 'accounts.semester' %}"
                 aria-describedby="tof-gn-programs-hint">
             {% for option in semester_opening_section.program_options %}
                 <option value="{{ option.value }}">{{ option.label }}</option>

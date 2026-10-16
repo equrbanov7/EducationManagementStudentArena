@@ -3197,3 +3197,9 @@ msgstr "Zuweisungen auf die neue Summe kürzen (beginnend mit der neuesten)?"
 
 msgid "«%(activity)s» sətirdən çıxarılsın? Bu fəaliyyətin bölgüsü də silinəcək."
 msgstr "«%(activity)s» aus der Zeile entfernen? Die Zuweisungen dieser Lehrform werden ebenfalls gelöscht."
+
+msgid "Təmizlə"
+msgstr "Leeren"
+
+msgid "Uyğun nəticə yoxdur"
+msgstr "Keine Treffer"
