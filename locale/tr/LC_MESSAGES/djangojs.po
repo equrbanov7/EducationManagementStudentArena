@@ -3133,3 +3133,9 @@ msgstr "Atamalar yeni toplama göre azaltılsın mı (en sonuncudan başlayarak)
 
 msgid "«%(activity)s» sətirdən çıxarılsın? Bu fəaliyyətin bölgüsü də silinəcək."
 msgstr "«%(activity)s» satırdan kaldırılsın mı? Bu etkinliğin atamaları da silinecek."
+
+msgid "Təmizlə"
+msgstr "Temizle"
+
+msgid "Uyğun nəticə yoxdur"
+msgstr "Eşleşme yok"

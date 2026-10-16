@@ -97682,3 +97682,35 @@ msgstr "Main mailbox"
 
 msgid "Köhnə dəstək ünvanı"
 msgstr "Former support address"
+
+msgctxt "accounts.workload"
+msgid "{count} qrup seçilib"
+msgstr "{count} groups selected"
+
+msgctxt "accounts.workload"
+msgid "Qrup axtar…"
+msgstr "Search groups…"
+
+msgctxt "accounts.semester"
+msgid "Bütün aktiv ixtisaslar"
+msgstr "All active programmes"
+
+msgctxt "accounts.semester"
+msgid "{count} ixtisas seçilib"
+msgstr "{count} programmes selected"
+
+msgctxt "accounts.semester"
+msgid "İxtisas axtar…"
+msgstr "Search programmes…"
+
+msgctxt "accounts.workload_center"
+msgid "Kafedranın bütün ixtisasları"
+msgstr "All programmes of the department"
+
+msgctxt "accounts.workload_center"
+msgid "{count} ixtisas seçilib"
+msgstr "{count} programmes selected"
+
+msgctxt "accounts.workload_center"
+msgid "İxtisas axtar…"
+msgstr "Search programmes…"

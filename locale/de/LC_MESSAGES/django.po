@@ -98768,3 +98768,35 @@ msgstr "Hauptpostfach"
 
 msgid "Köhnə dəstək ünvanı"
 msgstr "Frühere Support-Adresse"
+
+msgctxt "accounts.workload"
+msgid "{count} qrup seçilib"
+msgstr "{count} Gruppen ausgewählt"
+
+msgctxt "accounts.workload"
+msgid "Qrup axtar…"
+msgstr "Gruppe suchen…"
+
+msgctxt "accounts.semester"
+msgid "Bütün aktiv ixtisaslar"
+msgstr "Alle aktiven Studiengänge"
+
+msgctxt "accounts.semester"
+msgid "{count} ixtisas seçilib"
+msgstr "{count} Studiengänge ausgewählt"
+
+msgctxt "accounts.semester"
+msgid "İxtisas axtar…"
+msgstr "Studiengang suchen…"
+
+msgctxt "accounts.workload_center"
+msgid "Kafedranın bütün ixtisasları"
+msgstr "Alle Studiengänge des Lehrstuhls"
+
+msgctxt "accounts.workload_center"
+msgid "{count} ixtisas seçilib"
+msgstr "{count} Studiengänge ausgewählt"
+
+msgctxt "accounts.workload_center"
+msgid "İxtisas axtar…"
+msgstr "Studiengang suchen…"

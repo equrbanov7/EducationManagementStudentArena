@@ -14,6 +14,11 @@
     var Forms = (window.EMSWorkloadForms = window.EMSWorkloadForms || {});
 
     function refresh(select) {
+        // `group_ids` — stilli çoxseçim (EMSMultiSelect): `option.selected` yazısı mutasiya vermir, açıq yenilə.
+        if (select && select.multiple && window.EMSMultiSelect) {
+            window.EMSMultiSelect.refresh(select);
+            return;
+        }
         if (window.EMSBootstrapSelect && typeof window.EMSBootstrapSelect.refresh === "function") {
             window.EMSBootstrapSelect.refresh(select);
         }
@@ -78,7 +83,11 @@
     Forms.fillRow = function fillRow(form, row) {
         if (!form) return;
         reset(form);
-        if (!row) return;
+        if (!row) {
+            // Boş forma da stilli seçicilərə yansısın (əvvəlki sətrin etiketi/qrupları qalmasın).
+            Array.prototype.forEach.call(form.querySelectorAll("select"), refresh);
+            return;
+        }
         var elements = form.elements;
         Forms.ensureOption(elements.subject_id, row.subject_id, row.subject);
         Forms.ensureOption(elements.period_id, row.period_id, row.period_label);

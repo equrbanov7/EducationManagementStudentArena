@@ -3144,3 +3144,9 @@ msgstr "Уменьшить назначения до новой суммы (на
 
 msgid "«%(activity)s» sətirdən çıxarılsın? Bu fəaliyyətin bölgüsü də silinəcək."
 msgstr "Убрать «%(activity)s» из строки? Назначения по этому виду занятий тоже будут удалены."
+
+msgid "Təmizlə"
+msgstr "Очистить"
+
+msgid "Uyğun nəticə yoxdur"
+msgstr "Совпадений нет"

@@ -97233,3 +97233,35 @@ msgstr "Əsas poçt qutusu"
 
 msgid "Köhnə dəstək ünvanı"
 msgstr "Köhnə dəstək ünvanı"
+
+msgctxt "accounts.workload"
+msgid "{count} qrup seçilib"
+msgstr "{count} qrup seçilib"
+
+msgctxt "accounts.workload"
+msgid "Qrup axtar…"
+msgstr "Qrup axtar…"
+
+msgctxt "accounts.semester"
+msgid "Bütün aktiv ixtisaslar"
+msgstr "Bütün aktiv ixtisaslar"
+
+msgctxt "accounts.semester"
+msgid "{count} ixtisas seçilib"
+msgstr "{count} ixtisas seçilib"
+
+msgctxt "accounts.semester"
+msgid "İxtisas axtar…"
+msgstr "İxtisas axtar…"
+
+msgctxt "accounts.workload_center"
+msgid "Kafedranın bütün ixtisasları"
+msgstr "Kafedranın bütün ixtisasları"
+
+msgctxt "accounts.workload_center"
+msgid "{count} ixtisas seçilib"
+msgstr "{count} ixtisas seçilib"
+
+msgctxt "accounts.workload_center"
+msgid "İxtisas axtar…"
+msgstr "İxtisas axtar…"
