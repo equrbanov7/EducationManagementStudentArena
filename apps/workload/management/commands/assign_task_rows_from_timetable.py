@@ -31,7 +31,7 @@ from django.utils import timezone
 from apps.registrar.public import schedule_docx_parse
 from apps.workload.services.plan_calendar import normalize_year
 from apps.workload.services.task_workbook_import import Importer
-from apps.workload.services.timetable_task_assign import REPORT_HEADER, TimetableTaskAssigner
+from apps.workload.services.timetable_task_assign import REPORT_HEADER, TimetableTaskAssigner, parse_teacher_map
 from core.export_safety import safe_csv_writer
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
@@ -76,6 +76,12 @@ class Command(BaseCommand):
             "--allow-outside-chair",
             action="store_true",
             help="Kafedrada tapılmayan müəllim üçün təşkilatda TƏK uyğun aktiv hesabı qəbul et (kafedraya əlavə üzv)",
+        )
+        parser.add_argument(
+            "--teacher",
+            action="append",
+            default=[],
+            help="Açıq müəllim xəritəsi «Soyad İ.=istifadəçi.adı» (vergüllə də olar); soyad yazılışı fərqlidirsə",
         )
         parser.add_argument("--apply", action="store_true", help="Faktiki yaz (defolt: dry-run)")
 
@@ -124,7 +130,10 @@ class Command(BaseCommand):
             )
             importer.applier.note = f"Dərs cədvəli ({path.name[:60]}) {year} — cədvəldəki müəllim boş sətrə bağlandı"
             self.assigner = TimetableTaskAssigner(
-                importer=importer, period=period, allow_outside_chair=options["allow_outside_chair"]
+                importer=importer,
+                period=period,
+                allow_outside_chair=options["allow_outside_chair"],
+                teacher_map=parse_teacher_map(options["teacher"]),
             )
             self.assigner.run(parsed)
             if not options["apply"]:

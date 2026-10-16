@@ -600,6 +600,10 @@ jobs:
           else
             # Tapşırığın tədris ili semestrdən götürülür; kafedradankənar müəllim yalnız açıq bayraqla.
             test "$ALLOW_OUTSIDE_CHAIR" != "true" || args+=(--allow-outside-chair)
+            # Açıq müəllim xəritəsi (`teacher_map`): «Soyad İ.=istifadəçi.adı», vergüllə.
+            test -z "$TEACHER_MAP" || { [ "${#TEACHER_MAP}" -le 1000 ] && printf '%s' "$TEACHER_MAP" | grep -Eq '^[^=,]+=[A-Za-z0-9._-]+(,[^=,]+=[A-Za-z0-9._-]+)*$'; } \
+              || { echo "teacher_map formatı: AD=istifadəçi.adı,…" >&2; exit 2; }
+            test -z "$TEACHER_MAP" || args+=(--teacher "$TEACHER_MAP")
           fi
           if [ "$APPLY" = "true" ]; then
             echo "::group::💾 Ehtiyat nüsxə (postgres-backup /backup.sh)"
