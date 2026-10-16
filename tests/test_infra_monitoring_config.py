@@ -442,3 +442,12 @@ def test_deploy_and_smoke_health_probes_come_from_allowed_sources():
     compose = yaml.safe_load((ROOT / "docker-compose.prod.yml").read_text(encoding="utf-8"))
     subnet = compose["networks"]["emsarena-network"]["ipam"]["config"][0]["subnet"]
     assert subnet.endswith("172.18.0.0/16}") or subnet == "172.18.0.0/16", subnet
+
+
+def test_alertmanager_from_never_empty_2026_10_16():
+    """CI smoke (SMTP sirri yoxdur): ALERT_EMAIL_FROM və SMTP_USER boş olanda da `smtp_from` dolu qalır —
+    əks halda Alertmanager «no global SMTP from set» ilə yenidən başlama dövrünə düşür."""
+    from pathlib import Path
+
+    compose = (Path(__file__).resolve().parents[1] / "docker-compose.prod.yml").read_text(encoding="utf-8")
+    assert 'export ALERT_FROM="$${ALERT_FROM:-$${SMTP_USER:-alertmanager@localhost}}"' in compose
