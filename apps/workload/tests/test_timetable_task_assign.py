@@ -201,6 +201,16 @@ class TimetableTaskAssignTests(TestCase):
         self.assertEqual({m.scope_unit_id for m in memberships}, {self.other_chair.pk, self.chair.pk})
         self.assertFalse(memberships.get(scope_unit=self.chair).is_primary)
 
+    def test_explicit_teacher_map_resolves_a_different_surname_spelling(self):
+        # 2026-10-16: «Əmiraslanlı F.» ↔ «Əmiraslanova F.» — operatorun açıq xəritəsi.
+        path = self._docx(["Alqoritmlər sem.\nAbasovalı L."])
+        self._run(path, "--apply")
+        self.assertEqual(self._report()[0]["status"], "teacher_not_found")
+        out = self._run(path, "--apply", "--teacher", "Abasovalı L.=lamiye.a")
+        self.assertIn("chair_membership_added=1", out)
+        self.assertEqual(self._teachers(self.alq, "seminar"), {"lamiye.a"})
+        self.assertEqual(self._report()[0]["teacher_action"], "teacher_map")
+
     def test_unmatched_subject_and_spring_rows_are_ignored(self):
         path = self._docx(["Qraflar müh.\nHəsənova S.", "Astronomiya müh.\nHəsənova S.", "TƏCRÜBƏ"])
         out = self._run(path, "--apply")
