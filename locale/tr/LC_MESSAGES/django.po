@@ -97133,3 +97133,35 @@ msgstr "Ana e-posta kutusu"
 
 msgid "Köhnə dəstək ünvanı"
 msgstr "Eski destek adresi"
+
+msgctxt "accounts.workload"
+msgid "{count} qrup seçilib"
+msgstr "{count} grup seçildi"
+
+msgctxt "accounts.workload"
+msgid "Qrup axtar…"
+msgstr "Grup ara…"
+
+msgctxt "accounts.semester"
+msgid "Bütün aktiv ixtisaslar"
+msgstr "Tüm aktif programlar"
+
+msgctxt "accounts.semester"
+msgid "{count} ixtisas seçilib"
+msgstr "{count} program seçildi"
+
+msgctxt "accounts.semester"
+msgid "İxtisas axtar…"
+msgstr "Program ara…"
+
+msgctxt "accounts.workload_center"
+msgid "Kafedranın bütün ixtisasları"
+msgstr "Bölümün tüm programları"
+
+msgctxt "accounts.workload_center"
+msgid "{count} ixtisas seçilib"
+msgstr "{count} program seçildi"
+
+msgctxt "accounts.workload_center"
+msgid "İxtisas axtar…"
+msgstr "Program ara…"

@@ -45,6 +45,7 @@
     yüklənməlidir (bax static/css/navbar_brand.css).{% endcomment %}
     <link rel="stylesheet" href="{% static 'css/navbar_brand.css' %}?v=20261001-1">
     <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}?v=20260911-1">
+    <link rel="stylesheet" href="{% static 'css/ems_multi_select.css' %}?v=20261016-1">
     {% comment %}Axtarışlı seçici (EMSSearchableSelect) — VAHİD komponent üslubu;
     əvvəllər altı ayrı fayla kopyalanmışdı. Bax: static/css/searchable_select.css.{% endcomment %}
     <link rel="stylesheet" href="{% static 'css/searchable_select.css' %}?v=20261014-uifix">
@@ -193,7 +194,9 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
     <script src="{% static 'js/debounced_search_forms.js' %}?v=20261014-searchux"></script>
     <script src="{% static 'js/search_controls.js' %}?v=20261014-searchux"></script>
     <script src="{% static 'js/ems_table.js' %}?v=20260926-search"></script>
-    <script src="{% static 'js/bootstrap_select.js' %}?v=20260926-1"></script>
+    <script src="{% static 'js/bootstrap_select.js' %}?v=20261016-ms"></script>
+    {# EMSMultiSelect — `<select multiple data-ems-multi-select>` üçün stilli çoxseçim (axtarış, Hamısı/Təmizlə). #}
+    <script src="{% static 'js/ems_multi_select.js' %}?v=20261016-1"></script>
     <script src="{% static 'js/search_field.js' %}?v=20261014-searchux"></script>
     <script src="{% static 'js/csp_event_handlers.js' %}?v=20260914-a11y"></script>
     <script src="{% static 'js/footer_year.js' %}"></script>

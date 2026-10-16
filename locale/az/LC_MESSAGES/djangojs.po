@@ -3129,3 +3129,9 @@ msgstr "Bölgü yeni cəmə uyğun azaldılsın (ən son təyinatdan başlayaraq
 
 msgid "«%(activity)s» sətirdən çıxarılsın? Bu fəaliyyətin bölgüsü də silinəcək."
 msgstr "«%(activity)s» sətirdən çıxarılsın? Bu fəaliyyətin bölgüsü də silinəcək."
+
+msgid "Təmizlə"
+msgstr "Təmizlə"
+
+msgid "Uyğun nəticə yoxdur"
+msgstr "Uyğun nəticə yoxdur"

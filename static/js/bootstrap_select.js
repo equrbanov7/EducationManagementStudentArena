@@ -68,6 +68,10 @@
             return null;
         }
 
+        if (select.multiple) {
+            return null; // çoxseçim → EMSMultiSelect (yuxarıdakı qeyd)
+        }
+
         if (select.dataset.bootstrapSelectReady === "true") {
             return select._bootstrapSelectApi || null;
         }
@@ -335,11 +339,22 @@
         return api;
     }
 
+    // `<select multiple>` bu komponentin işi DEYİL (`select.value = …` bütün seçimləri silərdi) —
+    // stilli çoxseçim `static/js/ems_multi_select.js`-dədir (`EMSMultiSelect`). Ümumi
+    // `EMSBootstrapSelect.refresh/sync/init` çağırışları ora ötürülür ki, mövcud kod (məs.
+    // formadakı bütün select-ləri yeniləyən köməkçilər) çoxseçimi də sinxron saxlasın.
+    function multiApi() {
+        return window.EMSMultiSelect || null;
+    }
+
     function initBootstrapSelects(root) {
         var scope = root || document;
         scope.querySelectorAll("[data-bootstrap-select]").forEach(function (select) {
             enhanceBootstrapSelect(select);
         });
+        if (multiApi()) {
+            multiApi().init(scope);
+        }
     }
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -360,6 +375,13 @@
                 return;
             }
 
+            if (select.multiple) {
+                if (multiApi()) {
+                    multiApi().refresh(select);
+                }
+                return;
+            }
+
             if (typeof select._refreshBootstrapSelect === "function") {
                 select._refreshBootstrapSelect();
                 return;
@@ -368,6 +390,12 @@
             enhanceBootstrapSelect(select);
         },
         sync: function (select) {
+            if (select && select.multiple) {
+                if (multiApi()) {
+                    multiApi().sync(select);
+                }
+                return;
+            }
             if (select && typeof select._syncBootstrapSelect === "function") {
                 select._syncBootstrapSelect();
             }

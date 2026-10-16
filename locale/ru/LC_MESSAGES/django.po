@@ -97868,3 +97868,35 @@ msgstr "Основной почтовый ящик"
 
 msgid "Köhnə dəstək ünvanı"
 msgstr "Прежний адрес поддержки"
+
+msgctxt "accounts.workload"
+msgid "{count} qrup seçilib"
+msgstr "Выбрано групп: {count}"
+
+msgctxt "accounts.workload"
+msgid "Qrup axtar…"
+msgstr "Поиск группы…"
+
+msgctxt "accounts.semester"
+msgid "Bütün aktiv ixtisaslar"
+msgstr "Все активные специальности"
+
+msgctxt "accounts.semester"
+msgid "{count} ixtisas seçilib"
+msgstr "Выбрано специальностей: {count}"
+
+msgctxt "accounts.semester"
+msgid "İxtisas axtar…"
+msgstr "Поиск специальности…"
+
+msgctxt "accounts.workload_center"
+msgid "Kafedranın bütün ixtisasları"
+msgstr "Все специальности кафедры"
+
+msgctxt "accounts.workload_center"
+msgid "{count} ixtisas seçilib"
+msgstr "Выбрано специальностей: {count}"
+
+msgctxt "accounts.workload_center"
+msgid "İxtisas axtar…"
+msgstr "Поиск специальности…"

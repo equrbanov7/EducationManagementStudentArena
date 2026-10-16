@@ -3144,3 +3144,9 @@ msgstr "Reduce the assignments to the new total (starting from the latest one)?"
 
 msgid "«%(activity)s» sətirdən çıxarılsın? Bu fəaliyyətin bölgüsü də silinəcək."
 msgstr "Remove «%(activity)s» from the row? Its assignments will be deleted too."
+
+msgid "Təmizlə"
+msgstr "Clear"
+
+msgid "Uyğun nəticə yoxdur"
+msgstr "No matches"

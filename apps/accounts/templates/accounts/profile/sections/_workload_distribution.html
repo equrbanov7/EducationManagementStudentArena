@@ -212,7 +212,9 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
               </label>
               <label class="wl-form__field wl-form__field--wide">
                 <span>{% trans "Qruplar" context "accounts.workload" %}</span>
-                <select name="group_ids" multiple size="4" data-wl-option="groups"></select>
+                <select name="group_ids" multiple data-wl-option="groups" data-ems-multi-select
+                        data-ms-count-format="{% trans '{count} qrup seçilib' context 'accounts.workload' %}"
+                        data-ms-search-placeholder="{% trans 'Qrup axtar…' context 'accounts.workload' %}"></select>
               </label>
               <label class="wl-form__field">
                 <span>{% trans "Təhsil forması" context "accounts.workload" %}</span>
