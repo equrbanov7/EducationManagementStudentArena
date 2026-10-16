@@ -35,6 +35,7 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 
 from django.apps import apps as django_apps
+from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q
 
@@ -100,6 +101,21 @@ class Cell:
         ]  # fmt: skip
 
 
+def _token_key(token: str) -> str:
+    return " ".join(schedule_docx_parse.fold(token).replace(".", " ").split())
+
+
+def parse_teacher_map(values) -> dict:
+    """«Soyad İ.=istifadəçi.adı» (vergüllə və ya təkrarlanan) → ``{token: username}``."""
+    result = {}
+    for value in values or []:
+        for part in str(value).split(","):
+            token, sep, username = part.partition("=")
+            if sep and token.strip() and username.strip():
+                result[token.strip()] = username.strip()
+    return result
+
+
 def _matches(users, surname: str, initial: str, *, fuzzy: bool) -> list:
     """``schedule_docx_match`` müəllim qaydası: dəqiq soyad (və ya ≥ ``TEACHER_FUZZY`` yazı xətası) + baş hərf."""
     fold, key = schedule_docx_parse.fold, schedule_docx_match.surname_key
@@ -120,7 +136,7 @@ def _matches(users, surname: str, initial: str, *, fuzzy: bool) -> list:
 
 
 class TimetableTaskAssigner:
-    def __init__(self, *, importer, period, allow_outside_chair: bool = False):
+    def __init__(self, *, importer, period, allow_outside_chair: bool = False, teacher_map=None):
         self.importer = importer
         self.org = importer.org
         self.year = importer.year
@@ -133,6 +149,8 @@ class TimetableTaskAssigner:
         self._teacher_cache: dict = {}
         self._org_pools = None
         self._outside: set = set()  # (kafedra_id, user_id) — yazıdan əvvəl kafedraya üzv edilməli
+        # Operatorun açıq xəritəsi («Əmiraslanlı F.=fatma.emiraslanova.2024»): soyad yazılışı fərqlidirsə.
+        self.teacher_map = {_token_key(k): v for k, v in (teacher_map or {}).items()}
 
     # ── sətirlər ──────────────────────────────────────────────────────────
     def _load_rows(self) -> None:
@@ -232,6 +250,14 @@ class TimetableTaskAssigner:
         return self._teacher_cache[key]
 
     def _resolve_teacher(self, chair, token: str) -> tuple:
+        mapped = self.teacher_map.get(_token_key(token))
+        if mapped:
+            user = get_user_model().objects.filter(username=mapped, is_active=True).first()
+            if user is None:
+                return None, "teacher_map_unknown"
+            if user not in self._chair_pool(chair):
+                self._outside.add((chair.pk, user.pk))  # açıq xəritə = operatorun qərarı
+            return user, "teacher_map"
         surname, initial = schedule_docx_match.split_teacher(token)
         if not surname:
             return None, "teacher_missing"
@@ -396,7 +422,8 @@ class TimetableTaskAssigner:
             for teacher_id, _, _ in entries:
                 if (task.chair_id, teacher_id) not in self._outside:
                     continue
-                user = next(u for users in self._org_pool() for u in users if u.pk == teacher_id)
+                user = next((u for users in self._org_pool() for u in users if u.pk == teacher_id), None)
+                user = user or get_user_model().objects.get(pk=teacher_id)  # açıq xəritə ilə gələn hesab
                 if join_chair_as_teacher(
                     organization=self.org,
                     user=user,
