@@ -98358,3 +98358,7 @@ msgstr "Toplam"
 msgctxt "registrar.journal"
 msgid "İmtahana qədər bal tam ədəddir: hissələrin cəmi yarım-yuxarı yuvarlaqlaşdırılır (məs. 9,5 → 10, 9,4 → 9)."
 msgstr "Sınav öncesi puan tam sayıdır: bölümlerin toplamı yarım yukarı yuvarlanır (örn. 9,5 → 10, 9,4 → 9)."
+
+msgctxt "registrar.schedule_editor"
+msgid "Mövcud dərsin fənni dəyişdirilə bilməz — dərsi silib yenisini qoyun."
+msgstr "Mevcut dersin konusu değiştirilemez — dersi silip yenisini ekleyin."

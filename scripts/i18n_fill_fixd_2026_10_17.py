@@ -30,6 +30,14 @@ ROUNDING_HELP = (
 
 # ctx → msgid → {lang: msgstr}. "az" verilməyibsə az msgstr = msgid (AZ cümlə).
 ENTRIES = {
+    "registrar.schedule_editor": {
+        "Mövcud dərsin fənni dəyişdirilə bilməz — dərsi silib yenisini qoyun.": {
+            "en": "The subject of an existing lesson can't be changed — delete the lesson and add a new one.",
+            "ru": "Предмет существующего занятия изменить нельзя — удалите занятие и добавьте новое.",
+            "tr": "Mevcut dersin konusu değiştirilemez — dersi silip yenisini ekleyin.",
+            "de": "Das Fach einer bestehenden Stunde lässt sich nicht ändern — Stunde löschen und neu anlegen.",
+        },
+    },
     JOURNAL: {
         "Cəm": {"en": "Sum", "ru": "Сумма", "tr": "Toplam", "de": "Summe"},
         ROUNDING_HELP: {

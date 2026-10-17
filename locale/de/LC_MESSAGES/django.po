@@ -99993,3 +99993,7 @@ msgstr "Summe"
 msgctxt "registrar.journal"
 msgid "İmtahana qədər bal tam ədəddir: hissələrin cəmi yarım-yuxarı yuvarlaqlaşdırılır (məs. 9,5 → 10, 9,4 → 9)."
 msgstr "Die Punktzahl vor der Prüfung ist eine ganze Zahl: Die Summe der Teile wird kaufmännisch gerundet (z. B. 9,5 → 10, 9,4 → 9)."
+
+msgctxt "registrar.schedule_editor"
+msgid "Mövcud dərsin fənni dəyişdirilə bilməz — dərsi silib yenisini qoyun."
+msgstr "Das Fach einer bestehenden Stunde lässt sich nicht ändern — Stunde löschen und neu anlegen."

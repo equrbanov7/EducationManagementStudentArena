@@ -182,3 +182,34 @@ class ChairAndTutorScheduleScopeTest(TestCase):
             self.group.head = teacher
             self.group.save(update_fields=["head"])
         self.assertEqual(self._group_ids(teacher), set())
+
+    # Review 2026-10-17 (FIX-D low): mövcud slotun öz açılışı da yoxlanılır; fənn dəyişikliyi aydın 409 verir.
+    def _slot_for(self, subject, actor):
+        key = schedule_grid.lesson_periods(self.org)[0]["key"]
+        data = {"weekday": "2", "time_slot": key, "subject_id": str(subject.pk)}
+        with bypass_rls():
+            result = schedule_editor_actions.save_cell(
+                actor=actor, organization=self.org, group=self.group, period=self.period, data=data
+            )
+        return result["slot"]["id"]
+
+    def test_foreign_slot_cannot_be_edited_by_chair_head(self):
+        slot_id = self._slot_for(self.foreign_subject, self.owner)
+        with bypass_rls(), self.assertRaises(schedule_editor.CellError) as caught:
+            self._save(self.own_offering.subject, slot_id=str(slot_id))
+        self.assertEqual(caught.exception.status, 403)
+
+    def test_subject_change_on_existing_slot_is_a_clear_conflict(self):
+        slot_id = self._slot_for(self.foreign_subject, self.owner)
+        key = schedule_grid.lesson_periods(self.org)[0]["key"]
+        data = {
+            "weekday": "2",
+            "time_slot": key,
+            "subject_id": str(self.own_offering.subject.pk),
+            "slot_id": str(slot_id),
+        }
+        with bypass_rls(), self.assertRaises(schedule_editor.CellError) as caught:
+            schedule_editor_actions.save_cell(
+                actor=self.owner, organization=self.org, group=self.group, period=self.period, data=data
+            )
+        self.assertEqual(caught.exception.status, 409)

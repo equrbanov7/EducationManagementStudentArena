@@ -99093,3 +99093,7 @@ msgstr "Сумма"
 msgctxt "registrar.journal"
 msgid "İmtahana qədər bal tam ədəddir: hissələrin cəmi yarım-yuxarı yuvarlaqlaşdırılır (məs. 9,5 → 10, 9,4 → 9)."
 msgstr "Балл до экзамена — целое число: сумма частей округляется по правилу «половина вверх» (напр. 9,5 → 10, 9,4 → 9)."
+
+msgctxt "registrar.schedule_editor"
+msgid "Mövcud dərsin fənni dəyişdirilə bilməz — dərsi silib yenisini qoyun."
+msgstr "Предмет существующего занятия изменить нельзя — удалите занятие и добавьте новое."
