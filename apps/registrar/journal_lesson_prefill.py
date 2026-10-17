@@ -36,10 +36,9 @@ from __future__ import annotations
 
 import datetime as _dt
 
-from django.db.models import Q
 from django.utils import timezone
 
-from . import dashboard_data, journal_activation, schedule
+from . import dashboard_data, journal_activation, lesson_rooms, schedule
 from .journal_list_schedule import GRACE
 
 #: Jurnal dərs tipləri (``LessonKind``) — modalın tip seçimi ilə eyni sıra.
@@ -185,26 +184,8 @@ def _plan_kind(offering, lessons) -> str:
 
 
 def _slot_rooms(offering, slots) -> dict:
-    """Slotların sərbəst mətnli otağı → reyestr otağının id-si, BİR sorğu ilə.
-
-    ``journal_activation.resolve_slot_room`` qaydası: ad və ya kod, böyük/kiçik hərf fərqsiz, yalnız
-    TƏK dəqiq uyğunluq; tapılmasa və ya bir neçə otaq uyğun gəlsə — yoxdur (otaq yaddaşı işləyir)."""
-    texts = {(slot.room or "").strip() for slot in slots} - {""}
-    if not texts:
-        return {}
-    query = Q()
-    for text in texts:
-        query |= Q(name__iexact=text) | Q(code__iexact=text)
-    rooms = list(
-        offering.organization.exam_rooms.filter(is_active=True).filter(query).values_list("pk", "name", "code")
-    )
-    found = {}
-    for text in texts:
-        key = text.upper()
-        matches = [pk for pk, name, code in rooms if (name or "").upper() == key or (code or "").upper() == key]
-        if len(matches) == 1:
-            found[text] = str(matches[0])
-    return found
+    """Slotların sərbəst mətnli otağı → reyestr otağının id-si, BİR sorğu ilə (``lesson_rooms.slot_room_ids``)."""
+    return lesson_rooms.slot_room_ids(offering.organization, [slot.room for slot in slots])
 
 
 def _memory_room(memory, kind, day) -> str:
@@ -275,6 +256,36 @@ def posted_slot(offering, data, *, date, kind):
     return slot
 
 
+def schedule_slot_for(offering, day, start_time, kind):
+    """Seçilmiş TARİXİN cədvəl slotu (həftə günü + üst/alt + dövr): saatı uyğun gələn (eyni tip üstün),
+    yoxdursa eyni tipli, o da yoxdursa günün ilk slotu; həmin gün slot yoxdursa ``None``.
+
+    journal_lesson_schedule.js-in ``match`` qaydası ilə EYNİDİR (modal otağı buna görə doldurur)."""
+    slots = journal_activation.slots_on(offering, day)
+    if not slots:
+        return None
+    pool = [slot for slot in slots if start_time is not None and slot.start_time == start_time] or slots
+    return next((slot for slot in pool if journal_activation.slot_kind(slot) == kind), pool[0])
+
+
+def posted_room(offering, data, *, date, start_time, kind, slot):
+    """«Yeni dərs» POST-unun otağı (sahib 2026-10-17: «otaq nömrəsi cədvəldəki avtomatik gəlsin»).
+
+    * Otaq göndərilibsə — TƏŞKİLAT daxilində həll olunur (``lesson_rooms.resolve_lesson_room``): yad
+      təşkilatın / deaktiv / yararsız id-li otaq dərsə BAĞLANMIR (fail-closed) və cədvələ də keçilmir.
+    * Boşdursa və dərs slot yolundadırsa (``slot``) — ``create_lesson`` slotun otağını özü köçürür (``None``).
+    * Boşdursa və slot yoxdursa — həmin tarix/saatın cədvəl slotunun otağı (:func:`schedule_slot_for`);
+      slot yoxdursa və ya otağı reyestrdə tapılmırsa otaqsız."""
+    raw = (data.get("lesson_room") or "").strip()
+    if raw or slot is not None:
+        return lesson_rooms.resolve_lesson_room(offering.organization, raw)
+    from .gradebook_lessons import _coerce_date
+
+    day = _coerce_date(date)
+    match = schedule_slot_for(offering, day, start_time, kind) if day is not None else None
+    return journal_activation.resolve_slot_room(offering, match) if match is not None else None
+
+
 def own_lesson_time(lesson, raw):
     """Redaktə POST-u: göndərilən saat dərsin ÖZ saatıdırsa ``(start, end)``, yoxdursa ``(None, None)``.
 
@@ -296,6 +307,8 @@ __all__ = [
     "open_slots",
     "own_lesson_time",
     "pick_slot",
+    "posted_room",
     "posted_slot",
+    "schedule_slot_for",
     "topics_covered_by",
 ]

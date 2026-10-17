@@ -9,7 +9,8 @@
  *   4) toqquşmalar SERVERDƏN gəlir və olduğu kimi göstərilir — klient heç nə
  *      hesablamır (mühərrik: apps/registrar/schedule_conflicts.py);
  *   5) məcburi dəyişiklik səbəblə göndərilir; toqquşan dərs SİLİNMİR, parklanır;
- *   6) «boş yer təklif et» — serverin qaytardığı hüceyrələr bir klikə qoyulur.
+ *   6) toqquşmada serverin qaytardığı boş hüceyrələr bir klikə qoyulur; «Uyğun vaxtlar»
+ *      şəbəkəsi + otaq tövsiyəsi AYRI moduldadır (`schedule_editor_planner.js`).
  *
  * QAYDALAR (CLAUDE.md + docs/frontend/AJAX_SAFE_JS_PATTERN.md)
  *   · inline JS/CSS yoxdur — dinamik dəyərlər `data-*` atributlarındadır;
@@ -499,26 +500,6 @@
                 verdict("is-clash", (body && body.message) || texts().error || "");
             });
     }
-
-    DELEGATE.on("click", "[data-sedit-suggest-open]", function (event) {
-        event.preventDefault();
-        var payload = basePayload();
-        payload.action = "suggest";
-        payload.slot_id = getField("slot_id");
-        /* Slotu aparan müəllim seçilibsə boş xana ONUN üçün axtarılır (bölünmüş tədris);
-           fənn + növ axın qaydası üçündür (serverin `check`-i ilə eyni). */
-        payload.instructor_id = getField("slot_instructor_id") || getField("instructor_id");
-        payload.subject_id = getField("subject_id");
-        payload.slot_kind = getField("slot_kind");
-        payload.week_type = getField("week_type");
-        post(payload).then(function (result) {
-            var suggest = dialog() && dialog().querySelector("[data-sedit-suggest]");
-            if (suggest) {
-                suggest.hidden = false;
-                renderSuggestions(result.suggestions, suggest.querySelector("[data-sedit-suggest-list]"), pickCell);
-            }
-        });
-    });
 
     DELEGATE.on("click", "[data-sedit-place]", function (event, button) {
         event.preventDefault();

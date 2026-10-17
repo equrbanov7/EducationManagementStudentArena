@@ -116,3 +116,21 @@
     .jd2-slot__action { width: 100%; }
     .jd2-slot__btn { width: 100%; justify-content: center; }
 }
+
+/* «Cədvəldəki otaq: 33 ↺» — dərs modalında otaq cədvəldəkindən fərqlidirsə (sahib 2026-10-17). */
+.jd-room-restore {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin: 2px 0 4px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ems-primary-600);
+    font-size: var(--ems-fs-xs);
+    font-weight: 600;
+    cursor: pointer;
+}
+.jd-room-restore:hover,
+.jd-room-restore:focus-visible { text-decoration: underline; }
+.jd-room-restore[hidden] { display: none; }

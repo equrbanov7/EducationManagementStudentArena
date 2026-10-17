@@ -97165,3 +97165,255 @@ msgstr "{count} program seçildi"
 msgctxt "accounts.workload_center"
 msgid "İxtisas axtar…"
 msgstr "Program ara…"
+
+msgctxt "registrar.journal_prefill"
+msgid "Otaq dərs cədvəlindən götürülüb — dəyişə bilərsiniz."
+msgstr "Derslik ders programından alındı — değiştirebilirsiniz."
+
+msgctxt "registrar.journal_prefill"
+msgid "Cədvəldəki otaq"
+msgstr "Programdaki derslik"
+
+msgctxt "registrar.journal_prefill"
+msgid "Cədvəldəki otağı qaytar"
+msgstr "Programdaki dersliği geri getir"
+
+msgctxt "accounts.schedule_manage"
+msgid "Uyğun vaxtlar hesablanır…"
+msgstr "Uygun saatler hesaplanıyor…"
+
+msgctxt "accounts.schedule_manage"
+msgid "Təklifləri yükləmək olmadı."
+msgstr "Öneriler yüklenemedi."
+
+msgctxt "accounts.schedule_manage"
+msgid "Uyğun vaxtları görmək üçün əvvəlcə qrupu seçin."
+msgstr "Uygun saatleri görmek için önce grubu seçin."
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllim seçilməyib — yalnız qrupun məşğulluğu nəzərə alınır."
+msgstr "Öğretim elemanı seçilmedi — yalnızca grubun programı dikkate alınır."
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu rejimdə uyğun boş xana tapılmadı."
+msgstr "Bu modda uygun boş hücre bulunamadı."
+
+msgctxt "accounts.schedule_manage"
+msgid "Ortaq boş vaxt"
+msgstr "Ortak boş zaman"
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllim və qrup boşdur, amma otaq problemi var"
+msgstr "Öğretim elemanı ve grup boş, ancak derslik sorunu var"
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllim məşğuldur"
+msgstr "Öğretim elemanı meşgul"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrup məşğuldur"
+msgstr "Grup meşgul"
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllim də, qrup da məşğuldur"
+msgstr "Hem öğretim elemanı hem grup meşgul"
+
+msgctxt "accounts.schedule_manage"
+msgid "{n} uyğun boş otaq"
+msgstr "{n} uygun boş derslik"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrupda {n} tələbə"
+msgstr "Grupta {n} öğrenci"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrupun tələbə sayı məlum deyil — tutum yoxlanmır."
+msgstr "Grubun öğrenci sayısı bilinmiyor — kapasite kontrol edilmiyor."
+
+msgctxt "accounts.schedule_manage"
+msgid "Axın: {groups} — cəmi {n} tələbə"
+msgstr "Ortak ders: {groups} — toplam {n} öğrenci"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrupun korpusu: {campus}"
+msgstr "Grubun binası: {campus}"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrupun korpusu təyin edilməyib — bütün korpuslar bərabər sıralanır."
+msgstr "Grubun binası atanmamış — tüm binalar eşit sıralanır."
+
+msgctxt "accounts.schedule_manage"
+msgid "Otaqların tutumu daxil edilməyib — təklif yalnız korpus və boşluğa görə sıralanır."
+msgstr "Derslik kapasiteleri girilmemiş — öneriler yalnızca bina ve boşluğa göre sıralanır."
+
+msgctxt "accounts.schedule_manage"
+msgid "Otaq reyestri boşdur — otaqlar «İmtahan otaqları» bölməsində əlavə olunur."
+msgstr "Derslik kaydı boş — derslikler «Sınav salonları» bölümünde eklenir."
+
+msgctxt "accounts.schedule_manage"
+msgid "Otaq təklifi üçün gün və dərs saatını seçin."
+msgstr "Derslik önerisi için gün ve ders saatini seçin."
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu saatda boş otaq yoxdur."
+msgstr "Bu saatte boş derslik yok."
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu saatda qrupa sığan boş otaq yoxdur — kiçik otaqlar xəbərdarlıqla göstərilir."
+msgstr "Bu saatte grubu alan boş derslik yok — küçük derslikler uyarıyla gösteriliyor."
+
+msgctxt "accounts.schedule_manage"
+msgid "{n} yer"
+msgstr "{n} kişilik"
+
+msgctxt "accounts.schedule_manage"
+msgid "tutum məlum deyil"
+msgstr "kapasite bilinmiyor"
+
+msgctxt "accounts.schedule_manage"
+msgid "kiçikdir"
+msgstr "küçük"
+
+msgctxt "accounts.schedule_manage"
+msgid "başqa korpus"
+msgstr "başka bina"
+
+msgctxt "accounts.schedule_manage"
+msgid "laboratoriya"
+msgstr "laboratuvar"
+
+msgctxt "accounts.schedule_manage"
+msgid "seçilib"
+msgstr "seçildi"
+
+msgctxt "accounts.schedule_manage"
+msgid "Seçilmiş otaq bu saatda tutulub — boş otaqlardan birini seçin."
+msgstr "Seçilen derslik bu saatte dolu — boş dersliklerden birini seçin."
+
+msgctxt "accounts.schedule_manage"
+msgid "Axın mühazirəsi {room} otağındadır."
+msgstr "Ortak ders {room} dersliğinde."
+
+msgctxt "accounts.schedule_manage"
+msgid "Uyğun vaxtlar"
+msgstr "Uygun saatler"
+
+msgctxt "accounts.schedule_manage"
+msgid "Kim üçün uyğun"
+msgstr "Kimin için uygun"
+
+msgctxt "accounts.schedule_manage"
+msgid "Hər ikisi üçün uyğun"
+msgstr "İkisi için de uygun"
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllim üçün uyğun"
+msgstr "Öğretim elemanı için uygun"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrup üçün uyğun"
+msgstr "Grup için uygun"
+
+msgctxt "accounts.schedule_manage"
+msgid "ortaq boş"
+msgstr "ortak boş"
+
+msgctxt "accounts.schedule_manage"
+msgid "otaq problemi"
+msgstr "derslik sorunu"
+
+msgctxt "accounts.schedule_manage"
+msgid "müəllim məşğul"
+msgstr "öğretim elemanı meşgul"
+
+msgctxt "accounts.schedule_manage"
+msgid "qrup məşğul"
+msgstr "grup meşgul"
+
+msgctxt "accounts.schedule_manage"
+msgid "hər ikisi məşğul"
+msgstr "ikisi de meşgul"
+
+msgctxt "accounts.schedule_manage"
+msgid "Otaq təklifi"
+msgstr "Derslik önerisi"
+
+msgctxt "registrar.schedule_suggest"
+msgid "B.e."
+msgstr "Pzt"
+
+msgctxt "registrar.schedule_suggest"
+msgid "Ç.a."
+msgstr "Sal"
+
+msgctxt "registrar.schedule_suggest"
+msgid "Ç."
+msgstr "Çar"
+
+msgctxt "registrar.schedule_suggest"
+msgid "C.a."
+msgstr "Per"
+
+msgctxt "registrar.schedule_suggest"
+msgid "C."
+msgstr "Cum"
+
+msgctxt "registrar.schedule_suggest"
+msgid "Ş."
+msgstr "Cmt"
+
+msgctxt "registrar.schedule_suggest"
+msgid "B."
+msgstr "Paz"
+
+msgctxt "registrar.schedule_suggest"
+msgid "Müəllimin bu gün dərsi yoxdur"
+msgstr "Öğretim elemanının bu gün dersi yok"
+
+msgctxt "registrar.schedule_suggest"
+msgid "Müəllimin dərsinə bitişik"
+msgstr "Öğretim elemanının dersine bitişik"
+
+msgctxt "registrar.schedule_suggest"
+msgid "Müəllimin digər həftədəki dərsi ilə eyni saat"
+msgstr "Öğretim elemanının diğer haftadaki dersiyle aynı saat"
+
+#, python-format
+msgctxt "registrar.schedule_suggest"
+msgid "Müəllimin dərsləri arasında %(gap)s saat boşluq"
+msgstr "Öğretim elemanının dersleri arasında %(gap)s saat boşluk"
+
+msgctxt "registrar.schedule_suggest"
+msgid "Qrupun bu gün dərsi yoxdur — yeni gün"
+msgstr "Grubun bu gün dersi yok — yeni gün"
+
+msgctxt "registrar.schedule_suggest"
+msgid "Qrupun dərsinə bitişik — boşluq yoxdur"
+msgstr "Grubun dersine bitişik — boşluk yok"
+
+msgctxt "registrar.schedule_suggest"
+msgid "Qrupun digər həftədəki dərsi ilə eyni saat"
+msgstr "Grubun diğer haftadaki dersiyle aynı saat"
+
+#, python-format
+msgctxt "registrar.schedule_suggest"
+msgid "Qrupun dərsləri arasında %(gap)s saat boşluq"
+msgstr "Grubun dersleri arasında %(gap)s saat boşluk"
+
+#, python-format
+msgctxt "registrar.schedule_suggest"
+msgid "Axın mühazirəsi %(room)s otağındadır — eyni otaq seçilməlidir."
+msgstr "Ortak ders %(room)s dersliğinde — aynı derslik seçilmelidir."
+
+#, python-format
+msgctxt "registrar.schedule_suggest"
+msgid "%(room)s otağı bu saatda tutulub."
+msgstr "%(room)s dersliği bu saatte dolu."
+
+msgctxt "registrar.schedule_suggest"
+msgid "Bu saatda qrupa uyğun boş otaq yoxdur."
+msgstr "Bu saatte gruba uygun boş derslik yok."
+
+msgctxt "accounts.schedule_editor"
+msgid "Semestr tapılmadı."
+msgstr "Dönem bulunamadı."

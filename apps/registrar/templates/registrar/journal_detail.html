@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal_guest.css' %}?v=20260926-close">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_subject_exempt.css' %}?v=20261015-exempt">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_history.css' %}?v=20260925-hist2">
-    <link rel="stylesheet" href="{% static 'registrar/css/journal_activation.css' %}?v=20260925-act">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_activation.css' %}?v=20261017-room">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_cell_hint.css' %}?v=20261014-notip">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_autosave.css' %}?v=20261014-auto">
     {% comment %}Sakit düzüm qatı — HƏMİŞƏ SONUNCU yüklənir ki, yuxarıdakı
@@ -318,7 +318,9 @@
     <script src="{% static 'registrar/js/journal_detail.js' %}?v=20260715-jbatch2"></script>
     <script src="{% static 'registrar/js/syllabus_view.js' %}?v=20261008-reuse"></script>
     {# Korpus → otaq kaskadı journal_grid.js-dən ƏVVƏL yüklənir (o, modulu boot-da oxuyur). #}
-    <script src="{% static 'registrar/js/journal_lesson_room.js' %}?v=20260927-memory"></script>
+    {# Seçilmiş tarixin cədvəl slotu (otaq + saat, sahib 2026-10-17) — otaq kaskadı ondan oxuyur. #}
+    <script src="{% static 'registrar/js/journal_lesson_schedule.js' %}?v=20261017-room"></script>
+    <script src="{% static 'registrar/js/journal_lesson_room.js' %}?v=20261017-sched"></script>
     <script src="{% static 'registrar/js/journal_lesson_modal_guard.js' %}?v=20260920-guard"></script>
     {# journal_grid 2 hissədə, SIRA VACİBDİR: çiplər/qaralama/təsdiq → dərs modalı (2026-09-21 bölgüsü). #}
     <script src="{% static 'registrar/js/journal_grid.js' %}?v=20261014-auto"></script>

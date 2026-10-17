@@ -363,6 +363,36 @@ def slot_teacher_options(*, organization, group, period, subject_id, instructor_
     }
 
 
+def plan_target(*, organization, group, period, data):
+    """«Uyğun vaxtlar» (``action=plan``) üçün ``(müəllim id, fənn id, açılış id)`` — ``check`` ilə EYNİ həll.
+
+    Fənn seçilibsə açılış yalnız-oxu tapılır (``resolve_offering(create=False)`` — bazaya heç nə yazılmır)
+    və müəllim slotun EFFEKTİV müəllimidir («Dərsi aparan müəllim», yoxdursa jurnal sahibi); fənn hələ
+    seçilməyibsə dialoqdakı müəllim. Yararsız seçim ``CellError`` (``check`` ilə eyni 400/409)."""
+    from django.contrib.auth import get_user_model
+
+    from core.http_ids import parse_uuid
+
+    raw = str(data.get("instructor_id") or "").strip()
+    instructor = get_user_model().objects.filter(pk=int(raw)).first() if raw.isdigit() else None
+    subject_pk = parse_uuid(data.get("subject_id"))
+    subject = Subject.objects.filter(organization=organization, pk=subject_pk).first() if subject_pk else None
+    if subject is None:
+        return getattr(instructor, "pk", None), None, None
+    offering, _created, _assigned = resolve_offering(
+        actor=None,
+        organization=organization,
+        group=group,
+        period=period,
+        subject=subject,
+        instructor=instructor,
+        create=False,
+    )
+    slot_teacher = resolve_slot_instructor(offering=offering, data=data)
+    teacher_id = getattr(slot_teacher, "pk", None) or offering.instructor_id
+    return teacher_id, subject.pk, (None if offering._state.adding else offering.pk)
+
+
 # ── Yoxlama (heç nə yazmır) ──────────────────────────────────────────────────
 
 
@@ -470,6 +500,7 @@ __all__ = [
     "allowed_subjects",
     "check_cell",
     "parse_cell",
+    "plan_target",
     "resolve_offering",
     "resolve_slot_instructor",
     "scope_filter",

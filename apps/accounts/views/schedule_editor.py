@@ -11,6 +11,8 @@ burada YALNIZ redaktorun interaktiv əməlləri var:
 * ``delete``   — YUMŞAQ silmə (sətir bazada qalır);
 * ``suggest``  — «hara boşdur» tövsiyələri (səhər/günorta növbəsi);
 * ``options``  — seçilmiş qrupun fənn + müəllim seçiciləri;
+* ``plan``     — «Uyğun vaxtlar» şəbəkəsi (müəllim / qrup / ortaq boş) + seçilmiş vaxt üçün otaq
+  tövsiyəsi (tutum + korpus; 2026-10-17, ``registrar.schedule_suggest``);
 * ``slot_teachers`` — «Dərsi aparan müəllim» seçicisi (seçilmiş fənn + qrup açılışını apara
   bilənlər; bölünmüş tədris, 2026-09-25). Seçimin özü ``check``/``save``-də SERVERDƏ yoxlanır.
 
@@ -33,12 +35,13 @@ from apps.registrar.public import schedule_editor
 from apps.registrar.public import schedule_editor_actions as editor
 from apps.registrar.public import schedule_manage
 from apps.registrar.public import schedule_manage_actions as base
+from apps.registrar.public import schedule_suggest
 from core.http_ids import parse_uuid
 
 _CTX = "accounts.schedule_editor"
 
 ALLOWED_ACTIONS = frozenset(
-    {"check", "check_move", "save", "move", "place", "delete", "suggest", "options", "slot_teachers"}
+    {"check", "check_move", "save", "move", "place", "delete", "suggest", "options", "slot_teachers", "plan"}
 )
 
 
@@ -207,6 +210,38 @@ def _suggest(request, organization, data):
     )
 
 
+def _plan(request, organization, data):
+    """«Uyğun vaxtlar» + otaq tövsiyəsi — qrup YALNIZ aktorun əhatəsindən (403), semestr bu təşkilatdan (404)."""
+    group = _group(request, organization, data)
+    if group is None:
+        return _denied()
+    period = _period(organization, data)
+    if period is None:
+        return JsonResponse(
+            {"ok": False, "error": "not_found", "message": pgettext(_CTX, "Semestr tapılmadı.")}, status=404
+        )
+    teacher_id, subject_id, offering_id = schedule_editor.plan_target(
+        organization=organization, group=group, period=period, data=data
+    )
+    result = schedule_suggest.plan(
+        organization=organization,
+        group=group,
+        period_id=period.pk,
+        teacher_id=teacher_id,
+        subject_id=subject_id,
+        kind=str(data.get("slot_kind") or "").strip(),
+        week_type=str(data.get("week_type") or "").strip(),
+        offering_id=offering_id,
+        exclude_ids=(str(data.get("slot_id") or "").strip(),),
+        mode=str(data.get("mode") or "").strip(),
+        weekday=data.get("weekday"),
+        time_slot=str(data.get("time_slot") or "").strip(),
+        room=str(data.get("room") or "").strip()[:64],
+        visible=schedule_suggest.scope_visible(request.user, organization),
+    )
+    return JsonResponse({"ok": True, **result})
+
+
 def _write(request, organization, action, data):
     if action == "save":
         group = _group(request, organization, data)
@@ -262,6 +297,8 @@ def schedule_editor_action(request):
             return _slot_teachers(request, organization, data)
         if action == "suggest":
             return _suggest(request, organization, data)
+        if action == "plan":
+            return _plan(request, organization, data)
         if action == "check_move":
             slot = _slot(request, organization, data)
             if slot is None:

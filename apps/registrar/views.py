@@ -470,9 +470,11 @@ def _handle_add_lesson(request, offering):
             messages.error(request, _("Seçilmiş müəllim bu təşkilatın tədris heyətində deyil."))
             return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
-    # Dərsin otağı (opsional) — korpus yalnız UI süzgəcidir, saxlanan dəyər otaqdır.
-    # Otaq təşkilat daxilində həll olunur: başqa tenant-ın otağı keçmir.
-    room = lesson_rooms.resolve_lesson_room(offering.organization, request.POST.get("lesson_room"))
+    # Dərsin otağı (opsional; korpus yalnız UI süzgəcidir) — təşkilat daxilində həll olunur, boşdursa
+    # həmin tarix/saatın cədvəl slotunun otağı (sahib 2026-10-17, journal_lesson_prefill.posted_room).
+    room = journal_lesson_prefill.posted_room(
+        offering, request.POST, date=date, start_time=start_time, kind=kind, slot=slot
+    )
 
     # İKT/RİM Rəhbəri / superuser keçmiş tarixə də dərs aça bilər (tam override).
     allow_past = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False))

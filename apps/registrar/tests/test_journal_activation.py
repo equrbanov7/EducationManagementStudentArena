@@ -306,7 +306,8 @@ class JournalActivationTest(TestCase):
         self.assertContains(resp, 'id="jdSlotPattern"')
         self.assertContains(resp, "data-jd-offsched")
         pattern = resp.context["lesson_slot_pattern"]
-        self.assertIn({"weekday": self.today.isoweekday(), "week_type": WeekType.ALL, "start": "08:30"}, pattern)
+        brief = [{key: item[key] for key in ("weekday", "week_type", "start")} for item in pattern]
+        self.assertIn({"weekday": self.today.isoweekday(), "week_type": WeekType.ALL, "start": "08:30"}, brief)
         self.assertNotIn("13:35", [item["start"] for item in pattern])  # parklanmış slot
 
     # ── Köməkçilər ───────────────────────────────────────────────────────────
