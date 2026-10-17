@@ -266,3 +266,74 @@ th[aria-sort="descending"] {
         grid-template-columns: 1fr;
     }
 }
+
+/* ── Yığcam cədvəl + telefonda KART rejimi (Paket A 2026-10-18) ───────────
+   `.ems-table--compact` — az sütunlu cədvəl 900px min-eni ilə SÜRÜŞMƏSİN.
+   `.ems-table--stack`   — ≤ 768px-də hər sətir kartdır: başlıq sırası gizlənir
+   (ekran oxuyucuda qalır), hər `td[data-label]` «ETİKET … dəyər» cütü olur.
+   Şablon: `<td data-label="{% trans 'Tarix' %}">…</td>`; əməl xanası `data-label`-siz. */
+.ems-table--compact {
+    min-width: 0;
+}
+
+@media (max-width: 768px) {
+    .ems-table--stack {
+        min-width: 0;
+    }
+
+    .ems-table--stack,
+    .ems-table--stack tbody,
+    .ems-table--stack tr,
+    .ems-table--stack th[scope="row"],
+    .ems-table--stack td {
+        display: block;
+        width: 100%;
+    }
+
+    .ems-table--stack thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+
+    .ems-table--stack tbody tr {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--ems-border);
+    }
+
+    .ems-table--stack tbody tr:last-child {
+        border-bottom: 0;
+    }
+
+    .ems-table--stack th[scope="row"],
+    .ems-table--stack td {
+        padding: 4px 0;
+    }
+
+    .ems-table--stack td[data-label] {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--ems-sp-3);
+        text-align: right;
+    }
+
+    .ems-table--stack td[data-label]::before {
+        content: attr(data-label);
+        flex: none;
+        text-align: left;
+        font-size: var(--ems-fs-xs);
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--ems-neutral-500);
+    }
+
+    .ems-table--stack td:not([data-label]) .ems-btn {
+        width: 100%;
+        margin-top: 6px;
+    }
+}

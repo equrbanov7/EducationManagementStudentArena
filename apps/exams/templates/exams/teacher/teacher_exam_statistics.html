@@ -1,355 +1,66 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n exam_filters ems_ui %}
 
 {% block title %}{% trans "page_title" context "exams.template.exam_statistics" %} — {{ exam.title }}{% endblock %}
 
 {% block extraCss %}
-<link rel="stylesheet" href="{% static 'exams/css/teacher_exam_statistics.css' %}">
-    {# Ortaq token teması (sahib 2026-09-21): imtahan səthləri eyni dildə. #}
-    <link rel="stylesheet" href="{% static 'exams/css/teacher_surfaces_theme.css' %}?v=20260921-theme">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20261015-opt">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/header.css' %}?v=20260903-3">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/badge.css' %}?v=20260903-3">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/table.css' %}?v=20260914-a11y">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_statistics.css' %}?v=20261017-pkgb">
 {% endblock %}
 
 {% block content %}
-<div class="sd-page">
-    {% include "exams/partials/_exam_crumbs.html" %}
-    <a href="{{ results_url }}" class="sd-back">
-        <i class="fas fa-arrow-left"></i> {% trans "back_to_results" context "exams.template.exam_statistics" %}
-    </a>
+{% comment %}
+İmtahan statistikası — yenidən dizayn 2026-10-17 (Paket B): ortaq başlıq, tək sətirli filtr
+zolağı («Daha çox filtr» açılan blokda), 4+4 KPI, qrafik kartları (Chart.js), ems cədvəlləri,
+nəticə yoxdursa izahlı boş vəziyyət. GET parametrləri və AI xülasə axını dəyişməyib.
+{% endcomment %}
+{% trans "back_to_results" context "exams.template.exam_statistics" as back_label %}
+{% trans "page_title" context "exams.template.exam_statistics" as page_title %}
+<div class="etp-page tes-page">
+    {% include "exams/teacher/partials/_page_head.html" with head_title=page_title head_subtitle=exam.title head_back_url=results_url head_back_label=back_label head_pills_include="exams/teacher/partials/results/_head_pills.html" %}
 
-    <div class="sd-header">
-        <div class="sd-header__left">
-            <h1><i class="fas fa-chart-line"></i> {% trans "page_title" context "exams.template.exam_statistics" %}</h1>
-            <p>{{ exam.title }} — {{ exam.get_exam_type_display }}</p>
-        </div>
-        <span class="sd-header__badge">
-            <i class="fas fa-file-alt"></i> {{ exam.get_exam_type_display }}
-        </span>
-    </div>
+    <div class="etp-stack">
+        {% include "exams/teacher/partials/statistics/_filters.html" %}
 
-    <!-- ═══════════ Filters ═══════════ -->
-    <div class="sd-filter-card">
-        <div class="sd-filter-card__title"><i class="fas fa-filter"></i> {% trans "filter_title" context "exams.template.exam_statistics" %}</div>
-        <form method="get" id="statsFilterForm">
-            {% if request.GET.from_section %}<input type="hidden" name="from_section" value="{{ request.GET.from_section }}">{% endif %}
-            {% if request.GET.return_to %}<input type="hidden" name="return_to" value="{{ request.GET.return_to }}">{% endif %}
-            <div class="sd-filter-grid">
-                <div class="sd-filter-field">
-                    <label for="fGroup">{% trans "filter_group" context "exams.template.exam_statistics" %}</label>
-                    <div class="bootstrap-single-select">
-                        <select name="group" id="fGroup" class="bootstrap-single-select__native" data-bootstrap-select>
-                            <option value="">{% trans "filter_all_groups" context "exams.template.exam_statistics" %}</option>
-                            {% for g in teacher_groups %}
-                                <option value="{{ g.id }}" {% if f_group|stringformat:"d" == g.id|stringformat:"d" %}selected{% endif %}>{{ g.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-                <div class="sd-filter-field">
-                    <label for="fStudent">{% trans "filter_student" context "exams.template.exam_statistics" %}</label>
-                    <input type="text" name="student" id="fStudent" value="{{ f_student }}" placeholder="{% trans 'filter_student_placeholder' context 'exams.template.exam_statistics' %}" autocomplete="off">
-                </div>
-                <div class="sd-filter-field">
-                    <label for="fDateFrom">{% trans "filter_date_from" context "exams.template.exam_statistics" %}</label>
-                    <input type="date" name="date_from" id="fDateFrom" value="{{ f_date_from }}">
-                </div>
-                <div class="sd-filter-field">
-                    <label for="fDateTo">{% trans "filter_date_to" context "exams.template.exam_statistics" %}</label>
-                    <input type="date" name="date_to" id="fDateTo" value="{{ f_date_to }}">
-                </div>
-                <div class="sd-filter-field">
-                    <label for="fStatus">{% trans "filter_status" context "exams.template.exam_statistics" %}</label>
-                    <div class="bootstrap-single-select">
-                        <select name="status" id="fStatus" class="bootstrap-single-select__native" data-bootstrap-select>
-                            <option value="">{% trans "filter_all_statuses" context "exams.template.exam_statistics" %}</option>
-                            <option value="submitted" {% if f_status == "submitted" %}selected{% endif %}>{% trans "filter_status_submitted" context "exams.template.exam_statistics" %}</option>
-                            <option value="expired" {% if f_status == "expired" %}selected{% endif %}>{% trans "filter_status_expired" context "exams.template.exam_statistics" %}</option>
-                            <option value="in_progress" {% if f_status == "in_progress" %}selected{% endif %}>{% trans "filter_status_in_progress" context "exams.template.exam_statistics" %}</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="sd-filter-field">
-                    <label for="fScoreMin">{% trans "filter_score_min" context "exams.template.exam_statistics" %}</label>
-                    <input type="number" name="score_min" id="fScoreMin" value="{{ f_score_min }}" min="0" placeholder="0">
-                </div>
-                <div class="sd-filter-field">
-                    <label for="fScoreMax">{% trans "filter_score_max" context "exams.template.exam_statistics" %}</label>
-                    <input type="number" name="score_max" id="fScoreMax" value="{{ f_score_max }}" min="0" placeholder="100">
-                </div>
-                <div class="sd-filter-field">
-                    <label for="fPassFail">{% trans "filter_pass_fail" context "exams.template.exam_statistics" %}</label>
-                    <div class="bootstrap-single-select">
-                        <select name="pass_fail" id="fPassFail" class="bootstrap-single-select__native" data-bootstrap-select>
-                            <option value="">{% trans "filter_all" context "exams.template.exam_statistics" %}</option>
-                            <option value="pass" {% if f_pass_fail == "pass" %}selected{% endif %}>{% trans "filter_passed" context "exams.template.exam_statistics" %}</option>
-                            <option value="fail" {% if f_pass_fail == "fail" %}selected{% endif %}>{% trans "filter_failed" context "exams.template.exam_statistics" %}</option>
-                        </select>
-                    </div>
-                </div>
-                {% if blocks %}
-                <div class="sd-filter-field">
-                    <label for="fBlock">{% trans "filter_block" context "exams.template.exam_statistics" %}</label>
-                    <div class="bootstrap-single-select">
-                        <select name="block" id="fBlock" class="bootstrap-single-select__native" data-bootstrap-select>
-                            <option value="">{% trans "filter_all_blocks" context "exams.template.exam_statistics" %}</option>
-                            {% for b in blocks %}
-                                <option value="{{ b.id }}" {% if f_block|stringformat:"d" == b.id|stringformat:"d" %}selected{% endif %}>{{ b.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-                {% endif %}
-                {% if teacher_groups %}
-                <div class="sd-filter-field sd-filter-field--full">
-                    <label id="filter-compare-groups-label">{% trans "filter_compare_groups" context "exams.template.exam_statistics" %}</label>
-                    <div class="sd-check-row" role="group" aria-labelledby="filter-compare-groups-label">
-                        {% for g in teacher_groups %}
-                            <label class="sd-check-label">
-                                <input type="checkbox" name="compare_groups" value="{{ g.id }}"
-                                       {% if g.id|stringformat:"d" in f_compare_groups %}checked{% endif %}>
-                                {{ g.name }}
-                            </label>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-            <div class="sd-filter-actions sd-filter-actions--spaced">
-                <button type="submit" class="sd-filter-btn sd-filter-btn--apply">
-                    <i class="fas fa-filter"></i> {% trans "filter_apply" context "exams.template.exam_statistics" %}
-                </button>
-                <a href="{% url 'exams:teacher_exam_statistics' exam.slug %}?{{ nav_query }}" class="sd-filter-btn sd-filter-btn--clear">
-                    <i class="fas fa-eraser"></i> {% trans "filter_clear" context "exams.template.exam_statistics" %}
-                </a>
-            </div>
-        </form>
-    </div>
+        {% if total_attempts %}
+            {% include "exams/teacher/partials/statistics/_kpis.html" %}
+            {% include "exams/teacher/partials/statistics/_charts.html" %}
+            {% include "exams/teacher/partials/statistics/_tables.html" %}
 
-    <!-- ═══════════ Summary Cards ═══════════ -->
-    <div class="sd-summary">
-        <div class="sd-card sd-card--blue">
-            <div class="sd-card__icon"><i class="fas fa-users"></i></div>
-            <span class="sd-card__label">{% trans "card_total_attempts" context "exams.template.exam_statistics" %}</span>
-            <span class="sd-card__value">{{ total_attempts }}</span>
-        </div>
-        <div class="sd-card sd-card--green">
-            <div class="sd-card__icon"><i class="fas fa-chart-bar"></i></div>
-            <span class="sd-card__label">{% trans "card_avg_score" context "exams.template.exam_statistics" %}</span>
-            {% if is_written %}
-                <span class="sd-card__value">{{ avg_raw_score }}<small class="sd-card__value-sub">/{{ max_possible_score }}</small></span>
-            {% else %}
-                <span class="sd-card__value">{{ avg_score }}%</span>
-            {% endif %}
-        </div>
-        <div class="sd-card sd-card--teal">
-            <div class="sd-card__icon"><i class="fas fa-trophy"></i></div>
-            <span class="sd-card__label">{% trans "card_max_score" context "exams.template.exam_statistics" %}</span>
-            {% if is_written %}
-                <span class="sd-card__value">{{ max_raw_score }}<small class="sd-card__value-sub">/{{ max_possible_score }}</small></span>
-            {% else %}
-                <span class="sd-card__value">{{ max_score }}%</span>
-            {% endif %}
-        </div>
-        <div class="sd-card sd-card--red">
-            <div class="sd-card__icon"><i class="fas fa-arrow-down"></i></div>
-            <span class="sd-card__label">{% trans "card_min_score" context "exams.template.exam_statistics" %}</span>
-            {% if is_written %}
-                <span class="sd-card__value">{{ min_raw_score }}<small class="sd-card__value-sub">/{{ max_possible_score }}</small></span>
-            {% else %}
-                <span class="sd-card__value">{{ min_score }}%</span>
-            {% endif %}
-        </div>
-        <div class="sd-card sd-card--green">
-            <div class="sd-card__icon"><i class="fas fa-check-circle"></i></div>
-            <span class="sd-card__label">{% trans "card_pass_rate" context "exams.template.exam_statistics" %}</span>
-            <span class="sd-card__value">{{ pass_rate }}%</span>
-        </div>
-        <div class="sd-card sd-card--amber">
-            <div class="sd-card__icon"><i class="fas fa-clock"></i></div>
-            <span class="sd-card__label">{% trans "card_avg_duration" context "exams.template.exam_statistics" %}</span>
-            <span class="sd-card__value">{{ avg_duration }}s</span>
-        </div>
-        {% if is_written %}
-        <div class="sd-card sd-card--purple">
-            <div class="sd-card__icon"><i class="fas fa-user-check"></i></div>
-            <span class="sd-card__label">{% trans "card_checked" context "exams.template.exam_statistics" %}</span>
-            <span class="sd-card__value">{{ checked_count }}<small class="sd-card__value-sub">/{{ total_attempts }}</small></span>
-        </div>
+            <section class="ems-card tes-ai" id="aiSummaryPanel" aria-labelledby="tes-ai-title">
+                <div class="tes-card__head">
+                    <h2 class="tes-card__title" id="tes-ai-title"><i class="fas fa-robot" aria-hidden="true"></i> {% trans "ai_summary_title" context "exams.template.exam_statistics" %}</h2>
+                    <button type="button" class="ems-btn ems-btn--primary" id="aiSummaryBtn">
+                        <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i><span>{% trans "ai_generate_btn" context "exams.template.exam_statistics" %}</span>
+                    </button>
+                </div>
+                <div class="tes-ai__content" id="aiSummaryContent" aria-live="polite">
+                    <p class="tes-ai__placeholder">{% trans "ai_initial_message" context "exams.template.exam_statistics" %}</p>
+                </div>
+            </section>
         {% else %}
-        <div class="sd-card sd-card--purple">
-            <div class="sd-card__icon"><i class="fas fa-check"></i></div>
-            <span class="sd-card__label">{% trans "card_submitted" context "exams.template.exam_statistics" %}</span>
-            <span class="sd-card__value">{{ submitted_count }}</span>
-        </div>
+            <section class="ems-card">
+                {% if filter_query %}
+                    {% trans "Filtrlərə uyğun nəticə yoxdur" context "exams.template.teacher_exam_results" as empty_title %}
+                    {% trans "Axtarışı dəyişin və ya filtrləri sıfırlayın." context "exams.template.teacher_exam_results" as empty_body %}
+                    {% trans "Filtrləri sıfırla" context "exams.template.teacher_exam_results" as empty_action %}
+                    {% url 'exams:teacher_exam_statistics' exam.slug as stats_url %}
+                    {% include "partials/ems_ui/_empty.html" with state_title=empty_title state_body=empty_body state_icon="fa-filter-circle-xmark" state_action_label=empty_action state_action_url=stats_url|add:"?"|add:nav_query %}
+                {% else %}
+                    {% trans "Hələ iştirakçı yoxdur" context "exams.template.teacher_exam_results" as empty_title %}
+                    {% trans "Tələbələr imtahanı verdikcə nəticələr burada görünəcək." context "exams.template.teacher_exam_results" as empty_body %}
+                    {% include "partials/ems_ui/_empty.html" with state_title=empty_title state_body=empty_body state_icon="fa-chart-column" %}
+                {% endif %}
+            </section>
         {% endif %}
-        <div class="sd-card sd-card--red">
-            <div class="sd-card__icon"><i class="fas fa-hourglass-end"></i></div>
-            <span class="sd-card__label">{% trans "card_expired" context "exams.template.exam_statistics" %}</span>
-            <span class="sd-card__value">{{ expired_count }}</span>
-        </div>
-    </div>
-
-    <!-- ═══════════ Charts ═══════════ -->
-    <div class="sd-chart-row">
-        <div class="sd-chart-box">
-            <div class="sd-chart-box__title"><i class="fas fa-chart-bar"></i> {% trans "chart_student_scores" context "exams.template.exam_statistics" %}</div>
-            <div class="sd-chart-wrap"><canvas id="studentScoreChart"></canvas></div>
-        </div>
-        <div class="sd-chart-box">
-            <div class="sd-chart-box__title"><i class="fas fa-bullseye"></i> {% if is_written %}{% trans "chart_avg_score_percent" context "exams.template.exam_statistics" %}{% else %}{% trans "chart_question_accuracy" context "exams.template.exam_statistics" %}{% endif %}</div>
-            <div class="sd-chart-wrap"><canvas id="questionAccuracyChart"></canvas></div>
-        </div>
-    </div>
-    <div class="sd-chart-row">
-        {% if is_written %}
-        <div class="sd-chart-box">
-            <div class="sd-chart-box__title"><i class="fas fa-user-check"></i> {% trans "chart_checked_unchecked" context "exams.template.exam_statistics" %}</div>
-            <div class="sd-chart-wrap"><canvas id="checkedUncheckedChart"></canvas></div>
-        </div>
-        {% else %}
-        <div class="sd-chart-box">
-            <div class="sd-chart-box__title"><i class="fas fa-chart-pie"></i> {% trans "chart_correct_incorrect" context "exams.template.exam_statistics" %}</div>
-            <div class="sd-chart-wrap"><canvas id="correctIncorrectChart"></canvas></div>
-        </div>
-        {% endif %}
-        <div class="sd-chart-box">
-            <div class="sd-chart-box__title"><i class="fas fa-check-double"></i> {% trans "chart_pass_fail" context "exams.template.exam_statistics" %}</div>
-            <div class="sd-chart-wrap"><canvas id="passFailChart"></canvas></div>
-        </div>
-    </div>
-    <div class="sd-chart-row">
-        <div class="sd-chart-box sd-chart-box--full">
-            <div class="sd-chart-box__title"><i class="fas fa-layer-group"></i> {% trans "chart_score_distribution" context "exams.template.exam_statistics" %}</div>
-            <div class="sd-chart-box__hint">{% trans "chart_score_distribution_hint" context "exams.template.exam_statistics" %}</div>
-            <div class="sd-chart-wrap sd-chart-wrap--compact"><canvas id="scoreDistributionChart"></canvas></div>
-        </div>
-    </div>
-
-    {% if compare_groups_data %}
-    <!-- ═══════════ Group Comparison Charts ═══════════ -->
-    <div class="sd-chart-row">
-        <div class="sd-chart-box">
-            <div class="sd-chart-box__title"><i class="fas fa-balance-scale"></i> {% trans "chart_group_avg_score" context "exams.template.exam_statistics" %}</div>
-            <div class="sd-chart-wrap"><canvas id="groupAvgScoreChart"></canvas></div>
-        </div>
-        <div class="sd-chart-box">
-            <div class="sd-chart-box__title"><i class="fas fa-percentage"></i> {% trans "chart_group_pass_rate" context "exams.template.exam_statistics" %}</div>
-            <div class="sd-chart-wrap"><canvas id="groupPassRateChart"></canvas></div>
-        </div>
-    </div>
-
-    <!-- ═══════════ Group Comparison Table ═══════════ -->
-    <div class="sd-panel">
-        <div class="sd-panel__head">
-            <div class="sd-panel__title"><i class="fas fa-users-cog"></i> {% trans "table_group_comparison" context "exams.template.exam_statistics" %}</div>
-        </div>
-        <div class="sd-table-wrap">
-            <table class="sd-table">
-                <thead>
-                    <tr>
-                        <th>{% trans "table_group_name" context "exams.template.exam_statistics" %}</th>
-                        <th>{% trans "table_group_participants" context "exams.template.exam_statistics" %}</th>
-                        <th>{% trans "table_group_avg" context "exams.template.exam_statistics" %}</th>
-                        <th>{% trans "table_group_pass_rate" context "exams.template.exam_statistics" %}</th>
-                        <th>{% trans "table_group_max" context "exams.template.exam_statistics" %}</th>
-                        <th>{% trans "table_group_min" context "exams.template.exam_statistics" %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for g in compare_groups_data %}
-                    <tr>
-                        <td><strong>{{ g.name }}</strong></td>
-                        <td>{{ g.count }}</td>
-                        <td><strong>{{ g.avg_score }}{% if exam.exam_type == "test" %}%{% endif %}</strong></td>
-                        <td>
-                            <div class="sd-bar">
-                                <div class="sd-bar__track">
-                                    <div class="sd-bar__fill {% if g.pass_rate >= 70 %}sd-bar__fill--green{% elif g.pass_rate >= 40 %}sd-bar__fill--blue{% else %}sd-bar__fill--red{% endif %}" style="width:{{ g.pass_rate }}%"></div>
-                                </div>
-                                <span class="sd-bar__text">{{ g.pass_rate }}%</span>
-                            </div>
-                        </td>
-                        <td>{{ g.max_score }}</td>
-                        <td>{{ g.min_score }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- ═══════════ Question Statistics ═══════════ -->
-    <div class="sd-panel">
-        <div class="sd-panel__head">
-            <div class="sd-panel__title"><i class="fas fa-question-circle"></i> {% trans "table_question_stats" context "exams.template.exam_statistics" %}</div>
-            <div class="sd-panel__tools">
-                <div class="sd-search">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="questionSearch" placeholder="{% trans 'search_question' context 'exams.template.exam_statistics' %}" autocomplete="off" aria-label="{% trans 'search_question' context 'exams.template.exam_statistics' %}">
-                </div>
-            </div>
-        </div>
-        <div class="sd-table-wrap" id="questionTableWrap">
-            <table class="sd-table" id="questionTable">
-                <thead>
-                    <tr>
-                        <th class="sd-col-index">#</th>
-                        <th>{% trans "table_question" context "exams.template.exam_statistics" %}</th>
-                        <th>{% trans "table_answers" context "exams.template.exam_statistics" %}</th>
-                        {% if is_written %}
-                        <th>{% trans "table_avg_score" context "exams.template.exam_statistics" %}</th>
-                        <th>{% trans "table_max_points" context "exams.template.exam_statistics" %}</th>
-                        {% else %}
-                        <th>{% trans "table_correct" context "exams.template.exam_statistics" %}</th>
-                        <th>{% trans "table_incorrect" context "exams.template.exam_statistics" %}</th>
-                        {% endif %}
-                        <th class="sd-col-accuracy">{% if is_written %}{% trans "table_score_percent" context "exams.template.exam_statistics" %}{% else %}{% trans "table_accuracy" context "exams.template.exam_statistics" %}{% endif %}</th>
-                    </tr>
-                </thead>
-                <tbody id="questionTbody">
-                    {% for qs in question_stats %}
-                    <tr data-question="{{ qs.question.text|lower }}">
-                        <td><span class="sd-num--index">{{ forloop.counter }}</span></td>
-                        <td title="{{ qs.question.text }}">{{ qs.question.text|truncatechars:60 }}</td>
-                        <td>{{ qs.total_answers }}</td>
-                        {% if is_written %}
-                        <td class="sd-num--primary">{{ qs.avg_score }}</td>
-                        <td class="sd-num--secondary">{{ qs.max_points }}</td>
-                        {% else %}
-                        <td class="sd-num--correct">{{ qs.correct_answers }}</td>
-                        <td class="sd-num--incorrect">{{ qs.incorrect_answers }}</td>
-                        {% endif %}
-                        <td>
-                            <div class="sd-bar">
-                                <div class="sd-bar__track">
-                                    <div class="sd-bar__fill {% if qs.accuracy_percent >= 70 %}sd-bar__fill--green{% elif qs.accuracy_percent >= 40 %}sd-bar__fill--blue{% else %}sd-bar__fill--red{% endif %}" style="width:{{ qs.accuracy_percent }}%"></div>
-                                </div>
-                                <span class="sd-bar__text {% if qs.accuracy_percent >= 70 %}sd-bar__text--green{% elif qs.accuracy_percent >= 40 %}sd-bar__text--blue{% else %}sd-bar__text--red{% endif %}">{{ qs.accuracy_percent }}%</span>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="sd-pagination" id="questionPagination"></div>
-    </div>
-
-    <!-- ═══════════ AI Summary ═══════════ -->
-    <div class="sd-ai-panel" id="aiSummaryPanel">
-        <div class="sd-ai-panel__head">
-            <div class="sd-ai-panel__title"><i class="fas fa-robot"></i> {% trans "ai_summary_title" context "exams.template.exam_statistics" %}</div>
-            <button type="button" class="sd-ai-btn" id="aiSummaryBtn">
-                <i class="fas fa-magic"></i> {% trans "ai_generate_btn" context "exams.template.exam_statistics" %}
-            </button>
-        </div>
-        <div class="sd-ai-content" id="aiSummaryContent">
-            <p class="sd-ai-placeholder">{% trans "ai_initial_message" context "exams.template.exam_statistics" %}</p>
-        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extraJs %}
-{% include "exams/teacher/partials/_teacher_exam_statistics_js.html" %}
+{% if total_attempts %}{% include "exams/teacher/partials/_teacher_exam_statistics_js.html" %}{% endif %}
 {% endblock %}

@@ -9,9 +9,8 @@ QURULUŞ: çörək qırıntısı → «hero» (qapaq, ad, status, statistika, ə
 → yapışqan tab-bar (SERVERDƏ render olunur, JS yalnız paneli dəyişir) → panellər.
 Hər panelin başlığı (ad + izah + əməl yuvası) buradadır; bölmə məzmunu öz
 partial-larından gəlir. Başqa tətbiqlərin partial-ları (tapşırıq, lab, imtahan,
-layihə) hələ akkordeon qabığındadır — `course_panel.js` onların ilk sıradakı
-«əlavə et» düymələrini başlığın əməl yuvasına KÖÇÜRÜR (klon deyil — bütün
-handler-lər qalır), CSS isə akkordeon başlığını gizlədir.
+layihə) 2026-10-17-dən kurs panelinin öz `cd-task` kartlarıdır; onların «əlavə et»
+düymələri də başlığın əməl yuvasındadır (əvvəl JS ilə akkordeondan köçürülürdü).
 
 CSP: inline stil/skript yoxdur; dinamik dəyərlər data-* atributlarındadır.
 {% endcomment %}
@@ -20,16 +19,24 @@ CSP: inline stil/skript yoxdur; dinamik dəyərlər data-* atributlarındadır.
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20260909-hover">
-    <link rel="stylesheet" href="{% static 'css/ems_ui/badge.css' %}?v=20260903-3">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/badge.css' %}?v=20261018-pkga">
     <link rel="stylesheet" href="{% static 'courses/css/course_panel.css' %}?v=20260928-1">
     <link rel="stylesheet" href="{% static 'courses/css/course_panel_tabs.css' %}?v=20260928-1">
     {% if is_owner %}<link rel="stylesheet" href="{% static 'courses/css/course_create.css' %}?v=20261017-nofont">{% endif %}
-    <link rel="stylesheet" href="{% static 'courses/css/course_panel_sections.css' %}?v=20260928-1">
-    <link rel="stylesheet" href="{% static 'courses/css/course_panel_foreign.css' %}?v=20260928-1">
-    <link rel="stylesheet" href="{% static 'courses/css/course_panel_overlays.css' %}?v=20260928-1">
+    <link rel="stylesheet" href="{% static 'courses/css/course_panel_sections.css' %}?v=20261017-3">
+    <link rel="stylesheet" href="{% static 'courses/css/course_panel_tasks.css' %}?v=20261017-3">
+    <link rel="stylesheet" href="{% static 'courses/css/course_panel_overlays.css' %}?v=20261017-3">
+    {% if is_owner %}<link rel="stylesheet" href="{% static 'courses/css/course_dialogs.css' %}?v=20261017-3">{% endif %}
     {% if is_owner %}<link rel="stylesheet" href="{% static 'courses/css/course_panel_ai.css' %}?v=20260928-1">{% endif %}
-    {% if is_student %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/assigned_exams.css' %}">
+    {% comment %}Paket E: ortaq dialoq/tab/forma komponentləri (lab, imtahan məlumatı, imtahan əlaqələndirmə dialoqları) —
+    əvvəl bölmə partial-larının GÖVDƏSİNDƏ `<link>` idi (gec aşkarlanan sorğular); tələbə üçün 574 sətirlik
+    `assigned_exams.css` yalnız imtahan məlumat dialoqu üçün çəkilirdi.{% endcomment %}
+    <link rel="stylesheet" href="{% static 'css/ems_ui/overlay.css' %}?v=20260908-zindex">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/validation.css' %}?v=20260903-3">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/nav.css' %}?v=20261018-pkga">
+    <link rel="stylesheet" href="{% static 'exams/css/exam_section.css' %}?v=20261017-3">
+    {% if is_owner %}
+    <link rel="stylesheet" href="{% static 'labs/css/lab_modals.css' %}?v=20261017-3">
     {% endif %}
     {% if is_owner or user_role == 'teacher' %}
     <link rel="stylesheet" href="{% static 'exams/css/course_exam_modal.css' %}">
@@ -42,11 +49,13 @@ CSP: inline stil/skript yoxdur; dinamik dəyərlər data-* atributlarındadır.
          data-please-wait="{% trans 'please_wait' context 'courses.common.js' %}"
          data-retry-error="{% trans 'retry_error' context 'courses.common.js' %}"
          hidden></div>
+    <script defer src="{% static 'js/ems_ui/overlay.js' %}?v=20261015-reqfields"></script>
+    <script defer src="{% static 'js/ems_ui/nav.js' %}?v=20260908-tree"></script>
     <script src="{% static 'courses/js/courses_i18n.js' %}"></script>
     <script src="{% static 'courses/js/modal.js' %}"></script>
     <script src="{% static 'courses/js/forms.js' %}"></script>
     <script src="{% static 'courses/js/notifications.js' %}"></script>
-    <script src="{% static 'courses/js/course_panel.js' %}?v=20260928-1" defer></script>
+    <script src="{% static 'courses/js/course_panel.js' %}?v=20261017-3" defer></script>
     <script src="{% static 'courses/js/course_modals_enhance.js' %}?v=20260928-1" defer></script>
     <script src="{% static 'courses/js/course_dashboard.js' %}?v=20260928-1" defer></script>
     {% if is_owner %}
@@ -199,7 +208,22 @@ CSP: inline stil/skript yoxdur; dinamik dəyərlər data-* atributlarındadır.
             <p class="cd-panel__hint">{{ tab.hint }}</p>
           </div>
           <div class="cd-panel__actions" data-cd-actions>
-            {% if is_owner %}
+            {% if tab.key == "exams" %}
+              {% if is_owner %}
+                <button type="button" class="ems-btn" data-ems-overlay-open="linkExamModal">
+                  {% include "courses/partials/_cd_icon.html" with icon="link" size=16 %}
+                  {% trans "action_link_existing_exam" context "exams.partial.exam_section" %}
+                </button>
+              {% endif %}
+              {% if is_owner or user_role == 'teacher' %}
+                <button type="button" class="ems-btn ems-btn--primary js-open-course-exam-editor"
+                        data-url="{% url 'exams:create_exam' %}?course={{ course.id }}"
+                        data-modal-title="{% trans 'heading_create_exam' context 'exams.template.create_exam_modal' %}">
+                  {% include "courses/partials/_cd_icon.html" with icon="plus" size=16 stroke=2.4 %}
+                  {% trans "action_create_new_exam" context "exams.partial.exam_section" %}
+                </button>
+              {% endif %}
+            {% elif is_owner %}
               {% if tab.key == "topics" %}
                 <button type="button" class="ems-btn cd-btn-ai-soft" data-ems-ai>
                   {% include "courses/partials/_cd_icon.html" with icon="spark" size=15 stroke=1.8 %}
@@ -208,6 +232,21 @@ CSP: inline stil/skript yoxdur; dinamik dəyərlər data-* atributlarındadır.
                 <button type="button" class="ems-btn ems-btn--primary" data-bs-toggle="modal" data-bs-target="#topicFormModal">
                   {% include "courses/partials/_cd_icon.html" with icon="plus" size=16 stroke=2.4 %}
                   {% trans "action_add_new_topic" context "courses.partial.topic_accordion" %}
+                </button>
+              {% elif tab.key == "assignments" %}
+                <button type="button" class="ems-btn ems-btn--primary" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">
+                  {% include "courses/partials/_cd_icon.html" with icon="plus" size=16 stroke=2.4 %}
+                  {% trans "add_new" context "assignment.section" %}
+                </button>
+              {% elif tab.key == "labs" %}
+                <button type="button" class="ems-btn ems-btn--primary" data-ems-overlay-open="addLabModal">
+                  {% include "courses/partials/_cd_icon.html" with icon="plus" size=16 stroke=2.4 %}
+                  {% trans "action_add_new_lab" context "labs.template.lab_section" %}
+                </button>
+              {% elif tab.key == "projects" %}
+                <button type="button" class="ems-btn ems-btn--primary" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+                  {% include "courses/partials/_cd_icon.html" with icon="plus" size=16 stroke=2.4 %}
+                  {% trans "add_project_button" context "projects.section" %}
                 </button>
               {% elif tab.key == "resources" %}
                 <button type="button" class="ems-btn ems-btn--primary" data-bs-toggle="modal" data-bs-target="#resourceFormModal">
@@ -253,23 +292,33 @@ CSP: inline stil/skript yoxdur; dinamik dəyərlər data-* atributlarındadır.
 </div>
 
 <!-- MODALS -->
+{% comment %}
+Paket E (2026-10-17): mövzu / resurs / üzv / kurs redaktəsi modalları statik `ems-bsd` markup-ıdır
+(`course_dialogs.css`) — `.ems-cd-modals` örtüyündən (JS ilə başlıq qurur) kənardadır. Tapşırıq / layihə
+modalları (RİM açarları ilə gizlədilmiş modullar) `.ems-cd-modals` altında köhnə örtüklə qalır.
+{% endcomment %}
 <div class="ems-cd-modals">
 {% if can_manage_course %}
     {% include "courses/partials/_action_confirm_modal.html" %}
 {% endif %}
 
 {% if is_owner %}
-    {% include 'courses/partials/_topic_form_modal.html' %}
-    {% include 'courses/partials/_resource_form_modal.html' %}
-    {% include 'courses/partials/_member_form_modal.html' %}
-    {% include "courses/partials/_topic_edit_modal.html" %}
     {% include "assignments/partials/_assignment_modals.html" %}
     {% include "projects/partials/_project_modals.html" %}
     {% include "labs/partials/_lab_modals.html" %}
     {% include "courses/partials/_ai_drawer_config.html" %}
-    {% include "courses/partials/_edit_course_modal.html" %}
 {% endif %}
 </div>
+
+{% if is_owner %}
+<div class="ems-cd-dialogs">
+    {% include 'courses/partials/_topic_form_modal.html' %}
+    {% include 'courses/partials/_resource_form_modal.html' %}
+    {% include 'courses/partials/_member_form_modal.html' %}
+    {% include "courses/partials/_topic_edit_modal.html" %}
+    {% include "courses/partials/_edit_course_modal.html" %}
+</div>
+{% endif %}
 
 {% comment %} İmtahan modalları (pilləli sehrbaz) öz xüsusi dizaynı ilə qalır — generic
    restyle/enhancer-dən kənarda saxlanılır ki, ikiqat başlıq/pozulma olmasın.  {% endcomment %}

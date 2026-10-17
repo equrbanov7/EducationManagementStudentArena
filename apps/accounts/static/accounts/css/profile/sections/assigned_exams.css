@@ -5,147 +5,167 @@
     --task-border: var(--ems-primary-200);
 }
 
-.text-sky { color: var(--task-primary) !important; }
-.icon-sky-light { background: var(--task-light) !important; color: var(--task-primary) !important; }
-
-.profile-section--assigned-exams .assigned-task-tabs {
-    margin-bottom: 1.5rem;
+/* ═══════════════════════════════════════════════════════════════════════════
+   «Təyin olunmuş tapşırıqlar» — Paket A redizaynı 2026-10-18
+   Kartlar (`student_outcomes/_task_card.html`) + server tərəfli `ems-tabs`.
+   Vəziyyət badge-i `task_state` ailəsindəndir (status_catalog); kartın sol
+   konturu eyni tonu təkrarlayır (rəng yalnız köməkçi siqnaldır).
+   ═══════════════════════════════════════════════════════════════════════════ */
+.ta {
+    display: grid;
+    gap: var(--ems-sp-5);
+    min-width: 0;
 }
 
-.profile-section--assigned-exams .assigned-task-search-form {
-    margin-bottom: 1.5rem;
-    max-width: 460px;
+.ta > .ems-tabs {
+    margin-bottom: 0;
 }
 
-.profile-section--assigned-exams .assigned-task-search-input-wrap {
-    position: relative;
+.ta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: var(--ems-sp-5);
 }
 
-.profile-section--assigned-exams .assigned-task-search-input-wrap i {
-    position: absolute;
-    top: 50%;
-    left: 0.85rem;
-    transform: translateY(-50%);
-    color: var(--ems-neutral-500);
-    font-size: 0.9rem;
-}
-
-.profile-section--assigned-exams .assigned-task-search-input-wrap input {
-    width: 100%;
-    border: 1px solid var(--ems-neutral-300);
-    border-radius: 0.75rem;
-    padding: 0.65rem 0.85rem 0.65rem 2.25rem;
-    font-size: 0.92rem;
-    color: var(--ems-neutral-900);
-    background: var(--ems-neutral-0);
-}
-
-.profile-section--assigned-exams .assigned-task-search-input-wrap input:focus {
-    border-color: #93c5fd;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16);
-    outline: none;
-}
-
-.profile-section--assigned-exams .modern-tab:hover {
-    border-color: var(--task-primary);
-    color: var(--task-primary);
-    background: var(--task-light);
-}
-
-.profile-section--assigned-exams .modern-tab.active {
-    background: var(--task-primary);
-    border-color: var(--task-primary);
-    color: var(--ems-neutral-0);
-    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
-}
-
-.profile-section--assigned-exams .modern-tab.active .tab-count {
-    color: var(--task-primary);
-}
-
-.profile-section--assigned-exams .modern-assigned-task-card:hover {
-    border-color: var(--task-border);
-    box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.15);
-}
-
-.profile-section--assigned-exams .assigned-task-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+.ta-card {
     display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4);
+    min-width: 0;
+    padding: var(--ems-sp-5);
+    border: 1px solid var(--ems-border);
+    border-left: 4px solid var(--ems-success-600);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+}
+
+.ta-card.is-upcoming {
+    border-left-color: var(--ems-primary-400);
+}
+
+.ta-card.is-closed {
+    border-left-color: var(--ems-neutral-300);
+}
+
+.ta-card__head {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-4);
+    min-width: 0;
+}
+
+.ta-card__head > .ems-badge {
+    flex: none;
+}
+
+.ta-card__icon {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
-    flex-shrink: 0;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
 }
 
-.profile-section--assigned-exams .assigned-task-icon--courses {
-    background: var(--ems-success-100);
-    color: #15803d;
+.ta-card__icon--assignments,
+.ta-card__icon--courses {
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
 }
 
-.profile-section--assigned-exams .assigned-task-icon--exams {
-    background: var(--ems-danger-100);
+.ta-card__icon--labs {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.ta-card__icon--independent {
+    background: var(--ems-violet-100);
+    color: var(--ems-violet-800);
+}
+
+.ta-card__titles {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.ta-card__title {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    line-height: 1.3;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+    text-wrap: pretty;
+}
+
+.ta-card__kind {
+    margin: 4px 0 0;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-text-muted);
+}
+
+.ta-card__dates {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--ems-sp-3);
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle);
+}
+
+.ta-card__date dt {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.ta-card__date dd {
+    margin: 3px 0 0;
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+    color: var(--ems-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.ta-card__date--deadline dd {
     color: var(--ems-danger-strong);
 }
 
-.profile-section--assigned-exams .assigned-task-icon--assignments {
-    background: var(--ems-warning-100);
-    color: #b45309;
-}
-
-.profile-section--assigned-exams .assigned-task-icon--labs {
-    background: #e0f2fe;
-    color: #0284c7;
-}
-
-.profile-section--assigned-exams .assigned-task-icon--independent {
-    background: #e0f2fe;
-    color: #0369a1;
-}
-
-.profile-section--assigned-exams .assigned-task-body {
-    margin-bottom: 1.5rem;
-}
-
-.profile-section--assigned-exams .assigned-task-desc {
-    background: var(--ems-neutral-50);
-    border-left: 3px solid var(--ems-neutral-300);
-    border-radius: 0.5rem;
-    padding: 0.75rem 1rem;
-    color: var(--ems-neutral-700);
-    font-size: 0.9rem;
-    line-height: 1.5;
-}
-
-.profile-section--assigned-exams .assigned-task-desc p {
+.ta-card__desc {
     margin: 0;
+    font-size: var(--ems-fs-sm);
+    line-height: 1.55;
+    color: var(--ems-neutral-700);
+    overflow-wrap: anywhere;
 }
 
-.profile-section--assigned-exams .status-open {
-    background: var(--ems-success-100);
-    color: #166534;
-    border-color: #bbf7d0;
+.ta-card__foot {
+    margin-top: auto;
+    display: flex;
 }
 
-.profile-section--assigned-exams .status-upcoming {
-    background: #e0f2fe;
-    color: #075985;
-    border-color: #bae6fd;
+.ta-card__cta {
+    width: 100%;
 }
 
-.profile-section--assigned-exams .status-closed {
-    background: var(--ems-danger-100);
-    color: #991b1b;
-    border-color: var(--ems-danger-200);
+@media (max-width: 480px) {
+    .ta-card {
+        padding: var(--ems-sp-4);
+    }
 }
 
 /* --- Yeni Düymə və Footer Dizaynı --- */
-.profile-section--assigned-exams .task-card-footer {
-    margin-top: auto;
-    padding-top: 1.25rem;
-    border-top: 1px dashed var(--ems-neutral-300);
-}
 
 .profile-section--assigned-exams .btn-task-primary {
     display: flex;
@@ -534,27 +554,6 @@
 }
 
 @media (max-width: 640px) {
-    .profile-section--assigned-exams .assigned-task-search-form {
-        max-width: 100%;
-    }
-
-    /* RESP 2026-09-30: bax my_results.css — `1fr` kartı max-content enə dartırdı. */
-    .profile-section--assigned-exams .results-cards-grid {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
-    .profile-section--assigned-exams .result-title-group {
-        align-self: stretch;
-    }
-
-    .profile-section--assigned-exams .result-card-header {
-        flex-direction: column;
-    }
-
-    .profile-section--assigned-exams .result-status-wrap {
-        margin-top: 0.5rem;
-    }
-
     .assigned-exam-info-grid {
         grid-template-columns: 1fr;
     }

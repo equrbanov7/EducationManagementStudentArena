@@ -1,0 +1,191 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Tələbə elektron jurnalı — 2-ci hissə: gün detalı modalı + telefon düzümü
+   (Paket A 2026-10-18; journal_student.css 600 sətir limitinə görə bölündü).
+   journal_student.css-dən SONRA yüklənir (_section_assets.html) — kaskad ona görədir.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Gün detalı modalı ──────────────────────────────────────────────────── */
+.sjx-daymodal {
+    position: fixed;
+    inset: 0;
+    z-index: 1055;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.sjx-daymodal[hidden] {
+    display: none;
+}
+
+.sjx-daymodal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--ems-neutral-900) 45%, transparent);
+}
+
+.sjx-daymodal-card {
+    position: relative;
+    width: min(420px, 100%);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-dialog);
+    overflow: hidden;
+}
+
+.sjx-daymodal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--ems-border);
+    background: var(--ems-bg-subtle);
+}
+
+.sjx-daymodal-head h3 {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.sjx-daymodal-x {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: var(--ems-r-md);
+    background: none;
+    color: var(--ems-neutral-500);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.sjx-daymodal-x:hover {
+    background: var(--ems-neutral-100);
+    color: var(--ems-text);
+}
+
+.sjx-daymodal-body {
+    padding: 12px 18px 16px;
+}
+
+.sjx-day-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--ems-neutral-100);
+    font-size: var(--ems-fs-md);
+    color: var(--ems-text);
+}
+
+.sjx-day-row:last-child {
+    border-bottom: 0;
+}
+
+.sjx-day-key {
+    flex: none;
+    font-weight: 600;
+    color: var(--ems-text-muted);
+}
+
+.sjx-day-corrnote {
+    margin-top: 12px;
+    padding: 8px 10px;
+    border: 1px solid var(--ems-warning-bd);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-warning-bg);
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-warning-800);
+}
+
+@media (max-width: 768px) {
+    .sj-term {
+        width: 100%;
+    }
+
+    .sj-term .ems-field {
+        flex: 1 1 140px;
+        min-width: 0;
+    }
+
+    /* Telefonda KPI-lər 2 sütun — fənn kartları birinci ekrandan aşağı itməsin. */
+    .sj > .ems-kpis,
+    .sj-kpis.ems-kpis--4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--ems-sp-3);
+    }
+
+    .sj > .ems-kpis .ems-kpi {
+        padding: 12px 14px;
+    }
+
+    .sj > .ems-kpis .ems-kpi__value {
+        font-size: var(--ems-fs-2xl);
+    }
+
+    .sj-panel {
+        padding: var(--ems-sp-4);
+    }
+
+    /* Telefonda dərs sətri YIĞCAM kartdır: «tarix · həftə · tip … nəticə» bir sətirdə,
+       mövzu altında, otaq ən altda (ümumi `--stack` «etiket: dəyər» düzümü burada çox uzun idi). */
+    .sj-table tbody tr {
+        display: grid;
+        grid-template-columns: auto auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "date parity kind result"
+            "topic topic topic topic"
+            "room room room room";
+        align-items: center;
+        gap: 4px 8px;
+    }
+
+    .sj-table tbody tr > * {
+        width: auto;
+        padding: 0;
+    }
+
+    .sj-table th[scope="row"] {
+        grid-area: date;
+        font-size: var(--ems-fs-md);
+    }
+
+    .sj-table td:nth-child(2) {
+        grid-area: parity;
+    }
+
+    .sj-table td:nth-child(3) {
+        grid-area: kind;
+    }
+
+    .sj-table tbody td.sj-table__topic {
+        grid-area: topic;
+        justify-content: flex-start;
+        text-align: left;
+    }
+
+    .sj-table tbody td.sj-table__room {
+        grid-area: room;
+        justify-content: flex-start;
+        font-size: var(--ems-fs-sm);
+    }
+
+    .sj-table td.sj-table__result {
+        grid-area: result;
+        text-align: right;
+    }
+
+    .sj-table td[data-label]:not(.sj-table__room)::before {
+        display: none;
+    }
+
+    .sj-table td.sj-table__room::before {
+        content: attr(data-label) ":";
+    }
+}

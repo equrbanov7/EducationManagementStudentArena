@@ -8,8 +8,8 @@
     left: 0;
     width: 100%;
     z-index: 100000;
-    background: linear-gradient(135deg, #0f766e, #14b8a6);
-    color: #fff;
+    background: linear-gradient(135deg, var(--ems-success-strong), var(--ems-teal-500));
+    color: var(--ems-neutral-0);
     text-align: center;
     padding: 1rem 1.5rem;
     font-size: 1rem;
@@ -51,7 +51,7 @@
 .supervision-trial-banner__btn {
     background: rgba(255, 255, 255, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.4);
-    color: #fff;
+    color: var(--ems-neutral-0);
     padding: 0.3rem 0.8rem;
     border-radius: 6px;
     cursor: pointer;

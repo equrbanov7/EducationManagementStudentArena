@@ -14,8 +14,8 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    background: #fafafa;
-    border-bottom: 1px solid #eee;
+    background: var(--ems-neutral-50);
+    border-bottom: 1px solid var(--ems-gray-200);
   }
   
   .paint-hint {
@@ -59,7 +59,7 @@
   }
   
   .paint-enabled-checkbox:checked + .paint-switch-ui {
-    background: #22c55e;
+    background: var(--ems-emerald-600);
   }
   
   .paint-enabled-checkbox:checked + .paint-switch-ui::after {
@@ -112,11 +112,11 @@
   }
   
   .paint-btn:hover {
-    background: #f9fafb;
+    background: var(--ems-neutral-50);
   }
   
   .paint-btn.active {
-    border-color: #111827;
+    border-color: var(--ems-gray-900);
   }
   
   .paint-canvas-wrap {

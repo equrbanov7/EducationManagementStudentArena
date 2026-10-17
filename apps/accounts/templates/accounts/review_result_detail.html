@@ -4,115 +4,148 @@
 {% block title %}{% blocktrans with item_type=item_type_label %}{{ item_type }} nəticəsi{% endblocktrans %} - {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
-<link rel="stylesheet" href="{% static 'accounts/css/review_result_detail.css' %}">
+<link rel="stylesheet" href="{% static 'css/ems_ui/badge.css' %}?v=20260903-3">
+<link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20261015-opt">
+<link rel="stylesheet" href="{% static 'css/ems_ui/header.css' %}?v=20260903-3">
+<link rel="stylesheet" href="{% static 'exams/css/teacher_view_attempt.css' %}?v=20261017-rv1">
+<link rel="stylesheet" href="{% static 'exams/css/teacher_view_attempt_questions.css' %}?v=20261017-rv1">
 {% endblock %}
 
 {% block content %}
-<div class="review-result-page">
-    <div class="review-result-shell">
-        <header class="review-result-header">
-            <div class="review-result-kicker">{{ item_type_label }}</div>
-            <h1>{{ item_title }}</h1>
-            <p>{{ student.get_full_name|default:student.username }} · {{ course_title }}</p>
-            <a href="{{ back_url }}" class="review-back-link">
-                <i class="fas fa-arrow-left"></i> Geri
-            </a>
-        </header>
+{% comment %}
+Lab / tapşırıq / kurs işi nəticəsinə yalnız-oxu baxış («Dəyərləndirilmiş nəticələr» → «Bax»).
+Yenidən dizayn 2026-10-17: imtahan cəhdi baxışı ilə eyni «baxış vərəqi» qabığı (rv-*).
+{% endcomment %}
+<div class="container rv-page">
+    <nav class="rv-topbar" aria-label="{% trans 'Naviqasiya' context 'exams.attempt_review' %}">
+        <a href="{{ back_url }}" class="ems-btn ems-btn--sm rv-back">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Geri" context "exams.attempt_review" %}
+        </a>
+        <ol class="ems-crumbs rv-crumbs">
+            <li class="ems-crumbs__item">
+                <a class="ems-crumbs__link" href="{{ back_url }}">{% trans "Dəyərləndirilmiş nəticələr" context "accounts.review_results" %}</a>
+                <span class="ems-crumbs__sep" aria-hidden="true">/</span>
+            </li>
+            <li class="ems-crumbs__item" aria-current="page">{{ item_title }}</li>
+        </ol>
+    </nav>
 
-        <section class="review-summary-grid">
-            <article class="review-summary-card">
-                <span class="label">Status</span>
-                <span class="value">{{ status_display }}</span>
-            </article>
-            <article class="review-summary-card">
-                <span class="label">{% trans 'Nəticə' %}</span>
-                <span class="value score">{{ score_display }}</span>
-            </article>
-            <article class="review-summary-card">
-                <span class="label">{% trans 'Göndərilib' %}</span>
-                <span class="value">{{ submitted_at|date:"d.m.Y H:i" }}</span>
-            </article>
-            <article class="review-summary-card">
-                <span class="label">{% trans 'Qiymətləndirilib' %}</span>
-                <span class="value">{% if graded_at %}{{ graded_at|date:"d.m.Y H:i" }}{% else %}-{% endif %}</span>
-            </article>
-        </section>
+    <header class="rv-head">
+        <div class="rv-head__main">
+            <div class="rv-head__chips">
+                <span class="rv-type rv-type--{{ item_type }}">
+                    <i class="fas {% if item_type == 'lab' %}fa-flask{% elif item_type == 'project' %}fa-diagram-project{% else %}fa-file-signature{% endif %}" aria-hidden="true"></i>
+                    {{ item_type_label }}
+                </span>
+                <span class="ems-badge ems-badge--success"><span class="ems-badge__dot" aria-hidden="true"></span>{{ status_display }}</span>
+            </div>
+            <h1 class="rv-title">{{ item_title }}</h1>
+            <p class="rv-sub">{{ student.get_full_name|default:student.username }} · {{ course_title }}</p>
+        </div>
+        <div class="rv-head__actions">
+            <button type="button" class="ems-btn" data-rv-print><i class="fas fa-print" aria-hidden="true"></i> {% trans "Çap et" context "exams.attempt_review" %}</button>
+        </div>
+    </header>
 
-        {% if content_text %}
-        <section class="review-block">
-            <h2>{% trans 'Cavab mətni' %}</h2>
-            <div class="review-content">{{ content_text|linebreaks }}</div>
-        </section>
-        {% endif %}
-
-        {% if attachments %}
-        <section class="review-block">
-            <h2>{% trans 'Əlavələr' %}</h2>
-            <ul class="review-file-list">
-                {% for file_item in attachments %}
-                <li>
-                    <a href="{{ file_item.url }}" target="_blank" rel="noopener">
-                        <i class="fas fa-paperclip"></i>
-                        <span>{{ file_item.name }}</span>
-                    </a>
-                </li>
-                {% endfor %}
-            </ul>
-        </section>
-        {% endif %}
-
-        {% if lab_answers %}
-        <section class="review-block">
-            <h2>{% trans 'Lab sual cavabları' %}</h2>
-            <div class="review-answers">
-                {% for answer in lab_answers %}
-                <article class="review-answer-card" id="review-answer-{{ answer.id }}">
-                    <h3>
-                        <span>{{ forloop.counter }}. {{ answer.question.question_text }}</span>
-                        <button type="button" class="review-answer-toggle" data-review-toggle="{{ answer.id }}" aria-label="Toggle answer">
-                            <i class="fas fa-chevron-up"></i>
-                        </button>
-                    </h3>
-                    <div class="review-answer-preview">
-                        {% if answer.answer %}
-                            {{ answer.answer|striptags|truncatechars:90 }}
-                        {% elif answer.answer_file %}
-                            {% trans 'Fayl əlavə edilib...' %}
-                        {% else %}
-                            {% trans 'Bu sual üçün cavab yoxdur.' %}
-                        {% endif %}
+    <div class="rv-layout">
+        <aside class="rv-aside" aria-label="{% trans 'Nəticə xülasəsi' context 'exams.attempt_review' %}">
+            <section class="rv-card" aria-labelledby="rv-score-title">
+                <h2 class="rv-card__title" id="rv-score-title">{% trans "Nəticə" context "accounts.review_results" %}</h2>
+                <p class="rv-scorecard__big">{{ score_display }}</p>
+            </section>
+            <section class="rv-card" aria-labelledby="rv-meta-title">
+                <h2 class="rv-card__title" id="rv-meta-title">{% trans "Təqdimat haqqında" context "exams.attempt_review" %}</h2>
+                <dl class="rv-dl">
+                    <div class="rv-dl__row">
+                        <dt><i class="fas fa-user-graduate" aria-hidden="true"></i> {% trans "Tələbə" context "accounts.review_results" %}</dt>
+                        <dd>{{ student.get_full_name|default:student.username }}</dd>
                     </div>
-                    <div class="review-answer-body">
-                        {% if answer.answer %}
-                        <div class="review-answer-text">{{ answer.answer|linebreaks }}</div>
-                        {% endif %}
-                        {% if answer.answer_file %}
-                        <a class="review-file-inline" href="{{ answer.answer_file.url }}" target="_blank" rel="noopener">
-                            <i class="fas fa-download"></i> {% trans 'Faylı aç' %}
-                        </a>
-                        {% endif %}
-                        {% if not answer.answer and not answer.answer_file %}
-                        <p class="review-answer-empty">{% trans 'Bu sual üçün cavab yoxdur.' %}</p>
-                        {% endif %}
+                    {% if reviewer_display %}
+                    <div class="rv-dl__row">
+                        <dt><i class="fas fa-chalkboard-teacher" aria-hidden="true"></i> {% trans "Yoxlayan müəllim" context "exams.attempt_review" %}</dt>
+                        <dd>{{ reviewer_display }}</dd>
+                    </div>
+                    {% endif %}
+                    <div class="rv-dl__row">
+                        <dt><i class="far fa-paper-plane" aria-hidden="true"></i> {% trans 'Göndərilib' %}</dt>
+                        <dd>{% if submitted_at %}{{ submitted_at|date:"d.m.Y H:i" }}{% else %}—{% endif %}</dd>
+                    </div>
+                    <div class="rv-dl__row">
+                        <dt><i class="fas fa-check-double" aria-hidden="true"></i> {% trans 'Qiymətləndirilib' %}</dt>
+                        <dd>{% if graded_at %}{{ graded_at|date:"d.m.Y H:i" }}{% else %}—{% endif %}</dd>
+                    </div>
+                </dl>
+            </section>
+        </aside>
+
+        <div class="rv-main">
+            <div class="rv-questions">
+                <section class="rv-card rv-overall" aria-labelledby="rv-feedback-title">
+                    <h2 class="rv-card__title" id="rv-feedback-title"><i class="fas fa-comment-dots" aria-hidden="true"></i> {% trans 'Müəllim rəyi' %}</h2>
+                    {% if feedback %}
+                    <div class="rv-overall__text">{{ feedback|linebreaks }}</div>
+                    {% else %}
+                    <p class="rv-eval__empty">{% trans 'Rəy əlavə edilməyib.' %}</p>
+                    {% endif %}
+                </section>
+
+                {% if content_text %}
+                <section class="rv-card">
+                    <h2 class="rv-card__title">{% trans 'Cavab mətni' %}</h2>
+                    <div class="rv-answer"><div class="rv-answer__text">{{ content_text|linebreaks }}</div></div>
+                </section>
+                {% endif %}
+
+                {% if attachments %}
+                <section class="rv-card">
+                    <h2 class="rv-card__title">{% trans 'Əlavələr' %}</h2>
+                    <ul class="rv-files">
+                        {% for file_item in attachments %}
+                        <li class="rv-files__item">
+                            <a href="{{ file_item.url }}" target="_blank" rel="noopener" class="rv-files__name">
+                                <i class="fas fa-paperclip" aria-hidden="true"></i> {{ file_item.name }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+                {% endif %}
+
+                {% if lab_answers %}
+                <h2 class="rv-tools__title">{% trans 'Lab sual cavabları' %}</h2>
+                {% for answer in lab_answers %}
+                <article class="rv-q{% if answer.score is not None %} rv-q--info{% else %} rv-q--muted{% endif %}" id="review-answer-{{ answer.id }}" aria-labelledby="review-answer-{{ answer.id }}-title">
+                    <header class="rv-q__head">
+                        <span class="rv-q__num" aria-hidden="true">{{ forloop.counter }}</span>
+                        <h3 class="rv-q__title" id="review-answer-{{ answer.id }}-title">{{ answer.question.question_text }}</h3>
+                        <div class="rv-q__chips">
+                            <span class="rv-points">{% if answer.score is not None %}{{ answer.score }}{% else %}—{% endif %}{% if answer.question.points %} / {{ answer.question.points }}{% endif %} {% trans "unit_points" context "exams.template.teacher_view_attempt" %}</span>
+                        </div>
+                    </header>
+                    <div class="rv-q__body">
+                        <div class="rv-answer">
+                            {% if answer.answer %}
+                            <div class="rv-answer__text">{{ answer.answer|linebreaks }}</div>
+                            {% endif %}
+                            {% if answer.answer_file %}
+                            <a class="ems-btn ems-btn--sm" href="{{ answer.answer_file.url }}" target="_blank" rel="noopener">
+                                <i class="fas fa-download" aria-hidden="true"></i> {% trans 'Faylı aç' %}
+                            </a>
+                            {% endif %}
+                            {% if not answer.answer and not answer.answer_file %}
+                            <p class="rv-answer__empty">{% trans 'Bu sual üçün cavab yoxdur.' %}</p>
+                            {% endif %}
+                        </div>
                     </div>
                 </article>
                 {% endfor %}
+                {% endif %}
             </div>
-        </section>
-        {% endif %}
-
-        <section class="review-block review-feedback">
-            <h2>{% trans 'Müəllim rəyi' %}</h2>
-            {% if feedback %}
-            <div class="feedback-text">{{ feedback|linebreaks }}</div>
-            {% else %}
-            <p class="feedback-empty">{% trans 'Rəy əlavə edilməyib.' %}</p>
-            {% endif %}
-        </section>
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extraJs %}
-<script src="{% static 'accounts/js/review_result_detail.js' %}"></script>
+<script src="{% static 'exams/js/teacher_view_attempt.js' %}?v=20261017-rv1"></script>
 {% endblock %}

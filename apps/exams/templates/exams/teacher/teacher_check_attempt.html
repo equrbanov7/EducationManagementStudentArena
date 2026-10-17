@@ -3,359 +3,113 @@
 
 {% block title %}{{ exam.title }} - {% trans "title_review" context "exams.template.teacher_check_attempt" %}{% endblock %}
 
-{% block extraCss %} 
-    <link rel="stylesheet" href="{% static 'exams/css/teacher_check_attempt/_part1.css' %}">
-    <link rel="stylesheet" href="{% static 'exams/css/teacher_check_attempt/_part2.css' %}">
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20261015-opt">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/header.css' %}?v=20260903-3">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/badge.css' %}?v=20260903-3">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/table.css' %}?v=20260914-a11y">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/overlay.css' %}?v=20260908-zindex">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/validation.css' %}?v=20260903-3">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_check_attempt/grading.css' %}?v=20261017-pkgb">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_check_attempt/grading_aside.css' %}?v=20261017-pkgb">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_check_attempt/grading_dialog.css' %}?v=20261017-pkgb">
     <link rel="stylesheet" href="{% static 'exams/css/teacher_proctoring_summary.css' %}?v=20261001-proc">
 {% endblock %}
 
 {% block content %}
-<div class="review-container">
-    <div class="exam-header">
-        <h1>{{ exam.title }} – {% trans "heading_review" context "exams.template.teacher_check_attempt" %}</h1>
-        <p class="text-muted mb-0">
-            {% trans 'Tələbə:' %}
-            <strong{% if not can_view_student_identity %} class="text-warning"{% endif %}>{{ student_display }}</strong>
-        </p>
-        <p class="text-muted mb-0">
-            {% trans 'İmtahanı yaradan müəllim:' %}
-            <strong>{{ exam_creator_display }}</strong>
-        </p>
+{% comment %}
+Müəllimin yazılı cəhdi yoxlama səhifəsi — yenidən dizayn 2026-10-17 (Paket B).
+Hər sual kartında bal və rəy BİRBAŞA yazılır (sahə adları score_<id>/feedback_<id>, POST
+eyni ünvana gedir). Sağda (mobildə yuxarıda) cəmi bal, irəliləyiş və sual xəritəsi; altda
+yapışqan zolaqda saxlanma vəziyyəti və «Yadda saxla». «Ətraflı» dialoqu sualı tam ölçüdə,
+AI qiymətləndirmə və əvvəlki/növbəti keçidi ilə açır. Bal ID-ləri (hidden_score_<id>)
+köhnə JS müqaviləsinə görə saxlanılıb — indi görünən sahədir.
+{% endcomment %}
+<div class="etp-page tca-page" data-tca-root>
+    <header class="ems-header etp-head tca-head">
+        <div class="ems-header__main">
+            <div class="etp-head__top">
+                <a href="{{ results_return_url }}" class="etp-back" id="backBtn">
+                    <i class="fas fa-arrow-left" aria-hidden="true"></i><span>{% trans "action_back" context "exams.template.teacher_check_attempt" %}</span>
+                </a>
+            </div>
+            <h1 class="ems-header__title">{{ exam.title }}</h1>
+            <p class="ems-header__subtitle">{% trans "title_review" context "exams.template.teacher_check_attempt" %}</p>
+            <dl class="tca-meta">
+                <div class="tca-meta__item">
+                    <dt>{% trans 'Tələbə:' %}</dt>
+                    <dd{% if not can_view_student_identity %} class="tca-meta__anon"{% endif %}>
+                        {% if not can_view_student_identity %}<i class="fas fa-user-secret" aria-hidden="true"></i>{% endif %}
+                        {{ student_display }}
+                    </dd>
+                </div>
+                <div class="tca-meta__item">
+                    <dt>{% trans 'İmtahanı yaradan müəllim:' %}</dt>
+                    <dd>{{ exam_creator_display }}</dd>
+                </div>
+            </dl>
+        </div>
+    </header>
+
+    <div class="etp-stack">
         {% if attempt.supervision_status == "removed" %}
-        <div class="proctor-flag" role="alert">
-            <i class="fas fa-shield-alt"></i>
+        <div class="ems-banner ems-banner--danger tca-banner" role="alert">
+            <i class="fas fa-shield-halved tca-banner__icon" aria-hidden="true"></i>
             <div>
-                <strong class="proctor-flag__title">{% trans 'Nəzarətçi tərəfindən dayandırılıb' %}</strong>
-                <span class="proctor-flag__note">
+                <div class="ems-banner__title">{% trans 'Nəzarətçi tərəfindən dayandırılıb' %}</div>
+                <div class="ems-banner__body">
                     {% trans 'Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb.' %}
                     {% blocktrans with count=attempt.supervision_violation_count %}Tələbə pozuntu limitini keçdiyi və ya müəllim vaxtında bərpa etmədiyi üçün imtahan avtomatik tamamlanıb. Qeyd olunan {{ count }} pozuntu aşkarlanıb — nəticələr bu kontekstdə qiymətləndirilməlidir.{% endblocktrans %}
-                </span>
+                </div>
             </div>
         </div>
         {% endif %}
-        <div class="exam-timing-summary">
-            <article class="exam-timing-card">
-                <span class="exam-timing-card__label">{% trans 'Başlayıb' %}</span>
-                <strong class="exam-timing-card__value">
-                    {% if attempt_timing.started_at %}
-                        {{ attempt_timing.started_at|date:"d.m.Y H:i" }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </strong>
-            </article>
-            <article class="exam-timing-card">
-                <span class="exam-timing-card__label">Bitirib</span>
-                <strong class="exam-timing-card__value">
-                    {% if attempt_timing.finished_at %}
-                        {{ attempt_timing.finished_at|date:"d.m.Y H:i" }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </strong>
-            </article>
-            <article class="exam-timing-card">
-                <span class="exam-timing-card__label">{% trans 'Ümumi müddət' %}</span>
-                <strong class="exam-timing-card__value">
-                    {% if attempt_timing.has_duration %}
-                        {{ attempt_timing.duration_seconds|format_duration }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </strong>
-            </article>
-        </div>
         {% if not can_view_student_identity and identity_window_seconds_left %}
-            <div class="alert alert-warning mt-3 mb-0">
-                {% blocktrans %}Tələbə adı anonim qalır. Qalan vaxt: <span data-review-countdown="{{ identity_window_seconds_left }}">--:--:--</span>{% endblocktrans %}
-            </div>
+        <div class="ems-banner ems-banner--warning tca-banner" role="status">
+            <i class="fas fa-user-secret tca-banner__icon" aria-hidden="true"></i>
+            <div class="ems-banner__body">{% blocktrans %}Tələbə adı anonim qalır. Qalan vaxt: <span data-review-countdown="{{ identity_window_seconds_left }}">--:--:--</span>{% endblocktrans %}</div>
+        </div>
         {% endif %}
-        {% include "exams/teacher/partials/_attempt_proctoring_summary.html" %}
-    </div>
 
-    <form method="post" id="gradingForm">
-        {% csrf_token %}
-        <ul class="questions-grid" data-ems-math>
-            {% for item in qa_list %}
-                {% with q=item.question ans=item.answer %}
-                    <li class="question-card" data-question-id="{{ q.id }}">
-                        <div class="question-card-header">
-                            <span>{% trans "label_question" context "exams.template.teacher_check_attempt" %} #{{ forloop.counter }}</span>
+        <form method="post" id="gradingForm" class="tca-form" novalidate>
+            {% csrf_token %}
+            <div class="tca-layout">
+                {% include "exams/teacher/partials/check_attempt/_aside.html" %}
 
-                            <span class="status-badge 
-                                {% if not ans %}
-                                    status-empty
-                                {% elif ans.teacher_score is not None %}
-                                    status-scored
-                                {% elif item.has_answer_content %}
-                                    status-not-checked
-                                {% else %}
-                                    status-empty
-                                {% endif %}" 
-                                id="badge_{{ q.id }}">
-                                
-                                {% if not ans %}
-                                    {% trans "status_no_answer" context "exams.template.teacher_check_attempt" %}
-                                {% elif ans.teacher_score is not None %}
-                                    {{ ans.teacher_score }} {% trans "unit_points" context "exams.template.teacher_check_attempt" %}
-                                {% elif item.has_answer_content %}
-                                    {% trans "status_not_checked" context "exams.template.teacher_check_attempt" %}
-                                {% else %}
-                                    {% trans "status_empty_answer" context "exams.template.teacher_check_attempt" %}
-                                {% endif %}
-                            </span>
-                        </div>
+                <div class="tca-main">
+                    {% include "exams/teacher/partials/_attempt_proctoring_summary.html" %}
 
-                        <p class="mb-2">{{ q.text|truncatewords:8 }}</p>
-
-                        {# ---- SUALIN MEDİASI (şəkil / video) ---- #}
-                        {% if q.image %}
-                            <div class="question-media mb-2">
-                                <img src="{{ q.image|protected_media_url }}" alt="" class="img-fluid rounded tca-media-capped">
-                            </div>
-                        {% endif %}
-                        {% if q.video %}
-                            <div class="question-media mb-2">
-                                <video controls preload="metadata" playsinline class="img-fluid rounded tca-media-capped">
-                                    <source src="{{ q.video|protected_media_url }}">
-                                </video>
-                            </div>
-                        {% endif %}
-
-                        {# ---- GİZLİ SCORE INPUT ---- #}
-                        <input type="hidden"
-                               id="hidden_score_{{ q.id }}"
-                               name="score_{{ q.id }}" 
-                               value="{% if ans and ans.teacher_score is not None %}{{ ans.teacher_score }}{% endif %}">
-                        {# EXAM-P0-04: max bal serverdə snapshot-dan hesablanır; POST edilmir #}
-                        <input type="hidden"
-                               id="hidden_max_points_{{ q.id }}"
-                               value="{{ item.max_points }}">
-                        
-                        {# ---- GİZLİ FEEDBACK TEXTAREA ---- #}
-                        <textarea class="tca-hidden"
-                                  id="hidden_feedback_{{ q.id }}"
-                                  name="feedback_{{ q.id }}">{% if ans %}{{ ans.teacher_feedback }}{% endif %}</textarea>
-
-                        {# ---- JS ÜÇÜN MƏLUMAT STORAGE ---- #}
-                        <div class="data-store tca-hidden"
-                             data-q-text="{{ q.text|escape }}"
-                             data-ans-text="{% if ans %}{{ ans.text_answer|escape }}{% else %}{% endif %}"
-                             data-has-answer="{% if item.has_answer_content %}1{% else %}0{% endif %}"
-                             data-has-ai-gradable="{% if item.has_ai_gradeable_content %}1{% else %}0{% endif %}"
-                             data-has-file-answer="{% if item.has_file_answer %}1{% else %}0{% endif %}"
-                             data-has-paint-answer="{% if item.has_paint_answer %}1{% else %}0{% endif %}"
-                             data-q-points="{{ item.max_points }}"
-                             data-q-correct-answer="{{ q.correct_answer|default_if_none:''|escape }}">
-                        </div>
-
-                        <div class="answer-preview">
-                            {% if exam.exam_type == "coding" and item.coding_submission %}
-                                <div class="answered-with-file">
-                                    <i class="fas fa-code"></i>
-                                    {{ item.coding_submission.get_execution_status_display }}
-                                    {% if item.coding_submission.score is not None %}
-                                        · {{ item.coding_submission.score }} {% trans "unit_points" context "exams.template.teacher_check_attempt" %}
-                                    {% endif %}
-                                </div>
-                                {% if item.coding_submission.output %}
-                                    <pre class="mt-2">{{ item.coding_submission.output|truncatechars:400 }}</pre>
-                                {% endif %}
-                                {% if item.coding_submission.error_message %}
-                                    {% comment %}
-                                    Praktiki imtahanda runner stdin/DOM olmadığı üçün "runtime_error" verə
-                                    bilər, halbuki kod konseptual düzgündür. Müəllimi qorxudan qırmızı
-                                    traceback yerinə neytral, daraldıla bilən icra qeydi göstəririk.
-                                    {% endcomment %}
-                                    <details class="coding-exec-note" data-review-card-ignore>
-                                        <summary>{% trans "label_execution_note" context "exams.template.teacher_check_attempt" %}</summary>
-                                        <pre>{{ item.coding_submission.error_message|truncatechars:400 }}</pre>
-                                    </details>
-                                {% endif %}
-                            {% elif item.has_text_answer %}
-                                {{ ans.text_answer|truncatewords:10 }}
-                            {% elif item.has_file_answer %}
-                                <span class="answered-with-file">
-                                    <i class="fas fa-paperclip"></i> {% trans "label_uploaded_files" context "exams.template.teacher_check_attempt" %}
-                                </span>
-                        
-                            {% elif item.has_paint_answer %}
-                                <span class="answered-with-paint">
-                                    <i class="fas fa-paint-brush"></i> {% trans "status_answered_with_paint" context "exams.template.teacher_check_attempt" %}
-                                </span>
-                        
-                            {% else %}
-                                <span class="not-answered">{% trans "status_no_answer" context "exams.template.teacher_check_attempt" %}</span>
-                            {% endif %}
-                        </div>
-
-                        {% if exam.exam_type == "coding" and item.coding_submission and item.coding_files %}
-                            <div class="coding-files-review" data-review-card-ignore>
-                                {% for code_file in item.coding_files %}
-                                    <details class="coding-file-detail" {% if item.coding_file_count == 1 %}open{% endif %}>
-                                        <summary>
-                                            <span><i class="far fa-file-code me-2"></i>{{ code_file.name }}</span>
-                                            {% if code_file.is_main %}
-                                                <small>{% trans "Main File" context "exams.template.coding_exam" %}</small>
-                                            {% endif %}
-                                        </summary>
-                                        <pre>{{ code_file.content }}</pre>
-                                    </details>
-                                {% endfor %}
-                                {% if item.coding_file_count > 1 %}
-                                    <a class="btn btn-sm btn-outline-primary coding-download-link"
-                                       data-review-card-ignore
-                                       href="{% url 'exams:coding_submission_download' exam.slug attempt.id item.coding_submission.id %}">
-                                        <span class="coding-download-link__content">
-                                            <i class="fas fa-download" aria-hidden="true"></i>
-                                            <span>{% trans "Download ZIP" context "exams.template.coding_exam" %}</span>
-                                        </span>
-                                    </a>
-                                {% endif %}
-                            </div>
-                        {% endif %}
-                        
-
-                        {# ====== YENİ: YÜKLƏNMİŞ FAYLLAR BLOKU ====== #}
-                        {% if item.has_file_answer %}
-                            <div class="answer-files">
-                                <span class="files-title">{% trans "label_uploaded_files" context "exams.template.teacher_check_attempt" %}:</span>
-                                <ul class="file-list">
-                                    {% for f in item.answer_files %}
-                                        {% with name=f.filename|lower %}
-                                            <li class="file-item">
-                                                <span class="file-icon">
-                                                    {% if ".pdf" in name %}
-                                                        <i class="fas fa-file-pdf"></i>
-                                                    {% elif ".zip" in name %}
-                                                        <i class="fas fa-file-archive"></i>
-                                                    {% elif ".png" in name or ".jpg" in name or ".jpeg" in name or ".gif" in name %}
-                                                        <i class="fas fa-image"></i>
-                                                    {% else %}
-                                                        <i class="fas fa-file"></i>
-                                                    {% endif %}
-                                                </span>
-                                                
-                                                <a href="{{ f.file.url }}" 
-                                                   target="_blank" 
-                                                   class="file-link">
-                                                    {{ f.filename }}
-                                                </a>
-
-                                                {# Şəkillər üçün kiçik inline preview #}
-                                                {% if ".png" in name or ".jpg" in name or ".jpeg" in name or ".gif" in name %}
-                                                    <div class="file-thumb">
-                                                        <img src="{{ f.file.url }}" 
-                                                             alt="{{ f.filename }}">
-                                                    </div>
-                                                {% endif %}
-                                            </li>
-                                        {% endwith %}
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        {% endif %}
-                        {# ====== /YENİ BLOK ====== #}
-                       {# ====== PAINT CAVABI (ExamAnswer.paint_image) ====== #}
-                        {% if ans and ans.paint_image %}
-                        <div class="paint-preview-section">
-                        <h4>
-                            <i class="fas fa-paint-brush"></i>
-                            {% trans "label_paint_answer" context "exams.template.teacher_check_attempt" %}
-                            {% if ans.paint_updated_at %}
-                                <small class="tca-paint-date">({{ ans.paint_updated_at|date:"d.m.Y H:i" }})</small>
-                            {% endif %}
-                                </h4>
-
-                                <a href="{{ ans.paint_image.url }}" target="_blank" class="paint-open-link" data-label-no-answer="{% trans 'status_no_answer' context 'exams.template.teacher_check_attempt' %}">
-                                    <img src="{{ ans.paint_image.url }}" alt="{% trans 'alt_paint' context 'exams.template.teacher_check_attempt' %}" class="paint-preview-img">
-                                </a>
-                                </div>
-                        {% endif %}
-                        {# ====== /PAINT CAVABI ====== #}
-
-                    </li>
-                {% endwith %}
-            {% endfor %}
-        </ul>
-
-        <div class="main-actions sticky-bottom">
-            <a href="{{ results_return_url }}" class="btn btn-secondary" id="backBtn">
-                <i class="fas fa-arrow-left"></i> {% trans "action_back" context "exams.template.teacher_check_attempt" %}
-            </a>
-            <button type="submit" class="btn btn-success" id="mainSaveBtn" disabled>
-                <i class="fas fa-save"></i> {% trans "status_no_changes" context "exams.template.teacher_check_attempt" %}
-            </button>
-        </div>
-    </form>
-</div>
-
-<div class="modal-backdrop" id="modalBackdrop"></div>
-<div class="modal-content-wrapper" id="questionModal">
-    <div class="modal-header">
-        <span id="modalTitle">{% trans "label_question" context "exams.template.teacher_check_attempt" %}</span>
-        <button type="button" class="close-btn" id="modalCloseBtn">&times;</button>
-    </div>
-    <div class="modal-body">
-        <div class="question-detail" id="modalQuestionText"></div>
-        <div class="answer-detail" id="modalAnswerText"></div>
-        
-        <div class="grading-area">
-            <div class="ai-grade-section">
-                <button type="button" class="btn-ai-grade" id="aiGradeBtn">
-                    <span class="btn-ai-grade__icon"><i class="fas fa-robot"></i></span>
-                    <span class="btn-ai-grade__text">{% trans "action_ai_grade" context "exams.template.teacher_check_attempt" %}</span>
-                    <span class="btn-ai-grade__loader u-hidden"><i class="fas fa-circle-notch fa-spin"></i></span>
-                </button>
-                <span class="ai-grade-status" id="aiGradeStatus"></span>
-            </div>
-
-            <div class="grading-fields">
-                <div class="grading-field grading-field--score">
-                    <label for="modalScoreInput">{% trans "label_score" context "exams.template.teacher_check_attempt" %}</label>
-                    <div class="score-input-wrap">
-                        <input type="number" id="modalScoreInput" class="form-control" step="1" min="0" inputmode="numeric">
-                        <span class="score-max-divider" aria-hidden="true">/</span>
-                        {# EXAM-P0-04: max bal yalnız göstərilir; dəyişmək üçün sual redaktə formu #}
-                        <input type="number"
-                               id="modalMaxPointsInput"
-                               class="form-control score-max-input"
-                               step="1"
-                               min="1"
-                               inputmode="numeric"
-                               readonly
-                               tabindex="-1"
-                               aria-label="Max points">
-                    </div>
-                </div>
-                <div class="grading-field grading-field--feedback">
-                    <label for="modalFeedbackInput">{% trans "label_feedback" context "exams.template.teacher_check_attempt" %}</label>
-                    <textarea id="modalFeedbackInput" rows="4" class="form-control"></textarea>
+                    {% if qa_list %}
+                    <ol class="tca-list" data-ems-math aria-label="{% trans 'Sual' context 'exams.attempt_review' %}">
+                        {% include "exams/teacher/partials/check_attempt/_question_cards.html" %}
+                    </ol>
+                    {% else %}
+                        {% trans "Bu cəhddə yoxlanılacaq sual yoxdur." context "exams.teacher.grading" as empty_title %}
+                        {% include "partials/ems_ui/_empty.html" with state_title=empty_title state_icon="fa-clipboard-check" %}
+                    {% endif %}
                 </div>
             </div>
 
-            <input type="hidden" id="currentQuestionId">
-        </div>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" id="modalCancelBtn">{% trans "action_cancel" context "exams.template.teacher_check_attempt" %}</button>
-        <button type="button" class="btn btn-primary" id="modalSaveBtn">{% trans "action_confirm_temporary" context "exams.template.teacher_check_attempt" %}</button>
-    </div>
-</div> 
-
-<div class="custom-alert-overlay u-hidden" id="warningModal">
-    <div class="custom-alert-box">
-        <div class="alert-icon">
-            <i class="fas fa-exclamation-triangle"></i>
-        </div>
-        <h3>{% trans "warning_unsaved_changes_title" context "exams.template.teacher_check_attempt" %}</h3>
-        <p>{% trans "warning_unsaved_changes_desc" context "exams.template.teacher_check_attempt" %}</p>
-        <div class="alert-actions">
-            <button class="btn btn-secondary" id="warningCancelBtn">{% trans "warning_no_return" context "exams.template.teacher_check_attempt" %}</button>
-            <button class="btn btn-danger" id="warningConfirmBtn">{% trans "warning_yes_close" context "exams.template.teacher_check_attempt" %}</button>
-        </div>
+            <div class="etp-actionbar tca-bar" role="region" aria-label="{% trans 'Yadda saxla' context 'exams.teacher.grading' %}">
+                <div class="tca-bar__info">
+                    <span class="tca-bar__total"><span class="tca-bar__total-label">{% trans "Cəmi bal" context "exams.teacher.grading" %}:</span> <b data-tca-total>–</b> / <span data-tca-max>–</span></span>
+                    <span class="tca-state" data-tca-state data-state="clean" role="status" aria-live="polite">{% trans "Dəyişiklik yoxdur" context "exams.teacher.grading" %}</span>
+                </div>
+                <div class="etp-actionbar__actions">
+                    <button type="button" class="ems-btn" data-tca-next-ungraded>
+                        <i class="fas fa-forward" aria-hidden="true"></i><span>{% trans "Növbəti qiymətləndirilməmiş" context "exams.teacher.grading" %}</span>
+                    </button>
+                    <button type="submit" class="ems-btn ems-btn--primary" id="mainSaveBtn" disabled aria-keyshortcuts="Control+S Meta+S">
+                        <i class="fas fa-floppy-disk" aria-hidden="true"></i><span>{% trans "status_no_changes" context "exams.template.teacher_check_attempt" %}</span>
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
+
+{% include "exams/teacher/partials/check_attempt/_dialogs.html" %}
 {% include "courses/partials/_action_confirm_modal.html" %}
 {% endblock %}
 
@@ -370,6 +124,7 @@
             "noAnswer": "{% filter escapejs %}{% trans 'status_no_answer' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
             "pointsUnit": "{% filter escapejs %}{% trans 'unit_points' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
             "statusNotChecked": "{% filter escapejs %}{% trans 'status_not_checked' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            "statusEmptyAnswer": "{% filter escapejs %}{% trans 'status_empty_answer' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
             "saveButtonDirty": "{% filter escapejs %}{% trans 'status_changes_present' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
             "confirmTitle": "{% filter escapejs %}{% trans 'confirm_save_review_title' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
             "confirmMessage": "{% filter escapejs %}{% trans 'confirm_save_review_message' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
@@ -380,10 +135,20 @@
             "aiQuotaInfo": "{% filter escapejs %}{% trans 'ai_quota_info' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
             "aiNoAnswer": "{% filter escapejs %}{% trans 'ai_no_answer_to_grade' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
             "uploadedFilesLabel": "{% filter escapejs %}{% trans 'label_uploaded_files' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
-            "answeredWithPaint": "{% filter escapejs %}{% trans 'status_answered_with_paint' context 'exams.template.teacher_check_attempt' %}{% endfilter %}"
+            "answeredWithPaint": "{% filter escapejs %}{% trans 'status_answered_with_paint' context 'exams.template.teacher_check_attempt' %}{% endfilter %}",
+            "stateClean": "{% filter escapejs %}{% trans 'Dəyişiklik yoxdur' context 'exams.teacher.grading' %}{% endfilter %}",
+            "stateDirty": "{% filter escapejs %}{% trans 'Yadda saxlanmamış dəyişiklik: {n} sual' context 'exams.teacher.grading' %}{% endfilter %}",
+            "stateSaving": "{% filter escapejs %}{% trans 'Yadda saxlanılır…' context 'exams.teacher.grading' %}{% endfilter %}",
+            "progress": "{% filter escapejs %}{% trans 'Qiymətləndirilib: {done} / {total}' context 'exams.teacher.grading' %}{% endfilter %}",
+            "allGraded": "{% filter escapejs %}{% trans 'Bütün suallar qiymətləndirilib' context 'exams.teacher.grading' %}{% endfilter %}",
+            "questionN": "{% filter escapejs %}{% trans 'Sual %(n)s' context 'exams.attempt_review' %}{% endfilter %}",
+            "mapScored": "{% filter escapejs %}{% trans 'Yoxlanılıb' context 'exams.attempt_review' %}{% endfilter %}",
+            "mapPending": "{% filter escapejs %}{% trans 'Yoxlanılmayıb' context 'exams.attempt_review' %}{% endfilter %}",
+            "mapEmpty": "{% filter escapejs %}{% trans 'Cavabsız' context 'exams.attempt_review' %}{% endfilter %}"
         }
     }
     </script>
-    <script src="{% static 'exams/js/teacher_check_attempt_bootstrap.js' %}"></script>
-    <script src="{% static 'exams/js/teacher_check_attempt.js' %}"></script>
+    <script src="{% static 'exams/js/teacher_check_attempt_bootstrap.js' %}?v=20261017-pkgb"></script>
+    <script src="{% static 'exams/js/teacher_check_attempt_ui.js' %}?v=20261017-pkgb"></script>
+    <script src="{% static 'exams/js/teacher_check_attempt.js' %}?v=20261017-pkgb"></script>
 {% endblock %}

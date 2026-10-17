@@ -1,0 +1,41 @@
+{% load i18n %}
+{% comment %}Tələbənin imtahan məlumatı dialoqunun gövdəsi. Bütün `courseExam*` ID-ləri `exam_section.js` üçün saxlanılıb.{% endcomment %}
+<div class="cx-info">
+    <p class="cx-info__name" id="courseExamInfoExamName"></p>
+
+    <div class="cx-lang" id="courseExamLanguageBlock" hidden>
+        <div class="ems-field">
+            <label class="ems-field__label" for="courseExamLanguageSelect">{% trans "modal_language_question" context "exams.template.student_exam_list" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select id="courseExamLanguageSelect" class="ems-select bootstrap-single-select__native" data-bootstrap-select></select>
+            </div>
+            <p class="ems-field__hint">{% trans "modal_language_help" context "exams.template.student_exam_list" %}</p>
+        </div>
+    </div>
+
+    <dl class="cx-facts">
+        <div><dt>{% trans "modal_label_type" context "exams.partial.exam_section" %}</dt><dd id="courseExamInfoType">-</dd></div>
+        <div><dt>{% trans "modal_label_duration" context "exams.partial.exam_section" %}</dt><dd id="courseExamInfoDuration">-</dd></div>
+        <div><dt>{% trans "modal_label_start" context "exams.partial.exam_section" %}</dt><dd id="courseExamInfoStart">-</dd></div>
+        <div><dt>{% trans "modal_label_end" context "exams.partial.exam_section" %}</dt><dd id="courseExamInfoEnd">-</dd></div>
+    </dl>
+
+    <div class="cx-note">
+        <span class="cx-note__label">{% trans "modal_label_note" context "exams.partial.exam_section" %}</span>
+        <p id="courseExamInfoNote">{% trans "modal_note_empty" context "exams.partial.exam_section" %}</p>
+    </div>
+
+    <form method="post" action="{% url 'exams:exam_code_check' %}" id="courseExamCodeForm" class="cx-code" hidden novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="exam_slug" id="courseExamCodeSlug">
+        <input type="hidden" name="language" id="courseExamCodeLanguage">
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <div class="ems-field">
+            <label class="ems-field__label" for="courseExamAccessCodeInput">{% trans "modal_access_code_label" context "exams.partial.exam_section" %}</label>
+            <input type="text" id="courseExamAccessCodeInput" name="access_code" class="ems-input cx-code__input"
+                   maxlength="6" inputmode="numeric" autocomplete="off" aria-describedby="courseExamCodeError"
+                   placeholder="{% trans 'modal_access_code_placeholder' context 'exams.partial.exam_section' %}">
+            <p class="ems-msg ems-msg--error" id="courseExamCodeError" role="alert" hidden></p>
+        </div>
+    </form>
+</div>

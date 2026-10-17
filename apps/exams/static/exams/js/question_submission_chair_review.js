@@ -92,6 +92,14 @@
             if (hintEl) {
                 hintEl.textContent = copy.hint;
             }
+            // Paket C 2026-10-17: təsdiq düyməsi seçilmiş əməlin adını və tonunu daşıyır
+            // («Rədd et» qırmızı, «Düzəliş istə» sarı) — «Təsdiq et» rədd dialoqunda çaşdırırdı.
+            if (copy.title) {
+                confirmBtn.textContent = copy.title;
+            }
+            confirmBtn.classList.toggle("ems-btn--danger", decision === "reject");
+            confirmBtn.classList.toggle("ems-btn--warning", decision === "revision");
+            confirmBtn.classList.remove("ems-btn--primary");
             textEl.value = "";
             renderCounter();
             lastFocused = document.activeElement;

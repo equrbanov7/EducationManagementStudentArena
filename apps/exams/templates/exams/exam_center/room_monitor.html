@@ -8,18 +8,18 @@
     (süzgəc paneli və boş vəziyyət üçün).{% endcomment %}
     {% include "partials/ems_ui/_assets.html" %}
     <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor_filters.css' %}?v=20260910-1">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/panel.css' %}?v=20260730-shared">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/stats.css' %}?v=20260729-stats">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor.css' %}?v=20260717-vio-modal">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/vio_modal.css' %}?v=20260717-vio-modal">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/room_monitor.css' %}?v=20260729-cscroll">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/proctor_identity.css' %}?v=20261013-note">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/duties.css' %}?v=20261013-duty">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}?v=20261017-pkgd">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/panel.css' %}?v=20261017-pkgd">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/stats.css' %}?v=20261017-pkgd">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor.css' %}?v=20261018-pkgd2">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/vio_modal.css' %}?v=20261017-pkgd">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/room_monitor.css' %}?v=20261018-pkgd2">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/proctor_identity.css' %}?v=20261017-pkgd">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/duties.css' %}?v=20261018-pkgd2">
 {% endblock %}
 
 {% block content %}
-<div class="container py-4 fxc-page"
+<div class="container py-4 fxc-page fxc-page--wide fxc-monitor-page"
      id="fxc-room-root"
      data-snapshot-url="{% url 'exams:exam_center_room_snapshot' room_id=room.pk %}"
      data-start-all-url="{% url 'exams:exam_center_room_start_all' room_id=room.pk %}"
@@ -32,32 +32,30 @@
      data-heartbeat-seconds="{{ heartbeat_seconds }}">
 
   {% csrf_token %}
-  {% url 'exams:exam_center_room_list' as rooms_url %}
-  {% include "exams/exam_center/_breadcrumb.html" with back_url=rooms_url current_label=room.name %}
-
-  <header class="fxc-head">
-    <div>
-      <span class="fxc-headline-row">
+  <div class="ems-header fxc-header">
+    <div class="ems-header__main">
+      {% include "exams/exam_center/_breadcrumb.html" with current_label=room.name %}
+      <div class="fxc-header__status">
         <span class="fxc-conn" id="fxc-room-ws" data-state="online">{% trans "Canlı" %}</span>
         <span class="fxc-updated" id="fxc-room-updated"></span>
-      </span>
-      <h1><i class="fas fa-tower-observation"></i> {{ room.name }} <code>{{ room.code }}</code></h1>
-      <p class="fxc-sub" id="fxc-room-sessions">
+      </div>
+      <h1 class="ems-header__title"><i class="fas fa-tower-observation" aria-hidden="true"></i> {{ room.name }} <code>{{ room.code }}</code></h1>
+      <p class="ems-header__subtitle" id="fxc-room-sessions">
         {% trans "Zaldakı canlı imtahanlar" %}
       </p>
     </div>
-    <div class="fxc-head-actions">
+    <div class="ems-header__actions">
       <button type="button" class="fxc-btn fxc-btn-primary" id="fxc-open-all-btn" hidden>
-        <i class="fas fa-door-open"></i> {% trans "Hamısında girişi aç" %}
+        <i class="fas fa-door-open" aria-hidden="true"></i> {% trans "Hamısında girişi aç" %}
       </button>
       <button type="button" class="fxc-btn fxc-btn-success" id="fxc-start-all-btn">
-        <i class="fas fa-play"></i> {% trans "Zalda hamısını başlat" %}
+        <i class="fas fa-play" aria-hidden="true"></i> {% trans "Zalda hamısını başlat" %}
       </button>
       <button type="button" class="fxc-btn fxc-btn-danger" id="fxc-end-all-btn" hidden>
-        <i class="fas fa-stop"></i> {% trans "Zalda hamısını bitir" %}
+        <i class="fas fa-stop" aria-hidden="true"></i> {% trans "Zalda hamısını bitir" %}
       </button>
     </div>
-  </header>
+  </div>
 
   {# 2026-10-13 (gecə): nəzarətçinin öz növbə zolağı — çıxışın nə vaxt bağlanacağı. #}
   {% include "exams/exam_center/_duty_strip.html" with cards=my_duty_cards link=False %}

@@ -53,15 +53,16 @@ def ems_status(family: str, key):
 
 
 @register.inclusion_tag("partials/ems_ui/_status_badge.html", name="ems_status_badge")
-def ems_status_badge(family: str, key, wrap: bool = False, dot: bool = False):
+def ems_status_badge(family: str, key, wrap: bool = False, dot: bool = False, nowrap: bool = False):
     """Status badge-i render edir.
 
     KONTEKST MÜQAVİLƏSİ (`_status_badge.html`):
       `status` — `core.ui.status_catalog.Status`
       `wrap`   — uzun etiket sarılsın (`.ems-badge--wrap`)
       `dot`    — etiketdən əvvəl rəngli nöqtə göstərilsin
+      `nowrap` — badge bir sətirdə qalsın (`.ems-badge--nowrap`, opt-in; defolt sarılır)
     """
-    return {"status": _resolve(family, key), "wrap": bool(wrap), "dot": bool(dot)}
+    return {"status": _resolve(family, key), "wrap": bool(wrap), "dot": bool(dot), "nowrap": bool(nowrap)}
 
 
 @register.simple_tag(name="ems_next_step")
@@ -109,6 +110,34 @@ def ems_pct_style(value) -> str:
         number = 0.0
     number = max(0.0, min(100.0, number))
     return f"--ems-bar-pct:{number:.4g}%"
+
+
+def _clamp_pct(value) -> float:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        number = 0.0
+    return max(0.0, min(100.0, number))
+
+
+@register.simple_tag(name="ems_ring_dash")
+def ems_ring_dash(value) -> str:
+    """Bal halqasının (`_score_ring.html`) SVG ``stroke-dasharray`` dəyəri.
+
+    SVG təqdimat atributudur (``style`` DEYİL) — CSP ``style-src-attr``-a toxunmur.
+    Dəyər lokalizasiyasız nöqtəli ədəddir (``72.5 100``): az/ru/de-də ``floatformat``
+    vergül verərdi və brauzer atributu atardı; 0–100 aralığına sıxılır."""
+    return f"{_clamp_pct(value):.4g} 100"
+
+
+@register.filter(name="ems_pct_tone")
+def ems_pct_tone(value) -> str:
+    """Faizə görə ton: ≥ 50 → ``success``, əks halda ``danger`` (müəllim baxışı ilə eyni hədd)."""
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return "neutral"
+    return "success" if number >= 50 else "danger"
 
 
 @register.simple_tag(name="ems_datetime_input")

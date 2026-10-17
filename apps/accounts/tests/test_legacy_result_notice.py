@@ -345,7 +345,8 @@ class LegacyResultNoticeTest(TestCase):
         html = self._get("my-results").content.decode()
         migrated_card = html[html.index("LRN101") : html.index("LRN102")]
         self.assertEqual(migrated_card.count("legacy-notice__text"), 1)
-        self.assertGreater(migrated_card.count("result-academic-cell"), 1)
+        # Paket A (2026-10-18): bal xanaları `mr-facts__row` (əvvəl `result-academic-cell`).
+        self.assertGreater(migrated_card.count("mr-facts__row"), 1)
 
     def test_my_results_actually_loads_the_academic_stylesheet(self):
         """Sübut panelinin RƏNGİ yalnız fayl YÜKLƏNİRSƏ mənalıdır.

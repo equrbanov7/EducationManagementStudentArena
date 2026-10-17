@@ -1,0 +1,42 @@
+{% load i18n %}
+{# Detalın KPI sırası: suallar, müddət, sual vaxtı (varsa), cəhd limiti; reyestr qrupları altda. #}
+<section class="etp-kpis ted-kpis" aria-label="{% trans 'Xülasə' context 'exams.template.teacher_exam_results' %}">
+    <div class="etp-kpi etp-kpi--primary">
+        <span class="etp-kpi__icon"><i class="fas fa-list-ol" aria-hidden="true"></i></span>
+        <span class="etp-kpi__body">
+            <span class="etp-kpi__value">{{ questions_total_count }}</span>
+            <span class="etp-kpi__label">{% trans "Sual" context "exams.attempt_review" %}{% if questions_total_count and active_questions_count != questions_total_count %} · {% blocktrans trimmed with n=active_questions_count context "exams.teacher.exam_detail" %}{{ n }} aktiv{% endblocktrans %}{% endif %}</span>
+        </span>
+    </div>
+    <div class="etp-kpi etp-kpi--violet">
+        <span class="etp-kpi__icon"><i class="far fa-clock" aria-hidden="true"></i></span>
+        <span class="etp-kpi__body">
+            <span class="etp-kpi__value">{% if exam.total_duration_minutes %}{{ exam.total_duration_minutes }}<small class="ted-kpi__unit">{% trans "unit_minutes" context "exams.template.teacher_exam_detail" %}</small>{% else %}–{% endif %}</span>
+            <span class="etp-kpi__label">{% trans "label_total_duration" context "exams.template.teacher_exam_detail" %}</span>
+        </span>
+    </div>
+    {% if exam.default_question_time_seconds %}
+    <div class="etp-kpi etp-kpi--warning">
+        <span class="etp-kpi__icon"><i class="fas fa-stopwatch" aria-hidden="true"></i></span>
+        <span class="etp-kpi__body">
+            <span class="etp-kpi__value">{{ exam.default_question_time_seconds }}<small class="ted-kpi__unit">{% trans "unit_seconds" context "exams.template.teacher_exam_detail" %}</small></span>
+            <span class="etp-kpi__label">{% trans "label_question_time" context "exams.template.teacher_exam_detail" %}</span>
+        </span>
+    </div>
+    {% endif %}
+    <div class="etp-kpi etp-kpi--success">
+        <span class="etp-kpi__icon"><i class="fas fa-rotate-right" aria-hidden="true"></i></span>
+        <span class="etp-kpi__body">
+            <span class="etp-kpi__value">{% if exam.max_attempts_per_user %}{{ exam.max_attempts_per_user }}{% else %}∞{% endif %}</span>
+            <span class="etp-kpi__label">{% trans "label_attempts" context "exams.template.teacher_exam_detail" %}</span>
+        </span>
+    </div>
+</section>
+
+{% if assigned_unit_names %}
+{# 2026-09-14 (W4, R2): reyestr qrupu təyinatı detal səhifəsində görünür. #}
+<section class="ems-card ted-units" aria-labelledby="ted-units-title">
+    <h2 class="ted-units__title" id="ted-units-title"><i class="fas fa-users" aria-hidden="true"></i> {% trans "allowed_units" context "exams.template.create_exam_modal_form" %}</h2>
+    <p class="ted-units__list">{{ assigned_unit_names|join:", " }}</p>
+</section>
+{% endif %}

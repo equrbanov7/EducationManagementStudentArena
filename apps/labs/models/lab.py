@@ -177,6 +177,11 @@ class Lab(models.Model):
         return timezone.now() > self.end_datetime
 
     @property
+    def effective_max_file_size_mb(self):
+        """Serverin faktiki tətbiq etdiyi hədd (köhnə sətirdə 0 / tavandan böyük dəyər qala bilər) — UI ipucu üçün."""
+        return clamp_lab_max_file_size_mb(self.max_file_size_mb)
+
+    @property
     def total_questions(self):
         """Ümumi sual sayı"""
         return LabQuestion.objects.filter(block__lab=self).count()

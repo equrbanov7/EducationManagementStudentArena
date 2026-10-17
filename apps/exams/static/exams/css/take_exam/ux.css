@@ -14,8 +14,8 @@
     max-width: min(360px, calc(100vw - 32px));
     padding: 12px 20px;
     border-radius: 8px;
-    background: #1d4ed8;
-    color: #fff;
+    background: var(--ems-primary-700);
+    color: var(--ems-neutral-0);
     font-size: 14px;
     font-weight: 500;
     line-height: 1.4;
@@ -26,11 +26,11 @@
 }
 
 .auto-save-notification.success {
-    background: #047857;
+    background: var(--ems-success-strong);
 }
 
 .auto-save-notification.error {
-    background: #dc2626;
+    background: var(--ems-danger);
 }
 
 .auto-save-notification.is-hiding {
@@ -63,19 +63,19 @@
 .exam-sync-status--offline {
     background: var(--exam-amber-soft);
     border-color: var(--exam-amber);
-    color: #78350f;
+    color: var(--ems-warning-800);
 }
 
 .exam-sync-status--conflict {
     background: var(--exam-red-soft);
     border-color: var(--exam-red);
-    color: #7f1d1d;
+    color: var(--ems-danger-strong);
 }
 
 .exam-sync-status--ok {
     background: var(--exam-green-soft);
     border-color: var(--exam-green);
-    color: #065f46;
+    color: var(--ems-success-strong);
 }
 
 /* ── 3. Telefon / planşet ─────────────────────────────────────────────────── */
@@ -176,9 +176,9 @@
         padding: 6px 12px;
         border-radius: 999px;
         background: rgba(255, 255, 255, 0.96);
-        border: 1px solid var(--exam-border, #e2e8f0);
+        border: 1px solid var(--exam-border, var(--ems-neutral-200));
         box-shadow: 0 4px 14px rgba(15, 23, 42, 0.14);
-        color: var(--ems-neutral-700, #334155);
+        color: var(--ems-neutral-700, var(--ems-neutral-700));
         font-size: 0.9rem;
         font-weight: 800;
         font-variant-numeric: tabular-nums;
@@ -188,7 +188,7 @@
 
     .exam-timer-pill__item { display: none; align-items: center; gap: 6px; }
     .exam-timer-pill__item.is-on { display: inline-flex; }
-    .exam-timer-pill__item--q { color: #0369a1; }
-    .exam-timer-pill.is-danger { background: var(--exam-red-soft, #fee2e2); border-color: var(--exam-red, #ef4444); color: var(--exam-red-strong, #b91c1c); }
+    .exam-timer-pill__item--q { color: var(--ems-sky-800); }
+    .exam-timer-pill.is-danger { background: var(--exam-red-soft, var(--ems-danger-100)); border-color: var(--exam-red, var(--ems-danger-500)); color: var(--exam-red-strong, var(--ems-danger-strong)); }
     .exam-timer-pill.is-danger .exam-timer-pill__item--q { color: inherit; }
 }

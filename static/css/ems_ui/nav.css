@@ -61,6 +61,29 @@
     color: var(--ems-primary-800);
 }
 
+/* Server tərəfli tab-lar `<a class="ems-tabs__btn">` ola bilər (səhifə keçidi). */
+a.ems-tabs__btn {
+    text-decoration: none;
+}
+
+/* Telefonda tab-lar SƏTRƏ sarınmır — üfüqi sürüşür (Paket A 2026-10-18). Səhifənin
+   özü sürüşmür: konteyner `overflow-x: auto`-dur, scrollbar gizlidir. */
+.ems-tabs--scroll {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+}
+
+.ems-tabs--scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.ems-tabs--scroll .ems-tabs__btn {
+    flex: none;
+    white-space: nowrap;
+}
+
 /* ── Stepper / mərhələ zolağı ───────────────────────────────────────────── */
 .ems-steps {
     display: grid;

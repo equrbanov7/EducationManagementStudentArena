@@ -1,0 +1,20 @@
+{% comment %}
+Bal halqası — tələbə nəticə ekranları (Paket A, 2026-10-18). Faiz SVG `stroke-dasharray`
+atributu ilə verilir (inline `style` YOX — CSP); rəng tondan (`ems-ring--<ton>`), stil kpi.css-də.
+
+KONTEKST MÜQAVİLƏSİ
+  ring_pct   — 0–100 ədəd (məcburi; sıxılır)
+  ring_label — mərkəzdəki böyük mətn, məs. «75%» (məcburi)
+  ring_sub   — opsional kiçik alt mətn, məs. «9 / 12»
+  ring_tone  — opsional: success|warning|danger|primary (defolt primary)
+  ring_size  — opsional: sm|lg (defolt orta)
+  ring_aria  — ekran oxuyucu üçün tam cümlə (məs. «Bal: 9 / 12, 75%»)
+{% endcomment %}
+{% load ems_ui %}
+<span class="ems-ring ems-ring--{{ ring_tone|default:'primary' }}{% if ring_size %} ems-ring--{{ ring_size }}{% endif %}" role="img" aria-label="{{ ring_aria|default:ring_label }}">
+    <svg class="ems-ring__svg" viewBox="0 0 36 36" aria-hidden="true" focusable="false">
+        <circle class="ems-ring__track" cx="18" cy="18" r="15.9155" pathLength="100"></circle>
+        <circle class="ems-ring__fill" cx="18" cy="18" r="15.9155" pathLength="100" stroke-dasharray="{% ems_ring_dash ring_pct %}"></circle>
+    </svg>
+    <span class="ems-ring__label" aria-hidden="true">{{ ring_label }}{% if ring_sub %}<span class="ems-ring__sub">{{ ring_sub }}</span>{% endif %}</span>
+</span>

@@ -1,144 +1,107 @@
-{% load i18n static task_kinds %}
-{# 2026-10-13 (rol auditi B12): söndürülmüş «Sərbəst iş» / «Kurs işi» seçimi göstərilmir (RİM tənzimləməsi). #}
-{% task_kind_visibility as tkv %}
-<div class="section-card pending-review-results-card">
-    <div class="section-title">
-        <i class="fas fa-table"></i>
-        {% trans 'Dəyərləndirilmiş nəticələr (' %}{{ evaluated_review_total_count|default:0 }})
-    </div>
+{% load i18n %}
+{% comment %}
+«Dəyərləndirilmiş nəticələr» — yenidən dizayn 2026-10-17 (ems_ui qatı).
 
-    <div class="pr-filter-card">
-        <form method="get"
-              class="js-auto-filter-form"
-              data-auto-filter-form>
-            {% if embedded_in_profile %}
-                <input type="hidden" name="section" value="review-results">
-            {% endif %}
+Başlıq (h1) kabinet qabığındadır — burada yalnız alt başlıq. KPI-lər süzülmüş
+siyahıdan sayılır (sorğusuz); filtr AVTO rejimdədir (filter_bar.js): select dəyişən
+kimi, axtarış isə yazı dayananda tətbiq olunur, cədvəl skeleton göstərir.
+Desktopda cədvəl, ≤768 px-də hər sətir kartdır (CSS, `data-label`). CSS:
+`accounts/css/profile/sections/review_results.css` (`_section_assets.html`).
+{% endcomment %}
+{% trans "Yoxlama pəncərəsi bağlanmış imtahan, lab və tapşırıq nəticələri. «Bax» cavabları sual-sual açır." context "accounts.review_results" as rr_subtitle %}
+{% with ui=evaluated_review_ui %}
+<div class="rr">
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=rr_subtitle %}
 
-            <div class="pr-filter-grid">
-                <input
-                    type="text"
-                    name="evaluated_search"
-                    value="{{ evaluated_review_search_query }}"
-                    placeholder="{% trans 'search_placeholder' context 'profile.pending_review' %}"
-                    class="pr-form-control"
-                 aria-label="{% trans 'search_placeholder' context 'profile.pending_review' %}">
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=ui.kpi_tiles kpi_variant="4" %}
 
-                <div class="bootstrap-single-select pending-review-select-wrap">
-                    <select name="evaluated_type"
-                            class="form-select bootstrap-single-select__native js-bootstrap-single-select"
-                            data-bootstrap-select>
-                        <option value="all" {% if evaluated_review_filter_type == 'all' %}selected{% endif %}>{% trans "type_all" context "profile.pending_review" %}</option>
-                        <option value="exams" {% if evaluated_review_filter_type == 'exams' %}selected{% endif %}>{% trans "type_exam" context "profile.pending_review" %}</option>
-                        {% if tkv.selfwork %}<option value="assignments" {% if evaluated_review_filter_type == 'assignments' %}selected{% endif %}>{% trans "type_assignment" context "profile.pending_review" %}</option>{% endif %}
-                        {% if tkv.coursework %}<option value="projects" {% if evaluated_review_filter_type == 'projects' %}selected{% endif %}>{% trans "type_project" context "profile.pending_review" %}</option>{% endif %}
-                        <option value="labs" {% if evaluated_review_filter_type == 'labs' %}selected{% endif %}>{% trans "type_lab" context "profile.pending_review" %}</option>
-                    </select>
-                </div>
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="review-results" filter_prefix="er_" filter_fields=ui.filter_fields filter_count_label=ui.count_label filter_auto=True filter_bootstrap=True %}
 
-                <div class="bootstrap-single-select pending-review-select-wrap">
-                    <select name="evaluated_group"
-                            class="form-select bootstrap-single-select__native js-bootstrap-single-select"
-                            data-bootstrap-select>
-                        <option value="">{% trans 'Bütün qruplar' %}</option>
-                        {% for group_name in evaluated_review_available_groups %}
-                            <option value="{{ group_name }}" {% if evaluated_review_filter_group == group_name %}selected{% endif %}>
-                                {{ group_name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="bootstrap-single-select pending-review-select-wrap">
-                    <select name="evaluated_submitted_order"
-                            class="form-select bootstrap-single-select__native js-bootstrap-single-select"
-                            data-bootstrap-select>
-                        <option value="newest" {% if evaluated_review_submitted_order == 'newest' %}selected{% endif %}>{% trans 'Ən son göndərilən' %}</option>
-                        <option value="oldest" {% if evaluated_review_submitted_order == 'oldest' %}selected{% endif %}>{% trans 'Ən tez göndərilən' %}</option>
-                    </select>
-                </div>
-            </div>
-
-            <noscript>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-search"></i> {% trans "filter_button" context "profile.pending_review" %}
-                </button>
-            </noscript>
-        </form>
-    </div>
-
+    <div class="ems-tablewrap rr-tablewrap">
     {% if evaluated_review_items %}
-        <div class="table-responsive">
-            <table class="table pending-review-results-table">
+        <div class="ems-tablescroll">
+            <table class="ems-table rr-table">
+                <caption class="sr-only">{% trans "Dəyərləndirilmiş nəticələr" context "accounts.review_results" %}</caption>
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>{% trans 'Tələbə' %}</th>
-                        <th>{% trans 'Tapşırıq' %}</th>
-                        <th>{% trans 'Növ' %}</th>
-                        <th>Qrup</th>
-                        <th>{% trans 'Nəticə' %}</th>
-                        <th>{% trans 'Müəllim' %}</th>
-                        <th>{% trans 'Qiymətləndirilib' %}</th>
-                        <th>{% trans 'Əməliyyat' %}</th>
+                        <th scope="col">{% trans "Tələbə" context "accounts.review_results" %}</th>
+                        <th scope="col">{% trans "Tapşırıq" context "accounts.review_results" %}</th>
+                        <th scope="col">{% trans "Növ" context "accounts.review_results" %}</th>
+                        <th scope="col">{% trans "Qrup" context "accounts.review_results" %}</th>
+                        <th scope="col">{% trans "Nəticə" context "accounts.review_results" %}</th>
+                        <th scope="col">{% trans "Yoxlayan" context "accounts.review_results" %}</th>
+                        <th scope="col">{% trans "Tarix" context "accounts.review_results" %}</th>
+                        <th scope="col"><span class="sr-only">{% trans "Əməliyyat" context "accounts.review_results" %}</span></th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in evaluated_review_items %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ item.student.get_full_name|default:item.student.username }}</td>
-                            <td>
-                                <strong>{{ item.title }}</strong>
-                                <div class="text-muted small">{{ item.course_title|default:"-" }}</div>
-                            </td>
-                            <td>
-                                <span class="pending-review-type-badge pending-review-type-badge--{{ item.type }}">
-                                    {% if item.type == 'exam' %}
-                                        {% trans "type_exam" context "profile.pending_review" %}
-                                    {% elif item.type == 'assignment' %}
-                                        {% trans "type_assignment" context "profile.pending_review" %}
-                                    {% elif item.type == 'project' %}
-                                        {% trans "type_project" context "profile.pending_review" %}
-                                    {% else %}
-                                        {% trans "type_lab" context "profile.pending_review" %}
-                                    {% endif %}
-                                </span>
-                            </td>
-                            <td>{{ item.group_name|default:"-" }}</td>
-                            <td>
-                                <span class="pending-review-score">{{ item.score_display }}</span>
+                    <tr class="rr-row">
+                        <th scope="row" class="rr-cell rr-cell--student">
+                            <span class="rr-avatar" aria-hidden="true">{{ item.initials }}</span>
+                            <span class="rr-student">
+                                <span class="rr-student__name">{{ item.student_display }}</span>
+                                <span class="rr-student__meta">{{ item.student.username }}</span>
+                            </span>
+                        </th>
+                        <td class="rr-cell rr-cell--task" data-label="{% trans 'Tapşırıq' context 'accounts.review_results' %}">
+                            <span class="rr-task__title">{{ item.title }}</span>
+                            {% if item.course_title and item.course_title != "-" %}<span class="rr-task__course">{{ item.course_title }}</span>{% endif %}
+                        </td>
+                        <td class="rr-cell" data-label="{% trans 'Növ' context 'accounts.review_results' %}">
+                            <span class="rr-type rr-type--{{ item.type_modifier }}">
+                                <i class="fas {{ item.type_icon }}" aria-hidden="true"></i>{{ item.type_label }}
+                            </span>
+                        </td>
+                        <td class="rr-cell" data-label="{% trans 'Qrup' context 'accounts.review_results' %}">
+                            {% if item.group_name %}<span class="rr-group">{{ item.group_name }}</span>{% else %}<span class="rr-muted">—</span>{% endif %}
+                        </td>
+                        <td class="rr-cell rr-cell--score" data-label="{% trans 'Nəticə' context 'accounts.review_results' %}">
+                            <span class="rr-score">
+                                <span class="rr-score__value">{{ item.score_display|default:"—" }}</span>
                                 {% if item.score_percent_display %}
-                                <span class="pending-review-score-pct">{{ item.score_percent_display }}</span>
+                                <span class="ems-badge ems-badge--{{ item.score_tone|default:'neutral' }} rr-score__pct">{{ item.score_percent_display }}</span>
                                 {% endif %}
-                            </td>
-                            <td>
-                                <span class="pending-review-evaluator">
-                                    <i class="fas fa-chalkboard-teacher"></i>
-                                    {{ item.evaluator_display|default:"-" }}
-                                </span>
-                            </td>
-                            <td>{{ item.reviewed_at|default:item.submitted_at|date:"d.m.Y H:i" }}</td>
-                            <td>
-                                <a href="{{ item.action_url }}" class="btn btn-sm btn-review-view">Bax</a>
-                            </td>
-                        </tr>
+                            </span>
+                            {% if item.appeal %}
+                            <span class="ems-badge ems-badge--{{ item.appeal.tone }} rr-appeal">
+                                <i class="fas fa-gavel" aria-hidden="true"></i>
+                                {% blocktrans with status=item.appeal.label context "accounts.review_results" %}Apellyasiya: {{ status }}{% endblocktrans %}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="rr-cell" data-label="{% trans 'Yoxlayan' context 'accounts.review_results' %}">
+                            <span class="rr-evaluator">{{ item.evaluator_display|default:"—" }}</span>
+                        </td>
+                        <td class="rr-cell rr-cell--date" data-label="{% trans 'Tarix' context 'accounts.review_results' %}">
+                            {% if item.row_date %}
+                            <time datetime="{{ item.row_date|date:'c' }}">
+                                <span class="rr-date__day">{{ item.row_date|date:"d.m.Y" }}</span>
+                                <span class="rr-date__time">{{ item.row_date|date:"H:i" }}</span>
+                            </time>
+                            {% else %}<span class="rr-muted">—</span>{% endif %}
+                        </td>
+                        <td class="rr-cell rr-cell--action">
+                            <a href="{{ item.action_url }}" class="ems-btn ems-btn--primary ems-btn--sm rr-view"
+                               aria-label="{% blocktrans with student=item.student_display title=item.title context 'accounts.review_results' %}Bax: {{ student }} — {{ title }}{% endblocktrans %}">
+                                <i class="fas fa-eye" aria-hidden="true"></i>
+                                <span>{% trans "Bax" context "profile.pending_review.action" %}</span>
+                            </a>
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-
-        {% if not embedded_in_profile %}
-            {% include "partials/_pagination.html" with page_obj=evaluated_review_items extra_query=evaluated_review_pagination_query %}
-        {% else %}
-            {% include "partials/_pagination.html" with page_obj=evaluated_review_page_obj extra_query=evaluated_review_pagination_query page_param="er_page" %}
-        {% endif %}
     {% else %}
-        <div class="empty-state">
-            <i class="fas fa-chart-line"></i>
-            <p>{% trans 'Dəyərləndirilmiş nəticə tapılmadı.' %}</p>
-        </div>
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon=ui.empty.icon state_title=ui.empty.title state_body=ui.empty.body %}
+    {% endif %}
+    </div>
+
+    {% if evaluated_review_items %}
+    <div class="rr-pagination">
+        {% include "partials/_pagination.html" with page_obj=evaluated_review_page_obj extra_query=evaluated_review_pagination_query page_param="er_page" %}
+    </div>
     {% endif %}
 </div>
-
-<script defer src="{% static 'accounts/js/profile_auto_filter_form.js' %}?v=20261014-searchux"></script>
+{% endwith %}

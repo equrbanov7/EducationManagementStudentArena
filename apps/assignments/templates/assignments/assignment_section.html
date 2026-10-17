@@ -1,202 +1,139 @@
 {% load i18n %}
-{% load static %}
-{% comment %}C3 mikro inline-stil-lər assignment_section.css-ə köçürüldü.{% endcomment %}
-<link rel="stylesheet" href="{% static 'assignment/css/assignment_section.css' %}">
+{% comment %}
+Kurs panelinin «Tapşırıqlar» bölməsi. Paket E (2026-10-17): Bootstrap akkordeon/list-group/badge → kurs
+panelinin `cd-task` kartları + `ems-badge`/`ems-btn`. Panel başlığındakı «yeni tapşırıq» düyməsi
+`course_dashboard.html`-dədir. Qarmaqlar dəyişməyib: `.js-edit-assignment[data-url]`, `.js-delete-assignment[data-url]`,
+`#addAssignmentModal`. Bax/redaktə/sil yalnız kurs sahibinə (modallar da yalnız sahibə render olunur).
+{% endcomment %}
+{% if is_owner or is_teacher %}
+    {% if assignments %}
+    <ul class="cd-tasks">
+        {% for a in assignments %}
+        <li class="cd-task">
+            <div class="cd-task__head">
+                <span class="cd-task__ic cd-task__ic--assignment" aria-hidden="true">{% include "courses/partials/_cd_icon.html" with icon="clip" size=20 %}</span>
+                <div class="cd-task__titles">
+                    <h3 class="cd-task__title">{{ a.title }}</h3>
+                    {% if a.description %}<p class="cd-task__desc">{{ a.description|truncatewords:20 }}</p>{% endif %}
+                </div>
+                <div class="cd-task__badges">
+                    <span class="ems-badge ems-badge--info">{{ a.get_submissions_count }} {% trans "submissions" context "assignment.section" %}</span>
+                    {% if a.get_pending_submissions > 0 %}
+                    <span class="ems-badge ems-badge--warning">{{ a.get_pending_submissions }} {% trans "pending" context "assignment.section" %}</span>
+                    {% endif %}
+                </div>
+            </div>
 
-<div class="accordion-item">
-    <h2 class="accordion-header">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                data-bs-target="#assignmentCollapse" aria-expanded="false">
-            <i class="fa-solid fa-clipboard-list me-2 fs-5 assignment-section-1"></i>
-            <span class="fw-bold">{% trans "title" context "assignment.section" %}</span>
-            <span class="badge bg-warning ms-2">
-                {% if is_student %}
-                    {{ assignments_with_user_data|length }}
-                {% else %}
-                    {{ assignments|length }}
+            <ul class="cd-task__meta">
+                <li class="cd-chip"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i> {{ a.deadline|date:"d.m.Y H:i" }}</li>
+                {% if a.is_open_status %}
+                    {% if a.is_deadline_passed %}
+                    <li><span class="ems-badge ems-badge--danger">{% trans "deadline_passed" context "assignment.section" %}</span></li>
+                    {% else %}
+                    <li><span class="ems-badge ems-badge--success">{% trans "status_active" context "assignment.section" %}</span></li>
+                    {% endif %}
+                {% elif a.status == 'inactive' %}
+                <li><span class="ems-badge ems-badge--warning">{% trans "status_inactive" context "assignment.section" %}</span></li>
                 {% endif %}
-            </span>
-        </button>
-    </h2>
-
-    <div id="assignmentCollapse" class="accordion-collapse collapse" data-bs-parent="#courseDashboard">
-        <div class="accordion-body">
+                <li class="cd-chip"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i> {% trans "max_attempts" context "assignment.section" %}: {{ a.max_attempts }}</li>
+            </ul>
 
             {% if is_owner %}
-                <div class="mb-3 text-end">
-                    <button class="btn btn-warning btn-sm text-white" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">
-                        <i class="fa-solid fa-plus-circle me-1"></i> {% trans "add_new" context "assignment.section" %}
-                    </button>
-                </div>
+            <div class="cd-task__actions">
+                <a href="{% url 'assignments:review_assignment_submissions' a.id %}?from_section={{ profile_return_section|default:'my-courses' }}&return_to={{ request.get_full_path|urlencode }}" class="ems-btn ems-btn--sm">
+                    <i class="fa-solid fa-eye" aria-hidden="true"></i> {% trans "review_answers" context "assignment.section" %}
+                </a>
+                <button type="button" class="ems-btn ems-btn--sm js-edit-assignment" data-url="{% url 'assignments:edit_assignment' a.id %}">
+                    <i class="fa-solid fa-pen" aria-hidden="true"></i> {% trans "edit" context "assignment.section" %}
+                </button>
+                <button type="button" class="ems-btn ems-btn--sm cd-btn--danger js-delete-assignment" data-url="{% url 'assignments:delete_assignment' a.id %}">
+                    <i class="fa-solid fa-trash" aria-hidden="true"></i> {% trans "delete" context "assignment.section" %}
+                </button>
+            </div>
             {% endif %}
-
-            {% if is_owner or is_teacher %}
-                {% if assignments %}
-                    <div class="list-group list-group-flush">
-                        {% for a in assignments %}
-                        <div class="list-group-item border-0 border-bottom pb-3 mb-3">
-                            <div class="d-flex w-100 justify-content-between align-items-start mb-2">
-                                <h6 class="mb-1 fw-bold">
-                                    <i class="fa-solid fa-file-lines text-warning"></i> {{ a.title }}
-                                </h6>
-                                <div class="ms-2">
-                                    <span class="badge bg-info">{{ a.get_submissions_count }} {% trans "submissions" context "assignment.section" %}</span>
-                                    {% if a.get_pending_submissions > 0 %}
-                                    <span class="badge bg-warning text-dark">{{ a.get_pending_submissions }} {% trans "pending" context "assignment.section" %}</span>
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            {% if a.description %}
-                            <p class="text-muted small mb-2">{{ a.description|truncatewords:20 }}</p>
-                            {% endif %}
-
-                            <div class="d-flex flex-wrap gap-3 mb-3">
-                                <small class="text-muted">
-                                    <i class="fa-solid fa-calendar-days"></i>
-                                    {{ a.deadline|date:"d.m.Y H:i" }}
-
-                                    {% if a.is_open_status %}
-                                        {% if a.is_deadline_passed %}
-                                            <span class="badge bg-danger ms-1">{% trans "deadline_passed" context "assignment.section" %}</span>
-                                        {% else %}
-                                            <span class="badge bg-success ms-1">{% trans "status_active" context "assignment.section" %}</span>
-                                        {% endif %}
-                                    {% elif a.status == 'inactive' %}
-                                        <span class="badge bg-warning ms-1">{% trans "status_inactive" context "assignment.section" %}</span>
-                                    {% endif %}
-                                </small>
-                                <small class="text-muted">
-                                    <i class="fa-solid fa-rotate-right"></i> {% trans "max_attempts" context "assignment.section" %}: {{ a.max_attempts }}
-                                </small>
-                            </div>
-
-                            {% comment %}2026-09-28: bax/redaktə/sil view-ları yalnız kurs sahibinə açıqdır,
-                               modallar da yalnız sahibə render olunur — digər müəllimə ölü düymə göstərilmir.{% endcomment %}
-                            {% if is_owner %}
-                            <div class="btn-group btn-group-sm gap-2">
-                                <a href="{% url 'assignments:review_assignment_submissions' a.id %}?from_section={{ profile_return_section|default:'my-courses' }}&return_to={{ request.get_full_path|urlencode }}"
-                                   class="btn btn-sm btn-outline-info">
-                                    <i class="fa-solid fa-eye"></i> {% trans "review_answers" context "assignment.section" %}
-                                </a>
-                                <button type="button" class="btn btn-sm btn-outline-primary js-edit-assignment"
-                                        data-url="{% url 'assignments:edit_assignment' a.id %}">
-                                    <i class="fa-solid fa-pen"></i> {% trans "edit" context "assignment.section" %}
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-danger js-delete-assignment"
-                                        data-url="{% url 'assignments:delete_assignment' a.id %}">
-                                    <i class="fa-solid fa-trash"></i> {% trans "delete" context "assignment.section" %}
-                                </button>
-                            </div>
-                            {% endif %}
-                        </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="alert alert-light text-center py-4">
-                        <i class="fa-solid fa-inbox assignment-section-2"></i>
-                        <p class="text-muted mt-2 mb-0">{% trans "empty_teacher" context "assignment.section" %}</p>
-                        {% if is_owner %}
-                        <button class="btn btn-warning btn-sm mt-3 text-white" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">
-                            <i class="fa-solid fa-plus-circle"></i> {% trans "add_first" context "assignment.section" %}
-                        </button>
-                        {% endif %}
-                    </div>
-                {% endif %}
-
-            {% elif is_student %}
-                {% if assignments_with_user_data %}
-                    <div class="list-group list-group-flush">
-                        {% for item in assignments_with_user_data %}
-                        {% with a=item.assignment %}
-                        <div class="list-group-item border-0 border-bottom pb-3 mb-3">
-                            <div class="d-flex w-100 justify-content-between align-items-start mb-2">
-                                <h6 class="mb-1 fw-bold">
-                                    <i class="fa-solid fa-file-lines text-warning"></i> {{ a.title }}
-                                </h6>
-                            </div>
-
-                            {% if a.description %}
-                            <p class="text-muted small mb-2">{{ a.description|truncatewords:20 }}</p>
-                            {% endif %}
-
-                            <div class="d-flex flex-wrap gap-3 mb-3">
-                                <small class="text-muted">
-                                    <i class="fa-solid fa-calendar-days"></i>
-                                    {{ a.deadline|date:"d.m.Y H:i" }}
-
-                                    {% if a.is_open_status %}
-                                        {% if item.is_deadline_passed %}
-                                            <span class="badge bg-danger ms-1">{% trans "deadline_passed" context "assignment.section" %}</span>
-                                        {% else %}
-                                            <span class="badge bg-success ms-1">{% trans "status_active" context "assignment.section" %}</span>
-                                        {% endif %}
-                                    {% elif a.status == 'inactive' %}
-                                        <span class="badge bg-warning ms-1">{% trans "status_inactive" context "assignment.section" %}</span>
-                                    {% endif %}
-                                </small>
-
-                                <small class="text-muted">
-                                    <i class="fa-solid fa-rotate-right"></i>
-                                    <strong>{% trans "attempts" context "assignment.section" %}:</strong>
-                                    <span class="{% if item.attempts_left == 0 %}text-danger fw-bold{% endif %}">
-                                        {{ item.user_attempts }} / {{ a.max_attempts }}
-                                    </span>
-                                    {% if item.attempts_left > 0 and not item.is_deadline_passed and a.is_open_status %}
-                                        <span class="badge bg-info ms-1">{{ item.attempts_left }} {% trans "attempts_left" context "assignment.section" %}</span>
-                                    {% elif item.attempts_left == 0 %}
-                                        <span class="badge bg-danger ms-1">{% trans "attempts_finished" context "assignment.section" %}</span>
-                                    {% endif %}
-                                </small>
-                            </div>
-
-                            <div class="btn-group btn-group-sm gap-2">
-                                {% if item.user_attempts > 0 %}
-                                    <a href="{% url 'assignments:my_submissions' a.id %}?return_to={{ profile_return_url|urlencode }}"
-                                       class="btn btn-sm btn-outline-warning">
-                                        <i class="fa-solid fa-list-check"></i> {% blocktrans trimmed context "assignment.section" with attempts=item.user_attempts %}Cavablarım ({{ attempts }}){% endblocktrans %}
-                                    </a>
-                                {% endif %}
-
-                                {% if item.can_submit %}
-                                    <a href="{% url 'assignments:assignment_detail' a.id %}?return_to={{ profile_return_url|urlencode }}"
-                                       class="btn btn-sm btn-warning">
-                                        <i class="fa-solid fa-arrow-right"></i> {% trans "submit_answer" context "assignment.section" %}
-                                    </a>
-                                {% else %}
-                                    {% if item.is_deadline_passed %}
-                                        <span class="btn btn-sm btn-secondary disabled">
-                                            <i class="fa-solid fa-lock"></i> {% trans "deadline_passed_locked" context "assignment.section" %}
-                                        </span>
-                                    {% elif not a.is_open_status %}
-                                        <span class="btn btn-sm btn-secondary disabled">
-                                            <i class="fa-solid fa-pause"></i> {% trans "status_inactive" context "assignment.section" %}
-                                        </span>
-                                    {% elif not item.has_started %}
-                                        <span class="btn btn-sm btn-secondary disabled">
-                                            <i class="fa-solid fa-lock"></i> {% trans "Hələ başlamayıb" context "assignment.section" %}
-                                        </span>
-                                    {% endif %}
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endwith %}
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="alert alert-light text-center py-4">
-                        <i class="fa-solid fa-clipboard-list assignment-section-2"></i>
-                        <p class="text-muted mt-2 mb-0">{% trans "empty_student" context "assignment.section" %}</p>
-                    </div>
-                {% endif %}
-
-            {% else %}
-                <div class="alert alert-light text-center py-4">
-                    <i class="fa-solid fa-clipboard-list assignment-section-2"></i>
-                    <p class="text-muted mt-2 mb-0">{% trans "empty_generic" context "assignment.section" %}</p>
-                </div>
-            {% endif %}
-
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="cd-empty">
+        <span class="cd-empty__ic cd-empty__ic--assignments">{% include "courses/partials/_cd_icon.html" with icon="clip" size=26 stroke=1.8 %}</span>
+        <p class="cd-empty__title">{% trans "empty_teacher" context "assignment.section" %}</p>
+        {% if is_owner %}
+        <div class="cd-empty__actions">
+            <button type="button" class="ems-btn ems-btn--primary" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">
+                {% include "courses/partials/_cd_icon.html" with icon="plus" size=16 stroke=2.4 %}
+                {% trans "add_first" context "assignment.section" %}
+            </button>
         </div>
+        {% endif %}
     </div>
-</div>
+    {% endif %}
+
+{% elif is_student %}
+    {% if assignments_with_user_data %}
+    <ul class="cd-tasks">
+        {% for item in assignments_with_user_data %}
+        {% with a=item.assignment %}
+        <li class="cd-task">
+            <div class="cd-task__head">
+                <span class="cd-task__ic cd-task__ic--assignment" aria-hidden="true">{% include "courses/partials/_cd_icon.html" with icon="clip" size=20 %}</span>
+                <div class="cd-task__titles">
+                    <h3 class="cd-task__title">{{ a.title }}</h3>
+                    {% if a.description %}<p class="cd-task__desc">{{ a.description|truncatewords:20 }}</p>{% endif %}
+                </div>
+            </div>
+
+            <ul class="cd-task__meta">
+                <li class="cd-chip"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i> {{ a.deadline|date:"d.m.Y H:i" }}</li>
+                {% if a.is_open_status %}
+                    {% if item.is_deadline_passed %}
+                    <li><span class="ems-badge ems-badge--danger">{% trans "deadline_passed" context "assignment.section" %}</span></li>
+                    {% else %}
+                    <li><span class="ems-badge ems-badge--success">{% trans "status_active" context "assignment.section" %}</span></li>
+                    {% endif %}
+                {% elif a.status == 'inactive' %}
+                <li><span class="ems-badge ems-badge--warning">{% trans "status_inactive" context "assignment.section" %}</span></li>
+                {% endif %}
+                <li class="cd-chip"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i> {% trans "attempts" context "assignment.section" %}: {{ item.user_attempts }} / {{ a.max_attempts }}</li>
+                {% if item.attempts_left > 0 and not item.is_deadline_passed and a.is_open_status %}
+                <li><span class="ems-badge ems-badge--info">{{ item.attempts_left }} {% trans "attempts_left" context "assignment.section" %}</span></li>
+                {% elif item.attempts_left == 0 %}
+                <li><span class="ems-badge ems-badge--danger">{% trans "attempts_finished" context "assignment.section" %}</span></li>
+                {% endif %}
+            </ul>
+
+            <div class="cd-task__actions">
+                {% if item.user_attempts > 0 %}
+                <a href="{% url 'assignments:my_submissions' a.id %}?return_to={{ profile_return_url|urlencode }}" class="ems-btn ems-btn--sm">
+                    <i class="fa-solid fa-list-check" aria-hidden="true"></i> {% blocktrans trimmed context "assignment.section" with attempts=item.user_attempts %}Cavablarım ({{ attempts }}){% endblocktrans %}
+                </a>
+                {% endif %}
+                {% if item.can_submit %}
+                <a href="{% url 'assignments:assignment_detail' a.id %}?return_to={{ profile_return_url|urlencode }}" class="ems-btn ems-btn--sm ems-btn--primary">
+                    <i class="fa-solid fa-arrow-right" aria-hidden="true"></i> {% trans "submit_answer" context "assignment.section" %}
+                </a>
+                {% elif item.is_deadline_passed %}
+                <span class="ems-btn ems-btn--sm" aria-disabled="true"><i class="fa-solid fa-lock" aria-hidden="true"></i> {% trans "deadline_passed_locked" context "assignment.section" %}</span>
+                {% elif not a.is_open_status %}
+                <span class="ems-btn ems-btn--sm" aria-disabled="true"><i class="fa-solid fa-pause" aria-hidden="true"></i> {% trans "status_inactive" context "assignment.section" %}</span>
+                {% elif not item.has_started %}
+                <span class="ems-btn ems-btn--sm" aria-disabled="true"><i class="fa-solid fa-lock" aria-hidden="true"></i> {% trans "Hələ başlamayıb" context "assignment.section" %}</span>
+                {% endif %}
+            </div>
+        </li>
+        {% endwith %}
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="cd-empty">
+        <span class="cd-empty__ic cd-empty__ic--assignments">{% include "courses/partials/_cd_icon.html" with icon="clip" size=26 stroke=1.8 %}</span>
+        <p class="cd-empty__title">{% trans "empty_student" context "assignment.section" %}</p>
+    </div>
+    {% endif %}
+
+{% else %}
+    <div class="cd-empty">
+        <span class="cd-empty__ic cd-empty__ic--assignments">{% include "courses/partials/_cd_icon.html" with icon="clip" size=26 stroke=1.8 %}</span>
+        <p class="cd-empty__title">{% trans "empty_generic" context "assignment.section" %}</p>
+    </div>
+{% endif %}

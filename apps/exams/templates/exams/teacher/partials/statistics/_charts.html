@@ -1,0 +1,42 @@
+{% load i18n %}
+{# Qrafik kartları — canvas ID-ləri teacher_exam_statistics_charts.js müqaviləsidir. #}
+<div class="tes-grid">
+    <section class="ems-card tes-chart" aria-labelledby="tes-c1">
+        <h2 class="tes-card__title" id="tes-c1"><i class="fas fa-chart-bar" aria-hidden="true"></i> {% trans "chart_student_scores" context "exams.template.exam_statistics" %}</h2>
+        <div class="tes-chart__wrap"><canvas id="studentScoreChart" role="img" aria-labelledby="tes-c1"></canvas></div>
+    </section>
+    <section class="ems-card tes-chart" aria-labelledby="tes-c2">
+        <h2 class="tes-card__title" id="tes-c2"><i class="fas fa-bullseye" aria-hidden="true"></i> {% if is_written %}{% trans "chart_avg_score_percent" context "exams.template.exam_statistics" %}{% else %}{% trans "chart_question_accuracy" context "exams.template.exam_statistics" %}{% endif %}</h2>
+        <div class="tes-chart__wrap"><canvas id="questionAccuracyChart" role="img" aria-labelledby="tes-c2"></canvas></div>
+    </section>
+    {% if is_written %}
+    <section class="ems-card tes-chart" aria-labelledby="tes-c3">
+        <h2 class="tes-card__title" id="tes-c3"><i class="fas fa-user-check" aria-hidden="true"></i> {% trans "chart_checked_unchecked" context "exams.template.exam_statistics" %}</h2>
+        <div class="tes-chart__wrap tes-chart__wrap--donut"><canvas id="checkedUncheckedChart" role="img" aria-labelledby="tes-c3"></canvas></div>
+    </section>
+    {% else %}
+    <section class="ems-card tes-chart" aria-labelledby="tes-c3">
+        <h2 class="tes-card__title" id="tes-c3"><i class="fas fa-chart-pie" aria-hidden="true"></i> {% trans "chart_correct_incorrect" context "exams.template.exam_statistics" %}</h2>
+        <div class="tes-chart__wrap tes-chart__wrap--donut"><canvas id="correctIncorrectChart" role="img" aria-labelledby="tes-c3"></canvas></div>
+    </section>
+    {% endif %}
+    <section class="ems-card tes-chart" aria-labelledby="tes-c4">
+        <h2 class="tes-card__title" id="tes-c4"><i class="fas fa-check-double" aria-hidden="true"></i> {% trans "chart_pass_fail" context "exams.template.exam_statistics" %}</h2>
+        <div class="tes-chart__wrap tes-chart__wrap--donut"><canvas id="passFailChart" role="img" aria-labelledby="tes-c4"></canvas></div>
+    </section>
+    <section class="ems-card tes-chart tes-chart--full" aria-labelledby="tes-c5">
+        <h2 class="tes-card__title" id="tes-c5"><i class="fas fa-layer-group" aria-hidden="true"></i> {% trans "chart_score_distribution" context "exams.template.exam_statistics" %}</h2>
+        <p class="etp-hint tes-chart__hint">{% trans "chart_score_distribution_hint" context "exams.template.exam_statistics" %}</p>
+        <div class="tes-chart__wrap tes-chart__wrap--compact"><canvas id="scoreDistributionChart" role="img" aria-labelledby="tes-c5"></canvas></div>
+    </section>
+    {% if compare_groups_data %}
+    <section class="ems-card tes-chart" aria-labelledby="tes-c6">
+        <h2 class="tes-card__title" id="tes-c6"><i class="fas fa-scale-balanced" aria-hidden="true"></i> {% trans "chart_group_avg_score" context "exams.template.exam_statistics" %}</h2>
+        <div class="tes-chart__wrap"><canvas id="groupAvgScoreChart" role="img" aria-labelledby="tes-c6"></canvas></div>
+    </section>
+    <section class="ems-card tes-chart" aria-labelledby="tes-c7">
+        <h2 class="tes-card__title" id="tes-c7"><i class="fas fa-percent" aria-hidden="true"></i> {% trans "chart_group_pass_rate" context "exams.template.exam_statistics" %}</h2>
+        <div class="tes-chart__wrap"><canvas id="groupPassRateChart" role="img" aria-labelledby="tes-c7"></canvas></div>
+    </section>
+    {% endif %}
+</div>

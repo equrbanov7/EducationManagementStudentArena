@@ -60,11 +60,11 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_exams.css' %}?v=20260930-resp">
     {% endif %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_courses.css' %}?v=20260928-1">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/courses.css' %}?v=20260912-1">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/assigned_exams.css' %}?v=20260930-resp">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/assigned_courses.css' %}?v=20260912-1">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_results.css' %}?v=20260930-resp">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_results_academic.css' %}?v=20260827-legacy-grade">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/courses.css' %}?v=20261018-pkga">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/assigned_exams.css' %}?v=20261018-pkga">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/assigned_courses.css' %}?v=20261018-pkga">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_results.css' %}?v=20261018-pkga">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_results_academic.css' %}?v=20261018-pkga">
     {% if 'pending-post-approvals' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/pending_post_approvals.css' %}?v=20260912-1">
     {% endif %}
@@ -105,6 +105,10 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/responsive.css' %}?v=20261017-drawer">
     {% comment %}«Ana səhifə» — default bölmə, HƏR üzvdə var (şərtsiz yüklənir).{% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/dashboard.css' %}?v=20260925-cards">
+    {% comment %}«Dəyərləndirilmiş nəticələr» (2026-10-17) — `responsive.css`-dən SONRA: manifest prefiksi (`profile.css` @import sırası) dəyişmir.{% endcomment %}
+    {% if 'review-results' in asset_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/review_results.css' %}?v=20261017-rr2">
+    {% endif %}
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
     {% if 'statistics' in asset_sections %}
@@ -127,9 +131,9 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% if 'superadmin-ai' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/superadmin_ai_settings.css' %}">
     {% endif %}
-    {% if 'assigned-exams' in asset_sections %}
-    <link rel="stylesheet" href="{% static 'exams/css/student_exam_list.css' %}">
-    {% endif %}
+    {% comment %}Paket A (2026-10-18): `exams/css/student_exam_list.css` (598 sətir) artıq «Təyin olunmuş
+    tapşırıqlar»a yüklənmir — bölmə onun heç bir sinfini işlətmirdi (`.ems-exams` / `.exam-start-modal`
+    yalnız müstəqil «Mövcud imtahanlar» səhifəsindədir). Kart + modal üslubu `assigned_exams.css`-dədir.{% endcomment %}
     {% comment %}Kurs / imtahan yaratma modallarının markup-ı `profile.html`-də qabıqdadır,
     amma açan düymələr yalnız öz bölmələrindədir (PERF-2 H4) — üslublar bölməyə bağlıdır.
     Gizli vəziyyət (`.course-modal-overlay`) `profile/base.css`-də də var ki, bu fayl
@@ -142,8 +146,8 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260911-1">
     <link rel="stylesheet" href="{% static 'exams/css/exam_wizard.css' %}?v=20261014-uifix">
     <link rel="stylesheet" href="{% static 'css/ems_datetime.css' %}?v=20261008-1">
-    <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part1.css' %}?v=20260710-appeals-ux">
-    <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part2.css' %}?v=20260710-appeals-ux">
+    <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part1.css' %}?v=20261017-pkgc">
+    <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part2.css' %}?v=20261017-pkgc">
     {% endif %}
     {% if 'category-management' in asset_sections or 'create-category' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/category_management.css' %}?v=20260930-resp">
@@ -243,7 +247,8 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
     {% endif %}
     {% if 'my-journal' in asset_sections or 'journal-close' in asset_sections %}
-    <link rel="stylesheet" href="{% static 'registrar/css/journal_student.css' %}?v=20261017-exempt">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_student.css' %}?v=20261018-pkga">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_student_detail.css' %}?v=20261018-pkga">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20261017-fixg">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_list.css' %}?v=20260930-resp">
     <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260831-excuse">

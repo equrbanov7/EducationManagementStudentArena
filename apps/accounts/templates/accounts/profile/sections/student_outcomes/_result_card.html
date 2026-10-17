@@ -1,0 +1,97 @@
+{% load i18n ems_ui %}
+{% comment %}
+«Nəticələrim» kartı (Paket A redizaynı 2026-10-18). Kontekst: `item` (`_collect_my_results` sözlüyü;
+test balı + `appeal` səhifə üçün `fill_my_results_scores`-dan). Mobil-öncəlikli: başlıq tam sarılır
+(kəsilmir), status badge kataloqdan, bal halqası faiz olanda; akademik sətir öz gövdəsindədir.
+{% endcomment %}
+<article class="mr-card mr-card--{{ item.category }}{% if item.category == 'academic' %} is-outcome-{{ item.academic.outcome }}{% endif %}">
+    <header class="mr-card__head">
+        <span class="mr-card__icon mr-card__icon--{{ item.category }}" aria-hidden="true"><i class="{{ item.icon }}"></i></span>
+        <div class="mr-card__titles">
+            <h3 class="mr-card__title">{{ item.title }}</h3>
+            <p class="mr-card__meta">
+                <span class="mr-card__type">{{ item.type_label }}</span>
+                {% if item.kind %}<span class="mr-card__kind">{{ item.kind }}</span>{% endif %}
+                {% if item.category == 'academic' %}
+                    {% if item.academic.period_label %}<span class="mr-card__when"><i class="far fa-calendar-alt" aria-hidden="true"></i> {{ item.academic.period_label }}</span>{% endif %}
+                {% elif item.submitted_at %}
+                    <time class="mr-card__when" datetime="{{ item.submitted_at|date:'c' }}"><i class="far fa-clock" aria-hidden="true"></i> {{ item.submitted_at|date:"d.m.Y H:i" }}</time>
+                {% endif %}
+            </p>
+        </div>
+    </header>
+
+    <div class="mr-card__badges">
+        {% if item.category == 'academic' %}
+        <span class="{{ item.academic.outcome|ems_status_class:'academic_outcome' }}">{{ item.academic.outcome_label }}</span>
+        {% elif item.removed_from_exam %}
+        {% ems_status_badge "student_result" "removed" %}
+        {% else %}
+        {% comment %}2026-09-14 (W3 `w3sweep`): nişan xam açarı («submitted») göstərmir — kataloqun tərcümə olunmuş etiketi.{% endcomment %}
+        {% ems_status_badge "student_result" item.status %}
+        {% endif %}
+        {% if item.appeal %}
+        <span class="ems-badge ems-badge--{{ item.appeal.tone }} ems-badge--wrap">
+            <i class="fas fa-gavel" aria-hidden="true"></i>
+            {% blocktrans with status=item.appeal.label context "profile.results.ui" %}Apellyasiya: {{ status }}{% endblocktrans %}
+        </span>
+        {% endif %}
+    </div>
+
+    <div class="mr-card__body">
+        {% if item.category == 'academic' %}
+            {% include "accounts/profile/sections/student_outcomes/_result_academic.html" %}
+        {% else %}
+            {% if item.removed_from_exam and item.removal_reason %}
+            <p class="mr-note mr-note--danger">
+                <i class="fas fa-user-slash" aria-hidden="true"></i>
+                <span><strong>{% trans "Səbəb" %}:</strong> {{ item.removal_reason|truncatechars:180 }}</span>
+            </p>
+            {% endif %}
+
+            {% if item.score != None %}
+            <div class="mr-score">
+                {% if item.score_pct_value is not None %}
+                {% trans "score_label" context "profile.results" as score_word %}
+                {% include "partials/ems_ui/_score_ring.html" with ring_pct=item.score_pct_value ring_label=item.score_percent ring_tone=item.score_pct_value|ems_pct_tone ring_size="sm" ring_aria=score_word|add:": "|add:item.score|add:" · "|add:item.score_percent %}
+                {% endif %}
+                <div class="mr-score__text">
+                    <span class="mr-score__label">{% trans "score_label" context "profile.results" %}</span>
+                    <span class="mr-score__value">{{ item.score }}</span>
+                    {% if item.score_percent and item.score_pct_value is None %}<span class="ems-badge ems-badge--info">{{ item.score_percent }}</span>{% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if item.score == None and not item.feedback %}
+            <p class="mr-note mr-note--{{ item.status|lower }}">
+                <i class="fas fa-hourglass-half" aria-hidden="true"></i>
+                <span>
+                    {% if item.status == "submitted" %}
+                        {% trans "pending_submitted" context "profile.results" %}
+                    {% elif item.status == "pending" %}
+                        {% trans "pending_processing" context "profile.results" %}
+                    {% else %}
+                        {% trans "pending_default" context "profile.results" %}
+                    {% endif %}
+                </span>
+            </p>
+            {% endif %}
+        {% endif %}
+
+        {% if item.feedback %}
+        <p class="mr-note mr-note--feedback">
+            <i class="fas fa-comment-dots" aria-hidden="true"></i>
+            <span>{{ item.feedback|truncatechars:180 }}</span>
+        </p>
+        {% endif %}
+    </div>
+
+    {% if item.detail_url %}
+    <footer class="mr-card__foot">
+        <a href="{{ item.detail_url }}" class="ems-btn ems-btn--primary ems-btn--sm mr-card__cta">
+            <i class="fas fa-eye" aria-hidden="true"></i> {% trans "view_result" context "profile.results" %}
+        </a>
+    </footer>
+    {% endif %}
+</article>

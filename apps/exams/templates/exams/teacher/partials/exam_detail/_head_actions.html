@@ -1,0 +1,76 @@
+{% load i18n exam_start %}
+{% comment %}
+Detal başlığının əməlləri: «Redaktə» (sehrbaz modalı), aktiv/deaktiv (görünən niyyət `desired_state`
+POST olunur — paralel tab double-flip etməsin), «Digər» menyusu (nəticə görünürlüyü, sınaq keç, sil).
+{% endcomment %}
+<a href="{% url 'exams:edit_exam' exam.slug %}"
+   class="ems-btn js-open-exam-form-modal"
+   data-exam-modal-mode="edit"
+   data-exam-modal-url="{% url 'exams:edit_exam' exam.slug %}">
+    <i class="fas fa-pen" aria-hidden="true"></i><span>{% trans "action_edit" context "exams.template.teacher_exam_detail" %}</span>
+</a>
+
+{# R4 (W4): naviqasiya parametrləri action-da daşınır ki, «Geri» kabinetə qayıtsın. #}
+<form method="post" action="{% url 'exams:toggle_exam_active' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}" class="ted-inline-form">
+    {% csrf_token %}
+    {% if exam.is_active %}
+        <input type="hidden" name="desired_state" value="0">
+        {# EXAMQA R8: canlı imtahanda bir klik bütün tələbələrin yazısını bloklayırdı — təsdiq. #}
+        {% trans "Deactivating stops the exam for everyone: students who are taking it right now will not be able to save or submit answers. Continue?" context "exams.template.teacher_exam_detail" as deactivate_confirm %}
+        <button type="submit" class="ems-btn ems-btn--warning" data-ems-confirm="{{ deactivate_confirm }}">
+            <i class="fas fa-circle-pause" aria-hidden="true"></i><span>{% trans "action_deactivate" context "exams.template.teacher_exam_detail" %}</span>
+        </button>
+    {% else %}
+        <input type="hidden" name="desired_state" value="1">
+        <button type="submit" class="ems-btn ems-btn--success">
+            <i class="fas fa-circle-play" aria-hidden="true"></i><span>{% trans "action_activate" context "exams.template.teacher_exam_detail" %}</span>
+        </button>
+    {% endif %}
+</form>
+
+<div class="dropdown">
+    <button type="button" class="ems-btn" id="tedMoreMenu" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">
+        <i class="fas fa-ellipsis" aria-hidden="true"></i><span>{% trans "Digər" context "exams.teacher.exam_detail" %}</span>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end etp-menu" aria-labelledby="tedMoreMenu">
+        <li>
+            <form method="post" action="{% url 'exams:toggle_exam_results_visibility' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}">
+                {% csrf_token %}
+                {% if exam.results_hidden_from_students %}
+                    <input type="hidden" name="desired_state" value="0">
+                    <button type="submit" class="dropdown-item"><i class="fas fa-eye" aria-hidden="true"></i>{% trans "action_show_results" context "exams.template.teacher_exam_detail" %}</button>
+                {% else %}
+                    <input type="hidden" name="desired_state" value="1">
+                    <button type="submit" class="dropdown-item"><i class="fas fa-eye-slash" aria-hidden="true"></i>{% trans "action_hide_results" context "exams.template.teacher_exam_detail" %}</button>
+                {% endif %}
+            </form>
+        </li>
+        {% comment %}Sınaq keç — müəllim imtahanı tələbə kimi yoxlayır (nəticələrə sayılmır). Sual yoxdursa
+        start_exam-a getmirik (qaralamada 404 idi) — izahlı dialoq açılır.{% endcomment %}
+        {% if can_manage_exam_questions %}
+        <li>
+            {% if active_questions_count %}
+                <a href="{% url 'exams:start_exam' exam.slug %}?trial=1&si={% exam_start_intent exam %}" class="dropdown-item"
+                   title="{% trans 'trial_run_hint' context 'exams.template.teacher_exam_detail' %}">
+                    <i class="fas fa-vial" aria-hidden="true"></i>{% trans "trial_run" context "exams.template.teacher_exam_detail" %}
+                </a>
+            {% else %}
+                <button type="button" class="dropdown-item js-trial-run-blocked"
+                        title="{% trans 'trial_run_blocked_hint' context 'exams.template.teacher_exam_detail' %}">
+                    <i class="fas fa-vial" aria-hidden="true"></i>{% trans "trial_run" context "exams.template.teacher_exam_detail" %}
+                </button>
+            {% endif %}
+        </li>
+        {% endif %}
+        <li><hr class="dropdown-divider"></li>
+        <li>
+            <a href="{% url 'exams:delete_exam' exam.slug %}"
+               class="dropdown-item etp-menu__danger js-open-delete-confirm-modal"
+               data-delete-action="{% url 'exams:delete_exam' exam.slug %}"
+               data-delete-message="{% trans 'confirm_delete_exam' context 'exams.template.teacher_exam_detail' %}"
+               data-delete-target="{{ exam.title }}">
+                <i class="fas fa-trash-can" aria-hidden="true"></i>{% trans "action_delete" context "exams.template.teacher_exam_detail" %}
+            </a>
+        </li>
+    </ul>
+</div>

@@ -22,29 +22,80 @@
     padding: 24px 20px 40px;
 }
 
-/* ── Başlıq + stat kartları ─────────────────────────────────────────────── */
-.bulk-page-wrapper .page-header { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--ems-border); }
-.bulk-page-wrapper .page-title { font-size: var(--ems-fs-3xl); letter-spacing: -0.3px; color: var(--ems-text); }
-.bulk-page-wrapper .page-subtitle { color: var(--ems-text-muted); font-size: var(--ems-fs-md); }
+/* ── Başlıq + KPI sırası (Paket C 2026-10-17) ────────────────────────────
+   Struktur: ems-header + etp-head (teacher_page_shell.css) · etp-kpis tam en sırası.
+   Əvvəl başlıq solda, 2×2 stat kartları sağda «üzürdü» (position-lu layout). */
+.bulk-page-wrapper .wb-head {
+    margin-bottom: var(--ems-sp-6);
+}
+
+.bulk-page-wrapper .wb-head__title {
+    margin: 0;
+    font-size: var(--ems-fs-2xl);
+}
+
+.bulk-page-wrapper .wb-head__actions {
+    flex-wrap: wrap;
+}
+
 .bulk-page-wrapper .page-header-link {
-    display: inline-flex; align-items: center; gap: 6px; min-height: var(--ems-h-xs);
-    padding: 0 12px; border-radius: var(--ems-r-lg); border: 1px solid var(--ems-neutral-300);
-    background: var(--ems-bg); color: var(--ems-neutral-700); font-size: var(--ems-fs-base); font-weight: 700;
-    text-decoration: none; box-shadow: none;
+    display: inline-flex; align-items: center; gap: 8px; min-height: var(--ems-h-field);
+    padding: 6px 14px; border-radius: var(--ems-r-lg); border: 1px solid var(--ems-neutral-300);
+    background: var(--ems-bg); color: var(--ems-neutral-700); font: inherit; font-size: var(--ems-fs-sm); font-weight: 700;
+    text-align: left; text-decoration: none; box-shadow: none; cursor: pointer;
 }
 .bulk-page-wrapper .page-header-link:hover { background: var(--ems-bg-subtle); color: var(--ems-primary-700); border-color: var(--ems-primary-300); transform: none; }
+.bulk-page-wrapper .page-header-link:focus-visible { outline: none; box-shadow: var(--ems-sh-focus); }
 .bulk-page-wrapper .page-header-link--accent { background: var(--ems-primary-50); border-color: var(--ems-primary-200); color: var(--ems-primary-700); }
-.bulk-page-wrapper .stat-card {
-    border: 1px solid var(--ems-border); border-radius: var(--ems-r-2xl); background: var(--ems-bg);
-    box-shadow: var(--ems-sh-card); padding: 12px 16px;
+.bulk-page-wrapper .page-header-link__body { display: flex; flex-direction: column; min-width: 0; }
+.bulk-page-wrapper .page-header-link__hint { font-size: var(--ems-fs-xs); font-weight: 500; color: var(--ems-text-muted); }
+
+.bulk-page-wrapper .wb-kpis {
+    grid-template-columns: repeat(auto-fit, minmax(min(170px, 100%), 1fr));
+    margin-bottom: var(--ems-sp-7);
 }
-.bulk-page-wrapper .stat-card:hover { box-shadow: var(--ems-sh-raised); transform: none; border-color: var(--ems-primary-200); }
-.bulk-page-wrapper .stat-icon { border-radius: var(--ems-r-xl); }
-.bulk-page-wrapper .stat-icon.blue { background: var(--ems-primary-50); color: var(--ems-primary-700); }
-.bulk-page-wrapper .stat-icon.red { background: var(--ems-danger-100); color: var(--ems-danger-700); }
-.bulk-page-wrapper .stat-icon.yellow { background: var(--ems-warning-100); color: var(--ems-warning-700); }
-.bulk-page-wrapper .stat-label { font-size: var(--ems-fs-xs); font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ems-neutral-500); }
-.bulk-page-wrapper .stat-value { font-size: var(--ems-fs-2xl); font-weight: 800; color: var(--ems-text); }
+
+.bulk-page-wrapper button.etp-kpi:focus-visible { outline: none; box-shadow: var(--ems-sh-focus); }
+
+.bulk-page-wrapper .wb-kpi--settings {
+    grid-column: span 2;
+}
+
+.bulk-page-wrapper .wb-kpi__settings {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-4);
+    min-width: 0;
+}
+
+.bulk-page-wrapper .wb-kpi__field {
+    display: flex;
+    flex: 1 1 110px;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.bulk-page-wrapper .wb-kpi__field label {
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    color: var(--ems-neutral-600);
+}
+
+.bulk-page-wrapper .wb-kpi__field .ems-input {
+    width: 100%;
+    min-height: 34px;
+}
+
+@media (max-width: 560px) {
+    .bulk-page-wrapper .wb-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ems-sp-4); }
+    .bulk-page-wrapper .wb-kpis .etp-kpi { gap: var(--ems-sp-3); padding: 10px; }
+    .bulk-page-wrapper .wb-kpis .etp-kpi__icon { width: 30px; height: 30px; }
+    .bulk-page-wrapper .wb-kpis .etp-kpi__value { font-size: var(--ems-fs-xl); }
+    .bulk-page-wrapper .wb-kpi--settings { grid-column: 1 / -1; }
+    .bulk-page-wrapper .wb-head__actions,
+    .bulk-page-wrapper .wb-head__actions .page-header-link { width: 100%; }
+}
 
 /* ── Göndəriş məlumatları (qsubm) ───────────────────────────────────────── */
 .qsubm-card { border: 1px solid var(--ems-border); border-radius: var(--ems-r-2xl); box-shadow: var(--ems-sh-card); background: var(--ems-bg); }
@@ -182,3 +233,14 @@
 .bulk-page-wrapper .wb-default-a__text strong { font-size: var(--ems-fs-base); }
 .bulk-page-wrapper .btn-action.confirm-default-a { border-color: var(--ems-warning-bd); background: var(--ems-warning-bg); color: var(--ems-warning-800); }
 .bulk-page-wrapper .btn-action.confirm-default-a:hover { border-color: var(--ems-warning-500); color: var(--ems-warning-800); }
+
+/* Profil örtüyündə (sual göndərişi) qabıq artıq kənar boşluğu verir. */
+.profile-sections--embed .bulk-page-wrapper {
+    padding: 0;
+}
+
+@media (max-width: 560px) {
+    .bulk-page-wrapper {
+        padding: 16px 16px 32px;
+    }
+}

@@ -1,0 +1,227 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   EMSArena — Kurs dialoqları (mövzu · resurs · kurs redaktəsi · üzv/qrup) · 2026-10-17 (Paket E)
+
+   Bu modallar Bootstrap-ın modal İŞ vaxtını saxlayır (`data-bs-toggle`, `bootstrap.Modal`, `show.bs.modal`
+   — 7 yerdən açılır, seçici/AJAX JS-ləri ona bağlıdır), amma GÖRÜNÜŞ ortaq `ems_ui` dialoqu
+   (`.ems-dialog`) ilə eynidir: başlıq (ikon plitəsi + ad), gövdə, boz altlıq, `ems-field/ems-input/ems-btn`.
+   Əvvəlki `course_modals_enhance.js` (başlığı JS ilə yenidən qurur) + `.ems-cd-modals … !important`
+   örtükləri bu modallar üçün SİLİNDİ — markup statik yazılıb. Qalan Bootstrap modallar (tapşırıq/layihə)
+   `.ems-cd-modals` altında köhnə örtüklə qalır. Yalnız `--ems-*` tokenləri.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.ems-bsd .modal-content {
+    border: 0;
+    border-radius: var(--ems-r-2xl);
+    overflow: hidden;
+    box-shadow: var(--ems-sh-dialog);
+    color: var(--ems-neutral-800);
+}
+
+.ems-bsd.fade .modal-dialog {
+    transition: transform 0.18s ease-out;
+}
+
+/* Forma başlıq/gövdə/altlığı sarıdıqda flex zənciri qırılmasın (uzun forma gövdədə sürüşsün). */
+.ems-bsd .modal-content > form {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.ems-bsd .ems-bsd__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex: none;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--ems-border);
+    background: var(--ems-bg);
+}
+
+.ems-bsd__ic {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.ems-bsd__ic--topics { background: var(--ems-primary-50); color: var(--ems-primary-800); }
+.ems-bsd__ic--edit { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.ems-bsd__ic--resources { background: var(--ems-success-100); color: var(--ems-success-700); }
+.ems-bsd__ic--members { background: var(--ems-success-100); color: var(--ems-success-700); }
+
+.ems-bsd__tx {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.ems-bsd .modal-title {
+    margin: 0;
+    font-size: var(--ems-fs-xl);
+    font-weight: 800;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.ems-bsd__sub {
+    margin: 0;
+    font-size: var(--ems-fs-base);
+    color: var(--ems-text-muted);
+}
+
+.ems-bsd .ems-bsd__head .btn-close {
+    margin: 0;
+    border-radius: var(--ems-r-md);
+    opacity: 0.55;
+}
+
+.ems-bsd .ems-bsd__head .btn-close:hover {
+    opacity: 1;
+    background-color: var(--ems-neutral-100);
+}
+
+.ems-bsd .ems-bsd__body {
+    flex: 1 1 auto;
+    padding: 20px 22px;
+    overflow-y: auto;
+}
+
+.ems-bsd__fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+}
+
+.ems-bsd .ems-bsd__foot {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--ems-sp-4);
+    padding: 14px 22px;
+    border-top: 1px solid var(--ems-border);
+    background: var(--ems-bg-subtle);
+}
+
+.ems-bsd .ems-bsd__foot > * {
+    margin: 0;
+}
+
+/* Xəta bloku (JS `<strong>` + `<ul>` yazır; `.d-none` ilə gizlənir). */
+.ems-bsd__errors {
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--ems-danger-bd);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-danger-bg);
+}
+
+.ems-bsd__errors ul {
+    margin: 4px 0 0;
+    padding-left: 18px;
+}
+
+/* ── Seqment seçimi (resurs növü) ────────────────────────────────────────── */
+.ems-seg {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: var(--ems-sp-3);
+}
+
+.ems-seg input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+}
+
+.ems-seg label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ems-sp-3);
+    min-height: var(--ems-h-field);
+    padding: 0 12px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-base);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ems-seg label:hover {
+    background: var(--ems-bg-subtle);
+}
+
+.ems-seg input:checked + label {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.ems-seg input:focus-visible + label {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}
+
+/* ── Redaktə modalında cari qapaq şəkli (əvvəl course_panel_overlays.css-də) ── */
+.ems-cc-current {
+    position: relative;
+    margin-bottom: 10px;
+    overflow: hidden;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-xl);
+    aspect-ratio: 2 / 1;
+    max-height: 200px;
+}
+
+.ems-cc-current img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ems-cc-current span {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    padding: 3px 10px;
+    border-radius: var(--ems-r-pill);
+    background: rgba(15, 23, 42, 0.72);
+    color: var(--ems-neutral-0);
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+}
+
+@media (max-width: 575.98px) {
+    .ems-bsd .modal-dialog {
+        margin: 0.5rem;
+    }
+
+    .ems-bsd .ems-bsd__body {
+        padding: 16px;
+    }
+
+    .ems-bsd .ems-bsd__foot > .ems-btn {
+        flex: 1 1 auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ems-bsd.fade .modal-dialog {
+        transition: none;
+    }
+}

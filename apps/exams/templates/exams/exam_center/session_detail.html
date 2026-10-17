@@ -7,49 +7,49 @@
     {% comment %}ems_ui komponent qatı — müstəqil səhifədir, kabinet qabığı yoxdur
     (süzgəc paneli və boş vəziyyət üçün).{% endcomment %}
     {% include "partials/ems_ui/_assets.html" %}
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}?v=20261017-pkgd">
 {% endblock %}
 
 {% block content %}
 <div class="container py-4 fxc-page">
-  {% url 'exams:exam_center_room_list' as sessions_url %}
-  {% include "exams/exam_center/_breadcrumb.html" with back_url=sessions_url current_label=session.room.name %}
-  <header class="fxc-head">
-    <div>
-      <span class="fxc-pill fxc-pill--state-{{ session.state }}">{{ session.get_state_display }}</span>
-      <h1><i class="fas fa-door-open"></i> {{ session.room.name }} <code>{{ session.room.code }}</code></h1>
-      <p class="fxc-sub">
-        <i class="far fa-clock"></i> {{ session.scheduled_start|date:"d.m.Y H:i" }} – {{ session.scheduled_end|time:"H:i" }}
+  {% url 'exams:exam_center_room_monitor' room_id=session.room_id as room_monitor_url %}
+  {% trans "Zal oturumu" as detail_label %}
+  <div class="ems-header fxc-header">
+    <div class="ems-header__main">
+      {% include "exams/exam_center/_breadcrumb.html" with parent_label=session.room.name parent_url=room_monitor_url current_label=detail_label %}
+      <div class="fxc-header__status">
+        <span class="fxc-pill fxc-pill--state-{{ session.state }}">{{ session.get_state_display }}</span>
+      </div>
+      <h1 class="ems-header__title"><i class="fas fa-door-open" aria-hidden="true"></i> {{ session.room.name }} <code>{{ session.room.code }}</code></h1>
+      <p class="ems-header__subtitle">
+        <span><i class="far fa-clock" aria-hidden="true"></i> {{ session.scheduled_start|date:"d.m.Y H:i" }} – {{ session.scheduled_end|time:"H:i" }}</span>
         {% with invs=session.room.invigilators.all %}
         {% if invs %}
-        · <i class="fas fa-user-shield"></i> {% for u in invs %}{{ u.get_full_name|default:u.username }}{% if not forloop.last %}, {% endif %}{% endfor %}
+        <span><i class="fas fa-user-shield" aria-hidden="true"></i> {% for u in invs %}{{ u.get_full_name|default:u.username }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
         {% endif %}
         {% endwith %}
       </p>
     </div>
-    <div class="fxc-head-actions">
-      <a href="{% url 'exams:exam_center_room_list' %}" class="fxc-btn fxc-btn-ghost">
-        <i class="fas fa-arrow-left"></i> {% trans "Zallar" %}
-      </a>
+    <div class="ems-header__actions">
       {% if can_view_history %}
       <a href="{% url 'exams:exam_center_session_history' session_id=session.pk %}" class="fxc-btn fxc-btn-ghost">
-        <i class="fas fa-clock-rotate-left"></i> {% trans "Tarixçə" %}
+        <i class="fas fa-clock-rotate-left" aria-hidden="true"></i> {% trans "Tarixçə" %}
       </a>
       {% endif %}
-      <a href="{% url 'exams:exam_center_room_monitor' room_id=session.room_id %}" class="fxc-btn fxc-btn-primary">
-        <i class="fas fa-tower-observation"></i> {% trans "Canlı monitor" %}
+      <a href="{{ room_monitor_url }}" class="fxc-btn fxc-btn-primary">
+        <i class="fas fa-tower-observation" aria-hidden="true"></i> {% trans "Canlı monitor" %}
       </a>
     </div>
-  </header>
+  </div>
 
   <div class="fxc-alert fxc-alert-info" role="note">
-    <i class="fas fa-circle-info"></i>
+    <i class="fas fa-circle-info" aria-hidden="true"></i>
     {% trans "Zal oturumu imtahandan asılı deyil. Tələbə fərdi PIN-i ilə qeydli kompüterdən girəndə bu oturuma qoşulur. Nəzarətçi oturumu başladanda hər kəs öz imtahanına başlayır." context "exams.final_center.session_detail" %}
   </div>
 
   <section aria-labelledby="fxc-tickets-title">
     <h2 id="fxc-tickets-title" class="fxc-section-title">
-      <i class="fas fa-users"></i> {% trans "Oturuma qoşulmuş tələbələr" %} ({{ tickets|length }})
+      <i class="fas fa-users" aria-hidden="true"></i> {% trans "Oturuma qoşulmuş tələbələr" %} <span class="ems-badge ems-badge--neutral">{{ tickets|length }}</span>
     </h2>
     {% if tickets %}
     <div class="fxc-table-wrap">
@@ -83,7 +83,7 @@
               <form method="post" action="{% url 'exams:exam_center_ticket_readmit' session_id=session.pk ticket_id=t.pk %}" class="fxc-inline-form">
                 {% csrf_token %}
                 <button type="submit" class="fxc-btn fxc-btn-sm fxc-btn-ghost">
-                  <i class="fas fa-rotate-left"></i> {% trans "Yenidən burax" %}
+                  <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Yenidən burax" %}
                 </button>
               </form>
               {% endif %}
@@ -108,7 +108,7 @@
       {% csrf_token %}
       <input type="hidden" name="reason" value="manual_cancel">
       <button type="submit" class="fxc-btn fxc-btn-danger-ghost">
-        <i class="fas fa-ban"></i> {% trans "Oturumu ləğv et" %}
+        <i class="fas fa-ban" aria-hidden="true"></i> {% trans "Oturumu ləğv et" %}
       </button>
     </form>
   </section>

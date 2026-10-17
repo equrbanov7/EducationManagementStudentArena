@@ -5,8 +5,13 @@
 {% block title %}{{ course.title }} - {% trans "page_suffix_members" context "courses.members_page" %}{% endblock %}
 
 {% block extraCss %}
-    {% include "courses/partials/_courses_assets_css.html" %}
-    <link rel="stylesheet" href="{% static 'courses/css/course_members.css' %}">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20261015-opt">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/header.css' %}?v=20260903-3">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/badge.css' %}?v=20261018-pkga">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/kpi.css' %}?v=20261018-pkga">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/table.css' %}?v=20261018-pkga">
+    <link rel="stylesheet" href="{% static 'courses/css/course_dialogs.css' %}?v=20261017-3">
+    <link rel="stylesheet" href="{% static 'courses/css/course_members.css' %}?v=20261017-3">
 {% endblock %}
 
 {% block extraJs %}
@@ -14,129 +19,109 @@
 {% endblock %}
 
 {% block content %}
-<div class="members-page-wrapper">
-    <div class="members-container">
-        
-        <div class="members-header">
-            <div class="header-left">
-                <a href="{% url 'courses:course_dashboard' course.id %}" class="back-btn">
-                    <i class="fas fa-arrow-left me-1"></i> {% trans "back_dashboard" context "courses.members_page" %}
-                </a>
-                <div class="mt-2">
-                    <h1>{% trans "title_members" context "courses.members_page" %}</h1>
-                    <p>{{ course.title }}</p>
+{% comment %}
+Paket E (2026-10-17): kurs üzvləri səhifəsi `ems_ui` dilinə keçdi (başlıq + KPI + qrup kartları + boş vəziyyət,
+telefonda kart düzümü). Köhnə `course_dashboard.css` (akkordeon dövrü) bu səhifədən çıxarıldı. Qarmaqlar dəyişməyib:
+`[data-delete-member-id]`, `form[data-confirm-message]` (qrupu sil), `#addStudentModal`, `#addGroupModal`.
+{% endcomment %}
+{% trans "title_members" context "courses.members_page" as t_members %}
+<div class="cm-page">
+    {% include "partials/ems_ui/_content_header.html" with header_title=t_members header_subtitle=course.title header_actions_include="courses/partials/_members_header_actions.html" %}
+
+    {% regroup students by group_name as grouped_students %}
+    <div class="ems-kpis">
+        <div class="ems-kpi">
+            <div class="ems-kpi__label">{% trans "section_students" context "courses.members_page" %}</div>
+            <div class="ems-kpi__value">{{ students|length }}</div>
+        </div>
+        <div class="ems-kpi">
+            <div class="ems-kpi__label">{% trans "stat_groups" context "courses.dashboard" %}</div>
+            <div class="ems-kpi__value">{{ grouped_students|length }}</div>
+        </div>
+    </div>
+
+    {% if teacher %}
+    <section class="cm-card">
+        <header class="cm-card__head">
+            <h2 class="cm-card__title"><i class="fas fa-chalkboard-teacher" aria-hidden="true"></i> {% trans "section_teacher" context "courses.members_page" %}</h2>
+        </header>
+        <ul class="cm-list">
+            <li class="cm-member">
+                <span class="cm-avatar cm-avatar--teacher" aria-hidden="true"><i class="fas fa-user-tie"></i></span>
+                <div class="cm-member__text">
+                    <strong class="cm-member__name">{{ teacher.user.get_full_name|default:teacher.user.username }}</strong>
+                    <span class="cm-member__user">@{{ teacher.user.username }}</span>
                 </div>
-            </div>
-            
+                <span class="ems-badge ems-badge--warning">{% trans "badge_course_owner" context "courses.members_page" %}</span>
+            </li>
+        </ul>
+    </section>
+    {% endif %}
+
+    {% if students %}
+        {% for group in grouped_students %}
+        <section class="cm-card">
+            <header class="cm-card__head">
+                <h2 class="cm-card__title">
+                    <i class="fas fa-layer-group" aria-hidden="true"></i>
+                    {% if group.grouper %}{% trans "label_group" context "courses.members_page" %}: {{ group.grouper }}{% else %}{% trans "grouped_unassigned_students" context "courses.members_page" %}{% endif %}
+                    <span class="ems-badge ems-badge--neutral">{{ group.list|length }}</span>
+                </h2>
+                {% if is_owner and group.grouper %}
+                <form method="POST"
+                      action="{% url 'courses:delete_group_from_course' course.id %}"
+                      data-confirm-message="{% blocktrans with group_name=group.grouper context 'courses.members_page' %}Do you want to delete this group?\n\nAll students in {{ group_name }} group will be removed from the course!{% endblocktrans %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="group_name" value="{{ group.grouper }}">
+                    <button type="submit" class="ems-btn ems-btn--sm cm-btn--danger">
+                        <i class="fas fa-trash-alt" aria-hidden="true"></i> {% trans "delete_group" context "courses.members_page" %}
+                    </button>
+                </form>
+                {% endif %}
+            </header>
+            <ul class="cm-list">
+                {% for student in group.list %}
+                <li class="cm-member">
+                    <span class="cm-avatar" aria-hidden="true"><i class="fas fa-user"></i></span>
+                    <div class="cm-member__text">
+                        <strong class="cm-member__name">{{ student.user.get_full_name|default:student.user.username }}</strong>
+                        <span class="cm-member__user">@{{ student.user.username }}</span>
+                    </div>
+                    {% if is_owner %}
+                    <button type="button" class="ems-iconbtn ems-iconbtn--danger"
+                            data-delete-member-id="{{ student.id }}"
+                            data-delete-member-name="{{ student.user.username }}"
+                            aria-label="{% trans 'Üzvü kursdan sil' context 'courses.members_page' %}"
+                            title="{% trans 'Üzvü kursdan sil' context 'courses.members_page' %}">
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endfor %}
+    {% else %}
+    <div class="cm-card cm-card--empty">
+        <div class="ems-state" role="status">
+            <i class="fas fa-user-friends ems-state__icon" aria-hidden="true"></i>
+            <p class="ems-state__title">{% trans "no_students_added_yet" context "courses.members_page" %}</p>
             {% if is_owner %}
-            <div class="header-actions">
-                <button class="btn-custom btn-primary-custom" data-open-modal-id="addStudentModal">
-                    <i class="fas fa-user-plus"></i> {% trans "add_student" context "courses.members_page" %}
+            <div class="cm-empty-actions">
+                <button type="button" class="ems-btn" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+                    <i class="fas fa-user-plus" aria-hidden="true"></i> {% trans "add_student" context "courses.members_page" %}
                 </button>
-                <button class="btn-custom btn-secondary-custom" data-open-modal-id="addGroupModal">
-                    <i class="fas fa-users-cog"></i> {% trans "add_group" context "courses.members_page" %}
+                <button type="button" class="ems-btn ems-btn--primary" data-bs-toggle="modal" data-bs-target="#addGroupModal">
+                    <i class="fas fa-users-cog" aria-hidden="true"></i> {% trans "add_group" context "courses.members_page" %}
                 </button>
             </div>
             {% endif %}
         </div>
-
-        {% if teacher %}
-        <div class="section-card">
-            <div class="section-header">
-                <h3><i class="fas fa-chalkboard-teacher me-2"></i> {% trans "section_teacher" context "courses.members_page" %}</h3>
-            </div>
-            <div class="member-list">
-                <div class="member-item">
-                    <div class="member-avatar">
-                        <i class="fas fa-user-tie"></i>
-                    </div>
-                    <div class="member-info">
-                        <strong>{{ teacher.user.get_full_name|default:teacher.user.username }}</strong>
-                        <small>@{{ teacher.user.username }}</small>
-                    </div>
-                    <span class="badge-role badge-teacher">{% trans "badge_course_owner" context "courses.members_page" %}</span>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        {% if students %}
-        <div class="section-card">
-            <div class="section-header">
-                <h3><i class="fas fa-user-friends me-2"></i> {% trans "section_students" context "courses.members_page" %}</h3>
-                <span class="count-badge">{{ students.count }} {% trans "count_people_suffix" context "courses.members_page" %}</span>
-            </div>
-            
-            {% regroup students by group_name as grouped_students %}
-            
-            {% for group in grouped_students %}
-            <div class="group-section-wrapper">
-                <div class="group-header">
-                    <div class="group-title">
-                        <i class="fas fa-layer-group text-primary"></i>
-                        {% if group.grouper %}
-                            {% trans "label_group" context "courses.members_page" %}: {{ group.grouper }}
-                        {% else %}
-                            {% trans "grouped_unassigned_students" context "courses.members_page" %}
-                        {% endif %}
-                        <span class="text-muted small">({{ group.list|length }})</span>
-                    </div>
-
-                    {% if is_owner and group.grouper %}
-                    <form method="POST"
-                          action="{% url 'courses:delete_group_from_course' course.id %}"
-                          data-confirm-message="{% blocktrans with group_name=group.grouper context 'courses.members_page' %}Do you want to delete this group?\n\nAll students in {{ group_name }} group will be removed from the course!{% endblocktrans %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="group_name" value="{{ group.grouper }}">
-                        <button type="submit" class="btn-delete-group">
-                            <i class="fas fa-trash-alt me-1"></i> {% trans "delete_group" context "courses.members_page" %}
-                        </button>
-                    </form>
-                    {% endif %}
-                </div>
-
-                <div class="member-list">
-                    {% for student in group.list %}
-                    <div class="member-item">
-                        <div class="member-avatar">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div class="member-info">
-                            <strong>{{ student.user.get_full_name|default:student.user.username }}</strong>
-                            <small>@{{ student.user.username }}</small>
-                        </div>
-                        <div class="member-actions">
-                            {% if is_owner %}
-                            <button type="button" class="btn-icon-delete"
-                                    data-delete-member-id="{{ student.id }}"
-                                    data-delete-member-name="{{ student.user.username }}"
-                                    aria-label="{% trans 'Üzvü kursdan sil' context 'courses.members_page' %}">
-                                <i class="fas fa-times-circle" aria-hidden="true"></i>
-                            </button>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-            <div class="alert alert-info text-center m-4">
-                <i class="fas fa-info-circle me-2"></i> {% trans "no_students_added_yet" context "courses.members_page" %}
-            </div>
-        {% endif %}
-
     </div>
+    {% endif %}
 </div>
 
 {% if is_owner %}
-<!-- Action Buttons -->
     {% include 'courses/partials/_member_form_modal.html' %}
-
 {% endif %}
-
-
-
-
 {% endblock %}

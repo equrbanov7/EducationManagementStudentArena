@@ -1,0 +1,462 @@
+/* ============================================================================
+   Sual göndərişi SƏHİFƏLƏRİ (müəllim detalı · kafedra təsdiqi · İmtahan Mərkəzi
+   baxışı) — Paket C 2026-10-17. Ortaq ems_ui qatının (header · stepper · kpi ·
+   banner · card · timeline · dialog) üstündə yalnız səhifəyə xas düzülüş.
+   Prefiks: qsx-*  (+ JS-in tanıdığı köhnə adlar: qsubq-*, qsubr-*, qchair-*).
+   Hex YOXDUR — yalnız `--ems-*` tokenləri. 375 px-də səhifə üfüqi sürüşmür.
+   ========================================================================== */
+
+.qsx {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+    min-width: 0;
+}
+
+.qsx > *,
+.qsx .ems-kpis,
+.qsx .ems-steps {
+    margin-bottom: 0;
+}
+
+.qsx [hidden] {
+    display: none;
+}
+
+/* ── Başlıq: breadcrumb + status + meta ─────────────────────────────────── */
+.qsx-head {
+    margin-bottom: 0;
+}
+
+.qsx-head .ems-crumbs__item[aria-current="page"] {
+    overflow-wrap: anywhere;
+}
+
+.qsx-head__status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3) var(--ems-sp-5);
+    margin-top: var(--ems-sp-3);
+}
+
+.qsx-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2) var(--ems-sp-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.qsx-meta__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.qsx-meta__item i {
+    color: var(--ems-neutral-500);
+    font-size: var(--ems-fs-xs);
+}
+
+.qsx-head__actions {
+    flex-wrap: wrap;
+}
+
+.qsx-bank-gone em {
+    color: var(--ems-text-muted);
+    font-style: normal;
+}
+
+/* ── Mərhələ zolağı — 4 addım bir sırada (planşetdə 2×2) ─────────────────── */
+.qsx .ems-steps {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.qsx .ems-step__note {
+    overflow-wrap: anywhere;
+}
+
+/* ── «Növbəti addım» lenti ──────────────────────────────────────────────── */
+.qsx-next {
+    align-items: center;
+}
+
+/* ems-banner telefonda sütuna keçir — orada mətn sola yapışsın, düymə tam en olsun. */
+@media (max-width: 768px) {
+    .qsx-next {
+        align-items: stretch;
+    }
+
+    .qsx-next .ems-banner__actions {
+        margin-left: 0;
+    }
+
+    .qsx-next .ems-banner__actions .ems-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+.qsx-next__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+    min-width: 0;
+}
+
+.qsx-next__note {
+    padding: var(--ems-sp-3) var(--ems-sp-4);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg);
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.qsx-next__bank {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    font-weight: 700;
+}
+
+/* ── İki sütun: əsas (qərar + suallar) · yan (qeydlər + lent) ──────────── */
+.qsx-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--ems-sp-6);
+    align-items: start;
+}
+
+.qsx-layout__main,
+.qsx-layout__aside {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+    min-width: 0;
+}
+
+@media (min-width: 1200px) {
+    .qsx-layout {
+        grid-template-columns: minmax(0, 1fr) 340px;
+    }
+
+    .qsx-layout__aside {
+        position: sticky;
+        top: calc(var(--ems-header-h, 64px) + var(--ems-sp-5));
+    }
+}
+
+.qsx-card .ems-card__title {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+}
+
+.qsx-card .ems-card__title i {
+    color: var(--ems-primary-600);
+    font-size: var(--ems-fs-base);
+}
+
+.qsx-note__text {
+    color: var(--ems-text);
+    font-size: var(--ems-fs-base);
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+.qsx-history .ems-tl {
+    margin: 0;
+}
+
+.qsx-section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    margin: var(--ems-sp-4) 0 0;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    scroll-margin-top: calc(var(--ems-header-h, 64px) + var(--ems-sp-5));
+}
+
+.qsx-section-title i {
+    color: var(--ems-primary-600);
+}
+
+.qsx-anchor {
+    scroll-margin-top: calc(var(--ems-header-h, 64px) + var(--ems-sp-5));
+}
+
+/* Redaktə rejimində lent bükülə bilən kartdır. */
+.qsx-history-fold__summary {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    padding: var(--ems-sp-6) 18px;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-base);
+    font-weight: 800;
+    cursor: pointer;
+    list-style: none;
+}
+
+.qsx-history-fold__summary::-webkit-details-marker {
+    display: none;
+}
+
+.qsx-history-fold__summary::after {
+    content: "\25BE";
+    margin-left: auto;
+    color: var(--ems-text-muted);
+    transition: transform 0.15s ease;
+}
+
+.qsx-history-fold[open] .qsx-history-fold__summary::after {
+    transform: rotate(180deg);
+}
+
+.qsx-history-fold__summary i {
+    color: var(--ems-primary-600);
+}
+
+.qsx-history-fold__summary:focus-visible {
+    outline: none;
+    box-shadow: var(--ems-sh-focus);
+}
+
+.qsx-history-fold__body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+    gap: var(--ems-sp-5);
+    padding: 0 18px 18px;
+}
+
+.qsx-history-fold__body .ems-card {
+    box-shadow: none;
+}
+
+/* Təhlükə zonası (göndərişi sil) — səhifənin sonunda. */
+.qsx-danger {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-5);
+    padding: var(--ems-sp-6) 18px;
+    border: 1px solid var(--ems-danger-bd);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-danger-bg);
+}
+
+.qsx-danger__title {
+    margin: 0;
+    color: var(--ems-danger-strong);
+    font-weight: 800;
+}
+
+.qsx-danger__text {
+    margin: 2px 0 0;
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm);
+}
+
+/* ── Lazy sual siyahısı: alət zolağı + bayraq çipləri ───────────────────── */
+.qsubq-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-4);
+    margin-bottom: var(--ems-sp-6);
+}
+
+.qsubq-search {
+    position: relative;
+    flex: 1 1 260px;
+    min-width: 0;
+}
+
+.qsubq-search > i {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    color: var(--ems-neutral-500);
+    font-size: var(--ems-fs-sm);
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.qsubq-search .ems-input {
+    width: 100%;
+    padding-left: 34px;
+}
+
+.qsubq-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+}
+
+.qsubq-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    min-height: var(--ems-h-chip);
+    padding: 4px 12px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-700);
+    font: inherit;
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.qsubq-pill:hover {
+    border-color: var(--ems-primary-400);
+}
+
+.qsubq-pill:focus-visible {
+    outline: none;
+    box-shadow: var(--ems-sh-focus);
+}
+
+.qsubq-pill.is-active {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.qsubq-pill--error i {
+    color: var(--ems-danger);
+}
+
+.qsubq-pill--warning i {
+    color: var(--ems-warning-600);
+}
+
+.qsubq-pill--clean i {
+    color: var(--ems-success-700);
+}
+
+.qsubq-pill__count {
+    min-width: 20px;
+    padding: 0 6px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.qsubq-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ems-sp-3);
+    padding: var(--ems-sp-8) var(--ems-sp-5);
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: var(--ems-r-xl);
+    color: var(--ems-text-muted);
+}
+
+.qsubq-more {
+    align-self: center;
+    margin: var(--ems-sp-6) auto 0;
+}
+
+.qsubq {
+    display: flex;
+    flex-direction: column;
+}
+
+.qsubq-spinner {
+    display: none;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--ems-neutral-300);
+    border-top-color: var(--ems-primary-600);
+    border-radius: 50%;
+    animation: qsx-spin 0.8s linear infinite;
+}
+
+.qsubq-more.is-loading .qsubq-spinner {
+    display: inline-block;
+}
+
+@keyframes qsx-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .qsubq-spinner {
+        animation: none;
+    }
+}
+
+/* ── Responsiv ──────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+    .qsx .ems-steps {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 560px) {
+    /* Telefonda 4 addım 2×2 yığcam kartdır — status bir baxışda görünsün, səhifə uzanmasın. */
+    .qsx .ems-steps {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--ems-sp-3);
+    }
+
+    .qsx .ems-step {
+        padding: 8px 10px;
+    }
+
+    .qsx .ems-step--current {
+        padding: 7px 9px;
+    }
+
+    .qsx .ems-step__label {
+        font-size: var(--ems-fs-sm);
+    }
+
+    .qsx .ems-step__note {
+        font-size: var(--ems-fs-xs);
+    }
+
+    .qsx-head__actions,
+    .qsx-head__actions .ems-btn {
+        width: 100%;
+    }
+
+    .qsx-head__actions .ems-btn {
+        justify-content: center;
+    }
+
+    .qsx .ems-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--ems-sp-4);
+    }
+
+    .qsx .ems-kpi {
+        padding: 12px 14px;
+    }
+
+    .qsx .ems-kpi__value {
+        overflow-wrap: anywhere;
+    }
+
+    .qsubq-pills {
+        width: 100%;
+    }
+}

@@ -556,7 +556,9 @@ class LabTeacherReviewWindowTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'value="95"')
         self.assertContains(response, 'step="1"')
-        self.assertContains(response, "courseActionConfirmModal")
+        # Paket E (2026-10-17): saxlama təsdiqi ortaq `EMSConfirm` ilədir (kurs təsdiq modalı səhifədən çıxdı).
+        self.assertContains(response, "labs/js/grade_submission.js")
+        self.assertContains(response, 'id="gradeForm"')
         self.assertNotContains(response, "useManualTotal")
         self.assertContains(response, f'name="answer_score_{self.answer.id}"')
 
@@ -657,10 +659,12 @@ class LabReviewVisibilityTest(TestCase):
 
         hidden_answers_response = self.client.get(reverse("labs:my_lab_answers", kwargs={"pk": self.lab.id}))
         self.assertEqual(hidden_answers_response.status_code, 200)
-        self.assertContains(hidden_answers_response, 'data-bs-target="#viewLabSubmission')
+        self.assertContains(hidden_answers_response, 'data-ems-overlay-open="viewLabSubmission')
         self.assertContains(hidden_answers_response, 'data-review-countdown="')
         self.assertNotContains(hidden_answers_response, "17,25")
-        self.assertContains(hidden_answers_response, "status-review-pending")
+        self.assertContains(
+            hidden_answers_response, "ems-badge--neutral"
+        )  # Paket E: `status-review-pending` → ems-badge
         self.assertNotContains(hidden_answers_response, "fa-spin-pulse")
 
         self.submission.graded_at = timezone.now() - timedelta(minutes=6)

@@ -1,0 +1,12 @@
+{% load i18n %}
+{% comment %}«Sual təsdiqi» cədvəlinin birinci sütunu: ad (kafedra qərar səhifəsinə keçid), fənn · qrup, dekanlıq yönləndirməsi.{% endcomment %}
+<div class="qsub-title">
+    <a class="qsub-title__link js-profile-section-link-skip" href="{{ row.data.open_url }}">{{ row.data.title }}</a>
+    <span class="qsub-title__meta">{{ row.data.subject }} · {{ row.data.group }}</span>
+    {% if row.data.routed_to_dean %}
+    <span class="qsub-title__bank">
+        <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
+        {% trans "Kafedra müdiri təyin edilməyib — dekanlığa yönləndirilib" context "accounts.profile.question_chair_review" %}
+    </span>
+    {% endif %}
+</div>

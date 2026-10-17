@@ -1,0 +1,15 @@
+{% load i18n %}
+{% comment %}İmtahan Mərkəzi baxışının başlıq əməlləri: qəbul edilmiş bank (silinibsə link YOX — 404 olmasın).{% endcomment %}
+{% if submission.accepted_bank %}
+{% if submission.accepted_bank.is_active %}
+<a href="{% url 'exams:question_bank_detail' submission.accepted_bank.id %}" class="ems-btn ems-btn--primary">
+    <i class="fas fa-layer-group" aria-hidden="true"></i> {{ submission.accepted_bank.name }}
+</a>
+{% else %}
+<span class="ems-btn qsx-bank-gone" aria-disabled="true"
+      title="{% trans 'Bu bank artıq mövcud deyil.' context 'exams.template.question_submission' %}">
+    <i class="fas fa-layer-group" aria-hidden="true"></i> {{ submission.accepted_bank.name }}
+    <em>({% trans "silinib" context "exams.template.question_submission" %})</em>
+</span>
+{% endif %}
+{% endif %}

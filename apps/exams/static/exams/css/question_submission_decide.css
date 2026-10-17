@@ -1,0 +1,232 @@
+/* ============================================================================
+   Sual göndərişi — QƏRAR kartları (İmtahan Mərkəzi seçim kartları + kafedra
+   düymələri/səbəb dialoqu) və «Göndərişi sil» təsdiq modalı — Paket C 2026-10-17.
+   question_submission_page.css-dən ayrılıb (modul ölçü qapısı, 600 sətir).
+   JS-in tanıdığı adlar: qsubr-* (question_submission_review.js), qchair-*
+   (question_submission_chair_review.js). Hex YOXDUR — yalnız `--ems-*`.
+   ========================================================================== */
+
+/* ── Qərar kartı (mərkəz + kafedra) ─────────────────────────────────────── */
+.qsx-decide {
+    scroll-margin-top: calc(var(--ems-header-h, 64px) + var(--ems-sp-5));
+}
+
+.qsx-decide__warn {
+    margin-bottom: var(--ems-sp-6);
+}
+
+.qsubr-choices {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
+    gap: var(--ems-sp-4);
+    min-width: 0;
+    margin: 0 0 var(--ems-sp-6);
+    padding: 0;
+    border: 0;
+}
+
+.qsubr-choice {
+    position: relative;
+    display: block;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.qsubr-choice input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.qsubr-choice__card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-4);
+    height: 100%;
+    padding: var(--ems-sp-5) var(--ems-sp-6);
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.qsubr-choice:hover .qsubr-choice__card {
+    border-color: var(--ems-primary-400);
+}
+
+.qsubr-choice input:focus-visible + .qsubr-choice__card {
+    box-shadow: var(--ems-sh-focus);
+}
+
+.qsubr-choice__icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
+.qsubr-choice__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.qsubr-choice__title {
+    color: var(--ems-text);
+    font-weight: 800;
+}
+
+.qsubr-choice__hint {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    line-height: 1.45;
+}
+
+.qsubr-choice--accept input:checked + .qsubr-choice__card {
+    border: 2px solid var(--ems-success-700);
+    background: var(--ems-success-bg);
+}
+
+.qsubr-choice--accept input:checked + .qsubr-choice__card .qsubr-choice__icon {
+    background: var(--ems-success-700);
+    color: var(--ems-neutral-0);
+}
+
+.qsubr-choice--revision input:checked + .qsubr-choice__card {
+    border: 2px solid var(--ems-warning-600);
+    background: var(--ems-warning-bg);
+}
+
+.qsubr-choice--revision input:checked + .qsubr-choice__card .qsubr-choice__icon {
+    background: var(--ems-warning-600);
+    color: var(--ems-neutral-0);
+}
+
+.qsubr-choice--reject input:checked + .qsubr-choice__card {
+    border: 2px solid var(--ems-danger);
+    background: var(--ems-danger-bg);
+}
+
+.qsubr-choice--reject input:checked + .qsubr-choice__card .qsubr-choice__icon {
+    background: var(--ems-danger);
+    color: var(--ems-neutral-0);
+}
+
+.qsubr-panel {
+    display: none;
+    margin-bottom: var(--ems-sp-6);
+}
+
+.qsubr-panel.is-open {
+    display: block;
+}
+
+.qsx-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+    gap: var(--ems-sp-5);
+}
+
+.qsx-fields__wide {
+    grid-column: 1 / -1;
+}
+
+.qsx-fields .ems-input,
+.qsx-fields .ems-textarea,
+.qsubr-panel .ems-textarea {
+    width: 100%;
+}
+
+.qsx-hint {
+    margin: var(--ems-sp-2) 0 0;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-xs);
+    line-height: 1.45;
+}
+
+.qsubr-submit-row {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Kafedra: üç qərar düyməsi. */
+.qchair-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-4);
+}
+
+.qchair-dialog__textarea {
+    width: 100%;
+    min-height: 120px;
+}
+
+.qchair-dialog__counter {
+    margin-right: auto;
+    color: var(--ems-text-muted);
+}
+
+.qchair-dialog__counter.is-short {
+    color: var(--ems-danger-strong);
+}
+
+/* ── Sil təsdiqi (Bootstrap modalı, ems görünüşü) ───────────────────────── */
+.qsx-modal .modal-content {
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    box-shadow: var(--ems-sh-dialog);
+}
+
+.qsx-modal__body {
+    padding: var(--ems-sp-8) var(--ems-sp-7) var(--ems-sp-6);
+    text-align: center;
+}
+
+.qsx-modal__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: var(--ems-sp-5);
+    border-radius: 50%;
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger);
+    font-size: var(--ems-fs-lg);
+}
+
+.qsx-modal__title {
+    margin: 0 0 var(--ems-sp-2);
+    color: var(--ems-text);
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+}
+
+.qsx-modal__text {
+    margin: 0;
+    color: var(--ems-text-muted);
+}
+
+.qsx-modal__foot {
+    gap: var(--ems-sp-3);
+    border-top: 1px solid var(--ems-border);
+}
+
+.qsx-modal__foot form {
+    margin: 0;
+}
+
+@media (max-width: 560px) {
+    .qchair-actions .ems-btn,
+    .qsubr-submit-row .ems-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

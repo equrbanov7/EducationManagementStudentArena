@@ -1,0 +1,29 @@
+{% load i18n %}
+{% comment %}Müəllimin / kafedranın qeydləri + hadisə lentı — səhifənin yan sütunu (Paket C 2026-10-17).{% endcomment %}
+{% if submission.teacher_note %}
+<section class="ems-card qsx-card qsx-note">
+    <div class="ems-card__head"><h2 class="ems-card__title"><i class="fas fa-comment-dots" aria-hidden="true"></i> {% if qsx_role == "teacher" %}{% trans "Qeydiniz" context "exams.template.question_submission" %}{% else %}{% trans "Müəllimin qeydi" context "exams.template.question_submission" %}{% endif %}</h2></div>
+    <div class="ems-card__body qsx-note__text">{{ submission.teacher_note|linebreaksbr }}</div>
+</section>
+{% endif %}
+{% if submission.chair_note and qsx_role != "chair" %}
+<section class="ems-card qsx-card qsx-note">
+    <div class="ems-card__head">
+        <h2 class="ems-card__title"><i class="fas fa-user-tie" aria-hidden="true"></i> {% trans "Kafedra qeydi" context "exams.template.question_submission" %}</h2>
+        {% if submission.chair_reviewer %}<span class="ems-card__sub">{{ submission.chair_reviewer.get_full_name|default:submission.chair_reviewer.username }}</span>{% endif %}
+    </div>
+    <div class="ems-card__body qsx-note__text">{{ submission.chair_note|linebreaksbr }}</div>
+</section>
+{% endif %}
+{% if qsx_timeline %}
+<section class="ems-card qsx-card qsx-history">
+    <div class="ems-card__head">
+        <h2 class="ems-card__title"><i class="fas fa-clock-rotate-left" aria-hidden="true"></i> {% trans "Göndərişin yolu" context "exams.template.question_chain" %}</h2>
+        <span class="ems-badge ems-badge--neutral">{{ qsx_timeline|length }}</span>
+    </div>
+    <div class="ems-card__body">
+        {% trans "Göndərişin yolu" context "exams.template.question_chain" as qsx_tl_label %}
+        {% include "partials/ems_ui/_timeline.html" with timeline=qsx_timeline timeline_label=qsx_tl_label %}
+    </div>
+</section>
+{% endif %}

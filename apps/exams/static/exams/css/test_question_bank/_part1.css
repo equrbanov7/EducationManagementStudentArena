@@ -1,14 +1,14 @@
 :root {
-    --primary: #4361ee;
-    --primary-hover: #3751d4;
-    --bg: #f8f9fc;
+    --primary: var(--ems-primary-600);
+    --primary-hover: var(--ems-primary-700);
+    --bg: var(--ems-neutral-50);
     --card-bg: var(--ems-neutral-0);
-    --text-dark: #2d3436;
-    --text-muted: #636e72;
-    --border: #e1e4e8;
-    --success: #27ae60;
-    --warning: #f39c12;
-    --danger: #e74c3c;
+    --text-dark: var(--ems-neutral-800);
+    --text-muted: var(--ems-neutral-500);
+    --border: var(--ems-neutral-200);
+    --success: var(--ems-success);
+    --warning: var(--ems-warning-500);
+    --danger: var(--ems-danger-500);
 }
 
 body {
@@ -74,7 +74,7 @@ body {
     width: fit-content;
     padding: 10px 16px;
     border-radius: 999px;
-    border: 1px solid #dbe4ff;
+    border: 1px solid var(--ems-primary-100);
     background: var(--ems-primary-50);
     color: var(--primary);
     font-size: 0.95rem;
@@ -121,7 +121,7 @@ body {
 
 .stat-card:hover {
     box-shadow: 0 8px 15px rgba(0,0,0,0.05);
-    border-color: #d1d5db;
+    border-color: var(--ems-neutral-300);
 }
 
 /* Ayarlar Bölməsi (Sual sayı & Bal) */
@@ -160,7 +160,7 @@ body {
     font-size: 0.95rem;
     font-weight: 700;
     color: var(--primary);
-    background: #f8faff;
+    background: var(--ems-neutral-50);
     transition: 0.2s;
 }
 
@@ -197,8 +197,8 @@ body {
 }
 
 .stat-icon.blue { background: var(--ems-primary-50); color: var(--primary); }
-.stat-icon.yellow { background: #fff9db; color: var(--warning); }
-.stat-icon.red { background: #fff5f5; color: var(--danger); }
+.stat-icon.yellow { background: var(--ems-warning-100); color: var(--warning); }
+.stat-icon.red { background: var(--ems-neutral-50); color: var(--danger); }
 
 .stat-label { font-size: 0.8rem; color: var(--text-muted); display: block; }
 .stat-value { font-size: 1.4rem; font-weight: 700; }
@@ -211,7 +211,7 @@ body {
 /* AI Question Generator */
 .ai-bank-card {
     background: var(--ems-neutral-0);
-    border: 1px solid #dbe4ff;
+    border: 1px solid var(--ems-primary-100);
     border-radius: 16px;
     padding: 22px;
     margin-bottom: 24px;
@@ -232,7 +232,7 @@ body {
     width: 46px;
     height: 46px;
     border-radius: 12px;
-    background: #eef4ff;
+    background: var(--ems-primary-50);
     color: var(--primary);
     display: inline-flex;
     align-items: center;
@@ -271,7 +271,7 @@ body {
 }
 
 .ai-field span {
-    color: #4b5563;
+    color: var(--ems-neutral-600);
     font-size: 0.78rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -281,7 +281,7 @@ body {
 .ai-field input,
 .ai-field select {
     width: 100%;
-    border: 1px solid #d8dee9;
+    border: 1px solid var(--ems-neutral-300);
     border-radius: 10px;
     background: var(--ems-neutral-0);
     color: var(--ems-neutral-800);
@@ -305,10 +305,13 @@ body {
 }
 
 .ai-file-field {
+    position: relative;
     cursor: pointer;
 }
 
-.ai-file-input {
+/* `.ai-field input { width: 100% }` bunu üstələyirdi — gizli input 375 px-də səhifəni 35 px sürüşdürürdü. */
+.ai-file-input,
+.ai-field .ai-file-input {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -321,7 +324,7 @@ body {
 
 .ai-file-picker {
     min-height: 44px;
-    border: 1px solid #d8dee9;
+    border: 1px solid var(--ems-neutral-300);
     border-radius: 10px;
     background: var(--ems-neutral-50);
     color: var(--ems-neutral-800);
@@ -358,13 +361,13 @@ body {
 }
 
 .ai-file-name.has-file {
-    color: #047857;
+    color: var(--ems-success-600);
 }
 
 .ai-difficulty-select .bootstrap-single-select__toggle {
     min-height: 44px;
     padding: 10px 12px;
-    border-color: #d8dee9;
+    border-color: var(--ems-neutral-300);
     border-radius: 10px;
     background: var(--ems-neutral-0);
     box-shadow: none;
@@ -387,7 +390,7 @@ body {
     align-items: center;
     flex-wrap: wrap;
     padding: 4px;
-    border: 1px solid #d8dee9;
+    border: 1px solid var(--ems-neutral-300);
     border-radius: 12px;
     background: var(--ems-neutral-50);
     min-height: 44px;
@@ -430,7 +433,7 @@ body {
     min-height: 44px;
     border: none;
     border-radius: 10px;
-    background: #14b8a6;
+    background: var(--ems-teal-500);
     color: var(--ems-neutral-0);
     font-weight: 800;
     padding: 0 18px;
@@ -444,7 +447,7 @@ body {
 }
 
 .ai-generate-btn:hover {
-    background: #0f9f91;
+    background: var(--ems-success-strong);
 }
 
 .ai-generate-btn:disabled {
@@ -460,7 +463,7 @@ body {
     font-weight: 700;
 }
 
-.ai-question-status.is-success { color: #047857; }
+.ai-question-status.is-success { color: var(--ems-success-600); }
 .ai-question-status.is-error { color: var(--ems-danger); }
 .ai-question-status.is-loading { color: var(--primary); }
 
@@ -488,13 +491,13 @@ body {
     flex: 0 0 320px;
     min-width: 0;
     padding: 40px;
-    background: #fcfcfd;
+    background: var(--ems-neutral-0);
     border-right: 1px solid var(--border);
 }
 
 .upload-zone {
     margin-top: 20px;
-    border: 2px dashed #cbd5e0;
+    border: 2px dashed var(--ems-neutral-300);
     border-radius: 12px;
     padding: 30px 20px;
     text-align: center;
@@ -505,7 +508,7 @@ body {
     transition: 0.3s;
 }
 
-.upload-zone:hover { border-color: var(--primary); background: #f8faff; }
+.upload-zone:hover { border-color: var(--primary); background: var(--ems-neutral-50); }
 
 .file-input-hidden { display: none; }
 

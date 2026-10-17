@@ -1,36 +1,327 @@
-/* --- Yazılı Cavab & Fayllar --- */
-.response-label {
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: #4b5563;
+/* ═══════════════════════════════════════════════════════════════════════════
+   Tələbə imtahan nəticəsi — 2-ci hissə: sual təhlili kartları, test variantları,
+   yazılı/praktiki cavab, fayllar, müəllim rəyi, final çıxış zolağı, sınaq qeydi
+   (Paket A 2026-10-18 — hex palitrası `--ems-*` tokenlərinə köçürüldü).
+   Sinif çəngəlləri (`correct-option`, `q-verdict-chip--*`, `question-card--question-only`,
+   `final-result-exitbar`, `trial-result-note`) testlərdə yoxlanılır — adları dəyişməyin.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Sual kartları ──────────────────────────────────────────────────────── */
+.questions-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-5);
+}
+
+.question-card {
+    border: 1px solid var(--ems-border);
+    border-left: 4px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+    overflow: hidden;
+}
+
+.question-card--correct {
+    border-left-color: var(--ems-success-600);
+}
+
+.question-card--wrong {
+    border-left-color: var(--ems-danger);
+}
+
+.question-card--unanswered {
+    border-left-color: var(--ems-neutral-400);
+}
+
+.question-card--marked {
+    border-color: var(--ems-warning-bd);
+    border-left-color: var(--ems-warning-500);
+}
+
+.question-card--appeal-updated,
+.question-card--marked.question-card--appeal-updated {
+    border-color: var(--ems-success-bd);
+    border-left-color: var(--ems-success-600);
+}
+
+.q-header {
+    display: flex;
+    gap: var(--ems-sp-4);
+    padding: var(--ems-sp-5);
+    background: var(--ems-bg-subtle);
+    border-bottom: 1px solid var(--ems-border);
+}
+
+.question-card--question-only .q-header {
+    border-bottom: 0;
+}
+
+.questionAndMedia {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.q-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    margin-top: 2px;
+    border-radius: var(--ems-r-md);
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.q-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+}
+
+.q-chips:not(:empty) {
+    margin-bottom: var(--ems-sp-3);
+}
+
+.q-verdict-chip,
+.marked-result-chip,
+.appeal-corrected-chip,
+.appeal-status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    min-height: var(--ems-h-chip);
+    padding: 2px 10px;
+    border: 1px solid transparent;
+    border-radius: var(--ems-r-pill);
+    font-size: var(--ems-fs-sm);
+    font-weight: 800;
+}
+
+.q-verdict-chip--correct,
+.appeal-corrected-chip {
+    border-color: var(--ems-success-bd);
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+.q-verdict-chip--wrong,
+.appeal-status-chip--rejected {
+    border-color: var(--ems-danger-bd);
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+.q-verdict-chip--unanswered {
+    border-color: var(--ems-neutral-300);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+}
+
+.marked-result-chip,
+.appeal-status-chip--pending {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.q-text {
+    font-size: var(--ems-fs-md);
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.q-text p:last-child {
+    margin-bottom: 0;
+}
+
+.question-media {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: var(--ems-sp-4) 0 0;
+    padding: 10px;
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-neutral-50);
+}
+
+.question-media img,
+.question-media video {
+    max-width: 100%;
+    max-height: 400px;
+    width: auto;
+    height: auto;
+    border-radius: var(--ems-r-md);
+    object-fit: contain;
+}
+
+.question-media img.source-rendered-image {
+    max-height: none;
+}
+
+.q-body {
+    padding: var(--ems-sp-5);
+}
+
+/* ── Test variantları ───────────────────────────────────────────────────── */
+.option-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.option-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-3);
+    padding: 12px 16px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+    color: var(--ems-text);
+}
+
+.option-main {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3);
+    min-width: 0;
+}
+
+.option-text {
+    overflow-wrap: anywhere;
+}
+
+.option-image {
     display: block;
-    margin-bottom: 8px;
+    max-width: 100%;
+    height: auto;
+    margin-top: var(--ems-sp-2);
+}
+
+.option-icon,
+.correct-icon,
+.wrong-icon {
+    flex: none;
+    font-size: 1.15rem;
+}
+
+.option-icon {
+    color: var(--ems-neutral-300);
+}
+
+.correct-icon {
+    color: var(--ems-success-700);
+}
+
+.wrong-icon {
+    color: var(--ems-danger);
+}
+
+.correct-option {
+    border-color: var(--ems-success-bd);
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+.wrong-selected {
+    border-color: var(--ems-danger-bd);
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+.correct-selected {
+    border-width: 2px;
+    font-weight: 700;
+}
+
+.option-item.is-selected:not(.correct-option):not(.wrong-selected) {
+    border-color: var(--ems-primary-300);
+    background: var(--ems-primary-50);
+}
+
+.option-selected-badge {
+    flex: none;
+}
+
+.feedback-status {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--ems-sp-4);
+}
+
+/* ── Yazılı / praktiki cavab ────────────────────────────────────────────── */
+.written-response-area {
+    display: grid;
+    gap: var(--ems-sp-4);
+}
+
+.xr-answer,
+.xr-ideal {
+    display: grid;
+    gap: var(--ems-sp-2);
+}
+
+.response-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-600);
+}
+
+.response-label--primary {
+    color: var(--ems-primary-700);
+}
+
+.response-label--success {
+    color: var(--ems-success-700);
 }
 
 .code-block {
+    margin: 0;
+    padding: 14px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
     background: var(--ems-neutral-50);
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: 8px;
-    padding: 15px;
-    font-family: 'Courier New', monospace;
-    font-size: 0.95rem;
-    color: var(--ems-neutral-700);
+    font-family: var(--ems-ff-mono);
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-800);
     white-space: pre-wrap;
     word-break: break-word;
 }
-.user-answer { border-left: 4px solid var(--ems-primary-500); }
-.correct-answer { border-left: 4px solid var(--ems-success); background: #f0fdf4; }
+
+.user-answer {
+    border-left: 4px solid var(--ems-primary-500);
+}
+
+.correct-answer {
+    border-left: 4px solid var(--ems-success-600);
+    background: var(--ems-success-bg);
+}
 
 .coding-files-review {
     display: grid;
     gap: 10px;
-    margin-bottom: 18px;
 }
 
 .coding-file-detail {
-    border: 1px solid var(--ems-gray-200);
-    border-radius: 8px;
-    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
     overflow: hidden;
 }
 
@@ -39,12 +330,12 @@
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    padding: 14px 16px;
+    min-height: 48px;
+    padding: 12px 14px;
     color: var(--ems-neutral-800);
     cursor: pointer;
     font-weight: 700;
     list-style: none;
-    min-height: 52px;
 }
 
 .coding-file-detail summary::-webkit-details-marker {
@@ -70,504 +361,188 @@
 .coding-file-detail summary small {
     margin-left: auto;
     padding: 2px 8px;
-    border-radius: 999px;
+    border-radius: var(--ems-r-pill);
     background: var(--ems-primary-100);
     color: var(--ems-primary-700);
-    font-size: 0.72rem;
+    font-size: var(--ems-fs-xs);
     white-space: nowrap;
 }
 
 .coding-file-detail pre {
     margin: 0;
-    padding: 14px 16px;
     max-height: 360px;
+    padding: 14px;
     overflow: auto;
+    border-top: 1px solid var(--ems-border);
     background: var(--ems-neutral-900);
-    color: #e5edf8;
-    border-top: 1px solid var(--ems-gray-200);
-    border-radius: 0;
-    font-family: 'Courier New', monospace;
-    font-size: 0.9rem;
+    color: var(--ems-neutral-100);
+    font-family: var(--ems-ff-mono);
+    font-size: var(--ems-fs-sm);
     line-height: 1.55;
     white-space: pre-wrap;
 }
 
-/* File list */
+/* Fayllar */
 .answer-files {
-    background: #f9fafb;
-    border-radius: 8px;
     padding: 12px;
     border: 1px dashed var(--ems-neutral-300);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle);
 }
 
-.file-item {
-    margin-bottom: 10px;
+.file-list {
+    margin: var(--ems-sp-2) 0 0;
+    padding: 0;
+    list-style: none;
 }
+
+.file-item + .file-item {
+    margin-top: 10px;
+}
+
 .file-main {
     display: flex;
     align-items: center;
     gap: 8px;
+    min-width: 0;
 }
+
+.file-icon {
+    color: var(--ems-neutral-500);
+}
+
 .file-link {
-    color: var(--ems-primary-600);
+    color: var(--ems-link);
+    font-weight: 600;
     text-decoration: none;
-    font-weight: 500;
+    overflow-wrap: anywhere;
 }
-.file-link:hover { text-decoration: underline; }
+
+.file-link:hover {
+    color: var(--ems-link-hover);
+    text-decoration: underline;
+}
 
 .file-thumb img {
-    margin-top: 5px;
-    margin-left: 28px;
     max-width: 150px;
     max-height: 100px;
-    border-radius: 4px;
-    border: 1px solid var(--ems-gray-200);
+    margin: 6px 0 0 26px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-sm);
 }
 
-/* --- Teacher Feedback --- */
-.teacher-feedback-box {
-    margin-top: 25px;
-    background: var(--ems-neutral-0);
-    border: 1px solid var(--ems-primary-200);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-}
-
-.tf-header {
-    background: var(--ems-primary-50);
-    padding: 12px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--ems-primary-100);
-}
-.tf-avatar {
-    width: 32px; height: 32px;
-    background: var(--ems-primary-600);
-    color: white;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-}
-.tf-title { color: var(--ems-primary-700); font-weight: 700; margin-left: 8px; }
-.tf-score {
-    background: var(--ems-neutral-0);
-    color: var(--ems-primary-700);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-weight: 700;
-    border: 1px solid var(--ems-primary-200);
-}
-.tf-body { padding: 20px; color: var(--ems-neutral-800); line-height: 1.6; }
-
-/* --- Footer Düymələr --- */
-.action-footer {
-    /* Sticky → scroll boyu aşağıda üzür, səhifənin sonunda (Digər cəhdlərdən
-       sonra) öz yerində dayanır və footer-in üstünə düşmür. */
-    position: sticky;
-    bottom: 16px;
-    z-index: 1030;
-    max-width: 980px;
-    margin: 24px auto 0;
-    padding: 14px 18px;
-    border: 1px solid rgba(226, 232, 240, 0.95);
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.94);
-    backdrop-filter: blur(18px);
-    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
-}
-
-.action-footer__inner {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 16px;
-    width: min(980px, 100%);
-    margin: 0 auto;
-    flex-wrap: wrap;
-}
-
-.custom-blue-btn {
-    background-color: var(--ems-primary-500);
-    color: var(--ems-neutral-0);
-    border: none;
-    border-radius: 10px;
-    padding: 12px 24px;
-    font-size: 1rem;
-    font-weight: 600;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.custom-blue-btn:hover {
-    background-color: var(--ems-primary-600);
-    color: var(--ems-neutral-0);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
-}
-
-
-/* ===== Final imtahan: SABİT çıxış zolağı (taymer + giriş səhifəsi) ===== */
-/* Uzun sual siyahısında da həmişə görünsün deyə ekranın altına bərkidilir. */
-.result-container[data-final-result-timeout] {
-    padding-bottom: 120px;
-}
-
-.final-result-exitbar {
-    position: fixed;
-    left: 50%;
-    bottom: 18px;
-    transform: translateX(-50%);
-    z-index: 1040;
-    width: min(760px, calc(100vw - 28px));
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 12px 16px;
-    border: 1px solid rgba(226, 232, 240, 0.95);
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(18px);
-    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.18);
-}
-
-.final-result-exitbar__timer {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 0;
-}
-
-.final-result-exitbar__clock {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    flex: 0 0 auto;
-    border-radius: 12px;
-    background: var(--ems-primary-50);
-    color: var(--ems-primary-600);
-    font-size: 1.05rem;
-}
-
-.final-result-exitbar__text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.2;
-    min-width: 0;
-}
-
-.final-result-exitbar__count {
-    font-size: 1.35rem;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-    color: var(--ems-neutral-900);
-    letter-spacing: 0.5px;
-}
-
-.final-result-exitbar__hint {
-    font-size: 0.78rem;
-    color: var(--ems-neutral-500);
-    font-weight: 600;
-}
-
-.final-result-exitbar__timer.is-urgent .final-result-exitbar__clock {
-    background: #fef2f2;
-    color: var(--ems-danger);
-}
-.final-result-exitbar__timer.is-urgent .final-result-exitbar__count {
-    color: var(--ems-danger);
-}
-
-.final-result-exitbar__btn {
-    flex: 0 0 auto;
-    background-color: var(--ems-primary-500);
-    color: var(--ems-neutral-0);
-    border: none;
-    border-radius: 10px;
-    padding: 11px 20px;
-    font-weight: 700;
-    display: inline-flex;
-    align-items: center;
-    text-decoration: none;
-    transition: transform 0.18s, box-shadow 0.18s, background-color 0.18s;
-}
-.final-result-exitbar__btn:hover {
-    background-color: var(--ems-primary-600);
-    color: var(--ems-neutral-0);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
-}
-
-@media (max-width: 640px) {
-    .final-result-exitbar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-        bottom: 10px;
-    }
-    .final-result-exitbar__btn {
-        justify-content: center;
-    }
-    .result-container[data-final-result-timeout] {
-        padding-bottom: 160px;
-    }
-}
-
-
-/* ===== Student paint preview ===== */
-.paint-answer-box{
-    border: 1px solid var(--ems-gray-200);
-    border-radius: 12px;
+.paint-answer-box {
+    display: grid;
+    gap: var(--ems-sp-2);
     padding: 12px;
-    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
     overflow: hidden;
-  }
-  
-  .paint-open-link{
+}
+
+.paint-open-link {
     display: block;
+    max-height: 520px;
+    overflow: auto;
+    border-radius: var(--ems-r-lg);
     text-decoration: none;
-    border-radius: 10px;
-    overflow: auto;      /* böyükdürsə scroll olsun */
-    max-height: 520px;   /* istəsən 400/600 et */
-  }
-  
-  .paint-answer-img{
+}
+
+.paint-answer-img {
     display: block;
     width: 100%;
     max-width: 100%;
     height: 250px;
-    border-radius: 10px;
-    border: 1px solid var(--ems-gray-200);
-    background: #f9fafb;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle);
     object-fit: contain;
-  }
-  
-
-/* Mobil Uyğunluq */
-@media (max-width: 992px) {
-    .result-container {
-        padding-left: 16px;
-        padding-right: 16px;
-    }
 }
 
-@media (max-width: 768px) {
-    .result-container {
-        max-width: 100%;
-        padding-left: 14px;
-        padding-right: 14px;
-        padding-bottom: 24px;
-        margin: 20px auto;
-    }
-    .page-title {
-        font-size: 1.4rem;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-    }
-    .summary-card {
-        padding: 18px;
-        max-width: 100%;
-    }
-    .main-score .stat-value { font-size: 2.45rem; }
-    .score-points-value { padding: 0 58px; }
-    .score-percent-chip {
-        right: 0;
-        min-width: 48px;
-        padding: 6px 9px;
-        font-size: 0.85rem;
-    }
-    .test-stats-grid { gap: 10px 14px; }
-    /* Telefonda sətirdə 2 kart; tək qalan (5-ci) sətri tam doldurur. */
-    .test-stats-grid > .stat-item { flex: 1 1 calc(50% - 7px); }
-    .result-action-panel {
-        flex-direction: column;
-        align-items: stretch;
-        margin-top: 0;
-    }
-    .result-action-panel__actions {
-        justify-content: stretch;
-    }
-    .result-action-panel__actions .btn {
-        flex: 1 1 180px;
-    }
-    .action-footer__inner {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-    }
-    .action-footer .btn,
-    .custom-blue-btn { width: 100%; justify-content: center; }
-    .question-media img, .question-media video { max-height: 250px; }
-    .q-header {
-        padding: 16px;
-        flex-direction: column;
-        gap: 10px;
-    }
-    .q-body {
-        padding: 16px;
-    }
-    .option-item {
-        padding: 12px 14px;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-    .tf-header {
-        flex-direction: column;
-        gap: 10px;
-        align-items: flex-start;
-        padding: 12px 16px;
-    }
-    .section-title {
-        font-size: 1.25rem;
-    }
+/* Müəllim rəyi */
+.teacher-feedback-box {
+    border: 1px solid var(--ems-primary-200);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+    overflow: hidden;
 }
 
-@media (max-width: 480px) {
-    .result-container {
-        padding-left: 10px;
-        padding-right: 10px;
-        margin: 14px auto;
-    }
-    .page-title {
-        font-size: 1.2rem;
-    }
-    .summary-card {
-        padding: 16px;
-        border-radius: 12px;
-    }
-    .main-score .stat-value {
-        font-size: 2rem;
-    }
-    .score-display-row {
-        flex-direction: column;
-        gap: 8px;
-    }
-    .score-points-value {
-        padding: 0;
-    }
-    .score-percent-chip {
-        position: static;
-        transform: none;
-    }
-    .q-header {
-        padding: 12px;
-    }
-    .q-body {
-        padding: 12px;
-    }
-    .custom-blue-btn {
-        padding: 10px 18px;
-        font-size: 0.9rem;
-    }
-    .action-footer__inner {
-        grid-template-columns: 1fr;
-    }
-    .section-divider {
-        margin: 30px 0 20px 0;
-    }
+.tf-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--ems-primary-100);
+    background: var(--ems-primary-50);
 }
 
-
-/* ── Elektron jurnal nəticəsi (giriş + imtahan → ümumi bal + A–F hərf) ──────
-   İmtahan mərkəzi ↔ jurnal körpüsü. Göy palitrada, müasir kart. */
-.journal-result-card {
-    margin: 0 0 1.25rem;
-    padding: 1rem 1.25rem;
-    border: 1px solid #dbe4ff;
-    border-radius: 14px;
-    background: linear-gradient(180deg, #f5f8ff 0%, #eef3ff 100%);
-}
-.journal-result-card .jr-head {
+.tf-who {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-weight: 700;
-    font-size: 0.85rem;
-    color: #1e3a8a;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    margin-bottom: 0.75rem;
+    gap: var(--ems-sp-2);
 }
-.journal-result-card .jr-body {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-}
-.journal-result-card .jr-part {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 84px;
-    padding: 0.5rem 0.75rem;
-    background: #fff;
-    border: 1px solid #e2e8f5;
-    border-radius: 10px;
-}
-.journal-result-card .jr-total { border-color: #2563eb; box-shadow: 0 0 0 1px #2563eb inset; }
-.journal-result-card .jr-part-label { font-size: 0.72rem; color: #64748b; font-weight: 600; }
-.journal-result-card .jr-part-value { font-size: 1.35rem; font-weight: 800; color: #1e293b; }
-.journal-result-card .jr-plus,
-.journal-result-card .jr-eq { font-size: 1.25rem; font-weight: 700; color: var(--ems-neutral-500); }
-.journal-result-card .jr-letter {
-    margin-left: auto;
+
+.tf-avatar {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 58px;
-    height: 58px;
-    border-radius: 14px;
-    font-size: 1.9rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+}
+
+.tf-title {
     font-weight: 800;
-    color: #fff;
-    background: #2563eb;
-}
-.journal-result-card .jr-letter--fail,
-.journal-result-card .jr-letter--f { background: #dc2626; }
-.journal-result-card .jr-note {
-    margin-top: 0.75rem;
-    font-size: 0.82rem;
-    font-weight: 600;
-    padding: 0.45rem 0.7rem;
-    border-radius: 8px;
-}
-.journal-result-card .jr-note--pass { color: #15803d; background: #f0fdf4; }
-.journal-result-card .jr-note--fail,
-.journal-result-card .jr-note--barred { color: #b42318; background: #fef3f2; }
-
-/* Sınaq (trial) nəticəsi: final-mərkəz çıxış zolağının əvəzinə məlumat qeydi.
-   Müəllim sınaqda /exams/final/ PIN səhifəsinə atılmır. */
-.trial-result-note {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    margin: 18px auto 0;
-    max-width: 900px;
-    padding: 14px 18px;
-    border: 1px solid #99f6e4;
-    border-left: 4px solid #0f766e;
-    border-radius: 10px;
-    background: #f0fdfa;
-    color: #134e4a;
+    color: var(--ems-primary-800);
 }
 
-.trial-result-note__icon {
-    font-size: 1.1rem;
-    margin-top: 2px;
-    color: #0f766e;
-}
-
-.trial-result-note__title {
+.tf-score {
+    padding: 4px 12px;
+    border: 1px solid var(--ems-primary-200);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-bg);
+    color: var(--ems-primary-800);
     font-weight: 700;
-    margin-bottom: 2px;
 }
 
-.trial-result-note__text {
-    font-size: 0.92rem;
-    opacity: 0.9;
+.tf-body {
+    padding: 16px;
+    color: var(--ems-neutral-800);
+    line-height: 1.6;
+}
+
+.tf-body p:last-child {
+    margin-bottom: 0;
+}
+
+/* ── Planşet / telefon ──────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .q-header {
+        flex-direction: column;
+        gap: 10px;
+        padding: 14px;
+    }
+
+    .q-body {
+        padding: 14px;
+    }
+
+    .option-item {
+        flex-wrap: wrap;
+        padding: 10px 12px;
+    }
+
+    .question-media img,
+    .question-media video {
+        max-height: 250px;
+    }
+
+    .tf-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }

@@ -440,6 +440,12 @@ def review_results(request):
     return _render_profile_section(request, "review-results")
 
 
+def _reviewer_display(submission):
+    """«Yoxlayan» — ``graded_by`` artıq select_related-dədir (əlavə sorğu yox)."""
+    grader = submission.graded_by if submission.graded_by_id else None
+    return (grader.get_full_name() or grader.username) if grader else ""
+
+
 @login_required
 def review_result_detail(request, item_type, item_id):
     """Teacher-facing detail page for graded assignment/project/lab results."""
@@ -471,7 +477,8 @@ def review_result_detail(request, item_type, item_id):
         )
         context = {
             "item_type": normalized_type,
-            "item_type_label": "Sərbəst iş",
+            "item_type_label": _pending_review_type_label(normalized_type),
+            "reviewer_display": _reviewer_display(submission),
             "item_title": submission.assignment.title,
             "course_title": submission.assignment.course.title,
             "student": submission.user,
@@ -498,7 +505,8 @@ def review_result_detail(request, item_type, item_id):
 
         context = {
             "item_type": normalized_type,
-            "item_type_label": "Kurs işi",
+            "item_type_label": _pending_review_type_label(normalized_type),
+            "reviewer_display": _reviewer_display(submission),
             "item_title": submission.project.title,
             "course_title": submission.project.course.title,
             "student": submission.student,
@@ -515,7 +523,7 @@ def review_result_detail(request, item_type, item_id):
 
     submission = get_object_or_404(
         LabSubmission.objects.select_related(
-            "assignment", "assignment__lab", "assignment__lab__course", "assignment__student"
+            "assignment", "assignment__lab", "assignment__lab__course", "assignment__student", "graded_by"
         ),
         id=item_id,
         assignment__lab__course__in=teacher_courses,
@@ -551,7 +559,8 @@ def review_result_detail(request, item_type, item_id):
 
     context = {
         "item_type": normalized_type,
-        "item_type_label": "Lab işi",
+        "item_type_label": _pending_review_type_label(normalized_type),
+        "reviewer_display": _reviewer_display(submission),
         "item_title": submission.assignment.lab.title,
         "course_title": submission.assignment.lab.course.title,
         "student": submission.assignment.student,

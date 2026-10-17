@@ -1,0 +1,54 @@
+{% load i18n exam_filters %}
+{# Statistika KPI-ları: 4 əsas + 4 köməkçi, hər ikisi 4 sütunlu tor (yarımçıq ikinci sıra yoxdur). #}
+<section class="etp-kpis tes-kpis" aria-label="{% trans 'Xülasə' context 'exams.template.teacher_exam_results' %}">
+    <div class="etp-kpi etp-kpi--primary">
+        <span class="etp-kpi__icon"><i class="fas fa-users" aria-hidden="true"></i></span>
+        <span class="etp-kpi__body"><span class="etp-kpi__value">{{ total_attempts }}</span><span class="etp-kpi__label">{% trans "card_total_attempts" context "exams.template.exam_statistics" %}</span></span>
+    </div>
+    <div class="etp-kpi etp-kpi--violet">
+        <span class="etp-kpi__icon"><i class="fas fa-chart-simple" aria-hidden="true"></i></span>
+        <span class="etp-kpi__body">
+            <span class="etp-kpi__value">{% if is_written %}{{ avg_raw_score }}<small class="tes-kpi__sub">/{{ max_possible_score }}</small>{% else %}{{ avg_score }}%{% endif %}</span>
+            <span class="etp-kpi__label">{% trans "card_avg_score" context "exams.template.exam_statistics" %}</span>
+        </span>
+    </div>
+    <div class="etp-kpi etp-kpi--success">
+        <span class="etp-kpi__icon"><i class="fas fa-circle-check" aria-hidden="true"></i></span>
+        <span class="etp-kpi__body">
+            <span class="etp-kpi__value">{{ pass_rate }}%</span>
+            <span class="etp-kpi__label">{% trans "card_pass_rate" context "exams.template.exam_statistics" %} · ≥{{ pass_threshold }}%</span>
+        </span>
+    </div>
+    <div class="etp-kpi etp-kpi--warning">
+        <span class="etp-kpi__icon"><i class="fas fa-clock" aria-hidden="true"></i></span>
+        <span class="etp-kpi__body"><span class="etp-kpi__value tes-kpi__value--text">{% if avg_duration %}{{ avg_duration|format_duration }}{% else %}–{% endif %}</span><span class="etp-kpi__label">{% trans "card_avg_duration" context "exams.template.exam_statistics" %}</span></span>
+    </div>
+
+    <div class="etp-kpi tes-kpi--minor">
+        <span class="etp-kpi__icon"><i class="fas fa-trophy" aria-hidden="true"></i></span>
+        <span class="etp-kpi__body">
+            <span class="etp-kpi__value">{% if is_written %}{{ max_raw_score }}<small class="tes-kpi__sub">/{{ max_possible_score }}</small>{% else %}{{ max_score }}%{% endif %}</span>
+            <span class="etp-kpi__label">{% trans "card_max_score" context "exams.template.exam_statistics" %}</span>
+        </span>
+    </div>
+    <div class="etp-kpi tes-kpi--minor">
+        <span class="etp-kpi__icon"><i class="fas fa-arrow-trend-down" aria-hidden="true"></i></span>
+        <span class="etp-kpi__body">
+            <span class="etp-kpi__value">{% if is_written %}{{ min_raw_score }}<small class="tes-kpi__sub">/{{ max_possible_score }}</small>{% else %}{{ min_score }}%{% endif %}</span>
+            <span class="etp-kpi__label">{% trans "card_min_score" context "exams.template.exam_statistics" %}</span>
+        </span>
+    </div>
+    <div class="etp-kpi tes-kpi--minor">
+        {% if is_written %}
+        <span class="etp-kpi__icon"><i class="fas fa-user-check" aria-hidden="true"></i></span>
+        <span class="etp-kpi__body"><span class="etp-kpi__value">{{ checked_count }}<small class="tes-kpi__sub">/{{ total_attempts }}</small></span><span class="etp-kpi__label">{% trans "card_checked" context "exams.template.exam_statistics" %}</span></span>
+        {% else %}
+        <span class="etp-kpi__icon"><i class="fas fa-paper-plane" aria-hidden="true"></i></span>
+        <span class="etp-kpi__body"><span class="etp-kpi__value">{{ submitted_count }}</span><span class="etp-kpi__label">{% trans "card_submitted" context "exams.template.exam_statistics" %}</span></span>
+        {% endif %}
+    </div>
+    <div class="etp-kpi tes-kpi--minor">
+        <span class="etp-kpi__icon"><i class="fas fa-hourglass-end" aria-hidden="true"></i></span>
+        <span class="etp-kpi__body"><span class="etp-kpi__value">{{ expired_count }}</span><span class="etp-kpi__label">{% trans "card_expired" context "exams.template.exam_statistics" %}</span></span>
+    </div>
+</section>

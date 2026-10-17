@@ -52,5 +52,6 @@ class MyResultsStatusBadgeTest(TestCase):
             response = self.client.get(reverse("accounts:profile"), {"section": "my-results", "results_type": "exams"})
         self.assertEqual(response.status_code, 200)
         html = response.content.decode("utf-8")
-        self.assertIn('class="status-badge status-submitted">Təqdim edilib</span>', html)
-        self.assertNotIn('class="status-badge status-submitted">submitted</span>', html)
+        # Paket A (2026-10-18): badge `status_catalog` («student_result») ailəsindən render olunur.
+        self.assertRegex(html, r'class="ems-badge ems-badge--primary">\s*Təqdim edilib\s*</span>')
+        self.assertNotRegex(html, r'class="ems-badge[^"]*">\s*submitted\s*</span>')

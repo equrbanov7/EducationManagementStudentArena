@@ -1,559 +1,581 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const i18n = window.TEACHER_CHECK_I18N || {};
-    const t = {
-        modalTitleDetails: i18n.modalTitleDetails || "label_question",
-        noAnswer: i18n.noAnswer || "label_no_answer",
-        pointsUnit: i18n.pointsUnit || "unit_points",
-        statusNotChecked: i18n.statusNotChecked || "status_not_checked",
-        saveButtonDirty: i18n.saveButtonDirty || "Save",
-        confirmTitle: i18n.confirmTitle || "Save review",
-        confirmMessage: i18n.confirmMessage || "Are you sure you want to save and finalize this review?",
-        aiGrading: i18n.aiGrading || "AI is grading...",
-        aiGradeBtn: i18n.aiGradeBtn || "Grade with AI",
-        aiError: i18n.aiError || "AI grading error",
-        aiCached: i18n.aiCached || "Cached",
-        aiQuotaInfo: i18n.aiQuotaInfo || "{remaining}/{limit} ({window})",
-        aiNoAnswer: i18n.aiNoAnswer || "No answer to grade",
-        uploadedFilesLabel: i18n.uploadedFilesLabel || "Uploaded files",
-        answeredWithPaint: i18n.answeredWithPaint || "Answered with paint",
-    };
+/*
+ * teacher_check_attempt.js — yoxlama səhifəsinin dialoq + saxlama qatı (Paket B, 2026-10-17).
+ * Source: exams/teacher/teacher_check_attempt.html
+ *
+ * Vəziyyət/cəmi bal/klaviatura naviqasiyası teacher_check_attempt_ui.js-dədir
+ * (window.TCAGrading). Bu fayl:
+ *   • «Ətraflı» dialoqu (#questionModal): sualın tam mətni, cavab, AI qiymətləndirmə,
+ *     əvvəlki/növbəti (Alt+←/→), Enter → tətbiq et və növbəti; Escape/×/fon → dəyişiklik
+ *     varsa xəbərdarlıq (#warningModal);
+ *   • «Geri» keçidi və səhifədən çıxış — yadda saxlanmamış dəyişiklik xəbərdarlığı;
+ *   • göndərmə təsdiqi (window.openActionConfirmModal) və Ctrl/⌘+S.
+ * Form sahələri (score_<id>, feedback_<id>), POST ünvanı və ID-lər dəyişməyib.
+ */
+(function () {
+    "use strict";
 
-    // Elementlər
-    const modal = document.getElementById('questionModal');
-    const backdrop = document.getElementById('modalBackdrop');
-    const warningModal = document.getElementById('warningModal'); 
-    const mainSaveBtn = document.getElementById('mainSaveBtn');
-    const backBtn = document.getElementById('backBtn'); // HTML-də id="backBtn" olduğundan əmin olun
-    const gradingForm = document.getElementById('gradingForm');
-    const modalScoreInput = document.getElementById('modalScoreInput');
-    const modalMaxPointsInput = document.getElementById('modalMaxPointsInput');
-    
-    let isFormDirty = false;  
-    let isModalDirty = false;
-    let submitConfirmed = false;
-    
-    // YENİ: İtifadıçının getmək istədiyi ünvanı yadda saxlamaq üçün dəyişən
-    let pendingNavigationUrl = null; 
-
-    function normalizePositiveIntegerInput(input, fallbackValue = '1') {
-        if (!input) return fallbackValue;
-        const rawValue = String(input.value || '').trim();
-        if (rawValue === '') {
-            input.value = fallbackValue;
-            return input.value;
-        }
-
-        const parsed = parseInt(rawValue, 10);
-        if (!Number.isFinite(parsed) || parsed < 1) {
-            input.value = fallbackValue;
-            return input.value;
-        }
-
-        input.value = String(parsed);
-        return input.value;
-    }
-
-    function readNonNegativeIntegerValue(input) {
-        if (!input) return null;
-        const normalized = String(input.value || '').trim().replace(',', '.');
-        if (!normalized) {
-            return null;
-        }
-        const match = normalized.match(/^-?\d+/);
-        if (!match) {
-            return null;
-        }
-        const parsed = parseInt(match[0], 10);
-        if (!Number.isFinite(parsed)) {
-            return null;
-        }
-        return parsed < 0 ? 0 : parsed;
-    }
-
-    function syncScoreConstraints() {
-        if (!modalScoreInput || !modalMaxPointsInput) return;
-        // EXAM-P0-04: max bal serverdə snapshot-dan gəlir və dəyişməzdir;
-        // bal max-ı aşarsa bal max-a endirilir (əvvəlki "max-ı qaldır" davranışı yox).
-        const maxPoints = parseInt(normalizePositiveIntegerInput(
-            modalMaxPointsInput,
-            modalMaxPointsInput.getAttribute('min') || '1'
-        ), 10);
-        if (!Number.isFinite(maxPoints)) return;
-        modalScoreInput.setAttribute('max', String(maxPoints));
-
-        const scoreValue = readNonNegativeIntegerValue(modalScoreInput);
-        if (scoreValue !== null && scoreValue > maxPoints) {
-            modalScoreInput.value = String(maxPoints);
-        }
-    }
-
-    // 1. Kartlara klikləmə
-    document.querySelectorAll('.question-card').forEach(card => {
-        card.addEventListener('click', (event) => {
-            if (event.target.closest('[data-review-card-ignore], a, button, input, textarea, select, details, summary, pre')) {
-                return;
-            }
-            const qId = card.getAttribute('data-question-id');
-            openModal(qId);
-        });
-    }); 
-
-    // 2. Modalı açmaq
-    function openModal(qId) {
-        const currentScore = document.getElementById(`hidden_score_${qId}`).value;
-        const currentFeedback = document.getElementById(`hidden_feedback_${qId}`).value;
-        const currentMaxPoints = document.getElementById(`hidden_max_points_${qId}`).value;
-
-        const card = document.querySelector(`.question-card[data-question-id="${qId}"]`);
-        const dataStore = card.querySelector('.data-store');
-
-        document.getElementById('modalTitle').textContent = `${t.modalTitleDetails} #${qId}`;
-        document.getElementById('modalQuestionText').innerText = dataStore.getAttribute('data-q-text');
-
-        const ansText = dataStore.getAttribute('data-ans-text');
-        const hasAnswer = dataStore.getAttribute('data-has-answer') === '1';
-        const hasAiGradable = dataStore.getAttribute('data-has-ai-gradable') === '1';
-        const hasFileAnswer = dataStore.getAttribute('data-has-file-answer') === '1';
-        const hasPaintAnswer = dataStore.getAttribute('data-has-paint-answer') === '1';
-        const modalAnswerEl = document.getElementById('modalAnswerText');
-        const codeFilesReview = card.querySelector('.coding-files-review');
-        if (codeFilesReview) {
-            modalAnswerEl.innerHTML = '';
-            modalAnswerEl.appendChild(codeFilesReview.cloneNode(true));
-        } else if (ansText) {
-            modalAnswerEl.textContent = ansText;
-        } else if (hasFileAnswer || hasPaintAnswer) {
-            modalAnswerEl.innerHTML = '';
-            const infoEl = document.createElement('i');
-            infoEl.className = 'text-muted';
-            infoEl.textContent = hasFileAnswer ? t.uploadedFilesLabel : t.answeredWithPaint;
-            modalAnswerEl.appendChild(infoEl);
-        } else if (hasAnswer) {
-            modalAnswerEl.innerHTML = '';
-            const infoEl = document.createElement('i');
-            infoEl.className = 'text-muted';
-            infoEl.textContent = t.statusNotChecked;
-            modalAnswerEl.appendChild(infoEl);
-        } else {
-            // Use DOM manipulation to safely add italic element
-            modalAnswerEl.innerHTML = '';
-            const italicEl = document.createElement('i');
-            italicEl.className = 'text-danger';
-            italicEl.textContent = t.noAnswer;
-            modalAnswerEl.appendChild(italicEl);
-        }
-
-        document.getElementById('modalScoreInput').value = currentScore;
-        document.getElementById('modalFeedbackInput').value = currentFeedback;
-        document.getElementById('currentQuestionId').value = qId;
-        normalizeIntegerInput(modalScoreInput);
-
-        const maxPoints = currentMaxPoints || dataStore.getAttribute('data-q-points') || '1';
-        if (modalMaxPointsInput) {
-            modalMaxPointsInput.value = maxPoints;
-            modalMaxPointsInput.setAttribute('placeholder', maxPoints);
-        }
-        if (modalScoreInput) {
-            modalScoreInput.setAttribute('placeholder', '0');
-        }
-        syncScoreConstraints();
-
-        // Reset AI grade button state
-        const aiBtn = document.getElementById('aiGradeBtn');
-        const aiStatus = document.getElementById('aiGradeStatus');
-        if (aiBtn) {
-            aiBtn.disabled = !hasAiGradable;
-            aiBtn.classList.remove('is-loading');
-            // Restore button inner elements visibility
-            const iconEl = aiBtn.querySelector('.btn-ai-grade__icon');
-            const textEl = aiBtn.querySelector('.btn-ai-grade__text');
-            const loaderEl = aiBtn.querySelector('.btn-ai-grade__loader');
-            if (iconEl) iconEl.style.display = '';
-            if (textEl) textEl.style.display = '';
-            if (loaderEl) loaderEl.style.display = 'none';
-        }
-        if (aiStatus) {
-            aiStatus.textContent = '';
-            aiStatus.className = 'ai-grade-status';
-        }
-
-        backdrop.style.display = 'block';
-        modal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
-
-        isModalDirty = false;
-    }
-
-    // 3. Modalda dəyişiklik izləmə
-    ['modalScoreInput', 'modalMaxPointsInput', 'modalFeedbackInput'].forEach(id => {
-        document.getElementById(id).addEventListener('input', () => {
-            isModalDirty = true;
-        });
-    });
-
-    if (modalScoreInput) {
-        modalScoreInput.addEventListener('blur', () => {
-            normalizeIntegerInput(modalScoreInput);
-            syncScoreConstraints();
-        });
-    }
-
-    if (modalMaxPointsInput) {
-        modalMaxPointsInput.addEventListener('input', syncScoreConstraints);
-        modalMaxPointsInput.addEventListener('blur', () => {
-            normalizePositiveIntegerInput(modalMaxPointsInput);
-            syncScoreConstraints();
-        });
-    }
-
-    // 4. Overlay Click
-    backdrop.addEventListener('click', (e) => {
-        if (e.target === backdrop) {
-            attemptCloseModal();
-        }
-    });
-
-    // ===============================================
-    // YENİ: "Geri" Düyməsi Məntiqi
-    // ===============================================
-    if (backBtn) {
-        backBtn.addEventListener('click', (e) => {
-            // Əgər dəyişiklik varsa, standart keçidi dayandır və xəbərdarlıq aç
-            if (isFormDirty) {
-                e.preventDefault(); 
-                pendingNavigationUrl = backBtn.getAttribute('href'); // Hara getmək istədiyini yadda saxla
-                warningModal.style.display = 'flex';
-            }
-            // Əgər dəyişiklik yoxdursa, heç nə etmə, qoy link işləsin
-        });
-    }
-
-    // ===============================================
-    // Xəbərdarlıq Sistemi (Yenilənmiş)
-    // ===============================================
-    
-    // Sual modalından çıxmağa cəhd edəndə
-    function attemptCloseModal() {
-        if (isModalDirty) {
-            warningModal.style.display = 'flex'; 
-        } else {
-            closeMainModal();
-        }
-    }
-
-    // "Xeyr" (Qayıt)
-    function closeWarningModal() {
-        warningModal.style.display = 'none';
-        pendingNavigationUrl = null; // Gediləcək yolu sıfırla
-    }
-
-    // "Bəli" (Məcburi Bağla/Get) - ƏSAS DƏYİŞİKLİK BURADADIR
-    function forceCloseModal() {
-        warningModal.style.display = 'none';
-        
-        // SENARİ 1: İstifadəçi "Geri" düyməsinə basıb səhifədən getmək istəyir
-        if (pendingNavigationUrl) {
-            isFormDirty = false; // Brauzerin öz xəbərdarlığını söndürürük
-            window.location.href = pendingNavigationUrl; // Yadda saxlanılan linkə yönləndiririk
-        }
-        // SENARİ 2: İstifadəçi sadəcə Sual Modalını bağlamaq istəyir
-        else {
-            isModalDirty = false;
-            closeMainModal();
-        }
-    }
-
-    // Əsas sual modalını bağlayan funksiya
-    function closeMainModal() {
-        backdrop.style.display = 'none';
-        modal.style.display = 'none';
-        document.body.style.overflow = '';
-        isModalDirty = false;
-    }
-
-    // 5. Yadda Saxla (Modal daxili)
-    function saveFromModal() {
-        const qId = document.getElementById('currentQuestionId').value;
-        if (modalMaxPointsInput) {
-            normalizePositiveIntegerInput(modalMaxPointsInput);
-        }
-        syncScoreConstraints();
-        normalizeIntegerInput(modalScoreInput);
-        if ((modalMaxPointsInput && !modalMaxPointsInput.checkValidity()) || !modalScoreInput.checkValidity()) {
-            if (modalMaxPointsInput && !modalMaxPointsInput.checkValidity()) {
-                modalMaxPointsInput.reportValidity();
-            } else {
-                modalScoreInput.reportValidity();
-            }
+    function init() {
+        var root = document.querySelector("[data-tca-root]");
+        var G = window.TCAGrading;
+        if (!root || !G) {
             return;
         }
-        const newScore = document.getElementById('modalScoreInput').value;
-        const newFeedback = document.getElementById('modalFeedbackInput').value;
-        const newMaxPoints = modalMaxPointsInput ? modalMaxPointsInput.value : '';
-
-        document.getElementById(`hidden_score_${qId}`).value = newScore;
-        document.getElementById(`hidden_feedback_${qId}`).value = newFeedback;
-        document.getElementById(`hidden_max_points_${qId}`).value = newMaxPoints;
-
-        const badge = document.getElementById(`badge_${qId}`);
-        const card = document.querySelector(`.question-card[data-question-id="${qId}"]`);
-        const dataStore = card ? card.querySelector('.data-store') : null;
-        if (dataStore && newMaxPoints) {
-            dataStore.setAttribute('data-q-points', newMaxPoints);
+        var i18n = window.TEACHER_CHECK_I18N || {};
+        var t = {
+            modalTitleDetails: i18n.modalTitleDetails || "Question details",
+            noAnswer: i18n.noAnswer || "No answer",
+            pointsUnit: i18n.pointsUnit || "pts",
+            statusNotChecked: i18n.statusNotChecked || "Not reviewed",
+            confirmTitle: i18n.confirmTitle || "Save review",
+            confirmMessage: i18n.confirmMessage || "Are you sure you want to save and finalize this review?",
+            aiGrading: i18n.aiGrading || "AI is grading...",
+            aiError: i18n.aiError || "AI grading error",
+            aiCached: i18n.aiCached || "Cached",
+            aiQuotaInfo: i18n.aiQuotaInfo || "{remaining}/{limit} ({window})",
+            aiNoAnswer: i18n.aiNoAnswer || "No answer to grade",
+            uploadedFilesLabel: i18n.uploadedFilesLabel || "Uploaded files",
+            answeredWithPaint: i18n.answeredWithPaint || "Answered with paint",
+            stateSaving: i18n.stateSaving || "Saving…",
+            questionN: i18n.questionN || "Question %(n)s",
+        };
+        if (!G.init(i18n)) {
+            return; // artıq bağlanıb (idempotent)
         }
-        if (newScore) {
-            badge.className = 'status-badge status-scored';
-            badge.textContent = `${newScore} ${t.pointsUnit}`;
-        } else {
-            badge.className = 'status-badge status-not-checked';
-            badge.textContent = t.statusNotChecked;
+
+        var backdrop = document.getElementById("modalBackdrop");
+        var modal = document.getElementById("questionModal");
+        var warning = document.getElementById("warningModal");
+        var form = document.getElementById("gradingForm");
+        var mainSaveBtn = document.getElementById("mainSaveBtn");
+        var backBtn = document.getElementById("backBtn");
+        var scoreEl = document.getElementById("modalScoreInput");
+        var maxEl = document.getElementById("modalMaxPointsInput");
+        var feedbackEl = document.getElementById("modalFeedbackInput");
+        var currentEl = document.getElementById("currentQuestionId");
+        var prevBtn = document.getElementById("modalPrevBtn");
+        var nextBtn = document.getElementById("modalNextBtn");
+        var aiBtn = document.getElementById("aiGradeBtn");
+        var aiStatus = document.getElementById("aiGradeStatus");
+
+        var modalDirty = false;
+        var submitConfirmed = false;
+        var pendingNavigationUrl = null;
+        var pendingAfterWarning = null;
+        var returnFocus = null;
+
+        function isOpen(el) {
+            return el && !el.hidden;
         }
 
-        markFormAsDirty();
-        isModalDirty = false;
-        closeMainModal();
-    }
+        function dataStore(qId) {
+            var card = document.getElementById("tca-q-" + qId);
+            return card ? card.querySelector(".data-store") : null;
+        }
 
-    // Wire up modal button event listeners (CSP-compliant: no inline onclick)
-    const modalCloseBtn = document.getElementById('modalCloseBtn');
-    const modalCancelBtn = document.getElementById('modalCancelBtn');
-    const modalSaveBtn = document.getElementById('modalSaveBtn');
-    const warningCancelBtn = document.getElementById('warningCancelBtn');
-    const warningConfirmBtn = document.getElementById('warningConfirmBtn');
+        function lockScroll(lock) {
+            document.body.classList.toggle("modal-open", lock);
+            document.documentElement.classList.toggle("ems-modal-open", lock);
+        }
 
-    if (modalCloseBtn) modalCloseBtn.addEventListener('click', attemptCloseModal);
-    if (modalCancelBtn) modalCancelBtn.addEventListener('click', attemptCloseModal);
-    if (modalSaveBtn) modalSaveBtn.addEventListener('click', saveFromModal);
-    if (warningCancelBtn) warningCancelBtn.addEventListener('click', closeWarningModal);
-    if (warningConfirmBtn) warningConfirmBtn.addEventListener('click', forceCloseModal);
-
-    // ===============================================
-    // AI Grade Button
-    // ===============================================
-    const aiGradeBtn = document.getElementById('aiGradeBtn');
-    const aiGradeStatus = document.getElementById('aiGradeStatus');
-
-    function setAiButtonLoading(loading) {
-        if (!aiGradeBtn) return;
-        if (loading) {
-            aiGradeBtn.disabled = true;
-            aiGradeBtn.classList.add('is-loading');
-            const iconEl = aiGradeBtn.querySelector('.btn-ai-grade__icon');
-            const textEl = aiGradeBtn.querySelector('.btn-ai-grade__text');
-            const loaderEl = aiGradeBtn.querySelector('.btn-ai-grade__loader');
-            if (iconEl) iconEl.style.display = 'none';
-            if (textEl) textEl.style.display = 'none';
-            if (loaderEl) {
-                loaderEl.style.display = 'inline-flex';
-                loaderEl.innerHTML = '';
-                const spinIcon = document.createElement('i');
-                spinIcon.className = 'fas fa-circle-notch fa-spin';
-                loaderEl.appendChild(spinIcon);
-                const loadingText = document.createTextNode(' ' + t.aiGrading);
-                loaderEl.appendChild(loadingText);
+        /* ---- dialoq ------------------------------------------------------- */
+        function fillAnswer(qId) {
+            var store = dataStore(qId);
+            var answerEl = document.getElementById("modalAnswerText");
+            var card = document.getElementById("tca-q-" + qId);
+            if (!store || !answerEl) {
+                return;
             }
-        } else {
-            aiGradeBtn.disabled = false;
-            aiGradeBtn.classList.remove('is-loading');
-            const iconEl = aiGradeBtn.querySelector('.btn-ai-grade__icon');
-            const textEl = aiGradeBtn.querySelector('.btn-ai-grade__text');
-            const loaderEl = aiGradeBtn.querySelector('.btn-ai-grade__loader');
-            if (iconEl) iconEl.style.display = '';
-            if (textEl) textEl.style.display = '';
-            if (loaderEl) loaderEl.style.display = 'none';
+            answerEl.textContent = "";
+            var codeFiles = card ? card.querySelector(".coding-files-review") : null;
+            var ansText = store.getAttribute("data-ans-text");
+            var note = null;
+            if (codeFiles) {
+                answerEl.appendChild(codeFiles.cloneNode(true));
+            } else if (ansText) {
+                answerEl.textContent = ansText;
+            } else if (store.getAttribute("data-has-file-answer") === "1") {
+                note = t.uploadedFilesLabel;
+            } else if (store.getAttribute("data-has-paint-answer") === "1") {
+                note = t.answeredWithPaint;
+            } else if (store.getAttribute("data-has-answer") === "1") {
+                note = t.statusNotChecked;
+            } else {
+                note = t.noAnswer;
+            }
+            if (note) {
+                var em = document.createElement("em");
+                em.className = "tca-dialog__muted";
+                em.textContent = note;
+                answerEl.appendChild(em);
+            }
         }
-    }
 
-    if (aiGradeBtn) {
-        aiGradeBtn.addEventListener('click', function handleAiGradeClick(e) {
-            e.preventDefault();
-            e.stopPropagation();
+        function loadQuestion(qId) {
+            var store = dataStore(qId);
+            if (!store) {
+                return;
+            }
+            var card = document.getElementById("tca-q-" + qId);
+            var index = card ? card.getAttribute("data-index") : "";
+            var ids = G.orderedIds();
+            document.getElementById("modalTitle").textContent = t.questionN.replace("%(n)s", index);
+            var sub = document.getElementById("modalSubtitle");
+            if (sub) {
+                sub.textContent = t.modalTitleDetails + " · " + index + " / " + ids.length;
+            }
+            document.getElementById("modalQuestionText").textContent = store.getAttribute("data-q-text") || "";
+            fillAnswer(qId);
 
-            const qId = document.getElementById('currentQuestionId').value;
-            if (!qId) return;
-
-            const card = document.querySelector('.question-card[data-question-id="' + qId + '"]');
-            if (!card) return;
-            const dataStore = card.querySelector('.data-store');
-            if (!dataStore) return;
-            const ansText = dataStore.getAttribute('data-ans-text');
-            const hasAiGradable = dataStore.getAttribute('data-has-ai-gradable') === '1';
-
-            if (!ansText && !hasAiGradable) {
-                if (aiGradeStatus) {
-                    aiGradeStatus.textContent = t.aiNoAnswer;
-                    aiGradeStatus.className = 'ai-grade-status ai-grade-error';
+            var model = document.getElementById("modalModelAnswer");
+            var modelText = store.getAttribute("data-q-correct-answer") || "";
+            if (model) {
+                model.hidden = !modelText;
+                model.open = false;
+                var modelBody = model.querySelector("[data-tca-modal-model]");
+                if (modelBody) {
+                    modelBody.textContent = modelText;
                 }
+            }
+
+            currentEl.value = qId;
+            scoreEl.value = G.scoreInput(qId) ? G.scoreInput(qId).value : "";
+            feedbackEl.value = G.feedbackInput(qId) ? G.feedbackInput(qId).value : "";
+            var max = String(G.maxPoints(qId));
+            maxEl.value = max;
+            maxEl.setAttribute("placeholder", max);
+            scoreEl.setAttribute("max", max);
+            scoreEl.setAttribute("placeholder", "\u2013");
+            G.setInvalid(scoreEl, false);
+
+            if (prevBtn) {
+                prevBtn.disabled = !G.neighbour(qId, -1);
+            }
+            if (nextBtn) {
+                nextBtn.disabled = !G.neighbour(qId, 1);
+            }
+            resetAi(store.getAttribute("data-has-ai-gradable") === "1");
+            modalDirty = false;
+            if (window.EMSMath && typeof window.EMSMath.render === "function") {
+                window.EMSMath.render(modal);
+            }
+        }
+
+        function openModal(qId) {
+            if (!backdrop || !modal || !dataStore(qId)) {
                 return;
             }
+            returnFocus = document.activeElement;
+            loadQuestion(qId);
+            backdrop.hidden = false;
+            lockScroll(true);
+            scoreEl.focus();
+            scoreEl.select();
+        }
 
-            if (modalMaxPointsInput) {
-                normalizePositiveIntegerInput(modalMaxPointsInput);
-            }
-            syncScoreConstraints();
-            if (modalMaxPointsInput && !modalMaxPointsInput.checkValidity()) {
-                modalMaxPointsInput.reportValidity();
+        function closeModal() {
+            if (!backdrop) {
                 return;
             }
-
-            const maxPoints = parseInt((modalMaxPointsInput && modalMaxPointsInput.value) || '1', 10);
-            const aiUrl = window.AI_GRADE_URL;
-            if (!aiUrl) return;
-
-            // Loading state
-            setAiButtonLoading(true);
-            if (aiGradeStatus) {
-                aiGradeStatus.textContent = '';
-                aiGradeStatus.className = 'ai-grade-status';
+            backdrop.hidden = true;
+            modalDirty = false;
+            lockScroll(isOpen(warning));
+            var qId = currentEl.value;
+            var fallback = qId ? G.scoreInput(qId) : null;
+            var target = returnFocus && document.contains(returnFocus) ? returnFocus : fallback;
+            if (target && typeof target.focus === "function") {
+                target.focus();
             }
+            returnFocus = null;
+        }
 
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        /* Dialoqdakı dəyərləri karta yazır. Etibarsızdırsa false (fokus sahədə qalır). */
+        function applyModal() {
+            var qId = currentEl.value;
+            if (!qId) {
+                return false;
+            }
+            var max = G.maxPoints(qId);
+            var raw = scoreEl.value.trim();
+            var value = G.parseScore(raw);
+            // badInput: brauzer mətni oxumadı (`value === ""`) — boş sayıb balı SİLMƏ.
+            if (G.isBadInput(scoreEl) || (raw && value === null)) {
+                G.setInvalid(scoreEl, true);
+                scoreEl.focus();
+                return false;
+            }
+            G.setInvalid(scoreEl, false);
+            if (value !== null && value > max) {
+                value = max;
+            }
+            G.setValues(qId, value, feedbackEl.value);
+            modalDirty = false;
+            return true;
+        }
 
-            fetch(aiUrl, {
-                method: 'POST',
+        function move(step) {
+            var target = G.neighbour(currentEl.value, step);
+            if (!target) {
+                return;
+            }
+            if (!applyModal()) {
+                return;
+            }
+            loadQuestion(target);
+            scoreEl.focus();
+            scoreEl.select();
+        }
+
+        function attemptClose() {
+            if (modalDirty) {
+                pendingAfterWarning = function () {
+                    closeModal();
+                };
+                openWarning();
+                return;
+            }
+            closeModal();
+        }
+
+        /* ---- xəbərdarlıq -------------------------------------------------- */
+        function openWarning() {
+            if (!warning) {
+                return;
+            }
+            warning.hidden = false;
+            lockScroll(true);
+            var cancel = document.getElementById("warningCancelBtn");
+            if (cancel) {
+                cancel.focus();
+            }
+        }
+
+        function closeWarning() {
+            warning.hidden = true;
+            pendingNavigationUrl = null;
+            pendingAfterWarning = null;
+            lockScroll(isOpen(backdrop));
+            if (isOpen(backdrop)) {
+                scoreEl.focus();
+            } else if (backBtn) {
+                backBtn.focus();
+            }
+        }
+
+        function confirmWarning() {
+            var url = pendingNavigationUrl;
+            var after = pendingAfterWarning;
+            warning.hidden = true;
+            pendingNavigationUrl = null;
+            pendingAfterWarning = null;
+            if (url) {
+                submitConfirmed = true; // beforeunload xəbərdarlığı təkrar çıxmasın
+                window.location.href = url;
+                return;
+            }
+            modalDirty = false;
+            if (after) {
+                after();
+            }
+            lockScroll(isOpen(backdrop));
+        }
+
+        /* ---- AI qiymətləndirmə ------------------------------------------- */
+        function setAiLoading(loading) {
+            if (!aiBtn) {
+                return;
+            }
+            aiBtn.disabled = loading;
+            aiBtn.classList.toggle("is-loading", loading);
+            aiBtn.setAttribute("aria-busy", loading ? "true" : "false");
+            var icon = aiBtn.querySelector(".btn-ai-grade__icon");
+            var text = aiBtn.querySelector(".btn-ai-grade__text");
+            var loader = aiBtn.querySelector(".btn-ai-grade__loader");
+            if (icon) {
+                icon.hidden = loading;
+            }
+            if (text) {
+                text.textContent = loading ? t.aiGrading : i18n.aiGradeBtn || text.textContent;
+            }
+            if (loader) {
+                loader.hidden = !loading;
+            }
+        }
+
+        function setAiStatus(text, kind) {
+            if (!aiStatus) {
+                return;
+            }
+            aiStatus.textContent = text || "";
+            aiStatus.className = "ai-grade-status" + (kind ? " ai-grade-" + kind : "");
+        }
+
+        function resetAi(enabled) {
+            setAiLoading(false);
+            if (aiBtn) {
+                aiBtn.disabled = !enabled;
+            }
+            setAiStatus("", "");
+        }
+
+        function flash(el) {
+            if (!el) {
+                return;
+            }
+            el.classList.add("ai-filled");
+            window.setTimeout(function () {
+                el.classList.remove("ai-filled");
+            }, 2000);
+        }
+
+        function runAiGrade() {
+            var qId = currentEl.value;
+            var store = qId ? dataStore(qId) : null;
+            var url = window.AI_GRADE_URL;
+            if (!store || !url) {
+                return;
+            }
+            if (!store.getAttribute("data-ans-text") && store.getAttribute("data-has-ai-gradable") !== "1") {
+                setAiStatus(t.aiNoAnswer, "error");
+                return;
+            }
+            setAiLoading(true);
+            setAiStatus("", "");
+            var csrf = document.querySelector("[name=csrfmiddlewaretoken]");
+            fetch(url, {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest',
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrf ? csrf.value : "",
+                    "X-Requested-With": "XMLHttpRequest",
                 },
-                body: JSON.stringify({
-                    question_id: parseInt(qId, 10),
-                    max_points: maxPoints,
-                }),
+                body: JSON.stringify({ question_id: parseInt(qId, 10), max_points: G.maxPoints(qId) }),
             })
-            .then(function(res) {
-                if (!res.ok) {
-                    throw new Error('HTTP ' + res.status);
-                }
-                return res.json();
-            })
-            .then(function(data) {
-                setAiButtonLoading(false);
-
-                if (data.ok) {
-                    // Fill score and feedback
-                    var scoreInput = document.getElementById('modalScoreInput');
-                    var feedbackInput = document.getElementById('modalFeedbackInput');
-                    if (scoreInput) scoreInput.value = data.score;
-                    if (feedbackInput) feedbackInput.value = data.explanation;
-                    isModalDirty = true;
-
-                    // Highlight fields briefly
-                    if (scoreInput) {
-                        scoreInput.classList.add('ai-filled');
-                        setTimeout(function() { scoreInput.classList.remove('ai-filled'); }, 2000);
+                .then(function (res) {
+                    if (!res.ok) {
+                        throw new Error("HTTP " + res.status);
                     }
-                    if (feedbackInput) {
-                        feedbackInput.classList.add('ai-filled');
-                        setTimeout(function() { feedbackInput.classList.remove('ai-filled'); }, 2000);
+                    return res.json();
+                })
+                .then(function (data) {
+                    setAiLoading(false);
+                    if (currentEl.value !== qId) {
+                        return; // istifadəçi artıq başqa suala keçib
                     }
-
-                    // Show quota info
-                    var statusParts = [];
+                    if (!data.ok) {
+                        setAiStatus(data.error || t.aiError, "error");
+                        return;
+                    }
+                    scoreEl.value = data.score;
+                    feedbackEl.value = data.explanation || "";
+                    modalDirty = true;
+                    flash(scoreEl);
+                    flash(feedbackEl);
+                    var parts = [];
                     if (data.cached) {
-                        statusParts.push(t.aiCached);
+                        parts.push(t.aiCached);
                     }
                     if (data.remaining !== undefined && data.limit !== undefined) {
-                        var quotaText = t.aiQuotaInfo
-                            .replace('{remaining}', data.remaining)
-                            .replace('{limit}', data.limit)
-                            .replace('{window}', data.window || '');
-                        statusParts.push(quotaText);
+                        parts.push(
+                            t.aiQuotaInfo
+                                .replace("{remaining}", data.remaining)
+                                .replace("{limit}", data.limit)
+                                .replace("{window}", data.window || "")
+                        );
                     }
-                    if (aiGradeStatus) {
-                        aiGradeStatus.textContent = statusParts.join(' \u00B7 ');
-                        aiGradeStatus.className = 'ai-grade-status ai-grade-success';
-                    }
-                } else {
-                    if (aiGradeStatus) {
-                        aiGradeStatus.textContent = data.error || t.aiError;
-                        aiGradeStatus.className = 'ai-grade-status ai-grade-error';
-                    }
+                    setAiStatus(parts.join(" · "), "success");
+                })
+                .catch(function () {
+                    setAiLoading(false);
+                    setAiStatus(t.aiError, "error");
+                });
+        }
+
+        /* ---- göndərmə ----------------------------------------------------- */
+        function submitNow() {
+            submitConfirmed = true;
+            G.markSaving(t.stateSaving);
+            if (mainSaveBtn) {
+                mainSaveBtn.disabled = true;
+                mainSaveBtn.setAttribute("aria-busy", "true");
+            }
+            // requestSubmit `submit` hadisəsini yenidən atır; bayraq ikinci dövrü buraxır.
+            if (typeof form.requestSubmit === "function") {
+                form.requestSubmit();
+            } else {
+                form.submit();
+            }
+        }
+
+        if (form) {
+            form.addEventListener("submit", function (event) {
+                if (submitConfirmed) {
+                    return;
                 }
-            })
-            .catch(function(err) {
-                setAiButtonLoading(false);
-                if (aiGradeStatus) {
-                    aiGradeStatus.textContent = t.aiError;
-                    aiGradeStatus.className = 'ai-grade-status ai-grade-error';
+                event.preventDefault();
+                var invalid = G.normalizeAll();
+                if (invalid.length) {
+                    G.focusQuestion(invalid[0]);
+                    return; // oxunmayan bal var — təsdiq dialoqu açılmır
                 }
+                if (!G.changedCount()) {
+                    return;
+                }
+                if (typeof window.openActionConfirmModal !== "function") {
+                    submitNow();
+                    return;
+                }
+                window.openActionConfirmModal({
+                    title: t.confirmTitle,
+                    message: t.confirmMessage,
+                    confirmLabel: mainSaveBtn ? mainSaveBtn.textContent.trim() : "",
+                    confirmButtonClass: "btn btn-success",
+                    onConfirm: submitNow,
+                });
             });
+        }
+
+        window.addEventListener("beforeunload", function (event) {
+            if (!submitConfirmed && G.changedCount()) {
+                event.preventDefault();
+                event.returnValue = "";
+            }
         });
-    }
 
-    // 6. Əsas Form statusu
-    function markFormAsDirty() {
-        if (!isFormDirty) {
-            isFormDirty = true;
-            mainSaveBtn.disabled = false;
-            mainSaveBtn.innerHTML = `<i class="fas fa-save"></i> ${t.saveButtonDirty}`;
-            mainSaveBtn.classList.remove('btn-success');
-            mainSaveBtn.classList.add('btn-warning');
-            mainSaveBtn.style.color = '#000';
+        if (backBtn) {
+            backBtn.addEventListener("click", function (event) {
+                if (!G.changedCount() || event.metaKey || event.ctrlKey || event.shiftKey) {
+                    return;
+                }
+                event.preventDefault();
+                pendingNavigationUrl = backBtn.getAttribute("href");
+                openWarning();
+            });
         }
-    }
 
-    // Səhifədən çıxanda (Browser Tab close / Refresh) xəbərdarlıq
-    window.addEventListener('beforeunload', (e) => {
-        if (isFormDirty) {
-            e.preventDefault();
-            e.returnValue = '';
-        }
-    });
+        /* ---- bağlamalar --------------------------------------------------- */
+        root.addEventListener("click", function (event) {
+            var opener = event.target.closest("[data-tca-open]");
+            if (opener) {
+                event.preventDefault();
+                openModal(opener.getAttribute("data-tca-open"));
+            }
+        });
 
-    if (gradingForm) {
-        gradingForm.addEventListener('submit', (e) => {
-            if (submitConfirmed) {
-                submitConfirmed = false;
-                isFormDirty = false;
+        [scoreEl, maxEl, feedbackEl].forEach(function (el) {
+            if (el) {
+                el.addEventListener("input", function () {
+                    modalDirty = true;
+                    if (el === scoreEl && !G.isBadInput(scoreEl)) {
+                        G.setInvalid(scoreEl, false);
+                    }
+                });
+            }
+        });
+
+        scoreEl.addEventListener("blur", function () {
+            var qId = currentEl.value;
+            if (G.isBadInput(scoreEl)) {
+                G.setInvalid(scoreEl, true);
+            } else if (qId && scoreEl.value.trim()) {
+                G.normalizeScoreField(scoreEl, G.maxPoints(qId));
+            }
+        });
+
+        scoreEl.addEventListener("keydown", function (event) {
+            if (event.key !== "Enter" || event.isComposing) {
                 return;
             }
+            event.preventDefault();
+            if (G.neighbour(currentEl.value, 1)) {
+                move(1);
+            } else if (applyModal()) {
+                closeModal();
+            }
+        });
 
-            e.preventDefault();
+        document.getElementById("modalCloseBtn").addEventListener("click", attemptClose);
+        document.getElementById("modalCancelBtn").addEventListener("click", attemptClose);
+        document.getElementById("modalSaveBtn").addEventListener("click", function () {
+            if (applyModal()) {
+                closeModal();
+            }
+        });
+        if (prevBtn) {
+            prevBtn.addEventListener("click", function () {
+                move(-1);
+            });
+        }
+        if (nextBtn) {
+            nextBtn.addEventListener("click", function () {
+                move(1);
+            });
+        }
+        if (aiBtn) {
+            aiBtn.addEventListener("click", function (event) {
+                event.preventDefault();
+                runAiGrade();
+            });
+        }
+        document.getElementById("warningCancelBtn").addEventListener("click", closeWarning);
+        document.getElementById("warningConfirmBtn").addEventListener("click", confirmWarning);
 
-            if (typeof window.openActionConfirmModal !== 'function') {
-                submitConfirmed = true;
-                if (typeof gradingForm.requestSubmit === 'function') {
-                    gradingForm.requestSubmit();
-                } else {
-                    gradingForm.submit();
+        // Fona klik (mousedown + mouseup eyni yerdə) — mətn seçimi zamanı yanlış bağlanmasın.
+        var downOnScrim = false;
+        backdrop.addEventListener("mousedown", function (event) {
+            downOnScrim = event.target === backdrop;
+        });
+        backdrop.addEventListener("mouseup", function (event) {
+            if (downOnScrim && event.target === backdrop) {
+                attemptClose();
+            }
+            downOnScrim = false;
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if (isOpen(warning)) {
+                if (event.key === "Escape") {
+                    event.preventDefault();
+                    closeWarning();
+                } else if (event.key === "Tab") {
+                    G.trapFocus(event, warning);
                 }
                 return;
             }
-
-            window.openActionConfirmModal({
-                title: t.confirmTitle,
-                message: t.confirmMessage,
-                confirmLabel: mainSaveBtn ? mainSaveBtn.textContent.trim() : gettext('Yadda saxla'),
-                confirmButtonClass: 'btn btn-success',
-                onConfirm: function () {
-                    submitConfirmed = true;
-                    if (typeof gradingForm.requestSubmit === 'function') {
-                        gradingForm.requestSubmit();
+            if (isOpen(backdrop)) {
+                if (event.key === "Escape") {
+                    event.preventDefault();
+                    attemptClose();
+                } else if (event.key === "Tab") {
+                    G.trapFocus(event, modal);
+                } else if (event.altKey && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
+                    event.preventDefault();
+                    move(event.key === "ArrowLeft" ? -1 : 1);
+                } else if ((event.ctrlKey || event.metaKey) && String(event.key).toLowerCase() === "s") {
+                    event.preventDefault(); // brauzerin «Səhifəni saxla» dialoqu açılmasın
+                }
+                return;
+            }
+            if ((event.ctrlKey || event.metaKey) && !event.altKey && String(event.key).toLowerCase() === "s") {
+                if (document.querySelector(".modal.show")) {
+                    return; // təsdiq dialoqu artıq açıqdır
+                }
+                event.preventDefault();
+                if (mainSaveBtn && !mainSaveBtn.disabled && form) {
+                    if (typeof form.requestSubmit === "function") {
+                        form.requestSubmit(mainSaveBtn);
                     } else {
-                        gradingForm.submit();
+                        mainSaveBtn.click();
                     }
                 }
-            });
+            }
         });
     }
 
-    function normalizeIntegerInput(input) {
-        if (!input) return;
-        const normalized = (input.value || '').trim().replace(',', '.');
-        if (!normalized) {
-            input.value = '';
-            return;
-        }
-        const match = normalized.match(/^-?\d+/);
-        if (!match) {
-            input.value = '';
-            return;
-        }
-        let nextValue = parseInt(match[0], 10);
-        if (Number.isNaN(nextValue) || nextValue < 0) {
-            nextValue = 0;
-        }
-        input.value = String(nextValue);
+    if (typeof window.EMSReady === "function") {
+        window.EMSReady(init);
+    } else if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
     }
-});
+})();

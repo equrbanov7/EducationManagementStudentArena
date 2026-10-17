@@ -33,7 +33,7 @@ PREFIX_FILES = {
     "acr": "apps/accounts/static/accounts/css/profile/sections/academic_records.css",
     "jl": "apps/registrar/static/registrar/css/jd2.css",
     "qbk": "apps/exams/static/exams/css/question_bank_list_body.css",
-    "qsf": "apps/exams/static/exams/css/question_submission_ui_ext.css",
+    # «qsf» (sual göndərişi filtrləri) faylı Paket C 2026-10-17-də silinib — filtr indi ems_ui paneli ilədir.
 }
 
 

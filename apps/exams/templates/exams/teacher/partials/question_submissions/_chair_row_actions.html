@@ -1,0 +1,7 @@
+{% load i18n %}
+{% comment %}«Sual təsdiqi» cədvəlinin sətir əməli — kafedra qərar səhifəsi (profil örtüyünün içində).{% endcomment %}
+<a class="ems-btn ems-btn--sm js-profile-section-link-skip" href="{{ row.data.open_url }}"
+   aria-label="{% blocktrans with title=row.data.title context "accounts.profile.question_chair_review" %}«{{ title }}» dəstinə bax{% endblocktrans %}">
+    <i class="fas fa-gavel" aria-hidden="true"></i>
+    {% trans "Bax və qərar ver" context "accounts.profile.question_chair_review" %}
+</a>

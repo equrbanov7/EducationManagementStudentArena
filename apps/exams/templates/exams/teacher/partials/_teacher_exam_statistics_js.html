@@ -2,8 +2,8 @@
 {% comment %}
   Exam-statistics charts: server data + i18n bridged via JSON islands, logic in
   exams/js/teacher_exam_statistics_charts.js (CSP-safe, no inline script/style).
+  2026-10-17: yalnız nəticə olduqda daxil edilir (boş səhifə Chart.js-i endirmir).
 {% endcomment %}
-<link rel="stylesheet" href="{% static 'exams/css/teacher_exam_statistics_charts.css' %}">
 <script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
 {{ chart_data|json_script:"statsChartData" }}
 <script id="statsExtra" type="application/json">
@@ -35,10 +35,12 @@
     "chartEmptyDistribution": "{% filter escapejs %}{% trans 'chart_empty_distribution' context 'exams.template.exam_statistics' %}{% endfilter %}",
     "chartLabelAvgScore": "{% filter escapejs %}{% trans 'chart_label_avg_score' context 'exams.template.exam_statistics' %}{% endfilter %}",
     "chartLabelPassRate": "{% filter escapejs %}{% trans 'chart_label_pass_rate' context 'exams.template.exam_statistics' %}{% endfilter %}",
+    "paginationPrev": "{% filter escapejs %}{% trans 'Əvvəlki səhifə' context 'exams.teacher.statistics' %}{% endfilter %}",
+    "paginationNext": "{% filter escapejs %}{% trans 'Növbəti səhifə' context 'exams.teacher.statistics' %}{% endfilter %}",
     "paginationResults": "{% filter escapejs %}{% trans 'pagination_results' context 'exams.template.exam_statistics' %}{% endfilter %}",
     "aiQuotaInfo": "{% filter escapejs %}{% trans 'ai_quota_info' context 'exams.template.exam_statistics' %}{% endfilter %}",
     "aiCached": "{% filter escapejs %}{% trans 'ai_cached' context 'exams.template.exam_statistics' %}{% endfilter %}",
     "aiError": "{% filter escapejs %}{% trans 'ai_error' context 'exams.template.exam_statistics' %}{% endfilter %}"
 }
 </script>
-<script src="{% static 'exams/js/teacher_exam_statistics_charts.js' %}"></script>
+<script src="{% static 'exams/js/teacher_exam_statistics_charts.js' %}?v=20261017-pkgb"></script>

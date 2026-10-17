@@ -11,12 +11,12 @@ yenidən yönəlir (meta-refresh) → dalğa-dalğa boşalır, server çökmür.
 {% endblock %}
 
 {% block extraCss %}
-<link rel="stylesheet" href="{% static 'exams/css/exam_starting.css' %}">
+<link rel="stylesheet" href="{% static 'exams/css/exam_starting.css' %}?v=20261017-pkgd">
 {% endblock %}
 
 {% block content %}
-<div class="exam-starting-wrap">
-  <div class="exam-starting-spinner"></div>
+<div class="exam-starting-wrap" role="status" aria-live="polite">
+  <div class="exam-starting-spinner" aria-hidden="true"></div>
   <h1 class="exam-starting-title">
     {% trans "İmtahan başladılır…" context "exams.starting" %}
   </h1>
@@ -24,6 +24,7 @@ yenidən yönəlir (meta-refresh) → dalğa-dalğa boşalır, server çökmür.
     {% blocktrans context "exams.starting" %}Hazırda çox sayda tələbə eyni anda bu imtahana başlayır. Növbəniz bir neçə saniyəyə çatacaq — bu səhifə avtomatik yenilənir, heç nə etməyinizə ehtiyac yoxdur.{% endblocktrans %}
   </p>
   <a href="{{ retry_url }}" class="exam-starting-btn">
+    <i class="fas fa-rotate-right" aria-hidden="true"></i>
     {% trans "İndi yoxla" context "exams.starting" %}
   </a>
 </div>

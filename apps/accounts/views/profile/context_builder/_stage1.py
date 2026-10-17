@@ -19,6 +19,7 @@ from ..._dashboard_helpers import (
     _collect_pending_answer_items,
     academic_filter_options,
     academic_filter_selection,
+    fill_my_results_scores,
 )
 from ..._dashboard_helpers.cheap_counts import compute_profile_badge_counts
 from ..._helpers import (
@@ -409,6 +410,8 @@ class _Stage1Mixin:
                 self.my_results_page_obj = Paginator(self.my_result_items, 6).get_page(
                     self.request.GET.get(self.my_results_page_param)
                 )
+                # Perf (Paket A): test balı + apellyasiya nişanı YALNIZ görünən 6 kart üçün.
+                fill_my_results_scores(self.my_results_page_obj.object_list)
                 self.my_result_items = self.my_results_page_obj
                 self.my_results_pagination_query = _query_string(
                     section="my-results",

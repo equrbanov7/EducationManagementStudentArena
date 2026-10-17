@@ -4,70 +4,46 @@
 <!-- MODAL: Mövzu Əlavə Etmə -->
 <!-- courses/templates/courses/partials/_topic_form_modal.html -->
 
-<link rel="stylesheet" href="{% static 'courses/css/topic_form_modal.css' %}">
-
 <div id="topicFormModalConfig" hidden
      data-i18n-adding="{% trans 'msg_adding' context 'courses.partial.topic_modal' %}"
      data-i18n-error-retry="{% trans 'msg_error_retry' context 'courses.partial.topic_modal' %}"
      data-i18n-errors-header="{% trans 'msg_errors_header' context 'courses.partial.topic_modal' %}"></div>
 
-<div class="modal fade" id="topicFormModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade ems-bsd" id="topicFormModal" tabindex="-1" aria-hidden="true" aria-labelledby="topicFormModalLabel">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <!-- Header -->
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">
-                    <i class="fas fa-plus-circle"></i> {% trans "title_add_topic" context "courses.partial.topic_modal" %}
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{% trans 'aria_close' context 'courses.partial.topic_modal' %}"></button>
+            <div class="modal-header ems-bsd__head">
+                <span class="ems-bsd__ic ems-bsd__ic--topics" aria-hidden="true">{% include "courses/partials/_cd_icon.html" with icon="book" size=20 %}</span>
+                <div class="ems-bsd__tx">
+                    <h5 class="modal-title" id="topicFormModalLabel">{% trans "title_add_topic" context "courses.partial.topic_modal" %}</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'aria_close' context 'courses.partial.topic_modal' %}"></button>
             </div>
-            
-            <!-- Body -->
-            <div class="modal-body">
-                <form id="topicForm" method="post" action="{% url 'courses:add_topic' course.id %}">
-                    {% csrf_token %}
-                    
-                    <!-- Title Field -->
-                    <div class="mb-3">
-                        <label for="topicTitle" class="form-label">
-                            <strong>{% trans "field_topic_name" context "courses.partial.topic_modal" %}</strong>
-                            <span class="text-danger">*</span>
-                        </label>
-                        <input type="text" class="form-control" id="topicTitle" 
-                               name="title" placeholder="{% trans 'placeholder_topic_name' context 'courses.partial.topic_modal' %}"
-                               required>
-                        <small class="text-muted">
-                            {% trans "help_topic_name" context "courses.partial.topic_modal" %}
-                        </small>
+
+            <form id="topicForm" method="post" action="{% url 'courses:add_topic' course.id %}" novalidate>
+                {% csrf_token %}
+                <div class="ems-bsd__body ems-bsd__fields">
+                    <div class="ems-field">
+                        <label for="topicTitle" class="ems-field__label">{% trans "field_topic_name" context "courses.partial.topic_modal" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+                        <input type="text" class="ems-input" id="topicTitle" name="title" maxlength="255" required autocomplete="off"
+                               placeholder="{% trans 'placeholder_topic_name' context 'courses.partial.topic_modal' %}">
+                        <p class="ems-field__hint">{% trans "help_topic_name" context "courses.partial.topic_modal" %}</p>
                     </div>
-                    
-                    <!-- Description Field -->
-                    <div class="mb-3">
-                        <label for="topicDescription" class="form-label">
-                            <strong>{% trans "field_topic_description" context "courses.partial.topic_modal" %}</strong>
-                        </label>
-                        <textarea class="form-control" id="topicDescription" 
-                                  name="description" rows="3" 
+                    <div class="ems-field">
+                        <label for="topicDescription" class="ems-field__label">{% trans "field_topic_description" context "courses.partial.topic_modal" %}</label>
+                        <textarea class="ems-textarea" id="topicDescription" name="description" rows="3"
                                   placeholder="{% trans 'placeholder_topic_description' context 'courses.partial.topic_modal' %}"></textarea>
-                        <small class="text-muted">
-                            {% trans "help_topic_goal" context "courses.partial.topic_modal" %}
-                        </small>
+                        <p class="ems-field__hint">{% trans "help_topic_goal" context "courses.partial.topic_modal" %}</p>
                     </div>
-                    
-                    <!-- Error Messages Container -->
-                    <div id="topicErrors" class="alert alert-danger d-none" role="alert"></div>
-                    
-                    <!-- Submit Button -->
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary flex-grow-1">
-                            <i class="fas fa-save"></i> {% trans "action_add_topic" context "courses.partial.topic_modal" %}
-                        </button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times"></i> {% trans "action_cancel" context "courses.partial.topic_modal" %}
-                        </button>
-                    </div>
-                </form>
-            </div>
+                    <div id="topicErrors" class="ems-msg ems-msg--error ems-bsd__errors d-none" role="alert"></div>
+                </div>
+                <div class="modal-footer ems-bsd__foot">
+                    <button type="button" class="ems-btn" data-bs-dismiss="modal">{% trans "action_cancel" context "courses.partial.topic_modal" %}</button>
+                    <button type="submit" class="ems-btn ems-btn--primary">
+                        <i class="fas fa-save" aria-hidden="true"></i> {% trans "action_add_topic" context "courses.partial.topic_modal" %}
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

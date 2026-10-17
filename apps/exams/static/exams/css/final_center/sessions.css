@@ -18,8 +18,8 @@
     margin-left: 6px;
     padding: 0 6px;
     border-radius: 999px;
-    background: #E2E8F0;
-    color: #475569;
+    background: var(--ems-neutral-200);
+    color: var(--ems-neutral-600);
     font-size: .72rem;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
@@ -28,7 +28,7 @@
 
 .fxc-tab.is-active .fxc-tab__n {
     background: rgba(255, 255, 255, .24);
-    color: #fff;
+    color: var(--ems-neutral-0);
 }
 
 /* Boş vəziyyət: gizlətmirik (filtr yeri sabit qalsın), sadəcə solğunlaşdırırıq. */
@@ -47,15 +47,15 @@
     flex-wrap: wrap;
     margin: -4px 0 14px;
     padding: 8px 12px;
-    border-left: 3px solid #2C5BFF;
+    border-left: 3px solid var(--ems-primary-600);
     border-radius: 8px;
-    background: #F1F5FF;
-    color: #334155;
+    background: var(--ems-primary-50);
+    color: var(--ems-neutral-700);
     font-size: .82rem;
 }
 
 .fxc-state-legend i {
-    color: #2C5BFF;
+    color: var(--ems-primary-600);
 }
 
 @media (max-width: 640px) {

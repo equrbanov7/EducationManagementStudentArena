@@ -272,7 +272,7 @@ def room_monitor_snapshot(room):
 
     tickets = list(
         FinalExamTicket.objects.filter(session_id__in=session_ids)
-        .select_related("student", "attempt", "session", "exam")
+        .select_related("student", "attempt", "attempt__exam", "session", "exam")
         .order_by("exam__title", "seat_number", "id")
     )
     for ticket in tickets:

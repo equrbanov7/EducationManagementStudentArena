@@ -4,9 +4,8 @@
    1) Tablar: server render edir (role=tablist); burada yalnız aktiv panel
       dəyişir, URL hash-i (#sec-<key>) saxlanır, ←/→/Home/End klaviatura
       naviqasiyası (WAI-ARIA tabs), üfüqi daşmada kənar kölgələri.
-   2) Başqa tətbiqlərin bölmə partial-ları (tapşırıq/lab/imtahan/layihə) hələ
-      akkordeon qabığındadır: onların İLK sıradakı «əlavə et» düymələri panel
-      başlığının əməl yuvasına KÖÇÜRÜLÜR (klon deyil — bütün handler-lər qalır).
+   2) (2026-10-17) Başqa tətbiqlərin bölmə partial-ları artıq `cd-task` kartlarıdır —
+      «əlavə et» düymələri `course_dashboard.html`-də panel başlığındadır, JS ilə köçürmə yoxdur.
    3) Mövzu sətrinin açılıb-bağlanması ([data-cd-topic-toggle]).
    4) Üzv siyahısında dözümlü axtarış (EMSSearchFold varsa).
    5) Qrupu kursdan çıxarma (AJAX, təsdiq dialoqu ilə).
@@ -63,42 +62,10 @@
     wrap.classList.toggle("is-scroll-end", bar.scrollLeft < max - 4);
   }
 
-  /* ───────────── başqa tətbiq partial-larının əlavə düymələri ───────────── */
-  function isAddBtn(b) {
-    return b.getAttribute("data-bs-toggle") === "modal" || b.classList.contains("js-open-course-exam-editor");
-  }
-
-  function hoistSectionActions() {
-    document.querySelectorAll(".cd-panel").forEach(function (panel) {
-      if (panel.dataset.cdHoisted === "1") { return; }
-      panel.dataset.cdHoisted = "1";
-      var slot = panel.querySelector("[data-cd-actions]");
-      var body = panel.querySelector(".accordion-body");
-      if (!slot || !body || slot.children.length) { return; }
-      var first = body.firstElementChild;
-      if (!first) { return; }
-      var candidates = first.matches(".btn") ? [first] : Array.prototype.slice.call(first.querySelectorAll(".btn"));
-      var moved = 0;
-      var adds = candidates.filter(isAddBtn);
-      adds.forEach(function (b, idx) {
-        // Bootstrap rəng/ölçü sinifləri tam atılır (qalanda `.btn:hover` kontrastı
-        // pozurdu — tünd fonda tünd mətn); yalnız JS çəngəlləri (`js-*`) saxlanılır.
-        var keep = Array.prototype.filter.call(b.classList, function (c) { return c.indexOf("js-") === 0; });
-        b.className = ["ems-btn"].concat(idx === adds.length - 1 ? ["ems-btn--primary"] : []).concat(keep).join(" ");
-        var icon = b.querySelector("i");
-        if (icon) { icon.classList.remove("me-1", "me-2"); icon.setAttribute("aria-hidden", "true"); }
-        slot.appendChild(b);
-        moved++;
-      });
-      if (moved && !first.querySelector(".btn") && !first.textContent.trim()) { first.remove(); }
-    });
-  }
-
   /* ───────────────────────── init (idempotent) ───────────────────────── */
   function init() {
     var root = rootEl();
     if (!root) { return; }
-    hoistSectionActions();
 
     var bar = document.querySelector("[data-cd-tabs]");
     if (bar && bar.dataset.cdBound !== "1") {

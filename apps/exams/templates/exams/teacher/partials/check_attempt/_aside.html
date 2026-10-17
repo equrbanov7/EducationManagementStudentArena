@@ -1,0 +1,61 @@
+{% load i18n exam_filters %}
+{% comment %}
+Yoxlama səhifəsinin yan paneli: cəmi bal + irəliləyiş (JS doldurur, `data-tca-*`), sual
+xəritəsi (klik → həmin sualın bal sahəsi), cəhdin vaxtları və klaviatura qısayolları.
+Desktopda yapışqandır; 1100px-dən dar ekranda kartların üstündə yığcam görünür.
+{% endcomment %}
+<aside class="tca-side" aria-label="{% trans 'Nəticə xülasəsi' context 'exams.attempt_review' %}">
+    <section class="ems-card tca-sum">
+        <h2 class="tca-side__title">{% trans "Cəmi bal" context "exams.teacher.grading" %}</h2>
+        <p class="tca-sum__score"><b data-tca-total>–</b><span class="tca-sum__max"> / <span data-tca-max>–</span> {% trans "unit_points" context "exams.template.teacher_check_attempt" %}</span></p>
+        <div class="ems-bar tca-sum__bar" aria-hidden="true"><div class="ems-bar__fill tca-sum__fill" data-tca-progress-bar></div></div>
+        <p class="tca-sum__progress" data-tca-progress>{% trans "Qiymətləndirilib" context "exams.teacher.grading" %}: – / {{ qa_list|length }}</p>
+    </section>
+
+    {% if qa_list %}
+    <nav class="ems-card tca-map" aria-label="{% trans 'Sual xəritəsi' context 'exams.attempt_review' %}">
+        <h2 class="tca-side__title">{% trans "Sual xəritəsi" context "exams.attempt_review" %}</h2>
+        <ol class="tca-map__grid">
+            {% for item in qa_list %}
+            <li>
+                <a class="tca-map__chip" href="#tca-q-{{ item.question.id }}" data-tca-jump="{{ item.question.id }}"
+                   data-state="{% if item.answer and item.answer.teacher_score is not None %}scored{% elif item.has_answer_content %}pending{% else %}empty{% endif %}">{{ forloop.counter }}</a>
+            </li>
+            {% endfor %}
+        </ol>
+        <ul class="tca-map__legend">
+            <li><span class="tca-dot tca-dot--scored" aria-hidden="true"></span>{% trans "Yoxlanılıb" context "exams.attempt_review" %}</li>
+            <li><span class="tca-dot tca-dot--pending" aria-hidden="true"></span>{% trans "Yoxlanılmayıb" context "exams.attempt_review" %}</li>
+            <li><span class="tca-dot tca-dot--empty" aria-hidden="true"></span>{% trans "Cavabsız" context "exams.attempt_review" %}</li>
+        </ul>
+    </nav>
+    {% endif %}
+
+    <section class="ems-card tca-info">
+        <h2 class="tca-side__title">{% trans "Cəhd haqqında" context "exams.attempt_review" %}</h2>
+        <dl class="tca-info__list">
+            <div>
+                <dt>{% trans 'Başlayıb' %}</dt>
+                <dd>{% if attempt_timing.started_at %}{{ attempt_timing.started_at|date:"d.m.Y H:i" }}{% else %}–{% endif %}</dd>
+            </div>
+            <div>
+                <dt>{% trans 'Bitirib' %}</dt>
+                <dd>{% if attempt_timing.finished_at %}{{ attempt_timing.finished_at|date:"d.m.Y H:i" }}{% else %}–{% endif %}</dd>
+            </div>
+            <div>
+                <dt>{% trans 'Ümumi müddət' %}</dt>
+                <dd>{% if attempt_timing.has_duration %}{{ attempt_timing.duration_seconds|format_duration }}{% else %}–{% endif %}</dd>
+            </div>
+        </dl>
+    </section>
+
+    <section class="tca-keys" aria-label="{% trans 'Klaviatura qısayolları' context 'exams.teacher.grading' %}">
+        <h2 class="tca-side__title">{% trans "Klaviatura qısayolları" context "exams.teacher.grading" %}</h2>
+        <ul>
+            <li><kbd>Enter</kbd> {% trans "növbəti sualın balı" context "exams.teacher.grading" %}</li>
+            <li><kbd>Shift</kbd>+<kbd>Enter</kbd> {% trans "əvvəlki sual" context "exams.teacher.grading" %}</li>
+            <li><kbd>Ctrl</kbd>+<kbd>S</kbd> {% trans "yadda saxla" context "exams.teacher.grading" %}</li>
+            <li><kbd>Esc</kbd> {% trans "dialoqu bağla" context "exams.teacher.grading" %}</li>
+        </ul>
+    </section>
+</aside>

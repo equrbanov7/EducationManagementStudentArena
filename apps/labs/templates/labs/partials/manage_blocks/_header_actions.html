@@ -1,0 +1,7 @@
+{% load i18n %}
+<a href="{% url 'labs:preview_randomization' lab.id %}" class="ems-btn">
+    <i class="fas fa-eye" aria-hidden="true"></i> {% trans "action_random_preview" context "labs.template.manage_blocks" %}
+</a>
+<button type="button" class="ems-btn ems-btn--primary" data-ems-overlay-open="addBlockModal">
+    <i class="fas fa-plus" aria-hidden="true"></i> {% trans "action_new_block" context "labs.template.manage_blocks" %}
+</button>

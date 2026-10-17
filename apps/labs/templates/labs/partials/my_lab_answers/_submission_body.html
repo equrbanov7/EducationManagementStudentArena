@@ -1,0 +1,93 @@
+{% load i18n lab_filters %}
+{% comment %}Bir cəhdin məzmunu (`sub` kontekstdədir). `answer-toggle-btn` + `#answer-item-<id>` qarmaqları saxlanılıb.{% endcomment %}
+<div class="lab-sub">
+    <dl class="lab-sub__meta">
+        <div><dt>{% trans "submitted_at" context "assignment.my_submissions" %}</dt><dd>{{ sub.submitted_at|date:"d.m.Y H:i" }}</dd></div>
+        <div><dt>{% trans "label_completion_time" context "labs.template.my_lab_answers" %}</dt><dd>{{ sub.duration|default:"--" }}</dd></div>
+        <div><dt>{% trans "label_status" context "labs.template.my_lab_answers" %}</dt>
+            <dd>
+                {% if sub.is_review_pending %}
+                    <span data-review-countdown="{{ sub.review_available_in_seconds }}">--:--:--</span>
+                {% elif sub.status == 'graded' %}
+                    {% trans "status_graded" context "labs.template.my_lab_answers" %}
+                {% elif sub.status == 'late' %}
+                    {% trans "status_late" context "labs.template.my_lab_answers" %}
+                {% else %}
+                    {% trans "status_pending" context "labs.template.my_lab_answers" %}
+                {% endif %}
+            </dd>
+        </div>
+        <div><dt>{% trans "label_score" context "labs.template.my_lab_answers" %}</dt>
+            <dd>{% if sub.show_review_data and sub.score is not None %}{{ sub.score }} / {{ lab.max_score }}{% else %}&ndash;{% endif %}</dd>
+        </div>
+    </dl>
+
+    {% if sub.show_review_data and sub.feedback %}
+    <div class="ems-banner ems-banner--success lab-sub__feedback">
+        <div>
+            <div class="ems-banner__title"><i class="fa-regular fa-comment-dots" aria-hidden="true"></i> {% trans "teacher_feedback" context "assignment.my_submissions" %}</div>
+            <div class="ems-banner__body lab-prose">{{ sub.feedback|linebreaks }}</div>
+        </div>
+    </div>
+    {% elif sub.status == 'graded' and sub.review_available_in_seconds > 0 %}
+    <div class="ems-banner ems-banner--warning lab-sub__feedback">
+        <div>
+            <div class="ems-banner__title"><i class="fa-regular fa-hourglass-half" aria-hidden="true"></i> {% trans 'Yoxlama tamamlanıb' %}</div>
+            <div class="ems-banner__body">{% trans 'Qiymət və müəllim rəyi görünəcək:' %} <strong data-review-countdown="{{ sub.review_available_in_seconds }}">--:--:--</strong></div>
+        </div>
+    </div>
+    {% endif %}
+
+    <ol class="lab-sub__answers">
+        {% for answer in sub.answer_items %}
+        <li class="lab-ans" id="answer-item-{{ answer.id }}">
+            <div class="lab-ans__head">
+                <span class="lab-qno">{{ forloop.counter }}</span>
+                <h3 class="lab-ans__q">{{ answer.question.question_text }}</h3>
+                <button type="button" class="lab-toggle answer-toggle-btn" data-answer-toggle="{{ answer.id }}"
+                        aria-expanded="true" aria-controls="answer-content-{{ answer.id }}"
+                        aria-label="{% trans 'Cavabı aç/bağla' context 'labs.template.my_lab_answers' %}">
+                    <i class="fas fa-chevron-up" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="lab-ans__content answer-content" id="answer-content-{{ answer.id }}">
+                {% if answer.answer %}
+                <div class="lab-ans__box">
+                    <span class="lab-label"><i class="fas fa-pen-nib" aria-hidden="true"></i> {% trans "label_text_answer" context "labs.template.my_lab_answers" %}</span>
+                    <div class="lab-prose">{{ answer.answer|linebreaks }}</div>
+                </div>
+                {% endif %}
+
+                {% if answer.answer_file %}
+                <div class="lab-ans__file">
+                    <div class="lab-ans__filetext">
+                        <span class="lab-label"><i class="fas fa-paperclip" aria-hidden="true"></i> {% trans "label_uploaded_file" context "labs.template.my_lab_answers" %}</span>
+                        <span class="lab-ans__filename">{{ answer.answer_file.name|filename }}</span>
+                    </div>
+                    <a href="{{ answer.answer_file.url }}" target="_blank" rel="noopener" class="ems-btn ems-btn--sm ems-btn--primary">
+                        <i class="fas fa-download" aria-hidden="true"></i> {% trans 'Yüklə' %}
+                    </a>
+                </div>
+                {% endif %}
+
+                {% if not answer.answer and not answer.answer_file %}
+                <p class="lab-ans__empty"><i class="fas fa-exclamation-circle" aria-hidden="true"></i> {% trans "empty_no_answer_for_question" context "labs.template.my_lab_answers" %}</p>
+                {% endif %}
+
+                {% if sub.show_review_data and answer.score is not None %}
+                <span class="ems-badge ems-badge--warning lab-ans__score">
+                    <i class="fas fa-star" aria-hidden="true"></i> {% trans "grade" context "assignment.my_submissions" %}:
+                    <strong>{% blocktrans trimmed context "labs.template.my_lab_answers" with score=answer.score %}label_points {{ score }}{% endblocktrans %}</strong>
+                </span>
+                {% endif %}
+            </div>
+        </li>
+        {% empty %}
+        <li class="ems-state" role="status">
+            <i class="fas fa-inbox ems-state__icon" aria-hidden="true"></i>
+            <p class="ems-state__title">{% trans 'Bu cəhd üçün cavab yoxdur' %}</p>
+            <p class="ems-state__body">{% trans "empty_no_answers_for_attempt" context "labs.template.my_lab_answers" %}</p>
+        </li>
+        {% endfor %}
+    </ol>
+</div>

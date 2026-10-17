@@ -4,49 +4,45 @@
     Audit 2026-09-28 EX28-03: tələbənin hələ cəhd haqqı varsa (``answer_key_hidden``)
     variantların düzgünlüyü (açar) göstərilmir — yalnız öz seçimi və ümumi verdikt.
     Kontekst: delivered, ans, has_selection, answer_key_hidden.
+    Paket A (2026-10-18): Bootstrap `badge bg-*` → `ems-badge`; sinif çəngəlləri
+    (`correct-option`, `wrong-selected`, `correct-selected`) testlər üçün dəyişməyib.
 {% endcomment %}
 <ul class="option-list">
     {% for opt in delivered.options %}
-        <li class="option-item
-            {% if not answer_key_hidden %}
-            {% if opt.is_correct %}correct-option{% endif %}
-            {% if ans and opt.is_selected and not opt.is_correct %}wrong-selected{% endif %}
-            {% if ans and opt.is_selected and opt.is_correct %}correct-selected{% endif %}
-            {% endif %}
-        ">
-            <div class="d-flex align-items-center">
+        <li class="option-item{% if not answer_key_hidden %}{% if opt.is_correct %} correct-option{% endif %}{% if ans and opt.is_selected and not opt.is_correct %} wrong-selected{% endif %}{% if ans and opt.is_selected and opt.is_correct %} correct-selected{% endif %}{% endif %}{% if ans and opt.is_selected %} is-selected{% endif %}">
+            <div class="option-main">
                 {% if answer_key_hidden %}
-                    <i class="far fa-circle option-icon"></i>
+                    <i class="far fa-circle option-icon" aria-hidden="true"></i>
                 {% elif opt.is_correct %}
-                    <i class="fas fa-check-circle correct-icon"></i>
+                    <i class="fas fa-check-circle correct-icon" aria-hidden="true"></i>
                 {% elif ans and opt.is_selected and not opt.is_correct %}
-                    <i class="fas fa-times-circle wrong-icon"></i>
+                    <i class="fas fa-times-circle wrong-icon" aria-hidden="true"></i>
                 {% else %}
-                    <i class="far fa-circle option-icon"></i>
+                    <i class="far fa-circle option-icon" aria-hidden="true"></i>
                 {% endif %}
                 <span class="option-text">{% if opt.label %}<strong>{{ opt.label }}.</strong>{% endif %}{% if not opt.image_replaces_text or not opt.image_url %} {{ opt.text }}{% endif %}</span>
                 {% if opt.image_url %}
-                    <img src="{{ opt.image_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" loading="lazy" class="img-fluid mt-2">
+                    <img src="{{ opt.image_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" loading="lazy" class="option-image">
                 {% endif %}
             </div>
 
             {% if ans and opt.is_selected %}
-                <span class="badge bg-light text-dark border">{% trans "your_selection" context "exams.template.student_exam_result" %}</span>
+                <span class="ems-badge ems-badge--neutral option-selected-badge">{% trans "your_selection" context "exams.template.student_exam_result" %}</span>
             {% endif %}
         </li>
     {% endfor %}
 </ul>
 
-<div class="feedback-status mt-3 text-end">
+<div class="feedback-status">
     {% if ans %}
         {% if not has_selection %}
-            <span class="badge bg-warning text-dark feedback-badge">{% trans "answer_not_provided" context "exams.template.student_exam_result" %}</span>
+            <span class="ems-badge ems-badge--warning feedback-badge">{% trans "answer_not_provided" context "exams.template.student_exam_result" %}</span>
         {% elif ans.is_correct %}
-            <span class="badge bg-success feedback-badge"><i class="fas fa-check"></i> {% trans "answer_correct" context "exams.template.student_exam_result" %}</span>
+            <span class="ems-badge ems-badge--success feedback-badge"><i class="fas fa-check" aria-hidden="true"></i> {% trans "answer_correct" context "exams.template.student_exam_result" %}</span>
         {% else %}
-            <span class="badge bg-danger feedback-badge"><i class="fas fa-times"></i> {% trans "answer_wrong" context "exams.template.student_exam_result" %}</span>
+            <span class="ems-badge ems-badge--danger feedback-badge"><i class="fas fa-times" aria-hidden="true"></i> {% trans "answer_wrong" context "exams.template.student_exam_result" %}</span>
         {% endif %}
     {% else %}
-        <span class="badge bg-warning text-dark feedback-badge">{% trans "answer_not_provided" context "exams.template.student_exam_result" %}</span>
+        <span class="ems-badge ems-badge--warning feedback-badge">{% trans "answer_not_provided" context "exams.template.student_exam_result" %}</span>
     {% endif %}
 </div>

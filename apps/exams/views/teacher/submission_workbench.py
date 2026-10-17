@@ -177,6 +177,8 @@ def build_workbench_context(
         "form_state": form_state,
         # Workbench konteksti
         "wb_workbench_key": "question-submission",
+        # Paket C 2026-10-17: profil örtüyündə — başlıq H2 (qabıq H1-i verir), ems_ui asset-ləri qabıqdadır.
+        "wb_embedded": True,
         "wb_title": title,
         "wb_subtitle": subtitle,
         "wb_back_url": f"{reverse('accounts:profile')}?section=question-submissions",
