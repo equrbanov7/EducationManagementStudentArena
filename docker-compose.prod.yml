@@ -1371,7 +1371,7 @@ services:
           cpus: "${DOCKER_PROXY_CPU_LIMIT:-0.1}"
           memory: ${DOCKER_PROXY_MEM_LIMIT:-64M}
     # /_ping proxy → docker.sock zəncirini yoxlayır (socket əlçatmazdırsa 503 → unhealthy).
-    # promtail bundan asılı deyil (service_started) — healthcheck yalnız görünürlük üçündür.
+    # promtail-in özü başlanğıcda /_ping-i gözləyir (bax promtail entrypoint) — healthcheck görünürlük üçündür.
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:2375/_ping >/dev/null"]
       interval: 30s
@@ -1383,8 +1383,18 @@ services:
   promtail:
     image: grafana/promtail:3.1.1
     container_name: emsarena-promtail
+    # 2026-10-17 (loglar 2026-10-11-dən Loki-yə düşmürdü): docker_sd klienti API versiyasını İLK sorğuda
+    # `/_ping` ilə razılaşdırır; proxy o an əlçatmazdırsa (host/dockerd restartında konteynerlər sırasız
+    # qalxır — compose depends_on işləmir) klient 1.24-ə düşüb ƏBƏDİ orada qalır, Docker 29 isə min 1.40
+    # istəyir → «client version 1.24 is too old», 0 log. Ona görə promtail proxy cavab verənə qədər GÖZLƏYİR;
+    # 3 dəqiqədə cavab yoxdursa çıxır və restart siyasəti yenidən cəhd edir. Lokal təkrar: proxy dayananda
+    # başladılan promtail /v1.24 sorğuları göndərir; bu sarğı ilə /v1.44.
+    entrypoint: ["/bin/sh", "-c"]
     command:
-      - -config.file=/etc/promtail/promtail-config.yml
+      - >-
+        i=0; until wget -q -O /dev/null http://docker-socket-proxy:2375/_ping; do
+        i=$$((i+1)); [ "$$i" -ge 90 ] && echo "docker-socket-proxy cavab vermir" >&2 && exit 1; sleep 2; done;
+        exec /usr/bin/promtail -config.file=/etc/promtail/promtail-config.yml
     # Təhlükəsizlik auditi 2026-10-07: xam /var/run/docker.sock mount-u SİLİNDİ —
     # docker_sd və log axını tcp://docker-socket-proxy:2375 üzərindən (yalnız GET).
     volumes:

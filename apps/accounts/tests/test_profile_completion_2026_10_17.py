@@ -24,12 +24,13 @@ from django.urls import reverse
 
 from apps.accounts import profile_completion as policy
 from apps.accounts.models import RuntimeSetting
-from apps.accounts.services.profile_completion import AUDIT_REASON_CONFLICT, AUDIT_REASON_SAVED
+from apps.accounts.services.profile_completion import AUDIT_REASON_CONFLICT, AUDIT_REASON_SAVED, IDENTITY_CHECK_SCOPE
 from apps.accounts.services.rim.search import FLAG_INCOMPLETE, apply_flag_filter
 from apps.audit.models import AuditLog
 from apps.organizations.models import Membership, Organization, Role
 from core import runtime_settings as rs
 from core.constants import OrganizationType, RoleScopeType
+from core.rate_limit import clear_rate_limit
 
 User = get_user_model()
 
@@ -84,6 +85,8 @@ class ProfileCompletionGateTest(TestCase):
         self.client = Client()
         self.url = reverse("accounts:complete_profile")
         rs.invalidate()
+        for user in (self.student, self.teacher):
+            clear_rate_limit(IDENTITY_CHECK_SCOPE, user.pk)
 
     def _get(self, user, path=None, **headers):
         self.client.force_login(user)
@@ -190,6 +193,34 @@ class ProfileCompletionGateTest(TestCase):
         row = AuditLog.objects.get(reason=AUDIT_REASON_CONFLICT, object_id=str(self.student.pk))
         self.assertEqual(row.changes["fields"], ["fin"])
         self.assertNotIn(OTHER_FIN, json.dumps(row.changes) + json.dumps(row.new_values or {}))
+
+    def test_fin_uniqueness_is_not_checked_while_other_fields_are_invalid(self):
+        # SEC-1 F1: «phone=x» + başqasının FİN-i → yalnız telefon xətası; FİN-in mövcudluğu SÖYLƏNMİR.
+        self.client.force_login(self.teacher)
+        response = self.client.post(self.url, {"fin": OTHER_FIN, "phone": "x"})
+        self.assertEqual(response.status_code, 200)
+        errors = {field["name"]: field["error"] for field in response.context["fields"]}
+        self.assertEqual(errors["fin"], "")
+        self.assertTrue(errors["phone"])
+        self.assertFalse(AuditLog.objects.filter(reason=AUDIT_REASON_CONFLICT, object_id=str(self.teacher.pk)).exists())
+
+    @override_settings(PROFILE_COMPLETION_IDENTITY_RATE_LIMIT="3/1h")
+    def test_fin_uniqueness_checks_are_rate_limited(self):
+        self.client.force_login(self.student)
+        for _ in range(3):
+            response = self.client.post(self.url, {"fin": OTHER_FIN})
+            self.assertIn("başqa hesabda", response.context["fields"][0]["error"])
+        response = self.client.post(self.url, {"fin": OTHER_FIN})
+        error = response.context["fields"][0]["error"]
+        self.assertNotIn("başqa hesabda", error)
+        self.assertIn("dəqiqə", error)
+        self.assertEqual(
+            AuditLog.objects.filter(reason=AUDIT_REASON_CONFLICT, object_id=str(self.student.pk)).count(), 3
+        )
+        # Limit doluykən düzgün (boş) FİN də yazılmır — növbəti pəncərədə.
+        self.client.post(self.url, {"fin": "5ABC12D"})
+        self.student.profile.refresh_from_db()
+        self.assertIsNone(self.student.profile.fin)
 
     def test_teacher_fills_all_three_with_phone_normalised(self):
         self.teacher.email = ""
