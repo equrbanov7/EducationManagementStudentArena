@@ -237,6 +237,7 @@ def _plan(request, organization, data):
         weekday=data.get("weekday"),
         time_slot=str(data.get("time_slot") or "").strip(),
         room=str(data.get("room") or "").strip()[:64],
+        building=str(data.get("room_building") or "").strip()[:120],
         visible=schedule_suggest.scope_visible(request.user, organization),
     )
     return JsonResponse({"ok": True, **result})

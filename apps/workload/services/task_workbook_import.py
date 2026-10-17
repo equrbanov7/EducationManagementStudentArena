@@ -561,7 +561,14 @@ class Importer(TeacherResolverMixin):
                 organization=self.org, group=offering.group, is_active=True, status="enrolled"
             ).select_related("student")
             for record in records:
-                _, created = enroll_student_in_subject(
-                    record=record, subject=offering.subject, period=offering.period, kind="mandatory"
-                )
+                # Aktiv tələbə üzvlüyü olmayan qeyd DB qoruyucusunda (registrar_guard_active_member) dayanır —
+                # bütün idxal geri qayıtmasın (2026-10-17 magistratura): savepoint + say, `enroll_group_students` kimi.
+                try:
+                    with transaction.atomic():
+                        _, created = enroll_student_in_subject(
+                            record=record, subject=offering.subject, period=offering.period, kind="mandatory"
+                        )
+                except IntegrityError:
+                    self.counters["enrollment_not_member"] += 1
+                    continue
                 self.counters["enrollment_created" if created else "enrollment_exists"] += 1

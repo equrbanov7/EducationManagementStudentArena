@@ -20,7 +20,8 @@ CONTEXT MÜQAVİLƏSİ (`schedule_manage_section`; UI buna söykənir)
     matrix                 — `registrar/partials/_schedule_matrix.html`
     week / week_nav_prefix — üst/alt həftə pilləri
     parked                 — «yenidən yerləşdirilməli» slot sətirləri
-    subjects / teachers / rooms / week_types / slot_kinds / weekdays / shifts
+    subjects / teachers / week_types / slot_kinds / weekdays / shifts
+    rooms / room_buildings / room_default_building — dialoqun «Korpus → Otaq» seçiciləri
     lesson_periods         — dialoqun «Dərs saatı» seçicisi
     editor_url / reload_url
 """
@@ -33,15 +34,12 @@ from django.utils.translation import pgettext
 from apps.registrar.public import schedule as schedule_service
 from apps.registrar.public import schedule_conflicts, schedule_editor
 from apps.registrar.public import schedule_editor_actions as editor
-from apps.registrar.public import schedule_grid, schedule_manage
+from apps.registrar.public import schedule_grid, schedule_manage, schedule_rooms
 
 from .kollokvium_windows import _current_semester, _season_label
 
 _CTX = "accounts.schedule_manage"
 PREFIX = "sm_"
-
-#: Auditoriya təklifləri (`exams.ExamRoom` kataloqu) — məcburi seçim DEYİL.
-_ROOM_SUGGESTION_LIMIT = 200
 
 
 def _person_name(user) -> str:
@@ -98,18 +96,6 @@ def _periods(section, request, organization):
     section["periods"] = periods_in_year
     section["period"] = period
     return period
-
-
-def _rooms(organization):
-    try:
-        from apps.exams.models import ExamRoom
-    except Exception:  # pragma: no cover — imtahan modulu söndürülübsə
-        return []
-    return list(
-        ExamRoom.objects.filter(organization=organization, is_active=True)
-        .order_by("name")
-        .values_list("name", flat=True)[:_ROOM_SUGGESTION_LIMIT]
-    )
 
 
 def _teachers_in_scope(offerings_qs):
@@ -318,7 +304,12 @@ def build_schedule_manage_section(request, section, *, active_organization, allo
         else schedule_editor.allowed_subjects(organization=organization, group=group, period=period)
     )
     section["teachers"] = schedule_editor.teacher_choices(organization)
-    section["rooms"] = _rooms(organization)
+    # «Korpus → Otaq» seçiciləri (2026-10-17): otaqlar korpusu + tutumu ilə; yeni xanada korpus qrupun
+    # ixtisas korpusudur (`default_building`), redaktədə kartın otağının korpusu (JS).
+    catalog = schedule_rooms.dialog_rooms(organization, group if view_mode == "group" else None)
+    section["rooms"] = catalog["rooms"]
+    section["room_buildings"] = catalog["buildings"]
+    section["room_default_building"] = catalog["default_building"]
     section["lesson_periods"] = schedule_grid.lesson_periods(organization)
     section["shifts"] = [
         {"value": key, "label": str(label)}

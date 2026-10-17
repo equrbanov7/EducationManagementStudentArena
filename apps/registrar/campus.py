@@ -83,6 +83,20 @@ def default_building_for_group(organization, group) -> str:
     return ""
 
 
+def match_building(buildings, name) -> str:
+    """``name`` (xəritədəki və ya POST-dan gələn korpus) → otaq reyestrindəki ƏSL yazılış.
+
+    Xəritənin «Korpus B»-si ilə ``ExamRoom.building``-in «korpus b»si eyni korpusdur — UI seçicisi
+    reyestrin yazılışını göstərir, ona görə defolt və seçim həmin mətnə çevrilir. Tapılmasa ``""``."""
+    key = normalize_unit_name(name)
+    if not key:
+        return ""
+    for building in buildings:
+        if normalize_unit_name(building) == key:
+            return building
+    return ""
+
+
 def default_building_for_offering(offering) -> str:
     """Açılışın qrupuna görə korpus defoltu (bax :func:`default_building_for_group`)."""
     return default_building_for_group(offering.organization, getattr(offering, "group", None))

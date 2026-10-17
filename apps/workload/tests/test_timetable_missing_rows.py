@@ -21,7 +21,7 @@ from django.utils import timezone
 
 import docx
 
-from apps.organizations.models import AcademicPeriod, OrgUnit
+from apps.organizations.models import AcademicPeriod, Membership, OrgUnit
 from apps.registrar.models import (
     AcademicStatus,
     CourseOffering,
@@ -175,6 +175,25 @@ class TimetableMissingRowsTests(TestCase):
         self.assertNotIn("row_created", out)
         self.assertIn("cell_already_assigned=2", out)
         self.assertEqual(self._counts(), counts)
+
+    def test_student_without_active_membership_does_not_abort_the_import(self):
+        # Prod 2026-10-17: qrupda aktiv tələbə üzvlüyü olmayan qeyd registrar_guard_active_member-də
+        # dayanırdı və bütün tətbiq geri qayıdırdı — indi o tələbə sayılıb ötürülür.
+        ghost = User.objects.create_user("mag.ghost", "mg@x.test", "pw")
+        activate_member(self.org, ghost, "student", scope_unit=self.bm)
+        record = StudentAcademicRecord.objects.filter(student=self.student).first()
+        StudentAcademicRecord.objects.create(
+            organization=self.org, student=ghost, program=record.program, curriculum=record.curriculum,
+            group=self.bm, admission_year=2026, status=AcademicStatus.ENROLLED,
+        )  # fmt: skip
+        Membership.objects.filter(organization=self.org, user=ghost).update(is_active=False)
+        path = self._docx([("Tədqiqat metodları (45 saat) Rail Səfiyev", "")])
+        out = self._run(path, "--create-missing-rows", "--apply")
+        self.assertIn("row_created=1", out)
+        self.assertIn("enrollment_not_member=1", out)
+        offering = CourseOffering.objects.get(organization=self.org, group=self.bm, subject__name="Tədqiqat metodları")
+        self.assertTrue(Enrollment.objects.filter(offering=offering, student=self.student).exists())
+        self.assertFalse(Enrollment.objects.filter(offering=offering, student=ghost).exists())
 
     def test_distributed_task_gets_new_row_through_amendment(self):
         self._run(self._docx([("Tədqiqat metodları (45 saat) Rail Səfiyev", "")]), "--create-missing-rows", "--apply")
