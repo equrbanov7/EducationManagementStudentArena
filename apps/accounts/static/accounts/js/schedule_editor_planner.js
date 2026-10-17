@@ -6,7 +6,9 @@
  *     məşğul / qrup məşğul / hər ikisi; rejim düymələri (hər ikisi / müəllim / qrup üçün) hansı
  *     xanaların TƏKLİF olunduğunu dəyişir — hesablamanı SERVER edir (`registrar/schedule_suggest.py`);
  *   · təklif olunan xanaya və ya qısa siyahıdakı sətrə klik → «Gün» + «Dərs saatı» dolur;
- *   · seçilmiş vaxt üçün boş otaqlar (tutum + korpus + laboratoriya sırası) — klik → «Otaq» dolur.
+ *   · seçilmiş vaxt üçün boş otaqlar (tutum + korpus + laboratoriya sırası) — klik → «Otaq» dolur;
+ *     sıralama dialoqda SEÇİLMİŞ korpusa görədir (`room_building`), başqa korpusun otağına klik korpus
+ *     seçicisini də keçirir (`schedule_editor_room.js` → `EMSScheduleRoom.pick`).
  *   Sahə doldurulanda `change` göndərilir ki, əsas skriptin (`schedule_editor.js`) `runCheck`-i
  *   adi toqquşma yoxlamasını etsin.
  *
@@ -24,7 +26,7 @@
     var DIALOG_ID = "seditCell";
     var DELAY_MS = 120;
     var FIELDS = ["slot_id", "subject_id", "instructor_id", "slot_instructor_id", "slot_kind", "week_type",
-        "weekday", "time_slot", "room"];
+        "weekday", "time_slot", "room", "room_building"];
     var state = { mode: "both", ticket: 0, timer: null, last: null };
 
     function root() {
@@ -142,6 +144,9 @@
                 }
                 state.last = data;
                 render(data);
+                if (window.EMSScheduleRoom) {
+                    window.EMSScheduleRoom.applyDefault(data.campus || "");   /* yeni xana: qrupun korpusu */
+                }
             })
             .catch(function (err) {
                 if (ticket === state.ticket) {
@@ -281,6 +286,9 @@
             parts.push(t("tSizeUnknown"));
         }
         parts.push(data.campus ? t("tCampus", { campus: data.campus }) : t("tNoCampus"));
+        if (data.campus_selected && data.campus_selected !== data.campus) {
+            parts.push(t("tCampusSelected", { campus: data.campus_selected }));
+        }
         return parts.join(" · ");
     }
 
@@ -313,6 +321,7 @@
         var btn = el("button", "sedit-rooms__btn");
         btn.type = "button";
         btn.setAttribute("data-sedit-room-pick", row.label);
+        btn.setAttribute("data-sedit-room-building", row.building || "");
         if (row.fits === false) {
             btn.classList.add("is-small");
         }
@@ -419,7 +428,12 @@
 
     DELEGATE.on("click", "[data-sedit-room-pick]", function (event, button) {
         event.preventDefault();
-        setField("room", button.getAttribute("data-sedit-room-pick"), true);
+        var label = button.getAttribute("data-sedit-room-pick");
+        /* Korpus → Otaq seçiciləri (`schedule_editor_room.js`): başqa korpusun otağı korpusu da keçirir. */
+        var api = window.EMSScheduleRoom;
+        if (!api || !api.pick(label, button.getAttribute("data-sedit-room-building") || "")) {
+            setField("room", label, true);
+        }
     });
 
     window.EMSSchedulePlanner = { refresh: refresh, setMode: setMode };

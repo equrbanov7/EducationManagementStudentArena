@@ -324,6 +324,8 @@ class _Stage2Mixin:
             "offerings": [],
             "slots": [],
             "rooms": [],
+            "room_buildings": [],
+            "room_default_building": "",
             "weekdays": (),
             "standard_times": (),
             "week_types": (),

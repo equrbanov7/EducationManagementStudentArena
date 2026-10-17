@@ -436,9 +436,12 @@ def plan(
     weekday=None,
     time_slot="",
     room="",
+    building="",
     visible=None,
 ) -> dict:
-    """«Uyğun vaxtlar» paneli + seçilmiş vaxt üçün otaq tövsiyəsi (bax modul başlığı)."""
+    """«Uyğun vaxtlar» paneli + seçilmiş vaxt üçün otaq tövsiyəsi (bax modul başlığı).
+
+    ``building`` — dialoqda SEÇİLMİŞ korpus (boşdursa qrupun korpusu): otaqlar ona görə sıralanır."""
     mode = mode if mode in MODES else MODE_BOTH
     context = _Plan(
         organization=organization,
@@ -452,8 +455,11 @@ def plan(
         exclude=exclude_ids,
     )
     periods = schedule_grid.lesson_periods(organization)
-    building = campus.default_building_for_group(organization, group)
     rooms = load_rooms(organization)
+    buildings = sorted({row["building"] for row in rooms if row["building"]})
+    home = campus.default_building_for_group(organization, group)
+    home = campus.match_building(buildings, home) or home
+    building = campus.match_building(buildings, building) or home
     partner_offerings = {slot.offering_id for slot in context.mine if not context.is_group(slot)}
     group_ids = {context.group_id} | {slot.offering.group_id for slot in context.mine if not context.is_group(slot)}
     sizes = group_sizes(organization, group_ids, {offering_id, *partner_offerings})
@@ -525,7 +531,8 @@ def plan(
         ],
         "cells": cells,
         "top": top,
-        "campus": building,
+        "campus": home,
+        "campus_selected": building,
         "group_size": sizes.get(str(context.group_id), 0),
         "rooms": _rooms_for_time(context, rooms, sizes, periods, weekday, time_slot, room, building),
     }

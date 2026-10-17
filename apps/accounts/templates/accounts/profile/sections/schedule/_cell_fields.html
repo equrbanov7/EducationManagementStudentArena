@@ -125,15 +125,48 @@ Seçimlər JS ilə yenilənəndə `EMSBootstrapSelect.refresh(select)` çağır�
     </div>
   </div>
 
+  {% if sec.rooms %}
+  {% comment %}«Korpus → Otaq» (sahib 2026-10-17: «korpusa uyğun otaqları düz seç»). Otaq adları korpuslar
+  arasında təkrarlanır, ona görə otaq siyahısı YALNIZ seçilmiş korpusun otaqlarıdır
+  (`accounts/js/schedule_editor_room.js`, `option.hidden` + `EMSBootstrapSelect.refresh`). Korpus serverə
+  yazılmır — yalnız süzgəcdir və «Uyğun vaxtlar»ın otaq sıralamasına gedir (`room_building`); POST-un otağı
+  əvvəlki kimi MƏTNDİR (`room`). Yeni xanada korpus qrupun ixtisas korpusudur, redaktədə kartın otağınınkı.{% endcomment %}
+  <div class="ems-field">
+    <label class="ems-field__label" for="sedit-room-building">{% trans "Korpus" context "accounts.schedule_manage" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+      <select class="ems-select bootstrap-single-select__native" id="sedit-room-building"
+              data-sedit-field="room_building" data-sedit-room-building data-bootstrap-select
+              data-default-building="{{ sec.room_default_building }}">
+        <option value="">{% trans "Bütün korpuslar" context "accounts.schedule_manage" %}</option>
+        {% for building in sec.room_buildings %}<option value="{{ building }}">{{ building }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="ems-field">
+    <label class="ems-field__label" for="sedit-room">{% trans "Otaq (opsional)" context "accounts.schedule_manage" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+      <select class="ems-select bootstrap-single-select__native" id="sedit-room" name="room"
+              data-sedit-field="room" data-sedit-room data-bootstrap-select data-live-search="true"
+              data-live-search-placeholder="{% trans 'Otaq axtar…' context 'accounts.schedule_manage' %}"
+              data-live-search-empty="{% trans 'Bu korpusda uyğun otaq yoxdur' context 'accounts.schedule_manage' %}">
+        <option value="">{% trans "Otaq seçilməyib" context "accounts.schedule_manage" %}</option>
+        {% for room in sec.rooms %}<option value="{{ room.label }}" data-building="{{ room.building }}" data-text="{{ room.text }}">{{ room.text }}{% if room.building %} — {{ room.building }}{% endif %}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+  <p class="ems-field__hint sedit-room-hint" data-sedit-room-hint hidden
+     data-t-default="{% trans 'Korpus qrupun ixtisasına görə seçilib — dəyişə bilərsiniz; otaqlar korpusa görə süzülür.' context 'accounts.schedule_manage' %}"
+     data-t-pick="{% trans 'Əvvəlcə korpusu seçin — otaq siyahısı həmin korpusun otaqlarıdır.' context 'accounts.schedule_manage' %}"
+     data-t-legacy="{% trans 'Bu otaq otaq reyestrində yoxdur — saxlanılır; dəyişmək üçün siyahıdan seçin.' context 'accounts.schedule_manage' %}"></p>
+  {% else %}
   <div class="ems-field ems-field--wide">
     <label class="ems-field__label" for="sedit-room">{% trans "Otaq (opsional)" context "accounts.schedule_manage" %}</label>
-    <input class="ems-input" type="text" id="sedit-room" name="room" maxlength="64" list="sedit-rooms"
-           data-sedit-field="room"
+    <input class="ems-input" type="text" id="sedit-room" name="room" maxlength="64" data-sedit-field="room"
            placeholder="{% trans 'məs. Otaq 304 · II korpus' context 'accounts.schedule_manage' %}">
-    <datalist id="sedit-rooms">
-      {% for room in sec.rooms %}<option value="{{ room }}"></option>{% endfor %}
-    </datalist>
+    <p class="ems-field__hint">{% trans "Otaq reyestri boşdur — otaqlar «İmtahan otaqları» bölməsində əlavə olunur." context "accounts.schedule_manage" %}</p>
   </div>
+  {% endif %}
 </div>
 
 {# ── Server cavabı: toqquşmalar + tövsiyələr + məcburi dəyişiklik ───────── #}
