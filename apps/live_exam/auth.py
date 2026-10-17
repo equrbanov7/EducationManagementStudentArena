@@ -168,36 +168,46 @@ def load_player_token_payload(
     }
 
 
-def authenticate_player_token(token: str | None, *, pin: str) -> tuple[dict[str, Any] | None, LivePlayer | None]:
+def _token_player(payload: dict[str, Any], *, pin: str) -> LivePlayer | None:
+    player_qs = LivePlayer.objects.select_related("session").filter(
+        id=payload["player_id"],
+        session__pin=str(pin),
+    )
+    if payload["client_id"]:
+        player_qs = player_qs.filter(client_id=payload["client_id"])
+    else:
+        player_qs = player_qs.filter(client_id="")
+    return player_qs.first()
+
+
+def authenticate_player_token(
+    token: str | None, *, pin: str, rls_bypassed: bool = False
+) -> tuple[dict[str, Any] | None, LivePlayer | None]:
+    """``rls_bypassed=True`` — çağıran ÖZÜ artıq ``bypass_rls()`` blokunun içindədir (məs. `state/<pin>/`):
+    iç-içə bypass açılmır (transaction-scoped RLS-də hər biri ``current_setting`` + 2 ``set_config`` idi)."""
     payload = load_player_token_payload(token, pin=pin)
     if payload is None:
         return None, None
 
-    # Player token auth is PIN/client scoped rather than tenant-argument scoped.
-    with rls_worker_atomic(), bypass_rls():
-        player_qs = LivePlayer.objects.select_related("session").filter(
-            id=payload["player_id"],
-            session__pin=str(pin),
-        )
-        if payload["client_id"]:
-            player_qs = player_qs.filter(client_id=payload["client_id"])
-        else:
-            player_qs = player_qs.filter(client_id="")
-
-        player = player_qs.first()
+    if rls_bypassed:
+        player = _token_player(payload, pin=pin)
+    else:
+        # Player token auth is PIN/client scoped rather than tenant-argument scoped.
+        with rls_worker_atomic(), bypass_rls():
+            player = _token_player(payload, pin=pin)
     if player is None:
         return None, None
 
     return payload, player
 
 
-def get_player_from_token(token: str | None, *, pin: str) -> LivePlayer | None:
-    _, player = authenticate_player_token(token, pin=pin)
+def get_player_from_token(token: str | None, *, pin: str, rls_bypassed: bool = False) -> LivePlayer | None:
+    _, player = authenticate_player_token(token, pin=pin, rls_bypassed=rls_bypassed)
     return player
 
 
-def get_request_player(request, *, pin: str) -> LivePlayer | None:
-    return get_player_from_token(request.COOKIES.get(PLAYER_COOKIE_NAME), pin=pin)
+def get_request_player(request, *, pin: str, rls_bypassed: bool = False) -> LivePlayer | None:
+    return get_player_from_token(request.COOKIES.get(PLAYER_COOKIE_NAME), pin=pin, rls_bypassed=rls_bypassed)
 
 
 def authorize_socket_connection(

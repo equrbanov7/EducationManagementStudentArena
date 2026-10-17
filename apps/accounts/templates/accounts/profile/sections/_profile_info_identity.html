@@ -1,4 +1,4 @@
-{% load i18n static %}
+{% load i18n static avatar_tags %}
 {% trans "not_set" context "profile.info" as profile_not_set %}
 {% trans "default_org" context "profile.info" as profile_default_org %}
 {% comment %}«Profil məlumatları» — kimlik başlığı + məlumat kartları.
@@ -32,7 +32,7 @@ forması serverdə qalır (geri uyğunluq), şablon artıq onu göndərmir.
 <header class="pfx-hero">
     <div class="pfx-avatar" {% include "accounts/profile/sections/_avatar_scope_attrs.html" %} data-avatar-modal="#profileAvatarUpdateModal">
         <div class="pfx-avatar__frame" data-avatar-display>
-            <img {% if profile.avatar %}src="{% url 'accounts:profile_avatar' user.id %}?v={{ profile.updated_at|date:'U' }}"{% else %}hidden{% endif %}
+            <img {% if profile.avatar %}src="{% url 'accounts:profile_avatar' user.id %}?v={{ profile.updated_at|avatar_version }}"{% else %}hidden{% endif %}
                  alt="" class="pfx-avatar__img" data-avatar-img>
             <span class="pfx-avatar__initials" data-avatar-initials{% if profile.avatar %} hidden{% endif %}>{{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}</span>
         </div>

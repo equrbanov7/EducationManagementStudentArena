@@ -101,3 +101,16 @@ class ClarityGatingTests(TestCase):
                 self.assertIn('data-clarity-mask="True"', source)
         for path in list(REPO_ROOT.glob("templates/**/*.html")) + list(REPO_ROOT.glob("apps/*/templates/**/*.html")):
             self.assertNotIn("data-clarity-unmask", path.read_text(encoding="utf-8"), msg=str(path))
+
+
+def test_local_settings_disable_clarity_but_production_keeps_it_2026_10_17():
+    """Sahib 2026-10-17: lokal / QA klonunda Clarity söndürülüb (real adlar), prod-da qalır."""
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[2] / "config" / "settings"
+    local = (root / "local.py").read_text(encoding="utf-8")
+    assert 'MICROSOFT_CLARITY_PROJECT_ID = os.getenv("MICROSOFT_CLARITY_LOCAL_PROJECT_ID", "").strip()' in local
+    production = (root / "production.py").read_text(encoding="utf-8")
+    assert "from .local" not in production
+    integrations = (root / "components" / "integrations.py").read_text(encoding="utf-8")
+    assert 'os.getenv("MICROSOFT_CLARITY_PROJECT_ID", "x2xrg3vw2i")' in integrations

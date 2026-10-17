@@ -17,6 +17,7 @@ from apps.registrar import gradebook, services
 from apps.registrar.journal_names import journal_student_name
 from apps.registrar.models import Enrollment, LessonKind, Subject
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
+from core.person_names import clean_name_part
 from core.rls import bypass_rls
 
 User = get_user_model()
@@ -35,6 +36,17 @@ class JournalStudentNameHelperTest(TestCase):
     def test_missing_patronymic_is_skipped(self):
         user = self._user("jsn_b", "Əli", "Vəliyev")
         self.assertEqual(journal_student_name(user), "Vəliyev Əli")
+
+    def test_import_placeholder_patronymic_is_skipped(self):
+        """QA-1 F15: köhnə idxaldan gələn ata adı «-» jurnalda «Soyad Ad -» kimi görünmür."""
+        for placeholder in ("-", " – ", "--", ".", "yoxdur"):
+            with self.subTest(placeholder=placeholder):
+                user = self._user("jsn_p", "Əli", "Vəliyev", placeholder)
+                self.assertEqual(journal_student_name(user), "Vəliyev Əli")
+                self.assertEqual(user.profile.full_name_with_patronymic, "Əli Vəliyev")
+                user.delete()
+        self.assertEqual(clean_name_part("Həsən-oğlu"), "Həsən-oğlu")
+        self.assertEqual(clean_name_part(None), "")
 
     def test_missing_profile_does_not_raise(self):
         user = self._user("jsn_c", "Əli", "Vəliyev", "Həsən")

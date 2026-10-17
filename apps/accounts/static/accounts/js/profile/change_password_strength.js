@@ -57,6 +57,9 @@
 
     function isTrivial(value, rules) {
         var lowered = value.trim().toLowerCase();
+        if (lowered.length > 1 && lowered.split(lowered.charAt(0)).join("") === "") {
+            return true; /* tək simvolun təkrarı («aaaaaaaa») — serverlə eyni qayda */
+        }
         return rules.trivial.indexOf(lowered) !== -1 || (!!rules.username && lowered === rules.username);
     }
 

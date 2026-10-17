@@ -31,6 +31,7 @@ Seçim yalnız bu açılışı apara bilən müəllimlərdəndir — server yoxl
 from __future__ import annotations
 
 from django.apps import apps as django_apps
+from django.conf import settings
 from django.utils.translation import pgettext
 
 from apps.registrar import schedule as schedule_service
@@ -38,9 +39,6 @@ from apps.registrar import schedule_conflicts, schedule_grid, schedule_manage, s
 from apps.registrar.models import CourseOffering, SlotKind, Subject, WeekType
 
 _CTX = "registrar.schedule_editor"
-
-#: Müəllim/fənn seçicilərində göstərilən maksimum sətir (canlı axtarış var).
-CHOICE_LIMIT = 400
 
 
 class CellError(Exception):
@@ -128,11 +126,16 @@ def allowed_subjects(*, organization, group, period, instructor=None) -> list[di
             CourseOffering.objects.filter(organization=organization, period=period).values_list("subject_id", flat=True)
         )
         subject_ids.discard(None)
+    # 2026-10-17: siyahı KƏSİLMİR (əvvəl `[:400]` kodla sıralanmış — köhnə semestrdə 600+ fənnin, kataloqda
+    # 2 538-in qalanı səssizcə yox idi). Seçicidə axtarış var, menyu tənbəl qurulur; kataloq ehtiyatı (dövrdə
+    # heç bir açılış yoxdursa) QKU klonunda 289 KB JSON / 97 KB gzip-dir. `values_list` — model nümunəsi yox.
+    rows = Subject.objects.filter(organization=organization)
     if subject_ids:
-        rows = Subject.objects.filter(organization=organization, pk__in=subject_ids).order_by("code")[:CHOICE_LIMIT]
-    else:
-        rows = Subject.objects.filter(organization=organization).order_by("code")[:CHOICE_LIMIT]
-    return [{"id": str(row.pk), "code": row.code or "", "name": row.name or ""} for row in rows]
+        rows = rows.filter(pk__in=subject_ids)
+    return [
+        {"id": str(pk), "code": code or "", "name": name or ""}
+        for pk, code, name in rows.order_by("code", "pk").values_list("pk", "code", "name")
+    ]
 
 
 def _task_subject_ids(organization, period, *, group=None, teacher=None) -> set:
@@ -156,26 +159,62 @@ def _task_subject_ids(organization, period, *, group=None, teacher=None) -> set:
 
 
 def teacher_choices(organization) -> list[dict]:
-    """Cədvələ qoyula bilən müəllimlər — təşkilatın AKTİV müəllim üzvlükləri."""
+    """Cədvələ qoyula bilən müəllimlər — təşkilatın AKTİV müəllim üzvlükləri.
+
+    PERF-1 F-16: siyahı təşkilat üzrə keşlənir (``core.cache.SCHEDULE_TEACHER_CHOICES_TTL``; üzvlük / rol
+    yazısı keşi silir) — hər redaktor açılışında bütün üzvlüklərin skanı + model nümunələri idi.
+    """
     if organization is None:
         return []
-    Membership = django_apps.get_model("organizations", "Membership")
-    rows = (
-        Membership.objects.filter(organization=organization, is_active=True)
-        .exclude(role__name__in=("student", "lead_student", "alumni"))
-        .select_related("user")
-        .order_by("user__first_name", "user__last_name", "user__username")
+    from core.cache import SCHEDULE_TEACHER_CHOICES_TTL, cached_or_compute, schedule_teacher_choices_key
+
+    return cached_or_compute(
+        schedule_teacher_choices_key(organization.pk),
+        lambda: _teacher_choices(organization),
+        timeout=SCHEDULE_TEACHER_CHOICES_TTL,
     )
-    seen, out = set(), []
-    for membership in rows:
-        user = membership.user
-        if user is None or user.pk in seen:
-            continue
-        seen.add(user.pk)
-        out.append({"id": str(user.pk), "name": _person_name(user)})
-        if len(out) >= CHOICE_LIMIT:
-            break
-    return sorted(out, key=lambda row: row["name"].lower())
+
+
+def _teacher_choices(organization) -> list[dict]:
+    """Jurnal sahibi ola bilən HƏR müəllim — aktiv üzvlüyü aktiv ``grade.input`` rolundan gələn aktiv istifadəçi.
+
+    Dəst ``schedule_slot_teachers.authorized_teacher_ids`` / ``integrity.eligible_instructor_user_ids`` ilə
+    EYNİDİR (yazı onu yoxlayır). 2026-10-17 (PERF-1 F-16 ardı): əvvəl siyahı ad üzrə sıralanıb 400-də kəsilirdi
+    (`CHOICE_LIMIT`, indi yoxdur) — 871 heyətli təşkilatda əlifbanın sonundakı müəllimlər redaktorda yox idi; tələbə rolları
+    ad ilə çıxarılırdı. İndi kəsilmir, soyad → ad üzrə sıralanır (seçicidə axtarış var). İki yüngül sorğu
+    (rol icazəsi rol başına bir dəfə), nəticə ``teacher_choices``-də 5 dəqiqə keşlənir."""
+    from core.permissions import has_permission
+
+    from .integrity import INSTRUCTOR_PERMISSION
+
+    Role = django_apps.get_model("organizations", "Role")
+    Membership = django_apps.get_model("organizations", "Membership")
+    role_ids = [
+        role_id
+        for role_id, permissions in Role.objects.filter(organization=organization, is_active=True).values_list(
+            "id", "permissions"
+        )
+        if has_permission(list(permissions or []), INSTRUCTOR_PERMISSION)
+    ]
+    if not role_ids:
+        return []
+    member_ids = Membership.objects.filter(
+        organization=organization,
+        organization__is_active=True,
+        is_active=True,
+        role_id__in=role_ids,
+    ).values("user_id")
+    User = django_apps.get_model(*settings.AUTH_USER_MODEL.split("."))
+    rows = (
+        User.objects.filter(pk__in=member_ids, is_active=True)
+        .order_by("last_name", "first_name", "username", "pk")
+        .values_list("pk", "first_name", "last_name", "username")
+    )
+    # Ad `User.get_full_name()` ilə eyni (``_person_name``): «ad soyad», boşdursa istifadəçi adı.
+    return [
+        {"id": str(pk), "name": f"{first_name or ''} {last_name or ''}".strip() or str(username or "")}
+        for pk, first_name, last_name, username in rows
+    ]
 
 
 # ── Payload ──────────────────────────────────────────────────────────────────
@@ -495,7 +534,6 @@ def check_cell(*, organization, offering, cleaned, exclude_id=None, slot_instruc
 
 
 __all__ = [
-    "CHOICE_LIMIT",
     "CellError",
     "allowed_subjects",
     "check_cell",

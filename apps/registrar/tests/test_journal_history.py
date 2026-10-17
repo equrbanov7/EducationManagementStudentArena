@@ -159,6 +159,23 @@ class JournalHistoryTest(TestCase):
         self.assertEqual(journal_history.display_mark("qbx"), "qbx")
         self.assertEqual(journal_history.display_mark("iə"), "i/e")
 
+    def test_stored_lesson_kind_is_shown_in_the_active_language(self):
+        """Başqa dildə yazılmış «2024-10-01 · Mühazirə» aktiv dildə göstərilir (QA-1 F7); saxlanan mətn dəyişmir."""
+        from django.utils import translation
+
+        self._log(item="2024-10-01 · Mühazirə")
+        self._log(item="2024-10-02 · Lecture")
+        self._log(item="2024-10-03 · Naməlum mövzu")
+        with translation.override("en"):
+            self.assertEqual(journal_history.localize_lesson_item("2024-10-01 · Mühazirə"), "2024-10-01 · Lecture")
+            self.assertEqual(journal_history.localize_lesson_item("2024-10-01 · Лекция"), "2024-10-01 · Lecture")
+            self.assertEqual(journal_history.localize_lesson_item("Naməlum"), "Naməlum")
+            entries = self._client(self.teacher).get(self._url(), HTTP_ACCEPT_LANGUAGE="en").json()["entries"]
+            items = {row["item"] for entry in entries for row in entry["rows"]}
+        self.assertIn("2024-10-01 · Lecture", items)
+        self.assertIn("2024-10-02 · Lecture", items)
+        self.assertIn("2024-10-03 · Naməlum mövzu", items)  # tanınmayan mətnə toxunulmur
+
     def test_pagination_after_twenty_entries(self):
         for index in range(25):
             self._log(new=f"iə {index % 10}")

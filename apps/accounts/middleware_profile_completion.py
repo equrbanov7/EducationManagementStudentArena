@@ -9,7 +9,11 @@ Davranış: HTML → 302 «Məlumatlarınızı tamamlayın» (GET-də ``?next=``
 
 Açıq qalan yollar: səhifənin özü, çıxış, ilk-giriş / parol bərpası, view-as-dan çıxış, şəbəkə zonası izahı,
 statik / media, dil seçimi, JS kataloqu, sağlamlıq ucları, admin (öz 2FA qapısı var) və canlı imtahan oyunçu
-axını (QR / PIN ilə qoşulma HƏR vəziyyətdə işləməlidir — ilk-giriş qapısı ilə eyni istisna).
+axını (QR / PIN ilə qoşulma HƏR vəziyyətdə işləməlidir — ilk-giriş qapısı ilə eyni istisna), ``/exams/``
+altında isə yalnız imtahan verənin yolları (``EXAM_TAKER_URL_NAMES``).
+
+View-as: aktor qapını view-as-a GİRƏNDƏ keçir (``view_as_start`` qapılıdır), ona görə view-as içində yoxlanmır —
+hədəfin adından səhifə hədəfin məlumatını yazmamalıdır.
 
 Sorğu büdcəsi: qapı söndürülüdürsə və ya sahələr doludursa SIFIR əlavə sorğu — profil və üzvlüklər əvvəlki
 middleware-lərdə artıq yüklənib.
@@ -21,7 +25,7 @@ from urllib.parse import urlencode
 
 from django.http import JsonResponse
 from django.shortcuts import redirect
-from django.urls import NoReverseMatch, reverse
+from django.urls import NoReverseMatch, Resolver404, resolve, reverse
 
 from . import profile_completion as policy
 
@@ -66,7 +70,41 @@ def _parent(path: str) -> str:
 class ProfileCompletionMiddleware:
     LIVE_PLAYER_PREFIXES = ("/live/join/", "/live/wait/", "/live/play/", "/live/state/")
     LIVE_PIN_ENTRY_PATH = "/live/"
+    #: ``/exmas/`` — imtahan zalında tez-tez yazılan səhv (``config/urls.legacy_exmas_redirect`` → ``/exams/…``).
     EXAM_PREFIXES = ("/exams/",)
+    EXAM_TYPO_PREFIXES = ("/exmas",)
+    #: SEC-1 F6 / QA-2 F-12 (2026-10-17): ``/exams/`` altında YALNIZ imtahan VERƏNİN yolları açıqdır — siyahı,
+    #: başla, cəhd (+ kod / proktorinq API-ləri), nəticə, final PIN girişi və gözləmə otağı. İmtahan günü cəhd heç
+    #: vaxt kəsilmir (rol yoxlanmır — cəhd edən müəllim də keçir). İmtahan mərkəzi, sual bankı, müəllim idarəsi və
+    #: axtarış ucları kabinetin qalanı kimi qapılıdır. ``teacher_exam_list`` (``/exams/``) yalnız yönləndirmədir.
+    EXAM_TAKER_URL_NAMES = frozenset(
+        {
+            "teacher_exam_list",
+            "student_exam_list",
+            "assigned_exam_list",
+            "student_exam_history",
+            "exam_code_check",
+            "final_exam_entry",
+            "final_exam_waiting",
+            "final_exam_cancel",
+            "final_exam_begin",
+            "final_ticket_state",
+            "start_exam",
+            "take_exam",
+            "question_seen",
+            "exam_result",
+            "coding_autosave",
+            "coding_run",
+            "coding_submit",
+            "coding_submission_download",
+            "supervision_log_incident",
+            "supervision_status_api",
+            "supervision_log_signal",
+            "supervision_heartbeat",
+            # Cəhd səhifəsi tələbənin ÖZ şəklini buradan yükləyir (nəzarətçi üçün); view öz / heyət əhatəsini yoxlayır.
+            "proctor_student_photo",
+        }
+    )
     #: QA-1 P2 (2026-10-17): tələbənin imtahan SİYAHISI kabinet bölməsidir — ``/exams/`` və ``/exams/available/``
     #: ``?section=assigned-exams``-ə yönləndirir. Yalnız bu bölmə (səhifə + AJAX fraqmenti) qapıda dayanmır;
     #: kabinetin qalan bölmələri qapılı qalır (``my-exams`` — müəllimin idarə səhifəsidir, qapılıdır).
@@ -139,15 +177,28 @@ class ProfileCompletionMiddleware:
             return True
         if path == self.LIVE_PIN_ENTRY_PATH or path.startswith(self.LIVE_PLAYER_PREFIXES):
             return True
+        if path.startswith(self.EXAM_TYPO_PREFIXES) or path == "/exams":
+            return True  # yalnız yönləndirmədir — hədəf yol ``/exams/…`` kimi ayrıca yoxlanılır
         if path.startswith(self.EXAM_PREFIXES):
             # 2026-10-17 tövsiyə: imtahan (başla / cəhd / final gözləmə otağı) heç vaxt bu qapıda dayanmır —
-            # məlumat sonra kabinetdə tamamlanır.
-            return True
+            # məlumat sonra kabinetdə tamamlanır. Heyətin imtahan idarə yolları isə qapılıdır (SEC-1 F6).
+            return self._is_exam_taker_path(path)
         try:
             self._resolve()
         except Exception:  # noqa: BLE001 — URLconf hazır deyil (başlanğıc) → bloklama
             return True
         return path in self._exempt_paths or path.startswith(self._exempt_prefixes)
+
+    def _is_exam_taker_path(self, path: str) -> bool:
+        try:
+            match = resolve(path)
+        except Resolver404:
+            # Review 2026-10-17 (P1): ``/exams/final`` (sonda «/» yoxdur) həll olunmur — tələbə zalda əl ilə yazır.
+            # Naməlum yol onsuz da 404-dür, APPEND_SLASH yönləndirməsinin hədəfi isə ayrıca düzgün yoxlanılır.
+            return True
+        except Exception:  # noqa: BLE001 — URLconf hazır deyil → imtahanı bloklama
+            return True
+        return match.namespace == "exams" and match.url_name in self.EXAM_TAKER_URL_NAMES
 
     @staticmethod
     def _wants_json(request) -> bool:

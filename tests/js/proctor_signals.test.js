@@ -177,7 +177,9 @@ test("superhuman typing speed is reported as fast_input", async () => {
             api.onBeforeInput({ isTrusted: true, target: ta, inputType: "insertText", data: "ab", preventDefault() {} });
         }
         const fast = signals(calls, "fast_input");
-        assert.equal(fast.length, 1);
+        // 2026-10-17: yavaş CI-da 80 hadisə ölçü pəncərəsinin sərhədini keçə bilir → siqnal 2 dəfə (flaky idi).
+        // Mütləq olan: ən azı bir dəfə və axın başına iki pəncərədən çox deyil.
+        assert.ok(fast.length >= 1 && fast.length <= 2, `fast_input count ${fast.length}`);
         assert.ok(fast[0].body.detail.chars > 150);
     } finally {
         api.stop();

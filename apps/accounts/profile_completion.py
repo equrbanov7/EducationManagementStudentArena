@@ -258,7 +258,16 @@ def missing_users_q(prefix: str = "") -> Q:
         clauses |= Q(**{f"{prefix}profile__phone": ""})
     if field_enabled(FIELD_EMAIL):
         clauses |= Q(**{f"{prefix}email": ""}) | Q(**{f"{prefix}email__iendswith": "@" + PLACEHOLDER_EMAIL_DOMAIN})
-    exempt = Q(**{f"{prefix}is_superuser": True}) | Q(**{f"{prefix}username__istartswith": QA_USERNAME_PREFIX})
+    # QA-2 F-13: ``is_exempt_user`` ilə eyni azadlıqlar — süzgəc yalnız qapının HƏQİQƏTƏN dayandıracağı hesabları
+    # sayır (ilk-giriş axınındakı, aktiv olmayan / arxiv / silinmiş hesab burada da sayılmır).
+    exempt = (
+        Q(**{f"{prefix}is_superuser": True})
+        | Q(**{f"{prefix}username__istartswith": QA_USERNAME_PREFIX})
+        | Q(**{f"{prefix}is_active": False})
+        | ~Q(**{f"{prefix}profile__access_state": "active"})
+        | Q(**{f"{prefix}profile__is_deleted": True})
+        | Q(**{f"{prefix}profile__password_change_required": True})
+    )
     return clauses & ~exempt
 
 

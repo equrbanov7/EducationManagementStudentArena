@@ -17,7 +17,7 @@ açılmır (``scripts/module_deps.py``).
 
 from __future__ import annotations
 
-from django.db.models import Case, IntegerField, Q, Value, When
+from django.db.models import Case, IntegerField, Q, Subquery, Value, When
 
 from ..constants import OPEN_STATUSES, SyllabusStatus
 from ..models import Syllabus
@@ -93,14 +93,17 @@ def syllabus_for_offering(*, organization, offering_id=None, subject_id=None, pe
         default=Value(len(tiers)),
         output_field=IntegerField(),
     )
-    return (
+    # PERF-1 F-14 (2026-10-17): pillə seçimi JOIN-suz alt-sorğuda (yalnız sıralama üçün `subject`), 9 cədvəllik
+    # `select_related` isə xarici sorğuda PK bərabərliyi ilə — Case/OR pillələri JOIN-larla birgə planlaşdırılmır.
+    # Planlaşdırma ~6 → ~3 ms (icra 0,3 ms); round-trip yenə BİRDİR (jurnal / sərbəst iş sorğu büdcələri dəyişmir).
+    tier_pick = (
         Syllabus.objects.filter(organization=organization, is_active=True)
         .filter(combined)
-        .select_related(*_RELATED)
         .annotate(_tier=rank)
         .order_by("_tier", "subject__code", "pk")
-        .first()
+        .values("pk")[:1]
     )
+    return Syllabus.objects.select_related(*_RELATED).filter(pk=Subquery(tier_pick)).first()
 
 
 _SYLLABUS_MEMO_ATTR = "_syllabus_memo"

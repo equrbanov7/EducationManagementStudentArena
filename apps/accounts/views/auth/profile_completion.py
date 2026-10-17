@@ -8,10 +8,12 @@ Siyasət: ``apps/accounts/profile_completion.py``; yazı: ``services/profile_com
 from __future__ import annotations
 
 import logging
+from urllib.parse import urlsplit
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.audit.public import log_action
@@ -27,7 +29,11 @@ logger = logging.getLogger(__name__)
 
 def _next_url(request) -> str:
     raw = request.POST.get("next") if request.method == "POST" else request.GET.get("next")
-    return _safe_same_origin_redirect_path(request, raw or "")
+    target = _safe_same_origin_redirect_path(request, raw or "")
+    # «next» özü bu səhifədirsə qapıya geri qayıdırdıq (QA-1 F18) — kabinetə düşsün.
+    if target and urlsplit(target).path.rstrip("/") == reverse("accounts:complete_profile").rstrip("/"):
+        return ""
+    return target
 
 
 def _audit_skip(request, missing) -> None:

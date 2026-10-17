@@ -224,10 +224,12 @@
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && isOpen) closePanel(); });
 
     // İlk dəfə (səhifə açılandan 6 s sonra) bir dəfə diqqət çəkir — daimi dalğa yox.
+    // Telefonda (≤768 px) izah qutusu göstərilmir: kiçik ekranda kartın/cərgənin üstünü örtür (QA-1 F10) — yalnız əl yellənir.
+    const narrowScreen = window.matchMedia ? window.matchMedia("(max-width: 768px)") : null;
     window.setTimeout(() => {
         if (isOpen || fabHidden() || botBtn.classList.contains("ai-bot-btn--tucked")) return;
         botBtn.classList.add("ai-bot-btn--wave");
-        tooltip.classList.add("ai-bot-tooltip--visible");
+        if (!(narrowScreen && narrowScreen.matches)) tooltip.classList.add("ai-bot-tooltip--visible");
         window.setTimeout(() => botBtn.classList.remove("ai-bot-btn--wave"), 1600);
         window.setTimeout(() => tooltip.classList.remove("ai-bot-tooltip--visible"), 5000);
     }, 6000);

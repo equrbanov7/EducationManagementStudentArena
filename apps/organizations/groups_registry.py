@@ -185,14 +185,15 @@ def _group_settings(organization, scope=None):
     return queryset.values_list("settings", flat=True)
 
 
-def language_options(organization, scope=None) -> list:
+def language_options(organization, scope=None, *, settings_rows=None) -> list:
     """Dil sektoru seçiciləri — TENANT DATASINDAN, hardcode YOX.
 
     Layihə yaddaşı: sektor tenant-konfiqurasiya olunandır; universitetdə hansı
-    sektorlar varsa, süzgəcdə də onlar görünür.
+    sektorlar varsa, süzgəcdə də onlar görünür. ``settings_rows`` — eyni əhatə üçün artıq oxunmuş
+    ``_group_settings`` siyahısı (PERF-1 F-08: reyestr onu bir dəfə oxuyur).
     """
     values = set()
-    for raw in _group_settings(organization, scope):
+    for raw in _group_settings(organization, scope) if settings_rows is None else settings_rows:
         if isinstance(raw, dict):
             value = (raw.get("language_sector") or "").strip()
             if value:
@@ -200,22 +201,22 @@ def language_options(organization, scope=None) -> list:
     return [{"value": value, "label": value} for value in sorted(values)]
 
 
-def language_form_options(organization) -> list:
-    """Forma üçün dil sektoru seçimləri: standart AZ/EN/RU + tenantın öz dəyərləri."""
+def language_form_options(organization, *, settings_rows=None) -> list:
+    """Forma üçün dil sektoru seçimləri: standart AZ/EN/RU + tenantın öz dəyərləri (BÜTÜN qruplar üzrə)."""
     seen = []
     for value in DEFAULT_LANGUAGE_SECTORS:
         seen.append(value)
-    for option in language_options(organization):
+    for option in language_options(organization, settings_rows=settings_rows):
         if option["value"].upper() not in seen and option["value"] not in seen:
             seen.append(option["value"])
     return [{"value": value, "label": value} for value in seen]
 
 
-def admission_year_options(organization, *, current_year: int, scope=None) -> list:
+def admission_year_options(organization, *, current_year: int, scope=None, settings_rows=None) -> list:
     """Qəbul ili seçimləri — cari il + geriyə `ADMISSION_YEAR_SPAN` il, tenant
     datasındakı kənar illər də (məs. köçürülmüş köhnə qruplar) əlavə olunur."""
     years = set(range(current_year + 1, current_year - ADMISSION_YEAR_SPAN, -1))
-    for raw in _group_settings(organization, scope):
+    for raw in _group_settings(organization, scope) if settings_rows is None else settings_rows:
         if isinstance(raw, dict):
             try:
                 year = int(raw.get("admission_year") or 0)
@@ -242,6 +243,29 @@ def scoped_filter_options(organization, scope, unit_type, *, limit=None) -> list
     if limit:
         queryset = queryset[:limit]
     return [{"value": str(unit.id), "label": unit.name} for unit in queryset]
+
+
+def _parent_links(organization, page_units) -> tuple[dict, dict]:
+    """Səhifədəki qruplar üçün ana qrup adları və alt qrup sayları — 2 toplu sorğu (səhifə ölçüsündən asılı deyil)."""
+    parent_ids = {str((unit.settings or {}).get("parent_group") or "") for unit in page_units} - {""}
+    parent_names = (
+        dict(
+            (str(pk), name)
+            for pk, name in OrgUnit.objects.filter(organization=organization, pk__in=parent_ids).values_list(
+                "pk", "name"
+            )
+        )
+        if parent_ids
+        else {}
+    )
+    page_ids = [str(unit.id) for unit in page_units]
+    subgroup_counts = {}
+    if page_ids:
+        for parent_id in OrgUnit.objects.filter(
+            organization=organization, unit_type=OrgUnitType.GROUP, is_active=True, settings__parent_group__in=page_ids
+        ).values_list("settings__parent_group", flat=True):
+            subgroup_counts[str(parent_id)] = subgroup_counts.get(str(parent_id), 0) + 1
+    return parent_names, subgroup_counts
 
 
 def build_groups_registry(request, organization) -> dict:
@@ -279,7 +303,9 @@ def build_groups_registry(request, organization) -> dict:
         queryset = scope_org_units(OrgUnit.objects.filter(organization=organization, is_active=False), scope)
     else:
         queryset = _visible_units_queryset(organization, scope)
-    queryset = queryset.filter(unit_type="group").select_related("parent", "parent__parent", "parent__parent__parent")
+    # PERF-1 F-08: bütün əhatə qrupları JOIN-suz yüklənir (süzgəc/KPI yalnız öz sahələrini oxuyur);
+    # ixtisas → kafedra → fakültə zənciri və tyutor yalnız SƏHİFƏ sətirləri üçün bir sorğu ilə gəlir.
+    queryset = queryset.filter(unit_type="group")
 
     total_count = queryset.count()
     # Dözümlü kod axtarışı (sahib 2026-09-26): «234king», «234k ing», «234-K-ing» → «234 K ing».
@@ -299,6 +325,7 @@ def build_groups_registry(request, organization) -> dict:
     # Dil/kurs süzgəci JSON sahədədir — DB-dən asılı olmamaq üçün Python-da
     # tətbiq olunur (qrup sayı onluqlarla/yüzlərlədir, min deyil).
     units = list(queryset)
+    python_filtered = bool(language or course.isdigit() or education_form or admission_year.isdigit())
     if language:
         units = [unit for unit in units if group_meta(unit)["language_sector"] == language]
     if course.isdigit():
@@ -311,6 +338,14 @@ def build_groups_registry(request, organization) -> dict:
     page_obj = Paginator(units, PAGE_SIZE).get_page(request.GET.get("gr_page"))
 
     page_ids = [unit.id for unit in page_obj.object_list]
+    page_units_by_id = (
+        OrgUnit.objects.filter(pk__in=page_ids)
+        .select_related("parent", "parent__parent", "parent__parent__parent", "head")
+        .in_bulk()
+        if page_ids
+        else {}
+    )
+    page_units = [page_units_by_id.get(unit.id, unit) for unit in page_obj.object_list]
     # «Plan yoxdur» qrupun ÖZ metadatasından DEYİL, ixtisasın TƏSDİQLƏNMİŞ
     # planından hesablanır (ekran 03/07 ilə eyni meyar) — köçürülmüş qruplarda
     # `settings.curriculum_id` boşdur və o, plan yoxluğu demək DEYİL.
@@ -333,14 +368,17 @@ def build_groups_registry(request, organization) -> dict:
     )
 
     form_labels = {option["value"]: option["label"] for option in education_form_choices()}
+    # PERF-1 F-08: qrup `settings` JSON-ları (dil / qəbul ili seçimləri) bir dəfə oxunur — əvvəl 3 dəfə idi.
+    scoped_settings = list(_group_settings(organization, scope))
     # 2026-10-14: OXU əhatəsi fakültəyə genişləndi (kafedra/ixtisas tyutoru bütün fakültənin qruplarını görür),
     # YAZI isə dar `unit.group_manage` əhatəsindədir — sətir düymələri yalnız yazı əhatəsindəki qrupa (server
     # kənar qrupa onsuz da 404 qaytarır). Sorğusuz: əhatə bir dəfə, yoxlama yol üzrə.
     can_manage = can_manage_groups(request)
     manage_scope = group_manage_scope(request, organization) if can_manage else EMPTY_SCOPE
     can_view_students = can_view_group_students(request)
+    parent_names, subgroup_counts = _parent_links(organization, page_units)
     rows = []
-    for unit in page_obj.object_list:
+    for unit in page_units:
         meta = group_meta(unit)
         specialty_name, chair_name, faculty_name = _specialty_chain(unit)
         rows.append(
@@ -365,6 +403,9 @@ def build_groups_registry(request, organization) -> dict:
                 "tutor": (unit.head.get_full_name() or unit.head.username) if unit.head_id else "",
                 "tutor_id": str(unit.head_id) if unit.head_id else "",
                 "is_active": unit.is_active,
+                # QA-2 F-16 (2026-10-17): ortaq ana / alt qrup əlaqəsi (settings.parent_group, bax parent_groups.py).
+                "parent_group_name": parent_names.get(str((unit.settings or {}).get("parent_group") or ""), ""),
+                "subgroup_count": subgroup_counts.get(str(unit.id), 0),
                 "path": unit.path or "",
                 "can_manage": can_manage and unit_in_scope(manage_scope, unit),
                 "can_view_students": can_view_students,
@@ -389,9 +430,12 @@ def build_groups_registry(request, organization) -> dict:
         "filtered_count": page_obj.paginator.count,
         # KPI-lər SƏHİFƏ deyil, ƏHATƏDƏKİ süzülmüş qrupların hamısı üzrə (2026-10-14, sahib: dekan öz
         # fakültəsinin tələbə sayını görsün) — `units` artıq `unit.view` əhatəsi ilə süzülüb.
+        # PERF-1 F-08: Python süzgəci yoxdursa `units` = `queryset` — uzun id siyahısı əvəzinə alt-sorğu.
         "student_total": (
             StudentAcademicRecord.objects.filter(
-                organization=organization, is_active=True, group_id__in=[unit.id for unit in units]
+                organization=organization,
+                is_active=True,
+                group_id__in=[unit.id for unit in units] if python_filtered else queryset.values("pk"),
             ).count()
             if units
             else 0
@@ -413,15 +457,22 @@ def build_groups_registry(request, organization) -> dict:
         # bütün təşkilatın fakültə/ixtisasları siyahıda görünürdü (qrup sətirləri onsuz da süzülürdü).
         "faculty_options": scoped_filter_options(organization, scope, OrgUnitType.FACULTY),
         "specialty_options": scoped_filter_options(organization, scope, OrgUnitType.SPECIALTY, limit=500),
-        "language_options": language_options(organization, scope),
-        "language_form_options": language_form_options(organization),
+        "language_options": language_options(organization, scope, settings_rows=scoped_settings),
+        "language_form_options": language_form_options(
+            organization, settings_rows=scoped_settings if scope.is_org_wide else None
+        ),
         "education_form_options": education_form_choices(),
         "current_year": current_year,
-        "admission_year_options": admission_year_options(organization, current_year=current_year, scope=scope),
+        "admission_year_options": admission_year_options(
+            organization, current_year=current_year, scope=scope, settings_rows=scoped_settings
+        ),
         # Köçürmə dialoqunun hədəf qrupları — əhatədəki AKTİV qruplar (səhifədən asılı deyil).
         "group_options": [
-            {"value": str(unit.id), "label": unit.name}
-            for unit in _visible_units_queryset(organization, scope).filter(unit_type="group").order_by("name")[:1000]
+            {"value": str(unit_id), "label": name}
+            for unit_id, name in _visible_units_queryset(organization, scope)
+            .filter(unit_type="group")
+            .order_by("name")
+            .values_list("id", "name")[:1000]
         ],
         "can_manage": can_manage,
         "can_move_students": can_move_students(request),

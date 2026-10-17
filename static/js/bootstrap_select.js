@@ -1,3 +1,17 @@
+/*
+ * static/js/bootstrap_select.js — stilli tək seçim (`[data-bootstrap-select]`).
+ *
+ * TƏNBƏL MENYU (PERF-2 H3, 2026-10-17): əvvəl hər select üçün bütün variant düymələri
+ * (düymə + 2 span + ikon + ayrıca click dinləyicisi) səhifə yüklənəndə qurulurdu —
+ * jurnal xanası 25–81 DOM düyünü, qruplar reyestri 4,4k → 12k element. İndi init
+ * yalnız toggle-u (etiket seçilmiş variantdan) qurur; variant düymələri menyu İLK
+ * açılanda (`show.bs.dropdown` — klaviatura ilə açılış da bu hadisədən keçir) və ya
+ * toggle fokus alanda qurulur. Kliklər menyuda BİR delegə dinləyici ilə tutulur.
+ * `refresh()` bağlı menyunu «köhnəlmiş» kimi işarələyir — növbəti açılışda native
+ * `<select>`-in o anki vəziyyətindən (gizli option-lar daxil) yenidən qurulur.
+ * Native `<select>`, `change` hadisəsi, `data-*` atributları və `refresh/sync/init`
+ * API-si dəyişməyib; `api.build()` menyunu dərhal qurmaq üçündür (testlər, köməkçilər).
+ */
 (function () {
     function normalizeValue(value) {
         return value === null || value === undefined ? "" : String(value);
@@ -200,7 +214,16 @@
             });
         }
 
+        // Menyu ilk açılışa qədər qurulmur (yuxarıdakı qeyd); `menuDirty` — native
+        // `<select>` dəyişib, düymələr növbəti açılışda yenidən qurulmalıdır.
+        var menuDirty = true;
+
+        function isMenuOpen() {
+            return menu.classList.contains("show");
+        }
+
         function buildMenu() {
+            menuDirty = false;
             menu.innerHTML = "";
             if (searchWrap) {
                 searchInput.value = "";
@@ -244,19 +267,6 @@
                 optionCheck.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i>';
                 optionButton.appendChild(optionCheck);
 
-                optionButton.addEventListener("click", function () {
-                    if (optionButton.disabled) {
-                        return;
-                    }
-
-                    select.value = option.value;
-                    select.dispatchEvent(new Event("change", { bubbles: true }));
-
-                    if (window.bootstrap && window.bootstrap.Dropdown) {
-                        window.bootstrap.Dropdown.getOrCreateInstance(toggle).hide();
-                    }
-                });
-
                 menu.appendChild(optionButton);
             });
 
@@ -264,8 +274,36 @@
             syncToggleState();
         }
 
+        function ensureMenu() {
+            if (menuDirty) {
+                buildMenu();
+            }
+        }
+
+        // Bir delegə dinləyici (əvvəl hər variant düyməsində ayrıca idi).
+        menu.addEventListener("click", function (event) {
+            var optionButton = event.target && event.target.closest
+                ? event.target.closest(".bootstrap-single-select__option")
+                : null;
+            if (!optionButton || !menu.contains(optionButton) || optionButton.disabled) {
+                return;
+            }
+
+            select.value = optionButton.dataset.value;
+            select.dispatchEvent(new Event("change", { bubbles: true }));
+
+            if (window.bootstrap && window.bootstrap.Dropdown) {
+                window.bootstrap.Dropdown.getOrCreateInstance(toggle).hide();
+            }
+        });
+
         function refresh() {
-            buildMenu();
+            if (isMenuOpen()) {
+                buildMenu(); // açıq menyu dərhal yenilənsin (köhnə davranış)
+                return;
+            }
+            menuDirty = true;
+            syncToggleState();
         }
 
         function sync() {
@@ -295,7 +333,11 @@
             closeDropdown();
         }
 
+        // Fokusda əvvəlcədən qur — klaviatura istifadəçisi üçün ilk açılış gecikməsin.
+        toggle.addEventListener("focus", ensureMenu);
+
         toggle.addEventListener("show.bs.dropdown", function () {
+            ensureMenu(); // menyu göstərilməzdən və yerləşdirilməzdən ƏVVƏL qurulur
             if (!useFixedStrategy) {
                 return;
             }
@@ -331,6 +373,7 @@
         var api = {
             refresh: refresh,
             sync: sync,
+            build: ensureMenu,
         };
 
         select._bootstrapSelectApi = api;

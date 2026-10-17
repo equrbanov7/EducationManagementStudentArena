@@ -26,6 +26,7 @@ from .people import (
 from .queries import (
     chair_tasks,
     serialize_rows,
+    serialize_rows_state,
     task_rows,
     teacher_load_panel,
     teacher_workload_rows,
@@ -163,6 +164,7 @@ __all__ = [
     "save_row",
     "save_row_amended",
     "serialize_rows",
+    "serialize_rows_state",
     "set_activity_hours",
     "set_row_review",
     "slice_progress",

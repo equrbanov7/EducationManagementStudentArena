@@ -14,6 +14,8 @@ from __future__ import annotations
 
 from django.core.exceptions import ObjectDoesNotExist
 
+from core.person_names import clean_name_part
+
 
 def journal_student_name(user) -> str:
     """«Soyad Ad Ata adı»; boş hissələr atılır, heç biri yoxdursa ``username``."""
@@ -26,7 +28,7 @@ def journal_student_name(user) -> str:
     parts = (
         (getattr(user, "last_name", "") or "").strip(),
         (getattr(user, "first_name", "") or "").strip(),
-        (getattr(profile, "patronymic", "") or "").strip(),
+        clean_name_part(getattr(profile, "patronymic", "")),
     )
     return " ".join(part for part in parts if part) or (getattr(user, "username", "") or "")
 

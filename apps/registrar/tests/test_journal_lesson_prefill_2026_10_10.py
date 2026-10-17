@@ -100,6 +100,58 @@ class TopicsCoveredTest(SimpleTestCase):
         self.assertEqual(marked[0]["kinds"], ["lecture"])
         self.assertFalse(marked[1]["covered"])
 
+    def test_future_dated_lesson_is_planned_not_held(self):
+        """QA-1 F13: üç gün sonrakı tarixli dərs «✓ keçirilib» yox, «planlaşdırılıb» sayılır."""
+        future = Lesson(topic="Giriş", kind=LessonKind.LECTURE, date=timezone.localdate() + datetime.timedelta(days=3))
+        marked = journal_lesson_prefill.topics_covered_by([{"title": "Giriş", "kinds": ["lecture"]}], [future])
+        self.assertFalse(marked[0]["covered"])
+        self.assertTrue(marked[0]["planned"])
+        self.assertEqual(marked[0]["date"], future.date)
+
+    def test_held_lecture_with_future_seminar_is_covered_not_planned(self):
+        """Mühazirəsi keçilmiş, seminarı gələcəkdə olan mövzu «keçirilib» (tarix = son keçirilmiş dərs)."""
+        today = timezone.localdate()
+        past = today - datetime.timedelta(days=4)
+        future = today + datetime.timedelta(days=3)
+        lessons = [  # ən yenisi birinci
+            Lesson(topic="Giriş", kind=LessonKind.SEMINAR, date=future),
+            Lesson(topic="Giriş", kind=LessonKind.LECTURE, date=past),
+            Lesson(topic="SQL", kind=LessonKind.SEMINAR, date=future),
+            Lesson(topic="SQL", kind=LessonKind.LAB, date=future + datetime.timedelta(days=7)),
+        ]
+        rows = [{"title": "Giriş", "kinds": []}, {"title": "SQL", "kinds": []}, {"title": "Yeni", "kinds": []}]
+        giris, sql, yeni = journal_lesson_prefill.topics_covered_by(rows, lessons)
+        self.assertTrue(giris["covered"])
+        self.assertFalse(giris["planned"])
+        self.assertEqual(giris["date"], past)
+        self.assertEqual(giris["covered_kinds"], ["lecture"])
+        self.assertFalse(sql["covered"])
+        self.assertTrue(sql["planned"])
+        self.assertEqual(sql["date"], future)  # ən yaxın gələcək dərs
+        self.assertFalse(yeni["covered"] or yeni["planned"])
+        self.assertIsNone(yeni["date"])
+
+    def test_calendar_plan_agrees_with_topics_covered_by(self):
+        today = datetime.date(2026, 10, 17)
+        lessons = [
+            Lesson(topic="Giriş", kind=LessonKind.LECTURE, date=today - datetime.timedelta(days=4)),
+            Lesson(topic="Giriş", kind=LessonKind.SEMINAR, date=today + datetime.timedelta(days=3)),
+        ]
+        with mock.patch("apps.registrar.journal_extras.lesson_topic_choices", return_value=["Giriş"]):
+            plan = journal_extras.calendar_plan(object(), lessons, today)
+        self.assertTrue(plan[0]["covered"])
+        self.assertFalse(plan[0]["planned"])
+
+    def test_calendar_plan_marks_future_lessons_as_planned(self):
+        today = datetime.date(2026, 10, 17)
+        held = Lesson(topic="A", kind=LessonKind.LECTURE, date=today)
+        future = Lesson(topic="B", kind=LessonKind.LECTURE, date=today + datetime.timedelta(days=3))
+        with mock.patch("apps.registrar.journal_extras.lesson_topic_choices", return_value=["A", "B", "C"]):
+            plan = {item["title"]: item for item in journal_extras.calendar_plan(object(), [held, future], today)}
+        self.assertTrue(plan["A"]["covered"] and not plan["A"]["planned"])
+        self.assertTrue(plan["B"]["planned"] and not plan["B"]["covered"])
+        self.assertFalse(plan["C"]["covered"] or plan["C"]["planned"])
+
 
 class LessonPrefillBase(TestCase):
     @classmethod

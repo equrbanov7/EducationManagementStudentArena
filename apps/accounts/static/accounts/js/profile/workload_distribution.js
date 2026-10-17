@@ -100,6 +100,9 @@
     }
 
     function renderStatus() {
+        /* QA-2 F-17: tapşırıq artıq varsa «Tapşırıq yarat» gizlənir (idempotent idi, amma çaşdırırdı). */
+        var create = q("[data-wl-create-task]");
+        if (create) create.hidden = !!STATE.task;
         var chip = q("[data-wl-status-chip]");
         if (!chip) return;
         if (!STATE.task) {

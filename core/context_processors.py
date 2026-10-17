@@ -104,6 +104,8 @@ NOINDEX_PREFIXES = (
     "/accounts/manage-roles/",
     "/accounts/superadmin/",
     "/i18n/",
+    "/jurnal/",
+    "/live/",
 )
 
 
@@ -129,6 +131,11 @@ def seo_context(request):
     # Private/tenant pages default to noindex; public pages default to index.
     path = request.path
     is_private = any(path.startswith(p) for p in NOINDEX_PREFIXES)
+    # Daxil olmuş istifadəçinin gördüyü HƏR səhifə şəxsidir (jurnal, kabinet) — ictimai yol kimi görünsə də
+    # indekslənmir (QA-1 F17). Görünüşün ``seo_robots`` ilə açıq seçimi bundan üstündür.
+    user = getattr(request, "user", None)
+    if not is_private and user is not None and getattr(user, "is_authenticated", False):
+        is_private = True
     default_robots = "noindex, nofollow" if is_private else "index, follow"
 
     # hreflang alternates.  The project serves all languages on the SAME

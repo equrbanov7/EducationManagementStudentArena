@@ -190,6 +190,8 @@ def build_curriculum_section(request, section, *, active_organization, allowed_s
 def _group_row(row, *, can_manage):
     return {
         "row_head": row["name"],
+        # QA-2 F-16: ad + «alt qrup · ana: …» / «ortaq qrup · N alt qrup» işarəsi.
+        "head_include": "accounts/profile/sections/teaching_office/_group_name_cell.html",
         "cells": [
             {"text": row["code"] or "—"},
             {"text": row["specialty_name"] or "—"},

@@ -84,6 +84,47 @@ def scrub_personal(text) -> str:
     return value
 
 
+#: Tokenli yollar: ``/accounts/reset/<uidb64>/<token>/`` (bərpa linki), sual idxalı tokeni.
+_TOKEN_PATH_RE = re.compile(r"(/reset/)(?!done(?:/|\b))[^/\s\"'?#]+(?:/[^/\s\"'?#]+)?", re.IGNORECASE)
+_IMPORT_TOKEN_RE = re.compile(r"(/question-imports/)[^/\s\"'?#]+", re.IGNORECASE)
+#: Yolda istifadəçi adı: ``/accounts/users/<username>/`` (ictimai profil).
+_USERS_PATH_RE = re.compile(r"(/users/)[^/\s\"'?#]+", re.IGNORECASE)
+#: Sorğu sətrində və strukturlaşdırılmış logda şəxsi açarlar (``?username=…``, ``"email": "…"``).
+_PERSONAL_KEYS = r"username|user_name|user|email|e-mail|login|fin|phone"
+_QUERY_PERSONAL_RE = re.compile(rf"(?i)([?&](?:{_PERSONAL_KEYS})=)[^&\s\"'#]*")
+_KV_PERSONAL_RE = re.compile(
+    rf"(?i)([\"']?\b(?:{_PERSONAL_KEYS})[\"']?\s*[=:]\s*)(?!\[x\])(\"[^\"]*\"|'[^']*'|[^\s,;&}}\]]+)"
+)
+
+
+def scrub_log_line(text) -> str:
+    """«Loglar» tabı (SEC-1 F4, 2026-10-17): sirlər + şəxsi məlumat — İP, e-poçt, yoldakı istifadəçi adı,
+    sorğu / log açarlarındakı istifadəçi adı, bərpa linki tokeni. Superadmin də daxil HƏR KƏSƏ (təhlükəsiz variant):
+    texniki diaqnostika üçün yol, status, vaxt, konteyner kifayətdir. ``scrub_personal``-dan fərqli olaraq modul /
+    fayl adlarına (``apps.accounts``, ``main.css``) toxunmur — sətir oxunaqlı qalır."""
+    if not text:
+        return ""
+    value = redact_secrets(text)
+    for pattern, replacement in (
+        (_TOKEN_PATH_RE, r"\1***"),
+        (_IMPORT_TOKEN_RE, r"\1***"),
+        (_USERS_PATH_RE, r"\1[user]"),
+        (_QUERY_PERSONAL_RE, r"\1[x]"),
+        (_KV_PERSONAL_RE, r"\1[x]"),
+        (_EMAIL_RE, "[email]"),
+        (_IPV4_RE, "[ip]"),
+    ):
+        try:
+            value = pattern.sub(replacement, value)
+        except Exception:  # pragma: no cover - regex heç vaxt sorğunu yıxmamalıdır
+            continue
+    try:
+        value = _IPV6_RE.sub(_ipv6_replacement, value)
+    except Exception:  # pragma: no cover
+        pass
+    return value
+
+
 def scrub_path(path) -> str:
     """Endpoint yolunu AI xülasəsi üçün təmizləyir (seqment səviyyəsində)."""
     if not path:
@@ -97,4 +138,4 @@ def scrub_path(path) -> str:
     return "/".join(segments)
 
 
-__all__ = ["redact_secrets", "scrub_path", "scrub_personal"]
+__all__ = ["redact_secrets", "scrub_log_line", "scrub_path", "scrub_personal"]

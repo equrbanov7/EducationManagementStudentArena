@@ -72,6 +72,19 @@ def _denied():
     )
 
 
+def _not_found(message):
+    """QA-2 F-09 (2026-10-17): əhatədən kənar / olmayan qrup və dərs → 404 (açar yoxdursa 403 — ``_denied``)."""
+    return JsonResponse({"ok": False, "error": "not_found", "message": message}, status=404)
+
+
+def _group_not_found():
+    return _not_found(pgettext(_CTX, "Qrup tapılmadı və ya əhatənizdə deyil."))
+
+
+def _slot_not_found():
+    return _not_found(pgettext(_CTX, "Dərs tapılmadı və ya əhatənizdə deyil."))
+
+
 def _error(exc):
     payload = {"ok": False, "error": exc.code, "message": exc.message, "errors": exc.errors}
     payload.update(exc.extra or {})
@@ -106,6 +119,8 @@ def _slot(request, organization, data):
 
 def _check(request, organization, data):
     group = _group(request, organization, data)
+    if group is None and parse_uuid(data.get("group_id")) is not None:
+        return _group_not_found()  # «plan» / «save» ilə eyni cavab (əvvəl 400 «seçilməlidir» idi)
     period = _period(organization, data)
     cleaned, errors = schedule_editor.parse_cell(data, organization=organization)
     if errors:
@@ -216,7 +231,7 @@ def _plan(request, organization, data):
     """«Uyğun vaxtlar» + otaq tövsiyəsi — qrup YALNIZ aktorun əhatəsindən (403), semestr bu təşkilatdan (404)."""
     group = _group(request, organization, data)
     if group is None:
-        return _denied()
+        return _group_not_found()
     period = _period(organization, data)
     if period is None:
         return JsonResponse(
@@ -250,7 +265,7 @@ def _write(request, organization, action, data):
         group = _group(request, organization, data)
         period = _period(organization, data)
         if group is None or period is None:
-            return _denied()
+            return _group_not_found() if group is None else _denied()
         return JsonResponse(
             {
                 "ok": True,
@@ -266,7 +281,7 @@ def _write(request, organization, action, data):
         )
     slot = _slot(request, organization, data)
     if slot is None:
-        return _denied()
+        return _slot_not_found()  # artıq silinmiş / əhatədən kənar dərs (QA-2 F-09)
     if action == "delete":
         row = base.delete_slot(actor=request.user, organization=organization, slot=slot, request=request)
         return JsonResponse({"ok": True, "slot": row})
@@ -305,7 +320,7 @@ def schedule_editor_action(request):
         if action == "check_move":
             slot = _slot(request, organization, data)
             if slot is None:
-                return _denied()
+                return _slot_not_found()
             return JsonResponse(editor.check_move(actor=request.user, organization=organization, slot=slot, data=data))
         return _write(request, organization, action, data)
     except schedule_editor.CellError as exc:

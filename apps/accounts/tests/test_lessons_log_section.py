@@ -177,6 +177,12 @@ class LessonsLogSectionTest(TestCase):
         self.assertIn(SECTION, self._sections(self.teacher))
         self.assertEqual(self._fragment(self.teacher).status_code, 200)
 
+    def test_day_total_renders_counted_lesson_and_hour_labels(self):
+        """QA-1 F8: günlük cəm ``blocktrans count`` ilə (cəm forması) — xam ``%(n)s`` qalmır."""
+        html = self._fragment(self.teacher).json()["html"]
+        self.assertRegex(html, r'llog-day__total">\s*\d+ dərs · \d+ saat')
+        self.assertNotIn("%(n)s", html)
+
     def test_student_is_denied(self):
         self.assertNotIn(SECTION, self._sections(self.student))
         self.assertEqual(self._fragment(self.student).status_code, 403)

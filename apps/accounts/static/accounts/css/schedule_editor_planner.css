@@ -410,3 +410,14 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* QA-2 F-11 (2026-10-17): toxunma ekranında xana və rejim düymələri 44 px-lik hədəfdir (26 px idi). */
+@media (pointer: coarse) {
+    .sedit-plan__slot {
+        height: 44px;
+    }
+
+    .sedit-plan__mode {
+        min-height: 44px;
+    }
+}

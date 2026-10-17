@@ -25,11 +25,13 @@ from __future__ import annotations
 
 import datetime as _dt
 import re
+from functools import lru_cache
 
 from django.apps import apps as django_apps
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, JsonResponse
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_GET
 
@@ -60,6 +62,37 @@ _MARK_CODE_DISPLAY = {"iə": "i/e", "qb": "q/b"}
 def display_mark(text: str) -> str:
     """«iə 8» → «i/e 8», «qb» → «q/b»; başqa mətn olduğu kimi."""
     return _MARK_CODE_RE.sub(lambda match: _MARK_CODE_DISPLAY[match.group(1)], text)
+
+
+#: Audit sətrində dərs «2026-09-25 · Seminar» kimi YAZILDIĞI dildə saxlanır; göstərmədə növ hissəsi aktiv dilə çevrilir
+#: (QA-1 F7: ingilis interfeysdə yeni sətir «Lecture», köhnələr «Mühazirə» qalırdı). Saxlanan mətn dəyişmir.
+_LESSON_ITEM_RE = re.compile(r"^(\d{4}-\d{2}-\d{2}) · (.+)$")
+
+
+@lru_cache(maxsize=1)
+def _lesson_kind_index() -> dict:
+    """Bütün dillərdəki dərs növü etiketi (casefold) → ``LessonKind`` dəyəri."""
+    from .models import LessonKind
+
+    index: dict = {}
+    for code, _name in settings.LANGUAGES:
+        with translation.override(code):
+            for value, label in LessonKind.choices:
+                index.setdefault(str(label).casefold(), value)
+    return index
+
+
+def localize_lesson_item(text: str) -> str:
+    """«2026-09-25 · Mühazirə» → aktiv dildə «2026-09-25 · Lecture»; tanınmayan mətn olduğu kimi."""
+    match = _LESSON_ITEM_RE.match(text or "")
+    if not match:
+        return text
+    value = _lesson_kind_index().get(match.group(2).strip().casefold())
+    if value is None:
+        return text
+    from .models import LessonKind
+
+    return f"{match.group(1)} · {dict(LessonKind.choices)[value]}"
 
 
 #: Audit «kind» → UI qrupu (müştəri tərəfindəki növ çipləri bununla süzür).
@@ -179,8 +212,8 @@ def _serialize_entry(row, names, impersonation_key) -> dict:
         real_rows.append(change)
     rows = []
     for change in real_rows[:ROW_CAP]:
-        student = str(change.get("student") or "")
-        item = str(change.get("item") or "")
+        student = localize_lesson_item(str(change.get("student") or ""))
+        item = localize_lesson_item(str(change.get("item") or ""))
         lesson_level = student in ("", "—") or bool(_DATE_RE.match(student))
         if student == "academic-record":
             student, lesson_level = pgettext(_CTX, "Akademik qeyd"), True
@@ -275,6 +308,7 @@ __all__ = [
     "history_page",
     "kind_group",
     "kind_label",
+    "localize_lesson_item",
     "parse_filter_date",
     "row_date",
 ]

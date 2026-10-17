@@ -550,3 +550,8 @@
   background: var(--ems-neutral-50, #f7f9fc);
   border-bottom: 0;
 }
+
+/* QA-2 F-17: mövcud tapşırıqda «Tapşırıq yarat» gizlənir — `display: inline-flex` `hidden`-i üstələməsin. */
+.wl-btn[hidden] {
+  display: none;
+}

@@ -84,6 +84,17 @@ _NOTICE = {
     ),
 }
 
+#: Dərs hələ yoxdur (jurnal boşdur) — «Dərslər başlayıb» yalan olardı (QA-1 F14): ton yumşaq, mətn irəliyə baxır.
+_MISSING_BEFORE_LESSONS = (
+    "warning",
+    pgettext_lazy(_CTX, "Bu fənn üzrə sillabus yazılmayıb"),
+    pgettext_lazy(
+        _CTX,
+        "Fənnin sillabusu hələ yaradılmayıb. Dərslər başlamazdan əvvəl sillabusunuzu yazıb kafedra müdirinin "
+        "təsdiqinə göndərin — tələbələr yalnız təsdiqlənmiş sillabusu görür.",
+    ),
+)
+
 #: Bannerin əməl düyməsinin mətni — vəziyyətə görə.
 _ACTION_LABEL = {
     STATE_MISSING: pgettext_lazy(_CTX, "Sillabus yarat"),
@@ -104,8 +115,11 @@ def _profile_link(section: str, **params) -> str:
     return f"{reverse('accounts:profile')}?section={section}{query}"
 
 
-def journal_syllabus_notice(offering) -> dict:
+def journal_syllabus_notice(offering, *, has_lessons: bool | None = None, journal_closed: bool = False) -> dict:
     """Jurnal başlığındakı vəziyyət zolağı üçün kontekst.
+
+    ``has_lessons is False`` (jurnalda HEÇ dərs yox — süzgəcdən asılı olmayaraq) → «Dərslər başlayıb» demir; ``journal_closed`` (RİM bağlayıb) → banner yoxdur: bağlı
+    jurnalda sillabus yaratmaq əməli yoxdur (QA-1 F14). «Sillabusa bax» keçidi yenə də verilir.
 
     HƏMİŞƏ dict qaytarır (``None`` yox): təsdiqlənmiş halda da şablon
     «Sillabusa bax» keçidini bu dict-dən oxuyur, sadəcə ``show_banner`` False
@@ -115,6 +129,8 @@ def journal_syllabus_notice(offering) -> dict:
     state = syllabus_services.offering_syllabus_state(syllabus)
     key = state["state"]
     tone, title, message = _NOTICE.get(key, (None, None, None))
+    if key == STATE_MISSING and has_lessons is False:
+        tone, title, message = _MISSING_BEFORE_LESSONS
 
     if key == STATE_MISSING:
         # Dosye yoxdur — siyahı ekranı açılır (yaratma düyməsi oradadır).
@@ -132,7 +148,7 @@ def journal_syllabus_notice(offering) -> dict:
         "reason_label": REASON_LABEL,
         "action_label": _ACTION_LABEL.get(key),
         "action_url": link,
-        "show_banner": key != STATE_APPROVED,
+        "show_banner": key != STATE_APPROVED and not journal_closed,
         # «Sillabusa bax» yalnız oxunacaq məzmun VARSA göstərilir.
         "can_open": state["syllabus"] is not None and version is not None,
         "syllabus_id": str(syllabus.pk) if syllabus is not None else "",

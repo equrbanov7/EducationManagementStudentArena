@@ -58,9 +58,40 @@ def _is_live_assigned_instructor(user, offering) -> bool:
 
     from .integrity import is_authorized_instructor
 
+    snapshot_verdict = _snapshot_grade_input(user, offering.organization)
+    if snapshot_verdict is not None:
+        return snapshot_verdict
     return is_authorized_instructor(
         organization=offering.organization,
         instructor=user,
+    )
+
+
+def _snapshot_grade_input(user, organization) -> bool | None:
+    """PERF-1 F-15: ``is_authorized_instructor``-un cavabı middleware-in request üzvlük snapshot-undan.
+
+    Snapshot = ``Membership(user, org, is_active=True, role__organization=org)`` (aktiv org, rol yüklü);
+    canlı sorğunun qalan şərtləri (aktiv istifadəçi, aktiv rol) burada Python-da yoxlanılır. Snapshot
+    yararsızdırsa (başqa org / epoxa / superuser) ``None`` — çağıran canlı sorğuya düşür. Jurnal açılışında
+    eyni yoxlama iki dəfə (`can_edit_journal` + `is_direct_editor`) ayrıca SELECT idi.
+    """
+    if organization is None or not getattr(organization, "is_active", False):
+        return None
+    from apps.organizations.public import request_active_memberships
+
+    rows = request_active_memberships(user, organization)
+    if rows is None:
+        return None
+    if not getattr(user, "is_active", False):
+        return False
+
+    from core.permissions import has_permission
+
+    from .integrity import INSTRUCTOR_PERMISSION
+
+    return any(
+        membership.role.is_active and has_permission(list(membership.role.permissions or []), INSTRUCTOR_PERMISSION)
+        for membership in rows
     )
 
 

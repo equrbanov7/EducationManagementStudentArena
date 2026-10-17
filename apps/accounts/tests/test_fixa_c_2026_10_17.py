@@ -113,13 +113,14 @@ class StudentOrgManagementTest(_CBase):
                 PROFILE_URL, {"section": "student-organization-management", "hm_q": "ppl"}
             )
         self.assertEqual(response.status_code, 200)
-        section = response.context["student_org_management_section"]
+        section = response.context.get("student_org_management_section") or {}
         return {row["username"] for row in section.get("rows", [])}
 
     def test_hr_does_not_list_students_but_ikt_does(self):
+        # Sahib 2026-10-17 (FIX-H): bölmə tələbə tərəfi açarı ilə açılır — HR onu ümumiyyətlə görmür.
         hr_names = self.names(self.fx.hr_full)
-        self.assertIn(self.fx.teacher_a.username, hr_names)
         self.assertNotIn(self.fx.student_a.username, hr_names)
+        self.assertNotIn(self.fx.teacher_a.username, hr_names)
         self.assertIn(self.fx.student_a.username, self.names(self.fx.ikt))
 
     def remove(self, actor, target):

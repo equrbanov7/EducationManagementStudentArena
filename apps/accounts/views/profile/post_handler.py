@@ -245,6 +245,13 @@ def handle_profile_post(
             if avatar_error:
                 messages.error(request, avatar_error)
                 return _result(redirect(f"{reverse('accounts:profile')}?section=edit-profile"))
+            from ...services.avatar_image import AvatarImageError, normalize_avatar_upload
+
+            try:
+                uploaded_avatar = normalize_avatar_upload(uploaded_avatar)  # PERF-2 H5: ≤512 px WebP
+            except AvatarImageError as exc:
+                messages.error(request, str(exc))
+                return _result(redirect(f"{reverse('accounts:profile')}?section=edit-profile"))
             randomize_uploaded_filename(uploaded_avatar)
             replaced_avatar = (profile.avatar.storage, str(profile.avatar.name or "")) if profile.avatar else None
             profile.avatar = uploaded_avatar

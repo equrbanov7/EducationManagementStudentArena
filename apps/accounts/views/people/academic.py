@@ -64,6 +64,9 @@ def people_academic_groups(request):
     görünməsi yanlış gözlənti yaradırdı).
     """
     actor = people.resolve_actor(request)
+    if not actor.can_manage_academic:
+        # SEC-2 F-4 (2026-10-17): 200 + ``has_access: false`` yox, 403 (layihənin qalanı kimi); seçici boş qalır.
+        return JsonResponse({"has_access": False, "results": [], "has_more": False}, status=403)
     groups = people.scoped_groups_qs(actor, request=request)
 
     # Qrup adı kod kimidir: «234king», «234k ing», «234-K-ing» → «234 K ing».
@@ -78,7 +81,7 @@ def people_academic_groups(request):
     window = list(groups.order_by("name").values("id", "name")[offset : offset + limit + 1])
     return JsonResponse(
         {
-            "has_access": actor.can_manage_academic,
+            "has_access": True,
             "results": [{"id": str(row["id"]), "text": row["name"]} for row in window[:limit]],
             "has_more": len(window) > limit,
         }

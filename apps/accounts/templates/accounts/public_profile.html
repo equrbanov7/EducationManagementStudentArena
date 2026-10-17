@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n avatar_tags %}
 {% comment %}Açıq profil (və «Önizləmə» rejimi) — 2026-09-07 yenidən dizayn.
 
 ƏVVƏLKİ PROBLEMLƏR
@@ -45,7 +45,7 @@ olanda görünür.
         <header class="ppx-hero">
             <div class="ppx-hero__avatar">
                 {% if request.user.is_authenticated and profile.avatar %}
-                <img src="{% url 'accounts:profile_avatar' profile_user.id %}?v={{ profile.updated_at|date:'U' }}"
+                <img src="{% url 'accounts:profile_avatar' profile_user.id %}?v={{ profile.updated_at|avatar_version }}"
                      alt="" class="ppx-hero__img">
                 {% else %}
                 <span class="ppx-hero__initials">{{ display_name|slice:":1"|upper }}</span>

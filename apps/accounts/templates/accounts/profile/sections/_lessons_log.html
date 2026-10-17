@@ -43,7 +43,7 @@ Dinamik dəyər yalnız `data-*` atributları ilə ötürülür.{% endcomment %}
             <div class="llog-day__head">
                 <span class="llog-day__date">{{ day.date|date:"d.m.Y" }}</span>
                 <span class="llog-day__weekday">{{ day.weekday }}</span>
-                <span class="llog-day__total">{{ day.lessons }} {% trans "dərs" context "accounts.lessons_log" %} · {{ day.hours }} {% trans "saat" context "accounts.lessons_log" %}</span>
+                <span class="llog-day__total">{% blocktrans count n=day.lessons context "accounts.lessons_log" %}{{ n }} dərs{% plural %}{{ n }} dərs{% endblocktrans %} · {% blocktrans count n=day.hours context "accounts.lessons_log" %}{{ n }} saat{% plural %}{{ n }} saat{% endblocktrans %}</span>
             </div>
             <div class="ems-tablescroll">
                 <table class="ems-table ems-table--zebra llog-table">

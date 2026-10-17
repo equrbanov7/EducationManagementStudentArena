@@ -398,6 +398,7 @@ td.jd2-fb-qeyd { text-align: left; padding: 9px 14px; }
     font-size: 10px; font-weight: 800; color: #059669;
     background: #dcfce7; border-radius: 5px; padding: 1px 6px; margin-left: 6px; white-space: nowrap;
 }
+.jd2-covered-badge--planned { color: #1d4ed8; background: #dbeafe; }
 .jd2-topic-row.is-pending .jd2-topic-title { color: var(--j-soft); font-weight: 500; }
 
 /* Modern Save düyməsi */

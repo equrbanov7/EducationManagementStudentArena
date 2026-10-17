@@ -152,6 +152,8 @@ class SidebarRoleMatrixTest(TestCase):
 
         self.assertNotIn("groups", sections)
         self.assertIn("role-assignment", sections)  # öz sahəsi qalır
+        # Tələbə qoşulma müraciətləri (FIX-H, 2026-10-17) — tələbə açarsız HR-da yoxdur.
+        self.assertNotIn("student-organization-management", sections)
 
     def test_hr_has_no_exam_or_course_surfaces(self):
         """Kod şərhi bunu vəd edir: «HR — … İmtahan/kurs YOXDUR»."""
@@ -168,7 +170,8 @@ class SidebarRoleMatrixTest(TestCase):
             "teacher": {"my-exams", "my-courses", "pending-review", "review-results"},
             "exam_center_head": {"my-exams", "exam-center-pins", "exam-center-stats", "academic-records"},
             "student": {"assigned-exams", "assigned-courses", "my-results"},
-            "hr": {"role-assignment", "manage-roles", "student-organization-management"},
+            # Sahib 2026-10-17 (FIX-H): «Heyət idarəetməsi» tələbə tərəfi açarı ilə — HR-da yoxdur.
+            "hr": {"role-assignment", "manage-roles"},
         }
         for role, core in expected.items():
             with self.subTest(role=role):

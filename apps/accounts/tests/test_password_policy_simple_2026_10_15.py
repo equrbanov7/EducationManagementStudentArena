@@ -45,6 +45,8 @@ class SimplePasswordPolicyTest(SimpleTestCase):
             [
                 "apps.accounts.password_policy.MinimumLengthValidator",
                 "apps.accounts.password_policy.TrivialPasswordValidator",
+                # SEC-1 F5 (2026-10-17): yalnız rəhbər hesablarda tam rəqəm / tarix parolu olmaz.
+                "apps.accounts.password_policy.PrivilegedPasswordValidator",
             ],
         )
 
@@ -72,6 +74,12 @@ class SimplePasswordPolicyTest(SimpleTestCase):
         self.assertEqual(_codes("elvin.qurbanov", user), {"password_too_common"})
         self.assertEqual(_codes("Elvin.Qurbanov", user), {"password_too_common"})
 
+    def test_single_repeated_character_is_rejected(self):
+        # QA-1 F12: «11111111» siyahıdadır, «aaaaaaaa» isə keçirdi.
+        for password in ("aaaaaaaa", "ZZZZZZZZZ", "........"):
+            with self.subTest(password=password):
+                self.assertEqual(_codes(password), {"password_too_common"})
+
     def test_messages_are_short_and_friendly(self):
         with self.assertRaises(ValidationError) as short:
             validate_password("abc")
@@ -91,7 +99,7 @@ class MinLengthRuntimeSettingTest(TestCase):
         rs.invalidate()
         self.assertEqual(rs.get_int("password.min_length"), 8)
         spec = rs.SPECS["password.min_length"]
-        self.assertEqual((spec.group, spec.min, spec.max), ("login", 6, 32))
+        self.assertEqual((spec.group, spec.min, spec.max), ("login", 8, 32))  # SEC-1 F5: alt hədd 8
 
     def test_override_changes_the_validator(self):
         RuntimeSetting.objects.create(key="password.min_length", value=10)
@@ -163,3 +171,21 @@ class SimplePasswordFlowsTest(TestCase):
         self.assertContains(response, 'data-pw-rule="trivial"')
         self.assertNotContains(response, 'data-pw-rule="variety"')
         self.assertNotContains(response, 'data-pw-rule="numeric"')
+
+    def test_profile_change_password_rejects_the_current_password(self):
+        user = User.objects.create_user("pw.same", "pw.same@qku.edu.az", "OldPassword!42")
+        same = CustomPasswordChangeForm(
+            user,
+            {"old_password": "OldPassword!42", "new_password1": "OldPassword!42", "new_password2": "OldPassword!42"},
+        )
+        self.assertFalse(same.is_valid())
+        self.assertEqual(same.errors["new_password1"].as_data()[0].code, "password_unchanged")
+
+    def test_current_password_hint_is_not_given_when_the_old_one_is_wrong(self):
+        user = User.objects.create_user("pw.guess", "pw.guess@qku.edu.az", "OldPassword!42")
+        guess = CustomPasswordChangeForm(
+            user,
+            {"old_password": "Wrong-guess-1", "new_password1": "OldPassword!42", "new_password2": "OldPassword!42"},
+        )
+        self.assertFalse(guess.is_valid())
+        self.assertNotIn("new_password1", guess.errors)
