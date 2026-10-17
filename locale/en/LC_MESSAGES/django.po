@@ -98911,3 +98911,7 @@ msgstr "The pre-exam score is a whole number: the sum of the parts is rounded ha
 msgctxt "registrar.schedule_editor"
 msgid "Mövcud dərsin fənni dəyişdirilə bilməz — dərsi silib yenisini qoyun."
 msgstr "The subject of an existing lesson can't be changed — delete the lesson and add a new one."
+
+msgctxt "accounts.groups"
+msgid "Qrupun tələbə siyahısına baxmaq səlahiyyətiniz yoxdur."
+msgstr "You do not have permission to view this group's student list."

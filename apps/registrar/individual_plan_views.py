@@ -12,11 +12,11 @@ from __future__ import annotations
 from urllib.parse import quote
 
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseForbidden
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
-from apps.organizations.public import can_view_groups, group_scope, visible_group
+from apps.organizations.public import can_view_group_students, can_view_groups, group_scope, visible_group
 from core.tenancy import get_request_organization
 
 from . import individual_plan
@@ -29,6 +29,9 @@ def group_individual_plan(request, group_id):
     organization = get_request_organization(request)
     if organization is None or not can_view_groups(request):
         raise Http404
+    # QA-2 F-03 (2026-10-17): sənəd tələbə adları daşıyır — `unit.view` (struktur oxusu) kifayət deyil.
+    if not can_view_group_students(request):
+        return HttpResponseForbidden()
     scope = group_scope(request, organization)
     if not scope.has_structure_access:
         raise Http404

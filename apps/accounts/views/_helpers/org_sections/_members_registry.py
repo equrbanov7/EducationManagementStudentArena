@@ -240,13 +240,17 @@ class _MemberIndex:
     "kind": str, "is_leader": bool, "profile_role": str}``
     """
 
-    def __init__(self, *, organization, scope_q, superadmin_user_ids, unit_index):
+    def __init__(self, *, organization, scope_q, superadmin_user_ids, unit_index, hide_students=False):
         self.by_user = {}
         membership_rows = Membership.objects.filter(
             organization=organization, is_active=True, user__is_active=True
         ).exclude(user_id__in=superadmin_user_ids)
         if scope_q is not None:
             membership_rows = membership_rows.filter(scope_q)
+        if hide_students:  # QA-2 F-03: tələbə tərəfi açarı olmayan aktor (HR) yalnız-tələbə hesablarını görmür.
+            from apps.organizations.public import student_only_q
+
+            membership_rows = membership_rows.exclude(student_only_q(organization, user_ref="user_id"))
         for user_id, role_name, role_level, unit_id in membership_rows.order_by().values_list(
             "user_id", "role__name", "role__level", "scope_unit_id"
         ):
@@ -279,7 +283,7 @@ class _MemberIndex:
                 .values_list("user_id", "role")
             )
             for user_id, profile_role in profile_rows:
-                if user_id in self.by_user:
+                if user_id in self.by_user or (hide_students and _kind_for_profile_role(profile_role) == KIND_STUDENTS):
                     continue
                 self.by_user[user_id] = {
                     "roles": [],
@@ -443,6 +447,19 @@ def _build_row(
 # ─── Public builder ─────────────────────────────────────────────────────────
 
 
+def actor_sees_students(request, organization) -> bool:
+    """QA-2 F-03: tələbə tərəfi açarı və ya `member.student_manage` (müəllimə delegasiya daxil) — yoxsa HR kimi."""
+    from apps.organizations.public import holds_student_key, request_holds_student_key
+    from core.permissions import has_permission
+
+    from ..rbac import _collect_actor_permissions
+
+    if request_holds_student_key(request) or getattr(organization, "owner_id", None) == request.user.pk:
+        return True
+    actor_perms = list(_collect_actor_permissions(request.user, organization, request=request)[0])
+    return holds_student_key(actor_perms) or has_permission(actor_perms, "member.student_manage")
+
+
 def build_members_registry(
     *,
     request,
@@ -465,6 +482,7 @@ def build_members_registry(
     from apps.organizations.public import get_permission_scope
 
     unit_scope = get_permission_scope(request.user, organization, "member.view", request=request)
+    hide_students = not (is_superadmin or actor_sees_students(request, organization))
     scoped_unit_ids = None
     if not is_superadmin and unit_scope.is_unit_scoped:
         scoped_unit_ids = list(
@@ -499,6 +517,7 @@ def build_members_registry(
             scope_q=scope_q,
             superadmin_user_ids=superadmin_user_ids,
             unit_index=unit_index,
+            hide_students=hide_students,
         )
         # «Struktur bölməsi» və «Qrup» seçimləri AYRI və əhatə ilə (2026-10-14).
         unit_options, group_options = member_scope.split_unit_options(

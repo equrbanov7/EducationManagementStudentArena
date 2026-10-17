@@ -3203,3 +3203,6 @@ msgstr "Leeren"
 
 msgid "Uyğun nəticə yoxdur"
 msgstr "Keine Treffer"
+
+msgid "Axtarmaq üçün ən az %(n)s hərf yazın"
+msgstr "Geben Sie mindestens %(n)s Buchstaben ein, um zu suchen"

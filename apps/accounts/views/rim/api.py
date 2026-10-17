@@ -17,6 +17,7 @@ from apps.accounts.services.rim import (
     PERM_SEARCH,
     RimAccessError,
     manageable_users_queryset,
+    prefetch_memberships,
     require_permission,
     resolve_actor,
     search_users,
@@ -56,6 +57,9 @@ def rim_user_search(request):
     except RimAccessError as exc:
         return _error_response(exc)
 
+    results = payload["results"]
+    # PERF-1 F-02: sətirlərin üzvlükləri bir sorğu ilə (əvvəl hər sətir ayrıca sorğu atırdı).
+    prefetch_memberships(results, actor.organization if not actor.is_superadmin else None)
     return JsonResponse(
         {
             "ok": True,
@@ -70,7 +74,7 @@ def rim_user_search(request):
             "total": payload["total"],
             "has_next": payload["has_next"],
             "has_previous": payload["has_previous"],
-            "results": [serialize_row(user, actor) for user in payload["results"]],
+            "results": [serialize_row(user, actor) for user in results],
         }
     )
 

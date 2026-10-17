@@ -150,7 +150,8 @@ class StarostaTestBase(TestCase):
                 "rim_operator",
                 level=70,
                 scope_type=RoleScopeType.ORGANIZATION,
-                permissions=["role.assign", "role.view", "org.manage_members", "member.view"],
+                # QA-2 F-03 (2026-10-17): `role.assign` starosta üçün yalnız tələbə tərəfi açarı ilə (real RİM rəhbəri).
+                permissions=["role.assign", "role.view", "org.manage_members", "member.view", "people.view_students"],
             )
 
             cls.ali = cls._student("st_ali", "Əli", "Abbasov", "1001", cls.group)

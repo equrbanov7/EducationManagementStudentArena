@@ -50,6 +50,7 @@ from . import services
 from .curriculum_registry import programs_without_approved_plan
 from .models import CourseOffering, Curriculum, CurriculumSubject, Program, StudentAcademicRecord
 from .models.curriculum_meta import PlanStatus
+from .read_scope import offering_scope_q, program_scope_q, semester_read_scope, unit_scope_q
 from .semester_readiness import ISSUES, approved_syllabus_offering_ids, offering_issues, readiness_by_chair
 
 _CTX = "accounts.semester"
@@ -274,9 +275,11 @@ def semester_howto(steps: list) -> list:
     return items
 
 
-def coverage(organization, period) -> dict:
-    """Açılış əhatəsi — KPI sırasının mənbəyi (heç nə saxlanılmır, §8/13)."""
+def coverage(organization, period, *, scope_q=None) -> dict:
+    """Açılış əhatəsi — KPI sırasının mənbəyi (heç nə saxlanılmır, §8/13). ``scope_q`` — oxu əhatəsi."""
     offerings = CourseOffering.objects.filter(organization=organization, period=period, is_active=True)
+    if scope_q is not None:
+        offerings = offerings.filter(scope_q)
     total = offerings.count()
     with_instructor = offerings.filter(instructor__isnull=False).count()
     with_course = offerings.filter(course__isnull=False).count()
@@ -387,6 +390,9 @@ def build_semester_opening(request, organization) -> dict:
             ),
         }
 
+    # QA-2 F-01 (2026-10-17): OXU `semester.view` əhatəsi ilə — bax `read_scope.py`.
+    scope = semester_read_scope(request, organization)
+    scope_q = offering_scope_q(scope)
     AcademicPeriod = _period_model()
     period_id = (request.GET.get("sm_period") or "").strip()
     periods = list(AcademicPeriod.objects.filter(organization=organization).order_by("-start_date")[:40])
@@ -404,7 +410,9 @@ def build_semester_opening(request, organization) -> dict:
         "period_options": [{"value": str(item.id), "label": f"{item.year_display} · {item.name}"} for item in periods],
         "program_options": [
             {"value": str(item.id), "label": item.display_label}
-            for item in Program.objects.filter(organization=organization, is_archived=False).order_by("name")[:500]
+            for item in Program.objects.filter(organization=organization, is_archived=False)
+            .filter(program_scope_q(scope))
+            .order_by("name")[:500]
         ],
         "filters": {
             "period": str(period.id) if period else "",
@@ -414,23 +422,24 @@ def build_semester_opening(request, organization) -> dict:
         "period": None,
         "rows": [],
         "steps": [],
-        "blockers": programs_without_approved_plan(organization),
+        "blockers": programs_without_approved_plan(organization, program_q=program_scope_q(scope)),
         "table_state": "empty",
     }
     if period is None:
         return payload
 
-    stats = coverage(organization, period)
+    stats = coverage(organization, period, scope_q=scope_q)
     chair = payload["filters"]["chair"]
     offerings = (
         CourseOffering.objects.filter(organization=organization, period=period)
+        .filter(scope_q)
         .select_related("subject", "group", "instructor", "course", "subject__chair_unit")
         .order_by("subject__code", "group__name")
     )
     if chair:
         offerings = offerings.filter(subject__chair_unit_id=chair)
     # 2026-10-03 «Semestr hazırlığı»: problem xəritəsi BİR dəfə hesablanır (kafedra cədvəli + süzgəc + sətir).
-    issues_map = offering_issues(organization, period)
+    issues_map = offering_issues(organization, period, scope_q=scope_q)
     if issue := payload["filters"]["issue"]:
         offerings = offerings.filter(pk__in=[key for key, item in issues_map.items() if issue in item["issues"]])
 
@@ -480,6 +489,7 @@ def build_semester_opening(request, organization) -> dict:
             },
             "stats": stats,
             "readiness": readiness_by_chair(organization, period, issues_map=issues_map),
+            "chair_rows": offering_counts_by_chair(organization, period, scope_q=scope_q),
             "rows": rows,
             "page_obj": page_obj,
             "rows_total": page_obj.paginator.count,
@@ -492,6 +502,7 @@ def build_semester_opening(request, organization) -> dict:
                 {"value": str(unit.id), "label": unit.name}
                 for unit in _org_unit_model()
                 .objects.filter(organization=organization, is_active=True, unit_type__in=("chair", "department"))
+                .filter(unit_scope_q(scope))
                 .order_by("name")
             ],
             # Kilid QAPISI: üç şərt (handoff ekran 07). Düymə GİZLƏNMİR — disabled olur.
@@ -518,10 +529,11 @@ def build_semester_opening(request, organization) -> dict:
     return payload
 
 
-def offering_counts_by_chair(organization, period) -> list:
-    """Kafedra üzrə açılış/saat bölgüsü (ekran 07-nin «kafedralar» paneli)."""
+def offering_counts_by_chair(organization, period, *, scope_q=None) -> list:
+    """Kafedra üzrə açılış/saat bölgüsü (ekran 07-nin «kafedralar» paneli). ``scope_q`` — oxu əhatəsi."""
     rows = (
         CourseOffering.objects.filter(organization=organization, period=period, is_active=True)
+        .filter(scope_q if scope_q is not None else Q())
         .values("subject__chair_unit_id", "subject__chair_unit__name")
         .annotate(
             total=Count("id"),

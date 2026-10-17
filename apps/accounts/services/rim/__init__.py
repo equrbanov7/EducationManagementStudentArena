@@ -44,7 +44,7 @@ from .create_unit import (
     require_create_unit,
 )
 from .credentials import set_temporary_password
-from .detail import serialize_detail, serialize_memberships, serialize_row
+from .detail import prefetch_memberships, serialize_detail, serialize_memberships, serialize_row
 from .lifecycle import block_user, normalize_reason, restore_user, soft_delete_user, unblock_user
 from .policy import (
     PERM_BLOCK,
@@ -96,6 +96,7 @@ __all__ = [
     "resolve_actor",
     "restore_user",
     "search_users",
+    "prefetch_memberships",
     "serialize_detail",
     "serialize_memberships",
     "serialize_row",

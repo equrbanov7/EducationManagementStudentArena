@@ -47,7 +47,7 @@ _CELLS = "accounts/profile/sections/roles/"
 PENDING_PAGE_SIZE = 10
 
 
-def _members_queryset(organization, *, actor_level, is_superadmin, catalogue):
+def _members_queryset(organization, *, actor_level, is_superadmin, catalogue, hide_students=False):
     """Aktorun dəyişə bildiyi üzvlər — səviyyə qapısı SERVERLƏ eyni hesabla.
 
     DİQQƏT: süzgəc `Role.level` sütunu ilə APARILMIR. Kataloq rəqəmi RBAC
@@ -74,6 +74,12 @@ def _members_queryset(organization, *, actor_level, is_superadmin, catalogue):
         blocked = roles_at_or_above(actor_level, catalogue)
         if blocked:
             queryset = queryset.exclude(pk__in=users_holding_roles(organization, blocked))
+    if hide_students:
+        # QA-2 F-03 (2026-10-17): `role.assign` heyət üçündür — tələbə tərəfi açarı olmayan aktor (HR)
+        # YALNIZ-tələbə hesablarını (ad, e-poçt) siyahıda görmür; server tərəfi də rədd edir.
+        from apps.organizations.public import student_only_q
+
+        queryset = queryset.exclude(student_only_q(organization, user_ref="pk"))
     return queryset
 
 
@@ -242,8 +248,14 @@ def build_role_assignment_section(
     catalogue = list(role_queryset(management_org))
     grantable = list(assignable_roles(management_org, actor_level=actor_level, is_superadmin=is_superadmin))
 
+    from apps.organizations.public import request_holds_student_key
+
     members = _members_queryset(
-        management_org, actor_level=actor_level, is_superadmin=is_superadmin, catalogue=catalogue
+        management_org,
+        actor_level=actor_level,
+        is_superadmin=is_superadmin,
+        catalogue=catalogue,
+        hide_students=not (is_superadmin or request_holds_student_key(request)),
     )
     filtered = members
     search_q = tolerant_q(search, ("username", "email", "first_name", "last_name"))

@@ -99997,3 +99997,7 @@ msgstr "Die Punktzahl vor der Prüfung ist eine ganze Zahl: Die Summe der Teile 
 msgctxt "registrar.schedule_editor"
 msgid "Mövcud dərsin fənni dəyişdirilə bilməz — dərsi silib yenisini qoyun."
 msgstr "Das Fach einer bestehenden Stunde lässt sich nicht ändern — Stunde löschen und neu anlegen."
+
+msgctxt "accounts.groups"
+msgid "Qrupun tələbə siyahısına baxmaq səlahiyyətiniz yoxdur."
+msgstr "Sie sind nicht berechtigt, die Studierendenliste dieser Gruppe anzuzeigen."

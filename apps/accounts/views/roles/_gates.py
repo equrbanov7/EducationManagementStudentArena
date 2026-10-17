@@ -57,6 +57,20 @@ def target_in_unit_scope(organization, scope, target_user) -> bool:
     ).exists()
 
 
+def target_is_hidden_student(organization, target_user, permission_list) -> bool:
+    """QA-2 F-03 (2026-10-17): `role.assign` heyət üçündür — tələbə tərəfi açarı olmayan aktor (HR)
+    YALNIZ-tələbə hesabının rolunu dəyişmir (siyahıda da görmür)."""
+    from django.contrib.auth import get_user_model
+
+    from apps.organizations.public import holds_student_key, student_only_q
+
+    if holds_student_key(permission_list):
+        return False
+    return (
+        get_user_model().objects.filter(pk=target_user.pk).filter(student_only_q(organization, user_ref="pk")).exists()
+    )
+
+
 def manage_roles_gate_error(request, organization, target_user, *, is_superadmin):
     """`None` = icazə var; əks halda istifadəçiyə göstəriləcək mesaj."""
     if is_superadmin or getattr(organization, "owner_id", None) == request.user.id:
@@ -69,6 +83,9 @@ def manage_roles_gate_error(request, organization, target_user, *, is_superadmin
     permission_list = list(actor_permissions)
     if not (has_permission(permission_list, "role.assign") or has_permission(permission_list, "org.manage_members")):
         return pgettext_lazy("accounts.manage_roles.message", "missing_member_management_permission")
+    if target_is_hidden_student(organization, target_user, permission_list):
+        # Üzv olmayan hesabla EYNİ mesaj (`manage.py`) — fərqli mesaj mövcudluq orakulu olardı.
+        return pgettext_lazy("accounts.manage_roles.message", "manage_only_own_org_users")
     scope = assign_scope(request.user, organization)
     if scope.is_org_wide:
         return None

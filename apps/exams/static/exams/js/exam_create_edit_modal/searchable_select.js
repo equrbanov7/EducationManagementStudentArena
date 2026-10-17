@@ -65,6 +65,8 @@
         var hasMore = true;
         var loading = false;
         var query = "";
+        // Server qısa sorğuda kataloq vermirsə (`min_query`, SEC-2 2026-10-17) boş vəziyyət ipucu göstərir.
+        var minQuery = 0;
         var requestSeq = 0;
         // Əlavə query fraqmenti (məs. sağ tələbə siyahısı üçün seçilmiş qrup
         // ID-ləri) və seçim dəyişəndə çağırılan callback (qrup→tələbə sinxronu).
@@ -250,7 +252,13 @@
             if (!selectedWrap.children.length && !resultsWrap.children.length) {
                 var empty = document.createElement("div");
                 empty.className = "create-exam-search-empty";
-                empty.textContent = query ? gettext("Nəticə tapılmadı") : gettext("Məlumat yoxdur");
+                if (minQuery && query.length < minQuery) {
+                    empty.textContent = interpolate(
+                        gettext("Axtarmaq üçün ən az %(n)s hərf yazın"), { n: minQuery }, true
+                    );
+                } else {
+                    empty.textContent = query ? gettext("Nəticə tapılmadı") : gettext("Məlumat yoxdur");
+                }
                 resultsWrap.appendChild(empty);
             }
         }
@@ -298,6 +306,7 @@
                         window.EMSSearchInput.busy(searchInput, false);
                     }
                     var results = (data && data.results) || [];
+                    minQuery = Number((data && data.min_query) || 0);
                     appendResults(results);
                     offset += results.length;
                     hasMore = Boolean(data && data.has_more);

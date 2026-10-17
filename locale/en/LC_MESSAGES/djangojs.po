@@ -3150,3 +3150,6 @@ msgstr "Clear"
 
 msgid "Uyğun nəticə yoxdur"
 msgstr "No matches"
+
+msgid "Axtarmaq üçün ən az %(n)s hərf yazın"
+msgstr "Type at least %(n)s letters to search"

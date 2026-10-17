@@ -31,6 +31,7 @@ from dataclasses import dataclass, field
 from django.contrib.auth import get_user_model
 from django.db.models import Max, Q
 
+from apps.organizations import public as _org_public
 from core.permissions import has_permission
 
 User = get_user_model()
@@ -52,6 +53,10 @@ RIM_PERMISSIONS = (
 
 #: Aktorun səviyyəsi bu həddə çatırsa iyerarxiya/tenant filtrləri tətbiq olunmur.
 SUPERADMIN_LEVEL = 999
+
+#: QA-2 F-03 (2026-10-17): TƏLƏBƏ hesabları (ad, şəxsi e-poçt, FİN, «redaktə») RİM-də yalnız tələbə tərəfi
+#: açarlarından birini daşıyan aktora görünür. TƏK MƏNBƏ: ``apps.organizations.student_privacy`` (bax orada).
+STUDENT_ACCOUNT_PERMISSIONS = _org_public.STUDENT_ACCOUNT_PERMISSIONS
 
 
 class RimAccessError(Exception):
@@ -165,6 +170,20 @@ def resolve_actor(request) -> RimActor:
     )
 
 
+def can_see_student_accounts(actor: RimActor) -> bool:
+    """Aktor tələbə hesablarını RİM-də görə / idarə edə bilərmi (bax ``STUDENT_ACCOUNT_PERMISSIONS``)."""
+    return actor.is_superadmin or any(actor.has(permission) for permission in STUDENT_ACCOUNT_PERMISSIONS)
+
+
+def student_only_q(organization) -> Q:
+    """``User`` sorğusu üçün: təşkilatda YALNIZ tələbə ailəsi rolu olan hesab (``student_privacy.student_only_q``)."""
+    return _org_public.student_only_q(organization, user_ref="pk")
+
+
+def _is_student_only_target(target_user, organization) -> bool:
+    return User.objects.filter(pk=target_user.pk).filter(student_only_q(organization)).exists()
+
+
 def require_permission(actor: RimActor, permission: str) -> None:
     """Aktorda icazə yoxdursa ``RimAccessError`` atır."""
     if not actor.has(permission):
@@ -255,6 +274,11 @@ def assert_can_manage(actor: RimActor, target_user) -> None:
             status=404,
         )
 
+    # QA-2 F-03: tələbə hesabı tələbə tərəfi açarı olmayan aktorun sahəsindən KƏNARDIR. Cavab olmayan id ilə
+    # EYNİDİR (`target_not_found`, 404) — fərqli kod mövcudluq orakulu olardı.
+    if not can_see_student_accounts(actor) and _is_student_only_target(target_user, organization):
+        raise RimAccessError("target_not_found", "İstifadəçi tapılmadı.", status=404)
+
     # (6) Təşkilat sahibi.
     if getattr(organization, "owner_id", None) == getattr(target_user, "pk", None):
         raise RimAccessError(
@@ -324,7 +348,8 @@ def manageable_users_queryset(actor: RimActor):
     queryset = queryset.exclude(pk=getattr(actor.user, "pk", None))
 
     if actor.is_superadmin:
-        return queryset.distinct()
+        # PERF-1 F-02: JOIN yoxdur (yalnız birə-bir `profile`) — sətirlər onsuz da unikaldır, `.distinct()` yox.
+        return queryset
 
     organization = actor.organization
     if organization is None:
@@ -357,8 +382,13 @@ def manageable_users_queryset(actor: RimActor):
         | Q(_rim_active_level__lt=actor.level)
         | Q(_rim_active_level__isnull=True, profile__is_deleted=False)
     )
+    if not can_see_student_accounts(actor):
+        queryset = queryset.exclude(student_only_q(organization))
 
-    return queryset.distinct()
+    # PERF-1 F-02 (2026-10-17): `.distinct()` çıxarıldı — `Max(...)` annotasiyası sorğunu `GROUP BY auth_user.id`
+    # edir, yəni üzvlük JOIN-u dublikat sətir yarada bilmir (DISTINCT bütün sütunlar üzrə diskdə sıralayırdı).
+    # Test: `test_fixa_2026_10_17.RimSearchNoDuplicatesTest`.
+    return queryset
 
 
 __all__ = [
@@ -371,9 +401,12 @@ __all__ = [
     "RimAccessError",
     "assert_no_foreign_authority",
     "RimActor",
+    "STUDENT_ACCOUNT_PERMISSIONS",
     "assert_can_manage",
+    "can_see_student_accounts",
     "manageable_users_queryset",
     "require_permission",
     "resolve_actor",
+    "student_only_q",
     "target_level",
 ]
