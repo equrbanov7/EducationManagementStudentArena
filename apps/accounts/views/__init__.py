@@ -24,6 +24,7 @@ from .auth import (
     NamespacedPasswordResetConfirmView,
     NamespacedPasswordResetDoneView,
     NamespacedPasswordResetView,
+    complete_profile_view,
     login_portal,
     logout_view,
     set_initial_password_view,
@@ -183,6 +184,7 @@ __all__ = [
     "NamespacedPasswordResetDoneView",
     "NamespacedPasswordResetConfirmView",
     "set_initial_password_view",
+    "complete_profile_view",
     "logout_view",
     # Profile
     "user_profile",

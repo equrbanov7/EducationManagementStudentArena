@@ -316,6 +316,15 @@ class UserProfile(models.Model):
         verbose_name="Bal xəbərdarlığı gözləyir",
         help_text="Parol bərpasından sonra ilk girişdə köçürülmüş ballar barədə xəbərdarlıq göstərilsin.",
     )
+    # Sahib 2026-10-17: məcburi profil məlumatları (FİN, telefon, e-poçt) səhifəsi sonuncu dəfə NƏ VAXT tamamlanıb
+    # (bax ``apps/accounts/profile_completion.py``). Qapı dəyərlərin özünə baxır — bu yalnız izdir.
+    profile_completed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        default=None,
+        verbose_name="Məlumatlar tamamlanıb",
+        help_text="Məcburi profil məlumatları səhifəsinin sonuncu tamamlanma vaxtı.",
+    )
 
     # Superadmin tərəfindən verilən "imtahan zalı idarəçisi" icazəsi: bu bayraq
     # açıq olan istifadəçi (superadmin olmasa da) imtahan zalı və zaldakı

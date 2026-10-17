@@ -20,6 +20,24 @@ from core.roles import ProfileRole
 User = get_user_model()
 
 
+def fill_ci_identity(profile, username) -> list:
+    """Boş FİN / telefonu deterministik test dəyəri ilə doldurur (məcburi profil məlumatları qapısı, 2026-10-17).
+
+    CI yığını production tənzimləməsi ilə işləyir — qapı açıqdır; E2E istifadəçisi «Məlumatlarınızı tamamlayın»da
+    dayanmasın. FİN unikaldır: istifadəçi adının həşindən 7 simvol (``CI`` + 5 hex). Dəyişən sahələri qaytarır.
+    """
+    import hashlib
+
+    changed = []
+    if not (profile.fin or "").strip():
+        profile.fin = "CI" + hashlib.sha256(username.encode("utf-8")).hexdigest()[:5].upper()
+        changed.append("fin")
+    if not (profile.phone or "").strip():
+        profile.phone = "+994500000000"
+        changed.append("phone")
+    return changed
+
+
 class Command(ProductionCommandSafetyMixin, BaseCommand):
     safety_command_name = "seed_ci_e2e_user"
     help = "Seed the CI E2E university user with all default university roles."
@@ -210,6 +228,7 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
         profile.country = "Azerbaijan"
         profile.student_university_name = organization.name
         profile.role = ProfileRole.ORG_OWNER
+        identity_fields = fill_ci_identity(profile, username)
         profile.save(
             update_fields=[
                 "organization",
@@ -218,6 +237,7 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
                 "student_university_name",
                 "role",
                 "updated_at",
+                *identity_fields,
             ]
         )
 

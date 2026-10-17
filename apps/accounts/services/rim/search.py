@@ -71,7 +71,8 @@ TEACHING_ROLE_NAMES = (*TEACHER_ROLE_NAMES, "chair_head")
 FLAG_INITIAL = "initial"  # ilk giriş gözlənilir (öz parolunu qurmayıb)
 FLAG_NEVER = "never"  # sistemə heç daxil olmayıb
 FLAG_UNVERIFIED = "unverified"  # email təsdiqlənməyib
-ALLOWED_FLAGS = (FLAG_INITIAL, FLAG_NEVER, FLAG_UNVERIFIED)
+FLAG_INCOMPLETE = "incomplete"  # məcburi profil məlumatı (FİN / telefon / e-poçt) boşdur — 2026-10-17
+ALLOWED_FLAGS = (FLAG_INITIAL, FLAG_NEVER, FLAG_UNVERIFIED, FLAG_INCOMPLETE)
 
 #: Sıralama. Sorğu YOXDURSA defolt «ən yeni» (operator son yaradılanları yoxlayır), varsa «ada görə».
 SORT_NAME = "name"
@@ -154,7 +155,21 @@ def apply_flag_filter(queryset, flag: str):
         return queryset.filter(last_login__isnull=True)
     if flag == FLAG_UNVERIFIED:
         return queryset.exclude(profile__email_verified=True)
+    if flag == FLAG_INCOMPLETE:
+        return _incomplete(queryset)
     return queryset
+
+
+def _incomplete(queryset):
+    """Qapının dayandıracağı hesablar: tələbə / heyət rolu var və vacib sahə boşdur (siyasət: profile_completion)."""
+    from apps.organizations.models import Membership
+
+    from ... import profile_completion
+
+    gated_role = Membership.objects.filter(user_id=OuterRef("pk"), is_active=True).exclude(
+        role__name__in=("alumni", "parent", "member")
+    )
+    return queryset.filter(profile_completion.missing_users_q()).filter(Exists(gated_role))
 
 
 def status_counts(queryset) -> dict:

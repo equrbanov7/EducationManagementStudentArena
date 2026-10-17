@@ -98193,3 +98193,139 @@ msgstr "Выбранный корпус: {campus} — сначала его ау
 msgctxt "registrar.schedule_rooms"
 msgid "%(room)s · %(count)s nəfər"
 msgstr "%(room)s · %(count)s мест"
+
+msgctxt "accounts.profile_completion"
+msgid "FİN kod"
+msgstr "Код FIN"
+
+msgctxt "accounts.profile_completion"
+msgid "Rəsmi sənədlər (arayış, diplom əlavəsi), dövlət sistemləri (ATİS/DİM) ilə uyğunlaşdırma və hesabınızın bərpasında kimliyinizi təsdiqləmək üçün. Şəxsiyyət vəsiqəsinin arxa üzündəki 7 simvoldur."
+msgstr "Для официальных документов (справки, приложение к диплому), сверки с государственными системами (ATİS/DİM) и подтверждения вашей личности при восстановлении аккаунта. Это 7 символов на обороте удостоверения личности."
+
+msgctxt "accounts.profile_completion"
+msgid "məs: 5ABC12D"
+msgstr "напр.: 5ABC12D"
+
+msgctxt "accounts.profile_completion"
+msgid "Mobil telefon"
+msgstr "Мобильный телефон"
+
+msgctxt "accounts.profile_completion"
+msgid "Təcili xəbərdarlıqlar və hesabın bərpası üçün."
+msgstr "Для срочных уведомлений и восстановления аккаунта."
+
+msgctxt "accounts.profile_completion"
+msgid "məs: 050 123 45 67"
+msgstr "напр.: 050 123 45 67"
+
+msgctxt "accounts.profile_completion"
+msgid "Şəxsi e-poçt"
+msgstr "Личная эл. почта"
+
+msgctxt "accounts.profile_completion"
+msgid "Parol bərpası kodu bu ünvana göndərilir. Hər gün istifadə etdiyiniz ünvanı yazın (məs. Gmail)."
+msgstr "Код восстановления пароля отправляется на этот адрес. Укажите адрес, которым пользуетесь каждый день (напр. Gmail)."
+
+msgctxt "accounts.profile_completion"
+msgid "məs: adiniz@gmail.com"
+msgstr "напр.: vashe_imya@gmail.com"
+
+msgctxt "accounts.profile_completion"
+msgid "FİN kodunu yazın."
+msgstr "Введите код FIN."
+
+msgctxt "accounts.profile_completion"
+msgid "FİN kod 7 simvoldur: yalnız latın hərfləri və rəqəmlər (məs. 5ABC12D)."
+msgstr "Код FIN состоит из 7 символов: только латинские буквы и цифры (напр. 5ABC12D)."
+
+msgctxt "accounts.profile_completion"
+msgid "Mobil telefon nömrəsini yazın."
+msgstr "Введите номер мобильного телефона."
+
+msgctxt "accounts.profile_completion"
+msgid "Telefon nömrəsi düzgün deyil (məs. 050 123 45 67)."
+msgstr "Неверный номер телефона (напр. 050 123 45 67)."
+
+msgctxt "accounts.profile_completion"
+msgid "E-poçt ünvanını yazın."
+msgstr "Введите адрес эл. почты."
+
+msgctxt "accounts.profile_completion"
+msgid "Etibarlı e-poçt ünvanı yazın."
+msgstr "Введите действительный адрес эл. почты."
+
+msgctxt "accounts.profile_completion"
+msgid "Bu FİN kod başqa hesabda qeydə alınıb. Düzgün yazdığınıza əminsinizsə, RİM-ə müraciət edin — hesablarınız yoxlanılıb birləşdiriləcək."
+msgstr "Этот код FIN зарегистрирован в другом аккаунте. Если вы уверены, что ввели его верно, обратитесь в RİM — ваши аккаунты будут проверены и объединены."
+
+msgctxt "accounts.profile_completion"
+msgid "Bu e-poçt ünvanı istifadə oluna bilməz. Başqa ünvan yazın."
+msgstr "Этот адрес эл. почты нельзя использовать. Укажите другой адрес."
+
+msgctxt "accounts.profile_completion"
+msgid "Məlumatlarınız saxlanıldı. Təşəkkür edirik!"
+msgstr "Ваши данные сохранены. Спасибо!"
+
+msgctxt "accounts.profile_completion"
+msgid "Məlumatlarınızı tamamlayın"
+msgstr "Заполните ваши данные"
+
+msgctxt "accounts.profile_completion"
+msgid "hesabınızda bəzi vacib məlumatlar yoxdur. Davam etmək üçün aşağıdakı xanaları doldurun — bu bir dəfəlik addımdır."
+msgstr "в вашем аккаунте не хватает важных данных. Чтобы продолжить, заполните поля ниже — это одноразовый шаг."
+
+msgctxt "accounts.profile_completion"
+msgid "Bəzi xanalarda səhv var — aşağıda qeyd olunub."
+msgstr "В некоторых полях есть ошибки — они отмечены ниже."
+
+msgctxt "accounts.profile_completion"
+msgid "Nəyə lazımdır:"
+msgstr "Зачем это нужно:"
+
+msgctxt "accounts.profile_completion"
+msgid "Məlumatlarınız qorunur"
+msgstr "Ваши данные защищены"
+
+msgctxt "accounts.profile_completion"
+msgid "Bu məlumatlar ictimai profilinizdə göstərilmir və kənar şəxslərlə paylaşılmır. Onları yalnız siz və iş zərurəti olan səlahiyyətli əməkdaşlar (RİM, dekanlıq, kadrlar şöbəsi) görə bilər."
+msgstr "Эти данные не показываются в вашем публичном профиле и не передаются посторонним. Их видите только вы и уполномоченные сотрудники по служебной необходимости (RİM, деканат, отдел кадров)."
+
+msgctxt "accounts.profile_completion"
+msgid "Səhv yazdığınızı sonra görsəniz, düzəliş üçün RİM-ə müraciət edin."
+msgstr "Если позже заметите ошибку, обратитесь в RİM для исправления."
+
+msgctxt "accounts.profile_completion"
+msgid "Saxla və davam et"
+msgstr "Сохранить и продолжить"
+
+msgctxt "accounts.profile_completion"
+msgid "Çıxış"
+msgstr "Выйти"
+
+msgctxt "core.runtime_settings"
+msgid "Məcburi profil məlumatları"
+msgstr "Обязательные данные профиля"
+
+msgctxt "core.runtime_settings"
+msgid "Girişdən sonra vacib məlumatları məcburi doldurmaq"
+msgstr "Обязательное заполнение важных данных после входа"
+
+msgctxt "core.runtime_settings"
+msgid "Yanılıda FİN kodu, mobil telefonu və ya şəxsi e-poçtu boş olan tələbə və əməkdaş girişdən sonra «Məlumatlarınızı tamamlayın» səhifəsinə yönlənir və onları doldurmadan sistemdən istifadə edə bilmir. Söndürülüdə (qəza halı) heç kim dayandırılmır."
+msgstr "Если включено, студент или сотрудник с пустым кодом FIN, мобильным телефоном или личной почтой после входа направляется на страницу «Заполните ваши данные» и не может пользоваться системой, пока не заполнит их. Если выключено (экстренный случай), никто не останавливается."
+
+msgctxt "core.runtime_settings"
+msgid "FİN kod məcburidir"
+msgstr "Код FIN обязателен"
+
+msgctxt "core.runtime_settings"
+msgid "Mobil telefon məcburidir"
+msgstr "Мобильный телефон обязателен"
+
+msgctxt "core.runtime_settings"
+msgid "Şəxsi e-poçt məcburidir"
+msgstr "Личная эл. почта обязательна"
+
+msgctxt "profile.rim"
+msgid "Məlumat natamam (FİN, telefon, e-poçt)"
+msgstr "Данные неполные (FIN, телефон, эл. почта)"
