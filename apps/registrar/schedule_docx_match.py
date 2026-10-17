@@ -27,7 +27,8 @@ qalır) və səbəb hesabata düşür.
 
 NÖV: hüceyrədə yoxdursa — açılışın saat bölgüsündə TƏK növ varsa o; yoxsa müəllimin bu açılış üzrə
 yük bölgüsündə TƏK fəaliyyəti varsa o; yoxsa ``kind_unknown`` (yazılmır). Magistratura hüceyrəsi (növ
-işarəsi yoxdur) bu halda mühazirədir (``kind_default_lecture``).
+işarəsi yoxdur) bu halda mühazirədir (``kind_default_lecture``) — yalnız plan saatında mühazirə VARSA və ya
+plan məlum deyilsə (:func:`default_kind`; workload tapşırıq sətri də eyni qaydadır).
 """
 
 from __future__ import annotations
@@ -50,6 +51,14 @@ SUBJECT_MARGIN = 0.04
 TEACHER_FUZZY = 0.85
 _CANCELLED_TASK = "cancelled"
 _ACTIVITIES = ("lecture", "seminar", "lab")
+
+
+def default_kind(kinds, default: str) -> tuple[str, str]:
+    """Hüceyrədə növ yoxdur, plandan TƏK növ çıxmır → ``default`` (magistratura: mühazirə) yalnız plan
+    məlum deyilsə və ya plan növlərindədirsə; əks halda ``kind_unknown`` (registrar + workload eyni qayda)."""
+    if default and (not kinds or default in kinds):
+        return default, f"kind_default_{default}"
+    return "", "kind_unknown"
 
 
 def code_key(code: str) -> str:
@@ -354,9 +363,7 @@ class Resolver:
             )
             if len(activities) == 1:
                 return activities.pop(), "kind_from_load"
-        if default:
-            return default, f"kind_default_{default}"
-        return "", "kind_unknown"
+        return default_kind(kinds, default)
 
     # ── görünmə ────────────────────────────────────────────────────────────
     def visible_students(self, offering) -> int:
@@ -379,6 +386,7 @@ __all__ = [
     "Resolver",
     "Target",
     "code_key",
+    "default_kind",
     "is_full_name",
     "split_teacher",
     "subject_contains",

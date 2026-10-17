@@ -12,6 +12,9 @@ QAYDALAR (ehtiyatlı):
   vahidinə düşməlidir (alt qrup açılışı / eyni adlı iki qrup → ``create_group_not_single``).
 * Bir (fənn, qrup) — BİR sətir: bir neçə hüceyrə toplanır; saat «(N saat)»-ın MAKSİMUMU (fərqlidirsə
   ``row_hours_differ`` sayı + hüceyrədə ``hours_max:…``); saat yoxdursa ``create_hours_missing``.
+  Toplama fənn həll olunandan / yaradılandan SONRA (qrup, fənn) üzrə təkrarlanır: iki yazılış
+  («Tədqiqat metodları» / «Tədqiqatın metodları») eyni fənnə düşür → yenə BİR sətir (``duplicate_row`` yox);
+  dry-run və tətbiq eyni sayı verir.
 * Fənn — :meth:`Importer.find_subject` (kitabça idxalçısının qaydası: dəqiq ad, sonra ≥ 0.9 oxşarlıq);
   yoxdursa :meth:`Importer.resolve_subject` kimi kataloqda YARADILIR (``subject_created``, kod «QKU-N»,
   fənnin kafedrası = sətrin kafedrası).
@@ -23,9 +26,11 @@ QAYDALAR (ehtiyatlı):
   ``row_edit.save_row_amended`` (UI-nin yolu: bölgü təsdiqlənibsə əvvəl «Rəsmi sərəncam/əmr» düzəlişi);
   yalnız ``draft`` / ``distributed`` / ``amended`` sənədə (digər statusda ``task_blocked``). Saat bölgüsü
   məlum deyil → hamısı mühazirədə, qeyd «saat bölgüsü cədvəldən — kafedra dəqiqləşdirsin».
-* Bölgü və açılış — mövcud sətirlərlə EYNİ yol (``TimetableTaskAssigner._apply_task``: qaralamanın rəsmi
-  təsdiqi, ``RowPlanApplier``, ``Importer._confirm_and_enroll`` → açılış + qrupun tələbələri). Hər kafedra
-  öz savepoint-indədir; dry-run-da heç nə yazılmır (yalnız saylar).
+* Bölgü və açılış — mövcud sətirlərlə EYNİ addımda (``TimetableTaskAssigner._apply``: kafedranın yeni VƏ
+  mövcud sətirləri bir ``_apply_task`` çağırışında — qaralamanın rəsmi təsdiqi, ``RowPlanApplier``,
+  ``Importer._confirm_and_enroll`` → açılış + qrupun tələbələri, hər biri bir dəfə). Hər kafedra öz
+  savepoint-indədir; geri qayıtmada saylar da bərpa olunur (``chair_rolled_back``). Dry-run-da heç nə
+  yazılmır (yalnız saylar).
 * İdempotent — ikinci işə salmada sətir artıq var → adi axın (``already_assigned``).
 """
 
@@ -35,7 +40,6 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 
 from django.apps import apps as django_apps
-from django.db import transaction
 
 from apps.registrar.public import schedule_docx_match, schedule_docx_parse
 from core.constants import OrgUnitType
@@ -81,18 +85,21 @@ class MissingRowCreator:
         self.importer = assigner.importer
         self.counters = assigner.counters
         self._teacher_chairs: dict = {}
+        self.by_chair: dict = {}
 
     # ── toplama ───────────────────────────────────────────────────────────
-    def run(self) -> None:
+    def prepare(self) -> None:
+        """Namizədlər → kafedra üzrə spec-lər. Dry-run: plan (yazı yoxdur); tətbiq: ``by_chair`` — yazı
+        ``TimetableTaskAssigner._apply``-da həmin kafedranın mövcud sətirləri ilə BİR savepoint-də."""
         by_chair: dict = defaultdict(list)
         for spec in self._collect().values():
             if self._check(spec):
                 by_chair[spec.chair.pk].append(spec)
+        if self.importer.apply:
+            self.by_chair = dict(by_chair)
+            return
         for specs in by_chair.values():
-            if self.importer.apply:
-                self._apply_chair(specs)
-            else:
-                self._plan_chair(specs)
+            self._plan_chair(specs)
 
     def _fail(self, cells, status: str, detail: str = "") -> None:
         for cell in cells:
@@ -127,15 +134,9 @@ class MissingRowCreator:
 
     # ── yoxlama: saat, kafedra, müəllim ───────────────────────────────────
     def _check(self, spec: _Spec) -> bool:
-        hours = {int(cell.entry.text.hours or 0) for cell in spec.cells} - {0}
-        if not hours:
+        if not self._hours(spec):
             self._fail(spec.cells, "create_hours_missing")
             return False
-        spec.hours = max(hours)
-        if len(hours) > 1:
-            self.counters["row_hours_differ"] += 1
-            for cell in spec.cells:
-                cell.detail = "hours_max:" + "/".join(str(value) for value in sorted(hours, reverse=True))
         owner = getattr(spec.subject, "chair_unit", None) if spec.subject is not None else None
         resolved = []
         for cell in spec.cells:
@@ -162,6 +163,39 @@ class MissingRowCreator:
             self._fail(spec.cells, "teacher_chair_unknown")
             return False
         return True
+
+    @staticmethod
+    def _hours(spec: _Spec) -> set:
+        hours = {int(cell.entry.text.hours or 0) for cell in spec.cells} - {0}
+        spec.hours = max(hours, default=0)
+        return hours
+
+    def _merge(self, specs, chair) -> list:
+        """Fənn həll olunandan / yaradılandan SONRA (qrup, fənn) üzrə birləşdirmə: hüceyrələr toplanır, saat
+        maksimum; fərqli müəllim → ``conflict``. Dry-run və tətbiq eyni yoldan keçir (eyni ``row_created``)."""
+        merged: dict = {}
+        for spec in specs:
+            if spec.subject is None:
+                spec.subject = self.importer.resolve_subject(spec.name, chair, "")[0]
+            if spec.subject is None:
+                self._fail(spec.cells, "create_subject_unresolved")
+                continue
+            head = merged.setdefault((spec.group.pk, spec.subject.pk), spec)
+            if head is not spec:
+                head.cells.extend(spec.cells)
+                head.user = head.user if head.user is not None and head.user.pk == spec.user.pk else None
+        result = []
+        for spec in merged.values():
+            if spec.user is None:
+                self._fail(spec.cells, "conflict", "teachers_differ")
+                continue
+            hours = self._hours(spec)
+            if len(hours) > 1:
+                self.counters["row_hours_differ"] += 1
+                for cell in spec.cells:
+                    cell.detail = "hours_max:" + "/".join(str(value) for value in sorted(hours, reverse=True))
+            result.append(spec)
+        return result
 
     def _teacher_anywhere(self, token: str) -> tuple:
         """Fənnin kafedrası yoxdur → təşkilatda TƏK uyğun aktiv müəllim (sonra əməkdaş) hesabı."""
@@ -220,34 +254,20 @@ class MissingRowCreator:
             self.counters["task_blocked"] += 1
             return
         self.counters["task_created"] += task is None
-        for spec in specs:
-            if spec.subject is None:
-                spec.subject = self.importer.resolve_subject(spec.name, chair, "")[0]
+        for spec in self._merge(specs, chair):
             self.counters["row_created"] += 1
             self._mark(spec, ROW_PLANNED)
             for cell in spec.cells:
                 cell.assignment = "would_assign"
 
-    def _apply_chair(self, specs) -> None:
-        importer = self.importer
-        snapshot = (dict(importer.subject_index), list(importer.subject_names), importer.next_code)
-        subjects_before = importer.counters["subject_created"]
-        try:
-            with transaction.atomic():
-                rows, results = self._write_chair(specs)
-        except WorkloadDenied as exc:
-            importer.subject_index, importer.subject_names, importer.next_code = snapshot
-            importer.counters["subject_created"] = subjects_before
-            for spec in specs:
-                self._fail(spec.cells, "task_blocked", getattr(exc, "code", "") or "workload_denied")
-            self.counters["task_blocked"] += 1
-            return
-        self.counters["row_created"] += len(rows)
+    def fail_blocked(self, specs, code: str) -> None:
+        """Kafedranın savepoint-i geri qayıdıb (``WorkloadDenied``) — hüceyrələr ``task_blocked``."""
         for spec in specs:
-            for cell in spec.cells:
-                cell.assignment = results.get(cell.row.pk, "")
+            self._fail(spec.cells, "task_blocked", code)
 
-    def _write_chair(self, specs) -> tuple[list, dict]:
+    def write_rows(self, specs) -> tuple:
+        """Çağıranın savepoint-i daxilində: tapşırıq + yeni sətirlər → (tapşırıq, sətirlər, bölgü planı,
+        bölünmüş sənədə düzəliş ilə əlavə olunubmu). Bölgü + təsdiq ``TimetableTaskAssigner._apply_task``-dadır."""
         importer, assigner = self.importer, self.assigner
         chair = specs[0].chair
         task, created = get_or_create_task(
@@ -256,24 +276,16 @@ class MissingRowCreator:
         if task.status not in _OPEN_STATUSES:
             raise WorkloadDenied("workload.task_not_editable", "Tapşırıq bu statusda yeni sətir qəbul etmir.")
         self.counters["task_created"] += created
-        amended = task.status in AMENDABLE_STATUSES
+        amendable = task.status in AMENDABLE_STATUSES
         rows, desired = [], {}
-        for spec in specs:
-            if spec.subject is None:
-                spec.subject = importer.resolve_subject(spec.name, chair, "")[0]
+        for spec in self._merge(specs, chair):
             task.refresh_from_db(fields=["status", "distributed_at"])
             row = self._create_row(task, spec)
             rows.append(row)
             desired[row.pk] = {_LECTURE: [(spec.user.pk, spec.hours, False)]}
             self._mark(spec, ROW_CREATED, row)
-        confirmed = self.counters["task_confirmed"]
-        results = assigner._apply_task(task, rows, desired)
-        task.refresh_from_db(fields=["status"])
-        if amended and task.status == TaskStatus.AMENDED and self.counters["task_confirmed"] == confirmed:
-            # Düzəlişi sətrin yaradılması açıb (``save_row_amended``) — bölgü təsdiqi sənədi yenidən bağlayır.
-            importer._confirm_and_enroll(task)
-            self.counters["task_confirmed"] += 1
-        return rows, results
+        self.counters["row_created"] += len(rows)
+        return task, rows, desired, amendable and bool(rows)
 
     def _create_row(self, task, spec: _Spec):
         group = spec.group

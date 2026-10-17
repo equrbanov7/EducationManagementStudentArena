@@ -541,7 +541,8 @@ class Importer(TeacherResolverMixin):
                 users[position] = next(iter(same.values()))
         return users
 
-    def _confirm_and_enroll(self, task):
+    def _confirm_and_enroll(self, task, *, notify: bool = True):
+        # ``notify=False`` — əvvəl bölünmüş sənədin yenidən təsdiqi (düzəliş): təkrar bildiriş yox.
         # Bölgüsüz qalan dərs sətirləri «Vakant» ilə doldurulur ki, təsdiq keçsin
         # (jurnal sahibi sonra «Fənn təhvili»/düzəlişlə təyin olunur).
         for row in task.rows.all():
@@ -552,7 +553,7 @@ class Importer(TeacherResolverMixin):
                         row=row, actor=self.actor, activity=str(activity), teacher_id=None, hours=left, note="Vakant"
                     )
                     self.counters["assignment_vacant"] += 1
-        result = confirm_distribution(task=task, actor=self.actor, allow_vacant=True)
+        result = confirm_distribution(task=task, actor=self.actor, allow_vacant=True, notify=notify)
         self.counters["offering_created"] += result["sync"]["created"]
         self.counters["offering_updated"] += result["sync"]["updated"]
         self.counters["offering_instructor_blocked"] += result["sync"]["instructor_blocked"]
