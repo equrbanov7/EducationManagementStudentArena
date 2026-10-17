@@ -81,6 +81,17 @@ class AttachUserHiddenStudentTest(_CBase):
         self.assertEqual(hidden, missing)
         self.assertEqual(hidden[1]["reason_code"], "target_user_not_found")
 
+    def test_membershipless_profile_student_is_hidden_too(self):
+        # Review 2026-10-17: üzvlüyü olmayan köhnə tələbə (yalnız profile.organization + tələbə profil rolu).
+        with bypass_rls():
+            Membership.objects.filter(user=self.fx.student_b, organization=self.fx.org).update(is_active=False)
+            UserProfile.objects.filter(user=self.fx.student_b).update(
+                organization=self.fx.org, role="student", requested_organization=self.fx.org
+            )
+        hidden = self.prepare(self.fx.hr_full, self.fx.student_b.pk)
+        missing = self.prepare(self.fx.hr_full, 987654321)
+        self.assertEqual(hidden, missing)
+
     def test_ikt_can_prepare_attach_for_student(self):
         with bypass_rls():
             UserProfile.objects.filter(user=self.fx.student_b).update(requested_organization=self.fx.org)

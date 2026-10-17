@@ -231,8 +231,12 @@ def _student_scope(request, organization, caps):
     from apps.organizations.public import request_holds_student_key
 
     if caps.get("can_search_directory") and not request_holds_student_key(request):
-        return None, can_view_contacts
-    permission = "member.view" if caps.get("can_search_directory") else "member.student_manage"
+        # Delegasiya olunmuş `member.student_manage` varsa o əhatə ilə (reyestrlə eyni qayda — review 2026-10-17).
+        if not caps.get("teacher_can_manage_students"):
+            return None, can_view_contacts
+        permission = "member.student_manage"
+    else:
+        permission = "member.view" if caps.get("can_search_directory") else "member.student_manage"
     scope = get_permission_scope(request.user, organization, permission, request=request)
     if scope.is_org_wide:
         return Q(), can_view_contacts

@@ -30,6 +30,8 @@ STUDENT_ACCOUNT_PERMISSIONS = (
 #: Tələbə ailəsi rolları; ``member`` (doldurucu) neytraldır.
 STUDENT_ROLE_NAMES = ("student", "lead_student", "alumni")
 NEUTRAL_ROLE_NAMES = ("member",)
+#: ``UserProfile.role`` tələbə dəyərləri (üzvlüksüz köhnə hesablar üçün).
+PROFILE_STUDENT_ROLES = ("student", "lead_student")
 
 
 def holds_student_key(permissions) -> bool:
@@ -68,11 +70,20 @@ def student_only_q(organization, *, user_ref: str = "pk") -> Q:
     active = _student_only(any_membership.filter(is_active=True))
     # EXISTS (LEFT JOIN `profile` sahəsi deyil): `exclude()` altında NULL profil sətri itməsin.
     is_deleted = Exists(profile_model.objects.filter(user_id=OuterRef(user_ref), is_deleted=True))
-    return Q(active) | (Q(is_deleted) & _student_only(any_membership))
+    # Review 2026-10-17: üzvlüyü olmayan köhnə tələbə hesabı (yalnız ``profile.organization`` + tələbə profil rolu)
+    # reyestrdə gizlənirdi, amma attach_user / üzvü çıxar onu tapırdı — eyni tərif bütün qapılarda.
+    profile_student = Exists(
+        profile_model.objects.filter(
+            user_id=OuterRef(user_ref), organization=organization, role__in=PROFILE_STUDENT_ROLES
+        )
+    )
+    no_active_role = ~Exists(any_membership.filter(is_active=True).exclude(role__name__in=NEUTRAL_ROLE_NAMES))
+    return Q(active) | (Q(is_deleted) & _student_only(any_membership)) | (Q(profile_student) & Q(no_active_role))
 
 
 __all__ = [
     "NEUTRAL_ROLE_NAMES",
+    "PROFILE_STUDENT_ROLES",
     "STUDENT_ACCOUNT_PERMISSIONS",
     "STUDENT_ROLE_NAMES",
     "holds_student_key",
