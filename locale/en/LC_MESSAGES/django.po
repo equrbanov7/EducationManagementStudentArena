@@ -98899,3 +98899,11 @@ msgstr "You have no active subjects this semester."
 msgctxt "profile.subjects"
 msgid "Qeydiyyatda olduğunuz fənlərdən azad edilmisiniz (aşağıda). Qrupunuz dəyişmir; sual yaranarsa dekanlığa müraciət edin."
 msgstr "You are exempted from the subjects you were registered for (see below). Your group does not change; contact the dean's office if you have questions."
+
+msgctxt "registrar.journal"
+msgid "Cəm"
+msgstr "Sum"
+
+msgctxt "registrar.journal"
+msgid "İmtahana qədər bal tam ədəddir: hissələrin cəmi yarım-yuxarı yuvarlaqlaşdırılır (məs. 9,5 → 10, 9,4 → 9)."
+msgstr "The pre-exam score is a whole number: the sum of the parts is rounded half up (e.g. 9.5 → 10, 9.4 → 9)."

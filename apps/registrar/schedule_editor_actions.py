@@ -92,8 +92,13 @@ def parked_rows(*, organization, period=None, group=None, actor=None) -> list[di
     if group is not None:
         queryset = queryset.filter(offering__group=group)
     if actor is not None:
+        # Dar qrup əhatəsi + açılış səviyyəli genişlənmə (kafedranın öz fənni): kafedra müdiri öz parkladığı
+        # dərsi görüb yenidən yerləşdirə bilməlidir (FIX-D 2026-10-17).
+        from django.db.models import Q
+
         scoped = schedule_manage.scoped_groups(actor, organization)
-        queryset = queryset.filter(offering__group__in=scoped.values("pk"))
+        own = schedule_manage.scoped_offerings(actor, organization, widened=True)
+        queryset = queryset.filter(Q(offering__group__in=scoped.values("pk")) | Q(offering__in=own.values("pk")))
     return [base.slot_row(slot) for slot in queryset.order_by("weekday", "start_time")]
 
 
@@ -254,12 +259,21 @@ def save_cell(*, actor, organization, group, period, data, request=None) -> dict
     # ⚠️ ƏHATƏ ƏVVƏL: açılış yaradılmazdan ƏVVƏL qrupun aktorun `schedule.manage`
     # alt-ağacında olduğu yoxlanılır — əks halda icazəsiz aktor rədd edilməzdən
     # əvvəl boş `CourseOffering` doğura bilərdi.
-    if group is None or not schedule_manage.scoped_groups(actor, organization).filter(pk=group.pk).exists():
+    if (
+        group is None
+        or not schedule_manage.scoped_groups(actor, organization, widened=True).filter(pk=group.pk).exists()
+    ):
         raise schedule_editor.CellError(
             "permission_denied", pgettext(_CTX, "Dərs cədvəlini idarə etmək üçün icazəniz yoxdur."), status=403
         )
 
     subject = Subject.objects.filter(organization=organization, pk=str(data.get("subject_id") or "").strip()).first()
+    # Review 2026-10-17 (FIX-D, HIGH): (qrup, fənn) səlahiyyəti açılış YARADILMAZDAN / müəllim bağlanmazdan
+    # ƏVVƏL — `ATOMIC_REQUESTS` altında sonrakı 403 `resolve_offering`-in yazısını geri almır.
+    if subject is not None and not schedule_manage.can_manage_group_subject(actor, organization, group, subject):
+        raise schedule_editor.CellError(
+            "permission_denied", pgettext(_CTX, "Dərs cədvəlini idarə etmək üçün icazəniz yoxdur."), status=403
+        )
     instructor_id = str(data.get("instructor_id") or "").strip()
     instructor = None
     if instructor_id:

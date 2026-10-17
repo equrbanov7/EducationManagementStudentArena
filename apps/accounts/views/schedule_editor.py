@@ -83,7 +83,9 @@ def _group(request, organization, data):
     group_id = parse_uuid(data.get("group_id"))
     if group_id is None:
         return None
-    return schedule_manage.scoped_groups(request.user, organization).filter(pk=group_id).first()
+    # Hüceyrə əməlləri açılış səviyyəlidir → genişlənmiş əhatə (kafedranın öz fənni olan qruplar); yazı
+    # (`save_cell`) əlavə olaraq (qrup, fənn) cütünü yoxlayır.
+    return schedule_manage.scoped_groups(request.user, organization, widened=True).filter(pk=group_id).first()
 
 
 def _period(organization, data):
