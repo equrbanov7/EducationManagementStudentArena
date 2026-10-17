@@ -15,7 +15,7 @@ from django.test import SimpleTestCase
 
 import docx
 
-from apps.registrar.schedule_docx_match import is_full_name, label_key, teacher_matches
+from apps.registrar.schedule_docx_match import Resolver, default_kind, is_full_name, label_key, teacher_matches
 from apps.registrar.schedule_docx_parse import parse_group_label, parse_subject_text, parse_tables
 
 
@@ -177,3 +177,34 @@ class FullNameTeacherTests(SimpleTestCase):
     def test_ambiguous_full_name_returns_every_account(self):
         users = [_user(1, "Rail", "Səfiyev"), _user(2, "Rail", "Səfiyev")]
         self.assertEqual(len(teacher_matches(users, "Səfiyev Rail", fuzzy=False)), 2)
+
+
+class DefaultKindTests(SimpleTestCase):
+    """2026-10-17 rəyi: magistratura hüceyrəsinin defolt mühazirəsi yalnız planda mühazirə VARSA (və ya plan
+    məlum deyilsə) — workload tapşırıq sətri ilə eyni qayda (``default_kind``)."""
+
+    def _resolver(self, hours):
+        resolver = Resolver.__new__(Resolver)
+        resolver._hours = {1: hours}
+        return resolver
+
+    def test_default_lecture_requires_lecture_in_planned_kinds(self):
+        self.assertEqual(default_kind([], "lecture"), ("lecture", "kind_default_lecture"))
+        self.assertEqual(default_kind(["lecture", "seminar"], "lecture"), ("lecture", "kind_default_lecture"))
+        self.assertEqual(default_kind(["seminar", "lab"], "lecture"), ("", "kind_unknown"))
+        self.assertEqual(default_kind(["lecture"], ""), ("", "kind_unknown"))
+        offering = SimpleNamespace(pk=1)
+        infer = Resolver.infer_kind
+        self.assertEqual(
+            infer(self._resolver({"seminar": 30, "lab": 15}), offering, None, default="lecture"), ("", "kind_unknown")
+        )
+        self.assertEqual(
+            infer(self._resolver({"lab": 15}), offering, None, default="lecture"), ("lab", "kind_from_hours")
+        )
+        self.assertEqual(
+            infer(self._resolver({"lecture": 30, "seminar": 15}), offering, None, default="lecture"),
+            ("lecture", "kind_default_lecture"),
+        )
+        self.assertEqual(
+            infer(self._resolver({}), offering, None, default="lecture"), ("lecture", "kind_default_lecture")
+        )

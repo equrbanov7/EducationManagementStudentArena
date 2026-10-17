@@ -28,7 +28,11 @@ QAYDALAR (heç nə YARADILMIR: qrup, hesab; sətir/fənn/tapşırıq yalnız ``c
   bərabər bölünür). Həll olunmamış müəllimli hüceyrə də həmin cütü ``conflict`` edir.
 * Yazı — yalnız :class:`~.task_load_reassign.RowPlanApplier` (düzəliş axını, blokerlər, açılış sinxronu);
   sonunda Forma 1 kimi ``Importer._confirm_and_enroll`` (bölgü təsdiqi → açılış + tələbə qeydiyyatı).
-  Hər tapşırıq öz savepoint-indədir: təsdiq alınmasa həmin tapşırığın dəyişiklikləri geri alınır.
+  Hər tapşırıq (= kafedra + il) öz savepoint-indədir və işdə BİR dəfə emal olunur: yeni sətirlər
+  (:mod:`.timetable_missing_rows`) və mövcud sətirlərin bölgüsü eyni addımdadır → rəsmi təsdiq və bölgü
+  təsdiqi bir dəfə (2026-10-17 rəyi: əvvəl köhnəlmiş ``draft`` statusu ilə ikinci dəfə təsdiqlənirdi).
+  Təsdiq alınmasa həmin tapşırığın dəyişiklikləri VƏ sayları geri alınır (``task_blocked``).
+  Əvvəl bölünmüş sənədin yenidən təsdiqi müəllimlərə təkrar «Dərs yükü təyin edildi» GÖNDƏRMİR.
 """
 
 from __future__ import annotations
@@ -51,6 +55,7 @@ from .scoping import WorkloadDenied
 from .task_form1_import import Form1Importer
 from .task_load_reassign import ASSIGNED, REASSIGNED
 from .task_workbook_parsing import clean_subject_name, is_block
+from .timetable_missing_rows import ROW_CREATED, ROW_PLANNED, MissingRowCreator
 
 REPORT_HEADER = [
     "table", "row", "weekday", "start", "end", "group", "sub", "subject", "kind", "teacher",
@@ -205,9 +210,9 @@ class TimetableTaskAssigner:
         kinds = [a for a in _ACTIVITIES if int(getattr(row, ACTIVITY_TOTAL_FIELD[a], 0) or 0) > 0]
         if len(kinds) == 1:
             return kinds[0], "kind_from_hours"
-        if default and default in kinds:
-            return default, f"kind_default_{default}"
-        return "", "kind_unknown"
+        if not kinds:  # sətirdə auditoriya saatı yoxdur — yazılacaq fəaliyyət yoxdur
+            return "", "kind_unknown"
+        return schedule_docx_match.default_kind(kinds, default)  # registrar matcher-i ilə eyni qayda
 
     # ── müəllim ───────────────────────────────────────────────────────────
     def _chair_pool(self, chair) -> list:
@@ -290,13 +295,13 @@ class TimetableTaskAssigner:
             cell = Cell(entry=entry)
             self.cells.append(cell)
             self._match(cell, resolver)
+        creator = None
         if self.create_missing_rows:
-            from .timetable_missing_rows import MissingRowCreator
-
-            MissingRowCreator(self, resolver).run()
+            creator = MissingRowCreator(self, resolver)
+            creator.prepare()
+        self._apply(self._aggregate(), creator)
         for cell in self.cells:
             self.counters[f"cell_{cell.status}"] += 1
-        self._apply(self._aggregate())
 
     def _match(self, cell: Cell, resolver) -> None:
         text = cell.entry.text
@@ -355,8 +360,6 @@ class TimetableTaskAssigner:
             if reason:
                 for cell in planned:
                     cell.status, cell.detail = CONFLICT, reason
-                    self.counters["cell_planned"] -= 1
-                    self.counters["cell_conflict"] += 1
                 continue
             plan[row_pk][activity] = desired
             self.rows[row_pk] = row
@@ -379,24 +382,59 @@ class TimetableTaskAssigner:
         share = Counter(subs.values())
         return [(user_id, total // len(subs) * count, False) for user_id, count in sorted(share.items(), key=str)], ""
 
-    def _apply(self, plan: dict) -> None:
-        by_task: dict = defaultdict(list)
+    def _apply(self, plan: dict, creator=None) -> None:
+        """Kafedra (= tapşırıq, ``uniq_teaching_task_year_chair``) üzrə BİR addım: yeni sətirlər + mövcud sətirlər."""
+        units: dict = defaultdict(lambda: ([], []))
         for row_pk in plan:
-            by_task[self.rows[row_pk].task_id].append(self.rows[row_pk])
-        for rows in by_task.values():
-            task = rows[0].task
+            units[self.rows[row_pk].task.chair_id][0].append(self.rows[row_pk])
+        for chair_pk, specs in (creator.by_chair if creator is not None else {}).items():
+            units[chair_pk][1].extend(specs)
+        for rows, specs in units.values():
+            snapshot = self._snapshot()
             try:
                 with transaction.atomic():
-                    results = self._apply_task(task, rows, plan)
+                    results = self._apply_unit(rows, specs, plan, creator)
             except WorkloadDenied as exc:
+                self._restore(snapshot)
                 code = getattr(exc, "code", "") or "workload_denied"
                 results = {row.pk: f"task_blocked:{code}" for row in rows}
+                if specs:
+                    creator.fail_blocked(specs, code)
+                    self.counters["chair_rolled_back"] += 1
                 self.counters["task_blocked"] += 1
             for cell in self.cells:
-                if cell.status == PLANNED and cell.row is not None and cell.row.pk in results:
+                if cell.status in (PLANNED, ROW_CREATED) and cell.row is not None and cell.row.pk in results:
                     cell.assignment = results[cell.row.pk]
 
-    def _apply_task(self, task, rows, plan: dict) -> dict:
+    def _apply_unit(self, rows, specs, plan: dict, creator) -> dict:
+        task, rows_amended = (rows[0].task if rows else None), False
+        if specs:
+            task, new_rows, desired, rows_amended = creator.write_rows(specs)
+            rows, plan = [*rows, *new_rows], {**plan, **desired}
+        if not rows:
+            return {}
+        return self._apply_task(task, rows, plan, rows_amended=rows_amended)
+
+    def _snapshot(self) -> tuple:
+        """Savepoint geri qayıdanda saylar da qayıtsın (prod log-u yalnız saylardır) + idxalçının fənn indeksi."""
+        importer = self.importer
+        counters = list({id(c): c for c in (self.counters, self.applier.counters, importer.counters)}.values())
+        state = (dict(importer.subject_index), list(importer.subject_names), importer.next_code)
+        return [(c, Counter(c)) for c in counters], state, list(importer.created_subjects)
+
+    def _restore(self, snapshot: tuple) -> None:
+        counters, state, created = snapshot
+        for counter, saved in counters:
+            counter.clear()
+            counter.update(saved)
+        importer = self.importer
+        importer.subject_index, importer.subject_names, importer.next_code = state
+        importer.created_subjects[:] = created
+
+    def _apply_task(self, task, rows, plan: dict, *, rows_amended: bool = False) -> dict:
+        """``rows_amended`` — yeni sətir bölünmüş sənədə düzəliş axını ilə əlavə olunub (təsdiq onu bağlayır)."""
+        task.refresh_from_db(fields=["status", "distributed_at"])  # sətrin ``task``-ı köhnəlmiş ola bilər
+        first_distribution = task.distributed_at is None
         if self.importer.apply and task.status == TaskStatus.DRAFT:
             self.importer._approve_official_workbook(task)
         opened_before = self.applier.counters["amendment_opened"]
@@ -417,9 +455,12 @@ class TimetableTaskAssigner:
         self.applier.reassign = False
         if self.importer.apply:
             task.refresh_from_db(fields=["status"])
-            amended = task.status == TaskStatus.AMENDED and self.applier.counters["amendment_opened"] > opened_before
+            opened = self.applier.counters["amendment_opened"] > opened_before or rows_amended
+            amended = task.status == TaskStatus.AMENDED and opened
             if (written and task.status in (TaskStatus.APPROVED, TaskStatus.DISTRIBUTING)) or amended:
-                self.importer._confirm_and_enroll(task)
+                # Əvvəl bölünmüş sənəd (düzəliş) — kafedranın bütün müəllimlərinə təkrar bildiriş yox
+                # (``fix_task_row_hours`` kimi ``notify=False``).
+                self.importer._confirm_and_enroll(task, notify=first_distribution)
                 self.counters["task_confirmed"] += 1
         return results
 
@@ -445,7 +486,7 @@ class TimetableTaskAssigner:
     def all_counters(self) -> Counter:
         counters = Counter(self.counters) + self.applier.counters + self.importer.counters
         for cell in self.cells:
-            if cell.status in (PLANNED, "row_created", "row_planned") and cell.assignment:
+            if cell.status in (PLANNED, ROW_CREATED, ROW_PLANNED) and cell.assignment:
                 counters[f"result_{cell.assignment.split(':', 1)[0]}"] += 1
         return +counters
 

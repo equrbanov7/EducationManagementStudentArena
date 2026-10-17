@@ -17,6 +17,7 @@ from django.test import TestCase
 import docx
 from openpyxl import Workbook
 
+from apps.notifications.models import InAppNotification
 from apps.organizations.models import Membership, OrgUnit
 from apps.registrar.models import CourseOffering, Subject
 from apps.workload.models import TeacherAssignment, TeachingTask
@@ -176,6 +177,18 @@ class TimetableTaskAssignTests(TestCase):
         self.assertEqual(self.task.status, "distributed")
         offering = CourseOffering.objects.get(organization=self.org, subject__name="Veb texnologiyalar")
         self.assertEqual(offering.instructor, self.users["sekine.h"])
+        # 2026-10-17 rəyi: əvvəl bölünmüş sənədin (düzəliş) yenidən təsdiqi kafedraya təkrar bildiriş GÖNDƏRMİR.
+        notified = InAppNotification.objects.filter(metadata__event="workload_assigned")
+        self.assertEqual(notified.filter(recipient=self.users["sekine.h"]).count(), 1)
+        self.assertFalse(notified.filter(recipient=self.users["minaye.a"]).exists())
+
+    def test_existing_row_kind_rule_matches_registrar_default_kind(self):
+        # Rəy (4): növ işarəsiz (magistratura) hüceyrə — sətirdə mühazirə yoxdursa defolt mühazirə YOX.
+        self.veb.lecture_total, self.veb.seminar_total, self.veb.lab_total = 0, 30, 30
+        self.veb.save(update_fields=["lecture_total", "seminar_total", "lab_total"])
+        self._run(self._docx(["Veb texnologiyalar (30 saat) Səkinə Həsənova"]))
+        report = self._report()[0]
+        self.assertEqual((report["status"], report["activity"]), ("kind_unknown", ""))
 
     def test_ambiguous_teacher_is_reported_not_written(self):
         out = self._run(self._docx(["Alqoritmlər müh.\nMəmmədov R."]), "--apply")
