@@ -13,6 +13,7 @@ siyahısını daraldan süzgəcdir və POST-a yalnız otaq gedir.
 from __future__ import annotations
 
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 
 #: legacy_rooms fazası / seed_qku_campuses_rooms.py ilə eyni prefiks.
 LEGACY_ROOM_CODE_PREFIX = "myedu-room-"
@@ -68,6 +69,27 @@ def resolve_lesson_room(organization, room_id):
         return organization.exam_rooms.filter(pk=room_id, is_active=True).first()
     except (ValueError, TypeError, ValidationError):  # yararsız UUID mətni
         return None
+
+
+def slot_room_ids(organization, texts) -> dict:
+    """Cədvəl slotlarının sərbəst mətnli otağı (``ScheduleSlot.room``) → reyestr otağının id-si, BİR sorğu ilə.
+
+    ``journal_activation.resolve_slot_room`` qaydası: ad və ya kod, böyük/kiçik hərf fərqsiz, yalnız
+    TƏK dəqiq uyğunluq; tapılmasa və ya bir neçə otaq uyğun gəlsə — açar yoxdur (çağıran yaddaşa keçir)."""
+    texts = {(text or "").strip() for text in texts} - {""}
+    if not texts:
+        return {}
+    query = Q()
+    for text in texts:
+        query |= Q(name__iexact=text) | Q(code__iexact=text)
+    rooms = list(organization.exam_rooms.filter(is_active=True).filter(query).values_list("pk", "name", "code"))
+    found = {}
+    for text in texts:
+        key = text.upper()
+        matches = [pk for pk, name, code in rooms if (name or "").upper() == key or (code or "").upper() == key]
+        if len(matches) == 1:
+            found[text] = str(matches[0])
+    return found
 
 
 def remembered_rooms(offering) -> dict:

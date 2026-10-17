@@ -153,10 +153,25 @@ def slot_time_key(slot) -> str:
 
 
 def slot_pattern(offering) -> list:
-    """Dərs modalı üçün slot naxışı (JSON adası) — JS «cədvəldən kənar» sahəsini buna görə açır."""
+    """Dərs modalı üçün slot naxışı (JSON adası ``#jdSlotPattern``).
+
+    JS «cədvəldən kənar» sahəsini (journal_activation.js) və seçilmiş tarixin cədvəl otağını / saatını
+    (journal_lesson_schedule.js, sahib 2026-10-17) buna görə hesablayır: həftə günü + üst/alt + saat + tip
+    + otaq. ``room_id`` — slotun mətn otağı reyestrdə TƏK uyğunluqla tapılıbsa (yoxdursa boş, otaq
+    yaddaşı işləyir); ``room_label`` — cədvəldə yazıldığı kimi. Otaqlar bir sorğu ilə həll olunur."""
+    slots = offering_slots(offering)
+    room_ids = lesson_rooms.slot_room_ids(offering.organization, [slot.room for slot in slots])
     return [
-        {"weekday": slot.weekday, "week_type": slot.week_type, "start": slot.start_time.strftime("%H:%M")}
-        for slot in offering_slots(offering)
+        {
+            "weekday": slot.weekday,
+            "week_type": slot.week_type,
+            "start": slot.start_time.strftime("%H:%M"),
+            "end": slot.end_time.strftime("%H:%M"),
+            "kind": slot_kind(slot),
+            "room_id": room_ids.get((slot.room or "").strip(), ""),
+            "room_label": (slot.room or "").strip(),
+        }
+        for slot in slots
     ]
 
 

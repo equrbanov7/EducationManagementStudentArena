@@ -159,11 +159,9 @@ Seçimlər JS ilə yenilənəndə `EMSBootstrapSelect.refresh(select)` çağır�
   </button>
 </div>
 
+{% include "accounts/profile/sections/schedule/_planner.html" %}
+
 <div class="sedit-form__extra">
-  <button type="button" class="ems-btn" data-sedit-suggest-open>
-    <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
-    {% trans "Boş yer təklif et" context "accounts.schedule_manage" %}
-  </button>
   <button type="button" class="ems-btn ems-btn--danger" data-sedit-delete hidden>
     <i class="fas fa-trash-can" aria-hidden="true"></i>
     {% trans "Dərsi cədvəldən çıxar" context "accounts.schedule_manage" %}

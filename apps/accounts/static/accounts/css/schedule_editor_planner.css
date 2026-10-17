@@ -1,0 +1,412 @@
+/* ═══ Cədvəl redaktoru — «Uyğun vaxtlar» + otaq tövsiyəsi (2026-10-17) ══════════
+   Hüceyrə dialoqunun paneli (`schedule/_planner.html`, `schedule_editor_planner.js`).
+   Rənglər YALNIZ `--ems-*` tokenlərindən; telefon enində şəbəkə 7 dar sütuna sığır,
+   lazım olsa yalnız öz qabığında üfüqi sürüşür (səhifə yox). */
+
+.sedit-plan {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3, 8px);
+    margin-top: var(--ems-sp-4, 10px);
+    padding: var(--ems-sp-4, 10px);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle);
+    min-width: 0;
+}
+
+.sedit-plan__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-3, 8px);
+    flex-wrap: wrap;
+}
+
+.sedit-plan__title {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--ems-text-muted);
+}
+
+/* ── Rejim düymələri (seqmentli idarə) ──────────────────────────────────── */
+.sedit-plan__modes {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 3px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg);
+}
+
+.sedit-plan__mode {
+    padding: 4px 10px;
+    border: 0;
+    border-radius: var(--ems-r-sm);
+    background: transparent;
+    color: var(--ems-text-muted);
+    font: inherit;
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.sedit-plan__mode.is-active {
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+}
+
+.sedit-plan__mode:focus-visible,
+.sedit-plan__pick:focus-visible,
+.sedit-plan__slot:focus-visible,
+.sedit-rooms__btn:focus-visible {
+    outline: 2px solid var(--ems-primary-500);
+    outline-offset: 1px;
+}
+
+.sedit-plan__status:empty {
+    display: none;
+}
+
+.sedit-plan__status,
+.sedit-plan__empty,
+.sedit-rooms__meta {
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+/* ── Qısa siyahı ────────────────────────────────────────────────────────── */
+.sedit-plan__top {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 6px;
+}
+
+.sedit-plan__pick {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border: 1px solid var(--ems-success-bd);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg);
+    color: var(--ems-text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    min-width: 0;
+}
+
+.sedit-plan__pick.is-room {
+    border-color: var(--ems-warning-bd);
+}
+
+.sedit-plan__pick:hover {
+    border-color: var(--ems-primary-500);
+    background: var(--ems-primary-50);
+}
+
+.sedit-plan__pick-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.sedit-plan__pick-text b {
+    font-size: var(--ems-fs-sm);
+}
+
+.sedit-plan__pick-text small {
+    font-size: var(--ems-fs-2xs);
+    color: var(--ems-text-muted);
+}
+
+.sedit-plan__rank {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-success-strong);
+    color: var(--ems-neutral-0);
+    font-size: var(--ems-fs-2xs);
+    font-weight: 800;
+}
+
+/* ── Şəbəkə ─────────────────────────────────────────────────────────────── */
+.sedit-plan__scroll {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.sedit-plan__grid {
+    width: 100%;
+    min-width: 280px;
+    border-collapse: separate;
+    border-spacing: 3px;
+    table-layout: fixed;
+}
+
+.sedit-plan__corner {
+    width: 44px;
+}
+
+.sedit-plan__day {
+    font-size: var(--ems-fs-2xs);
+    font-weight: 800;
+    color: var(--ems-text-muted);
+    text-align: center;
+}
+
+.sedit-plan__time {
+    text-align: left;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.sedit-plan__time b {
+    font-size: var(--ems-fs-xs);
+}
+
+.sedit-plan__time small {
+    display: block;
+    font-size: var(--ems-fs-2xs);
+    font-weight: 400;
+    color: var(--ems-text-muted);
+}
+
+.sedit-plan__cell {
+    padding: 0;
+}
+
+.sedit-plan__slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 26px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--ems-r-sm);
+    font: inherit;
+    opacity: 0.75;
+}
+
+.sedit-plan__slot.is-free {
+    background: var(--ems-success-bg);
+    border-color: var(--ems-success-bd);
+}
+
+.sedit-plan__slot.is-room {
+    background: var(--ems-warning-bg);
+    border-color: var(--ems-warning-bd);
+}
+
+.sedit-plan__slot.is-teacher {
+    background: var(--ems-violet-100);
+    border: 1px dashed var(--ems-violet-600);
+}
+
+.sedit-plan__slot.is-group {
+    background: var(--ems-sky-100);
+    border: 1px dashed var(--ems-sky-600);
+}
+
+.sedit-plan__slot.is-both {
+    background: var(--ems-neutral-200);
+    border: 1px dashed var(--ems-neutral-400);
+}
+
+.sedit-plan__slot.is-suggested {
+    opacity: 1;
+    cursor: pointer;
+}
+
+.sedit-plan__slot.is-suggested:hover {
+    border-color: var(--ems-primary-500);
+}
+
+.sedit-plan__slot.is-selected {
+    opacity: 1;
+    box-shadow: inset 0 0 0 2px var(--ems-primary-600);
+}
+
+/* ── Legend ──────────────────────────────────────────────────────────────── */
+.sedit-plan__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--ems-fs-2xs);
+    color: var(--ems-text-muted);
+}
+
+.sedit-plan__legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.sedit-plan__swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+.sedit-plan__swatch.is-free {
+    background: var(--ems-success-bg);
+    border: 1px solid var(--ems-success-bd);
+}
+
+.sedit-plan__swatch.is-room {
+    background: var(--ems-warning-bg);
+    border: 1px solid var(--ems-warning-bd);
+}
+
+.sedit-plan__swatch.is-teacher {
+    background: var(--ems-violet-100);
+}
+
+.sedit-plan__swatch.is-group {
+    background: var(--ems-sky-100);
+}
+
+.sedit-plan__swatch.is-both {
+    background: var(--ems-neutral-200);
+}
+
+/* ── Otaq tövsiyəsi ─────────────────────────────────────────────────────── */
+.sedit-rooms {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: var(--ems-sp-3, 8px);
+    border-top: 1px solid var(--ems-border);
+}
+
+.sedit-rooms__warn {
+    margin: 0;
+    padding: 6px 10px;
+    border: 1px solid var(--ems-warning-bd);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+    font-size: var(--ems-fs-sm);
+}
+
+.sedit-rooms__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 6px;
+}
+
+.sedit-rooms__btn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 6px 10px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg);
+    color: var(--ems-text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    min-width: 0;
+}
+
+.sedit-rooms__btn:hover {
+    border-color: var(--ems-primary-500);
+    background: var(--ems-primary-50);
+}
+
+.sedit-rooms__btn.is-current {
+    border-color: var(--ems-primary-600);
+    box-shadow: inset 0 0 0 1px var(--ems-primary-600);
+}
+
+.sedit-rooms__btn.is-small {
+    border-style: dashed;
+    border-color: var(--ems-warning-bd);
+}
+
+.sedit-rooms__name {
+    font-size: var(--ems-fs-sm);
+    overflow-wrap: anywhere;
+}
+
+.sedit-rooms__info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 8px;
+    font-size: var(--ems-fs-2xs);
+    color: var(--ems-text-muted);
+}
+
+.sedit-rooms__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+}
+
+.sedit-rooms__badge {
+    padding: 0 6px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-2xs);
+    font-weight: 700;
+}
+
+.sedit-rooms__badge.is-warn {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.sedit-rooms__badge.is-other {
+    background: var(--ems-sky-100);
+    color: var(--ems-sky-900);
+}
+
+.sedit-rooms__badge.is-ok {
+    background: var(--ems-success-bg);
+    color: var(--ems-success-strong);
+}
+
+@media (max-width: 480px) {
+    .sedit-plan {
+        padding: var(--ems-sp-3, 8px);
+    }
+
+    .sedit-plan__modes {
+        width: 100%;
+    }
+
+    .sedit-plan__mode {
+        flex: 1 1 auto;
+    }
+
+    .sedit-plan__corner {
+        width: 36px;
+    }
+
+    .sedit-plan__top,
+    .sedit-rooms__list {
+        grid-template-columns: 1fr;
+    }
+}
