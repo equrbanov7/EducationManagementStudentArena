@@ -98397,3 +98397,19 @@ msgstr "Иностранный номер"
 msgctxt "accounts.profile_completion"
 msgid "Operator kodundan sonra 7 rəqəm yazın (məs. 123 45 67)."
 msgstr "Введите 7 цифр после кода оператора (напр. 123 45 67)."
+
+msgctxt "accounts.profile_completion"
+msgid "Hələlik keç"
+msgstr "Пропустить пока"
+
+msgctxt "accounts.profile_completion"
+msgid "Məlumatlar doldurulana qədər bu səhifə hər girişdə yenə göstəriləcək."
+msgstr "Пока данные не заполнены, эта страница будет показываться при каждом входе."
+
+msgctxt "core.runtime_settings"
+msgid "«Hələlik keç» düyməsi"
+msgstr "Кнопка «Пропустить пока»"
+
+msgctxt "core.runtime_settings"
+msgid "Açıqdırsa istifadəçi məlumatları doldurmadan bu girişdə davam edə bilir; səhifə hər yeni girişdə yenə göstərilir (məlumatlar doldurulana qədər). Söndürüləndə doldurmaq məcburidir."
+msgstr "Если включено, пользователь может продолжить этот вход без заполнения данных; страница снова показывается при каждом новом входе (пока данные не заполнены). Если выключено — заполнение обязательно."

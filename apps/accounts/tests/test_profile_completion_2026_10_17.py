@@ -334,6 +334,42 @@ class ProfileCompletionGateTest(TestCase):
         self.assertFalse(response.headers.get("Location", "").startswith(self.url))  # yalnız FİN boş idi
         rs.invalidate()
 
+    def test_skip_lets_through_this_session_only(self):
+        # Sahib 2026-10-17: «hələlik keçmək üçün skip olsun, amma doldurana kimi hər daxil olduqca gəlsin».
+        results = reverse("accounts:my_results")
+        self.client.force_login(self.student)
+        page = self.client.get(self.url)
+        self.assertContains(page, 'name="skip"')
+        response = self.client.post(self.url, {"skip": "1", "next": results})
+        self.assertEqual(response.headers["Location"], results)
+        response = self.client.get(results)
+        self.assertFalse(response.headers.get("Location", "").startswith(self.url))
+        self.student.profile.refresh_from_db()
+        self.assertIsNone(self.student.profile.fin)  # heç nə yazılmır
+        self.assertTrue(
+            AuditLog.objects.filter(reason="profile_completion_skipped", object_id=str(self.student.pk)).exists()
+        )
+        # Yeni giriş → səhifə yenə gəlir.
+        self.client.logout()
+        self.client.force_login(self.student)
+        response = self.client.get(results)
+        self.assertTrue(response.headers.get("Location", "").startswith(self.url))
+
+    @override_settings(RUNTIME_SETTINGS_ENABLED=True)
+    def test_skip_can_be_switched_off(self):
+        RuntimeSetting.objects.create(key="profile.allow_skip", value=False)
+        rs.invalidate()
+        try:
+            self.client.force_login(self.student)
+            self.assertNotContains(self.client.get(self.url), 'name="skip"')
+            response = self.client.post(self.url, {"skip": "1"})
+            self.assertEqual(response.status_code, 200)  # ötürmə qəbul olunmur — forma xətası
+            response = self.client.get(reverse("accounts:my_results"))
+            self.assertTrue(response.headers.get("Location", "").startswith(self.url))
+        finally:
+            RuntimeSetting.objects.filter(key="profile.allow_skip").delete()
+            rs.invalidate()
+
     def test_view_as_request_is_never_gated(self):
         request = SimpleNamespace(is_view_as=True, user=self.student, org_memberships=[])
         self.assertEqual(policy.missing_for_request(request), [])

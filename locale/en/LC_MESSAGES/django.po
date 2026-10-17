@@ -98211,3 +98211,19 @@ msgstr "Foreign number"
 msgctxt "accounts.profile_completion"
 msgid "Operator kodundan sonra 7 rəqəm yazın (məs. 123 45 67)."
 msgstr "Enter 7 digits after the operator code (e.g. 123 45 67)."
+
+msgctxt "accounts.profile_completion"
+msgid "Hələlik keç"
+msgstr "Skip for now"
+
+msgctxt "accounts.profile_completion"
+msgid "Məlumatlar doldurulana qədər bu səhifə hər girişdə yenə göstəriləcək."
+msgstr "Until the details are filled in, this page will be shown again at every sign-in."
+
+msgctxt "core.runtime_settings"
+msgid "«Hələlik keç» düyməsi"
+msgstr "«Skip for now» button"
+
+msgctxt "core.runtime_settings"
+msgid "Açıqdırsa istifadəçi məlumatları doldurmadan bu girişdə davam edə bilir; səhifə hər yeni girişdə yenə göstərilir (məlumatlar doldurulana qədər). Söndürüləndə doldurmaq məcburidir."
+msgstr "When on, the user can continue this session without filling in the details; the page is shown again at every new sign-in (until the details are filled in). When off, filling them in is mandatory."

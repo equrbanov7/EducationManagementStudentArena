@@ -52,6 +52,19 @@ GATE_HELP = (
 # ctx → msgid → {lang: msgstr}. "az" verilməyibsə az msgstr = msgid (AZ cümlə).
 ENTRIES = {
     PC: {
+        # «Hələlik keç» (sahib 2026-10-17).
+        "Hələlik keç": {
+            "en": "Skip for now",
+            "ru": "Пропустить пока",
+            "tr": "Şimdilik geç",
+            "de": "Vorerst überspringen",
+        },
+        "Məlumatlar doldurulana qədər bu səhifə hər girişdə yenə göstəriləcək.": {
+            "en": "Until the details are filled in, this page will be shown again at every sign-in.",
+            "ru": "Пока данные не заполнены, эта страница будет показываться при каждом входе.",
+            "tr": "Bilgiler doldurulana kadar bu sayfa her girişte yeniden gösterilecek.",
+            "de": "Bis die Angaben ausgefüllt sind, wird diese Seite bei jeder Anmeldung erneut angezeigt.",
+        },
         # Telefon operatoru seçimi (sahib 2026-10-17: «050, 055 kimi ordan seçib yazsın»).
         "məs: 123 45 67": {
             "en": "e.g. 123 45 67",
@@ -247,6 +260,25 @@ ENTRIES = {
         "Çıxış": {"en": "Log out", "ru": "Выйти", "tr": "Çıkış", "de": "Abmelden"},
     },
     RS: {
+        "«Hələlik keç» düyməsi": {
+            "en": "«Skip for now» button",
+            "ru": "Кнопка «Пропустить пока»",
+            "tr": "«Şimdilik geç» düğmesi",
+            "de": "Schaltfläche «Vorerst überspringen»",
+        },
+        (
+            "Açıqdırsa istifadəçi məlumatları doldurmadan bu girişdə davam edə bilir; səhifə hər yeni girişdə "
+            "yenə göstərilir (məlumatlar doldurulana qədər). Söndürüləndə doldurmaq məcburidir."
+        ): {
+            "en": "When on, the user can continue this session without filling in the details; the page is shown "
+            "again at every new sign-in (until the details are filled in). When off, filling them in is mandatory.",
+            "ru": "Если включено, пользователь может продолжить этот вход без заполнения данных; страница снова "
+            "показывается при каждом новом входе (пока данные не заполнены). Если выключено — заполнение обязательно.",
+            "tr": "Açıksa kullanıcı bilgileri doldurmadan bu girişte devam edebilir; sayfa her yeni girişte yeniden "
+            "gösterilir (bilgiler doldurulana kadar). Kapalıysa doldurmak zorunludur.",
+            "de": "Wenn aktiv, kann der Nutzer in dieser Sitzung ohne Ausfüllen fortfahren; die Seite erscheint bei "
+            "jeder neuen Anmeldung erneut (bis die Angaben ausgefüllt sind). Wenn inaktiv, ist das Ausfüllen Pflicht.",
+        },
         "Məcburi profil məlumatları": {
             "en": "Required profile details",
             "ru": "Обязательные данные профиля",

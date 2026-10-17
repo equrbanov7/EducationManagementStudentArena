@@ -5,9 +5,9 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}?v=20260909-focus">
-    <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}?v=20261005-lang2">
+    <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}?v=20261017-scroll">
     <link rel="stylesheet" href="{% static 'accounts/css/login_first_login.css' %}?v=20260930-email">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile_completion.css' %}?v=20261017-4">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile_completion.css' %}?v=20261017-5">
 {% endblock %}
 
 {% block content %}
@@ -85,6 +85,12 @@
             <button type="submit" class="auth-submit-btn">
                 {% trans "Saxla və davam et" context "accounts.profile_completion" %}
             </button>
+            {% if can_skip %}
+            <button type="submit" name="skip" value="1" formnovalidate class="pc-skip-btn" aria-describedby="pc-skip-note">
+                {% trans "Hələlik keç" context "accounts.profile_completion" %}
+            </button>
+            <p class="pc-skip-note" id="pc-skip-note">{% trans "Məlumatlar doldurulana qədər bu səhifə hər girişdə yenə göstəriləcək." context "accounts.profile_completion" %}</p>
+            {% endif %}
         </form>
 
         {# Çıxış YALNIZ POST ilə işləyir (logout_view). #}

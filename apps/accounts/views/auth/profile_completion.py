@@ -7,22 +7,43 @@ Siyasət: ``apps/accounts/profile_completion.py``; yazı: ``services/profile_com
 
 from __future__ import annotations
 
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.utils.translation import pgettext
 
+from apps.audit.public import log_action
+from core.constants import AuditAction
 from core.helpers import _safe_same_origin_redirect_path
 
 from ... import profile_completion as policy
 from ...services.profile_completion import complete_profile
 
 _CTX = "accounts.profile_completion"
+logger = logging.getLogger(__name__)
 
 
 def _next_url(request) -> str:
     raw = request.POST.get("next") if request.method == "POST" else request.GET.get("next")
     return _safe_same_origin_redirect_path(request, raw or "")
+
+
+def _audit_skip(request, missing) -> None:
+    """Ötürmə audit-ə yalnız sahə adları ilə düşür (RİM kimlərin hələ doldurmadığını görür)."""
+    try:
+        log_action(
+            action=AuditAction.UPDATE,
+            user=request.user,
+            organization=getattr(request, "organization", None),
+            obj=request.user,
+            reason="profile_completion_skipped",
+            changes={"fields": sorted(spec.key for spec in missing)},
+            request=request,
+        )
+    except Exception:  # noqa: BLE001 — audit xətası istifadəçini bloklamamalıdır
+        logger.exception("profile completion skip audit failed")
 
 
 def _leave(request):
@@ -37,6 +58,12 @@ def complete_profile_view(request):
 
     missing = policy.missing_for_request(request)
     if not missing:
+        return _leave(request)
+
+    if request.method == "POST" and request.POST.get("skip") and policy.skip_allowed():
+        # «Hələlik keç»: heç nə yazılmır, yalnız bu sessiyada davam edir (sahib 2026-10-17).
+        policy.mark_skipped(request)
+        _audit_skip(request, missing)
         return _leave(request)
 
     errors, submitted = {}, {}
@@ -70,6 +97,7 @@ def complete_profile_view(request):
             "next_url": _next_url(request),
             "user_display": user.get_full_name() or user.username,
             "has_errors": bool(errors),
+            "can_skip": policy.skip_allowed(),
             "phone_operators": policy.AZ_MOBILE_OPERATORS,
             "phone_operator": operator,
             "phone_operator_other": policy.OPERATOR_OTHER,

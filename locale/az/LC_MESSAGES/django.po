@@ -97762,3 +97762,19 @@ msgstr "Xarici nömrə"
 msgctxt "accounts.profile_completion"
 msgid "Operator kodundan sonra 7 rəqəm yazın (məs. 123 45 67)."
 msgstr "Operator kodundan sonra 7 rəqəm yazın (məs. 123 45 67)."
+
+msgctxt "accounts.profile_completion"
+msgid "Hələlik keç"
+msgstr "Hələlik keç"
+
+msgctxt "accounts.profile_completion"
+msgid "Məlumatlar doldurulana qədər bu səhifə hər girişdə yenə göstəriləcək."
+msgstr "Məlumatlar doldurulana qədər bu səhifə hər girişdə yenə göstəriləcək."
+
+msgctxt "core.runtime_settings"
+msgid "«Hələlik keç» düyməsi"
+msgstr "«Hələlik keç» düyməsi"
+
+msgctxt "core.runtime_settings"
+msgid "Açıqdırsa istifadəçi məlumatları doldurmadan bu girişdə davam edə bilir; səhifə hər yeni girişdə yenə göstərilir (məlumatlar doldurulana qədər). Söndürüləndə doldurmaq məcburidir."
+msgstr "Açıqdırsa istifadəçi məlumatları doldurmadan bu girişdə davam edə bilir; səhifə hər yeni girişdə yenə göstərilir (məlumatlar doldurulana qədər). Söndürüləndə doldurmaq məcburidir."

@@ -389,6 +389,16 @@ SPECS: dict[str, Spec] = {
         Spec("profile.require_fin", "profile", "bool", lambda: True, pgettext_lazy(_CTX, "FİN kod məcburidir")),
         Spec("profile.require_phone", "profile", "bool", lambda: True, pgettext_lazy(_CTX, "Mobil telefon məcburidir")),
         Spec("profile.require_email", "profile", "bool", lambda: True, pgettext_lazy(_CTX, "Şəxsi e-poçt məcburidir")),
+        # 2026-10-17 (sahib): «hələlik keçmək üçün skip olsun, amma doldurana kimi hər daxil olduqca gəlsin».
+        Spec(
+            "profile.allow_skip", "profile", "bool", lambda: True,
+            pgettext_lazy(_CTX, "«Hələlik keç» düyməsi"),
+            pgettext_lazy(
+                _CTX,
+                "Açıqdırsa istifadəçi məlumatları doldurmadan bu girişdə davam edə bilir; səhifə hər yeni girişdə "
+                "yenə göstərilir (məlumatlar doldurulana qədər). Söndürüləndə doldurmaq məcburidir.",
+            ),
+        ),
     )
 }  # fmt: skip
 

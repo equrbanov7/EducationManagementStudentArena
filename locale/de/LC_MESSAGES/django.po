@@ -99297,3 +99297,19 @@ msgstr "Ausländische Nummer"
 msgctxt "accounts.profile_completion"
 msgid "Operator kodundan sonra 7 rəqəm yazın (məs. 123 45 67)."
 msgstr "Geben Sie nach der Vorwahl 7 Ziffern ein (z. B. 123 45 67)."
+
+msgctxt "accounts.profile_completion"
+msgid "Hələlik keç"
+msgstr "Vorerst überspringen"
+
+msgctxt "accounts.profile_completion"
+msgid "Məlumatlar doldurulana qədər bu səhifə hər girişdə yenə göstəriləcək."
+msgstr "Bis die Angaben ausgefüllt sind, wird diese Seite bei jeder Anmeldung erneut angezeigt."
+
+msgctxt "core.runtime_settings"
+msgid "«Hələlik keç» düyməsi"
+msgstr "Schaltfläche «Vorerst überspringen»"
+
+msgctxt "core.runtime_settings"
+msgid "Açıqdırsa istifadəçi məlumatları doldurmadan bu girişdə davam edə bilir; səhifə hər yeni girişdə yenə göstərilir (məlumatlar doldurulana qədər). Söndürüləndə doldurmaq məcburidir."
+msgstr "Wenn aktiv, kann der Nutzer in dieser Sitzung ohne Ausfüllen fortfahren; die Seite erscheint bei jeder neuen Anmeldung erneut (bis die Angaben ausgefüllt sind). Wenn inaktiv, ist das Ausfüllen Pflicht."

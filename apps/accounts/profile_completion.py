@@ -54,6 +54,10 @@ NON_STAFF_ROLE_NAMES = frozenset({ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT,
 QA_USERNAME_PREFIX = "qa."
 
 ENABLED_KEY = "profile.required_fields_enabled"
+#: «Hələlik keç» (sahib 2026-10-17): ötürmə SESSİYAYA yazılır — çıxış / yeni giriş sessiyanı yeniləyir, ona görə
+#: səhifə məlumatlar doldurulana qədər HƏR girişdə yenə gəlir.
+SKIP_KEY = "profile.allow_skip"
+SKIP_SESSION_KEY = "profile_completion_skipped"
 
 
 @dataclass(frozen=True)
@@ -140,6 +144,19 @@ _PHONE_ALLOWED = re.compile(r"^\+?[0-9()\-\s.]+$")
 
 def gate_enabled() -> bool:
     return runtime_settings.get_bool(ENABLED_KEY)
+
+
+def skip_allowed() -> bool:
+    return runtime_settings.get_bool(SKIP_KEY)
+
+
+def skipped_in_session(request) -> bool:
+    session = getattr(request, "session", None)
+    return bool(session is not None and session.get(SKIP_SESSION_KEY)) and skip_allowed()
+
+
+def mark_skipped(request) -> None:
+    request.session[SKIP_SESSION_KEY] = True
 
 
 def field_enabled(key: str) -> bool:
@@ -333,15 +350,20 @@ __all__ = [
     "ROLE_REQUIREMENTS",
     "ROLE_STAFF",
     "ROLE_STUDENT",
+    "SKIP_KEY",
+    "SKIP_SESSION_KEY",
     "combine_phone",
     "field_enabled",
     "gate_enabled",
     "has_value",
     "is_exempt_user",
+    "mark_skipped",
     "missing_fields",
     "missing_for_request",
     "missing_users_q",
     "request_memberships",
+    "skip_allowed",
+    "skipped_in_session",
     "required_fields",
     "role_family",
 ]
