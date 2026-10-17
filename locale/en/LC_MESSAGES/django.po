@@ -98179,3 +98179,7 @@ msgstr "Details incomplete (FIN, phone, e-mail)"
 msgctxt "monitoring.alert"
 msgid "Mərkəzi loglar toplanmır — «Loglar» bölməsi boş qalır"
 msgstr "Central logs are not being collected — the «Logs» section stays empty"
+
+msgctxt "accounts.profile_completion"
+msgid "Çox sayda cəhd edildi. %(minutes)s dəqiqə sonra yenidən yoxlayın."
+msgstr "Too many attempts. Please try again in %(minutes)s minutes."

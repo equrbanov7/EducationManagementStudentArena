@@ -18,6 +18,7 @@ from django.test import TestCase
 
 from apps.accounts.services.account_deletion import block_account
 from apps.accounts.services.blocked_accounts import BlockedAccountsReport
+from apps.accounts.services.teacher_roster.apply import BLOCK_REASON_CODE, block_text
 from apps.audit.models import AuditLog
 from core.rls import bypass_rls
 
@@ -30,7 +31,13 @@ class BlockedAccountsReportTest(TestCase):
         cls.fx = PeopleFixture()
         with bypass_rls():
             cls.qa_teacher = cls.fx.add_teacher("qa.teacher", first="QA", last="Teacher")
-            for user in (cls.fx.teacher_a, cls.fx.teacher_b, cls.fx.student_a, cls.qa_teacher):
+            # teacher_a — «Forma 7» idxalının bloku (avtomatik açıla bilər); qalanları əl ilə bloklanıb.
+            block_account(
+                cls.fx.teacher_a,
+                reason=block_text("roster-20261016-000000-ab12", "2026/2027"),
+                reason_code=BLOCK_REASON_CODE,
+            )
+            for user in (cls.fx.teacher_b, cls.fx.student_a, cls.qa_teacher):
                 block_account(user, reason="test bloku")
 
     def _run(self, *extra):
@@ -85,3 +92,19 @@ class BlockedAccountsReportTest(TestCase):
         )
         again, _rows = self._run("--apply-unblock-teachers-with-load")
         self.assertIn("unblocked=0", again)
+
+    def test_manual_block_is_never_auto_unblocked(self):
+        # SEC-1 F3: təhlükəsizlik / intizam / işdən çıxma — əl ilə qoyulan blok yükə görə AÇILMIR.
+        with bypass_rls():
+            profile = self.fx.teacher_a.profile
+            profile.block_reason = "Hesab təhlükəsizlik səbəbilə dayandırıldı"
+            profile.block_reason_code = "security"
+            profile.save(update_fields=["block_reason", "block_reason_code"])
+            report = BlockedAccountsReport(self.fx.org)
+        counts = report.counters()
+        self.assertEqual(counts["teacher_with_load_blocked"], 0)
+        self.assertEqual(counts["teacher_with_load_manual_review"], 1)
+        output, rows = self._run("--apply-unblock-teachers-with-load")
+        self.assertIn("unblocked=0", output)
+        self._refresh(self.fx.teacher_a)
+        self.assertFalse(self.fx.teacher_a.is_active)

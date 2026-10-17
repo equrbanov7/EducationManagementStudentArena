@@ -451,3 +451,20 @@ def test_alertmanager_from_never_empty_2026_10_16():
 
     compose = (Path(__file__).resolve().parents[1] / "docker-compose.prod.yml").read_text(encoding="utf-8")
     assert 'export ALERT_FROM="$${ALERT_FROM:-$${SMTP_USER:-alertmanager@localhost}}"' in compose
+
+
+def test_promtail_waits_for_socket_proxy_before_start_2026_10_17():
+    """Promtail docker_sd API versiyasını ilk `/_ping`-də razılaşdırır; proxy hazır deyilsə 1.24-ə düşüb qalır
+    (Docker 29: «client version 1.24 is too old», 2026-10-11-dən 0 log). Promtail proxy-ni gözləməlidir."""
+    compose = yaml.safe_load((Path(__file__).resolve().parents[1] / "docker-compose.prod.yml").read_text("utf-8"))
+    promtail = compose["services"]["promtail"]
+    assert promtail["entrypoint"] == ["/bin/sh", "-c"]
+    script = promtail["command"][0]
+    assert "until wget -q -O /dev/null http://docker-socket-proxy:2375/_ping" in script
+    assert script.rstrip().endswith("exec /usr/bin/promtail -config.file=/etc/promtail/promtail-config.yml")
+    # Compose interpolasiyası: qabıq dəyişənləri `$$` ilə qaçırılır (əks halda compose onları boşaldır).
+    assert "$$((i+1))" in script and '"$$i"' in script
+    host = yaml.safe_load(
+        (Path(__file__).resolve().parents[1] / "docker/promtail/promtail-config.yml").read_text("utf-8")
+    )
+    assert host["scrape_configs"][0]["docker_sd_configs"][0]["host"] == "tcp://docker-socket-proxy:2375"

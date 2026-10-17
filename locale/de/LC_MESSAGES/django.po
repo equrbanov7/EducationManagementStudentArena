@@ -99265,3 +99265,7 @@ msgstr "Angaben unvollständig (FIN, Telefon, E-Mail)"
 msgctxt "monitoring.alert"
 msgid "Mərkəzi loglar toplanmır — «Loglar» bölməsi boş qalır"
 msgstr "Zentrale Logs werden nicht gesammelt — der Bereich «Logs» bleibt leer"
+
+msgctxt "accounts.profile_completion"
+msgid "Çox sayda cəhd edildi. %(minutes)s dəqiqə sonra yenidən yoxlayın."
+msgstr "Zu viele Versuche. Bitte versuchen Sie es in %(minutes)s Minuten erneut."

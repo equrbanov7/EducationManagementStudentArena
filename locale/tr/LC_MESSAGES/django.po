@@ -97630,3 +97630,7 @@ msgstr "Bilgiler eksik (FİN, telefon, e-posta)"
 msgctxt "monitoring.alert"
 msgid "Mərkəzi loglar toplanmır — «Loglar» bölməsi boş qalır"
 msgstr "Merkezî loglar toplanmıyor — «Loglar» bölümü boş kalıyor"
+
+msgctxt "accounts.profile_completion"
+msgid "Çox sayda cəhd edildi. %(minutes)s dəqiqə sonra yenidən yoxlayın."
+msgstr "Çok fazla deneme yapıldı. %(minutes)s dakika sonra tekrar deneyin."
