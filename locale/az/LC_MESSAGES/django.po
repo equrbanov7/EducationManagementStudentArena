@@ -97265,3 +97265,15 @@ msgstr "{count} ixtisas seçilib"
 msgctxt "accounts.workload_center"
 msgid "İxtisas axtar…"
 msgstr "İxtisas axtar…"
+
+msgctxt "registrar.journal_prefill"
+msgid "Otaq dərs cədvəlindən götürülüb — dəyişə bilərsiniz."
+msgstr "Otaq dərs cədvəlindən götürülüb — dəyişə bilərsiniz."
+
+msgctxt "registrar.journal_prefill"
+msgid "Cədvəldəki otaq"
+msgstr "Cədvəldəki otaq"
+
+msgctxt "registrar.journal_prefill"
+msgid "Cədvəldəki otağı qaytar"
+msgstr "Cədvəldəki otağı qaytar"

@@ -97900,3 +97900,15 @@ msgstr "Выбрано специальностей: {count}"
 msgctxt "accounts.workload_center"
 msgid "İxtisas axtar…"
 msgstr "Поиск специальности…"
+
+msgctxt "registrar.journal_prefill"
+msgid "Otaq dərs cədvəlindən götürülüb — dəyişə bilərsiniz."
+msgstr "Аудитория взята из расписания — её можно изменить."
+
+msgctxt "registrar.journal_prefill"
+msgid "Cədvəldəki otaq"
+msgstr "Аудитория по расписанию"
+
+msgctxt "registrar.journal_prefill"
+msgid "Cədvəldəki otağı qaytar"
+msgstr "Вернуть аудиторию по расписанию"

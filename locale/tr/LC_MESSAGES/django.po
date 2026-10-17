@@ -97165,3 +97165,15 @@ msgstr "{count} program seçildi"
 msgctxt "accounts.workload_center"
 msgid "İxtisas axtar…"
 msgstr "Program ara…"
+
+msgctxt "registrar.journal_prefill"
+msgid "Otaq dərs cədvəlindən götürülüb — dəyişə bilərsiniz."
+msgstr "Derslik ders programından alındı — değiştirebilirsiniz."
+
+msgctxt "registrar.journal_prefill"
+msgid "Cədvəldəki otaq"
+msgstr "Programdaki derslik"
+
+msgctxt "registrar.journal_prefill"
+msgid "Cədvəldəki otağı qaytar"
+msgstr "Programdaki dersliği geri getir"

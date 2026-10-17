@@ -22,6 +22,13 @@
  * slotunun otağı və ya server yaddaşı — `modal.dataset.jdPrefillRoom`) o, yaddaşdan ÜSTÜNDÜR, amma
  * yalnız tarix + dərs tipi doldurulan kimi qaldıqca (`jdPrefillRoomKey`); dəyişəndə yuxarıdakı yaddaş qaydası.
  *
+ * CƏDVƏL OTAĞI (sahib 2026-10-17: «otaq nömrəsi cədvəldəki avtomatik gəlsin, müəllim istəsə dəyişə bilər»):
+ * YENİ dərsdə seçilmiş tarixin cədvəl slotunun otağı (journal_lesson_schedule.js `match` — həftə günü +
+ * üst/alt + saat/tip) HƏR ŞEYDƏN üstündür; tarix / saat / tip dəyişəndə yenidən hesablanır. Müəllim korpus və
+ * ya otağı özü dəyişibsə (`jdRoomTouched`) daha toxunulmur — yerinə «Cədvəldəki otaq: 33 ↺» düyməsi çıxır,
+ * basanda bayraq sıfırlanır və cədvəl otağı qayıdır. Slot yoxdursa / otağı reyestrdə tapılmırsa — aşağıdakı
+ * doldurma → yaddaş → korpus defoltu qaydası.
+ *
  * QOŞULMA: journal_grid.js dərs modalını açanda `jd:lesson-modal-open` hadisəsini
  * göndərir (detail = redaktə datası, əlavə rejimində null). Bu modul yalnız ona
  * qulaq asır — yəni jurnal şəbəkəsi otaq məntiqindən xəbərsizdir və modul
@@ -150,22 +157,71 @@
         if (!b || b.dataset.jdRoomBound === "1") return;
         b.dataset.jdRoomBound = "1";
         b.addEventListener("change", function () {
-            if (!_applying) modal.dataset.jdRoomTouched = "1";
+            var byTeacher = !_applying;
+            if (byTeacher) modal.dataset.jdRoomTouched = "1";
             renderOptions(modal, b.value, "", setSelectValue);
+            if (byTeacher) syncRestore(modal);
         });
         var r = roomSelect(modal);
         if (r) {
             r.addEventListener("change", function () {
-                if (!_applying) modal.dataset.jdRoomTouched = "1";
+                if (_applying) return;
+                modal.dataset.jdRoomTouched = "1";
+                syncRestore(modal);
             });
         }
-        // Tarix / dərs tipi dəyişdi → yaddaşdan yenidən doldur (yalnız yeni dərsdə və toxunulmayıbsa).
+        // Tarix / saat / dərs tipi dəyişdi → cədvəldən (yoxdursa yaddaşdan) yenidən doldur — yalnız yeni dərsdə
+        // və müəllim otağa toxunmayıbsa; toxunubsa yalnız «Cədvəldəki otaq ↺» düyməsi yenilənir.
         modal.addEventListener("change", function (event) {
             var t = event.target;
-            if (_applying || !t || !t.matches("[data-jd-lesson-date], [name='lesson_kind']")) return;
-            if (modal.dataset.jdRoomMode !== "add" || modal.dataset.jdRoomTouched === "1") return;
+            if (_applying || !t || !t.matches("[data-jd-lesson-date], [data-jd-lesson-time], [name='lesson_kind']")) {
+                return;
+            }
+            if (modal.dataset.jdRoomMode !== "add") return;
+            if (modal.dataset.jdRoomTouched === "1") {
+                syncRestore(modal);
+                return;
+            }
             apply(modal, "");
         });
+        var restore = modal.querySelector("[data-jd-room-restore]");
+        if (restore) {
+            restore.addEventListener("click", function (event) {
+                event.preventDefault();
+                delete modal.dataset.jdRoomTouched;
+                apply(modal, "");
+            });
+        }
+    }
+
+    /** Seçilmiş tarixin cədvəl slotu (journal_lesson_schedule.js), modul yoxdursa null. */
+    function scheduleSlot(modal) {
+        var api = window.EMSJournalSchedule;
+        return api && typeof api.match === "function" ? api.match(modal) : null;
+    }
+
+    /** Cədvəl slotunun reyestr otağı (otaq siyahısında varsa), yoxdursa boş. */
+    function scheduleRoom(modal) {
+        var slot = scheduleSlot(modal);
+        return slot && slot.room_id && roomById(String(slot.room_id)) ? String(slot.room_id) : "";
+    }
+
+    /** «Cədvəldəki otaq: 33 ↺» — yeni dərsdə seçilmiş otaq cədvəldəkindən fərqlidirsə görünür. */
+    function syncRestore(modal) {
+        var link = modal.querySelector("[data-jd-room-restore]");
+        if (!link) return;
+        var wanted = modal.dataset.jdRoomMode === "add" ? scheduleRoom(modal) : "";
+        var sel = roomSelect(modal);
+        var show = Boolean(wanted && sel && sel.value !== wanted);
+        link.hidden = !show;
+        var label = link.querySelector("[data-jd-room-restore-label]");
+        if (label) {
+            var slot = show ? scheduleSlot(modal) : null;
+            var room = show ? roomById(wanted) : null;
+            label.textContent = show ? (slot && slot.room_label) || (room && room.name) || "" : "";
+        }
+        var hint = modal.querySelector("[data-jd-room-schedule-hint]");
+        if (hint && show) hint.hidden = true;
     }
 
     function memory() {
@@ -196,11 +252,14 @@
         return byKind && roomById(byKind) ? byKind : "";
     }
 
-    function showMemoryHint(modal, on) {
+    /** Otağın mənbə ipucu: "schedule" (cədvəl) / "memory" (əvvəlki dərs) / "" (ümumi ipucu). */
+    function showSourceHint(modal, source) {
         var memHint = modal.querySelector("[data-jd-room-memory-hint]");
+        var schedHint = modal.querySelector("[data-jd-room-schedule-hint]");
         var hint = modal.querySelector("[data-jd-room-hint]");
-        if (memHint) memHint.hidden = !on;
-        if (hint) hint.hidden = Boolean(on && memHint);
+        if (memHint) memHint.hidden = source !== "memory";
+        if (schedHint) schedHint.hidden = source !== "schedule";
+        if (hint) hint.hidden = Boolean((source === "memory" && memHint) || (source === "schedule" && schedHint));
     }
 
     /** Korpus seçimində mövcud olan defolt (yoxdursa boş). */
@@ -225,22 +284,26 @@
     }
 
     /** Redaktədə: otağın korpusunu tapıb əvvəlcə onu, sonra otağı seç.
-     *  Əlavə rejimində (otaq yoxdur): «Yeni dərs» doldurmasının otağı, sonra otaq yaddaşı, o da yoxdursa
-     *  qrupun ixtisasına görə korpus defoltu (`data-default-building`, sahib qərarı 2026-09-20) — müəllim dəyişə bilər. */
+     *  Əlavə rejimində (otaq yoxdur): seçilmiş tarixin CƏDVƏL otağı, sonra «Yeni dərs» doldurmasının otağı,
+     *  sonra otaq yaddaşı, o da yoxdursa qrupun ixtisasına görə korpus defoltu (`data-default-building`,
+     *  sahib qərarı 2026-09-20) — müəllim dəyişə bilər. */
     function apply(modal, roomId) {
-        var fromMemory = "";
+        var source = "";
         if (!roomId && modal.dataset.jdRoomMode === "add") {
-            roomId = prefillRoom(modal);
+            roomId = scheduleRoom(modal);
+            source = roomId ? "schedule" : "";
+            if (!roomId) roomId = prefillRoom(modal);
             if (!roomId) {
-                fromMemory = rememberedRoom(modal);
-                roomId = fromMemory;
+                roomId = rememberedRoom(modal);
+                source = roomId ? "memory" : "";
             }
         }
         var room = roomById(roomId || "");
         var building = room ? room.building : defaultBuilding(modal);
         setSelectValue(buildingSelect(modal), building);
         renderOptions(modal, building, roomId || "", setSelectValue);
-        showMemoryHint(modal, Boolean(fromMemory));
+        showSourceHint(modal, source);
+        syncRestore(modal);
     }
 
     document.addEventListener("jd:lesson-modal-open", function (event) {

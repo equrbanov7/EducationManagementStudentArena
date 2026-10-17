@@ -97714,3 +97714,15 @@ msgstr "{count} programmes selected"
 msgctxt "accounts.workload_center"
 msgid "İxtisas axtar…"
 msgstr "Search programmes…"
+
+msgctxt "registrar.journal_prefill"
+msgid "Otaq dərs cədvəlindən götürülüb — dəyişə bilərsiniz."
+msgstr "The room is taken from the timetable — you can change it."
+
+msgctxt "registrar.journal_prefill"
+msgid "Cədvəldəki otaq"
+msgstr "Timetable room"
+
+msgctxt "registrar.journal_prefill"
+msgid "Cədvəldəki otağı qaytar"
+msgstr "Restore the timetable room"

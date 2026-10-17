@@ -98800,3 +98800,15 @@ msgstr "{count} Studiengänge ausgewählt"
 msgctxt "accounts.workload_center"
 msgid "İxtisas axtar…"
 msgstr "Studiengang suchen…"
+
+msgctxt "registrar.journal_prefill"
+msgid "Otaq dərs cədvəlindən götürülüb — dəyişə bilərsiniz."
+msgstr "Der Raum stammt aus dem Stundenplan — Sie können ihn ändern."
+
+msgctxt "registrar.journal_prefill"
+msgid "Cədvəldəki otaq"
+msgstr "Raum laut Stundenplan"
+
+msgctxt "registrar.journal_prefill"
+msgid "Cədvəldəki otağı qaytar"
+msgstr "Raum laut Stundenplan wiederherstellen"
