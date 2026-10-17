@@ -1,0 +1,139 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   EMSArena — Kurs paneli · tapşırıq / lab / imtahan / layihə kartları (2026-10-17, Paket E)
+   course_panel_sections.css-dən ayrıldı (fayl ölçü büdcəsi). Qabıq: course_panel.css.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Tapşırıq / lab / imtahan / layihə kartları (2026-10-17, Paket E) ────────
+   Əvvəl bu bölmələr Bootstrap akkordeon + `list-group` + `badge bg-*` markup-ı idi və
+   `course_panel_foreign.css` onları `!important` örtükləri ilə kabinet kartına çevirirdi.
+   İndi partial-lar birbaşa bu siniflərlə yazılıb (`ems-badge`, `ems-btn`, `cd-chip`). */
+.cd-tasks {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.cd-task {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+    transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.cd-task:hover {
+    border-color: var(--ems-neutral-300);
+    box-shadow: var(--ems-sh-raised);
+}
+
+.cd-task__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.cd-task__ic {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+}
+
+.cd-task__ic--lab { background: var(--ems-violet-100); color: var(--ems-violet-800); }
+.cd-task__ic--exam { background: var(--ems-sky-100); color: var(--ems-sky-900); }
+.cd-task__ic--assignment { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.cd-task__ic--project { background: var(--ems-rose-100); color: var(--ems-rose-800); }
+
+.cd-task__titles {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.cd-task__title {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    line-height: 1.35;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.cd-task__desc {
+    margin: 0;
+    font-size: var(--ems-fs-md);
+    line-height: 1.5;
+    color: var(--ems-neutral-600);
+    overflow-wrap: anywhere;
+}
+
+.cd-task__badges {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+    max-width: 45%;
+}
+
+.cd-task__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.cd-task__meta .cd-chip i {
+    color: var(--ems-neutral-500);
+}
+
+.cd-task__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.cd-btn--danger:hover:not([aria-disabled="true"]) {
+    border-color: var(--ems-danger-bd);
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+.cd-empty__ic--labs { background: var(--ems-violet-100); color: var(--ems-violet-800); }
+.cd-empty__ic--exams { background: var(--ems-sky-100); color: var(--ems-sky-900); }
+.cd-empty__ic--assignments { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.cd-empty__ic--projects { background: var(--ems-rose-100); color: var(--ems-rose-800); }
+
+@media (max-width: 640px) {
+    .cd-task {
+        padding: 12px;
+    }
+
+    .cd-task__head {
+        flex-wrap: wrap;
+    }
+
+    .cd-task__badges {
+        max-width: none;
+        width: 100%;
+        justify-content: flex-start;
+        padding-left: 52px;
+    }
+
+    .cd-task__actions .ems-btn {
+        flex: 1 1 auto;
+    }
+}

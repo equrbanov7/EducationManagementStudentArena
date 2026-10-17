@@ -1,0 +1,11 @@
+{% load i18n %}
+{% if lab.is_open %}
+    <span class="ems-badge ems-badge--success"><span class="ems-badge__dot" aria-hidden="true"></span>{% trans "status_open" context "labs.template.lab_detail" %}</span>
+{% elif lab.is_upcoming %}
+    <span class="ems-badge ems-badge--info"><span class="ems-badge__dot" aria-hidden="true"></span>{% trans "status_upcoming" context "labs.template.lab_detail" %}</span>
+{% else %}
+    <span class="ems-badge ems-badge--danger"><span class="ems-badge__dot" aria-hidden="true"></span>{% trans "status_closed" context "labs.template.lab_detail" %}</span>
+{% endif %}
+<a href="{{ back_url }}" class="ems-btn">
+    <i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "action_back" context "labs.template.lab_detail" %}
+</a>

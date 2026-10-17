@@ -1,0 +1,61 @@
+{% load i18n %}
+{% comment %}
+Sualların LAZY siyahısı (axtarış + bayraq filtri + sonsuz yükləmə) — İmtahan Mərkəzi, kafedra və
+müəllimin (redaktə olunmayan) detalı EYNİ qabığı işlədir (Paket C 2026-10-17; əvvəl iki şablonda
+təkrar idi, müəllim detalı isə BÜTÜN sualları birdən render edirdi).
+JS çəngəlləri dəyişməyib: js-qsubq · js-qsubq-search · data-flag · data-count-key · js-qsubq-list ·
+js-qsubq-empty · js-qsubq-sentinel (question_submission_review_questions.js).
+Kontekst: submission, parsed_questions (ilk səhifə), question_flag_counts, questions_has_more,
+questions_page_size.
+{% endcomment %}
+{% include "partials/ems_ui/_math_assets.html" %}
+<section class="ems-card qsx-card qsx-questions" aria-labelledby="qsxQuestionsTitle">
+    <div class="ems-card__head">
+        <h2 class="ems-card__title" id="qsxQuestionsTitle"><i class="fas fa-list-check" aria-hidden="true"></i> {% trans "Suallar və xəbərdarlıqlar" context "exams.template.question_submission" %}</h2>
+    </div>
+    <div class="ems-card__body">
+        <div class="qsubq js-qsubq"
+             data-questions-url="{% url 'exams:question_submission_questions' submission.id %}"
+             data-page-size="{{ questions_page_size }}"
+             data-has-more="{% if questions_has_more %}1{% else %}0{% endif %}">
+            <div class="qsubq-toolbar">
+                <div class="qsubq-search">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                    <input type="search" class="ems-input js-qsubq-search"
+                           placeholder="{% trans 'Sual və ya variant mətnində axtar…' context 'exams.template.question_submission' %}"
+                           aria-label="{% trans 'Suallarda axtar' context 'exams.template.question_submission' %}"
+                           autocomplete="off">
+                </div>
+                <div class="qsubq-pills" role="group" aria-label="{% trans 'Sual filtri' context 'exams.template.question_submission' %}">
+                    <button type="button" class="qsubq-pill is-active" data-flag="" aria-pressed="true">
+                        {% trans "Hamısı" context "exams.template.question_submission" %}
+                        <span class="qsubq-pill__count" data-count-key="all">{{ question_flag_counts.all }}</span>
+                    </button>
+                    <button type="button" class="qsubq-pill qsubq-pill--error" data-flag="error" aria-pressed="false">
+                        <i class="fas fa-circle-xmark" aria-hidden="true"></i> {% trans "Xətalı" context "exams.template.question_submission" %}
+                        <span class="qsubq-pill__count" data-count-key="error">{{ question_flag_counts.error }}</span>
+                    </button>
+                    <button type="button" class="qsubq-pill qsubq-pill--warning" data-flag="warning" aria-pressed="false">
+                        <i class="fas fa-triangle-exclamation" aria-hidden="true"></i> {% trans "Xəbərdarlıq" context "exams.template.question_submission" %}
+                        <span class="qsubq-pill__count" data-count-key="warning">{{ question_flag_counts.warning }}</span>
+                    </button>
+                    <button type="button" class="qsubq-pill qsubq-pill--clean" data-flag="clean" aria-pressed="false">
+                        <i class="fas fa-circle-check" aria-hidden="true"></i> {% trans "Təmiz" context "exams.template.question_submission" %}
+                        <span class="qsubq-pill__count" data-count-key="clean">{{ question_flag_counts.clean }}</span>
+                    </button>
+                </div>
+            </div>
+            <ol class="qsubp-list js-qsubq-list">
+                {% include "exams/teacher/partials/_question_submission_preview_items.html" with questions=parsed_questions %}
+            </ol>
+            <div class="qsubq-empty js-qsubq-empty" hidden>
+                <i class="fas fa-filter-circle-xmark" aria-hidden="true"></i>
+                {% trans "Bu şərtlərə uyğun sual tapılmadı." context "exams.template.question_submission" %}
+            </div>
+            <button type="button" class="ems-btn qsubq-more js-qsubq-sentinel"{% if not questions_has_more %} hidden{% endif %}>
+                <span class="qsubq-spinner" aria-hidden="true"></span>
+                {% trans "Daha çox yüklənir…" context "exams.template.question_submission" %}
+            </button>
+        </div>
+    </div>
+</section>

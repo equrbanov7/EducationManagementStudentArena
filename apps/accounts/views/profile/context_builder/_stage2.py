@@ -67,6 +67,7 @@ class _Stage2Mixin:
         self.evaluated_review_submitted_order = "newest"
         self.evaluated_review_page_obj = None
         self.evaluated_review_pagination_query = ""
+        self.evaluated_review_ui = {}
         if self.active_section == "pending-review" and "pending-review" in self.allowed_sections:
             self._pr = build_pending_review_context(self.request)
             self.pending_review_items = self._pr["pending_review_items"]
@@ -88,6 +89,14 @@ class _Stage2Mixin:
             self.evaluated_review_submitted_order = self._er["evaluated_review_submitted_order"]
             self.evaluated_review_page_obj = self._er["evaluated_review_page_obj"]
             self.evaluated_review_pagination_query = self._er["evaluated_review_pagination_query"]
+            # Yenidən dizayn (2026-10-17): KPI / filtr / boş vəziyyət — bir açarda.
+            self.evaluated_review_ui = {
+                "kpi_tiles": self._er["evaluated_review_kpi_tiles"],
+                "filter_fields": self._er["evaluated_review_filter_fields"],
+                "count_label": self._er["evaluated_review_count_label"],
+                "empty": self._er["evaluated_review_empty"],
+                "period": self._er["evaluated_review_period"],
+            }
         self.role_assignment_section = {
             "organization": None,
             "members": [],

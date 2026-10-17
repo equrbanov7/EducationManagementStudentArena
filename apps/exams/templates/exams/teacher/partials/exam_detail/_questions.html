@@ -1,0 +1,62 @@
+{% load i18n %}
+{% comment %}Suallar kartı: başlıqda say + «Bloklarla toplu əlavə» + «Sual əlavə et» (modal); siyahı ilk
+səhifə + tənbəl yükləmə (data-question-lazy, IntersectionObserver); boş vəziyyətdə ilk sual CTA-sı.{% endcomment %}
+<section class="ems-card questions-section ted-questions" aria-labelledby="ted-questions-title">
+    <div class="ted-questions__head">
+        <h2 class="ted-questions__title" id="ted-questions-title">
+            {% trans "heading_existing_questions" context "exams.template.teacher_exam_detail" %}
+            <span class="ted-count">{{ questions_total_count }}</span>
+        </h2>
+        {% if can_manage_exam_questions %}
+        <div class="ted-questions__actions">
+            {% if exam.exam_type == "test" %}
+                <a href="{% url 'exams:test_question_bank' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}" class="ems-btn"
+                   title="{% trans 'desc_bulk_add_blocks' context 'exams.template.teacher_exam_detail' %}">
+                    <i class="fas fa-layer-group" aria-hidden="true"></i><span>{% trans "action_bulk_add_blocks" context "exams.template.teacher_exam_detail" %}</span>
+                </a>
+            {% elif exam.exam_type == "written" or exam.exam_type == "coding" %}
+                <a href="{% url 'exams:create_question_bank' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}" class="ems-btn"
+                   title="{% trans 'desc_bulk_add_blocks' context 'exams.template.teacher_exam_detail' %}">
+                    <i class="fas fa-layer-group" aria-hidden="true"></i><span>{% trans "action_bulk_add_blocks" context "exams.template.teacher_exam_detail" %}</span>
+                </a>
+            {% endif %}
+            <a href="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
+               class="ems-btn ems-btn--primary js-open-question-form-modal"
+               data-question-modal-mode="create"
+               data-question-modal-url="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}">
+                <i class="fas fa-plus" aria-hidden="true"></i><span>{% trans "action_add_question" context "exams.template.teacher_exam_detail" %}</span>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if questions %}
+        <ol class="ted-qlist" data-question-list>
+            {% include "exams/teacher/partials/_exam_detail_question_items.html" with questions=questions exam=exam exam_navigation_query=exam_navigation_query %}
+        </ol>
+        {% if questions_has_more %}
+            <div class="ted-lazy" data-question-lazy
+                 data-load-url="{% url 'exams:teacher_exam_detail_questions_page' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
+                 data-next-offset="{{ questions_next_offset }}"
+                 data-page-size="{{ questions_page_size }}">
+                <button type="button" class="ems-btn" data-question-lazy-trigger>{% trans "load_more" %}</button>
+                <span class="ted-lazy__status" data-question-lazy-status role="status" hidden>
+                    <i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i> {% trans "Yüklənir..." %}
+                </span>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="ems-state ted-empty" role="status">
+            <i class="far fa-lightbulb ems-state__icon" aria-hidden="true"></i>
+            <p class="ems-state__title">{% trans "empty_no_questions" context "exams.template.teacher_exam_detail" %}</p>
+            {% if can_manage_exam_questions %}
+            <a href="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
+               class="ems-btn ems-btn--primary js-open-question-form-modal"
+               data-question-modal-mode="create"
+               data-question-modal-url="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}">
+                <i class="fas fa-plus" aria-hidden="true"></i><span>{% trans "action_add_first_question" context "exams.template.teacher_exam_detail" %}</span>
+            </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</section>

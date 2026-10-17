@@ -1,6 +1,4 @@
 {% load i18n static %}
-{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü (xarici CSS).{% endcomment %}
-<link rel="stylesheet" href="{% static 'exams/css/exam_modals.css' %}">
 {% comment %}
   2026-08-01 fix: bu partial `#createExamModalForm`-u (sehrbaz markası,
   _create_exam_modal_form.html) `#courseExamEditorModal`-a yükləyir, amma
@@ -34,63 +32,9 @@
 ></div>
 
 {% if is_owner %}
-<div class="modal fade" id="linkExamModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title"><i class="fas fa-link me-2"></i> {% trans "heading_link_exam_to_course" context "exams.partial.exam_modals" %}</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <input type="text" class="form-control" id="examSearchInput"
-                           placeholder="{% trans 'placeholder_search_by_exam_name' context 'exams.partial.exam_modals' %}" aria-label="{% trans 'placeholder_search_by_exam_name' context 'exams.partial.exam_modals' %}">
-                </div>
-
-                <div id="examSearchResults" class="exam-modals-1">
-                    {% if teacher_exams %}
-                        {% for exam in teacher_exams %}
-                        <div class="exam-search-item d-flex justify-content-between align-items-center p-3 border-bottom">
-                            <div>
-                                <strong>{{ exam.title }}</strong>
-                                <small class="text-muted d-block">
-                                    {{ exam.get_exam_type_display }} · {{ exam.questions_total }} {% trans "label_question_short" context "exams.partial.exam_modals" %}
-                                    {% if exam.course %}
-                                        · <span class="text-warning">{{ exam.course.title }} {% trans "label_linked_to_course" context "exams.partial.exam_modals" %}</span>
-                                    {% endif %}
-                                </small>
-                            </div>
-                            <button type="button" class="btn btn-sm btn-info js-link-exam"
-                                    data-exam-id="{{ exam.id }}"
-                                    {% if exam.course %}disabled{% endif %}>
-                                {% if exam.course %}
-                                    <i class="fas fa-check"></i> {% trans "status_linked" context "exams.partial.exam_modals" %}
-                                {% else %}
-                                    <i class="fas fa-link"></i> {% trans "action_link" context "exams.partial.exam_modals" %}
-                                {% endif %}
-                            </button>
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="text-center py-4 text-muted">
-                            <i class="fas fa-info-circle fa-2x mb-2"></i>
-                            <p>{% trans "empty_no_exam_to_link" context "exams.partial.exam_modals" %}</p>
-                            <button type="button"
-                                    class="btn btn-success btn-sm js-open-course-exam-editor"
-                                    data-url="{% url 'exams:create_exam' %}?course={{ course.id }}"
-                                    data-modal-title="{% trans 'heading_create_exam' context 'exams.template.create_exam_modal' %}">
-                                <i class="fas fa-plus"></i> {% trans "action_create_new_exam" context "exams.partial.exam_modals" %}
-                            </button>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "action_close" context "exams.partial.exam_modals" %}</button>
-            </div>
-        </div>
-    </div>
-</div>
+{% comment %}Paket E (2026-10-17): «mövcud imtahanı əlaqələndir» — Bootstrap modal → ortaq `_dialog.html` (EMSOverlay).{% endcomment %}
+{% trans "heading_link_exam_to_course" context "exams.partial.exam_modals" as t_link_exam %}
+{% include "partials/ems_ui/_dialog.html" with dialog_id="linkExamModal" dialog_title=t_link_exam dialog_wide=True dialog_body_include="exams/components/_link_exam_body.html" dialog_foot_include="exams/components/_link_exam_foot.html" %}
 {% endif %}
 
 {% comment %}
@@ -130,7 +74,7 @@
 {# 2026-10-14: telefonda klaviatura açıqkən sehrbaz görünən sahəyə sığsın (visualViewport). #}
 <script src="{% static 'exams/js/exam_wizard_viewport.js' %}?v=20261014-modalux"></script>
 {# 2026-09-21 bölgüsü: forma köməkçiləri ayrı faylda; əsas fayl onları bindEditorForm() anında oxuyur. #}
-<script src="{% static 'exams/js/course_exam_dashboard.js' %}?v=20260926-search"></script>
+<script src="{% static 'exams/js/course_exam_dashboard.js' %}?v=20261017-3"></script>
 <script src="{% static 'exams/js/course_exam_dashboard_form.js' %}?v=20261014-searchux"></script>
 
 {% endif %}

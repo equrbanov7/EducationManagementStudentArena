@@ -121,7 +121,8 @@ def _get_tenant_course_or_404(request, course_id):
 
 
 def _get_tenant_lab_or_404(request, lab_id):
-    return get_object_or_404(_tenant_scoped_labs(request), id=lab_id)
+    # select_related("course"): hər lab səhifəsi `lab.course.title/id` oxuyur (çörək qırıntısı, geri linki).
+    return get_object_or_404(_tenant_scoped_labs(request).select_related("course"), id=lab_id)
 
 
 def _get_tenant_block_or_404(request, block_id):

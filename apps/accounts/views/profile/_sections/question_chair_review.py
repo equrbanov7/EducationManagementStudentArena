@@ -48,6 +48,7 @@ def _inactive_defaults() -> dict:
         "question_chair_review_clear_url": "",
         "question_chair_review_pagination_query": "",
         "question_chair_review_has_filters": False,
+        "question_chair_review_ui": {},
     }
 
 
@@ -126,7 +127,11 @@ def build_question_chair_review_context(request, *, allowed_sections, active_sec
     subjects = sorted({name for name in scoped.values_list("subject", flat=True) if name})
 
     filtered = scoped
-    if filters["status"]:
+    if filters["status"] == QuestionSubmission.STATUS_CHAIR_APPROVED:
+        # «Təsdiqlədiyim» KPI-si ilə EYNİ şərt: kafedra təsdiqləyib (sonra mərkəzdə nə olmasından asılı
+        # olmayaraq) — əvvəl say `chair_decision`, klik isə yalnız `status` ilə süzürdü (Paket C 2026-10-17).
+        filtered = filtered.filter(chair_decision=QuestionSubmission.CHAIR_DECISION_APPROVED)
+    elif filters["status"]:
         filtered = filtered.filter(status=filters["status"])
     if filters["kind"]:
         filtered = filtered.filter(exam_kind=filters["kind"])
@@ -152,8 +157,22 @@ def build_question_chair_review_context(request, *, allowed_sections, active_sec
         "qchair_teacher": filters["teacher"],
     }
 
+    from .question_chair_review_ui import section_ui
+
+    items = list(page.object_list)
     return {
-        "question_chair_review_items": list(page.object_list),
+        # Paket C 2026-10-17: ems_ui təqdimat modeli (KPI filtrləri · avto filtr paneli · cədvəl).
+        "question_chair_review_ui": section_ui(
+            counts=counts,
+            filters=filters,
+            items=items,
+            teachers=teachers,
+            exam_kinds=QUESTION_EXAM_KIND_CHOICES,
+            status_values=_STATUS_VALUES,
+            has_filters=any(active_params.values()),
+            total=counts["total"] or 0,
+        ),
+        "question_chair_review_items": items,
         "question_chair_review_page": page,
         "question_chair_review_has_access": True,
         "question_chair_review_pending_count": counts["pending"] or 0,

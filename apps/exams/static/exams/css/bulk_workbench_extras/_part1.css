@@ -17,8 +17,8 @@
     gap: 16px;
     padding: 16px;
     margin-bottom: 18px;
-    background: linear-gradient(180deg, #f5f8ff 0%, var(--ems-neutral-0) 100%);
-    border: 1px solid #e2e9f7;
+    background: linear-gradient(180deg, var(--ems-primary-50) 0%, var(--ems-neutral-0) 100%);
+    border: 1px solid var(--ems-neutral-200);
     border-radius: 14px;
 }
 
@@ -34,19 +34,19 @@
     gap: 7px;
     font-size: 0.82rem;
     font-weight: 700;
-    color: var(--text-dark, #2d3436);
+    color: var(--text-dark, var(--ems-neutral-800));
     text-transform: uppercase;
     letter-spacing: 0.02em;
 }
 
 .wb-param-label i {
-    color: var(--primary, #4361ee);
+    color: var(--primary, var(--ems-primary-600));
 }
 
 .wb-param-hint {
     margin: 2px 0 0;
     font-size: 0.78rem;
-    color: var(--text-muted, #636e72);
+    color: var(--text-muted, var(--ems-neutral-500));
     line-height: 1.35;
 }
 
@@ -58,8 +58,8 @@
     box-sizing: border-box;
     padding: 4px;
     gap: 4px;
-    background: #eef2fb;
-    border: 1px solid #e0e7f6;
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-neutral-200);
     border-radius: 12px;
     width: 100%;
 }
@@ -83,18 +83,18 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--text-muted, #636e72);
+    color: var(--text-muted, var(--ems-neutral-500));
     cursor: pointer;
     transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
 }
 
 .wb-format-pill:hover {
-    color: var(--primary, #4361ee);
+    color: var(--primary, var(--ems-primary-600));
 }
 
 .wb-format-pill.is-active {
     background: var(--ems-neutral-0);
-    color: var(--primary, #4361ee);
+    color: var(--primary, var(--ems-primary-600));
     box-shadow: 0 2px 8px rgba(67, 97, 238, 0.18);
 }
 
@@ -131,18 +131,18 @@
     margin: 0;
     font-size: 1.8rem;
     font-weight: 800;
-    color: var(--text-dark, #2d3436);
+    color: var(--text-dark, var(--ems-neutral-800));
 }
 
 .qb-page__subtitle {
     margin: 6px 0 0;
-    color: var(--text-muted, #636e72);
+    color: var(--text-muted, var(--ems-neutral-500));
 }
 
 /* Yeni bank yaratma kartı */
 .qb-create-card {
     background: var(--card-bg, var(--ems-neutral-0));
-    border: 1px solid var(--border, #e1e4e8);
+    border: 1px solid var(--border, var(--ems-neutral-200));
     border-radius: 18px;
     box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
     overflow: visible;
@@ -154,8 +154,8 @@
     align-items: center;
     gap: 12px;
     padding: 18px 22px;
-    background: linear-gradient(120deg, #eef3ff 0%, var(--ems-neutral-0) 100%);
-    border-bottom: 1px solid #eef1f6;
+    background: linear-gradient(120deg, var(--ems-primary-50) 0%, var(--ems-neutral-0) 100%);
+    border-bottom: 1px solid var(--ems-neutral-100);
     border-radius: 18px 18px 0 0;
 }
 
@@ -173,7 +173,7 @@
     width: 42px;
     height: 42px;
     border-radius: 12px;
-    background: var(--primary, #4361ee);
+    background: var(--primary, var(--ems-primary-600));
     color: var(--ems-neutral-0);
     font-size: 1.1rem;
     flex-shrink: 0;
@@ -183,13 +183,13 @@
     margin: 0;
     font-size: 1.05rem;
     font-weight: 800;
-    color: var(--text-dark, #2d3436);
+    color: var(--text-dark, var(--ems-neutral-800));
 }
 
 .qb-create-card__desc {
     margin: 2px 0 0;
     font-size: 0.85rem;
-    color: var(--text-muted, #636e72);
+    color: var(--text-muted, var(--ems-neutral-500));
 }
 
 .qb-form {
@@ -208,22 +208,22 @@
 .qb-field__label {
     font-size: 0.82rem;
     font-weight: 700;
-    color: var(--text-dark, #2d3436);
+    color: var(--text-dark, var(--ems-neutral-800));
 }
 
 .qb-field__hint {
     font-size: 0.74rem;
-    color: var(--text-muted, #636e72);
+    color: var(--text-muted, var(--ems-neutral-500));
 }
 
 .qb-input,
 .qb-select {
     width: 100%;
     padding: 11px 14px;
-    border: 1px solid #d8deea;
+    border: 1px solid var(--ems-neutral-300);
     border-radius: 11px;
     font-size: 0.95rem;
-    color: var(--text-dark, #2d3436);
+    color: var(--text-dark, var(--ems-neutral-800));
     background: var(--ems-neutral-0);
     transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
@@ -231,7 +231,7 @@
 .qb-input:focus,
 .qb-select:focus {
     outline: none;
-    border-color: var(--primary, #4361ee);
+    border-color: var(--primary, var(--ems-primary-600));
     box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.14);
 }
 
@@ -242,7 +242,7 @@
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 14px;
-    border-top: 1px dashed #e6e9f0;
+    border-top: 1px dashed var(--ems-neutral-200);
     padding-top: 16px;
 }
 
@@ -267,7 +267,7 @@
     width: 42px;
     height: 24px;
     border-radius: 999px;
-    background: #cdd5e3;
+    background: var(--ems-neutral-300);
     transition: background 0.2s ease;
     flex-shrink: 0;
 }
@@ -286,7 +286,7 @@
 }
 
 .qb-switch input:checked + .qb-switch__track {
-    background: var(--primary, #4361ee);
+    background: var(--primary, var(--ems-primary-600));
 }
 
 .qb-switch input:checked + .qb-switch__track::after {
@@ -301,12 +301,12 @@
 .qb-switch__title {
     font-size: 0.88rem;
     font-weight: 700;
-    color: var(--text-dark, #2d3436);
+    color: var(--text-dark, var(--ems-neutral-800));
 }
 
 .qb-switch__hint {
     font-size: 0.74rem;
-    color: var(--text-muted, #636e72);
+    color: var(--text-muted, var(--ems-neutral-500));
 }
 
 .qbx-btn {
@@ -316,7 +316,7 @@
     padding: 12px 26px;
     border: none;
     border-radius: 11px;
-    background: var(--primary, #4361ee);
+    background: var(--primary, var(--ems-primary-600));
     color: var(--ems-neutral-0);
     font-size: 0.95rem;
     font-weight: 700;
@@ -326,20 +326,20 @@
 }
 
 .qbx-btn:hover {
-    background: var(--primary-hover, #3751d4);
+    background: var(--primary-hover, var(--ems-primary-700));
     transform: translateY(-1px);
     box-shadow: 0 8px 18px rgba(67, 97, 238, 0.28);
 }
 
 .qbx-btn--ghost {
     background: var(--ems-neutral-0);
-    color: var(--primary, #4361ee);
-    border: 1px solid #d5deef;
+    color: var(--primary, var(--ems-primary-600));
+    border: 1px solid var(--ems-neutral-300);
     box-shadow: none;
 }
 
 .qbx-btn--ghost:hover {
-    background: #f3f6ff;
+    background: var(--ems-primary-50);
     box-shadow: none;
 }
 
@@ -366,7 +366,7 @@
     gap: 12px;
     padding: 20px;
     background: var(--card-bg, var(--ems-neutral-0));
-    border: 1px solid var(--border, #e1e4e8);
+    border: 1px solid var(--border, var(--ems-neutral-200));
     border-radius: 16px;
     text-decoration: none;
     color: inherit;
@@ -375,7 +375,7 @@
 
 .qb-card:hover,
 .qb-card:focus-within {
-    border-color: #c3d0ef;
+    border-color: var(--ems-primary-200);
     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
     transform: translateY(-2px);
 }
@@ -388,7 +388,7 @@
 }
 
 .qb-card__stretched-link:focus-visible {
-    outline: 2px solid var(--primary, #4361ee);
+    outline: 2px solid var(--primary, var(--ems-primary-600));
     outline-offset: 2px;
 }
 
@@ -435,13 +435,13 @@
 }
 
 .qb-icon-btn:hover {
-    background: #eef2fb;
-    color: var(--primary, #4361ee);
-    border-color: #c3d0ef;
+    background: var(--ems-primary-50);
+    color: var(--primary, var(--ems-primary-600));
+    border-color: var(--ems-primary-200);
 }
 
 .qb-icon-btn--danger:hover {
-    background: #fef2f2;
+    background: var(--ems-neutral-50);
     color: var(--ems-danger);
     border-color: var(--ems-danger-200);
 }
@@ -459,7 +459,7 @@
     align-items: center;
     gap: 5px;
     font-size: 0.78rem;
-    color: var(--text-muted, #636e72);
+    color: var(--text-muted, var(--ems-neutral-500));
 }
 
 /* Bank siyahısı axtarış paneli */
@@ -475,7 +475,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    border: 1px solid #d8deea;
+    border: 1px solid var(--ems-neutral-300);
     border-radius: 11px;
     padding: 0 14px;
     background: var(--ems-neutral-0);
@@ -498,14 +498,14 @@
 .qb-edit-field { display: flex; flex-direction: column; gap: 6px; }
 .qb-edit-field label { font-size: 0.82rem; font-weight: 700; color: var(--ems-neutral-700); }
 .qb-edit-field input[type="text"], .qb-edit-field select {
-    padding: 10px 13px; border: 1px solid #d8deea; border-radius: 10px; font-size: 0.94rem; color: #2d3436;
+    padding: 10px 13px; border: 1px solid var(--ems-neutral-300); border-radius: 10px; font-size: 0.94rem; color: var(--ems-neutral-800);
 }
 .qb-edit-field input[type="text"]:focus, .qb-edit-field select:focus {
-    outline: none; border-color: #4361ee; box-shadow: 0 0 0 3px rgba(67,97,238,0.14);
+    outline: none; border-color: var(--ems-primary-600); box-shadow: 0 0 0 3px rgba(67,97,238,0.14);
 }
 .qb-edit-switch { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: var(--ems-neutral-700); cursor: pointer; }
 .qb-confirm-icon { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; font-size: 1.4rem; margin: 0 auto 14px; }
-.qb-confirm-icon--danger { background: #fef2f2; color: var(--ems-danger); }
+.qb-confirm-icon--danger { background: var(--ems-neutral-50); color: var(--ems-danger); }
 @media (max-width: 560px) { .qb-edit-row { grid-template-columns: 1fr; } }
 
 .qb-card__top {
@@ -519,5 +519,5 @@
     margin: 0;
     font-size: 1.05rem;
     font-weight: 800;
-    color: var(--text-dark, #2d3436);
+    color: var(--text-dark, var(--ems-neutral-800));
 }

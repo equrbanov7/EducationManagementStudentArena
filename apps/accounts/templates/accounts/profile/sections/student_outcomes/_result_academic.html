@@ -1,0 +1,123 @@
+{% load i18n ems_ui %}
+{% comment %}
+«Nəticələrim» akademik (jurnal) kartının gövdəsi — `item.academic` (registrar fasadının sətri, hesablama YOX).
+2026/2027+ (midterm qaydası) sətirdə bal bölgüsü: davamiyyət · aktivlik · midterm → final → cəm /100
+(`partials/ems_ui/_entry_breakdown.html`); köhnə (kollokvium) sətirdə giriş/çıxış/yekun kartları.
+Halqanın tonu nəticə badge-i ilə EYNİ mənbədəndir (`academic_outcome` kataloqu — keçid balı 51 + final
+minimumu registrar-da hesablanır), faizdən çıxarılmır: halqa badge-ə zidd düşə bilməz.
+Köhnə sistem sübut paneli və qeydlər əvvəlki kimi (`my_results_academic.css` sinifləri, testlər oxuyur).
+{% endcomment %}
+{% with a=item.academic %}
+<div class="result-academic-current mr-academic" role="group" aria-label="{% trans 'Cari sistem üzrə hesablanmış nəticə' context 'profile.results.academic' %}">
+    <div class="mr-academic__summary">
+        {% if a.total != None %}
+            {% include "partials/ems_ui/_score_ring.html" with ring_pct=a.total ring_label=a.total|floatformat:"-2" ring_sub="/ 100" ring_tone=a.outcome|ems_status_tone:"academic_outcome" ring_aria=item.status_raw %}
+        {% elif a.entry_score != None %}
+            {% widthratio a.entry_score 50 100 as entry_pct %}
+            {% include "partials/ems_ui/_score_ring.html" with ring_pct=entry_pct ring_label=a.entry_score|floatformat:"-2" ring_sub="/ 50" ring_tone=a.outcome|ems_status_tone:"academic_outcome" ring_aria=item.status_raw %}
+        {% endif %}
+        <div class="mr-academic__facts">
+            <h4 class="mr-academic__title">
+                <i class="fas fa-calculator" aria-hidden="true"></i>
+                {% trans "Cari sistem üzrə hesablanmış nəticə" context "profile.results.academic" %}
+            </h4>
+            <dl class="mr-facts">
+                <div class="mr-facts__row">
+                    <dt>{% trans "Kredit" context "profile.results.academic" %}</dt>
+                    <dd>{{ a.credit }}</dd>
+                </div>
+                <div class="mr-facts__row">
+                    <dt>{% trans "Dərəcə" context "profile.results.academic" %}</dt>
+                    <dd>{% if a.letter %}<span class="result-letter result-letter--{{ a.letter }}">{{ a.letter }}</span>{% else %}—{% endif %}</dd>
+                </div>
+                <div class="mr-facts__row">
+                    <dt>{% trans "Giriş balı" context "profile.results.academic" %}</dt>
+                    <dd>{% if a.entry_score != None %}{{ a.entry_score|floatformat:"-2" }}{% else %}—{% endif %}</dd>
+                </div>
+                {% if not a.entry_parts %}
+                <div class="mr-facts__row">
+                    <dt>{% trans "Çıxış balı" context "profile.results.academic" %}</dt>
+                    <dd>{% if a.exit_score != None %}{{ a.exit_score|floatformat:"-2" }}{% else %}—{% endif %}</dd>
+                </div>
+                <div class="mr-facts__row">
+                    <dt>{% trans "Yekun" context "profile.results.academic" %}</dt>
+                    <dd>{% if a.total != None %}<strong>{{ a.total|floatformat:"-2" }}</strong>{% else %}—{% endif %}</dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+    {% if a.entry_parts %}
+    {% include "partials/ems_ui/_entry_breakdown.html" with parts=a.entry_parts final_score=a.exit_score final_max=50 total=a.total total_max=100 %}
+    {% endif %}
+    {% comment %}
+      Köçürülmüş nəticənin qeydi BALLARIN ALTINDA, açılan «xam mənbə»
+      panelinin ÜSTÜNDƏDİR: tələbə rəqəmi görən kimi onun necə
+      oxunacağını bilsin, panel açmağa məcbur qalmasın.
+    {% endcomment %}
+    {% include "registrar/partials/_legacy_grade_notice.html" with legacy=a.legacy variant="block" %}
+</div>
+{% if a.legacy_grade_facts %}
+<details class="result-legacy-grade">
+    <summary class="result-legacy-grade__summary">
+        <span>
+            <i class="fas fa-box-archive" aria-hidden="true"></i>
+            {% trans "Köhnə sistemdən köçürülmüş xam mənbə balları" context "profile.results.academic" %}
+            <strong class="result-legacy-grade__summary-warning">{{ a.legacy.warning }}</strong>
+        </span>
+        <span class="result-legacy-grade__count" aria-label="{% trans 'Mənbə qeydlərinin sayı' context 'profile.results.academic' %}">{{ a.legacy_grade_facts|length }}</span>
+    </summary>
+    <div class="result-legacy-grade__body">
+        <p class="result-legacy-grade__explanation">
+            {% trans "Aşağıdakı dəyərlər köhnə bazadakı mənbə sətirlərindən dəyişdirilmədən göstərilir; yuxarıdakı cari hesabla eyniləşdirilmir." context "profile.results.academic" %}
+        </p>
+        <ol class="result-legacy-fact-list">
+            {% for fact in a.legacy_grade_facts %}
+            <li class="result-legacy-fact">
+                <div class="result-legacy-fact__header">
+                    <strong>{{ fact.kind_label }}</strong>
+                    <span>{{ fact.source_reference }}{% if fact.is_archive %} · {% trans "arxiv" context "profile.results.academic" %}{% endif %}</span>
+                </div>
+                <dl class="result-legacy-fact__scores">
+                    {% if fact.entry_score %}
+                    <div><dt>{% trans "Giriş" context "profile.results.academic" %}</dt><dd>{{ fact.entry_score }}</dd><span class="result-legacy-fact__score-warning">{{ fact.warning }}</span></div>
+                    {% endif %}
+                    {% if fact.exam_score %}
+                    <div><dt>{% trans "Çıxış (imtahan)" context "profile.results.academic" %}</dt><dd>{{ fact.exam_score }}</dd><span class="result-legacy-fact__score-warning">{{ fact.warning }}</span></div>
+                    {% endif %}
+                    {% if fact.final_score %}
+                    <div><dt>{% trans "Yekun" context "profile.results.academic" %}</dt><dd>{{ fact.final_score }}</dd><span class="result-legacy-fact__score-warning">{{ fact.warning }}</span></div>
+                    {% endif %}
+                    {% if fact.resit_score %}
+                    <div><dt>{% trans "Təkrar imtahan" context "profile.results.academic" %}</dt><dd>{{ fact.resit_score }}</dd><span class="result-legacy-fact__score-warning">{{ fact.warning }}</span></div>
+                    {% endif %}
+                    {% if fact.kind == "other" and fact.raw_score %}
+                    <div><dt>{{ fact.score_code }}</dt><dd>{{ fact.raw_score }}</dd><span class="result-legacy-fact__score-warning">{{ fact.warning }}</span></div>
+                    {% endif %}
+                </dl>
+                {% if fact.kind == "exam_entry_exit" %}
+                <p class="result-legacy-fact__attempt">
+                    {% trans "Cəhd tipi" context "profile.results.academic" %}: {{ fact.legacy_attempt_type }}
+                    {% if fact.legacy_recorded_at %} · {% trans "Köhnə qeyd vaxtı" context "profile.results.academic" %}: {{ fact.legacy_recorded_at }}{% endif %}
+                </p>
+                {% endif %}
+                <div class="result-legacy-fact__meta">
+                    <span>{{ fact.mapping_label }}</span>
+                    <span class="result-legacy-fact__review result-legacy-fact__review--{{ fact.review_status }}">
+                        {% if fact.review_required %}<i class="fas fa-circle-exclamation" aria-hidden="true"></i>{% else %}<i class="fas fa-circle-check" aria-hidden="true"></i>{% endif %}
+                        {{ fact.review_label }}
+                    </span>
+                </div>
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+</details>
+{% endif %}
+{% if a.fail_reason_label %}
+<p class="mr-note mr-note--danger">
+    <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+    <span>{{ a.fail_reason_label }}</span>
+</p>
+{% endif %}
+{% endwith %}

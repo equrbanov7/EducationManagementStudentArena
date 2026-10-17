@@ -37,13 +37,9 @@ class LabDeadlineInputTests(base._LabFixture):
     def test_modals_render_locale_free_inputs(self):
         request = RequestFactory().get("/")
         request.user = SimpleNamespace(is_teacher_or_above=True, is_authenticated=True, pk=self.owner.pk)
-        html = "".join(
-            render_to_string(name, {"course": self.course, "request": request})
-            for name in (
-                "labs/partials/lab_modals/_add_lab_modal.html",
-                "labs/partials/lab_modals/_edit_lab_modal.html",
-                "labs/partials/lab_modals/_scripts.html",
-            )
+        # Paket E (2026-10-17): add/edit modalları tək `_lab_modals.html`-də (ortaq `_form_dialog` + `_lab_fields`).
+        html = render_to_string(
+            "labs/partials/_lab_modals.html", {"course": self.course, "request": request, "is_owner": True}
         )
         self.assertNotIn("datetime-local", html)
         self.assertEqual(html.count("data-ems-dt-input"), 4)

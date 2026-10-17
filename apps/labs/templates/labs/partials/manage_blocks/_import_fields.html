@@ -1,0 +1,20 @@
+{% load i18n %}
+{% comment %}Toplu sual idxalı sahələri.{% endcomment %}
+<div class="lab-form">
+    <input type="hidden" id="importBlockId" name="block_id">
+    <div class="ems-banner ems-banner--info lab-form__note" role="note">
+        <div>
+            <div class="ems-banner__title">{% trans "label_format" context "labs.template.manage_blocks" %}</div>
+            <ul class="ems-banner__body lab-form__formats">
+                <li>{% trans "format_line_1" context "labs.template.manage_blocks" %}</li>
+                <li>{% trans "format_line_2" context "labs.template.manage_blocks" %}</li>
+                <li>{% trans "format_line_3" context "labs.template.manage_blocks" %}</li>
+            </ul>
+        </div>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="import-questions-text">{% trans "label_paste_questions" context "labs.template.manage_blocks" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <textarea id="import-questions-text" name="questions_text" class="ems-textarea lab-mono" rows="10" required autofocus
+                  placeholder="{% trans 'placeholder_import_questions' context 'labs.template.manage_blocks' %}"></textarea>
+    </div>
+</div>

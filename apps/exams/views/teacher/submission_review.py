@@ -38,6 +38,7 @@ from apps.exams.views.teacher.submission_meta import (
     filter_snapshot_questions,
     snapshot_flag_counts,
 )
+from apps.exams.views.teacher.submission_page_ui import ROLE_CENTER, page_context
 from core.permissions import request_has_permission
 
 #: 2026-10-13 (rol auditi B1): qəbul / rədd / düzəlişə qaytarma QƏRARDIR — əvvəl mərkəz rolu ADI
@@ -68,7 +69,9 @@ def question_submission_review(request, submission_id):
     _ensure_teacher(request.user)
     organization = _require_organization(request)
     submission = get_object_or_404(
-        QuestionSubmission.objects.select_related("teacher", "accepted_bank", "subject_ref"),
+        QuestionSubmission.objects.select_related(
+            "teacher", "accepted_bank", "subject_ref", "chair_unit", "chair_reviewer", "reviewer"
+        ),
         id=submission_id,
         organization=organization,
     )
@@ -109,24 +112,28 @@ def question_submission_review(request, submission_id):
     # Sual siyahısı LAZY yüklənir: ilkin render yalnız birinci səhifədir,
     # qalanını JS fraqment endpoint-dən (filtr + axtarış ilə) gətirir.
     questions = annotate_display_numbers(annotate_preview_flags(list(submission.parsed_snapshot or [])))
+    # ``actor_label`` sətirdə saxlanılır — istifadəçi cədvəlinə JOIN lazım deyil.
+    events = list(submission.events.all())
 
-    return render(
-        request,
-        "exams/teacher/question_submission_review.html",
-        {
-            "submission": submission,
-            "can_decide": can_decide,
-            "parsed_questions": questions[:QUESTIONS_PAGE_SIZE],
-            "question_flag_counts": snapshot_flag_counts(questions),
-            "questions_has_more": len(questions) > QUESTIONS_PAGE_SIZE,
-            "questions_page_size": QUESTIONS_PAGE_SIZE,
-            "banks": banks,
-            # Kafedra qərarı və tam zaman xətti mərkəzin ekranında AÇIQ görünür.
-            "submission_events": list(submission.events.select_related("actor")),
-            "min_reason_length": MIN_REASON_LENGTH,
-            "back_url": _profile_section_url("question-submissions"),
-        },
-    )
+    context = {
+        "submission": submission,
+        "can_decide": can_decide,
+        "parsed_questions": questions[:QUESTIONS_PAGE_SIZE],
+        "question_flag_counts": snapshot_flag_counts(questions),
+        "questions_has_more": len(questions) > QUESTIONS_PAGE_SIZE,
+        "questions_page_size": QUESTIONS_PAGE_SIZE,
+        "banks": banks,
+        # Kafedra qərarı və tam zaman xətti mərkəzin ekranında AÇIQ görünür.
+        "submission_events": events,
+        "min_reason_length": MIN_REASON_LENGTH,
+        "back_url": _profile_section_url("question-submissions"),
+        # Paket C 2026-10-17: baxış profil örtüyünün içində açılır (sidebar qalır).
+        "embed_active_section": "question-submissions",
+        "embed_section_title": submission.title,
+        "is_reviewer": True,
+    }
+    context.update(page_context(submission, events, role=ROLE_CENTER, can_decide=can_decide))
+    return render(request, "exams/teacher/question_submission_review.html", context)
 
 
 @login_required

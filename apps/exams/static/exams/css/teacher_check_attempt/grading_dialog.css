@@ -1,0 +1,207 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Yoxlama səhifəsinin dialoqları — Paket B (2026-10-17)
+   ───────────────────────────────────────────────────────────────────────────
+   Daxili görünüş `ems_ui/overlay.css`-in `.ems-dialog*` qatındandır. Qab
+   `tca-overlay`-dir (overlay.js-in Escape-i xəbərdarlıqsız bağlamasın deyə öz
+   davranışı teacher_check_attempt.js-dədir); mövqe/scrim burada təyin olunur.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tca-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1052;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.55);
+}
+
+.tca-overlay[hidden] {
+    display: none;
+}
+
+/* Xəbərdarlıq HƏMİŞƏ sual dialoqunun üstündədir. */
+.tca-overlay--alert {
+    z-index: 1053;
+}
+
+.tca-dialog {
+    max-width: 860px;
+}
+
+.tca-dialog__nav {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 6px;
+}
+
+.tca-dialog__nav .ems-iconbtn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.tca-dialog__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-5);
+}
+
+.tca-dialog__block {
+    min-width: 0;
+}
+
+.tca-dialog__block.tca-answer {
+    padding: 12px 14px;
+}
+
+.tca-dialog__text {
+    max-height: 32vh;
+    overflow-y: auto;
+    font-size: var(--ems-fs-md);
+    line-height: 1.65;
+    color: var(--ems-text);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.tca-dialog__text .coding-files-review {
+    white-space: normal;
+}
+
+.tca-dialog__muted {
+    color: var(--ems-text-muted);
+}
+
+.tca-dialog__grade {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-5);
+    padding-top: var(--ems-sp-5);
+    border-top: 1px solid var(--ems-neutral-100);
+}
+
+.tca-dialog__fields {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--ems-sp-5) var(--ems-sp-6);
+    align-items: start;
+}
+
+.ems-input.tca-score__input--max {
+    width: 72px;
+    color: var(--ems-text-muted);
+}
+
+.tca-dialog__hint {
+    margin-right: auto;
+}
+
+/* AI qiymətləndirmə */
+.tca-ai {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-4);
+}
+
+.ems-btn.tca-ai__btn {
+    border-color: var(--ems-violet-600);
+    color: var(--ems-violet-800);
+}
+
+.ems-btn.tca-ai__btn:hover:not(:disabled) {
+    background: var(--ems-violet-100);
+    color: var(--ems-violet-800);
+}
+
+.ems-btn.tca-ai__btn:disabled {
+    border-color: var(--ems-border);
+    color: var(--ems-neutral-500);
+    cursor: not-allowed;
+}
+
+.ai-grade-status {
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+    color: var(--ems-text-muted);
+}
+
+.ai-grade-status.ai-grade-success {
+    color: var(--ems-success-700);
+}
+
+.ai-grade-status.ai-grade-error {
+    color: var(--ems-danger-strong);
+}
+
+.ems-input.ai-filled,
+.ems-textarea.ai-filled {
+    border-color: var(--ems-violet-600);
+    background: var(--ems-violet-100);
+    transition: background-color 0.4s ease;
+}
+
+/* Yadda saxlanmamış dəyişiklik xəbərdarlığı */
+.tca-alert {
+    max-width: 460px;
+}
+
+.tca-alert__body {
+    display: flex;
+    gap: var(--ems-sp-5);
+}
+
+.tca-alert__icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.tca-alert__text {
+    margin: 6px 0 0;
+    font-size: var(--ems-fs-md);
+    color: var(--ems-neutral-700);
+}
+
+@media (max-width: 640px) {
+    .tca-overlay {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .tca-overlay .ems-dialog {
+        max-height: 92vh;
+        border-radius: var(--ems-r-2xl) var(--ems-r-2xl) 0 0;
+    }
+
+    .tca-dialog__fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .tca-dialog__hint {
+        display: none;
+    }
+
+    .tca-overlay .ems-dialog__foot {
+        flex-wrap: wrap;
+    }
+
+    .tca-overlay .ems-dialog__foot > .ems-btn {
+        flex: 1 1 auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ems-input.ai-filled,
+    .ems-textarea.ai-filled {
+        transition: none;
+    }
+}

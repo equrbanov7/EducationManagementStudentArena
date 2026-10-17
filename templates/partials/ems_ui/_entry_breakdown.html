@@ -1,0 +1,63 @@
+{% load i18n l10n %}
+{% comment %}
+Bal bölgüsü kartları — tələbə nəticə ekranları (Paket A, 2026-10-18). Sahibin 2026-10-10 qaydası:
+davamiyyət /10 + aktivlik /10 + midterm /30 (+ sərbəst iş açıqdırsa) = imtahana qədər /50;
+final /50; cəm /100. Hesablama YOX — `parts` = `entry_standard.EntryParts`, tavanlar ondan gəlir.
+`registrar/partials/_entry_parts.html`-in (müəllim səthləri) kart variantıdır: eyni çəngəllər
+(`data-entry-standard`, `data-entry-rounding` — FIX-G «Cəm» yuvarlaqlaşdırma sətri) saxlanılır.
+
+KONTEKST MÜQAVİLƏSİ
+  parts        — EntryParts (məcburi)
+  final_score  — opsional final (çıxış) balı; `final_max` verilibsə kart göstərilir («—» = hələ yoxdur)
+  final_max    — opsional final tavanı (adətən 50)
+  total        — opsional cəm; `total_max` verilibsə kart göstərilir
+  total_max    — opsional cəm tavanı (adətən 100)
+Zolaqlar native `<progress>`-dir (dinamik en üçün inline style lazım deyil).
+{% endcomment %}
+<ul class="ems-breakdown" data-entry-standard>
+    <li class="ems-breakdown__item">
+        <span class="ems-breakdown__label">{% trans "Davamiyyət" context "registrar.journal" %}</span>
+        <span class="ems-breakdown__value">{{ parts.attendance|floatformat:"-2" }} <span class="ems-breakdown__max">/{{ parts.attendance_max|floatformat:"-2" }}</span></span>
+        <progress class="ems-progress" value="{{ parts.attendance|unlocalize }}" max="{{ parts.attendance_max|unlocalize }}" aria-hidden="true"></progress>
+    </li>
+    <li class="ems-breakdown__item">
+        <span class="ems-breakdown__label">{% trans "Aktivlik" context "registrar.journal" %}</span>
+        <span class="ems-breakdown__value">{{ parts.activity|floatformat:"-2" }} <span class="ems-breakdown__max">/{{ parts.activity_max|floatformat:"-2" }}</span></span>
+        <progress class="ems-progress" value="{{ parts.activity|unlocalize }}" max="{{ parts.activity_max|unlocalize }}" aria-hidden="true"></progress>
+        {% with detail=parts.activity_detail %}{% if detail.split %}
+        <span class="ems-breakdown__note">{% trans "seminar" context "registrar.journal" %} {{ detail.seminar_part|floatformat:"-2" }} + {% trans "lab" context "registrar.journal" %} {{ detail.lab_part|floatformat:"-2" }}</span>
+        {% endif %}{% endwith %}
+    </li>
+    <li class="ems-breakdown__item">
+        <span class="ems-breakdown__label">{% trans "Midterm" context "registrar.journal" %}</span>
+        <span class="ems-breakdown__value">{{ parts.midterm|floatformat:"-2" }} <span class="ems-breakdown__max">/{{ parts.midterm_max|floatformat:"-2" }}</span></span>
+        <progress class="ems-progress" value="{{ parts.midterm|unlocalize }}" max="{{ parts.midterm_max|unlocalize }}" aria-hidden="true"></progress>
+    </li>
+    {% if parts.selfwork_active %}
+    <li class="ems-breakdown__item">
+        <span class="ems-breakdown__label">{% trans "Sərbəst iş" context "registrar.journal" %}</span>
+        <span class="ems-breakdown__value">{{ parts.selfwork|floatformat:"-2" }} <span class="ems-breakdown__max">/{{ parts.selfwork_max|floatformat:"-2" }}</span></span>
+        <progress class="ems-progress" value="{{ parts.selfwork|unlocalize }}" max="{{ parts.selfwork_max|unlocalize }}" aria-hidden="true"></progress>
+    </li>
+    {% endif %}
+    {% if final_max %}
+    <li class="ems-breakdown__item">
+        <span class="ems-breakdown__label">{% trans "Final imtahan" context "ui.score_breakdown" %}</span>
+        <span class="ems-breakdown__value">{% if final_score is not None %}{{ final_score|floatformat:"-2" }}{% else %}—{% endif %} <span class="ems-breakdown__max">/{{ final_max|floatformat:"-2" }}</span></span>
+        {% if final_score is not None %}<progress class="ems-progress" value="{{ final_score|unlocalize }}" max="{{ final_max|unlocalize }}" aria-hidden="true"></progress>{% endif %}
+    </li>
+    {% endif %}
+    {% if total_max %}
+    <li class="ems-breakdown__item ems-breakdown__item--total">
+        <span class="ems-breakdown__label">{% trans "Cəm" context "registrar.journal" %}</span>
+        <span class="ems-breakdown__value">{% if total is not None %}{{ total|floatformat:"-2" }}{% else %}—{% endif %} <span class="ems-breakdown__max">/{{ total_max|floatformat:"-2" }}</span></span>
+        {% if total is not None %}<progress class="ems-progress" value="{{ total|unlocalize }}" max="{{ total_max|unlocalize }}" aria-hidden="true"></progress>{% endif %}
+    </li>
+    {% endif %}
+</ul>
+{% if parts.rounded_from is not None %}
+<p class="ems-breakdown-note" data-entry-rounding>
+    <i class="fas fa-circle-info" aria-hidden="true"></i>
+    <span>{% trans "İmtahana qədər bal tam ədəddir: hissələrin cəmi yarım-yuxarı yuvarlaqlaşdırılır (məs. 9,5 → 10, 9,4 → 9)." context "registrar.journal" %} {% trans "Cəm" context "registrar.journal" %}: {{ parts.rounded_from|floatformat:"-2" }} → <strong>{{ parts.total }}</strong></span>
+</p>
+{% endif %}

@@ -1,0 +1,69 @@
+{% load i18n %}
+{% comment %}
+Detal səhifəsinin dialoqları — `ems_ui` dialoq qatı (overlay.js: fokus tələsi, Escape, fokusun qayıtması).
+ID-lər teacher_exam_detail.js müqaviləsidir: silmə təsdiqi (forma action-ı JS-də dəyişir), sınaq bloku
+(sual yoxdur → izah + «Sual əlavə et»), aktiv canlı sessiya (qayıt / yenisini başlat).
+{% endcomment %}
+<div class="ems-overlay ems-overlay--dialog" id="examDetailDeleteConfirmModal" hidden>
+    <div class="ems-dialog ted-dialog" role="alertdialog" aria-modal="true" aria-labelledby="examDetailDeleteConfirmTitle" aria-describedby="examDetailDeleteConfirmMessage">
+        <form method="post" id="examDetailDeleteConfirmForm">
+            {% csrf_token %}
+            <div class="ems-dialog__head">
+                <h2 class="ems-dialog__title" id="examDetailDeleteConfirmTitle"><i class="fas fa-trash-can ted-dialog__danger" aria-hidden="true"></i> {% trans "action_delete" context "exams.template.teacher_exam_detail" %}</h2>
+                <button type="button" class="ems-dialog__x" data-ems-overlay-close aria-label="{% trans 'modal_close' context 'exams.template.teacher_exam_detail' %}">×</button>
+            </div>
+            <div class="ems-dialog__body">
+                <p id="examDetailDeleteConfirmMessage" class="ted-dialog__text"></p>
+                <div id="examDetailDeleteConfirmTarget" class="ted-dialog__target"></div>
+            </div>
+            <div class="ems-dialog__foot">
+                <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "action_cancel" context "exams.template.add_exam_question" %}</button>
+                <button type="submit" class="ems-btn ems-btn--danger">{% trans "action_delete" context "exams.template.teacher_exam_detail" %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="ems-overlay ems-overlay--dialog" id="examDetailTrialRunBlockedModal" hidden>
+    <div class="ems-dialog ted-dialog" role="dialog" aria-modal="true" aria-labelledby="examDetailTrialRunBlockedTitle">
+        <div class="ems-dialog__head">
+            <h2 class="ems-dialog__title" id="examDetailTrialRunBlockedTitle"><i class="fas fa-vial" aria-hidden="true"></i> {% trans "trial_run_blocked_title" context "exams.template.teacher_exam_detail" %}</h2>
+            <button type="button" class="ems-dialog__x" data-ems-overlay-close aria-label="{% trans 'modal_close' context 'exams.template.teacher_exam_detail' %}">×</button>
+        </div>
+        <div class="ems-dialog__body">
+            <p class="ted-dialog__text">{% trans "trial_run_blocked_body" context "exams.template.teacher_exam_detail" %}</p>
+        </div>
+        <div class="ems-dialog__foot">
+            <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "action_cancel" context "exams.template.add_exam_question" %}</button>
+            <a href="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
+               class="ems-btn ems-btn--primary js-open-question-form-modal"
+               data-question-modal-mode="create"
+               data-question-modal-url="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}">
+                <i class="fas fa-plus" aria-hidden="true"></i><span>{% trans "trial_run_blocked_cta" context "exams.template.teacher_exam_detail" %}</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="ems-overlay ems-overlay--dialog live-session-modal" id="tedLiveSessionModal" data-live-session-modal hidden>
+    <div class="ems-dialog ted-dialog" role="dialog" aria-modal="true" aria-labelledby="liveSessionModalTitle" aria-describedby="liveSessionModalBody">
+        <div class="ems-dialog__head">
+            <div>
+                <p class="etp-eyebrow ted-dialog__eyebrow"><i class="fas fa-tower-broadcast" aria-hidden="true"></i> {% trans "live_resume_modal_eyebrow" context "exams.template.teacher_exam_detail" %}</p>
+                <h2 class="ems-dialog__title" id="liveSessionModalTitle">{% trans "live_resume_modal_title" context "exams.template.teacher_exam_detail" %}</h2>
+            </div>
+            <button type="button" class="ems-dialog__x" data-live-session-close aria-label="{% trans 'modal_close' context 'exams.template.teacher_exam_detail' %}">×</button>
+        </div>
+        <div class="ems-dialog__body">
+            <p class="ted-dialog__text" id="liveSessionModalBody">{% trans "live_resume_modal_body" context "exams.template.teacher_exam_detail" %}</p>
+            <dl class="ted-dialog__meta">
+                <div><dt>{% trans "live_resume_modal_pin" context "exams.template.teacher_exam_detail" %}</dt><dd class="ems-mono" data-live-session-pin>-</dd></div>
+                <div><dt>{% trans "live_resume_modal_started" context "exams.template.teacher_exam_detail" %}</dt><dd data-live-session-created>-</dd></div>
+            </dl>
+        </div>
+        <div class="ems-dialog__foot">
+            <button type="button" class="ems-btn" data-live-session-new>{% trans "live_resume_modal_new" context "exams.template.teacher_exam_detail" %}</button>
+            <button type="button" class="ems-btn ems-btn--primary" data-live-session-return>{% trans "live_resume_modal_return" context "exams.template.teacher_exam_detail" %}</button>
+        </div>
+    </div>
+</div>

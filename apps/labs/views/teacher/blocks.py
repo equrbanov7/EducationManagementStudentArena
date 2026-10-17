@@ -25,13 +25,18 @@ def manage_blocks(request, pk):
 
     if lab.created_by != request.user:
         messages.error(request, pgettext("labs.view.permission", "permission_denied"))
-        return redirect("courses:course_dashboard", pk=lab.course.id)
+        return redirect("courses:course_dashboard", course_id=lab.course.id)
 
-    blocks = lab.blocks.all().order_by("order")
+    # prefetch_related("questions"): manage_blocks.html hər blok üçün həm sual sayını, həm
+    # `block.questions.all` siyahısını göstərir — prefetch olmasa blok başına 3 sorğu (N+1).
+    blocks = list(lab.blocks.prefetch_related("questions").order_by("order"))
+    # Ümumi sual sayı prefetch olunmuş siyahılardan — `lab.total_questions` ayrıca COUNT sorğusu idi.
+    total_questions = sum(len(block.questions.all()) for block in blocks)
 
     context = {
         "lab": lab,
         "blocks": blocks,
+        "total_questions": total_questions,
     }
 
     return render(request, "labs/manage_blocks.html", context)
@@ -128,7 +133,7 @@ def update_questions_per_student(request, pk):
 
     if lab.created_by != request.user:
         messages.error(request, pgettext("labs.view.permission", "permission_denied"))
-        return redirect("courses:course_dashboard", pk=lab.course.id)
+        return redirect("courses:course_dashboard", course_id=lab.course.id)
 
     try:
         value = int(request.POST.get("questions_per_student", 0) or 0)

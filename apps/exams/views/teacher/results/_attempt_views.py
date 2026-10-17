@@ -24,6 +24,7 @@ from apps.exams.views.shared.tenant import get_result_viewable_exam_or_404, get_
 from core.permissions import request_has_permission
 from core.search_text import tolerant_match
 
+from ._attempt_review_ui import annotate_questions, build_question_map, build_summary
 from ._helpers import (
     _answer_max_points,
     _append_query_params,
@@ -37,6 +38,11 @@ from ._helpers import (
     _user_display_name,
 )
 from ._results_views import _explicit_return_url  # noqa: E402
+
+#: Baxış səhifəsində bir səhifədəki sual sayı (sual xəritəsi də bunu işlədir).
+QUESTIONS_PAGE_SIZE = 6
+#: Kabinet yoxlama növbələri — «Geri» onların özünə (filtrləri ilə) qayıdır.
+REVIEW_QUEUE_SECTIONS = frozenset({"pending-review", "review-results"})
 
 
 @login_required
@@ -114,18 +120,24 @@ def teacher_view_attempt(request, slug, attempt_id):
     # ``exam.attempts`` — ``attempt.exam`` səhifənin imtahan instansıdır (təkrar SELECT yox).
     attempt = get_object_or_404(exam.attempts, id=attempt_id)
     profile_return_url, navigation_params = _resolve_profile_navigation(request, default_section="my-exams")
-    # «Geri» = nəticələr səhifəsi (əvvəlki kramb); yalnız «yoxlama növbəsi»ndən gələn
-    # kabinet bölməsinə qayıdır (sahib 2026-09-21: ilişən referer-lər ləğv edildi).
-    if navigation_params.get("from_section") != "pending-review" and not _explicit_return_url(request):
-        profile_return_url = _append_query_params(
-            reverse("exams:teacher_exam_results", kwargs={"slug": exam.slug}), **navigation_params
-        )
+    exam_results_url = _append_query_params(
+        reverse("exams:teacher_exam_results", kwargs={"slug": exam.slug}), **navigation_params
+    )
+    # «Geri» = nəticələr səhifəsi (əvvəlki kramb); yalnız kabinet NÖVBƏLƏRİNDƏN («Yoxlanılacaq
+    # işlər», «Dəyərləndirilmiş nəticələr») gələn öz bölməsinə — filtrləri ilə — qayıdır
+    # (sahib 2026-09-21: ilişən referer-lər ləğv edildi; 2026-10-17: nəticələr növbəsi əlavə).
+    from_queue = navigation_params.get("from_section") in REVIEW_QUEUE_SECTIONS
+    if not from_queue and not _explicit_return_url(request):
+        profile_return_url = exam_results_url
     _sync_coding_answers_from_final_submissions(attempt)
 
     # Cavabları al
     answers = _load_review_answers(attempt, exam)
 
     qa_list = [_build_answer_review_item(a) for a in answers]
+    # Vəziyyət / nömrə / səhifə — TAM siyahı üzrə (axtarış süzgəcindən əvvəl, sorğusuz).
+    annotate_questions(qa_list, is_test=exam.exam_type == "test", page_size=QUESTIONS_PAGE_SIZE)
+    all_questions = list(qa_list)
     test_result = calculate_test_attempt_result(attempt, answers=answers) if exam.exam_type == "test" else None
 
     # Apellyasiya nəticəsində bal düzəlibsə effektiv balı + düzəlmiş sualları göstər.
@@ -164,7 +176,7 @@ def teacher_view_attempt(request, slug, attempt_id):
                 filtered.append(item)
         qa_list = filtered
 
-    questions_page = Paginator(qa_list, 6).get_page(request.GET.get("questions_page"))
+    questions_page = Paginator(qa_list, QUESTIONS_PAGE_SIZE).get_page(request.GET.get("questions_page"))
     pagination_query = urlencode(
         {
             **navigation_params,
@@ -193,6 +205,23 @@ def teacher_view_attempt(request, slug, attempt_id):
         "exam_evaluator_display": _user_display_name(exam.author),
         "can_view_student_identity": can_view_name,
         "identity_window_seconds_left": identity_window_seconds,
+        "from_review_queue": from_queue,
+        "exam_results_url": exam_results_url,
+        "review_summary": build_summary(
+            all_questions,
+            exam=exam,
+            attempt=attempt,
+            test_result=test_result,
+            effective_score_info=effective_score_info,
+            appeal_bonus_points=appeal_bonus_points,
+        ),
+        "question_map": build_question_map(
+            all_questions,
+            base_path=request.path,
+            navigation_params=navigation_params,
+            current_page=questions_page.number,
+            searching=bool(search_query),
+        ),
     }
 
     return render(request, "exams/teacher/teacher_view_attempt.html", context)

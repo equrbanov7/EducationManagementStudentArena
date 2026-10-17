@@ -1,0 +1,42 @@
+{% load i18n %}
+<div class="ems-field cx-link__search">
+    <label class="ems-field__label" for="examSearchInput">{% trans "placeholder_search_by_exam_name" context "exams.partial.exam_modals" %}</label>
+    <input type="search" class="ems-input" id="examSearchInput" autocomplete="off"
+           placeholder="{% trans 'placeholder_search_by_exam_name' context 'exams.partial.exam_modals' %}">
+</div>
+
+<div id="examSearchResults" class="cx-link__list">
+    {% if teacher_exams %}
+        <ul class="cx-link__items">
+        {% for exam in teacher_exams %}
+            <li class="exam-search-item cx-link__item">
+                <div class="cx-link__text">
+                    <strong class="cx-link__title">{{ exam.title }}</strong>
+                    <span class="cx-link__meta">
+                        {{ exam.get_exam_type_display }} · {{ exam.questions_total }} {% trans "label_question_short" context "exams.partial.exam_modals" %}
+                        {% if exam.course %}· <span class="cx-link__linked">{{ exam.course.title }} {% trans "label_linked_to_course" context "exams.partial.exam_modals" %}</span>{% endif %}
+                    </span>
+                </div>
+                <button type="button" class="ems-btn ems-btn--sm{% if not exam.course %} ems-btn--primary{% endif %} js-link-exam"
+                        data-exam-id="{{ exam.id }}"{% if exam.course %} disabled{% endif %}>
+                    {% if exam.course %}
+                        <i class="fas fa-check" aria-hidden="true"></i> {% trans "status_linked" context "exams.partial.exam_modals" %}
+                    {% else %}
+                        <i class="fas fa-link" aria-hidden="true"></i> {% trans "action_link" context "exams.partial.exam_modals" %}
+                    {% endif %}
+                </button>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <div class="ems-state" role="status">
+            <i class="fas fa-circle-info ems-state__icon" aria-hidden="true"></i>
+            <p class="ems-state__title">{% trans "empty_no_exam_to_link" context "exams.partial.exam_modals" %}</p>
+            <button type="button" class="ems-btn ems-btn--primary js-open-course-exam-editor"
+                    data-url="{% url 'exams:create_exam' %}?course={{ course.id }}"
+                    data-modal-title="{% trans 'heading_create_exam' context 'exams.template.create_exam_modal' %}">
+                <i class="fas fa-plus" aria-hidden="true"></i> {% trans "action_create_new_exam" context "exams.partial.exam_modals" %}
+            </button>
+        </div>
+    {% endif %}
+</div>

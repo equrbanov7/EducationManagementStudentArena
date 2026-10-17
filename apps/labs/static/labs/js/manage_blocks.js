@@ -1,411 +1,319 @@
-/* Manage blocks and questions logic */
+/*
+ * manage_blocks.js — Lab «Bloklar və suallar» səhifəsi (2026-10-17, Paket E).
+ *
+ * Bloklar sol tab siyahısında, seçilmiş blokun sualları sağ paneldə (hamısı serverdə render olunub);
+ * seçim `location.hash`-də (`#block-<id>`) saxlanılır. Yaratma/redaktə/idxal dialoqları ortaq
+ * `ems_ui/overlay.js` (`EMSOverlay`) ilə açılır; göndəriş `EMSCore.fetchJSON` ilə, uğurda səhifə
+ * yenilənir. AJAX-safe: `EMSDelegate` (document-səviyyəli, bir dəfə) + `EMSReady` (idempotent init).
+ * Konfiqurasiya + tərcümələr `#manageBlocksConfig` data-* atributlarındadır.
+ */
 (function () {
-    'use strict';
+    "use strict";
 
-    const LAB_ID = window.LAB_CONFIG.labId;
-    const CSRF = window.LAB_CONFIG.csrf;
-    const $ = (id) => document.getElementById(id);
-    const I18N = window.LAB_I18N || {};
-    const t = (key, fallback) => I18N[key] || fallback;
-    const RELOAD_NOTIFICATION_KEY = 'labs.manageBlocks.pendingNotification';
-    const ICON_CLASS_BY_TYPE = {
-        success: 'fa-check-circle',
-        error: 'fa-exclamation-circle',
-        warning: 'fa-exclamation-triangle',
-        info: 'fa-info-circle',
-    };
+    var RELOAD_NOTIFICATION_KEY = "labs.manageBlocks.pendingNotification";
 
-    let pendingBlockData = null;
-    let pendingQuestionData = null;
-    let pendingImportBlockId = null;
-    let pendingAddQuestionBlockId = null;
-
-    function escapeHtml(value) {
-        return String(value)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
+    function config() {
+        var el = document.getElementById("manageBlocksConfig");
+        return el ? el.dataset : null;
     }
 
-    function getToastContainer() {
-        let container = document.querySelector('.toast-container');
-        if (container) return container;
-
-        container = document.createElement('div');
-        container.className = 'toast-container';
-        document.body.appendChild(container);
-        return container;
+    function labId() {
+        var d = config();
+        return d ? d.labId : "";
     }
 
-    function showNotification(message, type = 'info', duration = 4000) {
-        const normalizedType = ['success', 'error', 'warning', 'info'].includes(type) ? type : 'info';
-        const alertType = normalizedType === 'error' ? 'danger' : normalizedType;
-        const container = getToastContainer();
-        const toast = document.createElement('div');
-        toast.className = `alert alert-${alertType} alert-dismissible fade show`;
-        toast.setAttribute('role', 'alert');
-        toast.dataset.autoHide = String(duration);
-        toast.innerHTML = `
-            <i class="fas ${ICON_CLASS_BY_TYPE[normalizedType] || ICON_CLASS_BY_TYPE.info} me-2"></i>
-            ${escapeHtml(message)}
-            <button type="button" class="btn-close" aria-label="${escapeHtml(t('actionClose', 'Close'))}"></button>
-        `;
+    function t(key, fallback) {
+        var d = config();
+        var name = "i18n" + key.charAt(0).toUpperCase() + key.slice(1);
+        return (d && d[name]) || fallback;
+    }
 
-        const closeButton = toast.querySelector('.btn-close');
-        const removeToast = () => {
-            toast.classList.add('fade-out');
-            setTimeout(() => toast.remove(), 300);
-        };
+    function byId(id) {
+        return document.getElementById(id);
+    }
 
-        closeButton.addEventListener('click', removeToast);
-        container.appendChild(toast);
-
-        if (duration > 0) {
-            setTimeout(removeToast, duration);
+    function toast(message, level, timeout) {
+        if (window.EMSToast && typeof window.EMSToast.show === "function") {
+            window.EMSToast.show(message, level || "info", timeout);
         }
     }
 
-    function showError(message) {
-        showNotification(message, 'error', 5000);
+    /* ── Dialoq köməkçiləri ─────────────────────────────────────────────── */
+    function formOf(dialogId) {
+        var dialog = byId(dialogId);
+        return dialog ? dialog.querySelector("form") : null;
     }
 
-    function persistNotificationForReload(message, type = 'success', duration = 4000) {
-        try {
-            sessionStorage.setItem(
-                RELOAD_NOTIFICATION_KEY,
-                JSON.stringify({ message, type, duration })
-            );
-        } catch (error) {
-            // Ignore storage failures and continue with reload.
+    function setFormError(form, message) {
+        var box = form && form.querySelector("[data-ems-form-error]");
+        if (!box) {
+            if (message) { toast(message, "error", 5000); }
+            return;
         }
+        box.textContent = message || "";
+        box.hidden = !message;
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        try {
-            const rawValue = sessionStorage.getItem(RELOAD_NOTIFICATION_KEY);
-            if (!rawValue) return;
+    function openDialog(dialogId) {
+        var form = formOf(dialogId);
+        if (form) { setFormError(form, ""); }
+        if (window.EMSOverlay) { window.EMSOverlay.open(dialogId); }
+    }
 
-            sessionStorage.removeItem(RELOAD_NOTIFICATION_KEY);
-            const notification = JSON.parse(rawValue);
-            if (!notification || !notification.message) return;
+    function setBusy(button, label) {
+        if (!button) { return; }
+        if (button.dataset.idleHtml === undefined) { button.dataset.idleHtml = button.innerHTML; }
+        button.disabled = true;
+        button.textContent = "";
+        var spinner = document.createElement("i");
+        spinner.className = "fas fa-spinner fa-spin";
+        spinner.setAttribute("aria-hidden", "true");
+        button.appendChild(spinner);
+        button.appendChild(document.createTextNode(" " + label));
+    }
 
-            showNotification(notification.message, notification.type || 'info', notification.duration || 4000);
-        } catch (error) {
-            sessionStorage.removeItem(RELOAD_NOTIFICATION_KEY);
+    function setIdle(button) {
+        if (!button || button.dataset.idleHtml === undefined) { return; }
+        button.disabled = false;
+        button.innerHTML = button.dataset.idleHtml;
+        delete button.dataset.idleHtml;
+    }
+
+    function errorText(err, payload) {
+        var body = payload || (err && err.payload);
+        if (body && typeof body === "object") {
+            if (body.view_as_blocked) { return ""; } // EMSCore.fetchJSON artıq göstərib
+            if (body.error) { return t("errorPrefix", "Error") + ": " + body.error; }
         }
-    });
+        return t("errorServer", "Server error");
+    }
 
-    const editBlockModal = $('editBlockModal');
-    if (editBlockModal) {
-        editBlockModal.addEventListener('shown.bs.modal', () => {
-            if (!pendingBlockData) return;
-            $('editBlockId').value = pendingBlockData.id || '';
-            $('editBlockTitle').value = pendingBlockData.title || '';
-            $('editBlockDescription').value = pendingBlockData.description || '';
-            $('editBlockQTP').value = pendingBlockData.qtp || 0;
-            pendingBlockData = null;
+    /* POST + uğurda yenilə; xəta dialoqun içində göstərilir. */
+    function submitDialogForm(form, url, busyKey, busyFallback, onSuccess) {
+        if (!form) { return; }
+        if (typeof form.checkValidity === "function" && !form.checkValidity()) {
+            setFormError(form, t("required", "Please fill in the required fields."));
+            if (typeof form.reportValidity === "function") { form.reportValidity(); }
+            return;
+        }
+        var button = form.querySelector('[type="submit"]');
+        setFormError(form, "");
+        setBusy(button, t(busyKey, busyFallback));
+        window.EMSCore.fetchJSON(url, { method: "POST", body: new FormData(form) })
+            .then(function (data) {
+                if (data && data.success) {
+                    if (onSuccess) { onSuccess(data); }
+                    window.location.reload();
+                    return;
+                }
+                setFormError(form, t("errorPrefix", "Error") + ": " + ((data && data.error) || t("errorUnknown", "Unknown error")));
+                setIdle(button);
+            })
+            .catch(function (err) {
+                var message = errorText(err);
+                if (message) { setFormError(form, message); }
+                setIdle(button);
+            });
+    }
+
+    function confirmAndPost(bodyText, url) {
+        window.EMSConfirm.open({ body: bodyText, danger: true }).then(function (ok) {
+            if (!ok) { return; }
+            window.EMSCore.fetchJSON(url, { method: "POST" })
+                .then(function (data) {
+                    if (data && data.success) {
+                        window.location.reload();
+                    } else {
+                        toast(t("errorPrefix", "Error") + ": " + ((data && data.error) || t("errorUnknown", "Unknown error")), "error", 5000);
+                    }
+                })
+                .catch(function (err) {
+                    var message = errorText(err);
+                    if (message) { toast(message, "error", 5000); }
+                });
         });
     }
 
-    document.addEventListener('click', (e) => {
-        const btn = e.target.closest('.js-edit-block');
-        if (!btn) return;
-        pendingBlockData = {
-            id: btn.dataset.id,
-            title: btn.dataset.title,
-            description: btn.dataset.description,
-            qtp: btn.dataset.qtp,
-        };
-        bootstrap.Modal.getOrCreateInstance(editBlockModal).show();
-    });
+    /* ── Blok tab-ları ──────────────────────────────────────────────────── */
+    function blockTabs() {
+        return Array.prototype.slice.call(document.querySelectorAll("[data-lab-block-tab]"));
+    }
 
-    const editQuestionModal = $('editQuestionModal');
-    if (editQuestionModal) {
-        editQuestionModal.addEventListener('shown.bs.modal', () => {
-            if (!pendingQuestionData) return;
-            $('editQuestionId').value = pendingQuestionData.id || '';
-            $('editQuestionText').value = pendingQuestionData.text || '';
-            $('editQuestionPoints').value = pendingQuestionData.points || 0;
-
-            if (pendingQuestionData.attachment) {
-                $('editQuestionCurrentFile').innerHTML =
-                    '<a href="' +
-                    pendingQuestionData.attachment +
-                    '" target="_blank" class="btn btn-sm btn-outline-secondary">' +
-                    '<i class="fas fa-paperclip me-1"></i> ' +
-                    t('fileExisting', 'Existing file') +
-                    '</a>';
+    function selectBlock(blockId, focusTab) {
+        var found = null;
+        blockTabs().forEach(function (tab) {
+            var on = tab.dataset.labBlockTab === String(blockId);
+            tab.setAttribute("aria-selected", on ? "true" : "false");
+            if (on) {
+                tab.removeAttribute("tabindex");
+                found = tab;
             } else {
-                $('editQuestionCurrentFile').innerHTML = '';
+                tab.setAttribute("tabindex", "-1");
             }
-
-            pendingQuestionData = null;
         });
+        if (!found) { return false; }
+        Array.prototype.forEach.call(document.querySelectorAll("[data-lab-block-panel]"), function (panel) {
+            panel.hidden = panel.dataset.labBlockPanel !== String(blockId);
+        });
+        if (focusTab) { found.focus(); }
+        return true;
     }
 
-    document.addEventListener('click', (e) => {
-        const btn = e.target.closest('.js-edit-question');
-        if (!btn) return;
-        pendingQuestionData = {
-            id: btn.dataset.id,
-            text: btn.dataset.text,
-            points: btn.dataset.points,
-            attachment: btn.dataset.attachment,
-        };
-        bootstrap.Modal.getOrCreateInstance(editQuestionModal).show();
+    function selectFromHash() {
+        var match = /^#block-(\d+)$/.exec(window.location.hash || "");
+        if (match) { selectBlock(match[1], false); }
+    }
+
+    function initBlocks() {
+        selectFromHash();
+        try {
+            var raw = window.sessionStorage.getItem(RELOAD_NOTIFICATION_KEY);
+            if (raw) {
+                window.sessionStorage.removeItem(RELOAD_NOTIFICATION_KEY);
+                var note = JSON.parse(raw);
+                if (note && note.message) { toast(note.message, note.type || "info", note.duration || 4500); }
+            }
+        } catch (err) {
+            /* sessionStorage əlçatmazdır — bildiriş atlanır */
+        }
+    }
+
+    window.EMSReady(initBlocks);
+    window.EMSReady.once("labs-manage-blocks-hash", function () {
+        window.addEventListener("hashchange", selectFromHash);
     });
 
-    const addQuestionModal = $('addQuestionModal');
-    if (addQuestionModal) {
-        addQuestionModal.addEventListener('shown.bs.modal', () => {
-            if (!pendingAddQuestionBlockId) return;
-            $('addQuestionBlockId').value = pendingAddQuestionBlockId;
-            pendingAddQuestionBlockId = null;
-        });
-    }
-
-    document.addEventListener('click', (e) => {
-        const btn = e.target.closest('.js-add-question');
-        if (!btn) return;
-        pendingAddQuestionBlockId = btn.dataset.blockId;
-        $('addQuestionForm').reset();
-        bootstrap.Modal.getOrCreateInstance(addQuestionModal).show();
+    window.EMSDelegate.on("click", "[data-lab-block-tab]", function (event, tab) {
+        selectBlock(tab.dataset.labBlockTab, false);
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, "", "#block-" + tab.dataset.labBlockTab);
+        }
     });
 
-    const importModal = $('importQuestionsModal');
-    if (importModal) {
-        importModal.addEventListener('shown.bs.modal', () => {
-            if (!pendingImportBlockId) return;
-            $('importBlockId').value = pendingImportBlockId;
-            pendingImportBlockId = null;
-        });
-    }
-
-    document.addEventListener('click', (e) => {
-        const btn = e.target.closest('.js-import-questions');
-        if (!btn) return;
-        pendingImportBlockId = btn.dataset.blockId;
-        $('importQuestionsForm').reset();
-        bootstrap.Modal.getOrCreateInstance(importModal).show();
+    window.EMSDelegate.on("keydown", "[data-lab-block-tab]", function (event, tab) {
+        var tabs = blockTabs();
+        var index = tabs.indexOf(tab);
+        var next = null;
+        if (event.key === "ArrowDown" || event.key === "ArrowRight") { next = tabs[(index + 1) % tabs.length]; }
+        else if (event.key === "ArrowUp" || event.key === "ArrowLeft") { next = tabs[(index - 1 + tabs.length) % tabs.length]; }
+        else if (event.key === "Home") { next = tabs[0]; }
+        else if (event.key === "End") { next = tabs[tabs.length - 1]; }
+        if (!next) { return; }
+        event.preventDefault();
+        selectBlock(next.dataset.labBlockTab, true);
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, "", "#block-" + next.dataset.labBlockTab);
+        }
     });
 
-    const addBlockForm = $('addBlockForm');
-    if (addBlockForm) {
-        addBlockForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const btn = e.target.querySelector('[type=submit]');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> ' + t('stateCreating', 'Creating...');
+    /* ── Blok: redaktə / sil ────────────────────────────────────────────── */
+    window.EMSDelegate.on("click", ".js-edit-block", function (event, btn) {
+        var form = formOf("editBlockModal");
+        if (!form) { return; }
+        byId("editBlockId").value = btn.dataset.id || "";
+        byId("edit-block-title").value = btn.dataset.title || "";
+        byId("edit-block-description").value = btn.dataset.description || "";
+        byId("edit-block-qtp").value = btn.dataset.qtp || 0;
+        openDialog("editBlockModal");
+    });
 
-            fetch(`/labs/${LAB_ID}/blocks/create/`, {
-                method: 'POST',
-                body: new FormData(e.target),
-                headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
-            })
-                .then((r) => r.json())
-                .then((d) => {
-                    if (d.success) {
-                        location.reload();
-                    } else {
-                        showError(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
-                        btn.disabled = false;
-                        btn.innerHTML = t('actionCreate', 'Create');
-                    }
-                })
-                .catch(() => {
-                    showError(t('errorServer', 'Server error'));
-                    btn.disabled = false;
-                    btn.innerHTML = t('actionCreate', 'Create');
-                });
-        });
-    }
+    window.EMSDelegate.on("click", ".js-delete-block", function (event, btn) {
+        confirmAndPost(t("confirmDeleteBlock", "Delete this block and all questions inside it?"), "/labs/blocks/" + btn.dataset.id + "/delete/");
+    });
 
-    const editBlockForm = $('editBlockForm');
-    if (editBlockForm) {
-        editBlockForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const blockId = $('editBlockId').value;
-            if (!blockId) return;
+    window.EMSDelegate.on("submit", "#addBlockModal form", function (event, form) {
+        event.preventDefault();
+        submitDialogForm(form, "/labs/" + labId() + "/blocks/create/", "stateCreating", "Creating...");
+    });
 
-            const btn = e.target.querySelector('[type=submit]');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> ' + t('stateSaving', 'Saving...');
+    window.EMSDelegate.on("submit", "#editBlockModal form", function (event, form) {
+        event.preventDefault();
+        var blockId = byId("editBlockId").value;
+        if (!blockId) { return; }
+        submitDialogForm(form, "/labs/blocks/" + blockId + "/edit/", "stateSaving", "Saving...");
+    });
 
-            fetch(`/labs/blocks/${blockId}/edit/`, {
-                method: 'POST',
-                body: new FormData(e.target),
-                headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
-            })
-                .then((r) => r.json())
-                .then((d) => {
-                    if (d.success) {
-                        location.reload();
-                    } else {
-                        showError(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
-                        btn.disabled = false;
-                        btn.innerHTML = t('actionSave', 'Save');
-                    }
-                })
-                .catch(() => {
-                    showError(t('errorServer', 'Server error'));
-                    btn.disabled = false;
-                    btn.innerHTML = t('actionSave', 'Save');
-                });
-        });
-    }
+    /* ── Sual: əlavə / redaktə / sil / idxal ────────────────────────────── */
+    window.EMSDelegate.on("click", ".js-add-question", function (event, btn) {
+        var form = formOf("addQuestionModal");
+        if (!form) { return; }
+        form.reset();
+        byId("addQuestionId").value = btn.dataset.blockId || "";
+        openDialog("addQuestionModal");
+    });
 
-    const addQuestionForm = $('addQuestionForm');
-    if (addQuestionForm) {
-        addQuestionForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const blockId = $('addQuestionBlockId').value;
-            const btn = e.target.querySelector('[type=submit]');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> ' + t('stateAdding', 'Adding...');
+    window.EMSDelegate.on("click", ".js-edit-question", function (event, btn) {
+        var form = formOf("editQuestionModal");
+        if (!form) { return; }
+        form.reset();
+        byId("editQuestionId").value = btn.dataset.id || "";
+        byId("edit-question-text").value = btn.dataset.text || "";
+        byId("edit-question-points").value = btn.dataset.points || 0;
+        var current = byId("editQuestionCurrentFile");
+        if (current) {
+            current.textContent = "";
+            if (btn.dataset.attachment) {
+                var link = document.createElement("a");
+                link.className = "lab-chip";
+                link.href = btn.dataset.attachment;
+                link.target = "_blank";
+                link.rel = "noopener";
+                var icon = document.createElement("i");
+                icon.className = "fas fa-paperclip";
+                icon.setAttribute("aria-hidden", "true");
+                link.appendChild(icon);
+                link.appendChild(document.createTextNode(" " + t("fileExisting", "Existing file")));
+                current.appendChild(link);
+            }
+        }
+        openDialog("editQuestionModal");
+    });
 
-            fetch(`/labs/blocks/${blockId}/questions/create/`, {
-                method: 'POST',
-                body: new FormData(e.target),
-                headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
-            })
-                .then((r) => r.json())
-                .then((d) => {
-                    if (d.success) {
-                        location.reload();
-                    } else {
-                        showError(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
-                        btn.disabled = false;
-                        btn.innerHTML = t('actionAdd', 'Add');
-                    }
-                })
-                .catch(() => {
-                    showError(t('errorServer', 'Server error'));
-                    btn.disabled = false;
-                    btn.innerHTML = t('actionAdd', 'Add');
-                });
-        });
-    }
+    window.EMSDelegate.on("click", ".js-import-questions", function (event, btn) {
+        var form = formOf("importQuestionsModal");
+        if (!form) { return; }
+        form.reset();
+        byId("importBlockId").value = btn.dataset.blockId || "";
+        openDialog("importQuestionsModal");
+    });
 
-    const editQuestionForm = $('editQuestionForm');
-    if (editQuestionForm) {
-        editQuestionForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const questionId = $('editQuestionId').value;
-            if (!questionId) return;
+    window.EMSDelegate.on("click", ".js-delete-question", function (event, btn) {
+        confirmAndPost(t("confirmDeleteQuestion", "Delete this question?"), "/labs/questions/" + btn.dataset.id + "/delete/");
+    });
 
-            const btn = e.target.querySelector('[type=submit]');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> ' + t('stateSaving', 'Saving...');
+    window.EMSDelegate.on("submit", "#addQuestionModal form", function (event, form) {
+        event.preventDefault();
+        var blockId = byId("addQuestionId").value;
+        if (!blockId) { return; }
+        submitDialogForm(form, "/labs/blocks/" + blockId + "/questions/create/", "stateAdding", "Adding...");
+    });
 
-            fetch(`/labs/questions/${questionId}/edit/`, {
-                method: 'POST',
-                body: new FormData(e.target),
-                headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
-            })
-                .then((r) => r.json())
-                .then((d) => {
-                    if (d.success) {
-                        location.reload();
-                    } else {
-                        showError(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
-                        btn.disabled = false;
-                        btn.innerHTML = t('actionSave', 'Save');
-                    }
-                })
-                .catch(() => {
-                    showError(t('errorServer', 'Server error'));
-                    btn.disabled = false;
-                    btn.innerHTML = t('actionSave', 'Save');
-                });
-        });
-    }
+    window.EMSDelegate.on("submit", "#editQuestionModal form", function (event, form) {
+        event.preventDefault();
+        var questionId = byId("editQuestionId").value;
+        if (!questionId) { return; }
+        submitDialogForm(form, "/labs/questions/" + questionId + "/edit/", "stateSaving", "Saving...");
+    });
 
-    const importForm = $('importQuestionsForm');
-    if (importForm) {
-        importForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const blockId = $('importBlockId').value;
-            const btn = e.target.querySelector('[type=submit]');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> ' + t('stateImporting', 'Importing...');
-
-            fetch(`/labs/blocks/${blockId}/questions/import/`, {
-                method: 'POST',
-                body: new FormData(e.target),
-                headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
-            })
-                .then((r) => r.json())
-                .then((d) => {
-                    if (d.success) {
-                        persistNotificationForReload(
-                            d.message ||
-                                t('successImportDefault', '{count} questions imported').replace('{count}', d.count || 0),
-                            'success',
-                            4500
-                        );
-                        const modal = bootstrap.Modal.getInstance(importModal);
-                        if (modal) {
-                            modal.hide();
-                        }
-                        location.reload();
-                    } else {
-                        showError(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fas fa-upload me-1"></i> ' + t('actionImport', 'Import');
-                    }
-                })
-                .catch(() => {
-                    showError(t('errorServer', 'Server error'));
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-upload me-1"></i> ' + t('actionImport', 'Import');
-                });
-        });
-    }
-
-    document.addEventListener('click', (e) => {
-        const btn = e.target.closest('.js-delete-block');
-        if (!btn) return;
-
-        // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
-        window.EMSConfirm.open({ body: t('confirmDeleteBlock', 'Delete this block and all questions inside it?'), danger: true }).then((ok) => {
-            if (!ok) return;
-            fetch(`/labs/blocks/${btn.dataset.id}/delete/`, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
-            })
-                .then((r) => r.json())
-                .then((d) => {
-                    if (d.success) {
-                        location.reload();
-                    } else {
-                        showError(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
-                    }
-                })
-                .catch(() => showError(t('errorServer', 'Server error')));
+    window.EMSDelegate.on("submit", "#importQuestionsModal form", function (event, form) {
+        event.preventDefault();
+        var blockId = byId("importBlockId").value;
+        if (!blockId) { return; }
+        submitDialogForm(form, "/labs/blocks/" + blockId + "/questions/import/", "stateImporting", "Importing...", function (data) {
+            var message = data.message || t("successImportDefault", "{count} questions imported").replace("{count}", data.count || 0);
+            try {
+                window.sessionStorage.setItem(RELOAD_NOTIFICATION_KEY, JSON.stringify({ message: message, type: "success", duration: 4500 }));
+            } catch (err) {
+                /* sessionStorage əlçatmazdır — bildiriş atlanır */
+            }
         });
     });
 
-    document.addEventListener('click', (e) => {
-        const btn = e.target.closest('.js-delete-question');
-        if (!btn) return;
-
-        window.EMSConfirm.open({ body: t('confirmDeleteQuestion', 'Delete this question?'), danger: true }).then((ok) => {
-            if (!ok) return;
-            fetch(`/labs/questions/${btn.dataset.id}/delete/`, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
-            })
-                .then((r) => r.json())
-                .then((d) => {
-                    if (d.success) {
-                        location.reload();
-                    } else {
-                        showError(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
-                    }
-                })
-                .catch(() => showError(t('errorServer', 'Server error')));
-        });
+    /* Yeni sual/idxal: seçilmiş blok hash-də qalsın. */
+    window.EMSDelegate.on("click", ".js-add-question, .js-import-questions", function (event, btn) {
+        var blockId = btn.dataset.blockId;
+        if (blockId && window.history && window.history.replaceState) {
+            window.history.replaceState(null, "", "#block-" + blockId);
+        }
     });
 })();

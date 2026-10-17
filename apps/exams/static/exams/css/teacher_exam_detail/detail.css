@@ -1,0 +1,536 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Müəllimin imtahan detalı — Paket B (2026-10-17)
+   ───────────────────────────────────────────────────────────────────────────
+   Əvəz etdiyi qatlar: teacher_exam_detail/_part1.css + _part2.css (32 hex) və
+   teacher_exam_detail_theme.css (token örtüyü) — üçü də silinib. Qabıq
+   `teacher_page_shell.css` (`etp-*`), komponentlər `ems_ui`. Prefiks: `ted-`.
+   Rəng YALNIZ `--ems-*` tokenləri ilə.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ted-page .ems-header__subtitle {
+    max-width: 80ch;
+    white-space: pre-line;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.ted-inline-form {
+    display: inline-flex;
+    margin: 0;
+}
+
+.ted-page .ems-header__actions .dropdown-item {
+    border: 0;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+}
+
+/* ── KPI ──────────────────────────────────────────────────────────────── */
+.ted-kpi__unit {
+    margin-left: 4px;
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+    color: var(--ems-text-muted);
+}
+
+.ted-units {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px var(--ems-sp-4);
+    padding: 12px 16px;
+}
+
+.ted-units__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: var(--ems-fs-base);
+    font-weight: 800;
+    color: var(--ems-neutral-700);
+}
+
+.ted-units__title i {
+    color: var(--ems-primary-600);
+}
+
+.ted-units__list {
+    margin: 0;
+    font-size: var(--ems-fs-base);
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+/* ── Bölmələrə keçid zolağı ───────────────────────────────────────────── */
+.ted-nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--ems-sp-5);
+}
+
+.ted-nav__link {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-5);
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+    color: var(--ems-text);
+    text-decoration: none;
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.ted-nav__link:hover {
+    border-color: var(--ems-primary-300);
+    background: var(--ems-primary-50);
+    color: var(--ems-text);
+}
+
+.ted-nav__icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+}
+
+.ted-nav__icon--primary { background: var(--ems-primary-100); color: var(--ems-primary-700); }
+.ted-nav__icon--violet { background: var(--ems-violet-100); color: var(--ems-violet-800); }
+.ted-nav__icon--success { background: var(--ems-success-bg); color: var(--ems-success-700); }
+.ted-nav__icon--warning { background: var(--ems-warning-bg); color: var(--ems-warning-800); }
+
+.ted-nav__text {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ted-nav__title {
+    font-size: var(--ems-fs-md);
+    font-weight: 800;
+}
+
+.ted-nav__desc {
+    font-size: var(--ems-fs-sm);
+    line-height: 1.4;
+    color: var(--ems-text-muted);
+}
+
+/* ── Canlı sessiya ────────────────────────────────────────────────────── */
+.ted-live {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-5) var(--ems-sp-6);
+    padding: 16px 18px;
+    border-color: var(--ems-primary-200);
+    background: var(--ems-primary-50);
+}
+
+.ted-live__icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+}
+
+.ted-live__text {
+    flex: 1 1 260px;
+    min-width: 0;
+}
+
+.ted-live__title {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.ted-live__desc {
+    margin: 2px 0 0;
+    font-size: var(--ems-fs-base);
+    color: var(--ems-neutral-700);
+}
+
+.ted-live__btn[aria-busy="true"] {
+    opacity: 0.7;
+    cursor: progress;
+}
+
+.ted-live__btn[aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.ted-live__disabled {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    max-width: 320px;
+}
+
+.ted-live__disabled .etp-hint {
+    margin: 0;
+    text-align: right;
+}
+
+/* ── Suallar ──────────────────────────────────────────────────────────── */
+.ted-questions {
+    padding: 18px 20px;
+}
+
+.ted-questions__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-4);
+    margin-bottom: var(--ems-sp-5);
+}
+
+.ted-questions__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-size: var(--ems-fs-xl);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.ted-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 24px;
+    padding: 0 8px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.ted-questions__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3);
+}
+
+.ted-qlist {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--ems-neutral-100);
+}
+
+.ted-q {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: var(--ems-sp-5);
+    align-items: start;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--ems-neutral-100);
+}
+
+.ted-q__num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.ted-q__content {
+    min-width: 0;
+}
+
+.ted-q__text {
+    margin: 4px 0 0;
+    font-size: var(--ems-fs-md);
+    line-height: 1.55;
+    color: var(--ems-text);
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.ted-q__image,
+.ted-opt__image {
+    display: block;
+    max-width: min(100%, 520px);
+    max-height: 280px;
+    margin-top: 8px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-md);
+    object-fit: contain;
+}
+
+.ted-q__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.ted-q__pts {
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-text-muted);
+}
+
+.ted-opts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    max-width: 720px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ted-opt {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 7px 10px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg);
+    font-size: var(--ems-fs-base);
+}
+
+.ted-opt__mark {
+    color: var(--ems-neutral-500);
+}
+
+.ted-opt__label {
+    font-weight: 800;
+    color: var(--ems-neutral-700);
+}
+
+.ted-opt__text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.ted-opt.is-correct {
+    border-color: var(--ems-success-bd);
+    background: var(--ems-success-bg);
+}
+
+.ted-opt.is-correct .ted-opt__mark,
+.ted-opt.is-correct .ted-opt__text,
+.ted-opt.is-correct .ted-opt__label {
+    color: var(--ems-success-700);
+}
+
+.ted-q__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.ted-lazy {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ems-sp-4);
+    padding-top: var(--ems-sp-5);
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.ted-empty {
+    padding: var(--ems-sp-8) var(--ems-sp-6);
+}
+
+/* Sual forması modalının yüklənmə / xəta qutusu (əvvəl exam_create_edit_modal.css-dən gəlirdi,
+   o fayl indi yalnız «Redaktə»-də tənbəl yüklənir). */
+#questionFormModal .create-exam-modal-loading,
+#questionFormModal .create-exam-modal-error {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 160px;
+    padding: 1rem;
+    color: var(--ems-neutral-500);
+    font-weight: 600;
+}
+
+#questionFormModal .create-exam-modal-error {
+    align-items: center;
+    justify-content: center;
+    color: var(--ems-danger-strong);
+}
+
+/* ── Dialoqlar ────────────────────────────────────────────────────────── */
+.ted-dialog__danger {
+    color: var(--ems-danger);
+}
+
+.ted-dialog__text {
+    margin: 0;
+    font-size: var(--ems-fs-md);
+    color: var(--ems-neutral-700);
+}
+
+.ted-dialog__target {
+    margin-top: var(--ems-sp-4);
+    padding: 10px 12px;
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg-subtle);
+    color: var(--ems-text);
+    font-size: var(--ems-fs-base);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.ted-dialog__target[hidden] {
+    display: none;
+}
+
+.ted-dialog__eyebrow {
+    margin-bottom: 4px;
+    color: var(--ems-primary-700);
+}
+
+.ted-dialog__meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ems-sp-4);
+    margin: var(--ems-sp-5) 0 0;
+}
+
+.ted-dialog__meta > div {
+    padding: 10px 12px;
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg-subtle);
+}
+
+.ted-dialog__meta dt {
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ems-neutral-500);
+}
+
+.ted-dialog__meta dd {
+    margin: 2px 0 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+/* ── Telefon ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .ted-questions {
+        padding: 14px;
+    }
+
+    .ted-questions__actions,
+    .ted-questions__actions > .ems-btn {
+        flex: 1 1 auto;
+    }
+
+    .ted-q {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .ted-opts {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ted-nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--ems-sp-4);
+    }
+
+    .ted-nav__link {
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .ted-nav__icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .ted-nav__title {
+        font-size: var(--ems-fs-sm);
+    }
+
+    .ted-nav__desc {
+        display: none;
+    }
+
+    .ted-q__actions {
+        grid-column: 2;
+        justify-content: flex-start;
+    }
+
+    .ted-live__disabled {
+        align-items: stretch;
+        max-width: none;
+        width: 100%;
+    }
+
+    .ted-live__disabled .etp-hint {
+        text-align: left;
+    }
+
+    .ted-live__btn {
+        width: 100%;
+    }
+
+    .ted-page .ems-header__actions {
+        width: 100%;
+    }
+
+    .ted-page .ems-header__actions > * {
+        flex: 1 1 auto;
+    }
+
+    .ted-page .ems-header__actions .ted-inline-form > .ems-btn,
+    .ted-page .ems-header__actions .dropdown > .ems-btn {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ted-nav__link {
+        transition: none;
+    }
+}

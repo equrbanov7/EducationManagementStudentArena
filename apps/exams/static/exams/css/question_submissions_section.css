@@ -170,3 +170,15 @@
         margin-bottom: var(--ems-sp-3);
     }
 }
+
+/* «Sual təsdiqi» bölməsi (Paket C 2026-10-17): telefonda 4 KPI 2×2 — filtr və cədvəl ekrana yaxın qalsın. */
+@media (max-width: 560px) {
+    .qchair-section .ems-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--ems-sp-4);
+    }
+
+    .qchair-section .ems-kpi {
+        padding: 12px 14px;
+    }
+}

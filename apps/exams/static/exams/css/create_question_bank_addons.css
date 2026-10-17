@@ -1,16 +1,25 @@
 /* ═══ create_question_bank — Faza 6.4 Sprint-4 (2026-07-02) əlavələri ═══
    Əsas fayl (create_question_bank.css) 600-sətirlik SOFT_CAP-dədir, ona görə
    inline-style miqrasiyasının klassları bu addon faylındadır. */
-.qb-warning-box {
-    padding: 15px;
-    background: var(--ems-warning-100);
-    color: #856404;
-    border: 1px solid #ffeeba;
-    border-radius: 8px;
-    margin-bottom: 20px;
+/* Paket C 2026-10-17: başlıq ortaq `etp-head`-dir; köhnə «Geri»/mərkəzlənmiş başlıq stilləri çıxarılıb. */
+.cqb-page .etp-head {
+    margin-bottom: var(--ems-sp-6);
 }
-.qb-bank-header { text-align: center; margin-bottom: 30px; }
-.qb-heading-accent { color: #6c5ce7; }
+
+.cqb-messages {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    margin-bottom: var(--ems-sp-6);
+}
+
+@media (max-width: 560px) {
+    .cqb-page {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}
+
 .qb-hint { color: grey; }
-.qb-empty-ic { font-size: 40px; color: #ff7675; margin-bottom: 10px; }
-.qb-empty-text { color: #636e72; }
+.qb-empty-ic { font-size: 40px; color: var(--ems-danger-500); margin-bottom: 10px; }
+.qb-empty-text { color: var(--ems-neutral-500); }

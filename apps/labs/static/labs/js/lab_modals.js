@@ -1,9 +1,9 @@
 /*
  * lab_modals.js
  * Source: apps/labs/templates/labs/partials/lab_modals/_scripts.html
- * Add/Edit lab modals: group/student lazy loading + selection state, AJAX
- * create/edit, delete (confirm-gated). COURSE_ID + i18n read from
- * #labModalsConfig data-*; CSRF from EMSCore. escapeHtml from utils/escape.js.
+ * Add/Edit lab dialogs (2026-10-17, Paket E: Bootstrap modal → ortaq `EMSOverlay` dialoqu): group/student
+ * lazy loading + selection state, AJAX create/edit, delete (confirm-gated). COURSE_ID + i18n read from
+ * #labModalsConfig data-*; CSRF from EMSCore. escapeHtml from utils/escape.js. Hadisələr `EMSDelegate` ilədir.
  */
 (function () {
     // İkiqat yüklənmədə (dashboard partial təkrar render) dinləyicilər təkrarlanmasın.
@@ -68,6 +68,38 @@
             if (payload.error) return I18N.errorPrefix + ': ' + payload.error;
         }
         return I18N.errorServer;
+    }
+
+    var SKELETON = '<div class="lab-picker__skel" aria-hidden="true"><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span></div>';
+
+    function pickerMessage(text, isError) {
+        return '<p class="lab-picker__empty' + (isError ? ' is-error' : '') + '">' + escapeHtml(text || '') + '</p>';
+    }
+
+    function formOf(dialogId) {
+        var dialog = $(dialogId);
+        return dialog ? dialog.querySelector('form') : null;
+    }
+
+    function setFormError(form, message) {
+        var box = form && form.querySelector('[data-ems-form-error]');
+        if (!box) { notifyError(message); return; }
+        box.textContent = message || '';
+        box.hidden = !message;
+    }
+
+    function setBusy(btn) {
+        if (!btn) return;
+        btn.dataset.idleHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i>';
+    }
+
+    function setIdle(btn) {
+        if (!btn || btn.dataset.idleHtml === undefined) return;
+        btn.disabled = false;
+        btn.innerHTML = btn.dataset.idleHtml;
+        delete btn.dataset.idleHtml;
     }
 
     function createSelectionState(initialSelectedIds, initialManuallyDeselectedAutoIds) {
@@ -164,17 +196,17 @@
 
     window.openEditLabModal = function(url) {
         const modalEl = $('editLabModal');
-        if (!modalEl) {
+        if (!modalEl || !window.EMSOverlay) {
             notifyError(I18N.modalNotFound);
             return;
         }
 
         modeSelectionState.edit = createSelectionState();
-        $('editLabGroupList').innerHTML = '<div class="d-flex flex-column gap-2 p-2" aria-hidden="true"><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span></div>';
-        $('editLabStudentList').innerHTML = '<div class="d-flex flex-column gap-2 p-2" aria-hidden="true"><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span></div>';
+        $('editLabGroupList').innerHTML = SKELETON;
+        $('editLabStudentList').innerHTML = SKELETON;
+        setFormError(formOf('editLabModal'), '');
 
-        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-        modal.show();
+        window.EMSOverlay.open(modalEl);
 
         EMSCore.fetchJSON(url)
         .then(res => {
@@ -199,18 +231,30 @@
                 $('editLabStatus')._refreshBootstrapSelect && $('editLabStatus')._refreshBootstrapSelect();
             }
             if ($('editLabQPS')) $('editLabQPS').value = d.questions_per_student || 0;
-            if ($('editAllowLate')) $('editAllowLate').checked = d.allow_late_submission;
-            if ($('editLatePenalty')) $('editLatePenalty').value = d.late_penalty_percent || 0;
-            if ($('editAllowFile')) $('editAllowFile').checked = d.allow_file_upload;
-            if ($('editAllowLink')) $('editAllowLink').checked = d.allow_link_submission;
-            if ($('editMaxFileSize')) $('editMaxFileSize').value = d.max_file_size_mb || 50;
-            if ($('editAllowedExt')) $('editAllowedExt').value = d.allowed_extensions || '';
+            if ($('editLabAllowLate')) $('editLabAllowLate').checked = d.allow_late_submission;
+            if ($('editLabLatePenalty')) $('editLabLatePenalty').value = d.late_penalty_percent || 0;
+            if ($('editLabAllowFile')) $('editLabAllowFile').checked = d.allow_file_upload;
+            if ($('editLabAllowLink')) $('editLabAllowLink').checked = d.allow_link_submission;
+            if ($('editLabMaxFileSize')) $('editLabMaxFileSize').value = d.max_file_size_mb || 50;
+            if ($('editLabAllowedExt')) $('editLabAllowedExt').value = d.allowed_extensions || '';
             if ($('editLabInstructions')) $('editLabInstructions').value = d.teacher_instructions || '';
 
-            if (d.teacher_files_url && $('editCurrentFile')) {
-                $('editCurrentFile').innerHTML = '<a href="' + d.teacher_files_url + '" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-download me-1"></i> ' + I18N.existingFile + '</a>';
-            } else if ($('editCurrentFile')) {
-                $('editCurrentFile').innerHTML = '';
+            var currentFile = $('editCurrentFile');
+            if (currentFile) {
+                currentFile.textContent = '';
+                if (d.teacher_files_url) {
+                    var link = document.createElement('a');
+                    link.className = 'lab-chip';
+                    link.href = d.teacher_files_url;
+                    link.target = '_blank';
+                    link.rel = 'noopener';
+                    var icon = document.createElement('i');
+                    icon.className = 'fas fa-download';
+                    icon.setAttribute('aria-hidden', 'true');
+                    link.appendChild(icon);
+                    link.appendChild(document.createTextNode(' ' + I18N.existingFile));
+                    currentFile.appendChild(link);
+                }
             }
 
             modeSelectionState.edit = createSelectionState(
@@ -252,19 +296,14 @@
         });
     };
 
-    document.addEventListener('click', function(event) {
-        const editBtn = event.target.closest('.js-edit-lab');
-        if (editBtn) {
-            event.preventDefault();
-            window.openEditLabModal(editBtn.dataset.url);
-            return;
-        }
+    window.EMSDelegate.on('click', '.js-edit-lab', function(event, editBtn) {
+        event.preventDefault();
+        window.openEditLabModal(editBtn.dataset.url);
+    });
 
-        const deleteBtn = event.target.closest('.js-delete-lab');
-        if (deleteBtn) {
-            event.preventDefault();
-            window.deleteLabConfirm(deleteBtn.dataset.url, deleteBtn);
-        }
+    window.EMSDelegate.on('click', '.js-delete-lab', function(event, deleteBtn) {
+        event.preventDefault();
+        window.deleteLabConfirm(deleteBtn.dataset.url, deleteBtn);
     });
 
     function loadGroups(mode, checkedGroups) {
@@ -272,14 +311,14 @@
         const container = $(mode + 'LabGroupList');
         if (!container) return;
 
-        container.innerHTML = '<div class="d-flex flex-column gap-2 p-2" aria-hidden="true"><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span></div>';
+        container.innerHTML = SKELETON;
 
         fetch('/labs/api/groups/' + COURSE_ID + '/')
         .then(r => r.json())
         .then(function(data) {
             const groups = data.groups || [];
             if (!groups.length) {
-                container.innerHTML = '<p class="text-muted text-center py-3">' + I18N.noGroups + '</p>';
+                container.innerHTML = pickerMessage(I18N.noGroups);
                 return;
             }
 
@@ -306,7 +345,7 @@
             if (checkedGroups.length) loadStudents(mode);
         })
         .catch(function() {
-            container.innerHTML = '<p class="text-danger text-center py-3">' + I18N.stateError + '</p>';
+            container.innerHTML = pickerMessage(I18N.stateError, true);
         });
     }
 
@@ -321,12 +360,12 @@
 
         if (!groups.length) {
             resetRemovedAutoSelections(mode);
-            container.innerHTML = '<p class="text-muted text-center py-3">' + I18N.selectGroupFirst + '</p>';
+            container.innerHTML = pickerMessage(I18N.selectGroupFirst);
             updateCount(mode);
             return;
         }
 
-        container.innerHTML = '<div class="d-flex flex-column gap-2 p-2" aria-hidden="true"><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span></div>';
+        container.innerHTML = SKELETON;
 
         fetch('/labs/api/students/' + COURSE_ID + '/?groups=' + encodeURIComponent(groups.join(',')))
         .then(r => r.json())
@@ -334,7 +373,7 @@
             const students = data.students || [];
             syncSelectedStudentsFromGroups(mode, students);
             if (!students.length) {
-                container.innerHTML = '<p class="text-muted text-center py-3">' + I18N.noStudents + '</p>';
+                container.innerHTML = pickerMessage(I18N.noStudents);
                 updateCount(mode);
                 return;
             }
@@ -349,7 +388,7 @@
                 html += '<div class="lab-chk-row">' +
                     '<input type="checkbox" id="' + escapeHtml(mode) + 'LabS' + studentId + '" name="student_ids[]" value="' + studentId + '" ' + isChecked + '>' +
                     '<label for="' + escapeHtml(mode) + 'LabS' + studentId + '">' + escapedName + '</label>' +
-                    '<span class="badge bg-secondary">' + escapedGroupName + '</span>' +
+                    '<span class="ems-badge ems-badge--neutral">' + escapedGroupName + '</span>' +
                     '</div>';
             }
             container.innerHTML = html;
@@ -378,7 +417,7 @@
             updateCount(mode);
         })
         .catch(function() {
-            container.innerHTML = '<p class="text-danger text-center py-3">' + I18N.stateError + '</p>';
+            container.innerHTML = pickerMessage(I18N.stateError, true);
         });
     }
 
@@ -389,70 +428,59 @@
         if ($(mode + 'LabStudentCount')) $(mode + 'LabStudentCount').textContent = sc;
     }
 
-    var addModal = $('addLabModal');
-    if (addModal) {
-        addModal.addEventListener('shown.bs.modal', function() {
-            modeSelectionState.add = createSelectionState();
-            $('addLabStudentList').innerHTML = '<p class="text-muted text-center py-3">' + I18N.selectGroupFirst + '</p>';
-            loadGroups('add');
-        });
+    // Dialoq açılanda/bağlananda (ortaq `ems:overlay:*` hadisələri overlay elementindən qabarcıqlanır).
+    window.EMSDelegate.on('ems:overlay:open', '#addLabModal', function() {
+        modeSelectionState.add = createSelectionState();
+        $('addLabStudentList').innerHTML = pickerMessage(I18N.selectGroupFirst);
+        setFormError(formOf('addLabModal'), '');
+        loadGroups('add');
+    });
 
-        addModal.addEventListener('hidden.bs.modal', function() {
-            $('createLabForm').reset();
-            modeSelectionState.add = createSelectionState();
-        });
-    }
+    window.EMSDelegate.on('ems:overlay:close', '#addLabModal', function() {
+        var form = formOf('addLabModal');
+        if (form) form.reset();
+        modeSelectionState.add = createSelectionState();
+    });
 
-    var createForm = $('createLabForm');
-    if (createForm) {
-        createForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            var btn = this.querySelector('[type=submit]');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    function submitLab(mode, form, url) {
+        if (typeof form.checkValidity === 'function' && !form.checkValidity()) {
+            if (typeof form.reportValidity === 'function') form.reportValidity();
+            return;
+        }
+        var btn = form.querySelector('[type=submit]');
+        setFormError(form, '');
+        setBusy(btn);
 
-            EMSCore.fetchJSON('/labs/create/' + COURSE_ID + '/', {
-                method: 'POST',
-                body: buildFormData('add', this)
-            })
-            .then(function(d) {
-                if (d && d.success) location.reload();
-                else notifyError(I18N.errorPrefix + ': ' + ((d && d.error) || I18N.errorUnknown));
-            })
-            .catch(function(err) { notifyError(requestErrorText(err)); })
-            .finally(function() {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-check me-1"></i> ' + I18N.buttonCreate;
-            });
-        });
-    }
-
-    var editForm = $('editLabForm');
-    if (editForm) {
-        editForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            var labId = $('editLabId').value;
-            if (!labId) return;
-
-            var btn = this.querySelector('[type=submit]');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-
-            EMSCore.fetchJSON('/labs/' + labId + '/edit/', {
-                method: 'POST',
-                body: buildFormData('edit', this)
-            })
-            .then(function(d) {
-                if (d && d.success) location.reload();
-                else notifyError(I18N.errorPrefix + ': ' + ((d && d.error) || I18N.errorUnknown));
-            })
-            .catch(function(err) { notifyError(requestErrorText(err)); })
-            .finally(function() {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-save me-1"></i> ' + I18N.buttonSave;
-            });
+        EMSCore.fetchJSON(url, {
+            method: 'POST',
+            body: buildFormData(mode, form)
+        })
+        .then(function(d) {
+            if (d && d.success) {
+                location.reload();
+                return;
+            }
+            setFormError(form, I18N.errorPrefix + ': ' + ((d && d.error) || I18N.errorUnknown));
+            setIdle(btn);
+        })
+        .catch(function(err) {
+            var message = requestErrorText(err);
+            if (message) setFormError(form, message);
+            setIdle(btn);
         });
     }
+
+    window.EMSDelegate.on('submit', '#addLabModal form', function(event, form) {
+        event.preventDefault();
+        submitLab('add', form, '/labs/create/' + COURSE_ID + '/');
+    });
+
+    window.EMSDelegate.on('submit', '#editLabModal form', function(event, form) {
+        event.preventDefault();
+        var labId = $('editLabId').value;
+        if (!labId) return;
+        submitLab('edit', form, '/labs/' + labId + '/edit/');
+    });
 
     // Qrup + tələbə siyahısı axtarışı (tolerant). 2026-09-28: tələbə axtarış
     // inputlarının (add/editLabStudentSearch) dinləyicisi yox idi — yazmaq heç nə etmirdi.
@@ -467,7 +495,7 @@
         input.addEventListener('input', function(e) {
             var match = searchMatcher(e.target.value);
             document.querySelectorAll('#' + pair[1] + ' .lab-chk-row').forEach(function(row) {
-                row.style.display = match(row.textContent) ? '' : 'none';
+                row.hidden = !match(row.textContent);
             });
         });
     });

@@ -35,6 +35,7 @@ from apps.exams.views.teacher.submission_meta import (
     annotate_preview_flags,
     snapshot_flag_counts,
 )
+from apps.exams.views.teacher.submission_page_ui import ROLE_CHAIR, page_context
 
 _CTX = "exams.view.question_submission.chair"
 
@@ -42,7 +43,9 @@ _CTX = "exams.view.question_submission.chair"
 def _get_submission(request, submission_id):
     organization = _require_organization(request)
     submission = get_object_or_404(
-        QuestionSubmission.objects.select_related("teacher", "subject_ref", "chair_unit", "chair_reviewer"),
+        QuestionSubmission.objects.select_related(
+            "teacher", "subject_ref", "chair_unit", "chair_reviewer", "organization"
+        ),
         id=submission_id,
         organization=organization,
     )
@@ -55,23 +58,22 @@ def question_submission_chair_review(request, submission_id):
     """Kafedra baxış səhifəsi — sual önizləməsi + qərar formu + zaman xətti."""
     submission = _get_submission(request, submission_id)
     questions = annotate_display_numbers(annotate_preview_flags(list(submission.parsed_snapshot or [])))
-    return render(
-        request,
-        "exams/teacher/question_submission_chair_review.html",
-        {
-            "submission": submission,
-            "submission_events": list(submission.events.select_related("actor")),
-            "parsed_questions": questions[:QUESTIONS_PAGE_SIZE],
-            "question_flag_counts": snapshot_flag_counts(questions),
-            "questions_has_more": len(questions) > QUESTIONS_PAGE_SIZE,
-            "questions_page_size": QUESTIONS_PAGE_SIZE,
-            "can_decide": submission.is_at_chair,
-            "min_reason_length": MIN_REASON_LENGTH,
-            "back_url": _profile_section_url("question-chair-review"),
-            "embed_active_section": "question-chair-review",
-            "embed_section_title": submission.title,
-        },
-    )
+    events = list(submission.events.all())
+    context = {
+        "submission": submission,
+        "submission_events": events,
+        "parsed_questions": questions[:QUESTIONS_PAGE_SIZE],
+        "question_flag_counts": snapshot_flag_counts(questions),
+        "questions_has_more": len(questions) > QUESTIONS_PAGE_SIZE,
+        "questions_page_size": QUESTIONS_PAGE_SIZE,
+        "can_decide": submission.is_at_chair,
+        "min_reason_length": MIN_REASON_LENGTH,
+        "back_url": _profile_section_url("question-chair-review"),
+        "embed_active_section": "question-chair-review",
+        "embed_section_title": submission.title,
+    }
+    context.update(page_context(submission, events, role=ROLE_CHAIR, can_decide=submission.is_at_chair))
+    return render(request, "exams/teacher/question_submission_chair_review.html", context)
 
 
 @login_required

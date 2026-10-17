@@ -8,14 +8,14 @@
     (süzgəc paneli və boş vəziyyət üçün).{% endcomment %}
     {% include "partials/ems_ui/_assets.html" %}
     <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor_filters.css' %}?v=20260910-1">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/stats.css' %}?v=20260729-stats">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor.css' %}?v=20260716-live-snapshot">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/proctor_identity.css' %}?v=20261013-note">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}?v=20261017-pkgd">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/stats.css' %}?v=20261017-pkgd">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor.css' %}?v=20261018-pkgd2">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/proctor_identity.css' %}?v=20261017-pkgd">
 {% endblock %}
 
 {% block content %}
-<div class="container py-4 fxc-page"
+<div class="container py-4 fxc-page fxc-page--wide fxc-monitor-page"
      id="fxc-monitor-root"
      data-ws-path="{{ ws_path }}"
      data-snapshot-url="{% url 'exams:exam_center_session_snapshot' session_id=session.pk %}"
@@ -27,46 +27,47 @@
 
   {% csrf_token %}
 
-  {% url 'exams:exam_center_room_list' as sessions_url %}
-  {% include "exams/exam_center/_breadcrumb.html" with back_url=sessions_url current_label=session.room.name %}
-
-  <header class="fxc-head">
-    <div>
-      <span class="fxc-pill fxc-pill--state-{{ session.state }}" id="fxc-state-pill" data-state="{{ session.state }}">
-        {{ session.get_state_display }}
-      </span>
-      <span class="fxc-conn" id="fxc-ws-state" data-state="connecting">{% trans "Qoşulur…" %}</span>
-      <h1><i class="fas fa-door-open"></i> {{ session.room.name }}</h1>
-      <p class="fxc-sub">
-        <i class="fas fa-door-open"></i> {{ session.room.name }} ({{ session.room.code }})
-        · <i class="far fa-clock"></i> {{ session.scheduled_start|date:"d.m.Y H:i" }} – {{ session.scheduled_end|time:"H:i" }}
-        · <span id="fxc-server-time" aria-label="{% trans 'Server vaxtı' %}"></span>
+  {% url 'exams:exam_center_room_monitor' room_id=session.room_id as room_monitor_url %}
+  {% trans "Canlı monitor" as monitor_label %}
+  <div class="ems-header fxc-header">
+    <div class="ems-header__main">
+      {% include "exams/exam_center/_breadcrumb.html" with parent_label=session.room.name parent_url=room_monitor_url current_label=monitor_label %}
+      <div class="fxc-header__status">
+        <span class="fxc-pill fxc-pill--state-{{ session.state }}" id="fxc-state-pill" data-state="{{ session.state }}">
+          {{ session.get_state_display }}
+        </span>
+        <span class="fxc-conn" id="fxc-ws-state" data-state="connecting">{% trans "Qoşulur…" %}</span>
+      </div>
+      <h1 class="ems-header__title"><i class="fas fa-door-open" aria-hidden="true"></i> {{ session.room.name }} <code>{{ session.room.code }}</code></h1>
+      <p class="ems-header__subtitle">
+        <span><i class="far fa-clock" aria-hidden="true"></i> {{ session.scheduled_start|date:"d.m.Y H:i" }} – {{ session.scheduled_end|time:"H:i" }}</span>
+        <span id="fxc-server-time" aria-label="{% trans 'Server vaxtı' %}"></span>
       </p>
     </div>
-    <div class="fxc-head-actions">
+    <div class="ems-header__actions">
       {# Bu zalda başqa canlı imtahanlar da varsa — zal aqreqasiya monitoruna keçid. #}
-      <a href="{% url 'exams:exam_center_room_monitor' room_id=session.room_id %}" class="fxc-btn fxc-btn-ghost">
-        <i class="fas fa-tower-observation"></i> {% trans "Zal nəzarəti (bütün imtahanlar)" %}
+      <a href="{{ room_monitor_url }}" class="fxc-btn fxc-btn-ghost">
+        <i class="fas fa-tower-observation" aria-hidden="true"></i> {% trans "Zal nəzarəti (bütün imtahanlar)" %}
       </a>
       <a href="{% url 'exams:exam_center_session_detail' session_id=session.pk %}" class="fxc-btn fxc-btn-ghost">
-        <i class="fas fa-list-check"></i> {% trans "Detal" %}
+        <i class="fas fa-list-check" aria-hidden="true"></i> {% trans "Detal" %}
       </a>
       {% if session.state == "prepared" %}
       <form method="post" action="{% url 'exams:exam_center_session_open_entry' session_id=session.pk %}" class="fxc-inline-form">
         {% csrf_token %}
         <button type="submit" class="fxc-btn fxc-btn-primary">
-          <i class="fas fa-door-open"></i> {% trans "Girişi aç" %}
+          <i class="fas fa-door-open" aria-hidden="true"></i> {% trans "Girişi aç" %}
         </button>
       </form>
       {% endif %}
       <button type="button" class="fxc-btn fxc-btn-success" id="fxc-start-btn" hidden>
-        <i class="fas fa-play"></i> {% trans "İmtahanı başlat" %}
+        <i class="fas fa-play" aria-hidden="true"></i> {% trans "İmtahanı başlat" %}
       </button>
       <button type="button" class="fxc-btn fxc-btn-danger" id="fxc-end-btn" hidden>
-        <i class="fas fa-stop"></i> {% trans "Oturumu bitir" %}
+        <i class="fas fa-stop" aria-hidden="true"></i> {% trans "Oturumu bitir" %}
       </button>
     </div>
-  </header>
+  </div>
 
   <section class="fxc-stats" id="fxc-stats" aria-label="{% trans 'Oturum statistikası' %}">
     {# JS doldurur — açarlar: total, participated, waiting (ready daxil), active, completed, removed, absent #}

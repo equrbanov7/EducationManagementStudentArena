@@ -1845,10 +1845,10 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(response.context["attempt_timing"]["finished_at"], finished_at)
         self.assertEqual(response.context["attempt_timing"]["duration_seconds"], 35 * 60)
         self.assertEqual(response.context["exam_evaluator_display"], "View Teacher")
-        self.assertContains(response, "Yoxlayan müəllim:")
+        self.assertContains(response, "Yoxlayan müəllim")
         self.assertContains(response, "View Teacher")
-        self.assertContains(response, "Bitirib:")
-        self.assertContains(response, "Ümumi müddət:")
+        self.assertContains(response, "Bitirib")
+        self.assertContains(response, "Ümumi müddət")
         self.assertContains(response, "35 dəq")
 
     def test_teacher_check_attempt_includes_confirm_modal_and_integer_score_input(self):
@@ -2459,8 +2459,9 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'data-has-answer="1"')
         self.assertContains(response, 'data-has-ai-gradable="1"')
-        self.assertContains(response, "status-not-checked")
-        self.assertNotContains(response, "status-empty")
+        # 2026-10-17 redizayn: vəziyyət kartın `data-state`-indədir (scored | pending | empty).
+        self.assertContains(response, 'data-state="pending"')
+        self.assertNotContains(response, 'data-state="empty"')
 
 
 # Sahib 2026-10-10: «Mövcud imtahanlar» bayraqla söndürülüb (default False); bu sinif
@@ -4167,7 +4168,20 @@ class TeacherViewAttemptSearchPaginationTest(TestCase):
         self.assertIn("section%3Dreview-results", response.context["qa_pagination_query"])
         self.assertIn("from_section=review-results", response.context["qa_clear_search_url"])
         self.assertIn("section=review-results", response.context["qa_clear_search_url"])
-        self.assertContains(response, 'class="attempt-search-group input-group"')
+        self.assertContains(response, 'class="rv-search"')
+        # 2026-10-17: kabinet növbəsindən («Dəyərləndirilmiş nəticələr») gələndə «Geri» oraya — filtrləri ilə.
+        self.assertTrue(response.context["from_review_queue"])
+        self.assertEqual(response.context["profile_return_url"], "/accounts/profile/?section=review-results")
+        self.assertTrue(
+            response.context["exam_results_url"].startswith(
+                reverse("exams:teacher_exam_results", args=[self.exam.slug])
+            )
+        )
+        # Sual xəritəsi axtarışdan asılı deyil: 7 sualın hamısı, səhifə linki ilə.
+        question_map = response.context["question_map"]
+        self.assertEqual([row["number"] for row in question_map], list(range(1, 8)))
+        self.assertIn("questions_page=2", question_map[6]["href"])
+        self.assertTrue(all(row["tone"] == "success" for row in question_map))
 
         response_page_two = self.client.get(
             reverse("exams:teacher_view_attempt", args=[self.exam.slug, self.attempt.id]),
@@ -4993,7 +5007,8 @@ Cavab: A
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
-        self.assertContains(response, 'class="btn-back-main"', html=False)
+        # Paket C 2026-10-17: geri keçidi müəllim səhifələrinin ortaq başlığındadır (`etp-back`).
+        self.assertContains(response, 'class="etp-back"', html=False)
 
     def test_create_question_bank_shows_student_question_count_setting_for_written_exam(self):
         self.exam.exam_type = "written"

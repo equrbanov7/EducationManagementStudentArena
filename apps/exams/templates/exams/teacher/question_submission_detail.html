@@ -1,194 +1,79 @@
 {% extends "accounts/profile_embed_base.html" %}
 {% load static i18n %}
+{% comment %}
+Müəllimin göndəriş detalı (Paket C 2026-10-17 — ems_ui): status + mərhələ zolağı + «növbəti addım»
+lenti + KPI; redaktə olunursa yeni göndərişlə EYNİ workbench, olunmursa lazy sual siyahısı.
+Sil formu (`js-qsub-delete-form`) və `_qsub_delete_modal` çəngəlləri dəyişməyib.
+{% endcomment %}
 
 {% block embed_title %}{{ submission.title }} — {% trans "Sual göndərişi" context "exams.template.question_submission" %}{% endblock %}
 
 {% block embed_extra_css %}
-    <link rel="stylesheet" href="{% static 'exams/css/teacher_questions_bank/_part1.css' %}?v=20260607-management">
-    <link rel="stylesheet" href="{% static 'exams/css/teacher_questions_bank/_part2.css' %}?v=20260607-management">
+    {% include "partials/ems_ui/_assets.html" %}
     {% if can_edit %}
-    {# Redaktə workbench-i yeni-göndəriş səhifəsi ilə EYNİ üslub dəstini istəyir. #}
-    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part1.css' %}?v=20260621-sticky-footer">
-    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part2.css' %}?v=20260621-sticky-footer">
-    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part3.css' %}?v=20260621-sticky-footer">
+    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part1.css' %}?v=20261017-pkgc">
+    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part2.css' %}?v=20261017-pkgc">
+    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part3.css' %}?v=20261018-a11y">
+    <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part1.css' %}?v=20261017-pkgc">
+    <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part2.css' %}?v=20261017-pkgc">
     {% endif %}
-    <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part1.css' %}?v=20260607-drawer">
-    <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part2.css' %}?v=20260607-drawer">
-    <link rel="stylesheet" href="{% static 'exams/css/question_submission.css' %}?v=20260930-resp">
-    <link rel="stylesheet" href="{% static 'exams/css/question_submission_ui.css' %}?v=20260717a">
-    <link rel="stylesheet" href="{% static 'exams/css/question_submission_ui_ext.css' %}?v=20260731-lazy">
-    <link rel="stylesheet" href="{% static 'exams/css/question_submission_chain.css' %}?v=20260903-chair">
+    <link rel="stylesheet" href="{% static 'exams/css/question_submission.css' %}?v=20261017-pkgc">
+    <link rel="stylesheet" href="{% static 'exams/css/question_submission_page.css' %}?v=20261017-pkgc">
+    {% if can_edit %}<link rel="stylesheet" href="{% static 'exams/css/question_submission_decide.css' %}?v=20261017-pkgc">{% endif %}
 {% endblock %}
 
 {% block embed_content %}
-<div class="qb-page">
-    <div class="qb-shell">
-        {# ---- Başlıq + əməliyyatlar ("sualları idarə et" ilə eyni) ---- #}
-        <header class="qb-header">
-            <div class="qb-header-titles">
-                <h1><i class="fas fa-paper-plane"></i> {{ submission.title }}</h1>
-                <p>
-                    <i class="fas fa-book"></i> {{ submission.subject }}
-                    {% if submission.exam_kind %}&nbsp;·&nbsp; <i class="fas fa-flag-checkered"></i> {{ submission.get_exam_kind_display }}{% endif %}
-                    &nbsp;·&nbsp; <i class="fas fa-users"></i> {{ submission.group_label }}
-                    &nbsp;·&nbsp; <i class="fas fa-globe"></i> {{ submission.get_language_display }}
-                    &nbsp;·&nbsp; <i class="far fa-clock"></i> {{ submission.created_at|date:"d.m.Y H:i" }}
-                </p>
-            </div>
-            <div class="qb-header-actions">
-                <a href="{{ back_url }}" class="qb-btn qb-btn-light">
-                    <i class="fas fa-arrow-left"></i> {% trans "Göndərişlərə qayıt" context "exams.template.question_submission" %}
-                </a>
-            </div>
-        </header>
+{% trans "Sual göndərişləri" as qsx_section_label %}
+{% trans "Göndərişlərə qayıt" context "exams.template.question_submission" as qsx_back_label %}
+<div class="qsx{% if can_edit %} qsx--edit{% endif %}" data-qsx-page="detail">
+    {% if is_reviewer and qsx_role != "teacher" %}
+    {% include "exams/teacher/partials/question_submissions/_page_head.html" with qsx_actions_include="exams/teacher/partials/question_submissions/_review_head_actions.html" %}
+    {% else %}
+    {% include "exams/teacher/partials/question_submissions/_page_head.html" %}
+    {% endif %}
 
-        {# ---- Tam zəncir: müəllim → kafedra müdiri → İmtahan Mərkəzi ---- #}
-        {% include "exams/teacher/partials/_question_submission_chain.html" %}
-
-        {# ---- Stat kartlar ---- #}
-        <section class="qb-stats">
-            <article class="qb-stat-card">
-                <span class="qb-stat-card__icon qb-ic-slate"><i class="fas fa-database"></i></span>
-                <div class="qb-stat-card__body">
-                    <span class="qb-stat-card__label">{% trans "Ümumi sual sayı" context "exams.template.question_submission" %}</span>
-                    <strong>{{ submission.question_count }}</strong>
-                </div>
-            </article>
-            <article class="qb-stat-card qb-stat-card-red">
-                <span class="qb-stat-card__icon qb-ic-red"><i class="fas fa-circle-xmark"></i></span>
-                <div class="qb-stat-card__body">
-                    <span class="qb-stat-card__label">{% trans "Xətalı" context "exams.template.question_submission" %}</span>
-                    <strong>{{ submission.error_count }}</strong>
-                </div>
-            </article>
-            <article class="qb-stat-card qb-stat-card-amber">
-                <span class="qb-stat-card__icon qb-ic-amber"><i class="fas fa-triangle-exclamation"></i></span>
-                <div class="qb-stat-card__body">
-                    <span class="qb-stat-card__label">{% trans "Xəbərdarlıq" context "exams.template.question_submission" %}</span>
-                    <strong>{{ submission.warning_count }}</strong>
-                </div>
-            </article>
-            {% if submission.status == "pending" %}
-            <article class="qb-stat-card qb-stat-card-blue">
-                <span class="qb-stat-card__icon qb-ic-blue"><i class="fas fa-hourglass-half"></i></span>
-                <div class="qb-stat-card__body">
-                    <span class="qb-stat-card__label">{% trans "Status" context "exams.template.question_submission" %}</span>
-                    <strong>{% trans "Baxılır" context "exams.template.question_submission" %}</strong>
-                </div>
-            </article>
-            {% elif submission.status == "accepted" %}
-            <article class="qb-stat-card qb-stat-card-green">
-                <span class="qb-stat-card__icon qb-ic-green"><i class="fas fa-circle-check"></i></span>
-                <div class="qb-stat-card__body">
-                    <span class="qb-stat-card__label">{% trans "Status" context "exams.template.question_submission" %}</span>
-                    <strong>{% trans "Qəbul edildi" context "exams.template.question_submission" %}</strong>
-                </div>
-            </article>
-            {% else %}
-            <article class="qb-stat-card qb-stat-card-red">
-                <span class="qb-stat-card__icon qb-ic-red"><i class="fas fa-rotate-left"></i></span>
-                <div class="qb-stat-card__body">
-                    <span class="qb-stat-card__label">{% trans "Status" context "exams.template.question_submission" %}</span>
-                    <strong>{% trans "Geri qaytarılıb" context "exams.template.question_submission" %}</strong>
-                </div>
-            </article>
-            {% endif %}
-        </section>
-
-        {# ---- İmtahan mərkəzinin qərarı — bir baxışda görünən banner ---- #}
-        {% if submission.status == "rejected" %}
-        <div class="qsubd-verdict qsubd-verdict--rejected" role="alert">
-            <div class="qsubd-verdict__icon"><i class="fas fa-rotate-left"></i></div>
-            <div class="qsubd-verdict__body">
-                <p class="qsubd-verdict__title">{% trans "İmtahan mərkəzi göndərişi geri qaytardı — düzəliş gözlənilir" context "exams.template.question_submission" %}</p>
-                {% if submission.reviewer_note %}
-                <div class="qsubd-verdict__text">{{ submission.reviewer_note|linebreaksbr }}</div>
-                {% endif %}
-                <div class="qsubd-verdict__meta">
-                    {% if submission.reviewer %}
-                    <span><i class="fas fa-user-check"></i>{{ submission.reviewer.get_full_name|default:submission.reviewer.username }}</span>
-                    {% endif %}
-                    {% if submission.reviewed_at %}
-                    <span><i class="far fa-clock"></i>{{ submission.reviewed_at|date:"d.m.Y H:i" }}</span>
-                    {% endif %}
-                </div>
-                {% if can_edit %}
-                <a href="#qsubEdit" class="qsubd-verdict__cta">
-                    <i class="fas fa-pen-to-square"></i> {% trans "Düzəlt və yenidən göndər" context "exams.template.question_submission" %}
-                </a>
-                {% endif %}
-            </div>
+    {% if can_edit %}
+    <details class="ems-card qsx-card qsx-history-fold"{% if submission.status != "submitted_to_chair" %} open{% endif %}>
+        <summary class="qsx-history-fold__summary">
+            <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+            {% trans "Göndərişin yolu" context "exams.template.question_chain" %}
+            <span class="ems-badge ems-badge--neutral">{{ qsx_timeline|length }}</span>
+        </summary>
+        <div class="qsx-history-fold__body">
+            {% include "exams/teacher/partials/question_submissions/_notes.html" %}
         </div>
-        {% elif submission.status == "accepted" %}
-        <div class="qsubd-verdict qsubd-verdict--accepted">
-            <div class="qsubd-verdict__icon"><i class="fas fa-check"></i></div>
-            <div class="qsubd-verdict__body">
-                <p class="qsubd-verdict__title">{% trans "Göndəriş qəbul edildi" context "exams.template.question_submission" %}</p>
-                {% if submission.reviewer_note %}
-                <div class="qsubd-verdict__text">{{ submission.reviewer_note|linebreaksbr }}</div>
-                {% endif %}
-                <div class="qsubd-verdict__meta">
-                    {% if submission.reviewer %}
-                    <span><i class="fas fa-user-check"></i>{{ submission.reviewer.get_full_name|default:submission.reviewer.username }}</span>
-                    {% endif %}
-                    {% if submission.reviewed_at %}
-                    <span><i class="far fa-clock"></i>{{ submission.reviewed_at|date:"d.m.Y H:i" }}</span>
-                    {% endif %}
-                </div>
-                {% if submission.accepted_bank %}
-                {% if is_reviewer and submission.accepted_bank.is_active %}
-                <a href="{% url 'exams:question_bank_detail' submission.accepted_bank.id %}" class="qsubd-verdict__cta">
-                    <i class="fas fa-layer-group"></i>
-                    {% blocktrans with count=submission.question_count bank=submission.accepted_bank.name context "exams.template.question_submission" %}{{ count }} sual «{{ bank }}» bankına yazıldı{% endblocktrans %}
-                </a>
-                {% else %}
-                {# Mərkəz bankları müəllimə açıq deyil — link yox, məlumat pill-i. #}
-                <span class="qsubd-verdict__cta qsubd-verdict__cta--static">
-                    <i class="fas fa-layer-group"></i>
-                    {% blocktrans with count=submission.question_count bank=submission.accepted_bank.name context "exams.template.question_submission" %}{{ count }} sual «{{ bank }}» bankına yazıldı{% endblocktrans %}
-                </span>
-                {% endif %}
-                {% endif %}
-            </div>
-        </div>
-        {% endif %}
+    </details>
 
-        {% if submission.teacher_note %}
-        <div class="qsubd-note qsubd-note--teacher">
-            <div class="qsubd-note__icon"><i class="fas fa-comment-dots"></i></div>
-            <div>
-                <div class="qsubd-note__label">{% trans "Qeydiniz" context "exams.template.question_submission" %}</div>
-                <div class="qsubd-note__text">{{ submission.teacher_note|linebreaksbr }}</div>
-            </div>
-        </div>
-        {% endif %}
+    {# Redaktə bölməsinin lövbəri (lentdəki «Düzəlt və yenidən göndər» CTA-sı); başlığı workbench özü verir. #}
+    <div class="qsx-anchor" id="qsubEdit"></div>
+    {% include "exams/teacher/partials/_bulk_question_workbench.html" with wb_meta_include="exams/teacher/partials/_question_submission_meta.html" %}
 
-        {# ---- Düzəliş / yenidən göndərmə — yeni göndərişlə EYNİ workbench ---- #}
-        {% if can_edit %}
-        <h2 class="qsubd-section-title" id="qsubEdit">
-            <i class="fas fa-pen-to-square"></i>
-            {% if submission.status == "rejected" %}{% trans "Düzəlt və yenidən göndər" context "exams.template.question_submission" %}{% else %}{% trans "Düzəliş et" context "exams.template.question_submission" %}{% endif %}
-        </h2>
-        {% include "exams/teacher/partials/_bulk_question_workbench.html" with wb_meta_include="exams/teacher/partials/_question_submission_meta.html" %}
-
-        <div class="qsubd-actions">
-            {# Sil — ayrıca route; təsdiq mərkəzləşmiş bootstrap modalındadır. #}
-            <form method="post" action="{% url 'exams:question_submission_delete' submission_id=submission.id %}"
-                  class="js-qsub-delete-form"
-                  data-confirm="{% trans 'Bu göndəriş həmişəlik silinəcək. Davam edilsin?' context 'exams.template.question_submission' %}">
-                {% csrf_token %}
-                <button type="submit" class="qb-btn-danger-ghost">
-                    <i class="fas fa-trash-can"></i> {% trans "Göndərişi sil" context "exams.template.question_submission" %}
-                </button>
-            </form>
+    <div class="qsx-danger">
+        <div>
+            <p class="qsx-danger__title">{% trans "Göndərişi sil" context "exams.template.question_submission" %}</p>
+            <p class="qsx-danger__text">{% trans "Bu göndəriş həmişəlik silinəcək. Davam edilsin?" context "exams.template.question_submission" %}</p>
         </div>
-        {% else %}
-        <h2 class="qsubd-section-title"><i class="fas fa-list-check"></i> {% trans "Göndərilmiş suallar" context "exams.template.question_submission" %}</h2>
-        {% include "exams/teacher/partials/_question_submission_preview.html" with questions=parsed_questions counts=None %}
-        {% endif %}
+        <form method="post" action="{% url 'exams:question_submission_delete' submission_id=submission.id %}"
+              class="js-qsub-delete-form"
+              data-confirm="{% trans 'Bu göndəriş həmişəlik silinəcək. Davam edilsin?' context 'exams.template.question_submission' %}">
+            {% csrf_token %}
+            <button type="submit" class="ems-btn ems-btn--danger">
+                <i class="fas fa-trash-can" aria-hidden="true"></i> {% trans "Göndərişi sil" context "exams.template.question_submission" %}
+            </button>
+        </form>
     </div>
+    {% else %}
+    <div class="qsx-layout">
+        <div class="qsx-layout__main">
+            {% include "exams/teacher/partials/question_submissions/_question_list.html" %}
+        </div>
+        <aside class="qsx-layout__aside">
+            {% include "exams/teacher/partials/question_submissions/_notes.html" %}
+        </aside>
+    </div>
+    {% endif %}
 </div>
-{% include "exams/teacher/partials/_qsub_delete_modal.html" %}
+{% if can_edit %}{% include "exams/teacher/partials/_qsub_delete_modal.html" %}{% endif %}
 {% endblock %}
 
 {% block embed_extra_js %}
@@ -196,6 +81,8 @@
 {% include "exams/teacher/partials/_bulk_workbench_scripts.html" %}
 <script src="{% static 'exams/js/question_submission_subjects.js' %}?v=20260708-groups"></script>
 <script src="{% static 'exams/js/question_submission_form.js' %}"></script>
+{% else %}
+<script src="{% static 'exams/js/question_submission_review_questions.js' %}?v=20261014-searchux" defer></script>
 {% endif %}
 <script src="{% static 'exams/js/question_submission_list.js' %}?v=20260909-ems" defer></script>
 {% endblock %}

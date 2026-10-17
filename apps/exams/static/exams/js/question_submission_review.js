@@ -6,6 +6,9 @@
  * sahələri `disabled` olur (hər iki paneldə name="note" var — yalnız aktiv
  * olan POST-a düşsün), submit düyməsinin mətni/rəngi qərara uyğunlaşır.
  * Bank seçimində mövcud bank seçilərsə "yeni bankın adı" sahəsi gizlənir.
+ *
+ * Paket C 2026-10-17: düymə tonu ems_ui sinifləri ilə (ems-btn--success/warning/danger);
+ * AJAX-safe — `EMSReady` + formada `data-qsubr-ready` bayrağı (təkrar bağlanma yoxdur).
  */
 (function () {
     "use strict";
@@ -40,7 +43,7 @@
                 return;
             }
             var isNewBank = !bankSelect.value;
-            newBankField.style.display = isNewBank ? "" : "none";
+            newBankField.hidden = !isNewBank;
             var input = newBankField.querySelector("input");
             if (input) {
                 input.disabled = !isNewBank || bankSelect.disabled;
@@ -56,17 +59,17 @@
                 return;
             }
             submit.disabled = !value;
-            submit.classList.remove("qb-btn-green", "qb-btn-outline-danger");
+            submit.classList.remove("ems-btn--success", "ems-btn--warning", "ems-btn--danger");
             if (value === "accept") {
-                submit.classList.add("qb-btn-green");
+                submit.classList.add("ems-btn--success");
                 if (submitLabel) { submitLabel.textContent = submit.dataset.acceptLabel || ""; }
                 if (submitIcon) { submitIcon.className = "fas fa-check js-qsubr-submit-icon"; }
             } else if (value === "revision") {
-                submit.classList.add("qb-btn-outline-danger");
+                submit.classList.add("ems-btn--warning");
                 if (submitLabel) { submitLabel.textContent = submit.dataset.revisionLabel || ""; }
                 if (submitIcon) { submitIcon.className = "fas fa-pen js-qsubr-submit-icon"; }
             } else if (value === "reject") {
-                submit.classList.add("qb-btn-outline-danger");
+                submit.classList.add("ems-btn--danger");
                 if (submitLabel) { submitLabel.textContent = submit.dataset.rejectLabel || ""; }
                 if (submitIcon) { submitIcon.className = "fas fa-ban js-qsubr-submit-icon"; }
             } else {
@@ -92,7 +95,21 @@
         applyDecision(checked ? checked.value : "");
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll(".js-qsubr-form").forEach(initDecisionForm);
-    });
+    function boot() {
+        document.querySelectorAll(".js-qsubr-form").forEach(function (form) {
+            if (form.dataset.qsubrReady === "1") {
+                return;
+            }
+            form.dataset.qsubrReady = "1";
+            initDecisionForm(form);
+        });
+    }
+
+    if (window.EMSReady) {
+        window.EMSReady(boot);
+    } else if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", boot);
+    } else {
+        boot();
+    }
 })();

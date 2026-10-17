@@ -11,11 +11,11 @@
     justify-content: center;
     border-radius: 50%;
     overflow: hidden;
-    background: linear-gradient(135deg, #E0E7FF, #C7D2FE);
-    color: #3730A3;
+    background: linear-gradient(135deg, var(--ems-primary-100), var(--ems-primary-200));
+    color: var(--ems-primary-800);
     font-weight: 800;
     line-height: 1;
-    box-shadow: 0 0 0 2px #fff;
+    box-shadow: 0 0 0 2px var(--ems-neutral-0);
     user-select: none;
 }
 .fxc-ava--sm { width: 34px; height: 34px; font-size: .78rem; }
@@ -27,19 +27,19 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    background: #fff;
+    background: var(--ems-neutral-0);
 }
 .fxc-ava--photo .fxc-ava__ini { visibility: hidden; }
-.fxc-ava--flagged { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #DC2626; }
+.fxc-ava--flagged { box-shadow: 0 0 0 2px var(--ems-neutral-0), 0 0 0 4px var(--ems-danger); }
 
 /* ── Kompüter xəritəsi hücrəsi: şəkil üçün bir az böyük ── */
 .fxc-computer-map { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
 .fxc-cell { gap: 1px; padding: 6px 4px; }
 .fxc-cell .fxc-cell-ava { margin-bottom: 2px; width: 40px; height: 40px; }
 .fxc-cell .fxc-cell-num { font-size: .95rem; }
-.fxc-cell--flagged { border-color: #DC2626; box-shadow: 0 0 0 2px rgba(220, 38, 38, .25); }
+.fxc-cell--flagged { border-color: var(--ems-danger); box-shadow: 0 0 0 2px rgba(220, 38, 38, .25); }
 .fxc-cell--hb-missing,
-.fxc-cell--hb-stale { border-style: dashed; border-color: #64748B; }
+.fxc-cell--hb-stale { border-style: dashed; border-color: var(--ems-neutral-500); }
 .fxc-cell--hb-stale .fxc-cell-ava { filter: grayscale(1); opacity: .7; }
 
 /* ── Kiçik nişanlar ── */
@@ -52,31 +52,31 @@
     border-radius: 999px;
     padding: 2px 8px;
     white-space: nowrap;
-    background: #F1F5F9;
-    color: #334155;
-    border: 1px solid #E2E8F0;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    border: 1px solid var(--ems-neutral-200);
 }
-.fxc-pbadge--flag { background: #DC2626; color: #fff; border-color: #DC2626; }
+.fxc-pbadge--flag { background: var(--ems-danger); color: var(--ems-neutral-0); border-color: var(--ems-danger); }
 .fxc-pbadge--sev-critical,
-.fxc-pbadge--sev-high { background: #FEE2E2; color: #991B1B; border-color: #FECACA; }
-.fxc-pbadge--sev-medium { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
-.fxc-pbadge--sev-low { background: #E0F2FE; color: #075985; border-color: #BAE6FD; }
-.fxc-pbadge--sig { background: #F5F3FF; color: #5B21B6; border-color: #DDD6FE; }
+.fxc-pbadge--sev-high { background: var(--ems-danger-100); color: var(--ems-danger-strong); border-color: var(--ems-danger-200); }
+.fxc-pbadge--sev-medium { background: var(--ems-warning-100); color: var(--ems-warning-800); border-color: var(--ems-warning-bd); }
+.fxc-pbadge--sev-low { background: var(--ems-sky-100); color: var(--ems-sky-900); border-color: var(--ems-primary-200); }
+.fxc-pbadge--sig { background: var(--ems-neutral-100); color: var(--ems-violet-800); border-color: var(--ems-violet-100); }
 .fxc-pbadge--hb-missing,
-.fxc-pbadge--hb-stale { background: #F8FAFC; color: #475569; border-style: dashed; border-color: #94A3B8; }
+.fxc-pbadge--hb-stale { background: var(--ems-neutral-50); color: var(--ems-neutral-600); border-style: dashed; border-color: var(--ems-neutral-400); }
 
 /* ── «Qayda pozanlar» paneli sətri ── */
 .fxc-vio-who { display: flex; align-items: center; gap: 9px; min-width: 0; }
 .fxc-vio-who__txt { display: flex; flex-direction: column; min-width: 0; }
 .fxc-vio-who .fxc-vio-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fxc-vio-meta { font-size: .72rem; color: #64748B; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fxc-vio-meta { font-size: .72rem; color: var(--ems-neutral-500); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fxc-vio-pbadges { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 8px; }
-.fxc-vio-row--flagged { border-color: #FCA5A5; background: #FEF2F2; }
+.fxc-vio-row--flagged { border-color: var(--ems-danger-200); background: var(--ems-danger-100); }
 
 /* ── Oturum cədvəli «Tələbə» sütunu ── */
 .fxc-who { display: inline-flex; align-items: center; gap: 9px; }
 .fxc-who__txt { display: inline-flex; flex-direction: column; }
-.fxc-who__meta { font-size: .72rem; font-weight: 500; color: #64748B; }
+.fxc-who__meta { font-size: .72rem; font-weight: 500; color: var(--ems-neutral-500); }
 
 /* ── Kimlik kartı (modallar) ── */
 .fxc-snapshot-identity[hidden],
@@ -87,21 +87,21 @@
     gap: 16px;
     padding: 14px;
     margin: 4px 0 12px;
-    border: 1px solid #E2E8F0;
+    border: 1px solid var(--ems-neutral-200);
     border-radius: 14px;
-    background: #F8FAFC;
+    background: var(--ems-neutral-50);
 }
 .fxc-idcard__body { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.fxc-idcard__kicker { font-size: .68rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #64748B; }
-.fxc-idcard__name { font-size: 1.12rem; font-weight: 800; color: #0F172A; overflow-wrap: anywhere; }
-.fxc-idcard__meta { font-size: .84rem; color: #334155; }
+.fxc-idcard__kicker { font-size: .68rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--ems-neutral-500); }
+.fxc-idcard__name { font-size: 1.12rem; font-weight: 800; color: var(--ems-neutral-900); overflow-wrap: anywhere; }
+.fxc-idcard__meta { font-size: .84rem; color: var(--ems-neutral-700); }
 .fxc-idcard__meta:empty { display: none; }
-.fxc-idcard__user { font-size: .78rem; color: #64748B; }
+.fxc-idcard__user { font-size: .78rem; color: var(--ems-neutral-500); }
 .fxc-idcard__badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 
 /* ── Hadisə xronologiyası ── */
 .fxc-tl-wrap { margin-top: 14px; }
-.fxc-tl-title { font-size: .86rem; font-weight: 800; color: #0F172A; margin: 0 0 8px; display: flex; gap: 6px; align-items: center; }
+.fxc-tl-title { font-size: .86rem; font-weight: 800; color: var(--ems-neutral-900); margin: 0 0 8px; display: flex; gap: 6px; align-items: center; }
 .fxc-tl { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto; }
 .fxc-tl__item {
     display: grid;
@@ -109,23 +109,23 @@
     gap: 2px 10px;
     padding: 7px 10px;
     border-radius: 10px;
-    border-left: 4px solid #CBD5E1;
-    background: #F8FAFC;
+    border-left: 4px solid var(--ems-neutral-300);
+    background: var(--ems-neutral-50);
     font-size: .8rem;
 }
 .fxc-tl__item--critical,
-.fxc-tl__item--high { border-left-color: #DC2626; background: #FEF2F2; }
-.fxc-tl__item--medium { border-left-color: #F59E0B; background: #FFFBEB; }
-.fxc-tl__item--low { border-left-color: #0EA5E9; }
-.fxc-tl__time { color: #64748B; font-variant-numeric: tabular-nums; }
-.fxc-tl__label { color: #0F172A; font-weight: 600; overflow-wrap: anywhere; }
+.fxc-tl__item--high { border-left-color: var(--ems-danger); background: var(--ems-danger-100); }
+.fxc-tl__item--medium { border-left-color: var(--ems-warning-500); background: var(--ems-warning-100); }
+.fxc-tl__item--low { border-left-color: var(--ems-sky-500); }
+.fxc-tl__time { color: var(--ems-neutral-500); font-variant-numeric: tabular-nums; }
+.fxc-tl__label { color: var(--ems-neutral-900); font-weight: 600; overflow-wrap: anywhere; }
 .fxc-tl__tags { grid-column: 2; display: flex; flex-wrap: wrap; gap: 4px; }
 .fxc-tl__src,
 .fxc-tl__sev,
-.fxc-tl__counts { font-size: .66rem; font-weight: 700; border-radius: 999px; padding: 1px 7px; background: #E2E8F0; color: #334155; }
-.fxc-tl__src--signal { background: #EDE9FE; color: #5B21B6; }
-.fxc-tl__counts { background: #FEE2E2; color: #991B1B; }
-.fxc-tl__empty { color: #64748B; font-size: .82rem; margin: 0; }
+.fxc-tl__counts { font-size: .66rem; font-weight: 700; border-radius: 999px; padding: 1px 7px; background: var(--ems-neutral-200); color: var(--ems-neutral-700); }
+.fxc-tl__src--signal { background: var(--ems-violet-100); color: var(--ems-violet-800); }
+.fxc-tl__counts { background: var(--ems-danger-100); color: var(--ems-danger-strong); }
+.fxc-tl__empty { color: var(--ems-neutral-500); font-size: .82rem; margin: 0; }
 
 @media (max-width: 640px) {
     .fxc-idcard { flex-direction: column; align-items: flex-start; }
@@ -137,4 +137,4 @@
 }
 
 /* 2026-10-13: nəzarətçi qeydinin mətni xronologiyada (proctor_identity.js timelineHtml). */
-.fxc-tl__note { display: block; margin-top: 2px; font-style: italic; color: #334155; }
+.fxc-tl__note { display: block; margin-top: 2px; font-style: italic; color: var(--ems-neutral-700); }

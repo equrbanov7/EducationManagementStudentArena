@@ -1,4 +1,32 @@
+/*
+ * teacher_exam_detail.js — müəllimin imtahan detalı (Source: exams/teacher/teacher_exam_detail.html).
+ * 2026-10-17 (Paket B): silmə / sınaq bloku / canlı sessiya dialoqları `ems_ui` overlay-dir
+ * (window.EMSOverlay — fokus tələsi, Escape, fokusun qayıtması); sual forması modalı Bootstrap
+ * olaraq qalır. Sehrbaz paketi teacher_exam_detail_lazy.js ilə tənbəl yüklənir.
+ */
 (function () {
+    function overlayOpen(el) {
+        if (!el) {
+            return;
+        }
+        if (window.EMSOverlay && typeof window.EMSOverlay.open === "function") {
+            window.EMSOverlay.open(el);
+        } else {
+            el.hidden = false;
+        }
+    }
+
+    function overlayClose(el) {
+        if (!el) {
+            return;
+        }
+        if (window.EMSOverlay && typeof window.EMSOverlay.close === "function") {
+            window.EMSOverlay.close(el);
+        } else {
+            el.hidden = true;
+        }
+    }
+
     if (window._TEACHER_EXAM_DETAIL_INIT) {
         return;
     }
@@ -26,18 +54,14 @@
                 if (createdEl) {
                     createdEl.textContent = trigger.getAttribute("data-live-created") || "-";
                 }
-                modal.hidden = false;
-                document.body.classList.add("live-session-modal-open");
-                window.setTimeout(function () {
-                    if (returnBtn) {
-                        returnBtn.focus();
-                    }
-                }, 40);
+                overlayOpen(modal);
+                if (returnBtn) {
+                    returnBtn.focus();
+                }
             }
 
             function closeModal() {
-                modal.hidden = true;
-                document.body.classList.remove("live-session-modal-open");
+                overlayClose(modal);
             }
 
             function withQueryParam(rawUrl, name, value) {
@@ -158,13 +182,6 @@
                 }
             });
 
-            document.addEventListener("keydown", function (event) {
-                if (modal.hidden || event.key !== "Escape") {
-                    return;
-                }
-                closeModal();
-            });
-
             if (returnBtn) {
                 returnBtn.addEventListener("click", function () {
                     var targetUrl = activeTrigger ? activeTrigger.getAttribute("data-live-return-url") : "";
@@ -183,6 +200,48 @@
                     submitStartForm(targetUrl, true);
                 });
             }
+        })();
+
+        (function initOverlayDialogs() {
+            var deleteModalElement = document.getElementById("examDetailDeleteConfirmModal");
+            var deleteModalMessage = document.getElementById("examDetailDeleteConfirmMessage");
+            var deleteModalTarget = document.getElementById("examDetailDeleteConfirmTarget");
+            var deleteConfirmForm = document.getElementById("examDetailDeleteConfirmForm");
+            var trialBlockedModalElement = document.getElementById("examDetailTrialRunBlockedModal");
+
+            document.addEventListener("click", function (event) {
+                // Sual yüklənməyib: "Sınaq keç" imtahanı başlatmır, izahlı dialoq açır.
+                var trialBlockedTrigger = event.target.closest(".js-trial-run-blocked");
+                if (trialBlockedTrigger) {
+                    event.preventDefault();
+                    overlayOpen(trialBlockedModalElement);
+                    return;
+                }
+
+                var deleteTrigger = event.target.closest(".js-open-delete-confirm-modal");
+                if (!deleteTrigger || !deleteModalElement || !deleteConfirmForm) {
+                    return;
+                }
+                event.preventDefault();
+                deleteConfirmForm.setAttribute("action", deleteTrigger.getAttribute("data-delete-action") || "");
+                if (deleteModalMessage) {
+                    deleteModalMessage.textContent = deleteTrigger.getAttribute("data-delete-message") || "";
+                }
+                if (deleteModalTarget) {
+                    deleteModalTarget.textContent = deleteTrigger.getAttribute("data-delete-target") || "";
+                    deleteModalTarget.hidden = !deleteModalTarget.textContent;
+                }
+                overlayOpen(deleteModalElement);
+            });
+
+            // «Sual əlavə et» CTA-sı sınaq dialoqunun içindədirsə, əvvəlcə dialoq bağlanır
+            // (capture — sual modalının klik dinləyicisindən ƏVVƏL).
+            document.addEventListener("click", function (event) {
+                var cta = event.target.closest(".js-open-question-form-modal");
+                if (cta && trialBlockedModalElement && trialBlockedModalElement.contains(cta)) {
+                    overlayClose(trialBlockedModalElement);
+                }
+            }, true);
         })();
 
         (function initQuestionLazyLoading() {
@@ -290,24 +349,11 @@
         var questionModalBody = document.getElementById("questionFormModalBody");
         var questionModalTitle = document.getElementById("questionFormModalTitle");
         var questionModalTrigger = null;
-        var deleteModalElement = document.getElementById("examDetailDeleteConfirmModal");
-        var deleteModalMessage = document.getElementById("examDetailDeleteConfirmMessage");
-        var deleteModalTarget = document.getElementById("examDetailDeleteConfirmTarget");
-        var deleteConfirmForm = document.getElementById("examDetailDeleteConfirmForm");
-        var trialBlockedModalElement = document.getElementById("examDetailTrialRunBlockedModal");
         var questionModal = null;
-        var deleteModal = null;
-        var trialBlockedModal = null;
         var submitInFlight = false;
 
         if (questionModalElement && questionModalBody) {
             questionModal = bootstrap.Modal.getOrCreateInstance(questionModalElement);
-        }
-        if (deleteModalElement) {
-            deleteModal = bootstrap.Modal.getOrCreateInstance(deleteModalElement);
-        }
-        if (trialBlockedModalElement) {
-            trialBlockedModal = bootstrap.Modal.getOrCreateInstance(trialBlockedModalElement);
         }
 
         function buildModalUrl(rawUrl) {
@@ -448,36 +494,6 @@
         }
 
         document.addEventListener("click", function (event) {
-            // Sual yüklənməyib: "Sınaq keç" imtahanı başlatmır, izahlı modal açır.
-            var trialBlockedTrigger = event.target.closest(".js-trial-run-blocked");
-            if (trialBlockedTrigger) {
-                event.preventDefault();
-                if (trialBlockedModal) {
-                    trialBlockedModal.show();
-                }
-                return;
-            }
-
-            var deleteTrigger = event.target.closest(".js-open-delete-confirm-modal");
-            if (deleteTrigger) {
-                event.preventDefault();
-                if (!deleteModal || !deleteConfirmForm) {
-                    return;
-                }
-
-                deleteConfirmForm.setAttribute("action", deleteTrigger.getAttribute("data-delete-action") || "");
-                if (deleteModalMessage) {
-                    deleteModalMessage.textContent = deleteTrigger.getAttribute("data-delete-message") || "";
-                }
-                if (deleteModalTarget) {
-                    deleteModalTarget.textContent = deleteTrigger.getAttribute("data-delete-target") || "";
-                    deleteModalTarget.hidden = !deleteModalTarget.textContent;
-                }
-
-                deleteModal.show();
-                return;
-            }
-
             var questionTrigger = event.target.closest(".js-open-question-form-modal");
             if (!questionTrigger) {
                 return;
@@ -488,11 +504,6 @@
             }
 
             event.preventDefault();
-            // CTA "sual yoxdur" modalının içindədirsə, iki modal üst-üstə
-            // qalmasın — əvvəlcə onu bağlayırıq.
-            if (trialBlockedModalElement && trialBlockedModalElement.contains(questionTrigger)) {
-                trialBlockedModal.hide();
-            }
             openQuestionModal(
                 questionTrigger.getAttribute("data-question-modal-url") || questionTrigger.getAttribute("href"),
                 questionTrigger.getAttribute("data-question-modal-mode") || "edit"

@@ -1,0 +1,12 @@
+{% load i18n %}
+<a href="{% url 'courses:course_dashboard' course.id %}" class="ems-btn">
+    <i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "back_dashboard" context "courses.members_page" %}
+</a>
+{% if is_owner %}
+<button type="button" class="ems-btn" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+    <i class="fas fa-user-plus" aria-hidden="true"></i> {% trans "add_student" context "courses.members_page" %}
+</button>
+<button type="button" class="ems-btn ems-btn--primary" data-bs-toggle="modal" data-bs-target="#addGroupModal">
+    <i class="fas fa-users-cog" aria-hidden="true"></i> {% trans "add_group" context "courses.members_page" %}
+</button>
+{% endif %}

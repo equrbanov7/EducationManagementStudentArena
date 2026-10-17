@@ -312,3 +312,56 @@
 .ems-bar__fill--danger {
     background: var(--ems-danger);
 }
+
+/* ── İkonlu axtarış sahəsi (Paket A 2026-10-18) ─────────────────────────────
+   `<form class="ems-search">` + `<i class="ems-search__icon">` + `<input class="ems-input ems-search__input">`
+   (+ opsional `<a class="ems-search__clear">`). Bölmələrin hər birində ayrıca yazılan
+   eyni axtarış qutusu (`mr-/ta-/sc-/xh-search`) burada birləşdi. */
+.ems-search {
+    position: relative;
+    max-width: 460px;
+}
+
+.ems-search__icon {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: var(--ems-neutral-400);
+    pointer-events: none;
+}
+
+.ems-search .ems-search__input {
+    width: 100%;
+    padding-left: 36px;
+}
+
+.ems-search--clearable .ems-search__input {
+    padding-right: 36px;
+}
+
+.ems-search__clear {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    transform: translateY(-50%);
+    border-radius: var(--ems-r-md);
+    color: var(--ems-neutral-500);
+    text-decoration: none;
+}
+
+.ems-search__clear:hover {
+    background: var(--ems-neutral-100);
+    color: var(--ems-text);
+}
+
+@media (max-width: 480px) {
+    .ems-search {
+        max-width: none;
+    }
+}

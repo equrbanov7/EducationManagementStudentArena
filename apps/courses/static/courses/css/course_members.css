@@ -1,201 +1,156 @@
-/* --- Ümumi Layout --- */
-.members-page-wrapper {
-    background-color: #f4f6f9;
-    min-height: 100vh;
-    padding: 30px 0;
-}
+/* ════════════════════════════════════════════════════════════════════════════
+   EMSArena — Kurs üzvləri səhifəsi (course_members.html) · 2026-10-17 (Paket E)
+   41 hex rəngi, `btn-custom` düymələri və ayrıca «header» kartı çıxarıldı; başlıq/KPI/badge/düymə ortaq
+   `ems_ui`-dandır. Yalnız `--ems-*` tokenləri, telefonda (375 px) üfüqi sürüşmə yoxdur.
+   ════════════════════════════════════════════════════════════════════════════ */
 
-.members-container {
-    max-width: 1100px;
+.cm-page {
+    max-width: var(--ems-w-page);
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 22px 24px 72px;
+    color: var(--ems-neutral-800);
 }
 
-/* --- Header --- */
-.members-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+.cm-page *,
+.cm-page *::before,
+.cm-page *::after {
+    box-sizing: border-box;
 }
 
-.header-left .back-btn {
-    text-decoration: none;
-    color: #6c757d;
-    font-size: 0.9rem;
-    display: inline-flex;
-    align-items: center;
-    margin-bottom: 5px;
-    transition: color 0.2s;
+.cm-page .ems-header__title,
+.cm-page .ems-header__subtitle {
+    overflow-wrap: anywhere;
 }
 
-.header-left .back-btn:hover { color: #333; }
-.header-left h1 { margin: 0; font-size: 1.8rem; color: #2c3e50; }
-.header-left p { margin: 0; color: #6c757d; font-size: 1rem; }
-
-.header-actions { display: flex; gap: 10px; }
-
-.btn-custom {
-    padding: 10px 20px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s;
-}
-
-.btn-primary-custom { background-color: #4e73df; color: white; }
-.btn-primary-custom:hover { background-color: #2e59d9; transform: translateY(-2px); }
-
-.btn-secondary-custom { background-color: #858796; color: white; }
-.btn-secondary-custom:hover { background-color: #60616f; transform: translateY(-2px); }
-
-/* --- Section Cards --- */
-.section-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-    margin-bottom: 25px;
+.cm-card {
+    margin-bottom: var(--ems-sp-6);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
     overflow: hidden;
 }
 
-.section-header {
-    padding: 15px 20px;
-    background: #f8f9fc;
-    border-bottom: 1px solid #e3e6f0;
+.cm-card--empty {
+    border-style: dashed;
+    border-color: var(--ems-neutral-300);
+}
+
+.cm-card__head {
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
-    align-items: center;
+    gap: var(--ems-sp-4);
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--ems-border);
+    background: var(--ems-bg-subtle);
 }
 
-.section-header h3 { margin: 0; font-size: 1.1rem; color: #4e73df; font-weight: 700; }
-.count-badge { background: var(--ems-primary-50); color: #4e73df; padding: 2px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+.cm-card__head form {
+    margin: 0;
+}
 
-/* --- Group Specific Headers --- */
-.group-section-wrapper { border-bottom: 1px solid #eee; }
-.group-section-wrapper:last-child { border-bottom: none; }
-
-.group-header {
-    padding: 12px 20px;
-    background: var(--ems-neutral-0);
+.cm-card__title {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
     align-items: center;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
 }
 
-.group-title { font-weight: 700; color: #5a5c69; display: flex; align-items: center; gap: 8px; }
-.btn-delete-group {
-    background: transparent;
-    border: 1px solid #e74a3b;
-    color: #e74a3b;
-    padding: 5px 12px;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s;
+.cm-card__title i {
+    color: var(--ems-primary-600);
 }
-.btn-delete-group:hover { background: #e74a3b; color: white; }
 
-/* --- Member List Items --- */
-.member-list { padding: 0; }
+.cm-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
 
-.member-item {
+.cm-member {
     display: flex;
     align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid #f1f1f1;
-    transition: background 0.2s;
+    gap: var(--ems-sp-5);
+    padding: 10px 18px;
 }
-.member-item:last-child { border-bottom: none; }
-.member-item:hover { background-color: #fafbfc; }
 
-.member-avatar {
-    width: 45px;
-    height: 45px;
-    background: linear-gradient(135deg, var(--ems-primary-600) 0%, #0ea5e9 100%);
-    color: white;
+.cm-member + .cm-member {
+    border-top: 1px solid var(--ems-neutral-100);
+}
+
+.cm-member:hover {
+    background: var(--ems-bg-subtle);
+}
+
+.cm-avatar {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+}
+
+.cm-avatar--teacher {
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
+}
+
+.cm-member__text {
     display: flex;
-    align-items: center;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.cm-member__name {
+    font-size: var(--ems-fs-md);
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.cm-member__user {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+    overflow-wrap: anywhere;
+}
+
+.cm-btn--danger:hover:not(:disabled) {
+    border-color: var(--ems-danger-bd);
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+.cm-empty-actions {
+    display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    font-size: 1.2rem;
-    margin-right: 15px;
+    gap: var(--ems-sp-3);
 }
 
-.member-info { flex-grow: 1; }
-.member-info strong { display: block; color: #333; }
-.member-info small { color: #888; }
+@media (max-width: 768px) {
+    .cm-page .ems-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--ems-sp-4);
+    }
+}
 
-.badge-role { padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; margin-right: 10px; }
-.badge-teacher { background: #d1fae5; color: #065f46; }
-.badge-assistant { background: #fff7ed; color: #9a3412; }
-.badge-student { background: var(--ems-primary-50); color: var(--ems-primary-800); }
+@media (max-width: 575.98px) {
+    .cm-page {
+        padding: 16px 14px 56px;
+    }
 
-.btn-icon-delete {
-    background: none; border: none; color: #e74a3b;
-    cursor: pointer; opacity: 0.6; transition: opacity 0.2s; font-size: 1.1rem;
+    .cm-card__head,
+    .cm-member {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
 }
-.btn-icon-delete:hover { opacity: 1; }
-
-/* --- Custom Searchable Selector (Modal İçin) --- */
-.custom-selector-box {
-    border: 1px solid #d1d3e2;
-    border-radius: 8px;
-    padding: 15px;
-    background: #fdfdfe;
-}
-.search-input-wrap { position: relative; margin-bottom: 10px; }
-.search-input-wrap i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #aaa; }
-.custom-search-input {
-    width: 100%; padding: 8px 10px 8px 35px;
-    border: 1px solid #d1d3e2; border-radius: 6px; outline: none;
-}
-.custom-list-box {
-    max-height: 200px; overflow-y: auto;
-    border: 1px solid #e3e6f0; border-radius: 6px; background: white;
-}
-.list-row {
-    display: flex; align-items: center; padding: 8px 12px;
-    border-bottom: 1px solid #f8f9fc; cursor: pointer;
-}
-.list-row:hover { background: #f1f3f9; }
-.list-row input { transform: scale(1.2); margin-right: 10px; cursor: pointer; }
-.list-row label { cursor: pointer; width: 100%; margin: 0; font-size: 0.9rem; }
-.selection-count { text-align: right; font-size: 0.8rem; color: #888; margin-top: 5px; }
-
-/* --- Modal Styles --- */
-.custom-modal {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5); z-index: 1050;
-    display: none; align-items: center; justify-content: center;
-    opacity: 0; transition: opacity 0.3s ease;
-}
-.custom-modal.active { display: flex; opacity: 1; }
-.custom-modal-content {
-    background: white; width: 90%; max-width: 600px;
-    border-radius: 12px; overflow: hidden;
-    box-shadow: 0 15px 50px rgba(0,0,0,0.3);
-    transform: translateY(-20px); transition: transform 0.3s ease;
-}
-.custom-modal.active .custom-modal-content { transform: translateY(0); }
-.modal-header {
-    background: #4e73df; color: white; padding: 15px 20px;
-    display: flex; justify-content: space-between; align-items: center;
-}
-.modal-header h2 { margin: 0; font-size: 1.25rem; }
-.modal-close { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
-.modal-body { padding: 20px; max-height: 70vh; overflow-y: auto; }
-.modal-footer {
-    padding: 15px 20px; background: #f8f9fc; border-top: 1px solid #e3e6f0;
-    display: flex; justify-content: flex-end; gap: 10px;
-}
-.form-group { margin-bottom: 15px; }
-.form-label { display: block; font-weight: 600; margin-bottom: 5px; color: #555; }
-.form-control { width: 100%; padding: 10px; border: 1px solid #d1d3e2; border-radius: 6px; }

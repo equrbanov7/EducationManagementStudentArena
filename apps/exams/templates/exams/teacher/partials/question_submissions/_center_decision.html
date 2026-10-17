@@ -1,0 +1,109 @@
+{% load i18n %}
+{% comment %}
+İmtahan Mərkəzinin qərar kartı (Paket C 2026-10-17 — ems_ui kart + seçim kartları).
+POST müqaviləsi dəyişməyib: decision (accept|revision|reject) · bank_id · new_bank_name · note.
+Qəbul paneli və rədd/düzəliş paneli eyni `name="note"` işlədir — gizli panelin sahələri JS ilə
+`disabled` olur (question_submission_review.js; çəngəllər js-qsubr-*).
+{% endcomment %}
+<section class="ems-card qsx-card qsx-decide" id="qsubDecision" aria-labelledby="qsxDecideTitle">
+    <div class="ems-card__head">
+        <div>
+            <h2 class="ems-card__title" id="qsxDecideTitle"><i class="fas fa-gavel" aria-hidden="true"></i> {% trans "Qərar" context "exams.template.question_submission" %}</h2>
+            <p class="ems-card__sub">{% trans "Qərarınızı seçin" context "exams.template.question_submission" %}</p>
+        </div>
+    </div>
+    <div class="ems-card__body">
+        {% if submission.error_count %}
+        <div class="ems-banner ems-banner--danger qsx-decide__warn" role="alert">
+            <div class="ems-banner__body">{% blocktrans with count=submission.error_count context "exams.template.question_submission" %}Bu göndərişdə {{ count }} xətalı sual var — qəbul etməzdən əvvəl aşağıdakı siyahıda yoxlayın.{% endblocktrans %}</div>
+        </div>
+        {% endif %}
+        <form method="post" action="{% url 'exams:question_submission_decide' submission.id %}" class="js-qsubr-form">
+            {% csrf_token %}
+            <fieldset class="qsubr-choices">
+                <legend class="sr-only">{% trans "Qərarınızı seçin" context "exams.template.question_submission" %}</legend>
+                <label class="qsubr-choice qsubr-choice--accept">
+                    <input type="radio" name="decision" value="accept" required>
+                    <span class="qsubr-choice__card">
+                        <span class="qsubr-choice__icon" aria-hidden="true"><i class="fas fa-check"></i></span>
+                        <span class="qsubr-choice__text">
+                            <span class="qsubr-choice__title">{% trans "Qəbul et" context "exams.template.question_submission" %}</span>
+                            <span class="qsubr-choice__hint">{% trans "Suallar seçdiyiniz sual bankına yazılacaq və müəllimə bildiriş gedəcək." context "exams.template.question_submission" %}</span>
+                        </span>
+                    </span>
+                </label>
+                <label class="qsubr-choice qsubr-choice--revision">
+                    <input type="radio" name="decision" value="revision" required>
+                    <span class="qsubr-choice__card">
+                        <span class="qsubr-choice__icon" aria-hidden="true"><i class="fas fa-pen"></i></span>
+                        <span class="qsubr-choice__text">
+                            <span class="qsubr-choice__title">{% trans "Düzəliş istə" context "exams.template.question_submission" %}</span>
+                            <span class="qsubr-choice__hint">{% trans "Müəllim düzəldib yenidən göndərəcək — düzəlişdən sonra dəst TƏKRAR kafedra təsdiqindən keçir." context "exams.template.question_submission" %}</span>
+                        </span>
+                    </span>
+                </label>
+                <label class="qsubr-choice qsubr-choice--reject">
+                    <input type="radio" name="decision" value="reject" required>
+                    <span class="qsubr-choice__card">
+                        <span class="qsubr-choice__icon" aria-hidden="true"><i class="fas fa-rotate-left"></i></span>
+                        <span class="qsubr-choice__text">
+                            <span class="qsubr-choice__title">{% trans "Rədd et" context "exams.template.question_submission" %}</span>
+                            <span class="qsubr-choice__hint">{% trans "Dəst rədd edilir — müəllim istəsə düzəldib yenidən kafedra təsdiqinə göndərə bilər." context "exams.template.question_submission" %}</span>
+                        </span>
+                    </span>
+                </label>
+            </fieldset>
+
+            <div class="qsubr-panel js-qsubr-panel" data-decision="accept">
+                <div class="qsx-fields">
+                    <div class="ems-field">
+                        <label class="ems-field__label" for="qsubBank">{% trans "Suallar hansı banka yazılsın?" context "exams.template.question_submission" %}</label>
+                        <div class="bootstrap-single-select bootstrap-single-select--ems">
+                            <select id="qsubBank" name="bank_id" disabled
+                                    class="ems-select bootstrap-single-select__native js-qsubr-bank" data-bootstrap-select
+                                    data-live-search="true"
+                                    data-live-search-placeholder="{% trans 'Axtar…' context 'ui.filters' %}"
+                                    data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'ui.filters' %}">
+                                <option value="">{% trans "— Yeni bank yaradılsın —" context "exams.template.question_submission" %}</option>
+                                {% for bank in banks %}
+                                <option value="{{ bank.id }}">{% if bank.match_rank < 3 %}★ {% endif %}{{ bank.name }}{% if bank.subject_label %} ({{ bank.subject_label }}{% if bank.exam_kind %} · {{ bank.get_exam_kind_display }}{% endif %}){% elif bank.exam_kind %} ({{ bank.get_exam_kind_display }}){% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <p class="qsx-hint">{% trans "Boş saxlasanız suallar göndərişin fənni və imtahan növü ilə yeni banka yazılacaq. ★ — fənnə/növə uyğun banklar." context "exams.template.question_submission" %}</p>
+                    </div>
+                    <div class="ems-field js-qsubr-newbank">
+                        <label class="ems-field__label" for="qsubNewBank">{% trans "Yeni bankın adı" context "exams.template.question_submission" %} <span class="ems-field__opt">{% trans "(boşdursa başlıq götürülür)" context "exams.template.question_submission" %}</span></label>
+                        <input type="text" class="ems-input" id="qsubNewBank" name="new_bank_name" maxlength="200" disabled placeholder="{{ submission.title }}">
+                    </div>
+                    <div class="ems-field qsx-fields__wide">
+                        <label class="ems-field__label" for="qsubAcceptNote">{% trans "Müəllimə qeyd" context "exams.template.question_submission" %} <span class="ems-field__opt">{% trans "(opsional)" context "exams.template.question_submission" %}</span></label>
+                        <textarea class="ems-textarea" id="qsubAcceptNote" name="note" rows="2" disabled
+                                  placeholder="{% trans 'məs. təşəkkürlər, suallar final bankına əlavə olundu…' context 'exams.template.question_submission' %}"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="qsubr-panel js-qsubr-panel" data-decision="reject revision">
+                <div class="ems-field">
+                    <label class="ems-field__label" for="qsubRejectNote">{% trans "Müəllim nəyi düzəltməlidir?" context "exams.template.question_submission" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+                    <textarea class="ems-textarea" id="qsubRejectNote" name="note" rows="3" required disabled
+                              minlength="{{ min_reason_length }}" aria-describedby="qsubRejectHint"
+                              placeholder="{% trans 'məs. 3-cü sualda düzgün cavab işarələnməyib...' context 'exams.template.question_submission' %}"></textarea>
+                    <p class="qsx-hint" id="qsubRejectHint">{% trans "Bu mətn müəllimin göndəriş səhifəsində banner kimi görünəcək." context "exams.template.question_submission" %}</p>
+                </div>
+            </div>
+
+            <div class="qsubr-submit-row">
+                <button type="submit" class="ems-btn ems-btn--lg qsubr-submit js-qsubr-submit" disabled
+                        data-idle-label="{% trans 'Əvvəlcə qərar seçin' context 'exams.template.question_submission' %}"
+                        data-accept-label="{% trans 'Qəbul et və banka əlavə et' context 'exams.template.question_submission' %}"
+                        data-revision-label="{% trans 'Düzəliş üçün geri qaytar' context 'exams.template.question_submission' %}"
+                        data-reject-label="{% trans 'Rədd et' context 'exams.template.question_submission' %}">
+                    <i class="fas fa-gavel js-qsubr-submit-icon" aria-hidden="true"></i>
+                    <span class="js-qsubr-submit-label">{% trans "Əvvəlcə qərar seçin" context "exams.template.question_submission" %}</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</section>

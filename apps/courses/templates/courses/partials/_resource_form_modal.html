@@ -8,134 +8,82 @@
      data-i18n-loading="{% trans 'loading' context 'courses.partial.resource_modal' %}"
      data-i18n-error-retry="{% trans 'error_retry' context 'courses.partial.resource_modal' %}"></div>
 
-<div class="modal fade" id="resourceFormModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade ems-bsd" id="resourceFormModal" tabindex="-1" aria-hidden="true" aria-labelledby="resourceFormModalLabel">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
-            <!-- Header -->
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title">
-                    <i class="fas fa-file-upload"></i> {% trans "title_add_resource" context "courses.partial.resource_modal" %}
-                    <span id="resourceModalTopicName" class="text-white-50"></span>
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header ems-bsd__head">
+                <span class="ems-bsd__ic ems-bsd__ic--resources" aria-hidden="true">{% include "courses/partials/_cd_icon.html" with icon="folder" size=20 %}</span>
+                <div class="ems-bsd__tx">
+                    <h5 class="modal-title" id="resourceFormModalLabel">{% trans "title_add_resource" context "courses.partial.resource_modal" %}</h5>
+                    <p class="ems-bsd__sub" id="resourceModalTopicName"></p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'ui.dialog' %}"></button>
             </div>
-            
-            <!-- Body -->
-            <div class="modal-body">
-                <form id="resourceForm" method="post" action="{% url 'courses:add_resource' course.id %}" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    
-                    <!-- Resource Type Selection -->
-                    <div class="mb-3">
-                        <label class="form-label" id="resource-type-label">
-                            <strong>{% trans "field_resource_type" context "courses.partial.resource_modal" %}</strong>
-                            <span class="text-danger">*</span>
-                        </label>
-                        <div class="btn-group w-100" role="group" aria-labelledby="resource-type-label">
-                            <input type="radio" class="btn-check" name="resource_type" 
-                                   id="typeFile" value="file" checked>
-                            <label class="btn btn-outline-primary" for="typeFile">
-                                <i class="fas fa-file-pdf"></i> {% trans "type_file" context "courses.partial.resource_modal" %}
-                            </label>
-                            
-                            <input type="radio" class="btn-check" name="resource_type" 
-                                   id="typeLink" value="link">
-                            <label class="btn btn-outline-primary" for="typeLink">
-                                <i class="fas fa-link"></i> {% trans "type_link" context "courses.partial.resource_modal" %}
-                            </label>
-                            
-                            <input type="radio" class="btn-check" name="resource_type" 
-                                   id="typeVideo" value="video">
-                            <label class="btn btn-outline-primary" for="typeVideo">
-                                <i class="fas fa-video"></i> {% trans "type_video" context "courses.partial.resource_modal" %}
-                            </label>
-                            
-                            <input type="radio" class="btn-check" name="resource_type" 
-                                   id="typeDocument" value="document">
-                            <label class="btn btn-outline-primary" for="typeDocument">
-                                <i class="fas fa-file-alt"></i> {% trans "type_document" context "courses.partial.resource_modal" %}
-                            </label>
+
+            <form id="resourceForm" method="post" action="{% url 'courses:add_resource' course.id %}" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                <div class="ems-bsd__body ems-bsd__fields">
+                    <div class="ems-field">
+                        <span class="ems-field__label" id="resource-type-label">{% trans "field_resource_type" context "courses.partial.resource_modal" %} <span class="ems-field__req" aria-hidden="true">*</span></span>
+                        <div class="ems-seg" role="radiogroup" aria-labelledby="resource-type-label">
+                            <input type="radio" name="resource_type" id="typeFile" value="file" checked>
+                            <label for="typeFile"><i class="fas fa-file-pdf" aria-hidden="true"></i> {% trans "type_file" context "courses.partial.resource_modal" %}</label>
+                            <input type="radio" name="resource_type" id="typeLink" value="link">
+                            <label for="typeLink"><i class="fas fa-link" aria-hidden="true"></i> {% trans "type_link" context "courses.partial.resource_modal" %}</label>
+                            <input type="radio" name="resource_type" id="typeVideo" value="video">
+                            <label for="typeVideo"><i class="fas fa-video" aria-hidden="true"></i> {% trans "type_video" context "courses.partial.resource_modal" %}</label>
+                            <input type="radio" name="resource_type" id="typeDocument" value="document">
+                            <label for="typeDocument"><i class="fas fa-file-alt" aria-hidden="true"></i> {% trans "type_document" context "courses.partial.resource_modal" %}</label>
                         </div>
                     </div>
-                    
-                    <!-- Title Field -->
-                    <div class="mb-3">
-                        <label for="resourceTitle" class="form-label">
-                            <strong>{% trans "field_resource_title" context "courses.partial.resource_modal" %}</strong>
-                            <span class="text-danger">*</span>
-                        </label>
-                        <input type="text" class="form-control" id="resourceTitle" 
-                               name="title" placeholder="{% trans 'placeholder_resource_title' context 'courses.partial.resource_modal' %}"
-                               required>
+
+                    <div class="ems-field">
+                        <label for="resourceTitle" class="ems-field__label">{% trans "field_resource_title" context "courses.partial.resource_modal" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+                        <input type="text" class="ems-input" id="resourceTitle" name="title" maxlength="255" required autocomplete="off"
+                               placeholder="{% trans 'placeholder_resource_title' context 'courses.partial.resource_modal' %}">
                     </div>
-                    
-                    <!-- Topic Selection -->
-                    <div class="mb-3">
-                        <label for="resourceTopic" class="form-label">
-                            <strong>{% trans "field_topic" context "courses.partial.resource_modal" %}</strong>
-                        </label>
-                        <div class="bootstrap-single-select">
-                            <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" id="resourceTopic" name="topic" data-bootstrap-select>
+
+                    <div class="ems-field">
+                        <label for="resourceTopic" class="ems-field__label">{% trans "field_topic" context "courses.partial.resource_modal" %}</label>
+                        <div class="bootstrap-single-select bootstrap-single-select--ems">
+                            <select class="ems-select bootstrap-single-select__native" id="resourceTopic" name="topic" data-bootstrap-select>
                                 <option value="">{% trans "option_no_topic" context "courses.partial.resource_modal" %}</option>
                                 {% for topic in topics %}
                                     <option value="{{ topic.id }}">{{ topic.order }}. {{ topic.title }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <small class="text-muted">
-                            {% trans "help_topic_optional" context "courses.partial.resource_modal" %}
-                        </small>
+                        <p class="ems-field__hint">{% trans "help_topic_optional" context "courses.partial.resource_modal" %}</p>
                     </div>
-                    
-                    <!-- Description Field -->
-                    <div class="mb-3">
-                        <label for="resourceDescription" class="form-label">
-                            <strong>{% trans "field_description" context "courses.partial.resource_modal" %}</strong>
-                        </label>
-                        <textarea class="form-control" id="resourceDescription" 
-                                  name="description" rows="2" 
+
+                    <div class="ems-field">
+                        <label for="resourceDescription" class="ems-field__label">{% trans "field_description" context "courses.partial.resource_modal" %}</label>
+                        <textarea class="ems-textarea" id="resourceDescription" name="description" rows="2"
                                   placeholder="{% trans 'placeholder_description' context 'courses.partial.resource_modal' %}"></textarea>
                     </div>
-                    
-                    <!-- File Upload (conditional) -->
-                    <div class="mb-3" id="fileUploadSection">
-                        <label for="resourceFile" class="form-label">
-                            <strong>{% trans "field_file" context "courses.partial.resource_modal" %}</strong>
-                            <span class="text-danger">*</span>
-                        </label>
-                        <input type="file" class="form-control" id="resourceFile" name="file">
-                        <small class="text-muted">
-                            {% trans "help_supported_formats" context "courses.partial.resource_modal" %}
-                        </small>
+
+                    <div class="ems-field" id="fileUploadSection">
+                        <label for="resourceFile" class="ems-field__label">{% trans "field_file" context "courses.partial.resource_modal" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+                        <input type="file" class="ems-input ems-bsd__file" id="resourceFile" name="file">
+                        <p class="ems-field__hint">{% trans "help_supported_formats" context "courses.partial.resource_modal" %}</p>
                     </div>
-                    
-                    <!-- URL Input (conditional) -->
-                    <div class="mb-3 d-none" id="urlInputSection">
-                        <label for="resourceUrl" class="form-label">
-                            <strong>{% trans "field_url" context "courses.partial.resource_modal" %}</strong>
-                            <span class="text-danger">*</span>
-                        </label>
-                        <input type="url" class="form-control" id="resourceUrl" 
-                               name="url" placeholder="{% trans 'placeholder_url' context 'courses.partial.resource_modal' %}">
-                        <small class="text-muted">
-                            {% trans "help_external_link" context "courses.partial.resource_modal" %}
-                        </small>
+
+                    <div class="ems-field d-none" id="urlInputSection">
+                        <label for="resourceUrl" class="ems-field__label">{% trans "field_url" context "courses.partial.resource_modal" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+                        <input type="url" class="ems-input" id="resourceUrl" name="url"
+                               placeholder="{% trans 'placeholder_url' context 'courses.partial.resource_modal' %}">
+                        <p class="ems-field__hint">{% trans "help_external_link" context "courses.partial.resource_modal" %}</p>
                     </div>
-                    
-                    <!-- Error Messages Container -->
-                    <div id="resourceErrors" class="alert alert-danger d-none" role="alert"></div>
-                    
-                    <!-- Submit Button -->
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-success flex-grow-1">
-                            <i class="fas fa-save"></i> {% trans "action_add_resource" context "courses.partial.resource_modal" %}
-                        </button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times"></i> {% trans "action_cancel" context "courses.partial.resource_modal" %}
-                        </button>
-                    </div>
-                </form>
-            </div>
+
+                    <div id="resourceErrors" class="ems-msg ems-msg--error ems-bsd__errors d-none" role="alert"></div>
+                </div>
+                <div class="modal-footer ems-bsd__foot">
+                    <button type="button" class="ems-btn" data-bs-dismiss="modal">{% trans "action_cancel" context "courses.partial.resource_modal" %}</button>
+                    <button type="submit" class="ems-btn ems-btn--primary">
+                        <i class="fas fa-save" aria-hidden="true"></i> {% trans "action_add_resource" context "courses.partial.resource_modal" %}
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

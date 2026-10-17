@@ -1,0 +1,107 @@
+{% load i18n ems_ui %}
+{% comment %}
+Qrup müqayisəsi və sual statistikası cədvəlləri (`ems-table`). Sual cədvəlinin axtarışı və
+səhifələnməsi teacher_exam_statistics_charts.js-dədir (#questionTbody, #questionSearch,
+#questionPagination). Faiz zolağı dinamikdir → `--ems-bar-pct` (ems_pct_style).
+{% endcomment %}
+{% if compare_groups_data %}
+<section class="ems-card tes-table-card" aria-labelledby="tes-t1">
+    <div class="tes-card__head">
+        <h2 class="tes-card__title" id="tes-t1"><i class="fas fa-users-gear" aria-hidden="true"></i> {% trans "table_group_comparison" context "exams.template.exam_statistics" %}</h2>
+    </div>
+    <div class="ems-tablewrap tes-tablewrap">
+        <div class="ems-tablescroll">
+            <table class="ems-table ems-table--zebra">
+                <thead>
+                    <tr>
+                        <th scope="col">{% trans "table_group_name" context "exams.template.exam_statistics" %}</th>
+                        <th scope="col" class="ems-table__num">{% trans "table_group_participants" context "exams.template.exam_statistics" %}</th>
+                        <th scope="col" class="ems-table__num">{% trans "table_group_avg" context "exams.template.exam_statistics" %}</th>
+                        <th scope="col">{% trans "table_group_pass_rate" context "exams.template.exam_statistics" %}</th>
+                        <th scope="col" class="ems-table__num">{% trans "table_group_max" context "exams.template.exam_statistics" %}</th>
+                        <th scope="col" class="ems-table__num">{% trans "table_group_min" context "exams.template.exam_statistics" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for g in compare_groups_data %}
+                    <tr>
+                        <th scope="row">{{ g.name }}</th>
+                        <td class="ems-table__num">{{ g.count }}</td>
+                        <td class="ems-table__num"><strong>{{ g.avg_score }}{% if exam.exam_type == "test" %}%{% endif %}</strong></td>
+                        <td>
+                            <div class="tes-bar">
+                                <div class="ems-bar tes-bar__track"><div class="ems-bar__fill {% if g.pass_rate >= 70 %}ems-bar__fill--success{% elif g.pass_rate < 40 %}ems-bar__fill--danger{% endif %}" style="{% ems_pct_style g.pass_rate %}"></div></div>
+                                <span class="tes-bar__text">{{ g.pass_rate }}%</span>
+                            </div>
+                        </td>
+                        <td class="ems-table__num">{{ g.max_score }}</td>
+                        <td class="ems-table__num">{{ g.min_score }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="ems-card tes-table-card" aria-labelledby="tes-t2">
+    <div class="tes-card__head">
+        <h2 class="tes-card__title" id="tes-t2"><i class="fas fa-circle-question" aria-hidden="true"></i> {% trans "table_question_stats" context "exams.template.exam_statistics" %}</h2>
+        <div class="etp-search tes-search">
+            <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+            <input type="search" id="questionSearch" class="ems-input" autocomplete="off"
+                   placeholder="{% trans 'search_question' context 'exams.template.exam_statistics' %}"
+                   aria-label="{% trans 'search_question' context 'exams.template.exam_statistics' %}">
+        </div>
+    </div>
+    {% if question_stats %}
+    <div class="ems-tablewrap tes-tablewrap" id="questionTableWrap">
+        <div class="ems-tablescroll">
+            <table class="ems-table" id="questionTable">
+                <thead>
+                    <tr>
+                        <th scope="col" class="ems-table__num">#</th>
+                        <th scope="col">{% trans "table_question" context "exams.template.exam_statistics" %}</th>
+                        <th scope="col" class="ems-table__num">{% trans "table_answers" context "exams.template.exam_statistics" %}</th>
+                        {% if is_written %}
+                        <th scope="col" class="ems-table__num">{% trans "table_avg_score" context "exams.template.exam_statistics" %}</th>
+                        <th scope="col" class="ems-table__num">{% trans "table_max_points" context "exams.template.exam_statistics" %}</th>
+                        {% else %}
+                        <th scope="col" class="ems-table__num">{% trans "table_correct" context "exams.template.exam_statistics" %}</th>
+                        <th scope="col" class="ems-table__num">{% trans "table_incorrect" context "exams.template.exam_statistics" %}</th>
+                        {% endif %}
+                        <th scope="col" class="tes-col-bar">{% if is_written %}{% trans "table_score_percent" context "exams.template.exam_statistics" %}{% else %}{% trans "table_accuracy" context "exams.template.exam_statistics" %}{% endif %}</th>
+                    </tr>
+                </thead>
+                <tbody id="questionTbody">
+                    {% for qs in question_stats %}
+                    <tr data-question="{{ qs.question.text|lower }}">
+                        <td class="ems-table__num ems-table__muted">{{ forloop.counter }}</td>
+                        <th scope="row" class="tes-qtext" title="{{ qs.question.text }}">{{ qs.question.text|truncatechars:90 }}</th>
+                        <td class="ems-table__num">{{ qs.total_answers }}</td>
+                        {% if is_written %}
+                        <td class="ems-table__num"><strong>{{ qs.avg_score }}</strong></td>
+                        <td class="ems-table__num ems-table__muted">{{ qs.max_points }}</td>
+                        {% else %}
+                        <td class="ems-table__num tes-num--ok">{{ qs.correct_answers }}</td>
+                        <td class="ems-table__num tes-num--bad">{{ qs.incorrect_answers }}</td>
+                        {% endif %}
+                        <td>
+                            <div class="tes-bar">
+                                <div class="ems-bar tes-bar__track"><div class="ems-bar__fill {% if qs.accuracy_percent >= 70 %}ems-bar__fill--success{% elif qs.accuracy_percent < 40 %}ems-bar__fill--danger{% endif %}" style="{% ems_pct_style qs.accuracy_percent %}"></div></div>
+                                <span class="tes-bar__text">{{ qs.accuracy_percent }}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="tes-pagination" id="questionPagination"></div>
+    {% else %}
+        {% trans "chart_empty_questions" context "exams.template.exam_statistics" as q_empty %}
+        {% include "partials/ems_ui/_empty.html" with state_title=q_empty state_icon="fa-circle-question" %}
+    {% endif %}
+</section>

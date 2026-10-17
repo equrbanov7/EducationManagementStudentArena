@@ -1,0 +1,124 @@
+{% load i18n %}
+{% comment %}
+Statistika filtrləri — GET forması (sahə adları dəyişməyib: student, group, status, pass_fail,
+block, date_from, date_to, score_min, score_max, compare_groups). Əsas sahələr bir sırada;
+tarix/bal aralığı və qrup müqayisəsi «Daha çox filtr» blokundadır (seçim varsa açıq gəlir).
+{% endcomment %}
+<section class="ems-card tes-filters" aria-label="{% trans 'filter_title' context 'exams.template.exam_statistics' %}">
+    <form method="get" id="statsFilterForm" role="search" novalidate>
+        {% if request.GET.from_section %}<input type="hidden" name="from_section" value="{{ request.GET.from_section }}">{% endif %}
+        {% if request.GET.return_to %}<input type="hidden" name="return_to" value="{{ request.GET.return_to }}">{% endif %}
+        <div class="etp-toolbar">
+            <div class="etp-toolbar__field etp-toolbar__field--grow">
+                <label class="etp-label" for="fStudent">{% trans "filter_student" context "exams.template.exam_statistics" %}</label>
+                <div class="etp-search">
+                    <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                    <input type="search" name="student" id="fStudent" value="{{ f_student }}" class="ems-input" autocomplete="off"
+                           placeholder="{% trans 'Ad, soyad və ya istifadəçi adı' context 'exams.template.teacher_exam_results' %}">
+                </div>
+            </div>
+            {% if teacher_groups %}
+            <div class="etp-toolbar__field">
+                <label class="etp-label" for="fGroup">{% trans "filter_group" context "exams.template.exam_statistics" %}</label>
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                    <select name="group" id="fGroup" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-live-search="true"
+                            data-live-search-placeholder="{% trans 'Qrup axtar…' context 'exams.template.teacher_exam_results' %}"
+                            data-live-search-empty="{% trans 'Uyğun qrup yoxdur' context 'exams.template.teacher_exam_results' %}">
+                        <option value="">{% trans "filter_all_groups" context "exams.template.exam_statistics" %}</option>
+                        {% for g in teacher_groups %}
+                            <option value="{{ g.id }}" {% if f_group|stringformat:"d" == g.id|stringformat:"d" %}selected{% endif %}>{{ g.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            {% endif %}
+            <div class="etp-toolbar__field">
+                <label class="etp-label" for="fStatus">{% trans "filter_status" context "exams.template.exam_statistics" %}</label>
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                    <select name="status" id="fStatus" class="ems-select bootstrap-single-select__native" data-bootstrap-select>
+                        <option value="">{% trans "filter_all_statuses" context "exams.template.exam_statistics" %}</option>
+                        <option value="submitted" {% if f_status == "submitted" %}selected{% endif %}>{% trans "filter_status_submitted" context "exams.template.exam_statistics" %}</option>
+                        <option value="expired" {% if f_status == "expired" %}selected{% endif %}>{% trans "filter_status_expired" context "exams.template.exam_statistics" %}</option>
+                        <option value="in_progress" {% if f_status == "in_progress" %}selected{% endif %}>{% trans "filter_status_in_progress" context "exams.template.exam_statistics" %}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="etp-toolbar__field">
+                <label class="etp-label" for="fPassFail">{% trans "filter_pass_fail" context "exams.template.exam_statistics" %}</label>
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                    <select name="pass_fail" id="fPassFail" class="ems-select bootstrap-single-select__native" data-bootstrap-select>
+                        <option value="">{% trans "filter_all" context "exams.template.exam_statistics" %}</option>
+                        <option value="pass" {% if f_pass_fail == "pass" %}selected{% endif %}>{% trans "filter_passed" context "exams.template.exam_statistics" %}</option>
+                        <option value="fail" {% if f_pass_fail == "fail" %}selected{% endif %}>{% trans "filter_failed" context "exams.template.exam_statistics" %}</option>
+                    </select>
+                </div>
+            </div>
+            {% if blocks %}
+            <div class="etp-toolbar__field">
+                <label class="etp-label" for="fBlock">{% trans "filter_block" context "exams.template.exam_statistics" %}</label>
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                    <select name="block" id="fBlock" class="ems-select bootstrap-single-select__native" data-bootstrap-select>
+                        <option value="">{% trans "filter_all_blocks" context "exams.template.exam_statistics" %}</option>
+                        {% for b in blocks %}
+                            <option value="{{ b.id }}" {% if f_block|stringformat:"d" == b.id|stringformat:"d" %}selected{% endif %}>{{ b.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            {% endif %}
+            <div class="etp-toolbar__actions tes-filters__actions">
+                <button type="submit" class="ems-btn ems-btn--primary">
+                    <i class="fas fa-filter" aria-hidden="true"></i><span>{% trans "filter_apply" context "exams.template.exam_statistics" %}</span>
+                </button>
+                {% if filter_query %}
+                <a href="{% url 'exams:teacher_exam_statistics' exam.slug %}?{{ nav_query }}" class="ems-btn">
+                    <i class="fas fa-rotate-left" aria-hidden="true"></i><span>{% trans "filter_clear" context "exams.template.exam_statistics" %}</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <details class="tes-more"{% if f_date_from or f_date_to or f_score_min != "" or f_score_max != "" or f_compare_groups %} open{% endif %}>
+            <summary class="tes-more__toggle">
+                <i class="fas fa-sliders" aria-hidden="true"></i> {% trans "Daha çox filtr" context "exams.teacher.statistics" %}
+            </summary>
+            {% trans "Tarixi gg.aa.iiii formatında yazın (məs. 06.10.2026)." context "exams.template.teacher_exam_results" as date_hint %}
+            {% trans "gg.aa.iiii" context "exams.template.teacher_exam_results" as date_ph %}
+            <div class="etp-toolbar tes-more__body">
+                <div class="etp-toolbar__field">
+                    <label class="etp-label" for="fDateFrom">{% trans "filter_date_from" context "exams.template.exam_statistics" %}</label>
+                    <input type="text" name="date_from" id="fDateFrom" value="{{ f_date_from }}" class="ems-input" inputmode="numeric"
+                           maxlength="10" autocomplete="off" placeholder="{{ date_ph }}" aria-describedby="tesDateHint">
+                </div>
+                <div class="etp-toolbar__field">
+                    <label class="etp-label" for="fDateTo">{% trans "filter_date_to" context "exams.template.exam_statistics" %}</label>
+                    <input type="text" name="date_to" id="fDateTo" value="{{ f_date_to }}" class="ems-input" inputmode="numeric"
+                           maxlength="10" autocomplete="off" placeholder="{{ date_ph }}" aria-describedby="tesDateHint">
+                </div>
+                <div class="etp-toolbar__field tes-num">
+                    <label class="etp-label" for="fScoreMin">{% trans "filter_score_min" context "exams.template.exam_statistics" %}</label>
+                    <input type="number" name="score_min" id="fScoreMin" value="{{ f_score_min }}" min="0" class="ems-input" inputmode="numeric" placeholder="0">
+                </div>
+                <div class="etp-toolbar__field tes-num">
+                    <label class="etp-label" for="fScoreMax">{% trans "filter_score_max" context "exams.template.exam_statistics" %}</label>
+                    <input type="number" name="score_max" id="fScoreMax" value="{{ f_score_max }}" min="0" class="ems-input" inputmode="numeric" placeholder="100">
+                </div>
+            </div>
+            <p class="etp-hint" id="tesDateHint">{{ date_hint }}</p>
+            {% if teacher_groups %}
+            <fieldset class="tes-compare">
+                <legend class="etp-label">{% trans "filter_compare_groups" context "exams.template.exam_statistics" %}</legend>
+                <div class="tes-compare__list">
+                    {% for g in teacher_groups %}
+                        <label class="tes-check">
+                            <input type="checkbox" name="compare_groups" value="{{ g.id }}" {% if g.id|stringformat:"d" in f_compare_groups %}checked{% endif %}>
+                            <span>{{ g.name }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </fieldset>
+            {% endif %}
+        </details>
+
+    </form>
+</section>

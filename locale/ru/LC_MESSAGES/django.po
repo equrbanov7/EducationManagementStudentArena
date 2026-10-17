@@ -35349,7 +35349,7 @@ msgstr "Этот ответ неверный."
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:264
 msgctxt "exams.template.teacher_view_attempt"
 msgid "label_student_answer"
-msgstr "Студенты"
+msgstr "Ответ студента"
 
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:291
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:304
@@ -99762,3 +99762,636 @@ msgstr "подгруппа · основная: %(parent)s"
 msgctxt "accounts.groups"
 msgid "ortaq qrup · alt qruplar: %(n)s"
 msgstr "общая группа · подгрупп: %(n)s"
+
+msgctxt "accounts.review_results"
+msgid "Apellyasiya"
+msgstr "Апелляция"
+
+msgctxt "accounts.review_results"
+msgid "Apellyasiya: %(status)s"
+msgstr "Апелляция: %(status)s"
+
+msgctxt "accounts.review_results"
+msgid "Axtarış"
+msgstr "Поиск"
+
+msgctxt "accounts.review_results"
+msgid "Axtarışı qısaldın və ya «Sıfırla» ilə bütün nəticələrə qayıdın."
+msgstr "Сократите запрос или нажмите «Сбросить», чтобы вернуться ко всем результатам."
+
+msgctxt "accounts.review_results"
+msgid "Açıq: %(n)s"
+msgstr "Открыто: %(n)s"
+
+msgctxt "accounts.review_results"
+msgid "Bax: %(student)s — %(title)s"
+msgstr "Открыть: %(student)s — %(title)s"
+
+msgctxt "accounts.review_results"
+msgid "Bütün qruplar"
+msgstr "Все группы"
+
+msgctxt "accounts.review_results"
+msgid "Bütün vaxtlar"
+msgstr "За всё время"
+
+msgctxt "accounts.review_results"
+msgid "Dövr"
+msgstr "Период"
+
+msgctxt "accounts.review_results"
+msgid "Dəyərləndirilib"
+msgstr "Оценено"
+
+msgctxt "accounts.review_results"
+msgid "Dəyərləndirilmiş nəticələr"
+msgstr "Оценённые результаты"
+
+msgctxt "accounts.review_results"
+msgid "Filtrə uyğun nəticə tapılmadı"
+msgstr "Нет результатов по фильтрам"
+
+msgctxt "accounts.review_results"
+msgid "Hələ dəyərləndirilmiş nəticə yoxdur"
+msgstr "Оценённых результатов пока нет"
+
+msgctxt "accounts.review_results"
+msgid "Növ"
+msgstr "Тип"
+
+msgctxt "accounts.review_results"
+msgid "Nəticə"
+msgstr "Результат"
+
+msgctxt "accounts.review_results"
+msgid "Nəticə: %(n)s"
+msgstr "Результатов: %(n)s"
+
+msgctxt "accounts.review_results"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "accounts.review_results"
+msgid "Qrup: %(n)s"
+msgstr "Групп: %(n)s"
+
+msgctxt "accounts.review_results"
+msgid "Son 30 gün"
+msgstr "Последние 30 дней"
+
+msgctxt "accounts.review_results"
+msgid "Son 7 gün"
+msgstr "Последние 7 дней"
+
+msgctxt "accounts.review_results"
+msgid "Son 90 gün"
+msgstr "Последние 90 дней"
+
+msgctxt "accounts.review_results"
+msgid "Sıralama"
+msgstr "Сортировка"
+
+msgctxt "accounts.review_results"
+msgid "Tapşırıq"
+msgstr "Задание"
+
+msgctxt "accounts.review_results"
+msgid "Tarix"
+msgstr "Дата"
+
+msgctxt "accounts.review_results"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "accounts.review_results"
+msgid "Tələbə, imtahan və ya fənn"
+msgstr "Студент, экзамен или предмет"
+
+msgctxt "accounts.review_results"
+msgid "Yoxlama pəncərəsi bağlanmış imtahan, lab və tapşırıq nəticələri. «Bax» cavabları sual-sual açır."
+msgstr "Результаты экзаменов, лабораторных и заданий с закрытым окном проверки. «Открыть» показывает ответы по вопросам."
+
+msgctxt "accounts.review_results"
+msgid "Yoxlanılan işlər redaktə pəncərəsi bağlandıqdan sonra burada görünür; test imtahanları — təhvil verilən kimi."
+msgstr "Проверенные работы появляются здесь после закрытия окна редактирования; тестовые экзамены — сразу после сдачи."
+
+msgctxt "accounts.review_results"
+msgid "Yoxlayan"
+msgstr "Проверяющий"
+
+msgctxt "accounts.review_results"
+msgid "bu həftə qiymətləndirilən"
+msgstr "оценено за неделю"
+
+msgctxt "accounts.review_results"
+msgid "İmtahan — test"
+msgstr "Экзамен — тест"
+
+msgctxt "accounts.review_results"
+msgid "İmtahan — yazılı"
+msgstr "Экзамен — письменный"
+
+msgctxt "accounts.review_results"
+msgid "İmtahan: %(exams)s · digər iş: %(other)s"
+msgstr "Экзамены: %(exams)s · другие работы: %(other)s"
+
+msgctxt "accounts.review_results"
+msgid "İmtahanlar (hamısı)"
+msgstr "Экзамены (все)"
+
+msgctxt "accounts.review_results"
+msgid "Əməliyyat"
+msgstr "Действие"
+
+msgctxt "accounts.review_results"
+msgid "Ən köhnəsi əvvəl"
+msgstr "Сначала старые"
+
+msgctxt "accounts.review_results"
+msgid "Ən yenisi əvvəl"
+msgstr "Сначала новые"
+
+msgctxt "exams.attempt_review"
+msgid "0 bal"
+msgstr "0 баллов"
+
+msgctxt "exams.attempt_review"
+msgid "Apellyasiya ilə düzəldilib"
+msgstr "Исправлено по апелляции"
+
+msgctxt "exams.attempt_review"
+msgid "Avtomatik qiymətləndirilib"
+msgstr "Оценено автоматически"
+
+msgctxt "exams.attempt_review"
+msgid "Bal"
+msgstr "Балл"
+
+msgctxt "exams.attempt_review"
+msgid "Başlayıb"
+msgstr "Начато"
+
+msgctxt "exams.attempt_review"
+msgid "Bitirib"
+msgstr "Завершено"
+
+msgctxt "exams.attempt_review"
+msgid "Cavablar"
+msgstr "Ответы"
+
+msgctxt "exams.attempt_review"
+msgid "Cavabsız"
+msgstr "Без ответа"
+
+msgctxt "exams.attempt_review"
+msgid "Cəhd haqqında"
+msgstr "О попытке"
+
+msgctxt "exams.attempt_review"
+msgid "Düzgün"
+msgstr "Верно"
+
+msgctxt "exams.attempt_review"
+msgid "Geri"
+msgstr "Назад"
+
+msgctxt "exams.attempt_review"
+msgid "Müəllimin ümumi rəyi"
+msgstr "Общий отзыв преподавателя"
+
+msgctxt "exams.attempt_review"
+msgid "Naviqasiya"
+msgstr "Навигация"
+
+msgctxt "exams.attempt_review"
+msgid "Nümunə (gözlənilən) cavab"
+msgstr "Образец (ожидаемый) ответа"
+
+msgctxt "exams.attempt_review"
+msgid "Nəticə xülasəsi"
+msgstr "Сводка результата"
+
+msgctxt "exams.attempt_review"
+msgid "Qazanılan / maksimum bal"
+msgstr "Набрано / максимум баллов"
+
+msgctxt "exams.attempt_review"
+msgid "Qismən"
+msgstr "Частично"
+
+msgctxt "exams.attempt_review"
+msgid "Qismən bal"
+msgstr "Частичный балл"
+
+msgctxt "exams.attempt_review"
+msgid "Qiymətləndirilməyib"
+msgstr "Не оценено"
+
+msgctxt "exams.attempt_review"
+msgid "Sual"
+msgstr "Вопросы"
+
+msgctxt "exams.attempt_review"
+msgid "Sual %(n)s"
+msgstr "Вопрос %(n)s"
+
+msgctxt "exams.attempt_review"
+msgid "Sual %(n)s: %(state)s"
+msgstr "Вопрос %(n)s: %(state)s"
+
+msgctxt "exams.attempt_review"
+msgid "Sual xəritəsi"
+msgstr "Карта вопросов"
+
+msgctxt "exams.attempt_review"
+msgid "Səhv"
+msgstr "Неверно"
+
+msgctxt "exams.attempt_review"
+msgid "Tam bal"
+msgstr "Полный балл"
+
+msgctxt "exams.attempt_review"
+msgid "Tələbənin seçimi"
+msgstr "Выбор студента"
+
+msgctxt "exams.attempt_review"
+msgid "Təqdimat haqqında"
+msgstr "О работе"
+
+msgctxt "exams.attempt_review"
+msgid "Variantlar"
+msgstr "Варианты"
+
+msgctxt "exams.attempt_review"
+msgid "Yoxlanılacaq işlər"
+msgstr "Работы на проверку"
+
+msgctxt "exams.attempt_review"
+msgid "Yoxlanılmayıb"
+msgstr "Не проверено"
+
+msgctxt "exams.attempt_review"
+msgid "Yoxlanılıb"
+msgstr "Проверено"
+
+msgctxt "exams.attempt_review"
+msgid "Yoxlayan müəllim"
+msgstr "Проверяющий преподаватель"
+
+msgctxt "exams.attempt_review"
+msgid "Çap et"
+msgstr "Печать"
+
+msgctxt "exams.attempt_review"
+msgid "Ümumi müddət"
+msgstr "Общая длительность"
+
+msgctxt "exams.attempt_review"
+msgid "İmtahanın bütün nəticələri"
+msgstr "Все результаты экзамена"
+
+msgctxt "exams.attempt_review"
+msgid "Əvvəlki bal"
+msgstr "Исходный балл"
+
+msgctxt "exams.attempt_review"
+msgid "Düzgün cavab"
+msgstr "Правильный ответ"
+
+msgctxt "ui.status"
+msgid "Qiymətləndirilib"
+msgstr "Оценено"
+
+msgctxt "ui.status"
+msgid "İmtahandan çıxarılıb"
+msgstr "Удалён с экзамена"
+
+msgctxt "ui.status"
+msgid "Təhvil verilib"
+msgstr "Сдано"
+
+msgctxt "ui.status"
+msgid "Yoxlanılır"
+msgstr "На проверке"
+
+msgctxt "ui.status"
+msgid "Müddəti keçib"
+msgstr "Время истекло"
+
+msgctxt "ui.status"
+msgid "Gizlidir"
+msgstr "Скрыто"
+
+msgctxt "ui.status"
+msgid "Keçdi"
+msgstr "Сдал"
+
+msgctxt "ui.status"
+msgid "Davam edir"
+msgstr "Продолжается"
+
+msgctxt "ui.status"
+msgid "Kəsildi"
+msgstr "Не сдал"
+
+msgctxt "ui.status"
+msgid "Kəsilir"
+msgstr "Не допущен"
+
+msgctxt "ui.status"
+msgid "Nəticə yazılmayıb"
+msgstr "Результат не записан"
+
+msgctxt "ui.status"
+msgid "Bağlı"
+msgstr "Закрыто"
+
+msgctxt "profile.results.ui"
+msgid "Nəticə növü"
+msgstr "Тип результата"
+
+msgctxt "profile.results.ui"
+msgid "Axtarış"
+msgstr "Поиск"
+
+#, python-format
+msgctxt "profile.results.ui"
+msgid "Apellyasiya: %(status)s"
+msgstr "Апелляция: %(status)s"
+
+msgctxt "profile.assigned_tasks.ui"
+msgid "Tapşırıq növü"
+msgstr "Тип задания"
+
+msgctxt "ui.score_breakdown"
+msgid "Final imtahan"
+msgstr "Финальный экзамен"
+
+msgctxt "exams.student_history"
+msgid "Maksimum bal"
+msgstr "Максимальный балл"
+
+msgctxt "exams.student_history"
+msgid "İmtahan vəziyyəti"
+msgstr "Статус экзамена"
+
+msgctxt "exams.student_history"
+msgid "Bitib"
+msgstr "Завершён"
+
+msgctxt "exams.student_history"
+msgid "Aktiv"
+msgstr "Активен"
+
+msgctxt "exams.student_history"
+msgid "Passiv"
+msgstr "Неактивен"
+
+msgctxt "exams.student_history"
+msgid "Geri"
+msgstr "Назад"
+
+#, python-format
+msgctxt "exams.student_history"
+msgid "%(count)s sual"
+msgstr "%(count)s вопр."
+
+msgctxt "registrar.journal"
+msgid "Status nişanları"
+msgstr "Значки статуса"
+
+msgctxt "exams.teacher.grading"
+msgid "Balı tam ədədlə yazın (məs. 4)."
+msgstr "Введите балл целым числом (напр. 4)."
+
+msgctxt "exams.teacher.grading"
+msgid "Maksimum bal"
+msgstr "Максимальный балл"
+
+msgctxt "exams.teacher.grading"
+msgid "Bu cəhddə yoxlanılacaq sual yoxdur."
+msgstr "В этой попытке нет вопросов для проверки."
+
+msgctxt "exams.teacher.grading"
+msgid "Bütün suallar qiymətləndirilib"
+msgstr "Все вопросы оценены"
+
+msgctxt "exams.teacher.grading"
+msgid "Cəmi bal"
+msgstr "Итоговый балл"
+
+msgctxt "exams.teacher.grading"
+msgid "Dəyişiklik yoxdur"
+msgstr "Изменений нет"
+
+msgctxt "exams.teacher.grading"
+msgid "Enter — tətbiq et və növbəti sual"
+msgstr "Enter — применить и перейти к следующему вопросу"
+
+msgctxt "exams.teacher.grading"
+msgid "Klaviatura qısayolları"
+msgstr "Сочетания клавиш"
+
+msgctxt "exams.teacher.grading"
+msgid "Növbəti qiymətləndirilməmiş"
+msgstr "Следующий неоценённый"
+
+msgctxt "exams.teacher.grading"
+msgid "Növbəti sual"
+msgstr "Следующий вопрос"
+
+msgctxt "exams.teacher.grading"
+msgid "Qiymətləndirilib"
+msgstr "Оценено"
+
+msgctxt "exams.teacher.grading"
+msgid "Qiymətləndirilib: {done} / {total}"
+msgstr "Оценено: {done} / {total}"
+
+#, python-format
+msgctxt "exams.teacher.grading"
+msgid "Sual %(n)s: ətraflı bax və AI ilə qiymətləndir"
+msgstr "Вопрос %(n)s: подробнее и оценка с помощью ИИ"
+
+msgctxt "exams.teacher.grading"
+msgid "Tez bal"
+msgstr "Быстрый балл"
+
+msgctxt "exams.teacher.grading"
+msgid "Tələbənin cavabı"
+msgstr "Ответ студента"
+
+msgctxt "exams.teacher.grading"
+msgid "Tətbiq et"
+msgstr "Применить"
+
+msgctxt "exams.teacher.grading"
+msgid "Yadda saxla"
+msgstr "Сохранить"
+
+msgctxt "exams.teacher.grading"
+msgid "Yadda saxlanmamış dəyişiklik: {n} sual"
+msgstr "Несохранённые изменения: вопросов — {n}"
+
+msgctxt "exams.teacher.grading"
+msgid "Yadda saxlanılır…"
+msgstr "Сохранение…"
+
+msgctxt "exams.teacher.grading"
+msgid "dialoqu bağla"
+msgstr "закрыть окно"
+
+msgctxt "exams.teacher.grading"
+msgid "istəyə bağlı"
+msgstr "необязательно"
+
+msgctxt "exams.teacher.grading"
+msgid "növbəti sualın balı"
+msgstr "балл следующего вопроса"
+
+msgctxt "exams.teacher.grading"
+msgid "yadda saxla"
+msgstr "сохранить"
+
+msgctxt "exams.teacher.grading"
+msgid "Ətraflı"
+msgstr "Подробнее"
+
+msgctxt "exams.teacher.grading"
+msgid "Əvvəlki sual"
+msgstr "Предыдущий вопрос"
+
+msgctxt "exams.teacher.grading"
+msgid "əvvəlki sual"
+msgstr "предыдущий вопрос"
+
+msgctxt "exams.teacher.statistics"
+msgid "Daha çox filtr"
+msgstr "Больше фильтров"
+
+msgctxt "exams.teacher.statistics"
+msgid "Növbəti səhifə"
+msgstr "Следующая страница"
+
+msgctxt "exams.teacher.statistics"
+msgid "Əvvəlki səhifə"
+msgstr "Предыдущая страница"
+
+#, python-format
+msgctxt "exams.teacher.exam_detail"
+msgid "%(n)s aktiv"
+msgstr "активных: %(n)s"
+
+msgctxt "exams.teacher.exam_detail"
+msgid "Canlı sessiya"
+msgstr "Живая сессия"
+
+msgctxt "exams.teacher.exam_detail"
+msgid "Digər"
+msgstr "Ещё"
+
+msgctxt "exams.teacher.exam_detail"
+msgid "Testi auditoriyada canlı keçirin — tələbələr PIN ilə qoşulur, nəticələr dərhal görünür."
+msgstr "Проведите тест вживую в аудитории — студенты подключаются по PIN, результаты видны сразу."
+
+msgctxt "exams.teacher.exam_detail"
+msgid "İmtahan bölmələri"
+msgstr "Разделы экзамена"
+
+msgctxt "exams.template.question_submission"
+msgid "Kafedra müdirinin təsdiqi gözlənilir"
+msgstr "Ожидается утверждение заведующего кафедрой"
+
+msgctxt "exams.template.question_submission"
+msgid "Dekanlığın təsdiqi gözlənilir"
+msgstr "Ожидается утверждение деканата"
+
+msgctxt "exams.template.question_submission"
+msgid "Təsdiqdən sonra dəst İmtahan Mərkəzinə gedəcək. Bu mərhələdə sualları hələ düzəldə bilərsiniz."
+msgstr "После утверждения набор будет отправлен в Экзаменационный центр. На этом этапе вопросы ещё можно исправить."
+
+msgctxt "exams.template.question_submission"
+msgid "Kafedra təsdiqindən sonra dəst dondurulur — İmtahan Mərkəzinin qərarını gözləyin."
+msgstr "После утверждения кафедрой набор заморожен — дождитесь решения Экзаменационного центра."
+
+msgctxt "exams.template.question_submission"
+msgid "Kafedra düzəliş istədi — düzəldib yenidən göndərin"
+msgstr "Кафедра запросила исправления — исправьте и отправьте снова"
+
+msgctxt "exams.template.question_submission"
+msgid "İmtahan Mərkəzi düzəliş istədi — düzəldib yenidən göndərin"
+msgstr "Экзаменационный центр запросил исправления — исправьте и отправьте снова"
+
+msgctxt "exams.template.question_submission"
+msgid "Qərarınız gözlənilir"
+msgstr "Требуется ваше решение"
+
+msgctxt "exams.template.question_submission"
+msgid "Sualları və xəbərdarlıqları yoxlayın, sonra təsdiqləyin, düzəliş istəyin və ya rədd edin."
+msgstr "Проверьте вопросы и предупреждения, затем утвердите, запросите исправления или отклоните."
+
+msgctxt "exams.template.question_submission"
+msgid "Qəbul etsəniz suallar seçdiyiniz banka yazılır; düzəliş və rədd üçün müəllimə qeyd məcburidir."
+msgstr "При принятии вопросы записываются в выбранный банк; для исправления или отклонения комментарий преподавателю обязателен."
+
+msgctxt "exams.template.question_submission"
+msgid "Qərar ver"
+msgstr "Принять решение"
+
+msgctxt "exams.final_center"
+msgid "Kabinet"
+msgstr "Кабинет"
+
+msgctxt "exams.start_confirm"
+msgid "Yazdığınız cavablar avtomatik saxlanılır."
+msgstr "Набранные ответы сохраняются автоматически."
+
+msgctxt "exams.start_confirm"
+msgid "Vaxt serverdə hesablanır — səhifəni bağlasanız da dayanmır."
+msgstr "Время отсчитывается на сервере — оно не останавливается, даже если закрыть страницу."
+
+msgctxt "exams.start_confirm"
+msgid "Başlamazdan əvvəl internet bağlantınızı yoxlayın."
+msgstr "Перед началом проверьте подключение к интернету."
+
+msgctxt "labs.template.manage_blocks"
+msgid "Sual bloklarını yaradın və hər blokdan hər tələbəyə neçə sual düşəcəyini təyin edin."
+msgstr "Создавайте блоки вопросов и задавайте, сколько вопросов из каждого блока получает студент."
+
+msgctxt "labs.js.manage_blocks"
+msgid "Məcburi sahələri doldurun."
+msgstr "Заполните обязательные поля."
+
+msgctxt "labs.template.lab_detail"
+msgid "Maksimum fayl ölçüsü %(mb)s MB"
+msgstr "Максимальный размер файла: %(mb)s МБ"
+
+msgctxt "labs.template.lab_detail"
+msgid "Sualı aç/bağla"
+msgstr "Развернуть / свернуть вопрос"
+
+msgctxt "labs.template.lab_detail"
+msgid "Faylı sil"
+msgstr "Удалить файл"
+
+msgctxt "labs.template.my_lab_answers"
+msgid "Cavabı aç/bağla"
+msgstr "Развернуть / свернуть ответ"
+
+msgctxt "labs.template.grade_submission"
+msgid "Bu suala bal"
+msgstr "Балл за этот вопрос"
+
+msgctxt "labs.template.grade_submission"
+msgid "Bu suala bal (0 – %(max)s)"
+msgstr "Балл за этот вопрос (0 – %(max)s)"
+
+msgctxt "labs.template.grade_submission"
+msgid "Tələbə adı qiymətləndirmə tamamlanana qədər gizlidir."
+msgstr "Имя студента скрыто до завершения проверки."
+
+#, python-format
+msgctxt "exams.attempt_review"
+msgid "Sual %%(n)s"
+msgstr "Вопрос %%(n)s"

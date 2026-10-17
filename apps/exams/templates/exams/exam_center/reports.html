@@ -7,24 +7,25 @@
     {% comment %}ems_ui komponent qatı — müstəqil səhifədir, kabinet qabığı yoxdur.{% endcomment %}
     {% include "partials/ems_ui/_assets.html" %}
     <link rel="stylesheet" href="{% static 'css/skeleton.css' %}">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/reports.css' %}?v=20260910-1">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}?v=20261017-pkgd">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/reports.css' %}?v=20261017-pkgd">
 {% endblock %}
 
 {% block content %}
-<div class="container py-4 fxc-page">
-  {% url 'exams:exam_center_room_list' as sessions_url %}
+<div class="container py-4 fxc-page fxc-page--wide">
   {% trans "Hesabatlar" as cur_label %}
-  {% include "exams/exam_center/_breadcrumb.html" with back_url=sessions_url current_label=cur_label %}
-  <header class="fxc-head">
-    <div>
-      <h1><i class="fas fa-chart-column"></i> {% trans "Final imtahan hesabatları" %}</h1>
-      <p class="fxc-sub">{% trans "Oturum tarixçəsi, tələbə iştirakı və çıxarılma qeydləri" %}</p>
+  <div class="ems-header fxc-header">
+    <div class="ems-header__main">
+      {% include "exams/exam_center/_breadcrumb.html" with current_label=cur_label %}
+      <h1 class="ems-header__title"><i class="fas fa-chart-column" aria-hidden="true"></i> {% trans "Final imtahan hesabatları" %}</h1>
+      <p class="ems-header__subtitle">{% trans "Oturum tarixçəsi, tələbə iştirakı və çıxarılma qeydləri" %}</p>
     </div>
-    <a href="{% url 'exams:exam_center_room_list' %}" class="ems-btn">
-      <i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Zallar" %}
-    </a>
-  </header>
+    <div class="ems-header__actions">
+      <a href="{% url 'exams:exam_center_room_list' %}" class="ems-btn">
+        <i class="fas fa-tower-observation" aria-hidden="true"></i> {% trans "Zallar" %}
+      </a>
+    </div>
+  </div>
 
   <nav class="ems-tabs rpt-tabs" aria-label="{% trans 'Hesabat növü' %}">
     <a href="?tab=sessions" class="ems-tabs__btn" {% if tab == 'sessions' %}aria-current="page"{% endif %}>{% trans "Oturumlar" %}</a>
@@ -231,7 +232,7 @@
         {% for t in page_obj %}
         <tr>
           <th scope="row" class="fxc-strong">{{ t.student.get_full_name|default:t.student.username }}
-            <span class="fxc-muted">({{ t.student.username }})</span></td>
+            <span class="fxc-muted">({{ t.student.username }})</span></th>
           <td>{{ t.exam.title }}</td>
           <td>{{ t.session.room.name }}</td>
           <td><span class="fxc-pill fxc-pill--t-{{ t.status }}">{{ t.get_status_display }}</span></td>

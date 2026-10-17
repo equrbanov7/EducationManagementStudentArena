@@ -1,0 +1,183 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Yoxlama səhifəsinin yan paneli — Paket B (2026-10-17)
+   Cəmi bal, sual xəritəsi, cəhd məlumatı, klaviatura qısayolları (`tca-side`
+   düzülüşü grading.css-dədir). Rəng YALNIZ `--ems-*` tokenləri ilə.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tca-side__title {
+    margin: 0 0 var(--ems-sp-3);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.tca-side .ems-card {
+    padding: 14px 16px;
+}
+
+/* Cəmi bal */
+.tca-sum__score {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.tca-sum__score b {
+    font-size: var(--ems-fs-3xl);
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--ems-text);
+}
+
+.tca-sum__max {
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+    color: var(--ems-text-muted);
+}
+
+.tca-sum__bar {
+    margin: var(--ems-sp-4) 0 var(--ems-sp-3);
+}
+
+.tca-sum__progress {
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+}
+
+/* Sual xəritəsi */
+.tca-map__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tca-map__chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 36px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    text-decoration: none;
+}
+
+.tca-map__chip:hover {
+    border-color: var(--ems-primary-300);
+    color: var(--ems-primary-700);
+}
+
+.tca-map__chip[data-state="scored"] {
+    border-color: var(--ems-success-bd);
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+.tca-map__chip[data-state="pending"] {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.tca-map__chip[data-state="empty"] {
+    border-style: dashed;
+    color: var(--ems-neutral-500);
+}
+
+.tca-map__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px var(--ems-sp-5);
+    margin: var(--ems-sp-4) 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-text-muted);
+}
+
+.tca-map__legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tca-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    border: 1px solid var(--ems-border);
+}
+
+.tca-dot--scored { background: var(--ems-success-bg); border-color: var(--ems-success-bd); }
+.tca-dot--pending { background: var(--ems-warning-bg); border-color: var(--ems-warning-bd); }
+.tca-dot--empty { border-style: dashed; }
+
+/* Cəhd məlumatı */
+.tca-info__list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+}
+
+.tca-info__list > div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--ems-sp-4);
+    font-size: var(--ems-fs-sm);
+}
+
+.tca-info__list dt {
+    font-weight: 600;
+    color: var(--ems-text-muted);
+}
+
+.tca-info__list dd {
+    margin: 0;
+    font-weight: 700;
+    color: var(--ems-text);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Klaviatura qısayolları */
+.tca-keys {
+    padding: 0 4px;
+}
+
+.tca-keys ul {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-text-muted);
+}
+
+.tca-keys kbd {
+    display: inline-block;
+    min-width: 22px;
+    padding: 1px 6px;
+    border: 1px solid var(--ems-neutral-300);
+    border-bottom-width: 2px;
+    border-radius: var(--ems-r-sm);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-700);
+    font-family: inherit;
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    text-align: center;
+}

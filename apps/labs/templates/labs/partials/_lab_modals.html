@@ -1,11 +1,17 @@
 {% load static i18n %}
-<link rel="stylesheet" href="{% static 'labs/css/lab_modals.css' %}">
+{% comment %}
+Lab yaratma/redaktə dialoqları (yalnız kurs sahibinə). Paket E (2026-10-17): Bootstrap modal → ortaq
+`ems_ui` dialoqu (`EMSOverlay`). Açmaq: `data-ems-overlay-open="addLabModal"` və `.js-edit-lab[data-url]`.
+Dialoq/tab/lab CSS-i və JS-i kurs panelində (`course_dashboard.html`) bir dəfə, `<head>`-də yüklənir.
+{% endcomment %}
 
 {% if is_owner %}
-
-{% include "labs/partials/lab_modals/_add_lab_modal.html" %}
-
-{% include "labs/partials/lab_modals/_edit_lab_modal.html" %}
+{% trans "modal_new_lab" context "labs.template.lab_modals" as t_new_lab %}
+{% trans "modal_edit_lab" context "labs.template.lab_modals" as t_edit_lab %}
+{% trans "action_create" context "labs.template.lab_modals" as t_create %}
+{% trans "button_save" context "labs.js.lab_modals" as t_save %}
+{% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="addLabModal" form_dialog_title=t_new_lab form_dialog_body_include="labs/partials/lab_modals/_lab_fields.html" form_dialog_submit_label=t_create form_dialog_wide=True fp="add" %}
+{% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="editLabModal" form_dialog_title=t_edit_lab form_dialog_body_include="labs/partials/lab_modals/_lab_fields.html" form_dialog_submit_label=t_save form_dialog_wide=True fp="edit" %}
 
 {% include "labs/partials/lab_modals/_scripts.html" %}
 {% endif %}

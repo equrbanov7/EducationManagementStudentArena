@@ -1,105 +1,168 @@
-/* Source: exams/student/exam_start_confirm.html — tokensiz start linki üçün təsdiq (EXAMQA R1, 2026-10-01). */
+/* Source: exams/student/exam_start_confirm.html — tokensiz start linki üçün təsdiq (EXAMQA R1, 2026-10-01).
+   2026-10-17 (Paket D): tokenlər + «başlamazdan əvvəl» siyahısı; 375 px-də tam enli düymələr. */
+
+.exam-start-confirm-page {
+    display: flex;
+    justify-content: center;
+    padding: 8vh 16px 48px;
+}
 
 .exam-start-confirm {
+    width: 100%;
     max-width: 520px;
-    margin: 10vh auto;
-    padding: 2rem 1.5rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    background: #fff;
+    padding: 32px 28px 28px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-raised);
     text-align: center;
 }
 
 .exam-start-confirm__icon {
     width: 56px;
     height: 56px;
-    margin: 0 auto 1rem;
+    margin: 0 auto 16px;
     border-radius: 50%;
     display: grid;
     place-items: center;
-    background: #eff6ff;
-    color: #2563eb;
-    font-size: 1.4rem;
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-primary-200);
+    color: var(--ems-primary-600);
+    font-size: 1.3rem;
 }
 
 .exam-start-confirm__title {
-    margin: 0 0 0.35rem;
-    color: #0f172a;
-    font-size: 1.3rem;
+    margin: 0 0 6px;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-2xl);
     font-weight: 800;
+    letter-spacing: -0.01em;
 }
 
 .exam-start-confirm__exam {
-    margin: 0 0 0.75rem;
-    color: #1e3a8a;
+    margin: 0 0 12px;
+    color: var(--ems-primary-800);
+    font-size: var(--ems-fs-xl);
     font-weight: 700;
+    overflow-wrap: anywhere;
 }
 
 .exam-start-confirm__meta {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    margin: 0 0 0.75rem;
+    gap: var(--ems-sp-2);
+    margin: 0 0 14px;
     padding: 4px 12px;
-    border-radius: 999px;
-    background: #f1f5f9;
-    color: #334155;
-    font-size: 0.9rem;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    border: 1px solid var(--ems-neutral-200);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-md);
     font-weight: 700;
+    font-variant-numeric: tabular-nums;
 }
 
 .exam-start-confirm__text {
-    margin: 0 0 1.25rem;
-    color: #475569;
-    font-size: 0.95rem;
-    line-height: 1.55;
+    margin: 0 0 16px;
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-lg);
+    line-height: 1.6;
+}
+
+.exam-start-confirm__tips {
+    display: grid;
+    gap: var(--ems-sp-3);
+    margin: 0 0 22px;
+    padding: 14px 16px;
+    list-style: none;
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg-subtle);
+    border: 1px solid var(--ems-border);
+    text-align: left;
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-md);
+    line-height: 1.5;
+}
+
+.exam-start-confirm__tips li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-4);
+}
+
+.exam-start-confirm__tips i {
+    flex: none;
+    width: 18px;
+    margin-top: 2px;
+    color: var(--ems-primary-600);
+    text-align: center;
 }
 
 .exam-start-confirm__actions {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
+    gap: var(--ems-sp-4);
 }
 
 .exam-start-confirm__btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: var(--ems-sp-3);
     min-height: 44px;
-    padding: 0.6rem 1.3rem;
+    padding: 0 20px;
     border: 1px solid transparent;
-    border-radius: 12px;
+    border-radius: var(--ems-r-lg);
     font: inherit;
+    font-size: var(--ems-fs-md);
     font-weight: 700;
     text-decoration: none;
     cursor: pointer;
 }
 
+.exam-start-confirm__btn:focus-visible {
+    outline: none;
+    box-shadow: var(--ems-sh-focus);
+}
+
 .exam-start-confirm__btn--primary {
-    background: #2563eb;
-    color: #fff;
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
 }
 
 .exam-start-confirm__btn--primary:hover {
-    background: #1d4ed8;
-    color: #fff;
+    border-color: var(--ems-primary-700);
+    background: var(--ems-primary-700);
+    color: var(--ems-neutral-0);
 }
 
 .exam-start-confirm__btn--ghost {
-    background: #fff;
-    border-color: #e2e8f0;
-    color: #1e293b;
+    background: var(--ems-bg);
+    border-color: var(--ems-neutral-300);
+    color: var(--ems-neutral-700);
+}
+
+.exam-start-confirm__btn--ghost:hover {
+    background: var(--ems-bg-subtle);
+    color: var(--ems-text);
 }
 
 @media (max-width: 560px) {
+    .exam-start-confirm-page {
+        padding-top: 24px;
+    }
+
     .exam-start-confirm {
-        margin: 16px;
-        padding: 1.5rem 1rem;
+        padding: 24px 16px 20px;
+    }
+
+    .exam-start-confirm__actions {
+        flex-direction: column-reverse;
     }
 
     .exam-start-confirm__btn {
         width: 100%;
-        justify-content: center;
     }
 }

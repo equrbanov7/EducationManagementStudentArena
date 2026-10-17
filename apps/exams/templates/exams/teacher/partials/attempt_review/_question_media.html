@@ -1,0 +1,13 @@
+{% load i18n exam_filters %}
+{% if item.question.image %}
+<figure class="rv-media">
+    <img src="{{ item.question.image|protected_media_url }}" alt="{% if item.question.image_replaces_text %}{{ item.question.text }}{% else %}{% trans 'q_text' context 'exams.template.teacher_view_attempt' %}{% endif %}" class="rv-media__img{% if item.question.image_replaces_text %} rv-media__img--source{% endif %}" loading="lazy">
+</figure>
+{% endif %}
+{% if item.question.video %}
+<figure class="rv-media">
+    <video controls preload="metadata" playsinline class="rv-media__img">
+        <source src="{{ item.question.video|protected_media_url }}">
+    </video>
+</figure>
+{% endif %}

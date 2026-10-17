@@ -11,7 +11,7 @@ from django.utils.translation import pgettext_lazy
 from core.search_text import tolerant_q
 from core.tenancy import restore_request_organization_from_profile
 
-from .._dashboard_helpers import _collect_my_results, academic_filter_options
+from .._dashboard_helpers import _collect_my_results, academic_filter_options, fill_my_results_scores
 from .._helpers import (
     _assigned_courses_queryset,
     _assigned_exams_queryset,
@@ -120,6 +120,7 @@ def my_results(request):
     paginator = Paginator(items, 15)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
+    fill_my_results_scores(page_obj.object_list)
 
     context = {
         "items": page_obj,

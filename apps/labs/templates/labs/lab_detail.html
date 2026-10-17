@@ -5,385 +5,262 @@
 {% block title %}{{ lab.title }}{% endblock %}
 
 {% block extraCss %}
-<link rel="stylesheet" href="{% static 'labs/css/lab_detail.css' %}">
-<link rel="stylesheet" href="{% static 'labs/css/lab_detail_template.css' %}">
+{% include "labs/partials/_ui_assets.html" %}
+<link rel="stylesheet" href="{% static 'labs/css/lab_detail.css' %}?v=20261017-3">
 {% endblock %}
 
 {% block content %}
-{% comment %}C3 mikro inline-stil lab_detail.css-ə köçürüldü.{% endcomment %}
+{% comment %}
+Paket E (2026-10-17): tələbənin lab səhifəsi `ems_ui` dilinə keçdi — Bootstrap `card/btn/badge`,
+gradient başlıqlar və `--primary-blue` palitrası çıxarıldı. JS qarmaqları dəyişməyib:
+`#labForm`, `#submitBtn`, `.question-card`, `.answer-textarea`, `.file-input`, `#answeredCount`,
+`#progressBar`, `#elapsedTimer`, `#remainingTimer`, `[data-toggle-question]`, `#finishLabConfirmModal`.
+{% endcomment %}
+{% trans "label_answered" context "labs.template.lab_detail" as t_answered %}
+{% lab_crumbs lab "" "" as header_crumbs %}
 
-<div class="container py-5">
-    
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start mb-5 gap-3">
-        <div>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-2 small fw-medium">
-                    <li class="breadcrumb-item">
-                        <a href="{% url 'courses:course_dashboard' lab.course.id %}" class="text-decoration-none text-muted hover-primary">
-                            <i class="fas fa-layer-group me-1"></i> {{ lab.course.title }}
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active text-primary-blue">{{ lab.title }}</li>
-                </ol>
-            </nav>
-            <h2 class="fw-bold text-dark-blue mb-2">
-                <i class="fas fa-flask text-primary-blue me-2"></i> {{ lab.title }}
-            </h2>
-            {% if lab.description %}
-            <p class="text-secondary mb-0 lh-lg lab-desc">{{ lab.description }}</p>
-            {% endif %}
+<div class="lab-page lab-detail">
+
+    {% include "partials/ems_ui/_content_header.html" with header_title=lab.title header_subtitle=lab.description header_actions_include="labs/partials/lab_detail/_header_actions.html" %}
+
+    {% if has_submitted and not can_retry %}
+    <div class="ems-banner ems-banner--success lab-result" role="status">
+        <div class="lab-result__main">
+            <span class="lab-result__ic" aria-hidden="true"><i class="fas fa-check-circle"></i></span>
+            <div>
+                <div class="ems-banner__title">{% trans "notice_already_submitted" context "labs.template.lab_detail" %}</div>
+                <div class="ems-banner__body">
+                    {% blocktrans trimmed context "labs.template.lab_detail" with submitted_at=submission.submitted_at|date:"d.m.Y H:i" attempt_count=attempt_count max_attempts=lab.max_attempts %}label_submission_info {{ submitted_at }} · {{ attempt_count }} / {{ max_attempts }}{% endblocktrans %}
+                </div>
+            </div>
         </div>
-        <div class="d-flex flex-column align-items-md-end gap-2">
-            {% if lab.is_open %}
-                <span class="status-badge-custom badge-open"><i class="fas fa-check-circle"></i> {% trans "status_open" context "labs.template.lab_detail" %}</span>
-            {% elif lab.is_upcoming %}
-                <span class="status-badge-custom badge-upcoming"><i class="fas fa-clock"></i> {% trans "status_upcoming" context "labs.template.lab_detail" %}</span>
+        <div class="ems-banner__actions lab-result__side">
+            {% if submission.status == 'graded' %}
+                {% if show_review_data and submission.score is not None %}
+                <span class="ems-badge ems-badge--success">{{ submission.score }}/{{ lab.max_score }}</span>
+                {% elif show_review_data %}
+                <span class="ems-badge ems-badge--success">{% trans 'Qiymətləndirilib' %}</span>
+                {% else %}
+                <span class="ems-badge ems-badge--neutral">{% trans 'Nəticə:' %} <span data-review-countdown="{{ review_available_in_seconds }}">--:--:--</span></span>
+                {% endif %}
             {% else %}
-                <span class="status-badge-custom badge-closed"><i class="fas fa-lock"></i> {% trans "status_closed" context "labs.template.lab_detail" %}</span>
+                <span class="ems-badge ems-badge--warning">{% trans "status_not_graded" context "labs.template.lab_detail" %}</span>
             {% endif %}
-            
-            <a href="{{ back_url }}" class="btn btn-outline-custom mt-2">
-                <i class="fas fa-arrow-left me-1"></i> {% trans "action_back" context "labs.template.lab_detail" %}
+            <a href="{{ answers_url }}" class="ems-btn ems-btn--success">
+                <i class="fas fa-eye" aria-hidden="true"></i> {% trans 'Cavablarım' %}
             </a>
         </div>
     </div>
-    
-    {% if has_submitted and not can_retry %}
-    <div class="card card-modern border border-success border-opacity-25 mb-4 shadow-sm lab-card--green">
-        <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="bg-white p-2 rounded-circle shadow-sm">
-                        <i class="fas fa-check-circle text-primary-green fs-2"></i>
-                    </div>
-                    <div>
-                        <strong class="text-dark-green fs-5 d-block mb-1">{% trans "notice_already_submitted" context "labs.template.lab_detail" %}</strong>
-                        <div class="text-muted small fw-medium">
-                            <i class="fas fa-calendar-check me-1"></i>
-                            {% blocktrans trimmed context "labs.template.lab_detail" with submitted_at=submission.submitted_at|date:"d.m.Y H:i" attempt_count=attempt_count max_attempts=lab.max_attempts %}label_submission_info {{ submitted_at }} · {{ attempt_count }} / {{ max_attempts }}{% endblocktrans %}
-                        </div>
-                    </div>
-                    {% if submission.status == 'graded' %}
-                        {% if show_review_data and submission.score is not None %}
-                        <span class="badge bg-white text-primary-green border border-success px-3 py-2 ms-3 rounded-pill fs-6">{{ submission.score }}/{{ lab.max_score }}</span>
-                        {% elif show_review_data %}
-                        <span class="badge bg-white text-primary-green border border-success px-3 py-2 ms-3 rounded-pill fs-6">{% trans 'Qiymətləndirilib' %}</span>
-                        {% else %}
-                        <span class="badge bg-white text-secondary border border-secondary px-3 py-2 ms-3 rounded-pill">
-                            {% trans 'Nəticə:' %}
-                            <span data-review-countdown="{{ review_available_in_seconds }}">--:--:--</span>
-                        </span>
-                        {% endif %}
-                    {% else %}
-                        <span class="badge bg-white text-warning border border-warning px-3 py-2 ms-3 rounded-pill">{% trans "status_not_graded" context "labs.template.lab_detail" %}</span>
-                    {% endif %}
-                </div>
-                <a href="{{ answers_url }}" class="btn btn-gradient-success rounded-pill px-4">
-                    <i class="fas fa-eye me-2"></i> {% trans 'Cavablarım' %}
-                </a>
-            </div>
-        </div>
-    </div>
     {% endif %}
-    
+
     {% if lab.is_open and questions and can_retry %}
-    <div class="timer-box p-4 mb-5">
-        <div class="row align-items-center g-4">
-            <div class="col-md-3 border-end">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="bg-light p-3 rounded-circle text-primary-blue">
-                        <i class="fas fa-list-check fs-4"></i>
-                    </div>
-                    <div>
-                        <span class="d-block text-muted small fw-bold text-uppercase tracking-wide mb-1">{% trans "label_answered" context "labs.template.lab_detail" %}</span>
-                        <div class="fs-4 fw-bold text-dark-blue">
-                            <span id="answeredCount" class="text-primary-blue">0</span> 
-                            <span class="text-muted fs-5">/ {{ questions|length }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-5">
-                <div class="d-flex justify-content-evenly">
-                    <div class="text-center">
-                        <small class="text-muted d-block fw-bold text-uppercase mb-1">{% trans "label_elapsed_time" context "labs.template.lab_detail" %}</small>
-                        <div class="fs-4 fw-bold text-primary-blue font-monospace" id="elapsedTimer">00:00:00</div>
-                    </div>
-                    <div class="text-center">
-                        <small class="text-muted d-block fw-bold text-uppercase mb-1">{% trans "label_remaining_time" context "labs.template.lab_detail" %}</small>
-                        <div class="fs-4 fw-bold text-danger font-monospace" id="remainingTimer">--:--:--</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="progress shadow-sm lab-progress">
-                    <div class="progress-bar lab-detail-1" id="progressBar"></div>
-                </div>
-            </div>
+    <section class="lab-card lab-timer" aria-label="{{ t_answered }}">
+        <div class="lab-timer__item">
+            <span class="lab-label">{{ t_answered }}</span>
+            <span class="lab-timer__value"><span id="answeredCount">0</span> <span class="lab-timer__of">/ {{ questions|length }}</span></span>
         </div>
-    </div>
+        <div class="lab-timer__item">
+            <span class="lab-label">{% trans "label_elapsed_time" context "labs.template.lab_detail" %}</span>
+            <span class="lab-timer__value lab-timer__value--mono" id="elapsedTimer">00:00:00</span>
+        </div>
+        <div class="lab-timer__item">
+            <span class="lab-label">{% trans "label_remaining_time" context "labs.template.lab_detail" %}</span>
+            <span class="lab-timer__value lab-timer__value--mono lab-timer__value--danger" id="remainingTimer">--:--:--</span>
+        </div>
+        <div class="lab-timer__bar ems-bar" aria-hidden="true">
+            <div class="ems-bar__fill ems-bar__fill--success" id="progressBar"></div>
+        </div>
+    </section>
     {% endif %}
-    
-    <div class="row g-4">
-        <div class="col-lg-4 mb-4">
-            
-            <div class="card card-modern border-0 lab-info-card">
-                <div class="card-header text-white d-flex align-items-center">
-                    <i class="fas fa-info-circle me-2"></i> <span>{% trans "card_lab_info" context "labs.template.lab_detail" %}</span>
-                </div>
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-start mb-4">
-                        <div class="bg-light p-2 rounded-circle me-3 icon-fixed text-primary-blue d-flex align-items-center justify-content-center lab-stat-ic">
-                            <i class="fas fa-calendar-alt"></i>
-                        </div>
-                        <div>
-                            <small class="text-muted d-block fw-semibold">{% trans "label_start" context "labs.template.lab_detail" %}</small>
-                            <strong class="text-dark">{{ lab.start_datetime|date:"d.m.Y H:i" }}</strong>
-                        </div>
+
+    <div class="lab-detail__grid">
+        <aside class="lab-detail__side">
+            <section class="lab-card">
+                <header class="lab-card__head">
+                    <h2 class="lab-card__title"><i class="fas fa-circle-info" aria-hidden="true"></i> {% trans "card_lab_info" context "labs.template.lab_detail" %}</h2>
+                </header>
+                <dl class="lab-facts">
+                    <div class="lab-fact">
+                        <dt><i class="fas fa-calendar-alt" aria-hidden="true"></i> {% trans "label_start" context "labs.template.lab_detail" %}</dt>
+                        <dd>{{ lab.start_datetime|date:"d.m.Y H:i" }}</dd>
                     </div>
-                    <div class="d-flex align-items-start mb-4">
-                        <div class="bg-light p-2 rounded-circle me-3 icon-fixed text-danger d-flex align-items-center justify-content-center lab-stat-ic">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div>
-                            <small class="text-muted d-block fw-semibold">{% trans "label_deadline" context "labs.template.lab_detail" %}</small>
-                            <strong class="text-dark">{{ lab.end_datetime|date:"d.m.Y H:i" }}</strong>
-                        </div>
+                    <div class="lab-fact">
+                        <dt><i class="fas fa-clock" aria-hidden="true"></i> {% trans "label_deadline" context "labs.template.lab_detail" %}</dt>
+                        <dd>{{ lab.end_datetime|date:"d.m.Y H:i" }}</dd>
                     </div>
-                    <div class="d-flex align-items-start mb-4">
-                        <div class="bg-light p-2 rounded-circle me-3 icon-fixed text-warning d-flex align-items-center justify-content-center lab-stat-ic">
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <div>
-                            <small class="text-muted d-block fw-semibold">{% trans "label_max_score" context "labs.template.lab_detail" %}</small>
-                            <strong class="text-dark">{{ lab.max_score }}</strong>
-                        </div>
+                    <div class="lab-fact">
+                        <dt><i class="fas fa-star" aria-hidden="true"></i> {% trans "label_max_score" context "labs.template.lab_detail" %}</dt>
+                        <dd>{{ lab.max_score }}</dd>
                     </div>
-                    <div class="d-flex align-items-start mb-4">
-                        <div class="bg-light p-2 rounded-circle me-3 icon-fixed text-primary-green d-flex align-items-center justify-content-center lab-stat-ic">
-                            <i class="fas fa-redo"></i>
-                        </div>
-                        <div>
-                            <small class="text-muted d-block fw-semibold">{% trans "label_attempt" context "labs.template.lab_detail" %}</small>
-                            <strong class="text-dark">{{ attempt_count|default:0 }} / {{ lab.max_attempts }}</strong>
-                        </div>
+                    <div class="lab-fact">
+                        <dt><i class="fas fa-redo" aria-hidden="true"></i> {% trans "label_attempt" context "labs.template.lab_detail" %}</dt>
+                        <dd>{{ attempt_count|default:0 }} / {{ lab.max_attempts }}</dd>
                     </div>
-                    <div class="d-flex align-items-start">
-                        <div class="bg-light p-2 rounded-circle me-3 icon-fixed text-primary-blue d-flex align-items-center justify-content-center lab-stat-ic">
-                            <i class="fas fa-question-circle"></i>
-                        </div>
-                        <div>
-                            <small class="text-muted d-block fw-semibold">{% trans "label_question_count" context "labs.template.lab_detail" %}</small>
-                            <strong class="text-dark">{% blocktrans trimmed context "labs.template.lab_detail" with question_count=questions|length %}label_questions_count_value {{ question_count }}{% endblocktrans %}</strong>
-                        </div>
+                    <div class="lab-fact">
+                        <dt><i class="fas fa-question-circle" aria-hidden="true"></i> {% trans "label_question_count" context "labs.template.lab_detail" %}</dt>
+                        <dd>{% blocktrans trimmed context "labs.template.lab_detail" with question_count=questions|length %}label_questions_count_value {{ question_count }}{% endblocktrans %}</dd>
                     </div>
-                </div>
-            </div>
-            
+                </dl>
+            </section>
+
             {% if lab.teacher_files or lab.teacher_instructions %}
-            <div class="card card-modern border-0 materials-card">
-                <div class="card-header text-white d-flex align-items-center">
-                    <i class="fas fa-file-alt me-2"></i> <span>{% trans "card_materials" context "labs.template.lab_detail" %}</span>
-                </div>
-                <div class="card-body p-4">
+            <section class="lab-card">
+                <header class="lab-card__head">
+                    <h2 class="lab-card__title"><i class="fas fa-file-alt" aria-hidden="true"></i> {% trans "card_materials" context "labs.template.lab_detail" %}</h2>
+                </header>
+                <div class="lab-card__body lab-materials">
                     {% if lab.teacher_files %}
-                    <div class="mb-4">
-                        <small class="text-muted fw-bold d-block mb-2 text-uppercase tracking-wide">{% trans "label_teacher_file" context "labs.template.lab_detail" %}</small>
-                        <a href="{{ lab.teacher_files.url }}" target="_blank" class="btn btn-outline-custom w-100 d-flex justify-content-between align-items-center">
-                            <span class="text-truncate"><i class="fas fa-download me-2"></i> {{ lab.teacher_files.name|filename }}</span>
-                            <i class="fas fa-chevron-right small"></i>
+                    <div>
+                        <span class="lab-label">{% trans "label_teacher_file" context "labs.template.lab_detail" %}</span>
+                        <a href="{{ lab.teacher_files.url }}" target="_blank" rel="noopener" class="ems-btn lab-download">
+                            <i class="fas fa-download" aria-hidden="true"></i> <span class="lab-download__name">{{ lab.teacher_files.name|filename }}</span>
                         </a>
                     </div>
                     {% endif %}
-                    
                     {% if lab.teacher_instructions %}
                     <div>
-                        <small class="text-muted fw-bold d-block mb-2 text-uppercase tracking-wide">{% trans "label_instructions" context "labs.template.lab_detail" %}</small>
-                        <div class="bg-light p-3 rounded-3 small text-secondary border border-light">
-                            {{ lab.teacher_instructions|linebreaks }}
-                        </div>
+                        <span class="lab-label">{% trans "label_instructions" context "labs.template.lab_detail" %}</span>
+                        <div class="lab-prose lab-instructions">{{ lab.teacher_instructions|linebreaks }}</div>
                     </div>
                     {% endif %}
                 </div>
-            </div>
+            </section>
             {% endif %}
-            
-        </div>
-        
-        <div class="col-lg-8">
+        </aside>
+
+        <div class="lab-detail__main">
             {% if lab.is_open and can_retry %}
                 {% if questions %}
-                <form id="labForm" method="POST" enctype="multipart/form-data">
+                <form id="labForm" method="POST" enctype="multipart/form-data" novalidate>
                     {% csrf_token %}
-                    
+
                     {% for question in questions %}
-                    <div class="card card-modern border-0 question-card" 
-                         id="question-{{ question.id }}" 
-                         data-question-id="{{ question.id }}">
-                         
-                        <div class="card-header question-header d-flex align-items-center gap-3 text-white">
-                            <span class="badge bg-white text-primary-blue question-number shadow-sm">
-                                {{ forloop.counter }}
-                            </span>
-                            <span class="flex-grow-1 fw-medium lh-base">{{ question.question_text }}</span>
-                            
+                    <article class="lab-card question-card" id="question-{{ question.id }}" data-question-id="{{ question.id }}">
+                        <header class="lab-qcard__head">
+                            <span class="lab-qno">{{ forloop.counter }}</span>
+                            <h3 class="lab-qcard__text">{{ question.question_text }}</h3>
                             {% if question.points > 0 %}
-                            <span class="badge bg-white bg-opacity-25 text-white border border-white border-opacity-50 px-3 py-2 rounded-pill shadow-sm">
-                                <i class="fas fa-star text-warning me-1"></i>
+                            <span class="ems-badge ems-badge--warning lab-qcard__pts">
+                                <i class="fas fa-star" aria-hidden="true"></i>
                                 {% blocktrans trimmed context "labs.template.lab_detail" with points=question.points %}label_points {{ points }}{% endblocktrans %}
                             </span>
                             {% endif %}
-                            <button type="button" class="btn btn-sm question-toggle-btn ms-2" data-toggle-question="{{ question.id }}" aria-label="Toggle question">
-                                <i class="fas fa-chevron-up"></i>
+                            <button type="button" class="lab-toggle question-toggle-btn" data-toggle-question="{{ question.id }}"
+                                    aria-expanded="true" aria-controls="question-content-{{ question.id }}"
+                                    aria-label="{% trans 'Sualı aç/bağla' context 'labs.template.lab_detail' %}">
+                                <i class="fas fa-chevron-up" aria-hidden="true"></i>
                             </button>
-                        </div>
-                        
-                        <div class="card-body p-4 bg-light bg-opacity-50 question-content" id="question-content-{{ question.id }}">
+                        </header>
+
+                        <div class="lab-qcard__body question-content" id="question-content-{{ question.id }}">
                             {% if question.attachment %}
-                            <div class="mb-4">
-                                <a href="{{ question.attachment.url }}" target="_blank" class="btn btn-light border text-primary-blue rounded-pill px-4 shadow-sm fw-medium">
-                                    <i class="fas fa-paperclip me-2"></i> {{ question.attachment.name|filename }}
-                                </a>
-                            </div>
+                            <a href="{{ question.attachment.url }}" target="_blank" rel="noopener" class="lab-chip lab-chip--file lab-qcard__att">
+                                <i class="fas fa-paperclip" aria-hidden="true"></i> {{ question.attachment.name|filename }}
+                            </a>
                             {% endif %}
-                            
+
                             {% with saved_answer=saved_answers|get_item:question.id|default_if_none:'' %}
-                            <textarea class="form-control answer-textarea mb-4 bg-white" 
-                                      name="answer_{{ question.id }}" 
+                            <label class="lab-sr" for="answer-{{ question.id }}">{% trans "placeholder_answer" context "labs.template.lab_detail" %}</label>
+                            <textarea class="ems-textarea answer-textarea" id="answer-{{ question.id }}"
+                                      name="answer_{{ question.id }}" rows="5"
                                       placeholder="{% trans 'placeholder_answer' context 'labs.template.lab_detail' %}">{{ saved_answer }}</textarea>
                             {% endwith %}
-                            
-                            <div class="file-upload-area p-4 text-center mb-3 shadow-sm"
-                                 data-file-input-target="#file-{{ question.id }}">
-                                <input type="file" name="file_{{ question.id }}" id="file-{{ question.id }}" 
-                                       class="d-none file-input" accept="image/*,.pdf,.doc,.docx,.zip,.py,.java,.cpp,.txt">
-                                <div class="bg-white d-inline-flex p-3 rounded-circle mb-2 shadow-sm text-primary-blue">
-                                    <i class="fas fa-cloud-upload-alt fs-4"></i>
-                                </div>
-                                <h6 class="fw-bold text-dark-blue mb-1">{% trans "action_add_file" context "labs.template.lab_detail" %}</h6>
-                                <span class="text-muted small">{% trans 'Maksimum fayl ölçüsü 10MB' %}</span>
-                            </div>
-                            
-                            <div class="file-preview d-none mb-3" id="preview-{{ question.id }}">
-                                <span class="badge d-inline-flex align-items-center shadow-sm">
-                                    <i class="fas fa-file-alt me-2"></i>
+
+                            <button type="button" class="lab-drop file-upload-area" data-file-input-target="#file-{{ question.id }}">
+                                <i class="fas fa-cloud-upload-alt lab-drop__ic" aria-hidden="true"></i>
+                                <span class="lab-drop__title">{% trans "action_add_file" context "labs.template.lab_detail" %}</span>
+                                <span class="lab-drop__hint">{% blocktrans trimmed context "labs.template.lab_detail" with mb=lab.effective_max_file_size_mb %}Maksimum fayl ölçüsü {{ mb }} MB{% endblocktrans %}</span>
+                            </button>
+                            <input type="file" name="file_{{ question.id }}" id="file-{{ question.id }}"
+                                   class="lab-sr file-input" tabindex="-1" aria-hidden="true"
+                                   accept="image/*,.pdf,.doc,.docx,.zip,.py,.java,.cpp,.txt">
+
+                            <div class="file-preview" id="preview-{{ question.id }}" hidden>
+                                <span class="lab-chip lab-chip--file">
+                                    <i class="fas fa-file-alt" aria-hidden="true"></i>
                                     <span class="file-name"></span>
-                                    <button type="button" class="btn-close btn-close-white ms-3 file-remove" 
-                                            data-remove-file-question="{{ question.id }}"></button>
+                                    <button type="button" class="lab-chip__x file-remove"
+                                            data-remove-file-question="{{ question.id }}"
+                                            aria-label="{% trans 'Faylı sil' context 'labs.template.lab_detail' %}">
+                                        <i class="fas fa-xmark" aria-hidden="true"></i>
+                                    </button>
                                 </span>
                             </div>
-                            
-                            <div class="save-status pt-3 border-top" id="status-{{ question.id }}">
+
+                            <div class="save-status" id="status-{{ question.id }}" role="status" aria-live="polite">
                                 {% if saved_answers|get_item:question.id %}
-                                <i class="fas fa-check-circle text-primary-green fs-5"></i> 
-                                <span class="text-dark-green">{% trans "status_saved" context "labs.template.lab_detail" %}</span>
+                                <i class="fas fa-check-circle lab-save__ic is-saved" aria-hidden="true"></i>
+                                <span class="lab-save__txt is-saved">{% trans "status_saved" context "labs.template.lab_detail" %}</span>
                                 {% else %}
-                                <i class="far fa-circle text-muted fs-5"></i> 
-                                <span class="text-secondary">{% trans "status_waiting_for_answer" context "labs.template.lab_detail" %}</span>
+                                <i class="far fa-circle lab-save__ic" aria-hidden="true"></i>
+                                <span class="lab-save__txt">{% trans "status_waiting_for_answer" context "labs.template.lab_detail" %}</span>
                                 {% endif %}
                             </div>
                         </div>
-                    </div>
+                    </article>
                     {% endfor %}
-                    
-                    <div class="card card-modern border-0 submit-card shadow mt-5">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-4">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="bg-white bg-opacity-25 p-3 rounded-circle text-white">
-                                        <i class="fas fa-exclamation-triangle fs-3"></i>
-                                    </div>
-                                    <div class="text-white">
-                                        <strong class="d-block fs-5 mb-1">{% trans "warning_label" context "labs.template.lab_detail" %}</strong>
-                                        <span class="text-white text-opacity-75">{% trans "warning_submit_locked" context "labs.template.lab_detail" %}</span>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn bg-white text-dark-green btn-lg px-5 py-3 fw-bold rounded-pill shadow" id="submitBtn">
-                                    <i class="fas fa-paper-plane me-2 text-primary-green"></i> {% trans "action_finish_lab" context "labs.template.lab_detail" %}
-                                </button>
+
+                    <section class="lab-card lab-submit">
+                        <div class="lab-submit__text">
+                            <span class="lab-submit__ic" aria-hidden="true"><i class="fas fa-exclamation-triangle"></i></span>
+                            <div>
+                                <strong class="lab-submit__title">{% trans "warning_label" context "labs.template.lab_detail" %}</strong>
+                                <p class="lab-submit__body">{% trans "warning_submit_locked" context "labs.template.lab_detail" %}</p>
                             </div>
                         </div>
-                    </div>
-                    
+                        <button type="submit" class="ems-btn ems-btn--success ems-btn--lg" id="submitBtn">
+                            <i class="fas fa-paper-plane" aria-hidden="true"></i> {% trans "action_finish_lab" context "labs.template.lab_detail" %}
+                        </button>
+                    </section>
+
                 </form>
                 {% else %}
-                <div class="alert alert-modern alert-warning-modern text-center">
-                    <div class="bg-white d-inline-flex p-4 rounded-circle mb-4 shadow-sm text-warning">
-                        <i class="fas fa-exclamation-circle fa-3x"></i>
+                <div class="lab-state lab-state--solid">
+                    <div class="ems-state" role="status">
+                        <i class="fas fa-exclamation-circle ems-state__icon" aria-hidden="true"></i>
+                        <p class="ems-state__title">{% trans "empty_no_questions" context "labs.template.lab_detail" %}</p>
+                        <p class="ems-state__body">{% trans "empty_teacher_has_not_added_questions" context "labs.template.lab_detail" %}</p>
                     </div>
-                    <h4 class="fw-bold text-dark-blue mb-2">{% trans "empty_no_questions" context "labs.template.lab_detail" %}</h4>
-                    <p class="text-secondary mb-0">{% trans "empty_teacher_has_not_added_questions" context "labs.template.lab_detail" %}</p>
                 </div>
                 {% endif %}
-                
+
             {% elif has_submitted and not can_retry %}
-                <div class="alert alert-modern alert-success-modern text-center">
-                    <div class="bg-white d-inline-flex p-4 rounded-circle mb-4 shadow-sm text-primary-green">
-                        <i class="fas fa-check-circle fa-3x"></i>
+                <div class="lab-state lab-state--solid">
+                    <div class="ems-state" role="status">
+                        <i class="fas fa-check-circle ems-state__icon lab-state__ic--ok" aria-hidden="true"></i>
+                        <p class="ems-state__title">{% trans "notice_submission_successful" context "labs.template.lab_detail" %}</p>
+                        <p class="ems-state__body">{% blocktrans trimmed context "labs.template.lab_detail" with attempt_count=attempt_count max_attempts=lab.max_attempts %}notice_attempts_exhausted {{ attempt_count }} / {{ max_attempts }}{% endblocktrans %}</p>
+                        <a href="{{ answers_url }}" class="ems-btn ems-btn--primary">
+                            <i class="fas fa-eye" aria-hidden="true"></i> {% trans 'Cavablarım' %}
+                        </a>
                     </div>
-                    <h4 class="fw-bold text-dark-green mb-3">{% trans "notice_submission_successful" context "labs.template.lab_detail" %}</h4>
-                    <p class="text-secondary mb-4 fw-medium">
-                        {% blocktrans trimmed context "labs.template.lab_detail" with attempt_count=attempt_count max_attempts=lab.max_attempts %}notice_attempts_exhausted {{ attempt_count }} / {{ max_attempts }}{% endblocktrans %}
-                    </p>
-                    <a href="{{ answers_url }}" class="btn btn-gradient-success rounded-pill px-4 py-2">
-                        <i class="fas fa-eye me-2"></i> {% trans 'Cavablarım' %}
-                    </a>
                 </div>
-                
+
             {% elif lab.is_upcoming %}
-                <div class="alert alert-modern alert-info-modern text-center">
-                    <div class="bg-white d-inline-flex p-4 rounded-circle mb-4 shadow-sm text-primary-blue">
-                        <i class="fas fa-clock fa-3x"></i>
+                <div class="lab-state lab-state--solid">
+                    <div class="ems-state" role="status">
+                        <i class="fas fa-clock ems-state__icon" aria-hidden="true"></i>
+                        <p class="ems-state__title">{% trans "notice_lab_not_started" context "labs.template.lab_detail" %}</p>
+                        <span class="ems-badge ems-badge--info">{% blocktrans trimmed context "labs.template.lab_detail" with start_at=lab.start_datetime|date:"d.m.Y H:i" %}label_start_at {{ start_at }}{% endblocktrans %}</span>
                     </div>
-                    <h4 class="fw-bold text-dark-blue mb-3">{% trans "notice_lab_not_started" context "labs.template.lab_detail" %}</h4>
-                    <span class="badge bg-white text-primary-blue border border-primary px-4 py-2 rounded-pill fs-6 shadow-sm">
-                        {% blocktrans trimmed context "labs.template.lab_detail" with start_at=lab.start_datetime|date:"d.m.Y H:i" %}label_start_at {{ start_at }}{% endblocktrans %}
-                    </span>
                 </div>
-                
+
             {% else %}
-                <div class="alert alert-modern text-center lab-alert-danger-soft">
-                    <div class="bg-white d-inline-flex p-4 rounded-circle mb-4 shadow-sm text-danger">
-                        <i class="fas fa-lock fa-3x"></i>
+                <div class="lab-state lab-state--solid">
+                    <div class="ems-state ems-state--error" role="status">
+                        <i class="fas fa-lock ems-state__icon" aria-hidden="true"></i>
+                        <p class="ems-state__title">{% trans "notice_lab_closed" context "labs.template.lab_detail" %}</p>
+                        <span class="ems-badge ems-badge--danger">{% blocktrans trimmed context "labs.template.lab_detail" with deadline=lab.end_datetime|date:"d.m.Y H:i" %}label_deadline_at {{ deadline }}{% endblocktrans %}</span>
                     </div>
-                    <h4 class="fw-bold text-danger mb-3">{% trans "notice_lab_closed" context "labs.template.lab_detail" %}</h4>
-                    <span class="badge bg-white text-danger border border-danger px-4 py-2 rounded-pill fs-6 shadow-sm">
-                        {% blocktrans trimmed context "labs.template.lab_detail" with deadline=lab.end_datetime|date:"d.m.Y H:i" %}label_deadline_at {{ deadline }}{% endblocktrans %}
-                    </span>
                 </div>
             {% endif %}
-            
         </div>
     </div>
 </div>
 
 {% if lab.is_open and questions and can_retry %}
-<div class="modal fade" id="finishLabConfirmModal" tabindex="-1" aria-labelledby="finishLabConfirmModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold text-dark-blue" id="finishLabConfirmModalLabel">
-                    {% trans "confirm_finish_title" context "labs.template.lab_detail" %}
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body pt-2">
-                <p class="text-secondary mb-0" id="finishLabConfirmMessage">
-                    {% trans "confirm_finish_description" context "labs.template.lab_detail" %}
-                </p>
-                <div class="alert alert-warning mt-3 mb-0 d-none" id="finishLabUnansweredNotice" role="alert"></div>
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
-                    {% trans "confirm_finish_no_back" context "labs.template.lab_detail" %}
-                </button>
-                <button type="button" class="btn btn-success rounded-pill px-4" id="confirmFinishLabBtn">
-                    {% trans "confirm_finish_yes" context "labs.template.lab_detail" %}
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+{% trans "confirm_finish_title" context "labs.template.lab_detail" as t_finish_title %}
+{% include "partials/ems_ui/_dialog.html" with dialog_id="finishLabConfirmModal" dialog_title=t_finish_title dialog_body_include="labs/partials/lab_detail/_finish_body.html" dialog_foot_include="labs/partials/lab_detail/_finish_foot.html" %}
 
 <div id="labDetailConfig" hidden
      data-lab-id="{{ lab.id }}"
@@ -399,8 +276,7 @@
      data-i18n-error-unknown="{% trans 'error_unknown' context 'labs.js.lab_detail' %}"
      data-i18n-error-server="{% trans 'error_server' context 'labs.js.lab_detail' %}"
      data-i18n-action-finish-lab="{% trans 'action_finish_lab' context 'labs.js.lab_detail' %}"></div>
-<script src="{% static 'labs/js/lab_detail_template.js' %}" defer></script>
-<script src="{% static 'labs/js/lab_detail.js' %}" defer></script>
+<script src="{% static 'labs/js/lab_detail.js' %}?v=20261017-3" defer></script>
 {% endif %}
 
 {% endblock %}

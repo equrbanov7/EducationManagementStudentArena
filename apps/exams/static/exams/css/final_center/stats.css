@@ -12,17 +12,24 @@
 }
 
 .fxc-stat {
-    background: #fff;
-    border: 1px solid #E2E8F0;
-    border-radius: 12px;
-    padding: 12px 14px;
-    text-align: center;
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 4px;
+    background: var(--ems-bg);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    box-shadow: var(--ems-sh-card);
+    padding: 14px 16px;
+    text-align: left;
 }
 
+/* KPI kartı kimi: etiket üstdə (column-reverse — JS markup-ı dəyər → etiket sırasındadır). */
 .fxc-stat-value {
-    font-size: 1.35rem;
+    line-height: 1.1;
+    font-size: 1.6rem;
     font-weight: 800;
-    color: #0F172A;
+    color: var(--ems-neutral-900);
     font-variant-numeric: tabular-nums;
 }
 
@@ -32,14 +39,14 @@
     text-transform: uppercase;
     letter-spacing: .04em;
     color: var(--ems-neutral-500);
-    margin-top: 2px;
+    margin-top: 0;
 }
 
-.fxc-stat--connected .fxc-stat-value { color: #15803D; }
-.fxc-stat--active .fxc-stat-value { color: #2C5BFF; }
-.fxc-stat--participated .fxc-stat-value { color: #7C3AED; }
-.fxc-stat--offline .fxc-stat-value { color: #B45309; }
-.fxc-stat--removed .fxc-stat-value { color: #B91C1C; }
+.fxc-stat--connected .fxc-stat-value { color: var(--ems-success-700); }
+.fxc-stat--active .fxc-stat-value { color: var(--ems-primary-600); }
+.fxc-stat--participated .fxc-stat-value { color: var(--ems-violet-600); }
+.fxc-stat--offline .fxc-stat-value { color: var(--ems-warning-700); }
+.fxc-stat--removed .fxc-stat-value { color: var(--ems-danger-strong); }
 
 /* ── Responsivlik (planşet / mobil) ── */
 @media (max-width: 900px) {
@@ -51,4 +58,11 @@
     .fxc-stat { padding: 10px 8px; }
     .fxc-stat-value { font-size: 1.15rem; }
     .fxc-stat-label { font-size: .64rem; }
+}
+
+/* Proyektor / böyük ekran (zal monitoru) — rəqəmlər uzaqdan oxunsun. */
+@media (min-width: 1600px) {
+    .fxc-monitor-page .fxc-stats { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+    .fxc-monitor-page .fxc-stat-value { font-size: 2.2rem; }
+    .fxc-monitor-page .fxc-stat-label { font-size: .82rem; }
 }

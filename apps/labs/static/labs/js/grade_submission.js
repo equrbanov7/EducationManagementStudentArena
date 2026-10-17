@@ -1,140 +1,131 @@
-/* Grade submission interactions */
+/*
+ * grade_submission.js — müəllimin qiymətləndirmə səhifəsi (2026-10-17, Paket E).
+ * Suallar üzrə balların cəmi ümumi balı hesablayır (əl ilə yazılıbsa toxunmur), saxlamadan əvvəl təsdiq
+ * (ortaq `EMSConfirm`), cavab kartlarının aç/bağla düyməsi. AJAX-safe: `EMSDelegate` + `EMSReady`;
+ * sahələr hər hadisədə yenidən sorğulanır. Qarmaqlar: `#totalScoreInput`, `#gradeForm`,
+ * `.answer-score-input`, `[data-grade-toggle]`.
+ */
 (function () {
-    'use strict';
+    "use strict";
 
-    const totalInput = document.getElementById('totalScoreInput');
-    const gradeForm = document.getElementById('gradeForm');
-    const scoreInputs = Array.from(document.querySelectorAll('.answer-score-input'));
+    var state = { manualTotalActive: false, submitConfirmed: false };
 
-    let manualTotalActive = totalInput && totalInput.dataset.manualTotalInitial === '1';
-    let submitConfirmed = false;
+    function totalInput() {
+        return document.getElementById("totalScoreInput");
+    }
 
-    function formatScoreValue(value) {
-        return String(value);
+    function scoreInputs() {
+        return Array.prototype.slice.call(document.querySelectorAll(".answer-score-input"));
     }
 
     function parseIntegerValue(rawValue) {
-        const normalized = (rawValue || '').trim().replace(',', '.');
-        if (!normalized) return null;
-        const match = normalized.match(/^-?\d+/);
-        if (!match) return null;
-        const parsed = parseInt(match[0], 10);
-        return Number.isNaN(parsed) ? null : parsed;
+        var normalized = (rawValue || "").trim().replace(",", ".");
+        if (!normalized) { return null; }
+        var match = normalized.match(/^-?\d+/);
+        if (!match) { return null; }
+        var parsed = parseInt(match[0], 10);
+        return isNaN(parsed) ? null : parsed;
     }
 
     function getQuestionMax(input) {
-        const parsed = parseInt(input.dataset.questionMax || '0', 10);
-        return Number.isNaN(parsed) ? 0 : parsed;
+        var parsed = parseInt(input.dataset.questionMax || "0", 10);
+        return isNaN(parsed) ? 0 : parsed;
     }
 
     function normalizePerQuestion(input) {
-        const parsed = parseIntegerValue(input.value);
+        var parsed = parseIntegerValue(input.value);
         if (parsed === null) {
-            input.value = '';
+            input.value = "";
             return 0;
         }
-
-        let nextValue = parsed;
-        if (nextValue < 0) nextValue = 0;
-        const max = getQuestionMax(input);
-        if (max > 0 && nextValue > max) nextValue = max;
-        input.value = formatScoreValue(nextValue);
-        return nextValue;
+        var next = parsed < 0 ? 0 : parsed;
+        var max = getQuestionMax(input);
+        if (max > 0 && next > max) { next = max; }
+        input.value = String(next);
+        return next;
     }
 
     function recalcTotal() {
-        if (!totalInput || !scoreInputs.length || manualTotalActive) return;
-        const sum = scoreInputs.reduce((acc, input) => acc + normalizePerQuestion(input), 0);
-        totalInput.value = formatScoreValue(sum);
+        var total = totalInput();
+        var inputs = scoreInputs();
+        if (!total || !inputs.length || state.manualTotalActive) { return; }
+        total.value = String(inputs.reduce(function (acc, input) { return acc + normalizePerQuestion(input); }, 0));
     }
 
-    scoreInputs.forEach((input) => {
-        input.addEventListener('input', recalcTotal);
-        input.addEventListener('blur', function () {
-            normalizePerQuestion(this);
+    function submitForm(form) {
+        if (typeof form.requestSubmit === "function") {
+            form.requestSubmit();
+        } else {
+            form.submit();
+        }
+    }
+
+    window.EMSReady(function () {
+        var total = totalInput();
+        state.manualTotalActive = !!(total && total.dataset.manualTotalInitial === "1");
+        if (!state.manualTotalActive && scoreInputs().length) { recalcTotal(); }
+    });
+
+    window.EMSDelegate.on("input", ".answer-score-input", function () {
+        recalcTotal();
+    });
+
+    window.EMSDelegate.on("focusout", ".answer-score-input", function (event, input) {
+        normalizePerQuestion(input);
+        recalcTotal();
+    });
+
+    window.EMSDelegate.on("input", "#totalScoreInput", function (event, input) {
+        if (input.disabled) { return; }
+        if (!(input.value || "").trim()) {
+            state.manualTotalActive = false;
             recalcTotal();
+            return;
+        }
+        state.manualTotalActive = true;
+    });
+
+    window.EMSDelegate.on("focusout", "#totalScoreInput", function (event, input) {
+        if (input.disabled) { return; }
+        var parsed = parseIntegerValue(input.value);
+        if (parsed === null) {
+            state.manualTotalActive = false;
+            recalcTotal();
+            return;
+        }
+        var next = parsed < 0 ? 0 : parsed;
+        var max = parseInt(input.getAttribute("max") || "0", 10);
+        if (!isNaN(max) && max > 0 && next > max) { next = max; }
+        input.value = String(next);
+    });
+
+    window.EMSDelegate.on("submit", "#gradeForm", function (event, form) {
+        var submitButton = form.querySelector('button[type="submit"]');
+        if (state.submitConfirmed || !submitButton || submitButton.disabled) {
+            state.submitConfirmed = false;
+            return;
+        }
+        event.preventDefault();
+        window.EMSConfirm.open({
+            title: gettext("Qiymətləndirməni təsdiqləyin"),
+            body: gettext("Bu bal və rəyi saxlamaq istədiyinizə əminsiniz?"),
+            confirmLabel: submitButton.textContent.trim()
+        }).then(function (ok) {
+            if (!ok) { return; }
+            state.submitConfirmed = true;
+            submitForm(form);
         });
     });
 
-    if (totalInput && !totalInput.disabled) {
-        totalInput.addEventListener('input', function () {
-            const raw = (this.value || '').trim();
-            if (!raw) {
-                manualTotalActive = false;
-                recalcTotal();
-                return;
-            }
-            manualTotalActive = true;
-        });
-
-        totalInput.addEventListener('blur', function () {
-            const parsed = parseIntegerValue(this.value);
-            if (parsed === null) {
-                manualTotalActive = false;
-                recalcTotal();
-                return;
-            }
-
-            let nextValue = parsed;
-            if (nextValue < 0) nextValue = 0;
-            const max = parseInt(this.getAttribute('max') || '0', 10);
-            if (!Number.isNaN(max) && max > 0 && nextValue > max) nextValue = max;
-            this.value = formatScoreValue(nextValue);
-        });
-    }
-
-    if (!manualTotalActive && scoreInputs.length) {
-        recalcTotal();
-    }
-
-    if (gradeForm) {
-        gradeForm.addEventListener('submit', function (event) {
-            const submitButton = gradeForm.querySelector('button[type="submit"]');
-            if (submitConfirmed || !submitButton || submitButton.disabled) {
-                submitConfirmed = false;
-                return;
-            }
-
-            event.preventDefault();
-
-            if (typeof window.openActionConfirmModal !== 'function') {
-                submitConfirmed = true;
-                if (typeof gradeForm.requestSubmit === 'function') {
-                    gradeForm.requestSubmit();
-                } else {
-                    gradeForm.submit();
-                }
-                return;
-            }
-
-            window.openActionConfirmModal({
-                title: gettext('Qiymətləndirməni təsdiqləyin'),
-                message: gettext('Bu bal və rəyi saxlamaq istədiyinizə əminsiniz?'),
-                confirmLabel: submitButton.textContent.trim(),
-                confirmButtonClass: 'btn btn-success',
-                onConfirm: function () {
-                    submitConfirmed = true;
-                    if (typeof gradeForm.requestSubmit === 'function') {
-                        gradeForm.requestSubmit();
-                    } else {
-                        gradeForm.submit();
-                    }
-                }
-            });
-        });
-    }
-
-    document.querySelectorAll('.answer-toggle-btn').forEach((btn) => {
-        btn.addEventListener('click', function () {
-            const id = this.dataset.gradeToggle;
-            const card = document.getElementById('grade-answer-' + id);
-            if (!card) return;
-            const collapsed = card.classList.toggle('answer-collapsed');
-            const icon = this.querySelector('i');
-            if (icon) {
-                icon.classList.toggle('fa-chevron-down', collapsed);
-                icon.classList.toggle('fa-chevron-up', !collapsed);
-            }
-        });
+    window.EMSDelegate.on("click", ".answer-toggle-btn[data-grade-toggle]", function (event, btn) {
+        var card = document.getElementById("grade-answer-" + btn.dataset.gradeToggle);
+        if (!card) { return; }
+        var collapsed = card.classList.toggle("answer-collapsed");
+        btn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        var icon = btn.querySelector("i");
+        if (icon) {
+            icon.classList.toggle("fa-chevron-down", collapsed);
+            icon.classList.toggle("fa-chevron-up", !collapsed);
+        }
     });
 })();

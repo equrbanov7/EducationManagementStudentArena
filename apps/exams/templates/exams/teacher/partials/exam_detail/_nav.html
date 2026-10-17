@@ -1,0 +1,24 @@
+{% load i18n %}
+{% comment %}İmtahanın bölmələrinə keçid zolağı (əvvəlki 6 plitəlik «əməl kartları» şəbəkəsi). Hər keçid
+naviqasiya parametrlərini (from_section/return_to) daşıyır ki, «Geri» düzgün qayıtsın.{% endcomment %}
+<nav class="ted-nav" aria-label="{% trans 'İmtahan bölmələri' context 'exams.teacher.exam_detail' %}">
+    <a class="ted-nav__link" href="{% url 'exams:teacher_exam_results' exam.slug %}?{{ exam_navigation_query }}">
+        <span class="ted-nav__icon ted-nav__icon--primary"><i class="fas fa-square-poll-vertical" aria-hidden="true"></i></span>
+        <span class="ted-nav__text"><span class="ted-nav__title">{% trans "action_view_results" context "exams.template.teacher_exam_detail" %}</span><span class="ted-nav__desc">{% trans "desc_view_results" context "exams.template.teacher_exam_detail" %}</span></span>
+    </a>
+    <a class="ted-nav__link" href="{% url 'exams:teacher_exam_statistics' exam.slug %}?{{ exam_navigation_query }}">
+        <span class="ted-nav__icon ted-nav__icon--violet"><i class="fas fa-chart-line" aria-hidden="true"></i></span>
+        <span class="ted-nav__text"><span class="ted-nav__title">{% trans "action_view_statistics" context "exams.template.teacher_exam_detail" %}</span><span class="ted-nav__desc">{% trans "desc_view_statistics" context "exams.template.teacher_exam_detail" %}</span></span>
+    </a>
+    <a class="ted-nav__link" href="{% url 'exams:teacher_questions_bank' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}">
+        <span class="ted-nav__icon ted-nav__icon--success"><i class="fas fa-database" aria-hidden="true"></i></span>
+        <span class="ted-nav__text"><span class="ted-nav__title">{% trans "action_questions_bank" context "exams.template.teacher_exam_detail" %}</span><span class="ted-nav__desc">{% trans "desc_questions_bank" context "exams.template.teacher_exam_detail" %}</span></span>
+    </a>
+    {% comment %}Canlı nəticələr — yalnız canlı sessiya ilə keçirilən testlər; final/midterm İmtahan Mərkəzindədir.{% endcomment %}
+    {% if exam.exam_type == "test" and exam.exam_type_extended != "final" and exam.exam_type_extended != "midterm" %}
+    <a class="ted-nav__link" href="{% url 'liveExam:teacher_live_results' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}">
+        <span class="ted-nav__icon ted-nav__icon--warning"><i class="fas fa-tower-broadcast" aria-hidden="true"></i></span>
+        <span class="ted-nav__text"><span class="ted-nav__title">{% trans "action_view_live_results" context "exams.template.teacher_exam_detail" %}</span><span class="ted-nav__desc">{% trans "desc_view_live_results" context "exams.template.teacher_exam_detail" %}</span></span>
+    </a>
+    {% endif %}
+</nav>

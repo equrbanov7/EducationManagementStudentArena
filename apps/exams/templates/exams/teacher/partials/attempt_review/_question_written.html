@@ -1,0 +1,107 @@
+{% load i18n %}
+{% comment %}Yazılı / praktiki sual: tələbənin cavabı + əlavələr, (varsa) nümunə cavab, müəllimin balı və rəyi.{% endcomment %}
+<article class="rv-q rv-q--{{ item.state_tone }}" id="{{ item.anchor }}" aria-labelledby="{{ item.anchor }}-title">
+    {% include "exams/teacher/partials/attempt_review/_question_head.html" %}
+
+    <div class="rv-q__body">
+        {% include "exams/teacher/partials/attempt_review/_question_media.html" %}
+
+        <section class="rv-block">
+            <h4 class="rv-block__title"><i class="fas fa-pen" aria-hidden="true"></i> {% trans "label_student_answer" context "exams.template.teacher_view_attempt" %}</h4>
+            <div class="rv-answer">
+                {% if exam.exam_type == "coding" %}
+                    {% if item.coding_submission and item.coding_files %}
+                        <div class="coding-files-review">
+                            {% for code_file in item.coding_files %}
+                                <details class="coding-file-detail" {% if item.coding_file_count == 1 %}open{% endif %}>
+                                    <summary>
+                                        <span><i class="far fa-file-code" aria-hidden="true"></i> {{ code_file.name }}</span>
+                                        {% if code_file.is_main %}<small>{% trans "Main File" context "exams.template.coding_exam" %}</small>{% endif %}
+                                    </summary>
+                                    <pre>{{ code_file.content }}</pre>
+                                </details>
+                            {% endfor %}
+                            {% if item.coding_file_count > 1 %}
+                                <a class="ems-btn ems-btn--sm" href="{% url 'exams:coding_submission_download' exam.slug attempt.id item.coding_submission.id %}">
+                                    <i class="fas fa-download" aria-hidden="true"></i>
+                                    <span>{% trans "Download ZIP" context "exams.template.coding_exam" %}</span>
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <p class="rv-answer__empty">{% trans "empty_student_text_answer" context "exams.template.teacher_view_attempt" %}</p>
+                    {% endif %}
+                {% elif item.has_text_answer %}
+                    <div class="rv-answer__text">{{ item.answer.text_answer|linebreaks }}</div>
+                {% elif item.has_file_answer %}
+                    <p class="rv-answer__empty"><i class="fas fa-paperclip" aria-hidden="true"></i> {% trans "label_attached_files" context "exams.template.teacher_view_attempt" %}</p>
+                {% elif item.has_paint_answer %}
+                    <p class="rv-answer__empty"><i class="fas fa-paint-brush" aria-hidden="true"></i> {% trans "label_paint_answer" context "exams.template.teacher_view_attempt" %}</p>
+                {% else %}
+                    <p class="rv-answer__empty">{% trans "empty_student_text_answer" context "exams.template.teacher_view_attempt" %}</p>
+                {% endif %}
+            </div>
+        </section>
+
+        {% if item.has_file_answer %}
+        <section class="rv-block">
+            <h4 class="rv-block__title"><i class="fas fa-paperclip" aria-hidden="true"></i> {% trans "label_attached_files" context "exams.template.teacher_view_attempt" %}</h4>
+            <ul class="rv-files">
+                {% for f in item.answer_files %}
+                <li class="rv-files__item">
+                    <a href="{{ f.file.url }}" target="_blank" rel="noopener" class="rv-files__name"><i class="far fa-file" aria-hidden="true"></i> {{ f.filename }}</a>
+                    <a href="{{ f.file.url }}" download class="ems-btn ems-btn--sm"><i class="fas fa-download" aria-hidden="true"></i> {% trans "action_download" context "exams.template.teacher_view_attempt" %}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        {% if item.has_paint_answer %}
+        <section class="rv-block">
+            <h4 class="rv-block__title"><i class="fas fa-paint-brush" aria-hidden="true"></i> {% trans "label_paint_answer" context "exams.template.teacher_view_attempt" %}</h4>
+            <a href="{{ item.answer.paint_image.url }}" target="_blank" rel="noopener" class="rv-paint">
+                <img src="{{ item.answer.paint_image.url }}" alt="{% trans 'label_paint_answer' context 'exams.template.teacher_view_attempt' %}" loading="lazy">
+            </a>
+        </section>
+        {% endif %}
+
+        {% if exam.exam_type == "coding" and item.coding_submission %}
+        <section class="rv-block">
+            <h4 class="rv-block__title"><i class="fas fa-terminal" aria-hidden="true"></i> {% trans "Run output" context "exams.template.teacher_view_attempt" %}</h4>
+            <div class="rv-answer">
+                <strong>{{ item.coding_submission.get_execution_status_display }}</strong>
+                {% if item.coding_submission.score is not None %}<span class="ems-badge ems-badge--primary">{{ item.coding_submission.score }}</span>{% endif %}
+                {% if item.coding_submission.output %}<pre class="rv-pre">{{ item.coding_submission.output }}</pre>{% endif %}
+                {% if item.coding_submission.error_message %}<pre class="rv-pre rv-pre--error">{{ item.coding_submission.error_message }}</pre>{% endif %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if item.question.correct_answer %}
+        <details class="rv-model">
+            <summary><i class="fas fa-key" aria-hidden="true"></i> {% trans "Nümunə (gözlənilən) cavab" context "exams.attempt_review" %}</summary>
+            <div class="rv-model__body">{{ item.question.correct_answer|linebreaks }}</div>
+        </details>
+        {% endif %}
+
+        <section class="rv-eval rv-eval--{{ item.state_tone }}" aria-label="{% trans 'label_teacher_evaluation' context 'exams.template.teacher_view_attempt' %}">
+            <div class="rv-eval__score">
+                <span class="rv-eval__label">{% trans "label_given_score" context "exams.template.teacher_view_attempt" %}</span>
+                {% if item.answer.teacher_score is not None %}
+                    <strong class="rv-eval__value">{{ item.answer.teacher_score }} <span>/ {{ item.max_points }}</span></strong>
+                {% else %}
+                    <span class="ems-badge ems-badge--info">{% trans "status_not_graded" context "exams.template.teacher_view_attempt" %}</span>
+                {% endif %}
+            </div>
+            <div class="rv-eval__feedback">
+                <span class="rv-eval__label"><i class="fas fa-chalkboard-teacher" aria-hidden="true"></i> {% trans "label_feedback" context "exams.template.teacher_view_attempt" %}</span>
+                {% if item.answer.teacher_feedback %}
+                    <div class="rv-eval__text">{{ item.answer.teacher_feedback|linebreaks }}</div>
+                {% else %}
+                    <p class="rv-eval__empty">{% trans "empty_feedback_not_written" context "exams.template.teacher_view_attempt" %}</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</article>

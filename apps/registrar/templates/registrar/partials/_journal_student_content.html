@@ -1,37 +1,40 @@
-{% load static i18n %}
-{% comment %}Tələbənin elektron jurnalı (mockup dizaynı, yalnız-oxu).
-Fənn pilləri → KPI kartlar → bal bölgüsü → dərs tarixçəsi (paritet çipləri +
-kollokvium markerləri). Bu günün qeydləri də DƏRHAL görünür (sahib 2026-10-15).{% endcomment %}
+{% load static i18n l10n ems_ui %}
+{% comment %}Tələbənin elektron jurnalı (yalnız-oxu) — Paket A redizaynı 2026-10-18 (ems_ui qatı).
+Fənn kartları (KPI sırası + buraxılış badge-i `exam_eligibility` ailəsindən) → detal: KPI-lər, bal
+bölgüsü (`_entry_breakdown.html`, FIX-G «Cəm» yuvarlaqlaşdırma sətri daxil), dərs tarixçəsi
+(`ems-table --stack`: telefonda kart, əvvəlki 640px sürüşmə yoxdur), gün modalı. JS çəngəlləri
+(`.sjx-term`, `[data-sjx-year|period|filter|day|daymodal]`, `tr.sjx-drow`, `data-corr-history`) saxlanılıb.
+Bu günün qeydləri də DƏRHAL görünür (sahib 2026-10-15). Azad fənlər (FIX-C) landing boş-halında.{% endcomment %}
 {% with sec=journal_student_section d=journal_student_section.detail %}
-<div class="journal-page sjx jd2">
-    {# ── Kimlik + fənn pilləri ─────────────────────────────────────────────── #}
-    <div class="sjx-topbar">
-        <div class="sjx-identity">
-            <div class="sjx-avatar">{{ request.user.get_full_name|default:request.user.username|slice:":1"|upper }}{{ request.user.last_name|slice:":1"|upper }}</div>
-            <div>
-                <div class="sjx-identity-name">{{ request.user.get_full_name|default:request.user.username }}</div>
-                <div class="sjx-identity-sub">
+<div class="journal-page sjx sj">
+    {# ── Kimlik + tədris ili / yarım il ─────────────────────────────────── #}
+    <div class="sj-top">
+        <div class="sj-identity">
+            <span class="sj-avatar" aria-hidden="true">{{ request.user.get_full_name|default:request.user.username|slice:":1"|upper }}{{ request.user.last_name|slice:":1"|upper }}</span>
+            <div class="sj-identity__text">
+                <div class="sj-identity__name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                <div class="sj-identity__sub">
                     {% if sec.record.group %}{% trans "Qrup" context "registrar.journal" %} {{ sec.record.group.name }}{% endif %}{% if sec.period %} · {{ sec.period.name }}{% endif %}
                 </div>
             </div>
         </div>
         {# Tədris ili + yarım il (Payız/Yaz/Yay) — MÜƏLLİM jurnalı ilə eyni #}
-        <div class="sjx-term" data-base-url="{{ profile_base_url|default:'/accounts/profile/' }}"
+        <div class="sjx-term sj-term" data-base-url="{{ profile_base_url|default:'/accounts/profile/' }}"
              data-selected-period="{{ sec.selected_period_id }}">
-            <div class="sjx-term-field">
-                <label class="sjx-term-label" for="sjxYear">{% trans "TƏDRİS İLİ" context "registrar.journal" %}</label>
-                <div class="bootstrap-single-select">
-                    <select id="sjxYear" class="sjx-term-select form-select bootstrap-single-select__native js-bootstrap-single-select" data-sjx-year data-bootstrap-select>
+            <div class="ems-field">
+                <label class="ems-field__label" for="sjxYear">{% trans "TƏDRİS İLİ" context "registrar.journal" %}</label>
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                    <select id="sjxYear" class="ems-select bootstrap-single-select__native js-bootstrap-single-select" data-sjx-year data-bootstrap-select>
                         {% for y in sec.year_choices %}
                         <option value="{{ y.value }}" {% if y.value == sec.selected_year %}selected{% endif %}>{{ y.label }}</option>
                         {% endfor %}
                     </select>
                 </div>
             </div>
-            <div class="sjx-term-field">
-                <label class="sjx-term-label" for="sjxPeriod">{% trans "YARIM İL" context "registrar.journal" %}</label>
-                <div class="bootstrap-single-select">
-                    <select id="sjxPeriod" class="sjx-term-select form-select bootstrap-single-select__native js-bootstrap-single-select" data-sjx-period data-bootstrap-select>
+            <div class="ems-field">
+                <label class="ems-field__label" for="sjxPeriod">{% trans "YARIM İL" context "registrar.journal" %}</label>
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                    <select id="sjxPeriod" class="ems-select bootstrap-single-select__native js-bootstrap-single-select" data-sjx-period data-bootstrap-select>
                         {% for p in sec.period_choices %}
                         <option value="{{ p.id }}" data-year="{{ p.year }}"
                                 {% if p.id == sec.selected_period_id %}selected{% endif %}
@@ -44,56 +47,78 @@ kollokvium markerləri). Bu günün qeydləri də DƏRHAL görünür (sahib 2026
     </div>
 
     {% if not d %}
-    {# ── Fənn kartları (landing): müəllim jurnalı kimi kart → klik → cədvəl ──── #}
+    {# ── Fənn kartları (landing): kart → klik → fənnin jurnalı ─────────────── #}
     {% if sec.subjects %}
-    <div class="sjx-cards">
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=sec.kpi_tiles kpi_variant="4" %}
+    <div class="sj-cards">
         {% for row in sec.subjects %}
-        <a class="sjx-card {% if row.journal.barred %}is-barred{% endif %}"
+        <a class="sjx-card sj-card sj-card--{{ row.ui.status }}"
            href="{{ profile_base_url|default:'/accounts/profile/' }}?section=my-journal&amp;period={{ sec.selected_period_id }}&amp;subject={{ row.enrollment.id }}">
-            <div class="sjx-card-top">
-                <span class="sjx-card-subject">{{ row.subject.name }}</span>
-                <span class="sjx-card-ects">{{ row.ects }} ECTS</span>
-            </div>
-            <div class="sjx-card-teacher">
-                <i class="fas fa-chalkboard-teacher"></i>
+            <span class="sj-card__top">
+                <span class="sj-card__subject">{{ row.subject.name }}</span>
+                <span class="ems-badge ems-badge--neutral ems-badge--nowrap sj-card__ects">{{ row.ects }} ECTS</span>
+            </span>
+            <span class="sj-card__teacher">
+                <i class="fas fa-chalkboard-teacher" aria-hidden="true"></i>
                 {% if row.teacher %}{{ row.teacher.get_full_name|default:row.teacher.username }}{% else %}{% trans "Müəllim təyin edilməyib" context "registrar.journal" %}{% endif %}
-            </div>
-            <div class="sjx-card-foot">
-                <span class="sjx-card-score">{% trans "Giriş balı" context "registrar.journal" %}: <b>{{ row.journal.entry_score|floatformat:0 }}/{{ row.journal.entry_score_max }}</b></span>
-                {% if row.journal.eligibility.frozen %}<span class="sjx-card-badge is-legacy" title="{{ row.journal.eligibility.notice }}">{{ row.journal.eligibility.frozen_badge }}</span>{% elif row.journal.barred %}<span class="sjx-card-badge is-danger">{% trans "İmtahana buraxılmır" context "registrar.journal" %}</span>{% else %}<span class="sjx-card-badge is-ok">{% trans "Buraxılır" context "registrar.journal" %} ✓</span>{% endif %}
-            </div>
+            </span>
+            <span class="sj-card__score">
+                <span class="sj-card__score-label">{% trans "Giriş balı" context "registrar.journal" %}</span>
+                <span class="sj-card__score-value"><b>{{ row.journal.entry_score|floatformat:0 }}</b> / {{ row.journal.entry_score_max }}</span>
+            </span>
+            <progress class="ems-progress" value="{{ row.journal.entry_score|default:0|unlocalize }}" max="{{ row.journal.entry_score_max|default:50|unlocalize }}" aria-hidden="true"></progress>
+            <span class="sj-card__foot"{% if row.journal.eligibility.frozen %} title="{{ row.journal.eligibility.notice }}"{% endif %}>
+                {% ems_status_badge "exam_eligibility" row.ui.status dot=True %}
+                <i class="fas fa-chevron-right sj-card__chev" aria-hidden="true"></i>
+            </span>
         </a>
         {% endfor %}
     </div>
+    {% if sec.legend %}
+    <details class="sj-legend">
+        <summary class="sj-legend__summary"><i class="fas fa-circle-info" aria-hidden="true"></i> {% trans "Status nişanları" context "registrar.journal" %}</summary>
+        <ul class="sj-legend__list">
+            {% for item in sec.legend %}
+            <li>{% ems_status_badge "exam_eligibility" item.status dot=True %} <span>{{ item.hint }}</span></li>
+            {% endfor %}
+        </ul>
+    </details>
+    {% endif %}
     {% else %}
     {% if sec.exempt_subjects %}
-    <div class="journal-empty"><i class="fas fa-user-check"></i><p>{% trans "Bu semestrdə jurnalı aktiv fənniniz yoxdur — qeydiyyatda olduğunuz fənlərdən azad edilmisiniz. Qrupunuz dəyişmir." context "registrar.journal_exempt" %}</p>
-        <ul class="sjx-exempt-list">{% for item in sec.exempt_subjects %}<li>{{ item.name }} · <b>{% trans "Azad edilib" context "profile.subjects" %}</b></li>{% endfor %}</ul></div>
+    <div class="ems-state journal-empty" role="status">
+        <i class="fas fa-user-check ems-state__icon" aria-hidden="true"></i>
+        <p class="ems-state__title">{% trans "Bu semestrdə jurnalı aktiv fənniniz yoxdur — qeydiyyatda olduğunuz fənlərdən azad edilmisiniz. Qrupunuz dəyişmir." context "registrar.journal_exempt" %}</p>
+        <ul class="sjx-exempt-list sj-exempt">{% for item in sec.exempt_subjects %}<li>{{ item.name }} · <b>{% trans "Azad edilib" context "profile.subjects" %}</b></li>{% endfor %}</ul>
+    </div>
     {% else %}
-    <div class="journal-empty"><i class="fas fa-folder-open"></i><p>{% trans "Bu semestr üçün fənn qeydiyyatı tapılmadı." context "registrar.journal" %}</p></div>
+    <div class="ems-state journal-empty" role="status">
+        <i class="fas fa-folder-open ems-state__icon" aria-hidden="true"></i>
+        <p class="ems-state__title">{% trans "Bu semestr üçün fənn qeydiyyatı tapılmadı." context "registrar.journal" %}</p>
+    </div>
     {% endif %}
     {% endif %}
     {% else %}
-    {# ── Detal: geri düyməsi + fənn/müəllim başlığı ──────────────────────────── #}
-    <div class="sjx-detail-head">
-        <a class="sjx-back" href="{{ profile_base_url|default:'/accounts/profile/' }}?section=my-journal&amp;period={{ sec.selected_period_id }}">
-            <i class="fas fa-arrow-left"></i> {% trans "Fənlər" context "registrar.journal" %}
+    {# ── Detal: geri + fənn/müəllim başlığı + sillabus ─────────────────────── #}
+    <div class="sj-detail-head">
+        <a class="ems-btn ems-btn--sm sjx-back" href="{{ profile_base_url|default:'/accounts/profile/' }}?section=my-journal&amp;period={{ sec.selected_period_id }}">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Fənlər" context "registrar.journal" %}
         </a>
-        <div class="sjx-detail-title">
-            <span class="sjx-detail-subject">{{ d.subject.name }}</span>
-            {% if d.teacher %}<span class="sjx-detail-teacher"><i class="fas fa-chalkboard-teacher"></i> {{ d.teacher.get_full_name|default:d.teacher.username }}</span>{% endif %}
+        <div class="sj-detail-title">
+            <h2 class="sj-detail-title__subject">{{ d.subject.name }}</h2>
+            {% if d.teacher %}<span class="sj-detail-title__teacher"><i class="fas fa-chalkboard-teacher" aria-hidden="true"></i> {{ d.teacher.get_full_name|default:d.teacher.username }}</span>{% endif %}
         </div>
         {% comment %}Fənnin sillabusu — ekranda oxu paneli + PDF yükləmə.
         Düymələr YALNIZ təsdiqlənmiş versiya varsa çıxır (`syllabus_available`);
         tələbə heç vaxt qaralama və ya baxışdakı versiyanı görmür.{% endcomment %}
         {% if d.syllabus_available %}
-        <div class="sjx-detail-actions">
-            <button type="button" class="sylv-open-btn"
+        <div class="sj-detail-actions">
+            <button type="button" class="ems-btn ems-btn--sm sylv-open-btn"
                     data-sylv-open="{% url 'registrar:offering_syllabus_json' d.offering.id %}">
                 <i class="fas fa-file-lines" aria-hidden="true"></i>
                 {% trans "Sillabusa bax" context "registrar.syllabus" %}
             </button>
-            <a class="sylv-open-btn sylv-open-btn--pdf"
+            <a class="ems-btn ems-btn--sm sylv-open-btn sylv-open-btn--pdf"
                href="{% url 'registrar:offering_syllabus_pdf' d.offering.id %}">
                 <i class="fas fa-file-pdf" aria-hidden="true"></i>
                 {% trans "PDF yüklə" context "registrar.syllabus" %}
@@ -102,103 +127,99 @@ kollokvium markerləri). Bu günün qeydləri də DƏRHAL görünür (sahib 2026
         {% endif %}
     </div>
 
-    {# ── KPI kartları (mockup) ─────────────────────────────────────────────── #}
-    <div class="sjx-kpis">
-        <div class="sjx-kpi">
-            <div class="sjx-kpi-label">{% trans "QAYIB (LİMİT" context "registrar.journal" %} {{ d.journal.allowed_absence|floatformat:0 }} {% trans "SAAT)" context "registrar.journal" %}</div>
-            <div class="sjx-kpi-value {% if d.journal.barred %}is-danger{% elif d.journal.absence_hours %}is-warn{% else %}is-ok{% endif %}">
-                {{ d.journal.absence_hours }} <span class="sjx-kpi-unit">{% trans "saat" context "registrar.journal" %}</span>
-            </div>
-            <div class="sjx-kpi-bar"><span class="sjx-kpi-barfill {% if d.journal.barred %}is-danger{% endif %}" data-sjx-abs="{{ d.journal.absence_hours }}" data-sjx-limit="{{ d.journal.allowed_absence|floatformat:0 }}"></span></div>
+    {# ── KPI kartları ───────────────────────────────────────────────────── #}
+    <div class="ems-kpis ems-kpis--4 sj-kpis">
+        <div class="ems-kpi {% if d.journal.barred %}ems-kpi--accent-danger{% elif d.journal.absence_hours %}ems-kpi--accent-warning{% else %}ems-kpi--accent-success{% endif %}">
+            <div class="ems-kpi__label">{% trans "QAYIB (LİMİT" context "registrar.journal" %} {{ d.journal.allowed_absence|floatformat:0 }} {% trans "SAAT)" context "registrar.journal" %}</div>
+            <div class="ems-kpi__value">{{ d.journal.absence_hours }}<span class="ems-kpi__unit">{% trans "saat" context "registrar.journal" %}</span></div>
+            <progress class="ems-progress{% if d.journal.barred %} ems-progress--danger{% endif %}" value="{{ d.journal.absence_hours|default:0|unlocalize }}" max="{{ d.journal.allowed_absence|default:1|unlocalize }}" aria-hidden="true"></progress>
         </div>
         {% if d.interim.is_midterm %}
         {# 2026/2027-dən: TƏK midterm (0–30; sərbəst iş açıqdırsa 0–20) — orta bal yoxdur, balın özü; şkala komponentin tavanından. #}
         {% with mt=d.kollokviums.0 %}
-        <div class="sjx-kpi">
-            <div class="sjx-kpi-label">{% trans "MIDTERM" context "registrar.journal" %}</div>
-            <div class="sjx-kpi-value is-blue">{% if mt and mt.score is not None %}{{ mt.score|floatformat:'-1' }}{% else %}—{% endif %} <span class="sjx-kpi-unit">/ {% if mt %}{{ mt.component.max_score }}{% else %}{{ d.interim.max_score }}{% endif %}</span></div>
-            <div class="sjx-kpi-sub">{% if mt and mt.score is not None %}{% trans "aralıq imtahan balı" context "registrar.journal" %}{% else %}{% trans "hələ yazılmayıb" context "registrar.journal" %}{% endif %}</div>
+        <div class="ems-kpi ems-kpi--accent-primary">
+            <div class="ems-kpi__label">{% trans "MIDTERM" context "registrar.journal" %}</div>
+            <div class="ems-kpi__value">{% if mt and mt.score is not None %}{{ mt.score|floatformat:'-1' }}{% else %}—{% endif %}<span class="ems-kpi__unit">/ {% if mt %}{{ mt.component.max_score }}{% else %}{{ d.interim.max_score }}{% endif %}</span></div>
+            <div class="ems-kpi__note">{% if mt and mt.score is not None %}{% trans "aralıq imtahan balı" context "registrar.journal" %}{% else %}{% trans "hələ yazılmayıb" context "registrar.journal" %}{% endif %}</div>
         </div>
         {% endwith %}
         {% else %}
-        <div class="sjx-kpi">
-            <div class="sjx-kpi-label">{% trans "KOLLOKVİUM ORTA BALI" context "registrar.journal" %}</div>
-            <div class="sjx-kpi-value is-blue">{% if d.koll_avg is not None %}{{ d.koll_avg|floatformat:'-1' }}{% else %}—{% endif %}</div>
-            <div class="sjx-kpi-sub">
+        <div class="ems-kpi ems-kpi--accent-primary">
+            <div class="ems-kpi__label">{% trans "KOLLOKVİUM ORTA BALI" context "registrar.journal" %}</div>
+            <div class="ems-kpi__value">{% if d.koll_avg is not None %}{{ d.koll_avg|floatformat:'-1' }}{% else %}—{% endif %}</div>
+            <div class="ems-kpi__note">
                 {% for k in d.kollokviums %}{% if k.score is not None %}Kol.{{ forloop.counter }}: {{ k.score|floatformat:'-1' }}{% if not forloop.last %} · {% endif %}{% endif %}{% endfor %}
             </div>
         </div>
         {% endif %}
-        <div class="sjx-kpi">
-            <div class="sjx-kpi-label">{% trans "İMTAHANA QƏDƏR BAL" context "registrar.journal" %}</div>
-            <div class="sjx-kpi-value is-blue">{{ d.entry_score|floatformat:0 }} <span class="sjx-kpi-unit">/ {{ d.entry_score_max }}</span></div>
-            <div class="sjx-kpi-bar"><span class="sjx-kpi-barfill is-blue" data-jd-width="{{ d.entry_pct }}"></span></div>
+        <div class="ems-kpi ems-kpi--primary">
+            <div class="ems-kpi__label">{% trans "İMTAHANA QƏDƏR BAL" context "registrar.journal" %}</div>
+            <div class="ems-kpi__value">{{ d.entry_score|floatformat:0 }}<span class="ems-kpi__unit">/ {{ d.entry_score_max }}</span></div>
+            <progress class="ems-progress" value="{{ d.entry_pct|default:0|unlocalize }}" max="100" aria-hidden="true"></progress>
         </div>
-        <div class="sjx-kpi {% if d.journal.eligibility.frozen %}sjx-kpi--legacy{% elif not d.journal.barred %}sjx-kpi--ok{% else %}sjx-kpi--bad{% endif %}">
-            <div class="sjx-kpi-label">{% trans "STATUS" context "registrar.journal" %}</div>
-            <div class="sjx-kpi-status {% if d.journal.eligibility.frozen %}is-legacy{% elif d.journal.barred %}is-danger{% else %}is-ok{% endif %}"
-                 {% if d.journal.eligibility.frozen %}title="{{ d.journal.eligibility.notice }}"{% endif %}>
-                {% if d.journal.eligibility.frozen %}{{ d.journal.eligibility.frozen_badge }}{% elif d.journal.barred %}{% trans "İmtahana buraxılmır" context "registrar.journal" %}{% else %}{% trans "İmtahana buraxılır" context "registrar.journal" %} ✓{% endif %}
-            </div>
-            <div class="sjx-kpi-sub">{% trans "Davamiyyət" context "registrar.journal" %}: {% if d.dav_score is not None %}{{ d.dav_score|floatformat:'-2' }}/10{% else %}{% trans "imtahana buraxılmır" context "registrar.journal" %}{% endif %}</div>
+        <div class="ems-kpi"{% if d.journal.eligibility.frozen %} title="{{ d.journal.eligibility.notice }}"{% endif %}>
+            <div class="ems-kpi__label">{% trans "STATUS" context "registrar.journal" %}</div>
+            <div class="sj-kpi-status">{% ems_status_badge "exam_eligibility" d.ui.status dot=True wrap=True %}</div>
+            <div class="ems-kpi__note">{% trans "Davamiyyət" context "registrar.journal" %}: {% if d.dav_score is not None %}{{ d.dav_score|floatformat:'-2' }}/10{% else %}{% trans "imtahana buraxılmır" context "registrar.journal" %}{% endif %}</div>
         </div>
     </div>
 
     {# ── Bal bölgüsü (real kompozisiya) ────────────────────────────────────── #}
-    {% if d.standard %}
-    <div class="sjx-balbox">
-        <div class="sjx-balbox-head"><span class="sjx-kpi-label">{% trans "BAL BÖLGÜSÜ — İMTAHANA QƏDƏR" context "registrar.journal" %} ({{ d.entry_score }}/{{ d.entry_score_max }})</span></div>
-        {% include "registrar/partials/_entry_parts.html" with parts=d.standard %}
-    </div>
-    {% else %}
-    <div class="sjx-balbox">
-        <div class="sjx-balbox-head">
-            <span class="sjx-kpi-label">{% trans "BAL BÖLGÜSÜ — İMTAHANA QƏDƏR" context "registrar.journal" %} ({{ d.entry_score|floatformat:0 }}/{{ d.entry_score_max }})</span>
-            <span class="sjx-balbox-formula">{% trans "Dərs balları" context "registrar.journal" %} {{ d.parts.lesson_sum|floatformat:0 }} + {% if d.interim.is_midterm %}{% trans "Midterm" context "registrar.journal" %}{% else %}{% trans "Kollokvium" context "registrar.journal" %}{% endif %} {{ d.parts.koll_sum|floatformat:0 }} + {% trans "Sərbəst iş" context "registrar.journal" %} {{ d.parts.selfwork }}</span>
-        </div>
-        <div class="sjx-balbar">
-            <span class="sjx-balseg sjx-balseg--lessons" data-jd-width="{{ d.parts.lesson_pct }}"></span>
-            <span class="sjx-balseg sjx-balseg--koll" data-jd-width="{{ d.parts.koll_pct }}"></span>
-            <span class="sjx-balseg sjx-balseg--selfwork" data-jd-width="{{ d.parts.selfwork_pct }}"></span>
-        </div>
-        <div class="sjx-ballegend">
-            <span><i class="sjx-dot sjx-dot--lessons"></i>{% trans "Dərs balları" context "registrar.journal" %} {{ d.parts.lesson_sum|floatformat:0 }}</span>
-            <span><i class="sjx-dot sjx-dot--koll"></i>{% if d.interim.is_midterm %}{% trans "Midterm" context "registrar.journal" %}{% else %}{% trans "Kollokvium" context "registrar.journal" %}{% endif %} {{ d.parts.koll_sum|floatformat:0 }}</span>
-            <span><i class="sjx-dot sjx-dot--selfwork"></i>{% trans "Sərbəst iş" context "registrar.journal" %} {{ d.parts.selfwork }}</span>
-        </div>
-    </div>
-
-    {% endif %}
+    <section class="sj-panel">
+        <h3 class="sj-panel__title">{% trans "BAL BÖLGÜSÜ — İMTAHANA QƏDƏR" context "registrar.journal" %} <span class="sj-panel__meta">({% if d.standard %}{{ d.entry_score }}{% else %}{{ d.entry_score|floatformat:0 }}{% endif %}/{{ d.entry_score_max }})</span></h3>
+        {% if d.standard %}
+        {% include "partials/ems_ui/_entry_breakdown.html" with parts=d.standard %}
+        {% else %}
+        <ul class="ems-breakdown">
+            <li class="ems-breakdown__item">
+                <span class="ems-breakdown__label">{% trans "Dərs balları" context "registrar.journal" %}</span>
+                <span class="ems-breakdown__value">{{ d.parts.lesson_sum|floatformat:0 }}</span>
+                <progress class="ems-progress" value="{{ d.parts.lesson_pct|default:0|unlocalize }}" max="100" aria-hidden="true"></progress>
+            </li>
+            <li class="ems-breakdown__item">
+                <span class="ems-breakdown__label">{% if d.interim.is_midterm %}{% trans "Midterm" context "registrar.journal" %}{% else %}{% trans "Kollokvium" context "registrar.journal" %}{% endif %}</span>
+                <span class="ems-breakdown__value">{{ d.parts.koll_sum|floatformat:0 }}</span>
+                <progress class="ems-progress" value="{{ d.parts.koll_pct|default:0|unlocalize }}" max="100" aria-hidden="true"></progress>
+            </li>
+            <li class="ems-breakdown__item">
+                <span class="ems-breakdown__label">{% trans "Sərbəst iş" context "registrar.journal" %}</span>
+                <span class="ems-breakdown__value">{{ d.parts.selfwork }}</span>
+                <progress class="ems-progress" value="{{ d.parts.selfwork_pct|default:0|unlocalize }}" max="100" aria-hidden="true"></progress>
+            </li>
+        </ul>
+        {% endif %}
+    </section>
 
     {# ── Dərs tarixçəsi ────────────────────────────────────────────────────── #}
-    <div class="sjx-historybox">
-        <div class="sjx-history-head">
-            <div class="jd2-panel-label">{% trans "DƏRS TARİXÇƏSİ" context "registrar.journal" %} — {{ d.subject.name|upper }}</div>
+    <section class="ems-tablewrap sj-history" aria-labelledby="sjHistoryTitle">
+        <div class="sj-history__head">
+            <h3 class="sj-panel__title" id="sjHistoryTitle">{% trans "DƏRS TARİXÇƏSİ" context "registrar.journal" %} — {{ d.subject.name|upper }}</h3>
             {% if d.lesson_kinds %}
-            <div class="sjx-filter" data-sjx-filter role="group" aria-label="{% trans 'Dərs tipinə görə süz' context 'registrar.journal' %}">
-                <button type="button" class="sjx-filter-btn is-active" data-kind="all">{% trans "Hamısı" context "registrar.journal" %}</button>
+            <div class="sjx-filter sj-filter" data-sjx-filter role="group" aria-label="{% trans 'Dərs tipinə görə süz' context 'registrar.journal' %}">
+                <button type="button" class="sjx-filter-btn is-active" data-kind="all" aria-pressed="true">{% trans "Hamısı" context "registrar.journal" %}</button>
                 {% for k in d.lesson_kinds %}
-                <button type="button" class="sjx-filter-btn" data-kind="{{ k.value }}">{{ k.label }}</button>
+                <button type="button" class="sjx-filter-btn" data-kind="{{ k.value }}" aria-pressed="false">{{ k.label }}</button>
                 {% endfor %}
             </div>
             {% endif %}
         </div>
         {% if d.history %}
-        <div class="sjx-table-wrap">
-            <table class="sjx-table">
+        <div class="ems-tablescroll">
+            <table class="ems-table ems-table--compact ems-table--stack sj-table">
                 <thead>
                     <tr>
-                        <th class="sjx-th-date">{% trans "TARİX" context "registrar.journal" %}</th>
-                        <th class="sjx-th-week">{% trans "HƏFTƏ" context "registrar.journal" %}</th>
-                        <th class="sjx-th-kind">{% trans "TİP" context "registrar.journal" %}</th>
-                        <th>{% trans "MÖVZU" context "registrar.journal" %}</th>
-                        <th class="sjx-th-room">{% trans "OTAQ" context "registrar.journal" %}</th>
-                        <th class="sjx-th-result">{% trans "NƏTİCƏ" context "registrar.journal" %}</th>
+                        <th scope="col">{% trans "TARİX" context "registrar.journal" %}</th>
+                        <th scope="col">{% trans "HƏFTƏ" context "registrar.journal" %}</th>
+                        <th scope="col">{% trans "TİP" context "registrar.journal" %}</th>
+                        <th scope="col">{% trans "MÖVZU" context "registrar.journal" %}</th>
+                        <th scope="col">{% trans "OTAQ" context "registrar.journal" %}</th>
+                        <th scope="col" class="sj-table__result">{% trans "NƏTİCƏ" context "registrar.journal" %}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for h in d.history %}
                     <tr class="sjx-drow {% if h.kollokvium %}is-koll{% endif %}{% if h.corrected %} sjx-row--fixed{% endif %}{% if h.legacy_excuse %} sjx-row--excuse{% endif %}"
+                        tabindex="0"
                         data-kind="{{ h.kind }}"
                         data-sjx-day
                         data-date="{{ h.mark.lesson.date|date:'d.m.Y' }}"
@@ -210,23 +231,25 @@ kollokvium markerləri). Bu günün qeydləri də DƏRHAL görünür (sahib 2026
                         data-score="{% if h.kollokvium and h.kollokvium.score is not None %}{{ h.kollokvium.label }}: {{ h.kollokvium.score|floatformat:0 }}{% elif h.mark.score is not None %}{{ h.mark.score|floatformat:0 }}{% else %}—{% endif %}"
                         data-corrected="{% if h.corrected %}1{% endif %}"
                         data-legacy-excuse="{% if h.legacy_excuse %}1{% endif %}">
-                        <td class="sjx-date">{{ h.mark.lesson.date|date:"d.m" }}</td>
-                        <td>
-                            {% if h.parity == 'odd' %}<span class="sgx-chip sgx-chip--ust">ÜST</span>{% else %}<span class="sgx-chip sgx-chip--alt">ALT</span>{% endif %}
+                        <th scope="row" class="sj-table__date"><time datetime="{{ h.mark.lesson.date|date:'Y-m-d' }}">{{ h.mark.lesson.date|date:"d.m" }}</time></th>
+                        <td data-label="{% trans 'HƏFTƏ' context 'registrar.journal' %}">
+                            {% if h.parity == 'odd' %}<span class="ems-badge ems-badge--primary ems-badge--nowrap sj-parity">ÜST</span>{% else %}<span class="ems-badge ems-badge--neutral ems-badge--nowrap sj-parity">ALT</span>{% endif %}
                         </td>
-                        <td class="sjx-kind-cell"><span class="sjx-kind sjx-kind--{{ h.kind }}">{{ h.kind_display }}</span></td>
-                        <td class="sjx-topic">
+                        <td data-label="{% trans 'TİP' context 'registrar.journal' %}"><span class="sjx-kind sjx-kind--{{ h.kind }}">{{ h.kind_display }}</span></td>
+                        <td data-label="{% trans 'MÖVZU' context 'registrar.journal' %}" class="sj-table__topic">
+                            <span>
                             {{ h.mark.lesson.topic|default:h.mark.lesson.get_kind_display }}
                             {% if h.kollokvium %} — <span class="sjx-kollmark">{{ h.kollokvium.component.name|lower }}</span>{% endif %}
-                            {% if h.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ h.mark.id }}" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% elif h.legacy_excuse %}<button type="button" class="corr-fixed-badge corr-excuse-badge" data-corr-history="{{ h.mark.id }}" title="{% trans 'Üzrlü qayıb sənədi var — bax' context 'registrar.legacy_excuse' %}">✎</button>{% endif %}
+                            {% if h.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ h.mark.id }}" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}" aria-label="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% elif h.legacy_excuse %}<button type="button" class="corr-fixed-badge corr-excuse-badge" data-corr-history="{{ h.mark.id }}" title="{% trans 'Üzrlü qayıb sənədi var — bax' context 'registrar.legacy_excuse' %}" aria-label="{% trans 'Üzrlü qayıb sənədi var — bax' context 'registrar.legacy_excuse' %}">✎</button>{% endif %}
+                            </span>
                         </td>
-                        <td class="sjx-room-cell">{{ h.room_label|default:"—" }}</td>
-                        <td class="sjx-result-cell">
+                        <td data-label="{% trans 'OTAQ' context 'registrar.journal' %}" class="sj-table__room">{{ h.room_label|default:"—" }}</td>
+                        <td data-label="{% trans 'NƏTİCƏ' context 'registrar.journal' %}" class="sj-table__result">
                             {# Bir sütun: bal varsa bal (davamiyyət avtomatik i/e); yoxdursa q/b · üq · i/e #}
                             {% if h.kollokvium and h.kollokvium.score is not None %}
                                 <b class="sjx-kollscore">{{ h.kollokvium.label }}: {{ h.kollokvium.score|floatformat:0 }}</b>
                             {% elif h.mark.score is not None %}
-                                <b class="sjx-att sjx-att--ie">{{ h.mark.score|floatformat:0 }}</b>
+                                <b class="sjx-att sjx-att--ie sj-score">{{ h.mark.score|floatformat:0 }}</b>
                             {% elif h.mark.status == 'absent' %}
                                 <span class="sjx-att sjx-att--qb">q/b</span>
                             {% elif h.mark.status == 'excused' %}
@@ -243,7 +266,7 @@ kollokvium markerləri). Bu günün qeydləri də DƏRHAL görünür (sahib 2026
         {% else %}
         <p class="sjx-empty-line">{% trans "Hələ qeyd yoxdur." context "registrar.journal" %}</p>
         {% endif %}
-    </div>
+    </section>
 
     {# ── Gün detalı modalı ──────────────────────────────────────────────────── #}
     <div class="sjx-daymodal" id="sjxDayModal" hidden data-sjx-daymodal>
@@ -268,44 +291,47 @@ kollokvium markerləri). Bu günün qeydləri də DƏRHAL görünür (sahib 2026
 
     {# ── Sərbəst iş + kurs işi (öz vəziyyəti) ─────────────────────────────── #}
     {% if d.selfwork_active and d.selfwork_topics and d.selfwork_row %}
-    <div class="sjx-swbox">
-        <div class="jd2-panel-label">{% trans "SƏRBƏST İŞ" context "registrar.journal" %} <span class="sjx-h3-badge">{{ d.selfwork_row.total }} / 10</span></div>
+    <section class="sj-panel sjx-swbox">
+        <h3 class="sj-panel__title">{% trans "SƏRBƏST İŞ" context "registrar.journal" %} <span class="ems-badge ems-badge--info">{{ d.selfwork_row.total }} / 10</span></h3>
         <ol class="sjx-sw-list">
             {% for cell in d.selfwork_row.cells %}{% if cell.topic %}
             {% comment %}Bal strukturunda (2 × 5 / 1 × 10) slot-slot bal: «Sərbəst iş 1: 4/5»;
             çeklistdə (10 × 1 / köhnə) ✓ / ·. Fənn qovluğundan gələn bal nişanlanır.{% endcomment %}
             <li>
-                <span class="sjx-sw-dot {% if cell.points is not None %}is-on{% endif %}">{% if cell.points is not None %}✓{% else %}·{% endif %}</span>
+                <span class="sjx-sw-dot {% if cell.points is not None %}is-on{% endif %}" aria-hidden="true">{% if cell.points is not None %}✓{% else %}·{% endif %}</span>
                 <span class="sjx-sw-title">{{ cell.topic.title }}</span>
                 {% if cell.points_mode %}<b class="sjx-sw-pts">{{ cell.points_value|default:"—" }}/{{ cell.max_points }}</b>{% endif %}
-                {% if cell.from_folder %}<span class="sjx-sw-src" title="{% trans 'Bal fənn qovluğunda müəllimin qiymətləndirməsindən jurnala yazılıb' context 'registrar.selfwork' %}">{% trans "Fənn qovluğu" context "registrar.selfwork" %}</span>{% endif %}
+                {% if cell.from_folder %}<span class="ems-badge ems-badge--success sjx-sw-src" title="{% trans 'Bal fənn qovluğunda müəllimin qiymətləndirməsindən jurnala yazılıb' context 'registrar.selfwork' %}">{% trans "Fənn qovluğu" context "registrar.selfwork" %}</span>{% endif %}
             </li>
             {% endif %}{% endfor %}
         </ol>
-    </div>
+    </section>
     {% endif %}
     {% if d.coursework %}
-    <div class="sjx-cw">
-        <span class="jd2-panel-label">{% trans "KURS İŞİ" context "registrar.journal" %}</span>
-        <span class="sjx-cw-topic">{{ d.coursework.topic }}</span>
-        <b>{% if d.coursework.score is not None %}{{ d.coursework.score|floatformat:'-2' }} / 100{% else %}—{% endif %}</b>
-        {% if d.coursework.submitted_on %}<small>{{ d.coursework.submitted_on|date:"d.m.Y" }}</small>{% endif %}
-    </div>
+    <section class="sj-panel sj-cw">
+        <h3 class="sj-panel__title">{% trans "KURS İŞİ" context "registrar.journal" %}</h3>
+        <span class="sj-cw__topic">{{ d.coursework.topic }}</span>
+        <b class="sj-cw__score">{% if d.coursework.score is not None %}{{ d.coursework.score|floatformat:'-2' }} / 100{% else %}—{% endif %}</b>
+        {% if d.coursework.submitted_on %}<small class="sj-cw__date">{{ d.coursework.submitted_on|date:"d.m.Y" }}</small>{% endif %}
+    </section>
     {% endif %}
 
-    {# ── Alt legend + xəbərdarlıqlar (mockup) ─────────────────────────────── #}
-    <div class="sjx-footrow">
-        <div class="sjx-foot-legend">
-            <b class="jd2-ie">i/e</b> {% trans "iştirak edib" context "registrar.journal" %} · <b class="jd2-qb">q/b</b> {% trans "qayıb" context "registrar.journal" %} · {% trans "qayıb limiti" context "registrar.journal" %}: {{ d.journal.allowed_absence|floatformat:0 }} {% trans "saat" context "registrar.journal" %}
-        </div>
+    {# ── Alt legend + digər fənlər üzrə xəbərdarlıqlar ───────────────────── #}
+    <div class="sj-foot">
+        <p class="sj-foot__legend">
+            <b class="sjx-att sjx-att--ie">i/e</b> {% trans "iştirak edib" context "registrar.journal" %} · <b class="sjx-att sjx-att--qb">q/b</b> {% trans "qayıb" context "registrar.journal" %} · {% trans "qayıb limiti" context "registrar.journal" %}: {{ d.journal.allowed_absence|floatformat:0 }} {% trans "saat" context "registrar.journal" %}
+        </p>
         {% for w in sec.warnings %}
         {% if w.enrollment.id != d.enrollment.id %}
-        <div class="sjx-foot-warn">
+        <div class="ems-banner {% if w.journal.barred %}ems-banner--danger{% else %}ems-banner--warning{% endif %} sj-warn" role="status">
+            <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+            <div class="ems-banner__body">
             {% if w.journal.barred %}
             {{ w.subject.name }} {% trans "üzrə qayıb limiti keçilib — imtahana buraxılmırsınız" context "registrar.journal" %} ({{ w.journal.absence_hours }}/{{ w.journal.allowed_absence|floatformat:0 }} {% trans "saat" context "registrar.journal" %})
             {% else %}
             {{ w.subject.name }} {% trans "üzrə qayıb limitinə yaxınlaşırsınız" context "registrar.journal" %} — {{ w.journal.absence_hours }}/{{ w.journal.allowed_absence|floatformat:0 }} {% trans "saat" context "registrar.journal" %}
             {% endif %}
+            </div>
         </div>
         {% endif %}
         {% endfor %}

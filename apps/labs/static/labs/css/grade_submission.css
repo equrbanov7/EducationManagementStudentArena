@@ -1,51 +1,160 @@
-.answer-toggle-btn {
-    border: 1px solid var(--ems-neutral-300);
-    color: var(--ems-primary-600);
-    background: var(--ems-neutral-0);
-    border-radius: 999px;
-    width: 34px;
-    height: 34px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+/* ════════════════════════════════════════════════════════════════════════════
+   EMSArena — Müəllimin qiymətləndirmə səhifəsi (grade_submission.html) · 2026-10-17 (Paket E)
+   Gradient başlıq, hex rənglər və Bootstrap `card/alert` çıxarıldı. Cavab kartı (`.lab-ans`) ilə
+   ortaq qaydalar `my_lab_answers.css`-dəki ilə eyni dildədir, lakin burada özünə məxsus təkrarlanır
+   ki, səhifə yalnız öz faylını yükləsin. Yalnız `--ems-*` tokenləri.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.lab-grade__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+    gap: var(--ems-sp-6);
+    align-items: start;
 }
 
-.grade-answer-content {
-    max-height: 1200px;
-    overflow: hidden;
-    transition: max-height 0.25s ease, opacity 0.2s ease;
-    opacity: 1;
+.lab-grade__answers {
+    margin-bottom: 0;
+}
+
+.lab-grade__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lab-grade__list > .lab-ans {
+    padding-bottom: 16px;
+}
+
+.lab-grade__list > .lab-ans + .lab-ans {
+    border-top: 1px solid var(--ems-neutral-100);
+}
+
+.lab-ans__head {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-5);
+    padding: 14px 18px 10px;
+}
+
+.lab-ans__q {
+    flex: 1;
+    min-width: 0;
+    margin: 4px 0 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 700;
+    line-height: 1.5;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.lab-ans__content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--ems-sp-5);
+    padding: 0 18px 0 62px;
 }
 
 .answer-collapsed .grade-answer-content {
-    max-height: 0;
-    opacity: 0;
+    display: none;
 }
 
-.review-window-banner {
+.lab-ans__box {
+    align-self: stretch;
+    padding: 12px 14px;
+    border: 1px solid var(--ems-neutral-100);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg-subtle);
+}
+
+.lab-ans__empty {
+    margin: 0;
+    font-size: var(--ems-fs-base);
+    color: var(--ems-text-muted);
+}
+
+.lab-grade__score {
+    width: 100%;
+    max-width: 220px;
+}
+
+/* ── Qiymət paneli ───────────────────────────────────────────────────────── */
+.lab-grade__panel {
+    position: sticky;
+    top: 88px;
+    margin-bottom: 0;
+}
+
+.lab-grade__form {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px 16px;
+    flex-direction: column;
+    gap: var(--ems-sp-7);
+    padding: 16px 18px;
+}
+
+.lab-grade__total {
+    display: flex;
     align-items: center;
-    margin-bottom: 1.5rem;
-    padding: 0.9rem 1rem;
-    border-radius: 14px;
-    border: 1px solid #fcd34d;
-    background: #fffbeb;
-    color: var(--ems-warning-800);
+    gap: var(--ems-sp-4);
 }
 
-.review-window-banner strong {
+.lab-grade__total-input {
+    flex: 1;
+    min-width: 0;
+    height: 52px;
+    font-size: var(--ems-fs-3xl);
+    font-weight: 800;
+    text-align: center;
+}
+
+.lab-grade__max {
+    font-size: var(--ems-fs-xl);
     font-weight: 700;
+    color: var(--ems-text-muted);
+    white-space: nowrap;
 }
 
-.review-window-banner--locked {
-    border-color: var(--ems-neutral-300);
-    background: var(--ems-neutral-50);
-    color: var(--ems-neutral-600);
+.lab-grade__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
 }
 
-/* C3: mikro inline-stil köçürmələri (grade_submission.html) */
-.grade-submission-1 { background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%); }
-.grade-submission-2 { width: 40px; height: 40px; }
-.grade-submission-3 { top: 20px; }
+.lab-grade__foot {
+    padding: 12px 18px;
+    border-top: 1px solid var(--ems-border);
+    background: var(--ems-bg-subtle);
+    border-radius: 0 0 var(--ems-r-2xl) var(--ems-r-2xl);
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+.lab-grade__foot i {
+    color: var(--ems-success-700);
+}
+
+@media (max-width: 960px) {
+    .lab-grade__grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* Qiymət paneli telefonda cavablardan ƏVVƏL gəlmir — cavablara baxıb sonra bal verilir. */
+    .lab-grade__panel {
+        position: static;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .lab-ans__head {
+        padding: 12px 14px 8px;
+    }
+
+    .lab-ans__content {
+        padding: 0 14px;
+    }
+
+    .lab-grade__score {
+        max-width: none;
+    }
+}

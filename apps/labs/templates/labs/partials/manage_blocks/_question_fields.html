@@ -1,0 +1,20 @@
+{% load i18n %}
+{% comment %}Sual formasının sahələri (add/edit — `fp` ön şəkilçisi ilə).{% endcomment %}
+<div class="lab-form">
+    <input type="hidden" id="{{ fp }}QuestionId" name="{% if fp == 'edit' %}question_id{% else %}block_id{% endif %}">
+    <div class="ems-field">
+        <label class="ems-field__label" for="{{ fp }}-question-text">{% trans "label_question_text" context "labs.template.manage_blocks" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <textarea id="{{ fp }}-question-text" name="question_text" class="ems-textarea" rows="5" required autofocus></textarea>
+    </div>
+    <div class="lab-form__row">
+        <div class="ems-field">
+            <label class="ems-field__label" for="{{ fp }}-question-points">{% trans "table_points" context "labs.template.manage_blocks" %}</label>
+            <input type="number" id="{{ fp }}-question-points" name="points" class="ems-input" value="0" min="0">
+        </div>
+        <div class="ems-field">
+            <label class="ems-field__label" for="{{ fp }}-question-attachment">{% trans "label_attachment_file" context "labs.template.manage_blocks" %}</label>
+            <input type="file" id="{{ fp }}-question-attachment" name="attachment" class="ems-input lab-file-input">
+            {% if fp == "edit" %}<div id="editQuestionCurrentFile" class="lab-form__current"></div>{% endif %}
+        </div>
+    </div>
+</div>

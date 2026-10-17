@@ -1,0 +1,549 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Müəllimin yazılı cəhdi yoxlama səhifəsi — Paket B (2026-10-17)
+   ───────────────────────────────────────────────────────────────────────────
+   Qabıq `teacher_page_shell.css` (`etp-*`), komponentlər `ems_ui` qatındandır;
+   bu fayl yalnız səhifəyə xas düzülüşü verir. Prefiks: `tca-`. Rəng YALNIZ
+   `--ems-*` tokenləri ilə; vəziyyət rəng + mətnlə (badge, xəritə çipi, sol zolaq).
+   Dialoqlar: grading_dialog.css.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Başlıq meta sətri ─────────────────────────────────────────────────── */
+.tca-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3) var(--ems-sp-6);
+    margin: var(--ems-sp-4) 0 0;
+    font-size: var(--ems-fs-md);
+}
+
+.tca-meta__item {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+}
+
+.tca-meta dt {
+    font-weight: 600;
+    color: var(--ems-text-muted);
+}
+
+.tca-meta dd {
+    margin: 0;
+    font-weight: 800;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.tca-meta__anon {
+    color: var(--ems-warning-800);
+}
+
+.tca-banner {
+    margin-bottom: 0;
+}
+
+.tca-banner__icon {
+    margin-top: 3px;
+}
+
+/* ── İki sütunlu düzülüş: suallar + yapışqan xülasə ───────────────────── */
+.tca-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+}
+
+.tca-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 296px;
+    gap: var(--ems-sp-6);
+    align-items: start;
+}
+
+.tca-main {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+    min-width: 0;
+}
+
+.tca-side {
+    grid-column: 2;
+    grid-row: 1;
+    position: sticky;
+    top: calc(var(--ems-header-h, 72px) + var(--ems-sp-5));
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-5);
+    max-height: calc(100vh - var(--ems-header-h, 72px) - 120px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+/* ── Sual kartı ───────────────────────────────────────────────────────── */
+.tca-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tca-q {
+    position: relative;
+    min-width: 0;
+    border: 1px solid var(--ems-border);
+    border-left: 4px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+    scroll-margin-top: calc(var(--ems-header-h, 72px) + var(--ems-sp-5));
+    scroll-margin-bottom: 96px;
+    transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.tca-q[data-state="scored"] { border-left-color: var(--ems-success); }
+.tca-q[data-state="pending"] { border-left-color: var(--ems-warning-500); }
+
+.tca-q:focus-within {
+    border-color: var(--ems-primary-300);
+    box-shadow: 0 0 0 3px var(--ems-primary-100), var(--ems-sh-card);
+}
+
+.tca-q[data-state="scored"]:focus-within { border-left-color: var(--ems-success); }
+.tca-q[data-state="pending"]:focus-within { border-left-color: var(--ems-warning-500); }
+
+.tca-q__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3) var(--ems-sp-4);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--ems-neutral-100);
+}
+
+.tca-q__num {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.tca-q__title {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.tca-q__pts {
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+    color: var(--ems-text-muted);
+    white-space: nowrap;
+}
+
+.tca-q__open {
+    gap: 6px;
+}
+
+.tca-q__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-5);
+    padding: 14px 16px 16px;
+}
+
+.tca-q__text {
+    font-size: var(--ems-fs-md);
+    line-height: 1.6;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.tca-media {
+    margin: 0;
+}
+
+.tca-media img,
+.tca-media video {
+    display: block;
+    max-width: 100%;
+    max-height: 360px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    object-fit: contain;
+}
+
+.tca-answer {
+    padding: 12px 14px;
+    border: 1px solid var(--ems-primary-100);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-primary-50);
+    min-width: 0;
+}
+
+.tca-answer--empty {
+    border-color: var(--ems-border);
+    border-style: dashed;
+    background: var(--ems-bg-subtle);
+}
+
+.tca-answer__label {
+    margin: 0 0 6px;
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.tca-answer__text {
+    max-height: 420px;
+    overflow-y: auto;
+    font-size: var(--ems-fs-md);
+    line-height: 1.65;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.tca-answer__none,
+.tca-answer__meta {
+    margin: 0;
+    font-size: var(--ems-fs-base);
+    color: var(--ems-text-muted);
+}
+
+.tca-pre {
+    max-height: 320px;
+    margin: 8px 0 0;
+    padding: 10px 12px;
+    overflow: auto;
+    border-radius: var(--ems-r-md);
+    background: var(--ems-neutral-900);
+    color: var(--ems-neutral-100);
+    font-family: var(--ems-ff-mono);
+    font-size: var(--ems-fs-sm);
+    line-height: 1.5;
+    white-space: pre;
+}
+
+.tca-details {
+    margin-top: 8px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+}
+
+.tca-details > summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    min-height: 38px;
+    padding: 8px 12px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+    cursor: pointer;
+}
+
+.tca-details > summary small {
+    color: var(--ems-text-muted);
+}
+
+.tca-details > .tca-pre {
+    margin: 0 8px 8px;
+}
+
+.tca-model > summary {
+    color: var(--ems-success-700);
+}
+
+.tca-model__text {
+    padding: 0 12px 12px;
+    font-size: var(--ems-fs-md);
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+/* Fayllar / rəsm */
+.tca-files,
+.tca-paint {
+    margin-top: var(--ems-sp-4);
+}
+
+.tca-files__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+}
+
+.tca-files__list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tca-file {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg);
+    font-size: var(--ems-fs-base);
+}
+
+.tca-file > i {
+    color: var(--ems-neutral-500);
+}
+
+.tca-file__link {
+    min-width: 0;
+    color: var(--ems-link);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.tca-file__thumb {
+    flex-basis: 100%;
+}
+
+.tca-file__thumb img,
+.tca-paint__link img {
+    display: block;
+    max-width: min(100%, 420px);
+    max-height: 320px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg);
+    object-fit: contain;
+}
+
+/* ── Qiymətləndirmə zolağı (kartın altı) ─────────────────────────────── */
+.tca-q__grade {
+    display: grid;
+    grid-template-columns: 184px minmax(0, 1fr);
+    gap: var(--ems-sp-5) var(--ems-sp-6);
+    align-items: start;
+    padding: 12px 16px 14px;
+    border-top: 1px solid var(--ems-neutral-100);
+    border-radius: 0 0 var(--ems-r-xl) var(--ems-r-xl);
+    background: var(--ems-bg-subtle);
+}
+
+.tca-score__label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+}
+
+.tca-opt {
+    font-weight: 500;
+    color: var(--ems-text-muted);
+}
+
+.tca-score__ctrl {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ems-input.tca-score__input {
+    width: 88px;
+    min-height: 44px;
+    padding: 6px 8px;
+    font-size: var(--ems-fs-xl);
+    font-weight: 800;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.ems-input.tca-score__input:focus {
+    border-color: var(--ems-primary-600);
+    box-shadow: 0 0 0 3px var(--ems-primary-100);
+}
+
+.ems-input.tca-score__input.is-invalid {
+    border-color: var(--ems-danger);
+    box-shadow: 0 0 0 3px var(--ems-danger-bg);
+}
+
+.tca-score__error {
+    margin: 6px 0 0;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-danger-strong);
+}
+
+.tca-score__error[hidden] {
+    display: none;
+}
+
+.tca-score__max {
+    font-size: var(--ems-fs-lg);
+    font-weight: 700;
+    color: var(--ems-text-muted);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.tca-score__quick {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.ems-textarea.tca-fb__input {
+    min-height: 44px;
+    resize: vertical;
+}
+
+/* ── Yapışqan saxlama zolağı ─────────────────────────────────────────── */
+.tca-bar__info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px var(--ems-sp-6);
+    min-width: 0;
+}
+
+.tca-bar__total {
+    font-size: var(--ems-fs-md);
+    color: var(--ems-neutral-700);
+    font-variant-numeric: tabular-nums;
+}
+
+.tca-bar__total b {
+    font-size: var(--ems-fs-lg);
+    color: var(--ems-text);
+}
+
+.tca-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-text-muted);
+}
+
+.tca-state::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-success);
+}
+
+.tca-state[data-state="dirty"] {
+    color: var(--ems-warning-800);
+}
+
+.tca-state[data-state="dirty"]::before {
+    background: var(--ems-warning-500);
+}
+
+.tca-state[data-state="saving"]::before {
+    background: var(--ems-primary-600);
+}
+
+/* ── Planşet / telefon ───────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+    .tca-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .tca-main,
+    .tca-side {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    .tca-side {
+        position: static;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        max-height: none;
+        overflow: visible;
+    }
+
+    .tca-keys {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .tca-side {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .tca-q__head {
+        padding: 10px 12px;
+    }
+
+    .tca-q__open span {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+
+    .tca-q__body,
+    .tca-q__grade {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .tca-q__grade {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .tca-bar__total-label {
+        display: none;
+    }
+
+    [data-tca-next-ungraded] span {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tca-q {
+        transition: none;
+    }
+}

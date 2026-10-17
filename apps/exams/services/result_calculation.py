@@ -69,6 +69,35 @@ def _legacy_test_attempt_result(attempt):
     )
 
 
+def answer_scoring_keys(answer):
+    """Bir test cavabının RƏSMİ açarı: ``(bal, düzgün variant id-ləri, seçilmiş variant id-ləri)``.
+
+    ``calculate_test_attempt_result`` və müəllimin baxış səhifəsi (sual-sual «düzgün / səhv»)
+    eyni qaydanı işlətsin deyə ayrıca çıxarılıb (2026-10-17) — davranış dəyişməyib.
+    """
+    question = answer.question
+    # EXAM-INTEGRITY-001: qiymət çatdırılan anın snapshot-undan hesablanır ki,
+    # sonradan sualın/variantın redaktəsi keçmiş balı dəyişməsin. Snapshot
+    # boşdursa (köhnə cəhdlər) canlı suala düşürük (geriyə-uyğunluq).
+    snapshot = getattr(answer, "question_snapshot", None)
+    snapshot_options = snapshot.get("options") if isinstance(snapshot, dict) else None
+    if snapshot_options:
+        points = _as_decimal(snapshot.get("points", getattr(question, "points", 1)), default="1")
+        correct_option_ids = {opt["id"] for opt in snapshot_options if opt.get("is_correct")}
+    else:
+        points = _as_decimal(getattr(question, "points", 1), default="1")
+        correct_option_ids = {option.id for option in question.options.all() if option.is_correct}
+    # EXAM-P0-03: seçim snapshot-u varsa ondan oxunur — variant redaktəsi
+    # canlı M2M through sətirlərini silsə belə keçmiş seçim itmir.
+    # None = köhnə cavab → canlı M2M (geriyə-uyğunluq).
+    frozen_selection = getattr(answer, "selected_option_ids_snapshot", None)
+    if frozen_selection is not None:
+        selected_option_ids = {int(option_id) for option_id in frozen_selection}
+    else:
+        selected_option_ids = _option_ids(answer.selected_options)
+    return points, correct_option_ids, selected_option_ids
+
+
 def calculate_test_attempt_result(attempt, *, answers=None):
     """
     Calculate a test attempt only from the questions delivered to that attempt.
@@ -97,28 +126,9 @@ def calculate_test_attempt_result(attempt, *, answers=None):
     max_score = Decimal("0")
 
     for answer in answers:
-        question = answer.question
-        # EXAM-INTEGRITY-001: qiymət çatdırılan anın snapshot-undan hesablanır ki,
-        # sonradan sualın/variantın redaktəsi keçmiş balı dəyişməsin. Snapshot
-        # boşdursa (köhnə cəhdlər) canlı suala düşürük (geriyə-uyğunluq).
-        snapshot = getattr(answer, "question_snapshot", None)
-        snapshot_options = snapshot.get("options") if isinstance(snapshot, dict) else None
-        if snapshot_options:
-            points = _as_decimal(snapshot.get("points", getattr(question, "points", 1)), default="1")
-            correct_option_ids = {opt["id"] for opt in snapshot_options if opt.get("is_correct")}
-        else:
-            points = _as_decimal(getattr(question, "points", 1), default="1")
-            correct_option_ids = {option.id for option in question.options.all() if option.is_correct}
+        points, correct_option_ids, selected_option_ids = answer_scoring_keys(answer)
         max_score += points
 
-        # EXAM-P0-03: seçim snapshot-u varsa ondan oxunur — variant redaktəsi
-        # canlı M2M through sətirlərini silsə belə keçmiş seçim itmir.
-        # None = köhnə cavab → canlı M2M (geriyə-uyğunluq).
-        frozen_selection = getattr(answer, "selected_option_ids_snapshot", None)
-        if frozen_selection is not None:
-            selected_option_ids = {int(option_id) for option_id in frozen_selection}
-        else:
-            selected_option_ids = _option_ids(answer.selected_options)
         if not selected_option_ids:
             unanswered_count += 1
             continue
@@ -196,6 +206,7 @@ def attach_test_result_summaries(attempts, *, bonus_map_fn=None):
 
 __all__ = [
     "TestAttemptResult",
+    "answer_scoring_keys",
     "attach_test_result_summaries",
     "calculate_test_attempt_result",
     "sync_test_attempt_counts",

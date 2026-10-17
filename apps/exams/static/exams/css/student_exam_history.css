@@ -1,189 +1,176 @@
-:root {
-    --primary-blue: var(--ems-primary-600);
-    --dark-blue: var(--ems-primary-800);
-    --light-blue: var(--ems-primary-50);
-    --pale-blue: var(--ems-primary-200);
-    --primary-green: var(--ems-success);
-    --dark-green: var(--ems-success-600);
-    --light-green: var(--ems-emerald-50);
+/* ═══════════════════════════════════════════════════════════════════════════
+   «Mənim cavablarım» (exams:student_exam_history) — Paket A redizaynı 2026-10-18
+   Köhnə yerli palitra (`--dark-blue/--primary-blue/--primary-green`, gradient
+   cədvəl başlığı) silindi; komponentlər `ems_ui` qatındandır (`ems-header`,
+   `ems-kpi`, `ems-table --stack`, `ems-badge`, `ems-ring`). Yalnız tokenlər.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.xh {
+    max-width: 1080px;
+    margin: 24px auto 40px;
+    padding: 0 16px;
+    display: grid;
+    gap: var(--ems-sp-5);
 }
 
-.text-dark-blue { color: var(--dark-blue) !important; }
-.text-primary-blue { color: var(--primary-blue) !important; }
-.text-primary-green { color: var(--primary-green) !important; }
-
-.card-modern {
-    border: none;
-    border-radius: 1rem;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
-    overflow: hidden;
+.xh > .ems-header,
+.xh > .ems-kpis {
+    margin-bottom: 0;
 }
 
-.stat-card {
-    border-radius: 1rem;
-    padding: 1.5rem;
+.xh-kpis {
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.xh-kpi-status {
+    margin-top: 8px;
+}
+
+.xh-muted {
+    color: var(--ems-text-muted);
+}
+
+/* ── Axtarış ────────────────────────────────────────────────────────────── */
+/* ── Cədvəl ─────────────────────────────────────────────────────────────── */
+.xh-table__head {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    height: 100%;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease;
+    justify-content: space-between;
+    gap: var(--ems-sp-3);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--ems-border);
 }
 
-.stat-card:hover {
-    transform: translateY(-3px);
+.xh-table__title {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    margin: 0;
+    font-size: var(--ems-fs-md);
+    font-weight: 800;
+    color: var(--ems-text);
 }
 
-.stat-card.blue { background-color: var(--light-blue); }
-.stat-card.green { background-color: var(--light-green); }
-.stat-card.white {
-    background-color: var(--ems-neutral-0);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+.xh-table__title > i {
+    color: var(--ems-primary-600);
 }
 
-.history-tracking-label {
-    letter-spacing: 0.5px;
-}
-
-.btn-outline-custom {
-    color: var(--primary-blue);
-    border: 1px solid var(--pale-blue);
-    background: transparent;
-    font-weight: 500;
-    border-radius: 0.5rem;
-}
-
-.btn-outline-custom:hover {
-    background: var(--light-blue);
-    color: var(--dark-blue);
-    border-color: var(--primary-blue);
-}
-
-.table-modern-header {
-    background: linear-gradient(135deg, var(--dark-blue) 0%, var(--primary-blue) 55%, var(--primary-green) 100%);
-    color: var(--ems-neutral-0);
+.xh-table__count {
+    font-size: var(--ems-fs-sm);
     font-weight: 600;
-    padding: 1rem 1.5rem;
-    border-radius: 1rem 1rem 0 0;
+    color: var(--ems-text-muted);
 }
 
-.table-modern thead th {
-    background-color: var(--ems-neutral-50);
-    color: var(--ems-neutral-600);
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
-    border-bottom: 2px solid var(--ems-neutral-200);
-    padding: 1rem;
-}
-
-.table-modern tbody td {
-    padding: 1rem;
+.history-table td {
     vertical-align: middle;
-    color: var(--ems-neutral-700);
-    border-bottom: 1px solid var(--ems-neutral-100);
 }
 
-.table-modern tbody tr:hover {
-    background-color: var(--light-blue);
+.xh-num {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
 }
 
-.status-badge {
-    padding: 0.4rem 0.85rem;
-    font-weight: 600;
-    border-radius: 2rem;
-    font-size: 0.85rem;
+.xh-exam {
+    display: block;
+    font-weight: 700;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.xh-exam__meta {
+    display: block;
+    margin-top: 2px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 500;
+    color: var(--ems-text-muted);
+}
+
+.xh-status {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.xh-status__reason {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-danger-strong);
+}
+
+.xh-score {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: var(--ems-sp-3);
 }
 
-.status-pending {
-    background: var(--ems-warning-100);
-    color: #b45309;
+.xh-score__text {
+    display: inline-flex;
+    flex-direction: column;
+    line-height: 1.25;
 }
 
-.status-graded {
-    background: var(--light-green);
-    color: var(--dark-green);
+.xh-score__text strong {
+    font-size: var(--ems-fs-md);
+    color: var(--ems-text);
+    font-variant-numeric: tabular-nums;
 }
 
-.status-active {
-    background: var(--light-green);
-    color: var(--dark-green);
-    border: 1px solid #a7f3d0;
+.xh-score__text small {
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-text-muted);
 }
 
-.status-expired {
-    background: var(--ems-danger-100);
-    color: var(--ems-danger-strong);
-    border: 1px solid var(--ems-danger-200);
+.xh-action {
+    text-align: right;
+    white-space: nowrap;
 }
 
-.empty-state-card {
-    border: 2px dashed var(--pale-blue);
-    background-color: var(--light-blue);
-    border-radius: 1rem;
-    padding: 4rem 2rem;
+/* ── Yüklənmə örtüyü (səhifələmə klikində — student_exam_history.js) ────── */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 99998;
+    justify-content: center;
+    align-items: center;
+    background: color-mix(in srgb, var(--ems-bg) 72%, transparent);
+}
+
+.loading-overlay.show {
+    display: flex;
+}
+
+.loading-spinner {
     text-align: center;
-    transition: background-color 0.3s ease;
+    color: var(--ems-primary-600);
 }
 
-.empty-state-card:hover {
-    background-color: #e0f2fe;
+.loading-spinner i {
+    font-size: 2.5rem;
 }
 
-.history-empty-icon {
-    width: 80px;
-    height: 80px;
+.loading-spinner p {
+    margin-top: 0.75rem;
+    font-size: var(--ems-fs-md);
+    font-weight: 600;
+    color: var(--ems-neutral-600);
 }
 
 @media (max-width: 768px) {
-    .history-table {
-        min-width: 780px;
+    .xh {
+        margin-top: 16px;
     }
-    .stat-card {
-        padding: 1rem;
+
+    .xh-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--ems-sp-3);
     }
-    .stat-card h2 {
-        font-size: 1.3rem;
+
+    .xh-action {
+        text-align: left;
     }
-    .history-tracking-label {
-        font-size: 0.7rem;
+
+    .history-table td[data-label] .xh-status {
+        align-items: flex-end;
     }
 }
-
-@media (max-width: 576px) {
-    .container.py-5 {
-        padding-left: 12px !important;
-        padding-right: 12px !important;
-        padding-top: 1.5rem !important;
-        padding-bottom: 1.5rem !important;
-    }
-    .stat-card {
-        padding: 0.8rem;
-        border-radius: 0.75rem;
-    }
-    .stat-card h2 {
-        font-size: 1.1rem;
-    }
-    .table-modern-header {
-        padding: 0.75rem 1rem;
-        font-size: 0.9rem;
-    }
-    .empty-state-card {
-        padding: 2.5rem 1rem;
-    }
-}
-
-/* Appended from exams/student/student_exam_history.html inline <style> — loading overlay + search bar. */
-.loading-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.7); z-index:99998; justify-content:center; align-items:center; }
-.loading-overlay.show { display:flex; }
-.loading-spinner { text-align:center; color:#007bff; }
-.loading-spinner i { font-size:2.5rem; }
-.loading-spinner p { margin-top:0.75rem; font-size:0.95rem; color:#555; font-weight:600; }
-.history-search-bar { max-width: 400px; }
-.history-search-bar .form-control { border-radius: 8px; border: 1px solid #dee2e6; padding: 0.6rem 0.85rem 0.6rem 2.5rem; font-size: 0.9rem; }
-.history-search-bar .search-icon { position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: #999; pointer-events: none; }
