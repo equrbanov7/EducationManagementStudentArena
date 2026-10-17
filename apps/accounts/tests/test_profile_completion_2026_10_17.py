@@ -223,6 +223,37 @@ class ProfileCompletionGateTest(TestCase):
         self.student.profile.refresh_from_db()
         self.assertIsNone(self.student.profile.fin)
 
+    def test_phone_operator_select_is_combined(self):
+        # Sahib 2026-10-17: operator (050, 055 …) seçilir, xanaya qalan 7 rəqəm yazılır.
+        self.client.force_login(self.teacher)
+        page = self.client.get(self.url)
+        self.assertContains(page, 'name="phone_operator"')
+        self.assertContains(page, '<option value="055"')
+        self.assertContains(page, "123 45 67")
+        response = self.client.post(self.url, {"fin": "6TCH002", "phone_operator": "055", "phone": "123 45 67"})
+        self.assertEqual(response.status_code, 302)
+        self.teacher.profile.refresh_from_db()
+        self.assertEqual(self.teacher.profile.phone, "+994551234567")
+
+    def test_phone_operator_requires_seven_digits_and_keeps_choice(self):
+        self.client.force_login(self.teacher)
+        response = self.client.post(self.url, {"fin": "6TCH003", "phone_operator": "070", "phone": "12345"})
+        self.assertEqual(response.status_code, 200)
+        errors = {field["name"]: field["error"] for field in response.context["fields"]}
+        self.assertIn("7 rəqəm", errors["phone"])
+        self.assertEqual(response.context["phone_operator"], "070")
+        self.teacher.profile.refresh_from_db()
+        self.assertIsNone(self.teacher.profile.fin)
+
+    def test_foreign_phone_with_other_operator(self):
+        self.client.force_login(self.teacher)
+        response = self.client.post(
+            self.url, {"fin": "6TCH004", "phone_operator": "other", "phone": "+90 555 123 45 67"}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.teacher.profile.refresh_from_db()
+        self.assertEqual(self.teacher.profile.phone, "+905551234567")
+
     def test_teacher_fills_all_three_with_phone_normalised(self):
         self.teacher.email = ""
         self.teacher.save(update_fields=["email"])
@@ -333,6 +364,16 @@ class ProfileCompletionGateTest(TestCase):
 
 
 class ProfileCompletionCleanersTest(SimpleTestCase):
+    def test_combine_phone(self):
+        self.assertEqual(policy.combine_phone({"phone_operator": "050", "phone": "1234567"}), "0501234567")
+        self.assertEqual(policy.combine_phone({"phone_operator": "050", "phone": "050 123 45 67"}), "0501234567")
+        self.assertEqual(policy.combine_phone({"phone_operator": "099", "phone": "99 123 45 67"}), "0991234567")
+        self.assertEqual(policy.combine_phone({"phone": "050 123 45 67"}), "050 123 45 67")  # köhnə forma
+        self.assertEqual(policy.combine_phone({"phone_operator": "050", "phone": ""}), "")
+        for bad in ("123456", "12345678", "12a4567"):
+            with self.assertRaises(ValidationError):
+                policy.combine_phone({"phone_operator": "050", "phone": bad})
+
     def test_phone_normalisation(self):
         cases = {
             "050 123 45 67": "+994501234567",

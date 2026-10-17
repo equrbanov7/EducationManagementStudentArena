@@ -40,8 +40,12 @@ def complete_profile_view(request):
         return _leave(request)
 
     errors, submitted = {}, {}
+    operator = policy.AZ_MOBILE_OPERATORS[0]
     if request.method == "POST":
         submitted = {spec.key: (request.POST.get(spec.key) or "").strip()[: spec.max_length] for spec in missing}
+        posted_operator = (request.POST.get(policy.PHONE_OPERATOR_FIELD) or "").strip()
+        if posted_operator in policy.AZ_MOBILE_OPERATORS or posted_operator == policy.OPERATOR_OTHER:
+            operator = posted_operator
         result = complete_profile(request, request.POST)
         if result.ok:
             messages.success(request, pgettext(_CTX, "Məlumatlarınız saxlanıldı. Təşəkkür edirik!"))
@@ -66,5 +70,8 @@ def complete_profile_view(request):
             "next_url": _next_url(request),
             "user_display": user.get_full_name() or user.username,
             "has_errors": bool(errors),
+            "phone_operators": policy.AZ_MOBILE_OPERATORS,
+            "phone_operator": operator,
+            "phone_operator_other": policy.OPERATOR_OTHER,
         },
     )

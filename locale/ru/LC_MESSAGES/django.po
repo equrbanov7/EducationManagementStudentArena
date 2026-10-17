@@ -98377,3 +98377,23 @@ msgstr "Этот FIN уже есть в системе (введён владе�
 msgctxt "student_intake"
 msgid "Bu FİN-i başqa adlı hesab özü daxil edib (təsdiqlənməyib) — rəsmi sətir üstündür: FİN o hesabdan götürüləcək, sahibi FİN-i yenidən yazacaq."
 msgstr "Этот FIN ввёл сам владелец другого аккаунта с иным именем (не подтверждён) — приоритет у официальной строки: FIN будет снят с того аккаунта, владельцу нужно будет ввести его заново."
+
+msgctxt "accounts.profile_completion"
+msgid "məs: 123 45 67"
+msgstr "напр.: 123 45 67"
+
+msgctxt "accounts.profile_completion"
+msgid "məs: +90 555 123 45 67"
+msgstr "напр.: +90 555 123 45 67"
+
+msgctxt "accounts.profile_completion"
+msgid "Operator kodu"
+msgstr "Код оператора"
+
+msgctxt "accounts.profile_completion"
+msgid "Xarici nömrə"
+msgstr "Иностранный номер"
+
+msgctxt "accounts.profile_completion"
+msgid "Operator kodundan sonra 7 rəqəm yazın (məs. 123 45 67)."
+msgstr "Введите 7 цифр после кода оператора (напр. 123 45 67)."

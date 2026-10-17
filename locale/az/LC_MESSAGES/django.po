@@ -97742,3 +97742,23 @@ msgstr "Bu FİN artıq sistemdə var (sahibi özü daxil edib, ad-soyad uyğundu
 msgctxt "student_intake"
 msgid "Bu FİN-i başqa adlı hesab özü daxil edib (təsdiqlənməyib) — rəsmi sətir üstündür: FİN o hesabdan götürüləcək, sahibi FİN-i yenidən yazacaq."
 msgstr "Bu FİN-i başqa adlı hesab özü daxil edib (təsdiqlənməyib) — rəsmi sətir üstündür: FİN o hesabdan götürüləcək, sahibi FİN-i yenidən yazacaq."
+
+msgctxt "accounts.profile_completion"
+msgid "məs: 123 45 67"
+msgstr "məs: 123 45 67"
+
+msgctxt "accounts.profile_completion"
+msgid "məs: +90 555 123 45 67"
+msgstr "məs: +90 555 123 45 67"
+
+msgctxt "accounts.profile_completion"
+msgid "Operator kodu"
+msgstr "Operator kodu"
+
+msgctxt "accounts.profile_completion"
+msgid "Xarici nömrə"
+msgstr "Xarici nömrə"
+
+msgctxt "accounts.profile_completion"
+msgid "Operator kodundan sonra 7 rəqəm yazın (məs. 123 45 67)."
+msgstr "Operator kodundan sonra 7 rəqəm yazın (məs. 123 45 67)."

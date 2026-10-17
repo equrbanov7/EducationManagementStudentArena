@@ -92,7 +92,8 @@ FIELDS: dict[str, FieldSpec] = {
             "profile.require_phone",
             pgettext_lazy(_CTX, "Mobil telefon"),
             pgettext_lazy(_CTX, "Təcili xəbərdarlıqlar və hesabın bərpası üçün."),
-            pgettext_lazy(_CTX, "məs: 050 123 45 67"),
+            # Operator (050, 055 …) ayrıca seçilir — xanaya yalnız qalan 7 rəqəm yazılır (sahib 2026-10-17).
+            pgettext_lazy(_CTX, "məs: 123 45 67"),
             "tel",
             "tel",
             "tel",
@@ -120,6 +121,13 @@ ROLE_REQUIREMENTS: dict[str, tuple[str, ...]] = {
     ROLE_STUDENT: (FIELD_FIN, FIELD_PHONE, FIELD_EMAIL),
     ROLE_STAFF: (FIELD_FIN, FIELD_PHONE, FIELD_EMAIL),
 }
+
+#: Azərbaycan mobil operator kodları — telefon xanasının yanında seçilir (sahib 2026-10-17: «050, 055 kimi
+#: ordan seçib yazsın»). ``OPERATOR_OTHER`` → xarici nömrə, tam ``+`` formatında yazılır.
+AZ_MOBILE_OPERATORS = ("050", "051", "055", "099", "070", "077", "010", "060")
+OPERATOR_OTHER = "other"
+PHONE_OPERATOR_FIELD = "phone_operator"
+_LOCAL_DIGITS = 7
 
 #: Mobil nömrədə ən az / ən çox rəqəm (ölkə kodu daxil).
 _PHONE_MIN_DIGITS = 9
@@ -270,6 +278,28 @@ def clean_phone(raw) -> str:
     raise ValidationError(pgettext(_CTX, "Telefon nömrəsi düzgün deyil (məs. 050 123 45 67)."), code="invalid")
 
 
+def combine_phone(data) -> str:
+    """Operator seçimi + qalan rəqəmlər → ``clean_phone``-un qəbul etdiyi tam nömrə.
+
+    Operator seçilibsə xanada düz 7 rəqəm olmalıdır (``050`` + ``1234567``). Operator gəlməyibsə (köhnə forma,
+    API) və ya «Xarici nömrə» seçilibsə xananın özü tam nömrə kimi yoxlanılır.
+    """
+    operator = str(data.get(PHONE_OPERATOR_FIELD) or "").strip()
+    raw = str(data.get(FIELD_PHONE) or "")
+    if operator not in AZ_MOBILE_OPERATORS:
+        return raw
+    digits = re.sub(r"\D", "", raw)
+    if not digits:
+        return ""
+    if len(digits) == 9 and digits[:2] == operator[1:]:
+        digits = digits[2:]  # «50 123 45 67» yazılıbsa operator təkrarı atılır
+    elif len(digits) == 10 and digits[:3] == operator:
+        digits = digits[3:]
+    if len(digits) != _LOCAL_DIGITS or not _PHONE_ALLOWED.match(raw.strip()):
+        raise ValidationError(pgettext(_CTX, "Operator kodundan sonra 7 rəqəm yazın (məs. 123 45 67)."), code="invalid")
+    return operator + digits
+
+
 def clean_email(raw) -> str:
     from .identity import email_is_placeholder
     from .models import EmailOTP
@@ -290,6 +320,7 @@ CLEANERS = {FIELD_FIN: clean_fin, FIELD_PHONE: clean_phone, FIELD_EMAIL: clean_e
 
 
 __all__ = [
+    "AZ_MOBILE_OPERATORS",
     "CLEANERS",
     "ENABLED_KEY",
     "FIELDS",
@@ -297,9 +328,12 @@ __all__ = [
     "FIELD_FIN",
     "FIELD_PHONE",
     "FieldSpec",
+    "OPERATOR_OTHER",
+    "PHONE_OPERATOR_FIELD",
     "ROLE_REQUIREMENTS",
     "ROLE_STAFF",
     "ROLE_STUDENT",
+    "combine_phone",
     "field_enabled",
     "gate_enabled",
     "has_value",

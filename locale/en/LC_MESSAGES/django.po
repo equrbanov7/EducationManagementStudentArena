@@ -98191,3 +98191,23 @@ msgstr "This FIN already exists (entered by its owner, name matches) — the FIN
 msgctxt "student_intake"
 msgid "Bu FİN-i başqa adlı hesab özü daxil edib (təsdiqlənməyib) — rəsmi sətir üstündür: FİN o hesabdan götürüləcək, sahibi FİN-i yenidən yazacaq."
 msgstr "An account with a different name entered this FIN itself (unverified) — the official row wins: the FIN will be removed from that account and its owner will be asked to enter it again."
+
+msgctxt "accounts.profile_completion"
+msgid "məs: 123 45 67"
+msgstr "e.g. 123 45 67"
+
+msgctxt "accounts.profile_completion"
+msgid "məs: +90 555 123 45 67"
+msgstr "e.g. +90 555 123 45 67"
+
+msgctxt "accounts.profile_completion"
+msgid "Operator kodu"
+msgstr "Operator code"
+
+msgctxt "accounts.profile_completion"
+msgid "Xarici nömrə"
+msgstr "Foreign number"
+
+msgctxt "accounts.profile_completion"
+msgid "Operator kodundan sonra 7 rəqəm yazın (məs. 123 45 67)."
+msgstr "Enter 7 digits after the operator code (e.g. 123 45 67)."

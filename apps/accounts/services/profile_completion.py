@@ -108,7 +108,8 @@ def _clean(missing_keys, data) -> tuple[dict, dict]:
     values, errors = {}, {}
     for key in missing_keys:
         try:
-            values[key] = policy.CLEANERS[key](data.get(key))
+            raw = policy.combine_phone(data) if key == policy.FIELD_PHONE else data.get(key)
+            values[key] = policy.CLEANERS[key](raw)
         except ValidationError as exc:
             errors[key] = exc.messages[0]
     return values, errors

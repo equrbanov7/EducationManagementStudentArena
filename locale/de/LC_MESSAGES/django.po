@@ -99277,3 +99277,23 @@ msgstr "Diese FIN existiert bereits (vom Inhaber selbst eingegeben, Name stimmt)
 msgctxt "student_intake"
 msgid "Bu FİN-i başqa adlı hesab özü daxil edib (təsdiqlənməyib) — rəsmi sətir üstündür: FİN o hesabdan götürüləcək, sahibi FİN-i yenidən yazacaq."
 msgstr "Ein Konto mit anderem Namen hat diese FIN selbst eingegeben (unbestätigt) — die offizielle Zeile hat Vorrang: Die FIN wird diesem Konto entzogen, der Inhaber muss sie erneut eingeben."
+
+msgctxt "accounts.profile_completion"
+msgid "məs: 123 45 67"
+msgstr "z. B. 123 45 67"
+
+msgctxt "accounts.profile_completion"
+msgid "məs: +90 555 123 45 67"
+msgstr "z. B. +90 555 123 45 67"
+
+msgctxt "accounts.profile_completion"
+msgid "Operator kodu"
+msgstr "Vorwahl"
+
+msgctxt "accounts.profile_completion"
+msgid "Xarici nömrə"
+msgstr "Ausländische Nummer"
+
+msgctxt "accounts.profile_completion"
+msgid "Operator kodundan sonra 7 rəqəm yazın (məs. 123 45 67)."
+msgstr "Geben Sie nach der Vorwahl 7 Ziffern ein (z. B. 123 45 67)."

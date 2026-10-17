@@ -52,6 +52,32 @@ GATE_HELP = (
 # ctx → msgid → {lang: msgstr}. "az" verilməyibsə az msgstr = msgid (AZ cümlə).
 ENTRIES = {
     PC: {
+        # Telefon operatoru seçimi (sahib 2026-10-17: «050, 055 kimi ordan seçib yazsın»).
+        "məs: 123 45 67": {
+            "en": "e.g. 123 45 67",
+            "ru": "напр.: 123 45 67",
+            "tr": "örn: 123 45 67",
+            "de": "z. B. 123 45 67",
+        },
+        "məs: +90 555 123 45 67": {
+            "en": "e.g. +90 555 123 45 67",
+            "ru": "напр.: +90 555 123 45 67",
+            "tr": "örn: +90 555 123 45 67",
+            "de": "z. B. +90 555 123 45 67",
+        },
+        "Operator kodu": {"en": "Operator code", "ru": "Код оператора", "tr": "Operatör kodu", "de": "Vorwahl"},
+        "Xarici nömrə": {
+            "en": "Foreign number",
+            "ru": "Иностранный номер",
+            "tr": "Yabancı numara",
+            "de": "Ausländische Nummer",
+        },
+        "Operator kodundan sonra 7 rəqəm yazın (məs. 123 45 67).": {
+            "en": "Enter 7 digits after the operator code (e.g. 123 45 67).",
+            "ru": "Введите 7 цифр после кода оператора (напр. 123 45 67).",
+            "tr": "Operatör kodundan sonra 7 rakam yazın (örn. 123 45 67).",
+            "de": "Geben Sie nach der Vorwahl 7 Ziffern ein (z. B. 123 45 67).",
+        },
         # SEC-1 F1 (2026-10-17): FİN / e-poçt unikallıq yoxlaması hesab başına məhdud.
         "Çox sayda cəhd edildi. %(minutes)s dəqiqə sonra yenidən yoxlayın.": {
             "en": "Too many attempts. Please try again in %(minutes)s minutes.",
