@@ -158,6 +158,7 @@ class ProfileCompletionGateTest(TestCase):
         self.assertEqual(response.headers["Location"], reverse("accounts:profile"))
         self.student.profile.refresh_from_db()
         self.assertEqual(self.student.profile.fin, "5ABC12D")
+        self.assertTrue(self.student.profile.fin_self_reported)  # rəsmi idxal təsdiqləyənə qədər
         self.assertIsNotNone(self.student.profile.profile_completed_at)
         response = self.client.get(reverse("accounts:my_results"))
         self.assertFalse(response.headers.get("Location", "").startswith(self.url))

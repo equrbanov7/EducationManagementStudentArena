@@ -128,7 +128,9 @@ def _write(user, values: dict, *, completed: bool) -> None:
     profile_fields = ["updated_at"]
     if policy.FIELD_FIN in values:
         profile.fin = values[policy.FIELD_FIN]
-        profile_fields.append("fin")
+        # Özü yazdığı FİN təsdiqlənməmişdir — rəsmi idxal fərqli adla gəlsə üstün gəlir (SEC-1 F2).
+        profile.fin_self_reported = True
+        profile_fields += ["fin", "fin_self_reported"]
     if policy.FIELD_PHONE in values:
         profile.phone = values[policy.FIELD_PHONE]
         profile_fields.append("phone")

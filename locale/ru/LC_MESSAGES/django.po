@@ -98369,3 +98369,11 @@ msgstr "Централизованные логи не собираются — 
 msgctxt "accounts.profile_completion"
 msgid "Çox sayda cəhd edildi. %(minutes)s dəqiqə sonra yenidən yoxlayın."
 msgstr "Слишком много попыток. Повторите через %(minutes)s мин."
+
+msgctxt "student_intake"
+msgid "Bu FİN artıq sistemdə var (sahibi özü daxil edib, ad-soyad uyğundur) — FİN təsdiqlənir."
+msgstr "Этот FIN уже есть в системе (введён владельцем, имя совпадает) — FIN подтверждается."
+
+msgctxt "student_intake"
+msgid "Bu FİN-i başqa adlı hesab özü daxil edib (təsdiqlənməyib) — rəsmi sətir üstündür: FİN o hesabdan götürüləcək, sahibi FİN-i yenidən yazacaq."
+msgstr "Этот FIN ввёл сам владелец другого аккаунта с иным именем (не подтверждён) — приоритет у официальной строки: FIN будет снят с того аккаунта, владельцу нужно будет ввести его заново."

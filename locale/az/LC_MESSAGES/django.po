@@ -97734,3 +97734,11 @@ msgstr "Mərkəzi loglar toplanmır — «Loglar» bölməsi boş qalır"
 msgctxt "accounts.profile_completion"
 msgid "Çox sayda cəhd edildi. %(minutes)s dəqiqə sonra yenidən yoxlayın."
 msgstr "Çox sayda cəhd edildi. %(minutes)s dəqiqə sonra yenidən yoxlayın."
+
+msgctxt "student_intake"
+msgid "Bu FİN artıq sistemdə var (sahibi özü daxil edib, ad-soyad uyğundur) — FİN təsdiqlənir."
+msgstr "Bu FİN artıq sistemdə var (sahibi özü daxil edib, ad-soyad uyğundur) — FİN təsdiqlənir."
+
+msgctxt "student_intake"
+msgid "Bu FİN-i başqa adlı hesab özü daxil edib (təsdiqlənməyib) — rəsmi sətir üstündür: FİN o hesabdan götürüləcək, sahibi FİN-i yenidən yazacaq."
+msgstr "Bu FİN-i başqa adlı hesab özü daxil edib (təsdiqlənməyib) — rəsmi sətir üstündür: FİN o hesabdan götürüləcək, sahibi FİN-i yenidən yazacaq."

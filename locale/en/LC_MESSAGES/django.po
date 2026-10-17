@@ -98183,3 +98183,11 @@ msgstr "Central logs are not being collected — the «Logs» section stays empt
 msgctxt "accounts.profile_completion"
 msgid "Çox sayda cəhd edildi. %(minutes)s dəqiqə sonra yenidən yoxlayın."
 msgstr "Too many attempts. Please try again in %(minutes)s minutes."
+
+msgctxt "student_intake"
+msgid "Bu FİN artıq sistemdə var (sahibi özü daxil edib, ad-soyad uyğundur) — FİN təsdiqlənir."
+msgstr "This FIN already exists (entered by its owner, name matches) — the FIN is confirmed."
+
+msgctxt "student_intake"
+msgid "Bu FİN-i başqa adlı hesab özü daxil edib (təsdiqlənməyib) — rəsmi sətir üstündür: FİN o hesabdan götürüləcək, sahibi FİN-i yenidən yazacaq."
+msgstr "An account with a different name entered this FIN itself (unverified) — the official row wins: the FIN will be removed from that account and its owner will be asked to enter it again."
