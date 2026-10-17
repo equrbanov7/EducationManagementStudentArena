@@ -5,7 +5,8 @@ sətirləri prod-dadır, amma müəllim bölgüsü yoxdur → açılış (jurnal
 hüceyrəni ``subject_not_in_group`` kimi atır. Sahib: «cədvəli oxu; orada dərsi olan hər kəsi sistemdə
 seç və yüklə» / «nələr yoxdursa əlavə olunmayıbsa hamısını et».
 
-QAYDALAR (heç nə YARADILMIR: sətir, fənn, qrup, hesab):
+QAYDALAR (heç nə YARADILMIR: qrup, hesab; sətir/fənn/tapşırıq yalnız ``create_missing_rows`` ilə —
+:mod:`.timetable_missing_rows`, sahib 2026-10-17 «dərs yükündə olmayanları da əlavə et»):
 
 * Oxu — ``registrar.schedule_docx_parse.parse_docx``; qrup başlığı → qrup vahidləri
   ``schedule_docx_match.Resolver.group_units`` (alt qrup başlığı ana qrupu da gətirir).
@@ -13,11 +14,13 @@ QAYDALAR (heç nə YARADILMIR: sətir, fənn, qrup, hesab):
   uyğun, qrupları başlığın qruplarından birini daxil edən, fənni OLAN dərs sətri. Fənn oxşarlığı
   matcher-in ``subject_score`` qaydası ilə (≥ 0.80; fərqli fənn 0.04-dən yaxındırsa ``subject_ambiguous``;
   yalnız hissə — ``subject_partial``). Seçmə blok sətri seçilmiş fənni (``row.subject``) ilə sayılır.
-* Növ — hüceyrədə yoxdursa sətrin saat bölgüsündə TƏK fəaliyyət varsa o (matcher kimi); sətirdə
+* Növ — hüceyrədə yoxdursa sətrin saat bölgüsündə TƏK fəaliyyət varsa o (matcher kimi); magistratura
+  hüceyrəsində (növ işarəsi yoxdur) bölgüdən çıxmırsa mühazirə (``kind_default_lecture``); sətirdə
   hüceyrənin növü yoxdursa seminar↔laboratoriya (Forma 1 qaydası), yoxsa ``activity_not_in_row``.
 * Yalnız BOŞ fəaliyyət — bölgü yoxdur və ya hamısı «Vakant»dır. Real müəllim varsa → ``already_assigned``
   (toxunulmur). Saat — sətrin PLAN saatı (``ACTIVITY_TOTAL_FIELD``, Forma 1 ilə eyni), ``is_hourly_paid=False``.
-* Müəllim («Soyad İ.») — əvvəl sətrin kafedrasının müəllim üzvləri (dəqiq, sonra kiçik yazı xətası);
+* Müəllim («Soyad İ.» və ya magistraturanın TAM ADI «Ad Soyad», hər iki sıra) — əvvəl sətrin kafedrasının
+  müəllim üzvləri (dəqiq, sonra kiçik yazı xətası);
   sonra yalnız ``allow_outside_chair`` ilə təşkilatda TƏK aktiv müəllim / əməkdaş hesabı → kafedrada ƏLAVƏ
   müəllim üzvlüyü (``people.join_chair_as_teacher``, audit). Çox mənalı / tapılmayan → hesabat, yazı yox.
 * Toplama — bir (sətir, fəaliyyət) bir dəfə yazılır; hüceyrələrdə fərqli müəllimlər → ``conflict``
@@ -30,7 +33,6 @@ QAYDALAR (heç nə YARADILMIR: sətir, fənn, qrup, hesab):
 
 from __future__ import annotations
 
-import difflib
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 
@@ -83,6 +85,7 @@ class Cell:
     user: object = None
     teacher_action: str = ""
     assignment: str = ""
+    chair: object = None  # yeni sətir planı (dry-run-da sətir yoxdur, kafedra hesabatda görünsün)
 
     @property
     def sub(self) -> str:
@@ -94,7 +97,7 @@ class Cell:
         return [
             entry.table, entry.row, entry.weekday, entry.start.strftime("%H:%M"), entry.end.strftime("%H:%M"),
             entry.group.display, self.sub, text.subject, text.kind, text.teacher, self.status, self.detail,
-            getattr(getattr(getattr(row, "task", None), "chair", None), "name", ""),
+            getattr(getattr(getattr(row, "task", None), "chair", None) or self.chair, "name", ""),
             getattr(getattr(row, "subject", None), "name", ""), self.activity,
             f"{self.score:.3f}" if self.score else "", getattr(self.user, "username", ""), self.teacher_action,
             self.assignment,
@@ -116,27 +119,16 @@ def parse_teacher_map(values) -> dict:
     return result
 
 
-def _matches(users, surname: str, initial: str, *, fuzzy: bool) -> list:
-    """``schedule_docx_match`` müəllim qaydası: dəqiq soyad (və ya ≥ ``TEACHER_FUZZY`` yazı xətası) + baş hərf."""
-    fold, key = schedule_docx_parse.fold, schedule_docx_match.surname_key
-    out = {}
-    for user in users:
-        last = key(user.last_name)
-        if not last:
-            continue
-        if fuzzy:
-            same = last != surname and difflib.SequenceMatcher(None, last, surname).ratio() >= (
-                schedule_docx_match.TEACHER_FUZZY
-            )
-        else:
-            same = last == surname
-        if same and (not initial or fold(user.first_name)[:1] == initial):
-            out[user.pk] = user
-    return list(out.values())
+def _matches(users, token: str, *, fuzzy: bool) -> list:
+    """``schedule_docx_match`` müəllim qaydası: «Soyad İ.» (dəqiq soyad / ≥ ``TEACHER_FUZZY`` yazı xətası + baş
+    hərf) və ya TAM AD «Ad Soyad» (hər iki sıra)."""
+    return schedule_docx_match.teacher_matches(users, token, fuzzy=fuzzy)
 
 
 class TimetableTaskAssigner:
-    def __init__(self, *, importer, period, allow_outside_chair: bool = False, teacher_map=None):
+    def __init__(
+        self, *, importer, period, allow_outside_chair: bool = False, teacher_map=None, create_missing_rows=False
+    ):
         self.importer = importer
         self.org = importer.org
         self.year = importer.year
@@ -151,6 +143,7 @@ class TimetableTaskAssigner:
         self._outside: set = set()  # (kafedra_id, user_id) — yazıdan əvvəl kafedraya üzv edilməli
         # Operatorun açıq xəritəsi («Əmiraslanlı F.=fatma.emiraslanova.2024»): soyad yazılışı fərqlidirsə.
         self.teacher_map = {_token_key(k): v for k, v in (teacher_map or {}).items()}
+        self.create_missing_rows = create_missing_rows
 
     # ── sətirlər ──────────────────────────────────────────────────────────
     def _load_rows(self) -> None:
@@ -203,14 +196,18 @@ class TimetableTaskAssigner:
         return top, best, ""
 
     @staticmethod
-    def _activity(row, kind: str) -> tuple[str, str]:
+    def _activity(row, kind: str, default: str = "") -> tuple[str, str]:
         if kind:
             target = Form1Importer._row_activity(row, kind, {kind: 0})
             if target is None:
                 return "", "activity_not_in_row"
             return target, (f"{kind}->{target}" if target != kind else "")
         kinds = [a for a in _ACTIVITIES if int(getattr(row, ACTIVITY_TOTAL_FIELD[a], 0) or 0) > 0]
-        return (kinds[0], "kind_from_hours") if len(kinds) == 1 else ("", "kind_unknown")
+        if len(kinds) == 1:
+            return kinds[0], "kind_from_hours"
+        if default and default in kinds:
+            return default, f"kind_default_{default}"
+        return "", "kind_unknown"
 
     # ── müəllim ───────────────────────────────────────────────────────────
     def _chair_pool(self, chair) -> list:
@@ -249,28 +246,33 @@ class TimetableTaskAssigner:
             self._teacher_cache[key] = self._resolve_teacher(chair, token)
         return self._teacher_cache[key]
 
-    def _resolve_teacher(self, chair, token: str) -> tuple:
+    def mapped_teacher(self, token: str):
+        """Operatorun açıq xəritəsi: → (user|None, action) və ya ``None`` (xəritədə yoxdur)."""
         mapped = self.teacher_map.get(_token_key(token))
-        if mapped:
-            user = get_user_model().objects.filter(username=mapped, is_active=True).first()
-            if user is None:
-                return None, "teacher_map_unknown"
-            if user not in self._chair_pool(chair):
+        if not mapped:
+            return None
+        user = get_user_model().objects.filter(username=mapped, is_active=True).first()
+        return (user, "teacher_map") if user is not None else (None, "teacher_map_unknown")
+
+    def _resolve_teacher(self, chair, token: str) -> tuple:
+        mapped = self.mapped_teacher(token)
+        if mapped is not None:
+            user, action = mapped
+            if user is not None and user not in self._chair_pool(chair):
                 self._outside.add((chair.pk, user.pk))  # açıq xəritə = operatorun qərarı
-            return user, "teacher_map"
-        surname, initial = schedule_docx_match.split_teacher(token)
-        if not surname:
+            return user, action
+        if not schedule_docx_match.split_teacher(token)[0]:
             return None, "teacher_missing"
         pool = self._chair_pool(chair)
         for fuzzy, action in ((False, "chair"), (True, "chair_fuzzy")):
-            found = _matches(pool, surname, initial, fuzzy=fuzzy)
+            found = _matches(pool, token, fuzzy=fuzzy)
             if len(found) == 1:
                 return found[0], action
             if len(found) > 1:
                 return None, "teacher_ambiguous"
         teachers, staff = self._org_pool()
         for users, action in ((teachers, "outside_chair"), (staff, "outside_chair_staff")):
-            found = _matches(users, surname, initial, fuzzy=False)
+            found = _matches(users, token, fuzzy=False)
             if len(found) > 1:
                 return None, "teacher_ambiguous"
             if len(found) == 1:
@@ -288,6 +290,11 @@ class TimetableTaskAssigner:
             cell = Cell(entry=entry)
             self.cells.append(cell)
             self._match(cell, resolver)
+        if self.create_missing_rows:
+            from .timetable_missing_rows import MissingRowCreator
+
+            MissingRowCreator(self, resolver).run()
+        for cell in self.cells:
             self.counters[f"cell_{cell.status}"] += 1
         self._apply(self._aggregate())
 
@@ -314,7 +321,8 @@ class TimetableTaskAssigner:
         if reason:
             cell.status = reason
             return
-        targets = [(row, *self._activity(row, text.kind)) for row in top]
+        default = "lecture" if (text.hours or text.teacher_full) else ""  # magistratura: növ işarəsi yoxdur
+        targets = [(row, *self._activity(row, text.kind, default)) for row in top]
         found = [(row, activity, note) for row, activity, note in targets if activity]
         if not found:
             cell.row, cell.status = top[0], targets[0][2]
@@ -437,7 +445,7 @@ class TimetableTaskAssigner:
     def all_counters(self) -> Counter:
         counters = Counter(self.counters) + self.applier.counters + self.importer.counters
         for cell in self.cells:
-            if cell.status == PLANNED and cell.assignment:
+            if cell.status in (PLANNED, "row_created", "row_planned") and cell.assignment:
                 counters[f"result_{cell.assignment.split(':', 1)[0]}"] += 1
         return +counters
 

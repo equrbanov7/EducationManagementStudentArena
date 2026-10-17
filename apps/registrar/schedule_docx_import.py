@@ -210,7 +210,9 @@ def _resolve_entry(resolver: Resolver, entry) -> list[PlanRow]:
         if text.kind_note:
             reasons.append(f"kind_note:{text.kind_note.replace(' ', '+')}")
         if not kind:
-            kind, kind_source = resolver.infer_kind(offering, teacher)
+            # Magistratura hüceyrəsi («(N saat)» / tam ad) növsüzdür — bölgüdən çıxmırsa mühazirə.
+            default = "lecture" if (text.hours or text.teacher_full) else ""
+            kind, kind_source = resolver.infer_kind(offering, teacher, default=default)
         row = PlanRow(
             entry=entry,
             action=CREATE,
