@@ -232,6 +232,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
 
     from apps.registrar import entry_standard, exam_eligibility, gradebook, gradebook_components, journal_extras
     from apps.registrar import student_journal_context as _jsc
+    from apps.registrar import subject_exempt as _subject_exempt
     from apps.registrar.models import ComponentScore, Enrollment, LessonMark
 
     if organization is None or not getattr(request.user, "is_authenticated", False):
@@ -297,6 +298,8 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     for row in summary["subjects"]:
         row["teacher"] = getattr(row["enrollment"].offering, "instructor", None)
     section["subjects"] = summary["subjects"]
+    # «Fəndən azad» fənlər kartlarda yoxdur — boş-hal mətni «qeydiyyat yoxdur» deməsin (QA-1 F6).
+    section["exempt_subjects"] = _subject_exempt.student_exempt_subjects(record, period)
     section["semester_number"] = semester_number
     # Limit xəbərdarlıqları, KPI, legend və status açarları `student_journal_context
     # .decorate` ilə (sorğusuz) əlavə olunur — bax həmin modulun docstring-i.

@@ -8,8 +8,9 @@
    forms.py-a toxunmadan həmin elementləri dizayn primitivlərinə uyğunlaşdırırıq.
    ════════════════════════════════════════════════════════════════════════════ */
 
-/* Inter + Fraunces — CSP: style-src googleapis, font-src gstatic (icazəlidir) */
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Inter:wght@400;500;600;700&display=swap');
+/* Şriftlər: Google Fonts @import SİLİNDİB (PERF-2 H1) — render-bloklayan üçüncü tərəf sorğusu idi və hər kabinet
+   bölməsini gecikdirirdi. Aşağıdakı --serif / --sans yığınları sistem şriftlərinə düşür (Inter/Fraunces quraşdırılıbsa
+   yenə istifadə olunur). Öz serverimizdə (woff2) yerləşdirmək istənsə @font-face + font-display: swap əlavə edilir. */
 
 /* ── design tokens (wrapper-ə scope) ── */
 .ems-cc {

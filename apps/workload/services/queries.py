@@ -16,8 +16,15 @@ from ..models import TeacherAssignment, TeacherWorkloadProfile, TeachingTask, Te
 from .assignments import balance_for_rows
 from .norms import norm_hours_for, norms_for
 
-_ACTIVITY_LABELS = {str(value): str(label) for value, label in Activity.choices}
-_SEASON_LABELS = {str(value): str(label) for value, label in Season.choices}
+# ⚠️ Etiketlər LAZY qalır (import anında `str()` dili dondururdu — QA-1 F3); mətnə çevirmə çağırış anındadır.
+_ACTIVITY_LABELS = {str(value): label for value, label in Activity.choices}
+_SEASON_LABELS = {str(value): label for value, label in Season.choices}
+
+
+def _label(labels: dict, value: str) -> str:
+    """Seçim etiketi AKTİV dildə (çağırış anında); naməlum dəyər — olduğu kimi."""
+    label = labels.get(value)
+    return str(label) if label is not None else value
 
 
 def task_rows(task, *, season: str = "", search: str = ""):
@@ -70,7 +77,7 @@ def serialize_rows(task, *, season: str = "", search: str = "") -> list[dict]:
                 "specialty_id": str(row.specialty_id) if row.specialty_id else "",
                 "is_amend_target": row.pk in amend_targets,
                 "season": row.season,
-                "season_label": _SEASON_LABELS.get(row.season, row.season),
+                "season_label": _label(_SEASON_LABELS, row.season),
                 "subject": row.subject_label,
                 "subject_id": str(row.subject_id) if row.subject_id else "",
                 "period_id": str(row.period_id) if row.period_id else "",
@@ -95,7 +102,7 @@ def serialize_rows(task, *, season: str = "", search: str = "") -> list[dict]:
                     {
                         "id": str(assignment.pk),
                         "activity": assignment.activity,
-                        "activity_label": _ACTIVITY_LABELS.get(assignment.activity, assignment.activity),
+                        "activity_label": _label(_ACTIVITY_LABELS, assignment.activity),
                         "hours": assignment.hours,
                         "teacher_id": str(assignment.teacher_id) if assignment.teacher_id else "",
                         "teacher_name": (
@@ -219,11 +226,11 @@ def teacher_workload_rows(*, organization, teacher, academic_year: str = "", sea
                 "chair_id": str(row.task.chair_id),
                 "academic_year": row.task.academic_year,
                 "season": row.season,
-                "season_label": _SEASON_LABELS.get(row.season, row.season),
+                "season_label": _label(_SEASON_LABELS, row.season),
                 "subject": row.subject_label,
                 "groups": row.groups_text or ", ".join(group.name for group in row.groups.all()),
                 "activity": assignment.activity,
-                "activity_label": _ACTIVITY_LABELS.get(assignment.activity, assignment.activity),
+                "activity_label": _label(_ACTIVITY_LABELS, assignment.activity),
                 "hours": assignment.hours,
                 "education_form": row.education_form,
                 "degree_level": row.degree_level,

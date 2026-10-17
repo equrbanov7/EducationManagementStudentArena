@@ -143,7 +143,8 @@ varsa dərs tipi kilidlidir.
                     <div class="jd2-field">
                         <span class="jd2-field-label">{% trans "KORPUS" context "registrar.journal" %}</span>
                         <div class="bootstrap-single-select bootstrap-single-select--ems">
-                            <select name="lesson_building" class="ems-select bootstrap-single-select__native" data-jd-lesson-building data-bootstrap-select>
+                            <select name="lesson_building" class="ems-select bootstrap-single-select__native" data-jd-lesson-building data-bootstrap-select
+                                    data-live-search="true" data-live-search-placeholder="{% trans 'Korpus axtar…' context 'registrar.journal_room' %}" data-live-search-empty="{% trans 'Uyğun korpus tapılmadı' context 'registrar.journal_room' %}">
                                 <option value="">{% trans "Seçilməyib" context "registrar.journal" %}</option>
                                 {% for building in lesson_buildings %}
                                 <option value="{{ building }}">{{ building }}</option>
@@ -154,7 +155,8 @@ varsa dərs tipi kilidlidir.
                     <div class="jd2-field">
                         <span class="jd2-field-label">{% trans "OTAQ" context "registrar.journal" %}</span>
                         <div class="bootstrap-single-select bootstrap-single-select--ems">
-                            <select name="lesson_room" class="ems-select bootstrap-single-select__native" data-jd-lesson-room data-bootstrap-select>
+                            <select name="lesson_room" class="ems-select bootstrap-single-select__native" data-jd-lesson-room data-bootstrap-select
+                                    data-live-search="true" data-live-search-placeholder="{% trans 'Otaq nömrəsi ilə axtar…' context 'registrar.journal_room' %}" data-live-search-empty="{% trans 'Uyğun otaq tapılmadı' context 'registrar.journal_room' %}">
                                 <option value="">{% trans "Seçilməyib" context "registrar.journal" %}</option>
                             </select>
                         </div>

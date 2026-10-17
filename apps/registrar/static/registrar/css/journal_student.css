@@ -138,6 +138,7 @@
 .sjx-term-select { padding: 6px 10px; border: 1px solid #cdd8ee; border-radius: 10px; font-size: 0.85rem; background: #fff; color: #0f2a5e; font-weight: 600; }
 
 /* Fənn kartları (landing) */
+.sjx-exempt-list { list-style: none; margin: 0.75rem 0 0; padding: 0; color: var(--ems-neutral-700); }
 .sjx-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-top: 1rem; }
 .sjx-card { display: flex; flex-direction: column; gap: 10px; padding: 1.1rem; border: 1px solid #dbe4ff; border-radius: 16px; background: linear-gradient(180deg,#f8faff,#eef3ff); text-decoration: none; transition: box-shadow .15s, transform .15s; }
 .sjx-card:hover { box-shadow: 0 8px 24px rgba(37,99,235,.14); transform: translateY(-3px); }

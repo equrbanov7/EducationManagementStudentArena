@@ -43,6 +43,14 @@ _ATT_LABELS = {
     AttendanceStatus.EXCUSED: "üq",
 }
 
+#: Oxu/göstərmə üçün: saxlanan audit kodları jurnal şəbəkəsindəki yazılışla göstərilir (QA-1 F7).
+_ATT_DISPLAY = {"iə": "i/e", "qb": "q/b"}
+
+
+def _att_display(status):
+    label = _ATT_LABELS.get(status, status)
+    return _ATT_DISPLAY.get(label, label)
+
 
 def can_correct_journal(request) -> bool:
     """Düzəliş icazəsi: superadmin/superuser və ya ``journal.correct`` icazəsi.
@@ -486,11 +494,11 @@ def _entry(c: JournalCorrection, *, include_document: bool) -> dict:
         "field": c.field,
         "field_display": c.get_field_display(),
         "old": (
-            _ATT_LABELS.get(c.old_status, c.old_status)
+            _att_display(c.old_status)
             if c.field == CorrectionField.ATTENDANCE
             else (c.old_score if c.old_score is not None else "—")
         ),
-        "new": (_ATT_LABELS.get(c.new_status, c.new_status) if c.field == CorrectionField.ATTENDANCE else c.new_score),
+        "new": (_att_display(c.new_status) if c.field == CorrectionField.ATTENDANCE else c.new_score),
         "reason": c.get_reason_display(),
         "note": c.note,
         "by": c.corrected_by_name,

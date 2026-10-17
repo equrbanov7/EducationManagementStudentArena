@@ -94,7 +94,9 @@ def student_today(*, organization, record, period, allowed_sections, today, now)
         )
     from apps.registrar.public import schedule as schedule_service
 
-    slots = schedule_service.get_group_schedule(organization=organization, group=group, period=period)
+    slots = schedule_service.get_group_schedule(
+        organization=organization, group=group, period=period, exclude_exempt_for=getattr(record, "student_id", None)
+    )
     card = lessons.build(slots, period=period, today=today, now=now, with_group=False)
     return widget(
         "student-today",

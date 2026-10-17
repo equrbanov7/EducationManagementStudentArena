@@ -181,6 +181,56 @@ class LessonRoomTest(TestCase):
             buildings = lesson_rooms.lesson_building_choices(rooms)
         self.assertEqual(buildings, ["I korpus", "II korpus"])
 
+    def test_duplicate_room_labels_get_distinguishing_suffix(self):
+        """Eyni korpusda iki «102» (QA-1 F5): fərqləndirici şəkilçi — mərtəbə/tutum; təkrarsız otaq dəyişmir."""
+        with bypass_rls():
+            # Legacy idxal otaqlarının texniki kodu etiketdə göstərilmir → iki eyni «102» (real klon vəziyyəti).
+            twin = ExamRoom.objects.create(
+                organization=self.org, name="102", code="myedu-room-48", building="I korpus", capacity=60, floor="3"
+            )
+            ExamRoom.objects.filter(pk=self.room_a2.pk).update(floor="1", code="myedu-room-33")
+            rooms = lesson_rooms.lesson_room_choices(self.offering)
+        by_id = {r["id"]: r["name"] for r in rooms}
+        first, second = by_id[str(self.room_a2.id)], by_id[str(twin.id)]
+        self.assertNotEqual(first, second)
+        self.assertTrue(first.startswith("102") and second.startswith("102"))
+        self.assertIn("1", first)
+        self.assertIn("3", second)
+        # Təkrarsız otaq olduğu kimi qalır.
+        self.assertEqual(by_id[str(self.room_b1.id)], "201 (B201)")
+        # Cavabın forması dəyişməyib (köməkçi sahələr çıxarılır).
+        self.assertEqual(set(rooms[0]), {"id", "name", "building", "capacity"})
+
+    def test_disambiguate_never_leaves_identical_labels(self):
+        rooms = [
+            {"id": str(i), "name": "102", "building": "1", "capacity": 20, "floor": "", "code": ""} for i in range(3)
+        ]
+        lesson_rooms._disambiguate(rooms)
+        self.assertEqual(len({r["name"] for r in rooms}), 3)
+
+    def test_disambiguate_uses_building_when_rooms_are_in_different_buildings(self):
+        rooms = [
+            {"id": "a", "name": "102", "building": "1", "capacity": 20, "floor": "", "code": ""},
+            {"id": "b", "name": "102", "building": "2", "capacity": 20, "floor": "", "code": ""},
+        ]
+        lesson_rooms._disambiguate(rooms)
+        self.assertNotEqual(rooms[0]["name"], rooms[1]["name"])
+        self.assertIn("1", rooms[0]["name"])
+        self.assertIn("2", rooms[1]["name"])
+
+    def test_modal_building_and_room_selects_have_in_menu_search(self):
+        import re
+
+        html = (
+            self._client(self.teacher)
+            .get(reverse("registrar:journal_detail", args=[self.offering.id]))
+            .content.decode()
+        )
+        for name in ("lesson_building", "lesson_room"):
+            tag = re.search(r'<select name="%s".*?>' % name, html, re.S)
+            self.assertIsNotNone(tag, name)
+            self.assertIn('data-live-search="true"', tag.group(0), name)
+
     # ── Modal render ─────────────────────────────────────────────────────────
 
     def test_modal_renders_building_and_room_selects(self):

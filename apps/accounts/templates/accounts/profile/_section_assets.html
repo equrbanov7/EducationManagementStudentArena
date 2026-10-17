@@ -99,7 +99,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/contact_messages/_part1.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/contact_messages/_part2.css' %}">
     {% endif %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/responsive.css' %}?v=20261017-drawer">
     {% comment %}«Ana səhifə» — default bölmə, HƏR üzvdə var (şərtsiz yüklənir).{% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/dashboard.css' %}?v=20260925-cards">
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
@@ -130,7 +130,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% comment %}QABIQ: kurs / imtahan yaratma modalları `profile.html`-də qabıqdadır
     (istənilən bölmədən açılır) — üslubları icazə ilə qalır.{% endcomment %}
     {% if 'my-courses' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'courses/css/course_create.css' %}?v=20260629">
+    <link rel="stylesheet" href="{% static 'courses/css/course_create.css' %}?v=20261017-nofont">
     <link rel="stylesheet" href="{% static 'courses/css/create_course_modal.css' %}">
     {% endif %}
     {% if 'my-exams' in allowed_sections %}
@@ -238,7 +238,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
     {% endif %}
     {% if 'my-journal' in asset_sections or 'journal-close' in asset_sections %}
-    <link rel="stylesheet" href="{% static 'registrar/css/journal_student.css' %}?v=20260719-term2">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_student.css' %}?v=20261017-exempt">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260914-a11y">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_list.css' %}?v=20260930-resp">
     <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260831-excuse">

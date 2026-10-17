@@ -97778,3 +97778,675 @@ msgstr "«Hələlik keç» düyməsi"
 msgctxt "core.runtime_settings"
 msgid "Açıqdırsa istifadəçi məlumatları doldurmadan bu girişdə davam edə bilir; səhifə hər yeni girişdə yenə göstərilir (məlumatlar doldurulana qədər). Söndürüləndə doldurmaq məcburidir."
 msgstr "Açıqdırsa istifadəçi məlumatları doldurmadan bu girişdə davam edə bilir; səhifə hər yeni girişdə yenə göstərilir (məlumatlar doldurulana qədər). Söndürüləndə doldurmaq məcburidir."
+
+msgctxt "profile.statistics"
+msgid "%(absent)s saat qayıb / %(hours)s saat"
+msgstr "%(absent)s saat qayıb / %(hours)s saat"
+
+msgctxt "profile.statistics"
+msgid "%(computers)s kompüter · %(capacity)s yer · %(live)s canlı oturum"
+msgstr "%(computers)s kompüter · %(capacity)s yer · %(live)s canlı oturum"
+
+msgctxt "profile.statistics"
+msgid "%(groups)s qrup · %(instructors)s müəllim · %(period)s"
+msgstr "%(groups)s qrup · %(instructors)s müəllim · %(period)s"
+
+msgctxt "profile.statistics"
+msgid "%(groups)s qrup · %(students)s tələbə"
+msgstr "%(groups)s qrup · %(students)s tələbə"
+
+msgctxt "profile.statistics"
+msgid "%(n)s cəhd · orta bal %(avg)s"
+msgstr "%(n)s cəhd · orta bal %(avg)s"
+
+msgctxt "profile.statistics"
+msgid "%(n)s davamiyyət qeydi"
+msgstr "%(n)s davamiyyət qeydi"
+
+msgctxt "profile.statistics"
+msgid "%(n)s fənn · %(credits)s ECTS · keçid %(passed)s/%(graded)s"
+msgstr "%(n)s fənn · %(credits)s ECTS · keçid %(passed)s/%(graded)s"
+
+msgctxt "profile.statistics"
+msgid "%(n)s qiymətləndirilmiş fənn"
+msgstr "%(n)s qiymətləndirilmiş fənn"
+
+msgctxt "profile.statistics"
+msgid "%(programs)s ixtisas · akademik məzuniyyət %(leave)s"
+msgstr "%(programs)s ixtisas · akademik məzuniyyət %(leave)s"
+
+msgctxt "profile.statistics"
+msgid "Aktiv"
+msgstr "Aktiv"
+
+msgctxt "profile.statistics"
+msgid "Aktiv akademik qeyd yoxdur."
+msgstr "Aktiv akademik qeyd yoxdur."
+
+msgctxt "profile.statistics"
+msgid "Aktiv akademik qeydlər (qeydiyyatlı status)."
+msgstr "Aktiv akademik qeydlər (qeydiyyatlı status)."
+
+msgctxt "profile.statistics"
+msgid "Aktiv imtahan zalı yoxdur."
+msgstr "Aktiv imtahan zalı yoxdur."
+
+msgctxt "profile.statistics"
+msgid "Aktiv istifadəçi"
+msgstr "Aktiv istifadəçi"
+
+msgctxt "profile.statistics"
+msgid "Aktiv tələbə qeydi"
+msgstr "Aktiv tələbə qeydi"
+
+msgctxt "profile.statistics"
+msgid "Aktiv təşkilat"
+msgstr "Aktiv təşkilat"
+
+msgctxt "profile.statistics"
+msgid "Aktiv təşkilat yoxdur."
+msgstr "Aktiv təşkilat yoxdur."
+
+msgctxt "profile.statistics"
+msgid "Aktiv üzvlük yoxdur."
+msgstr "Aktiv üzvlük yoxdur."
+
+msgctxt "profile.statistics"
+msgid "Apellyasiya nəticələri"
+msgstr "Apellyasiya nəticələri"
+
+msgctxt "profile.statistics"
+msgid "Açıq"
+msgstr "Açıq"
+
+msgctxt "profile.statistics"
+msgid "Açıq apellyasiya"
+msgstr "Açıq apellyasiya"
+
+msgctxt "profile.statistics"
+msgid "Bal"
+msgstr "Bal"
+
+msgctxt "profile.statistics"
+msgid "Baxılır"
+msgstr "Baxılır"
+
+msgctxt "profile.statistics"
+msgid "Bağlı"
+msgstr "Bağlı"
+
+msgctxt "profile.statistics"
+msgid "Bağlı jurnal"
+msgstr "Bağlı jurnal"
+
+msgctxt "profile.statistics"
+msgid "Başlanğıc"
+msgstr "Başlanğıc"
+
+msgctxt "profile.statistics"
+msgid "Başlanğıc tarixi"
+msgstr "Başlanğıc tarixi"
+
+msgctxt "profile.statistics"
+msgid "Bitib"
+msgstr "Bitib"
+
+msgctxt "profile.statistics"
+msgid "Cari dövr üçün proses məlumatı yoxdur."
+msgstr "Cari dövr üçün proses məlumatı yoxdur."
+
+msgctxt "profile.statistics"
+msgid "Cari dövrdə sizə təyin olunmuş fənn açılışı yoxdur."
+msgstr "Cari dövrdə sizə təyin olunmuş fənn açılışı yoxdur."
+
+msgctxt "profile.statistics"
+msgid "Cəhd"
+msgstr "Cəhd"
+
+msgctxt "profile.statistics"
+msgid "Cəmi"
+msgstr "Cəmi"
+
+msgctxt "profile.statistics"
+msgid "Davamiyyət"
+msgstr "Davamiyyət"
+
+msgctxt "profile.statistics"
+msgid "Dövrdə %(total)s oturum · bitib %(ended)s · ləğv %(cancelled)s"
+msgstr "Dövrdə %(total)s oturum · bitib %(ended)s · ləğv %(cancelled)s"
+
+msgctxt "profile.statistics"
+msgid "Dövrdə apellyasiya yoxdur."
+msgstr "Dövrdə apellyasiya yoxdur."
+
+msgctxt "profile.statistics"
+msgid "Dövrdə imtahan yoxdur."
+msgstr "Dövrdə imtahan yoxdur."
+
+msgctxt "profile.statistics"
+msgid "Dərs yükü bölgüsü"
+msgstr "Dərs yükü bölgüsü"
+
+msgctxt "profile.statistics"
+msgid "Faiz"
+msgstr "Faiz"
+
+msgctxt "profile.statistics"
+msgid "Fənlərim (cari dövr)"
+msgstr "Fənlərim (cari dövr)"
+
+msgctxt "profile.statistics"
+msgid "Fənn"
+msgstr "Fənn"
+
+msgctxt "profile.statistics"
+msgid "Fənn açılışı"
+msgstr "Fənn açılışı"
+
+msgctxt "profile.statistics"
+msgid "Gözləyir"
+msgstr "Gözləyir"
+
+msgctxt "profile.statistics"
+msgid "Gözləyən tapşırıq"
+msgstr "Gözləyən tapşırıq"
+
+msgctxt "profile.statistics"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "profile.statistics"
+msgid "Hələ qiymətləndirilmiş semestr yoxdur."
+msgstr "Hələ qiymətləndirilmiş semestr yoxdur."
+
+msgctxt "profile.statistics"
+msgid "Jurnal"
+msgstr "Jurnal"
+
+msgctxt "profile.statistics"
+msgid "Jurnal bağlama"
+msgstr "Jurnal bağlama"
+
+msgctxt "profile.statistics"
+msgid "Keçib"
+msgstr "Keçib"
+
+msgctxt "profile.statistics"
+msgid "Keçid faizi"
+msgstr "Keçid faizi"
+
+msgctxt "profile.statistics"
+msgid "Keçilmiş fənn"
+msgstr "Keçilmiş fənn"
+
+msgctxt "profile.statistics"
+msgid "Kompüter"
+msgstr "Kompüter"
+
+msgctxt "profile.statistics"
+msgid "Kurs"
+msgstr "Kurs"
+
+msgctxt "profile.statistics"
+msgid "Kurslar"
+msgstr "Kurslar"
+
+msgctxt "profile.statistics"
+msgid "Kurslarım"
+msgstr "Kurslarım"
+
+msgctxt "profile.statistics"
+msgid "Kəsilib"
+msgstr "Kəsilib"
+
+msgctxt "profile.statistics"
+msgid "LMS kursları"
+msgstr "LMS kursları"
+
+msgctxt "profile.statistics"
+msgid "Müəllif olduğunuz imtahan yoxdur."
+msgstr "Müəllif olduğunuz imtahan yoxdur."
+
+msgctxt "profile.statistics"
+msgid "Nəticə"
+msgstr "Nəticə"
+
+msgctxt "profile.statistics"
+msgid "Nəzarət insidentləri"
+msgstr "Nəzarət insidentləri"
+
+msgctxt "profile.statistics"
+msgid "Orta yekun bal (0–100) və keçid — ən yeni semestr yuxarıda."
+msgstr "Orta yekun bal (0–100) və keçid — ən yeni semestr yuxarıda."
+
+msgctxt "profile.statistics"
+msgid "Oturum"
+msgstr "Oturum"
+
+msgctxt "profile.statistics"
+msgid "Planlaşdırılıb"
+msgstr "Planlaşdırılıb"
+
+msgctxt "profile.statistics"
+msgid "Proses"
+msgstr "Proses"
+
+msgctxt "profile.statistics"
+msgid "Proseslərin gedişi"
+msgstr "Proseslərin gedişi"
+
+msgctxt "profile.statistics"
+msgid "Qaralama"
+msgstr "Qaralama"
+
+msgctxt "profile.statistics"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "profile.statistics"
+msgid "Qruplar üzrə tələbə"
+msgstr "Qruplar üzrə tələbə"
+
+msgctxt "profile.statistics"
+msgid "Qəbul edilib"
+msgstr "Qəbul edilib"
+
+msgctxt "profile.statistics"
+msgid "Rədd edilib"
+msgstr "Rədd edilib"
+
+msgctxt "profile.statistics"
+msgid "Semestr üzrə nəticə"
+msgstr "Semestr üzrə nəticə"
+
+msgctxt "profile.statistics"
+msgid "Sillabus təsdiqi"
+msgstr "Sillabus təsdiqi"
+
+msgctxt "profile.statistics"
+msgid "Son imtahan nəticələri"
+msgstr "Son imtahan nəticələri"
+
+msgctxt "profile.statistics"
+msgid "Son imtahanlar"
+msgstr "Son imtahanlar"
+
+msgctxt "profile.statistics"
+msgid "Son tarix"
+msgstr "Son tarix"
+
+msgctxt "profile.statistics"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "profile.statistics"
+msgid "Tamamlanıb"
+msgstr "Tamamlanıb"
+
+msgctxt "profile.statistics"
+msgid "Tarix"
+msgstr "Tarix"
+
+msgctxt "profile.statistics"
+msgid "Toplanmış kredit"
+msgstr "Toplanmış kredit"
+
+msgctxt "profile.statistics"
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgctxt "profile.statistics"
+msgid "Tələbələr"
+msgstr "Tələbələr"
+
+msgctxt "profile.statistics"
+msgid "Təsdiqli sillabus"
+msgstr "Təsdiqli sillabus"
+
+msgctxt "profile.statistics"
+msgid "Təşkilat növləri"
+msgstr "Təşkilat növləri"
+
+msgctxt "profile.statistics"
+msgid "Yekun bal daxil edilib"
+msgstr "Yekun bal daxil edilib"
+
+msgctxt "profile.statistics"
+msgid "Yekunlaşmış imtahan cəhdi yoxdur."
+msgstr "Yekunlaşmış imtahan cəhdi yoxdur."
+
+msgctxt "profile.statistics"
+msgid "Yer"
+msgstr "Yer"
+
+msgctxt "profile.statistics"
+msgid "Yoxlama"
+msgstr "Yoxlama"
+
+msgctxt "profile.statistics"
+msgid "Yoxlama növbəsi"
+msgstr "Yoxlama növbəsi"
+
+msgctxt "profile.statistics"
+msgid "Yoxlanılıb"
+msgstr "Yoxlanılıb"
+
+msgctxt "profile.statistics"
+msgid "Yük bölgüsü tamamlanıb"
+msgstr "Yük bölgüsü tamamlanıb"
+
+msgctxt "profile.statistics"
+msgid "Zal"
+msgstr "Zal"
+
+msgctxt "profile.statistics"
+msgid "aktiv %(running)s · planlaşdırılıb %(scheduled)s"
+msgstr "aktiv %(running)s · planlaşdırılıb %(scheduled)s"
+
+msgctxt "profile.statistics"
+msgid "bal"
+msgstr "bal"
+
+msgctxt "profile.statistics"
+msgid "bölgü davam edir %(n)s"
+msgstr "bölgü davam edir %(n)s"
+
+msgctxt "profile.statistics"
+msgid "cari dövr"
+msgstr "cari dövr"
+
+msgctxt "profile.statistics"
+msgid "cari dövrün açılışları üzrə"
+msgstr "cari dövrün açılışları üzrə"
+
+msgctxt "profile.statistics"
+msgid "davam edir: %(n)s ECTS"
+msgstr "davam edir: %(n)s ECTS"
+
+msgctxt "profile.statistics"
+msgid "dərc olunmuş / cəmi"
+msgstr "dərc olunmuş / cəmi"
+
+msgctxt "profile.statistics"
+msgid "dərc olunub %(published)s"
+msgstr "dərc olunub %(published)s"
+
+msgctxt "profile.statistics"
+msgid "dərc olunub %(published)s · tələbə %(students)s"
+msgstr "dərc olunub %(published)s · tələbə %(students)s"
+
+msgctxt "profile.statistics"
+msgid "gecikmiş %(late)s · göndərilmiş %(sent)s"
+msgstr "gecikmiş %(late)s · göndərilmiş %(sent)s"
+
+msgctxt "profile.statistics"
+msgid "imtahan %(exams)s · tapşırıq %(tasks)s"
+msgstr "imtahan %(exams)s · tapşırıq %(tasks)s"
+
+msgctxt "profile.statistics"
+msgid "keçid %(rate)s · orta bal %(avg)s"
+msgstr "keçid %(rate)s · orta bal %(avg)s"
+
+msgctxt "profile.statistics"
+msgid "kəsilmiş %(failed)s · davam edən %(open)s"
+msgstr "kəsilmiş %(failed)s · davam edən %(open)s"
+
+msgctxt "profile.statistics"
+msgid "müəllim %(n)s"
+msgstr "müəllim %(n)s"
+
+msgctxt "profile.statistics"
+msgid "növbəti: %(date)s"
+msgstr "növbəti: %(date)s"
+
+msgctxt "profile.statistics"
+msgid "orta bal %(avg)s"
+msgstr "orta bal %(avg)s"
+
+msgctxt "profile.statistics"
+msgid "planlaşdırılıb %(scheduled)s · aktiv %(running)s · bitib %(finished)s"
+msgstr "planlaşdırılıb %(scheduled)s · aktiv %(running)s · bitib %(finished)s"
+
+msgctxt "profile.statistics"
+msgid "proqram tələbi: %(total)s ECTS"
+msgstr "proqram tələbi: %(total)s ECTS"
+
+msgctxt "profile.statistics"
+msgid "qəbul %(accepted)s · rədd %(rejected)s"
+msgstr "qəbul %(accepted)s · rədd %(rejected)s"
+
+msgctxt "profile.statistics"
+msgid "tələbə"
+msgstr "tələbə"
+
+msgctxt "profile.statistics"
+msgid "tələbə %(students)s · müəllim %(teachers)s · heyət %(staff)s"
+msgstr "tələbə %(students)s · müəllim %(teachers)s · heyət %(staff)s"
+
+msgctxt "profile.statistics"
+msgid "təsdiq gözləyir %(pending)s"
+msgstr "təsdiq gözləyir %(pending)s"
+
+msgctxt "profile.statistics"
+msgid "təşkilat"
+msgstr "təşkilat"
+
+msgctxt "profile.statistics"
+msgid "universitet %(n)s"
+msgstr "universitet %(n)s"
+
+msgctxt "profile.statistics"
+msgid "yoxlanılıb %(checked)s · növbədə %(queue)s"
+msgstr "yoxlanılıb %(checked)s · növbədə %(queue)s"
+
+msgctxt "profile.statistics"
+msgid "yüksək/kritik %(severe)s"
+msgstr "yüksək/kritik %(severe)s"
+
+msgctxt "profile.statistics"
+msgid "Üzvlər rol üzrə"
+msgstr "Üzvlər rol üzrə"
+
+msgctxt "profile.statistics"
+msgid "üzv"
+msgstr "üzv"
+
+msgctxt "profile.statistics"
+msgid "üzvlük %(n)s"
+msgstr "üzvlük %(n)s"
+
+msgctxt "profile.statistics"
+msgid "İmtahan"
+msgstr "İmtahan"
+
+msgctxt "profile.statistics"
+msgid "İmtahan cəhdləri"
+msgstr "İmtahan cəhdləri"
+
+msgctxt "profile.statistics"
+msgid "İmtahan həyat dövrü"
+msgstr "İmtahan həyat dövrü"
+
+msgctxt "profile.statistics"
+msgid "İmtahan mərkəzi"
+msgstr "İmtahan mərkəzi"
+
+msgctxt "profile.statistics"
+msgid "İmtahan zalları"
+msgstr "İmtahan zalları"
+
+msgctxt "profile.statistics"
+msgid "İmtahanlarım"
+msgstr "İmtahanlarım"
+
+msgctxt "profile.statistics"
+msgid "İxtisaslar üzrə tələbə"
+msgstr "İxtisaslar üzrə tələbə"
+
+msgctxt "profile.statistics"
+msgid "əvvəlki semestrə görə %(delta)s bal"
+msgstr "əvvəlki semestrə görə %(delta)s bal"
+
+msgctxt "profile.statistics"
+msgid "Universitet"
+msgstr "Universitet"
+
+msgctxt "profile.statistics"
+msgid "Məktəb"
+msgstr "Məktəb"
+
+msgctxt "profile.statistics"
+msgid "Kurs mərkəzi"
+msgstr "Kurs mərkəzi"
+
+msgctxt "profile.statistics"
+msgid "Fərdi"
+msgstr "Fərdi"
+
+msgctxt "ui.status"
+msgid "Baxılır"
+msgstr "Baxılır"
+
+msgctxt "ui.status"
+msgid "Baxış"
+msgstr "Baxış"
+
+msgctxt "ui.status"
+msgid "Bölüşdürülüb"
+msgstr "Bölüşdürülüb"
+
+msgctxt "ui.status"
+msgid "Bölüşdürülür"
+msgstr "Bölüşdürülür"
+
+msgctxt "ui.status"
+msgid "Düzəliş edilib"
+msgstr "Düzəliş edilib"
+
+msgctxt "ui.status"
+msgid "Dəyişiklik"
+msgstr "Dəyişiklik"
+
+msgctxt "ui.status"
+msgid "Giriş"
+msgstr "Giriş"
+
+msgctxt "ui.status"
+msgid "Gözləmədə"
+msgstr "Gözləmədə"
+
+msgctxt "ui.status"
+msgid "Köhnə sistemdən"
+msgstr "Köhnə sistemdən"
+
+msgctxt "ui.status"
+msgid "Limitə yaxın — buraxılır"
+msgstr "Limitə yaxın — buraxılır"
+
+msgctxt "ui.status"
+msgid "Qismən qəbul edildi"
+msgstr "Qismən qəbul edildi"
+
+msgctxt "ui.status"
+msgid "Qəbul edildi"
+msgstr "Qəbul edildi"
+
+msgctxt "ui.status"
+msgid "Rədd"
+msgstr "Rədd"
+
+msgctxt "ui.status"
+msgid "Rədd edildi"
+msgstr "Rədd edildi"
+
+msgctxt "ui.status"
+msgid "Silinmə"
+msgstr "Silinmə"
+
+msgctxt "ui.status"
+msgid "Status hesablanmır"
+msgstr "Status hesablanmır"
+
+msgctxt "ui.status"
+msgid "Tapşırıq yoxdur"
+msgstr "Tapşırıq yoxdur"
+
+msgctxt "ui.status"
+msgid "Təsdiqləmə"
+msgstr "Təsdiqləmə"
+
+msgctxt "ui.status"
+msgid "Yaradılma"
+msgstr "Yaradılma"
+
+msgctxt "ui.status"
+msgid "Yekun təsdiq gözləyir"
+msgstr "Yekun təsdiq gözləyir"
+
+msgctxt "ui.status"
+msgid "Yoxlama sorğusu"
+msgstr "Yoxlama sorğusu"
+
+msgctxt "ui.status"
+msgid "Yoxlanır"
+msgstr "Yoxlanır"
+
+msgctxt "ui.status"
+msgid "Çıxış"
+msgstr "Çıxış"
+
+msgctxt "ui.status"
+msgid "İmtahana buraxılmır"
+msgstr "İmtahana buraxılmır"
+
+msgctxt "ui.status"
+msgid "İmtahana buraxılır"
+msgstr "İmtahana buraxılır"
+
+msgctxt "ui.status"
+msgid "İxrac"
+msgstr "İxrac"
+
+msgctxt "registrar.journal_room"
+msgid "korpus %(value)s"
+msgstr "korpus %(value)s"
+
+msgctxt "registrar.journal_room"
+msgid "mərtəbə %(value)s"
+msgstr "mərtəbə %(value)s"
+
+msgctxt "registrar.journal_room"
+msgid "%(value)s yer"
+msgstr "%(value)s yer"
+
+msgctxt "registrar.journal_room"
+msgid "kod %(value)s"
+msgstr "kod %(value)s"
+
+msgctxt "registrar.journal_room"
+msgid "Korpus axtar…"
+msgstr "Korpus axtar…"
+
+msgctxt "registrar.journal_room"
+msgid "Uyğun korpus tapılmadı"
+msgstr "Uyğun korpus tapılmadı"
+
+msgctxt "registrar.journal_room"
+msgid "Otaq nömrəsi ilə axtar…"
+msgstr "Otaq nömrəsi ilə axtar…"
+
+msgctxt "registrar.journal_room"
+msgid "Uyğun otaq tapılmadı"
+msgstr "Uyğun otaq tapılmadı"
+
+msgctxt "registrar.journal_exempt"
+msgid "Bu semestrdə jurnalı aktiv fənniniz yoxdur — qeydiyyatda olduğunuz fənlərdən azad edilmisiniz. Qrupunuz dəyişmir."
+msgstr "Bu semestrdə jurnalı aktiv fənniniz yoxdur — qeydiyyatda olduğunuz fənlərdən azad edilmisiniz. Qrupunuz dəyişmir."
+
+msgctxt "profile.subjects"
+msgid "Bu semestrdə aktiv fənniniz yoxdur."
+msgstr "Bu semestrdə aktiv fənniniz yoxdur."
+
+msgctxt "profile.subjects"
+msgid "Qeydiyyatda olduğunuz fənlərdən azad edilmisiniz (aşağıda). Qrupunuz dəyişmir; sual yaranarsa dekanlığa müraciət edin."
+msgstr "Qeydiyyatda olduğunuz fənlərdən azad edilmisiniz (aşağıda). Qrupunuz dəyişmir; sual yaranarsa dekanlığa müraciət edin."
