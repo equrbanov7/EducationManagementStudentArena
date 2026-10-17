@@ -19,6 +19,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 from apps.accounts import profile_completion as policy
 from core.rls import bypass_rls
+from core.rls_pooling import rls_worker_atomic
 
 
 class Command(BaseCommand):
@@ -31,7 +32,7 @@ class Command(BaseCommand):
         Organization = django_apps.get_model("organizations", "Organization")
         Membership = django_apps.get_model("organizations", "Membership")
         User = get_user_model()
-        with bypass_rls():
+        with rls_worker_atomic(), bypass_rls():
             organization = Organization.objects.filter(slug=options["org"]).first()
             if organization is None:
                 raise CommandError(f"Təşkilat tapılmadı: {options['org']}")
