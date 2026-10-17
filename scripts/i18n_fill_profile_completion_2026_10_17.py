@@ -52,6 +52,45 @@ GATE_HELP = (
 # ctx → msgid → {lang: msgstr}. "az" verilməyibsə az msgstr = msgid (AZ cümlə).
 ENTRIES = {
     PC: {
+        # «Hələlik keç» (sahib 2026-10-17).
+        "Hələlik keç": {
+            "en": "Skip for now",
+            "ru": "Пропустить пока",
+            "tr": "Şimdilik geç",
+            "de": "Vorerst überspringen",
+        },
+        "Məlumatlar doldurulana qədər bu səhifə hər girişdə yenə göstəriləcək.": {
+            "en": "Until the details are filled in, this page will be shown again at every sign-in.",
+            "ru": "Пока данные не заполнены, эта страница будет показываться при каждом входе.",
+            "tr": "Bilgiler doldurulana kadar bu sayfa her girişte yeniden gösterilecek.",
+            "de": "Bis die Angaben ausgefüllt sind, wird diese Seite bei jeder Anmeldung erneut angezeigt.",
+        },
+        # Telefon operatoru seçimi (sahib 2026-10-17: «050, 055 kimi ordan seçib yazsın»).
+        "məs: 123 45 67": {
+            "en": "e.g. 123 45 67",
+            "ru": "напр.: 123 45 67",
+            "tr": "örn: 123 45 67",
+            "de": "z. B. 123 45 67",
+        },
+        "məs: +90 555 123 45 67": {
+            "en": "e.g. +90 555 123 45 67",
+            "ru": "напр.: +90 555 123 45 67",
+            "tr": "örn: +90 555 123 45 67",
+            "de": "z. B. +90 555 123 45 67",
+        },
+        "Operator kodu": {"en": "Operator code", "ru": "Код оператора", "tr": "Operatör kodu", "de": "Vorwahl"},
+        "Xarici nömrə": {
+            "en": "Foreign number",
+            "ru": "Иностранный номер",
+            "tr": "Yabancı numara",
+            "de": "Ausländische Nummer",
+        },
+        "Operator kodundan sonra 7 rəqəm yazın (məs. 123 45 67).": {
+            "en": "Enter 7 digits after the operator code (e.g. 123 45 67).",
+            "ru": "Введите 7 цифр после кода оператора (напр. 123 45 67).",
+            "tr": "Operatör kodundan sonra 7 rakam yazın (örn. 123 45 67).",
+            "de": "Geben Sie nach der Vorwahl 7 Ziffern ein (z. B. 123 45 67).",
+        },
         # SEC-1 F1 (2026-10-17): FİN / e-poçt unikallıq yoxlaması hesab başına məhdud.
         "Çox sayda cəhd edildi. %(minutes)s dəqiqə sonra yenidən yoxlayın.": {
             "en": "Too many attempts. Please try again in %(minutes)s minutes.",
@@ -221,6 +260,25 @@ ENTRIES = {
         "Çıxış": {"en": "Log out", "ru": "Выйти", "tr": "Çıkış", "de": "Abmelden"},
     },
     RS: {
+        "«Hələlik keç» düyməsi": {
+            "en": "«Skip for now» button",
+            "ru": "Кнопка «Пропустить пока»",
+            "tr": "«Şimdilik geç» düğmesi",
+            "de": "Schaltfläche «Vorerst überspringen»",
+        },
+        (
+            "Açıqdırsa istifadəçi məlumatları doldurmadan bu girişdə davam edə bilir; səhifə hər yeni girişdə "
+            "yenə göstərilir (məlumatlar doldurulana qədər). Söndürüləndə doldurmaq məcburidir."
+        ): {
+            "en": "When on, the user can continue this session without filling in the details; the page is shown "
+            "again at every new sign-in (until the details are filled in). When off, filling them in is mandatory.",
+            "ru": "Если включено, пользователь может продолжить этот вход без заполнения данных; страница снова "
+            "показывается при каждом новом входе (пока данные не заполнены). Если выключено — заполнение обязательно.",
+            "tr": "Açıksa kullanıcı bilgileri doldurmadan bu girişte devam edebilir; sayfa her yeni girişte yeniden "
+            "gösterilir (bilgiler doldurulana kadar). Kapalıysa doldurmak zorunludur.",
+            "de": "Wenn aktiv, kann der Nutzer in dieser Sitzung ohne Ausfüllen fortfahren; die Seite erscheint bei "
+            "jeder neuen Anmeldung erneut (bis die Angaben ausgefüllt sind). Wenn inaktiv, ist das Ausfüllen Pflicht.",
+        },
         "Məcburi profil məlumatları": {
             "en": "Required profile details",
             "ru": "Обязательные данные профиля",

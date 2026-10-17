@@ -80,3 +80,68 @@
 .pc-privacy p + p {
     margin-top: 6px;
 }
+
+/* Telefon: operator seçimi (050, 055 …) + qalan 7 rəqəm — sahib 2026-10-17. */
+.pc-phone {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+/* .bootstrap-single-select defoltu width:100% — burada sabit en (nömrə xanası qalan yeri tutur). */
+.pc-phone .pc-phone__operator {
+    flex: 0 0 104px;
+    width: 104px;
+    min-width: 0;
+}
+
+.pc-phone--other .pc-phone__operator {
+    flex-basis: 156px;
+    width: 156px;
+}
+
+.pc-phone .pc-phone__operator .bootstrap-single-select__toggle {
+    min-height: 46px;
+    height: 100%;
+    border-radius: 10px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.pc-phone input[type="tel"] {
+    flex: 1 1 auto;
+    min-width: 0;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+}
+
+/* «Hələlik keç» — ikinci dərəcəli düymə (sahib 2026-10-17). */
+.pc-skip-btn {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 11px 14px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 10px;
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-700);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.pc-skip-btn:hover,
+.pc-skip-btn:focus-visible {
+    border-color: var(--ems-neutral-500);
+    background: var(--ems-neutral-50);
+}
+
+.pc-skip-note {
+    margin: 8px 0 0;
+    color: var(--ems-neutral-600);
+    font-size: 0.78rem;
+    line-height: 1.4;
+    text-align: center;
+}
+

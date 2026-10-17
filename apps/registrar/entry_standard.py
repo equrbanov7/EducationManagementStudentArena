@@ -130,10 +130,22 @@ class EntryParts:
     midterm_max: Decimal = MIDTERM_MAX
     selfwork_active: bool = True
     activity_detail: activity_kinds.ActivityDetail | None = field(default=None, compare=False)
+    #: Hissələrin cəmi tavanı (``cap``) keçib — yekun tavanla kəsilib (yuvarlaqlaşdırma deyil; yalnız görünüş).
+    capped: bool = field(default=False, compare=False)
 
     @property
     def raw_sum(self) -> Decimal:
         return self.attendance + self.activity + self.midterm + self.selfwork
+
+    @property
+    def rounded_from(self) -> Decimal | None:
+        """QA-1 P3 (2026-10-17): hissələrin kəsirli cəmi yekundan fərqlidirsə o cəm, əks halda ``None``.
+
+        Yekun ``total`` qayda ilə tam ədəddir (``round_score``, yarım-yuxarı: 9,55 → 10); şablon bal bölgüsündə
+        «Cəm 9,55 → 10» sətrini göstərir ki, başlıqdakı bal ilə hissələr ziddiyyətli görünməsin. Cəm tavanı
+        keçibsə (``capped``) bu yuvarlaqlaşdırma deyil, kəsmədir — sətir göstərilmir."""
+        raw = self.raw_sum
+        return None if self.capped or raw == self.total else raw
 
     @property
     def attendance_max(self) -> Decimal:
@@ -204,6 +216,7 @@ def compose(
         midterm=midterm,
         selfwork=selfwork,
         total=round_score(min(raw, _dec(cap))),
+        capped=raw > _dec(cap),
         attendance_barred=attendance_barred,
         midterm_max=flags.midterm_max,
         selfwork_active=flags.selfwork,

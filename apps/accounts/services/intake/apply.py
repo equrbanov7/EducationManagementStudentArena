@@ -31,6 +31,7 @@ from django.utils.translation import pgettext
 from apps.audit.public import log_action
 from core.constants import AuditAction
 
+from . import fin_claims
 from .create import (
     KIND_STUDENT,
     STUDENT_ROLE_NAME,
@@ -65,6 +66,8 @@ def apply_plans(*, organization, plans, actor, request=None) -> dict:
     """Planları icra edir və nəticə sətirlərini qaytarır (parol yalnız burada)."""
 
     role = student_role(organization)
+    # Ad-soyadı uyğun gələn özü yazılmış FİN-lər rəsmi mənbə ilə təsdiqlənir (SEC-1 F2).
+    fin_claims.confirm_matching_claims(plans, actor=actor, organization=organization, request=request)
     results: list = []
     credentials: list = []
     created_count = 0

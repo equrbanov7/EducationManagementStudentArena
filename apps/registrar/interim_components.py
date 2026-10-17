@@ -19,9 +19,9 @@ from django.db import IntegrityError, transaction
 from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 
-from apps.registrar import interim_assessment
+from apps.registrar import interim_assessment, read_memo
 from apps.registrar.gradebook import journal_is_locked
-from apps.registrar.models import AssessmentComponent, ComponentKind, ComponentScore, CriterionScore, Enrollment
+from apps.registrar.models import AssessmentComponent, ComponentKind, ComponentScore, CriterionScore
 
 logger = logging.getLogger(__name__)
 
@@ -227,11 +227,7 @@ def get_kollokvium_grid(offering):
         )
     open_by_comp = {col["component"].id: col["open"] for col in columns}
 
-    enrollments = list(
-        offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
-        .select_related("student", "student__profile")
-        .order_by("student__last_name", "student__username")
-    )
+    enrollments = read_memo.enrolled_roster(offering)  # jurnal GET-də tablar arasında bir sorğu (PERF-1 F-06)
     score_map = {}
     for cs in ComponentScore.objects.filter(component__in=components, enrollment__offering=offering):
         score_map[(cs.enrollment_id, cs.component_id)] = cs.score

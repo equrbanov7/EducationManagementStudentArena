@@ -26,7 +26,7 @@ from collections.abc import Mapping
 
 from django.db.models import F
 
-from apps.registrar import activity_kinds, entry_standard, exam_eligibility, selfwork_points
+from apps.registrar import activity_kinds, entry_standard, exam_eligibility, read_memo, selfwork_points
 from apps.registrar.models import (
     AssessmentComponent,
     ComponentKind,
@@ -273,6 +273,58 @@ def _exempt_ids(enrollments) -> frozenset:
 
 
 def _components_with_period(offering_ids, *, with_bits=False):
+    """:func:`_load_components` — açıq oxu sahəsində (``read_memo``) açılış-başına memo ilə (PERF-1 F-06).
+
+    Jurnal səhifəsi eyni açılışın komponentlərini qrid, «Yekun» nəticələri və bölgü üçün üç dəfə
+    oxuyurdu; indi bir dəfə. Komponent yazısı (``ensure_kollokviums``) sahəni təmizləyir."""
+    memo = read_memo.bucket(("components", bool(with_bits)))
+    ids = read_memo.plain_ids(offering_ids) if memo is not None else None
+    if ids is None:
+        return _load_components(offering_ids, with_bits=with_bits)
+    ids = list(dict.fromkeys(ids))
+    missing = [oid for oid in ids if oid not in memo]
+    if missing:
+        loaded, loaded_carried, loaded_bits = _load_components(missing, with_bits=with_bits)
+        for oid in missing:
+            memo[oid] = (loaded.get(oid, []), loaded_carried.get(oid), loaded_bits.get(oid))
+    components: dict = defaultdict(list)
+    carried: dict = {}
+    bits: dict = {}
+    for oid in ids:
+        comps, carry, bit = memo[oid]
+        if comps:
+            components[oid] = list(comps)
+        if carry is not None:
+            carried[oid] = carry
+        if bit is not None:
+            bits[oid] = bit
+    return components, carried, bits
+
+
+def _component_scores(component_ids, enr_ids) -> list:
+    """Komponent balları — açıq oxu sahəsində EYNİ (komponent, yazılış) dəsti üçün bir dəfə (PERF-1 F-06).
+
+    Jurnal səhifəsi qrid, «Yekun» nəticələri və bölgü üçün eyni dəsti üç dəfə oxuyurdu. Açar dəqiq
+    dəstdir (fərqli dəst → yeni sorğu); bal/komponent yazısı sahəni təmizləyir (``read_memo``)."""
+    memo = read_memo.bucket("component_scores")
+    key = (frozenset(component_ids), frozenset(enr_ids)) if memo is not None else None
+    if key is not None and key in memo:
+        return memo[key]
+    rows = list(ComponentScore.objects.filter(component_id__in=component_ids, enrollment_id__in=enr_ids))
+    if key is not None:
+        memo[key] = rows
+    return rows
+
+
+def preload_components(offering_ids) -> None:
+    """Açıq oxu sahəsində komponent memo-sunu bir sorğu ilə doldur (sonrakı toplu dəstlər ondan oxuyur).
+
+    Sahə yoxdursa heç nə etmir; ``with_bits`` :func:`build`-in işlətdiyi RİM bayrağı ilə eynidir."""
+    if read_memo.active() and offering_ids:
+        _components_with_period(offering_ids, with_bits=entry_standard.rule_flags().activity_split)
+
+
+def _load_components(offering_ids, *, with_bits=False):
     """Açılışların komponentləri + (JOIN) dövr sahələri və təşkilatın ``midterm_from_year`` açarı.
 
     Rejim (``entry_standard``) üçün lazım olan hər şey EYNİ sorğudan gəlir — ayrıca dövr
@@ -350,7 +402,7 @@ def build(
 
     scores_by_enrollment: dict = defaultdict(list)
     if component_ids and enr_ids:
-        for score in ComponentScore.objects.filter(component_id__in=component_ids, enrollment_id__in=enr_ids):
+        for score in _component_scores(component_ids, enr_ids):
             scores_by_enrollment[score.enrollment_id].append(score)
 
     selfwork_totals: dict = {}
@@ -467,6 +519,7 @@ __all__ = [
     "absence_limit_percent_map",
     "build",
     "entry_batch",
+    "preload_components",
     "student_entry_batch",
     "DEFAULT_ABSENCE_LIMIT",
 ]

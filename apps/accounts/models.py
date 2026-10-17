@@ -325,6 +325,14 @@ class UserProfile(models.Model):
         verbose_name="Məlumatlar tamamlanıb",
         help_text="Məcburi profil məlumatları səhifəsinin sonuncu tamamlanma vaxtı.",
     )
+    # Sahib 2026-10-17 (SEC-1 F2, tövsiyə olunan variant): FİN-i istifadəçi ÖZÜ yazıbsa (profil tamamlama)
+    # o, rəsmi deyil — ATİS / kadr idxalı eyni FİN-lə başqa adda gəlsə rəsmi mənbə üstün gəlir
+    # (bax ``services/intake/fin_claims.py``). Rəsmi mənbə təsdiqləyəndə bayraq düşür.
+    fin_self_reported = models.BooleanField(
+        default=False,
+        verbose_name="FİN istifadəçinin özü tərəfindən yazılıb",
+        help_text="Rəsmi mənbə (ATİS / kadr idxalı) təsdiqləyənə qədər FİN təsdiqlənməmiş sayılır.",
+    )
 
     # Superadmin tərəfindən verilən "imtahan zalı idarəçisi" icazəsi: bu bayraq
     # açıq olan istifadəçi (superadmin olmasa da) imtahan zalı və zaldakı

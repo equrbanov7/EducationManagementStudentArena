@@ -45,7 +45,16 @@ def teacher_exam_list(request):
     """
     Legacy /exams/ entry point.
     Teacher exam list now lives inside the profile "my-exams" section.
+    QA-1 P2 (2026-10-17): YALNIZ tələbə (starosta daxil) öz imtahan siyahısına (``assigned-exams``) gedir —
+    profil tamamlama qapısı yalnız tələbə siyahısını buraxır. Qalan hamı (aktiv təşkilatı seçilməmiş müəllim də)
+    əvvəlki kimi «İmtahanlarım»a (``my-exams``).
     """
+    user = request.user
+    is_pure_student = (getattr(user, "is_student", False) or getattr(user, "is_lead_student", False)) and not getattr(
+        user, "is_teacher_or_above", False
+    )
+    if is_pure_student:
+        return redirect(f"{reverse('accounts:profile')}?section=assigned-exams")
     return redirect(_teacher_profile_my_exams_url())
 
 

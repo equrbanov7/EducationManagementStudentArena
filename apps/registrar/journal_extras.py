@@ -24,7 +24,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from apps.registrar import absence_limit, exam_eligibility, grade_audit
+from apps.registrar import absence_limit, exam_eligibility, grade_audit, read_memo
 from apps.registrar.gradebook import journal_is_locked, mark_edit_window
 
 # Keçmiş dövrlərin kollokvium sabitləri (geriyə uyğunluq) — rejim qərarı ``interim_assessment``-dədir.
@@ -129,11 +129,7 @@ def save_course_work(*, enrollment, topic, score, submitted_on=None, by_user=Non
 
 def get_course_work_rows(offering):
     """Kurs işi tabı: tələbə → (mövzu, bal, tarix, kilid bayrağı)."""
-    enrollments = list(
-        offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
-        .select_related("student", "student__profile")
-        .order_by("student__last_name", "student__username")
-    )
+    enrollments = read_memo.enrolled_roster(offering)  # jurnal GET-də tablar arasında bir sorğu (PERF-1 F-06)
     works = {w.enrollment_id: w for w in CourseWork.objects.filter(enrollment__offering=offering)}
     now = timezone.now()
     rows = []
@@ -178,11 +174,7 @@ def get_final_breakdown(offering):
 
     scheme = gradebook.ensure_assessment_scheme(offering=offering)
     interim, kolls = display_components(offering)
-    enrollments = list(
-        offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
-        .select_related("student", "student__profile")
-        .order_by("student__last_name", "student__username")
-    )
+    enrollments = read_memo.enrolled_roster(offering)  # jurnal GET-də tablar arasında bir sorğu (PERF-1 F-06)
     kscore_map = {}
     if kolls:
         for cs in ComponentScore.objects.filter(component__in=kolls, enrollment__offering=offering):

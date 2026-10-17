@@ -205,7 +205,12 @@ def _selection(section, request, organization, period, *, permission):
     """Qrup / müəllim seçimi — YALNIZ aktorun ``permission`` əhatəsindən (fail-closed)."""
     from apps.organizations.models import OrgUnit
 
-    groups = list(schedule_manage.scoped_groups(request.user, organization, permission=permission).values("id", "name"))
+    # Redaktorun OXU görünüşü genişlənmiş əhatədir (kafedra fənni olan qruplar, FIX-D 2026-10-17).
+    groups = list(
+        schedule_manage.scoped_groups(request.user, organization, permission=permission, widened=True).values(
+            "id", "name"
+        )
+    )
     section["groups"] = groups
     requested = (request.GET.get(PREFIX + "group") or "").strip()
     group = None
@@ -215,7 +220,9 @@ def _selection(section, request, organization, period, *, permission):
         group = OrgUnit.objects.filter(pk=chosen).first()
     section["group"] = group
 
-    scoped = schedule_manage.scoped_offerings(request.user, organization, period=period, permission=permission)
+    scoped = schedule_manage.scoped_offerings(
+        request.user, organization, period=period, permission=permission, widened=True
+    )
     teachers = _teachers_in_scope(scoped)
     section["scope_teachers"] = teachers
 

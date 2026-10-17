@@ -287,3 +287,82 @@ class SubjectExemptCabinetTest(_ExemptBase):
         html = fragment.json()["html"]
         self.assertIn("data-msx-exempt", html)
         self.assertIn("Fizika", html)
+
+
+class SubjectExemptScheduleTest(_ExemptBase):
+    """Azad edilən fənn tələbənin ÖZ cədvəlindən və «növbəti dərs»indən düşür; qrup cədvəli toxunulmazdır (QA-1 F6)."""
+
+    def _slots(self):
+        import datetime
+
+        from apps.registrar.models import ScheduleSlot
+
+        with bypass_rls():
+            for offering in (self.offering, self.math_enrollment.offering):
+                ScheduleSlot.objects.create(
+                    organization=self.org,
+                    offering=offering,
+                    weekday=1,
+                    start_time=datetime.time(8, 30),
+                    end_time=datetime.time(10, 0),
+                )
+
+    def _subjects(self, slots):
+        return {slot.offering.subject_id for slot in slots}
+
+    def test_student_schedule_and_group_schedule_drop_only_the_exempt_subject(self):
+        from apps.registrar import schedule
+
+        self._slots()
+        with bypass_rls():
+            before = schedule.get_student_schedule(self.org, self.student, self.group, self.period)
+            dash_before = schedule.get_group_schedule(
+                organization=self.org, group=self.group, period=self.period, exclude_exempt_for=self.student.id
+            )
+        self.assertEqual(self._subjects(before), {self.physics.id, self.math.id})
+        self.assertEqual(self._subjects(dash_before), {self.physics.id, self.math.id})
+
+        self._exempt()
+        with bypass_rls():
+            mine = schedule.get_student_schedule(self.org, self.student, self.group, self.period)
+            dashboard = schedule.get_group_schedule(
+                organization=self.org, group=self.group, period=self.period, exclude_exempt_for=self.student.id
+            )
+            classmate = schedule.get_student_schedule(self.org, self.classmate, self.group, self.period)
+            group_view = schedule.get_group_schedule(organization=self.org, group=self.group, period=self.period)
+        self.assertEqual(self._subjects(mine), {self.math.id})
+        self.assertEqual(self._subjects(dashboard), {self.math.id})
+        # Sinif yoldaşı və qrupun (müəllim/redaktor) cədvəli toxunulmazdır.
+        self.assertEqual(self._subjects(classmate), {self.physics.id, self.math.id})
+        self.assertEqual(self._subjects(group_view), {self.physics.id, self.math.id})
+
+    def test_restore_brings_the_subject_back_into_the_schedule(self):
+        from apps.registrar import schedule
+
+        self._slots()
+        self._exempt()
+        with bypass_rls():
+            decision = JournalHygieneDecision.objects.get(category=HygieneCategory.SUBJECT_EXEMPT.value)
+        response = self._post(
+            self.coordinator, "registrar:journal_subject_exempt_restore", {"decision": str(decision.pk)}
+        )
+        self.assertEqual(response.status_code, 200, response.content[:300])
+        with bypass_rls():
+            slots = schedule.get_student_schedule(self.org, self.student, self.group, self.period)
+        self.assertEqual(self._subjects(slots), {self.physics.id, self.math.id})
+
+    def test_empty_states_say_exempt_not_unregistered(self):
+        """Yalnız bir fənni olan tələbə azad edilib: boş-hal «qeydiyyat yoxdur» deməməlidir."""
+        from apps.registrar.public import build_student_subjects_context
+
+        self._exempt()
+        with bypass_rls():
+            Enrollment.objects.filter(pk=self.math_enrollment.pk).update(status=Enrollment.Status.DROPPED)
+        request = RequestFactory().get("/")
+        request.user = self.student
+        with bypass_rls():
+            section = build_student_subjects_context(request, organization=self.org, semester_number=1)[
+                "student_subjects_section"
+            ]
+        self.assertEqual(section["subjects"], [])
+        self.assertEqual([item["code"] for item in section["exempt_subjects"]], ["FIZ101"])

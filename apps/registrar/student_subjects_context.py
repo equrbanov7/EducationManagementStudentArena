@@ -37,6 +37,7 @@ from apps.registrar import (
     finals_batch,
     gradebook,
     interim_assessment,
+    read_memo,
     selfwork_points,
     services,
     subject_exempt,
@@ -305,6 +306,7 @@ LEGEND = (
 )
 
 
+@read_memo.scoped  # PERF-1 F-05: donma/saat/hədd/komponent girişləri bölmədə bir dəfə oxunur
 def build_section(*, request, organization, record, period, semester_number) -> dict:
     """Akademik qeydi və dövrü artıq həll olunmuş tələbə üçün bölmənin qalan hissəsi.
 
@@ -317,6 +319,8 @@ def build_section(*, request, organization, record, period, semester_number) -> 
     data = services.get_student_cabinet_data(record=record, period=period, semester_number=semester_number)
     data["subjects"] += other_period_subject_rows(organization, record, period, semester_number, data["subjects"])
 
+    # Bütün sətirlərin komponentləri BİR sorğu ilə — jurnal xülasəsi və zənginləşdirmə ondan oxuyur (PERF-1).
+    finals_batch.preload_components([row["enrollment"].offering_id for row in data["subjects"]])
     # Hər fənnin elektron jurnal xülasəsi (giriş balı + davamiyyət) — «Fənlərim»
     # eyni zamanda tələbənin «Qiymətlərim» görünüşüdür.
     journal_summary = gradebook.get_student_journal_summary(

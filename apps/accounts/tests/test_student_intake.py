@@ -524,3 +524,54 @@ class IntakeSafetyContractTest(StudentIntakeBase):
             set(login_blocked_access_states()),
             {UserProfile.AccessState.STAGED, UserProfile.AccessState.ARCHIVED},
         )
+
+
+class SelfReportedFinTests(StudentIntakeBase):
+    """SEC-1 F2 (sahib 2026-10-17, tövsiyə olunan variant): özü yazılmış FİN rəsmi idxala uduzmur."""
+
+    def _claim(self, fin, *, first="", last=""):
+        with bypass_rls():
+            self.student.first_name, self.student.last_name = first, last
+            self.student.save(update_fields=["first_name", "last_name"])
+            profile = self.student.profile
+            profile.fin = fin
+            profile.fin_self_reported = True
+            profile.save(update_fields=["fin", "fin_self_reported"])
+
+    def test_official_row_wins_over_foreign_self_reported_fin(self):
+        self._claim("4SQUAT4", first="Başqa", last="Adam")
+        preview = self.preview(self.rim, [student_row("4SQUAT4", "Aysel", "Məmmədova")]).json()["rows"][0]
+        self.assertEqual(preview["status"], "create")
+        with bypass_rls():
+            self.student.profile.refresh_from_db()
+            self.assertEqual(self.student.profile.fin, "4SQUAT4")  # ön baxış heç nə yazmır
+        payload = self.apply(self.rim, [student_row("4SQUAT4", "Aysel", "Məmmədova")]).json()
+        self.assertEqual(payload["summary"]["created"], 1)
+        with bypass_rls():
+            self.student.profile.refresh_from_db()
+            self.assertIsNone(self.student.profile.fin)
+            self.assertFalse(self.student.profile.fin_self_reported)
+            owner = UserProfile.objects.get(fin="4SQUAT4")
+            self.assertFalse(owner.fin_self_reported)
+            self.assertEqual(owner.user.first_name, "Aysel")
+            row = AuditLog.objects.get(reason="fin_self_reported_released", resource_id=str(self.student.pk))
+            self.assertEqual(row.changes, {"fields": ["fin"]})
+
+    def test_matching_name_confirms_self_reported_fin(self):
+        self._claim("4MATCH4", first="Aysel", last="Mammadova")
+        payload = self.apply(self.rim, [student_row("4MATCH4", "Aysel", "Məmmədova")]).json()
+        self.assertEqual(payload["summary"]["created"], 0)
+        self.assertEqual(payload["rows"][0]["code"], "fin_exists_self_reported_match")
+        with bypass_rls():
+            self.student.profile.refresh_from_db()
+            self.assertEqual(self.student.profile.fin, "4MATCH4")
+            self.assertFalse(self.student.profile.fin_self_reported)
+
+    def test_official_fin_is_still_skipped(self):
+        with bypass_rls():
+            profile = self.student.profile
+            profile.fin = "4OFFIC4"
+            profile.save(update_fields=["fin"])
+        payload = self.apply(self.rim, [student_row("4OFFIC4", "Yeni", "Ad")]).json()
+        self.assertEqual(payload["rows"][0]["code"], "fin_exists")
+        self.assertEqual(payload["summary"]["created"], 0)

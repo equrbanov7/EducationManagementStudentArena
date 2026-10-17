@@ -140,7 +140,9 @@ def schedule_scope(*, request, organization, allowed_sections) -> dict | None:
     from apps.registrar.public import schedule_manage
 
     # TAM say: əvvəl ilk 50 ad yüklənib sayılırdı.
-    groups, total = take(schedule_manage.scoped_groups(request.user, organization).values_list("name", flat=True))
+    groups, total = take(
+        schedule_manage.scoped_groups(request.user, organization, widened=True).values_list("name", flat=True)
+    )
     return widget(
         "schedule-scope",
         pgettext(_CTX, "Cədvəl idarəetməsi"),

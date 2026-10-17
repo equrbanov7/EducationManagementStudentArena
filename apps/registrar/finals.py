@@ -25,6 +25,7 @@ from apps.registrar import (
     gradebook,
     gradebook_components,
     grading_scale,
+    read_memo,
     services,
 )
 from apps.registrar.exam_eligibility import fail_reason_code as eligibility_reason
@@ -476,11 +477,7 @@ def get_offering_results(*, offering, batch=None):
     from apps.registrar import finals_batch
 
     scheme = gradebook.ensure_assessment_scheme(offering=offering)
-    enrollments = list(
-        offering.enrollments.filter(status=offering.enrollments.model.Status.ENROLLED)
-        .select_related("student")
-        .order_by("student__last_name", "student__username")
-    )
+    enrollments = read_memo.enrolled_roster(offering)  # jurnal GET-də tablar arasında bir sorğu (PERF-1 F-06)
     if batch is None:
         batch = finals_batch.build(enrollments)
     rows = [

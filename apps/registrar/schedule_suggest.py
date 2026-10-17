@@ -28,7 +28,8 @@ Ona görə «boş» göstərilən xana saxlamada toqquşma VERMİR (otaq sütunu
 
 SƏMƏRƏLİLİK
 -----------
-Semestrin canlı slotları BİR sorğu ilə gəlir, otaqlar bir, qrup sayları iki aqreqat sorğu ilə;
+Qrupun/müəllimin canlı slotları BİR sorğu ilə (tam obyekt), semestrin otaq məşğulluğu bir yüngül
+``values_list`` sorğusu ilə (PERF-1 F-07), otaqlar bir, qrup sayları iki aqreqat sorğu ilə gəlir;
 qalan hər şey Python-dadır (48 xana × yalnız müəllim/qrupa aid slotlar).
 
 OTAQ = MƏTN
@@ -239,13 +240,15 @@ class _Plan:
         self.week_type = week_type if week_type in dict(WeekType.choices) else WeekType.ALL
         self.offering_id = offering_id
         self.exclude = tuple(str(pk) for pk in exclude if pk)
-        rows = schedule_conflicts.live_slots(organization, period_id=period_id)
-        self.rows = [slot for slot in rows if str(slot.pk) not in self.exclude]
-        self.mine = [slot for slot in self.rows if self.is_group(slot) or self.is_teacher(slot)]
+        # PERF-1 F-07 (2026-10-17): tam obyekt YALNIZ qrupun/müəllimin slotları üçün; otaq
+        # məşğulluğu bütün semestrdən yüngül ``values_list`` sətirləri ilə (iki sorğu).
+        mine = schedule_conflicts.owner_slots(
+            organization, period_id=period_id, group_id=self.group_id, instructor_id=self.teacher_id
+        )
+        self.mine = [slot for slot in mine if str(slot.pk) not in self.exclude]
         self.room_rows: dict = {}
-        for slot in self.rows:
-            if slot.room:
-                self.room_rows.setdefault(slot.weekday, []).append(slot)
+        for slot in schedule_conflicts.room_rows(organization, period_id=period_id, exclude_ids=self.exclude):
+            self.room_rows.setdefault(slot.weekday, []).append(slot)
 
     def busy_rooms(self, weekday, start, end, partners) -> set:
         return _busy_rooms(
@@ -293,7 +296,7 @@ class _Plan:
         test = self.is_group if owner == MODE_GROUP else self.is_teacher
         periods = schedule_grid.lesson_periods(self.organization)
         out: dict = {}
-        for slot in self.rows:
+        for slot in self.mine:
             if not test(slot):
                 continue
             for row in periods:
@@ -302,7 +305,7 @@ class _Plan:
         return out
 
     def dominant_shift(self) -> str:
-        shifts = Counter(schedule_grid.shift_of(slot.start_time) for slot in self.rows if self.is_group(slot))
+        shifts = Counter(schedule_grid.shift_of(slot.start_time) for slot in self.mine if self.is_group(slot))
         return shifts.most_common(1)[0][0] if shifts else ""
 
 

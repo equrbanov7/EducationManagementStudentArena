@@ -20,6 +20,7 @@ from django.utils.translation import gettext as _
 
 from . import campus, finals, grade_audit, gradebook, journal_edit_windows, legacy_excuse, lesson_rooms, schedule
 from .models import AttendanceStatus, CorrectionReason, LessonKind
+from .read_memo import scoped_get as _read_memo_get
 
 
 def _current_period(organization):
@@ -61,6 +62,7 @@ _JOURNAL_TABS = ("grid", "kollokvium", "kurs-isi", "serbest", "yekun")
 
 
 @login_required
+@_read_memo_get  # PERF-1 F-06: GET-də toplu girişlər (donma, hədd, komponentlər) bir dəfə
 def journal_detail(request, offering_id):
     """Lesson-by-lesson journal for one offering: view (GET) + edit (POST).
 

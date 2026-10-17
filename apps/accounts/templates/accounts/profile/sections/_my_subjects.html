@@ -118,9 +118,15 @@ yox; hədəf `style-src-attr`-dan tam çıxmaqdır, bax csp.py).{% endcomment %}
             {% endfor %}
         </div>
         {% else %}
+        {% if sec.exempt_subjects %}
+        {% trans "Bu semestrdə aktiv fənniniz yoxdur." context "profile.subjects" as msx_no_subjects %}
+        {% trans "Qeydiyyatda olduğunuz fənlərdən azad edilmisiniz (aşağıda). Qrupunuz dəyişmir; sual yaranarsa dekanlığa müraciət edin." context "profile.subjects" as msx_no_subjects_body %}
+        {% include "partials/ems_ui/_empty.html" with state_icon="fa-user-check" state_title=msx_no_subjects state_body=msx_no_subjects_body %}
+        {% else %}
         {% trans "Bu semestr üçün hələ fənn qeydiyyatı yoxdur." context "profile.subjects" as msx_no_subjects %}
         {% trans "Qeydiyyat semestr açılışında dekanlıq tərəfindən aparılır. Fənləriniz görünmürsə, tyutor və ya dekanlığa müraciət edin." context "profile.subjects" as msx_no_subjects_body %}
         {% include "partials/ems_ui/_empty.html" with state_icon="fa-book-open" state_title=msx_no_subjects state_body=msx_no_subjects_body %}
+        {% endif %}
         {% endif %}
 
         {# ── «Fəndən azad» fənlər (sahib 2026-10-15) — kartlarda yoxdur, səbəbi burada ── #}

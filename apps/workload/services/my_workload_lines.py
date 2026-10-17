@@ -17,10 +17,17 @@ from __future__ import annotations
 from ..constants import Activity, DegreeLevel, EducationForm, Season
 from .row_edit import distribution_edit_url
 
-_FORM_LABELS = {str(value): str(label) for value, label in EducationForm.choices}
-_LEVEL_LABELS = {str(value): str(label) for value, label in DegreeLevel.choices}
+# ⚠️ Etiketlər LAZY qalır (import anında `str()` dili dondururdu — QA-1 F3); mətnə çevirmə çağırış anındadır.
+_FORM_LABELS = {str(value): label for value, label in EducationForm.choices}
+_LEVEL_LABELS = {str(value): label for value, label in DegreeLevel.choices}
 _SEASON_ORDER = {str(value): index for index, (value, _label) in enumerate(Season.choices)}
 _ACTIVITY_ORDER = {str(value): index for index, (value, _label) in enumerate(Activity.choices)}
+
+
+def _label(labels: dict, value: str) -> str:
+    """Seçim etiketi AKTİV dildə (çağırış anında); naməlum dəyər — olduğu kimi."""
+    label = labels.get(value)
+    return str(label) if label is not None else value
 
 
 def _activity_text(activities: list[dict]) -> str:
@@ -50,9 +57,9 @@ def group_workload_lines(rows, *, edit_chair_ids=None) -> list[dict]:
                 "subject": row.get("subject", ""),
                 "groups": row.get("groups", ""),
                 "education_form": row.get("education_form", ""),
-                "education_form_label": _FORM_LABELS.get(row.get("education_form", ""), row.get("education_form", "")),
+                "education_form_label": _label(_FORM_LABELS, row.get("education_form", "")),
                 "degree_level": row.get("degree_level", ""),
-                "degree_level_label": _LEVEL_LABELS.get(row.get("degree_level", ""), row.get("degree_level", "")),
+                "degree_level_label": _label(_LEVEL_LABELS, row.get("degree_level", "")),
                 "offering_id": row.get("offering_id", ""),
                 "is_hourly_paid": False,
                 "hours": 0,

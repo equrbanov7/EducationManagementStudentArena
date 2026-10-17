@@ -51,6 +51,17 @@ _PREFIX = "registrar.grade"
 
 _DATE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})")
 
+#: Audit sətrində davamiyyət SAXLANAN kod («iə 8», «qb») — jurnal şəbəkəsindəki yazılışla («i/e», «q/b») göstərilir
+#: (QA-1 F7). Saxlanan audit mətni DƏYİŞMİR (dəyişməz iz); yalnız çıxışda çevrilir.
+_MARK_CODE_RE = re.compile(r"^(iə|qb)(?=\s|$)")
+_MARK_CODE_DISPLAY = {"iə": "i/e", "qb": "q/b"}
+
+
+def display_mark(text: str) -> str:
+    """«iə 8» → «i/e 8», «qb» → «q/b»; başqa mətn olduğu kimi."""
+    return _MARK_CODE_RE.sub(lambda match: _MARK_CODE_DISPLAY[match.group(1)], text)
+
+
 #: Audit «kind» → UI qrupu (müştəri tərəfindəki növ çipləri bununla süzür).
 _GROUPS = {"mark": "mark", "component": "component", "final": "final", "resit": "final"}
 
@@ -177,8 +188,8 @@ def _serialize_entry(row, names, impersonation_key) -> dict:
             {
                 "student": names.get(student, student),
                 "item": item,
-                "old": str(change.get("old") if change.get("old") is not None else "—"),
-                "new": str(change.get("new") if change.get("new") is not None else "—"),
+                "old": display_mark(str(change.get("old") if change.get("old") is not None else "—")),
+                "new": display_mark(str(change.get("new") if change.get("new") is not None else "—")),
                 "date": row_date(item, student),
                 "lesson_level": lesson_level,
             }
