@@ -98972,3 +98972,11 @@ msgstr "Yalnızca «Etkinleştir» açıksa: öğretmen dersi yoklama defterinde
 msgctxt "core.runtime_settings"
 msgid "Yandırılanda FİN kodu, mobil telefonu və ya şəxsi e-poçtu boş olan tələbə və əməkdaş girişdən sonra «Məlumatlarınızı tamamlayın» səhifəsinə yönlənir və onları doldurmadan sistemdən istifadə edə bilmir. Söndürüləndə (qəza halı) heç kim dayandırılmır."
 msgstr "Açıkken FİN kodu, cep telefonu veya kişisel e-postası boş olan öğrenci ve personel girişten sonra «Bilgilerinizi tamamlayın» sayfasına yönlendirilir ve bunları doldurmadan sistemi kullanamaz. Kapalıyken (acil durum) kimse durdurulmaz."
+
+msgctxt "accounts.groups"
+msgid "alt qrup · ana: %(parent)s"
+msgstr "alt grup · ana: %(parent)s"
+
+msgctxt "accounts.groups"
+msgid "ortaq qrup · alt qruplar: %(n)s"
+msgstr "ortak grup · alt gruplar: %(n)s"

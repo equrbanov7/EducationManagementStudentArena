@@ -245,6 +245,29 @@ def scoped_filter_options(organization, scope, unit_type, *, limit=None) -> list
     return [{"value": str(unit.id), "label": unit.name} for unit in queryset]
 
 
+def _parent_links(organization, page_units) -> tuple[dict, dict]:
+    """Səhifədəki qruplar üçün ana qrup adları və alt qrup sayları — 2 toplu sorğu (səhifə ölçüsündən asılı deyil)."""
+    parent_ids = {str((unit.settings or {}).get("parent_group") or "") for unit in page_units} - {""}
+    parent_names = (
+        dict(
+            (str(pk), name)
+            for pk, name in OrgUnit.objects.filter(organization=organization, pk__in=parent_ids).values_list(
+                "pk", "name"
+            )
+        )
+        if parent_ids
+        else {}
+    )
+    page_ids = [str(unit.id) for unit in page_units]
+    subgroup_counts = {}
+    if page_ids:
+        for parent_id in OrgUnit.objects.filter(
+            organization=organization, unit_type=OrgUnitType.GROUP, is_active=True, settings__parent_group__in=page_ids
+        ).values_list("settings__parent_group", flat=True):
+            subgroup_counts[str(parent_id)] = subgroup_counts.get(str(parent_id), 0) + 1
+    return parent_names, subgroup_counts
+
+
 def build_groups_registry(request, organization) -> dict:
     """«Qruplar» reyestri: filtr + sıralama + səhifələmə (hamısı serverdə)."""
     if not can_view_groups(request):
@@ -353,6 +376,7 @@ def build_groups_registry(request, organization) -> dict:
     can_manage = can_manage_groups(request)
     manage_scope = group_manage_scope(request, organization) if can_manage else EMPTY_SCOPE
     can_view_students = can_view_group_students(request)
+    parent_names, subgroup_counts = _parent_links(organization, page_units)
     rows = []
     for unit in page_units:
         meta = group_meta(unit)
@@ -379,6 +403,9 @@ def build_groups_registry(request, organization) -> dict:
                 "tutor": (unit.head.get_full_name() or unit.head.username) if unit.head_id else "",
                 "tutor_id": str(unit.head_id) if unit.head_id else "",
                 "is_active": unit.is_active,
+                # QA-2 F-16 (2026-10-17): ortaq ana / alt qrup əlaqəsi (settings.parent_group, bax parent_groups.py).
+                "parent_group_name": parent_names.get(str((unit.settings or {}).get("parent_group") or ""), ""),
+                "subgroup_count": subgroup_counts.get(str(unit.id), 0),
                 "path": unit.path or "",
                 "can_manage": can_manage and unit_in_scope(manage_scope, unit),
                 "can_view_students": can_view_students,

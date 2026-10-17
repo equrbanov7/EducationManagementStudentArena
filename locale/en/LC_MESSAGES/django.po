@@ -99564,3 +99564,11 @@ msgstr "Only when «Activate» is on: after activating (opening) the lesson in t
 msgctxt "core.runtime_settings"
 msgid "Yandırılanda FİN kodu, mobil telefonu və ya şəxsi e-poçtu boş olan tələbə və əməkdaş girişdən sonra «Məlumatlarınızı tamamlayın» səhifəsinə yönlənir və onları doldurmadan sistemdən istifadə edə bilmir. Söndürüləndə (qəza halı) heç kim dayandırılmır."
 msgstr "When on, a student or staff member whose FIN code, mobile phone or personal e-mail is empty is sent to the «Complete your details» page after login and cannot use the system until they fill them in. When off (emergency), nobody is stopped."
+
+msgctxt "accounts.groups"
+msgid "alt qrup · ana: %(parent)s"
+msgstr "subgroup · parent: %(parent)s"
+
+msgctxt "accounts.groups"
+msgid "ortaq qrup · alt qruplar: %(n)s"
+msgstr "shared group · subgroups: %(n)s"

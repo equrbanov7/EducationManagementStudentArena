@@ -66,6 +66,11 @@
 #       mətn + keçid + metadata ilə 120 dəqiqə içində təkrarlanan OXUNMAMIŞ bildirişlərdən ən erkəni saxlanılır,
 #       qalanları OXUNMUŞ edilir (silinmir). Yeni giriş yoxdur (25 limit) — tarix girişləri təkrar istifadə olunur.
 #       Loga YALNIZ saylar (groups / duplicates_marked_read / users).
+#   archive_junk_groups — test / zibil qrup və ixtisaslar («.», «test…», «Silinməli…», «aaa»; QA-2 F-16, 2026-10-17):
+#       yalnız HEÇ BİR istinadı olmayanlar deaktiv olunur (`is_active=False` + `settings.junk_archived`), heç nə
+#       silinmir; istifadə olunanlar CSV-də hansı əlaqə ilə bağlı olduğu ilə (RİM köçürmə xidməti ilə həll edir).
+#   shrink_avatars — mövcud avatarlar ≤512 px WebP-yə (PERF-2 H5, 2026-10-17); orijinal fayllar SİLİNMİR,
+#       `updated_at` dəyişmir. Loga yalnız yekun saylar.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
 #       (backfill; `--include-drafts` BURADA YOXDUR — qaralama planlar sahibin qərarıdır).
 #   apply_org_structure — struktur planı (scripts/data/qku_structure_2026_09_27.json, yalnız vahid
@@ -113,6 +118,8 @@ on:
           - ensure_parent_groups
           - blocked_accounts_report
           - dedupe_notifications
+          - archive_junk_groups
+          - shrink_avatars
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -316,7 +323,7 @@ jobs:
           # reconcile_teacher_roster eyni faylı oxuyur (ad fərqi yalnız aydınlıq üçün deyil — təmizlik eyni qlobdur).
           rm -f "$RUNNER_TEMP/input.bin" "$RUNNER_TEMP/input.enc"
       - name: 🧰 Run
-        if: github.event.inputs.command != 'import_timetable_docx' && github.event.inputs.command != 'assign_task_rows_from_timetable' && github.event.inputs.command != 'backfill_teacher_lessons' && github.event.inputs.command != 'ensure_parent_groups' && github.event.inputs.command != 'blocked_accounts_report'
+        if: github.event.inputs.command != 'import_timetable_docx' && github.event.inputs.command != 'assign_task_rows_from_timetable' && github.event.inputs.command != 'backfill_teacher_lessons' && github.event.inputs.command != 'ensure_parent_groups' && github.event.inputs.command != 'blocked_accounts_report' && github.event.inputs.command != 'archive_junk_groups' && github.event.inputs.command != 'shrink_avatars'
         run: |
           set -euo pipefail
           # SEC-1 F7 (2026-10-17): TAM dəyər yoxlaması. `grep` sətir-sətir işləyir — API ilə göndərilən, sətir sonu
@@ -797,7 +804,7 @@ jobs:
       # ── ensure_parent_groups / blocked_accounts_report (ortaq ana qruplar + bloklanmış hesablar; öz addımları —
       #    digər əmrlərin axınına toxunmur). CSV hesabat şifrəli artifaktdadır (blocked_accounts.csv ŞƏXSİ datadır). ──
       - name: 👥 Ortaq ana qruplar / bloklanmış hesablar
-        if: github.event.inputs.command == 'ensure_parent_groups' || github.event.inputs.command == 'blocked_accounts_report'
+        if: github.event.inputs.command == 'ensure_parent_groups' || github.event.inputs.command == 'blocked_accounts_report' || github.event.inputs.command == 'archive_junk_groups' || github.event.inputs.command == 'shrink_avatars'
         run: |
           set -euo pipefail
           report_dir="/tmp/groups_accounts_report_${GITHUB_RUN_ID}"
@@ -821,6 +828,19 @@ jobs:
                 args+=(--apply-unblock-teachers-with-load --actor "$actor")
               fi
               ;;
+            archive_junk_groups)
+              # QA-2 F-16 (2026-10-17): test / zibil qruplar — yalnız istifadə olunmayan deaktiv, heç nə silinmir.
+              report_csv=junk_groups.csv
+              test "$CREATE_MISSING" != "true" || { echo "create_missing bu əmr üçün deyil" >&2; exit 2; }
+              test "$APPLY" != "true" || args+=(--apply)
+              ;;
+            shrink_avatars)
+              # PERF-2 H5 (2026-10-17): mövcud avatarlar ≤512 px WebP; orijinallar SİLİNMİR (--delete-originals verilmir).
+              report_csv=none.csv
+              test "$CREATE_MISSING" != "true" || { echo "create_missing bu əmr üçün deyil" >&2; exit 2; }
+              args=()
+              test "$APPLY" != "true" || args+=(--apply)
+              ;;
             *) echo "icazəsiz əmr: $COMMAND" >&2; exit 2 ;;
           esac
           if [ "$APPLY" = "true" ]; then
@@ -833,7 +853,7 @@ jobs:
           if docker exec "$APP_CONTAINER" test -s "${report_dir}/${report_csv}"; then
             docker exec "$APP_CONTAINER" cat "${report_dir}/${report_csv}" > "$RUNNER_TEMP/ga_details.csv"
           fi
-          grep -E '^(DRY-RUN \(heç nə yazılmadı\)|HESABAT \(heç nə yazılmadı\)|YAZILDI): [a-z_]+=[0-9]+( · [a-z_]+=[0-9]+)*$|^Hesabat: [a-z_]+\.csv \([0-9]+ sətir\)$' \
+          grep -E '^(DRY-RUN \(heç nə yazılmadı\)|HESABAT \(heç nə yazılmadı\)|YAZILDI): [a-z_]+=[0-9]+( · [a-z_]+=[0-9]+)*$|^Hesabat: [a-z_]+\.csv \([0-9]+ sətir\)$|^(TƏTBİQ OLUNDU|QURU QAÇIŞ \(heç nə yazılmadı; --apply ilə yazılır\)): çevriləcək/çevrilən [0-9]+, ötürülən [0-9]+, fayl yoxdur [0-9]+, xəta [0-9]+; qənaət ≈ [0-9.]+ [KM]B$' \
             "$RUNNER_TEMP/ga_out.log" | cut -c1-600 > "$RUNNER_TEMP/ga_summary.log" || true
           cat "$RUNNER_TEMP/ga_summary.log"
           {
@@ -845,7 +865,7 @@ jobs:
           test "${status:-0}" = 0 || { grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/ga_out.log" | head -n 1 || true; exit "$status"; }
       - name: 🔑 Ortaq ana qruplar / bloklanmış hesablar hesabatı (şifrəli)
         id: ga_report
-        if: always() && (github.event.inputs.command == 'ensure_parent_groups' || github.event.inputs.command == 'blocked_accounts_report')
+        if: always() && (github.event.inputs.command == 'ensure_parent_groups' || github.event.inputs.command == 'blocked_accounts_report' || github.event.inputs.command == 'archive_junk_groups' || github.event.inputs.command == 'shrink_avatars')
         env:
           STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
         run: |
@@ -871,7 +891,7 @@ jobs:
           path: ${{ runner.temp }}/ga-out/
           retention-days: 1
       - name: 🧹 Ortaq ana qruplar / bloklanmış hesablar — müvəqqəti faylları sil
-        if: always() && (github.event.inputs.command == 'ensure_parent_groups' || github.event.inputs.command == 'blocked_accounts_report')
+        if: always() && (github.event.inputs.command == 'ensure_parent_groups' || github.event.inputs.command == 'blocked_accounts_report' || github.event.inputs.command == 'archive_junk_groups' || github.event.inputs.command == 'shrink_avatars')
         run: |
           docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -rf /tmp/groups_accounts_report_*' || true
           rm -rf "$RUNNER_TEMP/ga-out" "$RUNNER_TEMP/ga_out.log" "$RUNNER_TEMP/ga_details.csv" || true

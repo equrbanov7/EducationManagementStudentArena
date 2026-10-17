@@ -99074,3 +99074,11 @@ msgstr "Yalnız «Aktivləşdir» yandırılıbsa: müəllim dərsi aktivləşdi
 msgctxt "core.runtime_settings"
 msgid "Yandırılanda FİN kodu, mobil telefonu və ya şəxsi e-poçtu boş olan tələbə və əməkdaş girişdən sonra «Məlumatlarınızı tamamlayın» səhifəsinə yönlənir və onları doldurmadan sistemdən istifadə edə bilmir. Söndürüləndə (qəza halı) heç kim dayandırılmır."
 msgstr "Yandırılanda FİN kodu, mobil telefonu və ya şəxsi e-poçtu boş olan tələbə və əməkdaş girişdən sonra «Məlumatlarınızı tamamlayın» səhifəsinə yönlənir və onları doldurmadan sistemdən istifadə edə bilmir. Söndürüləndə (qəza halı) heç kim dayandırılmır."
+
+msgctxt "accounts.groups"
+msgid "alt qrup · ana: %(parent)s"
+msgstr "alt qrup · ana: %(parent)s"
+
+msgctxt "accounts.groups"
+msgid "ortaq qrup · alt qruplar: %(n)s"
+msgstr "ortaq qrup · alt qruplar: %(n)s"

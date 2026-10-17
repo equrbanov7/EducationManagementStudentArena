@@ -100590,3 +100590,11 @@ msgstr "Nur wenn «Aktivieren» eingeschaltet ist: Nach dem Aktivieren (Öffnen)
 msgctxt "core.runtime_settings"
 msgid "Yandırılanda FİN kodu, mobil telefonu və ya şəxsi e-poçtu boş olan tələbə və əməkdaş girişdən sonra «Məlumatlarınızı tamamlayın» səhifəsinə yönlənir və onları doldurmadan sistemdən istifadə edə bilmir. Söndürüləndə (qəza halı) heç kim dayandırılmır."
 msgstr "Wenn aktiviert, werden Studierende und Mitarbeitende ohne FIN-Code, Mobilnummer oder private E-Mail nach der Anmeldung auf die Seite «Vervollständigen Sie Ihre Angaben» geleitet und können das System erst nach dem Ausfüllen nutzen. Wenn deaktiviert (Notfall), wird niemand aufgehalten."
+
+msgctxt "accounts.groups"
+msgid "alt qrup · ana: %(parent)s"
+msgstr "Untergruppe · Hauptgruppe: %(parent)s"
+
+msgctxt "accounts.groups"
+msgid "ortaq qrup · alt qruplar: %(n)s"
+msgstr "Gemeinsame Gruppe · Untergruppen: %(n)s"

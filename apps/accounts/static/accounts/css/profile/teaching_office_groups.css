@@ -135,3 +135,13 @@
     gap: var(--ems-sp-4, 12px);
     margin-bottom: var(--ems-sp-4, 12px);
 }
+
+/* QA-2 F-16 (2026-10-17): ad xanasında ortaq ana / alt qrup işarəsi. */
+.tof-gr-link {
+    display: block;
+    margin-top: 2px;
+    color: var(--ems-neutral-600);
+    font-size: 0.78rem;
+    font-weight: 500;
+    white-space: nowrap;
+}

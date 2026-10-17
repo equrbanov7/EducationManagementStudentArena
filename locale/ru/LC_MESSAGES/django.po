@@ -99754,3 +99754,11 @@ msgstr "Только если включена «Активировать»: п�
 msgctxt "core.runtime_settings"
 msgid "Yandırılanda FİN kodu, mobil telefonu və ya şəxsi e-poçtu boş olan tələbə və əməkdaş girişdən sonra «Məlumatlarınızı tamamlayın» səhifəsinə yönlənir və onları doldurmadan sistemdən istifadə edə bilmir. Söndürüləndə (qəza halı) heç kim dayandırılmır."
 msgstr "Если включено, студент или сотрудник с пустым кодом FIN, мобильным телефоном или личной почтой после входа направляется на страницу «Заполните ваши данные» и не может пользоваться системой, пока не заполнит их. Если выключено (экстренный случай), никто не останавливается."
+
+msgctxt "accounts.groups"
+msgid "alt qrup · ana: %(parent)s"
+msgstr "подгруппа · основная: %(parent)s"
+
+msgctxt "accounts.groups"
+msgid "ortaq qrup · alt qruplar: %(n)s"
+msgstr "общая группа · подгрупп: %(n)s"
