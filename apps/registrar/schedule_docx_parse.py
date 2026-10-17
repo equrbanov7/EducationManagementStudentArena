@@ -26,6 +26,10 @@ FƏNN HÜCEYRƏSİ: «<fənn> <növ>.\\n<Soyad İ.>»; növ: «müh» = mühazir
 laboratoriya; birləşmiş növ («müh/sem», «l+sem», «lab/sem») ilk/«lab» seçilir və qeyd olunur. Növsüz
 hüceyrə ``kind=""`` qalır — tutuşdurma onu fənnin saat bölgüsündən çıxarmağa çalışır. «TƏCRÜBƏ»
 (təcrübə) və «LEVEL» (ingilis dili səviyyə qrupları) dərs slotu DEYİL — ``special`` ilə işarələnir.
+
+MAGİSTRATURA (2026-10-17): «213/6BM ing (1)» başlıqları və «Fənn (45 saat) [dərəcə] Ad Soyad» hüceyrələri
+``schedule_docx_master``-dadır (``hours``, ``teacher_full``); bir neçə qrupun «aud» xanasını örtən BİRGƏ dərs
+hər qrupa düşür, otağı soldakı otaq xanasıdır.
 """
 
 from __future__ import annotations
@@ -34,6 +38,8 @@ import datetime
 import re
 import unicodedata
 from dataclasses import dataclass, field
+
+from apps.registrar.schedule_docx_master import normalize_group_text, parse_master_cell
 
 KIND_LECTURE = "lecture"
 KIND_SEMINAR = "seminar"
@@ -77,7 +83,7 @@ _KIND_RE = re.compile(
 #: «ATMF XI blok:» / «ÜFS I blok:» / «SF II blok» / «ATMF:» — seçmə blokun prefiksi; açılışın fənni SEÇİLMİŞ
 #: fəndir («İnsan genetikası»), ona görə prefiks fənn adından atılır (2026-10-15: prefikslə oxşarlıq 0 idi).
 _BLOCK_PREFIX_RE = re.compile(
-    r"^\s*(?:ATMF|ÜFS|UFS|SF|SFB)\b\s*(?:[IVXL]+|\d+)?\s*\.?\s*(?:blok(?:u)?)?\s*[:.]?\s*", re.IGNORECASE
+    r"^\s*(?:AMTSF|ATMF|ÜFS|UFS|SF|SFB)\b\s*(?:[IVXL]+|\d+)?\s*\.?\s*(?:blok(?:u)?)?\s*[:.]?\s*", re.IGNORECASE
 )
 _HALF_GROUP_RE = re.compile(r"\b\d\s*(?:-?\s*c[iıuü])?\s*yar[ıi]m\s*qrup\b", re.IGNORECASE)
 _SUB_GROUP_TAIL_RE = re.compile(r"(?:^|[\s/])(\d{3,4})\s*[^\W\d_]+\s*-\s*(\d)\s*$")
@@ -87,7 +93,10 @@ _WEEK_MARKER_RE = re.compile(rf"(?<!{_WORD})(üst|ust|alt)(?:\s+h[əe]ft[əe])?(
 _INITIAL_RE = re.compile(r"^[A-ZƏÖÜĞŞÇİI]\.?$")
 _SURNAME_RE = re.compile(r"^[A-ZƏÖÜĞŞÇİ][a-zəöüğşçı-]+$")
 _FRAGMENT_RE = re.compile(r"^[a-zəöüğşçı]{1,3}$")
-_GROUP_RE = re.compile(r"^(\d{3,4})\s*([^\W\d_]+?)\s*(?:-(\d)(?!\d))?\s*(az|ing|rus|en|ru)?\s*[-–]?\s*([\d+\s]*)$")
+#: «631/5 K ing» — magistratura qrupunun «/qəbul kodu» rəqəm hissəsinə daxildir (2026-10-17).
+_GROUP_RE = re.compile(
+    r"^(\d{3,4}(?:\s*/\s*\d{1,2})?)\s*([^\W\d_]+?)\s*(?:-(\d)(?!\d))?\s*(az|ing|rus|en|ru)?\s*[-–]?\s*([\d+\s]*)$"
+)
 _SECTOR_WORDS = (
     (re.compile(r"\b(?:İNG|İng|ING|Ing)\b"), "ing"),
     (re.compile(r"\b(?:RUS|Rus)\b"), "rus"),
@@ -134,7 +143,8 @@ def parse_time(text):
 
 @dataclass(frozen=True)
 class GroupLabel:
-    """«233 İTex ing 12» → digits=233, code=«İTex», sector=ing, sub=«», size=«12»."""
+    """«233 İTex ing 12» → digits=233, code=«İTex», sector=ing, sub=«», size=«12»; «631/5 K ing (7)» →
+    digits=«631/5» (magistratura: qəbul kodu kimliyin hissəsidir), code=«K», sector=ing."""
 
     raw: str
     digits: str
@@ -152,6 +162,7 @@ def parse_group_label(text) -> GroupLabel | None:
     """Başlıq/qrup adı → :class:`GroupLabel` («IV KURS» prefiksi və tələbə sayı atılır)."""
     raw = squash(text)
     body = re.sub(r"^[IVX]+\s*KURS\s*", "", raw, flags=re.IGNORECASE).strip()
+    body = normalize_group_text(body)  # «(N)» tələbə sayı / «intensiv» atılır, «(ing)» → «ing»
     body = re.sub(r"(?<=[^\W\d_])/(?=[^\W\d_])", "", body)  # «236 B/T 17» → «236 BT 17»
     for pattern, word in _SECTOR_WORDS:
         body = pattern.sub(word, body)
@@ -160,6 +171,7 @@ def parse_group_label(text) -> GroupLabel | None:
         return None
     digits, code, sub, sector, _size = match.groups()
     sector = {"en": "ing", "ru": "rus"}.get((sector or "az").lower(), (sector or "az").lower())
+    digits = re.sub(r"\s+", "", digits)
     return GroupLabel(raw=raw, digits=digits, code=code, sector=sector, sub=sub or "")
 
 
@@ -174,6 +186,10 @@ class SubjectText:
     special: str = ""
     #: Hüceyrənin sonunda yazılmış alt qrup («… Məmmədova S. 236 SBİO-1» → «1»), 2026-10-15.
     sub_group: str = ""
+    #: Magistratura formatı (2026-10-17): «(N saat)», ``teacher`` TAM AD («Ad Soyad», istənilən sıra).
+    hours: int = 0
+    teacher_full: bool = False
+    intensive: bool = False
 
 
 def _clean_teacher(text: str) -> str:
@@ -251,6 +267,14 @@ def parse_subject_text(text) -> SubjectText:
         return result
     if len(folded.replace(" ", "")) < 3:
         result.special = SPECIAL_JUNK
+        return result
+    master = parse_master_cell(flat)
+    if master is not None:
+        result.subject = _strip_block_prefix(master.subject)
+        result.hours, result.intensive = master.hours, master.intensive
+        result.teacher, result.teacher_full = master.teacher, bool(master.teacher)
+        if master.teacher_unparsed:
+            result.kind_note = "teacher_unparsed"
         return result
     raw = _HALF_GROUP_RE.sub(" ", raw)
     tail = _SUB_GROUP_TAIL_RE.search(raw.rstrip())
@@ -357,22 +381,47 @@ def _groups(rows, header: int, hours: int, table_index: int, result: ParseResult
     return groups
 
 
+def _merged_with_neighbour(row_cells, col: int) -> bool:
+    tc = row_cells[col]._tc
+    return any(0 <= other < len(row_cells) and row_cells[other]._tc is tc for other in (col - 1, col + 1))
+
+
 def _room(row_cells, group: _Group) -> str:
-    for col in group.aud_cols:
-        if col < len(row_cells):
-            text = squash(row_cells[col].text)
-            if text:
-                return text[:64]
+    """Qrupun «aud» xanası (otaq kimi görünən xana üstündür). 2026-10-17 (magistratura): bir neçə qrupun BİRGƏ
+    dərsi soldan «aud» xanasını da örtür — onda otaq birləşmiş hüceyrədən soldakı otaq xanasıdır (yoxdursa
+    köhnə qayda: xananın mətni)."""
+    texts = [(col, squash(row_cells[col].text)) for col in group.aud_cols if col < len(row_cells)]
+    for _col, text in texts:
+        if text and is_room(text):
+            return text[:64]
+    for col, text in texts:
+        if not text:
+            continue
+        if not _merged_with_neighbour(row_cells, col):
+            return text[:64]
+        tc, left = row_cells[col]._tc, col
+        while left > 0 and row_cells[left]._tc is tc:
+            left -= 1
+        room = squash(row_cells[left].text)
+        return (room if row_cells[left]._tc is not tc and is_room(room) else text)[:64]
     return ""
 
 
+def _lesson_like(cell) -> bool:
+    """Magistratura dərsi («(N saat)» / tam ad) — bakalavr hüceyrələrinin köhnə qaydası dəyişmir."""
+    text = parse_subject_text(cell.text)
+    return bool(text.subject and (text.hours or text.teacher_full))
+
+
 def _subject_cells(row_cells, group: _Group, foreign_aud_tcs: set) -> list:
+    """Qrupun fənn hüceyrələri. Qonşu qrupun «aud» xanası ilə BİRLƏŞMİŞ hüceyrə yalnız magistratura dərsidirsə
+    («(N saat)» / tam ad) götürülür — birgə dərs (2026-10-17); bakalavr qaydası dəyişmir."""
     seen, out = set(), []
     for col in group.subject_cols:
         if col >= len(row_cells):
             continue
         cell = row_cells[col]
-        if cell._tc in seen or cell._tc in foreign_aud_tcs:
+        if cell._tc in seen or (cell._tc in foreign_aud_tcs and not _lesson_like(cell)):
             continue
         seen.add(cell._tc)
         if squash(cell.text) and not is_room(cell.text):

@@ -34,7 +34,10 @@
 #       «Soyad İ.» müəllimini plan saatı ilə yazır (RowPlanApplier → düzəliş axını, bölgü təsdiqi, açılış +
 #       qeydiyyat) — sonra import_timetable_docx slotları yarada bilir. Real müəllimə toxunmur; qeyri-müəyyən /
 #       toqquşan hüceyrə yazılmır; `allow_outside_chair` → təşkilatda TƏK hesab kafedraya ƏLAVƏ müəllim üzvü.
-#       Hesab/fənn/sətir YARADILMIR; idempotent. Loga yalnız saylar; CSV hesabat şifrəli artifaktdadır.
+#       Hesab YARADILMIR; idempotent. `create_missing` (sahib 2026-10-17, magistratura) → --create-missing-rows:
+#       heç bir sətrə uyğun gəlməyən dərs üçün (müəllim + qrup + fənn həll olunub) fənnin/müəllimin kafedrasında
+#       tapşırıq + sətir («(N saat)» → mühazirə) + lazım olsa kataloq fənni, bölgü + açılış + qeydiyyat.
+#       Loga yalnız saylar; CSV hesabat şifrəli artifaktdadır.
 #   backfill_teacher_lessons — müəllimin (`teacher`, ad.soyad) keçmiş dərsləri [`date_from`, `date_to`] aralığında
 #       cədvəl slotlarından yaranır (həftə günü + üst/alt paritet; mövcud dərs təkrarlanmır) və aktiv tələbələrə
 #       «iə» yazılır (mövcud işarəyə toxunulmur). Slotlar: canlı cədvəl, və ya ŞİFRƏLİ spesifikasiya
@@ -140,7 +143,7 @@ on:
         required: false
         default: ""
       create_missing:
-        description: "reconcile_teacher_roster: «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı yarat · blocked_accounts_report (apply ilə): yükü olan bloklanmış müəllimlərin blokunu aç"
+        description: "reconcile_teacher_roster: «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı yarat · blocked_accounts_report (apply ilə): yükü olan bloklanmış müəllimlərin blokunu aç · assign_task_rows_from_timetable: dərs yükündə olmayan dərsə yeni tapşırıq sətri (--create-missing-rows)"
         required: false
         type: boolean
         default: false
@@ -607,8 +610,11 @@ jobs:
           args=(--file "/tmp/timetable_${GITHUB_RUN_ID}.docx" --org "$ORG" --period "$PERIOD" --actor "$actor"
                 --report "/tmp/timetable_report_${GITHUB_RUN_ID}")
           if [ "$COMMAND" = "import_timetable_docx" ]; then
+            test "$CREATE_MISSING" != "true" || { echo "create_missing import_timetable_docx üçün deyil (assign_task_rows_from_timetable)" >&2; exit 2; }
             test "$REPLACE_GROUP_SLOTS" != "true" || args+=(--replace-group-slots)
           else
+            # `create_missing` → dərs yükündə olmayan dərs üçün yeni tapşırıq sətri (+ tapşırıq / kataloq fənni).
+            test "$CREATE_MISSING" != "true" || args+=(--create-missing-rows)
             # Tapşırığın tədris ili semestrdən götürülür; kafedradankənar müəllim yalnız açıq bayraqla.
             test "$ALLOW_OUTSIDE_CHAIR" != "true" || args+=(--allow-outside-chair)
             # Açıq müəllim xəritəsi (`teacher_map`): «Soyad İ.=istifadəçi.adı», vergüllə.

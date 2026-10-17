@@ -8,13 +8,17 @@ Forma 1 göndərməyən kafedraların tapşırıq sətirləri müəllimsiz qalı
 
 * DEFOLT DRY-RUN — bir tranzaksiya, ``--apply`` verilməsə geri alınır (heç nə yazılmır).
 * İdempotent: təkrar işə salma ``already_assigned`` verir, 0 yazı.
+* ``--create-missing-rows`` (sahib 2026-10-17): heç bir sətrə uyğun gəlməyən hüceyrə (müəllim + qrup + fənn
+  həll olunub) üçün kafedranın tapşırığında YENİ sətir (lazım olsa tapşırıq və kataloq fənni də) yaradılır —
+  saat «(N saat)»-dan, hamısı mühazirədə; qaydalar :mod:`apps.workload.services.timetable_missing_rows`.
 * Stdout-a YALNIZ saylar düşür; şəxs adları olan tam hesabat ``--report`` qovluğuna CSV kimi
   (``core.export_safety.safe_csv_writer``) — lokal/şifrəli saxlayın.
 
 İstifadə::
 
     manage.py assign_task_rows_from_timetable --file cədvəl.docx --org qku --period "Payız 2026/2027" \\
-        --year 2026/2027 --actor superadmin --report /tmp/tt-assign [--allow-outside-chair] [--apply]
+        --year 2026/2027 --actor superadmin --report /tmp/tt-assign [--allow-outside-chair] \\
+        [--create-missing-rows] [--apply]
 """
 
 from __future__ import annotations
@@ -83,6 +87,11 @@ class Command(BaseCommand):
             default=[],
             help="Açıq müəllim xəritəsi «Soyad İ.=istifadəçi.adı» (vergüllə də olar); soyad yazılışı fərqlidirsə",
         )
+        parser.add_argument(
+            "--create-missing-rows",
+            action="store_true",
+            help="Dərs yükündə olmayan dərs üçün kafedranın tapşırığında yeni sətir (+ tapşırıq / fənn) yarat",
+        )
         parser.add_argument("--apply", action="store_true", help="Faktiki yaz (defolt: dry-run)")
 
     def handle(self, *args, **options):
@@ -134,6 +143,7 @@ class Command(BaseCommand):
                 period=period,
                 allow_outside_chair=options["allow_outside_chair"],
                 teacher_map=parse_teacher_map(options["teacher"]),
+                create_missing_rows=options["create_missing_rows"],
             )
             self.assigner.run(parsed)
             if not options["apply"]:
