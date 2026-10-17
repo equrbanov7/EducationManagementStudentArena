@@ -13,6 +13,7 @@ import datetime
 from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
@@ -21,6 +22,8 @@ from django.utils import timezone
 
 import docx
 
+from apps.audit.models import AuditLog
+from apps.notifications.models import InAppNotification
 from apps.organizations.models import AcademicPeriod, Membership, OrgUnit
 from apps.registrar.models import (
     AcademicStatus,
@@ -32,6 +35,7 @@ from apps.registrar.models import (
     Subject,
 )
 from apps.workload.models import TeacherAssignment, TeachingTask, TeachingTaskRow, WorkloadAmendment
+from apps.workload.services.scoping import WorkloadDenied
 from core.constants import OrgUnitType, RoleScopeType
 
 from .factories import TEACHER_PERMS, activate_member, make_org
@@ -126,6 +130,23 @@ class TimetableMissingRowsTests(TestCase):
         with (Path(self.tmp.name) / "timetable_task_assign.csv").open(encoding="utf-8") as handle:
             return list(csv.DictReader(handle))
 
+    def _notified(self, username):
+        return InAppNotification.objects.filter(
+            recipient=self.users[username], metadata__event="workload_assigned"
+        ).count()
+
+    def _diplomatiya_draft(self, **hours):
+        subject = Subject.objects.create(organization=self.org, code="QKU-9", name="Diplomatiya", ects=5)
+        task = TeachingTask.objects.create(
+            organization=self.org, chair=self.ir_chair, academic_year="2026/2027", created_by=self.admin
+        )
+        row = TeachingTaskRow.objects.create(
+            organization=self.org, task=task, season="fall", period=self.period, subject=subject,
+            subject_text="Diplomatiya", total_hours=sum(hours.values()), **hours,
+        )  # fmt: skip
+        row.groups.set([self.bm])
+        return task, row
+
     def _counts(self):
         return (
             TeachingTask.objects.filter(organization=self.org).count(),
@@ -211,6 +232,9 @@ class TimetableMissingRowsTests(TestCase):
         self.assertEqual(
             set(TeacherAssignment.objects.filter(row=row).values_list("teacher__username", flat=True)), {"nail.q"}
         )
+        # Əvvəl bölünmüş sənədin yenidən təsdiqi — kafedraya təkrar «Dərs yükü təyin edildi» getmir.
+        self.assertEqual(self._notified("rail.s"), 1)
+        self.assertEqual(self._notified("nail.q"), 0)
 
     def test_existing_row_is_used_and_subject_owner_chair_wins(self):
         subject = Subject.objects.create(
@@ -262,3 +286,70 @@ class TimetableMissingRowsTests(TestCase):
             (report["status"], report["activity"], report["detail"]), ("planned", "lecture", "kind_default_lecture")
         )
         self.assertEqual(report["username"], "rail.s")
+
+    def test_draft_task_with_new_and_existing_rows_is_approved_and_confirmed_once(self):
+        # 2026-10-17 rəyi (1): eyni kafedranın tapşırığında həm yeni sətir, həm mövcud sətrin bölgüsü —
+        # əvvəl köhnəlmiş «draft» statusu ilə İKİ dəfə təsdiqlənir, bildirişlər iki dəfə gedirdi.
+        task, row = self._diplomatiya_draft(lecture_total=30)
+        path = self._docx(
+            [("Diplomatiya (30 saat) Rail Səfiyev", ""), ("Tədqiqat metodları (45 saat) Rail Səfiyev", "")]
+        )
+        out = self._run(path, "--create-missing-rows", "--apply")
+        for line in ("row_created=1", "task_confirmed=1", "result_assigned=2"):
+            self.assertIn(line, out)
+        self.assertNotIn("reassigned", out)
+        task.refresh_from_db()
+        self.assertEqual(task.status, "distributed")
+        reasons = list(AuditLog.objects.filter(resource_id=str(task.pk)).values_list("reason", flat=True))
+        self.assertEqual(reasons.count("workload.task_approved_by_official_workbook_import"), 1)
+        self.assertEqual(reasons.count("workload.distribution_confirmed"), 1)
+        self.assertEqual(self._notified("rail.s"), 1)
+        self.assertEqual(self._teachers_of(row), {"rail.s"})
+        self.assertEqual(self._teachers_of(task.rows.get(subject__name="Tədqiqat metodları")), {"rail.s"})
+
+    def _teachers_of(self, row):
+        return set(TeacherAssignment.objects.filter(row=row).values_list("teacher__username", flat=True))
+
+    def test_two_spellings_of_one_new_subject_make_one_row_in_dry_run_and_apply(self):
+        # Rəy (2): «Tədqiqat metodları» / «Tədqiqatın metodları» (≥ 0.9 oxşar) eyni fənnə düşür → BİR sətir;
+        # əvvəl dry-run row_created=2 deyirdi, tətbiq isə ``duplicate_row`` ilə bütün kafedranı geri qaytarırdı.
+        path = self._docx(
+            [
+                ("Tədqiqat metodları (45 saat) Rail Səfiyev", ""),
+                ("Tədqiqatın metodları (30 saat) Rail Səfiyev", ""),
+            ]
+        )
+        for extra in ((), ("--apply",)):
+            out = self._run(path, "--create-missing-rows", *extra)
+            for line in ("row_created=1", "subject_created=1", "row_hours_differ=1"):
+                self.assertIn(line, out)
+            self.assertNotIn("task_blocked", out)
+        self.assertEqual({r["status"] for r in self._report()}, {"row_created"})
+        self.assertEqual({r["detail"] for r in self._report()}, {"hours_max:45/30"})
+        row = TeachingTaskRow.objects.get(organization=self.org)
+        self.assertEqual(
+            (row.subject.name, row.lecture_total, list(row.groups.all())), ("Tədqiqat metodları", 45, [self.bm])
+        )
+        self.assertEqual(Subject.objects.filter(organization=self.org).count(), 1)
+
+    def test_rolled_back_chair_restores_every_counter(self):
+        # Rəy (3): kafedranın savepoint-i geri qayıdanda yalnız ``subject_created`` bərpa olunurdu —
+        # ``task_created`` / ``row_created`` / ``assigned`` … log-da qalırdı (prod log-u yalnız saylardır).
+        self._diplomatiya_draft(lecture_total=30)
+        path = self._docx(
+            [("Diplomatiya (30 saat) Rail Səfiyev", ""), ("Tədqiqat metodları (45 saat) Rail Səfiyev", "")]
+        )
+        denied = WorkloadDenied("workload.distribution_incomplete", "test")
+        with mock.patch("apps.workload.services.task_workbook_import.confirm_distribution", side_effect=denied):
+            out = self._run(path, "--create-missing-rows", "--apply")
+        counters = dict(line.strip().split("=", 1) for line in out.splitlines() if line.startswith("  "))
+        self.assertEqual(
+            counters,
+            {"cell_planned": "1", "cell_task_blocked": "1", "chair_rolled_back": "1", "task_blocked": "1",
+             "result_task_blocked": "1"},
+        )  # fmt: skip
+        self.assertEqual(TeachingTaskRow.objects.filter(organization=self.org).count(), 1)
+        self.assertEqual(Subject.objects.filter(organization=self.org).count(), 1)
+        self.assertEqual(TeachingTask.objects.get(organization=self.org).status, "draft")
+        self.assertFalse(TeacherAssignment.objects.filter(row__task__organization=self.org).exists())
+        self.assertEqual({r["status"] for r in self._report()}, {"planned", "task_blocked"})
