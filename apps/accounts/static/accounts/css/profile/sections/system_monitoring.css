@@ -354,6 +354,29 @@
     word-break: break-all;
 }
 
+/* 2026-10-17: «Loglar» tabının boş/xəta vəziyyətində sorğu (LogQL + aralıq) və göndərən ipucu. */
+.smx-log-query,
+.smx-log-hint {
+    color: #8a97a8;
+    font-size: 12px;
+    margin: -24px 0 12px;
+    text-align: center;
+    word-break: break-all;
+}
+
+.smx-log-query code {
+    font-family: ui-monospace, Menlo, monospace;
+}
+
+.smx-log-hint {
+    color: #92400e;
+    margin-top: -24px;
+}
+
+.smx-log-hint + .smx-log-query {
+    margin-top: 0;
+}
+
 .smx-actions button {
     background: #fff;
     border: 1px solid var(--smx-line);

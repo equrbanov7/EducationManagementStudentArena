@@ -98007,3 +98007,175 @@ msgstr "Selected building: {campus} — its rooms come first"
 msgctxt "registrar.schedule_rooms"
 msgid "%(room)s · %(count)s nəfər"
 msgstr "%(room)s · %(count)s seats"
+
+msgctxt "monitoring.ui"
+msgid "Log mənbəyinə qoşulmaq olmadı: {reason}"
+msgstr "Could not connect to the log source: {reason}"
+
+msgctxt "monitoring.ui"
+msgid "Loki {detail} ərzində cavab vermədi"
+msgstr "Loki did not respond within {detail}"
+
+msgctxt "monitoring.ui"
+msgid "Loki xidmətinə bağlantı qurulmadı (xidmət dayanıb və ya şəbəkə əlçatmazdır)"
+msgstr "No connection to the Loki service (the service is stopped or the network is unreachable)"
+
+msgctxt "monitoring.ui"
+msgid "Loki HTTP {status} xətası qaytardı"
+msgstr "Loki returned an HTTP {status} error"
+
+msgctxt "monitoring.ui"
+msgid "Loki gözlənilməz cavab qaytardı"
+msgstr "Loki returned an unexpected response"
+
+msgctxt "monitoring.ui"
+msgid "Log servisi müvəqqəti əlçatmazdır"
+msgstr "The log service is temporarily unavailable"
+
+msgctxt "monitoring.ui"
+msgid "Son {range} ərzində bu sorğuya uyğun log yoxdur"
+msgstr "No logs match this query in the last {range}"
+
+msgctxt "monitoring.ui"
+msgid "Loki son 6 saatda heç bir konteynerdən log almayıb — problem log toplayıcıdadır (promtail), sorğuda deyil."
+msgstr "Loki has received no logs from any container in the last 6 hours — the problem is in the log collector (promtail), not in the query."
+
+msgctxt "accounts.profile_completion"
+msgid "FİN kod"
+msgstr "FIN code"
+
+msgctxt "accounts.profile_completion"
+msgid "Rəsmi sənədlər (arayış, diplom əlavəsi), dövlət sistemləri (ATİS/DİM) ilə uyğunlaşdırma və hesabınızın bərpasında kimliyinizi təsdiqləmək üçün. Şəxsiyyət vəsiqəsinin arxa üzündəki 7 simvoldur."
+msgstr "For official documents (certificates, diploma supplement), matching with state systems (ATIS/DIM) and confirming your identity when your account is recovered. It is the 7 characters on the back of your ID card."
+
+msgctxt "accounts.profile_completion"
+msgid "məs: 5ABC12D"
+msgstr "e.g. 5ABC12D"
+
+msgctxt "accounts.profile_completion"
+msgid "Mobil telefon"
+msgstr "Mobile phone"
+
+msgctxt "accounts.profile_completion"
+msgid "Təcili xəbərdarlıqlar və hesabın bərpası üçün."
+msgstr "For urgent notices and account recovery."
+
+msgctxt "accounts.profile_completion"
+msgid "məs: 050 123 45 67"
+msgstr "e.g. 050 123 45 67"
+
+msgctxt "accounts.profile_completion"
+msgid "Şəxsi e-poçt"
+msgstr "Personal e-mail"
+
+msgctxt "accounts.profile_completion"
+msgid "Parol bərpası kodu bu ünvana göndərilir. Hər gün istifadə etdiyiniz ünvanı yazın (məs. Gmail)."
+msgstr "The password recovery code is sent to this address. Enter the address you use every day (e.g. Gmail)."
+
+msgctxt "accounts.profile_completion"
+msgid "məs: adiniz@gmail.com"
+msgstr "e.g. yourname@gmail.com"
+
+msgctxt "accounts.profile_completion"
+msgid "FİN kodunu yazın."
+msgstr "Enter your FIN code."
+
+msgctxt "accounts.profile_completion"
+msgid "FİN kod 7 simvoldur: yalnız latın hərfləri və rəqəmlər (məs. 5ABC12D)."
+msgstr "The FIN code has 7 characters: Latin letters and digits only (e.g. 5ABC12D)."
+
+msgctxt "accounts.profile_completion"
+msgid "Mobil telefon nömrəsini yazın."
+msgstr "Enter your mobile phone number."
+
+msgctxt "accounts.profile_completion"
+msgid "Telefon nömrəsi düzgün deyil (məs. 050 123 45 67)."
+msgstr "The phone number is not valid (e.g. 050 123 45 67)."
+
+msgctxt "accounts.profile_completion"
+msgid "E-poçt ünvanını yazın."
+msgstr "Enter your e-mail address."
+
+msgctxt "accounts.profile_completion"
+msgid "Etibarlı e-poçt ünvanı yazın."
+msgstr "Enter a valid e-mail address."
+
+msgctxt "accounts.profile_completion"
+msgid "Bu FİN kod başqa hesabda qeydə alınıb. Düzgün yazdığınıza əminsinizsə, RİM-ə müraciət edin — hesablarınız yoxlanılıb birləşdiriləcək."
+msgstr "This FIN code is registered to another account. If you are sure you typed it correctly, contact the RİM — your accounts will be checked and merged."
+
+msgctxt "accounts.profile_completion"
+msgid "Bu e-poçt ünvanı istifadə oluna bilməz. Başqa ünvan yazın."
+msgstr "This e-mail address cannot be used. Enter another address."
+
+msgctxt "accounts.profile_completion"
+msgid "Məlumatlarınız saxlanıldı. Təşəkkür edirik!"
+msgstr "Your details have been saved. Thank you!"
+
+msgctxt "accounts.profile_completion"
+msgid "Məlumatlarınızı tamamlayın"
+msgstr "Complete your details"
+
+msgctxt "accounts.profile_completion"
+msgid "hesabınızda bəzi vacib məlumatlar yoxdur. Davam etmək üçün aşağıdakı xanaları doldurun — bu bir dəfəlik addımdır."
+msgstr "some important details are missing from your account. Fill in the fields below to continue — this is a one-time step."
+
+msgctxt "accounts.profile_completion"
+msgid "Bəzi xanalarda səhv var — aşağıda qeyd olunub."
+msgstr "Some fields contain errors — they are marked below."
+
+msgctxt "accounts.profile_completion"
+msgid "Nəyə lazımdır:"
+msgstr "Why we need it:"
+
+msgctxt "accounts.profile_completion"
+msgid "Məlumatlarınız qorunur"
+msgstr "Your data is protected"
+
+msgctxt "accounts.profile_completion"
+msgid "Bu məlumatlar ictimai profilinizdə göstərilmir və kənar şəxslərlə paylaşılmır. Onları yalnız siz və iş zərurəti olan səlahiyyətli əməkdaşlar (RİM, dekanlıq, kadrlar şöbəsi) görə bilər."
+msgstr "These details are not shown on your public profile and are not shared with outsiders. Only you and authorised staff with a work need (RİM, dean's office, HR department) can see them."
+
+msgctxt "accounts.profile_completion"
+msgid "Səhv yazdığınızı sonra görsəniz, düzəliş üçün RİM-ə müraciət edin."
+msgstr "If you later notice a mistake, contact the RİM to have it corrected."
+
+msgctxt "accounts.profile_completion"
+msgid "Saxla və davam et"
+msgstr "Save and continue"
+
+msgctxt "accounts.profile_completion"
+msgid "Çıxış"
+msgstr "Log out"
+
+msgctxt "core.runtime_settings"
+msgid "Məcburi profil məlumatları"
+msgstr "Required profile details"
+
+msgctxt "core.runtime_settings"
+msgid "Girişdən sonra vacib məlumatları məcburi doldurmaq"
+msgstr "Require important details after login"
+
+msgctxt "core.runtime_settings"
+msgid "Yanılıda FİN kodu, mobil telefonu və ya şəxsi e-poçtu boş olan tələbə və əməkdaş girişdən sonra «Məlumatlarınızı tamamlayın» səhifəsinə yönlənir və onları doldurmadan sistemdən istifadə edə bilmir. Söndürülüdə (qəza halı) heç kim dayandırılmır."
+msgstr "When on, a student or staff member whose FIN code, mobile phone or personal e-mail is empty is sent to the «Complete your details» page after login and cannot use the system until they fill them in. When off (emergency), nobody is stopped."
+
+msgctxt "core.runtime_settings"
+msgid "FİN kod məcburidir"
+msgstr "FIN code is required"
+
+msgctxt "core.runtime_settings"
+msgid "Mobil telefon məcburidir"
+msgstr "Mobile phone is required"
+
+msgctxt "core.runtime_settings"
+msgid "Şəxsi e-poçt məcburidir"
+msgstr "Personal e-mail is required"
+
+msgctxt "profile.rim"
+msgid "Məlumat natamam (FİN, telefon, e-poçt)"
+msgstr "Details incomplete (FIN, phone, e-mail)"
+
+msgctxt "monitoring.alert"
+msgid "Mərkəzi loglar toplanmır — «Loglar» bölməsi boş qalır"
+msgstr "Central logs are not being collected — the «Logs» section stays empty"

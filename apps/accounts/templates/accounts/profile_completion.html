@@ -1,0 +1,78 @@
+{% extends "base_auth.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Məlumatlarınızı tamamlayın" context "accounts.profile_completion" %} | {{ site_brand_name }}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}?v=20261005-lang2">
+    <link rel="stylesheet" href="{% static 'accounts/css/login_first_login.css' %}?v=20260930-email">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile_completion.css' %}?v=20261017-2">
+{% endblock %}
+
+{% block content %}
+<div class="auth-page-wrapper">
+    <div class="auth-card">
+        <span class="auth-brand" aria-label="{{ site_brand_name }}">
+            <img src="{% static 'brand/wcu-official-lockup.svg' %}?v=20261001" alt="{{ site_brand_name }}"
+                 class="auth-brand-logo auth-brand-logo--official" width="303" height="66" loading="eager" decoding="async">
+        </span>
+        <h1 class="auth-heading">{% trans "Məlumatlarınızı tamamlayın" context "accounts.profile_completion" %}</h1>
+        <p class="auth-subheading">
+            {% if user_display %}{{ user_display }}, {% endif %}{% trans "hesabınızda bəzi vacib məlumatlar yoxdur. Davam etmək üçün aşağıdakı xanaları doldurun — bu bir dəfəlik addımdır." context "accounts.profile_completion" %}
+        </p>
+
+        {% if messages %}
+        <div class="auth-messages">
+            {% for message in messages %}
+            <div class="auth-message auth-message--{{ message.tags }}" role="{% if 'error' in message.tags %}alert{% else %}status{% endif %}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if has_errors %}
+        <div class="auth-messages">
+            <div class="auth-message auth-message--error" role="alert">{% trans "Bəzi xanalarda səhv var — aşağıda qeyd olunub." context "accounts.profile_completion" %}</div>
+        </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'accounts:complete_profile' %}" class="auth-form" novalidate data-clarity-mask="True">
+            {% csrf_token %}
+            {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
+
+            {% for field in fields %}
+            <div class="auth-form-field">
+                <label for="pc-{{ field.name }}">{{ field.spec.label }}</label>
+                <input type="{{ field.spec.input_type }}" id="pc-{{ field.name }}" name="{{ field.name }}" value="{{ field.value }}"
+                       maxlength="{{ field.spec.max_length }}" autocomplete="{{ field.spec.autocomplete }}"
+                       inputmode="{{ field.spec.inputmode }}" placeholder="{{ field.spec.placeholder }}"
+                       autocapitalize="{% if field.name == 'fin' %}characters{% else %}none{% endif %}" autocorrect="off" spellcheck="false"
+                       class="{% if field.name == 'fin' %}pc-input--fin{% endif %}{% if field.error %} is-invalid{% endif %}"
+                       required aria-describedby="pc-{{ field.name }}-why{% if field.error %} pc-{{ field.name }}-error{% endif %}"
+                       {% if field.error %}aria-invalid="true"{% endif %}{% if forloop.first %} autofocus{% endif %}>
+                {% if field.error %}<p class="auth-field-error" id="pc-{{ field.name }}-error">{{ field.error }}</p>{% endif %}
+                <p class="pc-why" id="pc-{{ field.name }}-why">
+                    <span class="pc-why__label">{% trans "Nəyə lazımdır:" context "accounts.profile_completion" %}</span>
+                    <span>{{ field.spec.why }}</span>
+                </p>
+            </div>
+            {% endfor %}
+
+            <div class="pc-privacy" role="note">
+                <span class="pc-privacy__title">{% trans "Məlumatlarınız qorunur" context "accounts.profile_completion" %}</span>
+                <p>{% trans "Bu məlumatlar ictimai profilinizdə göstərilmir və kənar şəxslərlə paylaşılmır. Onları yalnız siz və iş zərurəti olan səlahiyyətli əməkdaşlar (RİM, dekanlıq, kadrlar şöbəsi) görə bilər." context "accounts.profile_completion" %}</p>
+                <p>{% trans "Səhv yazdığınızı sonra görsəniz, düzəliş üçün RİM-ə müraciət edin." context "accounts.profile_completion" %}</p>
+            </div>
+
+            <button type="submit" class="auth-submit-btn">
+                {% trans "Saxla və davam et" context "accounts.profile_completion" %}
+            </button>
+        </form>
+
+        {# Çıxış YALNIZ POST ilə işləyir (logout_view). #}
+        <form method="post" action="{% url 'accounts:logout' %}" class="auth-footer-text auth-logout-form">
+            {% csrf_token %}
+            <button type="submit" class="auth-link-btn">{% trans "Çıxış" context "accounts.profile_completion" %}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

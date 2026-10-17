@@ -1,5 +1,6 @@
 {% load i18n %}{% comment %}«Sistem Monitorinqi» JS mətnləri (2026-10-01 redizayn) — xülasə və AI paneli;
 2026-10-05: «Təhlükəsizlik» tabının IP filtri və «uğurlu girişlər» bloku (`ip*`, `logins*`).
+2026-10-17: «Loglar» tabının xəta/boş vəziyyətləri (`logs*`, `scripts/i18n_fill_monitoring_logs_2026_10_17.py`).
 Açar = JS açarı (`t("key")`); dəyər = `monitoring.ui` kontekstli trans (django.po,
 `scripts/i18n_fill_mon_2026_10_01.py`). Yer tutucular `{name}` formasındadır və JS-də
 `fmt()` ilə doldurulur — `%` işlədilmir, çünki `{% trans %}` msgid-də onu `%%`-ə çevirir.
@@ -108,5 +109,13 @@ Tərcümə yoxdursa msgid (az) göstərilir.{% endcomment %}
   "colLastLogin": "{% filter escapejs %}{% trans 'Son giriş' context 'monitoring.ui' %}{% endfilter %}",
   "colDevice": "{% filter escapejs %}{% trans 'Cihaz / brauzer' context 'monitoring.ui' %}{% endfilter %}",
   "firstSeen": "{% filter escapejs %}{% trans 'ilk: {time}' context 'monitoring.ui' %}{% endfilter %}",
-  "eventsEmptyIp": "{% filter escapejs %}{% trans 'Bu IP üzrə təhlükəsizlik hadisəsi yoxdur' context 'monitoring.ui' %}{% endfilter %}"
+  "eventsEmptyIp": "{% filter escapejs %}{% trans 'Bu IP üzrə təhlükəsizlik hadisəsi yoxdur' context 'monitoring.ui' %}{% endfilter %}",
+  "logsErrTitle": "{% filter escapejs %}{% trans 'Log mənbəyinə qoşulmaq olmadı: {reason}' context 'monitoring.ui' %}{% endfilter %}",
+  "logsErrTimeout": "{% filter escapejs %}{% trans 'Loki {detail} ərzində cavab vermədi' context 'monitoring.ui' %}{% endfilter %}",
+  "logsErrConnection": "{% filter escapejs %}{% trans 'Loki xidmətinə bağlantı qurulmadı (xidmət dayanıb və ya şəbəkə əlçatmazdır)' context 'monitoring.ui' %}{% endfilter %}",
+  "logsErrHttp": "{% filter escapejs %}{% trans 'Loki HTTP {status} xətası qaytardı' context 'monitoring.ui' %}{% endfilter %}",
+  "logsErrInvalid": "{% filter escapejs %}{% trans 'Loki gözlənilməz cavab qaytardı' context 'monitoring.ui' %}{% endfilter %}",
+  "logsErrUnknown": "{% filter escapejs %}{% trans 'Log servisi müvəqqəti əlçatmazdır' context 'monitoring.ui' %}{% endfilter %}",
+  "logsEmpty": "{% filter escapejs %}{% trans 'Son {range} ərzində bu sorğuya uyğun log yoxdur' context 'monitoring.ui' %}{% endfilter %}",
+  "logsNoStreams": "{% filter escapejs %}{% trans 'Loki son 6 saatda heç bir konteynerdən log almayıb — problem log toplayıcıdadır (promtail), sorğuda deyil.' context 'monitoring.ui' %}{% endfilter %}"
 }</script>

@@ -25,7 +25,7 @@ from apps.registrar.public import enroll_student_in_subject
 from apps.workload.constants import ACTIVITY_TOTAL_FIELD, TEACHING_ACTIVITIES, RowKind, TaskStatus
 from apps.workload.models import TeacherAssignment, TeachingTask, TeachingTaskRow
 from apps.workload.services.assignments import assign_teacher, remaining_hours
-from apps.workload.services.distribution import confirm_distribution
+from apps.workload.services.distribution import confirm_distribution, teacher_loads
 from apps.workload.services.imports import normalize
 from apps.workload.services.scoping import resolve_actor
 from apps.workload.services.task_load_reassign import (
@@ -342,6 +342,7 @@ class Importer(TeacherResolverMixin):
             return
         task = self._task_for(chair)
         existing_rows = task.rows.prefetch_related("groups") if task is not None and task.pk else []
+        loads_before = teacher_loads(task) if task is not None and task.pk else {}
         matcher = RowMatcher(existing_rows)
         rows_to_plan: list[tuple] = []
         for record in records:
@@ -376,7 +377,7 @@ class Importer(TeacherResolverMixin):
             task.refresh_from_db(fields=["status"])
             amended = task.status == TaskStatus.AMENDED and self.applier.counters["amendment_opened"]
             if (planned and task.status in (TaskStatus.APPROVED, TaskStatus.DISTRIBUTING)) or amended:
-                self._confirm_and_enroll(task)
+                self._confirm_and_enroll(task, loads_before=loads_before)
         self.stdout.write(f"  · vərəq → kafedra: {len(records)} sətir, bölgü planı {len(rows_to_plan)} sətirdə")
 
     def _import_record(self, record, entry, chair, task, matcher, rows_to_plan) -> None:
@@ -541,8 +542,9 @@ class Importer(TeacherResolverMixin):
                 users[position] = next(iter(same.values()))
         return users
 
-    def _confirm_and_enroll(self, task, *, notify: bool = True):
-        # ``notify=False`` — əvvəl bölünmüş sənədin yenidən təsdiqi (düzəliş): təkrar bildiriş yox.
+    def _confirm_and_enroll(self, task, *, notify: bool = True, loads_before: dict | None = None):
+        # ``loads_before`` (``teacher_loads``, yazıdan ƏVVƏL) — əvvəl bölünmüş sənədin yenidən təsdiqində yalnız
+        # bölgüsü yeni/dəyişən müəllimə bildiriş (sahib 2026-10-17); ilk təsdiq hamıya bildirir.
         # Bölgüsüz qalan dərs sətirləri «Vakant» ilə doldurulur ki, təsdiq keçsin
         # (jurnal sahibi sonra «Fənn təhvili»/düzəlişlə təyin olunur).
         for row in task.rows.all():
@@ -553,7 +555,9 @@ class Importer(TeacherResolverMixin):
                         row=row, actor=self.actor, activity=str(activity), teacher_id=None, hours=left, note="Vakant"
                     )
                     self.counters["assignment_vacant"] += 1
-        result = confirm_distribution(task=task, actor=self.actor, allow_vacant=True, notify=notify)
+        result = confirm_distribution(
+            task=task, actor=self.actor, allow_vacant=True, notify=notify, loads_before=loads_before
+        )
         self.counters["offering_created"] += result["sync"]["created"]
         self.counters["offering_updated"] += result["sync"]["updated"]
         self.counters["offering_instructor_blocked"] += result["sync"]["instructor_blocked"]

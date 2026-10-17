@@ -14,10 +14,12 @@ from .login import (  # noqa: F401
     login_portal,
 )
 from .logout import logout_view  # noqa: F401
+from .profile_completion import complete_profile_view  # noqa: F401
 
 __all__ = [
     "AUTH_DEVICE_COOKIE_NAME",
     "CustomLoginView",
+    "complete_profile_view",
     "NamespacedPasswordResetConfirmView",
     "NamespacedPasswordResetDoneView",
     "NamespacedPasswordResetView",

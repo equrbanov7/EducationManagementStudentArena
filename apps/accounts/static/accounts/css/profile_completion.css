@@ -1,0 +1,82 @@
+/* «Məlumatlarınızı tamamlayın» (2026-10-17) — login.css + login_first_login.css-dən SONRA yüklənir.
+   Yalnız bu səhifəyə aid əlavələr: tel xanası, «nəyə lazımdır» izahı, məxfilik qeydi. */
+
+.auth-form-field input[type="tel"] {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 1rem;
+    color: var(--ems-neutral-900);
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 10px;
+    outline: none;
+    background-color: var(--ems-neutral-0);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    box-sizing: border-box;
+}
+
+.auth-form-field input[type="tel"]:focus {
+    border-color: var(--ems-primary-600);
+    box-shadow: 0 0 0 3px var(--ems-primary-100);
+}
+
+.auth-form-field input.is-invalid {
+    border-color: var(--ems-danger-600);
+}
+
+/* FİN həmişə böyük hərflə görünür (server də böyüdür). */
+.pc-input--fin {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-variant-numeric: tabular-nums;
+}
+
+.pc-input--fin::placeholder {
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.pc-why {
+    display: block;
+    margin: 8px 0 0;
+    padding: 9px 11px;
+    border-radius: 8px;
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
+    color: var(--ems-neutral-700);
+    font-size: 0.8rem;
+    line-height: 1.45;
+    text-align: left;
+}
+
+.pc-why__label {
+    margin-right: 4px;
+    font-weight: 600;
+    color: var(--ems-primary-700);
+}
+
+.pc-privacy {
+    margin: 4px 0 20px;
+    padding: 11px 13px;
+    border-radius: 10px;
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-primary-100);
+    color: var(--ems-neutral-800);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    text-align: left;
+}
+
+.pc-privacy__title {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+    color: var(--ems-primary-700);
+}
+
+.pc-privacy p {
+    margin: 0;
+}
+
+.pc-privacy p + p {
+    margin-top: 6px;
+}

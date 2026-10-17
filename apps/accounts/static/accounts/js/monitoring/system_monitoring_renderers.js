@@ -336,8 +336,54 @@
             body.innerHTML = '<div class="smx-empty">' + escapeHtml(gettext("Təhlükəsizlik hadisəsi yoxdur")) + "</div>";
         }
 
+        // 2026-10-17 (sahib: «loglar boş göstərir»): Loki xətası və boş nəticə AYRI vəziyyətlərdir.
+        // Xəta: «Log mənbəyinə qoşulmaq olmadı: <səbəb>» (+ HTTP status); boş: «Son <aralıq>
+        // ərzində log yoxdur» + sorğu; Loki heç bir axın tanımırsa — göndərən (promtail) ipucu.
+        function rangeLabel(seconds) {
+            var select = body.closest("#smx-root") && body.closest("#smx-root").querySelector("#smx-range");
+            var option = select && Array.prototype.find.call(select.options, function (item) {
+                return Number(item.value) === Number(seconds);
+            });
+            return option ? option.textContent.trim() : formatDuration(seconds);
+        }
+
+        function logErrorReason(error) {
+            error = error || {};
+            var reason = {
+                timeout: context.fmt(t("logsErrTimeout"), { detail: error.detail || "" }),
+                connection: t("logsErrConnection"),
+                http: context.fmt(t("logsErrHttp"), { status: error.status || "?" }),
+                invalid: t("logsErrInvalid"),
+            }[error.kind] || t("logsErrUnknown");
+            return error.kind === "http" && error.detail ? reason + " — " + error.detail : reason;
+        }
+
+        function logQueryNote(query) {
+            if (!query || !query.logql) return "";
+            return '<p class="smx-log-query"><code>' + escapeHtml(query.logql) + "</code> · " +
+                escapeHtml(rangeLabel(query.range_seconds)) + "</p>";
+        }
+
+        function renderLogState(html, data) {
+            if (data.degraded) {
+                body.innerHTML = html + '<div class="smx-error" role="alert" data-smx-log-state="error">' +
+                    '<i class="fas fa-circle-exclamation" aria-hidden="true"></i> ' +
+                    escapeHtml(context.fmt(t("logsErrTitle"), { reason: logErrorReason(data.degraded.error) })) +
+                    "</div>" + logQueryNote(data.degraded.query);
+                return;
+            }
+            var query = data.query || {};
+            var hint = data.streams_known === 0 ?
+                '<p class="smx-log-hint">' + escapeHtml(t("logsNoStreams")) + "</p>" : "";
+            body.innerHTML = html + '<div class="smx-empty" data-smx-log-state="empty">' +
+                escapeHtml(query.range_seconds ? context.fmt(t("logsEmpty"), { range: rangeLabel(query.range_seconds) }) :
+                    gettext("Log tapılmadı")) +
+                "</div>" + hint + logQueryNote(query);
+        }
+
         function renderLogs(data) {
             var state = states.logs;
+            data = data || {};
             var rows = rowsFrom(data, "lines");
             var containers = data.containers || [];
             var html = '<div class="smx-filter">' + selectMarkup(
@@ -352,9 +398,8 @@
                 escapeHtml(gettext("Mətn axtarışı…")) + '" maxlength="120" value="' +
                 escapeHtml(state.q) + '"><button type="button" class="smx-btn" id="smx-log-go">' +
                 '<i class="fas fa-search"></i> ' + escapeHtml(gettext("Axtar")) + "</button></div>";
-            if (!rows.length) {
-                body.innerHTML = html + '<div class="smx-empty">' +
-                    escapeHtml(gettext("Log tapılmadı")) + "</div>";
+            if (data.degraded || !rows.length) {
+                renderLogState(html, data);
                 return;
             }
             html += '<div class="smx-table-wrap"><table class="smx-table"><tbody>';

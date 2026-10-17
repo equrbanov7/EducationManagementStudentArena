@@ -207,6 +207,11 @@ CACHES = {
 # testləri pozulmur. Xüsusiyyətin öz testləri `override_settings(RUNTIME_SETTINGS_ENABLED=True)` ilə açır.
 RUNTIME_SETTINGS_ENABLED = False
 
+# Məcburi profil məlumatları qapısı (2026-10-17, apps/accounts/profile_completion.py): fixture istifadəçilərinin
+# əksəriyyətində FİN / telefon yoxdur — qapı testlərdə defolt SÖNÜLÜDÜR ki, giriş axını testləri pozulmasın.
+# Qapının öz testləri `override_settings(PROFILE_COMPLETION_ENABLED=True)` ilə açır.
+PROFILE_COMPLETION_ENABLED = False
+
 # Use console email backend for tests
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 SITE_URL = "http://testserver"

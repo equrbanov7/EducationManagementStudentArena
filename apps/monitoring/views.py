@@ -16,7 +16,6 @@ from __future__ import annotations
 import hmac
 import json
 import logging
-import time
 
 from django.conf import settings
 from django.db.models import Q
@@ -24,8 +23,8 @@ from django.http import HttpResponseForbidden, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
-from . import queries
-from .clients import LOKI_MAX_LINES, AlertmanagerClient, LokiClient, degraded
+from . import logs, queries
+from .clients import AlertmanagerClient, LokiClient, degraded
 from .models import Incident, IncidentStatus, SecurityEvent
 from .pagination import clamp_page, paginated_data, parse_pagination
 from .permissions import monitoring_view_required, superadmin_monitoring_required
@@ -119,90 +118,21 @@ def alerts_api(request):
 @require_GET
 @monitoring_view_required
 def logs_api(request):
-    """Loki log axtarışı: servis + severity + mətn filtri, sərt limitlərlə."""
-    container = (request.GET.get("container") or "").strip()[:80]
-    search = (request.GET.get("q") or "").strip()[:120]
-    level = (request.GET.get("level") or "").strip().lower()
+    """Loki log axtarışı: servis + severity + mətn filtri, sərt limitlərlə (``logs.py``).
+
+    Xətada ``degraded`` + ``error`` (növ/HTTP status) + ``query``; boş nəticədə ``query``
+    və ``streams_known`` — UI «boş» ilə «qoşulmaq olmadı»nı ayırır (2026-10-17).
+    """
     range_seconds, _ = queries.clamp_range(_range_seconds(request))
-
-    selector = f"{{container={json.dumps(container, ensure_ascii=False)}}}" if container else '{job="docker"}'
-    logql = selector
-    if search:
-        escaped = search.replace("\\", "\\\\").replace("`", "")
-        logql += f" |= `{escaped}`"
-    if level in {"error", "warning", "critical"}:
-        logql += f" |~ `(?i){level}`"
-
     page, page_size = parse_pagination(request.GET)
-    max_log_page = max(1, (LOKI_MAX_LINES + page_size - 1) // page_size)
-    page = min(page, max_log_page)
-
-    now_ns = time.time_ns()
-    try:
-        anchor_ns = int(request.GET.get("anchor_ns", now_ns))
-    except (TypeError, ValueError):
-        anchor_ns = now_ns
-    anchor_ns = max(1, min(anchor_ns, now_ns))
-    before_raw = request.GET.get("before_ns")
-    if page > 1 and not before_raw:
-        page = 1
-    try:
-        end_ns = int(before_raw) if before_raw else anchor_ns
-    except (TypeError, ValueError):
-        end_ns = anchor_ns
-    end_ns = max(1, min(end_ns, anchor_ns))
-    start_ns = max(0, anchor_ns - range_seconds * 1_000_000_000)
-    end_ns = max(start_ns, end_ns)
-    client = LokiClient()
-    query_limit = min(page_size + 1, LOKI_MAX_LINES)
-    result = client.query_range(logql, start_ns=start_ns, end_ns=end_ns, limit=query_limit)
-    if result is None:
-        return JsonResponse(degraded("loki", "Log servisi müvəqqəti əlçatmazdır"))
-
-    lines = []
-    for stream in result:
-        labels = stream.get("stream", {})
-        for ts, line in stream.get("values", []):
-            try:
-                ts_ns = int(ts)
-            except (TypeError, ValueError):
-                continue
-            lines.append(
-                {
-                    "_ts_ns": ts_ns,
-                    "ts": ts_ns // 1_000_000,  # ms
-                    "container": labels.get("container", ""),
-                    "line": redact_secrets(line[:1000]),
-                }
-            )
-    lines.sort(key=lambda row: (row["_ts_ns"], row["container"], row["line"]), reverse=True)
-
-    page_lines = lines[:page_size]
-    has_next = len(lines) > page_size
-    next_cursor_ns = max(1, page_lines[-1]["_ts_ns"] - 1) if has_next and page_lines else None
-    for row in page_lines:
-        row.pop("_ts_ns", None)
-    total_exact = not has_next
-    total = (page - 1) * page_size + len(page_lines) + int(has_next)
-    total_pages = page + int(has_next)
-    containers = client.labels_values("container") or []
-    data = paginated_data(
-        "lines",
-        page_lines,
-        total=total,
+    payload = logs.build_response(
+        request.GET,
+        client=LokiClient(),
+        range_seconds=range_seconds,
         page=page,
         page_size=page_size,
-        has_next=has_next,
-        total_pages=total_pages,
-        total_exact=total_exact,
-        extra={
-            "containers": containers,
-            "anchor_ns": anchor_ns,
-            "before_ns": end_ns,
-            "next_cursor_ns": next_cursor_ns,
-        },
     )
-    return JsonResponse({"status": "ok", "data": data})
+    return JsonResponse(payload)
 
 
 @require_GET

@@ -74,6 +74,7 @@ GROUPS = (
     ("journal", pgettext_lazy(_CTX, "Elektron jurnal")),
     ("ai", pgettext_lazy(_CTX, "Süni intellekt")),
     ("exam", pgettext_lazy(_CTX, "İmtahanlar")),
+    ("profile", pgettext_lazy(_CTX, "Məcburi profil məlumatları")),
 )
 
 _RATE_HELP = pgettext_lazy(_CTX, "Pəncərə ərzində icazə verilən say; keçəndə istifadəçi gözləməli olur.")
@@ -374,6 +375,20 @@ SPECS: dict[str, Spec] = {
             ),
             pgettext_lazy(_CTX, "gün"), min=1, max=14,
         ),
+        # 2026-10-17 (sahib): girişdən sonra boş FİN / telefon / e-poçt məcburi doldurulur — apps/accounts/profile_completion.py.
+        Spec(
+            "profile.required_fields_enabled", "profile", "bool", _setting("PROFILE_COMPLETION_ENABLED", True),
+            pgettext_lazy(_CTX, "Girişdən sonra vacib məlumatları məcburi doldurmaq"),
+            pgettext_lazy(
+                _CTX,
+                "Yanılıda FİN kodu, mobil telefonu və ya şəxsi e-poçtu boş olan tələbə və əməkdaş girişdən sonra "
+                "«Məlumatlarınızı tamamlayın» səhifəsinə yönlənir və onları doldurmadan sistemdən istifadə edə bilmir. "
+                "Söndürülüdə (qəza halı) heç kim dayandırılmır.",
+            ),
+        ),
+        Spec("profile.require_fin", "profile", "bool", lambda: True, pgettext_lazy(_CTX, "FİN kod məcburidir")),
+        Spec("profile.require_phone", "profile", "bool", lambda: True, pgettext_lazy(_CTX, "Mobil telefon məcburidir")),
+        Spec("profile.require_email", "profile", "bool", lambda: True, pgettext_lazy(_CTX, "Şəxsi e-poçt məcburidir")),
     )
 }  # fmt: skip
 

@@ -396,9 +396,9 @@ class IpFilterFrontendContractTests(SimpleTestCase):
         template = (SECTIONS / "_system_monitoring.html").read_text(encoding="utf-8")
         for asset in (
             "css/profile/sections/system_monitoring_security.css' %}?v=20261005-ipf",
-            "js/monitoring/system_monitoring_renderers.js' %}?v=20261005-ipf",
+            "js/monitoring/system_monitoring_renderers.js' %}?v=20261017-logs",
             "js/monitoring/system_monitoring_security.js' %}?v=20261005-ipf",
-            "js/monitoring/system_monitoring.js' %}?v=20261005-ipf",
+            "js/monitoring/system_monitoring.js' %}?v=20261017-logs",
         ):
             self.assertIn(asset, template)
         renderers = template.index("js/monitoring/system_monitoring_renderers.js'")

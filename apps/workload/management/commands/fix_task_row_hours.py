@@ -7,7 +7,7 @@ seminar 15 = 45) yazılıb → idxal sətrə ``lab_total=45`` və 45 saatlıq la
 Yol UI ilə EYNİDİR (``services.row_edit.set_activity_hours``): sənəd təsdiqlənibsə sətir üçün düzəliş
 (``--reason`` qeyd kimi, səbəb «Texniki səhvin düzəlişi») → fəaliyyətin bölgüsü yeni cəmə sığdırılır
 (0 → silinir) → sətrin fəaliyyət cəmi (0-da plan da) yazılır, ``total_hours`` yenidən hesablanır →
-sənəd əvvəl ``distributed`` idisə yenidən təsdiqlənir (müəllimlərə TƏKRAR bildiriş getmir). Jurnal sahibi
+sənəd əvvəl ``distributed`` idisə yenidən təsdiqlənir (TƏKRAR bildiriş yalnız saatı dəyişən müəllimə). Jurnal sahibi
 (``CourseOffering.instructor``) mövcud sinxronla izləyir — mühazirəçi dəyişmirsə toxunulmur.
 
 * DEFOLT DRY-RUN — bir tranzaksiya, ``--apply`` verilməsə sonda geri alınır (heç nə yazılmır).
@@ -33,7 +33,7 @@ from django.db import transaction
 
 from apps.workload.constants import ACTIVITY_TOTAL_FIELD, AmendmentReason, TaskStatus
 from apps.workload.models import TeacherAssignment, TeachingTask, WorkloadAmendment
-from apps.workload.services.distribution import confirm_distribution, distribution_readiness
+from apps.workload.services.distribution import confirm_distribution, distribution_readiness, teacher_loads
 from apps.workload.services.row_edit import set_activity_hours
 from apps.workload.services.scoping import WorkloadDenied, resolve_actor
 from apps.workload.services.task_form1_import import find_chair, subject_slug
@@ -127,6 +127,7 @@ class Command(BaseCommand):
 
         actor = resolve_actor(user, organization)
         was_distributed = task.status == TaskStatus.DISTRIBUTED
+        loads_before = teacher_loads(task)
         activity, hours = options["activity"], options["hours"]
         field = ACTIVITY_TOTAL_FIELD[activity]
         amend = {"reason": AmendmentReason.CORRECTION, "note": options["reason"].strip()}
@@ -153,7 +154,8 @@ class Command(BaseCommand):
             readiness = distribution_readiness(task)
             if not readiness["is_ready"]:
                 raise CommandError(f"reconfirm_blocked: incomplete_rows={len(readiness['incomplete_rows'])}")
-            confirm_distribution(task=task, actor=actor, allow_vacant=True, notify=False)
+            # Kafedranın bütün müəllimlərinə təkrar bildiriş yox — yalnız saatı dəyişən müəllimə (sahib 2026-10-17).
+            confirm_distribution(task=task, actor=actor, allow_vacant=True, loads_before=loads_before)
             counters["reconfirmed"] += 1
         elif task.status == TaskStatus.AMENDED:
             counters["left_amended"] += 1  # düzəliş əmrdən ƏVVƏL açıq idi — təsdiq kafedranın qərarıdır
