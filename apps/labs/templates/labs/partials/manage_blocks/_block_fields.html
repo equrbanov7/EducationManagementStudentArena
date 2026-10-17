@@ -1,0 +1,18 @@
+{% load i18n %}
+{% comment %}Blok formasının sahələri (add/edit — `fp` ön şəkilçisi ilə). `_form_dialog.html` bunu `<form>` daxilində render edir.{% endcomment %}
+<div class="lab-form">
+    {% if fp == "edit" %}<input type="hidden" id="editBlockId" name="block_id">{% endif %}
+    <div class="ems-field">
+        <label class="ems-field__label" for="{{ fp }}-block-title">{% trans "label_block_title" context "labs.template.manage_blocks" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input type="text" id="{{ fp }}-block-title" name="title" class="ems-input" maxlength="255" required autofocus>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="{{ fp }}-block-description">{% trans "label_description" context "labs.template.manage_blocks" %}</label>
+        <textarea id="{{ fp }}-block-description" name="description" class="ems-textarea" rows="3"></textarea>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="{{ fp }}-block-qtp">{% trans "label_questions_to_pick" context "labs.template.manage_blocks" %}</label>
+        <input type="number" id="{{ fp }}-block-qtp" name="questions_to_pick" class="ems-input" value="0" min="0" aria-describedby="{{ fp }}-block-qtp-hint">
+        <p class="ems-field__hint" id="{{ fp }}-block-qtp-hint">{% trans "help_zero_all_questions" context "labs.template.manage_blocks" %}</p>
+    </div>
+</div>

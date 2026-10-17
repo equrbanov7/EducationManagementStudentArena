@@ -8,25 +8,24 @@
     (süzgəc paneli və boş vəziyyət üçün).{% endcomment %}
     {% include "partials/ems_ui/_assets.html" %}
     <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor_filters.css' %}?v=20260910-1">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/stats.css' %}?v=20260729-stats">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/history.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}?v=20261017-pkgd">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/stats.css' %}?v=20261017-pkgd">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/history.css' %}?v=20261017-pkgd">
 {% endblock %}
 
 {% block content %}
 <div class="container py-4 fxc-page">
   {% url 'exams:exam_center_session_detail' session_id=session.pk as detail_url %}
   {% trans "Tarixçə" as hist_label %}
-  {% include "exams/exam_center/_breadcrumb.html" with back_url=detail_url current_label=hist_label %}
-
-  <header class="fxc-head">
-    <div>
-      <h1><i class="fas fa-clock-rotate-left"></i> {% trans "Oturum tarixçəsi" %}</h1>
-      <p class="fxc-sub">
-        <i class="fas fa-door-open"></i> {{ session.room.name }} <code>{{ session.room.code }}</code>
+  <div class="ems-header fxc-header">
+    <div class="ems-header__main">
+      {% include "exams/exam_center/_breadcrumb.html" with parent_label=session.room.name parent_url=detail_url current_label=hist_label %}
+      <h1 class="ems-header__title"><i class="fas fa-clock-rotate-left" aria-hidden="true"></i> {% trans "Oturum tarixçəsi" %}</h1>
+      <p class="ems-header__subtitle">
+        <span><i class="fas fa-door-open" aria-hidden="true"></i> {{ session.room.name }} <code>{{ session.room.code }}</code></span>
       </p>
     </div>
-  </header>
+  </div>
 
   <section class="fxc-stats" aria-label="{% trans 'Tarixçə xülasəsi' %}">
     <div class="fxc-stat fxc-stat--connected"><div class="fxc-stat-value">{{ summary.entries }}</div><div class="fxc-stat-label">{% trans "Girişlər" %}</div></div>

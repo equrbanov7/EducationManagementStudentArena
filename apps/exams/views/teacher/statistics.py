@@ -24,6 +24,7 @@ from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.ai_summary import generate_exam_statistics_summary
 from apps.exams.views.shared.breadcrumbs import exam_breadcrumbs
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
+from apps.exams.views.teacher.results._helpers import _parse_filter_date
 from core.helpers import _safe_same_origin_redirect_path
 from core.search_text import tolerant_q
 
@@ -96,8 +97,10 @@ def teacher_exam_statistics(request, slug):
     # ── Filters ───────────────────────────────────────────────────────
     group_id = _parse_int(request.GET.get("group"))
     student_q = (request.GET.get("student") or "").strip()
-    date_from = (request.GET.get("date_from") or "").strip()
-    date_to = (request.GET.get("date_to") or "").strip()
+    # 2026-10-17 (Paket B): tarix sahəsi gg.aa.iiii mətnidir (sahib qaydası 2026-10-10);
+    # köhnə ISO linkləri də oxunur. Oxunmayan dəyər səssizcə nəzərə alınmır.
+    date_from, date_from_value = _parse_filter_date(request.GET.get("date_from"))
+    date_to, date_to_value = _parse_filter_date(request.GET.get("date_to"))
     status_filter = (request.GET.get("status") or "").strip()
     score_min = _parse_int(request.GET.get("score_min"))
     score_max = _parse_int(request.GET.get("score_max"))
@@ -108,7 +111,7 @@ def teacher_exam_statistics(request, slug):
     org = getattr(request, "organization", None)
     teacher_groups = StudentGroup.objects.none()
     if org:
-        teacher_groups = StudentGroup.objects.filter(organization=org)
+        teacher_groups = StudentGroup.objects.filter(organization=org).only("id", "name").order_by("name")
 
     selected_group = None
     if group_id:
@@ -120,10 +123,10 @@ def teacher_exam_statistics(request, slug):
     if student_filter is not None:
         attempts = attempts.filter(student_filter)
 
-    if date_from:
-        attempts = attempts.filter(started_at__date__gte=date_from)
-    if date_to:
-        attempts = attempts.filter(started_at__date__lte=date_to)
+    if date_from_value:
+        attempts = attempts.filter(started_at__date__gte=date_from_value)
+    if date_to_value:
+        attempts = attempts.filter(started_at__date__lte=date_to_value)
 
     allowed_statuses = {"draft", "in_progress", "submitted", "expired"}
     if status_filter in allowed_statuses:
@@ -279,23 +282,23 @@ def teacher_exam_statistics(request, slug):
     # ── Group comparison ──────────────────────────────────────────────
     compare_group_ids = request.GET.getlist("compare_groups")
     compare_groups_data = []
-    if compare_group_ids:
-        for gid in compare_group_ids:
-            gid_int = _parse_int(gid)
-            if not gid_int:
-                continue
-            grp = teacher_groups.filter(id=gid_int).first()
+    compare_ids = [gid for gid in (_parse_int(raw) for raw in compare_group_ids) if gid]
+    if compare_ids:
+        # Seçilmiş qruplar TƏK sorğu ilə (əvvəl hər qrup üçün ayrıca `.filter(id=…).first()`).
+        groups_by_id = {grp.id: grp for grp in teacher_groups.filter(id__in=compare_ids)}
+        for gid_int in compare_ids:
+            grp = groups_by_id.get(gid_int)
             if not grp:
                 continue
             grp_attempts = ExamAttempt.objects.filter(
                 exam=exam,
                 user__in=grp.students.all(),
                 status__in=["submitted", "expired"],
-            )
-            if date_from:
-                grp_attempts = grp_attempts.filter(started_at__date__gte=date_from)
-            if date_to:
-                grp_attempts = grp_attempts.filter(started_at__date__lte=date_to)
+            ).only("id", "correct_count", "wrong_count", "teacher_score")
+            if date_from_value:
+                grp_attempts = grp_attempts.filter(started_at__date__gte=date_from_value)
+            if date_to_value:
+                grp_attempts = grp_attempts.filter(started_at__date__lte=date_to_value)
 
             grp_list = list(grp_attempts)
             grp_scores = [_attempt_score(a) for a in grp_list]
@@ -454,6 +457,7 @@ def teacher_exam_statistics(request, slug):
             "pass_rate": pass_rate,
             "pass_count": pass_count,
             "fail_count": fail_count,
+            "pass_threshold": pass_threshold,
             "avg_duration": avg_duration,
             "submitted_count": submitted_count,
             "expired_count": expired_count,

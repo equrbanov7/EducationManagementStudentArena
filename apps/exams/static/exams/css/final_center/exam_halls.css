@@ -21,7 +21,7 @@
     gap: var(--ems-sp-2, 8px) var(--ems-sp-3, 12px);
     padding-bottom: var(--ems-sp-2, 8px);
     margin-bottom: var(--ems-sp-3, 12px);
-    border-bottom: 1px solid var(--ems-border, #E2E8F0);
+    border-bottom: 1px solid var(--ems-border, var(--ems-neutral-200));
 }
 
 .fxc-bld__title {
@@ -32,12 +32,12 @@
     min-width: 0;
     font-size: var(--ems-fs-lg, 1.05rem);
     font-weight: 800;
-    color: var(--ems-fg, #0F172A);
+    color: var(--ems-fg, var(--ems-neutral-900));
     overflow-wrap: anywhere;
 }
 
 .fxc-bld__title i {
-    color: var(--ems-primary, #2C5BFF);
+    color: var(--ems-primary, var(--ems-primary-600));
 }
 
 .fxc-bld__counts {
@@ -62,15 +62,15 @@
     gap: var(--ems-sp-2, 8px);
     min-width: 0;
     padding: var(--ems-sp-3, 12px);
-    border: 1px solid var(--ems-border, #E2E8F0);
+    border: 1px solid var(--ems-border, var(--ems-neutral-200));
     border-radius: var(--ems-r-lg, 12px);
-    background: var(--ems-bg, #fff);
+    background: var(--ems-bg, var(--ems-neutral-0));
     transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
 }
 
 .fxc-hall-tile[data-hall="1"] {
-    border-color: var(--ems-success-bd, #86EFAC);
-    background: var(--ems-success-bg, #F0FDF4);
+    border-color: var(--ems-success-bd, var(--ems-green-400));
+    background: var(--ems-success-bg, var(--ems-emerald-50));
 }
 
 .fxc-hall-tile__head {
@@ -84,7 +84,7 @@
     min-width: 0;
     font-size: 1.02rem;
     font-weight: 800;
-    color: var(--ems-fg, #0F172A);
+    color: var(--ems-fg, var(--ems-neutral-900));
     overflow-wrap: anywhere;
 }
 
@@ -94,7 +94,7 @@
     align-items: center;
     gap: 4px 10px;
     font-size: var(--ems-fs-sm, .82rem);
-    color: var(--ems-fg-muted, #64748B);
+    color: var(--ems-fg-muted, var(--ems-neutral-500));
 }
 
 .fxc-hall-tile__meta span {
@@ -109,7 +109,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: .74rem;
-    color: var(--ems-fg-muted, #64748B);
+    color: var(--ems-fg-muted, var(--ems-neutral-500));
     background: transparent;
     padding: 0;
 }
@@ -132,9 +132,9 @@
 }
 
 .fxc-hall-badge--off {
-    color: var(--ems-fg-muted, #64748B);
-    border-color: var(--ems-border, #E2E8F0);
-    background: var(--ems-bg-subtle, #F8FAFC);
+    color: var(--ems-fg-muted, var(--ems-neutral-500));
+    border-color: var(--ems-border, var(--ems-neutral-200));
+    background: var(--ems-bg-subtle, var(--ems-neutral-50));
 }
 
 .fxc-hall-toggle {
@@ -144,27 +144,27 @@
 
 /* Bayraqlı otaqda düymə «çıxar» əməlidir — sakit, təhlükə tonlu kənar. */
 .fxc-hall-toggle[data-hall="1"] {
-    color: var(--ems-danger-700, #B91C1C);
-    border-color: var(--ems-danger-bd, #FECACA);
-    background: var(--ems-bg, #fff);
+    color: var(--ems-danger-700, var(--ems-danger-strong));
+    border-color: var(--ems-danger-bd, var(--ems-danger-200));
+    background: var(--ems-bg, var(--ems-neutral-0));
 }
 
 .fxc-hall-toggle[data-hall="1"]:hover:not(:disabled) {
-    background: var(--ems-danger-bg, #FEF2F2);
+    background: var(--ems-danger-bg, var(--ems-danger-100));
 }
 
 /* Bayraqsız otaqda düymə «qeyd et»dir — konturlu (yüzlərlə otaqlı siyahıda
    hər plitədə dolu mavi düymə vizual səs-küy yaradırdı). */
 .fxc-hall-toggle[data-hall="0"] {
-    color: var(--ems-primary-700, #1D3FBF);
-    border-color: var(--ems-primary-200, #C7D2FE);
-    background: var(--ems-bg, #fff);
+    color: var(--ems-primary-700, var(--ems-primary-800));
+    border-color: var(--ems-primary-200, var(--ems-primary-200));
+    background: var(--ems-bg, var(--ems-neutral-0));
 }
 
 .fxc-hall-toggle[data-hall="0"]:hover:not(:disabled) {
-    color: #fff;
-    border-color: var(--ems-primary, #2C5BFF);
-    background: var(--ems-primary, #2C5BFF);
+    color: var(--ems-neutral-0);
+    border-color: var(--ems-primary, var(--ems-primary-600));
+    background: var(--ems-primary, var(--ems-primary-600));
 }
 
 .fxc-hall-toggle[aria-busy="true"] {

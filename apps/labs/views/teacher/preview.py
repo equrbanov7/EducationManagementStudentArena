@@ -21,7 +21,7 @@ def preview_randomization(request, pk):
 
     if lab.created_by != request.user:
         messages.error(request, pgettext("labs.view.permission", "permission_denied"))
-        return redirect("courses:course_dashboard", pk=lab.course.id)
+        return redirect("courses:course_dashboard", course_id=lab.course.id)
 
     # Kurs tələbələrini al
 

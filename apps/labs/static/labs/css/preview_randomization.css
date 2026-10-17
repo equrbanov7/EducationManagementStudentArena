@@ -1,132 +1,80 @@
-/* Rəng Palitrası və Qlobal Dəyişənlər */
-:root {
-    --primary-blue: var(--ems-primary-600);
-    --dark-blue: var(--ems-primary-800);
-    --light-blue: var(--ems-primary-50);
-    --pale-blue: var(--ems-primary-200);
-    
-    --primary-green: var(--ems-success);
-    --dark-green: var(--ems-success-600);
-    --light-green: var(--ems-emerald-50);
+/* ════════════════════════════════════════════════════════════════════════════
+   EMSArena — Randomizasiya önizləməsi (preview_randomization.html) · 2026-10-17 (Paket E)
+   `--primary-blue` palitrası, Bootstrap `card/list-group` və gradient başlıq çıxarıldı.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.lab-preview__kpi {
+    font-size: var(--ems-fs-2xl);
 }
 
-/* Ümumi Mətn Rəngləri */
-.text-dark-blue { color: var(--dark-blue) !important; }
-.text-primary-blue { color: var(--primary-blue) !important; }
-.text-primary-green { color: var(--primary-green) !important; }
-
-/* Kart Dizaynı */
-.card-modern {
-    border: none;
-    border-radius: 1rem;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
-    overflow: hidden;
-    margin-bottom: 1.5rem;
+.lab-preview__pick {
+    padding: 16px 18px;
 }
 
-/* Düymələr */
-.btn-outline-custom {
-    color: var(--primary-blue);
-    border: 1px solid var(--pale-blue);
-    background: transparent;
-    font-weight: 500;
-    border-radius: 0.5rem;
-    transition: all 0.3s ease;
-}
-.btn-outline-custom:hover {
-    background: var(--light-blue);
-    color: var(--dark-blue);
-    border-color: var(--primary-blue);
+.lab-preview__form {
+    display: grid;
+    grid-template-columns: minmax(240px, 420px) minmax(0, 1fr);
+    align-items: end;
+    gap: var(--ems-sp-6);
+    margin: 0;
 }
 
-/* Form Elementləri */
-.form-select-modern {
-    border: 1px solid var(--ems-neutral-300);
-    border-radius: 0.5rem;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-.form-select-modern:focus {
-    border-color: var(--primary-blue);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+.lab-preview__help {
+    margin: 0 0 var(--ems-sp-3);
+    font-size: var(--ems-fs-base);
+    line-height: 1.55;
+    color: var(--ems-text-muted);
 }
 
-.selectStudent {
-    width: 100%;
-}
-.helpSelectStudent{
-    width: 100%;
+.lab-preview__help i {
+    margin-right: var(--ems-sp-2);
+    color: var(--ems-primary-600);
 }
 
-/* Sual Siyahısı Dizaynı */
-.card-header-gradient {
-    background: linear-gradient(135deg, var(--dark-blue) 0%, var(--primary-blue) 100%);
-    color: white;
-    padding: 1rem 1.5rem;
-    border: none;
+.lab-preview__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
-.question-item {
-    transition: background-color 0.2s ease;
-}
-.question-item:hover {
-    background-color: var(--ems-neutral-50);
-}
-
-.question-number {
-    width: 40px;
-    height: 40px;
-    background-color: var(--light-blue);
-    color: var(--primary-blue);
-    border: 2px solid var(--pale-blue);
-    font-weight: bold;
-    font-size: 1.1rem;
-    flex-shrink: 0;
+.lab-preview__item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    gap: var(--ems-sp-5);
+    padding: 14px 18px;
 }
 
-.badge-soft-blue {
-    background-color: var(--light-blue);
-    color: var(--primary-blue);
-    border: 1px solid var(--pale-blue);
-    font-weight: 500;
+.lab-preview__item + .lab-preview__item {
+    border-top: 1px solid var(--ems-neutral-100);
 }
 
-/* Empty States (Boş Bildirişlər) */
-.empty-state-box {
-    background-color: var(--light-blue);
-    border: 2px dashed var(--pale-blue);
-    border-radius: 1rem;
-    padding: 3rem 2rem;
-    text-align: center;
-}
-
-/* Parametr (Settings) Qutuları */
-.info-box {
-    background-color: var(--ems-neutral-50);
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: 0.75rem;
-    padding: 1.25rem;
-    height: 100%;
-    transition: transform 0.2s ease;
-}
-.info-box:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-}
-.info-box-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+.lab-preview__body {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--light-green);
-    color: var(--primary-green);
-    margin-bottom: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--ems-sp-3);
+    min-width: 0;
 }
 
-/* C3: mikro inline-stil köçürmələri (preview_randomization.html) */
-.preview-randomization-1 { width: 80px; height: 80px; }
-.preview-randomization-2 { background-color: var(--light-blue); color: var(--primary-blue); }
-.preview-randomization-3 { background-color: #fef3c7; color: #d97706; }
+.lab-preview__pts {
+    margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+    .lab-preview__form {
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--ems-sp-4);
+    }
+
+    .lab-preview__item {
+        grid-template-columns: auto minmax(0, 1fr);
+        padding: 12px 14px;
+    }
+
+    .lab-preview__pts {
+        grid-column: 2;
+        justify-self: start;
+        margin-top: 0;
+    }
+}

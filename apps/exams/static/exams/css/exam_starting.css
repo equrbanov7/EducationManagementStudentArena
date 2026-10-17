@@ -1,47 +1,77 @@
-/* Source: exams/student/exam_starting.html — stampede/retry splash while an exam start is throttled. */
+/* Source: exams/student/exam_starting.html — stampede/retry splash while an exam start is throttled.
+   2026-10-17 (Paket D): tokenlər, kart görünüşü, azaldılmış hərəkət rejimi. */
 
 .exam-starting-wrap {
+    width: calc(100% - 32px);
     max-width: 520px;
     margin: 12vh auto;
-    padding: 2rem;
+    box-sizing: border-box;
+    padding: 32px 24px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-raised);
     text-align: center;
-    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
 .exam-starting-spinner {
     width: 56px;
     height: 56px;
-    margin: 0 auto 1.25rem;
-    border: 5px solid #dbe4ff;
-    border-top-color: #2563eb;
+    margin: 0 auto 20px;
+    border: 5px solid var(--ems-primary-100);
+    border-top-color: var(--ems-primary-600);
     border-radius: 50%;
     animation: exam-starting-sp 0.9s linear infinite;
 }
 
 .exam-starting-title {
-    font-size: 1.35rem;
+    font-size: var(--ems-fs-2xl);
     font-weight: 800;
-    color: #0f2a5e;
-    margin: 0 0 0.5rem;
+    color: var(--ems-text);
+    margin: 0 0 8px;
 }
 
 .exam-starting-text {
-    color: #5b6b8c;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    margin: 0 0 1.25rem;
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-lg);
+    line-height: 1.6;
+    margin: 0 0 20px;
 }
 
 .exam-starting-btn {
-    display: inline-block;
-    padding: 0.6rem 1.4rem;
-    background: #2563eb;
-    color: #fff;
-    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ems-sp-3);
+    min-height: 44px;
+    padding: 0 20px;
+    border: 1px solid var(--ems-primary-600);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
     font-weight: 700;
     text-decoration: none;
 }
 
+.exam-starting-btn:hover {
+    background: var(--ems-primary-700);
+    border-color: var(--ems-primary-700);
+    color: var(--ems-neutral-0);
+}
+
+.exam-starting-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--ems-sh-focus);
+}
+
 @keyframes exam-starting-sp {
     to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .exam-starting-spinner { animation-duration: 2.4s; }
+}
+
+@media (max-width: 560px) {
+    .exam-starting-btn { width: 100%; }
 }

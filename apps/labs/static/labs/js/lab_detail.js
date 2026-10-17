@@ -1,40 +1,51 @@
-/* Lab detail page logic */
+/*
+ * lab_detail.js — tələbənin lab səhifəsi: taymer, avto-saxlama, fayl önbaxışı, bitirmə (2026-10-17, Paket E).
+ *
+ * Davranış əvvəlki ilə eynidir (avto-saxlama 800 ms debounce, son 3 saniyədə avto-göndəriş,
+ * bitirmə təsdiqi); dəyişən: konfiqurasiya `#labDetailConfig` data-* atributlarından birbaşa oxunur
+ * (ayrıca `lab_detail_template.js` silindi), irəliləyiş zolağı `--ems-bar-pct` ilə, təsdiq dialoqu
+ * ortaq `EMSOverlay` ilə, hadisələr `EMSDelegate` ilə bağlanır.
+ */
 (function () {
-    'use strict';
+    "use strict";
 
-    const LAB_ID = window.LAB_CONFIG.labId;
-    const CSRF = window.LAB_CONFIG.csrf;
-    const END_TIME = new Date(window.LAB_CONFIG.endTime);
-    const TOTAL_QUESTIONS = window.LAB_CONFIG.totalQuestions;
-    const I18N = window.LAB_I18N || {};
-    const t = (key, fallback) => I18N[key] || fallback;
-    const finishConfirmModalEl = document.getElementById('finishLabConfirmModal');
-    const finishConfirmMessage = document.getElementById('finishLabConfirmMessage');
-    const finishUnansweredNotice = document.getElementById('finishLabUnansweredNotice');
-    const confirmFinishLabBtn = document.getElementById('confirmFinishLabBtn');
-    let finishConfirmModal = null;
+    var AUTO_SUBMIT_LEAD_SECONDS = 3;
+    var state = { ready: false, labId: 0, endTime: null, total: 0, startedAt: null, autoSubmitRequested: false, timer: null };
+    var saveTimeouts = {};
+    var I18N = {};
 
-    // Audit 2026-09-28 FQ-FE-4: native alert() → EMSToast; HTTP xətası (403/500,
-    // qeyri-JSON səhifə) JSON parse xətası kimi itmir — server `error`-u göstərilir.
+    function byId(id) {
+        return document.getElementById(id);
+    }
+
+    function t(key, fallback) {
+        return I18N[key] || fallback;
+    }
+
+    function csrf() {
+        return window.EMSCore && window.EMSCore.getCsrfToken ? window.EMSCore.getCsrfToken() : "";
+    }
+
+    /* Audit 2026-09-28 FQ-FE-4: native alert() → EMSToast. */
     function notifyError(message) {
-        if (!message) return;
-        if (window.EMSToast && typeof window.EMSToast.show === 'function') {
-            window.EMSToast.show(message, 'error');
+        if (!message) { return; }
+        if (window.EMSToast && typeof window.EMSToast.show === "function") {
+            window.EMSToast.show(message, "error");
         } else if (window.console) {
             window.console.error(message);
         }
     }
 
     function readJsonResponse(response) {
-        return response.text().then((text) => {
-            let data = null;
+        return response.text().then(function (text) {
+            var data = null;
             try {
                 data = text ? JSON.parse(text) : null;
             } catch (e) {
                 data = null;
             }
             if (!response.ok || !data) {
-                const err = new Error('HTTP ' + response.status);
+                var err = new Error("HTTP " + response.status);
                 err.payload = data;
                 throw err;
             }
@@ -42,295 +53,279 @@
         });
     }
 
-    let labStartTime = localStorage.getItem('lab_' + LAB_ID + '_start');
-    if (!labStartTime) {
-        labStartTime = new Date().toISOString();
-        localStorage.setItem('lab_' + LAB_ID + '_start', labStartTime);
+    function readConfig() {
+        var el = byId("labDetailConfig");
+        if (!el) { return false; }
+        var d = el.dataset;
+        state.labId = parseInt(d.labId, 10);
+        state.endTime = new Date(d.endTime);
+        state.total = parseInt(d.totalQuestions, 10) || 0;
+        I18N = {
+            statusSaved: d.i18nStatusSaved,
+            statusSaving: d.i18nStatusSaving,
+            statusError: d.i18nStatusError,
+            confirmUnanswered: d.i18nConfirmUnanswered,
+            confirmFinishDescription: d.i18nConfirmFinishDescription,
+            actionSubmitting: d.i18nActionSubmitting,
+            errorPrefix: d.i18nErrorPrefix,
+            errorUnknown: d.i18nErrorUnknown,
+            errorServer: d.i18nErrorServer,
+            actionFinishLab: d.i18nActionFinishLab
+        };
+        return true;
     }
-    labStartTime = new Date(labStartTime);
 
-    document.querySelectorAll('.file-input').forEach((input) => {
-        input.addEventListener('change', function () {
-            const questionId = this.id.replace('file-', '');
-            const preview = document.getElementById('preview-' + questionId);
+    /* ── Saxlanma vəziyyəti: ikon + mətn (HTML inyeksiyası yoxdur) ───────── */
+    function setStatus(questionId, kind) {
+        var el = byId("status-" + questionId);
+        if (!el) { return; }
+        var icons = { saved: "fas fa-check-circle", saving: "fas fa-spinner fa-spin", error: "fas fa-exclamation-circle" };
+        var texts = { saved: t("statusSaved", "Saved"), saving: t("statusSaving", "Saving..."), error: t("statusError", "Error") };
+        el.textContent = "";
+        var icon = document.createElement("i");
+        icon.className = icons[kind] + " lab-save__ic is-" + kind;
+        icon.setAttribute("aria-hidden", "true");
+        var text = document.createElement("span");
+        text.className = "lab-save__txt is-" + kind;
+        text.textContent = texts[kind];
+        el.appendChild(icon);
+        el.appendChild(text);
+    }
 
-            if (this.files && this.files[0]) {
-                preview.classList.remove('d-none');
-                preview.querySelector('.file-name').textContent = this.files[0].name;
-                const textarea = document.querySelector('[name="answer_' + questionId + '"]');
-                const answerText = textarea ? textarea.value : '';
-
-                const formData = new FormData();
-                formData.append('question_id', questionId);
-                formData.append('answer', answerText);
-                formData.append('answer_file', this.files[0]);
-
-                fetch('/labs/' + LAB_ID + '/auto-save/', {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'X-CSRFToken': CSRF },
-                })
-                    .then((r) => r.json())
-                    .then((data) => {
-                        const statusEl = document.getElementById('status-' + questionId);
-                        statusEl.innerHTML = data.success
-                            ? '<i class="fas fa-check-circle text-success"></i> ' + t('statusSaved', 'Saved')
-                            : '<i class="fas fa-exclamation-circle text-danger"></i> ' + t('statusError', 'Error');
-                    })
-                    .catch(() => {
-                        // Keep silent; per-question state already visible
-                    });
-            }
-        });
-    });
-
-    window.removeFile = function (questionId) {
-        document.getElementById('file-' + questionId).value = '';
-        document.getElementById('preview-' + questionId).classList.add('d-none');
-    };
-
-    // Vaxt bitəndə avtomatik göndəriş (2026-09-28). Əvvəl `labForm.submit()` idi —
-    // forma action-suz olduğu üçün POST lab_detail-ə gedirdi (göndəriş yaranmırdı,
-    // səhifə sadəcə yenilənirdi). İndi adi «Bitir» axını (`/submit/`) bir dəfə,
-    // server hələ qəbul edərkən (son 3 saniyə) çağırılır.
-    const AUTO_SUBMIT_LEAD_SECONDS = 3;
-    let autoSubmitRequested = false;
-    let autoSubmitHandler = null;
-
-    function updateTimers() {
-        const now = new Date();
-        const elapsed = Math.floor((now - labStartTime) / 1000);
-        const elapsedEl = document.getElementById('elapsedTimer');
-        if (elapsedEl) elapsedEl.textContent = formatTime(elapsed);
-
-        const remaining = Math.max(0, Math.floor((END_TIME - now) / 1000));
-        const remainingEl = document.getElementById('remainingTimer');
-        if (remainingEl) remainingEl.textContent = formatDuration(remaining);
-
-        if (remaining <= AUTO_SUBMIT_LEAD_SECONDS && !autoSubmitRequested && document.getElementById('labForm')) {
-            autoSubmitRequested = true;
-            if (autoSubmitHandler) autoSubmitHandler();
-        }
+    /* ── Taymerlər ───────────────────────────────────────────────────────── */
+    function pad(n) {
+        return String(n).padStart(2, "0");
     }
 
     function formatTime(seconds) {
-        const h = Math.floor(seconds / 3600);
-        const m = Math.floor((seconds % 3600) / 60);
-        const s = seconds % 60;
-        return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+        return pad(Math.floor(seconds / 3600)) + ":" + pad(Math.floor((seconds % 3600) / 60)) + ":" + pad(seconds % 60);
     }
 
     function formatDuration(seconds) {
-        const days = Math.floor(seconds / 86400);
-        const h = Math.floor((seconds % 86400) / 3600);
-        const m = Math.floor((seconds % 3600) / 60);
-        const s = seconds % 60;
+        var days = Math.floor(seconds / 86400);
         if (days > 0) {
-            return (
-                String(days).padStart(2, '0') +
-                ':' +
-                String(h).padStart(2, '0') +
-                ':' +
-                String(m).padStart(2, '0') +
-                ':' +
-                String(s).padStart(2, '0')
-            );
+            var rest = seconds % 86400;
+            return pad(days) + ":" + pad(Math.floor(rest / 3600)) + ":" + pad(Math.floor((rest % 3600) / 60)) + ":" + pad(rest % 60);
         }
         return formatTime(seconds);
     }
 
-    setInterval(updateTimers, 1000);
-    updateTimers();
+    function updateTimers() {
+        var now = new Date();
+        var elapsedEl = byId("elapsedTimer");
+        if (elapsedEl) { elapsedEl.textContent = formatTime(Math.max(0, Math.floor((now - state.startedAt) / 1000))); }
 
-    function updateProgress() {
-        const answeredEl = document.getElementById('answeredCount');
-        const progressEl = document.getElementById('progressBar');
-        if (!answeredEl || !progressEl) return;
+        var remaining = Math.max(0, Math.floor((state.endTime - now) / 1000));
+        var remainingEl = byId("remainingTimer");
+        if (remainingEl) { remainingEl.textContent = formatDuration(remaining); }
 
-        let answered = 0;
-        document.querySelectorAll('.answer-textarea').forEach((ta) => {
-            if (ta.value.trim()) answered += 1;
-        });
-
-        answeredEl.textContent = answered;
-        progressEl.style.width = (answered / TOTAL_QUESTIONS) * 100 + '%';
+        if (remaining <= AUTO_SUBMIT_LEAD_SECONDS && !state.autoSubmitRequested && byId("labForm")) {
+            state.autoSubmitRequested = true;
+            submitLabForm();
+        }
     }
 
-    const saveTimeouts = {};
-
-    document.querySelectorAll('.answer-textarea').forEach((ta) => {
-        ta.addEventListener('input', function () {
-            const card = this.closest('.question-card');
-            const qId = card.dataset.questionId;
-
-            clearTimeout(saveTimeouts[qId]);
-            saveTimeouts[qId] = setTimeout(() => {
-                autoSave(qId, ta.value);
-            }, 800);
+    function updateProgress() {
+        var answeredEl = byId("answeredCount");
+        var progressEl = byId("progressBar");
+        if (!answeredEl || !progressEl) { return; }
+        var answered = 0;
+        Array.prototype.forEach.call(document.querySelectorAll(".answer-textarea"), function (ta) {
+            if (ta.value.trim()) { answered += 1; }
         });
-    });
+        answeredEl.textContent = answered;
+        progressEl.style.setProperty("--ems-bar-pct", (state.total ? (answered / state.total) * 100 : 0) + "%");
+    }
 
+    /* ── Avto-saxlama ────────────────────────────────────────────────────── */
     function autoSave(questionId, answer) {
-        const statusEl = document.getElementById('status-' + questionId);
-        statusEl.innerHTML = '<i class="fas fa-spinner fa-spin text-primary"></i> ' + t('statusSaving', 'Saving...');
-
-        fetch('/labs/' + LAB_ID + '/auto-save/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': CSRF,
-            },
-            body: JSON.stringify({
-                question_id: questionId,
-                answer: answer,
-            }),
+        setStatus(questionId, "saving");
+        fetch("/labs/" + state.labId + "/auto-save/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": csrf() },
+            body: JSON.stringify({ question_id: questionId, answer: answer })
         })
-            .then((r) => r.json())
-            .then((data) => {
-                statusEl.innerHTML = data.success
-                    ? '<i class="fas fa-check-circle text-success"></i> ' + t('statusSaved', 'Saved')
-                    : '<i class="fas fa-exclamation-circle text-danger"></i> ' + t('statusError', 'Error');
-
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                setStatus(questionId, data.success ? "saved" : "error");
                 updateProgress();
             })
-            .catch(() => {
-                statusEl.innerHTML = '<i class="fas fa-exclamation-circle text-danger"></i> ' + t('statusError', 'Error');
+            .catch(function () {
+                setStatus(questionId, "error");
             });
     }
 
-    updateProgress();
+    function onFileChosen(input) {
+        var questionId = input.id.replace("file-", "");
+        var preview = byId("preview-" + questionId);
+        if (!input.files || !input.files[0]) { return; }
+        if (preview) {
+            preview.hidden = false;
+            var nameEl = preview.querySelector(".file-name");
+            if (nameEl) { nameEl.textContent = input.files[0].name; }
+        }
+        var textarea = document.querySelector('[name="answer_' + questionId + '"]');
+        var formData = new FormData();
+        formData.append("question_id", questionId);
+        formData.append("answer", textarea ? textarea.value : "");
+        formData.append("answer_file", input.files[0]);
+        setStatus(questionId, "saving");
+        fetch("/labs/" + state.labId + "/auto-save/", { method: "POST", body: formData, headers: { "X-CSRFToken": csrf() } })
+            .then(function (r) { return r.json(); })
+            .then(function (data) { setStatus(questionId, data.success ? "saved" : "error"); })
+            .catch(function () { setStatus(questionId, "error"); });
+    }
 
-    document.querySelectorAll('.question-toggle-btn').forEach((btn) => {
-        btn.addEventListener('click', function () {
-            const questionId = this.dataset.toggleQuestion;
-            const card = document.getElementById('question-' + questionId);
-            if (!card) return;
-            const collapsed = card.classList.toggle('question-collapsed');
-            const icon = this.querySelector('i');
-            if (icon) {
-                icon.classList.toggle('fa-chevron-down', collapsed);
-                icon.classList.toggle('fa-chevron-up', !collapsed);
-            }
-        });
-    });
+    /* `csp_event_handlers.js` «×» düyməsində `removeFile(questionId)` qlobalını çağırır. */
+    window.removeFile = function (questionId) {
+        var input = byId("file-" + questionId);
+        var preview = byId("preview-" + questionId);
+        if (input) { input.value = ""; }
+        if (preview) { preview.hidden = true; }
+    };
 
-    const labForm = document.getElementById('labForm');
-    if (!labForm) return;
-
+    /* ── Bitirmə ─────────────────────────────────────────────────────────── */
     function getUnansweredCount() {
-        const answeredEl = document.getElementById('answeredCount');
-        const answered = answeredEl ? parseInt(answeredEl.textContent, 10) : 0;
-        return TOTAL_QUESTIONS - (isNaN(answered) ? 0 : answered);
+        var answeredEl = byId("answeredCount");
+        var answered = answeredEl ? parseInt(answeredEl.textContent, 10) : 0;
+        return state.total - (isNaN(answered) ? 0 : answered);
     }
 
     function setSubmitButtonState(isSubmitting) {
-        const btn = document.getElementById('submitBtn');
-        if (!btn) return;
+        var btn = byId("submitBtn");
+        if (!btn) { return; }
         btn.disabled = isSubmitting;
-        btn.innerHTML = isSubmitting
-            ? '<span class="spinner-border spinner-border-sm me-2"></span> ' + t('actionSubmitting', 'Submitting...')
-            : '<i class="fas fa-paper-plane me-2"></i> ' + t('actionFinishLab', 'Finish Lab');
+        btn.textContent = "";
+        var icon = document.createElement("i");
+        icon.className = isSubmitting ? "fas fa-spinner fa-spin" : "fas fa-paper-plane";
+        icon.setAttribute("aria-hidden", "true");
+        btn.appendChild(icon);
+        btn.appendChild(document.createTextNode(" " + (isSubmitting ? t("actionSubmitting", "Submitting...") : t("actionFinishLab", "Finish Lab"))));
     }
 
     function setConfirmButtonState(isSubmitting) {
-        if (confirmFinishLabBtn) confirmFinishLabBtn.disabled = isSubmitting;
-    }
-
-    function updateFinishConfirmContent(unanswered) {
-        if (finishConfirmMessage) {
-            finishConfirmMessage.textContent = t(
-                'confirmFinishDescription',
-                'After finishing the lab, you will not be able to return and edit it.'
-            );
-        }
-
-        if (!finishUnansweredNotice) return;
-
-        if (unanswered > 0) {
-            finishUnansweredNotice.textContent = t('confirmUnanswered', '{count} questions are unanswered. Submit?').replace(
-                '{count}',
-                unanswered
-            );
-            finishUnansweredNotice.classList.remove('d-none');
-        } else {
-            finishUnansweredNotice.textContent = '';
-            finishUnansweredNotice.classList.add('d-none');
-        }
-    }
-
-    function getFinishConfirmModal() {
-        if (!finishConfirmModalEl || !window.bootstrap) return null;
-        if (!finishConfirmModal) {
-            finishConfirmModal = new window.bootstrap.Modal(finishConfirmModalEl);
-        }
-        return finishConfirmModal;
+        var confirmBtn = byId("confirmFinishLabBtn");
+        if (confirmBtn) { confirmBtn.disabled = isSubmitting; }
     }
 
     function submitLabForm() {
+        var labForm = byId("labForm");
+        if (!labForm) { return; }
         setSubmitButtonState(true);
         setConfirmButtonState(true);
 
-        fetch('/labs/' + LAB_ID + '/submit/', {
-            method: 'POST',
-            body: new FormData(labForm),
-            headers: { 'X-CSRFToken': CSRF },
-        })
+        fetch("/labs/" + state.labId + "/submit/", { method: "POST", body: new FormData(labForm), headers: { "X-CSRFToken": csrf() } })
             .then(readJsonResponse)
-            .then((data) => {
+            .then(function (data) {
                 if (data.success) {
-                    localStorage.removeItem('lab_' + LAB_ID + '_start');
-                    window.location.href = data.redirect_url || '/';
-                } else {
-                    notifyError(t('errorPrefix', 'Error') + ': ' + (data.error || t('errorUnknown', 'Unknown error')));
-                    setSubmitButtonState(false);
-                    setConfirmButtonState(false);
+                    try { window.localStorage.removeItem("lab_" + state.labId + "_start"); } catch (e) { /* keşsiz */ }
+                    window.location.href = data.redirect_url || "/";
+                    return;
                 }
+                notifyError(t("errorPrefix", "Error") + ": " + (data.error || t("errorUnknown", "Unknown error")));
+                setSubmitButtonState(false);
+                setConfirmButtonState(false);
             })
-            .catch((err) => {
-                const payload = err && err.payload;
-                notifyError(payload && payload.error
-                    ? t('errorPrefix', 'Error') + ': ' + payload.error
-                    : t('errorServer', 'Server error'));
+            .catch(function (err) {
+                var payload = err && err.payload;
+                notifyError(payload && payload.error ? t("errorPrefix", "Error") + ": " + payload.error : t("errorServer", "Server error"));
                 setSubmitButtonState(false);
                 setConfirmButtonState(false);
             });
     }
 
-    autoSubmitHandler = submitLabForm;
-    if (autoSubmitRequested) submitLabForm();
+    function updateFinishConfirmContent(unanswered) {
+        var message = byId("finishLabConfirmMessage");
+        if (message) {
+            message.textContent = t("confirmFinishDescription", "After finishing the lab, you will not be able to return and edit it.");
+        }
+        var notice = byId("finishLabUnansweredNotice");
+        if (!notice) { return; }
+        if (unanswered > 0) {
+            notice.textContent = t("confirmUnanswered", "{count} questions are unanswered. Submit?").replace("{count}", unanswered);
+            notice.hidden = false;
+        } else {
+            notice.textContent = "";
+            notice.hidden = true;
+        }
+    }
 
-    if (confirmFinishLabBtn) {
-        confirmFinishLabBtn.addEventListener('click', function () {
-            const modal = getFinishConfirmModal();
-            if (modal) modal.hide();
-            submitLabForm();
+    function askToFinish() {
+        var unanswered = getUnansweredCount();
+        if (window.EMSOverlay && byId("finishLabConfirmModal")) {
+            updateFinishConfirmContent(unanswered);
+            window.EMSOverlay.open("finishLabConfirmModal");
+            return;
+        }
+        var text = t("confirmFinishDescription", "After finishing the lab, you will not be able to return and edit it.");
+        if (unanswered > 0) {
+            text += "\n\n" + t("confirmUnanswered", "{count} questions are unanswered. Submit?").replace("{count}", unanswered);
+        }
+        // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm; ləğv = sorğu yoxdur.
+        window.EMSConfirm.open({ body: text }).then(function (ok) {
+            if (ok) { submitLabForm(); }
         });
     }
 
-    labForm.addEventListener('submit', function (e) {
-        e.preventDefault();
+    /* ── Başlanğıc ───────────────────────────────────────────────────────── */
+    function init() {
+        if (state.ready || !readConfig()) { return; }
+        state.ready = true;
 
-        const unanswered = getUnansweredCount();
-
-        const modal = getFinishConfirmModal();
-        if (!modal) {
-            let confirmText = t(
-                'confirmFinishDescription',
-                'After finishing the lab, you will not be able to return and edit it.'
-            );
-            if (unanswered > 0) {
-                confirmText +=
-                    '\n\n' +
-                    t('confirmUnanswered', '{count} questions are unanswered. Submit?').replace('{count}', unanswered);
+        var key = "lab_" + state.labId + "_start";
+        var stored = null;
+        try {
+            stored = window.localStorage.getItem(key);
+            if (!stored) {
+                stored = new Date().toISOString();
+                window.localStorage.setItem(key, stored);
             }
-            // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
-            window.EMSConfirm.open({ body: confirmText }).then(function (ok) {
-                if (ok) submitLabForm();
-            });
-            return;
+        } catch (e) {
+            stored = stored || new Date().toISOString();
         }
+        state.startedAt = new Date(stored);
+        if (isNaN(state.startedAt.getTime())) { state.startedAt = new Date(); }
 
-        updateFinishConfirmContent(unanswered);
-        modal.show();
+        updateTimers();
+        state.timer = window.setInterval(updateTimers, 1000);
+        updateProgress();
+    }
+
+    window.EMSReady(init);
+
+    window.EMSDelegate.on("change", ".file-input", function (event, input) {
+        onFileChosen(input);
+    });
+
+    window.EMSDelegate.on("input", ".answer-textarea", function (event, ta) {
+        var card = ta.closest(".question-card");
+        if (!card) { return; }
+        var qId = card.dataset.questionId;
+        window.clearTimeout(saveTimeouts[qId]);
+        saveTimeouts[qId] = window.setTimeout(function () {
+            autoSave(qId, ta.value);
+        }, 800);
+    });
+
+    window.EMSDelegate.on("click", ".question-toggle-btn", function (event, btn) {
+        var card = byId("question-" + btn.dataset.toggleQuestion);
+        if (!card) { return; }
+        var collapsed = card.classList.toggle("question-collapsed");
+        btn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        var icon = btn.querySelector("i");
+        if (icon) {
+            icon.classList.toggle("fa-chevron-down", collapsed);
+            icon.classList.toggle("fa-chevron-up", !collapsed);
+        }
+    });
+
+    window.EMSDelegate.on("submit", "#labForm", function (event) {
+        event.preventDefault();
+        askToFinish();
+    });
+
+    window.EMSDelegate.on("click", "#confirmFinishLabBtn", function () {
+        if (window.EMSOverlay) { window.EMSOverlay.close("finishLabConfirmModal"); }
+        submitLabForm();
     });
 })();

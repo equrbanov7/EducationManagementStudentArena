@@ -1,12 +1,170 @@
-/* lab_modals.css
- * Source: labs/partials/lab_modals/_scripts.html + _add_lab_modal.html + _edit_lab_modal.html (inline stil)
- */
-.lab-chk-row { display: flex; align-items: center; padding: 10px 12px; border-bottom: 1px solid #eee; cursor: pointer; }
-.lab-chk-row:hover { background: #f5f9ff; }
-.lab-chk-row:last-child { border-bottom: none; }
-.lab-chk-row input { width: 18px; height: 18px; margin-right: 10px; flex-shrink: 0; }
-.lab-chk-row label { margin: 0; flex: 1; cursor: pointer; font-weight: 500; }
-.lab-chk-row .badge { margin-left: auto; flex-shrink: 0; }
+/* ════════════════════════════════════════════════════════════════════════════
+   EMSArena — Lab yaratma/redaktə dialoqları (lab_modals) · 2026-10-17 (Paket E)
+   Bootstrap `modal/nav-tabs/form-switch` və hex rəngləri çıxarıldı; dialoq/tab/sahə komponentləri
+   ortaq `ems_ui`-dandır, burada yalnız forma düzəni və qrup/tələbə seçicisi var. Yalnız `--ems-*`.
+   ════════════════════════════════════════════════════════════════════════════ */
 
-/* C3: add/edit lab modal list container */
-.lab-modals-1 { max-height: 200px; overflow-y: auto; }
+/* Lab dialoqu iki seçici sütun sığdırmaq üçün 720-dən geniş. */
+#addLabModal .ems-dialog,
+#editLabModal .ems-dialog {
+    max-width: 880px;
+}
+
+.lab-dlg__tabs {
+    margin-bottom: var(--ems-sp-6);
+    overflow-x: auto;
+    flex-wrap: nowrap;
+}
+
+.lab-dlg__tabs .ems-tabs__btn {
+    flex: none;
+}
+
+.lab-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+}
+
+.lab-form[hidden] {
+    display: none;
+}
+
+.lab-form__row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: end;
+    gap: var(--ems-sp-6);
+}
+
+.lab-form__row--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.lab-form__narrow {
+    max-width: 280px;
+}
+
+.lab-check {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-4);
+    min-height: var(--ems-h-field);
+    font-size: var(--ems-fs-md);
+    font-weight: 600;
+    color: var(--ems-neutral-800);
+    cursor: pointer;
+}
+
+.lab-check input {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--ems-primary-600);
+}
+
+.lab-file-input {
+    padding: 6px 10px;
+}
+
+.lab-form__current {
+    margin-top: var(--ems-sp-3);
+}
+
+/* ── Qrup / tələbə seçicisi ──────────────────────────────────────────────── */
+.lab-pickers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ems-sp-6);
+}
+
+.lab-picker {
+    gap: var(--ems-sp-3);
+}
+
+.lab-picker__list {
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+}
+
+.lab-picker__empty {
+    margin: 0;
+    padding: 16px 12px;
+    text-align: center;
+    font-size: var(--ems-fs-base);
+    color: var(--ems-text-muted);
+}
+
+.lab-picker__empty.is-error {
+    color: var(--ems-danger-strong);
+}
+
+.lab-picker__skel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    padding: var(--ems-sp-3);
+}
+
+.lab-chk-row {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-4);
+    padding: 9px 12px;
+    cursor: pointer;
+}
+
+.lab-chk-row + .lab-chk-row {
+    border-top: 1px solid var(--ems-neutral-100);
+}
+
+.lab-chk-row:hover {
+    background: var(--ems-primary-50);
+}
+
+.lab-chk-row[hidden] {
+    display: none;
+}
+
+.lab-chk-row input {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--ems-primary-600);
+}
+
+.lab-chk-row label {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    font-size: var(--ems-fs-md);
+    font-weight: 600;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.lab-chk-row .ems-badge {
+    margin-left: auto;
+    flex: none;
+}
+
+/* Tarix sahəsi (EMSDateTime) — `ems-input` sinfi ilə gəlir; təqvim düyməsi üçün yer. */
+.lab-dlg .ems-dt input.ems-input {
+    padding-right: 44px;
+}
+
+@media (max-width: 640px) {
+    .lab-form__row,
+    .lab-form__row--3,
+    .lab-pickers {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .lab-form__narrow {
+        max-width: none;
+    }
+}

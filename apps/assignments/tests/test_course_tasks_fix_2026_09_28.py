@@ -245,4 +245,5 @@ class AssignmentSectionOwnerControlsTests(TestCase):
         html = self._render(self.owner, is_owner=True)
         self.assertIn("js-edit-assignment", html)
         self.assertIn("js-delete-assignment", html)
-        self.assertIn('data-bs-target="#addAssignmentModal"', html)
+        # Paket E (2026-10-17): «yeni tapşırıq» düyməsi bölmədən kurs panelinin başlığına köçdü
+        # (course_dashboard.html; apps/courses/tests/test_pkg_e_2026_10_17.py-də yoxlanılır).

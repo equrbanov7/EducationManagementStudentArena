@@ -1,23 +1,25 @@
 {% load i18n exam_filters %}
-
+{% comment %}Detal səhifəsinin sual elementləri — ilk səhifə və tənbəl yükləmə (JSON `html`) eyni partialı
+işlədir. Düsturlar KaTeX ilə (data-ems-math); düzgün variant rəng + ikon + gizli mətnlə.{% endcomment %}
 {% for q in questions %}
-<li class="question-item">
-    {# W3 2026-09-14: düsturlar KaTeX ilə (data-ems-math) — AJAX ilə əlavə olunan kartlar da render olunur #}
-    <div class="question-content" data-ems-math>
-        <span class="question-order">{{ q.order }}.</span>
-        {% if not q.image_replaces_text or not q.image %}<p class="question-text">{{ q.text }}</p>{% endif %}
-        {% if q.image %}<img src="{{ q.image|protected_media_url }}" alt="{% if q.image_replaces_text %}{{ q.text }}{% endif %}" class="question-source-image" loading="lazy">{% endif %}
-
+<li class="ted-q question-item">
+    <span class="ted-q__num" aria-hidden="true">{{ q.order }}</span>
+    <div class="ted-q__content" data-ems-math>
+        {% if not q.image_replaces_text or not q.image %}<p class="ted-q__text"><span class="sr-only">{{ q.order }}. </span>{{ q.text }}</p>{% endif %}
+        {% if q.image %}<img src="{{ q.image|protected_media_url }}" alt="{% if q.image_replaces_text %}{{ q.text }}{% endif %}" class="ted-q__image" loading="lazy" decoding="async">{% endif %}
+        <div class="ted-q__meta">
+            <span class="ted-q__pts">{{ q.points }} {% trans "unit_points" context "exams.template.teacher_check_attempt" %}</span>
+            {% if not q.is_active %}<span class="ems-badge ems-badge--muted">{% trans "status_passive" context "exams.template.teacher_exam_detail" %}</span>{% endif %}
+        </div>
         {% if exam.exam_type == "test" %}
-            <ul class="options-list">
+            <ul class="ted-opts">
                 {% for opt in q.options.all %}
-                    <li class="option-item {% if opt.is_correct %}correct{% endif %}">
-                        <span class="option-indicator">
-                            {% if opt.is_correct %}<i class="fas fa-check-circle"></i>{% else %}<i class="far fa-circle"></i>{% endif %}
-                        </span>
-                        <span class="option-label">{{ opt.label|default:"•" }}</span>
-                        {% if not opt.image_replaces_text or not opt.image %}<span class="option-text">{{ opt.text }}</span>{% endif %}
-                            {% if opt.image %}<img src="{{ opt.image|protected_media_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="option-source-image" loading="lazy">{% endif %}
+                    <li class="ted-opt{% if opt.is_correct %} is-correct{% endif %}">
+                        <span class="ted-opt__mark" aria-hidden="true">{% if opt.is_correct %}<i class="fas fa-circle-check"></i>{% else %}<i class="far fa-circle"></i>{% endif %}</span>
+                        <span class="ted-opt__label">{{ opt.label|default:"•" }}</span>
+                        {% if not opt.image_replaces_text or not opt.image %}<span class="ted-opt__text">{{ opt.text }}</span>{% endif %}
+                        {% if opt.image %}<img src="{{ opt.image|protected_media_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="ted-opt__image" loading="lazy" decoding="async">{% endif %}
+                        {% if opt.is_correct %}<span class="sr-only">({% trans "Düzgün" context "exams.attempt_review" %})</span>{% endif %}
                     </li>
                 {% endfor %}
             </ul>
@@ -25,20 +27,20 @@
     </div>
 
     {% if can_manage_exam_questions %}
-    <div class="question-actions">
+    <div class="ted-q__actions">
         <a href="{% url 'exams:edit_exam_question' exam.slug q.id %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
-           class="action-btn outline-btn-sm js-open-question-form-modal"
+           class="ems-btn ems-btn--sm js-open-question-form-modal"
            data-question-modal-mode="edit"
            data-question-modal-url="{% url 'exams:edit_exam_question' exam.slug q.id %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}">
-            <i class="fas fa-edit"></i> {% trans "action_edit" context "exams.template.teacher_exam_detail" %}
+            <i class="fas fa-pen" aria-hidden="true"></i><span>{% trans "action_edit" context "exams.template.teacher_exam_detail" %}</span>
         </a>
-
         <a href="{% url 'exams:delete_exam_question' exam.slug q.id %}"
-           class="action-btn danger-btn-sm js-open-delete-confirm-modal"
+           class="ems-btn ems-btn--sm etp-btn--danger-soft js-open-delete-confirm-modal"
            data-delete-action="{% url 'exams:delete_exam_question' exam.slug q.id %}"
            data-delete-message="{% trans 'confirm_delete_question' context 'exams.template.teacher_exam_detail' %}"
-           data-delete-target="{{ q.text|truncatechars:140 }}">
-            <i class="fas fa-trash-alt"></i> {% trans "action_delete" context "exams.template.teacher_exam_detail" %}
+           data-delete-target="{{ q.text|truncatechars:140 }}"
+           aria-label="{% trans 'action_delete' context 'exams.template.teacher_exam_detail' %}: {{ q.text|truncatechars:60 }}">
+            <i class="fas fa-trash-can" aria-hidden="true"></i><span>{% trans "action_delete" context "exams.template.teacher_exam_detail" %}</span>
         </a>
     </div>
     {% endif %}

@@ -1,232 +1,418 @@
-/* Rəng Palitrası və Qlobal Dəyişənlər */
-:root {
-    --primary-blue: var(--ems-primary-600);
-    --dark-blue: var(--ems-primary-800);
-    --light-blue: var(--ems-primary-50);
-    --pale-blue: var(--ems-primary-200);
-    
-    --primary-green: var(--ems-success);
-    --dark-green: var(--ems-success-600);
-    --light-green: var(--ems-emerald-50);
-}
+/* ════════════════════════════════════════════════════════════════════════════
+   EMSArena — Tələbənin lab səhifəsi (lab_detail.html) · 2026-10-17 (Paket E)
+   Gradient başlıqlar, `--primary-blue` palitrası və Bootstrap `card/badge` çıxarıldı;
+   komponentlər `ems_ui`-dan, qabıq `labs_common.css`-dən gəlir. Yalnız `--ems-*` tokenləri.
+   ════════════════════════════════════════════════════════════════════════════ */
 
-/* Ümumi Mətn Rəngləri */
-.text-dark-blue { color: var(--dark-blue) !important; }
-.text-primary-blue { color: var(--primary-blue) !important; }
-.text-primary-green { color: var(--primary-green) !important; }
-
-/* Kart Dizaynı (Card Modern) */
-.card-modern {
-    background: var(--ems-neutral-0);
-    border: none;
-    border-radius: 1.25rem;
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
-    overflow: hidden;
-    margin-bottom: 2rem;
-}
-
-/* Düymələr */
-.btn-outline-custom {
-    color: var(--primary-blue);
-    border: 1px solid var(--pale-blue);
-    background: transparent;
-    font-weight: 600;
-    border-radius: 0.5rem;
-    padding: 0.5rem 1rem;
-    transition: all 0.3s ease;
-}
-.btn-outline-custom:hover {
-    background: var(--light-blue);
-    color: var(--dark-blue);
-    border-color: var(--primary-blue);
-}
-
-.btn-gradient-success {
-    background: linear-gradient(135deg, var(--primary-green) 0%, var(--dark-green) 100%);
-    border: none;
-    color: var(--ems-neutral-0);
-    font-weight: 600;
-    border-radius: 0.5rem;
-    padding: 0.5rem 1.25rem;
-    transition: filter 0.3s ease, transform 0.2s ease;
-}
-.btn-gradient-success:hover {
-    color: var(--ems-neutral-0);
-    filter: brightness(0.9);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
-}
-
-/* Lab Info & Materials Cards */
-.lab-info-card .card-header {
-    background: linear-gradient(135deg, var(--dark-blue) 0%, var(--primary-blue) 100%);
-    padding: 1rem 1.5rem;
-    font-weight: 600;
-    font-size: 1.1rem;
-}
-
-.materials-card .card-header {
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-green) 100%);
-    padding: 1rem 1.5rem;
-    font-weight: 600;
-    font-size: 1.1rem;
-}
-
-.icon-fixed { width: 24px; text-align: center; }
-
-/* Question Card */
-.question-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border-radius: 1.25rem;
-}
-.question-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08) !important;
-}
-
-.question-header {
-    background: linear-gradient(135deg, var(--dark-blue) 0%, var(--primary-blue) 100%);
-    padding: 1rem 1.5rem;
-    border-radius: 1.25rem 1.25rem 0 0 !important;
-}
-
-.question-toggle-btn {
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    color: var(--ems-neutral-0);
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 999px;
-    width: 34px;
-    height: 34px;
-    display: inline-flex;
+/* ── Nəticə lenti (təhvil verilib) ───────────────────────────────────────── */
+.lab-result {
     align-items: center;
-    justify-content: center;
+    flex-wrap: wrap;
 }
 
-.question-toggle-btn:hover {
-    color: var(--ems-neutral-0);
-    background: rgba(255, 255, 255, 0.2);
+.lab-result__main {
+    display: flex;
+    flex: 1 1 280px;
+    align-items: center;
+    gap: var(--ems-sp-5);
+    min-width: 0;
 }
 
-.question-content {
-    max-height: 1200px;
+.lab-result__ic {
+    font-size: 26px;
+    color: var(--ems-success-700);
+}
+
+.lab-result__side {
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* ── Taymer + irəliləyiş ─────────────────────────────────────────────────── */
+.lab-timer {
+    position: sticky;
+    top: 72px;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, auto)) minmax(120px, 1fr);
+    align-items: center;
+    gap: var(--ems-sp-5) var(--ems-sp-8);
+    padding: 12px 18px;
+}
+
+.lab-timer__item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.lab-timer__item .lab-label {
+    margin-bottom: 0;
+}
+
+.lab-timer__value {
+    font-size: var(--ems-fs-2xl);
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--ems-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.lab-timer__value--mono {
+    font-family: var(--ems-ff-mono);
+}
+
+.lab-timer__value--danger {
+    color: var(--ems-danger-strong);
+}
+
+.lab-timer__of {
+    font-size: var(--ems-fs-xl);
+    font-weight: 600;
+    color: var(--ems-text-muted);
+}
+
+.lab-timer__bar {
+    height: 10px;
+}
+
+.lab-timer__bar .ems-bar__fill {
+    transition: width 0.4s ease;
+}
+
+/* ── İki sütun ───────────────────────────────────────────────────────────── */
+.lab-detail__grid {
+    display: grid;
+    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+    gap: var(--ems-sp-6);
+    align-items: start;
+}
+
+.lab-detail__side {
+    position: sticky;
+    top: 88px;
+}
+
+.lab-detail__main {
+    min-width: 0;
+}
+
+.lab-facts {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 6px 18px 10px;
+}
+
+.lab-fact {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--ems-sp-2) var(--ems-sp-5);
+    padding: 10px 0;
+}
+
+.lab-fact + .lab-fact {
+    border-top: 1px solid var(--ems-neutral-100);
+}
+
+.lab-fact dt {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    font-size: var(--ems-fs-base);
+    font-weight: 600;
+    color: var(--ems-neutral-600);
+}
+
+.lab-fact dt i {
+    width: 16px;
+    color: var(--ems-neutral-500);
+    text-align: center;
+}
+
+.lab-fact dd {
+    margin: 0;
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+    color: var(--ems-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.lab-materials {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+}
+
+.lab-download {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+}
+
+.lab-download__name {
     overflow: hidden;
-    transition: max-height 0.25s ease, opacity 0.2s ease, padding 0.2s ease;
-    opacity: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lab-instructions {
+    padding: 12px 14px;
+    border: 1px solid var(--ems-neutral-100);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg-subtle);
+    font-size: var(--ems-fs-base);
+}
+
+/* ── Sual kartı ──────────────────────────────────────────────────────────── */
+.lab-qcard__head {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-5);
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--ems-border);
+}
+
+.lab-qcard__text {
+    flex: 1;
+    min-width: 0;
+    margin: 4px 0 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 700;
+    line-height: 1.5;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.lab-qcard__pts {
+    flex: none;
+    margin-top: 4px;
+}
+
+.lab-qcard__body {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--ems-sp-5);
+    padding: 16px 18px;
+}
+
+.lab-qcard__att {
+    align-self: flex-start;
+}
+
+.question-card.question-collapsed .lab-qcard__head {
+    border-bottom: 0;
 }
 
 .question-collapsed .question-content {
-    max-height: 0;
-    opacity: 0;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
+    display: none;
 }
 
-.question-number {
-    width: 36px;
-    height: 36px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    flex-shrink: 0;
-}
-
-/* Answer Textarea */
 .answer-textarea {
-    resize: vertical;
-    min-height: 120px;
-    font-family: inherit;
-    border-radius: 0.75rem;
-    border: 1px solid var(--ems-neutral-300);
-    padding: 1rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-.answer-textarea:focus {
-    border-color: var(--primary-blue);
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    min-height: 140px;
 }
 
-/* File Upload Area */
-.file-upload-area {
-    border: 2px dashed var(--ems-neutral-300) !important;
+/* ── Fayl yükləmə sahəsi ─────────────────────────────────────────────────── */
+.lab-drop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    width: 100%;
+    padding: 18px 14px;
+    border: 2px dashed var(--ems-neutral-300);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg-subtle);
+    color: var(--ems-neutral-700);
     cursor: pointer;
-    background: var(--ems-neutral-50);
-    transition: all 0.3s ease;
-    border-radius: 0.75rem;
-}
-.file-upload-area:hover {
-    background: var(--light-blue);
-    border-color: var(--primary-blue) !important;
-    color: var(--primary-blue);
+    transition: border-color 0.12s ease, background-color 0.12s ease;
 }
 
-.file-preview .badge { font-size: 0.9rem; padding: 0.5rem 1rem !important; border-radius: 2rem; background-color: var(--primary-blue) !important; }
-.file-remove { font-size: 0.6rem; cursor: pointer; }
-
-/* Submit Card */
-.submit-card { border-radius: 1.25rem; }
-.submit-card .card-body {
-    background: linear-gradient(135deg, var(--primary-green) 0%, var(--dark-green) 100%);
-    border-radius: 1.25rem;
-    padding: 1.5rem 2rem;
+.lab-drop:hover {
+    border-color: var(--ems-primary-500);
+    background: var(--ems-primary-50);
 }
 
-/* Save Status */
+.lab-drop__ic {
+    font-size: 22px;
+    color: var(--ems-primary-600);
+}
+
+.lab-drop__title {
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.lab-drop__hint {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+.file-preview {
+    display: block;
+}
+
+.file-preview[hidden] {
+    display: none;
+}
+
+.lab-chip__x {
+    display: inline-grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    margin-left: var(--ems-sp-2);
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ems-neutral-500);
+    cursor: pointer;
+}
+
+.lab-chip__x:hover {
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger);
+}
+
+/* ── Saxlanma vəziyyəti ──────────────────────────────────────────────────── */
 .save-status {
-    font-size: 0.9rem;
-    font-weight: 500;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    margin-top: 0.5rem;
-}
-
-/* Timer and Progress Box */
-.timer-box {
-    background-color: var(--ems-neutral-0);
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: 1.25rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-}
-.progress { border-radius: 2rem; overflow: hidden; background-color: var(--ems-neutral-200); }
-.progress-bar { transition: width 0.5s ease; background-color: var(--primary-green) !important; }
-
-/* Status Badges */
-.status-badge-custom {
-    padding: 0.5rem 1rem;
+    gap: var(--ems-sp-3);
+    min-height: 24px;
+    padding-top: var(--ems-sp-4);
+    border-top: 1px solid var(--ems-neutral-100);
+    font-size: var(--ems-fs-base);
     font-weight: 600;
-    border-radius: 2rem;
-    font-size: 0.85rem;
-    display: inline-flex;
+    color: var(--ems-neutral-600);
+}
+
+.save-status .is-saved {
+    color: var(--ems-success-700);
+}
+
+.save-status .is-saving {
+    color: var(--ems-primary-700);
+}
+
+.save-status .is-error {
+    color: var(--ems-danger-strong);
+}
+
+/* ── Göndər çubuğu ───────────────────────────────────────────────────────── */
+.lab-submit {
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 0.35rem;
-}
-.badge-open { background: var(--light-green); color: var(--dark-green); border: 1px solid #a7f3d0; }
-.badge-upcoming { background: var(--light-blue); color: var(--primary-blue); border: 1px solid var(--pale-blue); }
-.badge-closed { background: var(--ems-danger-100); color: var(--ems-danger-strong); border: 1px solid var(--ems-danger-200); }
-
-/* Empty States / Alerts */
-.alert-modern {
-    border: none;
-    border-radius: 1.25rem;
-    padding: 3rem 2rem;
-}
-.alert-info-modern { background-color: var(--light-blue); border: 2px dashed var(--pale-blue); }
-.alert-warning-modern { background-color: var(--ems-warning-100); border: 2px dashed #fde68a; }
-.alert-success-modern { background-color: var(--light-green); border: 2px dashed #a7f3d0; }
-
-@media (max-width: 768px) {
-    .question-number { width: 30px; height: 30px; font-size: 1rem; }
-    .question-header { font-size: 1rem; padding: 1rem; }
+    justify-content: space-between;
+    gap: var(--ems-sp-6);
+    padding: 16px 18px;
+    border-color: var(--ems-success-bd);
+    background: var(--ems-success-bg);
 }
 
-/* ═══ Faza 6.4 Sprint-3 (2026-07-02): inline style → klass ═══ */
-.lab-desc { max-width: 800px; }
-.lab-card--green { background-color: var(--light-green); }
-.lab-progress { height: 14px; }
-.lab-stat-ic { width: 40px; height: 40px; }
-.lab-alert-danger-soft { background-color: var(--ems-danger-100); border: 2px dashed var(--ems-danger-200); }
+.lab-submit__text {
+    display: flex;
+    flex: 1 1 280px;
+    align-items: flex-start;
+    gap: var(--ems-sp-5);
+    min-width: 0;
+}
 
-/* C3: mikro inline-stil köçürməsi (lab_detail.html progress bar) */
-.lab-detail-1 { width: 0%; }
+.lab-submit__ic {
+    font-size: 22px;
+    color: var(--ems-warning-700);
+}
+
+.lab-submit__title {
+    display: block;
+    color: var(--ems-text);
+}
+
+.lab-submit__body {
+    margin: 2px 0 0;
+    font-size: var(--ems-fs-base);
+    color: var(--ems-neutral-700);
+}
+
+.lab-state__ic--ok {
+    color: var(--ems-success);
+}
+
+.lab-finish-notice {
+    margin: var(--ems-sp-5) 0 0;
+}
+
+.lab-finish-notice[hidden] {
+    display: none;
+}
+
+/* ── Planşet / mobil ─────────────────────────────────────────────────────── */
+@media (max-width: 960px) {
+    .lab-detail__grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .lab-detail__side {
+        position: static;
+        order: 2;
+    }
+
+    .lab-detail__main {
+        order: 1;
+    }
+}
+
+@media (max-width: 640px) {
+    .lab-timer {
+        top: 56px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--ems-sp-4) var(--ems-sp-6);
+        padding: 10px 14px;
+    }
+
+    .lab-timer__bar {
+        grid-column: 1 / -1;
+        height: 8px;
+    }
+
+    .lab-timer__value {
+        font-size: var(--ems-fs-xl);
+    }
+
+    .lab-qcard__head,
+    .lab-qcard__body {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    /* Telefonda bal nişanı mətni sıxmasın: nömrə | mətn | düymə, bal — mətnin altında. */
+    .lab-qcard__head {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: var(--ems-sp-3) var(--ems-sp-5);
+    }
+
+    .lab-qcard__pts {
+        grid-column: 2;
+        grid-row: 2;
+        justify-self: start;
+        margin-top: 0;
+    }
+
+    .lab-submit .ems-btn {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lab-timer__bar .ems-bar__fill {
+        transition: none;
+    }
+}

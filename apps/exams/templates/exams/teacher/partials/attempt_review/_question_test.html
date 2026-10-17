@@ -1,0 +1,46 @@
+{% load i18n exam_filters %}
+{% comment %}Test sualı: tələbənin seçimi ↔ düzgün variant. Vəziyyət rəng + mətn etiketi ilə (a11y).{% endcomment %}
+<article class="rv-q rv-q--{{ item.state_tone }}" id="{{ item.anchor }}" aria-labelledby="{{ item.anchor }}-title">
+    {% include "exams/teacher/partials/attempt_review/_question_head.html" %}
+
+    <div class="rv-q__body">
+        {% include "exams/teacher/partials/attempt_review/_question_media.html" %}
+
+        <ul class="rv-opts" aria-label="{% trans 'Variantlar' context 'exams.attempt_review' %}">
+            {% for opt in item.question.options.all %}
+            <li class="rv-opt{% if opt.id in item.selected_ids %} is-selected{% endif %}{% if opt.id in item.correct_ids %} is-correct{% endif %}{% if opt.id in item.selected_ids and opt.id not in item.correct_ids %} is-wrong{% endif %}">
+                <span class="rv-opt__label" aria-hidden="true">{{ opt.label|default:"•" }}</span>
+                <span class="rv-opt__text">
+                    {% if not opt.image_replaces_text or not opt.image %}{{ opt.text }}{% endif %}
+                    {% if opt.image %}<img src="{{ opt.image|protected_media_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="rv-opt__image" loading="lazy">{% endif %}
+                </span>
+                <span class="rv-opt__tags">
+                    {% if opt.id in item.selected_ids %}
+                        <span class="rv-tag rv-tag--{% if opt.id in item.correct_ids %}success{% else %}danger{% endif %}">
+                            <i class="fas {% if opt.id in item.correct_ids %}fa-check{% else %}fa-xmark{% endif %}" aria-hidden="true"></i>
+                            {% trans "Tələbənin seçimi" context "exams.attempt_review" %}
+                        </span>
+                    {% endif %}
+                    {% if opt.id in item.correct_ids %}
+                        <span class="rv-tag rv-tag--correct">
+                            <i class="fas fa-circle-check" aria-hidden="true"></i>
+                            {% trans "Düzgün cavab" context "exams.attempt_review" %}
+                        </span>
+                    {% endif %}
+                </span>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <p class="rv-verdict rv-verdict--{{ item.state_tone }}">
+            <i class="fas {{ item.state_icon }}" aria-hidden="true"></i>
+            {% if item.state == "unanswered" %}
+                {% trans 'Cavab verilməyib' %} (0 {% trans "unit_points" context "exams.template.teacher_view_attempt" %})
+            {% elif item.state == "correct" %}
+                {% trans "message_answer_fully_correct" context "exams.template.teacher_view_attempt" %} (+{{ item.max_points }} {% trans "unit_points" context "exams.template.teacher_view_attempt" %})
+            {% else %}
+                {% trans "message_answer_wrong" context "exams.template.teacher_view_attempt" %} (0 {% trans "unit_points" context "exams.template.teacher_view_attempt" %})
+            {% endif %}
+        </p>
+    </div>
+</article>

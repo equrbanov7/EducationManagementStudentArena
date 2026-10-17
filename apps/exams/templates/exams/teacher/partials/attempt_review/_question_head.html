@@ -1,0 +1,17 @@
+{% load i18n get_item %}
+{% comment %}Sual kartının başlığı: nömrə, mətn, vəziyyət nişanı (mətnlə), qazanılan / maks bal, apellyasiya düzəlişi.{% endcomment %}
+<header class="rv-q__head">
+    <span class="rv-q__num" aria-hidden="true">{{ item.number }}</span>
+    <h3 class="rv-q__title" id="{{ item.anchor }}-title">
+        {% if not item.question.image_replaces_text or not item.question.image %}<span class="sr-only">{% blocktrans with n=item.number context "exams.attempt_review" %}Sual {{ n }}{% endblocktrans %}:</span> {{ item.question.text }}{% else %}{% blocktrans with n=item.number context "exams.attempt_review" %}Sual {{ n }}{% endblocktrans %}{% endif %}
+    </h3>
+    <div class="rv-q__chips">
+        <span class="ems-badge ems-badge--{{ item.state_tone }}"><i class="fas {{ item.state_icon }}" aria-hidden="true"></i>{{ item.state_label }}</span>
+        <span class="rv-points" title="{% trans 'Qazanılan / maksimum bal' context 'exams.attempt_review' %}">
+            {% if item.earned is None %}—{% else %}{{ item.earned }}{% endif %} / {{ item.max_points }} {% trans "unit_points" context "exams.template.teacher_view_attempt" %}
+        </span>
+        {% if appeal_corrected_qids|get_item:item.question.id %}
+        <span class="ems-badge ems-badge--success"><i class="fas fa-gavel" aria-hidden="true"></i>{% trans "appeal_corrected_short" context "exams.template.teacher_view_attempt" %}</span>
+        {% endif %}
+    </div>
+</header>

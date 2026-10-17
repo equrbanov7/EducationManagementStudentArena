@@ -2,127 +2,64 @@
 {% task_kind_visibility as tkv %}
 {% if can_view_student_assignments %}
 <section class="profile-section-panel profile-section--assigned-exams {% if active_section == 'assigned-exams' %}is-active{% endif %}" data-profile-section-panel="assigned-exams" data-source-url="{% url 'accounts:assigned_exams' %}">
-    <div class="section-card">
-
-
-        <div class="modern-results-tabs assigned-task-tabs">
+    <div class="ta">
+        {% comment %}Redizayn 2026-10-18 (Paket A): server tərəfli `ems-tabs` (telefonda üfüqi sürüşür),
+        `ems-input` axtarış (çəngəllər — `js-profile-debounce-search`, `assigned_search` — dəyişməyib),
+        mobil-öncəlikli tapşırıq kartları; vəziyyət badge-i `task_state` ailəsindən (status_catalog).
+        İmtahan kartının düyməsi `.js-open-assigned-exam-modal` + `data-*` müqaviləsi ilə
+        `profile/assigned_exam.js` modalını açır — atributlar OLDUĞU KİMİ saxlanılıb.{% endcomment %}
+        <nav class="ems-tabs ems-tabs--scroll ta-tabs" aria-label="{% trans 'Tapşırıq növü' context 'profile.assigned_tasks.ui' %}">
             <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=all"
-               class="modern-tab {% if assigned_tasks_active_filter == 'all' %}active{% endif %}">
-                {% trans "tab_all" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.all|default:0 }}</span>
+               class="ems-tabs__btn"{% if assigned_tasks_active_filter == 'all' %} aria-current="page"{% endif %}>
+                {% trans "tab_all" context "profile.assigned_tasks" %} <span class="ems-tabs__count">{{ assigned_task_counts.all|default:0 }}</span>
             </a>
             <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=exams"
-               class="modern-tab {% if assigned_tasks_active_filter == 'exams' %}active{% endif %}">
-                {% trans "tab_exams" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.exams|default:0 }}</span>
+               class="ems-tabs__btn"{% if assigned_tasks_active_filter == 'exams' %} aria-current="page"{% endif %}>
+                {% trans "tab_exams" context "profile.assigned_tasks" %} <span class="ems-tabs__count">{{ assigned_task_counts.exams|default:0 }}</span>
             </a>
             {% if tkv.selfwork %}{# rol auditi B12 (2026-10-14): «Sərbəst iş» bağlıdırsa tab da yoxdur #}
             <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=assignments"
-               class="modern-tab {% if assigned_tasks_active_filter == 'assignments' %}active{% endif %}">
-                {% trans "tab_assignments" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.assignments|default:0 }}</span>
+               class="ems-tabs__btn"{% if assigned_tasks_active_filter == 'assignments' %} aria-current="page"{% endif %}>
+                {% trans "tab_assignments" context "profile.assigned_tasks" %} <span class="ems-tabs__count">{{ assigned_task_counts.assignments|default:0 }}</span>
             </a>
             {% endif %}
             <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=labs"
-               class="modern-tab {% if assigned_tasks_active_filter == 'labs' %}active{% endif %}">
-                {% trans "tab_labs" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.labs|default:0 }}</span>
+               class="ems-tabs__btn"{% if assigned_tasks_active_filter == 'labs' %} aria-current="page"{% endif %}>
+                {% trans "tab_labs" context "profile.assigned_tasks" %} <span class="ems-tabs__count">{{ assigned_task_counts.labs|default:0 }}</span>
             </a>
             {% if tkv.coursework %}
             <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=independent"
-               class="modern-tab {% if assigned_tasks_active_filter == 'independent' %}active{% endif %}">
-                {% trans "tab_independent" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.independent|default:0 }}</span>
+               class="ems-tabs__btn"{% if assigned_tasks_active_filter == 'independent' %} aria-current="page"{% endif %}>
+                {% trans "tab_independent" context "profile.assigned_tasks" %} <span class="ems-tabs__count">{{ assigned_task_counts.independent|default:0 }}</span>
             </a>
             {% endif %}
-        </div>
+        </nav>
 
-        <form method="get" class="assigned-task-search-form js-profile-debounce-search" data-debounce-ms="1000">
+        <form method="get" class="ems-search ta-search js-profile-debounce-search" data-debounce-ms="1000" role="search">
             <input type="hidden" name="section" value="assigned-exams">
             <input type="hidden" name="assigned_type" value="{{ assigned_tasks_active_filter }}">
-            <div class="assigned-task-search-input-wrap">
-                <i class="fas fa-search" aria-hidden="true"></i>
-                <input type="search"
-                       name="assigned_search"
-                       value="{{ assigned_tasks_search_query }}"
-                       placeholder="{% trans 'search_placeholder' context 'profile.assigned_tasks' %}"
-                       autocomplete="off" aria-label="{% trans 'search_placeholder' context 'profile.assigned_tasks' %}">
-            </div>
+            <label class="sr-only" for="assignedTaskSearch">{% trans 'search_placeholder' context 'profile.assigned_tasks' %}</label>
+            <i class="fas fa-search ems-search__icon" aria-hidden="true"></i>
+            <input type="search"
+                   id="assignedTaskSearch"
+                   class="ems-input ems-search__input"
+                   name="assigned_search"
+                   value="{{ assigned_tasks_search_query }}"
+                   placeholder="{% trans 'search_placeholder' context 'profile.assigned_tasks' %}"
+                   autocomplete="off">
         </form>
 
         {% if assigned_task_items %}
-        <div class="results-cards-grid assigned-tasks-grid">
+        <div class="ta-grid">
             {% for item in assigned_task_items %}
-            <div class="modern-result-card modern-assigned-task-card">
-                <div class="result-card-header">
-                    <div class="result-icon-wrapper assigned-task-icon assigned-task-icon--{{ item.category }}">
-                        <i class="{{ item.icon }}"></i>
-                    </div>
-                    <div class="result-title-group">
-                        <h4 class="result-title">{{ item.title }}</h4>
-                        <div class="result-meta-info">
-                            <span class="kind-badge">{{ item.kind }}</span>
-                            {% if item.assigned_at %}
-                            <span class="meta-divider">•</span>
-                            <span><i class="far fa-clock"></i> {{ item.assigned_at|date:"d.m.Y H:i" }}</span>
-                            {% endif %}
-                            {% if item.deadline %}
-                            <span class="meta-divider">•</span>
-                            <span><i class="fas fa-hourglass-end"></i> {% trans "deadline_prefix" context "profile.assigned_tasks" %}: {{ item.deadline|date:"d.m.Y H:i" }}</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="result-status-wrap">
-                        <span class="status-badge status-{{ item.state_badge }}">{{ item.state_label }}</span>
-                    </div>
-                </div>
-
-                {% if item.description %}
-                <div class="result-card-body assigned-task-body">
-                    <div class="assigned-task-desc">
-                        <p>{{ item.description|truncatechars:180 }}</p>
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="result-card-footer task-card-footer">
-                    {% if item.category == "exams" %}
-                    <button type="button"
-                            class="btn-action btn-task-primary js-open-assigned-exam-modal"
-                            data-start-url="{{ item.detail_url }}"
-                            data-exam-slug="{{ item.exam_slug }}"
-                            data-exam-title="{{ item.title }}"
-                            data-exam-kind="{{ item.kind }}"
-                            data-exam-type="{{ item.exam_type_display }}"
-                            data-exam-start="{% if item.exam_start_at %}{{ item.exam_start_at|date:'d.m.Y H:i' }}{% else %}{% trans 'Məhdudiyyət yoxdur (daimi)' %}{% endif %}"
-                            data-exam-end="{% if item.exam_end_at %}{{ item.exam_end_at|date:'d.m.Y H:i' }}{% else %}{% trans 'Məhdudiyyət yoxdur (daimi)' %}{% endif %}"
-                            data-exam-duration="{% if item.exam_total_duration_minutes %}{% blocktrans with minutes=item.exam_total_duration_minutes %}{{ minutes }} dəqiqə{% endblocktrans %}{% else %}{% trans 'Məhdudiyyət yoxdur' %}{% endif %}"
-                            data-exam-note="{% if item.description %}{{ item.description|striptags|escape }}{% else %}{% endif %}"
-                            data-requires-code="{% if item.exam_requires_code %}1{% else %}0{% endif %}"
-                            data-is-final="{% if item.is_final %}1{% else %}0{% endif %}"
-                            data-final-has-ticket="{% if item.final_has_ticket %}1{% else %}0{% endif %}"
-                            data-final-pin="{{ item.final_pin|default:'' }}"
-                            data-final-room="{{ item.final_room|default:'' }}"
-                            data-final-entry-open="{% if item.final_entry_open %}1{% else %}0{% endif %}"
-                            data-final-entry-url="{{ item.final_entry_url|default:'' }}"
-                            data-student-pin="{{ item.student_pin|default:'' }}"
-                            data-start-block-reason="{{ item.start_block_reason|default:'' }}">
-                        <span>{% trans "open_task" context "profile.assigned_tasks" %}</span>
-                        <i class="fas fa-arrow-right icon-arrow"></i>
-                    </button>
-                    {% else %}
-                    <a href="{{ item.detail_url }}" class="btn-action btn-task-primary">
-                        <span>{% trans "open_task" context "profile.assigned_tasks" %}</span>
-                        <i class="fas fa-arrow-right icon-arrow"></i>
-                    </a>
-                    {% endif %}
-                </div>
-            </div>
+            {% include "accounts/profile/sections/student_outcomes/_task_card.html" %}
             {% endfor %}
         </div>
-
         {% else %}
-        <div class="modern-empty-state">
-            <div class="empty-icon-wrapper icon-sky-light">
-                <i class="fas fa-tasks"></i>
-            </div>
-            <h3>{% trans "empty_title" context "profile.assigned_tasks" %}</h3>
-            <p>{% trans "empty_description" context "profile.assigned_tasks" %}</p>
+        <div class="ems-state" role="status">
+            <i class="fas fa-tasks ems-state__icon" aria-hidden="true"></i>
+            <p class="ems-state__title">{% trans "empty_title" context "profile.assigned_tasks" %}</p>
+            <p class="ems-state__body">{% trans "empty_description" context "profile.assigned_tasks" %}</p>
         </div>
         {% endif %}
     </div>

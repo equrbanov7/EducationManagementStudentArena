@@ -6,12 +6,12 @@
    sətir üslubları qalır. */
 
 .fxc-live-panel {
-    border-color: #BBF7D0;
-    border-left: 4px solid #16A34A;
-    background: #F0FDF4;
+    border-color: var(--ems-success-bd);
+    border-left: 4px solid var(--ems-emerald-600);
+    background: var(--ems-emerald-50);
 }
 
-.fxc-live-panel .rma-panel__summary { color: #14532D; }
+.fxc-live-panel .rma-panel__summary { color: var(--ems-success-700); }
 .fxc-live-panel .rma-panel__summary:hover { background: rgba(22, 163, 74, .06); }
 
 .fxc-live-panel .rma-panel__label {
@@ -21,21 +21,21 @@
 }
 
 .fxc-live-panel .rma-chip {
-    background: #16A34A;
-    color: #fff;
+    background: var(--ems-emerald-600);
+    color: var(--ems-neutral-0);
     font-weight: 800;
     font-variant-numeric: tabular-nums;
 }
 
 .fxc-live-panel .rma-toggle {
-    color: #15803D;
-    background: #DCFCE7;
-    border-color: #BBF7D0;
+    color: var(--ems-success-700);
+    background: var(--ems-success-100);
+    border-color: var(--ems-success-bd);
 }
 
 .fxc-live-panel .rma-cscroll {
-    border-color: #DCFCE7;
-    background: #fff;
+    border-color: var(--ems-success-100);
+    background: var(--ems-neutral-0);
 }
 
 .fxc-live-exams__list {
@@ -50,18 +50,18 @@
     gap: 14px;
     flex-wrap: wrap;
     padding: 10px 12px;
-    border: 1px solid #DCFCE7;
+    border: 1px solid var(--ems-success-100);
     border-radius: 10px;
-    background: #fff;
+    background: var(--ems-neutral-0);
     text-decoration: none;
-    color: #0F172A;
+    color: var(--ems-neutral-900);
     transition: border-color .15s ease, box-shadow .15s ease;
 }
 
 .fxc-live-exam:hover {
-    border-color: #16A34A;
+    border-color: var(--ems-emerald-600);
     box-shadow: 0 2px 10px rgba(22, 163, 74, .12);
-    color: #0F172A;
+    color: var(--ems-neutral-900);
 }
 
 .fxc-live-exam__exam {
@@ -70,25 +70,25 @@
 }
 
 .fxc-live-exam__room {
-    color: #475569;
+    color: var(--ems-neutral-600);
     font-size: .9rem;
 }
 
 .fxc-live-exam__room code {
     font-size: .8rem;
-    color: #16A34A;
+    color: var(--ems-emerald-600);
 }
 
 .fxc-live-exam__count {
     font-weight: 700;
-    color: #14532D;
+    color: var(--ems-success-700);
     font-size: .88rem;
     white-space: nowrap;
 }
 
 .fxc-live-exam__go {
     margin-left: auto;
-    color: #16A34A;
+    color: var(--ems-emerald-600);
     font-weight: 700;
     font-size: .85rem;
     white-space: nowrap;

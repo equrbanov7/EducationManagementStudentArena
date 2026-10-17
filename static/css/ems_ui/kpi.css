@@ -195,6 +195,216 @@ button.ems-kpi {
     color: var(--ems-neutral-300);
 }
 
+/* ── Bal halqası (`partials/ems_ui/_score_ring.html`) — Paket A 2026-10-18 ─
+   Faiz SVG `stroke-dasharray` ATRİBUTU ilə gəlir (inline style yox — CSP).
+   Dairə `pathLength="100"` olduğundan dasharray birbaşa faizdir. */
+.ems-ring {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 92px;
+    height: 92px;
+}
+
+.ems-ring__svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.ems-ring__track,
+.ems-ring__fill {
+    fill: none;
+    stroke-width: 3.4;
+}
+
+.ems-ring__track {
+    stroke: var(--ems-neutral-200);
+}
+
+.ems-ring__fill {
+    stroke: var(--ems-primary-600);
+}
+
+.ems-ring--success .ems-ring__fill {
+    stroke: var(--ems-success-600);
+}
+
+.ems-ring--warning .ems-ring__fill {
+    stroke: var(--ems-warning-500);
+}
+
+.ems-ring--danger .ems-ring__fill {
+    stroke: var(--ems-danger);
+}
+
+.ems-ring--neutral .ems-ring__fill,
+.ems-ring--muted .ems-ring__fill {
+    stroke: var(--ems-neutral-400);
+}
+
+.ems-ring__label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ems-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.ems-ring__sub {
+    margin-top: 2px;
+    font-size: var(--ems-fs-2xs);
+    font-weight: 700;
+    letter-spacing: 0;
+    color: var(--ems-text-muted);
+}
+
+.ems-ring--sm {
+    width: 58px;
+    height: 58px;
+}
+
+.ems-ring--sm .ems-ring__label {
+    font-size: var(--ems-fs-sm);
+}
+
+.ems-ring--lg {
+    width: 128px;
+    height: 128px;
+}
+
+.ems-ring--lg .ems-ring__label {
+    font-size: var(--ems-fs-2xl);
+}
+
+/* ── Bal bölgüsü (davamiyyət · aktivlik · midterm · final · cəm) ───────── */
+.ems-breakdown {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+    gap: var(--ems-sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ems-breakdown__item {
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle);
+}
+
+.ems-breakdown__label {
+    display: block;
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.ems-breakdown__value {
+    display: block;
+    margin-top: 4px;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.ems-breakdown__max {
+    margin-left: 2px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+    color: var(--ems-text-muted);
+}
+
+.ems-breakdown__note {
+    display: block;
+    margin-top: 4px;
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-text-muted);
+    text-wrap: pretty;
+}
+
+.ems-breakdown__item--total {
+    background: var(--ems-primary-50);
+    border-color: var(--ems-primary-200);
+}
+
+.ems-breakdown__item--total .ems-breakdown__value {
+    color: var(--ems-primary-800);
+}
+
+.ems-breakdown-note {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-2);
+    margin: var(--ems-sp-2) 0 0;
+    font-size: var(--ems-fs-sm);
+    line-height: 1.5;
+    color: var(--ems-primary-800);
+    text-wrap: pretty;
+}
+
+.ems-breakdown-note > i {
+    margin-top: 3px;
+    flex: none;
+}
+
+/* Native `<progress>` — dinamik en üçün inline style lazım deyil (CSP-təmiz). */
+.ems-progress {
+    display: block;
+    width: 100%;
+    height: 6px;
+    margin-top: 6px;
+    border: 0;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-200);
+    overflow: hidden;
+    appearance: none;
+}
+
+.ems-progress::-webkit-progress-bar {
+    background: var(--ems-neutral-200);
+    border-radius: var(--ems-r-pill);
+}
+
+.ems-progress::-webkit-progress-value {
+    background: var(--ems-primary-600);
+    border-radius: var(--ems-r-pill);
+}
+
+.ems-progress::-moz-progress-bar {
+    background: var(--ems-primary-600);
+    border-radius: var(--ems-r-pill);
+}
+
+.ems-progress--success::-webkit-progress-value {
+    background: var(--ems-success-600);
+}
+
+.ems-progress--success::-moz-progress-bar {
+    background: var(--ems-success-600);
+}
+
+.ems-progress--danger::-webkit-progress-value {
+    background: var(--ems-danger);
+}
+
+.ems-progress--danger::-moz-progress-bar {
+    background: var(--ems-danger);
+}
+
 /* ── Skeleton (yüklənmə) ────────────────────────────────────────────────── */
 .ems-kpi--skeleton .ems-kpi__label,
 .ems-kpi--skeleton .ems-kpi__value,

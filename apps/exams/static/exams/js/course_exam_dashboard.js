@@ -33,8 +33,8 @@
     var editorModalBody = document.getElementById("courseExamEditorModalBody");
     var searchInput = document.getElementById("examSearchInput");
     var editorModal = editorModalElement ? window.bootstrap.Modal.getOrCreateInstance(editorModalElement) : null;
+    // «Mövcud imtahanı əlaqələndir» dialoqu (2026-10-17): Bootstrap modal → ortaq `EMSOverlay`.
     var linkModalElement = document.getElementById("linkExamModal");
-    var linkModal = linkModalElement ? window.bootstrap.Modal.getOrCreateInstance(linkModalElement) : null;
     var submitInFlight = false;
     var config = configElement.dataset;
 
@@ -188,8 +188,8 @@
         return;
       }
 
-      if (linkModal) {
-        linkModal.hide();
+      if (linkModalElement && window.EMSOverlay) {
+        window.EMSOverlay.close(linkModalElement);
       }
 
       var targetUrl = trigger.getAttribute("data-url");
@@ -299,7 +299,7 @@
       searchInput.addEventListener("input", function () {
         var match = searchMatcher(searchInput.value);
         document.querySelectorAll(".exam-search-item").forEach(function (item) {
-          item.style.display = match(item.textContent) ? "" : "none";
+          item.hidden = !match(item.textContent);
         });
       });
     }

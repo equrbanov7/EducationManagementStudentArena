@@ -1,0 +1,16 @@
+{% load exam_start i18n %}
+{% comment %}Tələbənin «başla / yenidən başla» düyməsi (`exam`, `item` kontekstdədir). `.js-open-course-exam-modal` məlumat/kod dialoqunu açır.{% endcomment %}
+<button type="button" class="ems-btn ems-btn--sm ems-btn--primary js-open-course-exam-modal"
+        data-start-url="{% url 'exams:start_exam' exam.slug %}?next={{ request.get_full_path|urlencode }}&si={% exam_start_intent exam %}"
+        data-exam-slug="{{ exam.slug }}"
+        data-exam-title="{{ exam.title }}"
+        data-exam-type="{{ exam.get_exam_type_display }}"
+        data-exam-start="{% if exam.start_datetime %}{{ exam.start_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
+        data-exam-end="{% if exam.end_datetime %}{{ exam.end_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
+        data-exam-duration="{% if exam.total_duration_minutes %}{{ exam.total_duration_minutes }} {% trans 'label_duration_unit_minutes' context 'exams.partial.exam_section' %}{% else %}{% trans 'modal_value_unlimited' context 'exams.partial.exam_section' %}{% endif %}"
+        data-exam-note="{% if exam.description %}{{ exam.description|striptags|escape }}{% endif %}"
+        data-language-options-id="{{ item.language_options_id }}"
+        data-default-language="{{ item.default_language }}"
+        data-requires-code="{% if item.requires_code %}1{% else %}0{% endif %}">
+    {% if button_label_key == "restart" %}<i class="fas fa-redo" aria-hidden="true"></i> {% trans "action_restart_exam" context "exams.partial.exam_section" %}{% else %}<i class="fas fa-play" aria-hidden="true"></i> {% trans "action_start_exam" context "exams.partial.exam_section" %}{% endif %}
+</button>

@@ -1,3 +1,5 @@
+/* Imtahan yarat/redaktə modalının sahə stilləri (sehrbaz qabığı exam_wizard.css-dədir).
+   2026-10-17 (Paket B, sıra 15): hex rənglər `--ems-*` tokenlərinə köçürülüb (16 → 0). */
 .exam-create-edit-modal .modal-dialog {
     /* Sabit en — modal məzmununa görə kiçilməsin (məs. Nəzarət addımı digər
        addımlardan dar görünməsin); bütün addımlar eyni tam eni tutur. */
@@ -24,7 +26,7 @@
 }
 
 .create-exam-modal-error {
-    color: #991b1b;
+    color: var(--ems-danger-strong);
 }
 
 .create-exam-form-errors {
@@ -32,8 +34,8 @@
     padding: 0.75rem;
     border: 1px solid var(--ems-danger-200);
     border-radius: 8px;
-    background: #fef2f2;
-    color: #991b1b;
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
 }
 
 .create-exam-form-grid {
@@ -108,20 +110,20 @@
 }
 
 .create-exam-type-toggle > .create-exam-type-btn:hover {
-    border-color: #93c5fd;
+    border-color: var(--ems-primary-300);
     background: var(--ems-primary-50);
     color: var(--ems-primary-700);
 }
 
 .create-exam-type-toggle > .btn-check:focus + .create-exam-type-btn {
-    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+    box-shadow: var(--ems-sh-focus);
 }
 
 .create-exam-type-toggle > .btn-check:checked + .create-exam-type-btn {
     background: linear-gradient(135deg, var(--ems-primary-600) 0%, var(--ems-primary-700) 100%);
     border-color: var(--ems-primary-700);
     color: var(--ems-neutral-0);
-    box-shadow: 0 14px 28px rgba(37, 99, 235, 0.18);
+    box-shadow: var(--ems-sh-raised);
 }
 
 .create-exam-type-toggle > .btn-check:checked + .create-exam-type-btn:hover {
@@ -213,7 +215,7 @@
 
 .create-exam-search-input:focus {
     border-color: var(--ems-primary-500);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    box-shadow: var(--ems-sh-focus);
 }
 
 .create-exam-search-list {
@@ -250,22 +252,22 @@
 
 /* Seçilmiş qrupun üzvü — qrupla daxil, amma ayrı tələbə kimi istisna edilə bilər. */
 .create-exam-list-item.is-group-member {
-    background: var(--ems-success-50, #E7F6EF);
+    background: var(--ems-success-bg);
 }
 .create-exam-list-item.is-group-member .create-exam-item-checkbox {
-    accent-color: var(--ems-success, #0F9D58);
+    accent-color: var(--ems-success);
 }
 .create-exam-list-item.is-group-member .create-exam-item-label {
-    color: var(--ems-gray-600, #566);
+    color: var(--ems-neutral-600);
 }
 .create-exam-list-item.is-group-member.is-group-excluded {
-    background: var(--ems-danger-50, #FEECEC);
+    background: var(--ems-danger-bg);
 }
 .create-exam-list-item.is-group-member.is-group-excluded .create-exam-item-checkbox {
-    accent-color: var(--ems-danger, #DC3545);
+    accent-color: var(--ems-danger);
 }
 .create-exam-list-item.is-group-member.is-group-excluded .create-exam-item-label {
-    color: var(--ems-danger, #B42318);
+    color: var(--ems-danger-strong);
     text-decoration: line-through;
 }
 
@@ -321,7 +323,7 @@
 }
 
 .modal-check-label--active .form-check-input {
-    accent-color: #0ea5e9;
+    accent-color: var(--ems-sky-600);
     width: 1.15rem;
     height: 1.15rem;
 }
@@ -332,8 +334,8 @@
 }
 
 .modal-check-label--public {
-    background: #f0fdf4;
-    border: 1px solid #bbf7d0;
+    background: var(--ems-success-bg);
+    border: 1px solid var(--ems-success-bd);
 }
 
 .create-exam-modal-actions {
@@ -372,16 +374,16 @@
 }
 
 .exam-create-edit-modal .modal-cancel-btn:hover {
-    background: #4b5563;
+    background: var(--ems-neutral-700);
 }
 
 .exam-create-edit-modal .modal-confirm-btn {
-    background: #7367f0;
+    background: var(--ems-primary-600);
     color: var(--ems-neutral-0);
 }
 
 .exam-create-edit-modal .modal-confirm-btn:hover:not(:disabled) {
-    background: #5b4de0;
+    background: var(--ems-primary-700);
 }
 
 .exam-create-edit-modal .modal-confirm-btn:disabled {

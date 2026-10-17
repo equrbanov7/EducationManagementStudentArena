@@ -337,4 +337,7 @@ def exam_result_summary(*, student, subject_id, organization):
         "failed": result["failed"],
         "barred": result["barred"],
         "graded": result["graded"],
+        # Paket A (2026-10-18): nəticə səhifəsinin bal bölgüsü (davamiyyət · aktivlik · midterm) —
+        # ``compute_final_result``-un artıq hesabladığı hissələr; köhnə (kollokvium) dövrdə ``None``.
+        "entry_parts": result.get("entry_parts"),
     }

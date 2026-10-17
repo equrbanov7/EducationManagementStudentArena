@@ -179,15 +179,17 @@ class IconOnlyButtonNamesTest(SimpleTestCase):
         ("apps/exams/templates/exams/teacher/teacher_group_list.html", "jsOpenEditGroup"),
         ("apps/exams/templates/exams/teacher/teacher_group_list.html", "jsConfirmDeleteGroup"),
         ("apps/exams/templates/exams/teacher/teacher_group_list.html", 'id="deleteBtn"'),
-        ("apps/labs/templates/labs/manage_blocks.html", "js-edit-question"),
-        ("apps/labs/templates/labs/manage_blocks.html", "js-delete-question"),
+        # 2026-10-18 (Paket E): şablonun baş şərhi də hook adlarını sadalayır — marker düymə teqinin özündəndir.
+        ("apps/labs/templates/labs/manage_blocks.html", 'class="ems-iconbtn js-edit-question"'),
+        ("apps/labs/templates/labs/manage_blocks.html", 'class="ems-iconbtn ems-iconbtn--danger js-delete-question"'),
         ("apps/accounts/templates/accounts/assigned_exams.html", 'type="submit" class="btn btn-primary"'),
         ("apps/accounts/templates/accounts/assigned_exams.html", "data-close-exam-code-modal"),
         ("apps/accounts/templates/accounts/assigned_courses.html", 'type="submit" class="btn btn-primary"'),
         ("apps/assignments/templates/assignments/assignment_detail.html", 'id="clearFile"'),
         # 2026-09-29: final səhnənin bağla düyməsi şablondan stage.js-ə köçdü (JS ilə render olunur).
         ("apps/live_exam/static/js/host_lobby/stage.js", "data-stage-close"),
-        ("apps/courses/templates/courses/course_members.html", "btn-icon-delete"),
+        # 2026-10-18 (Paket E): üzv silmə düyməsi `ems-iconbtn` oldu — marker data-atributdur (klass dəyişsə də qalır).
+        ("apps/courses/templates/courses/course_members.html", 'data-delete-member-id="{{'),
         ("apps/courses/templates/courses/partials/_member_accordion.html", "js-delete-member"),
         ("apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html", 'id="closeEditModal"'),
         (

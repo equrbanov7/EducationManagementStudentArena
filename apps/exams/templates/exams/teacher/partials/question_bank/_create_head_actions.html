@@ -1,0 +1,9 @@
+{% load i18n %}
+{% comment %}Yazılı/praktiki bank səhifəsinin başlıq əməli: kitabxana bankından sual seçici (yalnız yazılı imtahan).{% endcomment %}
+{% if exam.exam_type == 'written' %}
+<button type="button" class="ems-btn ems-btn--primary"
+        data-bank-picker-open
+        data-picker-url="{% url 'exams:exam_bank_picker' exam.slug %}{% if question_bank_navigation_query %}?{{ question_bank_navigation_query }}{% endif %}">
+    <i class="fas fa-book-bookmark" aria-hidden="true"></i> {% trans "Suallar bankından seç" %}
+</button>
+{% endif %}

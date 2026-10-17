@@ -113,7 +113,7 @@ body > main {
     height: 100%;
     width: 0;
     border-radius: inherit;
-    background: linear-gradient(90deg, #60a5fa 0%, var(--exam-blue) 100%);
+    background: linear-gradient(90deg, var(--ems-primary-400) 0%, var(--exam-blue) 100%);
     transition: width 0.35s ease;
 }
 
@@ -144,8 +144,8 @@ body > main {
 
 .question-timer-badge {
     display: none;
-    background: #e0f2fe;
-    color: #0284c7;
+    background: var(--ems-sky-100);
+    color: var(--ems-sky-600);
 }
 
 .timer-badge.danger,
@@ -245,7 +245,7 @@ body > main {
 .question-nav-btn.is-answered:not(.is-current) {
     border-color: var(--exam-green);
     background: var(--exam-green-soft);
-    color: #047857;
+    color: var(--ems-success-strong);
 }
 
 .question-nav-btn.is-marked:not(.is-current):not(.is-answered) {

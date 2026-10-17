@@ -1,0 +1,92 @@
+{% load i18n %}
+{% comment %}
+Yoxlama səhifəsinin dialoqları. Görünüş `ems-dialog` qatındandır, davranış (fokus tələsi,
+Escape → yadda saxlanmamış dəyişiklik xəbərdarlığı) `teacher_check_attempt.js`-dədir —
+ona görə qab `ems-overlay` deyil, `tca-overlay`-dir (overlay.js Escape-i xəbərdarlıqsız bağlayırdı).
+ID-lər köhnə JS/test müqaviləsidir: questionModal, modalScoreInput, modalMaxPointsInput, modalSaveBtn …
+{% endcomment %}
+<div class="tca-overlay" id="modalBackdrop" hidden>
+    <div class="ems-dialog ems-dialog--wide tca-dialog" id="questionModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="ems-dialog__head">
+            <div>
+                <h2 class="ems-dialog__title" id="modalTitle">{% trans "label_question" context "exams.template.teacher_check_attempt" %}</h2>
+                <p class="ems-dialog__sub" id="modalSubtitle" data-tca-modal-sub></p>
+            </div>
+            <div class="tca-dialog__nav">
+                <button type="button" class="ems-iconbtn" id="modalPrevBtn" aria-keyshortcuts="Alt+ArrowLeft"
+                        aria-label="{% trans 'Əvvəlki sual' context 'exams.teacher.grading' %}" title="{% trans 'Əvvəlki sual' context 'exams.teacher.grading' %} (Alt+←)">
+                    <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="ems-iconbtn" id="modalNextBtn" aria-keyshortcuts="Alt+ArrowRight"
+                        aria-label="{% trans 'Növbəti sual' context 'exams.teacher.grading' %}" title="{% trans 'Növbəti sual' context 'exams.teacher.grading' %} (Alt+→)">
+                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="ems-dialog__x" id="modalCloseBtn" aria-label="{% trans 'modal_close' context 'exams.template.teacher_exam_detail' %}">×</button>
+            </div>
+        </div>
+        <div class="ems-dialog__body tca-dialog__body">
+            <section class="tca-dialog__block">
+                <h3 class="tca-answer__label">{% trans "label_question" context "exams.template.teacher_check_attempt" %}</h3>
+                <div class="tca-dialog__text" id="modalQuestionText" data-ems-math></div>
+            </section>
+            <section class="tca-dialog__block tca-answer">
+                <h3 class="tca-answer__label">{% trans "Tələbənin cavabı" context "exams.teacher.grading" %}</h3>
+                <div class="tca-dialog__text" id="modalAnswerText" data-ems-math></div>
+            </section>
+            <details class="tca-details tca-model" id="modalModelAnswer" hidden>
+                <summary>{% trans "Nümunə (gözlənilən) cavab" context "exams.attempt_review" %}</summary>
+                <div class="tca-model__text" data-tca-modal-model></div>
+            </details>
+
+            <div class="tca-dialog__grade">
+                <div class="tca-ai">
+                    <button type="button" class="ems-btn tca-ai__btn" id="aiGradeBtn">
+                        <span class="btn-ai-grade__icon"><i class="fas fa-robot" aria-hidden="true"></i></span>
+                        <span class="btn-ai-grade__text">{% trans "action_ai_grade" context "exams.template.teacher_check_attempt" %}</span>
+                        <span class="btn-ai-grade__loader" hidden><i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i></span>
+                    </button>
+                    <span class="ai-grade-status" id="aiGradeStatus" role="status" aria-live="polite"></span>
+                </div>
+                <div class="tca-dialog__fields">
+                    <div class="tca-score">
+                        <label class="tca-score__label" for="modalScoreInput">{% trans "label_score" context "exams.template.teacher_check_attempt" %}</label>
+                        <div class="tca-score__ctrl">
+                            <input type="number" id="modalScoreInput" class="ems-input tca-score__input" step="1" min="0" inputmode="numeric" autocomplete="off" aria-describedby="modalScoreError">
+                            <span class="tca-score__max" aria-hidden="true">/</span>
+                            {# EXAM-P0-04: max bal yalnız göstərilir; dəyişmək üçün sual redaktə formu. #}
+                            <input type="number" id="modalMaxPointsInput" class="ems-input tca-score__input tca-score__input--max"
+                                   step="1" min="1" inputmode="numeric" readonly tabindex="-1" aria-label="{% trans 'Maksimum bal' context 'exams.teacher.grading' %}">
+                        </div>
+                        <p class="tca-score__error" id="modalScoreError" data-tca-score-error="modalScoreInput" role="alert" hidden>{% trans "Balı tam ədədlə yazın (məs. 4)." context "exams.teacher.grading" %}</p>
+                    </div>
+                    <div class="tca-fb">
+                        <label class="tca-score__label" for="modalFeedbackInput">{% trans "label_feedback" context "exams.template.teacher_check_attempt" %}</label>
+                        <textarea id="modalFeedbackInput" rows="4" class="ems-textarea"></textarea>
+                    </div>
+                </div>
+                <input type="hidden" id="currentQuestionId">
+            </div>
+        </div>
+        <div class="ems-dialog__foot">
+            <span class="ems-dialog__foot-note tca-dialog__hint">{% trans "Enter — tətbiq et və növbəti sual" context "exams.teacher.grading" %}</span>
+            <button type="button" class="ems-btn" id="modalCancelBtn">{% trans "action_cancel" context "exams.template.teacher_check_attempt" %}</button>
+            <button type="button" class="ems-btn ems-btn--primary" id="modalSaveBtn">{% trans "Tətbiq et" context "exams.teacher.grading" %}</button>
+        </div>
+    </div>
+</div>
+
+<div class="tca-overlay tca-overlay--alert" id="warningModal" hidden>
+    <div class="ems-dialog tca-alert" role="alertdialog" aria-modal="true" aria-labelledby="warningModalTitle" aria-describedby="warningModalBody">
+        <div class="ems-dialog__body tca-alert__body">
+            <span class="tca-alert__icon" aria-hidden="true"><i class="fas fa-triangle-exclamation"></i></span>
+            <div>
+                <h2 class="ems-dialog__title" id="warningModalTitle">{% trans "warning_unsaved_changes_title" context "exams.template.teacher_check_attempt" %}</h2>
+                <p class="tca-alert__text" id="warningModalBody">{% trans "warning_unsaved_changes_desc" context "exams.template.teacher_check_attempt" %}</p>
+            </div>
+        </div>
+        <div class="ems-dialog__foot">
+            <button type="button" class="ems-btn" id="warningCancelBtn">{% trans "warning_no_return" context "exams.template.teacher_check_attempt" %}</button>
+            <button type="button" class="ems-btn ems-btn--danger" id="warningConfirmBtn">{% trans "warning_yes_close" context "exams.template.teacher_check_attempt" %}</button>
+        </div>
+    </div>
+</div>

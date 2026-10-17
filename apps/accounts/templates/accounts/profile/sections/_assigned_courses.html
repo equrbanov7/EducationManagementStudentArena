@@ -4,17 +4,20 @@
     {% comment %}2026-09-12 (audit P2-1): «Təyin olunmuş kurslar» başlığı qabıqdan
     (`#profileSectionTitle`) gəlir — köhnə `.section-header-flex > .section-title`
     onu təkrarlayırdı.{% endcomment %}
-    <div class="section-card">
-        <form method="get" class="assigned-courses-search-form js-profile-debounce-search" data-debounce-ms="1000">
+    {% comment %}Redizayn 2026-10-18 (Paket A): `ems-input` axtarış (çəngəllər — `js-profile-debounce-search`,
+    `assigned_course_search` — dəyişməyib) + `ems-state` boş vəziyyət; kartlar `.mc-card` (my_courses.css).{% endcomment %}
+    <div class="sc">
+        <form method="get" class="ems-search js-profile-debounce-search" data-debounce-ms="1000" role="search">
             <input type="hidden" name="section" value="assigned-courses">
-            <div class="assigned-courses-search-input-wrap">
-                <i class="fas fa-search" aria-hidden="true"></i>
-                <input type="search"
-                       name="assigned_course_search"
-                       value="{{ assigned_courses_search_query }}"
-                       placeholder="{% trans 'search_placeholder' context 'profile.assigned_courses' %}"
-                       autocomplete="off" aria-label="{% trans 'search_placeholder' context 'profile.assigned_courses' %}">
-            </div>
+            <label class="sr-only" for="assignedCourseSearch">{% trans 'search_placeholder' context 'profile.assigned_courses' %}</label>
+            <i class="fas fa-search ems-search__icon" aria-hidden="true"></i>
+            <input type="search"
+                   id="assignedCourseSearch"
+                   class="ems-input ems-search__input"
+                   name="assigned_course_search"
+                   value="{{ assigned_courses_search_query }}"
+                   placeholder="{% trans 'search_placeholder' context 'profile.assigned_courses' %}"
+                   autocomplete="off">
         </form>
 
         {% if assigned_courses %}
@@ -41,12 +44,10 @@
             {% endfor %}
         </div>
         {% else %}
-        <div class="modern-empty-state">
-            <div class="empty-icon-wrapper icon-emerald-light">
-                <i class="fas fa-laptop-house"></i>
-            </div>
-            <h3>{% trans "empty_title" context "profile.assigned_courses" %}</h3>
-            <p>{% trans "empty_description" context "profile.assigned_courses" %}</p>
+        <div class="ems-state" role="status">
+            <i class="fas fa-laptop-house ems-state__icon" aria-hidden="true"></i>
+            <p class="ems-state__title">{% trans "empty_title" context "profile.assigned_courses" %}</p>
+            <p class="ems-state__body">{% trans "empty_description" context "profile.assigned_courses" %}</p>
         </div>
         {% endif %}
         

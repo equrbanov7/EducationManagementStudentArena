@@ -1,0 +1,95 @@
+{% load i18n exam_filters %}
+{% comment %}Baxış səhifəsinin sağ sütunu (desktopda sticky): bal halqası, bölgü, məlumat, sual xəritəsi.
+`s` = review_summary (bax `_attempt_review_ui.build_summary`). Halqa/zolaq eni JS ilə (`data-rv-pct` / `data-rv-share`).{% endcomment %}
+<aside class="rv-aside" aria-label="{% trans 'Nəticə xülasəsi' context 'exams.attempt_review' %}">
+    <section class="rv-card rv-scorecard" aria-labelledby="rv-score-title">
+        <h2 class="rv-card__title" id="rv-score-title">{% trans "label_result" context "exams.template.teacher_view_attempt" %}</h2>
+        <div class="rv-scorecard__top">
+            <div class="rv-ring rv-ring--{{ s.percent_tone }}"{% if s.percent is not None %} data-rv-pct="{{ s.percent|stringformat:'s' }}"{% endif %}
+                 role="img" aria-label="{% if s.percent is not None %}{{ s.percent_display }}%{% else %}{% trans 'Yoxlanılmayıb' context 'exams.attempt_review' %}{% endif %}">
+                <span class="rv-ring__value" aria-hidden="true">{% if s.percent is not None %}{{ s.percent_display }}<small>%</small>{% else %}—{% endif %}</span>
+            </div>
+            <dl class="rv-scorecard__facts">
+                <div>
+                    <dt>{% trans "Bal" context "exams.attempt_review" %}</dt>
+                    <dd class="rv-scorecard__score">{{ s.score_text }}</dd>
+                </div>
+                <div>
+                    <dt>{% trans "Sual" context "exams.attempt_review" %}</dt>
+                    <dd>{{ s.question_count }}</dd>
+                </div>
+            </dl>
+        </div>
+        {% if s.appeal_applied %}
+        <p class="rv-note rv-note--success">
+            <i class="fas fa-gavel" aria-hidden="true"></i>
+            {% trans "appeal_effective_score" context "exams.template.teacher_view_attempt" %}
+            {% if test_result %}<span class="rv-note__muted">({% trans "Əvvəlki bal" context "exams.attempt_review" %}: {{ test_result.score_display }} / {{ test_result.max_score_display }})</span>{% endif %}
+        </p>
+        {% endif %}
+        {% if s.is_test and test_result %}
+        <p class="rv-note">
+            {% blocktrans with delivered=test_result.delivered_count score=test_result.score_display max_score=test_result.max_score_display %}{{ delivered }} verilmiş sual, {{ score }} / {{ max_score }} bal{% endblocktrans %}
+        </p>
+        {% endif %}
+
+        {% if s.question_count %}
+        <div class="rv-bar" role="img"
+             aria-label="{% for seg in s.segments %}{{ seg.label }}: {{ seg.count }}{% if not forloop.last %}, {% endif %}{% endfor %}">
+            {% for seg in s.segments %}{% if seg.count %}<span class="rv-bar__seg rv-bar__seg--{{ seg.tone }}" data-rv-share="{{ seg.share|stringformat:'s' }}"></span>{% endif %}{% endfor %}
+        </div>
+        <ul class="rv-legend">
+            {% for seg in s.segments %}
+            <li class="rv-legend__item">
+                <span class="rv-legend__dot rv-legend__dot--{{ seg.tone }}" aria-hidden="true"></span>
+                <span class="rv-legend__label">{{ seg.label }}</span>
+                <strong class="rv-legend__count">{{ seg.count }}</strong>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </section>
+
+    <section class="rv-card rv-meta" aria-labelledby="rv-meta-title">
+        <h2 class="rv-card__title" id="rv-meta-title">{% trans "Cəhd haqqında" context "exams.attempt_review" %}</h2>
+        <dl class="rv-dl">
+            <div class="rv-dl__row">
+                <dt><i class="fas fa-chalkboard-teacher" aria-hidden="true"></i> {% trans "Yoxlayan müəllim" context "exams.attempt_review" %}</dt>
+                <dd>{{ exam_evaluator_display }}</dd>
+            </div>
+            <div class="rv-dl__row">
+                <dt><i class="far fa-calendar-alt" aria-hidden="true"></i> {% trans "Başlayıb" context "exams.attempt_review" %}</dt>
+                <dd>{% if attempt_timing.started_at %}{{ attempt_timing.started_at|date:"d.m.Y H:i" }}{% else %}—{% endif %}</dd>
+            </div>
+            <div class="rv-dl__row">
+                <dt><i class="far fa-calendar-check" aria-hidden="true"></i> {% trans "Bitirib" context "exams.attempt_review" %}</dt>
+                <dd>{% if attempt_timing.finished_at %}{{ attempt_timing.finished_at|date:"d.m.Y H:i" }}{% else %}—{% endif %}</dd>
+            </div>
+            <div class="rv-dl__row">
+                <dt><i class="far fa-clock" aria-hidden="true"></i> {% trans "Ümumi müddət" context "exams.attempt_review" %}</dt>
+                <dd>{% if attempt_timing.has_duration %}{{ attempt_timing.duration_seconds|format_duration }}{% else %}—{% endif %}</dd>
+            </div>
+            {% if not s.is_test %}
+            <div class="rv-dl__row">
+                <dt><i class="fas fa-check-double" aria-hidden="true"></i> {% trans "Yoxlanılıb" context "exams.attempt_review" %}</dt>
+                <dd>{% if attempt.teacher_checked_at %}{{ attempt.teacher_checked_at|date:"d.m.Y H:i" }}{% else %}—{% endif %}</dd>
+            </div>
+            {% endif %}
+        </dl>
+    </section>
+
+    {% if question_map %}
+    <nav class="rv-card rv-qmap" aria-labelledby="rv-qmap-title">
+        <h2 class="rv-card__title" id="rv-qmap-title">{% trans "Sual xəritəsi" context "exams.attempt_review" %}</h2>
+        <ol class="rv-qmap__list">
+            {% for q in question_map %}
+            <li>
+                <a class="rv-qchip rv-qchip--{{ q.tone }}" href="{{ q.href }}"
+                   aria-label="{% blocktrans with n=q.number state=q.label context 'exams.attempt_review' %}Sual {{ n }}: {{ state }}{% endblocktrans %}"
+                   title="{{ q.label }}">{{ q.number }}</a>
+            </li>
+            {% endfor %}
+        </ol>
+    </nav>
+    {% endif %}
+</aside>

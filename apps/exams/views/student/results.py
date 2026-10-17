@@ -9,7 +9,7 @@ from django.core.paginator import Paginator
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils.translation import pgettext
+from django.utils.translation import gettext, pgettext
 
 from apps.exams import score_adjustments
 from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
@@ -327,6 +327,18 @@ def exam_result(request, slug, attempt_id):
     if test_result is not None and appeal_bonus_points:
         test_result = score_adjustments.apply_bonus(test_result, appeal_bonus_points)
 
+    # Paket A (2026-10-18): yazılı/praktiki nəticənin «bal / maks» halqası üçün tavan — çatdırılan
+    # sualların snapshot balından (müəllim baxışı və jurnal sinxronu ilə eyni qayda); sorğu YOX,
+    # cavablar artıq yüklənib. Bal özü dəyişmir (``attempt.teacher_score``).
+    written_max_score = None
+    written_score_pct = None
+    if exam.exam_type != "test" and answers:
+        from apps.exams.services.manual_grading import answer_max_points
+
+        written_max_score = sum(answer_max_points(answer) for answer in answers) or None
+        if written_max_score and attempt.checked_by_teacher and attempt.teacher_score is not None:
+            written_score_pct = round(float(attempt.teacher_score) * 100.0 / float(written_max_score), 1)
+
     # Elektron jurnal nəticəsi: giriş + imtahan balı → ümumi bal + hərf (A–F).
     # İmtahan bir jurnal fənninə bağlıdırsa göstərilir (best-effort, sındırmır).
     journal_result = None
@@ -339,6 +351,10 @@ def exam_result(request, slug, attempt_id):
             journal_result = summary if summary.get("linked") else None
         except Exception:
             journal_result = None
+    # Paket A baxışı (2026-10-18): yazılı/praktiki imtahan hələ yoxlanmayıbsa jurnal kartı (və «F» hərfi)
+    # göstərilmir — yoxlanmamış iş tələbəyə kəsilmiş kimi görünməsin.
+    if journal_result is not None and exam.exam_type != "test" and not attempt.checked_by_teacher:
+        journal_result = None
 
     return render(
         request,
@@ -347,6 +363,9 @@ def exam_result(request, slug, attempt_id):
             "exam": exam,
             "attempt": attempt,
             "journal_result": journal_result,
+            "written_max_score": written_max_score,
+            "written_score_pct": written_score_pct,
+            "written_ring_sub": f"/ {written_max_score}" if written_max_score else "",
             "exam_intervention": exam_intervention,
             "questions": questions,
             "answers_by_qid": answers_by_qid,
@@ -468,8 +487,21 @@ def student_exam_history(request):
             if has_custom_points:
                 history_max_score = exam.questions.aggregate(total=Sum("points")).get("total") or 0
 
+    # Paket A (2026-10-18): `_content_header` breadcrumb-u (əvvəl şablonda Bootstrap breadcrumb idi).
+    if exam and exam.course_id:
+        history_crumbs = [
+            {
+                "label": exam.course.title,
+                "url": reverse("courses:course_dashboard", kwargs={"course_id": exam.course_id}),
+            },
+            {"label": exam.title, "url": ""},
+        ]
+    else:
+        history_crumbs = [{"label": gettext("İmtahanlar"), "url": ""}]
+
     context = {
         "attempts": visible_attempts,
+        "history_crumbs": history_crumbs,
         "exam": exam,
         "back_url": back_url,
         "can_start_exam": bool(exam and exam.can_user_start(request.user, code=None)[0]),

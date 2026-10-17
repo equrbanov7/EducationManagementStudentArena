@@ -1,11 +1,16 @@
 {% load static i18n %}
 {% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü (xarici CSS).{% endcomment %}
-<link rel="stylesheet" href="{% static 'exams/css/bulk_question_workbench.css' %}">
+<link rel="stylesheet" href="{% static 'exams/css/bulk_question_workbench.css' %}?v=20261017-pkgc">
 {% comment %}W3 2026-09-14: preview-da LaTeX düsturlar KaTeX ilə (data-ems-math); DOCX şəkil/düstur inam nişanları.{% endcomment %}
-<link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_rich.css' %}?v=20260914-2">
+<link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_rich.css' %}?v=20261017-pkgc">
 {% comment %}2026-09-20 tema qatı (sahib): token-əsaslı görünüş, önizləmə skeletonu və
 göndərişdən əvvəl təsdiq xülasəsi — 5 səhifədə eyni (workbench_confirm.js).{% endcomment %}
-<link rel="stylesheet" href="{% static 'exams/css/workbench_theme.css' %}?v=20261008-1">
+{% if not wb_embedded %}{% comment %}Profil örtüyündə bunlar `ems_ui/_assets.html` ilə artıq gəlir.{% endcomment %}
+<link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20261015-opt">
+<link rel="stylesheet" href="{% static 'css/ems_ui/header.css' %}?v=20260903-3">
+{% endif %}
+<link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
+<link rel="stylesheet" href="{% static 'exams/css/workbench_theme.css' %}?v=20261017-pkgc">
 {% include "partials/ems_ui/_math_assets.html" %}
 
 {% comment %}
@@ -69,102 +74,92 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
     {% endif %}
 
     {# ─────────────────────────── HEADER + STATS ─────────────────────────── #}
+    {% comment %}Paket C 2026-10-17: müəllim səhifələrinin ortaq başlığı (etp-head) + KPI sırası (etp-kpis) — əvvəl
+    başlıq solda, 4 stat kartı sağda «üzürdü». Profil örtüyündə (`wb_embedded`) H1 YOX, H2: qabıq səhifə adını
+    artıq verir. JS çəngəlləri dəyişməyib: #totalErrors · #totalWarnings · #totalDuplicates · [data-filter-trigger] ·
+    #rqInput · #dpInput · [data-bank-picker-open].{% endcomment %}
     {% if not wb_hide_header %}
-    {% include "exams/partials/_exam_crumbs.html" %}
-    <header class="page-header">
-        <div class="title-section">
-            <div class="page-header-links">
-                {# wb_hide_back_link: səhifənin ÖZ qb-header-ində eyni link varsa təkrar göstərilmir. #}
+    <header class="ems-header etp-head wb-head">
+        <div class="ems-header__main">
+            {% if wb_back_url and not wb_hide_back_link or exam_crumbs %}
+            <div class="etp-head__top">
+                {# wb_hide_back_link: səhifənin ÖZ başlığında eyni link varsa təkrar göstərilmir. #}
                 {% if wb_back_url and not wb_hide_back_link %}
-                <a href="{{ wb_back_url }}" class="page-header-link page-header-link--secondary">
-                    <i class="fas fa-arrow-left"></i>
-                    {{ wb_back_label|default:default_wb_back_label }}
+                <a href="{{ wb_back_url }}" class="etp-back">
+                    <i class="fas fa-arrow-left" aria-hidden="true"></i><span>{{ wb_back_label|default:default_wb_back_label }}</span>
                 </a>
                 {% endif %}
-                {% if wb_picker_url %}
-                <button type="button" class="page-header-link page-header-link--accent{% if wb_picker_hint %} page-header-link--hinted{% endif %}"
-                        data-bank-picker-open
-                        data-picker-url="{{ wb_picker_url }}"
-                        {% if wb_picker_hint %}title="{{ wb_picker_hint }}"{% endif %}>
-                    <i class="fas fa-book-bookmark"></i>
-                    <span class="page-header-link__body">
-                        <span class="page-header-link__label">{{ wb_picker_label|default:default_wb_picker_label }}</span>
-                        {% if wb_picker_hint %}<span class="page-header-link__hint">{{ wb_picker_hint }}</span>{% endif %}
-                    </span>
-                </button>
-                {% endif %}
-                {% if wb_secondary_url %}
-                <a href="{{ wb_secondary_url }}" class="page-header-link{% if wb_secondary_hint %} page-header-link--hinted{% endif %}"
-                   {% if wb_secondary_hint %}title="{{ wb_secondary_hint }}"{% endif %}>
-                    <i class="fas {{ wb_secondary_icon|default:'fa-layer-group' }}"></i>
-                    <span class="page-header-link__body">
-                        <span class="page-header-link__label">{{ wb_secondary_label }}</span>
-                        {% if wb_secondary_hint %}<span class="page-header-link__hint">{{ wb_secondary_hint }}</span>{% endif %}
-                    </span>
-                </a>
-                {% endif %}
-            </div>
-            <h1 class="page-title">{{ wb_title }}</h1>
-            {% if wb_subtitle %}<p class="page-subtitle">{{ wb_subtitle }}</p>{% endif %}
-        </div>
-
-        <div class="stats-container">
-            {% if wb_show_settings %}
-            <div class="stat-card settings-card">
-                <div class="stat-icon blue"><i class="fas fa-gear"></i></div>
-                <div class="card-content-wrapper">
-                    <div class="quick-settings">
-                        <div class="qs-item">
-                            <label for="rqInput">{% trans "label_question_count" context "exams.template.test_question_bank" %}</label>
-                            <input id="rqInput" type="number" min="1" value="{{ rq_value }}">
-                        </div>
-                        <div class="qs-item">
-                            <label for="dpInput">{% trans "label_default_points" context "exams.template.test_question_bank" %}</label>
-                            <input id="dpInput" type="number" min="1" value="{{ dp_value }}">
-                        </div>
-                    </div>
-                    <div class="stat-divider"></div>
-                    <div class="stat-info">
-                        <span class="stat-label">{% trans "stat_total_questions" context "exams.template.test_question_bank" %}</span>
-                        <span class="stat-value">{{ parsed|length }}</span>
-                    </div>
-                </div>
-            </div>
-            {% else %}
-            <div class="stat-card">
-                <div class="stat-icon blue"><i class="fas fa-list-check"></i></div>
-                <div class="stat-info">
-                    <span class="stat-label">{% trans "stat_total_questions" context "exams.template.test_question_bank" %}</span>
-                    <span class="stat-value">{{ parsed|length }}</span>
-                </div>
+                {% include "exams/partials/_exam_crumbs.html" %}
             </div>
             {% endif %}
+            {% if wb_embedded %}
+            <h2 class="ems-header__title wb-head__title">{{ wb_title }}</h2>
+            {% else %}
+            <h1 class="ems-header__title">{{ wb_title }}</h1>
+            {% endif %}
+            {% if wb_subtitle %}<p class="ems-header__subtitle">{{ wb_subtitle }}</p>{% endif %}
+        </div>
+        {% if wb_picker_url or wb_secondary_url %}
+        <div class="ems-header__actions wb-head__actions">
+            {% if wb_picker_url %}
+            <button type="button" class="page-header-link page-header-link--accent{% if wb_picker_hint %} page-header-link--hinted{% endif %}"
+                    data-bank-picker-open
+                    data-picker-url="{{ wb_picker_url }}"
+                    {% if wb_picker_hint %}title="{{ wb_picker_hint }}"{% endif %}>
+                <i class="fas fa-book-bookmark" aria-hidden="true"></i>
+                <span class="page-header-link__body">
+                    <span class="page-header-link__label">{{ wb_picker_label|default:default_wb_picker_label }}</span>
+                    {% if wb_picker_hint %}<span class="page-header-link__hint">{{ wb_picker_hint }}</span>{% endif %}
+                </span>
+            </button>
+            {% endif %}
+            {% if wb_secondary_url %}
+            <a href="{{ wb_secondary_url }}" class="page-header-link{% if wb_secondary_hint %} page-header-link--hinted{% endif %}"
+               {% if wb_secondary_hint %}title="{{ wb_secondary_hint }}"{% endif %}>
+                <i class="fas {{ wb_secondary_icon|default:'fa-layer-group' }}" aria-hidden="true"></i>
+                <span class="page-header-link__body">
+                    <span class="page-header-link__label">{{ wb_secondary_label }}</span>
+                    {% if wb_secondary_hint %}<span class="page-header-link__hint">{{ wb_secondary_hint }}</span>{% endif %}
+                </span>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </header>
 
-            <div class="stat-card stat-card--clickable" data-filter-trigger="has-error" title="{% trans 'Yalnız xətalı sualları göstər' context 'exams.template.test_question_bank' %}">
-                <div class="stat-icon red"><i class="fas fa-circle-xmark"></i></div>
-                <div class="stat-info">
-                    <span class="stat-label">{% trans "Xətalar" context "exams.template.test_question_bank" %}</span>
-                    <span class="stat-value" id="totalErrors">{{ error_count|default:0 }}</span>
+    <section class="etp-kpis wb-kpis" aria-label="{% trans 'Xülasə' context 'exams.template.teacher_questions_bank' %}">
+        {% if wb_show_settings %}
+        <div class="etp-kpi wb-kpi--settings">
+            <span class="etp-kpi__icon" aria-hidden="true"><i class="fas fa-gear"></i></span>
+            <div class="wb-kpi__settings">
+                <div class="wb-kpi__field">
+                    <label for="rqInput">{% trans "label_question_count" context "exams.template.test_question_bank" %}</label>
+                    <input id="rqInput" class="ems-input" type="number" min="1" value="{{ rq_value }}">
                 </div>
-            </div>
-
-            <div class="stat-card stat-card--clickable" data-filter-trigger="has-warning" title="{% trans 'Yalnız xəbərdarlıqlı sualları göstər' context 'exams.template.test_question_bank' %}">
-                <div class="stat-icon yellow"><i class="fas fa-triangle-exclamation"></i></div>
-                <div class="stat-info">
-                    <span class="stat-label">{% trans "stat_warnings" context "exams.template.test_question_bank" %}</span>
-                    <span class="stat-value" id="totalWarnings">{{ warning_count|default:0 }}</span>
-                </div>
-            </div>
-
-            <div class="stat-card stat-card--clickable" data-filter-trigger="has-dup" title="{% trans 'Yalnız dublikatları göstər' context 'exams.template.test_question_bank' %}">
-                <div class="stat-icon red"><i class="fas fa-layer-group"></i></div>
-                <div class="stat-info">
-                    <span class="stat-label">{% trans "stat_duplicates" context "exams.template.test_question_bank" %}</span>
-                    <span class="stat-value" id="totalDuplicates">{{ duplicate_count|default:0 }}</span>
+                <div class="wb-kpi__field">
+                    <label for="dpInput">{% trans "label_default_points" context "exams.template.test_question_bank" %}</label>
+                    <input id="dpInput" class="ems-input" type="number" min="1" value="{{ dp_value }}">
                 </div>
             </div>
         </div>
-    </header>
+        {% endif %}
+        <div class="etp-kpi etp-kpi--primary">
+            <span class="etp-kpi__icon" aria-hidden="true"><i class="fas fa-list-check"></i></span>
+            <span class="etp-kpi__body"><span class="etp-kpi__value">{{ parsed|length }}</span><span class="etp-kpi__label">{% trans "stat_total_questions" context "exams.template.test_question_bank" %}</span></span>
+        </div>
+        <button type="button" class="etp-kpi etp-kpi--danger stat-card--clickable" data-filter-trigger="has-error" title="{% trans 'Yalnız xətalı sualları göstər' context 'exams.template.test_question_bank' %}">
+            <span class="etp-kpi__icon" aria-hidden="true"><i class="fas fa-circle-xmark"></i></span>
+            <span class="etp-kpi__body"><span class="etp-kpi__value" id="totalErrors">{{ error_count|default:0 }}</span><span class="etp-kpi__label">{% trans "Xətalar" context "exams.template.test_question_bank" %}</span></span>
+        </button>
+        <button type="button" class="etp-kpi etp-kpi--warning stat-card--clickable" data-filter-trigger="has-warning" title="{% trans 'Yalnız xəbərdarlıqlı sualları göstər' context 'exams.template.test_question_bank' %}">
+            <span class="etp-kpi__icon" aria-hidden="true"><i class="fas fa-triangle-exclamation"></i></span>
+            <span class="etp-kpi__body"><span class="etp-kpi__value" id="totalWarnings">{{ warning_count|default:0 }}</span><span class="etp-kpi__label">{% trans "stat_warnings" context "exams.template.test_question_bank" %}</span></span>
+        </button>
+        <button type="button" class="etp-kpi etp-kpi--violet stat-card--clickable" data-filter-trigger="has-dup" title="{% trans 'Yalnız dublikatları göstər' context 'exams.template.test_question_bank' %}">
+            <span class="etp-kpi__icon" aria-hidden="true"><i class="fas fa-layer-group"></i></span>
+            <span class="etp-kpi__body"><span class="etp-kpi__value" id="totalDuplicates">{{ duplicate_count|default:0 }}</span><span class="etp-kpi__label">{% trans "stat_duplicates" context "exams.template.test_question_bank" %}</span></span>
+        </button>
+    </section>
     {% endif %}
 
     {# ── Opsional meta kartı (məs. sual göndərişi: fənn/qrup/qeyd) ────────── #}

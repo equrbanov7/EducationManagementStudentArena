@@ -1,0 +1,13 @@
+{% load i18n %}
+{# İmtahan detalı başlığının status nişanları — ikon + mətn (yalnız rəng yox). #}
+<span class="ems-badge ems-badge--neutral"><i class="fas fa-clipboard-list" aria-hidden="true"></i>{{ exam.get_exam_type_display }}{% if exam.exam_type_extended %} · {{ exam.get_exam_type_extended_display }}{% endif %}</span>
+{% if exam.is_active %}
+<span class="ems-badge ems-badge--success"><i class="fas fa-circle-play" aria-hidden="true"></i>{% trans "status_active" context "exams.template.teacher_exam_detail" %}</span>
+{% else %}
+<span class="ems-badge ems-badge--muted"><i class="fas fa-circle-pause" aria-hidden="true"></i>{% trans "status_passive" context "exams.template.teacher_exam_detail" %}</span>
+{% endif %}
+{% if exam.results_hidden_from_students %}
+<span class="ems-badge ems-badge--warning"><i class="fas fa-eye-slash" aria-hidden="true"></i>{% trans "status_results_hidden" context "exams.template.teacher_exam_detail" %}</span>
+{% else %}
+<span class="ems-badge ems-badge--info"><i class="fas fa-eye" aria-hidden="true"></i>{% trans "status_results_visible" context "exams.template.teacher_exam_detail" %}</span>
+{% endif %}

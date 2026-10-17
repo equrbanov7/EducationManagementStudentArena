@@ -1,29 +1,30 @@
 {% load i18n %}
-{% comment %}İmtahan mərkəzi səhifələri üçün ortaq yol (breadcrumb) + geri düyməsi.
-Kök (İmtahan Nəzarət Sistemi) = zallar hub-ı.
-Parametrlər: back_url, parent_label, parent_url, current_label, root_current.
-root_current=True olduqda kök səhifənin özüdür (geri düyməsi yox, kök = cari).{% endcomment %}
-<nav class="fxc-breadcrumb" aria-label="{% trans 'Naviqasiya' %}">
-  {% if back_url %}
-  <a href="{{ back_url }}" class="fxc-breadcrumb-back">
-    <i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Geri" %}
-  </a>
-  {% endif %}
-  <ol class="fxc-breadcrumb-trail">
-    <li>
-      {% if root_current %}
-      <span aria-current="page"><i class="fas fa-tower-observation" aria-hidden="true"></i> {% trans "İmtahan Nəzarət Sistemi" %}</span>
-      {% else %}
-      <a href="{% url 'exams:exam_center_room_list' %}"><i class="fas fa-tower-observation" aria-hidden="true"></i> {% trans "İmtahan Nəzarət Sistemi" %}</a>
-      {% endif %}
+{% comment %}İmtahan mərkəzi səhifələri üçün ortaq yol (breadcrumb) — 2026-10-17 (Paket D) `ems-crumbs`
+komponenti ilə (ems_ui/header.css): köhnə «Geri» həbi yerinə tam yol, birinci kramb kabinetdir.
+Kök (İmtahan Nəzarət Sistemi) = zallar hub-ı. Parametrlər: parent_label, parent_url, current_label,
+root_current (True — kök səhifənin özüdür). `back_url` köhnə çağırışlar üçün qəbul olunur, istifadə edilmir.{% endcomment %}
+<nav aria-label="{% trans 'Naviqasiya' %}">
+  <ol class="ems-crumbs">
+    <li class="ems-crumbs__item">
+      <a class="ems-crumbs__link" href="{% url 'accounts:profile' %}"><i class="fas fa-house" aria-hidden="true"></i> {% trans "Kabinet" context "exams.final_center" %}</a>
+      <span class="ems-crumbs__sep" aria-hidden="true">/</span>
+    </li>
+    {% if root_current %}
+    <li class="ems-crumbs__item" aria-current="page"><i class="fas fa-tower-observation" aria-hidden="true"></i> {% trans "İmtahan Nəzarət Sistemi" %}</li>
+    {% else %}
+    <li class="ems-crumbs__item">
+      <a class="ems-crumbs__link" href="{% url 'exams:exam_center_room_list' %}"><i class="fas fa-tower-observation" aria-hidden="true"></i> {% trans "İmtahan Nəzarət Sistemi" %}</a>
+      <span class="ems-crumbs__sep" aria-hidden="true">/</span>
     </li>
     {% if parent_label %}
-    <li aria-hidden="true" class="fxc-breadcrumb-sep">/</li>
-    <li>{% if parent_url %}<a href="{{ parent_url }}">{{ parent_label }}</a>{% else %}<span>{{ parent_label }}</span>{% endif %}</li>
+    <li class="ems-crumbs__item">
+      {% if parent_url %}<a class="ems-crumbs__link" href="{{ parent_url }}">{{ parent_label }}</a>{% else %}{{ parent_label }}{% endif %}
+      {% if current_label %}<span class="ems-crumbs__sep" aria-hidden="true">/</span>{% endif %}
+    </li>
     {% endif %}
     {% if current_label %}
-    <li aria-hidden="true" class="fxc-breadcrumb-sep">/</li>
-    <li><span aria-current="page">{{ current_label }}</span></li>
+    <li class="ems-crumbs__item" aria-current="page">{{ current_label }}</li>
+    {% endif %}
     {% endif %}
   </ol>
 </nav>

@@ -10,10 +10,11 @@ DƏRHAL yaratmır — tələbə burada «İmtahana başla» ilə təsdiq edir (P
 {% endblock %}
 
 {% block extraCss %}
-<link rel="stylesheet" href="{% static 'exams/css/exam_start_confirm.css' %}?v=20261005-1">
+<link rel="stylesheet" href="{% static 'exams/css/exam_start_confirm.css' %}?v=20261017-pkgd">
 {% endblock %}
 
 {% block content %}
+<div class="exam-start-confirm-page">
 <section class="exam-start-confirm" aria-labelledby="exam-start-confirm-title">
   <div class="exam-start-confirm__icon" aria-hidden="true"><i class="fas fa-play"></i></div>
   <h1 id="exam-start-confirm-title" class="exam-start-confirm__title">
@@ -26,6 +27,11 @@ DƏRHAL yaratmır — tələbə burada «İmtahana başla» ilə təsdiq edir (P
   <p class="exam-start-confirm__text">
     {% trans "When you start, an attempt is created and the timer begins. Start only when you are ready." context "exams.start_confirm" %}
   </p>
+  <ul class="exam-start-confirm__tips">
+    <li><i class="fas fa-cloud-arrow-up" aria-hidden="true"></i> {% trans "Yazdığınız cavablar avtomatik saxlanılır." context "exams.start_confirm" %}</li>
+    <li><i class="fas fa-hourglass-half" aria-hidden="true"></i> {% trans "Vaxt serverdə hesablanır — səhifəni bağlasanız da dayanmır." context "exams.start_confirm" %}</li>
+    <li><i class="fas fa-wifi" aria-hidden="true"></i> {% trans "Başlamazdan əvvəl internet bağlantınızı yoxlayın." context "exams.start_confirm" %}</li>
+  </ul>
   <form method="post" action="{{ request.get_full_path }}" class="exam-start-confirm__actions">
     {% csrf_token %}
     <button type="submit" class="exam-start-confirm__btn exam-start-confirm__btn--primary">
@@ -33,8 +39,10 @@ DƏRHAL yaratmır — tələbə burada «İmtahana başla» ilə təsdiq edir (P
       {% trans "Start the exam" context "exams.start_confirm" %}
     </button>
     <a href="{{ back_url }}" class="exam-start-confirm__btn exam-start-confirm__btn--ghost">
+      <i class="fas fa-arrow-left" aria-hidden="true"></i>
       {% trans "Back" context "exams.start_confirm" %}
     </a>
   </form>
 </section>
+</div>
 {% endblock %}

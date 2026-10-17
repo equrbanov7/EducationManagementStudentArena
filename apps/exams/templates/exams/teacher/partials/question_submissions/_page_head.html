@@ -1,0 +1,40 @@
+{% load i18n %}
+{% comment %}
+Sual göndərişi səhifələrinin (müəllim detalı · kafedra · İmtahan Mərkəzi) ORTAQ başlığı — Paket C 2026-10-17.
+Sıra: breadcrumb + status + meta → mərhələ zolağı → «növbəti addım» lenti → KPI sırası.
+H1 YAZILMIR: profil örtüyü göndərişin adını `#profileSectionTitle` kimi artıq verir.
+Kontekst: `qsx_*` (views/teacher/submission_page_ui.py) + `back_url`, `qsx_section_label`,
+opsional `qsx_actions_include` (sağdakı əlavə düymələr).
+{% endcomment %}
+<header class="ems-header qsx-head">
+    <div class="ems-header__main">
+        <ol class="ems-crumbs">
+            <li class="ems-crumbs__item">
+                <a class="ems-crumbs__link" href="{{ back_url }}">{{ qsx_section_label }}</a>
+                <span class="ems-crumbs__sep" aria-hidden="true">/</span>
+            </li>
+            <li class="ems-crumbs__item" aria-current="page">{{ submission.title }}</li>
+        </ol>
+        <div class="qsx-head__status">
+            {% include "partials/ems_ui/_status_badge.html" with status=qsx_status dot=True wrap=True %}
+            <ul class="qsx-meta" aria-label="{% trans 'Göndəriş məlumatları' context 'exams.template.question_submission' %}">
+                {% for item in qsx_meta %}
+                <li class="qsx-meta__item"><i class="fas {{ item.icon }}" aria-hidden="true"></i><span>{{ item.text }}</span></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="ems-header__actions qsx-head__actions">
+        <a href="{{ back_url }}" class="ems-btn">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i> {{ qsx_back_label }}
+        </a>
+        {% if qsx_actions_include %}{% include qsx_actions_include %}{% endif %}
+    </div>
+</header>
+
+{% trans "Göndərişin yolu" context "exams.template.question_chain" as qsx_steps_label %}
+{% include "partials/ems_ui/_stepper.html" with steps=qsx_steps steps_label=qsx_steps_label %}
+
+{% if qsx_next %}{% include "exams/teacher/partials/question_submissions/_next_action.html" with next=qsx_next %}{% endif %}
+
+{% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=qsx_kpis %}

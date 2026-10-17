@@ -38,7 +38,8 @@ function initializeModals() {
                 form.reset();
                 
                 // Error messages silin
-                const errorAlerts = form.querySelectorAll('.alert-danger');
+                // 2026-10-18: yeni dialoq işarələməsi (`.ems-bsd__errors`) də təmizlənir — köhnə xəta qalmasın.
+                const errorAlerts = form.querySelectorAll('.alert-danger, .ems-bsd__errors');
                 errorAlerts.forEach(alert => {
                     alert.classList.add('d-none');
                     alert.innerHTML = '';

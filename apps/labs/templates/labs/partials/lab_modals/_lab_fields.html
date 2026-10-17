@@ -1,0 +1,124 @@
+{% load ems_ui i18n %}
+{% comment %}
+Lab yaratma/redaktə formasının sahələri (`fp` = "add" | "edit"; ID-lər `<fp>Lab…`). `_form_dialog.html` bunu
+`<form>` daxilində render edir. Tab-lar ortaq `ems_ui/nav.js` ilə (açar: `<fp>-info|settings|materials`).
+{% endcomment %}
+<div class="lab-dlg">
+    <nav class="ems-tabs lab-dlg__tabs" data-ems-tabs aria-label="{{ form_dialog_title }}">
+        <button type="button" class="ems-tabs__btn" data-ems-tab="{{ fp }}-info" aria-current="page">{% trans "tab_basic_info" context "labs.template.lab_modals" %}</button>
+        <button type="button" class="ems-tabs__btn" data-ems-tab="{{ fp }}-settings" tabindex="-1">{% trans "tab_settings" context "labs.template.lab_modals" %}</button>
+        <button type="button" class="ems-tabs__btn" data-ems-tab="{{ fp }}-materials" tabindex="-1">{% trans "tab_materials" context "labs.template.lab_modals" %}</button>
+    </nav>
+
+    {% if fp == "edit" %}<input type="hidden" id="editLabId" name="lab_id">{% endif %}
+
+    <div class="lab-form" data-ems-tabpanel="{{ fp }}-info">
+        <div class="ems-field">
+            <label class="ems-field__label" for="{{ fp }}LabTitle">{% trans "label_lab_title" context "labs.template.lab_modals" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+            <input type="text" id="{{ fp }}LabTitle" name="title" class="ems-input" maxlength="255" required autofocus>
+        </div>
+        <div class="lab-form__row lab-form__row--3">
+            <div class="ems-field">
+                <label class="ems-field__label" for="{{ fp }}LabMaxScore">{% trans "label_max_score" context "labs.template.lab_modals" %}</label>
+                <input type="number" id="{{ fp }}LabMaxScore" name="max_score" class="ems-input" min="1"{% if fp == "add" %} value="100"{% endif %}>
+            </div>
+            <div class="ems-field">
+                <label class="ems-field__label" for="{{ fp }}LabMaxAttempts">{% trans "label_attempt_count" context "labs.template.lab_modals" %}</label>
+                <input type="number" id="{{ fp }}LabMaxAttempts" name="max_attempts" class="ems-input" min="1"{% if fp == "add" %} value="1"{% endif %}>
+            </div>
+            <div class="ems-field">
+                <label class="ems-field__label" for="{{ fp }}LabStatus">{% trans "label_status" context "labs.template.lab_modals" %}</label>
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                    <select name="status" id="{{ fp }}LabStatus" class="ems-select bootstrap-single-select__native" data-bootstrap-select>
+                        <option value="draft">{% trans "status_draft" context "labs.template.lab_modals" %}</option>
+                        <option value="published">{% trans "status_publish" context "labs.template.lab_modals" %}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="ems-field">
+            <label class="ems-field__label" for="{{ fp }}LabDescription">{% trans "label_description" context "labs.template.lab_modals" %}</label>
+            <textarea name="description" id="{{ fp }}LabDescription" class="ems-textarea" rows="2"></textarea>
+        </div>
+        <div class="lab-form__row">
+            {% with start_id=fp|add:"LabStart" end_id=fp|add:"LabEnd" %}
+            <div class="ems-field">
+                <label class="ems-field__label" for="{{ start_id }}">{% trans "label_start" context "labs.template.lab_modals" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+                {% ems_datetime_input "start_datetime" input_id=start_id required=True css_class="ems-input" %}
+            </div>
+            <div class="ems-field">
+                <label class="ems-field__label" for="{{ end_id }}">{% trans "label_deadline" context "labs.template.lab_modals" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+                {% ems_datetime_input "end_datetime" input_id=end_id required=True css_class="ems-input" %}
+            </div>
+            {% endwith %}
+        </div>
+
+        <div class="lab-pickers">
+            <div class="ems-field lab-picker">
+                <span class="ems-field__label" id="{{ fp }}-lab-groups-label">{% trans "label_allowed_groups" context "labs.template.lab_modals" %}</span>
+                <input type="search" class="ems-input" id="{{ fp }}LabGroupSearch" autocomplete="off"
+                       aria-labelledby="{{ fp }}-lab-groups-label" placeholder="{% trans 'placeholder_search_group' context 'labs.template.lab_modals' %}">
+                <div id="{{ fp }}LabGroupList" class="lab-picker__list" role="group" aria-labelledby="{{ fp }}-lab-groups-label"></div>
+                <p class="ems-field__hint">{% trans "label_selected_count" context "labs.template.lab_modals" %}: <strong id="{{ fp }}LabGroupCount">0</strong></p>
+            </div>
+            <div class="ems-field lab-picker">
+                <span class="ems-field__label" id="{{ fp }}-lab-students-label">{% trans "label_allowed_students" context "labs.template.lab_modals" %}</span>
+                <input type="search" class="ems-input" id="{{ fp }}LabStudentSearch" autocomplete="off"
+                       aria-labelledby="{{ fp }}-lab-students-label" placeholder="{% trans 'placeholder_search_student' context 'labs.template.lab_modals' %}">
+                <div id="{{ fp }}LabStudentList" class="lab-picker__list" role="group" aria-labelledby="{{ fp }}-lab-students-label">
+                    <p class="lab-picker__empty">{% trans "hint_select_group_first" context "labs.template.lab_modals" %}</p>
+                </div>
+                <p class="ems-field__hint">{% trans "label_selected_count" context "labs.template.lab_modals" %}: <strong id="{{ fp }}LabStudentCount">0</strong></p>
+            </div>
+        </div>
+        <p class="ems-field__hint"><i class="fas fa-circle-info" aria-hidden="true"></i> {% trans "Heç bir qrup və ya tələbə seçilməsə, lab kursun bütün tələbələrinə açıq olur." context "labs.template.lab_modals" %}</p>
+    </div>
+
+    <div class="lab-form" data-ems-tabpanel="{{ fp }}-settings" hidden>
+        <div class="ems-field lab-form__narrow">
+            <label class="ems-field__label" for="{{ fp }}LabQPS">{% trans "label_questions_per_student" context "labs.template.lab_modals" %}</label>
+            <input type="number" id="{{ fp }}LabQPS" name="questions_per_student" class="ems-input" min="0"{% if fp == "add" %} value="0"{% endif %} aria-describedby="{{ fp }}LabQPSHint">
+            <p class="ems-field__hint" id="{{ fp }}LabQPSHint">{% trans "hint_zero_all_questions" context "labs.template.lab_modals" %}</p>
+        </div>
+        <div class="lab-form__row">
+            <label class="lab-check" for="{{ fp }}LabAllowLate">
+                <input type="checkbox" name="allow_late_submission" id="{{ fp }}LabAllowLate">
+                <span>{% trans "label_allow_late_submission" context "labs.template.lab_modals" %}</span>
+            </label>
+            <div class="ems-field">
+                <label class="ems-field__label" for="{{ fp }}LabLatePenalty">{% trans "label_late_penalty_percent" context "labs.template.lab_modals" %}</label>
+                <input type="number" name="late_penalty_percent" id="{{ fp }}LabLatePenalty" class="ems-input" min="0" max="100"{% if fp == "add" %} value="0"{% endif %}>
+            </div>
+        </div>
+        <div class="lab-form__row lab-form__row--3">
+            <label class="lab-check" for="{{ fp }}LabAllowFile">
+                <input type="checkbox" name="allow_file_upload" id="{{ fp }}LabAllowFile"{% if fp == "add" %} checked{% endif %}>
+                <span>{% trans "label_allow_file_upload" context "labs.template.lab_modals" %}</span>
+            </label>
+            <label class="lab-check" for="{{ fp }}LabAllowLink">
+                <input type="checkbox" name="allow_link_submission" id="{{ fp }}LabAllowLink"{% if fp == "add" %} checked{% endif %}>
+                <span>{% trans "label_allow_link_submission" context "labs.template.lab_modals" %}</span>
+            </label>
+            <div class="ems-field">
+                <label class="ems-field__label" for="{{ fp }}LabMaxFileSize">{% trans "label_max_file_size_mb" context "labs.template.lab_modals" %}</label>
+                <input type="number" name="max_file_size_mb" id="{{ fp }}LabMaxFileSize" class="ems-input" min="1" max="50"{% if fp == "add" %} value="50"{% endif %}>
+            </div>
+        </div>
+        <div class="ems-field">
+            <label class="ems-field__label" for="{{ fp }}LabAllowedExt">{% trans "label_allowed_file_types" context "labs.template.lab_modals" %}</label>
+            <input type="text" name="allowed_extensions" id="{{ fp }}LabAllowedExt" class="ems-input"{% if fp == "add" %} value="zip,pdf,docx,png,jpg,txt,py,java,cpp"{% endif %}>
+        </div>
+    </div>
+
+    <div class="lab-form" data-ems-tabpanel="{{ fp }}-materials" hidden>
+        <div class="ems-field">
+            <label class="ems-field__label" for="{{ fp }}LabFiles">{% trans "label_teacher_file" context "labs.template.lab_modals" %}</label>
+            <input type="file" name="teacher_files" id="{{ fp }}LabFiles" class="ems-input lab-file-input">
+            {% if fp == "edit" %}<div id="editCurrentFile" class="lab-form__current"></div>{% endif %}
+        </div>
+        <div class="ems-field">
+            <label class="ems-field__label" for="{{ fp }}LabInstructions">{% trans "label_teacher_instructions" context "labs.template.lab_modals" %}</label>
+            <textarea name="teacher_instructions" id="{{ fp }}LabInstructions" class="ems-textarea" rows="6"></textarea>
+        </div>
+    </div>
+</div>

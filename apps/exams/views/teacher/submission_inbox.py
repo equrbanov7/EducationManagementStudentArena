@@ -23,19 +23,27 @@ from apps.exams.services.question_submission import (
     submit_question_set,
 )
 from apps.exams.views.teacher.submission_meta import (
+    QUESTIONS_PAGE_SIZE,
     _form_state,
     _submission_sources,
     _validate_submission_meta,
+    annotate_display_numbers,
     annotate_preview_flags,
     prefill_group_keys,
+    snapshot_flag_counts,
 )
+from apps.exams.views.teacher.submission_page_ui import ROLE_CENTER, ROLE_TEACHER, page_context
 from apps.exams.views.teacher.submission_workbench import (
     build_workbench_context,
     initial_workbench_state,
     process_workbench_post,
 )
 from apps.exams.views.teacher.workbench_paste import paste_image_response, requested_paste_action
+from core.permissions import request_has_permission
 from core.tenancy import get_request_organization
+
+#: Mərkəz qərarının açarı — ``submission_review.PERM_EXAM_CENTER_DECIDE`` ilə eyni (dövri import olmasın).
+PERM_EXAM_CENTER_DECIDE = "exam_center.decide"
 
 
 def _profile_section_url(section):
@@ -202,7 +210,14 @@ def ai_generate_submission_questions(request):
 def question_submission_detail(request, submission_id):
     _ensure_teacher(request.user)
     organization = _require_organization(request)
-    submission = get_object_or_404(QuestionSubmission, id=submission_id, organization=organization)
+    # Paket C 2026-10-17: başlıq/zəncir/lent bu FK-ları oxuyur — əvvəl hər biri ayrıca sorğu idi.
+    submission = get_object_or_404(
+        QuestionSubmission.objects.select_related(
+            "teacher", "chair_unit", "chair_reviewer", "reviewer", "accepted_bank"
+        ),
+        id=submission_id,
+        organization=organization,
+    )
 
     # Mərkəz göndərişi YALNIZ kafedra təsdiqindən sonra görür (mövcudluq
     # sızmasın deyə əks halda 404 — «var, amma icazən yoxdur» demirik).
@@ -266,11 +281,23 @@ def question_submission_detail(request, submission_id):
                     return redirect("exams:question_submission_detail", submission_id=submission.id)
 
         # Preview (və ya xəta ilə yarımçıq save) — workbench vəziyyəti ilə render.
-        context = _detail_context(submission, can_edit=can_edit, is_reviewer=is_reviewer)
+        context = _detail_context(
+            submission,
+            can_edit=can_edit,
+            is_reviewer=is_reviewer,
+            is_owner=submission.teacher_id == request.user.id,
+            can_decide=is_reviewer and request_has_permission(request, PERM_EXAM_CENTER_DECIDE),
+        )
         context.update(_detail_workbench_context(request, organization, sources, submission, form_state, state))
         return render(request, "exams/teacher/question_submission_detail.html", context)
 
-    context = _detail_context(submission, can_edit=can_edit, is_reviewer=is_reviewer)
+    context = _detail_context(
+        submission,
+        can_edit=can_edit,
+        is_reviewer=is_reviewer,
+        is_owner=submission.teacher_id == request.user.id,
+        can_decide=is_reviewer and request_has_permission(request, PERM_EXAM_CENTER_DECIDE),
+    )
     if can_edit:
         sources = _submission_sources(request, organization)
         context["form_state"]["group_ids"] = prefill_group_keys(submission, sources.groups)
@@ -349,13 +376,14 @@ def question_submission_delete(request, submission_id):
     return redirect(_profile_section_url("question-submissions"))
 
 
-def _detail_context(submission, *, can_edit, is_reviewer):
-    return {
+def _detail_context(submission, *, can_edit, is_reviewer, is_owner=True, can_decide=False):
+    events = list(submission.events.all())
+    role = ROLE_TEACHER if is_owner else ROLE_CENTER
+    context = {
         "embed_active_section": "question-submissions",
         "embed_section_title": submission.title,
         "submission": submission,
-        "submission_events": list(submission.events.select_related("actor")),
-        "parsed_questions": annotate_preview_flags(list(submission.parsed_snapshot or [])),
+        "submission_events": events,
         "can_edit": can_edit,
         "is_reviewer": is_reviewer,
         "language_choices": EXAM_LANGUAGE_CHOICES,
@@ -365,8 +393,9 @@ def _detail_context(submission, *, can_edit, is_reviewer):
             # müəllim yenidən göndərərkən fənnini təzədən seçir.
             "subject": str(submission.subject_ref_id or ""),
             "exam_kind": submission.exam_kind,
-            "group_ids": [str(g.id) for g in submission.student_groups.all()]
-            or [str(submission.student_group_id or "")],
+            # Yalnız redaktədə lazımdır (GET-də ``prefill_group_keys`` əvəz edir, POST-da forma
+            # vəziyyəti) — oxunmayan sorğu atılmasın (Paket C 2026-10-17).
+            "group_ids": [str(submission.student_group_id or "")],
             "group_id": str(submission.student_group_id or ""),
             "group_label": submission.group_label,
             "teacher_note": submission.teacher_note,
@@ -376,6 +405,29 @@ def _detail_context(submission, *, can_edit, is_reviewer):
         },
         "back_url": _profile_section_url("question-submissions"),
     }
+    context.update(
+        page_context(
+            submission,
+            events,
+            role=role,
+            can_edit=can_edit,
+            can_decide=can_decide,
+            # Qərar açarı olan mərkəz istifadəçisi detaldan BAXIŞ səhifəsinə keçir (qərar formu oradadır).
+            decide_href=reverse("exams:question_submission_review", args=[submission.id]),
+        )
+    )
+    if not can_edit:
+        # Redaktə olunmayan detal da LAZY siyahı işlədir (əvvəl bütün suallar birdən render olunurdu).
+        questions = annotate_display_numbers(annotate_preview_flags(list(submission.parsed_snapshot or [])))
+        context.update(
+            {
+                "parsed_questions": questions[:QUESTIONS_PAGE_SIZE],
+                "question_flag_counts": snapshot_flag_counts(questions),
+                "questions_has_more": len(questions) > QUESTIONS_PAGE_SIZE,
+                "questions_page_size": QUESTIONS_PAGE_SIZE,
+            }
+        )
+    return context
 
 
 __all__ = [

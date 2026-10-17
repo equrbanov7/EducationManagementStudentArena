@@ -24,6 +24,7 @@ from .services.ai_summary import generate_appeal_statistics_summary  # noqa: F40
 from .services.exam_network import exam_network_allowed  # noqa: F401
 from .services.exam_network import exam_network_denied_message  # noqa: F401
 from .services.final_center import clear_entry_session  # noqa: F401
+from .services.manual_grading import answer_max_points  # noqa: F401
 from .services.question_chair_review import chair_queue_queryset  # noqa: F401
 from .services.question_chair_review import pending_chair_review_count  # noqa: F401
 from .services.question_snapshot import delivered_question_render  # noqa: F401
@@ -39,6 +40,7 @@ __all__ = [
     "QUESTION_EXAM_KIND_VALUES",
     "SECURE_EXAM_CATEGORIES",
     "allowed_units_prefetch",
+    "answer_max_points",
     "allowed_units_q",
     "allowed_units_under_q",
     "append_query_params",

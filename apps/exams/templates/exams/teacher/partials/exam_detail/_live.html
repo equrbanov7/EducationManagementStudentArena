@@ -1,0 +1,31 @@
+{% load i18n %}
+{% comment %}Canlı sessiya kartı (yalnız adi test). Passiv imtahanda düymə söndürülüb və səbəbi deyir —
+yaratma ünvanı səhifədə OLMUR. Aktiv sessiya varsa `data-*` ilə «qayıt / yenisini başlat» dialoqu açılır.{% endcomment %}
+<section class="ems-card live-start-section ted-live" aria-labelledby="ted-live-title">
+    <span class="ted-live__icon" aria-hidden="true"><i class="fas fa-tower-broadcast"></i></span>
+    <div class="ted-live__text">
+        <h2 class="ted-live__title" id="ted-live-title">{% trans "Canlı sessiya" context "exams.teacher.exam_detail" %}</h2>
+        <p class="ted-live__desc">{% trans "Testi auditoriyada canlı keçirin — tələbələr PIN ilə qoşulur, nəticələr dərhal görünür." context "exams.teacher.exam_detail" %}</p>
+    </div>
+    {% if exam.is_active %}
+        <a href="{% url 'liveExam:create_session_slug' slug=exam.slug %}"
+           class="ems-btn ems-btn--primary ted-live__btn"
+           data-live-start-trigger
+           {% if active_live_session %}
+               data-has-active-session="1"
+               data-live-return-url="{{ active_live_continue_url }}"
+               data-live-new-url="{{ active_live_new_url }}"
+               data-live-pin="{{ active_live_session.pin }}"
+               data-live-created="{{ active_live_session.created_at|date:'d.m.Y H:i' }}"
+           {% endif %}>
+            <i class="fas fa-play" aria-hidden="true"></i><span>{% trans "action_start_live" context "exams.template.teacher_exam_detail" %}</span>
+        </a>
+    {% else %}
+        <span class="ted-live__disabled">
+            <span class="ems-btn ems-btn--primary ted-live__btn" role="button" aria-disabled="true" tabindex="0" aria-describedby="tedLiveHint">
+                <i class="fas fa-play" aria-hidden="true"></i><span>{% trans "action_start_live" context "exams.template.teacher_exam_detail" %}</span>
+            </span>
+            <span class="etp-hint" id="tedLiveHint">{% trans 'hint_activate_exam_before_live' context 'exams.template.teacher_exam_detail' %}</span>
+        </span>
+    {% endif %}
+</section>

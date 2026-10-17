@@ -28,8 +28,32 @@ Custom template filters for labs app.
 import os
 
 from django import template
+from django.urls import reverse
 
 register = template.Library()
+
+
+@register.simple_tag
+def lab_crumbs(lab, last_label="", lab_url_name=""):
+    """`partials/ems_ui/_content_header.html` üçün çörək qırıntıları: Kurs › Lab [› cari səhifə].
+
+    Şablonda:
+        {% trans "Bloklar və suallar" context "..." as crumb_last %}
+        {% lab_crumbs lab crumb_last "labs:manage_blocks" as header_crumbs %}
+
+    ``last_label`` boşdursa lab özü cari səhifədir (link olmur); ``lab_url_name`` boşdursa lab
+    qırıntısı linksiz qalır.
+    """
+    crumbs = [
+        {
+            "label": lab.course.title,
+            "url": reverse("courses:course_dashboard", kwargs={"course_id": lab.course_id}),
+        },
+        {"label": lab.title, "url": reverse(lab_url_name, args=[lab.pk]) if lab_url_name else ""},
+    ]
+    if last_label:
+        crumbs.append({"label": str(last_label), "url": ""})
+    return crumbs
 
 
 @register.filter

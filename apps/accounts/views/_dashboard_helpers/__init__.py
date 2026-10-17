@@ -36,7 +36,7 @@ from .formatters import (
 )
 from .pending_answers import _collect_pending_answer_items
 from .pending_review import _collect_pending_review_items
-from .results import _collect_my_results
+from .results import _collect_my_results, fill_my_results_scores
 
 __all__ = [
     "SUBMISSION_DATE_ORDER_CHOICES",
@@ -54,6 +54,7 @@ __all__ = [
     "_user_display_name",
     "_collect_assigned_tasks",
     "_collect_my_results",
+    "fill_my_results_scores",
     "_collect_pending_answer_items",
     "_collect_pending_review_items",
     "_collect_evaluated_review_items",

@@ -174,7 +174,9 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        course = self.get_object()
+        # `DetailView.get()` obyekti artıq `self.object`-ə qoyub — ikinci `get_object()` kursu və üzvlüyü
+        # (2 sorğu) yenidən oxuyurdu (Paket E ölçümü: kurs paneli 4× `courses_course` + 4× `coursemembership`).
+        course = self.object
         user = self.request.user
 
         # ═══════════════════════════════════════════════════════════════════

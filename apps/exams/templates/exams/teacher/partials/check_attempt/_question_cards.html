@@ -1,0 +1,170 @@
+{% load i18n exam_filters %}
+{% comment %}
+Yoxlama səhifəsinin sual kartları (kontekst: `qa_list` — `_build_answer_review_item` elementləri,
+`exam`, `attempt`). Dövr partialın İÇİNDƏdir: sual başına `{% include %}` render vaxtını artırırdı. Vəziyyət (`data-state`): scored | pending | empty — JS bal yazıldıqca
+yeniləyir. `.data-store` dialoq üçün mətn mənbəyidir (köhnə JS müqaviləsi).
+{% endcomment %}
+{% for item in qa_list %}
+{% with q=item.question ans=item.answer %}
+<li class="tca-q" id="tca-q-{{ q.id }}" data-tca-q data-question-id="{{ q.id }}" data-index="{{ forloop.counter }}"
+    data-has-answer="{% if item.has_answer_content %}1{% else %}0{% endif %}"
+    data-state="{% if ans and ans.teacher_score is not None %}scored{% elif item.has_answer_content %}pending{% else %}empty{% endif %}"
+    aria-labelledby="tca-q-{{ q.id }}-title">
+    <header class="tca-q__head">
+        <span class="tca-q__num" aria-hidden="true">{{ forloop.counter }}</span>
+        <h2 class="tca-q__title" id="tca-q-{{ q.id }}-title">
+            {% blocktrans trimmed with n=forloop.counter context "exams.attempt_review" %}Sual {{ n }}{% endblocktrans %}
+            <span class="tca-q__pts">· {{ item.max_points }} {% trans "unit_points" context "exams.template.teacher_check_attempt" %}</span>
+        </h2>
+        <span class="ems-badge {% if ans and ans.teacher_score is not None %}ems-badge--success{% elif item.has_answer_content %}ems-badge--warning{% else %}ems-badge--muted{% endif %}"
+              id="badge_{{ q.id }}" data-tca-badge
+              data-empty-label="{% if not ans %}{% trans 'status_no_answer' context 'exams.template.teacher_check_attempt' %}{% else %}{% trans 'status_empty_answer' context 'exams.template.teacher_check_attempt' %}{% endif %}">
+            {% if not ans %}
+                {% trans "status_no_answer" context "exams.template.teacher_check_attempt" %}
+            {% elif ans.teacher_score is not None %}
+                {{ ans.teacher_score }} {% trans "unit_points" context "exams.template.teacher_check_attempt" %}
+            {% elif item.has_answer_content %}
+                {% trans "status_not_checked" context "exams.template.teacher_check_attempt" %}
+            {% else %}
+                {% trans "status_empty_answer" context "exams.template.teacher_check_attempt" %}
+            {% endif %}
+        </span>
+        <button type="button" class="ems-btn ems-btn--sm tca-q__open" data-tca-open="{{ q.id }}"
+                aria-label="{% blocktrans trimmed with n=forloop.counter context 'exams.teacher.grading' %}Sual {{ n }}: ətraflı bax və AI ilə qiymətləndir{% endblocktrans %}">
+            <i class="fas fa-up-right-and-down-left-from-center" aria-hidden="true"></i><span>{% trans "Ətraflı" context "exams.teacher.grading" %}</span>
+        </button>
+    </header>
+
+    <div class="tca-q__body">
+        <div class="tca-q__text">{{ q.text|linebreaksbr }}</div>
+
+        {% if q.image %}
+            <figure class="tca-media"><img src="{{ q.image|protected_media_url }}" alt="" loading="lazy" decoding="async"></figure>
+        {% endif %}
+        {% if q.video %}
+            <figure class="tca-media">
+                <video controls preload="metadata" playsinline><source src="{{ q.video|protected_media_url }}"></video>
+            </figure>
+        {% endif %}
+
+        <section class="tca-answer{% if not item.has_answer_content %} tca-answer--empty{% endif %}" aria-label="{% trans 'Tələbənin cavabı' context 'exams.teacher.grading' %}">
+            <h3 class="tca-answer__label">{% trans "Tələbənin cavabı" context "exams.teacher.grading" %}</h3>
+            {% if exam.exam_type == "coding" and item.coding_submission %}
+                <p class="tca-answer__meta">
+                    <i class="fas fa-code" aria-hidden="true"></i>
+                    {{ item.coding_submission.get_execution_status_display }}
+                    {% if item.coding_submission.score is not None %}
+                        · {{ item.coding_submission.score }} {% trans "unit_points" context "exams.template.teacher_check_attempt" %}
+                    {% endif %}
+                </p>
+                {% if item.coding_submission.output %}
+                    <pre class="tca-pre">{{ item.coding_submission.output|truncatechars:400 }}</pre>
+                {% endif %}
+                {% if item.coding_submission.error_message %}
+                    {# Runner stdin/DOM olmadan «runtime_error» verə bilər — neytral, daraldılan qeyd. #}
+                    <details class="tca-details" data-review-card-ignore>
+                        <summary>{% trans "label_execution_note" context "exams.template.teacher_check_attempt" %}</summary>
+                        <pre class="tca-pre">{{ item.coding_submission.error_message|truncatechars:400 }}</pre>
+                    </details>
+                {% endif %}
+                {% if item.coding_files %}
+                    <div class="coding-files-review" data-review-card-ignore>
+                        {% for code_file in item.coding_files %}
+                            <details class="tca-details" {% if item.coding_file_count == 1 %}open{% endif %}>
+                                <summary>
+                                    <span><i class="far fa-file-code" aria-hidden="true"></i> {{ code_file.name }}</span>
+                                    {% if code_file.is_main %}<small>{% trans "Main File" context "exams.template.coding_exam" %}</small>{% endif %}
+                                </summary>
+                                <pre class="tca-pre">{{ code_file.content }}</pre>
+                            </details>
+                        {% endfor %}
+                        {% if item.coding_file_count > 1 %}
+                            <a class="ems-btn ems-btn--sm" href="{% url 'exams:coding_submission_download' exam.slug attempt.id item.coding_submission.id %}">
+                                <i class="fas fa-download" aria-hidden="true"></i><span>{% trans "Download ZIP" context "exams.template.coding_exam" %}</span>
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% elif item.has_text_answer %}
+                <div class="tca-answer__text">{{ ans.text_answer|linebreaksbr }}</div>
+            {% elif not item.has_file_answer and not item.has_paint_answer %}
+                <p class="tca-answer__none">{% trans "status_no_answer" context "exams.template.teacher_check_attempt" %}</p>
+            {% endif %}
+
+            {% if item.has_file_answer %}
+                <div class="tca-files">
+                    <span class="tca-files__title">{% trans "label_uploaded_files" context "exams.template.teacher_check_attempt" %}</span>
+                    <ul class="tca-files__list">
+                        {% for f in item.answer_files %}
+                            {% with name=f.filename|lower %}
+                            <li class="tca-file">
+                                <i class="fas {% if '.pdf' in name %}fa-file-pdf{% elif '.zip' in name %}fa-file-zipper{% elif '.png' in name or '.jpg' in name or '.jpeg' in name or '.gif' in name %}fa-image{% else %}fa-file{% endif %}" aria-hidden="true"></i>
+                                <a href="{{ f.file.url }}" target="_blank" rel="noopener" class="tca-file__link">{{ f.filename }}</a>
+                                {% if '.png' in name or '.jpg' in name or '.jpeg' in name or '.gif' in name %}
+                                    <a href="{{ f.file.url }}" target="_blank" rel="noopener" class="tca-file__thumb"><img src="{{ f.file.url }}" alt="{{ f.filename }}" loading="lazy" decoding="async"></a>
+                                {% endif %}
+                            </li>
+                            {% endwith %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            {% if ans and ans.paint_image %}
+                <div class="tca-paint">
+                    <span class="tca-files__title">
+                        <i class="fas fa-paintbrush" aria-hidden="true"></i>
+                        {% trans "status_answered_with_paint" context "exams.template.teacher_check_attempt" %}
+                        {% if ans.paint_updated_at %}<small>({{ ans.paint_updated_at|date:"d.m.Y H:i" }})</small>{% endif %}
+                    </span>
+                    <a href="{{ ans.paint_image.url }}" target="_blank" rel="noopener" class="tca-paint__link">
+                        <img src="{{ ans.paint_image.url }}" alt="{% trans 'alt_paint' context 'exams.template.teacher_check_attempt' %}" loading="lazy" decoding="async">
+                    </a>
+                </div>
+            {% endif %}
+        </section>
+
+        {% if q.correct_answer %}
+        <details class="tca-details tca-model">
+            <summary>{% trans "Nümunə (gözlənilən) cavab" context "exams.attempt_review" %}</summary>
+            <div class="tca-model__text">{{ q.correct_answer|linebreaksbr }}</div>
+        </details>
+        {% endif %}
+    </div>
+
+    <div class="tca-q__grade">
+        <div class="tca-score">
+            <label class="tca-score__label" for="hidden_score_{{ q.id }}">{% trans "label_score" context "exams.template.teacher_check_attempt" %}</label>
+            <div class="tca-score__ctrl">
+                <input type="number" class="ems-input tca-score__input" id="hidden_score_{{ q.id }}" name="score_{{ q.id }}"
+                       value="{% if ans and ans.teacher_score is not None %}{{ ans.teacher_score }}{% endif %}"
+                       min="0" max="{{ item.max_points }}" step="1" inputmode="numeric" autocomplete="off"
+                       placeholder="–" data-tca-score aria-describedby="tca-q-{{ q.id }}-max tca-q-{{ q.id }}-err">
+                <span class="tca-score__max" id="tca-q-{{ q.id }}-max">/ {{ item.max_points }}</span>
+            </div>
+            <p class="tca-score__error" id="tca-q-{{ q.id }}-err" data-tca-score-error="hidden_score_{{ q.id }}" role="alert" hidden>{% trans "Balı tam ədədlə yazın (məs. 4)." context "exams.teacher.grading" %}</p>
+            <div class="tca-score__quick" role="group" aria-label="{% trans 'Tez bal' context 'exams.teacher.grading' %}">
+                <button type="button" class="ems-btn ems-btn--sm" data-tca-quick="0">0</button>
+                <button type="button" class="ems-btn ems-btn--sm" data-tca-quick="max">{% trans "Tam bal" context "exams.attempt_review" %}</button>
+            </div>
+        </div>
+        <div class="tca-fb">
+            <label class="tca-score__label" for="hidden_feedback_{{ q.id }}">{% trans "label_feedback" context "exams.template.teacher_check_attempt" %} <span class="tca-opt">({% trans "istəyə bağlı" context "exams.teacher.grading" %})</span></label>
+            <textarea class="ems-textarea tca-fb__input" id="hidden_feedback_{{ q.id }}" name="feedback_{{ q.id }}" rows="2" data-tca-feedback>{% if ans %}{{ ans.teacher_feedback }}{% endif %}</textarea>
+        </div>
+    </div>
+
+    {# EXAM-P0-04: max bal serverdə snapshot-dan hesablanır; POST edilmir (ad yoxdur). #}
+    <input type="hidden" id="hidden_max_points_{{ q.id }}" value="{{ item.max_points }}">
+    <div class="data-store" hidden
+         data-q-text="{{ q.text|escape }}"
+         data-ans-text="{% if ans %}{{ ans.text_answer|escape }}{% endif %}"
+         data-has-answer="{% if item.has_answer_content %}1{% else %}0{% endif %}"
+         data-has-ai-gradable="{% if item.has_ai_gradeable_content %}1{% else %}0{% endif %}"
+         data-has-file-answer="{% if item.has_file_answer %}1{% else %}0{% endif %}"
+         data-has-paint-answer="{% if item.has_paint_answer %}1{% else %}0{% endif %}"
+         data-q-points="{{ item.max_points }}"
+         data-q-correct-answer="{{ q.correct_answer|default_if_none:''|escape }}"></div>
+</li>
+{% endwith %}
+{% endfor %}

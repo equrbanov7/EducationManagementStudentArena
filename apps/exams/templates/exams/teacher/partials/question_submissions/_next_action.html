@@ -1,0 +1,32 @@
+{% load i18n %}
+{% comment %}
+«Növbəti addım» lenti — ems-banner görünüşü; qeyd (rəyçinin mətni) sətir keçidləri ilə.
+`qsubd-verdict--<variant>` sinfi köhnə testlərin/çəngəllərin tanıdığı ad kimi saxlanılır.
+Kontekst: `next` = {kind, title, body, note, cta{href,label}, variant}; opsional `submission`
+(qəbul edilmiş bankın adı üçün), `is_reviewer`.
+{% endcomment %}
+<div class="ems-banner ems-banner--{{ next.kind|default:'info' }} qsx-next qsubd-verdict--{{ next.variant }}"
+     role="{% if next.kind == 'danger' or next.kind == 'warning' %}alert{% else %}status{% endif %}">
+    <div class="qsx-next__body">
+        {% if next.title %}<div class="ems-banner__title">{{ next.title }}</div>{% endif %}
+        {% if next.body %}<div class="ems-banner__body">{{ next.body }}</div>{% endif %}
+        {% if next.note %}<div class="ems-banner__body qsx-next__note">{{ next.note|linebreaksbr }}</div>{% endif %}
+        {% if next.variant == "accepted" and submission.accepted_bank %}
+        <div class="ems-banner__body qsx-next__bank">
+            <i class="fas fa-layer-group" aria-hidden="true"></i>
+            {% blocktrans with count=submission.question_count bank=submission.accepted_bank.name context "exams.template.question_submission" %}{{ count }} sual «{{ bank }}» bankına yazıldı{% endblocktrans %}
+        </div>
+        {% endif %}
+    </div>
+    {% if next.cta %}
+    <div class="ems-banner__actions">
+        <a href="{{ next.cta.href }}" class="ems-btn ems-btn--primary ems-btn--sm qsx-next__cta">{{ next.cta.label }}</a>
+    </div>
+    {% elif next.variant == "accepted" and is_reviewer and submission.accepted_bank.is_active %}
+    <div class="ems-banner__actions">
+        <a href="{% url 'exams:question_bank_detail' submission.accepted_bank.id %}" class="ems-btn ems-btn--sm">
+            <i class="fas fa-layer-group" aria-hidden="true"></i> {{ submission.accepted_bank.name }}
+        </a>
+    </div>
+    {% endif %}
+</div>

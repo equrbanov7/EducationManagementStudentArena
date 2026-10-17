@@ -23,8 +23,16 @@
     font-size: var(--ems-fs-sm);
     font-weight: 700;
     line-height: 1.35;
+    /* Sarılma QLOBAL olaraq açıqdır (2026-10-18 baxışı): əvvəlki `white-space: nowrap` +
+       `text-wrap` qısa yazısı faktiki olaraq sarılan badge verirdi və ~345 istifadə (heyət
+       cədvəlləri) buna öyrəşib. Sətirdə qalmalı badge-lər `.ems-badge--nowrap` ilə açıq seçir;
+       `text-wrap-style` yalnız sətir bölgüsünü gözəlləşdirir (rejimə toxunmur). */
+    text-wrap-style: pretty;
+}
+
+/* Opt-in: badge bir sətirdə qalsın (cədvəl xanası, kart başlığı) — Paket A. */
+.ems-badge--nowrap {
     white-space: nowrap;
-    text-wrap: pretty;
 }
 
 /* Seçilmiş/vurğulu variant — handoff: «Düzəliş tələb olunur» konturu 2px. */

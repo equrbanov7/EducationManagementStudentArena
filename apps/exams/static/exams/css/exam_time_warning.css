@@ -22,7 +22,7 @@
     width: min(100%, 420px);
     padding: 1.35rem 1.4rem 1.25rem;
     border-radius: 16px;
-    border: 1px solid #fed7aa;
+    border: 1px solid var(--ems-warning-bd);
     background: var(--ems-neutral-0);
     box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
     transform: translateY(10px) scale(0.98);
@@ -41,8 +41,8 @@
     height: 2rem;
     border: 0;
     border-radius: 50%;
-    background: #fff7ed;
-    color: #9a3412;
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -50,7 +50,7 @@
 
 .exam-time-warning-close:hover,
 .exam-time-warning-close:focus {
-    background: #ffedd5;
+    background: var(--ems-warning-100);
     outline: none;
 }
 
@@ -62,14 +62,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #fff7ed;
-    color: #ea580c;
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-600);
     font-size: 1.35rem;
 }
 
 .exam-time-warning-title {
     margin: 0 2rem 0.45rem 0;
-    color: #111827;
+    color: var(--ems-gray-900);
     font-size: 1.18rem;
     font-weight: 800;
     letter-spacing: 0;
@@ -87,7 +87,7 @@
     align-items: center;
     gap: 0.45rem;
     margin-top: 0.85rem;
-    color: #9a3412;
+    color: var(--ems-warning-800);
     font-size: 0.86rem;
     font-weight: 700;
 }

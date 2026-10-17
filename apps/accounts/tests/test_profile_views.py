@@ -4081,7 +4081,8 @@ class MyResultsViewTest(TestCase):
         self.assertEqual(response.context["my_results_search_query"], "Unified Lab")
         self.assertEqual(len(response.context["my_result_items"].object_list), 1)
         self.assertEqual(response.context["my_result_items"].object_list[0]["title"], "Unified Lab")
-        self.assertContains(response, 'class="results-section-search-form js-profile-debounce-search"')
+        # Paket A (2026-10-18): forma `mr-filters` sinfindədir; debounce çəngəli dəyişməyib.
+        self.assertContains(response, 'class="mr-filters js-profile-debounce-search"')
 
     def test_profile_my_results_pagination_uses_partial_and_preserves_search(self):
         from django.utils import timezone

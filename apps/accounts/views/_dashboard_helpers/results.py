@@ -3,7 +3,7 @@
 """
 
 from django.contrib.auth import get_user_model
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
@@ -29,6 +29,64 @@ from .academic_results import collect_academic_items, count_academic_items
 from .formatters import _standard_item_type_meta
 
 User = get_user_model()
+
+
+def _test_attempt_has_delivered(attempt):
+    """``calculate_test_attempt_result(...).delivered_count > 0`` — cavab sətirlərini YÜKLƏMƏDƏN.
+
+    Cavab sətri varsa çatdırılmış sual sayı = cavab sayı; yoxdursa köhnə cəhd düzgün +
+    səhv sayğaclarından oxunur (``_legacy_test_attempt_result`` ilə eyni qayda)."""
+    answers = getattr(attempt, "_delivered_answers", None)
+    if answers:
+        return True
+    return (int(attempt.correct_count or 0) + int(attempt.wrong_count or 0)) > 0
+
+
+def fill_my_results_scores(items):
+    """Görünən səhifənin test ballarını TOPLU hesablayır (əvvəl bütün tarixçə üçün idi).
+
+    Cavab + sual + variant sətirləri bir prefetch dəstində, tələbəyə görünən apellyasiya
+    bonusları tək sorğuda oxunur; hesablama qaydası və mətn formatı əvvəlki kimidir.
+    Apellyasiya statusu (kartdakı nişan) da yalnız bu səhifənin imtahan sətirləri üçün
+    TƏK sorğu ilə gəlir. ``items`` — səhifənin dict siyahısı (yerində dəyişir)."""
+    from django.db.models import prefetch_related_objects
+
+    page_items = list(items)
+    pending = [item for item in page_items if item.get("pending_score_attempt") is not None]
+    if pending:
+        attempts = [item["pending_score_attempt"] for item in pending]
+        prefetch_related_objects(attempts, "answers__question__options", "answers__selected_options")
+        # Apellyasiya bonusları (tək sorğu) — tələbənin görəcəyi balda yalnız 5 dəqiqəlik reviewer
+        # redaktə pəncərəsi bağlanandan sonra əks olunsun (əvvəlki fallback qaydası ilə).
+        try:
+            from apps.appeals.public import apply_bonus_to_test_result, student_visible_appeal_bonus_map
+
+            bonus_by_attempt = student_visible_appeal_bonus_map([a.id for a in attempts])
+        except Exception:
+            bonus_by_attempt, apply_bonus_to_test_result = {}, None
+        for item, attempt in zip(pending, attempts):
+            test_result = calculate_test_attempt_result(attempt, answers=attempt.answers.all())
+            bonus = bonus_by_attempt.get(attempt.id)
+            if bonus and apply_bonus_to_test_result is not None:
+                test_result = apply_bonus_to_test_result(test_result, bonus)
+            item["score"] = f"{test_result.score_display} / {test_result.max_score_display}"
+            item["score_percent"] = f"{test_result.percentage_display}%"
+            item["score_pct_value"] = float(test_result.percentage)
+            item["pending_score_attempt"] = None
+    exam_attempt_ids = [item["attempt_id"] for item in page_items if item.get("attempt_id")]
+    if exam_attempt_ids:
+        try:
+            # Tələbəyə görünən status: qərar rəyçinin redaktə pəncərəsi bağlanana qədər «Baxılır».
+            from apps.appeals.public import student_appeal_status_by_attempt
+
+            appeal_map = student_appeal_status_by_attempt(exam_attempt_ids)
+        except Exception:  # pragma: no cover — nişan köməkçidir, siyahını sındırmasın
+            appeal_map = {}
+        for item in page_items:
+            appeal = appeal_map.get(item.get("attempt_id"))
+            if appeal:
+                item["appeal"] = {**appeal, "tone": "neutral" if appeal["is_final"] else "warning"}
+    return items
 
 
 def _collect_my_results(request, filter_type=None, search=None, year=None, season=None):
@@ -81,21 +139,16 @@ def _collect_my_results(request, filter_type=None, search=None, year=None, seaso
                 status__in=["submitted", "expired"],
             )
             .select_related("exam")
-            # Perf: test ballarının hesablanması üçün cavablar lazımdır —
-            # prefetch olmadan hər attempt 3-4 əlavə sorğu (N+1) yaradır.
-            .prefetch_related("answers__question__options", "answers__selected_options")
+            # Perf (Paket A, 2026-10-18): əvvəl BÜTÜN cəhdlərin cavab + sual + variant
+            # sətirləri (cəhd × sual × variant) burada yüklənirdi — yalnız 6 kartlıq
+            # səhifənin balı üçün. İndi yalnız çatdırılmış cavab SAYI gəlir (bal olub-
+            # olmadığını və statusu bilmək üçün kifayətdir); balın özü görünən səhifə
+            # üçün ``fill_my_results_scores`` ilə toplu hesablanır — rəqəm eynidir.
+            .annotate(_delivered_answers=Count("answers"))
             .order_by("-started_at")
         )
         attempts = list(attempts)
         attach_attempt_interventions(attempts)
-        # Apellyasiya bonusları (tək sorğu) — tələbənin görəcəyi balda yalnız
-        # 5 dəqiqəlik reviewer redaktə pəncərəsi bağlanandan sonra əks olunsun.
-        try:
-            from apps.appeals.public import apply_bonus_to_test_result, student_visible_appeal_bonus_map
-
-            _appeal_bonus_by_attempt = student_visible_appeal_bonus_map([a.id for a in attempts])
-        except Exception:
-            _appeal_bonus_by_attempt, apply_bonus_to_test_result = {}, None
         for attempt in attempts:
             is_auto_test = attempt.exam.exam_type == "test"
             if (
@@ -110,16 +163,15 @@ def _collect_my_results(request, filter_type=None, search=None, year=None, seaso
             # göstərilir (əvvəl test imtahanında faiz "Bal" kimi çıxırdı).
             score_value = attempt.teacher_score
             score_percent_value = ""
-            if score_value is None and is_auto_test:
-                test_result = calculate_test_attempt_result(attempt, answers=attempt.answers.all())
-                _bonus = _appeal_bonus_by_attempt.get(attempt.id)
-                if _bonus and apply_bonus_to_test_result is not None:
-                    test_result = apply_bonus_to_test_result(test_result, _bonus)
-                if test_result.delivered_count > 0:
-                    score_value = f"{test_result.score_display} / {test_result.max_score_display}"
-                    score_percent_value = f"{test_result.percentage_display}%"
+            pending_score_attempt = None
+            if score_value is None and is_auto_test and _test_attempt_has_delivered(attempt):
+                # Bal VAR (``calculate_test_attempt_result`` çatdırılmış sual sayı > 0 olanda
+                # bal qaytarır) — hesablanması səhifəyə qədər təxirə salınır.
+                pending_score_attempt = attempt
 
-            is_graded_visible = attempt.checked_by_teacher or score_value is not None
+            is_graded_visible = (
+                attempt.checked_by_teacher or score_value is not None or pending_score_attempt is not None
+            )
             items.append(
                 {
                     "category": "exams",
@@ -135,8 +187,11 @@ def _collect_my_results(request, filter_type=None, search=None, year=None, seaso
                     "status_raw": attempt.get_status_display(),
                     "score": score_value if is_graded_visible else None,
                     "score_percent": score_percent_value if is_graded_visible else "",
+                    "score_pct_value": None,
                     "feedback": attempt.teacher_feedback if is_graded_visible else "",
                     "removed_from_exam": attempt.exam_intervention["is_terminal"],
+                    "attempt_id": attempt.id,
+                    "pending_score_attempt": pending_score_attempt,
                     "removal_reason": attempt.exam_intervention["reason"],
                     "detail_url": _append_query_params(
                         reverse(

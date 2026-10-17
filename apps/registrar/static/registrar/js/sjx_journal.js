@@ -47,8 +47,12 @@
     var btn = ev.target.closest("[data-sjx-filter] .sjx-filter-btn");
     if (!btn) return;
     var group = btn.closest("[data-sjx-filter]");
-    group.querySelectorAll(".sjx-filter-btn").forEach(function (b) { b.classList.remove("is-active"); });
+    group.querySelectorAll(".sjx-filter-btn").forEach(function (b) {
+      b.classList.remove("is-active");
+      b.setAttribute("aria-pressed", "false");
+    });
     btn.classList.add("is-active");
+    btn.setAttribute("aria-pressed", "true");
     var kind = btn.getAttribute("data-kind");
     document.querySelectorAll("tr.sjx-drow").forEach(function (row) {
       row.style.display = kind === "all" || row.getAttribute("data-kind") === kind ? "" : "none";
@@ -57,17 +61,18 @@
 
   // ── Gün detalı modalı ──
   function modal() { return document.querySelector("[data-sjx-daymodal]"); }
+  // Paket A (2026-10-18): a11y — modal açılanda fokus «Bağla»-ya, bağlananda sətrə qayıdır.
+  var lastRow = null;
   function closeModal() {
     var m = modal();
-    if (m) m.hidden = true;
+    if (!m || m.hidden) return;
+    m.hidden = true;
     document.body.style.overflow = "";
+    if (lastRow && document.contains(lastRow)) lastRow.focus();
+    lastRow = null;
   }
 
-  document.addEventListener("click", function (ev) {
-    if (ev.target.closest("[data-sjx-day-close]")) { closeModal(); return; }
-    // Düzəliş ✎ nişanı gün modalını YOX, tarixçə modalını açır (correction_history.js).
-    if (ev.target.closest("[data-corr-history]")) return;
-    var row = ev.target.closest("[data-sjx-day]");
+  function openDay(row) {
     var m = modal();
     if (!row || !m) return;
     function put(sel, val) {
@@ -88,9 +93,25 @@
     if (excuse) excuse.hidden = row.getAttribute("data-legacy-excuse") !== "1";
     m.hidden = false;
     document.body.style.overflow = "hidden";
+    lastRow = row;
+    var closeBtn = m.querySelector(".sjx-daymodal-x");
+    if (closeBtn) closeBtn.focus();
+  }
+
+  document.addEventListener("click", function (ev) {
+    if (ev.target.closest("[data-sjx-day-close]")) { closeModal(); return; }
+    // Düzəliş ✎ nişanı gün modalını YOX, tarixçə modalını açır (correction_history.js).
+    if (ev.target.closest("[data-corr-history]")) return;
+    openDay(ev.target.closest("[data-sjx-day]"));
   });
 
   document.addEventListener("keydown", function (ev) {
-    if (ev.key === "Escape") closeModal();
+    if (ev.key === "Escape") { closeModal(); return; }
+    // Sətir klaviatura ilə də açılır (tabindex="0"): Enter / Boşluq.
+    if (ev.key !== "Enter" && ev.key !== " ") return;
+    var row = ev.target.closest ? ev.target.closest("[data-sjx-day]") : null;
+    if (!row || ev.target !== row) return;
+    ev.preventDefault();
+    openDay(row);
   });
 })();

@@ -32,14 +32,15 @@ ona görə CSS/JS-i özü yükləyir (JS `defer` ilə — bax test_shell_script_
      data-i18n-empty="{% trans 'empty_user_not_found' context 'courses.partial.member_modal' %}"
      data-i18n-remove="{% trans 'Çıxar' context 'registrar.guest_roster' %}"></div>
 
-<div class="modal fade" id="addStudentModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade ems-bsd" id="addStudentModal" tabindex="-1" aria-hidden="true" aria-labelledby="addStudentModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">
-                    <i class="fas fa-user-plus"></i> {% trans "student_modal_title" context "courses.partial.member_modal" %}
-                </h5>
-                <button type="button" class="btn-close btn-close-white"
+            <div class="modal-header ems-bsd__head">
+                <span class="ems-bsd__ic ems-bsd__ic--members" aria-hidden="true">{% include "courses/partials/_cd_icon.html" with icon="user" size=20 %}</span>
+                <div class="ems-bsd__tx">
+                    <h5 class="modal-title" id="addStudentModalTitle">{% trans "student_modal_title" context "courses.partial.member_modal" %}</h5>
+                </div>
+                <button type="button" class="btn-close"
                         data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'ui.dialog' %}"></button>
             </div>
 
@@ -47,13 +48,13 @@ ona görə CSS/JS-i özü yükləyir (JS `defer` ilə — bax test_shell_script_
                   action="{% url 'courses:add_member' course.id %}">
                 {% csrf_token %}
 
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="groupNameInput" class="form-label">
-                            <i class="fas fa-users"></i> {% trans "field_group_name_optional" context "courses.partial.member_modal" %}
+                <div class="modal-body ems-bsd__body ems-bsd__fields">
+                    <div class="ems-field">
+                        <label for="groupNameInput" class="ems-field__label">
+                            {% trans "field_group_name_optional" context "courses.partial.member_modal" %}
                         </label>
                         <input type="text"
-                               class="form-control"
+                               class="ems-input"
                                id="groupNameInput"
                                name="group_name"
                                placeholder="{% trans 'placeholder_group_name' context 'courses.partial.member_modal' %}">
@@ -63,7 +64,7 @@ ona görə CSS/JS-i özü yükləyir (JS `defer` ilə — bax test_shell_script_
                          id="studentPicker"
                          data-available-url="{% url 'courses:available_students' course.id %}"
                          data-page-size="20">
-                        <label class="form-label fw-bold mb-2" id="student-selector-label" for="student_search_input">{% trans "label_students" context "courses.partial.member_modal" %}</label>
+                        <label class="ems-field__label" id="student-selector-label" for="student_search_input">{% trans "label_students" context "courses.partial.member_modal" %}</label>
 
                         <div class="search-input-group">
                             <i class="fas fa-search"></i>
@@ -99,12 +100,12 @@ ona görə CSS/JS-i özü yükləyir (JS `defer` ilə — bax test_shell_script_
 
                 </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <div class="modal-footer ems-bsd__foot">
+                    <button type="button" class="ems-btn" data-bs-dismiss="modal">
                         {% trans "action_cancel" context "courses.partial.member_modal" %}
                     </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-check"></i> {% trans "action_add" context "courses.partial.member_modal" %}
+                    <button type="submit" class="ems-btn ems-btn--primary">
+                        <i class="fas fa-check" aria-hidden="true"></i> {% trans "action_add" context "courses.partial.member_modal" %}
                     </button>
                 </div>
             </form>
@@ -112,14 +113,15 @@ ona görə CSS/JS-i özü yükləyir (JS `defer` ilə — bax test_shell_script_
     </div>
 </div>
 
-<div class="modal fade" id="addGroupModal" tabindex="-1" aria-hidden="true" aria-labelledby="addGroupModalTitle">
+<div class="modal fade ems-bsd" id="addGroupModal" tabindex="-1" aria-hidden="true" aria-labelledby="addGroupModalTitle">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header bg-secondary text-white">
-                <h5 class="modal-title" id="addGroupModalTitle">
-                    <i class="fas fa-users-cog"></i> {% trans "group_modal_title" context "courses.partial.member_modal" %}
-                </h5>
-                <button type="button" class="btn-close btn-close-white"
+            <div class="modal-header ems-bsd__head">
+                <span class="ems-bsd__ic ems-bsd__ic--topics" aria-hidden="true">{% include "courses/partials/_cd_icon.html" with icon="users" size=20 %}</span>
+                <div class="ems-bsd__tx">
+                    <h5 class="modal-title" id="addGroupModalTitle">{% trans "group_modal_title" context "courses.partial.member_modal" %}</h5>
+                </div>
+                <button type="button" class="btn-close"
                         data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'ui.dialog' %}"></button>
             </div>
 
@@ -131,7 +133,7 @@ ona görə CSS/JS-i özü yükləyir (JS `defer` ilə — bax test_shell_script_
                   action="{% url 'courses:add_members_bulk' course.id %}">
                 {% csrf_token %}
 
-                <div class="modal-body">
+                <div class="modal-body ems-bsd__body">
                     <div class="custom-selector-wrapper" role="group" aria-labelledby="group-selector-label"
                          id="groupPicker"
                          data-available-url="{% url 'courses:available_groups' course.id %}"
@@ -143,7 +145,7 @@ ona görə CSS/JS-i özü yükləyir (JS `defer` ilə — bax test_shell_script_
                          data-i18n-empty-search="{% trans 'empty_group_not_found' context 'courses.partial.member_modal' %}"
                          data-i18n-search-hint="{% trans 'groups_search_hint' context 'courses.partial.member_modal' %}"
                          data-i18n-error="{% trans 'msg_server_error' context 'courses.partial.member_modal' %}">
-                        <label class="form-label fw-bold mb-2" id="group-selector-label" for="group_search_input">{% trans "label_groups" context "courses.partial.member_modal" %}</label>
+                        <label class="ems-field__label" id="group-selector-label" for="group_search_input">{% trans "label_groups" context "courses.partial.member_modal" %}</label>
 
                         <div class="search-input-group">
                             <i class="fas fa-search" aria-hidden="true"></i>
@@ -168,11 +170,11 @@ ona görə CSS/JS-i özü yükləyir (JS `defer` ilə — bax test_shell_script_
                     </div>
                 </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <div class="modal-footer ems-bsd__foot">
+                    <button type="button" class="ems-btn" data-bs-dismiss="modal">
                         {% trans "action_cancel" context "courses.partial.member_modal" %}
                     </button>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="ems-btn ems-btn--primary">
                         <i class="fas fa-check" aria-hidden="true"></i> {% trans "action_add_groups" context "courses.partial.member_modal" %}
                     </button>
                 </div>

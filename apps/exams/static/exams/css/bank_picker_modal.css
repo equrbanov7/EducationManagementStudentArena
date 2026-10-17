@@ -12,16 +12,16 @@
 
 /* Header-dəki vurğulu picker düyməsi (mavi dolu) */
 .page-header-link--accent {
-    background: var(--primary, #4361ee);
-    border-color: var(--primary, #4361ee);
+    background: var(--primary, var(--ems-primary-600));
+    border-color: var(--primary, var(--ems-primary-600));
     color: var(--ems-neutral-0);
     cursor: pointer;
     font: inherit;
     font-weight: 700;
 }
 .page-header-link--accent:hover {
-    background: var(--primary-hover, #3751d4);
-    border-color: var(--primary-hover, #3751d4);
+    background: var(--primary-hover, var(--ems-primary-700));
+    border-color: var(--primary-hover, var(--ems-primary-700));
     color: var(--ems-neutral-0);
 }
 
@@ -71,8 +71,8 @@ body.bankpicker-open {
     justify-content: space-between;
     gap: 12px;
     padding: 18px 22px;
-    border-bottom: 1px solid var(--border, #e1e4e8);
-    background: linear-gradient(120deg, #eef3ff, #f7f9ff);
+    border-bottom: 1px solid var(--border, var(--ems-neutral-200));
+    background: linear-gradient(120deg, var(--ems-primary-50), var(--ems-neutral-100));
 }
 .bankpicker-dialog__title {
     display: flex;
@@ -81,35 +81,35 @@ body.bankpicker-open {
 }
 .bankpicker-dialog__title > i {
     font-size: 1.35rem;
-    color: var(--primary, #4361ee);
+    color: var(--primary, var(--ems-primary-600));
 }
 .bankpicker-dialog__title h3 {
     margin: 0;
     font-size: 1.1rem;
     font-weight: 800;
-    color: var(--text-dark, #2d3436);
+    color: var(--text-dark, var(--ems-neutral-800));
 }
 .bankpicker-dialog__title p {
     margin: 2px 0 0;
     font-size: 0.85rem;
-    color: var(--text-muted, #636e72);
+    color: var(--text-muted, var(--ems-neutral-500));
 }
 .bankpicker-dialog__close {
     flex-shrink: 0;
     width: 38px;
     height: 38px;
     border-radius: 50%;
-    border: 1px solid var(--border, #e1e4e8);
+    border: 1px solid var(--border, var(--ems-neutral-200));
     background: var(--ems-neutral-0);
-    color: var(--text-muted, #636e72);
+    color: var(--text-muted, var(--ems-neutral-500));
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.15s ease;
 }
 .bankpicker-dialog__close:hover {
-    background: #fdecec;
-    border-color: #f5b7b1;
-    color: var(--danger, #e74c3c);
+    background: var(--ems-danger-100);
+    border-color: var(--ems-danger-200);
+    color: var(--danger, var(--ems-danger-500));
 }
 
 .bankpicker-dialog__body {
@@ -123,14 +123,14 @@ body.bankpicker-open {
     justify-content: center;
     gap: 10px;
     padding: 48px 0;
-    color: var(--text-muted, #636e72);
+    color: var(--text-muted, var(--ems-neutral-500));
     font-weight: 600;
 }
 .bankpicker-spinner {
     width: 18px;
     height: 18px;
-    border: 2.5px solid #d8e0f5;
-    border-top-color: var(--primary, #4361ee);
+    border: 2.5px solid var(--ems-primary-100);
+    border-top-color: var(--primary, var(--ems-primary-600));
     border-radius: 50%;
     animation: bankpicker-spin 0.7s linear infinite;
 }
@@ -149,7 +149,7 @@ body.bankpicker-open {
     flex-wrap: wrap;
     gap: 12px;
     padding: 18px 22px;
-    border-bottom: 1px solid var(--border, #e1e4e8);
+    border-bottom: 1px solid var(--border, var(--ems-neutral-200));
 }
 .bankpicker-field {
     display: flex;
@@ -168,24 +168,24 @@ body.bankpicker-open {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: var(--text-muted, #636e72);
+    color: var(--text-muted, var(--ems-neutral-500));
 }
-.bankpicker-field__label i { color: var(--primary, #4361ee); }
+.bankpicker-field__label i { color: var(--primary, var(--ems-primary-600)); }
 .bankpicker-select,
 .bankpicker-input {
     width: 100%;
     padding: 9px 12px;
-    border: 1px solid var(--border, #e1e4e8);
+    border: 1px solid var(--border, var(--ems-neutral-200));
     border-radius: 10px;
     font-size: 0.9rem;
-    color: var(--text-dark, #2d3436);
+    color: var(--text-dark, var(--ems-neutral-800));
     background: var(--ems-neutral-0);
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .bankpicker-select:focus,
 .bankpicker-input:focus {
     outline: none;
-    border-color: var(--primary, #4361ee);
+    border-color: var(--primary, var(--ems-primary-600));
     box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.14);
 }
 
@@ -196,8 +196,8 @@ body.bankpicker-open {
     align-items: center;
     gap: 14px;
     padding: 14px 22px;
-    background: #f7f9ff;
-    border-bottom: 1px solid var(--border, #e1e4e8);
+    background: var(--ems-neutral-100);
+    border-bottom: 1px solid var(--border, var(--ems-neutral-200));
 }
 .bankpicker-stat {
     display: flex;
@@ -207,11 +207,11 @@ body.bankpicker-open {
 .bankpicker-stat__value {
     font-size: 1.25rem;
     font-weight: 800;
-    color: var(--primary, #4361ee);
+    color: var(--primary, var(--ems-primary-600));
 }
 .bankpicker-stat__label {
     font-size: 0.74rem;
-    color: var(--text-muted, #636e72);
+    color: var(--text-muted, var(--ems-neutral-500));
     font-weight: 600;
 }
 .bankpicker-stat--chips {
@@ -232,25 +232,25 @@ body.bankpicker-open {
     gap: 5px;
     padding: 4px 11px;
     border-radius: 999px;
-    border: 1px solid #dbe4ff;
+    border: 1px solid var(--ems-primary-100);
     background: var(--ems-neutral-0);
-    color: var(--text-dark, #2d3436);
+    color: var(--text-dark, var(--ems-neutral-800));
     font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.15s ease;
 }
-.bankpicker-langchip strong { color: var(--primary, #4361ee); }
-.bankpicker-langchip:hover { border-color: var(--primary, #4361ee); }
+.bankpicker-langchip strong { color: var(--primary, var(--ems-primary-600)); }
+.bankpicker-langchip:hover { border-color: var(--primary, var(--ems-primary-600)); }
 .bankpicker-langchip.is-active {
-    background: var(--primary, #4361ee);
-    border-color: var(--primary, #4361ee);
+    background: var(--primary, var(--ems-primary-600));
+    border-color: var(--primary, var(--ems-primary-600));
     color: var(--ems-neutral-0);
 }
 .bankpicker-langchip.is-active strong { color: var(--ems-neutral-0); }
 .bankpicker-langchip--muted {
     cursor: default;
-    color: var(--text-muted, #636e72);
+    color: var(--text-muted, var(--ems-neutral-500));
     border-style: dashed;
 }
 
@@ -265,7 +265,7 @@ body.bankpicker-open {
 }
 .bankpicker-found {
     font-size: 0.85rem;
-    color: var(--text-muted, #636e72);
+    color: var(--text-muted, var(--ems-neutral-500));
     font-weight: 600;
 }
 .bankpicker-found em { font-style: normal; opacity: 0.75; }
@@ -277,14 +277,14 @@ body.bankpicker-open {
     padding: 5px 10px;
     border: none;
     background: transparent;
-    color: var(--primary, #4361ee);
+    color: var(--primary, var(--ems-primary-600));
     font-size: 0.82rem;
     font-weight: 700;
     cursor: pointer;
     border-radius: 8px;
     transition: background 0.15s ease;
 }
-.bankpicker-textbtn:hover { background: #eef3ff; }
+.bankpicker-textbtn:hover { background: var(--ems-primary-50); }
 
 /* Siyahı */
 .bankpicker-list {
@@ -298,28 +298,28 @@ body.bankpicker-open {
     align-items: flex-start;
     gap: 12px;
     padding: 12px 14px;
-    border: 1px solid var(--border, #e1e4e8);
+    border: 1px solid var(--border, var(--ems-neutral-200));
     border-radius: 12px;
     cursor: pointer;
     transition: border-color 0.15s ease, background 0.15s ease;
 }
-.bankpicker-item:hover { border-color: #c3d0f7; background: #fafbff; }
+.bankpicker-item:hover { border-color: var(--ems-primary-200); background: var(--ems-neutral-50); }
 .bankpicker-item__check {
     margin-top: 3px;
     width: 18px;
     height: 18px;
-    accent-color: var(--primary, #4361ee);
+    accent-color: var(--primary, var(--ems-primary-600));
     flex-shrink: 0;
     cursor: pointer;
 }
 .bankpicker-item:has(.bankpicker-item__check:checked) {
-    border-color: var(--primary, #4361ee);
-    background: #eef3ff;
+    border-color: var(--primary, var(--ems-primary-600));
+    background: var(--ems-primary-50);
 }
 .bankpicker-item__body { display: flex; flex-direction: column; gap: 7px; }
 .bankpicker-item__text {
     font-size: 0.9rem;
-    color: var(--text-dark, #2d3436);
+    color: var(--text-dark, var(--ems-neutral-800));
     line-height: 1.45;
 }
 .bankpicker-item__meta { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -328,12 +328,12 @@ body.bankpicker-open {
     align-items: center;
     padding: 2px 9px;
     border-radius: 999px;
-    background: #eef3ff;
-    color: var(--primary, #4361ee);
+    background: var(--ems-primary-50);
+    color: var(--primary, var(--ems-primary-600));
     font-size: 0.72rem;
     font-weight: 700;
 }
-.bankpicker-tag--soft { background: #f0f1f4; color: var(--text-muted, #636e72); }
+.bankpicker-tag--soft { background: var(--ems-neutral-100); color: var(--text-muted, var(--ems-neutral-500)); }
 
 /* Boş hallar */
 .bankpicker-empty {
@@ -342,7 +342,7 @@ body.bankpicker-open {
     align-items: center;
     gap: 10px;
     padding: 44px 22px;
-    color: var(--text-muted, #636e72);
+    color: var(--text-muted, var(--ems-neutral-500));
     text-align: center;
 }
 .bankpicker-empty i { font-size: 1.6rem; opacity: 0.55; }
@@ -358,13 +358,13 @@ body.bankpicker-open {
     justify-content: space-between;
     gap: 12px;
     padding: 14px 22px;
-    border-top: 1px solid var(--border, #e1e4e8);
+    border-top: 1px solid var(--border, var(--ems-neutral-200));
     background: var(--ems-neutral-0);
 }
 .bankpicker-selcount {
     font-size: 0.88rem;
     font-weight: 700;
-    color: var(--text-dark, #2d3436);
+    color: var(--text-dark, var(--ems-neutral-800));
 }
 .bankpicker-attach {
     display: inline-flex;
@@ -373,14 +373,14 @@ body.bankpicker-open {
     padding: 11px 20px;
     border: none;
     border-radius: 11px;
-    background: var(--primary, #4361ee);
+    background: var(--primary, var(--ems-primary-600));
     color: var(--ems-neutral-0);
     font-size: 0.92rem;
     font-weight: 700;
     cursor: pointer;
     transition: background 0.15s ease, opacity 0.15s ease;
 }
-.bankpicker-attach:hover:not(:disabled) { background: var(--primary-hover, #3751d4); }
+.bankpicker-attach:hover:not(:disabled) { background: var(--primary-hover, var(--ems-primary-700)); }
 .bankpicker-attach:disabled { opacity: 0.5; cursor: not-allowed; }
 .bankpicker-attach.is-loading { opacity: 0.7; cursor: progress; }
 
@@ -397,8 +397,8 @@ body.bankpicker-open {
     gap: 8px;
     padding: 10px 16px;
     border-radius: 999px;
-    border: 1px solid var(--primary, #4361ee);
-    background: var(--primary, #4361ee);
+    border: 1px solid var(--primary, var(--ems-primary-600));
+    background: var(--primary, var(--ems-primary-600));
     color: var(--ems-neutral-0);
     font-size: 0.92rem;
     font-weight: 700;
@@ -406,8 +406,8 @@ body.bankpicker-open {
     transition: background 0.15s ease, border-color 0.15s ease;
 }
 .bankpicker-open-btn:hover {
-    background: var(--primary-hover, #3751d4);
-    border-color: var(--primary-hover, #3751d4);
+    background: var(--primary-hover, var(--ems-primary-700));
+    border-color: var(--primary-hover, var(--ems-primary-700));
     color: var(--ems-neutral-0);
 }
 
@@ -462,7 +462,7 @@ body.bankpicker-open {
 }
 .bankpicker-item__chevron {
     flex-shrink: 0;
-    color: var(--text-muted, #636e72);
+    color: var(--text-muted, var(--ems-neutral-500));
     font-size: 0.85rem;
     transition: transform 0.2s ease;
 }
@@ -484,7 +484,7 @@ body.bankpicker-open {
     max-height: 680px;
     margin-top: 10px;
     padding-top: 10px;
-    border-top: 1px dashed var(--border, #e1e4e8);
+    border-top: 1px dashed var(--border, var(--ems-neutral-200));
 }
 .bankpicker-opt {
     display: flex;
@@ -492,11 +492,11 @@ body.bankpicker-open {
     gap: 9px;
     padding: 7px 10px;
     border-radius: 8px;
-    background: #f7f9ff;
+    background: var(--ems-neutral-100);
     font-size: 0.85rem;
-    color: var(--text-dark, #2d3436);
+    color: var(--text-dark, var(--ems-neutral-800));
 }
-.bankpicker-opt.is-correct { background: #e7f7ee; }
+.bankpicker-opt.is-correct { background: var(--ems-neutral-50); }
 .bankpicker-opt__label {
     flex-shrink: 0;
     width: 22px;
@@ -505,18 +505,18 @@ body.bankpicker-open {
     place-items: center;
     border-radius: 6px;
     background: var(--ems-neutral-0);
-    border: 1px solid var(--border, #e1e4e8);
+    border: 1px solid var(--border, var(--ems-neutral-200));
     font-weight: 700;
     font-size: 0.78rem;
 }
 .bankpicker-opt.is-correct .bankpicker-opt__label {
-    background: var(--success, #27ae60);
-    border-color: var(--success, #27ae60);
+    background: var(--success, var(--ems-success));
+    border-color: var(--success, var(--ems-success));
     color: var(--ems-neutral-0);
 }
 .bankpicker-opt__text { flex: 1; min-width: 0; }
-.bankpicker-opt__mark { color: var(--success, #27ae60); flex-shrink: 0; }
-.bankpicker-opt--muted { color: var(--text-muted, #636e72); background: #f4f5f7; }
+.bankpicker-opt__mark { color: var(--success, var(--ems-success)); flex-shrink: 0; }
+.bankpicker-opt--muted { color: var(--text-muted, var(--ems-neutral-500)); background: var(--ems-neutral-100); }
 
 .bankpicker-sentinel {
     display: flex;
@@ -524,7 +524,7 @@ body.bankpicker-open {
     justify-content: center;
     gap: 8px;
     padding: 14px;
-    color: var(--text-muted, #636e72);
+    color: var(--text-muted, var(--ems-neutral-500));
     font-size: 0.85rem;
     font-weight: 600;
 }

@@ -1,0 +1,69 @@
+{% load i18n ems_ui %}
+{% comment %}
+«Təyin olunmuş tapşırıqlar» kartı (Paket A redizaynı 2026-10-18). Kontekst: `item` (`_collect_assigned_tasks`).
+İmtahan düyməsinin sinfi və `data-*` atributları `profile/assigned_exam.js`-in müqaviləsidir — DƏYİŞMƏYİN.
+{% endcomment %}
+<article class="ta-card ta-card--{{ item.category }} is-{{ item.state_badge }}">
+    <header class="ta-card__head">
+        <span class="ta-card__icon ta-card__icon--{{ item.category }}" aria-hidden="true"><i class="{{ item.icon }}"></i></span>
+        <div class="ta-card__titles">
+            <h3 class="ta-card__title">{{ item.title }}</h3>
+            {% if item.kind %}<p class="ta-card__kind">{{ item.kind }}</p>{% endif %}
+        </div>
+        {% ems_status_badge "task_state" item.state_badge dot=True nowrap=True %}
+    </header>
+
+    {% if item.assigned_at or item.deadline %}
+    <dl class="ta-card__dates">
+        {% if item.assigned_at %}
+        <div class="ta-card__date">
+            <dt><i class="far fa-clock" aria-hidden="true"></i> {% trans 'Başlama vaxtı' %}</dt>
+            <dd><time datetime="{{ item.assigned_at|date:'c' }}">{{ item.assigned_at|date:"d.m.Y H:i" }}</time></dd>
+        </div>
+        {% endif %}
+        {% if item.deadline %}
+        <div class="ta-card__date ta-card__date--deadline">
+            <dt><i class="fas fa-hourglass-end" aria-hidden="true"></i> {% trans "deadline_prefix" context "profile.assigned_tasks" %}</dt>
+            <dd><time datetime="{{ item.deadline|date:'c' }}">{{ item.deadline|date:"d.m.Y H:i" }}</time></dd>
+        </div>
+        {% endif %}
+    </dl>
+    {% endif %}
+
+    {% if item.description %}
+    <p class="ta-card__desc">{{ item.description|truncatechars:180 }}</p>
+    {% endif %}
+
+    <footer class="ta-card__foot">
+        {% if item.category == "exams" %}
+        <button type="button"
+                class="ems-btn ems-btn--primary ta-card__cta js-open-assigned-exam-modal"
+                data-start-url="{{ item.detail_url }}"
+                data-exam-slug="{{ item.exam_slug }}"
+                data-exam-title="{{ item.title }}"
+                data-exam-kind="{{ item.kind }}"
+                data-exam-type="{{ item.exam_type_display }}"
+                data-exam-start="{% if item.exam_start_at %}{{ item.exam_start_at|date:'d.m.Y H:i' }}{% else %}{% trans 'Məhdudiyyət yoxdur (daimi)' %}{% endif %}"
+                data-exam-end="{% if item.exam_end_at %}{{ item.exam_end_at|date:'d.m.Y H:i' }}{% else %}{% trans 'Məhdudiyyət yoxdur (daimi)' %}{% endif %}"
+                data-exam-duration="{% if item.exam_total_duration_minutes %}{% blocktrans with minutes=item.exam_total_duration_minutes %}{{ minutes }} dəqiqə{% endblocktrans %}{% else %}{% trans 'Məhdudiyyət yoxdur' %}{% endif %}"
+                data-exam-note="{% if item.description %}{{ item.description|striptags|escape }}{% else %}{% endif %}"
+                data-requires-code="{% if item.exam_requires_code %}1{% else %}0{% endif %}"
+                data-is-final="{% if item.is_final %}1{% else %}0{% endif %}"
+                data-final-has-ticket="{% if item.final_has_ticket %}1{% else %}0{% endif %}"
+                data-final-pin="{{ item.final_pin|default:'' }}"
+                data-final-room="{{ item.final_room|default:'' }}"
+                data-final-entry-open="{% if item.final_entry_open %}1{% else %}0{% endif %}"
+                data-final-entry-url="{{ item.final_entry_url|default:'' }}"
+                data-student-pin="{{ item.student_pin|default:'' }}"
+                data-start-block-reason="{{ item.start_block_reason|default:'' }}">
+            <span>{% trans "open_task" context "profile.assigned_tasks" %}</span>
+            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+        </button>
+        {% else %}
+        <a href="{{ item.detail_url }}" class="ems-btn ems-btn--primary ta-card__cta">
+            <span>{% trans "open_task" context "profile.assigned_tasks" %}</span>
+            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+        </a>
+        {% endif %}
+    </footer>
+</article>

@@ -203,6 +203,7 @@ class _Stage4Mixin:
             "evaluated_review_total_count": len(self.evaluated_review_items),
             "evaluated_review_page_obj": self.evaluated_review_page_obj,
             "evaluated_review_pagination_query": self.evaluated_review_pagination_query,
+            "evaluated_review_ui": self.evaluated_review_ui,
             "pending_student_invites": self.pending_student_invites,
             "pending_student_join_requests": self.pending_student_join_requests,
             "notifications_unread_count": self.notifications_unread_count,

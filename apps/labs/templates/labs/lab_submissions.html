@@ -98,14 +98,14 @@
             </div>
             <div class="results-filter-field">
                 <label class="results-filter-label" for="resultsFilterDateToInput">
-                    Son tarix
+                    {% trans 'Son tarix' %}
                 </label>
                 <input type="date"
                        id="resultsFilterDateToInput"
                        name="date_to"
                        value="{{ date_to }}"
                        class="form-control js-auto-filter js-filter-resettable"
-                       aria-label="Son tarix">
+                       aria-label="{% trans 'Son tarix' %}">
             </div>
             <button type="submit" class="btn results-filter-submit">
                 <i class="fas fa-filter me-1"></i> {% trans 'Tətbiq et' %}

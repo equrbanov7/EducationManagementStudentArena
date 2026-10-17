@@ -1,398 +1,184 @@
-{% load exam_start i18n static %}
-{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü (xarici CSS).{% endcomment %}
-<link rel="stylesheet" href="{% static 'exams/css/exam_section.css' %}">
-
-<div class="accordion-item">
-    <h2 class="accordion-header" id="examHeading">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
-                data-bs-target="#examCollapse" aria-expanded="false">
-            <i class="fas fa-file-alt text-info me-2 fs-5"></i>
-            <strong>{% trans "section_exams" context "exams.partial.exam_section" %}</strong>
-            <span class="badge bg-info ms-2">
-                {% if is_student %}
-                    {{ exams_with_data|length }}
-                {% else %}
-                    {{ course_exams|length }}
-                {% endif %}
-            </span>
-        </button>
-    </h2>
-    
-    <div id="examCollapse" class="accordion-collapse collapse" data-bs-parent="#courseDashboard">
-        <div class="accordion-body">
-            
-            {% if is_owner or user_role == 'teacher' %}
-                <div class="mb-3 d-flex gap-2 justify-content-end flex-wrap">
-                    {% if is_owner %}
-                    <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#linkExamModal">
-                        <i class="fas fa-link me-1"></i> {% trans "action_link_existing_exam" context "exams.partial.exam_section" %}
-                    </button>
+{% load exam_start i18n %}
+{% comment %}
+Kurs panelinin «İmtahanlar» bölməsi. Paket E (2026-10-17): Bootstrap akkordeon/list-group/badge → kurs
+panelinin `cd-task` kartları + `ems-badge`/`ems-btn`. Panel başlığındakı əməllər (mövcudu əlaqələndir / yeni
+imtahan) `course_dashboard.html`-dədir (əvvəl JS ilə bu bölmədən köçürülürdü). Qarmaqlar dəyişməyib:
+`.js-open-course-exam-editor`, `.js-unlink-exam`, `.js-open-course-exam-modal`. Tələbənin məlumat/kod dialoqu
+`_exam_info_dialog.html`-dədir (ortaq `ems_ui` dialoqu).
+{% endcomment %}
+{% if is_owner or is_teacher %}
+    {% if course_exams %}
+    <ul class="cd-tasks">
+        {% for exam in course_exams %}
+        <li class="cd-task">
+            <div class="cd-task__head">
+                <span class="cd-task__ic cd-task__ic--exam" aria-hidden="true">{% include "courses/partials/_cd_icon.html" with icon="doc" size=20 %}</span>
+                <div class="cd-task__titles">
+                    <h3 class="cd-task__title">{{ exam.title }}</h3>
+                    {% if exam.description %}<p class="cd-task__desc">{{ exam.description|truncatewords:15 }}</p>{% endif %}
+                </div>
+                <div class="cd-task__badges">
+                    {% if exam.is_active %}
+                        {% if exam.is_before_start %}
+                            <span class="ems-badge ems-badge--warning">{% trans "status_not_started" context "exams.partial.exam_section" %}</span>
+                        {% elif exam.is_after_end %}
+                            <span class="ems-badge ems-badge--muted">{% trans "status_finished" context "exams.partial.exam_section" %}</span>
+                        {% else %}
+                            <span class="ems-badge ems-badge--success">{% trans "status_active" context "exams.partial.exam_section" %}</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="ems-badge ems-badge--muted">{% trans "status_inactive" context "exams.partial.exam_section" %}</span>
                     {% endif %}
-                    <button type="button"
-                            class="btn btn-success btn-sm js-open-course-exam-editor"
-                            data-url="{% url 'exams:create_exam' %}?course={{ course.id }}"
-                            data-modal-title="{% trans 'heading_create_exam' context 'exams.template.create_exam_modal' %}">
-                        <i class="fas fa-plus-circle me-1"></i> {% trans "action_create_new_exam" context "exams.partial.exam_section" %}
-                    </button>
+                    <span class="ems-badge ems-badge--info">{{ exam.get_exam_type_display }}</span>
                 </div>
-            {% endif %}
+            </div>
 
-            {# ═══════════════════════════════════════════════════════════ #}
-            {# MÜƏLLİM GÖRÜNÜŞÜ                                            #}
-            {# ═══════════════════════════════════════════════════════════ #}
-            {% if is_owner or is_teacher %}
-                {% if course_exams %}
-                    <div class="list-group list-group-flush">
-                        {% for exam in course_exams %}
-                        <div class="list-group-item border-0 border-bottom pb-3 mb-3">
-                            <div class="d-flex w-100 justify-content-between align-items-start mb-2">
-                                <h6 class="mb-1 fw-bold">
-                                    <i class="fas fa-file-alt text-info"></i> {{ exam.title }}
-                                </h6>
-                                <div>
-                                    {% if exam.is_active %}
-                                        {% if exam.is_before_start %}
-                                            <span class="badge bg-warning">{% trans "status_not_started" context "exams.partial.exam_section" %}</span>
-                                        {% elif exam.is_after_end %}
-                                            <span class="badge bg-secondary">{% trans "status_finished" context "exams.partial.exam_section" %}</span>
-                                        {% else %}
-                                            <span class="badge bg-success">{% trans "status_active" context "exams.partial.exam_section" %}</span>
-                                        {% endif %}
-                                    {% else %}
-                                        <span class="badge bg-secondary">{% trans "status_inactive" context "exams.partial.exam_section" %}</span>
-                                    {% endif %}
-                                    
-                                    <span class="badge bg-info ms-1">{{ exam.get_exam_type_display }}</span>
-                                </div>
-                            </div>
-                            
-                            {% if exam.description %}
-                            <p class="text-muted small mb-2">{{ exam.description|truncatewords:15 }}</p>
-                            {% endif %}
-                            
-                            <div class="d-flex flex-wrap gap-3 mb-3">
-                                <small class="text-muted">
-                                    <i class="fas fa-question-circle"></i>
-                                    {% blocktrans trimmed context "exams.partial.exam_section" with question_count=exam.questions_total %}
-                                        label_question_count_short {{ question_count }}
-                                    {% endblocktrans %}
-                                </small>
-                                {% if exam.total_duration_minutes %}
-                                <small class="text-muted">
-                                    <i class="fas fa-clock"></i>
-                                    {% blocktrans trimmed context "exams.partial.exam_section" with minutes=exam.total_duration_minutes %}
-                                        label_duration_minutes_short {{ minutes }}
-                                    {% endblocktrans %}
-                                </small>
-                                {% endif %}
-                                {% if exam.max_attempts_per_user %}
-                                <small class="text-muted">
-                                    <i class="fas fa-redo"></i>
-                                    {% blocktrans trimmed context "exams.partial.exam_section" with attempts=exam.max_attempts_per_user %}
-                                        label_attempt_count_short {{ attempts }}
-                                    {% endblocktrans %}
-                                </small>
-                                {% endif %}
-                                {% if exam.start_datetime %}
-                                <small class="text-muted">
-                                    <i class="fas fa-calendar-alt"></i> {{ exam.start_datetime|date:"d.m.Y H:i" }}
-                                </small>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="btn-group btn-group-sm gap-2">
-                                <a href="{% url 'exams:teacher_exam_detail' exam.slug %}?from_section={{ profile_return_section|default:'my-courses' }}&return_to={{ request.get_full_path|urlencode }}"
-                                   class="btn btn-sm btn-outline-info">
-                                    <i class="fas fa-eye"></i> {% trans 'Detallı imtahana bax' context 'exams.partial.exam_section' %}
-                                </a>
-                                <a href="{% url 'exams:teacher_exam_results' exam.slug %}?from_section={{ profile_return_section|default:'my-courses' }}&return_to={{ request.get_full_path|urlencode }}"
-                                   class="btn btn-sm btn-outline-success">
-                                    <i class="fas fa-chart-bar"></i> {% trans "action_results" context "exams.partial.exam_section" %}
-                                </a>
-                                {% if exam.author_id == request.user.id or request.user.is_superuser %}
-                                <button type="button"
-                                        class="btn btn-sm btn-outline-primary js-open-course-exam-editor"
-                                        data-url="{% url 'exams:edit_exam' exam.slug %}"
-                                        data-modal-title="{% trans 'heading_edit_exam' context 'exams.template.create_edit_exam' %}">
-                                    <i class="fas fa-pen"></i> {% trans "action_edit" context "exams.partial.exam_section" %}
-                                </button>
-                                {% endif %}
-                                {% if is_owner %}
-                                <button type="button" class="btn btn-sm btn-outline-danger js-unlink-exam" 
-                                        data-exam-id="{{ exam.id }}">
-                                    <i class="fas fa-unlink"></i> {% trans "action_unlink" context "exams.partial.exam_section" %}
-                                </button>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="alert alert-light text-center py-4">
-                        <i class="fas fa-file-alt exam-section-1"></i>
-                        <p class="text-muted mt-2 mb-0">{% trans "empty_no_exam_in_course" context "exams.partial.exam_section" %}</p>
-                        <div class="mt-3">
-                            {% if is_owner %}
-                            <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#linkExamModal">
-                                <i class="fas fa-link"></i> {% trans "action_link_existing_exam" context "exams.partial.exam_section" %}
-                            </button>
-                            {% endif %}
-                            {% if is_owner or user_role == 'teacher' %}
-                            <button type="button"
-                                    class="btn btn-success btn-sm js-open-course-exam-editor"
-                                    data-url="{% url 'exams:create_exam' %}?course={{ course.id }}"
-                                    data-modal-title="{% trans 'heading_create_exam' context 'exams.template.create_exam_modal' %}">
-                                <i class="fas fa-plus-circle"></i> {% trans "action_create_new_exam" context "exams.partial.exam_section" %}
-                            </button>
-                            {% endif %}
-                        </div>
-                    </div>
+            <ul class="cd-task__meta">
+                <li class="cd-chip"><i class="fas fa-question-circle" aria-hidden="true"></i> {% blocktrans trimmed context "exams.partial.exam_section" with question_count=exam.questions_total %}label_question_count_short {{ question_count }}{% endblocktrans %}</li>
+                {% if exam.total_duration_minutes %}
+                <li class="cd-chip"><i class="fas fa-clock" aria-hidden="true"></i> {% blocktrans trimmed context "exams.partial.exam_section" with minutes=exam.total_duration_minutes %}label_duration_minutes_short {{ minutes }}{% endblocktrans %}</li>
                 {% endif %}
-            
-            {# ═══════════════════════════════════════════════════════════ #}
-            {# TƏLƏBƏ GÖRÜNÜŞÜ                                             #}
-            {# ═══════════════════════════════════════════════════════════ #}
-            {% elif is_student %}
-                {% if exams_with_data %}
-                    <div class="list-group list-group-flush">
-                        {% for item in exams_with_data %}
-                        {% with exam=item.exam %}
-                        {{ item.language_options|json_script:item.language_options_id }}
-                        <div class="list-group-item border-0 border-bottom pb-3 mb-3">
-                            <div class="d-flex w-100 justify-content-between align-items-start mb-2">
-                                <h6 class="mb-1 fw-bold">
-                                    <i class="fas fa-file-alt text-info"></i> {{ exam.title }}
-                                </h6>
-                                <div>
-                                    {% if item.last_attempt %}
-                                        {% if item.last_attempt.status == 'submitted' %}
-                                            <span class="badge bg-success">{% trans "status_completed" context "exams.partial.exam_section" %}</span>
-                                            {% if not exam.results_hidden_from_students and item.last_attempt.score_percent %}
-                                            <span class="badge bg-primary ms-1">{{ item.last_attempt.score_percent }}%</span>
-                                            {% endif %}
-                                        {% endif %}
-                                    {% elif exam.is_before_start %}
-                                        <span class="badge bg-warning">{% trans "status_not_started" context "exams.partial.exam_section" %}</span>
-                                    {% elif exam.is_after_end %}
-                                        <span class="badge bg-secondary">{% trans "status_finished" context "exams.partial.exam_section" %}</span>
-                                    {% else %}
-                                        <span class="badge bg-success">{% trans "status_open" context "exams.partial.exam_section" %}</span>
-                                    {% endif %}
-                                    
-                                    <span class="badge bg-info ms-1">{{ exam.get_exam_type_display }}</span>
-                                </div>
-                            </div>
-                            
-                            {% if exam.description %}
-                            <p class="text-muted small mb-2">{{ exam.description|truncatewords:15 }}</p>
-                            {% endif %}
-                            
-                            <div class="d-flex flex-wrap gap-3 mb-3">
-                                <small class="text-muted">
-                                    <i class="fas fa-question-circle"></i> 
-                                    {% if exam.random_question_count > 0 %}
-                                        {% blocktrans trimmed context "exams.partial.exam_section" with question_count=exam.random_question_count %}
-                                            label_question_count_short {{ question_count }}
-                                        {% endblocktrans %}
-                                    {% else %}
-                                        {% blocktrans trimmed context "exams.partial.exam_section" with question_count=exam.questions_total %}
-                                            label_question_count_short {{ question_count }}
-                                        {% endblocktrans %}
-                                    {% endif %}
-                                </small>
-                                {% if exam.total_duration_minutes %}
-                                <small class="text-muted">
-                                    <i class="fas fa-clock"></i>
-                                    {% blocktrans trimmed context "exams.partial.exam_section" with minutes=exam.total_duration_minutes %}
-                                        label_duration_minutes_full {{ minutes }}
-                                    {% endblocktrans %}
-                                </small>
-                                {% endif %}
-                                <small class="text-muted">
-                                    <i class="fas fa-redo"></i> 
-                                    {% blocktrans trimmed context "exams.partial.exam_section" with attempt_count=item.attempt_count max_attempts=exam.max_attempts_per_user|default:"∞" %}
-                                        label_attempt_progress {{ attempt_count }} {{ max_attempts }}
-                                    {% endblocktrans %}
-                                </small>
-                                {% if exam.start_datetime %}
-                                <small class="text-muted">
-                                    <i class="fas fa-calendar-alt"></i> {{ exam.start_datetime|date:"d.m.Y H:i" }}
-                                </small>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="btn-group btn-group-sm gap-2">
-                                {% if item.last_attempt %}
-                                    <a href="{% url 'exams:student_exam_history' %}?exam={{ exam.slug }}&return_to={{ request.get_full_path|urlencode }}" 
-                                       class="btn btn-sm btn-outline-success">
-                                        <i class="fas fa-chart-bar"></i> {% blocktrans trimmed context "exams.partial.exam_section" with attempts=item.attempt_count %}Cavablarım ({{ attempts }}){% endblocktrans %}
-                                    </a>
-                                    
-                                    {% if item.can_start and item.attempts_left != 0 %}
-                                        <button type="button"
-                                                class="btn btn-sm btn-info js-open-course-exam-modal"
-                                                data-start-url="{% url 'exams:start_exam' exam.slug %}?next={{ request.get_full_path|urlencode }}&si={% exam_start_intent exam %}"
-                                                data-exam-slug="{{ exam.slug }}"
-                                                data-exam-title="{{ exam.title }}"
-                                                data-exam-type="{{ exam.get_exam_type_display }}"
-                                                data-exam-start="{% if exam.start_datetime %}{{ exam.start_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
-                                                data-exam-end="{% if exam.end_datetime %}{{ exam.end_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
-                                                data-exam-duration="{% if exam.total_duration_minutes %}{{ exam.total_duration_minutes }} {% trans 'label_duration_unit_minutes' context 'exams.partial.exam_section' %}{% else %}{% trans 'modal_value_unlimited' context 'exams.partial.exam_section' %}{% endif %}"
-                                                data-exam-note="{% if exam.description %}{{ exam.description|striptags|escape }}{% endif %}"
-                                                data-language-options-id="{{ item.language_options_id }}"
-                                                data-default-language="{{ item.default_language }}"
-                                                data-requires-code="{% if item.requires_code %}1{% else %}0{% endif %}">
-                                            <i class="fas fa-redo"></i> {% trans "action_restart_exam" context "exams.partial.exam_section" %}
-                                        </button>
-                                    {% endif %}
-                                    
-                                {% elif item.can_start %}
-                                    <button type="button"
-                                            class="btn btn-sm btn-info js-open-course-exam-modal"
-                                            data-start-url="{% url 'exams:start_exam' exam.slug %}?next={{ request.get_full_path|urlencode }}&si={% exam_start_intent exam %}"
-                                            data-exam-slug="{{ exam.slug }}"
-                                            data-exam-title="{{ exam.title }}"
-                                            data-exam-type="{{ exam.get_exam_type_display }}"
-                                            data-exam-start="{% if exam.start_datetime %}{{ exam.start_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
-                                            data-exam-end="{% if exam.end_datetime %}{{ exam.end_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
-                                            data-exam-duration="{% if exam.total_duration_minutes %}{{ exam.total_duration_minutes }} {% trans 'label_duration_unit_minutes' context 'exams.partial.exam_section' %}{% else %}{% trans 'modal_value_unlimited' context 'exams.partial.exam_section' %}{% endif %}"
-                                            data-exam-note="{% if exam.description %}{{ exam.description|striptags|escape }}{% endif %}"
-                                            data-language-options-id="{{ item.language_options_id }}"
-                                            data-default-language="{{ item.default_language }}"
-                                            data-requires-code="{% if item.requires_code %}1{% else %}0{% endif %}">
-                                        <i class="fas fa-play"></i> {% trans "action_start_exam" context "exams.partial.exam_section" %}
-                                    </button>
-                                    
-                                {% elif exam.is_before_start %}
-                                    <button class="btn btn-sm btn-secondary" disabled>
-                                        <i class="fas fa-lock"></i> {% trans "status_not_started_yet" context "exams.partial.exam_section" %}
-                                    </button>
-                                    
-                                {% elif exam.is_after_end %}
-                                    <span class="btn btn-sm btn-secondary disabled">
-                                        <i class="fas fa-lock"></i> {% trans "status_time_is_over" context "exams.partial.exam_section" %}
-                                    </span>
-                                    
-                                {% else %}
-                                    <span class="btn btn-sm btn-secondary disabled">
-                                        <i class="fas fa-ban"></i> {% trans "status_no_attempt_left" context "exams.partial.exam_section" %}
-                                    </span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endwith %}
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="alert alert-light text-center py-4">
-                        <i class="fas fa-file-alt exam-section-1"></i>
-                        <p class="text-muted mt-2 mb-0">{% trans "empty_no_exam_assigned_to_student" context "exams.partial.exam_section" %}</p>
-                    </div>
+                {% if exam.max_attempts_per_user %}
+                <li class="cd-chip"><i class="fas fa-redo" aria-hidden="true"></i> {% blocktrans trimmed context "exams.partial.exam_section" with attempts=exam.max_attempts_per_user %}label_attempt_count_short {{ attempts }}{% endblocktrans %}</li>
                 {% endif %}
-            
-            {% else %}
-                <div class="alert alert-light text-center py-4">
-                    <i class="fas fa-file-alt exam-section-1"></i>
-                    <p class="text-muted mt-2 mb-0">{% trans "empty_no_exam" context "exams.partial.exam_section" %}</p>
-                </div>
+                {% if exam.start_datetime %}
+                <li class="cd-chip"><i class="fas fa-calendar-alt" aria-hidden="true"></i> {{ exam.start_datetime|date:"d.m.Y H:i" }}</li>
+                {% endif %}
+            </ul>
+
+            <div class="cd-task__actions">
+                <a href="{% url 'exams:teacher_exam_detail' exam.slug %}?from_section={{ profile_return_section|default:'my-courses' }}&return_to={{ request.get_full_path|urlencode }}" class="ems-btn ems-btn--sm">
+                    <i class="fas fa-eye" aria-hidden="true"></i> {% trans 'Detallı imtahana bax' context 'exams.partial.exam_section' %}
+                </a>
+                <a href="{% url 'exams:teacher_exam_results' exam.slug %}?from_section={{ profile_return_section|default:'my-courses' }}&return_to={{ request.get_full_path|urlencode }}" class="ems-btn ems-btn--sm">
+                    <i class="fas fa-chart-bar" aria-hidden="true"></i> {% trans "action_results" context "exams.partial.exam_section" %}
+                </a>
+                {% if exam.author_id == request.user.id or request.user.is_superuser %}
+                <button type="button" class="ems-btn ems-btn--sm js-open-course-exam-editor"
+                        data-url="{% url 'exams:edit_exam' exam.slug %}"
+                        data-modal-title="{% trans 'heading_edit_exam' context 'exams.template.create_edit_exam' %}">
+                    <i class="fas fa-pen" aria-hidden="true"></i> {% trans "action_edit" context "exams.partial.exam_section" %}
+                </button>
+                {% endif %}
+                {% if is_owner %}
+                <button type="button" class="ems-btn ems-btn--sm cd-btn--danger js-unlink-exam" data-exam-id="{{ exam.id }}">
+                    <i class="fas fa-unlink" aria-hidden="true"></i> {% trans "action_unlink" context "exams.partial.exam_section" %}
+                </button>
+                {% endif %}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="cd-empty">
+        <span class="cd-empty__ic cd-empty__ic--exams">{% include "courses/partials/_cd_icon.html" with icon="doc" size=26 stroke=1.8 %}</span>
+        <p class="cd-empty__title">{% trans "empty_no_exam_in_course" context "exams.partial.exam_section" %}</p>
+        <div class="cd-empty__actions">
+            {% if is_owner or user_role == 'teacher' %}
+            <button type="button" class="ems-btn ems-btn--primary js-open-course-exam-editor"
+                    data-url="{% url 'exams:create_exam' %}?course={{ course.id }}"
+                    data-modal-title="{% trans 'heading_create_exam' context 'exams.template.create_exam_modal' %}">
+                {% include "courses/partials/_cd_icon.html" with icon="plus" size=16 stroke=2.4 %}
+                {% trans "action_create_new_exam" context "exams.partial.exam_section" %}
+            </button>
             {% endif %}
-            
+            {% if is_owner %}
+            <button type="button" class="ems-btn" data-ems-overlay-open="linkExamModal">
+                {% include "courses/partials/_cd_icon.html" with icon="link" size=16 %}
+                {% trans "action_link_existing_exam" context "exams.partial.exam_section" %}
+            </button>
+            {% endif %}
         </div>
     </div>
-</div>
+    {% endif %}
+
+{% elif is_student %}
+    {% if exams_with_data %}
+    <ul class="cd-tasks">
+        {% for item in exams_with_data %}
+        {% with exam=item.exam %}
+        {{ item.language_options|json_script:item.language_options_id }}
+        <li class="cd-task">
+            <div class="cd-task__head">
+                <span class="cd-task__ic cd-task__ic--exam" aria-hidden="true">{% include "courses/partials/_cd_icon.html" with icon="doc" size=20 %}</span>
+                <div class="cd-task__titles">
+                    <h3 class="cd-task__title">{{ exam.title }}</h3>
+                    {% if exam.description %}<p class="cd-task__desc">{{ exam.description|truncatewords:15 }}</p>{% endif %}
+                </div>
+                <div class="cd-task__badges">
+                    {% if item.last_attempt %}
+                        {% if item.last_attempt.status == 'submitted' %}
+                            <span class="ems-badge ems-badge--success">{% trans "status_completed" context "exams.partial.exam_section" %}</span>
+                            {% if not exam.results_hidden_from_students and item.last_attempt.score_percent %}
+                            <span class="ems-badge ems-badge--primary">{{ item.last_attempt.score_percent }}%</span>
+                            {% endif %}
+                        {% endif %}
+                    {% elif exam.is_before_start %}
+                        <span class="ems-badge ems-badge--warning">{% trans "status_not_started" context "exams.partial.exam_section" %}</span>
+                    {% elif exam.is_after_end %}
+                        <span class="ems-badge ems-badge--muted">{% trans "status_finished" context "exams.partial.exam_section" %}</span>
+                    {% else %}
+                        <span class="ems-badge ems-badge--success">{% trans "status_open" context "exams.partial.exam_section" %}</span>
+                    {% endif %}
+                    <span class="ems-badge ems-badge--info">{{ exam.get_exam_type_display }}</span>
+                </div>
+            </div>
+
+            <ul class="cd-task__meta">
+                <li class="cd-chip"><i class="fas fa-question-circle" aria-hidden="true"></i>
+                    {% if exam.random_question_count > 0 %}
+                        {% blocktrans trimmed context "exams.partial.exam_section" with question_count=exam.random_question_count %}label_question_count_short {{ question_count }}{% endblocktrans %}
+                    {% else %}
+                        {% blocktrans trimmed context "exams.partial.exam_section" with question_count=exam.questions_total %}label_question_count_short {{ question_count }}{% endblocktrans %}
+                    {% endif %}
+                </li>
+                {% if exam.total_duration_minutes %}
+                <li class="cd-chip"><i class="fas fa-clock" aria-hidden="true"></i> {% blocktrans trimmed context "exams.partial.exam_section" with minutes=exam.total_duration_minutes %}label_duration_minutes_full {{ minutes }}{% endblocktrans %}</li>
+                {% endif %}
+                <li class="cd-chip"><i class="fas fa-redo" aria-hidden="true"></i> {% blocktrans trimmed context "exams.partial.exam_section" with attempt_count=item.attempt_count max_attempts=exam.max_attempts_per_user|default:"∞" %}label_attempt_progress {{ attempt_count }} {{ max_attempts }}{% endblocktrans %}</li>
+                {% if exam.start_datetime %}
+                <li class="cd-chip"><i class="fas fa-calendar-alt" aria-hidden="true"></i> {{ exam.start_datetime|date:"d.m.Y H:i" }}</li>
+                {% endif %}
+            </ul>
+
+            <div class="cd-task__actions">
+                {% if item.last_attempt %}
+                    <a href="{% url 'exams:student_exam_history' %}?exam={{ exam.slug }}&return_to={{ request.get_full_path|urlencode }}" class="ems-btn ems-btn--sm">
+                        <i class="fas fa-chart-bar" aria-hidden="true"></i> {% blocktrans trimmed context "exams.partial.exam_section" with attempts=item.attempt_count %}Cavablarım ({{ attempts }}){% endblocktrans %}
+                    </a>
+                    {% if item.can_start and item.attempts_left != 0 %}
+                        {% include "exams/teacher/partials/_exam_open_button.html" with button_icon="fa-redo" button_label_key="restart" %}
+                    {% endif %}
+                {% elif item.can_start %}
+                    {% include "exams/teacher/partials/_exam_open_button.html" with button_icon="fa-play" button_label_key="start" %}
+                {% elif exam.is_before_start %}
+                    <span class="ems-btn ems-btn--sm" aria-disabled="true"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "status_not_started_yet" context "exams.partial.exam_section" %}</span>
+                {% elif exam.is_after_end %}
+                    <span class="ems-btn ems-btn--sm" aria-disabled="true"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "status_time_is_over" context "exams.partial.exam_section" %}</span>
+                {% else %}
+                    <span class="ems-btn ems-btn--sm" aria-disabled="true"><i class="fas fa-ban" aria-hidden="true"></i> {% trans "status_no_attempt_left" context "exams.partial.exam_section" %}</span>
+                {% endif %}
+            </div>
+        </li>
+        {% endwith %}
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="cd-empty">
+        <span class="cd-empty__ic cd-empty__ic--exams">{% include "courses/partials/_cd_icon.html" with icon="doc" size=26 stroke=1.8 %}</span>
+        <p class="cd-empty__title">{% trans "empty_no_exam_assigned_to_student" context "exams.partial.exam_section" %}</p>
+    </div>
+    {% endif %}
+
+{% else %}
+    <div class="cd-empty">
+        <span class="cd-empty__ic cd-empty__ic--exams">{% include "courses/partials/_cd_icon.html" with icon="doc" size=26 stroke=1.8 %}</span>
+        <p class="cd-empty__title">{% trans "empty_no_exam" context "exams.partial.exam_section" %}</p>
+    </div>
+{% endif %}
+
 {% if is_student %}
-<div id="courseExamInfoBackdrop" class="assigned-exam-info-backdrop" aria-hidden="true">
-    <div class="assigned-exam-info-modal" role="dialog" aria-modal="true" aria-labelledby="courseExamInfoTitle">
-        <button type="button"
-                class="assigned-exam-info-close"
-                id="courseExamInfoClose"
-                aria-label="{% trans 'modal_aria_close' context 'exams.partial.exam_section' %}">
-            <i class="fas fa-times"></i>
-        </button>
-
-        <h3 id="courseExamInfoTitle" class="assigned-exam-info-title">
-            {% trans "modal_title_exam_info" context "exams.partial.exam_section" %}
-        </h3>
-        <p class="assigned-exam-info-subtitle" id="courseExamInfoExamName"></p>
-
-        <div class="assigned-exam-language is-hidden" id="courseExamLanguageBlock">
-            <div class="assigned-exam-language-copy">
-                <span class="assigned-exam-language-icon">
-                    <i class="fas fa-language"></i>
-                </span>
-                <div>
-                    <label for="courseExamLanguageSelect" class="assigned-exam-language-label">
-                        {% trans "modal_language_question" context "exams.template.student_exam_list" %}
-                    </label>
-                    <p>{% trans "modal_language_help" context "exams.template.student_exam_list" %}</p>
-                </div>
-            </div>
-            <div class="bootstrap-single-select assigned-exam-language-select-wrap">
-                <select id="courseExamLanguageSelect"
-                        class="form-select bootstrap-single-select__native js-bootstrap-single-select"
-                        data-bootstrap-select></select>
-            </div>
-        </div>
-
-        <div class="assigned-exam-info-grid">
-            <div class="assigned-exam-info-row">
-                <span class="label">{% trans "modal_label_type" context "exams.partial.exam_section" %}</span>
-                <span class="value" id="courseExamInfoType">-</span>
-            </div>
-            <div class="assigned-exam-info-row">
-                <span class="label">{% trans "modal_label_duration" context "exams.partial.exam_section" %}</span>
-                <span class="value" id="courseExamInfoDuration">-</span>
-            </div>
-            <div class="assigned-exam-info-row">
-                <span class="label">{% trans "modal_label_start" context "exams.partial.exam_section" %}</span>
-                <span class="value" id="courseExamInfoStart">-</span>
-            </div>
-            <div class="assigned-exam-info-row">
-                <span class="label">{% trans "modal_label_end" context "exams.partial.exam_section" %}</span>
-                <span class="value" id="courseExamInfoEnd">-</span>
-            </div>
-        </div>
-
-        <div class="assigned-exam-info-note-wrap">
-            <div class="label">{% trans "modal_label_note" context "exams.partial.exam_section" %}</div>
-            <p id="courseExamInfoNote">{% trans "modal_note_empty" context "exams.partial.exam_section" %}</p>
-        </div>
-
-        <form method="post"
-              action="{% url 'exams:exam_code_check' %}"
-              id="courseExamCodeForm"
-              class="assigned-exam-code-form is-hidden">
-            {% csrf_token %}
-            <input type="hidden" name="exam_slug" id="courseExamCodeSlug">
-            <input type="hidden" name="language" id="courseExamCodeLanguage">
-            <input type="hidden" name="next" value="{{ request.get_full_path }}">
-            <label for="courseExamAccessCodeInput" class="assigned-exam-code-label">
-                {% trans "modal_access_code_label" context "exams.partial.exam_section" %}
-            </label>
-            <input type="text"
-                   id="courseExamAccessCodeInput"
-                   name="access_code"
-                   class="assigned-exam-code-input"
-                   maxlength="6"
-                   inputmode="numeric"
-                   placeholder="{% trans 'modal_access_code_placeholder' context 'exams.partial.exam_section' %}">
-            <div id="courseExamCodeError" class="exam-section-2" hidden></div>
-        </form>
-
-        <div class="assigned-exam-info-actions">
-            <button type="button"
-                    class="btn-action btn-task-secondary"
-                    id="courseExamInfoCancelBtn">
-                {% trans "modal_action_cancel" context "exams.partial.exam_section" %}
-            </button>
-            <button type="button"
-                    class="btn-action btn-task-primary"
-                    id="courseExamInfoStartBtn">
-                {% trans "modal_action_start" context "exams.partial.exam_section" %}
-            </button>
-        </div>
-    </div>
-</div>
-
+{% trans "modal_title_exam_info" context "exams.partial.exam_section" as t_exam_info %}
+{% include "partials/ems_ui/_dialog.html" with dialog_id="courseExamInfoBackdrop" dialog_title=t_exam_info dialog_body_include="exams/teacher/partials/_exam_info_body.html" dialog_foot_include="exams/teacher/partials/_exam_info_foot.html" %}
 {% include "exams/teacher/partials/_exam_section_js.html" %}
 {% endif %}

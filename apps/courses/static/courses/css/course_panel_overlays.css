@@ -1,7 +1,8 @@
 /* ════════════════════════════════════════════════════════════════════════════
    EMSArena — Kurs paneli · örtüklər (2026-09-28)
-   1) `.ems-cd-modals` — mövcud Bootstrap modallarının (5 app) kabinet görünüşü
-      (course_modals_enhance.js başlığa ikon plitəsi əlavə edir).
+   1) `.ems-cd-modals` — qalan Bootstrap modalların (tapşırıq / layihə) kabinet görünüşü
+      (course_modals_enhance.js başlığa ikon plitəsi əlavə edir). Mövzu/resurs/üzv/kurs
+      modalları 2026-10-17-dən `course_dialogs.css`-dədir (statik markup, örtüksüz).
    2) `.ems-ai-root` — «AI ilə kurs qur» çekməcəsi (course_ai_drawer.js).
    ════════════════════════════════════════════════════════════════════════════ */
 
@@ -161,40 +162,6 @@
 .ems-cd-modals .modal:not(.exam-wizard-modal) .btn-secondary:hover,
 .ems-cd-modals .modal:not(.exam-wizard-modal) .btn-light:hover {
     background: var(--ems-bg-subtle) !important;
-}
-
-.ems-cd-modals .ems-mh-ic--course {
-    background: var(--ems-warning-100);
-    color: var(--ems-warning-800);
-}
-
-/* redaktə modalında cari qapaq şəkli */
-.ems-cc-current {
-    position: relative;
-    margin-bottom: 10px;
-    overflow: hidden;
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: var(--ems-r-xl);
-    aspect-ratio: 2 / 1;
-    max-height: 200px;
-}
-
-.ems-cc-current img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.ems-cc-current span {
-    position: absolute;
-    left: 10px;
-    bottom: 10px;
-    padding: 3px 10px;
-    border-radius: var(--ems-r-pill);
-    background: rgba(15, 23, 42, 0.72);
-    color: #fff;
-    font-size: var(--ems-fs-xs);
-    font-weight: 700;
 }
 
 .ems-cd-modals .modal:not(.exam-wizard-modal) .modal-header .btn-close:focus-visible,

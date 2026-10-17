@@ -1,0 +1,540 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Müəllimin cəhd baxışı — sual kartları (yenidən dizayn 2026-10-17).
+
+   Partials: exams/teacher/partials/attempt_review/_question_{head,media,test,written}.html
+   Vəziyyət tonları (`rv-q--<ton>`): success · warning · danger · muted · info —
+   rəng sol kontur + nişan; mətn etiketi HƏMİŞƏ var (rəng yeganə siqnal deyil).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Axtarış zolağı ─────────────────────────────────────────────────────── */
+.rv-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-4) var(--ems-sp-6);
+    margin-bottom: var(--ems-sp-6);
+}
+
+.rv-tools__title {
+    margin: 0;
+    font-size: var(--ems-fs-2xl);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+.rv-search {
+    position: relative;
+    display: flex;
+    flex: 1 1 320px;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    min-width: 0;
+}
+
+.rv-search__icon {
+    position: absolute;
+    left: 12px;
+    color: var(--ems-neutral-500);
+    pointer-events: none;
+}
+
+.rv-search__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: var(--ems-h-xs);
+    padding-left: 36px;
+}
+
+.rv-tools__meta {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+/* ── Sual kartı ─────────────────────────────────────────────────────────── */
+.rv-questions {
+    display: grid;
+    gap: var(--ems-sp-6);
+}
+
+.rv-q {
+    --rv-q-accent: var(--ems-neutral-300);
+    scroll-margin-top: calc(var(--ems-header-h, 72px) + 16px);
+    overflow: hidden;
+    border: 1px solid var(--ems-border);
+    border-left: 4px solid var(--rv-q-accent);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+}
+
+.rv-q:target {
+    box-shadow: var(--ems-sh-focus), var(--ems-sh-card);
+}
+
+.rv-q--success { --rv-q-accent: var(--ems-success-600); }
+.rv-q--warning { --rv-q-accent: var(--ems-warning-500); }
+.rv-q--danger { --rv-q-accent: var(--ems-danger); }
+.rv-q--muted { --rv-q-accent: var(--ems-neutral-300); }
+.rv-q--info { --rv-q-accent: var(--ems-primary-400); }
+
+.rv-q__head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: "num title" "num chips";
+    gap: var(--ems-sp-3) var(--ems-sp-5);
+    padding: 16px 18px 14px;
+    border-bottom: 1px solid var(--ems-neutral-100);
+    background: var(--ems-bg-subtle);
+}
+
+.rv-q__num {
+    grid-area: num;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--ems-r-md);
+    background: var(--ems-neutral-900);
+    color: var(--ems-neutral-0);
+    font-size: var(--ems-fs-md);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.rv-q__title {
+    grid-area: title;
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 700;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.rv-q__chips {
+    grid-area: chips;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3);
+}
+
+.rv-points {
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-600);
+    font-variant-numeric: tabular-nums;
+}
+
+.rv-q__body {
+    display: grid;
+    gap: var(--ems-sp-6);
+    padding: 16px 18px 18px;
+}
+
+/* ── Media ──────────────────────────────────────────────────────────────── */
+.rv-media {
+    margin: 0;
+}
+
+.rv-media__img {
+    display: block;
+    max-width: 100%;
+    max-height: 420px;
+    height: auto;
+    border-radius: var(--ems-r-xl);
+    border: 1px solid var(--ems-border);
+}
+
+.rv-media__img--source {
+    max-height: none;
+}
+
+/* ── Test variantları ───────────────────────────────────────────────────── */
+.rv-opts {
+    display: grid;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.rv-opt {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--ems-sp-5);
+    padding: 10px 14px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+}
+
+.rv-opt__label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 800;
+}
+
+.rv-opt__text {
+    min-width: 0;
+    font-size: var(--ems-fs-md);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.rv-opt__image {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin-top: var(--ems-sp-2);
+    border-radius: var(--ems-r-md);
+}
+
+.rv-opt__tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--ems-sp-2);
+}
+
+.rv-opt.is-correct {
+    border-color: var(--ems-success-bd);
+    background: var(--ems-emerald-50);
+}
+
+.rv-opt.is-correct .rv-opt__label {
+    background: var(--ems-success-600);
+    color: var(--ems-neutral-0);
+}
+
+.rv-opt.is-wrong {
+    border-color: var(--ems-danger-bd);
+    background: var(--ems-danger-bg);
+}
+
+.rv-opt.is-wrong .rv-opt__label {
+    background: var(--ems-danger);
+    color: var(--ems-neutral-0);
+}
+
+.rv-opt.is-selected {
+    border-width: 2px;
+    padding: 9px 13px;
+}
+
+.rv-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-1);
+    padding: 2px 8px;
+    border-radius: var(--ems-r-pill);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.rv-tag--correct {
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+.rv-tag--success {
+    background: var(--ems-success-700);
+    color: var(--ems-neutral-0);
+}
+
+.rv-tag--danger {
+    background: var(--ems-danger-strong);
+    color: var(--ems-neutral-0);
+}
+
+.rv-verdict {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: var(--ems-r-xl);
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+}
+
+.rv-verdict--success { background: var(--ems-success-bg); color: var(--ems-success-700); }
+.rv-verdict--danger { background: var(--ems-danger-bg); color: var(--ems-danger-strong); }
+.rv-verdict--muted { background: var(--ems-neutral-100); color: var(--ems-neutral-700); }
+
+/* ── Yazılı cavab blokları ──────────────────────────────────────────────── */
+.rv-block__title {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    margin: 0 0 var(--ems-sp-3);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.rv-answer {
+    padding: 14px 16px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg-subtle);
+    font-size: var(--ems-fs-md);
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+}
+
+.rv-answer__text p:last-child {
+    margin-bottom: 0;
+}
+
+.rv-answer__empty {
+    margin: 0;
+    color: var(--ems-text-muted);
+    font-style: italic;
+}
+
+.rv-pre {
+    margin: var(--ems-sp-5) 0 0;
+    padding: 12px 14px;
+    max-height: 320px;
+    overflow: auto;
+    border-radius: var(--ems-r-md);
+    background: var(--ems-neutral-900);
+    color: var(--ems-neutral-100);
+    font-family: var(--ems-ff-mono);
+    font-size: var(--ems-fs-sm);
+    white-space: pre-wrap;
+}
+
+.rv-pre--error {
+    color: var(--ems-danger-200);
+}
+
+.rv-files {
+    display: grid;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.rv-files__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-4);
+    padding: 8px 12px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+}
+
+.rv-files__name {
+    min-width: 0;
+    color: var(--ems-link);
+    font-weight: 600;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+
+.rv-paint img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+}
+
+/* Praktiki (coding) fayllar — əvvəlki görünüş tokenlərlə. */
+.coding-files-review {
+    display: grid;
+    gap: var(--ems-sp-4);
+}
+
+.coding-file-detail {
+    overflow: hidden;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+}
+
+.coding-file-detail summary {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-4);
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--ems-primary-800);
+}
+
+.coding-file-detail summary small {
+    margin-left: auto;
+    padding: 2px 8px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
+    font-size: var(--ems-fs-xs);
+}
+
+.coding-file-detail pre {
+    margin: 0;
+    padding: 14px;
+    max-height: 420px;
+    overflow: auto;
+    background: var(--ems-neutral-900);
+    color: var(--ems-neutral-100);
+    font-family: var(--ems-ff-mono);
+    font-size: var(--ems-fs-sm);
+}
+
+/* Nümunə cavab — açılan blok (default bağlı: cavabı oxumağa mane olmasın). */
+.rv-model {
+    border: 1px dashed var(--ems-primary-200);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-primary-50);
+}
+
+.rv-model summary {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--ems-primary-800);
+}
+
+.rv-model summary:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}
+
+.rv-model__body {
+    padding: 0 14px 12px;
+    font-size: var(--ems-fs-md);
+    line-height: 1.6;
+}
+
+/* ── Müəllim qiymətləndirməsi ───────────────────────────────────────────── */
+.rv-eval {
+    display: grid;
+    grid-template-columns: minmax(140px, auto) minmax(0, 1fr);
+    gap: var(--ems-sp-6);
+    padding: 14px 16px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+}
+
+.rv-eval__label {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    margin-bottom: var(--ems-sp-2);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.rv-eval__value {
+    font-size: var(--ems-fs-2xl);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.rv-eval__value span {
+    font-size: var(--ems-fs-md);
+    color: var(--ems-text-muted);
+}
+
+.rv-eval--success .rv-eval__value { color: var(--ems-success-700); }
+.rv-eval--warning .rv-eval__value { color: var(--ems-warning-800); }
+.rv-eval--danger .rv-eval__value { color: var(--ems-danger-strong); }
+
+.rv-eval__text {
+    font-size: var(--ems-fs-md);
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.rv-eval__text p:last-child {
+    margin-bottom: 0;
+}
+
+.rv-eval__empty {
+    margin: 0;
+    color: var(--ems-text-muted);
+    font-style: italic;
+}
+
+.rv-empty {
+    display: grid;
+    justify-items: center;
+    gap: var(--ems-sp-4);
+    padding: 40px 20px;
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: var(--ems-r-2xl);
+    color: var(--ems-text-muted);
+    text-align: center;
+}
+
+.rv-empty i {
+    font-size: 24px;
+    color: var(--ems-neutral-400);
+}
+
+.rv-empty p {
+    margin: 0;
+    font-weight: 600;
+}
+
+@media (max-width: 576px) {
+    .rv-q__head,
+    .rv-q__body {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .rv-opt {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .rv-opt__tags {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+    }
+
+    .rv-eval {
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--ems-sp-4);
+    }
+
+    .rv-search {
+        flex-wrap: wrap;
+    }
+
+    .rv-search__input {
+        flex-basis: 100%;
+    }
+
+    .rv-search__icon {
+        top: 9px;
+    }
+}

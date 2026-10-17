@@ -1,6 +1,7 @@
 /* Source template: apps/exams/templates/exams/teacher/partials/_exam_section_js.html
  * (included by exams/teacher/exam_section.html)
- * Drives the "course exam info" modal: open/close, language choice, and access-code submit.
+ * Drives the "course exam info" dialog (2026-10-17, Paket E: ortaq `ems_ui` dialoqu / `EMSOverlay`):
+ * open/close, language choice, and access-code submit.
  * i18n strings are bridged via the #examSectionI18n JSON block in the partial.
  */
 (function () {
@@ -11,8 +12,6 @@
     }
 
     var backdrop = document.getElementById("courseExamInfoBackdrop");
-    var closeBtn = document.getElementById("courseExamInfoClose");
-    var cancelBtn = document.getElementById("courseExamInfoCancelBtn");
     var startBtn = document.getElementById("courseExamInfoStartBtn");
     var titleEl = document.getElementById("courseExamInfoExamName");
     var typeEl = document.getElementById("courseExamInfoType");
@@ -39,7 +38,7 @@
 
     function setCodeError(message) {
         if (codeInput) {
-            codeInput.classList.toggle("is-invalid", Boolean(message));
+            codeInput.setAttribute("aria-invalid", message ? "true" : "false");
         }
         if (codeError) {
             codeError.textContent = message || "";
@@ -120,18 +119,9 @@
             setSelectedLanguage("");
         }
 
-        languageBlock.classList.toggle("is-hidden", options.length <= 1);
+        languageBlock.hidden = options.length <= 1;
         languageSelect.required = options.length > 1;
         refreshLanguageSelect();
-    }
-
-    function closeModal() {
-        if (!backdrop) {
-            return;
-        }
-        backdrop.classList.remove("is-open");
-        backdrop.setAttribute("aria-hidden", "true");
-        document.body.style.overflow = "";
     }
 
     function openModal(trigger) {
@@ -165,7 +155,7 @@
             codeSlug.value = trigger.getAttribute("data-exam-slug") || "";
         }
         if (codeForm) {
-            codeForm.classList.toggle("is-hidden", !requiresCode);
+            codeForm.hidden = !requiresCode;
         }
         if (codeInput) {
             codeInput.value = "";
@@ -177,9 +167,9 @@
         }
         codeSubmitInFlight = false;
 
-        backdrop.classList.add("is-open");
-        backdrop.setAttribute("aria-hidden", "false");
-        document.body.style.overflow = "hidden";
+        if (window.EMSOverlay) {
+            window.EMSOverlay.open(backdrop);
+        }
 
         if (requiresCode && codeInput) {
             window.setTimeout(function () {
@@ -188,28 +178,10 @@
         }
     }
 
-    document.addEventListener("click", function (event) {
-        var trigger = event.target.closest(".js-open-course-exam-modal");
-        if (!trigger) {
-            return;
-        }
+    window.EMSDelegate.on("click", ".js-open-course-exam-modal", function (event, trigger) {
         event.preventDefault();
         openModal(trigger);
     });
-
-    if (backdrop) {
-        backdrop.addEventListener("click", function (event) {
-            if (event.target === backdrop) {
-                closeModal();
-            }
-        });
-    }
-    if (closeBtn) {
-        closeBtn.addEventListener("click", closeModal);
-    }
-    if (cancelBtn) {
-        cancelBtn.addEventListener("click", closeModal);
-    }
     if (codeInput) {
         codeInput.addEventListener("input", function () {
             this.value = this.value.replace(/[^0-9]/g, "");

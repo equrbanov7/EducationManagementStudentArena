@@ -439,6 +439,48 @@ PENDING_ANSWER: tuple[Status, ...] = (
 )
 
 
+# --------------------------------------------------------------------------- #
+# 11. Tələbə nəticələri (Paket A redizaynı 2026-10-18) — «Nəticələrim»,
+#     imtahan nəticəsi, «Mənim cavablarım», «Təyin olunmuş tapşırıqlar».
+#     Açarlar viewda hesablanır (SAXLANILMIR):
+#       student_result — `_result_status_badge` normallaşdırması + «çıxarılıb»;
+#       exam_attempt   — tələbənin öz cəhdinin vəziyyəti (nəticə/tarixçə);
+#       academic_outcome — jurnal fənn nəticəsi (`academic_results._outcome_code`);
+#                          etiket registrar-dan gəlir, burada yalnız TON üçündür;
+#       task_state     — təyin olunmuş tapşırığın açıq/gələcək/bağlı vəziyyəti.
+# --------------------------------------------------------------------------- #
+STUDENT_RESULT: tuple[Status, ...] = (
+    _s("graded", _t("Qiymətləndirilib"), "success", order=0),
+    _s("pending", _t("Gözləmədə"), "warning", order=1),
+    _s("submitted", _t("Təqdim edilib"), "primary", order=2),
+    _s("removed", _t("İmtahandan çıxarılıb"), "danger", order=3),
+)
+
+EXAM_ATTEMPT: tuple[Status, ...] = (
+    _s("submitted", _t("Təhvil verilib"), "success", order=0),
+    _s("graded", _t("Qiymətləndirilib"), "success", order=1),
+    _s("checking", _t("Yoxlanılır"), "info", order=2),
+    _s("expired", _t("Müddəti keçib"), "warning", order=3),
+    _s("removed", _t("İmtahandan çıxarılıb"), "danger", order=4),
+    _s("hidden", _t("Gizlidir"), "muted", order=5),
+    _s("waiting", _t("Gözləyir"), "neutral", order=6),
+)
+
+ACADEMIC_OUTCOME: tuple[Status, ...] = (
+    _s("pass", _t("Keçdi"), "success", order=0),
+    _s("progress", _t("Davam edir"), "info", order=1),
+    _s("fail", _t("Kəsildi"), "danger", order=2),
+    _s("barred", _t("Kəsilir"), "danger", order=3),
+    _s("legacy_no_result", _t("Nəticə yazılmayıb"), "muted", order=4),
+)
+
+TASK_STATE: tuple[Status, ...] = (
+    _s("open", _t("Aktiv"), "success", order=0),
+    _s("upcoming", _t("Gözləyir"), "info", order=1),
+    _s("closed", _t("Bağlı"), "muted", order=2),
+)
+
+
 #: Ailə adı → statuslar. Şablon tag-i yalnız bu xəritədən oxuyur.
 FAMILIES: dict[str, tuple[Status, ...]] = {
     "generic": GENERIC,
@@ -469,6 +511,10 @@ FAMILIES: dict[str, tuple[Status, ...]] = {
     "exam_room_computer": EXAM_ROOM_COMPUTER,
     "exam_eligibility": EXAM_ELIGIBILITY,
     "pending_answer": PENDING_ANSWER,
+    "student_result": STUDENT_RESULT,
+    "exam_attempt": EXAM_ATTEMPT,
+    "academic_outcome": ACADEMIC_OUTCOME,
+    "task_state": TASK_STATE,
 }
 
 
