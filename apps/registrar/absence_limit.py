@@ -32,7 +32,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import NamedTuple
 
-from apps.registrar import exam_eligibility
+from apps.registrar import exam_eligibility, read_memo
 from apps.registrar.exam_eligibility import DEFAULT_LIMIT_PERCENT
 from apps.registrar.models import StudentAcademicRecord
 
@@ -65,6 +65,7 @@ def limit_percent_for_enrollment(enrollment) -> int:
     )
 
 
+@read_memo.per_id("limit_pct", ids_arg="student_ids", result="dict", namespace_arg="organization_id")  # PERF-1
 def limit_percent_map_for_students(*, organization_id, student_ids) -> dict:
     """``student_id → hədd`` — TƏK sorğu; qeydsiz tələbə lüğətdə YOXDUR (çağıran defoltu tətbiq edir).
 
@@ -112,6 +113,7 @@ def row_limits(*, organization_id, enrollments, total_hours) -> dict:
     return result
 
 
+@read_memo.per_key("offering_limit", lambda offering: (offering.organization_id, offering.group_id))  # PERF-1
 def limit_percent_for_offering(offering) -> int:
     """AÇILIŞ-səviyyəli hədd — qrupun İLK (pk) akademik qeydinin proqramı.
 

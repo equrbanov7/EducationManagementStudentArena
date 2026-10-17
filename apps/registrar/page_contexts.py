@@ -526,13 +526,12 @@ def _student_offering_stats(user, organization, record, period) -> dict:
     (Midterm rejimində davamiyyət hissəsi aşağıdakı buraxılış girişləri ilə — ``entry_standard``)."""
     from decimal import Decimal
 
-    from apps.registrar import entry_standard, exam_eligibility, gradebook
-    from apps.registrar.models import Enrollment
+    from apps.registrar import exam_eligibility, finals_batch, gradebook
+    from apps.registrar.models import Enrollment, LessonMark
 
     if record is None or period is None:
         return {}
     limit_percent = record.program.absence_limit_percent if record.program else exam_eligibility.DEFAULT_LIMIT_PERCENT
-    midterm = entry_standard.period_is_midterm(period, organization)  # bütün sətirlər bu dövrdədir
     stats: dict = {}
     enrollments = list(
         Enrollment.objects.filter(
@@ -546,6 +545,9 @@ def _student_offering_stats(user, organization, record, period) -> dict:
     offering_ids = [e.offering_id for e in enrollments]
     frozen_ids = exam_eligibility.frozen_offering_ids(offering_ids)
     hours_map = exam_eligibility.lesson_hours_map(offering_ids)
+    # Giriş balı girişləri TOPLU (fənn başına 2 sorğu idi, PERF-1 F-04) — «Qiymətlərim» ilə eyni dəst və davamiyyət.
+    marks = finals_batch.group_marks(LessonMark.objects.filter(enrollment__in=enrollments).select_related("lesson"))
+    batch = finals_batch.student_entry_batch(enrollments, record, period, marks, hours_map, organization)
     for enrollment in enrollments:
         offering = enrollment.offering
         scheme = getattr(offering, "assessment_scheme", None)
@@ -562,11 +564,10 @@ def _student_offering_stats(user, organization, record, period) -> dict:
             exempt=bool(record.national_athlete_exemption),
             frozen=offering.id in frozen_ids,
         )
-        rule = entry_standard.EntryRule(True, total_hours, limit_percent, bool(record.national_athlete_exemption))
         stats[offering.id] = {
             "absence_hours": enrollment.absence_hours,
             "allowed_absence": allowed,
-            "entry_score": gradebook.entry_score_for(enrollment, cap, rule=rule if midterm else entry_standard.LEGACY),
+            "entry_score": gradebook.entry_score_for(enrollment, cap, **batch.entry_kwargs(enrollment)),
             "entry_score_max": cap,
             "barred": eligibility["barred"],
             "attendance_score": eligibility["attendance_score"],

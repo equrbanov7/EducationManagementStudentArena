@@ -285,3 +285,158 @@ def test_week_parity_helper_is_the_conflict_engine():
     slot = ScheduleSlot(weekday=1, start_time=_t("10:10"), end_time=_t("11:40"), week_type=WeekType.ODD)
     assert schedule_suggest._overlaps(slot, 1, _t("10:10"), _t("11:40"), WeekType.EVEN) is False
     assert schedule_suggest._overlaps(slot, 1, _t("10:10"), _t("11:40"), WeekType.ALL) is True
+
+
+class LeanSlotLoadingTest(_SuggestBase):
+    """PERF-1 F-07 (2026-10-17): tam obyekt yalnız qrupun/müəllimin slotları üçün, otaq məşğulluğu
+    yüngül sətirlərlə — nəticə köhnə «bütün semestri yüklə» yolu ilə EYNİDİR."""
+
+    code = "ssgl"
+
+    def _seed(self):
+        with bypass_rls():
+            partner = services.get_or_create_offering(
+                organization=self.org, subject=self.subject, period=self.period, group=self.groups[1]
+            )
+            partner.instructor = self.teacher_a
+            partner.save(update_fields=["instructor"])
+            self.edited = self._slot(self.offering, kind=SlotKind.SEMINAR, room="Uyğun")
+            self._slot(self.offering, weekday=3, start="08:30", end="10:00", kind=SlotKind.SEMINAR)
+            self._slot(self.offering_b, weekday=1, room="Böyük")
+            self._slot(self.offering_b, weekday=2, start="08:30", end="10:00", room="Uyğun", week_type=WeekType.ODD)
+            self._slot(self.offering_b, weekday=5, instructor=self.teacher_a, kind=SlotKind.SEMINAR)
+            self._slot(self.offering_c, weekday=3, room="Kiçik")
+            self._slot(self.offering_d, weekday=1, start="13:35", end="15:05", room="Uzaq")
+            self._slot(self.offering_d, weekday=4, instructor=self.teacher_a, kind=SlotKind.LAB, room="Lab-1")
+            self._slot(self.offering_d, weekday=2, room="Böyük", is_parked=True)
+            self._slot(partner, weekday=1, start="11:50", end="13:20", room=" böyük ")
+
+    @staticmethod
+    def _old_owner_slots(organization, *, period_id=None, group_id=None, instructor_id=None):
+        from apps.registrar import schedule_conflicts
+        from apps.registrar.schedule import effective_instructor_id, same_id
+
+        return [
+            slot
+            for slot in schedule_conflicts.live_slots(organization, period_id=period_id)
+            if same_id(group_id, slot.offering.group_id) or same_id(instructor_id, effective_instructor_id(slot))
+        ]
+
+    @staticmethod
+    def _old_room_rows(organization, *, period_id=None, exclude_ids=()):
+        from apps.registrar import schedule_conflicts
+
+        excluded = {str(value) for value in exclude_ids if value}
+        return [
+            slot
+            for slot in schedule_conflicts.live_slots(organization, period_id=period_id)
+            if slot.room and str(slot.pk) not in excluded
+        ]
+
+    def _both_ways(self, **overrides):
+        from unittest import mock
+
+        from apps.registrar import schedule_conflicts
+
+        new = self._plan(**overrides)
+        with (
+            mock.patch.object(schedule_conflicts, "owner_slots", self._old_owner_slots),
+            mock.patch.object(schedule_conflicts, "room_rows", self._old_room_rows),
+        ):
+            old = self._plan(**overrides)
+        return new, old
+
+    def test_plan_output_is_identical_to_full_semester_load(self):
+        self._seed()
+        variants = [
+            {},
+            {"exclude_ids": (str(self.edited.pk),)},
+            {"mode": schedule_suggest.MODE_TEACHER, "week_type": WeekType.EVEN},
+            {"mode": schedule_suggest.MODE_GROUP, "week_type": WeekType.ODD, "room": "Uyğun"},
+            {"kind": SlotKind.LECTURE, "weekday": 1, "time_slot": "11:50|13:20"},
+            {"kind": SlotKind.LECTURE, "weekday": 1, "time_slot": "10:10|11:40", "room": "Böyük"},
+            {"kind": SlotKind.LAB, "weekday": 4, "time_slot": "10:10|11:40", "building": "Korpus A"},
+            {"teacher_id": None, "weekday": 2, "time_slot": "08:30|10:00"},
+        ]
+        for overrides in variants:
+            with self.subTest(**{key: str(value) for key, value in overrides.items()}):
+                new, old = self._both_ways(**overrides)
+                self.assertEqual(new, old)
+
+    def test_owner_slots_match_python_filter_for_odd_ids(self):
+        from apps.registrar import schedule_conflicts
+
+        self._seed()
+        cases = [
+            (self.groups[0].pk, self.teacher_a.pk),
+            (str(self.groups[0].pk), str(self.teacher_a.pk)),
+            (None, self.teacher_a.pk),
+            (self.groups[2].pk, None),
+            ("not-a-uuid", "abc"),
+            (None, None),
+        ]
+        with bypass_rls():
+            for group_id, teacher_id in cases:
+                kwargs = {"period_id": self.period.pk, "group_id": group_id, "instructor_id": teacher_id}
+                new = {slot.pk for slot in schedule_conflicts.owner_slots(self.org, **kwargs)}
+                old = {slot.pk for slot in self._old_owner_slots(self.org, **kwargs)}
+                self.assertEqual(new, old, (group_id, teacher_id))
+
+    def test_suggest_output_is_identical_to_full_semester_detect(self):
+        from apps.registrar import schedule_conflicts, schedule_grid
+
+        self._seed()
+        rules = {"period_id": self.period.pk, "subject_id": self.subject.pk, "offering_id": self.offering.pk}
+        with bypass_rls():
+            for room, kind in (("", SlotKind.SEMINAR), ("böyük", SlotKind.LECTURE), ("Uyğun", SlotKind.SEMINAR)):
+                common = {
+                    "organization": self.org,
+                    "group_id": self.groups[0].pk,
+                    "instructor_id": self.teacher_a.pk,
+                    "week_type": WeekType.ALL,
+                    "room": room,
+                    "exclude_ids": (str(self.edited.pk),),
+                    "kind": kind,
+                    **rules,
+                }
+                rows = list(schedule_conflicts.live_slots(self.org, period_id=self.period.pk))
+                expected = set()
+                for weekday, _label in schedule_grid.TEACHING_WEEKDAYS:
+                    for period in schedule_grid.lesson_periods(self.org):
+                        clashes = schedule_conflicts.detect(
+                            weekday=weekday,
+                            start_time=period["start"],
+                            end_time=period["end"],
+                            candidates=rows,
+                            **common,
+                        )
+                        if not clashes:
+                            expected.add((weekday, period["key"]))
+                got = schedule_conflicts.suggest(limit=1000, **common)
+                self.assertEqual({(row["weekday"], row["time_slot"]) for row in got}, expected, room)
+
+    def test_unrelated_slots_are_not_instantiated(self):
+        from django.db.models.signals import post_init
+
+        built = []
+
+        def _count(sender, instance, **kwargs):
+            built.append(instance.pk)
+
+        def instances():
+            built.clear()
+            post_init.connect(_count, sender=ScheduleSlot)
+            try:
+                self._plan(weekday=1, time_slot="10:10|11:40")
+            finally:
+                post_init.disconnect(_count, sender=ScheduleSlot)
+            return len(built)
+
+        with bypass_rls():
+            self._slot(self.offering, weekday=2, kind=SlotKind.SEMINAR)
+        before = instances()
+        with bypass_rls():
+            for weekday in range(1, 6):
+                self._slot(self.offering_b, weekday=weekday, start="13:35", end="15:05", room="Böyük")
+                self._slot(self.offering_d, weekday=weekday, start="08:30", end="10:00", room="Uyğun")
+        self.assertEqual(instances(), before)
