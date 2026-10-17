@@ -97417,3 +97417,44 @@ msgstr "Bu saatte gruba uygun boş derslik yok."
 msgctxt "accounts.schedule_editor"
 msgid "Semestr tapılmadı."
 msgstr "Dönem bulunamadı."
+
+msgctxt "accounts.schedule_manage"
+msgid "Korpus"
+msgstr "Bina"
+
+msgctxt "accounts.schedule_manage"
+msgid "Bütün korpuslar"
+msgstr "Tüm binalar"
+
+msgctxt "accounts.schedule_manage"
+msgid "Otaq axtar…"
+msgstr "Derslik ara…"
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu korpusda uyğun otaq yoxdur"
+msgstr "Bu binada uygun derslik yok"
+
+msgctxt "accounts.schedule_manage"
+msgid "Otaq seçilməyib"
+msgstr "Derslik seçilmedi"
+
+msgctxt "accounts.schedule_manage"
+msgid "Korpus qrupun ixtisasına görə seçilib — dəyişə bilərsiniz; otaqlar korpusa görə süzülür."
+msgstr "Bina grubun programına göre seçildi — değiştirebilirsiniz; derslikler binaya göre süzülür."
+
+msgctxt "accounts.schedule_manage"
+msgid "Əvvəlcə korpusu seçin — otaq siyahısı həmin korpusun otaqlarıdır."
+msgstr "Önce binayı seçin — derslik listesi o binanın derslikleridir."
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu otaq otaq reyestrində yoxdur — saxlanılır; dəyişmək üçün siyahıdan seçin."
+msgstr "Bu derslik derslik kaydında yok — korunur; değiştirmek için listeden seçin."
+
+msgctxt "accounts.schedule_manage"
+msgid "Seçilmiş korpus: {campus} — otaqlar əvvəlcə bu korpusdan"
+msgstr "Seçilen bina: {campus} — önce bu binanın derslikleri"
+
+#, python-format
+msgctxt "registrar.schedule_rooms"
+msgid "%(room)s · %(count)s nəfər"
+msgstr "%(room)s · %(count)s kişilik"

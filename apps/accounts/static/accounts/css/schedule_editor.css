@@ -120,6 +120,12 @@
     grid-column: 1 / -1;
 }
 
+/* «Korpus → Otaq» ipucu (2026-10-17) — iki sütunun altında bütün en boyu. */
+.sedit-room-hint {
+    grid-column: 1 / -1;
+    margin: calc(-1 * var(--ems-sp-2, 6px)) 0 0;
+}
+
 .sedit-form__extra {
     display: flex;
     flex-wrap: wrap;

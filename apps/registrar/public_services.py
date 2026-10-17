@@ -34,6 +34,7 @@ from . import schedule_grid  # noqa: F401
 from . import schedule_manage  # noqa: F401
 from . import schedule_manage_actions  # noqa: F401
 from . import schedule_publish  # noqa: F401
+from . import schedule_rooms  # noqa: F401 — dialoqun «Korpus → Otaq» kataloqu (2026-10-17)
 from . import schedule_suggest  # noqa: F401 — «Uyğun vaxtlar» + otaq tövsiyəsi (2026-10-17)
 from . import selfwork_points  # noqa: F401
 from . import services  # noqa: F401
@@ -127,6 +128,7 @@ __all__ = [
     "schedule_manage",
     "schedule_manage_actions",
     "schedule_publish",
+    "schedule_rooms",
     "schedule_suggest",
     "season_label",
     "selfwork_points",

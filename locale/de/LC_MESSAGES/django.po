@@ -99052,3 +99052,44 @@ msgstr "Zu dieser Zeit gibt es keinen passenden freien Raum."
 msgctxt "accounts.schedule_editor"
 msgid "Semestr tapılmadı."
 msgstr "Semester nicht gefunden."
+
+msgctxt "accounts.schedule_manage"
+msgid "Korpus"
+msgstr "Gebäude"
+
+msgctxt "accounts.schedule_manage"
+msgid "Bütün korpuslar"
+msgstr "Alle Gebäude"
+
+msgctxt "accounts.schedule_manage"
+msgid "Otaq axtar…"
+msgstr "Raum suchen…"
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu korpusda uyğun otaq yoxdur"
+msgstr "Kein passender Raum in diesem Gebäude"
+
+msgctxt "accounts.schedule_manage"
+msgid "Otaq seçilməyib"
+msgstr "Kein Raum gewählt"
+
+msgctxt "accounts.schedule_manage"
+msgid "Korpus qrupun ixtisasına görə seçilib — dəyişə bilərsiniz; otaqlar korpusa görə süzülür."
+msgstr "Das Gebäude ist nach dem Studiengang der Gruppe vorbelegt — Sie können es ändern; Räume werden nach Gebäude gefiltert."
+
+msgctxt "accounts.schedule_manage"
+msgid "Əvvəlcə korpusu seçin — otaq siyahısı həmin korpusun otaqlarıdır."
+msgstr "Wählen Sie zuerst das Gebäude — die Raumliste zeigt dessen Räume."
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu otaq otaq reyestrində yoxdur — saxlanılır; dəyişmək üçün siyahıdan seçin."
+msgstr "Dieser Raum ist nicht im Raumverzeichnis — er bleibt erhalten; zum Ändern aus der Liste wählen."
+
+msgctxt "accounts.schedule_manage"
+msgid "Seçilmiş korpus: {campus} — otaqlar əvvəlcə bu korpusdan"
+msgstr "Gewähltes Gebäude: {campus} — seine Räume zuerst"
+
+#, python-format
+msgctxt "registrar.schedule_rooms"
+msgid "%(room)s · %(count)s nəfər"
+msgstr "%(room)s · %(count)s Plätze"
