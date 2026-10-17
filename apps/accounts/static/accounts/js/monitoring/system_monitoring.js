@@ -287,7 +287,9 @@
 
         function renderPayload(tab, payload, preserveOnDegraded) {
             if (setDegraded(payload)) {
-                if (!preserveOnDegraded) {
+                if (!preserveOnDegraded && tab === "logs") {  // səbəb + sorğu (renderers, 2026-10-17)
+                    destroyCharts(); renderers.logs({ degraded: payload });
+                } else if (!preserveOnDegraded) {
                     destroyCharts();
                     body.innerHTML = '<div class="smx-empty">' +
                         escapeHtml(gettext("Monitorinq asılılığı bərpa olunana qədər məlumat yoxdur.")) +

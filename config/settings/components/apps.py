@@ -92,6 +92,9 @@ MIDDLEWARE = [
     # request.user and tenant context are resolved and a suspended org still logs
     # out first. Exempts the set-password view, logout, static, admin (see mw).
     "apps.accounts.middleware.FirstLoginPasswordMiddleware",
+    # Məcburi profil məlumatları (2026-10-17): boş FİN / telefon / e-poçt → «Məlumatlarınızı tamamlayın».
+    # İlk-giriş axınından SONRA (o üstündür), sorğu qapısından ƏVVƏL. Bax apps/accounts/profile_completion.py.
+    "apps.accounts.middleware_profile_completion.ProfileCompletionMiddleware",
     # Anonim sorğu qapısı (2026-09-25): məcburi kampaniya doldurulmayınca tələbə
     # kabineti /sorgu/-ya yönlənir. İlk-giriş axınından SONRA (o, üstündür); view-as,
     # heyət və kabinetdən kənar yollar üçün sıfır sorğu. Bax apps/surveys/middleware.py.

@@ -191,11 +191,12 @@ class MonitoringPaginationApiTests(TestCase):
         self.assertEqual(client.query_range.call_args_list[1].kwargs["limit"], 11)
         self.assertEqual([row["line"] for row in first["lines"]], [f"line-{i:02d}" for i in range(10)])
         self.assertNotIn("_ts_ns", first["lines"][0])
-        self.assertEqual(first["anchor_ns"], anchor_ns)
+        # 2026-10-17: ns kursorları SƏTİRdir (JS Number 2^53-dən böyük tam ədədi yuvarlaqlaşdırır).
+        self.assertEqual(first["anchor_ns"], str(anchor_ns))
         self.assertEqual(first["total"], 11)
         self.assertFalse(first["total_exact"])
         self.assertTrue(first["has_next"])
-        self.assertEqual(first["next_cursor_ns"], anchor_ns - 10)
+        self.assertEqual(first["next_cursor_ns"], str(anchor_ns - 10))
 
         self.assertEqual([row["line"] for row in second["lines"]], [f"line-{i:02d}" for i in range(10, 20)])
         self.assertEqual(second["before_ns"], first["next_cursor_ns"])

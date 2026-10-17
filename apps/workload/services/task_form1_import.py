@@ -29,6 +29,7 @@ from core.constants import OrgUnitType
 
 from ..constants import ACTIVITY_TOTAL_FIELD, TaskStatus
 from ..models import TeachingTask
+from .distribution import teacher_loads
 from .imports import normalize
 from .people import chair_teacher_memberships, join_chair_as_teacher
 from .task_form1_parsing import group_key, group_tokens, name_words
@@ -278,6 +279,7 @@ class Form1Importer:
         return [(user_id, min(hours, total), hourly) for (user_id, hourly), hours in merged.items()]
 
     def _apply(self, task, rows_by_pk, contributions, entry_reports, index) -> None:
+        loads_before = teacher_loads(task)  # yenidən təsdiqdə yalnız yeni/dəyişən müəllimə bildiriş
         if self.importer.apply and contributions and task.status == TaskStatus.DRAFT:
             self.importer._approve_official_workbook(task)
         per_row: dict = defaultdict(dict)
@@ -310,7 +312,7 @@ class Form1Importer:
             task.refresh_from_db(fields=["status"])
             amended = task.status == TaskStatus.AMENDED and self.applier.counters["amendment_opened"]
             if (written and task.status in (TaskStatus.APPROVED, TaskStatus.DISTRIBUTING)) or amended:
-                self.importer._confirm_and_enroll(task)
+                self.importer._confirm_and_enroll(task, loads_before=loads_before)
 
 
 __all__ = ["Form1Importer", "SUBJECT_THRESHOLD", "find_chair", "subject_slug"]

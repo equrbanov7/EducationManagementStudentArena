@@ -316,6 +316,17 @@ Prometheus → *Status → Targets*-də `emsarena-app` altında `APP_REPLICAS`
 qədər `UP` hədəf görünməlidir; `ALLOWED_HOSTS` `localhost` daxil etməlidir
 (app healthcheck də bunu tələb edir).
 
+### 8.2 «Loglar» tabı boşdur (2026-10-17)
+
+Tab indi üç vəziyyəti ayırır: **«Log mənbəyinə qoşulmaq olmadı: …»** (Loki timeout
+5 s / bağlantı yoxdur / HTTP status — `apps/monitoring/logs.py` `error`), **«Son <aralıq>
+ərzində bu sorğuya uyğun log yoxdur»** + LogQL sorğusu, və Loki son 6 saatda heç bir
+konteyner axını tanımırsa **promtail ipucu**. Zənciri yoxlamaq (oxu-yalnız, log məzmunu
+çap olunmur): Actions → *Prod Audit* → `scope=logs` (`scripts/ops/prod_logs_diag.sh` +
+`prod_logs_probe.py`). Göndərmə 1 saat dayanarsa `LogIngestionStalled` alerti yanır.
+Loki logundakı `recalculate_owned_streams … "zone not set"` tək-replika (`inmemory` ring)
+rejimində zərərsizdir.
+
 ---
 
 ## 9. Yoxlama siyahısı

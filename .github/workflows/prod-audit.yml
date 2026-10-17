@@ -5,6 +5,12 @@ name: 🔎 Prod Audit (oxu-yalnız)
 # DƏYİŞMİR (heç bir POST, heç bir yazı), hesabat Actions summary + artefaktdır.
 on:
   workflow_dispatch:
+    inputs:
+      scope:
+        description: "full = bütün audit · logs = yalnız «Loglar» zənciri (promtail → Loki ← Django, ~40 s)"
+        type: choice
+        options: [full, logs]
+        default: full
 
 concurrency:
   group: prod-ops
@@ -28,13 +34,20 @@ jobs:
           persist-credentials: false
 
       - name: 🔎 Audit
+        env:
+          AUDIT_SCOPE: ${{ inputs.scope || 'full' }}
         run: |
           set -uo pipefail
           # Skriptlər canlı APP_DIR-dəki köçürülmüş nüsxədən YOX, bu checkout-dan gəlir
           # (deploy olunmamış düzəlişi də sınamaq mümkün olsun); APP_DIR yalnız
           # compose/.env üçündür.
           cp "$GITHUB_WORKSPACE/scripts/ops/prod_perf_probe.py" "$APP_DIR/scripts/ops/prod_perf_probe.py" 2>/dev/null || true
-          bash "$GITHUB_WORKSPACE/scripts/ops/prod_audit.sh" | tee "$RUNNER_TEMP/prod-audit.md"
+          if [ "$AUDIT_SCOPE" = "logs" ]; then
+            # 2026-10-17: «Sistem monitorinqi → Loglar» boşdur — yalnız log zənciri (oxu-yalnız, məzmunsuz).
+            bash "$GITHUB_WORKSPACE/scripts/ops/prod_logs_diag.sh" | tee "$RUNNER_TEMP/prod-audit.md"
+          else
+            bash "$GITHUB_WORKSPACE/scripts/ops/prod_audit.sh" | tee "$RUNNER_TEMP/prod-audit.md"
+          fi
           cat "$RUNNER_TEMP/prod-audit.md" >> "$GITHUB_STEP_SUMMARY"
 
       - name: 📎 Hesabat artefaktı

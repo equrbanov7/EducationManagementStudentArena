@@ -29,6 +29,8 @@ urlpatterns = [
     # parolsuz giriş (yalnız e-poçt OTP) və hesab orakulu yaradırdı.
     # First-login: provisioned users set their own password + verify email.
     path("set-password/", views.set_initial_password_view, name="set_initial_password"),
+    # 2026-10-17: girişdən sonra boş FİN / telefon / e-poçtun məcburi tamamlanması (apps/accounts/profile_completion.py).
+    path("complete-profile/", views.complete_profile_view, name="complete_profile"),
     # Login: generic /login/ artıq PORTAL SEÇİMİ (tələbə vs müəllim/əməkdaş);
     # əsl login formaları ayrı, ROL-QAPILI URL-lərdədir.
     path(

@@ -61,6 +61,11 @@
 #       bloklanmış MÜƏLLİM, aktiv qeydi olan bloklanmış TƏLƏBƏ; qa.* sayılmır. Defolt YALNIZ hesabat;
 #       `apply` + `create_missing` → YALNIZ yükü olan bloklanmış müəllimlərin bloku rəsmi servislə açılır
 #       (audit); tələbə heç vaxt avtomatik açılmır. Loga yalnız saylar; CSV (istifadəçi adları) şifrəlidir.
+#   dedupe_notifications — təkrar «Dərs yükü təyin edildi» (tip `assignment`, sahib 2026-10-17 «İkinci bildirişləri
+#       oxunmuş et»): `date_from` … `date_to` (YYYY-MM-DD, `date_to` boş = bu gün) aralığında eyni alıcı + başlıq +
+#       mətn + keçid + metadata ilə 120 dəqiqə içində təkrarlanan OXUNMAMIŞ bildirişlərdən ən erkəni saxlanılır,
+#       qalanları OXUNMUŞ edilir (silinmir). Yeni giriş yoxdur (25 limit) — tarix girişləri təkrar istifadə olunur.
+#       Loga YALNIZ saylar (groups / duplicates_marked_read / users).
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
 #       (backfill; `--include-drafts` BURADA YOXDUR — qaralama planlar sahibin qərarıdır).
 #   apply_org_structure — struktur planı (scripts/data/qku_structure_2026_09_27.json, yalnız vahid
@@ -107,6 +112,7 @@ on:
           - retire_qa_accounts
           - ensure_parent_groups
           - blocked_accounts_report
+          - dedupe_notifications
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -214,11 +220,11 @@ on:
         required: false
         default: ""
       date_from:
-        description: "backfill_teacher_lessons: başlanğıc tarix (YYYY-MM-DD)"
+        description: "backfill_teacher_lessons / dedupe_notifications: başlanğıc tarix (YYYY-MM-DD)"
         required: false
         default: ""
       date_to:
-        description: "backfill_teacher_lessons: son tarix (YYYY-MM-DD, bu gündən sonra yox)"
+        description: "backfill_teacher_lessons / dedupe_notifications: son tarix (YYYY-MM-DD, bu gündən sonra yox; dedupe-da boş = bu gün)"
         required: false
         default: ""
       replace_teacher_slots:
@@ -449,6 +455,16 @@ jobs:
               echo "::add-mask::$actor"
               args=(--org "$ORG" --year "$YEAR" --actor "$actor")
               ;;
+            dedupe_notifications)
+              # Sahib 2026-10-17: təkrar «Dərs yükü təyin edildi» bildirişləri oxunmuş edilir (silinmir). Tip sabitdir
+              # (yalnız workload `assignment`); tarixlər `date_from` / `date_to` girişlərindən, format yoxlanılır.
+              printf '%s' "$DATE_FROM" | grep -Eq '^20[0-9]{2}-[01][0-9]-[0-3][0-9]$' || { echo "date_from formatı: YYYY-MM-DD" >&2; exit 2; }
+              args=(--org "$ORG" --type assignment --since "$DATE_FROM" --window-minutes 120)
+              if [ -n "$DATE_TO" ]; then
+                printf '%s' "$DATE_TO" | grep -Eq '^20[0-9]{2}-[01][0-9]-[0-3][0-9]$' || { echo "date_to formatı: YYYY-MM-DD" >&2; exit 2; }
+                args+=(--until "$DATE_TO")
+              fi
+              ;;
             repair_group_leads)
               # Starosta (lead_student) üzvlüklərinin təmiri — gecə 2026-10-13: köhnə rol axınları starostanı
               # scope_unit-siz yaradırdı. Defolt QURU QAÇIŞ; apply → konservativ düzəliş (ehtiyat nüsxədən sonra).
@@ -507,7 +523,7 @@ jobs:
             grep -E '^(Şəxs:|Yaradılacaq|✓|Vahidi tapılmayan|Təşkilatda OLMAYAN|DRY-RUN|   [a-z_]+ +[0-9]+$)' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             test "${status:-0}" = 0 || { tail -n 5 "$RUNNER_TEMP/out.log" | grep -E 'Error|Exception' || true; exit "$status"; }
-          elif [ "$COMMAND" = "resync_task_offerings" ]; then
+          elif [ "$COMMAND" = "resync_task_offerings" ] || [ "$COMMAND" = "dedupe_notifications" ]; then
             # Loga YALNIZ saylar: əmr yalnız say çap edir; xəbərdarlıq/traceback sətirləri süzülür.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^(tasks=[0-9]+ · tasks_not_reached_chair=[0-9]+|(APPLY|DRY-RUN \(heç nə yazılmadı\)): [a-z_]+=[0-9]+( · [a-z_]+=[0-9]+)*)$' \

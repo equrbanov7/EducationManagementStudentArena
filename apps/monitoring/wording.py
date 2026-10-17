@@ -58,6 +58,7 @@ def alert_title(rule: str, fallback: str = "") -> str:
         "NodeTextfileCollectorError": pgettext(_ALERT, "Server göstəricilərinin bir hissəsi oxunmur"),
         "PgBouncerClientsWaiting": pgettext(_ALERT, "Bazaya qoşulmaq üçün növbədə gözləyən sorğular var"),
         "PgBouncerMaxWaitHigh": pgettext(_ALERT, "Bazaya qoşulma növbəsində gözləmə uzanıb"),
+        "LogIngestionStalled": pgettext(_ALERT, "Mərkəzi loglar toplanmır — «Loglar» bölməsi boş qalır"),
     }
     return titles.get(rule or "", "") or fallback or pgettext(_ALERT, "Naməlum xəbərdarlıq")
 

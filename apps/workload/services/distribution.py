@@ -93,8 +93,29 @@ def sync_offerings(task, *, actor=None, request=None) -> dict:
     return report
 
 
-def _notify_teachers(task) -> int:
-    """Hər müəllimə «Dərs yükü təyin edildi» bildirişi (fənn + cəmi saat)."""
+def teacher_loads(task) -> dict:
+    """Müəllim → bölgü imzası (sətir, fəaliyyət, saat, saathesabı) — təsdiqdən ƏVVƏL götürülür.
+
+    Yenidən təsdiqdə (``confirm_distribution(loads_before=…)``) yalnız imzası dəyişən / yeni müəllimə
+    bildiriş getsin deyə (sahib 2026-10-17 «yeni müəllimlərə bildiriş getsin»)."""
+    loads: dict = {}
+    rows = TeacherAssignment.objects.filter(row__task=task, teacher__isnull=False).values_list(
+        "teacher_id", "row_id", "activity", "hours", "is_hourly_paid"
+    )
+    for teacher_id, row_id, activity, hours, hourly in rows:
+        loads.setdefault(teacher_id, []).append((str(row_id), str(activity), int(hours or 0), bool(hourly)))
+    return {teacher_id: tuple(sorted(items)) for teacher_id, items in loads.items()}
+
+
+def changed_teacher_ids(task, before: dict) -> set:
+    """``before``-dan sonra bölgüsü YENİ yaranan və ya dəyişən müəllimlər (yükü tam götürülən sayılmır)."""
+    return {teacher_id for teacher_id, sig in teacher_loads(task).items() if before.get(teacher_id) != sig}
+
+
+def _notify_teachers(task, only: set | None = None) -> int:
+    """Hər müəllimə «Dərs yükü təyin edildi» bildirişi (fənn + cəmi saat); ``only`` — yalnız bu müəllimlər."""
+    if only is not None and not only:
+        return 0
     try:
         from apps.notifications.models import NotificationType
         from apps.notifications.public import create_notification
@@ -106,6 +127,8 @@ def _notify_teachers(task) -> int:
     assignments = TeacherAssignment.objects.filter(row__task=task, teacher__isnull=False).select_related(
         "teacher", "row", "row__subject"
     )
+    if only is not None:
+        assignments = assignments.filter(teacher_id__in=only)
     for assignment in assignments:
         bucket = totals.setdefault(assignment.teacher, {"hours": 0, "subjects": set()})
         bucket["hours"] += int(assignment.hours or 0)
@@ -145,11 +168,15 @@ def _notify_teachers(task) -> int:
 
 
 @transaction.atomic
-def confirm_distribution(*, task, actor, allow_vacant: bool = True, request=None, notify: bool = True) -> dict:
+def confirm_distribution(
+    *, task, actor, allow_vacant: bool = True, request=None, notify: bool = True, loads_before: dict | None = None
+) -> dict:
     """Bölgünü təsdiqlə → ``distributed`` + offering sinxronu + bildirişlər.
 
-    ``notify=False`` — yalnız operator məlumat düzəlişi (``fix_task_row_hours``): kafedranın bütün
-    müəllimlərinə təkrar «Dərs yükü təyin edildi» bildirişi getmir (UI yolu defoltla bildirir)."""
+    ``notify=False`` — heç kimə bildiriş yoxdur. ``loads_before`` (:func:`teacher_loads`, dəyişiklikdən ƏVVƏL) —
+    əmr/idxal yolu: əvvəl bölünmüş sənədin yenidən təsdiqində kafedranın bütün müəllimlərinə təkrar «Dərs yükü
+    təyin edildi» GETMİR, yalnız bölgüsü yeni yaranan / dəyişən müəllimə bir dəfə gedir (sahib 2026-10-17);
+    ilk təsdiq (``distributed_at`` boş) hamıya bildirir. UI yolu defoltla hamıya bildirir."""
     ensure_can_distribute(actor, task.chair_id)
     # Audit 2026-09-13 tests F-T1: təsdiq də eyni zəncir qapısından keçir —
     # göndərilməmiş TŞ qaralaması burada da «distributed» ola bilməz.
@@ -175,13 +202,17 @@ def confirm_distribution(*, task, actor, allow_vacant: bool = True, request=None
     if not allow_vacant and readiness["vacant_hours"]:
         raise WorkloadDenied("workload.vacant_not_allowed", "Vakant saatlar qalıb.")
 
+    if loads_before is not None:
+        task.refresh_from_db(fields=["distributed_at"])  # çağıranın nüsxəsi köhnəlmiş ola bilər
+    targeted = changed_teacher_ids(task, loads_before) if (loads_before is not None and task.distributed_at) else None
+
     task.status = TaskStatus.DISTRIBUTED
     task.distributed_by = getattr(actor, "user", None)
     task.distributed_at = timezone.now()
     task.save(update_fields=["status", "distributed_by", "distributed_at", "updated_at"])
 
     sync = sync_offerings(task, actor=actor, request=request)
-    notified = _notify_teachers(task) if notify else 0
+    notified = _notify_teachers(task, only=targeted) if notify else 0
 
     log_action(
         AuditAction.UPDATE,
@@ -205,4 +236,4 @@ def confirm_distribution(*, task, actor, allow_vacant: bool = True, request=None
     return {"status": task.status, "sync": sync, "notified": notified, "readiness": readiness}
 
 
-__all__ = ["confirm_distribution", "distribution_readiness", "sync_offerings"]
+__all__ = ["changed_teacher_ids", "confirm_distribution", "distribution_readiness", "sync_offerings", "teacher_loads"]

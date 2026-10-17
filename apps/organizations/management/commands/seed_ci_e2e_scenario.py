@@ -23,6 +23,8 @@ from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 from core.roles import ProfileRole
 
+from .seed_ci_e2e_user import fill_ci_identity
+
 User = get_user_model()
 
 
@@ -130,6 +132,7 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
         profile.role = profile_role
         if profile_role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}:
             profile.student_university_name = organization.name if organization else ""
+        fill_ci_identity(profile, user.username)
         profile.save()
         return profile
 
