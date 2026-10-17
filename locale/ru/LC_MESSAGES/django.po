@@ -99097,3 +99097,7 @@ msgstr "Балл до экзамена — целое число: сумма ч�
 msgctxt "registrar.schedule_editor"
 msgid "Mövcud dərsin fənni dəyişdirilə bilməz — dərsi silib yenisini qoyun."
 msgstr "Предмет существующего занятия изменить нельзя — удалите занятие и добавьте новое."
+
+msgctxt "accounts.groups"
+msgid "Qrupun tələbə siyahısına baxmaq səlahiyyətiniz yoxdur."
+msgstr "У вас нет прав на просмотр списка студентов этой группы."

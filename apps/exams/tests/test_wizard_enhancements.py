@@ -216,7 +216,11 @@ class WizardEnhancementsTests(TestCase):
         session["active_organization"] = self.org.slug
         session.save()
 
-        response = client.get(reverse("exams:user_search"), {"groups": str(group.id)})
+        # SEC-2 Low #2 (2026-10-17): sorğusuz cavab yalnız seçilmiş qrupun üzvləridir (kataloq deyil);
+        # qrupdan kənar tələbə ≥ 2 simvollu axtarışla tapılır və `group_member: false` ilə işarələnir.
+        short = client.get(reverse("exams:user_search"), {"groups": str(group.id)}).json()["results"]
+        self.assertEqual([item["id"] for item in short], [str(self.s1.id)])
+        response = client.get(reverse("exams:user_search"), {"groups": str(group.id), "q": "wiz_s"})
         self.assertEqual(response.status_code, 200)
         results = response.json()["results"]
         by_id = {item["id"]: item for item in results}

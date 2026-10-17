@@ -26,6 +26,7 @@ from .group_actions import _error, _visible_group
 from .groups_registry import (
     can_manage_groups,
     can_move_students,
+    can_view_group_students,
     can_view_groups,
     group_manage_scope,
     group_scope,
@@ -87,6 +88,11 @@ def group_students(request, slug, unit_id):
     organization = get_object_or_404(Organization, slug=slug, is_active=True)
     if not can_view_groups(request):
         return _error(pgettext(_CTX, "Qrup reyestrinə səlahiyyətiniz yoxdur."), status=403, code="forbidden")
+    # QA-2 F-03 (2026-10-17): `unit.view` STRUKTUR oxusudur — tələbə siyahısı tələbə tərəfi açarı istəyir.
+    if not can_view_group_students(request):
+        return _error(
+            pgettext(_CTX, "Qrupun tələbə siyahısına baxmaq səlahiyyətiniz yoxdur."), status=403, code="forbidden"
+        )
     scope = group_scope(request, organization)
     if not scope.has_structure_access:
         return _error(pgettext(_CTX, "Struktur əhatəniz yoxdur."), status=403, code="forbidden")

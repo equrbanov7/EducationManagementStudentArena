@@ -26,6 +26,16 @@ User = get_user_model()
 _PAGE_SIZE_DEFAULT = 10
 _PAGE_SIZE_MAX = 50
 
+#: SEC-2 Low #2 (2026-10-17): tələbə axtarışı istifadəçi kataloqunu sadalamasın. Sorğu bu uzunluqdan qısadırsa
+#: yalnız SEÇİLMİŞ qrupların üzvləri qayıdır (istisna etmək üçün); qrup yoxdursa boş. JS (`EMSSearchInput`)
+#: onsuz da ≥ 2 simvolda axtarır, ilk açılış isə boş sorğu ilə gəlir.
+USER_SEARCH_MIN_QUERY = 2
+#: Tələbə axtarışının səhifə həddi — klient 10-luq istəyir; böyük `limit` ilə toplu çəkiliş olmasın.
+USER_SEARCH_PAGE_MAX = 20
+#: Sürüşdürmənin (offset) yuxarı həddi — eyni sorğu ilə kataloqu səhifə-səhifə çəkmək olmasın; daha çoxu
+#: üçün müəllim sorğunu dəqiqləşdirir (JS `has_more: false` görüb dayanır).
+USER_SEARCH_MAX_OFFSET = 200
+
 
 def _page_bounds(request):
     """(offset, limit) — səhifələmə üçün. Default səhifə ölçüsü 10.
@@ -231,12 +241,12 @@ def user_search(request):
     if organization is None:
         return JsonResponse({"results": [], "has_more": False})
 
-    query = (request.GET.get("q") or "").strip()
+    query = (request.GET.get("q") or "").strip()[:120]
     qs = _org_user_queryset(request, organization)
 
-    # `groups` seçili qrupları bildirir. Sağ panel yenə bütün tələbələri göstərir;
-    # sadəcə həmin qrupların üzvləri metadata ilə işarələnir ki, frontend onları
-    # checked göstərib ayrı-ayrı istisna etməyə imkan versin.
+    # `groups` seçili qrupları bildirir. Həmin qrupların üzvləri metadata ilə işarələnir ki, frontend
+    # onları checked göstərib ayrı-ayrı istisna etməyə imkan versin. Axtarış (≥ 2 simvol) bütün
+    # təşkilat tələbələrini gəzir; qısa/boş sorğuda yalnız üzvlər qayıdır (SEC-2 Low #2).
     group_ids = [gid for gid in (request.GET.get("groups") or "").split(",") if gid.strip().isdigit()]
     group_member_ids = set()
     if group_ids:
@@ -249,9 +259,15 @@ def user_search(request):
     # kimi işarələnir — müəllim onları ayrı-ayrı istisna edə bilsin.
     group_member_ids |= _unit_member_ids(request, organization, _unit_ids_param(request))
 
-    search_q = tolerant_q(query, ("username", "first_name", "last_name", "email"))
-    if search_q is not None:
-        qs = qs.filter(search_q)
+    if len(query) < USER_SEARCH_MIN_QUERY:
+        # Qısa/boş sorğu: kataloq YOX — yalnız seçilmiş qrupların üzvləri (yoxdursa boş siyahı).
+        if not group_member_ids:
+            return JsonResponse({"results": [], "has_more": False, "min_query": USER_SEARCH_MIN_QUERY})
+        qs = qs.filter(id__in=group_member_ids)
+    else:
+        search_q = tolerant_q(query, ("username", "first_name", "last_name", "email"))
+        if search_q is not None:
+            qs = qs.filter(search_q)
     qs = qs.distinct()
     if group_member_ids:
         qs = qs.annotate(
@@ -265,6 +281,9 @@ def user_search(request):
         qs = qs.order_by("username")
 
     offset, limit = _page_bounds(request)
+    if offset >= USER_SEARCH_MAX_OFFSET:
+        return JsonResponse({"results": [], "has_more": False, "min_query": USER_SEARCH_MIN_QUERY})
+    limit = min(limit, USER_SEARCH_PAGE_MAX, USER_SEARCH_MAX_OFFSET - offset)
     results, has_more = _paginate(
         qs,
         offset,
@@ -275,7 +294,8 @@ def user_search(request):
             "group_member": u.id in group_member_ids,
         },
     )
-    return JsonResponse({"results": results, "has_more": has_more})
+    has_more = has_more and offset + len(results) < USER_SEARCH_MAX_OFFSET
+    return JsonResponse({"results": results, "has_more": has_more, "min_query": USER_SEARCH_MIN_QUERY})
 
 
 @login_required

@@ -15,13 +15,20 @@ from types import SimpleNamespace
 from django.urls import reverse
 
 from ....services.group_lead import group_lead_map
-from ...group_lead import LEAD_MANAGE_PERMISSIONS, can_manage_group_leads
+from ...group_lead import can_manage_group_leads, lead_manage_permissions
 
 LEAD_CELL_INCLUDE = "accounts/profile/sections/teaching_office/_group_lead_cell.html"
 
 
 def attach_group_leads(organization, rows) -> None:
-    """Reyestr sətirlərinə ``lead_*`` sahələrini yazır (yerində)."""
+    """Reyestr sətirlərinə ``lead_*`` sahələrini yazır (yerində).
+
+    QA-2 F-03 (2026-10-17): starostanın adı tələbə məlumatıdır — yalnız sətrin ``can_view_students`` bayrağı
+    (``can_view_group_students``, tələbə tərəfi açarı) varsa; yoxdursa (HR) xana boş qalır.
+    """
+    rows = [row for row in rows if row.get("can_view_students")]
+    if not rows:
+        return
     leads = group_lead_map(organization, [row["id"] for row in rows])
     by_id = {str(group_id): items for group_id, items in leads.items()}
     for row in rows:
@@ -48,7 +55,7 @@ def attach_lead_rights(request, organization, rows) -> None:
 
     scopes = [
         get_permission_scope(request.user, organization, permission, request=request)
-        for permission in LEAD_MANAGE_PERMISSIONS
+        for permission in lead_manage_permissions(request)
     ]
     scopes = [scope for scope in scopes if scope.has_structure_access]
     for row in rows:

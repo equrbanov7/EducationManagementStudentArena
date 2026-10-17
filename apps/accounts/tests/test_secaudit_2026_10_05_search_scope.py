@@ -77,7 +77,8 @@ class GlobalSearchStudentScopeTest(TestCase):
                 display_name="Directory",
                 level=60,
                 scope_type=RoleScopeType.UNIT,
-                permissions=["member.view", "unit.view"],
+                # QA-2 F-03 (2026-10-17): tələbə axtarışı tələbə tərəfi açarı istəyir (dekan kimi kataloq rolu).
+                permissions=["member.view", "unit.view", "people.view_students"],
                 is_active=True,
             )
             cls.officer = User.objects.create_user("gss_officer", "gss_officer@qku.edu.az", "pw")

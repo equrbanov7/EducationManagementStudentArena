@@ -295,8 +295,11 @@ class MembersContextCallersTest(_WorldMixin, TestCase):
         self.assertIn(self.student_a.id, dean_ids)
         self.assertNotIn(self.student_b.id, dean_ids)
         hr_ids = self._registry_member_ids(self.hr)
-        self.assertIn(self.student_a.id, hr_ids)
-        self.assertIn(self.student_b.id, hr_ids)
+        # QA-2 F-03 (2026-10-17): HR org-wide baxır, amma tələbə tərəfi açarı yoxdur — tələbələr görünmür.
+        self.assertIn(self.teacher_a.id, hr_ids)
+        self.assertIn(self.teacher_b.id, hr_ids)
+        self.assertNotIn(self.student_a.id, hr_ids)
+        self.assertNotIn(self.student_b.id, hr_ids)
         self.assertTrue(resolve_members_access(_request(self.hr, self.org), self.org).is_org_wide)
 
     def test_superadmin_with_a_role_membership_is_not_listed(self):
@@ -359,8 +362,10 @@ class StaffManagementRegistryScopeTest(_WorldMixin, TestCase):
         section = self._section(self.hr, 65)
         self.assertFalse(section["unit_scope_active"])
         ids = {row["user_id"] for row in section["rows"]}
-        self.assertIn(self.student_a.id, ids)
-        self.assertIn(self.student_b.id, ids)
+        # QA-2 F-03 (2026-10-17): HR org-wide baxır, amma tələbə tərəfi açarı yoxdur — tələbələr görünmür.
+        self.assertIn(self.teacher_a.id, ids)
+        self.assertNotIn(self.student_a.id, ids)
+        self.assertNotIn(self.student_b.id, ids)
 
     def test_actions_column_has_a_screen_reader_label(self):
         """P2-8: staff-management cədvəlinin əməllər sütunu."""

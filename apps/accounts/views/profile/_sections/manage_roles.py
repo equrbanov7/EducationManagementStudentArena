@@ -225,6 +225,11 @@ def build_manage_roles_section(request, section, *, capabilities):
     grantable = list(assignable_roles(organization, actor_level=actor_level, is_superadmin=is_superadmin))
 
     members = _members_queryset(organization)
+    # QA-2 F-03 (2026-10-17): tələbə tərəfi açarı olmayan aktor (HR) YALNIZ-tələbə hesablarını görmür.
+    from apps.organizations.public import request_holds_student_key, student_only_q
+
+    if not (is_superadmin or request_holds_student_key(request)):
+        members = members.exclude(student_only_q(organization, user_ref="pk"))
     filtered_members = members
     search_q = tolerant_q(search, ("username", "email", "first_name", "last_name"))
     if search_q is not None:

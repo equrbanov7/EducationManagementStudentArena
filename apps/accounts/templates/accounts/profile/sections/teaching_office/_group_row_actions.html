@@ -16,6 +16,9 @@ yazır (səbəb məcburi) — bax `_group_add_students_fields.html`.{% endcommen
            aria-label="{% blocktrans context 'accounts.groups' with name=row.data.name %}{{ name }} qrupunu seç{% endblocktrans %}">
 </label>
 {% endif %}
+{% comment %}QA-2 F-03 (2026-10-17): çekmecə və DOCX tələbə adları daşıyır — `unit.view` (struktur oxusu)
+kifayət deyil, sətrin `can_view_students` bayrağı tələbə tərəfi açarından gəlir (server də 403 verir).{% endcomment %}
+{% if row.data.can_view_students %}
 <button type="button" class="ems-btn ems-btn--sm tof-row-students"
         data-tof-students-open
         data-url="{{ row.data.students_url }}"
@@ -33,6 +36,7 @@ yazır (səbəb məcburi) — bax `_group_add_students_fields.html`.{% endcommen
     {% trans "Tələbələr" context "accounts.groups" %}
     <span class="tof-row-students__count">{{ row.data.students }}</span>
 </button>
+{% endif %}
 {% if row.data.can_manage and row.data.is_active %}
 <button type="button" class="ems-btn ems-btn--sm ems-btn--icon tof-row-add"
         data-tof-open="tofGroupAddStudentsDialog"
@@ -57,11 +61,13 @@ yazır (səbəb məcburi) — bax `_group_add_students_fields.html`.{% endcommen
     <i class="fas fa-object-ungroup" aria-hidden="true"></i>
 </button>
 {% endif %}
+{% if row.data.can_view_students %}
 <a class="ems-btn ems-btn--sm ems-btn--icon" href="{{ row.data.plan_url }}" download
    title="{% trans 'Fərdi tədris planı (DOCX) — bütöv qrup' context 'accounts.groups' %}"
    aria-label="{% trans 'Fərdi tədris planı (DOCX) — bütöv qrup' context 'accounts.groups' %}">
     <i class="fas fa-file-word" aria-hidden="true"></i>
 </a>
+{% endif %}
 {% if row.data.can_manage %}
 <button type="button" class="ems-btn ems-btn--sm"
         data-tof-open="tofGroupDialog"

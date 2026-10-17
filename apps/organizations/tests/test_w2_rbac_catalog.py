@@ -334,6 +334,8 @@ class JournalViewKeyTest(_Base):
     def test_org_wide_key_opens_journal(self):
         """ORGANIZATION rolu (qəyyum, 78) — açarla bütün təşkilatın jurnalını oxuyur, onsuz 404."""
         trustee = self.client_for(self.user("trustee"))
+        # 2026-10-17: qəyyum şablonu artıq `journal.view` daşıyır — açarsız halı yoxlamaq üçün götürülür.
+        self.strip("trustee", "journal.view")
         self.assertEqual(trustee.get(self.detail()).status_code, 404)
         self.grant("trustee", "journal.view")
         self.assertEqual(trustee.get(self.detail()).status_code, 200)

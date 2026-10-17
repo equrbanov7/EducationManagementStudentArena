@@ -21,6 +21,7 @@ from core.staff_position import visible_role_label
 from ..models import Membership, OrgUnit
 from ..scoping import get_permission_scope, scope_memberships_by_unit
 from ..services import get_user_org_role_level
+from ..student_privacy import request_holds_student_key, student_only_q
 from ..views import _can_manage_organization, _has_org_permission, _visible_units_queryset
 from ..views.org_admin.context import _has_org_wide_membership
 from ..views.shared._helpers import _user_holds_org_permission
@@ -180,6 +181,10 @@ def resolve_members_access(request, organization) -> MembersAccess:
     # (məs. «Rektor») olsa belə üzv reyestrində, KPI-lərdə, ixracda və ümumi baxışda göstərilmir. Girişi
     # rol üzvlüyündən deyil, superadmin bayrağından gəlir; üzvlük sətrinə TOXUNULMUR (Kadr analitikası ilə eyni).
     memberships = Membership.objects.filter(organization=organization, is_active=True).exclude(user__is_superuser=True)
+    # QA-2 F-03 (2026-10-17): tələbə tərəfi açarı olmayan aktor (HR: `member.view` / `member.edit` heyət üçündür)
+    # YALNIZ-tələbə hesablarını görmür — reyestr, üzv kartı, CSV ixracı, ümumi baxış eyni sorğudan keçir.
+    if not request_holds_student_key(request):
+        memberships = memberships.exclude(student_only_q(organization, user_ref="user_id"))
     if scope.is_unit_scoped:
         return MembersAccess(
             has_access=has_access,

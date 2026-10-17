@@ -38,6 +38,10 @@ from .structure_views.constants import KAFEDRA_UNIT_TYPES  # noqa: F401
 from .structure_views.constants import TEACHER_ROLE_NAMES  # noqa: F401
 from .structure_views.members_base import resolve_members_access  # noqa: F401
 from .structure_views.registry import unit_type_label  # noqa: F401
+from .student_privacy import STUDENT_ACCOUNT_PERMISSIONS  # noqa: F401
+from .student_privacy import holds_student_key  # noqa: F401
+from .student_privacy import request_holds_student_key  # noqa: F401
+from .student_privacy import student_only_q  # noqa: F401
 from .unit_heads import ancestor_unit_ids  # noqa: F401
 from .unit_heads import chair_head_memberships_for_unit  # noqa: F401
 from .unit_heads import dean_memberships_for_unit  # noqa: F401
@@ -56,6 +60,7 @@ __all__ = [
     "KAFEDRA_UNIT_TYPES",
     "ORG_WIDE_SCOPE",
     "REMOVE_SETTINGS_KEY",
+    "STUDENT_ACCOUNT_PERMISSIONS",
     "TEACHER_ROLE_NAMES",
     "UNCHANGED_SETTINGS_KEY",
     "UNIT_TYPES_BY_ORG",
@@ -78,6 +83,7 @@ __all__ = [
     "get_permission_label",
     "get_permission_scope",
     "has_org_permission",
+    "holds_student_key",
     "is_module_enabled",
     "members_covering_unit",
     "module_items",
@@ -85,6 +91,7 @@ __all__ = [
     "register_cabinet_section_resolver",
     "register_managed_settings_key",
     "request_active_memberships",
+    "request_holds_student_key",
     "resolve_ancestor",
     "resolve_members_access",
     "save_review_identity_reveal",
@@ -93,6 +100,7 @@ __all__ = [
     "unit_in_scope",
     "set_module_enabled",
     "set_settings_keys",
+    "student_only_q",
     "student_record_scope_q",
     "unit_type_label",
     "update_settings_key",

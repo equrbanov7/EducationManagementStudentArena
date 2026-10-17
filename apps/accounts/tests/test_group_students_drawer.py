@@ -85,6 +85,11 @@ class _StudentsBase(Stage2BaseTest):
             "people.manage_academic",
         ]
         head.save(update_fields=["permissions"])
+        # QA-2 F-03 (2026-10-17): çekmecə/DOCX tələbə tərəfi açarı istəyir — real dekan şablonu
+        # `people.view_students` daşıyır (`unit.view` təkcə struktur oxusudur).
+        dean = cls.roles["dean"]
+        dean.permissions = list(dean.permissions) + ["people.view_students"]
+        dean.save(update_fields=["permissions"])
         # Qrup köçürməsi yalnız CARİ dövrdə aparılır.
         cls.period.is_current = True
         cls.period.save(update_fields=["is_current"])

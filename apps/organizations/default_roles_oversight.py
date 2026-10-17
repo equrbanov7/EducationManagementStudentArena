@@ -17,10 +17,9 @@ təşkilat ayarları) alardı. Alternativ ``ADMIN_ALIAS_EXEMPT_ROLE_NAMES``-ə �
 etmək olardı, amma o siyahı «yüksək səviyyə lazımdır, amma admin yox» halları
 üçündür; qəyyumun səviyyəyə əsaslanan heç bir səthə ehtiyacı yoxdur.
 
-Qəsdən VERİLMƏYƏNLƏR: fərdi qiymətlər (`grade.view`), şəxs kataloqunun PII
-sütunları (`people.view_contacts` / `people.view_demographics`), imtahan
-əməlləri. Şura ÜMUMİ mənzərəni (analitika + audit izi) görür; fərdi tələbə
-məlumatı lazım olarsa universitet onu permission-editordan əlavə edir.
+2026-10-17 (sahib: «qəyyumlar şurası üçün hər şeyi açıq edə bilərsən»): bütün OXU
+açarları verildi — fərdi qiymətlər, jurnal, tələbə/müəllim kataloqu, kontakt və
+demoqrafik sütunlar da. Yazma açarı əvvəlki kimi YOXDUR, view-as yalnız-oxu.
 
 ──────────────────────────────────────────────────────────────────────────────
 2. ``admin_unit_head`` — İnzibati şöbə müdiri (səviyyə 65, UNIT əhatəsi)
@@ -45,7 +44,29 @@ from core.constants import RoleScopeType
 
 from .default_roles_shared import PEOPLE_DIRECTORY_READ
 
-#: Qəyyum: yalnız ÜMUMİ mənzərə — bir dənə də yazma açarı yoxdur.
+#: Qəyyum: hər şeyi GÖRÜR, heç nəyi DƏYİŞMİR — bir dənə də yazma açarı yoxdur.
+#: Sahib 2026-10-17: «qəyyumlar şurası üçün hər şeyi açıq edə bilərsən» → kataloqdakı BÜTÜN oxu açarları
+#: (fərdi qiymətlər, jurnal, tələbə/müəllim kataloqu, kontakt və demoqrafik sütunlar da). Texniki
+#: `system.monitoring.view` (server logları) nəzarət səthi deyil — verilmir.
+TRUSTEE_READ_ALL_2026_10_17 = (
+    "analytics.view_unit",
+    "exam.view",
+    "grade.view",
+    "group.view",
+    "journal.view",
+    "people.hr_analytics",
+    "people.view_contacts",
+    "people.view_demographics",
+    "people.view_students",
+    "people.view_teachers",
+    "plan.view",
+    "role.view",
+    "semester.view",
+    "student.records_view",
+    "student.registry_view",
+    "survey.results.view",
+    "user.search",
+)
 _TRUSTEE_PERMISSIONS = [
     "unit.view",
     "member.view",
@@ -54,11 +75,13 @@ _TRUSTEE_PERMISSIONS = [
     "schedule.view",
     "syllabus.view",
     "workload.view",
+    "workload.report",
     # Nəzarət orqanının əsas iki səthi: aqreqat hesabatlar və audit izi
     # (CSV ixracı da — `audit.export`, audit 2026-09-13 F-06 / 2026-09-14).
     "analytics.view_all",
     "audit.view",
     "audit.export",
+    *TRUSTEE_READ_ALL_2026_10_17,
 ]
 
 #: İnzibati şöbə müdiri: öz vahidi + kataloq oxusu.
@@ -92,7 +115,7 @@ OVERSIGHT_ROLES = [
         "level": 78,
         "scope_type": RoleScopeType.ORGANIZATION,
         "permissions": list(_TRUSTEE_PERMISSIONS),
-        "description": "Board of trustees member — read-only oversight (analytics and audit trail, no write keys)",
+        "description": "Board of trustees member — sees everything read-only (no write keys)",
     },
     {
         "name": "admin_unit_head",

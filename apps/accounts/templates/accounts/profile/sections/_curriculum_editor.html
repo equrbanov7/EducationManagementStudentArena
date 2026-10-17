@@ -151,7 +151,7 @@ düymə GİZLƏNMİR, `disabled` olur (§4).
     </div>
     {% endif %}
 
-    {% if curriculum_editor_section.can_edit %}
+    {% if curriculum_editor_section.can_create %}
         {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofPlanDialog" form_dialog_title=cu_plan_title form_dialog_subtitle=cu_plan_sub form_dialog_body_include="accounts/profile/sections/teaching_office/_plan_fields.html" form_dialog_action=curriculum_editor_section.action_url form_dialog_hidden=curriculum_editor_section.dialog_hidden form_dialog_data=curriculum_editor_section.form_data %}
     {% endif %}
     {% if curriculum_editor_section.can_edit_rows %}

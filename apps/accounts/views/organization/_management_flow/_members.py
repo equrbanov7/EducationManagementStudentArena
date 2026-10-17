@@ -72,6 +72,19 @@ class _MembersMixin:
         covered = OrgUnit.objects.filter(scope.unit_subtree_q()).filter(organization=self.org, pk__in=unit_ids).count()
         return covered == len(unit_ids)
 
+    def _is_hidden_student(self, target_user) -> bool:
+        from django.contrib.auth import get_user_model
+
+        from apps.organizations.public import student_only_q
+
+        from ..._helpers.org_sections._members_registry import actor_sees_students
+
+        if actor_sees_students(self.request, self.org):
+            return False
+        return (
+            get_user_model().objects.filter(pk=target_user.pk).filter(student_only_q(self.org, user_ref="pk")).exists()
+        )
+
     def _remove_org_member(self, target_user, *, remove_reason=""):
         from core.rls import bypass_rls as _bypass_rls
 
@@ -91,6 +104,9 @@ class _MembersMixin:
                 )
             )
         if not active_memberships and target_profile.organization != self.org:
+            return (False, "İstifadəçi bu təşkilata bağlı deyil.")
+        if not self.is_superadmin and self._is_hidden_student(target_user):
+            # QA-2 F-03: siyahıda görünməyən tələbə — üzv olmayan hesabla EYNİ cavab (orakul olmasın).
             return (False, "İstifadəçi bu təşkilata bağlı deyil.")
         effective_profile_role = None
         if active_memberships:

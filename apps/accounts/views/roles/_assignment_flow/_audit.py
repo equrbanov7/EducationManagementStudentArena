@@ -65,6 +65,8 @@ class _AuditMixin:
         extra=None,
         force_json=False,
     ):
+        # Baxış 2026-10-17: tənbəl (`pgettext_lazy`) mətn audit JSON-una düşəndə `TypeError` → 500 (həm də orakul).
+        reason_message = str(reason_message)
         resource_type = "role_assignment"
         resource_id = ""
         resource_repr = action_name or (self.request.POST.get("action", "") if self.request.method == "POST" else "")

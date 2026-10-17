@@ -45,6 +45,17 @@ PERM_MANAGE = "unit.group_manage"
 #: Tələbə hərəkəti (akademik məzuniyyət / xaric) — `apps.accounts.services.people`
 #: ilə EYNİ açar; qrup çekmecəsindəki düymələr buna görə görünür/gizlənir.
 PERM_STUDENT_MOVEMENT = "student.movement"
+#: QA-2 F-03 (2026-10-17): qrupun TƏLƏBƏ SİYAHISI (ad, istifadəçi adı, ixtisas) və «Fərdi tədris planı» DOCX-u
+#: yalnız tələbə tərəfi açarlarından birini daşıyana. ``unit.view`` təkcə STRUKTUR oxusudur — HR (heyət idxalı)
+#: onu daşıyır, tələbə kataloqu isə HR-a bağlıdır (rol auditi B6). Qrup idarəsi / tələbə hərəkəti də sayılır:
+#: həmin aktor çekmecədə tələbə ilə işləyir.
+STUDENT_LIST_PERMISSIONS = (
+    "people.view_students",
+    "student.records_view",
+    "student.registry_view",
+    PERM_MANAGE,
+    PERM_STUDENT_MOVEMENT,
+)
 
 PAGE_SIZE = 25
 
@@ -113,6 +124,11 @@ def can_manage_groups(request) -> bool:
 
 def can_move_students(request) -> bool:
     return _has_org_permission(request, PERM_STUDENT_MOVEMENT)
+
+
+def can_view_group_students(request) -> bool:
+    """Qrupun tələbə siyahısı / fərdi plan DOCX-u (bax ``STUDENT_LIST_PERMISSIONS``)."""
+    return any(_has_org_permission(request, key) for key in STUDENT_LIST_PERMISSIONS)
 
 
 def group_meta(unit) -> dict:
@@ -322,6 +338,7 @@ def build_groups_registry(request, organization) -> dict:
     # kənar qrupa onsuz da 404 qaytarır). Sorğusuz: əhatə bir dəfə, yoxlama yol üzrə.
     can_manage = can_manage_groups(request)
     manage_scope = group_manage_scope(request, organization) if can_manage else EMPTY_SCOPE
+    can_view_students = can_view_group_students(request)
     rows = []
     for unit in page_obj.object_list:
         meta = group_meta(unit)
@@ -350,6 +367,7 @@ def build_groups_registry(request, organization) -> dict:
                 "is_active": unit.is_active,
                 "path": unit.path or "",
                 "can_manage": can_manage and unit_in_scope(manage_scope, unit),
+                "can_view_students": can_view_students,
                 # Tələbə çekmecəsi (JSON) və rəsmi «Fərdi tədris planı» DOCX-u.
                 "students_url": reverse("organizations:group_students", args=[organization.slug, unit.id]),
                 "plan_url": reverse("registrar:group_individual_plan", args=[unit.id]),
@@ -407,6 +425,7 @@ def build_groups_registry(request, organization) -> dict:
         ],
         "can_manage": can_manage,
         "can_move_students": can_move_students(request),
+        "can_view_students": can_view_students,
     }
 
 
@@ -418,10 +437,12 @@ __all__ = [
     "PERM_STUDENT_MOVEMENT",
     "PERM_VIEW",
     "SETTING_KEYS",
+    "STUDENT_LIST_PERMISSIONS",
     "admission_year_options",
     "build_groups_registry",
     "can_manage_groups",
     "can_move_students",
+    "can_view_group_students",
     "can_view_groups",
     "education_form_choices",
     "education_form_label",

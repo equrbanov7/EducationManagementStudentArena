@@ -5,7 +5,9 @@ Düymələr GİZLƏNMİR, `disabled` olur (handoff §4): istifadəçi əməlin M
 olduğunu, sadəcə şərtin ödənmədiyini görməlidir. «Təsdiqə göndər» açıq
 xəbərdarlıq varsa bağlıdır (§8 qayda 11).{% endcomment %}
 {% with plan=curriculum_editor_section.plan %}
-{% if curriculum_editor_section.can_edit %}
+{% comment %}QA-2 F-02 (2026-10-17): «Yeni plan» `can_create` ilə — `plan.edit` əhatəsində ixtisas yoxdursa
+(məs. kafedra müdiri: ixtisaslar fakültənin altındadır) düymə göstərilmir, server də rədd edir.{% endcomment %}
+{% if curriculum_editor_section.can_create %}
 <button type="button" class="ems-btn"
         data-tof-open="tofPlanDialog"
         data-tof-prefill='{"action": "create_plan", "program": "", "admission_year": "", "name": ""}'>

@@ -81,6 +81,18 @@ class _ResolversMixin:
                 )
         return None
 
+    def _is_hidden_student(self, target_membership) -> bool:
+        return self._is_hidden_student_user(target_membership.user, organization=target_membership.organization)
+
+    def _is_hidden_student_user(self, target_user, *, organization=None) -> bool:
+        """Aktor tələbə tərəfi açarı daşımırsa və hədəf təşkilatda YALNIZ tələbədirsə — gizlidir."""
+        if getattr(self, "can_see_students", True):
+            return False
+        from apps.organizations.public import student_only_q
+
+        organization = organization or self.org
+        return User.objects.filter(pk=target_user.pk).filter(student_only_q(organization, user_ref="pk")).exists()
+
     def _resolve_target_role(self, *, action_name, role_id):
         target_role_uuid = self._parse_uuid(role_id)
         if target_role_uuid is None:
@@ -140,6 +152,10 @@ class _ResolversMixin:
                 ),
             )
         target_user = User.objects.filter(id=target_user_id, is_active=True).first()
+        # QA-2 F-03 (baxış 2026-10-17): gizli tələbə «tapılmadı» ilə EYNİ cavab alır — əks halda `get_or_create`
+        # onun MÖVCUD üzvlüyünü qaytarıb rolunu üstələyirdi (HR tələbəni müəllim edə bilirdi).
+        if target_user is not None and self._is_hidden_student_user(target_user):
+            target_user = None
         if target_user is None:
             return (
                 None,
@@ -341,7 +357,8 @@ class _ResolversMixin:
             .filter(id=target_membership_uuid, is_active=True)
             .first()
         )
-        if target_membership is None:
+        if target_membership is None or self._is_hidden_student(target_membership):
+            # QA-2 F-03: gizli tələbə hesabı «tapılmadı» ilə EYNİ cavab alır (mövcudluq orakulu olmasın).
             return (
                 None,
                 self._deny_assignment(

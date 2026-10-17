@@ -80,10 +80,15 @@ def _journal_window(period, today):
     return True, today - timedelta(days=JOURNAL_STALE_DAYS)
 
 
-def offering_issues(organization, period, *, offering_ids=None, today=None) -> dict:
-    """``{offering_id: {"issues": [...], "subject": …, "group": …, "chair_id": …, "instructor_id": …}}``."""
+def offering_issues(organization, period, *, offering_ids=None, today=None, scope_q=None) -> dict:
+    """``{offering_id: {"issues": [...], "subject": …, "group": …, "chair_id": …, "instructor_id": …}}``.
+
+    ``scope_q`` — aktorun oxu əhatəsi (``read_scope.offering_scope_q``, QA-2 F-01); ``None`` — bütün təşkilat.
+    """
     today = today or timezone.localdate()
     qs = CourseOffering.objects.filter(organization=organization, period=period, is_active=True)
+    if scope_q is not None:
+        qs = qs.filter(scope_q)
     if offering_ids is not None:
         qs = qs.filter(pk__in=list(offering_ids))
     offerings = list(
