@@ -46,6 +46,11 @@ for svc in promtail loki docker-socket-proxy; do
     echo '```'
     docker logs --since 6h "$cid" 2>&1 | grep -E 'level=(error|warn)' | grep -oE 'msg="[^"]{0,140}"' \
       | sort | uniq -c | sort -rn | head -8
+    # 2026-10-17: xətanın SƏBƏBİ (`err="…"`) — komponentin öz xəta mətni (şəxsi məlumat deyil); IP, port,
+    # 12+ simvolluq hex id-lər maskalanır ki, hesabatda yalnız xəta növü qalsın.
+    docker logs --since 6h "$cid" 2>&1 | grep -E 'level=(error|warn)' | grep -oE 'err="[^"]{0,220}"' \
+      | sed -E 's/[0-9]{1,3}(\.[0-9]{1,3}){3}(:[0-9]+)?/<ip>/g; s/[0-9a-f]{12,}/<id>/g' \
+      | sort | uniq -c | sort -rn | head -6
     echo '```'
   fi
 done
