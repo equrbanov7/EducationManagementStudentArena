@@ -51,6 +51,7 @@ class _RoleAssignmentFlow(_AuditMixin, _PredicatesMixin, _ResolversMixin):
         self.can_manage_members = False
         self.can_assign_owner_roles = False
         self.can_assign_admin_roles = False
+        self.can_see_students = False
         if not self.org:
             return
 
@@ -72,6 +73,14 @@ class _RoleAssignmentFlow(_AuditMixin, _PredicatesMixin, _ResolversMixin):
             or has_permission(actor_permission_list, "org.manage_members")
         )
         self.can_assign_owner_roles = self.is_superadmin or has_permission(actor_permission_list, "org.owner.assign")
+        # QA-2 F-03 (2026-10-17): YALNIZ-tələbə hesabının rolu yalnız tələbə tərəfi açarı ilə dəyişir (HR yox).
+        from apps.organizations.public import holds_student_key
+
+        self.can_see_students = (
+            self.is_superadmin
+            or getattr(self.org, "owner_id", None) == request.user.pk
+            or holds_student_key(actor_permission_list)
+        )
         # `user.grant_privileged` — RİM əsasnaməsinin 5.5 bəndinin («Təhlükəsizlik
         # üzrə səlahiyyət ayrılığı»: yeni administrator səlahiyyəti bir nəfərin
         # nəzarətsiz qərarı ilə verilməməlidir) RİM icazə dəstindəki adı.

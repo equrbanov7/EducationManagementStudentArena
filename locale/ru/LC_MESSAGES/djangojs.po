@@ -3150,3 +3150,6 @@ msgstr "Очистить"
 
 msgid "Uyğun nəticə yoxdur"
 msgstr "Совпадений нет"
+
+msgid "Axtarmaq üçün ən az %(n)s hərf yazın"
+msgstr "Введите не менее %(n)s букв для поиска"

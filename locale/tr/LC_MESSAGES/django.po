@@ -98362,3 +98362,7 @@ msgstr "Sınav öncesi puan tam sayıdır: bölümlerin toplamı yarım yukarı 
 msgctxt "registrar.schedule_editor"
 msgid "Mövcud dərsin fənni dəyişdirilə bilməz — dərsi silib yenisini qoyun."
 msgstr "Mevcut dersin konusu değiştirilemez — dersi silip yenisini ekleyin."
+
+msgctxt "accounts.groups"
+msgid "Qrupun tələbə siyahısına baxmaq səlahiyyətiniz yoxdur."
+msgstr "Bu grubun öğrenci listesini görüntüleme yetkiniz yok."

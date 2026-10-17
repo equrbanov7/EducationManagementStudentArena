@@ -32,6 +32,13 @@ def _profile_of(user):
 
 def serialize_memberships(user, organization=None, *, scope=None):
     """İstifadəçinin AKTİV üzvlüklərini qaytarır (ikili rol burada görünür)."""
+    prefetched = getattr(user, PREFETCH_ATTR, None)
+    if prefetched is not None and scope is None:
+        # PERF-1 F-02 (2026-10-17): axtarış səhifəsi üzvlükləri BİR sorğu ilə gətirir (`prefetch_memberships`).
+        memberships = [m for m in prefetched if organization is None or m.organization_id == organization.pk]
+        memberships.sort(key=lambda m: (-int(m.role.level or 0), m.role.name))
+        return [_membership_row(membership) for membership in memberships]
+
     from apps.organizations.models import Membership
 
     queryset = Membership.objects.filter(user=user, is_active=True).select_related("role", "organization", "scope_unit")
@@ -54,21 +61,36 @@ def serialize_memberships(user, organization=None, *, scope=None):
                 subtree = subtree.filter(organization=organization)
             queryset = queryset.filter(Q(scope_unit__isnull=True) | Q(scope_unit__in=subtree.values("pk")))
 
-    rows = []
-    for membership in queryset.order_by("-role__level", "role__name"):
-        rows.append(
-            {
-                "id": str(membership.id),
-                "role_name": membership.role.name,
-                "role_label": visible_role_label(membership.role.name, membership.role.display_name),
-                "role_level": int(membership.role.level or 0),
-                "organization": membership.organization.name,
-                "scope_unit": membership.scope_unit.name if membership.scope_unit_id else "",
-                "title": membership.title or "",
-                "is_primary": bool(membership.is_primary),
-            }
-        )
-    return rows
+    return [_membership_row(membership) for membership in queryset.order_by("-role__level", "role__name")]
+
+
+def _membership_row(membership) -> dict:
+    return {
+        "id": str(membership.id),
+        "role_name": membership.role.name,
+        "role_label": visible_role_label(membership.role.name, membership.role.display_name),
+        "role_level": int(membership.role.level or 0),
+        "organization": membership.organization.name,
+        "scope_unit": membership.scope_unit.name if membership.scope_unit_id else "",
+        "title": membership.title or "",
+        "is_primary": bool(membership.is_primary),
+    }
+
+
+#: `prefetch_memberships` nəticəsinin atributu (``serialize_memberships`` onu oxuyur).
+PREFETCH_ATTR = "_rim_memberships"
+
+
+def prefetch_memberships(users, organization=None) -> None:
+    """Siyahı sətirləri üçün AKTİV üzvlükləri BİR sorğu ilə yükləyir (PERF-1 F-02: sətir başına sorğu idi)."""
+    from django.db.models import Prefetch, prefetch_related_objects
+
+    from apps.organizations.models import Membership
+
+    queryset = Membership.objects.filter(is_active=True).select_related("role", "organization", "scope_unit")
+    if organization is not None:
+        queryset = queryset.filter(organization=organization)
+    prefetch_related_objects(list(users), Prefetch("memberships", queryset=queryset, to_attr=PREFETCH_ATTR))
 
 
 def serialize_row(user, actor: RimActor):
@@ -143,4 +165,4 @@ def serialize_detail(user, actor: RimActor):
     return row
 
 
-__all__ = ["serialize_detail", "serialize_memberships", "serialize_row"]
+__all__ = ["PREFETCH_ATTR", "prefetch_memberships", "serialize_detail", "serialize_memberships", "serialize_row"]

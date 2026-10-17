@@ -411,7 +411,7 @@ def build_semester_section(request, section, *, active_organization, allowed_sec
         section["has_access"] = False
         return
 
-    from apps.registrar.public import build_semester_opening, offering_counts_by_chair
+    from apps.registrar.public import build_semester_opening
 
     payload = build_semester_opening(request, active_organization)
     section.update(payload)
@@ -470,7 +470,8 @@ def build_semester_section(request, section, *, active_organization, allowed_sec
         },
         {"label": pgettext(_CTX_SEM, "SEMESTR SAATI"), "value": stats["hours"], "unit": "saat"},
     ]
-    section["chair_rows"] = offering_counts_by_chair(active_organization, _period_instance(active_organization, period))
+    # QA-2 F-01 (2026-10-17): kafedra bölgüsü servisdən OXU əhatəsi ilə gəlir (əvvəl bütün təşkilat üzrə idi).
+    section["chair_rows"] = payload.get("chair_rows", [])
     section["readiness"] = semester_readiness.readiness_context(payload.get("readiness") or {}, base_params)
     section["filter_fields"] = [
         {
@@ -498,13 +499,6 @@ def build_semester_section(request, section, *, active_organization, allowed_sec
     section["pagination_query"] = urlencode({k: v for k, v in base_params.items() if v not in ("", None)})
     section["dialog_hidden"] = [{"name": "action"}, {"name": "period"}, {"name": "id"}]
     section["reason_hidden"] = [{"name": "action"}, {"name": "period"}, {"name": "id"}]
-
-
-def _period_instance(organization, period_payload):
-    from django.apps import apps as django_apps
-
-    AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
-    return AcademicPeriod.objects.filter(organization=organization, pk=period_payload["id"]).first()
 
 
 __all__ = ["build_curriculum_section", "build_groups_section", "build_semester_section"]

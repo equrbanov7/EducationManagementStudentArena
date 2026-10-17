@@ -3135,3 +3135,6 @@ msgstr "Təmizlə"
 
 msgid "Uyğun nəticə yoxdur"
 msgstr "Uyğun nəticə yoxdur"
+
+msgid "Axtarmaq üçün ən az %(n)s hərf yazın"
+msgstr "Axtarmaq üçün ən az %(n)s hərf yazın"

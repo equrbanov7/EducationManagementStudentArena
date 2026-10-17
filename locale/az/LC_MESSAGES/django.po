@@ -98462,3 +98462,7 @@ msgstr "İmtahana qədər bal tam ədəddir: hissələrin cəmi yarım-yuxarı y
 msgctxt "registrar.schedule_editor"
 msgid "Mövcud dərsin fənni dəyişdirilə bilməz — dərsi silib yenisini qoyun."
 msgstr "Mövcud dərsin fənni dəyişdirilə bilməz — dərsi silib yenisini qoyun."
+
+msgctxt "accounts.groups"
+msgid "Qrupun tələbə siyahısına baxmaq səlahiyyətiniz yoxdur."
+msgstr "Qrupun tələbə siyahısına baxmaq səlahiyyətiniz yoxdur."

@@ -6,6 +6,7 @@ burada yalnız org-domain xidmətləri təqdim olunur.
 """
 
 from apps.organizations.groups_registry import (  # noqa: F401
+    can_view_group_students,
     can_view_groups,
     group_meta,
     group_scope,
@@ -58,6 +59,7 @@ from apps.organizations.views import (  # noqa: F401
 
 __all__ = [
     "register_student_transfer",
+    "can_view_group_students",
     "can_view_groups",
     "group_meta",
     "group_scope",

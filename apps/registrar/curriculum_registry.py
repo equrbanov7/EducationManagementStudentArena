@@ -37,6 +37,7 @@ from .models.curriculum_meta import (
     row_hour_errors,
     weekly_load,
 )
+from .read_scope import plan_read_scope, program_scope_q
 
 _CTX = "accounts.curriculum"
 
@@ -238,9 +239,11 @@ def _row_payload(row) -> dict:
     }
 
 
-def plan_options(organization, *, program_id: str = "") -> list:
-    """Plan seçicisi — proqram + qəbul ili + versiya (ən yenisi əvvəldə)."""
+def plan_options(organization, *, program_id: str = "", scope=None) -> list:
+    """Plan seçicisi — proqram + qəbul ili + versiya (ən yenisi əvvəldə). ``scope`` — oxu əhatəsi."""
     queryset = Curriculum.objects.filter(organization=organization).select_related("program")
+    if scope is not None:
+        queryset = queryset.filter(program_scope_q(scope, prefix="program__"))
     if program_id:
         queryset = queryset.filter(program_id=program_id)
     return [
@@ -324,29 +327,34 @@ def build_curriculum_editor(request, organization) -> dict:
     plan_id = (request.GET.get("cu_plan") or "").strip()
     semester = (request.GET.get("cu_sem") or "").strip()
 
-    plans = plan_options(organization, program_id=program_id)
+    # QA-2 F-02 (2026-10-17): OXU `plan.view` əhatəsi ilə (fakültəyə genişlənir) — bax `read_scope.py`.
+    # Əhatədən kənar `cu_plan` «tapılmadı» kimidir: seçilmir, sətirləri qayıtmır.
+    scope = plan_read_scope(request, organization)
+    plans = plan_options(organization, program_id=program_id, scope=scope)
+    visible_plans = Curriculum.objects.filter(organization=organization).filter(
+        program_scope_q(scope, prefix="program__")
+    )
     plan = None
     if plan_id:
-        plan = (
-            Curriculum.objects.filter(organization=organization, pk=plan_id)
-            .select_related("program", "previous_version")
-            .first()
-        )
+        plan = visible_plans.filter(pk=plan_id).select_related("program", "previous_version").first()
     if plan is None and plans:
-        plan = (
-            Curriculum.objects.filter(organization=organization, pk=plans[0]["value"])
-            .select_related("program", "previous_version")
-            .first()
-        )
+        plan = visible_plans.filter(pk=plans[0]["value"]).select_related("program", "previous_version").first()
 
     program_choices = [
         {"value": str(item.id), "label": item.display_label}
-        for item in Program.objects.filter(organization=organization, is_archived=False).order_by("name")[:500]
+        for item in Program.objects.filter(organization=organization, is_archived=False)
+        .filter(program_scope_q(scope))
+        .order_by("name")[:500]
     ]
+    # «Yeni plan» yalnız `plan.edit` əhatəsində ən azı bir ixtisas varsa (yazı `program_in_scope` ilə yoxlayır);
+    # cari planın redaktəsi — plan həmin əhatədədirsə.
+    can_create = can_edit_plans(request) and _has_editable_program(request, organization)
+    can_edit = can_create and (plan is None or program_in_scope(request, organization, plan.program, PERM_EDIT))
 
     payload = {
         "has_access": True,
-        "can_edit": can_edit_plans(request),
+        "can_create": can_create,
+        "can_edit": can_edit,
         "plan_options": plans,
         "program_options": program_choices,
         "chair_options": chair_options(organization),
@@ -422,6 +430,13 @@ def build_curriculum_editor(request, organization) -> dict:
     return payload
 
 
+def _has_editable_program(request, organization) -> bool:
+    scope = plan_scope(request, organization, PERM_EDIT)
+    if not scope.has_structure_access:
+        return False
+    return Program.objects.filter(organization=organization, is_archived=False).filter(program_scope_q(scope)).exists()
+
+
 #: Keçid → düymə mətni (state maşınında YOXDUR — orada yalnız qayda var).
 _ACTION_LABELS = {
     "submit": pgettext(_CTX, "Kafedra baxışına göndər"),
@@ -432,11 +447,11 @@ _ACTION_LABELS = {
 }
 
 
-def programs_without_approved_plan(organization) -> list:
+def programs_without_approved_plan(organization, *, program_q=None) -> list:
     """«Plan yoxdur» bloklayıcıları — TƏSDİQLƏNMİŞ plan meyarı ilə (ekran 07).
 
     Mərhələ 1-də meyar AKTİV planın mövcudluğu idi; təsdiq zənciri gələndən
-    sonra §6.1-ə uyğun olaraq «APPROVED plan yoxdur»a keçir.
+    sonra §6.1-ə uyğun olaraq «APPROVED plan yoxdur»a keçir. ``program_q`` — oxu əhatəsi (QA-2 F-01).
     """
     approved = set(
         Curriculum.objects.filter(organization=organization, status=PlanStatus.APPROVED, is_active=True)
@@ -446,6 +461,7 @@ def programs_without_approved_plan(organization) -> list:
     return [
         {"id": str(program.id), "label": program.display_label}
         for program in Program.objects.filter(organization=organization, is_archived=False)
+        .filter(program_q if program_q is not None else Q())
         .exclude(pk__in=approved)
         .order_by("name")
     ]

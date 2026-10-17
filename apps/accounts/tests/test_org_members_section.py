@@ -32,6 +32,8 @@ FIXTURE_USERNAMES = {
     "ds2_vice_dean",
     "ds2_other_teacher",
 }
+#: QA-2 F-03 (2026-10-17): HR (`member.view`, tələbə tərəfi açarı YOX) yalnız-tələbə hesablarını görmür.
+HR_VISIBLE = FIXTURE_USERNAMES - {"ds2_student"}
 SUBTREE_OF_FACULTY = {"ds2_dean", "ds2_chair_head", "ds2_teacher", "ds2_student", "ds2_program_coordinator"}
 LEADERS = {"ds2_dean", "ds2_chair_head", "ds2_teaching_office_head", "ds2_program_coordinator", "ds2_vice_dean"}
 
@@ -48,7 +50,8 @@ class _OrgMembersBase(Stage2BaseTest):
         # burada kataloqla uyğunlaşdırılır, əks halda dekan «əhatəsiz» sayılır.
         for name in ("dean", "chair_head"):
             unit_manager_role = cls.roles[name]
-            unit_manager_role.permissions = [*unit_manager_role.permissions, "member.view"]
+            # `people.view_students` — real dekan / kafedra müdiri şablonu (tələbə tərəfi açarı, QA-2 F-03).
+            unit_manager_role.permissions = [*unit_manager_role.permissions, "member.view", "people.view_students"]
             unit_manager_role.save(update_fields=["permissions"])
 
         def role(name, level, scope_type, permissions):
@@ -146,7 +149,7 @@ class MembersFragmentTest(_OrgMembersBase):
         section = response.context["org_members_section"]
         self.assertTrue(section["has_access"])
         self.assertTrue(section["is_org_wide"])
-        self.assertEqual({row["username"] for row in section["rows"]}, FIXTURE_USERNAMES)
+        self.assertEqual({row["username"] for row in section["rows"]}, HR_VISIBLE)
 
         dean = self._row(section, "ds2_dean")
         self.assertTrue(dean["is_leader"])
@@ -162,7 +165,8 @@ class MembersFragmentTest(_OrgMembersBase):
         self.assertFalse(teacher["is_leader"])
         self.assertEqual(teacher["head_lines"], [])
 
-        student = self._row(section, "ds2_student")
+        # Tələbə sətri tələbə tərəfi açarı olan baxanda (dekan) görünür.
+        student = self._row(self._section("dean"), "ds2_student")
         self.assertTrue(student["is_student"])
         self.assertEqual(student["unit_name"], self.group.name)
         self.assertIn(self.specialty.name, student["unit_trail"])
@@ -193,13 +197,13 @@ class MembersFragmentTest(_OrgMembersBase):
     def test_kpis_count_distinct_people(self):
         section = self._section("hr")
         kpis = {tile["label"]: tile["value"] for tile in section["kpi_tiles"]}
-        self.assertEqual(kpis["Üzv"], len(FIXTURE_USERNAMES))
-        self.assertEqual(kpis["Tələbə"], 1)
+        self.assertEqual(kpis["Üzv"], len(HR_VISIBLE))
+        self.assertEqual(kpis["Tələbə"], 0)
         self.assertEqual(kpis["Müəllim"], 2)
         self.assertEqual(kpis["Heyət"], len(FIXTURE_USERNAMES) - 1)
         self.assertEqual(kpis["Rəhbərlik"], len(LEADERS))
         self.assertEqual(kpis["Bölməsiz"], 1)
-        self.assertEqual(section["total_count"], len(FIXTURE_USERNAMES))
+        self.assertEqual(section["total_count"], len(HR_VISIBLE))
 
     def test_dean_sees_only_own_subtree(self):
         section = self._section("dean")
@@ -256,24 +260,26 @@ class MembersFilterTest(_OrgMembersBase):
         self.assertEqual({row["username"] for row in unscoped["rows"]}, {"ds2_vice_dean"})
 
         students = self._section("hr", om_kind="students")
+        self.assertEqual({row["username"] for row in students["rows"]}, set())
+        students = self._section("dean", om_kind="students")
         self.assertEqual({row["username"] for row in students["rows"]}, {"ds2_student"})
 
         staff = self._section("hr", om_kind="staff")
         self.assertEqual({row["username"] for row in staff["rows"]}, FIXTURE_USERNAMES - {"ds2_student"})
 
         bogus = self._section("hr", om_kind="whatever")
-        self.assertEqual({row["username"] for row in bogus["rows"]}, FIXTURE_USERNAMES)
+        self.assertEqual({row["username"] for row in bogus["rows"]}, HR_VISIBLE)
 
     def test_unit_filter_covers_subtree(self):
         section = self._section("hr", om_unit=str(self.chair.id))
         self.assertEqual(
             {row["username"] for row in section["rows"]},
-            {"ds2_chair_head", "ds2_teacher", "ds2_student", "ds2_program_coordinator"},
+            {"ds2_chair_head", "ds2_teacher", "ds2_program_coordinator"},
         )
         self.assertIn(f"om_unit={self.chair.id}", section["pagination_query"])
         # Səhv UUID sakitcə atılır — bütün siyahı.
         bad = self._section("hr", om_unit="not-a-uuid")
-        self.assertEqual({row["username"] for row in bad["rows"]}, FIXTURE_USERNAMES)
+        self.assertEqual({row["username"] for row in bad["rows"]}, HR_VISIBLE)
         self.assertNotIn("om_unit", bad["pagination_query"])
 
     def test_search_matches_name_username_and_title(self):

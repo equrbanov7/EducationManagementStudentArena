@@ -95,6 +95,43 @@ def _viewer_can_see_contact(request, profile_user):
     ).exists()
 
 
+#: Tələbə ailəsi — yalnız bu rollarda aktiv üzvlüyü olan hədəf «tələbə» sayılır
+#: (``core.people_visibility._STUDENT_ROLE_NAMES`` ilə eyni dəst).
+_STUDENT_ROLE_NAMES = frozenset({"student", "lead_student", "alumni"})
+
+
+def _target_is_student_only(profile_user) -> bool:
+    from apps.organizations.models import Membership
+
+    names = set(Membership.objects.filter(user=profile_user, is_active=True).values_list("role__name", flat=True))
+    return bool(names) and names <= _STUDENT_ROLE_NAMES
+
+
+def _viewer_may_see_student_pii(request, profile_user) -> bool:
+    """QA-2 F-04 (2026-10-17): TƏLƏBƏNİN əlaqə/şəxsi məlumatı (e-poçt, telefon, vəzifə kartı).
+
+    Qayda reyestr/«İnsanlar» kartı ilə EYNİDİR (``people.assert_in_catalog_scope``):
+    baxan tələbəni öz kataloq əhatəsində görməlidir — əks halda həmin kart 404 verir,
+    ümumi profil isə yalnız minimal kartı göstərir. Rol adı yox, icazə açarı + əhatə.
+    Heyət hədəfləri üçün bu qapı tətbiq olunmur (əməkdaş əlaqəsi əvvəlki qayda ilə).
+    """
+    if request.user == profile_user or is_superadmin_user(request.user):
+        return True
+    if not _target_is_student_only(profile_user):
+        return True
+
+    from apps.accounts.services import people
+    from apps.accounts.services.people.actions import assert_in_catalog_scope
+    from apps.accounts.services.rim.policy import RimAccessError
+
+    actor = people.resolve_actor(request)
+    try:
+        assert_in_catalog_scope(actor, profile_user, request=request)
+    except RimAccessError:
+        return False
+    return True
+
+
 @login_required
 @require_safe
 def public_user_profile(request, username):
@@ -125,11 +162,12 @@ def public_user_profile(request, username):
 
     from ...services import academic_profile
 
+    pii_allowed = _viewer_may_see_student_pii(request, profile_user)
     contact_phones = []
-    if _viewer_can_see_contact(request, profile_user):
+    if pii_allowed and _viewer_can_see_contact(request, profile_user):
         contact_phones = [phone for phone in (profile.phone, profile.phone_secondary) if (phone or "").strip()]
 
-    admin_membership = _admin_membership_for_viewer(request, profile_user)
+    admin_membership = _admin_membership_for_viewer(request, profile_user) if pii_allowed else None
     # ⚠️ Vəzifə zənciri: Membership.title → UserProfile.staff_position → real rol.
     # Doldurucu «Üzv» rolu YAZILMIR — sətir tamamilə gizlənir.
     admin_position_label = resolve_position_label(

@@ -305,7 +305,9 @@ class ArchivedAccountTests(TestCase):
             organization=self.organization,
             level=88,
             is_superadmin=False,
-            permissions={"user.search"},
+            # QA-2 F-03 (2026-10-17): tələbə hesabları yalnız tələbə tərəfi açarı ilə görünür —
+            # real `ikt_rehber` şablonu `people.view_students` daşıyır.
+            permissions={"user.search", "people.view_students"},
         )
 
         found = search_users(actor, query="legacy_alumni_9001", status=STATUS_ARCHIVED)
