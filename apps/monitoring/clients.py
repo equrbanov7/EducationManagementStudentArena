@@ -152,7 +152,11 @@ class LokiClient:
         sink: dict[str, Any] = {}
         payload = _get_json(self.service, path, params, error_sink=sink)
         if payload is not None and payload.get("status") != "success":
-            sink = {"kind": "invalid", "status": None, "detail": str(payload.get("error") or "")[:200]}
+            from .scrub import redact_secrets
+
+            # QA-2 F-14: Loki ``status:error`` mətni də sirr süzgəcindən keçir (HTTP xətası kimi).
+            detail = redact_secrets(str(payload.get("error") or "")[:200])
+            sink = {"kind": "invalid", "status": None, "detail": detail}
             payload = None
         self.last_error = (sink or {"kind": "error", "status": None, "detail": ""}) if payload is None else None
         return payload

@@ -129,6 +129,11 @@ def _incoming_value(spec, data):
     return text
 
 
+def _rate_window_ok(incoming: str) -> bool:
+    window = str(incoming or "").rsplit("/", 1)[-1].removesuffix("m").strip()
+    return window.isdigit() and 1 <= int(window) <= 24 * 60
+
+
 #: Bir-biri ilə uyğun olmalı cütlər: (aşağı hədd, yuxarı hədd) — aşağı yuxarıdan böyük ola bilməz.
 _ORDERED_PAIRS = (("workload.staff_rate_min", "workload.staff_rate_max"),)
 
@@ -169,6 +174,9 @@ def save_values(*, actor, data, request=None) -> dict:
                 errors[spec.key] = pgettext(_CTX, "Siyahıdan seçin.")
             elif spec.kind == "bool":
                 errors[spec.key] = pgettext(_CTX, "Yandırılmış və ya söndürülmüş olmalıdır.")
+            elif spec.kind == "rate" and not _rate_window_ok(incoming):
+                # QA-2 F-09: səhv PƏNCƏRƏDƏ say aralığı mesajı göstərilirdi.
+                errors[spec.key] = pgettext(_CTX, "Müddət 1–1440 dəqiqə (24 saat) aralığında olmalıdır.")
             else:
                 errors[spec.key] = pgettext(_CTX, "Dəyər %(min)s–%(max)s aralığında olmalıdır.") % {
                     "min": spec.min,

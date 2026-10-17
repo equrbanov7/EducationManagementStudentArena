@@ -239,10 +239,13 @@ class StudentOrgInviteGateTest(_RealRolesOrg):
         self.assertEqual(response.status_code, 302)
         self.assertFalse(self._invited(target))
 
-    def test_hr_with_org_wide_member_invite_still_invites(self):
+    def test_hr_without_student_key_cannot_invite_rector_can(self):
+        """Sahib 2026-10-17 (FIX-H): bölmə tələbə tərəfi açarı ilə açılır — HR (`member.invite` olsa da) yox."""
         target = self._free_user("rbs_free_hr")
         response = self._invite("hr", target)
         self.assertEqual(response.status_code, 302)
+        self.assertFalse(self._invited(target))
+        self._invite("rector", target)
         self.assertTrue(self._invited(target))
 
     def test_keyless_high_level_role_cannot_approve_a_student_request(self):
@@ -258,7 +261,7 @@ class StudentOrgInviteGateTest(_RealRolesOrg):
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Membership.objects.filter(user=target, organization=self.org, is_active=True).exists())
 
-        approved = self.client_for("hr").post(
+        approved = self.client_for("rector").post(
             reverse(self.URL),
             {
                 "action": "bulk_approve_requested_students",

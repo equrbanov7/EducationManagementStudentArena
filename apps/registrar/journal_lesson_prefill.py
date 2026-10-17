@@ -213,19 +213,29 @@ def topics_covered_by(rows, lessons) -> list:
     """Mövzu seçimlərinin «✓ keçirilib» işarəsi BÜTÜN dərslərə görə.
 
     ``journal_topics.lesson_topic_meta`` jurnalın görünən PƏNCƏRƏSİNİN dərslərini alırdı — pəncərədən
-    kənarda keçilmiş mövzu «keçirilməyib» görünürdü. Sətirlər ``lesson_rows`` sırasındadır (ən yenisi
-    birinci), işarənin tarixi əvvəlki kimi son dərsin tarixidir."""
-    dates: dict = {}
-    kinds: dict = {}
+    kənarda keçilmiş mövzu «keçirilməyib» görünürdü. İşarənin tarixi keçirilmiş ən son dərsin tarixidir
+    (yalnız gələcək dərs varsa — ən yaxın gələcək tarix)."""
+    today = timezone.localdate()
+    held: dict = {}  # mövzu → bu günə qədər (daxil) keçirilmiş ən son dərsin tarixi
+    upcoming: dict = {}  # mövzu → gələcək tarixli ən yaxın dərs
+    kinds: dict = {}  # mövzu → KEÇİRİLMİŞ dərs növləri
     for lesson in lessons:
-        if lesson.topic:
-            dates.setdefault(lesson.topic, lesson.date)
+        if not lesson.topic:
+            continue
+        if lesson.date <= today:
+            if lesson.topic not in held or lesson.date > held[lesson.topic]:
+                held[lesson.topic] = lesson.date
             kinds.setdefault(lesson.topic, set()).add(lesson.kind)
+        elif lesson.topic not in upcoming or lesson.date < upcoming[lesson.topic]:
+            upcoming[lesson.topic] = lesson.date
+    # «keçirilib» = mövzunun HƏR HANSI dərsi bu gün və ya əvvəl; «planlaşdırılıb» = keçirilməyib, amma gələcək dərs var
+    # (QA-1 F13; ``journal_extras.calendar_plan`` ilə eyni qayda). Mühazirəsi keçilmiş, seminarı gələcəkdə olan mövzu keçirilib.
     return [
         {
             **row,
-            "covered": row["title"] in dates,
-            "date": dates.get(row["title"]),
+            "covered": row["title"] in held,
+            "planned": row["title"] not in held and row["title"] in upcoming,
+            "date": held.get(row["title"]) or upcoming.get(row["title"]),
             "covered_kinds": sorted(kinds.get(row["title"], ())),
         }
         for row in rows

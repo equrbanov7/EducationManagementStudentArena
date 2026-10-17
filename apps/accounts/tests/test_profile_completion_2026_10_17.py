@@ -173,6 +173,12 @@ class ProfileCompletionGateTest(TestCase):
         response = self.client.post(self.url, {"fin": "5ABC12D", "next": "https://evil.example/x"})
         self.assertEqual(response.headers["Location"], reverse("accounts:profile"))
 
+    def test_next_pointing_at_the_gate_itself_falls_back_to_the_cabinet(self):
+        """QA-1 F18: ``next=/accounts/complete-profile/`` qapıya geri qaytarmır."""
+        self.client.force_login(self.student)
+        response = self.client.post(self.url, {"fin": "5ABC12D", "next": self.url + "?x=1"})
+        self.assertEqual(response.headers["Location"], reverse("accounts:profile"))
+
     def test_invalid_fin_is_rejected(self):
         self.client.force_login(self.student)
         for bad in ("12345", "5ABC12D9", "5AB-12D", "ƏABC12D"):

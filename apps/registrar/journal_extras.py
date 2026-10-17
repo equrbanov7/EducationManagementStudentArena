@@ -344,7 +344,9 @@ def calendar_plan(offering, lessons, today):
             {
                 "title": title,
                 "lesson": lesson,
-                "covered": lesson is not None,
+                # Gələcək tarixli dərs hələ «keçirilməyib» — yalnız planlaşdırılıb (QA-1 F13).
+                "covered": lesson is not None and lesson.date <= today,
+                "planned": lesson is not None and lesson.date > today,
                 "is_today": bool(lesson and lesson.date == today),
             }
         )
@@ -358,7 +360,8 @@ def calendar_plan(offering, lessons, today):
             {
                 "title": lesson.topic or _("Mövzu qeyd olunmayıb"),
                 "lesson": lesson,
-                "covered": True,
+                "covered": lesson.date <= today,
+                "planned": lesson.date > today,
                 "is_today": lesson.date == today,
             }
         )

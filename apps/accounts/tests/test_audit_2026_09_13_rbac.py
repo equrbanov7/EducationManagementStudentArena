@@ -140,11 +140,12 @@ class MemberRemovalGateTest(_Base):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(self.is_active_member(self.ua("hr"), self.A["org"]))
 
-    def test_f03_hr_with_member_remove_still_removes_teacher(self):
-        """Nəzarət: açarı daşıyan ORGANIZATION rolu (HR) əvvəlki kimi işləyir."""
+    def test_f03_hr_without_student_key_cannot_use_the_section(self):
+        """Sahib 2026-10-17 (FIX-H): «Heyət idarəetməsi» tələbə tərəfi açarı ilə açılır — HR (`member.remove`
+        olsa da) bölməyə və onun POST-larına daxil olmur; heyət çıxarılması digər yollardadır."""
         response = self._remove(self.ua("hr"), self.ua("teacher"))
         self.assertEqual(response.status_code, 302)
-        self.assertFalse(self.is_active_member(self.ua("teacher"), self.A["org"]))
+        self.assertTrue(self.is_active_member(self.ua("teacher"), self.A["org"]))
 
     def test_f03_owner_and_rector_wildcard_still_remove(self):
         response = self._remove(self.A["owner"], self.ua("teacher2"))

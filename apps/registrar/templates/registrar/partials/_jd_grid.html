@@ -22,7 +22,8 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                     <span class="jd2-topic-title">
                         {{ item.title }}
                         {% if item.is_today %}<span class="jd2-today-badge">{% trans "BU GÜN" context "registrar.journal" %}</span>
-                        {% elif item.covered %}<span class="jd2-covered-badge">✓ {% trans "keçirilib" context "registrar.journal" %}</span>{% endif %}
+                        {% elif item.covered %}<span class="jd2-covered-badge">✓ {% trans "keçirilib" context "registrar.journal" %}</span>
+                        {% elif item.planned %}<span class="jd2-covered-badge jd2-covered-badge--planned">{% trans "planlaşdırılıb" context "registrar.journal" %}</span>{% endif %}
                     </span>
                 </div>
                 {% empty %}
@@ -273,7 +274,7 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
     {# ── Alt legend zolağı (mockup) ───────────────────────────────────────── #}
     <div class="jd2-footbar">
         <span class="jd2-foot-legend"><b class="jd2-ie">i/e</b> {% trans "iştirak edib" context "registrar.journal" %} <b class="jd2-qb">q/b</b> {% trans "qayıb" context "registrar.journal" %}</span>
-        <span class="jd2-foot-note">{% if late_entry_days %}{% blocktrans with d=late_entry_days w=mark_edit_window_label context "registrar.journal" %}Davamiyyət dərs günü və ondan sonra ən çox {{ d }} gün ərzində qeyd edilə bilər · yazılmış qeyd {{ w }} sonra kilidlənir — düzəliş üçün Tyutor xidmətinə yazılı müraciət edilir.{% endblocktrans %}{% else %}{% blocktrans with w=mark_edit_window_label context "registrar.journal" %}Davamiyyət yalnız dərs günü qeyd edilə bilər · yazılmış qeyd {{ w }} sonra kilidlənir — düzəliş üçün Tyutor xidmətinə yazılı müraciət edilir.{% endblocktrans %}{% endif %}{% if activation_write_label %} · {% blocktrans with a=activation_write_label context "registrar.journal" %}aktivləşdirilmiş dərsə qeydlər aktivləşdirmədən sonra {{ a }} ərzində yazılır.{% endblocktrans %}{% endif %}</span>
+        <span class="jd2-foot-note">{% if late_entry_days %}{% blocktrans with d=late_entry_days w=mark_edit_window_label context "registrar.journal" %}Davamiyyət dərs günü və ondan sonra ən çox {{ d }} gün ərzində qeyd edilə bilər · yazılmış qeyd {{ w }} sonra kilidlənir — düzəliş üçün RİM-ə (sənədli düzəliş) müraciət edilir.{% endblocktrans %}{% else %}{% blocktrans with w=mark_edit_window_label context "registrar.journal" %}Davamiyyət yalnız dərs günü qeyd edilə bilər · yazılmış qeyd {{ w }} sonra kilidlənir — düzəliş üçün RİM-ə (sənədli düzəliş) müraciət edilir.{% endblocktrans %}{% endif %}{% if activation_write_label %} · {% blocktrans with a=activation_write_label context "registrar.journal" %}aktivləşdirilmiş dərsə qeydlər aktivləşdirmədən sonra {{ a }} ərzində yazılır.{% endblocktrans %}{% endif %}</span>
         <span class="jd2-foot-chips">
             <span class="jd2-limitchip jd2-limitchip--warn">■ {% trans "Limitə yaxın" context "registrar.journal" %}</span>
             <span class="jd2-limitchip jd2-limitchip--barred">■ {% trans "Limit keçib — kəsilir" context "registrar.journal" %}</span>

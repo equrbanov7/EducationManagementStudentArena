@@ -9,7 +9,7 @@ Nəyi qoruyur
 * otaqlar: kiçik otaq sonda (xəbərdarlıqla), qrupun korpusu əvvəl, ən kiçik uyğun otaq əvvəl,
   laboratoriya dərsinə laboratoriya; tutulmuş otaq təklif olunmur; tutum məlum deyilsə bayraq;
 * axın (birləşmiş mühazirə): qrup sayları cəmlənir, axının otağı məşğul sayılmır;
-* HTTP: icazəsiz 403, əhatədən kənar qrup 403, naməlum semestr 404; sorğu sayı slot sayından asılı deyil.
+* HTTP: icazəsiz 403, əhatədən kənar qrup 404, naməlum semestr 404; sorğu sayı slot sayından asılı deyil.
 """
 
 from __future__ import annotations
@@ -233,7 +233,8 @@ class EndpointTest(_SuggestBase):
                 organization=self.org, parent=far, name="999X", slug=f"{self.code}-999x", unit_type=OrgUnitType.GROUP
             )
         self.assertEqual(self._act(outsider, self._body()).status_code, 403)
-        self.assertEqual(self._act(self.coordinator, self._body(group_id=str(far_group.pk))).status_code, 403)
+        # QA-2 F-09 (FIX-H): əhatədən kənar qrup 404 («check» / «save» ilə eyni; açar yoxdursa 403).
+        self.assertEqual(self._act(self.coordinator, self._body(group_id=str(far_group.pk))).status_code, 404)
         missing = self._act(self.coordinator, self._body(period_id="00000000-0000-0000-0000-000000000000"))
         self.assertEqual(missing.status_code, 404)
         self.assertEqual(self._act(self.coordinator, self._body(period_id="abc")).status_code, 404)

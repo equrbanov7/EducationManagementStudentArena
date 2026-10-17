@@ -75,6 +75,21 @@ test("simple 8-char passwords are acceptable and never block submit", async () =
     }
 });
 
+test("a single repeated character is flagged as trivial like the server rule", async () => {
+    const window = await makeWindow();
+    try {
+        for (const value of ["aaaaaaaa", "ZZZZZZZZZ", "11111111", "........"]) {
+            type(window, value);
+            assert.equal(state(window, "trivial"), "bad", value);
+            assert.equal(window.document.querySelector("button[type=submit]").disabled, false, value);
+        }
+        type(window, "aaaaaaab");
+        assert.equal(state(window, "trivial"), "ok");
+    } finally {
+        window.close();
+    }
+});
+
 test("short password is neutral (no 'bad'), blocklisted and username are flagged", async () => {
     const window = await makeWindow();
     try {

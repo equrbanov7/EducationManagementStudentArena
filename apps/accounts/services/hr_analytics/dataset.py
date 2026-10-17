@@ -29,6 +29,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 
 from core.constants import OrgUnitType
+from core.person_names import clean_name_part
 
 from . import constants as C
 
@@ -298,7 +299,13 @@ def build_rows(actor, academic_year: str, *, today: date | None = None) -> list[
                 "id": values["pk"],
                 "username": values["username"],
                 "name": " ".join(
-                    part for part in (values["last_name"], values["first_name"], values["profile__patronymic"]) if part
+                    part
+                    for part in (
+                        values["last_name"],
+                        values["first_name"],
+                        clean_name_part(values["profile__patronymic"]),
+                    )
+                    if part
                 ).strip()
                 or values["username"],
                 "name_key": _name_key(values),

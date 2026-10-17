@@ -1,6 +1,6 @@
 """«Jurnal təmizliyi» — OXU endpoint-i (JSON): siyahı sətirləri, çip sayları, «hamısını seç», tarixçə.
 
-Fail-closed: icazəsiz aktor ``has_access: false`` və BOŞ data alır — nə sətir, nə say, nə ad sızır.
+Fail-closed: icazəsiz aktor 403 + ``has_access: false`` və BOŞ data alır — nə sətir, nə say, nə ad sızır.
 Domen məntiqi registrar-dadır (``journal_hygiene`` sorğu, ``journal_hygiene_rows`` təqdimat).
 """
 
@@ -52,7 +52,7 @@ def journal_hygiene_rows(request):
     ``not_held`` vahid açılışdır: «hamısını seç» yalnız 500-ə TAM sığan açılışları götürür (yarımçıq yox)."""
     actor = resolve_actor(request)
     if not actor.has_access:
-        return JsonResponse(_EMPTY)
+        return JsonResponse(_EMPTY, status=403)  # SEC-2 F-4: 200 + boş yox, 403 + boş
     organization = actor.organization
     tab = (request.GET.get("tab") or "left").strip()
     filters = _filters(request)

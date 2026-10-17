@@ -22,7 +22,7 @@ from typing import Any
 
 from .clients import LOKI_MAX_LINES, LOKI_MAX_RANGE_SECONDS, degraded
 from .pagination import paginated_data
-from .scrub import redact_secrets
+from .scrub import scrub_log_line
 
 #: Konteyner seçilməyəndə bütün promtail axınları (``docker/promtail/promtail-config.yml``
 #: ``job: docker`` etiketi qoyur).
@@ -38,7 +38,8 @@ def build_logql(container: str = "", search: str = "", level: str = "") -> str:
     level = (level or "").strip().lower()
     logql = f"{{container={json.dumps(container, ensure_ascii=False)}}}" if container else DEFAULT_SELECTOR
     if search:
-        escaped = search.replace("\\", "\\\\").replace("`", "")
+        # Backtick LogQL sətri «raw»dır: ``\`` hərfi qalır (ikiqatlaşdırma «\» axtarışını pozurdu, SEC-1 F4).
+        escaped = search.replace("`", "")
         logql += f" |= `{escaped}`"
     if level in LEVELS:
         logql += f" |~ `(?i){level}`"
@@ -72,7 +73,7 @@ def time_window(params, *, range_seconds: int, page: int, now_ns: int | None = N
 
 
 def shape_lines(result: list[dict]) -> list[dict[str, Any]]:
-    """Loki ``streams`` nəticəsini ən yenisi birinci sətirlərə çevirir (sirlər maskalanır)."""
+    """Loki ``streams`` nəticəsini ən yenisi birinci sətirlərə çevirir (sirlər və şəxsi məlumat maskalanır)."""
     lines = []
     for stream in result or []:
         labels = stream.get("stream", {}) or {}
@@ -87,7 +88,8 @@ def shape_lines(result: list[dict]) -> list[dict[str, Any]]:
                     "_ts_ns": ts_ns,
                     "ts": ts_ns // 1_000_000,  # ms
                     "container": labels.get("container", ""),
-                    "line": redact_secrets(line[:1000]),
+                    # SEC-1 F4: sirlər + şəxsi məlumat (İP, e-poçt, istifadəçi adı, bərpa tokeni) — hamıya.
+                    "line": scrub_log_line(line[:1000]),
                 }
             )
     lines.sort(key=lambda row: (row["_ts_ns"], row["container"], row["line"]), reverse=True)
@@ -102,6 +104,8 @@ def error_response(error: dict | None, logql: str, range_seconds: int) -> dict[s
     """Loki xətası: köhnə degraded müqaviləsi + UI üçün səbəb və sorğu."""
     payload = degraded("loki", "Log servisi müvəqqəti əlçatmazdır")
     payload["error"] = dict(error) if isinstance(error, dict) else {"kind": "error", "status": None, "detail": ""}
+    # QA-2 F-14: Loki ``status:error`` mətni də maskalanır (sorğu mətni / sirr detalda qayıda bilər).
+    payload["error"]["detail"] = scrub_log_line(payload["error"].get("detail") or "")
     payload["query"] = query_info(logql, range_seconds)
     return payload
 

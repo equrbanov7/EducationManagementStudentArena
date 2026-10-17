@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from datetime import date
 
+from core.person_names import clean_name_part
+
 from .constants import FACULTY_UNIT_TYPES, KAFEDRA_UNIT_TYPES
 from .filters import account_status_of
 
@@ -123,7 +125,7 @@ def identity_row(user, *, actor, today: date | None = None) -> dict:
         "full_name": full_name_of(user),
         "first_name": user.first_name or "",
         "last_name": user.last_name or "",
-        "patronymic": (getattr(profile, "patronymic", "") or "") if profile is not None else "",
+        "patronymic": clean_name_part(getattr(profile, "patronymic", "")) if profile is not None else "",
         "initials": initials_of(user),
         "avatar_url": avatar_url_of(profile),
         "status": account_status_of(user),

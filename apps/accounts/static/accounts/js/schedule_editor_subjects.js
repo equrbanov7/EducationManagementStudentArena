@@ -77,6 +77,8 @@
                 }
                 var current = want || select.value;
                 select.textContent = "";
+                /* QA-2 F-11: boş «Seçin…» həmişə birincidir — ilk fənn özbaşına seçilmir. */
+                addOption(select, "", select.getAttribute("data-empty-label") || "");
                 data.subjects.forEach(function (row) {
                     addOption(select, row.id, row.code + " — " + row.name);
                 });

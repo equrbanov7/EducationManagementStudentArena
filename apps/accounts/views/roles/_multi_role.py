@@ -30,6 +30,7 @@ from django.shortcuts import redirect
 from django.utils.translation import pgettext
 
 from apps.organizations.models import Membership, OrgUnit, Role
+from core.http_ids import parse_int, parse_uuid
 
 from ...services.group_lead import LEAD_ROLE_NAME as GROUP_LEAD_ROLE_NAME
 from ...services.role_catalog import (
@@ -42,7 +43,7 @@ from ...services.role_catalog import (
     sync_profile_primary_role,
 )
 from .._helpers.rbac import _collect_actor_permissions
-from ._gates import actor_is_unit_scoped, manage_roles_gate_error
+from ._gates import actor_is_unit_scoped, manage_roles_gate_error, target_is_hidden_student
 
 User = get_user_model()
 
@@ -87,8 +88,8 @@ def _owner_membership_exists(organization, *, exclude_id=None) -> bool:
 
 
 def _resolve_target_user(request):
-    user_id = (request.POST.get("user_id") or "").strip()
-    if not user_id:
+    user_id = parse_int(request.POST.get("user_id"))  # pozuq id → «seçilməyib» (500 yox)
+    if user_id is None:
         return None
     return User.objects.filter(pk=user_id).first()
 
@@ -103,6 +104,18 @@ def _is_active_member(user, organization) -> bool:
     (``manage_only_own_org_users``) və «Rol təyin et» axını bunu artıq rədd edir.
     """
     return Membership.objects.filter(user=user, organization=organization, is_active=True).exists()
+
+
+def _is_hidden_student(request, organization, target_user, *, is_superadmin) -> bool:
+    """Review 2026-10-17: gizli tələbə (HR) rol / üzvlük axtarışından ƏVVƏL «tapılmadı» alır — mesajlar eynidir."""
+    from core.permissions import has_permission
+
+    if is_superadmin or getattr(organization, "owner_id", None) == request.user.id:
+        return False
+    permissions = _actor_permission_list(request, organization)
+    if not (has_permission(permissions, "role.assign") or has_permission(permissions, "org.manage_members")):
+        return False  # qapının «icazə yoxdur» mesajı hər hədəf üçün eynidir
+    return target_is_hidden_student(organization, target_user, permissions)
 
 
 def _resolve_scope_unit(organization, raw_scope):
@@ -150,11 +163,13 @@ def _grant(request, *, organization, is_superadmin, actor_level, next_url):
     target_user = _resolve_target_user(request)
     if target_user is None:
         return _deny(request, next_url, pgettext(_CTX, "user_not_selected"))
-    if not _is_active_member(target_user, organization):
+    if not _is_active_member(target_user, organization) or _is_hidden_student(
+        request, organization, target_user, is_superadmin=is_superadmin
+    ):
         return _deny(request, next_url, pgettext(_CTX, "manage_only_own_org_users"))
 
     target_role = Role.objects.filter(
-        organization=organization, pk=(request.POST.get("role_id") or "").strip() or None, is_active=True
+        organization=organization, pk=parse_uuid(request.POST.get("role_id")), is_active=True
     ).first()
     if target_role is None:
         return _deny(request, next_url, pgettext(_CTX, "Rol tapılmadı və ya deaktivdir."))
@@ -219,12 +234,12 @@ def _grant(request, *, organization, is_superadmin, actor_level, next_url):
 def _revoke(request, *, organization, is_superadmin, actor_level, next_url):
     membership = (
         Membership.objects.filter(
-            organization=organization, pk=(request.POST.get("membership_id") or "").strip() or None, is_active=True
+            organization=organization, pk=parse_uuid(request.POST.get("membership_id")), is_active=True
         )
         .select_related("user", "role", "scope_unit")
         .first()
     )
-    if membership is None:
+    if membership is None or _is_hidden_student(request, organization, membership.user, is_superadmin=is_superadmin):
         return _deny(request, next_url, pgettext(_CTX, "Üzvlük tapılmadı."))
 
     target_user = membership.user

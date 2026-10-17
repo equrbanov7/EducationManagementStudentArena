@@ -49,6 +49,11 @@ class _StudentOrgManagementFlow(_RequestsMixin, _InvitesMixin, _MembersMixin):
         self.user_level = None
         self.teacher_student_only = False
 
+    def _holds_student_side_key(self) -> bool:
+        from ..._helpers.student_org_access import holds_student_side_key
+
+        return holds_student_side_key(self.request.user, self.org, request=self.request)
+
     def run(self):
         from apps.organizations.models import Membership
         from apps.organizations.public import create_audit_log, get_user_org_role_level
@@ -84,6 +89,10 @@ class _StudentOrgManagementFlow(_RequestsMixin, _InvitesMixin, _MembersMixin):
                     "Bu bölmədən istifadə üçün minimum HR, təşkilat admini və ya daha yüksək səlahiyyət tələb olunur.",
                 )
                 return redirect("accounts:profile")
+        if not self.is_superadmin and not teacher_student_only and not self._holds_student_side_key():
+            # 2026-10-17: bölmə tələbə tərəfi AÇARI ilə açılır (HR açarsızdır) — menyu ilə eyni qayda.
+            messages.error(self.request, "Bu əməliyyat üçün icazəniz yoxdur.")
+            return redirect("accounts:profile")
         self.teacher_student_only = teacher_student_only
         self.student_role = _resolve_membership_role(self.org, ProfileRole.STUDENT)
         if self.request.method == "POST":

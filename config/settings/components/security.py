@@ -17,6 +17,9 @@ idarə olunur (asılılıqlar: bax base.py).
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "apps.accounts.password_policy.MinimumLengthValidator"},
     {"NAME": "apps.accounts.password_policy.TrivialPasswordValidator"},
+    # SEC-1 F5 (2026-10-17): YALNIZ rəhbər hesablarda (superadmin, RİM rəhbəri, rektor, QŞ sədri, `*` rolu)
+    # tam rəqəm / tarix parolu rədd olunur; tələbə və müəllim üçün qayda dəyişmir.
+    {"NAME": "apps.accounts.password_policy.PrivilegedPasswordValidator"},
 ]
 
 # Login / logout settings

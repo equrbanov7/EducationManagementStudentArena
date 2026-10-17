@@ -11,6 +11,8 @@ from django.apps import apps as django_apps
 from django.db.models import Count, Q
 from django.utils import timezone
 
+from core.person_names import clean_name_part
+
 from . import journal_hygiene as hygiene
 from .models import Enrollment, HygieneCategory, JournalHygieneDecision
 
@@ -50,7 +52,7 @@ def student_name(row: dict, prefix: str = "student__") -> str:
     parts = (
         row.get(f"{prefix}last_name") or "",
         row.get(f"{prefix}first_name") or "",
-        row.get(f"{prefix}profile__patronymic") or "",
+        clean_name_part(row.get(f"{prefix}profile__patronymic")),
     )
     return " ".join(part.strip() for part in parts if part and part.strip()) or (row.get(f"{prefix}username") or "")
 
