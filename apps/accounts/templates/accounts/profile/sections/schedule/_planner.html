@@ -1,0 +1,79 @@
+{% load i18n %}
+{% comment %}«Uyğun vaxtlar» + otaq tövsiyəsi — hüceyrə dialoqunun paneli (sahib 2026-10-17).
+
+Şəbəkə (gün × dərs saatı) və otaq siyahısı SERVERDƏN gəlir (`action=plan`,
+`apps/registrar/schedule_suggest.py`) — klient heç nə hesablamır, yalnız çəkir:
+`accounts/js/schedule_editor_planner.js`. Rejim düymələri hansı xanaların təklif
+olunduğunu dəyişir (ortaq / müəllim üçün / qrup üçün). Xanaya klik → «Gün» + «Dərs saatı»,
+otağa klik → «Otaq» sahəsi dolur və adi yoxlama (`check`) işə düşür.
+
+JS mətnləri `data-t-*` atributlarındadır (xarici fayl Django template-dən keçmir);
+`{n}` / `{room}` / `{groups}` / `{campus}` yer tutanları JS-də əvəz olunur.{% endcomment %}
+<section class="sedit-plan" data-sedit-plan aria-labelledby="sedit-plan-title"
+         data-t-loading="{% trans 'Uyğun vaxtlar hesablanır…' context 'accounts.schedule_manage' %}"
+         data-t-error="{% trans 'Təklifləri yükləmək olmadı.' context 'accounts.schedule_manage' %}"
+         data-t-pick-group="{% trans 'Uyğun vaxtları görmək üçün əvvəlcə qrupu seçin.' context 'accounts.schedule_manage' %}"
+         data-t-no-teacher="{% trans 'Müəllim seçilməyib — yalnız qrupun məşğulluğu nəzərə alınır.' context 'accounts.schedule_manage' %}"
+         data-t-no-top="{% trans 'Bu rejimdə uyğun boş xana tapılmadı.' context 'accounts.schedule_manage' %}"
+         data-t-free="{% trans 'Ortaq boş vaxt' context 'accounts.schedule_manage' %}"
+         data-t-room="{% trans 'Müəllim və qrup boşdur, amma otaq problemi var' context 'accounts.schedule_manage' %}"
+         data-t-teacher="{% trans 'Müəllim məşğuldur' context 'accounts.schedule_manage' %}"
+         data-t-group="{% trans 'Qrup məşğuldur' context 'accounts.schedule_manage' %}"
+         data-t-both="{% trans 'Müəllim də, qrup da məşğuldur' context 'accounts.schedule_manage' %}"
+         data-t-free-rooms="{% trans '{n} uyğun boş otaq' context 'accounts.schedule_manage' %}"
+         data-t-size="{% trans 'Qrupda {n} tələbə' context 'accounts.schedule_manage' %}"
+         data-t-size-unknown="{% trans 'Qrupun tələbə sayı məlum deyil — tutum yoxlanmır.' context 'accounts.schedule_manage' %}"
+         data-t-joint="{% trans 'Axın: {groups} — cəmi {n} tələbə' context 'accounts.schedule_manage' %}"
+         data-t-campus="{% trans 'Qrupun korpusu: {campus}' context 'accounts.schedule_manage' %}"
+         data-t-no-campus="{% trans 'Qrupun korpusu təyin edilməyib — bütün korpuslar bərabər sıralanır.' context 'accounts.schedule_manage' %}"
+         data-t-capacity-unknown="{% trans 'Otaqların tutumu daxil edilməyib — təklif yalnız korpus və boşluğa görə sıralanır.' context 'accounts.schedule_manage' %}"
+         data-t-registry-empty="{% trans 'Otaq reyestri boşdur — otaqlar «İmtahan otaqları» bölməsində əlavə olunur.' context 'accounts.schedule_manage' %}"
+         data-t-pick-time="{% trans 'Otaq təklifi üçün gün və dərs saatını seçin.' context 'accounts.schedule_manage' %}"
+         data-t-no-rooms="{% trans 'Bu saatda boş otaq yoxdur.' context 'accounts.schedule_manage' %}"
+         data-t-no-fit="{% trans 'Bu saatda qrupa sığan boş otaq yoxdur — kiçik otaqlar xəbərdarlıqla göstərilir.' context 'accounts.schedule_manage' %}"
+         data-t-seats="{% trans '{n} yer' context 'accounts.schedule_manage' %}"
+         data-t-seats-unknown="{% trans 'tutum məlum deyil' context 'accounts.schedule_manage' %}"
+         data-t-small="{% trans 'kiçikdir' context 'accounts.schedule_manage' %}"
+         data-t-other-campus="{% trans 'başqa korpus' context 'accounts.schedule_manage' %}"
+         data-t-lab="{% trans 'laboratoriya' context 'accounts.schedule_manage' %}"
+         data-t-current="{% trans 'seçilib' context 'accounts.schedule_manage' %}"
+         data-t-current-busy="{% trans 'Seçilmiş otaq bu saatda tutulub — boş otaqlardan birini seçin.' context 'accounts.schedule_manage' %}"
+         data-t-stream-room="{% trans 'Axın mühazirəsi {room} otağındadır.' context 'accounts.schedule_manage' %}">
+  <div class="sedit-plan__head">
+    <p class="sedit-plan__title" id="sedit-plan-title">
+      <i class="fas fa-calendar-check" aria-hidden="true"></i>
+      {% trans "Uyğun vaxtlar" context "accounts.schedule_manage" %}
+    </p>
+    <div class="sedit-plan__modes" role="group" aria-label="{% trans 'Kim üçün uyğun' context 'accounts.schedule_manage' %}">
+      <button type="button" class="sedit-plan__mode is-active" data-sedit-plan-mode="both" aria-pressed="true">{% trans "Hər ikisi üçün uyğun" context "accounts.schedule_manage" %}</button>
+      <button type="button" class="sedit-plan__mode" data-sedit-plan-mode="teacher" aria-pressed="false">{% trans "Müəllim üçün uyğun" context "accounts.schedule_manage" %}</button>
+      <button type="button" class="sedit-plan__mode" data-sedit-plan-mode="group" aria-pressed="false">{% trans "Qrup üçün uyğun" context "accounts.schedule_manage" %}</button>
+    </div>
+  </div>
+
+  <p class="sedit-plan__status" data-sedit-plan-status role="status" aria-live="polite"></p>
+
+  <div class="sedit-plan__top" data-sedit-plan-top></div>
+
+  <div class="sedit-plan__scroll">
+    <table class="sedit-plan__grid" data-sedit-plan-grid></table>
+  </div>
+
+  <ul class="sedit-plan__legend">
+    <li><span class="sedit-plan__swatch is-free"></span>{% trans "ortaq boş" context "accounts.schedule_manage" %}</li>
+    <li><span class="sedit-plan__swatch is-room"></span>{% trans "otaq problemi" context "accounts.schedule_manage" %}</li>
+    <li><span class="sedit-plan__swatch is-teacher"></span>{% trans "müəllim məşğul" context "accounts.schedule_manage" %}</li>
+    <li><span class="sedit-plan__swatch is-group"></span>{% trans "qrup məşğul" context "accounts.schedule_manage" %}</li>
+    <li><span class="sedit-plan__swatch is-both"></span>{% trans "hər ikisi məşğul" context "accounts.schedule_manage" %}</li>
+  </ul>
+
+  <div class="sedit-rooms" data-sedit-rooms>
+    <p class="sedit-plan__title">
+      <i class="fas fa-door-open" aria-hidden="true"></i>
+      {% trans "Otaq təklifi" context "accounts.schedule_manage" %}
+    </p>
+    <p class="sedit-rooms__meta" data-sedit-rooms-meta></p>
+    <p class="sedit-rooms__warn" data-sedit-rooms-warn hidden></p>
+    <div class="sedit-rooms__list" data-sedit-rooms-list></div>
+  </div>
+</section>

@@ -97726,3 +97726,243 @@ msgstr "Timetable room"
 msgctxt "registrar.journal_prefill"
 msgid "Cədvəldəki otağı qaytar"
 msgstr "Restore the timetable room"
+
+msgctxt "accounts.schedule_manage"
+msgid "Uyğun vaxtlar hesablanır…"
+msgstr "Calculating suitable times…"
+
+msgctxt "accounts.schedule_manage"
+msgid "Təklifləri yükləmək olmadı."
+msgstr "Could not load the suggestions."
+
+msgctxt "accounts.schedule_manage"
+msgid "Uyğun vaxtları görmək üçün əvvəlcə qrupu seçin."
+msgstr "Select the group first to see suitable times."
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllim seçilməyib — yalnız qrupun məşğulluğu nəzərə alınır."
+msgstr "No teacher selected — only the group's timetable is taken into account."
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu rejimdə uyğun boş xana tapılmadı."
+msgstr "No suitable free slot found in this mode."
+
+msgctxt "accounts.schedule_manage"
+msgid "Ortaq boş vaxt"
+msgstr "Free for both"
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllim və qrup boşdur, amma otaq problemi var"
+msgstr "Teacher and group are free, but there is a room problem"
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllim məşğuldur"
+msgstr "Teacher is busy"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrup məşğuldur"
+msgstr "Group is busy"
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllim də, qrup da məşğuldur"
+msgstr "Both teacher and group are busy"
+
+msgctxt "accounts.schedule_manage"
+msgid "{n} uyğun boş otaq"
+msgstr "{n} suitable free rooms"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrupda {n} tələbə"
+msgstr "{n} students in the group"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrupun tələbə sayı məlum deyil — tutum yoxlanmır."
+msgstr "The group size is unknown — capacity is not checked."
+
+msgctxt "accounts.schedule_manage"
+msgid "Axın: {groups} — cəmi {n} tələbə"
+msgstr "Joint lecture: {groups} — {n} students in total"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrupun korpusu: {campus}"
+msgstr "Group's building: {campus}"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrupun korpusu təyin edilməyib — bütün korpuslar bərabər sıralanır."
+msgstr "The group has no building assigned — all buildings are ranked equally."
+
+msgctxt "accounts.schedule_manage"
+msgid "Otaqların tutumu daxil edilməyib — təklif yalnız korpus və boşluğa görə sıralanır."
+msgstr "Room capacities are not filled in — suggestions are ranked only by building and availability."
+
+msgctxt "accounts.schedule_manage"
+msgid "Otaq reyestri boşdur — otaqlar «İmtahan otaqları» bölməsində əlavə olunur."
+msgstr "The room registry is empty — rooms are added in the «Exam rooms» section."
+
+msgctxt "accounts.schedule_manage"
+msgid "Otaq təklifi üçün gün və dərs saatını seçin."
+msgstr "Select the day and class period to get room suggestions."
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu saatda boş otaq yoxdur."
+msgstr "No room is free at this time."
+
+msgctxt "accounts.schedule_manage"
+msgid "Bu saatda qrupa sığan boş otaq yoxdur — kiçik otaqlar xəbərdarlıqla göstərilir."
+msgstr "No free room fits the group at this time — smaller rooms are shown with a warning."
+
+msgctxt "accounts.schedule_manage"
+msgid "{n} yer"
+msgstr "{n} seats"
+
+msgctxt "accounts.schedule_manage"
+msgid "tutum məlum deyil"
+msgstr "capacity unknown"
+
+msgctxt "accounts.schedule_manage"
+msgid "kiçikdir"
+msgstr "too small"
+
+msgctxt "accounts.schedule_manage"
+msgid "başqa korpus"
+msgstr "other building"
+
+msgctxt "accounts.schedule_manage"
+msgid "laboratoriya"
+msgstr "laboratory"
+
+msgctxt "accounts.schedule_manage"
+msgid "seçilib"
+msgstr "selected"
+
+msgctxt "accounts.schedule_manage"
+msgid "Seçilmiş otaq bu saatda tutulub — boş otaqlardan birini seçin."
+msgstr "The selected room is taken at this time — pick one of the free rooms."
+
+msgctxt "accounts.schedule_manage"
+msgid "Axın mühazirəsi {room} otağındadır."
+msgstr "The joint lecture is in room {room}."
+
+msgctxt "accounts.schedule_manage"
+msgid "Uyğun vaxtlar"
+msgstr "Suitable times"
+
+msgctxt "accounts.schedule_manage"
+msgid "Kim üçün uyğun"
+msgstr "Suitable for"
+
+msgctxt "accounts.schedule_manage"
+msgid "Hər ikisi üçün uyğun"
+msgstr "Suitable for both"
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllim üçün uyğun"
+msgstr "Suitable for the teacher"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrup üçün uyğun"
+msgstr "Suitable for the group"
+
+msgctxt "accounts.schedule_manage"
+msgid "ortaq boş"
+msgstr "free for both"
+
+msgctxt "accounts.schedule_manage"
+msgid "otaq problemi"
+msgstr "room problem"
+
+msgctxt "accounts.schedule_manage"
+msgid "müəllim məşğul"
+msgstr "teacher busy"
+
+msgctxt "accounts.schedule_manage"
+msgid "qrup məşğul"
+msgstr "group busy"
+
+msgctxt "accounts.schedule_manage"
+msgid "hər ikisi məşğul"
+msgstr "both busy"
+
+msgctxt "accounts.schedule_manage"
+msgid "Otaq təklifi"
+msgstr "Room suggestion"
+
+msgctxt "registrar.schedule_suggest"
+msgid "B.e."
+msgstr "Mon"
+
+msgctxt "registrar.schedule_suggest"
+msgid "Ç.a."
+msgstr "Tue"
+
+msgctxt "registrar.schedule_suggest"
+msgid "Ç."
+msgstr "Wed"
+
+msgctxt "registrar.schedule_suggest"
+msgid "C.a."
+msgstr "Thu"
+
+msgctxt "registrar.schedule_suggest"
+msgid "C."
+msgstr "Fri"
+
+msgctxt "registrar.schedule_suggest"
+msgid "Ş."
+msgstr "Sat"
+
+msgctxt "registrar.schedule_suggest"
+msgid "B."
+msgstr "Sun"
+
+msgctxt "registrar.schedule_suggest"
+msgid "Müəllimin bu gün dərsi yoxdur"
+msgstr "The teacher has no classes this day"
+
+msgctxt "registrar.schedule_suggest"
+msgid "Müəllimin dərsinə bitişik"
+msgstr "Next to the teacher's class"
+
+msgctxt "registrar.schedule_suggest"
+msgid "Müəllimin digər həftədəki dərsi ilə eyni saat"
+msgstr "Same period as the teacher's class in the other week"
+
+#, python-format
+msgctxt "registrar.schedule_suggest"
+msgid "Müəllimin dərsləri arasında %(gap)s saat boşluq"
+msgstr "%(gap)s free period(s) between the teacher's classes"
+
+msgctxt "registrar.schedule_suggest"
+msgid "Qrupun bu gün dərsi yoxdur — yeni gün"
+msgstr "The group has no classes this day — a new day"
+
+msgctxt "registrar.schedule_suggest"
+msgid "Qrupun dərsinə bitişik — boşluq yoxdur"
+msgstr "Next to the group's class — no gap"
+
+msgctxt "registrar.schedule_suggest"
+msgid "Qrupun digər həftədəki dərsi ilə eyni saat"
+msgstr "Same period as the group's class in the other week"
+
+#, python-format
+msgctxt "registrar.schedule_suggest"
+msgid "Qrupun dərsləri arasında %(gap)s saat boşluq"
+msgstr "%(gap)s free period(s) between the group's classes"
+
+#, python-format
+msgctxt "registrar.schedule_suggest"
+msgid "Axın mühazirəsi %(room)s otağındadır — eyni otaq seçilməlidir."
+msgstr "The joint lecture is in room %(room)s — the same room must be chosen."
+
+#, python-format
+msgctxt "registrar.schedule_suggest"
+msgid "%(room)s otağı bu saatda tutulub."
+msgstr "Room %(room)s is taken at this time."
+
+msgctxt "registrar.schedule_suggest"
+msgid "Bu saatda qrupa uyğun boş otaq yoxdur."
+msgstr "No free room suits the group at this time."
+
+msgctxt "accounts.schedule_editor"
+msgid "Semestr tapılmadı."
+msgstr "Semester not found."
