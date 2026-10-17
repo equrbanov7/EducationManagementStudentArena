@@ -49,6 +49,15 @@
 #       seçmə blok seçimi («ATMF … blok» sətrinin fənni) qrupun seçimi kimi yazılır (GroupElectiveChoice), açılış +
 #       qrupun «elective» qeydiyyatı; qrupun BAŞQA qərarı əzilmir. `task_chair` boş → bütün kafedralar. Təyinata
 #       toxunmur, «Vakant» yazmır, bildiriş yoxdur. Loga YALNIZ saylar.
+#   ensure_parent_groups — alt qruplar («234 K-1», «234 K-2») üçün ORTAQ ana qrup («234 K az», sahib 2026-10-17):
+#       çatışmayan ana qrup eyni ixtisas altında (kurs/qəbul ili, sektor, forma alt qrupdan) yaradılır, alt
+#       qrupa `settings.parent_group` izi yazılır (group_split modeli; tələbə KÖÇÜRÜLMÜR). Qeyri-müəyyən hal
+#       (fərqli ixtisas, arxiv qrupla ad toqquşması, eyni adlı iki ana qrup …) yazılmır. Loga yalnız saylar;
+#       CSV (qrup adları) şifrəli artifaktdadır.
+#   blocked_accounts_report — bloklanmış/deaktiv hesablar (sahib 2026-10-17): cari semestrdə yükü olan
+#       bloklanmış MÜƏLLİM, aktiv qeydi olan bloklanmış TƏLƏBƏ; qa.* sayılmır. Defolt YALNIZ hesabat;
+#       `apply` + `create_missing` → YALNIZ yükü olan bloklanmış müəllimlərin bloku rəsmi servislə açılır
+#       (audit); tələbə heç vaxt avtomatik açılmır. Loga yalnız saylar; CSV (istifadəçi adları) şifrəlidir.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
 #       (backfill; `--include-drafts` BURADA YOXDUR — qaralama planlar sahibin qərarıdır).
 #   apply_org_structure — struktur planı (scripts/data/qku_structure_2026_09_27.json, yalnız vahid
@@ -93,6 +102,8 @@ on:
           - resync_task_offerings
           - repair_group_leads
           - retire_qa_accounts
+          - ensure_parent_groups
+          - blocked_accounts_report
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -129,7 +140,7 @@ on:
         required: false
         default: ""
       create_missing:
-        description: "reconcile_teacher_roster: «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı yarat"
+        description: "reconcile_teacher_roster: «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı yarat · blocked_accounts_report (apply ilə): yükü olan bloklanmış müəllimlərin blokunu aç"
         required: false
         type: boolean
         default: false
@@ -293,7 +304,7 @@ jobs:
           # reconcile_teacher_roster eyni faylı oxuyur (ad fərqi yalnız aydınlıq üçün deyil — təmizlik eyni qlobdur).
           rm -f "$RUNNER_TEMP/input.bin" "$RUNNER_TEMP/input.enc"
       - name: 🧰 Run
-        if: github.event.inputs.command != 'import_timetable_docx' && github.event.inputs.command != 'assign_task_rows_from_timetable' && github.event.inputs.command != 'backfill_teacher_lessons'
+        if: github.event.inputs.command != 'import_timetable_docx' && github.event.inputs.command != 'assign_task_rows_from_timetable' && github.event.inputs.command != 'backfill_teacher_lessons' && github.event.inputs.command != 'ensure_parent_groups' && github.event.inputs.command != 'blocked_accounts_report'
         run: |
           set -euo pipefail
           case "$YEAR" in (20[0-9][0-9]/20[0-9][0-9]) ;; (*) echo "year formatı YYYY/YYYY olmalıdır" >&2; exit 1;; esac
@@ -746,3 +757,84 @@ jobs:
         run: |
           docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/lesson_slots_*.json; rm -rf /tmp/lesson_backfill_report_*' || true
           rm -rf "$RUNNER_TEMP/bf-out" "$RUNNER_TEMP/slots.enc" "$RUNNER_TEMP/slots.json" || true
+      # ── ensure_parent_groups / blocked_accounts_report (ortaq ana qruplar + bloklanmış hesablar; öz addımları —
+      #    digər əmrlərin axınına toxunmur). CSV hesabat şifrəli artifaktdadır (blocked_accounts.csv ŞƏXSİ datadır). ──
+      - name: 👥 Ortaq ana qruplar / bloklanmış hesablar
+        if: github.event.inputs.command == 'ensure_parent_groups' || github.event.inputs.command == 'blocked_accounts_report'
+        run: |
+          set -euo pipefail
+          report_dir="/tmp/groups_accounts_report_${GITHUB_RUN_ID}"
+          args=(--org "$ORG" --report "$report_dir")
+          case "$COMMAND" in
+            ensure_parent_groups)
+              report_csv=parent_groups.csv
+              test "$CREATE_MISSING" != "true" || { echo "create_missing yalnız blocked_accounts_report üçündür" >&2; exit 2; }
+              test "$APPLY" != "true" || args+=(--apply)
+              ;;
+            blocked_accounts_report)
+              report_csv=blocked_accounts.csv
+              # Yeganə yazı: yükü olan bloklanmış müəllimin bloku (create_missing) — apply + confirm=APPLY ilə.
+              if [ "$APPLY" = "true" ] || [ "$CREATE_MISSING" = "true" ]; then
+                test "$APPLY" = "true" && test "$CREATE_MISSING" = "true" \
+                  || { echo "blokdan açmaq üçün apply=true + confirm=APPLY + create_missing=true verin" >&2; exit 2; }
+                actor="$(docker exec -i "$APP_CONTAINER" python manage.py shell -c \
+                  "from django.contrib.auth import get_user_model as g; u=g().objects.filter(is_superuser=True, is_active=True).order_by('date_joined').first(); print(u.username if u else '')" | tail -n1)"
+                test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+                echo "::add-mask::$actor"
+                args+=(--apply-unblock-teachers-with-load --actor "$actor")
+              fi
+              ;;
+            *) echo "icazəsiz əmr: $COMMAND" >&2; exit 2 ;;
+          esac
+          if [ "$APPLY" = "true" ]; then
+            echo "::group::💾 Ehtiyat nüsxə (postgres-backup /backup.sh)"
+            docker exec "$BACKUP_CONTAINER" /backup.sh
+            echo "::endgroup::"
+          fi
+          # Loga YALNIZ saylar (əmr ad çap etmir; yenə də süzülür); CSV şifrəli artifaktdadır.
+          docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/ga_out.log" 2>&1 || status=$?
+          if docker exec "$APP_CONTAINER" test -s "${report_dir}/${report_csv}"; then
+            docker exec "$APP_CONTAINER" cat "${report_dir}/${report_csv}" > "$RUNNER_TEMP/ga_details.csv"
+          fi
+          grep -E '^(DRY-RUN \(heç nə yazılmadı\)|HESABAT \(heç nə yazılmadı\)|YAZILDI): [a-z_]+=[0-9]+( · [a-z_]+=[0-9]+)*$|^Hesabat: [a-z_]+\.csv \([0-9]+ sətir\)$' \
+            "$RUNNER_TEMP/ga_out.log" | cut -c1-600 > "$RUNNER_TEMP/ga_summary.log" || true
+          cat "$RUNNER_TEMP/ga_summary.log"
+          {
+            echo "## 👥 ${COMMAND} — $([ "$APPLY" = "true" ] && echo APPLY || echo dry-run)"
+            echo '```'
+            cat "$RUNNER_TEMP/ga_summary.log"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          test "${status:-0}" = 0 || { grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/ga_out.log" | head -n 1 || true; exit "$status"; }
+      - name: 🔑 Ortaq ana qruplar / bloklanmış hesablar hesabatı (şifrəli)
+        id: ga_report
+        if: always() && (github.event.inputs.command == 'ensure_parent_groups' || github.event.inputs.command == 'blocked_accounts_report')
+        env:
+          STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
+        run: |
+          set -euo pipefail
+          enc() { openssl enc -aes-256-cbc -md sha256 -pbkdf2 -iter 200000 -salt -pass env:STAFF_PLAN_KEY -in "$1" -out "$2"; }
+          mkdir -p "$RUNNER_TEMP/ga-out"
+          if [ -n "$STAFF_PLAN_KEY" ]; then
+            for f in ga_out.log ga_details.csv; do
+              if [ -s "$RUNNER_TEMP/$f" ]; then
+                enc "$RUNNER_TEMP/$f" "$RUNNER_TEMP/ga-out/$f.enc"
+                echo "saved=1" >> "$GITHUB_OUTPUT"
+              fi
+            done
+          else
+            echo "STAFF_PLAN_KEY sirri yoxdur — hesabat yüklənmir" >&2
+          fi
+          rm -f "$RUNNER_TEMP/ga_out.log" "$RUNNER_TEMP/ga_summary.log" "$RUNNER_TEMP/ga_details.csv"
+      - name: 📦 Şifrəli ortaq ana qruplar / bloklanmış hesablar hesabatı
+        if: always() && steps.ga_report.outputs.saved != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ${{ github.event.inputs.command == 'blocked_accounts_report' && 'blocked-accounts-encrypted' || 'parent-groups-encrypted' }}
+          path: ${{ runner.temp }}/ga-out/
+          retention-days: 1
+      - name: 🧹 Ortaq ana qruplar / bloklanmış hesablar — müvəqqəti faylları sil
+        if: always() && (github.event.inputs.command == 'ensure_parent_groups' || github.event.inputs.command == 'blocked_accounts_report')
+        run: |
+          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -rf /tmp/groups_accounts_report_*' || true
+          rm -rf "$RUNNER_TEMP/ga-out" "$RUNNER_TEMP/ga_out.log" "$RUNNER_TEMP/ga_details.csv" || true
