@@ -106,8 +106,13 @@ const $ = (window, sel) => window.document.querySelector(sel);
 const visible = (window) => Array.from($(window, "[data-sedit-room]").options)
     .filter((opt) => opt.value && !opt.hidden)
     .map((opt) => opt.value + "@" + opt.getAttribute("data-building"));
-const menu = (window) => Array.from($(window, "[data-sedit-room]").closest(".bootstrap-single-select")
-    .querySelectorAll(".bootstrap-single-select__option")).map((btn) => btn.textContent);
+/* Menyu tənbəldir (PERF-2 H3): düymələr ilk açılışda qurulur — açılışı `api.build()` ilə təqlid edirik. */
+const menu = (window) => {
+    const select = $(window, "[data-sedit-room]");
+    select._bootstrapSelectApi.build();
+    return Array.from(select.closest(".bootstrap-single-select")
+        .querySelectorAll(".bootstrap-single-select__option")).map((btn) => btn.textContent);
+};
 
 function change(window, select, value) {
     select.value = value;

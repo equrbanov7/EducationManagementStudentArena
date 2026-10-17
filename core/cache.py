@@ -297,6 +297,42 @@ def invalidate_profile_badge_counts_cache(user_id, org_id=None) -> None:
 
 
 # --------------------------------------------------------------------------- #
+# Cədvəl redaktoru: təşkilatın müəllim seçim siyahısı (PERF-1 F-16)
+# --------------------------------------------------------------------------- #
+
+#: Siyahı hər redaktor açılışında təşkilatın BÜTÜN aktiv üzvlüklərini skan edirdi (~9,7 k sətir, 7–9 ms).
+#: Üzvlük / rol yazısı keşi dərhal silir (``apps.organizations.signals``); ad dəyişikliyi TTL ilə gəlir.
+SCHEDULE_TEACHER_CHOICES_TTL = 300
+
+
+def schedule_teacher_choices_key(org_id) -> str:
+    return f"{_PREFIX}:registrar:schedule_teacher_choices:{org_id}"
+
+
+def cached_or_compute(key: str, compute, *, timeout: int):
+    """Keşdən oxu, yoxdursa ``compute()`` + yaz; Redis əlçatmazdırsa birbaşa ``compute()``. ``None`` keşlənmir."""
+    cached = _safe_cache_get(key)
+    if cached is not None:
+        return cached
+    value = compute()
+    if value is not None:
+        try:
+            cache.set(key, value, timeout=timeout)
+        except Exception:
+            logger.warning("Redis unavailable; cache not populated for %s", safe_log_value(key))
+    return value
+
+
+def invalidate_schedule_teacher_choices_cache(org_id) -> None:
+    if not org_id:
+        return
+    try:
+        cache.delete(schedule_teacher_choices_key(org_id))
+    except Exception:
+        logger.warning("Redis unavailable; could not invalidate schedule teacher choices for org %s", org_id)
+
+
+# --------------------------------------------------------------------------- #
 # Sual bankı keyfiyyət analizi
 # --------------------------------------------------------------------------- #
 

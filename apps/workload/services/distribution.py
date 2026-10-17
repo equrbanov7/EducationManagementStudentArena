@@ -27,10 +27,18 @@ from .scoping import WorkloadDenied, ensure_can_distribute
 logger = logging.getLogger(__name__)
 
 
-def distribution_readiness(task) -> dict:
-    """Bölgü təsdiqə hazırdırmı — sətir-sətir qalıq xülasəsi."""
-    rows = list(task.rows.all().prefetch_related("groups"))
-    balance = balance_for_rows(rows)
+def distribution_readiness(task, *, rows=None, balance=None) -> dict:
+    """Bölgü təsdiqə hazırdırmı — sətir-sətir qalıq xülasəsi.
+
+    ``rows``/``balance`` — çağıran tapşırığın BÜTÜN sətirlərini (süzgəcsiz, ``groups`` prefetch ilə) artıq
+    yükləyibsə ötürür (PERF-1 F-09: `rows` endpoint-i eyni sətirləri iki dəfə oxuyurdu). ``subject``
+    select_related — natamam sətrin `subject_label`-i sətir başına sorğu açmasın.
+    """
+    if rows is None:
+        rows = list(task.rows.all().select_related("subject").prefetch_related("groups"))
+        balance = None
+    if balance is None:
+        balance = balance_for_rows(rows)
     incomplete = []
     for row in rows:
         info = balance.get(str(row.pk), {})

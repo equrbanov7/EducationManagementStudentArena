@@ -15,9 +15,10 @@ MÜQAVİLƏ:
   `ns.register`-ə (yalnız ilk açılışda işləyir) və tək `DOMContentLoaded`-a
   güvənməməlidir; skript bölmə paneli DOM-a düşməzdən ƏVVƏL icra olunur, panel
   swap-dan sonra `profile:section:loaded` gəlir.
-* QABIQ qrupları (`allowed_sections`) — qabıqdakı modalların (my-courses / my-exams),
-  `DOMContentLoaded`-a bağlı köhnə modulların (category / superadmin) skriptləri.
-  Onlar burada yalnız köhnə sıranı saxlamaq üçündür.
+* QABIQ qrupları (`allowed_sections`) — `DOMContentLoaded`-a bağlı köhnə modulların
+  (category / superadmin) skriptləri. Onlar burada yalnız köhnə sıranı saxlamaq üçündür.
+  Kurs / imtahan yaratma modallarının paketi 2026-10-17-dən (PERF-2 H4) bölməyə
+  (`asset_sections`) bağlıdır: açan düymələr yalnız «Kurslarım» / «İmtahanlarım»-dadır.
 {% endcomment %}
 {% load static %}
 {% if asset_phase == "pre" %}
@@ -65,7 +66,7 @@ idarə edir (EMSReady/EMSDelegate, `[data-smx-root]` yoxdursa heç nə etmir).{%
 AYRI moduldur və redaktordan SONRA yüklənir — `window.EMSScheduleEditor`-i işlədir.{% endcomment %}
 <script src="{% static 'accounts/js/schedule_editor_confirm.js' %}?v=20260909-confirm"></script>
 <script src="{% static 'accounts/js/schedule_editor.js' %}?v=20261017-plan"></script>
-<script src="{% static 'accounts/js/schedule_editor_subjects.js' %}?v=20261014-schedux"></script>
+<script src="{% static 'accounts/js/schedule_editor_subjects.js' %}?v=20261017-fixh"></script>
 <script src="{% static 'accounts/js/schedule_editor_room.js' %}?v=20261017-room"></script>
 <script src="{% static 'accounts/js/schedule_editor_planner.js' %}?v=20261017-room"></script>
 <script src="{% static 'accounts/js/schedule_editor_move.js' %}?v=20261014-schedux"></script>
@@ -102,7 +103,7 @@ xülasə və çekmecə məntiqi qalır. Göndəriş ortaq `teaching_office.js`-d
 çökmür — sadəcə bölmə init olunmur).{% endcomment %}
 <script src="{% static 'accounts/js/profile/workload_distribution_render.js' %}?v=20261016-ms"></script>
 <script src="{% static 'accounts/js/profile/workload_distribution_forms.js' %}?v=20261016-ms"></script>
-<script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20261015-amend"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20261017-fixh"></script>
 {% comment %}2026-10-15: təsdiqlənmiş bölgünün redaktəsi (düzəliş dialoqu + təkrar sorğu), fəaliyyətin
 çıxarılması, bölgünün redaktəsi, «Redaktə et» keçidinin sətir fokusu — əsas moduldan SONRA.{% endcomment %}
 <script src="{% static 'accounts/js/profile/workload_distribution_amend.js' %}?v=20261015-amend"></script>
@@ -188,12 +189,14 @@ qurulub, panel swap-da yenidən qoşulmağa ehtiyac yoxdur.{% endcomment %}
     {# Inzibati bolme (sobe/merkez) — mevcud struktur agaci endpoint-ine gedir #}
 <script src="{% static 'accounts/js/rim_center/create_unit.js' %}?v=20260906-2"></script>
 {% endif %}
-{% if 'my-courses' in allowed_sections %}
+{% if 'my-courses' in asset_sections %}
 <script src="{% static 'courses/js/course_create_form.js' %}?v=20260629"></script>
-<script src="{% static 'courses/js/create_course_modal.js' %}?v=20260604-globalmodal"></script>
+<script src="{% static 'courses/js/create_course_modal.js' %}?v=20261017-lazy"></script>
+{% endif %}
+{% if 'my-courses' in asset_sections or 'assigned-courses' in asset_sections %}
 <script src="{% static 'courses/js/course_card_nav.js' %}?v=20260928-1"></script>
 {% endif %}
-{% if 'my-exams' in allowed_sections %}
+{% if 'my-exams' in asset_sections %}
 <script src="{% static 'exams/js/exam_create_edit_modal/namespace.js' %}?v=20260911-1"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/markup.js' %}?v=20260911-1"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/searchable_select.js' %}?v=20261017-fixa2"></script>

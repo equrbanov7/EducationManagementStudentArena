@@ -36,7 +36,7 @@ from ..services import (
     resolve_chair,
     row_warnings,
     save_row_amended,
-    serialize_rows,
+    serialize_rows_state,
     teacher_load_panel,
     teacher_pool,
     unassign_amended,
@@ -51,10 +51,22 @@ from ._base import active_organization, actor_for, denied, error, json_body, no_
 
 #: Vəziyyət toqquşması (409) kodları: bölünmüş saatdan az cəm (W2) və təsdiqlənmiş sənəddə səbəbsiz yazı
 #: (2026-10-15 — UI düzəliş dialoqunu açıb sorğunu ``amend_reason`` / ``amend_note`` ilə təkrarlayır).
-_CONFLICT_CODES = frozenset({TOTAL_BELOW_ASSIGNED, AMENDMENT_REQUIRED})
+_CONFLICT_CODES = frozenset({TOTAL_BELOW_ASSIGNED, AMENDMENT_REQUIRED, "workload.hours_exceeded"})
+#: QA-2 F-09 (2026-10-17): məzmun xətası icazə xətası deyil — 403 yox, 400 (səhv səbəb / say / qeyd).
+_INPUT_CODES = frozenset(
+    {
+        "workload.invalid_reason",
+        "workload.hours_positive",
+        "workload.invalid_number",
+        "workload.negative_number",
+        "workload.note_required",
+    }
+)
 
 
 def _write_denied(exc: WorkloadDenied) -> JsonResponse:
+    if exc.code in _INPUT_CODES:
+        return denied(exc, status=400)
     return denied(exc, status=409 if exc.code in _CONFLICT_CODES else 403)
 
 
@@ -123,13 +135,22 @@ def rows(request) -> JsonResponse:
         if exc.code == "workload.task_not_found":
             return JsonResponse({"ok": True, "task": None, "rows": [], "teachers": [], "readiness": None})
         return denied(exc)
+    season = request.GET.get("season") or ""
+    search = request.GET.get("q") or ""
+    payload_rows, loaded_rows, balance = serialize_rows_state(task, season=season, search=search)
+    # PERF-1 F-09: süzgəcsiz görünüşdə hazırlıq eyni sətirlərdən; süzgəc varsa — tapşırığın hamısı yenidən.
+    readiness = (
+        distribution_readiness(task)
+        if season or search
+        else distribution_readiness(task, rows=loaded_rows, balance=balance)
+    )
     return JsonResponse(
         {
             "ok": True,
             "task": _task_payload(task),
-            "rows": serialize_rows(task, season=request.GET.get("season") or "", search=request.GET.get("q") or ""),
+            "rows": payload_rows,
             "teachers": teacher_load_panel(task),
-            "readiness": distribution_readiness(task),
+            "readiness": readiness,
         }
     )
 
@@ -442,7 +463,10 @@ def confirm(request) -> JsonResponse:
             "ok": True,
             "status": result["status"],
             "status_label": STATUS_LABELS.get(result["status"], result["status"]),
-            "sync": {key: value for key, value in result["sync"].items() if key != "offering_ids"},
+            # QA-2 F-09: id siyahıları (``offering_ids``, ``group_offering_ids`` — yüzlərlə UUID) UI-a lazım deyil.
+            "sync": {
+                key: value for key, value in result["sync"].items() if key not in ("offering_ids", "group_offering_ids")
+            },
             "notified": result["notified"],
         }
     )

@@ -303,6 +303,15 @@ def pre_question_rank(session, player_id: int, question_id: int | None) -> dict[
 
     Cari ballar cavab anında artdığı üçün canlı sıra reveal-dən əvvəl düzgünlüyü açardı.
     """
+    return pre_question_ranks(session, question_id).get(int(player_id), {})
+
+
+def pre_question_ranks(session, question_id: int | None) -> dict[int, dict[str, Any]]:
+    """Bütün oyunçuların sualdan ƏVVƏLKİ sıra sahələri (``player_id`` → sahələr) — 2 sorğu.
+
+    Sual ərzində sabitdir (cavab balı həm cari baldan, həm də çıxılandan eyni artır) — ``state/<pin>/``
+    oyunçu sorğusu onu ortaq keşdə saxlayır (PERF-1 F-11, bax :mod:`apps.live_exam.poll_cache`).
+    """
     players = _players(session)
     awarded: dict[int, int] = {}
     if question_id:
@@ -311,7 +320,7 @@ def pre_question_rank(session, player_id: int, question_id: int | None) -> dict[
         ):
             awarded[row["player_id"]] = safe_int(row["awarded_points"], 0)
     before = [{**player, "score": safe_int(player["score"], 0) - awarded.get(player["id"], 0)} for player in players]
-    return _rank_fields(sorted(before, key=leaderboard_key)).get(int(player_id), {})
+    return _rank_fields(sorted(before, key=leaderboard_key))
 
 
 def questions_played(session) -> int:

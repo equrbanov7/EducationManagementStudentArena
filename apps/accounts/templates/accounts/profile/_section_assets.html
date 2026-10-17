@@ -17,8 +17,11 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
   tələbə kabinetinin ilk açılışında açılmamış 25+ bölmənin üslubu yüklənirdi.
   Bölmə BAŞQA bölmənin faylındakı qaydanı işlədirsə — həmin bölməni borc siyahısına
   yazın (yoxsa SPA keçidində üslubsuz qalar).
-* QABIQ qrupları (`allowed_sections`): qabıqdakı modallar (my-courses / my-exams)
-  və superadmin üslubları — onlar istənilən bölmədən görünür.
+* QABIQ qrupları (`allowed_sections`): superadmin üslubları — istənilən bölmədən görünür.
+  Kurs / imtahan yaratma modallarının paketi (25 fayl, ~79 KB gzip) 2026-10-17-dən
+  (PERF-2 H4) `asset_sections`-dadır: modalları açan düymələr YALNIZ «Kurslarım» /
+  «İmtahanlarım» bölməsindədir; modal markup-ı qabıqda qalır, SPA keçidində
+  `section_assets.js` paketi gətirir (skriptlər `readyState`-ə dözümlüdür).
 * Kaskad sırası MƏNALIDIR — qonşu şərhlərdə hansı faylın hansından SONRA
   gəlməli olduğu yazılıb; sıranı dəyişməyin.
 {% endcomment %}
@@ -38,7 +41,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
         Admin/müəllim bölmələrinin faylları (adlar öz bölməsinə bağlıdır, selektor auditi
         2026-10-07) yalnız həmin bölmə render olunanda gəlir.
     {% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/base.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/base.css' %}?v=20261017-h4">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sidebar_groups.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sidebar_filter.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sidebar_rail.css' %}">
@@ -52,8 +55,8 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/list_cards.css' %}?v=20260907-createbtn">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/posts/_part1.css' %}?v=20260912-1">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/posts/_part2.css' %}">
-    {% comment %}QABIQ: `.tx-toast` qabıqdakı `my_exams_dashboard.js`-dən də gəlir.{% endcomment %}
-    {% if 'my-exams' in allowed_sections %}
+    {% comment %}`.tx-toast` `my_exams_dashboard.js`-dən gəlir — o da yalnız «İmtahanlarım»-da yüklənir.{% endcomment %}
+    {% if 'my-exams' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_exams.css' %}?v=20260930-resp">
     {% endif %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_courses.css' %}?v=20260928-1">
@@ -127,13 +130,15 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% if 'assigned-exams' in asset_sections %}
     <link rel="stylesheet" href="{% static 'exams/css/student_exam_list.css' %}">
     {% endif %}
-    {% comment %}QABIQ: kurs / imtahan yaratma modalları `profile.html`-də qabıqdadır
-    (istənilən bölmədən açılır) — üslubları icazə ilə qalır.{% endcomment %}
-    {% if 'my-courses' in allowed_sections %}
+    {% comment %}Kurs / imtahan yaratma modallarının markup-ı `profile.html`-də qabıqdadır,
+    amma açan düymələr yalnız öz bölmələrindədir (PERF-2 H4) — üslublar bölməyə bağlıdır.
+    Gizli vəziyyət (`.course-modal-overlay`) `profile/base.css`-də də var ki, bu fayl
+    yüklənməyən bölmədə qabıq markup-ı görünməsin.{% endcomment %}
+    {% if 'my-courses' in asset_sections %}
     <link rel="stylesheet" href="{% static 'courses/css/course_create.css' %}?v=20261017-nofont">
     <link rel="stylesheet" href="{% static 'courses/css/create_course_modal.css' %}">
     {% endif %}
-    {% if 'my-exams' in allowed_sections %}
+    {% if 'my-exams' in asset_sections %}
     <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260911-1">
     <link rel="stylesheet" href="{% static 'exams/css/exam_wizard.css' %}?v=20261014-uifix">
     <link rel="stylesheet" href="{% static 'css/ems_datetime.css' %}?v=20261008-1">
@@ -193,7 +198,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     görə ikiyə bölünüb; YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır:
     əvvəl səth (kartlar, cədvəl, qalıq zolaqları), sonra üst qat (modallar,
     mobil override).{% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/workload_base.css' %}?v=20261015-amend">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/workload_base.css' %}?v=20261017-fixh">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/workload_dialog.css' %}?v=20261015-amend">
     {% endif %}
     {% if 'syllabus-list' in asset_sections or 'syllabus-review' in asset_sections %}
@@ -239,7 +244,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% endif %}
     {% if 'my-journal' in asset_sections or 'journal-close' in asset_sections %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal_student.css' %}?v=20261017-exempt">
-    <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260914-a11y">
+    <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20261017-fixg">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_list.css' %}?v=20260930-resp">
     <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260831-excuse">
     {% comment %}Tələbənin «Sillabusa bax» paneli — jurnalın tam səhifə variantı
@@ -256,7 +261,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% comment %}Redaktorun öz xromu (həftə pilləri, dialoq sahələri, park
     siyahısı) — matris CSS-indən SONRA yüklənir (kaskad).{% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/schedule_editor.css' %}?v=20261017-room">
-    <link rel="stylesheet" href="{% static 'accounts/css/schedule_editor_planner.css' %}?v=20261017-plan">
+    <link rel="stylesheet" href="{% static 'accounts/css/schedule_editor_planner.css' %}?v=20261017-fixh">
     {% endif %}
     {% comment %}Qəbul paneli (`student-admission`, ekran 08) də bu fayl-yükləmə üslubunu
     işlədir və `student_services.css`-dən ƏVVƏL gəlməlidir (kaskad) — əvvəl orada ikinci
@@ -294,7 +299,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     semestr açılışı. Yenə YALNIZ düzüm; komponentlər `ems_ui`-dədir.{% endcomment %}
     {% if 'curriculum-editor' in asset_sections or 'groups-registry' in asset_sections or 'semester-opening' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_office_plan.css' %}?v=20261003-ready">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/teaching_office_groups.css' %}?v=20261015-reinstate">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/teaching_office_groups.css' %}?v=20261017-fixh">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/teaching_office_group_split.css' %}?v=20260920-split">
     {% endif %}
     {% comment %}Mərhələ 4 (ekran 12/13/15/17) — dərs yükü zənciri. YALNIZ düzüm

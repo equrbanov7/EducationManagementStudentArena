@@ -28,6 +28,8 @@ from core.upload_security import (
     validate_uploaded_file,
 )
 
+from .avatar_image import avatar_pixels_error
+
 # Profile-avatar upload limits. Defined here (a service module) rather than
 # imported from views._helpers so the service layer never depends on the view
 # layer — that would risk a circular import and inverts the dependency
@@ -65,6 +67,11 @@ def validate_profile_avatar_upload(uploaded_avatar) -> str:
         width, height = get_image_dimensions(uploaded_avatar)
         if not width or not height:
             return "Yüklənən fayl şəkil kimi oxunmadı."
+        # PERF-2 H5 review: kiçik faylda nəhəng ölçü (dekompressiya «bombası») — yalnız
+        # başlıqdan oxunan ölçü ilə, dekoddan ƏVVƏL rədd edilir (avatar_image.AVATAR_MAX_PIXELS).
+        pixels_error = avatar_pixels_error(width, height)
+        if pixels_error:
+            return pixels_error
     except Exception:
         return "Yüklənən fayl şəkil formatında deyil və ya zədəlidir."
     finally:

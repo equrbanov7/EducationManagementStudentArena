@@ -22,16 +22,32 @@ from django.utils.http import http_date
 from core.people_visibility import can_view_avatar
 
 from ...models import UserProfile
+from ...services.avatar_image import avatar_version
 from .search import _validate_profile_avatar_version
 
 User = get_user_model()
+
+#: PERF-2 H5 (2026-10-17): URL ``?v=<updated_at, mikrosaniyə>`` ilə versiyalıdır (``avatar_state`` və
+#: şablonlar) — şəkil dəyişəndə URL da dəyişir. CARİ versiyaya uyğun sorğu brauzerdə
+#: bir il keşlənir (əvvəl hər 5 dəqiqədən bir Daphne-yə qayıdırdı); versiyasız və ya
+#: köhnə versiyalı sorğu qısa keşdə qalır ki, köhnə URL yeni şəkli «dondurub» saxlamasın.
+#: ``private`` — şəkil icazə ilə verilir, paylaşılan keşə düşməməlidir.
+AVATAR_CACHE_VERSIONED = "private, max-age=31536000, immutable"
+AVATAR_CACHE_DEFAULT = "private, max-age=300"
+
+
+def avatar_cache_control(version, updated_at) -> str:
+    """``?v=`` cari ``updated_at`` versiyasıdırsa uzun/immutable, əks halda qısa keş."""
+    if version and updated_at and version == avatar_version(updated_at):
+        return AVATAR_CACHE_VERSIONED
+    return AVATAR_CACHE_DEFAULT
 
 
 @login_required
 def profile_avatar(request, user_id):
     """Serve a logged-in user's requested profile avatar through Django."""
     try:
-        _validate_profile_avatar_version(request.GET.get("v"))
+        version = _validate_profile_avatar_version(request.GET.get("v"))
     except ValidationError:
         return HttpResponseBadRequest("Invalid avatar version parameter.")
 
@@ -50,7 +66,7 @@ def profile_avatar(request, user_id):
 
     content_type = mimetypes.guess_type(avatar_field.name or "")[0] or "application/octet-stream"
     response = FileResponse(avatar_stream, content_type=content_type)
-    response["Cache-Control"] = "private, max-age=300"
+    response["Cache-Control"] = avatar_cache_control(version, target_profile.updated_at)
     response["Last-Modified"] = http_date(target_profile.updated_at.timestamp())
     response["X-Content-Type-Options"] = "nosniff"
     return response

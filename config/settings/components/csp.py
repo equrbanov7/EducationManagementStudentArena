@@ -22,10 +22,11 @@ idarə olunur (asılılıqlar: bax base.py).
 CONTENT_SECURITY_POLICY = {
     "DIRECTIVES": {
         "default-src": [SELF],
+        # PERF-2 H1/H2 (2026-10-17): Google Fonts heç yerdə yüklənmir (kurs modalı və canlı
+        # imtahan ekranları sistem şriftinə keçdi) — fonts.gstatic / fonts.googleapis çıxarıldı.
         "font-src": [
             SELF,
             "data:",
-            "https://fonts.gstatic.com",
         ],
         "img-src": [
             SELF,
@@ -45,7 +46,6 @@ CONTENT_SECURITY_POLICY = {
         "style-src": [
             SELF,
             NONCE,
-            "https://fonts.googleapis.com",
         ],
         "style-src-attr": [
             UNSAFE_INLINE,

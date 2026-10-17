@@ -8,9 +8,9 @@
     <meta name="format-detection" content="telephone=no">
     <title>{% trans "page_title" context "live_exam.player" %} | {{ session.pin }}</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    {% comment %}PERF-2 H2 (2026-10-17): Google Fonts (render-bloklayan 3-cü tərəf CSS) silindi — telefon
+    Google-a çata bilməyəndə oyunçu ekranı boş qalırdı. CSS-dəki «Manrope» / «Space Grotesk» cihazda varsa
+    işlənir, yoxdursa sistem şrifti (system-ui / Segoe UI / -apple-system).{% endcomment %}
     {% comment %}LXNET 2026-10-02: stil/skript siyahısı views/player/assets.py-dədir (gözləmə otağı eyni
     URL-ləri prefetch edir). Bütün ES modulları modulepreload — import qrafı bir dalğada yüklənir.{% endcomment %}
     {% for href in player_assets.css %}<link rel="stylesheet" href="{{ href }}">

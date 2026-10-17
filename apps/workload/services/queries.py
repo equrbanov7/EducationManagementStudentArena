@@ -62,6 +62,15 @@ _ROW_HOUR_FIELDS = (
 
 
 def serialize_rows(task, *, season: str = "", search: str = "") -> list[dict]:
+    return serialize_rows_state(task, season=season, search=search)[0]
+
+
+def serialize_rows_state(task, *, season: str = "", search: str = "") -> tuple[list[dict], list, dict]:
+    """``serialize_rows`` + yüklənmiş sətirlər və balans (PERF-1 F-09).
+
+    `rows` endpoint-i hazırlıq xülasəsini (``distribution_readiness``) eyni sorğunun sətirləri ilə qurur —
+    süzgəcsiz görünüşdə sətirlər, qruplar və balans ikinci dəfə oxunmur.
+    """
     from .tasks import _amendment_target_row_ids
 
     rows = list(task_rows(task, season=season, search=search))
@@ -118,7 +127,7 @@ def serialize_rows(task, *, season: str = "", search: str = "") -> list[dict]:
                 ],
             }
         )
-    return payload
+    return payload, rows, balance
 
 
 def teacher_load_panel(task) -> list[dict]:
@@ -376,6 +385,7 @@ def chair_tasks(*, organization, chair_ids, academic_year: str = ""):
 __all__ = [
     "chair_tasks",
     "serialize_rows",
+    "serialize_rows_state",
     "task_rows",
     "teacher_load_panel",
     "teacher_workload_rows",

@@ -18,6 +18,23 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: emsarena-staging-pg
+    # PERF-1 F-17 (2026-10-17): planlaşdırıcı parametrləri prod ilə EYNİ (docker-compose.prod.yml) — klonda
+    # alınan EXPLAIN / QA vaxtları prod-a uyğun olsun. Defolt `random_page_cost=4` ilə jurnalın legacy-excuse
+    # sorğusu 305 k sətirlik paralel seq scan seçirdi (14 ms; prod parametrləri ilə indeks, 0,7 ms). Yalnız
+    # planlaşdırıcı / sorğu yaddaşı — `shared_buffers` kimi RAM ayıran parametrlər QƏSDƏN yoxdur.
+    # Tətbiq: `docker compose -f docker-compose.staging.yml up -d` (konteyner yenidən yaranır, volume qalır).
+    command:
+      - postgres
+      - -c
+      - random_page_cost=1.1
+      - -c
+      - effective_io_concurrency=200
+      - -c
+      - effective_cache_size=${STAGING_POSTGRES_EFFECTIVE_CACHE_SIZE:-6GB}
+      - -c
+      - work_mem=${STAGING_POSTGRES_WORK_MEM:-16MB}
+      - -c
+      - jit=off
     environment:
       POSTGRES_DB: ${STAGING_POSTGRES_DB:-emsarena_staging}
       POSTGRES_USER: ${STAGING_POSTGRES_USER:-emsarena_staging}

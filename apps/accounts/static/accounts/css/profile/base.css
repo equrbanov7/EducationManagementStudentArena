@@ -31,3 +31,14 @@ body {
     min-height: calc(100vh - 80px);
     background: var(--bg-page);
 }
+
+/* PERF-2 H4 (2026-10-17): «Kurs yarat» modalının markup-ı qabıqdadır, tam üslubu
+   (`courses/css/create_course_modal.css`) isə yalnız «Kurslarım» bölməsində yüklənir.
+   Fayl gəlməyən bölmədə qabıq markup-ı görünməsin deyə gizli vəziyyət burada da var
+   (həmin faylın ilk qaydası ilə eynidir; `.active` orada açır). */
+.course-modal-overlay:not(.active) {
+    position: fixed;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
