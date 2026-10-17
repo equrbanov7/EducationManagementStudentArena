@@ -65,6 +65,12 @@
         padding-bottom: 110px;
     }
 
+    /* 2026-10-17 (sahib: «login və bu səhifə ekrana yerləşsə də aşağı-yuxarı scroll gedir»): auth səhifələrində
+       AI FAB yoxdur, kart özü 100vh-ı doldurur — 110px boşluq lazımsız scroll yaradırdı. */
+    .auth-body #main-content {
+        padding-bottom: 0;
+    }
+
     a {
         text-decoration: none;
         color: inherit;

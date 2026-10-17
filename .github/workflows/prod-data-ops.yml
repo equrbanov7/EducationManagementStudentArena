@@ -287,17 +287,20 @@ jobs:
           STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
         run: |
           set -euo pipefail
+          # SEC-1 F7 (2026-10-17): TAM dəyər yoxlaması. `grep` sətir-sətir işləyir — API ilə göndərilən, sətir sonu
+          # (LF/CR) olan dəyər «hər hansı sətir uyğundur» kimi keçə bilərdi. Əvvəlcə LF/CR rədd edilir, sonra bütün dəyər.
+          match() { case "$1" in (*$'\n'*|*$'\r'*) return 1 ;; esac; printf '%s' "$1" | grep -Eq -- "$2"; }
           test -n "$STAFF_PLAN_KEY" || { echo "STAFF_PLAN_KEY sirri yoxdur" >&2; exit 1; }
           # Asset adı və konteynerdəki fayl əmrdən asılıdır (tag prefiksi ilə birlikdə yoxlanılır).
           case "$COMMAND" in
             import_teaching_task_workbook)
-              printf '%s' "$ROSTER_TAG" | grep -Eq '^teaching-task-[0-9a-z-]+$' || { echo "roster_tag formatı: teaching-task-…" >&2; exit 1; }
+              match "$ROSTER_TAG" '^teaching-task-[0-9a-z-]+$' || { echo "roster_tag formatı: teaching-task-…" >&2; exit 1; }
               asset=tapsiriq.xlsx.enc; target="/tmp/teaching_task_${GITHUB_RUN_ID}.xlsx" ;;
             import_teaching_load_form1)
-              printf '%s' "$ROSTER_TAG" | grep -Eq '^teaching-load-[0-9a-z-]+$' || { echo "roster_tag formatı: teaching-load-…" >&2; exit 1; }
+              match "$ROSTER_TAG" '^teaching-load-[0-9a-z-]+$' || { echo "roster_tag formatı: teaching-load-…" >&2; exit 1; }
               asset=forma1.docx.enc; target="/tmp/teaching_load_${GITHUB_RUN_ID}.docx" ;;
             *)
-              case "$ROSTER_TAG" in (staff-roster-[0-9a-z-]*|teacher-roster-[0-9a-z-]*) ;; (*) echo "roster_tag formatı: staff-roster-… / teacher-roster-…" >&2; exit 1;; esac
+              match "$ROSTER_TAG" '^(staff|teacher)-roster-[0-9a-z-]+$' || { echo "roster_tag formatı: staff-roster-… / teacher-roster-…" >&2; exit 1; }
               asset=roster.xlsx.enc; target="/tmp/staff_roster_${GITHUB_RUN_ID}.xlsx" ;;
           esac
           # Serverdə `gh` YOXDUR — release asset-i birbaşa yüklənir (şifrəlidir; token private repo üçün).
@@ -316,6 +319,9 @@ jobs:
         if: github.event.inputs.command != 'import_timetable_docx' && github.event.inputs.command != 'assign_task_rows_from_timetable' && github.event.inputs.command != 'backfill_teacher_lessons' && github.event.inputs.command != 'ensure_parent_groups' && github.event.inputs.command != 'blocked_accounts_report'
         run: |
           set -euo pipefail
+          # SEC-1 F7 (2026-10-17): TAM dəyər yoxlaması. `grep` sətir-sətir işləyir — API ilə göndərilən, sətir sonu
+          # (LF/CR) olan dəyər «hər hansı sətir uyğundur» kimi keçə bilərdi. Əvvəlcə LF/CR rədd edilir, sonra bütün dəyər.
+          match() { case "$1" in (*$'\n'*|*$'\r'*) return 1 ;; esac; printf '%s' "$1" | grep -Eq -- "$2"; }
           case "$YEAR" in (20[0-9][0-9]/20[0-9][0-9]) ;; (*) echo "year formatı YYYY/YYYY olmalıdır" >&2; exit 1;; esac
           args=()
           custom_apply=0
@@ -352,8 +358,7 @@ jobs:
               ;;
             journal_hygiene_report)
               case "$HYGIENE_CATEGORY" in (all|left|empty|not_held) ;; (*) echo "hygiene_category yanlışdır" >&2; exit 2;; esac
-              case "$HYGIENE_CODE" in (""|[a-z_]*) ;; (*) echo "hygiene_code yalnız a-z və _" >&2; exit 2;; esac
-              test -z "$HYGIENE_CODE" || printf '%s\n' "$HYGIENE_CODE" | grep -Eq '^[a-z_]+$' || { echo "hygiene_code yalnız a-z və _" >&2; exit 2; }
+              test -z "$HYGIENE_CODE" || match "$HYGIENE_CODE" '^[a-z_]+$' || { echo "hygiene_code yalnız a-z və _" >&2; exit 2; }
               # Loga ŞƏXS ADI düşməsin: yalnız saylar (--show 0).
               args=(--organization "$ORG" --category "$HYGIENE_CATEGORY" --show 0)
               test -z "$HYGIENE_CODE" || args+=(--code "$HYGIENE_CODE")
@@ -374,7 +379,7 @@ jobs:
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
               if [ -n "$BATCH" ]; then
-                printf '%s' "$BATCH" | grep -Eq '^roster-[0-9a-z-]+$' || { echo "batch formatı: roster-…" >&2; exit 2; }
+                match "$BATCH" '^roster-[0-9a-z-]+$' || { echo "batch formatı: roster-…" >&2; exit 2; }
                 test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
                 args=(--organization "$ORG" --undo "$BATCH" --actor "$actor" --i-know-this-is-production)
               else
@@ -398,9 +403,9 @@ jobs:
             import_teaching_task_workbook|import_teaching_load_form1)
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
-              test -z "$CHOICES" || printf '%s' "$CHOICES" | grep -Eq '^[0-9]+=[0-9]+(,[0-9]+=[0-9]+)*$' \
+              test -z "$CHOICES" || match "$CHOICES" '^[0-9]+=[0-9]+(,[0-9]+=[0-9]+)*$' \
                 || { echo "choices formatı: 144=1,145=1" >&2; exit 2; }
-              test -z "$TEACHER_MAP" || { [ "${#TEACHER_MAP}" -le 1000 ] && printf '%s' "$TEACHER_MAP" | grep -Eq '^[^=,]+=[A-Za-z0-9._-]+(,[^=,]+=[A-Za-z0-9._-]+)*$'; } \
+              test -z "$TEACHER_MAP" || { [ "${#TEACHER_MAP}" -le 1000 ] && match "$TEACHER_MAP" '^[^=,]+=[A-Za-z0-9._-]+(,[^=,]+=[A-Za-z0-9._-]+)*$'; } \
                 || { echo "teacher_map formatı: AD=istifadəçi.adı,…" >&2; exit 2; }
               report_dir="/tmp/teaching_report_${GITHUB_RUN_ID}"
               if [ "$COMMAND" = "import_teaching_task_workbook" ]; then
@@ -424,10 +429,10 @@ jobs:
               test -n "$TASK_CHAIR" && [ "${#TASK_CHAIR}" -le 120 ] || { echo "task_chair verilməlidir" >&2; exit 2; }
               for value in "$ROW_GROUP" "$ROW_SUBJECT"; do
                 test -n "$value" && [ "${#value}" -le 200 ] || { echo "row_group / row_subject verilməlidir (≤200)" >&2; exit 2; }
-                printf '%s' "$value" | grep -Eq '^[^[:cntrl:]"`$\\;|&<>]+$' || { echo "row_group / row_subject icazəsiz simvol" >&2; exit 2; }
+                match "$value" '^[^[:cntrl:]"`$\\;|&<>]+$' || { echo "row_group / row_subject icazəsiz simvol" >&2; exit 2; }
               done
               case "$ROW_ACTIVITY" in (lecture|seminar|lab|consult|exam|thesis|postgrad|practice_research|practice_production) ;; (*) echo "row_activity yanlışdır" >&2; exit 2;; esac
-              printf '%s' "$ROW_HOURS" | grep -Eq '^[0-9]{1,4}$' || { echo "row_hours 0..9999 tam ədəd olmalıdır" >&2; exit 2; }
+              match "$ROW_HOURS" '^[0-9]{1,4}$' || { echo "row_hours 0..9999 tam ədəd olmalıdır" >&2; exit 2; }
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
               args=(--org "$ORG" --year "$YEAR" --chair "$TASK_CHAIR" --group "$ROW_GROUP" --subject "$ROW_SUBJECT"
@@ -442,7 +447,7 @@ jobs:
               args=(--org "$ORG" --year "$YEAR" --actor "$actor")
               if [ -n "$TASK_CHAIR" ]; then
                 [ "${#TASK_CHAIR}" -le 120 ] || { echo "task_chair uzundur (≤120)" >&2; exit 2; }
-                printf '%s' "$TASK_CHAIR" | grep -Eq '^[^[:cntrl:]"`$\\;|&<>]+$' || { echo "task_chair icazəsiz simvol" >&2; exit 2; }
+                match "$TASK_CHAIR" '^[^[:cntrl:]"`$\\;|&<>]+$' || { echo "task_chair icazəsiz simvol" >&2; exit 2; }
                 args+=(--chair "$TASK_CHAIR")
               else
                 args+=(--all-chairs)
@@ -458,10 +463,10 @@ jobs:
             dedupe_notifications)
               # Sahib 2026-10-17: təkrar «Dərs yükü təyin edildi» bildirişləri oxunmuş edilir (silinmir). Tip sabitdir
               # (yalnız workload `assignment`); tarixlər `date_from` / `date_to` girişlərindən, format yoxlanılır.
-              printf '%s' "$DATE_FROM" | grep -Eq '^20[0-9]{2}-[01][0-9]-[0-3][0-9]$' || { echo "date_from formatı: YYYY-MM-DD" >&2; exit 2; }
+              match "$DATE_FROM" '^20[0-9]{2}-[01][0-9]-[0-3][0-9]$' || { echo "date_from formatı: YYYY-MM-DD" >&2; exit 2; }
               args=(--org "$ORG" --type assignment --since "$DATE_FROM" --window-minutes 120)
               if [ -n "$DATE_TO" ]; then
-                printf '%s' "$DATE_TO" | grep -Eq '^20[0-9]{2}-[01][0-9]-[0-3][0-9]$' || { echo "date_to formatı: YYYY-MM-DD" >&2; exit 2; }
+                match "$DATE_TO" '^20[0-9]{2}-[01][0-9]-[0-3][0-9]$' || { echo "date_to formatı: YYYY-MM-DD" >&2; exit 2; }
                 args+=(--until "$DATE_TO")
               fi
               ;;
@@ -489,7 +494,11 @@ jobs:
               args+=(--credentials-out "/tmp/staff_creds_${GITHUB_RUN_ID}.csv")
             fi
           fi
-          echo "::group::▶ $COMMAND ${args[*]}"
+          # SEC-1 F7: loga arqument DƏYƏRLƏRİ düşmür (teacher_map → müəllim adları, aktor, fayl yolları) — yalnız
+          # arqument sayı və bayraq adları.
+          flags=()
+          for arg in "${args[@]}"; do case "$arg" in (--[a-z]*) flags+=("${arg%%=*}") ;; esac; done
+          echo "::group::▶ $COMMAND (${#args[@]} arqument; bayraqlar: ${flags[*]:-—})"
           if [ "$COMMAND" = "reconcile_teacher_roster" ]; then
             # Hesabatda şəxs adları var → loga yalnız «Nümunələr»-ə qədərki saylar + paket id-si düşür;
             # tam hesabat/CSV şifrəli artifaktdadır (aşağıdakı addım).
@@ -603,14 +612,17 @@ jobs:
           STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
         run: |
           set -euo pipefail
+          # SEC-1 F7 (2026-10-17): TAM dəyər yoxlaması. `grep` sətir-sətir işləyir — API ilə göndərilən, sətir sonu
+          # (LF/CR) olan dəyər «hər hansı sətir uyğundur» kimi keçə bilərdi. Əvvəlcə LF/CR rədd edilir, sonra bütün dəyər.
+          match() { case "$1" in (*$'\n'*|*$'\r'*) return 1 ;; esac; printf '%s' "$1" | grep -Eq -- "$2"; }
           test -n "$STAFF_PLAN_KEY" || { echo "STAFF_PLAN_KEY sirri yoxdur" >&2; exit 1; }
           case "$COMMAND" in
             import_timetable_docx) report_csv=timetable_import.csv ;;
             assign_task_rows_from_timetable) report_csv=timetable_task_assign.csv ;;
             *) echo "icazəsiz əmr: $COMMAND" >&2; exit 2 ;;
           esac
-          printf '%s' "$ROSTER_TAG" | grep -Eq '^timetable-[0-9a-z-]+$' || { echo "roster_tag formatı: timetable-…" >&2; exit 1; }
-          printf '%s' "$PERIOD" | grep -Eq '^(Payız|Yaz|Yay) 20[0-9]{2}/20[0-9]{2}$' || { echo "period formatı: «Payız 2026/2027»" >&2; exit 2; }
+          match "$ROSTER_TAG" '^timetable-[0-9a-z-]+$' || { echo "roster_tag formatı: timetable-…" >&2; exit 1; }
+          match "$PERIOD" '^(Payız|Yaz|Yay) 20[0-9]{2}/20[0-9]{2}$' || { echo "period formatı: «Payız 2026/2027»" >&2; exit 2; }
           umask 077
           curl -sSfL -H "Authorization: Bearer $GH_TOKEN" \
             "https://github.com/${GITHUB_REPOSITORY}/releases/download/${ROSTER_TAG}/timetable.docx.enc" \
@@ -634,7 +646,7 @@ jobs:
             # Tapşırığın tədris ili semestrdən götürülür; kafedradankənar müəllim yalnız açıq bayraqla.
             test "$ALLOW_OUTSIDE_CHAIR" != "true" || args+=(--allow-outside-chair)
             # Açıq müəllim xəritəsi (`teacher_map`): «Soyad İ.=istifadəçi.adı», vergüllə.
-            test -z "$TEACHER_MAP" || { [ "${#TEACHER_MAP}" -le 1000 ] && printf '%s' "$TEACHER_MAP" | grep -Eq '^[^=,]+=[A-Za-z0-9._-]+(,[^=,]+=[A-Za-z0-9._-]+)*$'; } \
+            test -z "$TEACHER_MAP" || { [ "${#TEACHER_MAP}" -le 1000 ] && match "$TEACHER_MAP" '^[^=,]+=[A-Za-z0-9._-]+(,[^=,]+=[A-Za-z0-9._-]+)*$'; } \
               || { echo "teacher_map formatı: AD=istifadəçi.adı,…" >&2; exit 2; }
             test -z "$TEACHER_MAP" || args+=(--teacher "$TEACHER_MAP")
           fi
@@ -697,15 +709,18 @@ jobs:
           STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
         run: |
           set -euo pipefail
-          printf '%s' "$TEACHER" | grep -Eq '^[A-Za-z0-9._-]{1,150}$' || { echo "teacher formatı: ^[A-Za-z0-9._-]+$" >&2; exit 2; }
+          # SEC-1 F7 (2026-10-17): TAM dəyər yoxlaması. `grep` sətir-sətir işləyir — API ilə göndərilən, sətir sonu
+          # (LF/CR) olan dəyər «hər hansı sətir uyğundur» kimi keçə bilərdi. Əvvəlcə LF/CR rədd edilir, sonra bütün dəyər.
+          match() { case "$1" in (*$'\n'*|*$'\r'*) return 1 ;; esac; printf '%s' "$1" | grep -Eq -- "$2"; }
+          match "$TEACHER" '^[A-Za-z0-9._-]{1,150}$' || { echo "teacher formatı: ^[A-Za-z0-9._-]+$" >&2; exit 2; }
           echo "::add-mask::$TEACHER"
-          printf '%s' "$DATE_FROM" | grep -Eq '^20[0-9]{2}-[01][0-9]-[0-3][0-9]$' || { echo "date_from formatı: YYYY-MM-DD" >&2; exit 2; }
-          printf '%s' "$DATE_TO" | grep -Eq '^20[0-9]{2}-[01][0-9]-[0-3][0-9]$' || { echo "date_to formatı: YYYY-MM-DD" >&2; exit 2; }
-          printf '%s' "$PERIOD" | grep -Eq '^(Payız|Yaz|Yay) 20[0-9]{2}/20[0-9]{2}$' || { echo "period formatı: «Payız 2026/2027»" >&2; exit 2; }
+          match "$DATE_FROM" '^20[0-9]{2}-[01][0-9]-[0-3][0-9]$' || { echo "date_from formatı: YYYY-MM-DD" >&2; exit 2; }
+          match "$DATE_TO" '^20[0-9]{2}-[01][0-9]-[0-3][0-9]$' || { echo "date_to formatı: YYYY-MM-DD" >&2; exit 2; }
+          match "$PERIOD" '^(Payız|Yaz|Yay) 20[0-9]{2}/20[0-9]{2}$' || { echo "period formatı: «Payız 2026/2027»" >&2; exit 2; }
           umask 077
           spec_args=()
           if [ -n "$ROSTER_TAG" ]; then
-            printf '%s' "$ROSTER_TAG" | grep -Eq '^lesson-slots-[0-9a-z-]+$' || { echo "roster_tag formatı: lesson-slots-…" >&2; exit 2; }
+            match "$ROSTER_TAG" '^lesson-slots-[0-9a-z-]+$' || { echo "roster_tag formatı: lesson-slots-…" >&2; exit 2; }
             test -n "$STAFF_PLAN_KEY" || { echo "STAFF_PLAN_KEY sirri yoxdur" >&2; exit 1; }
             curl -sSfL -H "Authorization: Bearer $GH_TOKEN" \
               "https://github.com/${GITHUB_REPOSITORY}/releases/download/${ROSTER_TAG}/slots.json.enc" \

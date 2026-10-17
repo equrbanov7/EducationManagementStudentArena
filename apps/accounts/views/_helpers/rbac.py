@@ -232,9 +232,9 @@ def _role_capabilities(user, profile):
     # Yüngül .exists() sorğusu; icazə view/consumer qatında yenidən yoxlanır.
     can_access_final_center = is_exam_center or is_superadmin
     if not can_access_final_center and (is_teacher or is_tutor or is_unit_manager):
-        from apps.exams.public import user_supervises_final_sessions
+        from .rbac_final_center import supervises_final_sessions  # request-ömürlü memo (PERF-1 F-03)
 
-        can_access_final_center = user_supervises_final_sessions(user)
+        can_access_final_center = supervises_final_sessions(user)
     # İmtahan zalı + kompüter/MAC idarəsi: superadmin, İKT Rəhbəri (rolun öz
     # tərifində `exam.*` var), YAXUD superadminin per-user bayraqla həvalə
     # etdiyi istifadəçi. Yalnız naviqasiya görünürlüyü; icazə view qatında

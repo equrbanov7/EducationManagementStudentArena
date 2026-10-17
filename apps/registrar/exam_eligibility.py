@@ -144,7 +144,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from django.apps import apps as django_apps
 from django.utils.translation import pgettext_lazy
 
-from apps.registrar import attendance
+from apps.registrar import attendance, read_memo
 from apps.registrar.models import AssessmentScheme, StudentAcademicRecord
 
 #: Buraxılış statusunun mənbəyi — UI bunu «niyə hesablanmadı»nı izah etmək üçün oxuyur.
@@ -255,6 +255,7 @@ def _migrated_offering_ids(offering_ids) -> set:
     return {wanted[pk] for pk in rows if pk in wanted}
 
 
+@read_memo.per_id("frozen", ids_arg="offering_ids", result="set")  # request-ömürlü (PERF-1 F-05/F-06)
 def frozen_offering_ids(offering_ids) -> frozenset:
     """Buraxılış statusu **DONDURULMUŞ** açılışların id dəsti — iki sabit sorğu.
 
@@ -286,6 +287,7 @@ def frozen_offering_ids(offering_ids) -> frozenset:
     return frozenset(_migrated_offering_ids(locked))
 
 
+@read_memo.per_id("lesson_hours", ids_arg="offering_ids", result="dict")
 def lesson_hours_map(offering_ids) -> dict:
     """offering_id → keçirilmiş dərslərin saat cəmi — **tək aqreqat sorğu**.
 
@@ -346,6 +348,7 @@ def lesson_hours_for(offering, lessons=None, *, hours_map=None) -> Decimal:
     return _as_decimal(lesson_hours_map([offering_id]).get(offering_id, 0))
 
 
+@read_memo.per_id("exempt", ids_arg="student_ids", result="set", namespace_arg="organization")
 def exempt_student_ids(organization, student_ids) -> frozenset:
     """Rəsmi idmançı-tələbə istisnası olan tələbələr — **tək sorğu**.
 

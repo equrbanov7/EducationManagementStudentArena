@@ -46,7 +46,16 @@ def _validate_scope(record, new_group, period):
         )
 
 
-def _audit(record, old_group, new_group, moved, created, by_user, reason, old_ids, new_ids):
+def _audit(record, old_group, new_group, moved, created, by_user, reason, old_ids, new_ids, reactivated_ids=()):
+    changes = {
+        "moved_enrollment_ids": [str(value) for value in old_ids],
+        "successor_enrollment_ids": [str(value) for value in new_ids],
+        "created_count": created,
+    }
+    if reactivated_ids:
+        # QA 2026-10-17 F-06: son köçürmənin geri qaytarılması — tarixçə sətri
+        # bərpa olundu (silinmədi); izi audit qeydində qalır.
+        changes["reactivated_enrollment_ids"] = [str(value) for value in reactivated_ids]
     return audit_service.log_action(
         user=by_user if getattr(by_user, "pk", None) else None,
         organization=record.organization,
@@ -57,11 +66,7 @@ def _audit(record, old_group, new_group, moved, created, by_user, reason, old_id
         resource_repr=f"{record.student_id} · {record.program.display_label}",
         old_values={"group_id": str(getattr(old_group, "pk", "") or "")},
         new_values={"group_id": str(new_group.pk)},
-        changes={
-            "moved_enrollment_ids": [str(value) for value in old_ids],
-            "successor_enrollment_ids": [str(value) for value in new_ids],
-            "created_count": created,
-        },
+        changes=changes,
         reason=reason
         or f"Qrup köçürmə: {getattr(old_group, 'name', '—')} → {new_group.name} "
         f"({moved} qeydiyyat tarixçəyə keçirildi)",
@@ -109,9 +114,41 @@ def _inherit_teaching_config(target, source) -> None:
         target.save(update_fields=[*fields, "updated_at"])
 
 
+def _is_undo_of_last_move(successor, current) -> bool:
+    """QA 2026-10-17 F-06: hədəf sətir məhz BU cari sətirlə əvəzlənmiş tarixçədirmi.
+
+    Yanlış köçürmə (A → B) dərhal geri qaytarılanda (B → A) A-dakı köhnə sətir
+    ``dropped`` + ``superseded_by = B-sətri`` olur. Bu, son köçürmənin birbaşa
+    tərsidir — tarixçə sətri yenidən aktivləşdirilə bilər. Başqa səbəbdən
+    tarixçəyə düşmüş (və ya daha uzaq zəncirdəki) sətir üçün qayda dəyişmir:
+    inzibati yoxlama tələb olunur.
+    """
+    return (
+        successor.status == Enrollment.Status.DROPPED
+        and successor.superseded_by_id is not None
+        and successor.superseded_by_id == current.pk
+    )
+
+
+def _reactivate_predecessor(enrollment) -> None:
+    """Son köçürmənin tərsi: əvvəlki sətir bərpa olunur (silinmir, yeni sətir yaranmır).
+
+    ``superseded_by`` əvvəl boşaldılır ki, cari sətir ona bağlananda DB tetikləyicisi
+    (``registrar_enrollment_supersession_guard``) dövr görməsin.
+    """
+    enrollment.status = Enrollment.Status.ENROLLED
+    enrollment.superseded_by = None
+    enrollment.full_clean(validate_unique=False, validate_constraints=False)
+    enrollment.save(update_fields=["status", "superseded_by", "updated_at"])
+
+
 @transaction.atomic
 def transfer_student_group(*, record, new_group, period, by_user=None, reason=""):
     """Move a student without deleting or reactivating enrollment history.
+
+    Yeganə istisna (QA 2026-10-17 F-06): son köçürmənin dərhal tərsi (A → B → A)
+    — A-dakı sətir məhz B-sətri ilə əvəzlənibsə, o, yenidən aktivləşdirilir
+    (bax :func:`_is_undo_of_last_move`); B-sətri adi qaydada tarixçəyə keçir.
 
     Returns ``{"moved": <historical old enrollments>, "created": <new enrollments>,
     "record": record}``. A no-op (moved=0) when the group is unchanged or None."""
@@ -161,6 +198,7 @@ def transfer_student_group(*, record, new_group, period, by_user=None, reason=""
 
     created = 0
     successors = []
+    reactivated = []
     inherit_from_parent = _is_subgroup_of(new_group, old_group)
     for enrollment in old_enrollments:
         offering_is_new = not CourseOffering.objects.filter(
@@ -176,7 +214,10 @@ def transfer_student_group(*, record, new_group, period, by_user=None, reason=""
             kind=enrollment.kind,
             allow_inactive=True,  # aktiv sətir 1:1 daşınır — yeni fantom yaranmır (jurnal təmizliyi qapısı)
         )
-        if successor.status != Enrollment.Status.ENROLLED:
+        if _is_undo_of_last_move(successor, enrollment):
+            _reactivate_predecessor(successor)
+            reactivated.append(successor.pk)
+        elif successor.status != Enrollment.Status.ENROLLED:
             raise ValidationError(
                 "Yeni qrupun açılışında bu tələbəyə aid tarixi qeydiyyat var; "
                 "tarixçəni yenidən aktivləşdirmədən əvvəl inzibati yoxlama tələb olunur."
@@ -201,6 +242,7 @@ def transfer_student_group(*, record, new_group, period, by_user=None, reason=""
         reason,
         [enrollment.pk for enrollment in old_enrollments],
         [enrollment.pk for enrollment in successors],
+        reactivated,
     )
     finalize_authorized_group_transfer(
         evidence_id=evidence_id,

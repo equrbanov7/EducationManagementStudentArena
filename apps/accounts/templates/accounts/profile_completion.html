@@ -4,9 +4,10 @@
 {% block title %}{% trans "Məlumatlarınızı tamamlayın" context "accounts.profile_completion" %} | {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}?v=20261005-lang2">
+    <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}?v=20260909-focus">
+    <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}?v=20261017-scroll">
     <link rel="stylesheet" href="{% static 'accounts/css/login_first_login.css' %}?v=20260930-email">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile_completion.css' %}?v=20261017-2">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile_completion.css' %}?v=20261017-5">
 {% endblock %}
 
 {% block content %}
@@ -42,13 +43,31 @@
             {% for field in fields %}
             <div class="auth-form-field">
                 <label for="pc-{{ field.name }}">{{ field.spec.label }}</label>
+                {% if field.name == "phone" %}
+                <div class="pc-phone" data-pc-phone
+                     data-placeholder-local="{{ field.spec.placeholder }}"
+                     data-placeholder-other="{% trans 'məs: +90 555 123 45 67' context 'accounts.profile_completion' %}"
+                     data-other="{{ phone_operator_other }}">
+                    <span class="pc-phone__operator bootstrap-single-select">
+                        <select name="phone_operator" id="pc-phone-operator"
+                                class="form-select bootstrap-single-select__native"
+                                data-bootstrap-select data-pc-phone-operator
+                                aria-label="{% trans 'Operator kodu' context 'accounts.profile_completion' %}">
+                            {% for code in phone_operators %}
+                            <option value="{{ code }}"{% if code == phone_operator %} selected{% endif %}>{{ code }}</option>
+                            {% endfor %}
+                            <option value="{{ phone_operator_other }}"{% if phone_operator == phone_operator_other %} selected{% endif %}>{% trans "Xarici nömrə" context "accounts.profile_completion" %}</option>
+                        </select>
+                    </span>
+                {% endif %}
                 <input type="{{ field.spec.input_type }}" id="pc-{{ field.name }}" name="{{ field.name }}" value="{{ field.value }}"
                        maxlength="{{ field.spec.max_length }}" autocomplete="{{ field.spec.autocomplete }}"
                        inputmode="{{ field.spec.inputmode }}" placeholder="{{ field.spec.placeholder }}"
                        autocapitalize="{% if field.name == 'fin' %}characters{% else %}none{% endif %}" autocorrect="off" spellcheck="false"
                        class="{% if field.name == 'fin' %}pc-input--fin{% endif %}{% if field.error %} is-invalid{% endif %}"
                        required aria-describedby="pc-{{ field.name }}-why{% if field.error %} pc-{{ field.name }}-error{% endif %}"
-                       {% if field.error %}aria-invalid="true"{% endif %}{% if forloop.first %} autofocus{% endif %}>
+                       {% if field.error %}aria-invalid="true"{% endif %}{% if forloop.first %} autofocus{% endif %}{% if field.name == "phone" %} data-pc-phone-input{% endif %}>
+                {% if field.name == "phone" %}</div>{% endif %}
                 {% if field.error %}<p class="auth-field-error" id="pc-{{ field.name }}-error">{{ field.error }}</p>{% endif %}
                 <p class="pc-why" id="pc-{{ field.name }}-why">
                     <span class="pc-why__label">{% trans "Nəyə lazımdır:" context "accounts.profile_completion" %}</span>
@@ -66,6 +85,12 @@
             <button type="submit" class="auth-submit-btn">
                 {% trans "Saxla və davam et" context "accounts.profile_completion" %}
             </button>
+            {% if can_skip %}
+            <button type="submit" name="skip" value="1" formnovalidate class="pc-skip-btn" aria-describedby="pc-skip-note">
+                {% trans "Hələlik keç" context "accounts.profile_completion" %}
+            </button>
+            <p class="pc-skip-note" id="pc-skip-note">{% trans "Məlumatlar doldurulana qədər bu səhifə hər girişdə yenə göstəriləcək." context "accounts.profile_completion" %}</p>
+            {% endif %}
         </form>
 
         {# Çıxış YALNIZ POST ilə işləyir (logout_view). #}
@@ -75,4 +100,10 @@
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'js/bootstrap_select.js' %}?v=20261016-ms"></script>
+<script src="{% static 'accounts/js/profile_completion_phone.js' %}?v=20261017-1"></script>
 {% endblock %}

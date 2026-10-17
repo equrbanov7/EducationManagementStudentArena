@@ -53,6 +53,15 @@
         transform: translateX(-100%);
     }
 
+    /* QA-1 F9 (2026-10-17): səhifə yüklənəndə şkaf `collapsed`-siz render olunur, JS onu sonradan bağlayırdı —
+       hər yüklənmədə şkaf bir an AÇIQ görünüb sürüşürdü. İndi açıq-vəziyyət yalnız JS «açıq» bayrağını
+       (`body.profile-sidebar-open-mobile`, `ui.js` sinxronu) qoyandan sonra görünür; ilk boyada şkaf bağlıdır
+       və keçid animasiyası yoxdur. İstifadəçi açanda (`collapsed` düşür + bayraq qoyulur) normal sürüşmə var. */
+    body:not(.profile-sidebar-open-mobile) .profile-sidebar:not(.collapsed) {
+        transform: translateX(-100%);
+        transition: none;
+    }
+
     .profile-main {
         margin-left: 0;
         width: 100%;

@@ -35,6 +35,7 @@ from core.constants import AuditAction
 from core.roles import ProfileRole
 
 from ...models import UserProfile
+from . import fin_claims
 
 _CTX = "student_intake"
 
@@ -346,6 +347,9 @@ def create_account(
 
     if kind not in ACCOUNT_KINDS:
         raise IntakeApplyError("account_kind_unknown", pgettext(_CTX, "Naməlum hesab növü."))
+
+    # Rəsmi sətir özü yazılmış FİN-i tutan başqa hesaba üstün gəlir — FİN eyni savepoint-də götürülür (SEC-1 F2).
+    fin_claims.release_claim(values, actor=actor, organization=organization, request=request)
 
     password = generate_initial_password()
     user = _build_user(values, password=password)

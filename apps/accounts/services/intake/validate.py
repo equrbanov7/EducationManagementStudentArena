@@ -36,7 +36,7 @@ from core.constants import OrgUnitType
 from core.validators import validate_fin
 
 from ...identity import canonical_identity
-from . import create
+from . import create, fin_claims
 
 _CTX = "student_intake"
 
@@ -194,6 +194,8 @@ class IntakeContext:
         self.existing_fins = set(
             UserProfile.objects.filter(fin__in=list(fins)).values_list("fin", flat=True) if fins else []
         )
+        # Özü yazılmış (təsdiqlənməmiş) FİN-lər — rəsmi sətir onlara uduzmur (bax fin_claims, SEC-1 F2).
+        self.fin_claims = fin_claims.load_claims(self.existing_fins)
         self.existing_codes = set(
             UserProfile.objects.filter(
                 organization=self.organization, institutional_identifier__in=list(codes)
@@ -310,8 +312,12 @@ def _validate_identity(plan: RowPlan, row: dict, context: IntakeContext) -> bool
         return False
     context.seen_fins.add(fin)
     if fin in context.existing_fins:
-        plan.skip("fin_exists", pgettext(_CTX, "Bu FİN artıq sistemdə var — sətir ötürülür."))
-        return False
+        claim = getattr(context, "fin_claims", {}).get(fin)
+        if claim is None:
+            plan.skip("fin_exists", pgettext(_CTX, "Bu FİN artıq sistemdə var — sətir ötürülür."))
+            return False
+        if not fin_claims.resolve(plan, claim, first_name, last_name):
+            return False
 
     plan.values.update(
         {

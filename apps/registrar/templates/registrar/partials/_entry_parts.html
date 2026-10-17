@@ -15,4 +15,7 @@ Tavanlar hesabın İŞLƏTDİYİ qaydadan gəlir (sahib 2026-10-10): Midterm /30
     {% if parts.selfwork_active %}
     <span class="ems-badge ems-badge--neutral">{% trans "Sərbəst iş" context "registrar.journal" %}: <strong>{{ parts.selfwork|floatformat:"-2" }}</strong>/{{ parts.selfwork_max|floatformat:"-2" }}</span>
     {% endif %}
+    {% if parts.rounded_from is not None %}
+    <span class="ems-badge ems-badge--info" data-entry-rounding title="{% trans 'İmtahana qədər bal tam ədəddir: hissələrin cəmi yarım-yuxarı yuvarlaqlaşdırılır (məs. 9,5 → 10, 9,4 → 9).' context 'registrar.journal' %}">{% trans "Cəm" context "registrar.journal" %}: {{ parts.rounded_from|floatformat:"-2" }} → <strong>{{ parts.total }}</strong></span>
+    {% endif %}
 </div>

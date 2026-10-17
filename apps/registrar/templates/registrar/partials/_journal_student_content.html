@@ -66,7 +66,12 @@ kollokvium markerləri). Bu günün qeydləri də DƏRHAL görünür (sahib 2026
         {% endfor %}
     </div>
     {% else %}
+    {% if sec.exempt_subjects %}
+    <div class="journal-empty"><i class="fas fa-user-check"></i><p>{% trans "Bu semestrdə jurnalı aktiv fənniniz yoxdur — qeydiyyatda olduğunuz fənlərdən azad edilmisiniz. Qrupunuz dəyişmir." context "registrar.journal_exempt" %}</p>
+        <ul class="sjx-exempt-list">{% for item in sec.exempt_subjects %}<li>{{ item.name }} · <b>{% trans "Azad edilib" context "profile.subjects" %}</b></li>{% endfor %}</ul></div>
+    {% else %}
     <div class="journal-empty"><i class="fas fa-folder-open"></i><p>{% trans "Bu semestr üçün fənn qeydiyyatı tapılmadı." context "registrar.journal" %}</p></div>
+    {% endif %}
     {% endif %}
     {% else %}
     {# ── Detal: geri düyməsi + fənn/müəllim başlığı ──────────────────────────── #}

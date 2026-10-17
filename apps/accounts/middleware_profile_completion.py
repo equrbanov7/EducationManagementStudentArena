@@ -67,11 +67,17 @@ class ProfileCompletionMiddleware:
     LIVE_PLAYER_PREFIXES = ("/live/join/", "/live/wait/", "/live/play/", "/live/state/")
     LIVE_PIN_ENTRY_PATH = "/live/"
     EXAM_PREFIXES = ("/exams/",)
+    #: QA-1 P2 (2026-10-17): tələbənin imtahan SİYAHISI kabinet bölməsidir — ``/exams/`` və ``/exams/available/``
+    #: ``?section=assigned-exams``-ə yönləndirir. Yalnız bu bölmə (səhifə + AJAX fraqmenti) qapıda dayanmır;
+    #: kabinetin qalan bölmələri qapılı qalır (``my-exams`` — müəllimin idarə səhifəsidir, qapılıdır).
+    EXAM_CABINET_SECTIONS = ("assigned-exams",)
 
     def __init__(self, get_response):
         self.get_response = get_response
         self._exempt_paths = None
         self._exempt_prefixes = None
+        self._profile_path = None
+        self._exam_section_paths = frozenset()
 
     def __call__(self, request):
         user = getattr(request, "user", None)
@@ -79,7 +85,11 @@ class ProfileCompletionMiddleware:
             return self.get_response(request)
         if getattr(request, "is_view_as", False) or not policy.gate_enabled():
             return self.get_response(request)
-        if self._is_exempt_path(request.path_info or request.path):
+        path = request.path_info or request.path
+        if self._is_exempt_path(path) or self._is_exam_cabinet_section(request, path):
+            return self.get_response(request)
+        if policy.skipped_in_session(request):
+            # «Hələlik keç» — yalnız bu sessiya; növbəti girişdə səhifə yenə gəlir.
             return self.get_response(request)
         if not policy.missing_for_request(request):
             return self.get_response(request)
@@ -104,8 +114,25 @@ class ProfileCompletionMiddleware:
             prefixes.append(reverse("admin:index"))
         except NoReverseMatch:  # pragma: no cover — admin bağlıdırsa
             pass
+        try:
+            self._profile_path = reverse("accounts:profile")
+            self._exam_section_paths = frozenset(
+                reverse("accounts:profile_section_fragment", kwargs={"section": section})
+                for section in self.EXAM_CABINET_SECTIONS
+            )
+        except NoReverseMatch:  # pragma: no cover — kabinet marşrutu yoxdursa istisna da yoxdur
+            self._profile_path, self._exam_section_paths = None, frozenset()
         self._exempt_paths = frozenset(paths)
         self._exempt_prefixes = tuple(prefixes)
+
+    def _is_exam_cabinet_section(self, request, path: str) -> bool:
+        """Kabinetin imtahan siyahısı bölməsi (``?section=assigned-exams`` və ya onun AJAX fraqmenti)."""
+        if request.method not in ("GET", "HEAD"):
+            return False
+        self._resolve()
+        if path in self._exam_section_paths:
+            return True
+        return path == self._profile_path and (request.GET.get("section") or "") in self.EXAM_CABINET_SECTIONS
 
     def _is_exempt_path(self, path: str) -> bool:
         if path.startswith(_STATIC_EXEMPT_PREFIXES):

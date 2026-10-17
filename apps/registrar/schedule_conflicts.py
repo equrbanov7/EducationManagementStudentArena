@@ -46,6 +46,10 @@ QAYDALAR
 
 from __future__ import annotations
 
+from collections import namedtuple
+
+from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.utils.translation import pgettext
 
 from apps.registrar.models import ScheduleSlot, SlotKind, WeekType
@@ -204,6 +208,63 @@ def live_slots(organization, *, weekday=None, period_id=None):
     )
 
 
+#: Otaq məşğulluğu üçün yüngül sətir (PERF-1 F-07, 2026-10-17): ``_busy_rooms`` / otaq toqquşması
+#: yalnız bu sahələri oxuyur — bütün semestr üçün tam model obyekti qurulmur.
+RoomRow = namedtuple("RoomRow", "pk weekday start_time end_time week_type room")
+
+
+def _sql_pk(field, value):
+    """Süzgəc üçün pk dəyəri; yararsız id (``"abc"``) ``None`` — Python müqayisəsi onsuz da tutmur."""
+    if not value:
+        return None
+    try:
+        return field.target_field.to_python(value)
+    except (ValidationError, TypeError, ValueError):
+        return None
+
+
+def owner_slots(organization, *, period_id=None, group_id=None, instructor_id=None) -> list:
+    """Yalnız qrupun VƏ YA (effektiv) müəllimin canlı slotları — tam obyekt (``live_slots`` ilə eyni).
+
+    SQL süzgəci üst-çoxluqdur; dəqiq seçim ``same_id`` ilə Python-da (``detect`` ilə EYNİ müqayisə),
+    ona görə nəticə «bütün slotları yüklə + Python-da süz» ilə eynidir, sadəcə semestrin qalanı yüklənmir."""
+    group_pk = _sql_pk(ScheduleSlot._meta.get_field("offering").related_model._meta.get_field("group"), group_id)
+    teacher_pk = _sql_pk(ScheduleSlot._meta.get_field("instructor"), instructor_id)
+    conditions = []
+    if group_pk is not None:
+        conditions.append(Q(offering__group_id=group_pk))
+    if teacher_pk is not None:
+        conditions.append(Q(instructor_id=teacher_pk) | Q(instructor__isnull=True, offering__instructor_id=teacher_pk))
+    if not conditions:
+        return []
+    condition = conditions[0] if len(conditions) == 1 else conditions[0] | conditions[1]
+    return [
+        slot
+        for slot in live_slots(organization, period_id=period_id).filter(condition)
+        if same_id(group_id, slot.offering.group_id) or same_id(instructor_id, effective_instructor_id(slot))
+    ]
+
+
+def room_rows(organization, *, period_id=None, exclude_ids=()) -> list:
+    """Otağı yazılmış canlı slotlar — yüngül :data:`RoomRow` (bir ``values_list`` sorğusu)."""
+    excluded = {str(value) for value in (exclude_ids or ()) if value}
+    queryset = ScheduleSlot.objects.filter(organization=organization, is_parked=False).exclude(room="")
+    if period_id:
+        queryset = queryset.filter(offering__period_id=period_id)
+    fields = ("pk", "weekday", "start_time", "end_time", "week_type", "room")
+    return [RoomRow(*row) for row in queryset.values_list(*fields) if str(row[0]) not in excluded]
+
+
+def _room_taken(rows, *, weekday, start_time, end_time, week_type, room_norm) -> bool:
+    return any(
+        row.weekday == weekday
+        and time_ranges_overlap(start_time, end_time, row.start_time, row.end_time)
+        and week_types_overlap(week_type, row.week_type)
+        and room_norm == (row.room or "").strip().lower()
+        for row in rows
+    )
+
+
 def detect(
     *,
     organization,
@@ -309,13 +370,35 @@ def suggest(
     from apps.registrar import schedule_grid
 
     weekdays = weekdays or schedule_grid.TEACHING_WEEKDAYS
-    rows = list(live_slots(organization, period_id=period_id))
+    # PERF-1 F-07: tam obyekt yalnız qrupun/müəllimin slotları üçün; qalan slotlar yalnız OTAQ
+    # toqquşması verə bilər (axın/paralel qayda müəllim/qrup tələb edir) — onlar yüngül sətirdir.
+    rows = owner_slots(organization, period_id=period_id, group_id=group_id, instructor_id=instructor_id)
+    room_norm = (room or "").strip().lower()
+    mine_ids = {str(slot.pk) for slot in rows}
+    others = (
+        [
+            row
+            for row in room_rows(organization, period_id=period_id, exclude_ids=exclude_ids)
+            if str(row.pk) not in mine_ids
+        ]
+        if room_norm
+        else []
+    )
     periods = [row for row in schedule_grid.lesson_periods(organization) if not shift or row["shift"] == shift]
 
     out = []
     for weekday, day_label in weekdays:
         load = _day_load(rows, weekday, group_id, instructor_id)
         for period in periods:
+            if others and _room_taken(
+                others,
+                weekday=weekday,
+                start_time=period["start"],
+                end_time=period["end"],
+                week_type=week_type,
+                room_norm=room_norm,
+            ):
+                continue
             clashes = detect(
                 organization=organization,
                 weekday=weekday,

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q
+from django.utils.translation import pgettext
 
 #: legacy_rooms fazası / seed_qku_campuses_rooms.py ilə eyni prefiks.
 LEGACY_ROOM_CODE_PREFIX = "myedu-room-"
@@ -26,12 +27,55 @@ LEGACY_ROOM_CODE_PREFIX = "myedu-room-"
 # korpus sadəcə otaq siyahısını daraldan süzgəcdir.
 
 
+def _disambiguation_texts(room: dict) -> dict:
+    """Bir otağın fərqləndirici mətnləri: korpus, mərtəbə, tutum, kod (boş sahə yoxdur)."""
+    ctx = "registrar.journal_room"
+    texts = {}
+    if room["building"]:
+        texts["building"] = pgettext(ctx, "korpus %(value)s") % {"value": room["building"]}
+    if room["floor"]:
+        texts["floor"] = pgettext(ctx, "mərtəbə %(value)s") % {"value": room["floor"]}
+    if room["capacity"]:
+        texts["capacity"] = pgettext(ctx, "%(value)s yer") % {"value": room["capacity"]}
+    if room["code"]:
+        texts["code"] = pgettext(ctx, "kod %(value)s") % {"value": room["code"]}
+    return texts
+
+
+def _disambiguate(rooms: list[dict]) -> None:
+    """Eyni etiketli otaqlara (məs. bir korpusda iki «102») fərqləndirici şəkilçi əlavə edir (QA-1 F5).
+
+    Yalnız toqquşan etiketlər dəyişir (təkrarsız «102» olduğu kimi qalır). Qrupu ayıran sahələr
+    (korpus → mərtəbə → tutum → kod) qrup tam ayrılana qədər ardıcıl əlavə olunur; sonda da eyni
+    qalanlara sıra nömrəsi qoyulur — iki otaq HEÇ VAXT eyni görünmür."""
+    groups: dict[str, list[dict]] = {}
+    for room in rooms:
+        groups.setdefault(room["name"].casefold(), []).append(room)
+    for group in (members for members in groups.values() if len(members) > 1):
+        texts = {id(room): _disambiguation_texts(room) for room in group}
+        suffixes = {id(room): [] for room in group}
+        for kind in ("building", "floor", "capacity", "code"):
+            if len({texts[id(room)].get(kind, "") for room in group}) <= 1:
+                continue  # bu sahə qrupu ayırmır
+            for room in group:
+                if texts[id(room)].get(kind):
+                    suffixes[id(room)].append(texts[id(room)][kind])
+            if len({tuple(suffixes[id(room)]) for room in group}) == len(group):
+                break
+        seen: dict[str, int] = {}
+        for room in group:
+            label = room["name"] + (" · " + ", ".join(suffixes[id(room)]) if suffixes[id(room)] else "")
+            seen[label] = seen.get(label, 0) + 1
+            room["name"] = label if seen[label] == 1 else f"{label} #{seen[label]}"
+
+
 def lesson_room_choices(offering):
     """Dərs modalı üçün otaqlar — təşkilatın AKTİV otaqları, korpusu ilə birlikdə.
 
     Qaytarır ``[{"id", "name", "building", "capacity"}]``; JS seçilmiş korpusa görə
     süzür. Siyahı kiçikdir (universitetdə onlarla/yüzlərlə otaq), ona görə modala
-    JSON kimi yerləşdirilir — ayrıca AJAX kaskadı və gözləmə olmur."""
+    JSON kimi yerləşdirilir — ayrıca AJAX kaskadı və gözləmə olmur. Eyni etiketli otaqlar
+    (iki «102») korpus / mərtəbə / tutum şəkilçisi ilə ayırd edilir (``_disambiguate``)."""
     rooms = offering.organization.exam_rooms.filter(is_active=True).order_by("building", "name", "code")
     out = []
     for room in rooms:
@@ -46,8 +90,14 @@ def lesson_room_choices(offering):
                 "name": label,
                 "building": (room.building or "").strip(),
                 "capacity": room.capacity or 0,
+                "floor": (room.floor or "").strip(),
+                "code": "" if code.startswith(LEGACY_ROOM_CODE_PREFIX) else code,
             }
         )
+    _disambiguate(out)
+    for room in out:  # köməkçi sahələr cavabda yoxdur (JS-in oxuduğu forma dəyişmir)
+        room.pop("floor", None)
+        room.pop("code", None)
     return out
 
 

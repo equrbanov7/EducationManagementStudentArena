@@ -129,8 +129,9 @@ class JournalHistoryTest(TestCase):
         self.assertTrue(data["ok"])
         self.assertEqual(len(data["entries"]), 2)
         newest, oldest = data["entries"]
-        self.assertEqual(newest["rows"][0]["old"], "iə 8")
-        self.assertEqual(newest["rows"][0]["new"], "iə 9")
+        # Saxlanan audit kodu «iə» jurnal şəbəkəsindəki yazılışla («i/e») göstərilir (QA-1 F7).
+        self.assertEqual(newest["rows"][0]["old"], "i/e 8")
+        self.assertEqual(newest["rows"][0]["new"], "i/e 9")
         self.assertEqual(oldest["rows"][0]["old"], "—")
         row = newest["rows"][0]
         self.assertEqual(row["student"], "Əli İsmayılov")
@@ -144,6 +145,19 @@ class JournalHistoryTest(TestCase):
         # Süzgəc seçimləri — açılışın dərs tarixləri (yalnız ilk, süzgəcsiz səhifədə).
         self.assertEqual(data["dates"][0]["value"], "2024-10-01")
         self.assertEqual(data["total"], 2)
+
+    def test_attendance_codes_are_shown_like_the_grid(self):
+        """Saxlanan «iə»/«qb» tarixçədə «i/e»/«q/b» göstərilir; audit mətni özü dəyişmir (QA-1 F7)."""
+        self._log(old="—", new="qb")
+        self._log(old="qb", new="iə 8")
+        self._log(old="üq", new="Mühazirə")
+        entries = self._client(self.teacher).get(self._url()).json()["entries"]
+        pairs = [(row["old"], row["new"]) for entry in entries for row in entry["rows"]]
+        self.assertIn(("—", "q/b"), pairs)
+        self.assertIn(("q/b", "i/e 8"), pairs)
+        self.assertIn(("üq", "Mühazirə"), pairs)  # üzrlü / başqa mətnə toxunulmur
+        self.assertEqual(journal_history.display_mark("qbx"), "qbx")
+        self.assertEqual(journal_history.display_mark("iə"), "i/e")
 
     def test_pagination_after_twenty_entries(self):
         for index in range(25):

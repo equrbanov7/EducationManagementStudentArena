@@ -26,6 +26,7 @@ from apps.audit.public import log_action
 from core.constants import AuditAction, OrgUnitType
 
 from . import create as create_mod
+from . import fin_claims
 from .parsing import read_rows as _read_rows
 from .spec import Column, normalize_header
 from .validate import PLACEHOLDER_DOMAIN, IntakeContext, RowPlan, _parse_date, _parse_gender, _text, _validate_identity
@@ -256,6 +257,8 @@ def summarize(plans) -> dict:
 def apply_plans(*, organization, plans, actor, request=None) -> dict:
     """Planları icra edir — sətir başına savepoint; parol yalnız cavabda."""
     role = create_mod.teacher_role(organization)
+    # Ad-soyadı uyğun gələn özü yazılmış FİN-lər rəsmi mənbə ilə təsdiqlənir (SEC-1 F2).
+    fin_claims.confirm_matching_claims(plans, actor=actor, organization=organization, request=request)
     results: list = []
     credentials: list = []
     created = failed = skipped = 0

@@ -24,7 +24,7 @@ from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
-from apps.registrar.models import Enrollment, ScheduleSlot, SlotKind, WeekType
+from apps.registrar.models import Enrollment, HygieneCategory, JournalHygieneDecision, ScheduleSlot, SlotKind, WeekType
 
 
 def effective_instructor_id(slot):
@@ -249,11 +249,29 @@ def _slots_for(queryset):
     )
 
 
-def get_group_schedule(*, organization, group, period):
-    """All slots for a group's offerings in a period (student view)."""
-    return _slots_for(
-        ScheduleSlot.objects.filter(organization=organization, offering__group=group, offering__period=period)
-    )
+def _exempt_offering_ids(student, period):
+    """Tələbənin «Fəndən azad» edildiyi açılışların id-ləri (alt-sorğu) — onun cədvəlindən düşür (QA-1 F6).
+
+    Qrup üzvlüyü dəyişmir, yalnız bu fənn tələbənin ÖZ cədvəlində / «növbəti dərs»ində göstərilmir; qrupun
+    cədvəli (müəllim, redaktor) toxunulmazdır. Yalnız qüvvədə olan (geri alınmamış) ``subject_exempt`` qərarı
+    + qeydiyyatın hələ ``dropped`` olması sayılır — ``subject_exempt.student_exempt_subjects`` ilə eyni tərif."""
+    return JournalHygieneDecision.objects.filter(
+        category=HygieneCategory.SUBJECT_EXEMPT.value,
+        reverted_at__isnull=True,
+        enrollment__student=student,
+        enrollment__status=Enrollment.Status.DROPPED,
+        enrollment__offering__period=period,
+    ).values("enrollment__offering_id")
+
+
+def get_group_schedule(*, organization, group, period, exclude_exempt_for=None):
+    """All slots for a group's offerings in a period (student view).
+
+    ``exclude_exempt_for`` — tələbə (istifadəçi): verilərsə onun «Fəndən azad» olduğu fənlər çıxarılır."""
+    queryset = ScheduleSlot.objects.filter(organization=organization, offering__group=group, offering__period=period)
+    if exclude_exempt_for is not None:
+        queryset = queryset.exclude(offering_id__in=_exempt_offering_ids(exclude_exempt_for, period))
+    return _slots_for(queryset)
 
 
 def get_student_schedule(organization, student, group, period):
@@ -266,7 +284,11 @@ def get_student_schedule(organization, student, group, period):
         organization=organization, student=student, status=Enrollment.Status.ENROLLED, offering__period=period
     ).values("offering_id")
     scope = Q(offering__group=group) | Q(offering_id__in=enrolled) if group is not None else Q(offering_id__in=enrolled)
-    return _slots_for(ScheduleSlot.objects.filter(organization=organization, offering__period=period).filter(scope))
+    return _slots_for(
+        ScheduleSlot.objects.filter(organization=organization, offering__period=period)
+        .filter(scope)
+        .exclude(offering_id__in=_exempt_offering_ids(student, period))
+    )
 
 
 def get_teacher_schedule(*, organization, teacher, period):

@@ -32,6 +32,7 @@ from __future__ import annotations
 import datetime
 
 from django.apps import apps as django_apps
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import pgettext
 
@@ -93,7 +94,8 @@ def can_manage_offering(user, organization, offering) -> bool:
     """Bu KONKRET açılışın cədvəlini aktor idarə edə bilirmi (fail-closed).
 
     Superuser/org sahibi həmişə; qalanlar üçün ``schedule.manage`` + açılışın
-    QRUP bölməsinin aktorun alt-ağacında olması. Açılışın MÜƏLLİMİ olmaq tək
+    QRUP bölməsinin aktorun alt-ağacında olması (və ya :func:`_extra_offering_q` —
+    kafedranın öz fənni / aktorun tyutoru olduğu qrup). Açılışın MÜƏLLİMİ olmaq tək
     başına səlahiyyət VERMİR (sahibin qərarı).
     """
     if offering is None or organization is None:
@@ -106,11 +108,99 @@ def can_manage_offering(user, organization, offering) -> bool:
         return True
     if getattr(organization, "owner_id", None) == getattr(user, "pk", None):
         return True
-    return journal_scope.offering_in_actor_scope(user, organization, offering, permission=SCHEDULE_PERMISSION)
+    if journal_scope.offering_in_actor_scope(user, organization, offering, permission=SCHEDULE_PERMISSION):
+        return True
+    extra = _extra_offering_q(user, organization, actor_scope(user, organization, SCHEDULE_PERMISSION), widened=True)
+    return extra is not None and CourseOffering.objects.filter(pk=offering.pk).filter(extra).exists()
 
 
-def scoped_groups(user, organization, *, permission=SCHEDULE_PERMISSION):
-    """Aktorun cədvəlini qura (``permission=schedule.view`` ilə: görə) biləcəyi QRUP bölmələri (fail-closed)."""
+def can_manage_group_subject(user, organization, group, subject) -> bool:
+    """(qrup, fənn) cütünün cədvəlini aktor qura bilirmi — açılış YARADILMAZDAN / dəyişdirilməzdən ƏVVƏL.
+
+    Review 2026-10-17 (FIX-D): «Xanaya dərs qoy» açılışı ``resolve_offering(create=True)`` ilə yaradır / müəllim
+    bağlayır; ``ATOMIC_REQUESTS`` altında sonrakı 403 bu yazını GERİ ALMIR. Ona görə səlahiyyət cüt üzrə əvvəlcədən
+    yoxlanılır — :func:`can_manage_offering` ilə EYNİ qayda (qrup alt-ağacı, kafedranın öz fənni, tyutorun qrupu).
+    """
+    if group is None or subject is None or organization is None:
+        return False
+    if getattr(group, "organization_id", None) != organization.pk:
+        return False
+    if getattr(subject, "organization_id", None) != organization.pk:
+        return False
+    if not getattr(user, "is_authenticated", False):
+        return False
+    if getattr(user, "is_superuser", False) or getattr(organization, "owner_id", None) == getattr(user, "pk", None):
+        return True
+    scope = actor_scope(user, organization)
+    if not scope.has_structure_access:
+        return False
+    if scope.is_org_wide:
+        return True
+    in_subtree = _org_unit_model().objects.filter(organization=organization, pk=group.pk).filter(scope.unit_subtree_q())
+    if in_subtree.exists() or (group.head_id is not None and group.head_id == user.pk and group.is_active):
+        return True
+    chair_q = _chair_subject_q(organization, scope, prefix="")
+    if chair_q is None:
+        return False
+    from apps.registrar.models import Subject
+
+    return Subject.objects.filter(organization=organization, pk=subject.pk).filter(chair_q).exists()
+
+
+def _chair_subject_q(organization, scope, *, prefix="subject__"):
+    """QA 2026-10-17 F-05: KAFEDRA kökləri üçün açılışın FƏNNİNİN sahib kafedrası (``subject.chair_unit``).
+
+    Bu universitetdə qruplar kafedranın deyil, fakültənin altındadır — kafedra alt-ağacında qrup yoxdur,
+    ona görə kafedra müdiri (və kafedraya təyin olunmuş tyutor) «Cədvəl idarəetməsi»ndə 0 qrup görürdü.
+    Kafedra kökünün əhatəsi indi ÖZ KAFEDRASININ fənlərinin açılışlarıdır (başqa kafedranın fənni yox).
+    Yalnız ``chair`` / ``department`` tipli köklər (``Subject.chair_unit`` ikisini də qəbul edir);
+    fakültə / ixtisas / qrup kökləri əvvəlki kimi qrup alt-ağacı ilə qalır.
+    """
+    from core.constants import OrgUnitType
+
+    if not scope.is_unit_scoped or not scope.unit_ids:
+        return None
+    chairs = list(
+        _org_unit_model()
+        .objects.filter(
+            organization=organization,
+            pk__in=list(scope.unit_ids),
+            unit_type__in=(OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT),
+            is_active=True,
+        )
+        .values_list("pk", "path")
+    )
+    if not chairs:
+        return None
+    q = Q(**{f"{prefix}chair_unit_id__in": [pk for pk, _path in chairs]})
+    for _pk, path in chairs:
+        if path:
+            q |= Q(**{f"{prefix}chair_unit__path__startswith": f"{path}/"})
+    return q
+
+
+def _extra_offering_q(user, organization, scope, *, widened=False):
+    """Qrup alt-ağacından ƏLAVƏ açılış əhatəsi: aktorun TYUTORU olduğu qruplar (+ ``widened``: kafedra fənləri).
+
+    Tyutor qrupun «rəhbəri»dir (``OrgUnit.head`` — qrup reyestrindəki «Tyutor» sütunu); açar
+    (``schedule.manage``) struktur əhatəsi verirsə, öz qruplarının cədvəlini də qurur — bu, QRUP səviyyəli
+    əhatədir (dar). Kafedra fənləri yalnız AÇILIŞ səviyyəlidir (``widened=True``): redaktorun oxu görünüşü və
+    hüceyrə əməlləri; qrup səviyyəli yazılar (növbə siyasəti, generator əhatəsi, dərc) dar əhatədə qalır.
+    Əhatəsiz aktora heç nə əlavə olunmur (fail-closed). ``None`` — əlavə əhatə yoxdur.
+    """
+    if not scope.is_unit_scoped:
+        return None
+    headed = Q(group__head_id=getattr(user, "pk", None), group__is_active=True)
+    extra = _chair_subject_q(organization, scope) if widened else None
+    return headed if extra is None else (extra | headed)
+
+
+def scoped_groups(user, organization, *, permission=SCHEDULE_PERMISSION, widened=False):
+    """Aktorun cədvəlini qura (``permission=schedule.view`` ilə: görə) biləcəyi QRUP bölmələri (fail-closed).
+
+    Defolt DAR əhatədir (alt-ağac + tyutorun qrupları) — qrup səviyyəli yazılar və generator bunu işlədir.
+    ``widened=True`` kafedra fənninin açılışı olan qrupları da qatır (yalnız redaktorun oxu görünüşü / hüceyrə
+    seçimi; hüceyrə yazısı əlavə olaraq :func:`can_manage_group_subject` ilə yoxlanılır)."""
     from core.constants import OrgUnitType
 
     org_unit_model = _org_unit_model()
@@ -124,11 +214,18 @@ def scoped_groups(user, organization, *, permission=SCHEDULE_PERMISSION):
         return org_unit_model.objects.none()
     if scope.is_org_wide:
         return base.order_by("name")
-    return base.filter(scope.unit_subtree_q()).order_by("name")
+    groups_q = scope.unit_subtree_q()
+    extra = _extra_offering_q(user, organization, scope, widened=widened)
+    if extra is not None:
+        extra_groups = CourseOffering.objects.filter(organization=organization, is_active=True).filter(extra)
+        groups_q |= Q(pk__in=extra_groups.values("group_id"))
+    return base.filter(groups_q).order_by("name")
 
 
-def scoped_offerings(user, organization, *, period=None, group=None, permission=SCHEDULE_PERMISSION):
-    """Aktorun cədvəlinə slot yaza (``permission=schedule.view`` ilə: görə) biləcəyi açılışlar (fail-closed)."""
+def scoped_offerings(user, organization, *, period=None, group=None, permission=SCHEDULE_PERMISSION, widened=False):
+    """Aktorun cədvəlinə slot yaza (``permission=schedule.view`` ilə: görə) biləcəyi açılışlar (fail-closed).
+
+    ``widened`` — :func:`scoped_groups` ilə eyni məna (kafedra fənləri yalnız redaktorun oxu görünüşündə)."""
     if organization is None:
         return CourseOffering.objects.none()
     queryset = CourseOffering.objects.filter(organization=organization, is_active=True)
@@ -144,7 +241,11 @@ def scoped_offerings(user, organization, *, period=None, group=None, permission=
     if scope.is_org_wide:
         return queryset
     units = _org_unit_model().objects.filter(organization=organization).filter(scope.unit_subtree_q())
-    return queryset.filter(group__in=units.values("pk"))
+    offerings_q = Q(group__in=units.values("pk"))
+    extra = _extra_offering_q(user, organization, scope, widened=widened)
+    if extra is not None:
+        offerings_q |= extra
+    return queryset.filter(offerings_q)
 
 
 # ── Slot validasiyası (PREVENT, don't save) ──────────────────────────────────
@@ -345,6 +446,7 @@ __all__ = [
     "SCHEDULE_VIEW_PERMISSION",
     "actor_scope",
     "can_manage",
+    "can_manage_group_subject",
     "can_manage_offering",
     "can_view",
     "check_slot",

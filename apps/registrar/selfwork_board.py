@@ -51,13 +51,13 @@ from decimal import Decimal
 
 from django.utils import timezone
 
+from apps.registrar import read_memo
 from apps.registrar import selfwork_points as rules
 from apps.registrar import selfwork_structure as structure
 from apps.registrar.gradebook import mark_edit_window
 from apps.registrar.models import (
     ComponentKind,
     ComponentScore,
-    Enrollment,
     SelfWorkMark,
     SelfWorkTopic,
 )
@@ -190,11 +190,7 @@ def get_selfwork_board(offering, *, with_structure=True):
     (köhnə ``si`` balı və ya None) və ``total`` (bax :func:`effective_total`);
     lövhədə ``has_archive`` — arxiv sütununun göstərilib-göstərilməyəcəyi."""
     topics = list(SelfWorkTopic.objects.filter(offering=offering).order_by("order", "created_at"))
-    enrollments = list(
-        offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
-        .select_related("student", "student__profile")
-        .order_by("student__last_name", "student__username")
-    )
+    enrollments = read_memo.enrolled_roster(offering)  # jurnal GET-də tablar arasında bir sorğu (PERF-1 F-06)
     now = timezone.now()
     mark_map = {}
     graded_topics = set()

@@ -108,7 +108,8 @@ def _clean(missing_keys, data) -> tuple[dict, dict]:
     values, errors = {}, {}
     for key in missing_keys:
         try:
-            values[key] = policy.CLEANERS[key](data.get(key))
+            raw = policy.combine_phone(data) if key == policy.FIELD_PHONE else data.get(key)
+            values[key] = policy.CLEANERS[key](raw)
         except ValidationError as exc:
             errors[key] = exc.messages[0]
     return values, errors
@@ -128,7 +129,9 @@ def _write(user, values: dict, *, completed: bool) -> None:
     profile_fields = ["updated_at"]
     if policy.FIELD_FIN in values:
         profile.fin = values[policy.FIELD_FIN]
-        profile_fields.append("fin")
+        # Özü yazdığı FİN təsdiqlənməmişdir — rəsmi idxal fərqli adla gəlsə üstün gəlir (SEC-1 F2).
+        profile.fin_self_reported = True
+        profile_fields += ["fin", "fin_self_reported"]
     if policy.FIELD_PHONE in values:
         profile.phone = values[policy.FIELD_PHONE]
         profile_fields.append("phone")
