@@ -16,7 +16,7 @@ Kim sayılır (təşkilatın üzvü — istənilən vəziyyətdə üzvlük və y
   ayrıca sayılır, şübhəli sayılmır).
 
 QA hesabları (``qa.*``) qəsdən təqaüdə çıxarılıb — hesabata DÜŞMÜR. ``unblock_teachers_with_load`` YALNIZ
-``blocked`` + ``teacher_with_load`` (tələbə olmayan) hesabları rəsmi servislə
+«Forma 7» idxalının blokladığı ``blocked`` + ``teacher_with_load`` (tələbə olmayan) hesabları rəsmi servislə
 (``account_deletion.unblock_account`` — audit sətri yazır) açır; tələbələr heç vaxt avtomatik açılmır.
 """
 
@@ -31,6 +31,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Count, Q
 
 from .account_deletion import AccountDeletionError, unblock_account
+from .teacher_roster.apply import BLOCK_REASON_CODE as ROSTER_BLOCK_REASON_CODE
 from .teacher_roster.protection import STUDENT_ROLE_NAMES, TEACHING_ROLE_NAMES
 
 QA_USERNAME = re.compile(r"^qa\.")
@@ -279,7 +280,9 @@ class BlockedAccountsReport:
             row.enrollments = enrollments.get(row.user_id, 0)
 
     def unblock_teachers_with_load(self, *, actor=None) -> int:
-        """Yalnız ``blocked`` + ``teacher_with_load`` (tələbə deyil) — rəsmi ``unblock_account`` ilə."""
+        """Yalnız «Forma 7» idxalının blokladığı ``blocked`` + ``teacher_with_load`` (tələbə deyil) — rəsmi
+        ``unblock_account`` ilə. Əl ilə (təhlükəsizlik, işdən çıxma, intizam …) bloklananlar AÇILMIR — hesabatda
+        ``manual_review`` kimi qalır (SEC-1 F3, 2026-10-17)."""
         users = get_user_model().objects.in_bulk([row.user_id for row in self.rows if self._can_unblock(row)])
         done = 0
         for row in self.rows:
@@ -297,7 +300,21 @@ class BlockedAccountsReport:
 
     @staticmethod
     def _can_unblock(row: Row) -> bool:
-        return row.status == STATUS_BLOCKED and row.flag == FLAG_TEACHER_LOAD and not row.is_student
+        return (
+            row.status == STATUS_BLOCKED
+            and row.flag == FLAG_TEACHER_LOAD
+            and not row.is_student
+            and row.block_source == "teacher_roster"
+            and row.block_reason_code == ROSTER_BLOCK_REASON_CODE
+        )
+
+    @staticmethod
+    def _needs_review(row: Row) -> bool:
+        return (
+            row.status == STATUS_BLOCKED
+            and row.flag == FLAG_TEACHER_LOAD
+            and not BlockedAccountsReport._can_unblock(row)
+        )
 
     def counters(self) -> dict:
         out = Counter({status: 0 for status in STATUSES})
@@ -305,6 +322,7 @@ class BlockedAccountsReport:
         out["total"] = len(self.rows)
         out[FLAG_TEACHER_LOAD] = sum(1 for row in self.rows if row.flag == FLAG_TEACHER_LOAD)
         out[f"{FLAG_TEACHER_LOAD}_blocked"] = sum(1 for row in self.rows if self._can_unblock(row))
+        out[f"{FLAG_TEACHER_LOAD}_manual_review"] = sum(1 for row in self.rows if self._needs_review(row))
         out[FLAG_STUDENT_ENROLLED] = sum(1 for row in self.rows if row.flag == FLAG_STUDENT_ENROLLED)
         out[FLAG_ARCHIVED_RECORD] = sum(1 for row in self.rows if row.flag == FLAG_ARCHIVED_RECORD)
         out["unblocked"] = sum(1 for row in self.rows if row.action == "unblocked")

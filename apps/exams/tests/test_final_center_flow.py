@@ -370,6 +370,25 @@ class RoomLifecycleTests(_FlowBase):
         # Təkrar begin eyni attempt-i qaytarır (dublikat yaranmır).
         self.assertEqual(begin_attempt_for_ticket(self.ticket).pk, attempt.pk)
 
+    def test_monitor_snapshot_loads_attempt_exam_with_tickets(self):
+        # PERF-1 F-01 (2026-10-17): 30 s-lik monitor sorğusu aktiv bilet başına ayrıca imtahan sorğusu verirdi.
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        from apps.exams.models import Exam
+
+        enter_waiting(self.ticket, language="")
+        start_room(self.session, self.invigilator)
+        self.session.refresh_from_db()
+        begin_attempt_for_ticket(self.ticket)
+        table = Exam._meta.db_table
+        with CaptureQueriesContext(connection) as ctx:
+            snapshot = session_monitor_snapshot(self.session)
+        self.assertEqual(snapshot["counts"]["active"], 1)
+        # Toplu ``IN (...)`` oxusu sabitdir; bilet başına ``WHERE id = %s`` olmamalıdır.
+        lookups = [q["sql"] for q in ctx.captured_queries if f'WHERE "{table}"."id" = ' in q["sql"]]
+        self.assertEqual(lookups, [])
+
     def test_pin_is_revoked_and_reentry_blocked_after_begin(self):
         # İmtahan başladıqdan sonra PIN birdəfəlikdir — təkrar giriş bloklanır.
         enter_waiting(self.ticket, language="")

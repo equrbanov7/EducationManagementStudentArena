@@ -15,6 +15,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
@@ -23,6 +24,7 @@ from django.utils.translation import pgettext
 
 from apps.audit.public import log_action
 from core.constants import AuditAction
+from core.rate_limit import record_rate_limit_hit
 
 from .. import profile_completion as policy
 
@@ -33,6 +35,11 @@ _CTX = "accounts.profile_completion"
 
 AUDIT_REASON_SAVED = "profile_completion"
 AUDIT_REASON_CONFLICT = "profile_completion_conflict"
+
+#: FİN / e-poçt unikallıq yoxlaması hesab başına məhdud (SEC-1 F1, 2026-10-17): «başqa hesabda var» cavabı
+#: başqasının FİN-ini təxmin etmək üçün işlədilməsin. Normal istifadəçi 1–2 cəhddə bitirir.
+IDENTITY_CHECK_SCOPE = "profile_completion_identity"
+_DEFAULT_IDENTITY_CHECK_RATE = "8/1h"
 
 
 @dataclass
@@ -52,6 +59,16 @@ def _fin_conflict_message() -> str:
         "Bu FİN kod başqa hesabda qeydə alınıb. Düzgün yazdığınıza əminsinizsə, RİM-ə müraciət edin — "
         "hesablarınız yoxlanılıb birləşdiriləcək.",
     )
+
+
+def _rate_limited_message(retry_after: int | None) -> str:
+    minutes = max(1, -(-int(retry_after or 60) // 60))
+    return pgettext(_CTX, "Çox sayda cəhd edildi. %(minutes)s dəqiqə sonra yenidən yoxlayın.") % {"minutes": minutes}
+
+
+def _identity_check_limited(user) -> tuple[bool, int | None]:
+    rate = getattr(settings, "PROFILE_COMPLETION_IDENTITY_RATE_LIMIT", _DEFAULT_IDENTITY_CHECK_RATE)
+    return record_rate_limit_hit(IDENTITY_CHECK_SCOPE, rate, user.pk)
 
 
 def _email_conflict_message() -> str:
@@ -134,6 +151,15 @@ def complete_profile(request, data) -> CompletionResult:
         return CompletionResult()
 
     values, errors = _clean(missing_keys, data)
+    if errors:
+        # Unikallıq yalnız BÜTÜN sahələr düzgün olanda yoxlanılır — «phone=x» ilə FİN sınamaq olmasın (SEC-1 F1).
+        return CompletionResult(errors=errors, remaining=missing_keys)
+    if any(key in values for key in (policy.FIELD_FIN, policy.FIELD_EMAIL)):
+        limited, retry_after = _identity_check_limited(user)
+        if limited:
+            message = _rate_limited_message(retry_after)
+            keys = [key for key in (policy.FIELD_FIN, policy.FIELD_EMAIL) if key in values]
+            return CompletionResult(errors={key: message for key in keys}, remaining=missing_keys)
     conflicts = _conflicts(values, user)
     if conflicts:
         _audit(request, user, reason=AUDIT_REASON_CONFLICT, fields=list(conflicts), extra={"outcome": "duplicate"})
@@ -162,4 +188,10 @@ def complete_profile(request, data) -> CompletionResult:
     return CompletionResult(saved=saved)
 
 
-__all__ = ["AUDIT_REASON_CONFLICT", "AUDIT_REASON_SAVED", "CompletionResult", "complete_profile"]
+__all__ = [
+    "AUDIT_REASON_CONFLICT",
+    "AUDIT_REASON_SAVED",
+    "IDENTITY_CHECK_SCOPE",
+    "CompletionResult",
+    "complete_profile",
+]

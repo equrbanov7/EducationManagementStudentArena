@@ -97730,3 +97730,7 @@ msgstr "Məlumat natamam (FİN, telefon, e-poçt)"
 msgctxt "monitoring.alert"
 msgid "Mərkəzi loglar toplanmır — «Loglar» bölməsi boş qalır"
 msgstr "Mərkəzi loglar toplanmır — «Loglar» bölməsi boş qalır"
+
+msgctxt "accounts.profile_completion"
+msgid "Çox sayda cəhd edildi. %(minutes)s dəqiqə sonra yenidən yoxlayın."
+msgstr "Çox sayda cəhd edildi. %(minutes)s dəqiqə sonra yenidən yoxlayın."

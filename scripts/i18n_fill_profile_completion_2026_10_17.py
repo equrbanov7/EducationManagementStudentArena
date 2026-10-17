@@ -52,6 +52,13 @@ GATE_HELP = (
 # ctx → msgid → {lang: msgstr}. "az" verilməyibsə az msgstr = msgid (AZ cümlə).
 ENTRIES = {
     PC: {
+        # SEC-1 F1 (2026-10-17): FİN / e-poçt unikallıq yoxlaması hesab başına məhdud.
+        "Çox sayda cəhd edildi. %(minutes)s dəqiqə sonra yenidən yoxlayın.": {
+            "en": "Too many attempts. Please try again in %(minutes)s minutes.",
+            "ru": "Слишком много попыток. Повторите через %(minutes)s мин.",
+            "tr": "Çok fazla deneme yapıldı. %(minutes)s dakika sonra tekrar deneyin.",
+            "de": "Zu viele Versuche. Bitte versuchen Sie es in %(minutes)s Minuten erneut.",
+        },
         "FİN kod": {"en": "FIN code", "ru": "Код FIN", "tr": "FİN kodu", "de": "FIN-Code"},
         FIN_WHY: {
             "en": "For official documents (certificates, diploma supplement), matching with state systems (ATIS/DIM) "

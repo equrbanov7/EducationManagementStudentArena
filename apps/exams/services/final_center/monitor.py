@@ -124,7 +124,7 @@ def _ticket_row(ticket, presence, exam_title=None):
 def session_monitor_snapshot(session):
     """Oturumun canlı vəziyyəti: sayğaclar + tələbə sətirləri (kompakt)."""
     tickets = list(
-        session.tickets.select_related("student", "attempt", "exam").order_by(
+        session.tickets.select_related("student", "attempt", "attempt__exam", "exam").order_by(
             "seat_number", "student__first_name", "id"
         )
     )
