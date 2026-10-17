@@ -25,6 +25,7 @@ from core import runtime_settings
 ROOT = Path(__file__).resolve().parents[2]
 LOCMEM = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache", "LOCATION": "ai-fab"}}
 CACHE_BUSTER = "?v=20261010-wp5ai"
+MAIN_BUSTER = "?v=20261017-fixg"  # ai_assistant.js (ai_assistant_fab.js hələ köhnə tokendədir)
 WIDGET_MARKERS = (
     'id="ai-fab"',
     'id="ai-bot-btn"',
@@ -96,7 +97,7 @@ class AiFabMarkupTests(TestCase):
     def test_fab_module_loads_before_the_widget_script(self):
         html = _page(self.client, self.user)
         self.assertLess(
-            html.index("js/ai_assistant_fab.js" + CACHE_BUSTER), html.index("js/ai_assistant.js" + CACHE_BUSTER)
+            html.index("js/ai_assistant_fab.js" + CACHE_BUSTER), html.index("js/ai_assistant.js" + MAIN_BUSTER)
         )
         self.assertIn("css/ai_assistant.css" + CACHE_BUSTER, html)
 

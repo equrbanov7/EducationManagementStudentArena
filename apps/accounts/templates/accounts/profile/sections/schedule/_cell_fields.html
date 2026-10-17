@@ -60,7 +60,10 @@ Seçimlər JS ilə yenilənəndə `EMSBootstrapSelect.refresh(select)` çağır�
       <select class="ems-select bootstrap-single-select__native" id="sedit-subject" name="subject_id"
               data-sedit-field="subject_id" data-bootstrap-select data-live-search="true"
               data-live-search-placeholder="{% trans 'Fənn axtar…' context 'accounts.schedule_manage' %}"
-              data-live-search-empty="{% trans 'Uyğun fənn yoxdur' context 'accounts.schedule_manage' %}" required>
+              data-live-search-empty="{% trans 'Uyğun fənn yoxdur' context 'accounts.schedule_manage' %}"
+              data-empty-label="{% trans 'Seçin…' context 'accounts.schedule_manage' %}" required>
+        {# QA-2 F-11: boş «Seçin…» — müəllim seçilməyəndə ilk fənn özbaşına seçilib yanlış yerləşdirilməsin. #}
+        <option value="">{% trans "Seçin…" context "accounts.schedule_manage" %}</option>
         {% for row in sec.subjects %}
         <option value="{{ row.id }}">{{ row.code }} — {{ row.name }}</option>
         {% endfor %}
@@ -138,7 +141,8 @@ Seçimlər JS ilə yenilənəndə `EMSBootstrapSelect.refresh(select)` çağır�
               data-sedit-field="room_building" data-sedit-room-building data-bootstrap-select
               data-default-building="{{ sec.room_default_building }}">
         <option value="">{% trans "Bütün korpuslar" context "accounts.schedule_manage" %}</option>
-        {% for building in sec.room_buildings %}<option value="{{ building }}">{{ building }}</option>{% endfor %}
+        {# QA-2 F-11: korpus adı yalnız rəqəmdirsə («1», «2») seçimdə «Korpus 1» yazılır; dəyər dəyişmir. #}
+        {% for building in sec.room_buildings %}<option value="{{ building }}">{% if building.isdigit %}{% blocktrans with number=building context "accounts.schedule_manage" %}Korpus {{ number }}{% endblocktrans %}{% else %}{{ building }}{% endif %}</option>{% endfor %}
       </select>
     </div>
   </div>

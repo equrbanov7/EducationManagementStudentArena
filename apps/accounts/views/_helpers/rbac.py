@@ -378,13 +378,7 @@ def _role_capabilities(user, profile):
             allowed_sections.add("superadmin-exam-rooms")
 
         if is_org_admin:
-            allowed_sections.update(
-                {
-                    "my-exams",
-                    "my-courses",
-                    "student-organization-management",
-                }
-            )
+            allowed_sections.update({"my-exams", "my-courses"})
             # Sahib 2026-10-11: «Dekan rol verə bilir — olmaz; hər rol öz səlahiyyəti qədər». `org_admin` aliası
             # səviyyə ≥ 80 olan HƏR rola (dekan, prorektor …) gəlir; rol idarəsi isə yalnız REAL açar daşıyana —
             # `role.assign` / `org.manage_members` (rektor, sədr, RİM rəhbəri `*` ilə) və ya təşkilat sahibinə.
@@ -413,8 +407,14 @@ def _role_capabilities(user, profile):
             )
 
         # HR — əməkdaş/üzv idarəetməsi və rol təyinatları. İmtahan/kurs YOXDUR.
+        # «Heyət idarəetməsi» (tələbə qoşulma müraciətləri) — 2026-10-17: rol ADI ilə yox, tələbə tərəfi AÇARI ilə;
+        # HR (açarsız) itirir, RİM / dekan / kafedra müdiri (açarlı) saxlayır. Bax `student_org_access`.
+        if is_org_admin or is_hr:
+            from .student_org_access import holds_student_side_key
+
+            if holds_student_side_key(user, active_organization):
+                allowed_sections.add("student-organization-management")
         if is_hr:
-            allowed_sections.add("student-organization-management")
             # Rol menyuları AD ilə yox, açarla (sahib 2026-10-11): icazə redaktorunda HR-dan
             # `role.assign` alınarsa menyu da itir — əvvəl görünür qalırdı, əməl isə 403 verirdi.
             if _can_manage_roles(user, active_organization):

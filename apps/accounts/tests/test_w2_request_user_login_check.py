@@ -33,9 +33,16 @@ class RequestUserLoginCheckMemoTest(TestCase):
         return [q["sql"] for q in ctx.captured_queries if '"accounts_userprofile"."access_state" IN' in q["sql"]]
 
     def test_access_state_is_read_once_per_request(self):
+        # PERF-1 F-12 (2026-10-17): `get_user` profili `auth_user` ilə BİR sorğuda (JOIN) oxuyur və vəziyyəti
+        # oradan yoxlayır — ayrıca `access_state IN (...)` EXISTS-i artıq yoxdur (əvvəl dəqiq 1 idi).
         client = _client_for(self.tenant["org"], self.tenant["teacher"])
         url = reverse("accounts:profile") + "?section=profile-info"
-        self.assertEqual(len(self._access_state_queries(client, url)), 1)
+        self.assertEqual(len(self._access_state_queries(client, url)), 0)
+        client.get(url)
+        with CaptureQueriesContext(connection) as ctx:
+            client.get(url)
+        user_reads = [q["sql"] for q in ctx.captured_queries if q["sql"].startswith('SELECT "auth_user"."id"')]
+        self.assertTrue(any('LEFT OUTER JOIN "accounts_userprofile"' in sql for sql in user_reads))
 
     def test_archived_account_is_still_logged_out_on_the_next_request(self):
         teacher = self.tenant["teacher"]

@@ -91,7 +91,7 @@ SPECS: dict[str, Spec] = {
             pgettext_lazy(_CTX, "Sərbəst iş (10 bal)"),
             pgettext_lazy(
                 _CTX,
-                "Söndürülüdə sərbəst iş jurnalda, sillabusda, fənn qovluğunda və kabinetdə görünmür, onun 10 balı "
+                "Söndürüləndə sərbəst iş jurnalda, sillabusda, fənn qovluğunda və kabinetdə görünmür, onun 10 balı "
                 "midterm-ə keçir (midterm 30). Yandırılanda əvvəlki qayda: midterm 20 + sərbəst iş 10. "
                 "Yalnız 2026/2027 və sonrakı semestrlərə aiddir; köhnə semestrlərin qiymətləri dəyişmir.",
             ),
@@ -102,7 +102,7 @@ SPECS: dict[str, Spec] = {
             pgettext_lazy(
                 _CTX,
                 "Fəndə həm seminar, həm laboratoriya varsa fəallıq balı: seminar ballarının ortası 5 + laboratoriya "
-                "ballarının ortası 5. Yalnız biri varsa 10 bal onun ortasından. Söndürülüdə bütün seminar və "
+                "ballarının ortası 5. Yalnız biri varsa 10 bal onun ortasından. Söndürüləndə bütün seminar və "
                 "laboratoriya balları birgə ortalanır.",
             ),
         ),
@@ -111,7 +111,7 @@ SPECS: dict[str, Spec] = {
             pgettext_lazy(_CTX, "Kurs işi (jurnalda)"),
             pgettext_lazy(
                 _CTX,
-                "Söndürülüdə jurnalda «Kurs işi» tabı, addımı və düzəlişi görünmür, tələbə öz jurnalında da görmür. "
+                "Söndürüləndə jurnalda «Kurs işi» tabı, addımı və düzəlişi görünmür, tələbə öz jurnalında da görmür. "
                 "Kurs işi balı imtahana qədər bala daxil deyil — hesablamalar dəyişmir. Yalnız 2026/2027 və sonrakı "
                 "semestrlərə aiddir; köhnə semestrlərdə və mövcud datada heç nə silinmir.",
             ),
@@ -121,9 +121,9 @@ SPECS: dict[str, Spec] = {
             pgettext_lazy(_CTX, "Sillabus dərs saatları yükdən"),
             pgettext_lazy(
                 _CTX,
-                "Yanılıda sillabusun mühazirə/seminar/laboratoriya saatları kafedranın paylanmış yükündən gəlir və "
+                "Yandırılanda sillabusun mühazirə/seminar/laboratoriya saatları kafedranın paylanmış yükündən gəlir və "
                 "müəllim dəyişə bilmir; yükdə olmayan dərs növü (məs. lab yoxdursa) həftəlik planda görünmür və ona "
-                "saat yazılmır. Yükdə sətir yoxdursa müəllim saatı özü seçir. Söndürülüdə əvvəlki qayda: əvvəl "
+                "saat yazılmır. Yükdə sətir yoxdursa müəllim saatı özü seçir. Söndürüləndə əvvəlki qayda: əvvəl "
                 "təsdiqlənmiş tədris planı, sonra yük; artıq növlər də göstərilir.",
             ),
         ),
@@ -204,10 +204,13 @@ SPECS: dict[str, Spec] = {
             pgettext_lazy(_CTX, "Parolun minimum uzunluğu"),
             pgettext_lazy(
                 _CTX,
-                "Yeni parol ən azı bu qədər simvol olmalıdır. Böyük hərf, rəqəm və ya simvol tələb olunmur — "
-                "yalnız «12345678» kimi çox asan parollar və istifadəçi adı rədd edilir.",
+                "Yeni parol ən azı bu qədər simvol olmalıdır (8-dən az olmaz). Böyük hərf, rəqəm və ya simvol "
+                "tələb olunmur — yalnız «12345678» kimi çox asan parollar və istifadəçi adı rədd edilir. Rəhbər "
+                "hesablarda (superadmin, RİM rəhbəri, rektor, Qəyyumlar Şurasının sədri) yalnız rəqəmdən və ya "
+                "tarixdən ibarət parol da qəbul olunmur.",
             ),
-            pgettext_lazy(_CTX, "simvol"), min=6, max=32,
+            # SEC-1 F5: alt hədd 8 — bazada qalmış 6/7 dəyəri ``coerce`` atır və defolt (8) işləyir.
+            pgettext_lazy(_CTX, "simvol"), min=8, max=32,
         ),
         Spec(
             "otp.expiry_minutes", "otp", "int", lambda: max(1, int(getattr(settings, "AUTH_OTP_EXPIRY_SECONDS", 300)) // 60),
@@ -303,7 +306,7 @@ SPECS: dict[str, Spec] = {
             pgettext_lazy(_CTX, "Cədvəldəki dərsi «Aktivləşdir» düyməsi"),
             pgettext_lazy(
                 _CTX,
-                "Söndürülüdə jurnalda «Aktivləşdir» düyməsi yoxdur — müəllim «Yeni dərs» ilə dərsi özü yaradır, "
+                "Söndürüləndə jurnalda «Aktivləşdir» düyməsi yoxdur — müəllim «Yeni dərs» ilə dərsi özü yaradır, "
                 "forma dərs cədvəli və son dərsə görə əvvəlcədən doldurulur.",
             ),
         ),
@@ -312,7 +315,7 @@ SPECS: dict[str, Spec] = {
             pgettext_lazy(_CTX, "Aktivləşdirmədən sonra yazı müddəti"),
             pgettext_lazy(
                 _CTX,
-                "Yalnız «Aktivləşdir» yanılıdırsa: müəllim dərsi aktivləşdirdikdən (jurnalda açdıqdan) sonra q/b, "
+                "Yalnız «Aktivləşdir» yandırılıbsa: müəllim dərsi aktivləşdirdikdən (jurnalda açdıqdan) sonra q/b, "
                 "i/e və balı bu qədər dəqiqə ərzində yazmalıdır; sonra həmin dərsə yeni qeyd yazılmır. Əvvəlcədən "
                 "açılmış dərsdə müddət dərsin başlama saatından sayılır.",
             ),
@@ -323,7 +326,7 @@ SPECS: dict[str, Spec] = {
             pgettext_lazy(_CTX, "Ayrılmış tələbələrin jurnala yazılmasının qarşısını al"),
             pgettext_lazy(
                 _CTX,
-                "Yanılıdırsa hesabı arxivdə olan (məzun, xaric) tələbələr yeni jurnallara yazılmır, qrupun seçmə "
+                "Yandırılıbsa hesabı arxivdə olan (məzun, xaric) tələbələr yeni jurnallara yazılmır, qrupun seçmə "
                 "fənni dəyişəndə və ya fənn ləğv olunanda köhnə BOŞ yazılışlar çıxarılır. Balı olan yazılışlara "
                 "toxunulmur.",
             ),
@@ -343,7 +346,7 @@ SPECS: dict[str, Spec] = {
             pgettext_lazy(_CTX, "AI köməkçi düyməsi"),
             pgettext_lazy(
                 _CTX,
-                "Söndürülüdə ekranın küncündəki AI düyməsi heç kimə göstərilmir. Yanılıdırsa hər istifadəçi onu öz "
+                "Söndürüləndə ekranın küncündəki AI düyməsi heç kimə göstərilmir. Yandırılıbsa hər istifadəçi onu öz "
                 "ekranında gizlədə və sürüşdürüb yerini dəyişə bilər.",
             ),
         ),
@@ -352,7 +355,7 @@ SPECS: dict[str, Spec] = {
             pgettext_lazy(_CTX, "«Mövcud imtahanlar» səhifəsi"),
             pgettext_lazy(
                 _CTX,
-                "Sahib 2026-10-10: hələlik lazım deyil. Söndürülüdə səhifə və ona aparan keçidlər görünmür; "
+                "Sahib 2026-10-10: hələlik lazım deyil. Söndürüləndə səhifə və ona aparan keçidlər görünmür; "
                 "kod saxlanılır — yandıranda geri qayıdır.",
             ),
         ),
@@ -381,9 +384,9 @@ SPECS: dict[str, Spec] = {
             pgettext_lazy(_CTX, "Girişdən sonra vacib məlumatları məcburi doldurmaq"),
             pgettext_lazy(
                 _CTX,
-                "Yanılıda FİN kodu, mobil telefonu və ya şəxsi e-poçtu boş olan tələbə və əməkdaş girişdən sonra "
+                "Yandırılanda FİN kodu, mobil telefonu və ya şəxsi e-poçtu boş olan tələbə və əməkdaş girişdən sonra "
                 "«Məlumatlarınızı tamamlayın» səhifəsinə yönlənir və onları doldurmadan sistemdən istifadə edə bilmir. "
-                "Söndürülüdə (qəza halı) heç kim dayandırılmır.",
+                "Söndürüləndə (qəza halı) heç kim dayandırılmır.",
             ),
         ),
         Spec("profile.require_fin", "profile", "bool", lambda: True, pgettext_lazy(_CTX, "FİN kod məcburidir")),

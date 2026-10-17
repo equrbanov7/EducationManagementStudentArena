@@ -289,6 +289,8 @@
             if (setDegraded(payload)) {
                 if (!preserveOnDegraded && tab === "logs") {  // səbəb + sorğu (renderers, 2026-10-17)
                     destroyCharts(); renderers.logs({ degraded: payload });
+                    // QA-2 F-14: xəta halında da süzgəc seçiciləri stilli komponentə çevrilir (native qalmır).
+                    if (window.EMSBootstrapSelect) window.EMSBootstrapSelect.init(body);
                 } else if (!preserveOnDegraded) {
                     destroyCharts();
                     body.innerHTML = '<div class="smx-empty">' +

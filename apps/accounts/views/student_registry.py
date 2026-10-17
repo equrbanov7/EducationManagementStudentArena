@@ -50,7 +50,8 @@ PROGRAM_PAGE_SIZE = 20
 
 def _error(exc: RimAccessError) -> JsonResponse:
     return JsonResponse(
-        {"ok": False, "has_access": False, "error": exc.reason_code, "message": exc.message},
+        # QA-2 F-09: məzmun xətası (400/409) icazəli aktorda ``has_access: false`` daşımır — yalnız 403/404.
+        {"ok": False, "has_access": exc.status not in (403, 404), "error": exc.reason_code, "message": exc.message},
         status=exc.status,
     )
 

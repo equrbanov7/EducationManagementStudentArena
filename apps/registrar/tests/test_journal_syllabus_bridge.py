@@ -200,6 +200,39 @@ class JournalSyllabusBridgeTest(TestCase):
         self.assertIn("section=syllabus-list", notice["action_url"])
         self.assertContains(resp, "jd2-sylbar")
 
+    def test_banner_wording_follows_lessons_and_closed_journal(self):
+        """QA-1 F14: dərs yoxdursa «Dərslər başlayıb» demir; bağlı jurnalda banner göstərilmir."""
+        from apps.registrar import syllabus_notice
+
+        empty = syllabus_notice.journal_syllabus_notice(self.offering, has_lessons=False)
+        started = syllabus_notice.journal_syllabus_notice(self.offering, has_lessons=True)
+        closed = syllabus_notice.journal_syllabus_notice(self.offering, has_lessons=True, journal_closed=True)
+        self.assertTrue(empty["show_banner"])
+        self.assertNotIn("Dərslər başlayıb", str(empty["message"]))
+        self.assertEqual(empty["tone"], "warning")
+        self.assertIn("Dərslər başlayıb", str(started["message"]))
+        self.assertEqual(started["tone"], "danger")
+        self.assertFalse(closed["show_banner"])
+        self.assertEqual(closed["state"], "missing")
+
+    def test_journal_banner_follows_real_lessons_not_the_visible_grid(self):
+        """Jurnalda dərs varsa (süzgəc / pəncərə nə göstərirsə göstərsin) «dərslər başlayıb» mətni qalır."""
+        import datetime
+
+        from apps.registrar import gradebook
+        from apps.registrar.models import LessonKind
+
+        empty = self._journal().context["syllabus_notice"]
+        self.assertNotIn("Dərslər başlayıb", str(empty["message"]))
+        with bypass_rls():
+            gradebook.create_lesson(
+                allow_past=True, offering=self.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.LECTURE
+            )
+        started = self._client(self.teacher).get(
+            reverse("registrar:journal_detail", args=[self.offering.id]), {"kind": "seminar", "lw": "1"}
+        )
+        self.assertIn("Dərslər başlayıb", str(started.context["syllabus_notice"]["message"]))
+
     def test_pending_syllabus_says_it_is_with_the_chair(self):
         _syllabus, version, actor = self._draft()
         version = self._fill(version, actor)

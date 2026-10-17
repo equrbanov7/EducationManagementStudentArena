@@ -412,16 +412,21 @@ def _joint_size(context, sizes, partners) -> int:
 
 
 def scope_visible(actor, organization):
-    """Toqquşan dərsin redaktorun əhatəsində olub-olmadığı — BİR sorğu (əhatə qruplarının id-ləri).
+    """Toqquşan dərsin redaktorun əhatəsində olub-olmadığı.
 
-    ``schedule_editor.scope_filter``-in toplu forması: 48 xana × onlarla açılış üçün hər açılışa
-    ayrıca icazə sorğusu getməsin. Fail-closed: əhatə qrupu deyilsə səbəb minimal açıqlama ilə gəlir."""
+    Sürətli yol — BİR sorğu: əhatə qruplarının id-ləri (48 xana × onlarla açılış üçün hər açılışa ayrıca icazə
+    sorğusu getməsin). Review 2026-10-17: yalnız sərt ``scoped_groups`` kafedranın öz fənninin başqa qrupdakı
+    dərsini «əhatədən kənar» sayırdı, saxlama-öncəsi yoxlama (``schedule_editor.scope_filter``) isə əhatədə — indi
+    əhatə qrupunda OLMAYAN dərs üçün açılış səviyyəsində ``can_manage_offering`` (açılış üzrə keşlə) soruşulur.
+    Fail-closed: əhatədə deyilsə səbəb minimal açıqlama ilə gəlir."""
     if actor is None:
         return None
     from apps.registrar import schedule_manage
+    from apps.registrar.schedule_editor import scope_filter
 
     ids = {str(pk) for pk in schedule_manage.scoped_groups(actor, organization).values_list("pk", flat=True)}
-    return lambda slot: str(slot.offering.group_id) in ids
+    by_offering = scope_filter(actor, organization)
+    return lambda slot: str(slot.offering.group_id) in ids or by_offering(slot)
 
 
 def plan(

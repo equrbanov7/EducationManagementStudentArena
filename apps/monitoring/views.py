@@ -4,7 +4,7 @@ OXU endpoint-ləri ``monitoring_view_required`` ilə qapılıdır: superadmin V�
 ``system.monitoring.view`` icazəli üzv (RİM rəhbəri, 2026-10-01). İcazəli üzv
 tenant sətirlərində (təhlükəsizlik hadisələri, imtahan sayları) yalnız ÖZ
 təşkilatını + org-suz sətirləri görür; insident ƏMƏLLƏRİ superadmin-only qalır.
-Log sətirləri UI-a getməzdən əvvəl ``scrub.redact_secrets``-dən keçir.
+Log sətirləri UI-a getməzdən əvvəl ``scrub.scrub_log_line``-dan keçir (sirlər + şəxsi məlumat, SEC-1 F4).
 
 Frontend yalnız bu endpoint-lərə müraciət edir; Prometheus/Loki/Alertmanager
 heç vaxt birbaşa açılmır. Asılılıq əlçatmazdırsa cavab ``status="degraded"``

@@ -42,7 +42,24 @@ _STATIC_REF = re.compile(r"""{%\s*static\s+['"]([^'"]+\.(?:css|js))['"]\s*%}""")
 
 #: Qabıq qrupları — `allowed_sections` ilə qalmalıdır (qabıqdakı modallar, superadmin
 #: üslubları, `DOMContentLoaded` modulları). Yeni giriş YALNIZ əsaslandırma ilə.
-SHELL_SCOPED = {"my-courses", "my-exams", "superadmin-users", "superadmin-ai", "category-management", "create-category"}
+SHELL_SCOPED = {"superadmin-users", "superadmin-ai", "category-management", "create-category"}
+
+#: Kurs / imtahan yaratma modal paketi (PERF-2 H4, 2026-10-17) — yalnız öz bölməsində.
+MODAL_STACK_MARKERS = (
+    "exams/css/exam_wizard.css",
+    "exams/css/exam_create_edit_modal.css",
+    "exams/css/bulk_workbench_extras/",
+    "sections/my_exams.css",
+    "courses/css/course_create.css",
+    "courses/css/create_course_modal.css",
+    "css/ems_datetime.css",
+    "exams/js/exam_wizard.js",
+    "exam_create_edit_modal/",
+    "js/ems_datetime",
+    "accounts/js/my_exams_dashboard.js",
+    "courses/js/create_course_modal.js",
+    "courses/js/course_create_form.js",
+)
 
 ALL_SECTIONS = frozenset(SECTION_PARTIALS)
 STUDENT_LAZY_MARKERS = (
@@ -137,9 +154,40 @@ class SectionAssetResolutionTest(SimpleTestCase):
         js = " ".join(section_js(keys, ALL_SECTIONS, "pre") + section_js(keys, ALL_SECTIONS, "post"))
         for marker in STUDENT_LAZY_MARKERS:
             self.assertNotIn(marker, css + js)
-        # Qabıq qrupları icazə ilə qalır (qabıqdakı modallar istənilən bölmədən açılır).
-        self.assertIn("exams/css/exam_wizard.css", css)
-        self.assertIn("courses/js/create_course_modal.js", js)
+        # PERF-2 H4 (2026-10-17): kurs / imtahan yaratma modal paketi də bölməyə bağlıdır.
+        for marker in MODAL_STACK_MARKERS:
+            self.assertNotIn(marker, css + js)
+
+    def test_modal_stack_follows_my_exams_and_my_courses(self):
+        """Modalları açan düymələr yalnız «İmtahanlarım» / «Kurslarım»-dadır — paket də orada gəlir."""
+        exams = section_assets_payload("my-exams", ALL_SECTIONS)
+        exams_all = " ".join(_hrefs(exams["css"]) + exams["js"])
+        for marker in (
+            "exams/css/exam_wizard.css",
+            "exams/js/exam_wizard.js",
+            "js/ems_datetime.js",
+            "exam_create_edit_modal/entry.js",
+            "accounts/js/my_exams_dashboard.js",
+        ):
+            self.assertIn(marker, exams_all)
+        self.assertNotIn("courses/js/create_course_modal.js", exams_all)
+        courses = section_assets_payload("my-courses", ALL_SECTIONS)
+        courses_all = " ".join(_hrefs(courses["css"]) + courses["js"])
+        for marker in (
+            "courses/css/create_course_modal.css",
+            "courses/js/create_course_modal.js",
+            "courses/js/course_card_nav.js",
+        ):
+            self.assertIn(marker, courses_all)
+        self.assertNotIn("exams/js/exam_wizard.js", courses_all)
+        assigned = section_assets_payload("assigned-courses", {"assigned-courses"})
+        self.assertTrue(any("courses/js/course_card_nav.js" in src for src in assigned["js"]))
+        for section in ("groups-registry", "schedule-manage", "system-monitoring", "workload-distribution"):
+            with self.subTest(section=section):
+                payload = section_assets_payload(section, ALL_SECTIONS)
+                joined = " ".join(_hrefs(payload["css"]) + payload["js"])
+                for marker in MODAL_STACK_MARKERS:
+                    self.assertNotIn(marker, joined)
 
     def test_section_brings_its_own_files_in_cascade_order(self):
         allowed = {"my-journal", "my-schedule", "my-transcript"}

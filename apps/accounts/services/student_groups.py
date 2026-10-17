@@ -74,6 +74,16 @@ def group_capacity(unit) -> int:
     return capacity if capacity > 0 else DEFAULT_GROUP_CAPACITY
 
 
+def configured_capacity(unit) -> int | None:
+    """Qrupun ƏL İLƏ yazılmış yer limiti; yazılmayıbsa ``None`` (defolt 30 sayılmır — QA-2 F-08)."""
+    raw = (getattr(unit, "settings", None) or {}).get("capacity")
+    try:
+        capacity = int(raw)
+    except (TypeError, ValueError):
+        return None
+    return capacity if capacity > 0 else None
+
+
 def group_sector(unit) -> str:
     """Qrupun dil bölməsi (normallaşdırılmamış — göstərilən dəyər)."""
     return str((getattr(unit, "settings", None) or {}).get("language_sector") or "")

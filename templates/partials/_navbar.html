@@ -1,4 +1,4 @@
-{% load static i18n notification_tags %}
+{% load static i18n notification_tags avatar_tags %}
 {% url 'home' as home_url %}
 {% url 'about' as about_url %}
 {% url 'contact' as contact_url %}
@@ -166,7 +166,7 @@
                             {% with nav_profile=request.user.profile %}
                             <span class="blog-header__user-avatar{% if nav_profile and nav_profile.avatar %} blog-header__user-avatar--image{% endif %}">
                                 {% if nav_profile and nav_profile.avatar %}
-                                    <img src="{% url 'accounts:profile_avatar' request.user.id %}?v={{ nav_profile.updated_at|date:'U' }}"
+                                    <img src="{% url 'accounts:profile_avatar' request.user.id %}?v={{ nav_profile.updated_at|avatar_version }}"
                                          alt="{{ request.user.username }}"
                                          class="blog-header__user-avatar-image"
                                          data-fallback-target=".blog-header__user-avatar-initials">
@@ -191,7 +191,7 @@
                                 {% with nav_profile=request.user.profile %}
                                 <span class="blog-header__user-head-avatar{% if nav_profile and nav_profile.avatar %} blog-header__user-avatar--image{% endif %}">
                                     {% if nav_profile and nav_profile.avatar %}
-                                        <img src="{% url 'accounts:profile_avatar' request.user.id %}?v={{ nav_profile.updated_at|date:'U' }}"
+                                        <img src="{% url 'accounts:profile_avatar' request.user.id %}?v={{ nav_profile.updated_at|avatar_version }}"
                                              alt="{{ request.user.username }}"
                                              class="blog-header__user-avatar-image"
                                              data-fallback-target=".blog-header__user-head-initials">
@@ -291,7 +291,7 @@
         {% with nav_profile=request.user.profile %}
         <span class="blog-header__user-head-avatar{% if nav_profile and nav_profile.avatar %} blog-header__user-avatar--image{% endif %}">
             {% if nav_profile and nav_profile.avatar %}
-                <img src="{% url 'accounts:profile_avatar' request.user.id %}?v={{ nav_profile.updated_at|date:'U' }}"
+                <img src="{% url 'accounts:profile_avatar' request.user.id %}?v={{ nav_profile.updated_at|avatar_version }}"
                      alt="{{ request.user.username }}" class="blog-header__user-avatar-image">
             {% else %}
                 <span class="blog-header__user-head-initials">{{ request.user.first_name|first|default:request.user.username|first|upper }}</span>

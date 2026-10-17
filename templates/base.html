@@ -194,7 +194,7 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
     <script src="{% static 'js/debounced_search_forms.js' %}?v=20261014-searchux"></script>
     <script src="{% static 'js/search_controls.js' %}?v=20261014-searchux"></script>
     <script src="{% static 'js/ems_table.js' %}?v=20260926-search"></script>
-    <script src="{% static 'js/bootstrap_select.js' %}?v=20261016-ms"></script>
+    <script src="{% static 'js/bootstrap_select.js' %}?v=20261017-lazy"></script>
     {# EMSMultiSelect — `<select multiple data-ems-multi-select>` üçün stilli çoxseçim (axtarış, Hamısı/Təmizlə). #}
     <script src="{% static 'js/ems_multi_select.js' %}?v=20261016-1"></script>
     <script src="{% static 'js/search_field.js' %}?v=20261014-searchux"></script>
@@ -215,7 +215,7 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
     <!-- AI Assistant Widget -->
     {# ai_assistant_fab.js (gizlətmək/sürüşdürmək, `EMSAiFab`) ai_assistant.js-dən ƏVVƏL gəlməlidir #}
     {% block ai_assistant_js %}{% if academic_rules.ai_button %}<script src="{% static 'js/ai_assistant_fab.js' %}?v=20261010-wp5ai"></script>
-    <script src="{% static 'js/ai_assistant.js' %}?v=20261010-wp5ai"></script>{% endif %}{% endblock %}
+    <script src="{% static 'js/ai_assistant.js' %}?v=20261017-fixg"></script>{% endif %}{% endblock %}
 
     <!-- Toast auto-hide -->
     <script src="{% static 'js/toast.js' %}?v=20260618-1"></script>

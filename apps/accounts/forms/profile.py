@@ -36,3 +36,18 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         strip=False,
         widget=forms.PasswordInput(attrs=_password_attrs(_("Yeni şifrəni təkrarla"), "new-password")),
     )
+
+    def clean(self):
+        cleaned = super().clean()
+        password = cleaned.get("new_password1")
+        # Cari parolla eyni parol «yeniləmə» deyil (QA-1 F12). Yalnız cari parol DÜZGÜN yazılıbsa deyilir
+        # (``old_password`` səhvdirsə cleaned_data-da yoxdur) — əks halda səhv təxmin «bu cari paroldur» ilə təsdiqlənərdi.
+        if password and cleaned.get("old_password") and not self.errors and self.user.check_password(password):
+            self.add_error(
+                "new_password1",
+                forms.ValidationError(
+                    _("Yeni şifrə cari şifrədən fərqli olmalıdır."),
+                    code="password_unchanged",
+                ),
+            )
+        return cleaned

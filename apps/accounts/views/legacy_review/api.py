@@ -84,7 +84,7 @@ def legacy_review_queue(request):
     """Baxış tələb edən köhnə imtahan nəticələri — səhifələnmiş cədvəl."""
     actor = resolve_actor(request)
     if not actor.has_access:
-        return JsonResponse(_EMPTY_QUEUE)
+        return JsonResponse(_EMPTY_QUEUE, status=403)
 
     filters = _filters(request)
     queryset = review_read.review_queue(
@@ -146,7 +146,9 @@ def legacy_review_options(request):
     """Dövr, status və şiddət açılışları — nadir dəyişir, ayrıca keşlənə bilər."""
     actor = resolve_actor(request)
     if not actor.has_access:
-        return JsonResponse({"has_access": False, "periods": [], "years": [], "statuses": [], "severities": []})
+        return JsonResponse(
+            {"has_access": False, "periods": [], "years": [], "statuses": [], "severities": []}, status=403
+        )
 
     from django.apps import apps as django_apps
 
@@ -196,6 +198,7 @@ def _lookup_payload(queryset, request, to_row):
     )
 
 
+#: SEC-2 F-4 (2026-10-17): icazəsiz aktor 200 + boş deyil, 403 + boş alır (layihənin qalanı kimi).
 _EMPTY_LOOKUP = {"results": [], "has_more": False}
 
 #: Kaskadın pillələri: hansı vahid tipi, valideyni hansı GET parametridir.
@@ -213,7 +216,7 @@ def legacy_review_units(request, kind):
     """Fakültə → kafedra → ixtisas kaskadı (valideyn seçimi ilə daralır)."""
     actor = resolve_actor(request)
     if not actor.has_access or kind not in _UNIT_STEPS:
-        return JsonResponse(_EMPTY_LOOKUP)
+        return JsonResponse(_EMPTY_LOOKUP, status=403)
 
     from django.apps import apps as django_apps
 
@@ -246,7 +249,7 @@ def legacy_review_groups(request):
     """Qrup seçicisi — ixtisas (və ya kafedra/fakültə) alt-ağacı ilə daralır."""
     actor = resolve_actor(request)
     if not actor.has_access:
-        return JsonResponse(_EMPTY_LOOKUP)
+        return JsonResponse(_EMPTY_LOOKUP, status=403)
 
     from django.apps import apps as django_apps
 
@@ -300,7 +303,7 @@ def legacy_review_subjects(request):
     """Fənn seçicisi — YALNIZ köhnə faktı olan fənlər (boş nəticə verməsin)."""
     actor = resolve_actor(request)
     if not actor.has_access:
-        return JsonResponse(_EMPTY_LOOKUP)
+        return JsonResponse(_EMPTY_LOOKUP, status=403)
 
     from apps.registrar.models import Subject
 
@@ -325,7 +328,7 @@ def legacy_review_teachers(request):
     """Müəllim seçicisi — növbədəki açılışların müəllimləri."""
     actor = resolve_actor(request)
     if not actor.has_access:
-        return JsonResponse(_EMPTY_LOOKUP)
+        return JsonResponse(_EMPTY_LOOKUP, status=403)
 
     from django.contrib.auth import get_user_model
 

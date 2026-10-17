@@ -218,7 +218,9 @@ def journal_detail(request, offering_id):
         "journal_close_notice": journal_close_notices.journal_banner(offering, today),
         # Sillabus vəziyyəti: xəbərdarlıq zolağı + «Sillabusa bax» keçidi.
         # ⚠️ Jurnalı KİLİDLƏMİR — yalnız məlumat verir (bax syllabus_notice.py).
-        "syllabus_notice": syllabus_notice.journal_syllabus_notice(offering),
+        "syllabus_notice": syllabus_notice.journal_syllabus_notice(
+            offering, has_lessons=offering.lessons.exists(), journal_closed=journal_locked
+        ),
         # README §8/2 qapısı — ORG SİYASƏTİ (default söndürülü).  Açıq olduqda
         # təsdiqlənmiş sillabusu olmayan jurnal YALNIZ-OXU olur (`can_edit`
         # yuxarıda söndürülür) və panel kilid + CTA göstərir.

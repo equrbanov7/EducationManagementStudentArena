@@ -126,3 +126,22 @@
 .tof-lead__actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .tof-lead-badge { display: inline-flex; align-items: center; gap: 4px; }
 .tof-lead-dialog__current { margin: 0 0 10px; font-size: 13px; color: var(--ems-text-muted, #64748b); }
+
+/* QA-2 F-11 (2026-10-17): hərəkət dialoqunda «Əmr nömrəsi» / «Əmr tarixi» — dar ekranda alt-alta düşəndə
+   etiket yuxarıdakı sahəyə yapışmasın (`ems-grid` sinfinin qlobal üslubu yoxdur). */
+.tof-movement-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--ems-sp-4, 12px);
+    margin-bottom: var(--ems-sp-4, 12px);
+}
+
+/* QA-2 F-16 (2026-10-17): ad xanasında ortaq ana / alt qrup işarəsi. */
+.tof-gr-link {
+    display: block;
+    margin-top: 2px;
+    color: var(--ems-neutral-600);
+    font-size: 0.78rem;
+    font-weight: 500;
+    white-space: nowrap;
+}

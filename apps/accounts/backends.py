@@ -9,6 +9,7 @@ from .identity import (
     REQUEST_USER_LOGIN_CHECKED_ATTR,
     canonical_identity,
     canonical_identity_queryset,
+    login_blocked_access_states,
     user_access_is_login_blocked,
 )
 
@@ -65,14 +66,26 @@ class EmailOrUsernameBackend(ModelBackend):
         return super().user_can_authenticate(user) and not user_access_is_login_blocked(user)
 
     def get_user(self, user_id):
-        # 2026-09-13 (Codex audit §14/§21 — kabinet qabığı sorğu büdcəsi):
-        # ``ModelBackend.get_user`` onsuz da ``self.user_can_authenticate`` ilə
-        # süzür (bloklanmış hesab → ``None``); burada ikinci dəfə çağırmaq eyni
-        # ``accounts_userprofile`` access_state SELECT-ini hər autentifikasiyalı
-        # sorğuda təkrarlayırdı. Semantika dəyişmir — yoxlama super()-dədir.
-        user = super().get_user(user_id)
-        if user is not None:
-            # 2026-09-14 (perf F-08): yoxlama keçilib — sorğu daxilində middleware və
-            # view-as köməkçiləri (`request_user_login_blocked`) eyni SELECT-i təkrarlamır.
-            setattr(user, REQUEST_USER_LOGIN_CHECKED_ATTR, True)
+        # PERF-1 F-12 (2026-10-17): istifadəçi profili ilə BİR sorğuda (LEFT JOIN) oxunur. Əvvəl hər
+        # autentifikasiyalı sorğuda 3 ayrı SELECT gedirdi: `auth_user`, `access_state` EXISTS
+        # (``user_can_authenticate``) və `OrganizationMiddleware`-də `user.profile`. Profil EYNİ sorğuda
+        # bazadan gəlir — ``_access_state_in``-in «köhnə keşə güvənmə» qaydası pozulmur (keş təzədir).
+        # Semantika ``ModelBackend.get_user`` + ``user_can_authenticate`` ilə eynidir.
+        user_model = get_user_model()
+        try:
+            user = user_model._default_manager.select_related("profile").get(pk=user_id)
+        except user_model.DoesNotExist:
+            return None
+        if not ModelBackend.user_can_authenticate(self, user):
+            return None
+        profile = user._state.fields_cache.get("profile")
+        if profile is None:
+            # Profil sətri yoxdur: keşdəki «yoxdur» işarəsi atılır ki, sorğuda sonradan yaradılan profil
+            # əvvəlki kimi təzə oxunsun.
+            user._state.fields_cache.pop("profile", None)
+        elif profile.access_state in login_blocked_access_states():
+            return None
+        # 2026-09-14 (perf F-08): yoxlama keçilib — sorğu daxilində middleware və
+        # view-as köməkçiləri (`request_user_login_blocked`) eyni SELECT-i təkrarlamır.
+        setattr(user, REQUEST_USER_LOGIN_CHECKED_ATTR, True)
         return user

@@ -148,15 +148,21 @@ def _target_group(actor, group_id, *, request):
 
 
 def _assert_capacity(actor, group) -> None:
-    """Qrup tutumu — handoff §5/09 «qrup tutumu yoxlanılır»."""
-    from ..student_groups import group_capacity, occupancy_map
+    """Qrup tutumu — handoff §5/09 «qrup tutumu yoxlanılır».
 
-    capacity = group_capacity(group)
+    QA-2 F-08 (2026-10-17): yalnız qrupa tutum ƏL İLƏ yazılıbsa yoxlanılır. Əvvəl tutumu olmayan qrupa hardkod 30
+    tətbiq olunurdu və artıq 32 tələbəsi olan qrupa «Bərpa et» bloklanırdı — limit heç yerdə təyin olunmamışdı."""
+    from ..student_groups import configured_capacity, occupancy_map
+
+    capacity = configured_capacity(group)
+    if capacity is None:
+        return
     taken = occupancy_map(actor.organization, [group.pk]).get(str(group.pk), 0)
     if taken >= capacity:
         raise RimAccessError(
             "group_full",
-            "«%s» qrupunda boş yer yoxdur (%d / %d)." % (group.name, taken, capacity),
+            "«%s» qrupunda boş yer yoxdur (%d / %d). Tutumu «Qruplar» → «Redaktə» ilə dəyişmək olar."
+            % (group.name, taken, capacity),
             status=409,
         )
 

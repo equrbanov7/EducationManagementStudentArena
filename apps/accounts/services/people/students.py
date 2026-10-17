@@ -63,7 +63,12 @@ def scoped_student_records(actor, *, request=None, filters=None):
 
     records = student_records_qs(organization)
     if not scope.is_org_wide:
-        records = records.filter(scope.unit_subtree_q(path_field="group__path", id_field="group_id"))
+        # PERF-1 F-13: əhatə alt-ağacı əvvəlcə vahid id-lərinə açılır (kiçik `orgunit` cədvəli üzrə alt-sorğu),
+        # sonra `group_id IN (...)` — əvvəlki `group_id = X OR group.path LIKE 'X/%'` hər korrelyasiyalı
+        # alt-sorğuda (Exists + 7 sütun) `orgunit` JOIN-u ilə bütün qeydləri skan edirdi. Dəst eynidir.
+        from apps.organizations.models import OrgUnit
+
+        records = records.filter(group_id__in=OrgUnit.objects.filter(scope.unit_subtree_q()).values("pk"))
 
     if filters is not None:
         structure_q = structure_filter_q(organization, filters, path_field="group__path", id_field="group_id")

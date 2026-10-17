@@ -22,6 +22,13 @@ INBOX_LIMIT = 100
 
 
 def _memberships(user, organization):
+    # PERF-1 F-15: middleware-in request snapshot-u (eyni `user, org, is_active=True` sətirləri, `role` və
+    # `scope_unit` yüklü) yararlıdırsa təkrar SELECT getmir; yararsızdırsa (başqa org, epoxa, superuser) canlı.
+    from apps.organizations.public import request_active_memberships
+
+    snapshot = request_active_memberships(user, organization)
+    if snapshot is not None:
+        return snapshot
     Membership = django_apps.get_model("organizations", "Membership")
     return list(
         Membership.objects.filter(user=user, organization=organization, is_active=True).select_related(

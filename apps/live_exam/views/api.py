@@ -21,7 +21,8 @@ from apps.live_exam.domain.question_config import resolve_question_config
 from apps.live_exam.domain.session import build_question_phase_times, get_question_by_index, get_total_questions
 from apps.live_exam.i18n import player_language
 from apps.live_exam.models import LiveAnswer, LiveSession
-from apps.live_exam.reveal import build_final_bundle, build_reveal_bundle, pre_question_rank
+from apps.live_exam.poll_cache import shared as poll_shared
+from apps.live_exam.reveal import build_final_bundle, build_reveal_bundle, pre_question_ranks
 from apps.live_exam.roster import eligible_players, is_pending
 from apps.live_exam.scoring import save_answer_and_score
 from apps.live_exam.serializers import (
@@ -165,14 +166,17 @@ def live_state_json(request, pin):
             # LX-SEC: host görünüşü (nəticələr + qəbul cavabları) digər host endpoint-ləri
             # ilə EYNİ RBAC-dan keçir (təşkilat konteksti + exam.host/exam.manage).
             _ensure_host_org_permission(request, session.exam.organization)
-        player = None if is_host else get_request_player(request, pin=pin)
+        # Artıq `bypass_rls()` içindəyik — oyunçu oxusu ikinci (iç-içə) bypass açmır (PERF-1 F-11).
+        player = None if is_host else get_request_player(request, pin=pin, rls_bypassed=True)
         if not is_host and player is None:
             return _player_auth_error(request, session)
 
         server_time = timezone.now()
         session = _maybe_auto_reveal(session, server_time)
         host_settings = get_host_session_settings(session)
-        total = get_total_questions(session)
+        # PERF-1 F-11: sual ərzində dəyişməyən hissə oyunçu sorğularında ortaq keşdən (host həmişə təzə).
+        cache_shared = player is not None
+        total = poll_shared(session, "total", lambda: get_total_questions(session), enabled=cache_shared)
 
         data: dict = {
             "ok": True,
@@ -221,7 +225,7 @@ def live_state_json(request, pin):
             return JsonResponse(data)
 
         idx = int(session.current_index or 0)
-        eq = get_question_by_index(session, idx)
+        eq = poll_shared(session, "question", lambda: get_question_by_index(session, idx), enabled=cache_shared)
         if (
             not eq
             or session.state not in {LiveSession.STATE_QUESTION, LiveSession.STATE_REVEAL}
@@ -263,7 +267,11 @@ def live_state_json(request, pin):
             # (WS qopuq olanda yeganə yol). ``previous_top`` oyunçuya lazım deyil (ağır sorğu).
             _record_delivery(session.pin, eq.id, player.id, at=server_time)
             # Refresh-dən sonra telefonun sıra göstəricisi — sualdan ƏVVƏLKİ sıra (sızma yoxdur).
-            data.update(pre_question_rank(session, player.id, eq.id))
+            # Sıra xəritəsinin açarında oyunçu sayı da var: çıxarılan/qoşulan oyunçu yeni hesablama deməkdir.
+            ranks = poll_shared(
+                session, f"ranks:{eq.id}:{data['total_players']}", lambda: pre_question_ranks(session, eq.id)
+            )
+            data.update(ranks.get(int(player.id), {}))
             # EX28-10: açıq sual ərzində yalnız «cavab saxlanıb» (düzlük reveal-də).
             data["player_answer"] = public_player_answer(
                 serialize_player_question_result(

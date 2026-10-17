@@ -5,7 +5,7 @@ Signal handlers for the organizations app.
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
-from core.cache import invalidate_signup_lookup_cache
+from core.cache import invalidate_schedule_teacher_choices_cache, invalidate_signup_lookup_cache
 from core.rls import set_rls_tenant
 from core.rls_pooling import rls_worker_atomic
 
@@ -87,3 +87,18 @@ def invalidate_org_switcher_on_membership_change(sender, instance, **kwargs):
 @receiver([post_save, post_delete], sender=Organization)
 def invalidate_request_membership_snapshots(sender, **kwargs):
     bump_membership_epoch()
+
+
+# ── Cədvəl redaktorunun müəllim seçim keşi (PERF-1 F-16) ─────────────────────
+# Siyahı təşkilat üzrə 5 dəqiqə keşlənir; üzvlük və ya rol (ad → tələbə/məzun süzgəci) dəyişəndə dərhal silinir.
+
+
+@receiver([post_save, post_delete], sender=Membership)
+@receiver([post_save, post_delete], sender=Role)
+def invalidate_schedule_teacher_choices(sender, instance, **kwargs):
+    # Review 2026-10-17: commit-dən SONRA — uzun idxal tranzaksiyası (Forma 7) zamanı açılan redaktor köhnə
+    # siyahını yenidən keşləməsin (on_commit: sinxron kontekstdə, tranzaksiyasız dərhal işləyir).
+    from django.db import transaction
+
+    organization_id = getattr(instance, "organization_id", None)
+    transaction.on_commit(lambda: invalidate_schedule_teacher_choices_cache(organization_id))

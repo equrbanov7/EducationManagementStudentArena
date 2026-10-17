@@ -8,7 +8,7 @@ düyməsi disabled), akademik məzuniyyətdə bitmə tarixi də (`effective_unti
 Səbəb İSTƏYƏ BAĞLIDIR (sahib 2026-10-15; dialoq `reason_optional=True`) — boş
 qalsa ledger/audit sətrinə əmrdən qurulan mətn yazılır. Kim və nə vaxt etdiyi
 audit + `StudentMovement` sətrində qalır (silinmir).{% endcomment %}
-<div class="ems-grid ems-grid--2">
+<div class="ems-grid ems-grid--2 tof-movement-fields">
     <div class="ems-field">
         <label class="ems-field__label" for="{{ reason_id }}-order-number">{% trans "Əmr nömrəsi" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
         <input type="text" class="ems-input" id="{{ reason_id }}-order-number" name="order_number" maxlength="64" autocomplete="off" data-ems-required

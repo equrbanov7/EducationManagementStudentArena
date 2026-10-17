@@ -6,6 +6,9 @@ siyahısı, məzmun imzası, ölçü tavanı); fayl adı təsadüfiləşdirilir.
 
 Köhnə fayl dəyişdiriləndə və ya silinəndə saxlanmadan da silinir — amma yalnız
 tranzaksiya UĞURLA bitəndən sonra (``on_commit``): DB geri qayıdarsa fayl itmir.
+
+2026-10-17 (PERF-2 H5): yoxlanılmış şəkil saxlanmadan əvvəl ``avatar_image``
+ilə kiçildilir (≤512 px WebP, EXIF atılır).
 """
 
 from __future__ import annotations
@@ -17,6 +20,7 @@ from django.urls import reverse
 
 from core.upload_security import randomize_uploaded_filename
 
+from .avatar_image import AvatarImageError, avatar_version, normalize_avatar_upload
 from .profile_actions import validate_profile_avatar_upload
 
 logger = logging.getLogger(__name__)
@@ -44,6 +48,10 @@ def replace_avatar(profile, uploaded):
     error = validate_profile_avatar_upload(uploaded)
     if error:
         return False, "", error
+    try:
+        uploaded = normalize_avatar_upload(uploaded)  # PERF-2 H5: ≤512 px WebP, EXIF atılır
+    except AvatarImageError as exc:  # piksel tavanı — yoxlama onsuz da tutur (müdafiə qatı)
+        return False, "", str(exc)
     randomize_uploaded_filename(uploaded)
     old_name = str(profile.avatar.name or "") if profile.avatar else ""
     storage = profile.avatar.storage
@@ -79,7 +87,7 @@ def avatar_state(user, profile):
     has_avatar = bool(profile.avatar)
     url = ""
     if has_avatar:
-        url = f"{reverse('accounts:profile_avatar', args=[user.id])}?v={int(profile.updated_at.timestamp())}"
+        url = f"{reverse('accounts:profile_avatar', args=[user.id])}?v={avatar_version(profile.updated_at)}"
     return {
         "has_avatar": has_avatar,
         "avatar_url": url,

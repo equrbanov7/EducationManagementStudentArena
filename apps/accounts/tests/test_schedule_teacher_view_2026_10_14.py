@@ -133,7 +133,7 @@ class TeacherViewEditableTest(TeacherViewBase):
 
     def test_teacher_view_save_into_an_outside_group_is_refused(self):
         response = self._act(self.coordinator, self._cell(group_id=str(self.outside_group.id), weekday=4))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)  # QA-2 F-09 (FIX-H): əhatədən kənar → 404
 
     def test_my_schedule_card_still_opens_the_details_modal(self):
         self._lecture(self.offering)

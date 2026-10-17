@@ -48,7 +48,8 @@ class BuildLogqlTests(SimpleTestCase):
         )
 
     def test_backticks_are_stripped_and_unknown_level_ignored(self):
-        self.assertEqual(logs.build_logql("", "a`b\\c", "debug"), '{job="docker"} |= `ab\\\\c`')
+        # SEC-1 F4: backtick sətri «raw»dır — ``\`` ikiqatlaşdırılmır (əks halda «\» axtarışı tapmırdı).
+        self.assertEqual(logs.build_logql("", "a`b\\c", "debug"), '{job="docker"} |= `ab\\c`')
 
     def test_inputs_are_length_capped(self):
         logql = logs.build_logql("c" * 200, "q" * 500)

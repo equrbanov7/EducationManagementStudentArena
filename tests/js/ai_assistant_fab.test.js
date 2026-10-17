@@ -69,7 +69,14 @@ async function page(options) {
         window.eval("Object.defineProperty(window, 'localStorage', { configurable: true, get() { throw new Error('denied'); } })");
     }
     if (opts.phone) {
-        window.matchMedia = (query) => ({ matches: true, media: query, addEventListener() {} });
+        // `window.__narrow` oxunuşda hesablanır: teaser testi ekranı «geniş» (false), tuck testi «dar» (default) edir.
+        window.matchMedia = (query) => ({
+            get matches() {
+                return window.__narrow !== false;
+            },
+            media: query,
+            addEventListener() {},
+        });
         Object.defineProperty(doc.documentElement, "scrollHeight", { configurable: true, value: 5000 });
         Object.defineProperty(doc.documentElement, "scrollTop", { configurable: true, writable: true, value: 0 });
     }
@@ -367,11 +374,16 @@ test("corrupt or blocked storage falls back to the default corner and hiding sti
 test("while hidden the attention teaser and the phone tuck are skipped", async () => {
     const hidden = await page({ stored: JSON.stringify({ hidden: true, side: "right", y: null }), phone: true });
     const visible = await page({ phone: true });
+    const narrow = await page({ phone: true });
     try {
         const tip = (p) => p.doc.getElementById("ai-bot-tooltip").classList.contains("ai-bot-tooltip--visible");
-        for (const p of [hidden, visible]) p.teaser.forEach((fn) => fn());
+        visible.window.__narrow = false; // geniş ekran: izah qutusu göstərilir
+        for (const p of [hidden, visible, narrow]) p.teaser.forEach((fn) => fn());
         assert.equal(tip(hidden), false);
         assert.equal(tip(visible), true, "harness sanity: the teaser runs for a visible button");
+        assert.equal(tip(narrow), false, "narrow (≤768px) screens never show the tooltip bubble");
+        assert.equal(narrow.btn.classList.contains("ai-bot-btn--wave"), true, "the waving hand still plays on phones");
+        visible.window.__narrow = true; // tuck testi üçün yenidən dar
         for (const p of [hidden, visible]) {
             p.doc.documentElement.scrollTop = 600;
             p.window.dispatchEvent(new p.window.Event("scroll"));
@@ -383,6 +395,7 @@ test("while hidden the attention teaser and the phone tuck are skipped", async (
     } finally {
         hidden.window.close();
         visible.window.close();
+        narrow.window.close();
     }
 });
 

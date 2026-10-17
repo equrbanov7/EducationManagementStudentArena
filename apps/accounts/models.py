@@ -8,6 +8,7 @@ from django.db import models
 from django.utils.translation import pgettext, pgettext_lazy
 
 from core.constants import OrganizationType
+from core.person_names import clean_name_part
 
 # M2 (2026-07-02): ProfileRole core.roles-a köçürülüb (dövri asılılıq kökü idi).
 # Köhnə `from apps.accounts.models import ProfileRole` import səthi qorunur (AGENTS §1).
@@ -483,7 +484,7 @@ class UserProfile(models.Model):
         parts = [
             (getattr(self.user, "first_name", "") or "").strip(),
             (getattr(self.user, "last_name", "") or "").strip(),
-            (self.patronymic or "").strip(),
+            clean_name_part(self.patronymic),
         ]
         return " ".join(part for part in parts if part)
 

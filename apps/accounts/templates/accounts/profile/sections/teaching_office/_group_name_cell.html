@@ -1,0 +1,7 @@
+{% load i18n %}{% comment %}Qruplar reyestri — ad xanası (QA-2 F-16, 2026-10-17): ortaq ana / alt qrup əlaqəsi görünür.{% endcomment %}
+{{ row.row_head }}
+{% if row.data.parent_group_name %}
+<span class="tof-gr-link">{% blocktrans with parent=row.data.parent_group_name context "accounts.groups" %}alt qrup · ana: {{ parent }}{% endblocktrans %}</span>
+{% elif row.data.subgroup_count %}
+<span class="tof-gr-link">{% blocktrans with n=row.data.subgroup_count context "accounts.groups" %}ortaq qrup · alt qruplar: {{ n }}{% endblocktrans %}</span>
+{% endif %}

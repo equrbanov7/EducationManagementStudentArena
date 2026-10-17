@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n avatar_tags %}
 {% comment %}
 Profil şəkli redaktoru — «Profili redaktə et» bölməsi (2026-10-01).
 Axın: «Şəkil yüklə / Şəkli dəyiş» → fayl seçimi → dairəvi önizləmə →
@@ -8,7 +8,7 @@ yenilənir. Davranış: accounts/js/profile/profile_avatar.js.
 {% endcomment %}
 <div class="avatar-editor" {% include "accounts/profile/sections/_avatar_scope_attrs.html" %}>
     <span class="avatar-editor__thumb" data-avatar-display>
-        <img {% if profile.avatar %}src="{% url 'accounts:profile_avatar' user.id %}?v={{ profile.updated_at|date:'U' }}"{% else %}hidden{% endif %}
+        <img {% if profile.avatar %}src="{% url 'accounts:profile_avatar' user.id %}?v={{ profile.updated_at|avatar_version }}"{% else %}hidden{% endif %}
              alt="" data-avatar-img>
         <span class="avatar-editor__initials" data-avatar-initials{% if profile.avatar %} hidden{% endif %}>{{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}</span>
     </span>
