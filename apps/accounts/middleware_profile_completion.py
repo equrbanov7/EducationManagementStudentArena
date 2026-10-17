@@ -66,6 +66,7 @@ def _parent(path: str) -> str:
 class ProfileCompletionMiddleware:
     LIVE_PLAYER_PREFIXES = ("/live/join/", "/live/wait/", "/live/play/", "/live/state/")
     LIVE_PIN_ENTRY_PATH = "/live/"
+    EXAM_PREFIXES = ("/exams/",)
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -110,6 +111,10 @@ class ProfileCompletionMiddleware:
         if path.startswith(_STATIC_EXEMPT_PREFIXES):
             return True
         if path == self.LIVE_PIN_ENTRY_PATH or path.startswith(self.LIVE_PLAYER_PREFIXES):
+            return True
+        if path.startswith(self.EXAM_PREFIXES):
+            # 2026-10-17 tövsiyə: imtahan (başla / cəhd / final gözləmə otağı) heç vaxt bu qapıda dayanmır —
+            # məlumat sonra kabinetdə tamamlanır.
             return True
         try:
             self._resolve()

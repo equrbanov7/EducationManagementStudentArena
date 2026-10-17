@@ -134,6 +134,8 @@ class ProfileCompletionGateTest(TestCase):
             "/health/",
             "/jsi18n/",
             "/live/",
+            "/exams/",
+            "/exams/final/waiting/1/",
         ):
             response = self.client.get(path)
             location = response.headers.get("Location", "")
