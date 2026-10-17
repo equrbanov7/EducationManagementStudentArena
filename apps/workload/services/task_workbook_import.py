@@ -196,14 +196,9 @@ class Importer(TeacherResolverMixin):
         self.created_specialties.append(full_name)
         return unit
 
-    def resolve_subject(self, raw: str, chair, credits: str, special_kind: str = "", chosen=None) -> tuple:
-        """→ (Subject|None, action, resolved_name). Xüsusi sətir (təcrübə/buraxılış) fənn YARATMIR.
-
-        ``chosen`` — zəngin mətndən (qalın/«+»/override) əvvəlcədən seçilmiş bənd."""
+    def find_subject(self, raw: str, chosen: str = "") -> tuple:
+        """Kataloqda (və bu işdə planlanmış fənlərdə) axtarış — YARATMIR: → (Subject|None, action, ad)."""
         candidates = [raw]
-        block = is_block(raw)
-        if chosen is None:
-            chosen = block_chosen_subject(raw) if block else ""
         if chosen:
             candidates.insert(0, chosen)
         single = clean_subject_name(raw)
@@ -222,6 +217,19 @@ class Importer(TeacherResolverMixin):
                 and (not key[-1:].isdigit() or key[-1:] == close[0][-1:])
             ):
                 return self.subject_index[close[0]], "fuzzy", self.subject_index[close[0]].name
+        return None, "", ""
+
+    def resolve_subject(self, raw: str, chair, credits: str, special_kind: str = "", chosen=None) -> tuple:
+        """→ (Subject|None, action, resolved_name). Xüsusi sətir (təcrübə/buraxılış) fənn YARATMIR.
+
+        ``chosen`` — zəngin mətndən (qalın/«+»/override) əvvəlcədən seçilmiş bənd."""
+        block = is_block(raw)
+        if chosen is None:
+            chosen = block_chosen_subject(raw) if block else ""
+        found = self.find_subject(raw, chosen)
+        if found[0] is not None:
+            return found
+        single = clean_subject_name(raw)
         if block and not chosen:
             return None, "block_unresolved", ""
         if special_kind:

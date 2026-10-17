@@ -17,7 +17,8 @@ ikinci namizəd 0.04-dən yaxındırsa → ``subject_ambiguous``; fayldakı ad s
 HİSSƏSİdirsə («Xətti cəbr» ⊂ «Xətti cəbr və analitik həndəsə») → ``subject_partial`` (yazılmır, yoxlanılsın).
 Qrupun bu semestrdə heç açılışı yoxdursa → ``group_no_offerings``.
 
-MÜƏLLİM («Soyad İ.»): (1) açılışın slotuna təyin oluna bilənlər —
+MÜƏLLİM («Soyad İ.»; magistratura cədvəlində TAM AD «Ad Soyad» — hər iki sıra, diakritikasız, 2026-10-17):
+(1) açılışın slotuna təyin oluna bilənlər —
 ``schedule_slot_teachers.allowed_teacher_ids`` (jurnal sahibi + jurnal dərsləri + kafedra yükü
 bölgüsü; əvvəl dəqiq soyad, sonra kiçik yazı xətası — ``teacher_fuzzy``); (2) fənnin kafedrasının müəllimləri; (3) təşkilatın
 bütün aktiv müəllimləri (yalnız dəqiq soyad + baş hərf). Hamısı aktiv ``grade.input`` üzvüdür (slot
@@ -25,7 +26,8 @@ müəllimi üçün DB qoruyucusu ilə eyni qayda). Bir mənalı deyilsə slot m�
 qalır) və səbəb hesabata düşür.
 
 NÖV: hüceyrədə yoxdursa — açılışın saat bölgüsündə TƏK növ varsa o; yoxsa müəllimin bu açılış üzrə
-yük bölgüsündə TƏK fəaliyyəti varsa o; yoxsa ``kind_unknown`` (yazılmır).
+yük bölgüsündə TƏK fəaliyyəti varsa o; yoxsa ``kind_unknown`` (yazılmır). Magistratura hüceyrəsi (növ
+işarəsi yoxdur) bu halda mühazirədir (``kind_default_lecture``).
 """
 
 from __future__ import annotations
@@ -128,6 +130,53 @@ def split_teacher(token: str) -> tuple[str, str]:
         return "", ""
     initial = fold(parts[1])[:1] if len(parts) > 1 else ""
     return surname_key(parts[0]), initial
+
+
+def is_full_name(token: str) -> bool:
+    """«Günel Rəhimli» / «Qasımzadə Nail» (magistratura, 2026-10-17) — iki tam söz, nöqtəsiz (inisial yox)."""
+    words = str(token or "").split()
+    return "." not in str(token or "") and len(words) == 2 and all(len(surname_key(w)) > 1 for w in words)
+
+
+def _first_word(value: str) -> str:
+    words = str(value or "").split()
+    return surname_key(words[0]) if words else ""
+
+
+def teacher_matches(users, token: str, *, fuzzy: bool) -> list:
+    """Nişana uyğun hesablar. «Soyad İ.»: dəqiq soyad (``fuzzy`` — yalnız ≥ ``TEACHER_FUZZY`` yazı xətası)
+    + baş hərf. TAM AD: (ad, soyad) cütü hər iki sırada; ``fuzzy`` — hər iki söz ≥ ``TEACHER_FUZZY``."""
+    out: dict = {}
+    if is_full_name(token):
+        a, b = (surname_key(word) for word in str(token).split())
+        for user in users:
+            first, last = _first_word(user.first_name), surname_key(user.last_name)
+            if not first or not last:
+                continue
+            exact = (first, last) in ((a, b), (b, a))
+            if fuzzy:
+                ratio = difflib.SequenceMatcher
+                same = not exact and any(
+                    ratio(None, x, first).ratio() >= TEACHER_FUZZY and ratio(None, y, last).ratio() >= TEACHER_FUZZY
+                    for x, y in ((a, b), (b, a))
+                )
+            else:
+                same = exact
+            if same:
+                out[user.pk] = user
+        return list(out.values())
+    surname, initial = split_teacher(token)
+    for user in users:
+        last = surname_key(user.last_name)
+        if not last or not surname:
+            continue
+        if fuzzy:
+            same = last != surname and difflib.SequenceMatcher(None, last, surname).ratio() >= TEACHER_FUZZY
+        else:
+            same = last == surname
+        if same and (not initial or fold(user.first_name)[:1] == initial):
+            out[user.pk] = user
+    return list(out.values())
 
 
 @dataclass
@@ -259,25 +308,9 @@ class Resolver:
             self._allowed[offering.pk] = schedule_slot_teachers.allowed_teacher_ids(offering)
         return self._allowed[offering.pk]
 
-    @staticmethod
-    def _matches(users, surname, initial, *, fuzzy: bool) -> list:
-        out = []
-        for user in users:
-            last = surname_key(user.last_name)
-            if not last:
-                continue
-            if fuzzy:
-                same = last != surname and difflib.SequenceMatcher(None, last, surname).ratio() >= TEACHER_FUZZY
-            else:
-                same = last == surname
-            if same and (not initial or fold(user.first_name)[:1] == initial):
-                out.append(user)
-        return out
-
     def teacher(self, offering, token: str):
         """→ (user | None, səbəb). Səbəb boşdursa açılışın öz müəllimləri arasında dəqiq tapılıb."""
-        surname, initial = split_teacher(token)
-        if not surname:
+        if not split_teacher(token)[0]:
             return None, "teacher_missing"
         pool = self._teacher_pool()
         allowed = [pool[pk][0] for pk in self._allowed_ids(offering) if pk in pool]
@@ -288,7 +321,7 @@ class Resolver:
             ([user for user, scopes in pool.values() if chair_id and chair_id in scopes], False, "teacher_chair_match"),
             ([user for user, _scopes in pool.values()], False, "teacher_org_match"),
         ):
-            found = {user.pk: user for user in self._matches(users, surname, initial, fuzzy=fuzzy)}
+            found = {user.pk: user for user in teacher_matches(users, token, fuzzy=fuzzy)}
             if len(found) == 1:
                 return next(iter(found.values())), reason
             if len(found) > 1:
@@ -296,7 +329,8 @@ class Resolver:
         return None, "teacher_not_found"
 
     # ── dərs növü ──────────────────────────────────────────────────────────
-    def infer_kind(self, offering, teacher) -> tuple[str, str]:
+    def infer_kind(self, offering, teacher, *, default: str = "") -> tuple[str, str]:
+        """``default`` — magistratura hüceyrəsində növ işarəsi yoxdur: bölgüdən çıxmırsa mühazirə (2026-10-17)."""
         from apps.registrar.plan_hours import plan_hours_for_offering
 
         if offering.pk not in self._hours:
@@ -320,6 +354,8 @@ class Resolver:
             )
             if len(activities) == 1:
                 return activities.pop(), "kind_from_load"
+        if default:
+            return default, f"kind_default_{default}"
         return "", "kind_unknown"
 
     # ── görünmə ────────────────────────────────────────────────────────────
@@ -343,8 +379,10 @@ __all__ = [
     "Resolver",
     "Target",
     "code_key",
+    "is_full_name",
     "split_teacher",
     "subject_contains",
     "subject_score",
     "surname_key",
+    "teacher_matches",
 ]
