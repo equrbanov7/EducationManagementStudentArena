@@ -8,7 +8,6 @@ from django.test import TransactionTestCase
 import pytest
 
 from apps.exams.services.access_code_crypto import decrypt_access_code
-from apps.organizations.models import Organization
 from core.constants import OrganizationType
 
 # Miqrasiya round-trip (migrate → sıfıra → geri) testləri xdist-də 4 worker-in
@@ -50,11 +49,18 @@ class AccessCodeMigrationRollbackTests(TransactionTestCase):
         super().tearDown()
 
     def test_reverse_migration_restores_plaintext_for_the_old_charfield(self):
-        teacher = User.objects.create_user("access_migration_teacher", password="pw")
-        org = Organization.objects.create(
+        # 2026-10-17: exams-i 0050-yə qaytarmaq asılılıq zənciri ilə (accounts 0030 → organizations 0057 → …)
+        # accounts-un sonrakı miqrasiyalarını da geri alır; CARİ User/Organization modelləri (və profil
+        # siqnalı) o sxemdə olmayan sütunlara yazır. Ona görə hamısı həmin andakı TARİXİ modellərlə yaradılır
+        # (tarixi modellər siqnal göndərmir).
+        state_apps = MigrationExecutor(connection).loader.project_state([self.migrate_from]).apps
+        historical_user = state_apps.get_model(*User._meta.label.split("."))
+        historical_org = state_apps.get_model("organizations", "Organization")
+        teacher = historical_user.objects.create(username="access_migration_teacher", password="!")
+        org = historical_org.objects.create(
             name="Access migration org",
             org_type=OrganizationType.SCHOOL,
-            owner=teacher,
+            owner_id=teacher.pk,
             status="active",
             is_active=True,
         )
