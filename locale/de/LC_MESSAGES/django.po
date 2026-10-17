@@ -99094,6 +99094,38 @@ msgctxt "registrar.schedule_rooms"
 msgid "%(room)s · %(count)s nəfər"
 msgstr "%(room)s · %(count)s Plätze"
 
+msgctxt "monitoring.ui"
+msgid "Log mənbəyinə qoşulmaq olmadı: {reason}"
+msgstr "Verbindung zur Log-Quelle fehlgeschlagen: {reason}"
+
+msgctxt "monitoring.ui"
+msgid "Loki {detail} ərzində cavab vermədi"
+msgstr "Loki hat nicht innerhalb von {detail} geantwortet"
+
+msgctxt "monitoring.ui"
+msgid "Loki xidmətinə bağlantı qurulmadı (xidmət dayanıb və ya şəbəkə əlçatmazdır)"
+msgstr "Keine Verbindung zum Loki-Dienst (Dienst gestoppt oder Netzwerk nicht erreichbar)"
+
+msgctxt "monitoring.ui"
+msgid "Loki HTTP {status} xətası qaytardı"
+msgstr "Loki hat einen HTTP-{status}-Fehler zurückgegeben"
+
+msgctxt "monitoring.ui"
+msgid "Loki gözlənilməz cavab qaytardı"
+msgstr "Loki hat eine unerwartete Antwort zurückgegeben"
+
+msgctxt "monitoring.ui"
+msgid "Log servisi müvəqqəti əlçatmazdır"
+msgstr "Der Log-Dienst ist vorübergehend nicht verfügbar"
+
+msgctxt "monitoring.ui"
+msgid "Son {range} ərzində bu sorğuya uyğun log yoxdur"
+msgstr "In den letzten {range} gibt es keine Logs zu dieser Abfrage"
+
+msgctxt "monitoring.ui"
+msgid "Loki son 6 saatda heç bir konteynerdən log almayıb — problem log toplayıcıdadır (promtail), sorğuda deyil."
+msgstr "Loki hat in den letzten 6 Stunden von keinem Container Logs erhalten — das Problem liegt beim Log-Sammler (promtail), nicht bei der Abfrage."
+
 msgctxt "accounts.profile_completion"
 msgid "FİN kod"
 msgstr "FIN-Code"
@@ -99229,3 +99261,7 @@ msgstr "Private E-Mail ist Pflicht"
 msgctxt "profile.rim"
 msgid "Məlumat natamam (FİN, telefon, e-poçt)"
 msgstr "Angaben unvollständig (FIN, Telefon, E-Mail)"
+
+msgctxt "monitoring.alert"
+msgid "Mərkəzi loglar toplanmır — «Loglar» bölməsi boş qalır"
+msgstr "Zentrale Logs werden nicht gesammelt — der Bereich «Logs» bleibt leer"

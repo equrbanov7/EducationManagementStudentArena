@@ -98194,6 +98194,38 @@ msgctxt "registrar.schedule_rooms"
 msgid "%(room)s · %(count)s nəfər"
 msgstr "%(room)s · %(count)s мест"
 
+msgctxt "monitoring.ui"
+msgid "Log mənbəyinə qoşulmaq olmadı: {reason}"
+msgstr "Не удалось подключиться к источнику логов: {reason}"
+
+msgctxt "monitoring.ui"
+msgid "Loki {detail} ərzində cavab vermədi"
+msgstr "Loki не ответил в течение {detail}"
+
+msgctxt "monitoring.ui"
+msgid "Loki xidmətinə bağlantı qurulmadı (xidmət dayanıb və ya şəbəkə əlçatmazdır)"
+msgstr "Нет соединения со службой Loki (служба остановлена или сеть недоступна)"
+
+msgctxt "monitoring.ui"
+msgid "Loki HTTP {status} xətası qaytardı"
+msgstr "Loki вернул ошибку HTTP {status}"
+
+msgctxt "monitoring.ui"
+msgid "Loki gözlənilməz cavab qaytardı"
+msgstr "Loki вернул неожиданный ответ"
+
+msgctxt "monitoring.ui"
+msgid "Log servisi müvəqqəti əlçatmazdır"
+msgstr "Служба логов временно недоступна"
+
+msgctxt "monitoring.ui"
+msgid "Son {range} ərzində bu sorğuya uyğun log yoxdur"
+msgstr "За последние {range} нет логов, соответствующих этому запросу"
+
+msgctxt "monitoring.ui"
+msgid "Loki son 6 saatda heç bir konteynerdən log almayıb — problem log toplayıcıdadır (promtail), sorğuda deyil."
+msgstr "За последние 6 часов Loki не получил логов ни от одного контейнера — проблема в сборщике логов (promtail), а не в запросе."
+
 msgctxt "accounts.profile_completion"
 msgid "FİN kod"
 msgstr "Код FIN"
@@ -98329,3 +98361,7 @@ msgstr "Личная эл. почта обязательна"
 msgctxt "profile.rim"
 msgid "Məlumat natamam (FİN, telefon, e-poçt)"
 msgstr "Данные неполные (FIN, телефон, эл. почта)"
+
+msgctxt "monitoring.alert"
+msgid "Mərkəzi loglar toplanmır — «Loglar» bölməsi boş qalır"
+msgstr "Централизованные логи не собираются — раздел «Логи» остаётся пустым"

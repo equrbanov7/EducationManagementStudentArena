@@ -6,7 +6,9 @@
 # §10 (sahib 2026-10-04): tutum/konfiqurasiya — host/kernel, disk, .env tutum
 # açarları, konteyner limitləri, Daphne/Celery/PostgreSQL/PgBouncer/Redis/nginx
 # faktiki parametrləri və Prometheus 24s/7g tarixçəsi (resurs boşdur/doymuşdur?).
+# §13 (sahib 2026-10-17): «Loglar» zənciri — `prod_logs_diag.sh` (source; tək də işləyir: scope=logs).
 set -uo pipefail
+AUDIT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_DIR="${APP_DIR:-/home/wcu/EducationManagementStudentArena}"
 COMPOSE="docker compose -f docker-compose.prod.yml"
 cd "$APP_DIR" || { echo "APP_DIR tapılmadı: $APP_DIR"; exit 1; }
@@ -522,6 +524,9 @@ if [ -n "$PGC" ] && [ -n "$APC" ]; then
 else
   warn "postgres/app konteyneri tapılmadı — prioritet yoxlanmadı"
 fi
+
+# shellcheck source=scripts/ops/prod_logs_diag.sh
+. "$AUDIT_DIR/prod_logs_diag.sh"
 
 section "Yekun"
 echo "- ❌ kritik: **$FAIL** · ⚠️ xəbərdarlıq: **$WARN**"

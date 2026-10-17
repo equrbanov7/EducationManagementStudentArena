@@ -49,8 +49,41 @@ def degraded(service: str, message: str) -> dict[str, Any]:
     }
 
 
-def _get_json(service: str, path: str, params: dict | None = None) -> dict | None:
-    """GET + JSON; cache-lənir; xətada None (çağıran degraded qaytarır)."""
+def describe_request_error(exc: Exception) -> dict[str, Any]:
+    """Sorğu xətasını UI-a təhlükəsiz forma salır: növ + HTTP status + qısa izah (2026-10-17).
+
+    ``str(exc)`` URL-i (sorğu sətri daxil) saxlayır — ona görə timeout/bağlantı
+    xətalarında yalnız növ qaytarılır; HTTP xətasında Loki-nin öz cavabının ilk
+    sətri (məs. «parse error …», «max entries limit …») sirr süzgəcindən keçib qısaldılır.
+    """
+    from .scrub import redact_secrets
+
+    if isinstance(exc, requests.Timeout):
+        return {"kind": "timeout", "status": None, "detail": f"{REQUEST_TIMEOUT_SECONDS} s"}
+    if isinstance(exc, requests.ConnectionError):
+        return {"kind": "connection", "status": None, "detail": ""}
+    if isinstance(exc, requests.HTTPError):
+        response = exc.response
+        status = getattr(response, "status_code", None)
+        body = (getattr(response, "text", "") or "").strip().splitlines()
+        return {"kind": "http", "status": status, "detail": redact_secrets(body[0][:200]) if body else ""}
+    if isinstance(exc, ValueError):
+        return {"kind": "invalid", "status": None, "detail": ""}
+    return {"kind": "error", "status": None, "detail": type(exc).__name__}
+
+
+def _get_json(
+    service: str,
+    path: str,
+    params: dict | None = None,
+    *,
+    error_sink: dict | None = None,
+) -> dict | None:
+    """GET + JSON; cache-lənir; xətada None (çağıran degraded qaytarır).
+
+    ``error_sink`` verilibsə xətanın təsviri (``describe_request_error``) ora yazılır —
+    UI «boş» əvəzinə səbəbi göstərə bilsin (2026-10-17, «loglar boş görünür»).
+    """
     import hashlib
 
     base = _base_urls()[service]
@@ -68,6 +101,8 @@ def _get_json(service: str, path: str, params: dict | None = None) -> dict | Non
         payload = response.json()
     except Exception as exc:
         logger.warning("Monitorinq %s sorğusu alınmadı (%s): %s", service, path, exc)
+        if error_sink is not None:
+            error_sink.update(describe_request_error(exc))
         return None
 
     cache.set(cache_key, payload, CACHE_TTL_SECONDS)
@@ -109,6 +144,19 @@ class PrometheusClient:
 class LokiClient:
     service = "loki"
 
+    def __init__(self) -> None:
+        #: Son uğursuz sorğunun təsviri (``describe_request_error``) və ya None.
+        self.last_error: dict[str, Any] | None = None
+
+    def _fetch(self, path: str, params: dict | None = None) -> dict | None:
+        sink: dict[str, Any] = {}
+        payload = _get_json(self.service, path, params, error_sink=sink)
+        if payload is not None and payload.get("status") != "success":
+            sink = {"kind": "invalid", "status": None, "detail": str(payload.get("error") or "")[:200]}
+            payload = None
+        self.last_error = (sink or {"kind": "error", "status": None, "detail": ""}) if payload is None else None
+        return payload
+
     def query_range(
         self,
         logql: str,
@@ -121,8 +169,7 @@ class LokiClient:
         limit = max(1, min(int(limit), LOKI_MAX_LINES))
         if end_ns - start_ns > LOKI_MAX_RANGE_SECONDS * 1_000_000_000:
             start_ns = end_ns - LOKI_MAX_RANGE_SECONDS * 1_000_000_000
-        payload = _get_json(
-            self.service,
+        payload = self._fetch(
             "/loki/api/v1/query_range",
             {
                 "query": logql,
@@ -132,13 +179,13 @@ class LokiClient:
                 "direction": direction,
             },
         )
-        if payload is None or payload.get("status") != "success":
+        if payload is None:
             return None
-        return payload["data"].get("result", [])
+        return (payload.get("data") or {}).get("result", [])
 
     def labels_values(self, label: str) -> list[str] | None:
-        payload = _get_json(self.service, f"/loki/api/v1/label/{label}/values")
-        if payload is None or payload.get("status") != "success":
+        payload = self._fetch(f"/loki/api/v1/label/{label}/values")
+        if payload is None:
             return None
         return payload.get("data", [])
 

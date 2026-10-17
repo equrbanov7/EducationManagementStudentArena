@@ -521,3 +521,22 @@ groups:
         annotations:
           summary: "Alertmanager bildirişləri çatdıra bilmir ({{ $labels.integration }})"
           description: "Son 15 dəqiqədə {{ $labels.integration }} inteqrasiyasında {{ $value | printf \"%.0f\" }} uğursuz göndəriş. E-poçt üçün Brevo «Authorised IPs», DNS və SMTP parolunu; webhook üçün nginx/app yolunu yoxlayın (SISTEM_MONITORINQI.md §8.1)."
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # Mərkəzi loglar (sahib 2026-10-17: «Sistem monitorinqində loglar boş göstərir»).
+  # Loki işləyə bilər (TargetDown yanmır), amma promtail heç nə göndərməyəndə
+  # «Loglar» tabı səssizcə boş qalırdı. 14 app replikası + nginx + celery beat
+  # hər saat yüzlərlə sətir yazır — 1 saatda SIFIR qəbul olunmuş sətir yalnız
+  # göndərmə zənciri (promtail → docker-socket-proxy → dockerd → Loki) qırılanda olur.
+  # Diaqnostika: prod-audit.yml scope=logs (scripts/ops/prod_logs_diag.sh).
+  # ═════════════════════════════════════════════════════════════════════════
+  - name: emsarena-logs
+    rules:
+      - alert: LogIngestionStalled
+        expr: sum(increase(loki_distributor_lines_received_total[1h])) < 1
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Loki son 1 saatda heç bir log sətri qəbul etməyib"
+          description: "promtail → docker-socket-proxy → Loki zənciri qırılıb; «Sistem monitorinqi → Loglar» boş görünür. prod-audit.yml scope=logs ilə yoxlayın."
