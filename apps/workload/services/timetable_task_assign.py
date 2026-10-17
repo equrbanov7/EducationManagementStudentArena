@@ -32,7 +32,8 @@ QAYDALAR (heç nə YARADILMIR: qrup, hesab; sətir/fənn/tapşırıq yalnız ``c
   (:mod:`.timetable_missing_rows`) və mövcud sətirlərin bölgüsü eyni addımdadır → rəsmi təsdiq və bölgü
   təsdiqi bir dəfə (2026-10-17 rəyi: əvvəl köhnəlmiş ``draft`` statusu ilə ikinci dəfə təsdiqlənirdi).
   Təsdiq alınmasa həmin tapşırığın dəyişiklikləri VƏ sayları geri alınır (``task_blocked``).
-  Əvvəl bölünmüş sənədin yenidən təsdiqi müəllimlərə təkrar «Dərs yükü təyin edildi» GÖNDƏRMİR.
+  Əvvəl bölünmüş sənədin yenidən təsdiqi müəllimlərə təkrar «Dərs yükü təyin edildi» GÖNDƏRMİR — yalnız bu işdə
+  bölgüsü yeni yaranan / dəyişən müəllimə bir dəfə (``distribution.teacher_loads``, sahib 2026-10-17).
 """
 
 from __future__ import annotations
@@ -49,6 +50,7 @@ from apps.registrar.public import schedule_docx_match, schedule_docx_parse
 
 from ..constants import ACTIVITY_TOTAL_FIELD, TEACHER_ROLE_NAMES, TEACHING_ACTIVITIES, RowKind, Season, TaskStatus
 from ..models import TeacherAssignment, TeachingTaskRow
+from .distribution import teacher_loads
 from .people import chair_teacher_memberships, join_chair_as_teacher
 from .plan_calendar import _rank, season_from_period
 from .scoping import WorkloadDenied
@@ -434,7 +436,7 @@ class TimetableTaskAssigner:
     def _apply_task(self, task, rows, plan: dict, *, rows_amended: bool = False) -> dict:
         """``rows_amended`` — yeni sətir bölünmüş sənədə düzəliş axını ilə əlavə olunub (təsdiq onu bağlayır)."""
         task.refresh_from_db(fields=["status", "distributed_at"])  # sətrin ``task``-ı köhnəlmiş ola bilər
-        first_distribution = task.distributed_at is None
+        loads_before = teacher_loads(task)
         if self.importer.apply and task.status == TaskStatus.DRAFT:
             self.importer._approve_official_workbook(task)
         opened_before = self.applier.counters["amendment_opened"]
@@ -458,9 +460,9 @@ class TimetableTaskAssigner:
             opened = self.applier.counters["amendment_opened"] > opened_before or rows_amended
             amended = task.status == TaskStatus.AMENDED and opened
             if (written and task.status in (TaskStatus.APPROVED, TaskStatus.DISTRIBUTING)) or amended:
-                # Əvvəl bölünmüş sənəd (düzəliş) — kafedranın bütün müəllimlərinə təkrar bildiriş yox
-                # (``fix_task_row_hours`` kimi ``notify=False``).
-                self.importer._confirm_and_enroll(task, notify=first_distribution)
+                # Əvvəl bölünmüş sənəd (düzəliş) — kafedranın bütün müəllimlərinə təkrar bildiriş yox, yalnız
+                # bu işdə bölgüsü yeni/dəyişən müəllimə (sahib 2026-10-17); ilk təsdiq hamıya bildirir.
+                self.importer._confirm_and_enroll(task, loads_before=loads_before)
                 self.counters["task_confirmed"] += 1
         return results
 

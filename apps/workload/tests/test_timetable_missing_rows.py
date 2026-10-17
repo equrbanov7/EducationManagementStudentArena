@@ -232,9 +232,12 @@ class TimetableMissingRowsTests(TestCase):
         self.assertEqual(
             set(TeacherAssignment.objects.filter(row=row).values_list("teacher__username", flat=True)), {"nail.q"}
         )
-        # Əvvəl bölünmüş sənədin yenidən təsdiqi — kafedraya təkrar «Dərs yükü təyin edildi» getmir.
+        # Əvvəl bölünmüş sənədin yenidən təsdiqi — kafedraya təkrar «Dərs yükü təyin edildi» getmir, yalnız yeni
+        # təyin olunan müəllimə bir dəfə (sahib 2026-10-17); dəyişikliksiz təkrar iş heç nə göndərmir.
         self.assertEqual(self._notified("rail.s"), 1)
-        self.assertEqual(self._notified("nail.q"), 0)
+        self.assertEqual(self._notified("nail.q"), 1)
+        self._run(path, "--create-missing-rows", "--apply")
+        self.assertEqual((self._notified("rail.s"), self._notified("nail.q")), (1, 1))
 
     def test_existing_row_is_used_and_subject_owner_chair_wins(self):
         subject = Subject.objects.create(

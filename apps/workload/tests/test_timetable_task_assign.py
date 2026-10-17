@@ -177,10 +177,14 @@ class TimetableTaskAssignTests(TestCase):
         self.assertEqual(self.task.status, "distributed")
         offering = CourseOffering.objects.get(organization=self.org, subject__name="Veb texnologiyalar")
         self.assertEqual(offering.instructor, self.users["sekine.h"])
-        # 2026-10-17 rəyi: əvvəl bölünmüş sənədin (düzəliş) yenidən təsdiqi kafedraya təkrar bildiriş GÖNDƏRMİR.
+        # 2026-10-17: əvvəl bölünmüş sənədin (düzəliş) yenidən təsdiqi kafedraya təkrar bildiriş GÖNDƏRMİR —
+        # yalnız bu işdə YENİ təyin olunan müəllimə bir dəfə; dəyişikliksiz təkrar iş heç nə göndərmir.
         notified = InAppNotification.objects.filter(metadata__event="workload_assigned")
         self.assertEqual(notified.filter(recipient=self.users["sekine.h"]).count(), 1)
-        self.assertFalse(notified.filter(recipient=self.users["minaye.a"]).exists())
+        self.assertEqual(notified.filter(recipient=self.users["minaye.a"]).count(), 1)
+        self._run(path, "--apply")
+        self.assertEqual(notified.filter(recipient=self.users["sekine.h"]).count(), 1)
+        self.assertEqual(notified.filter(recipient=self.users["minaye.a"]).count(), 1)
 
     def test_existing_row_kind_rule_matches_registrar_default_kind(self):
         # Rəy (4): növ işarəsiz (magistratura) hüceyrə — sətirdə mühazirə yoxdursa defolt mühazirə YOX.
