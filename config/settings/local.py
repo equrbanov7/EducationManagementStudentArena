@@ -101,6 +101,11 @@ if not SECRET_KEY:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = _env_bool("DEBUG", True)
 MANAGEMENT_COMMAND_ENVIRONMENT = "local"
+# Sahib 2026-10-17: «lokaldakı Clarity-ni bağla, prodda qalsın» — lokal / QA klonunda real adlar var, səhifələr
+# Microsoft Clarity-yə getməsin. Prod (`production.py`) toxunulmur. Lokalda yoxlamaq lazımdırsa:
+# MICROSOFT_CLARITY_LOCAL_PROJECT_ID=<id>.
+MICROSOFT_CLARITY_PROJECT_ID = os.getenv("MICROSOFT_CLARITY_LOCAL_PROJECT_ID", "").strip()
+MICROSOFT_CLARITY_AUTHENTICATED = False
 # Source connection details are materialized only after explicit attestation opt-in.
 LEGACY_MARIADB_SOURCE_ATTEST_ENABLED = os.getenv("LEGACY_MARIADB_SOURCE_ATTEST_ENABLED", "") == "1"
 LEGACY_MARIADB_SOURCE_LOCAL_DISPOSABLE = (
