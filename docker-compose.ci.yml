@@ -68,3 +68,12 @@ services:
   nginx:
     volumes:
       - ./docker/nginx/nginx.ci.conf:/etc/nginx/conf.d/default.conf:ro
+
+networks:
+  # 2026-10-18: `docker-api` (internal) şəbəkəsinin subnet-i pin-lənməyib və `emsarena-network`-dən ƏVVƏL
+  # yaradılır — təmiz runner-də Docker ona «növbəti boş» 172.18.0.0/16-nı verir, sonra pin-li
+  # `emsarena-network` «Pool overlaps» ilə qalxmır. CI-də ona ayrıca, toqquşmayan aralıq verilir.
+  docker-api:
+    ipam:
+      config:
+        - subnet: 172.30.255.0/24
