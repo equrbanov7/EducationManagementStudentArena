@@ -522,6 +522,19 @@
             ctx.mobileSidebarTrigger.addEventListener("click", function () {
                 setSidebarCollapsed(false);
             });
+            /* Mobil qabıq 2026-10-19: kənar dil-düymə aşağı sürüşəndə kənara çəkilir (mətnin ilk
+               14px-ni örtməsin), yuxarı sürüşəndə və səhifə başında qayıdır (AI düyməsi ilə eyni). */
+            var trigger = ctx.mobileSidebarTrigger, lastY = window.pageYOffset || 0, tuckRaf = 0;
+            window.addEventListener("scroll", function () {
+                if (tuckRaf) return;
+                tuckRaf = window.requestAnimationFrame(function () {
+                    tuckRaf = 0;
+                    var y = window.pageYOffset || 0, delta = y - lastY;
+                    if (Math.abs(delta) < 8) return;
+                    lastY = y;
+                    trigger.classList.toggle("is-tucked", isMobileViewport() && delta > 0 && y > 40);
+                });
+            }, { passive: true });
         }
 
         if (ctx.sidebarBackdrop && ctx.sidebar) {

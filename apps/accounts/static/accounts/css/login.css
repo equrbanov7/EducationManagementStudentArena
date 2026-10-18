@@ -328,16 +328,23 @@ body.auth-body {
 
 .input-visibility-toggle {
     position: absolute;
-    right: 10px;
+    right: 4px;
     top: 50%;
     transform: translateY(-50%);
+    /* Mobil qabıq 2026-10-19: toxunma sahəsi 28×30 idi — 40×40 (ikon yerində qalır:
+       əvvəl `right: 10px` + 6px padding, indi `right: 4px` + mərkəzləmə). */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
     border: 0;
     background: transparent;
     color: var(--ems-neutral-500);
     cursor: pointer;
     line-height: 1;
-    padding: 6px;
-    border-radius: 6px;
+    padding: 0;
+    border-radius: 8px;
 }
 
 .input-visibility-toggle:hover {
@@ -477,6 +484,18 @@ body.auth-body {
 
     .auth-language-label {
         display: none; /* dar ekranda yalnız seçim qutusu qalır */
+    }
+}
+
+/* Ən dar telefonlar (320–360px): kartın yan boşluqları 15+22px idi — forma xanası
+   (xüsusən telefon nömrəsi: operator + 7 rəqəm) sıxılırdı. Mobil qabıq 2026-10-19. */
+@media (max-width: 360px) {
+    .auth-page-wrapper {
+        padding: 16px 10px;
+    }
+
+    .auth-card {
+        padding: 44px 16px 22px;
     }
 }
 

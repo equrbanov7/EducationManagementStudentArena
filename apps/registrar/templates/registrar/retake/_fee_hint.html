@@ -1,0 +1,12 @@
+{% load i18n registrar_retake %}{% comment %}25% təxmini məbləği (sahib 2026-10-19): illik təhsil haqqı × faiz × (kredit ÷ illik kredit).
+Kontekst: `amount` (Decimal | None), `year` — məbləğin hesablandığı tədris ili (müraciət anının cari dövrü; review
+2026-10-19, M-10 — şəffaflıq üçün göstərilir).{% endcomment %}
+<span class="rt-fee">
+    <i class="fas fa-coins" aria-hidden="true"></i>
+    {% if amount is not None %}
+        {% blocktrans with amount=amount|retake_score context "registrar.retake" %}Təxmini məbləğ: {{ amount }} AZN — dəqiq məbləği Mühasibatlıq təsdiqləyir{% endblocktrans %}
+        {% if year %}<span class="rt-fee__year">{% blocktrans context "registrar.retake" %}({{ year }} tədris ilinin haqqı ilə){% endblocktrans %}</span>{% endif %}
+    {% else %}
+        {% trans "Məbləği Mühasibatlıqdan öyrənin" context "registrar.retake" %}
+    {% endif %}
+</span>

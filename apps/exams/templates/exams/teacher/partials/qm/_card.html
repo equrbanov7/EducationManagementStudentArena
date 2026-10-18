@@ -12,7 +12,7 @@ Keyfiyyət nişanları ikon + MƏTN (yalnız rəng/ikon yox).{% endcomment %}
     <div class="eqb-card__main">
         <div class="eqb-card__top">
             <span class="eqb-card__num etp-num">{% if qm_context == 'exam' %}#{{ q.order }}{% else %}#{{ forloop.counter0|add:page_obj.start_index }}{% endif %}</span>
-            {% if not q.image_replaces_text or not q.image %}<p class="eqb-card__text">{{ q.text }}</p>{% endif %}
+            {% if not q.image_replaces_text or not q.image %}<p class="eqb-card__text">{{ q.text|code_text }}</p>{% endif %}
             <div class="eqb-card__badges">
                 {% if q.is_active %}
                 <span class="ems-badge ems-badge--success"><i class="fas fa-circle-check" aria-hidden="true"></i>{% trans "status_active" context "exams.template.teacher_questions_bank" %}</span>
@@ -56,7 +56,7 @@ Keyfiyyət nişanları ikon + MƏTN (yalnız rəng/ikon yox).{% endcomment %}
             {% for opt in opts %}
             <li class="eqb-opt{% if opt.is_correct %} is-correct{% endif %}">
                 <span class="eqb-opt__label">{{ opt.label|default:"•" }}</span>
-                {% if not opt.image_replaces_text or not opt.image %}<span class="eqb-opt__text">{{ opt.text }}</span>{% endif %}
+                {% if not opt.image_replaces_text or not opt.image %}<span class="eqb-opt__text">{{ opt.text|code_text }}</span>{% endif %}
                 {% if opt.image %}<img src="{{ opt.image|protected_media_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="eqb-opt__image" loading="lazy">{% endif %}
                 {% if opt.is_correct %}<span class="ems-badge ems-badge--success"><i class="fas fa-check" aria-hidden="true"></i>{% trans "Düzgün" context "exams.template.teacher_questions_bank" %}</span>{% endif %}
             </li>

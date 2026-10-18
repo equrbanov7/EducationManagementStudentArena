@@ -1,0 +1,314 @@
+/* Publik sənəd yoxlaması (/yoxla/) — base_auth üzərində tək kart. Dizayn tokenləri: css/design-tokens.css.
+   375 px-də: kart tam en (16 px kənar), form sətri sütuna düşür, fakt cədvəli iki sətirli olur. */
+
+.dv-shell {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 32px 16px 40px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    color: var(--ems-fg, #0f172a);
+}
+
+.dv-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dv-brand__logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+}
+
+.dv-brand__name {
+    margin: 0;
+    font-weight: 700;
+    font-size: var(--ems-fs-md, 15px);
+}
+
+.dv-brand__sub {
+    margin: 0;
+    font-size: var(--ems-fs-sm, 13px);
+    color: var(--ems-fg-muted, #64748b);
+}
+
+.dv-card {
+    background: var(--ems-neutral-0, #fff);
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: var(--ems-r-xl, 16px);
+    box-shadow: var(--ems-sh-card, 0 1px 3px rgba(15, 23, 42, 0.08));
+    padding: 24px;
+}
+
+.dv-title {
+    margin: 0 0 8px;
+    font-size: var(--ems-fs-xl, 20px);
+    font-weight: 700;
+}
+
+.dv-lead {
+    margin: 0 0 16px;
+    color: var(--ems-fg-muted, #64748b);
+    font-size: var(--ems-fs-base, 14px);
+}
+
+/* ── kod formu ─────────────────────────────────────────────────────────── */
+.dv-form__row,
+.dv-compare__row {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.dv-form__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-family: var(--ems-ff-mono, ui-monospace, monospace);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.dv-alert {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    border-radius: var(--ems-r-lg, 12px);
+    border: 1px solid transparent;
+    font-size: var(--ems-fs-sm, 13px);
+}
+
+.dv-alert--danger {
+    background: var(--ems-danger-bg, #fef2f2);
+    border-color: var(--ems-danger-bd, #fecaca);
+    color: var(--ems-danger-700, #b91c1c);
+}
+
+.dv-alert--warning {
+    background: var(--ems-warning-bg, #fffbeb);
+    border-color: var(--ems-warning-bd, #fde68a);
+    color: var(--ems-warning-800, #92400e);
+}
+
+/* ── nəticə zolağı ─────────────────────────────────────────────────────── */
+.dv-status {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 16px;
+    border-radius: var(--ems-r-lg, 12px);
+    border: 1px solid transparent;
+    margin-bottom: 16px;
+}
+
+.dv-status--valid {
+    background: var(--ems-success-bg, #ecfdf5);
+    border-color: var(--ems-success-bd, #a7f3d0);
+    color: var(--ems-success-700, #047857);
+}
+
+.dv-status--revoked {
+    background: var(--ems-danger-bg, #fef2f2);
+    border-color: var(--ems-danger-bd, #fecaca);
+    color: var(--ems-danger-700, #b91c1c);
+}
+
+.dv-status__icon {
+    flex: 0 0 auto;
+    line-height: 0;
+}
+
+.dv-status__title {
+    margin: 0 0 2px;
+    font-size: var(--ems-fs-lg, 18px);
+    font-weight: 700;
+}
+
+.dv-status__text {
+    margin: 0;
+    font-size: var(--ems-fs-sm, 13px);
+    color: var(--ems-fg, #0f172a);
+}
+
+.dv-revoked {
+    margin: -4px 0 16px;
+    padding: 12px 14px;
+    border-radius: var(--ems-r-md, 10px);
+    background: var(--ems-bg-subtle, #f8fafc);
+    font-size: var(--ems-fs-sm, 13px);
+}
+
+.dv-revoked__row {
+    margin: 0;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.dv-revoked__row + .dv-revoked__row {
+    margin-top: 4px;
+}
+
+.dv-revoked__row span {
+    color: var(--ems-fg-muted, #64748b);
+    min-width: 96px;
+}
+
+/* ── faktlar ───────────────────────────────────────────────────────────── */
+.dv-facts {
+    margin: 0;
+    border-top: 1px solid var(--ems-border, #e2e8f0);
+}
+
+.dv-facts__row {
+    display: grid;
+    grid-template-columns: minmax(140px, 38%) 1fr;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--ems-border, #e2e8f0);
+    font-size: var(--ems-fs-base, 14px);
+}
+
+.dv-facts__row dt {
+    font-weight: 500;
+    color: var(--ems-fg-muted, #64748b);
+}
+
+.dv-facts__row dd {
+    margin: 0;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.dv-code {
+    font-family: var(--ems-ff-mono, ui-monospace, monospace);
+    letter-spacing: 0.03em;
+}
+
+.dv-note {
+    margin: 14px 0 0;
+    font-size: var(--ems-fs-xs, 12px);
+    color: var(--ems-fg-muted, #64748b);
+}
+
+/* ── faylı müqayisə ────────────────────────────────────────────────────── */
+.dv-compare {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--ems-border, #e2e8f0);
+}
+
+.dv-compare__title {
+    margin: 0 0 4px;
+    font-size: var(--ems-fs-md, 15px);
+    font-weight: 700;
+}
+
+.dv-compare__hint {
+    margin: 0 0 8px;
+    font-size: var(--ems-fs-sm, 13px);
+    color: var(--ems-fg-muted, #64748b);
+}
+
+.dv-file {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: var(--ems-r-md, 10px);
+    padding: 6px 10px;
+    background: var(--ems-bg-subtle, #f8fafc);
+}
+
+.dv-file__input {
+    width: 100%;
+    min-width: 0;
+    font-size: var(--ems-fs-sm, 13px);
+}
+
+.dv-file__input::file-selector-button {
+    margin-right: 10px;
+    padding: 4px 10px;
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: var(--ems-r-sm, 8px);
+    background: var(--ems-neutral-0, #fff);
+    color: var(--ems-fg, #0f172a);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.dv-result {
+    margin: 0 0 10px;
+    padding: 10px 12px;
+    border-radius: var(--ems-r-md, 10px);
+    font-size: var(--ems-fs-sm, 13px);
+    font-weight: 600;
+    background: var(--ems-warning-bg, #fffbeb);
+    color: var(--ems-warning-800, #92400e);
+}
+
+.dv-result--match {
+    background: var(--ems-success-bg, #ecfdf5);
+    color: var(--ems-success-700, #047857);
+}
+
+.dv-result--mismatch {
+    background: var(--ems-danger-bg, #fef2f2);
+    color: var(--ems-danger-700, #b91c1c);
+}
+
+.dv-again {
+    margin: 18px 0 0;
+    font-size: var(--ems-fs-sm, 13px);
+}
+
+.dv-link {
+    color: var(--ems-link, #2563eb);
+    font-weight: 600;
+}
+
+.dv-link:hover,
+.dv-link:focus-visible {
+    color: var(--ems-link-hover, #1d4ed8);
+    text-decoration: underline;
+}
+
+.dv-footer {
+    margin: 0;
+    text-align: center;
+    font-size: var(--ems-fs-xs, 12px);
+    color: var(--ems-fg-muted, #64748b);
+}
+
+@media (max-width: 520px) {
+    .dv-shell {
+        padding-top: 20px;
+    }
+
+    .dv-card {
+        padding: 18px 16px;
+    }
+
+    .dv-form__row,
+    .dv-compare__row {
+        flex-direction: column;
+    }
+
+    .dv-form__row .ems-btn,
+    .dv-compare__row .ems-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .dv-facts__row {
+        grid-template-columns: 1fr;
+        gap: 2px;
+    }
+}

@@ -1,0 +1,6 @@
+{% load i18n %}
+<p class="hrc-dialog__who" data-hrc-text="who"></p>
+<div class="ems-field">
+    <label class="ems-field__label" for="hrcTerminateDate">{% trans "Xitam tarixi" context "hr_contracts" %}</label>
+    <input class="ems-input ems-input--date" type="date" id="hrcTerminateDate" name="terminated_at" value="{{ hc.today }}">
+</div>

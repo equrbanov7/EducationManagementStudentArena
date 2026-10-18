@@ -47,8 +47,8 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sidebar_rail.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sidebar_icons.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sidebar.css' %}">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/layout.css' %}?v=20260912-1">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/common.css' %}?v=20260912-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/layout.css' %}?v=20261019-mob">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/common.css' %}?v=20261019-mob">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/profile_info.css' %}?v=20260912-1">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/profile_identity.css' %}?v=20260907-redesign">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/profile_identity_aside.css' %}?v=20260907-redesign">
@@ -57,19 +57,19 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/posts/_part2.css' %}">
     {% comment %}`.tx-toast` `my_exams_dashboard.js`-dən gəlir — o da yalnız «İmtahanlarım»-da yüklənir.{% endcomment %}
     {% if 'my-exams' in asset_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_exams.css' %}?v=20260930-resp">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_exams.css' %}?v=20261019-mob">
     {% endif %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_courses.css' %}?v=20260928-1">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/courses.css' %}?v=20261018-pkga">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/assigned_exams.css' %}?v=20261018-pkga">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/assigned_courses.css' %}?v=20261018-pkga">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_results.css' %}?v=20261018-pkga">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_results.css' %}?v=20261019-mob">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_results_academic.css' %}?v=20261018-retake">
     {% if 'pending-post-approvals' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/pending_post_approvals.css' %}?v=20260912-1">
     {% endif %}
     {% if 'pending-review' in asset_sections or 'pending-answers' in asset_sections or 'review-results' in asset_sections or 'pending-post-approvals' in asset_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/pending_review.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/pending_review.css' %}?v=20261019-mob">
     {% endif %}
     {% if 'role-assignment' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/role_assignment.css' %}">
@@ -89,8 +89,8 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% if 'student-organization-management' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/student_org_management.css' %}">
     {% endif %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/notifications.css' %}?v=20260908-files">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/notifications_rows.css' %}?v=20260908-files">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/notifications.css' %}?v=20261019-mob2">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/notifications_rows.css' %}?v=20261019-mob">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/notifications_modal.css' %}?v=20260930-resp">
     {% if 'publish-notification' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/publish_notification.css' %}?v=20260908-scopes">
@@ -102,7 +102,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/contact_messages/_part1.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/contact_messages/_part2.css' %}">
     {% endif %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/responsive.css' %}?v=20261017-drawer">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/responsive.css' %}?v=20261019-mob2">
     {% comment %}«Ana səhifə» — default bölmə, HƏR üzvdə var (şərtsiz yüklənir).{% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/dashboard.css' %}?v=20260925-cards">
     {% comment %}«Dəyərləndirilmiş nəticələr» (2026-10-17) — `responsive.css`-dən SONRA: manifest prefiksi (`profile.css` @import sırası) dəyişmir.{% endcomment %}
@@ -143,7 +143,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'courses/css/create_course_modal.css' %}">
     {% comment %}2026-10-18 «Kurslarım» redizaynı: kursun aksent tonu (kurs paneli ilə ortaq) → kart şəbəkəsi.{% endcomment %}
     <link rel="stylesheet" href="{% static 'courses/css/course_accent.css' %}?v=20261018-crs">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_courses_list.css' %}?v=20261018-crs">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_courses_list.css' %}?v=20261019-mob">
     {% endif %}
     {% if 'my-exams' in asset_sections %}
     <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260911-1">
@@ -169,7 +169,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/transcript.css' %}?v=20260912-1">
     {% endif %}
     {% if 'overall-academic' in asset_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/overall_academic.css' %}?v=20260720-4">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/overall_academic.css' %}?v=20261019-mob">
     {% endif %}
     {% if 'academic-records' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/academic_records.css' %}?v=20260910-1">
@@ -217,13 +217,13 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     kafedra müdiri «Sillabuslar» bölməsini görməsə də bu fayl yüklənir.{% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_base.css' %}?v=20260909-select">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_dialog.css' %}?v=20260830-3">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_list.css' %}?v=20260930-resp">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_list.css' %}?v=20261019-mob">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_drawer.css' %}?v=20260830-3">
     {% endif %}
     {% if 'syllabus-list' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor.css' %}?v=20260830-3">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_panels.css' %}?v=20261015-lo">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_aside.css' %}?v=20260830-3">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_aside.css' %}?v=20261019-mob">
     {% comment %}Köçürülmüş məzmunun səthi (kataloqdankənar metod çipləri, plandan
     artıq həftə sətirləri, strukturdan artıq sərbəst iş yuvaları) — kaskadda
     panellərdən SONRA gəlir, çünki onların tonunu üstələyir.{% endcomment %}
@@ -260,10 +260,10 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'registrar/css/syllabus_view.css' %}?v=20260830-syl1">
     {% endif %}
     {% if 'my-schedule' in asset_sections or 'schedule-manage' in asset_sections %}
-    <link rel="stylesheet" href="{% static 'registrar/css/schedule.css' %}?v=20260909-select">
+    <link rel="stylesheet" href="{% static 'registrar/css/schedule.css' %}?v=20261019-mob">
     {% comment %}Həftəlik matris — «Dərs cədvəli» (yalnız-oxu) ilə «Cədvəl
     idarəetməsi» (redaktor) ARASINDA ORTAQ grid stili.{% endcomment %}
-    <link rel="stylesheet" href="{% static 'registrar/css/schedule_matrix.css' %}?v=20260909-matrix">
+    <link rel="stylesheet" href="{% static 'registrar/css/schedule_matrix.css' %}?v=20261019-mob">
     {% endif %}
     {% if 'schedule-manage' in asset_sections %}
     {% comment %}Redaktorun öz xromu (həftə pilləri, dialoq sahələri, park
@@ -286,7 +286,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     `applications_modal.css` `_detail`-dən də SONRA olmalıdır: detal panelinin
     `.apx-body` sütun qaydasını və cavab qutusunun fonunu QƏSDƏN üstələyir.{% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/applications.css' %}?v=20260912-1">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_filters.css' %}?v=20260907-modal">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_filters.css' %}?v=20261019-mob">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_detail.css' %}?v=20260907-modal">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_modal.css' %}?v=20260907-modal">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_dialogs.css' %}?v=20260909-empty">
@@ -306,7 +306,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% comment %}Mərhələ 2 (ekran 05/06/07) — plan redaktoru, qrup reyestri,
     semestr açılışı. Yenə YALNIZ düzüm; komponentlər `ems_ui`-dədir.{% endcomment %}
     {% if 'curriculum-editor' in asset_sections or 'groups-registry' in asset_sections or 'semester-opening' in asset_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_office_plan.css' %}?v=20261003-ready">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_office_plan.css' %}?v=20261019-tofix">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/teaching_office_groups.css' %}?v=20261017-f16">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/teaching_office_group_split.css' %}?v=20260920-split">
     {% endif %}

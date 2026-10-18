@@ -41,6 +41,8 @@ CATEGORY_RULES = (
     ("apps/notifications/", "A", "recipient-scoped bildiriş"),
     ("apps/blog/", "A", "qlobal blog (tenant-suz)"),
     ("apps/live_exam/", "B", "public PIN/token girişi"),
+    # 2026-10-18: publik sənəd yoxlaması — dəqiq 80 bitlik kod üzrə TƏK sətir, yalnız publik sütunlar, yazısız.
+    ("apps/verification/lookup.py", "B", "public sənəd yoxlaması (kod üzrə tək sətir)"),
     ("apps/exams/services/final_center/", "B", "final mərkəzi PIN axını"),
     ("apps/exams/views/student/final_center.py", "B", "final mərkəzi PIN axını"),
     ("apps/exams/services/exam_center_gate.py", "B", "imtahan mərkəzi qapısı"),
@@ -64,6 +66,13 @@ CATEGORY_RULES = (
     ("apps/surveys/services/survey_buffer.py", "D", "anonim cavab buferi köçürməsi (artıq icazəli sorğu id-si)"),
     ("apps/surveys/management/", "C", "idarə əmrləri"),
     ("apps/timetable/tasks.py", "D", "Celery (cədvəl generatoru, run sətrinin təşkilatı)"),
+    # 2026-10-19: əmək müqaviləsi xatırlatmaları — bütün təşkilatlar bir keçiddə, hər sətir öz org-u ilə yazılır.
+    ("apps/hr_contracts/tasks.py", "D", "Celery (rls_worker_atomic; müqavilənin öz təşkilatı)"),
+    ("apps/hr_contracts/management/", "C", "idarə əmrləri (--org / --dry-run)"),
+    # Rəy A5/A6 (2026-10-19): alıcı üzvlükləri açıq org süzgəcli (transaction-scoped RLS-dən asılı olmasın) və
+    # əvəz olunmuş faylın «hələ istinad olunurmu» yoxlaması (commit-dən sonra, yalnız `file` yolu üzrə).
+    ("apps/hr_contracts/services/notify.py", "D", "bildiriş alıcıları (açıq təşkilat süzgəcli üzvlük oxusu)"),
+    ("apps/hr_contracts/services/files.py", "D", "commit-dən sonra yetim fayl təmizliyi (yol üzrə EXISTS)"),
     ("apps/workload/management/", "C", "idarə əmrləri (--org ilə)"),
     # 2026-10-08: WS qapısı — tenant GUC-suz ASGI scope; yalnız qoşulan istifadəçinin öz
     # profil/üzvlük oxusu (pk süzgəcli) + rədd audit sətri.

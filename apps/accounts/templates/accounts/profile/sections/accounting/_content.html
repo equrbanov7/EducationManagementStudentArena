@@ -1,7 +1,8 @@
 {% load i18n %}
-{% comment %}«Mühasibatlıq» çərçivəsi: başlıq + ixrac, avto filtrlər, KPI zolağı, müəllim cədvəli və ya drill-down.
-Kontekst: `ac` (services/accounting/panel.py).{% endcomment %}
-{% trans "Müəllimlərin jurnalda keçirdiyi dərs saatları ay üzrə, paylanmış dərs yükündən aylıq plan payı ilə müqayisədə: mühazirə, seminar, laboratoriya, fərq və ştat. Filtrlər cədvələ və KPI-lara tətbiq olunur; ixrac cari filtr dəstini Excel-ə çıxarır." context "accounts.accounting" as ac_subtitle %}
+{% comment %}«Mühasibatlıq» çərçivəsi: başlıq + ixrac, avto filtrlər (ay / bütün semestr / tarix aralığı), dövr sətri, KPI
+zolağı, status leqendası, müəllim cədvəli (sətrə klik → müəllim pəncərəsi) və ya tam səhifə drill-down-u, hesablama
+qaydası. Kontekst: `ac` (services/accounting/panel.py).{% endcomment %}
+{% trans "Müəllimlərin jurnalda keçirdiyi dərs saatları paylanmış dərs yükünün seçilmiş dövrə düşən payı ilə müqayisədə: mühazirə, seminar, laboratoriya, fərq və status. Dövr — ay, bütün semestr və ya tarix aralığı. Filtrlər KPI-lara, cədvələ və Excel ixracına eyni tətbiq olunur; müəllimin sətrinə klik ətraflı pəncərəni açır." context "accounts.accounting" as ac_subtitle %}
 <div class="ac" data-ac-root>
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=ac_subtitle header_actions_include="accounts/profile/sections/accounting/_actions.html" %}
     {% if ac.view_as %}
@@ -16,21 +17,36 @@ Kontekst: `ac` (services/accounting/panel.py).{% endcomment %}
         {% trans "Semestr təqvimi «Semestr açılışı» bölməsində yaradılır. Dövr olmadan keçirilmiş dərslər aylara bölünə bilmir." context "accounts.accounting" as st_body %}
         {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-calendar-xmark" %}
     {% else %}
-    {% if not ac.filters.teacher %}
-    <p class="ac__count" aria-live="polite">
-        {% blocktrans trimmed with period=ac.period_label shown=ac.total total=ac.total_all context "accounts.accounting" %}
-        {{ period }} · göstərilir: {{ shown }} / {{ total }} müəllim
-        {% endblocktrans %}
-        {% if ac.is_filtered %}<span class="ac__count-filtered">· {% trans "filtr tətbiq olunub" context "accounts.accounting" %}</span>{% endif %}
-    </p>
-    {% endif %}
+    {% for message in ac.range_messages %}
+    <div class="ems-msg ems-msg--warning ac__notice" role="status">
+        <i class="fas fa-triangle-exclamation ems-msg__icon" aria-hidden="true"></i>
+        <div>{{ message }}</div>
+    </div>
+    {% endfor %}
+    <div class="ac-period">
+        {% if not ac.filters.teacher %}
+        <p class="ac__count" aria-live="polite">
+            <strong class="ac__period">{{ ac.period_label }}</strong>
+            <span>· {% blocktrans trimmed with shown=ac.total total=ac.total_all context "accounts.accounting" %}göstərilir: {{ shown }} / {{ total }} müəllim{% endblocktrans %}</span>
+            {% if ac.is_filtered %}<span class="ac__count-filtered">· {% trans "filtr tətbiq olunub" context "accounts.accounting" %}</span>{% endif %}
+        </p>
+        {% if ac.total %}<p class="ac__hint"><i class="fas fa-hand-pointer" aria-hidden="true"></i> {% trans "Müəllimin sətrinə klikləyin — aylar, fənlər və keçirilmiş dərslər ətraflı pəncərədə açılır." context "accounts.accounting" %}</p>{% endif %}
+        {% endif %}
+    </div>
     {% if ac.month_in_progress %}
     <div class="ems-msg ems-msg--warning ac__notice" role="note">
         <i class="fas fa-hourglass-half ems-msg__icon" aria-hidden="true"></i>
-        <div>{% trans "Ay hələ bitməyib — fakt ayın sonunadək artacaq, «Plandan az» statusu ilkin göstəricidir." context "accounts.accounting" %}</div>
+        <div>{% if ac.is_range %}{% trans "Aralıq bu günü əhatə edir — fakt aralığın sonunadək artacaq, «Plandan az» statusu ilkin göstəricidir." context "accounts.accounting" %}{% else %}{% trans "Ay hələ bitməyib — fakt ayın sonunadək artacaq, «Plandan az» statusu ilkin göstəricidir." context "accounts.accounting" %}{% endif %}</div>
+    </div>
+    {% endif %}
+    {% if ac.is_range %}
+    <div class="ems-msg ems-msg--info ac__notice" role="note">
+        <i class="fas fa-calendar-week ems-msg__icon" aria-hidden="true"></i>
+        <div>{% trans "Aralığın planı: hər ayın plan payı həmin ayın aralığa düşən iş günləri qədər götürülür (ayın payı × aralıqdakı iş günləri ÷ ayın iş günləri). Tam düşən ay ay rejimi ilə, bütün semestr isə semestr planı ilə eyni rəqəmi verir." context "accounts.accounting" %}</div>
     </div>
     {% endif %}
     {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=ac.kpis kpi_variant="5" %}
+    {% include "accounts/profile/sections/accounting/_legend.html" %}
     <div class="ac-body" data-ems-filter-target>
         {% if ac.detail %}
             {% include "accounts/profile/sections/accounting/_detail.html" with detail=ac.detail %}
@@ -38,6 +54,13 @@ Kontekst: `ac` (services/accounting/panel.py).{% endcomment %}
             {% trans "Bu semestr üçün nə keçirilmiş dərs, nə də paylanmış yük var" context "accounts.accounting" as st_title %}
             {% trans "Fakt elektron jurnalın dərslərindən, plan «Yük bölgüsü»ndə müəllimlərə paylanmış saatlardan yığılır. Başqa semestr seçin." context "accounts.accounting" as st_body %}
             {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-calculator" %}
+        {% elif ac.total == 0 %}
+            {% trans "Filtrə uyğun müəllim yoxdur" context "accounts.accounting" as st_title %}
+            {% trans "Fakültə, kafedra, kənarlaşma və ya axtarış filtrini dəyişin. Dövr (ay və ya aralıq) saxlanılır." context "accounts.accounting" as st_body %}
+            {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-filter-circle-xmark" %}
+            <a class="ems-btn ac-empty-reset" href="{{ ac.reset_url }}" data-section="{{ ac.section }}">
+                <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Filtrləri təmizlə" context "accounts.accounting" %}
+            </a>
         {% else %}
             {% include "accounts/profile/sections/accounting/_table.html" with table=ac.table %}
         {% endif %}
@@ -48,8 +71,10 @@ Kontekst: `ac` (services/accounting/panel.py).{% endcomment %}
             <li>{% trans "Fakt — elektron jurnalda yazılmış (keçirilmiş) dərslərin akademik saatı (adətən 1 dərs = 2 saat). Dərsi bölünmüş fəndə dərsin öz müəllimi, əks halda jurnal sahibi sayılır. Bütün tələbələri «Jurnal təmizliyi» ilə çıxarılmış (keçirilməyən) fənnin dərsləri və passiv jurnallar sayılmır." context "accounts.accounting" %}</li>
             <li>{% trans "Plan — semestr üçün müəllimə paylanmış dərs yükü (mühazirə, seminar, laboratoriya; bölgüsü bitmiş tapşırıqlar). Məsləhət, imtahan, təcrübə və buraxılış işi saatları jurnalda dərs kimi yazılmadığı üçün müqayisəyə daxil deyil." context "accounts.accounting" %}</li>
             <li>{% trans "Aylıq plan — semestr planı dərs pəncərəsinin (semestrin başlanğıcından imtahan sessiyasına qədər) iş günlərinə (B.e.–Cümə) mütənasib bölünür; aylıq payların cəmi semestr planına bərabərdir. Bayram günləri nəzərə alınmır." context "accounts.accounting" %}</li>
-            <li>{% trans "Status — fakt planın ±10%-i daxilindədirsə «Plana uyğun»; az və ya çoxdursa müvafiq olaraq «Plandan az» / «Plandan çox»." context "accounts.accounting" %}</li>
+            <li>{% trans "Tarix aralığı — aralığın planı aylıq paylardan götürülür: qismən düşən ayın payı aralığa düşən iş günləri qədər kəsilir; fakt aralığın içində keçirilmiş dərslərdir. Aralıq seçilmiş semestrin hüdudlarında olmalıdır." context "accounts.accounting" %}</li>
+            <li>{% blocktrans trimmed with pct=ac.deviation_percent context "accounts.accounting" %}Status — fakt planın ±{{ pct }}%-i daxilindədirsə «Plana uyğun»; az və ya çoxdursa müvafiq olaraq «Plandan az» / «Plandan çox». Band «Sistem tənzimləmələri»ndə dəyişdirilir.{% endblocktrans %}</li>
         </ul>
     </details>
+    {% include "accounts/profile/sections/accounting/_dialog.html" %}
     {% endif %}
 </div>

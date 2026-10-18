@@ -42,6 +42,10 @@ INSTALLED_APPS = [
     # Fənn qovluğu — materiallar, sərbəst iş, ev tapşırığı (2026-09-25) — bax apps/subject_folder/public.py.
     "apps.subject_folder.apps.SubjectFolderConfig",
     "apps.trial_exams.apps.TrialExamsConfig",
+    # Sənəd yoxlaması (2026-10-18) — QR + kod, publik /yoxla/<kod>/. Bax apps/verification/public.py.
+    "apps.verification.apps.VerificationConfig",
+    # «Əmək müqavilələri» (2026-10-19) — HR qeydiyyatı, bitmə xatırlatmaları. Bax apps/hr_contracts/public.py.
+    "apps.hr_contracts.apps.HrContractsConfig",
     "core.admin_apps.SecureAdminConfig",
     "django.contrib.auth",
     "django.contrib.contenttypes",

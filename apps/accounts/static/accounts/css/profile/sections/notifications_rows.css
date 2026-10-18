@@ -225,3 +225,11 @@
 .nfx-modal__files {
     margin: 10px 0 4px;
 }
+
+/* Telefon (mobil qabıq 2026-10-19): «Oxundu» / «Sil» ikon düymələri 30 → 40px barmaq hədəfi. */
+@media (max-width: 768px) {
+    .nfx-icon-btn {
+        width: 40px;
+        height: 40px;
+    }
+}

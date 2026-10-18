@@ -229,3 +229,13 @@
         flex-wrap: wrap;
     }
 }
+
+/* Mobil audit 2026-10-19: il çipləri 31px idi — barmaq hədəfi ≥40px. */
+@media (max-width: 768px) {
+    .acal-year {
+        display: inline-flex;
+        align-items: center;
+        min-height: 40px;
+        padding: 6px 16px;
+    }
+}

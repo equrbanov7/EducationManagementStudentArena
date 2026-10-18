@@ -525,6 +525,15 @@ else
   warn "postgres/app konteyneri tapılmadı — prioritet yoxlanmadı"
 fi
 
+# 2026-10-18: compose şəbəkələrinin subnet-ləri (yalnız daxili 172.x/10.x aralıqları; oxu-yalnız).
+# `docker-api` subnet-i pin-lənməyib — yenidən yaradılanda pin-li `emsarena-network` (172.18.0.0/16) ilə
+# toqquşa bilər («Pool overlaps»); burada cari dəyər oxunur ki, compose-da ELƏ HƏMİN dəyərlə pin-lənsin.
+section "Docker şəbəkələri (subnet)"
+for NET in $(docker network ls --format '{{.Name}}' 2>/dev/null | grep -E 'emsarena|docker-api|docker_api' ); do
+  SUB=$(docker network inspect --format '{{range .IPAM.Config}}{{.Subnet}} gw={{.Gateway}} {{end}}internal={{.Internal}}' "$NET" 2>/dev/null)
+  echo "- ℹ️ ${NET}: ${SUB:-?}"
+done
+
 # shellcheck source=scripts/ops/prod_logs_diag.sh
 . "$AUDIT_DIR/prod_logs_diag.sh"
 

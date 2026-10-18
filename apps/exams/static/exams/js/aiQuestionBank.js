@@ -32,10 +32,24 @@
             button.dataset.defaultLabel = button.innerHTML;
         }
 
+        // 2026-10-19: yüklənmə vəziyyəti — düymə söndürülür, panel aria-busy, ikinci klik yoxdur.
         button.disabled = busy;
-        button.innerHTML = busy
-            ? '<i class="fas fa-circle-notch fa-spin"></i> ' + t("generating", gettext("Yaradılır..."))
-            : button.dataset.defaultLabel;
+        button.classList.toggle("is-loading", Boolean(busy));
+        button.setAttribute("aria-busy", busy ? "true" : "false");
+        panel.classList.toggle("is-busy", Boolean(busy));
+        panel.setAttribute("aria-busy", busy ? "true" : "false");
+        if (busy) {
+            button.textContent = "";
+            var spinner = document.createElement("i");
+            spinner.className = "fas fa-circle-notch fa-spin";
+            spinner.setAttribute("aria-hidden", "true");
+            var label = document.createElement("span");
+            label.textContent = t("generating", gettext("Yaradılır..."));
+            button.appendChild(spinner);
+            button.appendChild(label);
+        } else {
+            button.innerHTML = button.dataset.defaultLabel;
+        }
     }
 
     function appendField(formData, field) {
@@ -229,6 +243,8 @@
         var hasSourceFile = Boolean(formData.get("source_file"));
         var sourceText = String(formData.get("source_text") || "").trim();
 
+        if (panel.classList.contains("is-busy")) return;
+
         if (!prompt && !hasSourceFile && !sourceText) {
             setStatus(panel, t("emptyInput", gettext("Prompt yazın və ya fayl yükləyin.")), "error");
             return;
@@ -307,6 +323,106 @@
         });
     }
 
+    // ── Fayl drop zone (2026-10-19): seçilmiş adın göstərilməsi, «çıxar» düyməsi, sürüklə-burax ──
+    var ACCEPTED_EXT = [".pdf", ".txt", ".png", ".jpg", ".jpeg"];
+
+    function isAcceptedFile(file) {
+        var name = String((file && file.name) || "").toLowerCase();
+        for (var i = 0; i < ACCEPTED_EXT.length; i += 1) {
+            if (name.slice(-ACCEPTED_EXT[i].length) === ACCEPTED_EXT[i]) return true;
+        }
+        return false;
+    }
+
+    function formatSize(bytes) {
+        var size = Number(bytes) || 0;
+        if (size >= 1024 * 1024) return (size / (1024 * 1024)).toFixed(1) + " MB";
+        return Math.max(1, Math.round(size / 1024)) + " KB";
+    }
+
+    function renderFileState(panel, input) {
+        var file = input.files && input.files[0] ? input.files[0] : null;
+        var nameEl = panel.querySelector('[data-ai-file-name-for="' + input.id + '"]');
+        var zone = input.closest("[data-ai-dropzone]");
+        var clearBtn = zone ? zone.querySelector("[data-ai-file-clear]") : null;
+        var hint = zone ? zone.querySelector("[data-ai-file-hint]") : null;
+        if (nameEl) {
+            var emptyLabel = nameEl.getAttribute("data-empty-label") || t("noFileSelected", gettext("Fayl seçilməyib"));
+            nameEl.textContent = file ? file.name : emptyLabel;
+            nameEl.classList.toggle("has-file", Boolean(file));
+            nameEl.title = file ? file.name : "";
+        }
+        if (hint) {
+            if (!hint.dataset.defaultHint) hint.dataset.defaultHint = hint.textContent;
+            hint.textContent = file ? formatSize(file.size) : hint.dataset.defaultHint;
+        }
+        if (zone) zone.classList.toggle("has-file", Boolean(file));
+        if (clearBtn) clearBtn.hidden = !file;
+    }
+
+    function bindFileInput(panel, input) {
+        var zone = input.closest("[data-ai-dropzone]");
+        input.addEventListener("change", function () {
+            var file = input.files && input.files[0];
+            if (file && !isAcceptedFile(file)) {
+                input.value = "";
+                setStatus(panel, t("fileTypeInvalid", gettext("Bu fayl növü dəstəklənmir — PDF, TXT, PNG və ya JPG seçin.")), "error");
+            }
+            // Növbəti tick: testQuestionBank_upload.js ölçü yoxlamasında input-u sıfırlaya bilər.
+            window.setTimeout(function () { renderFileState(panel, input); }, 0);
+        });
+        renderFileState(panel, input);
+        if (!zone) return;
+
+        var clearBtn = zone.querySelector("[data-ai-file-clear]");
+        if (clearBtn) {
+            clearBtn.addEventListener("click", function (event) {
+                event.preventDefault();
+                input.value = "";
+                renderFileState(panel, input);
+                setStatus(panel, t("fileRemoved", gettext("Fayl çıxarıldı.")), "");
+                input.focus({ preventScroll: true });
+            });
+        }
+
+        function stop(event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        zone.addEventListener("dragenter", function (event) {
+            stop(event);
+            zone.classList.add("is-dragover");
+        });
+        zone.addEventListener("dragover", function (event) {
+            stop(event);
+            if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+            zone.classList.add("is-dragover");
+        });
+        zone.addEventListener("dragleave", function (event) {
+            if (event.relatedTarget && zone.contains(event.relatedTarget)) return;
+            zone.classList.remove("is-dragover");
+        });
+        zone.addEventListener("drop", function (event) {
+            stop(event);
+            zone.classList.remove("is-dragover");
+            var files = event.dataTransfer && event.dataTransfer.files;
+            if (!files || !files.length) return;
+            if (!isAcceptedFile(files[0])) {
+                setStatus(panel, t("fileTypeInvalid", gettext("Bu fayl növü dəstəklənmir — PDF, TXT, PNG və ya JPG seçin.")), "error");
+                return;
+            }
+            try {
+                var dt = new DataTransfer();
+                dt.items.add(files[0]);
+                input.files = dt.files;
+            } catch (err) {
+                return; // köhnə brauzer: yalnız «Fayl seçin» düyməsi işləyir
+            }
+            // testQuestionBank_upload.js-in ölçü yoxlaması da `change`-ə qulaq asır.
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+    }
+
     function initPanel(panel) {
         if (!panel || panel.dataset.aiQuestionPanelReady === "true") return;
         var button = panel.querySelector("[data-ai-question-submit]");
@@ -318,14 +434,7 @@
         }
 
         panel.querySelectorAll("[data-ai-file-input]").forEach(function (input) {
-            var fileNameEl = panel.querySelector('[data-ai-file-name-for="' + input.id + '"]');
-            input.addEventListener("change", function () {
-                var fileName = input.files && input.files[0] ? input.files[0].name : "";
-                if (!fileNameEl) return;
-                fileNameEl.textContent = fileName || t("noFileSelected", gettext("Fayl seçilməyib"));
-                fileNameEl.classList.toggle("has-file", Boolean(fileName));
-                fileNameEl.title = fileName || "";
-            });
+            bindFileInput(panel, input);
         });
 
         button.addEventListener("click", function (event) {
@@ -335,16 +444,30 @@
 
         panel.addEventListener("keydown", function (event) {
             var tagName = event.target && event.target.tagName ? event.target.tagName.toUpperCase() : "";
-            if (event.key === "Enter" && tagName !== "TEXTAREA") {
+            var type = String((event.target && event.target.type) || "").toLowerCase();
+            // Yalnız mətn/rəqəm sahəsində Enter generasiya edir — düymə, fayl, radio və
+            // seçici menyusunda Enter öz işini görsün (əvvəl «Fayl seç»-də Enter sorğu atırdı).
+            if (event.key === "Enter" && tagName === "INPUT" && (type === "number" || type === "text")) {
                 event.preventDefault();
                 handleGenerate(panel);
             }
         });
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll("[data-ai-question-form]").forEach(initPanel);
-    });
+    // AJAX-safe: EMSReady hər bölmə swap-ından sonra da işləyir; initPanel idempotentdir
+    // (data-ai-question-panel-ready). Köhnə səhifələr üçün DOMContentLoaded ehtiyatı.
+    function initAll(root) {
+        var scope = root && typeof root.querySelectorAll === "function" ? root : document;
+        scope.querySelectorAll("[data-ai-question-form]").forEach(initPanel);
+    }
+
+    if (typeof window.EMSReady === "function") {
+        window.EMSReady(function () { initAll(document); });
+    } else if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", function () { initAll(document); });
+    } else {
+        initAll(document);
+    }
 
     window.initAiQuestionBankPanel = initPanel;
 })();

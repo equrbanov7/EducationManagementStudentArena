@@ -1,11 +1,18 @@
 {% load i18n %}
 {% comment %}Avto filtr paneli — `filter_bar.js` MARKUP MÜQAVİLƏSİ (bax hr_analytics/_filters.html): select dəyişən kimi,
 axtarış isə debounce ilə bölmə yerində yenidən yüklənir, səhifə 1-ə qayıdır. Drill-down (`ac_teacher`) açıqdırsa
-gizli sahə ilə saxlanılır — ay/semestr dəyişəndə eyni müəllimin kartı qalır. Select-lər layihə komponentidir.{% endcomment %}
+gizli sahə ilə saxlanılır — ay/semestr dəyişəndə eyni müəllimin kartı qalır. Select-lər layihə komponentidir.
+
+Tarix aralığı (sahib 2026-10-19): «Ay» select-ində «Tarix aralığı…» seçiləndə iki tarix sahəsi görünür. TƏTBİQ olunan
+dəyərlər GİZLİ `ac_from` / `ac_to` sahələrindədir (filtr müqaviləsi — URL-ə onlar düşür); görünən tarix sahələri
+`data-ems-filter` DEYİL, ona görə yazı yarımçıq ikən bölmə yenilənmir — `accounting.js` tam və semestr hüdudundakı
+tarixi gizli sahəyə yazıb tətbiq edir. Ay rejimində gizli sahələr boşdur (URL-dən düşür).{% endcomment %}
 <form class="ems-filters ems-filters--auto ac-filters" data-ems-filters data-ems-filters-auto="1"
       data-section="{{ ac.section }}" data-param-prefix="ac_" data-base-url="{{ ac.base_url }}"
       role="search" aria-label="{% trans 'Mühasibatlıq filtrləri' context 'accounts.accounting' %}">
     {% if ac.filters.teacher %}<input type="hidden" name="ac_teacher" value="{{ ac.filters.teacher }}" data-ems-filter>{% endif %}
+    <input type="hidden" name="ac_from" value="{% if ac.is_range %}{{ ac.range_from }}{% endif %}" data-ems-filter data-ac-range-applied="from">
+    <input type="hidden" name="ac_to" value="{% if ac.is_range %}{{ ac.range_to }}{% endif %}" data-ems-filter data-ac-range-applied="to">
     {% for field in ac.filter_fields %}
     {% if not ac.filters.teacher or field.name == "ac_semester" or field.name == "ac_month" %}
     <div class="ems-field{% if field.wide %} ems-field--wide{% endif %}">
@@ -18,6 +25,28 @@ gizli sahə ilə saxlanılır — ay/semestr dəyişəndə eyni müəllimin kart
             </select>
         </div>
     </div>
+    {% if field.name == "ac_month" and ac.is_range %}
+    <fieldset class="ems-field ac-range" data-ac-range>
+        <legend class="ems-field__label">{% trans "Tarix aralığı" context "accounts.accounting" %}</legend>
+        <div class="ac-range__row">
+            <label class="ac-range__part">
+                <span class="ac-sr">{% trans "Başlanğıc tarixi" context "accounts.accounting" %}</span>
+                <input class="ems-input ems-input--date" type="date" id="f-ac_from" value="{{ ac.range_from }}"
+                       min="{{ ac.range_min }}" max="{{ ac.range_max }}" data-ac-range-input="from" required>
+                <span class="ac-range__suffix" aria-hidden="true">{% trans "-dan" context "accounts.accounting" %}</span>
+            </label>
+            <label class="ac-range__part">
+                <span class="ac-sr">{% trans "Son tarix" context "accounts.accounting" %}</span>
+                <input class="ems-input ems-input--date" type="date" id="f-ac_to" value="{{ ac.range_to }}"
+                       min="{{ ac.range_min }}" max="{{ ac.range_max }}" data-ac-range-input="to" required>
+                <span class="ac-range__suffix" aria-hidden="true">{% trans "-dək" context "accounts.accounting" %}</span>
+            </label>
+        </div>
+        <p class="ac-range__error" data-ac-range-error hidden role="alert"
+           data-msg-order="{% trans 'Başlanğıc tarixi son tarixdən sonra ola bilməz.' context 'accounts.accounting' %}"
+           data-msg-bounds="{% trans 'Tarix seçilmiş semestrin hüdudlarında olmalıdır.' context 'accounts.accounting' %}"></p>
+    </fieldset>
+    {% endif %}
     {% endif %}
     {% endfor %}
     {% if not ac.filters.teacher %}

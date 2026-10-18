@@ -16,6 +16,15 @@ Filtr/tab/səhifə linkləri paneli yerində yeniləyir (AJAX-safe); qərarlar `
 
     {% if rd.trail %}{% include "registrar/retake/_trail.html" with trail=rd.trail %}{% endif %}
 
+    <nav class="ems-tabs rt-tabs" aria-label="{% trans 'Növbələr' context 'registrar.retake' %}">
+        {% for t in rd.tabs %}
+        <a class="ems-tabs__btn" href="{{ profile_base_url }}?section=retake-desk&amp;rt_tab={{ t.key }}" data-section="retake-desk"{% if t.current %} aria-current="page"{% endif %}>{{ t.label }}</a>
+        {% endfor %}
+    </nav>
+
+    {% if rd.tab == "fees" %}
+    {% include "registrar/retake/_desk_fees.html" with fees=rd.fees %}
+    {% else %}
     <dl class="rt-kpis rt-kpis--6">
         {% for tile in rd.kpis %}
         <div class="rt-kpi{% if tile.value %} rt-kpi--{{ tile.status|retake_tone }}{% endif %}">
@@ -25,11 +34,6 @@ Filtr/tab/səhifə linkləri paneli yerində yeniləyir (AJAX-safe); qərarlar `
         {% endfor %}
     </dl>
 
-    <nav class="ems-tabs rt-tabs" aria-label="{% trans 'Növbələr' context 'registrar.retake' %}">
-        {% for t in rd.tabs %}
-        <a class="ems-tabs__btn" href="{{ profile_base_url }}?section=retake-desk&amp;rt_tab={{ t.key }}" data-section="retake-desk"{% if t.current %} aria-current="page"{% endif %}>{{ t.label }}</a>
-        {% endfor %}
-    </nav>
 
     <form method="get" action="" class="ems-filters ems-filters--auto rt-filters" role="search" data-profile-ajax-form data-section="retake-desk">
         <input type="hidden" name="section" value="retake-desk">
@@ -80,6 +84,8 @@ Filtr/tab/səhifə linkləri paneli yerində yeniləyir (AJAX-safe); qərarlar `
         {% trans "Növbə boşdur" context "registrar.retake" as rt_q_empty %}
         {% trans "Bu süzgəclərə uyğun müraciət yoxdur." context "registrar.retake" as rt_q_empty_b %}
         {% include "partials/ems_ui/_empty.html" with state_icon="fa-inbox" state_title=rt_q_empty state_body=rt_q_empty_b %}
+    {% endif %}
+
     {% endif %}
 
     {% include "registrar/retake/_desk_dialogs.html" %}

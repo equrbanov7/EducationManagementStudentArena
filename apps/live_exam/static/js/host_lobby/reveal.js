@@ -1,12 +1,12 @@
-import { UI } from './dom.js?v=lx20261014';
-import { PHASES } from './constants.js?v=lx20261014';
-import { state } from './state.js?v=lx20261014';
-import { playRevealSound } from './audio.js?v=lx20261014';
-import { icon } from './icons.js?v=lx20261014';
-import { answerTileMarkup, distributionBarsMarkup, optionsLengthClass, tilesGridClass } from './options.js?v=lx20261014';
-import { nextQuestion } from './api.js?v=lx20261014';
-import { renderScoreboardStage } from './scoreboard.js?v=lx20261014';
-import { isFinalReveal, renderFinalSuspenseStage } from './finale_suspense.js?v=lx20261014';
+import { UI } from './dom.js?v=lx20261019';
+import { PHASES } from './constants.js?v=lx20261019';
+import { state } from './state.js?v=lx20261019';
+import { playRevealSound } from './audio.js?v=lx20261019';
+import { icon } from './icons.js?v=lx20261019';
+import { answerTileMarkup, distributionBarsMarkup, optionsLengthClass, tilesGridClass } from './options.js?v=lx20261019';
+import { nextQuestion } from './api.js?v=lx20261019';
+import { renderScoreboardStage } from './scoreboard.js?v=lx20261019';
+import { isFinalReveal, renderFinalSuspenseStage } from './finale_suspense.js?v=lx20261019';
 import {
     avatarImageMarkup,
     controlsEnabled,
@@ -22,8 +22,8 @@ import {
     revealKey,
     toMs,
     tr,
-} from './utils.js?v=lx20261014';
-import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261014';
+} from './utils.js?v=lx20261019';
+import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261019';
 
 export function destroyRevealChart() {
     /* Chart.js artıq işlədilmir (xüsusi CSS sütunları) — köhnə çağırışlar üçün no-op. */
@@ -103,7 +103,7 @@ function headMarkup(question, payload) {
 
 function cardMarkup(question) {
     const text = String(question?.text || "");
-    return `<div class="hx-qcard hx-qcard--reveal notranslate" translate="no" data-len="${lengthClass(text)}"><h2 class="hx-qcard__text" data-fit>${esc(text)}</h2></div>`;
+    return `<div class="hx-qcard hx-qcard--reveal notranslate" translate="no" data-len="${lengthClass(text)}"><h2 class="hx-qcard__text" data-fit data-code-text>${esc(text)}</h2></div>`;
 }
 
 function typedMarkup(payload) {

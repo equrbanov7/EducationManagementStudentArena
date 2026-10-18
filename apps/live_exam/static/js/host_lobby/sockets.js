@@ -1,12 +1,12 @@
-import { UI } from './dom.js?v=lx20261014';
-import { state } from './state.js?v=lx20261014';
-import { applySessionSettings } from './settings.js?v=lx20261014';
-import { renderLobbyPlayers } from './lobby.js?v=lx20261014';
-import { applyQuestionState, updateAnsweredCounter, updateReceivedCounter } from './question.js?v=lx20261014';
-import { applyRevealState } from './reveal.js?v=lx20261014';
-import { renderPodium } from './podium.js?v=lx20261014';
-import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20261014';
-import { clearPendingStateSync, setPlaySocket, stopStatePolling, syncState } from './api.js?v=lx20261014';
+import { UI } from './dom.js?v=lx20261019';
+import { state } from './state.js?v=lx20261019';
+import { applySessionSettings } from './settings.js?v=lx20261019';
+import { renderLobbyPlayers } from './lobby.js?v=lx20261019';
+import { applyQuestionState, updateAnsweredCounter, updateReceivedCounter } from './question.js?v=lx20261019';
+import { applyRevealState } from './reveal.js?v=lx20261019';
+import { renderPodium } from './podium.js?v=lx20261019';
+import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20261019';
+import { clearPendingStateSync, setPlaySocket, stopStatePolling, syncState } from './api.js?v=lx20261019';
 import {
     esc,
     fmt,
@@ -18,7 +18,7 @@ import {
     tr,
     updateServerTimeOffset,
     wsUrl,
-} from './utils.js?v=lx20261014';
+} from './utils.js?v=lx20261019';
 
 /* WS: lobbi + oyun kanalları. Bağlantı qopanda eksponensial gözləmə ilə yenidən
  * qoşulur (1 → 2 → 4 … ≤ 15 s + titrəmə); açılanda HTTP snapshot ilə vəziyyət

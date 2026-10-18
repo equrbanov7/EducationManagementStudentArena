@@ -1,0 +1,15 @@
+{% load i18n %}
+{% comment %}Tarixçə dialoqu — məzmun `hr_contracts:history` JSON-undan (`html`) gəlir (`hr_contracts.js`).{% endcomment %}
+<div class="ems-overlay ems-overlay--dialog" id="hrcHistoryDialog" hidden>
+    <div class="ems-dialog ems-dialog--wide" role="dialog" aria-modal="true" aria-labelledby="hrcHistoryDialog-title">
+        <div class="ems-dialog__head">
+            <div><h2 class="ems-dialog__title" id="hrcHistoryDialog-title">{% trans "Müqavilənin tarixçəsi" context "hr_contracts" %}</h2></div>
+            <button type="button" class="ems-dialog__x" data-ems-overlay-close aria-label="{% trans 'Bağla' context 'hr_contracts' %}">×</button>
+        </div>
+        <div class="ems-dialog__body" data-hrc-history-body aria-live="polite"
+             data-loading="{% trans 'Yüklənir…' context 'hr_contracts' %}"></div>
+        <div class="ems-dialog__foot">
+            <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Bağla" context "hr_contracts" %}</button>
+        </div>
+    </div>
+</div>

@@ -96,7 +96,7 @@ def _legacy_grants(organization) -> dict:
     log_model = django_apps.get_model("registrar", "ExamChanceGrant")
     logged = set(log_model.objects.filter(organization=organization).values_list("student_id", "exam_id"))
     logged_students = {student_id for student_id, _exam in logged}
-    label = pgettext("accounts.exam_chance", "Köhnə qeyd (səbəb yazılmayıb)")
+    label = pgettext("accounts.exam_chance", "Köhnə qeyd (əsas yazılmayıb)")
     rows, students, attempts = [], set(), 0
     for grant in (
         StudentExamAttemptGrant.objects.filter(exam__organization=organization)

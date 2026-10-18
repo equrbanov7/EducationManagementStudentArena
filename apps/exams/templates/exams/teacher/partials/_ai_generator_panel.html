@@ -1,0 +1,116 @@
+{% load i18n %}
+{% comment %}
+================================================================================
+«AI ilə test sualı yarat» — ORTAQ PANEL (sahib 2026-10-19: «harda varsa səliqəli olsun»)
+--------------------------------------------------------------------------------
+Tək mənbə. İşlədən yerlər:
+  • partials/_bulk_question_workbench.html — imtahan test bankı, bank toplu əlavəsi,
+    kafedra sual göndərişi (yarat / redaktə) — ai_variant="card";
+  • create_question_bank.html — yazılı/praktiki imtahanın HƏR bloku + JS-in yeni blok
+    üçün klonladığı <template> — ai_variant="block".
+CSS: exams/css/ai_generator_panel.css (çağıran səhifə yükləyir — blokda partial dəfələrlə
+təkrarlandığı üçün <link> burada deyil). JS: exams/js/aiQuestionBank.js (dəyişməyən çəngəllər:
+[data-ai-question-form] · [data-ai-question-submit] · [data-ai-question-status] · [data-ai-file-input]
+· [data-ai-file-name-for] · [data-ai-insert-mode] · [data-ai-format-mirror]; yeni: [data-ai-dropzone]
+· [data-ai-file-clear]). Form sahə adları dəyişməyib: prompt · source_file · question_count ·
+difficulty · insert_mode (blokda ai_insert_mode_<N>) · q_format.
+
+Parametrlər:
+  ai_url (məcburi), ai_context ("test"/"written"), ai_target (CSS seçici, opsional),
+  ai_uid (id suffiksi; blokda forloop.counter / JS «__AIUID__»), ai_variant ("card"/"block"),
+  ai_file_prefix (fayl input id-si = prefiks + ai_uid — köhnə id-lər qorunur: testAiSourceFile,
+  writtenAiSourceFile<N>; testQuestionBank_upload.js #testAiSourceFile-ı yoxlayır),
+  ai_mode_name (radio adı, defolt "insert_mode"), ai_format_mirror + ai_format,
+  ai_title, ai_subtitle, ai_placeholder.
+================================================================================
+{% endcomment %}
+{% with uid=ai_uid|default:"main" variant=ai_variant|default:"card" file_prefix=ai_file_prefix|default:"aigenFile" %}{% with file_id=file_prefix|add:uid %}
+<section class="aigen aigen--{{ variant }}"
+         data-ai-question-form
+         data-ai-context="{{ ai_context|default:'test' }}"
+         data-ai-url="{{ ai_url }}"
+         data-extract-url="{% url 'exams:start_text_extraction' %}"
+         {% if ai_target %}data-ai-target="{{ ai_target }}"{% endif %}
+         aria-labelledby="aigenTitle{{ uid }}">
+    {% if ai_format_mirror %}
+    <input type="hidden" name="q_format" data-ai-format-mirror value="{{ ai_format|default:'test' }}">
+    {% endif %}
+
+    <header class="aigen__head">
+        <span class="aigen__icon" aria-hidden="true"><i class="fas fa-robot"></i></span>
+        <div class="aigen__intro">
+            {% trans "AI ilə test sualı yarat" context "exams.template.ai_question_bank" as default_ai_title %}
+            {% if variant == "block" %}
+            <h6 class="aigen__title" id="aigenTitle{{ uid }}">{{ ai_title|default:default_ai_title }}</h6>
+            {% else %}
+            <h2 class="aigen__title" id="aigenTitle{{ uid }}">{{ ai_title|default:default_ai_title }}</h2>
+            {% endif %}
+            {% if ai_subtitle %}<p class="aigen__sub">{{ ai_subtitle }}</p>{% endif %}
+        </div>
+    </header>
+
+    <div class="aigen__grid">
+        <div class="ems-field aigen__prompt">
+            <label class="ems-field__label" for="aigenPrompt{{ uid }}">{% trans "Prompt / mövzu" context "exams.template.ai_question_bank" %}</label>
+            <textarea id="aigenPrompt{{ uid }}" class="ems-textarea aigen__textarea" name="prompt" rows="3"
+                      placeholder="{{ ai_placeholder }}"></textarea>
+        </div>
+
+        <div class="ems-field aigen__file">
+            <span class="ems-field__label" id="aigenFileLabel{{ uid }}">{% trans "Mühazirə faylı" context "exams.template.ai_question_bank" %}</span>
+            <div class="aigen-drop" data-ai-dropzone>
+                <input id="{{ file_id }}" class="ai-file-input aigen-drop__input" data-ai-file-input type="file" name="source_file"
+                       accept=".pdf,.txt,.png,.jpg,.jpeg" aria-describedby="aigenFileLabel{{ uid }}">
+                <label class="aigen-drop__pick" for="{{ file_id }}">
+                    <i class="fas fa-file-arrow-up" aria-hidden="true"></i>
+                    <span class="aigen-drop__name ai-file-name" data-ai-file-name-for="{{ file_id }}"
+                          data-empty-label="{% trans 'Fayl seçin və ya bura atın' context 'exams.template.ai_question_bank' %}">{% trans "Fayl seçin və ya bura atın" context "exams.template.ai_question_bank" %}</span>
+                    <span class="aigen-drop__hint" data-ai-file-hint>PDF · TXT · PNG · JPG</span>
+                </label>
+                <button type="button" class="aigen-drop__clear" data-ai-file-clear hidden
+                        aria-label="{% trans 'Faylı çıxar' context 'exams.template.ai_question_bank' %}"
+                        title="{% trans 'Faylı çıxar' context 'exams.template.ai_question_bank' %}">
+                    <i class="fas fa-xmark" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="ems-field aigen__count">
+            <label class="ems-field__label" for="aigenCount{{ uid }}">{% trans "Sual sayı" context "exams.template.ai_question_bank" %}</label>
+            <input id="aigenCount{{ uid }}" class="ems-input" type="number" name="question_count" min="1" max="50" value="5" inputmode="numeric">
+        </div>
+
+        <div class="ems-field aigen__difficulty">
+            <label class="ems-field__label" for="aigenDifficulty{{ uid }}">{% trans "Çətinlik" context "exams.template.ai_question_bank" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems ai-difficulty-select">
+                <select id="aigenDifficulty{{ uid }}" name="difficulty" class="ems-select bootstrap-single-select__native" data-bootstrap-select>
+                    <option value="medium" selected>{% trans "Orta" context "exams.template.ai_question_bank" %}</option>
+                    <option value="easy">{% trans "Asan" context "exams.template.ai_question_bank" %}</option>
+                    <option value="hard">{% trans "Çətin" context "exams.template.ai_question_bank" %}</option>
+                    <option value="mixed">{% trans "Qarışıq" context "exams.template.ai_question_bank" %}</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <footer class="aigen__foot">
+        <fieldset class="aigen-mode ai-insert-toggle">
+            <legend class="aigen-mode__legend">{% trans "AI mətn yerləşdirmə rejimi" context "exams.template.ai_question_bank" %}</legend>
+            <label class="aigen-mode__opt">
+                <input type="radio" name="{{ ai_mode_name|default:'insert_mode' }}" data-ai-insert-mode value="append" checked>
+                <span>{% trans "Mətnin sonuna əlavə et" context "exams.template.ai_question_bank" %}</span>
+            </label>
+            <label class="aigen-mode__opt">
+                <input type="radio" name="{{ ai_mode_name|default:'insert_mode' }}" data-ai-insert-mode value="replace">
+                <span>{% trans "Mətn sahəsini əvəz et" context "exams.template.ai_question_bank" %}</span>
+            </label>
+        </fieldset>
+        <div class="aigen__actions">
+            <p class="ai-question-status aigen__status" data-ai-question-status role="status" aria-live="polite"></p>
+            <button type="button" class="ems-btn ems-btn--primary ems-btn--lg ai-generate-btn aigen__submit" data-ai-question-submit>
+                <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i><span>{% trans "AI ilə yarat" context "exams.template.ai_question_bank" %}</span>
+            </button>
+        </div>
+    </footer>
+</section>
+{% endwith %}{% endwith %}

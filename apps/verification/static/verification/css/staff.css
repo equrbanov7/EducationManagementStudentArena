@@ -1,0 +1,149 @@
+/* «Sənəd yoxlaması» əməkdaş siyahısı (/sened-yoxlamasi/). ems_ui komponentləri (header, table, badge,
+   dialog) üzərində yalnız düzüm; 640 px-dən aşağı cədvəl sətirləri kartlara çevrilir (375 px dəstəyi). */
+
+.dvs-page {
+    max-width: var(--ems-w-page, 1200px);
+    margin: 0 auto;
+    padding: 24px 16px 40px;
+}
+
+.dvs-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    margin: 16px 0 8px;
+}
+
+.dvs-search {
+    display: flex;
+    gap: 8px;
+    flex: 1 1 360px;
+    max-width: 560px;
+}
+
+.dvs-search__input {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.dvs-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.dvs-chip {
+    display: inline-flex;
+    align-items: center;
+    height: var(--ems-h-chip, 30px);
+    padding: 0 12px;
+    border-radius: var(--ems-r-pill, 999px);
+    border: 1px solid var(--ems-border, #e2e8f0);
+    background: var(--ems-neutral-0, #fff);
+    color: var(--ems-fg, #0f172a);
+    font-size: var(--ems-fs-sm, 13px);
+    font-weight: 600;
+}
+
+.dvs-chip:hover,
+.dvs-chip:focus-visible {
+    border-color: var(--ems-primary-300, #93c5fd);
+}
+
+.dvs-chip.is-active {
+    background: var(--ems-primary-50, #eff6ff);
+    border-color: var(--ems-primary-400, #60a5fa);
+    color: var(--ems-primary-700, #1d4ed8);
+}
+
+.dvs-public {
+    margin: 0 0 12px;
+    font-size: var(--ems-fs-sm, 13px);
+    color: var(--ems-fg-muted, #64748b);
+}
+
+.dvs-link,
+.dvs-code {
+    color: var(--ems-link, #2563eb);
+    font-weight: 600;
+}
+
+.dvs-code {
+    font-family: var(--ems-ff-mono, ui-monospace, monospace);
+    white-space: nowrap;
+}
+
+.dvs-muted {
+    color: var(--ems-fg-muted, #64748b);
+    font-size: var(--ems-fs-xs, 12px);
+}
+
+.dvs-reason {
+    display: block;
+    margin-top: 2px;
+    max-width: 320px;
+    overflow-wrap: anywhere;
+}
+
+.dvs-actions {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.dvs-pager {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+@media (max-width: 640px) {
+    .dvs-search {
+        flex-basis: 100%;
+        max-width: none;
+    }
+
+    .dvs-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+    }
+
+    .dvs-table,
+    .dvs-table tbody,
+    .dvs-table tr,
+    .dvs-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .dvs-table tr {
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--ems-border, #e2e8f0);
+    }
+
+    .dvs-table td {
+        padding: 3px 0;
+        border: 0;
+    }
+
+    .dvs-table td[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        font-size: var(--ems-fs-2xs, 11px);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--ems-fg-muted, #64748b);
+    }
+
+    .dvs-actions {
+        text-align: left;
+        padding-top: 6px;
+    }
+}

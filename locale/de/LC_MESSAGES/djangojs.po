@@ -3206,3 +3206,12 @@ msgstr "Keine Treffer"
 
 msgid "Axtarmaq üçün ən az %(n)s hərf yazın"
 msgstr "Geben Sie mindestens %(n)s Buchstaben ein, um zu suchen"
+
+msgid "Tələbənin imtahanı bərpa edilsin? Pozuntu sayğacı bir vahid azalacaq."
+msgstr "Prüfung der/des Studierenden wiederherstellen? Der Verstoßzähler sinkt um eins."
+
+msgid "Bu fayl növü dəstəklənmir — PDF, TXT, PNG və ya JPG seçin."
+msgstr "Dieser Dateityp wird nicht unterstützt — wählen Sie PDF, TXT, PNG oder JPG."
+
+msgid "Fayl çıxarıldı."
+msgstr "Datei entfernt."

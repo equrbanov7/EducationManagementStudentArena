@@ -1,0 +1,51 @@
+{% load i18n %}
+{% comment %}Aylar üzrə plan ↔ fakt. Ay / bütün semestr rejimində semestrin bütün ayları (seçilmiş ay işarələnir) +
+«Semestr» cəmi; aralıq rejimində yalnız aralığın ayları, qismən düşən ayın günləri `partial` qeydindədir (plan iş
+günlərinə görə kəsilib). Kontekst: `detail`, `kind_labels`.{% endcomment %}
+<div class="ems-tablewrap ac-tablewrap">
+    <div class="ems-tablescroll">
+        <table class="ems-table ems-table--compact ems-table--stack ac-table ac-table--fit">
+            <caption class="ac-sr">{% trans "Aylar üzrə plan və keçirilmiş saat" context "accounts.accounting" %}</caption>
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Ay" context "accounts.accounting" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Plan" context "accounts.accounting" %}</th>
+                    {% for label in kind_labels %}<th scope="col" class="ems-table__num">{{ label }}</th>{% endfor %}
+                    <th scope="col" class="ems-table__num">{% trans "Fakt" context "accounts.accounting" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Dərs" context "accounts.accounting" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Fərq" context "accounts.accounting" %}</th>
+                    <th scope="col">{% trans "Status" context "accounts.accounting" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for month in detail.months %}
+                <tr{% if month.is_current %} class="is-current" aria-current="true"{% endif %}>
+                    <th scope="row">{{ month.label }}{% if month.partial %} <small class="ac-muted ac-nowrap">({{ month.partial }})</small>{% endif %}</th>
+                    <td class="ems-table__num" data-label="{% trans 'Plan' context 'accounts.accounting' %}">{{ month.planned_text }}</td>
+                    {% for cell in month.kind_cells %}<td class="ems-table__num ac-muted" data-label="{{ cell.label }}">{{ cell.value }}</td>{% endfor %}
+                    <td class="ems-table__num ac-strong" data-label="{% trans 'Fakt' context 'accounts.accounting' %}">{{ month.held_text }}</td>
+                    <td class="ems-table__num" data-label="{% trans 'Dərs' context 'accounts.accounting' %}">{{ month.lessons }}</td>
+                    <td class="ems-table__num" data-label="{% trans 'Fərq' context 'accounts.accounting' %}">{{ month.diff_text }}</td>
+                    <td data-label="{% trans 'Status' context 'accounts.accounting' %}">{% include "partials/ems_ui/_status_badge.html" with status=month.status_obj nowrap=True %}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="9" class="ac-muted">{% trans "Bu dövrdə ay yoxdur." context "accounts.accounting" %}</td></tr>
+                {% endfor %}
+            </tbody>
+            {% if not detail.is_range %}
+            <tfoot>
+                <tr class="ac-table__total">
+                    <th scope="row">{% trans "Semestr" context "accounts.accounting" %}</th>
+                    <td class="ems-table__num" data-label="{% trans 'Plan' context 'accounts.accounting' %}">{{ detail.planned_sem_text }}</td>
+                    {% for cell in detail.held_sem_cells %}<td class="ems-table__num" data-label="{{ cell.label }}">{{ cell.value }}</td>{% endfor %}
+                    <td class="ems-table__num" data-label="{% trans 'Fakt' context 'accounts.accounting' %}">{{ detail.held_sem_text }}</td>
+                    <td class="ems-table__num" data-label="{% trans 'Dərs' context 'accounts.accounting' %}">{{ detail.row.lessons_sem }}</td>
+                    <td class="ems-table__num" data-label="{% trans 'Fərq' context 'accounts.accounting' %}">{{ detail.diff_sem_text }}</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+            {% endif %}
+        </table>
+    </div>
+</div>
+<p class="ac-note ac-muted">{% trans "Semestr planı növlər üzrə:" context "accounts.accounting" %} {% for cell in detail.planned_sem_cells %}{{ cell.label }} {{ cell.value }}{% if not forloop.last %} · {% endif %}{% endfor %}{% if detail.is_range %} · {% trans "Qismən ayın planı aralığa düşən iş günləri qədər götürülür." context "accounts.accounting" %}{% endif %}</p>

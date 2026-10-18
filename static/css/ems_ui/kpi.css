@@ -412,11 +412,40 @@ button.ems-kpi {
     color: transparent;
 }
 
+/* Telefon (mobil qabıq 2026-10-19): əvvəl hər sətirdə BİR kart idi — 4–6 KPI ekranın 1,5 hündürlüyünü
+   tuturdu və əsas siyahı görünmürdü. İndi 2 sütun (yığcam kart), çox dar ekranda (< 340px) yenə 1. */
 @media (max-width: 768px) {
     .ems-kpis,
     .ems-kpis--4,
     .ems-kpis--5 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--ems-sp-3);
+    }
+
+    .ems-kpis .ems-kpi {
+        padding: 12px 14px;
+        min-width: 0;
+    }
+
+    .ems-kpis .ems-kpi[aria-pressed="true"] {
+        padding: 11px 13px;
+    }
+
+    .ems-kpis .ems-kpi__label {
+        letter-spacing: 0.03em;
+        overflow-wrap: anywhere;
+    }
+
+    .ems-kpis .ems-kpi__value {
+        flex-wrap: wrap;
+        font-size: var(--ems-fs-2xl);
+    }
+}
+
+@media (max-width: 339.98px) {
+    .ems-kpis,
+    .ems-kpis--4,
+    .ems-kpis--5 {
         grid-template-columns: 1fr;
-        gap: var(--ems-sp-4);
     }
 }

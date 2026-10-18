@@ -3,6 +3,8 @@
    Əsas görünüş ems_ui komponentlərindəndir (kpi, filters, table, badge, card, msg);
    burada yalnız bölməyə xas düzülüş var. Rənglər YALNIZ --ems-* tokenləri ilə.
    Telefonda cədvəllər `ems-table--stack` ilə kartlaşır (table.css).
+   2026-10-19: dövr sətri + leqenda, yapışqan cədvəl başlığı, klikli sətir, müəllim pəncərəsi (`.ac-dialog`,
+   `.ac-modal`), tarix aralığı sahələri (`.ac-range`), 375 px düzülüşü.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .ac {
@@ -204,7 +206,314 @@
     }
 }
 
+/* ── Dövr sətri + leqenda ───────────────────────────────────────────────── */
+.ac-period {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--ems-sp-2) var(--ems-sp-4);
+}
+
+.ac__period {
+    color: var(--ems-text);
+    font-weight: 800;
+}
+
+.ac__hint {
+    margin: 0;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.ac-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2) var(--ems-sp-5);
+    margin: 0;
+    padding: var(--ems-sp-3) var(--ems-sp-4);
+    list-style: none;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle);
+}
+
+.ac-legend__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    min-width: 0;
+}
+
+.ac-legend__text {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.ac-nowrap {
+    white-space: nowrap;
+}
+
+/* Yığcam badge: cədvəl və leqendada sətir hündürlüyünü artırmasın. */
+.ac-table .ems-badge,
+.ac-legend .ems-badge,
+.ac-modal .ems-badge {
+    min-height: 0;
+    padding: 1px 8px;
+    font-size: var(--ems-fs-xs);
+}
+
+/* ── Əsas cədvəl: yapışqan başlıq + klikli sətir ──────────────────────── */
+.ac-row {
+    cursor: pointer;
+}
+
+.ac-row:focus-within th,
+.ac-row:focus-within td {
+    background: var(--ems-primary-50);
+}
+
+.ac-table__name a:focus-visible {
+    outline: 2px solid var(--ems-primary-500);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.ac-tablescroll:focus-visible {
+    outline: 2px solid var(--ems-primary-500);
+    outline-offset: -2px;
+}
+
+.ac-table--fit {
+    min-width: 0;
+}
+
+.ac-empty-reset {
+    align-self: center;
+}
+
+/* ── Tarix aralığı («… -dan … -dək») ────────────────────────────────────── */
+.ac-range {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.ems-filters .ac-range {
+    flex: 0 0 auto;
+}
+
+.ac-range__row {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: var(--ems-sp-2) var(--ems-sp-3);
+}
+
+.ac-range__part {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    margin: 0;
+    white-space: nowrap;
+}
+
+.ac-range__suffix {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+}
+
+.ac-range__error {
+    margin: var(--ems-sp-1) 0 0;
+    color: var(--ems-danger-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+}
+
+.ac-range .ems-input--date[aria-invalid="true"] {
+    border-color: var(--ems-danger-600);
+}
+
+/* ── Müəllim pəncərəsi ──────────────────────────────────────────────────── */
+.ac-dialog {
+    max-width: min(1080px, calc(100vw - 48px));
+}
+
+.ac-dialog__headtext {
+    min-width: 0;
+}
+
+.ac-dialog__body {
+    background: var(--ems-bg);
+}
+
+.ac-modal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-5);
+    min-width: 0;
+}
+
+.ac-modal__summary {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+}
+
+.ac-modal__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+}
+
+.ac-chip {
+    gap: var(--ems-sp-1);
+}
+
+.ac-modal__stats {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--ems-sp-3);
+    margin: 0;
+}
+
+.ac-modal__stats > div {
+    padding: var(--ems-sp-3) var(--ems-sp-4);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle);
+}
+
+.ac-modal__stats dt {
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-600);
+}
+
+.ac-modal__stats dd {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.ac-modal__stats small {
+    font-size: var(--ems-fs-xs);
+    font-weight: 600;
+    color: var(--ems-text-muted);
+}
+
+.ac-modal__block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+    min-width: 0;
+}
+
+.ac-modal .ac-h {
+    margin: 0;
+}
+
+.ac-more {
+    display: flex;
+    justify-content: center;
+}
+
+.ac-table .ems-table__num,
+.ac-modal .ems-table__num {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Masaüstü: cədvəl öz qutusunda şaquli sürüşür → başlıq sırası (və ad sütunu) yapışqan qalır. */
+@media (min-width: 769px) {
+    .ac-tablewrap--sticky .ac-tablescroll {
+        max-height: min(72vh, 780px);
+        overflow: auto;
+    }
+
+    .ac-tablewrap--sticky thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: var(--ems-bg-subtle);
+        box-shadow: inset 0 -1px 0 var(--ems-border);
+    }
+
+    .ac-tablewrap--sticky thead th:first-child {
+        z-index: 3;
+    }
+
+    .ac-tablewrap--sticky tfoot th,
+    .ac-tablewrap--sticky tfoot td {
+        position: sticky;
+        bottom: 0;
+        z-index: 1;
+        box-shadow: inset 0 1px 0 var(--ems-border);
+    }
+
+    .ac-tablewrap--sticky tfoot th:first-child {
+        left: 0;
+        z-index: 2;
+        background: var(--ems-bg-subtle);
+    }
+}
+
+@media (max-width: 900px) {
+    .ac-modal__stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
 @media (max-width: 768px) {
+    .ac .ems-kpis--5 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ac .ems-kpis--5 > :first-child {
+        grid-column: 1 / -1;
+    }
+
+    .ac-period {
+        flex-direction: column;
+    }
+
+    .ac-legend {
+        flex-direction: column;
+        gap: var(--ems-sp-2);
+    }
+
+    .ac-range,
+    .ac-range__row,
+    .ac-range__part {
+        width: 100%;
+    }
+
+    .ac-range__row {
+        flex-wrap: wrap;
+    }
+
+    .ac-range__part .ems-input--date {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .ac-range__suffix {
+        flex: 0 0 2.5em;
+    }
+
+    .ac-dialog {
+        max-width: none;
+    }
+
+    .ac-modal__stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .ac-person__stats {
         gap: var(--ems-sp-4);
     }

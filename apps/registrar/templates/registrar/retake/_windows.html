@@ -1,0 +1,128 @@
+{% load i18n registrar_retake %}
+{% comment %}«25% müraciət pəncərəsi» — sahib 2026-10-19: «İmtahan mərkəzi açsın bunu». Kollokvium pəncərəsi ilə eyni yer
+(İmtahan mərkəzi menyusu). Açar: `exam_center.decide`. Bir dövrdə bir açıq pəncərə; bağlananda sətir qalır
+(kim, nə vaxt). «Sistem tənzimləmələri»ndəki ümumi açar söndürülübsə pəncərə açıq olsa da müraciət qəbul olunmur.
+Data: `{% retake_windows as rw %}`; yazılar `retake.js` → JSON POST.{% endcomment %}
+{% retake_windows as rw %}
+{% if not rw.has_access %}
+    {% trans "Bu bölmə İmtahan mərkəzinin qərar səlahiyyəti olanlar üçündür." context "registrar.retake" as rt_w_denied %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="error" state_icon="fa-lock" state_title=rt_w_denied %}
+{% else %}
+<div class="rt" data-rt-root data-rt-error-generic="{% trans 'Əməl yerinə yetirilmədi — icazənizi yoxlayın və ya səhifəni yeniləyin.' context 'registrar.retake' %}" data-rt-section="retake-windows">
+    {% trans "Tələbələr 25% təkrar imtahan və alt qrup müraciətini yalnız açıq pəncərə müddətində göndərə bilir. Pəncərəni burada açıb bağlayın; bütün açılış və bağlanışlar tarixçədə qalır." context "registrar.retake" as rt_w_sub %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=rt_w_sub %}
+
+    {% if not rw.master_switch %}
+        {% trans "Ümumi açar söndürülüb" context "registrar.retake" as rt_w_kill_t %}
+        {% trans "«Sistem tənzimləmələri»ndə «Müraciət pəncərəsi açıqdır» söndürülüb — pəncərə açıq olsa belə müraciət qəbul olunmur." context "registrar.retake" as rt_w_kill_b %}
+        {% include "partials/ems_ui/_banner.html" with banner_kind="danger" banner_title=rt_w_kill_t banner_body=rt_w_kill_b %}
+    {% endif %}
+
+    {% if not rw.current and not rw.upcoming %}
+        {% comment %}Deploy-dan sonra pəncərə yoxdur → müraciət qəbulu bağlıdır (qəsdən); aydın çağırış (review 2026-10-19, M-4).{% endcomment %}
+        {% if rw.history %}
+            {% trans "Müraciət pəncərəsi bağlıdır" context "registrar.retake" as rt_w_cta_t %}
+        {% else %}
+            {% trans "Hələ pəncərə açılmayıb — müraciət qəbulu üçün pəncərə açın" context "registrar.retake" as rt_w_cta_t %}
+        {% endif %}
+        {% trans "Tələbələr hazırda 25% və alt qrup müraciəti göndərə bilmir. Aşağıdakı formadan dövrü seçib pəncərəni açın." context "registrar.retake" as rt_w_cta_b %}
+        {% include "partials/ems_ui/_banner.html" with banner_kind="warning" banner_title=rt_w_cta_t banner_body=rt_w_cta_b %}
+    {% endif %}
+
+    <section class="ems-card">
+        <div class="ems-card__head">
+            <div>
+                <h2 class="ems-card__title">{% trans "Cari vəziyyət" context "registrar.retake" %}</h2>
+                {% if rw.current %}
+                <p class="ems-card__sub">
+                    <span class="ems-badge ems-badge--success">{% trans "Açıqdır" context "registrar.retake" %}</span>
+                    {{ rw.current.period.name }} · {{ rw.current.opens_at|date:"d.m.Y H:i" }} →
+                    {% if rw.current.closes_at %}{{ rw.current.closes_at|date:"d.m.Y H:i" }}{% else %}{% trans "əl ilə bağlanana qədər" context "registrar.retake" %}{% endif %}
+                </p>
+                {% elif rw.upcoming %}
+                <p class="ems-card__sub"><span class="ems-badge ems-badge--info">{% trans "Planlaşdırılıb" context "registrar.retake" %}</span> {{ rw.upcoming.period.name }} · {{ rw.upcoming.opens_at|date:"d.m.Y H:i" }}</p>
+                {% else %}
+                <p class="ems-card__sub"><span class="ems-badge ems-badge--muted">{% trans "Bağlıdır" context "registrar.retake" %}</span></p>
+                {% endif %}
+            </div>
+            {% with live=rw.current|default:rw.upcoming %}{% if live %}
+            <form method="post" action="{% url 'retake:window_close' live.pk %}" novalidate>
+                <button type="submit" class="ems-btn ems-btn--danger ems-btn--sm" data-rt-confirm="{% trans 'Pəncərə bağlansın? Yeni müraciət qəbul olunmayacaq.' context 'registrar.retake' %}"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "Pəncərəni bağla" context "registrar.retake" %}</button>
+            </form>
+            {% endif %}{% endwith %}
+        </div>
+        <div class="ems-card__body">
+            {% if not rw.periods %}
+                {% trans "Cari və ya gələcək akademik dövr yoxdur — əvvəlcə dövr yaradılmalıdır." context "registrar.retake" as rt_w_noper %}
+                {% include "partials/ems_ui/_empty.html" with state_icon="fa-calendar-xmark" state_title=rt_w_noper %}
+            {% else %}
+            <form class="rt-form" method="post" action="{% url 'retake:window_open' %}" novalidate>
+                <div class="rt-grid">
+                    <div class="ems-field">
+                        <label class="ems-field__label" for="rtWinPeriod">{% trans "Akademik dövr" context "registrar.retake" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+                        <div class="bootstrap-single-select bootstrap-single-select--ems">
+                            <select class="ems-select bootstrap-single-select__native" id="rtWinPeriod" name="period" data-bootstrap-select required>
+                                {% for p in rw.periods %}<option value="{{ p.pk }}"{% if p == rw.default_period %} selected{% endif %}>{{ p.name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="ems-field">
+                        <label class="ems-field__label" for="rtWinOpens">{% trans "Açılış" context "registrar.retake" %} <span class="ems-field__opt">{% trans "(boş — indi)" context "registrar.retake" %}</span></label>
+                        <input class="ems-input" type="datetime-local" id="rtWinOpens" name="opens_at">
+                    </div>
+                    <div class="ems-field">
+                        <label class="ems-field__label" for="rtWinCloses">{% trans "Bağlanış" context "registrar.retake" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "ui.dialog" %}</span></label>
+                        <input class="ems-input" type="datetime-local" id="rtWinCloses" name="closes_at">
+                    </div>
+                </div>
+                <div class="ems-field">
+                    <label class="ems-field__label" for="rtWinNote">{% trans "Qeyd" context "registrar.retake" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "ui.dialog" %}</span></label>
+                    <input class="ems-input" type="text" id="rtWinNote" name="note" maxlength="300">
+                </div>
+                <p class="ems-msg ems-msg--error" data-rt-error role="alert" hidden></p>
+                <button type="submit" class="ems-btn ems-btn--primary"><i class="fas fa-lock-open" aria-hidden="true"></i> {% trans "Pəncərəni aç" context "registrar.retake" %}</button>
+            </form>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="ems-card">
+        <div class="ems-card__head"><div><h2 class="ems-card__title">{% trans "Tarixçə" context "registrar.retake" %}</h2></div></div>
+        {% if rw.history %}
+        <div class="ems-tablewrap">
+            <table class="ems-table ems-table--stack">
+                <thead><tr>
+                    <th scope="col">{% trans "Dövr" context "registrar.retake" %}</th>
+                    <th scope="col">{% trans "Açılış" context "registrar.retake" %}</th>
+                    <th scope="col">{% trans "Bağlanış" context "registrar.retake" %}</th>
+                    <th scope="col">{% trans "Açan" context "registrar.retake" %}</th>
+                    <th scope="col">{% trans "Bağlayan" context "registrar.retake" %}</th>
+                    <th scope="col"><span class="visually-hidden">{% trans "Əməl" context "registrar.retake" %}</span></th>
+                </tr></thead>
+                <tbody>
+                {% for w in rw.history %}
+                <tr>
+                    <td data-label="{% trans 'Dövr' context 'registrar.retake' %}">{{ w.period.name }}</td>
+                    <td data-label="{% trans 'Açılış' context 'registrar.retake' %}">{{ w.opens_at|date:"d.m.Y H:i" }}</td>
+                    <td data-label="{% trans 'Bağlanış' context 'registrar.retake' %}">{% if w.closed_at %}{{ w.closed_at|date:"d.m.Y H:i" }}{% elif w.closes_at %}{{ w.closes_at|date:"d.m.Y H:i" }}{% else %}—{% endif %}</td>
+                    <td data-label="{% trans 'Açan' context 'registrar.retake' %}">{{ w.opened_by_name|default:"—" }}{% if w.note %}<span class="exch-ref">{{ w.note }}</span>{% endif %}</td>
+                    <td data-label="{% trans 'Bağlayan' context 'registrar.retake' %}">{% if w.closed_at and not w.closed_by_name %}{% trans "sistem (vaxtı bitdi)" context "registrar.retake" %}{% else %}{{ w.closed_by_name|default:"—" }}{% endif %}</td>
+                    <td class="rt-table-actions">
+                        {% if not w.closed_at %}
+                        <form method="post" action="{% url 'retake:window_close' w.pk %}" novalidate>
+                            <button type="submit" class="ems-btn ems-btn--sm ems-btn--ghost rt-btn-danger" data-rt-confirm="{% trans 'Pəncərə bağlansın? Yeni müraciət qəbul olunmayacaq.' context 'registrar.retake' %}"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "Pəncərəni bağla" context "registrar.retake" %}</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            {% trans "Hələ pəncərə açılmayıb — müraciət qəbulu üçün pəncərə açın" context "registrar.retake" as rt_w_empty %}
+            {% include "partials/ems_ui/_empty.html" with state_icon="fa-calendar-xmark" state_title=rt_w_empty %}
+        {% endif %}
+    </section>
+</div>
+{% endif %}

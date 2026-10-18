@@ -59,7 +59,7 @@ class SecondChanceDecisionKeyTests(_ChanceBase):
             with self.subTest(role=role_name):
                 page = self._client_for(user).get(f"{reverse('accounts:profile')}?section=exam-chance")
                 self.assertEqual(page.status_code, 200)
-                self.assertContains(page, "Son verilən şanslar")
+                self.assertContains(page, "Son verilən cəhd hüquqları")
                 self.assertNotContains(page, 'name="exam_id"')
                 self.assertEqual(self._grant(user, exam).status_code, 403)
         self.assertFalse(StudentExamAttemptGrant.objects.filter(exam=exam).exists())

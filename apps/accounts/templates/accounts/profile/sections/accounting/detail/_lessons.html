@@ -1,0 +1,35 @@
+{% load i18n %}
+{% comment %}Keçirilmiş dərslərin cədvəli. Səhifə drill-down-u «Əvvəlki / Növbəti» (`lesson_prev_url`), müəllim pəncərəsi
+isə «Daha çox» (`more_url`, `accounting.js` sətirləri `[data-ac-lessons-body]`-yə əlavə edir). Kontekst: `lessons`,
+`lessons_total`; opsional `more_url`, `remaining`.{% endcomment %}
+{% if lessons %}
+<div class="ems-tablewrap ac-tablewrap">
+    <div class="ems-tablescroll">
+        <table class="ems-table ems-table--zebra ems-table--compact ems-table--stack ac-table ac-table--fit">
+            <caption class="ac-sr">{% trans "Keçirilmiş dərslərin siyahısı" context "accounts.accounting" %}</caption>
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Tarix" context "accounts.accounting" %}</th>
+                    <th scope="col">{% trans "Fənn" context "accounts.accounting" %}</th>
+                    <th scope="col">{% trans "Qrup" context "accounts.accounting" %}</th>
+                    <th scope="col">{% trans "Növ" context "accounts.accounting" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Saat" context "accounts.accounting" %}</th>
+                </tr>
+            </thead>
+            <tbody data-ac-lessons-body>
+                {% include "accounts/profile/sections/accounting/detail/_lesson_rows.html" %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% if more_url %}
+<div class="ac-more">
+    <button type="button" class="ems-btn ems-btn--sm" data-ac-more="{{ more_url }}">
+        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+        <span data-ac-more-label>{% blocktrans trimmed with count=remaining context "accounts.accounting" %}Daha çox göstər · {{ count }} qalıb{% endblocktrans %}</span>
+    </button>
+</div>
+{% endif %}
+{% else %}
+<p class="ac-muted ac-note">{% trans "Bu dövrdə keçirilmiş dərs yoxdur." context "accounts.accounting" %}</p>
+{% endif %}

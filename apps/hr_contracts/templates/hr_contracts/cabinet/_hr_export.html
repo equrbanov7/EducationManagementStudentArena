@@ -1,0 +1,6 @@
+{% load i18n %}
+{% if not hc.view_as %}
+<a class="ems-btn" href="{{ hc.export_url }}" download>
+    <i class="fas fa-file-excel" aria-hidden="true"></i> {% trans "Excel ixracı" context "hr_contracts" %}
+</a>
+{% endif %}

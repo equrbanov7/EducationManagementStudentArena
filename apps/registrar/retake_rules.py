@@ -38,15 +38,17 @@ TRANSITIONS: dict[str, frozenset] = {
     S.PAYMENT_PENDING_REVIEW: frozenset({S.PAYMENT_VERIFIED, S.PAYMENT_REJECTED, S.WITHDRAWN}),
     S.PAYMENT_REJECTED: frozenset({S.PAYMENT_PENDING_REVIEW, S.WITHDRAWN}),
     S.PAYMENT_VERIFIED: frozenset({S.ADMITTED, S.REJECTED, S.WITHDRAWN}),
-    S.ADMITTED: frozenset({S.EXAM_GRANTED, S.COMPLETED}),
-    S.EXAM_GRANTED: frozenset({S.COMPLETED}),
+    S.ADMITTED: frozenset({S.EXAM_GRANTED, S.COMPLETED, S.NO_SHOW, S.REJECTED, S.WITHDRAWN}),
+    S.EXAM_GRANTED: frozenset({S.COMPLETED, S.NO_SHOW, S.REJECTED, S.WITHDRAWN}),
     S.COMPLETED: frozenset(),
     S.REJECTED: frozenset(),
     S.WITHDRAWN: frozenset(),
+    S.NO_SHOW: frozenset(),
 }
 
 #: Tələbənin geri götürə bildiyi statuslar — «qərar verilməyənə qədər».
-WITHDRAWABLE = frozenset({S.SUBMITTED, S.PAYMENT_PENDING_REVIEW, S.PAYMENT_REJECTED, S.PAYMENT_VERIFIED})
+#: 2026-10-19 (sahib): ödəniş TƏSDİQLƏNƏNDƏN sonra tələbə özü geri götürə bilməz — yalnız heyət, rəsmi qərarla.
+WITHDRAWABLE = frozenset({S.SUBMITTED, S.PAYMENT_PENDING_REVIEW, S.PAYMENT_REJECTED})
 #: Qəbz yükləmək (ilk dəfə və ya rəddən sonra) mümkün olan statuslar.
 RECEIPT_UPLOADABLE = frozenset({S.SUBMITTED, S.PAYMENT_REJECTED})
 #: Nəticə yazıla bilən statuslar.
@@ -63,6 +65,7 @@ TONES = {
     S.COMPLETED: "success",
     S.REJECTED: "danger",
     S.WITHDRAWN: "muted",
+    S.NO_SHOW: "warning",
 }
 
 #: Tələbəyə «növbəti addım» mətni.
@@ -106,10 +109,20 @@ def next_step_for(application) -> str:
 # ── Tənzimləmələr (RİM «Sistem tənzimləmələri») ────────────────────────────
 
 
-def applications_open() -> bool:
+def master_switch() -> bool:
+    """«Sistem tənzimləmələri» ümumi açarı (qəza söndürücüsü, defolt açıq)."""
     from core import runtime_settings
 
     return runtime_settings.get_bool("retake.applications_open")
+
+
+def applications_open(organization) -> bool:
+    """Müraciət qəbul olunurmu: ümumi açar yanılı VƏ təşkilatda İmtahan mərkəzinin açdığı pəncərə açıqdır."""
+    if not master_switch():
+        return False
+    from .retake_window import current
+
+    return current(organization) is not None
 
 
 def max_attempts() -> int:

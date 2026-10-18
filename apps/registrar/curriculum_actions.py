@@ -15,7 +15,10 @@ status keçidi (göndər / təsdiqlə / qaytar / yenidən işlə) · YENİ VERS�
 
 SİLMƏ: plan sətri YALNIZ qaralama/qaytarılmış planda silinir — təsdiqlənmiş
 plandan heç nə silinmir (§8 qayda 1 + 5). Planın ÖZÜ heç vaxt silinmir: yeni
-versiya köhnəni ``is_active=False`` edir və ``previous_version`` ilə bağlayır.
+versiya QARALAMA kimi yaranır və ``previous_version`` ilə köhnəyə bağlanır;
+köhnə versiya ``is_active=False`` YALNIZ yeni versiya TƏSDİQLƏNƏNDƏ olur
+(``_supersede_other_versions``). Qaralama mərhələsində köhnə plan aktiv qalır —
+əks halda ixtisas təsdiq gedənə qədər «Plan yoxdur» bloklayıcısına düşərdi.
 
 Hər əməl ``core.audit.log_action``-a aktor + timestamp + səbəblə yazılır.
 """
@@ -34,6 +37,7 @@ from core.audit import log_action
 from core.constants import AuditAction
 from core.permissions import has_permission
 
+from .curriculum_elective import ElectiveFieldError, elective_fields, elective_snapshot, sync_block_choices
 from .curriculum_registry import (
     PERM_EDIT,
     actor_permissions,
@@ -228,11 +232,20 @@ def _save_row(request, organization):
     is_create = instance is None
     if is_create:
         instance = CurriculumSubject(organization=organization, curriculum=plan)
+    try:
+        elective = elective_fields(request.POST, instance)
+    except ElectiveFieldError as exc:
+        return _error(exc.message, code=exc.code, field=exc.field)
 
     old_values = (
         {}
         if is_create
-        else {"credits": instance.credits, "total_hours": instance.total_hours, "semester": instance.semester_number}
+        else {
+            "credits": instance.credits,
+            "total_hours": instance.total_hours,
+            "semester": instance.semester_number,
+            **elective_snapshot(instance),
+        }
     )
     instance.subject = subject
     instance.semester_number = semester
@@ -246,12 +259,15 @@ def _save_row(request, organization):
     instance.assessment_form = assessment
     instance.language = (request.POST.get("language") or "").strip()[:8]
     instance.teaching_chair = _chair_unit(organization, (request.POST.get("teaching_chair") or "").strip())
-    instance.is_elective = (request.POST.get("is_elective") or "") == "1"
-    instance.elective_group = (request.POST.get("elective_group") or "").strip()[:50]
+    instance.is_elective = elective["is_elective"]
+    instance.elective_group = elective["elective_group"]
+    instance.required_choices = elective["required_choices"]
     try:
-        instance.save()
+        with transaction.atomic():
+            instance.save()
     except IntegrityError:
         return _error(pgettext(_CTX, "Bu fənn həmin semestrdə artıq plandadır."), code="duplicate_row", field="subject")
+    block_synced = sync_block_choices(instance)
 
     log_action(
         action=AuditAction.CREATE if is_create else AuditAction.UPDATE,
@@ -261,7 +277,14 @@ def _save_row(request, organization):
         request=request,
         reason="curriculum: plan row saved — %s" % subject.code,
         old_values=old_values or None,
-        new_values={"subject": subject.code, "semester": semester, "credits": credits, "total_hours": total},
+        new_values={
+            "subject": subject.code,
+            "semester": semester,
+            "credits": credits,
+            "total_hours": total,
+            **elective_snapshot(instance),
+            **({"block_rows_synced": block_synced} if block_synced else {}),
+        },
     )
     errors = row_hour_errors(
         credits=credits,
@@ -344,12 +367,17 @@ def _transition(request, organization, action):
         plan.submitted_at = timezone.now()
         plan.submitted_by = request.user
         fields += ["submitted_at", "submitted_by"]
+    superseded = []
     if target == PlanStatus.APPROVED:
         plan.approved_at = timezone.now()
         plan.approved_by = request.user
         plan.protocol_number = (request.POST.get("protocol_number") or "").strip()[:64]
-        fields += ["approved_at", "approved_by", "protocol_number"]
-    plan.save(update_fields=fields)
+        plan.is_active = True
+        fields += ["approved_at", "approved_by", "protocol_number", "is_active"]
+    with transaction.atomic():
+        plan.save(update_fields=fields)
+        if target == PlanStatus.APPROVED:
+            superseded = _supersede_other_versions(plan)
 
     log_action(
         action=AuditAction.UPDATE,
@@ -359,15 +387,40 @@ def _transition(request, organization, action):
         request=request,
         reason=f"curriculum: {action} — {old_status} → {target}" + (f" — {reason}" if reason else ""),
         old_values={"status": old_status},
-        new_values={"status": target, "reason": reason},
+        new_values={"status": target, "reason": reason, **({"superseded_versions": superseded} if superseded else {})},
     )
     _notify_next_approver(plan, target, actor=request.user)
     return JsonResponse({"ok": True, "status": target})
 
 
+def _supersede_other_versions(plan) -> list:
+    """Təsdiqlənən versiya CARİ olur: eyni ixtisas + qəbul ilinin DİGƏR aktiv TƏSDİQLƏNMİŞ versiyaları söndürülür.
+
+    ``is_active=False`` — SİLMƏ deyil: plan, sətirləri və tarixçə qalır. Oxucular
+    (semestr açılışı, «Plan yoxdur», dərs yükü sinxronu) ``status=APPROVED,
+    is_active=True`` süzgəcindən keçir — ixtisasın HƏMİŞƏ tək cari planı olur və
+    arada plansız boşluq yaranmır (yeni versiya təsdiqlənənə qədər köhnə aktivdir).
+    Qaralama/baxışdakı paralel versiyalara TOXUNULMUR.
+    """
+    others = Curriculum.objects.filter(
+        organization_id=plan.organization_id,
+        program_id=plan.program_id,
+        admission_year=plan.admission_year,
+        status=PlanStatus.APPROVED,
+        is_active=True,
+    ).exclude(pk=plan.pk)
+    versions = sorted(others.values_list("version", flat=True))
+    if versions:
+        others.update(is_active=False, updated_at=timezone.now())
+    return versions
+
+
 @transaction.atomic
 def _new_version(request, organization):
-    """Təsdiqlənmiş plandan YENİ QARALAMA versiya — köhnə plan SİLİNMİR."""
+    """Təsdiqlənmiş plandan YENİ QARALAMA versiya — köhnə plan SİLİNMİR və AKTİV QALIR.
+
+    Köhnə versiya yalnız yeni versiya TƏSDİQLƏNƏNDƏ söndürülür (``_supersede_other_versions``).
+    """
     plan = _plan(request, organization, request.POST.get("plan"))
     if plan is None:
         return _error(pgettext(_CTX, "Plan tapılmadı."), status=404, code="not_found")

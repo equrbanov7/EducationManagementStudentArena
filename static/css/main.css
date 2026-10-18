@@ -85,3 +85,51 @@
    `!important` YOXDUR — JS `el.style.display = "flex"` ilə aça bilsin
    (bootstrap `d-none` bunu icazə vermir). */
 .u-hidden { display: none; }
+
+/* ── iOS: fokusda avtomatik yaxınlaşma YOXDUR (mobil qabıq 2026-10-19) ─────
+   iOS Safari şrifti 16px-dən kiçik xanaya toxunanda bütün səhifəni böyüdür və
+   istifadəçi geri kiçiltməli olur (kabinetdə 13–15px xanalar: bildiriş axtarışı,
+   «İstifadəçi profilinə bax», süzgəclər). Qayda YALNIZ iOS WebKit-də işləyir
+   (`-webkit-touch-callout` başqa brauzerdə yoxdur) — Android və masaüstü düzümü
+   dəyişmir; `maximum-scale` qoyulmur ki, barmaqla yaxınlaşdırma (WCAG 1.4.4) qalsın.
+   `!important` qəsdəndir: komponent qaydaları (2–3 sinif) element seçicisindən güclüdür. */
+@supports (-webkit-touch-callout: none) {
+    @media (max-width: 1024px) {
+        input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]),
+        select,
+        textarea {
+            font-size: max(16px, 1em) !important;
+        }
+    }
+}
+
+/* ── Səhifə səviyyəli `position: sticky` — YALNIZ kabinet və jurnal (mobil qabıq 2026-10-19) ──
+   `body { overflow-x: hidden }` body-ni sürüşmə konteyneri edir (overflow-y → auto), o isə heç
+   vaxt sürüşmür — ona görə səhifədəki BÜTÜN yapışqan elementlər ölüdür (sillabus redaktorunun
+   alt paneli, «Sistem tənzimləmələri»nin əməl zolağı, jurnalın saxlama zolağı…). `clip` eyni
+   üfüqi qorumanı verir, amma sürüşmə konteyneri yaratmır.
+   NİYƏ QLOBAL DEYİL: 2026-09-30-da qlobal `clip` imtahan səhifələrinə görə qəsdən geri alınıb
+   (bax yuxarıdakı body qeydi) — imtahan zolağı/final monitoru/sorğu kimi səhifələrdə onlarla
+   «yuxarı yapışan» qayda başlığın altına düşərdi. Burada yalnız kabinet (`.profile-page`) və
+   jurnal (`.jd2`) qoşulur; başlıq orada əvvəlki kimi səhifə ilə sürüşür (`position: relative`),
+   yəni bölmələrin `top: 8–16px` yapışqanları heç nəyin altında qalmır. Köhnə brauzer (`clip`
+   və ya `:has` yoxdur) — əvvəlki davranış (`hidden`). Kabinetin öz konteyneri: `profile/layout.css`.
+   TELEFON (≤ 768px) QƏSDƏN XARİCDƏDİR: bölmələrin yapışqanları masaüstü üçün çəkilib — 320px-də
+   sillabus addımları (391px) + alt panel (277px) birlikdə ekranın 85%-ni örtürdü. Telefonda
+   yapışqan panel üçün bölmənin öz yığcam mobil dizaynı lazımdır (bölmə sahibləri). */
+@supports (overflow: clip) {
+    @media (min-width: 769px) {
+        body:has(.profile-page),
+        body:has(.jd2) {
+            overflow-x: clip;
+            /* Başlıq burada yapışqan deyil — `top: calc(var(--ems-header-h, 64px) + …)` yazan
+               yan panellər (sual təqdimatı) boş 64px buraxmasın. */
+            --ems-header-h: 0px;
+        }
+
+        body:has(.profile-page) > .blog-header,
+        body:has(.jd2) > .blog-header {
+            position: relative;
+        }
+    }
+}

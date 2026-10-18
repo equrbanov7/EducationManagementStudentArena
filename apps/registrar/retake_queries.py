@@ -117,6 +117,9 @@ def decorate(application, *, viewer_is_student=False) -> dict:
         "receipt": receipt,
         "receipt_url": protected_media_url(receipt.file) if receipt is not None else "",
         "document_url": protected_media_url(application.decision_document) if application.decision_document else "",
+        "closure_document_url": (
+            protected_media_url(application.closure_document) if application.closure_document else ""
+        ),
         "result_text": result_text(application),
         "eligibility": application.eligibility or {},
     }
@@ -187,13 +190,22 @@ def student_panel(*, student, organization) -> dict:
     applications = student_applications(student=student, organization=organization)
     grants = student_grants(student=student, organization=organization)
     active = [a for a in applications if a.is_active]
+    # 2026-10-19 (sahib): təxmini məbləğ (təhsil haqqı cədvəli + düstur) — 2 sorğu, fənn sayından asılı deyil.
+    from . import retake_fees, retake_window
+
+    fee_context = retake_fees.student_context(student, organization)
+    for row in subjects:
+        row["fee"] = retake_fees.estimate(context=fee_context, period=row["period"], subject=row["subject"])
+    window = retake_window.current(organization)
     return {
         "subjects": subjects,
         "eligible_count": sum(1 for row in subjects if row["any_allowed"]),
         "applications": [decorate(a, viewer_is_student=True) for a in applications],
         "active_count": len(active),
         "history": attempt_history(applications, grants),
-        "window_open": retake_rules.applications_open(),
+        "window_open": retake_rules.master_switch() and window is not None,
+        "window": window,
+        "upcoming_window": None if window is not None else retake_window.upcoming(organization),
         "max_attempts": retake_rules.max_attempts(),
         "urls": {"apply": reverse("retake:apply")},
         "accept": ".pdf,.jpg,.jpeg,.png",

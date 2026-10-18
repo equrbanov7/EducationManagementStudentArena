@@ -1,0 +1,40 @@
+{% load i18n %}
+{% comment %}Müəllim pəncərəsinin (modal) gövdəsi — `views/accounting.py::accounting_teacher_detail` JSON-unun `html`-i.
+Dövr panelin dövrüdür (ay / bütün semestr / tarix aralığı). YALNIZ OXU: tələbə adı, qiymət YOXDUR. Kontekst:
+`detail` (detail_core), `kind_labels`, `lessons`, `lessons_total`, `more_url`, `remaining`.{% endcomment %}
+<div class="ac-modal" data-ac-modal>
+    <div class="ac-modal__summary">
+        <div class="ac-modal__badges">
+            <span class="ems-badge ems-badge--info ac-chip"><i class="fas fa-calendar-days" aria-hidden="true"></i> {{ detail.period_label }}</span>
+            {% if detail.staff_label %}<span class="ems-badge ems-badge--muted ac-chip">{% trans "Ştat" context "accounts.accounting" %}: {{ detail.staff_label }}{% if detail.staff_short != "—" %} ({{ detail.staff_short }}){% endif %}</span>{% endif %}
+            {% include "partials/ems_ui/_status_badge.html" with status=detail.status_obj nowrap=True %}
+        </div>
+        <dl class="ac-modal__stats">
+            <div><dt>{% trans "Plan" context "accounts.accounting" %}</dt><dd>{{ detail.planned_text }} <small>{% trans "saat" context "accounts.accounting" %}</small></dd></div>
+            <div><dt>{% trans "Fakt" context "accounts.accounting" %}</dt><dd>{{ detail.held_text }} <small>{% trans "saat" context "accounts.accounting" %}</small></dd></div>
+            <div><dt>{% trans "Fərq" context "accounts.accounting" %}</dt><dd>{{ detail.diff_text }}</dd></div>
+            <div><dt>{% trans "İcra" context "accounts.accounting" %}</dt><dd>{% if detail.pct is None %}—{% else %}{{ detail.pct }}%{% endif %}</dd></div>
+            <div><dt>{% trans "Dərs" context "accounts.accounting" %}</dt><dd>{{ detail.lessons_count }}</dd></div>
+        </dl>
+    </div>
+
+    <section class="ac-modal__block" aria-labelledby="ac-m-kinds">
+        <h3 class="ac-h" id="ac-m-kinds">{% trans "Növlər üzrə" context "accounts.accounting" %}</h3>
+        {% include "accounts/profile/sections/accounting/detail/_kinds.html" %}
+    </section>
+
+    <section class="ac-modal__block" aria-labelledby="ac-m-months">
+        <h3 class="ac-h" id="ac-m-months">{% if detail.is_range %}{% trans "Aralığın ayları" context "accounts.accounting" %}{% else %}{% blocktrans trimmed with semester=detail.semester_label context "accounts.accounting" %}Aylar üzrə — {{ semester }}{% endblocktrans %}{% endif %}</h3>
+        {% include "accounts/profile/sections/accounting/detail/_months.html" %}
+    </section>
+
+    <section class="ac-modal__block" aria-labelledby="ac-m-subjects">
+        <h3 class="ac-h" id="ac-m-subjects">{% trans "Fənn və qrup üzrə" context "accounts.accounting" %}</h3>
+        {% include "accounts/profile/sections/accounting/detail/_breakdown.html" %}
+    </section>
+
+    <section class="ac-modal__block" aria-labelledby="ac-m-lessons">
+        <h3 class="ac-h" id="ac-m-lessons">{% blocktrans trimmed with total=lessons_total context "accounts.accounting" %}Keçirilmiş dərslər · {{ total }}{% endblocktrans %}</h3>
+        {% include "accounts/profile/sections/accounting/detail/_lessons.html" %}
+    </section>
+</div>

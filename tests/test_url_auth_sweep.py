@@ -40,6 +40,7 @@ PUBLIC_ALLOWLIST = {
     # daxil olur. Qorunma PIN yoxlaması + kompüter/MAC qapısındadır.
     "exams:final_exam_entry",  # /exams/final/
     "liveExam:pin_entry",  # /live/
+    "verification:home",  # /yoxla/ — publik sənəd yoxlaması (QR), girişsiz; sürət limiti + noindex
     # ── Operativ problar (monitorinq autentifikasiyasız vurur) ──────────────
     "ping",
     "health_check",  # DİQQƏT: marşrutun adı `health` DEYİL

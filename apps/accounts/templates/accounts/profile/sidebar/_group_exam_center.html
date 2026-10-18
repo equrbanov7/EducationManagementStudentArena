@@ -1,15 +1,15 @@
 {% load i18n nav_icons %}
 {% comment %}«İmtahan mərkəzi» qrupu — final imtahan həyat dövrü: zal/oturum
-nəzarəti, PIN axtarışı, statistikalar, ikinci şans, kağız bal daxil etməsi,
+nəzarəti, PIN axtarışı, statistikalar, yenidən imtahan cəhdi, kağız bal daxil etməsi,
 köçürülmüş nəticələr və kollokvium pəncərələri.
 
 2026-09-10: qrup başlığının şərti bəndlərin ŞƏRTLƏRİNİN TAM birləşməsidir.
 Əvvəllər `appeal-stats` / `exam-chance` / `kollokvium-windows` başlıq şərtində
 yox idi — yalnız həmin açarı olan rol bu sətirləri BAŞLIQSIZ görürdü və
 akkordeon onları qonşu qrupa salırdı.{% endcomment %}
-{% if role_capabilities.can_access_final_center or 'exam-center-pins' in allowed_sections or 'exam-center-stats' in allowed_sections or 'appeal-stats' in allowed_sections or 'exam-chance' in allowed_sections or 'exam-score-entry' in allowed_sections or 'legacy-grade-review' in allowed_sections or 'kollokvium-windows' in allowed_sections %}
+{% if role_capabilities.can_access_final_center or 'exam-center-pins' in allowed_sections or 'exam-center-stats' in allowed_sections or 'appeal-stats' in allowed_sections or 'exam-chance' in allowed_sections or 'exam-score-entry' in allowed_sections or 'legacy-grade-review' in allowed_sections or 'kollokvium-windows' in allowed_sections or 'retake-windows' in allowed_sections %}
 <li class="sidebar-menu-group" data-sidebar-group="exam-center">
-    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|exam-center-pins|exam-center-stats|appeal-stats|exam-chance|exam-score-entry|legacy-grade-review|kollokvium-windows|" %} open{% endif %}>
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|exam-center-pins|exam-center-stats|appeal-stats|exam-chance|exam-score-entry|legacy-grade-review|kollokvium-windows|retake-windows|" %} open{% endif %}>
         {% trans "group_exam_center" context "profile.sidebar" as group_label %}
         {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="shield-check" %}
         <ul class="sidebar-menu-group-items">
@@ -55,11 +55,11 @@ akkordeon onları qonşu qrupa salırdı.{% endcomment %}
             <li class="sidebar-menu-item">
                 <a href="{{ profile_base_url }}?section=exam-chance"
                    data-section="exam-chance"
-                   data-title="{% trans 'İmtahan şansı ver' context 'profile.section' %}"
+                   data-title="{% trans 'Yenidən imtahan cəhdi' context 'profile.section' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'exam-chance' %}active{% endif %}">
                     {% nav_icon "rotate-ccw" "sidebar-menu-icon" %}
-                    <span class="sidebar-menu-text">{% trans 'İmtahan şansı ver' context 'profile.section' %}</span>
+                    <span class="sidebar-menu-text">{% trans 'Yenidən imtahan cəhdi' context 'profile.section' %}</span>
                 </a>
             </li>
             {% endif %}
@@ -96,6 +96,19 @@ akkordeon onları qonşu qrupa salırdı.{% endcomment %}
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'kollokvium-windows' %}active{% endif %}">
                     {% nav_icon "calendar-check" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans 'Midterm pəncərələri' context 'profile.section' %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if 'retake-windows' in allowed_sections %}
+            {# «25% müraciət pəncərəsi» — sahib 2026-10-19: «İmtahan mərkəzi açsın bunu» (`exam_center.decide`). #}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=retake-windows"
+                   data-section="retake-windows"
+                   data-title="{% trans '25% müraciət pəncərəsi' context 'profile.sidebar' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'retake-windows' %}active{% endif %}">
+                    {% nav_icon "calendar-clock" "sidebar-menu-icon" %}
+                    <span class="sidebar-menu-text">{% trans '25% müraciət pəncərəsi' context 'profile.sidebar' %}</span>
                 </a>
             </li>
             {% endif %}

@@ -1,0 +1,10 @@
+{% comment %}«Müqavilələrim» (apps.hr_contracts, sahib 2026-10-19) — işçinin öz əmək müqavilələri və «Tanış oldum,
+təsdiqləyirəm» təsdiqi. Menyu: müqaviləsi olan hər əməkdaş (`hr_contracts.public.employee_section_visible`).
+Təsdiq `/kadrlar/muqavileler/api/<id>/acknowledge/` JSON ucuna gedir → AJAX-safe.{% endcomment %}
+{% if 'my-contracts' in allowed_sections %}
+<section class="profile-section-panel profile-section--my-contracts {% if active_section == 'my-contracts' %}is-active{% endif %}"
+         data-profile-section-panel="my-contracts"
+         data-source-url="{{ profile_base_url }}?section=my-contracts">
+    {% include "hr_contracts/cabinet/_my_panel.html" %}
+</section>
+{% endif %}

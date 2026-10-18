@@ -1,12 +1,12 @@
-import { $, UI } from './dom.js?v=lx20261014';
-import { PHASES } from './constants.js?v=lx20261014';
-import { state } from './state.js?v=lx20261014';
-import { playAllAnswered, playCountdownSound, playIntroSound, playTick, playTimeUp, playWhoosh } from './audio.js?v=lx20261014';
-import { icon } from './icons.js?v=lx20261014';
-import { answerTileMarkup, optionsLengthClass, tilesGridClass } from './options.js?v=lx20261014';
-import { revealQuestion } from './api.js?v=lx20261014';
-import { playWipe } from './transitions.js?v=lx20261014';
-import { secondsLabel } from './time_setting.js?v=lx20261014';
+import { $, UI } from './dom.js?v=lx20261019';
+import { PHASES } from './constants.js?v=lx20261019';
+import { state } from './state.js?v=lx20261019';
+import { playAllAnswered, playCountdownSound, playIntroSound, playTick, playTimeUp, playWhoosh } from './audio.js?v=lx20261019';
+import { icon } from './icons.js?v=lx20261019';
+import { answerTileMarkup, optionsLengthClass, tilesGridClass } from './options.js?v=lx20261019';
+import { revealQuestion } from './api.js?v=lx20261019';
+import { playWipe } from './transitions.js?v=lx20261019';
+import { secondsLabel } from './time_setting.js?v=lx20261019';
 import {
     controlsEnabled,
     esc,
@@ -19,8 +19,8 @@ import {
     questionKey,
     toMs,
     tr,
-} from './utils.js?v=lx20261014';
-import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261014';
+} from './utils.js?v=lx20261019';
+import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261019';
 
 const isTextQuestion = (question) => String(question?.answer_input || "choice") === "text";
 
@@ -90,7 +90,7 @@ function cardMarkup(question, compact) {
     const text = String(question?.text || "");
     return `
         <div class="hx-qcard notranslate ${compact ? "hx-qcard--compact" : ""}" translate="no" data-len="${lengthClass(text)}">
-            <h2 class="hx-qcard__text" data-fit>${esc(text)}</h2>
+            <h2 class="hx-qcard__text" data-fit data-code-text>${esc(text)}</h2>
         </div>
     `;
 }

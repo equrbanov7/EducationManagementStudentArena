@@ -1,71 +1,85 @@
 {% load static i18n %}
 {% comment %}
 ================================================================================
-BANK PICKER — MODAL BODY (AJAX). Strukturu:
-  • Toolbar (bank + axtarış + dil + çətinlik) — STATİK, bootstrap-select ilə.
-  • Content (stats + siyahı) — filtr/bank dəyişəndə yenilənir (data-picker-content).
-  • Footer (seçim sayğacı + əlavə et) — statik.
-examBankPicker.js açılışda bütün gövdəni bir dəfə yükləyir, sonra yalnız content-i
-yeniləyir → bootstrap-select bir dəfə init olunur, lazy-scroll content daxilindədir.
+BANK PICKER — MODAL GÖVDƏSİ (AJAX). Strukturu:
+  • Filtr sırası (bank + axtarış + dil + çətinlik) — STATİK, hamısı 40px (`ems-*` kontrolları,
+    bootstrap-select `--ems` variantı), etiketlər bir xətdə.
+  • Content (xülasə + sual kartları) — filtr/bank dəyişəndə yenilənir (data-picker-content),
+    öz scroll-u var (lazy-scroll sentinel-i onu müşahidə edir).
+  • Alt sıra (seçim sayğacı + xəta + əlavə et) — STATİK, yapışqan.
+examBankPicker.js açılışda bütün gövdəni bir dəfə yükləyir, sonra yalnız content-i yeniləyir.
 ================================================================================
 {% endcomment %}
 <div class="bankpicker" data-picker-url="{{ picker_url }}" data-compatible-type="{{ compatible_type }}">
 
-    {# ── Toolbar (statik) ── #}
-    <div class="bankpicker-toolbar">
-        <label class="bankpicker-field bankpicker-field--bank">
-            <span class="bankpicker-field__label"><i class="fas fa-database"></i> {% trans "Bank" %}</span>
-            <div class="bootstrap-single-select">
-                <select class="form-select bootstrap-single-select__native" data-bootstrap-select data-picker-control="bank">
-                    <option value="">{% trans "— Bank seçin —" %}</option>
+    <div class="bankpicker-toolbar" role="search" aria-label="{% trans 'Bank və filtrlər' context 'exams.template.bank_picker' %}">
+        <div class="ems-field bankpicker-field bankpicker-field--bank">
+            <label class="ems-field__label" for="bankPickerBank">{% trans "Sual bankı" context "exams.template.bank_picker" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select id="bankPickerBank" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-picker-control="bank"
+                        data-live-search="true"
+                        data-live-search-placeholder="{% trans 'Bank axtar…' context 'exams.template.bank_picker' %}"
+                        data-live-search-empty="{% trans 'Uyğun bank yoxdur' context 'exams.template.bank_picker' %}"
+                        {% if not banks %}disabled{% endif %}>
+                    <option value="">{% trans "Bank seçin" context "exams.template.bank_picker" %}</option>
                     {% for bank in banks %}
                     <option value="{{ bank.id }}" {% if selected_bank and selected_bank.id == bank.id %}selected{% endif %}>{{ bank.name }}</option>
                     {% endfor %}
                 </select>
             </div>
-        </label>
+        </div>
 
-        <label class="bankpicker-field bankpicker-field--search">
-            <span class="bankpicker-field__label"><i class="fas fa-magnifying-glass"></i> {% trans "Axtarış" %}</span>
-            <input type="search" class="bankpicker-input" data-picker-control="q"
-                   value="{{ search_query }}" placeholder="{% trans 'Sual mətnində axtar...' %}" autocomplete="off">
-        </label>
+        <div class="ems-field bankpicker-field bankpicker-field--search">
+            <label class="ems-field__label" for="bankPickerSearch">{% trans "Axtarış" context "exams.template.bank_picker" %}</label>
+            <div class="ems-search bankpicker-search">
+                <i class="fas fa-magnifying-glass ems-search__icon" aria-hidden="true"></i>
+                <input id="bankPickerSearch" type="search" class="ems-input ems-search__input" data-picker-control="q"
+                       value="{{ search_query }}" autocomplete="off" enterkeyhint="search"
+                       placeholder="{% trans 'Sual mətnində axtar' context 'exams.template.bank_picker' %}">
+            </div>
+        </div>
 
-        <label class="bankpicker-field bankpicker-field--lang">
-            <span class="bankpicker-field__label"><i class="fas fa-globe"></i> {% trans "Dil" %}</span>
-            <div class="bootstrap-single-select">
-                <select class="form-select bootstrap-single-select__native" data-bootstrap-select data-picker-control="language">
-                    <option value="">{% trans "Bütün dillər" %}</option>
+        <div class="ems-field bankpicker-field bankpicker-field--lang">
+            <label class="ems-field__label" for="bankPickerLanguage">{% trans "Dil" context "exams.template.bank_picker" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select id="bankPickerLanguage" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-picker-control="language">
+                    <option value="">{% trans "Bütün dillər" context "exams.template.bank_picker" %}</option>
                     {% for code, label in language_choices %}
                     <option value="{{ code }}" {% if language_filter == code %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
                 </select>
             </div>
-        </label>
+        </div>
 
-        <label class="bankpicker-field bankpicker-field--diff">
-            <span class="bankpicker-field__label"><i class="fas fa-gauge-high"></i> {% trans "Çətinlik" %}</span>
-            <div class="bootstrap-single-select">
-                <select class="form-select bootstrap-single-select__native" data-bootstrap-select data-picker-control="difficulty">
-                    <option value="">{% trans "Hamısı" %}</option>
+        <div class="ems-field bankpicker-field bankpicker-field--diff">
+            <label class="ems-field__label" for="bankPickerDifficulty">{% trans "Çətinlik" context "exams.template.bank_picker" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select id="bankPickerDifficulty" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-picker-control="difficulty">
+                    <option value="">{% trans "Hamısı" context "exams.template.bank_picker" %}</option>
                     {% for value, label in difficulty_choices %}
                     <option value="{{ value }}" {% if difficulty_filter == value %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
                 </select>
             </div>
-        </label>
+        </div>
     </div>
 
-    {# ── Content (dəyişən) ── #}
-    <div class="bankpicker-content" data-picker-content>
+    <div class="bankpicker-content" data-picker-content tabindex="-1">
         {% include "exams/teacher/partials/_exam_bank_picker_content.html" %}
     </div>
 
-    {# ── Footer (statik) ── #}
     <div class="bankpicker-footer">
-        <span class="bankpicker-selcount" data-picker-selected-count>0 {% trans "seçilib" %}</span>
-        <button type="button" class="bankpicker-attach" data-picker-attach disabled>
-            <i class="fas fa-plus"></i> {% trans "Seçilmişləri imtahana əlavə et" %}
-        </button>
+        <div class="bankpicker-footer__info">
+            <span class="bankpicker-selcount" data-picker-selected-count aria-live="polite"
+                  data-count-template="{% trans '{n} sual seçilib' context 'exams.template.bank_picker' %}"
+                  data-count-empty="{% trans 'Heç bir sual seçilməyib' context 'exams.template.bank_picker' %}">{% trans "Heç bir sual seçilməyib" context "exams.template.bank_picker" %}</span>
+            <p class="bankpicker-error" data-picker-error role="alert" hidden></p>
+        </div>
+        <div class="bankpicker-footer__actions">
+            <button type="button" class="ems-btn bankpicker-cancel" data-bank-picker-close>{% trans "Ləğv et" context "exams.template.bank_picker" %}</button>
+            <button type="button" class="ems-btn ems-btn--primary bankpicker-attach" data-picker-attach disabled>
+                <i class="fas fa-plus" aria-hidden="true"></i><span data-picker-attach-label>{% trans "Seçilmişləri imtahana əlavə et" context "exams.template.bank_picker" %}</span>
+            </button>
+        </div>
     </div>
 </div>

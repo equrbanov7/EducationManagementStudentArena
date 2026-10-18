@@ -6,18 +6,20 @@ Müəllim × ay: jurnalda keçirilmiş dərs saatı (mühazirə / seminar / lab)
 fərq, ştat; müəllim drill-down-u (aylıq cədvəl, fənn × qrup, dərs siyahısı) və Excel ixracı. YALNIZ OXU.
 
 Panel SERVER-render-dir və AJAX-safe-dir: avto filtr paneli (`filter_bar.js`, `ac_*` URL-də), sıralama, səhifə və
-drill-down linkləri bölməni yerində yeniləyir. CSS xarici fayldadır və panelin İÇİNDƏDİR; JS lazım deyil.
+drill-down linkləri bölməni yerində yeniləyir. Müəllim pəncərəsi (modal), «Daha çox» və tarix aralığı sahələri
+`accounting.js`-dədir (AJAX-safe, EMSDelegate). CSS və JS xarici fayllardadır və panelin İÇİNDƏDİR.
 {% endcomment %}
 {% if 'accounting' in allowed_sections %}
 <section class="profile-section-panel profile-section--accounting {% if active_section == 'accounting' %}is-active{% endif %}"
          data-profile-section-panel="accounting"
          data-source-url="{{ profile_base_url }}?section=accounting">
-<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/accounting.css' %}?v=20261018-acct5">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/accounting.css' %}?v=20261019-acmodal">
 {% accounting_panel as ac %}
 {% if not ac.has_access %}
     {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=ac.access_denied_message %}
 {% else %}
     {% include "accounts/profile/sections/accounting/_content.html" %}
+<script defer src="{% static 'accounts/js/profile/accounting.js' %}?v=20261019-acreview"></script>
 {% endif %}
 </section>
 {% endif %}

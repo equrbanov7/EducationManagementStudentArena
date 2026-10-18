@@ -543,3 +543,8 @@
         white-space: nowrap;
     }
 }
+
+/* Telefon: iOS Safari 16px-dən kiçik şriftli sahəyə toxunanda səhifəni böyüdür (mobil müəllim 2026-10-19). */
+@media (max-width: 768px) {
+    .pr-form-control { font-size: 16px; }
+}

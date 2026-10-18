@@ -78,7 +78,9 @@ class OnlineRetakeAttemptTest(RetakeBase):
                 kind="retake_25",
                 receipt=pdf(),
             )
-            retake_decisions.verify_payment(actor=self.accountant, organization=self.org, application_id=app.id)
+            retake_decisions.verify_payment(
+                actor=self.accountant, organization=self.org, application_id=app.id, paid_amount="100"
+            )
             retake_decisions.admit(actor=self.dean, organization=self.org, application_id=app.id)
             exam = {
                 "id": self.exam.pk,
@@ -238,7 +240,9 @@ class ReviewHttpTest(RetakeBase):
                 kind="retake_25",
                 receipt=pdf(),
             )
-            retake_decisions.verify_payment(actor=self.accountant, organization=self.org, application_id=app.id)
+            retake_decisions.verify_payment(
+                actor=self.accountant, organization=self.org, application_id=app.id, paid_amount="100"
+            )
             retake_decisions.admit(actor=self.dean, organization=self.org, application_id=app.id)
         client = self.client_for(center)
         too_high = client.post(reverse("retake:result", args=[app.id]), {"score": "61"})

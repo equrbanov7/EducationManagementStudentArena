@@ -285,3 +285,31 @@
         margin-left: 0;
     }
 }
+
+/* ── Telefon: nəticə sətirləri KART olur (mobil müəllim 2026-10-19) ─────────────
+   Əvvəl 375px-də 900px-lik cədvəlin yalnız «#», ad və istifadəçi adı görünürdü — «Yoxla» / «Bax»
+   düyməsi sağda, ekrandan kənarda qalırdı. Qlobal `.ems-table--stack` (ems_ui/table.css) sətri
+   «ETİKET … dəyər» kartına çevirir; burada yalnız bu cədvələ xas düzəlişlər var. */
+@media (max-width: 768px) {
+    .etr-results .etp-tablescroll { max-height: none; overflow: visible; }
+    .etr-table tbody tr { position: relative; }
+    .etr-table .etr-col-no { display: none; }
+    /* «0» və «/3» ayrı flex elementləridir — etiket sola, dəyər bütöv sağa. */
+    .etr-table td[data-label] { justify-content: flex-end; gap: 2px; }
+    .etr-table td[data-label]::before { margin-right: auto; padding-right: 12px; }
+    .etr-table .etr-user { min-width: 0; padding-right: 36px; }
+    .etr-table .etr-col-check {
+        position: absolute;
+        top: 10px;
+        right: 14px;
+        width: auto;
+        padding: 0;
+    }
+    .etr-table .etr-check { width: 22px; height: 22px; }
+    .etr-table .etr-status { justify-content: flex-end; }
+    .etr-table .etr-col-actions { text-align: left; }
+    .etr-table .etr-actions { justify-content: stretch; min-width: 0; }
+    .etr-table .etr-actions > .ems-btn,
+    .etr-table .etr-actions .etr-inline-form,
+    .etr-table .etr-actions .etr-inline-form .ems-btn { flex: 1 1 100%; justify-content: center; min-height: 44px; }
+}

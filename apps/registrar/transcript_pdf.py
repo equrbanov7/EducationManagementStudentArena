@@ -156,7 +156,7 @@ class _Sheet:
 
         self.page.draw_rect(fitz.Rect(x0, y0, x1, y1), color=color, fill=None, width=width, dashes=dashes)
 
-    def finish_footers(self, generated_at, document_number=None):
+    def finish_footers(self, generated_at, document_number=None, verify_code=None):
         """Hər səhifənin altlığı: sənəd nömrəsi + vaxt · «Səhifə N / M» · izah qeydi.
 
         Nömrə HƏR səhifədə təkrarlanır — çoxsəhifəli rəsmi sənədin ayrı düşən
@@ -173,6 +173,8 @@ class _Sheet:
             top = _PAGE_H - 54
             page.draw_line((_MARGIN, top), (_PAGE_W - _MARGIN, top), color=_LINE, width=0.6)
             head = f"{doc_label}: {document_number}  ·  {stamp}" if document_number else stamp
+            if verify_code:  # QR yoxlama kodu (apps.verification) — ayrı düşən vərəq də yoxlanılsın
+                head = f"{head}  ·  {pgettext('registrar.pdf', 'Yoxlama kodu')}: {verify_code}"
             page.insert_text((_MARGIN, top + 12), head, fontname=_FONT_BOLD, fontsize=7, color=_MUTED)
             label = pgettext("registrar.pdf", "Səhifə %(page)s / %(total)s") % {"page": index, "total": total}
             width = _text_width(label, size=7)
@@ -502,7 +504,7 @@ def _uomg_text(value) -> str:
     return f"{value:.2f}"
 
 
-def _draw_footer(sheet, data, generated_at):
+def _draw_footer(sheet, data, generated_at, seal_mark=None):
     """ "Ümumi" cumulative row + the dean signature / issue-date line."""
     sheet.ensure(100)
     sheet.y += 2
@@ -535,10 +537,10 @@ def _draw_footer(sheet, data, generated_at):
 
     sheet.ensure(96)
     sheet.y += 26
-    _draw_signature_block(sheet, generated_at)
+    _draw_signature_block(sheet, generated_at, seal_mark)
 
 
-def _draw_signature_block(sheet, generated_at):
+def _draw_signature_block(sheet, generated_at, seal_mark=None):
     """Təsdiq zolağı: dekan imzası (solda) + möhür yeri (sağda) + rekvizitlər.
 
     Möhür yeri QƏSDƏN boşdur — elektron nüsxə möhürsüz etibarlıdır, kağız
@@ -559,14 +561,19 @@ def _draw_signature_block(sheet, generated_at):
     seal_label = pgettext("registrar.pdf", "Möhür yeri")
     width = _text_width(seal_label, size=7.4)
     sheet.text_at(stamp_x + (stamp_w - width) / 2, top + 26, seal_label, size=7.4, color=_MUTED)
+    if seal_mark is not None:  # QR + kod imza ilə möhür yeri arasında (transcript_seal)
+        from apps.registrar.transcript_seal import draw_verification_block
+
+        draw_verification_block(sheet, seal_mark, x=_MARGIN + 214, top=top, width=stamp_x - _MARGIN - 226)
     sheet.y = top + 68
 
 
-def render_transcript_pdf(*, organization, student, record, data) -> bytes:
-    """Build the official transcript PDF → raw bytes (subset fonts, compressed)."""
+def render_transcript_pdf(*, organization, student, record, data, seal_mark=None) -> bytes:
+    """Rəsmi transkript PDF → baytlar. ``seal_mark`` verilərsə QR + kod çap olunur və verilmə anı möhürünküdür:
+    eyni möhür → eyni baytlar (``no_new_id`` — fayl həşi ilə yükləyib-müqayisə işləsin)."""
     import fitz
 
-    generated_at = timezone.localtime()
+    generated_at = timezone.localtime(seal_mark.issued_at) if seal_mark is not None else timezone.localtime()
     document_number = build_document_number(record=record, student=student, issued_at=generated_at)
 
     doc = fitz.open()
@@ -577,8 +584,8 @@ def render_transcript_pdf(*, organization, student, record, data) -> bytes:
     for year in data["years"]:
         _draw_year(sheet, year)
 
-    _draw_footer(sheet, data, generated_at)
-    sheet.finish_footers(generated_at, document_number)
+    _draw_footer(sheet, data, generated_at, seal_mark)
+    sheet.finish_footers(generated_at, document_number, verify_code=getattr(seal_mark, "code", None))
 
     brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
     doc.set_metadata(
@@ -590,4 +597,4 @@ def render_transcript_pdf(*, organization, student, record, data) -> bytes:
         }
     )
     doc.subset_fonts()
-    return doc.tobytes(deflate=True, garbage=3)
+    return doc.tobytes(deflate=True, garbage=3, no_new_id=True)

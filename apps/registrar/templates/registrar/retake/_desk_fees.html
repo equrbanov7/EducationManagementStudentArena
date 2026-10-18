@@ -1,0 +1,84 @@
+{% load i18n registrar_retake %}
+{% comment %}«Təhsil haqqı cədvəli» (sahib 2026-10-19: «İlliyə görə hesablanır») — Mühasibatlıq saxlayır
+(`retake.payment_verify` / `accounting.manage_fees`). İxtisassız sətir defoltdur. Yazılar `retake.js` → JSON POST.
+Kontekst: `fees` = {rows, programs, years, settings}.{% endcomment %}
+<section class="ems-card">
+    <div class="ems-card__head">
+        <div>
+            <h2 class="ems-card__title">{% trans "Təhsil haqqı cədvəli" context "registrar.retake" %}</h2>
+            <p class="ems-card__sub">{% blocktrans with pct=fees.settings.percent|retake_score credits=fees.settings.annual_credits context "registrar.retake" %}Təxmini 25% məbləği = illik haqq × {{ pct }}% × (fənnin krediti ÷ {{ credits }}). Faiz və illik kredit «Sistem tənzimləmələri»ndədir; illik kredit 0 olarsa kreditə bölünmür.{% endblocktrans %}</p>
+        </div>
+    </div>
+    <div class="ems-card__body">
+        <form class="rt-form" method="post" action="{% url 'retake:tuition_save' %}" novalidate>
+            <div class="rt-grid">
+                <div class="ems-field">
+                    <label class="ems-field__label" for="rtFeeYear">{% trans "Tədris ili" context "registrar.retake" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select class="ems-select bootstrap-single-select__native" id="rtFeeYear" name="academic_year" data-bootstrap-select required>
+                            {% for year in fees.years %}<option value="{{ year }}">{{ year }}</option>{% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="ems-field">
+                    <label class="ems-field__label" for="rtFeeAdm">{% trans "Qəbul ili" context "registrar.retake" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+                    <input class="ems-input" type="number" id="rtFeeAdm" name="admission_year" min="1990" max="2100" required>
+                </div>
+                <div class="ems-field">
+                    <label class="ems-field__label" for="rtFeeProgram">{% trans "İxtisas" context "registrar.retake" %} <span class="ems-field__opt">{% trans "(boş — defolt)" context "registrar.retake" %}</span></label>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select class="ems-select bootstrap-single-select__native" id="rtFeeProgram" name="program" data-bootstrap-select data-live-search="true"
+                                data-live-search-placeholder="{% trans 'Axtar…' context 'ui.filters' %}" data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'ui.filters' %}">
+                            <option value="">{% trans "Bütün ixtisaslar (defolt)" context "registrar.retake" %}</option>
+                            {% for pk, name in fees.programs %}<option value="{{ pk }}">{{ name }}</option>{% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="ems-field">
+                    <label class="ems-field__label" for="rtFeeAmount">{% trans "İllik təhsil haqqı (AZN)" context "registrar.retake" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+                    <input class="ems-input" type="number" id="rtFeeAmount" name="annual_amount" min="0" step="0.01" inputmode="decimal" required>
+                </div>
+            </div>
+            <div class="ems-field">
+                <label class="ems-field__label" for="rtFeeNote">{% trans "Qeyd" context "registrar.retake" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "ui.dialog" %}</span></label>
+                <input class="ems-input" type="text" id="rtFeeNote" name="note" maxlength="300">
+            </div>
+            <p class="ems-msg ems-msg--error" data-rt-error role="alert" hidden></p>
+            <button type="submit" class="ems-btn ems-btn--primary"><i class="fas fa-floppy-disk" aria-hidden="true"></i> {% trans "Yadda saxla" context "registrar.retake" %}</button>
+        </form>
+    </div>
+    {% if fees.rows %}
+    <div class="ems-tablewrap">
+        <table class="ems-table ems-table--stack">
+            <thead><tr>
+                <th scope="col">{% trans "Tədris ili" context "registrar.retake" %}</th>
+                <th scope="col">{% trans "Qəbul ili" context "registrar.retake" %}</th>
+                <th scope="col">{% trans "İxtisas" context "registrar.retake" %}</th>
+                <th scope="col">{% trans "İllik haqq" context "registrar.retake" %}</th>
+                <th scope="col">{% trans "Qeyd" context "registrar.retake" %}</th>
+                <th scope="col"><span class="visually-hidden">{% trans "Əməl" context "registrar.retake" %}</span></th>
+            </tr></thead>
+            <tbody>
+            {% for row in fees.rows %}
+            <tr>
+                <td data-label="{% trans 'Tədris ili' context 'registrar.retake' %}">{{ row.academic_year }}</td>
+                <td data-label="{% trans 'Qəbul ili' context 'registrar.retake' %}">{{ row.admission_year }}</td>
+                <td data-label="{% trans 'İxtisas' context 'registrar.retake' %}">{% if row.program %}{{ row.program.name }}{% else %}{% trans "Bütün ixtisaslar (defolt)" context "registrar.retake" %}{% endif %}</td>
+                <td data-label="{% trans 'İllik haqq' context 'registrar.retake' %}">{{ row.annual_amount|retake_score }} AZN</td>
+                <td data-label="{% trans 'Qeyd' context 'registrar.retake' %}">{{ row.note|default:"—" }}</td>
+                <td class="rt-table-actions">
+                    <form method="post" action="{% url 'retake:tuition_delete' row.pk %}" novalidate>
+                        <button type="submit" class="ems-btn ems-btn--sm ems-btn--ghost rt-btn-danger" data-rt-confirm="{% trans 'Bu sətir silinsin?' context 'registrar.retake' %}"><i class="fas fa-trash" aria-hidden="true"></i> {% trans "Sil" context "registrar.retake" %}</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        {% trans "Cədvəl boşdur" context "registrar.retake" as rt_fee_empty %}
+        {% trans "Sətir olmayanda tələbə «Məbləği Mühasibatlıqdan öyrənin» görür." context "registrar.retake" as rt_fee_empty_b %}
+        {% include "partials/ems_ui/_empty.html" with state_icon="fa-coins" state_title=rt_fee_empty state_body=rt_fee_empty_b %}
+    {% endif %}
+</section>

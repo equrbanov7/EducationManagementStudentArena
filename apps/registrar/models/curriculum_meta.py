@@ -11,8 +11,9 @@ TƏSDİQLƏNMİŞ PLAN IMMUTABLE-DIR (handoff §8 qayda 1)
 ──────────────────────────────────────────────────────────────────────────────
 ``status == APPROVED`` olan planın sətirləri NƏ redaktə, NƏ də silinə bilər;
 dəyişiklik yalnız YENİ VERSİYA yaradır (``version`` artır, ``previous_version``
-köhnəyə göstərir, köhnə plan ``is_active=False`` olur — SİLİNMİR). Qapı servis
-qatındadır (``apps.registrar.curriculum_state``) və HTTP-də 409 qaytarır.
+köhnəyə göstərir; yeni versiya TƏSDİQLƏNƏNDƏ köhnə plan ``is_active=False``
+olur — SİLİNMİR, qaralama mərhələsində isə aktiv qalır). Qapı servis qatındadır
+(``apps.registrar.curriculum_state``) və HTTP-də 409 qaytarır.
 
 ──────────────────────────────────────────────────────────────────────────────
 SAAT HESABI (docs/workload/TEDRIS_PLANI_SPEC.md §3)

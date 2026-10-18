@@ -525,6 +525,12 @@
     .mcl-card__cover {
         height: 72px;
     }
+
+    /* Kart əməlləri (yayımla / redaktə / aç) 32px idi — barmaq üçün 40px (mobil müəllim 2026-10-19). */
+    .mcl-act {
+        min-width: 40px;
+        height: 40px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

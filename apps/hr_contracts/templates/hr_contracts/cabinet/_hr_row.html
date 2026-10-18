@@ -1,0 +1,84 @@
+{% load i18n %}
+{% with c=row.obj %}
+<tr class="hrc-row hrc-row--{{ row.state }}">
+    <td data-label="{% trans 'İşçi' context 'hr_contracts' %}">
+        <strong class="hrc-name">{{ row.employee_name }}</strong>
+        <span class="hrc-sub ems-mono">@{{ row.employee_username }}</span>
+        {% if c.position %}<span class="hrc-sub">{{ c.position }}</span>{% endif %}
+        {% if row.unit_name %}<span class="hrc-sub">{{ row.unit_name }}</span>{% endif %}
+    </td>
+    <td data-label="{% trans 'Müqavilə' context 'hr_contracts' %}">
+        <span class="ems-mono">№ {{ c.number }}</span>
+        <span class="hrc-sub">{{ row.type_label }}{% if row.staff_rate %} · {% trans "ştat" context "hr_contracts" %} {{ row.staff_rate }}{% endif %}{% if row.weekly_hours %} · {{ row.weekly_hours }} {% trans "saat/həftə" context "hr_contracts" %}{% endif %}</span>
+        {% if row.file_url %}
+        <a class="hrc-file" href="{{ row.file_url }}" target="_blank" rel="noopener"><i class="fas fa-paperclip" aria-hidden="true"></i> {% if c.file_name %}{{ c.file_name|truncatechars:32 }}{% else %}{% trans "Fayl" context "hr_contracts" %}{% endif %}</a>
+        {% endif %}
+    </td>
+    <td data-label="{% trans 'Müddət' context 'hr_contracts' %}" class="ems-table__nowrap">
+        {{ c.start_date|date:"d.m.Y" }} — {% if c.end_date %}{{ c.end_date|date:"d.m.Y" }}{% else %}{% trans "müddətsiz" context "hr_contracts" %}{% endif %}
+        {% if c.probation_end %}<span class="hrc-sub">{% trans "Sınaq:" context "hr_contracts" %} {{ c.probation_end|date:"d.m.Y" }}</span>{% endif %}
+    </td>
+    <td data-label="{% trans 'Qalan' context 'hr_contracts' %}">
+        {% if row.days_left is None or c.status != "active" %}
+            <span class="hrc-muted">—</span>
+        {% elif row.days_left < 0 %}
+            <span class="ems-badge ems-badge--danger ems-badge--nowrap">{% blocktrans with n=row.days_abs context "hr_contracts" %}{{ n }} gün keçib{% endblocktrans %}</span>
+        {% elif row.days_left == 0 %}
+            <span class="ems-badge ems-badge--danger ems-badge--nowrap">{% trans "bu gün bitir" context "hr_contracts" %}</span>
+        {% else %}
+            <span class="ems-badge ems-badge--{{ row.days_tone }} ems-badge--nowrap">{% blocktrans with n=row.days_left context "hr_contracts" %}{{ n }} gün{% endblocktrans %}</span>
+        {% endif %}
+    </td>
+    <td data-label="{% trans 'Vəziyyət' context 'hr_contracts' %}">
+        <span class="ems-badge ems-badge--{{ row.state_tone }} ems-badge--nowrap">{{ row.state_label }}</span>
+        {% if c.status == "terminated" and c.terminated_at %}<span class="hrc-sub">{{ c.terminated_at|date:"d.m.Y" }}</span>{% endif %}
+        {% if c.renewed_by_id %}<span class="hrc-sub">{% trans "Yeni:" context "hr_contracts" %} № {{ c.renewed_by.number }}</span>{% endif %}
+    </td>
+    <td data-label="{% trans 'Göndərilmə' context 'hr_contracts' %}">
+        {% if c.acknowledged_at %}
+            <span class="ems-badge ems-badge--success ems-badge--nowrap"><i class="fas fa-check" aria-hidden="true"></i> {% trans "Təsdiqlənib" context "hr_contracts" %}</span>
+            <span class="hrc-sub">{{ c.acknowledged_at|date:"d.m.Y H:i" }}</span>
+        {% elif c.sent_at %}
+            <span class="ems-badge ems-badge--warning ems-badge--nowrap">{% trans "Təsdiq gözləyir" context "hr_contracts" %}</span>
+            <span class="hrc-sub">{% trans "Göndərilib:" context "hr_contracts" %} {{ c.sent_at|date:"d.m.Y" }}</span>
+        {% else %}
+            <span class="hrc-muted">{% trans "Göndərilməyib" context "hr_contracts" %}</span>
+        {% endif %}
+    </td>
+    <td class="hrc-table__actions">
+        <div class="ems-rowactions hrc-actions">
+            {% if row.can_send %}
+            <button type="button" class="ems-btn ems-btn--sm{% if not c.sent_at %} ems-btn--primary{% endif %}" data-ems-overlay-open="hrcSendDialog" data-hrc-open
+                    data-hrc-url="{% url 'hr_contracts:send' row.id %}" data-hrc-who="{{ row.employee_name }} · № {{ c.number }}">
+                <i class="fas fa-paper-plane" aria-hidden="true"></i> {% if c.sent_at %}{% trans "Yenidən göndərildi" context "hr_contracts" %}{% else %}{% trans "Müqavilə göndərildi" context "hr_contracts" %}{% endif %}
+            </button>
+            {% endif %}
+            {% if row.can_edit %}
+            <button type="button" class="ems-btn ems-btn--sm" data-ems-overlay-open="hrcContractDialog" data-hrc-edit data-hrc-contract="{{ row.payload }}"{% if row.locked %} title="{% trans 'Təsdiqlənmiş müqavilədə yalnız qeyd dəyişdirilə bilər' context 'hr_contracts' %}"{% endif %}>
+                <i class="fas fa-pen" aria-hidden="true"></i> {% trans "Redaktə" context "hr_contracts" %}
+            </button>
+            {% endif %}
+            {% if row.can_renew %}
+            <button type="button" class="ems-btn ems-btn--sm" data-ems-overlay-open="hrcContractDialog" data-hrc-renew data-hrc-contract="{{ row.payload }}">
+                <i class="fas fa-rotate" aria-hidden="true"></i> {% trans "Yenilə" context "hr_contracts" %}
+            </button>
+            {% endif %}
+            <button type="button" class="ems-btn ems-btn--sm ems-btn--ghost" data-ems-overlay-open="hrcHistoryDialog" data-hrc-history="{% url 'hr_contracts:history' row.id %}">
+                <i class="fas fa-clock-rotate-left" aria-hidden="true"></i> {% trans "Tarixçə" context "hr_contracts" %}
+            </button>
+            {% if row.can_discard %}
+            <button type="button" class="ems-btn ems-btn--sm ems-btn--ghost hrc-danger" data-ems-overlay-open="hrcDiscardDialog" data-hrc-open
+                    data-hrc-url="{% url 'hr_contracts:discard' row.id %}" data-hrc-who="{{ row.employee_name }} · № {{ c.number }}">
+                <i class="fas fa-trash-can" aria-hidden="true"></i> {% trans "Qaralamanı ləğv et" context "hr_contracts" %}
+            </button>
+            {% endif %}
+            {% if row.can_terminate %}
+            <button type="button" class="ems-btn ems-btn--sm ems-btn--ghost hrc-danger" data-ems-overlay-open="hrcTerminateDialog" data-hrc-open
+                    data-hrc-url="{% url 'hr_contracts:terminate' row.id %}" data-hrc-who="{{ row.employee_name }} · № {{ c.number }}">
+                <i class="fas fa-ban" aria-hidden="true"></i> {% trans "Xitam" context "hr_contracts" %}
+            </button>
+            {% endif %}
+        </div>
+    </td>
+</tr>
+{% endwith %}

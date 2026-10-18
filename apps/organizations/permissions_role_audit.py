@@ -24,7 +24,7 @@ ROLE_AUDIT_PERMISSION_CATEGORIES = {
 
 ROLE_AUDIT_PERMISSION_LABELS = {
     PERM_EXAM_CENTER_DECIDE: pgettext_lazy(
-        _PERM_CTX, "İmtahan mərkəzinin qərarları (ikinci şans, kollokvium pəncərəsi, sual göndərişi)"
+        _PERM_CTX, "İmtahan mərkəzinin qərarları (yenidən imtahan cəhdi, kollokvium pəncərəsi, sual göndərişi)"
     ),
     PERM_STUDENT_RECORDS_VIEW: pgettext_lazy(_PERM_CTX, "Akademik qeydlərə baxış (ÜOMG, transkript)"),
     PERM_USER_IMPORT_STAFF: pgettext_lazy(_PERM_CTX, "Müəllim/heyət hesablarının toplu idxalı"),

@@ -90,7 +90,7 @@
     letter-spacing: -0.01em;
     overflow-wrap: anywhere;
     hyphens: auto;
-    white-space: pre-line;
+    white-space: pre-wrap; /* 2026-10-19: girinti də saxlanılır (kod nümunəsi) — live_code_text.css */
 }
 
 .lxp-qcard[data-len="s"] .lxp-qcard__text {

@@ -85,6 +85,10 @@ from apps.exams.services.second_chance import (  # noqa: F401
     SecondChanceError,
     grant_second_chance,
 )
+from apps.exams.services.second_chance_revoke import (  # noqa: F401
+    RevokeBlocked,
+    revoke_second_chance,
+)
 from apps.exams.services.start_intent import start_intent_token  # noqa: F401
 from apps.exams.services.supervision import attach_attempt_interventions  # noqa: F401
 from apps.exams.services.teacher_dashboard import (  # noqa: F401
@@ -108,6 +112,8 @@ __all__ = [
     "bulk_add_computers",
     "delete_room",
     "grant_second_chance",
+    "revoke_second_chance",
+    "RevokeBlocked",
     "can_assign_invigilators",
     "update_computer",
     "get_ai_rate_limit",

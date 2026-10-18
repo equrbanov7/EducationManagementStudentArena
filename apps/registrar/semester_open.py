@@ -51,6 +51,7 @@ from .curriculum_registry import programs_without_approved_plan
 from .models import CourseOffering, Curriculum, CurriculumSubject, Program, StudentAcademicRecord
 from .models.curriculum_meta import PlanStatus
 from .read_scope import offering_scope_q, program_scope_q, semester_read_scope, unit_scope_q
+from .semester_period_windows import period_edit_prefill
 from .semester_readiness import ISSUES, approved_syllabus_offering_ids, offering_issues, readiness_by_chair
 
 _CTX = "accounts.semester"
@@ -486,6 +487,7 @@ def build_semester_opening(request, organization) -> dict:
                 "is_locked": period.locked_at is not None,
                 "locked_at": period.locked_at,
                 "lock_reason": period.lock_reason,
+                "edit_prefill": period_edit_prefill(period),
             },
             "stats": stats,
             "readiness": readiness_by_chair(organization, period, issues_map=issues_map),

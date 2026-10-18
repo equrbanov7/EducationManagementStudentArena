@@ -3138,3 +3138,12 @@ msgstr "Uyğun nəticə yoxdur"
 
 msgid "Axtarmaq üçün ən az %(n)s hərf yazın"
 msgstr "Axtarmaq üçün ən az %(n)s hərf yazın"
+
+msgid "Tələbənin imtahanı bərpa edilsin? Pozuntu sayğacı bir vahid azalacaq."
+msgstr "Tələbənin imtahanı bərpa edilsin? Pozuntu sayğacı bir vahid azalacaq."
+
+msgid "Bu fayl növü dəstəklənmir — PDF, TXT, PNG və ya JPG seçin."
+msgstr "Bu fayl növü dəstəklənmir — PDF, TXT, PNG və ya JPG seçin."
+
+msgid "Fayl çıxarıldı."
+msgstr "Fayl çıxarıldı."

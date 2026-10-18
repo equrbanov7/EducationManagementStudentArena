@@ -1,11 +1,11 @@
-import { UI } from './dom.js?v=lx20261014';
-import { LOBBY_RESYNC_INTERVAL_MS, STATE_POLL_INTERVAL_MS } from './constants.js?v=lx20261014';
-import { state } from './state.js?v=lx20261014';
-import { applySessionSettings } from './settings.js?v=lx20261014';
-import { rebuildLobbyCloud, renderIdleStage } from './lobby.js?v=lx20261014';
-import { applyStateSnapshot } from './snapshot.js?v=lx20261014';
-import { openPresenterWindow } from './presentation.js?v=lx20261014';
-import { fmt, log, notifyHostShell, tr, updateServerTimeOffset } from './utils.js?v=lx20261014';
+import { UI } from './dom.js?v=lx20261019';
+import { LOBBY_RESYNC_INTERVAL_MS, STATE_POLL_INTERVAL_MS } from './constants.js?v=lx20261019';
+import { state } from './state.js?v=lx20261019';
+import { applySessionSettings } from './settings.js?v=lx20261019';
+import { rebuildLobbyCloud, renderIdleStage } from './lobby.js?v=lx20261019';
+import { applyStateSnapshot } from './snapshot.js?v=lx20261019';
+import { openPresenterWindow } from './presentation.js?v=lx20261019';
+import { fmt, log, notifyHostShell, tr, updateServerTimeOffset } from './utils.js?v=lx20261019';
 
 let playWS = null;
 // Eyni URL-ə eyni anda ikinci POST göndərilmir (sürətli təkrar kliklər → 409 yox).

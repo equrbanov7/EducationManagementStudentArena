@@ -1,0 +1,94 @@
+{% load i18n %}
+{% comment %}Müqavilə forması — əlavə (`data-hrc-create`), redaktə (`data-hrc-edit`) və yeniləmə (`data-hrc-renew`) üçün
+ORTAQ. İşçi seçicisi `EMSSearchableSelect` (server axtarışı, yalnız əhatədəki aktiv heyət); redaktə/yeniləmədə işçi
+dəyişmir — ad mətn kimi göstərilir. Bölmə və növ — stilli seçici (bölmədə menyu daxili axtarış).{% endcomment %}
+<input type="hidden" name="id" value="" data-hrc-field="id">
+<input type="hidden" name="renew_of" value="" data-hrc-field="renew_of">
+<input type="hidden" name="employee" value="" data-hrc-field="employee">
+<p class="ems-msg ems-msg--info" data-hrc-renew-note hidden>{% trans "Yeni müqavilə əvvəlkinin davamı kimi qeydə alınır: köhnə müqavilə «Yenilənib» statusuna keçir və onun üçün xatırlatmalar dayanır." context "hr_contracts" %}</p>
+
+<div class="ems-field" data-hrc-employee-picker>
+    <label class="ems-field__label" for="hrcEmployeeSearch">{% trans "İşçi" context "hr_contracts" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <div class="ems-ss hrc-ms js-hrc-employee" data-staff-url="{{ hc.staff_url }}"><div class="ems-ss__chips hrc-ms__chips"><input type="text" id="hrcEmployeeSearch" class="ems-ss__search hrc-ms__search" placeholder="{% trans 'Ad, soyad və ya istifadəçi adı' context 'hr_contracts' %}" autocomplete="off"></div><div class="ems-ss__menu hrc-ms__menu"></div></div>
+    <span class="ems-field__hint">{% trans "Yalnız aktiv əməkdaşlar (müəllim, inzibati və texniki heyət) — tələbələr siyahıda yoxdur." context "hr_contracts" %}</span>
+</div>
+<div class="ems-field" data-hrc-employee-fixed hidden>
+    <span class="ems-field__label">{% trans "İşçi" context "hr_contracts" %}</span>
+    <strong class="hrc-dialog__who" data-hrc-text="employee_name"></strong>
+</div>
+
+<div class="hrc-grid">
+    <div class="ems-field">
+        <label class="ems-field__label" for="hrcNumber">{% trans "Müqavilə №" context "hr_contracts" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="text" id="hrcNumber" name="number" maxlength="64" autocomplete="off" required data-hrc-field="number">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="hrcType">{% trans "Növ" context "hr_contracts" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="hrcType" name="contract_type" data-bootstrap-select data-hrc-field="contract_type" data-hrc-type>
+                {% for value, label in hc.type_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="ems-field ems-field--wide">
+        <label class="ems-field__label" for="hrcPosition">{% trans "Vəzifə" context "hr_contracts" %}</label>
+        <input class="ems-input" type="text" id="hrcPosition" name="position" maxlength="150" autocomplete="off" data-hrc-field="position"
+               placeholder="{% trans 'Məs.: baş müəllim, mühasib, laborant' context 'hr_contracts' %}">
+    </div>
+    <div class="ems-field ems-field--wide">
+        <label class="ems-field__label" for="hrcUnit">{% trans "Bölmə" context "hr_contracts" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="hrcUnit" name="unit" data-bootstrap-select data-live-search="true"
+                    data-live-search-placeholder="{% trans 'Axtar…' context 'hr_contracts' %}" data-live-search-empty="{% trans 'Uyğun bölmə yoxdur' context 'hr_contracts' %}" data-hrc-field="unit">
+                <option value="">{% trans "— İşçinin əsas bölməsi —" context "hr_contracts" %}</option>
+                {% for unit in hc.units %}<option value="{{ unit.pk }}">{{ unit.name }}</option>{% endfor %}
+            </select>
+        </div>
+        <span class="ems-field__hint">{% trans "Boş qalsa işçinin əsas üzvlüyündəki bölmə götürülür. Xatırlatmalar bu bölməni əhatə edən HR əməkdaşlarına gedir." context "hr_contracts" %}</span>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="hrcStart">{% trans "Başlama tarixi" context "hr_contracts" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input ems-input--date" type="date" id="hrcStart" name="start_date" required data-hrc-field="start_date">
+    </div>
+    <div class="ems-field" data-hrc-end-field>
+        <label class="ems-field__label" for="hrcEnd">{% trans "Bitmə tarixi" context "hr_contracts" %} <span class="ems-field__req" aria-hidden="true" data-hrc-end-required>*</span></label>
+        <input class="ems-input ems-input--date" type="date" id="hrcEnd" name="end_date" data-hrc-field="end_date">
+        <span class="ems-field__hint" data-hrc-end-hint hidden>{% trans "Müddətsiz müqavilənin bitmə tarixi olmur." context "hr_contracts" %}</span>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="hrcProbation">{% trans "Sınaq müddəti bitir" context "hr_contracts" %}</label>
+        <input class="ems-input ems-input--date" type="date" id="hrcProbation" name="probation_end" data-hrc-field="probation_end">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="hrcHours">{% trans "Həftəlik saat" context "hr_contracts" %}</label>
+        <input class="ems-input" type="text" inputmode="decimal" id="hrcHours" name="weekly_hours" maxlength="6" data-hrc-field="weekly_hours" placeholder="40">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="hrcRate">{% trans "Ştat vahidi" context "hr_contracts" %}</label>
+        <input class="ems-input" type="text" inputmode="decimal" id="hrcRate" name="staff_rate" maxlength="5" data-hrc-field="staff_rate" placeholder="1,00">
+    </div>
+    <div class="ems-field" data-hrc-status-field>
+        <label class="ems-field__label" for="hrcStatus">{% trans "Vəziyyət" context "hr_contracts" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="hrcStatus" name="status" data-bootstrap-select data-hrc-field="status">
+                <option value="active">{% trans "Qüvvədədir" context "hr_contracts" %}</option>
+                <option value="draft">{% trans "Qaralama (hələ qüvvədə deyil)" context "hr_contracts" %}</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="ems-field">
+    <label class="ems-field__label" for="hrcFile">{% trans "Müqavilənin faylı" context "hr_contracts" %}</label>
+    <input class="ems-input" type="file" id="hrcFile" name="file" accept="{{ hc.file_accept }}">
+    <span class="ems-field__hint">{% trans "PDF, JPG və ya PNG · ən çox 10 MB" context "hr_contracts" %}<span data-hrc-file-current hidden> · {% trans "Cari fayl:" context "hr_contracts" %} <span data-hrc-text="file_name"></span> ({% trans "yeni fayl seçsəniz əvəz olunacaq" context "hr_contracts" %})</span></span>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="hrcNotes">{% trans "Qeyd" context "hr_contracts" %}</label>
+    <textarea class="ems-textarea" id="hrcNotes" name="notes" rows="3" maxlength="4000" data-hrc-field="notes"></textarea>
+</div>
+<div class="hrc-dialog__titles" hidden
+     data-title-create="{% trans 'Müqavilə əlavə et' context 'hr_contracts' %}"
+     data-title-edit="{% trans 'Müqaviləni redaktə et' context 'hr_contracts' %}"
+     data-title-renew="{% trans 'Müqaviləni yenilə' context 'hr_contracts' %}"
+     data-employee-required="{% trans 'İşçini seçin.' context 'hr_contracts' %}"></div>

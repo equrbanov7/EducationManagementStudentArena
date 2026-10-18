@@ -278,7 +278,7 @@
     font-size: var(--ems-fs-md);
     line-height: 1.55;
     color: var(--ems-text);
-    white-space: pre-line;
+    white-space: pre-wrap; /* 2026-10-19: girinti də (kod nümunəsi) */
     overflow-wrap: anywhere;
 }
 
@@ -342,6 +342,7 @@
 .ted-opt__text {
     min-width: 0;
     overflow-wrap: anywhere;
+    white-space: pre-wrap;
 }
 
 .ted-opt.is-correct {

@@ -101,6 +101,14 @@ class RetakeBase(TestCase):
             cls.offering.lesson_hours = 60
             cls.offering.instructor = cls.teacher
             cls.offering.save(update_fields=["lesson_hours", "instructor"])
+            # 2026-10-19: müraciət yalnız İmtahan mərkəzinin açdığı pəncərədə qəbul olunur.
+            from django.utils import timezone
+
+            from apps.registrar.models import RetakeWindow
+
+            cls.window = RetakeWindow.objects.create(
+                organization=cls.org, period=cls.current, opens_at=timezone.now() - datetime.timedelta(days=1)
+            )
             cls.target = CourseOffering.objects.create(
                 organization=cls.org, subject=cls.subject, period=cls.current, group=cls.group2
             )

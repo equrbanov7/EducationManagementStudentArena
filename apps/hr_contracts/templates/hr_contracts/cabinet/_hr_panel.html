@@ -1,0 +1,72 @@
+{% load i18n static hr_contracts_tags %}
+{% comment %}«Əmək müqavilələri» — HR paneli (sahib 2026-10-19). Data: `{% hr_contracts_panel as hc %}`
+(`services/panel.hr_panel`; açar `hr.contracts_view` / `hr.contracts_manage`, struktur əhatəsi fail-closed).
+Filtr, KPI və səhifə linkləri paneli yerində yeniləyir (AJAX-safe); yazılar `hr_contracts.js` → JSON POST
+(`/kadrlar/muqavileler/api/…`). CSS/JS xarici fayldır və panelin İÇİNDƏDİR.{% endcomment %}
+{% hr_contracts_panel as hc %}
+<link rel="stylesheet" href="{% static 'hr_contracts/css/hr_contracts.css' %}?v=20261019-hrc4">
+{% if not hc.has_access %}
+    {% trans "Bu bölmə Kadrlar şöbəsi (HR) üçündür — əmək müqavilələrinə baxmaq icazəniz yoxdur." context "hr_contracts" as hrc_denied %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="error" state_icon="fa-lock" state_title=hrc_denied %}
+{% else %}
+<div class="hrc" data-hrc-root data-hrc-section="hr-contracts"
+     data-hrc-error-generic="{% trans 'Əməl yerinə yetirilmədi — icazənizi yoxlayın və ya səhifəni yeniləyin.' context 'hr_contracts' %}">
+    {% trans "Bütün əməkdaşların (müəllim, inzibati və texniki heyət) əmək müqavilələri: müddət, sənəd, göndərilmə və işçinin təsdiqi. Bitməsinə az qalan müqavilələr üçün HR və işçiyə avtomatik bildiriş gedir." context "hr_contracts" as hrc_sub %}
+    {% if hc.can_manage %}
+        {% include "partials/ems_ui/_content_header.html" with header_subtitle=hrc_sub header_actions_include="hr_contracts/cabinet/_hr_actions.html" %}
+    {% else %}
+        {% include "partials/ems_ui/_content_header.html" with header_subtitle=hrc_sub header_actions_include="hr_contracts/cabinet/_hr_export.html" %}
+    {% endif %}
+    {% if hc.view_as %}
+        <p class="ems-msg ems-msg--info">{% trans "Baxış rejimi: dəyişiklik etmək və ixrac bağlıdır." context "hr_contracts" %}</p>
+    {% endif %}
+
+    <div class="ems-kpis ems-kpis--4 hrc-kpis">
+        {% for tile in hc.kpis %}
+        <a class="ems-kpi ems-kpi--{{ tile.tone }} hrc-kpi{% if hc.params.status == tile.key %} is-current{% endif %}" href="{{ tile.url }}" data-section="hr-contracts">
+            <span class="ems-kpi__label">{{ tile.label }}</span>
+            <span class="ems-kpi__value">{{ tile.value }}</span>
+        </a>
+        {% endfor %}
+    </div>
+
+    {% blocktrans with n=hc.total context "hr_contracts" asvar hrc_count %}Nəticə: {{ n }}{% endblocktrans %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="hr-contracts" filter_prefix="hrc_" filter_fields=hc.filter_fields filter_auto=True filter_bootstrap=True filter_count_label=hrc_count %}
+
+    {% if hc.rows %}
+    <div class="ems-tablewrap hrc-tablewrap">
+        <table class="ems-table hrc-table">
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "İşçi" context "hr_contracts" %}</th>
+                    <th scope="col">{% trans "Müqavilə" context "hr_contracts" %}</th>
+                    <th scope="col">{% trans "Müddət" context "hr_contracts" %}</th>
+                    <th scope="col">{% trans "Qalan" context "hr_contracts" %}</th>
+                    <th scope="col">{% trans "Vəziyyət" context "hr_contracts" %}</th>
+                    <th scope="col">{% trans "Göndərilmə" context "hr_contracts" %}</th>
+                    <th scope="col" class="hrc-table__actions-head"><span class="hrc-sr">{% trans "Əməllər" context "hr_contracts" %}</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in hc.rows %}{% include "hr_contracts/cabinet/_hr_row.html" %}{% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if hc.page.has_other_pages %}
+    <nav class="ems-rowactions hrc-pager" aria-label="{% trans 'Səhifələmə' context 'hr_contracts' %}">
+        {% if hc.prev_url %}<a class="ems-btn ems-btn--sm" href="{{ hc.prev_url }}" data-section="hr-contracts" aria-label="{% trans 'Əvvəlki səhifə' context 'hr_contracts' %}"><i class="fas fa-chevron-left" aria-hidden="true"></i></a>{% endif %}
+        <span>{{ hc.page.number }} / {{ hc.page.paginator.num_pages }}</span>
+        {% if hc.next_url %}<a class="ems-btn ems-btn--sm" href="{{ hc.next_url }}" data-section="hr-contracts" aria-label="{% trans 'Növbəti səhifə' context 'hr_contracts' %}"><i class="fas fa-chevron-right" aria-hidden="true"></i></a>{% endif %}
+    </nav>
+    {% endif %}
+    {% else %}
+        {% trans "Bu filtrə uyğun müqavilə yoxdur." context "hr_contracts" as hrc_empty %}
+        {% if hc.can_manage %}{% trans "«Müqavilə əlavə et» düyməsi ilə ilk müqaviləni qeydə alın." context "hr_contracts" as hrc_empty_body %}{% endif %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-file-signature" state_title=hrc_empty state_body=hrc_empty_body %}
+    {% endif %}
+
+    {% if hc.can_manage %}{% include "hr_contracts/cabinet/_hr_dialogs.html" %}{% endif %}
+    {% include "hr_contracts/cabinet/_history_dialog.html" %}
+</div>
+{% endif %}
+<script src="{% static 'hr_contracts/js/hr_contracts.js' %}?v=20261019-hrc4" defer></script>

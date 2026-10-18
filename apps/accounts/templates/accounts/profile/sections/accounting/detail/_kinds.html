@@ -1,0 +1,42 @@
+{% load i18n %}
+{% comment %}Növlər üzrə seçilmiş dövrün planı ↔ faktı (mühazirə / seminar / laboratoriya + Cəmi). Kontekst: `detail`
+(services/accounting/detail.py → detail_core). Səhifə drill-down-u və müəllim pəncərəsi ortaqdır.{% endcomment %}
+<div class="ems-tablewrap ac-tablewrap">
+    <div class="ems-tablescroll">
+        <table class="ems-table ems-table--compact ems-table--stack ac-table ac-table--fit">
+            <caption class="ac-sr">{% blocktrans trimmed with period=detail.period_label context "accounts.accounting" %}Növlər üzrə plan və keçirilmiş saat — {{ period }}{% endblocktrans %}</caption>
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Növ" context "accounts.accounting" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Plan" context "accounts.accounting" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Fakt" context "accounts.accounting" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Fərq" context "accounts.accounting" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "İcra" context "accounts.accounting" %}</th>
+                    <th scope="col">{% trans "Status" context "accounts.accounting" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for kind in detail.kind_rows %}
+                <tr>
+                    <th scope="row">{{ kind.label }}</th>
+                    <td class="ems-table__num" data-label="{% trans 'Plan' context 'accounts.accounting' %}">{{ kind.planned_text }}</td>
+                    <td class="ems-table__num ac-strong" data-label="{% trans 'Fakt' context 'accounts.accounting' %}">{{ kind.held_text }}</td>
+                    <td class="ems-table__num" data-label="{% trans 'Fərq' context 'accounts.accounting' %}">{{ kind.diff_text }}</td>
+                    <td class="ems-table__num" data-label="{% trans 'İcra' context 'accounts.accounting' %}">{% if kind.pct is None %}—{% else %}{{ kind.pct }}%{% endif %}</td>
+                    <td data-label="{% trans 'Status' context 'accounts.accounting' %}">{% include "partials/ems_ui/_status_badge.html" with status=kind.status_obj nowrap=True %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="ac-table__total">
+                    <th scope="row">{% trans "Cəmi" context "accounts.accounting" %}</th>
+                    <td class="ems-table__num" data-label="{% trans 'Plan' context 'accounts.accounting' %}">{{ detail.planned_text }}</td>
+                    <td class="ems-table__num" data-label="{% trans 'Fakt' context 'accounts.accounting' %}">{{ detail.held_text }}</td>
+                    <td class="ems-table__num" data-label="{% trans 'Fərq' context 'accounts.accounting' %}">{{ detail.diff_text }}</td>
+                    <td class="ems-table__num" data-label="{% trans 'İcra' context 'accounts.accounting' %}">{% if detail.pct is None %}—{% else %}{{ detail.pct }}%{% endif %}</td>
+                    <td data-label="{% trans 'Status' context 'accounts.accounting' %}">{% include "partials/ems_ui/_status_badge.html" with status=detail.status_obj nowrap=True %}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

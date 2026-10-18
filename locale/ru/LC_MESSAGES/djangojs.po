@@ -3153,3 +3153,12 @@ msgstr "Совпадений нет"
 
 msgid "Axtarmaq üçün ən az %(n)s hərf yazın"
 msgstr "Введите не менее %(n)s букв для поиска"
+
+msgid "Tələbənin imtahanı bərpa edilsin? Pozuntu sayğacı bir vahid azalacaq."
+msgstr "Восстановить экзамен студента? Счётчик нарушений уменьшится на единицу."
+
+msgid "Bu fayl növü dəstəklənmir — PDF, TXT, PNG və ya JPG seçin."
+msgstr "Этот тип файла не поддерживается — выберите PDF, TXT, PNG или JPG."
+
+msgid "Fayl çıxarıldı."
+msgstr "Файл удалён."

@@ -106,6 +106,7 @@ from .movement import (
 from .retake import ACTIVE_STATUSES as RETAKE_ACTIVE_STATUSES
 from .retake import CONSUMED_STATUSES as RETAKE_CONSUMED_STATUSES
 from .retake import RetakeApplication, RetakeKind, RetakeResultSource, RetakeStatus
+from .retake_admin import RetakeTuition, RetakeWindow
 from .retake_log import (
     ExamChanceGrant,
     ExamChanceReason,
@@ -201,6 +202,8 @@ __all__ = [
     "RetakeReceipt",
     "RetakeResultSource",
     "RetakeStatus",
+    "RetakeTuition",
+    "RetakeWindow",
     "ExamChanceGrant",
     "ExamChanceReason",
     "Rubric",

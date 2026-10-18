@@ -75,6 +75,8 @@ urlpatterns = [
     *_seo_urlpatterns,
     # Public contact page (registered before catch-all blog urls so /contact/ resolves first)
     path("", include("apps.contact.urls")),
+    # Sənəd yoxlaması (2026-10-18): publik /yoxla/<kod>/ + əməkdaş /sened-yoxlamasi/ (blog catch-all-dan ƏVVƏL).
+    path("", include("apps.verification.urls")),
     # Trial-exam ("sınaq imtahanı") request — login-required student form.
     # Registered before the catch-all blog urls so /trial-exam/ resolves first.
     path("", include(("apps.trial_exams.urls", "trial_exams"), namespace="trial_exams")),
@@ -108,6 +110,8 @@ urlpatterns = [
     path("muracietler/", include(("apps.applications.urls", "applications"), namespace="applications")),
     # elanlar (2026-10-06) — JSON uçları + idarə səhifələri; istifadəçi ekranı kabinet bölməsidir
     path("elanlar/", include(("apps.announcements.urls", "announcements"), namespace="announcements")),
+    # əmək müqavilələri (2026-10-19) — JSON uçları + Excel; ekranlar kabinet bölmələridir
+    path("kadrlar/muqavileler/", include(("apps.hr_contracts.urls", "hr_contracts"), namespace="hr_contracts")),
     # organizations
     path(
         "organizations/",

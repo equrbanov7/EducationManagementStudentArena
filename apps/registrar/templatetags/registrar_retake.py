@@ -44,6 +44,30 @@ def retake_desk(context):
     return build(request, organization)
 
 
+@register.simple_tag(takes_context=True)
+def retake_windows(context):
+    """«25% müraciət pəncərəsi» (İmtahan mərkəzi, ``exam_center.decide``) — cari / planlaşdırılmış / tarixçə."""
+    _request, user, organization = _request_parts(context)
+    if user is None or organization is None:
+        return {"has_access": False}
+    from apps.registrar import retake_rules, retake_window
+
+    if not retake_window.can_manage(user, organization):
+        return {"has_access": False}
+    periods = retake_window.selectable_periods(organization)  # yalnız cari + gələcək dövrlər
+    return {
+        "has_access": True,
+        "current": retake_window.current(organization),
+        "upcoming": retake_window.upcoming(organization),
+        "history": retake_window.history(organization),
+        "periods": periods,
+        "default_period": next(
+            (p for p in periods if getattr(p, "is_current", False)), periods[0] if periods else None
+        ),
+        "master_switch": retake_rules.master_switch(),
+    }
+
+
 @register.filter
 def retake_tone(status):
     from apps.registrar.retake_rules import tone_for

@@ -265,18 +265,34 @@ def _actor_can_write(organization, user):
     ).exists()
 
 
+#: ``_retake_attempt_result`` — «bu 25% cəhdi deyil» (adi yola davam et). ``None`` isə «25% cəhdidir, işləndi».
+_NOT_RETAKE = object()
+
+
 def _retake_attempt_result(
     *, student, subject_id, organization, attempt, score_percent, is_expelled, by_user, appeal_id
 ):
-    """25% cəhdidirsə nəticəni müraciətə yaz və ``ResitRecord``-u qaytar; deyilsə ``None``."""
+    """25% cəhdidirsə nəticəni müraciətə yaz və ``ResitRecord``-u qaytar; deyilsə ``_NOT_RETAKE``.
+
+    Review 2026-10-19 HIGH-1: müraciət bağlanıbsa («İmtahana gəlmədi» / rədd / geri götürmə) cəhd yenə 25%
+    cəhdidir — bal HEÇ YERƏ yazılmır (nə müraciətə, nə ``FinalGrade.exam_score``-a), xəbərdarlıq loglanır,
+    nəticə ``None`` (işlənmiş no-op)."""
     if attempt is None:
-        return None
+        return _NOT_RETAKE
     from apps.registrar import retake_results
 
     application = retake_results.application_for_attempt(
         student=student, subject_id=subject_id, organization=organization, attempt=attempt
     )
     if application is None:
+        return _NOT_RETAKE
+    if application.status not in retake_results.RESULT_ACCEPTING:
+        logger.warning(
+            "exam_bridge: attempt %s belongs to closed retake application %s (%s) — score not recorded",
+            getattr(attempt, "pk", "?"),
+            application.pk,
+            application.status,
+        )
         return None
     if by_user is not None and not _actor_can_write(organization, by_user):
         by_user = None
@@ -321,7 +337,7 @@ def record_exam_result(
         by_user=by_user,
         appeal_id=appeal_id,
     )
-    if retake is not None:
+    if retake is not _NOT_RETAKE:
         return retake
     enrollment = resolve_enrollment(student=student, subject_id=subject_id, organization=organization)
     if enrollment is None:

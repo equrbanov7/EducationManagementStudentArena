@@ -96,7 +96,7 @@ def _notify_students(exam, students):
 
         create_notification_for_users(
             recipients=list(students),
-            title=pgettext("exams.second_chance.notification", "İmtahan üçün yenidən şans verildi"),
+            title=pgettext("exams.second_chance.notification", "Yenidən imtahan cəhdi hüququ verildi"),
             message=pgettext(
                 "exams.second_chance.notification",
                 "«{exam}» imtahanı üzrə sizə yenidən cəhd hüququ verildi. "

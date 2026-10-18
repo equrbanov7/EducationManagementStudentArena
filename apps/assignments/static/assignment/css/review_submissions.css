@@ -8,3 +8,9 @@
     background: #f8fafc;
     white-space: pre-wrap;
 }
+
+/* Telefon: iOS Safari 16px-dən kiçik şriftli sahəyə toxunanda səhifəni böyüdür (mobil müəllim 2026-10-19). */
+@media (max-width: 768px) {
+    .js-results-filters-form input.form-control,
+    #resultsFiltersForm input.form-control { font-size: 16px; }
+}

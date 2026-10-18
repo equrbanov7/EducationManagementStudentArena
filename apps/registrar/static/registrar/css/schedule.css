@@ -384,4 +384,10 @@
     .sgx-topbar { flex-direction: column; align-items: flex-start; }
     .sgx-add-grid { grid-template-columns: 1fr; }
     .sgx-modal { padding: 10px; }
+    /* Mobil qabıq 2026-10-19: barmaq hədəfləri — həftə pilləri 34 → 44px, dərs detalının «×»-i
+       30 → 40px; detal kartı iOS alətlər zolağının altında qalmasın (`dvh`). */
+    .sgx-weekpill { display: inline-flex; align-items: center; min-height: 44px; }
+    .sgx-modal-close { top: 8px; right: 10px; width: 40px; height: 40px; }
+    .sgx-modal-title { padding-right: 44px; }
+    .sgx-modal-card { max-height: 90dvh; }
 }

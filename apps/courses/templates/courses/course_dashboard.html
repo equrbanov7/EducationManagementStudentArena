@@ -26,6 +26,8 @@ CSP: inline stil/skript yoxdur; dinamik dəyərlər data-* atributlarındadır.
     <link rel="stylesheet" href="{% static 'courses/css/course_panel_tabs.css' %}?v=20260928-1">
     {% if is_owner %}<link rel="stylesheet" href="{% static 'courses/css/course_create.css' %}?v=20261017-nofont">{% endif %}
     <link rel="stylesheet" href="{% static 'courses/css/course_panel_sections.css' %}?v=20261018-crs">
+    {# 2026-10-19: resurs modalının fayl zonası/irəliləyişi + video oynadıcı (hamı üçün — tələbələr də izləyir). #}
+    <link rel="stylesheet" href="{% static 'courses/css/course_resource_media.css' %}?v=20261019-res">
     <link rel="stylesheet" href="{% static 'courses/css/course_panel_tasks.css' %}?v=20261017-3">
     <link rel="stylesheet" href="{% static 'courses/css/course_panel_overlays.css' %}?v=20261017-3">
     {% if is_owner %}<link rel="stylesheet" href="{% static 'courses/css/course_dialogs.css' %}?v=20261017-3">
@@ -34,7 +36,7 @@ CSP: inline stil/skript yoxdur; dinamik dəyərlər data-* atributlarındadır.
     {% comment %}Paket E: ortaq dialoq/tab/forma komponentləri (lab, imtahan məlumatı, imtahan əlaqələndirmə dialoqları) —
     əvvəl bölmə partial-larının GÖVDƏSİNDƏ `<link>` idi (gec aşkarlanan sorğular); tələbə üçün 574 sətirlik
     `assigned_exams.css` yalnız imtahan məlumat dialoqu üçün çəkilirdi.{% endcomment %}
-    <link rel="stylesheet" href="{% static 'css/ems_ui/overlay.css' %}?v=20260908-zindex">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/overlay.css' %}?v=20261019-mob">
     <link rel="stylesheet" href="{% static 'css/ems_ui/validation.css' %}?v=20260903-3">
     <link rel="stylesheet" href="{% static 'css/ems_ui/nav.css' %}?v=20261018-pkga">
     <link rel="stylesheet" href="{% static 'exams/css/exam_section.css' %}?v=20261017-3">

@@ -148,7 +148,8 @@ class RuntimeSettingsTest(TestCase):
         groups = fragment.context["system_settings_section"]["groups"]
         self.assertEqual(
             {group["key"] for group in groups},
-            # «credits» — kredit yükü və alt qrup, «retake» — 25% təkrar imtahan (2026-10-18).
+            # «credits» — kredit yükü və alt qrup, «retake» — 25% təkrar imtahan (2026-10-18),
+            # «accounting» — Mühasibatlığın plan ↔ fakt bandı (2026-10-19).
             {
                 "academic",
                 "credits",
@@ -161,6 +162,8 @@ class RuntimeSettingsTest(TestCase):
                 "exam",
                 "profile",
                 "retake",
+                "accounting",
+                "hr_contracts",  # «Əmək müqavilələri» — xatırlatma hədləri (2026-10-19)
             },
         )
 

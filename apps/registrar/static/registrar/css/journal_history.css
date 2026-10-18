@@ -206,4 +206,6 @@ body.jhist-open { overflow: hidden; }
     .jhist-entry__head { flex-wrap: wrap; }
     .jhist-entry__meta { justify-content: flex-start; }
     .jhist-rows__student { min-width: 120px; }
+    /* iOS Safari 16px-dən kiçik sahədə səhifəni böyüdür (mobil müəllim 2026-10-19). */
+    .jhist__panel input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]) { font-size: 16px; }
 }

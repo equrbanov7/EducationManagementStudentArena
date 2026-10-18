@@ -58,13 +58,15 @@ rejimində select_all=1 + cari filtrlər (q/language/difficulty) + excluded_ids[
         </div>
         <ul class="ebp-list" role="list">
             {% for q in questions %}
-            <li class="ebp-item">
-                <input class="ebp-item__check" type="checkbox" name="question_ids" value="{{ q.id }}" id="ebpQ{{ q.id }}" data-ebp-check>
+            {% if q.id in attached_ids %}{% trans "Artıq əlavə olunub" context "exams.template.bank_picker" as attached_label %}{% endif %}
+            <li class="ebp-item{% if q.id in attached_ids %} is-attached{% endif %}">
+                <input class="ebp-item__check" type="checkbox" name="question_ids" value="{{ q.id }}" id="ebpQ{{ q.id }}" data-ebp-check{% if q.id in attached_ids %} disabled title="{{ attached_label }}"{% endif %}>
                 <label class="ebp-item__main" for="ebpQ{{ q.id }}">
                     <span class="ebp-item__text">{{ q.text|striptags|truncatechars:220 }}</span>
                     <span class="ebp-item__tags">
                         <span class="ems-badge ems-badge--neutral">{{ q.get_language_display }}</span>
                         <span class="ems-badge ems-badge--muted">{{ q.get_difficulty_display }}</span>
+                        {% if q.id in attached_ids %}<span class="ems-badge ems-badge--success"><i class="fas fa-check" aria-hidden="true"></i>{{ attached_label }}</span>{% endif %}
                     </span>
                 </label>
                 {% if q.question_type == 'test' %}

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% comment %}
+«Sənəd yoxlaması» — əməkdaş siyahısı (sahib 2026-10-18). Görünüş: apps/verification/views_staff.py.
+Qapı: `document_seal.manage` (+ struktur əhatəsi). «Ləğv et» səbəb dialoqu ilə (≥ {{ min_reason }} simvol),
+view-as altında gizlidir. Stil/skript xarici fayllardadır (CSP); JS AJAX-safe (EMSReady/EMSDelegate).
+{% endcomment %}
+
+{% block title %}{% trans "Sənəd yoxlaması" context "verification.staff" %} — {{ site_brand_name }}{% endblock %}
+
+{% block extraCss %}
+{% include "partials/ems_ui/_assets.html" %}
+<link rel="stylesheet" href="{% static 'verification/css/staff.css' %}?v=20261018-dv1">
+{% endblock %}
+
+{% block content %}
+<div class="dvs-page">
+    {% trans "Sənəd yoxlaması" context "verification.staff" as page_title %}
+    {% trans "Sistemin verdiyi rəsmi sənədlər (QR + kod). Kod üzrə və ya tələbə adı ilə axtarın; səhv verilmiş sənədi ləğv edin." context "verification.staff" as page_subtitle %}
+    {% include "partials/ems_ui/_content_header.html" with header_title=page_title header_subtitle=page_subtitle %}
+
+    <div class="dvs-toolbar">
+        <form class="dvs-search" method="get" action="{% url 'verification:staff_list' %}" role="search">
+            {% if status != "all" %}<input type="hidden" name="status" value="{{ status }}">{% endif %}
+            <label class="visually-hidden" for="dvs-q">{% trans "Kod və ya tələbə" context "verification.staff" %}</label>
+            <input class="ems-input dvs-search__input" id="dvs-q" type="search" name="q" value="{{ query }}" maxlength="80"
+                   placeholder="{% trans 'Kod (QKU-…) və ya tələbənin adı' context 'verification.staff' %}">
+            <button type="submit" class="ems-btn ems-btn--primary">{% trans "Axtar" context "verification.staff" %}</button>
+        </form>
+        <nav class="dvs-chips" aria-label="{% trans 'Vəziyyət' context 'verification.staff' %}">
+            {% for link in status_links %}
+                <a class="dvs-chip{% if link.active %} is-active{% endif %}" href="?{{ link.query }}"{% if link.active %} aria-current="true"{% endif %}>{{ link.label }}</a>
+            {% endfor %}
+        </nav>
+    </div>
+
+    <p class="dvs-public">
+        {% trans "Publik yoxlama səhifəsi" context "verification.staff" %}:
+        <a class="dvs-link" href="{% url 'verification:home' %}" target="_blank" rel="noopener">{% url 'verification:home' %}</a>
+    </p>
+
+    {% if seals %}
+        <div class="ems-tablewrap">
+            <table class="ems-table ems-table--zebra dvs-table">
+                <thead>
+                    <tr>
+                        <th scope="col">{% trans "Kod" context "verification.staff" %}</th>
+                        <th scope="col">{% trans "Sənəd" context "verification.staff" %}</th>
+                        <th scope="col">{% trans "Sahibi" context "verification.staff" %}</th>
+                        <th scope="col">{% trans "Verilib" context "verification.staff" %}</th>
+                        <th scope="col">{% trans "Vəziyyət" context "verification.staff" %}</th>
+                        <th scope="col"><span class="visually-hidden">{% trans "Əməllər" context "verification.staff" %}</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for seal in seals %}
+                        <tr>
+                            <td data-label="{% trans 'Kod' context 'verification.staff' %}">
+                                <a class="dvs-code" href="{% url 'verification:detail' seal.code %}" target="_blank" rel="noopener">{{ seal.code }}</a>
+                            </td>
+                            <td data-label="{% trans 'Sənəd' context 'verification.staff' %}">{{ seal.get_doc_type_display }}</td>
+                            <td data-label="{% trans 'Sahibi' context 'verification.staff' %}">
+                                {% if seal.subject_user %}{{ seal.subject_user.get_full_name|default:seal.subject_user.username }}{% else %}{{ seal.payload.holder|default:"—" }}{% endif %}
+                            </td>
+                            <td data-label="{% trans 'Verilib' context 'verification.staff' %}">
+                                {{ seal.issued_at|date:"d.m.Y H:i" }}
+                                {% if seal.issued_by %}<span class="dvs-muted">· {{ seal.issued_by.get_full_name|default:seal.issued_by.username }}</span>{% endif %}
+                            </td>
+                            <td data-label="{% trans 'Vəziyyət' context 'verification.staff' %}">
+                                {% if seal.revoked_at %}
+                                    <span class="ems-badge ems-badge--danger">{% trans "Ləğv edilib" context "verification.staff" %}</span>
+                                    <span class="dvs-muted dvs-reason">{{ seal.revoked_at|date:"d.m.Y" }} · {{ seal.revoke_reason }}</span>
+                                {% else %}
+                                    <span class="ems-badge ems-badge--success">{% trans "Etibarlı" context "verification.staff" %}</span>
+                                {% endif %}
+                            </td>
+                            <td class="dvs-actions">
+                                {% if not seal.revoked_at and not read_only %}
+                                    <button type="button" class="ems-btn ems-btn--sm ems-btn--danger"
+                                            data-dvs-revoke
+                                            data-action="{% url 'verification:staff_revoke' seal.pk %}"
+                                            data-code="{{ seal.code }}">{% trans "Ləğv et" context "verification.staff" %}</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+            <nav class="dvs-pager" aria-label="{% trans 'Səhifələr' context 'verification.staff' %}">
+                {% if page_obj.has_previous %}<a class="ems-btn ems-btn--sm" href="?{% if page_query %}{{ page_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">‹ {% trans "Əvvəlki" context "verification.staff" %}</a>{% endif %}
+                <span class="dvs-muted">{% blocktrans trimmed context "verification.staff" with page=page_obj.number pages=page_obj.paginator.num_pages %}Səhifə {{ page }} / {{ pages }}{% endblocktrans %}</span>
+                {% if page_obj.has_next %}<a class="ems-btn ems-btn--sm" href="?{% if page_query %}{{ page_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}">{% trans "Növbəti" context "verification.staff" %} ›</a>{% endif %}
+            </nav>
+        {% endif %}
+    {% else %}
+        {% trans "Sənəd tapılmadı" context "verification.staff" as empty_title %}
+        {% if query %}{% trans "Axtarışı dəyişin və ya bütün sənədlərə qayıdın." context "verification.staff" as empty_body %}{% else %}{% trans "Möhürlənmiş sənəd transkript yüklənəndə avtomatik yaranır." context "verification.staff" as empty_body %}{% endif %}
+        {% include "partials/ems_ui/_empty.html" with state_title=empty_title state_body=empty_body state_icon="fa-qrcode" %}
+    {% endif %}
+</div>
+
+{% if not read_only %}
+    {% trans "Sənədi ləğv et" context "verification.staff" as reason_title %}
+    {% trans "Ləğv geri qaytarılmır. Səbəb yalnız əməkdaşlara görünür — publik səhifə yalnız ləğv tarixini göstərir." context "verification.staff" as reason_hint %}
+    {% trans "Məs.: səhv məlumatla verilib, yenisi ilə əvəz olunub" context "verification.staff" as reason_placeholder %}
+    {% trans "Ləğv et" context "verification.staff" as reason_submit %}
+    {% include "partials/ems_ui/_reason_dialog.html" with reason_id="dvs-revoke-dialog" reason_title=reason_title reason_subtitle=" " reason_hint=reason_hint reason_placeholder=reason_placeholder reason_min=min_reason reason_submit_label=reason_submit reason_submit_tone="danger" %}
+{% endif %}
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'verification/js/staff.js' %}?v=20261018-dv1"></script>
+{% endblock %}

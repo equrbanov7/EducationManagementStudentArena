@@ -1,10 +1,15 @@
 """courses model paketi — mövzu/resurs."""
 
+from pathlib import PurePosixPath
+
 from django.db import models
 
 from .course import (
     Course,
 )
+
+#: ``apps/courses/resource_upload.py`` VIDEO_EXTENSIONS ilə eyni (model modulu formaları import etmir).
+_PLAYABLE_VIDEO_EXTENSIONS = frozenset({".mp4", ".mov", ".webm", ".m4v"})
 
 
 class CourseTopic(models.Model):
@@ -165,3 +170,19 @@ class CourseResource(models.Model):
     def is_link(self):
         """Bu resurs link mı?"""
         return bool(self.url) and not self.file
+
+    @property
+    def file_extension(self):
+        """Saxlanmış faylın uzantısı (kiçik hərf, nöqtəli) — fayl yoxdursa ``""``."""
+        name = getattr(self.file, "name", "") or ""
+        return PurePosixPath(name.lower()).suffix if name else ""
+
+    @property
+    def is_video_file(self):
+        """Brauzerdə ``<video>`` ilə göstərilə bilən fayl (tipdən asılı deyil — köhnə «Fayl» videoları da)."""
+        return self.file_extension in _PLAYABLE_VIDEO_EXTENSIONS
+
+    @property
+    def is_quicktime_video(self):
+        """iPhone ``.MOV`` (çox vaxt HEVC) — Chrome/Android-də oynamaya bilər, «Endir» ehtiyatı göstərilir."""
+        return self.file_extension == ".mov"

@@ -1350,14 +1350,14 @@ class ProfileViewTest(TestCase):
         profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
 
         self.client.login(username="testuser", password="testpass123")
-        response = self.client.get(reverse("accounts:profile"))
+        response = self.client.get(reverse("accounts:profile"), {"section": "profile-info"})
 
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
         self.assertEqual(response.context["primary_user_role_label"], "Tələbə")
         self.assertEqual(response.context["user_roles"][0]["name"], ProfileRole.STUDENT)
         self.assertContains(response, "Tələbə")
-        self.assertIn('href="/accounts/profile/"', content)
+        self.assertIn('href="/accounts/profile/?section=profile-info"', content)
         self.assertIn("blog-header__nav-link--active", content)
         self.assertIn("blog-header__nav-link--logout", content)
         self.assertNotContains(response, ">İstifadəçi<", html=False)

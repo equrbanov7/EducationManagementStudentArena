@@ -37,3 +37,20 @@ html.ems-scroll-locked body {
 html.ems-scroll-locked body {
     padding-right: var(--ems-scroll-lock-gutter, 0px);
 }
+
+/* Kabinet / jurnal (`main.css`-də body `overflow-x: clip`, mobil qabıq 2026-10-19): kilid zamanı
+   body YENƏ sürüşmə konteyneri olmasın — əks halda yapışqan alt panellər dialoq açıq ikən öz
+   statik yerinə «sıçrayır». Kilidin özü `<html>`-dədir (viewport-a ötürülür), body-yə ehtiyac yoxdur. */
+@supports (overflow: clip) {
+    @media (min-width: 769px) {
+        html.ems-modal-open body:has(.profile-page),
+        html.ems-modal-open body:has(.jd2),
+        html.ems-scroll-locked body:has(.profile-page),
+        html.ems-scroll-locked body:has(.jd2),
+        body.modal-open:has(.profile-page),
+        body.modal-open:has(.jd2) {
+            overflow-x: clip !important;
+            overflow-y: visible !important;
+        }
+    }
+}

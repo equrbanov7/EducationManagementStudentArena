@@ -194,7 +194,7 @@ decoration over the same enrollment aggregation the "Transkript" section uses
                             data-oa-failed="{% if row.result.failed %}1{% else %}0{% endif %}"
                             data-oa-letter="{% if row.in_gpa %}{{ row.result.letter }}{% endif %}"
                             data-oa-fail-reason="{{ row.fail_reason }}">
-                            <td class="ta-left">
+                            <td class="ta-left oa-cell--subject">
                                 <span class="oa-subject-code">{{ row.subject.code }}</span>
                                 <span class="oa-subject-name">{{ row.subject.name }}</span>
                                 {% if row.fail_reason == "qb" %}
@@ -206,18 +206,18 @@ decoration over the same enrollment aggregation the "Transkript" section uses
                                 {% endif %}
                                 {% if row.retake %}<span class="oa-reason-badge"><i class="fas fa-rotate-right"></i> {{ row.retake.text }}</span>{% endif %}
                             </td>
-                            <td>{{ row.credit }}</td>
-                            <td class="ta-left">{{ row.teacher_name|default:"—" }}</td>
-                            <td>{{ row.result.entry_score|floatformat:'-2' }}</td>
-                            <td>{% if row.result.graded %}{{ row.result.effective_exam|floatformat:'-2' }}{% else %}—{% endif %}</td>
+                            <td data-label="{% trans 'Kredit' context 'profile.overall_academic' %}">{{ row.credit }}</td>
+                            <td class="ta-left oa-cell--teacher" data-label="{% trans 'Müəllim' context 'profile.overall_academic' %}">{{ row.teacher_name|default:"—" }}</td>
+                            <td data-label="{% trans 'Giriş balı' context 'profile.overall_academic' %}">{{ row.result.entry_score|floatformat:'-2' }}</td>
+                            <td data-label="{% trans 'Çıxış balı' context 'profile.overall_academic' %}">{% if row.result.graded %}{{ row.result.effective_exam|floatformat:'-2' }}{% else %}—{% endif %}</td>
                             {# Qlif HƏR köçürülmüş sətirdə — semestr qeydindəki «nişanlı» sözünün qarşılığıdır. #}
-                            <td>{% if row.result.passed or row.result.failed %}<strong>{{ row.result.total|floatformat:'-2' }}</strong>{% else %}—{% endif %}{% include "registrar/partials/_legacy_grade_mark.html" with legacy=row.legacy %}</td>
-                            <td>
+                            <td data-label="{% trans 'Nəticə' context 'profile.overall_academic' %}">{% if row.result.passed or row.result.failed %}<strong>{{ row.result.total|floatformat:'-2' }}</strong>{% else %}—{% endif %}{% include "registrar/partials/_legacy_grade_mark.html" with legacy=row.legacy %}</td>
+                            <td data-label="{% trans 'Dərəcə' context 'profile.overall_academic' %}">
                                 {% if row.in_gpa %}
                                 <span class="grade-{{ row.result.letter }} oa-letter">{{ row.result.letter }}</span>
                                 {% else %}—{% endif %}
                             </td>
-                            <td>
+                            <td data-label="{% trans 'Status' context 'profile.overall_academic' %}">
                                 {% if row.result.barred %}
                                 <span class="oa-status is-barred">{% trans "Kəsilir" context "profile.overall_academic" %}</span>
                                 {% elif row.result.passed %}

@@ -12,8 +12,10 @@ QAYDALAR (handoff §8)
 ---------------------
 1. **Təsdiqlənmiş plan IMMUTABLE-dır** (qayda 1): sətir əlavəsi/redaktəsi/
    silinməsi və status keçidi QADAĞANDIR. Dəyişiklik yalnız YENİ VERSİYA —
-   ``start_new_version`` köhnəni ``is_active=False`` edir (SİLMİR) və yeni
-   qaralama yaradır. HTTP qatı bunu **409 Conflict** kimi qaytarır.
+   ``curriculum_actions._new_version`` yeni QARALAMA yaradır (köhnə aktiv
+   qalır); yeni versiya TƏSDİQLƏNƏNDƏ köhnə ``is_active=False`` olur (SİLİNMİR,
+   ``curriculum_actions._supersede_other_versions``). HTTP qatı yazma cəhdini
+   **409 Conflict** kimi qaytarır.
 6. **Səbəb məcburidir** (≥20 simvol) «qaytar» əməlində; audit-ə aktor +
    timestamp ilə yazılır.
 11. **Saat uzlaşması** pozulubsa təsdiqə GÖNDƏRMƏ bloklanır — bu modul yalnız

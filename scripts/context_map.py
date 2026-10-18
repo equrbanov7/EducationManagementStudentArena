@@ -50,7 +50,9 @@ CONTEXTS = {
         "contact",
         "applications",
         "announcements",
+        "verification",  # sənəd yoxlaması (2026-10-18) — registrar → verification.public
     ),
+    "hr": ("hr_contracts",),  # əmək müqavilələri (2026-10-19) — accounts → hr_contracts.public / tag-lar
     "legacy_import": ("legacy_import",),
 }
 

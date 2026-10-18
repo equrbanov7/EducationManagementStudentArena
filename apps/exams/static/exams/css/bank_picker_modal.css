@@ -1,530 +1,409 @@
 /* ===========================================================================
- * bank_picker_modal.css
+ * bank_picker_modal.css — «Suallar bankından seç» modalı (redizayn 2026-10-19)
  * ---------------------------------------------------------------------------
- * 'Suallar bankına bax' picker modalı + vurğulu header düyməsi.
- * Müstəqil fayl: həm imtahan test-bankı, həm yazılı imtahan redaktoru yükləyir.
- * Token-lar var(--primary ...) fallback ilə işləyir (xarici asılılıq yox).
+ * Sahib: «bu modalı da yenidən redesign et, daha yaxşı formada olsun və
+ * problemsiz işləsin». Həm imtahan test bankı, həm yazılı imtahan redaktoru
+ * yükləyir. Rənglər/ölçülər yalnız `design-tokens.css`-dən; kontrollar
+ * `ems_ui/controls.css` (40px sahə), nişanlar `ems_ui/badge.css`, boş/xəta
+ * vəziyyəti `ems-state` (`ems_ui/table.css`).
+ *
+ * Quruluş: dialoq = baş (sabit) + filtr sırası (sabit) + content (öz scroll-u)
+ * + alt sıra (sabit). ≤ 640px-də tam ekran.
  * ======================================================================== */
 
-/* ======================================================================== *
- *  BANK PICKER MODALI ("Suallar bankına bax")
- * ======================================================================== */
-
-/* Header-dəki vurğulu picker düyməsi (mavi dolu) */
+/* Header-dəki vurğulu picker düyməsi (workbench başlığı) */
 .page-header-link--accent {
-    background: var(--primary, var(--ems-primary-600));
-    border-color: var(--primary, var(--ems-primary-600));
+    background: var(--ems-primary-600);
+    border-color: var(--ems-primary-600);
     color: var(--ems-neutral-0);
     cursor: pointer;
     font: inherit;
     font-weight: 700;
 }
+
 .page-header-link--accent:hover {
-    background: var(--primary-hover, var(--ems-primary-700));
-    border-color: var(--primary-hover, var(--ems-primary-700));
+    background: var(--ems-primary-700);
+    border-color: var(--ems-primary-700);
     color: var(--ems-neutral-0);
 }
 
+/* Arxa fon sürüşməsi kilidi (SPA-da əsl scroller <html>-dir). */
+html.bankpicker-lock,
 body.bankpicker-open {
     overflow: hidden;
 }
 
+/* ── Overlay + dialoq ───────────────────────────────────────────────────── */
 .bankpicker-overlay {
     position: fixed;
     inset: 0;
     z-index: 1080;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
-    padding: 5vh 16px;
-    background: rgba(20, 27, 45, 0.55);
-    backdrop-filter: blur(3px);
-    animation: bankpicker-fade 0.18s ease;
+    padding: 4vh 16px;
+    background: rgba(15, 23, 42, 0.55);
+    animation: bankpicker-fade 0.16s ease;
 }
+
 .bankpicker-overlay[hidden] {
     display: none;
 }
+
 @keyframes bankpicker-fade {
     from { opacity: 0; }
     to { opacity: 1; }
 }
 
 .bankpicker-dialog {
-    width: min(880px, 100%);
-    max-height: 90vh;
     display: flex;
     flex-direction: column;
-    background: var(--card-bg, var(--ems-neutral-0));
-    border-radius: 18px;
-    box-shadow: 0 24px 60px rgba(18, 28, 60, 0.28);
+    width: min(920px, 100%);
+    height: min(780px, 92vh);
+    max-height: 92vh;
     overflow: hidden;
-    animation: bankpicker-pop 0.2s ease;
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-dialog);
+    animation: bankpicker-pop 0.18s ease;
 }
+
+.bankpicker-dialog:focus {
+    outline: none;
+}
+
 @keyframes bankpicker-pop {
-    from { transform: translateY(14px) scale(0.985); opacity: 0; }
-    to { transform: translateY(0) scale(1); opacity: 1; }
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bankpicker-overlay,
+    .bankpicker-dialog {
+        animation: none;
+    }
 }
 
 .bankpicker-dialog__head {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 18px 22px;
-    border-bottom: 1px solid var(--border, var(--ems-neutral-200));
-    background: linear-gradient(120deg, var(--ems-primary-50), var(--ems-neutral-100));
+    flex: none;
+    align-items: flex-start;
+    gap: var(--ems-sp-5);
+    padding: var(--ems-sp-6) var(--ems-sp-7);
+    border-bottom: 1px solid var(--ems-border);
 }
+
+.bankpicker-dialog__icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-600);
+    font-size: 17px;
+}
+
 .bankpicker-dialog__title {
-    display: flex;
-    align-items: center;
-    gap: 14px;
+    flex: 1 1 auto;
+    min-width: 0;
 }
-.bankpicker-dialog__title > i {
-    font-size: 1.35rem;
-    color: var(--primary, var(--ems-primary-600));
-}
-.bankpicker-dialog__title h3 {
+
+.bankpicker-dialog__title h2 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: var(--ems-fs-xl);
     font-weight: 800;
-    color: var(--text-dark, var(--ems-neutral-800));
+    line-height: 1.3;
+    color: var(--ems-text);
 }
+
 .bankpicker-dialog__title p {
     margin: 2px 0 0;
-    font-size: 0.85rem;
-    color: var(--text-muted, var(--ems-neutral-500));
+    font-size: var(--ems-fs-base);
+    line-height: 1.45;
+    color: var(--ems-text-muted);
 }
+
 .bankpicker-dialog__close {
-    flex-shrink: 0;
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    border: 1px solid var(--border, var(--ems-neutral-200));
-    background: var(--ems-neutral-0);
-    color: var(--text-muted, var(--ems-neutral-500));
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-.bankpicker-dialog__close:hover {
-    background: var(--ems-danger-100);
-    border-color: var(--ems-danger-200);
-    color: var(--danger, var(--ems-danger-500));
+    width: var(--ems-h-field);
+    height: var(--ems-h-field);
 }
 
 .bankpicker-dialog__body {
-    padding: 0;
-    overflow-y: auto;
-}
-
-.bankpicker-loading {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 48px 0;
-    color: var(--text-muted, var(--ems-neutral-500));
-    font-weight: 600;
-}
-.bankpicker-spinner {
-    width: 18px;
-    height: 18px;
-    border: 2.5px solid var(--ems-primary-100);
-    border-top-color: var(--primary, var(--ems-primary-600));
-    border-radius: 50%;
-    animation: bankpicker-spin 0.7s linear infinite;
-}
-@keyframes bankpicker-spin {
-    to { transform: rotate(360deg); }
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
 }
 
 .bankpicker {
     display: flex;
+    flex: 1 1 auto;
     flex-direction: column;
+    min-height: 0;
 }
 
-/* Toolbar */
+/* ── Filtr sırası: bərabər hündürlük, etiketlər bir xətdə ───────────────── */
 .bankpicker-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    padding: 18px 22px;
-    border-bottom: 1px solid var(--border, var(--ems-neutral-200));
-}
-.bankpicker-field {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    flex: 1 1 150px;
-    min-width: 130px;
-}
-.bankpicker-field--bank { flex: 2 1 220px; }
-.bankpicker-field--search { flex: 2 1 200px; }
-.bankpicker-field__label {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--text-muted, var(--ems-neutral-500));
-}
-.bankpicker-field__label i { color: var(--primary, var(--ems-primary-600)); }
-.bankpicker-select,
-.bankpicker-input {
-    width: 100%;
-    padding: 9px 12px;
-    border: 1px solid var(--border, var(--ems-neutral-200));
-    border-radius: 10px;
-    font-size: 0.9rem;
-    color: var(--text-dark, var(--ems-neutral-800));
-    background: var(--ems-neutral-0);
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-.bankpicker-select:focus,
-.bankpicker-input:focus {
-    outline: none;
-    border-color: var(--primary, var(--ems-primary-600));
-    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.14);
+    display: grid;
+    flex: none;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr);
+    align-items: end;
+    gap: var(--ems-sp-5);
+    padding: var(--ems-sp-6) var(--ems-sp-7);
+    border-bottom: 1px solid var(--ems-border);
+    background: var(--ems-bg-subtle);
 }
 
-/* Statistika */
-.bankpicker-stats {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 14px;
-    padding: 14px 22px;
-    background: var(--ems-neutral-100);
-    border-bottom: 1px solid var(--border, var(--ems-neutral-200));
-}
-.bankpicker-stat {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.1;
-}
-.bankpicker-stat__value {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: var(--primary, var(--ems-primary-600));
-}
-.bankpicker-stat__label {
-    font-size: 0.74rem;
-    color: var(--text-muted, var(--ems-neutral-500));
-    font-weight: 600;
-}
-.bankpicker-stat--chips {
-    flex: 1 1 100%;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-.bankpicker-langchips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-.bankpicker-langchip {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 11px;
-    border-radius: 999px;
-    border: 1px solid var(--ems-primary-100);
-    background: var(--ems-neutral-0);
-    color: var(--text-dark, var(--ems-neutral-800));
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-.bankpicker-langchip strong { color: var(--primary, var(--ems-primary-600)); }
-.bankpicker-langchip:hover { border-color: var(--primary, var(--ems-primary-600)); }
-.bankpicker-langchip.is-active {
-    background: var(--primary, var(--ems-primary-600));
-    border-color: var(--primary, var(--ems-primary-600));
-    color: var(--ems-neutral-0);
-}
-.bankpicker-langchip.is-active strong { color: var(--ems-neutral-0); }
-.bankpicker-langchip--muted {
-    cursor: default;
-    color: var(--text-muted, var(--ems-neutral-500));
-    border-style: dashed;
-}
-
-/* Siyahı başlığı */
-.bankpicker-listhead {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 12px 22px 8px;
-    flex-wrap: wrap;
-}
-.bankpicker-found {
-    font-size: 0.85rem;
-    color: var(--text-muted, var(--ems-neutral-500));
-    font-weight: 600;
-}
-.bankpicker-found em { font-style: normal; opacity: 0.75; }
-.bankpicker-listhead__actions { display: flex; gap: 6px; }
-.bankpicker-textbtn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 10px;
-    border: none;
-    background: transparent;
-    color: var(--primary, var(--ems-primary-600));
-    font-size: 0.82rem;
-    font-weight: 700;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: background 0.15s ease;
-}
-.bankpicker-textbtn:hover { background: var(--ems-primary-50); }
-
-/* Siyahı */
-.bankpicker-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 4px 22px 16px;
-}
-.bankpicker-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 12px 14px;
-    border: 1px solid var(--border, var(--ems-neutral-200));
-    border-radius: 12px;
-    cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease;
-}
-.bankpicker-item:hover { border-color: var(--ems-primary-200); background: var(--ems-neutral-50); }
-.bankpicker-item__check {
-    margin-top: 3px;
-    width: 18px;
-    height: 18px;
-    accent-color: var(--primary, var(--ems-primary-600));
-    flex-shrink: 0;
-    cursor: pointer;
-}
-.bankpicker-item:has(.bankpicker-item__check:checked) {
-    border-color: var(--primary, var(--ems-primary-600));
-    background: var(--ems-primary-50);
-}
-.bankpicker-item__body { display: flex; flex-direction: column; gap: 7px; }
-.bankpicker-item__text {
-    font-size: 0.9rem;
-    color: var(--text-dark, var(--ems-neutral-800));
-    line-height: 1.45;
-}
-.bankpicker-item__meta { display: flex; gap: 6px; flex-wrap: wrap; }
-.bankpicker-tag {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 9px;
-    border-radius: 999px;
-    background: var(--ems-primary-50);
-    color: var(--primary, var(--ems-primary-600));
-    font-size: 0.72rem;
-    font-weight: 700;
-}
-.bankpicker-tag--soft { background: var(--ems-neutral-100); color: var(--text-muted, var(--ems-neutral-500)); }
-
-/* Boş hallar */
-.bankpicker-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    padding: 44px 22px;
-    color: var(--text-muted, var(--ems-neutral-500));
-    text-align: center;
-}
-.bankpicker-empty i { font-size: 1.6rem; opacity: 0.55; }
-.bankpicker-empty p { margin: 0; font-weight: 600; }
-.bankpicker-empty--inline { padding: 28px 12px; }
-
-/* Footer */
-.bankpicker-footer {
-    position: sticky;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 14px 22px;
-    border-top: 1px solid var(--border, var(--ems-neutral-200));
-    background: var(--ems-neutral-0);
-}
-.bankpicker-selcount {
-    font-size: 0.88rem;
-    font-weight: 700;
-    color: var(--text-dark, var(--ems-neutral-800));
-}
-.bankpicker-attach {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 11px 20px;
-    border: none;
-    border-radius: 11px;
-    background: var(--primary, var(--ems-primary-600));
-    color: var(--ems-neutral-0);
-    font-size: 0.92rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.15s ease, opacity 0.15s ease;
-}
-.bankpicker-attach:hover:not(:disabled) { background: var(--primary-hover, var(--ems-primary-700)); }
-.bankpicker-attach:disabled { opacity: 0.5; cursor: not-allowed; }
-.bankpicker-attach.is-loading { opacity: 0.7; cursor: progress; }
-
-@media (max-width: 620px) {
-    .bankpicker-overlay { padding: 0; }
-    .bankpicker-dialog { max-height: 100vh; height: 100vh; border-radius: 0; width: 100%; }
-    .bankpicker-field { flex: 1 1 100%; }
-}
-
-/* Yazılı imtahan redaktorunda picker açan düymə (self-contained) */
-.bankpicker-open-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    border-radius: 999px;
-    border: 1px solid var(--primary, var(--ems-primary-600));
-    background: var(--primary, var(--ems-primary-600));
-    color: var(--ems-neutral-0);
-    font-size: 0.92rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease;
-}
-.bankpicker-open-btn:hover {
-    background: var(--primary-hover, var(--ems-primary-700));
-    border-color: var(--primary-hover, var(--ems-primary-700));
-    color: var(--ems-neutral-0);
-}
-
-/* ======================================================================== *
- *  PICKER v2 — sticky toolbar + content + variant akkordeonu + lazy-scroll
- * ======================================================================== */
-.bankpicker-toolbar {
-    position: sticky;
-    top: 0;
-    z-index: 6;
-    background: var(--ems-neutral-0);
-}
-.bankpicker-footer {
-    z-index: 6;
-}
-.bankpicker-content {
+.bankpicker-field .ems-field__label {
     display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    line-height: 16px;
 }
+
+.bankpicker-field .bootstrap-single-select,
+.bankpicker-search {
+    width: 100%;
+    max-width: none;
+}
+
+.bankpicker-search .ems-search__input {
+    min-height: var(--ems-h-field);
+}
+
+.bankpicker-search .ems-search__input::-webkit-search-cancel-button {
+    cursor: pointer;
+}
+
+.bankpicker-field .bootstrap-single-select__menu {
+    z-index: 1090;
+}
+
+/* ── Content (scroll) ───────────────────────────────────────────────────── */
+.bankpicker-content {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.bankpicker-content:focus {
+    outline: none;
+}
+
+.bankpicker-content.ems-search-pending {
+    opacity: 0.55;
+    transition: opacity 0.12s ease;
+}
+
 .bankpicker-content-inner {
     display: flex;
     flex-direction: column;
+    min-height: 100%;
 }
 
-/* Toolbar field-də bootstrap-single-select tam en alsın */
-.bankpicker-field .bootstrap-single-select { width: 100%; }
-.bankpicker-field .bootstrap-single-select__toggle { width: 100%; justify-content: space-between; }
-
-/* Sual elementi (yeni struktur: checkbox + açılan toggle + variantlar) */
-.bankpicker-item { flex-wrap: wrap; }
-.bankpicker-item__toggle {
-    flex: 1;
-    min-width: 0;
+.bankpicker-summary {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 10px;
     justify-content: space-between;
-    background: none;
-    border: none;
-    padding: 0;
-    margin: 0;
-    text-align: left;
-    cursor: pointer;
-    color: inherit;
-    font: inherit;
+    gap: var(--ems-sp-3) var(--ems-sp-5);
+    padding: var(--ems-sp-5) var(--ems-sp-7) 0;
 }
-.bankpicker-item__toggle[data-picker-noexpand] { cursor: default; }
-.bankpicker-item__main {
+
+.bankpicker-summary__count {
+    margin: 0;
+    font-size: var(--ems-fs-base);
+    color: var(--ems-neutral-700);
+}
+
+.bankpicker-summary__count strong {
+    color: var(--ems-text);
+}
+
+.bankpicker-summary__muted {
+    color: var(--ems-text-muted);
+}
+
+.bankpicker-langchips {
     display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+}
+
+.bankpicker-langchip__n {
+    color: var(--ems-text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.bankpicker-langchip[aria-pressed="true"] .bankpicker-langchip__n {
+    color: var(--ems-primary-700);
+}
+
+.bankpicker-listhead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-3);
+    padding: var(--ems-sp-4) var(--ems-sp-7);
+    border-bottom: 1px solid var(--ems-border);
+    background: var(--ems-bg);
+}
+
+.bankpicker-pagecheck {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    min-height: var(--ems-h-xs);
+    font-size: var(--ems-fs-base);
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+    cursor: pointer;
+}
+
+.bankpicker-pagecheck input,
+.bankpicker-item__check {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--ems-primary-600);
+    cursor: pointer;
+}
+
+.bankpicker-listhead__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+}
+
+.bankpicker-listhead__actions .ems-btn {
+    gap: var(--ems-sp-2);
+}
+
+/* Sual kartları, variantlar, sentinel, boş/xəta vəziyyəti, skeleton: bank_picker_list.css. */
+
+/* ── Alt sıra (sabit) ──────────────────────────────────────────────────── */
+.bankpicker-footer {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-5);
+    padding: var(--ems-sp-5) var(--ems-sp-7);
+    border-top: 1px solid var(--ems-border);
+    background: var(--ems-bg);
+}
+
+.bankpicker-footer__info {
+    display: flex;
+    flex: 1 1 220px;
     flex-direction: column;
-    gap: 7px;
+    gap: 2px;
     min-width: 0;
 }
-.bankpicker-item__chevron {
-    flex-shrink: 0;
-    color: var(--text-muted, var(--ems-neutral-500));
-    font-size: 0.85rem;
-    transition: transform 0.2s ease;
-}
-.bankpicker-item.is-open .bankpicker-item__chevron { transform: rotate(180deg); }
 
-.bankpicker-item__options {
-    flex-basis: 100%;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    max-height: 0;
-    overflow: hidden;
-    margin-top: 0;
-    padding-top: 0;
-    transition: max-height 0.25s ease, margin-top 0.25s ease, padding-top 0.25s ease;
-}
-.bankpicker-item.is-open .bankpicker-item__options {
-    max-height: 680px;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px dashed var(--border, var(--ems-neutral-200));
-}
-.bankpicker-opt {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    padding: 7px 10px;
-    border-radius: 8px;
-    background: var(--ems-neutral-100);
-    font-size: 0.85rem;
-    color: var(--text-dark, var(--ems-neutral-800));
-}
-.bankpicker-opt.is-correct { background: var(--ems-neutral-50); }
-.bankpicker-opt__label {
-    flex-shrink: 0;
-    width: 22px;
-    height: 22px;
-    display: grid;
-    place-items: center;
-    border-radius: 6px;
-    background: var(--ems-neutral-0);
-    border: 1px solid var(--border, var(--ems-neutral-200));
+.bankpicker-selcount {
+    font-size: var(--ems-fs-md);
     font-weight: 700;
-    font-size: 0.78rem;
+    color: var(--ems-neutral-700);
+    font-variant-numeric: tabular-nums;
 }
-.bankpicker-opt.is-correct .bankpicker-opt__label {
-    background: var(--success, var(--ems-success));
-    border-color: var(--success, var(--ems-success));
-    color: var(--ems-neutral-0);
-}
-.bankpicker-opt__text { flex: 1; min-width: 0; }
-.bankpicker-opt__mark { color: var(--success, var(--ems-success)); flex-shrink: 0; }
-.bankpicker-opt--muted { color: var(--text-muted, var(--ems-neutral-500)); background: var(--ems-neutral-100); }
 
-.bankpicker-sentinel {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 14px;
-    color: var(--text-muted, var(--ems-neutral-500));
-    font-size: 0.85rem;
+.bankpicker-selcount.has-selection {
+    color: var(--ems-primary-700);
+}
+
+.bankpicker-error {
+    margin: 0;
+    font-size: var(--ems-fs-sm);
     font-weight: 600;
+    color: var(--ems-danger);
+}
+
+.bankpicker-error[hidden] {
+    display: none;
+}
+
+.bankpicker-footer__actions {
+    display: flex;
+    flex: none;
+    gap: var(--ems-sp-3);
+}
+
+.bankpicker-attach.is-loading:disabled {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+    opacity: 0.85;
+    cursor: progress;
+}
+
+/* ── Responsiv ─────────────────────────────────────────────────────────── */
+@media (max-width: 820px) {
+    .bankpicker-toolbar {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .bankpicker-overlay {
+        align-items: stretch;
+        padding: 0;
+    }
+
+    .bankpicker-dialog {
+        width: 100%;
+        height: 100%;
+        max-height: none;
+        border-radius: 0;
+    }
+
+    .bankpicker-dialog__head,
+    .bankpicker-toolbar,
+    .bankpicker-footer {
+        padding-right: var(--ems-sp-6);
+        padding-left: var(--ems-sp-6);
+    }
+
+    .bankpicker-toolbar {
+        gap: var(--ems-sp-4);
+    }
+
+    .bankpicker-field--bank,
+    .bankpicker-field--search {
+        grid-column: 1 / -1;
+    }
+
+    .bankpicker-summary,
+    .bankpicker-listhead {
+        padding-right: var(--ems-sp-6);
+        padding-left: var(--ems-sp-6);
+    }
+
+    .bankpicker-footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--ems-sp-3);
+    }
+
+    .bankpicker-footer__info {
+        flex: none;
+    }
+
+    .bankpicker-footer__actions {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+    }
 }

@@ -342,6 +342,12 @@ urlpatterns = [
     path("hr-analytics/export/", hr_analytics_views.hr_analytics_export, name="hr_analytics_export"),
     # 2026-10-18: «Mühasibatlıq» — Excel ixracı (`accounting.view`; audit olunur).
     path("accounting/export/", accounting_views.accounting_export, name="accounting_export"),
+    # 2026-10-19: «Mühasibatlıq» — müəllim pəncərəsi (modal, JSON; eyni qapı və əhatə).
+    path(
+        "accounting/teacher/<int:teacher_id>/",
+        accounting_views.accounting_teacher_detail,
+        name="accounting_teacher_detail",
+    ),
     # 2026-10-03: qrupun «ilk giriş» çap vərəqi (QR + təlimat + aktivləşdirməyənlər, PAROLSUZ).
     path(
         "student-registry/activation-sheet/",

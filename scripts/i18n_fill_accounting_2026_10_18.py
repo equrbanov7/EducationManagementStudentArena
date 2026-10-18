@@ -30,6 +30,12 @@ ENTRIES = {
             "Muhasebe bölümü (öğretim elemanlarının aylık verilen ders saatleri, plan, dışa aktarma)",
             "Bereich Buchhaltung (monatlich gehaltene Unterrichtsstunden der Lehrkräfte, Plan, Export)",
         ),
+        "Təhsil haqqı cədvəlini idarə etmək (25% təkrar imtahanın təxmini məbləği)": t(
+            "Manage the tuition fee table (estimated 25% re-exam amount)",
+            "Управлять таблицей платы за обучение (ориентировочная сумма пересдачи 25%)",
+            "Öğrenim ücreti tablosunu yönetmek (%25 tekrar sınavın tahmini tutarı)",
+            "Studiengebührentabelle verwalten (geschätzter Betrag der 25-%-Wiederholungsprüfung)",
+        ),
         "25% təkrar imtahan ödəniş qəbzini yoxlamaq": t(
             "Verify 25% re-exam payment receipts",
             "Проверять квитанции об оплате пересдачи (25%)",

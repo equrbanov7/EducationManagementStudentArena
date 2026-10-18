@@ -63,7 +63,7 @@ def _clean_date(raw):
 def validate(*, organization, exam, students, reason, reference_number="", reference_date=None, note="") -> dict:
     """Səbəbin tələblərini yoxla; ``{"reason", "reference_number", "reference_date", "note", "applications"}``."""
     if reason not in ExamChanceReason.values:
-        raise ValidationError(pgettext(_CTX, "Şansın səbəbini seçin."))
+        raise ValidationError(pgettext(_CTX, "Cəhdin əsasını seçin."))
     students = [s for s in students if getattr(s, "pk", None)]
     if not students:
         raise ValidationError(pgettext(_CTX, "Ən azı bir tələbə seçilməlidir."))
@@ -78,7 +78,7 @@ def validate(*, organization, exam, students, reason, reference_number="", refer
     applications: dict = {}
     if reason == ExamChanceReason.RETAKE_25:
         if exam.get("category") != "final":
-            raise ValidationError(pgettext(_CTX, "25% müraciəti yalnız yekun (final) imtahan üçün şans verir."))
+            raise ValidationError(pgettext(_CTX, "25% müraciəti yalnız yekun (final) imtahan üçün cəhd hüququ verir."))
         grantable = retake_decisions.grantable_applications(
             organization=organization, student_ids=[s.pk for s in students]
         )

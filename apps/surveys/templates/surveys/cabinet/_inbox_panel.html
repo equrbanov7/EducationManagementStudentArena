@@ -3,13 +3,27 @@
 Kartlar sadə linkdir — JS tələb olunmur; «Bu dəfə keç» / «Sonra doldur» düymələri qapının eniş
 səhifəsindədir (/sorgu/). Stil xarici faylda.{% endcomment %}
 <link rel="stylesheet" href="{% static 'surveys/css/survey_cabinet.css' %}?v=20260930-1">
-<link rel="stylesheet" href="{% static 'surveys/css/inbox.css' %}?v=20260930-1">
+<link rel="stylesheet" href="{% static 'surveys/css/inbox.css' %}?v=20261019-ui">
 {% survey_inbox_panel as ip %}
 <div class="svc svi">
+    {% comment %}2026-10-19 (sahib: «boş olanda biraz daha normal formada desin»): boş / əlçatmaz
+    vəziyyətlər `ems-state` kartıdır (ikon + başlıq + izah) — kiçik bir sətir yox.{% endcomment %}
     {% if ip.view_as %}
-    <p class="svc-empty">{% trans "Baxış rejimində (başqa istifadəçinin profili) sorğular göstərilmir — sorğunu yalnız istifadəçinin özü doldura bilər." context "surveys.inbox" %}</p>
+    <div class="ems-card svi-state-card">
+        <div class="ems-state" role="status">
+            <span class="svi-state__badge svi-state__badge--muted" aria-hidden="true"><i class="fas fa-eye"></i></span>
+            <p class="ems-state__title">{% trans "Baxış rejimində sorğular göstərilmir" context "surveys.inbox" %}</p>
+            <p class="ems-state__body">{% trans "Baxış rejimində (başqa istifadəçinin profili) sorğular göstərilmir — sorğunu yalnız istifadəçinin özü doldura bilər." context "surveys.inbox" %}</p>
+        </div>
+    </div>
     {% elif not ip.available %}
-    <p class="svc-empty">{% trans "Təşkilat konteksti tapılmadı." context "surveys.inbox" %}</p>
+    <div class="ems-card svi-state-card">
+        <div class="ems-state ems-state--error" role="status">
+            <i class="fas fa-building-circle-exclamation ems-state__icon" aria-hidden="true"></i>
+            <p class="ems-state__title">{% trans "Təşkilat konteksti tapılmadı." context "surveys.inbox" %}</p>
+            <p class="ems-state__body">{% trans "Səhifəni yeniləyin; problem qalırsa İKT dəstəyinə müraciət edin." context "surveys.inbox" %}</p>
+        </div>
+    </div>
     {% else %}
     <header class="svi-head">
         <p class="svc-intro">{% trans "Universitetin sizə ünvanladığı sorğular. Məcburi sorğular doldurulmayınca kabinet bağlana bilər; anonim sorğularda cavabınız adınızla saxlanılmır." context "surveys.inbox" %}</p>
@@ -17,7 +31,8 @@ səhifəsindədir (/sorgu/). Stil xarici faylda.{% endcomment %}
     </header>
 
     <section class="svi-group" aria-labelledby="svi-pending-title">
-        <h2 id="svi-pending-title" class="svi-group__title">{% trans "Gözləyən" context "surveys.inbox" %}</h2>
+        {# Heç bir siyahı yoxdursa başlıq görünmür (kart özü deyir) — ekran oxuyucusu üçün qalır. #}
+        <h2 id="svi-pending-title" class="svi-group__title{% if not ip.pending and not ip.campaign.pending and not ip.completed and not ip.closed and not ip.campaign %} svi-sr-only{% endif %}">{% trans "Gözləyən" context "surveys.inbox" %}</h2>
         {% if ip.campaign and ip.campaign.pending %}
         <article class="svi-card svi-card--pending">
             <div class="svi-card__body">
@@ -57,7 +72,13 @@ səhifəsindədir (/sorgu/). Stil xarici faylda.{% endcomment %}
         </article>
         {% endfor %}
         {% if not ip.pending and not ip.campaign.pending %}
-        <p class="svc-empty"><i class="fas fa-circle-check" aria-hidden="true"></i> {% trans "Hazırda sizi gözləyən sorğu yoxdur." context "surveys.inbox" %}</p>
+        <div class="ems-card svi-state-card">
+            <div class="ems-state" role="status">
+                <span class="svi-state__badge" aria-hidden="true"><i class="fas fa-clipboard-check"></i></span>
+                <p class="ems-state__title">{% trans "Gözləyən sorğu yoxdur" context "surveys.inbox" %}</p>
+                <p class="ems-state__body">{% trans "Yeni sorğu təyin olunanda burada görünəcək və bildiriş alacaqsınız." context "surveys.inbox" %}</p>
+            </div>
+        </div>
         {% endif %}
     </section>
 

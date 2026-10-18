@@ -435,15 +435,114 @@
 }
 
 @media (max-width: 640px) {
+    /* Mobil audit 2026-10-19: əvvəl `flex-direction: column` idi — sütun istiqamətində
+       `.oa-filter-search`-in `flex: 1 1 220px`-i HÜNDÜRLÜYƏ çevrilirdi (axtarış qutusu 220px
+       boş mavi sahə, lupa inputdan ayrılıb ortada). İndi sətir-sarğı: axtarış və çiplər tam en,
+       seçicilər yan-yana (iki sütun), panel ekranın yarısına sığır. */
     .oa-filter-bar {
-        flex-direction: column;
         align-items: stretch;
+        gap: 0.7rem;
+        padding: 0.85rem;
+    }
+    .oa-filter-search,
+    .oa-filter-toggles {
+        flex: 1 1 100%;
+    }
+    .oa-filter-select {
+        flex: 1 1 calc(50% - 0.7rem);
     }
     .oa-filter-select,
     .oa-filter-search {
         min-width: 0;
     }
+    .oa-status {
+        white-space: nowrap;
+    }
+    .oa-filter-search input {
+        height: 44px;
+        font-size: 16px; /* iOS: <16px inputa fokusda səhifə böyüyür */
+    }
+    .oa-filter-select .bootstrap-single-select__toggle,
+    .oa-chip,
+    .oa-filter-reset {
+        min-height: 44px;
+        height: auto;
+    }
+    .oa-chip {
+        padding-top: 8px;
+        padding-bottom: 8px;
+        border-radius: 16px;
+    }
     .oa-filter-reset {
         align-self: flex-start;
+    }
+    .oa-summary-box {
+        flex: 1 1 140px;
+        min-width: 0;
+    }
+
+    /* ── Cədvəl → kart (8 sütun telefonda üfüqi sürüşürdü, fənn adı 1 sözlük sütuna sıxılırdı) ── */
+    .oa-table-wrap {
+        overflow-x: visible;
+    }
+    .oa-table,
+    .oa-table tbody,
+    .oa-table tr,
+    .oa-table td {
+        display: block;
+        width: 100%;
+    }
+    .oa-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+    .oa-table tbody tr.oa-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px 12px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--ems-neutral-200);
+    }
+    .oa-table tbody tr.oa-row.is-hidden {
+        display: none;
+    }
+    .oa-table tbody td {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 0;
+        border: 0;
+        text-align: right;
+        background: transparent;
+    }
+    .oa-table tbody td[data-label]::before {
+        content: attr(data-label);
+        flex: none;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        color: var(--ems-neutral-500);
+        text-align: left;
+    }
+    .oa-table tbody td.oa-cell--subject,
+    .oa-table tbody td.oa-cell--teacher {
+        grid-column: 1 / -1;
+    }
+    .oa-table tbody td.oa-cell--subject {
+        display: block;
+        text-align: left;
+    }
+    .oa-row--fail {
+        background: var(--ems-danger-100);
+    }
+    .oa-reason-badge {
+        white-space: normal;
+        border-radius: 10px;
     }
 }

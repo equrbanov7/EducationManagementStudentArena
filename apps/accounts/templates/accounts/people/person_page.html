@@ -75,6 +75,7 @@ icazə varsa gəlir (`page.capabilities`).{% endcomment %}
         </main>
         <aside class="pp-side">
             {% include "accounts/people/_person_sidebar.html" with person=person structure=structure caps=page.capabilities %}
+            {% if page.kind != 'student' %}{% include "hr_contracts/_person_card.html" with user_id=person.id %}{% endif %}
         </aside>
     </div>
 </div>

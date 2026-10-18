@@ -77,8 +77,12 @@ TEACHER_ROLE_NAMES = frozenset(
 #: Rolsuz adi üzv — publik səthdən başqa heç nə görmür; kənardan bloklamağa dəyməz.
 NEUTRAL_ROLE_NAMES = frozenset({ProfileRole.MEMBER})
 
+#: Publik sənəd yoxlaması (2026-10-18) — QR-ı skan edən hər kəs (işəgötürən, başqa universitet) kənardan açır.
+#: Əməkdaş siyahısı (`/sened-yoxlamasi/`) QƏSDƏN bu prefiksdən kənardadır.
+DOCUMENT_VERIFY_PREFIX = "/yoxla/"
+
 #: Kənar zonada inzibati hesab üçün də açıq qalan yollar (prefiks).
-_ALWAYS_OPEN_PREFIXES = ("/static/", "/media/", "/health/", "/ping/", "/i18n/", "/jsi18n/")
+_ALWAYS_OPEN_PREFIXES = ("/static/", "/media/", "/health/", "/ping/", "/i18n/", "/jsi18n/", DOCUMENT_VERIFY_PREFIX)
 
 
 def _is_view_as(request) -> bool:

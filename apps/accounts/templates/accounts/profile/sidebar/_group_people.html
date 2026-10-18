@@ -16,9 +16,9 @@ qalır — link və testlər qırılmasın deyə. Bu qrup onun genişlənmiş g�
 
 Hamısı AJAX-safe SPA bölmələridir: panel sağda açılır, SOL SIDEBAR QALIR.
 {% endcomment %}
-{% if "student-admission" in allowed_sections or "student-registry" in allowed_sections or "people-students" in allowed_sections or "people-teachers" in allowed_sections or "hr-analytics" in allowed_sections or "academic-records" in allowed_sections %}
+{% if "student-admission" in allowed_sections or "student-registry" in allowed_sections or "people-students" in allowed_sections or "people-teachers" in allowed_sections or "hr-analytics" in allowed_sections or "hr-contracts" in allowed_sections or "academic-records" in allowed_sections %}
 <li class="sidebar-menu-group" data-sidebar-group="people">
-    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|student-admission|student-registry|people-students|people-teachers|hr-analytics|academic-records|" %} open{% endif %}>
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|student-admission|student-registry|people-students|people-teachers|hr-analytics|hr-contracts|academic-records|" %} open{% endif %}>
         {% trans "Tələbə və heyət" context "profile.sidebar" as group_label %}
         {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="users" %}
         <ul class="sidebar-menu-group-items">
@@ -71,6 +71,7 @@ Hamısı AJAX-safe SPA bölmələridir: panel sağda açılır, SOL SIDEBAR QALI
             </li>
             {% endif %}
             {% include "accounts/profile/sidebar/items/_hr_analytics.html" %}
+            {% include "accounts/profile/sidebar/items/_hr_contracts.html" %}
             {% if "academic-records" in allowed_sections %}
             <li class="sidebar-menu-item">
                 <a href="{{ profile_base_url }}?section=academic-records"

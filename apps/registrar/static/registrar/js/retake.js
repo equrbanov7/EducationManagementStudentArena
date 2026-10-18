@@ -165,6 +165,16 @@
         var box = trigger.closest("[data-rt-subject]");
         var who = box ? [box.getAttribute("data-rt-student"), box.getAttribute("data-rt-subject")].filter(Boolean).join(" · ") : "";
         setText(dialog, "who", who);
+        setText(dialog, "title", trigger.getAttribute("data-rt-title"));
+        var hint = form.querySelector("[data-rt-expected-hint]");
+        if (hint) {
+            var expected = trigger.getAttribute("data-rt-expected") || "";
+            form.setAttribute("data-rt-expected", expected);
+            hint.textContent = expected
+                ? (hint.getAttribute("data-template") || "").replace("{amount}", expected)
+                : hint.getAttribute("data-none") || "";
+            syncMismatch(form);
+        }
         var select = form.querySelector("[data-rt-offerings-select]");
         if (select) {
             var placing = trigger.getAttribute("data-rt-action") === "place";
@@ -176,6 +186,25 @@
         }
     });
 
+    /* 2026-10-19: ödənilən ≠ gözlənilən — XƏBƏRDARLIQ (blok deyil). */
+    function syncMismatch(form) {
+        var warn = form.querySelector("[data-rt-mismatch]");
+        var paid = form.querySelector("[data-rt-paid]");
+        var expected = parseFloat(form.getAttribute("data-rt-expected") || "");
+        if (!warn || !paid) {
+            return;
+        }
+        var value = parseFloat(String(paid.value || "").replace(",", "."));
+        warn.hidden = !(isFinite(expected) && isFinite(value) && Math.abs(value - expected) > 0.004);
+    }
+
+    document.addEventListener("input", function (event) {
+        var field = event.target;
+        if (field && field.matches && field.matches("[data-rt-paid]") && field.form) {
+            syncMismatch(field.form);
+        }
+    });
+
     /* ── Bütün POST formaları (panelin içində) ──────────────────────────── */
     document.addEventListener("submit", function (event) {
         var form = event.target;
@@ -184,6 +213,20 @@
             return;
         }
         event.preventDefault();
+        var confirmText = event.submitter && event.submitter.getAttribute("data-rt-confirm");
+        if (confirmText && window.EMSConfirm) {
+            // Native confirm() əvəzinə layihənin vahid dialoqu (a11y qoruyucusu, W2).
+            window.EMSConfirm.open({ body: confirmText, danger: true }).then(function (ok) {
+                if (ok) {
+                    sendForm(form, root);
+                }
+            });
+            return;
+        }
+        sendForm(form, root);
+    });
+
+    function sendForm(form, root) {
         var url = form.getAttribute("action");
         if (!url) {
             return;
@@ -213,7 +256,7 @@
                     submit.disabled = false;
                 }
             });
-    });
+    }
 
     /* ── Növbə filtri: select dəyişəndə / axtarış yazılanda avtomatik tətbiq ─ */
     var searchTimer = null;

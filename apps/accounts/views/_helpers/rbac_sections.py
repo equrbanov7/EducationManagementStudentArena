@@ -281,6 +281,7 @@ def apply_permission_section_gates(
     # icazəyə yox, qapı middleware-inin bu sorğuda hesabladığı vəziyyətə bağlıdır
     # (açıq kampaniyada hədəfi olan tələbə) — sıfır sorğu; view-as altında yoxdur.
     from apps.announcements.public import section_visible as announcements_section_visible
+    from apps.hr_contracts.public import employee_section_visible, hr_section_visible
     from apps.surveys.public import inbox_section_visible, student_section_visible
 
     # «Kadr analitikası» (sahib 2026-10-11) — `people.hr_analytics` (HR; rektor `*` ilə; RİM rəhbəri privileged).
@@ -319,9 +320,14 @@ def apply_permission_section_gates(
         (can_view_people_teachers, "people-teachers"),
         (can_view_hr_analytics, "hr-analytics"),
         (can_view_accounting, "accounting"),
+        # «Əmək müqavilələri» (sahib 2026-10-19) — `hr.contracts_*`; data qapısı `apps/hr_contracts/services/access.py`.
+        (hr_section_visible(permissions, privileged=privileged), "hr-contracts"),
+        (employee_section_visible(user, organization), "my-contracts"),  # «Müqavilələrim» — müqaviləsi olan əməkdaş
         (can_view_people_students, "people-students"),
         # «25% müraciətləri» (sahib 2026-10-18) — açar + əhatə: registrar `retake_access` (data tag yenə yoxlayır).
         (_retake_desk_visible(user, organization), "retake-desk"),
+        # «25% müraciət pəncərəsi» (sahib 2026-10-19: «İmtahan mərkəzi açsın») — `exam_center.decide`.
+        (_retake_windows_visible(user, organization), "retake-windows"),
         # «Alt qrupa tələbə əlavə et» (sahib 2026-10-18) — `retake.manage`; əhatə hər endpoint-də registrar-da.
         (privileged or has_permission(permissions, "retake.manage"), "subgroup-placement"),
         (can_view_syllabus, "syllabus-list"),
@@ -432,6 +438,8 @@ def apply_permission_section_gates(
         "can_manage_surveys": can_manage_surveys,
         "can_reset_passwords": can_reset_passwords,
         "can_view_monitoring": can_view_monitoring,
+        # «Sənəd yoxlaması» (2026-10-18) — ayrıca səhifə (/sened-yoxlamasi/), data qapısı apps/verification/access.py.
+        "can_manage_document_seals": privileged or has_permission(permissions, "document_seal.manage"),
     }
 
 
@@ -442,6 +450,19 @@ def _retake_desk_visible(user, organization) -> bool:
     """`retake.payment_verify` / `retake.manage` / `student.records_view` / `final_score.entry` struktur əhatəsi."""
     if organization is None:
         return False
-    from apps.registrar.public import retake_access
+    from apps.registrar.public import retake_access, retake_fees
 
-    return retake_access.can_view_desk(user, organization) or retake_access.can_record_result(user, organization)
+    return (
+        retake_access.can_view_desk(user, organization)
+        or retake_access.can_record_result(user, organization)
+        or retake_fees.can_manage(user, organization)
+    )
+
+
+def _retake_windows_visible(user, organization) -> bool:
+    """`exam_center.decide` ORG-WIDE əhatəsi (İmtahan mərkəzi rəhbəri / əməkdaşı; RİM rəhbəri `*` ilə)."""
+    if organization is None:
+        return False
+    from apps.registrar.public import retake_window
+
+    return retake_window.can_manage(user, organization)
