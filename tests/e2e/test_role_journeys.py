@@ -27,7 +27,7 @@ def _open_seeded_course_dashboard(page: Page, listing_path: str) -> None:
     """Navigate from a course listing page into the seeded scenario course dashboard."""
     page.goto(build_url(listing_path))
     page.wait_for_load_state("domcontentloaded")
-    expect(page.get_by_text(E2E_SCENARIO_COURSE_TITLE)).to_be_visible()
+    expect(page.get_by_text(E2E_SCENARIO_COURSE_TITLE, exact=True).first).to_be_visible()
 
     dashboard_url = page.evaluate(
         """
@@ -104,7 +104,7 @@ class TestRoleJourneys:
     def test_teacher_sees_seeded_course_and_exam(self, teacher_page: Page) -> None:
         teacher_page.goto(build_url("/accounts/profile/?section=my-courses"))
         teacher_page.wait_for_load_state("domcontentloaded")
-        expect(teacher_page.get_by_text(E2E_SCENARIO_COURSE_TITLE)).to_be_visible()
+        expect(teacher_page.get_by_text(E2E_SCENARIO_COURSE_TITLE, exact=True).first).to_be_visible()
 
         teacher_page.goto(build_url("/exams/"))
         teacher_page.wait_for_load_state("domcontentloaded")
