@@ -69,6 +69,10 @@
 #   archive_junk_groups — test / zibil qrup və ixtisaslar («.», «test…», «Silinməli…», «aaa»; QA-2 F-16, 2026-10-17):
 #       yalnız HEÇ BİR istinadı olmayanlar deaktiv olunur (`is_active=False` + `settings.junk_archived`), heç nə
 #       silinmir; istifadə olunanlar CSV-də hansı əlaqə ilə bağlı olduğu ilə (RİM köçürmə xidməti ilə həll edir).
+#   issue_staff_credentials — fakültə heyətinin ilkin parol siyahısını tamamlayır (sahib 2026-10-19): `task_chair` =
+#       fakültə adı, `teacher` = ad axtarışı (fakültəni tapmaq üçün), `roster_tag` = `staff-known-…` (şifrəli, YALNIZ
+#       artıq paylanmış istifadəçi adları — parol yox). Parol YALNIZ siyahıda olmayan VƏ aktivləşməmiş hesablara;
+#       hesabat və yeni parollar şifrəli artifaktdadır, loga yalnız saylar düşür.
 #   shrink_avatars — mövcud avatarlar ≤512 px WebP-yə (PERF-2 H5, 2026-10-17); orijinal fayllar SİLİNMİR,
 #       `updated_at` dəyişmir. Loga yalnız yekun saylar.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
@@ -120,6 +124,7 @@ on:
           - dedupe_notifications
           - archive_junk_groups
           - shrink_avatars
+          - issue_staff_credentials
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -288,7 +293,7 @@ jobs:
         with:
           persist-credentials: false
       - name: 🔐 Şifrəli heyət siyahısı / yük sənədi
-        if: github.event.inputs.command == 'seed_staff_roster' || (github.event.inputs.command == 'reconcile_teacher_roster' && github.event.inputs.batch == '') || startsWith(github.event.inputs.command, 'import_teaching_')
+        if: github.event.inputs.command == 'seed_staff_roster' || (github.event.inputs.command == 'reconcile_teacher_roster' && github.event.inputs.batch == '') || startsWith(github.event.inputs.command, 'import_teaching_') || (github.event.inputs.command == 'issue_staff_credentials' && github.event.inputs.roster_tag != '')
         env:
           GH_TOKEN: ${{ github.token }}
           STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
@@ -306,6 +311,9 @@ jobs:
             import_teaching_load_form1)
               match "$ROSTER_TAG" '^teaching-load-[0-9a-z-]+$' || { echo "roster_tag formatı: teaching-load-…" >&2; exit 1; }
               asset=forma1.docx.enc; target="/tmp/teaching_load_${GITHUB_RUN_ID}.docx" ;;
+            issue_staff_credentials)
+              match "$ROSTER_TAG" '^staff-known-[0-9a-z-]+$' || { echo "roster_tag formatı: staff-known-…" >&2; exit 1; }
+              asset=usernames.txt.enc; target="/tmp/staff_known_${GITHUB_RUN_ID}.txt" ;;
             *)
               match "$ROSTER_TAG" '^(staff|teacher)-roster-[0-9a-z-]+$' || { echo "roster_tag formatı: staff-roster-… / teacher-roster-…" >&2; exit 1; }
               asset=roster.xlsx.enc; target="/tmp/staff_roster_${GITHUB_RUN_ID}.xlsx" ;;
@@ -488,6 +496,26 @@ jobs:
               # Hesablar sintetikdir (şəxsi data yox) → istifadəçi adlarının loga düşməsi icazəlidir.
               args=(--org "$ORG")
               ;;
+            issue_staff_credentials)
+              # Fakültə adı (task_chair) və ad axtarışı (teacher): yalnız hərf/rəqəm/boşluq/nöqtə/tire, LF/CR yox.
+              test -z "$TASK_CHAIR" || { [ "${#TASK_CHAIR}" -le 120 ] && match "$TASK_CHAIR" '^[[:alnum:]ƏəIıİiĞğŞşÇçÖöÜü .()-]+$'; } \
+                || { echo "task_chair (fakültə) formatı yanlışdır" >&2; exit 2; }
+              test -z "$TEACHER" || { [ "${#TEACHER}" -le 80 ] && match "$TEACHER" '^[[:alnum:]ƏəIıİiĞğŞşÇçÖöÜü .-]+$'; } \
+                || { echo "teacher (ad axtarışı) formatı yanlışdır" >&2; exit 2; }
+              test -n "$TASK_CHAIR" || test -n "$TEACHER" || { echo "task_chair (fakültə) və ya teacher (ad) verin" >&2; exit 2; }
+              args=(--org "$ORG" --report-out "/tmp/roster_details_${GITHUB_RUN_ID}.csv")
+              test -z "$TASK_CHAIR" || args+=(--faculty "$TASK_CHAIR")
+              test -z "$TEACHER" || args+=(--find-name "$TEACHER")
+              test -z "$ROSTER_TAG" || args+=(--known-usernames "/tmp/staff_known_${GITHUB_RUN_ID}.txt")
+              if [ "$APPLY" = "true" ]; then
+                test -n "$TASK_CHAIR" || { echo "apply üçün task_chair (fakültə) məcburidir" >&2; exit 2; }
+                test -n "$ROSTER_TAG" || { echo "apply üçün roster_tag (staff-known-…) məcburidir" >&2; exit 2; }
+                args+=(--apply --credentials-out "/tmp/staff_creds_${GITHUB_RUN_ID}.csv"
+                       --reason "Fakültə üzrə ilkin parol siyahısının tamamlanması — sahibin 2026-10-19 tapşırığı"
+                       --i-know-this-is-production)
+              fi
+              custom_apply=1
+              ;;
             *)
               echo "icazəsiz əmr: $COMMAND" >&2; exit 2
               ;;
@@ -506,7 +534,14 @@ jobs:
           flags=()
           for arg in "${args[@]}"; do case "$arg" in (--[a-z]*) flags+=("${arg%%=*}") ;; esac; done
           echo "::group::▶ $COMMAND (${#args[@]} arqument; bayraqlar: ${flags[*]:-—})"
-          if [ "$COMMAND" = "reconcile_teacher_roster" ]; then
+          if [ "$COMMAND" = "issue_staff_credentials" ]; then
+            # Hesabatda şəxs adları var → loga YALNIZ sayların sətri; CSV şifrəli artifaktdadır.
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            docker exec "$APP_CONTAINER" cat "/tmp/roster_details_${GITHUB_RUN_ID}.csv" > "$RUNNER_TEMP/details.csv" 2>/dev/null || true
+            grep -E '^staff_credentials: [a-z_]+=[0-9A-Z-]+( [a-z_]+=[0-9A-Z-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            test "${status:-0}" = 0 || { grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true; exit "$status"; }
+          elif [ "$COMMAND" = "reconcile_teacher_roster" ]; then
             # Hesabatda şəxs adları var → loga yalnız «Nümunələr»-ə qədərki saylar + paket id-si düşür;
             # tam hesabat/CSV şifrəli artifaktdadır (aşağıdakı addım).
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
@@ -571,7 +606,7 @@ jobs:
           rm -f "$RUNNER_TEMP/summary.log"
       - name: 🔑 Hesabat + parollar (serverdə saxla, şifrəli artifakt)
         id: creds
-        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'reconcile_teacher_roster' || startsWith(github.event.inputs.command, 'import_teaching_'))
+        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'reconcile_teacher_roster' || startsWith(github.event.inputs.command, 'import_teaching_') || github.event.inputs.command == 'issue_staff_credentials')
         env:
           STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
         run: |
@@ -605,10 +640,10 @@ jobs:
           path: ${{ runner.temp }}/staff-out/
           retention-days: 1
       - name: 🧹 Konteynerdə müvəqqəti faylları sil
-        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'reconcile_teacher_roster' || startsWith(github.event.inputs.command, 'import_teaching_'))
+        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'reconcile_teacher_roster' || startsWith(github.event.inputs.command, 'import_teaching_') || github.event.inputs.command == 'issue_staff_credentials')
         run: |
           # root kimi: fərqli UID-li qalıqlar (sticky /tmp) app istifadəçisi ilə silinmir.
-          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/staff_roster*.xlsx /tmp/staff_creds*.csv /tmp/org_structure.json /tmp/roster_report_*.md /tmp/roster_details_*.csv /tmp/teaching_task_*.xlsx /tmp/teaching_load_*.docx; rm -rf /tmp/teaching_report_*' || true
+          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/staff_roster*.xlsx /tmp/staff_known_*.txt /tmp/staff_creds*.csv /tmp/org_structure.json /tmp/roster_report_*.md /tmp/roster_details_*.csv /tmp/teaching_task_*.xlsx /tmp/teaching_load_*.docx; rm -rf /tmp/teaching_report_*' || true
           rm -rf "$RUNNER_TEMP/staff-out" "$RUNNER_TEMP/out.log" || true
       # ── import_timetable_docx / assign_task_rows_from_timetable (dərs cədvəli; öz addımları — digər əmrlərin
       #    axınına toxunmur). Hər ikisi eyni şifrəli timetable.docx.enc faylını oxuyur. ──────────────────────
