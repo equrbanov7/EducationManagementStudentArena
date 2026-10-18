@@ -58,7 +58,8 @@ def _open_seeded_assignment_detail(page: Page) -> None:
     assignment_url = page.evaluate(
         """
         (assignmentTitle) => {
-            const items = Array.from(document.querySelectorAll('.list-group-item'));
+            // 2026-10-18 (Paket E): tapşırıq sətri `.cd-task` kartıdır (köhnə `.list-group-item` də qəbul olunur).
+            const items = Array.from(document.querySelectorAll('.cd-task, .list-group-item'));
             const matchingItem = items.find((item) => (item.textContent || '').includes(assignmentTitle));
             if (!matchingItem) {
                 return null;
