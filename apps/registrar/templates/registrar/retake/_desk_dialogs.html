@@ -27,3 +27,8 @@ dəyərlərini formaya yazır və JSON/multipart POST edir. Səbəb tələb edə
 {% trans "Bal ResitRecord-a yazılır və yekun nəticə yenidən hesablanır (təkrar imtahan balı əsas imtahan balını əvəz edir)." context "registrar.retake" as d6_sub %}
 {% trans "Yaz" context "registrar.retake" as d6_submit %}
 {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="rtResultDialog" form_dialog_title=d6_title form_dialog_subtitle=d6_sub form_dialog_body_include="registrar/retake/_dlg_result.html" form_dialog_submit_label=d6_submit %}
+
+{% trans "Ödənişdən sonra bağlanış" context "registrar.retake" as d7_title %}
+{% trans "Rəsmi qərar məcburidir: əmr nömrəsi və tarixi və ya qərar sənədi. Qaytarılma yoxdur — qərar və qeyd tarixçədə qalır." context "registrar.retake" as d7_sub %}
+{% trans "Qərarı yaz" context "registrar.retake" as d7_submit %}
+{% include "partials/ems_ui/_reason_dialog.html" with reason_id="rtCloseDialog" reason_title=d7_title reason_subtitle=d7_sub reason_submit_label=d7_submit reason_submit_tone="danger" reason_min=rd.reason_min reason_extra_include="registrar/retake/_dlg_close.html" %}

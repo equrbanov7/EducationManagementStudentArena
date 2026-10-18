@@ -1,0 +1,18 @@
+{% load i18n %}
+{% comment %}
+Kurs videosu (2026-10-19) — `resource` (file + is_video_file), `preload` ("metadata" | "none").
+`src` atributu (type-sız `<source>` yox): brauzer konteyneri özü tanıyır — H.264 `.mov` Chrome-da da
+oynayır; HEVC iPhone videosu oynamırsa resource_accordion.js `error`-u tutub izahı açır. Server
+transkod etmir. Fayl /media/course_resources/ → qorunan media (X-Accel, Range dəstəyi — irəli çəkmək olur).
+{% endcomment %}
+<div class="cd-res-video" data-resource-video-box>
+  <video class="cd-res-video__player" controls playsinline preload="{{ preload|default:'metadata' }}"
+         src="{{ resource.file.url }}" data-resource-video
+         aria-label="{% trans 'Video' context 'courses.resource_type' %}: {{ resource.title }}">
+    <a href="{{ resource.file.url }}" download>{% trans "Endir" context "courses.resource_upload" %}</a>
+  </video>
+  {% if resource.is_quicktime_video %}
+    <p class="cd-res-video__note">{% trans "iPhone (.MOV) videosu bəzi brauzerlərdə (Chrome, Android) oynamaya bilər — «Endir» ilə açın." context "courses.resource_upload" %}</p>
+  {% endif %}
+  <p class="cd-res-video__error" data-resource-video-error role="status" hidden>{% trans "Brauzer bu videonu oynada bilmir — «Endir» ilə kompüterə yükləyib açın." context "courses.resource_upload" %}</p>
+</div>

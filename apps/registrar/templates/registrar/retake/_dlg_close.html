@@ -1,0 +1,20 @@
+{% load i18n %}
+{% comment %}Ödənişdən sonra bağlanış qərarı (sahib 2026-10-19) — əmr № + tarix VƏ YA sənəd (server yoxlayır).{% endcomment %}
+<p class="rt-dialog__subject" data-rt-text="who"></p>
+<p class="rt-dialog__subject" data-rt-text="title"></p>
+<div class="rt-grid">
+    <div class="ems-field">
+        <label class="ems-field__label" for="rtCloseOrderNo">{% trans "Əmr / qərar №" context "registrar.retake" %}</label>
+        <input class="ems-input" type="text" id="rtCloseOrderNo" name="order_number" maxlength="80" autocomplete="off">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="rtCloseOrderDate">{% trans "Əmr tarixi" context "registrar.retake" %}</label>
+        <input class="ems-input ems-input--date" type="date" id="rtCloseOrderDate" name="order_date">
+    </div>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="rtCloseDoc">{% trans "və ya qərar sənədi" context "registrar.retake" %}</label>
+    <input class="ems-input" type="file" id="rtCloseDoc" name="document" accept=".pdf,.jpg,.jpeg,.png">
+    <span class="ems-field__hint">{% trans "PDF, JPG və ya PNG · ən çox 10 MB" context "registrar.retake" %}</span>
+</div>
+<p class="ems-msg ems-msg--info">{% trans "Qaytarılma yoxdur: sistem məbləği geri qaytarmır, yalnız qərar qeyd olunur." context "registrar.retake" %}</p>

@@ -530,9 +530,10 @@
     .view-as-dropdown__header {
         margin-bottom: 12px;
     }
+    /* Mobil qabıq 2026-10-19: 32 → 40px barmaq hədəfi. */
     .view-as-dropdown__close {
-        width: 32px;
-        height: 32px;
+        width: 40px;
+        height: 40px;
     }
     .view-as-dropdown__results {
         max-height: min(260px, 34dvh);

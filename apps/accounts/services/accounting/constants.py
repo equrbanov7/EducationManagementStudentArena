@@ -47,7 +47,25 @@ SEASON_LABELS = {
 TEACHING_WEEKDAYS = (0, 1, 2, 3, 4)
 
 #: Kənarlaşma bandı: keçirilmiş saat planın ±10%-i daxilindədirsə «plana uyğun».
+#: 2026-10-19 (sahib): band «Sistem tənzimləmələri» → ``accounting.deviation_percent`` (defolt 10) ilə idarə olunur;
+#: bu sabit yalnız tənzimləmə oxuna bilməyəndə ehtiyat dəyərdir. Oxu nöqtəsi: :func:`deviation_tolerance`.
 DEVIATION_TOLERANCE = 0.10
+
+
+def deviation_percent() -> int:
+    """Cari band (tam faiz, məs. 10) — «Sistem tənzimləmələri»ndən; oxunmasa sabitə düşür."""
+    try:
+        from core import runtime_settings
+
+        return int(runtime_settings.get_int("accounting.deviation_percent"))
+    except Exception:  # noqa: BLE001 — tənzimləmə xətası hesabatı sındırmır
+        return int(round(DEVIATION_TOLERANCE * 100))
+
+
+def deviation_tolerance() -> float:
+    """Cari band payı (məs. 0.10)."""
+    return deviation_percent() / 100
+
 
 #: Status ailəsi (``core/ui/status_catalog.py`` → ``accounting_plan``).
 STATUS_FAMILY = "accounting_plan"

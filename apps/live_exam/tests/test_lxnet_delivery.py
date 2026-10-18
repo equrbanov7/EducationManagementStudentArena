@@ -386,10 +386,12 @@ class PlayerAssetPrefetchTest(TestCase):
 
     def test_module_list_is_the_full_import_graph_with_the_shared_token(self):
         urls = player_module_urls()
-        names = {url.rsplit("/", 1)[1].split("?", 1)[0] for url in urls}
-        on_disk = {path.name for path in PLAYER_JS_DIR.glob("*.js")} - {"player.entry.js"}
-        self.assertEqual(names, on_disk)
-        self.assertIn("clock.js", names)
+        names = {"/".join(url.split("?", 1)[0].rsplit("/", 2)[-2:]) for url in urls}
+        on_disk = {f"player/{path.name}" for path in PLAYER_JS_DIR.glob("*.js")} - {"player/player.entry.js"}
+        # Ortaq SAF modullar (`../host_lobby/…`) da preload olunur — 1-ci sual əlavə RTT gözləmir.
+        self.assertEqual(names - on_disk, {"host_lobby/stage_logic.js", "host_lobby/code_text.js"})
+        self.assertLessEqual(on_disk, names)
+        self.assertIn("player/clock.js", names)
         tokens = {re.search(r"\?v=([\w.-]+)$", url).group(1) for url in urls}
         self.assertEqual(len(tokens), 1, tokens)
 

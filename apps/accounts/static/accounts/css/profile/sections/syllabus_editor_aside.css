@@ -221,3 +221,19 @@
 .syl-bottombar__actions .syl-btn {
     min-height: 44px;
 }
+
+/* ── Telefon: əməl paneli bölmənin dərhal ALTINDA (mobil müəllim 2026-10-19) ─────────
+   ≤ 820px-də şəbəkə tək sütundur və sağ panel (xülasə, çatışmayan tələblər, versiya jurnalı —
+   ~1500px) bölmə ilə «Növbəti / Qaralama saxla / Təsdiqə göndər» arasına düşürdü: müəllim hər
+   addımda düymələrə çatmaq üçün iki ekran sürüşdürürdü. Panelin `sticky`-si səhifə səviyyəsində
+   işləmir (main.css `body { overflow-x: hidden }`). Şəbəkə `display: contents` olur ki, əməl paneli
+   formadan sonra, xülasə isə ondan sonra gəlsin; masaüstü düzümü dəyişmir. */
+@media (max-width: 820px) {
+    .syl-editor { display: flex; flex-direction: column; }
+    .syl-editor__grid { display: contents; }
+    .syl-editor__grid > .syl-steps,
+    .syl-editor__grid > .syl-panels { margin-bottom: 14px; }
+    .syl-editor > .syl-bottombar { order: 1; margin: 0 0 14px; }
+    .syl-editor__grid > .syl-aside { order: 2; }
+    .syl-bottombar__progress { min-width: 0; flex: 1 1 100%; }
+}

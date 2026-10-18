@@ -135,3 +135,45 @@
     color: var(--ems-neutral-500);
     font-size: var(--ems-fs-sm, 12px);
 }
+
+/* ── Boş / əlçatmaz vəziyyət kartı (2026-10-19) ─────────────────────────────
+   `ems-state` (ems_ui/table.css) kartın içində: dairəvi ikon nişanı + başlıq + izah.
+   «Sorğular» inbox-u və tələbənin «Anonim sorğu» bölməsi eyni görünür. */
+.svi-state-card .ems-state {
+    padding: 40px 24px;
+}
+
+.svi-state__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--ems-success-100);
+    color: var(--ems-success-700);
+    font-size: 22px;
+}
+
+.svi-state__badge--muted {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-500);
+}
+
+.svi-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+@media (max-width: 480px) {
+    .svi-state-card .ems-state {
+        padding: 32px 16px;
+    }
+}

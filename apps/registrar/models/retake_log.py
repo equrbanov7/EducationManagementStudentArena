@@ -35,6 +35,7 @@ class RetakeEventAction(models.TextChoices):
     EXAM_GRANTED = "exam_granted", pgettext_lazy(_CTX, "İmtahan cəhdi verildi")
     RESULT_RECORDED = "result_recorded", pgettext_lazy(_CTX, "Nəticə yazıldı")
     WITHDRAWN = "withdrawn", pgettext_lazy(_CTX, "Geri götürüldü")
+    NO_SHOW = "no_show", pgettext_lazy(_CTX, "İmtahana gəlmədi")
 
 
 class RetakeActorRole(models.TextChoices):

@@ -232,6 +232,7 @@ def _row_payload(row) -> dict:
         "language": row.language or "",
         "is_elective": row.is_elective,
         "elective_group": row.elective_group or "",
+        "required_choices": row.required_choices,
         "chair_id": str(row.teaching_chair_id) if row.teaching_chair_id else "",
         "chair_name": row.teaching_chair.name if row.teaching_chair_id else "",
         "errors": errors,

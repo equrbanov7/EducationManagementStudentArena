@@ -173,6 +173,40 @@
         display: none;
     }
     /* Mobil menyu paneli və overlay JavaScript tərəfindən idarə olunacaq */
+
+    /* Mobil qabıq 2026-10-19: burger 32px idi — barmaq hədəfi ≥ 40px olmalıdır
+       (başlığın digər düymələri də 40px-dir). Xətlər eyni ölçüdə qalır. */
+    .blog-header__toggle {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+    }
+
+    /* Tələbənin «Qoşul» menyusu (canlı imtahana PIN ilə qoşulma) telefonda da
+       qalır: 2026-10-02-dən şkafda bu bənd yoxdur, ona görə başlıqda gizlədiləndə
+       telefondan PIN daxil etmək yolu qalmırdı. Telefonda yalnız ikon (40×40);
+       menyu istifadəçi menyusu kimi başlığa bağlanır və ekrana sığır. */
+    .blog-header__create.blog-header__create--student {
+        display: inline-flex;
+        position: static;
+        flex: 0 0 auto;
+    }
+    .blog-header__create--student .blog-header__create-toggle {
+        width: 40px;
+        padding: 0;
+        justify-content: center;
+    }
+    .blog-header__create--student .blog-header__create-label,
+    .blog-header__create--student .blog-header__create-caret {
+        display: none;
+    }
+    .blog-header__create--student .blog-header__create-menu {
+        left: auto;
+        right: max(12px, env(safe-area-inset-right));
+        top: calc(100% + 6px);
+        width: min(340px, calc(100vw - 24px));
+        max-width: none;
+    }
 }
 
 @media (min-width: 769px) {

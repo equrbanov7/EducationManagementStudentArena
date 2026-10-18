@@ -5,12 +5,32 @@
  * from #resourceAccordionConfig data-*. (Delete clicks on the dashboard are
  * handled by topic_accordion.js's document delegation; this keeps the legacy
  * global helper available, as before.)
+ *
+ * 2026-10-19: kurs videoları (`<video data-resource-video>`). Brauzer faylı oynada bilməyəndə
+ * (məs. iPhone HEVC .MOV Chrome/Android-də) `error` hadisəsi qabarmır — document-də capture ilə
+ * tutulur və videonun yanındakı «Yüklə» izahı (`[data-resource-video-error]`) göstərilir.
  */
 (function () {
     "use strict";
 
     function getCfg() {
         return document.getElementById("resourceAccordionConfig");
+    }
+
+    function revealVideoError(event) {
+        var target = event.target;
+        if (!target || !target.closest) { return; }
+        var video = target.matches && target.matches("[data-resource-video]") ? target : target.closest("[data-resource-video]");
+        if (!video) { return; }
+        var box = video.closest("[data-resource-video-box]");
+        var note = box && box.querySelector("[data-resource-video-error]");
+        if (note) { note.hidden = false; }
+        if (box) { box.classList.add("is-unplayable"); }
+    }
+
+    if (!window.__emsResourceVideoErrorBound) {
+        window.__emsResourceVideoErrorBound = true;
+        document.addEventListener("error", revealVideoError, true);
     }
 
     window.deleteResource = function (courseId, resourceId) {

@@ -39,6 +39,16 @@ def has_key(user, organization, key) -> bool:
     return scope(user, organization, key).has_structure_access
 
 
+def has_org_wide_key(user, organization, key) -> bool:
+    """Açar BÜTÜN təşkilat əhatəsindədir (UNIT rolu yox) — təşkilat səviyyəli tənzimləmələr üçün (pəncərə, təhsil
+    haqqı cədvəli). Kollokvium qapısı ``can_exam_center_decide`` ilə eyni ruh: alt-bölmə rolu bütün təşkilatın
+    qaydasını dəyişmir (review 2026-10-19, LOW-7)."""
+    if not _authenticated(user) or organization is None:
+        return False
+    unit_scope = scope(user, organization, key)
+    return bool(unit_scope.has_structure_access and unit_scope.is_org_wide)
+
+
 def can_verify_payments(user, organization) -> bool:
     return has_key(user, organization, retake_rules.PERM_PAYMENT_VERIFY)
 

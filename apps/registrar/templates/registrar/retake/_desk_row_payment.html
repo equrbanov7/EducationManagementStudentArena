@@ -37,11 +37,16 @@ eyni qəbz xəbərdarlığı və ödəniş addımları. Bal, nəticə, uyğunluq
             <span>{% trans "Qəbz yüklənməyib" context "registrar.retake" %}</span>
         {% endif %}
     </p>
+    <dl class="rt-facts">
+        <div><dt>{% trans "Gözlənilən məbləğ" context "registrar.retake" %}</dt><dd>{% if a.expected_fee is not None %}{{ a.expected_fee|retake_score }} AZN{% if a.fee_year %} <span class="rt-fee__year">{% blocktrans with year=a.fee_year context "registrar.retake" %}({{ year }} tədris ilinin haqqı ilə){% endblocktrans %}</span>{% endif %}{% else %}—{% endif %}</dd></div>
+        <div><dt>{% trans "Ödənilən məbləğ" context "registrar.retake" %}</dt><dd>{% if a.paid_amount is not None %}{{ a.paid_amount|retake_score }} AZN{% else %}—{% endif %}</dd></div>
+    </dl>
+    {% if a.amount_mismatch %}<p class="rt-note rt-note--danger"><i class="fas fa-scale-unbalanced" aria-hidden="true"></i> <span class="ems-badge ems-badge--warning">{% trans "Ödənilən məbləğ gözləniləndən fərqlidir" context "registrar.retake" %}</span></p>{% endif %}
     {% if app.payment_reference %}<p class="rt-note"><i class="fas fa-building-columns" aria-hidden="true"></i> <span>{% trans "Ödəniş №" context "registrar.retake" %}: <strong>{{ app.payment_reference }}</strong></span></p>{% endif %}
 
     {% if a.can_verify %}
     <div class="rt-actions" data-rt-subject="{{ app.subject.name }}" data-rt-student="{{ student.get_full_name|default:student.username }}">
-        <button type="button" class="ems-btn ems-btn--success ems-btn--sm" data-ems-overlay-open="rtVerifyDialog" data-rt-open data-rt-url="{% url 'retake:payment' a.id %}" data-rt-action="verify"><i class="fas fa-check" aria-hidden="true"></i> {% trans "Ödənişi təsdiqlə" context "registrar.retake" %}</button>
+        <button type="button" class="ems-btn ems-btn--success ems-btn--sm" data-ems-overlay-open="rtVerifyDialog" data-rt-open data-rt-url="{% url 'retake:payment' a.id %}" data-rt-action="verify" data-rt-expected="{% if a.expected_fee is not None %}{{ a.expected_fee|retake_score }}{% endif %}"><i class="fas fa-check" aria-hidden="true"></i> {% trans "Ödənişi təsdiqlə" context "registrar.retake" %}</button>
         <button type="button" class="ems-btn ems-btn--sm" data-ems-overlay-open="rtRejectPaymentDialog" data-rt-open data-rt-url="{% url 'retake:payment' a.id %}" data-rt-action="reject"><i class="fas fa-xmark" aria-hidden="true"></i> {% trans "Qəbzi rədd et" context "registrar.retake" %}</button>
     </div>
     {% endif %}

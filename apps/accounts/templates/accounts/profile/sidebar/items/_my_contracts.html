@@ -1,0 +1,14 @@
+{% load i18n nav_icons %}
+{% comment %}2026-10-19 (sahib): «Müqavilələrim» — əmək müqaviləsi qeydə alınmış hər əməkdaş (müəllim, inzibati heyət).{% endcomment %}
+{% if 'my-contracts' in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=my-contracts"
+       data-section="my-contracts"
+       data-title="{% trans 'Müqavilələrim' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-contracts' %}active{% endif %}">
+        {% nav_icon "file-check" "sidebar-menu-icon" %}
+        <span class="sidebar-menu-text">{% trans "Müqavilələrim" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}

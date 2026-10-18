@@ -9,8 +9,8 @@
 @import url("profile/sidebar_rail.css");
 @import url("profile/sidebar_icons.css");
 @import url("profile/sidebar.css");
-@import url("profile/layout.css?v=20260912-1");
-@import url("profile/common.css?v=20260912-1");
+@import url("profile/layout.css?v=20261019-mob");
+@import url("profile/common.css?v=20261019-mob");
 
 @import url("profile/sections/profile_info.css?v=20260912-1");
 @import url("profile/sections/profile_identity.css?v=20260907-redesign");
@@ -33,8 +33,8 @@
 @import url("profile/sections/org_management.css");
 @import url("profile/sections/org_unit_detail.css");
 @import url("profile/sections/student_org_management.css");
-@import url("profile/sections/notifications.css?v=20260908-files");
-@import url("profile/sections/notifications_rows.css?v=20260908-files");
+@import url("profile/sections/notifications.css?v=20261019-mob2");
+@import url("profile/sections/notifications_rows.css?v=20261019-mob");
 @import url("profile/sections/notifications_modal.css?v=20260930-resp");
 @import url("profile/sections/publish_notification.css?v=20260908-scopes");
 @import url("profile/sections/publish_notification_preview.css?v=20260908-scopes");
@@ -43,4 +43,4 @@
 @import url("profile/sections/contact_messages/_part1.css");
 @import url("profile/sections/contact_messages/_part2.css");
 
-@import url("profile/responsive.css");
+@import url("profile/responsive.css?v=20261019-mob2");

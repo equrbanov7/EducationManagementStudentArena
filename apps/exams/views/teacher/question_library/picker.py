@@ -2,7 +2,7 @@
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import pgettext
@@ -28,6 +28,14 @@ from ._shared import (
 )
 
 
+def _attached_source_ids(exam, bank_question_ids):
+    """İmtahanda artıq snapshot-u olan bank sualı id-ləri (təkrar əlavənin qarşısı)."""
+    ids = [qid for qid in bank_question_ids if qid]
+    if not ids:
+        return set()
+    return set(exam.questions.filter(source_bank_question_id__in=ids).values_list("source_bank_question_id", flat=True))
+
+
 @login_required
 def exam_bank_picker(request, slug):
     _ensure_teacher(request.user)
@@ -43,10 +51,15 @@ def exam_bank_picker(request, slug):
         .order_by("-created_at")
     )
 
+    # 2026-10-19: rəqəm olmayan `bank` (məs. ?bank=abc) əvvəl ValueError → 500 verirdi.
     bank_id = (request.GET.get("bank") or request.POST.get("bank") or "").strip()
-    selected_bank = banks.filter(id=bank_id).first() if bank_id else None
+    selected_bank = banks.filter(id=int(bank_id)).first() if bank_id.isdigit() else None
+    is_attach = request.method == "POST" and request.POST.get("action") == "attach"
+    if is_attach and bank_id and selected_bank is None:
+        # Əhatədən kənar (başqa təşkilat/müəllim, deaktiv və ya tipə uyğunsuz) bank — 404.
+        raise Http404
 
-    if request.method == "POST" and (request.POST.get("action") == "attach"):
+    if is_attach:
         if selected_bank is None:
             if is_modal:
                 return JsonResponse(
@@ -76,6 +89,11 @@ def exam_bank_picker(request, slug):
                     .filter(id__in=requested_ids)
                     .values_list("id", flat=True)
                 )
+            # 2026-10-19: artıq imtahanda olan bank sualı (source_bank_question) təkrar əlavə olunmur —
+            # əvvəl eyni sual iki dəfə snapshot olunurdu. Picker onları «artıq əlavə olunub» göstərir.
+            already = _attached_source_ids(exam, valid_ids)
+            skipped = sum(1 for qid in valid_ids if qid in already)
+            valid_ids = [qid for qid in valid_ids if qid not in already]
             # Yazılı/praktiki imtahanda suallar birinci bloka düşür (sonradan müəllim
             # özü bloklara bölə bilər). Test imtahanında blok məcburi deyil.
             attach_block = None if exam.exam_type == "test" else _first_or_default_block(exam)
@@ -98,11 +116,28 @@ def exam_bank_picker(request, slug):
                             "ayrı bölmələrə bölə bilərsiniz.",
                         ).format(count=len(created), block=attach_block.name),
                     )
-            if is_modal:
-                return JsonResponse(
-                    {"success": True, "count": len(created), "message": success_msg, "redirect_url": redirect_url}
+            if skipped and not created:
+                success_msg = pgettext(
+                    "exams.view.bank.message", "Seçilmiş suallar artıq imtahanda var — yeni sual əlavə olunmadı."
                 )
-            messages.success(request, success_msg)
+            elif skipped:
+                skipped_msg = pgettext("exams.view.bank.message", "{count} sual artıq imtahanda idi — ötürüldü.")
+                success_msg = f"{success_msg} {skipped_msg.format(count=skipped)}"
+            if is_modal:
+                # Modal səhifəni yeniləyəcəksə (yazılı redaktor: blok mətni serverdən gəlir) mesaj
+                # növbəti səhifədə toast kimi görünsün; qalmırsa JS özü toast göstərir (təkrar olmasın).
+                if request.POST.get("after") == "reload":
+                    (messages.success if created else messages.warning)(request, success_msg)
+                return JsonResponse(
+                    {
+                        "success": True,
+                        "count": len(created),
+                        "skipped": skipped,
+                        "message": success_msg,
+                        "redirect_url": redirect_url,
+                    }
+                )
+            (messages.success if created or not skipped else messages.warning)(request, success_msg)
             return redirect(redirect_url)
 
     try:
@@ -118,6 +153,7 @@ def exam_bank_picker(request, slug):
     bank_total_questions = 0
     bank_language_count = 0
     has_more = False
+    attached_count = 0
     if selected_bank is not None:
         # Variantlar (akkordeon) üçün prefetch — N+1 sorğunun qarşısını alır.
         question_qs = bank_questions_queryset(
@@ -128,6 +164,10 @@ def exam_bank_picker(request, slug):
             search=(request.GET.get("q") or "").strip() or None,
         ).prefetch_related("options")
         offset = (page - 1) * _PICKER_PAGE_SIZE
+        if not items_mode:
+            attached_count = question_qs.filter(
+                id__in=exam.questions.filter(source_bank_question__isnull=False).values("source_bank_question_id")
+            ).count()
         if items_mode:
             # Scroll əlavəsi: stats/count sorğusu YOX — bir əlavə element çəkib
             # növbəti səhifə olub-olmadığını bilirik (daha sürətli).
@@ -142,6 +182,8 @@ def exam_bank_picker(request, slug):
             questions = list(question_qs[offset : offset + _PICKER_PAGE_SIZE])
             has_more = total_count > offset + len(questions)
 
+    # Bu səhifənin artıq imtahanda olan sualları — BİR sorğu (N+1 yox).
+    attached_ids = _attached_source_ids(exam, [q.id for q in questions])
     page_start = (page - 1) * _PICKER_PAGE_SIZE + 1 if questions else 0
     context = {
         "exam": exam,
@@ -157,6 +199,9 @@ def exam_bank_picker(request, slug):
         "selected_bank": selected_bank,
         "questions": questions,
         "total_count": total_count,
+        "attached_ids": attached_ids,
+        "attached_count": attached_count,
+        "selectable_count": max(0, total_count - attached_count),
         "bank_language_stats": bank_language_stats,
         "bank_total_questions": bank_total_questions,
         "bank_language_count": bank_language_count,

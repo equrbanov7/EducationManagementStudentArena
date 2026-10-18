@@ -1,0 +1,11 @@
+{% load i18n %}
+{% comment %}Status leqendası — hər status bir cümlə ilə (band «Sistem tənzimləmələri» → `accounting.deviation_percent`).
+Kontekst: `ac.legend` (services/accounting/legend.py).{% endcomment %}
+<ul class="ac-legend" aria-label="{% trans 'Statusların izahı' context 'accounts.accounting' %}">
+    {% for item in ac.legend %}
+    <li class="ac-legend__item">
+        {% include "partials/ems_ui/_status_badge.html" with status=item.status nowrap=True %}
+        <span class="ac-legend__text">{{ item.text }}</span>
+    </li>
+    {% endfor %}
+</ul>

@@ -24,13 +24,13 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 
 from apps.registrar import transcript as transcript_service
-from apps.registrar import transcript_pdf
+from apps.registrar import transcript_seal
 from apps.registrar.audit_write import create_audit_row
 from apps.registrar.catalog_console import can_manage as _can_manage_registrar
 from apps.registrar.models import StudentAcademicRecord
 
 
-def _audit_issue(organization, record, by_user):
+def _audit_issue(organization, record, by_user, seal=None):
     """Best-effort audit entry for an issued transcript (never blocks the download).
 
     Audit 2026-09-28 DB-01: SAVEPOINT-li yazı (audit_write) — ATOMIC_REQUESTS
@@ -45,7 +45,8 @@ def _audit_issue(organization, record, by_user):
         resource_type="registrar.transcript_pdf",
         resource_id=str(record.pk) if record else "",
         resource_repr=f"Transkript PDF — {student.get_full_name() or student.username}",
-        reason="Akademik transkript PDF olaraq yükləndi.",
+        reason="Akademik transkript PDF olaraq yükləndi."
+        + (f" Yoxlama kodu: {seal.code}." if seal is not None else ""),
     )
 
 
@@ -92,13 +93,21 @@ def _attachment(payload: bytes, filename: str) -> HttpResponse:
     return response
 
 
-def _render_response(*, organization, student, record) -> HttpResponse:
+def _render_response(*, organization, student, record, request):
+    """``(HttpResponse, seal)`` — hər buraxılış QR + yoxlama kodu ilə möhürlənir (``transcript_seal``)."""
     program = record.program if record and record.program_id else None
     data = transcript_service.build_student_transcript(student=student, organization=organization, program=program)
     if not data["has_record"]:
         raise Http404  # nothing to certify yet
-    payload = transcript_pdf.render_transcript_pdf(organization=organization, student=student, record=record, data=data)
-    return _attachment(payload, _transcript_filename(student))
+    payload, seal = transcript_seal.render_sealed_transcript(
+        organization=organization,
+        student=student,
+        record=record,
+        data=data,
+        issued_by=getattr(request, "real_user", None) or request.user,
+        request=request,
+    )
+    return _attachment(payload, _transcript_filename(student)), seal
 
 
 @login_required
@@ -122,8 +131,8 @@ def my_transcript_pdf(request):
         .select_related("program", "group", "student")
         .first()
     )
-    response = _render_response(organization=organization, student=request.user, record=record)
-    _audit_issue(organization, record, request.user)
+    response, seal = _render_response(organization=organization, student=request.user, record=record, request=request)
+    _audit_issue(organization, record, request.user, seal)
     return response
 
 
@@ -180,6 +189,6 @@ def student_transcript_pdf(request, pk):
         StudentAcademicRecord.objects.filter(organization=organization).select_related("program", "group", "student"),
         pk=pk,
     )
-    response = _render_response(organization=organization, student=record.student, record=record)
-    _audit_issue(organization, record, request.user)
+    response, seal = _render_response(organization=organization, student=record.student, record=record, request=request)
+    _audit_issue(organization, record, request.user, seal)
     return response

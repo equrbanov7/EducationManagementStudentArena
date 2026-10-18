@@ -1,0 +1,72 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   live_code_text.css — canlı imtahanda sual / variant mətnindəki KOD NÜMUNƏSİ (sahib 2026-10-19)
+   «Kod nümunəsi alt-alta görünsün, birləşməsin — necə var o formada göstərək.»
+
+   * Sual və variant mətni `white-space: pre-wrap` — sətir sonları VƏ girinti saxlanılır
+     (əvvəl aparıcı ekranında hər şey bir sətrə birləşirdi, telefonda girinti itirdi).
+   * Kod bloku (`code_text.js` → `<code class="lx-code">`): eyni enli şrift, sətirlər SARINMIR,
+     uzun sətir blokun ÖZ içində üfüqi sürüşür (səhifə yox). Aparıcı ekranında `fitText` kodun
+     daşmasını da ölçür və şrifti kiçildir.
+   Ortaq fayl: aparıcı (`_host_head_assets.html`) + oyunçu (`views/player/assets.py` PLAYER_CSS).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.hx-qcard__text,
+.hx-tile__text,
+.lxp-qcard__text,
+.lxp-tile__text {
+    white-space: pre-wrap;
+    tab-size: 4;
+}
+
+.lx-code {
+    display: block;
+    box-sizing: border-box;
+    width: fit-content;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0.5em auto;
+    padding: 0.6em 0.9em;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 12px;
+    background: #111827;
+    color: #e5e7eb;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 0.72em;
+    font-weight: 500;
+    font-style: normal;
+    line-height: 1.45;
+    letter-spacing: 0;
+    text-align: left;
+    text-shadow: none;
+    white-space: pre;
+    tab-size: 4;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
+    font-variant-ligatures: none;
+}
+
+.lx-code:first-child { margin-top: 0; }
+.lx-code:last-child { margin-bottom: 0; }
+
+/* Rəngli variant plitələrində — açıq fon üzərində tünd blok əvəzinə yarımşəffaf «oyuq». */
+.hx-tile .lx-code,
+.lxp-tile .lx-code {
+    margin-inline: 0;
+    background: rgba(0, 0, 0, 0.28);
+    color: inherit;
+}
+
+/* Telefon: kod bloku hündürlükdə məhdud, öz içində sürüşür (4 sətirlik «clamp» kodu kəsmir). */
+.lxp-qcard .lx-code {
+    max-height: 46vh;
+    overflow-y: auto;
+    font-size: 0.8em;
+}
+
+.lxp-qcard.is-compact .lx-code { max-height: 32vh; }
+
+.lxp-qcard__text.has-code { text-align: left; }

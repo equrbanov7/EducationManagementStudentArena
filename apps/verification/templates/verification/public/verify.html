@@ -1,0 +1,139 @@
+{% extends "base_auth.html" %}
+{% load static i18n %}
+{% comment %}
+Publik sənəd yoxlaması (sahib 2026-10-18) — `/yoxla/` və `/yoxla/<kod>/`. Görünüş: apps/verification/views_public.py.
+Vəziyyətlər (`state`): form · invalid · not_found · limited · valid · revoked. Tapılmayan və yanlış formatlı kod
+EYNİ mətni alır (sadalamaya qarşı). Sahibin adı maskalıdır; yalnız `payload` faktları görünür.
+CSP: stil/skript YOXDUR — hamısı xarici CSS; ikonlar inline SVG (skript deyil). JS lazım deyil.
+{% endcomment %}
+
+{% block title %}{% trans "Sənəd yoxlaması" context "verification.public" %} — {{ site_brand_name }}{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20261018-pkga">
+<link rel="stylesheet" href="{% static 'verification/css/verify.css' %}?v=20261018-dv1">
+{% endblock %}
+
+{% block content %}
+<div class="dv-shell">
+    <header class="dv-brand">
+        <img class="dv-brand__logo" src="{% static 'brand/wcu-logo-circle.png' %}" alt="" width="40" height="40">
+        <div>
+            <p class="dv-brand__name">{{ site_brand_name }}</p>
+            <p class="dv-brand__sub">{% trans "Elektron sənəd yoxlaması" context "verification.public" %}</p>
+        </div>
+    </header>
+
+    <section class="dv-card" aria-labelledby="dv-title">
+        {% if state == "valid" or state == "revoked" %}
+            <div class="dv-status dv-status--{{ state }}" role="status">
+                <span class="dv-status__icon" aria-hidden="true">
+                    {% if state == "valid" %}
+                        <svg viewBox="0 0 24 24" width="28" height="28"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1.2 14.2-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4-7 7z"/></svg>
+                    {% else %}
+                        <svg viewBox="0 0 24 24" width="28" height="28"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.2 12.8-1.4 1.4L12 13.4l-2.8 2.8-1.4-1.4 2.8-2.8-2.8-2.8 1.4-1.4 2.8 2.8 2.8-2.8 1.4 1.4-2.8 2.8 2.8 2.8z"/></svg>
+                    {% endif %}
+                </span>
+                <div>
+                    <h1 class="dv-status__title" id="dv-title">
+                        {% if state == "valid" %}{% trans "Sənəd etibarlıdır" context "verification.public" %}{% else %}{% trans "Sənəd ləğv edilib" context "verification.public" %}{% endif %}
+                    </h1>
+                    <p class="dv-status__text">
+                        {% if state == "valid" %}
+                            {% trans "Bu sənəd universitetin elektron sistemi tərəfindən verilib və hazırda qüvvədədir." context "verification.public" %}
+                        {% else %}
+                            {% trans "Sənəd universitet tərəfindən ləğv edilib — ona etibar etməyin." context "verification.public" %}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            {% if state == "revoked" %}
+                <div class="dv-revoked">
+                    <p class="dv-revoked__row"><span>{% trans "Ləğv tarixi" context "verification.public" %}</span> <b>{{ seal.revoked_at|date:"d.m.Y H:i" }}</b></p>
+                </div>
+            {% endif %}
+
+            <dl class="dv-facts">
+                <div class="dv-facts__row"><dt>{% trans "Sənədin növü" context "verification.public" %}</dt><dd>{{ seal.doc_type_label }}</dd></div>
+                {% if org_name %}<div class="dv-facts__row"><dt>{% trans "Verən təşkilat" context "verification.public" %}</dt><dd>{{ org_name }}</dd></div>{% endif %}
+                <div class="dv-facts__row"><dt>{% trans "Verilmə tarixi" context "verification.public" %}</dt><dd>{{ seal.issued_at|date:"d.m.Y H:i" }}</dd></div>
+                <div class="dv-facts__row"><dt>{% trans "Sənədin sahibi" context "verification.public" %}</dt><dd>{{ holder }}</dd></div>
+                {% for label, value in facts %}
+                    <div class="dv-facts__row"><dt>{{ label }}</dt><dd>{{ value }}</dd></div>
+                {% endfor %}
+                <div class="dv-facts__row"><dt>{% trans "Yoxlama kodu" context "verification.public" %}</dt><dd class="dv-code">{{ seal.code }}</dd></div>
+            </dl>
+
+            <p class="dv-note">
+                {% trans "Səhifə yalnız sənədin əsas göstəricilərini göstərir. Tam məzmunu sənədin özü ilə tutuşdurun və ya faylı aşağıda müqayisə edin." context "verification.public" %}
+            </p>
+
+            {% if can_compare %}
+                <form class="dv-compare" method="post" enctype="multipart/form-data" action="{% url 'verification:detail' seal.code %}">
+                    {% csrf_token %}
+                    <h2 class="dv-compare__title">{% trans "Faylı müqayisə et" context "verification.public" %}</h2>
+                    <p class="dv-compare__hint">
+                        {% blocktrans trimmed context "verification.public" with mb=upload_max_mb %}Sizə verilmiş PDF faylı seçin — sistem onun rəqəmsal izini (SHA-256) universitetin verdiyi nüsxə ilə tutuşdurur. Fayl saxlanılmır. Ən çox {{ mb }} MB.{% endblocktrans %}
+                    </p>
+                    {% if compare_result %}
+                        <div class="dv-result dv-result--{{ compare_result }}" role="status">
+                            {% if compare_result == "match" %}
+                                {% if compare_revoked %}
+                                    {% trans "Fayl verilmiş nüsxə ilə eynidir, lakin sənəd ləğv edilib." context "verification.public" %}
+                                {% else %}
+                                    {% trans "Fayl universitetin verdiyi nüsxə ilə tam eynidir." context "verification.public" %}
+                                {% endif %}
+                            {% elif compare_result == "mismatch" %}
+                                {% trans "Fayl verilmiş nüsxə ilə eyni DEYİL — dəyişdirilmiş və ya başqa sənəd ola bilər." context "verification.public" %}
+                            {% elif compare_result == "not_pdf" %}
+                                {% trans "Seçilən fayl PDF deyil." context "verification.public" %}
+                            {% elif compare_result == "too_large" %}
+                                {% trans "Fayl çox böyükdür." context "verification.public" %}
+                            {% else %}
+                                {% trans "Fayl seçilməyib." context "verification.public" %}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    <div class="dv-compare__row">
+                        <label class="dv-file">
+                            <span class="visually-hidden">{% trans "PDF fayl" context "verification.public" %}</span>
+                            <input class="dv-file__input" type="file" name="{{ upload_field }}" accept="application/pdf,.pdf" required>
+                        </label>
+                        <button type="submit" class="ems-btn ems-btn--primary">{% trans "Müqayisə et" context "verification.public" %}</button>
+                    </div>
+                </form>
+            {% endif %}
+
+            <p class="dv-again"><a class="dv-link" href="{% url 'verification:home' %}">{% trans "Başqa kodu yoxla" context "verification.public" %}</a></p>
+        {% else %}
+            <h1 class="dv-title" id="dv-title">{% trans "Sənədin həqiqiliyini yoxlayın" context "verification.public" %}</h1>
+            <p class="dv-lead">{% trans "Universitetin verdiyi rəsmi sənədin üzərindəki QR kodu skan edin və ya yoxlama kodunu yazın." context "verification.public" %}</p>
+
+            {% if state == "not_found" or state == "invalid" %}
+                <div class="dv-alert dv-alert--danger" role="alert">
+                    <b>{% trans "Sənəd tapılmadı" context "verification.public" %}</b>
+                    <span>{% trans "Kodu yenidən yoxlayın. Kod düzgündürsə və sənəd yenə tapılmırsa, ona etibar etməyin və sənədi verən universitetlə əlaqə saxlayın." context "verification.public" %}</span>
+                </div>
+            {% elif state == "limited" %}
+                <div class="dv-alert dv-alert--warning" role="alert">
+                    <b>{% trans "Çox sayda sorğu" context "verification.public" %}</b>
+                    <span>{% trans "Bir neçə dəqiqə sonra yenidən cəhd edin." context "verification.public" %}</span>
+                </div>
+            {% endif %}
+
+            <form class="dv-form" method="get" action="{% url 'verification:home' %}">
+                <label class="ems-field__label" for="dv-code">{% trans "Yoxlama kodu" context "verification.public" %}</label>
+                <div class="dv-form__row">
+                    <input class="ems-input dv-form__input" id="dv-code" type="text" name="kod" value="{{ form_code }}"
+                           placeholder="QKU-XXXX-XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters"
+                           spellcheck="false" maxlength="40" required>
+                    <button type="submit" class="ems-btn ems-btn--primary">{% trans "Yoxla" context "verification.public" %}</button>
+                </div>
+            </form>
+        {% endif %}
+    </section>
+
+    <p class="dv-footer">{% trans "Yoxlama səhifəsi sənəd sahibinin şəxsi məlumatlarını göstərmir; sorğular anonim qeydə alınır." context "verification.public" %}</p>
+</div>
+{% endblock %}

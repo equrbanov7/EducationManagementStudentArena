@@ -2,6 +2,7 @@ from django import template
 from django.utils import timezone
 from django.utils.translation import pgettext
 
+from core.code_text import render_code_text
 from core.media_urls import protected_media_url as _protected_media_url
 
 register = template.Library()
@@ -10,6 +11,15 @@ register = template.Library()
 @register.filter
 def protected_media_url(value):
     return _protected_media_url(value)
+
+
+@register.filter(is_safe=True)
+def code_text(value):
+    """Sual/variant mətni: kod nümunəsi (```…``` və ya yapışdırılmış kod) eyni enli blokda, girintisi ilə.
+
+    Escape ``core.code_text.render_code_text``-in İÇİNDƏDİR (2026-10-19, sahib: «kod alt-alta görünsün»).
+    """
+    return render_code_text(value)
 
 
 @register.filter

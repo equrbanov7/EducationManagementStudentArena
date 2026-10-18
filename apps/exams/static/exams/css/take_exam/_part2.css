@@ -54,11 +54,13 @@
 }
 
 .opt-text {
+    min-width: 0;
     color: var(--ems-neutral-600);
     font-size: 1.02rem;
     font-weight: 650;
     line-height: 1.4;
     word-break: break-word;
+    white-space: pre-wrap; /* 2026-10-19: çoxsətirli variant / kod */
 }
 
 .written-answer {

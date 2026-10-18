@@ -27,8 +27,8 @@ sətrin fəsli = semestrin fəsli, tapşırıq statusu «bölüşdürülüb / d�
 imtahan, təcrübə, buraxılış işi jurnalda dərs kimi yazılmadığı üçün tutuşdurmaya daxil DEYİL). Semestr planı
 aylara ``periods.apportion`` qaydası ilə bölünür.
 
-Sorğu büdcəsi SABİTDİR (müəllim sayından asılı deyil): fakt 1, plan 1, istifadəçilər 1, üzvlüklər 1,
-struktur 1, yük profilləri 1. Filtr / sıralama / səhifələmə bundan sonra yaddaşda gedir (heyət ~10³).
+Sorğu büdcəsi SABİTDİR (müəllim sayından asılı deyil): fakt 1 (aralıq rejimində +1), plan 1, istifadəçilər 1,
+üzvlüklər 1, struktur 1, yük profilləri 1. Filtr / sıralama / səhifələmə bundan sonra yaddaşda gedir (heyət ~10³).
 """
 
 from __future__ import annotations
@@ -91,11 +91,19 @@ def held_lessons(organization, semester: Semester):
     )
 
 
-def held_matrix(organization, semester: Semester) -> dict:
-    """{müəllim: {ay: {növ: [saat, dərs]}}} — BİR GROUP BY sorğusu."""
+def held_matrix(organization, semester: Semester, *, start=None, end=None, teacher=None) -> dict:
+    """{müəllim: {ay: {növ: [saat, dərs]}}} — BİR GROUP BY sorğusu.
+
+    ``start`` / ``end`` verilsə yalnız həmin tarix aralığının dərsləri (sərbəst aralıq rejimi, ``ranges.py``);
+    ``teacher`` verilsə yalnız həmin müəllimin dərsləri (müəllim pəncərəsi — bütün təşkilat yığılmır).
+    """
+    queryset = held_lessons(organization, semester)
+    if teacher is not None:
+        queryset = queryset.filter(teacher=teacher)
+    if start and end:
+        queryset = queryset.filter(date__range=(start, end))
     rows = (
-        held_lessons(organization, semester)
-        .annotate(month=TruncMonth("date"))
+        queryset.annotate(month=TruncMonth("date"))
         .values("teacher", "month", "kind")
         .annotate(hours=Sum("hours"), lessons=Count("id"))
         .order_by()
@@ -108,11 +116,13 @@ def held_matrix(organization, semester: Semester) -> dict:
     return out
 
 
-def planned_matrix(organization, semester: Semester) -> dict:
-    """{müəllim: {növ: semestr saatı}} — BİR GROUP BY sorğusu."""
+def planned_matrix(organization, semester: Semester, *, teacher=None) -> dict:
+    """{müəllim: {növ: semestr saatı}} — BİR GROUP BY sorğusu (``teacher`` — yalnız bir müəllim)."""
+    queryset = _model("workload", "TeacherAssignment").objects.all()
+    if teacher is not None:
+        queryset = queryset.filter(teacher_id=teacher)
     rows = (
-        _model("workload", "TeacherAssignment")
-        .objects.filter(
+        queryset.filter(
             organization=organization,
             teacher__isnull=False,
             activity__in=C.KIND_KEYS,
@@ -162,6 +172,12 @@ def _profiles(organization, user_ids, academic_year: str) -> dict:
     }
 
 
+def _position_labels() -> dict:
+    """Yük profilinin vəzifə açarı → etiket (``TeacherPosition``; statik import yoxdur — modul sərhədi)."""
+    field = _model("workload", "TeacherWorkloadProfile")._meta.get_field("position")
+    return {key: str(label) for key, label in field.flatchoices}
+
+
 def _display_name(values) -> str:
     parts = (values["last_name"], values["first_name"], clean_name_part(values["profile__patronymic"]))
     return " ".join(part for part in parts if part).strip() or values["username"]
@@ -182,6 +198,7 @@ def people(actor, teacher_ids, academic_year: str, *, units: dict | None = None)
     memberships = _memberships(organization, ids)
     profiles = _profiles(organization, ids, academic_year)
     units = units if units is not None else _structure(organization)
+    positions = _position_labels()
     out = {}
     for values in users:
         picked = _pick_membership(memberships.get(values["pk"], []))
@@ -203,6 +220,7 @@ def people(actor, teacher_ids, academic_year: str, *, units: dict | None = None)
             "chair": chair,
             "staff_type": staff_type(profile),
             "staff_fraction": float(profile["staff_fraction"] or 0) if profile else None,
+            "position": positions.get((profile or {}).get("position") or "", ""),
         }
     return out
 

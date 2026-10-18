@@ -139,7 +139,7 @@ def failed_subjects(*, student, organization) -> list:
             open_after[subject_id].append(enrollment)
     apps_by_subject = _applications_by_subject(student, organization)
     limit = retake_rules.max_attempts()
-    window_open = retake_rules.applications_open()
+    window_open = retake_rules.applications_open(organization)
     rows = []
     for subject_id, enrollment in latest_failed.items():
         if subject_id in passed_subjects:

@@ -404,7 +404,7 @@
             var mainBtn = locked
                 ? '<button type="button" class="fxc-btn fxc-btn-sm fxc-btn-success" data-vio-act="grant" ' +
                     'data-session="' + esc(s.session_id) + '" data-ticket="' + esc(s.ticket_id) + '">' +
-                    '<i class="fas fa-rotate-left"></i> ' + esc(t("violations.grantChance", gettext("Şans ver"))) + "</button>"
+                    '<i class="fas fa-rotate-left"></i> ' + esc(t("violations.grantChance", gettext("Bərpa et"))) + "</button>"
                 : '<button type="button" class="fxc-btn fxc-btn-sm fxc-btn-danger-ghost" data-vio-act="block" ' +
                     'data-session="' + esc(s.session_id) + '" data-ticket="' + esc(s.ticket_id) + '">' +
                     '<i class="fas fa-ban"></i> ' + esc(t("violations.block", gettext("Blokla"))) + "</button>";
@@ -550,7 +550,7 @@
         });
     }
 
-    // Qayda pozanlar panelindəki əməliyyatlar: bax / şans ver (bərpa) / blokla.
+    // Qayda pozanlar panelindəki əməliyyatlar: bax / bərpa et / blokla.
     if (vioListEl) {
         vioListEl.addEventListener("click", function (evt) {
             var btn = evt.target.closest("[data-vio-act]");
@@ -560,7 +560,7 @@
                 openViolationsModal(btn.dataset.attempt);
             } else if (act === "grant") {
                 window.EMSConfirm.open({
-                    body: t("violations.confirmGrant", gettext("Tələbəyə əlavə şans verilib imtahan bərpa edilsin?"))
+                    body: t("violations.confirmGrant", gettext("Tələbənin imtahanı bərpa edilsin? Pozuntu sayğacı bir vahid azalacaq."))
                 }).then(function (ok) {
                     if (!ok) return;
                     btn.disabled = true;

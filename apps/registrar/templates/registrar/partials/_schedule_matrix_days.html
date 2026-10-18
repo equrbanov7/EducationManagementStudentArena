@@ -1,0 +1,43 @@
+{% load i18n %}
+{% comment %}Həftəlik matrisin TELEFON görünüşü — günlər alt-alta, hər gündə dərslər saat sırası ilə
+(mobil qabıq 2026-10-19). Səbəb: ≤ 576px-də 6 sütunlu grid-də cəmi ~2 gün görünürdü, kartın adı
+«Programl…» kimi kəsilirdi; tələbə/müəllim cədvəli əsasən telefondan açır.
+
+* YALNIZ yalnız-oxu matrisdə render olunur (`_schedule_matrix.html`, `matrix_editable` yox) —
+  redaktor («Cədvəl idarəetməsi») sürüklə-burax grid-də qalır.
+* Kart markup-ı EYNİDİR (`_schedule_matrix_card.html`, `data-sgx-slot` + `data-*`): detal modalı
+  `registrar/js/schedule_grid.js`-in sənəd səviyyəli klik delegasiyası ilə açılır — yeni JS yoxdur.
+* Grid ilə bu siyahının ikisi də DOM-dadır; hansının görünəcəyini CSS seçir
+  (`schedule_matrix.css`, ≤ 576px) — `display: none` olan nüsxə ekran oxuyucuda da yoxdur.
+* `row.cells[gün]` şablonda indekslə alınmır — xarici dövrün sayğacı (`di`) ilə müqayisə olunur
+  (6 gün × ~8 sətir × 6 xana — əhəmiyyətsiz).{% endcomment %}
+<div class="smtx-days" role="region" aria-label="{% trans 'Həftəlik dərs cədvəli' context 'registrar.schedule_grid' %}">
+    {% for day in matrix.day_headers %}
+    {% with di=forloop.counter0 %}
+    <section class="smtx-days__day{% if day.is_today %} is-today{% endif %}">
+        <h3 class="smtx-days__head">
+            <span class="smtx-days__name">{{ day.label }}</span>
+            <span class="smtx-days__sub">{% if day.date %}{{ day.date|date:"d.m" }}{% else %}{{ day.roman }}{% endif %}{% if day.is_today %} · {% trans "bu gün" context "registrar.schedule_grid" %}{% endif %}</span>
+            {% for ex in day.exams %}
+            <span class="smtx__day-exam" title="{{ ex.exam.title }}"><i class="fas fa-file-signature" aria-hidden="true"></i> {{ ex.start|time:"H:i" }}</span>
+            {% endfor %}
+        </h3>
+        <ul class="smtx-days__list">
+            {% for row in matrix.rows %}{% for cell in row.cells %}{% if forloop.counter0 == di %}{% for item in cell.items %}
+            <li class="smtx-days__item">
+                <span class="smtx-days__time"><span class="smtx__no">{{ row.no }}</span><b>{{ row.start_text }}</b><small>{{ row.end_text }}</small></span>
+                {% include "registrar/partials/_schedule_matrix_card.html" %}
+            </li>
+            {% endfor %}{% endif %}{% endfor %}{% endfor %}
+            {% for row in matrix.extra_rows %}{% for cell in row.cells %}{% if forloop.counter0 == di %}{% for item in cell.items %}
+            <li class="smtx-days__item smtx-days__item--extra">
+                <span class="smtx-days__time"><b>{{ row.start_text }}</b><small>{{ row.end_text }}</small></span>
+                {% include "registrar/partials/_schedule_matrix_card.html" %}
+            </li>
+            {% endfor %}{% endif %}{% endfor %}{% endfor %}
+        </ul>
+        <p class="smtx-days__empty">{% trans "Dərs yoxdur" context "ui.status" %}</p>
+    </section>
+    {% endwith %}
+    {% endfor %}
+</div>

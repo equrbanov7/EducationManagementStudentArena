@@ -4,12 +4,13 @@
 {% block title %}{{ exam.title }} - {% trans "title_question_bank" context "exams.template.test_question_bank" %}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part1.css' %}?v=20261017-pkgc">
+    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part1.css' %}?v=20261019-ui">
     <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part2.css' %}?v=20261017-pkgc">
-    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part3.css' %}?v=20261018-a11y">
+    <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part3.css' %}?v=20261019-ui">
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part1.css' %}?v=20261017-pkgc">
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part2.css' %}?v=20261017-pkgc">
-    <link rel="stylesheet" href="{% static 'exams/css/bank_picker_modal.css' %}?v=20261017-pkgc">
+    <link rel="stylesheet" href="{% static 'exams/css/bank_picker_modal.css' %}?v=20261019-ui">
+    <link rel="stylesheet" href="{% static 'exams/css/bank_picker_list.css' %}?v=20261019-ui">
 {% endblock %}
 
 {% block content %}
@@ -18,7 +19,8 @@
 
 {% block extraJs %}
 {% include "exams/teacher/partials/_bulk_workbench_scripts.html" %}
-<script src="{% static 'exams/js/examBankPicker.js' %}?v=20261014-searchux"></script>
+<script src="{% static 'exams/js/examBankPicker_parts.js' %}?v=20261019-ui"></script>
+<script src="{% static 'exams/js/examBankPicker.js' %}?v=20261019-ui"></script>
 
 {{ rq_value|default:10|json_script:"bankRqDefault" }}
 {{ dp_value|default:1|json_script:"bankDpDefault" }}

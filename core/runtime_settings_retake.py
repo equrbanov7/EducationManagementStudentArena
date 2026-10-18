@@ -13,6 +13,9 @@ from django.utils.translation import pgettext_lazy
 _CTX = "core.runtime_settings"
 
 GROUP = ("retake", pgettext_lazy(_CTX, "25% təkrar imtahan və alt qrup"))
+#: 2026-10-19 (sahib): Mühasibatlığın plan ↔ fakt kənarlaşma bandı da buradan idarə olunur.
+ACCOUNTING_GROUP = ("accounting", pgettext_lazy(_CTX, "Mühasibatlıq"))
+GROUPS = (GROUP, ACCOUNTING_GROUP)
 
 
 def retake_specs(spec_class) -> tuple:
@@ -44,7 +47,53 @@ def retake_specs(spec_class) -> tuple:
             min=1,
             max=10,
         ),
+        # 2026-10-19 (sahib: «İlliyə görə hesablanır, amma dəqiq bilmirəm»): təxmini məbləğin düsturu —
+        # illik təhsil haqqı × faiz ÷ 100 × (fənnin krediti ÷ illik kredit). Oxu nöqtəsi: ``apps.registrar.retake_fees``.
+        spec_class(
+            "retake.fee_percent",
+            "retake",
+            "decimal",
+            lambda: getattr(settings, "RETAKE_FEE_PERCENT", 25),
+            pgettext_lazy(_CTX, "25% ödənişinin faizi"),
+            pgettext_lazy(
+                _CTX,
+                "Təxmini məbləğ = illik təhsil haqqı × bu faiz ÷ 100 × (fənnin krediti ÷ illik kredit). Dəqiq məbləği "
+                "Mühasibatlıq qəbzi yoxlayanda təsdiqləyir; fərq xəbərdarlıqdır, blok deyil.",
+            ),
+            "%",
+            min=0,
+            max=100,
+        ),
+        spec_class(
+            "retake.fee_annual_credits",
+            "retake",
+            "int",
+            lambda: int(getattr(settings, "RETAKE_FEE_ANNUAL_CREDITS", 60)),
+            pgettext_lazy(_CTX, "İllik kredit (məbləğ düsturu üçün)"),
+            pgettext_lazy(
+                _CTX,
+                "Fənnin payı = fənnin krediti ÷ bu ədəd. 0 yazılsa kreditə bölünmür: məbləğ = illik haqq × faiz ÷ 100.",
+            ),
+            pgettext_lazy(_CTX, "kredit"),
+            min=0,
+            max=120,
+        ),
+        spec_class(
+            "accounting.deviation_percent",
+            "accounting",
+            "int",
+            lambda: int(getattr(settings, "ACCOUNTING_DEVIATION_PERCENT", 10)),
+            pgettext_lazy(_CTX, "Plan ↔ fakt kənarlaşma bandı"),
+            pgettext_lazy(
+                _CTX,
+                "Keçirilmiş dərs saatı planın ±bu faiz daxilindədirsə «Plana uyğun» sayılır; azdırsa «Plandan az», "
+                "çoxdursa «Plandan çox».",
+            ),
+            "%",
+            min=0,
+            max=50,
+        ),
     )
 
 
-__all__ = ["GROUP", "retake_specs"]
+__all__ = ["ACCOUNTING_GROUP", "GROUP", "GROUPS", "retake_specs"]

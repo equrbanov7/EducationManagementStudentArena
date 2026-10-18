@@ -1,5 +1,5 @@
-import { UI } from './dom.js?v=lx20261014';
-import { state } from './state.js?v=lx20261014';
+import { UI } from './dom.js?v=lx20261019';
+import { state } from './state.js?v=lx20261019';
 
 export const I18N = window.LIVE_EXAM_HOST_I18N || {};
 export const hostShellSubscribers = new Set();
@@ -73,6 +73,14 @@ export function lengthClass(text) {
  * Konteynerə sığana qədər şrifti addım-addım kiçildir (CSS: font-size: var(--fit-size, …)).
  * Yalnız vəziyyət dəyişəndə çağırılır (hər kadrda yox) — layout xərci azdır.
  */
+function codeOverflows(element) {
+    const blocks = element.querySelectorAll(".lx-code");
+    for (let i = 0; i < blocks.length; i += 1) {
+        if (blocks[i].scrollWidth > blocks[i].clientWidth + 2) return true;
+    }
+    return false;
+}
+
 export function fitText(element, { min = 16, step = 0.9 } = {}) {
     if (!element || !element.isConnected) return;
     element.style.removeProperty("--fit-size");
@@ -81,8 +89,11 @@ export function fitText(element, { min = 16, step = 0.9 } = {}) {
         // Dözüm: diakritika / aşağı çıxıntılar (ə, ı, ş, g…) sətir qutusundan bir neçə px
         // çıxır — bu «daşma» deyil; yalnız həqiqi əlavə sətir kiçiltmə tələb edir.
         const tolerance = Math.max(4, size * 0.3);
+        // 2026-10-19: kod bloku öz içində üfüqi sürüşür (`overflow-x: auto`) — onun daşması da kiçiltmə səbəbidir.
         const overflow =
-            element.scrollHeight > element.clientHeight + tolerance || element.scrollWidth > element.clientWidth + 2;
+            element.scrollHeight > element.clientHeight + tolerance ||
+            element.scrollWidth > element.clientWidth + 2 ||
+            codeOverflows(element);
         if (!overflow || size <= min) break;
         size = Math.max(min, Math.floor(size * step));
         element.style.setProperty("--fit-size", `${size}px`);

@@ -1,12 +1,34 @@
 {% load i18n %}
 {% load static %}
-
-<!-- MODAL: Resurs Əlavə Etmə (Updated with Topic Context) -->
-<!-- courses/templates/courses/partials/_resource_form_modal.html -->
+{% load course_resources %}
+{% comment %}
+MODAL: Resurs əlavə etmə. 2026-10-19: format/ölçü seçilən tipə görədir — hər radio-nun data-atributları
+(`accept`, ipucu, limit) `apps/courses/resource_upload.py`-dan gəlir; JS (resource_form_modal.js) tip
+dəyişəndə ipucunu/accept-i yeniləyir, faylı yükləmədən əvvəl yoxlayır və XHR ilə irəliləyişi göstərir.
+{% endcomment %}
+{% resource_upload_policy as upload_policy %}
 
 <div id="resourceFormModalConfig" hidden
      data-i18n-loading="{% trans 'loading' context 'courses.partial.resource_modal' %}"
-     data-i18n-error-retry="{% trans 'error_retry' context 'courses.partial.resource_modal' %}"></div>
+     data-i18n-error-retry="{% trans 'error_retry' context 'courses.partial.resource_modal' %}"
+     data-i18n-errors-header="{% trans 'Xətalar' context 'courses.resource_upload' %}"
+     data-i18n-uploading="{% trans 'Yüklənir: {pct}' context 'courses.resource_upload' %}"
+     data-i18n-processing="{% trans 'Fayl yükləndi, server yoxlayır…' context 'courses.resource_upload' %}"
+     data-i18n-ext-rejected="{% trans 'Bu format «{kind}» üçün qəbul edilmir: {ext}. İcazə verilənlər: {formats}' context 'courses.resource_upload' %}"
+     data-i18n-no-extension="{% trans '(uzantısız)' context 'courses.resource_upload' %}"
+     data-i18n-too-large="{% trans 'Fayl çox böyükdür: {size} MB (maks. {max_mb} MB)' context 'courses.resource_upload' %}"
+     data-i18n-empty-file="{% trans 'Fayl boşdur.' context 'courses.resource_upload' %}"
+     data-i18n-file-required="{% trans '«{kind}» üçün fayl seçin.' context 'courses.resource_upload' %}"
+     data-i18n-url-required="{% trans 'Link üçün URL daxil edin (http:// və ya https://).' context 'courses.resource_upload' %}"
+     data-i18n-url-scheme="{% trans 'Link http:// və ya https:// ilə başlamalıdır.' context 'courses.resource_upload' %}"
+     data-i18n-title-required="{% trans 'Resurs adını yazın.' context 'courses.resource_upload' %}"
+     data-i18n-server-limit="{% trans 'Fayl serverin qəbul etdiyi ölçüdən böyükdür (maks. {max_mb} MB).' context 'courses.resource_upload' %}"
+     data-i18n-session="{% trans 'Sessiyanız bitib — səhifəni yeniləyib yenidən daxil olun.' context 'courses.resource_upload' %}"
+     data-i18n-forbidden="{% trans 'Təhlükəsizlik yoxlaması keçmədi — səhifəni yeniləyib yenidən cəhd edin.' context 'courses.resource_upload' %}"
+     data-i18n-network="{% trans 'Bağlantı kəsildi — internetinizi yoxlayıb yenidən cəhd edin.' context 'courses.resource_upload' %}"
+     data-i18n-timeout="{% trans 'Server vaxtında cavab vermədi (kod {status}). Bir az sonra yenidən cəhd edin.' context 'courses.resource_upload' %}"
+     data-i18n-server="{% trans 'Server xətası (kod {status}). Bir az sonra yenidən cəhd edin.' context 'courses.resource_upload' %}"
+     data-body-max-bytes="{{ upload_policy.body_max_bytes }}"></div>
 
 <div class="modal fade ems-bsd" id="resourceFormModal" tabindex="-1" aria-hidden="true" aria-labelledby="resourceFormModalLabel">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -26,13 +48,25 @@
                     <div class="ems-field">
                         <span class="ems-field__label" id="resource-type-label">{% trans "field_resource_type" context "courses.partial.resource_modal" %} <span class="ems-field__req" aria-hidden="true">*</span></span>
                         <div class="ems-seg" role="radiogroup" aria-labelledby="resource-type-label">
-                            <input type="radio" name="resource_type" id="typeFile" value="file" checked>
+                            <input type="radio" name="resource_type" id="typeFile" value="file"
+                                   data-accept="{{ upload_policy.file.accept }}" data-hint="{{ upload_policy.file.hint }}"
+                                   data-max-bytes="{{ upload_policy.file.max_bytes }}" data-max-mb="{{ upload_policy.file.max_mb }}"
+                                   data-extensions="{{ upload_policy.file.extensions }}" data-formats="{{ upload_policy.file.formats }}" checked>
                             <label for="typeFile"><i class="fas fa-file-pdf" aria-hidden="true"></i> {% trans "type_file" context "courses.partial.resource_modal" %}</label>
-                            <input type="radio" name="resource_type" id="typeLink" value="link">
+                            <input type="radio" name="resource_type" id="typeLink" value="link"
+                                   data-accept="{{ upload_policy.link.accept }}" data-hint="{{ upload_policy.link.hint }}"
+                                   data-max-bytes="{{ upload_policy.link.max_bytes }}" data-max-mb="{{ upload_policy.link.max_mb }}"
+                                   data-extensions="{{ upload_policy.link.extensions }}" data-formats="{{ upload_policy.link.formats }}">
                             <label for="typeLink"><i class="fas fa-link" aria-hidden="true"></i> {% trans "type_link" context "courses.partial.resource_modal" %}</label>
-                            <input type="radio" name="resource_type" id="typeVideo" value="video">
+                            <input type="radio" name="resource_type" id="typeVideo" value="video"
+                                   data-accept="{{ upload_policy.video.accept }}" data-hint="{{ upload_policy.video.hint }}"
+                                   data-max-bytes="{{ upload_policy.video.max_bytes }}" data-max-mb="{{ upload_policy.video.max_mb }}"
+                                   data-extensions="{{ upload_policy.video.extensions }}" data-formats="{{ upload_policy.video.formats }}">
                             <label for="typeVideo"><i class="fas fa-video" aria-hidden="true"></i> {% trans "type_video" context "courses.partial.resource_modal" %}</label>
-                            <input type="radio" name="resource_type" id="typeDocument" value="document">
+                            <input type="radio" name="resource_type" id="typeDocument" value="document"
+                                   data-accept="{{ upload_policy.document.accept }}" data-hint="{{ upload_policy.document.hint }}"
+                                   data-max-bytes="{{ upload_policy.document.max_bytes }}" data-max-mb="{{ upload_policy.document.max_mb }}"
+                                   data-extensions="{{ upload_policy.document.extensions }}" data-formats="{{ upload_policy.document.formats }}">
                             <label for="typeDocument"><i class="fas fa-file-alt" aria-hidden="true"></i> {% trans "type_document" context "courses.partial.resource_modal" %}</label>
                         </div>
                     </div>
@@ -63,9 +97,30 @@
                     </div>
 
                     <div class="ems-field" id="fileUploadSection">
-                        <label for="resourceFile" class="ems-field__label">{% trans "field_file" context "courses.partial.resource_modal" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-                        <input type="file" class="ems-input ems-bsd__file" id="resourceFile" name="file">
-                        <p class="ems-field__hint">{% trans "help_supported_formats" context "courses.partial.resource_modal" %}</p>
+                        <span class="ems-field__label" id="resourceFileLabel">{% trans "field_file" context "courses.partial.resource_modal" %} <span class="ems-field__req" aria-hidden="true">*</span></span>
+                        <div class="cd-res-drop" data-resource-dropzone>
+                            <input type="file" class="cd-res-drop__input" id="resourceFile" name="file"
+                                   accept="{{ upload_policy.file.accept }}" aria-describedby="resourceFileLabel resourceFileHint">
+                            <label class="cd-res-drop__pick" for="resourceFile">
+                                <i class="fas fa-file-arrow-up" aria-hidden="true"></i>
+                                <span class="cd-res-drop__text">
+                                    <span class="cd-res-drop__name" data-resource-file-name
+                                          data-empty-label="{% trans 'Fayl seçin və ya bura atın' context 'courses.resource_upload' %}">{% trans "Fayl seçin və ya bura atın" context "courses.resource_upload" %}</span>
+                                    <span class="cd-res-drop__size" data-resource-file-size hidden></span>
+                                </span>
+                            </label>
+                            <button type="button" class="cd-res-drop__clear" data-resource-file-clear hidden
+                                    aria-label="{% trans 'Faylı çıxar' context 'courses.resource_upload' %}"
+                                    title="{% trans 'Faylı çıxar' context 'courses.resource_upload' %}">
+                                <i class="fas fa-xmark" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <p class="ems-field__hint" id="resourceFileHint" data-resource-file-hint>{{ upload_policy.file.hint }}</p>
+                        <div class="cd-res-progress" data-resource-progress hidden>
+                            <progress class="cd-res-progress__bar" data-resource-progress-bar max="100" value="0"
+                                      aria-labelledby="resourceProgressText"></progress>
+                            <span class="cd-res-progress__text" id="resourceProgressText" data-resource-progress-text aria-live="polite"></span>
+                        </div>
                     </div>
 
                     <div class="ems-field d-none" id="urlInputSection">
@@ -79,7 +134,7 @@
                 </div>
                 <div class="modal-footer ems-bsd__foot">
                     <button type="button" class="ems-btn" data-bs-dismiss="modal">{% trans "action_cancel" context "courses.partial.resource_modal" %}</button>
-                    <button type="submit" class="ems-btn ems-btn--primary">
+                    <button type="submit" class="ems-btn ems-btn--primary" data-resource-submit>
                         <i class="fas fa-save" aria-hidden="true"></i> {% trans "action_add_resource" context "courses.partial.resource_modal" %}
                     </button>
                 </div>
@@ -88,4 +143,4 @@
     </div>
 </div>
 
-<script src="{% static 'courses/js/resource_form_modal.js' %}" defer></script>
+<script src="{% static 'courses/js/resource_form_modal.js' %}?v=20261019-res" defer></script>

@@ -10,11 +10,20 @@ Kilid düyməsi şərtlər ödənməyəndə GİZLƏNMİR — `disabled` olur (ha
 {% if semester_opening_section.can_open %}
 <button type="button" class="ems-btn"
         data-tof-open="tofPeriodDialog"
-        data-tof-prefill='{"action": "save_period", "id": "", "name": "", "academic_year": "", "start_date": "", "end_date": ""}'>
+        data-tof-prefill='{"action": "save_period", "id": "", "name": "", "academic_year": "", "start_date": "", "end_date": "", "exam_session_start": "", "exam_session_end": "", "registration_start": "", "registration_end": ""}'>
     {% trans "Yeni dövr" context "accounts.semester" %}
 </button>
 {% endif %}
 {% if period %}
+    {% comment %}2026-10-19: seçilmiş dövrün redaktəsi (tarixlər + imtahan sessiyası / seçim pəncərəsi).
+    Kilidli semestr redaktə olunmur — server də 409 qaytarır.{% endcomment %}
+    {% if semester_opening_section.can_open and not period.is_locked %}
+    <button type="button" class="ems-btn"
+            data-tof-open="tofPeriodDialog"
+            data-tof-prefill="{{ period.edit_prefill }}">
+        {% trans "Dövrü redaktə et" context "accounts.semester" %}
+    </button>
+    {% endif %}
     {% if semester_opening_section.can_open and not period.is_current %}
     <button type="button" class="ems-btn"
             data-tof-submit='{"action": "set_current", "id": "{{ period.id }}"}'

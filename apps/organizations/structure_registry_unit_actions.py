@@ -33,6 +33,7 @@ from .structure_registry_helpers import (
 from .structure_views._shared import _teacher_memberships_qs
 from .structure_views.constants import KAFEDRA_UNIT_TYPES, TEACHER_ROLE_NAMES
 from .structure_views.registry import CHAIR_HEAD_ROLE, COORDINATOR_ROLE, DEAN_ROLE, ROLE_LABELS, VICE_DEAN_ROLE
+from .unit_head_assignment import apply_unit_head
 from .views import _unique_unit_slug
 
 # i18n skaneri kontekst sabitini MODUL daxilində axtarır — yerli təyin.
@@ -196,21 +197,11 @@ def _assign_head(request, organization, scope, flags):
             )
 
     is_faculty = unit.unit_type == OrgUnitType.FACULTY
-    role_name = DEAN_ROLE if is_faculty else CHAIR_HEAD_ROLE
-    role = _role(organization, role_name)
-    old_head = unit.head
     reason = (request.POST.get("reason") or "").strip()[:500]
 
     with transaction.atomic():
-        unit.head = new_head
-        unit.save(update_fields=["head", "updated_at"])
-        if role is not None:
-            if old_head is not None and (new_head is None or old_head.pk != new_head.pk):
-                Membership.objects.filter(
-                    organization=organization, user=old_head, role=role, scope_unit=unit, is_active=True
-                ).update(is_active=False)
-            if new_head is not None:
-                _ensure_membership(organization, new_head, role, unit, assigned_by=request.user)
+        # Ağac yolu ilə EYNİ servis (2026-10-19): unit.head + dean/chair_head üzvlüyü.
+        old_head, _role_name = apply_unit_head(organization, unit, new_head, assigned_by=request.user)
         log_action(
             action=AuditAction.UPDATE,
             user=request.user,

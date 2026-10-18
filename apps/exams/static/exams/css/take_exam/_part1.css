@@ -502,6 +502,8 @@ body > main {
     font-size: 1.26rem;
     font-weight: 800;
     line-height: 1.45;
+    white-space: pre-wrap; /* 2026-10-19: sətir sonu + girinti (kod nümunəsi) — ems_ui/code_text.css */
+    overflow-wrap: anywhere;
 }
 
 .q-text p {

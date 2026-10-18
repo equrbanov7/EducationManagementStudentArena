@@ -15,7 +15,9 @@ from .default_roles_student_services import STUDENT_SERVICES_ROLES, apply_studen
 from .default_roles_teaching_office import TEACHING_OFFICE_ROLES, apply_teaching_office_grants
 from .default_roles_vice_dean import VICE_DEAN_ROLES
 from .permissions_announcements import apply_announcement_grants
+from .permissions_document_seal import apply_document_seal_grants
 from .permissions_hr import apply_hr_grants
+from .permissions_hr_contracts import apply_hr_contract_grants
 
 #: Akademik kurasiya açarları — `program_coordinator` VƏ `tutor` üçün ORTAQ.
 #:
@@ -563,6 +565,11 @@ apply_hr_grants(UNIVERSITY_ROLES)
 UNIVERSITY_ROLES.extend(ACCOUNTING_ROLES)
 apply_accounting_grants(UNIVERSITY_ROLES)
 _grant_application_permissions(UNIVERSITY_ROLES)
+
+# «Sənəd yoxlaması» (2026-10-18): `document_seal.manage`. Mövcud: verification/0002.
+apply_document_seal_grants(UNIVERSITY_ROLES)
+# «Əmək müqavilələri» (2026-10-19): `hr.contracts_*` — hr, ikt_rehber; qəyyum yalnız oxu. Mövcud: organizations/0069.
+apply_hr_contract_grants(UNIVERSITY_ROLES)
 
 # Rol auditi (2026-10-13, sahib «tövsiyə olunan variantlarla»): açar verilişi/alınması + ölü açarlar.
 # Mövcud tenantlar: organizations/0061. SONUNCU olmalıdır — əvvəlki addımların əlavələrini də süzür.

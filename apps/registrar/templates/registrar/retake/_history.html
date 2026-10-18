@@ -41,7 +41,7 @@ heyətin iz görünüşündə EYNİ partial (sahibin 2026-09-07 memo-su: koordin
             {% for g in h.grants %}
             <li><i class="fas fa-rotate-right" aria-hidden="true"></i>
                 {% blocktrans trimmed with title=g.exam_title reason=g.reason|retake_reason_label when=g.created_at|date:"d.m.Y H:i" n=g.extra_attempts context "registrar.retake" %}
-                    İmtahan şansı: «{{ title }}» · +{{ n }} · {{ reason }} · {{ when }}
+                    Yenidən imtahan cəhdi: «{{ title }}» · +{{ n }} · {{ reason }} · {{ when }}
                 {% endblocktrans %}
             </li>
             {% endfor %}

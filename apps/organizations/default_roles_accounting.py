@@ -26,13 +26,19 @@ adlarını, fakültə / kafedra seçimlərini öz servisində (``accounts/servic
 
 from core.constants import RoleScopeType
 
-from .permissions_accounting import PERM_ACCOUNTING_VIEW, PERM_RETAKE_MANAGE, PERM_RETAKE_PAYMENT_VERIFY
+from .permissions_accounting import (
+    PERM_ACCOUNTING_MANAGE_FEES,
+    PERM_ACCOUNTING_VIEW,
+    PERM_RETAKE_MANAGE,
+    PERM_RETAKE_PAYMENT_VERIFY,
+)
 
 ACCOUNTANT_ROLE = "accountant"
 
 ACCOUNTANT_PERMISSIONS = (
     PERM_ACCOUNTING_VIEW,
     PERM_RETAKE_PAYMENT_VERIFY,
+    PERM_ACCOUNTING_MANAGE_FEES,
 )
 
 ACCOUNTING_ROLES = [
@@ -49,7 +55,7 @@ ACCOUNTING_ROLES = [
 #: Mövcud rollara VERİLƏN açarlar. ``*`` daşıyanlar (rektor, Qəyyumlar Şurasının sədri, RİM rəhbəri) onsuz da
 #: əhatəlidir — ``ikt_rehber`` siyahıdadır ki, tenantda ``*`` daraldılıbsa da açar qalsın.
 ACCOUNTING_GRANTS: dict[str, tuple[str, ...]] = {
-    "ikt_rehber": (PERM_ACCOUNTING_VIEW, PERM_RETAKE_MANAGE),
+    "ikt_rehber": (PERM_ACCOUNTING_VIEW, PERM_RETAKE_MANAGE, PERM_ACCOUNTING_MANAGE_FEES),
     "trustee": (PERM_ACCOUNTING_VIEW,),
     "dean": (PERM_RETAKE_MANAGE,),
     "vice_dean": (PERM_RETAKE_MANAGE,),

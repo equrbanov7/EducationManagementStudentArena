@@ -239,6 +239,14 @@
         }
         toggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
 
+        /* Mobil qabıq 2026-10-19: ≤ 576px-də panel ekranın ortasında sabit «vərəq»dir
+           (view_as.css) — arxa səhifə barmaqla sürüşməsin; nəticə siyahısı öz içində
+           sürüşür. Bağlananda (və ya enli ekranda) kilid həmişə açılır. */
+        if (window.EMSScrollLock) {
+            var isSheet = !!(window.matchMedia && window.matchMedia("(max-width: 576px)").matches);
+            window.EMSScrollLock.set("view-as", willOpen && isSheet, dropdown);
+        }
+
         if (willOpen) {
             if (isSuperadmin(launcher)) {
                 loadOrganizations(launcher);

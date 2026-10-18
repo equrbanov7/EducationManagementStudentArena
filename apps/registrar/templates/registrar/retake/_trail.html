@@ -8,7 +8,7 @@ Bütün qəbz yükləmələri (rədd edilənlər də) siyahıdadır; hadisələr
             <h2 class="ems-card__title" id="rtTrailTitle">{% trans "Tələbə tapılmadı və ya əhatənizdə deyil" context "registrar.retake" %}</h2>
             {% else %}
             <h2 class="ems-card__title" id="rtTrailTitle">{% blocktrans with name=trail.student.get_full_name|default:trail.student.username context "registrar.retake" %}{{ name }} — 25% izi{% endblocktrans %}</h2>
-            <p class="ems-card__sub">{% trans "Bütün müraciətlər, addımlar, qəbzlər, imtahan şansları və nəticələr." context "registrar.retake" %}</p>
+            <p class="ems-card__sub">{% trans "Bütün müraciətlər, addımlar, qəbzlər, yenidən imtahan cəhdləri və nəticələr." context "registrar.retake" %}</p>
             {% endif %}
         </div>
         <a class="ems-btn ems-btn--sm" href="{{ profile_base_url }}?section=retake-desk&amp;rt_tab={{ rd.tab }}" data-section="retake-desk"><i class="fas fa-xmark" aria-hidden="true"></i> {% trans "Bağla" context "registrar.retake" %}</a>

@@ -152,11 +152,13 @@ body:has(.jd2) .ai-bot-btn:focus-visible {
     .jd2-tabsbar .jd2-tab { flex: 1 1 auto; padding: 0 10px; text-align: center; }
 }
 
-/* ── 9. Telefon: toxunma hədəfləri ≥ 44px (UX2 2026-10-05) ───────────────────
+/* ── 9. Telefon/planşet: toxunma hədəfləri ≥ 44px (UX2 2026-10-05) ───────────
    Davamiyyət/bal seçimi (~26px), toplu «i/e»/«q/b» düymələri (~20px) və dərs redaktə qələmi (~20px)
    barmaqla vurulmaq üçün çox kiçik idi. Eni artırmırıq (sütun daralığı qalır) — yalnız hündürlük;
-   açılan menyunun sətirləri də 44px. Masaüstü düzümü dəyişmir. */
-@media (max-width: 640px) {
+   açılan menyunun sətirləri də 44px. Masaüstü (siçan) düzümü dəyişmir.
+   2026-10-19 (mobil müəllim): planşet (768px, toxunma) bu qaydadan kənarda qalırdı — xanalar 26px,
+   toplu düymələr 20px idi; `pointer: coarse` əlavə olundu. */
+@media (max-width: 640px), (pointer: coarse) {
     .jd2-semselect .bootstrap-single-select__toggle { min-height: 44px; font-size: 13px; }
     .jd2-semselect .dropdown-menu { max-height: 60vh; }
     .jd2-semselect .dropdown-menu .bootstrap-single-select__option { min-height: 44px; font-size: 14px; }
@@ -164,8 +166,51 @@ body:has(.jd2) .ai-bot-btn:focus-visible {
     .jd2-th-bulk { gap: 6px; }
     .jd2-bulk { min-height: 44px; min-width: 44px; font-size: 12px; }
     .jd2-th-edit { min-height: 44px; min-width: 44px; font-size: 13px; }
+    /* Redaktə vaxtı keçmiş dərsin tarixi «Gün özəti»ni açan düymədir (30×17px idi). */
+    .jd2-th-date-btn { min-height: 44px; min-width: 44px; }
 }
 
 /* Canlı q/b sayğacı: server sayından fərqlidirsə (hələ saxlanmayıb) incə çərçivə — «yadda saxla»
    lazımdır işarəsi. Rəng (is-warning / is-barred) hələ server hesabıdır. */
 .jd2-qchip.is-live { box-shadow: 0 0 0 2px var(--j-line, #dce6f7); }
+
+/* ── 10. Telefon: iş sahəsi, görünən saxlama vəziyyəti, iOS zoom (mobil müəllim 2026-10-19) ───────
+   * 375px-də səhifə qırağı 32+32px idi — grid-ə cəmi 309px qalırdı (bir dərs sütunu). Qırağı daraldırıq.
+   * «Yadda saxlanılır… / Yadda saxlanıldı» mətni cədvəlin ALTINDA idi (28 sətirdə ~2 ekran aşağı):
+     yuxarıdakı sətirdə bal seçən müəllim saxlanmanı görmürdü. Səhifə-səviyyəli `sticky` burada
+     İŞLƏMİR (main.css `body { overflow-x: hidden }`), ona görə telefonda vəziyyət mətni, yalnız
+     hadisə olanda, ekranın sol-altında kiçik «pill» kimi görünür (AI düyməsi sağ-altdadır);
+     «Yadda saxlanıldı» ~3 san sonra sönür, xəta/qismən yazılma qalır. JS dəyişmir — siniflər
+     journal_grid_autosave.js-in mövcud `is-*` vəziyyətləridir.
+   * iOS Safari 16px-dən kiçik şriftli sahəyə toxunanda səhifəni böyüdür — modal sahələri 16px. */
+@media (max-width: 640px) {
+    .journal-page.jd2 { padding: 14px 10px 40px; }
+    .jd2-th-student { min-width: 120px; }
+    .jd2-stu-name { overflow-wrap: break-word; hyphens: auto; }
+    .jd2-savebar .jd2-save-btn { min-height: 44px; }
+    .jd2-savebar .jd2-autosave.is-saving,
+    .jd2-savebar .jd2-autosave.is-saved,
+    .jd2-savebar .jd2-autosave.is-warning,
+    .jd2-savebar .jd2-autosave.is-error {
+        position: fixed;
+        left: 12px;
+        bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+        z-index: 1040;
+        max-width: calc(100vw - 96px);
+        padding: 9px 14px;
+        border: 1px solid var(--ems-border);
+        border-radius: var(--ems-r-pill);
+        background: var(--ems-neutral-0);
+        box-shadow: var(--ems-sh-raised);
+        font-size: 0.82rem;
+        pointer-events: none;
+    }
+    .jd2-savebar .jd2-autosave.is-saved { animation: jd2-autosave-fade 0.3s ease 2.8s forwards; }
+    .jd2 .jd2-winclose { width: 40px; height: 40px; }
+    .jd2 input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+    .jd2 textarea { font-size: 16px; }
+}
+@keyframes jd2-autosave-fade { to { opacity: 0; visibility: hidden; } }
+@media (max-width: 640px) and (prefers-reduced-motion: reduce) {
+    .jd2-savebar .jd2-autosave.is-saved { animation: none; }
+}

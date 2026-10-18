@@ -1,0 +1,243 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   EMSArena — Kurs resursları: fayl seçimi + yükləmə irəliləyişi + video oynadıcı · 2026-10-19
+
+   - `.cd-res-drop` — «Yeni Resurs» modalının fayl zonası (native «Choose File» görünmür, amma
+     klaviatura ilə fokuslanır). Nümunə: exams/css/ai_generator_panel.css `.aigen-drop`.
+   - `.cd-res-progress` — XHR yükləmə irəliləyişi (<progress>).
+   - `.cd-res-video` — kartda / mövzu siyahısında <video controls>.
+   Yalnız `--ems-*` tokenləri; 375 px-də sətirlər qırılır, üfüqi sürüşmə yoxdur.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Fayl zonası ─────────────────────────────────────────────────────────── */
+.cd-res-drop {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    min-height: 64px;
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+    transition:
+        border-color 0.12s ease,
+        background-color 0.12s ease;
+}
+
+.cd-res-drop:hover,
+.cd-res-drop.is-dragover {
+    border-color: var(--ems-primary-500);
+    background: var(--ems-primary-50);
+}
+
+.cd-res-drop:focus-within {
+    border-color: var(--ems-primary-500);
+    box-shadow: var(--ems-sh-focus);
+}
+
+.cd-res-drop.has-file {
+    border-style: solid;
+    border-color: var(--ems-primary-200);
+    background: var(--ems-primary-50);
+}
+
+.cd-res-drop.is-invalid {
+    border-style: solid;
+    border-color: var(--ems-danger);
+    background: var(--ems-danger-bg);
+}
+
+.cd-res-drop.is-busy {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* Native input görünmür, amma fokuslanır (Tab → Space/Enter seçimi açır). */
+.cd-res-drop__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    border: 0;
+    white-space: nowrap;
+}
+
+.cd-res-drop__pick {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: var(--ems-sp-4);
+    min-width: 0;
+    min-height: 62px;
+    margin: 0;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: var(--ems-fs-base);
+    color: var(--ems-neutral-700);
+}
+
+.cd-res-drop__pick > i {
+    flex: none;
+    font-size: 1.25rem;
+    color: var(--ems-primary-600);
+}
+
+.cd-res-drop__text {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.cd-res-drop__name {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 600;
+}
+
+.cd-res-drop.has-file .cd-res-drop__name {
+    color: var(--ems-text);
+}
+
+.cd-res-drop__size {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+.cd-res-drop__size[hidden],
+.cd-res-drop__clear[hidden],
+.cd-res-progress[hidden],
+.cd-res-video__error[hidden] {
+    display: none;
+}
+
+.cd-res-drop__clear {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    margin-right: 8px;
+    border: 0;
+    border-radius: var(--ems-r-md);
+    background: transparent;
+    color: var(--ems-neutral-500);
+    cursor: pointer;
+}
+
+.cd-res-drop__clear:hover,
+.cd-res-drop__clear:focus-visible {
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger);
+    outline: none;
+}
+
+/* ── Yükləmə irəliləyişi ─────────────────────────────────────────────────── */
+.cd-res-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: var(--ems-sp-3);
+}
+
+.cd-res-progress__bar {
+    width: 100%;
+    height: 8px;
+    border: 0;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--ems-neutral-200);
+    accent-color: var(--ems-primary-600);
+    appearance: none;
+}
+
+.cd-res-progress__bar::-webkit-progress-bar {
+    border-radius: 999px;
+    background: var(--ems-neutral-200);
+}
+
+.cd-res-progress__bar::-webkit-progress-value {
+    border-radius: 999px;
+    background: var(--ems-primary-600);
+    transition: width 0.2s ease;
+}
+
+.cd-res-progress__bar::-moz-progress-bar {
+    border-radius: 999px;
+    background: var(--ems-primary-600);
+}
+
+.cd-res-progress__text {
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+    color: var(--ems-neutral-700);
+}
+
+/* ── Video oynadıcı ──────────────────────────────────────────────────────── */
+.cd-res-video {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.cd-res-video__player {
+    display: block;
+    width: 100%;
+    max-height: 360px;
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-neutral-900);
+    aspect-ratio: 16 / 9;
+}
+
+.cd-res-video__note,
+.cd-res-video__error {
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+    line-height: 1.45;
+    color: var(--ems-text-muted);
+}
+
+.cd-res-video__error {
+    color: var(--ems-danger);
+    font-weight: 600;
+}
+
+/* Mövzu siyahısında: sətir altına açılan oynadıcı. */
+.cd-res-item--video {
+    flex-wrap: wrap;
+}
+
+.cd-res-item__video {
+    flex: 1 1 100%;
+    min-width: 0;
+}
+
+.cd-res-item__video > summary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    cursor: pointer;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-primary-700);
+}
+
+.cd-res-item__video[open] > summary {
+    margin-bottom: 6px;
+}
+
+@media (max-width: 575.98px) {
+    .cd-res-drop__pick {
+        padding: 10px;
+    }
+
+    .cd-res-video__player {
+        max-height: 240px;
+    }
+}

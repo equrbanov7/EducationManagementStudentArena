@@ -23,7 +23,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import pgettext
 
-from . import retake_files, retake_notify, retake_rules
+from . import retake_fees, retake_files, retake_notify, retake_rules
 from .models import (
     RETAKE_CONSUMED_STATUSES,
     Enrollment,
@@ -49,15 +49,31 @@ class SubgroupPlacementUnavailable(Exception):
 
 
 @transaction.atomic
-def verify_payment(*, actor, organization, application_id, payment_reference="", note="", request=None):
+def verify_payment(
+    *, actor, organization, application_id, paid_amount=None, payment_reference="", note="", request=None
+):
+    """Ödənişi təsdiqlə. 2026-10-19 (sahib): mühasib ÖDƏNİLƏN məbləği yazır; gözlənilən məbləğ (təhsil haqqı
+    cədvəli + düstur) bu anda yenidən hesablanır, ikisi və düsturun girişləri hadisəyə (append-only) yazılır.
+    Fərq XƏBƏRDARLIQDIR — təsdiqi bloklamır."""
     application = lock(application_id, organization)
     if application.status != RetakeStatus.PAYMENT_PENDING_REVIEW:
         raise ValidationError(pgettext(_CTX, "Bu müraciətdə yoxlanacaq qəbz yoxdur."))
+    paid = retake_fees.clean_amount(paid_amount, positive=True)
+    # Müraciət anında tələbəyə göstərilən məbləğ (snapshot) və təsdiq anındakı yenidən hesab AYRI saxlanılır.
+    # Yenidən hesab ``None`` olarsa köhnə məbləğ və ONUN girişləri qalır (cüt bir-birinə uyğun qalsın).
+    expected_at_submit = application.expected_fee
+    inputs_at_submit = application.fee_inputs or {}
+    fee = retake_fees.for_application(application)
+    expected = fee["amount"] if fee["amount"] is not None else expected_at_submit
     receipt = application.current_receipt
     duplicates = duplicate_receipt_map([receipt]).get(getattr(receipt, "id", None), [])
     application.payment_reference = (payment_reference or "").strip()[:120]
     application.payment_verified_by = actor
     application.payment_verified_at = timezone.now()
+    application.paid_amount = paid
+    application.expected_fee = expected
+    if fee["amount"] is not None:
+        application.fee_inputs = fee["inputs"]
     transition(
         application,
         RetakeStatus.PAYMENT_VERIFIED,
@@ -69,8 +85,23 @@ def verify_payment(*, actor, organization, application_id, payment_reference="",
             "payment_reference": application.payment_reference,
             "receipt_id": str(getattr(receipt, "pk", "") or ""),
             "duplicate_receipt_applications": sorted({str(d.application_id) for d in duplicates}),
+            "paid_amount": str(paid),
+            "expected_fee": str(expected) if expected is not None else None,
+            "expected_at_submit": str(expected_at_submit) if expected_at_submit is not None else None,
+            "expected_at_verify": str(fee["amount"]) if fee["amount"] is not None else None,
+            "amount_mismatch": expected is not None and paid != expected,
+            "fee_inputs": application.fee_inputs,
+            "fee_inputs_at_submit": inputs_at_submit,
+            "fee_inputs_at_verify": fee["inputs"],
         },
-        fields=("payment_reference", "payment_verified_by", "payment_verified_at"),
+        fields=(
+            "payment_reference",
+            "payment_verified_by",
+            "payment_verified_at",
+            "paid_amount",
+            "expected_fee",
+            "fee_inputs",
+        ),
         request=request,
     )
     retake_notify.notify_staff_queue(application, retake_rules.PERM_MANAGE)
@@ -151,9 +182,26 @@ def admit(*, actor, organization, application_id, note="", request=None):
 
 
 @transaction.atomic
-def reject(*, actor, organization, application_id, reason, request=None):
+def reject(
+    *, actor, organization, application_id, reason, order_number="", order_date=None, document=None, request=None
+):
+    """Rədd. Alt qrup (ödənişsiz) — səbəblə; 25% (ödənişdən sonra) — ``retake_closure`` ilə RƏSMİ QƏRARLA."""
     application = lock(application_id, organization)
-    allowed = {RetakeStatus.SUBMITTED} if application.kind == RetakeKind.SUBGROUP else {RetakeStatus.PAYMENT_VERIFIED}
+    if application.kind == RetakeKind.RETAKE_25:
+        from . import retake_closure
+
+        return retake_closure.close(
+            actor=actor,
+            organization=organization,
+            application_id=application.pk,
+            action="reject",
+            reason=reason,
+            order_number=order_number,
+            order_date=order_date,
+            document=document,
+            request=request,
+        )
+    allowed = {RetakeStatus.SUBMITTED}
     if application.status not in allowed:
         raise ValidationError(pgettext(_CTX, "Bu mərhələdə dekanlıq qərarı verilmir."))
     application.decided_by = actor

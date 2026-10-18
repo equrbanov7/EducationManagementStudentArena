@@ -79,6 +79,8 @@ class RetakeStatus(models.TextChoices):
     COMPLETED = "completed", pgettext_lazy(_CTX, "Tamamlanıb")
     REJECTED = "rejected", pgettext_lazy(_CTX, "Rədd edilib")
     WITHDRAWN = "withdrawn", pgettext_lazy(_CTX, "Geri götürülüb")
+    #: 2026-10-19 (sahib): ödənişdən sonra imtahana gəlməyib — cəhd İSTİFADƏ OLUNMUŞ sayılır (rəsmi qərarla).
+    NO_SHOW = "no_show", pgettext_lazy(_CTX, "İmtahana gəlmədi")
 
 
 #: Aktiv (bitməmiş) statuslar — bir fənn üzrə yalnız biri ola bilər.
@@ -92,7 +94,7 @@ ACTIVE_STATUSES = (
 )
 
 #: 25% cəhdini «istifadə olunmuş» sayan statuslar (cəhd limiti bunlardan hesablanır).
-CONSUMED_STATUSES = (RetakeStatus.ADMITTED, RetakeStatus.EXAM_GRANTED, RetakeStatus.COMPLETED)
+CONSUMED_STATUSES = (RetakeStatus.ADMITTED, RetakeStatus.EXAM_GRANTED, RetakeStatus.COMPLETED, RetakeStatus.NO_SHOW)
 
 
 class RetakeResultSource(models.TextChoices):
@@ -161,6 +163,19 @@ class RetakeApplication(UUIDModel, TimeStampedModel):
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
     closed_at = models.DateTimeField(null=True, blank=True)
+    # ── 2026-10-19 (sahib): ödəniş məbləği — gözlənilən (təhsil haqqı cədvəli + düstur) və ödənilən ──────────
+    #: Müraciət anında hesablanmış təxmini məbləğ (AZN) və düsturun girişləri (illik haqq, faiz, kredit…).
+    expected_fee = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    fee_inputs = models.JSONField(default=dict, blank=True)
+    #: Mühasibatlığın təsdiq anında yazdığı ödənilmiş məbləğ (AZN); fərq xəbərdarlıqdır, blok deyil.
+    paid_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    # ── Ödənişdən sonra bağlanmanın RƏSMİ qərarı (əmr № + tarix və ya sənəd). Qaytarılma YOXDUR — qayda sahibdən
+    #    gözlənilir (bax ``retake_closure``). ────────────────────────────────────────────────────────────────
+    closure_order_number = models.CharField(max_length=80, blank=True)
+    closure_order_date = models.DateField(null=True, blank=True)
+    closure_document = models.FileField(
+        upload_to=retake_document_path, blank=True, max_length=200, validators=retake_file_validators()
+    )
 
     objects = models.Manager()
 

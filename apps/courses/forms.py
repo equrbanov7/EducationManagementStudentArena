@@ -9,14 +9,18 @@ Nə üçün:
 - CSRF protection (otomatik)
 """
 
+from urllib.parse import urlsplit
+
 from django import forms
 from django.apps import apps
+from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
-from django.utils.translation import pgettext_lazy
+from django.utils.translation import pgettext, pgettext_lazy
 
 from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
 
 from .models import Course, CourseResource, CourseTopic
+from .resource_upload import LINK_KIND, kind_label, prepare_resource_file
 
 # Kurs statusunun TƏRCÜMƏ olunan etiketləri (2026-09-28). Modeldəki
 # `Course.STATUS_CHOICES` etiketləri sərt kodlanmış AZ-dır («Draft (yayımlanmayıb)»)
@@ -224,15 +228,12 @@ class CourseTopicForm(forms.ModelForm):
 
 class CourseResourceForm(forms.ModelForm):
     """
-    Resurs əlavə etmə forması (PDF, Link, Video, və s.).
+    Resurs əlavə etmə forması (Fayl / Link / Video / Sənəd).
 
-    Nə edər:
-    - Müəllim resurs adı, tipi, fayl/link daxil edir
-    - Validasiya: Fayl varsa URL boş olmalı (və əksinə)
-
-    Misal:
-    - Resurs 1: "Python Dokumentasiyası" (URL)
-    - Resurs 2: "Giriş Slaydları" (Fayl: PDF)
+    2026-10-19: format və ölçü SEÇİLƏN TİPƏ görədir (``apps/courses/resource_upload.py``) —
+    Video: MP4/MOV/WEBM/M4V ≤ 200 MB, Sənəd: ofis/PDF/ODT/TXT ≤ 50 MB, Fayl: sənəd + arxiv +
+    şəkil ≤ 100 MB; Link: yalnız http/https URL. Xətalar sahəyə bağlıdır (``file`` / ``url``)
+    və modalda göstərilir.
     """
 
     class Meta:
@@ -257,12 +258,7 @@ class CourseResourceForm(forms.ModelForm):
                     "class": "form-control",
                 }
             ),
-            "file": forms.FileInput(
-                attrs={
-                    "class": "form-control",
-                    "accept": ".pdf,.zip,.jpg,.png,.mp4",
-                }
-            ),
+            "file": forms.FileInput(attrs={"class": "form-control"}),
             "url": forms.URLInput(
                 attrs={
                     "class": "form-control",
@@ -276,48 +272,51 @@ class CourseResourceForm(forms.ModelForm):
             ),
         }
 
+    def clean_url(self):
+        url = (self.cleaned_data.get("url") or "").strip()
+        if url and urlsplit(url).scheme.lower() not in ("http", "https"):
+            raise forms.ValidationError(
+                pgettext("courses.resource_upload", "Link http:// və ya https:// ilə başlamalıdır.")
+            )
+        return url
+
     def clean(self):
-        """Fayl YA URL olmalı, ama ikisi bir vaxtda deyil."""
         cleaned_data = super().clean()
+        kind = cleaned_data.get("resource_type")
+        if not kind:
+            return cleaned_data  # tip xətası artıq sahəyə yazılıb
         file = cleaned_data.get("file")
         url = cleaned_data.get("url")
 
-        if not file and not url:
-            raise forms.ValidationError(pgettext_lazy("courses.form.resource.error", "file_or_url_required"))
+        if kind == LINK_KIND:
+            if file:
+                self.add_error(
+                    "file",
+                    pgettext(
+                        "courses.resource_upload",
+                        "«Link» tipində fayl yüklənmir — fayl üçün «Fayl», «Video» və ya «Sənəd» seçin.",
+                    ),
+                )
+            if not url and "url" not in self.errors:
+                self.add_error(
+                    "url", pgettext("courses.resource_upload", "Link üçün URL daxil edin (http:// və ya https://).")
+                )
+            return cleaned_data
 
-        if file and url:
-            raise forms.ValidationError(pgettext_lazy("courses.form.resource.error", "file_and_url_mutually_exclusive"))
-
-        return cleaned_data
-
-    def clean_file(self):
-        file = self.cleaned_data.get("file")
+        if url:
+            self.add_error(
+                "url",
+                pgettext("courses.resource_upload", "Bu tipdə fayl yüklənir — xarici link üçün «Link» tipini seçin."),
+            )
         if not file:
-            return file
-
-        validate_uploaded_file(
-            file,
-            allowed_extensions={
-                ".pdf",
-                ".zip",
-                ".rar",
-                ".7z",
-                ".txt",
-                ".doc",
-                ".docx",
-                ".xls",
-                ".xlsx",
-                ".ppt",
-                ".pptx",
-                ".jpg",
-                ".jpeg",
-                ".png",
-                ".webp",
-                ".mp4",
-                ".webm",
-                ".mov",
-            },
-            max_size_mb=50,
-        )
-        randomize_uploaded_filename(file)
-        return file
+            if "file" not in self.errors:
+                self.add_error(
+                    "file",
+                    pgettext("courses.resource_upload", "«{kind}» üçün fayl seçin.").format(kind=kind_label(kind)),
+                )
+            return cleaned_data
+        try:
+            prepare_resource_file(file, kind)
+        except ValidationError as error:
+            self.add_error("file", error)
+        return cleaned_data

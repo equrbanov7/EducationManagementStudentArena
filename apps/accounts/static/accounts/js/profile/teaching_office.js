@@ -418,7 +418,14 @@
                 }
                 // Şablon mətni yoxdursa serverin öz mesajı göstərilir (məs.
                 // «X «Y» fakültəsinə dekan təyin edildi») — səssiz uğur olmasın.
-                toast(form.getAttribute("data-tof-success") || (payload && payload.message) || "", "success");
+                // 2026-10-19: yazı keçib, amma server XƏBƏRDARLIQ qaytarıbsa (məs. dövr
+                // pəncərəsi semestrdən kənardadır) — uğur yox, xəbərdarlıq tostu.
+                var warnings = (payload && payload.warnings) || [];
+                if (warnings.length) {
+                    toast(warnings.join(" "), "warning");
+                } else {
+                    toast(form.getAttribute("data-tof-success") || (payload && payload.message) || "", "success");
+                }
                 reload(section, sectionUrl(section, {}));
             })
             .catch(function (err) {

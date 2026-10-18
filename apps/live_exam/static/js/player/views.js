@@ -2,9 +2,10 @@
 // Eyni açar (faza + sual + reveal) təkrar gələndə DOM yenidən qurulmur → ikiqat animasiya/səs yoxdur.
 // Keçid: köhnə view «is-leaving» (220 ms) ilə çıxır, yenisi «is-entering» ilə girir (yalnız
 // transform/opacity). Azaldılmış hərəkət rejimində dəyişmə anidir.
-import { prefersReducedMotion } from './config.js?v=lx20261014';
-import { UI } from './dom.js?v=lx20261014';
-import { state } from './state.js?v=lx20261014';
+import { prefersReducedMotion } from './config.js?v=lx20261019';
+import { UI } from './dom.js?v=lx20261019';
+import { state } from './state.js?v=lx20261019';
+import { hydrateCodeText } from '../host_lobby/code_text.js?v=lx20261019';
 
 const LEAVE_MS = 240;
 let current = null;
@@ -22,6 +23,8 @@ export function mountView(key, html, { tone = "", className = "" } = {}) {
     el.className = className ? `lxp-view ${className}` : "lxp-view";
     el.dataset.viewKey = key;
     el.innerHTML = html;
+    // 2026-10-19: sual/variant mətnindəki kod nümunəsi alt-alta, girintisi ilə (DOM, textContent ilə).
+    hydrateCodeText(el);
 
     if (current && current.el.isConnected) {
         const old = current.el;

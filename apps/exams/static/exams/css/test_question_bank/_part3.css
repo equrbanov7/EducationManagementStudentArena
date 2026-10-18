@@ -442,38 +442,7 @@
     font-weight: bold;
 }
 
-@media (max-width: 1180px) {
-    .ai-bank-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .ai-field--wide {
-        grid-column: 1 / -1;
-    }
-}
-
 @media (max-width: 992px) {
     .split-layout { flex-direction: column; }
     .upload-sidebar { width: 100%; flex-basis: auto; border-right: none; border-bottom: 1px solid var(--border); }
 }
-
-@media (max-width: 640px) {
-    .ai-bank-card {
-        padding: 18px;
-    }
-
-    .ai-bank-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .ai-insert-toggle,
-    .ai-generate-btn {
-        min-width: 0;
-        width: 100%;
-    }
-
-    .ai-insert-toggle {
-        grid-column: auto;
-    }
-}
-

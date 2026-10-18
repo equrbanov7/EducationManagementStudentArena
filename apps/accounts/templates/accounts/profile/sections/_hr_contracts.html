@@ -1,0 +1,11 @@
+{% comment %}«Əmək müqavilələri» (apps.hr_contracts, sahib 2026-10-19) — HR: bütün əməkdaşların müqavilələri, bitmə
+nəzarəti, «müqavilə göndərildi», xitam, yeniləmə. Menyu qapısı: rbac_sections.py (`hr.contracts_view` /
+`hr.contracts_manage`); data qapısı `apps/hr_contracts/services/access.py`. Bütün məntiq və şablonlar
+`apps.hr_contracts`-dadır; mutasiyalar `/kadrlar/muqavileler/api/…` JSON uclarına gedir → AJAX-safe.{% endcomment %}
+{% if 'hr-contracts' in allowed_sections %}
+<section class="profile-section-panel profile-section--hr-contracts {% if active_section == 'hr-contracts' %}is-active{% endif %}"
+         data-profile-section-panel="hr-contracts"
+         data-source-url="{{ profile_base_url }}?section=hr-contracts">
+    {% include "hr_contracts/cabinet/_hr_panel.html" %}
+</section>
+{% endif %}

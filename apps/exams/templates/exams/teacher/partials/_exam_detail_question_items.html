@@ -5,7 +5,7 @@ işlədir. Düsturlar KaTeX ilə (data-ems-math); düzgün variant rəng + ikon 
 <li class="ted-q question-item">
     <span class="ted-q__num" aria-hidden="true">{{ q.order }}</span>
     <div class="ted-q__content" data-ems-math>
-        {% if not q.image_replaces_text or not q.image %}<p class="ted-q__text"><span class="sr-only">{{ q.order }}. </span>{{ q.text }}</p>{% endif %}
+        {% if not q.image_replaces_text or not q.image %}<p class="ted-q__text"><span class="sr-only">{{ q.order }}. </span>{{ q.text|code_text }}</p>{% endif %}
         {% if q.image %}<img src="{{ q.image|protected_media_url }}" alt="{% if q.image_replaces_text %}{{ q.text }}{% endif %}" class="ted-q__image" loading="lazy" decoding="async">{% endif %}
         <div class="ted-q__meta">
             <span class="ted-q__pts">{{ q.points }} {% trans "unit_points" context "exams.template.teacher_check_attempt" %}</span>
@@ -17,7 +17,7 @@ işlədir. Düsturlar KaTeX ilə (data-ems-math); düzgün variant rəng + ikon 
                     <li class="ted-opt{% if opt.is_correct %} is-correct{% endif %}">
                         <span class="ted-opt__mark" aria-hidden="true">{% if opt.is_correct %}<i class="fas fa-circle-check"></i>{% else %}<i class="far fa-circle"></i>{% endif %}</span>
                         <span class="ted-opt__label">{{ opt.label|default:"•" }}</span>
-                        {% if not opt.image_replaces_text or not opt.image %}<span class="ted-opt__text">{{ opt.text }}</span>{% endif %}
+                        {% if not opt.image_replaces_text or not opt.image %}<span class="ted-opt__text">{{ opt.text|code_text }}</span>{% endif %}
                         {% if opt.image %}<img src="{{ opt.image|protected_media_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="ted-opt__image" loading="lazy" decoding="async">{% endif %}
                         {% if opt.is_correct %}<span class="sr-only">({% trans "Düzgün" context "exams.attempt_review" %})</span>{% endif %}
                     </li>

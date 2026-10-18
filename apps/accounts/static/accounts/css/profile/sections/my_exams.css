@@ -453,3 +453,8 @@
 .tx-toast.is-out { opacity: 0; transform: translate(-50%, 8px); transition: opacity .25s, transform .25s; }
 .tx-toast-ck { width: 22px; height: 22px; border-radius: 50%; background: var(--ems-success-600); display: grid; place-items: center; flex-shrink: 0; font-size: 11px; }
 @keyframes txToastIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+/* Telefon: iOS Safari 16px-dən kiçik şriftli sahəyə toxunanda səhifəni böyüdür (mobil müəllim 2026-10-19). */
+@media (max-width: 768px) {
+    .profile-section--my-exams .tx-search-input { font-size: 16px; }
+}

@@ -50,6 +50,9 @@ from django.utils._os import safe_join
 from django.views.decorators.http import require_GET
 
 from core import media_policies
+from core.upload_video import register_video_mimetypes
+
+register_video_mimetypes()  # 2026-10-19: kurs videoları (.m4v slim image-də tanınmırdı) — düzgün Content-Type
 
 # Geri uyğunluq: düzəliş sənədi siyasəti ``core.media_policies``-ə köçdü; köhnə
 # ad (testlər/monkeypatch) eyni funksiyaya işarə edir.

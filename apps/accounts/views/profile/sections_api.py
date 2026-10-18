@@ -8,8 +8,7 @@ Two endpoints:
   reload. Reuses ``user_profile`` for context-building so permission, tenant,
   RLS and section-gating behaviour stays identical to ``/accounts/profile/``.
 
-* ``profile_badges_api`` — returns sidebar badge counts as JSON via the
-  cheap counters from ``_dashboard_helpers.cheap_counts``.
+* ``profile_badges_api`` — sidebar badge counts as JSON (``_dashboard_helpers.cheap_counts``).
 
 Server-side ``/accounts/profile/?section=...`` continues to work untouched;
 the AJAX endpoints are pure progressive enhancement.
@@ -42,6 +41,7 @@ from core.logging_utils import safe_log_value
 from .._dashboard_helpers.cheap_counts import compute_profile_badge_counts, count_assigned_tasks
 from .._helpers import _get_active_organization, _load_user_profile, _role_capabilities
 from .section_assets import section_assets_payload
+from .sections_hr_contracts import HR_CONTRACT_AJAX_SECTIONS, HR_CONTRACT_SECTION_PARTIALS
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,7 @@ LEAN_FRAGMENT_CONTEXT = True  # qabıq dəyərləri tənbəl (``context_builder/
 # --------------------------------------------------------------------------- #
 
 # Bütün mövcud profile section-ları → partial template adı.
-SECTION_PARTIALS: dict[str, str] = {
+SECTION_PARTIALS: dict[str, str] = HR_CONTRACT_SECTION_PARTIALS | {
     # «Ana səhifə» — kabinetin default bölməsi (FAZA 22).
     "dashboard": "accounts/profile/sections/_dashboard.html",
     "profile-info": "accounts/profile/sections/_profile_info.html",
@@ -204,11 +204,12 @@ SECTION_PARTIALS: dict[str, str] = {
     "my-group": "accounts/profile/sections/_my_group.html",  # «Starosta» — baş tələbə (B10)
     "my-retakes": "accounts/profile/sections/_my_retakes.html",  # «25% və alt qrup» (2026-10-18)
     "retake-desk": "accounts/profile/sections/_retake_desk.html",  # «25% müraciətləri» — heyət növbəsi
+    "retake-windows": "accounts/profile/sections/_retake_windows.html",  # «25% müraciət pəncərəsi» (2026-10-19)
     "subgroup-placement": "accounts/profile/sections/_subgroup_placement.html",  # «Alt qrupa tələbə əlavə et»
 }
 
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin bölmələri normal full-page naviqasiyada qalır.
-AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
+AJAX_SAFE_SECTIONS: frozenset[str] = HR_CONTRACT_AJAX_SECTIONS | frozenset(
     {
         # «Ana səhifə» tam server-render, YALNIZ-OXU xülasədir → AJAX-safe.
         "dashboard",
@@ -343,10 +344,10 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "my-subject-folders",
         "announcements",  # «Elanlar» — panel oxu-only; mutasiyalar `/elanlar/api/` JSON uclarına gedir
         "my-group",  # «Starosta» (B10) — OXU-ONLY qrup mənzərəsi + şəxsi davamiyyət, mutasiya yoxdur
-        # «25% və alt qrup» / «25% müraciətləri» (2026-10-18) — panel server-render; bütün yazılar ayrıca
-        # `/tekrar-imtahan/…` JSON POST-larına gedir, filtr/tab/səhifə linkləri paneli yerində yeniləyir.
+        # 25% bölmələri (2026-10-18/19) — server-render; yazılar `/tekrar-imtahan/…` JSON POST-larına gedir.
         "my-retakes",
         "retake-desk",
+        "retake-windows",
     }
 )
 

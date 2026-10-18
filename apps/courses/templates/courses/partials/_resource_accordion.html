@@ -4,6 +4,7 @@
 Resurslar paneli (2026-09-28 redizayn) — kart şəbəkəsi. Silmə düyməsinin
 çəngəli (`data-delete-resource-*`) topic_accordion.js-in document delegasiyası
 ilə işləyir. View `resources`-i `select_related("topic")` ilə verir (N+1 yox).
+2026-10-19: video faylları kartda `<video controls preload="metadata">` ilə oynanır (_resource_video.html).
 {% endcomment %}
 
 <div id="resourceAccordionConfig" hidden
@@ -36,6 +37,10 @@ ilə işləyir. View `resources`-i `select_related("topic")` ilə verir (N+1 yox
 
       {% if resource.description %}
         <p class="cd-res-card__desc">{{ resource.description|truncatewords:24 }}</p>
+      {% endif %}
+
+      {% if resource.file and resource.is_video_file %}
+        {% include "courses/partials/_resource_video.html" with preload="metadata" %}
       {% endif %}
 
       <div class="cd-res-card__foot">
@@ -78,4 +83,4 @@ ilə işləyir. View `resources`-i `select_related("topic")` ilə verir (N+1 yox
   </div>
 {% endif %}
 
-<script src="{% static 'courses/js/resource_accordion.js' %}" defer></script>
+<script src="{% static 'courses/js/resource_accordion.js' %}?v=20261019-res" defer></script>

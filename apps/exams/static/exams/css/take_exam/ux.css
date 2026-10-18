@@ -192,3 +192,35 @@
     .exam-timer-pill.is-danger { background: var(--exam-red-soft, var(--ems-danger-100)); border-color: var(--exam-red, var(--ems-danger-500)); color: var(--exam-red-strong, var(--ems-danger-strong)); }
     .exam-timer-pill.is-danger .exam-timer-pill__item--q { color: inherit; }
 }
+
+/* ── 5. Telefon: fayl seçimi + sual paleti legendası (mobil audit 2026-10-19) ──
+   Yazılı cavabın fayl xanası brauzerin xam «Choose Files» düyməsi idi (≈30px, kiçik
+   şrift); legenda 4 sətir tuturdu — 2×2 şəbəkə «İmtahanı bitir»-i yuxarı çəkir. */
+@media (max-width: 768px) {
+    .file-input {
+        width: 100%;
+        min-height: 48px;
+        font-size: 15px;
+    }
+
+    .file-input::file-selector-button {
+        min-height: 40px;
+        margin-right: 10px;
+        padding: 0 16px;
+        border: 1px solid var(--ems-primary-300);
+        border-radius: 10px;
+        background: var(--ems-neutral-0);
+        color: var(--ems-primary-700);
+        font: inherit;
+        font-weight: 800;
+    }
+
+    .add-file-btn {
+        min-height: 44px;
+    }
+
+    .question-legend {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px 12px;
+    }
+}

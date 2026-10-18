@@ -19,7 +19,8 @@ from core.constants import AuditAction
 
 logger = logging.getLogger(__name__)
 
-_DIFFICULTY_CHOICES = (("easy", "Asan"), ("medium", "Orta"), ("hard", "Çətin"))
+# 2026-10-19: picker filtri model seçimlərini (pgettext_lazy) işlədir — əvvəl tərcüməsiz az sətirlər idi.
+_DIFFICULTY_CHOICES = BankQuestion.DIFFICULTY_CHOICES
 
 
 _ALLOWED_STATUSES = {"all", "active", "inactive"}

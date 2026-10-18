@@ -272,6 +272,23 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    /* Mobil audit 2026-10-19: çox seçimli sualda (`.lxp-multibar` var) plitələr sıxılıb
+       sətirləri qutudan daşırdı — yapışqan «Cavabı göndər» paneli ikinci sıranın
+       (Yaşıl/Mavi) ÜSTÜNƏ düşürdü. Plitələr nə sıxılır, nə uzanır (təbii 52px sıra). */
+    .lxp-tiles[data-multi="1"][data-layout] {
+        flex: 0 0 auto;
+        grid-auto-rows: minmax(52px, auto);
+    }
+
+    /* 390px hündürlükdə sual + ipucu + 2 sıra plitə + panel sığmır; yapışqan panel ikinci
+       sıranı örtürdü. Landşaftda panel axında qalır (plitələrdən SONRA) — səhnə bir az
+       sürüşür, heç nə örtülmür. */
+    .lxp-multibar {
+        position: static;
+        margin-top: 8px;
+        padding: 8px;
+    }
+
     /* Landşaftda plitələr sətir düzülüşlü (fiqur solda) və mövcud hündürlüyə sığır. */
     .lxp-round,
     .lxp-tiles[data-layout="grid"],

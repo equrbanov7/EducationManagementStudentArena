@@ -1,6 +1,6 @@
 {% load static i18n %}
 {% comment %}
-İmtahan Mərkəzi — «İmtahan şansı ver» (ikinci şans). Filtr paneli imtahan
+İmtahan Mərkəzi — «Yenidən imtahan cəhdi» (əvvəlki adı «İmtahan şansı ver»; 2026-10-19 akademik ad). Filtr paneli imtahan
 siyahısını tədris ili / semestr / fakültə / kafedra / ad axtarışı ilə daraldır
 (kafedra seçimləri seçilmiş fakültənin uşaqlarıdır); tələbə axtarışı qrup adı,
 istifadəçi adı və ya ad-soyad üzrə tapır — nəticələr grant formunda checkbox
@@ -24,11 +24,11 @@ boş vəziyyət `ems-state`. CSP: inline yoxdur.
 
   {% if not s.selected_org %}
     {% trans "Aktiv təşkilat tapılmadı." context "accounts.exam_chance" as exch_no_org %}
-    {% trans "Şans vermək üçün əvvəlcə aktiv təşkilat seçilməlidir." context "accounts.exam_chance" as exch_no_org_body %}
+    {% trans "Cəhd hüququ vermək üçün əvvəlcə aktiv təşkilat seçilməlidir." context "accounts.exam_chance" as exch_no_org_body %}
     {% include "partials/ems_ui/_empty.html" with state_icon="fa-building" state_title=exch_no_org state_body=exch_no_org_body %}
   {% else %}
 
-  {# ── KPI: filtrə uyğun imtahan + verilmiş şansların mənzərəsi ──────────── #}
+  {# ── KPI: filtrə uyğun imtahan + verilmiş cəhd hüquqlarının mənzərəsi ──────────── #}
   <div class="ems-kpis ems-kpis--4">
     <div class="ems-kpi">
       <div class="ems-kpi__label">{% trans "Uyğun imtahan" context "accounts.exam_chance" %}</div>
@@ -36,7 +36,7 @@ boş vəziyyət `ems-state`. CSP: inline yoxdur.
       <div class="ems-kpi__note">{% trans "cari süzgəclə" context "accounts.exam_chance" %}</div>
     </div>
     <div class="ems-kpi">
-      <div class="ems-kpi__label">{% trans "Verilən şans" context "accounts.exam_chance" %}</div>
+      <div class="ems-kpi__label">{% trans "Verilən cəhd hüququ" context "accounts.exam_chance" %}</div>
       <div class="ems-kpi__value">{{ s.grant_count }}</div>
       <div class="ems-kpi__note">{% trans "cəmi qeyd" context "accounts.exam_chance" %}</div>
     </div>
@@ -100,10 +100,10 @@ boş vəziyyət `ems-state`. CSP: inline yoxdur.
       </div>
     </div>
     <div class="ems-field">
-      <label class="ems-field__label" for="chance-reason">{% trans "Şansın səbəbi" context "accounts.exam_chance" %}</label>
+      <label class="ems-field__label" for="chance-reason">{% trans "Cəhdin əsası" context "accounts.exam_chance" %}</label>
       <div class="bootstrap-single-select bootstrap-single-select--ems">
         <select id="chance-reason" name="chance_reason" class="ems-select bootstrap-single-select__native" data-bootstrap-select>
-          <option value="">{% trans "Səbəb seçin…" context "accounts.exam_chance" %}</option>
+          <option value="">{% trans "Əsas seçin…" context "accounts.exam_chance" %}</option>
           {% for value, label in s.reasons %}
           <option value="{{ value }}" {% if s.selected_reason == value %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
@@ -130,10 +130,10 @@ boş vəziyyət `ems-state`. CSP: inline yoxdur.
     {% trans "Süzgəcləri genişləndirin — tədris ilini, semestri və ya fakültəni dəyişin." context "accounts.exam_chance" as exch_no_exam_body %}
     {% include "partials/ems_ui/_empty.html" with state_icon="fa-folder-open" state_title=exch_no_exam state_body=exch_no_exam_body %}
   {% elif not s.can_decide %}
-    {# 2026-10-13 (rol auditi B1): işçi / RİM əməkdaşı yalnız görür — şans vermək `exam_center.decide` açarı ilədir. #}
+    {# 2026-10-13 (rol auditi B1): işçi / RİM əməkdaşı yalnız görür — cəhd hüququ vermək `exam_center.decide` açarı ilədir. #}
     <div class="ems-msg ems-msg--info exch-note" role="status">
       <i class="fas fa-eye ems-msg__icon" aria-hidden="true"></i>
-      <div>{% trans "Yalnız baxış: imtahan şansını «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir." context "accounts.exam_chance" %}</div>
+      <div>{% trans "Yalnız baxış: cəhd hüququnu «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir." context "accounts.exam_chance" %}</div>
     </div>
   {% else %}
 
@@ -143,8 +143,8 @@ boş vəziyyət `ems-state`. CSP: inline yoxdur.
   <section class="ems-card exch-card">
     <div class="ems-card__head">
       <div>
-        <h2 class="ems-card__title">{% trans "Son verilən şanslar" context "accounts.exam_chance" %}</h2>
-        <p class="ems-card__sub">{% trans "Rəsmi qeyd: kim, kimə, hansı imtahan, hansı səbəb və əsasla. Qeydlər silinmir və dəyişdirilmir." context "accounts.exam_chance" %}</p>
+        <h2 class="ems-card__title">{% trans "Son verilən cəhd hüquqları" context "accounts.exam_chance" %}</h2>
+        <p class="ems-card__sub">{% trans "Rəsmi qeyd: kim, kimə, hansı imtahan, hansı əsasla və sənədlə. Qeydlər silinmir və dəyişdirilmir." context "accounts.exam_chance" %}</p>
       </div>
     </div>
     {% if s.recent_grants %}
@@ -155,7 +155,7 @@ boş vəziyyət `ems-state`. CSP: inline yoxdur.
           <tr>
             <th scope="col">{% trans "Tələbə" context "accounts.exam_chance" %}</th>
             <th scope="col">{% trans "İmtahan" context "accounts.exam_chance" %}</th>
-            <th scope="col">{% trans "Səbəb" context "accounts.exam_chance" %}</th>
+            <th scope="col">{% trans "Əsas" context "accounts.exam_chance" %}</th>
             <th scope="col">{% trans "Əlavə cəhd" context "accounts.exam_chance" %}</th>
             <th scope="col">{% trans "Verən" context "accounts.exam_chance" %}</th>
             <th scope="col">{% trans "Tarix" context "accounts.exam_chance" %}</th>
@@ -185,7 +185,7 @@ boş vəziyyət `ems-state`. CSP: inline yoxdur.
       </div>
     </div>
     {% else %}
-    {% trans "Hələ şans verilməyib." context "accounts.exam_chance" as exch_no_grant %}
+    {% trans "Hələ cəhd hüququ verilməyib." context "accounts.exam_chance" as exch_no_grant %}
     {% include "partials/ems_ui/_empty.html" with state_icon="fa-clock-rotate-left" state_title=exch_no_grant state_body="" %}
     {% endif %}
   </section>

@@ -79,5 +79,14 @@
     .apx-date {
         flex: 1;
         min-width: 0;
+        /* Mobil audit 2026-10-19: 28px hündürlük + 12.5px şrift — barmaqla çətin tutulur,
+           iOS fokusda səhifəni böyüdür. */
+        height: 40px;
+        font-size: 16px;
+    }
+
+    .apx-search__input {
+        height: 42px;
+        font-size: 16px;
     }
 }

@@ -351,3 +351,27 @@ body.host-players-open .host-players-drawer {
     .hx-toast,
     .hx-timeset__toggle .hx-icon { animation: none !important; transition: none !important; }
 }
+
+/* ── Telefon (aparıcı telefondan idarə edir, mobil müəllim 2026-10-19) ─────────────
+   375px-də sabit üst sıra (panel + səs solda, kilid + «Başla» sağda, ~76px) lobbi kartının
+   üstünə düşürdü (səhnənin üst boşluğu 64px), «Hər sual üçün vaxt: [Standart · 30 san ▾]»
+   sətri isə sınmadığı üçün səhifəni 12px üfüqi sürüşdürürdü. */
+@media (max-width: 600px) {
+    body.host-presentation-page .hx-lobby { padding-top: 92px; }
+    .hx-lobby__meta { row-gap: 10px; }
+    .hx-lobby .hx-timeset { flex-wrap: wrap; max-width: 100%; }
+    .hx-lobby .hx-timeset__label { white-space: normal; }
+    /* «Səsi aktivləşdirmək üçün klikləyin» işarəsi səs düymələrinin yanında açılıb sağdakı
+       «Başla» düyməsinin ÜSTÜNƏ düşürdü (toxunuş işarəyə gedirdi) — telefonda üst sıranın altında,
+       tam enli zolaq olur; görünəndə lobbi bir qədər aşağı sürüşür. */
+    .hx-sound__hint {
+        position: fixed;
+        top: 84px;
+        left: 16px;
+        right: 16px;
+        z-index: 47;
+        justify-content: center;
+        text-align: center;
+    }
+    body.host-presentation-page:has(.hx-sound__hint:not([hidden])) .hx-lobby { padding-top: 144px; }
+}

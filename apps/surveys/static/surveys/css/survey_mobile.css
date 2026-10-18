@@ -1,0 +1,27 @@
+/* Sorğu səhifələri telefonda (mobil audit 2026-10-19) — survey.css 594/600 sətirdədir,
+   ona görə mobil düzəlişlər ayrıca fayldadır (survey.css-dən SONRA yüklənir).
+   1) Mətn xanaları 14px idi — iOS Safari fokusda səhifəni böyüdürdü (≥16px lazımdır).
+   2) «Doldur» / «Qiymətləndir» / «Sonra doldur» kiçik düymələri 34px idi.
+   3) «Anonim göndər» sağ-sol boşluqlu dar düymə idi — baş barmaqla tam en daha rahatdır. */
+@media (max-width: 639.98px) {
+    .svy .svy-text,
+    .svy .svr-short {
+        font-size: 16px;
+    }
+
+    .svy .svy-btn--sm {
+        min-height: 44px;
+        padding: 0 16px;
+    }
+
+    .svy .svy-actions--form .svy-btn--primary {
+        width: 100%;
+        min-height: 48px;
+    }
+
+    .svy .svy-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 40px;
+    }
+}

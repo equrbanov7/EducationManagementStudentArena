@@ -1,0 +1,15 @@
+{% load i18n %}
+{% comment %}Müəllim pəncərəsinin altlığı: «Excel-ə ixrac (bu müəllim)» («Başqasının adından» rejimində yoxdur), tam səhifə
+görünüşü (paylaşılan link) və «Bağla». Kontekst: `export_url`, `page_url`, `view_as`.{% endcomment %}
+{% if view_as %}
+<span class="ems-dialog__foot-note"><i class="fas fa-eye" aria-hidden="true"></i> {% trans "«Başqasının adından» rejimində ixrac bağlıdır" context "accounts.accounting" %}</span>
+{% endif %}
+<a class="ems-btn ems-btn--ghost" href="{{ page_url }}" data-section="accounting">
+    <i class="fas fa-up-right-from-square" aria-hidden="true"></i> {% trans "Tam səhifədə aç" context "accounts.accounting" %}
+</a>
+{% if export_url %}
+<a class="ems-btn ems-btn--primary" href="{{ export_url }}" data-force-navigation="true" download>
+    <i class="fas fa-file-excel" aria-hidden="true"></i> {% trans "Excel-ə ixrac (bu müəllim)" context "accounts.accounting" %}
+</a>
+{% endif %}
+<button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Bağla" context "ui.dialog" %}</button>

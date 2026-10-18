@@ -42,6 +42,9 @@ EMAIL_FROM_NAME = (os.getenv("EMAIL_FROM_NAME") or "").strip()
 # the upstream server is known-slow.
 EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "8"))
 SITE_URL = os.getenv("SITE_URL", "http://127.0.0.1:8000")
+# Rəsmi sənədin QR kodunda çap olunan yoxlama ünvanının kökü (2026-10-18). Prod: publik domen
+# (`https://ems.wcu.edu.az`) — LAN IP-li SITE_URL kənardan açılmır. Boşdursa SITE_URL işlənir.
+DOCUMENT_VERIFY_BASE_URL = (os.getenv("DOCUMENT_VERIFY_BASE_URL") or "").strip()
 
 # ---------------------------------------------------------------------------
 # Contact form notifications

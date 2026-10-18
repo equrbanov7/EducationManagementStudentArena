@@ -11,7 +11,9 @@ simvol. Səbəb ``core.audit.log_action``-a aktor + timestamp ilə yazılır.
 QAPI ÜÇ QAT:
   1. ``unit.view`` + struktur scope-u (fail-closed — əhatəsiz aktor 403);
   2. əməl açarı — yaratma/redaktə/arxiv üçün ``unit.tree_manage`` (və ya köhnə
-     ``unit.create``/``unit.edit``), rəhbər təyini üçün AYRICA ``unit.assign_head``;
+     ``unit.create``/``unit.edit``), rəhbər təyini üçün AYRICA ``unit.assign_head``
+     (təyin reyestrlə EYNİ servisdən keçir — ``unit_head_assignment``: fakültə/kafedrada
+     rəhbər həm də ``dean``/``chair_head`` rol üzvlüyü alır);
   3. hədəf bölmənin GÖRÜNƏN olması (``_visible_units_queryset``) — cross-tenant
      və əhatədən kənar id 404 alır (IDOR).
 """
@@ -19,6 +21,7 @@ QAPI ÜÇ QAT:
 from __future__ import annotations
 
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -30,6 +33,7 @@ from core.constants import AuditAction
 
 from .models import Membership, Organization, OrgUnit
 from .structure_views.tree import TREE_TYPE_ORDER, tree_scope
+from .unit_head_assignment import apply_unit_head, head_target_is_student
 from .views import _has_org_permission, _unique_unit_slug, _visible_units_queryset
 
 _CTX = "accounts.structure_tree"
@@ -141,20 +145,25 @@ def _assign_head(request, organization, scope):
         if membership is None:
             return _error(pgettext(_CTX, "Seçilmiş şəxs bu təşkilatın aktiv üzvü deyil."), code="bad_head")
         new_head = membership.user
+        if head_target_is_student(organization, unit, new_head):
+            return _error(
+                pgettext(_CTX, "Tələbə hesabına rəhbər rolu verilə bilməz."), status=409, code="target_is_student"
+            )
 
-    old_head = unit.head
-    unit.head = new_head
-    unit.save(update_fields=["head", "updated_at"])
-    log_action(
-        action=AuditAction.UPDATE,
-        user=request.user,
-        organization=organization,
-        obj=unit,
-        request=request,
-        reason=f"structure tree: head assigned — {reason}",
-        old_values={"head": str(old_head) if old_head else ""},
-        new_values={"head": str(new_head) if new_head else ""},
-    )
+    # 2026-10-19: reyestrlə EYNİ servis — fakültə/kafedra üçün `dean`/`chair_head` üzvlüyü də
+    # yazılır (əvvəl yalnız `unit.head` dəyişirdi və sillabus təsdiqi əhatəsi yaranmırdı).
+    with transaction.atomic():
+        old_head, role_name = apply_unit_head(organization, unit, new_head, assigned_by=request.user)
+        log_action(
+            action=AuditAction.UPDATE,
+            user=request.user,
+            organization=organization,
+            obj=unit,
+            request=request,
+            reason=f"structure tree: head assigned — {reason}",
+            old_values={"head": str(old_head) if old_head else ""},
+            new_values={"head": str(new_head) if new_head else "", **({"role": role_name} if role_name else {})},
+        )
     return JsonResponse({"ok": True, "unit_id": str(unit.id)})
 
 

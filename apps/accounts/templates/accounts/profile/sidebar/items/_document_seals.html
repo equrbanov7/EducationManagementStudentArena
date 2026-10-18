@@ -1,0 +1,14 @@
+{% load i18n nav_icons %}
+{% comment %}«Sənəd yoxlaması» (sahib 2026-10-18) — kabinet bölməsi DEYİL, ayrıca səhifədir (↗ nişanı).
+Qapı bayraqdır: `role_capabilities.can_manage_document_seals` (`document_seal.manage`, rbac_sections.py);
+data qapısı və əhatə — apps/verification/access.py (açarsız 403, əhatədən kənar 404).{% endcomment %}
+{% if role_capabilities.can_manage_document_seals %}
+<li class="sidebar-menu-item">
+    <a href="{% url 'verification:staff_list' %}"
+       class="sidebar-menu-link">
+        {% nav_icon "shield-check" "sidebar-menu-icon" %}
+        <span class="sidebar-menu-text">{% trans "Sənəd yoxlaması" context "profile.sidebar" %}</span>
+        {% nav_icon "external-link" "sidebar-menu-ext" %}
+    </a>
+</li>
+{% endif %}

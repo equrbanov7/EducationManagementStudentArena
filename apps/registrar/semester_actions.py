@@ -21,9 +21,11 @@ tarixçəsi olduğu kimi qalır (§8 qayda 5).
 from __future__ import annotations
 
 import uuid
+from datetime import date
 
 from django.apps import apps as django_apps
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.db import IntegrityError, transaction
 from django.http import JsonResponse
 from django.utils import timezone
@@ -47,6 +49,7 @@ from .semester_open import (
     coverage,
     generate_offerings,
 )
+from .semester_period_windows import WindowError, read_windows, validate_windows, windows_snapshot
 
 _CTX = "accounts.semester"
 
@@ -91,7 +94,30 @@ def _period(organization, period_id):
     return AcademicPeriod.objects.filter(organization=organization, pk=(period_id or "").strip()).first()
 
 
+def _period_validation_error(exc):
+    """``full_clean()`` xətasını dialoqun sahə xətasına çevirir (modelin ÖZ mesajları — stack-trace yox)."""
+    error_dict = exc.error_dict if hasattr(exc, "error_dict") else {NON_FIELD_ERRORS: exc.error_list}
+    for field, errors in error_dict.items():
+        message = " ".join(str(message) for error in errors for message in error.messages)
+        if field != NON_FIELD_ERRORS:
+            return _error(message, code="validation", field=field)
+        if any(error.code == "unique_together" for error in errors):
+            return _error(
+                pgettext(_CTX, "Bu ad və tədris ili ilə dövr artıq mövcuddur."), code="duplicate", field="name"
+            )
+        # `AcademicPeriod.clean()` — eyni tipli dövrlə üst-üstə düşmə.
+        return _error(message, code="overlap", field="start_date")
+    return _error(pgettext(_CTX, "Dövr məlumatları düzgün deyil."), code="validation")
+
+
 def _save_period(request, organization):
+    """Dövr yarat/redaktə et — MODEL DOĞRULAMASI (``full_clean``) ilə.
+
+    2026-10-19: əvvəl ``instance.save()`` birbaşa çağırılırdı və
+    ``AcademicPeriod.clean()``-dakı «eyni tipli dövrlər üst-üstə düşmür» qaydası
+    kabinetdən HEÇ VAXT işləmirdi. İmtahan sessiyası və seçim pəncərəsi də
+    burada redaktə olunur (bax ``semester_period_windows``).
+    """
     AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
     instance = None
     period_id = (request.POST.get("id") or "").strip()
@@ -112,6 +138,10 @@ def _save_period(request, organization):
         return _error(
             pgettext(_CTX, "Başlama və bitmə tarixi tələb olunur."), code="dates_required", field="start_date"
         )
+    try:
+        start, end = date.fromisoformat(start), date.fromisoformat(end)
+    except ValueError:
+        return _error(pgettext(_CTX, "Tarix düzgün deyil."), code="bad_date", field="start_date")
     if start >= end:
         return _error(
             pgettext(_CTX, "Başlama tarixi bitmə tarixindən əvvəl olmalıdır."), code="bad_dates", field="end_date"
@@ -124,14 +154,36 @@ def _save_period(request, organization):
         return _error(
             pgettext(_CTX, "Kilidlənmiş semestr redaktə olunmur — əvvəlcə kilidi açın."), status=409, code="locked"
         )
+    try:
+        windows = read_windows(request.POST, None if is_create else instance)
+        warnings = validate_windows(windows, period_start=start, period_end=end)
+    except WindowError as exc:
+        return _error(exc.message, code=exc.code, field=exc.field)
 
-    old_values = {} if is_create else {"name": instance.name, "academic_year": instance.academic_year}
+    old_values = (
+        {}
+        if is_create
+        else {
+            "name": instance.name,
+            "academic_year": instance.academic_year,
+            "start": str(instance.start_date),
+            "end": str(instance.end_date),
+            **windows_snapshot(instance),
+        }
+    )
     instance.name = name
     instance.academic_year = year
     instance.start_date = start
     instance.end_date = end
+    for field, value in windows.items():
+        setattr(instance, field, value)
     try:
-        instance.save()
+        instance.full_clean()
+    except ValidationError as exc:
+        return _period_validation_error(exc)
+    try:
+        with transaction.atomic():
+            instance.save()
     except IntegrityError:
         return _error(pgettext(_CTX, "Bu ad və tədris ili ilə dövr artıq mövcuddur."), code="duplicate", field="name")
 
@@ -143,9 +195,18 @@ def _save_period(request, organization):
         request=request,
         reason="semester: period saved",
         old_values=old_values or None,
-        new_values={"name": name, "academic_year": year, "start": start, "end": end},
+        new_values={
+            "name": name,
+            "academic_year": year,
+            "start": str(start),
+            "end": str(end),
+            **windows_snapshot(windows),
+        },
     )
-    return JsonResponse({"ok": True, "id": str(instance.id), "created": is_create})
+    payload = {"ok": True, "id": str(instance.id), "created": is_create, "warnings": warnings}
+    if warnings:
+        payload["message"] = " ".join(warnings)
+    return JsonResponse(payload)
 
 
 def _set_current(request, organization):

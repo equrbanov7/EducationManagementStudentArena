@@ -98,6 +98,7 @@ COMPACT_SIDEBAR_TREES = {
             "surveys-inbox",
             "announcements",
             "profile-info",
+            "my-contracts",  # «Müqavilələrim» (2026-10-19) — əmək müqaviləsi olan müəllim
             "statistics",
         }
     ),

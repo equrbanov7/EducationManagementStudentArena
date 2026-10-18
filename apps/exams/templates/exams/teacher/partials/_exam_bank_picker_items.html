@@ -1,48 +1,50 @@
 {% load i18n %}
 {% comment %}
-Picker sual elementləri (bir səhifə). Həm content partialı daxilində, həm də
-lazy-scroll zamanı (items=1) tək-tək əlavə üçün istifadə olunur. Sonda sentinel
-varsa, IntersectionObserver növbəti səhifəni yükləyir.
+Picker sual kartları (bir səhifə) — `<ul data-picker-list>` içində. Həm content partialı daxilində,
+həm də lazy-scroll zamanı (items=1) əlavə üçün işlədilir. Sonda sentinel varsa IntersectionObserver
+növbəti səhifəni yükləyir; «Daha çox göstər» düyməsi klaviatura / köhnə brauzer ehtiyatıdır.
+Kart = <label for> — bütün kartın klikləri checkbox-u dəyişir; imtahanda artıq olan sual
+(`attached_ids`) söndürülüb və «Artıq əlavə olunub» nişanı daşıyır.
+Sual mətni `white-space: pre-wrap` ilə 2 sətirə qədər göstərilir — koddakı sətir sonları qalır.
 {% endcomment %}
+{% trans "Artıq əlavə olunub" context "exams.template.bank_picker" as attached_label %}
 {% for q in questions %}
-<div class="bankpicker-item" data-q-id="{{ q.id }}">
-    <input class="bankpicker-item__check" type="checkbox" data-picker-checkbox value="{{ q.id }}"
-           aria-label="{% trans 'Sualı seç' %}">
-    <button type="button" class="bankpicker-item__toggle"
-            {% if q.question_type != 'test' %}data-picker-noexpand{% else %}data-picker-toggle{% endif %}>
-        <span class="bankpicker-item__main">
-            <span class="bankpicker-item__text">{{ q.text|striptags|truncatechars:220 }}</span>
-            <span class="bankpicker-item__meta">
-                <span class="bankpicker-tag">{{ q.get_language_display }}</span>
-                <span class="bankpicker-tag bankpicker-tag--soft">{{ q.get_difficulty_display }}</span>
-            </span>
+<li class="bankpicker-item{% if q.id in attached_ids %} is-attached{% endif %}" data-q-id="{{ q.id }}">
+    <input class="bankpicker-item__check" type="checkbox" id="bpq{{ q.id }}" value="{{ q.id }}" data-picker-checkbox
+           aria-describedby="bpqMeta{{ q.id }}"{% if q.id in attached_ids %} disabled{% endif %}>
+    <label class="bankpicker-item__main" for="bpq{{ q.id }}">
+        <span class="bankpicker-item__text">{{ q.text|striptags|truncatechars:600 }}</span>
+        <span class="bankpicker-item__meta" id="bpqMeta{{ q.id }}">
+            <span class="ems-badge ems-badge--primary">{{ q.get_question_type_display }}{% if q.question_type == 'test' and q.answer_mode == 'multiple' %} · {% trans "çox cavablı" context "exams.template.bank_picker" %}{% endif %}</span>
+            <span class="ems-badge {% if q.difficulty == 'easy' %}ems-badge--success{% elif q.difficulty == 'hard' %}ems-badge--warning{% else %}ems-badge--info{% endif %}">{{ q.get_difficulty_display }}</span>
+            <span class="ems-badge ems-badge--neutral"><i class="fas fa-globe" aria-hidden="true"></i>{{ q.get_language_display }}</span>
+            {% if q.id in attached_ids %}<span class="ems-badge ems-badge--muted bankpicker-item__attached"><i class="fas fa-check" aria-hidden="true"></i>{{ attached_label }}</span>{% endif %}
         </span>
-        {% if q.question_type == 'test' %}
-        <i class="fas fa-chevron-down bankpicker-item__chevron" aria-hidden="true"></i>
-        {% endif %}
-    </button>
+    </label>
     {% if q.question_type == 'test' %}
-    <div class="bankpicker-item__options">
+    <button type="button" class="bankpicker-item__more" data-picker-toggle aria-expanded="false" aria-controls="bpqOpts{{ q.id }}">
+        <span>{% trans "Variantlar" context "exams.template.bank_picker" %}</span>
+        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+    </button>
+    <ol class="bankpicker-item__options" id="bpqOpts{{ q.id }}" hidden>
         {% for opt in q.options.all %}
-        <div class="bankpicker-opt {% if opt.is_correct %}is-correct{% endif %}">
+        <li class="bankpicker-opt{% if opt.is_correct %} is-correct{% endif %}">
             <span class="bankpicker-opt__label">{{ opt.label|default:'•' }}</span>
             <span class="bankpicker-opt__text">{{ opt.text }}</span>
-            {% if opt.is_correct %}<i class="fas fa-check bankpicker-opt__mark" aria-hidden="true"></i>{% endif %}
-        </div>
+            {% if opt.is_correct %}<span class="ems-badge ems-badge--success"><i class="fas fa-check" aria-hidden="true"></i>{% trans "Düzgün" context "exams.template.bank_picker" %}</span>{% endif %}
+        </li>
         {% empty %}
-        <div class="bankpicker-opt bankpicker-opt--muted">{% trans "Variant yoxdur" %}</div>
+        <li class="bankpicker-opt bankpicker-opt--muted">{% trans "Variant yoxdur" context "exams.template.bank_picker" %}</li>
         {% endfor %}
-    </div>
+    </ol>
     {% endif %}
-</div>
-{% empty %}
-<div class="bankpicker-empty bankpicker-empty--inline">
-    <i class="fas fa-filter-circle-xmark"></i>
-    <p>{% trans "Filtrlərə uyğun sual tapılmadı." %}</p>
-</div>
+</li>
 {% endfor %}
 {% if has_more %}
-<div class="bankpicker-sentinel" data-picker-sentinel data-next-page="{{ next_page }}">
-    <span class="bankpicker-spinner" aria-hidden="true"></span> {% trans "Yüklənir..." %}
-</div>
+<li class="bankpicker-sentinel" data-picker-sentinel data-next-page="{{ next_page }}">
+    <button type="button" class="ems-btn ems-btn--sm" data-picker-more>
+        <span class="bankpicker-spinner" aria-hidden="true"></span>
+        <span>{% trans "Daha çox göstər" context "exams.template.bank_picker" %}</span>
+    </button>
+</li>
 {% endif %}

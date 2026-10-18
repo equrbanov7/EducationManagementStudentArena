@@ -25,7 +25,9 @@ from core.permissions import (  # noqa: F401
 from .permissions_account import merge_account_permissions
 from .permissions_accounting import merge_accounting_permissions
 from .permissions_announcements import merge_announcement_permissions
+from .permissions_document_seal import merge_document_seal_permissions
 from .permissions_hr import merge_hr_permissions
+from .permissions_hr_contracts import merge_hr_contract_permissions
 from .permissions_role_audit import merge_role_audit_permissions
 from .permissions_stage2 import merge_stage2
 from .permissions_stage3 import merge_stage3
@@ -468,6 +470,10 @@ merge_hr_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSI
 merge_role_audit_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
 # «Mühasibatlıq» + 25% təkrar imtahan (2026-10-18) — `accounting.view`, `retake.payment_verify`, `retake.manage`.
 merge_accounting_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
+# «Sənəd yoxlaması» (2026-10-18) — `document_seal.manage`.
+merge_document_seal_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
+# «Əmək müqavilələri» (2026-10-19) — `hr.contracts_view` / `hr.contracts_manage` (apps.hr_contracts).
+merge_hr_contract_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
 
 
 def get_permission_label(permission: str) -> str:

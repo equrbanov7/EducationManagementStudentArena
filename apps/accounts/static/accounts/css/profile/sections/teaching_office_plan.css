@@ -115,6 +115,35 @@
     cursor: pointer;
 }
 
+/* ---- Ekran 05: sətir dialoqunda «Seçmə fənn» bayrağı (2026-10-19) -------
+   Sarğı etiketi 44 px klik sahəsi verir (WCAG 2.5.8), xana 18 px. */
+.tof-form__check {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: var(--ems-tap, 44px);
+    margin: 0;
+    font-weight: 700;
+    color: var(--ems-neutral-700, #334155);
+    cursor: pointer;
+}
+
+.tof-form__check input[type="checkbox"] {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--ems-primary-600, #2563eb);
+    cursor: pointer;
+}
+
+/* ---- Ekran 07: dövr dialoqunda pəncərə bölməsinin başlığı ----------- */
+.tof-form__legend {
+    margin: 4px 0 0;
+    font-weight: 800;
+    color: var(--ems-neutral-800, #1e293b);
+}
+
 /* ---- Ekran 07: kilid şərtləri ----------------------------------------- */
 
 .tof-gates {

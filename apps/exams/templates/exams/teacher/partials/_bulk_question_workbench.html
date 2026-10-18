@@ -11,6 +11,7 @@ göndərişdən əvvəl təsdiq xülasəsi — 5 səhifədə eyni (workbench_con
 {% endif %}
 <link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
 <link rel="stylesheet" href="{% static 'exams/css/workbench_theme.css' %}?v=20261017-pkgc">
+<link rel="stylesheet" href="{% static 'exams/css/ai_generator_panel.css' %}?v=20261019-ui">
 {% include "partials/ems_ui/_math_assets.html" %}
 
 {% comment %}
@@ -168,75 +169,10 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
 
     {# ───────────────────────────── AI KARTI ─────────────────────────────── #}
     {% if wb_ai_url %}
-    <section class="ai-bank-card"
-             data-ai-question-form
-             data-ai-context="{{ wb_ai_context|default:'test' }}"
-             data-ai-url="{{ wb_ai_url }}"
-             data-extract-url="{% url 'exams:start_text_extraction' %}"
-             data-ai-target="#testRawEditor">
-        {# Format toggle olan səhifələrdə (bank) AI da seçilmiş formata uyğun yaradır. #}
-        {% if wb_show_format %}
-        <input type="hidden" name="q_format" data-ai-format-mirror value="{{ wb_format|default:'test' }}">
-        {% endif %}
-        <div class="ai-bank-card__intro">
-            <div class="ai-bank-card__icon"><i class="fas fa-robot"></i></div>
-            <div>
-                <h2>{% trans "AI ilə test sualı yarat" context "exams.template.ai_question_bank" %}</h2>
-                <p>{% trans "Mühazirə faylı yükləyin və ya mövzunu prompt kimi yazın. AI nəticəni bu səhifənin test formatına çevirəcək." context "exams.template.ai_question_bank" %}</p>
-            </div>
-        </div>
-
-        <div class="ai-bank-grid">
-            <label class="ai-field ai-field--wide">
-                <span>{% trans "Prompt / mövzu" context "exams.template.ai_question_bank" %}</span>
-                <textarea name="prompt" rows="3" placeholder="{% trans 'Məsələn: Python funksiyaları mövzusundan tətbiqi səviyyədə test sualları yarat' context 'exams.template.ai_question_bank' %}"></textarea>
-            </label>
-
-            <label class="ai-field ai-file-field" for="testAiSourceFile">
-                <span>{% trans "Mühazirə faylı" context "exams.template.ai_question_bank" %}</span>
-                <input id="testAiSourceFile" class="ai-file-input" data-ai-file-input type="file" name="source_file" accept=".pdf,.txt,.png,.jpg,.jpeg">
-                <span class="ai-file-picker">
-                    <i class="fas fa-upload"></i>
-                    <strong>{% trans "Fayl seç" context "exams.template.ai_question_bank" %}</strong>
-                </span>
-                <small class="ai-file-name" data-ai-file-name-for="testAiSourceFile">{% trans "Fayl seçilməyib" context "exams.template.ai_question_bank" %}</small>
-            </label>
-
-            <label class="ai-field ai-field--small">
-                <span>{% trans "Sual sayı" context "exams.template.ai_question_bank" %}</span>
-                <input type="number" name="question_count" min="1" max="50" value="5">
-            </label>
-
-            <label class="ai-field ai-field--small">
-                <span>{% trans "Çətinlik" context "exams.template.ai_question_bank" %}</span>
-                <div class="bootstrap-single-select ai-difficulty-select">
-                    <select name="difficulty" class="form-select bootstrap-single-select__native" data-bootstrap-select>
-                        <option value="medium" selected>{% trans "Orta" context "exams.template.ai_question_bank" %}</option>
-                        <option value="easy">{% trans "Asan" context "exams.template.ai_question_bank" %}</option>
-                        <option value="hard">{% trans "Çətin" context "exams.template.ai_question_bank" %}</option>
-                        <option value="mixed">{% trans "Qarışıq" context "exams.template.ai_question_bank" %}</option>
-                    </select>
-                </div>
-            </label>
-
-            <div class="ai-insert-toggle" aria-label="{% trans 'AI mətn yerləşdirmə rejimi' %}">
-                <label>
-                    <input type="radio" name="insert_mode" value="append" checked>
-                    <span>{% trans "Mətnin sonuna əlavə et" context "exams.template.ai_question_bank" %}</span>
-                </label>
-                <label>
-                    <input type="radio" name="insert_mode" value="replace">
-                    <span>{% trans "Mətn sahəsini əvəz et" context "exams.template.ai_question_bank" %}</span>
-                </label>
-            </div>
-
-            <button type="button" class="ai-generate-btn" data-ai-question-submit>
-                <i class="fas fa-magic"></i> {% trans "AI ilə yarat" context "exams.template.ai_question_bank" %}
-            </button>
-        </div>
-
-        <div class="ai-question-status" data-ai-question-status role="status" aria-live="polite"></div>
-    </section>
+    {# 2026-10-19: ortaq panel (sahib: «səliqəli olsun») — eyni markup yazılı imtahan bloklarında da işləyir. #}
+    {% trans "Mühazirə faylı yükləyin və ya mövzunu prompt kimi yazın. AI nəticəni bu səhifənin test formatına çevirəcək." context "exams.template.ai_question_bank" as wb_ai_subtitle %}
+    {% trans "Məsələn: Python funksiyaları mövzusundan tətbiqi səviyyədə test sualları yarat" context "exams.template.ai_question_bank" as wb_ai_placeholder %}
+    {% include "exams/teacher/partials/_ai_generator_panel.html" with ai_url=wb_ai_url ai_context=wb_ai_context|default:"test" ai_target="#testRawEditor" ai_uid="File" ai_file_prefix="testAiSource" ai_variant="card" ai_format_mirror=wb_show_format ai_format=wb_format ai_subtitle=wb_ai_subtitle ai_placeholder=wb_ai_placeholder %}
     {% endif %}
 
     {# ───────────────────── UPLOAD SIDEBAR + EDITOR (form) ────────────────── #}

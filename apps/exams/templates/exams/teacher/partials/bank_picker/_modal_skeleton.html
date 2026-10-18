@@ -1,0 +1,29 @@
+{% comment %}Bank picker modalının yüklənmə skeleton-u (with_toolbar=True → filtr sırası da).
+Ölçülər əsl markup-la eynidir ki, yüklənəndə sətir «tullanmasın».{% endcomment %}
+<div class="bankpicker-skeleton" aria-hidden="true">
+    {% if with_toolbar %}
+    <div class="bankpicker-toolbar bankpicker-toolbar--skeleton">
+        {% for _ in "1234"|make_list %}
+        <div class="bankpicker-skeleton__field">
+            <span class="skeleton skeleton-line bankpicker-skeleton__label"></span>
+            <span class="skeleton bankpicker-skeleton__control"></span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <div class="bankpicker-skeleton__list">
+        {% for _ in "1234"|make_list %}
+        <div class="bankpicker-item bankpicker-item--skeleton">
+            <span class="skeleton bankpicker-skeleton__check"></span>
+            <div class="skeleton-stack">
+                <span class="skeleton skeleton-line skeleton-line--w80"></span>
+                <span class="skeleton skeleton-line skeleton-line--w55"></span>
+                <span class="bankpicker-skeleton__tags">
+                    <span class="skeleton skeleton-tag"></span>
+                    <span class="skeleton skeleton-tag"></span>
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>

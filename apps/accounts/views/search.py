@@ -82,6 +82,7 @@ _NAV_ICONS = {
     "my-appeals": "fa-scale-balanced",
     "my-retakes": "fa-rotate-right",
     "retake-desk": "fa-file-invoice",
+    "retake-windows": "fa-calendar-check",
     "subgroup-placement": "fa-user-plus",
     "manage-appeals": "fa-scale-balanced",
     "appeal-stats": "fa-scale-balanced",

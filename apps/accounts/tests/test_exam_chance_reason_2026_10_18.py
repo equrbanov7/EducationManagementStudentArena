@@ -55,7 +55,9 @@ class ExamChanceRetakeReasonTest(RetakeBase):
                 kind="retake_25",
                 receipt=pdf(),
             )
-            retake_decisions.verify_payment(actor=self.accountant, organization=self.org, application_id=app.id)
+            retake_decisions.verify_payment(
+                actor=self.accountant, organization=self.org, application_id=app.id, paid_amount="100"
+            )
             return retake_decisions.admit(actor=self.dean, organization=self.org, application_id=app.id)
 
     def test_retake_reason_requires_admitted_application(self):

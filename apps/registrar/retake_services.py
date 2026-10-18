@@ -188,7 +188,7 @@ def apply(*, student, organization, enrollment_id, kind, note="", receipt=None, 
     """Kəsr fənn üzrə müraciət (25% — qəbz indi və ya sonra; alt qrup — ödənişsiz)."""
     if kind not in RetakeKind.values:
         raise ValidationError(pgettext(_CTX, "Müraciət növü seçilməyib."))
-    if not retake_rules.applications_open():
+    if not retake_rules.applications_open(organization):
         raise ValidationError(pgettext(_CTX, "Müraciət pəncərəsi hazırda bağlıdır."))
     row = retake_eligibility.row_for_enrollment(student=student, organization=organization, enrollment_id=enrollment_id)
     if row is None:
@@ -203,6 +203,13 @@ def apply(*, student, organization, enrollment_id, kind, note="", receipt=None, 
     if receipt is not None:
         clean_upload(receipt)
     result = row["result"]
+    fee = {"amount": None, "inputs": {}}
+    if kind == RetakeKind.RETAKE_25:
+        from . import retake_fees
+
+        fee = retake_fees.estimate(
+            context=retake_fees.student_context(student, organization), period=row["period"], subject=row["subject"]
+        )
     try:
         with retake_files.discard_on_error(), transaction.atomic():
             application = RetakeApplication.objects.create(
@@ -219,6 +226,8 @@ def apply(*, student, organization, enrollment_id, kind, note="", receipt=None, 
                 eligibility=retake_eligibility.snapshot(row),
                 base_exam_score=result.get("effective_exam"),
                 base_total=result.get("total"),
+                expected_fee=fee["amount"],
+                fee_inputs=fee["inputs"],
             )
             record_event(
                 application,
@@ -227,7 +236,13 @@ def apply(*, student, organization, enrollment_id, kind, note="", receipt=None, 
                 role=RetakeActorRole.STUDENT,
                 to_status=RetakeStatus.SUBMITTED,
                 note=application.student_note,
-                metadata={"kind": kind, "eligibility": application.eligibility},
+                # Tələbəyə göstərilən təxmini məbləğ append-only hadisədə də qalır (review 2026-10-19, M-3).
+                metadata={
+                    "kind": kind,
+                    "eligibility": application.eligibility,
+                    "expected_fee": str(fee["amount"]) if fee["amount"] is not None else None,
+                    "fee_inputs": fee["inputs"],
+                },
             )
             log_action(
                 AuditAction.CREATE,
