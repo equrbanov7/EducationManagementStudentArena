@@ -100205,3 +100205,7 @@ msgstr "The student's name stays hidden until grading is complete."
 msgctxt "exams.attempt_review"
 msgid "Sual %%(n)s"
 msgstr "Question %%(n)s"
+
+msgctxt "exams.final_center.invigilators"
+msgid "Siyahıda yalnız nəzarətçi təyin oluna bilən müəllim və əməkdaşlar var. Siyahıdan «+» ilə seçin və ya ad yazın (ən az 2 hərf)."
+msgstr "Only teachers and staff who can be invigilators are listed. Pick with «+» or type a name (at least 2 letters)."

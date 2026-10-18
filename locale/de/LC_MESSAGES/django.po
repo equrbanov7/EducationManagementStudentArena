@@ -101231,3 +101231,7 @@ msgstr "Der Name der Person bleibt bis zum Abschluss der Bewertung verborgen."
 msgctxt "exams.attempt_review"
 msgid "Sual %%(n)s"
 msgstr "Frage %%(n)s"
+
+msgctxt "exams.final_center.invigilators"
+msgid "Siyahıda yalnız nəzarətçi təyin oluna bilən müəllim və əməkdaşlar var. Siyahıdan «+» ilə seçin və ya ad yazın (ən az 2 hərf)."
+msgstr "Aufgeführt sind nur Lehrkräfte und Mitarbeitende, die Aufsicht führen können. Mit «+» wählen oder Namen eingeben (mind. 2 Buchstaben)."

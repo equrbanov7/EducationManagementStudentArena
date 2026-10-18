@@ -100395,3 +100395,7 @@ msgstr "Имя студента скрыто до завершения пров�
 msgctxt "exams.attempt_review"
 msgid "Sual %%(n)s"
 msgstr "Вопрос %%(n)s"
+
+msgctxt "exams.final_center.invigilators"
+msgid "Siyahıda yalnız nəzarətçi təyin oluna bilən müəllim və əməkdaşlar var. Siyahıdan «+» ilə seçin və ya ad yazın (ən az 2 hərf)."
+msgstr "В списке только преподаватели и сотрудники, которых можно назначить наблюдателями. Выберите «+» или введите имя (не менее 2 букв)."

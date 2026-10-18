@@ -262,6 +262,9 @@
         search.addEventListener("focus", ensureOpened);
 
         updateCounts();
+        // 2026-10-18: panel səhifə yüklənəndə artıq AÇIQ ola bilər (`<details open>`) — `toggle` hadisəsi skriptdən
+        // əvvəl baş verib itir və ilk dəfə baxan istifadəçi boş siyahı görürdü. Açıqdırsa ilk səhifə dərhal yüklənir.
+        if (panel.open) ensureOpened();
     }
 
     if (window.EMSReady) {

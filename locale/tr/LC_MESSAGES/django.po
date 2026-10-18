@@ -99613,3 +99613,7 @@ msgstr "Öğrenci adı değerlendirme tamamlanana kadar gizlidir."
 msgctxt "exams.attempt_review"
 msgid "Sual %%(n)s"
 msgstr "Soru %%(n)s"
+
+msgctxt "exams.final_center.invigilators"
+msgid "Siyahıda yalnız nəzarətçi təyin oluna bilən müəllim və əməkdaşlar var. Siyahıdan «+» ilə seçin və ya ad yazın (ən az 2 hərf)."
+msgstr "Listede yalnızca gözetmen atanabilecek öğretim üyeleri ve personel var. «+» ile seçin veya ad yazın (en az 2 harf)."

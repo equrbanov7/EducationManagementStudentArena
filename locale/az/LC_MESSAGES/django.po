@@ -99715,3 +99715,7 @@ msgstr "Tələbə adı qiymətləndirmə tamamlanana qədər gizlidir."
 msgctxt "exams.attempt_review"
 msgid "Sual %%(n)s"
 msgstr "Sual %%(n)s"
+
+msgctxt "exams.final_center.invigilators"
+msgid "Siyahıda yalnız nəzarətçi təyin oluna bilən müəllim və əməkdaşlar var. Siyahıdan «+» ilə seçin və ya ad yazın (ən az 2 hərf)."
+msgstr "Siyahıda yalnız nəzarətçi təyin oluna bilən müəllim və əməkdaşlar var. Siyahıdan «+» ilə seçin və ya ad yazın (ən az 2 hərf)."
