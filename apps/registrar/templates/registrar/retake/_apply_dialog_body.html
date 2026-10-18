@@ -1,0 +1,17 @@
+{% load i18n %}
+{% comment %}Müraciət dialoqu — gizli sahələri `retake_student.js` düymənin `data-rt-*` atributlarından doldurur.
+25%-də qəbz İSTƏYƏ BAĞLIDIR (sonra da yükləmək olar); alt qrupda qəbz sahəsi gizlənir.{% endcomment %}
+<input type="hidden" name="enrollment" value="" data-rt-field="enrollment">
+<input type="hidden" name="kind" value="" data-rt-field="kind">
+<p class="rt-dialog__subject"><i class="fas fa-book" aria-hidden="true"></i> <strong data-rt-text="subject"></strong></p>
+<p class="ems-msg ems-msg--info" data-rt-kind-note="retake_25" hidden>{% trans "25% təkrar imtahan ödənişlidir. Qəbzi indi yükləyə və ya sonra «Müraciətlərim» tabından əlavə edə bilərsiniz. Ödənişi Mühasibatlıq yoxlayır, sonra dekanlıq imtahana buraxır." context "registrar.retake" %}</p>
+<p class="ems-msg ems-msg--info" data-rt-kind-note="subgroup" hidden>{% trans "Alt qrup ödənişsizdir: fənni başqa qrupla yenidən keçəcəksiniz. Dekanlıq təqdimat sənədi ilə təsdiqləyib sizi uyğun jurnala yerləşdirir." context "registrar.retake" %}</p>
+<div class="ems-field" data-rt-kind-only="retake_25" hidden>
+    <label class="ems-field__label" for="rtApplyReceipt">{% trans "Ödəniş qəbzi" context "registrar.retake" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "ui.dialog" %}</span></label>
+    <input class="ems-input" type="file" id="rtApplyReceipt" name="receipt" accept=".pdf,.jpg,.jpeg,.png">
+    <span class="ems-field__hint">{% trans "PDF, JPG və ya PNG · ən çox 10 MB" context "registrar.retake" %}</span>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="rtApplyNote">{% trans "Qeyd" context "registrar.retake" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "ui.dialog" %}</span></label>
+    <textarea class="ems-textarea" id="rtApplyNote" name="note" rows="3" maxlength="2000"></textarea>
+</div>

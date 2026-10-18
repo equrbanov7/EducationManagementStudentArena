@@ -20,7 +20,7 @@ from django.views.decorators.http import require_GET, require_POST
 
 from core.search_text import tolerant_q
 
-from . import guest_merge, guest_roster
+from . import guest_merge, guest_roster, subgroup_placement
 from .journal_access import offering_or_404
 from .models import AcademicStatus, Enrollment
 
@@ -246,6 +246,8 @@ def guest_add(request, offering_id):
     release = _flag(data, "release_source")
     try:
         with transaction.atomic():
+            # Kredit həddi + jurnal tutumu modalda da keçərlidir (aləti yan keçmək olmasın) — tarixçəyə də yazılır.
+            plan = subgroup_placement.journal_modal_check(student=student, offering=offering, release_source=release)
             enrollment = guest_roster.add_guest_student(
                 offering=offering,
                 student=student,
@@ -263,6 +265,16 @@ def guest_add(request, offering_id):
             )
             record.full_clean(exclude=["uploaded_by_name"])
             record.save()
+            subgroup_placement.record_journal_placement(
+                plan=plan,
+                enrollment=enrollment,
+                document=record,
+                actor=request.user,
+                reason=_field(data, "reason"),
+                request=request,
+            )
+    except subgroup_placement.SubgroupPlacementError as exc:
+        return _error(exc.message, status=409)
     except ValidationError as exc:
         return _error("; ".join(exc.messages))
 
@@ -299,13 +311,19 @@ def guest_remove(request, offering_id):
     )
     if enrollment is None:
         return _error(pgettext(_CTX, "Qeydiyyat tapılmadı."), status=404)
+    from django.db import transaction
+
     try:
-        guest_roster.remove_guest_student(
-            offering=offering,
-            enrollment=enrollment,
-            by_user=request.user,
-            reason=_field(data, "reason"),
-        )
+        with transaction.atomic():
+            guest_roster.remove_guest_student(
+                offering=offering,
+                enrollment=enrollment,
+                by_user=request.user,
+                reason=_field(data, "reason"),
+            )
+            subgroup_placement.record_journal_removal(
+                enrollment=enrollment, actor=request.user, reason=_field(data, "reason"), request=request
+            )
     except ValidationError as exc:
         return _error("; ".join(exc.messages))
     return JsonResponse({"ok": True, "message": pgettext(_CTX, "Tələbə jurnaldan çıxarıldı.")})

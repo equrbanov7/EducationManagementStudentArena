@@ -1,102 +1,71 @@
 {% load i18n %}
 {% if can_view_owned_learning %}
-<section class="profile-section-panel profile-section--my-courses {% if active_section == 'my-courses' %}is-active{% endif %}" data-profile-section-panel="my-courses">
-    {% comment %}2026-09-12 (audit P2-1): başlıq qabıqdan (`#profileSectionTitle`)
-    gəlir; say sol menyunun nişanındadır; «Yeni kurs» başlığın əməl yuvasındadır.
+{% comment %}«Kurslarım» (müəllim) — 2026-10-18 redizayn. Başlıq qabıqdandır (`#profileSectionTitle`), burada yalnız
+alt başlıq + əməllər. KPI → filtr paneli (avto, server tərəfli, `mc_` prefiksi) → kart şəbəkəsi / siyahı → səhifələmə.
+Siyahı, sayğaclar və rəng `apps.courses.course_list` / `presentation`-dadır (sorğu sayı kart sayından asılı deyil).
+Kart `article[data-mc-card]`-dır; əsas keçid başlıqdakı `a[data-mc-card-link]` (bütün kartı örtür), sürətli əməllər
+onun üstündədir. E2E `[data-mc-card]` + içindəki ilk `/courses/<id>/dashboard/` keçidini axtarır — sıra qorunur.{% endcomment %}
+{% trans "Yaratdığınız və müəllim kimi qoşulduğunuz kurslar: mövzular, tapşırıqlar, imtahanlar və tələbələr bir yerdə." context "courses.list" as mc_subtitle %}
+{% with sec=my_courses_section %}
+<section class="profile-section-panel profile-section--my-courses {% if active_section == 'my-courses' %}is-active{% endif %}"
+         data-profile-section-panel="my-courses"
+         data-source-url="{{ profile_base_url }}?section=my-courses">
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=mc_subtitle header_actions_include="accounts/profile/sections/_my_courses_header_actions.html" %}
 
-    2026-09-28 redizayn: kart = qapaq zolağı (şəkil və ya ikon) + status nişanı +
-    ad + təsvir + göstəricilər (mövzu/tələbə/qrup) + qrup çipləri. Status mətni
-    `get_status_display` deyil, tərcümə açarıdır (model etiketi sərt AZ idi —
-    «Draft (yayımlanmayıb)» sözü kartı iki sətrə bölürdü). Kartın klikində
-    `course_card_nav.js` səhifə gələnə qədər panel skeletini göstərir.{% endcomment %}
-    {% include "partials/ems_ui/_content_header.html" with header_actions_include="accounts/profile/sections/_my_courses_header_actions.html" %}
+    {% if sec.total %}
+        {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=sec.kpi_tiles kpi_variant="5" %}
 
-    {% if my_created_courses %}
-    <div class="mc-grid" data-mc-grid>
-        {% for course in my_created_courses %}
-        {% with cover_image_url=course.cover_image_url %}
-        <a href="{% url 'courses:course_dashboard' course.pk %}?from_section=my-courses&return_to={{ request.get_full_path|urlencode }}"
-           class="mc-card" data-mc-card>
-            <span class="mc-card__cover{% if cover_image_url %} has-img{% endif %}" aria-hidden="true">
-                {% if cover_image_url %}
-                    <img src="{{ cover_image_url }}" alt="" loading="lazy">
-                {% else %}
-                    <i class="fas fa-graduation-cap"></i>
-                {% endif %}
-                {% if course.status == 'published' %}
-                    <span class="mc-status mc-status--live">{% trans "status_published" context "courses.dashboard" %}</span>
-                {% elif course.status == 'archived' %}
-                    <span class="mc-status mc-status--archived">{% trans "status_archived" context "courses.dashboard" %}</span>
-                {% else %}
-                    <span class="mc-status mc-status--draft">{% trans "status_draft" context "courses.dashboard" %}</span>
-                {% endif %}
-            </span>
-            <span class="mc-card__body">
-                <span class="mc-card__title">{{ course.title }}</span>
-                {% if course.description %}<span class="mc-card__desc">{{ course.description }}</span>{% endif %}
-                <span class="mc-card__stats">
-                    <span class="mc-stat" title="{% trans 'stat_topics' context 'courses.dashboard' %}">
-                        <i class="fas fa-book-open" aria-hidden="true"></i>
-                        <b>{{ course.profile_topic_count|default:0 }}</b>
-                        <span class="visually-hidden">{% trans "stat_topics" context "courses.dashboard" %}</span>
-                    </span>
-                    <span class="mc-stat" title="{% trans 'stat_students' context 'courses.dashboard' %}">
-                        <i class="fas fa-user-graduate" aria-hidden="true"></i>
-                        <b>{{ course.profile_student_count|default:0 }}</b>
-                        <span class="visually-hidden">{% trans "stat_students" context "courses.dashboard" %}</span>
-                    </span>
-                    <span class="mc-stat" title="{% trans 'stat_groups' context 'courses.dashboard' %}">
-                        <i class="fas fa-users" aria-hidden="true"></i>
-                        <b>{{ course.profile_group_count|default:0 }}</b>
-                        <span class="visually-hidden">{% trans "stat_groups" context "courses.dashboard" %}</span>
-                    </span>
-                    <span class="mc-card__date"><i class="far fa-calendar-alt" aria-hidden="true"></i> {{ course.created_at|date:"d.m.Y" }}</span>
-                </span>
-                {% if course.profile_group_names %}
-                <span class="mc-card__groups">
-                    {% for name in course.profile_group_names|slice:":4" %}<span class="mc-chip">{{ name }}</span>{% endfor %}
-                    {% if course.profile_group_count > 4 %}<span class="mc-chip mc-chip--more">+{{ course.profile_group_count|add:"-4" }}</span>{% endif %}
-                </span>
-                {% endif %}
-            </span>
-        </a>
-        {% endwith %}
-        {% endfor %}
-    </div>
+        {% include "partials/ems_ui/_filter_bar.html" with filter_section="my-courses" filter_prefix="mc_" filter_fields=sec.filter_fields filter_count_label=sec.filter_count_label filter_auto=True filter_bootstrap=True %}
 
-    {# Kart klikində göstərilən panel skeleti (course_card_nav.js) — ilk boyada gizli. #}
-    <div class="mc-nav-skeleton" data-mc-nav-skeleton hidden aria-hidden="true">
-        <div class="mc-sk-hero">
-            <span class="skeleton mc-sk-cover"></span>
-            <span class="mc-sk-lines">
-                <span class="skeleton skeleton-line skeleton-line--sm"></span>
-                <span class="skeleton skeleton-line skeleton-line--lg"></span>
-                <span class="skeleton skeleton-line"></span>
-            </span>
+        {% if sec.courses %}
+        <div class="mcl-grid" data-mc-grid data-mcl-grid aria-label="{% trans 'Kurslar' context 'courses.list' %}">
+            {% for course in sec.courses %}
+                {% include "accounts/profile/sections/_my_courses_card.html" %}
+            {% endfor %}
         </div>
-        <div class="skeleton mc-sk-tabs"></div>
-        <div class="mc-sk-panel">
-            <span class="skeleton skeleton-line skeleton-line--lg"></span>
-            <span class="skeleton skeleton-block"></span>
-            <span class="skeleton skeleton-block"></span>
-        </div>
-    </div>
-    {% else %}
-    <div class="section-card">
-        <div class="modern-empty-state">
-            <div class="empty-icon-wrapper icon-orange-light">
-                <i class="fas fa-book-open"></i>
+
+        {% include "partials/_pagination.html" with page_obj=sec.page_obj page_param="mc_page" extra_query=sec.pagination_query %}
+
+        {# Kart klikində göstərilən panel skeleti (course_card_nav.js) — ilk boyada gizli. #}
+        <div class="mc-nav-skeleton" data-mc-nav-skeleton hidden aria-hidden="true">
+            <div class="mc-sk-hero">
+                <span class="skeleton mc-sk-cover"></span>
+                <span class="mc-sk-lines">
+                    <span class="skeleton skeleton-line skeleton-line--sm"></span>
+                    <span class="skeleton skeleton-line skeleton-line--lg"></span>
+                    <span class="skeleton skeleton-line"></span>
+                </span>
             </div>
-            <h3>{% trans "empty_title" context "profile.my_courses" %}</h3>
-            <p>{% trans "empty_description" context "profile.my_courses" %}</p>
-            <a href="{% url 'courses:create_course' %}"
-               class="btn-create-new btn-orange mt-3 js-open-create-course"
-               data-create-course-url="{% url 'courses:create_course' %}"
-               data-success-section="my-courses">
-                <i class="fas fa-plus"></i> {% trans "create_first_course" context "profile.my_courses" %}
-            </a>
+            <div class="skeleton mc-sk-tabs"></div>
+            <div class="mc-sk-panel">
+                <span class="skeleton skeleton-line skeleton-line--lg"></span>
+                <span class="skeleton skeleton-block"></span>
+                <span class="skeleton skeleton-block"></span>
+            </div>
         </div>
+        {% else %}
+            {% trans "Filtrə uyğun kurs tapılmadı" context "courses.list" as mc_empty_title %}
+            {% trans "Axtarışı qısaldın və ya «Sıfırla» ilə bütün kurslara qayıdın." context "courses.list" as mc_empty_body %}
+            {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-filter-circle-xmark" state_title=mc_empty_title state_body=mc_empty_body %}
+        {% endif %}
+    {% else %}
+    <div class="mcl-empty">
+        <span class="mcl-empty__ic" aria-hidden="true"><i class="fas fa-layer-group"></i></span>
+        <h3 class="mcl-empty__title">{% trans "empty_title" context "profile.my_courses" %}</h3>
+        <p class="mcl-empty__body">{% trans "empty_description" context "profile.my_courses" %}</p>
+        <ol class="mcl-empty__steps">
+            <li><span class="mcl-empty__num">1</span>{% trans "Kursu yaradın — ad və qısa təsvir kifayətdir." context "courses.list" %}</li>
+            <li><span class="mcl-empty__num">2</span>{% trans "Mövzuları sillabusun həftəlik planından bir kliklə götürün." context "courses.list" %}</li>
+            <li><span class="mcl-empty__num">3</span>{% trans "Qrupları əlavə edib kursu yayımlayın." context "courses.list" %}</li>
+        </ol>
+        <a href="{% url 'courses:create_course' %}"
+           class="ems-btn ems-btn--primary js-open-create-course"
+           data-create-course-url="{% url 'courses:create_course' %}"
+           data-success-section="my-courses">
+            <i class="fas fa-plus" aria-hidden="true"></i> {% trans "create_first_course" context "profile.my_courses" %}
+        </a>
     </div>
     {% endif %}
 </section>
+{% endwith %}
 {% endif %}

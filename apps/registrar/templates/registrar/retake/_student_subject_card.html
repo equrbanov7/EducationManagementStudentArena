@@ -1,0 +1,56 @@
+{% load i18n registrar_retake %}
+{% comment %}Kəsr fənn kartı — `row` = `retake_eligibility` sətri. Hər seçim (25% / alt qrup) «niyə olar / niyə olmaz»
+ilə; düymə `rtApplyDialog`-u açır və gizli sahələri `data-rt-*` atributlarından doldurur (retake_student.js).{% endcomment %}
+{% with r=row.result o25=row.options.retake_25 osg=row.options.subgroup %}
+<li class="rt-card">
+    <header class="rt-card__head">
+        <div class="rt-card__titles">
+            <h3 class="rt-card__title">{{ row.subject.name }}</h3>
+            <p class="rt-card__meta">
+                <span>{{ row.subject.code }}</span>
+                <span aria-hidden="true">·</span>
+                <span>{{ row.period.name }}</span>
+            </p>
+        </div>
+        <span class="ems-badge ems-badge--danger ems-badge--wrap">{% trans "Kəsr" context "registrar.retake" %}</span>
+    </header>
+    <dl class="rt-facts">
+        <div><dt>{% trans "Yekun" context "registrar.retake" %}</dt><dd>{% if r.graded %}{{ r.total|retake_score }} / 100{% else %}—{% endif %}</dd></div>
+        <div><dt>{% trans "İmtahan" context "registrar.retake" %}</dt><dd>{{ r.effective_exam|retake_score }}</dd></div>
+        <div><dt>{% trans "25% cəhd" context "registrar.retake" %}</dt><dd>{{ row.attempts_used }} / {{ row.attempts_limit }}</dd></div>
+    </dl>
+    {% if row.fail_reason_label %}<p class="rt-note rt-note--danger"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> <span>{{ row.fail_reason_label }}</span></p>{% endif %}
+    {% if row.active %}
+    <p class="rt-note"><i class="fas fa-hourglass-half" aria-hidden="true"></i>
+        <span>{% trans "Aktiv müraciət" context "registrar.retake" %}:</span>
+        {% include "registrar/retake/_badge.html" with status=row.active.status %}
+    </p>
+    {% endif %}
+    <ul class="rt-options">
+        <li class="rt-option{% if o25.allowed %} is-allowed{% endif %}">
+            <div class="rt-option__text">
+                <strong>{% trans "25% təkrar imtahan" context "registrar.retake" %}</strong>
+                {% if o25.allowed %}<span>{% trans "Ödəniş qəbzi ilə — Mühasibatlıq təsdiqləyəndən sonra dekanlıq buraxır." context "registrar.retake" %}</span>{% else %}<span class="rt-why">{{ o25.why }}</span>{% endif %}
+            </div>
+            {% if o25.allowed %}
+            <button type="button" class="ems-btn ems-btn--primary ems-btn--sm" data-ems-overlay-open="rtApplyDialog"
+                    data-rt-apply data-rt-kind="retake_25" data-rt-enrollment="{{ row.enrollment.id }}" data-rt-subject="{{ row.subject.name }}">
+                <i class="fas fa-file-invoice" aria-hidden="true"></i> {% trans "25% müraciət et" context "registrar.retake" %}
+            </button>
+            {% endif %}
+        </li>
+        <li class="rt-option{% if osg.allowed %} is-allowed{% endif %}">
+            <div class="rt-option__text">
+                <strong>{% trans "Alt qrupda yenidən keçmək" context "registrar.retake" %}</strong>
+                {% if osg.allowed %}<span>{% trans "Ödənişsiz — fənni başqa qrupla yenidən keçirsiniz; dekanlıq sənədlə təsdiqləyir." context "registrar.retake" %}</span>{% else %}<span class="rt-why">{{ osg.why }}</span>{% endif %}
+            </div>
+            {% if osg.allowed %}
+            <button type="button" class="ems-btn ems-btn--sm" data-ems-overlay-open="rtApplyDialog"
+                    data-rt-apply data-rt-kind="subgroup" data-rt-enrollment="{{ row.enrollment.id }}" data-rt-subject="{{ row.subject.name }}">
+                <i class="fas fa-people-arrows" aria-hidden="true"></i> {% trans "Alt qrupa müraciət et" context "registrar.retake" %}
+            </button>
+            {% endif %}
+        </li>
+    </ul>
+</li>
+{% endwith %}

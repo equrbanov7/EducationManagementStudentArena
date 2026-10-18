@@ -1,0 +1,141 @@
+{% load i18n %}
+{% comment %}Müəllim drill-down-u (YALNIZ OXU): başlıq kartı, aylıq plan ↔ fakt cədvəli, fənn × qrup bölgüsü, keçirilmiş
+dərslər (səhifələnir, `ac_lpage`). Tələbə məlumatı yoxdur. Kontekst: `detail` (services/accounting/detail.py), `ac`.{% endcomment %}
+<a class="ems-btn ems-btn--ghost ems-btn--sm ac-back" href="{{ ac.list_url }}" data-section="{{ ac.section }}">
+    <i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Bütün müəllimlər" context "accounts.accounting" %}
+</a>
+{% if not detail.found %}
+    {% trans "Müəllim tapılmadı" context "accounts.accounting" as st_title %}
+    {% trans "Bu semestrdə həmin müəllimin nə keçirilmiş dərsi, nə də paylanmış yükü var, və ya müəllim sizin əhatənizdən kənardadır." context "accounts.accounting" as st_body %}
+    {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-user-slash" %}
+{% else %}
+<section class="ems-card ac-person" aria-labelledby="ac-person-name">
+    <div class="ac-person__head">
+        <h2 class="ac-person__name" id="ac-person-name">{{ detail.name }}</h2>
+        <p class="ac-person__meta">{{ detail.chair|default:"—" }}{% if detail.faculty %} · {{ detail.faculty }}{% endif %} · {% trans "ştat" context "accounts.accounting" %} {{ detail.staff_short }}</p>
+    </div>
+    <dl class="ac-person__stats">
+        <div><dt>{% trans "Semestr planı" context "accounts.accounting" %}</dt><dd>{{ detail.planned_sem_text }}</dd></div>
+        <div><dt>{% trans "Semestr faktı" context "accounts.accounting" %}</dt><dd>{{ detail.held_sem_text }}</dd></div>
+        <div><dt>{% trans "Fərq" context "accounts.accounting" %}</dt><dd>{{ detail.diff_sem_text }}</dd></div>
+    </dl>
+</section>
+
+<h3 class="ac-h">{% trans "Aylar üzrə" context "accounts.accounting" %}</h3>
+<div class="ems-tablewrap">
+    <div class="ems-tablescroll">
+        <table class="ems-table ems-table--zebra ems-table--compact ems-table--stack ac-table">
+            <caption class="ac-sr">{% trans "Aylar üzrə plan və keçirilmiş saat" context "accounts.accounting" %}</caption>
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Ay" context "accounts.accounting" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Plan" context "accounts.accounting" %}</th>
+                    {% for label in ac.kind_labels %}<th scope="col" class="ems-table__num">{{ label }}</th>{% endfor %}
+                    <th scope="col" class="ems-table__num">{% trans "Fakt" context "accounts.accounting" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Dərs" context "accounts.accounting" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Fərq" context "accounts.accounting" %}</th>
+                    <th scope="col">{% trans "Status" context "accounts.accounting" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for month in detail.months %}
+                <tr{% if month.key == ac.filters.month %} class="is-current"{% endif %}>
+                    <th scope="row">{{ month.label }}</th>
+                    <td class="ems-table__num" data-label="{% trans 'Plan' context 'accounts.accounting' %}">{{ month.planned_text }}</td>
+                    {% for cell in month.kind_cells %}<td class="ems-table__num ac-muted" data-label="{{ cell.label }}">{{ cell.value }}</td>{% endfor %}
+                    <td class="ems-table__num ac-strong" data-label="{% trans 'Fakt' context 'accounts.accounting' %}">{{ month.held_text }}</td>
+                    <td class="ems-table__num" data-label="{% trans 'Dərs' context 'accounts.accounting' %}">{{ month.lessons }}</td>
+                    <td class="ems-table__num" data-label="{% trans 'Fərq' context 'accounts.accounting' %}">{{ month.diff_text }}</td>
+                    <td data-label="{% trans 'Status' context 'accounts.accounting' %}">{% if month.status_obj %}{% include "partials/ems_ui/_status_badge.html" with status=month.status_obj nowrap=True %}{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="ac-table__total">
+                    <th scope="row">{% trans "Semestr" context "accounts.accounting" %}</th>
+                    <td class="ems-table__num" data-label="{% trans 'Plan' context 'accounts.accounting' %}">{{ detail.planned_sem_text }}</td>
+                    {% for cell in detail.held_sem_cells %}<td class="ems-table__num" data-label="{{ cell.label }}">{{ cell.value }}</td>{% endfor %}
+                    <td class="ems-table__num" data-label="{% trans 'Fakt' context 'accounts.accounting' %}">{{ detail.held_sem_text }}</td>
+                    <td class="ems-table__num" data-label="{% trans 'Dərs' context 'accounts.accounting' %}">{{ detail.row.lessons_sem }}</td>
+                    <td class="ems-table__num" data-label="{% trans 'Fərq' context 'accounts.accounting' %}">{{ detail.diff_sem_text }}</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+<p class="ac-note">{% trans "Semestr planı növlər üzrə:" context "accounts.accounting" %} {% for cell in detail.planned_sem_cells %}{{ cell.label }} {{ cell.value }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>
+
+<h3 class="ac-h">{% blocktrans trimmed with period=ac.period_label context "accounts.accounting" %}Fənn və qrup üzrə — {{ period }}{% endblocktrans %}</h3>
+{% if detail.breakdown %}
+<div class="ems-tablewrap">
+    <div class="ems-tablescroll">
+        <table class="ems-table ems-table--zebra ems-table--compact ems-table--stack ac-table">
+            <caption class="ac-sr">{% trans "Fənn və qrup üzrə keçirilmiş saat" context "accounts.accounting" %}</caption>
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Fənn" context "accounts.accounting" %}</th>
+                    <th scope="col">{% trans "Qrup" context "accounts.accounting" %}</th>
+                    {% for label in ac.kind_labels %}<th scope="col" class="ems-table__num">{{ label }}</th>{% endfor %}
+                    <th scope="col" class="ems-table__num">{% trans "Cəmi" context "accounts.accounting" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Dərs" context "accounts.accounting" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in detail.breakdown %}
+                <tr>
+                    <th scope="row">{{ item.subject }}</th>
+                    <td data-label="{% trans 'Qrup' context 'accounts.accounting' %}">{{ item.group }}</td>
+                    {% for cell in item.kind_cells %}<td class="ems-table__num ac-muted" data-label="{{ cell.label }}">{{ cell.value }}</td>{% endfor %}
+                    <td class="ems-table__num ac-strong" data-label="{% trans 'Cəmi' context 'accounts.accounting' %}">{{ item.total_text }}</td>
+                    <td class="ems-table__num" data-label="{% trans 'Dərs' context 'accounts.accounting' %}">{{ item.lessons }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<p class="ac-muted ac-note">{% trans "Bu dövrdə keçirilmiş dərs yoxdur." context "accounts.accounting" %}</p>
+{% endif %}
+
+<h3 class="ac-h">{% blocktrans trimmed with total=detail.lessons_total context "accounts.accounting" %}Keçirilmiş dərslər · {{ total }}{% endblocktrans %}</h3>
+{% if detail.lessons %}
+<div class="ems-tablewrap">
+    <div class="ems-tablescroll">
+        <table class="ems-table ems-table--zebra ems-table--compact ems-table--stack ac-table">
+            <caption class="ac-sr">{% trans "Keçirilmiş dərslərin siyahısı" context "accounts.accounting" %}</caption>
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Tarix" context "accounts.accounting" %}</th>
+                    <th scope="col">{% trans "Qrup" context "accounts.accounting" %}</th>
+                    <th scope="col">{% trans "Fənn" context "accounts.accounting" %}</th>
+                    <th scope="col">{% trans "Növ" context "accounts.accounting" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Saat" context "accounts.accounting" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lesson in detail.lessons %}
+                <tr>
+                    <th scope="row">{{ lesson.date|date:"d.m.Y" }}{% if lesson.time %} <small class="ac-muted">{{ lesson.time|time:"H:i" }}</small>{% endif %}</th>
+                    <td data-label="{% trans 'Qrup' context 'accounts.accounting' %}">{{ lesson.group }}</td>
+                    <td data-label="{% trans 'Fənn' context 'accounts.accounting' %}">{{ lesson.subject }}</td>
+                    <td data-label="{% trans 'Növ' context 'accounts.accounting' %}">{{ lesson.kind_label }}</td>
+                    <td class="ems-table__num" data-label="{% trans 'Saat' context 'accounts.accounting' %}">{{ lesson.hours }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% if detail.lesson_pages > 1 %}
+<nav class="ac-pager" aria-label="{% trans 'Dərslərin səhifələnməsi' context 'accounts.accounting' %}">
+    {% if detail.lesson_prev_url %}<a class="ems-btn ems-btn--sm" href="{{ detail.lesson_prev_url }}" data-section="accounting"><i class="fas fa-chevron-left" aria-hidden="true"></i> {% trans "Əvvəlki" context "accounts.accounting" %}</a>{% endif %}
+    <span class="ac-pager__info">{% blocktrans trimmed with page=detail.lesson_page pages=detail.lesson_pages context "accounts.accounting" %}Səhifə {{ page }} / {{ pages }}{% endblocktrans %}</span>
+    {% if detail.lesson_next_url %}<a class="ems-btn ems-btn--sm" href="{{ detail.lesson_next_url }}" data-section="accounting">{% trans "Növbəti" context "accounts.accounting" %} <i class="fas fa-chevron-right" aria-hidden="true"></i></a>{% endif %}
+</nav>
+{% endif %}
+{% else %}
+<p class="ac-muted ac-note">{% trans "Bu dövrdə keçirilmiş dərs yoxdur." context "accounts.accounting" %}</p>
+{% endif %}
+{% endif %}

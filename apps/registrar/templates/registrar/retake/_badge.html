@@ -1,0 +1,1 @@
+{% load registrar_retake %}{% comment %}Müraciət statusu — `ems-badge` tonları (`retake_rules.TONES`). Kontekst: `status`.{% endcomment %}<span class="ems-badge ems-badge--{{ status|retake_tone }} ems-badge--wrap rt-badge">{{ status|retake_status_label }}</span>

@@ -75,3 +75,10 @@ def build_course_dashboard_context(*, course, user, membership, can_manage, is_s
         "assignments": assignments_qs,
         "assignments_with_user_data": assignments_with_user_data,
     }
+
+
+def course_task_queryset():
+    """«Kurslarım» kartının tapşırıq sayğacı üçün mənbə (bax ``dashboard_sources.register_task_counter``)."""
+    from apps.assignments.models import Assignment
+
+    return Assignment.objects.all()

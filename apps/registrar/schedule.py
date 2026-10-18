@@ -284,10 +284,16 @@ def get_student_schedule(organization, student, group, period):
         organization=organization, student=student, status=Enrollment.Status.ENROLLED, offering__period=period
     ).values("offering_id")
     scope = Q(offering__group=group) | Q(offering_id__in=enrolled) if group is not None else Q(offering_id__in=enrolled)
+    # 2026-10-18: alt qrup birləşməsində öz qrupunun jurnalından AZAD edilmiş fənn (dropped + superseded_by)
+    # tələbənin cədvəlindən düşür — dərsi artıq hədəf (alt qrup) jurnalında keçir, ikiqat görünməsin.
+    released = Enrollment.objects.filter(
+        organization=organization, student=student, offering__period=period, superseded_by__isnull=False
+    ).values("offering_id")
     return _slots_for(
         ScheduleSlot.objects.filter(organization=organization, offering__period=period)
         .filter(scope)
         .exclude(offering_id__in=_exempt_offering_ids(student, period))
+        .exclude(offering_id__in=released)
     )
 
 

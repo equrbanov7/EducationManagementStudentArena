@@ -180,29 +180,49 @@ class ExamChanceViewTests(_Base):
         )
         self.assertEqual(response.status_code, 403)
 
-    def test_grants_to_group_and_usernames(self):
+    def test_grant_requires_reason_and_concrete_students(self):
+        """2026-10-18 (sahib): şans RƏSMİDİR — səbəb növü məcburidir, yalnız konkret (axtarışdan seçilmiş)
+        tələbələrə verilir; bütöv qrup / ad siyahısı forması götürülüb və nəzərə alınmır."""
+        from apps.registrar.models import ExamChanceGrant
+
         exam = self._make_exam("final")
         group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="SC-901")
         group.students.add(self.student)
         other = User.objects.create_user("sc_student2", "sc_student2@test.az", PASSWORD)
         _assign_user_to_org(other, self.org, ProfileRole.STUDENT, "student")
+        client = self._client_for(self.center)
 
-        response = self._client_for(self.center).post(
+        no_reason = client.post(
+            reverse("accounts:exam_chance"),
+            {"exam_id": str(exam.pk), "student_ids": [str(other.pk)], "extra_attempts": "1"},
+        )
+        self.assertEqual(no_reason.status_code, 302)
+        self.assertFalse(StudentExamAttemptGrant.objects.filter(exam=exam).exists())
+
+        response = client.post(
             reverse("accounts:exam_chance"),
             {
                 "exam_id": str(exam.pk),
                 "group_id": str(group.pk),
-                "usernames": f"{other.username}\nmovcud-deyil",
+                "usernames": self.student.username,
+                "student_ids": [str(other.pk)],
+                "reason": "technical",
+                "note": "İmtahan zamanı kompüter söndü",
                 "extra_attempts": "1",
             },
         )
         self.assertEqual(response.status_code, 302)
         granted = set(StudentExamAttemptGrant.objects.filter(exam=exam).values_list("student__username", flat=True))
-        self.assertEqual(granted, {self.student.username, other.username})
+        self.assertEqual(granted, {other.username})
+        log = ExamChanceGrant.objects.get(exam_id=exam.pk)
+        self.assertEqual((log.student_id, log.reason, log.granted_by_id), (other.pk, "technical", self.center.pk))
+        self.assertEqual(log.exam_type, "test")
 
     def test_section_renders_for_center(self):
         self._make_exam("final", title="Görünən final")
-        response = self._client_for(self.center).get(f"{reverse('accounts:profile')}?section=exam-chance")
+        response = self._client_for(self.center).get(
+            f"{reverse('accounts:profile')}?section=exam-chance&chance_reason=other"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Görünən final")
         self.assertContains(response, 'name="exam_id"')
@@ -300,7 +320,10 @@ class ExamChanceFilterTests(_Base):
         )
 
     def _section(self, query=""):
-        return self._client_for(self.center).get(f"{reverse('accounts:profile')}?section=exam-chance{query}")
+        # 2026-10-18: şans forması səbəb seçiləndən sonra görünür (səbəbsiz şans yoxdur).
+        return self._client_for(self.center).get(
+            f"{reverse('accounts:profile')}?section=exam-chance&chance_reason=other{query}"
+        )
 
     def test_faculty_filter_narrows_exams_and_kafedra_options(self):
         inside = self._make_exam("final", title="Fakültə daxili final")
@@ -354,7 +377,13 @@ class ExamChanceFilterTests(_Base):
         exam = self._make_exam("final", title="Checkbox finalı")
         response = self._client_for(self.center).post(
             reverse("accounts:exam_chance"),
-            {"exam_id": str(exam.pk), "student_ids": [str(self.student.pk)], "extra_attempts": "1"},
+            {
+                "exam_id": str(exam.pk),
+                "student_ids": [str(self.student.pk)],
+                "extra_attempts": "1",
+                "reason": "other",
+                "note": "Dekanlığın şifahi qərarı ilə",
+            },
         )
         self.assertEqual(response.status_code, 302)
         self.assertTrue(StudentExamAttemptGrant.objects.filter(exam=exam, student=self.student).exists())

@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load i18n %}
+{% load ems_ui %}
 
 {% comment %}
 Kurs paneli — 2026-09-28 redizayn.
@@ -21,12 +22,14 @@ CSP: inline stil/skript yoxdur; dinamik dəyərlər data-* atributlarındadır.
     <link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20260909-hover">
     <link rel="stylesheet" href="{% static 'css/ems_ui/badge.css' %}?v=20261018-pkga">
     <link rel="stylesheet" href="{% static 'courses/css/course_panel.css' %}?v=20260928-1">
+    <link rel="stylesheet" href="{% static 'courses/css/course_accent.css' %}?v=20261018-crs">
     <link rel="stylesheet" href="{% static 'courses/css/course_panel_tabs.css' %}?v=20260928-1">
     {% if is_owner %}<link rel="stylesheet" href="{% static 'courses/css/course_create.css' %}?v=20261017-nofont">{% endif %}
-    <link rel="stylesheet" href="{% static 'courses/css/course_panel_sections.css' %}?v=20261017-3">
+    <link rel="stylesheet" href="{% static 'courses/css/course_panel_sections.css' %}?v=20261018-crs">
     <link rel="stylesheet" href="{% static 'courses/css/course_panel_tasks.css' %}?v=20261017-3">
     <link rel="stylesheet" href="{% static 'courses/css/course_panel_overlays.css' %}?v=20261017-3">
-    {% if is_owner %}<link rel="stylesheet" href="{% static 'courses/css/course_dialogs.css' %}?v=20261017-3">{% endif %}
+    {% if is_owner %}<link rel="stylesheet" href="{% static 'courses/css/course_dialogs.css' %}?v=20261017-3">
+    <link rel="stylesheet" href="{% static 'courses/css/course_syllabus_import.css' %}?v=20261018-crs">{% endif %}
     {% if is_owner %}<link rel="stylesheet" href="{% static 'courses/css/course_panel_ai.css' %}?v=20260928-1">{% endif %}
     {% comment %}Paket E: ortaq dialoq/tab/forma komponentləri (lab, imtahan məlumatı, imtahan əlaqələndirmə dialoqları) —
     əvvəl bölmə partial-larının GÖVDƏSİNDƏ `<link>` idi (gec aşkarlanan sorğular); tələbə üçün 574 sətirlik
@@ -65,7 +68,7 @@ CSP: inline stil/skript yoxdur; dinamik dəyərlər data-* atributlarındadır.
 {% endblock %}
 
 {% block content %}
-<div class="ems-cd" id="courseDashboardRoot"
+<div class="ems-cd crs-accent--{{ course_identity.accent }}" id="courseDashboardRoot"
      data-course-id="{{ course.id }}"
      data-i18n-course-delete="{% trans 'confirm_delete_course' context 'courses.dashboard' %}"
      data-i18n-course-delete-title="{% trans 'confirm_delete_course_title' context 'courses.dashboard' %}"
@@ -99,7 +102,7 @@ CSP: inline stil/skript yoxdur; dinamik dəyərlər data-* atributlarındadır.
         {% if cover_image_url %}
           <img src="{{ cover_image_url }}" alt="" loading="lazy">
         {% else %}
-          {% include "courses/partials/_cd_icon.html" with icon="cap" size=34 stroke=1.7 %}
+          <i class="fas {{ course_identity.icon }}" aria-hidden="true"></i>
         {% endif %}
       </div>
       {% endwith %}
@@ -121,6 +124,13 @@ CSP: inline stil/skript yoxdur; dinamik dəyərlər data-* atributlarındadır.
             {% include "courses/partials/_cd_icon.html" with icon="calendar" size=14 %}
             <span class="visually-hidden">{% trans "label_created" context "courses.dashboard" %}:</span> {{ course.created_at|date:"d.m.Y" }}
           </span>
+          {% if can_manage_course and linked_syllabus %}
+          <span class="cd-syl-chip" title="{% trans 'Bağlı sillabus' context 'courses.syllabus_import' %}">
+            <i class="fas fa-file-lines" aria-hidden="true"></i>
+            <span class="cd-syl-chip__name">{% blocktrans context "courses.syllabus_import" with subject=linked_syllabus.subject.name %}Sillabus: {{ subject }}{% endblocktrans %}</span>
+            {% if linked_syllabus_version %}{% ems_status_badge "syllabus" linked_syllabus_version.status nowrap=True %}{% endif %}
+          </span>
+          {% endif %}
         </div>
 
         <h1 class="cd-hero__title">{{ course.title }}</h1>
@@ -225,6 +235,10 @@ CSP: inline stil/skript yoxdur; dinamik dəyərlər data-* atributlarındadır.
               {% endif %}
             {% elif is_owner %}
               {% if tab.key == "topics" %}
+                <button type="button" class="ems-btn" data-bs-toggle="modal" data-bs-target="#syllabusImportModal" data-cd-syllabus-open>
+                  <i class="fas fa-file-import" aria-hidden="true"></i>
+                  {% trans "Sillabusdan götür" context "courses.syllabus_import" %}
+                </button>
                 <button type="button" class="ems-btn cd-btn-ai-soft" data-ems-ai>
                   {% include "courses/partials/_cd_icon.html" with icon="spark" size=15 stroke=1.8 %}
                   {% trans "ai_generate" context "courses.dashboard" %}
@@ -317,6 +331,7 @@ modalları (RİM açarları ilə gizlədilmiş modullar) `.ems-cd-modals` altın
     {% include 'courses/partials/_member_form_modal.html' %}
     {% include "courses/partials/_topic_edit_modal.html" %}
     {% include "courses/partials/_edit_course_modal.html" %}
+    {% include "courses/partials/_syllabus_import_modal.html" %}
 </div>
 {% endif %}
 

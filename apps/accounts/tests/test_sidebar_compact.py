@@ -58,6 +58,7 @@ STUDENT_ORDER = [
     "assigned-courses",
     "pending-answers",
     "my-appeals",
+    "my-retakes",  # «25% və alt qrup» (2026-10-18) — apellyasiyalardan sonra
     "evaluation-survey",
     "surveys-inbox",
     "announcements",

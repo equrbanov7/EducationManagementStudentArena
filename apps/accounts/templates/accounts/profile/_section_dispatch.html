@@ -140,6 +140,12 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_announcements.html" %}
             {% elif active_section == "my-group" and 'my-group' in allowed_sections %}
                 {% include "accounts/profile/sections/_my_group.html" %}
+            {% elif active_section == "my-retakes" and 'my-retakes' in allowed_sections %}
+                {% include "accounts/profile/sections/_my_retakes.html" %}
+            {% elif active_section == "retake-desk" and 'retake-desk' in allowed_sections %}
+                {% include "accounts/profile/sections/_retake_desk.html" %}
+            {% elif active_section == "subgroup-placement" and 'subgroup-placement' in allowed_sections %}
+                {% include "accounts/profile/sections/_subgroup_placement.html" %}
             {% elif active_section == "surveys-builder" and 'surveys-builder' in allowed_sections %}
                 {% include "accounts/profile/sections/_surveys_builder.html" %}
             {% elif active_section == "subject-folders" and 'subject-folders' in allowed_sections %}
@@ -206,6 +212,8 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_journal_hygiene.html" %}
             {% elif active_section == "hr-analytics" and 'hr-analytics' in allowed_sections %}
                 {% include "accounts/profile/sections/_hr_analytics.html" %}
+            {% elif active_section == "accounting" and 'accounting' in allowed_sections %}
+                {% include "accounts/profile/sections/_accounting.html" %}
             {% elif active_section == "exam-chance" and 'exam-chance' in allowed_sections %}
                 {% include "accounts/profile/sections/_exam_chance.html" %}
             {% elif active_section == "superadmin-contact-messages" and 'superadmin-contact-messages' in allowed_sections %}

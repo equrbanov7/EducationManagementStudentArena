@@ -9,7 +9,7 @@ Rəsmi = ən son bitmiş final cəhdi; əvvəlkilər «ləğv olundu», balı is
 <span class="jd2-attempts">
     {% for attempt in attempts %}
     <span class="jd2-attempt {% if attempt.is_official %}is-official{% else %}is-superseded{% endif %}">
-        {{ attempt.label }} {% trans "cəhd" context "registrar.journal" %}:
+        {{ attempt.label }} {% trans "cəhd" context "registrar.journal" %}{% if attempt.is_retake %} ({% trans "25% təkrar imtahan" context "registrar.retake" %}){% endif %}:
         <b>{% if attempt.percent is not None %}{{ attempt.percent }}{% else %}—{% endif %}</b>
         · {% if attempt.is_official %}{% trans "rəsmi" context "registrar.journal" %}{% else %}{% trans "ləğv olundu" context "registrar.journal" %}{% endif %}
         {% if attempt.finished_at %}· {{ attempt.finished_at|date:"d.m.Y H:i" }}{% endif %}

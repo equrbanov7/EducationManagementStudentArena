@@ -63,3 +63,6 @@ a.rma-chip-sel__name:hover { text-decoration: underline; }
 .rma-comp__student { font-size: .8rem; color: var(--ems-gray-700); }
 .rma-comp__idle { margin-top: .3rem; font-size: .78rem; color: var(--ems-neutral-400); }
 .rma-comp[hidden] { display: none; }
+
+/* 2026-10-18: ilk dəfə baxan istifadəçi üçün axtarış ipucu. */
+.rma-hint { margin: 6px 0 8px; }

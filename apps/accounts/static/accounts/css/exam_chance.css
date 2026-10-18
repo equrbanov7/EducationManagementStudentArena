@@ -183,3 +183,83 @@
 .exch-table .ems-badge {
     margin-left: 6px;
 }
+
+/* ── 2026-10-18: rəsmi şans — addımlar, 25% müraciət çipləri, bağlı tələbə, xülasə ── */
+.exch-step {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+}
+
+.exch-step__title {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    margin-bottom: var(--ems-sp-1);
+    padding: 0;
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.exch-step__no {
+    display: inline-grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+    font-size: var(--ems-fs-xs);
+}
+
+.exch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: var(--ems-sp-3);
+}
+
+.exch-stu.is-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.exch-apps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-1);
+    width: 100%;
+    margin: var(--ems-sp-1) 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--ems-fs-xs);
+}
+
+.exch-apps__link {
+    padding: 0 var(--ems-sp-2);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    font-weight: 600;
+}
+
+.exch-ref {
+    display: block;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-xs);
+}
+
+.exch-summary {
+    margin: var(--ems-sp-2) 0 0;
+    color: var(--ems-text);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.exch-stu:has(.exch-apps) {
+    flex-wrap: wrap;
+    border-radius: var(--ems-r-lg);
+}

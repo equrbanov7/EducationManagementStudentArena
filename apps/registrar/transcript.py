@@ -27,7 +27,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.utils import timezone
 
-from apps.registrar import analytics, exam_eligibility, finals, finals_batch, legacy_grade_read
+from apps.registrar import analytics, exam_eligibility, finals, finals_batch, legacy_grade_read, retake_queries
 from apps.registrar.models import Enrollment, StudentAcademicRecord
 
 _TWO_PLACES = Decimal("0.01")
@@ -224,6 +224,13 @@ def build_student_transcript(*, student, organization, program=None):
     # sürüşmə ``exam_eligibility`` docstring-indəki 2026-08-31 auditinin
     # mövzusudur).  Maliyyəti: tələbə başına bir toplu sorğu dəsti.
     legacy_grade_read.attach_legacy_provenance(rows, organization=organization)
+    # 25% təkrar imtahan izi (2026-10-18): «Əsas imtahan: 32 → 25%: 61» — tək sorğu. Yekunun ÖZÜ dəyişmir:
+    # ``compute_final_result`` tamamlanmış təkrar imtahan balını (``ResitRecord``) onsuz da qüvvədə olan sayır.
+    lines = retake_queries.result_lines(
+        organization=organization, enrollment_ids=[row["enrollment_id"] for row in rows]
+    )
+    for row in rows:
+        row["retake"] = lines.get(row["enrollment_id"])
 
     # Group into semesters, preserving the chronological (period) order.
     semesters: list[dict] = []
@@ -388,6 +395,7 @@ def build_student_overall_record(*, student, organization):
                     "result": result,
                     "in_gpa": row["in_gpa"],
                     "fail_reason": _fail_reason_code(result) if result["failed"] else "",
+                    "retake": row.get("retake"),
                 }
             )
         semesters.append(

@@ -1,4 +1,4 @@
-{% load static i18n l10n ems_ui %}
+{% load static i18n l10n ems_ui subgroup_placement_tags %}
 {% comment %}Tələbənin elektron jurnalı (yalnız-oxu) — Paket A redizaynı 2026-10-18 (ems_ui qatı).
 Fənn kartları (KPI sırası + buraxılış badge-i `exam_eligibility` ailəsindən) → detal: KPI-lər, bal
 bölgüsü (`_entry_breakdown.html`, FIX-G «Cəm» yuvarlaqlaşdırma sətri daxil), dərs tarixçəsi
@@ -15,6 +15,7 @@ Bu günün qeydləri də DƏRHAL görünür (sahib 2026-10-15). Azad fənlər (F
                 <div class="sj-identity__name">{{ request.user.get_full_name|default:request.user.username }}</div>
                 <div class="sj-identity__sub">
                     {% if sec.record.group %}{% trans "Qrup" context "registrar.journal" %} {{ sec.record.group.name }}{% endif %}{% if sec.period %} · {{ sec.period.name }}{% endif %}
+                    {% student_credit_load as scl %}{% if scl and scl.has_record and sec.period.is_current %} · {% blocktrans trimmed with total=scl.total limit=scl.limit context "registrar.journal" %}Bu semestr: {{ total }} / {{ limit }} kredit{% endblocktrans %}{% endif %}
                 </div>
             </div>
         </div>
@@ -57,6 +58,7 @@ Bu günün qeydləri də DƏRHAL görünür (sahib 2026-10-15). Azad fənlər (F
             <span class="sj-card__top">
                 <span class="sj-card__subject">{{ row.subject.name }}</span>
                 <span class="ems-badge ems-badge--neutral ems-badge--nowrap sj-card__ects">{{ row.ects }} ECTS</span>
+                {% if scl and row.enrollment.id|stringformat:"s" in scl.subgroup_enrollment_ids %}<span class="ems-badge ems-badge--warning ems-badge--nowrap">{% trans "Alt qrup" context "registrar.journal" %}</span>{% endif %}
             </span>
             <span class="sj-card__teacher">
                 <i class="fas fa-chalkboard-teacher" aria-hidden="true"></i>
@@ -67,6 +69,7 @@ Bu günün qeydləri də DƏRHAL görünür (sahib 2026-10-15). Azad fənlər (F
                 <span class="sj-card__score-value"><b>{{ row.journal.entry_score|floatformat:0 }}</b> / {{ row.journal.entry_score_max }}</span>
             </span>
             <progress class="ems-progress" value="{{ row.journal.entry_score|default:0|unlocalize }}" max="{{ row.journal.entry_score_max|default:50|unlocalize }}" aria-hidden="true"></progress>
+            {% if row.retake %}{% include "registrar/retake/_result_line.html" with retake=row.retake %}{% endif %}
             <span class="sj-card__foot"{% if row.journal.eligibility.frozen %} title="{{ row.journal.eligibility.notice }}"{% endif %}>
                 {% ems_status_badge "exam_eligibility" row.ui.status dot=True %}
                 <i class="fas fa-chevron-right sj-card__chev" aria-hidden="true"></i>

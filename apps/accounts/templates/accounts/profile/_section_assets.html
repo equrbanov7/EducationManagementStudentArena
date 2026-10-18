@@ -64,7 +64,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/assigned_exams.css' %}?v=20261018-pkga">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/assigned_courses.css' %}?v=20261018-pkga">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_results.css' %}?v=20261018-pkga">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_results_academic.css' %}?v=20261018-pkga">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_results_academic.css' %}?v=20261018-retake">
     {% if 'pending-post-approvals' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/pending_post_approvals.css' %}?v=20260912-1">
     {% endif %}
@@ -141,6 +141,9 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% if 'my-courses' in asset_sections %}
     <link rel="stylesheet" href="{% static 'courses/css/course_create.css' %}?v=20261017-nofont">
     <link rel="stylesheet" href="{% static 'courses/css/create_course_modal.css' %}">
+    {% comment %}2026-10-18 «Kurslarım» redizaynı: kursun aksent tonu (kurs paneli ilə ortaq) → kart şəbəkəsi.{% endcomment %}
+    <link rel="stylesheet" href="{% static 'courses/css/course_accent.css' %}?v=20261018-crs">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_courses_list.css' %}?v=20261018-crs">
     {% endif %}
     {% if 'my-exams' in asset_sections %}
     <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260911-1">
@@ -247,7 +250,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
     {% endif %}
     {% if 'my-journal' in asset_sections or 'journal-close' in asset_sections %}
-    <link rel="stylesheet" href="{% static 'registrar/css/journal_student.css' %}?v=20261018-pkga">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_student.css' %}?v=20261018-retake">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_student_detail.css' %}?v=20261018-pkga">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20261017-fixg">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_list.css' %}?v=20260930-resp">

@@ -1,0 +1,34 @@
+{% load i18n %}
+{% comment %}Avto filtr paneli — `filter_bar.js` MARKUP MÜQAVİLƏSİ (bax hr_analytics/_filters.html): select dəyişən kimi,
+axtarış isə debounce ilə bölmə yerində yenidən yüklənir, səhifə 1-ə qayıdır. Drill-down (`ac_teacher`) açıqdırsa
+gizli sahə ilə saxlanılır — ay/semestr dəyişəndə eyni müəllimin kartı qalır. Select-lər layihə komponentidir.{% endcomment %}
+<form class="ems-filters ems-filters--auto ac-filters" data-ems-filters data-ems-filters-auto="1"
+      data-section="{{ ac.section }}" data-param-prefix="ac_" data-base-url="{{ ac.base_url }}"
+      role="search" aria-label="{% trans 'Mühasibatlıq filtrləri' context 'accounts.accounting' %}">
+    {% if ac.filters.teacher %}<input type="hidden" name="ac_teacher" value="{{ ac.filters.teacher }}" data-ems-filter>{% endif %}
+    {% for field in ac.filter_fields %}
+    {% if not ac.filters.teacher or field.name == "ac_semester" or field.name == "ac_month" %}
+    <div class="ems-field{% if field.wide %} ems-field--wide{% endif %}">
+        <label class="ems-field__label" for="f-{{ field.name }}">{{ field.label }}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="f-{{ field.name }}" name="{{ field.name }}" data-ems-filter data-bootstrap-select{% if field.searchable %} data-live-search="true" data-live-search-placeholder="{% trans 'Axtar…' context 'ui.filters' %}" data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'ui.filters' %}"{% endif %}>
+                {% for option in field.options %}
+                <option value="{{ option.value }}"{% if option.selected %} selected{% endif %}>{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% if not ac.filters.teacher %}
+    <div class="ems-field ems-field--wide">
+        <label class="ems-field__label" for="f-ac_q">{% trans "Müəllim axtarışı" context "accounts.accounting" %}</label>
+        <input class="ems-input" type="search" id="f-ac_q" name="ac_q" value="{{ ac.filters.q }}"
+               placeholder="{% trans 'Ad, soyad, istifadəçi adı, kafedra…' context 'accounts.accounting' %}"
+               autocomplete="off" maxlength="100" data-ems-filter data-ems-filter-search>
+    </div>
+    <div class="ems-filters__actions">
+        <button type="button" class="ems-btn" data-ems-filters-reset>{% trans "Sıfırla" context "ui.filters" %}</button>
+    </div>
+    {% endif %}
+</form>

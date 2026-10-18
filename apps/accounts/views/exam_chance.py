@@ -1,8 +1,11 @@
 """İmtahan Mərkəzi — «imtahan şansı ver» (ikinci şans) bölməsinin view-u.
 
-POST: seçilmiş final/midterm imtahanı üzrə qrupa və ya ad-ad tələbələrə
-yenidən cəhd hüququ verir (``grant_second_chance``: grant + yeni PIN + final
-biletinin sıfırlanması + audit). GET: profil SPA bölməsini render edir —
+POST: seçilmiş final/midterm imtahanı üzrə KONKRET tələbələrə yenidən cəhd hüququ verir
+(``grant_second_chance``: grant + yeni PIN + final biletinin sıfırlanması + audit).
+2026-10-18 (sahib): şans RƏSMİDİR — səbəb növü məcburidir (25% müraciəti / universitet güzəşti /
+texniki problem / apellyasiya qərarı / digər), əsas (əmr №, tarix, qeyd) səbəbə görə yoxlanır və hər
+tələbə üçün append-only qeyd yazılır (``registrar.retake_chance``); «25% müraciəti» yalnız ödənişi
+təsdiqlənmiş + buraxılmış müraciəti olan tələbəyə verilir və müraciəti ``exam_granted`` edir. GET: profil SPA bölməsini render edir —
 sidebar itmir (superadmin_exam_rooms / kollokvium_windows pattern-i).
 """
 
@@ -11,15 +14,18 @@ import logging
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.accounts.services.exam_center_decide import can_exam_center_decide
-from apps.exams.models import Exam, StudentGroup
+from apps.exams.models import Exam
 from apps.exams.public import SECURE_EXAM_CATEGORIES, SecondChanceError, grant_second_chance, is_exam_center_user
 from apps.organizations.public import organization_user_queryset
+from apps.registrar.public import retake_chance
 
 from ._helpers import _append_query_params, _get_active_organization, _render_profile_section, _resolve_next_url
 
@@ -28,39 +34,27 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-def _parse_usernames(raw):
-    """Vergül/yeni sətirlə ayrılmış istifadəçi adları/emailləri → təmiz siyahı."""
-    tokens = (raw or "").replace(",", "\n").splitlines()
-    return [t.strip() for t in tokens if t.strip()]
+def _collect_students(organization, student_ids=()):
+    """Axtarışdan seçilmiş KONKRET tələbələr (hamısı org üzvlüyünə yoxlanır).
 
-
-def _collect_students(organization, group, username_tokens, student_ids=()):
-    """Qrup üzvləri + axtarışdan seçilmiş id-lər + ad-ad verilən istifadəçilər
-    (hamısı org üzvlüyünə yoxlanır). Qaytarır: (tələbə siyahısı, tapılmayanlar).
+    2026-10-18 (sahib): şans yalnız konkret tələbə(lər)ə verilir — bütöv qrupa / ad siyahısına toplu şans
+    forması götürüldü (hər tələbə axtarışdan seçilir və səbəb rəsmi qeydə düşür).
     """
-    students = {}
-    if group is not None:
-        for student in group.students.all():
-            students[student.pk] = student
-
     ids = [i for i in student_ids if str(i).isdigit()]
-    if ids:
-        id_qs = organization_user_queryset(organization, queryset=User.objects.filter(pk__in=ids))
-        for user in id_qs:
-            students[user.pk] = user
+    if not ids:
+        return []
+    return list(organization_user_queryset(organization, queryset=User.objects.filter(pk__in=ids)).order_by("pk"))
 
-    missing = []
-    for token in username_tokens:
-        user = User.objects.filter(username__iexact=token).first() or User.objects.filter(email__iexact=token).first()
-        if user is None:
-            missing.append(token)
-            continue
-        # Yalnız bu təşkilatın üzvləri — yad istifadəçiyə şans verilə bilməz.
-        if not organization_user_queryset(organization, queryset=User.objects.filter(pk=user.pk)).exists():
-            missing.append(token)
-            continue
-        students[user.pk] = user
-    return list(students.values()), missing
+
+def _exam_info(exam) -> dict:
+    """Registrar qeydi üçün imtahan snapshot-u (registrar exams-ı import etmir)."""
+    return {
+        "id": exam.pk,
+        "title": exam.title,
+        "exam_type": exam.exam_type or "",
+        "category": exam.exam_type_extended or "",
+        "subject_id": exam.subject_id,
+    }
 
 
 @login_required
@@ -97,30 +91,38 @@ def exam_chance(request):
             is_deleted=False,
         )
 
-        group = None
-        group_id = (request.POST.get("group_id") or "").strip()
-        if group_id.isdigit():
-            group = get_object_or_404(StudentGroup, pk=int(group_id), organization=organization)
-
-        username_tokens = _parse_usernames(request.POST.get("usernames"))
-        students, missing = _collect_students(
-            organization, group, username_tokens, student_ids=request.POST.getlist("student_ids")
-        )
-        for token in missing[:5]:
-            messages.warning(
-                request,
-                pgettext("accounts.exam_chance", "İstifadəçi tapılmadı və ya bu təşkilatda deyil: %(u)s")
-                % {"u": token},
-            )
-
+        students = _collect_students(organization, request.POST.getlist("student_ids"))
         try:
-            summary = grant_second_chance(
-                exam=exam,
+            cleaned = retake_chance.validate(
+                organization=organization,
+                exam=_exam_info(exam),
                 students=students,
-                extra=request.POST.get("extra_attempts", 1),
-                granted_by=request.user,
-                request=request,
+                reason=(request.POST.get("reason") or "").strip(),
+                reference_number=request.POST.get("reference_number"),
+                reference_date=request.POST.get("reference_date"),
+                note=request.POST.get("note"),
             )
+            # Şans + rəsmi qeyd (səbəb, əsas, müraciət keçidi) BİR tranzaksiyada — biri alınmasa heç biri yazılmır.
+            with transaction.atomic():
+                summary = grant_second_chance(
+                    exam=exam,
+                    students=students,
+                    extra=request.POST.get("extra_attempts", 1),
+                    granted_by=request.user,
+                    request=request,
+                )
+                retake_chance.record(
+                    organization=organization,
+                    exam=_exam_info(exam),
+                    students=students,
+                    cleaned=cleaned,
+                    extra=summary["extra"],
+                    actor=request.user,
+                    request=request,
+                )
+        except ValidationError as exc:
+            messages.error(request, "; ".join(str(m) for m in exc.messages))
+            return redirect(next_url)
         except SecondChanceError as exc:
             messages.error(request, str(exc))
             return redirect(next_url)

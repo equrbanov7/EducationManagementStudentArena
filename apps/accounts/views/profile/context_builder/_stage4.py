@@ -103,6 +103,7 @@ class _Stage4Mixin:
             **self._qchair_ctx,
             **self._unit_exams_ctx,  # unit_exams_* + unit_exams_section («Bölmə imtahanları»)
             "my_created_courses": self.my_created_courses,
+            "my_courses_section": self.my_courses_section,
             "my_created_courses_count": self.my_created_courses_count,
             "assigned_exams_count": self.assigned_exams_count,
             "assigned_courses_count": self.assigned_courses_count,

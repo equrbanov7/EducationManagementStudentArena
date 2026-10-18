@@ -67,6 +67,10 @@ urlpatterns = [
         views.DeleteTopicView.as_view(),
         name="delete_topic",
     ),
+    # «Sillabusdan mövzuları götür» (2026-10-18): seçici → ön baxış (yazmır) → tək POST ilə idxal
+    path("<int:course_id>/syllabus/options/", views.CourseSyllabusOptionsView.as_view(), name="syllabus_options"),
+    path("<int:course_id>/syllabus/preview/", views.CourseSyllabusPreviewView.as_view(), name="syllabus_preview"),
+    path("<int:course_id>/syllabus/import/", views.CourseSyllabusImportView.as_view(), name="syllabus_import"),
     # ════════════════════════════════════════════════════════════════════════
     # Resurslar (Resources)
     # ════════════════════════════════════════════════════════════════════════

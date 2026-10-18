@@ -1,13 +1,14 @@
 {% load i18n nav_icons %}
 {% comment %}«Dərs yükü» qrupu — Mərhələ 4 yük ZƏNCİRİ: tədris şöbəsi mərkəzi (12),
 kafedra bölgüsü, koordinator vizası (13), dekanlıq təsdiqi (15), rektorluq ümumi
-baxışı (17). Hər biri ÖZ icazə açarındadır; panellər server-render OXU-ONLYdir.
+baxışı (17), «Mühasibatlıq» (aylıq keçirilmiş saat ↔ plan, `accounting.view`, 2026-10-18). Hər biri ÖZ
+icazə açarındadır; panellər server-render OXU-ONLYdir.
 
 Müəllimin şəxsi «Dərs yüküm» sətri QƏSDƏN burada deyil — o, gündəlik iş səthidir
 və «Dərs və cədvəl» qrupundadır.{% endcomment %}
-{% if "workload-center" in allowed_sections or "workload-visa" in allowed_sections or "workload-approval" in allowed_sections or "workload-overview" in allowed_sections or "workload-distribution" in allowed_sections %}
+{% if "workload-center" in allowed_sections or "workload-visa" in allowed_sections or "workload-approval" in allowed_sections or "workload-overview" in allowed_sections or "workload-distribution" in allowed_sections or "accounting" in allowed_sections %}
 <li class="sidebar-menu-group" data-sidebar-group="workload">
-    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|workload-center|workload-visa|workload-approval|workload-overview|workload-distribution|" %} open{% endif %}>
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|workload-center|workload-visa|workload-approval|workload-overview|workload-distribution|accounting|" %} open{% endif %}>
         {% trans "Dərs yükü" context "profile.sidebar" as group_label %}
         {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="clock" %}
         <ul class="sidebar-menu-group-items">
@@ -74,6 +75,7 @@ və «Dərs və cədvəl» qrupundadır.{% endcomment %}
                 </a>
             </li>
             {% endif %}
+            {% include "accounts/profile/sidebar/items/_accounting.html" %}
         </ul>
     </details>
 </li>

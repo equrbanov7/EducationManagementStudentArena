@@ -1,0 +1,125 @@
+{% load i18n %}
+{% comment %}«İmtahan şansı ver» — RƏSMİ şans forması (sahib 2026-10-18). Addımlar: 1) səbəb (filtr panelindəki
+«Şansın səbəbi» — server vəziyyəti), 2) tələbə (axtarış → konkret tələbə; «25% müraciəti» səbəbində yalnız
+ödənişi təsdiqlənmiş + buraxılmış müraciəti olanlar seçilə bilir, müraciət linki ilə), 3) imtahan (25%-də
+seçilmiş tələbələrin fənlərinə görə süzülür — `exam_chance.js`), 4) əsas (əmr №/tarix, qeyd), 5) təsdiq.
+Server HƏR qaydanı yenidən yoxlayır (`registrar.retake_chance.validate`). Kontekst: `s` = exam_chance_section.{% endcomment %}
+<section class="ems-card exch-card">
+  <div class="ems-card__head">
+    <div>
+      <h2 class="ems-card__title">{% trans "Yenidən cəhd hüququ" context "accounts.exam_chance" %}</h2>
+      <p class="ems-card__sub">{% trans "Səbəbi seçin, tələbəni axtarıb işarələyin, imtahanı seçin və əsası yazın." context "accounts.exam_chance" %}</p>
+    </div>
+  </div>
+  <div class="ems-card__body">
+  {% if not s.selected_reason %}
+    <div class="ems-msg ems-msg--info exch-note" role="status">
+      <i class="fas fa-list-check ems-msg__icon" aria-hidden="true"></i>
+      <div>{% trans "1-ci addım: yuxarıdakı süzgəcdə «Şansın səbəbi»ni seçin — səbəbsiz şans verilmir." context "accounts.exam_chance" %}</div>
+    </div>
+  {% else %}
+  <form method="post" action="{% url 'accounts:exam_chance' %}" class="exch-form" data-exch-grant data-exch-reason="{{ s.selected_reason }}">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ s.post_next_url }}&amp;chance_reason={{ s.selected_reason }}">
+    <input type="hidden" name="reason" value="{{ s.selected_reason }}">
+
+    <fieldset class="exch-step exch-field--full">
+      <legend class="exch-step__title"><span class="exch-step__no">2</span> {% trans "Tələbə" context "accounts.exam_chance" %}</legend>
+      {% if not s.filters.student_q %}
+        <p class="ems-field__hint">{% trans "Yuxarıdakı «Tələbə axtarışı» sahəsinə ad, istifadəçi adı və ya qrup yazın." context "accounts.exam_chance" %}</p>
+      {% elif s.student_results %}
+      <div class="exch-students">
+        {% for row in s.student_results %}
+        {% with student=row.user %}
+        {% if s.selected_reason == "retake_25" and not row.retake_apps %}
+        <div class="exch-stu is-disabled" aria-disabled="true">
+          <span class="exch-stu__box"><i class="fas fa-ban"></i></span>
+          <span class="exch-stu__name">{{ student.get_full_name|default:student.username }}</span>
+          <span class="exch-stu__user">{% trans "25% müraciəti yoxdur (ödəniş təsdiqlənib + buraxılıb)" context "accounts.exam_chance" %}</span>
+        </div>
+        {% else %}
+        <label class="exch-stu">
+          <input type="checkbox" name="student_ids" value="{{ student.pk }}" data-exch-subjects="{{ row.subject_ids }}">
+          <span class="exch-stu__box"><i class="fas fa-check"></i></span>
+          <span class="exch-stu__name">{{ student.get_full_name|default:student.username }}</span>
+          <span class="exch-stu__user">{{ student.username }}</span>
+          {% if row.retake_apps %}
+          <ul class="exch-apps">
+            {% for app in row.retake_apps %}
+            <li><a class="exch-apps__link" href="{{ profile_base_url }}?section=retake-desk&amp;rt_student={{ student.pk }}#rt-trail-{{ app.pk }}" data-section="retake-desk">25% · {{ app.subject.name }} · {{ app.get_status_display }}</a></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </label>
+        {% endif %}
+        {% endwith %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="ems-field__hint">{% trans "Nəticə tapılmadı — axtarışı dəyişin." context "accounts.exam_chance" %}</p>
+      {% endif %}
+    </fieldset>
+
+    <fieldset class="exch-step exch-field--full">
+      <legend class="exch-step__title"><span class="exch-step__no">3</span> {% trans "İmtahan" context "accounts.exam_chance" %}</legend>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="exchExam" name="exam_id" required class="ems-select bootstrap-single-select__native" data-bootstrap-select data-live-search="true" data-exch-exam>
+          <option value="">{% trans "İmtahanı seçin…" context "accounts.exam_chance" %}</option>
+          {% for exam in s.exams %}
+          {% if s.selected_reason != "retake_25" or exam.exam_type_extended == "final" %}
+          <option value="{{ exam.pk }}" data-subject="{{ exam.subject_id|default:'' }}" {% if s.selected_exam_id == exam.pk|stringformat:'s' %}selected{% endif %}>
+            {{ exam.title }} — {% if exam.exam_type_extended == 'final' %}{% trans "Final" context "accounts.exam_chance" %}{% else %}{% trans "Midterm" context "accounts.exam_chance" %}{% endif %} · {{ exam.get_exam_type_display }}{% if exam.start_datetime %} · {{ exam.start_datetime|date:"d.m.Y H:i" }}{% endif %}
+          </option>
+          {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+      {% if s.selected_reason == "retake_25" %}<span class="ems-field__hint">{% trans "Yalnız final imtahanları; seçilmiş tələbənin 25% müraciəti olan fənnə görə süzülür." context "accounts.exam_chance" %}</span>{% endif %}
+    </fieldset>
+
+    <fieldset class="exch-step exch-field--full">
+      <legend class="exch-step__title"><span class="exch-step__no">4</span> {% trans "Əsas" context "accounts.exam_chance" %}</legend>
+      <div class="exch-grid">
+        {% if s.selected_reason == "university" %}
+        <div class="ems-field">
+          <label class="ems-field__label" for="exchRefNo">{% trans "Əmr / sərəncam №" context "accounts.exam_chance" %} <span class="ems-field__req">*</span></label>
+          <input type="text" id="exchRefNo" name="reference_number" class="ems-input" maxlength="80" required autocomplete="off">
+        </div>
+        <div class="ems-field">
+          <label class="ems-field__label" for="exchRefDate">{% trans "Əmr tarixi" context "accounts.exam_chance" %} <span class="ems-field__req">*</span></label>
+          <input type="date" id="exchRefDate" name="reference_date" class="ems-input ems-input--date" required>
+        </div>
+        {% elif s.selected_reason == "appeal" %}
+        <div class="ems-field">
+          <label class="ems-field__label" for="exchRefNo">{% trans "Apellyasiya qərarının №" context "accounts.exam_chance" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "ui.dialog" %}</span></label>
+          <input type="text" id="exchRefNo" name="reference_number" class="ems-input" maxlength="80" autocomplete="off">
+        </div>
+        {% endif %}
+        <div class="ems-field">
+          <label class="ems-field__label" for="exchExtra">{% trans "Əlavə cəhd sayı" context "accounts.exam_chance" %}</label>
+          <input type="number" id="exchExtra" name="extra_attempts" class="ems-input" min="1" max="10" value="1">
+        </div>
+      </div>
+      <div class="ems-field">
+        <label class="ems-field__label" for="exchNote">{% trans "Qeyd" context "accounts.exam_chance" %}
+          {% if s.selected_reason == "retake_25" %}<span class="ems-field__opt">{% trans "(istəyə bağlı)" context "ui.dialog" %}</span>{% else %}<span class="ems-field__req">*</span>{% endif %}
+        </label>
+        <textarea id="exchNote" name="note" class="ems-textarea exch-textarea" rows="3" maxlength="2000"{% if s.selected_reason != "retake_25" %} required minlength="10"{% endif %}
+                  placeholder="{% trans 'Nə baş verib, kim qərar verib…' context 'accounts.exam_chance' %}"></textarea>
+      </div>
+    </fieldset>
+
+    <div class="exch-field--full">
+      <div class="ems-msg ems-msg--info exch-note">
+        <i class="fas fa-circle-info ems-msg__icon" aria-hidden="true"></i>
+        <div>{% trans "Şans veriləndə: cəhd limiti artır, final/midterm üçün YENİ fərdi PIN yaradılır, finalın köhnə giriş bileti sıfırlanır və imtahan «Təyin olunmuş tapşırıqlar»da yenidən görünür. Qərar səbəbi və əsası ilə silinməyən qeydə yazılır və tələbənin 25% izində görünür." context "accounts.exam_chance" %}</div>
+      </div>
+      <p class="exch-summary" data-exch-summary aria-live="polite"></p>
+      <div class="exch-actions">
+        <button type="submit" class="ems-btn ems-btn--primary" data-exch-submit><i class="fas fa-rotate-right" aria-hidden="true"></i> {% trans "Təsdiqlə və şans ver" context "accounts.exam_chance" %}</button>
+      </div>
+    </div>
+  </form>
+  {% endif %}
+  </div>
+</section>

@@ -1,0 +1,13 @@
+{% load static %}
+{% comment %}«25% və alt qrup» (`my-retakes`) — tələbənin kəsr fənləri üzrə 25% / alt qrup müraciəti (sahib 2026-10-18).
+Panel məzmunu registrar-dadır (`{% retake_student_panel %}` tag-ı + `registrar/retake/_student_panel.html`) —
+Python importu yoxdur. CSS/JS xarici fayldır və panelin İÇİNDƏ yüklənir (AJAX swap-dan sonra da işləyir).{% endcomment %}
+{% if 'my-retakes' in allowed_sections %}
+<section class="profile-section-panel profile-section--my-retakes {% if active_section == 'my-retakes' %}is-active{% endif %}"
+         data-profile-section-panel="my-retakes"
+         data-source-url="{{ profile_base_url }}?section=my-retakes">
+    <link rel="stylesheet" href="{% static 'registrar/css/retake.css' %}?v=20261018-retake2">
+    {% include "registrar/retake/_student_panel.html" %}
+    <script src="{% static 'registrar/js/retake.js' %}?v=20261018-retake2" defer></script>
+</section>
+{% endif %}

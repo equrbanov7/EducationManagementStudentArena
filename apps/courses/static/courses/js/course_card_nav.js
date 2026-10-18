@@ -32,7 +32,10 @@
     }
 
     document.addEventListener("click", function (event) {
-        var card = event.target.closest && event.target.closest("[data-mc-card]");
+        // Tələbə kartında kartın ÖZÜ keçiddir (`a[data-mc-card]`); müəllim kartında (2026-10-18) keçid
+        // başlıqdakı `[data-mc-card-link]`-dir — kartdakı sürətli əməllər (yayımla, redaktə) skelet açmır.
+        var link = event.target.closest && event.target.closest("a[data-mc-card], [data-mc-card-link]");
+        var card = link && link.closest("[data-mc-card]");
         if (!card || event.defaultPrevented) {
             return;
         }

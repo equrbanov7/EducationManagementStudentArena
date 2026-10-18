@@ -268,7 +268,7 @@ class StaffSidebarRenderTest(TestCase):
         self.assertIn('data-sidebar-layout="student"', aside)
         tasks = aside[aside.index('data-sidebar-section="tasks"') : aside.index('data-sidebar-section="communication"')]
         self.assertIn('href="/accounts/profile/?section=evaluation-survey"', tasks)
-        self.assertIn('ems-nav.svg?v=20261011-wp10icons#clipboard-pen-line"', tasks)
+        self.assertIn('ems-nav.svg?v=20261018-calculator#clipboard-pen-line"', tasks)
         self.assertRegex(tasks, r'<span class="sidebar-menu-badge[^"]*" data-badge-key="evaluation_survey"></span>')
         self.assertNotIn("evaluation-survey", self._render(STUDENT_SECTIONS, caps))
 

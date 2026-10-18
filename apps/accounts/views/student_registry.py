@@ -29,6 +29,7 @@ from django.views.decorators.http import require_GET, require_POST
 from apps.accounts.services import people
 from apps.accounts.services.people import movements as movement_service
 from apps.accounts.services.people import registry as registry_service
+from apps.accounts.services.people import registry_subgroup
 from apps.accounts.services.people.account_card import account_card
 from apps.accounts.services.rim.policy import RimAccessError
 from core.export_safety import safe_csv_writer
@@ -116,6 +117,8 @@ def student_registry_card(request, record_id):
             # 2026-10-03: hesab vəziyyəti + dayandırma səbəbi / «kimə yaxınlaşmalı» (reyestrdən dayandır / bərpa et).
             "account": account_card(record.student),
             "can_block": bool(actor.can_manage_status),
+            # 2026-10-18: semestr kredit yükü + alt qrup yerləşdirmə izi (student_registry_subgroup.js).
+            **registry_subgroup.card_payload(request, record),
         }
     )
 

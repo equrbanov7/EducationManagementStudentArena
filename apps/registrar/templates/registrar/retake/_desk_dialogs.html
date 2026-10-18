@@ -1,0 +1,29 @@
+{% load i18n %}
+{% comment %}Növbə dialoqları — hər əməl üçün BİR dialoq; `retake_desk.js` düymənin `data-rt-url` / `data-rt-action`
+dəyərlərini formaya yazır və JSON/multipart POST edir. Səbəb tələb edən qərarlar `_reason_dialog` (≥20 simvol).{% endcomment %}
+{% trans "Ödənişi təsdiqlə" context "registrar.retake" as d1_title %}
+{% trans "Təsdiqlə" context "registrar.retake" as d1_submit %}
+{% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="rtVerifyDialog" form_dialog_title=d1_title form_dialog_body_include="registrar/retake/_dlg_verify.html" form_dialog_submit_label=d1_submit form_dialog_submit_tone="primary" %}
+
+{% trans "Qəbzi rədd et" context "registrar.retake" as d2_title %}
+{% trans "Tələbə səbəbi görəcək və düzgün qəbzi yenidən yükləyə biləcək." context "registrar.retake" as d2_sub %}
+{% trans "Rədd et" context "registrar.retake" as d2_submit %}
+{% include "partials/ems_ui/_reason_dialog.html" with reason_id="rtRejectPaymentDialog" reason_title=d2_title reason_subtitle=d2_sub reason_submit_label=d2_submit reason_submit_tone="danger" reason_min=rd.reason_min %}
+
+{% trans "25% imtahana burax" context "registrar.retake" as d3_title %}
+{% trans "Burax" context "registrar.retake" as d3_submit %}
+{% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="rtAdmitDialog" form_dialog_title=d3_title form_dialog_body_include="registrar/retake/_dlg_admit.html" form_dialog_submit_label=d3_submit %}
+
+{% trans "Müraciəti rədd et" context "registrar.retake" as d4_title %}
+{% trans "Rədd et" context "registrar.retake" as d4_submit %}
+{% include "partials/ems_ui/_reason_dialog.html" with reason_id="rtRejectDialog" reason_title=d4_title reason_submit_label=d4_submit reason_submit_tone="danger" reason_min=rd.reason_min %}
+
+{% trans "Alt qrup qərarı" context "registrar.retake" as d5_title %}
+{% trans "Təqdimat sənədi məcburidir; hədəf jurnal seçilsə tələbə rəsmi xidmətlə dərhal yerləşdirilir." context "registrar.retake" as d5_sub %}
+{% trans "Yadda saxla" context "registrar.retake" as d5_submit %}
+{% include "partials/ems_ui/_reason_dialog.html" with reason_id="rtSubgroupDialog" reason_title=d5_title reason_subtitle=d5_sub reason_submit_label=d5_submit reason_min=rd.reason_min reason_extra_include="registrar/retake/_dlg_subgroup.html" %}
+
+{% trans "25% imtahanın nəticəsi" context "registrar.retake" as d6_title %}
+{% trans "Bal ResitRecord-a yazılır və yekun nəticə yenidən hesablanır (təkrar imtahan balı əsas imtahan balını əvəz edir)." context "registrar.retake" as d6_sub %}
+{% trans "Yaz" context "registrar.retake" as d6_submit %}
+{% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="rtResultDialog" form_dialog_title=d6_title form_dialog_subtitle=d6_sub form_dialog_body_include="registrar/retake/_dlg_result.html" form_dialog_submit_label=d6_submit %}

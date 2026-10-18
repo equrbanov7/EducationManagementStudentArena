@@ -3,6 +3,7 @@ modul ölçü budcəsinə — SOFT_CAP=600 — görə ayrılıb; məzmun dəyiş
 
 from core.constants import RoleScopeType
 
+from .default_roles_accounting import ACCOUNTING_ROLES, apply_accounting_grants
 from .default_roles_oversight import OVERSIGHT_ROLES
 from .default_roles_quality import QUALITY_CONTROL_ROLES, apply_quality_control_grants
 from .default_roles_rim import RIM_STAFF_ROLES
@@ -556,6 +557,12 @@ apply_announcement_grants(UNIVERSITY_ROLES)
 
 # «Kadr analitikası» (sahib 2026-10-11): `people.hr_analytics` — `hr`. Mövcud: organizations/0058.
 apply_hr_grants(UNIVERSITY_ROLES)
+
+# «Mühasibatlıq» + 25% təkrar imtahan (sahib 2026-10-18): yeni `accountant` rolu + `accounting.view` /
+# `retake.manage` verilişləri. Mövcud tenantlar: organizations/0067.
+UNIVERSITY_ROLES.extend(ACCOUNTING_ROLES)
+apply_accounting_grants(UNIVERSITY_ROLES)
+_grant_application_permissions(UNIVERSITY_ROLES)
 
 # Rol auditi (2026-10-13, sahib «tövsiyə olunan variantlarla»): açar verilişi/alınması + ölü açarlar.
 # Mövcud tenantlar: organizations/0061. SONUNCU olmalıdır — əvvəlki addımların əlavələrini də süzür.

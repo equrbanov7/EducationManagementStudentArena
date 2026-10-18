@@ -101231,3 +101231,2553 @@ msgstr "Der Name der Person bleibt bis zum Abschluss der Bewertung verborgen."
 msgctxt "exams.attempt_review"
 msgid "Sual %%(n)s"
 msgstr "Frage %%(n)s"
+
+msgctxt "exams.final_center.invigilators"
+msgid "Siyahıda yalnız nəzarətçi təyin oluna bilən müəllim və əməkdaşlar var. Siyahıdan «+» ilə seçin və ya ad yazın (ən az 2 hərf)."
+msgstr "Aufgeführt sind nur Lehrkräfte und Mitarbeitende, die Aufsicht führen können. Mit «+» wählen oder Namen eingeben (mind. 2 Buchstaben)."
+
+msgctxt "ui.status"
+msgid "Yayımlanıb"
+msgstr "Veröffentlicht"
+
+msgctxt "ui.status"
+msgid "Arxivdədir"
+msgstr "Archiviert"
+
+msgctxt "courses.list"
+msgid "Yaratdığınız və müəllim kimi qoşulduğunuz kurslar: mövzular, tapşırıqlar, imtahanlar və tələbələr bir yerdə."
+msgstr "Kurse, die Sie erstellt haben oder unterrichten: Themen, Aufgaben, Prüfungen und Studierende an einem Ort."
+
+msgctxt "courses.list"
+msgid "Kurslar"
+msgstr "Kurse"
+
+#, python-format
+msgctxt "courses.list"
+msgid "Arxivdə: %(n)s"
+msgstr "Archiviert: %(n)s"
+
+msgctxt "courses.list"
+msgid "Yayımlanıb"
+msgstr "Veröffentlicht"
+
+msgctxt "courses.list"
+msgid "tələbələr görür"
+msgstr "für Studierende sichtbar"
+
+msgctxt "courses.list"
+msgid "Qaralama"
+msgstr "Entwürfe"
+
+msgctxt "courses.list"
+msgid "tələbələrdən gizlidir"
+msgstr "für Studierende verborgen"
+
+msgctxt "courses.list"
+msgid "Tələbələr"
+msgstr "Studierende"
+
+msgctxt "courses.list"
+msgid "bütün kurslar üzrə unikal"
+msgstr "eindeutig über alle Kurse"
+
+msgctxt "courses.list"
+msgid "Sillabusa bağlı"
+msgstr "Mit Syllabus verknüpft"
+
+#, python-format
+msgctxt "courses.list"
+msgid "%(n)s kursdan"
+msgstr "von %(n)s Kursen"
+
+msgctxt "courses.list"
+msgid "Axtarış"
+msgstr "Suche"
+
+msgctxt "courses.list"
+msgid "Kurs adı, təsviri və ya fənn"
+msgstr "Kurstitel, Beschreibung oder Fach"
+
+msgctxt "courses.list"
+msgid "Status"
+msgstr "Kursstatus"
+
+msgctxt "courses.list"
+msgid "Bütün statuslar"
+msgstr "Alle Status"
+
+msgctxt "courses.list"
+msgid "Fənn"
+msgstr "Fach"
+
+msgctxt "courses.list"
+msgid "Bütün fənlər"
+msgstr "Alle Fächer"
+
+msgctxt "courses.list"
+msgid "Semestr"
+msgstr "Semester"
+
+msgctxt "courses.list"
+msgid "Bütün semestrlər"
+msgstr "Alle Semester"
+
+msgctxt "courses.list"
+msgid "Sıralama"
+msgstr "Sortierung"
+
+msgctxt "courses.list"
+msgid "Ən yenisi əvvəl"
+msgstr "Neueste zuerst"
+
+msgctxt "courses.list"
+msgid "Son yenilənən"
+msgstr "Zuletzt aktualisiert"
+
+msgctxt "courses.list"
+msgid "Ada görə (A–Z)"
+msgstr "Nach Titel (A–Z)"
+
+msgctxt "courses.list"
+msgid "Ən çox tələbə"
+msgstr "Meiste Studierende"
+
+#, python-format
+msgctxt "courses.list"
+msgid "Nəticə: %(n)s kurs"
+msgstr "Ergebnis: %(n)s Kurse"
+
+msgctxt "courses.list"
+msgid "Filtrə uyğun kurs tapılmadı"
+msgstr "Keine Kurse entsprechen dem Filter"
+
+msgctxt "courses.list"
+msgid "Axtarışı qısaldın və ya «Sıfırla» ilə bütün kurslara qayıdın."
+msgstr "Kürzen Sie die Suche oder kehren Sie mit „Zurücksetzen“ zu allen Kursen zurück."
+
+msgctxt "courses.list"
+msgid "Kursu yaradın — ad və qısa təsvir kifayətdir."
+msgstr "Kurs anlegen — Titel und kurze Beschreibung genügen."
+
+msgctxt "courses.list"
+msgid "Mövzuları sillabusun həftəlik planından bir kliklə götürün."
+msgstr "Übernehmen Sie Themen mit einem Klick aus dem Wochenplan des Syllabus."
+
+msgctxt "courses.list"
+msgid "Qrupları əlavə edib kursu yayımlayın."
+msgstr "Gruppen hinzufügen und den Kurs veröffentlichen."
+
+msgctxt "courses.list"
+msgid "Görünüş"
+msgstr "Ansicht"
+
+msgctxt "courses.list"
+msgid "Kartlar"
+msgstr "Karten"
+
+msgctxt "courses.list"
+msgid "Siyahı"
+msgstr "Liste"
+
+msgctxt "courses.list"
+msgid "Bağlı sillabus"
+msgstr "Verknüpfter Syllabus"
+
+msgctxt "courses.list"
+msgid "Kursun göstəriciləri"
+msgstr "Kurskennzahlen"
+
+msgctxt "courses.list"
+msgid "Mövzu"
+msgstr "Themen"
+
+msgctxt "courses.list"
+msgid "Tapşırıq"
+msgstr "Aufgaben"
+
+msgctxt "courses.list"
+msgid "İmtahan"
+msgstr "Prüfungen"
+
+msgctxt "courses.list"
+msgid "Tələbə"
+msgstr "Studierende"
+
+msgctxt "courses.list"
+msgid "Qruplar"
+msgstr "Gruppen"
+
+#, python-format
+msgctxt "courses.list"
+msgid "Yeniləndi: %(date)s"
+msgstr "Aktualisiert: %(date)s"
+
+msgctxt "courses.list"
+msgid "Qaralamaya qaytar — tələbələr görməyəcək"
+msgstr "Zurück zum Entwurf — Studierende sehen ihn nicht"
+
+msgctxt "courses.list"
+msgid "Qaralamaya qaytar"
+msgstr "Zurück zum Entwurf"
+
+msgctxt "courses.list"
+msgid "Yayımla — tələbələr görəcək"
+msgstr "Veröffentlichen — Studierende sehen ihn"
+
+msgctxt "courses.list"
+msgid "Yayımla"
+msgstr "Veröffentlichen"
+
+msgctxt "courses.list"
+msgid "Redaktə et"
+msgstr "Bearbeiten"
+
+msgctxt "courses.syllabus_import"
+msgid "Sillabusdan götür"
+msgstr "Aus Syllabus"
+
+msgctxt "courses.syllabus_import"
+msgid "Sillabusdan mövzuları götür"
+msgstr "Themen aus dem Syllabus übernehmen"
+
+msgctxt "courses.syllabus_import"
+msgid "Həftəlik plandakı mövzular kursa bir dəfəyə əlavə olunur; kursda artıq olanlar təkrarlanmır."
+msgstr "Die Themen des Wochenplans werden in einem Schritt hinzugefügt; vorhandene Themen werden nicht dupliziert."
+
+msgctxt "courses.syllabus_import"
+msgid "Bağla"
+msgstr "Schließen"
+
+msgctxt "courses.syllabus_import"
+msgid "Sillabus seçimi"
+msgstr "Syllabus auswählen"
+
+msgctxt "courses.syllabus_import"
+msgid "Sillabus"
+msgstr "Syllabus (Lehrplan)"
+
+msgctxt "courses.syllabus_import"
+msgid "Fənn adı və ya kodu ilə axtar"
+msgstr "Nach Fachname oder -code suchen"
+
+msgctxt "courses.syllabus_import"
+msgid "Siyahıda yalnız baxmaq icazəniz olan sillabuslar var: öz sillabuslarınız və əhatənizdəki kafedraların sillabusları."
+msgstr "Aufgeführt sind nur Syllabi, die Sie einsehen dürfen: Ihre eigenen und die der Lehrstühle in Ihrem Bereich."
+
+msgctxt "courses.syllabus_import"
+msgid "Uyğun sillabus tapılmadı. Axtarışı dəyişin və ya əvvəlcə «Sillabuslar» bölməsində sillabus hazırlayın."
+msgstr "Kein passender Syllabus. Ändern Sie die Suche oder erstellen Sie zuerst einen Syllabus im Bereich „Syllabi“."
+
+msgctxt "courses.syllabus_import"
+msgid "Başqa sillabus"
+msgstr "Anderer Syllabus"
+
+msgctxt "courses.syllabus_import"
+msgid "Kursu bu sillabusla əlaqələndir — fənn kursun başlığında və «Kurslarım» kartında görünəcək."
+msgstr "Kurs mit diesem Syllabus verknüpfen — das Fach erscheint im Kurskopf und auf der Karte „Meine Kurse“."
+
+msgctxt "courses.syllabus_import"
+msgid "Ləğv et"
+msgstr "Abbrechen"
+
+msgctxt "courses.syllabus_import"
+msgid "Bağlıdır"
+msgstr "Verknüpft"
+
+msgctxt "courses.syllabus_import"
+msgid "Mənim"
+msgstr "Meins"
+
+msgctxt "courses.syllabus_import"
+msgid "Yeni"
+msgstr "Neu"
+
+msgctxt "courses.syllabus_import"
+msgid "Artıq var"
+msgstr "Bereits vorhanden"
+
+msgctxt "courses.syllabus_import"
+msgid "{new} yeni mövzu · {existing} artıq var"
+msgstr "{new} neue Themen · {existing} bereits vorhanden"
+
+msgctxt "courses.syllabus_import"
+msgid "Mövzuları əlavə et ({n})"
+msgstr "Themen hinzufügen ({n})"
+
+msgctxt "courses.syllabus_import"
+msgid "Yalnız kursu əlaqələndir"
+msgstr "Nur den Kurs verknüpfen"
+
+msgctxt "courses.syllabus_import"
+msgid "Əlavə ediləcək yeni mövzu yoxdur — hamısı kursda var."
+msgstr "Keine neuen Themen — alle sind bereits im Kurs."
+
+msgctxt "courses.syllabus_import"
+msgid "Bu sillabusun həftəlik planında mövzu yazılmayıb."
+msgstr "Der Wochenplan dieses Syllabus enthält keine Themen."
+
+msgctxt "courses.syllabus_import"
+msgid "Xəta baş verdi. Yenidən cəhd edin."
+msgstr "Ein Fehler ist aufgetreten. Bitte erneut versuchen."
+
+msgctxt "courses.syllabus_import"
+msgid "Əlavə olunur…"
+msgstr "Wird hinzugefügt…"
+
+msgctxt "courses.syllabus_import"
+msgid "Bağlı sillabus"
+msgstr "Verknüpfter Syllabus"
+
+#, python-format
+msgctxt "courses.syllabus_import"
+msgid "Sillabus: %(subject)s"
+msgstr "Syllabus: %(subject)s"
+
+#, python-format
+msgctxt "courses.syllabus_import"
+msgid "Həftə %(n)s"
+msgstr "Woche %(n)s"
+
+#, python-format
+msgctxt "courses.syllabus_import"
+msgid "%(kind)s: %(n)s saat"
+msgstr "%(kind)s: %(n)s Std."
+
+msgctxt "courses.syllabus_import"
+msgid "Mühazirə"
+msgstr "Vorlesung"
+
+msgctxt "courses.syllabus_import"
+msgid "Seminar"
+msgstr "Übung"
+
+msgctxt "courses.syllabus_import"
+msgid "Laboratoriya"
+msgstr "Labor"
+
+msgctxt "courses.syllabus_import"
+msgid "Baza sillabus (semestrsiz)"
+msgstr "Basis-Syllabus (ohne Semester)"
+
+msgctxt "courses.syllabus_import"
+msgid "Bu kursda mövzu idxalına icazəniz yoxdur."
+msgstr "Sie dürfen in diesen Kurs keine Themen importieren."
+
+msgctxt "courses.syllabus_import"
+msgid "Sillabus tapılmadı və ya ona baxmaq icazəniz yoxdur."
+msgstr "Syllabus nicht gefunden oder Sie dürfen ihn nicht einsehen."
+
+msgctxt "courses.syllabus_import"
+msgid "Kurs tapılmadı."
+msgstr "Kurs nicht gefunden."
+
+#, python-format
+msgctxt "courses.syllabus_import"
+msgid "%(created)s mövzu əlavə olundu, %(skipped)s artıq var idi."
+msgstr "%(created)s Themen hinzugefügt, %(skipped)s waren bereits vorhanden."
+
+msgctxt "organizations.permission.label"
+msgid "Mühasibatlıq bölməsi (müəllimlərin aylıq keçirilmiş dərs saatı, plan, ixrac)"
+msgstr "Bereich Buchhaltung (monatlich gehaltene Unterrichtsstunden der Lehrkräfte, Plan, Export)"
+
+msgctxt "organizations.permission.label"
+msgid "25% təkrar imtahan ödəniş qəbzini yoxlamaq"
+msgstr "Zahlungsbelege für die 25-%-Wiederholungsprüfung prüfen"
+
+msgctxt "organizations.permission.label"
+msgid "Tələbəni 25% təkrar imtahana buraxmaq və alt qrup yerləşdirməsinə qərar vermək"
+msgstr "Studierende zur 25-%-Wiederholungsprüfung zulassen und über die Untergruppe entscheiden"
+
+msgctxt "profile.sidebar"
+msgid "Mühasibatlıq"
+msgstr "Buchhaltung"
+
+msgctxt "ui.status"
+msgid "Plana uyğun"
+msgstr "Planmäßig"
+
+msgctxt "ui.status"
+msgid "Plandan az"
+msgstr "Unter Plan"
+
+msgctxt "ui.status"
+msgid "Plandan çox"
+msgstr "Über Plan"
+
+msgctxt "ui.status"
+msgid "Dərs yoxdur"
+msgstr "Keine Stunden"
+
+msgctxt "accounts.accounting"
+msgid "Mühazirə"
+msgstr "Vorlesung"
+
+msgctxt "accounts.accounting"
+msgid "Seminar"
+msgstr "Seminar"
+
+msgctxt "accounts.accounting"
+msgid "Laboratoriya"
+msgstr "Labor"
+
+msgctxt "accounts.accounting"
+msgid "Payız semestri"
+msgstr "Wintersemester"
+
+msgctxt "accounts.accounting"
+msgid "Yaz semestri"
+msgstr "Sommersemester"
+
+msgctxt "accounts.accounting"
+msgid "Yay semestri"
+msgstr "Sommerkurs"
+
+msgctxt "accounts.accounting"
+msgid "Yanvar"
+msgstr "Januar"
+
+msgctxt "accounts.accounting"
+msgid "Fevral"
+msgstr "Februar"
+
+msgctxt "accounts.accounting"
+msgid "Mart"
+msgstr "März"
+
+msgctxt "accounts.accounting"
+msgid "Aprel"
+msgstr "April"
+
+msgctxt "accounts.accounting"
+msgid "May"
+msgstr "Mai"
+
+msgctxt "accounts.accounting"
+msgid "İyun"
+msgstr "Juni"
+
+msgctxt "accounts.accounting"
+msgid "İyul"
+msgstr "Juli"
+
+msgctxt "accounts.accounting"
+msgid "Avqust"
+msgstr "August"
+
+msgctxt "accounts.accounting"
+msgid "Sentyabr"
+msgstr "September"
+
+msgctxt "accounts.accounting"
+msgid "Oktyabr"
+msgstr "Oktober"
+
+msgctxt "accounts.accounting"
+msgid "Noyabr"
+msgstr "November"
+
+msgctxt "accounts.accounting"
+msgid "Dekabr"
+msgstr "Dezember"
+
+msgctxt "accounts.accounting"
+msgid "Hamısı"
+msgstr "Alle"
+
+msgctxt "accounts.accounting"
+msgid "Semestr"
+msgstr "Semester"
+
+msgctxt "accounts.accounting"
+msgid "Ay"
+msgstr "Monat"
+
+msgctxt "accounts.accounting"
+msgid "Bütün semestr"
+msgstr "Ganzes Semester"
+
+msgctxt "accounts.accounting"
+msgid "Fakültə"
+msgstr "Fakultät"
+
+msgctxt "accounts.accounting"
+msgid "Kafedra"
+msgstr "Lehrstuhl"
+
+msgctxt "accounts.accounting"
+msgid "Kənarlaşma"
+msgstr "Abweichung"
+
+msgctxt "accounts.accounting"
+msgid "Bütün müəllimlər"
+msgstr "Alle Lehrkräfte"
+
+msgctxt "accounts.accounting"
+msgid "Yalnız plandan kənarlaşanlar"
+msgstr "Nur Planabweichungen"
+
+msgctxt "accounts.accounting"
+msgid "s/h"
+msgstr "Std.-Basis"
+
+msgctxt "accounts.accounting"
+msgid "Keçirilmiş saat"
+msgstr "Gehaltene Stunden"
+
+msgctxt "accounts.accounting"
+msgid "Plan"
+msgstr "Plan"
+
+msgctxt "accounts.accounting"
+msgid "İcra"
+msgstr "Erfüllung"
+
+msgctxt "accounts.accounting"
+msgid "saat"
+msgstr "Std."
+
+msgctxt "accounts.accounting"
+msgid "Plandan çox"
+msgstr "Über Plan"
+
+msgctxt "accounts.accounting"
+msgid "Plandan az"
+msgstr "Unter Plan"
+
+msgctxt "accounts.accounting"
+msgid "müəllim (> +10%)"
+msgstr "Lehrkräfte (> +10 %)"
+
+msgctxt "accounts.accounting"
+msgid "müəllim (< −10%)"
+msgstr "Lehrkräfte (< −10 %)"
+
+msgctxt "accounts.accounting"
+msgid "Müəllim"
+msgstr "Lehrkraft"
+
+msgctxt "accounts.accounting"
+msgid "Fakt"
+msgstr "Ist"
+
+msgctxt "accounts.accounting"
+msgid "Fərq"
+msgstr "Differenz"
+
+msgctxt "accounts.accounting"
+msgid "Mühasibatlıq bölməsi mühasib, rektor, Qəyyumlar Şurası və RİM rəhbəri üçündür."
+msgstr "Der Bereich Buchhaltung ist für Buchhaltung, Rektor, Kuratorium und die Leitung des DEZ bestimmt."
+
+msgctxt "accounts.accounting"
+msgid "İstifadəçi adı"
+msgstr "Benutzername"
+
+msgctxt "accounts.accounting"
+msgid "Ştat"
+msgstr "Stellenanteil"
+
+msgctxt "accounts.accounting"
+msgid "Ştat növü"
+msgstr "Stellenart"
+
+msgctxt "accounts.accounting"
+msgid "Plan (saat)"
+msgstr "Plan (Std.)"
+
+msgctxt "accounts.accounting"
+msgid "fakt"
+msgstr "Ist"
+
+msgctxt "accounts.accounting"
+msgid "Fakt (saat)"
+msgstr "Ist (Std.)"
+
+msgctxt "accounts.accounting"
+msgid "Dərs sayı"
+msgstr "Anzahl Stunden"
+
+msgctxt "accounts.accounting"
+msgid "Fərq (saat)"
+msgstr "Differenz (Std.)"
+
+msgctxt "accounts.accounting"
+msgid "İcra, %"
+msgstr "Erfüllung, %"
+
+msgctxt "accounts.accounting"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "accounts.accounting"
+msgid "Semestr planı"
+msgstr "Semesterplan"
+
+msgctxt "accounts.accounting"
+msgid "Semestr faktı"
+msgstr "Semester-Ist"
+
+msgctxt "accounts.accounting"
+msgid "Müəllimlər"
+msgstr "Lehrkräfte"
+
+msgctxt "accounts.accounting"
+msgid "Fənn"
+msgstr "Fach"
+
+msgctxt "accounts.accounting"
+msgid "Qrup"
+msgstr "Gruppe"
+
+msgctxt "accounts.accounting"
+msgid "Növ"
+msgstr "Art"
+
+msgctxt "accounts.accounting"
+msgid "Saat"
+msgstr "Stunden"
+
+msgctxt "accounts.accounting"
+msgid "Vaxt"
+msgstr "Uhrzeit"
+
+msgctxt "accounts.accounting"
+msgid "Fənn və qrup"
+msgstr "Fach und Gruppe"
+
+msgctxt "accounts.accounting"
+msgid "Tarix"
+msgstr "Datum"
+
+msgctxt "accounts.accounting"
+msgid "Akademik saat"
+msgstr "Unterrichtsstunden"
+
+msgctxt "accounts.accounting"
+msgid "Dərslər"
+msgstr "Stunden"
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "Mühasibatlıq · %(period)s · keçirilmiş dərs saatı və plan"
+msgstr "Buchhaltung · %(period)s · gehaltene Stunden und Plan"
+
+msgctxt "accounts.accounting"
+msgid "Mühasibatlıq ixracı"
+msgstr "Buchhaltungsexport"
+
+msgctxt "accounts.accounting"
+msgid "«Başqasının adından» rejimində ixrac bağlıdır"
+msgstr "Im Modus „Ansicht als“ ist der Export deaktiviert"
+
+msgctxt "accounts.accounting"
+msgid "Yalnız baxış"
+msgstr "Nur Ansicht"
+
+msgctxt "accounts.accounting"
+msgid "Excel-ə ixrac"
+msgstr "Nach Excel exportieren"
+
+msgctxt "accounts.accounting"
+msgid "Mühasibatlıq filtrləri"
+msgstr "Buchhaltungsfilter"
+
+msgctxt "accounts.accounting"
+msgid "Müəllim axtarışı"
+msgstr "Lehrkraft suchen"
+
+msgctxt "accounts.accounting"
+msgid "Ad, soyad, istifadəçi adı, kafedra…"
+msgstr "Vorname, Nachname, Benutzername, Lehrstuhl…"
+
+msgctxt "accounts.accounting"
+msgid "Müəllimlərin jurnalda keçirdiyi dərs saatları ay üzrə, paylanmış dərs yükündən aylıq plan payı ilə müqayisədə: mühazirə, seminar, laboratoriya, fərq və ştat. Filtrlər cədvələ və KPI-lara tətbiq olunur; ixrac cari filtr dəstini Excel-ə çıxarır."
+msgstr "Im Klassenbuch gehaltene Unterrichtsstunden der Lehrkräfte nach Monat im Vergleich zum Monatsanteil des verteilten Lehrdeputats: Vorlesung, Seminar, Labor, Differenz und Stellenanteil. Filter gelten für Tabelle und KPIs; der Export schreibt den aktuellen Filtersatz nach Excel."
+
+msgctxt "accounts.accounting"
+msgid "«Başqasının adından» rejimindəsiniz — bölmə yalnız baxış üçündür, ixrac bağlıdır."
+msgstr "Sie sind im Modus „Ansicht als“ — der Bereich ist schreibgeschützt, der Export ist deaktiviert."
+
+msgctxt "accounts.accounting"
+msgid "Akademik dövr tapılmadı"
+msgstr "Kein akademischer Zeitraum gefunden"
+
+msgctxt "accounts.accounting"
+msgid "Semestr təqvimi «Semestr açılışı» bölməsində yaradılır. Dövr olmadan keçirilmiş dərslər aylara bölünə bilmir."
+msgstr "Der Semesterkalender wird unter „Semestereröffnung“ angelegt. Ohne Zeitraum lassen sich gehaltene Stunden nicht nach Monaten aufteilen."
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "%(period)s · göstərilir: %(shown)s / %(total)s müəllim"
+msgstr "%(period)s · angezeigt: %(shown)s / %(total)s Lehrkräfte"
+
+msgctxt "accounts.accounting"
+msgid "filtr tətbiq olunub"
+msgstr "Filter aktiv"
+
+msgctxt "accounts.accounting"
+msgid "Ay hələ bitməyib — fakt ayın sonunadək artacaq, «Plandan az» statusu ilkin göstəricidir."
+msgstr "Der Monat ist noch nicht vorbei — die Ist-Stunden steigen bis Monatsende; „Unter Plan“ ist vorläufig."
+
+msgctxt "accounts.accounting"
+msgid "Bu semestr üçün nə keçirilmiş dərs, nə də paylanmış yük var"
+msgstr "Für dieses Semester gibt es weder gehaltene Stunden noch verteiltes Deputat"
+
+msgctxt "accounts.accounting"
+msgid "Fakt elektron jurnalın dərslərindən, plan «Yük bölgüsü»ndə müəllimlərə paylanmış saatlardan yığılır. Başqa semestr seçin."
+msgstr "Ist-Stunden stammen aus den Stunden des E-Klassenbuchs, der Plan aus den in „Deputatsverteilung“ zugewiesenen Stunden. Wählen Sie ein anderes Semester."
+
+msgctxt "accounts.accounting"
+msgid "Saatlar necə hesablanır?"
+msgstr "Wie werden die Stunden berechnet?"
+
+msgctxt "accounts.accounting"
+msgid "Fakt — elektron jurnalda yazılmış (keçirilmiş) dərslərin akademik saatı (adətən 1 dərs = 2 saat). Dərsi bölünmüş fəndə dərsin öz müəllimi, əks halda jurnal sahibi sayılır. Bütün tələbələri «Jurnal təmizliyi» ilə çıxarılmış (keçirilməyən) fənnin dərsləri və passiv jurnallar sayılmır."
+msgstr "Ist — Unterrichtsstunden der im E-Klassenbuch erfassten (gehaltenen) Stunden (meist 1 Stunde = 2 Unterrichtsstunden). Bei geteilten Fächern zählt die Lehrkraft der Stunde selbst, sonst die Klassenbuchverantwortliche. Stunden von Fächern, deren Studierende alle per „Klassenbuch-Bereinigung“ entfernt wurden (nicht durchgeführt), und inaktive Klassenbücher zählen nicht."
+
+msgctxt "accounts.accounting"
+msgid "Plan — semestr üçün müəllimə paylanmış dərs yükü (mühazirə, seminar, laboratoriya; bölgüsü bitmiş tapşırıqlar). Məsləhət, imtahan, təcrübə və buraxılış işi saatları jurnalda dərs kimi yazılmadığı üçün müqayisəyə daxil deyil."
+msgstr "Plan — das der Lehrkraft für das Semester verteilte Deputat (Vorlesung, Seminar, Labor; Aufgaben mit abgeschlossener Verteilung). Sprechstunden-, Prüfungs-, Praktikums- und Abschlussarbeitsstunden werden nicht als Klassenbuchstunden erfasst und daher nicht verglichen."
+
+msgctxt "accounts.accounting"
+msgid "Aylıq plan — semestr planı dərs pəncərəsinin (semestrin başlanğıcından imtahan sessiyasına qədər) iş günlərinə (B.e.–Cümə) mütənasib bölünür; aylıq payların cəmi semestr planına bərabərdir. Bayram günləri nəzərə alınmır."
+msgstr "Monatsplan — der Semesterplan wird anteilig auf die Arbeitstage (Mo–Fr) des Unterrichtszeitraums (Semesterbeginn bis Prüfungszeit) verteilt; die Monatsanteile ergeben zusammen den Semesterplan. Feiertage werden nicht berücksichtigt."
+
+msgctxt "accounts.accounting"
+msgid "Status — fakt planın ±10%-i daxilindədirsə «Plana uyğun»; az və ya çoxdursa müvafiq olaraq «Plandan az» / «Plandan çox»."
+msgstr "Status — „Planmäßig“, wenn die Ist-Stunden innerhalb von ±10 % des Plans liegen; sonst „Unter Plan“ / „Über Plan“."
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "Müəllimlərin keçirilmiş dərs saatı və planı — %(period)s"
+msgstr "Gehaltene Stunden und Plan der Lehrkräfte — %(period)s"
+
+msgctxt "accounts.accounting"
+msgid "Semestr: plan / fakt"
+msgstr "Semester: Plan / Ist"
+
+msgctxt "accounts.accounting"
+msgid "Filtrə uyğun müəllim yoxdur."
+msgstr "Keine Lehrkräfte entsprechen dem Filter."
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "Cəmi · %(count)s müəllim"
+msgstr "Summe · %(count)s Lehrkräfte"
+
+msgctxt "accounts.accounting"
+msgid "Səhifələmə"
+msgstr "Seitennavigation"
+
+msgctxt "accounts.accounting"
+msgid "Əvvəlki"
+msgstr "Zurück"
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "Səhifə %(page)s / %(pages)s · %(total)s müəllim"
+msgstr "Seite %(page)s / %(pages)s · %(total)s Lehrkräfte"
+
+msgctxt "accounts.accounting"
+msgid "Növbəti"
+msgstr "Weiter"
+
+msgctxt "accounts.accounting"
+msgid "Müəllim tapılmadı"
+msgstr "Lehrkraft nicht gefunden"
+
+msgctxt "accounts.accounting"
+msgid "Bu semestrdə həmin müəllimin nə keçirilmiş dərsi, nə də paylanmış yükü var, və ya müəllim sizin əhatənizdən kənardadır."
+msgstr "Diese Lehrkraft hat in diesem Semester weder gehaltene Stunden noch verteiltes Deputat oder liegt außerhalb Ihres Bereichs."
+
+msgctxt "accounts.accounting"
+msgid "ştat"
+msgstr "Stelle"
+
+msgctxt "accounts.accounting"
+msgid "Aylar üzrə"
+msgstr "Nach Monaten"
+
+msgctxt "accounts.accounting"
+msgid "Aylar üzrə plan və keçirilmiş saat"
+msgstr "Plan und gehaltene Stunden nach Monaten"
+
+msgctxt "accounts.accounting"
+msgid "Dərs"
+msgstr "Stunden"
+
+msgctxt "accounts.accounting"
+msgid "Semestr planı növlər üzrə:"
+msgstr "Semesterplan nach Art:"
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "Fənn və qrup üzrə — %(period)s"
+msgstr "Nach Fach und Gruppe — %(period)s"
+
+msgctxt "accounts.accounting"
+msgid "Fənn və qrup üzrə keçirilmiş saat"
+msgstr "Gehaltene Stunden nach Fach und Gruppe"
+
+msgctxt "accounts.accounting"
+msgid "Cəmi"
+msgstr "Summe"
+
+msgctxt "accounts.accounting"
+msgid "Bu dövrdə keçirilmiş dərs yoxdur."
+msgstr "In diesem Zeitraum wurden keine Stunden gehalten."
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "Keçirilmiş dərslər · %(total)s"
+msgstr "Gehaltene Stunden · %(total)s"
+
+msgctxt "accounts.accounting"
+msgid "Keçirilmiş dərslərin siyahısı"
+msgstr "Liste der gehaltenen Stunden"
+
+msgctxt "accounts.accounting"
+msgid "Dərslərin səhifələnməsi"
+msgstr "Seitennavigation der Stunden"
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "Səhifə %(page)s / %(pages)s"
+msgstr "Seite %(page)s / %(pages)s"
+
+msgctxt "core.runtime_settings"
+msgid "Kredit yükü və alt qrup"
+msgstr "Kreditlast und Untergruppen"
+
+msgctxt "core.runtime_settings"
+msgid "Semestrdə maksimum kredit"
+msgstr "Maximale Credits pro Semester"
+
+msgctxt "core.runtime_settings"
+msgid "Tələbənin bir semestrdə daşıya biləcəyi adi kredit yükü (öz qrupunun fənləri). Kabinetdə «Bu semestr: 27 / 30 kredit» kimi göstərilir. Tədris planı bu həddi keçirsə də öz fənləri bloklanmır — yalnız xəbərdarlıq görünür."
+msgstr "Die reguläre Kreditlast, die ein Studierender in einem Semester tragen kann (Fächer der eigenen Gruppe). Im Kabinett als „Dieses Semester: 27 / 30 Credits“ angezeigt. Überschreitet der Studienplan das Limit, werden die eigenen Fächer nicht gesperrt — es erscheint nur eine Warnung."
+
+msgctxt "core.runtime_settings"
+msgid "Alt qrupla birlikdə maksimum kredit"
+msgstr "Maximale Credits einschließlich Untergruppen"
+
+msgctxt "core.runtime_settings"
+msgid "Tələbə alt qrupa (başqa qrupun jurnalına) yerləşdiriləndə öz fənləri + alt qrup fənləri birlikdə bu həddi keçə bilməz — keçərsə yerləşdirmə edilmir. 0 — ayrıca hədd yoxdur, «Semestrdə maksimum kredit» tətbiq olunur."
+msgstr "Wird ein Studierender in eine Untergruppe (Journal einer anderen Gruppe) eingeteilt, dürfen eigene Fächer und Untergruppenfächer zusammen dieses Limit nicht überschreiten — sonst wird die Einteilung abgelehnt. 0 — kein eigenes Limit, es gilt „Maximale Credits pro Semester“."
+
+msgctxt "core.runtime_settings"
+msgid "Cədvəl toqquşması yerləşdirməni bloklasın"
+msgstr "Stundenplankonflikt blockiert die Einteilung"
+
+msgctxt "core.runtime_settings"
+msgid "Söndürülübsə alt qrupun dərs saatı tələbənin öz cədvəli ilə üst-üstə düşəndə yalnız xəbərdarlıq göstərilir və işçi bunu təsdiqləyib davam edə bilər. Yandırılıbsa toqquşan yerləşdirmə edilmir."
+msgstr "Ausgeschaltet: Überschneidet sich eine Untergruppenstunde mit dem eigenen Stundenplan, erscheint nur eine Warnung, und das Personal kann bestätigen und fortfahren. Eingeschaltet: Eine kollidierende Einteilung wird abgelehnt."
+
+msgctxt "core.runtime_settings"
+msgid "Bir jurnalda maksimum tələbə"
+msgstr "Maximale Studierende pro Journal"
+
+msgctxt "core.runtime_settings"
+msgid "Alt qrup yerləşdirməsində hədəf jurnalın tutumu: jurnalda bu qədər aktiv tələbə varsa yeni tələbə əlavə olunmur. 0 — tutum həddi yoxdur."
+msgstr "Kapazität des Zieljournals bei Untergruppen-Einteilungen: Hat das Journal bereits so viele aktive Studierende, wird niemand mehr hinzugefügt. 0 — keine Kapazitätsgrenze."
+
+msgctxt "core.runtime_settings"
+msgid "kredit"
+msgstr "Credits"
+
+msgctxt "core.runtime_settings"
+msgid "tələbə"
+msgstr "Studierende"
+
+msgctxt "registrar.model.subgroup_placement"
+msgid "Alt qrupa yerləşdirildi"
+msgstr "In Untergruppe eingeteilt"
+
+msgctxt "registrar.model.subgroup_placement"
+msgid "Yerləşdirmə geri götürüldü"
+msgstr "Einteilung zurückgenommen"
+
+msgctxt "registrar.model.subgroup_placement"
+msgid "subgroup placement event"
+msgstr "Untergruppen-Einteilungsereignis"
+
+msgctxt "registrar.model.subgroup_placement"
+msgid "subgroup placement events"
+msgstr "Untergruppen-Einteilungsereignisse"
+
+msgctxt "registrar.subgroup_placement"
+msgid "%(student)s alt qrupdan jurnalınıza əlavə olundu (öz qrupu: %(source)s)."
+msgstr "%(student)s wurde aus einer Untergruppe in Ihr Journal aufgenommen (eigene Gruppe: %(source)s)."
+
+msgctxt "registrar.subgroup_placement"
+msgid "%(student)s jurnaldan çıxarıldı (alt qrup yerləşdirməsi geri götürüldü)."
+msgstr "%(student)s wurde aus dem Journal entfernt (Untergruppen-Einteilung zurückgenommen)."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Alt qrup yerləşdirməsi geri götürüldü — %(subject)s"
+msgstr "Untergruppen-Einteilung zurückgenommen — %(subject)s"
+
+msgctxt "registrar.subgroup_placement"
+msgid "Alt qrupa yerləşdirildiniz — %(subject)s"
+msgstr "Sie wurden einer Untergruppe zugeteilt — %(subject)s"
+
+msgctxt "registrar.subgroup_placement"
+msgid "Alt qrupa yerləşdirmə üçün «retake.manage» səlahiyyəti lazımdır."
+msgstr "Für die Untergruppen-Einteilung ist die Berechtigung „retake.manage“ erforderlich."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Alt qrupun dərs saatı tələbənin öz cədvəli ilə üst-üstə düşür."
+msgstr "Die Unterrichtszeit der Untergruppe überschneidet sich mit dem eigenen Stundenplan."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Bu jurnal bu semestrdə aktiv deyil."
+msgstr "Dieses Journal ist in diesem Semester nicht aktiv."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Bu tələbə sizin struktur əhatənizdə deyil."
+msgstr "Dieser Studierende liegt außerhalb Ihres Zuständigkeitsbereichs."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Tələbə bu semestrdə bu fəndən azad edilib — əvvəlcə azadolma geri qaytarılmalıdır."
+msgstr "Der Studierende ist in diesem Semester von diesem Fach befreit — zuerst muss die Befreiung aufgehoben werden."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Bu qeydiyyat sonradan yenidən yerləşdirilib — yalnız ən son yerləşdirmə geri götürülə bilər."
+msgstr "Diese Einschreibung wurde später erneut eingeteilt — nur die letzte Einteilung kann zurückgenommen werden."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Jurnal modalından əlavə"
+msgstr "Aus dem Journaldialog hinzugefügt"
+
+msgctxt "registrar.subgroup_placement"
+msgid "Bu yerləşdirmə artıq geri götürülüb."
+msgstr "Diese Einteilung wurde bereits zurückgenommen."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Bu, tələbənin öz qrupunun jurnalıdır — alt qrup yerləşdirməsi tələb olunmur."
+msgstr "Dies ist das Journal der eigenen Gruppe — keine Untergruppen-Einteilung nötig."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Jurnal siyahısı dəyişdi — %(subject)s · %(group)s"
+msgstr "Journalliste geändert — %(subject)s · %(group)s"
+
+msgctxt "registrar.subgroup_placement"
+msgid "Jurnalda boş yer yoxdur (tutum həddi dolub)."
+msgstr "Im Journal sind keine Plätze frei (Kapazität erreicht)."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Jurnalın siyahısı bağlıdır — tələbə əlavə edilə bilməz."
+msgstr "Die Journalliste ist geschlossen — niemand kann hinzugefügt werden."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Semestr kredit həddi keçilir."
+msgstr "Das Semester-Creditlimit würde überschritten."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Semestr kredit həddi keçilir: yerləşdirmədən sonra %(after)s kredit olacaq, hədd %(limit)s."
+msgstr "Das Semester-Creditlimit würde überschritten: nach der Einteilung %(after)s Credits, Limit %(limit)s."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Siz «%(subject)s» fənni üzrə %(group)s qrupunun jurnalından çıxarıldınız."
+msgstr "Sie wurden aus dem Journal der Gruppe %(group)s für „%(subject)s“ entfernt."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Səbəb yazılmalıdır (ən azı 10 simvol)."
+msgstr "Eine Begründung ist erforderlich (mindestens 10 Zeichen)."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Sənəd faylı qəbul edilmədi — yalnız PDF, JPG və PNG (10 MB-a qədər)."
+msgstr "Die Dokumentdatei wurde abgelehnt — nur PDF, JPG und PNG (bis 10 MB)."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Sənəd məcburidir: təqdimat / sərəncam faylı (PDF, JPG, PNG) yükləyin və ya sərəncamın nömrəsi və tarixini yazın."
+msgstr "Ein Dokument ist erforderlich: Antrags-/Anordnungsdatei (PDF, JPG, PNG) hochladen oder Nummer und Datum der Anordnung eingeben."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Sərəncam tarixi düzgün deyil."
+msgstr "Das Datum der Anordnung ist ungültig."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Sərəncam tarixi gələcəkdə ola bilməz."
+msgstr "Das Datum der Anordnung darf nicht in der Zukunft liegen."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Sərəncamın həm nömrəsi, həm tarixi yazılmalıdır."
+msgstr "Nummer und Datum der Anordnung sind beide erforderlich."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Tələbə artıq bu jurnaldadır."
+msgstr "Der Studierende ist bereits in diesem Journal."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Tələbə bu fənn üzrə bu semestrdə başqa jurnalda aktivdir. «Öz jurnalından azad et» seçilməlidir — əvvəlki qeydiyyat tarixçəyə keçir, bal və davamiyyət saxlanılır."
+msgstr "Der Studierende ist in diesem Semester bereits in einem anderen Journal für dieses Fach aktiv. „Aus eigenem Journal lösen“ wählen — die bisherige Einschreibung wird Historie, Noten und Anwesenheit bleiben erhalten."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Tələbə bu fənni artıq keçib — təkrar yazılış yalnız kəsilmiş fənn üçündür."
+msgstr "Der Studierende hat dieses Fach bereits bestanden — Wiedereinschreibung nur für nicht bestandene Fächer."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Tələbə jurnala yazıla bilmədi."
+msgstr "Der Studierende konnte nicht in das Journal eingetragen werden."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Tələbə və jurnal eyni təşkilata aid olmalıdır."
+msgstr "Studierender und Journal müssen zur selben Organisation gehören."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Tələbənin aktiv akademik qeydi (qrupu) yoxdur — akademik məzuniyyətdə, xaric və ya məzun ola bilər."
+msgstr "Der Studierende hat keinen aktiven Studiendatensatz (Gruppe) — evtl. Urlaubssemester, exmatrikuliert oder Absolvent."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Yerləşdirmə geri götürülə bilmir."
+msgstr "Die Einteilung kann nicht zurückgenommen werden."
+
+msgctxt "registrar.subgroup_placement"
+msgid "Yerləşdirmə tapılmadı."
+msgstr "Einteilung nicht gefunden."
+
+msgctxt "registrar.subgroup_placement"
+msgid "artıq alt qrupdadır"
+msgstr "bereits in Untergruppe"
+
+msgctxt "registrar.subgroup_placement"
+msgid "keçib"
+msgstr "bestanden"
+
+msgctxt "registrar.subgroup_placement"
+msgid "kəsilib"
+msgstr "nicht bestanden"
+
+msgctxt "registrar.subgroup_placement"
+msgid "«%(subject)s» fənnini bu semestr %(group)s qrupu ilə keçəcəksiniz. Fənn cədvəlinizdə və jurnalınızda görünür."
+msgstr "In diesem Semester belegen Sie „%(subject)s“ mit der Gruppe %(group)s. Es erscheint in Ihrem Stundenplan und Journal."
+
+msgctxt "accounts.subgroup_placement"
+msgid "1. Tələbəni seçin"
+msgstr "1. Studierenden wählen"
+
+msgctxt "accounts.subgroup_placement"
+msgid "2. Fənn və alt qrup jurnalı"
+msgstr "2. Fach und Untergruppen-Journal"
+
+msgctxt "accounts.subgroup_placement"
+msgid "3. Sənəd, səbəb və təsdiq"
+msgstr "3. Dokument, Begründung und Bestätigung"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Ad, soyad, qrup və ya tələbə nömrəsi…"
+msgstr "Vorname, Nachname, Gruppe oder Matrikelnummer…"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Alt qrup"
+msgstr "Untergruppe"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Alt qrupa yerləşdir"
+msgstr "In Untergruppe einteilen"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Artıq bu jurnaldadır"
+msgstr "Bereits in diesem Journal"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Bu ada uyğun tələbə tapılmadı."
+msgstr "Kein Studierender mit diesem Namen gefunden."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Bu alət üçün «retake.manage» səlahiyyəti lazımdır."
+msgstr "Dieses Werkzeug erfordert die Berechtigung „retake.manage“."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Bu fənn bu semestr başqa qrupların heç birində açılmayıb."
+msgstr "Dieses Fach wird in diesem Semester in keiner anderen Gruppe angeboten."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Bu fənni seç"
+msgstr "Dieses Fach wählen"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Bu semestr"
+msgstr "Dieses Semester"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Bu semestr başqa qruplarda bu ada uyğun fənn yoxdur."
+msgstr "Kein Fach mit diesem Namen in anderen Gruppen in diesem Semester."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Bu semestrin fənləri"
+msgstr "Fächer dieses Semesters"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Bütün yoxlamalar uğurludur — yerləşdirmək olar."
+msgstr "Alle Prüfungen bestanden — Einteilung möglich."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Cari aktiv semestr təyin olunmayıb — yerləşdirmə yalnız cari semestrdə mümkündür."
+msgstr "Kein aktuelles aktives Semester festgelegt — Einteilungen sind nur im aktuellen Semester möglich."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Cədvəl"
+msgstr "Stundenplan"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Cədvəl hələ qurulmayıb"
+msgstr "Stundenplan noch nicht erstellt"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Cədvəl toqquşması yerləşdirməni bloklayır"
+msgstr "Ein Stundenplankonflikt blockiert die Einteilung"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Cədvəl toqquşması — xəbərdarlıq, təsdiqlə davam etmək olar"
+msgstr "Stundenplankonflikt — Warnung, Fortfahren nach Bestätigung möglich"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Cədvəl toqquşmasını gördüm, yerləşdirməni təsdiqləyirəm."
+msgstr "Ich habe den Stundenplankonflikt gesehen und bestätige die Einteilung."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Daha çox"
+msgstr "Mehr"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Dolub"
+msgstr "Voll"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Dərs saatı tələbənin öz cədvəli ilə üst-üstə düşür — təsdiq qutusunu işarələyin."
+msgstr "Die Unterrichtszeit überschneidet sich mit dem eigenen Stundenplan — Bestätigung ankreuzen."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Fayl yükləyin və ya sərəncamın nömrəsi ilə tarixini yazın."
+msgstr "Datei hochladen oder Nummer und Datum der Anordnung eingeben."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Fənn"
+msgstr "Fach"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Fənn axtarın…"
+msgstr "Fach suchen…"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Fənn və jurnal"
+msgstr "Fach und Journal"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Fənni seçin — sistem bu semestr başqa qruplarda açılmış uyğun jurnalları göstərir."
+msgstr "Fach wählen — das System zeigt passende Journale anderer Gruppen in diesem Semester."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Geri götür"
+msgstr "Zurücknehmen"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Geri götürmə səbəbi"
+msgstr "Grund der Rücknahme"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Geri götürmə səbəbi (ən azı 10 simvol)"
+msgstr "Grund der Rücknahme (mindestens 10 Zeichen)"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Geri götürüldü"
+msgstr "Zurückgenommen"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Hədd"
+msgstr "Limit"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Hələ yerləşdirmə olmayıb."
+msgstr "Noch keine Einteilungen."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Hələ yerləşdirmə yoxdur."
+msgstr "Noch keine Einteilungen."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Jurnal bağlıdır"
+msgstr "Journal geschlossen"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Kim"
+msgstr "Von"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Kim, nə vaxt, hansı sənədlə — geri götürülənlər də tarixçədə qalır."
+msgstr "Wer, wann, mit welchem Dokument — zurückgenommene Einteilungen bleiben ebenfalls in der Historie."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Kredit"
+msgstr "Credits"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Kredit həddi keçilib"
+msgstr "Creditlimit überschritten"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Kredit həddi: %(base)s (alt qrupla birlikdə %(sub)s)"
+msgstr "Creditlimit: %(base)s (mit Untergruppen %(sub)s)"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Kəsilmiş fənlər"
+msgstr "Nicht bestandene Fächer"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Kəsilmiş fənn yoxdur."
+msgstr "Keine nicht bestandenen Fächer."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Kəsilmiş fənnin təkrarı"
+msgstr "Wiederholung eines nicht bestandenen Fachs"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Ləğv et"
+msgstr "Abbrechen"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Müəllim"
+msgstr "Lehrkraft"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Müəllim təyin olunmayıb"
+msgstr "Keine Lehrkraft zugewiesen"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Məs.: 2024/2025 Yaz semestrində kəsilmiş fənn — dekanlığın 12.09.2025 tarixli təqdimatı"
+msgstr "Z. B.: im Sommersemester 2024/2025 nicht bestanden — Antrag des Dekanats vom 12.09.2025"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Nə vaxt"
+msgstr "Wann"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Qalan"
+msgstr "Verbleibend"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Qaydalar"
+msgstr "Regeln"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Seç"
+msgstr "Wählen"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Seçildi"
+msgstr "Ausgewählt"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Son yerləşdirmələr"
+msgstr "Letzte Einteilungen"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Səbəb"
+msgstr "Begründung"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Səbəb ən azı 10 simvol olmalıdır."
+msgstr "Die Begründung muss mindestens 10 Zeichen lang sein."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Sənəd faylı (PDF, JPG, PNG · 10 MB-a qədər)"
+msgstr "Dokumentdatei (PDF, JPG, PNG · bis 10 MB)"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Sənəd məcburidir"
+msgstr "Dokument erforderlich"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Sənəd və təsdiq"
+msgstr "Dokument und Bestätigung"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Sənədə bax"
+msgstr "Dokument ansehen"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Sərəncam"
+msgstr "Anordnung"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Sərəncam / təqdimat №"
+msgstr "Anordnungs-/Antrags-Nr."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Tapılmadı."
+msgstr "Nicht gefunden."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Tarixi"
+msgstr "Datum"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Tarixçədə axtar"
+msgstr "In der Historie suchen"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Toqquşma"
+msgstr "Konflikt"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Toqquşma yoxdur"
+msgstr "Kein Konflikt"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Toqquşmanı təsdiqləyin."
+msgstr "Konflikt bestätigen."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Tələbə"
+msgstr "Studierende(r)"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Tələbə alt qrupa yerləşdirildi: %(subject)s · %(group)s."
+msgstr "Studierende(r) in Untergruppe eingeteilt: %(subject)s · %(group)s."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Tələbə jurnaldan çıxarılır (bal və davamiyyət silinmir), birləşmə varsa öz jurnalı bərpa olunur. Hər iki əməl tarixçədə qalır."
+msgstr "Der Studierende wird aus dem Journal entfernt (Noten und Anwesenheit bleiben); nach einer Zusammenlegung wird das eigene Journal wiederhergestellt. Beide Vorgänge bleiben in der Historie."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Tələbə, fənn, sərəncam №…"
+msgstr "Studierende, Fach, Anordnungs-Nr.…"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Tələbəni başqa qrupun jurnalına (alt qrupa) yerləşdirin: sistem kredit həddini, fənnin keçilib-keçilmədiyini, jurnalın açıq olmasını, tutumu və cədvəl toqquşmasını yoxlayır. Sənəd məcburidir, hər yerləşdirmə tarixçədə qalır və geri götürülə bilər."
+msgstr "Teilen Sie Studierende in das Journal einer anderen Gruppe (Untergruppe) ein: Das System prüft Creditlimit, ob das Fach bestanden ist, ob das Journal offen ist, Kapazität und Stundenplankonflikte. Ein Dokument ist Pflicht; jede Einteilung bleibt in der Historie und kann zurückgenommen werden."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Təqdimat / sərəncam faylını yükləyin və ya sərəncamın nömrəsi və tarixini yazın."
+msgstr "Antrags-/Anordnungsdatei hochladen oder Nummer und Datum der Anordnung eingeben."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Uyğun jurnallar"
+msgstr "Passende Journale"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Xəbərdarlıq"
+msgstr "Warnung"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Yalnız sizin əhatənizdəki oxuyan tələbələr göstərilir."
+msgstr "Nur eingeschriebene Studierende in Ihrem Zuständigkeitsbereich werden angezeigt."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Yerləşdirildi"
+msgstr "Eingeteilt"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Yerləşdirmə addımları"
+msgstr "Schritte der Einteilung"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Yerləşdirmə geri götürüldü — tarixçə saxlanılır."
+msgstr "Einteilung zurückgenommen — die Historie bleibt erhalten."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Yerləşdirmə mümkün deyil:"
+msgstr "Einteilung nicht möglich:"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Yerləşdirmə tarixçəsi"
+msgstr "Einteilungshistorie"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Yerləşdirmədən sonra"
+msgstr "Nach der Einteilung"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Yerləşdirməni geri götür"
+msgstr "Einteilung zurücknehmen"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Yüklənir…"
+msgstr "Wird geladen…"
+
+msgctxt "accounts.subgroup_placement"
+msgid "boş yer"
+msgstr "freie Plätze"
+
+msgctxt "accounts.subgroup_placement"
+msgid "kredit"
+msgstr "Credits"
+
+msgctxt "accounts.subgroup_placement"
+msgid "qrupdan → jurnala"
+msgstr "Gruppe → Journal"
+
+msgctxt "accounts.subgroup_placement"
+msgid "tələbə"
+msgstr "Studierende"
+
+msgctxt "accounts.subgroup_placement"
+msgid "«Başqasının adından» rejimində yalnız baxış mümkündür."
+msgstr "Im Modus „Ansicht als“ ist nur Ansehen möglich."
+
+msgctxt "accounts.subgroup_placement"
+msgid "«Başqasının adından» rejimində yerləşdirmə edilmir — yalnız baxış."
+msgstr "Im Modus „Ansicht als“ keine Einteilungen — nur Ansicht."
+
+msgctxt "accounts.subgroup_placement"
+msgid "«Başqasının adından» rejimindəsiniz — yoxlamaları görürsünüz, yerləşdirmə edilmir."
+msgstr "Sie sind im Modus „Ansicht als“ — Sie sehen die Prüfungen, es wird nichts eingeteilt."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Öz fənləri"
+msgstr "Eigene Fächer"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Öz qrupunun jurnalında bu fənn var — yerləşdirmədə ondan azad ediləcək."
+msgstr "Dieses Fach steht im Journal der eigenen Gruppe — bei der Einteilung wird der Studierende daraus gelöst."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Öz qrupunun jurnalından azad et — əvvəlki qeydiyyat tarixçəyə keçir, bal və davamiyyət saxlanılır."
+msgstr "Aus dem Journal der eigenen Gruppe lösen — die bisherige Einschreibung wird Historie, Noten und Anwesenheit bleiben erhalten."
+
+msgctxt "accounts.subgroup_placement"
+msgid "üst-üstə düşür"
+msgstr "überschneidet sich"
+
+msgctxt "accounts.subgroup_placement"
+msgid "Əməliyyat alınmadı — yenidən cəhd edin."
+msgstr "Vorgang fehlgeschlagen — bitte erneut versuchen."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Ən azı 10 simvol."
+msgstr "Mindestens 10 Zeichen."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Ən azı 10 simvol. Tələbənin izində və audit jurnalında görünür."
+msgstr "Mindestens 10 Zeichen. Sichtbar im Verlauf des Studierenden und im Audit-Log."
+
+msgctxt "accounts.subgroup_placement"
+msgid "Əvvəlcə tələbəni seçin…"
+msgstr "Zuerst Studierenden wählen…"
+
+msgctxt "profile.sidebar"
+msgid "Alt qrupa tələbə əlavə et"
+msgstr "Studierende in Untergruppe aufnehmen"
+
+msgctxt "accounts.student_registry"
+msgid "Alt qrup yerləşdirmələri"
+msgstr "Untergruppen-Einteilungen"
+
+msgctxt "accounts.student_registry"
+msgid "Alt qrup yerləşdirməsi olmayıb."
+msgstr "Keine Untergruppen-Einteilungen."
+
+msgctxt "accounts.student_registry"
+msgid "Alt qrupa tələbə əlavə et"
+msgstr "Studierende in Untergruppe aufnehmen"
+
+msgctxt "accounts.student_registry"
+msgid "Bu semestr"
+msgstr "Dieses Semester"
+
+msgctxt "accounts.student_registry"
+msgid "Kredit yükü və alt qrup"
+msgstr "Kreditlast und Untergruppen"
+
+msgctxt "accounts.student_registry"
+msgid "Sənəd"
+msgstr "Dokument"
+
+msgctxt "accounts.student_registry"
+msgid "Sərəncam"
+msgstr "Anordnung"
+
+msgctxt "accounts.student_registry"
+msgid "alt qrup"
+msgstr "Untergruppe"
+
+msgctxt "accounts.student_registry"
+msgid "geri götürülüb"
+msgstr "zurückgenommen"
+
+msgctxt "accounts.student_registry"
+msgid "kredit"
+msgstr "Credits"
+
+msgctxt "profile.subjects"
+msgid "Alt qrup"
+msgstr "Untergruppe"
+
+msgctxt "profile.subjects"
+msgid "Bu fənni başqa qrupun jurnalında (alt qrupda) keçirsiniz"
+msgstr "Sie belegen dieses Fach im Journal einer anderen Gruppe (Untergruppe)"
+
+msgctxt "profile.subjects"
+msgid "Bu semestr: %(total)s / %(limit)s kredit"
+msgstr "Dieses Semester: %(total)s / %(limit)s Credits"
+
+msgctxt "profile.subjects"
+msgid "öz fənləri %(own)s, alt qrup %(sub)s"
+msgstr "eigene Fächer %(own)s, Untergruppe %(sub)s"
+
+msgctxt "registrar.journal"
+msgid "Alt qrup"
+msgstr "Untergruppe"
+
+msgctxt "registrar.journal"
+msgid "Bu semestr: %(total)s / %(limit)s kredit"
+msgstr "Dieses Semester: %(total)s / %(limit)s Credits"
+
+msgctxt "registrar.model.retake.meta"
+msgid "retake application"
+msgstr "Wiederholungsantrag"
+
+msgctxt "registrar.model.retake.meta"
+msgid "retake applications"
+msgstr "Wiederholungsanträge"
+
+msgctxt "registrar.model.retake_event.meta"
+msgid "retake application event"
+msgstr "Ereignis des Wiederholungsantrags"
+
+msgctxt "registrar.model.retake_event.meta"
+msgid "retake application events"
+msgstr "Ereignisse der Wiederholungsanträge"
+
+msgctxt "registrar.model.retake_receipt.meta"
+msgid "retake payment receipt"
+msgstr "Zahlungsbeleg für die Wiederholung"
+
+msgctxt "registrar.model.retake_receipt.meta"
+msgid "retake payment receipts"
+msgstr "Zahlungsbelege für die Wiederholung"
+
+msgctxt "registrar.model.exam_chance_grant.meta"
+msgid "exam chance grant"
+msgstr "Gewährte Prüfungschance"
+
+msgctxt "registrar.model.exam_chance_grant.meta"
+msgid "exam chance grants"
+msgstr "Gewährte Prüfungschancen"
+
+msgctxt "profile.sidebar"
+msgid "25% və alt qrup"
+msgstr "25 % und Untergruppe"
+
+msgctxt "profile.sidebar"
+msgid "25% müraciətləri"
+msgstr "25-%-Anträge"
+
+#, python-format
+msgctxt "profile.sidebar"
+msgid "25%% və alt qrup"
+msgstr "25 %% und Untergruppe"
+
+#, python-format
+msgctxt "profile.sidebar"
+msgid "25%% müraciətləri"
+msgstr "25-%%-Anträge"
+
+msgctxt "core.runtime_settings"
+msgid "25% təkrar imtahan və alt qrup"
+msgstr "25-%-Wiederholungsprüfung und Untergruppe"
+
+msgctxt "core.runtime_settings"
+msgid "Müraciət pəncərəsi açıqdır"
+msgstr "Antragsfenster ist geöffnet"
+
+msgctxt "core.runtime_settings"
+msgid "Açıq olanda tələbə kəsr fənlər üzrə 25% təkrar imtahan və ya alt qrup müraciəti göndərə bilir. Bağlananda yeni müraciət qəbul olunmur; artıq göndərilmiş müraciətlərə baxış və qərarlar davam edir."
+msgstr "Wenn geöffnet, können Studierende für nicht bestandene Fächer eine 25-%-Wiederholungsprüfung oder eine Untergruppe beantragen. Wenn geschlossen, werden keine neuen Anträge angenommen; eingereichte Anträge werden weiter geprüft und entschieden."
+
+msgctxt "core.runtime_settings"
+msgid "Bir fənn üzrə 25% cəhd sayı"
+msgstr "25-%-Versuche pro Fach"
+
+msgctxt "core.runtime_settings"
+msgid "Bir fənn üzrə tələbəyə ən çox neçə dəfə 25% təkrar imtahan verilir (buraxılmış, cəhdi verilmiş və tamamlanmış müraciətlər sayılır). Limit dolanda yalnız alt qrup yolu qalır."
+msgstr "Wie oft ein Studierender pro Fach höchstens die 25-%-Wiederholungsprüfung ablegen darf (zugelassene, gewährte und abgeschlossene Anträge zählen). Ist das Limit erreicht, bleibt nur der Weg über die Untergruppe."
+
+msgctxt "registrar.retake.notification"
+msgid "Müraciətiniz qəbul edildi"
+msgstr "Ihr Antrag ist eingegangen"
+
+msgctxt "registrar.retake.notification"
+msgid "Qəbz yoxlamaya göndərildi"
+msgstr "Beleg zur Prüfung gesendet"
+
+msgctxt "registrar.retake.notification"
+msgid "Ödəniş qəbzi rədd edildi"
+msgstr "Zahlungsbeleg abgelehnt"
+
+msgctxt "registrar.retake.notification"
+msgid "Ödənişiniz təsdiqləndi"
+msgstr "Ihre Zahlung wurde bestätigt"
+
+msgctxt "registrar.retake.notification"
+msgid "Təkrar imtahan cəhdi açıldı"
+msgstr "Wiederholungsversuch freigeschaltet"
+
+msgctxt "registrar.retake.notification"
+msgid "Müraciətiniz rədd edildi"
+msgstr "Ihr Antrag wurde abgelehnt"
+
+msgctxt "registrar.retake.notification"
+msgid "Müraciət geri götürüldü"
+msgstr "Antrag zurückgezogen"
+
+msgctxt "registrar.retake.notification"
+msgid "Müraciətinizin vəziyyəti dəyişdi"
+msgstr "Der Status Ihres Antrags hat sich geändert"
+
+msgctxt "registrar.retake.notification"
+msgid "Alt qrup müraciətiniz təsdiqləndi"
+msgstr "Ihr Untergruppenantrag wurde genehmigt"
+
+msgctxt "registrar.retake.notification"
+msgid "25% təkrar imtahana buraxıldınız"
+msgstr "Sie sind zur 25-%-Wiederholungsprüfung zugelassen"
+
+msgctxt "registrar.retake.notification"
+msgid "Alt qrupa yerləşdirildiniz"
+msgstr "Sie wurden einer Untergruppe zugewiesen"
+
+msgctxt "registrar.retake.notification"
+msgid "25% təkrar imtahanın nəticəsi yazıldı"
+msgstr "Das Ergebnis der 25-%-Wiederholungsprüfung wurde erfasst"
+
+msgctxt "registrar.retake.notification"
+msgid "\"{subject}\" — {kind}: {status}."
+msgstr "„{subject}“ — {kind}: {status}."
+
+msgctxt "registrar.retake.notification"
+msgid "Bal: {score}."
+msgstr "Punkte: {score}."
+
+msgctxt "registrar.retake.notification"
+msgid "Yeni 25% / alt qrup müraciəti növbədədir"
+msgstr "Ein neuer 25-%-/Untergruppenantrag wartet"
+
+msgctxt "registrar.retake.notification"
+msgid "{student} — \"{subject}\": {status}."
+msgstr "{student} — „{subject}“: {status}."
+
+msgctxt "accounts.exam_chance"
+msgid "Köhnə qeyd (səbəb yazılmayıb)"
+msgstr "Alter Eintrag (kein Grund erfasst)"
+
+msgctxt "accounts.exam_chance"
+msgid "Səbəbi seçin, tələbəni axtarıb işarələyin, imtahanı seçin və əsası yazın."
+msgstr "Grund wählen, Studierende suchen und markieren, Prüfung wählen und Grundlage eintragen."
+
+msgctxt "accounts.exam_chance"
+msgid "1-ci addım: yuxarıdakı süzgəcdə «Şansın səbəbi»ni seçin — səbəbsiz şans verilmir."
+msgstr "Schritt 1: Oben im Filter den „Grund der Chance“ wählen — ohne Grund wird keine Chance gewährt."
+
+msgctxt "accounts.exam_chance"
+msgid "Yuxarıdakı «Tələbə axtarışı» sahəsinə ad, istifadəçi adı və ya qrup yazın."
+msgstr "Namen, Benutzernamen oder Gruppe oben im Feld „Studierendensuche“ eingeben."
+
+#, python-format
+msgctxt "accounts.exam_chance"
+msgid "25%% müraciəti yoxdur (ödəniş təsdiqlənib + buraxılıb)"
+msgstr "Kein 25-%%-Antrag (Zahlung bestätigt + zugelassen)"
+
+#, python-format
+msgctxt "accounts.exam_chance"
+msgid "Yalnız final imtahanları; seçilmiş tələbənin 25%% müraciəti olan fənnə görə süzülür."
+msgstr "Nur Abschlussprüfungen; gefiltert nach den Fächern der 25-%%-Anträge des gewählten Studierenden."
+
+msgctxt "accounts.exam_chance"
+msgid "Əsas"
+msgstr "Grundlage"
+
+msgctxt "accounts.exam_chance"
+msgid "Əmr / sərəncam №"
+msgstr "Anordnung / Verfügung Nr."
+
+msgctxt "accounts.exam_chance"
+msgid "Əmr tarixi"
+msgstr "Datum der Anordnung"
+
+msgctxt "accounts.exam_chance"
+msgid "Apellyasiya qərarının №"
+msgstr "Nr. der Widerspruchsentscheidung"
+
+msgctxt "accounts.exam_chance"
+msgid "Qeyd"
+msgstr "Notiz"
+
+msgctxt "accounts.exam_chance"
+msgid "Nə baş verib, kim qərar verib…"
+msgstr "Was ist passiert, wer hat entschieden…"
+
+#, python-format
+msgctxt "accounts.exam_chance"
+msgid "Şans veriləndə: cəhd limiti artır, final/midterm üçün YENİ fərdi PIN yaradılır, finalın köhnə giriş bileti sıfırlanır və imtahan «Təyin olunmuş tapşırıqlar»da yenidən görünür. Qərar səbəbi və əsası ilə silinməyən qeydə yazılır və tələbənin 25%% izində görünür."
+msgstr "Bei Gewährung: das Versuchslimit steigt, für Abschluss-/Zwischenprüfungen wird eine NEUE persönliche PIN erzeugt, das alte Zutrittsticket der Abschlussprüfung wird zurückgesetzt und die Prüfung erscheint wieder unter „Zugewiesene Aufgaben“. Die Entscheidung wird mit Grund und Grundlage in einem unlöschbaren Eintrag gespeichert und ist im 25-%%-Verlauf des Studierenden sichtbar."
+
+msgctxt "accounts.exam_chance"
+msgid "Təsdiqlə və şans ver"
+msgstr "Bestätigen und gewähren"
+
+msgctxt "accounts.exam_chance"
+msgid "Seçilmiş final/midterm imtahanı üzrə konkret tələbəyə rəsmi səbəblə yenidən cəhd hüququ verin (test, yazılı və praktiki imtahanlar üçün eynidir). Sistem yeni giriş PIN-i yaradır, finalın köhnə girişini yenidən açır, imtahan tələbənin təyin olunmuş tapşırıqlarında yenidən görünür və qərar silinməyən qeydə düşür."
+msgstr "Gewähren Sie einem bestimmten Studierenden mit offiziellem Grund einen neuen Versuch für die gewählte Abschluss-/Zwischenprüfung (gleich für Test-, schriftliche und praktische Prüfungen). Das System erzeugt eine neue Zutritts-PIN, öffnet den alten Zutritt zur Abschlussprüfung erneut, die Prüfung erscheint wieder in den zugewiesenen Aufgaben und die Entscheidung bleibt in einem unlöschbaren Eintrag."
+
+msgctxt "accounts.exam_chance"
+msgid "Şansın səbəbi"
+msgstr "Grund der Chance"
+
+msgctxt "accounts.exam_chance"
+msgid "Səbəb seçin…"
+msgstr "Grund wählen…"
+
+msgctxt "accounts.exam_chance"
+msgid "Rəsmi qeyd: kim, kimə, hansı imtahan, hansı səbəb və əsasla. Qeydlər silinmir və dəyişdirilmir."
+msgstr "Offizieller Eintrag: wer wem für welche Prüfung mit welchem Grund und welcher Grundlage. Einträge werden nie gelöscht oder geändert."
+
+msgctxt "accounts.exam_chance"
+msgid "Səbəb"
+msgstr "Grund"
+
+msgctxt "registrar.retake"
+msgid "25% təkrar imtahan"
+msgstr "25-%-Wiederholungsprüfung"
+
+msgctxt "registrar.retake"
+msgid "Alt qrupda yenidən keçmək"
+msgstr "In einer Untergruppe wiederholen"
+
+msgctxt "registrar.retake"
+msgid "Göndərilib"
+msgstr "Eingereicht"
+
+msgctxt "registrar.retake"
+msgid "Ödəniş yoxlanılır"
+msgstr "Zahlung wird geprüft"
+
+msgctxt "registrar.retake"
+msgid "Qəbz rədd edilib"
+msgstr "Beleg abgelehnt"
+
+msgctxt "registrar.retake"
+msgid "Ödəniş təsdiqlənib"
+msgstr "Zahlung bestätigt"
+
+msgctxt "registrar.retake"
+msgid "Buraxılıb"
+msgstr "Zugelassen"
+
+msgctxt "registrar.retake"
+msgid "İmtahan cəhdi verilib"
+msgstr "Prüfungsversuch gewährt"
+
+msgctxt "registrar.retake"
+msgid "Tamamlanıb"
+msgstr "Abgeschlossen"
+
+msgctxt "registrar.retake"
+msgid "Rədd edilib"
+msgstr "Abgelehnt"
+
+msgctxt "registrar.retake"
+msgid "Geri götürülüb"
+msgstr "Zurückgezogen"
+
+msgctxt "registrar.retake"
+msgid "Dekanlıq daxil edib"
+msgstr "Vom Dekanat eingetragen"
+
+msgctxt "registrar.retake"
+msgid "İmtahan balından"
+msgstr "Aus der Prüfungsnote"
+
+msgctxt "registrar.retake"
+msgid "Müraciət göndərildi"
+msgstr "Antrag eingereicht"
+
+msgctxt "registrar.retake"
+msgid "Qəbz yükləndi"
+msgstr "Beleg hochgeladen"
+
+msgctxt "registrar.retake"
+msgid "Ödəniş təsdiqləndi"
+msgstr "Zahlung bestätigt"
+
+msgctxt "registrar.retake"
+msgid "Qəbz rədd edildi"
+msgstr "Beleg abgelehnt"
+
+msgctxt "registrar.retake"
+msgid "İmtahana buraxıldı"
+msgstr "Zur Prüfung zugelassen"
+
+msgctxt "registrar.retake"
+msgid "Alt qrup təsdiqləndi"
+msgstr "Untergruppe genehmigt"
+
+msgctxt "registrar.retake"
+msgid "Alt qrupa yerləşdirildi"
+msgstr "Einer Untergruppe zugewiesen"
+
+msgctxt "registrar.retake"
+msgid "Rədd edildi"
+msgstr "Abgelehnt"
+
+msgctxt "registrar.retake"
+msgid "İmtahan cəhdi verildi"
+msgstr "Prüfungsversuch gewährt"
+
+msgctxt "registrar.retake"
+msgid "Nəticə yazıldı"
+msgstr "Ergebnis erfasst"
+
+msgctxt "registrar.retake"
+msgid "Geri götürüldü"
+msgstr "Zurückgezogen"
+
+msgctxt "registrar.retake"
+msgid "Tələbə"
+msgstr "Studierende/r"
+
+msgctxt "registrar.retake"
+msgid "Mühasibatlıq"
+msgstr "Buchhaltung"
+
+msgctxt "registrar.retake"
+msgid "Dekanlıq / tədris şöbəsi"
+msgstr "Dekanat / Studienbüro"
+
+msgctxt "registrar.retake"
+msgid "İmtahan mərkəzi"
+msgstr "Prüfungszentrum"
+
+msgctxt "registrar.retake"
+msgid "Sistem"
+msgstr "System"
+
+msgctxt "registrar.retake"
+msgid "25% müraciəti"
+msgstr "25-%-Antrag"
+
+msgctxt "registrar.retake"
+msgid "Universitet güzəşti"
+msgstr "Entgegenkommen der Universität"
+
+msgctxt "registrar.retake"
+msgid "Texniki problem"
+msgstr "Technisches Problem"
+
+msgctxt "registrar.retake"
+msgid "Apellyasiya qərarı"
+msgstr "Widerspruchsentscheidung"
+
+msgctxt "registrar.retake"
+msgid "Digər"
+msgstr "Sonstiges"
+
+msgctxt "registrar.retake"
+msgid "Ödəniş qəbzini yükləyin — Mühasibatlıq yalnız qəbzdən sonra yoxlayır."
+msgstr "Laden Sie den Zahlungsbeleg hoch — die Buchhaltung prüft erst nach dem Hochladen."
+
+msgctxt "registrar.retake"
+msgid "Qəbziniz Mühasibatlıqda yoxlanılır."
+msgstr "Ihr Beleg wird von der Buchhaltung geprüft."
+
+msgctxt "registrar.retake"
+msgid "Qəbz rədd edilib — səbəbi oxuyun və düzgün qəbzi yenidən yükləyin."
+msgstr "Der Beleg wurde abgelehnt — lesen Sie den Grund und laden Sie den richtigen Beleg hoch."
+
+msgctxt "registrar.retake"
+msgid "Ödəniş təsdiqlənib — dekanlığın buraxılış qərarı gözlənilir."
+msgstr "Zahlung bestätigt — die Zulassungsentscheidung des Dekanats steht aus."
+
+msgctxt "registrar.retake"
+msgid "İmtahana buraxılmısınız — imtahan vaxtı İmtahan mərkəzi tərəfindən bildiriləcək."
+msgstr "Sie sind zugelassen — das Prüfungszentrum teilt den Prüfungstermin mit."
+
+msgctxt "registrar.retake"
+msgid "İmtahan cəhdi açılıb — imtahan «Təyin olunmuş tapşırıqlar»da görünür."
+msgstr "Prüfungsversuch freigeschaltet — die Prüfung erscheint unter „Zugewiesene Aufgaben“."
+
+msgctxt "registrar.retake"
+msgid "Müraciətiniz dekanlıqdadır — alt qrup qərarı gözlənilir."
+msgstr "Ihr Antrag liegt beim Dekanat — die Entscheidung über die Untergruppe steht aus."
+
+msgctxt "registrar.retake"
+msgid "Alt qrup təsdiqlənib — yerləşdirmə gözlənilir."
+msgstr "Untergruppe genehmigt — Zuweisung ausstehend."
+
+msgctxt "registrar.retake"
+msgid "Bu addım müraciətin cari vəziyyətində mümkün deyil ({current} → {target})."
+msgstr "Dieser Schritt ist im aktuellen Antragsstatus nicht möglich ({current} → {target})."
+
+msgctxt "registrar.retake"
+msgid "Səbəb ən azı {n} simvol olmalıdır — qərar zəncirində görünəcək."
+msgstr "Der Grund muss mindestens {n} Zeichen lang sein — er erscheint in der Entscheidungskette."
+
+msgctxt "registrar.retake"
+msgid "Müraciət pəncərəsi hazırda bağlıdır."
+msgstr "Das Antragsfenster ist derzeit geschlossen."
+
+msgctxt "registrar.retake"
+msgid "Qayıb həddi keçildiyi üçün 25% imtahan mümkün deyil — yalnız alt qrup."
+msgstr "Die Fehlzeitengrenze wurde überschritten, daher ist keine 25-%-Prüfung möglich — nur Untergruppe."
+
+msgctxt "registrar.retake"
+msgid "Bu fənn üzrə 25% cəhd limiti dolub ({used}/{limit})."
+msgstr "Das 25-%-Versuchslimit für dieses Fach ist ausgeschöpft ({used}/{limit})."
+
+msgctxt "registrar.retake"
+msgid "Bu fənn üzrə aktiv müraciətiniz var."
+msgstr "Sie haben bereits einen aktiven Antrag für dieses Fach."
+
+msgctxt "registrar.retake"
+msgid "Bu fənn hazırda yenidən keçilir."
+msgstr "Dieses Fach wird derzeit wiederholt."
+
+msgctxt "registrar.retake"
+msgid "Qayıb həddi keçilib — imtahana buraxılmamısınız"
+msgstr "Fehlzeitengrenze überschritten — Sie wurden nicht zur Prüfung zugelassen"
+
+msgctxt "registrar.retake"
+msgid "İmtahandan keçid balı toplanmayıb"
+msgstr "Die Bestehensgrenze in der Prüfung wurde nicht erreicht"
+
+msgctxt "registrar.retake"
+msgid "Yekun bal keçid həddindən aşağıdır"
+msgstr "Die Gesamtnote liegt unter der Bestehensgrenze"
+
+msgctxt "registrar.retake"
+msgid "Fayl seçilməyib."
+msgstr "Keine Datei ausgewählt."
+
+msgctxt "registrar.retake"
+msgid "Müraciət növü seçilməyib."
+msgstr "Kein Antragstyp ausgewählt."
+
+msgctxt "registrar.retake"
+msgid "Bu fənn üzrə müraciət etmək mümkün deyil — fənn kəsr siyahısında yoxdur."
+msgstr "Für dieses Fach ist kein Antrag möglich — es steht nicht in der Liste der nicht bestandenen Fächer."
+
+msgctxt "registrar.retake"
+msgid "Alt qrup müraciətinə ödəniş qəbzi tələb olunmur."
+msgstr "Für einen Untergruppenantrag ist kein Zahlungsbeleg nötig."
+
+msgctxt "registrar.retake"
+msgid "Qəbz yalnız ödəniş yoxlanmazdan əvvəl və ya rəddən sonra yüklənir."
+msgstr "Ein Beleg kann nur vor der Zahlungsprüfung oder nach einer Ablehnung hochgeladen werden."
+
+msgctxt "registrar.retake"
+msgid "Qərar verilmiş müraciəti geri götürmək olmaz."
+msgstr "Ein entschiedener Antrag kann nicht zurückgezogen werden."
+
+msgctxt "registrar.retake"
+msgid "Bu fənn üzrə aktiv müraciətiniz artıq var."
+msgstr "Sie haben bereits einen aktiven Antrag für dieses Fach."
+
+msgctxt "registrar.retake"
+msgid "Bu müraciətdə yoxlanacaq qəbz yoxdur."
+msgstr "Dieser Antrag hat keinen zu prüfenden Beleg."
+
+msgctxt "registrar.retake"
+msgid "Alt qrup müraciəti sənədlə təsdiqlənir."
+msgstr "Ein Untergruppenantrag wird mit einem Dokument genehmigt."
+
+msgctxt "registrar.retake"
+msgid "Buraxılış yalnız ödəniş təsdiqləndikdən sonra mümkündür."
+msgstr "Die Zulassung ist erst nach bestätigter Zahlung möglich."
+
+msgctxt "registrar.retake"
+msgid "Bu mərhələdə dekanlıq qərarı verilmir."
+msgstr "In dieser Phase entscheidet das Dekanat nicht."
+
+msgctxt "registrar.retake"
+msgid "Seçilmiş jurnal bu fənnə aid deyil."
+msgstr "Das gewählte Kursbuch gehört nicht zu diesem Fach."
+
+msgctxt "registrar.retake"
+msgid "Bu müraciət alt qrup qərarı gözləmir."
+msgstr "Dieser Antrag wartet nicht auf eine Untergruppenentscheidung."
+
+msgctxt "registrar.retake"
+msgid "Bu müraciət yerləşdirmə gözləmir."
+msgstr "Dieser Antrag wartet nicht auf eine Zuweisung."
+
+msgctxt "registrar.retake"
+msgid "Hədəf jurnal seçilməlidir."
+msgstr "Ein Ziel-Kursbuch muss gewählt werden."
+
+msgctxt "registrar.retake"
+msgid "Nəticə yalnız imtahana buraxılmış 25% müraciətinə yazılır."
+msgstr "Ein Ergebnis kann nur für einen zugelassenen 25-%-Antrag erfasst werden."
+
+msgctxt "registrar.retake"
+msgid "Alt qrupa yerləşdirmə servisi hələ aktiv deyil — sonra yenidən cəhd edin."
+msgstr "Der Dienst für die Untergruppenzuweisung ist noch nicht aktiv — bitte später erneut versuchen."
+
+msgctxt "registrar.retake"
+msgid "Bal rəqəm olmalıdır."
+msgstr "Die Punktzahl muss eine Zahl sein."
+
+msgctxt "registrar.retake"
+msgid "Şansın səbəbini seçin."
+msgstr "Wählen Sie den Grund der Chance."
+
+msgctxt "registrar.retake"
+msgid "Ən azı bir tələbə seçilməlidir."
+msgstr "Mindestens ein/e Studierende/r muss gewählt werden."
+
+msgctxt "registrar.retake"
+msgid "Universitet güzəşti üçün əmr / sərəncam nömrəsi və tarixi məcburidir."
+msgstr "Für ein Entgegenkommen der Universität sind Nummer und Datum der Anordnung / Verfügung Pflicht."
+
+msgctxt "registrar.retake"
+msgid "Əmr tarixi düzgün deyil."
+msgstr "Das Datum der Anordnung ist ungültig."
+
+msgctxt "registrar.retake"
+msgid "25% müraciəti yalnız yekun (final) imtahan üçün şans verir."
+msgstr "Ein 25-%-Antrag gewährt nur eine Chance für die Abschlussprüfung."
+
+msgctxt "registrar.retake"
+msgid "Bu səbəb üçün qeyd məcburidir (ən azı {n} simvol)."
+msgstr "Für diesen Grund ist eine Notiz Pflicht (mindestens {n} Zeichen)."
+
+msgctxt "registrar.retake"
+msgid "Bu fənn üzrə ödənişi təsdiqlənmiş və buraxılmış 25% müraciəti yoxdur: {names}."
+msgstr "Kein 25-%-Antrag mit bestätigter Zahlung und Zulassung für dieses Fach: {names}."
+
+msgctxt "registrar.retake"
+msgid "Əsas imtahan"
+msgstr "Hauptprüfung"
+
+msgctxt "registrar.retake"
+msgid "25%"
+msgstr "25 %"
+
+msgctxt "registrar.retake"
+msgid "Ödəniş №"
+msgstr "Zahlung Nr."
+
+msgctxt "registrar.retake"
+msgid "Bal"
+msgstr "Punkte"
+
+msgctxt "registrar.retake"
+msgid "Hamısı"
+msgstr "Alle"
+
+msgctxt "registrar.retake"
+msgid "Ödəniş yoxlaması"
+msgstr "Zahlungsprüfung"
+
+msgctxt "registrar.retake"
+msgid "Qəbul və qərar"
+msgstr "Zulassung und Entscheidungen"
+
+msgctxt "registrar.retake"
+msgid "Naməlum əməl."
+msgstr "Unbekannte Aktion."
+
+msgctxt "registrar.retake"
+msgid "Müraciətiniz göndərildi."
+msgstr "Ihr Antrag wurde gesendet."
+
+msgctxt "registrar.retake"
+msgid "Qəbz faylını seçin (PDF, JPG və ya PNG)."
+msgstr "Belegdatei wählen (PDF, JPG oder PNG)."
+
+msgctxt "registrar.retake"
+msgid "Qəbz yükləndi — Mühasibatlıq yoxlayacaq."
+msgstr "Beleg hochgeladen — die Buchhaltung prüft ihn."
+
+msgctxt "registrar.retake"
+msgid "Müraciət geri götürüldü."
+msgstr "Antrag zurückgezogen."
+
+msgctxt "registrar.retake"
+msgid "25% imtahanın nəticəsi yazıldı."
+msgstr "Das Ergebnis der 25-%-Prüfung wurde erfasst."
+
+msgctxt "registrar.retake"
+msgid "Ödəniş təsdiqləndi."
+msgstr "Zahlung bestätigt."
+
+msgctxt "registrar.retake"
+msgid "Qəbz rədd edildi — tələbəyə bildiriş göndərildi."
+msgstr "Beleg abgelehnt — der/die Studierende wurde benachrichtigt."
+
+msgctxt "registrar.retake"
+msgid "Tələbə 25% imtahana buraxıldı."
+msgstr "Der/die Studierende wurde zur 25-%-Prüfung zugelassen."
+
+msgctxt "registrar.retake"
+msgid "Müraciət rədd edildi."
+msgstr "Antrag abgelehnt."
+
+msgctxt "registrar.retake"
+msgid "Sənəd (təqdimat / sərəncam) yüklənməlidir — alt qrup sənədsiz olmur."
+msgstr "Ein Dokument (Vorlage / Verfügung) muss hochgeladen werden — ohne Dokument keine Untergruppe."
+
+msgctxt "registrar.retake"
+msgid "Alt qrup qərarı yazıldı."
+msgstr "Untergruppenentscheidung erfasst."
+
+msgctxt "registrar.retake"
+msgid "Tələbə alt qrupa yerləşdirildi."
+msgstr "Der/die Studierende wurde der Untergruppe zugewiesen."
+
+msgctxt "registrar.retake"
+msgid "Bal mənfi ola bilməz."
+msgstr "Die Punktzahl darf nicht negativ sein."
+
+msgctxt "registrar.retake"
+msgid "Bal bu fənnin imtahan tavanından ({cap}) çox ola bilməz."
+msgstr "Die Punktzahl darf das Prüfungsmaximum dieses Fachs ({cap}) nicht überschreiten."
+
+msgctxt "registrar.retake"
+msgid "Başqasının adından baxış rejimində dəyişiklik etmək olmaz."
+msgstr "Im Modus „Ansicht als anderer Benutzer“ sind keine Änderungen erlaubt."
+
+msgctxt "registrar.retake"
+msgid "Çıxış balı (adətən 0–50) — fənnin imtahan tavanından çox bal qəbul olunmur."
+msgstr "Abschlusspunkte (meist 0–50) — Punkte über dem Prüfungsmaximum des Fachs werden nicht angenommen."
+
+msgctxt "registrar.retake"
+msgid "Ödəniş addımları"
+msgstr "Zahlungsschritte"
+
+msgctxt "registrar.retake"
+msgid "Aktiv təşkilat tapılmadı."
+msgstr "Keine aktive Organisation gefunden."
+
+msgctxt "registrar.retake"
+msgid "Əməl yerinə yetirilmədi — icazənizi yoxlayın və ya səhifəni yeniləyin."
+msgstr "Die Aktion ist fehlgeschlagen — prüfen Sie Ihre Berechtigung oder laden Sie die Seite neu."
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Kəsr fənlər üzrə 25%% təkrar imtahana (ödənişlə) və ya alt qrupda fənni yenidən keçməyə buradan müraciət edin. Bir fənn üzrə 25%% cəhd limiti: %(limit)s. Qayıb həddi keçilibsə yalnız alt qrup yolu açıqdır."
+msgstr "Beantragen Sie hier für nicht bestandene Fächer eine 25-%%-Wiederholungsprüfung (kostenpflichtig) oder die Wiederholung in einer Untergruppe. 25-%%-Versuchslimit pro Fach: %(limit)s. Bei überschrittener Fehlzeitengrenze ist nur die Untergruppe möglich."
+
+msgctxt "registrar.retake"
+msgid "Müraciət pəncərəsi bağlıdır"
+msgstr "Das Antragsfenster ist geschlossen"
+
+msgctxt "registrar.retake"
+msgid "Hazırda yeni müraciət qəbul olunmur. Göndərdiyiniz müraciətlərin vəziyyətini aşağıda izləyə bilərsiniz."
+msgstr "Derzeit werden keine neuen Anträge angenommen. Den Status Ihrer eingereichten Anträge sehen Sie unten."
+
+msgctxt "registrar.retake"
+msgid "Kəsr fənn"
+msgstr "Nicht bestandene Fächer"
+
+msgctxt "registrar.retake"
+msgid "Müraciət mümkündür"
+msgstr "Antrag möglich"
+
+msgctxt "registrar.retake"
+msgid "Aktiv müraciət"
+msgstr "Aktiver Antrag"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "25%% cəhd limiti"
+msgstr "25-%%-Versuchslimit"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "25%% və alt qrup bölmələri"
+msgstr "Bereiche 25 %% und Untergruppe"
+
+msgctxt "registrar.retake"
+msgid "Kəsr fənlər"
+msgstr "Nicht bestandene Fächer"
+
+msgctxt "registrar.retake"
+msgid "Müraciətlərim"
+msgstr "Meine Anträge"
+
+msgctxt "registrar.retake"
+msgid "Cəhd tarixçəsi"
+msgstr "Versuchsverlauf"
+
+msgctxt "registrar.retake"
+msgid "Kəsr fənniniz yoxdur"
+msgstr "Sie haben keine nicht bestandenen Fächer"
+
+msgctxt "registrar.retake"
+msgid "Bütün fənlərinizi keçmisiniz və ya nəticələr hələ yazılmayıb. Kəsr olan fənn burada avtomatik görünəcək."
+msgstr "Sie haben alle Fächer bestanden oder die Ergebnisse sind noch nicht erfasst. Ein nicht bestandenes Fach erscheint hier automatisch."
+
+msgctxt "registrar.retake"
+msgid "Hələ müraciət yoxdur"
+msgstr "Noch keine Anträge"
+
+msgctxt "registrar.retake"
+msgid "«Kəsr fənlər» tabından fənni seçib müraciət edin."
+msgstr "Wählen Sie im Reiter „Nicht bestandene Fächer“ ein Fach und stellen Sie einen Antrag."
+
+msgctxt "registrar.retake"
+msgid "Müraciət"
+msgstr "Antrag"
+
+msgctxt "registrar.retake"
+msgid "Göndər"
+msgstr "Senden"
+
+msgctxt "registrar.retake"
+msgid "Müraciəti geri götür"
+msgstr "Antrag zurückziehen"
+
+msgctxt "registrar.retake"
+msgid "Geri götür"
+msgstr "Zurückziehen"
+
+msgctxt "registrar.retake"
+msgid "İmtahan balı"
+msgstr "Prüfungspunkte"
+
+msgctxt "registrar.retake"
+msgid "Qeyd"
+msgstr "Notiz"
+
+msgctxt "registrar.retake"
+msgid "Bank arayışı / ödəniş nömrəsi"
+msgstr "Bankreferenz / Zahlungsnummer"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "%(n)s-ci cəhd"
+msgstr "Versuch %(n)s"
+
+msgctxt "registrar.retake"
+msgid "Keçdi"
+msgstr "Bestanden"
+
+msgctxt "registrar.retake"
+msgid "Keçmədi"
+msgstr "Nicht bestanden"
+
+msgctxt "registrar.retake"
+msgid "Qəbz yüklənib"
+msgstr "Beleg hochgeladen"
+
+msgctxt "registrar.retake"
+msgid "Bax"
+msgstr "Ansehen"
+
+msgctxt "registrar.retake"
+msgid "Qəbz hələ yüklənməyib"
+msgstr "Noch kein Beleg hochgeladen"
+
+msgctxt "registrar.retake"
+msgid "Yeni qəbz yüklə"
+msgstr "Neuen Beleg hochladen"
+
+msgctxt "registrar.retake"
+msgid "Qəbzi yüklə"
+msgstr "Beleg hochladen"
+
+msgctxt "registrar.retake"
+msgid "PDF, JPG və ya PNG · ən çox 10 MB"
+msgstr "PDF, JPG oder PNG · höchstens 10 MB"
+
+msgctxt "registrar.retake"
+msgid "Addımlar"
+msgstr "Schritte"
+
+msgctxt "registrar.retake"
+msgid "Müraciətin addımları"
+msgstr "Schritte des Antrags"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "25%% təkrar imtahan ödənişlidir. Qəbzi indi yükləyə və ya sonra «Müraciətlərim» tabından əlavə edə bilərsiniz. Ödənişi Mühasibatlıq yoxlayır, sonra dekanlıq imtahana buraxır."
+msgstr "Die 25-%%-Wiederholungsprüfung ist kostenpflichtig. Sie können den Beleg jetzt hochladen oder später im Reiter „Meine Anträge“ ergänzen. Die Buchhaltung prüft die Zahlung, danach lässt das Dekanat zur Prüfung zu."
+
+msgctxt "registrar.retake"
+msgid "Alt qrup ödənişsizdir: fənni başqa qrupla yenidən keçəcəksiniz. Dekanlıq təqdimat sənədi ilə təsdiqləyib sizi uyğun jurnala yerləşdirir."
+msgstr "Die Untergruppe ist kostenlos: Sie wiederholen das Fach mit einer anderen Gruppe. Das Dekanat genehmigt dies mit einem Dokument und weist Sie dem passenden Kursbuch zu."
+
+msgctxt "registrar.retake"
+msgid "Ödəniş qəbzi"
+msgstr "Zahlungsbeleg"
+
+msgctxt "registrar.retake"
+msgid "Ödənişi təsdiqlə"
+msgstr "Zahlung bestätigen"
+
+msgctxt "registrar.retake"
+msgid "Təsdiqlə"
+msgstr "Bestätigen"
+
+msgctxt "registrar.retake"
+msgid "Qəbzi rədd et"
+msgstr "Beleg ablehnen"
+
+msgctxt "registrar.retake"
+msgid "Tələbə səbəbi görəcək və düzgün qəbzi yenidən yükləyə biləcək."
+msgstr "Der/die Studierende sieht den Grund und kann den richtigen Beleg erneut hochladen."
+
+msgctxt "registrar.retake"
+msgid "Rədd et"
+msgstr "Ablehnen"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "25%% imtahana burax"
+msgstr "Zur 25-%%-Prüfung zulassen"
+
+msgctxt "registrar.retake"
+msgid "Burax"
+msgstr "Zulassen"
+
+msgctxt "registrar.retake"
+msgid "Müraciəti rədd et"
+msgstr "Antrag ablehnen"
+
+msgctxt "registrar.retake"
+msgid "Alt qrup qərarı"
+msgstr "Untergruppenentscheidung"
+
+msgctxt "registrar.retake"
+msgid "Təqdimat sənədi məcburidir; hədəf jurnal seçilsə tələbə rəsmi xidmətlə dərhal yerləşdirilir."
+msgstr "Ein Vorlagedokument ist Pflicht; wird ein Ziel-Kursbuch gewählt, wird der/die Studierende sofort über den offiziellen Dienst zugewiesen."
+
+msgctxt "registrar.retake"
+msgid "Yadda saxla"
+msgstr "Speichern"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "25%% imtahanın nəticəsi"
+msgstr "Ergebnis der 25-%%-Prüfung"
+
+msgctxt "registrar.retake"
+msgid "Bal ResitRecord-a yazılır və yekun nəticə yenidən hesablanır (təkrar imtahan balı əsas imtahan balını əvəz edir)."
+msgstr "Die Punkte werden als Wiederholungseintrag gespeichert und das Endergebnis neu berechnet (die Wiederholungsnote ersetzt die Note der Hauptprüfung)."
+
+msgctxt "registrar.retake"
+msgid "Yaz"
+msgstr "Erfassen"
+
+msgctxt "registrar.retake"
+msgid "Tələbə tapılmadı və ya əhatənizdə deyil"
+msgstr "Studierende/r nicht gefunden oder außerhalb Ihres Zuständigkeitsbereichs"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "%(name)s — 25%% izi"
+msgstr "%(name)s — 25-%%-Verlauf"
+
+msgctxt "registrar.retake"
+msgid "Bütün müraciətlər, addımlar, qəbzlər, imtahan şansları və nəticələr."
+msgstr "Alle Anträge, Schritte, Belege, Prüfungschancen und Ergebnisse."
+
+msgctxt "registrar.retake"
+msgid "Bağla"
+msgstr "Schließen"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Qəbz %(n)s"
+msgstr "Beleg %(n)s"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "25%% təkrar imtahan"
+msgstr "25-%%-Wiederholungsprüfung"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Buraxılışdan sonra İmtahan mərkəzi «İmtahan şansı ver» bölməsində «25%% müraciəti» səbəbi ilə cəhd açır və ya kağız imtahanın balı yazılır."
+msgstr "Nach der Zulassung öffnet das Prüfungszentrum unter „Prüfungschance gewähren“ mit dem Grund „25-%%-Antrag“ einen Versuch, oder die Note der Papierprüfung wird erfasst."
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "25%% cəhd sayı: %(n)s"
+msgstr "25-%%-Versuche: %(n)s"
+
+msgctxt "registrar.retake"
+msgid "Son nəticə: keçdi"
+msgstr "Letztes Ergebnis: bestanden"
+
+msgctxt "registrar.retake"
+msgid "Son nəticə: keçmədi"
+msgstr "Letztes Ergebnis: nicht bestanden"
+
+msgctxt "registrar.retake"
+msgid "Status"
+msgstr "Bearbeitungsstand"
+
+msgctxt "registrar.retake"
+msgid "Yekun"
+msgstr "Gesamt"
+
+msgctxt "registrar.retake"
+msgid "Tarix"
+msgstr "Datum"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "İmtahan şansı: «%(title)s» · +%(n)s · %(reason)s · %(when)s"
+msgstr "Prüfungschance: „%(title)s“ · +%(n)s · %(reason)s · %(when)s"
+
+msgctxt "registrar.retake"
+msgid "Alt qrup müraciəti"
+msgstr "Untergruppenantrag"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "25%% tarixçəsi boşdur"
+msgstr "Noch kein 25-%%-Verlauf"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Buraxıldığınız hər 25%% cəhdi, onun balı və yekun nəticə burada qalır."
+msgstr "Jeder 25-%%-Versuch, zu dem Sie zugelassen wurden, seine Punkte und das Endergebnis bleiben hier."
+
+msgctxt "registrar.retake"
+msgid "Hədəf jurnal (cari semestr)"
+msgstr "Ziel-Kursbuch (aktuelles Semester)"
+
+msgctxt "registrar.retake"
+msgid "(istəyə bağlı — sonra da yerləşdirmək olar)"
+msgstr "(optional — die Zuweisung ist auch später möglich)"
+
+msgctxt "registrar.retake"
+msgid "— Seçilməyib —"
+msgstr "— Nicht gewählt —"
+
+msgctxt "registrar.retake"
+msgid "Təqdimat / sərəncam sənədi"
+msgstr "Vorlage-/Verfügungsdokument"
+
+msgctxt "registrar.retake"
+msgid "Bu qəbz başqa müraciətdə də yüklənib"
+msgstr "Dieser Beleg wurde auch bei einem anderen Antrag hochgeladen"
+
+msgctxt "registrar.retake"
+msgid "Səbəb"
+msgstr "Grund"
+
+msgctxt "registrar.retake"
+msgid "Nəticə"
+msgstr "Ergebnis"
+
+msgctxt "registrar.retake"
+msgid "Qəbzə bax"
+msgstr "Beleg ansehen"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "yüklənib: %(when)s"
+msgstr "hochgeladen: %(when)s"
+
+msgctxt "registrar.retake"
+msgid "Qəbz yüklənməyib"
+msgstr "Kein Beleg hochgeladen"
+
+msgctxt "registrar.retake"
+msgid "Qərar sənədi"
+msgstr "Entscheidungsdokument"
+
+msgctxt "registrar.retake"
+msgid "İmtahana burax"
+msgstr "Zur Prüfung zulassen"
+
+msgctxt "registrar.retake"
+msgid "Alt qrupu təsdiqlə"
+msgstr "Untergruppe genehmigen"
+
+msgctxt "registrar.retake"
+msgid "Alt qrupa yerləşdir"
+msgstr "Der Untergruppe zuweisen"
+
+msgctxt "registrar.retake"
+msgid "Nəticəni yaz"
+msgstr "Ergebnis erfassen"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Bu bölmə 25%% müraciətlərini yoxlayan heyət üçündür."
+msgstr "Dieser Bereich ist für Mitarbeitende, die 25-%%-Anträge prüfen."
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Tələbələrin 25%% təkrar imtahan və alt qrup müraciətləri: Mühasibatlıq qəbzi yoxlayır, dekanlıq / tədris şöbəsi buraxır və ya alt qrupa yerləşdirir. Hər addım tarixçədə qalır."
+msgstr "25-%%-Wiederholungs- und Untergruppenanträge der Studierenden: Die Buchhaltung prüft den Beleg, Dekanat / Studienbüro lässt zu oder weist einer Untergruppe zu. Jeder Schritt bleibt im Verlauf."
+
+msgctxt "registrar.retake"
+msgid "Növbələr"
+msgstr "Warteschlangen"
+
+msgctxt "registrar.retake"
+msgid "Axtarış"
+msgstr "Suche"
+
+msgctxt "registrar.retake"
+msgid "Tələbə, fənn və ya qrup"
+msgstr "Studierende/r, Fach oder Gruppe"
+
+msgctxt "registrar.retake"
+msgid "Bütün statuslar"
+msgstr "Alle Status"
+
+msgctxt "registrar.retake"
+msgid "Növ"
+msgstr "Art"
+
+msgctxt "registrar.retake"
+msgid "Hər iki növ"
+msgstr "Beide Arten"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Nəticə: %(n)s"
+msgstr "Ergebnisse: %(n)s"
+
+msgctxt "registrar.retake"
+msgid "Səhifələmə"
+msgstr "Seitennavigation"
+
+msgctxt "registrar.retake"
+msgid "Növbə boşdur"
+msgstr "Die Warteschlange ist leer"
+
+msgctxt "registrar.retake"
+msgid "Bu süzgəclərə uyğun müraciət yoxdur."
+msgstr "Keine Anträge entsprechen diesen Filtern."
+
+msgctxt "registrar.retake"
+msgid "Geri götürülən müraciət bağlanır və tarixçədə qalır. Lazım olsa sonra yenidən müraciət edə bilərsiniz."
+msgstr "Ein zurückgezogener Antrag wird geschlossen und bleibt im Verlauf. Bei Bedarf können Sie später erneut einen Antrag stellen."
+
+msgctxt "registrar.retake"
+msgid "Kəsr"
+msgstr "Nicht bestanden"
+
+msgctxt "registrar.retake"
+msgid "İmtahan"
+msgstr "Prüfung"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "25%% cəhd"
+msgstr "25-%%-Versuche"
+
+msgctxt "registrar.retake"
+msgid "Ödəniş qəbzi ilə — Mühasibatlıq təsdiqləyəndən sonra dekanlıq buraxır."
+msgstr "Mit Zahlungsbeleg — nach Bestätigung durch die Buchhaltung lässt das Dekanat zu."
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "25%% müraciət et"
+msgstr "25 %% beantragen"
+
+msgctxt "registrar.retake"
+msgid "Ödənişsiz — fənni başqa qrupla yenidən keçirsiniz; dekanlıq sənədlə təsdiqləyir."
+msgstr "Kostenlos — Sie wiederholen das Fach mit einer anderen Gruppe; das Dekanat genehmigt mit einem Dokument."
+
+msgctxt "registrar.retake"
+msgid "Alt qrupa müraciət et"
+msgstr "Untergruppe beantragen"

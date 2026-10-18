@@ -1,0 +1,23 @@
+{% load i18n static accounting_tags %}
+{% comment %}
+«Mühasibatlıq» (sahib 2026-10-18) — mühasib, qəyyum, rektor, Qəyyumlar Şurasının sədri, RİM rəhbəri
+(menyu qapısı: rbac_sections.py, açar `accounting.view`; data qapısı: services/accounting/policy.py).
+Müəllim × ay: jurnalda keçirilmiş dərs saatı (mühazirə / seminar / lab), paylanmış dərs yükündən aylıq plan payı,
+fərq, ştat; müəllim drill-down-u (aylıq cədvəl, fənn × qrup, dərs siyahısı) və Excel ixracı. YALNIZ OXU.
+
+Panel SERVER-render-dir və AJAX-safe-dir: avto filtr paneli (`filter_bar.js`, `ac_*` URL-də), sıralama, səhifə və
+drill-down linkləri bölməni yerində yeniləyir. CSS xarici fayldadır və panelin İÇİNDƏDİR; JS lazım deyil.
+{% endcomment %}
+{% if 'accounting' in allowed_sections %}
+<section class="profile-section-panel profile-section--accounting {% if active_section == 'accounting' %}is-active{% endif %}"
+         data-profile-section-panel="accounting"
+         data-source-url="{{ profile_base_url }}?section=accounting">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/accounting.css' %}?v=20261018-acct5">
+{% accounting_panel as ac %}
+{% if not ac.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=ac.access_denied_message %}
+{% else %}
+    {% include "accounts/profile/sections/accounting/_content.html" %}
+{% endif %}
+</section>
+{% endif %}

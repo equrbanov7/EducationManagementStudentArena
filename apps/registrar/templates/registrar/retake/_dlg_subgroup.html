@@ -1,0 +1,16 @@
+{% load i18n %}
+<p class="rt-dialog__subject" data-rt-text="who"></p>
+<div class="ems-field">
+    <label class="ems-field__label" for="rtSubgroupOffering">{% trans "Hədəf jurnal (cari semestr)" context "registrar.retake" %} <span class="ems-field__opt" data-rt-offering-opt>{% trans "(istəyə bağlı — sonra da yerləşdirmək olar)" context "registrar.retake" %}</span></label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="rtSubgroupOffering" name="offering" data-bootstrap-select data-live-search="true"
+                data-live-search-placeholder="{% trans 'Axtar…' context 'ui.filters' %}" data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'ui.filters' %}" data-rt-offerings-select>
+            <option value="">{% trans "— Seçilməyib —" context "registrar.retake" %}</option>
+        </select>
+    </div>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="rtSubgroupDoc">{% trans "Təqdimat / sərəncam sənədi" context "registrar.retake" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <input class="ems-input" type="file" id="rtSubgroupDoc" name="document" accept=".pdf,.jpg,.jpeg,.png" data-ems-required required>
+    <span class="ems-field__hint">{% trans "PDF, JPG və ya PNG · ən çox 10 MB" context "registrar.retake" %}</span>
+</div>

@@ -12,6 +12,7 @@ from .membership import (
     unlink_exam_from_course,
 )
 from .resources import AddResourceView, DeleteResourceView
+from .syllabus import CourseSyllabusImportView, CourseSyllabusOptionsView, CourseSyllabusPreviewView
 from .topics import AddTopicView, DeleteTopicView, EditTopicView
 
 __all__ = [
@@ -35,4 +36,7 @@ __all__ = [
     "DeleteGroupFromCourseView",
     "link_exam_to_course",
     "unlink_exam_from_course",
+    "CourseSyllabusImportView",
+    "CourseSyllabusOptionsView",
+    "CourseSyllabusPreviewView",
 ]

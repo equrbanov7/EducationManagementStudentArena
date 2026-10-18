@@ -431,6 +431,7 @@ def _role_capabilities(user, profile):
             if getattr(_dj_settings, "UNIVERSITY_MODE", True):
                 allowed_sections.add("my-subjects")
                 allowed_sections.add("overall-academic")
+                allowed_sections.add("my-retakes")  # «25% və alt qrup» müraciəti (sahib 2026-10-18)
                 # Transkript rəsmi sənəddir — tələbə onu kabinetdən birbaşa
                 # ALMIR, müraciət (ərizə) pəncərəsindən keçməlidir. Bayraq
                 # bağlı ikən bölmə siyahıya DÜŞMÜR, ona görə həm sidebar,

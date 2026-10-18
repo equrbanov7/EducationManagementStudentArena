@@ -1,0 +1,14 @@
+{% load i18n nav_icons %}
+{% comment %}2026-10-18 (sahib): «Alt qrupa tələbə əlavə et» — açar `retake.manage` (qapı: rbac_sections.py).{% endcomment %}
+{% if 'subgroup-placement' in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=subgroup-placement"
+       data-section="subgroup-placement"
+       data-title="{% trans 'Alt qrupa tələbə əlavə et' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}?section=subgroup-placement"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'subgroup-placement' %}active{% endif %}">
+        {% nav_icon "user-plus" "sidebar-menu-icon" %}
+        <span class="sidebar-menu-text">{% trans "Alt qrupa tələbə əlavə et" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}

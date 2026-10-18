@@ -21,6 +21,7 @@ from django.views.generic import DetailView
 from apps.courses import dashboard_sources
 from apps.courses.forms import CourseForm, CourseResourceForm, CourseTopicForm
 from apps.courses.models import Course, CourseMembership
+from apps.courses.presentation import course_identity
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.public import DEFAULT_EXAM_LANGUAGE, available_language_options, without_disabled_practical_exams
 from apps.registrar.public import course_groups
@@ -159,7 +160,14 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
     pk_url_kwarg = "course_id"
 
     def get_queryset(self):
-        return _tenant_scoped_courses(self.request).select_related("owner", "owner__profile")
+        # 2026-10-18: bağlı sillabus (başlıq çipi + aksent tonu) eyni SELECT-də gəlir — əlavə sorğu yoxdur.
+        return _tenant_scoped_courses(self.request).select_related(
+            "owner",
+            "owner__profile",
+            "syllabus__subject",
+            "syllabus__approved_version",
+            "syllabus__current_version",
+        )
 
     def get_object(self, queryset=None):
         course = super().get_object(queryset=queryset)
@@ -379,6 +387,14 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         else:
             # Owner deyilsə boş saxla
             context["assignment_groups"] = []
+
+        # 2026-10-18: kursun aksent tonu / fənn ikonu («Kurslarım» kartı ilə eyni) + bağlı sillabus çipi.
+        context["course_identity"] = course_identity(course)
+        linked = course.syllabus if course.syllabus_id else None
+        context["linked_syllabus"] = linked if (linked is not None and linked.is_active) else None
+        context["linked_syllabus_version"] = (
+            (linked.approved_version or linked.current_version) if context["linked_syllabus"] is not None else None
+        )
 
         context["dashboard_tabs"], context["tab_counts"] = _build_dashboard_tabs(context)
         members = context["members"]

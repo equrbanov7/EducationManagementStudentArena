@@ -1,0 +1,9 @@
+{% load i18n %}
+{% comment %}25% təkrar imtahan izi — «Əsas imtahan: 32 → 25%: 61» (sahib 2026-10-18). Kontekst: `retake` =
+`retake_queries.result_lines` sətri. Yekun bal (yuxarıda) SON qüvvədə olan nəticədir — təkrar imtahan balı əsas
+imtahan balını əvəz edir (mövcud `ResitRecord` qaydası); burada əvvəlki bal da görünür ki, iz itməsin.{% endcomment %}
+<p class="rt-result-line{% if retake.passed %} is-passed{% elif retake.passed is False %} is-failed{% endif %}">
+    <i class="fas fa-rotate-right" aria-hidden="true"></i>
+    <span class="rt-result-line__label">{% trans "25% təkrar imtahan" context "registrar.retake" %}:</span>
+    <span class="rt-result-line__chain">{{ retake.text }}</span>
+</p>

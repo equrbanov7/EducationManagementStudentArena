@@ -1,0 +1,60 @@
+{% load i18n registrar_retake %}
+{% comment %}«Neçə dəfə 25%-ə girib, nə olub» — `history` = `retake_queries.attempt_history`. Tələbə panelində və
+heyətin iz görünüşündə EYNİ partial (sahibin 2026-09-07 memo-su: koordinator / dekanlıq / rəhbərlik görsün).{% endcomment %}
+{% if history %}
+<ul class="rt-history">
+    {% for h in history %}
+    <li class="rt-history__item">
+        <div class="rt-history__head">
+            <strong class="rt-history__subject">{{ h.subject.name }}</strong>
+            <span class="ems-badge ems-badge--info">{% blocktrans with n=h.attempt_count context "registrar.retake" %}25% cəhd sayı: {{ n }}{% endblocktrans %}</span>
+            {% if h.final_passed is True %}<span class="ems-badge ems-badge--success">{% trans "Son nəticə: keçdi" context "registrar.retake" %}</span>
+            {% elif h.final_passed is False %}<span class="ems-badge ems-badge--danger">{% trans "Son nəticə: keçmədi" context "registrar.retake" %}</span>{% endif %}
+        </div>
+        <p class="rt-history__chain">{{ h.chain }}</p>
+        {% if h.attempts %}
+        <div class="ems-tablewrap rt-history__table">
+            <table class="ems-table ems-table--stack">
+                <thead><tr>
+                    <th scope="col">#</th>
+                    <th scope="col">{% trans "Status" context "registrar.retake" %}</th>
+                    <th scope="col">{% trans "Bal" context "registrar.retake" %}</th>
+                    <th scope="col">{% trans "Yekun" context "registrar.retake" %}</th>
+                    <th scope="col">{% trans "Tarix" context "registrar.retake" %}</th>
+                </tr></thead>
+                <tbody>
+                {% for at in h.attempts %}
+                <tr>
+                    <td data-label="#">{{ at.attempt_number }}</td>
+                    <td data-label="{% trans 'Status' context 'registrar.retake' %}">{% include "registrar/retake/_badge.html" with status=at.status %}</td>
+                    <td data-label="{% trans 'Bal' context 'registrar.retake' %}">{{ at.result_score|retake_score }}</td>
+                    <td data-label="{% trans 'Yekun' context 'registrar.retake' %}">{% if at.result_total is not None %}{{ at.result_total|retake_score }}{% if at.result_letter %} · {{ at.result_letter }}{% endif %}{% else %}—{% endif %}</td>
+                    <td data-label="{% trans 'Tarix' context 'registrar.retake' %}">{% if at.result_recorded_at %}{{ at.result_recorded_at|date:"d.m.Y H:i" }}{% else %}{{ at.created_at|date:"d.m.Y" }}{% endif %}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+        {% if h.grants %}
+        <ul class="rt-grants">
+            {% for g in h.grants %}
+            <li><i class="fas fa-rotate-right" aria-hidden="true"></i>
+                {% blocktrans trimmed with title=g.exam_title reason=g.reason|retake_reason_label when=g.created_at|date:"d.m.Y H:i" n=g.extra_attempts context "registrar.retake" %}
+                    İmtahan şansı: «{{ title }}» · +{{ n }} · {{ reason }} · {{ when }}
+                {% endblocktrans %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% for sg in h.subgroup %}
+        <p class="rt-note"><i class="fas fa-people-arrows" aria-hidden="true"></i> {% trans "Alt qrup müraciəti" context "registrar.retake" %}: {% include "registrar/retake/_badge.html" with status=sg.status %} · {{ sg.created_at|date:"d.m.Y" }}</p>
+        {% endfor %}
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+    {% trans "25% tarixçəsi boşdur" context "registrar.retake" as rt_hist_t %}
+    {% trans "Buraxıldığınız hər 25% cəhdi, onun balı və yekun nəticə burada qalır." context "registrar.retake" as rt_hist_b %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-clock-rotate-left" state_title=rt_hist_t state_body=rt_hist_b %}
+{% endif %}

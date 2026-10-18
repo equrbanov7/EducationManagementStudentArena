@@ -345,6 +345,9 @@ def check_guest_roster_document_access(user, path: str) -> bool:
         return True
     if user_has_org_permission(user, document.organization, "journal.roster"):
         return True
+    # «Alt qrupa tələbə əlavə et» aləti (2026-10-18) — sənədi yükləyən dekanlıq / tədris şöbəsi açarı.
+    if user_has_org_permission(user, document.organization, "retake.manage"):
+        return True
     return _is_correction_reviewer(user, document.organization)
 
 

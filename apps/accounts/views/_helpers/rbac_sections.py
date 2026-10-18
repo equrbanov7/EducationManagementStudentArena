@@ -286,6 +286,9 @@ def apply_permission_section_gates(
     # «Kadr analitikası» (sahib 2026-10-11) — `people.hr_analytics` (HR; rektor `*` ilə; RİM rəhbəri privileged).
     # Data qapısı və əhatə: `services/hr_analytics/policy.py` (hər yükləmədə və ixracda fail-closed).
     can_view_hr_analytics = privileged or has_permission(permissions, "people.hr_analytics")
+    # «Mühasibatlıq» (sahib 2026-10-18) — `accounting.view` (mühasib, qəyyum; `*` ilə rektor/sədr/RİM rəhbəri).
+    # Data qapısı və əhatə: `services/accounting/policy.py` (hər yükləmədə və ixracda fail-closed).
+    can_view_accounting = privileged or has_permission(permissions, "accounting.view")
     can_view_survey_results = privileged or has_permission(permissions, "survey.results.view")
     can_manage_surveys = privileged or has_permission(permissions, "survey.manage")
 
@@ -315,7 +318,12 @@ def apply_permission_section_gates(
         (can_use_rim_center, "rim-center"),
         (can_view_people_teachers, "people-teachers"),
         (can_view_hr_analytics, "hr-analytics"),
+        (can_view_accounting, "accounting"),
         (can_view_people_students, "people-students"),
+        # «25% müraciətləri» (sahib 2026-10-18) — açar + əhatə: registrar `retake_access` (data tag yenə yoxlayır).
+        (_retake_desk_visible(user, organization), "retake-desk"),
+        # «Alt qrupa tələbə əlavə et» (sahib 2026-10-18) — `retake.manage`; əhatə hər endpoint-də registrar-da.
+        (privileged or has_permission(permissions, "retake.manage"), "subgroup-placement"),
         (can_view_syllabus, "syllabus-list"),
         (can_view_syllabus, "syllabus-editor"),
         (can_review_syllabus, "syllabus-review"),
@@ -428,3 +436,12 @@ def apply_permission_section_gates(
 
 
 __all__ = ["apply_permission_section_gates"]
+
+
+def _retake_desk_visible(user, organization) -> bool:
+    """`retake.payment_verify` / `retake.manage` / `student.records_view` / `final_score.entry` struktur əhatəsi."""
+    if organization is None:
+        return False
+    from apps.registrar.public import retake_access
+
+    return retake_access.can_view_desk(user, organization) or retake_access.can_record_result(user, organization)

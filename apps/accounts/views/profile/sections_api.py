@@ -146,9 +146,9 @@ SECTION_PARTIALS: dict[str, str] = {
     "people-teachers": "accounts/profile/sections/_people_teachers.html",
     "people-students": "accounts/profile/sections/_people_students.html",
     "hr-analytics": "accounts/profile/sections/_hr_analytics.html",  # «Kadr analitikası» (sahib 2026-10-11)
-    # Sillabus — müəllim səthi. Redaktor ayrıca TAM SƏHİFƏ deyil: o da profil
-    # shell-inin içində açılır (sol sidebar qalır), hədəf versiya `?version=`
-    # sorğu parametrindən gəlir.
+    "accounting": "accounts/profile/sections/_accounting.html",  # «Mühasibatlıq» (sahib 2026-10-18)
+    # Sillabus — müəllim səthi. Redaktor ayrıca TAM SƏHİFƏ deyil: o da profil shell-inin içində açılır
+    # (sol sidebar qalır), hədəf versiya `?version=` sorğu parametrindən gəlir.
     # Fənn təhvili (`journal.reassign`) — RİM / dekan / kafedra müdiri.
     "teaching-handover": "accounts/profile/sections/_teaching_handover.html",
     "syllabus-list": "accounts/profile/sections/_syllabus_list.html",
@@ -177,9 +177,8 @@ SECTION_PARTIALS: dict[str, str] = {
     "curriculum-editor": "accounts/profile/sections/_curriculum_editor.html",
     "groups-registry": "accounts/profile/sections/_groups_registry.html",
     "semester-opening": "accounts/profile/sections/_semester_opening.html",
-    # Mərhələ 3 — Tələbə Xidmətləri Mərkəzi: qəbul (08) və reyestr (09).
-    # Hər ikisi SERVER-render OXU panelidir; mutasiyalar ayrıca JSON /
-    # multipart endpoint-lərinə gedir → AJAX swap təhlükəsizdir.
+    # Mərhələ 3 — Tələbə Xidmətləri Mərkəzi: qəbul (08) və reyestr (09). Hər ikisi SERVER-render OXU
+    # panelidir; mutasiyalar ayrıca JSON / multipart endpoint-lərinə gedir → AJAX swap təhlükəsizdir.
     # Mərhələ 6 — ekran 21 «Keçilmiş dərslər» (müəllim + nəzarətçi, OXU-ONLY).
     "lessons-log": "accounts/profile/sections/_lessons_log.html",
     "student-admission": "accounts/profile/sections/_student_admission.html",
@@ -203,6 +202,9 @@ SECTION_PARTIALS: dict[str, str] = {
     "my-subject-folders": "accounts/profile/sections/_my_subject_folders.html",
     "announcements": "accounts/profile/sections/_announcements.html",  # «Elanlar» (apps.announcements)
     "my-group": "accounts/profile/sections/_my_group.html",  # «Starosta» — baş tələbə (B10)
+    "my-retakes": "accounts/profile/sections/_my_retakes.html",  # «25% və alt qrup» (2026-10-18)
+    "retake-desk": "accounts/profile/sections/_retake_desk.html",  # «25% müraciətləri» — heyət növbəsi
+    "subgroup-placement": "accounts/profile/sections/_subgroup_placement.html",  # «Alt qrupa tələbə əlavə et»
 }
 
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin bölmələri normal full-page naviqasiyada qalır.
@@ -239,19 +241,12 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "org-members",
         "org-roles",
         "audit-log",
-        # «Heyət idarəetməsi» (2026-09-09 yenidən qurulub) — panel OXU-ONLY
-        # render olunur; yeganə mutasiya (üzvün səbəblə çıxarılması) ayrıca
-        # POST endpoint-inə gedir və `next` ilə qabığa qayıdır → AJAX swap
-        # təhlükəsizdir. Bu qeydiyyat olmasa AVTO filtr panelini yeniləyə
-        # bilmir (`section_loader.js` bölməni tanımır və heç nə etmir).
+        # «Heyət idarəetməsi» (2026-09-09) — panel OXU-ONLY; yeganə mutasiya (üzvün səbəblə çıxarılması) ayrıca POST-a
+        # gedir və `next` ilə qabığa qayıdır. Qeydiyyatsız AVTO filtr işləmir (`section_loader.js` bölməni tanımır).
         "student-organization-management",
-        # Rol / icazə səthləri (2026-09-09 yenidən qurulub) — panel OXU-ONLY
-        # render olunur; bütün mutasiyalar ayrıca POST endpoint-lərinə gedir
-        # (`accounts:role_assignment` JSON + imzalı token, `accounts:manage_roles`
-        # və `accounts:permission_editor` isə `next` ilə qabığa qayıdan adi POST)
-        # → AJAX swap təhlükəsizdir. Bu qeydiyyat olmasa AVTO filtr paneli və
-        # bölmələr arası «Rol təyin et ↔ Rolları idarə et» keçidi işləmir
-        # (`section_loader.js` bölməni tanımır və heç nə etmir).
+        # Rol / icazə səthləri (2026-09-09) — panel OXU-ONLY; mutasiyalar ayrıca POST-a gedir (`role_assignment` JSON +
+        # imzalı token; `manage_roles` / `permission_editor` `next` ilə adi POST). Qeydiyyatsız AVTO filtr və
+        # «Rol təyin et ↔ Rolları idarə et» keçidi işləmir (`section_loader.js` bölməni tanımır).
         "role-assignment",
         "manage-roles",
         "permission-editor",
@@ -277,14 +272,13 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "people-teachers",
         "people-students",
         "hr-analytics",  # «Kadr analitikası» — server-render OXU paneli; ixrac ayrıca GET-dir
-        # Sillabus siyahısı və redaktoru OXU-ONLY render olunur — bütün yazı
-        # əməliyyatları ayrıca JSON POST endpoint-inə gedir (autosave/əməllər),
-        # ona görə AJAX swap təhlükəsizdir.
+        "accounting",  # «Mühasibatlıq» — server-render OXU paneli; ixrac ayrıca GET-dir
+        # Sillabus siyahısı və redaktoru OXU-ONLY render olunur — bütün yazı əməliyyatları ayrıca JSON POST
+        # endpoint-inə gedir (autosave/əməllər), ona görə AJAX swap təhlükəsizdir.
         "syllabus-list",
         "syllabus-editor",
         "syllabus-review",
-        # Kafedra sual təsdiqi növbəsi OXU-ONLY render olunur (qərar ayrıca
-        # səhifədə, POST-la) → AJAX swap təhlükəsizdir.
+        # Kafedra sual təsdiqi növbəsi OXU-ONLY render olunur (qərar ayrıca səhifədə, POST-la) → AJAX-safe.
         "question-chair-review",
         # Fənn təhvili paneli də OXU-ONLY render olunur: cədvəl/seçicilər JSON
         # GET-lə, təhvil və geri qaytarma isə ayrıca JSON POST-la gedir.
@@ -306,6 +300,7 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         # «Sistem tənzimləmələri» — forma JSON POST-la saxlanılır (system_settings.js), panel oxu-only render.
         "system-settings",
         "journal-hygiene",  # «Jurnal təmizliyi» — panel oxu-only; əməllər tək JSON POST-a gedir
+        "subgroup-placement",  # «Alt qrupa tələbə əlavə et» — panel oxu-only; yazılar ayrıca POST-lara gedir
         # Tədris şöbəsi bölmələri — server yalnız oxu panelini verir; yaratma,
         # redaktə, rəhbər təyini və arxivləmə ayrıca JSON POST-a gedir.
         "org-structure-tree",
@@ -348,6 +343,10 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "my-subject-folders",
         "announcements",  # «Elanlar» — panel oxu-only; mutasiyalar `/elanlar/api/` JSON uclarına gedir
         "my-group",  # «Starosta» (B10) — OXU-ONLY qrup mənzərəsi + şəxsi davamiyyət, mutasiya yoxdur
+        # «25% və alt qrup» / «25% müraciətləri» (2026-10-18) — panel server-render; bütün yazılar ayrıca
+        # `/tekrar-imtahan/…` JSON POST-larına gedir, filtr/tab/səhifə linkləri paneli yerində yeniləyir.
+        "my-retakes",
+        "retake-desk",
     }
 )
 

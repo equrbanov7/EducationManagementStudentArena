@@ -48,6 +48,25 @@ class CourseTopic(models.Model):
         help_text="1, 2, 3, ... (hansı mövzu əvvəl göstərilsin)",
     )
 
+    # 2026-10-18: sillabusun həftəlik planından götürülübsə həftə nömrəsi (1-dən); əl ilə yaradılanda boş.
+    syllabus_week = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Sillabus həftəsi",
+        help_text="Sillabusdan idxal olunubsa həftə nömrəsi — təkrar idxalda eyni həftə yenidən yaradılmır.",
+    )
+
+    # Mənbə sillabus — təkrar idxal açarı `(syllabus_source, syllabus_week)`; sillabus silinsə mövzu qalır.
+    syllabus_source = models.ForeignKey(
+        "syllabus.Syllabus",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name="Mənbə sillabus",
+        help_text="Mövzu sillabusdan idxal olunubsa həmin sillabus dosyesi.",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaradılma Tarixi")
 
     class Meta:

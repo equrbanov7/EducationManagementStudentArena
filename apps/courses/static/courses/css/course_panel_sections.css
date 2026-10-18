@@ -156,6 +156,7 @@
     font-size: var(--ems-fs-md);
     line-height: 1.5;
     color: var(--ems-neutral-600);
+    white-space: pre-line; /* 2026-10-18: sillabusdan gələn təsvir sətirləri (həftə · saat / TN…) */
 }
 
 .cd-topic__meta {

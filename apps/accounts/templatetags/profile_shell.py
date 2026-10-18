@@ -65,6 +65,7 @@ COMPACT_SIDEBAR_TREES = {
             "assigned-courses",
             "pending-answers",
             "my-appeals",
+            "my-retakes",  # «25% və alt qrup» (2026-10-18)
             "evaluation-survey",
             "surveys-inbox",
             "announcements",
