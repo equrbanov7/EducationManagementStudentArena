@@ -5,7 +5,7 @@ Sətir əməlləri — «Kart» (çekmecə) hər zaman; «Hərəkət əmri» yal
 `can_move`; endpoint də fail-closed yenidən yoxlayır).
 
 «Transkript» rəsmi sənəddir: qapı `can_transcript` — `registrar:student_transcript_pdf`
-görünüşünün öz qapısı ilə eyni (təşkilat üzrə `course.edit`). Fayl endirməsidir,
+görünüşünün öz qapısı ilə eyni (`transcript.issue` və ya təşkilat üzrə `course.edit`). Fayl endirməsidir,
 ona görə SPA yükləyicisi tutmasın deyə `js-profile-section-link` sinfi YOXDUR.
 {% endcomment %}
 <button type="button" class="ems-btn ems-btn--sm" data-sr-card="{{ row.data.record_id }}">
@@ -18,6 +18,13 @@ ona görə SPA yükləyicisi tutmasın deyə `js-profile-section-link` sinfi YOX
     <i class="fas fa-file-pdf" aria-hidden="true"></i>
     {% trans "Transkript yüklə" context "accounts.student_registry" %}
 </a>
+{% endif %}
+{% if student_registry_section.can_arayis %}
+{# 2026-10-19: «Təhsil aldığı yer haqqında arayış» — dialoq (təqdim yeri) → POST, möhürlü PDF (student_registry_documents.js). #}
+<button type="button" class="ems-btn ems-btn--sm" data-sr-arayis="{{ row.data.record_id }}" data-sr-name="{{ row.data.name }}">
+    <i class="fas fa-file-signature" aria-hidden="true"></i>
+    {% trans "Arayış ver" context "accounts.student_registry" %}
+</button>
 {% endif %}
 {% if student_registry_section.can_move %}
 <button type="button" class="ems-btn ems-btn--sm ems-btn--primary"

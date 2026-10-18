@@ -2,7 +2,8 @@
 {% comment %}
 «Semestr hazırlığı» — kafedra üzrə nə çatışmır (sahib 2026-10-03). Məntiq: apps.registrar.semester_readiness.
 Rəqəm = süzgəc linki (həmin kafedra + problem → aşağıdakı «Açılış sətirləri»). «Xatırlat» kafedranın
-müəllimlərinə (sillabus / jurnal) və rəhbərinə (xülasə) bildiriş göndərir — 12 saatda bir dəfə.
+müəllimlərinə (sillabus / jurnal), rəhbərinə (xülasə) və «Cədvəl yoxdur» fənlərinin qrupunu əhatə edən cədvəl
+quranlara (dekanlıq / koordinator, `schedule.manage`) bildiriş göndərir — 12 saatda bir dəfə.
 Faiz `<meter>` ilə (inline style yoxdur).
 {% endcomment %}
 {% with rd=semester_opening_section.readiness period=semester_opening_section.period %}
@@ -43,7 +44,7 @@ Faiz `<meter>` ilə (inline style yoxdur).
                     {% if row.ready < row.total %}
                     <button type="button" class="ems-btn ems-btn--sm"
                             data-tof-submit='{"action": "remind_readiness", "period": "{{ period.id }}", "chair": "{{ row.chair_id }}"}'
-                            data-tof-confirm="{% trans 'Bu kafedranın müəllimlərinə (sillabus / jurnal) və rəhbərinə (xülasə) xatırlatma bildirişi göndərilsin? Eyni kafedraya 12 saatda bir dəfə göndərilir.' context 'accounts.semester' %}">
+                            data-tof-confirm="{% trans 'Xatırlatma göndərilsin? Müəllimlərə — sillabus / jurnal, kafedra rəhbərinə — xülasə, cədvəli olmayan fənlər üçün isə cədvəli quran dekanlıq / koordinatora. Eyni kafedraya 12 saatda bir dəfə göndərilir.' context 'accounts.semester' %}">
                         <i class="fas fa-bell" aria-hidden="true"></i> {% trans "Xatırlat" context "accounts.semester" %}
                     </button>
                     {% endif %}

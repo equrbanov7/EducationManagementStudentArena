@@ -1,0 +1,15 @@
+{% load i18n %}
+{% comment %}Müəllimin ödəniş qeydi (2026-10-19) — İLKİN hesab xəbərdarlığı, saathesabı ↔ ştat etiketi (PLAN üzrə) və dərəcə
+yoxdursa səbəb. Kontekst: `detail.pay` (services/accounting/rates_view.py → pay_detail). Modal və drill-down ortaqdır.{% endcomment %}
+{% if detail.pay %}
+<div class="ems-msg ems-msg--info ac__notice ac-pay-note" role="note">
+    <i class="fas fa-coins ems-msg__icon" aria-hidden="true"></i>
+    <div>
+        <p class="ac-pay-note__line"><strong>{% trans "Məbləğ" context "accounts.accounting" %}:</strong>
+            {% if detail.pay.amount_text %}{{ detail.pay.amount_text }} AZN{% else %}{{ detail.pay.missing_text }}{% endif %}
+        </p>
+        {% if detail.pay.hourly_note %}<p class="ac-pay-note__line">{{ detail.pay.hourly_note }}</p>{% endif %}
+        <p class="ac-pay-note__line ac-muted">{{ detail.pay.disclaimer }}</p>
+    </div>
+</div>
+{% endif %}

@@ -85,6 +85,10 @@
             return;
         }
         NS.paintSwatches(body);
+        // 2026-10-19: «Arayış sorğusu» emalçısına «Arayışı hazırla» bloku (applications_arayis.js; null-safe).
+        if (NS.arayis && typeof NS.arayis.decorate === "function") {
+            NS.arayis.decorate(body, app);
+        }
         NS.thread.scrollToLatest(body);
     }
 

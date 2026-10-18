@@ -32,3 +32,12 @@ dəyərlərini formaya yazır və JSON/multipart POST edir. Səbəb tələb edə
 {% trans "Rəsmi qərar məcburidir: əmr nömrəsi və tarixi və ya qərar sənədi. Qaytarılma yoxdur — qərar və qeyd tarixçədə qalır." context "registrar.retake" as d7_sub %}
 {% trans "Qərarı yaz" context "registrar.retake" as d7_submit %}
 {% include "partials/ems_ui/_reason_dialog.html" with reason_id="rtCloseDialog" reason_title=d7_title reason_subtitle=d7_sub reason_submit_label=d7_submit reason_submit_tone="danger" reason_min=rd.reason_min reason_extra_include="registrar/retake/_dlg_close.html" %}
+
+{% trans "Ödənişin qaytarılması qərarı" context "registrar.retake" as d8_title %}
+{% trans "Defolt qaytarılma yoxdur — qaytarılma yalnız rəsmi qərarla: əmr nömrəsi və tarixi və ya qərar sənədi, səbəb məcburidir. Bir müraciətə bir dəfə." context "registrar.retake" as d8_sub %}
+{% trans "Qərarı yaz" context "registrar.retake" as d8_submit %}
+{% include "partials/ems_ui/_reason_dialog.html" with reason_id="rtRefundDialog" reason_title=d8_title reason_subtitle=d8_sub reason_submit_label=d8_submit reason_submit_tone="warning" reason_min=rd.reason_min reason_extra_include="registrar/retake/_dlg_refund.html" %}
+
+{% trans "Ödəniş qaytarıldı" context "registrar.retake" as d9_title %}
+{% trans "Qaytarıldı" context "registrar.retake" as d9_submit %}
+{% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="rtRefundedDialog" form_dialog_title=d9_title form_dialog_body_include="registrar/retake/_dlg_refunded.html" form_dialog_submit_label=d9_submit form_dialog_submit_tone="primary" %}

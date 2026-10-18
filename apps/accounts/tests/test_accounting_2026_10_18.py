@@ -390,7 +390,7 @@ class AccountingSectionTest(AccountingFixture, TestCase):
         self.assertEqual(client.get(url, {"ac_month": OCT, "ac_teacher": "999999"}).status_code, 404)
         own = client.get(url, {"ac_month": OCT, "ac_teacher": self.t1.pk})
         self.assertEqual(own.status_code, 200)
-        self.assertEqual(load_workbook(io.BytesIO(own.content)).sheetnames[-1], "Dərslər")
+        self.assertEqual(load_workbook(io.BytesIO(own.content)).sheetnames[-2:], ["Dərslər", "Dərəcələr"])
         listing = load_workbook(io.BytesIO(client.get(url, {"ac_month": OCT}).content))
         self.assertEqual(
             {row[1] for row in list(listing.worksheets[0].iter_rows(values_only=True))[2:]}, {"ac_t1", "ac_t2"}
@@ -484,7 +484,7 @@ class AccountingSectionTest(AccountingFixture, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("spreadsheetml", response["Content-Type"])
         workbook = load_workbook(io.BytesIO(response.content))
-        self.assertEqual(workbook.sheetnames, ["Müəllimlər", "Fənn və qrup"])
+        self.assertEqual(workbook.sheetnames, ["Müəllimlər", "Fənn və qrup", "Dərəcələr"])  # 2026-10-19: +dərəcələr
         rows = list(workbook.worksheets[0].iter_rows(values_only=True))
         header = rows[1]
         body = {row[1]: row for row in rows[2:]}
@@ -496,7 +496,7 @@ class AccountingSectionTest(AccountingFixture, TestCase):
         detail = self._client(self.accountant).get(
             reverse("accounts:accounting_export"), {"ac_month": OCT, "ac_teacher": self.t1.pk}
         )
-        self.assertEqual(load_workbook(io.BytesIO(detail.content)).sheetnames[-1], "Dərslər")
+        self.assertEqual(load_workbook(io.BytesIO(detail.content)).sheetnames[-2:], ["Dərslər", "Dərəcələr"])
 
     # ── Sorğu büdcəsi ─────────────────────────────────────────────────────
     def test_query_count_does_not_grow_with_teachers(self):

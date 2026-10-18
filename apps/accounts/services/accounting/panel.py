@@ -20,14 +20,15 @@ from core.ui import status_catalog
 from ..hr_analytics.constants import STAFF_TYPES
 from ..hr_analytics.dataset import _CHAIR_TYPES, _FACULTY_TYPES, _placement, _structure
 from . import constants as C
-from . import dataset
+from . import dataset, rates
 from .detail import period_bounds, period_label, teacher_detail
 from .filters import MONTH_ALL, MONTH_RANGE, AccountingFilters, parse_filters
-from .formatting import fmt_hours, kind_cells, staff_short
+from .formatting import fmt_hours, fmt_money, kind_cells, staff_short
 from .legend import legend_items, range_messages
 from .periods import Semester, default_month, default_semester, month_label, months, semesters, teaching_days
 from .policy import resolve_actor
 from .ranges import range_day_counts
+from .rates_view import rate_card
 from .rows import apply_filters, build_rows, sort_rows, totals
 
 
@@ -45,6 +46,9 @@ class Resolved:
     range_held: dict | None = None
     range_counts: dict | None = None
     day_counts: dict | None = None
+    #: 2026-10-19: semestrin tədris ilinin ödəniş dərəcələri (aktiv + tarixçə; ``rates.year_rows``) və aktiv xəritə.
+    rate_rows: list | None = None
+    rate_map: dict | None = None
 
 
 def _structure_options(units: dict, actor) -> tuple[list[dict], list[dict]]:
@@ -114,8 +118,23 @@ def _resolve(request, *, teacher_id: int | None = None) -> Resolved:
         range_held=range_held,
         range_counts=range_counts,
     )
+    rate_rows = rates.year_rows(organization, semester.year)
+    rate_map = rates.active_map(rate_rows)
+    rates.attach(rows, rate_map)
     return Resolved(
-        actor, filters, semester, items, faculties, chairs, persons, rows, range_held, range_counts, day_counts
+        actor,
+        filters,
+        semester,
+        items,
+        faculties,
+        chairs,
+        persons,
+        rows,
+        range_held,
+        range_counts,
+        day_counts,
+        rate_rows,
+        rate_map,
     )
 
 
@@ -177,6 +196,20 @@ def _status(key: str):
     return status_catalog.get(C.STATUS_FAMILY, key)
 
 
+def _amount_kpi(pay: dict) -> dict:
+    """«Hesablanmış məbləğ» — dərəcəsi olan müəllimlərin cəmi; dərəcəsizlər sayılmır və qeyddə göstərilir."""
+    note = pgettext(C.CTX, "{n} müəllim · ilkin hesablama").format(n=pay["priced"])
+    if pay["missing"]:
+        note = pgettext(C.CTX, "{n} müəllim · dərəcəsi olmayan: {m}").format(n=pay["priced"], m=pay["missing"])
+    return {
+        "label": pgettext(C.CTX, "Hesablanmış məbləğ"),
+        "value": fmt_money(pay["amount"]) if pay["priced"] else "—",
+        "unit": "AZN" if pay["priced"] else "",
+        "tone": "accent-primary",
+        "note": note,
+    }
+
+
 def _kpis(summary: dict, period: str) -> list[dict]:
     """KPI kartları — hər kartın alt qeydi rəqəmin NƏ olduğunu bir cümlə ilə deyir (sahib: «daha aydın»)."""
     kinds = summary["kinds"]
@@ -217,6 +250,7 @@ def _kpis(summary: dict, period: str) -> list[dict]:
             "tone": "accent-danger",
             "note": pgettext(C.CTX, "müəllim · fakt < plan − {band}").format(band=f"{band}%"),
         },
+        _amount_kpi(summary["pay"]),
     ]
 
 
@@ -262,6 +296,8 @@ def _table(rows, filters: AccountingFilters, base: str) -> dict:
                 "planned_sem_text": fmt_hours(row["planned_sem"]),
                 "held_sem_text": fmt_hours(row["held_sem"]),
                 "status_obj": status,
+                "pay_text": fmt_money(row["pay"]["amount"]),
+                "pay_missing": "" if row["pay"]["amount"] is not None else rates.missing_text(row["pay"]),
                 "url": _url(base, filters, teacher=str(row["id"]), lpage=1),
                 "detail_url": reverse("accounts:accounting_teacher_detail", args=[row["id"]]) + "?" + query,
             }
@@ -317,7 +353,7 @@ def build_panel(request, *, profile_base_url: str = "") -> dict:
     rows = sort_rows(apply_filters(resolved.rows, filters), filters)
     # Drill-down açıqdırsa KPI-lar həmin müəllimindir (siyahının cəmi yox).
     focus = [row for row in resolved.rows if str(row["id"]) == filters.teacher] if filters.teacher else rows
-    summary = totals(focus)
+    summary = {**totals(focus), "pay": rates.totals(focus)}
     panel.update(
         semester_label=resolved.semester.label,
         period_label=period,
@@ -334,7 +370,9 @@ def build_panel(request, *, profile_base_url: str = "") -> dict:
             "held_text": fmt_hours(summary["held"]),
             "diff_text": fmt_hours(summary["diff"], signed=True),
             "kind_cells": kind_cells(summary["kinds"]),
+            "pay_text": fmt_money(summary["pay"]["amount"]) if summary["pay"]["priced"] else "",
         },
+        rates=rate_card(resolved),
         export_url=reverse("accounts:accounting_export") + "?" + urlencode(filters.as_params(page=1, lpage=1)),
         list_url=_url(base, filters, teacher="", lpage=1),
         reset_url=_url(base, filters, faculty="", chair="", q="", deviation="", page=1, teacher="", lpage=1),

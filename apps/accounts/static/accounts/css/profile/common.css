@@ -277,3 +277,15 @@
         grid-template-columns: minmax(0, 1fr);
     }
 }
+
+/* Telefon: kabinetdəki Bootstrap modallarının məzmun boşluğu. 2026-10-19-a qədər bu qayda
+   `sections/posts/_part2.css`-in mobil blokunda idi və o fayl HƏR kabinet səhifəsində yükləndiyi
+   üçün bütün `.modal-content`-lərə (bildiriş, profil, apellyasiya, yük bölgüsü…) tətbiq olunurdu.
+   Post paketi indi yalnız öz bölmələrində gəlir — qayda burada saxlanılır ki, telefon modalları
+   dəyişməsin. Kaskad: bu fayl ilə `posts/_part2.css` arasındakı fayllarda `.modal-content`
+   qaydası yoxdur, nəticə eynidir. */
+@media (max-width: 768px) {
+    .modal-content {
+        padding: 1rem;
+    }
+}

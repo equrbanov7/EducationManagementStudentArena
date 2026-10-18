@@ -157,3 +157,14 @@ görə HAMISINI yükləmir. İki registr şablonu var:
   güvənməməli. Skript panel DOM-a düşməzdən **əvvəl** icra olunur (köhnə AJAX semantikası).
 * Panelin **öz içindəki** `<script src>`-lər əvvəlki kimi hər swap-da yenidən icra olunur
   (`executeInlineScripts`) — bölmə-xüsusi kiçik skriptlər üçün bu yol qalır.
+* **2026-10-19 (mobil audit):** `profile.css` manifestinin bölmə faylları da (bildirişlər,
+  kimlik səthi, post paketi, kurs / tapşırıq / nəticə kartları, `blogCard.css`) artıq
+  şərtsiz deyil — tələbə «Ana səhifə»si 64 → 48 üslub faylı. Şərtsiz qalanlar yalnız
+  qabıq və ortaq siniflərdir (`base` … `common`, `profile_info.css`, `responsive`, `dashboard`).
+  `css/pagination.css` `base.html`-dədir — bölmə şablonlarında təkrar linkləməyin.
+* **Yeni bölmənin asset-i:** (1) `<link>`-i `_section_assets.html`-də kaskad yerində
+  `{% if '<açar>' in asset_sections %}` ilə şərtləyin, və ya partial-ın öz içində (panel
+  daxilində) `<link>` saxlayın; (2) başqa bölmə də həmin sinfi işlədirsə, şərtə `or` ilə
+  yazın və ya `SECTION_ASSET_BORROWS`-a əlavə edin; (3) `allowed_sections` yalnız panel
+  xaricindəki qabıq markup-ı (modal, AJAX skeleti) üçündür — `SHELL_SCOPED` ağ siyahısı;
+  (4) şərtsiz link əlavə etməyin.

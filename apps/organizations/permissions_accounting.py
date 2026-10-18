@@ -23,7 +23,8 @@ _PERM_CTX = "organizations.permission.label"
 PERM_ACCOUNTING_VIEW = "accounting.view"
 PERM_RETAKE_PAYMENT_VERIFY = "retake.payment_verify"
 PERM_RETAKE_MANAGE = "retake.manage"
-#: 2026-10-19: 25% ödənişinin «Təhsil haqqı cədvəli» (illik təhsil haqqı → təxmini məbləğ) — mühasib + RİM.
+#: 2026-10-19: 25% ödənişinin «Təhsil haqqı cədvəli» (illik təhsil haqqı → təxmini məbləğ) və «Mühasibatlıq» →
+#: «Dərs saatının ödəniş dərəcələri» (``accounts.TeachingPayRate``) — mühasib + RİM, TƏŞKİLAT əhatəsində.
 PERM_ACCOUNTING_MANAGE_FEES = "accounting.manage_fees"
 
 ACCOUNTING_PERMISSION_CATEGORIES = {
@@ -41,7 +42,8 @@ ACCOUNTING_PERMISSION_LABELS = {
         _PERM_CTX, "Mühasibatlıq bölməsi (müəllimlərin aylıq keçirilmiş dərs saatı, plan, ixrac)"
     ),
     PERM_ACCOUNTING_MANAGE_FEES: pgettext_lazy(
-        _PERM_CTX, "Təhsil haqqı cədvəlini idarə etmək (25% təkrar imtahanın təxmini məbləği)"
+        _PERM_CTX,
+        "Təhsil haqqı cədvəlini (25% təkrar imtahanın təxmini məbləği) və dərs saatının ödəniş dərəcələrini idarə etmək",
     ),
     PERM_RETAKE_PAYMENT_VERIFY: pgettext_lazy(_PERM_CTX, "25% təkrar imtahan ödəniş qəbzini yoxlamaq"),
     PERM_RETAKE_MANAGE: pgettext_lazy(

@@ -65,14 +65,16 @@ qaydası. Kontekst: `ac` (services/accounting/panel.py).{% endcomment %}
             {% include "accounts/profile/sections/accounting/_table.html" with table=ac.table %}
         {% endif %}
     </div>
+    {% include "accounts/profile/sections/accounting/_rates.html" %}
     <details class="ac-rule">
         <summary>{% trans "Saatlar necə hesablanır?" context "accounts.accounting" %}</summary>
         <ul class="ac-rule__list">
             <li>{% trans "Fakt — elektron jurnalda yazılmış (keçirilmiş) dərslərin akademik saatı (adətən 1 dərs = 2 saat). Dərsi bölünmüş fəndə dərsin öz müəllimi, əks halda jurnal sahibi sayılır. Bütün tələbələri «Jurnal təmizliyi» ilə çıxarılmış (keçirilməyən) fənnin dərsləri və passiv jurnallar sayılmır." context "accounts.accounting" %}</li>
             <li>{% trans "Plan — semestr üçün müəllimə paylanmış dərs yükü (mühazirə, seminar, laboratoriya; bölgüsü bitmiş tapşırıqlar). Məsləhət, imtahan, təcrübə və buraxılış işi saatları jurnalda dərs kimi yazılmadığı üçün müqayisəyə daxil deyil." context "accounts.accounting" %}</li>
-            <li>{% trans "Aylıq plan — semestr planı dərs pəncərəsinin (semestrin başlanğıcından imtahan sessiyasına qədər) iş günlərinə (B.e.–Cümə) mütənasib bölünür; aylıq payların cəmi semestr planına bərabərdir. Bayram günləri nəzərə alınmır." context "accounts.accounting" %}</li>
+            <li>{% trans "Aylıq plan — semestr planı dərs pəncərəsinin (semestrin başlanğıcından imtahan sessiyasına qədər) iş günlərinə (B.e.–Cümə) mütənasib bölünür; aylıq payların cəmi semestr planına bərabərdir. Bayram və qeyri-iş günləri (Akademik təqvim) iş günü sayılmır, iş günü elan olunmuş şənbə / bazar isə sayılır." context "accounts.accounting" %}</li>
             <li>{% trans "Tarix aralığı — aralığın planı aylıq paylardan götürülür: qismən düşən ayın payı aralığa düşən iş günləri qədər kəsilir; fakt aralığın içində keçirilmiş dərslərdir. Aralıq seçilmiş semestrin hüdudlarında olmalıdır." context "accounts.accounting" %}</li>
             <li>{% blocktrans trimmed with pct=ac.deviation_percent context "accounts.accounting" %}Status — fakt planın ±{{ pct }}%-i daxilindədirsə «Plana uyğun»; az və ya çoxdursa müvafiq olaraq «Plandan az» / «Plandan çox». Band «Sistem tənzimləmələri»ndə dəyişdirilir.{% endblocktrans %}</li>
+            <li>{% trans "Məbləğ — dövrün keçirilmiş saatı × «Dərs saatının ödəniş dərəcələri» cədvəlindəki dərəcə (tədris ili × müəllimin vəzifəsi × növ). Vəzifə və ya dərəcə yoxdursa məbləğ boş qalır («Dərəcə təyin edilməyib»), 0 yazılmır. Saathesabı və ştat saatları plan üzrə etiketlənir (jurnal dərsi konkret yük sətrinə bağlı deyil). İlkin hesablamadır — rəsmi əmək haqqı hesabı deyil." context "accounts.accounting" %}</li>
         </ul>
     </details>
     {% include "accounts/profile/sections/accounting/_dialog.html" %}

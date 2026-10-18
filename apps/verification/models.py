@@ -30,6 +30,10 @@ from .codes import CODE_MAX_LENGTH
 
 class DocType(models.TextChoices):
     TRANSCRIPT = "transcript", pgettext_lazy("verification.doc_type", "Akademik transkript")
+    #: «Təhsil aldığı yer haqqında arayış» (sahib 2026-10-19) — ``registrar.enrollment_certificate``.
+    ENROLLMENT_CERTIFICATE = "enrollment_certificate", pgettext_lazy(
+        "verification.doc_type", "Təhsil aldığı yer haqqında arayış"
+    )
 
 
 class DocumentSeal(models.Model):

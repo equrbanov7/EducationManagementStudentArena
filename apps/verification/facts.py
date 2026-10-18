@@ -18,6 +18,10 @@ FACT_LABELS = {
     "gpa": pgettext_lazy(_CTX, "Kumulyativ ÜOMG"),
     "ects": pgettext_lazy(_CTX, "Məzuniyyət yükü (ECTS)"),
     "document_number": pgettext_lazy(_CTX, "Sənəd №"),
+    # «Təhsil aldığı yer haqqında arayış» (2026-10-19) — tələbənin cari vəziyyəti, PII YOX.
+    "course": pgettext_lazy(_CTX, "Kurs"),
+    "education_form": pgettext_lazy(_CTX, "Təhsil forması"),
+    "student_status": pgettext_lazy(_CTX, "Tələbənin statusu"),
 }
 
 

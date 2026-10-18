@@ -1,6 +1,7 @@
 {% load i18n static registrar_retake %}
 {% comment %}«25% müraciətləri» — heyət növbəsi (sahib 2026-10-18). Data: `{% retake_desk as rd %}` (`retake_desk.build`).
-Tab-lar açardan: «Ödəniş yoxlaması» (`retake.payment_verify`), «Qəbul və qərar» (`retake.manage`), «Hamısı».
+Tab-lar açardan: «Ödəniş yoxlaması» (`retake.payment_verify`), «Qəbul və qərar» (`retake.manage`), «Hamısı»,
+«Qaytarılacaq ödənişlər» (2026-10-19: `retake.payment_verify` + təşkilat əhatəli `retake.manage`; `_desk_row_refund.html`).
 `?rt_student=<id>` — tələbənin tam izi (bütün müraciətlər, hadisələr, qəbzlər, şanslar, nəticələr) — YALNIZ
 `retake.manage` / `student.records_view`; mühasib izi və «Hamısı»nı görmür, «Ödəniş yoxlaması» sətri
 (`_desk_row_payment.html`) bal / nəticə / başqa fənn göstərmir (sahibin qaydası, 2026-10-18).
@@ -30,6 +31,7 @@ Filtr/tab/səhifə linkləri paneli yerində yeniləyir (AJAX-safe); qərarlar `
         <div class="rt-kpi{% if tile.value %} rt-kpi--{{ tile.status|retake_tone }}{% endif %}">
             <dt>{{ tile.label }}</dt>
             <dd><a href="{{ profile_base_url }}?section=retake-desk&amp;rt_tab={{ rd.tab }}&amp;rt_status={{ tile.status }}" data-section="retake-desk">{{ tile.value }}</a></dd>
+            {% if tile.note %}<dd class="rt-kpi__note">{{ tile.note }}</dd>{% endif %}
         </div>
         {% endfor %}
     </dl>
@@ -47,12 +49,12 @@ Filtr/tab/səhifə linkləri paneli yerində yeniləyir (AJAX-safe); qərarlar `
             <label class="ems-field__label" for="rtStatus">{% trans "Status" context "registrar.retake" %}</label>
             <div class="bootstrap-single-select bootstrap-single-select--ems">
                 <select class="ems-select bootstrap-single-select__native" id="rtStatus" name="rt_status" data-bootstrap-select data-rt-auto-field>
-                    <option value="">{% trans "Bütün statuslar" context "registrar.retake" %}</option>
+                    <option value="">{% if rd.refund_view %}{% trans "Hamısı" context "registrar.retake" %}{% else %}{% trans "Bütün statuslar" context "registrar.retake" %}{% endif %}</option>
                     {% for value, label in rd.status_choices %}<option value="{{ value }}"{% if rd.params.status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
                 </select>
             </div>
         </div>
-        {% if not rd.payment_view %}
+        {% if not rd.payment_view and not rd.refund_view %}
         <div class="ems-field">
             <label class="ems-field__label" for="rtKind">{% trans "Növ" context "registrar.retake" %}</label>
             <div class="bootstrap-single-select bootstrap-single-select--ems">
@@ -71,7 +73,7 @@ Filtr/tab/səhifə linkləri paneli yerində yeniləyir (AJAX-safe); qərarlar `
 
     {% if rd.rows %}
     <ul class="rt-cards rt-desk__rows">
-        {% for a in rd.rows %}{% if rd.payment_view %}{% include "registrar/retake/_desk_row_payment.html" %}{% else %}{% include "registrar/retake/_desk_row.html" %}{% endif %}{% endfor %}
+        {% for a in rd.rows %}{% if rd.refund_view %}{% include "registrar/retake/_desk_row_refund.html" %}{% elif rd.payment_view %}{% include "registrar/retake/_desk_row_payment.html" %}{% else %}{% include "registrar/retake/_desk_row.html" %}{% endif %}{% endfor %}
     </ul>
     {% if rd.page.has_other_pages %}
     <nav class="ems-rowactions rt-pager" aria-label="{% trans 'Səhifələmə' context 'registrar.retake' %}">

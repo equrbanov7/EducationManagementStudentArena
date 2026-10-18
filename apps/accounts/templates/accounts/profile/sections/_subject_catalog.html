@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n static %}
 {% comment %}
 Ekran 04 «Fənn kataloqu» — universitet üzrə vahid fənn reyestri.
 
@@ -9,8 +9,8 @@ TƏXİRƏ SALINANLAR (hesabatda sənədləşdirilib):
 * prerekvizit — model YOXDUR (Mərhələ 2, tədris planı ilə birlikdə gəlir);
 * saat bölgüsü (mühazirə/seminar/laboratoriya) — plan SƏTRİNDƏDİR, fənnin
   özündə deyil (kredit ixtisasa görə dəyişir);
-* `merge` (dublikat birləşdirmə) — destruktivdir, plan sətirləri və
-  sillabusların köçürülməsini tələb edir.
+* `merge` (dublikat birləşdirmə) — 2026-10-19-dan VAR: «Fənləri birləşdir» dialoqu
+  (`teaching_office/_subject_merge_dialog.html`, yalnız org-geniş `catalog.manage`).
 
 ⚠️ `<h1>` yazılmır (qabıq verir). CSS/JS xarici fayldadır (CSP).
 {% endcomment %}
@@ -49,6 +49,12 @@ TƏXİRƏ SALINANLAR (hesabatda sənədləşdirilib):
     {% if subject_catalog_section.can_manage %}
     <div class="tof__toolbar">
         <span class="tof__toolbar-spacer"></span>
+        {% if subject_catalog_section.can_merge %}
+        <button type="button" class="ems-btn" data-sm-open>
+            <i class="fas fa-code-merge" aria-hidden="true"></i>
+            {% trans "Fənləri birləşdir" context "registrar.subject_merge" %}
+        </button>
+        {% endif %}
         <button type="button" class="ems-btn ems-btn--primary"
                 data-tof-open="tofSubjectDialog"
                 data-tof-prefill='{"action": "save_subject", "id": "", "code": "", "name": "", "ects": "5", "kind": "core", "chair_unit": ""}'>
@@ -65,6 +71,11 @@ TƏXİRƏ SALINANLAR (hesabatda sənədləşdirilib):
         {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofSubjectDialog" form_dialog_title=sb_new_title form_dialog_subtitle=sb_new_sub form_dialog_wide=True form_dialog_body_include="accounts/profile/sections/teaching_office/_subject_fields.html" form_dialog_action=subject_catalog_section.action_url form_dialog_hidden=subject_catalog_section.dialog_hidden form_dialog_data=subject_catalog_section.form_data %}
         {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofCatalogArchiveDialog" reason_title=cat_archive_title reason_subtitle=cat_archive_sub reason_submit_label=cat_archive_btn reason_submit_tone="danger" reason_action=subject_catalog_section.action_url reason_hidden=subject_catalog_section.archive_hidden reason_form_data=subject_catalog_section.form_data %}
         {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofCatalogRestoreDialog" reason_title=cat_restore_title reason_subtitle=cat_restore_sub reason_action=subject_catalog_section.action_url reason_hidden=subject_catalog_section.archive_hidden reason_form_data=subject_catalog_section.form_data %}
+        {% if subject_catalog_section.can_merge %}
+            {% include "accounts/profile/sections/teaching_office/_subject_merge_dialog.html" %}
+            <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/subject_merge.css' %}?v=20261019-merge">
+            <script src="{% static 'accounts/js/profile/subject_merge.js' %}?v=20261019-merge" defer></script>
+        {% endif %}
     {% endif %}
 </div>
 {% endif %}

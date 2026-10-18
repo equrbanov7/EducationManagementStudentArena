@@ -1,0 +1,96 @@
+{% load static i18n %}
+{% comment %}«Akademik təqvim» → «Bayram və qeyri-iş günləri» (2026-10-19). Kontekst: `holidays`
+(apps/registrar/calendar_holidays.py). Hamı görür (yalnız-oxu); idarə — org-wide `semester.open`
+(`holidays.can_manage`), əməllər `registrar:holiday_action` JSON endpoint-inə gedir.
+
+CSS/JS xarici fayldadır (CSP); JS AJAX-safe (EMSDelegate, `[data-acal-hol-root]` yoxdursa heç nə etmir).
+Dinamik dəyərlər data-atributlardadır. Vəziyyət (bayram / qeyri-iş / iş günü köçürməsi) həm rəng, həm mətnlə.{% endcomment %}
+{% with hol=holidays %}
+<link rel="stylesheet" href="{% static 'registrar/css/academic_holidays.css' %}?v=20261019-hol">
+<section class="acal-group acal-hol"
+         data-acal-hol-root
+         data-acal-hol-section="academic-calendar"
+         data-acal-hol-url="{% url 'registrar:holiday_action' %}"
+         data-acal-hol-error="{% trans 'Əməl alınmadı. Yenidən cəhd edin.' context 'registrar.calendar' %}"
+         aria-labelledby="acal-hol-title">
+    <div class="acal-hol__head">
+        <h2 class="acal-group__year" id="acal-hol-title">
+            {% blocktrans with year=hol.academic_year context "registrar.calendar" %}Bayram və qeyri-iş günləri · {{ year }}{% endblocktrans %}
+        </h2>
+        {% if hol.can_manage %}
+        <div class="acal-hol__actions">
+            <button type="button" class="ems-btn ems-btn--sm"
+                    data-acal-hol-open="acalHolidaySeedDialog"
+                    data-acal-hol-prefill="{{ hol.seed_prefill }}">
+                <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+                {% trans "Rəsmi bayramları əlavə et (sabit tarixli)" context "registrar.calendar" %}
+            </button>
+            <button type="button" class="ems-btn ems-btn--sm ems-btn--primary"
+                    data-acal-hol-open="acalHolidayDialog"
+                    data-acal-hol-prefill="{{ hol.new_prefill }}"
+                    data-acal-hol-title="{% trans 'Gün əlavə et' context 'registrar.calendar' %}">
+                <i class="fas fa-plus" aria-hidden="true"></i> {% trans "Gün əlavə et" context "registrar.calendar" %}
+            </button>
+        </div>
+        {% endif %}
+    </div>
+    <p class="acal-hol__hint">
+        {% blocktrans with start=hol.range_start|date:"d.m.Y" end=hol.range_end|date:"d.m.Y" context "registrar.calendar" %}Tədris ili {{ start }} — {{ end }}. Bayram və qeyri-iş günləri dərs günü sayılmır: «Keçilmiş dərslər» onları «qeydə alınmayıb» saymır, mühasibatlığın aylıq planı və müraciətlərin cavab müddəti iş günü ilə hesablananda çıxılır. «İş günü köçürməsi» iş günü elan olunmuş şənbə/bazardır.{% endblocktrans %}
+    </p>
+    {% if hol.can_manage %}
+    <p class="acal-hol__hint acal-hol__hint--manage">
+        <i class="fas fa-circle-info" aria-hidden="true"></i>
+        {% trans "Düymə yalnız SABİT tarixli rəsmi bayramları (Yeni il, 8 Mart, Novruz, 9 May, 28 May, 15 İyun, 26 İyun, 8–9 Noyabr, 31 Dekabr) və 20 Yanvarı (Ümumxalq hüzn günü — qeyri-iş günü) əlavə edir; təqvimdə olan tarixlər atlanır. Ramazan və Qurban bayramları (hər il dəyişir), bayram həftə sonuna düşəndə verilən əlavə istirahət günləri və hökumətin iş günü köçürmələri «Gün əlavə et» ilə ƏL İLƏ daxil edilir." context "registrar.calendar" %}
+    </p>
+    {% endif %}
+
+    {% if hol.items %}
+    <ul class="acal-hol__list">
+        {% for item in hol.items %}
+        <li class="acal-hol__item acal-hol__item--{{ item.kind }}{% if item.is_past %} is-past{% endif %}">
+            <span class="acal-hol__date">
+                <strong>{{ item.date|date:"d.m.Y" }}</strong>
+                <span class="acal-hol__weekday{% if item.is_weekend %} is-weekend{% endif %}">{{ item.weekday }}</span>
+            </span>
+            <span class="acal-hol__body">
+                <span class="acal-hol__name">{{ item.name }}</span>
+                {% if item.note %}<span class="acal-hol__note">{{ item.note }}</span>{% endif %}
+            </span>
+            <span class="acal-hol__kind acal-hol__kind--{{ item.kind }}">{{ item.kind_label }}</span>
+            {% if hol.can_manage %}
+            <span class="acal-hol__row-actions">
+                <button type="button" class="ems-btn ems-btn--sm ems-btn--ghost"
+                        data-acal-hol-open="acalHolidayDialog"
+                        data-acal-hol-prefill="{{ item.prefill }}"
+                        data-acal-hol-title="{% trans 'Günü redaktə et' context 'registrar.calendar' %}"
+                        aria-label="{% blocktrans with name=item.name context 'registrar.calendar' %}Redaktə et: {{ name }}{% endblocktrans %}">
+                    <i class="fas fa-pen" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="ems-btn ems-btn--sm ems-btn--ghost"
+                        data-acal-hol-delete="{{ item.id }}"
+                        data-acal-hol-confirm="{% blocktrans with name=item.name day=item.date|date:'d.m.Y' context 'registrar.calendar' %}«{{ name }}» ({{ day }}) təqvimdən silinsin? Əməl audit jurnalına yazılır.{% endblocktrans %}"
+                        aria-label="{% blocktrans with name=item.name context 'registrar.calendar' %}Sil: {{ name }}{% endblocktrans %}">
+                    <i class="fas fa-trash" aria-hidden="true"></i>
+                </button>
+            </span>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+        {% trans "Bu tədris ili üçün bayram və qeyri-iş günü daxil edilməyib." context "registrar.calendar" as hol_empty %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-calendar-day" state_title=hol_empty %}
+    {% endif %}
+
+    {% if hol.can_manage %}
+        {% trans "Bayram / qeyri-iş günü" context "registrar.calendar" as hol_dialog_title %}
+        {% trans "Tarix təqvimdə bir dəfə ola bilər; dəyişiklik audit jurnalına yazılır." context "registrar.calendar" as hol_dialog_sub %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="acalHolidayDialog" form_dialog_title=hol_dialog_title form_dialog_subtitle=hol_dialog_sub form_dialog_body_include="registrar/partials/_calendar_holiday_fields.html" form_dialog_hidden=hol.dialog_hidden form_dialog_data=hol.form_data %}
+        {% trans "Rəsmi bayramları əlavə et" context "registrar.calendar" as hol_seed_title %}
+        {% trans "Seçilmiş tədris ilinin sabit tarixli bayramları əlavə olunur; mövcud tarixlərə toxunulmur." context "registrar.calendar" as hol_seed_sub %}
+        {% trans "Əlavə et" context "registrar.calendar" as hol_seed_btn %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="acalHolidaySeedDialog" form_dialog_title=hol_seed_title form_dialog_subtitle=hol_seed_sub form_dialog_submit_label=hol_seed_btn form_dialog_body_include="registrar/partials/_calendar_holiday_seed_fields.html" form_dialog_hidden=hol.seed_hidden form_dialog_data=hol.form_data %}
+    <script src="{% static 'registrar/js/academic_holidays.js' %}?v=20261019-hol"></script>
+    {% endif %}
+</section>
+{% endwith %}

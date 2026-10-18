@@ -1,6 +1,4 @@
-"""
-Models for the organizations app.
-"""
+"""Models for the organizations app."""
 
 import re
 
@@ -23,6 +21,7 @@ from apps.organizations.review_visibility import (  # noqa: F401
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType, RoleScopeType
 from core.models import ActiveManager, OrderedModel, TimeStampedModel, UUIDModel
 
+from .holiday_models import AcademicHoliday, HolidayKind  # noqa: F401  (bayram təqvimi; 600-sətir tavanı)
 from .semester_meta import SemesterLockMixin  # noqa: F401  (ekran 07 kilid qatı)
 from .settings_store import ManagedSettingsSaveMixin  # save() törəmə settings açarlarını əzmir
 

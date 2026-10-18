@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal_autosave.css' %}?v=20261014-auto">
     {% comment %}Sakit düzüm qatı — HƏMİŞƏ SONUNCU yüklənir ki, yuxarıdakı
     fayllardakı düzüm fərqlərini üstələsin; rəng palitrasına toxunmur.{% endcomment %}
-    <link rel="stylesheet" href="{% static 'registrar/css/journal_layout.css' %}?v=20261019-mob">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_layout.css' %}?v=20261019-head">
 {% endblock %}
 
 {% block content %}
@@ -329,6 +329,8 @@
     {# Sağdakı «N q/b» sayğacı davamiyyət dəyişəndə canlı yenilənir (UX2 2026-10-05). #}
     <script src="{% static 'registrar/js/journal_grid_absence.js' %}?v=20261005-live2"></script>
     <script src="{% static 'registrar/js/journal_cell_hint.js' %}?v=20261014-notip"></script>
+    {# Yapışqan başlıq sətri — daxili şaquli scroll olmadan (journal_layout.css §8, 2026-10-19). #}
+    <script src="{% static 'registrar/js/journal_sticky_head.js' %}?v=20261019-1"></script>
     {# Avtomatik yadda saxlama — journal_grid.js-dən SONRA (qaralama bərpası + `EMSJournalGrid.clearDraft`), sahib 2026-10-14. #}
     <script src="{% static 'registrar/js/journal_grid_autosave.js' %}?v=20261014-auto"></script>
     {# İkiqat göndəriş qapısı — ayrı fayl (QA P3-11). #}

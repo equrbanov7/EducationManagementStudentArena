@@ -323,11 +323,25 @@ def build_subjects_section(request, section, *, active_organization, allowed_sec
         },
     ]
     section["filter_count_label"] = pgettext(_CTX, "Nəticə: %(count)d sətir") % {"count": payload["filtered_count"]}
-    section["duplicate_note"] = pgettext(
-        _CTX,
-        "Eyni adlı fənlər birləşdirilmir — birləşdirmə (merge) destruktiv əməldir və "
-        "plan sətirləri ilə sillabusların köçürülməsini tələb edir (növbəti mərhələ).",
-    )
+    if payload.get("can_merge"):
+        # «Fənləri birləşdir» (2026-10-19): önizləmə → izlə təsdiq; dialoq URL-ləri serverdən.
+        section["merge_urls"] = {
+            "lookup": reverse("registrar:subject_merge_lookup"),
+            "groups": reverse("registrar:subject_merge_groups"),
+            "preview": reverse("registrar:subject_merge_preview"),
+            "apply": reverse("registrar:subject_merge_apply"),
+        }
+        section["duplicate_note"] = pgettext(
+            _CTX,
+            "Eyni adlı fənlər avtomatik birləşdirilmir. «Fənləri birləşdir» ilə saxlanılacaq kartı seçin — "
+            "önizləmə bütün istinadları və toqquşmaları göstərir, mənbə kartlar silinmir, arxivlənir.",
+        )
+    else:
+        section["duplicate_note"] = pgettext(
+            _CTX,
+            "Eyni adlı fənlər avtomatik birləşdirilmir — birləşdirməni Tədris şöbəsi (təşkilat səviyyəli "
+            "«Kataloqu idarə et» səlahiyyəti) aparır.",
+        )
 
 
 __all__ = ["build_programs_section", "build_subjects_section"]

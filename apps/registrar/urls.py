@@ -11,6 +11,7 @@ from . import (
     correction_views,
     curriculum_actions,
     guest_roster_views,
+    holiday_actions,
     individual_plan_views,
     journal_actions,
     journal_activation,
@@ -21,6 +22,7 @@ from . import (
     schedule_views,
     semester_actions,
     subject_exempt_views,
+    subject_merge_views,
     syllabus_views,
     views,
 )
@@ -39,10 +41,17 @@ urlpatterns = [
     path("kataloq/emel/", catalog_actions.catalog_action, name="catalog_action"),
     # İxtisasın «Ətraflı» çekmecəsi — OXU (`catalog.view`), 2026-09-09.
     path("kataloq/ixtisas/", catalog_actions.program_detail, name="program_detail"),
+    # «Fənləri birləşdir» (2026-10-19) — org-geniş `catalog.manage`; önizləmə → izlə təsdiq.
+    path("kataloq/fenn-birlesdir/axtar/", subject_merge_views.subject_lookup, name="subject_merge_lookup"),
+    path("kataloq/fenn-birlesdir/qruplar/", subject_merge_views.duplicate_groups, name="subject_merge_groups"),
+    path("kataloq/fenn-birlesdir/onizle/", subject_merge_views.merge_preview, name="subject_merge_preview"),
+    path("kataloq/fenn-birlesdir/tetbiq/", subject_merge_views.merge_apply, name="subject_merge_apply"),
     # Ekran 05 — tədris planı əməlləri (JSON POST, `plan.*` + state maşını).
     path("tedris-plani/emel/", curriculum_actions.curriculum_action, name="curriculum_action"),
     # Ekran 07 — semestr açılışı əməlləri (JSON POST, `semester.*`).
     path("semestr/emel/", semester_actions.semester_action, name="semester_action"),
+    # «Akademik təqvim» → «Bayram və qeyri-iş günləri» əməlləri (JSON POST, org-wide `semester.open`), 2026-10-19.
+    path("teqvim/bayram/emel/", holiday_actions.holiday_action, name="holiday_action"),
     # Ekran 06 «Qruplar» — rəsmi «Fərdi tədris planı» DOCX (qrup / ?student=<record>).
     path(
         "qrup/<uuid:group_id>/ferdi-plan.docx",
@@ -63,6 +72,12 @@ urlpatterns = [
     # `idareetme/` prefiksindən çıxarıldı. Literal prefiks — uuid catch-all-dan
     # ƏVVƏL durmalıdır.
     path("telebe/<uuid:pk>/transkript.pdf", pdf_views.student_transcript_pdf, name="student_transcript_pdf"),
+    # «Təhsil aldığı yer haqqında arayış» (sahib 2026-10-19) — POST (möhür yazır), qapı transkriptlə eyni.
+    path(
+        "telebe/<uuid:pk>/arayis.pdf",
+        pdf_views.student_enrollment_certificate_pdf,
+        name="student_enrollment_certificate_pdf",
+    ),
     # Rubrik qiymətləndirməsi `REGISTRAR_RUBRICS_ENABLED` söndürülü ikən 404 verir (sahib 2026-10-10).
     path("<uuid:offering_id>/rubrik/<uuid:component_id>/", views.rubric_grade_view, name="rubric_grade"),
     path("<uuid:offering_id>/export.xlsx", pdf_views.journal_xlsx, name="journal_xlsx"),

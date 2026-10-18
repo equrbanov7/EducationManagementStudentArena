@@ -1,0 +1,47 @@
+{% load i18n static %}
+{% comment %}«Tələbə reyestri» → «Arayış ver» dialoqu (sahib 2026-10-19).
+
+«Təhsil aldığı yer haqqında arayış» rəsmi, QR ilə möhürlənmiş PDF-dir: göndəriş
+`registrar:student_enrollment_certificate_pdf` (POST; qapı `transcript.issue` + əhatə, yalnız aktiv tələbə —
+əks halda 409 mətni dialoqda göstərilir). «Təqdim ediləcəyi yer» istəyə bağlıdır, boş qalsa arayışda
+«tələb olunan yerə» yazılır. Fayl `fetch` + `blob` ilə endirilir (student_registry_documents.js).
+Script panelin İÇİNDƏDİR — AJAX swap-dan sonra yenidən icra olunur (init idempotentdir).{% endcomment %}
+<div class="ems-overlay ems-overlay--dialog" id="srArayisDialog" data-sr-arayis-dialog hidden
+     data-sr-arayis-url="{{ student_registry_section.arayis_url_base }}"
+     data-msg-error="{% trans 'Arayış hazırlanmadı. Bir az sonra yenidən cəhd edin.' context 'accounts.student_registry' %}"
+     data-msg-done="{% trans 'Arayış hazırlandı və yükləndi.' context 'accounts.student_registry' %}">
+  <div class="ems-dialog" role="dialog" aria-modal="true" aria-labelledby="srArayisDialog-title">
+    <form novalidate data-sr-arayis-form>
+      <div class="ems-dialog__head">
+        <div>
+          <h2 class="ems-dialog__title" id="srArayisDialog-title">{% trans "Təhsil aldığı yer haqqında arayış" context "accounts.student_registry" %}</h2>
+          <p class="ems-dialog__sub" data-sr-arayis-target></p>
+        </div>
+        <button type="button" class="ems-dialog__x" data-ems-overlay-close aria-label="{% trans 'Bağla' context 'accounts.student_registry' %}">×</button>
+      </div>
+      <div class="ems-dialog__body">
+        <p class="ems-msg ems-msg--error" data-sr-arayis-error role="alert" hidden></p>
+        <div class="ems-field">
+          <label class="ems-field__label" for="srArayisDialog-place">{% trans "Təqdim ediləcəyi yer" context "accounts.student_registry" %}</label>
+          <input class="ems-input" type="text" id="srArayisDialog-place" name="place"
+                 maxlength="{{ student_registry_section.arayis_place_max }}" autocomplete="off"
+                 aria-describedby="srArayisDialog-place-hint"
+                 placeholder="{% trans 'məs.: Səbail rayon hərbi komissarlığına' context 'accounts.student_registry' %}">
+          <p class="ems-field__hint" id="srArayisDialog-place-hint">
+            {% trans "İstəyə bağlıdır. Yönlük halda yazın («… komissarlığına», «… bankına»); boş qalsa arayışda «tələb olunan yerə» yazılır." context "accounts.student_registry" %}
+          </p>
+        </div>
+        <p class="ems-field__hint">
+          {% trans "Arayış yalnız aktiv tələbəyə verilir. Sənəd QR və yoxlama kodu ilə möhürlənir; verilmə «Sənəd yoxlaması» siyahısına düşür." context "accounts.student_registry" %}
+        </p>
+      </div>
+      <div class="ems-dialog__foot">
+        <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Ləğv et" context "accounts.student_registry" %}</button>
+        <button type="submit" class="ems-btn ems-btn--primary" data-sr-arayis-submit>
+          <i class="fas fa-file-pdf" aria-hidden="true"></i> {% trans "Arayışı hazırla" context "accounts.student_registry" %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+<script src="{% static 'accounts/js/profile/student_registry_documents.js' %}?v=20261019-arayis1" defer></script>

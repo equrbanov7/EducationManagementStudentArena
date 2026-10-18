@@ -18,8 +18,10 @@ həmin açılışın həmin tarixdə dərs sütunu (``Lesson``) yoxdur → «qey
 * **Filtrlər** — bölmənin filtrləri ilə EYNİ məna (açılış, növ, qrup, müəllim, təhsil
   forması, axtarış, fakültə, kafedra), bax :func:`apply_slot_filters`.
 
-Tətil/bayram təqvimi sistemdə YOXDUR — belə günlər də «qeydə alınmayıb» sayıla bilər
-(bölmədə qeyd kimi yazılır). Sorğu: slotlar 1 + dərs cütləri 1, nəticə 300 s keşlənir.
+* **Bayram / qeyri-iş günü** (2026-10-19, «Akademik təqvim → Bayram və qeyri-iş günləri») — dərs günü deyil,
+  həmin günün slotları «qeydə alınmayıb» SAYILMIR (təqvim keşlidir; dəyişəndə keş açarı da dəyişir).
+
+Sorğu: slotlar 1 + dərs cütləri 1 (+ bayram təqvimi, il başına keşli), nəticə 300 s keşlənir.
 """
 
 from __future__ import annotations
@@ -175,7 +177,10 @@ def unrecorded_slots(user, organization, *, supervisor, window, periods=None, fi
         slots_qs = slots_qs.filter(offering__period__in=periods)
     slots_qs = apply_slot_filters(slots_qs, filters, supervisor=supervisor)
 
-    raw = f"{slots_qs.order_by().values('id').query}|{start}|{end}"
+    from apps.organizations.public import work_calendar
+
+    off_days = work_calendar(organization).non_working_between(start, end)
+    raw = f"{slots_qs.order_by().values('id').query}|{start}|{end}|{sorted(off_days)}"
     key = "registrar:lessons_log_unrecorded:" + hashlib.sha1(raw.encode("utf-8"), usedforsecurity=False).hexdigest()
     cached = cache.get(key)
     if cached is not None:
@@ -199,6 +204,8 @@ def unrecorded_slots(user, organization, *, supervisor, window, periods=None, fi
     due: dict = {}
     for slot in slots:
         for day in _occurrences(slot, start, end):
+            if day in off_days:
+                continue
             due.setdefault((slot.offering_id, day), []).append(slot)
     missing = []
     for (offering_id, day), day_slots in due.items():

@@ -1,7 +1,12 @@
 {% load i18n %}
 {% comment %}Fənn sətrinin əməlləri — `_data_table.html` `row.actions_include`.
-Birləşdirmə (merge) BU MƏRHƏLƏDƏ YOXDUR: destruktiv əməldir, plan sətirləri və
-sillabusların köçürülməsini tələb edir (hesabatda «təxirə salınanlar»).{% endcomment %}
+«Birləşdir» (2026-10-19): yalnız dublikat sətirdə və org-geniş `catalog.manage`-də; dialoq
+bu fənnin dublikat qrupunu hazır təklif kimi doldurur (`subject_merge.js`).{% endcomment %}
+{% if row.data.is_duplicate and not row.data.is_archived and subject_catalog_section.can_merge %}
+<button type="button" class="ems-btn ems-btn--sm" data-sm-open data-sm-subject="{{ row.data.id }}">
+    {% trans "Birləşdir" context "registrar.subject_merge" %}
+</button>
+{% endif %}
 <button type="button" class="ems-btn ems-btn--sm"
         data-tof-open="tofSubjectDialog"
         data-tof-prefill='{"action": "save_subject", "id": "{{ row.data.id }}", "code": "{{ row.data.code|escapejs }}", "name": "{{ row.data.name|escapejs }}", "ects": "{{ row.data.ects }}", "kind": "{{ row.data.kind }}", "chair_unit": "{{ row.data.chair_id }}"}'>

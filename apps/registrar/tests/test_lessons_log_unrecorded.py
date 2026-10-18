@@ -178,9 +178,17 @@ class UnrecordedSlotsTest(TestCase):
             # `bypass_rls()` öz `set_config`/`current_setting` sətirlərini yazır — onlar sayılmır.
             return [q["sql"] for q in ctx.captured_queries if "app.bypass_rls" not in q["sql"]]
 
+        from apps.organizations import holidays
+
+        key = holidays._KEY.format(org=self.org.pk, year=2025)  # bayram təqvimi soyuq — il başına BİR oxu
+        holidays._local.pop(key, None)
+        holidays._pending.pop(key, None)
         with CaptureQueriesContext(connection) as first:
             self._count(self.teacher, supervisor=False)
-        self.assertEqual(len(real(first)), 2)  # slotlar + dərs cütləri
+        queries = real(first)
+        holiday_reads = [sql for sql in queries if "organizations_academicholiday" in sql]
+        self.assertEqual(len(holiday_reads), 1)
+        self.assertEqual(len(queries) - len(holiday_reads), 2)  # slotlar + dərs cütləri
         with CaptureQueriesContext(connection) as second:
             self._count(self.teacher, supervisor=False)
         self.assertEqual(real(second), [])  # keşdən

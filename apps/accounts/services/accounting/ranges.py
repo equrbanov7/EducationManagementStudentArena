@@ -16,7 +16,7 @@ rejimindən 0,1 saat fərqlənə bilərdi. Bu qaydada TAM düşən ay ay rejimin
 semestr planını DƏQİQ verir — hesabat rejimləri bir-birini təsdiqləyir.
 
 Pəncərədən kənar günlər (imtahan sessiyası, şənbə-bazar) plan almır; həmin günlərdə keçirilmiş dərs faktda
-görünür. Bayram günləri nəzərə alınmır (ay rejimi ilə eyni).
+görünür. Bayram və qeyri-iş günləri iş günü sayılmır (ay rejimi ilə eyni gün dəsti — ``teaching_day_set``).
 
 DOĞRULAMA
 ---------

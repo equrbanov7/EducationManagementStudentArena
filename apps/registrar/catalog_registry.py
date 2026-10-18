@@ -41,6 +41,7 @@ from .catalog_scope import (
 from .models import Curriculum, CurriculumSubject, Program, Subject
 from .models.academic import DegreeLevel
 from .models.catalog_meta import EducationForm, SubjectKind
+from .subject_duplicates import normalized_subject_key
 
 _CTX = "accounts.catalog"
 
@@ -80,6 +81,15 @@ def can_view_catalog(request) -> bool:
 
 def can_manage_catalog(request) -> bool:
     return has_permission(actor_permissions(request), PERM_MANAGE)
+
+
+def can_merge_subjects(request) -> bool:
+    """«Fənləri birləşdir» (2026-10-19): ``catalog.manage`` + TƏŞKİLAT-GENİŞ əhatə (dekan/kafedra yox)."""
+    organization = getattr(request, "organization", None)
+    if organization is None or not can_manage_catalog(request):
+        return False
+    scope = _org_unit_model().user_permission_scope(getattr(request, "user", None), organization, PERM_MANAGE)
+    return scope.is_org_wide
 
 
 def _org_unit_model():
@@ -265,8 +275,13 @@ def build_programs_registry(request, organization) -> dict:
 
 
 def _normalized_subject_name(name) -> str:
-    """Dublikat açarı: boşluqlar sıxılır, ``casefold`` (reqistrsiz)."""
-    return " ".join((name or "").split()).casefold()
+    """Dublikat açarı — ``subject_duplicates.normalized_subject_key`` ilə EYNİ (2026-10-19).
+
+    Əvvəl yalnız boşluq sıxılır + ``casefold`` idi, «VoIP» / «Vo İP» kimi cütlər KPI-də
+    görünmürdü, «Fənləri birləşdir» dialoqunun dublikat qrupları isə güclü açarla qurulur —
+    iki səth eyni sayı göstərsin deyə açar birdir (registr, az hərfləri, boşluq/durğu dözümlü).
+    """
+    return normalized_subject_key(name)
 
 
 def subject_name_index(organization, subject_q=None) -> tuple[dict, dict]:
@@ -415,6 +430,7 @@ def build_subject_catalog(request, organization) -> dict:
         "kind_options": [{"value": value, "label": str(label)} for value, label in SubjectKind.choices],
         "chair_options": scoped_chair_options(organization, owner_scope, extra_unit_ids=owner_chair_ids),
         "can_manage": can_manage_catalog(request),
+        "can_merge": can_merge_subjects(request),
     }
 
 
@@ -424,6 +440,7 @@ __all__ = [
     "build_programs_registry",
     "build_subject_catalog",
     "can_manage_catalog",
+    "can_merge_subjects",
     "can_view_catalog",
     "chair_options",
     "duplicate_subject_names",

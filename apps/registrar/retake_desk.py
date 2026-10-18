@@ -7,7 +7,10 @@ Tab-lar açardan asılıdır (rol adı yox):
 * «Qəbul və qərar» — ``retake.manage``: ödənişi təsdiqlənmiş 25% müraciətləri, alt qrup müraciətləri,
   nəticə / yerləşdirmə gözləyənlər;
 * «Hamısı» + «Tələbə izi» — hər üç açardan biri (``student.records_view`` daxil — koordinator, dekanlıq,
-  rəhbərlik izi görür).
+  rəhbərlik izi görür);
+* «Qaytarılacaq ödənişlər» (2026-10-19) — ``retake.payment_verify`` (icra: «Qaytarıldı») və təşkilat əhatəli
+  ``retake.manage`` (qərarı verən): qaytarılma qərarı verilmiş müraciətlər — tələbə, fənn, ödənilən / qaytarılacaq
+  məbləğ, əmr. Bal / nəticə GÖSTƏRİLMİR. «Ödənişin qaytarılması qərarı» düyməsi «Hamısı» sətrindədir (``retake_refund``).
 
 Əhatə ``retake_access.scoped_applications`` ilədir; KPI-lər tək aqreqat sorğu, səhifədəki qəbzlərin
 dublikat yoxlaması tək sorğu.
@@ -16,13 +19,13 @@ dublikat yoxlaması tək sorğu.
 from __future__ import annotations
 
 from django.core.paginator import Paginator
-from django.db.models import Count
+from django.db.models import Count, Sum
 from django.utils.translation import pgettext_lazy
 
 from core.search_text import tolerant_q
 
-from . import retake_access, retake_closure, retake_fees, retake_queries, retake_rules
-from .models import RetakeApplication, RetakeKind, RetakeStatus
+from . import retake_access, retake_closure, retake_fees, retake_queries, retake_refund, retake_rules
+from .models import RetakeApplication, RetakeKind, RetakeRefundState, RetakeStatus
 from .retake_services import duplicate_receipt_map
 
 _CTX = "registrar.retake"
@@ -34,6 +37,7 @@ TAB_PAYMENTS = "payments"
 TAB_ADMISSION = "admission"
 TAB_ALL = "all"
 TAB_FEES = "fees"
+TAB_REFUNDS = "refunds"
 
 _ADMISSION_STATUSES = (
     RetakeStatus.SUBMITTED,
@@ -64,6 +68,8 @@ def _tabs(keys) -> list:
         tabs.append((TAB_ADMISSION, pgettext_lazy(_CTX, "Qəbul və qərar")))
     if keys["trail"]:  # mühasib «Hamısı»nı və tələbə izini GÖRMÜR (ballar / tarixçə — sahibin qaydası)
         tabs.append((TAB_ALL, pgettext_lazy(_CTX, "Hamısı")))
+    if keys["verify"] or keys.get("refund_decide"):  # 2026-10-19: qaytarılma qərarları və icrası
+        tabs.append((TAB_REFUNDS, pgettext_lazy(_CTX, "Qaytarılacaq ödənişlər")))
     if keys.get("fees"):  # 2026-10-19: təhsil haqqı cədvəli (Mühasibatlıq)
         tabs.append((TAB_FEES, pgettext_lazy(_CTX, "Təhsil haqqı cədvəli")))
     return tabs
@@ -102,7 +108,9 @@ _ALL_KPIS = (
 )
 
 #: «Ödəniş yoxlaması» sətrində görünən addımlar — bal / nəticə hadisələri mühasibə GÖSTƏRİLMİR.
-_PAYMENT_EVENTS = frozenset({"submitted", "receipt_uploaded", "payment_verified", "payment_rejected", "withdrawn"})
+_PAYMENT_EVENTS = frozenset(
+    {"submitted", "receipt_uploaded", "payment_verified", "payment_rejected", "withdrawn", "refund_decided", "refunded"}
+)
 
 
 def _kpis(queryset, order=_ALL_KPIS) -> list:
@@ -183,6 +191,8 @@ def _rows(page, keys, *, payment_view=False) -> list:
         row["can_close"] = keys["manage"] and is_25 and application.status in retake_closure.AFTER_PAYMENT
         row["can_no_show"] = keys["manage"] and is_25 and application.status in retake_closure.ACTIONS["no_show"][2]
         row["expected_fee"] = expected.get(application.pk)
+        # 2026-10-19: qaytarılma qərarı — yalnız təşkilat əhatəli ``retake.manage`` (``retake_refund.can_decide``).
+        row["can_refund_decide"] = keys.get("refund_decide", False) and retake_refund.is_refundable(application)
         rows.append(_payment_row(row, application) if payment_view else row)
     return rows
 
@@ -191,6 +201,7 @@ def build(request, organization) -> dict:
     user = request.user
     keys = retake_access.desk_keys(user, organization)
     keys["fees"] = retake_fees.can_manage(user, organization)
+    keys["refund_decide"] = retake_refund.can_decide(user, organization)
     if not (keys["trail"] or keys["record"] or keys["verify"] or keys["fees"]):
         return {"has_access": False}
     params = _params(request)
@@ -199,6 +210,8 @@ def build(request, organization) -> dict:
     tab = params["tab"] if params["tab"] in tab_keys else tab_keys[0]
     if tab == TAB_FEES:
         return _fees_tab(organization, keys, tabs, params)
+    if tab == TAB_REFUNDS:
+        return _refunds_tab(request, organization, keys, tabs, params)
     base = retake_access.scoped_applications(RetakeApplication.objects.all(), user, organization, _keys_for_tab(tab))
     tab_qs = _tab_filter(base, tab)
     status = params["status"] if params["status"] in RetakeStatus.values else ""
@@ -267,6 +280,79 @@ def _fees_tab(organization, keys, tabs, params) -> dict:
     }
 
 
+_REFUND_FILTERS = (
+    (RetakeRefundState.DECIDED, pgettext_lazy(_CTX, "Qaytarılmalı")),
+    (RetakeRefundState.REFUNDED, pgettext_lazy(_CTX, "Qaytarılıb")),
+)
+
+
+def _refund_row(application, keys) -> dict:
+    """Qaytarılma sətri — tələbə, fənn, məbləğlər, qərar və icra; bal / nəticə YOX (mühasib də görür)."""
+    profile = getattr(application.student, "profile", None)
+    timeline = retake_queries.timeline(application)
+    keep = [entry for entry, event in zip(timeline, application.ordered_events) if event.action in _PAYMENT_EVENTS]
+    if keep:
+        keep[-1] = {**keep[-1], "current": True}
+    return {
+        "app": application,
+        "id": str(application.pk),
+        "student_number": (getattr(profile, "institutional_identifier", "") or "") if profile else "",
+        "timeline": keep,
+        "can_mark": keys["verify"] and application.refund_state == RetakeRefundState.DECIDED,
+        **retake_queries.refund_info(application),
+    }
+
+
+def _refunds_tab(request, organization, keys, tabs, params) -> dict:
+    """«Qaytarılacaq ödənişlər» — qərar verilmişlər (defolt: icra gözləyənlər); KPI tək aqreqat sorğu."""
+    keys_for_tab = (retake_rules.PERM_PAYMENT_VERIFY, retake_rules.PERM_MANAGE)
+    base = retake_access.scoped_applications(
+        RetakeApplication.objects.all(), request.user, organization, keys_for_tab
+    ).exclude(refund_state="")
+    allowed = {value for value, _label in _REFUND_FILTERS}
+    state = params["status"] if params["status"] in allowed else ""
+    if not params["status"] and "rt_status" not in request.GET:
+        state = RetakeRefundState.DECIDED
+    totals = {
+        row["refund_state"]: row
+        for row in base.values("refund_state").annotate(n=Count("id"), total=Sum("refund_amount")).order_by()
+    }
+    kpis = []
+    for value, label in _REFUND_FILTERS:
+        entry = totals.get(value) or {}
+        kpis.append(
+            {
+                "label": label,
+                "value": entry.get("n", 0),
+                "note": f"{retake_queries.fmt(entry.get('total'))} AZN" if entry.get("total") is not None else "",
+                "status": value,
+            }
+        )
+    filtered = base.filter(refund_state=state) if state else base
+    filtered = _search(filtered, params["q"])
+    filtered = filtered.select_related(
+        "student", "student__profile", "subject", "student_group", "period", "refund_decided_by", "refunded_by"
+    ).prefetch_related(retake_queries.events_prefetch())
+    paginator = Paginator(filtered.order_by("-refund_decided_at"), PAGE_SIZE)
+    page = paginator.get_page(params["page"])
+    return {
+        "has_access": True,
+        "keys": keys,
+        "tabs": [{"key": key, "label": label, "current": key == TAB_REFUNDS} for key, label in tabs],
+        "tab": TAB_REFUNDS,
+        "params": {**params, "status": state, "tab": TAB_REFUNDS},
+        "kpis": kpis,
+        "rows": [_refund_row(application, keys) for application in page.object_list],
+        "refund_view": True,
+        "page": page,
+        "total": paginator.count,
+        "status_choices": list(_REFUND_FILTERS),
+        "kind_choices": [],
+        "trail": None,
+        "reason_min": retake_rules.REASON_MIN,
+    }
+
+
 def _is_uuid(value) -> bool:
     import uuid
 
@@ -290,4 +376,4 @@ def _trail(request, organization, raw_student, keys):
     return retake_queries.student_trail(student=student, organization=organization)
 
 
-__all__ = ["PAGE_SIZE", "SECTION", "TAB_ADMISSION", "TAB_ALL", "TAB_FEES", "TAB_PAYMENTS", "build"]
+__all__ = ["PAGE_SIZE", "SECTION", "TAB_ADMISSION", "TAB_ALL", "TAB_FEES", "TAB_PAYMENTS", "TAB_REFUNDS", "build"]

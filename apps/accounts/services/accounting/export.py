@@ -8,10 +8,14 @@ Vərəqlər:
 1. «Müəllimlər» — süzülmüş BÜTÜN müəllimlər (drill-down / modal ixracında yalnız həmin müəllim) (səhifələmə yoxdur): fakültə, kafedra, ştat, dövrün planı,
    fakt (mühazirə / seminar / lab / cəm), fərq, icra %, status, semestr planı və semestr faktı;
 2. «Fənn və qrup» — həmin müəllimlərin fənn × qrup × növ üzrə keçirilmiş saatı (1 GROUP BY);
-3. «Dərslər» — YALNIZ drill-down açıqdırsa (``ac_teacher``): həmin müəllimin dərs siyahısı.
+3. «Dərslər» — YALNIZ drill-down açıqdırsa (``ac_teacher``): həmin müəllimin dərs siyahısı;
+4. «Dərəcələr» — ixrac anında qüvvədə olan ödəniş dərəcələri (id ilə — sətir silinmir, sonradan da oxunur).
 
-Hücrələr ``core.export_safety.sheet_append`` ilə yazılır (formula injection neytrallaşdırılır). Pul məbləği
-YOXDUR — sahib saat istəyib; dərəcə/tarif qərarı açıq sualdır.
+2026-10-19 (sahib, tövsiyə olunan variant): «Müəllimlər» vərəqində vəzifə, növlər üzrə məbləğ və «Məbləğ (AZN)» =
+keçirilmiş saat × dərəcə (``rates.py``). Dərəcə yoxdursa məbləğ BOŞ qalır və «Dərəcə təyin edilməyib» yazılır (0 yox).
+Saathesabı hissə PLAN üzrə ayrıca sütundadır. Başlıq: «İlkin hesablama — rəsmi əmək haqqı hesabı deyil».
+
+Hücrələr ``core.export_safety.sheet_append`` ilə yazılır (formula injection neytrallaşdırılır).
 """
 
 from __future__ import annotations
@@ -25,9 +29,10 @@ from core.ui import status_catalog
 
 from ..hr_analytics.constants import STAFF_TYPES
 from . import constants as C
-from . import dataset
+from . import dataset, rates
 from .detail import lesson_list, period_bounds, period_label
 from .formatting import staff_short
+from .rates_view import disclaimer, rate_card
 
 _HEADER_FILL = "1F3A5F"
 _HEADER_FONT = "FFFFFF"
@@ -54,6 +59,7 @@ def _teachers_table(resolved, rows) -> dict:
         pgettext(C.CTX, "Kafedra"),
         pgettext(C.CTX, "Ştat"),
         pgettext(C.CTX, "Ştat növü"),
+        pgettext(C.CTX, "Vəzifə"),
         pgettext(C.CTX, "Plan (saat)"),
         *(f"{label} ({pgettext(C.CTX, 'fakt')})" for label in _kind_headers()),
         pgettext(C.CTX, "Fakt (saat)"),
@@ -63,6 +69,10 @@ def _teachers_table(resolved, rows) -> dict:
         pgettext(C.CTX, "Status"),
         pgettext(C.CTX, "Semestr planı"),
         pgettext(C.CTX, "Semestr faktı"),
+        pgettext(C.CTX, "Saathesabı plan (semestr, saat)"),
+        *(f"{label} ({pgettext(C.CTX, 'məbləğ, AZN')})" for label in _kind_headers()),
+        pgettext(C.CTX, "Məbləğ (AZN)"),
+        pgettext(C.CTX, "Məbləğ qeydi"),
     ]
     body = [
         [
@@ -72,6 +82,7 @@ def _teachers_table(resolved, rows) -> dict:
             row["chair"],
             staff_short(row),
             staff_labels.get(row["staff_type"], ""),
+            row.get("position") or "",
             row["planned"],
             *(row["kinds"][kind] for kind in C.KIND_KEYS),
             row["held"],
@@ -81,6 +92,10 @@ def _teachers_table(resolved, rows) -> dict:
             _status_label(row["status"]),
             row["planned_sem"],
             row["held_sem"],
+            row.get("planned_hourly_sem", 0),
+            *(row["pay"]["kinds"][kind]["amount"] for kind in C.KIND_KEYS),
+            row["pay"]["amount"],
+            row["pay"]["hourly_note"] if row["pay"]["amount"] is not None else rates.missing_text(row["pay"]),
         ]
         for row in rows
     ]
@@ -138,11 +153,45 @@ def _lessons_table(resolved) -> dict:
     return {"title": pgettext(C.CTX, "Dərslər"), "header": header, "rows": body}
 
 
+def _rates_table(resolved) -> dict:
+    card = rate_card(resolved, with_manage=False)
+    header = [
+        pgettext(C.CTX, "Tədris ili"),
+        pgettext(C.CTX, "Vəzifə"),
+        pgettext(C.CTX, "Növ"),
+        pgettext(C.CTX, "Dərəcə (AZN / saat)"),
+        pgettext(C.CTX, "Qeyd"),
+        pgettext(C.CTX, "Əlavə edib"),
+        pgettext(C.CTX, "Tarix"),
+        pgettext(C.CTX, "Dərəcə id"),
+    ]
+    body = [
+        [
+            card["year"],
+            item["position_label"],
+            item["kind_label"],
+            item["rate"],
+            item["note"],
+            item["created_by_name"],
+            item["created_at"].strftime("%d.%m.%Y %H:%M") if item["created_at"] else "",
+            item["id"],
+        ]
+        for item in card["active"]
+    ]
+    return {"title": pgettext(C.CTX, "Dərəcələr"), "header": header, "rows": body}
+
+
+def used_rate_ids(resolved) -> list[str]:
+    """İxracda istifadə olunan aktiv dərəcələrin id-ləri (audit üçün)."""
+    return sorted(str(row.pk) for row in (resolved.rate_map or {}).values())
+
+
 def build_tables(resolved, rows) -> list[dict]:
     tables = [_teachers_table(resolved, rows), _breakdown_table(resolved, rows)]
     # Əhatə: ``persons`` yalnız aktorun görə bildiyi müəllimlərdir — başqa id-nin dərsləri heç vaxt çıxmır.
     if resolved.filters.teacher and int(resolved.filters.teacher) in resolved.persons:
         tables.append(_lessons_table(resolved))
+    tables.append(_rates_table(resolved))
     return tables
 
 
@@ -175,7 +224,10 @@ def xlsx_bytes(tables, *, caption: str) -> bytes:
 
 
 def export_caption(resolved) -> str:
-    return pgettext(C.CTX, "Mühasibatlıq · %(period)s · keçirilmiş dərs saatı və plan") % {"period": _period(resolved)}
+    caption = pgettext(C.CTX, "Mühasibatlıq · %(period)s · keçirilmiş dərs saatı və plan") % {
+        "period": _period(resolved)
+    }
+    return f"{caption} · {disclaimer()}"
 
 
-__all__ = ["build_tables", "export_caption", "xlsx_bytes"]
+__all__ = ["build_tables", "export_caption", "used_rate_ids", "xlsx_bytes"]

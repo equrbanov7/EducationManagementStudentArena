@@ -28,7 +28,8 @@ imtahan, təcrübə, buraxılış işi jurnalda dərs kimi yazılmadığı üç�
 aylara ``periods.apportion`` qaydası ilə bölünür.
 
 Sorğu büdcəsi SABİTDİR (müəllim sayından asılı deyil): fakt 1 (aralıq rejimində +1), plan 1, istifadəçilər 1,
-üzvlüklər 1, struktur 1, yük profilləri 1. Filtr / sıralama / səhifələmə bundan sonra yaddaşda gedir (heyət ~10³).
+üzvlüklər 1, struktur 1, yük profilləri 1, ödəniş dərəcələri 1 (``rates.year_rows``).
+Filtr / sıralama / səhifələmə bundan sonra yaddaşda gedir (heyət ~10³).
 """
 
 from __future__ import annotations
@@ -37,7 +38,7 @@ from collections import defaultdict
 
 from django.apps import apps as django_apps
 from django.contrib.auth import get_user_model
-from django.db.models import Count, Exists, OuterRef, Sum
+from django.db.models import Count, Exists, OuterRef, Q, Sum
 from django.db.models.functions import Coalesce, TruncMonth
 
 from core.person_names import clean_name_part
@@ -117,7 +118,8 @@ def held_matrix(organization, semester: Semester, *, start=None, end=None, teach
 
 
 def planned_matrix(organization, semester: Semester, *, teacher=None) -> dict:
-    """{müəllim: {növ: semestr saatı}} — BİR GROUP BY sorğusu (``teacher`` — yalnız bir müəllim)."""
+    """{müəllim: {növ: semestr saatı, C.HOURLY_KEY: {növ: saathesabı saat}}} — BİR GROUP BY sorğusu
+    (``teacher`` — yalnız bir müəllim)."""
     queryset = _model("workload", "TeacherAssignment").objects.all()
     if teacher is not None:
         queryset = queryset.filter(teacher_id=teacher)
@@ -131,12 +133,15 @@ def planned_matrix(organization, semester: Semester, *, teacher=None) -> dict:
             row__season=semester.season,
         )
         .values("teacher_id", "activity")
-        .annotate(hours=Sum("hours"))
+        .annotate(hourly=Sum("hours", filter=Q(is_hourly_paid=True)), hours=Sum("hours"))  # sıra vacibdir
         .order_by()
     )
     out: dict = defaultdict(dict)
     for row in rows:
         out[row["teacher_id"]][row["activity"]] = int(row["hours"] or 0)
+        # 2026-10-19: saathesabı fondundan ödənilən plan saatı (``is_hourly_paid``) — eyni sorğu, ayrıca açar.
+        hourly = out[row["teacher_id"]].setdefault(C.HOURLY_KEY, {})
+        hourly[row["activity"]] = int(row["hourly"] or 0)
     return out
 
 
@@ -221,6 +226,8 @@ def people(actor, teacher_ids, academic_year: str, *, units: dict | None = None)
             "staff_type": staff_type(profile),
             "staff_fraction": float(profile["staff_fraction"] or 0) if profile else None,
             "position": positions.get((profile or {}).get("position") or "", ""),
+            #: Vəzifə AÇARI (ödəniş dərəcəsi üçün, ``rates.py``); yük profili yoxdursa boş.
+            "position_key": (profile or {}).get("position") or "",
         }
     return out
 

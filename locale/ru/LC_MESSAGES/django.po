@@ -105231,3 +105231,1307 @@ msgstr "Браузер не может воспроизвести это вид�
 msgctxt "organizations.permission.label"
 msgid "Təhsil haqqı cədvəlini idarə etmək (25% təkrar imtahanın təxmini məbləği)"
 msgstr "Управлять таблицей платы за обучение (ориентировочная сумма пересдачи 25%)"
+
+msgctxt "organizations.holiday"
+msgid "Bayram"
+msgstr "Праздник"
+
+msgctxt "organizations.holiday"
+msgid "Qeyri-iş günü"
+msgstr "Нерабочий день"
+
+msgctxt "organizations.holiday"
+msgid "İş günü köçürməsi"
+msgstr "Перенесённый рабочий день"
+
+msgctxt "organizations.holiday"
+msgid "Bayram / qeyri-iş günü"
+msgstr "Праздник / нерабочий день"
+
+msgctxt "organizations.holiday"
+msgid "Bayram və qeyri-iş günləri"
+msgstr "Праздники и нерабочие дни"
+
+msgctxt "organizations.holiday"
+msgid "Tarix düzgün deyil."
+msgstr "Неверная дата."
+
+msgctxt "organizations.holiday"
+msgid "Günün adı boş ola bilməz."
+msgstr "Название дня не может быть пустым."
+
+msgctxt "organizations.holiday"
+msgid "Günün növü düzgün deyil."
+msgstr "Неверный тип дня."
+
+msgctxt "organizations.holiday"
+msgid "«İş günü köçürməsi» yalnız şənbə və ya bazar gününə yazılır — həmin gün iş günü elan olunur."
+msgstr "«Перенесённый рабочий день» можно указать только для субботы или воскресенья — этот день объявляется рабочим."
+
+msgctxt "organizations.holiday"
+msgid "Qeyd tapılmadı."
+msgstr "Запись не найдена."
+
+msgctxt "organizations.holiday"
+msgid "Bu tarix artıq təqvimdədir — mövcud qeydi redaktə edin."
+msgstr "Эта дата уже есть в календаре — отредактируйте существующую запись."
+
+msgctxt "registrar.calendar"
+msgid "Bazar ertəsi"
+msgstr "Понедельник"
+
+msgctxt "registrar.calendar"
+msgid "Çərşənbə axşamı"
+msgstr "Вторник"
+
+msgctxt "registrar.calendar"
+msgid "Çərşənbə"
+msgstr "Среда"
+
+msgctxt "registrar.calendar"
+msgid "Cümə axşamı"
+msgstr "Четверг"
+
+msgctxt "registrar.calendar"
+msgid "Cümə"
+msgstr "Пятница"
+
+msgctxt "registrar.calendar"
+msgid "Şənbə"
+msgstr "Суббота"
+
+msgctxt "registrar.calendar"
+msgid "Bazar"
+msgstr "Воскресенье"
+
+msgctxt "registrar.calendar"
+msgid "Gün təqvimə əlavə olundu."
+msgstr "День добавлен в календарь."
+
+msgctxt "registrar.calendar"
+msgid "Dəyişiklik yadda saxlanıldı."
+msgstr "Изменения сохранены."
+
+#, python-format
+msgctxt "registrar.calendar"
+msgid "%(year)s: təqvimə %(created)d gün əlavə olundu, %(skipped)d tarix artıq təqvimdə idi."
+msgstr "%(year)s: в календарь добавлено дней — %(created)d, уже было в календаре дат — %(skipped)d."
+
+msgctxt "registrar.calendar"
+msgid "Gün təqvimdən silindi."
+msgstr "День удалён из календаря."
+
+msgctxt "registrar.calendar"
+msgid "Tədris ili seçilməyib."
+msgstr "Учебный год не выбран."
+
+msgctxt "registrar.calendar"
+msgid "Bayram təqvimini dəyişmək üçün səlahiyyətiniz yoxdur."
+msgstr "У вас нет прав на изменение календаря праздников."
+
+msgctxt "registrar.calendar"
+msgid "Naməlum əməl."
+msgstr "Неизвестное действие."
+
+msgctxt "registrar.calendar"
+msgid "Başqasının adından baxış rejimində dəyişiklik etmək olmaz."
+msgstr "В режиме просмотра от имени другого пользователя изменения запрещены."
+
+msgctxt "registrar.calendar"
+msgid "Əməl alınmadı. Yenidən cəhd edin."
+msgstr "Не удалось выполнить действие. Попробуйте ещё раз."
+
+#, python-format
+msgctxt "registrar.calendar"
+msgid "Bayram və qeyri-iş günləri · %(year)s"
+msgstr "Праздники и нерабочие дни · %(year)s"
+
+msgctxt "registrar.calendar"
+msgid "Rəsmi bayramları əlavə et (sabit tarixli)"
+msgstr "Добавить государственные праздники (с фиксированной датой)"
+
+msgctxt "registrar.calendar"
+msgid "Gün əlavə et"
+msgstr "Добавить день"
+
+#, python-format
+msgctxt "registrar.calendar"
+msgid "Tədris ili %(start)s — %(end)s. Bayram və qeyri-iş günləri dərs günü sayılmır: «Keçilmiş dərslər» onları «qeydə alınmayıb» saymır, mühasibatlığın aylıq planı və müraciətlərin cavab müddəti iş günü ilə hesablananda çıxılır. «İş günü köçürməsi» iş günü elan olunmuş şənbə/bazardır."
+msgstr "Учебный год %(start)s — %(end)s. Праздники и нерабочие дни не считаются учебными: «Проведённые занятия» не считают их «не отмеченными», а при расчёте месячного плана бухгалтерии и срока ответа на обращения в рабочих днях они исключаются. «Перенесённый рабочий день» — суббота/воскресенье, объявленные рабочими."
+
+msgctxt "registrar.calendar"
+msgid "Düymə yalnız SABİT tarixli rəsmi bayramları (Yeni il, 8 Mart, Novruz, 9 May, 28 May, 15 İyun, 26 İyun, 8–9 Noyabr, 31 Dekabr) və 20 Yanvarı (Ümumxalq hüzn günü — qeyri-iş günü) əlavə edir; təqvimdə olan tarixlər atlanır. Ramazan və Qurban bayramları (hər il dəyişir), bayram həftə sonuna düşəndə verilən əlavə istirahət günləri və hökumətin iş günü köçürmələri «Gün əlavə et» ilə ƏL İLƏ daxil edilir."
+msgstr "Кнопка добавляет только государственные праздники с ФИКСИРОВАННОЙ датой (Новый год, 8 Марта, Новруз, 9 Мая, 28 Мая, 15 Июня, 26 Июня, 8–9 Ноября, 31 Декабря) и 20 Января (День всенародной скорби — нерабочий день); даты, уже имеющиеся в календаре, пропускаются. Рамазан и Гурбан (меняются каждый год), дополнительные выходные при совпадении праздника с выходными и правительственные переносы рабочих дней вносятся ВРУЧНУЮ через «Добавить день»."
+
+msgctxt "registrar.calendar"
+msgid "Günü redaktə et"
+msgstr "Редактировать день"
+
+#, python-format
+msgctxt "registrar.calendar"
+msgid "Redaktə et: %(name)s"
+msgstr "Редактировать: %(name)s"
+
+#, python-format
+msgctxt "registrar.calendar"
+msgid "«%(name)s» (%(day)s) təqvimdən silinsin? Əməl audit jurnalına yazılır."
+msgstr "Удалить «%(name)s» (%(day)s) из календаря? Действие записывается в журнал аудита."
+
+#, python-format
+msgctxt "registrar.calendar"
+msgid "Sil: %(name)s"
+msgstr "Удалить: %(name)s"
+
+msgctxt "registrar.calendar"
+msgid "Bu tədris ili üçün bayram və qeyri-iş günü daxil edilməyib."
+msgstr "Для этого учебного года праздники и нерабочие дни не внесены."
+
+msgctxt "registrar.calendar"
+msgid "Bayram / qeyri-iş günü"
+msgstr "Праздник / нерабочий день"
+
+msgctxt "registrar.calendar"
+msgid "Tarix təqvimdə bir dəfə ola bilər; dəyişiklik audit jurnalına yazılır."
+msgstr "Дата может быть в календаре только один раз; изменения записываются в журнал аудита."
+
+msgctxt "registrar.calendar"
+msgid "Rəsmi bayramları əlavə et"
+msgstr "Добавить государственные праздники"
+
+msgctxt "registrar.calendar"
+msgid "Seçilmiş tədris ilinin sabit tarixli bayramları əlavə olunur; mövcud tarixlərə toxunulmur."
+msgstr "Добавляются праздники выбранного учебного года с фиксированной датой; существующие даты не изменяются."
+
+msgctxt "registrar.calendar"
+msgid "Əlavə et"
+msgstr "Добавить"
+
+msgctxt "registrar.calendar"
+msgid "Tarix"
+msgstr "Дата"
+
+msgctxt "registrar.calendar"
+msgid "Növ"
+msgstr "Тип"
+
+msgctxt "registrar.calendar"
+msgid "«İş günü köçürməsi» — şənbə/bazar iş günü elan olunub (yalnız həftə sonu tarixinə yazılır). Köçürmə ilə istirahət olan iş günü «Qeyri-iş günü»dür."
+msgstr "«Перенесённый рабочий день» — суббота/воскресенье, объявленные рабочими (только для выходных). Будний день, ставший выходным из-за переноса, — «Нерабочий день»."
+
+msgctxt "registrar.calendar"
+msgid "Ad"
+msgstr "Название"
+
+msgctxt "registrar.calendar"
+msgid "Ramazan bayramı"
+msgstr "Рамазан байрам"
+
+msgctxt "registrar.calendar"
+msgid "Qeyd"
+msgstr "Примечание"
+
+msgctxt "registrar.calendar"
+msgid "Məs. Nazirlər Kabinetinin qərarı"
+msgstr "Напр., решение Кабинета министров"
+
+msgctxt "registrar.calendar"
+msgid "Sentyabr–dekabr bayramları tədris ilinin birinci ilinə, yanvar–avqust bayramları ikinci ilinə yazılır. Ramazan və Qurban bayramları, hökumətin iş günü köçürmələri əlavə olunmur — onları əl ilə daxil edin."
+msgstr "Праздники сентября–декабря относятся к первому году учебного года, января–августа — ко второму. Рамазан, Гурбан и правительственные переносы рабочих дней не добавляются — внесите их вручную."
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "və daha %(n)d"
+msgstr "и ещё %(n)d"
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "Bu qəbul ili üçün təsdiqlənmiş plan yoxdur — ən son plan tətbiq olundu: %(groups)s."
+msgstr "Для этого года приёма нет утверждённого плана — применён последний план: %(groups)s."
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "Qrupun qəbul ili bilinmir (ad və ayarda yoxdur) — ən son plan tətbiq olundu: %(groups)s."
+msgstr "Год приёма группы неизвестен (нет ни в названии, ни в настройках) — применён последний план: %(groups)s."
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "%(n)d açılışın fənni qrupun öz qəbul ili planının bu semestrində yoxdur (əvvəlki qayda ilə ən son plandan yaradılıb). Açılışlar avtomatik silinmir — lazımsızdırsa «Ləğv et» ilə ləğv edin."
+msgstr "У %(n)d открытий дисциплина отсутствует в этом семестре плана года приёма группы (созданы по прежнему правилу из последнего плана). Открытия не удаляются автоматически — ненужные отмените кнопкой «Отменить»."
+
+msgctxt "accounts.semester"
+msgid "Yuxarıdakı süzgəcdən semestri seçin. «Plandan açılış yarat» həmin semestri oxuyan (kursu uyğun) hər qrup üçün qrupun ÖZ qəbul ilinin təsdiqlənmiş tədris planının (yoxdursa ən son planın) məcburi fənlərindən açılış yaradır və qrupun aktiv tələbələrini dərhal qeydiyyata alır; seçmə fənlər qrupun seçimi ilə açılır. Mövcud sətir təkrarlanmır, heç nə silinmir. «Plan yoxdur» ixtisaslar üçün sətir yaranmır — əvvəlcə «Tədris planı» bölməsində planı təsdiqləyin."
+msgstr "Выберите семестр в фильтре выше. «Создать открытия по плану» создаёт открытия для каждой группы, изучающей этот семестр (подходящий курс), из обязательных дисциплин утверждённого учебного плана СОБСТВЕННОГО года приёма группы (если его нет — последнего плана) и сразу зачисляет активных студентов группы; элективы открываются по выбору группы. Существующие строки не дублируются, ничего не удаляется. Для специальностей «Нет плана» строки не создаются — сначала утвердите план в разделе «Учебный план»."
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "Xatırlatma göndərildi: %(teachers)d müəllimə, %(chair)d kafedra əməkdaşına, %(schedule)d cədvəl quran əməkdaşa (dekanlıq / koordinator)."
+msgstr "Напоминание отправлено: преподавателям — %(teachers)d, сотрудникам кафедры — %(chair)d, составителям расписания (деканат / координатор) — %(schedule)d."
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "%(program)s · %(year)s qəbulu · semestr %(n)d"
+msgstr "%(program)s · приём %(year)s · семестр %(n)d"
+
+msgctxt "accounts.semester"
+msgid "Qəbul ili planı"
+msgstr "План года приёма"
+
+msgctxt "accounts.semester"
+msgid "Hər qrup öz qəbul ilinin təsdiqlənmiş planından açılır."
+msgstr "Каждая группа открывается по утверждённому плану своего года приёма."
+
+msgctxt "accounts.semester"
+msgid "Nümunə:"
+msgstr "Пример:"
+
+msgctxt "accounts.semester"
+msgid "Hər qrup üçün qrupun öz qəbul ilinin TƏSDİQLƏNMİŞ planından açılış sətirləri yaradılır (həmin il üçün plan yoxdursa — ən son plandan, xəbərdarlıqla). Əməl idempotentdir — mövcud açılış təkrarlanmır və heç nə silinmir."
+msgstr "Для каждой группы строки открытий создаются по УТВЕРЖДЁННОМУ плану её собственного года приёма (если для этого года плана нет — по последнему плану, с предупреждением). Действие идемпотентно — существующие открытия не дублируются, ничего не удаляется."
+
+msgctxt "accounts.semester"
+msgid "Xatırlatma göndərilsin? Müəllimlərə — sillabus / jurnal, kafedra rəhbərinə — xülasə, cədvəli olmayan fənlər üçün isə cədvəli quran dekanlıq / koordinatora. Eyni kafedraya 12 saatda bir dəfə göndərilir."
+msgstr "Отправить напоминание? Преподавателям — силлабус / журнал, заведующему кафедрой — сводка, а деканату / координатору, составляющему расписание, — дисциплины без расписания. Одной кафедре — не чаще раза в 12 часов."
+
+msgctxt "accounts.lessons_log"
+msgid "Keçmiş tarixə dərs sütununu yalnız RİM rəhbəri aça bilər (audit izinə düşür). «Akademik təqvim»də qeyd olunmuş bayram və qeyri-iş günləri burada sayılmır."
+msgstr "Открыть столбец занятия за прошедшую дату может только руководитель РИМ (попадает в аудит). Праздники и нерабочие дни, отмеченные в «Академическом календаре», здесь не учитываются."
+
+msgctxt "registrar.subject_merge"
+msgid "Səbəb ən azı 20 simvol olmalıdır — qısa qeyd audit üçün yetərli deyil."
+msgstr "Причина должна содержать не менее 20 символов — короткой заметки для аудита недостаточно."
+
+msgctxt "registrar.subject_merge"
+msgid "Saxlanılacaq fənni seçin."
+msgstr "Выберите сохраняемую дисциплину."
+
+msgctxt "registrar.subject_merge"
+msgid "Ən azı bir birləşdiriləcək fənn seçin."
+msgstr "Выберите хотя бы одну объединяемую дисциплину."
+
+msgctxt "registrar.subject_merge"
+msgid "Fənn tapılmadı."
+msgstr "Дисциплина не найдена."
+
+msgctxt "registrar.subject_merge"
+msgid "Saxlanılacaq fənn birləşdiriləcəklər siyahısında ola bilməz."
+msgstr "Сохраняемая дисциплина не может быть в списке объединяемых."
+
+msgctxt "registrar.subject_merge"
+msgid "Saxlanılacaq fənn arxivdədir — əvvəlcə onu arxivdən qaytarın."
+msgstr "Сохраняемая дисциплина в архиве — сначала восстановите её из архива."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Bir dəfəyə ən çox %(n)s fənn birləşdirilə bilər."
+msgstr "За один раз можно объединить не более %(n)s дисциплин."
+
+msgctxt "registrar.subject_merge"
+msgid "Məlumat önizləmədən sonra dəyişib — yenidən önizləyin."
+msgstr "Данные изменились после предпросмотра — выполните предпросмотр заново."
+
+msgctxt "registrar.subject_merge"
+msgid "Əvvəlcə önizləməyə baxın."
+msgstr "Сначала посмотрите предпросмотр."
+
+msgctxt "registrar.subject_merge"
+msgid "Toqquşmalar həll edilməyib — birləşdirmə bloklanır."
+msgstr "Конфликты не устранены — объединение заблокировано."
+
+msgctxt "registrar.subject_merge"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "Нет активного контекста организации."
+
+msgctxt "registrar.subject_merge"
+msgid "Fənləri birləşdirmək səlahiyyətiniz yoxdur."
+msgstr "У вас нет прав на объединение дисциплин."
+
+msgctxt "registrar.subject_merge"
+msgid "Səhifə tapılmadı."
+msgstr "Страница не найдена."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Birləşdirildi: %(sources)s → %(target)s."
+msgstr "Объединено: %(sources)s → %(target)s."
+
+msgctxt "registrar.subject_merge"
+msgid "Fənn növləri fərqlidir — saxlanılan fənnin növü qalır."
+msgstr "Типы дисциплин различаются — остаётся тип сохраняемой дисциплины."
+
+msgctxt "registrar.subject_merge"
+msgid "Adlar (boşluq/registr nəzərə alınmadan) fərqlidir — bunun həqiqətən eyni fənn olduğunu yoxlayın."
+msgstr "Названия различаются (без учёта пробелов/регистра) — убедитесь, что это действительно одна дисциплина."
+
+msgctxt "registrar.subject_merge"
+msgid "Birləşdiriləcək fənlərdən biri artıq arxivdədir — istinadları yenə köçürüləcək."
+msgstr "Одна из объединяемых дисциплин уже в архиве — её ссылки всё равно будут перенесены."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Kredit fərqlidir: %(list)s. Fərqli kreditli fənn üzrə yekun qiymət yoxdur — birləşmədən sonra saxlanılan fənnin krediti (%(ects)s ECTS) işlənir; plan sətirlərindəki kredit dəyişmir."
+msgstr "Кредиты различаются: %(list)s. По дисциплине с другим кредитом нет итоговых оценок — после объединения действует кредит сохраняемой дисциплины (%(ects)s ECTS); кредиты в строках планов не меняются."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Kredit fərqi: %(source)s — %(source_ects)s ECTS, saxlanılan %(target)s — %(target_ects)s ECTS. %(source)s üzrə %(n)s tələbənin yekun qiyməti var — birləşmə onların keçmiş transkriptində krediti və ÜOMG-ni dəyişərdi. Əvvəlcə ECTS-i uyğunlaşdırın və ya hər iki kartı saxlayın."
+msgstr "Расхождение кредитов: %(source)s — %(source_ects)s ECTS, сохраняемая %(target)s — %(target_ects)s ECTS. По %(source)s итоговые оценки есть у %(n)s студентов — объединение изменило бы кредиты и GPA в их прошлых транскриптах. Сначала согласуйте ECTS или сохраните обе карточки."
+
+msgctxt "registrar.subject_merge"
+msgid "Birləşmə DB qaydasını pozur — heç nə yazılmadı."
+msgstr "Объединение нарушает правило базы данных — ничего не записано."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(n)s təsdiqlənmiş və ya baxışdakı planın sətrində fənn kartı dəyişəcək — bu, məzmun deyil, identiklik düzəlişidir (kredit/saat/semestr dəyişmir) və audit-ə yazılır."
+msgstr "В строках %(n)s утверждённых или находящихся на рассмотрении планов изменится карточка дисциплины — это исправление идентичности, а не содержания (кредиты/часы/семестр не меняются), оно записывается в аудит."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(n)s açılışın qeydiyyatı var — açılışlar qiymət və davamiyyətləri ilə birlikdə köçür."
+msgstr "В %(n)s потоках есть записи студентов — потоки переносятся вместе с оценками и посещаемостью."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(n)s imtahan qrupunda hər iki fənn var — təkrar əlaqə çıxarılacaq."
+msgstr "В %(n)s экзаменационных группах есть обе дисциплины — повторная связь будет удалена."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(n)s imtahan şansı qeydi dəyişməz tarixçədir — arxivlənmiş fənndə qalır."
+msgstr "%(n)s записей о дополнительной попытке — неизменяемая история, они остаются у архивной дисциплины."
+
+msgctxt "registrar.subject_merge"
+msgid "Dövrsüz"
+msgstr "Без периода"
+
+msgctxt "registrar.subject_merge"
+msgid "Qrupsuz"
+msgstr "Без группы"
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(period)s: hər iki fənn üzrə qrupsuz açılış var — birləşmədən sonra ikisi qalır."
+msgstr "%(period)s: у обеих дисциплин есть поток без группы — после объединения останутся оба."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(period)s · %(group)s: hər iki fənn üzrə açılış var — əvvəlcə birini ləğv edin."
+msgstr "%(period)s · %(group)s: есть потоки по обеим дисциплинам — сначала отмените один из них."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Plan «%(plan)s» (%(status)s) · %(semester)s-ci semestr: hər iki fənn sətri var — bu statusda plan dəyişmir; əvvəlcə yeni versiyada birini çıxarın."
+msgstr "План «%(plan)s» (%(status)s) · семестр %(semester)s: есть строки обеих дисциплин — в этом статусе план не меняется; сначала уберите одну из них в новой версии."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Plan «%(plan)s» (%(status)s) · %(semester)s-ci semestr: hər iki fənn sətri var — saxlanılan fənnin sətri qalır, digəri plandan çıxarılır."
+msgstr "План «%(plan)s» (%(status)s) · семестр %(semester)s: есть строки обеих дисциплин — строка сохраняемой дисциплины остаётся, другая удаляется из плана."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Plan «%(plan)s»: fənlər müxtəlif semestrlərdədir — birləşmədən sonra fənn planda %(n)s dəfə olacaq."
+msgstr "План «%(plan)s»: дисциплины в разных семестрах — после объединения дисциплина будет в плане %(n)s раз."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(student)s · %(period)s: eyni dövrdə hər iki fənn üzrə aktiv qeydiyyat var — əvvəlcə birini bağlayın."
+msgstr "%(student)s · %(period)s: в одном периоде есть активные записи по обеим дисциплинам — сначала закройте одну из них."
+
+msgctxt "registrar.subject_merge"
+msgid "Hər ikisində yekun qiymət yazılıb."
+msgstr "В обеих выставлена итоговая оценка."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Sillabus · %(period)s: hər iki fənnin semestr sillabusu var — əvvəlcə birini ləğv edin."
+msgstr "Силлабус · %(period)s: у обеих дисциплин есть семестровый силлабус — сначала отмените один из них."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Sillabus (baza) · %(author)s: hər iki fənn üzrə baza sillabusu var — əvvəlcə birini ləğv edin."
+msgstr "Силлабус (базовый) · %(author)s: по обеим дисциплинам есть базовый силлабус — сначала отмените один."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Fənn qovluğu · %(owner)s · %(period)s: hər iki fənn üzrə qovluq var — əvvəlcə birini ləğv edin."
+msgstr "Папка дисциплины · %(owner)s · %(period)s: есть папки по обеим дисциплинам — сначала отмените одну."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Təkrar imtahan · %(student)s: hər iki fənn üzrə aktiv müraciət var — əvvəlcə birini bağlayın."
+msgstr "Пересдача · %(student)s: есть активные заявки по обеим дисциплинам — сначала закройте одну."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Tədris tapşırığı «%(task)s» · %(groups)s: eyni ixtisas və qruplar üçün hər iki fənn sətri var — əvvəlcə birini silin."
+msgstr "Учебное задание «%(task)s» · %(groups)s: для той же специальности и групп есть строки обеих дисциплин — сначала удалите одну."
+
+msgctxt "registrar.subject_merge"
+msgid "Fənn açılışları (jurnallar)"
+msgstr "Потоки дисциплины (журналы)"
+
+msgctxt "registrar.subject_merge"
+msgid "Tədris planı sətirləri"
+msgstr "Строки учебного плана"
+
+msgctxt "registrar.subject_merge"
+msgid "Qrupun seçmə fənn qərarları"
+msgstr "Решения группы по дисциплинам по выбору"
+
+msgctxt "registrar.subject_merge"
+msgid "Təkrar imtahan müraciətləri"
+msgstr "Заявки на пересдачу"
+
+msgctxt "registrar.subject_merge"
+msgid "İmtahan şansı qeydləri (dəyişməz tarixçə)"
+msgstr "Записи о дополнительных попытках (неизменяемая история)"
+
+msgctxt "registrar.subject_merge"
+msgid "Sillabuslar"
+msgstr "Силлабусы"
+
+msgctxt "registrar.subject_merge"
+msgid "Tədris tapşırığı sətirləri"
+msgstr "Строки учебного задания"
+
+msgctxt "registrar.subject_merge"
+msgid "İmtahan qrupları (əlaqə)"
+msgstr "Экзаменационные группы (связь)"
+
+msgctxt "registrar.subject_merge"
+msgid "İmtahanlar"
+msgstr "Экзамены"
+
+msgctxt "registrar.subject_merge"
+msgid "Sual bankları"
+msgstr "Банки вопросов"
+
+msgctxt "registrar.subject_merge"
+msgid "Sual göndərişləri"
+msgstr "Отправки вопросов"
+
+msgctxt "registrar.subject_merge"
+msgid "Sorğu cavabları (anonim)"
+msgstr "Ответы на опрос (анонимно)"
+
+msgctxt "registrar.subject_merge"
+msgid "Fənn qovluqları"
+msgstr "Папки дисциплин"
+
+msgctxt "registrar.subject_merge"
+msgid "Cədvəl: müəllimin fənn prioritetləri"
+msgstr "Расписание: приоритеты дисциплин преподавателя"
+
+msgctxt "registrar.subject_merge"
+msgid "Fənləri birləşdir"
+msgstr "Объединить дисциплины"
+
+msgctxt "registrar.subject_merge"
+msgid "Birləşdir"
+msgstr "Объединить"
+
+msgctxt "registrar.subject_merge"
+msgid "Bütün istinadlar (açılış, plan sətri, sillabus, tapşırıq, imtahan…) saxlanılan fənnə köçür; digər kartlar SİLİNMİR — arxivlənir."
+msgstr "Все ссылки (поток, строка плана, силлабус, задание, экзамен…) переходят к сохраняемой дисциплине; остальные карточки НЕ удаляются — архивируются."
+
+msgctxt "registrar.subject_merge"
+msgid "Ad üzrə dublikat qrupları (hazır təklif)"
+msgstr "Группы дубликатов по названию (готовое предложение)"
+
+msgctxt "registrar.subject_merge"
+msgid "Saxlanılacaq fənn"
+msgstr "Сохраняемая дисциплина"
+
+msgctxt "registrar.subject_merge"
+msgid "Birləşdiriləcək fənn(lər)"
+msgstr "Объединяемые дисциплины"
+
+msgctxt "registrar.subject_merge"
+msgid "Uyğun fənn tapılmadı"
+msgstr "Подходящая дисциплина не найдена"
+
+msgctxt "registrar.subject_merge"
+msgid "Kod və ya ad ilə axtar…"
+msgstr "Поиск по коду или названию…"
+
+msgctxt "registrar.subject_merge"
+msgid "Bir dəfəyə ən çox 10 fənn. Arxivdəki kartlar da seçilə bilər."
+msgstr "Не более 10 дисциплин за раз. Можно выбрать и архивные карточки."
+
+msgctxt "registrar.subject_merge"
+msgid "Önizlə"
+msgstr "Предпросмотр"
+
+msgctxt "registrar.subject_merge"
+msgid "Səbəb"
+msgstr "Причина"
+
+msgctxt "registrar.subject_merge"
+msgid "Məs. Tədris şöbəsinin təklifi: eyni fənnin iki kartı (əmr/protokol nömrəsi)"
+msgstr "Напр. предложение учебного отдела: две карточки одной дисциплины (номер приказа/протокола)"
+
+msgctxt "registrar.subject_merge"
+msgid "Ən azı 20 simvol — audit jurnalına aktor və vaxtla yazılır."
+msgstr "Не менее 20 символов — записывается в журнал аудита с исполнителем и временем."
+
+msgctxt "registrar.subject_merge"
+msgid "köçür"
+msgstr "переносится"
+
+msgctxt "registrar.subject_merge"
+msgid "qalır (dəyişməz tarixçə)"
+msgstr "остаётся (неизменяемая история)"
+
+msgctxt "registrar.subject_merge"
+msgid "Köçürüləcək istinad yoxdur — yalnız kart arxivlənəcək."
+msgstr "Ссылок для переноса нет — будет архивирована только карточка."
+
+msgctxt "registrar.subject_merge"
+msgid "Toqquşmalar — əvvəlcə bunları həll edin"
+msgstr "Конфликты — сначала устраните их"
+
+msgctxt "registrar.subject_merge"
+msgid "Avtomatik həll olunur"
+msgstr "Устраняется автоматически"
+
+msgctxt "registrar.subject_merge"
+msgid "Xəbərdarlıqlar"
+msgstr "Предупреждения"
+
+msgctxt "registrar.subject_merge"
+msgid "Qeydlər"
+msgstr "Примечания"
+
+msgctxt "registrar.subject_merge"
+msgid "və daha {n}"
+msgstr "и ещё {n}"
+
+msgctxt "registrar.subject_merge"
+msgid "Mənbə kartların arxiv səbəbi:"
+msgstr "Причина архивирования исходных карточек:"
+
+msgctxt "registrar.subject_merge"
+msgid "Toqquşma yoxdur — səbəbi yazıb birləşdirə bilərsiniz."
+msgstr "Конфликтов нет — укажите причину и объедините."
+
+msgctxt "registrar.subject_merge"
+msgid "Saxlanılacaq və ən azı bir birləşdiriləcək fənn seçin."
+msgstr "Выберите сохраняемую и хотя бы одну объединяемую дисциплину."
+
+msgctxt "registrar.subject_merge"
+msgid "Seçim dəyişdi — yenidən önizləyin."
+msgstr "Выбор изменился — выполните предпросмотр заново."
+
+msgctxt "registrar.subject_merge"
+msgid "Seç"
+msgstr "Выбрать"
+
+msgctxt "registrar.subject_merge"
+msgid "arxivdə"
+msgstr "в архиве"
+
+msgctxt "registrar.subject_merge"
+msgid "saxlanılır"
+msgstr "сохраняется"
+
+msgctxt "registrar.subject_merge"
+msgid "açılış"
+msgstr "потоков"
+
+msgctxt "registrar.subject_merge"
+msgid "Ad üzrə dublikat qrupu tapılmadı — fənləri axtarışla seçin."
+msgstr "Групп дубликатов по названию не найдено — выберите дисциплины через поиск."
+
+msgctxt "registrar.subject_merge"
+msgid "Sorğu alınmadı — yenidən cəhd edin."
+msgstr "Запрос не выполнен — попробуйте ещё раз."
+
+msgctxt "accounts.catalog"
+msgid "Eyni adlı fənlər avtomatik birləşdirilmir. «Fənləri birləşdir» ilə saxlanılacaq kartı seçin — önizləmə bütün istinadları və toqquşmaları göstərir, mənbə kartlar silinmir, arxivlənir."
+msgstr "Одноимённые дисциплины не объединяются автоматически. Выберите сохраняемую карточку через «Объединить дисциплины» — предпросмотр покажет все ссылки и конфликты; исходные карточки не удаляются, а архивируются."
+
+msgctxt "accounts.catalog"
+msgid "Eyni adlı fənlər avtomatik birləşdirilmir — birləşdirməni Tədris şöbəsi (təşkilat səviyyəli «Kataloqu idarə et» səlahiyyəti) aparır."
+msgstr "Одноимённые дисциплины не объединяются автоматически — объединение выполняет учебный отдел (право «Управлять каталогом» на уровне организации)."
+
+msgctxt "registrar.arayis"
+msgid "qeyd deaktivdir"
+msgstr "запись деактивирована"
+
+#, python-format
+msgctxt "registrar.arayis"
+msgid "Arayış yalnız təhsil alan (aktiv) tələbəyə verilir — tələbənin statusu: «%(status)s»."
+msgstr "Справка выдаётся только обучающемуся (активному) студенту — статус студента: «%(status)s»."
+
+msgctxt "registrar.arayis"
+msgid "Tələbənin hesabı arxivdədir (məzun və ya xaric) — arayış verilmir."
+msgstr "Учётная запись студента в архиве (выпускник или отчислен) — справка не выдаётся."
+
+msgctxt "registrar.arayis"
+msgid "Tələbənin qəbul ili məlum deyil — əvvəlcə akademik qeydi düzəldin."
+msgstr "Год поступления студента неизвестен — сначала исправьте академическую запись."
+
+msgctxt "registrar.arayis"
+msgid "Tələbənin oxu müddəti bitib — əvvəlcə statusunu rəsmiləşdirin (məzun, xaric və ya bərpa)."
+msgstr "Срок обучения студента истёк — сначала оформите статус (выпускник, отчислен или восстановлен)."
+
+msgctxt "registrar.arayis"
+msgid "bakalavriat"
+msgstr "бакалавриата"
+
+msgctxt "registrar.arayis"
+msgid "magistratura"
+msgstr "магистратуры"
+
+msgctxt "registrar.arayis"
+msgid "doktorantura"
+msgstr "докторантуры"
+
+msgctxt "registrar.arayis"
+msgid "ali təhsil"
+msgstr "высшего образования"
+
+msgctxt "registrar.arayis"
+msgid "fakültəsinin"
+msgstr "факультета"
+
+#, python-format
+msgctxt "registrar.arayis"
+msgid "ixtisası (şifr %(code)s)"
+msgstr "специальности (шифр %(code)s)"
+
+msgctxt "registrar.arayis"
+msgid "ixtisası"
+msgstr "специальности"
+
+#, python-format
+msgctxt "registrar.arayis"
+msgid "%(group)s qrup "
+msgstr "группы %(group)s "
+
+#, python-format
+msgctxt "registrar.arayis"
+msgid "Bu arayış ona verilir ki, %(name)s həqiqətən %(where)s %(program)s üzrə %(degree)s təhsil pilləsinin %(course)s kurs, %(group)stələbəsidir."
+msgstr "Настоящая справка выдана в том, что %(name)s действительно является студентом %(course)s курса, %(group)s%(degree)s, %(where)s, %(program)s."
+
+#, python-format
+msgctxt "registrar.arayis"
+msgid "Təhsil forması: %(form)s."
+msgstr "Форма обучения: %(form)s."
+
+#, python-format
+msgctxt "registrar.arayis"
+msgid "Qəbul ili: %(year)s."
+msgstr "Год поступления: %(year)s."
+
+#, python-format
+msgctxt "registrar.arayis"
+msgid "Arayış %(place)s təqdim edilmək üçün verilir."
+msgstr "Справка выдана для предъявления в %(place)s."
+
+msgctxt "registrar.arayis"
+msgid "Arayış tələb olunan yerə təqdim edilmək üçün verilir."
+msgstr "Справка выдана для предъявления по месту требования."
+
+msgctxt "registrar.arayis"
+msgid "Aktiv tələbə"
+msgstr "Действующий студент"
+
+msgctxt "registrar.arayis"
+msgid "Azərbaycan Respublikası Təhsil Nazirliyi"
+msgstr "Министерство образования Азербайджанской Республики"
+
+#, python-format
+msgctxt "registrar.arayis"
+msgid "Arayış № %(number)s"
+msgstr "Справка № %(number)s"
+
+msgctxt "registrar.arayis"
+msgid "Arayış №"
+msgstr "Справка №"
+
+#, python-format
+msgctxt "registrar.arayis"
+msgid "Tarix: %(date)s"
+msgstr "Дата: %(date)s"
+
+msgctxt "registrar.arayis"
+msgid "Arayış"
+msgstr "Справка"
+
+msgctxt "registrar.arayis"
+msgid "(imza)"
+msgstr "(подпись)"
+
+msgctxt "registrar.arayis"
+msgid "Fakültə dekanı"
+msgstr "Декан факультета"
+
+msgctxt "registrar.arayis"
+msgid "Tədris şöbəsinin müdiri / Tələbə Xidmətləri"
+msgstr "Начальник учебного отдела / Служба по работе со студентами"
+
+msgctxt "registrar.arayis"
+msgid "M.Y."
+msgstr "М.П."
+
+msgctxt "registrar.documents"
+msgid "«Başqasının adından» rejimində rəsmi sənəd verilmir — sənəd möhür yazır. Öz hesabınıza qayıdın."
+msgstr "В режиме «от имени другого» официальные документы не выдаются — выдача создаёт печать. Вернитесь в свою учётную запись."
+
+msgctxt "verification.doc_type"
+msgid "Təhsil aldığı yer haqqında arayış"
+msgstr "Справка с места учёбы"
+
+msgctxt "verification.fact"
+msgid "Kurs"
+msgstr "Курс"
+
+msgctxt "verification.fact"
+msgid "Təhsil forması"
+msgstr "Форма обучения"
+
+msgctxt "verification.fact"
+msgid "Tələbənin statusu"
+msgstr "Статус студента"
+
+msgctxt "organizations.permission.label"
+msgid "Transkript və arayış vermək"
+msgstr "Выдача транскриптов и справок"
+
+msgctxt "organizations.roles_registry"
+msgid "Rəsmi sənədlər"
+msgstr "Официальные документы"
+
+msgctxt "accounts.student_registry"
+msgid "Arayış ver"
+msgstr "Выдать справку"
+
+msgctxt "accounts.student_registry"
+msgid "Təhsil aldığı yer haqqında arayış"
+msgstr "Справка с места учёбы"
+
+msgctxt "accounts.student_registry"
+msgid "Arayış hazırlanmadı. Bir az sonra yenidən cəhd edin."
+msgstr "Не удалось подготовить справку. Повторите попытку чуть позже."
+
+msgctxt "accounts.student_registry"
+msgid "Arayış hazırlandı və yükləndi."
+msgstr "Справка подготовлена и загружена."
+
+msgctxt "accounts.student_registry"
+msgid "Təqdim ediləcəyi yer"
+msgstr "Место предъявления"
+
+msgctxt "accounts.student_registry"
+msgid "məs.: Səbail rayon hərbi komissarlığına"
+msgstr "напр.: в военный комиссариат Сабаильского района"
+
+msgctxt "accounts.student_registry"
+msgid "İstəyə bağlıdır. Yönlük halda yazın («… komissarlığına», «… bankına»); boş qalsa arayışda «tələb olunan yerə» yazılır."
+msgstr "Необязательно. Пишите в направительном падеже азербайджанского языка («… komissarlığına», «… bankına»); если пусто, в справке будет «по месту требования»."
+
+msgctxt "accounts.student_registry"
+msgid "Arayış yalnız aktiv tələbəyə verilir. Sənəd QR və yoxlama kodu ilə möhürlənir; verilmə «Sənəd yoxlaması» siyahısına düşür."
+msgstr "Справка выдаётся только действующим студентам. Документ заверяется QR-кодом и кодом проверки; выдача попадает в список «Проверка документов»."
+
+msgctxt "accounts.student_registry"
+msgid "Arayışı hazırla"
+msgstr "Подготовить справку"
+
+msgctxt "applications.arayis"
+msgid "Təhsil aldığı yer haqqında arayış"
+msgstr "Справка с места учёбы"
+
+msgctxt "applications.arayis"
+msgid "Arayış QR və yoxlama kodu ilə möhürlənir və müraciətə açıq qeyd kimi əlavə olunur — sahib onu müraciətdən endirir. «Təqdim ediləcəyi yer» istəyə bağlıdır (yönlük halda: «… bankına»)."
+msgstr "Справка заверяется QR-кодом и кодом проверки и прикрепляется к обращению открытой заметкой — заявитель скачивает её из обращения. «Место предъявления» необязательно (направительный падеж: «… bankına»)."
+
+msgctxt "applications.arayis"
+msgid "Təqdim ediləcəyi yer"
+msgstr "Место предъявления"
+
+msgctxt "applications.arayis"
+msgid "məs.: Səbail rayon hərbi komissarlığına"
+msgstr "напр.: в военный комиссариат Сабаильского района"
+
+msgctxt "applications.arayis"
+msgid "Arayışı hazırla və əlavə et"
+msgstr "Подготовить и прикрепить справку"
+
+msgctxt "applications.arayis"
+msgid "«Başqasının adından» rejimində rəsmi sənəd verilmir — öz hesabınıza qayıdın."
+msgstr "В режиме «от имени другого» официальные документы не выдаются — вернитесь в свою учётную запись."
+
+msgctxt "applications.arayis"
+msgid "Arayış əlavə olunub"
+msgstr "Справка прикреплена"
+
+msgctxt "applications.arayis"
+msgid "Arayışı aç"
+msgstr "Открыть справку"
+
+msgctxt "applications.arayis"
+msgid "tələb olunan yerə"
+msgstr "по месту требования"
+
+msgctxt "applications.arayis"
+msgid "Kod"
+msgstr "Код"
+
+msgctxt "applications.arayis"
+msgid "Yeni arayış hazırla (başqa yer üçün)"
+msgstr "Подготовить новую справку (для другого места)"
+
+msgctxt "applications.arayis"
+msgid "Eyni yer üçün yenidən hazırlasanız, artıq əlavə olunmuş arayış qaytarılır — ikinci fayl yaranmır."
+msgstr "Если подготовить справку повторно для того же места, вернётся уже прикреплённая — второй файл не создаётся."
+
+msgctxt "applications.arayis"
+msgid "Bu müraciətə arayış hazırlamaq mümkün deyil."
+msgstr "Для этого обращения нельзя подготовить справку."
+
+#, python-format
+msgctxt "applications.arayis"
+msgid "Təhsil aldığı yer haqqında arayış hazırlandı və əlavə olundu. Yoxlama kodu: %(code)s."
+msgstr "Справка с места учёбы подготовлена и прикреплена. Код проверки: %(code)s."
+
+msgctxt "accounts.accounting"
+msgid "Dərs saatının ödəniş dərəcələri"
+msgstr "Ставки оплаты учебного часа"
+
+msgctxt "accounts.accounting"
+msgid "Hesablanmış məbləğ"
+msgstr "Рассчитанная сумма"
+
+msgctxt "accounts.accounting"
+msgid "{n} müəllim · ilkin hesablama"
+msgstr "{n} преп. · предварительный расчёт"
+
+msgctxt "accounts.accounting"
+msgid "{n} müəllim · dərəcəsi olmayan: {m}"
+msgstr "{n} преп. · без ставки: {m}"
+
+msgctxt "accounts.accounting"
+msgid "Məbləğ"
+msgstr "Сумма"
+
+msgctxt "accounts.accounting"
+msgid "Məbləğ (AZN)"
+msgstr "Сумма (AZN)"
+
+msgctxt "accounts.accounting"
+msgid "məbləğ, AZN"
+msgstr "сумма, AZN"
+
+msgctxt "accounts.accounting"
+msgid "Məbləğ qeydi"
+msgstr "Примечание к сумме"
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə (AZN / saat)"
+msgstr "Ставка (AZN / час)"
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə təyin edilməyib"
+msgstr "Ставка не задана"
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə təyin edilməyib (vəzifə yoxdur)"
+msgstr "Ставка не задана (нет должности)"
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə təyin edilməyib: {kinds}"
+msgstr "Ставка не задана: {kinds}"
+
+msgctxt "accounts.accounting"
+msgid "Saathesabı müəllim — bütün saatlar saathesabı ödənilir."
+msgstr "Почасовик — все часы оплачиваются почасово."
+
+msgctxt "accounts.accounting"
+msgid "Plan üzrə bütün saatlar ştat yükündədir."
+msgstr "По плану все часы входят в штатную нагрузку."
+
+msgctxt "accounts.accounting"
+msgid "Plan üzrə (semestr): ştat yükü {norm} saat, saathesabı {hourly} saat."
+msgstr "По плану (семестр): штатная нагрузка {norm} ч, почасовая {hourly} ч."
+
+msgctxt "accounts.accounting"
+msgid "İlkin hesablama — rəsmi əmək haqqı hesabı deyil."
+msgstr "Предварительный расчёт — не официальный расчёт зарплаты."
+
+msgctxt "accounts.accounting"
+msgid "Bütün növlər"
+msgstr "Все виды"
+
+msgctxt "accounts.accounting"
+msgid "Saat dərəcəsini yazın (AZN)."
+msgstr "Укажите ставку за час (AZN)."
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə rəqəm olmalıdır."
+msgstr "Ставка должна быть числом."
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə 0-dan böyük və 10 000 AZN-dən az olmalıdır."
+msgstr "Ставка должна быть больше 0 и меньше 10 000 AZN."
+
+msgctxt "accounts.accounting"
+msgid "Tədris ilini seçin (akademik dövrlərdə olan il)."
+msgstr "Выберите учебный год (из академических периодов)."
+
+msgctxt "accounts.accounting"
+msgid "Vəzifəni seçin."
+msgstr "Выберите должность."
+
+msgctxt "accounts.accounting"
+msgid "Dərs növü düzgün deyil."
+msgstr "Неверный вид занятия."
+
+msgctxt "accounts.accounting"
+msgid "Bu dərəcə artıq qüvvədədir — dəyişiklik yoxdur."
+msgstr "Эта ставка уже действует — изменений нет."
+
+msgctxt "accounts.accounting"
+msgid "Bu dərəcə eyni anda başqa istifadəçi tərəfindən dəyişdirilib."
+msgstr "Эту ставку одновременно изменил другой пользователь."
+
+msgctxt "accounts.accounting"
+msgid "Yeni dərəcə ilə əvəzləndi"
+msgstr "Заменена новой ставкой"
+
+msgctxt "accounts.accounting"
+msgid "Ləğv edildi"
+msgstr "Отменена"
+
+msgctxt "accounts.accounting"
+msgid "Ödəniş dərəcələrini yalnız Mühasibatlıq dəyişə bilər."
+msgstr "Изменять ставки оплаты может только бухгалтерия."
+
+msgctxt "accounts.accounting"
+msgid "Başqasının adından baxış rejimində dəyişiklik etmək olmaz."
+msgstr "В режиме просмотра от имени другого изменения запрещены."
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə tapılmadı."
+msgstr "Ставка не найдена."
+
+msgctxt "accounts.accounting"
+msgid "Ödəniş dərəcəsi yadda saxlanıldı."
+msgstr "Ставка оплаты сохранена."
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə ləğv edildi — tarixçədə qalır."
+msgstr "Ставка отменена — остаётся в истории."
+
+msgctxt "accounts.accounting"
+msgid "Vəzifə"
+msgstr "Должность"
+
+msgctxt "accounts.accounting"
+msgid "Saathesabı plan (semestr, saat)"
+msgstr "Почасовой план (семестр, ч)"
+
+msgctxt "accounts.accounting"
+msgid "Tədris ili"
+msgstr "Учебный год"
+
+msgctxt "accounts.accounting"
+msgid "Qeyd"
+msgstr "Примечание"
+
+msgctxt "accounts.accounting"
+msgid "Əlavə edib"
+msgstr "Добавил(а)"
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə id"
+msgstr "ID ставки"
+
+msgctxt "accounts.accounting"
+msgid "Dərəcələr"
+msgstr "Ставки"
+
+msgctxt "accounts.accounting"
+msgid "Məbləğ = keçirilmiş saat × dərəcə (tədris ili × vəzifə × növ; növə xas dərəcə yoxdursa «bütün növlər» dərəcəsi). Vəzifə «Yük bölgüsü»ndəki müəllim profilindən götürülür. Dərəcə və ya vəzifə yoxdursa məbləğ boş qalır."
+msgstr "Сумма = проведённые часы × ставка (учебный год × должность × вид; если нет ставки для вида — ставка «все виды»). Должность берётся из профиля преподавателя в «Распределении нагрузки». Без ставки или должности сумма остаётся пустой."
+
+msgctxt "accounts.accounting"
+msgid "Dərəcəsi olmayan vəzifələr"
+msgstr "Должности без ставки"
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "Qüvvədə olan ödəniş dərəcələri — %(year)s"
+msgstr "Действующие ставки оплаты — %(year)s"
+
+msgctxt "accounts.accounting"
+msgid "Əməl"
+msgstr "Действие"
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə ləğv edilsin? Sətir tarixçədə qalır, keçmiş ixraclar dəyişmir."
+msgstr "Отменить ставку? Строка останется в истории, прошлые выгрузки не изменятся."
+
+msgctxt "accounts.accounting"
+msgid "Ləğv et"
+msgstr "Отменить"
+
+msgctxt "accounts.accounting"
+msgid "Bu tədris ili üçün dərəcə yoxdur"
+msgstr "Для этого учебного года ставок нет"
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə olmadan cədvəldə və ixracda «Dərəcə təyin edilməyib» görünür, məbləğ hesablanmır."
+msgstr "Без ставки в таблице и выгрузке видно «Ставка не задана», сумма не считается."
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə əlavə et və ya dəyiş"
+msgstr "Добавить или изменить ставку"
+
+msgctxt "accounts.accounting"
+msgid "Məs. rektorun əmri № …"
+msgstr "Напр., приказ ректора № …"
+
+msgctxt "accounts.accounting"
+msgid "Eyni il, vəzifə və növ üçün dərəcə artıq varsa, köhnəsi arxivə düşür və yenisi qüvvəyə minir."
+msgstr "Если ставка для того же года, должности и вида уже есть, старая уходит в архив, а новая вступает в силу."
+
+msgctxt "accounts.accounting"
+msgid "Yadda saxla"
+msgstr "Сохранить"
+
+msgctxt "accounts.accounting"
+msgid "Dərəcələri Mühasibatlıq (və RİM rəhbəri) dəyişir; siz yalnız baxırsınız."
+msgstr "Ставки меняет бухгалтерия (и руководитель ИТ); вы только просматриваете."
+
+msgctxt "accounts.accounting"
+msgid "Tarixçə"
+msgstr "История"
+
+msgctxt "accounts.accounting"
+msgid "Yadda saxlanılmadı — icazənizi yoxlayın və ya səhifəni yeniləyin."
+msgstr "Не сохранено — проверьте права или обновите страницу."
+
+msgctxt "accounts.accounting"
+msgid "Məbləğ — dövrün keçirilmiş saatı × «Dərs saatının ödəniş dərəcələri» cədvəlindəki dərəcə (tədris ili × müəllimin vəzifəsi × növ). Vəzifə və ya dərəcə yoxdursa məbləğ boş qalır («Dərəcə təyin edilməyib»), 0 yazılmır. Saathesabı və ştat saatları plan üzrə etiketlənir (jurnal dərsi konkret yük sətrinə bağlı deyil). İlkin hesablamadır — rəsmi əmək haqqı hesabı deyil."
+msgstr "Сумма — проведённые за период часы × ставка из таблицы «Ставки оплаты учебного часа» (учебный год × должность преподавателя × вид). Без должности или ставки сумма пуста («Ставка не задана»), 0 не пишется. Почасовые и штатные часы помечаются по плану (занятие в журнале не привязано к строке нагрузки). Это предварительный расчёт, а не официальный расчёт зарплаты."
+
+msgctxt "accounts.accounting"
+msgid "Aylıq plan — semestr planı dərs pəncərəsinin (semestrin başlanğıcından imtahan sessiyasına qədər) iş günlərinə (B.e.–Cümə) mütənasib bölünür; aylıq payların cəmi semestr planına bərabərdir. Bayram və qeyri-iş günləri (Akademik təqvim) iş günü sayılmır, iş günü elan olunmuş şənbə / bazar isə sayılır."
+msgstr "Месячный план — семестровый план делится пропорционально рабочим дням (Пн–Пт) учебного окна (от начала семестра до сессии); сумма месячных долей равна семестровому плану. Праздничные и нерабочие дни (Академический календарь) не считаются рабочими, а объявленные рабочими суббота / воскресенье считаются."
+
+msgctxt "accounts.model.pay_rate.meta"
+msgid "teaching pay rate"
+msgstr "ставка оплаты учебного часа"
+
+msgctxt "accounts.model.pay_rate.meta"
+msgid "teaching pay rates"
+msgstr "ставки оплаты учебного часа"
+
+msgctxt "organizations.permission.label"
+msgid "Təhsil haqqı cədvəlini (25% təkrar imtahanın təxmini məbləği) və dərs saatının ödəniş dərəcələrini idarə etmək"
+msgstr "Управление таблицей платы за обучение (ориентировочная сумма пересдачи 25%) и ставками оплаты учебного часа"
+
+msgctxt "registrar.retake"
+msgid "Cəhd istifadə olunmuş sayılmasın"
+msgstr "Не считать попытку использованной"
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma ödənilmiş cəhdin verilmədiyini tanıyır: «İmtahana gəlmədi» ilə sayılmış 25% cəhdi tələbəyə geri qayıdır. Rədd / geri götürmə cəhd saymır — orada bu seçim təsirsizdir. Qərardan sonra dəyişmir."
+msgstr "Возврат признаёт, что оплаченная попытка не была предоставлена: попытка 25%, засчитанная как «Не явился на экзамен», возвращается студенту. Отклонение / отзыв попытку не засчитывают — там эта опция ни на что не влияет. После решения не меняется."
+
+msgctxt "registrar.retake"
+msgid "25% cəhdi istifadə olunmuş sayılır"
+msgstr "Попытка 25% считается использованной"
+
+msgctxt "registrar.retake"
+msgid "25% cəhdi istifadə olunmuş sayılmır"
+msgstr "Попытка 25% не считается использованной"
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma yoxdur"
+msgstr "Без возврата"
+
+msgctxt "registrar.retake"
+msgid "Ödənişin qaytarılması qərarı verilib"
+msgstr "Решение о возврате оплаты принято"
+
+msgctxt "registrar.retake"
+msgid "Ödəniş qaytarılıb"
+msgstr "Оплата возвращена"
+
+msgctxt "registrar.retake"
+msgid "Ödənişin qaytarılması qərarı verildi"
+msgstr "Принято решение о возврате оплаты"
+
+msgctxt "registrar.retake"
+msgid "Ödəniş qaytarıldı"
+msgstr "Оплата возвращена"
+
+msgctxt "registrar.retake"
+msgid "Ödənişin qaytarılması qərarı"
+msgstr "Решение о возврате оплаты"
+
+msgctxt "registrar.retake"
+msgid "Qaytarılacaq ödənişlər"
+msgstr "Возвраты к выплате"
+
+msgctxt "registrar.retake"
+msgid "Qaytarılmalı"
+msgstr "К возврату"
+
+msgctxt "registrar.retake"
+msgid "Qaytarılıb"
+msgstr "Возвращено"
+
+msgctxt "registrar.retake"
+msgid "Qaytarıldı"
+msgstr "Возвращено"
+
+msgctxt "registrar.retake"
+msgid "Qaytarılacaq məbləğ"
+msgstr "Сумма к возврату"
+
+msgctxt "registrar.retake"
+msgid "Qaytarılacaq məbləğ (AZN)"
+msgstr "Сумма к возврату (AZN)"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Qaytarılacaq məbləğ: %(amount)s AZN"
+msgstr "Сумма к возврату: %(amount)s AZN"
+
+msgctxt "registrar.retake"
+msgid "Qaytarılacaq məbləğ: {amount} AZN."
+msgstr "Сумма к возврату: {amount} AZN."
+
+msgctxt "registrar.retake"
+msgid "Ödənilib: {amount} AZN."
+msgstr "Оплачено: {amount} AZN."
+
+msgctxt "registrar.retake"
+msgid "Ödənilən məbləğ qeyd olunmayıb — məbləği yazın."
+msgstr "Оплаченная сумма не записана — укажите сумму."
+
+msgctxt "registrar.retake"
+msgid "(boş — ödənilənin hamısı)"
+msgstr "(пусто — вся оплаченная сумма)"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "qaytarılıb: %(day)s, arayış № %(ref)s"
+msgstr "возвращено: %(day)s, справка № %(ref)s"
+
+msgctxt "registrar.retake"
+msgid "Əmr"
+msgstr "Приказ"
+
+msgctxt "registrar.retake"
+msgid "Qərar"
+msgstr "Решение"
+
+msgctxt "registrar.retake"
+msgid "Qərarı verib"
+msgstr "Решение принял(а)"
+
+msgctxt "registrar.retake"
+msgid "Bank arayışı / ödəniş tapşırığı №"
+msgstr "Банковская справка / платёжное поручение №"
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma tarixi"
+msgstr "Дата возврата"
+
+msgctxt "registrar.retake"
+msgid "Qeyd geri alınmır — yalnız pul faktiki qaytarıldıqdan sonra təsdiqləyin."
+msgstr "Запись нельзя отменить — подтверждайте только после фактического возврата денег."
+
+msgctxt "registrar.retake"
+msgid "Sistem pul köçürmür: qərar qeyd olunur, Mühasibatlıq «Qaytarılacaq ödənişlər» növbəsində icranı «Qaytarıldı» ilə təsdiqləyir."
+msgstr "Система не переводит деньги: решение записывается, бухгалтерия подтверждает исполнение кнопкой «Возвращено» в очереди «Возвраты к выплате»."
+
+msgctxt "registrar.retake"
+msgid "Defolt qaytarılma yoxdur — qaytarılma yalnız rəsmi qərarla: əmr nömrəsi və tarixi və ya qərar sənədi, səbəb məcburidir. Bir müraciətə bir dəfə."
+msgstr "По умолчанию возврата нет — только по официальному решению: номер и дата приказа или документ решения и причина обязательны. Один раз на заявку."
+
+msgctxt "registrar.retake"
+msgid "Defolt qaytarılma yoxdur. Qaytarılma lazımdırsa, bağlanışdan sonra «Ödənişin qaytarılması qərarı» ilə ayrıca rəsmi qərar verilir (Tədris şöbəsi / RİM)."
+msgstr "По умолчанию возврата нет. Если возврат нужен, после закрытия принимается отдельное официальное «Решение о возврате оплаты» (учебный отдел / руководитель ИТ)."
+
+msgctxt "registrar.retake"
+msgid "Bank arayışı və ya ödəniş tapşırığı nömrəsini yazın."
+msgstr "Укажите номер банковской справки или платёжного поручения."
+
+msgctxt "registrar.retake"
+msgid "Bu müraciət üzrə qaytarılma qərarı artıq verilib."
+msgstr "По этой заявке решение о возврате уже принято."
+
+msgctxt "registrar.retake"
+msgid "Bu müraciət üzrə qaytarılma qərarı yoxdur."
+msgstr "По этой заявке нет решения о возврате."
+
+msgctxt "registrar.retake"
+msgid "Qaytarılacaq məbləğ ödənilən məbləğdən çox ola bilməz."
+msgstr "Сумма возврата не может превышать оплаченную."
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma qərarı yalnız ödənişi təsdiqlənmiş və sonra rədd edilmiş, «İmtahana gəlmədi» və ya qərarla geri götürülmüş 25% müraciətinə verilir."
+msgstr "Решение о возврате принимается только по заявке 25% с подтверждённой оплатой, которая затем отклонена, отмечена «Не явился на экзамен» или отозвана решением."
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma rəsmi qərarla olur: əmr nömrəsi və tarixi və ya qərar sənədi əlavə edin."
+msgstr "Возврат — только по официальному решению: добавьте номер и дату приказа или документ решения."
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma tarixi düzgün deyil."
+msgstr "Неверная дата возврата."
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma tarixi gələcəkdə ola bilməz."
+msgstr "Дата возврата не может быть в будущем."
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma tarixi qərar tarixindən əvvəl ola bilməz."
+msgstr "Дата возврата не может быть раньше даты решения."
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma tarixini yazın."
+msgstr "Укажите дату возврата."
+
+msgctxt "registrar.retake"
+msgid "Ödəniş artıq qaytarılmış kimi qeyd olunub."
+msgstr "Оплата уже отмечена как возвращённая."
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma qərarı yazıldı — Mühasibatlığa bildiriş göndərildi."
+msgstr "Решение о возврате записано — бухгалтерия уведомлена."
+
+msgctxt "registrar.retake"
+msgid "Ödəniş qaytarılmış kimi qeyd olundu."
+msgstr "Оплата отмечена как возвращённая."
+
+msgctxt "registrar.retake.notification"
+msgid "Ödənişin qaytarılması qərarı verildi"
+msgstr "Принято решение о возврате оплаты"
+
+msgctxt "registrar.retake.notification"
+msgid "Ödəniş qaytarıldı"
+msgstr "Оплата возвращена"
+
+msgctxt "registrar.retake.notification"
+msgid "Qaytarılacaq ödəniş növbədədir"
+msgstr "Возврат оплаты ожидает в очереди"
+
+msgctxt "registrar.retake.notification"
+msgid "{student} — {message}"
+msgstr "{student} — {message}"
+
+msgctxt "registrar.retake.notification"
+msgid "\"{subject}\" — 25% ödənişi qaytarıldı: {amount} AZN ({date})."
+msgstr "«{subject}» — оплата 25% возвращена: {amount} AZN ({date})."
+
+msgctxt "registrar.retake.notification"
+msgid "\"{subject}\" — 25% ödənişinin qaytarılması qərarı: {amount} AZN. Mühasibatlıq icra edəcək."
+msgstr "«{subject}» — решение о возврате оплаты 25%: {amount} AZN. Бухгалтерия исполнит его."

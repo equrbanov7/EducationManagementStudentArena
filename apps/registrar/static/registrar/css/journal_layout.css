@@ -214,3 +214,23 @@ body:has(.jd2) .ai-bot-btn:focus-visible {
 @media (max-width: 640px) and (prefers-reduced-motion: reduce) {
     .jd2-savebar .jd2-autosave.is-saved { animation: none; }
 }
+
+/* ── 8. Yapışqan başlıq sətri — DAXİLİ ŞAQULİ SCROLL OLMADAN (2026-10-19) ──────
+   Cədvəl `.jd2-grid-wrap`-in içindədir və o, tarix sütunları üçün üfüqi sürüşür; `overflow-x: auto`
+   qutunu şaquli istiqamətdə də sürüşmə konteyneri edir, ona görə `thead th { position: sticky; top: 0 }`
+   yalnız qutunun İÇİNDƏ işləyə bilər. Qutuya `max-height` vermək sahibin 2026-09-06 qərarına ziddir
+   (yuxarıdakı ⚠️ qeydi — «jurnalın içində scroll olmasın»). Həll: başlıq xanaları səhifə sürüşdükcə
+   `translate` ilə ekranın yuxarısında saxlanılır (`registrar/js/journal_sticky_head.js` yalnız
+   `thead`-ə `--jd-head-y` yazır). Bütün sətirlər əvvəlki kimi görünür, ad sütunu (`left: 0`) və
+   başlıqdakı «i/e · q/b» / redaktə düymələri eyni elementlərdir (klon yoxdur); xana açılan menyuları
+   (z-index 1000) başlığın üstündə qalır. JS yoxdursa — əvvəlki davranış (başlıq səhifə ilə gedir). */
+.jd2-grid-wrap > table > thead th {
+    translate: 0 var(--jd-head-y, 0px);
+}
+.jd2-grid-wrap > table > thead.is-floating th {
+    box-shadow: inset 0 -1px 0 var(--j-line, var(--ems-border)), 0 6px 10px -8px rgba(15, 23, 42, 0.35);
+}
+.jd2-grid-wrap > table > thead.is-floating .jd2-th-student {
+    box-shadow: 6px 0 8px -6px rgba(15, 23, 42, 0.18), inset 0 -1px 0 var(--j-line, var(--ems-border)),
+        0 6px 10px -8px rgba(15, 23, 42, 0.35);
+}

@@ -355,3 +355,105 @@
     grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     gap: 13px;
 }
+
+/* ── Telefon: addım siyahısı açılan menyu (≤ 768px, 2026-10-19) ─────────────
+   Masaüstündə `.syl-steps__toggle` gizlidir, siyahı sol sütundur (dəyişməyib). Telefonda
+   9 addımlıq siyahı (~390px) formanın üstündə ekranın yarısını tuturdu — indi bir sətirlik
+   düymədir («3/9 · Təlim nəticələri»), siyahı onun altında üzən menyu kimi açılır.
+   Açılış / bağlanış və sayğac: `accounts/js/profile/syllabus_editor_phone.js`. */
+.syl-steps__toggle {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .syl-steps {
+        position: relative;
+        top: auto;
+        z-index: 30;
+        padding: 0;
+        border: 0;
+        background: transparent;
+    }
+
+    .syl-steps__toggle {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        min-height: 48px;
+        padding: 8px 14px;
+        border: 1px solid var(--ems-border);
+        border-radius: 14px;
+        background: var(--ems-bg);
+        color: var(--ems-neutral-800);
+        font-family: inherit;
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .syl-steps__toggle:focus-visible {
+        outline: 3px solid var(--ems-primary-300);
+        outline-offset: 2px;
+    }
+
+    .syl-steps__count {
+        flex: none;
+        padding: 2px 9px;
+        border-radius: var(--ems-r-pill);
+        background: var(--ems-primary-50);
+        color: var(--ems-primary-700);
+        font-size: 0.78rem;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .syl-steps__current {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .syl-steps__chevron {
+        flex: none;
+        color: var(--ems-text-muted);
+        transition: transform 0.15s ease;
+    }
+
+    .syl-steps.is-open .syl-steps__chevron {
+        transform: rotate(180deg);
+    }
+
+    .syl-steps__list {
+        display: none;
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        left: 0;
+        max-height: min(60vh, 460px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: 8px;
+        border: 1px solid var(--ems-border);
+        border-radius: 14px;
+        background: var(--ems-bg);
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.16);
+    }
+
+    .syl-steps.is-open .syl-steps__list {
+        display: block;
+    }
+
+    .syl-step {
+        min-height: 44px;
+    }
+}
+
+@media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+    .syl-steps__chevron {
+        transition: none;
+    }
+}

@@ -12,6 +12,7 @@ from ..payloads import STATUS_CATALOG, detail_payload, kind_payload, row_payload
 from ..services import access, queries, routing, submit, workflow
 from ..state_machine import Action
 from ._base import error, json_endpoint, load_application, ok
+from .documents import detail_with_tools
 
 
 def _date_param(request, name):
@@ -76,7 +77,8 @@ def application_detail(request, application_id, *, organization):
     # düşür, amma burada AÇIQ və şərtsiz istisna-tutma OLMADAN yoxlanır.
     if application.status == ApplicationStatus.SUBMITTED.value and access.can_act(request.user, application):
         workflow.mark_seen(application=application, user=request.user, request=request)
-    return ok({"application": detail_payload(application, user=request.user)})
+    # 2026-10-19: «Arayış sorğusu» emalçısına «Arayışı hazırla» bloku (views.documents).
+    return ok({"application": detail_with_tools(application, request=request)})
 
 
 @require_GET
@@ -193,7 +195,7 @@ def application_action(request, application_id, *, organization):
         application=application, user=request.user, request=request, **_action_kwargs(request, organization, action)
     )
     application.refresh_from_db()
-    return ok({"application": detail_payload(application, user=request.user)})
+    return ok({"application": detail_with_tools(application, request=request)})
 
 
 @require_GET

@@ -270,6 +270,60 @@ def decision(request, application_id):
     return _error(pgettext(_CTX, "Naməlum əməl."))
 
 
+def _restores_attempt(data) -> bool:
+    """Dialoq: gizli ``0`` + işarələnmiş checkbox ``1`` (son dəyər qalır). Sahə yoxdursa — defolt ``True`` (sahib qaydası)."""
+    raw = str(data.get("restores_attempt") or "").strip().lower()
+    return True if not raw else raw in ("1", "true", "on", "yes")
+
+
+@login_required
+@require_POST
+@_block_view_as
+def refund(request, application_id):
+    """2026-10-19: «Ödənişin qaytarılması qərarı» (``action=decide``) və Mühasibatlığın «Qaytarıldı» (``action=mark``).
+
+    Qərar — ``retake.manage`` TƏŞKİLAT əhatəsində: açarı olmayan da, açarı yalnız fakültə əhatəsində olan dekan da 403
+    alır (səlahiyyət yoxdur — mövcudluq yox); icra — ``retake.payment_verify``. Yad / mövcud olmayan müraciət 404."""
+    from . import retake_refund
+
+    data = _data(request)
+    action = _field(data, "action")
+    if action == "decide":
+        organization, application = _staff_application(request, application_id, (retake_rules.PERM_MANAGE,))
+        if not retake_refund.can_decide(request.user, organization):
+            raise PermissionDenied
+        return _run(
+            lambda: retake_refund.decide(
+                actor=request.user,
+                organization=organization,
+                application_id=application.pk,
+                reason=_field(data, "reason"),
+                amount=_field(data, "amount"),
+                order_number=_field(data, "order_number"),
+                order_date=_field(data, "order_date") or None,
+                document=request.FILES.get("document"),
+                restores_attempt=_restores_attempt(data),
+                request=request,
+            ),
+            success=pgettext(_CTX, "Qaytarılma qərarı yazıldı — Mühasibatlığa bildiriş göndərildi."),
+        )
+    if action == "mark":
+        organization, application = _staff_application(request, application_id, (retake_rules.PERM_PAYMENT_VERIFY,))
+        return _run(
+            lambda: retake_refund.mark_refunded(
+                actor=request.user,
+                organization=organization,
+                application_id=application.pk,
+                refunded_on=_field(data, "refunded_on"),
+                reference=_field(data, "reference"),
+                note=_field(data, "note"),
+                request=request,
+            ),
+            success=pgettext(_CTX, "Ödəniş qaytarılmış kimi qeyd olundu."),
+        )
+    return _error(pgettext(_CTX, "Naməlum əməl."))
+
+
 @login_required
 @require_POST
 @_block_view_as
@@ -351,4 +405,14 @@ def trail(request, student_id):
     return render(request, "registrar/retake/_trail.html", context)
 
 
-__all__ = ["apply", "decision", "payment", "result", "subgroup_offerings", "trail", "upload_receipt", "withdraw"]
+__all__ = [
+    "apply",
+    "decision",
+    "payment",
+    "refund",
+    "result",
+    "subgroup_offerings",
+    "trail",
+    "upload_receipt",
+    "withdraw",
+]

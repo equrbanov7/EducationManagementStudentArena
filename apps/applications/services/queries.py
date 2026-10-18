@@ -9,7 +9,7 @@ from core.search_text import tolerant_q
 
 from ..constants import CLOSED_STATUSES, OPEN_STATUSES, ApplicationStatus
 from ..models import Application, ApplicationAttachment
-from ..sla import working_days_between
+from ..sla import calendar_for, working_days_between
 from . import access
 
 TABS = ("mine", "inbox", "watching", "archive")
@@ -138,8 +138,9 @@ def sender_counts(*, organization, user) -> dict:
 
 def sender_kpis(*, organization, user) -> dict:
     resolved = base_queryset(organization).filter(created_by=user, status__in=_RESOLVED_STATUSES)
+    calendar = calendar_for(organization)
     durations = [
-        working_days_between(app.submitted_at.date(), app.resolved_at.date())
+        working_days_between(app.submitted_at.date(), app.resolved_at.date(), calendar)
         for app in resolved.exclude(resolved_at__isnull=True)
     ]
     average = round(sum(durations) / len(durations), 1) if durations else 0.0
