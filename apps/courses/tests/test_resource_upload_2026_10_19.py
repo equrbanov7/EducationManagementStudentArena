@@ -80,7 +80,9 @@ class PolicyAndSignatureTest(SimpleTestCase):
         register_video_mimetypes()
         import mimetypes
 
-        self.assertEqual(mimetypes.guess_type("a.m4v")[0], "video/x-m4v")
+        # Linux-un /etc/mime.types faylı .m4v-ni `video/mp4` kimi tanıyır, macOS isə `video/x-m4v`;
+        # hər ikisi brauzerdə oynanır — vacib olan `application/octet-stream` (yalnız yükləmə) olmamasıdır.
+        self.assertIn(mimetypes.guess_type("a.m4v")[0], {"video/x-m4v", "video/mp4"})
         self.assertEqual(mimetypes.guess_type("IMG_0189.MOV")[0], "video/quicktime")
 
 
