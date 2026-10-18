@@ -5,16 +5,22 @@ müraciəti bağlayan HƏR əməl (``reject`` rədd, ``no_show`` «İmtahana gə
 geri götürmə) dekanlıq / tədris şöbəsi (``retake.manage``) tərəfindən və qərarla olur: əmr № + tarix VƏ YA
 qərar sənədi (qəbzlə eyni yoxlama — PDF/JPG/PNG, 10 MB). Hadisəyə «Qaytarılma yoxdur» qeydi yazılır.
 
-``no_show`` 25% cəhdini İSTİFADƏ OLUNMUŞ sayır (``CONSUMED_STATUSES``); ``reject`` / ``withdraw`` saymır.
+``no_show`` 25% cəhdini İSTİFADƏ OLUNMUŞ sayır (``CONSUMED_STATUSES``); ``reject`` / ``withdraw`` saymır. Sonradan
+«Ödənişin qaytarılması qərarı» verilib və «Cəhd istifadə olunmuş sayılmasın» (``refund_restores_attempt``, defolt
+açıq) seçilibsə cəhd YENİDƏN sayılmır (``models.retake.consumes_attempt``).
 
 İMTAHAN CƏHDİ AÇILIBSA (``exam_granted``, review 2026-10-19 HIGH-1): bağlanışla birlikdə verilmiş əlavə cəhd və
 fərdi PIN exams modulunun ``second_chance_provider``-i ilə GERİ ALINIR. Tələbənin həmin imtahanda davam edən və ya
 yoxlanmamış cəhdi varsa bağlanış RƏDD olunur (əvvəlcə cəhd bitməli / yoxlanmalıdır). Geri almaq mümkün deyilsə
 (provayder yoxdur) ``exam_granted``-dən bağlanış ümumiyyətlə qəbul olunmur.
 
-TODO(sahib): QAYTARILMA QAYDASI hələ müəyyən deyil — sahib dəqiqləşdirəcək. Qayda gələnə qədər sistem heç bir
-məbləği geri qaytarmır və qaytarılma hesablamır; yalnız qərarın özü (və «qaytarılma yoxdur» qeydi) saxlanılır.
-Qayda gələndə: məbləğ / faiz / müddət burada hesablanmalı və hadisə metadata-sına yazılmalıdır.
+QAYTARILMA QAYDASI (sahib 2026-10-19, tövsiyə olunan variant): DEFOLT QAYTARILMA YOXDUR — bağlanış hadisəsi
+«Qaytarılma yoxdur» qeydi və ``metadata["refund"] = "none"`` ilə yazılır (bağlanış anının vəziyyəti). Qaytarılma
+YALNIZ ayrıca rəsmi qərarla verilir: «Ödənişin qaytarılması qərarı» (:mod:`apps.registrar.retake_refund`) —
+təşkilat əhatəli ``retake.manage`` (Tədris şöbəsi / RİM; dekan UNIT əhatəlidir, verə bilməz), əmr № + tarix və ya
+qərar sənədi (bu modulun ``clean_decision`` yoxlaması) və ≥ 20 simvol səbəb. Mühasibatlıq (``retake.payment_verify``)
+icranı «Qaytarıldı» (tarix + arayış №) ilə qeyd edir. Sistem pul köçürmür — yalnız qeyd; hər addım append-only
+``RetakeApplicationEvent`` (``refund_decided`` / ``refunded``) və audit jurnalındadır.
 """
 
 from __future__ import annotations
@@ -103,14 +109,15 @@ def _clean_date(raw):
         raise ValidationError(pgettext(_CTX, "Əmr tarixi düzgün deyil.")) from None
 
 
-def clean_decision(*, order_number="", order_date=None, document=None) -> dict:
+def clean_decision(*, order_number="", order_date=None, document=None, missing_message=None) -> dict:
     number = str(order_number or "").strip()[:80]
     date = _clean_date(order_date)
     if document is not None:
         clean_upload(document)
     if not ((number and date) or document is not None):
         raise ValidationError(
-            pgettext(
+            missing_message
+            or pgettext(
                 _CTX,
                 "Ödənişdən sonra bağlanış rəsmi qərarla olur: əmr nömrəsi və tarixi və ya qərar sənədi əlavə edin.",
             )
@@ -168,7 +175,8 @@ def close(
                 "order_number": decision["number"],
                 "order_date": decision["date"].isoformat() if decision["date"] else None,
                 "document": application.closure_document.name or None,
-                "refund": "none",  # TODO(sahib): qaytarılma qaydası gözlənilir (modul docstring-i)
+                # Bağlanış anında qaytarılma YOXDUR; qaytarılma yalnız ayrıca qərarla (``retake_refund``, docstring).
+                "refund": "none",
                 "paid_amount": str(application.paid_amount) if application.paid_amount is not None else None,
                 "consumes_attempt": target == RetakeStatus.NO_SHOW,
                 "revoked_exam_access": revoked,

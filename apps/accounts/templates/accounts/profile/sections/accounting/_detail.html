@@ -24,6 +24,7 @@ YALNIZ OXU, tələbə məlumatı yoxdur. Kontekst: `detail` (services/accounting
 
 <h3 class="ac-h">{% blocktrans trimmed with period=detail.period_label context "accounts.accounting" %}Növlər üzrə — {{ period }}{% endblocktrans %}</h3>
 {% include "accounts/profile/sections/accounting/detail/_kinds.html" %}
+{% include "accounts/profile/sections/accounting/detail/_pay_note.html" %}
 
 <h3 class="ac-h">{% trans "Aylar üzrə" context "accounts.accounting" %}</h3>
 {% include "accounts/profile/sections/accounting/detail/_months.html" with kind_labels=ac.kind_labels %}

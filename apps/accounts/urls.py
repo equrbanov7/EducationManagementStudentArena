@@ -9,6 +9,7 @@ from . import views
 from .views import academic_records as academic_records_views
 from .views import account_password_reset as password_reset_views
 from .views import accounting as accounting_views
+from .views import accounting_rates as accounting_rates_views
 from .views import exam_score_entry_changes as exam_score_changes_views
 from .views import exam_score_import as exam_score_import_views
 from .views import group_lead as group_lead_views
@@ -347,6 +348,13 @@ urlpatterns = [
         "accounting/teacher/<int:teacher_id>/",
         accounting_views.accounting_teacher_detail,
         name="accounting_teacher_detail",
+    ),
+    # 2026-10-19: «Dərs saatının ödəniş dərəcələri» — yazı yalnız `accounting.manage_fees` (org əhatəsi), audit olunur.
+    path("accounting/rates/", accounting_rates_views.accounting_rate_save, name="accounting_rate_save"),
+    path(
+        "accounting/rates/<uuid:rate_id>/archive/",
+        accounting_rates_views.accounting_rate_archive,
+        name="accounting_rate_archive",
     ),
     # 2026-10-03: qrupun «ilk giriş» çap vərəqi (QR + təlimat + aktivləşdirməyənlər, PAROLSUZ).
     path(

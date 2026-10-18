@@ -1,0 +1,42 @@
+{% load i18n registrar_retake %}
+{% comment %}«Qaytarılacaq ödənişlər» sətri (2026-10-19) — `a` = `retake_desk._refund_row`. Mühasibatlıq və Tədris şöbəsi / RİM
+görür: tələbə (ad, nömrə), fənn, ödənilən və qaytarılacaq məbləğ, qərar (səbəb, əmr, sənəd, kim / nə vaxt), icra.
+Bal, nəticə, uyğunluq səbəbi GÖSTƏRİLMİR. «Qaytarıldı» — yalnız `retake.payment_verify` (`a.can_mark`).{% endcomment %}
+{% with app=a.app student=a.app.student %}
+<li class="rt-card rt-row rt-row--refund" id="rt-row-{{ a.id }}">
+    <header class="rt-card__head">
+        <div class="rt-card__titles">
+            <h3 class="rt-card__title">{{ student.get_full_name|default:student.username }}</h3>
+            <p class="rt-card__meta">
+                {% if a.student_number %}<span>№ {{ a.student_number }}</span><span aria-hidden="true">·</span>{% endif %}
+                <span>{{ app.subject.name }}</span>
+                {% if app.student_group %}<span aria-hidden="true">·</span><span>{{ app.student_group.name }}</span>{% endif %}
+                {% if app.attempt_number %}<span aria-hidden="true">·</span><span>{% blocktrans with n=app.attempt_number context "registrar.retake" %}{{ n }}-ci cəhd{% endblocktrans %}</span>{% endif %}
+            </p>
+        </div>
+        {% include "registrar/retake/_badge.html" with status=app.status %}
+    </header>
+
+    <dl class="rt-facts">
+        <div><dt>{% trans "Ödənilən məbləğ" context "registrar.retake" %}</dt><dd>{% if app.paid_amount is not None %}{{ app.paid_amount|retake_score }} AZN{% else %}—{% endif %}</dd></div>
+        <div><dt>{% trans "Qaytarılacaq məbləğ" context "registrar.retake" %}</dt><dd>{{ a.refund_amount_text }} AZN</dd></div>
+        {% if app.payment_reference %}<div><dt>{% trans "Ödəniş №" context "registrar.retake" %}</dt><dd>{{ app.payment_reference }}</dd></div>{% endif %}
+        <div><dt>{% trans "Qərar" context "registrar.retake" %}</dt><dd>{% if app.refund_order_number %}№ {{ app.refund_order_number }}{% if app.refund_order_date %} · {{ app.refund_order_date|date:"d.m.Y" }}{% endif %}{% else %}—{% endif %}</dd></div>
+        <div class="rt-facts__text"><dt>{% trans "Qərarı verib" context "registrar.retake" %}</dt><dd>{{ app.refund_decided_by.get_full_name|default:app.refund_decided_by.username|default:"—" }} · {{ app.refund_decided_at|date:"d.m.Y H:i" }}</dd></div>
+        <div class="rt-facts__wide"><dt>{% trans "Səbəb" context "registrar.retake" %}</dt><dd>{{ app.refund_reason }}</dd></div>
+    </dl>
+    {% include "registrar/retake/_refund_line.html" %}
+
+    {% if a.can_mark %}
+    <div class="rt-actions" data-rt-subject="{{ app.subject.name }}" data-rt-student="{{ student.get_full_name|default:student.username }}">
+        <button type="button" class="ems-btn ems-btn--success ems-btn--sm" data-ems-overlay-open="rtRefundedDialog" data-rt-open data-rt-url="{% url 'retake:refund' a.id %}" data-rt-action="mark" data-rt-expected="{{ a.refund_amount_text }}"><i class="fas fa-check-double" aria-hidden="true"></i> {% trans "Qaytarıldı" context "registrar.retake" %}</button>
+    </div>
+    {% endif %}
+
+    <details class="rt-trail">
+        <summary>{% trans "Ödəniş addımları" context "registrar.retake" %} <span class="ems-tabs__count">{{ a.timeline|length }}</span></summary>
+        {% trans "Ödəniş addımları" context "registrar.retake" as rt_pay_tl %}
+        {% include "partials/ems_ui/_timeline.html" with timeline=a.timeline timeline_label=rt_pay_tl %}
+    </details>
+</li>
+{% endwith %}

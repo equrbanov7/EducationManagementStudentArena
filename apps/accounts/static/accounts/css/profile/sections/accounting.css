@@ -374,7 +374,7 @@
 
 .ac-modal__stats {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: var(--ems-sp-3);
     margin: 0;
 }
@@ -474,7 +474,8 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .ac .ems-kpis--5 > :first-child {
+    .ac .ems-kpis--5 > :first-child,
+    .ac .ems-kpis--5 > :nth-child(6):last-child {
         grid-column: 1 / -1;
     }
 

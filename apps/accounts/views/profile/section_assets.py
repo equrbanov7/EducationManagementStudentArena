@@ -23,6 +23,14 @@ HƏLL
 * Qabıq qrupları (`allowed_sections`) dəyişməyib: qabıqdakı modallar, superadmin
   üslubları, `ns.register` / tək `DOMContentLoaded` skriptləri.
 
+* 2026-10-19 (mobil audit: tələbə «Ana səhifə»si 64 üslub faylı): `profile.css` manifestinin
+  bölmə faylları da (bildirişlər, kimlik səthi, post paketi, kurs/tapşırıq/nəticə kartları,
+  `blogCard.css`) şərtsiz deyil — selektor auditinə görə öz bölmələrinə bağlıdır. Şərtsiz
+  qalanlar yalnız qabıq və ümumi siniflərdir (`base` … `common`, `profile_info.css`
+  — `.section-title` / `.info-grid` onlarla bölmədə —, `responsive`, `dashboard`).
+  Öz partial-ı olmayan açar (`_section_dispatch.html`-in `else` budağı) «Profil
+  məlumatları»nı göstərir — onun üslubu da gəlir (``_renders_profile_fallback``).
+
 Siyahılar yalnız `asset_sections`/`allowed_sections`-dan asılıdır — proses daxilində
 keşlənir (DEBUG-da yox: şablon dəyişikliyi dərhal görünsün).
 """
@@ -36,6 +44,8 @@ from typing import Iterable
 from django.conf import settings
 from django.template.loader import get_template, render_to_string
 from django.templatetags.static import static
+
+from .constants import FALLBACK_PROFILE_SECTION
 
 CSS_TEMPLATE = "accounts/profile/_section_assets.html"
 JS_TEMPLATE = "accounts/profile/_section_scripts.html"
@@ -94,11 +104,20 @@ _CACHE_LIMIT = 2048  # (bölmə dəsti × icazə dəsti) kombinasiyaları — ro
 _cache: dict[tuple, object] = {}
 
 
+def _renders_profile_fallback(section: str) -> bool:
+    """`_section_dispatch.html`-in `else` budağı: öz partial-ı olmayan açar «Profil məlumatları»nı göstərir."""
+    from .sections_api import SECTION_PARTIALS  # dövri import: sections_api bu modulu idxal edir
+
+    return section not in SECTION_PARTIALS
+
+
 def asset_sections_for(section: str | None, allowed_sections: Iterable[str] | None) -> frozenset[str]:
-    """Render olunan bölmə + onun icazəli borc qonşuları."""
+    """Render olunan bölmə + onun icazəli borc qonşuları (+ fallback-də profil bölməsi)."""
     allowed = set(allowed_sections or ())
     keys = {section} if section else set()
     keys.update(other for other in SECTION_ASSET_BORROWS.get(section or "", ()) if other in allowed)
+    if section and _renders_profile_fallback(section):
+        keys.add(FALLBACK_PROFILE_SECTION)
     return frozenset(keys)
 
 

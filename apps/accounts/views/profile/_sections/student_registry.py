@@ -23,7 +23,11 @@ from django.utils.translation import pgettext
 from apps.accounts.services import account_block_reasons, people
 from apps.accounts.services.people import movements as movement_service
 from apps.accounts.services.people import registry as registry_service
-from apps.registrar.public import catalog_console
+from apps.registrar.public import (
+    ENROLLMENT_CERTIFICATE_PLACE_MAX,
+    can_issue_documents,
+    documents_blocked_by_view_as,
+)
 
 from . import student_activation
 
@@ -117,12 +121,14 @@ def build_student_registry_section(request, section, *, active_organization, all
 
     can_move = bool(actor.can_move_students and actor.can_manage_academic)
     section["can_move"] = can_move
-    # «Transkript yüklə» — rəsmi sənəd. Qapı `registrar:student_transcript_pdf`
-    # görünüşünün öz qapısı ilə EYNİDİR (təşkilat üzrə `course.edit`), ona görə
-    # düymə ancaq faylı onsuz da ala bilən aktora görünür; tələbə rolunda bu
-    # bölmə də, açar da yoxdur. Görünüşün icazə yoxlaması DƏYİŞMİR.
-    can_transcript = catalog_console.can_manage(request.user, active_organization)
+    # «Transkript yüklə» / «Arayış ver» — rəsmi, möhürlü sənədlər. Qapı görünüşlərin öz qapısı ilə EYNİDİR
+    # (`registrar.document_access`: `transcript.issue` və ya təşkilat üzrə `course.edit`; dekan — öz
+    # fakültəsi, əhatədən kənar sətir server tərəfdə 404). Buraxılış möhür YAZIR → view-as rejimində gizlidir.
+    can_transcript = can_issue_documents(
+        request.user, active_organization, request=request
+    ) and not documents_blocked_by_view_as(request)
     section["can_transcript"] = can_transcript
+    section["can_arayis"] = can_transcript
     section["options"] = registry_service.registry_options(actor, request=request)
     section["movement_kinds"] = movement_service.movement_kinds()
 
@@ -174,6 +180,13 @@ def build_student_registry_section(request, section, *, active_organization, all
         if can_transcript
         else ""
     )
+    # «Təhsil aldığı yer haqqında arayış» (2026-10-19) — dialoq POST edir (student_registry_documents.js).
+    section["arayis_url_base"] = (
+        reverse("registrar:student_enrollment_certificate_pdf", args=["00000000-0000-0000-0000-000000000000"])
+        if can_transcript
+        else ""
+    )
+    section["arayis_place_max"] = ENROLLMENT_CERTIFICATE_PLACE_MAX
 
     kpis = payload["kpis"]
     section["kpi_tiles"] = [

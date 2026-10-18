@@ -1,0 +1,97 @@
+/*
+ * «Mühasibatlıq» → ödəniş dərəcələri və ilkin məbləğ (sahib 2026-10-19).
+ * Şablonlar: accounting/_rates.html (dərəcə kartı), accounting/detail/_pay_note.html (məbləğ qeydi),
+ * cədvəldə / növlər cədvəlində «Dərəcə təyin edilməyib» işarəsi. Əsas üslub: accounting.css.
+ */
+.ac-pay-missing {
+    font-size: var(--ems-fs-xs);
+    white-space: normal;
+}
+
+.ac-pay-note {
+    margin-top: var(--ems-sp-3);
+}
+
+.ac-pay-note__line {
+    margin: 0;
+}
+
+.ac-pay-note__line + .ac-pay-note__line {
+    margin-top: var(--ems-sp-1);
+}
+
+.ac-rates {
+    margin: var(--ems-sp-4) 0;
+    padding: 0;
+}
+
+.ac-rates__summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    padding: var(--ems-sp-3) var(--ems-sp-4);
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.ac-rates__title {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+}
+
+.ac-rates__body {
+    display: grid;
+    gap: var(--ems-sp-3);
+    padding: 0 var(--ems-sp-4) var(--ems-sp-4);
+}
+
+.ac-rates__lead {
+    margin: 0;
+}
+
+.ac-rates__form {
+    display: grid;
+    gap: var(--ems-sp-3);
+    padding-top: var(--ems-sp-3);
+    border-top: 1px solid var(--ems-border);
+}
+
+.ac-rates__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--ems-sp-3);
+}
+
+.ac-rates__note {
+    grid-column: 1 / -1;
+}
+
+.ac-rates__actions form {
+    margin: 0;
+}
+
+.ac-rates__history summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.ac-rates__log {
+    margin: var(--ems-sp-2) 0 0;
+    padding-left: var(--ems-sp-5);
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+@media (max-width: 768px) {
+    .ac-rates__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ac-rates__summary,
+    .ac-rates__body {
+        padding-left: var(--ems-sp-3);
+        padding-right: var(--ems-sp-3);
+    }
+}

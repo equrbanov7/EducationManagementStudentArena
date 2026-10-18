@@ -282,6 +282,7 @@ def _generate(request, organization):
             "created": result["created"],
             "existing": result["existing"],
             "blocked": [item["label"] for item in result["blocked_programs"]],
+            "cohort_fallback_groups": [item["group"] for item in result["cohort_fallbacks"]],
         },
     )
     return JsonResponse({"ok": True, **{key: result[key] for key in result if key != "offering_ids"}})
@@ -519,10 +520,11 @@ def _remind_readiness(request, organization):
         reason="semester: readiness reminder sent",
         new_values={"chair": chair_id, **result},
     )
-    message = pgettext(_CTX, "Xatırlatma göndərildi: %(teachers)d müəllimə, %(chair)d kafedra əməkdaşına.") % {
-        "teachers": result["teachers"],
-        "chair": result["chair_members"],
-    }
+    message = pgettext(
+        _CTX,
+        "Xatırlatma göndərildi: %(teachers)d müəllimə, %(chair)d kafedra əməkdaşına, "
+        "%(schedule)d cədvəl quran əməkdaşa (dekanlıq / koordinator).",
+    ) % {"teachers": result["teachers"], "chair": result["chair_members"], "schedule": result["schedule_owners"]}
     return JsonResponse({"ok": True, "message": message, **result})
 
 

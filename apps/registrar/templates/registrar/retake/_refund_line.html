@@ -1,0 +1,14 @@
+{% load i18n %}
+{% comment %}Qaytarılma vəziyyəti (2026-10-19) — `a` = `retake_queries.decorate` / `retake_desk._refund_row` (`refund_info`).
+Qərar (məbləğ, əmr № / tarix, sənəd) və icra (tarix, arayış №). Bal / nəticə YOXDUR — mühasib də görür.{% endcomment %}
+<p class="rt-note{% if a.refund_state == 'refunded' %} rt-note--success{% else %} rt-note--info{% endif %}">
+    <i class="fas fa-hand-holding-dollar" aria-hidden="true"></i>
+    <span>
+        <span class="ems-badge ems-badge--{% if a.refund_state == 'refunded' %}success{% else %}warning{% endif %}">{{ a.refund_label }}</span>
+        {% blocktrans with amount=a.refund_amount_text context "registrar.retake" %}Qaytarılacaq məbləğ: {{ amount }} AZN{% endblocktrans %}
+        {% if a.app.refund_order_number %} · {% trans "Əmr" context "registrar.retake" %} № {{ a.app.refund_order_number }}{% if a.app.refund_order_date %} ({{ a.app.refund_order_date|date:"d.m.Y" }}){% endif %}{% endif %}
+        {% if a.refund_document_url %} · <a class="rt-link" href="{{ a.refund_document_url }}" target="_blank" rel="noopener" data-no-route-loading>{% trans "Qərar sənədi" context "registrar.retake" %}</a>{% endif %}
+        {% if a.refund_attempt_label %} · {{ a.refund_attempt_label }}{% endif %}
+        {% if a.refund_state == "refunded" %} · {% blocktrans with day=a.app.refunded_on|date:"d.m.Y" ref=a.app.refund_reference context "registrar.retake" %}qaytarılıb: {{ day }}, arayış № {{ ref }}{% endblocktrans %}{% endif %}
+    </span>
+</p>

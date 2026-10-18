@@ -51,6 +51,13 @@
     text-decoration: none;
 }
 
+/* 2026-10-19: «Qaytarılacaq ödənişlər» KPI-ında məbləğ cəmi. */
+.rt-kpi .rt-kpi__note {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+}
+
 .rt-kpi--primary,
 .rt-kpi--info { border-left-color: var(--ems-primary-500); }
 .rt-kpi--warning { border-left-color: var(--ems-warning-500); }
@@ -154,6 +161,7 @@
 .rt-note--danger i { color: var(--ems-danger-700); }
 
 .rt-note--info i { color: var(--ems-primary-600); }
+.rt-note--success i { color: var(--ems-success-600); }
 
 .rt-result {
     padding: var(--ems-sp-2) var(--ems-sp-3);
@@ -428,4 +436,21 @@
         font: inherit;
         font-weight: 700;
     }
+}
+
+/* 2026-10-19: «Ödənişin qaytarılması qərarı» — «Cəhd istifadə olunmuş sayılmasın» seçimi. */
+.rt-check {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-2);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.rt-check__input {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    flex: 0 0 auto;
+    accent-color: var(--ems-primary-600);
 }

@@ -35,10 +35,11 @@ def _row_hours(row) -> dict:
     return hours
 
 
-def plan_hours_for_subject(*, organization, subject, program=None):
+def plan_hours_for_subject(*, organization, subject, program=None, admission_year=None):
     """Fənn üçün təsdiqlənmiş plan sətrinin saat bölgüsü (``{}`` — tapılmadı).
 
-    ``program`` verilibsə həmin ixtisasın planına üstünlük verilir; verilməsə (və
+    ``program`` verilibsə həmin ixtisasın planına üstünlük verilir; ``admission_year`` (qrupun kohortu,
+    2026-10-19 qaydası — ``cohort_plans``) da verilibsə ƏVVƏL həmin qəbul ilinin planı; verilməsə (və
     ya tapılmasa) təşkilatın ən yeni qəbul ilinə aid təsdiqlənmiş planı
     götürülür.  Kredit/saat İXTİSASA görə dəyişdiyi üçün (layihə yaddaşı) proqram
     uyğunluğu ƏHƏMİYYƏTLİDİR — geri çəkilmə yalnız heç nə tapılmayanda işə düşür.
@@ -51,6 +52,10 @@ def plan_hours_for_subject(*, organization, subject, program=None):
         curriculum__status=PlanStatus.APPROVED,
     ).select_related("curriculum")
     ordered = base.order_by("-curriculum__admission_year", "-curriculum__version")
+    if program is not None and admission_year:
+        row = ordered.filter(curriculum__program=program, curriculum__admission_year=admission_year).first()
+        if row is not None:
+            return _row_hours(row)
     if program is not None:
         row = ordered.filter(curriculum__program=program).first()
         if row is not None:
@@ -71,10 +76,13 @@ def plan_hours_for_offering(offering):
     from core.academic_rules import syllabus_hours_from_load
 
     def from_plan():
+        from .cohort_plans import group_cohort_year
+
         return plan_hours_for_subject(
             organization=offering.organization,
             subject=offering.subject,
             program=program_for_offering(offering),
+            admission_year=group_cohort_year(offering.group) if offering.group_id else None,
         )
 
     # Sahib 2026-10-12: «sillabus dərs saatı YÜKƏ görə tənzimlənsin — müəllim əl ilə yazmasın». RİM açarı

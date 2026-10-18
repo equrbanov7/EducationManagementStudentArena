@@ -97,6 +97,15 @@ ACTIVE_STATUSES = (
 CONSUMED_STATUSES = (RetakeStatus.ADMITTED, RetakeStatus.EXAM_GRANTED, RetakeStatus.COMPLETED, RetakeStatus.NO_SHOW)
 
 
+class RetakeRefundState(models.TextChoices):
+    """2026-10-19 (sahib, tövsiyə olunan variant): defolt qaytarılma YOXDUR; rəsmi qərar qaytarılmanı verə bilər
+    (``retake_refund``). Vəziyyət yalnız irəli gedir: «» → ``decided`` → ``refunded`` (DB trigger-i, 0094)."""
+
+    NONE = "", pgettext_lazy(_CTX, "Qaytarılma yoxdur")
+    DECIDED = "decided", pgettext_lazy(_CTX, "Ödənişin qaytarılması qərarı verilib")
+    REFUNDED = "refunded", pgettext_lazy(_CTX, "Ödəniş qaytarılıb")
+
+
 class RetakeResultSource(models.TextChoices):
     MANUAL = "manual", pgettext_lazy(_CTX, "Dekanlıq daxil edib")
     EXAM_ENTRY = "exam_entry", pgettext_lazy(_CTX, "İmtahan balından")
@@ -169,13 +178,39 @@ class RetakeApplication(UUIDModel, TimeStampedModel):
     fee_inputs = models.JSONField(default=dict, blank=True)
     #: Mühasibatlığın təsdiq anında yazdığı ödənilmiş məbləğ (AZN); fərq xəbərdarlıqdır, blok deyil.
     paid_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    # ── Ödənişdən sonra bağlanmanın RƏSMİ qərarı (əmr № + tarix və ya sənəd). Qaytarılma YOXDUR — qayda sahibdən
-    #    gözlənilir (bax ``retake_closure``). ────────────────────────────────────────────────────────────────
+    # ── Ödənişdən sonra bağlanmanın RƏSMİ qərarı (əmr № + tarix və ya sənəd). Defolt qaytarılma YOXDUR; qaytarılma
+    #    yalnız ayrıca qərarla (``refund_*`` sahələri, bax ``retake_closure`` / ``retake_refund``). ──────────────
     closure_order_number = models.CharField(max_length=80, blank=True)
     closure_order_date = models.DateField(null=True, blank=True)
     closure_document = models.FileField(
         upload_to=retake_document_path, blank=True, max_length=200, validators=retake_file_validators()
     )
+    # ── 2026-10-19 (sahib): «Ödənişin qaytarılması qərarı» — ödənişdən sonra bağlanmış müraciətə RƏSMİ QƏRARLA
+    #    (əmr № + tarix və ya sənəd, səbəb ≥ 20) qaytarılma; Mühasibatlıq icranı «Qaytarıldı» ilə qeyd edir. Sistem
+    #    pul köçürmür — yalnız qeyd. Sahələr bir dəfə yazılır (DB trigger-i, ``0094_retake_refund``). ──────────────
+    refund_state = models.CharField(max_length=12, choices=RetakeRefundState.choices, blank=True, default="")
+    refund_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    refund_reason = models.TextField(blank=True)
+    refund_order_number = models.CharField(max_length=80, blank=True)
+    refund_order_date = models.DateField(null=True, blank=True)
+    refund_document = models.FileField(
+        upload_to=retake_document_path, blank=True, max_length=200, validators=retake_file_validators()
+    )
+    refund_decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    refund_decided_at = models.DateTimeField(null=True, blank=True)
+    #: İcra (Mühasibatlıq): qaytarılma tarixi, bank arayışı / ödəniş tapşırığı №, kim və nə vaxt qeyd edib.
+    refunded_on = models.DateField(null=True, blank=True)
+    refund_reference = models.CharField(max_length=120, blank=True)
+    refunded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    refunded_at = models.DateTimeField(null=True, blank=True)
+    #: Sahib qaydası (review 2026-10-19, tövsiyə olunan variant): qaytarılma qərarı universitetin ödənilmiş cəhdin
+    #: VERİLMƏDİYİNİ tanımasıdır — defolt olaraq cəhd İSTİFADƏ OLUNMUŞ SAYILMIR («Cəhd istifadə olunmuş sayılmasın»).
+    #: Qərarla birlikdə donur (DB trigger-i). Qərar olmayan müraciətdə təsirsizdir. Bax :func:`consumes_attempt`.
+    refund_restores_attempt = models.BooleanField(default=True)
 
     objects = models.Manager()
 
@@ -188,6 +223,40 @@ class RetakeApplication(UUIDModel, TimeStampedModel):
                 fields=["organization", "student", "subject"],
                 condition=Q(status__in=[status.value for status in ACTIVE_STATUSES]),
                 name="registrar_retake_one_active_per_subject",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    # Qərar yoxdur — heç bir qaytarılma sahəsi dolu deyil (review 2026-10-19, L4).
+                    Q(
+                        refund_state="",
+                        refund_decided_at__isnull=True,
+                        refund_amount__isnull=True,
+                        refund_reason="",
+                        refund_order_number="",
+                        refund_order_date__isnull=True,
+                        refund_document="",
+                        refunded_at__isnull=True,
+                        refunded_on__isnull=True,
+                        refund_reference="",
+                    )
+                    # Qərar var, icra yoxdur — icra sahələri boşdur.
+                    | Q(
+                        refund_state="decided",
+                        refund_decided_at__isnull=False,
+                        refund_amount__gt=0,
+                        refunded_at__isnull=True,
+                        refunded_on__isnull=True,
+                        refund_reference="",
+                    )
+                    | Q(
+                        refund_state="refunded",
+                        refund_decided_at__isnull=False,
+                        refund_amount__gt=0,
+                        refunded_at__isnull=False,
+                        refunded_on__isnull=False,
+                    )
+                ),
+                name="registrar_retake_refund_state_consistent",
             ),
         ]
         indexes = [
@@ -202,18 +271,42 @@ class RetakeApplication(UUIDModel, TimeStampedModel):
     def is_active(self) -> bool:
         return self.status in ACTIVE_STATUSES
 
+    @property
+    def consumes_attempt(self) -> bool:
+        return consumes_attempt(self)
+
+
+#: Qaytarılma qərarı verilmiş vəziyyətlər (``RetakeRefundState`` dəyərləri).
+REFUND_DECIDED_STATES = ("decided", "refunded")
+
+
+def consumes_attempt(application) -> bool:
+    """25% cəhdini «istifadə olunmuş» sayırmı: ``CONSUMED_STATUSES`` + qaytarılma qərarı cəhdi BƏRPA etməyibsə."""
+    if application.kind != RetakeKind.RETAKE_25 or application.status not in CONSUMED_STATUSES:
+        return False
+    return not (application.refund_state in REFUND_DECIDED_STATES and application.refund_restores_attempt)
+
+
+def consumed_attempt_q() -> Q:
+    """:func:`consumes_attempt`-in queryset ekvivalenti (``kind`` filtri çağırandadır)."""
+    return Q(status__in=CONSUMED_STATUSES) & ~Q(refund_state__in=REFUND_DECIDED_STATES, refund_restores_attempt=True)
+
 
 __all__ = [
     "ACTIVE_STATUSES",
     "CONSUMED_STATUSES",
+    "REFUND_DECIDED_STATES",
     "RETAKE_DOCUMENT_PREFIX",
     "RETAKE_FILE_EXTENSIONS",
     "RETAKE_FILE_MAX_MB",
     "RETAKE_RECEIPT_PREFIX",
     "RetakeApplication",
     "RetakeKind",
+    "RetakeRefundState",
     "RetakeResultSource",
     "RetakeStatus",
+    "consumed_attempt_q",
+    "consumes_attempt",
     "retake_document_path",
     "retake_file_validators",
     "retake_receipt_path",

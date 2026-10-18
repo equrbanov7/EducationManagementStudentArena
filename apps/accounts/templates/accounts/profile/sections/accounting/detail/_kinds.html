@@ -1,5 +1,6 @@
 {% load i18n %}
-{% comment %}Növlər üzrə seçilmiş dövrün planı ↔ faktı (mühazirə / seminar / laboratoriya + Cəmi). Kontekst: `detail`
+{% comment %}Növlər üzrə seçilmiş dövrün planı ↔ faktı (mühazirə / seminar / laboratoriya + Cəmi) və 2026-10-19-dan dərəcə və
+məbləğ (keçirilmiş saat × dərəcə; dərəcə yoxdursa «Dərəcə təyin edilməyib», 0 yazılmır). Kontekst: `detail`
 (services/accounting/detail.py → detail_core). Səhifə drill-down-u və müəllim pəncərəsi ortaqdır.{% endcomment %}
 <div class="ems-tablewrap ac-tablewrap">
     <div class="ems-tablescroll">
@@ -13,6 +14,8 @@
                     <th scope="col" class="ems-table__num">{% trans "Fərq" context "accounts.accounting" %}</th>
                     <th scope="col" class="ems-table__num">{% trans "İcra" context "accounts.accounting" %}</th>
                     <th scope="col">{% trans "Status" context "accounts.accounting" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Dərəcə (AZN / saat)" context "accounts.accounting" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Məbləğ (AZN)" context "accounts.accounting" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -24,6 +27,8 @@
                     <td class="ems-table__num" data-label="{% trans 'Fərq' context 'accounts.accounting' %}">{{ kind.diff_text }}</td>
                     <td class="ems-table__num" data-label="{% trans 'İcra' context 'accounts.accounting' %}">{% if kind.pct is None %}—{% else %}{{ kind.pct }}%{% endif %}</td>
                     <td data-label="{% trans 'Status' context 'accounts.accounting' %}">{% include "partials/ems_ui/_status_badge.html" with status=kind.status_obj nowrap=True %}</td>
+                    <td class="ems-table__num" data-label="{% trans 'Dərəcə (AZN / saat)' context 'accounts.accounting' %}">{{ kind.rate_text|default:"—" }}</td>
+                    <td class="ems-table__num" data-label="{% trans 'Məbləğ (AZN)' context 'accounts.accounting' %}">{% if kind.amount_text %}{{ kind.amount_text }}{% elif kind.rate_missing %}<span class="ac-muted ac-pay-missing">{% trans "Dərəcə təyin edilməyib" context "accounts.accounting" %}</span>{% else %}—{% endif %}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -35,6 +40,8 @@
                     <td class="ems-table__num" data-label="{% trans 'Fərq' context 'accounts.accounting' %}">{{ detail.diff_text }}</td>
                     <td class="ems-table__num" data-label="{% trans 'İcra' context 'accounts.accounting' %}">{% if detail.pct is None %}—{% else %}{{ detail.pct }}%{% endif %}</td>
                     <td data-label="{% trans 'Status' context 'accounts.accounting' %}">{% include "partials/ems_ui/_status_badge.html" with status=detail.status_obj nowrap=True %}</td>
+                    <td></td>
+                    <td class="ems-table__num ac-strong" data-label="{% trans 'Məbləğ (AZN)' context 'accounts.accounting' %}">{% if detail.pay.amount_text %}{{ detail.pay.amount_text }}{% else %}<span class="ac-muted ac-pay-missing">{{ detail.pay.missing_text }}</span>{% endif %}</td>
                 </tr>
             </tfoot>
         </table>

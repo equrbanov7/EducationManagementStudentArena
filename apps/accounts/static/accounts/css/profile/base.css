@@ -42,3 +42,11 @@ body {
     visibility: hidden;
     pointer-events: none;
 }
+
+/* 2026-10-19: «İmtahan yarat» modalı (`#createExamModal.modal-overlay`) da qabıqdadır, onun
+   `.modal-overlay` əsası isə (`sections/posts/_part1.css`) artıq yalnız post / kateqoriya /
+   «Kurslarım» / «İmtahanlarım» bölmələrində yüklənir. Fayl gəlməyən bölmədə markup axında
+   görünməsin deyə gizli vəziyyət burada da var; açılış (`.active`) həmin fayldadır. */
+.modal-overlay:not(.active) {
+    display: none;
+}

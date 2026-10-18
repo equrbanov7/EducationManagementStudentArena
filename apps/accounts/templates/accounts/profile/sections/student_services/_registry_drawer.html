@@ -51,6 +51,13 @@ QƏSDƏN yoxdur (§8/13, sətir başına aqreqat qadağandır).
             <i class="fas fa-file-pdf" aria-hidden="true"></i>
             {% trans "Transkript yüklə" context "accounts.student_registry" %}
         </a>
+        {% if student_registry_section.can_arayis %}
+        {# Kartın `record_id`-si `sr:card` hadisəsi ilə gəlir (student_registry_documents.js) — o vaxta qədər gizlidir. #}
+        <button type="button" class="ems-btn ems-btn--sm" data-sr-arayis="" data-sr-arayis-card hidden>
+            <i class="fas fa-file-signature" aria-hidden="true"></i>
+            {% trans "Arayış ver" context "accounts.student_registry" %}
+        </button>
+        {% endif %}
     </div>
     {% endif %}
 

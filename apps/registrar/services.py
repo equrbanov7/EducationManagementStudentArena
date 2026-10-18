@@ -393,17 +393,19 @@ def _int_or_zero(value) -> int:
 def group_course_year(group, academic_year) -> int:
     """Qrupun verilmiş tədris ilindəki KURSU; bilinmirsə ``0`` (heç bir semestrə düşmür).
 
-    Üstünlük ``individual_plan._course_year`` ilə eynidir: (1) reyestrin açıq
-    ``settings.course_year``-ı («Kursa keçir» hər il +1 edir); (2) köçürülmüş
-    qrupların ``settings.admission_year``-ı: ``ilin başlanğıcı − qəbul ili + 1``.
-    Sərhəddən kənar dəyər (2017 qəbullu qrup → 10-cu «kurs») ``0`` qaytarır.
+    Üstünlük: (1) reyestrin açıq ``settings.course_year``-ı («Kursa keçir» hər il +1 edir); (2) qrupun
+    KOHORT ili — ``organizations.public.group_cohort_year`` (``settings.admission_year``, köçürülmüş «legacy»
+    qrupda isə — orada idxal ilidir — addan; semestr açılışının plan seçimi ilə EYNİ mənbə, rəy 2026-10-19):
+    ``ilin başlanğıcı − qəbul ili + 1``. Sərhəddən kənar dəyər (2017 qəbullu qrup → 10-cu «kurs») ``0`` qaytarır.
     """
     import re
+
+    from apps.organizations.public import group_cohort_year
 
     blob = group.settings if isinstance(getattr(group, "settings", None), dict) else {}
     course = _int_or_zero(blob.get("course_year"))
     if course <= 0:
-        admission = _int_or_zero(blob.get("admission_year"))
+        admission = group_cohort_year(group) or 0
         match = re.search(r"(\d{4})", str(academic_year or ""))
         course = int(match.group(1)) - admission + 1 if (admission and match) else 0
     return course if 1 <= course <= MAX_GROUP_COURSE_YEAR else 0

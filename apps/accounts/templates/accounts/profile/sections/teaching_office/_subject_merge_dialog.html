@@ -1,0 +1,102 @@
+{% load i18n %}
+{% comment %}
+«Fənləri birləşdir» dialoqu (2026-10-19) — fənn kataloqu, org-geniş `catalog.manage`.
+
+Axın: hədəf + mənbə(lər) seç → «Önizlə» (dry-run: cədvəl sayları, toqquşmalar, xəbərdarlıqlar,
+iz) → səbəb (≥20) → «Birləşdir» (iz ilə; arada məlumat dəyişibsə server 409 qaytarır).
+Davranış `accounts/js/profile/subject_merge.js`-dədir (EMSDelegate, AJAX-safe); bütün URL-lər
+`data-sm-*` atributlarından oxunur. Inline JS/CSS YOXDUR (CSP).
+{% endcomment %}
+<div class="ems-overlay ems-overlay--dialog" id="tofSubjectMergeDialog" hidden
+     data-sm-root
+     data-sm-lookup-url="{{ subject_catalog_section.merge_urls.lookup }}"
+     data-sm-groups-url="{{ subject_catalog_section.merge_urls.groups }}"
+     data-sm-preview-url="{{ subject_catalog_section.merge_urls.preview }}"
+     data-sm-apply-url="{{ subject_catalog_section.merge_urls.apply }}"
+     data-sm-text-moves="{% trans 'köçür' context 'registrar.subject_merge' %}"
+     data-sm-text-keeps="{% trans 'qalır (dəyişməz tarixçə)' context 'registrar.subject_merge' %}"
+     data-sm-text-nothing="{% trans 'Köçürüləcək istinad yoxdur — yalnız kart arxivlənəcək.' context 'registrar.subject_merge' %}"
+     data-sm-text-blocking="{% trans 'Toqquşmalar — əvvəlcə bunları həll edin' context 'registrar.subject_merge' %}"
+     data-sm-text-resolvable="{% trans 'Avtomatik həll olunur' context 'registrar.subject_merge' %}"
+     data-sm-text-warnings="{% trans 'Xəbərdarlıqlar' context 'registrar.subject_merge' %}"
+     data-sm-text-info="{% trans 'Qeydlər' context 'registrar.subject_merge' %}"
+     data-sm-text-more="{% trans 'və daha {n}' context 'registrar.subject_merge' %}"
+     data-sm-text-archive="{% trans 'Mənbə kartların arxiv səbəbi:' context 'registrar.subject_merge' %}"
+     data-sm-text-ready="{% trans 'Toqquşma yoxdur — səbəbi yazıb birləşdirə bilərsiniz.' context 'registrar.subject_merge' %}"
+     data-sm-text-pick="{% trans 'Saxlanılacaq və ən azı bir birləşdiriləcək fənn seçin.' context 'registrar.subject_merge' %}"
+     data-sm-text-stale="{% trans 'Seçim dəyişdi — yenidən önizləyin.' context 'registrar.subject_merge' %}"
+     data-sm-text-use="{% trans 'Seç' context 'registrar.subject_merge' %}"
+     data-sm-text-keep="{% trans 'saxlanılır' context 'registrar.subject_merge' %}"
+     data-sm-text-offerings="{% trans 'açılış' context 'registrar.subject_merge' %}"
+     data-sm-text-no-groups="{% trans 'Ad üzrə dublikat qrupu tapılmadı — fənləri axtarışla seçin.' context 'registrar.subject_merge' %}"
+     data-sm-text-error="{% trans 'Sorğu alınmadı — yenidən cəhd edin.' context 'registrar.subject_merge' %}">
+    <div class="ems-dialog ems-dialog--wide sm-dialog" role="dialog" aria-modal="true" aria-labelledby="tofSubjectMergeDialog-title">
+        <form method="post" data-sm-form novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="digest" value="" data-sm-digest>
+            <div class="ems-dialog__head">
+                <div>
+                    <h2 class="ems-dialog__title" id="tofSubjectMergeDialog-title">{% trans "Fənləri birləşdir" context "registrar.subject_merge" %}</h2>
+                    <p class="ems-dialog__sub">{% trans "Bütün istinadlar (açılış, plan sətri, sillabus, tapşırıq, imtahan…) saxlanılan fənnə köçür; digər kartlar SİLİNMİR — arxivlənir." context "registrar.subject_merge" %}</p>
+                </div>
+                <button type="button" class="ems-dialog__x" data-ems-overlay-close
+                        aria-label="{% trans 'Bağla' context 'ui.dialog' %}">×</button>
+            </div>
+
+            <div class="ems-dialog__body sm-body">
+                <p class="ems-msg ems-msg--error" data-ems-form-error role="alert" hidden></p>
+
+                <details class="sm-groups" data-sm-groups-box>
+                    <summary class="sm-groups__summary">{% trans "Ad üzrə dublikat qrupları (hazır təklif)" context "registrar.subject_merge" %}</summary>
+                    <div class="sm-groups__list" data-sm-groups aria-live="polite"></div>
+                </details>
+
+                <div class="ems-field">
+                    <label class="ems-field__label" for="sm-target-search">{% trans "Saxlanılacaq fənn" context "registrar.subject_merge" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+                    <div class="ems-ss ems-ss--single" data-sm-target-picker
+                         data-empty="{% trans 'Uyğun fənn tapılmadı' context 'registrar.subject_merge' %}">
+                        <div class="ems-ss__chips">
+                            <input type="text" id="sm-target-search" class="ems-ss__search" autocomplete="off"
+                                   placeholder="{% trans 'Kod və ya ad ilə axtar…' context 'registrar.subject_merge' %}">
+                        </div>
+                        <div class="ems-ss__menu"></div>
+                    </div>
+                </div>
+
+                <div class="ems-field">
+                    <label class="ems-field__label" for="sm-sources-search">{% trans "Birləşdiriləcək fənn(lər)" context "registrar.subject_merge" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+                    <div class="ems-ss ems-ss--multi" data-sm-sources-picker
+                         data-empty="{% trans 'Uyğun fənn tapılmadı' context 'registrar.subject_merge' %}">
+                        <div class="ems-ss__chips">
+                            <input type="text" id="sm-sources-search" class="ems-ss__search" autocomplete="off"
+                                   placeholder="{% trans 'Kod və ya ad ilə axtar…' context 'registrar.subject_merge' %}">
+                        </div>
+                        <div class="ems-ss__menu"></div>
+                    </div>
+                    <p class="ems-field__hint">{% trans "Bir dəfəyə ən çox 10 fənn. Arxivdəki kartlar da seçilə bilər." context "registrar.subject_merge" %}</p>
+                </div>
+
+                <div class="sm-actions">
+                    <button type="button" class="ems-btn" data-sm-preview>
+                        <i class="fas fa-magnifying-glass-chart" aria-hidden="true"></i>
+                        {% trans "Önizlə" context "registrar.subject_merge" %}
+                    </button>
+                </div>
+
+                <div class="sm-result" data-sm-result aria-live="polite" hidden></div>
+
+                <div class="ems-field" data-sm-reason-box hidden>
+                    <label class="ems-field__label" for="sm-reason">{% trans "Səbəb" context "registrar.subject_merge" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+                    <textarea class="ems-textarea" id="sm-reason" name="reason" rows="3" minlength="20" maxlength="2000" data-sm-reason
+                              placeholder="{% trans 'Məs. Tədris şöbəsinin təklifi: eyni fənnin iki kartı (əmr/protokol nömrəsi)' context 'registrar.subject_merge' %}"></textarea>
+                    <p class="ems-field__hint">{% trans "Ən azı 20 simvol — audit jurnalına aktor və vaxtla yazılır." context "registrar.subject_merge" %}</p>
+                </div>
+            </div>
+
+            <div class="ems-dialog__foot">
+                <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Ləğv et" context "ui.dialog" %}</button>
+                <button type="submit" class="ems-btn ems-btn--danger" data-sm-submit disabled>{% trans "Birləşdir" context "registrar.subject_merge" %}</button>
+            </div>
+        </form>
+    </div>
+</div>

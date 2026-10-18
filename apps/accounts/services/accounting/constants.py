@@ -28,6 +28,8 @@ KINDS = (
     (KIND_LAB, pgettext_lazy(CTX, "Laboratoriya")),
 )
 KIND_KEYS = tuple(key for key, _label in KINDS)
+#: ``dataset.planned_matrix`` sətrində saathesabı (``is_hourly_paid``) plan saatlarının açarı — növlərlə toqquşmur.
+HOURLY_KEY = "_hourly"
 
 #: Dərs yükünün sayılan tapşırıq statusları — «Dərs yüküm» / kafedra profili ilə EYNİ
 #: (``workload.services.queries.teacher_workload_summaries``): bölgüsü bitmiş və ya düzəliş edilmiş.

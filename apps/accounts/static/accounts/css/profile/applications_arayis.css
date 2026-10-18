@@ -1,0 +1,74 @@
+/* «Müraciətlərim» detalı → «Arayış sorğusu» emalçısına «Arayışı hazırla» bloku (sahib 2026-10-19).
+ * Blok `.apx-act` qutusunun görünüşünü işlədir (applications_detail.css); burada aralıq, əlavə olunmuş
+ * arayışların siyahısı və imtina (aktiv olmayan tələbə) mətninin tonu var. Markup: applications_arayis.js. */
+.apx-arayis {
+    margin-bottom: 10px;
+}
+
+.apx-arayis__title {
+    margin: 0 0 6px;
+    font-size: 0.86rem;
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+}
+
+.apx-arayis__blocked {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--ems-danger-700, #b91c1c);
+}
+
+.apx-arayis__done {
+    margin-bottom: 10px;
+}
+
+.apx-arayis__done-title {
+    margin: 0 0 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--ems-success-700, #047857);
+}
+
+.apx-arayis__list {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.apx-arayis__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    font-size: 0.8rem;
+    color: var(--ems-neutral-700);
+}
+
+.apx-arayis__code {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--ems-neutral-900);
+    overflow-wrap: anywhere;
+}
+
+.apx-arayis__place {
+    flex: 1 1 160px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.apx-arayis__link {
+    font-weight: 700;
+}
+
+.apx-arayis__form {
+    margin-top: 10px;
+}
+
+/* `.ems-btn` `display:inline-flex` verir — brauzerin `[hidden]` qaydası üstələnməsin. */
+.apx-arayis .ems-btn[hidden],
+.apx-arayis__form[hidden] {
+    display: none;
+}

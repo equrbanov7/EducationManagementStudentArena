@@ -35,6 +35,7 @@ Sorğu profili DƏYİŞMİR: tək `AcademicPeriod` sorğusu (bax
         {% trans "Hələ akademik dövr müəyyən edilməyib." context "registrar.calendar" as acal_none %}
         {% trans "Semestrlər «Akademik dövr» kataloqundan gəlir." context "registrar.calendar" as acal_none_body %}
         {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-calendar-xmark" state_title=acal_none state_body=acal_none_body %}
+        {% if holidays %}{% include "registrar/partials/_calendar_holidays.html" %}{% endif %}
     {% else %}
 
     {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=kpi_tiles kpi_variant="4" %}
@@ -48,6 +49,9 @@ Sorğu profili DƏYİŞMİR: tək `AcademicPeriod` sorğusu (bax
         {% endfor %}
     </nav>
     {% endif %}
+
+    {# 2026-10-19: bayram və qeyri-iş günləri — seçilmiş tədris ili (yoxdursa bu günün ili) üzrə. #}
+    {% if holidays %}{% include "registrar/partials/_calendar_holidays.html" %}{% endif %}
 
     {% if not periods %}
         {% trans "Bu tədris ilində semestr yoxdur." context "registrar.calendar" as acal_empty_year %}

@@ -105041,3 +105041,1307 @@ msgstr "Your browser cannot play this video — download it via «Download» and
 msgctxt "organizations.permission.label"
 msgid "Təhsil haqqı cədvəlini idarə etmək (25% təkrar imtahanın təxmini məbləği)"
 msgstr "Manage the tuition fee table (estimated 25% re-exam amount)"
+
+msgctxt "organizations.holiday"
+msgid "Bayram"
+msgstr "Public holiday"
+
+msgctxt "organizations.holiday"
+msgid "Qeyri-iş günü"
+msgstr "Day off"
+
+msgctxt "organizations.holiday"
+msgid "İş günü köçürməsi"
+msgstr "Transferred working day"
+
+msgctxt "organizations.holiday"
+msgid "Bayram / qeyri-iş günü"
+msgstr "Holiday / day off"
+
+msgctxt "organizations.holiday"
+msgid "Bayram və qeyri-iş günləri"
+msgstr "Holidays and days off"
+
+msgctxt "organizations.holiday"
+msgid "Tarix düzgün deyil."
+msgstr "The date is invalid."
+
+msgctxt "organizations.holiday"
+msgid "Günün adı boş ola bilməz."
+msgstr "The day name cannot be empty."
+
+msgctxt "organizations.holiday"
+msgid "Günün növü düzgün deyil."
+msgstr "The day type is invalid."
+
+msgctxt "organizations.holiday"
+msgid "«İş günü köçürməsi» yalnız şənbə və ya bazar gününə yazılır — həmin gün iş günü elan olunur."
+msgstr "A “transferred working day” can only be set on a Saturday or Sunday — that day is declared a working day."
+
+msgctxt "organizations.holiday"
+msgid "Qeyd tapılmadı."
+msgstr "Entry not found."
+
+msgctxt "organizations.holiday"
+msgid "Bu tarix artıq təqvimdədir — mövcud qeydi redaktə edin."
+msgstr "This date is already in the calendar — edit the existing entry."
+
+msgctxt "registrar.calendar"
+msgid "Bazar ertəsi"
+msgstr "Monday"
+
+msgctxt "registrar.calendar"
+msgid "Çərşənbə axşamı"
+msgstr "Tuesday"
+
+msgctxt "registrar.calendar"
+msgid "Çərşənbə"
+msgstr "Wednesday"
+
+msgctxt "registrar.calendar"
+msgid "Cümə axşamı"
+msgstr "Thursday"
+
+msgctxt "registrar.calendar"
+msgid "Cümə"
+msgstr "Friday"
+
+msgctxt "registrar.calendar"
+msgid "Şənbə"
+msgstr "Saturday"
+
+msgctxt "registrar.calendar"
+msgid "Bazar"
+msgstr "Sunday"
+
+msgctxt "registrar.calendar"
+msgid "Gün təqvimə əlavə olundu."
+msgstr "The day was added to the calendar."
+
+msgctxt "registrar.calendar"
+msgid "Dəyişiklik yadda saxlanıldı."
+msgstr "Changes saved."
+
+#, python-format
+msgctxt "registrar.calendar"
+msgid "%(year)s: təqvimə %(created)d gün əlavə olundu, %(skipped)d tarix artıq təqvimdə idi."
+msgstr "%(year)s: %(created)d days added to the calendar, %(skipped)d dates were already in the calendar."
+
+msgctxt "registrar.calendar"
+msgid "Gün təqvimdən silindi."
+msgstr "The day was removed from the calendar."
+
+msgctxt "registrar.calendar"
+msgid "Tədris ili seçilməyib."
+msgstr "No academic year selected."
+
+msgctxt "registrar.calendar"
+msgid "Bayram təqvimini dəyişmək üçün səlahiyyətiniz yoxdur."
+msgstr "You are not allowed to change the holiday calendar."
+
+msgctxt "registrar.calendar"
+msgid "Naməlum əməl."
+msgstr "Unknown action."
+
+msgctxt "registrar.calendar"
+msgid "Başqasının adından baxış rejimində dəyişiklik etmək olmaz."
+msgstr "Changes are not allowed while viewing as another user."
+
+msgctxt "registrar.calendar"
+msgid "Əməl alınmadı. Yenidən cəhd edin."
+msgstr "The action failed. Please try again."
+
+#, python-format
+msgctxt "registrar.calendar"
+msgid "Bayram və qeyri-iş günləri · %(year)s"
+msgstr "Holidays and days off · %(year)s"
+
+msgctxt "registrar.calendar"
+msgid "Rəsmi bayramları əlavə et (sabit tarixli)"
+msgstr "Add public holidays (fixed dates)"
+
+msgctxt "registrar.calendar"
+msgid "Gün əlavə et"
+msgstr "Add day"
+
+#, python-format
+msgctxt "registrar.calendar"
+msgid "Tədris ili %(start)s — %(end)s. Bayram və qeyri-iş günləri dərs günü sayılmır: «Keçilmiş dərslər» onları «qeydə alınmayıb» saymır, mühasibatlığın aylıq planı və müraciətlərin cavab müddəti iş günü ilə hesablananda çıxılır. «İş günü köçürməsi» iş günü elan olunmuş şənbə/bazardır."
+msgstr "Academic year %(start)s — %(end)s. Holidays and days off are not teaching days: “Lessons held” does not count them as “not recorded”, and they are excluded when the accounting monthly plan and the response deadline of applications are calculated in working days. A “transferred working day” is a Saturday/Sunday declared a working day."
+
+msgctxt "registrar.calendar"
+msgid "Düymə yalnız SABİT tarixli rəsmi bayramları (Yeni il, 8 Mart, Novruz, 9 May, 28 May, 15 İyun, 26 İyun, 8–9 Noyabr, 31 Dekabr) və 20 Yanvarı (Ümumxalq hüzn günü — qeyri-iş günü) əlavə edir; təqvimdə olan tarixlər atlanır. Ramazan və Qurban bayramları (hər il dəyişir), bayram həftə sonuna düşəndə verilən əlavə istirahət günləri və hökumətin iş günü köçürmələri «Gün əlavə et» ilə ƏL İLƏ daxil edilir."
+msgstr "The button adds only public holidays with FIXED dates (New Year, 8 March, Novruz, 9 May, 28 May, 15 June, 26 June, 8–9 November, 31 December) and 20 January (National Day of Mourning — a day off); dates already in the calendar are skipped. Ramadan and Gurban holidays (they change every year), extra days off when a holiday falls on a weekend and government working-day transfers are entered MANUALLY with “Add day”."
+
+msgctxt "registrar.calendar"
+msgid "Günü redaktə et"
+msgstr "Edit day"
+
+#, python-format
+msgctxt "registrar.calendar"
+msgid "Redaktə et: %(name)s"
+msgstr "Edit: %(name)s"
+
+#, python-format
+msgctxt "registrar.calendar"
+msgid "«%(name)s» (%(day)s) təqvimdən silinsin? Əməl audit jurnalına yazılır."
+msgstr "Remove “%(name)s” (%(day)s) from the calendar? The action is recorded in the audit log."
+
+#, python-format
+msgctxt "registrar.calendar"
+msgid "Sil: %(name)s"
+msgstr "Remove: %(name)s"
+
+msgctxt "registrar.calendar"
+msgid "Bu tədris ili üçün bayram və qeyri-iş günü daxil edilməyib."
+msgstr "No holidays or days off have been entered for this academic year."
+
+msgctxt "registrar.calendar"
+msgid "Bayram / qeyri-iş günü"
+msgstr "Holiday / day off"
+
+msgctxt "registrar.calendar"
+msgid "Tarix təqvimdə bir dəfə ola bilər; dəyişiklik audit jurnalına yazılır."
+msgstr "A date can appear in the calendar only once; changes are recorded in the audit log."
+
+msgctxt "registrar.calendar"
+msgid "Rəsmi bayramları əlavə et"
+msgstr "Add public holidays"
+
+msgctxt "registrar.calendar"
+msgid "Seçilmiş tədris ilinin sabit tarixli bayramları əlavə olunur; mövcud tarixlərə toxunulmur."
+msgstr "Fixed-date holidays of the selected academic year are added; existing dates are left untouched."
+
+msgctxt "registrar.calendar"
+msgid "Əlavə et"
+msgstr "Add"
+
+msgctxt "registrar.calendar"
+msgid "Tarix"
+msgstr "Date"
+
+msgctxt "registrar.calendar"
+msgid "Növ"
+msgstr "Type"
+
+msgctxt "registrar.calendar"
+msgid "«İş günü köçürməsi» — şənbə/bazar iş günü elan olunub (yalnız həftə sonu tarixinə yazılır). Köçürmə ilə istirahət olan iş günü «Qeyri-iş günü»dür."
+msgstr "“Transferred working day” — a Saturday/Sunday declared a working day (weekend dates only). A weekday that becomes a rest day through a transfer is a “Day off”."
+
+msgctxt "registrar.calendar"
+msgid "Ad"
+msgstr "Name"
+
+msgctxt "registrar.calendar"
+msgid "Ramazan bayramı"
+msgstr "Ramadan holiday"
+
+msgctxt "registrar.calendar"
+msgid "Qeyd"
+msgstr "Note"
+
+msgctxt "registrar.calendar"
+msgid "Məs. Nazirlər Kabinetinin qərarı"
+msgstr "E.g. Cabinet of Ministers decision"
+
+msgctxt "registrar.calendar"
+msgid "Sentyabr–dekabr bayramları tədris ilinin birinci ilinə, yanvar–avqust bayramları ikinci ilinə yazılır. Ramazan və Qurban bayramları, hökumətin iş günü köçürmələri əlavə olunmur — onları əl ilə daxil edin."
+msgstr "September–December holidays go to the first year of the academic year, January–August holidays to the second. Ramadan and Gurban holidays and government working-day transfers are not added — enter them manually."
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "və daha %(n)d"
+msgstr "and %(n)d more"
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "Bu qəbul ili üçün təsdiqlənmiş plan yoxdur — ən son plan tətbiq olundu: %(groups)s."
+msgstr "There is no approved plan for this admission year — the latest plan was applied: %(groups)s."
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "Qrupun qəbul ili bilinmir (ad və ayarda yoxdur) — ən son plan tətbiq olundu: %(groups)s."
+msgstr "The group's admission year is unknown (not in the name or settings) — the latest plan was applied: %(groups)s."
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "%(n)d açılışın fənni qrupun öz qəbul ili planının bu semestrində yoxdur (əvvəlki qayda ilə ən son plandan yaradılıb). Açılışlar avtomatik silinmir — lazımsızdırsa «Ləğv et» ilə ləğv edin."
+msgstr "%(n)d offerings have a subject that is not in this semester of the group's own admission-year plan (created from the latest plan under the previous rule). Offerings are not deleted automatically — cancel unneeded ones with “Cancel”."
+
+msgctxt "accounts.semester"
+msgid "Yuxarıdakı süzgəcdən semestri seçin. «Plandan açılış yarat» həmin semestri oxuyan (kursu uyğun) hər qrup üçün qrupun ÖZ qəbul ilinin təsdiqlənmiş tədris planının (yoxdursa ən son planın) məcburi fənlərindən açılış yaradır və qrupun aktiv tələbələrini dərhal qeydiyyata alır; seçmə fənlər qrupun seçimi ilə açılır. Mövcud sətir təkrarlanmır, heç nə silinmir. «Plan yoxdur» ixtisaslar üçün sətir yaranmır — əvvəlcə «Tədris planı» bölməsində planı təsdiqləyin."
+msgstr "Select the semester in the filter above. “Create offerings from plan” creates offerings for every group studying that semester (matching year of study) from the compulsory subjects of the approved curriculum of the group's OWN admission year (or the latest plan if there is none) and immediately enrols the group's active students; electives open according to the group's choice. Existing rows are not duplicated, nothing is deleted. No rows are created for programmes with “No plan” — approve the plan in the “Curriculum” section first."
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "Xatırlatma göndərildi: %(teachers)d müəllimə, %(chair)d kafedra əməkdaşına, %(schedule)d cədvəl quran əməkdaşa (dekanlıq / koordinator)."
+msgstr "Reminder sent: to %(teachers)d teachers, %(chair)d department staff and %(schedule)d timetable builders (dean's office / coordinator)."
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "%(program)s · %(year)s qəbulu · semestr %(n)d"
+msgstr "%(program)s · %(year)s intake · semester %(n)d"
+
+msgctxt "accounts.semester"
+msgid "Qəbul ili planı"
+msgstr "Admission-year plan"
+
+msgctxt "accounts.semester"
+msgid "Hər qrup öz qəbul ilinin təsdiqlənmiş planından açılır."
+msgstr "Each group is opened from the approved plan of its own admission year."
+
+msgctxt "accounts.semester"
+msgid "Nümunə:"
+msgstr "Example:"
+
+msgctxt "accounts.semester"
+msgid "Hər qrup üçün qrupun öz qəbul ilinin TƏSDİQLƏNMİŞ planından açılış sətirləri yaradılır (həmin il üçün plan yoxdursa — ən son plandan, xəbərdarlıqla). Əməl idempotentdir — mövcud açılış təkrarlanmır və heç nə silinmir."
+msgstr "Offering rows are created for each group from the APPROVED plan of the group's own admission year (if there is no plan for that year — from the latest plan, with a warning). The action is idempotent — existing offerings are not duplicated and nothing is deleted."
+
+msgctxt "accounts.semester"
+msgid "Xatırlatma göndərilsin? Müəllimlərə — sillabus / jurnal, kafedra rəhbərinə — xülasə, cədvəli olmayan fənlər üçün isə cədvəli quran dekanlıq / koordinatora. Eyni kafedraya 12 saatda bir dəfə göndərilir."
+msgstr "Send the reminder? Teachers get syllabus / journal items, the head of department a summary, and the dean's office / coordinator who builds the timetable gets subjects without a timetable. The same department can be reminded once every 12 hours."
+
+msgctxt "accounts.lessons_log"
+msgid "Keçmiş tarixə dərs sütununu yalnız RİM rəhbəri aça bilər (audit izinə düşür). «Akademik təqvim»də qeyd olunmuş bayram və qeyri-iş günləri burada sayılmır."
+msgstr "Only the RİM head can open a lesson column for a past date (it is audited). Holidays and days off entered in the “Academic calendar” are not counted here."
+
+msgctxt "registrar.subject_merge"
+msgid "Səbəb ən azı 20 simvol olmalıdır — qısa qeyd audit üçün yetərli deyil."
+msgstr "The reason must be at least 20 characters — a short note is not enough for the audit."
+
+msgctxt "registrar.subject_merge"
+msgid "Saxlanılacaq fənni seçin."
+msgstr "Choose the subject to keep."
+
+msgctxt "registrar.subject_merge"
+msgid "Ən azı bir birləşdiriləcək fənn seçin."
+msgstr "Choose at least one subject to merge."
+
+msgctxt "registrar.subject_merge"
+msgid "Fənn tapılmadı."
+msgstr "Subject not found."
+
+msgctxt "registrar.subject_merge"
+msgid "Saxlanılacaq fənn birləşdiriləcəklər siyahısında ola bilməz."
+msgstr "The subject to keep cannot also be in the list of subjects to merge."
+
+msgctxt "registrar.subject_merge"
+msgid "Saxlanılacaq fənn arxivdədir — əvvəlcə onu arxivdən qaytarın."
+msgstr "The subject to keep is archived — restore it from the archive first."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Bir dəfəyə ən çox %(n)s fənn birləşdirilə bilər."
+msgstr "At most %(n)s subjects can be merged at once."
+
+msgctxt "registrar.subject_merge"
+msgid "Məlumat önizləmədən sonra dəyişib — yenidən önizləyin."
+msgstr "The data changed after the preview — preview again."
+
+msgctxt "registrar.subject_merge"
+msgid "Əvvəlcə önizləməyə baxın."
+msgstr "Check the preview first."
+
+msgctxt "registrar.subject_merge"
+msgid "Toqquşmalar həll edilməyib — birləşdirmə bloklanır."
+msgstr "Conflicts are not resolved — the merge is blocked."
+
+msgctxt "registrar.subject_merge"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "No active organisation context."
+
+msgctxt "registrar.subject_merge"
+msgid "Fənləri birləşdirmək səlahiyyətiniz yoxdur."
+msgstr "You do not have permission to merge subjects."
+
+msgctxt "registrar.subject_merge"
+msgid "Səhifə tapılmadı."
+msgstr "Page not found."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Birləşdirildi: %(sources)s → %(target)s."
+msgstr "Merged: %(sources)s → %(target)s."
+
+msgctxt "registrar.subject_merge"
+msgid "Fənn növləri fərqlidir — saxlanılan fənnin növü qalır."
+msgstr "The subject types differ — the type of the kept subject remains."
+
+msgctxt "registrar.subject_merge"
+msgid "Adlar (boşluq/registr nəzərə alınmadan) fərqlidir — bunun həqiqətən eyni fənn olduğunu yoxlayın."
+msgstr "The names differ (ignoring spaces/case) — check that this really is the same subject."
+
+msgctxt "registrar.subject_merge"
+msgid "Birləşdiriləcək fənlərdən biri artıq arxivdədir — istinadları yenə köçürüləcək."
+msgstr "One of the subjects to merge is already archived — its references will still be moved."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Kredit fərqlidir: %(list)s. Fərqli kreditli fənn üzrə yekun qiymət yoxdur — birləşmədən sonra saxlanılan fənnin krediti (%(ects)s ECTS) işlənir; plan sətirlərindəki kredit dəyişmir."
+msgstr "Credits differ: %(list)s. There are no final grades in the subject with different credits — after the merge the kept subject's credits (%(ects)s ECTS) apply; credits in plan rows do not change."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Kredit fərqi: %(source)s — %(source_ects)s ECTS, saxlanılan %(target)s — %(target_ects)s ECTS. %(source)s üzrə %(n)s tələbənin yekun qiyməti var — birləşmə onların keçmiş transkriptində krediti və ÜOMG-ni dəyişərdi. Əvvəlcə ECTS-i uyğunlaşdırın və ya hər iki kartı saxlayın."
+msgstr "Credit mismatch: %(source)s — %(source_ects)s ECTS, kept %(target)s — %(target_ects)s ECTS. %(n)s students have final grades in %(source)s — the merge would change the credits and GPA on their past transcripts. Align the ECTS first or keep both cards."
+
+msgctxt "registrar.subject_merge"
+msgid "Birləşmə DB qaydasını pozur — heç nə yazılmadı."
+msgstr "The merge violates a database rule — nothing was written."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(n)s təsdiqlənmiş və ya baxışdakı planın sətrində fənn kartı dəyişəcək — bu, məzmun deyil, identiklik düzəlişidir (kredit/saat/semestr dəyişmir) və audit-ə yazılır."
+msgstr "The subject card will change in rows of %(n)s approved or in-review plans — this is an identity fix, not a content change (credits/hours/semester stay the same), and it is recorded in the audit."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(n)s açılışın qeydiyyatı var — açılışlar qiymət və davamiyyətləri ilə birlikdə köçür."
+msgstr "%(n)s offerings have enrolments — the offerings move together with their grades and attendance."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(n)s imtahan qrupunda hər iki fənn var — təkrar əlaqə çıxarılacaq."
+msgstr "%(n)s exam groups contain both subjects — the duplicate link will be removed."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(n)s imtahan şansı qeydi dəyişməz tarixçədir — arxivlənmiş fənndə qalır."
+msgstr "%(n)s exam chance records are immutable history — they stay on the archived subject."
+
+msgctxt "registrar.subject_merge"
+msgid "Dövrsüz"
+msgstr "No period"
+
+msgctxt "registrar.subject_merge"
+msgid "Qrupsuz"
+msgstr "No group"
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(period)s: hər iki fənn üzrə qrupsuz açılış var — birləşmədən sonra ikisi qalır."
+msgstr "%(period)s: both subjects have an offering without a group — both remain after the merge."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(period)s · %(group)s: hər iki fənn üzrə açılış var — əvvəlcə birini ləğv edin."
+msgstr "%(period)s · %(group)s: both subjects have an offering — cancel one of them first."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Plan «%(plan)s» (%(status)s) · %(semester)s-ci semestr: hər iki fənn sətri var — bu statusda plan dəyişmir; əvvəlcə yeni versiyada birini çıxarın."
+msgstr "Plan «%(plan)s» (%(status)s) · semester %(semester)s: both subjects have a row — the plan cannot change in this status; remove one of them in a new version first."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Plan «%(plan)s» (%(status)s) · %(semester)s-ci semestr: hər iki fənn sətri var — saxlanılan fənnin sətri qalır, digəri plandan çıxarılır."
+msgstr "Plan «%(plan)s» (%(status)s) · semester %(semester)s: both subjects have a row — the kept subject's row stays, the other is removed from the plan."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Plan «%(plan)s»: fənlər müxtəlif semestrlərdədir — birləşmədən sonra fənn planda %(n)s dəfə olacaq."
+msgstr "Plan «%(plan)s»: the subjects are in different semesters — after the merge the subject will appear %(n)s times in the plan."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(student)s · %(period)s: eyni dövrdə hər iki fənn üzrə aktiv qeydiyyat var — əvvəlcə birini bağlayın."
+msgstr "%(student)s · %(period)s: active enrolments in both subjects in the same period — close one of them first."
+
+msgctxt "registrar.subject_merge"
+msgid "Hər ikisində yekun qiymət yazılıb."
+msgstr "Both have a final grade."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Sillabus · %(period)s: hər iki fənnin semestr sillabusu var — əvvəlcə birini ləğv edin."
+msgstr "Syllabus · %(period)s: both subjects have a semester syllabus — cancel one of them first."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Sillabus (baza) · %(author)s: hər iki fənn üzrə baza sillabusu var — əvvəlcə birini ləğv edin."
+msgstr "Syllabus (base) · %(author)s: both subjects have a base syllabus — cancel one of them first."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Fənn qovluğu · %(owner)s · %(period)s: hər iki fənn üzrə qovluq var — əvvəlcə birini ləğv edin."
+msgstr "Subject folder · %(owner)s · %(period)s: both subjects have a folder — cancel one of them first."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Təkrar imtahan · %(student)s: hər iki fənn üzrə aktiv müraciət var — əvvəlcə birini bağlayın."
+msgstr "Retake · %(student)s: active applications in both subjects — close one of them first."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "Tədris tapşırığı «%(task)s» · %(groups)s: eyni ixtisas və qruplar üçün hər iki fənn sətri var — əvvəlcə birini silin."
+msgstr "Teaching assignment «%(task)s» · %(groups)s: both subjects have a row for the same programme and groups — delete one of them first."
+
+msgctxt "registrar.subject_merge"
+msgid "Fənn açılışları (jurnallar)"
+msgstr "Subject offerings (journals)"
+
+msgctxt "registrar.subject_merge"
+msgid "Tədris planı sətirləri"
+msgstr "Curriculum rows"
+
+msgctxt "registrar.subject_merge"
+msgid "Qrupun seçmə fənn qərarları"
+msgstr "Group elective decisions"
+
+msgctxt "registrar.subject_merge"
+msgid "Təkrar imtahan müraciətləri"
+msgstr "Retake applications"
+
+msgctxt "registrar.subject_merge"
+msgid "İmtahan şansı qeydləri (dəyişməz tarixçə)"
+msgstr "Exam chance records (immutable history)"
+
+msgctxt "registrar.subject_merge"
+msgid "Sillabuslar"
+msgstr "Syllabi"
+
+msgctxt "registrar.subject_merge"
+msgid "Tədris tapşırığı sətirləri"
+msgstr "Teaching assignment rows"
+
+msgctxt "registrar.subject_merge"
+msgid "İmtahan qrupları (əlaqə)"
+msgstr "Exam groups (link)"
+
+msgctxt "registrar.subject_merge"
+msgid "İmtahanlar"
+msgstr "Exams"
+
+msgctxt "registrar.subject_merge"
+msgid "Sual bankları"
+msgstr "Question banks"
+
+msgctxt "registrar.subject_merge"
+msgid "Sual göndərişləri"
+msgstr "Question submissions"
+
+msgctxt "registrar.subject_merge"
+msgid "Sorğu cavabları (anonim)"
+msgstr "Survey responses (anonymous)"
+
+msgctxt "registrar.subject_merge"
+msgid "Fənn qovluqları"
+msgstr "Subject folders"
+
+msgctxt "registrar.subject_merge"
+msgid "Cədvəl: müəllimin fənn prioritetləri"
+msgstr "Timetable: teacher's subject priorities"
+
+msgctxt "registrar.subject_merge"
+msgid "Fənləri birləşdir"
+msgstr "Merge subjects"
+
+msgctxt "registrar.subject_merge"
+msgid "Birləşdir"
+msgstr "Merge"
+
+msgctxt "registrar.subject_merge"
+msgid "Bütün istinadlar (açılış, plan sətri, sillabus, tapşırıq, imtahan…) saxlanılan fənnə köçür; digər kartlar SİLİNMİR — arxivlənir."
+msgstr "All references (offering, plan row, syllabus, assignment, exam…) move to the kept subject; the other cards are NOT deleted — they are archived."
+
+msgctxt "registrar.subject_merge"
+msgid "Ad üzrə dublikat qrupları (hazır təklif)"
+msgstr "Duplicate groups by name (ready suggestion)"
+
+msgctxt "registrar.subject_merge"
+msgid "Saxlanılacaq fənn"
+msgstr "Subject to keep"
+
+msgctxt "registrar.subject_merge"
+msgid "Birləşdiriləcək fənn(lər)"
+msgstr "Subject(s) to merge"
+
+msgctxt "registrar.subject_merge"
+msgid "Uyğun fənn tapılmadı"
+msgstr "No matching subject"
+
+msgctxt "registrar.subject_merge"
+msgid "Kod və ya ad ilə axtar…"
+msgstr "Search by code or name…"
+
+msgctxt "registrar.subject_merge"
+msgid "Bir dəfəyə ən çox 10 fənn. Arxivdəki kartlar da seçilə bilər."
+msgstr "At most 10 subjects at once. Archived cards can be selected too."
+
+msgctxt "registrar.subject_merge"
+msgid "Önizlə"
+msgstr "Preview"
+
+msgctxt "registrar.subject_merge"
+msgid "Səbəb"
+msgstr "Reason"
+
+msgctxt "registrar.subject_merge"
+msgid "Məs. Tədris şöbəsinin təklifi: eyni fənnin iki kartı (əmr/protokol nömrəsi)"
+msgstr "E.g. Teaching Office proposal: two cards of the same subject (order/protocol number)"
+
+msgctxt "registrar.subject_merge"
+msgid "Ən azı 20 simvol — audit jurnalına aktor və vaxtla yazılır."
+msgstr "At least 20 characters — recorded in the audit log with the actor and time."
+
+msgctxt "registrar.subject_merge"
+msgid "köçür"
+msgstr "moves"
+
+msgctxt "registrar.subject_merge"
+msgid "qalır (dəyişməz tarixçə)"
+msgstr "stays (immutable history)"
+
+msgctxt "registrar.subject_merge"
+msgid "Köçürüləcək istinad yoxdur — yalnız kart arxivlənəcək."
+msgstr "There are no references to move — only the card will be archived."
+
+msgctxt "registrar.subject_merge"
+msgid "Toqquşmalar — əvvəlcə bunları həll edin"
+msgstr "Conflicts — resolve these first"
+
+msgctxt "registrar.subject_merge"
+msgid "Avtomatik həll olunur"
+msgstr "Resolved automatically"
+
+msgctxt "registrar.subject_merge"
+msgid "Xəbərdarlıqlar"
+msgstr "Warnings"
+
+msgctxt "registrar.subject_merge"
+msgid "Qeydlər"
+msgstr "Notes"
+
+msgctxt "registrar.subject_merge"
+msgid "və daha {n}"
+msgstr "and {n} more"
+
+msgctxt "registrar.subject_merge"
+msgid "Mənbə kartların arxiv səbəbi:"
+msgstr "Archive reason for the source cards:"
+
+msgctxt "registrar.subject_merge"
+msgid "Toqquşma yoxdur — səbəbi yazıb birləşdirə bilərsiniz."
+msgstr "No conflicts — enter the reason and merge."
+
+msgctxt "registrar.subject_merge"
+msgid "Saxlanılacaq və ən azı bir birləşdiriləcək fənn seçin."
+msgstr "Choose the subject to keep and at least one subject to merge."
+
+msgctxt "registrar.subject_merge"
+msgid "Seçim dəyişdi — yenidən önizləyin."
+msgstr "The selection changed — preview again."
+
+msgctxt "registrar.subject_merge"
+msgid "Seç"
+msgstr "Select"
+
+msgctxt "registrar.subject_merge"
+msgid "arxivdə"
+msgstr "archived"
+
+msgctxt "registrar.subject_merge"
+msgid "saxlanılır"
+msgstr "kept"
+
+msgctxt "registrar.subject_merge"
+msgid "açılış"
+msgstr "offerings"
+
+msgctxt "registrar.subject_merge"
+msgid "Ad üzrə dublikat qrupu tapılmadı — fənləri axtarışla seçin."
+msgstr "No duplicate groups by name — select the subjects via search."
+
+msgctxt "registrar.subject_merge"
+msgid "Sorğu alınmadı — yenidən cəhd edin."
+msgstr "The request failed — try again."
+
+msgctxt "accounts.catalog"
+msgid "Eyni adlı fənlər avtomatik birləşdirilmir. «Fənləri birləşdir» ilə saxlanılacaq kartı seçin — önizləmə bütün istinadları və toqquşmaları göstərir, mənbə kartlar silinmir, arxivlənir."
+msgstr "Subjects with the same name are not merged automatically. Use «Merge subjects» to choose the card to keep — the preview shows all references and conflicts; source cards are not deleted but archived."
+
+msgctxt "accounts.catalog"
+msgid "Eyni adlı fənlər avtomatik birləşdirilmir — birləşdirməni Tədris şöbəsi (təşkilat səviyyəli «Kataloqu idarə et» səlahiyyəti) aparır."
+msgstr "Subjects with the same name are not merged automatically — merging is done by the Teaching Office (organisation-wide «Manage catalogue» permission)."
+
+msgctxt "registrar.arayis"
+msgid "qeyd deaktivdir"
+msgstr "record is inactive"
+
+#, python-format
+msgctxt "registrar.arayis"
+msgid "Arayış yalnız təhsil alan (aktiv) tələbəyə verilir — tələbənin statusu: «%(status)s»."
+msgstr "A certificate is issued only to a currently enrolled (active) student — the student's status: «%(status)s»."
+
+msgctxt "registrar.arayis"
+msgid "Tələbənin hesabı arxivdədir (məzun və ya xaric) — arayış verilmir."
+msgstr "The student's account is archived (graduated or expelled) — no certificate is issued."
+
+msgctxt "registrar.arayis"
+msgid "Tələbənin qəbul ili məlum deyil — əvvəlcə akademik qeydi düzəldin."
+msgstr "The student's admission year is unknown — correct the academic record first."
+
+msgctxt "registrar.arayis"
+msgid "Tələbənin oxu müddəti bitib — əvvəlcə statusunu rəsmiləşdirin (məzun, xaric və ya bərpa)."
+msgstr "The student's period of study has ended — formalise the status first (graduated, expelled or reinstated)."
+
+msgctxt "registrar.arayis"
+msgid "bakalavriat"
+msgstr "bachelor's"
+
+msgctxt "registrar.arayis"
+msgid "magistratura"
+msgstr "master's"
+
+msgctxt "registrar.arayis"
+msgid "doktorantura"
+msgstr "doctoral"
+
+msgctxt "registrar.arayis"
+msgid "ali təhsil"
+msgstr "higher education"
+
+msgctxt "registrar.arayis"
+msgid "fakültəsinin"
+msgstr "faculty"
+
+#, python-format
+msgctxt "registrar.arayis"
+msgid "ixtisası (şifr %(code)s)"
+msgstr "programme (code %(code)s)"
+
+msgctxt "registrar.arayis"
+msgid "ixtisası"
+msgstr "programme"
+
+#, python-format
+msgctxt "registrar.arayis"
+msgid "%(group)s qrup "
+msgstr "group %(group)s "
+
+#, python-format
+msgctxt "registrar.arayis"
+msgid "Bu arayış ona verilir ki, %(name)s həqiqətən %(where)s %(program)s üzrə %(degree)s təhsil pilləsinin %(course)s kurs, %(group)stələbəsidir."
+msgstr "This is to certify that %(name)s is indeed a year %(course)s %(group)sstudent of the %(degree)s level of %(where)s, %(program)s."
+
+#, python-format
+msgctxt "registrar.arayis"
+msgid "Təhsil forması: %(form)s."
+msgstr "Mode of study: %(form)s."
+
+#, python-format
+msgctxt "registrar.arayis"
+msgid "Qəbul ili: %(year)s."
+msgstr "Year of admission: %(year)s."
+
+#, python-format
+msgctxt "registrar.arayis"
+msgid "Arayış %(place)s təqdim edilmək üçün verilir."
+msgstr "This certificate is issued for submission to %(place)s."
+
+msgctxt "registrar.arayis"
+msgid "Arayış tələb olunan yerə təqdim edilmək üçün verilir."
+msgstr "This certificate is issued for submission where required."
+
+msgctxt "registrar.arayis"
+msgid "Aktiv tələbə"
+msgstr "Active student"
+
+msgctxt "registrar.arayis"
+msgid "Azərbaycan Respublikası Təhsil Nazirliyi"
+msgstr "Ministry of Education of the Republic of Azerbaijan"
+
+#, python-format
+msgctxt "registrar.arayis"
+msgid "Arayış № %(number)s"
+msgstr "Certificate No. %(number)s"
+
+msgctxt "registrar.arayis"
+msgid "Arayış №"
+msgstr "Certificate No."
+
+#, python-format
+msgctxt "registrar.arayis"
+msgid "Tarix: %(date)s"
+msgstr "Date: %(date)s"
+
+msgctxt "registrar.arayis"
+msgid "Arayış"
+msgstr "Certificate"
+
+msgctxt "registrar.arayis"
+msgid "(imza)"
+msgstr "(signature)"
+
+msgctxt "registrar.arayis"
+msgid "Fakültə dekanı"
+msgstr "Dean of the faculty"
+
+msgctxt "registrar.arayis"
+msgid "Tədris şöbəsinin müdiri / Tələbə Xidmətləri"
+msgstr "Head of the Academic Affairs Office / Student Services"
+
+msgctxt "registrar.arayis"
+msgid "M.Y."
+msgstr "Place of seal"
+
+msgctxt "registrar.documents"
+msgid "«Başqasının adından» rejimində rəsmi sənəd verilmir — sənəd möhür yazır. Öz hesabınıza qayıdın."
+msgstr "Official documents cannot be issued in «view as» mode — issuing writes a seal. Return to your own account."
+
+msgctxt "verification.doc_type"
+msgid "Təhsil aldığı yer haqqında arayış"
+msgstr "Certificate of enrolment"
+
+msgctxt "verification.fact"
+msgid "Kurs"
+msgstr "Year of study"
+
+msgctxt "verification.fact"
+msgid "Təhsil forması"
+msgstr "Mode of study"
+
+msgctxt "verification.fact"
+msgid "Tələbənin statusu"
+msgstr "Student status"
+
+msgctxt "organizations.permission.label"
+msgid "Transkript və arayış vermək"
+msgstr "Issue transcripts and certificates"
+
+msgctxt "organizations.roles_registry"
+msgid "Rəsmi sənədlər"
+msgstr "Official documents"
+
+msgctxt "accounts.student_registry"
+msgid "Arayış ver"
+msgstr "Issue certificate"
+
+msgctxt "accounts.student_registry"
+msgid "Təhsil aldığı yer haqqında arayış"
+msgstr "Certificate of enrolment"
+
+msgctxt "accounts.student_registry"
+msgid "Arayış hazırlanmadı. Bir az sonra yenidən cəhd edin."
+msgstr "The certificate could not be prepared. Please try again shortly."
+
+msgctxt "accounts.student_registry"
+msgid "Arayış hazırlandı və yükləndi."
+msgstr "The certificate has been prepared and downloaded."
+
+msgctxt "accounts.student_registry"
+msgid "Təqdim ediləcəyi yer"
+msgstr "To be submitted to"
+
+msgctxt "accounts.student_registry"
+msgid "məs.: Səbail rayon hərbi komissarlığına"
+msgstr "e.g.: Sabail district military commissariat"
+
+msgctxt "accounts.student_registry"
+msgid "İstəyə bağlıdır. Yönlük halda yazın («… komissarlığına», «… bankına»); boş qalsa arayışda «tələb olunan yerə» yazılır."
+msgstr "Optional. Write it in the Azerbaijani dative case («… komissarlığına», «… bankına»); if left empty, the certificate says «where required»."
+
+msgctxt "accounts.student_registry"
+msgid "Arayış yalnız aktiv tələbəyə verilir. Sənəd QR və yoxlama kodu ilə möhürlənir; verilmə «Sənəd yoxlaması» siyahısına düşür."
+msgstr "Certificates are issued only to active students. The document is sealed with a QR and verification code; the issue appears in the «Document verification» list."
+
+msgctxt "accounts.student_registry"
+msgid "Arayışı hazırla"
+msgstr "Prepare certificate"
+
+msgctxt "applications.arayis"
+msgid "Təhsil aldığı yer haqqında arayış"
+msgstr "Certificate of enrolment"
+
+msgctxt "applications.arayis"
+msgid "Arayış QR və yoxlama kodu ilə möhürlənir və müraciətə açıq qeyd kimi əlavə olunur — sahib onu müraciətdən endirir. «Təqdim ediləcəyi yer» istəyə bağlıdır (yönlük halda: «… bankına»)."
+msgstr "The certificate is sealed with a QR and verification code and attached to the request as a public note — the requester downloads it from the request. «To be submitted to» is optional (dative case: «… bankına»)."
+
+msgctxt "applications.arayis"
+msgid "Təqdim ediləcəyi yer"
+msgstr "To be submitted to"
+
+msgctxt "applications.arayis"
+msgid "məs.: Səbail rayon hərbi komissarlığına"
+msgstr "e.g.: Sabail district military commissariat"
+
+msgctxt "applications.arayis"
+msgid "Arayışı hazırla və əlavə et"
+msgstr "Prepare and attach the certificate"
+
+msgctxt "applications.arayis"
+msgid "«Başqasının adından» rejimində rəsmi sənəd verilmir — öz hesabınıza qayıdın."
+msgstr "Official documents cannot be issued in «view as» mode — return to your own account."
+
+msgctxt "applications.arayis"
+msgid "Arayış əlavə olunub"
+msgstr "Certificate attached"
+
+msgctxt "applications.arayis"
+msgid "Arayışı aç"
+msgstr "Open certificate"
+
+msgctxt "applications.arayis"
+msgid "tələb olunan yerə"
+msgstr "where required"
+
+msgctxt "applications.arayis"
+msgid "Kod"
+msgstr "Code"
+
+msgctxt "applications.arayis"
+msgid "Yeni arayış hazırla (başqa yer üçün)"
+msgstr "Prepare a new certificate (for another place)"
+
+msgctxt "applications.arayis"
+msgid "Eyni yer üçün yenidən hazırlasanız, artıq əlavə olunmuş arayış qaytarılır — ikinci fayl yaranmır."
+msgstr "If you prepare it again for the same place, the already attached certificate is returned — no second file is created."
+
+msgctxt "applications.arayis"
+msgid "Bu müraciətə arayış hazırlamaq mümkün deyil."
+msgstr "A certificate cannot be prepared for this request."
+
+#, python-format
+msgctxt "applications.arayis"
+msgid "Təhsil aldığı yer haqqında arayış hazırlandı və əlavə olundu. Yoxlama kodu: %(code)s."
+msgstr "The certificate of enrolment has been prepared and attached. Verification code: %(code)s."
+
+msgctxt "accounts.accounting"
+msgid "Dərs saatının ödəniş dərəcələri"
+msgstr "Teaching hour pay rates"
+
+msgctxt "accounts.accounting"
+msgid "Hesablanmış məbləğ"
+msgstr "Calculated amount"
+
+msgctxt "accounts.accounting"
+msgid "{n} müəllim · ilkin hesablama"
+msgstr "{n} teachers · preliminary calculation"
+
+msgctxt "accounts.accounting"
+msgid "{n} müəllim · dərəcəsi olmayan: {m}"
+msgstr "{n} teachers · without a rate: {m}"
+
+msgctxt "accounts.accounting"
+msgid "Məbləğ"
+msgstr "Amount"
+
+msgctxt "accounts.accounting"
+msgid "Məbləğ (AZN)"
+msgstr "Amount (AZN)"
+
+msgctxt "accounts.accounting"
+msgid "məbləğ, AZN"
+msgstr "amount, AZN"
+
+msgctxt "accounts.accounting"
+msgid "Məbləğ qeydi"
+msgstr "Amount note"
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə (AZN / saat)"
+msgstr "Rate (AZN / hour)"
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə təyin edilməyib"
+msgstr "No rate set"
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə təyin edilməyib (vəzifə yoxdur)"
+msgstr "No rate set (no position)"
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə təyin edilməyib: {kinds}"
+msgstr "No rate set: {kinds}"
+
+msgctxt "accounts.accounting"
+msgid "Saathesabı müəllim — bütün saatlar saathesabı ödənilir."
+msgstr "Hourly-paid teacher — all hours are paid hourly."
+
+msgctxt "accounts.accounting"
+msgid "Plan üzrə bütün saatlar ştat yükündədir."
+msgstr "By plan, all hours are within the staff load."
+
+msgctxt "accounts.accounting"
+msgid "Plan üzrə (semestr): ştat yükü {norm} saat, saathesabı {hourly} saat."
+msgstr "By plan (semester): staff load {norm} h, hourly-paid {hourly} h."
+
+msgctxt "accounts.accounting"
+msgid "İlkin hesablama — rəsmi əmək haqqı hesabı deyil."
+msgstr "Preliminary calculation — not an official payroll statement."
+
+msgctxt "accounts.accounting"
+msgid "Bütün növlər"
+msgstr "All kinds"
+
+msgctxt "accounts.accounting"
+msgid "Saat dərəcəsini yazın (AZN)."
+msgstr "Enter the hourly rate (AZN)."
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə rəqəm olmalıdır."
+msgstr "The rate must be a number."
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə 0-dan böyük və 10 000 AZN-dən az olmalıdır."
+msgstr "The rate must be above 0 and below 10,000 AZN."
+
+msgctxt "accounts.accounting"
+msgid "Tədris ilini seçin (akademik dövrlərdə olan il)."
+msgstr "Choose an academic year (one that has academic periods)."
+
+msgctxt "accounts.accounting"
+msgid "Vəzifəni seçin."
+msgstr "Choose a position."
+
+msgctxt "accounts.accounting"
+msgid "Dərs növü düzgün deyil."
+msgstr "Invalid class type."
+
+msgctxt "accounts.accounting"
+msgid "Bu dərəcə artıq qüvvədədir — dəyişiklik yoxdur."
+msgstr "This rate is already in force — nothing changed."
+
+msgctxt "accounts.accounting"
+msgid "Bu dərəcə eyni anda başqa istifadəçi tərəfindən dəyişdirilib."
+msgstr "This rate was changed by another user at the same time."
+
+msgctxt "accounts.accounting"
+msgid "Yeni dərəcə ilə əvəzləndi"
+msgstr "Replaced by a new rate"
+
+msgctxt "accounts.accounting"
+msgid "Ləğv edildi"
+msgstr "Cancelled"
+
+msgctxt "accounts.accounting"
+msgid "Ödəniş dərəcələrini yalnız Mühasibatlıq dəyişə bilər."
+msgstr "Only Accounting can change pay rates."
+
+msgctxt "accounts.accounting"
+msgid "Başqasının adından baxış rejimində dəyişiklik etmək olmaz."
+msgstr "Changes are not allowed in view-as mode."
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə tapılmadı."
+msgstr "Rate not found."
+
+msgctxt "accounts.accounting"
+msgid "Ödəniş dərəcəsi yadda saxlanıldı."
+msgstr "Pay rate saved."
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə ləğv edildi — tarixçədə qalır."
+msgstr "Rate cancelled — it stays in the history."
+
+msgctxt "accounts.accounting"
+msgid "Vəzifə"
+msgstr "Position"
+
+msgctxt "accounts.accounting"
+msgid "Saathesabı plan (semestr, saat)"
+msgstr "Hourly-paid plan (semester, h)"
+
+msgctxt "accounts.accounting"
+msgid "Tədris ili"
+msgstr "Academic year"
+
+msgctxt "accounts.accounting"
+msgid "Qeyd"
+msgstr "Note"
+
+msgctxt "accounts.accounting"
+msgid "Əlavə edib"
+msgstr "Added by"
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə id"
+msgstr "Rate ID"
+
+msgctxt "accounts.accounting"
+msgid "Dərəcələr"
+msgstr "Rates"
+
+msgctxt "accounts.accounting"
+msgid "Məbləğ = keçirilmiş saat × dərəcə (tədris ili × vəzifə × növ; növə xas dərəcə yoxdursa «bütün növlər» dərəcəsi). Vəzifə «Yük bölgüsü»ndəki müəllim profilindən götürülür. Dərəcə və ya vəzifə yoxdursa məbləğ boş qalır."
+msgstr "Amount = hours held × rate (academic year × position × kind; if there is no kind-specific rate, the “all kinds” rate). The position comes from the teacher profile in “Load distribution”. Without a rate or position the amount stays empty."
+
+msgctxt "accounts.accounting"
+msgid "Dərəcəsi olmayan vəzifələr"
+msgstr "Positions without a rate"
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "Qüvvədə olan ödəniş dərəcələri — %(year)s"
+msgstr "Pay rates in force — %(year)s"
+
+msgctxt "accounts.accounting"
+msgid "Əməl"
+msgstr "Action"
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə ləğv edilsin? Sətir tarixçədə qalır, keçmiş ixraclar dəyişmir."
+msgstr "Cancel this rate? The row stays in the history; past exports do not change."
+
+msgctxt "accounts.accounting"
+msgid "Ləğv et"
+msgstr "Cancel rate"
+
+msgctxt "accounts.accounting"
+msgid "Bu tədris ili üçün dərəcə yoxdur"
+msgstr "No rates for this academic year"
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə olmadan cədvəldə və ixracda «Dərəcə təyin edilməyib» görünür, məbləğ hesablanmır."
+msgstr "Without a rate the table and the export show “No rate set” and no amount is calculated."
+
+msgctxt "accounts.accounting"
+msgid "Dərəcə əlavə et və ya dəyiş"
+msgstr "Add or change a rate"
+
+msgctxt "accounts.accounting"
+msgid "Məs. rektorun əmri № …"
+msgstr "E.g. rector's order No. …"
+
+msgctxt "accounts.accounting"
+msgid "Eyni il, vəzifə və növ üçün dərəcə artıq varsa, köhnəsi arxivə düşür və yenisi qüvvəyə minir."
+msgstr "If a rate already exists for the same year, position and kind, the old one is archived and the new one takes effect."
+
+msgctxt "accounts.accounting"
+msgid "Yadda saxla"
+msgstr "Save"
+
+msgctxt "accounts.accounting"
+msgid "Dərəcələri Mühasibatlıq (və RİM rəhbəri) dəyişir; siz yalnız baxırsınız."
+msgstr "Rates are changed by Accounting (and the IT head); you can only view them."
+
+msgctxt "accounts.accounting"
+msgid "Tarixçə"
+msgstr "History"
+
+msgctxt "accounts.accounting"
+msgid "Yadda saxlanılmadı — icazənizi yoxlayın və ya səhifəni yeniləyin."
+msgstr "Not saved — check your permission or reload the page."
+
+msgctxt "accounts.accounting"
+msgid "Məbləğ — dövrün keçirilmiş saatı × «Dərs saatının ödəniş dərəcələri» cədvəlindəki dərəcə (tədris ili × müəllimin vəzifəsi × növ). Vəzifə və ya dərəcə yoxdursa məbləğ boş qalır («Dərəcə təyin edilməyib»), 0 yazılmır. Saathesabı və ştat saatları plan üzrə etiketlənir (jurnal dərsi konkret yük sətrinə bağlı deyil). İlkin hesablamadır — rəsmi əmək haqqı hesabı deyil."
+msgstr "Amount — hours held in the period × the rate from “Teaching hour pay rates” (academic year × teacher's position × kind). Without a position or rate the amount stays empty (“No rate set”), never 0. Hourly-paid and staff hours are labelled by plan (a journal class is not tied to a specific load line). This is a preliminary calculation — not an official payroll statement."
+
+msgctxt "accounts.accounting"
+msgid "Aylıq plan — semestr planı dərs pəncərəsinin (semestrin başlanğıcından imtahan sessiyasına qədər) iş günlərinə (B.e.–Cümə) mütənasib bölünür; aylıq payların cəmi semestr planına bərabərdir. Bayram və qeyri-iş günləri (Akademik təqvim) iş günü sayılmır, iş günü elan olunmuş şənbə / bazar isə sayılır."
+msgstr "Monthly plan — the semester plan is split in proportion to the working days (Mon–Fri) of the teaching window (from the start of the semester to the exam session); the monthly shares add up to the semester plan. Holidays and non-working days (Academic calendar) are not counted as working days, while a Saturday / Sunday declared a working day is counted."
+
+msgctxt "accounts.model.pay_rate.meta"
+msgid "teaching pay rate"
+msgstr "teaching pay rate"
+
+msgctxt "accounts.model.pay_rate.meta"
+msgid "teaching pay rates"
+msgstr "teaching pay rates"
+
+msgctxt "organizations.permission.label"
+msgid "Təhsil haqqı cədvəlini (25% təkrar imtahanın təxmini məbləği) və dərs saatının ödəniş dərəcələrini idarə etmək"
+msgstr "Manage the tuition table (estimated 25% resit amount) and teaching hour pay rates"
+
+msgctxt "registrar.retake"
+msgid "Cəhd istifadə olunmuş sayılmasın"
+msgstr "Do not count the attempt as used"
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma ödənilmiş cəhdin verilmədiyini tanıyır: «İmtahana gəlmədi» ilə sayılmış 25% cəhdi tələbəyə geri qayıdır. Rədd / geri götürmə cəhd saymır — orada bu seçim təsirsizdir. Qərardan sonra dəyişmir."
+msgstr "A refund acknowledges that the paid attempt was not delivered: a 25% attempt counted by “Did not attend the exam” is given back to the student. Rejection / withdrawal never count an attempt — there this option has no effect. It cannot be changed after the decision."
+
+msgctxt "registrar.retake"
+msgid "25% cəhdi istifadə olunmuş sayılır"
+msgstr "The 25% attempt counts as used"
+
+msgctxt "registrar.retake"
+msgid "25% cəhdi istifadə olunmuş sayılmır"
+msgstr "The 25% attempt does not count as used"
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma yoxdur"
+msgstr "No refund"
+
+msgctxt "registrar.retake"
+msgid "Ödənişin qaytarılması qərarı verilib"
+msgstr "Refund decision issued"
+
+msgctxt "registrar.retake"
+msgid "Ödəniş qaytarılıb"
+msgstr "Payment refunded"
+
+msgctxt "registrar.retake"
+msgid "Ödənişin qaytarılması qərarı verildi"
+msgstr "Refund decision issued"
+
+msgctxt "registrar.retake"
+msgid "Ödəniş qaytarıldı"
+msgstr "Payment refunded"
+
+msgctxt "registrar.retake"
+msgid "Ödənişin qaytarılması qərarı"
+msgstr "Refund decision"
+
+msgctxt "registrar.retake"
+msgid "Qaytarılacaq ödənişlər"
+msgstr "Refunds to pay"
+
+msgctxt "registrar.retake"
+msgid "Qaytarılmalı"
+msgstr "To refund"
+
+msgctxt "registrar.retake"
+msgid "Qaytarılıb"
+msgstr "Refunded"
+
+msgctxt "registrar.retake"
+msgid "Qaytarıldı"
+msgstr "Refunded"
+
+msgctxt "registrar.retake"
+msgid "Qaytarılacaq məbləğ"
+msgstr "Amount to refund"
+
+msgctxt "registrar.retake"
+msgid "Qaytarılacaq məbləğ (AZN)"
+msgstr "Amount to refund (AZN)"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Qaytarılacaq məbləğ: %(amount)s AZN"
+msgstr "Amount to refund: %(amount)s AZN"
+
+msgctxt "registrar.retake"
+msgid "Qaytarılacaq məbləğ: {amount} AZN."
+msgstr "Amount to refund: {amount} AZN."
+
+msgctxt "registrar.retake"
+msgid "Ödənilib: {amount} AZN."
+msgstr "Paid: {amount} AZN."
+
+msgctxt "registrar.retake"
+msgid "Ödənilən məbləğ qeyd olunmayıb — məbləği yazın."
+msgstr "The paid amount was not recorded — enter the amount."
+
+msgctxt "registrar.retake"
+msgid "(boş — ödənilənin hamısı)"
+msgstr "(empty — the full amount paid)"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "qaytarılıb: %(day)s, arayış № %(ref)s"
+msgstr "refunded: %(day)s, reference No. %(ref)s"
+
+msgctxt "registrar.retake"
+msgid "Əmr"
+msgstr "Order"
+
+msgctxt "registrar.retake"
+msgid "Qərar"
+msgstr "Decision"
+
+msgctxt "registrar.retake"
+msgid "Qərarı verib"
+msgstr "Decided by"
+
+msgctxt "registrar.retake"
+msgid "Bank arayışı / ödəniş tapşırığı №"
+msgstr "Bank reference / payment order No."
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma tarixi"
+msgstr "Refund date"
+
+msgctxt "registrar.retake"
+msgid "Qeyd geri alınmır — yalnız pul faktiki qaytarıldıqdan sonra təsdiqləyin."
+msgstr "This record cannot be undone — confirm only after the money has actually been returned."
+
+msgctxt "registrar.retake"
+msgid "Sistem pul köçürmür: qərar qeyd olunur, Mühasibatlıq «Qaytarılacaq ödənişlər» növbəsində icranı «Qaytarıldı» ilə təsdiqləyir."
+msgstr "The system does not move money: the decision is recorded, and Accounting confirms execution with “Refunded” in the “Refunds to pay” queue."
+
+msgctxt "registrar.retake"
+msgid "Defolt qaytarılma yoxdur — qaytarılma yalnız rəsmi qərarla: əmr nömrəsi və tarixi və ya qərar sənədi, səbəb məcburidir. Bir müraciətə bir dəfə."
+msgstr "By default there is no refund — a refund only by official decision: an order number and date or a decision document, and a reason, are required. Once per application."
+
+msgctxt "registrar.retake"
+msgid "Defolt qaytarılma yoxdur. Qaytarılma lazımdırsa, bağlanışdan sonra «Ödənişin qaytarılması qərarı» ilə ayrıca rəsmi qərar verilir (Tədris şöbəsi / RİM)."
+msgstr "By default there is no refund. If a refund is needed, a separate official “Refund decision” is issued after the closure (Teaching Office / IT head)."
+
+msgctxt "registrar.retake"
+msgid "Bank arayışı və ya ödəniş tapşırığı nömrəsini yazın."
+msgstr "Enter the bank reference or payment order number."
+
+msgctxt "registrar.retake"
+msgid "Bu müraciət üzrə qaytarılma qərarı artıq verilib."
+msgstr "A refund decision has already been issued for this application."
+
+msgctxt "registrar.retake"
+msgid "Bu müraciət üzrə qaytarılma qərarı yoxdur."
+msgstr "There is no refund decision for this application."
+
+msgctxt "registrar.retake"
+msgid "Qaytarılacaq məbləğ ödənilən məbləğdən çox ola bilməz."
+msgstr "The refund cannot exceed the amount paid."
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma qərarı yalnız ödənişi təsdiqlənmiş və sonra rədd edilmiş, «İmtahana gəlmədi» və ya qərarla geri götürülmüş 25% müraciətinə verilir."
+msgstr "A refund decision is only possible for a 25% application whose payment was verified and which was then rejected, marked “Did not attend the exam” or withdrawn by decision."
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma rəsmi qərarla olur: əmr nömrəsi və tarixi və ya qərar sənədi əlavə edin."
+msgstr "A refund needs an official decision: add an order number and date or a decision document."
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma tarixi düzgün deyil."
+msgstr "Invalid refund date."
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma tarixi gələcəkdə ola bilməz."
+msgstr "The refund date cannot be in the future."
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma tarixi qərar tarixindən əvvəl ola bilməz."
+msgstr "The refund date cannot be before the decision date."
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma tarixini yazın."
+msgstr "Enter the refund date."
+
+msgctxt "registrar.retake"
+msgid "Ödəniş artıq qaytarılmış kimi qeyd olunub."
+msgstr "The payment is already recorded as refunded."
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma qərarı yazıldı — Mühasibatlığa bildiriş göndərildi."
+msgstr "Refund decision recorded — Accounting has been notified."
+
+msgctxt "registrar.retake"
+msgid "Ödəniş qaytarılmış kimi qeyd olundu."
+msgstr "Payment recorded as refunded."
+
+msgctxt "registrar.retake.notification"
+msgid "Ödənişin qaytarılması qərarı verildi"
+msgstr "Refund decision issued"
+
+msgctxt "registrar.retake.notification"
+msgid "Ödəniş qaytarıldı"
+msgstr "Payment refunded"
+
+msgctxt "registrar.retake.notification"
+msgid "Qaytarılacaq ödəniş növbədədir"
+msgstr "A refund is waiting in the queue"
+
+msgctxt "registrar.retake.notification"
+msgid "{student} — {message}"
+msgstr "{student} — {message}"
+
+msgctxt "registrar.retake.notification"
+msgid "\"{subject}\" — 25% ödənişi qaytarıldı: {amount} AZN ({date})."
+msgstr "\"{subject}\" — the 25% payment was refunded: {amount} AZN ({date})."
+
+msgctxt "registrar.retake.notification"
+msgid "\"{subject}\" — 25% ödənişinin qaytarılması qərarı: {amount} AZN. Mühasibatlıq icra edəcək."
+msgstr "\"{subject}\" — decision to refund the 25% payment: {amount} AZN. Accounting will process it."

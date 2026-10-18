@@ -1051,7 +1051,10 @@ services:
       resources:
         limits:
           cpus: "${PROMETHEUS_CPU_LIMIT:-0.5}"
-          memory: ${PROMETHEUS_MEM_LIMIT:-512M}
+          # 2026-10-19: prod-audit — 7 gündə working set limitin 100%-i (1024M), 38 restart. Prometheus v3
+          # GOMEMLIMIT-i avtomatik limitin 90%-inə qoyur, deməli real ehtiyacdır (21k seriya, 15d retention).
+          # Köhnə PROMETHEUS_MEM_LIMIT .env-də 1024M kimi qalıb; yeni ad ilə defolt 2048M tətbiq olunur.
+          memory: ${PROMETHEUS_MEMORY_LIMIT:-2048M}
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9090/-/healthy >/dev/null"]
       interval: 30s

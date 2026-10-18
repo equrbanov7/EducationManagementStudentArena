@@ -23,7 +23,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
 from ..services.accounting import constants as C
-from ..services.accounting.export import build_tables, export_caption, xlsx_bytes
+from ..services.accounting.export import build_tables, export_caption, used_rate_ids, xlsx_bytes
 from ..services.accounting.modal import PART_LESSONS, teacher_modal
 from ..services.accounting.panel import resolve
 from ..services.accounting.rows import apply_filters, sort_rows
@@ -44,7 +44,13 @@ def _audit(request, resolved, rows: int) -> None:
         resource_type=AUDIT_RESOURCE,
         resource_repr=f"XLSX · {resolved.semester.key if resolved.semester else '—'}",
         reason=pgettext(C.CTX, "Mühasibatlıq ixracı"),
-        new_values={"format": "xlsx", "filters": resolved.filters.as_params(page=1, lpage=1), "rows": rows},
+        new_values={
+            "format": "xlsx",
+            "filters": resolved.filters.as_params(page=1, lpage=1),
+            "rows": rows,
+            # 2026-10-19: ixracın məbləğləri hansı dərəcələrlə hesablanıb (sətirlər silinmir — sonradan da oxunur).
+            "pay_rates": used_rate_ids(resolved),
+        },
     )
 
 

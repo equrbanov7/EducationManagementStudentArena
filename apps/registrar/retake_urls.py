@@ -16,6 +16,8 @@ urlpatterns = [
     path("<uuid:application_id>/odenis/", retake_views.payment, name="payment"),
     path("<uuid:application_id>/qerar/", retake_views.decision, name="decision"),
     path("<uuid:application_id>/netice/", retake_views.result, name="result"),
+    # 2026-10-19 (sahib): ödənişin qaytarılması — qərar (Tədris şöbəsi / RİM) və icra qeydi (Mühasibatlıq).
+    path("<uuid:application_id>/qaytarma/", retake_views.refund, name="refund"),
     path("iz/<int:student_id>/", retake_views.trail, name="trail"),
     # 2026-10-19 (sahib): pəncərəni İmtahan mərkəzi açır; təhsil haqqı cədvəlini Mühasibatlıq saxlayır.
     path("pencere/ac/", retake_admin_views.window_open, name="window_open"),

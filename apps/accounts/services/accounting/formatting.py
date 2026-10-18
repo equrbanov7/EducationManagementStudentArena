@@ -1,4 +1,4 @@
-"""«Mühasibatlıq» — saat və ştat dəyərlərinin göstərilişi (AZ yazılışı: onluq vergül)."""
+"""«Mühasibatlıq» — saat, məbləğ və ştat dəyərlərinin göstərilişi (AZ yazılışı: onluq vergül)."""
 
 from __future__ import annotations
 
@@ -17,6 +17,14 @@ def fmt_hours(value, *, signed: bool = False) -> str:
     return text or "0"
 
 
+def fmt_money(value) -> str:
+    """Məbləğ (AZN): «1 234,50»; ``None`` → «» (boş — «0» yazılmır)."""
+    if value is None:
+        return ""
+    text = f"{value:,.2f}"
+    return text.replace(",", "\u00a0").replace(".", ",")
+
+
 def staff_short(person) -> str:
     """Ştat sütunu: «1», «0,5», saathesabı «s/h», yük profili yoxdursa «—»."""
     if person["staff_type"] == STAFF_NONE:
@@ -31,4 +39,4 @@ def kind_cells(kinds: dict) -> list[dict]:
     return [{"label": str(label), "value": fmt_hours((kinds or {}).get(key, 0))} for key, label in C.KINDS]
 
 
-__all__ = ["fmt_hours", "kind_cells", "staff_short"]
+__all__ = ["fmt_hours", "fmt_money", "kind_cells", "staff_short"]

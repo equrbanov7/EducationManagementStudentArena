@@ -276,9 +276,8 @@
         align-self: flex-end;
     }
 
-    .modal-content {
-        padding: 1rem;
-    }
+    /* `.modal-content { padding: 1rem }` (bütün Bootstrap modalları, telefon) 2026-10-19-da
+       `profile/common.css`-ə köçdü: bu fayl artıq yalnız post / modal bölmələrində yüklənir. */
 
     .modal-buttons {
         flex-direction: column-reverse;

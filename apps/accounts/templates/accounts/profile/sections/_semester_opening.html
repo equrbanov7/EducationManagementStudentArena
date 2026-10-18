@@ -23,7 +23,7 @@ SƏHİFƏLƏNİR (`sm_page`, 25/səhifə) — əvvəl ilk 400 sətir bir səhif�
 {% trans "Tədris dövrü" context "accounts.semester" as sm_period_title %}
 {% trans "Semestrin adı və tarixləri; «cari dövr» ayrıca əməldir." context "accounts.semester" as sm_period_sub %}
 {% trans "Tədris planından açılış yarat" context "accounts.semester" as sm_gen_title %}
-{% trans "Seçilmiş ixtisasların TƏSDİQLƏNMİŞ planından hər qrup üçün açılış sətirləri yaradılır. Əməl idempotentdir — mövcud açılış təkrarlanmır və heç nə silinmir." context "accounts.semester" as sm_gen_sub %}
+{% trans "Hər qrup üçün qrupun öz qəbul ilinin TƏSDİQLƏNMİŞ planından açılış sətirləri yaradılır (həmin il üçün plan yoxdursa — ən son plandan, xəbərdarlıqla). Əməl idempotentdir — mövcud açılış təkrarlanmır və heç nə silinmir." context "accounts.semester" as sm_gen_sub %}
 {% trans "Açılışları yarat" context "accounts.semester" as sm_gen_btn %}
 {% trans "Semestrin kilidini aç" context "accounts.semester" as sm_unlock_title %}
 {% trans "Səbəb audit jurnalına aktor və vaxtla yazılır." context "accounts.semester" as sm_unlock_sub %}
@@ -68,6 +68,8 @@ SƏHİFƏLƏNİR (`sm_page`, 25/səhifə) — əvvəl ilk 400 sətir bir səhif�
     {% if semester_opening_section.blockers %}
         {% include "accounts/profile/sections/teaching_office/_semester_blockers.html" %}
     {% endif %}
+
+    {% include "accounts/profile/sections/teaching_office/_semester_cohort_warnings.html" %}
 
     <div class="tof-split">
         <div class="tof-pane">

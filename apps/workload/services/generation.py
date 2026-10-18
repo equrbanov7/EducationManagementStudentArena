@@ -13,7 +13,9 @@ Mərhələ 2 ``CurriculumSubject``-ə ``credits`` + ``lecture/seminar/lab_hours`
 QAYDALAR
 --------
 * Mənbə YALNIZ ``PlanStatus.APPROVED`` plandır — qaralama plan sətir vermir
-  (ekran 07-nin «Plan yoxdur» bloklayıcısı ilə eyni meyar).
+  (ekran 07-nin «Plan yoxdur» bloklayıcısı ilə eyni meyar). 2026-10-19: semestr ``N``-in sətirləri HƏMİN
+  semestri oxuyan kohortun planından gəlir (``_plan_rows_for``, semestr açılışı ilə eyni qayda); mövcud
+  sətirlər silinmir.
 * **İDEMPOTENT**: eyni (fənn, ixtisas, semestr nömrəsi) üçün sətir varsa
   təkrarlanmır; mövcud sətrin saatları ƏZİLMİR (tədris şöbəsi əl ilə
   düzəldibsə itmir).
@@ -61,22 +63,75 @@ _APPROVED = "approved"
 _DEGREE_VALUES = {str(value) for value, _ in DegreeLevel.choices}
 
 
-def _plan_rows_for(organization, program_ids):
-    """Təsdiqlənmiş planların sətirləri (proqram üzrə ən yeni versiya)."""
-    Curriculum = django_apps.get_model("registrar", "Curriculum")
+def _plan_rows_for(organization, programs, academic_year: str = "", group_map=None, fallbacks=None):
+    """Təsdiqlənmiş planların sətirləri — semestr ``N`` üçün HƏMİN semestri oxuyan kohortun planı.
+
+    Sahib qaydası 2026-10-19 (semestr açılışı ilə eyni, ``registrar.cohort_plans``). Kohort ili:
+
+    1. ``group_map`` verilibsə — ixtisasın semestr ``N``-i oxuyan (kursu ``ceil(N/2)``) qruplarının
+       ``group_cohort_year``-ı (semestr açılışının plan seçimi ilə EYNİ mənbə; qruplar fərqlidirsə — ən çox olan);
+    2. qrup yoxdursa — tədris ilindən: ``Y − ceil(N/2) + 1``.
+
+    Həmin qəbul ilinin təsdiqlənmiş AKTİV planı (ən yüksək versiya); yoxdursa ixtisasın ƏN SON planı
+    (``-admission_year, -version``) və ``fallbacks`` siyahısına qeyd (semestr açılışı ilə eyni xəbərdarlıq).
+    ``is_active=False`` = eyni kohortun YENİ versiyası təsdiqlənib (``curriculum_actions._supersede_other_versions``)
+    — köhnə versiya sətir vermir; «Plan yoxdur» meyarı semestr açılışının bloklayıcısı ilə eynidir.
+    Tədris ili verilməyibsə — bütün semestrlər ən son plandan. ``latest`` — ixtisas → ən son plan.
+    """
+    from collections import Counter
+
+    from apps.registrar.public import cohort_plans
+
     CurriculumSubject = django_apps.get_model("registrar", "CurriculumSubject")
-    latest: dict = {}
-    for plan in Curriculum.objects.filter(
-        organization=organization, program_id__in=list(program_ids), status=_APPROVED
-    ).order_by("program_id", "-version", "-admission_year"):
-        latest.setdefault(plan.program_id, plan)
+    program_by_id = {program.pk: program for program in programs}
+    plans = cohort_plans.approved_plans(organization, list(program_by_id))
+    indexes = {program_id: cohort_plans.PlanIndex(items) for program_id, items in plans.items()}
+    latest = {program_id: index.newest for program_id, index in indexes.items() if index}
     if not latest:
         return [], {}
-    rows = list(
-        CurriculumSubject.objects.filter(curriculum_id__in=[plan.pk for plan in latest.values()])
+
+    def cohort_of(program_id, semester):
+        program = program_by_id.get(program_id)
+        if group_map is not None and program is not None:
+            course = max(math.ceil(int(semester) / 2), 1)
+            years = Counter(
+                year
+                for unit, group_course in group_map.get(program.specialty_unit_id, [])
+                if group_course == course and (year := cohort_plans.group_cohort_year(unit))
+            )
+            if years:
+                return years.most_common(1)[0][0]
+        return cohort_plans.cohort_for_semester(academic_year, semester)
+
+    memo: dict = {}
+
+    def chosen(program_id, semester):
+        key = (program_id, semester)
+        if key not in memo:
+            index = indexes[program_id]
+            cohort = cohort_of(program_id, semester) if academic_year else None
+            plan, status = index.for_year(cohort) if cohort else (index.newest, cohort_plans.COHORT)
+            memo[key] = plan.pk
+            if status != cohort_plans.COHORT and fallbacks is not None:
+                fallbacks.append(
+                    {
+                        "group": cohort_plans.semester_label(program_by_id[program_id], cohort, semester),
+                        "admission_year": cohort or 0,
+                        "plan_year": int(plan.admission_year),
+                        "semester": int(semester),
+                        "reason": status,
+                    }
+                )
+        return memo[key]
+
+    all_ids = [plan.pk for items in plans.values() for plan in items]
+    rows = [
+        row
+        for row in CurriculumSubject.objects.filter(curriculum_id__in=all_ids)
         .select_related("subject", "curriculum", "curriculum__program")
         .order_by("curriculum__program__name", "semester_number", "order")
-    )
+        if row.curriculum_id == chosen(row.curriculum.program_id, row.semester_number)
+    ]
     return rows, latest
 
 
@@ -111,9 +166,14 @@ def plan_preview(*, organization, chair, academic_year: str) -> dict:
             organization=organization, specialty_unit_id__in=specialty_ids, is_active=True
         ).select_related("specialty_unit")
     )
-    plan_rows, latest = _plan_rows_for(organization, [program.pk for program in programs])
+    fallbacks: list = []
+    group_map = _groups_by_specialty(organization, specialty_ids, academic_year)
+    plan_rows, latest = _plan_rows_for(organization, programs, academic_year, group_map, fallbacks)
     blocked = [program.name for program in programs if program.pk not in latest]
+    from apps.registrar.public import cohort_plans
+
     return {
+        "warnings": cohort_plans.fallback_messages(fallbacks),
         "programs": [
             {"id": str(program.pk), "name": program.name, "has_plan": program.pk in latest} for program in programs
         ],
@@ -148,14 +208,19 @@ def generate_rows_from_plan(*, task, actor, program_ids=None, request=None) -> d
     if not programs:
         raise WorkloadDenied("workload.no_program", "İxtisas seçilməyib və ya aktiv ixtisas yoxdur.")
 
-    plan_rows, latest = _plan_rows_for(organization, [program.pk for program in programs])
+    from apps.registrar.public import cohort_plans
+
+    fallbacks: list = []
+    group_map = _groups_by_specialty(organization, specialty_ids, task.academic_year)
+    plan_rows, latest = _plan_rows_for(organization, programs, task.academic_year, group_map, fallbacks)
     blocked = sorted({program.name for program in programs if program.pk not in latest})
+    # Semestr açılışı ilə EYNİ xəbərdarlıq — kohort planı yoxdursa ən son plan tətbiq olunub (2026-10-19).
+    warnings = cohort_plans.fallback_messages(fallbacks)
     resolver = PeriodResolver(organization)
     if not plan_rows:
-        return {"created": 0, "existing": 0, "blocked": blocked, **_fix_periods(task, resolver)}
+        return {"created": 0, "existing": 0, "blocked": blocked, "warnings": warnings, **_fix_periods(task, resolver)}
 
     program_by_id = {program.pk: program for program in programs}
-    group_map = _groups_by_specialty(organization, specialty_ids, task.academic_year)
     # İdempotentlik açarı: (fənn, ixtisas, fəsil, semestr). `order` sahəsi
     # QƏSDƏN semestr nömrəsini daşıyır (aşağıda `order=semester`), ona görə
     # mövcud sətirlər eyni açarla oxunur.
@@ -222,14 +287,20 @@ def generate_rows_from_plan(*, task, actor, program_ids=None, request=None) -> d
         user=getattr(actor, "user", None),
         organization=organization,
         obj=task,
-        new_values={"created": created, "existing": skipped, "blocked": blocked, **periods},
+        new_values={
+            "created": created,
+            "existing": skipped,
+            "blocked": blocked,
+            "cohort_fallbacks": [item["group"] for item in fallbacks],
+            **periods,
+        },
         reason="workload.rows_generated_from_plan",
         request=request,
         resource_type="workload.TeachingTask",
         resource_id=str(task.pk),
         resource_repr=f"{task.chair_id} · {task.academic_year}",
     )
-    return {"created": created, "existing": skipped, "blocked": blocked, **periods}
+    return {"created": created, "existing": skipped, "blocked": blocked, "warnings": warnings, **periods}
 
 
 def _fix_periods(task, resolver) -> dict:

@@ -42,9 +42,14 @@ def _fit_size(value: str, *, width: float, size: float, bold=False) -> float:
     return size
 
 
-def draw_verification_block(sheet, mark, *, x: float, top: float, width: float) -> None:
-    """İmza zolağının ortasına: vektor QR (``_QR_SIZE`` pt) + «Sənədi yoxlayın» + qısa ünvan + kod."""
+def draw_verification_block(sheet, mark, *, x: float, top: float, width: float, color=None) -> None:
+    """İmza zolağının ortasına: vektor QR (``_QR_SIZE`` pt) + «Sənədi yoxlayın» + qısa ünvan + kod.
+
+    ``color`` verilərsə (arayışın qara blankı) QR, ünvan və etiketlər həmin rəngdədir."""
     import fitz
+
+    dark = color or transcript_pdf._DARK
+    muted = color or transcript_pdf._MUTED
 
     matrix = qr_matrix(mark.url)
     modules = len(matrix) or 1
@@ -56,23 +61,25 @@ def draw_verification_block(sheet, mark, *, x: float, top: float, width: float) 
             if dark:
                 left, upper = x + col_index * cell, y0 + row_index * cell
                 shape.draw_rect(fitz.Rect(left, upper, left + cell, upper + cell))
-    shape.finish(color=None, fill=transcript_pdf._DARK, width=0)
+    shape.finish(color=None, fill=dark, width=0)
     shape.commit()
 
     text_x = x + _QR_SIZE + _QR_GAP
     text_w = max(20.0, width - _QR_SIZE - _QR_GAP)
     title = pgettext("registrar.pdf", "Sənədin həqiqiliyini yoxlayın")
-    sheet.text_at(text_x, top, title, size=_fit_size(title, width=text_w, size=_LABEL_SIZE, bold=True), bold=True)
+    title_size = _fit_size(title, width=text_w, size=_LABEL_SIZE, bold=True)
+    sheet.text_at(text_x, top, title, size=title_size, bold=True, color=dark)
     sheet.text_at(
         text_x,
         top + 12,
         mark.short_url,
         size=_fit_size(mark.short_url, width=text_w, size=_LABEL_SIZE),
-        color=transcript_pdf._BLUE,
+        color=color or transcript_pdf._BLUE,
     )
     code_label = pgettext("registrar.pdf", "Kod")
-    sheet.text_at(text_x, top + 24, code_label, size=6.2, color=transcript_pdf._MUTED)
-    sheet.text_at(text_x, top + 34, mark.code, size=_fit_size(mark.code, width=text_w, size=7.4, bold=True), bold=True)
+    sheet.text_at(text_x, top + 24, code_label, size=6.2, color=muted)
+    code_size = _fit_size(mark.code, width=text_w, size=7.4, bold=True)
+    sheet.text_at(text_x, top + 34, mark.code, size=code_size, bold=True, color=dark)
 
 
 def render_sealed_transcript(*, organization, student, record, data, issued_by, request=None):

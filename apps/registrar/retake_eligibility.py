@@ -23,12 +23,12 @@ from . import finals, finals_batch, retake_rules
 from .exam_eligibility import FAIL_REASON_BARRED, FAIL_REASON_EXAM, FAIL_REASON_TOTAL
 from .models import (
     RETAKE_ACTIVE_STATUSES,
-    RETAKE_CONSUMED_STATUSES,
     Enrollment,
     RetakeApplication,
     RetakeKind,
     StudentAcademicRecord,
 )
+from .models.retake import consumes_attempt
 
 _CTX = "registrar.retake"
 
@@ -90,7 +90,8 @@ def _option(allowed: bool, why="") -> dict:
 
 def _row(enrollment, result, *, apps, limit, window_open, in_progress) -> dict:
     fail_reason = result.get("fail_reason") or ""
-    used = sum(1 for a in apps if a.kind == RetakeKind.RETAKE_25 and a.status in RETAKE_CONSUMED_STATUSES)
+    # 2026-10-19 (sahib): qaytarılma qərarı «cəhd istifadə olunmuş sayılmasın» ilə cəhdi bərpa edir.
+    used = sum(1 for a in apps if consumes_attempt(a))
     active = next((a for a in apps if a.status in RETAKE_ACTIVE_STATUSES), None)
     barred = fail_reason == FAIL_REASON_BARRED
     common_block = WHY_WINDOW if not window_open else WHY_ACTIVE if active else WHY_IN_PROGRESS if in_progress else ""

@@ -54,6 +54,13 @@ ENGINE_HOOKS = (
     "data-syl-save-now",
     "data-syl-retry",
     "data-syl-reload",
+    # Telefon naviqasiyası (`syllabus_editor_phone.js`, 2026-10-19): addım menyusu + «3/9» sayğacı.
+    "data-syl-steps",
+    "data-syl-steps-toggle",
+    "data-syl-step-count",
+    "data-syl-step-current",
+    'data-syl-nav="prev"',
+    'data-syl-nav="next"',
 )
 
 #: `syllabus_editor_fields.js` toplayıcılarının oxuduğu sahələr.
@@ -319,3 +326,27 @@ class SyllabusEditorAssetWiringTest(TestCase):
             body.index("syllabus_editor.js'"),
             "sahə modulu redaktor mühərrikindən SONRA yüklənir",
         )
+
+    def test_phone_navigation_loads_after_the_engine(self):
+        """Telefon addım menyusu mühərrikə toxunmur — `.is-on` dəyişikliyini izləyir, ondan SONRA gəlir."""
+        template = Path(settings.BASE_DIR) / "apps/accounts/templates/accounts/profile/_section_scripts.html"
+        body = template.read_text("utf-8")
+
+        self.assertLess(body.index("syllabus_editor.js'"), body.index("syllabus_editor_phone.js'"))
+
+    def test_phone_bar_is_compact_sticky_and_scoped_to_the_open_editor(self):
+        """Telefon paneli yapışqandır, ≤ 56px-dir və səhifə `clip`-i yalnız aktiv redaktora bağlıdır (2026-10-19)."""
+        css = (
+            Path(settings.BASE_DIR) / "apps/accounts/static/accounts/css/profile/sections/syllabus_editor_aside.css"
+        ).read_text("utf-8")
+        phone = css[css.index("YIĞCAM yapışqan alt panel") :]
+        self.assertIn("position: sticky", phone)
+        self.assertIn("env(safe-area-inset-bottom", phone)
+        self.assertIn("min-height: 44px", phone)  # 44 + 2×5 padding + 2×1 border = 56
+        self.assertIn("padding: 5px 8px", phone)
+        rules = re.findall(
+            r"([^{}]+)\{\s*overflow(?:-x)?:\s*(?:visible|clip)", re.sub(r"/\*.*?\*/", "", phone, flags=re.S)
+        )
+        self.assertGreaterEqual(len(rules), 3)
+        for rule in rules:
+            self.assertIn(".profile-section-panel.is-active .syl-editor", rule)

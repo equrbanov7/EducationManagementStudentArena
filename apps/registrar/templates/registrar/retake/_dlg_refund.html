@@ -1,0 +1,33 @@
+{% load i18n %}
+{% comment %}«Ödənişin qaytarılması qərarı» (2026-10-19) — əmr № + tarix VƏ YA sənəd (server yoxlayır, bağlanışla eyni qayda);
+məbləğ boşdursa ödənilən məbləğ tam qaytarılır (qismən qaytarılma üçün az yazın). Səbəb `_reason_dialog`-dadır (≥20).{% endcomment %}
+<p class="rt-dialog__subject" data-rt-text="who"></p>
+<div class="rt-grid">
+    <div class="ems-field">
+        <label class="ems-field__label" for="rtRefundOrderNo">{% trans "Əmr / qərar №" context "registrar.retake" %}</label>
+        <input class="ems-input" type="text" id="rtRefundOrderNo" name="order_number" maxlength="80" autocomplete="off">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="rtRefundOrderDate">{% trans "Əmr tarixi" context "registrar.retake" %}</label>
+        <input class="ems-input ems-input--date" type="date" id="rtRefundOrderDate" name="order_date">
+    </div>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="rtRefundDoc">{% trans "və ya qərar sənədi" context "registrar.retake" %}</label>
+    <input class="ems-input" type="file" id="rtRefundDoc" name="document" accept=".pdf,.jpg,.jpeg,.png">
+    <span class="ems-field__hint">{% trans "PDF, JPG və ya PNG · ən çox 10 MB" context "registrar.retake" %}</span>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="rtRefundAmount">{% trans "Qaytarılacaq məbləğ (AZN)" context "registrar.retake" %} <span class="ems-field__opt">{% trans "(boş — ödənilənin hamısı)" context "registrar.retake" %}</span></label>
+    <input class="ems-input" type="number" id="rtRefundAmount" name="amount" min="0.01" step="0.01" inputmode="decimal">
+    <span class="ems-field__hint" data-rt-expected-hint data-template="{% trans 'Ödənilib: {amount} AZN.' context 'registrar.retake' %}" data-none="{% trans 'Ödənilən məbləğ qeyd olunmayıb — məbləği yazın.' context 'registrar.retake' %}"></span>
+</div>
+<div class="ems-field">
+    <input type="hidden" name="restores_attempt" value="0">
+    <label class="rt-check" for="rtRefundRestores">
+        <input class="rt-check__input" type="checkbox" id="rtRefundRestores" name="restores_attempt" value="1" checked>
+        <span>{% trans "Cəhd istifadə olunmuş sayılmasın" context "registrar.retake" %}</span>
+    </label>
+    <span class="ems-field__hint">{% trans "Qaytarılma ödənilmiş cəhdin verilmədiyini tanıyır: «İmtahana gəlmədi» ilə sayılmış 25% cəhdi tələbəyə geri qayıdır. Rədd / geri götürmə cəhd saymır — orada bu seçim təsirsizdir. Qərardan sonra dəyişmir." context "registrar.retake" %}</span>
+</div>
+<p class="ems-msg ems-msg--info">{% trans "Sistem pul köçürmür: qərar qeyd olunur, Mühasibatlıq «Qaytarılacaq ödənişlər» növbəsində icranı «Qaytarıldı» ilə təsdiqləyir." context "registrar.retake" %}</p>

@@ -12,7 +12,7 @@ from django.utils.translation import pgettext
 
 from ..constants import MIN_NOTE_LENGTH, ApplicationStatus, EventKind
 from ..models import ApplicationEvent, ApplicationWatch
-from ..sla import add_working_days
+from ..sla import add_working_days, calendar_for
 from ..state_machine import ACTOR_HANDLER, Action, TransitionDenied, ensure_allowed, rule_for
 from . import access, notify
 from .submit import attach_files
@@ -396,7 +396,9 @@ def reopen(*, application, user, text: str, files=None, request=None):
     old = application.status
     application.status = rule.target
     application.resolved_at = None
-    application.sla_due_on = add_working_days(timezone.localdate(), application.kind.sla_days)
+    application.sla_due_on = add_working_days(
+        timezone.localdate(), application.kind.sla_days, calendar_for(application.organization_id)
+    )
     _touch(application, ["status", "resolved_at", "sla_due_on"])
     event = _write_event(application, kind=EventKind.REOPENED, actor=user, text=text, old=old)
     attach_files(application, files, event=event, uploaded_by=user)

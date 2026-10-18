@@ -3,7 +3,8 @@
 «Mühasibatlıq» (sahib 2026-10-18) — mühasib, qəyyum, rektor, Qəyyumlar Şurasının sədri, RİM rəhbəri
 (menyu qapısı: rbac_sections.py, açar `accounting.view`; data qapısı: services/accounting/policy.py).
 Müəllim × ay: jurnalda keçirilmiş dərs saatı (mühazirə / seminar / lab), paylanmış dərs yükündən aylıq plan payı,
-fərq, ştat; müəllim drill-down-u (aylıq cədvəl, fənn × qrup, dərs siyahısı) və Excel ixracı. YALNIZ OXU.
+fərq, ştat; müəllim drill-down-u (aylıq cədvəl, fənn × qrup, dərs siyahısı) və Excel ixracı. 2026-10-19: ilkin
+məbləğ (saat × «Dərs saatının ödəniş dərəcələri»); dərəcə cədvəlinə yazı yalnız `accounting.manage_fees` (`accounting_rates.js`).
 
 Panel SERVER-render-dir və AJAX-safe-dir: avto filtr paneli (`filter_bar.js`, `ac_*` URL-də), sıralama, səhifə və
 drill-down linkləri bölməni yerində yeniləyir. Müəllim pəncərəsi (modal), «Daha çox» və tarix aralığı sahələri
@@ -13,13 +14,15 @@ drill-down linkləri bölməni yerində yeniləyir. Müəllim pəncərəsi (moda
 <section class="profile-section-panel profile-section--accounting {% if active_section == 'accounting' %}is-active{% endif %}"
          data-profile-section-panel="accounting"
          data-source-url="{{ profile_base_url }}?section=accounting">
-<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/accounting.css' %}?v=20261019-acmodal">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/accounting.css' %}?v=20261019-acpay">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/accounting_rates.css' %}?v=20261019-acpay">
 {% accounting_panel as ac %}
 {% if not ac.has_access %}
     {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=ac.access_denied_message %}
 {% else %}
     {% include "accounts/profile/sections/accounting/_content.html" %}
 <script defer src="{% static 'accounts/js/profile/accounting.js' %}?v=20261019-acreview"></script>
+<script defer src="{% static 'accounts/js/profile/accounting_rates.js' %}?v=20261019-acpay"></script>
 {% endif %}
 </section>
 {% endif %}

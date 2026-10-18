@@ -8,8 +8,21 @@ from .cabinet_modules import is_module_enabled  # noqa: F401
 from .cabinet_modules import module_items  # noqa: F401
 from .cabinet_modules import set_module_enabled  # noqa: F401
 from .default_roles import get_default_roles_for_org_type  # noqa: F401
+from .group_cohort import group_admission_year  # noqa: F401
+from .group_cohort import group_cohort_year  # noqa: F401
 from .groups_registry import build_groups_registry  # noqa: F401
 from .groups_registry import student_record_scope_q  # noqa: F401
+from .holidays import HolidayError  # noqa: F401
+from .holidays import WorkCalendar  # noqa: F401
+from .holidays import delete_holiday  # noqa: F401
+from .holidays import holidays_between  # noqa: F401
+from .holidays import save_holiday  # noqa: F401
+from .holidays import seed_fixed_holidays  # noqa: F401
+from .holidays import work_calendar  # noqa: F401
+from .holidays import academic_year_bounds as holiday_academic_year_bounds  # noqa: F401
+from .holidays import academic_year_label as holiday_academic_year_label  # noqa: F401
+from .holidays import academic_year_start as holiday_academic_year_start  # noqa: F401
+from .holidays import current_academic_year_start as holiday_current_academic_year  # noqa: F401
 from .overview import build_overview_data  # noqa: F401
 from .permissions import get_permission_label  # noqa: F401
 from .request_memberships import drop_request_memberships  # noqa: F401
@@ -66,7 +79,20 @@ __all__ = [
     "UNIT_TYPES_BY_ORG",
     "UnitScope",
     "ancestor_unit_ids",
+    "HolidayError",
+    "WorkCalendar",
     "build_groups_registry",
+    "delete_holiday",
+    "group_admission_year",
+    "group_cohort_year",
+    "holiday_academic_year_bounds",
+    "holiday_academic_year_label",
+    "holiday_academic_year_start",
+    "holiday_current_academic_year",
+    "holidays_between",
+    "save_holiday",
+    "seed_fixed_holidays",
+    "work_calendar",
     "build_overview_data",
     "build_structure_tree_context",
     "can_manage_org_settings",

@@ -3,9 +3,16 @@
 Default DENY. Faylı görür: müraciətin SAHİBİ (tələbə) və müraciəti struktur əhatəsində görən heyət
 (qəbz: ``retake.payment_verify`` / ``retake.manage`` / ``student.records_view``; qərar sənədi: mühasibsiz). Fayl adı təsadüfidir — orijinal
 ad yalnız Mühasibatlıq növbəsində göstərilir.
+
+``retake_documents/`` prefiksi ALTINDA üç sənəd sahəsi var (review 2026-10-19, B1): alt qrup qərarı
+(``decision_document``), ödənişdən sonra bağlanış qərarı (``closure_document``) və «Ödənişin qaytarılması qərarı»
+(``refund_document``). Hamısı eyni iz açarları ilə (``TRAIL_KEYS``) açılır; qaytarılma qərarını əlavə olaraq
+Mühasibatlıq (``retake.payment_verify``) görür — «Qaytarılacaq ödənişlər» növbəsində icra üçün lazımdır.
 """
 
 from __future__ import annotations
+
+from django.db.models import Q
 
 from . import retake_access
 from .models import RetakeApplication, RetakeReceipt
@@ -31,9 +38,21 @@ def check_receipt_access(user, path: str) -> bool:
     return receipt is not None and _allowed(user, receipt.application, retake_access.RECEIPT_KEYS)
 
 
+def _document_keys(application, path: str) -> tuple:
+    if application.refund_document and application.refund_document.name == path:
+        return retake_access.RECEIPT_KEYS  # iz açarları + Mühasibatlıq
+    return retake_access.TRAIL_KEYS
+
+
 def check_document_access(user, path: str) -> bool:
-    application = _single(RetakeApplication.objects.select_related("organization"), decision_document=path)
-    return _allowed(user, application, retake_access.TRAIL_KEYS)
+    if not path:
+        return False
+    match = Q(decision_document=path) | Q(closure_document=path) | Q(refund_document=path)
+    try:
+        application = RetakeApplication.objects.select_related("organization").get(match)
+    except (RetakeApplication.DoesNotExist, RetakeApplication.MultipleObjectsReturned):
+        return False
+    return _allowed(user, application, _document_keys(application, path))
 
 
 __all__ = ["check_document_access", "check_receipt_access"]

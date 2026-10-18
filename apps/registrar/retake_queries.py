@@ -23,8 +23,10 @@ from .models import (
     RetakeEventAction,
     RetakeKind,
     RetakeReceipt,
+    RetakeRefundState,
     RetakeStatus,
 )
+from .models.retake import consumes_attempt
 
 _CTX = "registrar.retake"
 
@@ -41,6 +43,8 @@ _EVENT_TONES = {
     RetakeEventAction.EXAM_GRANTED: "primary",
     RetakeEventAction.RESULT_RECORDED: "success",
     RetakeEventAction.WITHDRAWN: "muted",
+    RetakeEventAction.REFUND_DECIDED: "warning",
+    RetakeEventAction.REFUNDED: "success",
 }
 
 BASE_LABEL = pgettext_lazy(_CTX, "Əsas imtahan")
@@ -75,6 +79,9 @@ def timeline(application) -> list:
         reference = (event.metadata or {}).get("payment_reference")
         if reference:
             what = f"{what} · {pgettext(_CTX, 'Ödəniş №')}: {reference}"
+        refund_amount = (event.metadata or {}).get("refund_amount")
+        if refund_amount and event.action in (RetakeEventAction.REFUND_DECIDED, RetakeEventAction.REFUNDED):
+            what = f"{what} · {refund_amount} AZN"
         score = (event.metadata or {}).get("score")
         if score and event.action == RetakeEventAction.RESULT_RECORDED:
             what = f"{what} · {pgettext(_CTX, 'Bal')}: {score}"
@@ -122,6 +129,29 @@ def decorate(application, *, viewer_is_student=False) -> dict:
         ),
         "result_text": result_text(application),
         "eligibility": application.eligibility or {},
+        **refund_info(application),
+    }
+
+
+def refund_info(application) -> dict:
+    """2026-10-19: qaytarılma vəziyyəti (tələbə kartı, növbə sətri) — «» / qərar verilib / qaytarılıb."""
+    state = application.refund_state or ""
+    if not state:
+        return {"refund_state": "", "refund_label": "", "refund_document_url": ""}
+    return {
+        "refund_state": state,
+        "refund_label": str(RetakeRefundState(state).label),
+        "refund_amount_text": fmt(application.refund_amount),
+        # Review 2026-10-19: qərar cəhdi bərpa edibmi (``refund_restores_attempt``) — nəticə həqiqi sayğacdan.
+        "refund_restores_attempt": application.refund_restores_attempt,
+        "refund_attempt_label": (
+            pgettext(_CTX, "25% cəhdi istifadə olunmuş sayılır")
+            if consumes_attempt(application)
+            else pgettext(_CTX, "25% cəhdi istifadə olunmuş sayılmır")
+        ),
+        "refund_document_url": (
+            protected_media_url(application.refund_document) if application.refund_document else ""
+        ),
     }
 
 
@@ -288,6 +318,7 @@ __all__ = [
     "events_prefetch",
     "fmt",
     "grant_reason_label",
+    "refund_info",
     "result_lines",
     "result_text",
     "student_applications",

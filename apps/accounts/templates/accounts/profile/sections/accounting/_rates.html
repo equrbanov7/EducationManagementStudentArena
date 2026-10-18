@@ -1,0 +1,121 @@
+{% load i18n %}
+{% comment %}«Dərs saatının ödəniş dərəcələri» (sahib 2026-10-19) — semestrin tədris ili üzrə tədris ili × vəzifə × növ × saat
+dərəcəsi (AZN). Hamı (accounting.view) görür; forma və «Ləğv et» YALNIZ `rates.can_manage` (accounting.manage_fees, təşkilat
+əhatəsi) üçündür və «Başqasının adından» rejimində gizlidir. Sətir silinmir: dəyişiklik köhnəni arxivləyir (tarixçə).
+Yazılar `accounting_rates.js` → `EMSCore.fetchJSON` (FormData, CSRF), uğurdan sonra bölmə yerində yenilənir.
+Kontekst: `ac.rates` (services/accounting/rates_view.py → rate_card).{% endcomment %}
+{% with rates=ac.rates %}
+<details class="ems-card ac-rates" id="ac-rates"{% if not rates.active %} open{% endif %} data-ac-rates data-ac-rates-error="{% trans 'Yadda saxlanılmadı — icazənizi yoxlayın və ya səhifəni yeniləyin.' context 'accounts.accounting' %}">
+    <summary class="ac-rates__summary">
+        <span class="ac-rates__title"><i class="fas fa-coins" aria-hidden="true"></i> {% trans "Dərs saatının ödəniş dərəcələri" context "accounts.accounting" %}</span>
+        <span class="ems-badge ems-badge--muted">{{ rates.year|default:"—" }}</span>
+        <span class="ems-tabs__count">{{ rates.active|length }}</span>
+    </summary>
+    <div class="ac-rates__body">
+        <p class="ac-muted ac-rates__lead">{% trans "Məbləğ = keçirilmiş saat × dərəcə (tədris ili × vəzifə × növ; növə xas dərəcə yoxdursa «bütün növlər» dərəcəsi). Vəzifə «Yük bölgüsü»ndəki müəllim profilindən götürülür. Dərəcə və ya vəzifə yoxdursa məbləğ boş qalır." context "accounts.accounting" %} {{ rates.disclaimer }}</p>
+        {% if rates.uncovered and rates.year %}
+        <p class="ems-msg ems-msg--warning ac__notice" role="note"><i class="fas fa-triangle-exclamation ems-msg__icon" aria-hidden="true"></i> <span>{% trans "Dərəcəsi olmayan vəzifələr" context "accounts.accounting" %}: {{ rates.uncovered|join:", " }}</span></p>
+        {% endif %}
+
+        {% if rates.active %}
+        <div class="ems-tablewrap ac-tablewrap">
+            <div class="ems-tablescroll">
+                <table class="ems-table ems-table--compact ems-table--stack ac-table ac-table--fit">
+                    <caption class="ac-sr">{% blocktrans trimmed with year=rates.year context "accounts.accounting" %}Qüvvədə olan ödəniş dərəcələri — {{ year }}{% endblocktrans %}</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">{% trans "Vəzifə" context "accounts.accounting" %}</th>
+                            <th scope="col">{% trans "Növ" context "accounts.accounting" %}</th>
+                            <th scope="col" class="ems-table__num">{% trans "Dərəcə (AZN / saat)" context "accounts.accounting" %}</th>
+                            <th scope="col">{% trans "Qeyd" context "accounts.accounting" %}</th>
+                            <th scope="col">{% trans "Əlavə edib" context "accounts.accounting" %}</th>
+                            {% if rates.can_manage %}<th scope="col"><span class="ac-sr">{% trans "Əməl" context "accounts.accounting" %}</span></th>{% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in rates.active %}
+                        <tr>
+                            <th scope="row">{{ item.position_label }}</th>
+                            <td data-label="{% trans 'Növ' context 'accounts.accounting' %}">{{ item.kind_label }}</td>
+                            <td class="ems-table__num ac-strong" data-label="{% trans 'Dərəcə (AZN / saat)' context 'accounts.accounting' %}">{{ item.rate_text }}</td>
+                            <td data-label="{% trans 'Qeyd' context 'accounts.accounting' %}">{{ item.note|default:"—" }}</td>
+                            <td data-label="{% trans 'Əlavə edib' context 'accounts.accounting' %}"><span>{{ item.created_by_name|default:"—" }}</span> <small class="ac-muted ac-block">{{ item.created_at|date:"d.m.Y H:i" }}</small></td>
+                            {% if rates.can_manage %}
+                            <td class="ac-rates__actions">
+                                <form method="post" action="{{ item.archive_url }}" data-ac-rate-form novalidate>
+                                    {% csrf_token %}
+                                    <button type="submit" class="ems-btn ems-btn--sm ems-btn--ghost" data-ac-confirm="{% trans 'Dərəcə ləğv edilsin? Sətir tarixçədə qalır, keçmiş ixraclar dəyişmir.' context 'accounts.accounting' %}"><i class="fas fa-box-archive" aria-hidden="true"></i> {% trans "Ləğv et" context "accounts.accounting" %}</button>
+                                </form>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+            {% trans "Bu tədris ili üçün dərəcə yoxdur" context "accounts.accounting" as st_title %}
+            {% trans "Dərəcə olmadan cədvəldə və ixracda «Dərəcə təyin edilməyib» görünür, məbləğ hesablanmır." context "accounts.accounting" as st_body %}
+            {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-coins" %}
+        {% endif %}
+
+        {% if rates.can_manage %}
+        <form class="ac-rates__form" method="post" action="{{ rates.save_url }}" data-ac-rate-form novalidate>
+            {% csrf_token %}
+            <h3 class="ac-h">{% trans "Dərəcə əlavə et və ya dəyiş" context "accounts.accounting" %}</h3>
+            <div class="ac-rates__grid">
+                <div class="ems-field">
+                    <label class="ems-field__label" for="acRateYear">{% trans "Tədris ili" context "accounts.accounting" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select class="ems-select bootstrap-single-select__native" id="acRateYear" name="academic_year" data-bootstrap-select required>
+                            {% for year in rates.years %}<option value="{{ year }}"{% if year == rates.year %} selected{% endif %}>{{ year }}</option>{% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="ems-field">
+                    <label class="ems-field__label" for="acRatePosition">{% trans "Vəzifə" context "accounts.accounting" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select class="ems-select bootstrap-single-select__native" id="acRatePosition" name="position" data-bootstrap-select required>
+                            {% for key, label in rates.positions %}<option value="{{ key }}">{{ label }}</option>{% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="ems-field">
+                    <label class="ems-field__label" for="acRateKind">{% trans "Növ" context "accounts.accounting" %}</label>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select class="ems-select bootstrap-single-select__native" id="acRateKind" name="activity" data-bootstrap-select>
+                            {% for key, label in rates.kinds %}<option value="{{ key }}">{{ label }}</option>{% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="ems-field">
+                    <label class="ems-field__label" for="acRateValue">{% trans "Dərəcə (AZN / saat)" context "accounts.accounting" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+                    <input class="ems-input" type="number" id="acRateValue" name="hourly_rate" min="0.01" max="9999.99" step="0.01" inputmode="decimal" required>
+                </div>
+                <div class="ems-field ac-rates__note">
+                    <label class="ems-field__label" for="acRateNote">{% trans "Qeyd" context "accounts.accounting" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "ui.dialog" %}</span></label>
+                    <input class="ems-input" type="text" id="acRateNote" name="note" maxlength="300" placeholder="{% trans 'Məs. rektorun əmri № …' context 'accounts.accounting' %}">
+                </div>
+            </div>
+            <p class="ems-field__hint">{% trans "Eyni il, vəzifə və növ üçün dərəcə artıq varsa, köhnəsi arxivə düşür və yenisi qüvvəyə minir." context "accounts.accounting" %}</p>
+            <p class="ems-msg ems-msg--error" data-ac-rate-error role="alert" hidden></p>
+            <button type="submit" class="ems-btn ems-btn--primary"><i class="fas fa-floppy-disk" aria-hidden="true"></i> {% trans "Yadda saxla" context "accounts.accounting" %}</button>
+        </form>
+        {% elif not ac.view_as %}
+        <p class="ac-muted ac-rates__lead"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "Dərəcələri Mühasibatlıq (və RİM rəhbəri) dəyişir; siz yalnız baxırsınız." context "accounts.accounting" %}</p>
+        {% endif %}
+
+        {% if rates.history %}
+        <details class="ac-rates__history">
+            <summary>{% trans "Tarixçə" context "accounts.accounting" %} <span class="ems-tabs__count">{{ rates.history|length }}</span></summary>
+            <ul class="ac-rates__log">
+                {% for item in rates.history %}
+                <li><strong>{{ item.position_label }} · {{ item.kind_label }}</strong> — {{ item.rate_text }} AZN · {{ item.reason_label }} · {{ item.archived_at|date:"d.m.Y H:i" }}{% if item.archived_by_name %} · {{ item.archived_by_name }}{% endif %}</li>
+                {% endfor %}
+            </ul>
+        </details>
+        {% endif %}
+    </div>
+</details>
+{% endwith %}

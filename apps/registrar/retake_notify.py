@@ -1,6 +1,8 @@
 """25% / alt qrup müraciəti bildirişləri — BEST-EFFORT (xəta qərar tranzaksiyasını sındırmır).
 
 * Tələbə HƏR status dəyişikliyində bildiriş alır (link: kabinetin «25% və alt qrup» bölməsi).
+* 2026-10-19: «Ödənişin qaytarılması qərarı» — tələbəyə və ``retake.payment_verify`` daşıyanlara (növbə «Qaytarılacaq
+  ödənişlər»), «Qaytarıldı» — tələbəyə (:func:`notify_refund`).
 * Növbəyə düşən müraciət haqqında açar daşıyan heyətə xəbər verilir: qəbz yüklənəndə
   ``retake.payment_verify``, ödəniş təsdiqlənəndə / alt qrup müraciəti gələndə ``retake.manage``.
   Alıcılar rol ADI ilə yox, açarı AÇIQ yazılmış aktiv rollarla tapılır (wildcard ``*`` rollar — rektor və
@@ -155,4 +157,62 @@ def notify_staff_queue(application, key: str) -> None:
     transaction.on_commit(_send)
 
 
-__all__ = ["DESK_SECTION", "STUDENT_SECTION", "notify_staff_queue", "notify_student"]
+def _refund_text(application, stage: str) -> tuple[str, str]:
+    subject = getattr(application.subject, "name", "") or ""
+    amount = format(application.refund_amount.normalize(), "f") if application.refund_amount is not None else "—"
+    if stage == "refunded":
+        return (
+            pgettext(_CTX, "Ödəniş qaytarıldı"),
+            pgettext(_CTX, '"{subject}" — 25% ödənişi qaytarıldı: {amount} AZN ({date}).').format(
+                subject=subject,
+                amount=amount,
+                date=application.refunded_on.strftime("%d.%m.%Y") if application.refunded_on else "—",
+            ),
+        )
+    return (
+        pgettext(_CTX, "Ödənişin qaytarılması qərarı verildi"),
+        pgettext(
+            _CTX, '"{subject}" — 25% ödənişinin qaytarılması qərarı: {amount} AZN. Mühasibatlıq icra edəcək.'
+        ).format(subject=subject, amount=amount),
+    )
+
+
+def notify_refund(application, *, stage: str, staff_key: str = "") -> None:
+    """2026-10-19: qaytarılma qərarı / icrası — tələbəyə və (qərarda) Mühasibatlığa; BEST-EFFORT, commit-dən sonra."""
+
+    def _send():
+        try:
+            from apps.notifications.public import create_notification, create_notification_for_users
+
+            title, message = _refund_text(application, stage)
+            metadata = {"retake_application_id": str(application.pk), "refund_state": application.refund_state}
+            create_notification(
+                recipient=application.student,
+                title=title,
+                message=message,
+                link=_section_link(STUDENT_SECTION),
+                notification_type="application",
+                metadata=metadata,
+                organization=application.organization,
+            )
+            recipients = _key_holders(application, staff_key) if staff_key else []
+            if recipients:
+                student = application.student
+                create_notification_for_users(
+                    recipients=recipients,
+                    title=pgettext(_CTX, "Qaytarılacaq ödəniş növbədədir"),
+                    message=pgettext(_CTX, "{student} — {message}").format(
+                        student=(student.get_full_name() or "").strip() or student.username, message=message
+                    ),
+                    link=f"{_section_link(DESK_SECTION)}&rt_tab=refunds",
+                    notification_type="application",
+                    metadata=metadata,
+                    organization=application.organization,
+                )
+        except Exception:  # noqa: BLE001
+            logger.warning("Retake refund notification failed.", exc_info=True)
+
+    transaction.on_commit(_send)
+
+
+__all__ = ["DESK_SECTION", "STUDENT_SECTION", "notify_refund", "notify_staff_queue", "notify_student"]

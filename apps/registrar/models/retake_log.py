@@ -36,6 +36,9 @@ class RetakeEventAction(models.TextChoices):
     RESULT_RECORDED = "result_recorded", pgettext_lazy(_CTX, "Nəticə yazıldı")
     WITHDRAWN = "withdrawn", pgettext_lazy(_CTX, "Geri götürüldü")
     NO_SHOW = "no_show", pgettext_lazy(_CTX, "İmtahana gəlmədi")
+    #: 2026-10-19 (sahib): ödənişin qaytarılması — rəsmi qərar və Mühasibatlığın icra qeydi (``retake_refund``).
+    REFUND_DECIDED = "refund_decided", pgettext_lazy(_CTX, "Ödənişin qaytarılması qərarı verildi")
+    REFUNDED = "refunded", pgettext_lazy(_CTX, "Ödəniş qaytarıldı")
 
 
 class RetakeActorRole(models.TextChoices):
