@@ -1,0 +1,19 @@
+{% load i18n %}
+{% comment %}Mühasibatlıq — «Qaytarıldı» (2026-10-19): qaytarılma tarixi + bank arayışı / ödəniş tapşırığı №; bir dəfə yazılır.{% endcomment %}
+<p class="rt-dialog__subject" data-rt-text="who"></p>
+<p class="ems-field__hint" data-rt-expected-hint data-template="{% trans 'Qaytarılacaq məbləğ: {amount} AZN.' context 'registrar.retake' %}" data-none=""></p>
+<div class="rt-grid">
+    <div class="ems-field">
+        <label class="ems-field__label" for="rtRefundedOn">{% trans "Qaytarılma tarixi" context "registrar.retake" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input ems-input--date" type="date" id="rtRefundedOn" name="refunded_on" required>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="rtRefundRef">{% trans "Bank arayışı / ödəniş tapşırığı №" context "registrar.retake" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="text" id="rtRefundRef" name="reference" maxlength="120" autocomplete="off" required>
+    </div>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="rtRefundNote">{% trans "Qeyd" context "registrar.retake" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "ui.dialog" %}</span></label>
+    <input class="ems-input" type="text" id="rtRefundNote" name="note" maxlength="2000">
+</div>
+<p class="ems-msg ems-msg--warning">{% trans "Qeyd geri alınmır — yalnız pul faktiki qaytarıldıqdan sonra təsdiqləyin." context "registrar.retake" %}</p>

@@ -1051,7 +1051,10 @@ services:
       resources:
         limits:
           cpus: "${PROMETHEUS_CPU_LIMIT:-0.5}"
-          memory: ${PROMETHEUS_MEM_LIMIT:-512M}
+          # 2026-10-19: prod-audit — 7 gündə working set limitin 100%-i (1024M), 38 restart. Prometheus v3
+          # GOMEMLIMIT-i avtomatik limitin 90%-inə qoyur, deməli real ehtiyacdır (21k seriya, 15d retention).
+          # Köhnə PROMETHEUS_MEM_LIMIT .env-də 1024M kimi qalıb; yeni ad ilə defolt 2048M tətbiq olunur.
+          memory: ${PROMETHEUS_MEMORY_LIMIT:-2048M}
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9090/-/healthy >/dev/null"]
       interval: 30s
@@ -1558,6 +1561,13 @@ networks:
   docker-api:
     driver: bridge
     internal: true
+    # 2026-10-19: subnet pin-ləndi — pin-siz qalanda yenidən yaradılarkən Docker ona «növbəti boş» aralığı
+    # verirdi və pin-li `emsarena-network` (172.18.0.0/16) ilə «Pool overlaps» toqquşması ola bilirdi.
+    # Dəyər prod-un CARİ aralığıdır (prod-audit «Docker şəbəkələri», 2026-10-19) — mövcud şəbəkə dəyişmir.
+    ipam:
+      config:
+        - subnet: ${DOCKER_API_NETWORK_SUBNET:-172.20.0.0/16}
+          gateway: ${DOCKER_API_NETWORK_GATEWAY:-172.20.0.1}
 
 volumes:
   postgres_data:

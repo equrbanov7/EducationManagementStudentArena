@@ -15,12 +15,14 @@ Dövr panelin dövrüdür (ay / bütün semestr / tarix aralığı). YALNIZ OXU:
             <div><dt>{% trans "Fərq" context "accounts.accounting" %}</dt><dd>{{ detail.diff_text }}</dd></div>
             <div><dt>{% trans "İcra" context "accounts.accounting" %}</dt><dd>{% if detail.pct is None %}—{% else %}{{ detail.pct }}%{% endif %}</dd></div>
             <div><dt>{% trans "Dərs" context "accounts.accounting" %}</dt><dd>{{ detail.lessons_count }}</dd></div>
+            <div><dt>{% trans "Məbləğ" context "accounts.accounting" %}</dt><dd>{% if detail.pay.amount_text %}{{ detail.pay.amount_text }} <small>AZN</small>{% else %}—{% endif %}</dd></div>
         </dl>
     </div>
 
     <section class="ac-modal__block" aria-labelledby="ac-m-kinds">
         <h3 class="ac-h" id="ac-m-kinds">{% trans "Növlər üzrə" context "accounts.accounting" %}</h3>
         {% include "accounts/profile/sections/accounting/detail/_kinds.html" %}
+        {% include "accounts/profile/sections/accounting/detail/_pay_note.html" %}
     </section>
 
     <section class="ac-modal__block" aria-labelledby="ac-m-months">

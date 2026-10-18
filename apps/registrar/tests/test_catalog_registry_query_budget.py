@@ -150,7 +150,8 @@ class SubjectCatalogDuplicateTest(_CatalogQueryBudgetBase):
         with CaptureQueriesContext(connection) as dup:
             payload_dup = build_subject_catalog(self._request(sb_dup="1"), self.org)
 
-        self.assertEqual(duplicate_subject_names(self.org), {"riyaziyyat": 2, "fizika 1": 2})
+        # 2026-10-19: açar `subject_duplicates.normalized_subject_key`-dir (boşluq/durğu atılır) → «fizika1».
+        self.assertEqual(duplicate_subject_names(self.org), {"riyaziyyat": 2, "fizika1": 2})
         self.assertEqual(payload["duplicate_name_total"], 2)
         self.assertEqual(payload["duplicate_total"], 4)
         self.assertEqual(

@@ -25,7 +25,6 @@ from django.utils.translation import pgettext
 
 from . import retake_fees, retake_files, retake_notify, retake_rules
 from .models import (
-    RETAKE_CONSUMED_STATUSES,
     Enrollment,
     RetakeActorRole,
     RetakeApplication,
@@ -33,6 +32,7 @@ from .models import (
     RetakeKind,
     RetakeStatus,
 )
+from .models.retake import consumed_attempt_q
 from .retake_results import record_result  # noqa: F401 — nəticə yazısı ``retake_results``-dadır (geriyə uyğun ad)
 from .retake_services import clean_upload, duplicate_receipt_map, lock, transition
 
@@ -142,8 +142,8 @@ def _consumed_attempts(application) -> int:
             student_id=application.student_id,
             subject_id=application.subject_id,
             kind=RetakeKind.RETAKE_25,
-            status__in=RETAKE_CONSUMED_STATUSES,
         )
+        .filter(consumed_attempt_q())  # qaytarılma qərarı cəhdi bərpa edibsə sayılmır (2026-10-19)
         .exclude(pk=application.pk)
         .count()
     )

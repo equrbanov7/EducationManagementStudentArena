@@ -1,0 +1,16 @@
+{% load i18n %}
+{% comment %}«Rəsmi bayramları əlavə et (sabit tarixli)» — tədris ili seçimi (stilli seçici).{% endcomment %}
+<div class="acal-hol-form">
+    <div class="ems-field acal-hol-form__full">
+        <label class="ems-field__label" for="acal-hol-seed-year">{% trans "Tədris ili" context "registrar.calendar" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="acal-hol-seed-year" name="academic_year" data-bootstrap-select
+                    aria-describedby="acal-hol-seed-hint">
+                {% for option in hol.seed_year_options %}
+                    <option value="{{ option.value }}"{% if option.value == hol.seed_default %} selected{% endif %}>{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <p class="ems-field__hint" id="acal-hol-seed-hint">{% trans "Sentyabr–dekabr bayramları tədris ilinin birinci ilinə, yanvar–avqust bayramları ikinci ilinə yazılır. Ramazan və Qurban bayramları, hökumətin iş günü köçürmələri əlavə olunmur — onları əl ilə daxil edin." context "registrar.calendar" %}</p>
+    </div>
+</div>

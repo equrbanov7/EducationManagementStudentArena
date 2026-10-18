@@ -203,6 +203,17 @@ def issue_sealed_document(
     return data, seal
 
 
+def payloads_by_code(*, organization, codes, doc_type=None) -> dict:
+    """Təşkilatın ÖZ möhürlərinin ``payload``-ı kod üzrə (tenant RLS altında; publik oxu DEYİL)."""
+    wanted = sorted({str(code) for code in (codes or []) if code})
+    if organization is None or not wanted:
+        return {}
+    rows = DocumentSeal.objects.filter(organization=organization, code__in=wanted)
+    if doc_type:
+        rows = rows.filter(doc_type=doc_type)
+    return {code: dict(payload or {}) for code, payload in rows.values_list("code", "payload")}
+
+
 def revoke_seal(*, seal, actor, reason, request=None) -> DocumentSeal:
     """Möhürü ləğv edir (birdəfəlik). Səlahiyyət/əhatə çağıranda YOXLANILIB."""
     from core.constants import AuditAction
@@ -243,6 +254,7 @@ __all__ = [
     "issue_sealed_document",
     "mark_for",
     "mask_holder_name",
+    "payloads_by_code",
     "revoke_seal",
     "sha256_hex",
     "verification_url",

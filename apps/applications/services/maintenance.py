@@ -15,7 +15,7 @@ from django.utils import timezone
 
 from ..constants import AUTO_CLOSE_WORKING_DAYS, ApplicationStatus, EventKind
 from ..models import Application, ApplicationEvent
-from ..sla import working_days_between
+from ..sla import calendar_for, working_days_between
 from . import notify
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,18 @@ def stale_resolved(*, organization=None, today=None, working_days=AUTO_CLOSE_WOR
     queryset = Application.objects.filter(status=ApplicationStatus.RESOLVED, resolved_at__isnull=False)
     if organization is not None:
         queryset = queryset.filter(organization=organization)
-    return [app for app in queryset if working_days_between(app.resolved_at.date(), today) >= working_days]
+    calendars: dict = {}  # təşkilat başına bir təqvim (il başına bir oxu)
+
+    def calendar(org_id):
+        if org_id not in calendars:
+            calendars[org_id] = calendar_for(org_id)
+        return calendars[org_id]
+
+    return [
+        app
+        for app in queryset
+        if working_days_between(app.resolved_at.date(), today, calendar(app.organization_id)) >= working_days
+    ]
 
 
 def close_stale_resolved(*, organization=None, today=None, working_days=AUTO_CLOSE_WORKING_DAYS) -> int:

@@ -22,8 +22,9 @@ GÜNLƏRİNƏ (bazar ertəsi – cümə, ``TEACHING_WEEKDAYS``) mütənasib böl
 
 Nəticə 0,1 saata yuvarlaqlaşdırılır; yuvarlaq qalığı pəncərənin SON ayına yazılır ki, aylıq planların cəmi
 semestr planına DƏQİQ bərabər olsun. İmtahan sessiyası ayları (pəncərədən sonra) plan almır, amma həmin
-aylarda keçirilmiş dərs (məs. kompensasiya) faktda görünür. Bayram günləri nəzərə alınmır (sahib qərarı
-gözlənilir — təqvim reyestri yoxdur).
+aylarda keçirilmiş dərs (məs. kompensasiya) faktda görünür. BAYRAM və QEYRİ-İŞ GÜNLƏRİ (təşkilatın «Akademik
+təqvim → Bayram və qeyri-iş günləri» reyestri, 2026-10-19) iş günü sayılmır; «iş günü köçürməsi» ilə iş günü
+elan olunmuş şənbə/bazar isə sayılır. Təqvim ``Semester.organization_id``-dən oxunur (keşli, il başına bir oxu).
 
 Sərbəst tarix aralığı («… -dan … -dək») eyni aylıq paylardan iş günlərinə görə kəsilir — bax ``ranges.py``.
 """
@@ -46,6 +47,8 @@ class Semester:
     end: date
     windows: tuple  # ((başlanğıc, son), …) — dərs günləri
     is_current: bool
+    #: Bayram təqvimi üçün (``None`` → yalnız həftə günləri; köhnə/test çağırışları).
+    organization_id: str | None = None
 
     @property
     def label(self) -> str:
@@ -91,6 +94,7 @@ def semesters(periods, *, today: date | None = None) -> list[Semester]:
                 end=max(item.end_date for item in items),
                 windows=tuple(sorted(_teaching_window(item) for item in items)),
                 is_current=any(item.is_current for item in items),
+                organization_id=str(items[0].organization_id) if getattr(items[0], "organization_id", None) else None,
             )
         )
     out.sort(key=lambda item: item.start, reverse=True)
@@ -148,12 +152,23 @@ def default_month(semester: Semester, *, today: date | None = None) -> str:
 
 
 def teaching_day_set(semester: Semester) -> set[date]:
-    """Pəncərənin iş günləri (dövr pəncərələri üst-üstə düşsə də gün bir dəfə sayılır)."""
+    """Pəncərənin iş günləri (dövr pəncərələri üst-üstə düşsə də gün bir dəfə sayılır).
+
+    Bayram / qeyri-iş günü çıxılır, «iş günü köçürməsi» (iş günü elan olunmuş şənbə/bazar) daxil edilir.
+    """
+    calendar = None
+    if semester.organization_id:
+        from apps.organizations.public import work_calendar
+
+        calendar = work_calendar(semester.organization_id)
     days: set[date] = set()
     for start, end in semester.windows:
         cursor = start
         while cursor <= end:
-            if cursor.weekday() in C.TEACHING_WEEKDAYS:
+            if calendar is not None:
+                if calendar.is_working_day(cursor, weekdays=C.TEACHING_WEEKDAYS):
+                    days.add(cursor)
+            elif cursor.weekday() in C.TEACHING_WEEKDAYS:
                 days.add(cursor)
             cursor += timedelta(days=1)
     return days

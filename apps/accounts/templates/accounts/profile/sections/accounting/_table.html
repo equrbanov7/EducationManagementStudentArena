@@ -18,6 +18,7 @@ telefonda `ems-table--stack` — hər sətir kartdır. Kontekst: `table`, `ac`.{
                     {% with col=table.columns.diff %}<th scope="col" class="ems-table__num"{% if col.dir %} aria-sort="{{ col.dir }}"{% endif %}><a class="ems-sort" href="{{ col.url }}" data-section="{{ ac.section }}">{{ col.label }}<span class="ems-sort__arrow" aria-hidden="true">{% if col.dir == "ascending" %}▲{% elif col.dir == "descending" %}▼{% else %}↕{% endif %}</span></a></th>{% endwith %}
                     {% with col=table.columns.pct %}<th scope="col" class="ems-table__num"{% if col.dir %} aria-sort="{{ col.dir }}"{% endif %}><a class="ems-sort" href="{{ col.url }}" data-section="{{ ac.section }}">{{ col.label }}<span class="ems-sort__arrow" aria-hidden="true">{% if col.dir == "ascending" %}▲{% elif col.dir == "descending" %}▼{% else %}↕{% endif %}</span></a></th>{% endwith %}
                     <th scope="col">{% trans "Status" context "accounts.accounting" %}</th>
+                    <th scope="col" class="ems-table__num" title="{% trans 'İlkin hesablama — rəsmi əmək haqqı hesabı deyil.' context 'accounts.accounting' %}">{% trans "Məbləğ (AZN)" context "accounts.accounting" %}</th>
                     <th scope="col" class="ems-table__num" title="{% trans 'Semestr: plan / fakt' context 'accounts.accounting' %}">{% trans "Semestr" context "accounts.accounting" %}</th>
                 </tr>
             </thead>
@@ -36,10 +37,11 @@ telefonda `ems-table--stack` — hər sətir kartdır. Kontekst: `table`, `ac`.{
                     <td class="ems-table__num ac-diff{% if row.diff < 0 %} is-under{% elif row.diff > 0 %} is-over{% endif %}" data-label="{{ table.columns.diff.label }}">{{ row.diff_text }}</td>
                     <td class="ems-table__num" data-label="{{ table.columns.pct.label }}">{% if row.pct is None %}—{% else %}{{ row.pct }}%{% endif %}</td>
                     <td data-label="{% trans 'Status' context 'accounts.accounting' %}">{% if row.status_obj %}{% include "partials/ems_ui/_status_badge.html" with status=row.status_obj nowrap=True %}{% endif %}</td>
+                    <td class="ems-table__num" data-label="{% trans 'Məbləğ (AZN)' context 'accounts.accounting' %}">{% if row.pay_text %}<span class="ac-strong">{{ row.pay_text }}</span>{% else %}<span class="ac-muted ac-pay-missing">{{ row.pay_missing }}</span>{% endif %}</td>
                     <td class="ems-table__num" data-label="{% trans 'Semestr: plan / fakt' context 'accounts.accounting' %}">{{ row.planned_sem_text }} / {{ row.held_sem_text }}</td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="11" class="ac-muted">{% trans "Filtrə uyğun müəllim yoxdur." context "accounts.accounting" %}</td></tr>
+                <tr><td colspan="12" class="ac-muted">{% trans "Filtrə uyğun müəllim yoxdur." context "accounts.accounting" %}</td></tr>
                 {% endfor %}
             </tbody>
             {% if table.results %}
@@ -53,6 +55,7 @@ telefonda `ems-table--stack` — hər sətir kartdır. Kontekst: `table`, `ac`.{
                     <td class="ems-table__num" data-label="{{ table.columns.diff.label }}">{{ ac.summary.diff_text }}</td>
                     <td class="ems-table__num" data-label="{{ table.columns.pct.label }}">{% if ac.summary.pct is None %}—{% else %}{{ ac.summary.pct }}%{% endif %}</td>
                     <td></td>
+                    <td class="ems-table__num" data-label="{% trans 'Məbləğ (AZN)' context 'accounts.accounting' %}">{{ ac.summary.pay_text|default:"—" }}</td>
                     <td></td>
                 </tr>
             </tfoot>

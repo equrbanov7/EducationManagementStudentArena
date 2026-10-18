@@ -80,7 +80,20 @@ Davranış (addım, autosave, dialoq): accounts/js/profile/syllabus_editor.js
     {% include "accounts/profile/sections/syllabus/_reuse_banner.html" with se=se %}
 
     <div class="syl-editor__grid">
-      <nav class="syl-steps" aria-label="{% trans 'Sillabus bölmələri' context 'accounts.syllabus' %}">
+      {% comment %}Telefon (≤ 768px, 2026-10-19): addım siyahısı açılan menyuya yığılır — düymə cari
+      addımı «3/9 · Ad» kimi göstərir, siyahı `.is-open` ilə açılır (`syllabus_editor_phone.js`).
+      Masaüstündə düymə gizlidir, siyahı əvvəlki kimi sol sütundur. Addım düymələrinin
+      `data-syl-step` hook-ları dəyişməyib.{% endcomment %}
+      <nav class="syl-steps" data-syl-steps aria-label="{% trans 'Sillabus bölmələri' context 'accounts.syllabus' %}">
+        <button type="button" class="syl-steps__toggle" data-syl-steps-toggle
+                aria-expanded="false" aria-controls="sylStepList">
+          {% for step in se.nav %}{% if step.id == se.active_id %}
+          <span class="syl-steps__count" data-syl-step-count>{{ forloop.counter }}/{{ se.nav|length }}</span>
+          <span class="syl-steps__current" data-syl-step-current>{{ step.label }}</span>
+          {% endif %}{% endfor %}
+          <i class="fas fa-chevron-down syl-steps__chevron" aria-hidden="true"></i>
+        </button>
+        <div class="syl-steps__list" id="sylStepList">
         {% for step in se.nav %}
         <button type="button" class="syl-step syl-step--{{ step.state }}{% if step.id == se.active_id %} is-on{% endif %}"
                 data-syl-step="{{ step.id }}"
@@ -90,6 +103,7 @@ Davranış (addım, autosave, dialoq): accounts/js/profile/syllabus_editor.js
           {% if step.issue_count %}<span class="syl-step__warn">{% blocktrans context "accounts.syllabus" count counter=step.issue_count %}{{ counter }} xəta{% plural %}{{ counter }} xəta{% endblocktrans %}</span>{% endif %}
         </button>
         {% endfor %}
+        </div>
       </nav>
 
       <div class="syl-panels">
@@ -109,12 +123,16 @@ Davranış (addım, autosave, dialoq): accounts/js/profile/syllabus_editor.js
         <span class="syl-bar__value syl-bar__value--{{ se.completion.tone }}" data-syl-progress-value>{{ se.completion.percent }}%</span>
         <span class="syl-meta" data-syl-progress-note>{{ se.completion.note }}</span>
       </div>
+      {% comment %}Telefonda (≤ 768px) bu zolaq ekranın altına yapışan YIĞCAM paneldir (≤ 56px):
+      ‹ əvvəlki · «3/9» · növbəti › · saxla · göndər. Mətnlər DOM-da qalır (ekran oxuyucu),
+      yalnız vizual gizlənir; «Yekun görünüş» addım menyusundadır.{% endcomment %}
       <div class="syl-bottombar__actions">
-        <button type="button" class="syl-btn syl-btn--secondary" data-syl-nav="prev">{% trans "Əvvəlki" context "accounts.syllabus" %}</button>
-        <button type="button" class="syl-btn syl-btn--secondary" data-syl-nav="next">{% trans "Növbəti" context "accounts.syllabus" %}</button>
-        <button type="button" class="syl-btn syl-btn--secondary" data-syl-save-now {% if se.readonly %}disabled{% endif %}>{% trans "Qaralama saxla" context "accounts.syllabus" %}</button>
-        <button type="button" class="syl-btn syl-btn--secondary" data-syl-step="prev">{% trans "Yekun görünüş" context "accounts.syllabus" %}</button>
-        <button type="button" class="syl-btn syl-btn--primary" data-syl-submit {% if not se.can_submit %}disabled{% endif %}>{% trans "Təsdiqə göndər" context "accounts.syllabus" %}</button>
+        <button type="button" class="syl-btn syl-btn--secondary syl-bottombar__nav" data-syl-nav="prev"><i class="fas fa-chevron-left syl-btn__icon" aria-hidden="true"></i><span class="syl-btn__label">{% trans "Əvvəlki" context "accounts.syllabus" %}</span></button>
+        <span class="syl-bottombar__step" data-syl-step-count aria-hidden="true">{% for step in se.nav %}{% if step.id == se.active_id %}{{ forloop.counter }}/{{ se.nav|length }}{% endif %}{% endfor %}</span>
+        <button type="button" class="syl-btn syl-btn--secondary syl-bottombar__nav" data-syl-nav="next"><span class="syl-btn__label">{% trans "Növbəti" context "accounts.syllabus" %}</span><i class="fas fa-chevron-right syl-btn__icon" aria-hidden="true"></i></button>
+        <button type="button" class="syl-btn syl-btn--secondary syl-bottombar__save" data-syl-save-now {% if se.readonly %}disabled{% endif %}><i class="fas fa-floppy-disk syl-btn__icon" aria-hidden="true"></i><span class="syl-btn__label">{% trans "Qaralama saxla" context "accounts.syllabus" %}</span></button>
+        <button type="button" class="syl-btn syl-btn--secondary syl-bottombar__preview" data-syl-step="prev">{% trans "Yekun görünüş" context "accounts.syllabus" %}</button>
+        <button type="button" class="syl-btn syl-btn--primary syl-bottombar__submit" data-syl-submit {% if not se.can_submit %}disabled{% endif %}><i class="fas fa-paper-plane syl-btn__icon" aria-hidden="true"></i><span class="syl-btn__label">{% trans "Təsdiqə göndər" context "accounts.syllabus" %}</span></button>
       </div>
     </div>
 

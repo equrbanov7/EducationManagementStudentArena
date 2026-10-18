@@ -24,6 +24,20 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
   `section_assets.js` paketi gətirir (skriptlər `readyState`-ə dözümlüdür).
 * Kaskad sırası MƏNALIDIR — qonşu şərhlərdə hansı faylın hansından SONRA
   gəlməli olduğu yazılıb; sıranı dəyişməyin.
+* 2026-10-19 (mobil audit, tələbə «Ana səhifə»si 64 üslub faylı): `profile.css` manifestinin
+  bölmə faylları da (bildirişlər, kimlik səthi, post paketi, kurs / tapşırıq / nəticə kartları,
+  `blogCard.css`) öz bölmələrinə bağlandı — şərtsiz qalan yalnız qabıq + ortaq siniflərdir.
+  `css/pagination.css` burada artıq YOXDUR: `base.html` onu hər səhifəyə verir (iki dəfə idi).
+
+YENİ BÖLMƏNİN ASSET-İ (qısa qayda):
+1. Fayl yalnız o bölmənin markup-ındadırsa: `<link>`-i kaskadda uyğun yerə qoyun və
+   `«if '<açar>' in asset_sections»` ilə şərtləyin (və ya partial-ın ÖZÜNDƏ, panel içində
+   `<link>` saxlayın — `_dashboard.html` kimi; AJAX swap onu da gətirir).
+2. Başqa bölmə də həmin sinifləri işlədirsə: o bölməni ya şərtə `or` ilə yazın, ya da
+   `SECTION_ASSET_BORROWS`-a əlavə edin.
+3. `allowed_sections` YALNIZ qabıqdakı (panel xaricindəki) markup üçündür — modal, AJAX
+   skeleti; açar `test_profile_section_assets.SHELL_SCOPED` ağ siyahısına əsaslandırma ilə düşür.
+4. Heç vaxt şərtsiz link əlavə etməyin — o, hər rolun hər kabinet səhifəsinə gedir.
 {% endcomment %}
 {% load static %}
     {% comment %}
@@ -41,30 +55,54 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
         Admin/müəllim bölmələrinin faylları (adlar öz bölməsinə bağlıdır, selektor auditi
         2026-10-07) yalnız həmin bölmə render olunanda gəlir.
     {% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/base.css' %}?v=20261017-h4">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/base.css' %}?v=20261019-lazy">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sidebar_groups.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sidebar_filter.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sidebar_rail.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sidebar_icons.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sidebar.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/layout.css' %}?v=20261019-mob">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/common.css' %}?v=20261019-mob">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/common.css' %}?v=20261019-lazy">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/profile_info.css' %}?v=20260912-1">
+    {% comment %}Kimlik səthi (`.pfx*`) yalnız «Profil məlumatları»ndadır — fallback (naməlum bölmə → profil) `asset_sections_for`-dadır.{% endcomment %}
+    {% if 'profile-info' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/profile_identity.css' %}?v=20260907-redesign">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/profile_identity_aside.css' %}?v=20260907-redesign">
+    {% endif %}
+    {% comment %}`.post-item` / `.posts-grid` yalnız post təsdiqindədir; `.profile-group-*` heç bir kabinet şablonunda yoxdur (2026-10-19 selektor auditi).{% endcomment %}
+    {% if 'pending-post-approvals' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/list_cards.css' %}?v=20260907-createbtn">
+    {% endif %}
+    {% comment %}Post paketi + ortaq `.modal-overlay` modalı (post / kateqoriya bölmələri, qabıqdakı kurs və imtahan yaratma modalları — açan düymələr yalnız «Kurslarım» / «İmtahanlarım»-dadır). Telefon `.modal-content` boşluğu (bütün Bootstrap modalları) `profile/common.css`-ə köçürülüb.{% endcomment %}
+    {% if 'posts' in asset_sections or 'create-post' in asset_sections or 'pending-post-approvals' in asset_sections or 'category-management' in asset_sections or 'my-courses' in asset_sections or 'my-exams' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/posts/_part1.css' %}?v=20260912-1">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/posts/_part2.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/posts/_part2.css' %}?v=20261019-lazy">
+    {% endif %}
     {% comment %}`.tx-toast` `my_exams_dashboard.js`-dən gəlir — o da yalnız «İmtahanlarım»-da yüklənir.{% endcomment %}
     {% if 'my-exams' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_exams.css' %}?v=20261019-mob">
     {% endif %}
+    {% comment %}QABIQ (`allowed_sections`): `.mc-card` / `.mc-skeleton` AJAX skeleti `profile.html`-dədir və fraqment gəlməmiş göstərilir.{% endcomment %}
+    {% if 'my-courses' in allowed_sections or 'assigned-courses' in allowed_sections or 'courses' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_courses.css' %}?v=20260928-1">
+    {% endif %}
+    {% if 'courses' in asset_sections or 'my-courses' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/courses.css' %}?v=20261018-pkga">
+    {% endif %}
+    {% if 'assigned-exams' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/assigned_exams.css' %}?v=20261018-pkga">
+    {% endif %}
+    {% if 'assigned-courses' in asset_sections or 'courses' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/assigned_courses.css' %}?v=20261018-pkga">
+    {% endif %}
+    {% comment %}`.status-badge` əsası superadmin istifadəçi siyahısında da işlənir (`account_management.py`).{% endcomment %}
+    {% if 'my-results' in asset_sections or 'superadmin-users' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_results.css' %}?v=20261019-mob">
+    {% endif %}
+    {% comment %}`.rt-result-line` (25% zənciri) jurnalın tələbə görünüşündə də var.{% endcomment %}
+    {% if 'my-results' in asset_sections or 'my-journal' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_results_academic.css' %}?v=20261018-retake">
+    {% endif %}
     {% if 'pending-post-approvals' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/pending_post_approvals.css' %}?v=20260912-1">
     {% endif %}
@@ -89,15 +127,24 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% if 'student-organization-management' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/student_org_management.css' %}">
     {% endif %}
+    {% comment %}`.nfx*` yalnız «Bildirişlər» bölməsindədir.{% endcomment %}
+    {% if 'notifications' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/notifications.css' %}?v=20261019-mob2">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/notifications_rows.css' %}?v=20261019-mob">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/notifications_modal.css' %}?v=20260930-resp">
+    {% endif %}
     {% if 'publish-notification' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/publish_notification.css' %}?v=20260908-scopes">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/publish_notification_preview.css' %}?v=20260908-scopes">
     {% endif %}
+    {% comment %}`.profile-form-actions` «Şifrəni dəyiş» formasında da işlənir.{% endcomment %}
+    {% if 'edit-profile' in asset_sections or 'change-password' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile.css' %}">
+    {% endif %}
+    {% comment %}`.settings-note` — «Profili redaktə et» və superadmin təşkilat müfəttişi.{% endcomment %}
+    {% if 'edit-profile' in asset_sections or 'superadmin-org-inspector' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/shortcut_sections.css' %}">
+    {% endif %}
     {% if 'superadmin-contact-messages' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/contact_messages/_part1.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/contact_messages/_part2.css' %}">
@@ -109,8 +156,10 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% if 'review-results' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/review_results.css' %}?v=20261017-rr2">
     {% endif %}
+    {% comment %}`.blog-card` + qlobal `.card-body` / `.card-title` — yalnız post və kateqoriya bölmələri.{% endcomment %}
+    {% if 'posts' in asset_sections or 'category-management' in asset_sections or 'create-category' in asset_sections %}
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
-    <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
+    {% endif %}
     {% if 'statistics' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/statistics.css' %}?v=20260613-1">
     {% endif %}
@@ -221,9 +270,9 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_drawer.css' %}?v=20260830-3">
     {% endif %}
     {% if 'syllabus-list' in asset_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor.css' %}?v=20260830-3">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor.css' %}?v=20261019-phone">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_panels.css' %}?v=20261015-lo">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_aside.css' %}?v=20261019-mob">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_aside.css' %}?v=20261019-phone">
     {% comment %}Köçürülmüş məzmunun səthi (kataloqdankənar metod çipləri, plandan
     artıq həftə sətirləri, strukturdan artıq sərbəst iş yuvaları) — kaskadda
     panellərdən SONRA gəlir, çünki onların tonunu üstələyir.{% endcomment %}

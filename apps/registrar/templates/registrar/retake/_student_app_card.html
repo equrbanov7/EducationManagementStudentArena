@@ -14,6 +14,7 @@ GÖSTƏRİLMİR (yalnız Mühasibatlıqda); burada yalnız «qəbz yüklənib» 
         </div>
         {% include "registrar/retake/_badge.html" with status=a.app.status %}
     </header>
+    {% if a.refund_state %}{% include "registrar/retake/_refund_line.html" %}{% endif %}
     {% if a.next_step %}<p class="rt-note rt-note--info"><i class="fas fa-circle-info" aria-hidden="true"></i> <span>{{ a.next_step }}</span></p>{% endif %}
     {% if a.result_text %}
     <p class="rt-result{% if a.app.result_passed %} is-passed{% else %} is-failed{% endif %}">

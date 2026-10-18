@@ -237,3 +237,130 @@
     .syl-editor__grid > .syl-aside { order: 2; }
     .syl-bottombar__progress { min-width: 0; flex: 1 1 100%; }
 }
+
+/* Masaüstü: telefon panelinin əlavələri gizlidir — düzüm əvvəlki kimidir. */
+.syl-bottombar__step,
+.syl-btn__icon {
+    display: none;
+}
+
+/* ── Telefon: YIĞCAM yapışqan alt panel (≤ 768px, 2026-10-19) ───────────────
+   Əvvəl: 277px-lik çox sətirli zolaq formanın arasında statik dururdu (səhifə səviyyəli
+   `sticky` telefonda ölü idi). İndi tək sətir, ≤ 56px (+ iPhone ev zolağı üçün
+   `safe-area-inset-bottom`): ‹ əvvəlki · «3/9» · növbəti › … saxla · göndər. Zolaq redaktorun
+   SONUNA düşür (xülasədən sonra) və bütün redaktor boyu ekranın altına yapışır; tamamlanma
+   faizi panelin üst kənarında 3px-lik xətdir. Düymə mətnləri DOM-dadır (ekran oxuyucu),
+   yalnız vizual gizlənir; «Yekun görünüş» addım menyusunda 8-ci addımdır. JS hook-ları
+   (`data-syl-nav`, `data-syl-save-now`, `data-syl-submit`, `data-syl-progress-*`) dəyişməyib. */
+@media (max-width: 768px) {
+    .syl-editor > .syl-bottombar {
+        order: 3;
+        position: sticky;
+        bottom: 0;
+        z-index: 40;
+        flex-wrap: nowrap;
+        gap: 0;
+        margin: 14px 0 0;
+        padding: 5px 8px calc(5px + env(safe-area-inset-bottom, 0px));
+        border-radius: 14px 14px 0 0;
+        box-shadow: 0 -6px 18px rgba(15, 23, 42, 0.1);
+    }
+
+    .syl-bottombar__progress {
+        position: absolute;
+        top: -1px;
+        right: 14px;
+        left: 14px;
+        flex: none;
+        min-width: 0;
+        height: 3px;
+        gap: 0;
+    }
+
+    .syl-bottombar__progress .syl-bar {
+        width: 100%;
+        max-width: none;
+        height: 3px;
+    }
+
+    .syl-bottombar__progress .syl-bar__value,
+    .syl-bottombar__progress .syl-meta,
+    .syl-bottombar__actions .syl-btn__label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .syl-bottombar__actions {
+        flex: 1 1 auto;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+    }
+
+    .syl-bottombar__actions .syl-btn {
+        flex: none;
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0 12px;
+    }
+
+    .syl-bottombar__actions .syl-btn__icon {
+        display: inline-block;
+    }
+
+    .syl-bottombar__step {
+        display: block;
+        min-width: 3.2em;
+        color: var(--ems-neutral-800);
+        font-size: 0.85rem;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+        text-align: center;
+    }
+
+    .syl-bottombar__save {
+        margin-left: auto;
+    }
+
+    .syl-bottombar__actions .syl-bottombar__preview {
+        display: none;
+    }
+}
+
+/* Telefonda səhifə səviyyəli `sticky` yalnız redaktor AÇIQ ikən işə salınır (bax `main.css`
+   «TELEFON QƏSDƏN XARİCDƏDİR» qeydi və `profile/layout.css`): body və `.profile-main`
+   sürüşmə konteyneri olmasın deyə `clip`. Başlıq səhifə ilə sürüşür (masaüstündəki kimi),
+   digər bölmələrin yapışqan qaydaları toxunulmur — selektor aktiv paneldəki redaktora bağlıdır.
+   Köhnə brauzer (`clip` / `:has` yoxdur): panel əvvəlki kimi statik qalır. */
+@supports (overflow: clip) {
+    @media (max-width: 768px) {
+        body:has(.profile-section-panel.is-active .syl-editor) {
+            overflow-x: clip;
+            --ems-header-h: 0px;
+        }
+
+        body:has(.profile-section-panel.is-active .syl-editor) > .blog-header {
+            position: relative;
+        }
+
+        .profile-main:has(.profile-section-panel.is-active .syl-editor) {
+            overflow: visible;
+            overflow-x: clip;
+        }
+
+        html.ems-modal-open body:has(.profile-section-panel.is-active .syl-editor),
+        html.ems-scroll-locked body:has(.profile-section-panel.is-active .syl-editor),
+        body.modal-open:has(.profile-section-panel.is-active .syl-editor) {
+            overflow-x: clip !important;
+            overflow-y: visible !important;
+        }
+    }
+}

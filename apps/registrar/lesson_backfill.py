@@ -8,7 +8,8 @@ yarat və hamıya i/e qoy; qiymətləri sonra özüm dəyişəcəyəm». Bu modu
 * DƏRSLƏR: [from, to] (bu gündən sonra yox; dövr sərhədi daxilində) hər gün üçün o gün keçirilən slotlar —
   ``dashboard_data.lessons_on`` (həftə günü + üst/alt paritet ``schedule.week_parity``: dövrün ilk həftəsi
   = üst/odd + dövr sərhədi; jurnalın «Aktivləşdir» qaydası ilə EYNİ). Bu gün üçün yalnız başlamış slotlar.
-  Bayram təqvimi sistemdə YOXDUR (bax ``lessons_log_unrecorded``) — heç bir gün çıxılmır.
+  BAYRAM / QEYRİ-İŞ GÜNÜ («Akademik təqvim», 2026-10-19) dərs günü deyil — həmin gün dərs YARADILMIR
+  (sətir ``skipped:holiday``); həmin gün artıq yazılmış dərs varsa (kompensasiya) tutuşdurulur və işarələnir.
 * İDEMPOTENTLİK: açılış + tarix üzrə mövcud dərs əvvəl eyni başlama saatı ilə, sonra eyni NÖV ilə
   (fərqli saatda — məs. köhnə səhv slotdan açılmış dərs) tutuşdurulur; tutuşan dərs YENİDƏN YARADILMIR.
 * YARATMA: ``gradebook_lessons.create_lesson(slot=…, allow_past=True)`` — saat/növ/otaq slotdan, müəllim
@@ -255,9 +256,11 @@ def plan_lessons(
     *, organization, period, slots, actor, date_from, date_to, result: Result, include_late_joiners: bool = False
 ) -> None:
     """Hər gün × o gün keçirilən slot → mövcud dərsə bağla və ya yarat; sonra açılış üzrə «iə»."""
+    from apps.organizations.public import work_calendar
     from apps.registrar import gradebook, journal_topics
 
     now = timezone.localtime()
+    off_days = work_calendar(organization).non_working_between(date_from, date_to)
     by_offering = defaultdict(list)
     for slot in slots:
         by_offering[slot.offering_id].append(slot)
@@ -294,6 +297,8 @@ def plan_lessons(
                     rows.append(LessonRow(offering, day, slot, action, lesson=lesson))
                 elif locked:
                     rows.append(LessonRow(offering, day, slot, SKIPPED, "journal_locked"))
+                elif day in off_days:
+                    rows.append(LessonRow(offering, day, slot, SKIPPED, "holiday"))
                 else:
                     lesson, reason = _create(offering, day, slot, actor, topic_rows, covered)
                     action = CREATE if lesson is not None else SKIPPED

@@ -47,9 +47,9 @@ from django.utils.translation import pgettext
 from core.permissions import has_permission
 
 from . import services
+from .cohort_plans import COHORT, fallback_item, fallback_messages, period_cohort_warnings, plan_index_for
 from .curriculum_registry import programs_without_approved_plan
-from .models import CourseOffering, Curriculum, CurriculumSubject, Program, StudentAcademicRecord
-from .models.curriculum_meta import PlanStatus
+from .models import CourseOffering, CurriculumSubject, Program, StudentAcademicRecord
 from .read_scope import offering_scope_q, program_scope_q, semester_read_scope, unit_scope_q
 from .semester_period_windows import period_edit_prefill
 from .semester_readiness import ISSUES, approved_syllabus_offering_ids, offering_issues, readiness_by_chair
@@ -116,14 +116,8 @@ def groups_for_semester(organization, program, *, semester_number, academic_year
 
 
 def approved_plan_for(organization, program):
-    """İxtisasın ƏN SON təsdiqlənmiş planı (yoxdursa None → bloklayıcı)."""
-    return (
-        Curriculum.objects.filter(
-            organization=organization, program=program, status=PlanStatus.APPROVED, is_active=True
-        )
-        .order_by("-admission_year", "-version")
-        .first()
-    )
+    """İxtisasın ƏN SON təsdiqlənmiş planı (yoxdursa None → bloklayıcı); qrupun planı — ``cohort_plans``."""
+    return plan_index_for(organization, program).newest
 
 
 @transaction.atomic
@@ -131,17 +125,20 @@ def generate_offerings(*, organization, period, programs, semester_number, actor
     """Təsdiqlənmiş plandan açılış yaradır — İDEMPOTENT, heç nə silmir.
 
     Qaytarır: ``{"created", "existing", "skipped_no_plan", "skipped_no_group",
-    "skipped_electives", "enrolled", "blocked_programs", "offering_ids"}``.
+    "skipped_electives", "enrolled", "blocked_programs", "offering_ids", "cohort_fallbacks", "warnings"}``.
     ``skipped_no_group`` — ixtisasda bu semestri oxuyan (kursu uyğun) qrup yoxdur.
+    2026-10-19: hər qrup ÖZ qəbul ilinin planından açılır (``cohort_plans``); kohort planı yoxdursa ən son
+    plan + ``cohort_fallbacks`` / ``warnings``. Köhnə qayda ilə yaranmış açılışlara toxunulmur.
     """
     counters = {"created": 0, "existing": 0, "skipped_no_plan": 0, "skipped_no_group": 0, "skipped_electives": 0}
     blocked: list = []
     offering_ids: list = []
     to_enroll: list = []
+    fallbacks: list = []
 
     for program in programs:
-        plan = approved_plan_for(organization, program)
-        if plan is None:
+        index = plan_index_for(organization, program)
+        if not index:
             counters["skipped_no_plan"] += 1
             blocked.append({"id": str(program.id), "label": program.display_label})
             continue
@@ -153,35 +150,51 @@ def generate_offerings(*, organization, period, programs, semester_number, actor
             counters["skipped_no_group"] += 1
             continue
 
-        plan_rows = CurriculumSubject.objects.filter(curriculum=plan, semester_number=semester_number)
-        counters["skipped_electives"] += plan_rows.filter(is_elective=True).count()
-        rows = list(plan_rows.filter(is_elective=False).select_related("subject"))
-        for row in rows:
-            lesson_hours = row.lecture_hours + row.seminar_hours + row.lab_hours
-            for group in groups:
-                offering, created = CourseOffering.objects.get_or_create(
-                    organization=organization,
-                    subject=row.subject,
-                    period=period,
-                    group=group,
-                    # ⚠️ `instructor` DEFAULTS-da YOXDUR: mövcud açılışın müəllimi
-                    # heç vaxt sıfırlanmır (idempotentlik = mövcud data toxunulmazlığı).
-                    defaults={"lesson_hours": lesson_hours},
-                )
-                offering_ids.append(str(offering.pk))
-                to_enroll.append((offering, created))
-                if created:
-                    counters["created"] += 1
-                else:
-                    counters["existing"] += 1
-                    # Saat plandan gəlir: sətir dəyişibsə açılışın saatı yenilənir,
-                    # amma YALNIZ o hələ 0-dırsa və ya plandan fərqlidirsə.
-                    if lesson_hours and offering.lesson_hours != lesson_hours:
-                        offering.lesson_hours = lesson_hours
-                        offering.save(update_fields=["lesson_hours", "updated_at"])
+        by_plan: dict = {}
+        for group in groups:
+            plan, status, year = index.for_group(group)
+            by_plan.setdefault(plan.pk, (plan, []))[1].append(group)
+            if status != COHORT:
+                fallbacks.append(fallback_item(program, group, year, plan, status))
+        for plan, plan_groups in by_plan.values():
+            _open_plan_rows(organization, period, plan, plan_groups, semester_number, counters, offering_ids, to_enroll)
 
     counters["enrolled"] = _enroll_new_offerings(to_enroll, actor=actor)
-    return {**counters, "blocked_programs": blocked, "offering_ids": offering_ids}
+    return {
+        **counters,
+        "blocked_programs": blocked,
+        "offering_ids": offering_ids,
+        "cohort_fallbacks": fallbacks,
+        "warnings": fallback_messages(fallbacks),
+    }
+
+
+def _open_plan_rows(organization, period, plan, groups, semester_number, counters, offering_ids, to_enroll):
+    """Bir planın semestr sətirləri × həmin planı oxuyan qruplar → ``get_or_create`` (idempotent)."""
+    plan_rows = CurriculumSubject.objects.filter(curriculum=plan, semester_number=semester_number)
+    counters["skipped_electives"] += plan_rows.filter(is_elective=True).count()
+    for row in plan_rows.filter(is_elective=False).select_related("subject"):
+        lesson_hours = row.lecture_hours + row.seminar_hours + row.lab_hours
+        for group in groups:
+            offering, created = CourseOffering.objects.get_or_create(
+                organization=organization,
+                subject=row.subject,
+                period=period,
+                group=group,
+                # ⚠️ `instructor` DEFAULTS-da YOXDUR: mövcud açılışın müəllimi
+                # heç vaxt sıfırlanmır (idempotentlik = mövcud data toxunulmazlığı).
+                defaults={"lesson_hours": lesson_hours},
+            )
+            offering_ids.append(str(offering.pk))
+            to_enroll.append((offering, created))
+            if created:
+                counters["created"] += 1
+                continue
+            counters["existing"] += 1
+            # Saat plandan gəlir: sətir dəyişibsə açılışın saatı yenilənir (plandan fərqlidirsə).
+            if lesson_hours and offering.lesson_hours != lesson_hours:
+                offering.lesson_hours = lesson_hours
+                offering.save(update_fields=["lesson_hours", "updated_at"])
 
 
 def _enroll_new_offerings(pairs, *, actor) -> int:
@@ -221,7 +234,8 @@ def semester_howto(steps: list) -> list:
             "text": pgettext(
                 _CTX,
                 "Yuxarıdakı süzgəcdən semestri seçin. «Plandan açılış yarat» həmin semestri oxuyan (kursu uyğun) "
-                "qruplar üçün təsdiqlənmiş tədris planının məcburi fənlərindən açılış yaradır və qrupun aktiv "
+                "hər qrup üçün qrupun ÖZ qəbul ilinin təsdiqlənmiş tədris planının (yoxdursa ən son planın) məcburi "
+                "fənlərindən açılış yaradır və qrupun aktiv "
                 "tələbələrini dərhal qeydiyyata alır; seçmə fənlər qrupun seçimi ilə açılır. Mövcud sətir "
                 "təkrarlanmır, heç nə silinmir. «Plan yoxdur» ixtisaslar üçün sətir yaranmır — əvvəlcə «Tədris "
                 "planı» bölməsində planı təsdiqləyin.",
@@ -491,6 +505,7 @@ def build_semester_opening(request, organization) -> dict:
             },
             "stats": stats,
             "readiness": readiness_by_chair(organization, period, issues_map=issues_map),
+            "cohort_warnings": period_cohort_warnings(organization, period, scope_q=scope_q),
             "chair_rows": offering_counts_by_chair(organization, period, scope_q=scope_q),
             "rows": rows,
             "page_obj": page_obj,

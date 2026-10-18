@@ -1,0 +1,173 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   academic_holidays.css — «Akademik təqvim» → «Bayram və qeyri-iş günləri» (2026-10-19)
+
+   Yalnız `--ems-*` tokenləri. Növ (bayram / qeyri-iş / iş günü köçürməsi) həm rəng, həm mətn çipi ilə.
+   375 px-də sətir iki sıraya düşür (tarix + ad yuxarıda, çip + əməllər aşağıda).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.acal-hol {
+    padding: var(--ems-sp-4, 12px) var(--ems-sp-5, 16px);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl, 14px);
+    background: var(--ems-bg);
+}
+
+.acal-hol__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-3, 8px);
+}
+
+.acal-hol__head .acal-group__year {
+    flex: 1 1 260px;
+    margin: 0;
+}
+
+.acal-hol__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2, 6px);
+}
+
+.acal-hol__hint {
+    margin: var(--ems-sp-3, 8px) 0 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-fg-muted);
+}
+
+.acal-hol__hint--manage {
+    padding: var(--ems-sp-3, 8px) var(--ems-sp-4, 12px);
+    border-radius: var(--ems-r-lg, 10px);
+    background: var(--ems-bg-subtle);
+}
+
+.acal-hol__list {
+    display: grid;
+    gap: 6px;
+    margin: var(--ems-sp-4, 12px) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.acal-hol__item {
+    display: grid;
+    grid-template-columns: 128px minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: var(--ems-sp-3, 8px);
+    padding: var(--ems-sp-3, 8px) var(--ems-sp-4, 12px);
+    border-radius: var(--ems-r-lg, 10px);
+    background: var(--ems-bg-subtle);
+}
+
+.acal-hol__item.is-past {
+    opacity: 0.72;
+}
+
+.acal-hol__date {
+    display: flex;
+    flex-direction: column;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-fg);
+}
+
+.acal-hol__weekday {
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-fg-muted);
+}
+
+.acal-hol__weekday.is-weekend {
+    color: var(--ems-danger, #dc2626);
+}
+
+.acal-hol__body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.acal-hol__name {
+    font-weight: 600;
+    color: var(--ems-fg);
+    overflow-wrap: anywhere;
+}
+
+.acal-hol__note {
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-fg-muted);
+    overflow-wrap: anywhere;
+}
+
+.acal-hol__kind {
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.acal-hol__kind--holiday {
+    background: var(--ems-danger-100, #fee2e2);
+    color: var(--ems-danger-700, #b91c1c);
+}
+
+.acal-hol__kind--day_off {
+    background: var(--ems-warning-100, #fef3c7);
+    color: var(--ems-warning-800, #92400e);
+}
+
+.acal-hol__kind--workday {
+    background: var(--ems-success-100, #dcfce7);
+    color: var(--ems-success-700, #15803d);
+}
+
+.acal-hol__row-actions {
+    display: inline-flex;
+    gap: 4px;
+}
+
+/* Dialoq sahələri — iki sütun, dar ekranda bir sütun. */
+.acal-hol-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ems-sp-4, 12px);
+}
+
+.acal-hol-form__full {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+    .acal-hol {
+        padding: var(--ems-sp-3, 8px) var(--ems-sp-3, 10px);
+    }
+
+    .acal-hol__item {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .acal-hol__body {
+        grid-column: 1 / -1;
+        order: -1;
+    }
+
+    .acal-hol__actions,
+    .acal-hol__actions .ems-btn {
+        width: 100%;
+    }
+
+    .acal-hol__actions .ems-btn {
+        justify-content: center;
+        min-height: 40px;
+    }
+
+    .acal-hol__row-actions .ems-btn {
+        min-width: 40px;
+        min-height: 40px;
+    }
+
+    .acal-hol-form {
+        grid-template-columns: 1fr;
+    }
+}

@@ -3,6 +3,7 @@
 * növlər üzrə: seçilmiş dövrün planı ↔ faktı (mühazirə / seminar / laboratoriya), fərq, icra, status;
 * aylıq cədvəl: ay / bütün semestr rejimində semestrin bütün ayları (seçilmiş ay işarələnir); aralıq rejimində
   YALNIZ aralığın ayları — qismən düşən ayın planı iş günlərinə görə kəsilir (``ranges.py``), faktı aralığın dərsləri;
+* ödəniş (2026-10-19): növlər üzrə dərəcə və məbləğ, cəm və saathesabı etiketi (``rates_view.pay_detail``; İLKİN hesab);
 * fənn × qrup bölgüsü: seçilmiş dövrün keçirilmiş saatı növlər üzrə — 1 sorğu;
 * keçirilmiş dərslərin siyahısı: tarix, qrup, fənn, növ, saat — səhifələnir (say + dilim, 2 sorğu).
 
@@ -24,6 +25,7 @@ from .filters import MONTH_ALL
 from .formatting import fmt_hours, kind_cells, staff_short
 from .periods import month_bounds, month_label, months
 from .ranges import fmt_date, month_parts, month_slice, range_label, range_months
+from .rates_view import pay_detail
 from .rows import plan_status
 
 
@@ -95,7 +97,8 @@ def _range_month_rows(resolved, row: dict) -> list[dict]:
 
 
 def kind_rows(row: dict) -> list[dict]:
-    """Növlər üzrə dövrün planı ↔ faktı + «Cəmi» sətri."""
+    """Növlər üzrə dövrün planı ↔ faktı + «Cəmi» sətri; 2026-10-19: dərəcə və məbləğ (``rates_view.pay_detail``)."""
+    pay = {cell["key"]: cell for cell in pay_detail(row)["kinds"]} if row.get("pay") else {}
     out = []
     for key, label in C.KINDS:
         planned = float(row["planned_kinds"].get(key, 0) or 0)
@@ -108,6 +111,9 @@ def kind_rows(row: dict) -> list[dict]:
                 "diff_text": fmt_hours(round(held - planned, 1), signed=True),
                 "pct": int(round(held * 100 / planned)) if planned > 0 else None,
                 "status_obj": _status(planned, held),
+                "rate_text": pay.get(key, {}).get("rate_text", ""),
+                "amount_text": pay.get(key, {}).get("amount_text", ""),
+                "rate_missing": pay.get(key, {}).get("missing", False),
             }
         )
     return out
@@ -196,6 +202,7 @@ def detail_core(resolved, row: dict) -> dict:
         "months": _range_month_rows(resolved, row) if filters.is_range else _semester_months(row, filters),
         "month_count": len(months(resolved.semester)),
         "breakdown": breakdown,
+        "pay": pay_detail(row) if row.get("pay") else None,
     }
 
 

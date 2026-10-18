@@ -45,9 +45,12 @@
 @keyframes ai-pulse-sm { 0% { opacity: 1; box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45); } 100% { opacity: 0; box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); } }
 @keyframes ai-nod { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } }
 
-/* Yapışqan alt paneli olan səhifələrdə (workbench «Göndər») düymə yuxarı qalxır. */
-body:has(.sticky-footer) .ai-bot-btn { bottom: 86px; }
-body:has(.sticky-footer) .ai-bot-tooltip { bottom: 94px; }
+/* Yapışqan alt paneli olan səhifələrdə (workbench «Göndər», sillabus redaktorunun alt paneli —
+   2026-10-19: düymə «Təsdiqə göndər»-in üstünə düşürdü) düymə yuxarı qalxır. */
+body:has(.sticky-footer) .ai-bot-btn,
+body:has(.profile-section-panel.is-active .syl-bottombar) .ai-bot-btn { bottom: 86px; }
+body:has(.sticky-footer) .ai-bot-tooltip,
+body:has(.profile-section-panel.is-active .syl-bottombar) .ai-bot-tooltip { bottom: 94px; }
 
 /* ── Tooltip ─────────────────────────────────────────────────────────────── */
 .ai-bot-tooltip {
@@ -206,7 +209,8 @@ body:has(.blog-header__user-menu--open) .ai-fab-restore {
     .ai-bot-btn__icon { width: 30px; height: 30px; }
     .ai-bot-btn--tucked { opacity: 0; pointer-events: none; transform: translateX(calc(100% + 16px)); }
     .ai-bot-tooltip { right: calc(max(12px, env(safe-area-inset-right)) + 58px); bottom: max(18px, env(safe-area-inset-bottom)); max-width: min(240px, calc(100vw - 96px)); }
-    body:has(.sticky-footer) .ai-bot-btn { bottom: calc(76px + env(safe-area-inset-bottom)); }
+    body:has(.sticky-footer) .ai-bot-btn,
+    body:has(.profile-section-panel.is-active .syl-bottombar) .ai-bot-btn { bottom: calc(76px + env(safe-area-inset-bottom)); }
     .ai-chat-panel { height: min(620px, calc(100vh - 48px)); height: min(620px, calc(100dvh - 48px)); }
     .ai-chat-input { font-size: 16px; }
 }
@@ -260,7 +264,8 @@ body:has(.blog-header__user-menu--open) .ai-fab-restore {
 .ai-fab-restore:focus-visible { outline: 3px solid var(--ems-primary-300); outline-offset: 2px; }
 .ai-fab-restore__icon { font-size: 13px; }
 .ai-fab-restore__text { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; }
-body:has(.sticky-footer) .ai-fab-restore { bottom: 86px; }
+body:has(.sticky-footer) .ai-fab-restore,
+body:has(.profile-section-panel.is-active .syl-bottombar) .ai-fab-restore { bottom: 86px; }
 
 /* İstifadəçi menyusundakı açar (`[data-ai-fab-toggle]`, templates/partials/_navbar.html). */
 .ai-fab-menu-item__switch {

@@ -52,10 +52,11 @@ başqa müraciətdə də varsa xəbərdarlıq nişanı + o müraciətin izinə l
     </p>
     {% endif %}
     {% if a.closure_document_url or a.app.closure_order_number %}<p class="rt-receipt"><i class="fas fa-gavel" aria-hidden="true"></i> {% trans "Bağlanış qərarı" context "registrar.retake" %}{% if a.app.closure_order_number %}: № {{ a.app.closure_order_number }}{% if a.app.closure_order_date %} · {{ a.app.closure_order_date|date:"d.m.Y" }}{% endif %}{% endif %}{% if a.closure_document_url %} · <a class="rt-link" href="{{ a.closure_document_url }}" target="_blank" rel="noopener" data-no-route-loading>{% trans "Sənəd" context "registrar.retake" %}</a>{% endif %}</p>{% endif %}
+    {% if a.refund_state %}{% include "registrar/retake/_refund_line.html" %}{% endif %}
     {% if a.document_url %}<p class="rt-receipt"><i class="fas fa-file-signature" aria-hidden="true"></i> <a class="rt-link" href="{{ a.document_url }}" target="_blank" rel="noopener" data-no-route-loading>{% trans "Qərar sənədi" context "registrar.retake" %}</a></p>{% endif %}
     {% if app.student_note %}<p class="rt-note"><i class="far fa-comment" aria-hidden="true"></i> <span>{{ app.student_note }}</span></p>{% endif %}
 
-    {% if a.can_verify or a.can_admit or a.can_decide_subgroup or a.can_place or a.can_record or a.can_close %}
+    {% if a.can_verify or a.can_admit or a.can_decide_subgroup or a.can_place or a.can_record or a.can_close or a.can_refund_decide %}
     <div class="rt-actions" data-rt-subject="{{ app.subject.name }}" data-rt-student="{{ student.get_full_name|default:student.username }}">
         {% if a.can_verify %}
         <button type="button" class="ems-btn ems-btn--success ems-btn--sm" data-ems-overlay-open="rtVerifyDialog" data-rt-open data-rt-url="{% url 'retake:payment' a.id %}" data-rt-action="verify"><i class="fas fa-check" aria-hidden="true"></i> {% trans "Ödənişi təsdiqlə" context "registrar.retake" %}</button>
@@ -80,6 +81,10 @@ başqa müraciətdə də varsa xəbərdarlıq nişanı + o müraciətin izinə l
         {% endif %}
         {% if a.can_place %}
         <button type="button" class="ems-btn ems-btn--primary ems-btn--sm" data-ems-overlay-open="rtSubgroupDialog" data-rt-open data-rt-url="{% url 'retake:decision' a.id %}" data-rt-action="place" data-rt-offerings="{% url 'retake:subgroup_offerings' a.id %}"><i class="fas fa-user-plus" aria-hidden="true"></i> {% trans "Alt qrupa yerləşdir" context "registrar.retake" %}</button>
+        {% endif %}
+        {% if a.can_refund_decide %}
+        {% comment %}2026-10-19 (sahib): ödənişdən sonra bağlanmış müraciətə qaytarılma — yalnız RƏSMİ QƏRARLA (Tədris şöbəsi / RİM).{% endcomment %}
+        <button type="button" class="ems-btn ems-btn--sm" data-ems-overlay-open="rtRefundDialog" data-rt-open data-rt-url="{% url 'retake:refund' a.id %}" data-rt-action="decide" data-rt-expected="{% if app.paid_amount is not None %}{{ app.paid_amount|retake_score }}{% endif %}"><i class="fas fa-hand-holding-dollar" aria-hidden="true"></i> {% trans "Ödənişin qaytarılması qərarı" context "registrar.retake" %}</button>
         {% endif %}
         {% if a.can_record %}
         <button type="button" class="ems-btn ems-btn--sm" data-ems-overlay-open="rtResultDialog" data-rt-open data-rt-url="{% url 'retake:result' a.id %}" data-rt-action="result"><i class="fas fa-pen" aria-hidden="true"></i> {% trans "Nəticəni yaz" context "registrar.retake" %}</button>

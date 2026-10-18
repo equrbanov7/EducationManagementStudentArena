@@ -1,0 +1,23 @@
+{% load i18n %}
+{% comment %}«Semestr açılışı» — qrupun öz qəbul ili planı üzrə xəbərdarlıqlar (sahib qaydası 2026-10-19).
+Mənbə: apps/registrar/cohort_plans.period_cohort_warnings. Köhnə qayda ilə yaranmış açılışlar silinmir —
+yalnız sayılır və nümunə göstərilir; qərarı Tədris şöbəsi «Ləğv et» ilə verir.{% endcomment %}
+{% with cw=semester_opening_section.cohort_warnings %}
+{% if cw.messages %}
+{% trans "Qəbul ili planı" context "accounts.semester" as sm_cohort_title %}
+<div class="ems-banner ems-banner--warning" role="status">
+    <div>
+        <div class="ems-banner__title">{{ sm_cohort_title }}</div>
+        <div class="ems-banner__body">
+            <p>{% trans "Hər qrup öz qəbul ilinin təsdiqlənmiş planından açılır." context "accounts.semester" %}</p>
+            <ul>
+                {% for message in cw.messages %}<li>{{ message }}</li>{% endfor %}
+            </ul>
+            {% if cw.mismatch_examples %}
+            <p>{% trans "Nümunə:" context "accounts.semester" %} {{ cw.mismatch_examples|join:"; " }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endwith %}

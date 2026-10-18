@@ -193,7 +193,12 @@ def build_profile_registrar_section(request, *, organization, section: str) -> d
     if section == "my-schedule":
         return page_contexts.schedule_context(request, organization, embedded=True)
     if section == "academic-calendar":
-        return calendar_ctx(organization, year=(request.GET.get("ac_year") or "").strip())
+        from apps.registrar.calendar_holidays import holidays_context
+
+        year = (request.GET.get("ac_year") or "").strip()
+        context = calendar_ctx(organization, year=year)
+        context["holidays"] = holidays_context(request, organization, year=year, years=context.get("years", ()))
+        return context
     if section == "my-journal":
         # Rol-aware: tələbə → öz jurnal xülasəsi (yalnız-oxu); müəllim/admin → qrup
         # seçimi. Tələbə ailəsi HEÇ VAXT müəllim siyahısına düşmür — org konteksti
@@ -580,3 +585,8 @@ from .public_subgroup import *  # noqa: E402,F401,F403
 from .public_subgroup import __all__ as _subgroup_exports  # noqa: E402
 
 __all__ += [name for name in _subgroup_exports if name not in __all__]
+# Rəsmi sənəd buraxılışı — `transcript.issue` + «Təhsil aldığı yer haqqında arayış» (2026-10-19).
+from .public_documents import *  # noqa: E402,F401,F403
+from .public_documents import __all__ as _document_exports  # noqa: E402
+
+__all__ += [name for name in _document_exports if name not in __all__]

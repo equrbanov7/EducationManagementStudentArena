@@ -101,7 +101,7 @@ class AiFabMarkupTests(TestCase):
         self.assertLess(
             html.index("js/ai_assistant_fab.js" + CACHE_BUSTER), html.index("js/ai_assistant.js" + MAIN_BUSTER)
         )
-        self.assertIn("css/ai_assistant.css" + MAIN_BUSTER, html)
+        self.assertIn("css/ai_assistant.css?v=", html)  # versiya tokeni hər CSS dəyişikliyində dəyişir
 
     def test_anonymous_visitor_gets_no_button_or_switch(self):
         html = _page(self.client)

@@ -82,6 +82,7 @@ def build_rows(
     for teacher_id, person in persons.items():
         held_months = held.get(teacher_id, {})
         planned_kinds = {kind: int(planned.get(teacher_id, {}).get(kind, 0)) for kind in C.KIND_KEYS}
+        hourly_kinds = planned.get(teacher_id, {}).get(C.HOURLY_KEY, {})
         months = teacher_months(planned_kinds, held_months, month_keys, day_counts)
         held_sem_kinds = {kind: 0 for kind in C.KIND_KEYS}
         lessons_sem = 0
@@ -114,6 +115,8 @@ def build_rows(
                 **person,
                 "planned_sem": planned_sem,
                 "planned_sem_kinds": planned_kinds,
+                #: Semestr planının saathesabı hissəsi (``TeacherAssignment.is_hourly_paid``) — ödəniş etiketi üçün.
+                "planned_hourly_sem": sum(int(hourly_kinds.get(kind, 0) or 0) for kind in C.KIND_KEYS),
                 "held_sem": held_sem,
                 "held_sem_kinds": held_sem_kinds,
                 "lessons_sem": lessons_sem,

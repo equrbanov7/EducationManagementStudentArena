@@ -132,32 +132,15 @@ def occupancy_map(organization, group_ids) -> dict:
     return {str(row["group_id"]): row["total"] for row in rows}
 
 
-_GROUP_YEAR_RE = re.compile(r"^(?:\d/)?(\d{3,4})")
-
-
 def group_admission_year(unit) -> int | None:
-    """Qrupun qəbul ili: ad şablonundan; şablonsuz addan yalnız etibarlı ayar.
+    """Qrupun qəbul ili — 2026-10-19-dan ``apps.organizations.group_cohort``-dadır (registrar/workload da işlədir).
 
-    QKU şablonu: «236 K» / «536 Bİ» / «2236 M» / «3/336 F» — rəqəm blokunun SON
-    rəqəmi ilin son rəqəmidir (233 → 2023 … 236 → 2026). Onilliyi cari ildən
-    götürürük (on ildən köhnə qruplar reyestrdə qalmır).
+    Burada mövcud çağırışlar üçün saxlanılır (davranış eynidir); import gecikdirilir — modul yüklənəndə
+    ``organizations.public`` zəncirini çəkməsin.
     """
-    settings = getattr(unit, "settings", None) or {}
-    match = _GROUP_YEAR_RE.match(str(getattr(unit, "name", "") or "").strip())
-    if not match:
-        # Ad şablonsuz qrup: ayar YALNIZ köçürmə («legacy») damğası yoxdursa etibarlıdır —
-        # köçürülmüş qruplarda `admission_year` idxal ili ilə doldurulub (2026-09-19 tapıntısı).
-        raw = settings.get("admission_year") if "legacy" not in settings else None
-        try:
-            return int(raw) if raw else None
-        except (TypeError, ValueError):
-            return None
-    digit = int(match.group(1)[-1])
-    from datetime import date
+    from apps.organizations.public import group_admission_year as _impl
 
-    decade = date.today().year // 10 * 10
-    year = decade + digit
-    return year if year <= date.today().year + 1 else year - 10
+    return _impl(unit)
 
 
 _MASTER_NAME_RE = re.compile(r"^(?:\d{4}\b|\d{3}/\d)")

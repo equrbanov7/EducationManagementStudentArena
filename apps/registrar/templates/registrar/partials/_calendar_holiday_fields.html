@@ -1,0 +1,31 @@
+{% load i18n %}
+{% comment %}«Bayram / qeyri-iş günü» dialoqunun sahələri — `_form_dialog.html` gövdəsi.
+Tarix stilli `ems-input type="date"`, növ — layihənin stilli seçicisi (native görünüş yox).{% endcomment %}
+<div class="acal-hol-form">
+    <div class="ems-field">
+        <label class="ems-field__label" for="acal-hol-date">{% trans "Tarix" context "registrar.calendar" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="date" id="acal-hol-date" name="date" required>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="acal-hol-kind">{% trans "Növ" context "registrar.calendar" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="acal-hol-kind" name="kind" data-bootstrap-select
+                    aria-describedby="acal-hol-kind-hint">
+                {% for option in hol.kind_options %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <p class="ems-field__hint" id="acal-hol-kind-hint">{% trans "«İş günü köçürməsi» — şənbə/bazar iş günü elan olunub (yalnız həftə sonu tarixinə yazılır). Köçürmə ilə istirahət olan iş günü «Qeyri-iş günü»dür." context "registrar.calendar" %}</p>
+    </div>
+    <div class="ems-field acal-hol-form__full">
+        <label class="ems-field__label" for="acal-hol-name">{% trans "Ad" context "registrar.calendar" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="text" id="acal-hol-name" name="name" maxlength="150" required
+               placeholder="{% trans 'Ramazan bayramı' context 'registrar.calendar' %}">
+    </div>
+    <div class="ems-field acal-hol-form__full">
+        <label class="ems-field__label" for="acal-hol-note">{% trans "Qeyd" context "registrar.calendar" %}</label>
+        <input class="ems-input" type="text" id="acal-hol-note" name="note" maxlength="300"
+               placeholder="{% trans 'Məs. Nazirlər Kabinetinin qərarı' context 'registrar.calendar' %}">
+    </div>
+</div>

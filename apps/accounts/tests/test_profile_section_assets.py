@@ -42,7 +42,36 @@ _STATIC_REF = re.compile(r"""{%\s*static\s+['"]([^'"]+\.(?:css|js))['"]\s*%}""")
 
 #: Qabıq qrupları — `allowed_sections` ilə qalmalıdır (qabıqdakı modallar, superadmin
 #: üslubları, `DOMContentLoaded` modulları). Yeni giriş YALNIZ əsaslandırma ilə.
-SHELL_SCOPED = {"superadmin-users", "superadmin-ai", "category-management", "create-category"}
+SHELL_SCOPED = {
+    "superadmin-users",
+    "superadmin-ai",
+    "category-management",
+    "create-category",
+    # `.mc-card` / `.mc-skeleton`: kurs bölmələrinin AJAX skeleti `profile.html`-dədir (2026-10-19).
+    "my-courses",
+    "assigned-courses",
+}
+
+#: `profile.css` manifestinin bölmə faylları (mobil audit 2026-10-19) — əvvəl HƏR kabinet
+#: səhifəsində şərtsiz yüklənirdi; indi yalnız öz bölməsində (və ya qabıq skeletində).
+MANIFEST_SECTION_FILES = {
+    "sections/profile_identity.css": "profile-info",
+    "sections/profile_identity_aside.css": "profile-info",
+    "sections/list_cards.css": "pending-post-approvals",
+    "sections/posts/_part1.css": "posts",
+    "sections/posts/_part2.css": "posts",
+    "sections/courses.css": "courses",
+    "sections/assigned_exams.css": "assigned-exams",
+    "sections/assigned_courses.css": "assigned-courses",
+    "sections/my_results.css": "my-results",
+    "sections/my_results_academic.css": "my-results",
+    "sections/notifications.css": "notifications",
+    "sections/notifications_rows.css": "notifications",
+    "sections/notifications_modal.css": "notifications",
+    "sections/edit_profile.css": "edit-profile",
+    "sections/shortcut_sections.css": "edit-profile",
+    "css/blogCard.css": "posts",
+}
 
 #: Kurs / imtahan yaratma modal paketi (PERF-2 H4, 2026-10-17) — yalnız öz bölməsində.
 MODAL_STACK_MARKERS = (
@@ -131,6 +160,11 @@ class SectionAssetTemplateContractTest(SimpleTestCase):
             body = re.sub(r"/\*.*?\*/", "", (css_root / path[len("accounts/css/") :]).read_text("utf-8"), flags=re.S)
             self.assertNotIn("@import", body, path)
 
+    def test_pagination_css_is_not_linked_again(self):
+        """`css/pagination.css` `base.html`-dədir — kabinet onu ikinci dəfə linkləmirdi (2026-10-19)."""
+        self.assertNotIn("css/pagination.css", _STATIC_REF.findall(_CSS_TPL.read_text("utf-8")))
+        self.assertIn("css/pagination.css", (Path(settings.BASE_DIR) / "templates/base.html").read_text("utf-8"))
+
     def test_borrow_map_only_names_real_sections(self):
         for section, borrowed in SECTION_ASSET_BORROWS.items():
             with self.subTest(section=section):
@@ -157,6 +191,47 @@ class SectionAssetResolutionTest(SimpleTestCase):
         # PERF-2 H4 (2026-10-17): kurs / imtahan yaratma modal paketi də bölməyə bağlıdır.
         for marker in MODAL_STACK_MARKERS:
             self.assertNotIn(marker, css + js)
+
+    def test_manifest_section_files_follow_their_section(self):
+        """Bildiriş / kimlik / post / kart üslubları yalnız öz bölməsində gəlir (mobil audit 2026-10-19)."""
+        allowed = ALL_SECTIONS - {"superadmin-users"}  # superadmin: `.status-badge` əsası (my_results.css)
+        dashboard = " ".join(_hrefs(section_css(asset_sections_for("dashboard", allowed), allowed)))
+        for marker in MANIFEST_SECTION_FILES:
+            self.assertNotIn(marker, dashboard)
+        self.assertIn("sections/my_courses.css", dashboard)  # qabıq skeleti: icazə varsa
+        self.assertIn("sections/profile_info.css", dashboard)  # `.section-title` / `.info-grid` — ortaq
+        student = {"dashboard", "assigned-courses", "my-results", "notifications"}
+        lean = " ".join(_hrefs(section_css(asset_sections_for("dashboard", student), student)))
+        self.assertIn("sections/my_courses.css", lean)
+        staff = {"dashboard", "notifications", "profile-info"}
+        lean = " ".join(_hrefs(section_css(asset_sections_for("dashboard", staff), staff)))
+        self.assertNotIn("sections/my_courses.css", lean)
+        for marker, section in MANIFEST_SECTION_FILES.items():
+            with self.subTest(marker=marker):
+                hrefs = " ".join(_hrefs(section_assets_payload(section, ALL_SECTIONS)["css"]))
+                self.assertIn(marker, hrefs)
+
+    def test_cross_section_rules_keep_their_files(self):
+        """Selektor auditi: başqa bölmənin faylındakı qaydanı işlədən bölmə həmin faylı alır."""
+        cases = {
+            "my-courses": ("sections/posts/_part1.css", "sections/courses.css"),  # `.modal-overlay` (qabıq modalı)
+            "my-exams": ("sections/posts/_part2.css",),
+            "category-management": ("sections/posts/_part1.css", "css/blogCard.css"),
+            "pending-post-approvals": ("sections/list_cards.css", "sections/posts/_part1.css"),
+            "my-journal": ("sections/my_results_academic.css",),  # `.rt-result-line`
+            "superadmin-org-inspector": ("sections/shortcut_sections.css",),  # `.settings-note`
+            "superadmin-users": ("sections/my_results.css",),  # `.status-badge` əsası
+        }
+        for section, markers in cases.items():
+            hrefs = " ".join(_hrefs(section_assets_payload(section, ALL_SECTIONS)["css"]))
+            for marker in markers:
+                with self.subTest(section=section, marker=marker):
+                    self.assertIn(marker, hrefs)
+
+    def test_section_without_partial_gets_the_profile_fallback_styles(self):
+        """`_section_dispatch.html` `else` budağı «Profil məlumatları»nı render edir."""
+        self.assertIn("profile-info", asset_sections_for("blog", {"blog", "profile-info"}))
+        self.assertNotIn("profile-info", asset_sections_for("dashboard", ALL_SECTIONS))
 
     def test_modal_stack_follows_my_exams_and_my_courses(self):
         """Modalları açan düymələr yalnız «İmtahanlarım» / «Kurslarım»-dadır — paket də orada gəlir."""
@@ -233,7 +308,7 @@ class StudentCabinetAssetPageTest(TestCase):
 
     def test_dashboard_skips_unrendered_section_assets(self):
         html = self._client().get(reverse("accounts:profile")).content.decode()
-        for marker in STUDENT_LAZY_MARKERS + ("sections/my_exams.css",):
+        for marker in STUDENT_LAZY_MARKERS + ("sections/my_exams.css",) + tuple(MANIFEST_SECTION_FILES):
             self.assertNotIn(marker, html)
         self.assertIn("accounts/css/profile/sidebar.css", html)  # qabıq: birbaşa link
         self.assertIn("accounts/js/profile/section_assets.js", html)

@@ -25,7 +25,7 @@ from ..constants import (
     EventKind,
 )
 from ..models import Application, ApplicationAttachment, ApplicationCounter, ApplicationEvent
-from ..sla import add_working_days
+from ..sla import add_working_days, calendar_for
 from ..state_machine import TransitionDenied
 from . import access, notify
 from .routing import resolve_scope_unit, route_for, sender_family_for
@@ -186,7 +186,7 @@ def submit_application(
         current_scope_unit=scope_unit,
         submitted_at=now,
         last_activity_at=now,
-        sla_due_on=add_working_days(timezone.localdate(), kind.sla_days),
+        sla_due_on=add_working_days(timezone.localdate(), kind.sla_days, calendar_for(organization)),
     )
 
     event = ApplicationEvent.objects.create(

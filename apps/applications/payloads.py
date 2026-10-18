@@ -24,7 +24,7 @@ from .constants import (
     EventKind,
 )
 from .services import access
-from .sla import sla_banner
+from .sla import calendar_for, sla_banner
 from .state_machine import available_actions
 
 
@@ -202,6 +202,7 @@ def detail_payload(application, *, user) -> dict:
             today=timezone.localdate(),
             is_open=application.is_open,
             status_label=application.status_label,
+            holidays=calendar_for(application.organization_id),
         ),
         # BÜTÜN sənədlər — dizayn §4.7-nin «Əlavə olunan sənədlər» bölməsi tam
         # siyahıdır; hadisəyə bağlı olanlar əlavə olaraq zaman xəttində də görünür.

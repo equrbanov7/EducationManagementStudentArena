@@ -2,6 +2,7 @@
 
 from . import analytics  # noqa: F401
 from . import catalog_console  # noqa: F401
+from . import cohort_plans  # noqa: F401 — qrupun öz qəbul ili planı (workload generation, 2026-10-19)
 from . import course_groups  # noqa: F401
 from . import dashboard_data  # noqa: F401
 from . import entry_standard  # noqa: F401
@@ -117,6 +118,7 @@ __all__ = [
     "offering_counts_by_chair",
     "plan_hours_by_offering",
     "plan_hours_for_offering",
+    "cohort_plans",
     "programs_by_offering",
     "workload_hours_for_offering",
     "program_for_offering",

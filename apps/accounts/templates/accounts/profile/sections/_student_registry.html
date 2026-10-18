@@ -58,6 +58,10 @@ SİLMƏ YOXDUR — status dəyişikliyi TARİXÇƏ YAZISIDIR (§8/5): hər əmr
 
     {% include "partials/ems_ui/_drawer.html" with drawer_id="srStudentCard" drawer_title=sr_card_title drawer_xl=True drawer_body_include="accounts/profile/sections/student_services/_registry_drawer.html" %}
 
+    {% if student_registry_section.can_arayis %}
+        {% include "accounts/profile/sections/student_services/_registry_arayis_dialog.html" %}
+    {% endif %}
+
     {% if student_registry_section.block_options.reasons %}
         {% include "accounts/profile/sections/student_services/_registry_block_dialog.html" %}
     {% endif %}

@@ -4,11 +4,14 @@ Two thin views over :func:`transcript_pdf.render_transcript_pdf`:
 
 * ``my_transcript_pdf`` — the requesting student downloads their **own**
   transcript (tenant scoping from the active org / RLS).
-* ``student_transcript_pdf`` — registrar səlahiyyətli işçi İSTƏNİLƏN tələbənin
-  transkriptini yükləyir. Qapı akademik kataloqun qapısı ilə EYNİDİR
-  (``catalog_console.can_manage`` — org-wide ``course.edit``); köhnə
-  «Registrar idarəetməsi» konsolu 2026-09-10-da silinəndə bu səth toxunulmaz
-  qaldı, yalnız icazə köməkçisinin YERİ dəyişdi.
+* ``student_transcript_pdf`` — sənəd verə bilən işçi tələbənin transkriptini yükləyir. Qapı
+  ``document_access`` (sahib 2026-10-19): org-wide ``course.edit`` (köhnə yol — rektor, prorektor, RİM)
+  və ya ``transcript.issue`` (Tədris şöbəsinin müdiri, Tələbə xidmətləri, RİM rəhbəri — bütün təşkilat;
+  dekan / dekan müavini — yalnız öz fakültəsi). Əhatədən kənar qeyd 404.
+* ``student_enrollment_certificate_pdf`` — «Təhsil aldığı yer haqqında arayış» (POST, eyni qapı); yalnız
+  aktiv tələbəyə, əks halda 409 (``enrollment_certificate.refusal_for``).
+
+Möhürlü sənəd buraxılışı möhür sətri YAZIR — «başqasının adından» (view-as) rejimində hər üç yol 403.
 
 The PDF is generated on the fly and never stored; each issuance is written to
 the audit log (official-document trail).
@@ -20,13 +23,16 @@ import re
 from urllib.parse import quote
 
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpResponse
+from django.core.exceptions import PermissionDenied
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
+from django.utils.translation import pgettext
+from django.views.decorators.http import require_POST
 
+from apps.registrar import document_access, enrollment_certificate
 from apps.registrar import transcript as transcript_service
 from apps.registrar import transcript_seal
 from apps.registrar.audit_write import create_audit_row
-from apps.registrar.catalog_console import can_manage as _can_manage_registrar
 from apps.registrar.models import StudentAcademicRecord
 
 
@@ -123,6 +129,8 @@ def my_transcript_pdf(request):
 
     if not STUDENT_TRANSCRIPT_SELF_SERVICE:
         raise Http404
+    if document_access.blocked_by_view_as(request):
+        return _view_as_refusal(request)
     organization = getattr(request, "organization", None)
     if organization is None:
         raise Http404
@@ -179,16 +187,76 @@ def _audit_export(offering, by_user):
     )
 
 
+def _wants_json(request) -> bool:
+    accept = (request.headers.get("Accept") or "").lower()
+    return request.headers.get("x-requested-with") == "XMLHttpRequest" or "application/json" in accept
+
+
+def _view_as_refusal(request):
+    """View-as-da sənəd verilmir: fetch/AJAX → JSON 403; adi link (yeni tab) → layihənin 403 səhifəsi."""
+    message = pgettext(
+        "registrar.documents",
+        "«Başqasının adından» rejimində rəsmi sənəd verilmir — sənəd möhür yazır. Öz hesabınıza qayıdın.",
+    )
+    if not _wants_json(request):
+        raise PermissionDenied(message)
+    return JsonResponse({"detail": message, "message": message, "view_as_blocked": True}, status=403)
+
+
+def _issuable_record_or_404(request, pk):
+    """Sənəd verə bilən aktorun ƏHATƏSİNDƏKİ qeyd; açarsız və ya əhatədən kənar → 404 (mövcudluq sızmır)."""
+    organization = getattr(request, "organization", None)
+    if not document_access.can_issue(request.user, organization, request=request):
+        raise Http404  # do not leak console URLs to unauthorised users
+    records = document_access.issuable_records(request.user, organization, request=request)
+    record = get_object_or_404(records.select_related("program", "group", "student", "student__profile"), pk=pk)
+    return organization, record
+
+
 @login_required
 def student_transcript_pdf(request, pk):
-    """Registrar console: any student's transcript as PDF (staff only)."""
-    organization = getattr(request, "organization", None)
-    if not _can_manage_registrar(request.user, organization):
-        raise Http404  # do not leak console URLs to unauthorised users
-    record = get_object_or_404(
-        StudentAcademicRecord.objects.filter(organization=organization).select_related("program", "group", "student"),
-        pk=pk,
-    )
+    """Sənəd verə bilən işçi: əhatəsindəki tələbənin transkripti PDF olaraq (``document_access``)."""
+    if document_access.blocked_by_view_as(request):
+        return _view_as_refusal(request)
+    organization, record = _issuable_record_or_404(request, pk)
     response, seal = _render_response(organization=organization, student=record.student, record=record, request=request)
     _audit_issue(organization, record, request.user, seal)
     return response
+
+
+@login_required
+@require_POST
+def student_enrollment_certificate_pdf(request, pk):
+    """«Təhsil aldığı yer haqqında arayış» — möhürlü PDF; ``place`` (təqdim ediləcəyi yer) istəyə bağlıdır."""
+    if document_access.blocked_by_view_as(request):
+        return _view_as_refusal(request)
+    organization, record = _issuable_record_or_404(request, pk)
+    place = enrollment_certificate.clean_place(request.POST.get("place", ""))
+    try:
+        payload, seal = enrollment_certificate.issue_enrollment_certificate(
+            organization=organization,
+            record=record,
+            issued_by=getattr(request, "real_user", None) or request.user,
+            place=place,
+            request=request,
+        )
+    except enrollment_certificate.CertificateRefused as refusal:
+        return JsonResponse({"detail": refusal.message, "message": refusal.message, "code": refusal.code}, status=409)
+    create_audit_row(
+        user=request.user,
+        organization=organization,
+        action=_audit_update_action(),
+        resource_type="registrar.enrollment_certificate_pdf",
+        resource_id=str(record.pk),
+        resource_repr=f"Arayış PDF — {record.student.get_full_name() or record.student.username}"[:200],
+        reason=f"Təhsil aldığı yer haqqında arayış verildi. Yoxlama kodu: {seal.code}.",
+        # Sonradan «arayış hara verilib» görünsün — təmizlənmiş təqdim yeri (PDF-də çap olunanla eyni).
+        new_values={"code": seal.code, "place": place},
+    )
+    return _attachment(payload, enrollment_certificate.certificate_filename(record))
+
+
+def _audit_update_action():
+    from core.constants import AuditAction
+
+    return AuditAction.UPDATE
