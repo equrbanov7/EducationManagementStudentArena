@@ -5,14 +5,20 @@ dashboard-una bölmə provider-lərini ready()-də qeyd edir. Course/
 CourseMembership modellərinə ehtiyac üçün ORM əlaqələri və ya get_model.
 """
 
+from apps.courses.course_list import build_teacher_course_list  # noqa: F401
 from apps.courses.dashboard_sources import (  # noqa: F401
     build_context,
     register,
+    register_task_counter,
 )
+from apps.courses.presentation import course_identity  # noqa: F401
 
 __all__ = [
     "build_context",
+    "build_teacher_course_list",
+    "course_identity",
     "register",
+    "register_task_counter",
 ]
 
 

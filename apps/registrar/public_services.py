@@ -24,6 +24,8 @@ from . import legacy_grade_review_counts  # noqa: F401
 from . import legacy_grade_review_rows  # noqa: F401
 from . import lessons_log  # noqa: F401
 from . import movements  # noqa: F401
+from . import retake_access  # noqa: F401 — 25% / alt qrup müraciəti: açar + əhatə (2026-10-18)
+from . import retake_chance  # noqa: F401 — «İmtahan şansı ver» rəsmi qeydi (2026-10-18)
 from . import schedule  # noqa: F401
 from . import schedule_conflicts  # noqa: F401
 from . import schedule_docx_match  # noqa: F401 — cədvəl → tapşırıq sətri (workload, 2026-10-15)
@@ -118,6 +120,8 @@ __all__ = [
     "program_for_offering",
     "recompute_absence_hours",
     "render_syllabus_pdf",
+    "retake_access",
+    "retake_chance",
     "schedule",
     "schedule_conflicts",
     "schedule_docx_match",

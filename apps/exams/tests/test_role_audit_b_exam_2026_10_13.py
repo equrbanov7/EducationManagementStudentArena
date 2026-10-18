@@ -44,7 +44,13 @@ class SecondChanceDecisionKeyTests(_ChanceBase):
 
     def _grant(self, user, exam):
         return self._client_for(user).post(
-            reverse("accounts:exam_chance"), {"exam_id": str(exam.pk), "usernames": self.student.username}
+            reverse("accounts:exam_chance"),
+            {
+                "exam_id": str(exam.pk),
+                "student_ids": [str(self.student.pk)],
+                "reason": "other",  # 2026-10-18: səbəbsiz şans yoxdur
+                "note": "Rəhbərin qərarı ilə əlavə cəhd",
+            },
         )
 
     def test_staff_and_rim_staff_see_section_but_cannot_grant(self):

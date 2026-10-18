@@ -12,6 +12,7 @@ class AssignmentsConfig(AppConfig):
         # (bax apps/courses/dashboard_sources.py — registry pattern).
         from apps.courses.public import dashboard_sources
 
-        from .course_dashboard import build_course_dashboard_context
+        from .course_dashboard import build_course_dashboard_context, course_task_queryset
 
         dashboard_sources.register(build_course_dashboard_context)
+        dashboard_sources.register_task_counter(course_task_queryset)

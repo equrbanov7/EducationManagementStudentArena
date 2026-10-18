@@ -1,0 +1,59 @@
+{% load i18n registrar_retake %}
+{% comment %}Tələbənin müraciət kartı — `a` = `retake_queries.decorate`. Qəbzin orijinal adı / yükləmə vaxtı tələbəyə
+GÖSTƏRİLMİR (yalnız Mühasibatlıqda); burada yalnız «qəbz yüklənib» + baxış linki.{% endcomment %}
+<li class="rt-card" id="rt-app-{{ a.id }}">
+    <header class="rt-card__head">
+        <div class="rt-card__titles">
+            <h3 class="rt-card__title">{{ a.app.subject.name }}</h3>
+            <p class="rt-card__meta">
+                <span>{{ a.kind_label }}</span>
+                {% if a.app.attempt_number %}<span aria-hidden="true">·</span><span>{% blocktrans with n=a.app.attempt_number context "registrar.retake" %}{{ n }}-ci cəhd{% endblocktrans %}</span>{% endif %}
+                <span aria-hidden="true">·</span>
+                <time datetime="{{ a.app.created_at|date:'c' }}">{{ a.app.created_at|date:"d.m.Y H:i" }}</time>
+            </p>
+        </div>
+        {% include "registrar/retake/_badge.html" with status=a.app.status %}
+    </header>
+    {% if a.next_step %}<p class="rt-note rt-note--info"><i class="fas fa-circle-info" aria-hidden="true"></i> <span>{{ a.next_step }}</span></p>{% endif %}
+    {% if a.result_text %}
+    <p class="rt-result{% if a.app.result_passed %} is-passed{% else %} is-failed{% endif %}">
+        <i class="fas fa-flag-checkered" aria-hidden="true"></i> <span>{{ a.result_text }}</span>
+        <span class="ems-badge ems-badge--{% if a.app.result_passed %}success{% else %}danger{% endif %}">{% if a.app.result_passed %}{% trans "Keçdi" context "registrar.retake" %}{% else %}{% trans "Keçmədi" context "registrar.retake" %}{% endif %}</span>
+    </p>
+    {% endif %}
+    {% if a.app.kind == "retake_25" %}
+    <p class="rt-receipt">
+        <i class="fas fa-receipt" aria-hidden="true"></i>
+        {% if a.receipt %}
+            <span>{% trans "Qəbz yüklənib" context "registrar.retake" %}</span>
+            <a class="rt-link" href="{{ a.receipt_url }}" target="_blank" rel="noopener" data-no-route-loading>{% trans "Bax" context "registrar.retake" %}</a>
+        {% else %}
+            <span>{% trans "Qəbz hələ yüklənməyib" context "registrar.retake" %}</span>
+        {% endif %}
+    </p>
+    {% endif %}
+    {% if a.can_upload_receipt or a.can_withdraw %}
+    <div class="rt-actions">
+        {% if a.can_upload_receipt %}
+        <form class="rt-upload" method="post" action="{% url 'retake:receipt' a.id %}" enctype="multipart/form-data" data-rt-form novalidate>
+            <label class="rt-upload__label" for="rt-receipt-{{ a.id }}">{% if a.receipt %}{% trans "Yeni qəbz yüklə" context "registrar.retake" %}{% else %}{% trans "Qəbzi yüklə" context "registrar.retake" %}{% endif %}</label>
+            <input class="ems-input rt-upload__file" type="file" id="rt-receipt-{{ a.id }}" name="receipt" accept=".pdf,.jpg,.jpeg,.png" required>
+            <span class="ems-field__hint">{% trans "PDF, JPG və ya PNG · ən çox 10 MB" context "registrar.retake" %}</span>
+            <p class="ems-msg ems-msg--error" data-rt-error role="alert" hidden></p>
+            <button type="submit" class="ems-btn ems-btn--primary ems-btn--sm"><i class="fas fa-upload" aria-hidden="true"></i> {% trans "Göndər" context "registrar.retake" %}</button>
+        </form>
+        {% endif %}
+        {% if a.can_withdraw %}
+        <button type="button" class="ems-btn ems-btn--sm ems-btn--ghost rt-btn-danger" data-ems-overlay-open="rtWithdrawDialog"
+                data-rt-withdraw data-rt-url="{% url 'retake:withdraw' a.id %}" data-rt-subject="{{ a.app.subject.name }}">
+            <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Geri götür" context "registrar.retake" %}
+        </button>
+        {% endif %}
+    </div>
+    {% endif %}
+    <details class="rt-trail">
+        <summary>{% trans "Addımlar" context "registrar.retake" %} <span class="ems-tabs__count">{{ a.timeline|length }}</span></summary>
+        {% trans "Müraciətin addımları" context "registrar.retake" as rt_tl_label %}
+        {% include "partials/ems_ui/_timeline.html" with timeline=a.timeline timeline_label=rt_tl_label %}
+    </details>
+</li>

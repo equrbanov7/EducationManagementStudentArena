@@ -287,3 +287,22 @@
         flex-direction: column;
     }
 }
+
+/* 25% təkrar imtahan izi — «Əsas imtahan: 32 → 25%: 61» (registrar/retake/_result_line.html, 2026-10-18). */
+.rt-result-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-1) var(--ems-sp-2);
+    margin: var(--ems-sp-2) 0 0;
+    padding: var(--ems-sp-2) var(--ems-sp-3);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg-subtle);
+    color: var(--ems-text);
+    font-size: var(--ems-fs-sm);
+}
+
+.rt-result-line.is-passed { background: var(--ems-success-bg); }
+.rt-result-line.is-failed { background: var(--ems-danger-bg); }
+.rt-result-line__label { color: var(--ems-text-muted); font-weight: 600; }
+.rt-result-line__chain { font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }

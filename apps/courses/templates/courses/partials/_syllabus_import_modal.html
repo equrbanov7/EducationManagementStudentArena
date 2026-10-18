@@ -1,0 +1,81 @@
+{% load i18n static %}
+{% comment %}«Sillabusdan mövzuları götür» (2026-10-18) — iki addım: sillabus seçimi → ön baxış (heç nə yazılmır)
+→ «Mövzuları əlavə et» (tək POST, idempotent). Görünüş Paket E `ems-bsd` dialoqudur (course_dialogs.css); addımlar,
+siyahı və həftə sətirləri `course_syllabus_import.js` tərəfindən `textContent` ilə qurulur (server mətni HTML kimi
+yazılmır). Mətnlər `data-i18n-*`-dadır; `{new}` / `{existing}` / `{n}` / `{subject}` yer tutucularını JS doldurur.{% endcomment %}
+<div class="modal fade ems-bsd si-modal crs-accent--{{ course_identity.accent }}" id="syllabusImportModal" tabindex="-1" aria-hidden="true" aria-labelledby="syllabusImportModalLabel"
+     data-si-root
+     data-options-url="{% url 'courses:syllabus_options' course.id %}"
+     data-preview-url="{% url 'courses:syllabus_preview' course.id %}"
+     data-import-url="{% url 'courses:syllabus_import' course.id %}"
+     data-linked-id="{% if linked_syllabus %}{{ linked_syllabus.pk }}{% endif %}"
+     data-i18n-linked="{% trans 'Bağlıdır' context 'courses.syllabus_import' %}"
+     data-i18n-own="{% trans 'Mənim' context 'courses.syllabus_import' %}"
+     data-i18n-new="{% trans 'Yeni' context 'courses.syllabus_import' %}"
+     data-i18n-exists="{% trans 'Artıq var' context 'courses.syllabus_import' %}"
+     data-i18n-summary="{% trans '{new} yeni mövzu · {existing} artıq var' context 'courses.syllabus_import' %}"
+     data-i18n-confirm="{% trans 'Mövzuları əlavə et ({n})' context 'courses.syllabus_import' %}"
+     data-i18n-link-only="{% trans 'Yalnız kursu əlaqələndir' context 'courses.syllabus_import' %}"
+     data-i18n-nothing="{% trans 'Əlavə ediləcək yeni mövzu yoxdur — hamısı kursda var.' context 'courses.syllabus_import' %}"
+     data-i18n-no-rows="{% trans 'Bu sillabusun həftəlik planında mövzu yazılmayıb.' context 'courses.syllabus_import' %}"
+     data-i18n-error="{% trans 'Xəta baş verdi. Yenidən cəhd edin.' context 'courses.syllabus_import' %}"
+     data-i18n-saving="{% trans 'Əlavə olunur…' context 'courses.syllabus_import' %}">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header ems-bsd__head">
+                <span class="ems-bsd__ic ems-bsd__ic--syllabus" aria-hidden="true"><i class="fas fa-file-import"></i></span>
+                <div class="ems-bsd__tx">
+                    <h5 class="modal-title" id="syllabusImportModalLabel">{% trans "Sillabusdan mövzuları götür" context "courses.syllabus_import" %}</h5>
+                    <p class="ems-bsd__sub">{% trans "Həftəlik plandakı mövzular kursa bir dəfəyə əlavə olunur; kursda artıq olanlar təkrarlanmır." context "courses.syllabus_import" %}</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'courses.syllabus_import' %}"></button>
+            </div>
+
+            <div class="ems-bsd__body si-body">
+                <section class="si-step" data-si-step="pick" aria-label="{% trans 'Sillabus seçimi' context 'courses.syllabus_import' %}">
+                    <label class="ems-field__label" for="siSearch">{% trans "Sillabus" context "courses.syllabus_import" %}</label>
+                    <input type="search" id="siSearch" class="ems-input" data-si-search autocomplete="off"
+                           placeholder="{% trans 'Fənn adı və ya kodu ilə axtar' context 'courses.syllabus_import' %}">
+                    <p class="ems-field__hint">{% trans "Siyahıda yalnız baxmaq icazəniz olan sillabuslar var: öz sillabuslarınız və əhatənizdəki kafedraların sillabusları." context "courses.syllabus_import" %}</p>
+                    <div class="si-list" data-si-list role="list"></div>
+                    <p class="si-empty" data-si-empty hidden>{% trans "Uyğun sillabus tapılmadı. Axtarışı dəyişin və ya əvvəlcə «Sillabuslar» bölməsində sillabus hazırlayın." context "courses.syllabus_import" %}</p>
+                </section>
+
+                <section class="si-step" data-si-step="preview" hidden aria-live="polite">
+                    <div class="si-source">
+                        <span class="si-source__ic" aria-hidden="true"><i class="fas fa-file-lines"></i></span>
+                        <span class="si-source__tx">
+                            <span class="si-source__title" data-si-source-title></span>
+                            <span class="si-source__meta" data-si-source-meta></span>
+                        </span>
+                        <span data-si-source-badge></span>
+                        <button type="button" class="ems-btn ems-btn--sm si-source__back" data-si-back>
+                            <i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Başqa sillabus" context "courses.syllabus_import" %}
+                        </button>
+                    </div>
+                    <p class="si-summary" data-si-summary></p>
+                    <ol class="si-weeks" data-si-weeks></ol>
+                    <label class="si-link">
+                        <input type="checkbox" data-si-link checked>
+                        <span>{% trans "Kursu bu sillabusla əlaqələndir — fənn kursun başlığında və «Kurslarım» kartında görünəcək." context "courses.syllabus_import" %}</span>
+                    </label>
+                </section>
+
+                <div class="si-loading" data-si-loading hidden aria-hidden="true">
+                    <span class="skeleton skeleton-line skeleton-line--lg"></span>
+                    <span class="skeleton skeleton-block"></span>
+                    <span class="skeleton skeleton-block"></span>
+                </div>
+                <div class="ems-msg ems-msg--error ems-bsd__errors d-none" data-si-error role="alert"></div>
+            </div>
+
+            <div class="modal-footer ems-bsd__foot">
+                <button type="button" class="ems-btn" data-bs-dismiss="modal">{% trans "Ləğv et" context "courses.syllabus_import" %}</button>
+                <button type="button" class="ems-btn ems-btn--primary" data-si-confirm disabled hidden>
+                    <i class="fas fa-file-import" aria-hidden="true"></i> <span data-si-confirm-label></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{% static 'courses/js/course_syllabus_import.js' %}?v=20261018-crs" defer></script>

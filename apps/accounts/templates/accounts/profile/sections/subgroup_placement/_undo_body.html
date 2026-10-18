@@ -1,0 +1,8 @@
+{% load i18n %}
+<p class="sgp-undo__target" data-sgp-undo-target></p>
+<div class="ems-field ems-field--wide">
+    <label class="ems-field__label" for="sgp-undo-reason">{% trans "Geri götürmə səbəbi" context "accounts.subgroup_placement" %} <span class="ems-field__req">*</span></label>
+    <textarea id="sgp-undo-reason" class="ems-textarea" rows="3" maxlength="2000" data-sgp-undo-reason></textarea>
+    <span class="ems-field__hint">{% trans "Ən azı 10 simvol." context "accounts.subgroup_placement" %}</span>
+</div>
+<p class="sgp-form__error" data-sgp-undo-error role="alert" hidden></p>

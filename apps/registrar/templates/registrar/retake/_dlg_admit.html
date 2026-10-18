@@ -1,0 +1,7 @@
+{% load i18n %}
+<p class="rt-dialog__subject" data-rt-text="who"></p>
+<p class="ems-msg ems-msg--info">{% trans "Buraxılışdan sonra İmtahan mərkəzi «İmtahan şansı ver» bölməsində «25% müraciəti» səbəbi ilə cəhd açır və ya kağız imtahanın balı yazılır." context "registrar.retake" %}</p>
+<div class="ems-field">
+    <label class="ems-field__label" for="rtAdmitNote">{% trans "Qeyd" context "registrar.retake" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "ui.dialog" %}</span></label>
+    <textarea class="ems-textarea" id="rtAdmitNote" name="note" rows="3" maxlength="2000"></textarea>
+</div>

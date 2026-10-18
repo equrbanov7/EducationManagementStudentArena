@@ -1,0 +1,14 @@
+{% load i18n nav_icons %}
+{# «25% müraciətləri» — Mühasibatlıq / dekanlıq növbəsi + tələbə izi (sahib 2026-10-18; qapı: rbac_sections). #}
+{% if "retake-desk" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=retake-desk"
+       data-section="retake-desk"
+       data-title="{% trans '25% müraciətləri' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'retake-desk' %}active{% endif %}">
+        {% nav_icon "file-check" "sidebar-menu-icon" %}
+        <span class="sidebar-menu-text">{% trans "25% müraciətləri" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}

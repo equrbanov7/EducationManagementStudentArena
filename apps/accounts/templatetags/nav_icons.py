@@ -25,7 +25,7 @@ register = template.Library()
 
 #: Sprite faylı (``static/`` altında) və keş-buster (dev-də manifest heşi yoxdur).
 SPRITE_PATH = "vendor/lucide/ems-nav.svg"
-SPRITE_VERSION = "20261011-wp10icons"
+SPRITE_VERSION = "20261018-calculator"
 
 
 def sprite_url():

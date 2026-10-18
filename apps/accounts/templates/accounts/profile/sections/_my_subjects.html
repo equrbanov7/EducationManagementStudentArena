@@ -1,4 +1,4 @@
-{% load i18n ems_ui %}
+{% load i18n ems_ui subgroup_placement_tags %}
 {% comment %}«Fənlərim» — tələbə kabineti, ekran 10 «Cari semestr» (redizayn 2026-09-12,
 audit bəndi 7/1; sahib: «modern UX/UI prinsipləri əsasında… tələbə üçün aydın olsun»).
 
@@ -31,6 +31,11 @@ yox; hədəf `style-src-attr`-dan tam çıxmaqdır, bax csp.py).{% endcomment %}
             {% if sec.record.group %}<span class="msx-ctx__item"><i class="fas fa-users" aria-hidden="true"></i> {{ sec.record.group.name }}</span>{% endif %}
             {% if sec.period %}<span class="msx-ctx__item"><i class="fas fa-calendar-alt" aria-hidden="true"></i> {{ sec.period.name }}</span>{% endif %}
             <span class="msx-ctx__item"><i class="fas fa-layer-group" aria-hidden="true"></i> {% trans "Semestr" context "profile.subjects" %} {{ sec.semester_number }}</span>
+            {% comment %}Semestr kredit yükü (sahib 2026-10-18) — öz fənləri + alt qrup; hədd «Sistem tənzimləmələri»ndən.{% endcomment %}
+            {% student_credit_load as scl %}
+            {% if scl and scl.has_record %}
+            <span class="msx-ctx__item" data-credit-load="{{ scl.total }}/{{ scl.limit }}"><i class="fas fa-coins" aria-hidden="true"></i> {% blocktrans trimmed with total=scl.total limit=scl.limit context "profile.subjects" %}Bu semestr: {{ total }} / {{ limit }} kredit{% endblocktrans %}{% if scl.subgroup %} · {% blocktrans trimmed with own=scl.own sub=scl.subgroup context "profile.subjects" %}öz fənləri {{ own }}, alt qrup {{ sub }}{% endblocktrans %}{% endif %}</span>
+            {% endif %}
         </div>
 
         {# ── KPI sırası (prototip: toplanmış bal · kredit · buraxılmayan · yekun) ── #}

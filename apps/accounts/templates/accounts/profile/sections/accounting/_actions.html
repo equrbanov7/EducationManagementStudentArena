@@ -1,0 +1,10 @@
+{% load i18n %}
+{% if ac.view_as %}
+<span class="ems-badge ems-badge--muted" title="{% trans '«Başqasının adından» rejimində ixrac bağlıdır' context 'accounts.accounting' %}">
+    <i class="fas fa-eye" aria-hidden="true"></i> {% trans "Yalnız baxış" context "accounts.accounting" %}
+</span>
+{% elif ac.has_semester %}
+<a class="ems-btn ems-btn--primary" href="{{ ac.export_url }}" data-force-navigation="true" download>
+    <i class="fas fa-file-excel" aria-hidden="true"></i> {% trans "Excel-ə ixrac" context "accounts.accounting" %}
+</a>
+{% endif %}

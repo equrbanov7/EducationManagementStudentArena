@@ -10,6 +10,7 @@ ad-soyad üzrə işləyir və nəticələr grant formunda checkbox kimi seçilir
 """
 
 from django.urls import reverse
+from django.utils.translation import pgettext
 
 from apps.accounts.views._helpers.formatting import _append_query_params
 
@@ -81,17 +82,69 @@ def _search_students(organization, query):
     )
 
 
+def _grant_value(row, key):
+    return row.get(key) if isinstance(row, dict) else getattr(row, key)
+
+
+def _legacy_grants(organization) -> dict:
+    """2026-10-18 öncəsi şanslar (rəy LOW-10): rəsmi qeydi (``ExamChanceGrant``) olmayan köhnə
+    ``StudentExamAttemptGrant`` sətirləri siyahıda və KPI-də itməsin — səbəb «Köhnə qeyd» kimi göstərilir."""
+    from django.apps import apps as django_apps
+
+    from apps.exams.models import StudentExamAttemptGrant
+
+    log_model = django_apps.get_model("registrar", "ExamChanceGrant")
+    logged = set(log_model.objects.filter(organization=organization).values_list("student_id", "exam_id"))
+    logged_students = {student_id for student_id, _exam in logged}
+    label = pgettext("accounts.exam_chance", "Köhnə qeyd (səbəb yazılmayıb)")
+    rows, students, attempts = [], set(), 0
+    for grant in (
+        StudentExamAttemptGrant.objects.filter(exam__organization=organization)
+        .select_related("exam", "student", "granted_by")
+        .order_by("-updated_at")
+    ):
+        if (grant.student_id, grant.exam_id) in logged:
+            continue
+        students.add(grant.student_id)
+        attempts += grant.extra_attempts or 0
+        granted_by = grant.granted_by
+        rows.append(
+            {
+                "student": grant.student,
+                "exam_title": grant.exam.title,
+                "exam_category": grant.exam.exam_type_extended or "",
+                "get_reason_display": label,
+                "is_legacy": True,
+                "reference_number": "",
+                "reference_date": None,
+                "note": "",
+                "extra_attempts": grant.extra_attempts,
+                "granted_by_name": (
+                    ((granted_by.get_full_name() or "").strip() or granted_by.username) if granted_by else ""
+                ),
+                "created_at": grant.updated_at,
+            }
+        )
+    return {
+        "rows": rows[:RECENT_GRANT_LIMIT],
+        "count": len(rows),
+        "attempts": attempts,
+        "new_students": len(students - logged_students),
+    }
+
+
 def build_exam_chance_section(request, section, *, active_organization, allowed_sections, active_section):
     if "exam-chance" not in allowed_sections or active_section != "exam-chance":
         return
 
-    from django.db.models import Count, Q, Sum
+    from django.db.models import Q
 
     from apps.accounts.services.exam_center_decide import can_exam_center_decide
-    from apps.exams.models import Exam, StudentExamAttemptGrant, StudentGroup
+    from apps.exams.models import Exam
     from apps.exams.public import SECURE_EXAM_CATEGORIES
     from apps.organizations.models import AcademicPeriod, OrgUnit
     from apps.organizations.public import KAFEDRA_UNIT_TYPES
+    from apps.registrar.public import retake_chance
     from core.constants import OrgUnitType
     from core.search_text import tolerant_q
 
@@ -156,38 +209,41 @@ def build_exam_chance_section(request, section, *, active_organization, allowed_
             ranges |= Q(start_datetime__date__range=(p.start_date, p.end_date))
         exams_qs = exams_qs.filter(ranges)
     section["exams"] = list(
-        exams_qs.only("id", "title", "exam_type_extended", "start_datetime")
+        exams_qs.only("id", "title", "exam_type", "exam_type_extended", "start_datetime", "subject_id")
         .distinct()
         .order_by("-start_datetime", "-id")[:300]
     )
 
-    # ── Qruplar (fakültə/kafedra seçiminə uyğun daraldılır) ────────────────
-    groups_qs = StudentGroup.objects.filter(organization=organization)
-    if unit is not None:
-        groups_qs = groups_qs.filter(org_unit__path__startswith=unit.path)
-    section["groups"] = list(groups_qs.only("id", "name").order_by("name"))
+    # ── Tələbə axtarışı (qrup / istifadəçi adı / ad-soyad) + hər tələbənin 25% müraciətləri ─────────
+    # 2026-10-18 (sahib): şans KONKRET tələbəyə verilir; «25% müraciəti» səbəbi yalnız ödənişi təsdiqlənmiş +
+    # buraxılmış müraciəti olan tələbəyə açıqdır — müraciətlər TƏK sorğu ilə qoşulur.
+    found = _search_students(organization, filters["student_q"]) if filters["student_q"] else []
+    grantable = retake_chance.grantable_applications(organization=organization, student_ids=[u.pk for u in found])
+    section["student_results"] = [
+        {
+            "user": user,
+            "retake_apps": grantable.get(user.pk, []),
+            "subject_ids": ",".join(str(app.subject_id) for app in grantable.get(user.pk, [])),
+        }
+        for user in found
+    ]
 
-    # ── Tələbə axtarışı (qrup / istifadəçi adı / ad-soyad) ─────────────────
-    section["student_results"] = _search_students(organization, filters["student_q"]) if filters["student_q"] else []
+    # ── Son verilən şanslar — rəsmi append-only qeyd (səbəb, əsas, müraciət) ─────────────────────────
+    official = retake_chance.recent(organization=organization, limit=RECENT_GRANT_LIMIT)
+    legacy = _legacy_grants(organization)
+    section["recent_grants"] = sorted(
+        [*official, *legacy["rows"]], key=lambda row: _grant_value(row, "created_at"), reverse=True
+    )[:RECENT_GRANT_LIMIT]
+    section["reasons"] = retake_chance.reason_choices()
+    selected_reason = (request.GET.get("chance_reason") or "").strip()
+    section["selected_reason"] = selected_reason if selected_reason in dict(section["reasons"]) else ""
 
-    # ── Son verilən şanslar (görünən jurnal; tam tarixçə auditdədir) ───────
-    grants_qs = StudentExamAttemptGrant.objects.filter(exam__organization=organization)
-    section["recent_grants"] = list(
-        grants_qs.select_related("exam", "student", "granted_by").order_by("-updated_at")[:RECENT_GRANT_LIMIT]
-    )
-
-    # ── KPI: bölmənin yuxarısındakı rəqəmlər (tək aqreqat sorğu) ───────────
-    # `exam_count` — filtrə uyğun imtahanların ƏSL sayı: `section["exams"]`
-    # 300-lə kəsilib, ona görə ayrıca count() alınır.
+    # ── KPI: filtrə uyğun imtahanların ƏSL sayı (siyahı 300-lə kəsilib) + rəsmi qeydlərin cəmi ────────
     section["exam_count"] = exams_qs.distinct().count()
-    totals = grants_qs.aggregate(
-        n=Count("id"),
-        students=Count("student_id", distinct=True),
-        attempts=Sum("extra_attempts"),
-    )
-    section["grant_count"] = totals["n"] or 0
-    section["grant_students"] = totals["students"] or 0
-    section["grant_attempts"] = totals["attempts"] or 0
+    totals = retake_chance.totals(organization=organization)
+    section["grant_count"] = totals["count"] + legacy["count"]
+    section["grant_students"] = totals["students"] + legacy["new_students"]
+    section["grant_attempts"] = totals["attempts"] + legacy["attempts"]
 
     section["filters"] = filters
     section["years"] = years

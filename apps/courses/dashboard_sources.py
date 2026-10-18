@@ -35,3 +35,42 @@ def build_context(*, course, user, membership, can_manage, is_student):
             )
         )
     return data
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Kart sayğacları (2026-10-18, «Kurslarım» redizaynı)
+# ────────────────────────────────────────────────────────────────────────────
+# Kurs siyahısı hər kartda «tapşırıq» sayını (tapşırıq + lab + layihə) göstərir.
+# courses task modellərini tanımır — hər task modulu `ready()`-də öz
+# queryset-ini qeyd edir:
+#     dashboard_sources.register_task_counter(lambda: Assignment.objects.all())
+# Siyahı bunu korrelyasiyalı alt-sorğu kimi annotate edir (kart sayından asılı
+# olmayaraq SIFIR əlavə sorğu; hər modulun `course` FK-sı indekslidir).
+# ════════════════════════════════════════════════════════════════════════════
+
+_TASK_COUNTERS = []
+
+
+def register_task_counter(factory):
+    """``factory() -> QuerySet`` (``course`` FK-lı task modeli) — idempotent."""
+    if factory not in _TASK_COUNTERS:
+        _TASK_COUNTERS.append(factory)
+
+
+def task_count_expression(outer_ref="pk"):
+    """Qeydli task modullarının cəmi — ``Course`` queryset-ində annotate üçün ifadə."""
+    from django.db.models import Count, IntegerField, OuterRef, Subquery, Value
+    from django.db.models.functions import Coalesce
+
+    total = Value(0, output_field=IntegerField())
+    for factory in _TASK_COUNTERS:
+        queryset = (
+            factory()
+            .filter(course_id=OuterRef(outer_ref))
+            .order_by()
+            .values("course_id")
+            .annotate(n=Count("pk"))
+            .values("n")
+        )
+        total = total + Coalesce(Subquery(queryset, output_field=IntegerField()), Value(0))
+    return total

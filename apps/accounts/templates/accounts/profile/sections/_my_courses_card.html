@@ -1,0 +1,93 @@
+{% load i18n ems_ui %}
+{% comment %}«Kurslarım» kartı (2026-10-18). `course` — `apps.courses.course_list` annotasiyaları ilə (`card_*`, `ui_accent`,
+`ui_icon`). Rəng `crs-accent--<ton>` sinfindən (course_accent.css → `--ems-*` tokenləri); inline stil yoxdur.{% endcomment %}
+{% url 'courses:course_dashboard' course.pk as mc_dash_url %}
+<article class="mcl-card crs-accent--{{ course.ui_accent }}" data-mc-card data-course-id="{{ course.pk }}">
+    {% with cover_image_url=course.cover_image_url %}
+    <div class="mcl-card__cover{% if cover_image_url %} has-img{% endif %}" aria-hidden="true">
+        {% if cover_image_url %}
+            <img src="{{ cover_image_url }}" alt="" loading="lazy">
+        {% else %}
+            <span class="mcl-card__glyph"><i class="fas {{ course.ui_icon }}"></i></span>
+        {% endif %}
+    </div>
+    {% endwith %}
+
+    <div class="mcl-card__body">
+        <div class="mcl-card__eyebrow">
+            {% ems_status_badge "course" course.status dot=True nowrap=True %}
+            {% if course.card_syllabus_version %}
+                <span class="mcl-syl" title="{% trans 'Bağlı sillabus' context 'courses.list' %}">
+                    <i class="fas fa-file-lines" aria-hidden="true"></i>
+                    <span class="mcl-syl__name">{{ course.syllabus.subject.name }}</span>
+                    {% ems_status_badge "syllabus" course.card_syllabus_version.status nowrap=True %}
+                </span>
+            {% endif %}
+        </div>
+
+        <h3 class="mcl-card__title">
+            <a href="{{ mc_dash_url }}?from_section=my-courses&amp;return_to={{ my_courses_section.return_to|urlencode }}"
+               class="mcl-card__link" data-mc-card-link>{{ course.title }}</a>
+        </h3>
+        {% if course.description %}<p class="mcl-card__desc">{{ course.description }}</p>{% endif %}
+
+        <ul class="mcl-stats" aria-label="{% trans 'Kursun göstəriciləri' context 'courses.list' %}">
+            <li class="mcl-stat{% if not course.card_topic_count %} is-zero{% endif %}">
+                <i class="fas fa-book-open" aria-hidden="true"></i>
+                <b>{{ course.card_topic_count }}</b><span>{% trans "Mövzu" context "courses.list" %}</span>
+            </li>
+            <li class="mcl-stat{% if not course.card_task_count %} is-zero{% endif %}">
+                <i class="fas fa-clipboard-list" aria-hidden="true"></i>
+                <b>{{ course.card_task_count }}</b><span>{% trans "Tapşırıq" context "courses.list" %}</span>
+            </li>
+            <li class="mcl-stat{% if not course.card_exam_count %} is-zero{% endif %}">
+                <i class="fas fa-file-pen" aria-hidden="true"></i>
+                <b>{{ course.card_exam_count }}</b><span>{% trans "İmtahan" context "courses.list" %}</span>
+            </li>
+            <li class="mcl-stat{% if not course.card_student_count %} is-zero{% endif %}">
+                <i class="fas fa-user-graduate" aria-hidden="true"></i>
+                <b>{{ course.card_student_count }}</b><span>{% trans "Tələbə" context "courses.list" %}</span>
+            </li>
+        </ul>
+
+        {% if course.card_group_names %}
+        <div class="mcl-card__groups" aria-label="{% trans 'Qruplar' context 'courses.list' %}">
+            {% for name in course.card_group_names %}<span class="mcl-chip">{{ name }}</span>{% endfor %}
+            {% if course.card_group_more %}<span class="mcl-chip mcl-chip--more">+{{ course.card_group_more }}</span>{% endif %}
+        </div>
+        {% endif %}
+
+        <div class="mcl-card__foot">
+            <span class="mcl-card__date">
+                <i class="far fa-clock" aria-hidden="true"></i>
+                {% blocktrans context "courses.list" with date=course.updated_at|date:"d.m.Y" %}Yeniləndi: {{ date }}{% endblocktrans %}
+            </span>
+            <span class="mcl-card__actions">
+                {% if course.card_is_owner %}
+                    {% if course.status != 'archived' %}
+                    <form method="post" action="{% url 'courses:update_course_status' course.pk %}" class="mcl-card__form">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ my_courses_section.return_to }}">
+                        {% if course.status == 'published' %}
+                        <button type="submit" name="status" value="draft" class="mcl-act"
+                                title="{% trans 'Qaralamaya qaytar — tələbələr görməyəcək' context 'courses.list' %}">
+                            <i class="fas fa-eye-slash" aria-hidden="true"></i><span class="visually-hidden">{% trans "Qaralamaya qaytar" context "courses.list" %}: {{ course.title }}</span>
+                        </button>
+                        {% else %}
+                        <button type="submit" name="status" value="published" class="mcl-act mcl-act--publish"
+                                title="{% trans 'Yayımla — tələbələr görəcək' context 'courses.list' %}">
+                            <i class="fas fa-globe" aria-hidden="true"></i><span class="mcl-act__label">{% trans "Yayımla" context "courses.list" %}</span><span class="visually-hidden">: {{ course.title }}</span>
+                        </button>
+                        {% endif %}
+                    </form>
+                    {% endif %}
+                    <a href="{{ mc_dash_url }}?edit=1&amp;from_section=my-courses&amp;return_to={{ my_courses_section.return_to|urlencode }}" class="mcl-act"
+                       title="{% trans 'Redaktə et' context 'courses.list' %}">
+                        <i class="fas fa-pen" aria-hidden="true"></i><span class="visually-hidden">{% trans "Redaktə et" context "courses.list" %}: {{ course.title }}</span>
+                    </a>
+                {% endif %}
+                <span class="mcl-act mcl-act--open" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
+            </span>
+        </div>
+    </div>
+</article>

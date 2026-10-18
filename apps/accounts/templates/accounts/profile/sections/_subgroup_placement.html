@@ -1,0 +1,26 @@
+{% load i18n static subgroup_placement_tags %}
+{% comment %}
+«Alt qrupa tələbə əlavə et» (sahib 2026-10-18) — dekanlıq / tədris şöbəsi / RİM; açar `retake.manage`
+(menyu qapısı: rbac_sections.py). Üç addım: tələbə (qrup, kredit yükü, kəsilmiş fənlər) → fənn və uyğun
+jurnal (müəllim, cədvəl, tutum, kredit təsiri, toqquşma) → sənəd + səbəb → nəticə. Altda «Son yerləşdirmələr»
+(tarixçə + rəsmi geri götürmə).
+
+Panel SPA-dır: çərçivə `{% subgroup_placement_panel %}` tag-ından gəlir (profil qurucusuna toxunulmur),
+məlumat JSON GET-lərlə, yazılar ayrıca POST-larla (`accounts:subgroup_placement_*`). CSS/JS xarici fayldadır və
+panelin İÇİNDƏDİR (AJAX swap-dan sonra da işləsin).
+{% endcomment %}
+{% if 'subgroup-placement' in allowed_sections %}
+<section class="profile-section-panel profile-section--subgroup-placement {% if active_section == 'subgroup-placement' %}is-active{% endif %}"
+         data-profile-section-panel="subgroup-placement"
+         data-source-url="{{ profile_base_url }}?section=subgroup-placement">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/subgroup_placement.css' %}?v=20261018-sgp3">
+{% subgroup_placement_panel as sp %}
+{% if not sp.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=sp.access_denied_message %}
+{% else %}
+    {% include "accounts/profile/sections/subgroup_placement/_content.html" %}
+    <script src="{% static 'accounts/js/profile/subgroup_placement_render.js' %}?v=20261018-sgp3" defer></script>
+    <script src="{% static 'accounts/js/profile/subgroup_placement.js' %}?v=20261018-sgp3" defer></script>
+{% endif %}
+</section>
+{% endif %}

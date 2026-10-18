@@ -137,6 +137,18 @@ class Course(models.Model):
         help_text="JSON formatında əlavə tənzimləmələr",
     )
 
+    # 2026-10-18: «Sillabusdan mövzuları götür» — kursun bağlı olduğu sillabus dosyesi (fənn onun üzərindən).
+    # Sillabus silinsə / deaktiv olsa kurs qalır (SET_NULL); tərs keçid yoxdur (`+`) — sillabus kursları tanımır.
+    syllabus = models.ForeignKey(
+        "syllabus.Syllabus",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name="Bağlı sillabus",
+        help_text="Mövzuların götürüldüyü sillabus dosyesi (fənn + semestr).",
+    )
+
     class Meta:
         verbose_name = "Kurs"
         verbose_name_plural = "Kurslar"

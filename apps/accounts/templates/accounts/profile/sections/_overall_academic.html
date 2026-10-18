@@ -204,6 +204,7 @@ decoration over the same enrollment aggregation the "Transkript" section uses
                                 {% elif row.fail_reason == "total" %}
                                 <span class="oa-reason-badge is-total"><i class="fas fa-calculator"></i> {% trans "Ümumi baldan kəsilib" context "profile.overall_academic" %}</span>
                                 {% endif %}
+                                {% if row.retake %}<span class="oa-reason-badge"><i class="fas fa-rotate-right"></i> {{ row.retake.text }}</span>{% endif %}
                             </td>
                             <td>{{ row.credit }}</td>
                             <td class="ta-left">{{ row.teacher_name|default:"—" }}</td>

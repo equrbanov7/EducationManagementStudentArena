@@ -59,3 +59,10 @@ def build_course_dashboard_context(*, course, user, membership, can_manage, is_s
         return {"projects": projects_qs, "projects_with_user_data": projects_with_user_data}
     except Exception:
         return {"projects": [], "projects_with_user_data": []}
+
+
+def course_task_queryset():
+    """«Kurslarım» kartının tapşırıq sayğacı üçün mənbə (bax ``dashboard_sources.register_task_counter``)."""
+    from apps.projects.models import Project
+
+    return Project.objects.all()

@@ -1,0 +1,536 @@
+/*
+ * «Kurslarım» (müəllim) — 2026-10-18 redizayn: kart şəbəkəsi / siyahı (`.mcl-*`).
+ *
+ * Rəng kursun aksent tonundandır (`courses/css/course_accent.css` → `--crs-ac*`);
+ * KPI, filtr paneli, boş vəziyyət və status nişanı ORTAQ `ems_ui` qatındadır.
+ * Köhnə `.mc-*` kartı (my_courses.css) tələbənin «Kurslarım» bölməsində qalır —
+ * bu fayl ona toxunmur. Yalnız `my-courses` bölməsi render olunanda yüklənir.
+ */
+
+.profile-section--my-courses .ems-kpis {
+    margin-bottom: 16px;
+}
+
+/* ── Görünüş açarı ─────────────────────────────────────────────────────── */
+.mcl-view {
+    display: inline-flex;
+    padding: 3px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-lg, 10px);
+    background: var(--ems-bg);
+}
+
+.mcl-view__btn {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 32px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ems-neutral-500);
+    cursor: pointer;
+}
+
+.mcl-view__btn:hover {
+    color: var(--ems-text);
+}
+
+.mcl-view__btn[aria-pressed="true"] {
+    background: var(--ems-neutral-100);
+    color: var(--ems-text);
+}
+
+.mcl-view__btn:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 1px;
+}
+
+/* ── Şəbəkə ────────────────────────────────────────────────────────────── */
+.mcl-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.mcl-grid[hidden] {
+    display: none;
+}
+
+.mcl-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 16px;
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card, 0 1px 2px rgba(15, 23, 42, 0.06));
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.mcl-card:hover {
+    border-color: var(--crs-ac-tint);
+    box-shadow: 0 10px 24px -14px rgba(15, 23, 42, 0.28);
+    transform: translateY(-2px);
+}
+
+.mcl-card:has(.mcl-card__link:focus-visible) {
+    outline: 3px solid var(--crs-ac);
+    outline-offset: 2px;
+}
+
+.mcl-card__cover {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 84px;
+    padding: 0 18px;
+    overflow: hidden;
+    background: linear-gradient(120deg, var(--crs-ac-soft) 0%, var(--crs-ac-tint) 100%);
+}
+
+.mcl-card__cover::after {
+    content: "";
+    position: absolute;
+    top: -46px;
+    right: -30px;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 18px solid var(--crs-ac);
+    opacity: 0.08;
+}
+
+.mcl-card__cover.has-img {
+    padding: 0;
+    background: var(--ems-neutral-100);
+}
+
+.mcl-card__cover.has-img::after {
+    display: none;
+}
+
+.mcl-card__cover img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mcl-card__glyph {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    background: var(--crs-ac);
+    color: #fff;
+    font-size: 1.15rem;
+    box-shadow: 0 6px 14px -8px var(--crs-ac);
+}
+
+.mcl-card__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    padding: 14px 16px 12px;
+}
+
+.mcl-card__eyebrow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.mcl-syl {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    max-width: 100%;
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-xs, 0.75rem);
+    font-weight: 600;
+}
+
+.mcl-syl > i {
+    color: var(--crs-ac-ink);
+}
+
+.mcl-syl__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mcl-card__title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.mcl-card__link {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    color: var(--ems-text);
+    text-decoration: none;
+}
+
+.mcl-card__link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+.mcl-card__link:hover {
+    color: var(--crs-ac-ink);
+}
+
+.mcl-card__link:focus-visible {
+    outline: none;
+}
+
+.mcl-card__desc {
+    display: -webkit-box;
+    margin: -4px 0 0;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-sm, 0.875rem);
+    line-height: 1.45;
+}
+
+.mcl-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mcl-stat {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    column-gap: 6px;
+    align-items: center;
+    min-width: 0;
+    padding: 7px 8px;
+    border: 1px solid var(--ems-neutral-100);
+    border-radius: 10px;
+    background: var(--ems-neutral-50);
+}
+
+.mcl-stat i {
+    grid-row: 1;
+    color: var(--crs-ac-ink);
+    font-size: 0.78rem;
+}
+
+.mcl-stat b {
+    grid-row: 1;
+    color: var(--ems-text);
+    font-size: 1rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+}
+
+.mcl-stat span {
+    grid-column: 1 / -1;
+    overflow: hidden;
+    color: var(--ems-neutral-600);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mcl-stat.is-zero i,
+.mcl-stat.is-zero b {
+    color: var(--ems-neutral-500);
+}
+
+.mcl-card__groups {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.mcl-chip {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: var(--ems-r-pill, 999px);
+    background: var(--crs-ac-tint);
+    color: var(--crs-ac-ink);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.mcl-chip--more {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+}
+
+.mcl-card__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid var(--ems-neutral-100);
+}
+
+.mcl-card__date {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-xs, 0.75rem);
+    white-space: nowrap;
+}
+
+.mcl-card__actions {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mcl-card__form {
+    display: contents;
+}
+
+.mcl-act {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 9px;
+    background: var(--ems-bg);
+    color: var(--ems-neutral-600);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.mcl-act:hover {
+    border-color: var(--crs-ac-tint);
+    background: var(--crs-ac-soft);
+    color: var(--crs-ac-ink);
+}
+
+.mcl-act:focus-visible {
+    outline: 2px solid var(--crs-ac);
+    outline-offset: 1px;
+}
+
+.mcl-act--publish {
+    border-color: var(--ems-success-bd, #bbf7d0);
+    color: var(--ems-success-700);
+}
+
+.mcl-act--open {
+    border-color: transparent;
+    background: var(--crs-ac-tint);
+    color: var(--crs-ac-ink);
+    pointer-events: none;
+}
+
+.mcl-card:hover .mcl-act--open {
+    background: var(--crs-ac);
+    color: #fff;
+}
+
+/* ── Siyahı görünüşü (`[data-mcl-grid].mcl-grid--list`) ─────────────────── */
+@media (min-width: 760px) {
+    .mcl-grid--list {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+    }
+
+    .mcl-grid--list .mcl-card {
+        flex-direction: row;
+    }
+
+    .mcl-grid--list .mcl-card:hover {
+        transform: none;
+    }
+
+    .mcl-grid--list .mcl-card__cover {
+        flex: 0 0 96px;
+        justify-content: center;
+        height: auto;
+        padding: 0;
+    }
+
+    .mcl-grid--list .mcl-card__body {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+        column-gap: 20px;
+        row-gap: 6px;
+        align-items: center;
+        padding: 12px 16px;
+    }
+
+    .mcl-grid--list .mcl-card__eyebrow,
+    .mcl-grid--list .mcl-card__title,
+    .mcl-grid--list .mcl-card__desc,
+    .mcl-grid--list .mcl-card__groups {
+        grid-column: 1;
+    }
+
+    .mcl-grid--list .mcl-card__desc {
+        margin: 0;
+        -webkit-line-clamp: 1;
+    }
+
+    .mcl-grid--list .mcl-stats {
+        grid-column: 2;
+        grid-row: 1 / span 3;
+    }
+
+    .mcl-grid--list .mcl-card__foot {
+        grid-column: 1 / -1;
+        margin-top: 2px;
+        padding-top: 8px;
+    }
+}
+
+/* ── İlk dəfə boş vəziyyət ─────────────────────────────────────────────── */
+.mcl-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 40px 20px;
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: 18px;
+    background: var(--ems-bg);
+    text-align: center;
+}
+
+.mcl-empty__ic {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    font-size: 1.5rem;
+}
+
+.mcl-empty__title {
+    margin: 4px 0 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+
+.mcl-empty__body {
+    max-width: 520px;
+    margin: 0;
+    color: var(--ems-neutral-600);
+}
+
+.mcl-empty__steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    width: min(100%, 760px);
+    margin: 10px 0 8px;
+    padding: 0;
+    list-style: none;
+    text-align: left;
+}
+
+.mcl-empty__steps li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 12px;
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm, 0.875rem);
+}
+
+.mcl-empty__num {
+    display: grid;
+    flex: 0 0 24px;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--ems-primary-600);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+@media (max-width: 759px) {
+    /* Siyahı görünüşü yalnız geniş ekranda fərqlidir — açar telefonda gizlənir. */
+    .mcl-view {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    /* KPI-lər telefonda iki sütun, yığcam (ortaq `ems-kpis` burada tək sütuna düşür → 5 hündür kart). */
+    .profile-section--my-courses .ems-kpis--5 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .profile-section--my-courses .ems-kpis--5 .ems-kpi {
+        padding: 10px 12px;
+    }
+
+    .profile-section--my-courses .ems-kpis--5 .ems-kpi__value {
+        font-size: 1.35rem;
+    }
+
+    .profile-section--my-courses .ems-kpis--5 .ems-kpi:first-child {
+        grid-column: 1 / -1;
+    }
+
+    .mcl-empty__steps {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .mcl-card__cover {
+        height: 72px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mcl-card,
+    .mcl-card:hover {
+        transition: none;
+        transform: none;
+    }
+}

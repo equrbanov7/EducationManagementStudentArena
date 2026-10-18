@@ -192,9 +192,10 @@ qurulub, panel swap-da yenidən qoşulmağa ehtiyac yoxdur.{% endcomment %}
 {% if 'my-courses' in asset_sections %}
 <script src="{% static 'courses/js/course_create_form.js' %}?v=20260629"></script>
 <script src="{% static 'courses/js/create_course_modal.js' %}?v=20261017-lazy"></script>
+<script src="{% static 'courses/js/my_courses_list.js' %}?v=20261018-crs"></script>
 {% endif %}
 {% if 'my-courses' in asset_sections or 'assigned-courses' in asset_sections %}
-<script src="{% static 'courses/js/course_card_nav.js' %}?v=20260928-1"></script>
+<script src="{% static 'courses/js/course_card_nav.js' %}?v=20261018-crs"></script>
 {% endif %}
 {% if 'my-exams' in asset_sections %}
 <script src="{% static 'exams/js/exam_create_edit_modal/namespace.js' %}?v=20260911-1"></script>

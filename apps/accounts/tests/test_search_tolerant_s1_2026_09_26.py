@@ -97,19 +97,20 @@ class ExamChanceTolerantSearchTest(_RegistryFixture):
         for query in ("634ing", "634 İNG", "634-ing", "634"):
             with self.subTest(query=query):
                 results = self._section(chance_student_q=query)["student_results"]
-                self.assertEqual({user.username for user in results}, {"w5l_student", "w5l_student2"})
+                self.assertEqual({row["user"].username for row in results}, {"w5l_student", "w5l_student2"})
 
     def test_student_name_and_cohort_tolerant(self):
         self.assertEqual(
-            [user.username for user in self._section(chance_student_q="Mervi")["student_results"]], ["w5l_student"]
+            [row["user"].username for row in self._section(chance_student_q="Mervi")["student_results"]],
+            ["w5l_student"],
         )
         self.assertEqual(
-            [user.username for user in self._section(chance_student_q="kohorta")["student_results"]],
+            [row["user"].username for row in self._section(chance_student_q="kohorta")["student_results"]],
             ["w5l_outsider"],
         )
         # Tokenlər VƏ: ad + qrup eyni tələbədə olmalıdır.
         self.assertEqual(
-            [user.username for user in self._section(chance_student_q="Aysel 634ing")["student_results"]],
+            [row["user"].username for row in self._section(chance_student_q="Aysel 634ing")["student_results"]],
             ["w5l_student2"],
         )
         self.assertEqual(self._section(chance_student_q="Aysel 701biz")["student_results"], [])

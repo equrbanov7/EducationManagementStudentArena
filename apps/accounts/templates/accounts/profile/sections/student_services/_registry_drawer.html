@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n static %}
 {% comment %}
 Ekran 09 — tələbə kartı (çekmecə). Məzmun SERVERDƏN JSON ilə gəlir
 (`accounts:student_registry_card`), burada yalnız SKELET var: JS mətnləri
@@ -79,6 +79,25 @@ QƏSDƏN yoxdur (§8/13, sətir başına aqreqat qadağandır).
             </button>
         </div>
     </div>
+
+    {% comment %}2026-10-18 (sahib): semestr kredit yükü + alt qrup yerləşdirmə izi (student_registry_subgroup.js,
+    `sr:card` hadisəsi ilə doldurulur — əsas çekməcə moduluna toxunulmur).{% endcomment %}
+    <div class="stsvc-subgroup" data-sr-subgroup hidden
+         data-label-credit="{% trans 'Bu semestr' context 'accounts.student_registry' %}"
+         data-label-credits="{% trans 'kredit' context 'accounts.student_registry' %}"
+         data-label-subgroup="{% trans 'alt qrup' context 'accounts.student_registry' %}"
+         data-label-undone="{% trans 'geri götürülüb' context 'accounts.student_registry' %}"
+         data-label-document="{% trans 'Sənəd' context 'accounts.student_registry' %}"
+         data-label-order="{% trans 'Sərəncam' context 'accounts.student_registry' %}">
+        <h3 class="stsvc-card__title">{% trans "Kredit yükü və alt qrup" context "accounts.student_registry" %}</h3>
+        <p class="stsvc-subgroup__credit" data-sr-subgroup-credit></p>
+        <p class="stsvc-card__empty" data-sr-subgroup-empty hidden>{% trans "Alt qrup yerləşdirməsi olmayıb." context "accounts.student_registry" %}</p>
+        <ol class="ems-tl" data-sr-subgroup-list aria-label="{% trans 'Alt qrup yerləşdirmələri' context 'accounts.student_registry' %}"></ol>
+        <a class="ems-btn ems-btn--sm js-profile-section-link" data-sr-subgroup-link data-section="subgroup-placement" href="#" hidden>
+            <i class="fas fa-user-plus" aria-hidden="true"></i> {% trans "Alt qrupa tələbə əlavə et" context "accounts.student_registry" %}
+        </a>
+    </div>
+    <script src="{% static 'accounts/js/profile/student_registry_subgroup.js' %}?v=20261018-sgp1" defer></script>
 
     <h3 class="stsvc-card__title">{% trans "Hərəkət tarixçəsi" context "accounts.student_registry" %}</h3>
     <p class="stsvc-card__empty" data-sr-history-empty hidden>

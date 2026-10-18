@@ -223,3 +223,26 @@
     --ems-violet-600: #7c3aed;
     --ems-violet-800: #5b21b6;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Kurs aksent palitrası (2026-10-18, add-only) — «Kurslarım» kartları və kurs
+   paneli hər kursa fənn/ad üzrə DETERMİNİSTİK bir ton verir
+   (`apps/courses/presentation.py` → `crs-accent--<ad>`, `course_accent.css`).
+   Mövcud tonlara (primary/sky/emerald/warning/rose/violet) yalnız çatışmayan
+   teal və indigo pillələri əlavə olunur. Hər ton üçün: 50/100 = fon,
+   600 = dolu ikon/zolaq (ağ ikonla ≥ 3:1), 800 = mətn (100 fonda ≥ 7:1).
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+    --ems-teal-50: #f0fdfa;
+    --ems-teal-100: #ccfbf1;
+    --ems-teal-600: #0d9488;
+    --ems-teal-800: #115e59;
+    --ems-indigo-50: #eef2ff;
+    --ems-indigo-100: #e0e7ff;
+    --ems-indigo-600: #4f46e5;
+    --ems-indigo-800: #3730a3;
+    --ems-warning-50: #fffbeb;
+    --ems-sky-50: #f0f9ff;
+    --ems-rose-50: #fff1f4;
+    --ems-violet-50: #f8f5ff;
+}

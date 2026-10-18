@@ -35,6 +35,7 @@ Açılıb-bağlanma: `[data-cd-topic-toggle]` → course_panel.js.
                 {% include "courses/partials/_cd_icon.html" with icon="folder" size=13 %}
                 {{ res_count }} {% trans "suffix_resources" context "courses.partial.topic_accordion" %}
               </span>
+              {% if topic.syllabus_week %}<span class="cd-chip cd-topic__week">{% blocktrans context "courses.syllabus_import" with n=topic.syllabus_week %}Həftə {{ n }}{% endblocktrans %}</span>{% endif %}
               <span class="cd-muted">{{ topic.created_at|date:"d.m.Y" }}</span>
             </span>
           </span>
@@ -127,7 +128,11 @@ Açılıb-bağlanma: `[data-cd-topic-toggle]` → course_panel.js.
     {% if is_owner %}
       <p class="cd-empty__body">{% trans "empty_topic_hint" context "courses.dashboard" %}</p>
       <div class="cd-empty__actions">
-        <button type="button" class="ems-btn ems-btn--primary" data-bs-toggle="modal" data-bs-target="#topicFormModal">
+        <button type="button" class="ems-btn ems-btn--primary" data-bs-toggle="modal" data-bs-target="#syllabusImportModal" data-cd-syllabus-open>
+          <i class="fas fa-file-import" aria-hidden="true"></i>
+          {% trans "Sillabusdan mövzuları götür" context "courses.syllabus_import" %}
+        </button>
+        <button type="button" class="ems-btn" data-bs-toggle="modal" data-bs-target="#topicFormModal">
           {% include "courses/partials/_cd_icon.html" with icon="plus" size=16 stroke=2.4 %}
           {% trans "action_add_first_topic" context "courses.partial.topic_accordion" %}
         </button>

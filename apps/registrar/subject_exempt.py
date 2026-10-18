@@ -230,6 +230,21 @@ def student_exempt_subjects(record, period) -> list:
     ]
 
 
+def is_exempt_from_subject(record, period, subject_id) -> bool:
+    """Tələbə bu dövrdə *subject_id* fənnindən azad edilibmi (alt qrupa yerləşdirmə qapısı)."""
+    if record is None or period is None or subject_id is None:
+        return False
+    return JournalHygieneDecision.objects.filter(
+        organization_id=record.organization_id,
+        category=EXEMPT,
+        reverted_at__isnull=True,
+        enrollment__student_id=record.student_id,
+        enrollment__status=Enrollment.Status.DROPPED,
+        enrollment__offering__period=period,
+        enrollment__offering__subject_id=subject_id,
+    ).exists()
+
+
 def page_context(user, offering) -> dict:
     """Jurnal səhifəsi: düymə (icazə + açıq siyahı) və «Azad edilənlər» siyahısı.
 

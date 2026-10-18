@@ -1,0 +1,11 @@
+{% load i18n %}
+<p class="rt-dialog__subject" data-rt-text="who"></p>
+<div class="ems-field">
+    <label class="ems-field__label" for="rtResultScore">{% trans "İmtahan balı" context "registrar.retake" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <input class="ems-input" type="number" id="rtResultScore" name="score" min="0" max="100" step="0.5" inputmode="decimal" required>
+    <span class="ems-field__hint">{% trans "Çıxış balı (adətən 0–50) — fənnin imtahan tavanından çox bal qəbul olunmur." context "registrar.retake" %}</span>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="rtResultNote">{% trans "Qeyd" context "registrar.retake" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "ui.dialog" %}</span></label>
+    <textarea class="ems-textarea" id="rtResultNote" name="note" rows="2" maxlength="2000"></textarea>
+</div>

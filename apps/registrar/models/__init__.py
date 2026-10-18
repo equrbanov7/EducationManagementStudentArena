@@ -103,6 +103,18 @@ from .movement import (
     StudentMovement,
     movement_document_path,
 )
+from .retake import ACTIVE_STATUSES as RETAKE_ACTIVE_STATUSES
+from .retake import CONSUMED_STATUSES as RETAKE_CONSUMED_STATUSES
+from .retake import RetakeApplication, RetakeKind, RetakeResultSource, RetakeStatus
+from .retake_log import (
+    ExamChanceGrant,
+    ExamChanceReason,
+    RetakeActorRole,
+    RetakeApplicationEvent,
+    RetakeEventAction,
+    RetakeReceipt,
+)
+from .subgroup_placement import SubgroupPlacementEvent, SubgroupPlacementKind
 from .transfer_evidence import GroupTransferEvidence
 
 __all__ = [
@@ -169,6 +181,8 @@ __all__ = [
     "GUEST_DOCUMENT_EXTENSIONS",
     "GuestRosterDocument",
     "guest_document_path",
+    "SubgroupPlacementEvent",
+    "SubgroupPlacementKind",
     "MOVEMENT_REASON_MIN_LENGTH",
     "MovementKind",
     "movement_document_path",
@@ -177,6 +191,18 @@ __all__ = [
     "ResitReason",
     "ResitRecord",
     "ResitStatus",
+    "RETAKE_ACTIVE_STATUSES",
+    "RETAKE_CONSUMED_STATUSES",
+    "RetakeActorRole",
+    "RetakeApplication",
+    "RetakeApplicationEvent",
+    "RetakeEventAction",
+    "RetakeKind",
+    "RetakeReceipt",
+    "RetakeResultSource",
+    "RetakeStatus",
+    "ExamChanceGrant",
+    "ExamChanceReason",
     "Rubric",
     "RubricCriterion",
     "ScheduleSlot",

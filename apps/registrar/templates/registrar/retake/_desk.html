@@ -1,0 +1,87 @@
+{% load i18n static registrar_retake %}
+{% comment %}«25% müraciətləri» — heyət növbəsi (sahib 2026-10-18). Data: `{% retake_desk as rd %}` (`retake_desk.build`).
+Tab-lar açardan: «Ödəniş yoxlaması» (`retake.payment_verify`), «Qəbul və qərar» (`retake.manage`), «Hamısı».
+`?rt_student=<id>` — tələbənin tam izi (bütün müraciətlər, hadisələr, qəbzlər, şanslar, nəticələr) — YALNIZ
+`retake.manage` / `student.records_view`; mühasib izi və «Hamısı»nı görmür, «Ödəniş yoxlaması» sətri
+(`_desk_row_payment.html`) bal / nəticə / başqa fənn göstərmir (sahibin qaydası, 2026-10-18).
+Filtr/tab/səhifə linkləri paneli yerində yeniləyir (AJAX-safe); qərarlar `retake_desk.js` → JSON POST.{% endcomment %}
+{% retake_desk as rd %}
+{% if not rd.has_access %}
+    {% trans "Bu bölmə 25% müraciətlərini yoxlayan heyət üçündür." context "registrar.retake" as rt_denied %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="error" state_icon="fa-lock" state_title=rt_denied %}
+{% else %}
+<div class="rt rt-desk" data-rt-root data-rt-error-generic="{% trans 'Əməl yerinə yetirilmədi — icazənizi yoxlayın və ya səhifəni yeniləyin.' context 'registrar.retake' %}" data-rt-section="retake-desk">
+    {% trans "Tələbələrin 25% təkrar imtahan və alt qrup müraciətləri: Mühasibatlıq qəbzi yoxlayır, dekanlıq / tədris şöbəsi buraxır və ya alt qrupa yerləşdirir. Hər addım tarixçədə qalır." context "registrar.retake" as rt_desk_sub %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=rt_desk_sub %}
+
+    {% if rd.trail %}{% include "registrar/retake/_trail.html" with trail=rd.trail %}{% endif %}
+
+    <dl class="rt-kpis rt-kpis--6">
+        {% for tile in rd.kpis %}
+        <div class="rt-kpi{% if tile.value %} rt-kpi--{{ tile.status|retake_tone }}{% endif %}">
+            <dt>{{ tile.label }}</dt>
+            <dd><a href="{{ profile_base_url }}?section=retake-desk&amp;rt_tab={{ rd.tab }}&amp;rt_status={{ tile.status }}" data-section="retake-desk">{{ tile.value }}</a></dd>
+        </div>
+        {% endfor %}
+    </dl>
+
+    <nav class="ems-tabs rt-tabs" aria-label="{% trans 'Növbələr' context 'registrar.retake' %}">
+        {% for t in rd.tabs %}
+        <a class="ems-tabs__btn" href="{{ profile_base_url }}?section=retake-desk&amp;rt_tab={{ t.key }}" data-section="retake-desk"{% if t.current %} aria-current="page"{% endif %}>{{ t.label }}</a>
+        {% endfor %}
+    </nav>
+
+    <form method="get" action="" class="ems-filters ems-filters--auto rt-filters" role="search" data-profile-ajax-form data-section="retake-desk">
+        <input type="hidden" name="section" value="retake-desk">
+        <input type="hidden" name="rt_tab" value="{{ rd.tab }}">
+        <div class="ems-field ems-field--wide">
+            <label class="ems-field__label" for="rtQ">{% trans "Axtarış" context "registrar.retake" %}</label>
+            <input type="search" class="ems-input" id="rtQ" name="rt_q" value="{{ rd.params.q }}" autocomplete="off" data-rt-auto-search
+                   placeholder="{% trans 'Tələbə, fənn və ya qrup' context 'registrar.retake' %}">
+        </div>
+        <div class="ems-field">
+            <label class="ems-field__label" for="rtStatus">{% trans "Status" context "registrar.retake" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select class="ems-select bootstrap-single-select__native" id="rtStatus" name="rt_status" data-bootstrap-select data-rt-auto-field>
+                    <option value="">{% trans "Bütün statuslar" context "registrar.retake" %}</option>
+                    {% for value, label in rd.status_choices %}<option value="{{ value }}"{% if rd.params.status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+        {% if not rd.payment_view %}
+        <div class="ems-field">
+            <label class="ems-field__label" for="rtKind">{% trans "Növ" context "registrar.retake" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select class="ems-select bootstrap-single-select__native" id="rtKind" name="rt_kind" data-bootstrap-select data-rt-auto-field>
+                    <option value="">{% trans "Hər iki növ" context "registrar.retake" %}</option>
+                    {% for value, label in rd.kind_choices %}<option value="{{ value }}"{% if rd.params.kind == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+        {% endif %}
+        <div class="ems-filters__actions">
+            <a class="ems-btn" href="{{ profile_base_url }}?section=retake-desk&amp;rt_tab={{ rd.tab }}" data-section="retake-desk"><i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Sıfırla" context "ui.filters" %}</a>
+        </div>
+        <div class="ems-filters__count" aria-live="polite">{% blocktrans with n=rd.total context "registrar.retake" %}Nəticə: {{ n }}{% endblocktrans %}</div>
+    </form>
+
+    {% if rd.rows %}
+    <ul class="rt-cards rt-desk__rows">
+        {% for a in rd.rows %}{% if rd.payment_view %}{% include "registrar/retake/_desk_row_payment.html" %}{% else %}{% include "registrar/retake/_desk_row.html" %}{% endif %}{% endfor %}
+    </ul>
+    {% if rd.page.has_other_pages %}
+    <nav class="ems-rowactions rt-pager" aria-label="{% trans 'Səhifələmə' context 'registrar.retake' %}">
+        {% if rd.page.has_previous %}<a class="ems-btn ems-btn--sm" href="{{ profile_base_url }}?section=retake-desk&amp;rt_tab={{ rd.tab }}&amp;rt_status={{ rd.params.status }}&amp;rt_kind={{ rd.params.kind }}&amp;rt_q={{ rd.params.q|urlencode }}&amp;rt_page={{ rd.page.previous_page_number }}" data-section="retake-desk"><i class="fas fa-chevron-left" aria-hidden="true"></i></a>{% endif %}
+        <span>{{ rd.page.number }} / {{ rd.page.paginator.num_pages }}</span>
+        {% if rd.page.has_next %}<a class="ems-btn ems-btn--sm" href="{{ profile_base_url }}?section=retake-desk&amp;rt_tab={{ rd.tab }}&amp;rt_status={{ rd.params.status }}&amp;rt_kind={{ rd.params.kind }}&amp;rt_q={{ rd.params.q|urlencode }}&amp;rt_page={{ rd.page.next_page_number }}" data-section="retake-desk"><i class="fas fa-chevron-right" aria-hidden="true"></i></a>{% endif %}
+    </nav>
+    {% endif %}
+    {% else %}
+        {% trans "Növbə boşdur" context "registrar.retake" as rt_q_empty %}
+        {% trans "Bu süzgəclərə uyğun müraciət yoxdur." context "registrar.retake" as rt_q_empty_b %}
+        {% include "partials/ems_ui/_empty.html" with state_icon="fa-inbox" state_title=rt_q_empty state_body=rt_q_empty_b %}
+    {% endif %}
+
+    {% include "registrar/retake/_desk_dialogs.html" %}
+</div>
+{% endif %}

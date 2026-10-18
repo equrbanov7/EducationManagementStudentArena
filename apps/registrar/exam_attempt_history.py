@@ -134,10 +134,35 @@ def attempt_rows_for_subject(*, student, subject_id, organization):
         return []
     # Sətir formatı TƏK yerdən (toplu variant da eyni funksiyanı işlədir).
     percents, appeals = _history_extras(attempts)
-    return _rows_from_attempts(attempts, percents, appeals)
+    return _rows_from_attempts(attempts, percents, appeals, retake_attempt_ids(attempts))
 
 
-def _rows_from_attempts(attempts, percents, appeals) -> list:
+def retake_attempt_ids(attempts) -> set:
+    """25% təkrar imtahan cəhdləri (2026-10-18): «İmtahan şansı ver» səbəbi «25% müraciəti» olan qeyddən
+    SONRA başlanmış cəhdlər — tək sorğu (``ExamChanceGrant``). UI «· 25%» nişanı göstərir."""
+    if not attempts:
+        return set()
+    from .models import ExamChanceGrant, ExamChanceReason
+
+    first_grant: dict = {}
+    for student_id, exam_id, created_at in ExamChanceGrant.objects.filter(
+        reason=ExamChanceReason.RETAKE_25,
+        student_id__in={a.user_id for a in attempts},
+        exam_id__in={a.exam_id for a in attempts},
+    ).values_list("student_id", "exam_id", "created_at"):
+        key = (student_id, exam_id)
+        if key not in first_grant or created_at < first_grant[key]:
+            first_grant[key] = created_at
+    marked = set()
+    for attempt in attempts:
+        granted_at = first_grant.get((attempt.user_id, attempt.exam_id))
+        started = attempt.started_at or attempt.finished_at
+        if granted_at is not None and started is not None and started >= granted_at:
+            marked.add(attempt.id)
+    return marked
+
+
+def _rows_from_attempts(attempts, percents, appeals, retakes=frozenset()) -> list:
     """Sıralanmış cəhd sətirlərini UI formatına çevir (rəsmi = SONUNCU bitmiş final cəhdi)."""
     last_index = len(attempts) - 1
     return [
@@ -151,6 +176,7 @@ def _rows_from_attempts(attempts, percents, appeals) -> list:
             "is_expelled": getattr(attempt, "supervision_status", "") == "removed",
             "attempt_id": attempt.id,
             "appeals": appeals.get(attempt.id, []),
+            "is_retake": attempt.id in retakes,
         }
         for index, attempt in enumerate(attempts)
     ]
@@ -159,10 +185,11 @@ def _rows_from_attempts(attempts, percents, appeals) -> list:
 def _grouped_rows(attempts, key) -> dict:
     """Cəhdləri ``key(attempt)`` üzrə qruplaşdır — faiz/apellyasiya TƏK toplu çağırışla."""
     percents, appeals = _history_extras(attempts)
+    retakes = retake_attempt_ids(attempts)
     grouped: dict = {}
     for attempt in attempts:
         grouped.setdefault(key(attempt), []).append(attempt)
-    return {group: _rows_from_attempts(rows, percents, appeals) for group, rows in grouped.items()}
+    return {group: _rows_from_attempts(rows, percents, appeals, retakes) for group, rows in grouped.items()}
 
 
 def attempt_rows_by_student(*, student_ids, subject_id, organization) -> dict:
