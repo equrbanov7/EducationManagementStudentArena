@@ -1558,6 +1558,13 @@ networks:
   docker-api:
     driver: bridge
     internal: true
+    # 2026-10-19: subnet pin-ləndi — pin-siz qalanda yenidən yaradılarkən Docker ona «növbəti boş» aralığı
+    # verirdi və pin-li `emsarena-network` (172.18.0.0/16) ilə «Pool overlaps» toqquşması ola bilirdi.
+    # Dəyər prod-un CARİ aralığıdır (prod-audit «Docker şəbəkələri», 2026-10-19) — mövcud şəbəkə dəyişmir.
+    ipam:
+      config:
+        - subnet: ${DOCKER_API_NETWORK_SUBNET:-172.20.0.0/16}
+          gateway: ${DOCKER_API_NETWORK_GATEWAY:-172.20.0.1}
 
 volumes:
   postgres_data:
