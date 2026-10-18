@@ -5,7 +5,6 @@ core.auth_otp-dadır. Genişlənmə nöqtəsi: apps.accounts.profile_hooks
 (profil bölmə kontribusiyaları — blog ready()-də qeydiyyat).
 """
 
-from apps.accounts.identity import login_blocked_access_states  # noqa: F401
 from apps.accounts.services import (  # noqa: F401
     ARCHIVE_ROLE_NAME,
     activate_staged_account,
@@ -34,7 +33,6 @@ __all__ = [
     "get_user_role_level",
     "is_superadmin_user",
     "issue_email_otp",
-    "login_blocked_access_states",
     "order_evidence_digest",
     "map_org_role_to_profile_role",
     "purge_stale_pending_registration",

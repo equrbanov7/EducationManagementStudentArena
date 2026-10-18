@@ -100,11 +100,15 @@ def center_staff_queryset(organization):
     rolsuz «üzv» siyahıya düşürdü. İndi müsbət qayda: aktiv hesab, girişi bağlı olmayan profil və bu təşkilatda heyət
     rolu ilə AKTİV üzvlük (aktiv rol). ``eligible_invigilators`` də bu sorğu üzərində qurulur — axtarış və yazı eynidir.
     """
+    from django.apps import apps as django_apps
     from django.contrib.auth import get_user_model
     from django.db.models import Exists, OuterRef
 
-    from apps.accounts.public import login_blocked_access_states
     from apps.organizations.models import Membership
+
+    # Model `get_model` ilə — exams → accounts statik importu modul dövrü yaradır (accounts ↔ exams).
+    access = django_apps.get_model("accounts", "UserProfile").AccessState
+    blocked_states = (access.STAGED, access.ARCHIVED)  # = accounts.identity.login_blocked_access_states()
 
     User = get_user_model()
     staff_membership = Membership.objects.filter(
@@ -114,7 +118,7 @@ def center_staff_queryset(organization):
         User.objects.filter(is_active=True)
         .filter(Exists(staff_membership))
         .exclude(profile__is_deleted=True)
-        .exclude(profile__access_state__in=login_blocked_access_states())
+        .exclude(profile__access_state__in=blocked_states)
         .exclude(profile__role__in=("student", "lead_student"))
         .order_by("first_name", "last_name", "username")
     )
