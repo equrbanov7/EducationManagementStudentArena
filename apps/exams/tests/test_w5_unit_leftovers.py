@@ -305,7 +305,7 @@ class ExamChanceSectionUnitTests(_RegistryFixture):
 
     def test_student_search_matches_registry_group_name(self):
         results = self._section(chance_student_q="634")["student_results"]
-        self.assertEqual({u.username for u in results}, {"w5l_student", "w5l_student2"})
+        self.assertEqual({row["user"].username for row in results}, {"w5l_student", "w5l_student2"})
 
 
 class TeacherResultsUnitGroupTests(_RegistryFixture):

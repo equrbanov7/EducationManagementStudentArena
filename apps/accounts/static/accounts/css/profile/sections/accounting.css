@@ -1,0 +1,219 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   «Mühasibatlıq» (sahib 2026-10-18) — şablon: sections/accounting/_content.html.
+   Əsas görünüş ems_ui komponentlərindəndir (kpi, filters, table, badge, card, msg);
+   burada yalnız bölməyə xas düzülüş var. Rənglər YALNIZ --ems-* tokenləri ilə.
+   Telefonda cədvəllər `ems-table--stack` ilə kartlaşır (table.css).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ac {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4);
+    min-width: 0;
+}
+
+.ac__notice {
+    margin: 0;
+}
+
+.ac__count {
+    margin: 0;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.ac-muted {
+    color: var(--ems-text-muted);
+}
+
+.ac-block {
+    display: block;
+}
+
+.ac-strong {
+    font-weight: 800;
+}
+
+.ac-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.ac-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    min-width: 0;
+}
+
+/* ── Cədvəl ─────────────────────────────────────────────────────────────── */
+.ac-table__name {
+    min-width: 12rem;
+}
+
+.ac-table__name a {
+    font-weight: 700;
+    color: var(--ems-text);
+    text-decoration: none;
+}
+
+.ac-table__name a:hover,
+.ac-table__name a:focus-visible {
+    text-decoration: underline;
+}
+
+.ac-diff.is-under {
+    color: var(--ems-danger-700);
+    font-weight: 700;
+}
+
+.ac-diff.is-over {
+    color: var(--ems-warning-800);
+    font-weight: 700;
+}
+
+.ac-table__total th,
+.ac-table__total td {
+    font-weight: 800;
+    background: var(--ems-bg-subtle);
+}
+
+.ac-table tr.is-current th,
+.ac-table tr.is-current td {
+    background: var(--ems-primary-50);
+}
+
+.ac-pager {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ems-sp-4);
+    margin-top: var(--ems-sp-3);
+}
+
+.ac-pager__info {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+/* ── Drill-down ─────────────────────────────────────────────────────────── */
+.ac-back {
+    align-self: flex-start;
+}
+
+.ac-person {
+    padding: var(--ems-sp-4) var(--ems-sp-5);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-4);
+}
+
+.ac-person__name {
+    margin: 0;
+    font-size: var(--ems-fs-xl);
+    font-weight: 800;
+}
+
+.ac-person__meta {
+    margin: var(--ems-sp-1) 0 0;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.ac-person__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-6);
+    margin: 0;
+}
+
+.ac-person__stats dt {
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ems-text-muted);
+}
+
+.ac-person__stats dd {
+    margin: 0;
+    font-size: var(--ems-fs-xl);
+    font-weight: 800;
+}
+
+.ac-h {
+    margin: var(--ems-sp-4) 0 0;
+    font-size: var(--ems-fs-md);
+}
+
+.ac-note {
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+}
+
+/* ── Qayda izahı ────────────────────────────────────────────────────────── */
+.ac-rule {
+    border: 1px solid var(--ems-border);
+    border-radius: 8px;
+    padding: var(--ems-sp-3) var(--ems-sp-4);
+    background: var(--ems-bg);
+}
+
+.ac-rule summary {
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.ac-rule__list {
+    margin: var(--ems-sp-3) 0 0;
+    padding-left: var(--ems-sp-5);
+    max-width: var(--ems-w-text, 72ch);
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    line-height: 1.5;
+}
+
+/* 11 sütun 1100–1400px məzmun enində sürüşməsin: üfüqi doldurma yığcam. */
+@media (min-width: 769px) {
+    .ac-table th[scope="col"],
+    .ac-table th[scope="row"],
+    .ac-table td {
+        padding-left: 9px;
+        padding-right: 9px;
+    }
+
+    .ac-table td.ems-table__num {
+        white-space: nowrap;
+    }
+}
+
+/* 5 KPI kartı: geniş ekranda bir sıra, dar ekranda 2 sütun. */
+@media (min-width: 1100px) {
+    .ac .ems-kpis {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .ac-person__stats {
+        gap: var(--ems-sp-4);
+    }
+
+    .ac-table__total td:empty {
+        display: none;
+    }
+
+    .ac-table__name {
+        min-width: 0;
+    }
+}

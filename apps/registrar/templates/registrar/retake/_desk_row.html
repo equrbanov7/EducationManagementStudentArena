@@ -1,0 +1,87 @@
+{% load i18n registrar_retake %}
+{% comment %}Növbə sətri — `a` = `retake_queries.decorate` + `retake_desk._rows` bayraqları.
+Qəbzin orijinal adı, ölçüsü və yükləmə vaxtı YALNIZ Mühasibatlığa (`rd.keys.verify`) göstərilir; eyni SHA-256
+başqa müraciətdə də varsa xəbərdarlıq nişanı + o müraciətin izinə link (blok DEYİL — qərar mühasibindir).{% endcomment %}
+{% with app=a.app student=a.app.student %}
+<li class="rt-card rt-row" id="rt-row-{{ a.id }}">
+    <header class="rt-card__head">
+        <div class="rt-card__titles">
+            <h3 class="rt-card__title">
+                <a class="rt-link" href="{{ profile_base_url }}?section=retake-desk&amp;rt_tab={{ rd.tab }}&amp;rt_student={{ student.pk }}" data-section="retake-desk">{{ student.get_full_name|default:student.username }}</a>
+            </h3>
+            <p class="rt-card__meta">
+                <span>{{ app.subject.name }}</span>
+                <span aria-hidden="true">·</span><span>{{ a.kind_label }}</span>
+                {% if app.attempt_number %}<span aria-hidden="true">·</span><span>{% blocktrans with n=app.attempt_number context "registrar.retake" %}{{ n }}-ci cəhd{% endblocktrans %}</span>{% endif %}
+                {% if app.student_group %}<span aria-hidden="true">·</span><span>{{ app.student_group.name }}</span>{% endif %}
+                <span aria-hidden="true">·</span><time datetime="{{ app.created_at|date:'c' }}">{{ app.created_at|date:"d.m.Y H:i" }}</time>
+            </p>
+        </div>
+        {% include "registrar/retake/_badge.html" with status=app.status %}
+    </header>
+
+    {% if a.duplicates %}
+    <p class="rt-note rt-note--danger rt-dup" role="alert">
+        <i class="fas fa-clone" aria-hidden="true"></i>
+        <span class="ems-badge ems-badge--danger">{% trans "Bu qəbz başqa müraciətdə də yüklənib" context "registrar.retake" %}</span>
+        {% for dup in a.duplicates %}
+            <a class="rt-link" href="{{ profile_base_url }}?section=retake-desk&amp;rt_tab={{ rd.tab }}&amp;rt_student={{ dup.application.student_id }}#rt-trail-{{ dup.application_id }}" data-section="retake-desk">{{ dup.application.student.get_full_name|default:dup.application.student.username }} · {{ dup.application.subject.name }}</a>{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </p>
+    {% endif %}
+
+    <dl class="rt-facts">
+        <div><dt>{% trans "Əsas imtahan" context "registrar.retake" %}</dt><dd>{{ app.base_exam_score|retake_score }}</dd></div>
+        <div><dt>{% trans "Yekun" context "registrar.retake" %}</dt><dd>{{ app.base_total|retake_score }}</dd></div>
+        <div class="rt-facts__text"><dt>{% trans "Səbəb" context "registrar.retake" %}</dt><dd>{{ a.eligibility.fail_reason_label|default:"—" }}</dd></div>
+        {% if app.payment_reference %}<div><dt>{% trans "Ödəniş №" context "registrar.retake" %}</dt><dd>{{ app.payment_reference }}</dd></div>{% endif %}
+        {% if a.result_text %}<div class="rt-facts__wide"><dt>{% trans "Nəticə" context "registrar.retake" %}</dt><dd>{{ a.result_text }}</dd></div>{% endif %}
+    </dl>
+
+    {% if app.kind == "retake_25" %}
+    <p class="rt-receipt">
+        <i class="fas fa-receipt" aria-hidden="true"></i>
+        {% if a.receipt %}
+            <a class="rt-link" href="{{ a.receipt_url }}" target="_blank" rel="noopener" data-no-route-loading>{% trans "Qəbzə bax" context "registrar.retake" %}</a>
+            {% if rd.keys.verify %}
+            <span class="rt-receipt__meta">{{ a.receipt.original_name|default:"—" }} · {{ a.receipt.size|retake_filesize }} · {% blocktrans with when=a.receipt.created_at|date:"d.m.Y H:i" context "registrar.retake" %}yüklənib: {{ when }}{% endblocktrans %}</span>
+            {% endif %}
+        {% else %}
+            <span>{% trans "Qəbz yüklənməyib" context "registrar.retake" %}</span>
+        {% endif %}
+    </p>
+    {% endif %}
+    {% if a.document_url %}<p class="rt-receipt"><i class="fas fa-file-signature" aria-hidden="true"></i> <a class="rt-link" href="{{ a.document_url }}" target="_blank" rel="noopener" data-no-route-loading>{% trans "Qərar sənədi" context "registrar.retake" %}</a></p>{% endif %}
+    {% if app.student_note %}<p class="rt-note"><i class="far fa-comment" aria-hidden="true"></i> <span>{{ app.student_note }}</span></p>{% endif %}
+
+    {% if a.can_verify or a.can_admit or a.can_decide_subgroup or a.can_place or a.can_record %}
+    <div class="rt-actions" data-rt-subject="{{ app.subject.name }}" data-rt-student="{{ student.get_full_name|default:student.username }}">
+        {% if a.can_verify %}
+        <button type="button" class="ems-btn ems-btn--success ems-btn--sm" data-ems-overlay-open="rtVerifyDialog" data-rt-open data-rt-url="{% url 'retake:payment' a.id %}" data-rt-action="verify"><i class="fas fa-check" aria-hidden="true"></i> {% trans "Ödənişi təsdiqlə" context "registrar.retake" %}</button>
+        <button type="button" class="ems-btn ems-btn--sm" data-ems-overlay-open="rtRejectPaymentDialog" data-rt-open data-rt-url="{% url 'retake:payment' a.id %}" data-rt-action="reject"><i class="fas fa-xmark" aria-hidden="true"></i> {% trans "Qəbzi rədd et" context "registrar.retake" %}</button>
+        {% endif %}
+        {% if a.can_admit %}
+        <button type="button" class="ems-btn ems-btn--primary ems-btn--sm" data-ems-overlay-open="rtAdmitDialog" data-rt-open data-rt-url="{% url 'retake:decision' a.id %}" data-rt-action="admit"><i class="fas fa-door-open" aria-hidden="true"></i> {% trans "İmtahana burax" context "registrar.retake" %}</button>
+        {% endif %}
+        {% if a.can_decide_subgroup %}
+        <button type="button" class="ems-btn ems-btn--primary ems-btn--sm" data-ems-overlay-open="rtSubgroupDialog" data-rt-open data-rt-url="{% url 'retake:decision' a.id %}" data-rt-action="approve_subgroup" data-rt-offerings="{% url 'retake:subgroup_offerings' a.id %}"><i class="fas fa-people-arrows" aria-hidden="true"></i> {% trans "Alt qrupu təsdiqlə" context "registrar.retake" %}</button>
+        {% endif %}
+        {% if a.can_admit or a.can_decide_subgroup %}
+        <button type="button" class="ems-btn ems-btn--sm" data-ems-overlay-open="rtRejectDialog" data-rt-open data-rt-url="{% url 'retake:decision' a.id %}" data-rt-action="reject"><i class="fas fa-ban" aria-hidden="true"></i> {% trans "Rədd et" context "registrar.retake" %}</button>
+        {% endif %}
+        {% if a.can_place %}
+        <button type="button" class="ems-btn ems-btn--primary ems-btn--sm" data-ems-overlay-open="rtSubgroupDialog" data-rt-open data-rt-url="{% url 'retake:decision' a.id %}" data-rt-action="place" data-rt-offerings="{% url 'retake:subgroup_offerings' a.id %}"><i class="fas fa-user-plus" aria-hidden="true"></i> {% trans "Alt qrupa yerləşdir" context "registrar.retake" %}</button>
+        {% endif %}
+        {% if a.can_record %}
+        <button type="button" class="ems-btn ems-btn--sm" data-ems-overlay-open="rtResultDialog" data-rt-open data-rt-url="{% url 'retake:result' a.id %}" data-rt-action="result"><i class="fas fa-pen" aria-hidden="true"></i> {% trans "Nəticəni yaz" context "registrar.retake" %}</button>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <details class="rt-trail">
+        <summary>{% trans "Addımlar" context "registrar.retake" %} <span class="ems-tabs__count">{{ a.timeline|length }}</span></summary>
+        {% trans "Müraciətin addımları" context "registrar.retake" as rt_tl_label %}
+        {% include "partials/ems_ui/_timeline.html" with timeline=a.timeline timeline_label=rt_tl_label %}
+    </details>
+</li>
+{% endwith %}

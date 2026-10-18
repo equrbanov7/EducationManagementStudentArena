@@ -265,8 +265,31 @@ def _actor_can_write(organization, user):
     ).exists()
 
 
+def _retake_attempt_result(
+    *, student, subject_id, organization, attempt, score_percent, is_expelled, by_user, appeal_id
+):
+    """25% cəhdidirsə nəticəni müraciətə yaz və ``ResitRecord``-u qaytar; deyilsə ``None``."""
+    if attempt is None:
+        return None
+    from apps.registrar import retake_results
+
+    application = retake_results.application_for_attempt(
+        student=student, subject_id=subject_id, organization=organization, attempt=attempt
+    )
+    if application is None:
+        return None
+    if by_user is not None and not _actor_can_write(organization, by_user):
+        by_user = None
+    scheme = gradebook.ensure_assessment_scheme(offering=application.enrollment.offering)
+    score = 0 if is_expelled else _to_exam_scale(score_percent, scheme)
+    application = retake_results.record_attempt_result(
+        application=application, score=score, attempt=attempt, by_user=by_user, appeal_id=appeal_id
+    )
+    return application.resit_record
+
+
 def record_exam_result(
-    *, student, subject_id, organization, score_percent, is_expelled=False, by_user=None, appeal_id=None
+    *, student, subject_id, organization, score_percent, is_expelled=False, by_user=None, appeal_id=None, attempt=None
 ):
     """İmtahan nəticəsini jurnala yaz (``FinalGrade.exam_score``).
 
@@ -282,7 +305,24 @@ def record_exam_result(
     ``by_user`` — yoxlayan müəllim / reviewer; ``None`` = avtomatik (sistem)
     yazı, audit izində belə də işarələnir (2026-08 auditi, G7).
     Nəticə: yazılan ``FinalGrade`` və ya ``None``.
+
+    ``attempt`` (2026-10-18, 25% müraciəti): cəhd «İmtahan şansı ver» (səbəb «25% müraciəti») qeydindən
+    SONRA başlayıbsa bu, 25% cəhdidir — bal ``FinalGrade.exam_score``-a (əsas imtahanın balı) YAZILMIR,
+    ``retake_results.record_attempt_result`` ilə ``ResitRecord``-a + müraciətə yazılır (ilk yazı, təkrar
+    yoxlama və apellyasiya — hamısı bu yolla). Nəticə: ``ResitRecord``.
     """
+    retake = _retake_attempt_result(
+        student=student,
+        subject_id=subject_id,
+        organization=organization,
+        attempt=attempt,
+        score_percent=score_percent,
+        is_expelled=is_expelled,
+        by_user=by_user,
+        appeal_id=appeal_id,
+    )
+    if retake is not None:
+        return retake
     enrollment = resolve_enrollment(student=student, subject_id=subject_id, organization=organization)
     if enrollment is None:
         return None

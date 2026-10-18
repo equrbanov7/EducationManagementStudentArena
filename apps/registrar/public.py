@@ -575,3 +575,8 @@ from .public_services import *  # noqa: E402,F401,F403
 from .public_services import __all__ as _service_exports  # noqa: E402
 
 __all__ += [name for name in _service_exports if name not in __all__]
+# Semestr kredit yükü + «Alt qrupa yerləşdirmə» (2026-10-18) — ayrıca səth modulu (ölçü büdcəsi).
+from .public_subgroup import *  # noqa: E402,F401,F403
+from .public_subgroup import __all__ as _subgroup_exports  # noqa: E402
+
+__all__ += [name for name in _subgroup_exports if name not in __all__]

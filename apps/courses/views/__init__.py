@@ -18,6 +18,9 @@ from .teacher import (
     CourseAIApplyView,
     CourseAIPlanView,
     CourseMembersView,
+    CourseSyllabusImportView,
+    CourseSyllabusOptionsView,
+    CourseSyllabusPreviewView,
     CreateCourseView,
     DeleteCourseView,
     DeleteGroupFromCourseView,
@@ -53,4 +56,7 @@ __all__ = [
     "DeleteGroupFromCourseView",
     "link_exam_to_course",
     "unlink_exam_from_course",
+    "CourseSyllabusImportView",
+    "CourseSyllabusOptionsView",
+    "CourseSyllabusPreviewView",
 ]

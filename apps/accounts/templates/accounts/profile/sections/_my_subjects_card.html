@@ -20,6 +20,9 @@ imtahana buraxılıram? (status badge — rəng + MƏTN, handoff §7) → sillab
         {% else %}
         <span class="msx-kind msx-kind--mandatory">{% trans "Məcburi" context "profile.subjects" %}</span>
         {% endif %}
+        {% if scl and row.enrollment.id|stringformat:"s" in scl.subgroup_enrollment_ids %}
+        <span class="msx-kind msx-kind--period" title="{% trans 'Bu fənni başqa qrupun jurnalında (alt qrupda) keçirsiniz' context 'profile.subjects' %}">{% trans "Alt qrup" context "profile.subjects" %}</span>
+        {% endif %}
         {% if row.enrollment.offering.period_id != student_subjects_section.period.id %}
         <span class="msx-kind msx-kind--period" title="{% trans 'Başqa dövrün aktiv qeydiyyatı' context 'profile.subjects' %}">{{ row.enrollment.offering.period.name }}</span>
         {% endif %}
@@ -86,7 +89,7 @@ imtahana buraxılıram? (status badge — rəng + MƏTN, handoff §7) → sillab
     <ul class="msx-chips msx-chips--attempts" aria-label="{% trans 'İmtahan cəhdləri' context 'profile.subjects' %}">
         {% for attempt in row.attempts %}
         <li class="msx-chip {% if attempt.is_official %}msx-chip--official{% else %}msx-chip--superseded{% endif %}">
-            {{ attempt.label }} {% trans "cəhd" context "profile.subjects" %}:
+            {{ attempt.label }} {% trans "cəhd" context "profile.subjects" %}{% if attempt.is_retake %} ({% trans "25% təkrar imtahan" context "registrar.retake" %}){% endif %}:
             <strong>{% if attempt.percent is not None %}{{ attempt.percent }}{% else %}—{% endif %}</strong>
             · {% if attempt.is_official %}{% trans "rəsmi" context "profile.subjects" %}{% else %}{% trans "ləğv olundu" context "profile.subjects" %}{% endif %}
         </li>

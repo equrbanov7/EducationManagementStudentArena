@@ -88,15 +88,38 @@ def visible_sessions_qs(request, organization):
     return sessions_visible_to(request.user, base)
 
 
+#: Nəzarətçi ola BİLMƏYƏN rollar — tələbə ailəsi və neytral doldurucu (``member``).
+_NON_STAFF_ROLE_NAMES = ("student", "lead_student", "alumni", "member")
+
+
 def center_staff_queryset(organization):
-    """Nəzarətçi namizədləri: org-un tələbə olmayan aktiv üzvləri (müəllim/mərkəz)."""
+    """Nəzarətçi namizədləri — YALNIZ heyət (müəllim / əməkdaş).
+
+    2026-10-18 (sahib: «burda tələbələri göstərmə, kimləri nəzarətçi seçə bilərəmsə elə göstər»): əvvəl yalnız
+    ``profile.role == "student"`` çıxarılırdı — starosta, məzun, profili fərqli tələbə, deaktiv / silinmiş hesab və
+    rolsuz «üzv» siyahıya düşürdü. İndi müsbət qayda: aktiv hesab, girişi bağlı olmayan profil və bu təşkilatda heyət
+    rolu ilə AKTİV üzvlük (aktiv rol). ``eligible_invigilators`` də bu sorğu üzərində qurulur — axtarış və yazı eynidir.
+    """
+    from django.apps import apps as django_apps
     from django.contrib.auth import get_user_model
+    from django.db.models import Exists, OuterRef
+
+    from apps.organizations.models import Membership
+
+    # Model `get_model` ilə — exams → accounts statik importu modul dövrü yaradır (accounts ↔ exams).
+    access = django_apps.get_model("accounts", "UserProfile").AccessState
+    blocked_states = (access.STAGED, access.ARCHIVED)  # = accounts.identity.login_blocked_access_states()
 
     User = get_user_model()
+    staff_membership = Membership.objects.filter(
+        user_id=OuterRef("pk"), organization=organization, is_active=True, role__is_active=True
+    ).exclude(role__name__in=_NON_STAFF_ROLE_NAMES)
     return (
-        User.objects.filter(memberships__organization=organization, memberships__is_active=True)
-        .exclude(profile__role="student")
-        .distinct()
+        User.objects.filter(is_active=True)
+        .filter(Exists(staff_membership))
+        .exclude(profile__is_deleted=True)
+        .exclude(profile__access_state__in=blocked_states)
+        .exclude(profile__role__in=("student", "lead_student"))
         .order_by("first_name", "last_name", "username")
     )
 

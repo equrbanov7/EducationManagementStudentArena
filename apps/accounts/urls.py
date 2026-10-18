@@ -3,11 +3,12 @@ URL patterns for accounts app.
 """
 
 from django.contrib.auth import views as auth_views
-from django.urls import path
+from django.urls import include, path
 
 from . import views
 from .views import academic_records as academic_records_views
 from .views import account_password_reset as password_reset_views
+from .views import accounting as accounting_views
 from .views import exam_score_entry_changes as exam_score_changes_views
 from .views import exam_score_import as exam_score_import_views
 from .views import group_lead as group_lead_views
@@ -335,8 +336,12 @@ urlpatterns = [
     # 2026-10-10: «Jurnal təmizliyi» — siyahı (GET) + önizləmə/tətbiq/bərpa (tək JSON POST); RİM rəhbəri.
     path("journal-hygiene/rows/", journal_hygiene_views.journal_hygiene_rows, name="journal_hygiene_rows"),
     path("journal-hygiene/action/", journal_hygiene_views.journal_hygiene_action, name="journal_hygiene_action"),
+    # «Alt qrupa tələbə əlavə et» (sahib 2026-10-18) — `retake.manage`; adlar `accounts:subgroup_placement_*`.
+    path("alt-qrup-yerlesdirme/", include("apps.accounts.views.subgroup_placement.urls")),
     # 2026-10-11: «Kadr analitikası» — Excel ixracı (HR / rektor / RİM rəhbəri; audit olunur).
     path("hr-analytics/export/", hr_analytics_views.hr_analytics_export, name="hr_analytics_export"),
+    # 2026-10-18: «Mühasibatlıq» — Excel ixracı (`accounting.view`; audit olunur).
+    path("accounting/export/", accounting_views.accounting_export, name="accounting_export"),
     # 2026-10-03: qrupun «ilk giriş» çap vərəqi (QR + təlimat + aktivləşdirməyənlər, PAROLSUZ).
     path(
         "student-registry/activation-sheet/",

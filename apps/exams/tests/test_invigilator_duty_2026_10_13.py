@@ -354,3 +354,45 @@ class QuestionOrderShuffleTests(_DutyBase):
             generate_random_questions_for_attempt(attempt)
         self.assertTrue(shuf.called)
         self.assertEqual(attempt.answers.count(), 6)
+
+
+class InvigilatorCandidatesStaffOnlyTests(_DutyBase):
+    """Sahib 2026-10-18: «tələbələri göstərmə, kimləri nəzarətçi seçə bilərəmsə elə göstər»."""
+
+    def _extra(self, username, profile_role, role_name, **profile):
+        user = User.objects.create_user(username, f"{username}@test.az", PASSWORD)
+        _assign_user_to_org(user, self.org, profile_role, role_name)
+        if profile:
+            for key, value in profile.items():
+                setattr(user.profile, key, value)
+            user.profile.save(update_fields=[*profile, "updated_at"])
+        return user
+
+    def _search_usernames(self, q=""):
+        from django.urls import reverse
+
+        response = self._client(self.head).get(reverse("exams:invigilator_search"), {"q": q, "limit": 50})
+        self.assertEqual(response.status_code, 200)
+        return {row["username"] for row in response.json()["results"]}
+
+    def test_only_staff_are_candidates(self):
+        lead = self._extra("idt_lead", ProfileRole.LEAD_STUDENT, "lead_student")
+        alum = self._extra("idt_alum", ProfileRole.MEMBER, "alumni")
+        member = self._extra("idt_member", ProfileRole.MEMBER, "member")
+        archived = self._extra("idt_arch", ProfileRole.TEACHER, "teacher", access_state="archived")
+        inactive = self._extra("idt_inact", ProfileRole.TEACHER, "teacher")
+        inactive.is_active = False
+        inactive.save(update_fields=["is_active"])
+        names = self._search_usernames()
+        self.assertIn(self.invig.username, names)
+        self.assertIn(self.staff.username, names)
+        for user in (self.student, lead, alum, member, archived, inactive):
+            self.assertNotIn(user.username, names, user.username)
+
+    def test_server_rejects_non_staff_even_if_posted(self):
+        from apps.exams.services.final_center.duty_admin import eligible_invigilators
+        from apps.exams.views.exam_center._shared import center_staff_queryset
+
+        lead = self._extra("idt_lead2", ProfileRole.LEAD_STUDENT, "lead_student")
+        chosen = eligible_invigilators(center_staff_queryset(self.org), [lead.pk, self.invig.pk])
+        self.assertEqual([user.pk for user in chosen], [self.invig.pk])

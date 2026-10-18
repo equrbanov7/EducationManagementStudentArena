@@ -37,6 +37,7 @@ DIRECT_PROFILE_SECTION_TEMPLATES = {
     "legacy-grade-review": "accounts/profile/sections/_legacy_grade_review.html",
     "system-settings": "accounts/profile/sections/_system_settings.html",
     "journal-hygiene": "accounts/profile/sections/_journal_hygiene.html",
+    "subgroup-placement": "accounts/profile/sections/_subgroup_placement.html",
     "exam-chance": "accounts/profile/sections/_exam_chance.html",
     "org-structure": "accounts/profile/sections/_org_structure.html",
     "org-faculties": "accounts/profile/sections/_org_faculties.html",
@@ -49,6 +50,7 @@ DIRECT_PROFILE_SECTION_TEMPLATES = {
     "people-teachers": "accounts/profile/sections/_people_teachers.html",
     "people-students": "accounts/profile/sections/_people_students.html",
     "hr-analytics": "accounts/profile/sections/_hr_analytics.html",
+    "accounting": "accounts/profile/sections/_accounting.html",
     "syllabus-list": "accounts/profile/sections/_syllabus_list.html",
     "syllabus-editor": "accounts/profile/sections/_syllabus_editor.html",
     "syllabus-review": "accounts/profile/sections/_syllabus_review.html",
@@ -155,6 +157,7 @@ def build_section_titles() -> dict:
         "people-teachers": pgettext_lazy("profile.sidebar", "Müəllimlər"),
         "people-students": pgettext_lazy("profile.sidebar", "Tələbələr"),
         "hr-analytics": pgettext_lazy("profile.sidebar", "Kadr analitikası"),
+        "accounting": pgettext_lazy("profile.sidebar", "Mühasibatlıq"),
         "syllabus-list": pgettext_lazy("profile.sidebar", "Sillabuslar"),
         "syllabus-editor": pgettext_lazy("profile.sidebar", "Sillabus redaktoru"),
         "syllabus-review": pgettext_lazy("profile.sidebar", "Sillabus təsdiqi"),
@@ -180,6 +183,9 @@ def build_section_titles() -> dict:
         "evaluation-campaigns": pgettext_lazy("profile.sidebar", "Sorğu kampaniyaları"),
         "surveys-inbox": pgettext_lazy("profile.sidebar", "Sorğular"),
         "announcements": pgettext_lazy("profile.sidebar", "Elanlar"),
+        "my-retakes": pgettext_lazy("profile.sidebar", "25% və alt qrup"),
+        "retake-desk": pgettext_lazy("profile.sidebar", "25% müraciətləri"),
+        "subgroup-placement": pgettext_lazy("profile.sidebar", "Alt qrupa tələbə əlavə et"),
         "my-group": pgettext_lazy("profile.sidebar", "Starosta"),  # B10; 2026-10-13 (gecə) «Qrupum» → «Starosta»
         "surveys-builder": pgettext_lazy("profile.sidebar", "Sorğu qurucusu"),
         # «Fənn qovluğu» (apps.subject_folder) — sidebar bəndləri ilə eyni mətnlər.

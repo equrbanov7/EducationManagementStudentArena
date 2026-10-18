@@ -277,6 +277,8 @@ def sync_attempt_to_journal(attempt, *, actor=None, appeal_id=None):
             by_user=by_user,
             # Audit 2026-09-28 EXA-03: apellyasiya qərarı → ledger-də «apellyasiya» sətri.
             appeal_id=appeal_id,
+            # 2026-10-18: 25% cəhdi (şans qeydindən sonra) ResitRecord-a gedir, əsas imtahan balına yox.
+            attempt=attempt,
         )
     except Exception:  # körpü heç vaxt imtahanı sındırmır
         logger.exception("journal_sync: failed to write attempt %s to FinalGrade", getattr(attempt, "id", "?"))

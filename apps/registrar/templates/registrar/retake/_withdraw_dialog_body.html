@@ -1,0 +1,7 @@
+{% load i18n %}
+<p class="rt-dialog__subject"><i class="fas fa-book" aria-hidden="true"></i> <strong data-rt-text="subject"></strong></p>
+<p class="ems-msg ems-msg--warning">{% trans "Geri götürülən müraciət bağlanır və tarixçədə qalır. Lazım olsa sonra yenidən müraciət edə bilərsiniz." context "registrar.retake" %}</p>
+<div class="ems-field">
+    <label class="ems-field__label" for="rtWithdrawNote">{% trans "Səbəb" context "registrar.retake" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "ui.dialog" %}</span></label>
+    <textarea class="ems-textarea" id="rtWithdrawNote" name="note" rows="3" maxlength="2000"></textarea>
+</div>

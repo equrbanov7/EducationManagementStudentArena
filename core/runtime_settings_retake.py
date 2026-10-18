@@ -1,0 +1,50 @@
+"""«Sistem tənzimləmələri» — 25% təkrar imtahan / alt qrup müraciəti açarları (sahib 2026-10-18).
+
+``core/runtime_settings.py`` modul-ölçü tavanına (600) yaxındır; açarlar burada təyin olunub oradan
+``SPECS``-ə qatılır. Oxu nöqtəsi YALNIZ ``apps.registrar.retake_rules`` — çağıranlar açarı birbaşa oxumur.
+``Spec`` sinfi parametr kimi gəlir (dövri import yoxdur).
+"""
+
+from __future__ import annotations
+
+from django.conf import settings
+from django.utils.translation import pgettext_lazy
+
+_CTX = "core.runtime_settings"
+
+GROUP = ("retake", pgettext_lazy(_CTX, "25% təkrar imtahan və alt qrup"))
+
+
+def retake_specs(spec_class) -> tuple:
+    return (
+        spec_class(
+            "retake.applications_open",
+            "retake",
+            "bool",
+            lambda: bool(getattr(settings, "RETAKE_APPLICATIONS_OPEN", True)),
+            pgettext_lazy(_CTX, "Müraciət pəncərəsi açıqdır"),
+            pgettext_lazy(
+                _CTX,
+                "Açıq olanda tələbə kəsr fənlər üzrə 25% təkrar imtahan və ya alt qrup müraciəti göndərə bilir. "
+                "Bağlananda yeni müraciət qəbul olunmur; artıq göndərilmiş müraciətlərə baxış və qərarlar davam edir.",
+            ),
+        ),
+        spec_class(
+            "retake.max_attempts",
+            "retake",
+            "int",
+            lambda: int(getattr(settings, "RETAKE_MAX_ATTEMPTS", 1)),
+            pgettext_lazy(_CTX, "Bir fənn üzrə 25% cəhd sayı"),
+            pgettext_lazy(
+                _CTX,
+                "Bir fənn üzrə tələbəyə ən çox neçə dəfə 25% təkrar imtahan verilir (buraxılmış, cəhdi verilmiş "
+                "və tamamlanmış müraciətlər sayılır). Limit dolanda yalnız alt qrup yolu qalır.",
+            ),
+            pgettext_lazy(_CTX, "cəhd"),
+            min=1,
+            max=10,
+        ),
+    )
+
+
+__all__ = ["GROUP", "retake_specs"]

@@ -1,0 +1,13 @@
+{% load static %}
+{% comment %}«25% müraciətləri» (`retake-desk`) — Mühasibatlıq (`retake.payment_verify`) + dekanlıq / tədris şöbəsi
+(`retake.manage`) növbəsi və tələbə izi (`student.records_view` də görür). Data qapısı registrar tag-ındadır
+(`{% retake_desk %}` açar + əhatəni render vaxtı YENİDƏN yoxlayır). CSS/JS panelin içində.{% endcomment %}
+{% if 'retake-desk' in allowed_sections %}
+<section class="profile-section-panel profile-section--retake-desk {% if active_section == 'retake-desk' %}is-active{% endif %}"
+         data-profile-section-panel="retake-desk"
+         data-source-url="{{ profile_base_url }}?section=retake-desk">
+    <link rel="stylesheet" href="{% static 'registrar/css/retake.css' %}?v=20261018-retake2">
+    {% include "registrar/retake/_desk.html" %}
+    <script src="{% static 'registrar/js/retake.js' %}?v=20261018-retake2" defer></script>
+</section>
+{% endif %}

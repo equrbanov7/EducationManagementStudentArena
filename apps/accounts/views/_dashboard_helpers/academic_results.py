@@ -261,6 +261,8 @@ def _build_item(row, *, period_label, sort_at) -> dict:
             # KİMİ ötürür: «qeyd görünsünmü?» qərarı burada TƏKRARLANSA,
             # «Ümumi tədris məlumatı» ilə sürüşərdi.
             "legacy": row.get("legacy"),
+            # 25% təkrar imtahan izi — «Əsas imtahan: 32 → 25%: 61» (registrar fasadının sətri, 2026-10-18).
+            "retake": row.get("retake"),
         },
     }
 

@@ -90,6 +90,8 @@ urlpatterns = [
     path("accounts/", include(("apps.accounts.urls", "accounts"), namespace="accounts")),
     # registrar — elektron jurnal (müəllim üzü)
     path("jurnal/", include(("apps.registrar.urls", "registrar"), namespace="registrar")),
+    # 25% təkrar imtahan / alt qrup müraciəti (2026-10-18) — /jurnal/ xaricində: tələbə evdən də müraciət edir
+    path("tekrar-imtahan/", include(("apps.registrar.retake_urls", "retake"), namespace="retake")),
     # exams
     re_path(r"^exmas/?$", legacy_exmas_redirect, name="legacy_exmas_redirect"),
     re_path(r"^exmas/(?P<path>.*)$", legacy_exmas_redirect, name="legacy_exmas_path_redirect"),

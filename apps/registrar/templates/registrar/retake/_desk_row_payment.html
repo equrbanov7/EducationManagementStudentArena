@@ -1,0 +1,55 @@
+{% load i18n registrar_retake %}
+{% comment %}«Ödəniş yoxlaması» sətri — Mühasibatlıq görünüşü (sahibin qaydası, 2026-10-18): YALNIZ ödəniş yoxlamasına
+lazım olanlar — tələbənin adı / nömrəsi, fənn, cəhd nömrəsi, qəbz (orijinal ad, ölçü, yükləmə vaxtı), bank arayışı,
+eyni qəbz xəbərdarlığı və ödəniş addımları. Bal, nəticə, uyğunluq səbəbi və tələbənin başqa fənləri GÖSTƏRİLMİR.
+`a` = `retake_desk._payment_row`.{% endcomment %}
+{% with app=a.app student=a.app.student %}
+<li class="rt-card rt-row rt-row--payment" id="rt-row-{{ a.id }}">
+    <header class="rt-card__head">
+        <div class="rt-card__titles">
+            <h3 class="rt-card__title">{{ student.get_full_name|default:student.username }}</h3>
+            <p class="rt-card__meta">
+                {% if a.student_number %}<span>№ {{ a.student_number }}</span><span aria-hidden="true">·</span>{% endif %}
+                <span>{{ app.subject.name }}</span>
+                <span aria-hidden="true">·</span><span>{{ a.kind_label }}</span>
+                {% if app.attempt_number %}<span aria-hidden="true">·</span><span>{% blocktrans with n=app.attempt_number context "registrar.retake" %}{{ n }}-ci cəhd{% endblocktrans %}</span>{% endif %}
+            </p>
+        </div>
+        {% include "registrar/retake/_badge.html" with status=app.status %}
+    </header>
+
+    {% if a.duplicates %}
+    <p class="rt-note rt-note--danger rt-dup" role="alert">
+        <i class="fas fa-clone" aria-hidden="true"></i>
+        <span class="ems-badge ems-badge--danger">{% trans "Bu qəbz başqa müraciətdə də yüklənib" context "registrar.retake" %}</span>
+        {% for dup in a.duplicates %}
+            <a class="rt-link" href="{{ profile_base_url }}?section=retake-desk&amp;rt_tab=payments&amp;rt_status=&amp;rt_app={{ dup.application_id }}" data-section="retake-desk">{{ dup.application.student.get_full_name|default:dup.application.student.username }} · {{ dup.application.subject.name }}</a>{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </p>
+    {% endif %}
+
+    <p class="rt-receipt">
+        <i class="fas fa-receipt" aria-hidden="true"></i>
+        {% if a.receipt %}
+            <a class="rt-link" href="{{ a.receipt_url }}" target="_blank" rel="noopener" data-no-route-loading>{% trans "Qəbzə bax" context "registrar.retake" %}</a>
+            <span class="rt-receipt__meta">{{ a.receipt.original_name|default:"—" }} · {{ a.receipt.size|retake_filesize }} · {% blocktrans with when=a.receipt.created_at|date:"d.m.Y H:i" context "registrar.retake" %}yüklənib: {{ when }}{% endblocktrans %}</span>
+        {% else %}
+            <span>{% trans "Qəbz yüklənməyib" context "registrar.retake" %}</span>
+        {% endif %}
+    </p>
+    {% if app.payment_reference %}<p class="rt-note"><i class="fas fa-building-columns" aria-hidden="true"></i> <span>{% trans "Ödəniş №" context "registrar.retake" %}: <strong>{{ app.payment_reference }}</strong></span></p>{% endif %}
+
+    {% if a.can_verify %}
+    <div class="rt-actions" data-rt-subject="{{ app.subject.name }}" data-rt-student="{{ student.get_full_name|default:student.username }}">
+        <button type="button" class="ems-btn ems-btn--success ems-btn--sm" data-ems-overlay-open="rtVerifyDialog" data-rt-open data-rt-url="{% url 'retake:payment' a.id %}" data-rt-action="verify"><i class="fas fa-check" aria-hidden="true"></i> {% trans "Ödənişi təsdiqlə" context "registrar.retake" %}</button>
+        <button type="button" class="ems-btn ems-btn--sm" data-ems-overlay-open="rtRejectPaymentDialog" data-rt-open data-rt-url="{% url 'retake:payment' a.id %}" data-rt-action="reject"><i class="fas fa-xmark" aria-hidden="true"></i> {% trans "Qəbzi rədd et" context "registrar.retake" %}</button>
+    </div>
+    {% endif %}
+
+    <details class="rt-trail">
+        <summary>{% trans "Ödəniş addımları" context "registrar.retake" %} <span class="ems-tabs__count">{{ a.timeline|length }}</span></summary>
+        {% trans "Ödəniş addımları" context "registrar.retake" as rt_pay_tl %}
+        {% include "partials/ems_ui/_timeline.html" with timeline=a.timeline timeline_label=rt_pay_tl %}
+    </details>
+</li>
+{% endwith %}

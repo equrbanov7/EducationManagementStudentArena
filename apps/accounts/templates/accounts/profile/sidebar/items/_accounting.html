@@ -1,0 +1,15 @@
+{% load i18n nav_icons %}
+{% comment %}2026-10-18 (sahib): «Mühasibatlıq» — mühasib, qəyyum, rektor, Qəyyumlar Şurasının sədri, RİM rəhbəri
+(qapı: rbac_sections.py, açar `accounting.view`; data qapısı: services/accounting/policy.py).{% endcomment %}
+{% if 'accounting' in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=accounting"
+       data-section="accounting"
+       data-title="{% trans 'Mühasibatlıq' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'accounting' %}active{% endif %}">
+        {% nav_icon "calculator" "sidebar-menu-icon" %}
+        <span class="sidebar-menu-text">{% trans "Mühasibatlıq" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}

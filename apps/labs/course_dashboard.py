@@ -106,3 +106,10 @@ def build_course_dashboard_context(*, course, user, membership, can_manage, is_s
         )
 
     return {"labs": [], "labs_with_user_data": labs_with_user_data}
+
+
+def course_task_queryset():
+    """«Kurslarım» kartının tapşırıq sayğacı üçün mənbə (bax ``dashboard_sources.register_task_counter``)."""
+    from apps.labs.models import Lab
+
+    return Lab.objects.all()

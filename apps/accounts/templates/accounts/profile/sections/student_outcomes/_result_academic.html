@@ -47,6 +47,7 @@ Köhnə sistem sübut paneli və qeydlər əvvəlki kimi (`my_results_academic.c
             </dl>
         </div>
     </div>
+    {% if a.retake %}{% include "registrar/retake/_result_line.html" with retake=a.retake %}{% endif %}
     {% if a.entry_parts %}
     {% include "partials/ems_ui/_entry_breakdown.html" with parts=a.entry_parts final_score=a.exit_score final_max=50 total=a.total total_max=100 %}
     {% endif %}

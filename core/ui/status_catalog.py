@@ -480,6 +480,26 @@ TASK_STATE: tuple[Status, ...] = (
     _s("closed", _t("Bağlı"), "muted", order=2),
 )
 
+# --------------------------------------------------------------------------- #
+# 12. Kurs (LMS) — «Kurslarım» kartı və kurs paneli (2026-10-18). ``Course.status``.
+# --------------------------------------------------------------------------- #
+COURSE: tuple[Status, ...] = (
+    _s("published", _t("Yayımlanıb"), "success", order=0),
+    _s("draft", _t("Qaralama"), "warning", order=1),
+    _s("archived", _t("Arxivdədir"), "muted", order=2),
+)
+
+# --------------------------------------------------------------------------- #
+# 13. Mühasibatlıq — müəllimin keçirilmiş saatı plana nisbətən (2026-10-18).
+#     Band ±10% (``apps/accounts/services/accounting/constants.DEVIATION_TOLERANCE``).
+# --------------------------------------------------------------------------- #
+ACCOUNTING_PLAN: tuple[Status, ...] = (
+    _s("on_plan", _t("Plana uyğun"), "success", order=0),
+    _s("under", _t("Plandan az"), "danger", order=1),
+    _s("over", _t("Plandan çox"), "warning", order=2),
+    _s("no_plan", _t("Plan yoxdur"), "info", order=3),
+    _s("idle", _t("Dərs yoxdur"), "muted", order=4),
+)
 
 #: Ailə adı → statuslar. Şablon tag-i yalnız bu xəritədən oxuyur.
 FAMILIES: dict[str, tuple[Status, ...]] = {
@@ -515,6 +535,8 @@ FAMILIES: dict[str, tuple[Status, ...]] = {
     "exam_attempt": EXAM_ATTEMPT,
     "academic_outcome": ACADEMIC_OUTCOME,
     "task_state": TASK_STATE,
+    "course": COURSE,
+    "accounting_plan": ACCOUNTING_PLAN,
 }
 
 

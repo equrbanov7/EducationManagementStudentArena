@@ -1,0 +1,156 @@
+{% load i18n %}
+{% comment %}
+«Alt qrupa tələbə əlavə et» panelinin çərçivəsi. Xülasə, jurnal kartları, yoxlamalar və tarixçə JS ilə
+(`subgroup_placement*.js`) doldurulur; burada yalnız qablar, seçicilər (layihənin server-backed
+`EMSSearchableSelect` komponenti) və forma var. Bütün URL-lər data-atributla ötürülür (CSP: inline JS yoxdur).
+{% endcomment %}
+{% trans "Tələbəni başqa qrupun jurnalına (alt qrupa) yerləşdirin: sistem kredit həddini, fənnin keçilib-keçilmədiyini, jurnalın açıq olmasını, tutumu və cədvəl toqquşmasını yoxlayır. Sənəd məcburidir, hər yerləşdirmə tarixçədə qalır və geri götürülə bilər." context "accounts.subgroup_placement" as sgp_subtitle %}
+<div class="sgp" data-sgp-root
+     data-students-url="{{ sp.urls.students }}"
+     data-student-url="{{ sp.urls.student }}"
+     data-subjects-url="{{ sp.urls.subjects }}"
+     data-offerings-url="{{ sp.urls.offerings }}"
+     data-preview-url="{{ sp.urls.preview }}"
+     data-place-url="{{ sp.urls.place }}"
+     data-undo-url="{{ sp.urls.undo }}"
+     data-recent-url="{{ sp.urls.recent }}"
+     data-can-write="{% if sp.can_write %}1{% else %}0{% endif %}"
+     data-initial-student="{{ sp.initial_student.id|default:'' }}"
+     data-initial-student-text="{{ sp.initial_student.text|default:'' }}">
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=sgp_subtitle %}
+
+    {% if sp.view_as %}
+    <div class="ems-msg ems-msg--info sgp-notice" role="status">
+        <i class="fas fa-eye ems-msg__icon" aria-hidden="true"></i>
+        <div>{% trans "«Başqasının adından» rejimindəsiniz — yoxlamaları görürsünüz, yerləşdirmə edilmir." context "accounts.subgroup_placement" %}</div>
+    </div>
+    {% endif %}
+    {% if not sp.has_period %}
+    <div class="ems-msg ems-msg--warning sgp-notice" role="status">
+        <i class="fas fa-calendar-times ems-msg__icon" aria-hidden="true"></i>
+        <div>{% trans "Cari aktiv semestr təyin olunmayıb — yerləşdirmə yalnız cari semestrdə mümkündür." context "accounts.subgroup_placement" %}</div>
+    </div>
+    {% endif %}
+
+    <ul class="sgp-rules" aria-label="{% trans 'Qaydalar' context 'accounts.subgroup_placement' %}">
+        {% if sp.period_label %}<li class="sgp-rules__item"><i class="fas fa-calendar-alt" aria-hidden="true"></i> {{ sp.period_label }}</li>{% endif %}
+        <li class="sgp-rules__item"><i class="fas fa-layer-group" aria-hidden="true"></i>
+            {% blocktrans trimmed with base=sp.base_limit sub=sp.subgroup_limit context "accounts.subgroup_placement" %}Kredit həddi: {{ base }} (alt qrupla birlikdə {{ sub }}){% endblocktrans %}</li>
+        <li class="sgp-rules__item"><i class="fas fa-clock" aria-hidden="true"></i>
+            {% if sp.clash_blocks %}{% trans "Cədvəl toqquşması yerləşdirməni bloklayır" context "accounts.subgroup_placement" %}{% else %}{% trans "Cədvəl toqquşması — xəbərdarlıq, təsdiqlə davam etmək olar" context "accounts.subgroup_placement" %}{% endif %}</li>
+        <li class="sgp-rules__item"><i class="fas fa-file-signature" aria-hidden="true"></i> {% trans "Sənəd məcburidir" context "accounts.subgroup_placement" %}</li>
+    </ul>
+
+    <ol class="ems-steps sgp-steps" aria-label="{% trans 'Yerləşdirmə addımları' context 'accounts.subgroup_placement' %}">
+        <li class="ems-step ems-step--current" data-sgp-step-mark="1"><div class="ems-step__top"><span class="ems-step__mark" aria-hidden="true">1</span><span class="ems-step__label">{% trans "Tələbə" context "accounts.subgroup_placement" %}</span></div></li>
+        <li class="ems-step" data-sgp-step-mark="2"><div class="ems-step__top"><span class="ems-step__mark" aria-hidden="true">2</span><span class="ems-step__label">{% trans "Fənn və jurnal" context "accounts.subgroup_placement" %}</span></div></li>
+        <li class="ems-step" data-sgp-step-mark="3"><div class="ems-step__top"><span class="ems-step__mark" aria-hidden="true">3</span><span class="ems-step__label">{% trans "Sənəd və təsdiq" context "accounts.subgroup_placement" %}</span></div></li>
+    </ol>
+
+    <div class="sgp-flow">
+        <section class="ems-card sgp-card" data-sgp-step="1" aria-labelledby="sgp-step1-title">
+            <div class="ems-card__head">
+                <h2 class="ems-card__title" id="sgp-step1-title">{% trans "1. Tələbəni seçin" context "accounts.subgroup_placement" %}</h2>
+                <p class="ems-card__sub">{% trans "Yalnız sizin əhatənizdəki oxuyan tələbələr göstərilir." context "accounts.subgroup_placement" %}</p>
+            </div>
+            <div class="ems-card__body">
+                <div class="ems-field ems-field--wide">
+                    <span class="ems-field__label">{% trans "Tələbə" context "accounts.subgroup_placement" %}</span>
+                    {% trans "Ad, soyad, qrup və ya tələbə nömrəsi…" context "accounts.subgroup_placement" as sgp_student_ph %}
+                    {% include "accounts/profile/sections/_searchable_picker.html" with prefix="sgp" hook="sgp-student" placeholder=sgp_student_ph %}
+                </div>
+                <div class="sgp-summary" data-sgp-summary hidden aria-live="polite"></div>
+            </div>
+        </section>
+
+        <div class="sgp-flow__side">
+        <section class="ems-card sgp-card is-disabled" data-sgp-step="2" aria-labelledby="sgp-step2-title">
+            <div class="ems-card__head">
+                <h2 class="ems-card__title" id="sgp-step2-title">{% trans "2. Fənn və alt qrup jurnalı" context "accounts.subgroup_placement" %}</h2>
+                <p class="ems-card__sub">{% trans "Fənni seçin — sistem bu semestr başqa qruplarda açılmış uyğun jurnalları göstərir." context "accounts.subgroup_placement" %}</p>
+            </div>
+            <div class="ems-card__body">
+                <div class="ems-field ems-field--wide">
+                    <span class="ems-field__label">{% trans "Fənn" context "accounts.subgroup_placement" %}</span>
+                    {% trans "Əvvəlcə tələbəni seçin…" context "accounts.subgroup_placement" as sgp_subject_ph %}
+                    {% include "accounts/profile/sections/_searchable_picker.html" with prefix="sgp" hook="sgp-subject" placeholder=sgp_subject_ph %}
+                </div>
+                <div class="sgp-offerings ems-picks" data-sgp-offerings role="radiogroup"
+                     aria-label="{% trans 'Uyğun jurnallar' context 'accounts.subgroup_placement' %}"></div>
+            </div>
+        </section>
+
+        <section class="ems-card sgp-card is-disabled" data-sgp-step="3" aria-labelledby="sgp-step3-title">
+            <div class="ems-card__head">
+                <h2 class="ems-card__title" id="sgp-step3-title">{% trans "3. Sənəd, səbəb və təsdiq" context "accounts.subgroup_placement" %}</h2>
+                <p class="ems-card__sub">{% trans "Təqdimat / sərəncam faylını yükləyin və ya sərəncamın nömrəsi və tarixini yazın." context "accounts.subgroup_placement" %}</p>
+            </div>
+            <div class="ems-card__body">
+                <div class="sgp-checks" data-sgp-checks aria-live="polite"></div>
+                <form class="sgp-form" data-sgp-form novalidate>
+                    <div class="sgp-form__grid">
+                        <div class="ems-field ems-field--wide">
+                            <label class="ems-field__label" for="sgp-document">{% trans "Sənəd faylı (PDF, JPG, PNG · 10 MB-a qədər)" context "accounts.subgroup_placement" %}</label>
+                            <input type="file" id="sgp-document" name="document" class="ems-input sgp-file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png">
+                        </div>
+                        <div class="ems-field">
+                            <label class="ems-field__label" for="sgp-order-number">{% trans "Sərəncam / təqdimat №" context "accounts.subgroup_placement" %}</label>
+                            <input type="text" id="sgp-order-number" name="order_number" class="ems-input" maxlength="64" autocomplete="off">
+                        </div>
+                        <div class="ems-field">
+                            <label class="ems-field__label" for="sgp-order-date">{% trans "Tarixi" context "accounts.subgroup_placement" %}</label>
+                            <input type="date" id="sgp-order-date" name="order_date" class="ems-input ems-input--date">
+                        </div>
+                        <div class="ems-field ems-field--wide">
+                            <label class="ems-field__label" for="sgp-reason">{% trans "Səbəb" context "accounts.subgroup_placement" %} <span class="ems-field__req">*</span></label>
+                            <textarea id="sgp-reason" name="reason" class="ems-textarea" rows="3" maxlength="2000" required
+                                      placeholder="{% trans 'Məs.: 2024/2025 Yaz semestrində kəsilmiş fənn — dekanlığın 12.09.2025 tarixli təqdimatı' context 'accounts.subgroup_placement' %}"></textarea>
+                            <span class="ems-field__hint">{% trans "Ən azı 10 simvol. Tələbənin izində və audit jurnalında görünür." context "accounts.subgroup_placement" %}</span>
+                        </div>
+                    </div>
+                    <label class="sgp-check" data-sgp-release-row hidden>
+                        <input type="checkbox" name="release_source" value="1" data-sgp-release>
+                        <span>{% trans "Öz qrupunun jurnalından azad et — əvvəlki qeydiyyat tarixçəyə keçir, bal və davamiyyət saxlanılır." context "accounts.subgroup_placement" %}</span>
+                    </label>
+                    <label class="sgp-check sgp-check--warning" data-sgp-clash-row hidden>
+                        <input type="checkbox" name="accept_clash" value="1" data-sgp-clash-accept>
+                        <span>{% trans "Cədvəl toqquşmasını gördüm, yerləşdirməni təsdiqləyirəm." context "accounts.subgroup_placement" %}</span>
+                    </label>
+                    <p class="sgp-form__error" data-sgp-form-error role="alert" hidden></p>
+                    <div class="sgp-form__actions">
+                        <button type="submit" class="ems-btn ems-btn--primary" data-sgp-submit disabled>
+                            <i class="fas fa-user-plus" aria-hidden="true"></i>
+                            {% trans "Alt qrupa yerləşdir" context "accounts.subgroup_placement" %}
+                        </button>
+                    </div>
+                </form>
+                <div class="sgp-result" data-sgp-result hidden aria-live="polite"></div>
+            </div>
+        </section>
+        </div>
+    </div>
+
+    <section class="ems-card sgp-recent" aria-labelledby="sgp-recent-title">
+        <div class="ems-card__head sgp-recent__head">
+            <div>
+                <h2 class="ems-card__title" id="sgp-recent-title">{% trans "Son yerləşdirmələr" context "accounts.subgroup_placement" %}</h2>
+                <p class="ems-card__sub">{% trans "Kim, nə vaxt, hansı sənədlə — geri götürülənlər də tarixçədə qalır." context "accounts.subgroup_placement" %}</p>
+            </div>
+            <div class="ems-search sgp-recent__search">
+                <i class="fas fa-search ems-search__icon" aria-hidden="true"></i>
+                <input type="search" class="ems-search__input" data-sgp-recent-q maxlength="80" autocomplete="off"
+                       aria-label="{% trans 'Tarixçədə axtar' context 'accounts.subgroup_placement' %}"
+                       placeholder="{% trans 'Tələbə, fənn, sərəncam №…' context 'accounts.subgroup_placement' %}">
+            </div>
+        </div>
+        <div class="ems-card__body">
+            <ul class="sgp-history" data-sgp-recent></ul>
+            <button type="button" class="ems-btn ems-btn--ghost sgp-more" data-sgp-more hidden>{% trans "Daha çox" context "accounts.subgroup_placement" %}</button>
+        </div>
+    </section>
+
+    {% trans "Yerləşdirməni geri götür" context "accounts.subgroup_placement" as sgp_undo_title %}
+    {% trans "Tələbə jurnaldan çıxarılır (bal və davamiyyət silinmir), birləşmə varsa öz jurnalı bərpa olunur. Hər iki əməl tarixçədə qalır." context "accounts.subgroup_placement" as sgp_undo_sub %}
+    {% include "partials/ems_ui/_dialog.html" with dialog_id="sgp-undo-dialog" dialog_title=sgp_undo_title dialog_subtitle=sgp_undo_sub dialog_body_include="accounts/profile/sections/subgroup_placement/_undo_body.html" dialog_foot_include="accounts/profile/sections/subgroup_placement/_undo_foot.html" %}
+    {{ sp.i18n|json_script:"sgp-i18n" }}
+</div>

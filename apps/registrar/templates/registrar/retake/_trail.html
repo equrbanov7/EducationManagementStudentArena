@@ -1,0 +1,46 @@
+{% load i18n registrar_retake %}
+{% comment %}Tələbənin 25% izi — heyət (koordinator / dekanlıq / rəhbərlik / Mühasibatlıq). `trail` = `retake_queries.student_trail`.
+Bütün qəbz yükləmələri (rədd edilənlər də) siyahıdadır; hadisələr append-only jurnaldandır.{% endcomment %}
+<section class="ems-card rt-trail-card" aria-labelledby="rtTrailTitle">
+    <div class="ems-card__head">
+        <div>
+            {% if trail.missing %}
+            <h2 class="ems-card__title" id="rtTrailTitle">{% trans "Tələbə tapılmadı və ya əhatənizdə deyil" context "registrar.retake" %}</h2>
+            {% else %}
+            <h2 class="ems-card__title" id="rtTrailTitle">{% blocktrans with name=trail.student.get_full_name|default:trail.student.username context "registrar.retake" %}{{ name }} — 25% izi{% endblocktrans %}</h2>
+            <p class="ems-card__sub">{% trans "Bütün müraciətlər, addımlar, qəbzlər, imtahan şansları və nəticələr." context "registrar.retake" %}</p>
+            {% endif %}
+        </div>
+        <a class="ems-btn ems-btn--sm" href="{{ profile_base_url }}?section=retake-desk&amp;rt_tab={{ rd.tab }}" data-section="retake-desk"><i class="fas fa-xmark" aria-hidden="true"></i> {% trans "Bağla" context "registrar.retake" %}</a>
+    </div>
+    {% if not trail.missing %}
+    <div class="ems-card__body">
+        {% include "registrar/retake/_history.html" with history=trail.history %}
+        <ul class="rt-cards">
+            {% for a in trail.applications %}
+            <li class="rt-card" id="rt-trail-{{ a.id }}">
+                <header class="rt-card__head">
+                    <div class="rt-card__titles">
+                        <h3 class="rt-card__title">{{ a.app.subject.name }}</h3>
+                        <p class="rt-card__meta"><span>{{ a.kind_label }}</span><span aria-hidden="true">·</span><span>{{ a.app.period.name }}</span><span aria-hidden="true">·</span><time>{{ a.app.created_at|date:"d.m.Y H:i" }}</time></p>
+                    </div>
+                    {% include "registrar/retake/_badge.html" with status=a.app.status %}
+                </header>
+                {% if a.result_text %}<p class="rt-result"><i class="fas fa-flag-checkered" aria-hidden="true"></i> {{ a.result_text }}</p>{% endif %}
+                {% if a.receipts %}
+                <ul class="rt-receipts">
+                    {% for r in a.receipts %}
+                    <li><i class="fas fa-receipt" aria-hidden="true"></i> <a class="rt-link" href="{{ r.url }}" target="_blank" rel="noopener" data-no-route-loading>{% blocktrans with n=forloop.counter context "registrar.retake" %}Qəbz {{ n }}{% endblocktrans %}</a>
+                        {% if rd.keys.verify %}<span class="rt-receipt__meta">{{ r.receipt.original_name|default:"—" }} · {{ r.receipt.size|retake_filesize }} · {{ r.receipt.created_at|date:"d.m.Y H:i" }} · SHA-256 {{ r.receipt.sha256|slice:":12" }}…</span>{% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% trans "Müraciətin addımları" context "registrar.retake" as rt_tl_label %}
+                {% include "partials/ems_ui/_timeline.html" with timeline=a.timeline timeline_label=rt_tl_label %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</section>

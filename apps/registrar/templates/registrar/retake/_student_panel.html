@@ -1,0 +1,75 @@
+{% load i18n static registrar_retake %}
+{% comment %}«25% və alt qrup» — tələbə paneli (sahib 2026-10-18). Data: `{% retake_student_panel as rp %}`
+(`retake_queries.student_panel`). Üç tab: kəsr fənlər (uyğunluq «niyə»si ilə), müraciətlərim (status zolağı,
+qəbz, geri götürmə), tarixçə («neçə dəfə 25%-ə girib, nə olub»). Yazılar `retake_student.js`-dən
+`EMSCore.fetchJSON` (FormData) ilə gedir; uğurdan sonra bölmə yenidən yüklənir. CSP: inline yoxdur.{% endcomment %}
+{% retake_student_panel as rp %}
+{% if rp is None %}
+    {% trans "Aktiv təşkilat tapılmadı." context "registrar.retake" as rt_no_org %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-building" state_title=rt_no_org %}
+{% else %}
+<div class="rt" data-rt-root data-rt-error-generic="{% trans 'Əməl yerinə yetirilmədi — icazənizi yoxlayın və ya səhifəni yeniləyin.' context 'registrar.retake' %}" data-rt-section="my-retakes">
+    {% blocktrans trimmed asvar rt_subtitle context "registrar.retake" with limit=rp.max_attempts %}
+        Kəsr fənlər üzrə 25% təkrar imtahana (ödənişlə) və ya alt qrupda fənni yenidən keçməyə buradan müraciət edin.
+        Bir fənn üzrə 25% cəhd limiti: {{ limit }}. Qayıb həddi keçilibsə yalnız alt qrup yolu açıqdır.
+    {% endblocktrans %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=rt_subtitle %}
+
+    {% if not rp.window_open %}
+        {% trans "Müraciət pəncərəsi bağlıdır" context "registrar.retake" as rt_closed_t %}
+        {% trans "Hazırda yeni müraciət qəbul olunmur. Göndərdiyiniz müraciətlərin vəziyyətini aşağıda izləyə bilərsiniz." context "registrar.retake" as rt_closed_b %}
+        {% include "partials/ems_ui/_banner.html" with banner_kind="warning" banner_title=rt_closed_t banner_body=rt_closed_b %}
+    {% endif %}
+
+    <dl class="rt-kpis">
+        <div class="rt-kpi"><dt>{% trans "Kəsr fənn" context "registrar.retake" %}</dt><dd>{{ rp.subjects|length }}</dd></div>
+        <div class="rt-kpi rt-kpi--primary"><dt>{% trans "Müraciət mümkündür" context "registrar.retake" %}</dt><dd>{{ rp.eligible_count }}</dd></div>
+        <div class="rt-kpi rt-kpi--warning"><dt>{% trans "Aktiv müraciət" context "registrar.retake" %}</dt><dd>{{ rp.active_count }}</dd></div>
+        <div class="rt-kpi"><dt>{% trans "25% cəhd limiti" context "registrar.retake" %}</dt><dd>{{ rp.max_attempts }}</dd></div>
+    </dl>
+
+    {% trans "25% və alt qrup bölmələri" context "registrar.retake" as rt_tabs_label %}
+    <nav class="ems-tabs rt-tabs" data-ems-tabs aria-label="{{ rt_tabs_label }}">
+        <button type="button" class="ems-tabs__btn" data-ems-tab="rt-subjects" aria-current="page">{% trans "Kəsr fənlər" context "registrar.retake" %}{% if rp.subjects %} <span class="ems-tabs__count">{{ rp.subjects|length }}</span>{% endif %}</button>
+        <button type="button" class="ems-tabs__btn" data-ems-tab="rt-apps" tabindex="-1">{% trans "Müraciətlərim" context "registrar.retake" %}{% if rp.applications %} <span class="ems-tabs__count">{{ rp.applications|length }}</span>{% endif %}</button>
+        <button type="button" class="ems-tabs__btn" data-ems-tab="rt-history" tabindex="-1">{% trans "Cəhd tarixçəsi" context "registrar.retake" %}</button>
+    </nav>
+
+    <section class="rt-pane" data-ems-tabpanel="rt-subjects">
+        {% if rp.subjects %}
+        <ul class="rt-cards">
+            {% for row in rp.subjects %}{% include "registrar/retake/_student_subject_card.html" %}{% endfor %}
+        </ul>
+        {% else %}
+            {% trans "Kəsr fənniniz yoxdur" context "registrar.retake" as rt_none_t %}
+            {% trans "Bütün fənlərinizi keçmisiniz və ya nəticələr hələ yazılmayıb. Kəsr olan fənn burada avtomatik görünəcək." context "registrar.retake" as rt_none_b %}
+            {% include "partials/ems_ui/_empty.html" with state_icon="fa-circle-check" state_title=rt_none_t state_body=rt_none_b %}
+        {% endif %}
+    </section>
+
+    <section class="rt-pane" data-ems-tabpanel="rt-apps" hidden>
+        {% if rp.applications %}
+        <ul class="rt-cards">
+            {% for a in rp.applications %}{% include "registrar/retake/_student_app_card.html" %}{% endfor %}
+        </ul>
+        {% else %}
+            {% trans "Hələ müraciət yoxdur" context "registrar.retake" as rt_noapp_t %}
+            {% trans "«Kəsr fənlər» tabından fənni seçib müraciət edin." context "registrar.retake" as rt_noapp_b %}
+            {% include "partials/ems_ui/_empty.html" with state_icon="fa-inbox" state_title=rt_noapp_t state_body=rt_noapp_b %}
+        {% endif %}
+    </section>
+
+    <section class="rt-pane" data-ems-tabpanel="rt-history" hidden>
+        {% include "registrar/retake/_history.html" with history=rp.history %}
+    </section>
+
+    {% trans "Müraciət" context "registrar.retake" as rt_apply_title %}
+    {% trans "Göndər" context "registrar.retake" as rt_apply_submit %}
+    {% url "retake:apply" as rt_apply_url %}
+    {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="rtApplyDialog" form_dialog_title=rt_apply_title form_dialog_body_include="registrar/retake/_apply_dialog_body.html" form_dialog_action=rt_apply_url form_dialog_submit_label=rt_apply_submit %}
+
+    {% trans "Müraciəti geri götür" context "registrar.retake" as rt_wd_title %}
+    {% trans "Geri götür" context "registrar.retake" as rt_wd_submit %}
+    {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="rtWithdrawDialog" form_dialog_title=rt_wd_title form_dialog_body_include="registrar/retake/_withdraw_dialog_body.html" form_dialog_submit_label=rt_wd_submit form_dialog_submit_tone="danger" %}
+</div>
+{% endif %}

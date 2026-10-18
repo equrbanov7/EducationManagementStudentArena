@@ -132,6 +132,19 @@ LEGEND = (
 )
 
 
+def _attach_retake_lines(rows) -> None:
+    """25% təkrar imtahan izi kartda (2026-10-18): «Əsas imtahan: 32 → 25%: 61» — tək sorğu, yalnız sətir varsa."""
+    enrollments = [row.get("enrollment") for row in rows if row.get("enrollment") is not None]
+    if not enrollments:
+        return
+    from apps.registrar.retake_queries import result_lines
+
+    lines = result_lines(organization=enrollments[0].organization_id, enrollment_ids=[e.pk for e in enrollments])
+    for row in rows:
+        enrollment = row.get("enrollment")
+        row["retake"] = lines.get(enrollment.pk) if enrollment is not None else None
+
+
 def decorate(section: dict) -> dict:
     """Bölmə lüğətini görünüş açarları ilə tamamlayır (yerində; sorğusuz).
 
@@ -142,6 +155,7 @@ def decorate(section: dict) -> dict:
     for row in rows:
         journal = row.get("journal") or {}
         row["ui"] = {"status": eligibility_status(journal.get("eligibility"))}
+    _attach_retake_lines(rows)
     section["warnings"] = warnings_for(rows)
     section["kpis"] = _kpis(rows)
     section["kpi_tiles"] = _kpi_tiles(section["kpis"], section) if rows else []

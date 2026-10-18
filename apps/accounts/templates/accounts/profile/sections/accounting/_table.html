@@ -1,0 +1,66 @@
+{% load i18n %}
+{% comment %}Müəllim × dövr cədvəli (dövr = seçilmiş ay və ya bütün semestr). SERVER sıralaması (başlıq linkləri `ac_sort`,
+ikinci klik istiqaməti çevirir) və server səhifələməsi; ad linki drill-down açır (`ac_teacher`). Telefonda
+`ems-table--stack` — hər sətir kartdır. Kontekst: `table`, `ac`.{% endcomment %}
+<div class="ems-tablewrap">
+    <div class="ems-tablescroll">
+        <table class="ems-table ems-table--zebra ems-table--stack ac-table">
+            <caption class="ac-sr">{% blocktrans trimmed with period=ac.period_label context "accounts.accounting" %}Müəllimlərin keçirilmiş dərs saatı və planı — {{ period }}{% endblocktrans %}</caption>
+            <thead>
+                <tr>
+                    {% with col=table.columns.name %}<th scope="col"{% if col.dir %} aria-sort="{{ col.dir }}"{% endif %}><a class="ems-sort" href="{{ col.url }}" data-section="{{ ac.section }}">{{ col.label }}<span class="ems-sort__arrow" aria-hidden="true">{% if col.dir == "ascending" %}▲{% elif col.dir == "descending" %}▼{% else %}↕{% endif %}</span></a></th>{% endwith %}
+                    <th scope="col" class="ems-table__num">{% trans "Ştat" context "accounts.accounting" %}</th>
+                    {% with col=table.columns.planned %}<th scope="col" class="ems-table__num"{% if col.dir %} aria-sort="{{ col.dir }}"{% endif %}><a class="ems-sort" href="{{ col.url }}" data-section="{{ ac.section }}">{{ col.label }}<span class="ems-sort__arrow" aria-hidden="true">{% if col.dir == "ascending" %}▲{% elif col.dir == "descending" %}▼{% else %}↕{% endif %}</span></a></th>{% endwith %}
+                    {% for label in ac.kind_labels %}<th scope="col" class="ems-table__num">{{ label }}</th>{% endfor %}
+                    {% with col=table.columns.held %}<th scope="col" class="ems-table__num"{% if col.dir %} aria-sort="{{ col.dir }}"{% endif %}><a class="ems-sort" href="{{ col.url }}" data-section="{{ ac.section }}">{{ col.label }}<span class="ems-sort__arrow" aria-hidden="true">{% if col.dir == "ascending" %}▲{% elif col.dir == "descending" %}▼{% else %}↕{% endif %}</span></a></th>{% endwith %}
+                    {% with col=table.columns.diff %}<th scope="col" class="ems-table__num"{% if col.dir %} aria-sort="{{ col.dir }}"{% endif %}><a class="ems-sort" href="{{ col.url }}" data-section="{{ ac.section }}">{{ col.label }}<span class="ems-sort__arrow" aria-hidden="true">{% if col.dir == "ascending" %}▲{% elif col.dir == "descending" %}▼{% else %}↕{% endif %}</span></a></th>{% endwith %}
+                    {% with col=table.columns.pct %}<th scope="col" class="ems-table__num"{% if col.dir %} aria-sort="{{ col.dir }}"{% endif %}><a class="ems-sort" href="{{ col.url }}" data-section="{{ ac.section }}">{{ col.label }}<span class="ems-sort__arrow" aria-hidden="true">{% if col.dir == "ascending" %}▲{% elif col.dir == "descending" %}▼{% else %}↕{% endif %}</span></a></th>{% endwith %}
+                    <th scope="col">{% trans "Status" context "accounts.accounting" %}</th>
+                    <th scope="col" class="ems-table__num" title="{% trans 'Semestr: plan / fakt' context 'accounts.accounting' %}">{% trans "Semestr" context "accounts.accounting" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in table.results %}
+                <tr>
+                    <th scope="row" class="ac-table__name">
+                        <a href="{{ row.url }}" data-section="{{ ac.section }}">{{ row.name }}</a>
+                        <small class="ac-muted ac-block">{{ row.chair|default:"—" }}{% if row.faculty %} · {{ row.faculty }}{% endif %}</small>
+                    </th>
+                    <td class="ems-table__num" data-label="{% trans 'Ştat' context 'accounts.accounting' %}"><span title="{{ row.staff_label }}">{{ row.staff_short }}</span></td>
+                    <td class="ems-table__num" data-label="{{ table.columns.planned.label }}">{{ row.planned_text }}</td>
+                    {% for cell in row.kind_cells %}<td class="ems-table__num ac-muted" data-label="{{ cell.label }}">{{ cell.value }}</td>{% endfor %}
+                    <td class="ems-table__num ac-strong" data-label="{{ table.columns.held.label }}">{{ row.held_text }}</td>
+                    <td class="ems-table__num ac-diff{% if row.diff < 0 %} is-under{% elif row.diff > 0 %} is-over{% endif %}" data-label="{{ table.columns.diff.label }}">{{ row.diff_text }}</td>
+                    <td class="ems-table__num" data-label="{{ table.columns.pct.label }}">{% if row.pct is None %}—{% else %}{{ row.pct }}%{% endif %}</td>
+                    <td data-label="{% trans 'Status' context 'accounts.accounting' %}">{% if row.status_obj %}{% include "partials/ems_ui/_status_badge.html" with status=row.status_obj nowrap=True %}{% endif %}</td>
+                    <td class="ems-table__num" data-label="{% trans 'Semestr: plan / fakt' context 'accounts.accounting' %}">{{ row.planned_sem_text }} / {{ row.held_sem_text }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="11" class="ac-muted">{% trans "Filtrə uyğun müəllim yoxdur." context "accounts.accounting" %}</td></tr>
+                {% endfor %}
+            </tbody>
+            {% if table.results %}
+            <tfoot>
+                <tr class="ac-table__total">
+                    <th scope="row">{% blocktrans trimmed with count=ac.total context "accounts.accounting" %}Cəmi · {{ count }} müəllim{% endblocktrans %}</th>
+                    <td></td>
+                    <td class="ems-table__num" data-label="{{ table.columns.planned.label }}">{{ ac.summary.planned_text }}</td>
+                    {% for cell in ac.summary.kind_cells %}<td class="ems-table__num" data-label="{{ cell.label }}">{{ cell.value }}</td>{% endfor %}
+                    <td class="ems-table__num" data-label="{{ table.columns.held.label }}">{{ ac.summary.held_text }}</td>
+                    <td class="ems-table__num" data-label="{{ table.columns.diff.label }}">{{ ac.summary.diff_text }}</td>
+                    <td class="ems-table__num" data-label="{{ table.columns.pct.label }}">{% if ac.summary.pct is None %}—{% else %}{{ ac.summary.pct }}%{% endif %}</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tfoot>
+            {% endif %}
+        </table>
+    </div>
+</div>
+{% if table.num_pages > 1 %}
+<nav class="ac-pager" aria-label="{% trans 'Səhifələmə' context 'accounts.accounting' %}">
+    {% if table.prev_url %}<a class="ems-btn ems-btn--sm" href="{{ table.prev_url }}" data-section="accounting"><i class="fas fa-chevron-left" aria-hidden="true"></i> {% trans "Əvvəlki" context "accounts.accounting" %}</a>{% endif %}
+    <span class="ac-pager__info">{% blocktrans trimmed with page=table.page pages=table.num_pages total=table.total context "accounts.accounting" %}Səhifə {{ page }} / {{ pages }} · {{ total }} müəllim{% endblocktrans %}</span>
+    {% if table.next_url %}<a class="ems-btn ems-btn--sm" href="{{ table.next_url }}" data-section="accounting">{% trans "Növbəti" context "accounts.accounting" %} <i class="fas fa-chevron-right" aria-hidden="true"></i></a>{% endif %}
+</nav>
+{% endif %}

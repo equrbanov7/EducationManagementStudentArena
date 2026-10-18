@@ -82,6 +82,8 @@ _TRUSTEE_PERMISSIONS = [
     "audit.view",
     "audit.export",
     *TRUSTEE_READ_ALL_2026_10_17,
+    # Sahib 2026-10-18: «Mühasibatlıq» bölməsi qəyyumlara da açıqdır (yalnız oxu; miqrasiya 0067).
+    "accounting.view",
 ]
 
 #: İnzibati şöbə müdiri: öz vahidi + kataloq oxusu.

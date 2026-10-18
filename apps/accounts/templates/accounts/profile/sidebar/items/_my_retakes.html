@@ -1,0 +1,14 @@
+{% load i18n nav_icons %}
+{# «25% və alt qrup» — tələbənin kəsr fənlər üzrə 25% / alt qrup müraciəti (sahib 2026-10-18). #}
+{% if "my-retakes" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=my-retakes"
+       data-section="my-retakes"
+       data-title="{% trans '25% və alt qrup' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-retakes' %}active{% endif %}">
+        {% nav_icon "rotate-ccw" "sidebar-menu-icon" %}
+        <span class="sidebar-menu-text">{% trans "25% və alt qrup" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}

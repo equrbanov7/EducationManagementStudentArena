@@ -1,0 +1,347 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   «25% və alt qrup» (`my-retakes`) + «25% müraciətləri» (`retake-desk`) — sahib 2026-10-18.
+   Şablonlar: registrar/retake/*.html. Badge / dialoq / timeline / tab / filtr ems_ui-dandır; burada yalnız
+   bölməyə xas düzülüş. Mobil-öncəlikli (375 px: tək sütun, düymələr tam en). Rənglər YALNIZ --ems-* tokenləri.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rt {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4);
+    min-width: 0;
+}
+
+/* ── KPI zolağı ─────────────────────────────────────────────────────────── */
+.rt-kpis {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ems-sp-2);
+    margin: 0;
+}
+
+.rt-kpi {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-1);
+    padding: var(--ems-sp-3);
+    border: 1px solid var(--ems-border);
+    border-left: 4px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+}
+
+.rt-kpi dt {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.rt-kpi dd {
+    margin: 0;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-xl);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.rt-kpi dd a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.rt-kpi--primary,
+.rt-kpi--info { border-left-color: var(--ems-primary-500); }
+.rt-kpi--warning { border-left-color: var(--ems-warning-500); }
+.rt-kpi--success { border-left-color: var(--ems-success-600); }
+.rt-kpi--danger { border-left-color: var(--ems-danger-600); }
+
+/* ── Kartlar ────────────────────────────────────────────────────────────── */
+.rt-cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.rt-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    padding: var(--ems-pad-card, var(--ems-sp-4));
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+    min-width: 0;
+}
+
+.rt-card__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ems-sp-3);
+}
+
+.rt-card__titles { min-width: 0; }
+
+.rt-card__title {
+    margin: 0;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.rt-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-1);
+    margin: var(--ems-sp-1) 0 0;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.rt-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+    gap: var(--ems-sp-2);
+    margin: 0;
+}
+
+.rt-facts > div {
+    padding: var(--ems-sp-2) var(--ems-sp-3);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg-subtle);
+}
+
+.rt-facts__wide { grid-column: 1 / -1; }
+
+.rt-facts dt {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-xs);
+    font-weight: 600;
+}
+
+.rt-facts dd {
+    margin: 0;
+    color: var(--ems-text);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+
+.rt-note,
+.rt-receipt,
+.rt-result {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    margin: 0;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-sm);
+    line-height: 1.45;
+}
+
+.rt-note i,
+.rt-receipt i { color: var(--ems-text-muted); }
+
+.rt-note--danger,
+.rt-note--danger i { color: var(--ems-danger-700); }
+
+.rt-note--info i { color: var(--ems-primary-600); }
+
+.rt-result {
+    padding: var(--ems-sp-2) var(--ems-sp-3);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg-subtle);
+    font-weight: 700;
+}
+
+.rt-result.is-passed { background: var(--ems-success-bg); }
+.rt-result.is-failed { background: var(--ems-danger-bg); }
+
+.rt-receipt__meta {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-xs);
+    overflow-wrap: anywhere;
+}
+
+.rt-link {
+    color: var(--ems-link);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.rt-link:hover { color: var(--ems-link-hover); }
+
+/* ── Seçimlər (25% / alt qrup) ──────────────────────────────────────────── */
+.rt-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.rt-option {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+    padding: var(--ems-sp-3);
+    border: 1px dashed var(--ems-border);
+    border-radius: var(--ems-r-lg);
+}
+
+.rt-option.is-allowed {
+    border-style: solid;
+    border-color: var(--ems-primary-200);
+    background: var(--ems-primary-50);
+}
+
+.rt-option__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-1);
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text);
+}
+
+.rt-why { color: var(--ems-text-muted); }
+
+.rt-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+}
+
+.rt-actions .ems-btn { flex: 1 1 100%; justify-content: center; }
+
+.rt-btn-danger { color: var(--ems-danger-700); }
+
+.rt-upload {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+    flex: 1 1 100%;
+}
+
+.rt-upload__label {
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+}
+
+.rt-dialog__subject {
+    display: flex;
+    gap: var(--ems-sp-2);
+    align-items: center;
+    margin: 0 0 var(--ems-sp-3);
+    color: var(--ems-text);
+}
+
+/* ── İz / tarixçə ───────────────────────────────────────────────────────── */
+.rt-trail summary {
+    cursor: pointer;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+}
+
+.rt-trail[open] summary { margin-bottom: var(--ems-sp-2); }
+
+.rt-history {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    margin: 0 0 var(--ems-sp-4);
+    padding: 0;
+    list-style: none;
+}
+
+.rt-history__item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+    padding: var(--ems-sp-3);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+}
+
+.rt-history__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+}
+
+.rt-history__chain {
+    margin: 0;
+    color: var(--ems-text);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+
+.rt-grants,
+.rt-receipts {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--ems-fs-sm);
+}
+
+.rt-dup {
+    padding: var(--ems-sp-2) var(--ems-sp-3);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-danger-bg);
+}
+
+.rt-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ems-sp-3);
+}
+
+.rt-tabs { overflow-x: auto; }
+
+/* ── «İmtahan şansı ver»: səbəb və tələbə seçimi (accounts/exam_chance) ── */
+.rt-chance-apps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-1);
+    margin: var(--ems-sp-1) 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--ems-fs-xs);
+}
+
+@media (min-width: 640px) {
+    .rt-kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .rt-kpis--6 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .rt-actions .ems-btn { flex: 0 0 auto; }
+    .rt-upload { flex: 1 1 18rem; }
+    .rt-upload .ems-btn { align-self: flex-start; }
+    .rt-option {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+@media (min-width: 1100px) {
+    .rt-kpis--6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+
+.rt-facts__text dd {
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+}

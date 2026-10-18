@@ -23,6 +23,7 @@ from core.permissions import (  # noqa: F401
 )
 
 from .permissions_account import merge_account_permissions
+from .permissions_accounting import merge_accounting_permissions
 from .permissions_announcements import merge_announcement_permissions
 from .permissions_hr import merge_hr_permissions
 from .permissions_role_audit import merge_role_audit_permissions
@@ -465,6 +466,8 @@ merge_announcement_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS
 merge_hr_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
 # Rol auditi (2026-10-13) — `exam_center.decide`, `student.records_view`, `user.import_staff`.
 merge_role_audit_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
+# «Mühasibatlıq» + 25% təkrar imtahan (2026-10-18) — `accounting.view`, `retake.payment_verify`, `retake.manage`.
+merge_accounting_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
 
 
 def get_permission_label(permission: str) -> str:

@@ -1,0 +1,247 @@
+/*
+ * courses/css/course_syllabus_import.css — «Sillabusdan mövzuları götür» dialoqu (2026-10-18).
+ * Qabıq Paket E `ems-bsd` dialoqudur (course_dialogs.css); burada yalnız seçici siyahısı, mənbə zolağı
+ * və həftə sətirləri. Yalnız `--ems-*` / `--crs-ac*` tokenləri.
+ */
+
+.ems-bsd__ic--syllabus {
+    background: var(--crs-ac-tint);
+    color: var(--crs-ac-ink);
+}
+
+.si-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.si-step[hidden],
+.si-loading[hidden],
+.si-link[hidden] {
+    display: none;
+}
+
+.si-step {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.si-step .ems-field__hint {
+    margin: -6px 0 0;
+}
+
+.si-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.si-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+    color: var(--ems-text);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.si-option:hover,
+.si-option:focus-visible {
+    border-color: var(--crs-ac);
+    background: var(--crs-ac-soft);
+    outline: none;
+}
+
+.si-option__main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.si-option__title {
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.si-option__meta {
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-xs);
+}
+
+.si-option__tags {
+    display: inline-flex;
+    flex-wrap: wrap;
+    flex: none;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.si-empty {
+    margin: 8px 0 0;
+    padding: 16px;
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-600);
+    text-align: center;
+}
+
+.si-source {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--crs-ac-tint);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+}
+
+.si-source__ic {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--crs-ac-tint);
+    color: var(--crs-ac-ink);
+}
+
+.si-source__tx {
+    display: flex;
+    flex: 1 1 200px;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.si-source__title {
+    font-weight: 800;
+}
+
+.si-source__meta {
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-xs);
+}
+
+.si-summary {
+    margin: 0;
+    color: var(--ems-neutral-700);
+    font-weight: 700;
+}
+
+.si-weeks {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 46vh;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.si-week {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+}
+
+.si-week.is-existing {
+    background: var(--ems-bg-subtle);
+}
+
+.si-week.is-existing .si-week__title {
+    color: var(--ems-neutral-600);
+}
+
+.si-week__num {
+    display: grid;
+    place-items: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
+    border-radius: 8px;
+    background: var(--crs-ac-tint);
+    color: var(--crs-ac-ink);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.si-week__text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.si-week__title {
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.si-week__meta {
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-xs);
+}
+
+.si-link {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm);
+    cursor: pointer;
+}
+
+.si-link input {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    accent-color: var(--crs-ac);
+}
+
+.si-loading {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+@media (max-width: 575px) {
+    .si-option {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .si-option__tags {
+        justify-content: flex-start;
+    }
+
+    .si-week {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .si-week > .ems-badge {
+        grid-column: 2;
+        justify-self: start;
+    }
+}
