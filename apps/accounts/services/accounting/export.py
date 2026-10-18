@@ -1,8 +1,11 @@
 """«Mühasibatlıq» — Excel ixracı (panelin cari filtr dəsti üzrə).
 
+Dövr panelin dövrüdür: ay, bütün semestr və ya sərbəst tarix aralığı (``ac_from`` / ``ac_to`` — plan aylıq payların
+iş günlərinə görə kəsilməsidir, bax ``ranges.py``); başlıqda dövr yazılır.
+
 Vərəqlər:
 
-1. «Müəllimlər» — süzülmüş BÜTÜN müəllimlər (səhifələmə yoxdur): fakültə, kafedra, ştat, dövrün planı,
+1. «Müəllimlər» — süzülmüş BÜTÜN müəllimlər (drill-down / modal ixracında yalnız həmin müəllim) (səhifələmə yoxdur): fakültə, kafedra, ştat, dövrün planı,
    fakt (mühazirə / seminar / lab / cəm), fərq, icra %, status, semestr planı və semestr faktı;
 2. «Fənn və qrup» — həmin müəllimlərin fənn × qrup × növ üzrə keçirilmiş saatı (1 GROUP BY);
 3. «Dərslər» — YALNIZ drill-down açıqdırsa (``ac_teacher``): həmin müəllimin dərs siyahısı.
@@ -23,10 +26,8 @@ from core.ui import status_catalog
 from ..hr_analytics.constants import STAFF_TYPES
 from . import constants as C
 from . import dataset
-from .detail import lesson_list, period_bounds
-from .filters import MONTH_ALL
+from .detail import lesson_list, period_bounds, period_label
 from .formatting import staff_short
-from .periods import month_label
 
 _HEADER_FILL = "1F3A5F"
 _HEADER_FONT = "FFFFFF"
@@ -41,9 +42,7 @@ def _status_label(key: str) -> str:
 
 
 def _period(resolved) -> str:
-    if resolved.filters.month == MONTH_ALL:
-        return resolved.semester.label
-    return month_label(resolved.filters.month)
+    return period_label(resolved.filters, resolved.semester)
 
 
 def _teachers_table(resolved, rows) -> dict:

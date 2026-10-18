@@ -179,7 +179,9 @@ def record_result(*, actor, organization, application_id, score, note="", reques
 def application_for_attempt(*, student, subject_id, organization, attempt):
     """Bu onlayn cəhd 25% cəhdidirmi? — «25% müraciəti» şans qeydindən SONRA başlanmış həmin imtahanın cəhdi.
 
-    Uyğun müraciət (``exam_granted`` və ya — təkrar yoxlama üçün — ``completed``) və ya ``None``.
+    Uyğun müraciət (STATUSUNDAN ASILI OLMAYARAQ — review 2026-10-19, HIGH-1: bağlanmış müraciətin cəhdi də 25%
+    cəhdidir və əsas imtahan balına düşməməlidir) və ya ``None``. Status qərarını çağıran verir
+    (``exam_bridge``: ``exam_granted`` / ``completed`` → nəticə yazılır, bağlanmış → heç nə yazılmır).
     ``exam_attempt_history.retake_attempt_ids`` ilə EYNİ qayda (şans qeydi ≤ cəhdin başlanğıcı)."""
     if attempt is None or student is None or organization is None or not subject_id:
         return None
@@ -195,7 +197,6 @@ def application_for_attempt(*, student, subject_id, organization, attempt):
             application__isnull=False,
             application__subject_id=subject_id,
             application__kind=RetakeKind.RETAKE_25,
-            application__status__in=(RetakeStatus.EXAM_GRANTED, RetakeStatus.COMPLETED),
             created_at__lte=started,
         )
         .select_related("application")
@@ -205,11 +206,15 @@ def application_for_attempt(*, student, subject_id, organization, attempt):
     return grant.application if grant is not None else None
 
 
+#: Bu statuslarda 25% cəhdinin balı müraciətə yazılır; qalanlarda (bağlanmış) heç nə yazılmır.
+RESULT_ACCEPTING = frozenset({RetakeStatus.EXAM_GRANTED, RetakeStatus.COMPLETED})
+
+
 @transaction.atomic
 def record_attempt_result(*, application, score, attempt, by_user=None, appeal_id=None):
     """İmtahan körpüsü: 25% cəhdinin balı (ilk yazı və ya sonrakı yoxlama / apellyasiya)."""
     application = lock(application.pk, application.organization)
-    if application.status not in (RetakeStatus.EXAM_GRANTED, RetakeStatus.COMPLETED):
+    if application.status not in RESULT_ACCEPTING:
         return application
     value = clean_score(score, cap=score_cap(application))
     metadata = {"attempt_id": getattr(attempt, "pk", None), "exam_id": getattr(attempt, "exam_id", None)}
@@ -226,4 +231,11 @@ def record_attempt_result(*, application, score, attempt, by_user=None, appeal_i
     return application
 
 
-__all__ = ["application_for_attempt", "clean_score", "record_attempt_result", "record_result", "score_cap"]
+__all__ = [
+    "RESULT_ACCEPTING",
+    "application_for_attempt",
+    "clean_score",
+    "record_attempt_result",
+    "record_result",
+    "score_cap",
+]

@@ -1,6 +1,12 @@
 {% load i18n %}
 <p class="rt-dialog__subject" data-rt-text="who"></p>
 <div class="ems-field">
+    <label class="ems-field__label" for="rtVerifyPaid">{% trans "Ödənilən məbləğ (AZN)" context "registrar.retake" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <input class="ems-input" type="number" id="rtVerifyPaid" name="paid_amount" min="0.01" step="0.01" inputmode="decimal" required data-rt-paid>
+    <span class="ems-field__hint" data-rt-expected-hint data-template="{% trans 'Gözlənilən (təxmini): {amount} AZN' context 'registrar.retake' %}" data-none="{% trans 'Təhsil haqqı cədvəlində sətir yoxdur — gözlənilən məbləğ hesablanmır.' context 'registrar.retake' %}"></span>
+    <p class="ems-msg ems-msg--warning" data-rt-mismatch hidden>{% trans "Məbləğ gözləniləndən fərqlidir — təsdiq bloklanmır, fərq qərar zəncirində qeyd olunur." context "registrar.retake" %}</p>
+</div>
+<div class="ems-field">
     <label class="ems-field__label" for="rtVerifyRef">{% trans "Bank arayışı / ödəniş nömrəsi" context "registrar.retake" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "ui.dialog" %}</span></label>
     <input class="ems-input" type="text" id="rtVerifyRef" name="payment_reference" maxlength="120" autocomplete="off">
 </div>

@@ -102265,3 +102265,2289 @@ msgstr "Ödənişsiz — fənni başqa qrupla yenidən keçirsiniz; dekanlıq s�
 msgctxt "registrar.retake"
 msgid "Alt qrupa müraciət et"
 msgstr "Alt qrupa müraciət et"
+
+msgctxt "verification.public"
+msgid "Sənəd yoxlaması"
+msgstr "Sənəd yoxlaması"
+
+msgctxt "verification.public"
+msgid "Elektron sənəd yoxlaması"
+msgstr "Elektron sənəd yoxlaması"
+
+msgctxt "verification.public"
+msgid "Sənəd etibarlıdır"
+msgstr "Sənəd etibarlıdır"
+
+msgctxt "verification.public"
+msgid "Sənəd ləğv edilib"
+msgstr "Sənəd ləğv edilib"
+
+msgctxt "verification.public"
+msgid "Bu sənəd universitetin elektron sistemi tərəfindən verilib və hazırda qüvvədədir."
+msgstr "Bu sənəd universitetin elektron sistemi tərəfindən verilib və hazırda qüvvədədir."
+
+msgctxt "verification.public"
+msgid "Sənəd universitet tərəfindən ləğv edilib — ona etibar etməyin."
+msgstr "Sənəd universitet tərəfindən ləğv edilib — ona etibar etməyin."
+
+msgctxt "verification.public"
+msgid "Ləğv tarixi"
+msgstr "Ləğv tarixi"
+
+msgctxt "verification.public"
+msgid "Sənədin növü"
+msgstr "Sənədin növü"
+
+msgctxt "verification.public"
+msgid "Verən təşkilat"
+msgstr "Verən təşkilat"
+
+msgctxt "verification.public"
+msgid "Verilmə tarixi"
+msgstr "Verilmə tarixi"
+
+msgctxt "verification.public"
+msgid "Sənədin sahibi"
+msgstr "Sənədin sahibi"
+
+msgctxt "verification.public"
+msgid "Yoxlama kodu"
+msgstr "Yoxlama kodu"
+
+msgctxt "verification.public"
+msgid "Səhifə yalnız sənədin əsas göstəricilərini göstərir. Tam məzmunu sənədin özü ilə tutuşdurun və ya faylı aşağıda müqayisə edin."
+msgstr "Səhifə yalnız sənədin əsas göstəricilərini göstərir. Tam məzmunu sənədin özü ilə tutuşdurun və ya faylı aşağıda müqayisə edin."
+
+msgctxt "verification.public"
+msgid "Faylı müqayisə et"
+msgstr "Faylı müqayisə et"
+
+#, python-format
+msgctxt "verification.public"
+msgid "Sizə verilmiş PDF faylı seçin — sistem onun rəqəmsal izini (SHA-256) universitetin verdiyi nüsxə ilə tutuşdurur. Fayl saxlanılmır. Ən çox %(mb)s MB."
+msgstr "Sizə verilmiş PDF faylı seçin — sistem onun rəqəmsal izini (SHA-256) universitetin verdiyi nüsxə ilə tutuşdurur. Fayl saxlanılmır. Ən çox %(mb)s MB."
+
+msgctxt "verification.public"
+msgid "Fayl verilmiş nüsxə ilə eynidir, lakin sənəd ləğv edilib."
+msgstr "Fayl verilmiş nüsxə ilə eynidir, lakin sənəd ləğv edilib."
+
+msgctxt "verification.public"
+msgid "Fayl universitetin verdiyi nüsxə ilə tam eynidir."
+msgstr "Fayl universitetin verdiyi nüsxə ilə tam eynidir."
+
+msgctxt "verification.public"
+msgid "Fayl verilmiş nüsxə ilə eyni DEYİL — dəyişdirilmiş və ya başqa sənəd ola bilər."
+msgstr "Fayl verilmiş nüsxə ilə eyni DEYİL — dəyişdirilmiş və ya başqa sənəd ola bilər."
+
+msgctxt "verification.public"
+msgid "Seçilən fayl PDF deyil."
+msgstr "Seçilən fayl PDF deyil."
+
+msgctxt "verification.public"
+msgid "Fayl çox böyükdür."
+msgstr "Fayl çox böyükdür."
+
+msgctxt "verification.public"
+msgid "Fayl seçilməyib."
+msgstr "Fayl seçilməyib."
+
+msgctxt "verification.public"
+msgid "PDF fayl"
+msgstr "PDF fayl"
+
+msgctxt "verification.public"
+msgid "Müqayisə et"
+msgstr "Müqayisə et"
+
+msgctxt "verification.public"
+msgid "Başqa kodu yoxla"
+msgstr "Başqa kodu yoxla"
+
+msgctxt "verification.public"
+msgid "Sənədin həqiqiliyini yoxlayın"
+msgstr "Sənədin həqiqiliyini yoxlayın"
+
+msgctxt "verification.public"
+msgid "Universitetin verdiyi rəsmi sənədin üzərindəki QR kodu skan edin və ya yoxlama kodunu yazın."
+msgstr "Universitetin verdiyi rəsmi sənədin üzərindəki QR kodu skan edin və ya yoxlama kodunu yazın."
+
+msgctxt "verification.public"
+msgid "Sənəd tapılmadı"
+msgstr "Sənəd tapılmadı"
+
+msgctxt "verification.public"
+msgid "Kodu yenidən yoxlayın. Kod düzgündürsə və sənəd yenə tapılmırsa, ona etibar etməyin və sənədi verən universitetlə əlaqə saxlayın."
+msgstr "Kodu yenidən yoxlayın. Kod düzgündürsə və sənəd yenə tapılmırsa, ona etibar etməyin və sənədi verən universitetlə əlaqə saxlayın."
+
+msgctxt "verification.public"
+msgid "Çox sayda sorğu"
+msgstr "Çox sayda sorğu"
+
+msgctxt "verification.public"
+msgid "Bir neçə dəqiqə sonra yenidən cəhd edin."
+msgstr "Bir neçə dəqiqə sonra yenidən cəhd edin."
+
+msgctxt "verification.public"
+msgid "Yoxla"
+msgstr "Yoxla"
+
+msgctxt "verification.public"
+msgid "Yoxlama səhifəsi sənəd sahibinin şəxsi məlumatlarını göstərmir; sorğular anonim qeydə alınır."
+msgstr "Yoxlama səhifəsi sənəd sahibinin şəxsi məlumatlarını göstərmir; sorğular anonim qeydə alınır."
+
+msgctxt "verification.staff"
+msgid "Sənəd yoxlaması"
+msgstr "Sənəd yoxlaması"
+
+msgctxt "verification.staff"
+msgid "Sistemin verdiyi rəsmi sənədlər (QR + kod). Kod üzrə və ya tələbə adı ilə axtarın; səhv verilmiş sənədi ləğv edin."
+msgstr "Sistemin verdiyi rəsmi sənədlər (QR + kod). Kod üzrə və ya tələbə adı ilə axtarın; səhv verilmiş sənədi ləğv edin."
+
+msgctxt "verification.staff"
+msgid "Kod və ya tələbə"
+msgstr "Kod və ya tələbə"
+
+msgctxt "verification.staff"
+msgid "Kod (QKU-…) və ya tələbənin adı"
+msgstr "Kod (QKU-…) və ya tələbənin adı"
+
+msgctxt "verification.staff"
+msgid "Axtar"
+msgstr "Axtar"
+
+msgctxt "verification.staff"
+msgid "Vəziyyət"
+msgstr "Vəziyyət"
+
+msgctxt "verification.staff"
+msgid "Publik yoxlama səhifəsi"
+msgstr "Publik yoxlama səhifəsi"
+
+msgctxt "verification.staff"
+msgid "Kod"
+msgstr "Kod"
+
+msgctxt "verification.staff"
+msgid "Sənəd"
+msgstr "Sənəd"
+
+msgctxt "verification.staff"
+msgid "Sahibi"
+msgstr "Sahibi"
+
+msgctxt "verification.staff"
+msgid "Verilib"
+msgstr "Verilib"
+
+msgctxt "verification.staff"
+msgid "Əməllər"
+msgstr "Əməllər"
+
+msgctxt "verification.staff"
+msgid "Ləğv edilib"
+msgstr "Ləğv edilib"
+
+msgctxt "verification.staff"
+msgid "Etibarlı"
+msgstr "Etibarlı"
+
+msgctxt "verification.staff"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "verification.staff"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "verification.staff"
+msgid "Səhifələr"
+msgstr "Səhifələr"
+
+msgctxt "verification.staff"
+msgid "Əvvəlki"
+msgstr "Əvvəlki"
+
+msgctxt "verification.staff"
+msgid "Növbəti"
+msgstr "Növbəti"
+
+#, python-format
+msgctxt "verification.staff"
+msgid "Səhifə %(page)s / %(pages)s"
+msgstr "Səhifə %(page)s / %(pages)s"
+
+msgctxt "verification.staff"
+msgid "Sənəd tapılmadı"
+msgstr "Sənəd tapılmadı"
+
+msgctxt "verification.staff"
+msgid "Axtarışı dəyişin və ya bütün sənədlərə qayıdın."
+msgstr "Axtarışı dəyişin və ya bütün sənədlərə qayıdın."
+
+msgctxt "verification.staff"
+msgid "Möhürlənmiş sənəd transkript yüklənəndə avtomatik yaranır."
+msgstr "Möhürlənmiş sənəd transkript yüklənəndə avtomatik yaranır."
+
+msgctxt "verification.staff"
+msgid "Sənədi ləğv et"
+msgstr "Sənədi ləğv et"
+
+msgctxt "verification.staff"
+msgid "Ləğv geri qaytarılmır. Səbəb yalnız əməkdaşlara görünür — publik səhifə yalnız ləğv tarixini göstərir."
+msgstr "Ləğv geri qaytarılmır. Səbəb yalnız əməkdaşlara görünür — publik səhifə yalnız ləğv tarixini göstərir."
+
+msgctxt "verification.staff"
+msgid "Məs.: səhv məlumatla verilib, yenisi ilə əvəz olunub"
+msgstr "Məs.: səhv məlumatla verilib, yenisi ilə əvəz olunub"
+
+#, python-format
+msgctxt "verification.staff"
+msgid "Səbəb ən azı %(n)s simvol olmalıdır."
+msgstr "Səbəb ən azı %(n)s simvol olmalıdır."
+
+msgctxt "verification.staff"
+msgid "Bu sənəd artıq ləğv edilib."
+msgstr "Bu sənəd artıq ləğv edilib."
+
+#, python-format
+msgctxt "verification.staff"
+msgid "Sənəd ləğv edildi: %(code)s"
+msgstr "Sənəd ləğv edildi: %(code)s"
+
+msgctxt "verification.fact"
+msgid "İxtisas"
+msgstr "İxtisas"
+
+msgctxt "verification.fact"
+msgid "Təhsil pilləsi"
+msgstr "Təhsil pilləsi"
+
+msgctxt "verification.fact"
+msgid "Toplanmış kredit"
+msgstr "Toplanmış kredit"
+
+msgctxt "verification.fact"
+msgid "Kumulyativ ÜOMG"
+msgstr "Kumulyativ ÜOMG"
+
+msgctxt "verification.fact"
+msgid "Məzuniyyət yükü (ECTS)"
+msgstr "Məzuniyyət yükü (ECTS)"
+
+msgctxt "verification.fact"
+msgid "Sənəd №"
+msgstr "Sənəd №"
+
+msgctxt "verification.doc_type"
+msgid "Akademik transkript"
+msgstr "Akademik transkript"
+
+msgctxt "verification.audit"
+msgid "Rəsmi sənəd möhürləndi (QR yoxlama kodu verildi)."
+msgstr "Rəsmi sənəd möhürləndi (QR yoxlama kodu verildi)."
+
+msgctxt "registrar.pdf"
+msgid "Yoxlama kodu"
+msgstr "Yoxlama kodu"
+
+msgctxt "registrar.pdf"
+msgid "Sənədin həqiqiliyini yoxlayın"
+msgstr "Sənədin həqiqiliyini yoxlayın"
+
+msgctxt "organizations.permission.label"
+msgid "Verilmiş rəsmi sənədlərin siyahısı və sənədi ləğv etmək (QR yoxlaması)"
+msgstr "Verilmiş rəsmi sənədlərin siyahısı və sənədi ləğv etmək (QR yoxlaması)"
+
+msgctxt "profile.sidebar"
+msgid "Sənəd yoxlaması"
+msgstr "Sənəd yoxlaması"
+
+msgctxt "registrar.model.retake_window.meta"
+msgid "retake application window"
+msgstr "25% müraciət pəncərəsi"
+
+msgctxt "registrar.model.retake_window.meta"
+msgid "retake application windows"
+msgstr "25% müraciət pəncərələri"
+
+msgctxt "registrar.model.retake_tuition.meta"
+msgid "annual tuition"
+msgstr "illik təhsil haqqı"
+
+msgctxt "registrar.model.retake_tuition.meta"
+msgid "annual tuition table"
+msgstr "təhsil haqqı cədvəli"
+
+msgctxt "profile.sidebar"
+msgid "25% müraciət pəncərəsi"
+msgstr "25% müraciət pəncərəsi"
+
+#, python-format
+msgctxt "profile.sidebar"
+msgid "25%% müraciət pəncərəsi"
+msgstr "25%% müraciət pəncərəsi"
+
+msgctxt "accounts.accounting"
+msgid "müəllim (> +{pct}%)"
+msgstr "müəllim (> +{pct}%)"
+
+msgctxt "accounts.accounting"
+msgid "müəllim (< −{pct}%)"
+msgstr "müəllim (< −{pct}%)"
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "Status — fakt planın ±%(pct)s%%-i daxilindədirsə «Plana uyğun»; az və ya çoxdursa müvafiq olaraq «Plandan az» / «Plandan çox». Band «Sistem tənzimləmələri»ndə dəyişdirilir."
+msgstr "Status — fakt planın ±%(pct)s%%-i daxilindədirsə «Plana uyğun»; az və ya çoxdursa müvafiq olaraq «Plandan az» / «Plandan çox». Band «Sistem tənzimləmələri»ndə dəyişdirilir."
+
+msgctxt "core.runtime_settings"
+msgid "Mühasibatlıq"
+msgstr "Mühasibatlıq"
+
+msgctxt "core.runtime_settings"
+msgid "25% ödənişinin faizi"
+msgstr "25% ödənişinin faizi"
+
+msgctxt "core.runtime_settings"
+msgid "Təxmini məbləğ = illik təhsil haqqı × bu faiz ÷ 100 × (fənnin krediti ÷ illik kredit). Dəqiq məbləği Mühasibatlıq qəbzi yoxlayanda təsdiqləyir; fərq xəbərdarlıqdır, blok deyil."
+msgstr "Təxmini məbləğ = illik təhsil haqqı × bu faiz ÷ 100 × (fənnin krediti ÷ illik kredit). Dəqiq məbləği Mühasibatlıq qəbzi yoxlayanda təsdiqləyir; fərq xəbərdarlıqdır, blok deyil."
+
+msgctxt "core.runtime_settings"
+msgid "İllik kredit (məbləğ düsturu üçün)"
+msgstr "İllik kredit (məbləğ düsturu üçün)"
+
+msgctxt "core.runtime_settings"
+msgid "Fənnin payı = fənnin krediti ÷ bu ədəd. 0 yazılsa kreditə bölünmür: məbləğ = illik haqq × faiz ÷ 100."
+msgstr "Fənnin payı = fənnin krediti ÷ bu ədəd. 0 yazılsa kreditə bölünmür: məbləğ = illik haqq × faiz ÷ 100."
+
+msgctxt "core.runtime_settings"
+msgid "Plan ↔ fakt kənarlaşma bandı"
+msgstr "Plan ↔ fakt kənarlaşma bandı"
+
+msgctxt "core.runtime_settings"
+msgid "Keçirilmiş dərs saatı planın ±bu faiz daxilindədirsə «Plana uyğun» sayılır; azdırsa «Plandan az», çoxdursa «Plandan çox»."
+msgstr "Keçirilmiş dərs saatı planın ±bu faiz daxilindədirsə «Plana uyğun» sayılır; azdırsa «Plandan az», çoxdursa «Plandan çox»."
+
+msgctxt "registrar.retake"
+msgid "İmtahana gəlmədi"
+msgstr "İmtahana gəlmədi"
+
+msgctxt "registrar.retake"
+msgid "Təhsil haqqı cədvəli"
+msgstr "Təhsil haqqı cədvəli"
+
+msgctxt "registrar.retake"
+msgid "«İmtahana gəlmədi» qərarı yazıldı — cəhd istifadə olunmuş sayılır."
+msgstr "«İmtahana gəlmədi» qərarı yazıldı — cəhd istifadə olunmuş sayılır."
+
+msgctxt "registrar.retake"
+msgid "Müraciət qərarla geri götürüldü."
+msgstr "Müraciət qərarla geri götürüldü."
+
+msgctxt "registrar.retake"
+msgid "Bağlanış vaxtı açılışdan sonra olmalıdır."
+msgstr "Bağlanış vaxtı açılışdan sonra olmalıdır."
+
+msgctxt "registrar.retake"
+msgid "Pəncərə artıq bağlanıb."
+msgstr "Pəncərə artıq bağlanıb."
+
+msgctxt "registrar.retake"
+msgid "Bu dövr üçün artıq açıq (və ya planlaşdırılmış) pəncərə var — əvvəlcə onu bağlayın."
+msgstr "Bu dövr üçün artıq açıq (və ya planlaşdırılmış) pəncərə var — əvvəlcə onu bağlayın."
+
+msgctxt "registrar.retake"
+msgid "Açılış vaxtı göstərilməlidir."
+msgstr "Açılış vaxtı göstərilməlidir."
+
+msgctxt "registrar.retake"
+msgid "Tarix və saat düzgün deyil."
+msgstr "Tarix və saat düzgün deyil."
+
+msgctxt "registrar.retake"
+msgid "Məbləğ 0 ilə 1 000 000 AZN arasında olmalıdır."
+msgstr "Məbləğ 0 ilə 1 000 000 AZN arasında olmalıdır."
+
+msgctxt "registrar.retake"
+msgid "Qəbul ili düzgün deyil."
+msgstr "Qəbul ili düzgün deyil."
+
+msgctxt "registrar.retake"
+msgid "Tədris ilini seçin."
+msgstr "Tədris ilini seçin."
+
+msgctxt "registrar.retake"
+msgid "Ödənilən məbləği yazın (AZN)."
+msgstr "Ödənilən məbləği yazın (AZN)."
+
+msgctxt "registrar.retake"
+msgid "Məbləğ rəqəm olmalıdır."
+msgstr "Məbləğ rəqəm olmalıdır."
+
+msgctxt "registrar.retake"
+msgid "İxtisas tapılmadı."
+msgstr "İxtisas tapılmadı."
+
+msgctxt "registrar.retake"
+msgid "Bu sətir artıq var."
+msgstr "Bu sətir artıq var."
+
+msgctxt "registrar.retake"
+msgid "Ödənişdən sonra bağlanış rəsmi qərarla olur: əmr nömrəsi və tarixi və ya qərar sənədi əlavə edin."
+msgstr "Ödənişdən sonra bağlanış rəsmi qərarla olur: əmr nömrəsi və tarixi və ya qərar sənədi əlavə edin."
+
+msgctxt "registrar.retake"
+msgid "Bu mərhələdə bu bağlanış mümkün deyil."
+msgstr "Bu mərhələdə bu bağlanış mümkün deyil."
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma yoxdur."
+msgstr "Qaytarılma yoxdur."
+
+msgctxt "registrar.retake"
+msgid "Müraciət pəncərəsi açıldı."
+msgstr "Müraciət pəncərəsi açıldı."
+
+msgctxt "registrar.retake"
+msgid "Müraciət pəncərəsi bağlandı."
+msgstr "Müraciət pəncərəsi bağlandı."
+
+msgctxt "registrar.retake"
+msgid "Təhsil haqqı sətri yadda saxlanıldı."
+msgstr "Təhsil haqqı sətri yadda saxlanıldı."
+
+msgctxt "registrar.retake"
+msgid "Təhsil haqqı sətri silindi."
+msgstr "Təhsil haqqı sətri silindi."
+
+msgctxt "registrar.retake"
+msgid "Gözlənilən məbləğ"
+msgstr "Gözlənilən məbləğ"
+
+msgctxt "registrar.retake"
+msgid "Ödənilən məbləğ"
+msgstr "Ödənilən məbləğ"
+
+msgctxt "registrar.retake"
+msgid "Ödənilən məbləğ gözləniləndən fərqlidir"
+msgstr "Ödənilən məbləğ gözləniləndən fərqlidir"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Müraciət pəncərəsi açıqdır — %(until)s tarixinədək"
+msgstr "Müraciət pəncərəsi açıqdır — %(until)s tarixinədək"
+
+msgctxt "registrar.retake"
+msgid "Müraciət pəncərəsi açıqdır"
+msgstr "Müraciət pəncərəsi açıqdır"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Dövr: %(period)s. Pəncərəni İmtahan mərkəzi açır və bağlayır."
+msgstr "Dövr: %(period)s. Pəncərəni İmtahan mərkəzi açır və bağlayır."
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Pəncərə %(when)s tarixində açılacaq. Göndərdiyiniz müraciətlərin vəziyyətini aşağıda izləyə bilərsiniz."
+msgstr "Pəncərə %(when)s tarixində açılacaq. Göndərdiyiniz müraciətlərin vəziyyətini aşağıda izləyə bilərsiniz."
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Təxmini məbləğ: %(amount)s AZN — dəqiq məbləği Mühasibatlıq təsdiqləyir"
+msgstr "Təxmini məbləğ: %(amount)s AZN — dəqiq məbləği Mühasibatlıq təsdiqləyir"
+
+msgctxt "registrar.retake"
+msgid "Məbləği Mühasibatlıqdan öyrənin"
+msgstr "Məbləği Mühasibatlıqdan öyrənin"
+
+msgctxt "registrar.retake"
+msgid "Bu bölmə İmtahan mərkəzinin qərar səlahiyyəti olanlar üçündür."
+msgstr "Bu bölmə İmtahan mərkəzinin qərar səlahiyyəti olanlar üçündür."
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Tələbələr 25%% təkrar imtahan və alt qrup müraciətini yalnız açıq pəncərə müddətində göndərə bilir. Pəncərəni burada açıb bağlayın; bütün açılış və bağlanışlar tarixçədə qalır."
+msgstr "Tələbələr 25%% təkrar imtahan və alt qrup müraciətini yalnız açıq pəncərə müddətində göndərə bilir. Pəncərəni burada açıb bağlayın; bütün açılış və bağlanışlar tarixçədə qalır."
+
+msgctxt "registrar.retake"
+msgid "Ümumi açar söndürülüb"
+msgstr "Ümumi açar söndürülüb"
+
+msgctxt "registrar.retake"
+msgid "«Sistem tənzimləmələri»ndə «Müraciət pəncərəsi açıqdır» söndürülüb — pəncərə açıq olsa belə müraciət qəbul olunmur."
+msgstr "«Sistem tənzimləmələri»ndə «Müraciət pəncərəsi açıqdır» söndürülüb — pəncərə açıq olsa belə müraciət qəbul olunmur."
+
+msgctxt "registrar.retake"
+msgid "Cari vəziyyət"
+msgstr "Cari vəziyyət"
+
+msgctxt "registrar.retake"
+msgid "Açıqdır"
+msgstr "Açıqdır"
+
+msgctxt "registrar.retake"
+msgid "əl ilə bağlanana qədər"
+msgstr "əl ilə bağlanana qədər"
+
+msgctxt "registrar.retake"
+msgid "Planlaşdırılıb"
+msgstr "Planlaşdırılıb"
+
+msgctxt "registrar.retake"
+msgid "Bağlıdır"
+msgstr "Bağlıdır"
+
+msgctxt "registrar.retake"
+msgid "Pəncərə bağlansın? Yeni müraciət qəbul olunmayacaq."
+msgstr "Pəncərə bağlansın? Yeni müraciət qəbul olunmayacaq."
+
+msgctxt "registrar.retake"
+msgid "Pəncərəni bağla"
+msgstr "Pəncərəni bağla"
+
+msgctxt "registrar.retake"
+msgid "Akademik dövr"
+msgstr "Akademik dövr"
+
+msgctxt "registrar.retake"
+msgid "Açılış"
+msgstr "Açılış"
+
+msgctxt "registrar.retake"
+msgid "(boş — indi)"
+msgstr "(boş — indi)"
+
+msgctxt "registrar.retake"
+msgid "Bağlanış"
+msgstr "Bağlanış"
+
+msgctxt "registrar.retake"
+msgid "Pəncərəni aç"
+msgstr "Pəncərəni aç"
+
+msgctxt "registrar.retake"
+msgid "Tarixçə"
+msgstr "Tarixçə"
+
+msgctxt "registrar.retake"
+msgid "Dövr"
+msgstr "Dövr"
+
+msgctxt "registrar.retake"
+msgid "Açan"
+msgstr "Açan"
+
+msgctxt "registrar.retake"
+msgid "Bağlayan"
+msgstr "Bağlayan"
+
+msgctxt "registrar.retake"
+msgid "Ödənilən məbləğ (AZN)"
+msgstr "Ödənilən məbləğ (AZN)"
+
+msgctxt "registrar.retake"
+msgid "Gözlənilən (təxmini): {amount} AZN"
+msgstr "Gözlənilən (təxmini): {amount} AZN"
+
+msgctxt "registrar.retake"
+msgid "Təhsil haqqı cədvəlində sətir yoxdur — gözlənilən məbləğ hesablanmır."
+msgstr "Təhsil haqqı cədvəlində sətir yoxdur — gözlənilən məbləğ hesablanmır."
+
+msgctxt "registrar.retake"
+msgid "Məbləğ gözləniləndən fərqlidir — təsdiq bloklanmır, fərq qərar zəncirində qeyd olunur."
+msgstr "Məbləğ gözləniləndən fərqlidir — təsdiq bloklanmır, fərq qərar zəncirində qeyd olunur."
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Təsdiqlənmiş ödəniş: %(amount)s AZN"
+msgstr "Təsdiqlənmiş ödəniş: %(amount)s AZN"
+
+msgctxt "registrar.retake"
+msgid "Ödənişdən sonra bağlanış"
+msgstr "Ödənişdən sonra bağlanış"
+
+msgctxt "registrar.retake"
+msgid "Rəsmi qərar məcburidir: əmr nömrəsi və tarixi və ya qərar sənədi. Qaytarılma yoxdur — qərar və qeyd tarixçədə qalır."
+msgstr "Rəsmi qərar məcburidir: əmr nömrəsi və tarixi və ya qərar sənədi. Qaytarılma yoxdur — qərar və qeyd tarixçədə qalır."
+
+msgctxt "registrar.retake"
+msgid "Qərarı yaz"
+msgstr "Qərarı yaz"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Təxmini 25%% məbləği = illik haqq × %(pct)s%% × (fənnin krediti ÷ %(credits)s). Faiz və illik kredit «Sistem tənzimləmələri»ndədir; illik kredit 0 olarsa kreditə bölünmür."
+msgstr "Təxmini 25%% məbləği = illik haqq × %(pct)s%% × (fənnin krediti ÷ %(credits)s). Faiz və illik kredit «Sistem tənzimləmələri»ndədir; illik kredit 0 olarsa kreditə bölünmür."
+
+msgctxt "registrar.retake"
+msgid "Tədris ili"
+msgstr "Tədris ili"
+
+msgctxt "registrar.retake"
+msgid "Qəbul ili"
+msgstr "Qəbul ili"
+
+msgctxt "registrar.retake"
+msgid "İxtisas"
+msgstr "İxtisas"
+
+msgctxt "registrar.retake"
+msgid "(boş — defolt)"
+msgstr "(boş — defolt)"
+
+msgctxt "registrar.retake"
+msgid "Bütün ixtisaslar (defolt)"
+msgstr "Bütün ixtisaslar (defolt)"
+
+msgctxt "registrar.retake"
+msgid "İllik təhsil haqqı (AZN)"
+msgstr "İllik təhsil haqqı (AZN)"
+
+msgctxt "registrar.retake"
+msgid "İllik haqq"
+msgstr "İllik haqq"
+
+msgctxt "registrar.retake"
+msgid "Əməl"
+msgstr "Əməl"
+
+msgctxt "registrar.retake"
+msgid "Bu sətir silinsin?"
+msgstr "Bu sətir silinsin?"
+
+msgctxt "registrar.retake"
+msgid "Sil"
+msgstr "Sil"
+
+msgctxt "registrar.retake"
+msgid "Cədvəl boşdur"
+msgstr "Cədvəl boşdur"
+
+msgctxt "registrar.retake"
+msgid "Sətir olmayanda tələbə «Məbləği Mühasibatlıqdan öyrənin» görür."
+msgstr "Sətir olmayanda tələbə «Məbləği Mühasibatlıqdan öyrənin» görür."
+
+msgctxt "registrar.retake"
+msgid "Əmr / qərar №"
+msgstr "Əmr / qərar №"
+
+msgctxt "registrar.retake"
+msgid "Əmr tarixi"
+msgstr "Əmr tarixi"
+
+msgctxt "registrar.retake"
+msgid "və ya qərar sənədi"
+msgstr "və ya qərar sənədi"
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma yoxdur: sistem məbləği geri qaytarmır, yalnız qərar qeyd olunur."
+msgstr "Qaytarılma yoxdur: sistem məbləği geri qaytarmır, yalnız qərar qeyd olunur."
+
+msgctxt "registrar.retake"
+msgid "Bağlanış qərarı"
+msgstr "Bağlanış qərarı"
+
+msgctxt "registrar.retake"
+msgid "Sənəd"
+msgstr "Sənəd"
+
+msgctxt "registrar.retake"
+msgid "Qərarla geri götür"
+msgstr "Qərarla geri götür"
+
+msgctxt "registrar.retake"
+msgid "Qərarla rədd et"
+msgstr "Qərarla rədd et"
+
+msgctxt "registrar.retake"
+msgid "Pəncərə yalnız cari və ya gələcək dövr üçün açılır."
+msgstr "Pəncərə yalnız cari və ya gələcək dövr üçün açılır."
+
+msgctxt "registrar.retake"
+msgid "Bu tədris ili üçün hələ akademik dövr yoxdur — sətir dövr yaradılanda işləyəcək."
+msgstr "Bu tədris ili üçün hələ akademik dövr yoxdur — sətir dövr yaradılanda işləyəcək."
+
+msgctxt "registrar.retake"
+msgid "Ödənilən məbləğ 0-dan böyük olmalıdır."
+msgstr "Ödənilən məbləğ 0-dan böyük olmalıdır."
+
+msgctxt "registrar.retake"
+msgid "Tədris ili «2026/2027» formatında olmalıdır."
+msgstr "Tədris ili «2026/2027» formatında olmalıdır."
+
+msgctxt "registrar.retake"
+msgid "İmtahan cəhdi geri alına bilmir — imtahan cəhdi açılmış müraciət hələ bağlanmır."
+msgstr "İmtahan cəhdi geri alına bilmir — imtahan cəhdi açılmış müraciət hələ bağlanmır."
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "(%(year)s tədris ilinin haqqı ilə)"
+msgstr "(%(year)s tədris ilinin haqqı ilə)"
+
+msgctxt "registrar.retake"
+msgid "Müraciət pəncərəsi bağlıdır — imtahan mərkəzi açanda burada görünəcək"
+msgstr "Müraciət pəncərəsi bağlıdır — imtahan mərkəzi açanda burada görünəcək"
+
+msgctxt "registrar.retake"
+msgid "Hələ pəncərə açılmayıb — müraciət qəbulu üçün pəncərə açın"
+msgstr "Hələ pəncərə açılmayıb — müraciət qəbulu üçün pəncərə açın"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Tələbələr hazırda 25%% və alt qrup müraciəti göndərə bilmir. Aşağıdakı formadan dövrü seçib pəncərəni açın."
+msgstr "Tələbələr hazırda 25%% və alt qrup müraciəti göndərə bilmir. Aşağıdakı formadan dövrü seçib pəncərəni açın."
+
+msgctxt "registrar.retake"
+msgid "Cari və ya gələcək akademik dövr yoxdur — əvvəlcə dövr yaradılmalıdır."
+msgstr "Cari və ya gələcək akademik dövr yoxdur — əvvəlcə dövr yaradılmalıdır."
+
+msgctxt "registrar.retake"
+msgid "sistem (vaxtı bitdi)"
+msgstr "sistem (vaxtı bitdi)"
+
+msgctxt "exams.second_chance.error"
+msgid "Tələbə «{exam}» imtahanında hazırda cəhd edir — cəhd bitməmiş müraciət bağlanmır."
+msgstr "Tələbə «{exam}» imtahanında hazırda cəhd edir — cəhd bitməmiş müraciət bağlanmır."
+
+msgctxt "exams.second_chance.error"
+msgid "Tələbənin «{exam}» imtahanındakı cəhdi hələ yoxlanmayıb — əvvəlcə yoxlanmalıdır."
+msgstr "Tələbənin «{exam}» imtahanındakı cəhdi hələ yoxlanmayıb — əvvəlcə yoxlanmalıdır."
+
+msgctxt "profile.section"
+msgid "Yenidən imtahan cəhdi"
+msgstr "Yenidən imtahan cəhdi"
+
+msgctxt "accounts.exam_chance"
+msgid "Cəhd hüququ vermək üçün əvvəlcə aktiv təşkilat seçilməlidir."
+msgstr "Cəhd hüququ vermək üçün əvvəlcə aktiv təşkilat seçilməlidir."
+
+msgctxt "accounts.exam_chance"
+msgid "Verilən cəhd hüququ"
+msgstr "Verilən cəhd hüququ"
+
+msgctxt "accounts.exam_chance"
+msgid "Cəhdin əsası"
+msgstr "Cəhdin əsası"
+
+msgctxt "accounts.exam_chance"
+msgid "Əsas seçin…"
+msgstr "Əsas seçin…"
+
+msgctxt "accounts.exam_chance"
+msgid "Yalnız baxış: cəhd hüququnu «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
+msgstr "Yalnız baxış: cəhd hüququnu «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
+
+msgctxt "accounts.exam_chance"
+msgid "Son verilən cəhd hüquqları"
+msgstr "Son verilən cəhd hüquqları"
+
+msgctxt "accounts.exam_chance"
+msgid "Rəsmi qeyd: kim, kimə, hansı imtahan, hansı əsasla və sənədlə. Qeydlər silinmir və dəyişdirilmir."
+msgstr "Rəsmi qeyd: kim, kimə, hansı imtahan, hansı əsasla və sənədlə. Qeydlər silinmir və dəyişdirilmir."
+
+msgctxt "accounts.exam_chance"
+msgid "Hələ cəhd hüququ verilməyib."
+msgstr "Hələ cəhd hüququ verilməyib."
+
+msgctxt "accounts.exam_chance"
+msgid "Cəhd hüququ ver"
+msgstr "Cəhd hüququ ver"
+
+msgctxt "accounts.exam_chance"
+msgid "Əsası seçin, tələbəni axtarıb işarələyin, imtahanı seçin, sənədi və qeydi yazın."
+msgstr "Əsası seçin, tələbəni axtarıb işarələyin, imtahanı seçin, sənədi və qeydi yazın."
+
+msgctxt "accounts.exam_chance"
+msgid "1-ci addım: yuxarıdakı süzgəcdə «Cəhdin əsası»nı seçin — əsassız cəhd hüququ verilmir."
+msgstr "1-ci addım: yuxarıdakı süzgəcdə «Cəhdin əsası»nı seçin — əsassız cəhd hüququ verilmir."
+
+msgctxt "accounts.exam_chance"
+msgid "Sənəd və qeyd"
+msgstr "Sənəd və qeyd"
+
+#, python-format
+msgctxt "accounts.exam_chance"
+msgid "Cəhd hüququ veriləndə: cəhd limiti artır, final/midterm üçün YENİ fərdi PIN yaradılır, finalın köhnə giriş bileti sıfırlanır və imtahan «Təyin olunmuş tapşırıqlar»da yenidən görünür. Qərar əsası və sənədi ilə silinməyən qeydə yazılır və tələbənin 25%% izində görünür."
+msgstr "Cəhd hüququ veriləndə: cəhd limiti artır, final/midterm üçün YENİ fərdi PIN yaradılır, finalın köhnə giriş bileti sıfırlanır və imtahan «Təyin olunmuş tapşırıqlar»da yenidən görünür. Qərar əsası və sənədi ilə silinməyən qeydə yazılır və tələbənin 25%% izində görünür."
+
+msgctxt "accounts.exam_chance"
+msgid "Cəhd hüququ vermək üçün qərar səlahiyyətiniz yoxdur."
+msgstr "Cəhd hüququ vermək üçün qərar səlahiyyətiniz yoxdur."
+
+msgctxt "accounts.exam_chance"
+msgid "Köhnə qeyd (əsas yazılmayıb)"
+msgstr "Köhnə qeyd (əsas yazılmayıb)"
+
+msgctxt "registrar.retake"
+msgid "Cəhdin əsasını seçin."
+msgstr "Cəhdin əsasını seçin."
+
+msgctxt "registrar.retake"
+msgid "25% müraciəti yalnız yekun (final) imtahan üçün cəhd hüququ verir."
+msgstr "25% müraciəti yalnız yekun (final) imtahan üçün cəhd hüququ verir."
+
+msgctxt "registrar.retake"
+msgid "Bütün müraciətlər, addımlar, qəbzlər, yenidən imtahan cəhdləri və nəticələr."
+msgstr "Bütün müraciətlər, addımlar, qəbzlər, yenidən imtahan cəhdləri və nəticələr."
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Buraxılışdan sonra İmtahan mərkəzi «Yenidən imtahan cəhdi» bölməsində «25%% müraciəti» əsası ilə cəhd hüququ verir və ya kağız imtahanın balı yazılır."
+msgstr "Buraxılışdan sonra İmtahan mərkəzi «Yenidən imtahan cəhdi» bölməsində «25%% müraciəti» əsası ilə cəhd hüququ verir və ya kağız imtahanın balı yazılır."
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Yenidən imtahan cəhdi: «%(title)s» · +%(n)s · %(reason)s · %(when)s"
+msgstr "Yenidən imtahan cəhdi: «%(title)s» · +%(n)s · %(reason)s · %(when)s"
+
+msgctxt "exams.second_chance.notification"
+msgid "Yenidən imtahan cəhdi hüququ verildi"
+msgstr "Yenidən imtahan cəhdi hüququ verildi"
+
+msgctxt "organizations.permission.label"
+msgid "İmtahan mərkəzinin qərarları (yenidən imtahan cəhdi, kollokvium pəncərəsi, sual göndərişi)"
+msgstr "İmtahan mərkəzinin qərarları (yenidən imtahan cəhdi, kollokvium pəncərəsi, sual göndərişi)"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Qrupa yenidən imtahan cəhdi"
+msgstr "Qrupa yenidən imtahan cəhdi"
+
+msgid "Tələbənin imtahanı bərpa edilsin? Pozuntu sayğacı bir vahid azalacaq."
+msgstr "Tələbənin imtahanı bərpa edilsin? Pozuntu sayğacı bir vahid azalacaq."
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Fayl seçin və ya bura atın"
+msgstr "Fayl seçin və ya bura atın"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Faylı çıxar"
+msgstr "Faylı çıxar"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Bu fayl növü dəstəklənmir — PDF, TXT, PNG və ya JPG seçin."
+msgstr "Bu fayl növü dəstəklənmir — PDF, TXT, PNG və ya JPG seçin."
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Fayl çıxarıldı."
+msgstr "Fayl çıxarıldı."
+
+msgctxt "exams.template.bank_picker"
+msgid "Siyahı yüklənmədi"
+msgstr "Siyahı yüklənmədi"
+
+msgctxt "exams.template.bank_picker"
+msgid "Bağlantını yoxlayıb yenidən cəhd edin. Problem qalırsa səhifəni yeniləyin."
+msgstr "Bağlantını yoxlayıb yenidən cəhd edin. Problem qalırsa səhifəni yeniləyin."
+
+msgctxt "exams.template.bank_picker"
+msgid "Yenidən cəhd et"
+msgstr "Yenidən cəhd et"
+
+msgctxt "exams.template.bank_picker"
+msgid "Növbəti suallar yüklənmədi."
+msgstr "Növbəti suallar yüklənmədi."
+
+msgctxt "exams.template.bank_picker"
+msgid "Suallar əlavə olunmadı. Yenidən cəhd edin."
+msgstr "Suallar əlavə olunmadı. Yenidən cəhd edin."
+
+msgctxt "exams.template.bank_picker"
+msgid "Şəbəkə xətası — bağlantını yoxlayıb yenidən cəhd edin."
+msgstr "Şəbəkə xətası — bağlantını yoxlayıb yenidən cəhd edin."
+
+msgctxt "exams.template.bank_picker"
+msgid "Bu imtahana sual əlavə etmək icazəniz yoxdur."
+msgstr "Bu imtahana sual əlavə etmək icazəniz yoxdur."
+
+msgctxt "exams.template.bank_picker"
+msgid "Bank tapılmadı və ya artıq sizə açıq deyil. Siyahını yeniləyin."
+msgstr "Bank tapılmadı və ya artıq sizə açıq deyil. Siyahını yeniləyin."
+
+msgctxt "exams.template.bank_picker"
+msgid "Əlavə olunur…"
+msgstr "Əlavə olunur…"
+
+msgctxt "exams.template.bank_picker"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "exams.template.bank_picker"
+msgid "Seçilmişləri imtahana əlavə et"
+msgstr "Seçilmişləri imtahana əlavə et"
+
+msgctxt "exams.template.bank_picker"
+msgid "{n} sual seçilib"
+msgstr "{n} sual seçilib"
+
+msgctxt "exams.template.bank_picker"
+msgid "Görünənlərin hamısını seç"
+msgstr "Görünənlərin hamısını seç"
+
+#, python-format
+msgctxt "exams.template.bank_picker"
+msgid "%(n)s artıq imtahanda"
+msgstr "%(n)s artıq imtahanda"
+
+msgctxt "exams.template.bank_picker"
+msgid "Artıq əlavə olunub"
+msgstr "Artıq əlavə olunub"
+
+msgctxt "exams.template.bank_picker"
+msgid "çox cavablı"
+msgstr "çox cavablı"
+
+msgctxt "exams.template.bank_picker"
+msgid "Daha çox göstər"
+msgstr "Daha çox göstər"
+
+msgctxt "exams.view.bank.message"
+msgid "Seçilmiş suallar artıq imtahanda var — yeni sual əlavə olunmadı."
+msgstr "Seçilmiş suallar artıq imtahanda var — yeni sual əlavə olunmadı."
+
+msgctxt "exams.view.bank.message"
+msgid "{count} sual artıq imtahanda idi — ötürüldü."
+msgstr "{count} sual artıq imtahanda idi — ötürüldü."
+
+msgctxt "surveys.inbox"
+msgid "Baxış rejimində sorğular göstərilmir"
+msgstr "Baxış rejimində sorğular göstərilmir"
+
+msgctxt "surveys.inbox"
+msgid "Səhifəni yeniləyin; problem qalırsa İKT dəstəyinə müraciət edin."
+msgstr "Səhifəni yeniləyin; problem qalırsa İKT dəstəyinə müraciət edin."
+
+msgctxt "surveys.inbox"
+msgid "Gözləyən sorğu yoxdur"
+msgstr "Gözləyən sorğu yoxdur"
+
+msgctxt "surveys.inbox"
+msgid "Yeni sorğu təyin olunanda burada görünəcək və bildiriş alacaqsınız."
+msgstr "Yeni sorğu təyin olunanda burada görünəcək və bildiriş alacaqsınız."
+
+msgctxt "surveys.cabinet"
+msgid "Açıq sorğu yoxdur"
+msgstr "Açıq sorğu yoxdur"
+
+msgctxt "surveys.cabinet"
+msgid "Semestr sonu anonim qiymətləndirmə açılanda burada görünəcək və bildiriş alacaqsınız."
+msgstr "Semestr sonu anonim qiymətləndirmə açılanda burada görünəcək və bildiriş alacaqsınız."
+
+msgctxt "accounts.accounting"
+msgid "Müəllimlərin jurnalda keçirdiyi dərs saatları paylanmış dərs yükünün seçilmiş dövrə düşən payı ilə müqayisədə: mühazirə, seminar, laboratoriya, fərq və status. Dövr — ay, bütün semestr və ya tarix aralığı. Filtrlər KPI-lara, cədvələ və Excel ixracına eyni tətbiq olunur; müəllimin sətrinə klik ətraflı pəncərəni açır."
+msgstr "Müəllimlərin jurnalda keçirdiyi dərs saatları paylanmış dərs yükünün seçilmiş dövrə düşən payı ilə müqayisədə: mühazirə, seminar, laboratoriya, fərq və status. Dövr — ay, bütün semestr və ya tarix aralığı. Filtrlər KPI-lara, cədvələ və Excel ixracına eyni tətbiq olunur; müəllimin sətrinə klik ətraflı pəncərəni açır."
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "göstərilir: %(shown)s / %(total)s müəllim"
+msgstr "göstərilir: %(shown)s / %(total)s müəllim"
+
+msgctxt "accounts.accounting"
+msgid "Müəllimin sətrinə klikləyin — aylar, fənlər və keçirilmiş dərslər ətraflı pəncərədə açılır."
+msgstr "Müəllimin sətrinə klikləyin — aylar, fənlər və keçirilmiş dərslər ətraflı pəncərədə açılır."
+
+msgctxt "accounts.accounting"
+msgid "Aralıq bu günü əhatə edir — fakt aralığın sonunadək artacaq, «Plandan az» statusu ilkin göstəricidir."
+msgstr "Aralıq bu günü əhatə edir — fakt aralığın sonunadək artacaq, «Plandan az» statusu ilkin göstəricidir."
+
+msgctxt "accounts.accounting"
+msgid "Aralığın planı: hər ayın plan payı həmin ayın aralığa düşən iş günləri qədər götürülür (ayın payı × aralıqdakı iş günləri ÷ ayın iş günləri). Tam düşən ay ay rejimi ilə, bütün semestr isə semestr planı ilə eyni rəqəmi verir."
+msgstr "Aralığın planı: hər ayın plan payı həmin ayın aralığa düşən iş günləri qədər götürülür (ayın payı × aralıqdakı iş günləri ÷ ayın iş günləri). Tam düşən ay ay rejimi ilə, bütün semestr isə semestr planı ilə eyni rəqəmi verir."
+
+msgctxt "accounts.accounting"
+msgid "Tarix aralığı — aralığın planı aylıq paylardan götürülür: qismən düşən ayın payı aralığa düşən iş günləri qədər kəsilir; fakt aralığın içində keçirilmiş dərslərdir. Aralıq seçilmiş semestrin hüdudlarında olmalıdır."
+msgstr "Tarix aralığı — aralığın planı aylıq paylardan götürülür: qismən düşən ayın payı aralığa düşən iş günləri qədər kəsilir; fakt aralığın içində keçirilmiş dərslərdir. Aralıq seçilmiş semestrin hüdudlarında olmalıdır."
+
+msgctxt "accounts.accounting"
+msgid "Tarix aralığı…"
+msgstr "Tarix aralığı…"
+
+msgctxt "accounts.accounting"
+msgid "Tarix aralığı"
+msgstr "Tarix aralığı"
+
+msgctxt "accounts.accounting"
+msgid "Başlanğıc tarixi"
+msgstr "Başlanğıc tarixi"
+
+msgctxt "accounts.accounting"
+msgid "Son tarix"
+msgstr "Son tarix"
+
+msgctxt "accounts.accounting"
+msgid "-dan"
+msgstr "-dan"
+
+msgctxt "accounts.accounting"
+msgid "-dək"
+msgstr "-dək"
+
+msgctxt "accounts.accounting"
+msgid "Başlanğıc tarixi son tarixdən sonra ola bilməz."
+msgstr "Başlanğıc tarixi son tarixdən sonra ola bilməz."
+
+msgctxt "accounts.accounting"
+msgid "Tarix seçilmiş semestrin hüdudlarında olmalıdır."
+msgstr "Tarix seçilmiş semestrin hüdudlarında olmalıdır."
+
+msgctxt "accounts.accounting"
+msgid "Tarix tanınmadı — defolt aralıq göstərilir (semestrin başlanğıcından bu günədək)."
+msgstr "Tarix tanınmadı — defolt aralıq göstərilir (semestrin başlanğıcından bu günədək)."
+
+msgctxt "accounts.accounting"
+msgid "Başlanğıc tarixi son tarixdən sonra idi — tarixlərin yeri dəyişdirildi."
+msgstr "Başlanğıc tarixi son tarixdən sonra idi — tarixlərin yeri dəyişdirildi."
+
+msgctxt "accounts.accounting"
+msgid "Seçilmiş aralıq bu semestrə düşmür — defolt aralıq göstərilir ({start} – {end})."
+msgstr "Seçilmiş aralıq bu semestrə düşmür — defolt aralıq göstərilir ({start} – {end})."
+
+msgctxt "accounts.accounting"
+msgid "Aralıq seçilmiş semestrin hüdudlarına ({start} – {end}) uyğunlaşdırıldı."
+msgstr "Aralıq seçilmiş semestrin hüdudlarına ({start} – {end}) uyğunlaşdırıldı."
+
+msgctxt "accounts.accounting"
+msgid "{period} üçün paylanmış yükün payı"
+msgstr "{period} üçün paylanmış yükün payı"
+
+msgctxt "accounts.accounting"
+msgid "fakt ÷ plan · fərq {diff} saat"
+msgstr "fakt ÷ plan · fərq {diff} saat"
+
+msgctxt "accounts.accounting"
+msgid "müəllim · fakt > plan + {band}"
+msgstr "müəllim · fakt > plan + {band}"
+
+msgctxt "accounts.accounting"
+msgid "müəllim · fakt < plan − {band}"
+msgstr "müəllim · fakt < plan − {band}"
+
+msgctxt "accounts.accounting"
+msgid "Statusların izahı"
+msgstr "Statusların izahı"
+
+msgctxt "accounts.accounting"
+msgid "fakt planın ±{band} hüdudunda"
+msgstr "fakt planın ±{band} hüdudunda"
+
+msgctxt "accounts.accounting"
+msgid "fakt planın {share}-indən az"
+msgstr "fakt planın {share}-indən az"
+
+msgctxt "accounts.accounting"
+msgid "fakt planın {share}-indən çox"
+msgstr "fakt planın {share}-indən çox"
+
+msgctxt "accounts.accounting"
+msgid "dərs keçilib, amma bu dövr üçün plan yoxdur"
+msgstr "dərs keçilib, amma bu dövr üçün plan yoxdur"
+
+msgctxt "accounts.accounting"
+msgid "nə plan, nə keçirilmiş dərs"
+msgstr "nə plan, nə keçirilmiş dərs"
+
+msgctxt "accounts.accounting"
+msgid "Müəllimlər cədvəli"
+msgstr "Müəllimlər cədvəli"
+
+msgctxt "accounts.accounting"
+msgid "Filtrə uyğun müəllim yoxdur"
+msgstr "Filtrə uyğun müəllim yoxdur"
+
+msgctxt "accounts.accounting"
+msgid "Fakültə, kafedra, kənarlaşma və ya axtarış filtrini dəyişin. Dövr (ay və ya aralıq) saxlanılır."
+msgstr "Fakültə, kafedra, kənarlaşma və ya axtarış filtrini dəyişin. Dövr (ay və ya aralıq) saxlanılır."
+
+msgctxt "accounts.accounting"
+msgid "Filtrləri təmizlə"
+msgstr "Filtrləri təmizlə"
+
+msgctxt "accounts.accounting"
+msgid "Dövr: {period}"
+msgstr "Dövr: {period}"
+
+msgctxt "accounts.accounting"
+msgid "Yüklənir…"
+msgstr "Yüklənir…"
+
+msgctxt "accounts.accounting"
+msgid "Məlumatı yükləmək alınmadı. Bir az sonra yenidən cəhd edin."
+msgstr "Məlumatı yükləmək alınmadı. Bir az sonra yenidən cəhd edin."
+
+msgctxt "accounts.accounting"
+msgid "Müəllim tapılmadı və ya sizin əhatənizdən kənardadır."
+msgstr "Müəllim tapılmadı və ya sizin əhatənizdən kənardadır."
+
+msgctxt "accounts.accounting"
+msgid "Bu məlumata baxmaq üçün icazəniz yoxdur."
+msgstr "Bu məlumata baxmaq üçün icazəniz yoxdur."
+
+msgctxt "accounts.accounting"
+msgid "Növlər üzrə"
+msgstr "Növlər üzrə"
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "Növlər üzrə — %(period)s"
+msgstr "Növlər üzrə — %(period)s"
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "Növlər üzrə plan və keçirilmiş saat — %(period)s"
+msgstr "Növlər üzrə plan və keçirilmiş saat — %(period)s"
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "Aylar üzrə — %(semester)s"
+msgstr "Aylar üzrə — %(semester)s"
+
+msgctxt "accounts.accounting"
+msgid "Aralığın ayları"
+msgstr "Aralığın ayları"
+
+msgctxt "accounts.accounting"
+msgid "Fənn və qrup üzrə"
+msgstr "Fənn və qrup üzrə"
+
+msgctxt "accounts.accounting"
+msgid "Bu dövrdə ay yoxdur."
+msgstr "Bu dövrdə ay yoxdur."
+
+msgctxt "accounts.accounting"
+msgid "Qismən ayın planı aralığa düşən iş günləri qədər götürülür."
+msgstr "Qismən ayın planı aralığa düşən iş günləri qədər götürülür."
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "Daha çox göstər · %(count)s qalıb"
+msgstr "Daha çox göstər · %(count)s qalıb"
+
+msgctxt "accounts.accounting"
+msgid "Tam səhifədə aç"
+msgstr "Tam səhifədə aç"
+
+msgctxt "accounts.accounting"
+msgid "Excel-ə ixrac (bu müəllim)"
+msgstr "Excel-ə ixrac (bu müəllim)"
+
+msgctxt "profile.sidebar"
+msgid "Əmək müqavilələri"
+msgstr "Əmək müqavilələri"
+
+msgctxt "profile.sidebar"
+msgid "Müqavilələrim"
+msgstr "Müqavilələrim"
+
+msgctxt "organizations.permission.label"
+msgid "Əmək müqavilələrinə baxmaq (siyahı, fayl, tarixçə, ixrac)"
+msgstr "Əmək müqavilələrinə baxmaq (siyahı, fayl, tarixçə, ixrac)"
+
+msgctxt "organizations.permission.label"
+msgid "Əmək müqavilələrini idarə etmək (əlavə, yeniləmə, göndərmə, xitam; bitmə xatırlatmaları)"
+msgstr "Əmək müqavilələrini idarə etmək (əlavə, yeniləmə, göndərmə, xitam; bitmə xatırlatmaları)"
+
+msgctxt "core.runtime_settings"
+msgid "Əmək müqavilələri"
+msgstr "Əmək müqavilələri"
+
+msgctxt "core.runtime_settings"
+msgid "Bitmə xatırlatmalarının günləri"
+msgstr "Bitmə xatırlatmalarının günləri"
+
+msgctxt "core.runtime_settings"
+msgid "Müqavilənin bitməsinə bu qədər gün qalanda işçiyə və Kadrlar şöbəsinə (HR) bildiriş gedir — hər hədd bir dəfə. Müddəti bitən müqavilə üçün əlavə olaraq bir dəfə «müddəti bitdi» bildirişi göndərilir. Yenilənmiş və ya xitam verilmiş müqavilələrə xatırlatma getmir."
+msgstr "Müqavilənin bitməsinə bu qədər gün qalanda işçiyə və Kadrlar şöbəsinə (HR) bildiriş gedir — hər hədd bir dəfə. Müddəti bitən müqavilə üçün əlavə olaraq bir dəfə «müddəti bitdi» bildirişi göndərilir. Yenilənmiş və ya xitam verilmiş müqavilələrə xatırlatma getmir."
+
+msgctxt "core.runtime_settings"
+msgid "«Bitmək üzrədir» pəncərəsi"
+msgstr "«Bitmək üzrədir» pəncərəsi"
+
+msgctxt "core.runtime_settings"
+msgid "HR siyahısında müqavilə bitməsinə bu qədər gün (və ya daha az) qalanda «Bitmək üzrədir» kimi işarələnir və yuxarıdakı sayğacda göstərilir."
+msgstr "HR siyahısında müqavilə bitməsinə bu qədər gün (və ya daha az) qalanda «Bitmək üzrədir» kimi işarələnir və yuxarıdakı sayğacda göstərilir."
+
+msgctxt "core.runtime_settings"
+msgid "Müqavilə bildirişləri e-poçtla da getsin"
+msgstr "Müqavilə bildirişləri e-poçtla da getsin"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılıbsa bitmə xatırlatması, «müqavilə göndərildi» və «işçi təsdiqlədi» bildirişləri kabinetdən əlavə istifadəçinin e-poçtuna da gedir. Söndürüləndə yalnız kabinet bildirişi qalır."
+msgstr "Yandırılıbsa bitmə xatırlatması, «müqavilə göndərildi» və «işçi təsdiqlədi» bildirişləri kabinetdən əlavə istifadəçinin e-poçtuna da gedir. Söndürüləndə yalnız kabinet bildirişi qalır."
+
+msgctxt "hr_contracts.email"
+msgid "Hörmətli"
+msgstr "Hörmətli"
+
+msgctxt "hr_contracts.email"
+msgid "Kabinetə keç"
+msgstr "Kabinetə keç"
+
+msgctxt "hr_contracts"
+msgid "Müddətli"
+msgstr "Müddətli"
+
+msgctxt "hr_contracts"
+msgid "Müddətsiz"
+msgstr "Müddətsiz"
+
+msgctxt "hr_contracts"
+msgid "Əvəzçilik"
+msgstr "Əvəzçilik"
+
+msgctxt "hr_contracts"
+msgid "Saathesabı"
+msgstr "Saathesabı"
+
+msgctxt "hr_contracts"
+msgid "Digər"
+msgstr "Digər"
+
+msgctxt "hr_contracts"
+msgid "Qaralama"
+msgstr "Qaralama"
+
+msgctxt "hr_contracts"
+msgid "Qüvvədədir"
+msgstr "Qüvvədədir"
+
+msgctxt "hr_contracts"
+msgid "Xitam verilib"
+msgstr "Xitam verilib"
+
+msgctxt "hr_contracts"
+msgid "Yenilənib"
+msgstr "Yenilənib"
+
+msgctxt "hr_contracts"
+msgid "Bitmək üzrədir"
+msgstr "Bitmək üzrədir"
+
+msgctxt "hr_contracts"
+msgid "Müddəti bitib"
+msgstr "Müddəti bitib"
+
+msgctxt "hr_contracts"
+msgid "Qeydə alındı"
+msgstr "Qeydə alındı"
+
+msgctxt "hr_contracts"
+msgid "Redaktə olundu"
+msgstr "Redaktə olundu"
+
+msgctxt "hr_contracts"
+msgid "Qüvvəyə mindi"
+msgstr "Qüvvəyə mindi"
+
+msgctxt "hr_contracts"
+msgid "Fayl yeniləndi"
+msgstr "Fayl yeniləndi"
+
+msgctxt "hr_contracts"
+msgid "İşçiyə göndərildi"
+msgstr "İşçiyə göndərildi"
+
+msgctxt "hr_contracts"
+msgid "İşçi təsdiqlədi"
+msgstr "İşçi təsdiqlədi"
+
+msgctxt "hr_contracts"
+msgid "Bitmə xatırlatması göndərildi"
+msgstr "Bitmə xatırlatması göndərildi"
+
+msgctxt "hr_contracts"
+msgid "Müddəti bitdi bildirişi göndərildi"
+msgstr "Müddəti bitdi bildirişi göndərildi"
+
+msgctxt "hr_contracts"
+msgid "Xitam verildi"
+msgstr "Xitam verildi"
+
+msgctxt "hr_contracts"
+msgid "Yeni müqavilə ilə yeniləndi"
+msgstr "Yeni müqavilə ilə yeniləndi"
+
+msgctxt "hr_contracts"
+msgid "Bu bölmə Kadrlar şöbəsi (HR) üçündür — əmək müqavilələrinə baxmaq icazəniz yoxdur."
+msgstr "Bu bölmə Kadrlar şöbəsi (HR) üçündür — əmək müqavilələrinə baxmaq icazəniz yoxdur."
+
+msgctxt "hr_contracts"
+msgid "Əməl yerinə yetirilmədi — icazənizi yoxlayın və ya səhifəni yeniləyin."
+msgstr "Əməl yerinə yetirilmədi — icazənizi yoxlayın və ya səhifəni yeniləyin."
+
+msgctxt "hr_contracts"
+msgid "Əməl yerinə yetirilmədi — səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Əməl yerinə yetirilmədi — səhifəni yeniləyib yenidən cəhd edin."
+
+msgctxt "hr_contracts"
+msgid "Bütün əməkdaşların (müəllim, inzibati və texniki heyət) əmək müqavilələri: müddət, sənəd, göndərilmə və işçinin təsdiqi. Bitməsinə az qalan müqavilələr üçün HR və işçiyə avtomatik bildiriş gedir."
+msgstr "Bütün əməkdaşların (müəllim, inzibati və texniki heyət) əmək müqavilələri: müddət, sənəd, göndərilmə və işçinin təsdiqi. Bitməsinə az qalan müqavilələr üçün HR və işçiyə avtomatik bildiriş gedir."
+
+msgctxt "hr_contracts"
+msgid "Baxış rejimi: dəyişiklik etmək və ixrac bağlıdır."
+msgstr "Baxış rejimi: dəyişiklik etmək və ixrac bağlıdır."
+
+#, python-format
+msgctxt "hr_contracts"
+msgid "Nəticə: %(n)s"
+msgstr "Nəticə: %(n)s"
+
+msgctxt "hr_contracts"
+msgid "İşçi"
+msgstr "İşçi"
+
+msgctxt "hr_contracts"
+msgid "Müqavilə"
+msgstr "Müqavilə"
+
+msgctxt "hr_contracts"
+msgid "Müddət"
+msgstr "Müddət"
+
+msgctxt "hr_contracts"
+msgid "Qalan"
+msgstr "Qalan"
+
+msgctxt "hr_contracts"
+msgid "Vəziyyət"
+msgstr "Vəziyyət"
+
+msgctxt "hr_contracts"
+msgid "Göndərilmə"
+msgstr "Göndərilmə"
+
+msgctxt "hr_contracts"
+msgid "Əməllər"
+msgstr "Əməllər"
+
+msgctxt "hr_contracts"
+msgid "Səhifələmə"
+msgstr "Səhifələmə"
+
+msgctxt "hr_contracts"
+msgid "Əvvəlki səhifə"
+msgstr "Əvvəlki səhifə"
+
+msgctxt "hr_contracts"
+msgid "Növbəti səhifə"
+msgstr "Növbəti səhifə"
+
+msgctxt "hr_contracts"
+msgid "Bu filtrə uyğun müqavilə yoxdur."
+msgstr "Bu filtrə uyğun müqavilə yoxdur."
+
+msgctxt "hr_contracts"
+msgid "«Müqavilə əlavə et» düyməsi ilə ilk müqaviləni qeydə alın."
+msgstr "«Müqavilə əlavə et» düyməsi ilə ilk müqaviləni qeydə alın."
+
+msgctxt "hr_contracts"
+msgid "Müqavilə əlavə et"
+msgstr "Müqavilə əlavə et"
+
+msgctxt "hr_contracts"
+msgid "Excel ixracı"
+msgstr "Excel ixracı"
+
+msgctxt "hr_contracts"
+msgid "ştat"
+msgstr "ştat"
+
+msgctxt "hr_contracts"
+msgid "saat/həftə"
+msgstr "saat/həftə"
+
+msgctxt "hr_contracts"
+msgid "Fayl"
+msgstr "Fayl"
+
+msgctxt "hr_contracts"
+msgid "müddətsiz"
+msgstr "müddətsiz"
+
+msgctxt "hr_contracts"
+msgid "Sınaq:"
+msgstr "Sınaq:"
+
+#, python-format
+msgctxt "hr_contracts"
+msgid "%(n)s gün keçib"
+msgstr "%(n)s gün keçib"
+
+msgctxt "hr_contracts"
+msgid "bu gün bitir"
+msgstr "bu gün bitir"
+
+#, python-format
+msgctxt "hr_contracts"
+msgid "%(n)s gün"
+msgstr "%(n)s gün"
+
+msgctxt "hr_contracts"
+msgid "Yeni:"
+msgstr "Yeni:"
+
+msgctxt "hr_contracts"
+msgid "Təsdiqlənib"
+msgstr "Təsdiqlənib"
+
+msgctxt "hr_contracts"
+msgid "Təsdiq gözləyir"
+msgstr "Təsdiq gözləyir"
+
+msgctxt "hr_contracts"
+msgid "Göndərilib:"
+msgstr "Göndərilib:"
+
+msgctxt "hr_contracts"
+msgid "Göndərilməyib"
+msgstr "Göndərilməyib"
+
+msgctxt "hr_contracts"
+msgid "Yenidən göndərildi"
+msgstr "Yenidən göndərildi"
+
+msgctxt "hr_contracts"
+msgid "Müqavilə göndərildi"
+msgstr "Müqavilə göndərildi"
+
+msgctxt "hr_contracts"
+msgid "Redaktə"
+msgstr "Redaktə"
+
+msgctxt "hr_contracts"
+msgid "Yenilə"
+msgstr "Yenilə"
+
+msgctxt "hr_contracts"
+msgid "Tarixçə"
+msgstr "Tarixçə"
+
+msgctxt "hr_contracts"
+msgid "Xitam"
+msgstr "Xitam"
+
+msgctxt "hr_contracts"
+msgid "Yadda saxla"
+msgstr "Yadda saxla"
+
+msgctxt "hr_contracts"
+msgid "Müqavilə işçiyə göndərildi"
+msgstr "Müqavilə işçiyə göndərildi"
+
+msgctxt "hr_contracts"
+msgid "Müqaviləni işçinin e-poçtuna göndərdiyinizi qeyd edin — işçiyə sistemə daxil olub təsdiqləməsi üçün bildiriş gedəcək."
+msgstr "Müqaviləni işçinin e-poçtuna göndərdiyinizi qeyd edin — işçiyə sistemə daxil olub təsdiqləməsi üçün bildiriş gedəcək."
+
+msgctxt "hr_contracts"
+msgid "Qeyd et və bildir"
+msgstr "Qeyd et və bildir"
+
+msgctxt "hr_contracts"
+msgid "Müqaviləyə xitam ver"
+msgstr "Müqaviləyə xitam ver"
+
+msgctxt "hr_contracts"
+msgid "Xitam geri alınmır: müqavilə bağlanır, xatırlatmalar dayanır, səbəb tarixçədə qalır."
+msgstr "Xitam geri alınmır: müqavilə bağlanır, xatırlatmalar dayanır, səbəb tarixçədə qalır."
+
+msgctxt "hr_contracts"
+msgid "Xitam ver"
+msgstr "Xitam ver"
+
+msgctxt "hr_contracts"
+msgid "Xitamın səbəbi"
+msgstr "Xitamın səbəbi"
+
+#, python-format
+msgctxt "hr_contracts"
+msgid "Səbəb ən azı %(n)s simvol olmalıdır."
+msgstr "Səbəb ən azı %(n)s simvol olmalıdır."
+
+msgctxt "hr_contracts"
+msgid "İşçi bildirişdə belə mətn görəcək: «Yeni əmək müqaviləniz e-poçtunuza göndərilib. Sistemə daxil olub tanış olduğunuzu təsdiqləyin.»"
+msgstr "İşçi bildirişdə belə mətn görəcək: «Yeni əmək müqaviləniz e-poçtunuza göndərilib. Sistemə daxil olub tanış olduğunuzu təsdiqləyin.»"
+
+msgctxt "hr_contracts"
+msgid "İşçiyə qeyd"
+msgstr "İşçiyə qeyd"
+
+msgctxt "hr_contracts"
+msgid "(istəyə bağlı)"
+msgstr "(istəyə bağlı)"
+
+msgctxt "hr_contracts"
+msgid "Məs.: yeni müqavilə 1 noyabrdan qüvvəyə minir."
+msgstr "Məs.: yeni müqavilə 1 noyabrdan qüvvəyə minir."
+
+msgctxt "hr_contracts"
+msgid "Xitam tarixi"
+msgstr "Xitam tarixi"
+
+msgctxt "hr_contracts"
+msgid "Yeni müqavilə əvvəlkinin davamı kimi qeydə alınır: köhnə müqavilə «Yenilənib» statusuna keçir və onun üçün xatırlatmalar dayanır."
+msgstr "Yeni müqavilə əvvəlkinin davamı kimi qeydə alınır: köhnə müqavilə «Yenilənib» statusuna keçir və onun üçün xatırlatmalar dayanır."
+
+msgctxt "hr_contracts"
+msgid "Ad, soyad və ya istifadəçi adı"
+msgstr "Ad, soyad və ya istifadəçi adı"
+
+msgctxt "hr_contracts"
+msgid "Yalnız aktiv əməkdaşlar (müəllim, inzibati və texniki heyət) — tələbələr siyahıda yoxdur."
+msgstr "Yalnız aktiv əməkdaşlar (müəllim, inzibati və texniki heyət) — tələbələr siyahıda yoxdur."
+
+msgctxt "hr_contracts"
+msgid "Müqavilə №"
+msgstr "Müqavilə №"
+
+msgctxt "hr_contracts"
+msgid "Növ"
+msgstr "Növ"
+
+msgctxt "hr_contracts"
+msgid "Vəzifə"
+msgstr "Vəzifə"
+
+msgctxt "hr_contracts"
+msgid "Məs.: baş müəllim, mühasib, laborant"
+msgstr "Məs.: baş müəllim, mühasib, laborant"
+
+msgctxt "hr_contracts"
+msgid "Bölmə"
+msgstr "Bölmə"
+
+msgctxt "hr_contracts"
+msgid "Axtar…"
+msgstr "Axtar…"
+
+msgctxt "hr_contracts"
+msgid "Uyğun bölmə yoxdur"
+msgstr "Uyğun bölmə yoxdur"
+
+msgctxt "hr_contracts"
+msgid "— İşçinin əsas bölməsi —"
+msgstr "— İşçinin əsas bölməsi —"
+
+msgctxt "hr_contracts"
+msgid "Boş qalsa işçinin əsas üzvlüyündəki bölmə götürülür. Xatırlatmalar bu bölməni əhatə edən HR əməkdaşlarına gedir."
+msgstr "Boş qalsa işçinin əsas üzvlüyündəki bölmə götürülür. Xatırlatmalar bu bölməni əhatə edən HR əməkdaşlarına gedir."
+
+msgctxt "hr_contracts"
+msgid "Başlama tarixi"
+msgstr "Başlama tarixi"
+
+msgctxt "hr_contracts"
+msgid "Bitmə tarixi"
+msgstr "Bitmə tarixi"
+
+msgctxt "hr_contracts"
+msgid "Müddətsiz müqavilənin bitmə tarixi olmur."
+msgstr "Müddətsiz müqavilənin bitmə tarixi olmur."
+
+msgctxt "hr_contracts"
+msgid "Sınaq müddəti bitir"
+msgstr "Sınaq müddəti bitir"
+
+msgctxt "hr_contracts"
+msgid "Həftəlik saat"
+msgstr "Həftəlik saat"
+
+msgctxt "hr_contracts"
+msgid "Ştat vahidi"
+msgstr "Ştat vahidi"
+
+msgctxt "hr_contracts"
+msgid "Qaralama (hələ qüvvədə deyil)"
+msgstr "Qaralama (hələ qüvvədə deyil)"
+
+msgctxt "hr_contracts"
+msgid "Müqavilənin faylı"
+msgstr "Müqavilənin faylı"
+
+msgctxt "hr_contracts"
+msgid "PDF, JPG və ya PNG · ən çox 10 MB"
+msgstr "PDF, JPG və ya PNG · ən çox 10 MB"
+
+msgctxt "hr_contracts"
+msgid "Cari fayl:"
+msgstr "Cari fayl:"
+
+msgctxt "hr_contracts"
+msgid "yeni fayl seçsəniz əvəz olunacaq"
+msgstr "yeni fayl seçsəniz əvəz olunacaq"
+
+msgctxt "hr_contracts"
+msgid "Qeyd"
+msgstr "Qeyd"
+
+msgctxt "hr_contracts"
+msgid "Müqaviləni redaktə et"
+msgstr "Müqaviləni redaktə et"
+
+msgctxt "hr_contracts"
+msgid "Müqaviləni yenilə"
+msgstr "Müqaviləni yenilə"
+
+msgctxt "hr_contracts"
+msgid "İşçini seçin."
+msgstr "İşçini seçin."
+
+msgctxt "hr_contracts"
+msgid "Müqavilənin tarixçəsi"
+msgstr "Müqavilənin tarixçəsi"
+
+msgctxt "hr_contracts"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "hr_contracts"
+msgid "Yüklənir…"
+msgstr "Yüklənir…"
+
+#, python-format
+msgctxt "hr_contracts"
+msgid "%(n)s günlük hədd"
+msgstr "%(n)s günlük hədd"
+
+msgctxt "hr_contracts"
+msgid "sistem"
+msgstr "sistem"
+
+msgctxt "hr_contracts"
+msgid "Hadisə yoxdur."
+msgstr "Hadisə yoxdur."
+
+msgctxt "hr_contracts"
+msgid "Kadrlar şöbəsində qeydə alınmış əmək müqavilələriniz: müddət, sənəd və təsdiq."
+msgstr "Kadrlar şöbəsində qeydə alınmış əmək müqavilələriniz: müddət, sənəd və təsdiq."
+
+msgctxt "hr_contracts"
+msgid "Yeni müqaviləniz e-poçtunuza göndərilib. Tanış olub təsdiqləyin"
+msgstr "Yeni müqaviləniz e-poçtunuza göndərilib. Tanış olub təsdiqləyin"
+
+msgctxt "hr_contracts"
+msgid "Müqaviləyə sistemdə bax"
+msgstr "Müqaviləyə sistemdə bax"
+
+msgctxt "hr_contracts"
+msgid "Baxış rejimində təsdiq vermək olmaz."
+msgstr "Baxış rejimində təsdiq vermək olmaz."
+
+msgctxt "hr_contracts"
+msgid "Tanış oldum, təsdiqləyirəm"
+msgstr "Tanış oldum, təsdiqləyirəm"
+
+msgctxt "hr_contracts"
+msgid "Təsdiq geri alınmır və Kadrlar şöbəsinə bildirilir."
+msgstr "Təsdiq geri alınmır və Kadrlar şöbəsinə bildirilir."
+
+msgctxt "hr_contracts"
+msgid "Cari müqavilə"
+msgstr "Cari müqavilə"
+
+msgctxt "hr_contracts"
+msgid "gün əvvəl bitib"
+msgstr "gün əvvəl bitib"
+
+msgctxt "hr_contracts"
+msgid "gün qalıb"
+msgstr "gün qalıb"
+
+msgctxt "hr_contracts"
+msgid "Sınaq müddəti"
+msgstr "Sınaq müddəti"
+
+msgctxt "hr_contracts"
+msgid "Təsdiqləmisiniz"
+msgstr "Təsdiqləmisiniz"
+
+msgctxt "hr_contracts"
+msgid "Müqaviləni aç"
+msgstr "Müqaviləni aç"
+
+msgctxt "hr_contracts"
+msgid "Digər müqavilələr"
+msgstr "Digər müqavilələr"
+
+msgctxt "hr_contracts"
+msgid "Sizin üçün qeydə alınmış əmək müqaviləsi yoxdur."
+msgstr "Sizin üçün qeydə alınmış əmək müqaviləsi yoxdur."
+
+msgctxt "hr_contracts"
+msgid "Müqaviləniz sistemə əlavə olunanda burada görünəcək."
+msgstr "Müqaviləniz sistemə əlavə olunanda burada görünəcək."
+
+msgctxt "hr_contracts"
+msgid "Əmək müqaviləsi"
+msgstr "Əmək müqaviləsi"
+
+msgctxt "hr_contracts"
+msgid "Qeydə alınmış müqavilə yoxdur."
+msgstr "Qeydə alınmış müqavilə yoxdur."
+
+msgctxt "hr_contracts"
+msgid "Bütün müqavilələr"
+msgstr "Bütün müqavilələr"
+
+msgctxt "hr_contracts"
+msgid "Qüvvədə"
+msgstr "Qüvvədə"
+
+msgctxt "hr_contracts"
+msgid "{n} gün ərzində bitir"
+msgstr "{n} gün ərzində bitir"
+
+msgctxt "hr_contracts"
+msgid "30 gün ərzində bitir"
+msgstr "30 gün ərzində bitir"
+
+msgctxt "hr_contracts"
+msgid "60 gün ərzində bitir"
+msgstr "60 gün ərzində bitir"
+
+msgctxt "hr_contracts"
+msgid "90 gün ərzində bitir"
+msgstr "90 gün ərzində bitir"
+
+msgctxt "hr_contracts"
+msgid "Axtarış"
+msgstr "Axtarış"
+
+msgctxt "hr_contracts"
+msgid "Ad, soyad, vəzifə və ya müqavilə №"
+msgstr "Ad, soyad, vəzifə və ya müqavilə №"
+
+msgctxt "hr_contracts"
+msgid "Bütün bölmələr"
+msgstr "Bütün bölmələr"
+
+msgctxt "hr_contracts"
+msgid "Bütün növlər"
+msgstr "Bütün növlər"
+
+msgctxt "hr_contracts"
+msgid "Bütün vəziyyətlər"
+msgstr "Bütün vəziyyətlər"
+
+msgctxt "hr_contracts"
+msgid "Bitmə müddəti"
+msgstr "Bitmə müddəti"
+
+msgctxt "hr_contracts"
+msgid "İstənilən"
+msgstr "İstənilən"
+
+msgctxt "hr_contracts"
+msgid "İstifadəçi adı"
+msgstr "İstifadəçi adı"
+
+msgctxt "hr_contracts"
+msgid "Başlama"
+msgstr "Başlama"
+
+msgctxt "hr_contracts"
+msgid "Bitmə"
+msgstr "Bitmə"
+
+msgctxt "hr_contracts"
+msgid "Qalan gün"
+msgstr "Qalan gün"
+
+msgctxt "hr_contracts"
+msgid "Ştat"
+msgstr "Ştat"
+
+msgctxt "hr_contracts"
+msgid "Göndərilib"
+msgstr "Göndərilib"
+
+msgctxt "hr_contracts"
+msgid "Müqavilələr"
+msgstr "Müqavilələr"
+
+msgctxt "hr_contracts"
+msgid "Əmək müqavilələri ixracı"
+msgstr "Əmək müqavilələri ixracı"
+
+msgctxt "hr_contracts"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "Aktiv təşkilat konteksti yoxdur."
+
+msgctxt "hr_contracts"
+msgid "Bu əməl üçün icazəniz yoxdur."
+msgstr "Bu əməl üçün icazəniz yoxdur."
+
+msgctxt "hr_contracts"
+msgid "Müqavilə tapılmadı."
+msgstr "Müqavilə tapılmadı."
+
+msgctxt "hr_contracts"
+msgid "Baxış rejimində dəyişiklik etmək olmaz."
+msgstr "Baxış rejimində dəyişiklik etmək olmaz."
+
+msgctxt "hr_contracts"
+msgid "Baxış rejimində ixrac bağlıdır."
+msgstr "Baxış rejimində ixrac bağlıdır."
+
+msgctxt "hr_contracts"
+msgid "Bu sahə məcburidir."
+msgstr "Bu sahə məcburidir."
+
+msgctxt "hr_contracts"
+msgid "Tarix düzgün deyil."
+msgstr "Tarix düzgün deyil."
+
+msgctxt "hr_contracts"
+msgid "Rəqəm düzgün deyil."
+msgstr "Rəqəm düzgün deyil."
+
+msgctxt "hr_contracts"
+msgid "Dəyər 0-dan böyük və {max}-dən kiçik olmalıdır."
+msgstr "Dəyər 0-dan böyük və {max}-dən kiçik olmalıdır."
+
+msgctxt "hr_contracts"
+msgid "Bölmə tapılmadı."
+msgstr "Bölmə tapılmadı."
+
+msgctxt "hr_contracts"
+msgid "Müqavilə nömrəsini yazın."
+msgstr "Müqavilə nömrəsini yazın."
+
+msgctxt "hr_contracts"
+msgid "Müqavilə növünü seçin."
+msgstr "Müqavilə növünü seçin."
+
+msgctxt "hr_contracts"
+msgid "Müddətli müqavilədə bitmə tarixi məcburidir."
+msgstr "Müddətli müqavilədə bitmə tarixi məcburidir."
+
+msgctxt "hr_contracts"
+msgid "Bitmə tarixi başlama tarixindən əvvəl ola bilməz."
+msgstr "Bitmə tarixi başlama tarixindən əvvəl ola bilməz."
+
+msgctxt "hr_contracts"
+msgid "Sınaq müddəti müqavilə müddətinin içində olmalıdır."
+msgstr "Sınaq müddəti müqavilə müddətinin içində olmalıdır."
+
+msgctxt "hr_contracts"
+msgid "Öz əhatənizdəki bölməni seçin."
+msgstr "Öz əhatənizdəki bölməni seçin."
+
+msgctxt "hr_contracts"
+msgid "Bu bölmə sizin əhatənizdən kənardadır."
+msgstr "Bu bölmə sizin əhatənizdən kənardadır."
+
+msgctxt "hr_contracts"
+msgid "Bu nömrəli müqavilə artıq qeydə alınıb."
+msgstr "Bu nömrəli müqavilə artıq qeydə alınıb."
+
+msgctxt "hr_contracts"
+msgid "Seçilmiş şəxs bu təşkilatın aktiv əməkdaşı deyil (tələbəyə əmək müqaviləsi bağlanmır)."
+msgstr "Seçilmiş şəxs bu təşkilatın aktiv əməkdaşı deyil (tələbəyə əmək müqaviləsi bağlanmır)."
+
+msgctxt "hr_contracts"
+msgid "Bu müqavilə artıq yenilənib və ya xitam verilib."
+msgstr "Bu müqavilə artıq yenilənib və ya xitam verilib."
+
+msgctxt "hr_contracts"
+msgid "Yeni müqavilə əvvəlkindən sonra başlamalıdır."
+msgstr "Yeni müqavilə əvvəlkindən sonra başlamalıdır."
+
+msgctxt "hr_contracts"
+msgid "Xitam verilmiş və ya yenilənmiş müqavilə redaktə olunmur."
+msgstr "Xitam verilmiş və ya yenilənmiş müqavilə redaktə olunmur."
+
+msgctxt "hr_contracts"
+msgid "Bu müqavilə artıq bağlanıb."
+msgstr "Bu müqavilə artıq bağlanıb."
+
+msgctxt "hr_contracts"
+msgid "İşçi bu müqaviləni artıq təsdiqləyib."
+msgstr "İşçi bu müqaviləni artıq təsdiqləyib."
+
+msgctxt "hr_contracts"
+msgid "Xitamın səbəbini yazın (ən azı {n} simvol)."
+msgstr "Xitamın səbəbini yazın (ən azı {n} simvol)."
+
+msgctxt "hr_contracts"
+msgid "Xitam tarixi müqavilənin başlanğıcından əvvəl ola bilməz."
+msgstr "Xitam tarixi müqavilənin başlanğıcından əvvəl ola bilməz."
+
+msgctxt "hr_contracts"
+msgid "Siz bu müqaviləni artıq təsdiqləmisiniz."
+msgstr "Siz bu müqaviləni artıq təsdiqləmisiniz."
+
+msgctxt "hr_contracts"
+msgid "Müqavilə qeydə alındı."
+msgstr "Müqavilə qeydə alındı."
+
+msgctxt "hr_contracts"
+msgid "Dəyişikliklər yadda saxlanıldı."
+msgstr "Dəyişikliklər yadda saxlanıldı."
+
+msgctxt "hr_contracts"
+msgid "İşçiyə bildiriş göndərildi."
+msgstr "İşçiyə bildiriş göndərildi."
+
+msgctxt "hr_contracts"
+msgid "Müqaviləyə xitam verildi."
+msgstr "Müqaviləyə xitam verildi."
+
+msgctxt "hr_contracts"
+msgid "Təşəkkürlər — təsdiqiniz qeydə alındı."
+msgstr "Təşəkkürlər — təsdiqiniz qeydə alındı."
+
+msgctxt "hr_contracts"
+msgid "Ləğv edilib"
+msgstr "Ləğv edilib"
+
+msgctxt "hr_contracts"
+msgid "Dəyişdi — yenidən göndərilməlidir"
+msgstr "Dəyişdi — yenidən göndərilməlidir"
+
+msgctxt "hr_contracts"
+msgid "Qaralama ləğv edildi"
+msgstr "Qaralama ləğv edildi"
+
+msgctxt "hr_contracts"
+msgid "Qaralama ləğv edildi."
+msgstr "Qaralama ləğv edildi."
+
+msgctxt "hr_contracts"
+msgid "Qaralamanı ləğv et"
+msgstr "Qaralamanı ləğv et"
+
+msgctxt "hr_contracts"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "hr_contracts"
+msgid "Qaralama işçiyə heç vaxt göstərilmir; sətir və tarixçə saxlanılır, nömrəni yenidən istifadə etmək olar."
+msgstr "Qaralama işçiyə heç vaxt göstərilmir; sətir və tarixçə saxlanılır, nömrəni yenidən istifadə etmək olar."
+
+msgctxt "hr_contracts"
+msgid "Qaralama «göndərildi» qeyd olunanda avtomatik qüvvəyə minir."
+msgstr "Qaralama «göndərildi» qeyd olunanda avtomatik qüvvəyə minir."
+
+msgctxt "hr_contracts"
+msgid "Qaralamaya xitam verilmir — «Qaralamanı ləğv et» əməlindən istifadə edin."
+msgstr "Qaralamaya xitam verilmir — «Qaralamanı ləğv et» əməlindən istifadə edin."
+
+msgctxt "hr_contracts"
+msgid "Yalnız qaralama ləğv edilə bilər."
+msgstr "Yalnız qaralama ləğv edilə bilər."
+
+msgctxt "hr_contracts"
+msgid "Təsdiqlənmiş müqavilə dəyişdirilə bilməz — «Yenilə» ilə yeni müqavilə yaradın."
+msgstr "Təsdiqlənmiş müqavilə dəyişdirilə bilməz — «Yenilə» ilə yeni müqavilə yaradın."
+
+msgctxt "hr_contracts"
+msgid "Təsdiqlənmiş müqavilədə yalnız qeyd dəyişdirilə bilər"
+msgstr "Təsdiqlənmiş müqavilədə yalnız qeyd dəyişdirilə bilər"
+
+msgctxt "hr_contracts"
+msgid "Məlumat ziddiyyətlidir — səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Məlumat ziddiyyətlidir — səhifəni yeniləyib yenidən cəhd edin."
+
+msgctxt "hr_contracts"
+msgid "İşçi tapılmadı."
+msgstr "İşçi tapılmadı."
+
+msgctxt "hr_contracts"
+msgid "bitmə tarixi"
+msgstr "bitmə tarixi"
+
+msgctxt "hr_contracts"
+msgid "Yeni əmək müqaviləniz göndərildi"
+msgstr "Yeni əmək müqaviləniz göndərildi"
+
+msgctxt "hr_contracts"
+msgid "Yeni əmək müqaviləniz e-poçtunuza göndərilib. Sistemə daxil olub tanış olduğunuzu təsdiqləyin."
+msgstr "Yeni əmək müqaviləniz e-poçtunuza göndərilib. Sistemə daxil olub tanış olduğunuzu təsdiqləyin."
+
+msgctxt "hr_contracts"
+msgid "Müqavilə № {number} · {position}"
+msgstr "Müqavilə № {number} · {position}"
+
+msgctxt "hr_contracts"
+msgid "Müqavilə təsdiqləndi: {name}"
+msgstr "Müqavilə təsdiqləndi: {name}"
+
+msgctxt "hr_contracts"
+msgid "{name} № {number} əmək müqaviləsi ilə tanış olduğunu təsdiqlədi."
+msgstr "{name} № {number} əmək müqaviləsi ilə tanış olduğunu təsdiqlədi."
+
+msgctxt "hr_contracts"
+msgid "bitməsinə {days} gün qalıb"
+msgstr "bitməsinə {days} gün qalıb"
+
+msgctxt "hr_contracts"
+msgid "Əmək müqavilənizin müddəti bitir"
+msgstr "Əmək müqavilənizin müddəti bitir"
+
+msgctxt "hr_contracts"
+msgid "№ {number} əmək müqavilənizin {when} (bitmə tarixi: {end}). Ətraflı məlumat üçün Kadrlar şöbəsinə müraciət edin."
+msgstr "№ {number} əmək müqavilənizin {when} (bitmə tarixi: {end}). Ətraflı məlumat üçün Kadrlar şöbəsinə müraciət edin."
+
+msgctxt "hr_contracts"
+msgid "Müqavilə müddəti bitir: {name}"
+msgstr "Müqavilə müddəti bitir: {name}"
+
+msgctxt "hr_contracts"
+msgid "{name} — «{position}», № {number}: {when} (bitmə tarixi: {end})."
+msgstr "{name} — «{position}», № {number}: {when} (bitmə tarixi: {end})."
+
+msgctxt "hr_contracts"
+msgid "Əmək müqavilənizin müddəti bitdi"
+msgstr "Əmək müqavilənizin müddəti bitdi"
+
+msgctxt "hr_contracts"
+msgid "№ {number} əmək müqavilənizin müddəti {end} tarixində bitib. Kadrlar şöbəsinə müraciət edin."
+msgstr "№ {number} əmək müqavilənizin müddəti {end} tarixində bitib. Kadrlar şöbəsinə müraciət edin."
+
+msgctxt "hr_contracts"
+msgid "Müqavilənin müddəti bitdi: {name}"
+msgstr "Müqavilənin müddəti bitdi: {name}"
+
+msgctxt "hr_contracts"
+msgid "{name} — «{position}», № {number}: müddəti {end} tarixində bitib, yenilənməyib."
+msgstr "{name} — «{position}», № {number}: müddəti {end} tarixində bitib, yenilənməyib."
+
+msgctxt "accounts.curriculum"
+msgid "Seçmə fənn"
+msgstr "Seçmə fənn"
+
+msgctxt "accounts.curriculum"
+msgid "Seçmə fənn blokdan seçilir; bayraq söndürülsə sətir məcburi olur."
+msgstr "Seçmə fənn blokdan seçilir; bayraq söndürülsə sətir məcburi olur."
+
+msgctxt "accounts.curriculum"
+msgid "Seçmə bloku"
+msgstr "Seçmə bloku"
+
+msgctxt "accounts.curriculum"
+msgid "Məs. SB1"
+msgstr "Məs. SB1"
+
+msgctxt "accounts.curriculum"
+msgid "Eyni blokun sətirləri eyni adı daşıyır."
+msgstr "Eyni blokun sətirləri eyni adı daşıyır."
+
+msgctxt "accounts.curriculum"
+msgid "Seçiləcək fənn sayı"
+msgstr "Seçiləcək fənn sayı"
+
+msgctxt "accounts.curriculum"
+msgid "Blokun bütün sətirlərinə şamil olunur."
+msgstr "Blokun bütün sətirlərinə şamil olunur."
+
+msgctxt "accounts.curriculum"
+msgid "Seçmə fənn üçün seçmə bloku göstərilməlidir."
+msgstr "Seçmə fənn üçün seçmə bloku göstərilməlidir."
+
+msgctxt "accounts.curriculum"
+msgid "Seçiləcək fənn sayı 1–20 aralığında olmalıdır."
+msgstr "Seçiləcək fənn sayı 1–20 aralığında olmalıdır."
+
+msgctxt "accounts.semester"
+msgid "Təqvim pəncərələri"
+msgstr "Təqvim pəncərələri"
+
+msgctxt "accounts.semester"
+msgid "Opsionaldır. İmtahan balının kilidi, mühasibatlığın tədris pəncərəsi və seçmə fənn qeydiyyatı bu tarixlərə baxır."
+msgstr "Opsionaldır. İmtahan balının kilidi, mühasibatlığın tədris pəncərəsi və seçmə fənn qeydiyyatı bu tarixlərə baxır."
+
+msgctxt "accounts.semester"
+msgid "İmtahan sessiyasının başlanğıcı"
+msgstr "İmtahan sessiyasının başlanğıcı"
+
+msgctxt "accounts.semester"
+msgid "İmtahan sessiyasının sonu"
+msgstr "İmtahan sessiyasının sonu"
+
+msgctxt "accounts.semester"
+msgid "Semestrin bitmə tarixindən sonraya uzana bilər."
+msgstr "Semestrin bitmə tarixindən sonraya uzana bilər."
+
+msgctxt "accounts.semester"
+msgid "Seçim (qeydiyyat) pəncərəsi başlanğıcı"
+msgstr "Seçim (qeydiyyat) pəncərəsi başlanğıcı"
+
+msgctxt "accounts.semester"
+msgid "Seçim (qeydiyyat) pəncərəsi sonu"
+msgstr "Seçim (qeydiyyat) pəncərəsi sonu"
+
+msgctxt "accounts.semester"
+msgid "Dövrü redaktə et"
+msgstr "Dövrü redaktə et"
+
+msgctxt "accounts.semester"
+msgid "Tarix düzgün deyil."
+msgstr "Tarix düzgün deyil."
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "%(window)s üçün həm başlanğıc, həm də son tarix göstərilməlidir."
+msgstr "%(window)s üçün həm başlanğıc, həm də son tarix göstərilməlidir."
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "%(window)s: son tarix başlanğıcdan əvvəl ola bilməz."
+msgstr "%(window)s: son tarix başlanğıcdan əvvəl ola bilməz."
+
+msgctxt "accounts.semester"
+msgid "İmtahan sessiyası"
+msgstr "İmtahan sessiyası"
+
+msgctxt "accounts.semester"
+msgid "Seçim (qeydiyyat) pəncərəsi"
+msgstr "Seçim (qeydiyyat) pəncərəsi"
+
+msgctxt "accounts.semester"
+msgid "İmtahan sessiyası semestr tarixləri daxilində başlamır — tarixləri yoxlayın."
+msgstr "İmtahan sessiyası semestr tarixləri daxilində başlamır — tarixləri yoxlayın."
+
+msgctxt "accounts.semester"
+msgid "Seçim pəncərəsi semestr tarixlərindən xeyli kənardadır — tarixləri yoxlayın."
+msgstr "Seçim pəncərəsi semestr tarixlərindən xeyli kənardadır — tarixləri yoxlayın."
+
+msgctxt "accounts.semester"
+msgid "Dövr məlumatları düzgün deyil."
+msgstr "Dövr məlumatları düzgün deyil."
+
+msgctxt "accounts.structure_tree"
+msgid "Tələbə hesabına rəhbər rolu verilə bilməz."
+msgstr "Tələbə hesabına rəhbər rolu verilə bilməz."
+
+msgctxt "courses.resource_type"
+msgid "Fayl"
+msgstr "Fayl"
+
+msgctxt "courses.resource_type"
+msgid "Link"
+msgstr "Link"
+
+msgctxt "courses.resource_type"
+msgid "Video"
+msgstr "Video"
+
+msgctxt "courses.resource_type"
+msgid "Sənəd"
+msgstr "Sənəd"
+
+msgctxt "courses.resource_upload"
+msgid "Dəstəklənən formatlar: {formats} · maks. {max_mb} MB"
+msgstr "Dəstəklənən formatlar: {formats} · maks. {max_mb} MB"
+
+msgctxt "courses.resource_upload"
+msgid "iPhone videosu: mümkünsə MP4 seçin (MOV bəzi brauzerlərdə oynamır)"
+msgstr "iPhone videosu: mümkünsə MP4 seçin (MOV bəzi brauzerlərdə oynamır)"
+
+msgctxt "courses.resource_upload"
+msgid "Bu fayl üçün «{kind}» tipini seçin."
+msgstr "Bu fayl üçün «{kind}» tipini seçin."
+
+msgctxt "courses.resource_upload"
+msgid "(uzantısız)"
+msgstr "(uzantısız)"
+
+msgctxt "courses.resource_upload"
+msgid "Bu format «{kind}» üçün qəbul edilmir: {ext}. İcazə verilənlər: {formats}"
+msgstr "Bu format «{kind}» üçün qəbul edilmir: {ext}. İcazə verilənlər: {formats}"
+
+msgctxt "courses.resource_upload"
+msgid "Fayl boşdur."
+msgstr "Fayl boşdur."
+
+msgctxt "courses.resource_upload"
+msgid "Fayl çox böyükdür: {size} MB (maks. {max_mb} MB)"
+msgstr "Fayl çox böyükdür: {size} MB (maks. {max_mb} MB)"
+
+msgctxt "courses.resource_upload"
+msgid "Faylın məzmunu {ext} formatına uyğun deyil — fayl zədələnib və ya uzantısı dəyişdirilib."
+msgstr "Faylın məzmunu {ext} formatına uyğun deyil — fayl zədələnib və ya uzantısı dəyişdirilib."
+
+msgctxt "courses.resource_upload"
+msgid "Link http:// və ya https:// ilə başlamalıdır."
+msgstr "Link http:// və ya https:// ilə başlamalıdır."
+
+msgctxt "courses.resource_upload"
+msgid "«Link» tipində fayl yüklənmir — fayl üçün «Fayl», «Video» və ya «Sənəd» seçin."
+msgstr "«Link» tipində fayl yüklənmir — fayl üçün «Fayl», «Video» və ya «Sənəd» seçin."
+
+msgctxt "courses.resource_upload"
+msgid "Link üçün URL daxil edin (http:// və ya https://)."
+msgstr "Link üçün URL daxil edin (http:// və ya https://)."
+
+msgctxt "courses.resource_upload"
+msgid "Bu tipdə fayl yüklənir — xarici link üçün «Link» tipini seçin."
+msgstr "Bu tipdə fayl yüklənir — xarici link üçün «Link» tipini seçin."
+
+msgctxt "courses.resource_upload"
+msgid "«{kind}» üçün fayl seçin."
+msgstr "«{kind}» üçün fayl seçin."
+
+msgctxt "courses.resource_upload"
+msgid "Sessiyanız bitib — səhifəni yeniləyib yenidən daxil olun."
+msgstr "Sessiyanız bitib — səhifəni yeniləyib yenidən daxil olun."
+
+msgctxt "courses.resource_upload"
+msgid "Xətalar"
+msgstr "Xətalar"
+
+msgctxt "courses.resource_upload"
+msgid "Yüklənir: {pct}"
+msgstr "Yüklənir: {pct}"
+
+msgctxt "courses.resource_upload"
+msgid "Fayl yükləndi, server yoxlayır…"
+msgstr "Fayl yükləndi, server yoxlayır…"
+
+msgctxt "courses.resource_upload"
+msgid "Resurs adını yazın."
+msgstr "Resurs adını yazın."
+
+msgctxt "courses.resource_upload"
+msgid "Fayl serverin qəbul etdiyi ölçüdən böyükdür (maks. {max_mb} MB)."
+msgstr "Fayl serverin qəbul etdiyi ölçüdən böyükdür (maks. {max_mb} MB)."
+
+msgctxt "courses.resource_upload"
+msgid "Təhlükəsizlik yoxlaması keçmədi — səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Təhlükəsizlik yoxlaması keçmədi — səhifəni yeniləyib yenidən cəhd edin."
+
+msgctxt "courses.resource_upload"
+msgid "Bağlantı kəsildi — internetinizi yoxlayıb yenidən cəhd edin."
+msgstr "Bağlantı kəsildi — internetinizi yoxlayıb yenidən cəhd edin."
+
+msgctxt "courses.resource_upload"
+msgid "Server vaxtında cavab vermədi (kod {status}). Bir az sonra yenidən cəhd edin."
+msgstr "Server vaxtında cavab vermədi (kod {status}). Bir az sonra yenidən cəhd edin."
+
+msgctxt "courses.resource_upload"
+msgid "Server xətası (kod {status}). Bir az sonra yenidən cəhd edin."
+msgstr "Server xətası (kod {status}). Bir az sonra yenidən cəhd edin."
+
+msgctxt "courses.resource_upload"
+msgid "Fayl seçin və ya bura atın"
+msgstr "Fayl seçin və ya bura atın"
+
+msgctxt "courses.resource_upload"
+msgid "Faylı çıxar"
+msgstr "Faylı çıxar"
+
+msgctxt "courses.resource_upload"
+msgid "Videoya bax"
+msgstr "Videoya bax"
+
+msgctxt "courses.resource_upload"
+msgid "Endir"
+msgstr "Endir"
+
+msgctxt "courses.resource_upload"
+msgid "iPhone (.MOV) videosu bəzi brauzerlərdə (Chrome, Android) oynamaya bilər — «Endir» ilə açın."
+msgstr "iPhone (.MOV) videosu bəzi brauzerlərdə (Chrome, Android) oynamaya bilər — «Endir» ilə açın."
+
+msgctxt "courses.resource_upload"
+msgid "Brauzer bu videonu oynada bilmir — «Endir» ilə kompüterə yükləyib açın."
+msgstr "Brauzer bu videonu oynada bilmir — «Endir» ilə kompüterə yükləyib açın."
+
+msgctxt "organizations.permission.label"
+msgid "Təhsil haqqı cədvəlini idarə etmək (25% təkrar imtahanın təxmini məbləği)"
+msgstr "Təhsil haqqı cədvəlini idarə etmək (25% təkrar imtahanın təxmini məbləği)"

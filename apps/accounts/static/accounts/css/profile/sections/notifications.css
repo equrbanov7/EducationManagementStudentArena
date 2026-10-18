@@ -403,3 +403,31 @@
     padding-top: 6px;
 }
 
+
+/* ── Telefon (mobil qabıq 2026-10-19): barmaq hədəfləri ──────────────────
+   Seqment 28px, axtarış 34px, «Axtar»/«Təmizlə» 24px idi — barmaqla qonşu
+   seqmentə düşmək asan idi. Düzüm eynidir, yalnız hündürlüklər böyüyür. */
+@media (max-width: 768px) {
+    .nfx-segment__item {
+        height: 36px;
+    }
+
+    .nfx-search {
+        height: 40px;
+    }
+
+    /* 13px idi — iPhone fokusda səhifəni yaxınlaşdırırdı; telefonda 16px (bütün brauzerlər). */
+    .nfx-search__input {
+        font-size: 16px;
+    }
+
+    .nfx-search__clear,
+    .nfx-search__submit {
+        width: 34px;
+        height: 34px;
+    }
+
+    .nfx-btn {
+        height: 40px;
+    }
+}

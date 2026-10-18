@@ -84,4 +84,26 @@ təsdiqə göndərməni bloklayır (§8 qayda 11).{% endcomment %}
             </select>
         </div>
     </div>
+    {% comment %}Seçmə sahələri (2026-10-19): əvvəl dialoqda yox idi və redaktə seçmə sətri
+    MƏCBURİ edirdi. Bayraq söndürüləndə server blok/say sahələrini nəzərə almır.{% endcomment %}
+    <div class="ems-field tof-form__full">
+        <label class="tof-form__check" for="tof-pr-elective">
+            <input type="checkbox" id="tof-pr-elective" name="is_elective" value="1"
+                   aria-describedby="tof-pr-elective-hint">
+            <span>{% trans "Seçmə fənn" context "accounts.curriculum" %}</span>
+        </label>
+        <p class="ems-field__hint" id="tof-pr-elective-hint">{% trans "Seçmə fənn blokdan seçilir; bayraq söndürülsə sətir məcburi olur." context "accounts.curriculum" %}</p>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-pr-block">{% trans "Seçmə bloku" context "accounts.curriculum" %}</label>
+        <input class="ems-input" type="text" id="tof-pr-block" name="elective_group" maxlength="50"
+               placeholder="{% trans 'Məs. SB1' context 'accounts.curriculum' %}" aria-describedby="tof-pr-block-hint">
+        <p class="ems-field__hint" id="tof-pr-block-hint">{% trans "Eyni blokun sətirləri eyni adı daşıyır." context "accounts.curriculum" %}</p>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-pr-choices">{% trans "Seçiləcək fənn sayı" context "accounts.curriculum" %}</label>
+        <input class="ems-input" type="number" id="tof-pr-choices" name="required_choices" min="1" max="20" step="1"
+               aria-describedby="tof-pr-choices-hint">
+        <p class="ems-field__hint" id="tof-pr-choices-hint">{% trans "Blokun bütün sətirlərinə şamil olunur." context "accounts.curriculum" %}</p>
+    </div>
 </div>

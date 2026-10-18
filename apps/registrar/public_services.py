@@ -26,6 +26,8 @@ from . import lessons_log  # noqa: F401
 from . import movements  # noqa: F401
 from . import retake_access  # noqa: F401 — 25% / alt qrup müraciəti: açar + əhatə (2026-10-18)
 from . import retake_chance  # noqa: F401 — «İmtahan şansı ver» rəsmi qeydi (2026-10-18)
+from . import retake_fees  # noqa: F401 — 25% təxmini məbləği + təhsil haqqı cədvəli (2026-10-19)
+from . import retake_window  # noqa: F401 — 25% müraciət pəncərəsi (İmtahan mərkəzi, 2026-10-19)
 from . import schedule  # noqa: F401
 from . import schedule_conflicts  # noqa: F401
 from . import schedule_docx_match  # noqa: F401 — cədvəl → tapşırıq sətri (workload, 2026-10-15)
@@ -122,6 +124,8 @@ __all__ = [
     "render_syllabus_pdf",
     "retake_access",
     "retake_chance",
+    "retake_fees",
+    "retake_window",
     "schedule",
     "schedule_conflicts",
     "schedule_docx_match",

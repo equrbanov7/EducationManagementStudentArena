@@ -354,3 +354,138 @@
         min-width: 66px;
     }
 }
+
+/* ── Telefon: günlər üzrə siyahı (mobil qabıq 2026-10-19) ──────────────────
+   Partial: `_schedule_matrix_days.html` (yalnız-oxu matris, `.smtx--has-days`).
+   ≤ 576px-də grid gizlənir, günlər alt-alta kart kimi düzülür; dərs kartının adı,
+   növü və otağı TAM görünür (grid-də «Programl…» kimi kəsilirdi). Masaüstü və
+   redaktor («Cədvəl idarəetməsi») dəyişmir. */
+.smtx-days {
+    display: none;
+}
+
+@media (max-width: 576px) {
+    .smtx--has-days .smtx__scroll {
+        display: none;
+    }
+
+    .smtx--has-days .smtx-days {
+        display: grid;
+        gap: 10px;
+    }
+
+    .smtx-days__day {
+        border: 1px solid var(--ems-border);
+        border-radius: var(--ems-r-xl);
+        background: var(--ems-bg);
+        box-shadow: var(--ems-sh-card);
+        overflow: hidden;
+    }
+
+    .smtx-days__day.is-today {
+        border-color: var(--ems-primary-200);
+    }
+
+    .smtx-days__head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 4px 8px;
+        margin: 0;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--ems-border);
+        background: var(--ems-bg-subtle);
+        color: var(--ems-text);
+        font-size: var(--ems-fs-md);
+        font-weight: 800;
+        line-height: 1.3;
+    }
+
+    .smtx-days__day.is-today .smtx-days__head {
+        background: var(--ems-primary-50);
+        color: var(--ems-primary-800);
+    }
+
+    .smtx-days__sub {
+        font-size: var(--ems-fs-xs);
+        font-weight: 700;
+        color: var(--ems-text-muted);
+    }
+
+    .smtx-days__list {
+        display: grid;
+        gap: 8px;
+        margin: 0;
+        padding: 10px;
+        list-style: none;
+    }
+
+    .smtx-days__item {
+        display: grid;
+        grid-template-columns: 52px minmax(0, 1fr);
+        gap: 10px;
+        align-items: center;
+    }
+
+    .smtx-days__time {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        line-height: 1.2;
+        text-align: center;
+    }
+
+    .smtx-days__time b {
+        font-size: var(--ems-fs-sm);
+        color: var(--ems-text);
+    }
+
+    .smtx-days__time small {
+        font-size: var(--ems-fs-2xs);
+        font-weight: 600;
+        color: var(--ems-text-muted);
+    }
+
+    .smtx-days .smtx-card {
+        min-height: 44px;
+        margin: 0;
+        padding: 9px 12px;
+    }
+
+    .smtx-days .smtx-card__title,
+    .smtx-days .smtx-card__meta,
+    .smtx-days .smtx-card__room {
+        overflow: visible;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .smtx-days .smtx-card__title {
+        font-size: var(--ems-fs-base);
+    }
+
+    .smtx-days .smtx-card__meta,
+    .smtx-days .smtx-card__room {
+        margin-top: 2px;
+        font-size: var(--ems-fs-sm);
+    }
+
+    /* Boş gün: siyahı gizlənir, «Dərs yoxdur» görünür (`:has` olmayan köhnə brauzerdə
+       gün başlığı tək qalır — məzmun itmir). */
+    .smtx-days__empty {
+        display: none;
+        margin: 0;
+        padding: 10px 14px;
+        font-size: var(--ems-fs-sm);
+        color: var(--ems-text-muted);
+    }
+
+    .smtx-days__day:not(:has(.smtx-days__item)) .smtx-days__list {
+        display: none;
+    }
+
+    .smtx-days__day:not(:has(.smtx-days__item)) .smtx-days__empty {
+        display: block;
+    }
+}

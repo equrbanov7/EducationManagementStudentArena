@@ -1,0 +1,25 @@
+{% load i18n %}
+<p class="hrc-dialog__who">{{ employee_name }} · № {{ contract.number }}</p>
+{% if events %}
+<ol class="hrc-history">
+    {% for item in events %}{% with event=item.event %}
+    <li class="hrc-history__item hrc-history__item--{{ event.kind }}">
+        <div class="hrc-history__head">
+            <strong>{{ event.get_kind_display }}</strong>{% if event.threshold %} · {% blocktrans with n=event.threshold context "hr_contracts" %}{{ n }} günlük hədd{% endblocktrans %}{% endif %}
+            <span class="hrc-sub">{{ event.created_at|date:"d.m.Y H:i" }}{% if event.actor %} · {{ event.actor.get_full_name|default:event.actor.username }}{% elif event.actor_name %} · {{ event.actor_name }}{% else %} · {% trans "sistem" context "hr_contracts" %}{% endif %}{% if event.end_date %} · {% trans "bitmə tarixi" context "hr_contracts" %} {{ event.end_date|date:"d.m.Y" }}{% endif %}</span>
+        </div>
+        {% if event.note %}<p class="hrc-history__note">{{ event.note|linebreaksbr }}</p>{% endif %}
+        {% if item.changes %}
+        <ul class="hrc-history__changes">
+            {% for label, old, new in item.changes %}
+            <li><span class="hrc-history__field">{{ label }}</span>: {{ old|default:"—" }} → {{ new|default:"—" }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% if event.data.file_name %}<p class="hrc-sub">{{ event.data.file_name }}</p>{% endif %}
+    </li>
+    {% endwith %}{% endfor %}
+</ol>
+{% else %}
+<p class="hrc-muted">{% trans "Hadisə yoxdur." context "hr_contracts" %}</p>
+{% endif %}

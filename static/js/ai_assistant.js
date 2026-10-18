@@ -188,6 +188,67 @@
         window.requestAnimationFrame(updateTuck);
     }, { passive: true });
 
+    // Mobil qabıq 2026-10-19: telefonda düymə dayanıb qalanda altında MƏZMUN varsa — toxunulan
+    // element (düymə, keçid, xana: yapışqan «Yadda saxla» paneli, kartın oxu), mətn (kart başlığı,
+    // cədvəl xanası) və ya şəkil/ikon — düymə ekranın kənarına «dil» kimi çəkilir (`--dodge`,
+    // ai_assistant.css): yalnız 14px görünür, o da səhifənin 16px kənar boşluğunda qalır; toxunanda
+    // çat yenə açılır. Boş fonun (kartın kənar boşluğu, səhifə fonu) üstündə tam düymə qalır.
+    // Yoxlama sürüşmə dayananda və ölçü dəyişəndə edilir (6×6 nöqtə, elementsFromPoint + Range).
+    const DODGE_TARGETS = "a[href], button, input, select, textarea, summary, label, [role='button'], [tabindex]:not([tabindex='-1'])";
+    const DODGE_MEDIA = "img, svg, i, canvas, video";
+    let dodgeTimer = 0;
+    function textAt(el, x, y) {
+        // Elementin ÖZ mətn düyünləri nöqtəni örtürmü (konteynerin boş fonu sayılmır)?
+        for (let node = el.firstChild; node; node = node.nextSibling) {
+            if (node.nodeType !== 3 || !node.textContent.trim()) continue;
+            const range = document.createRange();
+            range.selectNodeContents(node);
+            const rects = range.getClientRects();
+            for (let i = 0; i < rects.length; i += 1) {
+                const r = rects[i];
+                if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return true;
+            }
+        }
+        return false;
+    }
+    function coversContent() {
+        // `offset*` transform-u saymır — düymənin «ev» yeri (`--dodge`/`--tucked` sürüşməsindən asılı deyil).
+        const left = botBtn.offsetLeft;
+        const top = botBtn.offsetTop;
+        const width = botBtn.offsetWidth;
+        const height = botBtn.offsetHeight;
+        if (!width || typeof document.elementsFromPoint !== "function") return false;
+        for (let x = left + 4; x < left + width; x += 8) {
+            for (let y = top + 4; y < top + height; y += 8) {
+                const stack = document.elementsFromPoint(x, y);
+                const below = stack.find((el) => !fabRoot.contains(el) && el !== document.documentElement && el !== document.body);
+                if (!below || below.closest("#ai-fab")) continue;
+                if (below.closest(DODGE_TARGETS) || below.closest(DODGE_MEDIA) || textAt(below, x, y)) return true;
+            }
+        }
+        return false;
+    }
+    function updateDodge() {
+        dodgeTimer = 0;
+        const phone = !!(phoneQuery && phoneQuery.matches);
+        const tucked = botBtn.classList.contains("ai-bot-btn--tucked");
+        if (!phone || isOpen || fabHidden() || !fabRoot) {
+            botBtn.classList.remove("ai-bot-btn--dodge");
+            return;
+        }
+        if (tucked) return; // kənara çəkilmiş düymə heç nəyi örtmür — vəziyyət qayıdanda yoxlanır
+        botBtn.classList.toggle("ai-bot-btn--dodge", coversContent());
+    }
+    function queueDodge(delay) {
+        if (dodgeTimer) window.clearTimeout(dodgeTimer);
+        dodgeTimer = window.setTimeout(updateDodge, delay);
+    }
+    window.addEventListener("scroll", () => queueDodge(180), { passive: true });
+    window.addEventListener("resize", () => queueDodge(180));
+    document.addEventListener("profile:section:loaded", () => queueDodge(300));
+    window.addEventListener("load", () => queueDodge(400));
+    queueDodge(800);
+
     // ── Panel ───────────────────────────────────────────────────────────
     function openPanel() {
         resetHistoryIfExpired();

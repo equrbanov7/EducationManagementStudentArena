@@ -125,6 +125,12 @@ POST_DELETE_RATE_LIMIT = os.getenv("POST_DELETE_RATE_LIMIT", "10/5m")
 # toxunulmur, yalnız skriptlə «spray» kəsilir (bax `core/write_rate_limit.py`).
 SCORE_WRITE_RATE_LIMIT = os.getenv("SCORE_WRITE_RATE_LIMIT", "120/1m")
 
+# Publik sənəd yoxlaması (`/yoxla/<kod>/`, 2026-10-18) — İP başına. Kod 80 bitdir; limit sadalamanı
+# yox, səs-küyü kəsir. «Tapılmadı» büdcəsi bitəndə kod ümumiyyətlə həll olunmur (apps/verification).
+DOCUMENT_VERIFY_RATE_LIMIT = os.getenv("DOCUMENT_VERIFY_RATE_LIMIT", "60/10m")
+DOCUMENT_VERIFY_MISS_RATE_LIMIT = os.getenv("DOCUMENT_VERIFY_MISS_RATE_LIMIT", "15/10m")
+DOCUMENT_VERIFY_UPLOAD_RATE_LIMIT = os.getenv("DOCUMENT_VERIFY_UPLOAD_RATE_LIMIT", "10/10m")
+
 
 # ---------------------------------------------------------------------------
 # FAIL-CLOSED konfiqurasiya yoxlaması (2026-09-02 audit, P2-5)

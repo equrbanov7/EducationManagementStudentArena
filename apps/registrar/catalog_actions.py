@@ -80,6 +80,23 @@ def _int_or(value, default, *, low, high):
 # --------------------------------------------------------------------------- #
 
 
+def _program_audit_snapshot(program) -> dict:
+    """Formanın dəyişdirdiyi BÜTÜN sahələr — audit old/new eyni açarlarla (2026-10-19).
+
+    Əvvəl ``absence_limit_percent`` (davamiyyət həddi — kəsr qərarına təsir edir),
+    ``ects_total`` və ``specialty_unit`` audit-ə düşmürdü.
+    """
+    return {
+        "name": program.name,
+        "degree_level": program.degree_level,
+        "education_form": program.education_form,
+        "official_code": program.official_code,
+        "specialty_unit": str(program.specialty_unit_id or ""),
+        "ects_total": program.ects_total,
+        "absence_limit_percent": program.absence_limit_percent,
+    }
+
+
 def _save_program(request, organization):
     program_id = (request.POST.get("id") or "").strip()
     instance = None
@@ -114,16 +131,7 @@ def _save_program(request, organization):
             suffix += 1
         instance = Program(organization=organization, code=candidate)
 
-    old_values = (
-        {}
-        if is_create
-        else {
-            "name": instance.name,
-            "degree_level": instance.degree_level,
-            "education_form": instance.education_form,
-            "official_code": instance.official_code,
-        }
-    )
+    old_values = {} if is_create else _program_audit_snapshot(instance)
 
     instance.name = name
     instance.degree_level = degree
@@ -152,7 +160,7 @@ def _save_program(request, organization):
         request=request,
         reason="catalog: program created" if is_create else "catalog: program updated",
         old_values=old_values or None,
-        new_values={"name": instance.name, "degree_level": degree, "education_form": form},
+        new_values=_program_audit_snapshot(instance),
     )
     return JsonResponse({"ok": True, "id": str(instance.id), "created": is_create})
 

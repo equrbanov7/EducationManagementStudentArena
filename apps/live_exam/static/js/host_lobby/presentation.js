@@ -1,11 +1,12 @@
-import { UI } from './dom.js?v=lx20261014';
-import { state } from './state.js?v=lx20261014';
-import { stopAllLoops, stopDanceBeat, stopLobbyMusic, syncLobbyMusic } from './audio.js?v=lx20261014';
-import { stopStatePolling } from './api.js?v=lx20261014';
-import { renderIdleStage, resetLobbyStage } from './lobby.js?v=lx20261014';
-import { teardownStage } from './stage.js?v=lx20261014';
-import { cancelWipe } from './transitions.js?v=lx20261014';
-import { fmt, log, markStateMutation, notifyHostShell, safeDisplay, tr } from './utils.js?v=lx20261014';
+import { UI } from './dom.js?v=lx20261019';
+import { state } from './state.js?v=lx20261019';
+import { stopAllLoops, stopDanceBeat, stopLobbyMusic, syncLobbyMusic } from './audio.js?v=lx20261019';
+import { stopStatePolling } from './api.js?v=lx20261019';
+import { renderIdleStage, resetLobbyStage } from './lobby.js?v=lx20261019';
+import { teardownStage } from './stage.js?v=lx20261019';
+import { cancelWipe } from './transitions.js?v=lx20261019';
+import { fmt, log, markStateMutation, notifyHostShell, safeDisplay, tr } from './utils.js?v=lx20261019';
+import { hydrateCodeText } from './code_text.js?v=lx20261019';
 
 let presenterWindowRef = null;
 
@@ -98,6 +99,8 @@ export function setPresentationMarkup(phase, signature, markup, afterMount) {
     state.phase = phase;
     state.phaseSignature = signature;
     UI.presentationContent.innerHTML = markup;
+    // 2026-10-19: sual/variant mətnindəki kod nümunəsi — fitText ölçməzdən ƏVVƏL (DOM, textContent ilə).
+    hydrateCodeText(UI.presentationContent);
     if (typeof afterMount === "function") {
         try {
             afterMount(UI.presentationContent);

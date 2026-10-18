@@ -1,0 +1,441 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ai_generator_panel.css — «AI ilə test sualı yarat» paneli (sahib 2026-10-19:
+   «bu hissə harda varsa oranın da dizaynını düzəltmək lazımdır, səliqəli olsun»).
+
+   Tək partial: exams/teacher/partials/_ai_generator_panel.html — imtahan test
+   bankı, müstəqil bank toplu əlavəsi, kafedra sual göndərişi (workbench «card»
+   variantı) və yazılı/praktiki imtahan bloku («block» variantı, JS ilə əlavə
+   olunan bloklar da eyni <template>-dən klonlanır).
+
+   Sxem (masaüstü):
+     [ikon] Başlıq / alt mətn
+     Prompt / mövzu ............................................ (tam en)
+     Mühazirə faylı (drop zone, 1fr) | Sual sayı (128px) | Çətinlik (200px)
+     ───────────────────────────────────────────────────────────────────────
+     [Sonuna əlavə et | Əvəz et] (məzmun eni)        status · [AI ilə yarat]
+
+   Bütün sahələr 40px (`--ems-h-field`), etiketlər bir xətdə (`ems-field__label`),
+   düymə/dəyər mətni cümlə registrində. Rənglər yalnız `--ems-*` tokenlərindəndir.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.aigen {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+    min-width: 0;
+    max-width: 100%;
+    margin: 0 0 var(--ems-sp-8);
+    padding: var(--ems-sp-7);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+}
+
+/* Blok daxilində (yazılı imtahan redaktoru) — kart içində kart: yığcam, fonlu. */
+.aigen--block {
+    margin: var(--ems-sp-6) 0;
+    padding: var(--ems-sp-6);
+    border-color: var(--ems-primary-100);
+    background: var(--ems-bg-subtle);
+    box-shadow: none;
+}
+
+.aigen.is-busy {
+    cursor: progress;
+}
+
+/* ── Başlıq ─────────────────────────────────────────────────────────────── */
+.aigen__head {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-5);
+    min-width: 0;
+}
+
+.aigen__icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-600);
+    font-size: 17px;
+}
+
+.aigen--block .aigen__icon {
+    width: 34px;
+    height: 34px;
+    font-size: 15px;
+    background: var(--ems-bg);
+}
+
+.aigen__intro {
+    min-width: 0;
+}
+
+.aigen__title {
+    margin: 0;
+    font-size: var(--ems-fs-xl);
+    font-weight: 800;
+    line-height: 1.3;
+    color: var(--ems-text);
+}
+
+.aigen--block .aigen__title {
+    font-size: var(--ems-fs-lg);
+}
+
+.aigen__sub {
+    margin: 2px 0 0;
+    max-width: 72ch;
+    font-size: var(--ems-fs-base);
+    line-height: 1.5;
+    color: var(--ems-text-muted);
+    text-wrap: pretty;
+}
+
+/* ── Sahələr şəbəkəsi ───────────────────────────────────────────────────── */
+.aigen__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 128px 200px;
+    align-items: start;
+    gap: var(--ems-sp-6) var(--ems-sp-5);
+    min-width: 0;
+}
+
+.aigen__prompt {
+    grid-column: 1 / -1;
+}
+
+/* Etiketlər eyni hündürlükdə bir xətt — uzun tərcümə sahəni aşağı itələməsin. */
+.aigen .ems-field__label {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    line-height: 16px;
+}
+
+.aigen__textarea {
+    min-height: 84px;
+    line-height: 1.5;
+}
+
+.aigen .ems-input,
+.aigen .ems-textarea {
+    box-shadow: none;
+}
+
+.aigen .ems-input:focus,
+.aigen .ems-textarea:focus {
+    box-shadow: var(--ems-sh-focus);
+}
+
+/* `bootstrap-single-select--ems` artıq 40px verir; dəyər mətni registrə toxunulmur. */
+.aigen .bootstrap-single-select__toggle {
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.aigen .bootstrap-single-select__menu {
+    z-index: 1040;
+}
+
+/* ── Fayl drop zone ─────────────────────────────────────────────────────── */
+.aigen-drop {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    min-height: var(--ems-h-field);
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+    transition:
+        border-color 0.12s ease,
+        background-color 0.12s ease;
+}
+
+.aigen-drop:hover,
+.aigen-drop.is-dragover {
+    border-color: var(--ems-primary-500);
+    background: var(--ems-primary-50);
+}
+
+.aigen-drop:focus-within {
+    border-color: var(--ems-primary-500);
+    box-shadow: var(--ems-sh-focus);
+}
+
+.aigen-drop.has-file {
+    border-style: solid;
+    border-color: var(--ems-primary-200);
+    background: var(--ems-primary-50);
+}
+
+/* Native fayl input-u görünmür, amma fokuslanır (klaviatura: Tab → Space/Enter). */
+.aigen-drop__input,
+.aigen .ai-file-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    border: 0;
+    white-space: nowrap;
+}
+
+.aigen-drop__pick {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    min-width: 0;
+    min-height: calc(var(--ems-h-field) - 2px);
+    margin: 0;
+    padding: 0 12px;
+    cursor: pointer;
+    font-size: var(--ems-fs-base);
+    color: var(--ems-neutral-700);
+}
+
+.aigen-drop__pick > i {
+    flex: none;
+    color: var(--ems-primary-600);
+}
+
+.aigen-drop__name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 600;
+}
+
+.aigen-drop.has-file .aigen-drop__name {
+    color: var(--ems-text);
+}
+
+.aigen-drop__hint {
+    flex: none;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+.aigen-drop__clear {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-right: 6px;
+    border: 0;
+    border-radius: var(--ems-r-md);
+    background: transparent;
+    color: var(--ems-neutral-500);
+    cursor: pointer;
+}
+
+.aigen-drop__clear:hover,
+.aigen-drop__clear:focus-visible {
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger);
+    outline: none;
+}
+
+.aigen-drop__clear[hidden] {
+    display: none;
+}
+
+/* ── Alt sıra: rejim + status + əsas düymə ──────────────────────────────── */
+.aigen__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-5);
+    padding-top: var(--ems-sp-6);
+    border-top: 1px solid var(--ems-border);
+}
+
+/* Seqmentli seçici — məzmun eni (əvvəl bütün sıranı tuturdu). */
+.aigen-mode {
+    display: inline-flex;
+    flex: 0 1 auto;
+    align-items: stretch;
+    gap: 2px;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+    padding: 3px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-neutral-100);
+}
+
+.aigen-mode__legend {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.aigen-mode__opt {
+    position: relative;
+    display: inline-flex;
+    margin: 0;
+}
+
+.aigen-mode__opt input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.aigen-mode__opt span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    padding: 0 12px;
+    border-radius: var(--ems-r-md);
+    font-size: var(--ems-fs-base);
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--ems-neutral-600);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.aigen-mode__opt input:checked + span {
+    background: var(--ems-bg);
+    color: var(--ems-primary-700);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    font-weight: 700;
+}
+
+.aigen-mode__opt input:focus-visible + span {
+    box-shadow: var(--ems-sh-focus);
+}
+
+.aigen__actions {
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--ems-sp-5);
+    min-width: 0;
+}
+
+.aigen__status {
+    flex: 1 1 200px;
+    min-width: 0;
+    font-size: var(--ems-fs-base);
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--ems-text-muted);
+    text-align: right;
+    text-wrap: pretty;
+}
+
+.aigen__status:empty {
+    display: none;
+}
+
+.aigen__status.is-success {
+    color: var(--ems-success-700);
+}
+
+.aigen__status.is-error {
+    color: var(--ems-danger);
+}
+
+.aigen__status.is-loading {
+    color: var(--ems-primary-700);
+}
+
+.aigen__submit {
+    flex: none;
+    white-space: nowrap;
+}
+
+/* Yüklənmə: düymə söndürülür, amma əsas rəngdə qalır (spinner + «Yaradılır…»). */
+.aigen__submit.is-loading:disabled {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+    opacity: 0.85;
+    cursor: progress;
+}
+
+/* ── Responsiv ──────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .aigen__grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .aigen__file {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 600px) {
+    .aigen,
+    .aigen--block {
+        padding: var(--ems-sp-6);
+    }
+
+    .aigen__foot {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .aigen-mode {
+        display: flex;
+        width: 100%;
+    }
+
+    .aigen-mode__opt {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+
+    .aigen-mode__opt span {
+        width: 100%;
+        padding: 6px 8px;
+        white-space: normal;
+    }
+
+    .aigen__actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .aigen__status {
+        flex: none;
+        text-align: left;
+    }
+
+    .aigen__submit {
+        width: 100%;
+    }
+
+    .aigen-drop__hint {
+        display: none;
+    }
+}

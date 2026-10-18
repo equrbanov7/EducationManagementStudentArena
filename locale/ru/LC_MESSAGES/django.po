@@ -102945,3 +102945,2289 @@ msgstr "Бесплатно — вы повторно изучаете предм
 msgctxt "registrar.retake"
 msgid "Alt qrupa müraciət et"
 msgstr "Подать в подгруппу"
+
+msgctxt "verification.public"
+msgid "Sənəd yoxlaması"
+msgstr "Проверка документа"
+
+msgctxt "verification.public"
+msgid "Elektron sənəd yoxlaması"
+msgstr "Электронная проверка документов"
+
+msgctxt "verification.public"
+msgid "Sənəd etibarlıdır"
+msgstr "Документ действителен"
+
+msgctxt "verification.public"
+msgid "Sənəd ləğv edilib"
+msgstr "Документ аннулирован"
+
+msgctxt "verification.public"
+msgid "Bu sənəd universitetin elektron sistemi tərəfindən verilib və hazırda qüvvədədir."
+msgstr "Этот документ выдан электронной системой университета и в настоящее время действителен."
+
+msgctxt "verification.public"
+msgid "Sənəd universitet tərəfindən ləğv edilib — ona etibar etməyin."
+msgstr "Университет аннулировал этот документ — не полагайтесь на него."
+
+msgctxt "verification.public"
+msgid "Ləğv tarixi"
+msgstr "Дата аннулирования"
+
+msgctxt "verification.public"
+msgid "Sənədin növü"
+msgstr "Тип документа"
+
+msgctxt "verification.public"
+msgid "Verən təşkilat"
+msgstr "Выдавшая организация"
+
+msgctxt "verification.public"
+msgid "Verilmə tarixi"
+msgstr "Дата выдачи"
+
+msgctxt "verification.public"
+msgid "Sənədin sahibi"
+msgstr "Владелец документа"
+
+msgctxt "verification.public"
+msgid "Yoxlama kodu"
+msgstr "Код проверки"
+
+msgctxt "verification.public"
+msgid "Səhifə yalnız sənədin əsas göstəricilərini göstərir. Tam məzmunu sənədin özü ilə tutuşdurun və ya faylı aşağıda müqayisə edin."
+msgstr "На странице показаны только основные показатели документа. Сверьте полное содержание с самим документом или сравните файл ниже."
+
+msgctxt "verification.public"
+msgid "Faylı müqayisə et"
+msgstr "Сравнить файл"
+
+#, python-format
+msgctxt "verification.public"
+msgid "Sizə verilmiş PDF faylı seçin — sistem onun rəqəmsal izini (SHA-256) universitetin verdiyi nüsxə ilə tutuşdurur. Fayl saxlanılmır. Ən çox %(mb)s MB."
+msgstr "Выберите полученный PDF-файл — система сравнит его цифровой отпечаток (SHA-256) с копией, выданной университетом. Файл не сохраняется. Не более %(mb)s МБ."
+
+msgctxt "verification.public"
+msgid "Fayl verilmiş nüsxə ilə eynidir, lakin sənəd ləğv edilib."
+msgstr "Файл совпадает с выданной копией, но документ аннулирован."
+
+msgctxt "verification.public"
+msgid "Fayl universitetin verdiyi nüsxə ilə tam eynidir."
+msgstr "Файл полностью совпадает с копией, выданной университетом."
+
+msgctxt "verification.public"
+msgid "Fayl verilmiş nüsxə ilə eyni DEYİL — dəyişdirilmiş və ya başqa sənəd ola bilər."
+msgstr "Файл НЕ совпадает с выданной копией — он мог быть изменён или это другой документ."
+
+msgctxt "verification.public"
+msgid "Seçilən fayl PDF deyil."
+msgstr "Выбранный файл не является PDF."
+
+msgctxt "verification.public"
+msgid "Fayl çox böyükdür."
+msgstr "Файл слишком большой."
+
+msgctxt "verification.public"
+msgid "Fayl seçilməyib."
+msgstr "Файл не выбран."
+
+msgctxt "verification.public"
+msgid "PDF fayl"
+msgstr "PDF-файл"
+
+msgctxt "verification.public"
+msgid "Müqayisə et"
+msgstr "Сравнить"
+
+msgctxt "verification.public"
+msgid "Başqa kodu yoxla"
+msgstr "Проверить другой код"
+
+msgctxt "verification.public"
+msgid "Sənədin həqiqiliyini yoxlayın"
+msgstr "Проверьте подлинность документа"
+
+msgctxt "verification.public"
+msgid "Universitetin verdiyi rəsmi sənədin üzərindəki QR kodu skan edin və ya yoxlama kodunu yazın."
+msgstr "Отсканируйте QR-код на официальном документе университета или введите код проверки."
+
+msgctxt "verification.public"
+msgid "Sənəd tapılmadı"
+msgstr "Документ не найден"
+
+msgctxt "verification.public"
+msgid "Kodu yenidən yoxlayın. Kod düzgündürsə və sənəd yenə tapılmırsa, ona etibar etməyin və sənədi verən universitetlə əlaqə saxlayın."
+msgstr "Проверьте код ещё раз. Если код верен, а документ всё равно не найден, не полагайтесь на него и свяжитесь с выдавшим его университетом."
+
+msgctxt "verification.public"
+msgid "Çox sayda sorğu"
+msgstr "Слишком много запросов"
+
+msgctxt "verification.public"
+msgid "Bir neçə dəqiqə sonra yenidən cəhd edin."
+msgstr "Повторите попытку через несколько минут."
+
+msgctxt "verification.public"
+msgid "Yoxla"
+msgstr "Проверить"
+
+msgctxt "verification.public"
+msgid "Yoxlama səhifəsi sənəd sahibinin şəxsi məlumatlarını göstərmir; sorğular anonim qeydə alınır."
+msgstr "Страница проверки не показывает личные данные владельца; запросы регистрируются анонимно."
+
+msgctxt "verification.staff"
+msgid "Sənəd yoxlaması"
+msgstr "Проверка документов"
+
+msgctxt "verification.staff"
+msgid "Sistemin verdiyi rəsmi sənədlər (QR + kod). Kod üzrə və ya tələbə adı ilə axtarın; səhv verilmiş sənədi ləğv edin."
+msgstr "Официальные документы, выданные системой (QR + код). Ищите по коду или имени студента; аннулируйте ошибочно выданный документ."
+
+msgctxt "verification.staff"
+msgid "Kod və ya tələbə"
+msgstr "Код или студент"
+
+msgctxt "verification.staff"
+msgid "Kod (QKU-…) və ya tələbənin adı"
+msgstr "Код (QKU-…) или имя студента"
+
+msgctxt "verification.staff"
+msgid "Axtar"
+msgstr "Найти"
+
+msgctxt "verification.staff"
+msgid "Vəziyyət"
+msgstr "Статус"
+
+msgctxt "verification.staff"
+msgid "Publik yoxlama səhifəsi"
+msgstr "Публичная страница проверки"
+
+msgctxt "verification.staff"
+msgid "Kod"
+msgstr "Код"
+
+msgctxt "verification.staff"
+msgid "Sənəd"
+msgstr "Документ"
+
+msgctxt "verification.staff"
+msgid "Sahibi"
+msgstr "Владелец"
+
+msgctxt "verification.staff"
+msgid "Verilib"
+msgstr "Выдан"
+
+msgctxt "verification.staff"
+msgid "Əməllər"
+msgstr "Действия"
+
+msgctxt "verification.staff"
+msgid "Ləğv edilib"
+msgstr "Аннулирован"
+
+msgctxt "verification.staff"
+msgid "Etibarlı"
+msgstr "Действителен"
+
+msgctxt "verification.staff"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "verification.staff"
+msgid "Ləğv et"
+msgstr "Аннулировать"
+
+msgctxt "verification.staff"
+msgid "Səhifələr"
+msgstr "Страницы"
+
+msgctxt "verification.staff"
+msgid "Əvvəlki"
+msgstr "Предыдущая"
+
+msgctxt "verification.staff"
+msgid "Növbəti"
+msgstr "Следующая"
+
+#, python-format
+msgctxt "verification.staff"
+msgid "Səhifə %(page)s / %(pages)s"
+msgstr "Страница %(page)s / %(pages)s"
+
+msgctxt "verification.staff"
+msgid "Sənəd tapılmadı"
+msgstr "Документы не найдены"
+
+msgctxt "verification.staff"
+msgid "Axtarışı dəyişin və ya bütün sənədlərə qayıdın."
+msgstr "Измените запрос или вернитесь ко всем документам."
+
+msgctxt "verification.staff"
+msgid "Möhürlənmiş sənəd transkript yüklənəndə avtomatik yaranır."
+msgstr "Документ с печатью создаётся автоматически при скачивании транскрипта."
+
+msgctxt "verification.staff"
+msgid "Sənədi ləğv et"
+msgstr "Аннулировать документ"
+
+msgctxt "verification.staff"
+msgid "Ləğv geri qaytarılmır. Səbəb yalnız əməkdaşlara görünür — publik səhifə yalnız ləğv tarixini göstərir."
+msgstr "Аннулирование необратимо. Причина видна только сотрудникам — публичная страница показывает лишь дату аннулирования."
+
+msgctxt "verification.staff"
+msgid "Məs.: səhv məlumatla verilib, yenisi ilə əvəz olunub"
+msgstr "Напр.: выдан с ошибочными данными, заменён новым"
+
+#, python-format
+msgctxt "verification.staff"
+msgid "Səbəb ən azı %(n)s simvol olmalıdır."
+msgstr "Причина должна содержать не менее %(n)s символов."
+
+msgctxt "verification.staff"
+msgid "Bu sənəd artıq ləğv edilib."
+msgstr "Этот документ уже аннулирован."
+
+#, python-format
+msgctxt "verification.staff"
+msgid "Sənəd ləğv edildi: %(code)s"
+msgstr "Документ аннулирован: %(code)s"
+
+msgctxt "verification.fact"
+msgid "İxtisas"
+msgstr "Специальность"
+
+msgctxt "verification.fact"
+msgid "Təhsil pilləsi"
+msgstr "Ступень образования"
+
+msgctxt "verification.fact"
+msgid "Toplanmış kredit"
+msgstr "Набранные кредиты"
+
+msgctxt "verification.fact"
+msgid "Kumulyativ ÜOMG"
+msgstr "Совокупный средний балл (GPA)"
+
+msgctxt "verification.fact"
+msgid "Məzuniyyət yükü (ECTS)"
+msgstr "Нагрузка для выпуска (ECTS)"
+
+msgctxt "verification.fact"
+msgid "Sənəd №"
+msgstr "Документ №"
+
+msgctxt "verification.doc_type"
+msgid "Akademik transkript"
+msgstr "Академический транскрипт"
+
+msgctxt "verification.audit"
+msgid "Rəsmi sənəd möhürləndi (QR yoxlama kodu verildi)."
+msgstr "Официальный документ заверен (выдан QR-код проверки)."
+
+msgctxt "registrar.pdf"
+msgid "Yoxlama kodu"
+msgstr "Код проверки"
+
+msgctxt "registrar.pdf"
+msgid "Sənədin həqiqiliyini yoxlayın"
+msgstr "Проверьте подлинность документа"
+
+msgctxt "organizations.permission.label"
+msgid "Verilmiş rəsmi sənədlərin siyahısı və sənədi ləğv etmək (QR yoxlaması)"
+msgstr "Список выданных официальных документов и аннулирование документа (QR-проверка)"
+
+msgctxt "profile.sidebar"
+msgid "Sənəd yoxlaması"
+msgstr "Проверка документов"
+
+msgctxt "registrar.model.retake_window.meta"
+msgid "retake application window"
+msgstr "окно приёма заявок на пересдачу"
+
+msgctxt "registrar.model.retake_window.meta"
+msgid "retake application windows"
+msgstr "окна приёма заявок на пересдачу"
+
+msgctxt "registrar.model.retake_tuition.meta"
+msgid "annual tuition"
+msgstr "годовая плата за обучение"
+
+msgctxt "registrar.model.retake_tuition.meta"
+msgid "annual tuition table"
+msgstr "таблица годовой платы за обучение"
+
+msgctxt "profile.sidebar"
+msgid "25% müraciət pəncərəsi"
+msgstr "Окно заявок на 25%"
+
+#, python-format
+msgctxt "profile.sidebar"
+msgid "25%% müraciət pəncərəsi"
+msgstr "Окно заявок на 25%%"
+
+msgctxt "accounts.accounting"
+msgid "müəllim (> +{pct}%)"
+msgstr "преподаватели (> +{pct}%)"
+
+msgctxt "accounts.accounting"
+msgid "müəllim (< −{pct}%)"
+msgstr "преподаватели (< −{pct}%)"
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "Status — fakt planın ±%(pct)s%%-i daxilindədirsə «Plana uyğun»; az və ya çoxdursa müvafiq olaraq «Plandan az» / «Plandan çox». Band «Sistem tənzimləmələri»ndə dəyişdirilir."
+msgstr "Статус — если факт в пределах ±%(pct)s%% плана, «По плану»; меньше или больше — «Ниже плана» / «Выше плана». Диапазон меняется в «Системных настройках»."
+
+msgctxt "core.runtime_settings"
+msgid "Mühasibatlıq"
+msgstr "Бухгалтерия"
+
+msgctxt "core.runtime_settings"
+msgid "25% ödənişinin faizi"
+msgstr "Процент оплаты 25%"
+
+msgctxt "core.runtime_settings"
+msgid "Təxmini məbləğ = illik təhsil haqqı × bu faiz ÷ 100 × (fənnin krediti ÷ illik kredit). Dəqiq məbləği Mühasibatlıq qəbzi yoxlayanda təsdiqləyir; fərq xəbərdarlıqdır, blok deyil."
+msgstr "Примерная сумма = годовая плата × этот процент ÷ 100 × (кредиты предмета ÷ годовые кредиты). Точную сумму подтверждает бухгалтерия при проверке квитанции; расхождение — предупреждение, а не блокировка."
+
+msgctxt "core.runtime_settings"
+msgid "İllik kredit (məbləğ düsturu üçün)"
+msgstr "Годовые кредиты (для формулы суммы)"
+
+msgctxt "core.runtime_settings"
+msgid "Fənnin payı = fənnin krediti ÷ bu ədəd. 0 yazılsa kreditə bölünmür: məbləğ = illik haqq × faiz ÷ 100."
+msgstr "Доля предмета = кредиты предмета ÷ это число. При 0 деления на кредиты нет: сумма = годовая плата × процент ÷ 100."
+
+msgctxt "core.runtime_settings"
+msgid "Plan ↔ fakt kənarlaşma bandı"
+msgstr "Допустимое отклонение план ↔ факт"
+
+msgctxt "core.runtime_settings"
+msgid "Keçirilmiş dərs saatı planın ±bu faiz daxilindədirsə «Plana uyğun» sayılır; azdırsa «Plandan az», çoxdursa «Plandan çox»."
+msgstr "Проведённые часы в пределах ±этого процента плана считаются «По плану»; меньше — «Ниже плана», больше — «Выше плана»."
+
+msgctxt "registrar.retake"
+msgid "İmtahana gəlmədi"
+msgstr "Не явился на экзамен"
+
+msgctxt "registrar.retake"
+msgid "Təhsil haqqı cədvəli"
+msgstr "Таблица платы за обучение"
+
+msgctxt "registrar.retake"
+msgid "«İmtahana gəlmədi» qərarı yazıldı — cəhd istifadə olunmuş sayılır."
+msgstr "Решение «не явился» записано — попытка считается использованной."
+
+msgctxt "registrar.retake"
+msgid "Müraciət qərarla geri götürüldü."
+msgstr "Заявка отозвана по решению."
+
+msgctxt "registrar.retake"
+msgid "Bağlanış vaxtı açılışdan sonra olmalıdır."
+msgstr "Время закрытия должно быть позже открытия."
+
+msgctxt "registrar.retake"
+msgid "Pəncərə artıq bağlanıb."
+msgstr "Окно уже закрыто."
+
+msgctxt "registrar.retake"
+msgid "Bu dövr üçün artıq açıq (və ya planlaşdırılmış) pəncərə var — əvvəlcə onu bağlayın."
+msgstr "Для этого периода уже есть открытое (или запланированное) окно — сначала закройте его."
+
+msgctxt "registrar.retake"
+msgid "Açılış vaxtı göstərilməlidir."
+msgstr "Нужно указать время открытия."
+
+msgctxt "registrar.retake"
+msgid "Tarix və saat düzgün deyil."
+msgstr "Неверные дата и время."
+
+msgctxt "registrar.retake"
+msgid "Məbləğ 0 ilə 1 000 000 AZN arasında olmalıdır."
+msgstr "Сумма должна быть от 0 до 1 000 000 AZN."
+
+msgctxt "registrar.retake"
+msgid "Qəbul ili düzgün deyil."
+msgstr "Неверный год поступления."
+
+msgctxt "registrar.retake"
+msgid "Tədris ilini seçin."
+msgstr "Выберите учебный год."
+
+msgctxt "registrar.retake"
+msgid "Ödənilən məbləği yazın (AZN)."
+msgstr "Введите оплаченную сумму (AZN)."
+
+msgctxt "registrar.retake"
+msgid "Məbləğ rəqəm olmalıdır."
+msgstr "Сумма должна быть числом."
+
+msgctxt "registrar.retake"
+msgid "İxtisas tapılmadı."
+msgstr "Специальность не найдена."
+
+msgctxt "registrar.retake"
+msgid "Bu sətir artıq var."
+msgstr "Такая строка уже есть."
+
+msgctxt "registrar.retake"
+msgid "Ödənişdən sonra bağlanış rəsmi qərarla olur: əmr nömrəsi və tarixi və ya qərar sənədi əlavə edin."
+msgstr "Закрытие после оплаты — только по официальному решению: укажите номер и дату приказа или приложите документ."
+
+msgctxt "registrar.retake"
+msgid "Bu mərhələdə bu bağlanış mümkün deyil."
+msgstr "На этом этапе такое закрытие невозможно."
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma yoxdur."
+msgstr "Возврата нет."
+
+msgctxt "registrar.retake"
+msgid "Müraciət pəncərəsi açıldı."
+msgstr "Окно приёма заявок открыто."
+
+msgctxt "registrar.retake"
+msgid "Müraciət pəncərəsi bağlandı."
+msgstr "Окно приёма заявок закрыто."
+
+msgctxt "registrar.retake"
+msgid "Təhsil haqqı sətri yadda saxlanıldı."
+msgstr "Строка платы за обучение сохранена."
+
+msgctxt "registrar.retake"
+msgid "Təhsil haqqı sətri silindi."
+msgstr "Строка платы за обучение удалена."
+
+msgctxt "registrar.retake"
+msgid "Gözlənilən məbləğ"
+msgstr "Ожидаемая сумма"
+
+msgctxt "registrar.retake"
+msgid "Ödənilən məbləğ"
+msgstr "Оплаченная сумма"
+
+msgctxt "registrar.retake"
+msgid "Ödənilən məbləğ gözləniləndən fərqlidir"
+msgstr "Оплаченная сумма отличается от ожидаемой"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Müraciət pəncərəsi açıqdır — %(until)s tarixinədək"
+msgstr "Приём заявок открыт до %(until)s"
+
+msgctxt "registrar.retake"
+msgid "Müraciət pəncərəsi açıqdır"
+msgstr "Приём заявок открыт"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Dövr: %(period)s. Pəncərəni İmtahan mərkəzi açır və bağlayır."
+msgstr "Период: %(period)s. Окно открывает и закрывает экзаменационный центр."
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Pəncərə %(when)s tarixində açılacaq. Göndərdiyiniz müraciətlərin vəziyyətini aşağıda izləyə bilərsiniz."
+msgstr "Окно откроется %(when)s. Статус поданных заявок можно отслеживать ниже."
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Təxmini məbləğ: %(amount)s AZN — dəqiq məbləği Mühasibatlıq təsdiqləyir"
+msgstr "Примерная сумма: %(amount)s AZN — точную сумму подтверждает бухгалтерия"
+
+msgctxt "registrar.retake"
+msgid "Məbləği Mühasibatlıqdan öyrənin"
+msgstr "Уточните сумму в бухгалтерии"
+
+msgctxt "registrar.retake"
+msgid "Bu bölmə İmtahan mərkəzinin qərar səlahiyyəti olanlar üçündür."
+msgstr "Этот раздел для сотрудников экзаменационного центра с правом решения."
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Tələbələr 25%% təkrar imtahan və alt qrup müraciətini yalnız açıq pəncərə müddətində göndərə bilir. Pəncərəni burada açıb bağlayın; bütün açılış və bağlanışlar tarixçədə qalır."
+msgstr "Студенты могут подавать заявки на пересдачу 25%% и в подгруппу только при открытом окне. Открывайте и закрывайте окно здесь; каждое открытие и закрытие сохраняется в истории."
+
+msgctxt "registrar.retake"
+msgid "Ümumi açar söndürülüb"
+msgstr "Общий переключатель выключен"
+
+msgctxt "registrar.retake"
+msgid "«Sistem tənzimləmələri»ndə «Müraciət pəncərəsi açıqdır» söndürülüb — pəncərə açıq olsa belə müraciət qəbul olunmur."
+msgstr "В «Системных настройках» выключено «Приём заявок открыт» — заявки не принимаются, даже если окно открыто."
+
+msgctxt "registrar.retake"
+msgid "Cari vəziyyət"
+msgstr "Текущее состояние"
+
+msgctxt "registrar.retake"
+msgid "Açıqdır"
+msgstr "Открыто"
+
+msgctxt "registrar.retake"
+msgid "əl ilə bağlanana qədər"
+msgstr "до ручного закрытия"
+
+msgctxt "registrar.retake"
+msgid "Planlaşdırılıb"
+msgstr "Запланировано"
+
+msgctxt "registrar.retake"
+msgid "Bağlıdır"
+msgstr "Закрыто"
+
+msgctxt "registrar.retake"
+msgid "Pəncərə bağlansın? Yeni müraciət qəbul olunmayacaq."
+msgstr "Закрыть окно? Новые заявки приниматься не будут."
+
+msgctxt "registrar.retake"
+msgid "Pəncərəni bağla"
+msgstr "Закрыть окно"
+
+msgctxt "registrar.retake"
+msgid "Akademik dövr"
+msgstr "Академический период"
+
+msgctxt "registrar.retake"
+msgid "Açılış"
+msgstr "Открытие"
+
+msgctxt "registrar.retake"
+msgid "(boş — indi)"
+msgstr "(пусто — сейчас)"
+
+msgctxt "registrar.retake"
+msgid "Bağlanış"
+msgstr "Закрытие"
+
+msgctxt "registrar.retake"
+msgid "Pəncərəni aç"
+msgstr "Открыть окно"
+
+msgctxt "registrar.retake"
+msgid "Tarixçə"
+msgstr "История"
+
+msgctxt "registrar.retake"
+msgid "Dövr"
+msgstr "Период"
+
+msgctxt "registrar.retake"
+msgid "Açan"
+msgstr "Открыл"
+
+msgctxt "registrar.retake"
+msgid "Bağlayan"
+msgstr "Закрыл"
+
+msgctxt "registrar.retake"
+msgid "Ödənilən məbləğ (AZN)"
+msgstr "Оплаченная сумма (AZN)"
+
+msgctxt "registrar.retake"
+msgid "Gözlənilən (təxmini): {amount} AZN"
+msgstr "Ожидаемая (примерно): {amount} AZN"
+
+msgctxt "registrar.retake"
+msgid "Təhsil haqqı cədvəlində sətir yoxdur — gözlənilən məbləğ hesablanmır."
+msgstr "В таблице платы нет строки — ожидаемая сумма не рассчитывается."
+
+msgctxt "registrar.retake"
+msgid "Məbləğ gözləniləndən fərqlidir — təsdiq bloklanmır, fərq qərar zəncirində qeyd olunur."
+msgstr "Сумма отличается от ожидаемой — подтверждение не блокируется, разница фиксируется в цепочке решений."
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Təsdiqlənmiş ödəniş: %(amount)s AZN"
+msgstr "Подтверждённая оплата: %(amount)s AZN"
+
+msgctxt "registrar.retake"
+msgid "Ödənişdən sonra bağlanış"
+msgstr "Закрытие после оплаты"
+
+msgctxt "registrar.retake"
+msgid "Rəsmi qərar məcburidir: əmr nömrəsi və tarixi və ya qərar sənədi. Qaytarılma yoxdur — qərar və qeyd tarixçədə qalır."
+msgstr "Нужно официальное решение: номер и дата приказа или документ. Возврата нет — решение и запись остаются в истории."
+
+msgctxt "registrar.retake"
+msgid "Qərarı yaz"
+msgstr "Записать решение"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Təxmini 25%% məbləği = illik haqq × %(pct)s%% × (fənnin krediti ÷ %(credits)s). Faiz və illik kredit «Sistem tənzimləmələri»ndədir; illik kredit 0 olarsa kreditə bölünmür."
+msgstr "Примерная сумма 25%% = годовая плата × %(pct)s%% × (кредиты предмета ÷ %(credits)s). Процент и годовые кредиты — в «Системных настройках»; при 0 годовых кредитов деления нет."
+
+msgctxt "registrar.retake"
+msgid "Tədris ili"
+msgstr "Учебный год"
+
+msgctxt "registrar.retake"
+msgid "Qəbul ili"
+msgstr "Год поступления"
+
+msgctxt "registrar.retake"
+msgid "İxtisas"
+msgstr "Специальность"
+
+msgctxt "registrar.retake"
+msgid "(boş — defolt)"
+msgstr "(пусто — по умолчанию)"
+
+msgctxt "registrar.retake"
+msgid "Bütün ixtisaslar (defolt)"
+msgstr "Все специальности (по умолчанию)"
+
+msgctxt "registrar.retake"
+msgid "İllik təhsil haqqı (AZN)"
+msgstr "Годовая плата за обучение (AZN)"
+
+msgctxt "registrar.retake"
+msgid "İllik haqq"
+msgstr "Годовая плата"
+
+msgctxt "registrar.retake"
+msgid "Əməl"
+msgstr "Действие"
+
+msgctxt "registrar.retake"
+msgid "Bu sətir silinsin?"
+msgstr "Удалить эту строку?"
+
+msgctxt "registrar.retake"
+msgid "Sil"
+msgstr "Удалить"
+
+msgctxt "registrar.retake"
+msgid "Cədvəl boşdur"
+msgstr "Таблица пуста"
+
+msgctxt "registrar.retake"
+msgid "Sətir olmayanda tələbə «Məbləği Mühasibatlıqdan öyrənin» görür."
+msgstr "Если строки нет, студент видит «Уточните сумму в бухгалтерии»."
+
+msgctxt "registrar.retake"
+msgid "Əmr / qərar №"
+msgstr "№ приказа / решения"
+
+msgctxt "registrar.retake"
+msgid "Əmr tarixi"
+msgstr "Дата приказа"
+
+msgctxt "registrar.retake"
+msgid "və ya qərar sənədi"
+msgstr "или документ решения"
+
+msgctxt "registrar.retake"
+msgid "Qaytarılma yoxdur: sistem məbləği geri qaytarmır, yalnız qərar qeyd olunur."
+msgstr "Возврата нет: система не возвращает сумму, фиксируется только решение."
+
+msgctxt "registrar.retake"
+msgid "Bağlanış qərarı"
+msgstr "Решение о закрытии"
+
+msgctxt "registrar.retake"
+msgid "Sənəd"
+msgstr "Документ"
+
+msgctxt "registrar.retake"
+msgid "Qərarla geri götür"
+msgstr "Отозвать по решению"
+
+msgctxt "registrar.retake"
+msgid "Qərarla rədd et"
+msgstr "Отклонить по решению"
+
+msgctxt "registrar.retake"
+msgid "Pəncərə yalnız cari və ya gələcək dövr üçün açılır."
+msgstr "Окно можно открыть только для текущего или будущего периода."
+
+msgctxt "registrar.retake"
+msgid "Bu tədris ili üçün hələ akademik dövr yoxdur — sətir dövr yaradılanda işləyəcək."
+msgstr "Для этого учебного года ещё нет академического периода — строка заработает, когда период будет создан."
+
+msgctxt "registrar.retake"
+msgid "Ödənilən məbləğ 0-dan böyük olmalıdır."
+msgstr "Оплаченная сумма должна быть больше 0."
+
+msgctxt "registrar.retake"
+msgid "Tədris ili «2026/2027» formatında olmalıdır."
+msgstr "Учебный год должен быть в формате «2026/2027»."
+
+msgctxt "registrar.retake"
+msgid "İmtahan cəhdi geri alına bilmir — imtahan cəhdi açılmış müraciət hələ bağlanmır."
+msgstr "Попытку экзамена нельзя отозвать — заявку с открытой попыткой пока нельзя закрыть."
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "(%(year)s tədris ilinin haqqı ilə)"
+msgstr "(по плате за %(year)s учебный год)"
+
+msgctxt "registrar.retake"
+msgid "Müraciət pəncərəsi bağlıdır — imtahan mərkəzi açanda burada görünəcək"
+msgstr "Приём заявок закрыт — когда экзаменационный центр откроет окно, оно появится здесь"
+
+msgctxt "registrar.retake"
+msgid "Hələ pəncərə açılmayıb — müraciət qəbulu üçün pəncərə açın"
+msgstr "Окно ещё не открывалось — откройте его, чтобы принимать заявки"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Tələbələr hazırda 25%% və alt qrup müraciəti göndərə bilmir. Aşağıdakı formadan dövrü seçib pəncərəni açın."
+msgstr "Сейчас студенты не могут подавать заявки на 25%% и в подгруппу. Выберите период в форме ниже и откройте окно."
+
+msgctxt "registrar.retake"
+msgid "Cari və ya gələcək akademik dövr yoxdur — əvvəlcə dövr yaradılmalıdır."
+msgstr "Нет текущего или будущего академического периода — сначала создайте период."
+
+msgctxt "registrar.retake"
+msgid "sistem (vaxtı bitdi)"
+msgstr "система (срок истёк)"
+
+msgctxt "exams.second_chance.error"
+msgid "Tələbə «{exam}» imtahanında hazırda cəhd edir — cəhd bitməmiş müraciət bağlanmır."
+msgstr "Студент сейчас проходит «{exam}» — заявку нельзя закрыть, пока попытка не завершена."
+
+msgctxt "exams.second_chance.error"
+msgid "Tələbənin «{exam}» imtahanındakı cəhdi hələ yoxlanmayıb — əvvəlcə yoxlanmalıdır."
+msgstr "Попытка студента в «{exam}» ещё не проверена — сначала её нужно проверить."
+
+msgctxt "profile.section"
+msgid "Yenidən imtahan cəhdi"
+msgstr "Повторная попытка экзамена"
+
+msgctxt "accounts.exam_chance"
+msgid "Cəhd hüququ vermək üçün əvvəlcə aktiv təşkilat seçilməlidir."
+msgstr "Чтобы предоставить право на попытку, сначала выберите активную организацию."
+
+msgctxt "accounts.exam_chance"
+msgid "Verilən cəhd hüququ"
+msgstr "Предоставлено попыток"
+
+msgctxt "accounts.exam_chance"
+msgid "Cəhdin əsası"
+msgstr "Основание попытки"
+
+msgctxt "accounts.exam_chance"
+msgid "Əsas seçin…"
+msgstr "Выберите основание…"
+
+msgctxt "accounts.exam_chance"
+msgid "Yalnız baxış: cəhd hüququnu «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
+msgstr "Только просмотр: право на попытку предоставляет пользователь с полномочием «Решения экзаменационного центра» (руководитель экзаменационного центра)."
+
+msgctxt "accounts.exam_chance"
+msgid "Son verilən cəhd hüquqları"
+msgstr "Недавно предоставленные попытки"
+
+msgctxt "accounts.exam_chance"
+msgid "Rəsmi qeyd: kim, kimə, hansı imtahan, hansı əsasla və sənədlə. Qeydlər silinmir və dəyişdirilmir."
+msgstr "Официальная запись: кто, кому, какой экзамен, на каком основании и по какому документу. Записи не удаляются и не изменяются."
+
+msgctxt "accounts.exam_chance"
+msgid "Hələ cəhd hüququ verilməyib."
+msgstr "Право на попытку ещё не предоставлялось."
+
+msgctxt "accounts.exam_chance"
+msgid "Cəhd hüququ ver"
+msgstr "Предоставить попытку"
+
+msgctxt "accounts.exam_chance"
+msgid "Əsası seçin, tələbəni axtarıb işarələyin, imtahanı seçin, sənədi və qeydi yazın."
+msgstr "Выберите основание, найдите и отметьте студента, выберите экзамен, укажите документ и примечание."
+
+msgctxt "accounts.exam_chance"
+msgid "1-ci addım: yuxarıdakı süzgəcdə «Cəhdin əsası»nı seçin — əsassız cəhd hüququ verilmir."
+msgstr "Шаг 1: выберите «Основание попытки» в фильтре выше — без основания право на попытку не предоставляется."
+
+msgctxt "accounts.exam_chance"
+msgid "Sənəd və qeyd"
+msgstr "Документ и примечание"
+
+#, python-format
+msgctxt "accounts.exam_chance"
+msgid "Cəhd hüququ veriləndə: cəhd limiti artır, final/midterm üçün YENİ fərdi PIN yaradılır, finalın köhnə giriş bileti sıfırlanır və imtahan «Təyin olunmuş tapşırıqlar»da yenidən görünür. Qərar əsası və sənədi ilə silinməyən qeydə yazılır və tələbənin 25%% izində görünür."
+msgstr "При предоставлении попытки: лимит попыток увеличивается, для финала/промежуточного экзамена создаётся НОВЫЙ личный PIN, старый входной билет финала сбрасывается, и экзамен снова появляется в «Назначенных заданиях». Решение с основанием и документом записывается в неудаляемый журнал и отображается в истории 25%% студента."
+
+msgctxt "accounts.exam_chance"
+msgid "Cəhd hüququ vermək üçün qərar səlahiyyətiniz yoxdur."
+msgstr "У вас нет полномочия принимать решение о предоставлении попытки."
+
+msgctxt "accounts.exam_chance"
+msgid "Köhnə qeyd (əsas yazılmayıb)"
+msgstr "Старая запись (основание не указано)"
+
+msgctxt "registrar.retake"
+msgid "Cəhdin əsasını seçin."
+msgstr "Выберите основание попытки."
+
+msgctxt "registrar.retake"
+msgid "25% müraciəti yalnız yekun (final) imtahan üçün cəhd hüququ verir."
+msgstr "Заявка 25% даёт право на попытку только на итоговом (финальном) экзамене."
+
+msgctxt "registrar.retake"
+msgid "Bütün müraciətlər, addımlar, qəbzlər, yenidən imtahan cəhdləri və nəticələr."
+msgstr "Все заявки, шаги, квитанции, повторные попытки экзамена и результаты."
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Buraxılışdan sonra İmtahan mərkəzi «Yenidən imtahan cəhdi» bölməsində «25%% müraciəti» əsası ilə cəhd hüququ verir və ya kağız imtahanın balı yazılır."
+msgstr "После допуска экзаменационный центр в разделе «Повторная попытка экзамена» предоставляет попытку по основанию «Заявка 25%%», либо вносится балл бумажного экзамена."
+
+#, python-format
+msgctxt "registrar.retake"
+msgid "Yenidən imtahan cəhdi: «%(title)s» · +%(n)s · %(reason)s · %(when)s"
+msgstr "Повторная попытка экзамена: «%(title)s» · +%(n)s · %(reason)s · %(when)s"
+
+msgctxt "exams.second_chance.notification"
+msgid "Yenidən imtahan cəhdi hüququ verildi"
+msgstr "Предоставлена повторная попытка экзамена"
+
+msgctxt "organizations.permission.label"
+msgid "İmtahan mərkəzinin qərarları (yenidən imtahan cəhdi, kollokvium pəncərəsi, sual göndərişi)"
+msgstr "Решения экзаменационного центра (повторная попытка экзамена, окно коллоквиума, отправка вопросов)"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Qrupa yenidən imtahan cəhdi"
+msgstr "Повторная попытка экзамена для группы"
+
+msgid "Tələbənin imtahanı bərpa edilsin? Pozuntu sayğacı bir vahid azalacaq."
+msgstr "Восстановить экзамен студента? Счётчик нарушений уменьшится на единицу."
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Fayl seçin və ya bura atın"
+msgstr "Выберите файл или перетащите его сюда"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Faylı çıxar"
+msgstr "Убрать файл"
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Bu fayl növü dəstəklənmir — PDF, TXT, PNG və ya JPG seçin."
+msgstr "Этот тип файла не поддерживается — выберите PDF, TXT, PNG или JPG."
+
+msgctxt "exams.template.ai_question_bank"
+msgid "Fayl çıxarıldı."
+msgstr "Файл убран."
+
+msgctxt "exams.template.bank_picker"
+msgid "Siyahı yüklənmədi"
+msgstr "Не удалось загрузить список"
+
+msgctxt "exams.template.bank_picker"
+msgid "Bağlantını yoxlayıb yenidən cəhd edin. Problem qalırsa səhifəni yeniləyin."
+msgstr "Проверьте подключение и попробуйте снова. Если проблема сохраняется, обновите страницу."
+
+msgctxt "exams.template.bank_picker"
+msgid "Yenidən cəhd et"
+msgstr "Повторить"
+
+msgctxt "exams.template.bank_picker"
+msgid "Növbəti suallar yüklənmədi."
+msgstr "Не удалось загрузить следующие вопросы."
+
+msgctxt "exams.template.bank_picker"
+msgid "Suallar əlavə olunmadı. Yenidən cəhd edin."
+msgstr "Вопросы не добавлены. Попробуйте снова."
+
+msgctxt "exams.template.bank_picker"
+msgid "Şəbəkə xətası — bağlantını yoxlayıb yenidən cəhd edin."
+msgstr "Ошибка сети — проверьте подключение и попробуйте снова."
+
+msgctxt "exams.template.bank_picker"
+msgid "Bu imtahana sual əlavə etmək icazəniz yoxdur."
+msgstr "У вас нет права добавлять вопросы в этот экзамен."
+
+msgctxt "exams.template.bank_picker"
+msgid "Bank tapılmadı və ya artıq sizə açıq deyil. Siyahını yeniləyin."
+msgstr "Банк не найден или больше вам недоступен. Обновите список."
+
+msgctxt "exams.template.bank_picker"
+msgid "Əlavə olunur…"
+msgstr "Добавление…"
+
+msgctxt "exams.template.bank_picker"
+msgid "Ləğv et"
+msgstr "Отмена"
+
+msgctxt "exams.template.bank_picker"
+msgid "Seçilmişləri imtahana əlavə et"
+msgstr "Добавить выбранные в экзамен"
+
+msgctxt "exams.template.bank_picker"
+msgid "{n} sual seçilib"
+msgstr "Выбрано вопросов: {n}"
+
+msgctxt "exams.template.bank_picker"
+msgid "Görünənlərin hamısını seç"
+msgstr "Выбрать все показанные"
+
+#, python-format
+msgctxt "exams.template.bank_picker"
+msgid "%(n)s artıq imtahanda"
+msgstr "%(n)s уже в экзамене"
+
+msgctxt "exams.template.bank_picker"
+msgid "Artıq əlavə olunub"
+msgstr "Уже добавлен"
+
+msgctxt "exams.template.bank_picker"
+msgid "çox cavablı"
+msgstr "несколько ответов"
+
+msgctxt "exams.template.bank_picker"
+msgid "Daha çox göstər"
+msgstr "Показать ещё"
+
+msgctxt "exams.view.bank.message"
+msgid "Seçilmiş suallar artıq imtahanda var — yeni sual əlavə olunmadı."
+msgstr "Выбранные вопросы уже есть в экзамене — новые вопросы не добавлены."
+
+msgctxt "exams.view.bank.message"
+msgid "{count} sual artıq imtahanda idi — ötürüldü."
+msgstr "{count} вопр. уже были в экзамене — пропущены."
+
+msgctxt "surveys.inbox"
+msgid "Baxış rejimində sorğular göstərilmir"
+msgstr "В режиме просмотра опросы не показываются"
+
+msgctxt "surveys.inbox"
+msgid "Səhifəni yeniləyin; problem qalırsa İKT dəstəyinə müraciət edin."
+msgstr "Обновите страницу; если проблема сохраняется, обратитесь в службу ИКТ-поддержки."
+
+msgctxt "surveys.inbox"
+msgid "Gözləyən sorğu yoxdur"
+msgstr "Нет ожидающих опросов"
+
+msgctxt "surveys.inbox"
+msgid "Yeni sorğu təyin olunanda burada görünəcək və bildiriş alacaqsınız."
+msgstr "Когда вам назначат новый опрос, он появится здесь, и вы получите уведомление."
+
+msgctxt "surveys.cabinet"
+msgid "Açıq sorğu yoxdur"
+msgstr "Нет открытых опросов"
+
+msgctxt "surveys.cabinet"
+msgid "Semestr sonu anonim qiymətləndirmə açılanda burada görünəcək və bildiriş alacaqsınız."
+msgstr "Когда откроется анонимная оценка в конце семестра, она появится здесь, и вы получите уведомление."
+
+msgctxt "accounts.accounting"
+msgid "Müəllimlərin jurnalda keçirdiyi dərs saatları paylanmış dərs yükünün seçilmiş dövrə düşən payı ilə müqayisədə: mühazirə, seminar, laboratoriya, fərq və status. Dövr — ay, bütün semestr və ya tarix aralığı. Filtrlər KPI-lara, cədvələ və Excel ixracına eyni tətbiq olunur; müəllimin sətrinə klik ətraflı pəncərəni açır."
+msgstr "Проведённые преподавателями часы по журналу в сравнении с долей распределённой нагрузки за выбранный период: лекции, семинары, лабораторные, разница и статус. Период — месяц, весь семестр или диапазон дат. Фильтры одинаково применяются к KPI, таблице и экспорту в Excel; щелчок по строке преподавателя открывает подробное окно."
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "göstərilir: %(shown)s / %(total)s müəllim"
+msgstr "показано: %(shown)s / %(total)s преподавателей"
+
+msgctxt "accounts.accounting"
+msgid "Müəllimin sətrinə klikləyin — aylar, fənlər və keçirilmiş dərslər ətraflı pəncərədə açılır."
+msgstr "Щёлкните по строке преподавателя — месяцы, дисциплины и проведённые занятия откроются в подробном окне."
+
+msgctxt "accounts.accounting"
+msgid "Aralıq bu günü əhatə edir — fakt aralığın sonunadək artacaq, «Plandan az» statusu ilkin göstəricidir."
+msgstr "Диапазон включает сегодняшний день — факт будет расти до его конца, статус «Меньше плана» предварительный."
+
+msgctxt "accounts.accounting"
+msgid "Aralığın planı: hər ayın plan payı həmin ayın aralığa düşən iş günləri qədər götürülür (ayın payı × aralıqdakı iş günləri ÷ ayın iş günləri). Tam düşən ay ay rejimi ilə, bütün semestr isə semestr planı ilə eyni rəqəmi verir."
+msgstr "План диапазона: плановая доля каждого месяца берётся пропорционально его рабочим дням внутри диапазона (доля месяца × рабочие дни в диапазоне ÷ рабочие дни месяца). Полностью вошедший месяц даёт ту же цифру, что и режим месяца, весь семестр — план семестра."
+
+msgctxt "accounts.accounting"
+msgid "Tarix aralığı — aralığın planı aylıq paylardan götürülür: qismən düşən ayın payı aralığa düşən iş günləri qədər kəsilir; fakt aralığın içində keçirilmiş dərslərdir. Aralıq seçilmiş semestrin hüdudlarında olmalıdır."
+msgstr "Диапазон дат — план диапазона берётся из месячных долей: доля частично вошедшего месяца урезается до его рабочих дней в диапазоне; факт — занятия, проведённые внутри диапазона. Диапазон должен быть в пределах выбранного семестра."
+
+msgctxt "accounts.accounting"
+msgid "Tarix aralığı…"
+msgstr "Диапазон дат…"
+
+msgctxt "accounts.accounting"
+msgid "Tarix aralığı"
+msgstr "Диапазон дат"
+
+msgctxt "accounts.accounting"
+msgid "Başlanğıc tarixi"
+msgstr "Дата начала"
+
+msgctxt "accounts.accounting"
+msgid "Son tarix"
+msgstr "Дата окончания"
+
+msgctxt "accounts.accounting"
+msgid "-dan"
+msgstr "(с)"
+
+msgctxt "accounts.accounting"
+msgid "-dək"
+msgstr "(по)"
+
+msgctxt "accounts.accounting"
+msgid "Başlanğıc tarixi son tarixdən sonra ola bilməz."
+msgstr "Дата начала не может быть позже даты окончания."
+
+msgctxt "accounts.accounting"
+msgid "Tarix seçilmiş semestrin hüdudlarında olmalıdır."
+msgstr "Дата должна быть в пределах выбранного семестра."
+
+msgctxt "accounts.accounting"
+msgid "Tarix tanınmadı — defolt aralıq göstərilir (semestrin başlanğıcından bu günədək)."
+msgstr "Дата не распознана — показан диапазон по умолчанию (с начала семестра до сегодня)."
+
+msgctxt "accounts.accounting"
+msgid "Başlanğıc tarixi son tarixdən sonra idi — tarixlərin yeri dəyişdirildi."
+msgstr "Дата начала была позже даты окончания — даты поменяны местами."
+
+msgctxt "accounts.accounting"
+msgid "Seçilmiş aralıq bu semestrə düşmür — defolt aralıq göstərilir ({start} – {end})."
+msgstr "Выбранный диапазон не входит в этот семестр — показан диапазон по умолчанию ({start} – {end})."
+
+msgctxt "accounts.accounting"
+msgid "Aralıq seçilmiş semestrin hüdudlarına ({start} – {end}) uyğunlaşdırıldı."
+msgstr "Диапазон приведён к границам выбранного семестра ({start} – {end})."
+
+msgctxt "accounts.accounting"
+msgid "{period} üçün paylanmış yükün payı"
+msgstr "доля распределённой нагрузки за {period}"
+
+msgctxt "accounts.accounting"
+msgid "fakt ÷ plan · fərq {diff} saat"
+msgstr "факт ÷ план · разница {diff} ч"
+
+msgctxt "accounts.accounting"
+msgid "müəllim · fakt > plan + {band}"
+msgstr "преподавателей · факт > план + {band}"
+
+msgctxt "accounts.accounting"
+msgid "müəllim · fakt < plan − {band}"
+msgstr "преподавателей · факт < план − {band}"
+
+msgctxt "accounts.accounting"
+msgid "Statusların izahı"
+msgstr "Пояснение статусов"
+
+msgctxt "accounts.accounting"
+msgid "fakt planın ±{band} hüdudunda"
+msgstr "факт в пределах ±{band} от плана"
+
+msgctxt "accounts.accounting"
+msgid "fakt planın {share}-indən az"
+msgstr "факт меньше {share} плана"
+
+msgctxt "accounts.accounting"
+msgid "fakt planın {share}-indən çox"
+msgstr "факт больше {share} плана"
+
+msgctxt "accounts.accounting"
+msgid "dərs keçilib, amma bu dövr üçün plan yoxdur"
+msgstr "занятия проведены, но плана на этот период нет"
+
+msgctxt "accounts.accounting"
+msgid "nə plan, nə keçirilmiş dərs"
+msgstr "нет ни плана, ни проведённых занятий"
+
+msgctxt "accounts.accounting"
+msgid "Müəllimlər cədvəli"
+msgstr "Таблица преподавателей"
+
+msgctxt "accounts.accounting"
+msgid "Filtrə uyğun müəllim yoxdur"
+msgstr "Нет преподавателей, соответствующих фильтру"
+
+msgctxt "accounts.accounting"
+msgid "Fakültə, kafedra, kənarlaşma və ya axtarış filtrini dəyişin. Dövr (ay və ya aralıq) saxlanılır."
+msgstr "Измените фильтр факультета, кафедры, отклонения или поиска. Период (месяц или диапазон) сохраняется."
+
+msgctxt "accounts.accounting"
+msgid "Filtrləri təmizlə"
+msgstr "Сбросить фильтры"
+
+msgctxt "accounts.accounting"
+msgid "Dövr: {period}"
+msgstr "Период: {period}"
+
+msgctxt "accounts.accounting"
+msgid "Yüklənir…"
+msgstr "Загрузка…"
+
+msgctxt "accounts.accounting"
+msgid "Məlumatı yükləmək alınmadı. Bir az sonra yenidən cəhd edin."
+msgstr "Не удалось загрузить данные. Повторите попытку чуть позже."
+
+msgctxt "accounts.accounting"
+msgid "Müəllim tapılmadı və ya sizin əhatənizdən kənardadır."
+msgstr "Преподаватель не найден или вне вашей зоны доступа."
+
+msgctxt "accounts.accounting"
+msgid "Bu məlumata baxmaq üçün icazəniz yoxdur."
+msgstr "У вас нет прав на просмотр этих данных."
+
+msgctxt "accounts.accounting"
+msgid "Növlər üzrə"
+msgstr "По видам"
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "Növlər üzrə — %(period)s"
+msgstr "По видам — %(period)s"
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "Növlər üzrə plan və keçirilmiş saat — %(period)s"
+msgstr "План и проведённые часы по видам — %(period)s"
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "Aylar üzrə — %(semester)s"
+msgstr "По месяцам — %(semester)s"
+
+msgctxt "accounts.accounting"
+msgid "Aralığın ayları"
+msgstr "Месяцы диапазона"
+
+msgctxt "accounts.accounting"
+msgid "Fənn və qrup üzrə"
+msgstr "По дисциплинам и группам"
+
+msgctxt "accounts.accounting"
+msgid "Bu dövrdə ay yoxdur."
+msgstr "В этом периоде нет месяцев."
+
+msgctxt "accounts.accounting"
+msgid "Qismən ayın planı aralığa düşən iş günləri qədər götürülür."
+msgstr "План неполного месяца берётся пропорционально его рабочим дням в диапазоне."
+
+#, python-format
+msgctxt "accounts.accounting"
+msgid "Daha çox göstər · %(count)s qalıb"
+msgstr "Показать ещё · осталось %(count)s"
+
+msgctxt "accounts.accounting"
+msgid "Tam səhifədə aç"
+msgstr "Открыть на всю страницу"
+
+msgctxt "accounts.accounting"
+msgid "Excel-ə ixrac (bu müəllim)"
+msgstr "Экспорт в Excel (этот преподаватель)"
+
+msgctxt "profile.sidebar"
+msgid "Əmək müqavilələri"
+msgstr "Трудовые договоры"
+
+msgctxt "profile.sidebar"
+msgid "Müqavilələrim"
+msgstr "Мои договоры"
+
+msgctxt "organizations.permission.label"
+msgid "Əmək müqavilələrinə baxmaq (siyahı, fayl, tarixçə, ixrac)"
+msgstr "Просмотр трудовых договоров (список, файл, история, экспорт)"
+
+msgctxt "organizations.permission.label"
+msgid "Əmək müqavilələrini idarə etmək (əlavə, yeniləmə, göndərmə, xitam; bitmə xatırlatmaları)"
+msgstr "Управление трудовыми договорами (добавление, продление, отправка, расторжение; напоминания об окончании)"
+
+msgctxt "core.runtime_settings"
+msgid "Əmək müqavilələri"
+msgstr "Трудовые договоры"
+
+msgctxt "core.runtime_settings"
+msgid "Bitmə xatırlatmalarının günləri"
+msgstr "Дни напоминаний об окончании"
+
+msgctxt "core.runtime_settings"
+msgid "Müqavilənin bitməsinə bu qədər gün qalanda işçiyə və Kadrlar şöbəsinə (HR) bildiriş gedir — hər hədd bir dəfə. Müddəti bitən müqavilə üçün əlavə olaraq bir dəfə «müddəti bitdi» bildirişi göndərilir. Yenilənmiş və ya xitam verilmiş müqavilələrə xatırlatma getmir."
+msgstr "Когда до окончания договора остаётся столько дней, сотрудник и отдел кадров (HR) получают уведомление — один раз на каждый порог. Для истёкшего договора дополнительно один раз отправляется уведомление «срок истёк». Продлённые и расторгнутые договоры напоминаний не получают."
+
+msgctxt "core.runtime_settings"
+msgid "«Bitmək üzrədir» pəncərəsi"
+msgstr "Окно «скоро истекает»"
+
+msgctxt "core.runtime_settings"
+msgid "HR siyahısında müqavilə bitməsinə bu qədər gün (və ya daha az) qalanda «Bitmək üzrədir» kimi işarələnir və yuxarıdakı sayğacda göstərilir."
+msgstr "В списке HR договор отмечается как «Скоро истекает» и учитывается в счётчике сверху, когда до его окончания остаётся столько дней (или меньше)."
+
+msgctxt "core.runtime_settings"
+msgid "Müqavilə bildirişləri e-poçtla da getsin"
+msgstr "Отправлять уведомления о договорах также по e-mail"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılıbsa bitmə xatırlatması, «müqavilə göndərildi» və «işçi təsdiqlədi» bildirişləri kabinetdən əlavə istifadəçinin e-poçtuna da gedir. Söndürüləndə yalnız kabinet bildirişi qalır."
+msgstr "Если включено, напоминания об окончании и уведомления «договор отправлен» и «сотрудник подтвердил» приходят не только в кабинет, но и на e-mail пользователя. Если выключено, остаётся только уведомление в кабинете."
+
+msgctxt "hr_contracts.email"
+msgid "Hörmətli"
+msgstr "Уважаемый(ая)"
+
+msgctxt "hr_contracts.email"
+msgid "Kabinetə keç"
+msgstr "Перейти в кабинет"
+
+msgctxt "hr_contracts"
+msgid "Müddətli"
+msgstr "Срочный"
+
+msgctxt "hr_contracts"
+msgid "Müddətsiz"
+msgstr "Бессрочный"
+
+msgctxt "hr_contracts"
+msgid "Əvəzçilik"
+msgstr "Совместительство"
+
+msgctxt "hr_contracts"
+msgid "Saathesabı"
+msgstr "Почасовой"
+
+msgctxt "hr_contracts"
+msgid "Digər"
+msgstr "Другое"
+
+msgctxt "hr_contracts"
+msgid "Qaralama"
+msgstr "Черновик"
+
+msgctxt "hr_contracts"
+msgid "Qüvvədədir"
+msgstr "Действует"
+
+msgctxt "hr_contracts"
+msgid "Xitam verilib"
+msgstr "Расторгнут"
+
+msgctxt "hr_contracts"
+msgid "Yenilənib"
+msgstr "Продлён"
+
+msgctxt "hr_contracts"
+msgid "Bitmək üzrədir"
+msgstr "Скоро истекает"
+
+msgctxt "hr_contracts"
+msgid "Müddəti bitib"
+msgstr "Срок истёк"
+
+msgctxt "hr_contracts"
+msgid "Qeydə alındı"
+msgstr "Зарегистрирован"
+
+msgctxt "hr_contracts"
+msgid "Redaktə olundu"
+msgstr "Изменён"
+
+msgctxt "hr_contracts"
+msgid "Qüvvəyə mindi"
+msgstr "Вступил в силу"
+
+msgctxt "hr_contracts"
+msgid "Fayl yeniləndi"
+msgstr "Файл заменён"
+
+msgctxt "hr_contracts"
+msgid "İşçiyə göndərildi"
+msgstr "Отправлен сотруднику"
+
+msgctxt "hr_contracts"
+msgid "İşçi təsdiqlədi"
+msgstr "Сотрудник подтвердил"
+
+msgctxt "hr_contracts"
+msgid "Bitmə xatırlatması göndərildi"
+msgstr "Отправлено напоминание об окончании"
+
+msgctxt "hr_contracts"
+msgid "Müddəti bitdi bildirişi göndərildi"
+msgstr "Отправлено уведомление об истечении срока"
+
+msgctxt "hr_contracts"
+msgid "Xitam verildi"
+msgstr "Договор расторгнут"
+
+msgctxt "hr_contracts"
+msgid "Yeni müqavilə ilə yeniləndi"
+msgstr "Продлён новым договором"
+
+msgctxt "hr_contracts"
+msgid "Bu bölmə Kadrlar şöbəsi (HR) üçündür — əmək müqavilələrinə baxmaq icazəniz yoxdur."
+msgstr "Этот раздел предназначен для отдела кадров (HR) — у вас нет права просматривать трудовые договоры."
+
+msgctxt "hr_contracts"
+msgid "Əməl yerinə yetirilmədi — icazənizi yoxlayın və ya səhifəni yeniləyin."
+msgstr "Действие не выполнено — проверьте права доступа или обновите страницу."
+
+msgctxt "hr_contracts"
+msgid "Əməl yerinə yetirilmədi — səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Действие не выполнено — обновите страницу и попробуйте ещё раз."
+
+msgctxt "hr_contracts"
+msgid "Bütün əməkdaşların (müəllim, inzibati və texniki heyət) əmək müqavilələri: müddət, sənəd, göndərilmə və işçinin təsdiqi. Bitməsinə az qalan müqavilələr üçün HR və işçiyə avtomatik bildiriş gedir."
+msgstr "Трудовые договоры всех сотрудников (преподаватели, административный и технический персонал): срок, документ, отправка и подтверждение сотрудника. О скором окончании договора HR и сотрудник уведомляются автоматически."
+
+msgctxt "hr_contracts"
+msgid "Baxış rejimi: dəyişiklik etmək və ixrac bağlıdır."
+msgstr "Режим просмотра: изменения и экспорт недоступны."
+
+#, python-format
+msgctxt "hr_contracts"
+msgid "Nəticə: %(n)s"
+msgstr "Результатов: %(n)s"
+
+msgctxt "hr_contracts"
+msgid "İşçi"
+msgstr "Сотрудник"
+
+msgctxt "hr_contracts"
+msgid "Müqavilə"
+msgstr "Договор"
+
+msgctxt "hr_contracts"
+msgid "Müddət"
+msgstr "Срок"
+
+msgctxt "hr_contracts"
+msgid "Qalan"
+msgstr "Осталось"
+
+msgctxt "hr_contracts"
+msgid "Vəziyyət"
+msgstr "Состояние"
+
+msgctxt "hr_contracts"
+msgid "Göndərilmə"
+msgstr "Отправка"
+
+msgctxt "hr_contracts"
+msgid "Əməllər"
+msgstr "Действия"
+
+msgctxt "hr_contracts"
+msgid "Səhifələmə"
+msgstr "Пагинация"
+
+msgctxt "hr_contracts"
+msgid "Əvvəlki səhifə"
+msgstr "Предыдущая страница"
+
+msgctxt "hr_contracts"
+msgid "Növbəti səhifə"
+msgstr "Следующая страница"
+
+msgctxt "hr_contracts"
+msgid "Bu filtrə uyğun müqavilə yoxdur."
+msgstr "Нет договоров по этому фильтру."
+
+msgctxt "hr_contracts"
+msgid "«Müqavilə əlavə et» düyməsi ilə ilk müqaviləni qeydə alın."
+msgstr "Зарегистрируйте первый договор кнопкой «Добавить договор»."
+
+msgctxt "hr_contracts"
+msgid "Müqavilə əlavə et"
+msgstr "Добавить договор"
+
+msgctxt "hr_contracts"
+msgid "Excel ixracı"
+msgstr "Экспорт в Excel"
+
+msgctxt "hr_contracts"
+msgid "ştat"
+msgstr "ставка"
+
+msgctxt "hr_contracts"
+msgid "saat/həftə"
+msgstr "ч/нед."
+
+msgctxt "hr_contracts"
+msgid "Fayl"
+msgstr "Файл"
+
+msgctxt "hr_contracts"
+msgid "müddətsiz"
+msgstr "бессрочно"
+
+msgctxt "hr_contracts"
+msgid "Sınaq:"
+msgstr "Испытательный срок:"
+
+#, python-format
+msgctxt "hr_contracts"
+msgid "%(n)s gün keçib"
+msgstr "просрочен на %(n)s дн."
+
+msgctxt "hr_contracts"
+msgid "bu gün bitir"
+msgstr "истекает сегодня"
+
+#, python-format
+msgctxt "hr_contracts"
+msgid "%(n)s gün"
+msgstr "%(n)s дн."
+
+msgctxt "hr_contracts"
+msgid "Yeni:"
+msgstr "Новый:"
+
+msgctxt "hr_contracts"
+msgid "Təsdiqlənib"
+msgstr "Подтверждён"
+
+msgctxt "hr_contracts"
+msgid "Təsdiq gözləyir"
+msgstr "Ожидает подтверждения"
+
+msgctxt "hr_contracts"
+msgid "Göndərilib:"
+msgstr "Отправлен:"
+
+msgctxt "hr_contracts"
+msgid "Göndərilməyib"
+msgstr "Не отправлен"
+
+msgctxt "hr_contracts"
+msgid "Yenidən göndərildi"
+msgstr "Отправлен повторно"
+
+msgctxt "hr_contracts"
+msgid "Müqavilə göndərildi"
+msgstr "Договор отправлен"
+
+msgctxt "hr_contracts"
+msgid "Redaktə"
+msgstr "Изменить"
+
+msgctxt "hr_contracts"
+msgid "Yenilə"
+msgstr "Продлить"
+
+msgctxt "hr_contracts"
+msgid "Tarixçə"
+msgstr "История"
+
+msgctxt "hr_contracts"
+msgid "Xitam"
+msgstr "Расторгнуть"
+
+msgctxt "hr_contracts"
+msgid "Yadda saxla"
+msgstr "Сохранить"
+
+msgctxt "hr_contracts"
+msgid "Müqavilə işçiyə göndərildi"
+msgstr "Договор отправлен сотруднику"
+
+msgctxt "hr_contracts"
+msgid "Müqaviləni işçinin e-poçtuna göndərdiyinizi qeyd edin — işçiyə sistemə daxil olub təsdiqləməsi üçün bildiriş gedəcək."
+msgstr "Отметьте, что вы отправили договор на e-mail сотрудника, — он получит уведомление войти в систему и подтвердить его."
+
+msgctxt "hr_contracts"
+msgid "Qeyd et və bildir"
+msgstr "Отметить и уведомить"
+
+msgctxt "hr_contracts"
+msgid "Müqaviləyə xitam ver"
+msgstr "Расторгнуть договор"
+
+msgctxt "hr_contracts"
+msgid "Xitam geri alınmır: müqavilə bağlanır, xatırlatmalar dayanır, səbəb tarixçədə qalır."
+msgstr "Расторжение необратимо: договор закрывается, напоминания прекращаются, причина остаётся в истории."
+
+msgctxt "hr_contracts"
+msgid "Xitam ver"
+msgstr "Расторгнуть"
+
+msgctxt "hr_contracts"
+msgid "Xitamın səbəbi"
+msgstr "Причина расторжения"
+
+#, python-format
+msgctxt "hr_contracts"
+msgid "Səbəb ən azı %(n)s simvol olmalıdır."
+msgstr "Причина должна содержать не менее %(n)s символов."
+
+msgctxt "hr_contracts"
+msgid "İşçi bildirişdə belə mətn görəcək: «Yeni əmək müqaviləniz e-poçtunuza göndərilib. Sistemə daxil olub tanış olduğunuzu təsdiqləyin.»"
+msgstr "Сотрудник увидит: «Ваш новый трудовой договор отправлен на ваш e-mail. Войдите в систему и подтвердите, что ознакомились с ним.»"
+
+msgctxt "hr_contracts"
+msgid "İşçiyə qeyd"
+msgstr "Примечание для сотрудника"
+
+msgctxt "hr_contracts"
+msgid "(istəyə bağlı)"
+msgstr "(необязательно)"
+
+msgctxt "hr_contracts"
+msgid "Məs.: yeni müqavilə 1 noyabrdan qüvvəyə minir."
+msgstr "Напр.: новый договор вступает в силу с 1 ноября."
+
+msgctxt "hr_contracts"
+msgid "Xitam tarixi"
+msgstr "Дата расторжения"
+
+msgctxt "hr_contracts"
+msgid "Yeni müqavilə əvvəlkinin davamı kimi qeydə alınır: köhnə müqavilə «Yenilənib» statusuna keçir və onun üçün xatırlatmalar dayanır."
+msgstr "Новый договор регистрируется как продолжение предыдущего: старый получает статус «Продлён», напоминания по нему прекращаются."
+
+msgctxt "hr_contracts"
+msgid "Ad, soyad və ya istifadəçi adı"
+msgstr "Имя, фамилия или логин"
+
+msgctxt "hr_contracts"
+msgid "Yalnız aktiv əməkdaşlar (müəllim, inzibati və texniki heyət) — tələbələr siyahıda yoxdur."
+msgstr "Только действующие сотрудники (преподаватели, административный и технический персонал) — студентов в списке нет."
+
+msgctxt "hr_contracts"
+msgid "Müqavilə №"
+msgstr "№ договора"
+
+msgctxt "hr_contracts"
+msgid "Növ"
+msgstr "Вид"
+
+msgctxt "hr_contracts"
+msgid "Vəzifə"
+msgstr "Должность"
+
+msgctxt "hr_contracts"
+msgid "Məs.: baş müəllim, mühasib, laborant"
+msgstr "Напр.: старший преподаватель, бухгалтер, лаборант"
+
+msgctxt "hr_contracts"
+msgid "Bölmə"
+msgstr "Подразделение"
+
+msgctxt "hr_contracts"
+msgid "Axtar…"
+msgstr "Поиск…"
+
+msgctxt "hr_contracts"
+msgid "Uyğun bölmə yoxdur"
+msgstr "Нет подходящего подразделения"
+
+msgctxt "hr_contracts"
+msgid "— İşçinin əsas bölməsi —"
+msgstr "— Основное подразделение сотрудника —"
+
+msgctxt "hr_contracts"
+msgid "Boş qalsa işçinin əsas üzvlüyündəki bölmə götürülür. Xatırlatmalar bu bölməni əhatə edən HR əməkdaşlarına gedir."
+msgstr "Если оставить пустым, берётся подразделение основного членства сотрудника. Напоминания получают сотрудники HR, чья зона охватывает это подразделение."
+
+msgctxt "hr_contracts"
+msgid "Başlama tarixi"
+msgstr "Дата начала"
+
+msgctxt "hr_contracts"
+msgid "Bitmə tarixi"
+msgstr "Дата окончания"
+
+msgctxt "hr_contracts"
+msgid "Müddətsiz müqavilənin bitmə tarixi olmur."
+msgstr "У бессрочного договора нет даты окончания."
+
+msgctxt "hr_contracts"
+msgid "Sınaq müddəti bitir"
+msgstr "Окончание испытательного срока"
+
+msgctxt "hr_contracts"
+msgid "Həftəlik saat"
+msgstr "Часов в неделю"
+
+msgctxt "hr_contracts"
+msgid "Ştat vahidi"
+msgstr "Ставка"
+
+msgctxt "hr_contracts"
+msgid "Qaralama (hələ qüvvədə deyil)"
+msgstr "Черновик (ещё не действует)"
+
+msgctxt "hr_contracts"
+msgid "Müqavilənin faylı"
+msgstr "Файл договора"
+
+msgctxt "hr_contracts"
+msgid "PDF, JPG və ya PNG · ən çox 10 MB"
+msgstr "PDF, JPG или PNG · не более 10 МБ"
+
+msgctxt "hr_contracts"
+msgid "Cari fayl:"
+msgstr "Текущий файл:"
+
+msgctxt "hr_contracts"
+msgid "yeni fayl seçsəniz əvəz olunacaq"
+msgstr "будет заменён, если выбрать новый файл"
+
+msgctxt "hr_contracts"
+msgid "Qeyd"
+msgstr "Примечание"
+
+msgctxt "hr_contracts"
+msgid "Müqaviləni redaktə et"
+msgstr "Изменить договор"
+
+msgctxt "hr_contracts"
+msgid "Müqaviləni yenilə"
+msgstr "Продлить договор"
+
+msgctxt "hr_contracts"
+msgid "İşçini seçin."
+msgstr "Выберите сотрудника."
+
+msgctxt "hr_contracts"
+msgid "Müqavilənin tarixçəsi"
+msgstr "История договора"
+
+msgctxt "hr_contracts"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "hr_contracts"
+msgid "Yüklənir…"
+msgstr "Загрузка…"
+
+#, python-format
+msgctxt "hr_contracts"
+msgid "%(n)s günlük hədd"
+msgstr "порог %(n)s дн."
+
+msgctxt "hr_contracts"
+msgid "sistem"
+msgstr "система"
+
+msgctxt "hr_contracts"
+msgid "Hadisə yoxdur."
+msgstr "Событий нет."
+
+msgctxt "hr_contracts"
+msgid "Kadrlar şöbəsində qeydə alınmış əmək müqavilələriniz: müddət, sənəd və təsdiq."
+msgstr "Ваши трудовые договоры, зарегистрированные отделом кадров: срок, документ и подтверждение."
+
+msgctxt "hr_contracts"
+msgid "Yeni müqaviləniz e-poçtunuza göndərilib. Tanış olub təsdiqləyin"
+msgstr "Ваш новый договор отправлен на ваш e-mail. Ознакомьтесь и подтвердите"
+
+msgctxt "hr_contracts"
+msgid "Müqaviləyə sistemdə bax"
+msgstr "Открыть договор в системе"
+
+msgctxt "hr_contracts"
+msgid "Baxış rejimində təsdiq vermək olmaz."
+msgstr "В режиме просмотра подтверждать нельзя."
+
+msgctxt "hr_contracts"
+msgid "Tanış oldum, təsdiqləyirəm"
+msgstr "Ознакомлен(а), подтверждаю"
+
+msgctxt "hr_contracts"
+msgid "Təsdiq geri alınmır və Kadrlar şöbəsinə bildirilir."
+msgstr "Подтверждение нельзя отозвать, о нём сообщается в отдел кадров."
+
+msgctxt "hr_contracts"
+msgid "Cari müqavilə"
+msgstr "Текущий договор"
+
+msgctxt "hr_contracts"
+msgid "gün əvvəl bitib"
+msgstr "дн. назад истёк"
+
+msgctxt "hr_contracts"
+msgid "gün qalıb"
+msgstr "дн. осталось"
+
+msgctxt "hr_contracts"
+msgid "Sınaq müddəti"
+msgstr "Испытательный срок"
+
+msgctxt "hr_contracts"
+msgid "Təsdiqləmisiniz"
+msgstr "Вы подтвердили"
+
+msgctxt "hr_contracts"
+msgid "Müqaviləni aç"
+msgstr "Открыть договор"
+
+msgctxt "hr_contracts"
+msgid "Digər müqavilələr"
+msgstr "Другие договоры"
+
+msgctxt "hr_contracts"
+msgid "Sizin üçün qeydə alınmış əmək müqaviləsi yoxdur."
+msgstr "Для вас не зарегистрировано трудовых договоров."
+
+msgctxt "hr_contracts"
+msgid "Müqaviləniz sistemə əlavə olunanda burada görünəcək."
+msgstr "Договор появится здесь после добавления в систему."
+
+msgctxt "hr_contracts"
+msgid "Əmək müqaviləsi"
+msgstr "Трудовой договор"
+
+msgctxt "hr_contracts"
+msgid "Qeydə alınmış müqavilə yoxdur."
+msgstr "Договоры не зарегистрированы."
+
+msgctxt "hr_contracts"
+msgid "Bütün müqavilələr"
+msgstr "Все договоры"
+
+msgctxt "hr_contracts"
+msgid "Qüvvədə"
+msgstr "Действуют"
+
+msgctxt "hr_contracts"
+msgid "{n} gün ərzində bitir"
+msgstr "Истекают в течение {n} дн."
+
+msgctxt "hr_contracts"
+msgid "30 gün ərzində bitir"
+msgstr "Истекают в течение 30 дн."
+
+msgctxt "hr_contracts"
+msgid "60 gün ərzində bitir"
+msgstr "Истекают в течение 60 дн."
+
+msgctxt "hr_contracts"
+msgid "90 gün ərzində bitir"
+msgstr "Истекают в течение 90 дн."
+
+msgctxt "hr_contracts"
+msgid "Axtarış"
+msgstr "Поиск"
+
+msgctxt "hr_contracts"
+msgid "Ad, soyad, vəzifə və ya müqavilə №"
+msgstr "Имя, фамилия, должность или № договора"
+
+msgctxt "hr_contracts"
+msgid "Bütün bölmələr"
+msgstr "Все подразделения"
+
+msgctxt "hr_contracts"
+msgid "Bütün növlər"
+msgstr "Все виды"
+
+msgctxt "hr_contracts"
+msgid "Bütün vəziyyətlər"
+msgstr "Все состояния"
+
+msgctxt "hr_contracts"
+msgid "Bitmə müddəti"
+msgstr "Окончание"
+
+msgctxt "hr_contracts"
+msgid "İstənilən"
+msgstr "Любой"
+
+msgctxt "hr_contracts"
+msgid "İstifadəçi adı"
+msgstr "Логин"
+
+msgctxt "hr_contracts"
+msgid "Başlama"
+msgstr "Начало"
+
+msgctxt "hr_contracts"
+msgid "Bitmə"
+msgstr "Окончание"
+
+msgctxt "hr_contracts"
+msgid "Qalan gün"
+msgstr "Осталось дней"
+
+msgctxt "hr_contracts"
+msgid "Ştat"
+msgstr "Ставка"
+
+msgctxt "hr_contracts"
+msgid "Göndərilib"
+msgstr "Отправлен"
+
+msgctxt "hr_contracts"
+msgid "Müqavilələr"
+msgstr "Договоры"
+
+msgctxt "hr_contracts"
+msgid "Əmək müqavilələri ixracı"
+msgstr "Экспорт трудовых договоров"
+
+msgctxt "hr_contracts"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "Нет контекста активной организации."
+
+msgctxt "hr_contracts"
+msgid "Bu əməl üçün icazəniz yoxdur."
+msgstr "У вас нет права на это действие."
+
+msgctxt "hr_contracts"
+msgid "Müqavilə tapılmadı."
+msgstr "Договор не найден."
+
+msgctxt "hr_contracts"
+msgid "Baxış rejimində dəyişiklik etmək olmaz."
+msgstr "В режиме просмотра изменения запрещены."
+
+msgctxt "hr_contracts"
+msgid "Baxış rejimində ixrac bağlıdır."
+msgstr "В режиме просмотра экспорт недоступен."
+
+msgctxt "hr_contracts"
+msgid "Bu sahə məcburidir."
+msgstr "Это поле обязательно."
+
+msgctxt "hr_contracts"
+msgid "Tarix düzgün deyil."
+msgstr "Неверная дата."
+
+msgctxt "hr_contracts"
+msgid "Rəqəm düzgün deyil."
+msgstr "Неверное число."
+
+msgctxt "hr_contracts"
+msgid "Dəyər 0-dan böyük və {max}-dən kiçik olmalıdır."
+msgstr "Значение должно быть больше 0 и не превышать {max}."
+
+msgctxt "hr_contracts"
+msgid "Bölmə tapılmadı."
+msgstr "Подразделение не найдено."
+
+msgctxt "hr_contracts"
+msgid "Müqavilə nömrəsini yazın."
+msgstr "Укажите номер договора."
+
+msgctxt "hr_contracts"
+msgid "Müqavilə növünü seçin."
+msgstr "Выберите вид договора."
+
+msgctxt "hr_contracts"
+msgid "Müddətli müqavilədə bitmə tarixi məcburidir."
+msgstr "Для срочного договора дата окончания обязательна."
+
+msgctxt "hr_contracts"
+msgid "Bitmə tarixi başlama tarixindən əvvəl ola bilməz."
+msgstr "Дата окончания не может быть раньше даты начала."
+
+msgctxt "hr_contracts"
+msgid "Sınaq müddəti müqavilə müddətinin içində olmalıdır."
+msgstr "Испытательный срок должен быть в пределах срока договора."
+
+msgctxt "hr_contracts"
+msgid "Öz əhatənizdəki bölməni seçin."
+msgstr "Выберите подразделение в пределах вашей зоны."
+
+msgctxt "hr_contracts"
+msgid "Bu bölmə sizin əhatənizdən kənardadır."
+msgstr "Это подразделение вне вашей зоны."
+
+msgctxt "hr_contracts"
+msgid "Bu nömrəli müqavilə artıq qeydə alınıb."
+msgstr "Договор с таким номером уже зарегистрирован."
+
+msgctxt "hr_contracts"
+msgid "Seçilmiş şəxs bu təşkilatın aktiv əməkdaşı deyil (tələbəyə əmək müqaviləsi bağlanmır)."
+msgstr "Выбранное лицо не является действующим сотрудником этой организации (со студентом трудовой договор не заключается)."
+
+msgctxt "hr_contracts"
+msgid "Bu müqavilə artıq yenilənib və ya xitam verilib."
+msgstr "Этот договор уже продлён или расторгнут."
+
+msgctxt "hr_contracts"
+msgid "Yeni müqavilə əvvəlkindən sonra başlamalıdır."
+msgstr "Новый договор должен начинаться после предыдущего."
+
+msgctxt "hr_contracts"
+msgid "Xitam verilmiş və ya yenilənmiş müqavilə redaktə olunmur."
+msgstr "Расторгнутый или продлённый договор нельзя изменить."
+
+msgctxt "hr_contracts"
+msgid "Bu müqavilə artıq bağlanıb."
+msgstr "Этот договор уже закрыт."
+
+msgctxt "hr_contracts"
+msgid "İşçi bu müqaviləni artıq təsdiqləyib."
+msgstr "Сотрудник уже подтвердил этот договор."
+
+msgctxt "hr_contracts"
+msgid "Xitamın səbəbini yazın (ən azı {n} simvol)."
+msgstr "Укажите причину расторжения (не менее {n} символов)."
+
+msgctxt "hr_contracts"
+msgid "Xitam tarixi müqavilənin başlanğıcından əvvəl ola bilməz."
+msgstr "Дата расторжения не может быть раньше начала договора."
+
+msgctxt "hr_contracts"
+msgid "Siz bu müqaviləni artıq təsdiqləmisiniz."
+msgstr "Вы уже подтвердили этот договор."
+
+msgctxt "hr_contracts"
+msgid "Müqavilə qeydə alındı."
+msgstr "Договор зарегистрирован."
+
+msgctxt "hr_contracts"
+msgid "Dəyişikliklər yadda saxlanıldı."
+msgstr "Изменения сохранены."
+
+msgctxt "hr_contracts"
+msgid "İşçiyə bildiriş göndərildi."
+msgstr "Сотруднику отправлено уведомление."
+
+msgctxt "hr_contracts"
+msgid "Müqaviləyə xitam verildi."
+msgstr "Договор расторгнут."
+
+msgctxt "hr_contracts"
+msgid "Təşəkkürlər — təsdiqiniz qeydə alındı."
+msgstr "Спасибо — ваше подтверждение зарегистрировано."
+
+msgctxt "hr_contracts"
+msgid "Ləğv edilib"
+msgstr "Аннулирован"
+
+msgctxt "hr_contracts"
+msgid "Dəyişdi — yenidən göndərilməlidir"
+msgstr "Изменён — нужно отправить повторно"
+
+msgctxt "hr_contracts"
+msgid "Qaralama ləğv edildi"
+msgstr "Черновик аннулирован"
+
+msgctxt "hr_contracts"
+msgid "Qaralama ləğv edildi."
+msgstr "Черновик аннулирован."
+
+msgctxt "hr_contracts"
+msgid "Qaralamanı ləğv et"
+msgstr "Аннулировать черновик"
+
+msgctxt "hr_contracts"
+msgid "Ləğv et"
+msgstr "Аннулировать"
+
+msgctxt "hr_contracts"
+msgid "Qaralama işçiyə heç vaxt göstərilmir; sətir və tarixçə saxlanılır, nömrəni yenidən istifadə etmək olar."
+msgstr "Черновик никогда не показывается сотруднику; запись и история сохраняются, номер можно использовать снова."
+
+msgctxt "hr_contracts"
+msgid "Qaralama «göndərildi» qeyd olunanda avtomatik qüvvəyə minir."
+msgstr "Черновик автоматически вступает в силу, когда отмечается как отправленный."
+
+msgctxt "hr_contracts"
+msgid "Qaralamaya xitam verilmir — «Qaralamanı ləğv et» əməlindən istifadə edin."
+msgstr "Черновик нельзя расторгнуть — используйте «Аннулировать черновик»."
+
+msgctxt "hr_contracts"
+msgid "Yalnız qaralama ləğv edilə bilər."
+msgstr "Аннулировать можно только черновик."
+
+msgctxt "hr_contracts"
+msgid "Təsdiqlənmiş müqavilə dəyişdirilə bilməz — «Yenilə» ilə yeni müqavilə yaradın."
+msgstr "Подтверждённый договор нельзя изменить — создайте новый через «Продлить»."
+
+msgctxt "hr_contracts"
+msgid "Təsdiqlənmiş müqavilədə yalnız qeyd dəyişdirilə bilər"
+msgstr "В подтверждённом договоре можно изменить только примечание"
+
+msgctxt "hr_contracts"
+msgid "Məlumat ziddiyyətlidir — səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Данные противоречат друг другу — обновите страницу и попробуйте ещё раз."
+
+msgctxt "hr_contracts"
+msgid "İşçi tapılmadı."
+msgstr "Сотрудник не найден."
+
+msgctxt "hr_contracts"
+msgid "bitmə tarixi"
+msgstr "дата окончания"
+
+msgctxt "hr_contracts"
+msgid "Yeni əmək müqaviləniz göndərildi"
+msgstr "Ваш новый трудовой договор отправлен"
+
+msgctxt "hr_contracts"
+msgid "Yeni əmək müqaviləniz e-poçtunuza göndərilib. Sistemə daxil olub tanış olduğunuzu təsdiqləyin."
+msgstr "Ваш новый трудовой договор отправлен на ваш e-mail. Войдите в систему и подтвердите, что ознакомились с ним."
+
+msgctxt "hr_contracts"
+msgid "Müqavilə № {number} · {position}"
+msgstr "Договор № {number} · {position}"
+
+msgctxt "hr_contracts"
+msgid "Müqavilə təsdiqləndi: {name}"
+msgstr "Договор подтверждён: {name}"
+
+msgctxt "hr_contracts"
+msgid "{name} № {number} əmək müqaviləsi ilə tanış olduğunu təsdiqlədi."
+msgstr "{name} подтвердил(а) ознакомление с трудовым договором № {number}."
+
+msgctxt "hr_contracts"
+msgid "bitməsinə {days} gün qalıb"
+msgstr "истекает через {days} дн."
+
+msgctxt "hr_contracts"
+msgid "Əmək müqavilənizin müddəti bitir"
+msgstr "Срок вашего трудового договора истекает"
+
+msgctxt "hr_contracts"
+msgid "№ {number} əmək müqavilənizin {when} (bitmə tarixi: {end}). Ətraflı məlumat üçün Kadrlar şöbəsinə müraciət edin."
+msgstr "Ваш трудовой договор № {number}: {when} (дата окончания: {end}). За подробностями обратитесь в отдел кадров."
+
+msgctxt "hr_contracts"
+msgid "Müqavilə müddəti bitir: {name}"
+msgstr "Срок договора истекает: {name}"
+
+msgctxt "hr_contracts"
+msgid "{name} — «{position}», № {number}: {when} (bitmə tarixi: {end})."
+msgstr "{name} — «{position}», № {number}: {when} (дата окончания: {end})."
+
+msgctxt "hr_contracts"
+msgid "Əmək müqavilənizin müddəti bitdi"
+msgstr "Срок вашего трудового договора истёк"
+
+msgctxt "hr_contracts"
+msgid "№ {number} əmək müqavilənizin müddəti {end} tarixində bitib. Kadrlar şöbəsinə müraciət edin."
+msgstr "Срок вашего трудового договора № {number} истёк {end}. Обратитесь в отдел кадров."
+
+msgctxt "hr_contracts"
+msgid "Müqavilənin müddəti bitdi: {name}"
+msgstr "Срок договора истёк: {name}"
+
+msgctxt "hr_contracts"
+msgid "{name} — «{position}», № {number}: müddəti {end} tarixində bitib, yenilənməyib."
+msgstr "{name} — «{position}», № {number}: срок истёк {end}, договор не продлён."
+
+msgctxt "accounts.curriculum"
+msgid "Seçmə fənn"
+msgstr "Дисциплина по выбору"
+
+msgctxt "accounts.curriculum"
+msgid "Seçmə fənn blokdan seçilir; bayraq söndürülsə sətir məcburi olur."
+msgstr "Дисциплина по выбору выбирается из блока; если снять флажок, строка станет обязательной."
+
+msgctxt "accounts.curriculum"
+msgid "Seçmə bloku"
+msgstr "Блок по выбору"
+
+msgctxt "accounts.curriculum"
+msgid "Məs. SB1"
+msgstr "Напр. SB1"
+
+msgctxt "accounts.curriculum"
+msgid "Eyni blokun sətirləri eyni adı daşıyır."
+msgstr "Строки одного блока имеют одинаковое название."
+
+msgctxt "accounts.curriculum"
+msgid "Seçiləcək fənn sayı"
+msgstr "Количество выбираемых дисциплин"
+
+msgctxt "accounts.curriculum"
+msgid "Blokun bütün sətirlərinə şamil olunur."
+msgstr "Применяется ко всем строкам блока."
+
+msgctxt "accounts.curriculum"
+msgid "Seçmə fənn üçün seçmə bloku göstərilməlidir."
+msgstr "Для дисциплины по выбору нужно указать блок."
+
+msgctxt "accounts.curriculum"
+msgid "Seçiləcək fənn sayı 1–20 aralığında olmalıdır."
+msgstr "Количество выбираемых дисциплин должно быть от 1 до 20."
+
+msgctxt "accounts.semester"
+msgid "Təqvim pəncərələri"
+msgstr "Календарные окна"
+
+msgctxt "accounts.semester"
+msgid "Opsionaldır. İmtahan balının kilidi, mühasibatlığın tədris pəncərəsi və seçmə fənn qeydiyyatı bu tarixlərə baxır."
+msgstr "Необязательно. Блокировка экзаменационных баллов, учебное окно бухгалтерии и запись на дисциплины по выбору опираются на эти даты."
+
+msgctxt "accounts.semester"
+msgid "İmtahan sessiyasının başlanğıcı"
+msgstr "Начало экзаменационной сессии"
+
+msgctxt "accounts.semester"
+msgid "İmtahan sessiyasının sonu"
+msgstr "Конец экзаменационной сессии"
+
+msgctxt "accounts.semester"
+msgid "Semestrin bitmə tarixindən sonraya uzana bilər."
+msgstr "Может выходить за дату окончания семестра."
+
+msgctxt "accounts.semester"
+msgid "Seçim (qeydiyyat) pəncərəsi başlanğıcı"
+msgstr "Начало окна выбора (записи)"
+
+msgctxt "accounts.semester"
+msgid "Seçim (qeydiyyat) pəncərəsi sonu"
+msgstr "Конец окна выбора (записи)"
+
+msgctxt "accounts.semester"
+msgid "Dövrü redaktə et"
+msgstr "Изменить период"
+
+msgctxt "accounts.semester"
+msgid "Tarix düzgün deyil."
+msgstr "Неверная дата."
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "%(window)s üçün həm başlanğıc, həm də son tarix göstərilməlidir."
+msgstr "Для «%(window)s» нужно указать и дату начала, и дату окончания."
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "%(window)s: son tarix başlanğıcdan əvvəl ola bilməz."
+msgstr "%(window)s: дата окончания не может быть раньше начала."
+
+msgctxt "accounts.semester"
+msgid "İmtahan sessiyası"
+msgstr "Экзаменационная сессия"
+
+msgctxt "accounts.semester"
+msgid "Seçim (qeydiyyat) pəncərəsi"
+msgstr "Окно выбора (записи)"
+
+msgctxt "accounts.semester"
+msgid "İmtahan sessiyası semestr tarixləri daxilində başlamır — tarixləri yoxlayın."
+msgstr "Экзаменационная сессия начинается вне дат семестра — проверьте даты."
+
+msgctxt "accounts.semester"
+msgid "Seçim pəncərəsi semestr tarixlərindən xeyli kənardadır — tarixləri yoxlayın."
+msgstr "Окно выбора далеко за пределами дат семестра — проверьте даты."
+
+msgctxt "accounts.semester"
+msgid "Dövr məlumatları düzgün deyil."
+msgstr "Данные периода неверны."
+
+msgctxt "accounts.structure_tree"
+msgid "Tələbə hesabına rəhbər rolu verilə bilməz."
+msgstr "Учётной записи студента нельзя назначить роль руководителя."
+
+msgctxt "courses.resource_type"
+msgid "Fayl"
+msgstr "Файл"
+
+msgctxt "courses.resource_type"
+msgid "Link"
+msgstr "Ссылка"
+
+msgctxt "courses.resource_type"
+msgid "Video"
+msgstr "Видео"
+
+msgctxt "courses.resource_type"
+msgid "Sənəd"
+msgstr "Документ"
+
+msgctxt "courses.resource_upload"
+msgid "Dəstəklənən formatlar: {formats} · maks. {max_mb} MB"
+msgstr "Поддерживаемые форматы: {formats} · макс. {max_mb} МБ"
+
+msgctxt "courses.resource_upload"
+msgid "iPhone videosu: mümkünsə MP4 seçin (MOV bəzi brauzerlərdə oynamır)"
+msgstr "Видео с iPhone: по возможности выбирайте MP4 (MOV воспроизводится не во всех браузерах)"
+
+msgctxt "courses.resource_upload"
+msgid "Bu fayl üçün «{kind}» tipini seçin."
+msgstr "Для этого файла выберите тип «{kind}»."
+
+msgctxt "courses.resource_upload"
+msgid "(uzantısız)"
+msgstr "(без расширения)"
+
+msgctxt "courses.resource_upload"
+msgid "Bu format «{kind}» üçün qəbul edilmir: {ext}. İcazə verilənlər: {formats}"
+msgstr "Этот формат не принимается для «{kind}»: {ext}. Разрешены: {formats}"
+
+msgctxt "courses.resource_upload"
+msgid "Fayl boşdur."
+msgstr "Файл пуст."
+
+msgctxt "courses.resource_upload"
+msgid "Fayl çox böyükdür: {size} MB (maks. {max_mb} MB)"
+msgstr "Файл слишком большой: {size} МБ (макс. {max_mb} МБ)"
+
+msgctxt "courses.resource_upload"
+msgid "Faylın məzmunu {ext} formatına uyğun deyil — fayl zədələnib və ya uzantısı dəyişdirilib."
+msgstr "Содержимое файла не соответствует формату {ext} — файл повреждён или его расширение изменено."
+
+msgctxt "courses.resource_upload"
+msgid "Link http:// və ya https:// ilə başlamalıdır."
+msgstr "Ссылка должна начинаться с http:// или https://."
+
+msgctxt "courses.resource_upload"
+msgid "«Link» tipində fayl yüklənmir — fayl üçün «Fayl», «Video» və ya «Sənəd» seçin."
+msgstr "Для типа «Ссылка» файл не загружается — для файла выберите «Файл», «Видео» или «Документ»."
+
+msgctxt "courses.resource_upload"
+msgid "Link üçün URL daxil edin (http:// və ya https://)."
+msgstr "Введите URL ссылки (http:// или https://)."
+
+msgctxt "courses.resource_upload"
+msgid "Bu tipdə fayl yüklənir — xarici link üçün «Link» tipini seçin."
+msgstr "Для этого типа загружается файл — для внешней ссылки выберите тип «Ссылка»."
+
+msgctxt "courses.resource_upload"
+msgid "«{kind}» üçün fayl seçin."
+msgstr "Выберите файл для «{kind}»."
+
+msgctxt "courses.resource_upload"
+msgid "Sessiyanız bitib — səhifəni yeniləyib yenidən daxil olun."
+msgstr "Сеанс истёк — обновите страницу и войдите снова."
+
+msgctxt "courses.resource_upload"
+msgid "Xətalar"
+msgstr "Ошибки"
+
+msgctxt "courses.resource_upload"
+msgid "Yüklənir: {pct}"
+msgstr "Загрузка: {pct}"
+
+msgctxt "courses.resource_upload"
+msgid "Fayl yükləndi, server yoxlayır…"
+msgstr "Файл загружен, сервер проверяет его…"
+
+msgctxt "courses.resource_upload"
+msgid "Resurs adını yazın."
+msgstr "Введите название ресурса."
+
+msgctxt "courses.resource_upload"
+msgid "Fayl serverin qəbul etdiyi ölçüdən böyükdür (maks. {max_mb} MB)."
+msgstr "Файл больше, чем принимает сервер (макс. {max_mb} МБ)."
+
+msgctxt "courses.resource_upload"
+msgid "Təhlükəsizlik yoxlaması keçmədi — səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Проверка безопасности не пройдена — обновите страницу и попробуйте снова."
+
+msgctxt "courses.resource_upload"
+msgid "Bağlantı kəsildi — internetinizi yoxlayıb yenidən cəhd edin."
+msgstr "Соединение прервано — проверьте интернет и попробуйте снова."
+
+msgctxt "courses.resource_upload"
+msgid "Server vaxtında cavab vermədi (kod {status}). Bir az sonra yenidən cəhd edin."
+msgstr "Сервер не ответил вовремя (код {status}). Повторите попытку чуть позже."
+
+msgctxt "courses.resource_upload"
+msgid "Server xətası (kod {status}). Bir az sonra yenidən cəhd edin."
+msgstr "Ошибка сервера (код {status}). Повторите попытку чуть позже."
+
+msgctxt "courses.resource_upload"
+msgid "Fayl seçin və ya bura atın"
+msgstr "Выберите файл или перетащите его сюда"
+
+msgctxt "courses.resource_upload"
+msgid "Faylı çıxar"
+msgstr "Убрать файл"
+
+msgctxt "courses.resource_upload"
+msgid "Videoya bax"
+msgstr "Смотреть видео"
+
+msgctxt "courses.resource_upload"
+msgid "Endir"
+msgstr "Скачать"
+
+msgctxt "courses.resource_upload"
+msgid "iPhone (.MOV) videosu bəzi brauzerlərdə (Chrome, Android) oynamaya bilər — «Endir» ilə açın."
+msgstr "Видео с iPhone (.MOV) может не воспроизводиться в некоторых браузерах (Chrome, Android) — откройте через «Скачать»."
+
+msgctxt "courses.resource_upload"
+msgid "Brauzer bu videonu oynada bilmir — «Endir» ilə kompüterə yükləyib açın."
+msgstr "Браузер не может воспроизвести это видео — скачайте его через «Скачать» и откройте."
+
+msgctxt "organizations.permission.label"
+msgid "Təhsil haqqı cədvəlini idarə etmək (25% təkrar imtahanın təxmini məbləği)"
+msgstr "Управлять таблицей платы за обучение (ориентировочная сумма пересдачи 25%)"

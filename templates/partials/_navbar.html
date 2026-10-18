@@ -119,10 +119,12 @@
                 {% if request.user.is_authenticated and not request.user.is_teacher_or_above %}
                 {# Quick-actions dropdown for students / non-teachers (mirrors the teacher create menu). #}
                 <div class="blog-header__create blog-header__create--student">
+                    {# `aria-label`: telefonda etiket gizlənir (yalnız ikon) — düymənin adı qalsın (mobil qabıq 2026-10-19). #}
                     <button type="button"
                             class="blog-header__create-toggle"
                             aria-haspopup="true"
-                            aria-expanded="false">
+                            aria-expanded="false"
+                            aria-label="{% trans 'join' context 'nav' %}">
                         <i class="fas fa-bolt blog-header__create-plus" aria-hidden="true"></i>
                         <span class="blog-header__create-label">{% trans "join" context "nav" %}</span>
                         <i class="fas fa-chevron-down blog-header__create-caret" aria-hidden="true"></i>
@@ -217,8 +219,9 @@
 
                             <div class="blog-header__user-menu-sep" role="presentation"></div>
 
-                            <a href="{% url 'accounts:profile' %}"
-                               class="blog-header__user-menu-item {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'profile' and request.GET.section != 'notifications' %}blog-header__user-menu-item--active{% endif %}">
+                            {% comment %}Sahib 2026-10-19: «Mənim profilim» Ana səhifəyə yox, «Profil məlumatları» bölməsinə aparır.{% endcomment %}
+                            <a href="{% url 'accounts:profile' %}?section=profile-info"
+                               class="blog-header__user-menu-item {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'profile' and request.GET.section == 'profile-info' %}blog-header__user-menu-item--active{% endif %}">
                                 <i class="fas fa-user blog-header__user-menu-icon" aria-hidden="true"></i>
                                 <span>{% trans "my_profile" context "nav" %}</span>
                             </a>
@@ -382,9 +385,9 @@
         {% if request.user.is_authenticated %}
         <li class="blog-header__nav-item blog-header__nav-item--divider"></li>
         <li class="blog-header__nav-item">
-            <a href="{% url 'accounts:profile' %}"
-               {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'profile' and request.GET.section != 'notifications' and active_main_nav != 'exams' %}aria-current="page"{% endif %}
-               class="blog-header__nav-link {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'profile' and request.GET.section != 'notifications' and active_main_nav != 'exams' %}blog-header__nav-link--active{% endif %}">
+            <a href="{% url 'accounts:profile' %}?section=profile-info"
+               {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'profile' and request.GET.section == 'profile-info' %}aria-current="page"{% endif %}
+               class="blog-header__nav-link {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'profile' and request.GET.section == 'profile-info' %}blog-header__nav-link--active{% endif %}">
                 <i class="fas fa-user" aria-hidden="true"></i>
                 <span>{% trans "my_profile" context "nav" %}</span>
             </a>

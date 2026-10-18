@@ -345,3 +345,87 @@
     font-size: var(--ems-fs-sm);
     font-weight: 600;
 }
+
+/* ── 2026-10-19: məbləğ, bağlanış qərarı, pəncərə, təhsil haqqı cədvəli ── */
+.rt-fee {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-1);
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+}
+
+.rt-fee__year {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-xs, 0.75rem);
+    font-weight: 500;
+}
+
+.rt-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: var(--ems-sp-3);
+}
+
+.rt-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+}
+
+.rt-form .ems-btn[type="submit"] { align-self: flex-start; }
+
+.rt-table-actions { white-space: nowrap; }
+
+/* ── Tələbə «25% və alt qrup» telefonda (mobil audit 2026-10-19) ─────────────
+   Tablar 2 sətirə sınırdı («Kəsr / fənlər»), düymələr 34px idi, qəbz seçimi brauzerin
+   xam «Choose File» düyməsi (≈30px) idi, qeyd xanası 13px — iOS fokusda zoom edirdi. */
+@media (max-width: 768px) {
+    .rt-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .rt-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .rt-tabs .ems-tabs__btn {
+        flex: 0 0 auto;
+        min-height: 44px;
+        white-space: nowrap;
+    }
+
+    .profile-section--my-retakes .ems-btn {
+        min-height: 44px;
+    }
+
+    #rtApplyDialog .ems-textarea,
+    .profile-section--my-retakes .ems-textarea {
+        font-size: 16px;
+    }
+
+    #rtApplyReceipt,
+    .rt-upload__file {
+        min-height: 48px;
+        padding: 6px;
+        font-size: 15px;
+    }
+
+    #rtApplyReceipt::file-selector-button,
+    .rt-upload__file::file-selector-button {
+        min-height: 36px;
+        margin-right: 10px;
+        padding: 0 14px;
+        border: 1px solid var(--ems-primary-300);
+        border-radius: var(--ems-r-md);
+        background: var(--ems-primary-50);
+        color: var(--ems-primary-700);
+        font: inherit;
+        font-weight: 700;
+    }
+}

@@ -2,6 +2,7 @@
 {% comment %}Tələbənin «Anonim sorğu» kabinet bölməsi — status + /sorgu/ keçidi (sıfır sorğu:
 vəziyyət qapı middleware-indən gəlir).{% endcomment %}
 <link rel="stylesheet" href="{% static 'surveys/css/survey_cabinet.css' %}?v=20260930-1">
+<link rel="stylesheet" href="{% static 'surveys/css/inbox.css' %}?v=20261019-ui">
 {% survey_student_panel as sp %}
 <div class="svc">
     {% if sp.available %}
@@ -28,6 +29,13 @@ vəziyyət qapı middleware-indən gəlir).{% endcomment %}
         {% endif %}
     </div>
     {% else %}
-    <p class="svc-empty">{% trans "Hazırda sizin üçün açıq sorğu yoxdur." context "surveys.cabinet" %}</p>
+    {# 2026-10-19: «Sorğular» inbox-u ilə eyni boş vəziyyət kartı. #}
+    <div class="ems-card svi-state-card">
+        <div class="ems-state" role="status">
+            <span class="svi-state__badge" aria-hidden="true"><i class="fas fa-clipboard-check"></i></span>
+            <p class="ems-state__title">{% trans "Açıq sorğu yoxdur" context "surveys.cabinet" %}</p>
+            <p class="ems-state__body">{% trans "Semestr sonu anonim qiymətləndirmə açılanda burada görünəcək və bildiriş alacaqsınız." context "surveys.cabinet" %}</p>
+        </div>
+    </div>
     {% endif %}
 </div>

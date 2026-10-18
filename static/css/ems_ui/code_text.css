@@ -1,0 +1,40 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ems_ui/code_text.css — sual / variant mətnindəki KOD NÜMUNƏSİ (sahib 2026-10-19)
+   Server tərəfi: `exam_filters.code_text` (core/code_text.py) → <code class="ems-code">.
+   Canlı imtahan əkizi: apps/live_exam/static/css/live_code_text.css (.lx-code).
+
+   Eyni enli şrift, sətirlər SARINMIR, girinti olduğu kimi; uzun sətir blokun ÖZ içində
+   üfüqi sürüşür (səhifə yox — 375 px telefonda da). Mətn konteynerləri `pre-wrap`-dır
+   (səhifə CSS-lərində: .q-text, .opt-text, .ted-q__text, .eqb-card__text …).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ems-code {
+    display: block;
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0.6em 0;
+    padding: 0.7em 0.95em;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--ems-border);
+    border-radius: 10px;
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-900);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 0.86em;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: 0;
+    text-align: left;
+    white-space: pre;
+    tab-size: 4;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
+    font-variant-ligatures: none;
+}
+
+.ems-code:first-child { margin-top: 0; }
+.ems-code:last-child { margin-bottom: 0; }

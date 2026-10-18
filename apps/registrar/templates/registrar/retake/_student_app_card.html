@@ -22,6 +22,11 @@ GÖSTƏRİLMİR (yalnız Mühasibatlıqda); burada yalnız «qəbz yüklənib» 
     </p>
     {% endif %}
     {% if a.app.kind == "retake_25" %}
+    {% if a.app.paid_amount is not None %}
+    <p class="rt-fee"><i class="fas fa-coins" aria-hidden="true"></i> {% blocktrans with amount=a.app.paid_amount|retake_score context "registrar.retake" %}Təsdiqlənmiş ödəniş: {{ amount }} AZN{% endblocktrans %}</p>
+    {% else %}
+    {% include "registrar/retake/_fee_hint.html" with amount=a.app.expected_fee year=a.app.fee_inputs.academic_year %}
+    {% endif %}
     <p class="rt-receipt">
         <i class="fas fa-receipt" aria-hidden="true"></i>
         {% if a.receipt %}

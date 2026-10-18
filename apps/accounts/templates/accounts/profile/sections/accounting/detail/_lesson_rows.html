@@ -1,0 +1,11 @@
+{% load i18n %}{% comment %}Keçirilmiş dərs sətirləri — cədvəl gövdəsi və «Daha çox» cavabı (views/accounting.py, `ac_part=lessons`)
+eyni şablondan. Tələbə məlumatı yoxdur. Kontekst: `lessons`.{% endcomment %}
+{% for lesson in lessons %}
+<tr>
+    <th scope="row" class="ac-nowrap">{{ lesson.date|date:"d.m.Y" }}{% if lesson.time %} <small class="ac-muted">{{ lesson.time|time:"H:i" }}</small>{% endif %}</th>
+    <td data-label="{% trans 'Fənn' context 'accounts.accounting' %}">{{ lesson.subject }}</td>
+    <td data-label="{% trans 'Qrup' context 'accounts.accounting' %}">{{ lesson.group }}</td>
+    <td data-label="{% trans 'Növ' context 'accounts.accounting' %}">{{ lesson.kind_label }}</td>
+    <td class="ems-table__num" data-label="{% trans 'Saat' context 'accounts.accounting' %}">{{ lesson.hours }}</td>
+</tr>
+{% endfor %}

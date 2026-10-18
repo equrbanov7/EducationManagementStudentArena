@@ -1,0 +1,101 @@
+{% load i18n static hr_contracts_tags %}
+{% comment %}«Müqavilələrim» — işçinin öz əmək müqavilələri (sahib 2026-10-19). Data: `{% my_contracts_panel as mc %}`
+(yalnız `employee == request.user`; qaralama yalnız «göndərildi» qeyd olunubsa). Təsdiq `hr_contracts.js` → JSON POST.
+CSS/JS xarici fayldır və panelin İÇİNDƏDİR (AJAX-safe).{% endcomment %}
+{% my_contracts_panel as mc %}
+<link rel="stylesheet" href="{% static 'hr_contracts/css/hr_contracts.css' %}?v=20261019-hrc4">
+<div class="hrc hrc-my" data-hrc-root data-hrc-section="my-contracts"
+     data-hrc-error-generic="{% trans 'Əməl yerinə yetirilmədi — səhifəni yeniləyib yenidən cəhd edin.' context 'hr_contracts' %}">
+    {% trans "Kadrlar şöbəsində qeydə alınmış əmək müqavilələriniz: müddət, sənəd və təsdiq." context "hr_contracts" as mc_sub %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=mc_sub %}
+
+    {% for row in mc.pending %}
+    <section class="ems-card hrc-pending" aria-labelledby="hrcPending{{ forloop.counter }}">
+        <div class="hrc-pending__icon" aria-hidden="true"><i class="fas fa-envelope-open-text"></i></div>
+        <div class="hrc-pending__body">
+            <h2 class="hrc-pending__title" id="hrcPending{{ forloop.counter }}">{% trans "Yeni müqaviləniz e-poçtunuza göndərilib. Tanış olub təsdiqləyin" context "hr_contracts" %}</h2>
+            <p class="hrc-pending__meta">№ {{ row.obj.number }} · {{ row.type_label }}{% if row.obj.position %} · {{ row.obj.position }}{% endif %} · {{ row.obj.start_date|date:"d.m.Y" }} — {% if row.obj.end_date %}{{ row.obj.end_date|date:"d.m.Y" }}{% else %}{% trans "müddətsiz" context "hr_contracts" %}{% endif %}</p>
+            {% if row.obj.sent_note %}<p class="hrc-pending__note">{{ row.obj.sent_note }}</p>{% endif %}
+            {% if row.file_url %}<p><a class="hrc-file" href="{{ row.file_url }}" target="_blank" rel="noopener"><i class="fas fa-paperclip" aria-hidden="true"></i> {% trans "Müqaviləyə sistemdə bax" context "hr_contracts" %}</a></p>{% endif %}
+            {% if mc.view_as %}
+                <p class="ems-msg ems-msg--info">{% trans "Baxış rejimində təsdiq vermək olmaz." context "hr_contracts" %}</p>
+            {% else %}
+            <form method="post" action="{% url mc.ack_url_name row.id %}" class="hrc-pending__form" novalidate>
+                {% csrf_token %}
+                <p class="ems-msg ems-msg--error" data-ems-form-error role="alert" hidden></p>
+                <div class="ems-field">
+                    <label class="ems-field__label" for="hrcAckNote{{ forloop.counter }}">{% trans "Qeyd" context "hr_contracts" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "hr_contracts" %}</span></label>
+                    <textarea class="ems-textarea" id="hrcAckNote{{ forloop.counter }}" name="note" rows="2" maxlength="500"></textarea>
+                </div>
+                <button type="submit" class="ems-btn ems-btn--primary">
+                    <i class="fas fa-check" aria-hidden="true"></i> {% trans "Tanış oldum, təsdiqləyirəm" context "hr_contracts" %}
+                </button>
+                <span class="hrc-sub">{% trans "Təsdiq geri alınmır və Kadrlar şöbəsinə bildirilir." context "hr_contracts" %}</span>
+            </form>
+            {% endif %}
+        </div>
+    </section>
+    {% endfor %}
+
+    {% if mc.current %}
+    {% with row=mc.current c=mc.current.obj %}
+    <section class="ems-card hrc-current" aria-labelledby="hrcCurrentTitle">
+        <div class="hrc-current__head">
+            <h2 class="hrc-current__title" id="hrcCurrentTitle">{% trans "Cari müqavilə" context "hr_contracts" %}</h2>
+            <span class="ems-badge ems-badge--{{ row.state_tone }}">{{ row.state_label }}</span>
+        </div>
+        <div class="hrc-current__grid">
+            <div class="hrc-days hrc-days--{{ row.days_tone }}">
+                {% if row.days_left is None %}
+                    <span class="hrc-days__value">∞</span><span class="hrc-days__label">{% trans "müddətsiz" context "hr_contracts" %}</span>
+                {% elif row.days_left < 0 %}
+                    <span class="hrc-days__value">{{ row.days_abs }}</span><span class="hrc-days__label">{% trans "gün əvvəl bitib" context "hr_contracts" %}</span>
+                {% else %}
+                    <span class="hrc-days__value">{{ row.days_left }}</span><span class="hrc-days__label">{% trans "gün qalıb" context "hr_contracts" %}</span>
+                {% endif %}
+            </div>
+            <dl class="hrc-facts">
+                <div><dt>{% trans "Müqavilə №" context "hr_contracts" %}</dt><dd class="ems-mono">{{ c.number }}</dd></div>
+                <div><dt>{% trans "Növ" context "hr_contracts" %}</dt><dd>{{ row.type_label }}</dd></div>
+                {% if c.position %}<div><dt>{% trans "Vəzifə" context "hr_contracts" %}</dt><dd>{{ c.position }}</dd></div>{% endif %}
+                {% if row.unit_name %}<div><dt>{% trans "Bölmə" context "hr_contracts" %}</dt><dd>{{ row.unit_name }}</dd></div>{% endif %}
+                <div><dt>{% trans "Müddət" context "hr_contracts" %}</dt><dd>{{ c.start_date|date:"d.m.Y" }} — {% if c.end_date %}{{ c.end_date|date:"d.m.Y" }}{% else %}{% trans "müddətsiz" context "hr_contracts" %}{% endif %}</dd></div>
+                {% if c.probation_end %}<div><dt>{% trans "Sınaq müddəti" context "hr_contracts" %}</dt><dd>{{ c.probation_end|date:"d.m.Y" }}</dd></div>{% endif %}
+                {% if row.weekly_hours %}<div><dt>{% trans "Həftəlik saat" context "hr_contracts" %}</dt><dd>{{ row.weekly_hours }}</dd></div>{% endif %}
+                {% if row.staff_rate %}<div><dt>{% trans "Ştat vahidi" context "hr_contracts" %}</dt><dd>{{ row.staff_rate }}</dd></div>{% endif %}
+                {% if c.acknowledged_at %}<div><dt>{% trans "Təsdiqləmisiniz" context "hr_contracts" %}</dt><dd>{{ c.acknowledged_at|date:"d.m.Y H:i" }}</dd></div>{% endif %}
+            </dl>
+        </div>
+        {% if row.file_url %}<a class="ems-btn hrc-current__file" href="{{ row.file_url }}" target="_blank" rel="noopener"><i class="fas fa-file-pdf" aria-hidden="true"></i> {% trans "Müqaviləni aç" context "hr_contracts" %}</a>{% endif %}
+    </section>
+    {% endwith %}
+    {% endif %}
+
+    {% if mc.others %}
+    <section class="hrc-past" aria-labelledby="hrcPastTitle">
+        <h2 class="hrc-past__title" id="hrcPastTitle">{% trans "Digər müqavilələr" context "hr_contracts" %}</h2>
+        <ul class="hrc-past__list">
+            {% for row in mc.others %}
+            <li class="ems-card hrc-past__item">
+                <div class="hrc-past__main">
+                    <strong class="ems-mono">№ {{ row.obj.number }}</strong>
+                    <span class="hrc-sub">{{ row.type_label }}{% if row.obj.position %} · {{ row.obj.position }}{% endif %}</span>
+                    <span class="hrc-sub">{{ row.obj.start_date|date:"d.m.Y" }} — {% if row.obj.end_date %}{{ row.obj.end_date|date:"d.m.Y" }}{% else %}{% trans "müddətsiz" context "hr_contracts" %}{% endif %}</span>
+                </div>
+                <div class="hrc-past__side">
+                    <span class="ems-badge ems-badge--{{ row.state_tone }}">{{ row.state_label }}</span>
+                    {% if row.file_url %}<a class="hrc-file" href="{{ row.file_url }}" target="_blank" rel="noopener"><i class="fas fa-paperclip" aria-hidden="true"></i> {% trans "Fayl" context "hr_contracts" %}</a>{% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+
+    {% if not mc.rows %}
+        {% trans "Sizin üçün qeydə alınmış əmək müqaviləsi yoxdur." context "hr_contracts" as mc_empty %}
+        {% trans "Müqaviləniz sistemə əlavə olunanda burada görünəcək." context "hr_contracts" as mc_empty_body %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-file-signature" state_title=mc_empty state_body=mc_empty_body %}
+    {% endif %}
+</div>
+<script src="{% static 'hr_contracts/js/hr_contracts.js' %}?v=20261019-hrc4" defer></script>

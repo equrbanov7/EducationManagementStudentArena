@@ -1,10 +1,12 @@
 {% load i18n %}
 {% comment %}Müəllim × dövr cədvəli (dövr = seçilmiş ay və ya bütün semestr). SERVER sıralaması (başlıq linkləri `ac_sort`,
-ikinci klik istiqaməti çevirir) və server səhifələməsi; ad linki drill-down açır (`ac_teacher`). Telefonda
-`ems-table--stack` — hər sətir kartdır. Kontekst: `table`, `ac`.{% endcomment %}
-<div class="ems-tablewrap">
-    <div class="ems-tablescroll">
-        <table class="ems-table ems-table--zebra ems-table--stack ac-table">
+ikinci klik istiqaməti çevirir) və server səhifələməsi. Sətrə / ada klik müəllim PƏNCƏRƏSİNİ açır (`accounting.js`,
+`data-ac-detail-url` → `accounting_teacher_detail`); ad linkinin `href`-i tam səhifə drill-down-udur (`ac_teacher` —
+yeni tab, paylaşılan link, JS-siz yol). Masaüstündə başlıq sırası və ad sütunu yapışqandır (`ac-tablewrap--sticky`);
+telefonda `ems-table--stack` — hər sətir kartdır. Kontekst: `table`, `ac`.{% endcomment %}
+<div class="ems-tablewrap ac-tablewrap ac-tablewrap--sticky">
+    <div class="ems-tablescroll ac-tablescroll" tabindex="0" aria-label="{% trans 'Müəllimlər cədvəli' context 'accounts.accounting' %}">
+        <table class="ems-table ems-table--zebra ems-table--stack ems-table--sticky ac-table ac-table--main">
             <caption class="ac-sr">{% blocktrans trimmed with period=ac.period_label context "accounts.accounting" %}Müəllimlərin keçirilmiş dərs saatı və planı — {{ period }}{% endblocktrans %}</caption>
             <thead>
                 <tr>
@@ -21,9 +23,10 @@ ikinci klik istiqaməti çevirir) və server səhifələməsi; ad linki drill-do
             </thead>
             <tbody>
                 {% for row in table.results %}
-                <tr>
+                <tr class="ac-row" data-ac-row data-ac-detail-url="{{ row.detail_url }}">
                     <th scope="row" class="ac-table__name">
-                        <a href="{{ row.url }}" data-section="{{ ac.section }}">{{ row.name }}</a>
+                        <a href="{{ row.url }}" data-ac-open data-ac-detail-url="{{ row.detail_url }}" data-force-navigation="true"
+                           aria-haspopup="dialog">{{ row.name }}</a>
                         <small class="ac-muted ac-block">{{ row.chair|default:"—" }}{% if row.faculty %} · {{ row.faculty }}{% endif %}</small>
                     </th>
                     <td class="ems-table__num" data-label="{% trans 'Ştat' context 'accounts.accounting' %}"><span title="{{ row.staff_label }}">{{ row.staff_short }}</span></td>

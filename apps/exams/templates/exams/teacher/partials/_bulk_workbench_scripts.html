@@ -21,11 +21,13 @@ Hər iki səhifə bu partial-ı include edir ki, kod təkrarı olmasın.
     "noFileSelected": "{% filter escapejs %}{% trans 'Fayl seçilməyib' context 'exams.template.ai_question_bank' %}{% endfilter %}",
     "extracting": "{% filter escapejs %}{% trans 'Fayldan mətn çıxarılır...' context 'exams.template.ai_question_bank' %}{% endfilter %}",
     "extractFailed": "{% filter escapejs %}{% trans 'Fayldan mətn çıxarıla bilmədi.' context 'exams.template.ai_question_bank' %}{% endfilter %}",
-    "extractTimeout": "{% filter escapejs %}{% trans 'Mətn çıxarma çox uzun çəkdi. Yenidən cəhd edin.' context 'exams.template.ai_question_bank' %}{% endfilter %}"
+    "extractTimeout": "{% filter escapejs %}{% trans 'Mətn çıxarma çox uzun çəkdi. Yenidən cəhd edin.' context 'exams.template.ai_question_bank' %}{% endfilter %}",
+    "fileTypeInvalid": "{% filter escapejs %}{% trans 'Bu fayl növü dəstəklənmir — PDF, TXT, PNG və ya JPG seçin.' context 'exams.template.ai_question_bank' %}{% endfilter %}",
+    "fileRemoved": "{% filter escapejs %}{% trans 'Fayl çıxarıldı.' context 'exams.template.ai_question_bank' %}{% endfilter %}"
 }
 </script>
 <script src="{% static 'exams/js/aiQuestionBank_i18n_bootstrap.js' %}"></script>
-<script src="{% static 'exams/js/aiQuestionBank.js' %}?v=20260702-extract-jobs"></script>
+<script src="{% static 'exams/js/aiQuestionBank.js' %}?v=20261019-ui"></script>
 {# 2026-09-21 bölgüsü: fayl validasiyası / mətn çıxarma / submit qoruyucusu 2-ci fayldadır — SIRA VACİBDİR. #}
 <script src="{% static 'exams/js/testQuestionBank.js' %}?v=20260926-search"></script>
 <script src="{% static 'exams/js/testQuestionBank_upload.js' %}?v=20260921-split"></script>

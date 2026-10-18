@@ -429,9 +429,18 @@
         padding: var(--ems-sp-3);
     }
 
-    .mr-filters > .ems-field,
     .mr-filters > .mr-filters__search,
     .mr-filters__reset {
         flex: 1 1 100%;
+    }
+
+    /* Mobil audit 2026-10-19: il və semestr yan-yana — süzgəc paneli ekranın tamamını
+       tuturdu, ilk nəticə kartı ikinci ekrandan başlayırdı. */
+    .mr-filters > .ems-field:not(.mr-filters__search) {
+        flex: 1 1 calc(50% - var(--ems-sp-4));
+    }
+
+    .mr-filters__reset {
+        min-height: 44px;
     }
 }

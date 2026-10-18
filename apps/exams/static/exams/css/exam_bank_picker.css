@@ -138,6 +138,19 @@
     margin-top: 3px;
 }
 
+/* 2026-10-19: imtahanda artıq olan bank sualı — seçilmir, solğun. */
+.ebp-item.is-attached {
+    background: var(--ems-bg-subtle);
+}
+
+.ebp-item.is-attached .ebp-item__main {
+    cursor: default;
+}
+
+.ebp-item.is-attached .ebp-item__text {
+    color: var(--ems-text-muted);
+}
+
 .ebp-item__main {
     display: flex;
     flex-direction: column;

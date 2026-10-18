@@ -1,0 +1,9 @@
+{% load i18n %}
+<p class="hrc-dialog__who" data-hrc-text="who"></p>
+<p class="ems-msg ems-msg--info">{% trans "İşçi bildirişdə belə mətn görəcək: «Yeni əmək müqaviləniz e-poçtunuza göndərilib. Sistemə daxil olub tanış olduğunuzu təsdiqləyin.»" context "hr_contracts" %}</p>
+<p class="ems-field__hint">{% trans "Qaralama «göndərildi» qeyd olunanda avtomatik qüvvəyə minir." context "hr_contracts" %}</p>
+<div class="ems-field">
+    <label class="ems-field__label" for="hrcSendNote">{% trans "İşçiyə qeyd" context "hr_contracts" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "hr_contracts" %}</span></label>
+    <textarea class="ems-textarea" id="hrcSendNote" name="note" rows="3" maxlength="500"
+              placeholder="{% trans 'Məs.: yeni müqavilə 1 noyabrdan qüvvəyə minir.' context 'hr_contracts' %}"></textarea>
+</div>

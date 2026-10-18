@@ -19,7 +19,7 @@ KONTEKST MÜQAVİLƏSİ
 
 CSP: inline CSS/JS yoxdur; davranış `accounts/js/schedule_editor.js` və
 `registrar/js/schedule_grid.js` xarici fayllarındadır.{% endcomment %}
-<div class="smtx{% if matrix_editable %} smtx--editable{% endif %}" data-schedule-matrix>
+<div class="smtx{% if matrix_editable %} smtx--editable{% else %} smtx--has-days{% endif %}" data-schedule-matrix>
     <div class="smtx__scroll" tabindex="0" role="region"
          aria-label="{% trans 'Həftəlik dərs cədvəli' context 'registrar.schedule_grid' %}">
         <table class="smtx__table">
@@ -58,6 +58,8 @@ CSP: inline CSS/JS yoxdur; davranış `accounts/js/schedule_editor.js` və
             </tbody>
         </table>
     </div>
+    {# Telefon (≤ 576px): yalnız-oxu cədvəl günlər üzrə siyahı kimi — redaktor grid-də qalır (mobil qabıq 2026-10-19). #}
+    {% if not matrix_editable %}{% include "registrar/partials/_schedule_matrix_days.html" %}{% endif %}
     {% if not matrix.has_slots %}
     <p class="smtx__hint" role="status">
         {% if matrix_empty_text %}

@@ -438,7 +438,8 @@ class NavbarAccountMenuTest(TestCase):
                 drawer = html[html.index('<nav class="mobile-nav-panel"') :]
                 drawer = drawer[: drawer.index("</nav>")]
                 for chunk in (menu, drawer):
-                    self.assertIn(f'href="{profile_url}"', chunk)
+                    # Sahib 2026-10-19: «Mənim profilim» → «Profil məlumatları» bölməsi (Ana səhifə yox).
+                    self.assertIn(f'href="{profile_url}?section=profile-info"', chunk)
                     self.assertIn(f'href="{profile_url}?section=notifications"', chunk)
                     self.assertIn(reverse("accounts:logout"), chunk)
                     self.assertNotIn("section=edit-profile", chunk)

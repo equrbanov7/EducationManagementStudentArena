@@ -23,8 +23,11 @@ from django.templatetags.static import static
 
 PLAYER_JS_DIR = Path(__file__).resolve().parents[2] / "static" / "js" / "player"
 ENTRY_MODULE = "player.entry.js"
-ENTRY_VERSION = "lxp-20261008"
-_IMPORT_RE = re.compile(r"""(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)(['"])\./([\w.-]+\.js)(\?v=[\w.-]+)?\1""")
+ENTRY_VERSION = "lxp-20261019"
+#: ``./x.js`` və ortaq SAF modullar ``../host_lobby/x.js`` (stage_logic.js, code_text.js — 2026-10-19).
+_IMPORT_RE = re.compile(
+    r"""(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)(['"])(\./|\.\./host_lobby/)([\w.-]+\.js)(\?v=[\w.-]+)?\1"""
+)
 
 #: (yol, versiya) — player_screen.html-in stil faylları (sıra vacibdir).
 PLAYER_CSS = (
@@ -33,10 +36,11 @@ PLAYER_CSS = (
     ("css/live_theme.css", "lx-20260929"),
     ("css/player/_base.css", "lxp-20260930"),
     ("css/player/_ui.css", "lxp-20261002"),
-    ("css/player/_round.css", "lxp-20260929"),
-    ("css/player/_answer.css", "lxp-20261008"),
+    ("css/player/_round.css", "lxp-20261019"),
+    ("css/player/_answer.css", "lxp-20261019m4"),
     ("css/player/_reveal.css", "lxp-20260930"),
     ("css/player/_finale.css", "lxp-20260929"),
+    ("css/live_code_text.css", "lx-20261019"),
 )
 #: Modul yüklənməzdən ƏVVƏL işləyən klassik skriptlər (player_screen.html sırası ilə).
 PLAYER_CLASSIC_JS = (
@@ -55,21 +59,23 @@ def _versioned(path: str, version: str) -> str:
 @lru_cache(maxsize=1)
 def player_module_urls() -> tuple[str, ...]:
     """Giriş modulundan əlçatan BÜTÜN nisbi importlar (rekursiv), brauzerin həll etdiyi URL ilə."""
-    base = settings.STATIC_URL.rstrip("/") + "/js/player/"
+    static_js = settings.STATIC_URL.rstrip("/") + "/js/"
     seen: dict[str, str] = {}
-    stack = [ENTRY_MODULE]
+    stack = [("player", ENTRY_MODULE)]
     while stack:
-        name = stack.pop()
+        folder, name = stack.pop()
         try:
-            source = (PLAYER_JS_DIR / name).read_text(encoding="utf-8")
+            source = (PLAYER_JS_DIR.parent / folder / name).read_text(encoding="utf-8")
         except OSError:
             continue
         for match in _IMPORT_RE.finditer(source):
-            child, version = match.group(2), match.group(3) or ""
-            if child not in seen:
-                seen[child] = f"{base}{child}{version}"
-                stack.append(child)
-    return tuple(seen[name] for name in sorted(seen))
+            child_folder = folder if match.group(2) == "./" else "host_lobby"
+            child, version = match.group(3), match.group(4) or ""
+            key = f"{child_folder}/{child}"
+            if key not in seen:
+                seen[key] = f"{static_js}{key}{version}"
+                stack.append((child_folder, child))
+    return tuple(seen[key] for key in sorted(seen))
 
 
 def player_assets() -> dict[str, object]:

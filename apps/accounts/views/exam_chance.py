@@ -71,7 +71,7 @@ def exam_chance(request):
         # son şanslar), şans vermək `exam_center.decide` açarı ilədir (şablonda rəhbərdə).
         if not can_exam_center_decide(request):
             return HttpResponseForbidden(
-                pgettext("accounts.exam_chance", "İmtahan şansı vermək üçün qərar səlahiyyətiniz yoxdur.")
+                pgettext("accounts.exam_chance", "Cəhd hüququ vermək üçün qərar səlahiyyətiniz yoxdur.")
             )
         next_url = _resolve_next_url(request, fallback_next)
         organization = _get_active_organization(request)

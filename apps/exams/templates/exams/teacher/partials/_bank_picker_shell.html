@@ -1,42 +1,48 @@
-{% load i18n %}
+{% load i18n static %}
 {% comment %}
 ================================================================================
 BANK PICKER MODAL SHELL (ortaq) — examBankPicker.js bunu AJAX ilə doldurur.
-Parametr: picker_url (exam_bank_picker URL-i).
-Həm imtahan test-bankı, həm yazılı imtahan redaktoru bu shell-i include edir.
+Parametrlər: picker_url (exam_bank_picker URL-i), picker_after ("stay" | "reload").
+  stay   — əlavədən sonra modal bağlanır, toast göstərilir (imtahan test bankı);
+  reload — səhifə yenilənir, mesaj serverdən toast kimi gəlir (yazılı redaktor: blok mətni
+           serverdə qurulur — köhnə textarea saxlansa əlavə olunan suallar itə bilərdi).
+2026-10-19 redizayn (sahib: «daha yaxşı formada olsun və problemsiz işləsin»): bərabər
+hündürlüklü filtr sırası, sual kartları, «artıq əlavə olunub», skeleton / boş / xəta
+vəziyyətləri, yapışqan alt sıra, fokus tələsi, 375 px-də tam ekran.
+JS mətnləri data-t-* atributlarındadır (xarici JS şablondan keçmir).
 ================================================================================
 {% endcomment %}
-<div class="bankpicker-overlay" id="bankPickerModal" data-picker-url="{{ picker_url }}" hidden>
-    <div class="bankpicker-dialog" role="dialog" aria-modal="true" aria-labelledby="bankPickerTitle">
+<link rel="stylesheet" href="{% static 'css/ems_ui/badge.css' %}?v=20261018-pkga">
+<link rel="stylesheet" href="{% static 'css/ems_ui/table.css' %}?v=20261018-pkga">
+<div class="bankpicker-overlay" id="bankPickerModal" data-picker-url="{{ picker_url }}"
+     data-picker-after="{{ picker_after|default:'stay' }}"
+     data-t-load-error="{% trans 'Siyahı yüklənmədi' context 'exams.template.bank_picker' %}"
+     data-t-load-error-body="{% trans 'Bağlantını yoxlayıb yenidən cəhd edin. Problem qalırsa səhifəni yeniləyin.' context 'exams.template.bank_picker' %}"
+     data-t-retry="{% trans 'Yenidən cəhd et' context 'exams.template.bank_picker' %}"
+     data-t-more-error="{% trans 'Növbəti suallar yüklənmədi.' context 'exams.template.bank_picker' %}"
+     data-t-attach-error="{% trans 'Suallar əlavə olunmadı. Yenidən cəhd edin.' context 'exams.template.bank_picker' %}"
+     data-t-network-error="{% trans 'Şəbəkə xətası — bağlantını yoxlayıb yenidən cəhd edin.' context 'exams.template.bank_picker' %}"
+     data-t-forbidden="{% trans 'Bu imtahana sual əlavə etmək icazəniz yoxdur.' context 'exams.template.bank_picker' %}"
+     data-t-not-found="{% trans 'Bank tapılmadı və ya artıq sizə açıq deyil. Siyahını yeniləyin.' context 'exams.template.bank_picker' %}"
+     data-t-adding="{% trans 'Əlavə olunur…' context 'exams.template.bank_picker' %}"
+     hidden>
+    <div class="bankpicker-dialog" role="dialog" aria-modal="true" aria-labelledby="bankPickerTitle" aria-describedby="bankPickerSub" tabindex="-1">
         <header class="bankpicker-dialog__head">
+            <span class="bankpicker-dialog__icon" aria-hidden="true"><i class="fas fa-book-bookmark"></i></span>
             <div class="bankpicker-dialog__title">
-                <i class="fas fa-book-bookmark"></i>
-                <div>
-                    <h3 id="bankPickerTitle">{% trans "Suallar bankından seç" %}</h3>
-                    <p>{% trans "Kitabxanadan sual seçib bu imtahana birbaşa əlavə et." %}</p>
-                </div>
+                <h2 id="bankPickerTitle">{% trans "Suallar bankından seç" %}</h2>
+                <p id="bankPickerSub">{% trans "Kitabxanadan sual seçib bu imtahana birbaşa əlavə et." %}</p>
             </div>
-            <button type="button" class="bankpicker-dialog__close" data-bank-picker-close aria-label="{% trans 'Bağla' %}">
-                <i class="fas fa-xmark"></i>
+            <button type="button" class="ems-iconbtn bankpicker-dialog__close" data-bank-picker-close
+                    aria-label="{% trans 'Bağla' %}" title="{% trans 'Bağla' %} (Esc)">
+                <i class="fas fa-xmark" aria-hidden="true"></i>
             </button>
         </header>
-        <div class="bankpicker-dialog__body" data-bank-picker-body>
-            <div class="bankpicker-skeleton" aria-hidden="true">
-                <div class="bankpicker-toolbar">
-                    <span class="skeleton skeleton-block skeleton-field skeleton-field--wide"></span>
-                    <span class="skeleton skeleton-block skeleton-field skeleton-field--mid"></span>
-                    <span class="skeleton skeleton-block skeleton-field skeleton-field--narrow"></span>
-                    <span class="skeleton skeleton-block skeleton-field skeleton-field--narrow"></span>
-                </div>
-                {% for _ in "1234"|make_list %}
-                <div class="bankpicker-item">
-                    <div class="skeleton-stack">
-                        <span class="skeleton skeleton-line skeleton-line--w80"></span>
-                        <span class="skeleton skeleton-line skeleton-line--sm skeleton-line--w40"></span>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+        <div class="bankpicker-dialog__body" data-bank-picker-body aria-busy="true">
+            {% include "exams/teacher/partials/bank_picker/_modal_skeleton.html" with with_toolbar=True %}
         </div>
     </div>
+    {# JS bunları klonlayır — skeleton markup-ı bir yerdədir, JS-də inline style yoxdur. #}
+    <template id="bankPickerSkeletonFull">{% include "exams/teacher/partials/bank_picker/_modal_skeleton.html" with with_toolbar=True %}</template>
+    <template id="bankPickerSkeletonItems">{% include "exams/teacher/partials/bank_picker/_modal_skeleton.html" %}</template>
 </div>

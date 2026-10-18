@@ -21,7 +21,7 @@ from django.utils.translation import pgettext_lazy
 
 from core.search_text import tolerant_q
 
-from . import retake_access, retake_queries, retake_rules
+from . import retake_access, retake_closure, retake_fees, retake_queries, retake_rules
 from .models import RetakeApplication, RetakeKind, RetakeStatus
 from .retake_services import duplicate_receipt_map
 
@@ -33,6 +33,7 @@ SECTION = "retake-desk"
 TAB_PAYMENTS = "payments"
 TAB_ADMISSION = "admission"
 TAB_ALL = "all"
+TAB_FEES = "fees"
 
 _ADMISSION_STATUSES = (
     RetakeStatus.SUBMITTED,
@@ -63,6 +64,8 @@ def _tabs(keys) -> list:
         tabs.append((TAB_ADMISSION, pgettext_lazy(_CTX, "Qəbul və qərar")))
     if keys["trail"]:  # mühasib «Hamısı»nı və tələbə izini GÖRMÜR (ballar / tarixçə — sahibin qaydası)
         tabs.append((TAB_ALL, pgettext_lazy(_CTX, "Hamısı")))
+    if keys.get("fees"):  # 2026-10-19: təhsil haqqı cədvəli (Mühasibatlıq)
+        tabs.append((TAB_FEES, pgettext_lazy(_CTX, "Təhsil haqqı cədvəli")))
     return tabs
 
 
@@ -135,10 +138,16 @@ def _payment_row(row, application) -> dict:
     ]
     if keep:
         keep[-1] = {**keep[-1], "current": True}
+    expected = row.get("expected_fee")
+    paid = application.paid_amount
     return {
         **{key: row[key] for key in ("app", "id", "kind_label", "receipt", "receipt_url", "duplicates", "can_verify")},
         "student_number": (getattr(profile, "institutional_identifier", "") or "") if profile else "",
         "timeline": keep,
+        "expected_fee": expected,
+        "fee_year": (application.fee_inputs or {}).get("academic_year") or "",
+        "paid_amount": paid,
+        "amount_mismatch": expected is not None and paid is not None and paid != expected,
     }
 
 
@@ -146,6 +155,7 @@ def _rows(page, keys, *, payment_view=False) -> list:
     applications = list(page.object_list)
     receipts = [a.current_receipt for a in applications if a.current_receipt_id]
     duplicates = duplicate_receipt_map(receipts) if keys["verify"] else {}
+    expected = retake_fees.expected_map(applications) if payment_view else {}
     rows = []
     for application in applications:
         row = retake_queries.decorate(application)
@@ -168,6 +178,11 @@ def _rows(page, keys, *, payment_view=False) -> list:
             and application.kind == RetakeKind.RETAKE_25
             and application.status in retake_rules.RESULT_RECORDABLE
         )
+        is_25 = application.kind == RetakeKind.RETAKE_25
+        # 2026-10-19 (sahib): ödənişdən sonra bağlanış — yalnız qərarla (``retake_closure``).
+        row["can_close"] = keys["manage"] and is_25 and application.status in retake_closure.AFTER_PAYMENT
+        row["can_no_show"] = keys["manage"] and is_25 and application.status in retake_closure.ACTIONS["no_show"][2]
+        row["expected_fee"] = expected.get(application.pk)
         rows.append(_payment_row(row, application) if payment_view else row)
     return rows
 
@@ -175,12 +190,15 @@ def _rows(page, keys, *, payment_view=False) -> list:
 def build(request, organization) -> dict:
     user = request.user
     keys = retake_access.desk_keys(user, organization)
-    if not (keys["trail"] or keys["record"] or keys["verify"]):
+    keys["fees"] = retake_fees.can_manage(user, organization)
+    if not (keys["trail"] or keys["record"] or keys["verify"] or keys["fees"]):
         return {"has_access": False}
     params = _params(request)
     tabs = _tabs(keys)
     tab_keys = [key for key, _label in tabs]
     tab = params["tab"] if params["tab"] in tab_keys else tab_keys[0]
+    if tab == TAB_FEES:
+        return _fees_tab(organization, keys, tabs, params)
     base = retake_access.scoped_applications(RetakeApplication.objects.all(), user, organization, _keys_for_tab(tab))
     tab_qs = _tab_filter(base, tab)
     status = params["status"] if params["status"] in RetakeStatus.values else ""
@@ -228,6 +246,27 @@ def build(request, organization) -> dict:
     }
 
 
+def _fees_tab(organization, keys, tabs, params) -> dict:
+    years = retake_fees.known_years(organization)
+    return {
+        "has_access": True,
+        "keys": keys,
+        "tabs": [{"key": key, "label": label, "current": key == TAB_FEES} for key, label in tabs],
+        "tab": TAB_FEES,
+        "params": {**params, "tab": TAB_FEES},
+        "fees": {
+            "rows": retake_fees.table(organization),
+            "programs": retake_fees.program_choices(organization),
+            "years": years,
+            "settings": retake_fees.settings_snapshot(),
+        },
+        "kpis": [],
+        "rows": [],
+        "trail": None,
+        "reason_min": retake_rules.REASON_MIN,
+    }
+
+
 def _is_uuid(value) -> bool:
     import uuid
 
@@ -251,4 +290,4 @@ def _trail(request, organization, raw_student, keys):
     return retake_queries.student_trail(student=student, organization=organization)
 
 
-__all__ = ["PAGE_SIZE", "SECTION", "TAB_ADMISSION", "TAB_ALL", "TAB_PAYMENTS", "build"]
+__all__ = ["PAGE_SIZE", "SECTION", "TAB_ADMISSION", "TAB_ALL", "TAB_FEES", "TAB_PAYMENTS", "build"]

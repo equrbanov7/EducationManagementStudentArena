@@ -3142,3 +3142,12 @@ msgstr "Eşleşme yok"
 
 msgid "Axtarmaq üçün ən az %(n)s hərf yazın"
 msgstr "Aramak için en az %(n)s harf yazın"
+
+msgid "Tələbənin imtahanı bərpa edilsin? Pozuntu sayğacı bir vahid azalacaq."
+msgstr "Öğrencinin sınavı devam ettirilsin mi? İhlal sayacı bir azalacak."
+
+msgid "Bu fayl növü dəstəklənmir — PDF, TXT, PNG və ya JPG seçin."
+msgstr "Bu dosya türü desteklenmiyor — PDF, TXT, PNG veya JPG seçin."
+
+msgid "Fayl çıxarıldı."
+msgstr "Dosya kaldırıldı."

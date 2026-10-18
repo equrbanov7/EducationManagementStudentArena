@@ -1,0 +1,26 @@
+{% load i18n hr_contracts_tags %}
+{% comment %}Şəxs səhifəsinin kiçik kartı — cari əmək müqaviləsi + qalan gün. Yalnız `hr.contracts_view` əhatəsindəki
+aktora görünür (`hr_contract_person_card` əhatədən kənarda `None` qaytarır → kart çıxmır).{% endcomment %}
+{% hr_contract_person_card user_id as hrc_card %}
+{% if hrc_card %}
+<section class="ems-card pp-card">
+    <h2 class="pp-card__title">{% trans "Əmək müqaviləsi" context "hr_contracts" %}</h2>
+    {% if hrc_card.empty %}
+        <p class="pp-list__sub">{% trans "Qeydə alınmış müqavilə yoxdur." context "hr_contracts" %}</p>
+    {% else %}
+    {% with row=hrc_card.row c=hrc_card.row.obj %}
+    <dl class="pp-facts">
+        <div><dt>{% trans "Müqavilə №" context "hr_contracts" %}</dt><dd class="ems-mono">{{ c.number }}</dd></div>
+        <div><dt>{% trans "Növ" context "hr_contracts" %}</dt><dd>{{ row.type_label }}</dd></div>
+        <div><dt>{% trans "Müddət" context "hr_contracts" %}</dt><dd>{{ c.start_date|date:"d.m.Y" }} — {% if c.end_date %}{{ c.end_date|date:"d.m.Y" }}{% else %}{% trans "müddətsiz" context "hr_contracts" %}{% endif %}</dd></div>
+        <div><dt>{% trans "Vəziyyət" context "hr_contracts" %}</dt><dd><span class="ems-badge ems-badge--{{ row.state_tone }}">{{ row.state_label }}</span>
+            {% if row.days_left is not None and c.status == "active" %}
+                {% if row.days_left < 0 %}<span class="ems-badge ems-badge--danger">{% blocktrans with n=row.days_abs context "hr_contracts" %}{{ n }} gün keçib{% endblocktrans %}</span>
+                {% else %}<span class="ems-badge ems-badge--{{ row.days_tone }}">{% blocktrans with n=row.days_left context "hr_contracts" %}{{ n }} gün{% endblocktrans %}</span>{% endif %}
+            {% endif %}</dd></div>
+    </dl>
+    {% endwith %}
+    {% endif %}
+    <a class="ems-btn ems-btn--sm" href="{{ hrc_card.url }}">{% trans "Bütün müqavilələr" context "hr_contracts" %}</a>
+</section>
+{% endif %}

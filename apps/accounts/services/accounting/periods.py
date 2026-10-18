@@ -24,6 +24,8 @@ Nəticə 0,1 saata yuvarlaqlaşdırılır; yuvarlaq qalığı pəncərənin SON 
 semestr planına DƏQİQ bərabər olsun. İmtahan sessiyası ayları (pəncərədən sonra) plan almır, amma həmin
 aylarda keçirilmiş dərs (məs. kompensasiya) faktda görünür. Bayram günləri nəzərə alınmır (sahib qərarı
 gözlənilir — təqvim reyestri yoxdur).
+
+Sərbəst tarix aralığı («… -dan … -dək») eyni aylıq paylardan iş günlərinə görə kəsilir — bax ``ranges.py``.
 """
 
 from __future__ import annotations
@@ -145,8 +147,8 @@ def default_month(semester: Semester, *, today: date | None = None) -> str:
     return keys[-1] if today > semester.end else keys[0]
 
 
-def teaching_days(semester: Semester) -> dict[str, int]:
-    """Ay → pəncərənin həmin aya düşən iş günləri (dövr pəncərələri üst-üstə düşsə də gün bir dəfə sayılır)."""
+def teaching_day_set(semester: Semester) -> set[date]:
+    """Pəncərənin iş günləri (dövr pəncərələri üst-üstə düşsə də gün bir dəfə sayılır)."""
     days: set[date] = set()
     for start, end in semester.windows:
         cursor = start
@@ -154,8 +156,13 @@ def teaching_days(semester: Semester) -> dict[str, int]:
             if cursor.weekday() in C.TEACHING_WEEKDAYS:
                 days.add(cursor)
             cursor += timedelta(days=1)
+    return days
+
+
+def teaching_days(semester: Semester) -> dict[str, int]:
+    """Ay → pəncərənin həmin aya düşən iş günləri."""
     counts: dict[str, int] = {}
-    for day in days:
+    for day in teaching_day_set(semester):
         key = month_key(day.year, day.month)
         counts[key] = counts.get(key, 0) + 1
     return counts
@@ -188,5 +195,6 @@ __all__ = [
     "months",
     "season_of",
     "semesters",
+    "teaching_day_set",
     "teaching_days",
 ]

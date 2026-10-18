@@ -1,9 +1,9 @@
-import { PHASES, SCOREBOARD_ROWS } from './constants.js?v=lx20261014';
-import { state } from './state.js?v=lx20261014';
-import { playScoreboardSound } from './audio.js?v=lx20261014';
-import { icon } from './icons.js?v=lx20261014';
-import { setPresentationMarkup } from './presentation.js?v=lx20261014';
-import { avatarImageMarkup, countUp, esc, fmt, formatNumber, progressLabel, reducedMotion, tr } from './utils.js?v=lx20261014';
+import { PHASES, SCOREBOARD_ROWS } from './constants.js?v=lx20261019';
+import { state } from './state.js?v=lx20261019';
+import { playScoreboardSound } from './audio.js?v=lx20261019';
+import { icon } from './icons.js?v=lx20261019';
+import { setPresentationMarkup } from './presentation.js?v=lx20261019';
+import { avatarImageMarkup, countUp, esc, fmt, formatNumber, progressLabel, reducedMotion, tr } from './utils.js?v=lx20261019';
 
 /* Liderlər lövhəsi: sətirlər YENİ sırada render olunur, sonra hər biri köhnə
  * yerindən (previous_top) yeni yerinə «FLIP» ilə sürüşür; xal əvvəlki xaldan

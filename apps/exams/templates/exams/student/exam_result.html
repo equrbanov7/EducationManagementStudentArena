@@ -24,7 +24,8 @@ təhlili → digər cəhdlər (desktopda cədvəl, telefonda kart). Bütün aça
 {% block extraCss %}
     {% include "partials/ems_ui/_assets.html" %}
     <link rel="stylesheet" href="{% static 'exams/css/exam_result/_part1.css' %}?v=20261018-pkga">
-    <link rel="stylesheet" href="{% static 'exams/css/exam_result/_part2.css' %}?v=20261018-pkga">
+    <link rel="stylesheet" href="{% static 'exams/css/exam_result/_part2.css' %}?v=20261019-mob">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/code_text.css' %}?v=20261019-tok">
     <link rel="stylesheet" href="{% static 'exams/css/exam_result/_part3.css' %}?v=20261018-pkga">
 {% endblock %}
 
@@ -313,7 +314,7 @@ təhlili → digər cəhdlər (desktopda cədvəl, telefonda kart). Bütün aça
                         {% endif %}
                         </div>
                         {% if not delivered.image_replaces_text or not delivered.image_url %}
-                        <div class="q-text">{{ delivered.text|linebreaks }}</div>
+                        <div class="q-text">{{ delivered.text|code_text }}</div>
                         {% endif %}
                         {% if delivered.image_url %}
                             <div class="question-media">

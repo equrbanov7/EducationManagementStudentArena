@@ -48,10 +48,16 @@ class RetakeHttpTest(RetakeBase):
         app = self._app()
         url = reverse("retake:payment", args=[app.id])
         # açar yoxdur → 403
-        self.assertEqual(self.client_for(self.teacher).post(url, {"action": "verify"}).status_code, 403)
-        self.assertEqual(self.client_for(self.dean).post(url, {"action": "verify"}).status_code, 403)
+        self.assertEqual(
+            self.client_for(self.teacher).post(url, {"action": "verify", "paid_amount": "100"}).status_code, 403
+        )
+        self.assertEqual(
+            self.client_for(self.dean).post(url, {"action": "verify", "paid_amount": "100"}).status_code, 403
+        )
         # mühasib → 200 + bank arayışı yazılır
-        response = self.client_for(self.accountant).post(url, {"action": "verify", "payment_reference": "KB-1"})
+        response = self.client_for(self.accountant).post(
+            url, {"action": "verify", "payment_reference": "KB-1", "paid_amount": "120"}
+        )
         self.assertEqual(response.status_code, 200, response.content)
         app.refresh_from_db()
         self.assertEqual((app.status, app.payment_reference), (RetakeStatus.PAYMENT_VERIFIED, "KB-1"))
@@ -60,7 +66,9 @@ class RetakeHttpTest(RetakeBase):
         self._apply()
         app = self._app()
         with bypass_rls():
-            retake_decisions.verify_payment(actor=self.accountant, organization=self.org, application_id=app.id)
+            retake_decisions.verify_payment(
+                actor=self.accountant, organization=self.org, application_id=app.id, paid_amount="100"
+            )
         url = reverse("retake:decision", args=[app.id])
         self.assertEqual(self.client_for(self.dean_b).post(url, {"action": "admit"}).status_code, 404)
         self.assertEqual(self.client_for(self.accountant).post(url, {"action": "admit"}).status_code, 403)
@@ -185,7 +193,9 @@ class RetakeHttpTest(RetakeBase):
                 kind="retake_25",
                 receipt=pdf(),
             )
-            retake_decisions.verify_payment(actor=self.accountant, organization=self.org, application_id=app.id)
+            retake_decisions.verify_payment(
+                actor=self.accountant, organization=self.org, application_id=app.id, paid_amount="100"
+            )
             retake_decisions.admit(actor=self.dean, organization=self.org, application_id=app.id)
             retake_decisions.record_result(actor=self.dean, organization=self.org, application_id=app.id, score=45)
         client = self.client_for(self.student)

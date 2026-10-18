@@ -6,16 +6,18 @@ from core.search_text import tolerant_match
 
 from . import constants as C
 from .periods import apportion
+from .ranges import range_plan_kinds
 
 
 def plan_status(planned: float, held: float) -> str:
-    """Plan ↔ fakt statusu: ±``DEVIATION_TOLERANCE`` bandı «plana uyğun»dur."""
+    """Plan ↔ fakt statusu: ±band («Sistem tənzimləmələri» → ``accounting.deviation_percent``) «plana uyğun»dur."""
     if planned <= 0:
         return C.STATUS_NO_PLAN if held > 0 else C.STATUS_IDLE
     ratio = held / planned
-    if ratio < 1 - C.DEVIATION_TOLERANCE:
+    tolerance = C.deviation_tolerance()
+    if ratio < 1 - tolerance:
         return C.STATUS_UNDER
-    if ratio > 1 + C.DEVIATION_TOLERANCE:
+    if ratio > 1 + tolerance:
         return C.STATUS_OVER
     return C.STATUS_ON_PLAN
 
@@ -45,8 +47,37 @@ def teacher_months(planned_kinds: dict, held_months: dict, month_keys, day_count
     return out
 
 
-def build_rows(persons: dict, held: dict, planned: dict, *, month_keys, day_counts, month: str) -> list[dict]:
-    """Hər müəllim üçün bir sətir; ``month`` — seçilmiş ay («YYYY-MM») və ya ``"all"`` (bütün semestr)."""
+def _range_cell(planned_kinds: dict, range_months: dict, day_counts, range_counts) -> dict:
+    """Aralıq rejimi: plan — aylıq payların iş günlərinə görə kəsilməsi (``ranges.py``), fakt — aralığın dərsləri."""
+    kinds = dict.fromkeys(C.KIND_KEYS, 0)
+    lessons = 0
+    for cell in range_months.values():
+        for kind, (hours, count) in cell.items():
+            if kind in kinds:
+                kinds[kind] += hours
+            lessons += count
+    plan_kinds = range_plan_kinds(planned_kinds, day_counts, range_counts)
+    return {
+        "planned": _round(sum(plan_kinds.values())),
+        "planned_kinds": plan_kinds,
+        "kinds": kinds,
+        "lessons": lessons,
+    }
+
+
+def build_rows(
+    persons: dict,
+    held: dict,
+    planned: dict,
+    *,
+    month_keys,
+    day_counts,
+    month: str,
+    range_held: dict | None = None,
+    range_counts: dict | None = None,
+) -> list[dict]:
+    """Hər müəllim üçün bir sətir; ``month`` — seçilmiş ay («YYYY-MM»), ``"all"`` (bütün semestr) və ya
+    ``"range"`` (sərbəst aralıq: ``range_held`` — aralığın fakt matrisi, ``range_counts`` — aralığın iş günləri)."""
     rows = []
     for teacher_id, person in persons.items():
         held_months = held.get(teacher_id, {})
@@ -63,9 +94,20 @@ def build_rows(persons: dict, held: dict, planned: dict, *, month_keys, day_coun
         held_sem = sum(held_sem_kinds.values())
         if month == "all":
             planned_now, kinds_now, lessons_now = float(planned_sem), held_sem_kinds, lessons_sem
-        else:
-            cell = months.get(month) or {"planned": 0.0, "kinds": dict.fromkeys(C.KIND_KEYS, 0), "lessons": 0}
+            plan_kinds_now = {kind: float(hours) for kind, hours in planned_kinds.items()}
+        elif month == "range":
+            cell = _range_cell(planned_kinds, (range_held or {}).get(teacher_id, {}), day_counts, range_counts or {})
             planned_now, kinds_now, lessons_now = cell["planned"], cell["kinds"], cell["lessons"]
+            plan_kinds_now = cell["planned_kinds"]
+        else:
+            cell = months.get(month) or {
+                "planned": 0.0,
+                "planned_kinds": {},
+                "kinds": dict.fromkeys(C.KIND_KEYS, 0),
+                "lessons": 0,
+            }
+            planned_now, kinds_now, lessons_now = cell["planned"], cell["kinds"], cell["lessons"]
+            plan_kinds_now = {kind: round(cell["planned_kinds"].get(kind, 0.0), 1) for kind in C.KIND_KEYS}
         held_now = sum(kinds_now.values())
         rows.append(
             {
@@ -77,6 +119,7 @@ def build_rows(persons: dict, held: dict, planned: dict, *, month_keys, day_coun
                 "lessons_sem": lessons_sem,
                 "months": months,
                 "planned": _round(planned_now),
+                "planned_kinds": plan_kinds_now,
                 "kinds": kinds_now,
                 "held": held_now,
                 "lessons": lessons_now,

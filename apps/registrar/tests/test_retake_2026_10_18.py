@@ -38,7 +38,9 @@ class _Helpers(RetakeBase):
         app = retake_services.apply(
             student=student, organization=self.org, enrollment_id=enrollment.id, kind="retake_25", receipt=pdf()
         )
-        retake_decisions.verify_payment(actor=self.accountant, organization=self.org, application_id=app.id)
+        retake_decisions.verify_payment(
+            actor=self.accountant, organization=self.org, application_id=app.id, paid_amount="100"
+        )
         return retake_decisions.admit(actor=self.dean, organization=self.org, application_id=app.id)
 
 
@@ -120,7 +122,11 @@ class FlowTest(_Helpers):
             self.assertEqual(app.base_exam_score, Decimal("10"))
             self.assertEqual(app.eligibility["fail_reason"], "exam25")
             retake_decisions.verify_payment(
-                actor=self.accountant, organization=self.org, application_id=app.id, payment_reference="BNK-77"
+                actor=self.accountant,
+                organization=self.org,
+                application_id=app.id,
+                payment_reference="BNK-77",
+                paid_amount="100",
             )
             retake_decisions.admit(actor=self.dean, organization=self.org, application_id=app.id)
             retake_decisions.record_result(actor=self.dean, organization=self.org, application_id=app.id, score=45)
@@ -437,7 +443,9 @@ class FlowTest(_Helpers):
             )
             second.refresh_from_db()
             dup = retake_services.duplicate_receipt_map([second.current_receipt])
-            retake_decisions.verify_payment(actor=self.accountant, organization=self.org, application_id=second.id)
+            retake_decisions.verify_payment(
+                actor=self.accountant, organization=self.org, application_id=second.id, paid_amount="100"
+            )
             event = second.events.get(action=RetakeEventAction.PAYMENT_VERIFIED)
         self.assertEqual([r.application_id for r in dup[second.current_receipt_id]], [first.id])
         self.assertEqual(event.metadata["duplicate_receipt_applications"], [str(first.id)])

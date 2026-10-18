@@ -1,0 +1,23 @@
+{% load i18n %}
+{% comment %}HR dialoqları — hər əməl üçün BİR dialoq; `hr_contracts.js` düymənin `data-hrc-*` dəyərlərini formaya yazır
+və multipart POST edir (uğurdan sonra bölmə yerində yenilənir). Əlavə / redaktə / yeniləmə EYNİ formadır.{% endcomment %}
+{% trans "Müqavilə əlavə et" context "hr_contracts" as d1_title %}
+{% trans "Yadda saxla" context "hr_contracts" as d1_submit %}
+{% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="hrcContractDialog" form_dialog_title=d1_title form_dialog_body_include="hr_contracts/cabinet/_dlg_contract.html" form_dialog_submit_label=d1_submit form_dialog_action=hc.save_url form_dialog_wide=True %}
+
+{% trans "Müqavilə işçiyə göndərildi" context "hr_contracts" as d2_title %}
+{% trans "Müqaviləni işçinin e-poçtuna göndərdiyinizi qeyd edin — işçiyə sistemə daxil olub təsdiqləməsi üçün bildiriş gedəcək." context "hr_contracts" as d2_sub %}
+{% trans "Qeyd et və bildir" context "hr_contracts" as d2_submit %}
+{% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="hrcSendDialog" form_dialog_title=d2_title form_dialog_subtitle=d2_sub form_dialog_body_include="hr_contracts/cabinet/_dlg_send.html" form_dialog_submit_label=d2_submit %}
+
+{% trans "Qaralamanı ləğv et" context "hr_contracts" as d4_title %}
+{% trans "Qaralama işçiyə heç vaxt göstərilmir; sətir və tarixçə saxlanılır, nömrəni yenidən istifadə etmək olar." context "hr_contracts" as d4_sub %}
+{% trans "Ləğv et" context "hr_contracts" as d4_submit %}
+{% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="hrcDiscardDialog" form_dialog_title=d4_title form_dialog_subtitle=d4_sub form_dialog_body_include="hr_contracts/cabinet/_dlg_discard.html" form_dialog_submit_label=d4_submit form_dialog_submit_tone="danger" %}
+
+{% trans "Müqaviləyə xitam ver" context "hr_contracts" as d3_title %}
+{% trans "Xitam geri alınmır: müqavilə bağlanır, xatırlatmalar dayanır, səbəb tarixçədə qalır." context "hr_contracts" as d3_sub %}
+{% trans "Xitam ver" context "hr_contracts" as d3_submit %}
+{% trans "Xitamın səbəbi" context "hr_contracts" as d3_label %}
+{% blocktrans with n=hc.reason_min context "hr_contracts" asvar d3_hint_invalid %}Səbəb ən azı {{ n }} simvol olmalıdır.{% endblocktrans %}
+{% include "partials/ems_ui/_reason_dialog.html" with reason_id="hrcTerminateDialog" reason_title=d3_title reason_subtitle=d3_sub reason_submit_label=d3_submit reason_submit_tone="danger" reason_min=hc.reason_min reason_label=d3_label reason_hint_invalid=d3_hint_invalid reason_extra_include="hr_contracts/cabinet/_dlg_terminate.html" %}

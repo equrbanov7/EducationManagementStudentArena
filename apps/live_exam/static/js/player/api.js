@@ -7,9 +7,9 @@
 //  * `fetchState({ fresh: true })` (socket təzə açıldı / tab qayıtdı / şəbəkə qayıtdı) köhnəlmiş
 //    gözləyən sorğunu ləğv edib dərhal yenisini göndərir — şəbəkə artıq işləyir;
 //  * snapshot həm də saat sinxronu üçün gediş-gəliş nümunəsidir (clock.js).
-import { BOOTSTRAP } from './config.js?v=lx20261014';
-import { state } from './state.js?v=lx20261014';
-import { recordServerRoundTrip } from './utils.js?v=lx20261014';
+import { BOOTSTRAP } from './config.js?v=lx20261019';
+import { state } from './state.js?v=lx20261019';
+import { recordServerRoundTrip } from './utils.js?v=lx20261019';
 
 const SNAPSHOT_TIMEOUT_MS = 6000;
 const STALE_IN_FLIGHT_MS = 1500;

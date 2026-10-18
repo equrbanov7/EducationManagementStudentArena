@@ -76,7 +76,9 @@
        və dialoqlar onun üstünə düşür (əvvəl 1060 idi və hamısının üstündə «üzürdü»). */
     .profile-mobile-sidebar-trigger {
         left: 0;
-        top: 104px;
+        /* 104 → 74px (mobil qabıq 2026-10-19): bölmə başlığının sırasına düşür (başlıq 18px
+           sola yer verir) — əvvəl başlığın altındakı izah sətrinin ilk hərflərini örtürdü. */
+        top: 74px;
         width: 30px;
         height: 52px;
         border-radius: 0 14px 14px 0;
@@ -91,6 +93,12 @@
 
     .profile-mobile-sidebar-trigger.is-hidden {
         transform: translateX(-100%);
+    }
+
+    /* Aşağı sürüşəndə kənara çəkilir, yuxarı sürüşəndə qayıdır (`ui.js`, mobil qabıq 2026-10-19). */
+    .profile-mobile-sidebar-trigger.is-tucked {
+        transform: translateX(-100%);
+        pointer-events: none;
     }
 
     .profile-header:has(> .profile-mobile-sidebar-trigger) {
@@ -112,6 +120,32 @@
 
     .profile-title {
         font-size: 1.5rem;
+    }
+
+    /* ── Mobil qabıq 2026-10-19: barmaq hədəfləri ≥ 40px ──────────────────
+       Kənar dil-düymə 30px enində qalır (görünüş və `left: 0` müqaviləsi), amma
+       toxunma sahəsi şəffaf `::after` ilə 42×64-ə çatır — kiçik ekranda başlığa
+       yer saxlanılır, barmaq isə dili tapır. */
+    .profile-mobile-sidebar-trigger::after {
+        content: "";
+        position: absolute;
+        inset: -6px -12px -6px 0;
+    }
+
+    /* Şkafın bəndləri 38px idi (masaüstü ritmi) — telefonda 44px (iOS HIG), bağlama
+       düyməsi 32 → 40px. Dəyişən yalnız sətir hündürlüyüdür, düzüm eynidir. */
+    .profile-sidebar {
+        --sb-row-h: 44px;
+    }
+
+    .profile-sidebar .sidebar-toggle {
+        width: 40px;
+        height: 40px;
+    }
+
+    /* Bölmə başlığı ilə məzmun arasında telefonda 32px boşluq çox idi. */
+    .profile-header {
+        margin-bottom: 1.25rem;
     }
 }
 

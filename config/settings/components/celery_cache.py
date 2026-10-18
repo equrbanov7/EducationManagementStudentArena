@@ -176,4 +176,11 @@ CELERY_BEAT_SCHEDULE = {
         "task": "exams.purge_finished_extraction_jobs",
         "schedule": crontab(hour=4, minute=0),
     },
+    # «Əmək müqavilələri» (2026-10-19): bitmə xatırlatmaları HR-a və işçiyə — gündə bir dəfə, iş saatının
+    # əvvəlində. İdempotentdir (hər hədd müqavilə başına bir dəfə — DB unikal indeksi); əl ilə / ehtiyat:
+    # `python manage.py send_contract_reminders [--dry-run]`.
+    "hr-contracts-send-reminders": {
+        "task": "hr_contracts.send_contract_reminders",
+        "schedule": crontab(hour=8, minute=30),
+    },
 }

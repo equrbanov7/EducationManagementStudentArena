@@ -123,3 +123,29 @@ body.modal-open .profile-mobile-sidebar-trigger {
 .section-card__title {
     margin-top: 0;
 }
+
+/* Mobil qabıq 2026-10-19: `.profile-main { overflow-y: auto }` heç vaxt sürüşmür (hündürlüyü
+   məzmun qədərdir), amma sürüşmə konteyneri olduğu üçün bölmələrdəki BÜTÜN yapışqan elementləri
+   (sillabus redaktorunun alt paneli və addımları, «Sistem tənzimləmələri», yük bölgüsünün yan
+   paneli, kütləvi əməl zolağı…) ölü edirdi. `clip` üfüqi qorumanı saxlayır, konteyner yaratmır;
+   body-nin cütü `main.css`-dədir (kabinetdə başlıq səhifə ilə sürüşür). 3 rol × 112 bölmə ×
+   375/1280px yoxlanıb — heç bir bölmə `.profile-main`-dən üfüqi daşmır (geniş cədvəllər öz
+   sürüşmə qutusundadır). Köhnə brauzer və telefon (≤ 768px, bax `main.css` qeydi): əvvəlki `auto`. */
+@supports (overflow: clip) {
+    @media (min-width: 769px) {
+        .profile-main {
+            overflow: visible;
+            overflow-x: clip;
+        }
+    }
+}
+
+/* Yapışqan «Menyuda axtar» (masaüstü, `sidebar.css` `top: 72px` — yapışqan başlıq fərziyyəsi idi)
+   indi işləyir; kabinetdə başlıq yapışqan olmadığı üçün o, ekranın lap yuxarısına yapışır. */
+@supports (overflow: clip) {
+    @media (min-width: 769px) {
+        .profile-sidebar .sidebar-header {
+            top: 0;
+        }
+    }
+}

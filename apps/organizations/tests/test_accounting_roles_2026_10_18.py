@@ -44,7 +44,8 @@ class AccountingCatalogTest(SimpleTestCase):
             self.assertIn(key, role["permissions"])
         self.assertFalse(holds_student_key(role["permissions"]))  # tələbə şəxsi məlumatı açarı yoxdur
         self.assertEqual(
-            set(role["permissions"]) - {"application.create"}, {"accounting.view", "retake.payment_verify"}
+            set(role["permissions"]) - {"application.create"},
+            {"accounting.view", "retake.payment_verify", "accounting.manage_fees"},
         )
         for key in ("retake.manage", "unit.view", "people.view_teachers", "member.view", "grade.view", "role.assign"):
             self.assertFalse(has_permission(role["permissions"], key), key)
@@ -57,13 +58,25 @@ class AccountingCatalogTest(SimpleTestCase):
         for name in ("teacher", "dean", "hr", "student", "chair_head", "vice_rector"):
             self.assertFalse(has_permission(_template(name)["permissions"], "accounting.view"), name)
         self.assertFalse(has_permission(_template("trustee")["permissions"], "retake.manage"))
+        # «Təhsil haqqı cədvəli» (2026-10-19): mühasib + RİM; dekanlıq və qəyyum yox.
+        for name in ("accountant", "ikt_rehber"):
+            self.assertTrue(has_permission(_template(name)["permissions"], "accounting.manage_fees"), name)
+        for name in ("dean", "trustee", "teaching_office_head", "teacher", "student"):
+            self.assertFalse(has_permission(_template(name)["permissions"], "accounting.manage_fees"), name)
 
     def test_migration_copies_match_templates(self):
         migration = importlib.import_module(_MIGRATION)
-        self.assertEqual(set(migration._ROLE_SPEC["permissions"]), set(_template("accountant")["permissions"]))
+        fees = importlib.import_module("apps.organizations.migrations.0068_accounting_manage_fees")
+        # 0067 + 0068 birlikdə şablonu verir (0068 yalnız `accounting.manage_fees` əlavə edir).
+        with_fees = set(migration._ROLE_SPEC["permissions"]) | {fees._KEY}
+        self.assertEqual(with_fees, set(_template("accountant")["permissions"]))
         self.assertEqual(migration._ROLE_SPEC["level"], _template("accountant")["level"])
-        self.assertEqual(migration._GRANTS, ACCOUNTING_GRANTS)
-        self.assertLessEqual(set(ACCOUNTANT_PERMISSIONS), set(migration._ROLE_SPEC["permissions"]))
+        grants = {name: set(keys) for name, keys in migration._GRANTS.items()}
+        for name in fees._ROLES:
+            if name in grants:
+                grants[name].add(fees._KEY)
+        self.assertEqual(grants, {name: set(keys) for name, keys in ACCOUNTING_GRANTS.items()})
+        self.assertLessEqual(set(ACCOUNTANT_PERMISSIONS), with_fees)
 
 
 class AccountingMigrationTest(TestCase):

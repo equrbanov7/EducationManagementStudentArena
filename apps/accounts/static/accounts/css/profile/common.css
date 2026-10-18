@@ -217,3 +217,63 @@
         padding: 2.5rem 1rem;
     }
 }
+
+/* ── Tələbə bölmələri telefonda (mobil audit 2026-10-19) ─────────────────────
+   1) Ortaq KPI sırası (`ems_ui/kpi.css`) ≤768px-də TƏK sütuna düşür: 4 KPI ekranın
+      1–1.5 hündürlüyünü tutur, əsas məzmun (fənn, nəticə) ikinci ekrandan başlayırdı.
+      Tələbə bölmələrində 2 sütun (çox dar ≤340px ekranda yenə 1 sütun). Qlobal qayda
+      qabıq komponentinindir — burada yalnız tələbənin öz bölmələri hədəflənir.
+   2) iOS Safari 16px-dən kiçik şriftli xanaya fokusda səhifəni böyüdür (zoom) — ortaq
+      `ems-input` / `ems-search__input` 13px-dir. Tələbə bölmələrində xanalar 16px. */
+@media (max-width: 768px) {
+    .profile-section-panel.profile-section--my-subjects .ems-kpis,
+    .profile-section-panel.profile-section--statistics .ems-kpis,
+    .profile-section-panel.profile-section--academic-calendar .ems-kpis,
+    .profile-section-panel.profile-section--pending-answers .ems-kpis,
+    .profile-section-panel.profile-section--dashboard .ems-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--ems-sp-3, 10px);
+    }
+
+    .profile-section-panel.profile-section--my-subjects .ems-kpi,
+    .profile-section-panel.profile-section--statistics .ems-kpi,
+    .profile-section-panel.profile-section--academic-calendar .ems-kpi,
+    .profile-section-panel.profile-section--pending-answers .ems-kpi,
+    .profile-section-panel.profile-section--dashboard .ems-kpi {
+        min-width: 0;
+        padding: 14px;
+        overflow-wrap: break-word;
+    }
+
+    /* Yarım en kartda böyük rəqəm şrifti «2026/2027 Payız»-ı «2026/20 | 27» kimi qırırdı. */
+    .profile-section-panel.profile-section--my-subjects .ems-kpi__value,
+    .profile-section-panel.profile-section--statistics .ems-kpi__value,
+    .profile-section-panel.profile-section--academic-calendar .ems-kpi__value,
+    .profile-section-panel.profile-section--pending-answers .ems-kpi__value,
+    .profile-section-panel.profile-section--dashboard .ems-kpi__value {
+        font-size: 1.45rem;
+        overflow-wrap: normal;
+    }
+
+    .profile-section-panel.profile-section--my-results .ems-search__input,
+    .profile-section-panel.profile-section--assigned-exams .ems-search__input,
+    .profile-section-panel.profile-section--assigned-courses .ems-search__input,
+    .profile-section-panel.profile-section--pending-answers .ems-input,
+    .profile-section-panel.profile-section--my-appeals .ems-input,
+    .profile-section-panel.profile-section--announcements .ems-input,
+    .profile-section-panel.profile-section--applications input[type="search"],
+    .profile-section-panel.profile-section--applications input[type="text"],
+    .profile-section-panel.profile-section--applications input[type="date"] {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 340px) {
+    .profile-section-panel.profile-section--my-subjects .ems-kpis,
+    .profile-section-panel.profile-section--statistics .ems-kpis,
+    .profile-section-panel.profile-section--academic-calendar .ems-kpis,
+    .profile-section-panel.profile-section--pending-answers .ems-kpis,
+    .profile-section-panel.profile-section--dashboard .ems-kpis {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

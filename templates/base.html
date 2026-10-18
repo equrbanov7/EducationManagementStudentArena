@@ -27,18 +27,24 @@
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
+    {% comment %}Perf (mobil qabıq 2026-10-19): başlığın, şkafın və düymələrin ikon şrifti
+    `all.min.css` yüklənib parse olunandan SONRA kəşf olunurdu (mobil şəbəkədə +1 RTT; FA
+    `font-display: block` işlədir — o vaxta qədər ikonlar görünmür). Preload eyni URL-i
+    (prod-da manifest hash-i də eynidir) CSS ilə paralel gətirir; `crossorigin` şrift
+    sorğusunun CORS rejiminə uyğundur (yoxsa iki dəfə yüklənərdi).{% endcomment %}
+    <link rel="preload" href="{% static 'vendor/fontawesome/webfonts/fa-solid-900.woff2' %}" as="font" type="font/woff2" crossorigin>
 
     <!-- Sənin global CSS-lərin -->
     <!-- Design tokens (rəng palitrası) — bütün digər CSS-lərdən ƏVVƏL yüklənir
          ki, var(--ems-*) hər yerdə əlçatan olsun. Sənəd: docs/frontend/UI_COLOR_TOKENS_MIGRASIYA.md -->
     <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}?v=20261018-crs">
-    <link rel="stylesheet" href="{% static 'css/main.css' %}?v=20261017-auth">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}?v=20261019-mob2">
     {% comment %}Naviqasiya üslubu modul ölçüsü qaydasına (SOFT_CAP=600) görə üçə
     bölünüb; YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır: əvvəl başlıq +
     desktop menyu, sonra mobil overlay/panel + media query-lər, ən sonda
     «+ Yarat» / dil pilləsi / zəngin istifadəçi menyusu.{% endcomment %}
     <link rel="stylesheet" href="{% static 'css/navbar.css' %}?v=20260709-profile-menu">
-    <link rel="stylesheet" href="{% static 'css/navbar_mobile.css' %}?v=20260930-1">
+    <link rel="stylesheet" href="{% static 'css/navbar_mobile.css' %}?v=20261019-mob">
     <link rel="stylesheet" href="{% static 'css/navbar_menus.css' %}?v=20260926-account">
     {% comment %}Başlığın brend kilidi + ritm/fokus qatı. `navbar.css` ölçü
     büdcəsində dondurulduğu üçün yeni qaydalar ayrıca fayldadır və ondan SONRA
@@ -52,13 +58,13 @@
     <link rel="stylesheet" href="{% static 'css/language-switcher.css' %}?v=20260925-1">
     <link rel="stylesheet" href="{% static 'css/footer.css' %}?v=20260618-1">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
-    <link rel="stylesheet" href="{% static 'css/toast.css' %}?v=20260618-1">
+    <link rel="stylesheet" href="{% static 'css/toast.css' %}?v=20261019-mob">
     {# UX-15: qlobal təsdiq dialoqu (EMSConfirm) — native confirm() əvəzi #}
-    <link rel="stylesheet" href="{% static 'css/ems_confirm.css' %}?v=20260928-1">
+    <link rel="stylesheet" href="{% static 'css/ems_confirm.css' %}?v=20261019-mob">
     {# Qlobal modal fon-scroll kilidi (bax static/js/modal_scroll_lock.js) #}
-    <link rel="stylesheet" href="{% static 'css/modal_scroll_lock.css' %}?v=20260926-1">
+    <link rel="stylesheet" href="{% static 'css/modal_scroll_lock.css' %}?v=20261019-mob">
     {# AI köməkçi: RİM «Sistem tənzimləmələri» → «AI köməkçi düyməsi» söndürülüdə üslub, partial və skript yüklənmir (sahib 2026-10-10) #}
-    {% if academic_rules.ai_button %}<link rel="stylesheet" href="{% static 'css/ai_assistant.css' %}?v=20261010-wp5ai">{% endif %}
+    {% if academic_rules.ai_button %}<link rel="stylesheet" href="{% static 'css/ai_assistant.css' %}?v=20261019-mob">{% endif %}
     <link rel="stylesheet" href="{% static 'css/skeleton.css' %}">
     <link rel="stylesheet" href="{% static 'css/legacy_mark.css' %}?v=20260901-notice">
     <link rel="stylesheet" href="{% static 'css/ems_components.css' %}?v=20260913-1">
@@ -75,7 +81,7 @@
 
     {# "View as" UI yalnız səlahiyyətli/aktiv hallarda yüklənir (perf) #}
     {% if view_as.active or view_as.can_use %}
-    <link rel="stylesheet" href="{% static 'css/view_as.css' %}?v=20260925-1">
+    <link rel="stylesheet" href="{% static 'css/view_as.css' %}?v=20261019-mob">
     {% endif %}
 
     {% block extraCss %}{% endblock %}
@@ -207,7 +213,7 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
         {% endif %}
     {% endblock %}
     {% if view_as.can_use and not view_as.active %}
-    <script src="{% static 'js/view_as.js' %}?v=20261014-searchux"></script>
+    <script src="{% static 'js/view_as.js' %}?v=20261019-mob"></script>
     {% endif %}
 
    
@@ -215,7 +221,7 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
     <!-- AI Assistant Widget -->
     {# ai_assistant_fab.js (gizlətmək/sürüşdürmək, `EMSAiFab`) ai_assistant.js-dən ƏVVƏL gəlməlidir #}
     {% block ai_assistant_js %}{% if academic_rules.ai_button %}<script src="{% static 'js/ai_assistant_fab.js' %}?v=20261010-wp5ai"></script>
-    <script src="{% static 'js/ai_assistant.js' %}?v=20261017-fixg"></script>{% endif %}{% endblock %}
+    <script src="{% static 'js/ai_assistant.js' %}?v=20261019-mob"></script>{% endif %}{% endblock %}
 
     <!-- Toast auto-hide -->
     <script src="{% static 'js/toast.js' %}?v=20260618-1"></script>

@@ -161,11 +161,15 @@
     animation: toastSlideOut 0.22s ease-in forwards;
 }
 
+/* Telefon (mobil qabıq 2026-10-19): toast ALTDA, ev zolağının üstündə — yuxarıda (76px) olanda
+   ~3 s ərzində imtahan zolağını, tələbənin kimlik sətrini və bölmə başlığını örtürdü (başlıq
+   yapışqan deyil, yəni 76px məzmunun özü idi). Alt kənar üzən panellərin (AI düyməsi) üstündədir. */
 @media (max-width: 640px) {
     .toast-container {
-        top: 76px;
-        right: 14px;
-        left: 14px;
+        top: auto;
+        bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+        right: max(12px, env(safe-area-inset-right, 0px));
+        left: max(12px, env(safe-area-inset-left, 0px));
         width: auto;
     }
 

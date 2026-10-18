@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.http import Http404, JsonResponse
 from django.urls import reverse
 from django.utils.translation import pgettext
@@ -85,7 +85,7 @@ def _validation_message(exc) -> str:
 def _run(callable_, *, success):
     try:
         callable_()
-    except RetakeApplication.DoesNotExist:
+    except ObjectDoesNotExist:  # müraciət / pəncərə / təhsil haqqı sətri yoxdur və ya yaddır → 404 (LOW-8)
         raise Http404 from None
     except PermissionDenied:
         raise Http404 from None
@@ -182,6 +182,7 @@ def payment(request, application_id):
                 actor=request.user,
                 organization=organization,
                 application_id=application.pk,
+                paid_amount=_field(data, "paid_amount"),
                 payment_reference=_field(data, "payment_reference"),
                 note=_field(data, "note"),
                 request=request,
@@ -215,10 +216,28 @@ def decision(request, application_id):
             lambda: retake_decisions.admit(note=_field(data, "note"), request=request, **common),
             success=pgettext(_CTX, "Tələbə 25% imtahana buraxıldı."),
         )
+    decision = {
+        "order_number": _field(data, "order_number"),
+        "order_date": _field(data, "order_date") or None,
+        "document": request.FILES.get("document"),
+    }
     if action == "reject":
         return _run(
-            lambda: retake_decisions.reject(reason=_field(data, "reason"), request=request, **common),
+            lambda: retake_decisions.reject(reason=_field(data, "reason"), request=request, **decision, **common),
             success=pgettext(_CTX, "Müraciət rədd edildi."),
+        )
+    if action in ("no_show", "withdraw"):
+        from . import retake_closure
+
+        return _run(
+            lambda: retake_closure.close(
+                action=action, reason=_field(data, "reason"), request=request, **decision, **common
+            ),
+            success=(
+                pgettext(_CTX, "«İmtahana gəlmədi» qərarı yazıldı — cəhd istifadə olunmuş sayılır.")
+                if action == "no_show"
+                else pgettext(_CTX, "Müraciət qərarla geri götürüldü.")
+            ),
         )
     if action == "approve_subgroup":
         document = request.FILES.get("document")

@@ -145,3 +145,10 @@
     text-align: center;
 }
 
+/* 320–360px: operator seçimi 104px nömrə xanasını sıxırdı (nümunə «məs: 123 45 67» kəsilirdi). */
+@media (max-width: 360px) {
+    .pc-phone .pc-phone__operator {
+        flex-basis: 92px;
+        width: 92px;
+    }
+}

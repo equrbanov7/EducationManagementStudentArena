@@ -1,0 +1,12 @@
+{% extends "emails/base_email.html" %}{% load i18n %}
+{% comment %}Əmək müqaviləsi bildirişi (göndərildi / təsdiqləndi / bitmə xatırlatması) — tək dilli e-poçt (layihə qaydası).
+Kontekst: heading, name, lines (siyahı), url (kabinet bölməsinin mütləq ünvanı).{% endcomment %}
+{% block title %}{{ heading }}{% endblock %}
+{% block preheader %}{{ heading }}{% endblock %}
+{% block heading %}{{ heading }}{% endblock %}
+{% block content %}
+<p class="em-text" style="margin:0 0 12px;font-size:16px;line-height:1.6;color:#334155;">{% trans "Hörmətli" context "hr_contracts.email" %} <strong class="em-strong" style="color:#0f172a;">{{ name }}</strong>,</p>
+{% for line in lines %}<p class="em-text" style="margin:0 0 12px;font-size:15px;line-height:1.6;color:#334155;">{{ line }}</p>{% endfor %}
+{% trans "Kabinetə keç" context "hr_contracts.email" as button_label %}
+{% include "emails/_button.html" with url=url label=button_label %}
+{% endblock %}

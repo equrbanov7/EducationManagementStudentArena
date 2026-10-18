@@ -1,6 +1,11 @@
 {% load i18n %}
 {% comment %}Tədris dövrü sahələri — `_form_dialog.html` gövdəsi.
-Akademik il formatı «2025/2026» (layihə qərarı); semestr adı Payız/Yaz/Yay.{% endcomment %}
+Akademik il formatı «2025/2026» (layihə qərarı); semestr adı Payız/Yaz/Yay.
+
+Təqvim pəncərələri (2026-10-19) OPSİONALDIR, amma imtahan balı kilidini,
+Mühasibatlığın tədris pəncərəsini və seçmə fənn qeydiyyatını idarə edir. Hər
+pəncərə cütdür (ya iki tarix, ya heç biri); dövrdən kənar tarix xəbərdarlıq
+verir, yazını bloklamır (bax `registrar/semester_period_windows.py`).{% endcomment %}
 <div class="tof-form">
     <div class="ems-field">
         <label class="ems-field__label" for="tof-sm-name">{% trans "Semestrin adı" context "accounts.semester" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
@@ -19,5 +24,27 @@ Akademik il formatı «2025/2026» (layihə qərarı); semestr adı Payız/Yaz/Y
     <div class="ems-field">
         <label class="ems-field__label" for="tof-sm-end">{% trans "Bitmə tarixi" context "accounts.semester" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
         <input class="ems-input" type="date" id="tof-sm-end" name="end_date" required>
+    </div>
+    <div class="tof-form__full">
+        <p class="tof-form__legend">{% trans "Təqvim pəncərələri" context "accounts.semester" %}</p>
+        <p class="ems-field__hint">{% trans "Opsionaldır. İmtahan balının kilidi, mühasibatlığın tədris pəncərəsi və seçmə fənn qeydiyyatı bu tarixlərə baxır." context "accounts.semester" %}</p>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-sm-exam-start">{% trans "İmtahan sessiyasının başlanğıcı" context "accounts.semester" %}</label>
+        <input class="ems-input" type="date" id="tof-sm-exam-start" name="exam_session_start">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-sm-exam-end">{% trans "İmtahan sessiyasının sonu" context "accounts.semester" %}</label>
+        <input class="ems-input" type="date" id="tof-sm-exam-end" name="exam_session_end"
+               aria-describedby="tof-sm-exam-end-hint">
+        <p class="ems-field__hint" id="tof-sm-exam-end-hint">{% trans "Semestrin bitmə tarixindən sonraya uzana bilər." context "accounts.semester" %}</p>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-sm-reg-start">{% trans "Seçim (qeydiyyat) pəncərəsi başlanğıcı" context "accounts.semester" %}</label>
+        <input class="ems-input" type="date" id="tof-sm-reg-start" name="registration_start">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-sm-reg-end">{% trans "Seçim (qeydiyyat) pəncərəsi sonu" context "accounts.semester" %}</label>
+        <input class="ems-input" type="date" id="tof-sm-reg-end" name="registration_end">
     </div>
 </div>

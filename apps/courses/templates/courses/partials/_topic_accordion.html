@@ -67,7 +67,7 @@ Açılıb-bağlanma: `[data-cd-topic-toggle]` → course_panel.js.
         {% if res_count %}
           <ul class="cd-res-list">
             {% for resource in topic.resources.all %}
-            <li class="cd-res-item">
+            <li class="cd-res-item{% if resource.file and resource.is_video_file %} cd-res-item--video{% endif %}">
               <span class="cd-res-ic cd-res-ic--{{ resource.resource_type }}" aria-hidden="true">
                 {% if resource.resource_type == 'link' %}{% include "courses/partials/_cd_icon.html" with icon="link" size=16 %}
                 {% elif resource.resource_type == 'video' %}{% include "courses/partials/_cd_icon.html" with icon="video" size=16 %}
@@ -101,6 +101,13 @@ Açılıb-bağlanma: `[data-cd-topic-toggle]` → course_panel.js.
                   </button>
                 {% endif %}
               </span>
+              {% if resource.file and resource.is_video_file %}
+                {# Mövzu siyahısında oynadıcı açılana qədər yüklənmir (preload="none") — Resurslar tabında da var. #}
+                <details class="cd-res-item__video">
+                  <summary>{% trans "Videoya bax" context "courses.resource_upload" %}</summary>
+                  {% include "courses/partials/_resource_video.html" with preload="none" %}
+                </details>
+              {% endif %}
             </li>
             {% endfor %}
           </ul>

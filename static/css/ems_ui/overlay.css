@@ -38,6 +38,9 @@
     width: 100%;
     max-width: var(--ems-w-dialog);
     max-height: calc(100vh - 48px);
+    /* iOS Safari: `100vh` alətlər zolağını da sayır — dialoqun altı (düymələr) zolağın
+       altında qalırdı. `dvh` görünən sahədir; köhnə brauzer üstdəki sətri işlədir. */
+    max-height: calc(100dvh - 48px);
     display: flex;
     flex-direction: column;
     background: var(--ems-bg);
@@ -287,10 +290,25 @@
     .ems-dialog {
         max-width: none;
         max-height: 92vh;
+        max-height: 92dvh;
         border-radius: var(--ems-r-2xl) var(--ems-r-2xl) 0 0;
     }
 
     .ems-drawer {
         max-width: none;
+    }
+
+    /* Alt vərəq / tam ekran çekmecə: iPhone-un ev zolağı (home indicator) düymələri
+       örtməsin — altlığa təhlükəsiz sahə qədər əlavə boşluq (mobil qabıq 2026-10-19). */
+    .ems-dialog__foot,
+    .ems-drawer__foot {
+        padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* «×» 32 → 40px barmaq hədəfi. */
+    .ems-dialog__x,
+    .ems-drawer__x {
+        width: 40px;
+        height: 40px;
     }
 }

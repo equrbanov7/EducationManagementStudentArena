@@ -42,6 +42,7 @@
 .ai-bot-btn--wave .ai-bot-btn__pulse { animation: ai-pulse 1.6s ease-out 1; }
 .ai-bot-btn--wave .ai-bot-btn__icon { animation: ai-nod 1.6s ease-in-out 1; }
 @keyframes ai-pulse { 0% { opacity: 1; box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45); } 100% { opacity: 0; box-shadow: 0 0 0 22px rgba(37, 99, 235, 0); } }
+@keyframes ai-pulse-sm { 0% { opacity: 1; box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45); } 100% { opacity: 0; box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); } }
 @keyframes ai-nod { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } }
 
 /* Yapışqan alt paneli olan səhifələrdə (workbench «Göndər») düymə yuxarı qalxır. */
@@ -320,6 +321,32 @@ body:has(.sticky-footer) .ai-fab-restore { bottom: 86px; }
     box-shadow: 0 18px 36px rgba(37, 99, 235, 0.45);
 }
 #ai-fab.ai-fab--dragging #ai-bot-tooltip { opacity: 0; }
+/* ── Telefon: kənara çəkilmə («dil») + təhlükəsiz sahə (mobil qabıq 2026-10-19) ─────
+   `--dodge` (ai_assistant.js): düymə dayanıb qalanda altında toxunulan element varsa
+   (yapışqan «Yadda saxla» paneli, kartın oxu, xana) düymə kənara çəkilir — yalnız 14px
+   görünür və o da təhlükəsiz sahənin içində, səhifənin 16px kənar boşluğundadır; toxunanda
+   çat yenə açılır. «×» bu vəziyyətdə gizlidir (məzmunun küncünə düşməsin). Bərpa nişanı
+   iPhone-un ev zolağına/çentiyinə hörmət edir; «×»-in toxunma sahəsi 40px-ə çatır. */
+@media (max-width: 768px) {
+    #ai-bot-btn.ai-bot-btn--dodge {
+        transform: translateX(calc(max(12px, env(safe-area-inset-right, 0px)) + 100% - 14px - env(safe-area-inset-right, 0px)));
+        opacity: 0.92;
+    }
+    #ai-fab.ai-fab--left #ai-bot-btn.ai-bot-btn--dodge {
+        transform: translateX(calc(-1 * (max(12px, env(safe-area-inset-left, 0px)) + 100% - 14px - env(safe-area-inset-left, 0px))));
+    }
+    #ai-bot-btn.ai-bot-btn--tucked.ai-bot-btn--dodge { opacity: 0; pointer-events: none; }
+    .ai-bot-btn--dodge .ai-bot-btn__hide { opacity: 0; pointer-events: none; }
+    .ai-bot-btn--dodge .ai-bot-btn__hand,
+    .ai-bot-btn--dodge .ai-bot-btn__pulse { animation: none; }
+    /* Dalğa halqası 22px yayılırdı — 12px kənar boşluğundan ekrandan çıxırdı; telefonda 10px. */
+    .ai-bot-btn--wave .ai-bot-btn__pulse { animation-name: ai-pulse-sm; }
+    .ai-fab-restore { right: env(safe-area-inset-right, 0px); bottom: max(22px, calc(env(safe-area-inset-bottom, 0px) + 12px)); }
+    #ai-fab.ai-fab--left #ai-fab-restore { left: env(safe-area-inset-left, 0px); }
+}
+@media (hover: none) {
+    .ai-bot-btn__hide::after { content: ""; position: absolute; inset: -8px; }
+}
 @media print {
     .ai-fab { display: none; }
 }

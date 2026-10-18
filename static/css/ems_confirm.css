@@ -151,5 +151,14 @@
 
     .ems-confirm__foot .btn {
         flex: 1 1 0;
+        min-height: 44px;
+    }
+
+    /* «×» 32 → 40px barmaq hədəfi (mobil qabıq 2026-10-19); mətnin sağ boşluğu 48px qalır. */
+    .ems-confirm__x {
+        top: 8px;
+        right: 8px;
+        width: 40px;
+        height: 40px;
     }
 }

@@ -17,7 +17,7 @@
     }
 
     function boxes(form) {
-        return Array.prototype.slice.call(form.querySelectorAll("[data-ebp-check]"));
+        return Array.prototype.slice.call(form.querySelectorAll("[data-ebp-check]:not(:disabled)"));
     }
 
     function selectAllInput(form) {

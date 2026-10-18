@@ -19,8 +19,9 @@ const urlCache = new Map();
 function moduleUrl(file) {
     if (urlCache.has(file)) return urlCache.get(file);
     let src = fs.readFileSync(file, "utf8");
-    // Nisbi importlar keş üçün `?v=` tokeni daşıyır (test_static_module_versions.py) — tanınır və atılır.
-    src = src.replace(/from\s+'\.\/([\w.]+?\.js)(?:\?v=[\w.-]+)?'/g, (match, name) => `from '${moduleUrl(path.join(PLAYER, name))}'`);
+    // Nisbi importlar (./x.js, ../host_lobby/y.js) faylın qovluğuna görə həll olunur; `?v=` tokeni
+    // (test_static_module_versions.py) tanınır və atılır.
+    src = src.replace(/from\s+'(\.{1,2}\/[\w./-]+?\.js)(?:\?v=[\w.-]+)?'/g, (match, rel) => `from '${moduleUrl(path.resolve(path.dirname(file), rel))}'`);
     const url = "data:text/javascript;base64," + Buffer.from(src).toString("base64");
     urlCache.set(file, url);
     return url;
@@ -144,4 +145,24 @@ test("multi select: respects max_select and toggles off", async () => {
     assert.deepEqual([...state.selectedIds].sort(), [1, 2]);
     answer.handleOptionTap(1); // geri götür
     assert.deepEqual([...state.selectedIds], [2]);
+});
+
+test("question card: a pasted code sample keeps its lines and indentation (hydrated, never clamped)", async () => {
+    const round = await load("render_round.js");
+    const views = await load("views.js");
+    const prose = "Aşağıdakı JavaScript kodu konsola nə yazdırır? ".repeat(5).trim();
+    const text = `${prose}\n\`\`\`js\nfor (let i = 0; i < 3; i++) {\n    console.log("<b>" + i);\n}\n\`\`\``;
+    const { el } = views.mountView("code-card-test", round.questionCardMarkup({ text }, { compact: true }));
+    const card = el.querySelector(".lxp-qcard");
+    assert.equal(card.classList.contains("is-clamped"), false);
+    const body = card.querySelector(".lxp-qcard__text");
+    assert.ok(body.classList.contains("has-code"));
+    const code = body.querySelector("code.lx-code");
+    assert.equal(code.textContent, 'for (let i = 0; i < 3; i++) {\n    console.log("<b>" + i);\n}');
+    assert.equal(code.querySelector("b"), null);
+    assert.equal(body.querySelector(".lx-code-text").textContent, prose);
+    // Kodsuz uzun mətn əvvəlki kimi qısaldılır, sətirləri isə toxunulmaz qalır.
+    const plain = views.mountView("plain-card-test", round.questionCardMarkup({ text: `${prose}\n${prose}` }, { compact: true }));
+    assert.equal(plain.el.querySelector(".lxp-qcard").classList.contains("is-clamped"), true);
+    assert.equal(plain.el.querySelector(".lxp-qcard__text").textContent, `${prose}\n${prose}`);
 });

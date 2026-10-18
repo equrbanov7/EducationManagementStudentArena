@@ -1,5 +1,5 @@
-import { icon, shapeKey, shapeSvg, toneIndex } from './icons.js?v=lx20261014';
-import { esc, formatNumber, lengthClass, tr } from './utils.js?v=lx20261014';
+import { icon, shapeKey, shapeSvg, toneIndex } from './icons.js?v=lx20261019';
+import { esc, formatNumber, lengthClass, tr } from './utils.js?v=lx20261019';
 
 /* Cavab plitələri — rəng (t1..t6) + FİQUR (rəng korları üçün), host və telefonda eyni:
  * 1 üçbucaq (qırmızı), 2 romb (göy), 3 dairə (kəhrəba), 4 kvadrat (yaşıl),
@@ -42,7 +42,7 @@ export function answerTileMarkup(option, index, verdict) {
     return `
         <article class="hx-tile hx-tile--t${toneIndex(index)} ${verdictClass}" data-len="${lengthClass(text)}" data-option-id="${Number(option?.id || 0)}">
             <span class="hx-tile__shape" role="img" aria-label="${esc(label)}">${shapeSvg(shape)}</span>
-            <span class="hx-tile__text hx-scroll">${esc(text)}</span>
+            <span class="hx-tile__text hx-scroll" data-code-text>${esc(text)}</span>
             ${
                 verdict
                     ? `<span class="hx-tile__verdict" role="img" aria-label="${esc(verdictText)}">${icon(verdict === "correct" ? "check" : "cross")}</span>`

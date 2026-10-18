@@ -7,9 +7,9 @@
     <link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20260909-hover">
     <link rel="stylesheet" href="{% static 'css/ems_ui/header.css' %}?v=20260903-3">
     <link rel="stylesheet" href="{% static 'css/ems_ui/badge.css' %}?v=20260903-3">
-    <link rel="stylesheet" href="{% static 'css/ems_ui/table.css' %}?v=20260914-a11y">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/table.css' %}?v=20261018-pkga">
     <link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
-    <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results_page.css' %}?v=20261010-wp3exams">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results_page.css' %}?v=20261019-mob">
 {% endblock %}
 
 {% block content %}
@@ -132,12 +132,12 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
         </section>
 
         {% if available_groups %}
-        {# Bütöv qrupa ikinci şans — filtr formasından AYRI form (iç-içə form HTML-də etibarsızdır). #}
+        {# Bütöv qrupa yenidən imtahan cəhdi — filtr formasından AYRI form (iç-içə form HTML-də etibarsızdır). #}
         <section class="ems-card etr-grant">
             <form method="post" action="{% url 'exams:grant_extra_attempt_group' slug=exam.slug %}" class="etr-grant__form">
                 {% csrf_token %}
                 <div class="etr-grant__copy">
-                    <h2 class="etr-grant__title"><i class="fas fa-rotate-right" aria-hidden="true"></i> {% trans "Qrupa ikinci şans" context "exams.template.teacher_exam_results" %}</h2>
+                    <h2 class="etr-grant__title"><i class="fas fa-rotate-right" aria-hidden="true"></i> {% trans "Qrupa yenidən imtahan cəhdi" context "exams.template.teacher_exam_results" %}</h2>
                     <p class="etp-hint">{% trans 'Seçilmiş qrupun bütün tələbələrinə bu imtahan üçün əlavə cəhd verir.' context 'exams.template.teacher_exam_results' %}</p>
                 </div>
                 <div class="etr-grant__field">
@@ -181,9 +181,11 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
                 {% trans "Başlama" context "exams.template.teacher_exam_results" as l_start %}
                 {% trans "Bitmə" context "exams.template.teacher_exam_results" as l_end %}
                 {% trans "Müddət" context "exams.template.teacher_exam_results" as l_duration %}
+                {% trans "Cavabsız" context "exams.template.teacher_exam_results" as l_unanswered %}
+                {% trans "Faiz" context "exams.template.teacher_exam_results" as l_percent %}
                 {% trans "saat:dəq:san" as t_duration %}
                 <div class="etp-tablescroll">
-                    <table class="ems-table etr-table">
+                    <table class="ems-table ems-table--stack etr-table">
                         <thead>
                             <tr>
                                 {% if can_delete_attempts %}<th scope="col" class="etr-col-check"><span class="visually-hidden">{% trans "Seçim" context "exams.template.teacher_exam_results" %}</span></th>{% endif %}

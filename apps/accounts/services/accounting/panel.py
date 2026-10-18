@@ -21,20 +21,13 @@ from ..hr_analytics.constants import STAFF_TYPES
 from ..hr_analytics.dataset import _CHAIR_TYPES, _FACULTY_TYPES, _placement, _structure
 from . import constants as C
 from . import dataset
-from .detail import teacher_detail
-from .filters import MONTH_ALL, AccountingFilters, parse_filters
+from .detail import period_bounds, period_label, teacher_detail
+from .filters import MONTH_ALL, MONTH_RANGE, AccountingFilters, parse_filters
 from .formatting import fmt_hours, kind_cells, staff_short
-from .periods import (
-    Semester,
-    default_month,
-    default_semester,
-    month_bounds,
-    month_label,
-    months,
-    semesters,
-    teaching_days,
-)
+from .legend import legend_items, range_messages
+from .periods import Semester, default_month, default_semester, month_label, months, semesters, teaching_days
 from .policy import resolve_actor
+from .ranges import range_day_counts
 from .rows import apply_filters, build_rows, sort_rows, totals
 
 
@@ -48,6 +41,10 @@ class Resolved:
     chairs: list
     persons: dict
     rows: list
+    #: Aralıq rejimi: aralığın fakt matrisi ({müəllim: {ay: {növ: [saat, dərs]}}}) və iş günləri (ay → gün).
+    range_held: dict | None = None
+    range_counts: dict | None = None
+    day_counts: dict | None = None
 
 
 def _structure_options(units: dict, actor) -> tuple[list[dict], list[dict]]:
@@ -68,6 +65,16 @@ def _structure_options(units: dict, actor) -> tuple[list[dict], list[dict]]:
 
 def resolve(request) -> Resolved:
     """Panel və ixrac EYNİ yoldan keçir (fail-closed). Sorğu sayı sabitdir."""
+    return _resolve(request)
+
+
+def resolve_teacher(request, teacher_id: int) -> Resolved:
+    """Müəllim pəncərəsi üçün: qapı, filtrlər və əhatə ``resolve`` ilə EYNİ, amma fakt / plan / şəxs sorğuları
+    YALNIZ həmin müəllim üçündür — ``rows`` ən çox bir sətirdir (əhatədən kənardırsa boşdur)."""
+    return _resolve(request, teacher_id=teacher_id)
+
+
+def _resolve(request, *, teacher_id: int | None = None) -> Resolved:
     actor = resolve_actor(request)
     empty = Resolved(actor, None, None, [], [], [], {}, [])
     if not actor.has_access:
@@ -88,13 +95,28 @@ def resolve(request) -> Resolved:
     semester = next((item for item in items if item.key == filters.semester), None)
     if semester is None:
         return Resolved(actor, filters, None, items, faculties, chairs, {}, [])
-    held = dataset.held_matrix(organization, semester)
-    planned = dataset.planned_matrix(organization, semester)
+    held = dataset.held_matrix(organization, semester, teacher=teacher_id)
+    planned = dataset.planned_matrix(organization, semester, teacher=teacher_id)
     persons = dataset.people(actor, set(held) | set(planned), semester.year, units=units)
+    day_counts = teaching_days(semester)
+    range_held = range_counts = None
+    if filters.is_range:
+        start, end = filters.range_dates
+        range_held = dataset.held_matrix(organization, semester, start=start, end=end, teacher=teacher_id)
+        range_counts = range_day_counts(semester, start, end)
     rows = build_rows(
-        persons, held, planned, month_keys=months(semester), day_counts=teaching_days(semester), month=filters.month
+        persons,
+        held,
+        planned,
+        month_keys=months(semester),
+        day_counts=day_counts,
+        month=filters.month,
+        range_held=range_held,
+        range_counts=range_counts,
     )
-    return Resolved(actor, filters, semester, items, faculties, chairs, persons, rows)
+    return Resolved(
+        actor, filters, semester, items, faculties, chairs, persons, rows, range_held, range_counts, day_counts
+    )
 
 
 def _url(base: str, filters: AccountingFilters, **overrides) -> str:
@@ -120,7 +142,10 @@ def _filter_fields(resolved: Resolved) -> list[dict]:
             "name": "ac_month",
             "label": pgettext(C.CTX, "Ay"),
             "options": [_option(key, month_label(key), filters.month) for key in month_keys]
-            + [_option(MONTH_ALL, pgettext(C.CTX, "Bütün semestr"), filters.month)],
+            + [
+                _option(MONTH_ALL, pgettext(C.CTX, "Bütün semestr"), filters.month),
+                _option(MONTH_RANGE, pgettext(C.CTX, "Tarix aralığı…"), filters.month),
+            ],
         },
         {
             "name": "ac_faculty",
@@ -152,30 +177,45 @@ def _status(key: str):
     return status_catalog.get(C.STATUS_FAMILY, key)
 
 
-def _kpis(summary: dict, period_label: str) -> list[dict]:
+def _kpis(summary: dict, period: str) -> list[dict]:
+    """KPI kartları — hər kartın alt qeydi rəqəmin NƏ olduğunu bir cümlə ilə deyir (sahib: «daha aydın»)."""
     kinds = summary["kinds"]
     held_note = " · ".join(f"{label} {fmt_hours(kinds[key])}" for key, label in C.KINDS)
     pct = summary["pct"]
+    band = C.deviation_percent()
+    hours = pgettext(C.CTX, "saat")
     return [
-        {"label": pgettext(C.CTX, "Keçirilmiş saat"), "value": fmt_hours(summary["held"]), "note": held_note},
-        {"label": pgettext(C.CTX, "Plan"), "value": fmt_hours(summary["planned"]), "note": period_label},
+        {
+            "label": pgettext(C.CTX, "Keçirilmiş saat"),
+            "value": fmt_hours(summary["held"]),
+            "unit": hours,
+            "note": held_note,
+        },
+        {
+            "label": pgettext(C.CTX, "Plan"),
+            "value": fmt_hours(summary["planned"]),
+            "unit": hours,
+            "note": pgettext(C.CTX, "{period} üçün paylanmış yükün payı").format(period=period),
+        },
         {
             "label": pgettext(C.CTX, "İcra"),
             "value": "—" if pct is None else pct,
             "unit": "" if pct is None else "%",
-            "note": fmt_hours(summary["diff"], signed=True) + " " + pgettext(C.CTX, "saat"),
+            "note": pgettext(C.CTX, "fakt ÷ plan · fərq {diff} saat").format(
+                diff=fmt_hours(summary["diff"], signed=True)
+            ),
         },
         {
             "label": pgettext(C.CTX, "Plandan çox"),
             "value": summary["over"],
             "tone": "accent-warning",
-            "note": pgettext(C.CTX, "müəllim (> +10%)"),
+            "note": pgettext(C.CTX, "müəllim · fakt > plan + {band}").format(band=f"{band}%"),
         },
         {
             "label": pgettext(C.CTX, "Plandan az"),
             "value": summary["under"],
             "tone": "accent-danger",
-            "note": pgettext(C.CTX, "müəllim (< −10%)"),
+            "note": pgettext(C.CTX, "müəllim · fakt < plan − {band}").format(band=f"{band}%"),
         },
     ]
 
@@ -198,9 +238,15 @@ def _columns(filters: AccountingFilters, base: str) -> list[dict]:
     return out
 
 
+def detail_query(filters: AccountingFilters, **overrides) -> str:
+    """Müəllim pəncərəsinin (modal) və ixracın query-si — panelin cari dövrü/filtrləri, səhifəsiz."""
+    return urlencode(filters.as_params(**{"page": 1, "lpage": 1, "teacher": "", **overrides}))
+
+
 def _table(rows, filters: AccountingFilters, base: str) -> dict:
     paginator = Paginator(rows, C.PAGE_SIZE)
     page = paginator.get_page(filters.page)
+    query = detail_query(filters)
     results = []
     for row in page.object_list:
         status = _status(row["status"])
@@ -217,6 +263,7 @@ def _table(rows, filters: AccountingFilters, base: str) -> dict:
                 "held_sem_text": fmt_hours(row["held_sem"]),
                 "status_obj": status,
                 "url": _url(base, filters, teacher=str(row["id"]), lpage=1),
+                "detail_url": reverse("accounts:accounting_teacher_detail", args=[row["id"]]) + "?" + query,
             }
         )
     return {
@@ -230,10 +277,16 @@ def _table(rows, filters: AccountingFilters, base: str) -> dict:
     }
 
 
-def _period_label(resolved: Resolved) -> str:
-    if resolved.filters.month == MONTH_ALL:
-        return resolved.semester.label
-    return month_label(resolved.filters.month)
+def _range_context(resolved: Resolved) -> dict:
+    filters, semester = resolved.filters, resolved.semester
+    return {
+        "is_range": filters.is_range,
+        "range_from": filters.date_from,
+        "range_to": filters.date_to,
+        "range_min": semester.start.isoformat(),
+        "range_max": semester.end.isoformat(),
+        "range_messages": range_messages(filters.range_notes, semester),
+    }
 
 
 def build_panel(request, *, profile_base_url: str = "") -> dict:
@@ -256,23 +309,25 @@ def build_panel(request, *, profile_base_url: str = "") -> dict:
         has_semester=resolved.semester is not None,
         filter_fields=_filter_fields(resolved),
         kind_labels=[str(label) for _key, label in C.KINDS],
+        deviation_percent=C.deviation_percent(),
     )
     if resolved.semester is None:
         return panel
-    period_label = _period_label(resolved)
+    period = period_label(filters, resolved.semester)
     rows = sort_rows(apply_filters(resolved.rows, filters), filters)
     # Drill-down açıqdırsa KPI-lar həmin müəllimindir (siyahının cəmi yox).
     focus = [row for row in resolved.rows if str(row["id"]) == filters.teacher] if filters.teacher else rows
     summary = totals(focus)
     panel.update(
         semester_label=resolved.semester.label,
-        period_label=period_label,
+        period_label=period,
         is_whole_semester=filters.month == MONTH_ALL,
-        month_in_progress=_month_in_progress(filters.month),
+        month_in_progress=_in_progress(filters),
         total_all=len(resolved.rows),
         total=len(rows),
         is_filtered=filters.is_filtered,
-        kpis=_kpis(summary, period_label),
+        kpis=_kpis(summary, period),
+        legend=legend_items(),
         summary={
             **summary,
             "planned_text": fmt_hours(summary["planned"]),
@@ -282,6 +337,8 @@ def build_panel(request, *, profile_base_url: str = "") -> dict:
         },
         export_url=reverse("accounts:accounting_export") + "?" + urlencode(filters.as_params(page=1, lpage=1)),
         list_url=_url(base, filters, teacher="", lpage=1),
+        reset_url=_url(base, filters, faculty="", chair="", q="", deviation="", page=1, teacher="", lpage=1),
+        **_range_context(resolved),
     )
     if filters.teacher:
         panel["detail"] = teacher_detail(resolved, base=base, url=_url)
@@ -290,11 +347,12 @@ def build_panel(request, *, profile_base_url: str = "") -> dict:
     return panel
 
 
-def _month_in_progress(month: str) -> bool:
-    if not month or month == MONTH_ALL:
+def _in_progress(filters: AccountingFilters) -> bool:
+    """Seçilmiş dövr bu günü əhatə edir (ay və ya aralıq) — fakt hələ artacaq."""
+    if not filters.month or filters.month == MONTH_ALL:
         return False
-    first, last = month_bounds(month)
+    first, last = period_bounds(filters)
     return first <= date.today() <= last
 
 
-__all__ = ["Resolved", "build_panel", "resolve"]
+__all__ = ["Resolved", "build_panel", "detail_query", "resolve", "resolve_teacher"]

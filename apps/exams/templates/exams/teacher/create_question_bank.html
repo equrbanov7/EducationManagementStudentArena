@@ -8,13 +8,18 @@
 <link rel="stylesheet" href="{% static 'css/ems_ui/header.css' %}?v=20260903-3">
 <link rel="stylesheet" href="{% static 'css/ems_ui/validation.css' %}?v=20260903-3">
 <link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
-<link rel="stylesheet" href="{% static 'exams/css/bank_picker_modal.css' %}?v=20261017-pkgc">
-<link rel="stylesheet" href="{% static 'exams/css/create_question_bank.css' %}?v=20261017-pkgc">
+<link rel="stylesheet" href="{% static 'exams/css/bank_picker_modal.css' %}?v=20261019-ui">
+<link rel="stylesheet" href="{% static 'exams/css/bank_picker_list.css' %}?v=20261019-ui">
+<link rel="stylesheet" href="{% static 'exams/css/create_question_bank.css' %}?v=20261019-ui">
+<link rel="stylesheet" href="{% static 'exams/css/ai_generator_panel.css' %}?v=20261019-ui">
 <link rel="stylesheet" href="{% static 'exams/css/create_question_bank_addons.css' %}?v=20261017-pkgc">
 {% endblock %}
 
 {% block content %} 
 <div class="bank-container etp-page cqb-page">
+    {% url 'exams:ai_generate_question_bank' exam.slug as qbank_ai_url %}
+    {% trans "AI ilə bu blok üçün sual yarat" context "exams.template.ai_question_bank" as qbank_ai_title %}
+    {% trans "Mühazirə faylı və ya prompt əsasında suallar hazırlanacaq və bu blokun mətn sahəsinə əlavə olunacaq." context "exams.template.ai_question_bank" as qbank_ai_subtitle %}
     {% comment %}Paket C 2026-10-17: müəllim səhifələrinin ortaq başlığı (geri + breadcrumb + H1) — əvvəl
     tərcüməsiz «Geri» düyməsi və mərkəzlənmiş bənövşəyi başlıq idi. Bank seçici düyməsinin
     çəngəli (`data-bank-picker-open` + `data-picker-url`) dəyişməyib.{% endcomment %}
@@ -127,64 +132,13 @@
                             </div>
                         {% endif %}
 
-                        <div class="ai-block-panel"
-                             data-ai-question-form
-                             data-ai-context="written"
-                             data-ai-url="{% url 'exams:ai_generate_question_bank' exam.slug %}">
-                            <div class="ai-block-panel__head">
-                                <span class="ai-block-panel__icon"><i class="fas fa-robot"></i></span>
-                                <div>
-                                    <h6>{% trans "AI ilə bu blok üçün sual yarat" context "exams.template.ai_question_bank" %}</h6>
-                                    <p>{% trans "Mühazirə faylı və ya prompt əsasında suallar hazırlanacaq və bu blokun mətn sahəsinə əlavə olunacaq." context "exams.template.ai_question_bank" %}</p>
-                                </div>
-                            </div>
-                            <div class="ai-block-grid">
-                                <label class="ai-block-field ai-block-field--wide">
-                                    <span>{% trans "Prompt / mövzu" context "exams.template.ai_question_bank" %}</span>
-                                    <textarea name="prompt" rows="2" placeholder="{% blocktrans trimmed with block_name=item.obj.name context 'exams.template.ai_question_bank' %}Məsələn: {{ block_name }} mövzusundan 5 yazılı sual yarat{% endblocktrans %}"></textarea>
-                                </label>
-                                <label class="ai-block-field ai-file-field" for="writtenAiSourceFile{{ forloop.counter }}">
-                                    <span>{% trans "Mühazirə faylı" context "exams.template.ai_question_bank" %}</span>
-                                    <input id="writtenAiSourceFile{{ forloop.counter }}" class="ai-file-input" data-ai-file-input type="file" name="source_file" accept=".pdf,.txt,.png,.jpg,.jpeg">
-                                    <span class="ai-file-picker">
-                                        <i class="fas fa-upload"></i>
-                                        <strong>{% trans "Fayl seç" context "exams.template.ai_question_bank" %}</strong>
-                                    </span>
-                                    <small class="ai-file-name" data-ai-file-name-for="writtenAiSourceFile{{ forloop.counter }}">{% trans "Fayl seçilməyib" context "exams.template.ai_question_bank" %}</small>
-                                </label>
-                                <label class="ai-block-field">
-                                    <span>{% trans "Sual sayı" context "exams.template.ai_question_bank" %}</span>
-                                    <input type="number" name="question_count" min="1" max="50" value="5">
-                                </label>
-                                <label class="ai-block-field">
-                                    <span>{% trans "Çətinlik" context "exams.template.ai_question_bank" %}</span>
-                                    <div class="bootstrap-single-select ai-difficulty-select">
-                                        <select name="difficulty" class="form-select bootstrap-single-select__native" data-bootstrap-select>
-                                            <option value="medium" selected>{% trans "Orta" context "exams.template.ai_question_bank" %}</option>
-                                            <option value="easy">{% trans "Asan" context "exams.template.ai_question_bank" %}</option>
-                                            <option value="hard">{% trans "Çətin" context "exams.template.ai_question_bank" %}</option>
-                                            <option value="mixed">{% trans "Qarışıq" context "exams.template.ai_question_bank" %}</option>
-                                        </select>
-                                    </div>
-                                </label>
-                                <div class="ai-block-actions">
-                                    <div class="ai-insert-toggle" aria-label="{% trans 'AI mətn yerləşdirmə rejimi' %}">
-                                        <label>
-                                            <input type="radio" name="ai_insert_mode_{{ forloop.counter }}" data-ai-insert-mode value="append" checked>
-                                            <span>{% trans "Mətnin sonuna əlavə et" context "exams.template.ai_question_bank" %}</span>
-                                        </label>
-                                        <label>
-                                            <input type="radio" name="ai_insert_mode_{{ forloop.counter }}" data-ai-insert-mode value="replace">
-                                            <span>{% trans "Mətn sahəsini əvəz et" context "exams.template.ai_question_bank" %}</span>
-                                        </label>
-                                    </div>
-                                    <button type="button" class="ai-generate-btn" data-ai-question-submit>
-                                        <i class="fas fa-magic"></i> {% trans "AI ilə yarat" context "exams.template.ai_question_bank" %}
-                                    </button>
-                                    <span class="ai-question-status" data-ai-question-status role="status" aria-live="polite"></span>
-                                </div>
-                            </div>
-                        </div>
+                        {% comment %}2026-10-19: ortaq AI paneli (blok variantı) — əvvəl burada, aşağıdakı defolt blokda və
+                        create_question_bank.js-də 3 ayrı kopya idi; serverdə render olunan bloklarda `data-extract-url`
+                        yox idi (fayl worker-də çıxarılmadan sinxron göndərilirdi).{% endcomment %}
+                        {% with ai_n=forloop.counter|stringformat:"d" %}
+                        {% blocktrans trimmed with block_name=item.obj.name context 'exams.template.ai_question_bank' asvar block_ai_placeholder %}Məsələn: {{ block_name }} mövzusundan 5 yazılı sual yarat{% endblocktrans %}
+                        {% include "exams/teacher/partials/_ai_generator_panel.html" with ai_url=qbank_ai_url ai_context="written" ai_uid=ai_n ai_file_prefix="writtenAiSourceFile" ai_variant="block" ai_mode_name="ai_insert_mode_"|add:ai_n ai_title=qbank_ai_title ai_subtitle=qbank_ai_subtitle ai_placeholder=block_ai_placeholder %}
+                        {% endwith %}
 
                         <div class="form-group">
                             <label for="block-content-{{ forloop.counter }}">{% trans "label_questions_copy_paste" context "exams.template.create_question_bank" %}:</label>
@@ -232,64 +186,8 @@
                             </div>
                         {% endif %}
 
-                        <div class="ai-block-panel"
-                             data-ai-question-form
-                             data-ai-context="written"
-                             data-ai-url="{% url 'exams:ai_generate_question_bank' exam.slug %}">
-                            <div class="ai-block-panel__head">
-                                <span class="ai-block-panel__icon"><i class="fas fa-robot"></i></span>
-                                <div>
-                                    <h6>{% trans "AI ilə bu blok üçün sual yarat" context "exams.template.ai_question_bank" %}</h6>
-                                    <p>{% trans "Mühazirə faylı və ya prompt əsasında suallar hazırlanacaq və bu blokun mətn sahəsinə əlavə olunacaq." context "exams.template.ai_question_bank" %}</p>
-                                </div>
-                            </div>
-                            <div class="ai-block-grid">
-                                <label class="ai-block-field ai-block-field--wide">
-                                    <span>{% trans "Prompt / mövzu" context "exams.template.ai_question_bank" %}</span>
-                                    <textarea name="prompt" rows="2" placeholder="{% trans 'Məsələn: Bölmə 1 üçün 5 yazılı sual yarat' context 'exams.template.ai_question_bank' %}"></textarea>
-                                </label>
-                                <label class="ai-block-field ai-file-field" for="writtenAiSourceFile1">
-                                    <span>{% trans "Mühazirə faylı" context "exams.template.ai_question_bank" %}</span>
-                                    <input id="writtenAiSourceFile1" class="ai-file-input" data-ai-file-input type="file" name="source_file" accept=".pdf,.txt,.png,.jpg,.jpeg">
-                                    <span class="ai-file-picker">
-                                        <i class="fas fa-upload"></i>
-                                        <strong>{% trans "Fayl seç" context "exams.template.ai_question_bank" %}</strong>
-                                    </span>
-                                    <small class="ai-file-name" data-ai-file-name-for="writtenAiSourceFile1">{% trans "Fayl seçilməyib" context "exams.template.ai_question_bank" %}</small>
-                                </label>
-                                <label class="ai-block-field">
-                                    <span>{% trans "Sual sayı" context "exams.template.ai_question_bank" %}</span>
-                                    <input type="number" name="question_count" min="1" max="50" value="5">
-                                </label>
-                                <label class="ai-block-field">
-                                    <span>{% trans "Çətinlik" context "exams.template.ai_question_bank" %}</span>
-                                    <div class="bootstrap-single-select ai-difficulty-select">
-                                        <select name="difficulty" class="form-select bootstrap-single-select__native" data-bootstrap-select>
-                                            <option value="medium" selected>{% trans "Orta" context "exams.template.ai_question_bank" %}</option>
-                                            <option value="easy">{% trans "Asan" context "exams.template.ai_question_bank" %}</option>
-                                            <option value="hard">{% trans "Çətin" context "exams.template.ai_question_bank" %}</option>
-                                            <option value="mixed">{% trans "Qarışıq" context "exams.template.ai_question_bank" %}</option>
-                                        </select>
-                                    </div>
-                                </label>
-                                <div class="ai-block-actions">
-                                    <div class="ai-insert-toggle" aria-label="{% trans 'AI mətn yerləşdirmə rejimi' %}">
-                                        <label>
-                                            <input type="radio" name="ai_insert_mode_1" data-ai-insert-mode value="append" checked>
-                                            <span>{% trans "Mətnin sonuna əlavə et" context "exams.template.ai_question_bank" %}</span>
-                                        </label>
-                                        <label>
-                                            <input type="radio" name="ai_insert_mode_1" data-ai-insert-mode value="replace">
-                                            <span>{% trans "Mətn sahəsini əvəz et" context "exams.template.ai_question_bank" %}</span>
-                                        </label>
-                                    </div>
-                                    <button type="button" class="ai-generate-btn" data-ai-question-submit>
-                                        <i class="fas fa-magic"></i> {% trans "AI ilə yarat" context "exams.template.ai_question_bank" %}
-                                    </button>
-                                    <span class="ai-question-status" data-ai-question-status role="status" aria-live="polite"></span>
-                                </div>
-                            </div>
-                        </div>
+                        {% trans 'Məsələn: Bölmə 1 üçün 5 yazılı sual yarat' context 'exams.template.ai_question_bank' as first_ai_placeholder %}
+                        {% include "exams/teacher/partials/_ai_generator_panel.html" with ai_url=qbank_ai_url ai_context="written" ai_uid="1" ai_file_prefix="writtenAiSourceFile" ai_variant="block" ai_mode_name="ai_insert_mode_1" ai_title=qbank_ai_title ai_subtitle=qbank_ai_subtitle ai_placeholder=first_ai_placeholder %}
 
                         <div class="form-group">
                             <label for="block-content-1">{% trans "label_questions_copy_paste" context "exams.template.create_question_bank" %}:</label>
@@ -333,11 +231,16 @@
     </div>
 </div>
 
+{# Yeni blok üçün AI paneli — create_question_bank.js klonlayır («__AIUID__» → blok id-si). #}
+<template id="qbankAiPanelTemplate">
+{% include "exams/teacher/partials/_ai_generator_panel.html" with ai_url=qbank_ai_url ai_context="written" ai_uid="__AIUID__" ai_file_prefix="writtenAiSourceFile" ai_variant="block" ai_mode_name="ai_insert_mode___AIUID__" ai_title=qbank_ai_title ai_subtitle=qbank_ai_subtitle ai_placeholder="" %}
+</template>
 {% include "exams/teacher/partials/_create_question_bank_scripts.html" %}
-<script src="{% static 'exams/js/aiQuestionBank.js' %}?v=20260508-ai-form-fix"></script>
+<script src="{% static 'exams/js/aiQuestionBank.js' %}?v=20261019-ui"></script>
 {% if exam.exam_type == 'written' %}
 {% url 'exams:exam_bank_picker' exam.slug as picker_url %}
-{% include "exams/teacher/partials/_bank_picker_shell.html" with picker_url=picker_url %}
-<script src="{% static 'exams/js/examBankPicker.js' %}?v=20261014-searchux"></script>
+{% include "exams/teacher/partials/_bank_picker_shell.html" with picker_url=picker_url picker_after="reload" %}
+<script src="{% static 'exams/js/examBankPicker_parts.js' %}?v=20261019-ui"></script>
+<script src="{% static 'exams/js/examBankPicker.js' %}?v=20261019-ui"></script>
 {% endif %}
 {% endblock %}

@@ -51,10 +51,11 @@ başqa müraciətdə də varsa xəbərdarlıq nişanı + o müraciətin izinə l
         {% endif %}
     </p>
     {% endif %}
+    {% if a.closure_document_url or a.app.closure_order_number %}<p class="rt-receipt"><i class="fas fa-gavel" aria-hidden="true"></i> {% trans "Bağlanış qərarı" context "registrar.retake" %}{% if a.app.closure_order_number %}: № {{ a.app.closure_order_number }}{% if a.app.closure_order_date %} · {{ a.app.closure_order_date|date:"d.m.Y" }}{% endif %}{% endif %}{% if a.closure_document_url %} · <a class="rt-link" href="{{ a.closure_document_url }}" target="_blank" rel="noopener" data-no-route-loading>{% trans "Sənəd" context "registrar.retake" %}</a>{% endif %}</p>{% endif %}
     {% if a.document_url %}<p class="rt-receipt"><i class="fas fa-file-signature" aria-hidden="true"></i> <a class="rt-link" href="{{ a.document_url }}" target="_blank" rel="noopener" data-no-route-loading>{% trans "Qərar sənədi" context "registrar.retake" %}</a></p>{% endif %}
     {% if app.student_note %}<p class="rt-note"><i class="far fa-comment" aria-hidden="true"></i> <span>{{ app.student_note }}</span></p>{% endif %}
 
-    {% if a.can_verify or a.can_admit or a.can_decide_subgroup or a.can_place or a.can_record %}
+    {% if a.can_verify or a.can_admit or a.can_decide_subgroup or a.can_place or a.can_record or a.can_close %}
     <div class="rt-actions" data-rt-subject="{{ app.subject.name }}" data-rt-student="{{ student.get_full_name|default:student.username }}">
         {% if a.can_verify %}
         <button type="button" class="ems-btn ems-btn--success ems-btn--sm" data-ems-overlay-open="rtVerifyDialog" data-rt-open data-rt-url="{% url 'retake:payment' a.id %}" data-rt-action="verify"><i class="fas fa-check" aria-hidden="true"></i> {% trans "Ödənişi təsdiqlə" context "registrar.retake" %}</button>
@@ -66,8 +67,16 @@ başqa müraciətdə də varsa xəbərdarlıq nişanı + o müraciətin izinə l
         {% if a.can_decide_subgroup %}
         <button type="button" class="ems-btn ems-btn--primary ems-btn--sm" data-ems-overlay-open="rtSubgroupDialog" data-rt-open data-rt-url="{% url 'retake:decision' a.id %}" data-rt-action="approve_subgroup" data-rt-offerings="{% url 'retake:subgroup_offerings' a.id %}"><i class="fas fa-people-arrows" aria-hidden="true"></i> {% trans "Alt qrupu təsdiqlə" context "registrar.retake" %}</button>
         {% endif %}
-        {% if a.can_admit or a.can_decide_subgroup %}
+        {% if a.can_decide_subgroup %}
         <button type="button" class="ems-btn ems-btn--sm" data-ems-overlay-open="rtRejectDialog" data-rt-open data-rt-url="{% url 'retake:decision' a.id %}" data-rt-action="reject"><i class="fas fa-ban" aria-hidden="true"></i> {% trans "Rədd et" context "registrar.retake" %}</button>
+        {% endif %}
+        {% comment %}2026-10-19 (sahib): ödənişdən sonra bağlanış — yalnız RƏSMİ QƏRARLA (əmr № + tarix və ya sənəd); qaytarılma yoxdur.{% endcomment %}
+        {% if a.can_no_show %}
+        <button type="button" class="ems-btn ems-btn--sm" data-ems-overlay-open="rtCloseDialog" data-rt-open data-rt-url="{% url 'retake:decision' a.id %}" data-rt-action="no_show" data-rt-title="{% trans 'İmtahana gəlmədi' context 'registrar.retake' %}"><i class="fas fa-user-xmark" aria-hidden="true"></i> {% trans "İmtahana gəlmədi" context "registrar.retake" %}</button>
+        {% endif %}
+        {% if a.can_close %}
+        <button type="button" class="ems-btn ems-btn--sm" data-ems-overlay-open="rtCloseDialog" data-rt-open data-rt-url="{% url 'retake:decision' a.id %}" data-rt-action="withdraw" data-rt-title="{% trans 'Qərarla geri götür' context 'registrar.retake' %}"><i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Qərarla geri götür" context "registrar.retake" %}</button>
+        <button type="button" class="ems-btn ems-btn--sm" data-ems-overlay-open="rtCloseDialog" data-rt-open data-rt-url="{% url 'retake:decision' a.id %}" data-rt-action="reject" data-rt-title="{% trans 'Qərarla rədd et' context 'registrar.retake' %}"><i class="fas fa-ban" aria-hidden="true"></i> {% trans "Qərarla rədd et" context "registrar.retake" %}</button>
         {% endif %}
         {% if a.can_place %}
         <button type="button" class="ems-btn ems-btn--primary ems-btn--sm" data-ems-overlay-open="rtSubgroupDialog" data-rt-open data-rt-url="{% url 'retake:decision' a.id %}" data-rt-action="place" data-rt-offerings="{% url 'retake:subgroup_offerings' a.id %}"><i class="fas fa-user-plus" aria-hidden="true"></i> {% trans "Alt qrupa yerləşdir" context "registrar.retake" %}</button>

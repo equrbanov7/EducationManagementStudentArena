@@ -26,6 +26,7 @@ from __future__ import annotations
 
 from django.apps import apps as django_apps
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.http import JsonResponse
@@ -100,14 +101,24 @@ def _apply_meta(unit, request):
     education_form = (request.POST.get("education_form") or "").strip()
     allowed_forms = {option["value"] for option in education_form_choices()}
     settings_blob["education_form"] = education_form if education_form in allowed_forms else ""
-    curriculum_id = (request.POST.get("curriculum_id") or "").strip()
-    if curriculum_id:
-        Curriculum = django_apps.get_model("registrar", "Curriculum")
-        exists = Curriculum.objects.filter(organization=unit.organization, pk=curriculum_id).exists()
-        settings_blob["curriculum_id"] = curriculum_id if exists else ""
-    else:
-        settings_blob["curriculum_id"] = ""
+    # 2026-10-19: forma `curriculum_id` GÖNDƏRMİR — əvvəl hər yazı bağlantını "" edirdi.
+    # İndi «tutor» kimi: yalnız sahə POST-da VARSA dəyişir (boş dəyər = bağlantını sil).
+    if "curriculum_id" in request.POST:
+        settings_blob["curriculum_id"] = _known_curriculum_id(unit.organization, request.POST.get("curriculum_id"))
     unit.settings = settings_blob
+
+
+def _known_curriculum_id(organization, raw) -> str:
+    """Tenant daxilində mövcud planın id-si, əks halda "" (yanlış UUID də "")."""
+    curriculum_id = (raw or "").strip()
+    if not curriculum_id:
+        return ""
+    Curriculum = django_apps.get_model("registrar", "Curriculum")
+    try:
+        exists = Curriculum.objects.filter(organization=organization, pk=curriculum_id).exists()
+    except (ValueError, ValidationError):
+        exists = False
+    return curriculum_id if exists else ""
 
 
 def _save_group(request, organization, scope):

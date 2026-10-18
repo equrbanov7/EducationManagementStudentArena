@@ -7,7 +7,7 @@ Nə üçün:
 - /courses/create_course/ → Kurs yaratma
 - /courses/<id>/dashboard/ → Kurs dashboard (accordion)
 - /courses/<id>/topic/add/ → Mövzu əlavə et (modal)
-- /courses/<id>/resource/add/ → Resurs əlavə et (modal)
+- /courses/resource-upload/<id>/ → Resurs əlavə et (modal; nginx-də ayrıca böyük gövdə limiti)
 - ... və s.
 
 Namespace: courses:
@@ -74,10 +74,11 @@ urlpatterns = [
     # ════════════════════════════════════════════════════════════════════════
     # Resurslar (Resources)
     # ════════════════════════════════════════════════════════════════════════
-    # POST /courses/<id>/resource/add/ (AJAX/Modal)
-    # Resurs əlavə et
+    # POST /courses/resource-upload/<id>/ (AJAX/Modal) — Resurs əlavə et.
+    # 2026-10-19: sabit prefiks (əvvəl `<id>/resource/add/`) ki, nginx `location ^~ /courses/resource-upload/`
+    # yalnız bu yola böyük gövdə (video ≤ 200 MB) versin — bax docker/nginx/nginx.conf, apps/courses/resource_upload.py.
     path(
-        "<int:course_id>/resource/add/",
+        "resource-upload/<int:course_id>/",
         views.AddResourceView.as_view(),
         name="add_resource",
     ),

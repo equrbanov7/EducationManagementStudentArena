@@ -4,7 +4,8 @@
  *         (extracted from partials/_create_question_bank_scripts.html)
  *
  * Written/coding question-bank builder: add/remove blocks, live block-title
- * mirroring, duplicate-name guard, and the per-block AI generation panel.
+ * mirroring, duplicate-name guard, and the per-block AI generation panel
+ * (cloned from the server-rendered <template id="qbankAiPanelTemplate">).
  *
  * Config + i18n come from JSON islands rendered by the template:
  *   #qbank-config           scalars/flags/URLs
@@ -30,87 +31,29 @@
 
     var QBANK_DEFAULT_BLOCK_PAINT_ENABLED = Boolean(CFG.defaultBlockPaintEnabled);
     var QBANK_SHOW_BLOCK_PAINT = Boolean(CFG.showBlockPaint);
-    var QBANK_AI_URL = CFG.aiUrl || "";
-    var QBANK_EXTRACT_URL = CFG.extractUrl || "";
 
     var blockToDelete = null;
     var blockCounter = Number(CFG.blockCount);
     if (!blockCounter || blockCounter === 0) { blockCounter = 1; }
 
-    function escapeHtml(value) {
-        return String(value || "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;");
-    }
-
+    // 2026-10-19: AI paneli artıq JS sətrində qurulmur — server-də ortaq partial-dan
+    // (_ai_generator_panel.html) render olunan <template id="qbankAiPanelTemplate"> klonlanır,
+    // «__AIUID__» blokun unikal id-si ilə əvəz olunur. Beləliklə yeni blokun paneli
+    // server bloklarınınkı ilə eynidir (dizayn, tərcümə, data-extract-url).
     function renderAiBlockPanel(uniqueID, defaultTitle) {
-        var fileInputId = "writtenAiSourceFile" + uniqueID;
-        var promptPlaceholder = escapeHtml(
-            (I18N_QBANK.aiDynamicPlaceholder || "").replace("{block_name}", defaultTitle)
-        );
-
-        return "" +
-            '<div class="ai-block-panel"' +
-            '     data-ai-question-form' +
-            '     data-ai-context="written"' +
-            '     data-ai-url="' + QBANK_AI_URL + '"' +
-            '     data-extract-url="' + QBANK_EXTRACT_URL + '">' +
-            '    <div class="ai-block-panel__head">' +
-            '        <span class="ai-block-panel__icon"><i class="fas fa-robot"></i></span>' +
-            '        <div>' +
-            '            <h6>' + I18N_QBANK.aiBlockTitle + '</h6>' +
-            '            <p>' + I18N_QBANK.aiBlockDesc + '</p>' +
-            '        </div>' +
-            '    </div>' +
-            '    <div class="ai-block-grid">' +
-            '        <label class="ai-block-field ai-block-field--wide">' +
-            '            <span>' + I18N_QBANK.aiPromptTopic + '</span>' +
-            '            <textarea name="prompt" rows="2" placeholder="' + promptPlaceholder + '"></textarea>' +
-            '        </label>' +
-            '        <label class="ai-block-field ai-file-field" for="' + fileInputId + '">' +
-            '            <span>' + I18N_QBANK.aiLectureFile + '</span>' +
-            '            <input id="' + fileInputId + '" class="ai-file-input" data-ai-file-input type="file" name="source_file" accept=".pdf,.txt,.png,.jpg,.jpeg">' +
-            '            <span class="ai-file-picker">' +
-            '                <i class="fas fa-upload"></i>' +
-            '                <strong>' + I18N_QBANK.aiChooseFile + '</strong>' +
-            '            </span>' +
-            '            <small class="ai-file-name" data-ai-file-name-for="' + fileInputId + '">' + I18N_QBANK.aiNoFileSelected + '</small>' +
-            '        </label>' +
-            '        <label class="ai-block-field">' +
-            '            <span>' + I18N_QBANK.aiQuestionCount + '</span>' +
-            '            <input type="number" name="question_count" min="1" max="50" value="5">' +
-            '        </label>' +
-            '        <label class="ai-block-field">' +
-            '            <span>' + I18N_QBANK.aiDifficulty + '</span>' +
-            '            <div class="bootstrap-single-select ai-difficulty-select">' +
-            '                <select name="difficulty" class="form-select bootstrap-single-select__native" data-bootstrap-select>' +
-            '                    <option value="medium" selected>' + I18N_QBANK.aiMedium + '</option>' +
-            '                    <option value="easy">' + I18N_QBANK.aiEasy + '</option>' +
-            '                    <option value="hard">' + I18N_QBANK.aiHard + '</option>' +
-            '                    <option value="mixed">' + I18N_QBANK.aiMixed + '</option>' +
-            '                </select>' +
-            '            </div>' +
-            '        </label>' +
-            '        <div class="ai-block-actions">' +
-            '            <div class="ai-insert-toggle" aria-label="' + I18N_QBANK.aiInsertModeLabel + '">' +
-            '                <label>' +
-            '                    <input type="radio" name="ai_insert_mode_' + uniqueID + '" data-ai-insert-mode value="append" checked>' +
-            '                    <span>' + I18N_QBANK.aiAppendMode + '</span>' +
-            '                </label>' +
-            '                <label>' +
-            '                    <input type="radio" name="ai_insert_mode_' + uniqueID + '" data-ai-insert-mode value="replace">' +
-            '                    <span>' + I18N_QBANK.aiReplaceMode + '</span>' +
-            '                </label>' +
-            '            </div>' +
-            '            <button type="button" class="ai-generate-btn" data-ai-question-submit>' +
-            '                <i class="fas fa-magic"></i> ' + I18N_QBANK.aiGenerate +
-            '            </button>' +
-            '            <span class="ai-question-status" data-ai-question-status role="status" aria-live="polite"></span>' +
-            '        </div>' +
-            '    </div>' +
-            '</div>';
+        var tpl = document.getElementById("qbankAiPanelTemplate");
+        if (!tpl) { return ""; }
+        var html = tpl.innerHTML.replace(/__AIUID__/g, String(uniqueID));
+        var holder = document.createElement("div");
+        holder.innerHTML = html.trim();
+        var prompt = holder.querySelector('textarea[name="prompt"]');
+        if (prompt) {
+            prompt.setAttribute(
+                "placeholder",
+                (I18N_QBANK.aiDynamicPlaceholder || "").replace("{block_name}", defaultTitle)
+            );
+        }
+        return holder.innerHTML;
     }
 
     document.addEventListener('DOMContentLoaded', function() {

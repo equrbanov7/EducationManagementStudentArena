@@ -499,9 +499,10 @@ class RegistrarMigrationTargetGuardTests(TestCase):
         # + 0058 `registrar_teachinghandover.offering_id` (fənn təhvili qeydi)
         # + 0086 `registrar_journalhygienedecision` (jurnal təmizliyi qərarı, 2026-10-11)
         # + 0092 `registrar_subgroupplacementevent` (alt qrupa yerləşdirmə hadisəsi, 2026-10-18)
-        # + 0091 25% / alt qrup müraciəti: 12 FK (müraciət ×8, hadisə, qəbz, imtahan şansı ×2), 2026-10-18.
+        # + 0091 25% / alt qrup müraciəti: 12 FK (müraciət ×8, hadisə, qəbz, imtahan şansı ×2), 2026-10-18
+        # + 0093 25% pəncərəsi (dövr) + təhsil haqqı cədvəli (ixtisas): 2 FK, 2026-10-19.
         self.assertEqual(immutable_trigger_count, 30)
-        self.assertEqual(same_org_trigger_count, 55)
+        self.assertEqual(same_org_trigger_count, 57)
 
     def test_precheck_stops_instead_of_rewriting_existing_violation(self):
         with self.assertRaises(IntegrityError):

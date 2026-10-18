@@ -408,13 +408,15 @@ SPECS: dict[str, Spec] = {
 # 2026-10-18 (sahib): 25% təkrar imtahan / alt qrup açarları ayrı modulda (bu fayl 600-sətir tavanındadır).
 from core import runtime_settings_retake as _retake  # noqa: E402
 
-GROUPS = GROUPS + (_retake.GROUP,)
+GROUPS = GROUPS + _retake.GROUPS
 SPECS.update({spec.key: spec for spec in _retake.retake_specs(Spec)})
 # «Kredit yükü və alt qrup» (sahib 2026-10-18) — oxu nöqtəsi YALNIZ apps.registrar.credit_load.
 from core import runtime_settings_credits as _credits  # noqa: E402
 
 GROUPS = GROUPS[:1] + (_credits.GROUP,) + GROUPS[1:]
 SPECS.update({spec.key: spec for spec in _credits.build_specs(Spec)})
+# «Əmək müqavilələri» (2026-10-19) — ayrı modul; import ifadənin içindədir (fayl 600-sətir tavanındadır).
+GROUPS = __import__("core.runtime_settings_hr_contracts", fromlist=["register"]).register(GROUPS, SPECS, Spec)
 
 
 def enabled() -> bool:

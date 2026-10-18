@@ -1,11 +1,11 @@
 // LX-FE-PLAYER (2026-09-29): raund görünüşləri — «Hazır ol», giriş (sual oxunur), cavab plitələri
 // (tək/çox seçim, yazılı cavab), «cavab qəbul edildi» və «vaxt bitdi». Hər görünüş açarla qurulur
 // (views.js) — eyni açarla təkrar çağırış yalnız dinamik hissələri (saniyə, sayğac) yeniləyir.
-import { PHASES, TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20261014';
-import { playSound } from './audio.js?v=lx20261014';
-import { state } from './state.js?v=lx20261014';
-import { shapeKey, shapeLabel, shapeSvg, toneIndex } from './shapes.js?v=lx20261014';
-import { announce, setQuestionChip, setTimer, startTimeBar, stopTimeBar } from './ui.js?v=lx20261014';
+import { PHASES, TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20261019';
+import { playSound } from './audio.js?v=lx20261019';
+import { state } from './state.js?v=lx20261019';
+import { shapeKey, shapeLabel, shapeSvg, toneIndex } from './shapes.js?v=lx20261019';
+import { announce, setQuestionChip, setTimer, startTimeBar, stopTimeBar } from './ui.js?v=lx20261019';
 import {
     esc,
     fmt,
@@ -17,8 +17,9 @@ import {
     toInt,
     tr,
     ts,
-} from './utils.js?v=lx20261014';
-import { currentViewEl, mountView } from './views.js?v=lx20261014';
+} from './utils.js?v=lx20261019';
+import { currentViewEl, mountView } from './views.js?v=lx20261019';
+import { hasCodeBlock } from '../host_lobby/code_text.js?v=lx20261019';
 
 export const CHECK_SVG =
     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -66,10 +67,12 @@ function roundKicker(question) {
 export function questionCardMarkup(question, { compact = false } = {}) {
     const show = showQuestionsOnDevices();
     const text = show ? String(question.text || "") : tr("questionHiddenBody", "Sual böyük ekrandadır — oradan oxu");
-    const long = show && text.length > (compact ? 110 : 220);
+    // 2026-10-19: kod nümunəsi sətir-sətir kəsilmir (4 sətirlik «clamp» kodu yarımçıq qoyardı) — kod
+    // bloku özü hündürlükdə məhdudlaşır və içində sürüşür (css/live_code_text.css).
+    const long = show && text.length > (compact ? 110 : 220) && !hasCodeBlock(text);
     return (
         `<div class="lxp-qcard notranslate${compact ? " is-compact" : ""}${long ? " is-clamped" : ""}${show ? "" : " is-hidden-text"}" translate="no" data-len="${lengthClass(text)}">` +
-        `<p class="lxp-qcard__text">${esc(text)}</p>` +
+        `<p class="lxp-qcard__text" data-code-text>${esc(text)}</p>` +
         (long
             ? `<button type="button" class="lxp-qcard__more" data-lxp-expand aria-expanded="false">${esc(tr("expandQuestion", "Tam oxu"))}</button>`
             : "") +
@@ -95,7 +98,7 @@ function tilesMarkup(question) {
                 `data-tone="${toneIndex(option, index)}" data-len="${lengthClass(text)}" aria-pressed="${selected ? "true" : "false"}" ` +
                 `aria-label="${esc(text ? `${label}: ${text}` : label)}">` +
                 `<span class="lxp-tile__shape">${shapeSvg(key)}</span>` +
-                (text ? `<span class="lxp-tile__text">${esc(text)}</span>` : "") +
+                (text ? `<span class="lxp-tile__text" data-code-text>${esc(text)}</span>` : "") +
                 (multi ? `<span class="lxp-tile__check" aria-hidden="true">${CHECK_SVG}</span>` : "") +
                 `</button>`
             );

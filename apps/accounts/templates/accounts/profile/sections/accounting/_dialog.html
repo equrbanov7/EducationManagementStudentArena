@@ -1,0 +1,25 @@
+{% load i18n %}
+{% comment %}Müəllim pəncərəsinin qabığı (ems_ui dialoq müqaviləsi: role=dialog, aria-modal, aria-labelledby; fokus tələsi,
+Escape və fokusun qayıtması `ems_ui/overlay.js`-dədir). Məzmunu `accounting.js` `accounting_teacher_detail` JSON-undan
+doldurur; mətnlər (yüklənir / xəta) data-atributlardadır. Panelin İÇİNDƏDİR — bölmə yenilənəndə özü də yenilənir.{% endcomment %}
+<div class="ems-overlay ems-overlay--dialog" id="ac-teacher-dialog" hidden data-ac-dialog
+     data-ac-loading="{% trans 'Yüklənir…' context 'accounts.accounting' %}"
+     data-ac-error="{% trans 'Məlumatı yükləmək alınmadı. Bir az sonra yenidən cəhd edin.' context 'accounts.accounting' %}"
+     data-ac-not-found="{% trans 'Müəllim tapılmadı və ya sizin əhatənizdən kənardadır.' context 'accounts.accounting' %}"
+     data-ac-forbidden="{% trans 'Bu məlumata baxmaq üçün icazəniz yoxdur.' context 'accounts.accounting' %}">
+    <div class="ems-dialog ac-dialog" role="dialog" aria-modal="true"
+         aria-labelledby="ac-teacher-dialog-title" aria-describedby="ac-teacher-dialog-sub">
+        <div class="ems-dialog__head">
+            <div class="ac-dialog__headtext">
+                <h2 class="ems-dialog__title" id="ac-teacher-dialog-title" data-ac-dialog-title>{% trans "Müəllim" context "accounts.accounting" %}</h2>
+                <p class="ems-dialog__sub" id="ac-teacher-dialog-sub" data-ac-dialog-sub></p>
+            </div>
+            <button type="button" class="ems-dialog__x" data-ems-overlay-close
+                    aria-label="{% trans 'Bağla' context 'ui.dialog' %}">×</button>
+        </div>
+        <div class="ems-dialog__body ac-dialog__body" data-ac-dialog-body aria-live="polite"></div>
+        <div class="ems-dialog__foot" data-ac-dialog-foot>
+            <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Bağla" context "ui.dialog" %}</button>
+        </div>
+    </div>
+</div>

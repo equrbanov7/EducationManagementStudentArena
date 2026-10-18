@@ -31,6 +31,7 @@ ilə; düymə `rtApplyDialog`-u açır və gizli sahələri `data-rt-*` atributl
             <div class="rt-option__text">
                 <strong>{% trans "25% təkrar imtahan" context "registrar.retake" %}</strong>
                 {% if o25.allowed %}<span>{% trans "Ödəniş qəbzi ilə — Mühasibatlıq təsdiqləyəndən sonra dekanlıq buraxır." context "registrar.retake" %}</span>{% else %}<span class="rt-why">{{ o25.why }}</span>{% endif %}
+                {% include "registrar/retake/_fee_hint.html" with amount=row.fee.amount year=row.fee.inputs.academic_year %}
             </div>
             {% if o25.allowed %}
             <button type="button" class="ems-btn ems-btn--primary ems-btn--sm" data-ems-overlay-open="rtApplyDialog"

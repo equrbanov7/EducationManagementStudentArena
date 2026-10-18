@@ -15,9 +15,23 @@ qəbz, geri götürmə), tarixçə («neçə dəfə 25%-ə girib, nə olub»). Y
     {% endblocktrans %}
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=rt_subtitle %}
 
-    {% if not rp.window_open %}
-        {% trans "Müraciət pəncərəsi bağlıdır" context "registrar.retake" as rt_closed_t %}
-        {% trans "Hazırda yeni müraciət qəbul olunmur. Göndərdiyiniz müraciətlərin vəziyyətini aşağıda izləyə bilərsiniz." context "registrar.retake" as rt_closed_b %}
+    {% comment %}2026-10-19 (sahib: «İmtahan mərkəzi açsın bunu»): pəncərəni İmtahan mərkəzi açır və bağlayır.{% endcomment %}
+    {% if rp.window_open %}
+        {% if rp.window.closes_at %}
+            {% blocktrans asvar rt_open_t with until=rp.window.closes_at|date:"d.m.Y H:i" context "registrar.retake" %}Müraciət pəncərəsi açıqdır — {{ until }} tarixinədək{% endblocktrans %}
+        {% else %}
+            {% trans "Müraciət pəncərəsi açıqdır" context "registrar.retake" as rt_open_t %}
+        {% endif %}
+        {% blocktrans asvar rt_open_b with period=rp.window.period.name context "registrar.retake" %}Dövr: {{ period }}. Pəncərəni İmtahan mərkəzi açır və bağlayır.{% endblocktrans %}
+        {% include "partials/ems_ui/_banner.html" with banner_kind="success" banner_title=rt_open_t banner_body=rt_open_b %}
+    {% else %}
+        {% if rp.upcoming_window %}
+            {% trans "Müraciət pəncərəsi bağlıdır" context "registrar.retake" as rt_closed_t %}
+            {% blocktrans asvar rt_closed_b with when=rp.upcoming_window.opens_at|date:"d.m.Y H:i" context "registrar.retake" %}Pəncərə {{ when }} tarixində açılacaq. Göndərdiyiniz müraciətlərin vəziyyətini aşağıda izləyə bilərsiniz.{% endblocktrans %}
+        {% else %}
+            {% trans "Müraciət pəncərəsi bağlıdır — imtahan mərkəzi açanda burada görünəcək" context "registrar.retake" as rt_closed_t %}
+            {% trans "Hazırda yeni müraciət qəbul olunmur. Göndərdiyiniz müraciətlərin vəziyyətini aşağıda izləyə bilərsiniz." context "registrar.retake" as rt_closed_b %}
+        {% endif %}
         {% include "partials/ems_ui/_banner.html" with banner_kind="warning" banner_title=rt_closed_t banner_body=rt_closed_b %}
     {% endif %}
 

@@ -583,3 +583,10 @@ p.ann-ack { flex-direction: row; align-items: center; gap: 8px; margin: 0; font-
 @media (prefers-reduced-motion: reduce) {
     .ann-card { transition: none; }
 }
+
+/* Mobil audit 2026-10-19: 3 seçici telefonda 3 ayrı sətir tuturdu — 2+1 düzülüş. */
+@media (max-width: 480px) {
+    .ann-filters__select {
+        flex-basis: 120px;
+    }
+}

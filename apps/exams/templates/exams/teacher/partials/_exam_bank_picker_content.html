@@ -1,61 +1,77 @@
 {% load i18n %}
 {% comment %}
-Picker modalının DƏYİŞƏN hissəsi (stats + siyahı başlığı + ilk səhifə).
-Toolbar/footer statik qalır; bu hissə filtr/bank dəyişəndə yenidən yüklənir.
-data-picker-total selection JS-i üçün ümumi sayı daşıyır.
+Picker modalının DƏYİŞƏN hissəsi (xülasə + siyahı başlığı + ilk səhifə). Filtr sırası/alt sıra
+statik qalır; bu hissə filtr/bank dəyişəndə yenidən yüklənir. `data-picker-total` — SEÇİLƏ BİLƏN
+(imtahanda olmayan) uyğun sualların sayı: «Bütün N sualı seç» sayğacı onunla hesablanır.
 {% endcomment %}
-{% if not selected_bank %}
-<div class="bankpicker-empty">
-    <i class="fas fa-arrow-up"></i>
-    <p>{% trans "Başlamaq üçün yuxarıdan bir sual bankı seçin." %}</p>
+{% if not banks %}
+<div class="ems-state bankpicker-state" role="status">
+    <i class="fas fa-database ems-state__icon" aria-hidden="true"></i>
+    <p class="ems-state__title">{% trans "Uyğun sual bankı yoxdur" context "exams.template.bank_picker" %}</p>
+    <p class="ems-state__body">{% trans "Bu imtahanın tipinə uyğun bank tapılmadı. Sual bankları kitabxanasında yeni bank yaradın və ya sizinlə paylaşılmasını xahiş edin." context "exams.template.bank_picker" %}</p>
+    <a class="ems-btn ems-btn--primary" href="{% url 'exams:question_bank_list' %}">{% trans "Sual banklarına keç" context "exams.template.bank_picker" %}</a>
+</div>
+{% elif not selected_bank %}
+<div class="ems-state bankpicker-state" role="status">
+    <span class="bankpicker-state__badge" aria-hidden="true"><i class="fas fa-book-bookmark"></i></span>
+    <p class="ems-state__title">{% trans "Əvvəl bank seçin" context "exams.template.bank_picker" %}</p>
+    <p class="ems-state__body">{% trans "Sualları görmək üçün yuxarıdan sual bankını seçin — sonra axtarış və filtrlərlə daraldın." context "exams.template.bank_picker" %}</p>
 </div>
 {% else %}
-<div class="bankpicker-content-inner" data-picker-total="{{ total_count }}">
-    {# ── Statistika ── #}
-    <div class="bankpicker-stats">
-        <div class="bankpicker-stat">
-            <span class="bankpicker-stat__value">{{ bank_total_questions }}</span>
-            <span class="bankpicker-stat__label">
-                {% if compatible_type == 'written' %}{% trans "yazılı sual" %}{% else %}{% trans "test sualı" %}{% endif %}
-            </span>
+<div class="bankpicker-content-inner" data-picker-total="{{ selectable_count }}">
+    <div class="bankpicker-summary">
+        <p class="bankpicker-summary__count">
+            {% trans "Tapılan suallar" context "exams.template.bank_picker" %}: <strong class="etp-num">{{ total_count }}</strong>
+            {% if attached_count %}<span class="bankpicker-summary__muted">· {% blocktrans trimmed with n=attached_count context "exams.template.bank_picker" %}{{ n }} artıq imtahanda{% endblocktrans %}</span>{% endif %}
+        </p>
+        {% if bank_language_count > 1 %}
+        <div class="bankpicker-langchips" role="group" aria-label="{% trans 'Dil üzrə süz' context 'exams.template.bank_picker' %}">
+            <button type="button" class="ems-chip bankpicker-langchip" data-picker-lang="" aria-pressed="{% if not language_filter %}true{% else %}false{% endif %}">
+                {% trans "Hamısı" context "exams.template.bank_picker" %} <span class="bankpicker-langchip__n">{{ bank_total_questions }}</span>
+            </button>
+            {% for stat in bank_language_stats %}
+            <button type="button" class="ems-chip bankpicker-langchip" data-picker-lang="{{ stat.code }}" aria-pressed="{% if language_filter == stat.code %}true{% else %}false{% endif %}">
+                {{ stat.label }} <span class="bankpicker-langchip__n">{{ stat.count }}</span>
+            </button>
+            {% endfor %}
         </div>
-        <div class="bankpicker-stat">
-            <span class="bankpicker-stat__value">{{ bank_language_count }}</span>
-            <span class="bankpicker-stat__label">{% trans "dil" %}</span>
-        </div>
-        <div class="bankpicker-stat bankpicker-stat--chips">
-            <span class="bankpicker-stat__label">{% trans "Dil üzrə" %}:</span>
-            <div class="bankpicker-langchips">
-                {% for stat in bank_language_stats %}
-                <button type="button" class="bankpicker-langchip {% if language_filter == stat.code %}is-active{% endif %}"
-                        data-picker-lang="{{ stat.code }}" title="{{ stat.label }}">
-                    {{ stat.label }} <strong>{{ stat.count }}</strong>
-                </button>
-                {% empty %}
-                <span class="bankpicker-langchip bankpicker-langchip--muted">{% trans "Bu bankda uyğun sual yoxdur" %}</span>
-                {% endfor %}
-            </div>
-        </div>
+        {% endif %}
     </div>
 
-    {# ── Siyahı başlığı ── #}
+    {% if questions %}
     <div class="bankpicker-listhead">
-        <span class="bankpicker-found">
-            {{ total_count }} {% trans "sual tapıldı" %}
-        </span>
+        <label class="bankpicker-pagecheck">
+            <input type="checkbox" data-picker-page-toggle {% if not selectable_count %}disabled{% endif %}>
+            <span>{% trans "Görünənlərin hamısını seç" context "exams.template.bank_picker" %}</span>
+        </label>
         <div class="bankpicker-listhead__actions">
-            <button type="button" class="bankpicker-textbtn" data-picker-select-all>
-                <i class="fas fa-check-double"></i> {% trans "Hamısını seç" %}
+            {% if selectable_count > questions|length %}
+            <button type="button" class="ems-btn ems-btn--ghost ems-btn--sm" data-picker-select-all>
+                <i class="fas fa-check-double" aria-hidden="true"></i>{% blocktrans trimmed with n=selectable_count context "exams.template.bank_picker" %}Bütün {{ n }} sualı seç{% endblocktrans %}
             </button>
-            <button type="button" class="bankpicker-textbtn" data-picker-deselect-all>
-                <i class="fas fa-xmark"></i> {% trans "Təmizlə" %}
+            {% endif %}
+            <button type="button" class="ems-btn ems-btn--ghost ems-btn--sm" data-picker-deselect-all>
+                <i class="fas fa-xmark" aria-hidden="true"></i>{% trans "Təmizlə" context "exams.template.bank_picker" %}
             </button>
         </div>
     </div>
 
-    {# ── Sual siyahısı (lazy-scroll əlavələri buraya gəlir) ── #}
-    <div class="bankpicker-list" data-picker-list>
+    <ul class="bankpicker-list" data-picker-list role="list">
         {% include "exams/teacher/partials/_exam_bank_picker_items.html" %}
+    </ul>
+    {% elif bank_total_questions %}
+    <div class="ems-state bankpicker-state" role="status">
+        <i class="fas fa-filter-circle-xmark ems-state__icon" aria-hidden="true"></i>
+        <p class="ems-state__title">{% trans "Filtrlərə uyğun sual tapılmadı" context "exams.template.bank_picker" %}</p>
+        <p class="ems-state__body">{% trans "Axtarışı dəyişin və ya filtrləri sıfırlayın." context "exams.template.bank_picker" %}</p>
+        <button type="button" class="ems-btn" data-picker-reset>{% trans "Filtrləri sıfırla" context "exams.template.bank_picker" %}</button>
     </div>
+    {% else %}
+    <div class="ems-state bankpicker-state" role="status">
+        <i class="fas fa-box-open ems-state__icon" aria-hidden="true"></i>
+        <p class="ems-state__title">{% trans "Bu bankda uyğun sual yoxdur" context "exams.template.bank_picker" %}</p>
+        <p class="ems-state__body">{% trans "Başqa bank seçin və ya kitabxanada bu banka sual əlavə edin." context "exams.template.bank_picker" %}</p>
+    </div>
+    {% endif %}
 </div>
 {% endif %}

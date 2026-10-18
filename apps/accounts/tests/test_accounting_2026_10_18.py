@@ -85,8 +85,9 @@ class PeriodRuleTest(SimpleTestCase):
         self.assertEqual(plan_status(0, 0), C.STATUS_IDLE)
 
 
-@override_settings(UNIVERSITY_MODE=True)
-class AccountingSectionTest(TestCase):
+class AccountingFixture:
+    """Fikstur (TestCase olmayan mixin) — ``test_accounting_detail_2026_10_19.py`` də istifadə edir."""
+
     @classmethod
     def setUpTestData(cls):
         owner = User.objects.create_user("ac_owner", "ac_owner@qku.edu.az", "pw")
@@ -289,6 +290,9 @@ class AccountingSectionTest(TestCase):
         resolved = resolve(self._request(user or self.accountant, **params))
         return resolved, {row["username"]: row for row in apply_filters(resolved.rows, resolved.filters)}
 
+
+@override_settings(UNIVERSITY_MODE=True)
+class AccountingSectionTest(AccountingFixture, TestCase):
     # ── RBAC ──────────────────────────────────────────────────────────────
     def test_visible_for_accountant_rim_trustee_rector_and_superadmin(self):
         for user in (self.accountant, self.rim, self.trustee, self.rector, self.superadmin):
@@ -414,7 +418,10 @@ class AccountingSectionTest(TestCase):
 
     def test_accountant_with_only_two_keys_renders_section_and_export(self):
         role = self.org.roles.get(name="accountant")
-        self.assertEqual(set(role.permissions) - {"application.create"}, {"accounting.view", "retake.payment_verify"})
+        self.assertEqual(
+            set(role.permissions) - {"application.create"},
+            {"accounting.view", "retake.payment_verify", "accounting.manage_fees"},
+        )
         Role.objects.filter(pk=role.pk).update(permissions=["accounting.view", "retake.payment_verify"])
         client = self._client(self.accountant)
         html = client.get(reverse("accounts:profile_section_fragment", args=[SECTION]), {"ac_month": OCT}).json()[

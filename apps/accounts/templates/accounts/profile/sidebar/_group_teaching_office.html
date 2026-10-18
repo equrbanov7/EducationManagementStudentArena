@@ -14,7 +14,7 @@ kataloq ailəsindədir. Qapı DƏYİŞMƏYİB (`can_manage_registrar`, org-wide
 Hamısı AJAX-safe SPA bölmələridir (`js-profile-section-link`): panel sağda
 açılır, SOL SIDEBAR QALIR (sahibin tələbi).
 {% endcomment %}
-{% if "org-structure-tree" in allowed_sections or "chair-profile" in allowed_sections or "programs-registry" in allowed_sections or "subject-catalog" in allowed_sections or "curriculum-editor" in allowed_sections or "groups-registry" in allowed_sections or "semester-opening" in allowed_sections or "registrar-catalog" in allowed_sections or "retake-desk" in allowed_sections or "subgroup-placement" in allowed_sections %}
+{% if "org-structure-tree" in allowed_sections or "chair-profile" in allowed_sections or "programs-registry" in allowed_sections or "subject-catalog" in allowed_sections or "curriculum-editor" in allowed_sections or "groups-registry" in allowed_sections or "semester-opening" in allowed_sections or "registrar-catalog" in allowed_sections or "retake-desk" in allowed_sections or "subgroup-placement" in allowed_sections or role_capabilities.can_manage_document_seals %}
 <li class="sidebar-menu-group" data-sidebar-group="teaching-office">
     <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|org-structure-tree|chair-profile|programs-registry|subject-catalog|curriculum-editor|groups-registry|semester-opening|registrar-catalog|retake-desk|subgroup-placement|" %} open{% endif %}>
         {% trans "Tədris şöbəsi" context "profile.sidebar" as group_label %}
@@ -121,6 +121,7 @@ açılır, SOL SIDEBAR QALIR (sahibin tələbi).
             {% endif %}
             {% include "accounts/profile/sidebar/items/_retake_desk.html" %}
             {% include "accounts/profile/sidebar/items/_subgroup_placement.html" %}
+            {% include "accounts/profile/sidebar/items/_document_seals.html" %}
         </ul>
     </details>
 </li>
