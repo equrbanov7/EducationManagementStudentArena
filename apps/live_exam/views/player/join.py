@@ -41,6 +41,7 @@ from apps.live_exam.roster import late_join_index
 from apps.live_exam.serializers import serialize_player_identity
 from apps.live_exam.session_settings import (
     DEFAULT_MAX_PARTICIPANTS,
+    characters_allowed,
     generate_guest_nickname,
     get_session_settings,
     late_join_enabled,
@@ -336,7 +337,7 @@ def _join_profile(request, session_settings):
         nickname = generate_guest_nickname()
     avatar_key = request.POST.get("avatar_key") or ""
     accessory_key = request.POST.get("accessory_key") or ""
-    if not session_settings.get("characters_enabled", True):
+    if not characters_allowed(session_settings):  # 2026-10-19: «Rəsmi» üslubda da avatar yoxdur
         avatar_key, accessory_key = DEFAULT_AVATAR_KEY, DEFAULT_ACCESSORY_KEY
     else:
         if avatar_key not in AVATAR_KEYS:

@@ -4,13 +4,13 @@
 //  * köhnə mesaj yenisini geri qaytarmır (zaman xətti müqayisəsi, utils.js);
 //  * hər faza açarla render olunur → təkrar mesaj ikiqat animasiya/səs vermir;
 //  * faza dəyişəndə bütün taymerlər təmizlənir.
-import { BOOTSTRAP, PHASES } from './config.js?v=lx20261019';
-import { handleAnswerError, handleAnswerSaved, setAnswerHooks } from './answer.js?v=lx20261019';
-import { fetchState } from './api.js?v=lx20261019';
-import { renderFinal } from './finale.js?v=lx20261019';
-import { isFinalReveal, renderFinalSuspense, stageRevealOffsetMs } from './final_gate.js?v=lx20261019';
-import { stopStatePolling } from './polling.js?v=lx20261019';
-import { setRank } from './ui.js?v=lx20261019';
+import { BOOTSTRAP, PHASES } from './config.js?v=lx20261019s';
+import { handleAnswerError, handleAnswerSaved, setAnswerHooks } from './answer.js?v=lx20261019s';
+import { fetchState } from './api.js?v=lx20261019s';
+import { renderFinal } from './finale.js?v=lx20261019s';
+import { isFinalReveal, renderFinalSuspense, stageRevealOffsetMs } from './final_gate.js?v=lx20261019s';
+import { stopStatePolling } from './polling.js?v=lx20261019s';
+import { renderPlayerIdentity, setRank } from './ui.js?v=lx20261019s';
 import {
     questionKeyOf,
     renderGetReady,
@@ -19,12 +19,12 @@ import {
     renderQuestion,
     renderTimeUp,
     updateSelectionUI,
-} from './render_round.js?v=lx20261019';
-import { answeredButUnknown, renderLeaderboard, renderResult } from './render_reveal.js?v=lx20261019';
-import { renderIdle, renderLateJoin, renderRemoved } from './render_status.js?v=lx20261019';
-import { applySessionSettings } from './settings.js?v=lx20261019';
-import { closePlayerSocket, sendJson } from './sockets.js?v=lx20261019';
-import { state } from './state.js?v=lx20261019';
+} from './render_round.js?v=lx20261019s';
+import { answeredButUnknown, renderLeaderboard, renderResult } from './render_reveal.js?v=lx20261019s';
+import { renderIdle, renderLateJoin, renderRemoved } from './render_status.js?v=lx20261019s';
+import { applySessionSettings } from './settings.js?v=lx20261019s';
+import { closePlayerSocket, sendJson } from './sockets.js?v=lx20261019s';
+import { state } from './state.js?v=lx20261019s';
 import {
     clearAckTimer,
     clearAllTimers,
@@ -33,7 +33,7 @@ import {
     queuePhaseTransition,
     scheduleBoundary,
     startTicker,
-} from './timers.js?v=lx20261019';
+} from './timers.js?v=lx20261019s';
 import {
     getRevealKey,
     getRevealTimings,
@@ -42,8 +42,8 @@ import {
     shouldApplyTimelinePayload,
     ts,
     updateServerTimeOffset,
-} from './utils.js?v=lx20261019';
-import { currentViewEl } from './views.js?v=lx20261019';
+} from './utils.js?v=lx20261019s';
+import { currentViewEl } from './views.js?v=lx20261019s';
 
 let revealRefetchKey = "";
 let finalRefetchDone = false;
@@ -268,7 +268,7 @@ export function handleSnapshot(snapshot) {
     if (!snapshot || !snapshot.ok) return;
     if (!shouldApplyTimelinePayload(snapshot)) return;
     rememberTimelinePayload(snapshot);
-    if (snapshot.settings) applySessionSettings(snapshot.settings);
+    if (snapshot.settings && applySessionSettings(snapshot.settings)) renderPlayerIdentity();
     if (Number(snapshot.total_players)) state.totalPlayers = Number(snapshot.total_players);
     if (snapshot.late_join_pending) {
         enterLateJoinWait(snapshot);
@@ -304,7 +304,7 @@ export function handleSocketMessage(message) {
     updateServerTimeOffset(data);
     switch (data.type) {
         case "session_settings":
-            applySessionSettings(data.settings);
+            if (applySessionSettings(data.settings)) renderPlayerIdentity(); // üslub: avatar ↔ baş hərflər
             if (state.currentQuestion && !state.revealPayload) syncQuestionPhase();
             break;
         case "question_published":

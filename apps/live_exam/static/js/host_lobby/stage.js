@@ -1,7 +1,9 @@
-import { UI } from './dom.js?v=lx20261019';
-import { icon } from './icons.js?v=lx20261019';
-import { createFx } from './fx.js?v=lx20261019';
-import { audienceDelay, buildStageModel, danceFor, stageTimeline } from './stage_logic.js?v=lx20261019';
+import { UI } from './dom.js?v=lx20261019s';
+import { icon } from './icons.js?v=lx20261019s';
+import { createFx } from './fx.js?v=lx20261019s';
+import { formalStageMarkup } from './formal_stage.js?v=lx20261019s';
+import { isFormal } from './style_mode.js?v=lx20261019s';
+import { audienceDelay, buildStageModel, danceFor, stageTimeline } from './stage_logic.js?v=lx20261019s';
 import {
     playCheer,
     playFanfare,
@@ -10,13 +12,14 @@ import {
     startDanceBeat,
     startDrumroll,
     stopDanceBeat,
-} from './audio.js?v=lx20261019';
-import { avatarMarkup, countUp, esc, fmt, formatNumber, formatSeconds, reducedMotion, tr } from './utils.js?v=lx20261019';
+} from './audio.js?v=lx20261019s';
+import { avatarMarkup, countUp, esc, fmt, formatNumber, formatSeconds, reducedMotion, tr } from './utils.js?v=lx20261019s';
 
 /* FİNAL SƏHNƏSİ — qaranlıq zal, açılan pərdələr, süpürən projektorlar, qalxan
  * 3 pilləli podium; 3-cü → 2-ci → barabam → 1-ci (tac, fanfar, sol+sağ konfetti
  * topları, fişəng), sonra podium rəqs edir, 4–10-cu yerlər tamaşaçı kimi alqışlayır.
- * Hər işə salınma `run` nişanı alır: köhnə taymerlər (replay/teardown) heç nə etmir. */
+ * Hər işə salınma `run` nişanı alır: köhnə taymerlər (replay/teardown) heç nə etmir.
+ * 2026-10-19: «Rəsmi» üslubda şou YOXDUR — formal_stage.js sakit sıralama cədvəli (səs/fx/rəqs yox). */
 
 const BEAT = 60 / 112;
 const S = {
@@ -302,6 +305,15 @@ function start() {
     const run = S.run;
     S.done = false;
     const container = UI.finalPodium;
+    if (isFormal()) {
+        S.fx?.destroy();
+        S.fx = null;
+        const resultsUrl = CONFIG.controlsEnabled !== false ? CONFIG.resultsUrl || "" : "";
+        container.innerHTML = formalStageMarkup(S.model, S.payload, { closable: !CONFIG.presentationOnly, resultsUrl });
+        S.root = container.querySelector("[data-stage]");
+        S.done = true;
+        return;
+    }
     container.innerHTML = stageMarkup(S.model, S.payload);
     S.root = container.querySelector("[data-stage]");
     S.fx?.destroy();

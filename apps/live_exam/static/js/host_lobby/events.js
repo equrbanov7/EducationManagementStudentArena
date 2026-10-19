@@ -1,9 +1,9 @@
-import { UI } from './dom.js?v=lx20261019';
-import { finishGame, nextQuestion, postJson, refreshHostState, revealQuestion, startGame } from './api.js?v=lx20261019';
-import { unlockAudio } from './audio.js?v=lx20261019';
-import { openPresenterWindow, tryEnterFullscreen } from './presentation.js?v=lx20261019';
-import { refitLobbyCloud } from './lobby.js?v=lx20261019';
-import { controlsEnabled, fitAll } from './utils.js?v=lx20261019';
+import { UI } from './dom.js?v=lx20261019s';
+import { finishGame, nextQuestion, postJson, refreshHostState, revealQuestion, startGame } from './api.js?v=lx20261019s';
+import { unlockAudio } from './audio.js?v=lx20261019s';
+import { openPresenterWindow, tryEnterFullscreen } from './presentation.js?v=lx20261019s';
+import { refitLobbyCloud } from './lobby.js?v=lx20261019s';
+import { controlsEnabled, fitAll } from './utils.js?v=lx20261019s';
 
 export function bindHostEvents() {
     if (UI.startBtn) UI.startBtn.onclick = startGame;

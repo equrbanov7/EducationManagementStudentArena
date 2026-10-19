@@ -8,7 +8,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
     {% include "liveExam/partials/_host_head_assets.html" %}
 </head>
-<body class="host-live-page host-presentation-page{% if presentation_controls %} has-controls{% endif %}" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}" data-session-state="lobby">
+<body class="host-live-page host-presentation-page{% if presentation_controls %} has-controls{% endif %}" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}" data-lx-style="{{ session_settings.presentation_style|default:'playful' }}" data-session-state="lobby">
     <div class="hx-backdrop" aria-hidden="true">
         <span class="hx-backdrop__glow hx-backdrop__glow--a"></span>
         <span class="hx-backdrop__glow hx-backdrop__glow--b"></span>

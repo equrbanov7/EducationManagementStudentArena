@@ -27,6 +27,14 @@ host_lobby/icons.js onları xüsusi SVG ilə doldurur (Font Awesome yoxdur).{% e
             {% comment %}2026-10-08 (L2): «Hər sual üçün vaxt» — host_lobby/time_setting.js doldurur (oyun gedərkən də);
             panelin YUXARISINDA — yapışqan düymələrin altında qalmasın.{% endcomment %}
             <div class="control-timeset" data-time-setting></div>
+            {% comment %}2026-10-19: təqdimat üslubu (Rəsmi / Qeyri-rəsmi) — lobbidə; tənzimləmə çekməcəsindəki ilə eyni (host_lobby_shell.js).{% endcomment %}
+            <div class="control-style" data-lobby-only>
+                <span class="control-style__label" id="controlStyleLabel">{% trans "Görünüş üslubu" context "live_exam.presentation_style" %}</span>
+                <div class="hx-seg control-style__seg" role="radiogroup" aria-labelledby="controlStyleLabel" data-setting-choice="presentation_style">
+                    <button type="button" class="hx-seg__btn" role="radio" aria-checked="false" data-value="formal">{% trans "Rəsmi" context "live_exam.presentation_style" %}</button>
+                    <button type="button" class="hx-seg__btn" role="radio" aria-checked="false" data-value="playful">{% trans "Qeyri-rəsmi" context "live_exam.presentation_style" %}</button>
+                </div>
+            </div>
             <label class="question-count-box" for="questionCount">
                 <span class="question-count-box__label"><span class="hx-i" data-icon="sparkle"></span>{% trans "question_label" context "live_exam.host_lobby" %}</span>
                 <span class="question-count-box__input">

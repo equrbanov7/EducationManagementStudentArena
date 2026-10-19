@@ -1,11 +1,12 @@
 // LX-FE-PLAYER (2026-09-29): raund görünüşləri — «Hazır ol», giriş (sual oxunur), cavab plitələri
 // (tək/çox seçim, yazılı cavab), «cavab qəbul edildi» və «vaxt bitdi». Hər görünüş açarla qurulur
 // (views.js) — eyni açarla təkrar çağırış yalnız dinamik hissələri (saniyə, sayğac) yeniləyir.
-import { PHASES, TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20261019';
-import { playSound } from './audio.js?v=lx20261019';
-import { state } from './state.js?v=lx20261019';
-import { shapeKey, shapeLabel, shapeSvg, toneIndex } from './shapes.js?v=lx20261019';
-import { announce, setQuestionChip, setTimer, startTimeBar, stopTimeBar } from './ui.js?v=lx20261019';
+import { PHASES, TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20261019s';
+import { playSound } from './audio.js?v=lx20261019s';
+import { state } from './state.js?v=lx20261019s';
+import { optionLabel, optionMark, toneIndex } from './shapes.js?v=lx20261019s';
+import { isFormal } from '../host_lobby/style_mode.js?v=lx20261019s';
+import { announce, setQuestionChip, setTimer, startTimeBar, stopTimeBar } from './ui.js?v=lx20261019s';
 import {
     esc,
     fmt,
@@ -17,9 +18,9 @@ import {
     toInt,
     tr,
     ts,
-} from './utils.js?v=lx20261019';
-import { currentViewEl, mountView } from './views.js?v=lx20261019';
-import { hasCodeBlock } from '../host_lobby/code_text.js?v=lx20261019';
+} from './utils.js?v=lx20261019s';
+import { currentViewEl, mountView } from './views.js?v=lx20261019s';
+import { hasCodeBlock } from '../host_lobby/code_text.js?v=lx20261019s';
 
 export const CHECK_SVG =
     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -39,6 +40,8 @@ function lengthClass(text) {
 }
 
 function waitingMessage(question) {
+    // 2026-10-19: «Rəsmi» üslubda zarafatlı ifadələr yoxdur — bir neytral cümlə.
+    if (isFormal()) return tr("waitMsg4", "Digərləri hələ düşünür…");
     const pool = [
         tr("waitMsg1", "Barmaqlarını çarpaz saxla 🤞"),
         tr("waitMsg2", "Görək nə olacaq…"),
@@ -88,8 +91,7 @@ function tilesMarkup(question) {
     const multi = isMulti(question);
     const tiles = options
         .map((option, index) => {
-            const key = shapeKey(option, index);
-            const label = shapeLabel(key);
+            const label = optionLabel(option, index);
             const text = show ? String(option.text || "") : "";
             const optionId = Number(option.id);
             const selected = state.selectedIds.has(optionId);
@@ -97,7 +99,7 @@ function tilesMarkup(question) {
                 `<button type="button" class="lxp-tile option-btn${selected ? " is-selected" : ""}" data-option-id="${optionId}" ` +
                 `data-tone="${toneIndex(option, index)}" data-len="${lengthClass(text)}" aria-pressed="${selected ? "true" : "false"}" ` +
                 `aria-label="${esc(text ? `${label}: ${text}` : label)}">` +
-                `<span class="lxp-tile__shape">${shapeSvg(key)}</span>` +
+                `<span class="lxp-tile__shape">${optionMark(option, index)}</span>` +
                 (text ? `<span class="lxp-tile__text" data-code-text>${esc(text)}</span>` : "") +
                 (multi ? `<span class="lxp-tile__check" aria-hidden="true">${CHECK_SVG}</span>` : "") +
                 `</button>`
@@ -310,9 +312,8 @@ function chosenChipsMarkup(question, answer) {
         .map((option, index) => ({ option, index }))
         .filter(({ option }) => ids.has(Number(option.id)))
         .map(({ option, index }) => {
-            const key = shapeKey(option, index);
-            const label = show && option.text ? option.text : shapeLabel(key);
-            return `<span class="lxp-chip" data-tone="${toneIndex(option, index)}">${shapeSvg(key, "lxp-chip__shape")}<span>${esc(label)}</span></span>`;
+            const label = show && option.text ? option.text : optionLabel(option, index);
+            return `<span class="lxp-chip" data-tone="${toneIndex(option, index)}">${optionMark(option, index, "lxp-chip__shape")}<span>${esc(label)}</span></span>`;
         })
         .join("");
     if (!chips) return "";

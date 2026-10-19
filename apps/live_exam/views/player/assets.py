@@ -23,7 +23,7 @@ from django.templatetags.static import static
 
 PLAYER_JS_DIR = Path(__file__).resolve().parents[2] / "static" / "js" / "player"
 ENTRY_MODULE = "player.entry.js"
-ENTRY_VERSION = "lxp-20261019"
+ENTRY_VERSION = "lxp-20261019s"
 #: ``./x.js`` və ortaq SAF modullar ``../host_lobby/x.js`` (stage_logic.js, code_text.js — 2026-10-19).
 _IMPORT_RE = re.compile(
     r"""(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)(['"])(\./|\.\./host_lobby/)([\w.-]+\.js)(\?v=[\w.-]+)?\1"""
@@ -41,13 +41,16 @@ PLAYER_CSS = (
     ("css/player/_reveal.css", "lxp-20260930"),
     ("css/player/_finale.css", "lxp-20260929"),
     ("css/live_code_text.css", "lx-20261019"),
+    # 2026-10-19: «Rəsmi» təqdimat üslubu qatı (body[data-lx-style="formal"]) — SONDA, üstələyir.
+    ("css/live_formal/_base.css", "lx-20261019s"),
+    ("css/live_formal/_player.css", "lx-20261019s"),
 )
 #: Modul yüklənməzdən ƏVVƏL işləyən klassik skriptlər (player_screen.html sırası ilə).
 PLAYER_CLASSIC_JS = (
     ("js/ems_ajax_init.js", ""),
     ("js/player_screen_config.js", "lxp-20260929"),
     ("js/live_avatar_catalog.js", "lx-20260929"),
-    ("js/live_avatar_renderer.js", "lx-20260929"),
+    ("js/live_avatar_renderer.js", "lx-20261019s"),
 )
 
 

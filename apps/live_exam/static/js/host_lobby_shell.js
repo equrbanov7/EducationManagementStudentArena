@@ -40,6 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
         themeButtons: Array.from(document.querySelectorAll("[data-theme-key]")),
         choiceGroups: Array.from(document.querySelectorAll("[data-setting-choice]")),
         drawerBody: document.querySelector(".host-settings-drawer__body"),
+        lobbyOnly: Array.from(document.querySelectorAll("[data-lobby-only]")),
+        playfulOnly: Array.from(document.querySelectorAll("[data-playful-only]")),
     };
 
     if (!controlsEnabled || !dom.controlBar) return;
@@ -175,6 +177,17 @@ document.addEventListener("DOMContentLoaded", () => {
             const active = button.dataset.themeKey === (snapshot.settings?.theme_key || "aurora");
             button.classList.toggle("is-active", active);
             button.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+        // 2026-10-19: üslub yalnız lobbidə dəyişir; «Rəsmi»-də avatar/reaksiya açarları təsirsizdir.
+        const lobbyOnly = snapshot.sessionState === "lobby";
+        dom.lobbyOnly.forEach((element) => {
+            element.classList.toggle("is-locked", !lobbyOnly);
+            element.querySelectorAll("button, input").forEach((control) => { control.disabled = !lobbyOnly; });
+        });
+        const formal = snapshot.settings?.presentation_style === "formal";
+        dom.playfulOnly.forEach((element) => {
+            element.classList.toggle("host-settings-item--disabled", formal);
+            element.querySelectorAll("button, input").forEach((control) => { control.disabled = formal; });
         });
         if (dom.autoMode) dom.autoMode.checked = Boolean(snapshot.settings?.autoplay);
         if (dom.maxParticipants && document.activeElement !== dom.maxParticipants) {

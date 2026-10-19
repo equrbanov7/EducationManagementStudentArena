@@ -20,7 +20,7 @@ from apps.live_exam.constants import (
 from apps.live_exam.i18n import player_language, session_language
 from apps.live_exam.models import LiveSession
 from apps.live_exam.serializers import serialize_player_identity, serialize_players
-from apps.live_exam.session_settings import get_session_settings
+from apps.live_exam.session_settings import characters_allowed, get_session_settings, reactions_allowed
 from apps.live_exam.text_safety import screen_nickname
 from apps.live_exam.transport import broadcast, build_reaction_event_payload
 from core.rate_limit import record_rate_limit_hit
@@ -118,7 +118,8 @@ def _update_profile(request, player, session):
     # Kilidli lobbidə ad dondurulur (host adları yoxlayıb kilidləyir); avatar dəyişə bilər.
     if session.is_locked and nickname != player.nickname:
         return _json_error(pgettext("live_exam.view.message", "nickname_locked"), 403)
-    if not session_settings.get("characters_enabled", True):
+    # 2026-10-19: «Rəsmi» üslubda avatar seçilmir (baş hərflər göstərilir) — söndürülmüş kimi.
+    if not characters_allowed(session_settings):
         avatar_key = DEFAULT_AVATAR_KEY
         accessory_key = DEFAULT_ACCESSORY_KEY
     elif avatar_key not in AVATAR_KEYS:
@@ -182,7 +183,8 @@ def _send_reaction(request, player, session):
     if session.state != LiveSession.STATE_LOBBY:
         return _json_error(pgettext("live_exam.view.message", "reactions_lobby_only"), 409)
 
-    if not get_session_settings(session).get("reactions_enabled", True):
+    # 2026-10-19: «Rəsmi» üslubda emoji reaksiyaları yoxdur.
+    if not reactions_allowed(get_session_settings(session)):
         return _json_error(pgettext("live_exam.view.message", "Reactions are disabled for this live exam."), 403)
 
     reaction_key = (request.POST.get("reaction_key") or "").strip().lower()

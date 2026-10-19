@@ -467,7 +467,7 @@ def update_host_settings(session: LiveSession, raw_updates: dict | None, *, max_
     with transaction.atomic():
         locked = lock_session(session)
         settings = update_session_settings(locked, raw_updates, max_participants_cap=max_participants_cap)
-    _sync_instance(session, locked, ("host_settings",))
+    _sync_instance(session, locked, ("host_settings", "presentation_style"))
 
     public = public_session_settings(settings)
     lobby_state = build_lobby_state_payload(locked)

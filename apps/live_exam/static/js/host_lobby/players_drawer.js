@@ -5,11 +5,12 @@
  * qayıtmır, balı liderlər lövhəsində görünmür). Lobbi baloncuqlarındakı «×» də eyni dialoqdan keçir.
  * Siyahı: lobbi roster-i (WS `lobby_state`) + açılışda HTTP snapshot. Hadisələr document-də delegasiya.
  */
-import { state } from './state.js?v=lx20261019';
-import { post, syncState } from './api.js?v=lx20261019';
-import { showToast } from './toast.js?v=lx20261019';
-import { avatarImageMarkup, controlsEnabled, esc, fmt, formatNumber, tr } from './utils.js?v=lx20261019';
-import { icon } from './icons.js?v=lx20261019';
+import { state } from './state.js?v=lx20261019s';
+import { post, syncState } from './api.js?v=lx20261019s';
+import { showToast } from './toast.js?v=lx20261019s';
+import { presentationStyle } from './style_mode.js?v=lx20261019s';
+import { avatarImageMarkup, controlsEnabled, esc, fmt, formatNumber, tr } from './utils.js?v=lx20261019s';
+import { icon } from './icons.js?v=lx20261019s';
 
 const $ = (id) => document.getElementById(id);
 let bound = false;
@@ -61,7 +62,7 @@ export function renderPlayersDrawer() {
     if (!list || !isOpen()) return;
     const needle = String(search?.value || "").trim().toLocaleLowerCase();
     const rows = playerRows().filter((player) => !needle || String(player.nickname || "").toLocaleLowerCase().includes(needle));
-    const signature = `${needle}|${state.sessionState}|${state.currentQuestion?.index || 0}|${[...removing].join(",")}|${rows
+    const signature = `${presentationStyle()}|${needle}|${state.sessionState}|${state.currentQuestion?.index || 0}|${[...removing].join(",")}|${rows
         .map((player) => `${player.id}:${player.nickname}:${player.avatar_key}:${player.active_from_index || 0}`)
         .join(",")}`;
     if (signature === listSignature) return;

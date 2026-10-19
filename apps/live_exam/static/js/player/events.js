@@ -1,14 +1,14 @@
 // LX-FE-PLAYER (2026-09-29): hadisələr — hamısı delegasiya ilə (EMSDelegate.on; view-lar
 // dəyişdikcə yeni düymələr avtomatik tutulur, dinləyici yığılmır).
-import { TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20261019';
-import { handleOptionTap, submitAnswer } from './answer.js?v=lx20261019';
-import { fetchState } from './api.js?v=lx20261019';
-import { isMuted, onAudioChange, playSound, setMuted, unlockAudio } from './audio.js?v=lx20261019';
-import { markUserActivation } from './haptics.js?v=lx20261019';
-import { isSocketOpen, reconnectNow } from './sockets.js?v=lx20261019';
-import { state } from './state.js?v=lx20261019';
-import { renderSoundToggle, setNetStatus } from './ui.js?v=lx20261019';
-import { toInt, tr } from './utils.js?v=lx20261019';
+import { TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20261019s';
+import { handleOptionTap, submitAnswer } from './answer.js?v=lx20261019s';
+import { fetchState } from './api.js?v=lx20261019s';
+import { isMuted, onAudioChange, playSound, setMuted, unlockAudio } from './audio.js?v=lx20261019s';
+import { markUserActivation } from './haptics.js?v=lx20261019s';
+import { isSocketOpen, reconnectNow } from './sockets.js?v=lx20261019s';
+import { state } from './state.js?v=lx20261019s';
+import { renderSoundToggle, setNetStatus } from './ui.js?v=lx20261019s';
+import { toInt, tr } from './utils.js?v=lx20261019s';
 
 function delegate(type, selector, handler) {
     if (window.EMSDelegate && typeof window.EMSDelegate.on === "function") {

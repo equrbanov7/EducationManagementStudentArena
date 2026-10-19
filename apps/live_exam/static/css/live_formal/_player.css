@@ -1,0 +1,187 @@
+/* live_formal/_player.css — «Rəsmi» üslub: telefon (oyun ekranı, qoşulma, gözləmə otağı), 2026-10-19.
+ *
+ * Telefon (375 px) üçün: sakit tünd-göy fon (işıq ləkəsi yox), eyni rəngli A/B/C/D plitələri, mavi
+ * əsas düymə (sarı yox), baş hərflər (avatar yox), səs düyməsi / reaksiya paneli / avatar seçimi
+ * gizli, konfetti qatı gizli. Kod nümunəsi bloku (live_code_text.css) toxunulmur.
+ * Bütün qaydalar `body[data-lx-style="formal"]` altındadır — «Qeyri-rəsmi»-də heç nə dəyişmir.
+ */
+
+body.lxp[data-lx-style="formal"],
+body.lxj[data-lx-style="formal"],
+body.lxw[data-lx-style="formal"] {
+    --lxp-bg-1: var(--lxf-bg-1);
+    --lxp-bg-2: var(--lxf-bg-2);
+    --lxp-bg-3: var(--lxf-bg-2);
+    --lxp-glow: transparent;
+    --lxp-panel: rgba(18, 48, 90, 0.7);
+    --lxp-panel-strong: rgba(10, 26, 52, 0.92);
+    --lxp-line: var(--lxf-line);
+    --lxp-cta: var(--lxf-accent-strong);
+    --lxp-cta-ink: #ffffff;
+    --lxp-radius: 12px;
+    --lxj-bg-1: var(--lxf-bg-1);
+    --lxj-bg-2: var(--lxf-bg-2);
+    --lxj-bg-3: var(--lxf-bg-2);
+    --lxj-accent: var(--lxf-accent);
+    --lxj-cta: var(--lxf-accent-strong);
+    --lxj-cta-ink: #ffffff;
+    --lxw-bg-1: var(--lxf-bg-1);
+    --lxw-bg-2: var(--lxf-bg-2);
+    --lxw-bg-3: var(--lxf-bg-2);
+    --lxw-accent: var(--lxf-accent);
+    --lxw-cta: var(--lxf-accent-strong);
+    --lxw-cta-ink: #ffffff;
+    --lxw-panel: rgba(18, 48, 90, 0.7);
+    --lxw-line: var(--lxf-line);
+}
+
+/* Fon: düz qradiyent, işıq ləkələri / proyektor dairəsi yox. */
+body[data-lx-style="formal"] .lxp-bg,
+body[data-lx-style="formal"] .lxj-bg,
+body[data-lx-style="formal"] .lxw-bg {
+    background: linear-gradient(180deg, var(--lxf-bg-1) 0%, var(--lxf-bg-2) 100%);
+}
+
+body[data-lx-style="formal"] .lxp-bg__glow,
+body[data-lx-style="formal"] .lxj-bg__glow,
+body[data-lx-style="formal"] .lxw-bg__glow,
+body[data-lx-style="formal"] .lxw-hero__spot,
+body[data-lx-style="formal"] .lxj-avatar,
+body[data-lx-style="formal"] .lxw-react,
+body[data-lx-style="formal"] .lxw-bursts,
+body[data-lx-style="formal"] .lxp-sound,
+body[data-lx-style="formal"] .lxp-fx {
+    display: none;
+}
+
+/* Faza fonları: «Nəticələr ekranda» / final — bənövşəyi / qızılı parıltı yox (düzgün / səhv rəngi qalır). */
+body[data-lx-style="formal"][data-tone="suspense"] .lxp-bg::after,
+body[data-lx-style="formal"][data-tone^="final"] .lxp-bg::after { opacity: 0; }
+body[data-lx-style="formal"] .lxp-suspense__badge {
+    box-shadow: 0 0 0 12px rgba(191, 219, 254, 0.14);
+    color: var(--ems-navy-800, #0b2a52);
+    animation: none;
+}
+
+/* ── Oyun ekranı: plitələr ─────────────────────────────────────────────────── */
+body[data-lx-style="formal"] .lxp-tile {
+    border: 1px solid var(--lxf-line);
+    border-radius: 12px;
+    background: var(--lxf-surface);
+    font-weight: 600;
+    box-shadow: 0 2px 0 rgba(3, 9, 22, 0.45), 0 6px 14px rgba(3, 9, 22, 0.25);
+}
+
+body[data-lx-style="formal"] .lxp-tile:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 rgba(3, 9, 22, 0.45);
+}
+
+body[data-lx-style="formal"] .lxp-tile.is-selected {
+    border-color: #ffffff;
+    background: var(--lxf-surface-2);
+    box-shadow: 0 0 0 2px #ffffff;
+}
+
+body[data-lx-style="formal"] .lxp-tile__shape,
+body[data-lx-style="formal"] .lxp-tile[data-tone] .lxp-tile__shape {
+    background: transparent;
+    font-size: 1.15rem;
+}
+
+body[data-lx-style="formal"] .lxp-tiles[data-layout="shapes"] .lxp-tile__shape { font-size: 2rem; }
+
+body[data-lx-style="formal"] .lxp-chip {
+    border: 1px solid var(--lxf-line);
+    background: var(--lxf-surface);
+    font-weight: 600;
+    box-shadow: none;
+}
+
+body[data-lx-style="formal"] .lxp-chip .lxp-letter {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+}
+
+/* Taymer / zolaq / sayğac — nəbzsiz, sakit rənglər. */
+body[data-lx-style="formal"] .lxp-timer { font-weight: 600; box-shadow: 0 0 0 3px rgba(191, 219, 254, 0.28); }
+body[data-lx-style="formal"] .lxp-timer.is-danger { animation: none; }
+body[data-lx-style="formal"] .lxp-timebar__fill { background: #ffffff; }
+
+/* Başlıqlar: daha sakit çəkilər. */
+body[data-lx-style="formal"] .lxp-title,
+body[data-lx-style="formal"] .lxp-board__title,
+body[data-lx-style="formal"] .lxp-final__title,
+body[data-lx-style="formal"] .lxp-qcard__text,
+body[data-lx-style="formal"] .lxw-hero__name,
+body[data-lx-style="formal"] .lxj-title {
+    font-weight: 600;
+    letter-spacing: 0;
+}
+
+/* Liderlik sətirləri — sürüşmə animasiyası yox. */
+body[data-lx-style="formal"] .lxp-lrow {
+    border-radius: 10px;
+    animation: lxfFade 0.25s ease-out both;
+}
+
+body[data-lx-style="formal"] .lxp-lrow__rank { font-weight: 600; }
+body[data-lx-style="formal"] .lxp-lrow__art { border-radius: 50%; }
+
+/* ── Yekun (finale.js renderFormalFinal) ──────────────────────────────────── */
+body[data-lx-style="formal"] .lxp-final--formal {
+    display: grid;
+    gap: 14px;
+    justify-items: stretch;
+    text-align: center;
+}
+
+.lxp-final__who {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    justify-self: center;
+    font-size: 1.15rem;
+}
+
+.lxp-final__initials { display: block; width: 56px; height: 56px; border-radius: 50%; }
+
+.lxp-final__summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.lxp-final--formal .lxp-final__place,
+.lxp-final--formal .lxp-final__score {
+    display: grid;
+    gap: 4px;
+    align-content: center;
+    justify-items: center;
+    margin: 0;
+    padding: 12px;
+    border: 1px solid var(--lxf-line, rgba(255, 255, 255, 0.2));
+    border-radius: 12px;
+    background: rgba(18, 48, 90, 0.7);
+}
+
+.lxp-final--formal .lxp-final__place { color: #ffffff; font-weight: 500; }
+.lxp-final--formal .lxp-final__place span { color: var(--lxf-muted, #c7d4ea); }
+.lxp-final--formal .lxp-final__score strong,
+.lxp-final--formal .lxp-final__place strong { font-weight: 600; }
+.lxp-final--formal .lxp-final__list { margin: 4px 0 0; text-align: left; }
+
+/* ── Qoşulma: sarı «3D» kölgəsi olmayan mavi düymə ─────────────────────────────── */
+body[data-lx-style="formal"] .lxj-btn--primary,
+body[data-lx-style="formal"] .lxw-btn--primary,
+body[data-lx-style="formal"] .lxp-btn--primary,
+body[data-lx-style="formal"] .lxp-btn--primary:active:not(:disabled) { box-shadow: 0 6px 16px rgba(3, 9, 22, 0.25); }
+body[data-lx-style="formal"] .lxj-btn--primary:active:not(:disabled) { transform: translateY(1px); }
+
+/* ── Gözləmə otağı: avatar səhnəsi əvəzinə baş hərflər ─────────────────────────── */
+body[data-lx-style="formal"] .lxw-hero__stage { min-height: 0; }
+body[data-lx-style="formal"] .lxw-hero__avatar .live-avatar--initials { --live-avatar-size: 112px; }
+body[data-lx-style="formal"] .lxw-hero__badge { font-weight: 600; }

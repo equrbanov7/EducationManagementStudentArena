@@ -106345,3 +106345,83 @@ msgstr "\"{subject}\" — the 25% payment was refunded: {amount} AZN ({date})."
 msgctxt "registrar.retake.notification"
 msgid "\"{subject}\" — 25% ödənişinin qaytarılması qərarı: {amount} AZN. Mühasibatlıq icra edəcək."
 msgstr "\"{subject}\" — decision to refund the 25% payment: {amount} AZN. Accounting will process it."
+
+msgctxt "live_exam.presentation_style"
+msgid "Görünüş üslubu"
+msgstr "Presentation style"
+
+msgctxt "live_exam.presentation_style"
+msgid "Rəsmi"
+msgstr "Formal"
+
+msgctxt "live_exam.presentation_style"
+msgid "Qeyri-rəsmi"
+msgstr "Informal"
+
+msgctxt "live_exam.presentation_style"
+msgid "A/B/C/D variantları, sakit ikonlar, baş hərflər və sıralama cədvəli. Konfetti, səs effektləri və emoji yoxdur."
+msgstr "A/B/C/D options, calm icons, initials and a ranking table. No confetti, sound effects or emoji."
+
+msgctxt "live_exam.presentation_style"
+msgid "Rəngli fiqurlar, avatarlar, reaksiyalar, musiqi və final səhnəsində konfetti."
+msgstr "Colourful shapes, avatars, reactions, music and confetti on the final stage."
+
+msgctxt "live_exam.presentation_style"
+msgid "«Rəsmi»: A/B/C/D variantları, sakit ikonlar, baş hərflər, sıralama cədvəli — konfetti, səs effekti və emoji olmadan. «Qeyri-rəsmi»: fiqurlar, avatarlar, musiqi və final şousu. Yalnız oyun başlamazdan əvvəl dəyişir."
+msgstr "«Formal»: A/B/C/D options, calm icons, initials, a ranking table — without confetti, sound effects or emoji. «Informal»: shapes, avatars, music and the final show. Can only be changed before the game starts."
+
+msgctxt "live_exam.presentation_style"
+msgid "Variant {letter}"
+msgstr "Option {letter}"
+
+msgctxt "live_exam.presentation_style"
+msgid "Yekun nəticələr hazırlanır"
+msgstr "Preparing the final results"
+
+msgctxt "live_exam.presentation_style"
+msgid "Yekun nəticələr"
+msgstr "Final results"
+
+msgctxt "live_exam.presentation_style"
+msgid "Yer"
+msgstr "Rank"
+
+msgctxt "live_exam.presentation_style"
+msgid "İştirakçı"
+msgstr "Participant"
+
+msgctxt "live_exam.presentation_style"
+msgid "Düzgün cavablar"
+msgstr "Correct answers"
+
+msgctxt "live_exam.presentation_style"
+msgid "Xal"
+msgstr "Points"
+
+msgctxt "live_exam.presentation_style"
+msgid "Oyun başa çatdı"
+msgstr "The game has ended"
+
+msgctxt "live_exam.presentation_style"
+msgid "Adınızı və soyadınızı yazın — oyun müəllim başladanda açılacaq."
+msgstr "Enter your first and last name — the game opens when the teacher starts it."
+
+msgctxt "live_exam.presentation_style"
+msgid "Ad və soyad"
+msgstr "First and last name"
+
+msgctxt "live_exam.host_settings"
+msgid "Görünüş üslubu yalnız «Rəsmi» və ya «Qeyri-rəsmi» ola bilər."
+msgstr "The presentation style can only be «Formal» or «Informal»."
+
+msgctxt "live_exam.host_settings"
+msgid "Görünüş üslubu yalnız oyun başlamazdan əvvəl dəyişdirilə bilər."
+msgstr "The presentation style can only be changed before the game starts."
+
+msgctxt "live_exam.model.session.presentation_style"
+msgid "Rəsmi"
+msgstr "Formal"
+
+msgctxt "live_exam.model.session.presentation_style"
+msgid "Qeyri-rəsmi"
+msgstr "Informal"

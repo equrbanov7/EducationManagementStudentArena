@@ -18,7 +18,7 @@
     {% for href in player_assets.modules %}<link rel="modulepreload" href="{{ href }}">
     {% endfor %}
 </head>
-<body class="lxp" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}">
+<body class="lxp" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}" data-lx-style="{{ session_settings.presentation_style|default:'playful' }}">
     {% comment %}LX-FE-PLAYER 2026-09-29: telefon oyun ekranı. Faza görünüşləri JS ilə #lxpViews-ə
     qurulur (player/*.js); burada yalnız sabit karkas var — inline style/script YOXDUR.{% endcomment %}
     <div class="lxp-shell" id="lxpShell">
@@ -182,6 +182,10 @@
         "youChose": "{% filter escapejs %}{% trans 'you_chose' context 'live_exam.player' %}{% endfilter %}",
         "youLabel": "{% filter escapejs %}{% trans 'you_label' context 'live_exam.player' %}{% endfilter %}",
         "yourAnswer": "{% filter escapejs %}{% trans 'your_answer' context 'live_exam.player' %}{% endfilter %}",
+        "optionLetter": "{% filter escapejs %}{% trans 'Variant {letter}' context 'live_exam.presentation_style' %}{% endfilter %}",
+        "formalFinalKicker": "{% filter escapejs %}{% trans 'Oyun başa çatdı' context 'live_exam.presentation_style' %}{% endfilter %}",
+        "formalResultsTitle": "{% filter escapejs %}{% trans 'Yekun nəticələr' context 'live_exam.presentation_style' %}{% endfilter %}",
+        "formalSuspenseSub": "{% filter escapejs %}{% trans 'Yekun nəticələr hazırlanır' context 'live_exam.presentation_style' %}{% endfilter %}",
         "shapeTriangle": "{% filter escapejs %}{% trans 'shape_triangle' context 'live_exam.player' %}{% endfilter %}",
         "shapeDiamond": "{% filter escapejs %}{% trans 'shape_diamond' context 'live_exam.player' %}{% endfilter %}",
         "shapeCircle": "{% filter escapejs %}{% trans 'shape_circle' context 'live_exam.player' %}{% endfilter %}",

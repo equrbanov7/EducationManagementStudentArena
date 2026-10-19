@@ -64,7 +64,10 @@
         if (!dom.form || !dom.input || !dom.button) return;
 
         const settings = config.sessionSettings || {};
-        const charactersEnabled = settings.characters_enabled !== false;
+        // 2026-10-19: «Rəsmi» üslubda avatar seçilmir — baş hərflər (server də avatarı defolta salır).
+        const formal = settings.presentation_style === "formal";
+        window.LiveAvatarRenderer?.setFormal?.(formal);
+        const charactersEnabled = settings.characters_enabled !== false && !formal;
         const remembered = config.rememberedPlayer || null;
         const defaultAvatar = catalog.defaultAvatarKey || "avatar_1";
         const defaultAccessory = catalog.defaultAccessoryKey || "accessory_none";

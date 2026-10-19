@@ -1,12 +1,13 @@
-import { UI } from './dom.js?v=lx20261019';
-import { state } from './state.js?v=lx20261019';
-import { applySessionSettings } from './settings.js?v=lx20261019';
-import { renderLobbyPlayers } from './lobby.js?v=lx20261019';
-import { applyQuestionState, updateAnsweredCounter, updateReceivedCounter } from './question.js?v=lx20261019';
-import { applyRevealState } from './reveal.js?v=lx20261019';
-import { renderPodium } from './podium.js?v=lx20261019';
-import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20261019';
-import { clearPendingStateSync, setPlaySocket, stopStatePolling, syncState } from './api.js?v=lx20261019';
+import { UI } from './dom.js?v=lx20261019s';
+import { state } from './state.js?v=lx20261019s';
+import { applySessionSettings } from './settings.js?v=lx20261019s';
+import { isFormal } from './style_mode.js?v=lx20261019s';
+import { renderLobbyPlayers } from './lobby.js?v=lx20261019s';
+import { applyQuestionState, updateAnsweredCounter, updateReceivedCounter } from './question.js?v=lx20261019s';
+import { applyRevealState } from './reveal.js?v=lx20261019s';
+import { renderPodium } from './podium.js?v=lx20261019s';
+import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20261019s';
+import { clearPendingStateSync, setPlaySocket, stopStatePolling, syncState } from './api.js?v=lx20261019s';
 import {
     esc,
     fmt,
@@ -18,14 +19,15 @@ import {
     tr,
     updateServerTimeOffset,
     wsUrl,
-} from './utils.js?v=lx20261019';
+} from './utils.js?v=lx20261019s';
 
 /* WS: lobbi + oyun kanalları. Bağlantı qopanda eksponensial gözləmə ilə yenidən
  * qoşulur (1 → 2 → 4 … ≤ 15 s + titrəmə); açılanda HTTP snapshot ilə vəziyyət
  * serverlə sinxronlaşır (UI həmişə server vəziyyətinə yaxınsayır). */
 
 function spawnReaction(eventData) {
-    if (!UI.reactionOverlay) return;
+    // 2026-10-19: «Rəsmi» üslubda emoji reaksiyaları göstərilmir (server də qəbul etmir).
+    if (!UI.reactionOverlay || isFormal()) return;
     const meta = (window.LiveAvatarCatalog || {}).reactions?.[eventData?.reaction_key] || {};
     if (UI.reactionOverlay.childElementCount > 24) return; // çox reaksiya — DOM-u şişirtmə
     const burst = document.createElement("div");
