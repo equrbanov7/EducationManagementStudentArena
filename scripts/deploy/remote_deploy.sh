@@ -270,6 +270,22 @@ recreate_alertmanager() {
     || echo "Alertmanager recreate failed; incident webhook may be stale." >&2
 }
 
+heal_promtail_proxy_link() {
+  # 2026-10-20: docker-api şəbəkəsi (subnet pin-i, 2026-10-18 deploy-u) yenidən yaradılandan sonra promtail
+  # docker-socket-proxy-ya çata bilmirdi — entrypoint 3 dəq gözləyib çıxırdı, ~475 restart/gün, Loki-yə 0 log.
+  # `compose up -d` konfiqi dəyişməyən konteynerə toxunmur; ona görə əlaqə promtail-in İÇİNDƏN yoxlanılır,
+  # yoxdursa ikisi də yenidən yaradılır (yalnız monitorinq; tətbiqə təsiri yoxdur).
+  local cid
+  cid=$(docker compose -f "$COMPOSE_FILE" ps -q promtail 2>/dev/null | head -n 1)
+  [ -n "$cid" ] || return 0
+  if docker exec "$cid" sh -c 'wget -q -T 3 -O /dev/null http://docker-socket-proxy:2375/_ping' >/dev/null 2>&1; then
+    return 0
+  fi
+  echo "promtail → docker-socket-proxy əlaqəsi yoxdur; ikisi də yenidən yaradılır..." >&2
+  docker compose -f "$COMPOSE_FILE" up -d --no-deps --force-recreate docker-socket-proxy promtail \
+    || echo "promtail/docker-socket-proxy recreate failed; loglar Loki-yə düşməyə bilər." >&2
+}
+
 legacy_deploy() {
   if [ ! -x "${VENV_DIR}/bin/python" ]; then
     echo "Missing virtualenv at ${VENV_DIR}." >&2
@@ -1044,6 +1060,7 @@ docker_deploy() {
   refresh_nginx_upstream
   reload_prometheus_config
   recreate_alertmanager
+  heal_promtail_proxy_link
 
   wait_for_http "${APP_BASE_URL}${PING_PATH}" "200" "$PING_JSON" || {
     docker compose -f "$COMPOSE_FILE" ps >&2 || true
