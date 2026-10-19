@@ -37,6 +37,23 @@ for svc in loki promtail docker-socket-proxy; do
   st=$(docker inspect --format '{{.State.Status}} health={{if .State.Health}}{{.State.Health.Status}}{{else}}n/a{{end}} restarts={{.RestartCount}} oom={{.State.OOMKilled}} başlayıb={{.State.StartedAt}} image={{.Config.Image}}' "$cid" 2>/dev/null)
   case "$st" in running*) ok "$svc: $st";; *) bad "$svc: $st";; esac
 done
+# 2026-10-20: promtail restart döngüsü (entrypoint proxy-ni 3 dəq gözləyib çıxır — səviyyəsiz sətir, yuxarıdakı
+# warn/error sayğacına düşmür). Şəbəkə bağlılığı, DNS və /_ping promtail konteynerinin İÇİNDƏN yoxlanılır.
+PTC=$($COMPOSE ps -q promtail 2>/dev/null | head -1)
+PXC=$($COMPOSE ps -q docker-socket-proxy 2>/dev/null | head -1)
+if [ -n "$PTC" ] && [ -n "$PXC" ]; then
+  echo "- ℹ️ promtail şəbəkələri: $(docker inspect --format '{{range $k, $v := .NetworkSettings.Networks}}{{$k}}={{$v.NetworkID | printf "%.12s"}}/{{$v.IPAddress}} {{end}}' "$PTC" 2>/dev/null)"
+  echo "- ℹ️ proxy şəbəkələri: $(docker inspect --format '{{range $k, $v := .NetworkSettings.Networks}}{{$k}}={{$v.NetworkID | printf "%.12s"}}/{{$v.IPAddress}} {{end}}' "$PXC" 2>/dev/null)"
+  for n in $(docker network ls --format '{{.Name}}' | grep -E 'docker-api'); do
+    echo "- ℹ️ şəbəkə $n id=$(docker network inspect --format '{{.Id}}' "$n" | cut -c1-12) üzvlər: $(docker network inspect --format '{{range .Containers}}{{.Name}} {{end}}' "$n")"
+  done
+  echo "- ℹ️ promtail son səviyyəsiz sətirlər: $(docker logs --tail 40 "$PTC" 2>&1 | grep -v 'level=' | sort | uniq -c | sort -rn | head -3 | tr -s ' ' | cut -c1-160 | tr '\n' ';')"
+  if docker exec "$PTC" sh -c 'wget -q -T 3 -O - http://docker-socket-proxy:2375/_ping' >/dev/null 2>&1; then
+    ok "promtail içindən docker-socket-proxy:2375/_ping cavab verir"
+  else
+    bad "promtail içindən docker-socket-proxy:2375/_ping CAVAB VERMİR: $(docker exec "$PTC" sh -c 'getent hosts docker-socket-proxy || echo DNS-yox' 2>&1 | head -1 | cut -c1-80)"
+  fi
+fi
 # promtail/Loki/proxy-nin ÖZ xəta mesajları (son 6 saat) — yalnız `msg="…"` mətni + say.
 for svc in promtail loki docker-socket-proxy; do
   cid=$($COMPOSE ps -q "$svc" 2>/dev/null | head -1); [ -n "$cid" ] || continue
