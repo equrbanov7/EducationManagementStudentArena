@@ -107371,3 +107371,83 @@ msgstr "„{subject}“ — die 25%-Zahlung wurde erstattet: {amount} AZN ({date
 msgctxt "registrar.retake.notification"
 msgid "\"{subject}\" — 25% ödənişinin qaytarılması qərarı: {amount} AZN. Mühasibatlıq icra edəcək."
 msgstr "„{subject}“ — Entscheidung zur Erstattung der 25%-Zahlung: {amount} AZN. Die Buchhaltung führt sie aus."
+
+msgctxt "live_exam.presentation_style"
+msgid "Görünüş üslubu"
+msgstr "Darstellungsstil"
+
+msgctxt "live_exam.presentation_style"
+msgid "Rəsmi"
+msgstr "Formell"
+
+msgctxt "live_exam.presentation_style"
+msgid "Qeyri-rəsmi"
+msgstr "Locker"
+
+msgctxt "live_exam.presentation_style"
+msgid "A/B/C/D variantları, sakit ikonlar, baş hərflər və sıralama cədvəli. Konfetti, səs effektləri və emoji yoxdur."
+msgstr "Antworten A/B/C/D, ruhige Symbole, Initialen und eine Ranglistentabelle. Kein Konfetti, keine Soundeffekte, keine Emojis."
+
+msgctxt "live_exam.presentation_style"
+msgid "Rəngli fiqurlar, avatarlar, reaksiyalar, musiqi və final səhnəsində konfetti."
+msgstr "Bunte Formen, Avatare, Reaktionen, Musik und Konfetti auf der Finalbühne."
+
+msgctxt "live_exam.presentation_style"
+msgid "«Rəsmi»: A/B/C/D variantları, sakit ikonlar, baş hərflər, sıralama cədvəli — konfetti, səs effekti və emoji olmadan. «Qeyri-rəsmi»: fiqurlar, avatarlar, musiqi və final şousu. Yalnız oyun başlamazdan əvvəl dəyişir."
+msgstr "«Formell»: Antworten A/B/C/D, ruhige Symbole, Initialen, Ranglistentabelle — ohne Konfetti, Soundeffekte und Emojis. «Locker»: Formen, Avatare, Musik und Finalshow. Nur vor Spielbeginn änderbar."
+
+msgctxt "live_exam.presentation_style"
+msgid "Variant {letter}"
+msgstr "Antwort {letter}"
+
+msgctxt "live_exam.presentation_style"
+msgid "Yekun nəticələr hazırlanır"
+msgstr "Endergebnisse werden vorbereitet"
+
+msgctxt "live_exam.presentation_style"
+msgid "Yekun nəticələr"
+msgstr "Endergebnisse"
+
+msgctxt "live_exam.presentation_style"
+msgid "Yer"
+msgstr "Platz"
+
+msgctxt "live_exam.presentation_style"
+msgid "İştirakçı"
+msgstr "Teilnehmer/in"
+
+msgctxt "live_exam.presentation_style"
+msgid "Düzgün cavablar"
+msgstr "Richtige Antworten"
+
+msgctxt "live_exam.presentation_style"
+msgid "Xal"
+msgstr "Punkte"
+
+msgctxt "live_exam.presentation_style"
+msgid "Oyun başa çatdı"
+msgstr "Das Spiel ist beendet"
+
+msgctxt "live_exam.presentation_style"
+msgid "Adınızı və soyadınızı yazın — oyun müəllim başladanda açılacaq."
+msgstr "Geben Sie Vor- und Nachnamen ein — das Spiel öffnet sich, sobald die Lehrkraft es startet."
+
+msgctxt "live_exam.presentation_style"
+msgid "Ad və soyad"
+msgstr "Vor- und Nachname"
+
+msgctxt "live_exam.host_settings"
+msgid "Görünüş üslubu yalnız «Rəsmi» və ya «Qeyri-rəsmi» ola bilər."
+msgstr "Der Darstellungsstil kann nur «Formell» oder «Locker» sein."
+
+msgctxt "live_exam.host_settings"
+msgid "Görünüş üslubu yalnız oyun başlamazdan əvvəl dəyişdirilə bilər."
+msgstr "Der Darstellungsstil kann nur vor Spielbeginn geändert werden."
+
+msgctxt "live_exam.model.session.presentation_style"
+msgid "Rəsmi"
+msgstr "Formell"
+
+msgctxt "live_exam.model.session.presentation_style"
+msgid "Qeyri-rəsmi"
+msgstr "Locker"

@@ -62,7 +62,8 @@
             document.querySelectorAll("[data-wait-room-panel]").forEach((panel) => {
                 const on = panel.dataset.waitRoomPanel === active;
                 panel.classList.toggle("is-active", on);
-                panel.hidden = !on || getState().settings.characters_enabled === false;
+                const settings = getState().settings;
+                panel.hidden = !on || settings.characters_enabled === false || settings.presentation_style === "formal";
             });
         }
 

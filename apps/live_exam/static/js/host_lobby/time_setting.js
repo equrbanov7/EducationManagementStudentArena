@@ -9,11 +9,11 @@
  * Bir neçə yer (`[data-time-setting]`) eyni vəziyyəti göstərir; hadisələr document-də delegasiya
  * ilə bir dəfə bağlanır (səhnə yenidən çəkiləndə dinləyici yığılmır).
  */
-import { state } from './state.js?v=lx20261019';
-import { postJson } from './api.js?v=lx20261019';
-import { icon } from './icons.js?v=lx20261019';
-import { showToast } from './toast.js?v=lx20261019';
-import { controlsEnabled, esc, fmt, tr } from './utils.js?v=lx20261019';
+import { state } from './state.js?v=lx20261019s';
+import { postJson } from './api.js?v=lx20261019s';
+import { icon } from './icons.js?v=lx20261019s';
+import { showToast } from './toast.js?v=lx20261019s';
+import { controlsEnabled, esc, fmt, tr } from './utils.js?v=lx20261019s';
 
 const DEFAULTS = { default: 30, presets: [10, 20, 30, 60, 90, 120], min: 5, max: 300 };
 let bound = false;

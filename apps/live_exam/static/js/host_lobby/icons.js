@@ -3,7 +3,10 @@
  * `window.LiveHostIcons` klassik skriptlər (host_lobby_shell.js) üçün də açıqdır.
  * Server fiqur açarları: triangle, diamond, circle, square, pentagon (ULDUZ kimi
  * çəkilir — kiçik ölçüdə altıbucaqdan fərqlənsin), hexagon.
+ * 2026-10-19: «Rəsmi» üslubda oyunbaz ikonlar (şimşək, alov, tac, kubok, ulduz, parıltı) sakit xətti
+ * qarşılıqları ilə əvəzlənir (FORMAL_SWAP) — çağıranlar dəyişmir.
  */
+import { isFormal } from './style_mode.js?v=lx20261019s';
 
 const STROKE = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
 
@@ -42,6 +45,12 @@ const PATHS = {
     up: '<path d="M12 5l7.5 9h-15z" fill="currentColor"/>',
     down: '<path d="M12 19l-7.5-9h15z" fill="currentColor"/>',
     close: `<path d="M6.5 6.5l11 11M17.5 6.5l-11 11" ${STROKE} stroke-width="2.4"/>`,
+    // 2026-10-19: «Rəsmi» üslubun xətti ikonları (lucide üslubunda: check-circle, clock, user, chart-bar, medal).
+    checkCircle: `<circle cx="12" cy="12" r="9" ${STROKE}/><path d="M8.2 12.3l2.6 2.6 5-5.4" ${STROKE}/>`,
+    clock: `<circle cx="12" cy="12" r="9" ${STROKE}/><path d="M12 7.2V12l3.2 2" ${STROKE}/>`,
+    user: `<circle cx="12" cy="8" r="3.8" ${STROKE}/><path d="M4.5 20c.8-3.8 3.9-6 7.5-6s6.7 2.2 7.5 6" ${STROKE}/>`,
+    chartBar: `<path d="M4 20h16" ${STROKE}/><rect x="5.5" y="11" width="3" height="6" rx=".6" ${STROKE}/><rect x="10.5" y="6" width="3" height="11" rx=".6" ${STROKE}/><rect x="15.5" y="13.5" width="3" height="3.5" rx=".6" ${STROKE}/>`,
+    medalLine: `<path d="M7 3h4l2 5.2M17 3h-4l-1 2.6" ${STROKE}/><circle cx="12" cy="15" r="6" ${STROKE}/><circle cx="12" cy="15" r="2.3" ${STROKE}/>`,
     userMinus: `<circle cx="10" cy="8.5" r="3.4" ${STROKE}/><path d="M3.5 19.5c.6-3.3 3.3-5.3 6.5-5.3 1.3 0 2.5.3 3.5.9M15.5 16.5h6" ${STROKE}/>`,
 };
 
@@ -56,8 +65,20 @@ const SHAPES = {
 
 const SHAPE_ORDER = ["triangle", "diamond", "circle", "square", "star", "hexagon"];
 
+const FORMAL_SWAP = {
+    bolt: "clock",
+    timer: "clock",
+    flame: "checkCircle",
+    star: "checkCircle",
+    sparkle: "chartBar",
+    trophy: "medalLine",
+    crown: "medalLine",
+    medal: "medalLine",
+};
+
 export function icon(name, className = "") {
-    const body = PATHS[name] || "";
+    const resolved = isFormal() ? FORMAL_SWAP[name] || name : name;
+    const body = PATHS[resolved] || "";
     return `<svg class="hx-icon${className ? ` ${className}` : ""}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${body}</svg>`;
 }
 

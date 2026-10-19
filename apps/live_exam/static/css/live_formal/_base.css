@@ -1,0 +1,82 @@
+/* live_formal/_base.css — «Rəsmi» təqdimat üslubunun ORTAQ qatı (2026-10-19).
+ *
+ * Yalnız `body[data-lx-style="formal"]` altında işləyir (aparıcı səhnəsi, telefon, qoşulma, gözləmə
+ * otağı); «Qeyri-rəsmi» üslubda bu faylın heç bir qaydası tətbiq olunmur. Rənglər universitetin
+ * dizayn tokenlərindəndir (css/design-tokens.css: --ems-navy-*, --ems-primary-*, --ems-neutral-*).
+ * Bütün cavab variantları EYNİ sakit rəngdədir — fərqləndirici HƏRFDİR (A, B, C, D), fiqur yox.
+ * Fayl SONDA yüklənir (üstələyir); mövcud JS qarmaqları/sinifləri dəyişmir.
+ */
+
+body[data-lx-style="formal"] {
+    --lxf-bg-1: var(--ems-navy-900, #081427);
+    --lxf-bg-2: #0c2140;
+    --lxf-surface: #12305a;
+    --lxf-surface-2: #183a6a;
+    --lxf-line: rgba(191, 219, 254, 0.22);
+    --lxf-ink: #ffffff;
+    --lxf-muted: #c7d4ea;
+    --lxf-accent: var(--ems-primary-500, #3b82f6);
+    --lxf-accent-strong: var(--ems-primary-600, #2563eb);
+    --lxf-badge-bg: #ffffff;
+    --lxf-badge-ink: var(--ems-navy-800, #0b2a52);
+
+    /* Cavab tokenləri (live_theme.css) — hamısı eyni neytral səth, ağ mətn (AA ≥ 7:1). */
+    --lx-ans-1-bg: var(--lxf-surface);  --lx-ans-1-bg2: var(--lxf-surface);  --lx-ans-1-ink: #ffffff;
+    --lx-ans-2-bg: var(--lxf-surface);  --lx-ans-2-bg2: var(--lxf-surface);  --lx-ans-2-ink: #ffffff;
+    --lx-ans-3-bg: var(--lxf-surface);  --lx-ans-3-bg2: var(--lxf-surface);  --lx-ans-3-ink: #ffffff;
+    --lx-ans-4-bg: var(--lxf-surface);  --lx-ans-4-bg2: var(--lxf-surface);  --lx-ans-4-ink: #ffffff;
+    --lx-ans-5-bg: var(--lxf-surface);  --lx-ans-5-bg2: var(--lxf-surface);  --lx-ans-5-ink: #ffffff;
+    --lx-ans-6-bg: var(--lxf-surface);  --lx-ans-6-bg2: var(--lxf-surface);  --lx-ans-6-ink: #ffffff;
+    --lx-correct: #16a34a;
+    --lx-correct-ink: #ffffff;
+    --lx-wrong-bg: #0e2342;
+    --lx-wrong-ink: #b8c6de;
+    /* «Qızılı» vurğu → universitet mavisi. */
+    --lx-gold: var(--ems-primary-500, #3b82f6);
+    --lx-gold-ink: #ffffff;
+    --lx-stage-bg: var(--lxf-bg-1);
+}
+
+/* ── Baş hərf avatarı (live_avatar_renderer.js `setFormal(true)`) ───────────────── */
+.live-avatar.live-avatar--initials {
+    display: inline-grid;
+    place-items: center;
+    width: var(--live-avatar-size, 48px);
+    height: var(--live-avatar-size, 48px);
+    min-width: var(--live-avatar-size, 48px);
+    min-height: var(--live-avatar-size, 48px);
+    border-radius: 50%;
+    background: var(--ems-blue-900, #1e3a8a);
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+    font: 600 calc(var(--live-avatar-size, 48px) * 0.38) / 1 "Manrope", system-ui, sans-serif;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    animation: none;
+    overflow: hidden;
+}
+
+/* ── Variant hərfi (A, B, C…) — host `.hx-letter`, telefon `.lxp-letter` ─────────── */
+body[data-lx-style="formal"] .hx-letter,
+body[data-lx-style="formal"] .lxp-letter {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    background: var(--lxf-badge-bg);
+    color: var(--lxf-badge-ink);
+    font: 600 1em / 1 "Space Grotesk", "Manrope", system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+}
+
+/* Rəsmi üslubda heç bir «oynaq» hərəkət: sıçrayış, yellənmə, nəbz yoxdur (yalnız sakit görünmə — lxfFade). */
+body[data-lx-style="formal"] .live-avatar[data-dance] {
+    animation: none;
+}
+
+@keyframes lxfFade {
+    from { opacity: 0; }
+}

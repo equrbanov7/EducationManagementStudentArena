@@ -14,6 +14,18 @@
     <div class="host-settings-drawer__body">
         <section class="host-settings-group">
             <div class="host-settings-group__title">{% trans "group_general" context "live_exam.host_settings" %}</div>
+            {% comment %}2026-10-19: təqdimat üslubu — yalnız lobbidə dəyişir (server də yoxlayır); oyun başlayanda düymələr söndürülür.
+            «Rəsmi»-də təsirsiz olan ayarlar (mövzu, musiqi, səs, personajlar, reaksiyalar) `data-playful-only` ilə sönük göstərilir.{% endcomment %}
+            <div class="host-settings-item host-settings-item--field" data-lobby-only>
+                <div class="host-settings-item__copy">
+                    <strong id="settingPresentationStyleLabel">{% trans "Görünüş üslubu" context "live_exam.presentation_style" %}</strong>
+                    <span>{% trans "«Rəsmi»: A/B/C/D variantları, sakit ikonlar, baş hərflər, sıralama cədvəli — konfetti, səs effekti və emoji olmadan. «Qeyri-rəsmi»: fiqurlar, avatarlar, musiqi və final şousu. Yalnız oyun başlamazdan əvvəl dəyişir." context "live_exam.presentation_style" %}</span>
+                </div>
+                <div class="hx-seg" role="radiogroup" aria-labelledby="settingPresentationStyleLabel" data-setting-choice="presentation_style">
+                    <button type="button" class="hx-seg__btn" role="radio" aria-checked="false" data-value="formal">{% trans "Rəsmi" context "live_exam.presentation_style" %}</button>
+                    <button type="button" class="hx-seg__btn" role="radio" aria-checked="false" data-value="playful">{% trans "Qeyri-rəsmi" context "live_exam.presentation_style" %}</button>
+                </div>
+            </div>
             <label class="host-settings-item">
                 <div class="host-settings-item__copy">
                     <strong>{% trans "show_questions_label" context "live_exam.host_settings" %}</strong>
@@ -22,7 +34,7 @@
                 <input id="settingShowQuestionsOnDevices" class="host-switch__input" type="checkbox">
                 <span class="host-switch" aria-hidden="true"><span></span></span>
             </label>
-            <label class="host-settings-item">
+            <label class="host-settings-item" data-playful-only>
                 <div class="host-settings-item__copy">
                     <strong>{% trans "characters_label" context "live_exam.host_settings" %}</strong>
                     <span>{% trans "characters_help" context "live_exam.host_settings" %}</span>
@@ -30,7 +42,7 @@
                 <input id="settingCharactersEnabled" class="host-switch__input" type="checkbox">
                 <span class="host-switch" aria-hidden="true"><span></span></span>
             </label>
-            <div class="host-settings-item host-settings-item--stack">
+            <div class="host-settings-item host-settings-item--stack" data-playful-only>
                 <div class="host-settings-item__copy">
                     <strong>{% trans "theme_label" context "live_exam.host_settings" %}</strong>
                     <span>{% trans "theme_help" context "live_exam.host_settings" %}</span>
@@ -70,7 +82,7 @@
                     <button type="button" class="hx-seg__btn" role="radio" aria-checked="false" data-value="de">DE</button>
                 </div>
             </div>
-            <div class="host-settings-item host-settings-item--field">
+            <div class="host-settings-item host-settings-item--field" data-playful-only>
                 <div class="host-settings-item__copy">
                     <strong id="settingLobbyMusicLabel">{% trans "lobby_music_label" context "live_exam.host_settings" %}</strong>
                     <span>{% trans "lobby_music_help" context "live_exam.host_settings" %}</span>
@@ -81,7 +93,7 @@
                     <button type="button" class="hx-seg__btn" role="radio" aria-checked="false" data-value="silent">{% trans "music_silent" context "live_exam.host_settings" %}</button>
                 </div>
             </div>
-            <div class="host-settings-item host-settings-item--field">
+            <div class="host-settings-item host-settings-item--field" data-playful-only>
                 <div class="host-settings-item__copy">
                     <strong>{% trans "sfx_volume_label" context "live_exam.host_settings" %}</strong>
                     <span>{% trans "sfx_volume_help" context "live_exam.host_settings" %}</span>
@@ -110,7 +122,7 @@
 
         <section class="host-settings-group">
             <div class="host-settings-group__title">{% trans "group_hosting" context "live_exam.host_settings" %}</div>
-            <label class="host-settings-item">
+            <label class="host-settings-item" data-playful-only>
                 <div class="host-settings-item__copy">
                     <strong>{% trans "reactions_label" context "live_exam.host_settings" %}</strong>
                     <span>{% trans "reactions_help" context "live_exam.host_settings" %}</span>

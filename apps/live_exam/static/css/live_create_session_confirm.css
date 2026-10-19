@@ -36,8 +36,101 @@
 }
 
 .live-create-confirm__actions {
+    margin-top: 20px;
+}
+
+.live-create-confirm__buttons {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
     margin-top: 20px;
+}
+
+/* 2026-10-19: təqdimat üslubu seçimi (Rəsmi / Qeyri-rəsmi) — radio kartlar. */
+.live-create-confirm__style {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.live-create-confirm__legend {
+    margin: 0 0 4px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--ems-text, #0f172a);
+}
+
+.live-style-card {
+    position: relative;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    border: 1px solid var(--color-border, #e5e7eb);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.live-style-card:hover {
+    border-color: var(--ems-primary-600, #2563eb);
+}
+
+.live-style-card:has(.live-style-card__input:checked) {
+    border-color: var(--ems-primary-600, #2563eb);
+    background: var(--ems-primary-50, #eff6ff);
+}
+
+.live-style-card__input {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--ems-primary-600, #2563eb);
+}
+
+.live-style-card__input:focus-visible {
+    outline: 2px solid var(--ems-primary-600, #2563eb);
+    outline-offset: 2px;
+}
+
+.live-style-card__body {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.live-style-card__head {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    color: var(--ems-text, #0f172a);
+}
+
+.live-style-card__head .fas {
+    width: 18px;
+    color: var(--color-text-muted, #475569);
+    text-align: center;
+}
+
+.live-style-card__help {
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--color-text-muted, #475569);
+}
+
+@media (max-width: 480px) {
+    .live-create-confirm__card {
+        padding: 20px 16px;
+    }
+
+    .live-create-confirm__buttons {
+        flex-direction: column-reverse;
+    }
+
+    .live-create-confirm__buttons .btn {
+        width: 100%;
+    }
 }

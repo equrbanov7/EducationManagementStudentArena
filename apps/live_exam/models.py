@@ -5,7 +5,13 @@ from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
 from apps.exams.models import Exam, ExamQuestion
-from apps.live_exam.constants import DEFAULT_ACCESSORY_KEY, DEFAULT_AVATAR_KEY
+from apps.live_exam.constants import (
+    DEFAULT_ACCESSORY_KEY,
+    DEFAULT_AVATAR_KEY,
+    DEFAULT_PRESENTATION_STYLE,
+    PRESENTATION_FORMAL,
+    PRESENTATION_PLAYFUL,
+)
 
 # Accept a small legacy window because older deployments may still have
 # shorter active session PINs in the database.
@@ -61,6 +67,19 @@ class LiveSession(models.Model):
     # ✅ Random seçilən sualların ID-ləri (order burada saxlanır)
     selected_question_ids = models.JSONField(default=list, blank=True)
     host_settings = models.JSONField(default=dict, blank=True)
+
+    # 2026-10-19: təqdimat üslubu — «Rəsmi» (yeni sessiyaların defoltu) / «Qeyri-rəsmi» (əvvəlki görünüş).
+    # Aparıcı yalnız LOBBİDƏ dəyişir (session_settings.update_session_settings yoxlayır); səhnə və bütün
+    # oyunçular onu ictimai ayarlarda (``presentation_style``) alır. Miqrasiya 0006: köhnə sətirlər «playful».
+    PRESENTATION_STYLE_CHOICES = [
+        (PRESENTATION_FORMAL, pgettext_lazy("live_exam.model.session.presentation_style", "Rəsmi")),
+        (PRESENTATION_PLAYFUL, pgettext_lazy("live_exam.model.session.presentation_style", "Qeyri-rəsmi")),
+    ]
+    presentation_style = models.CharField(
+        max_length=12,
+        choices=PRESENTATION_STYLE_CHOICES,
+        default=DEFAULT_PRESENTATION_STYLE,
+    )
 
     def _ensure_unique_pin(self):
         """

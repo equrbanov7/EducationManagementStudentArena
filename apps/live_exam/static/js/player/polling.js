@@ -3,11 +3,11 @@
 //  * WS açıqdırsa — «gözətçi»: gözlənilən server mesajı gecikibsə (sual bitib, reveal gəlməyib; və ya
 //    növbəti sual vaxtı keçib) snapshot çəkir; gecikmə davam etdikcə interval 4 → 8 → 16 → 30 s artır
 //    (host əl rejimində gözləyəndə 90 telefon serveri döyəcləməsin).
-import { PHASES } from './config.js?v=lx20261019';
-import { fetchState } from './api.js?v=lx20261019';
-import { isSocketOpen } from './sockets.js?v=lx20261019';
-import { state } from './state.js?v=lx20261019';
-import { getRevealTimings, nowMs, ts } from './utils.js?v=lx20261019';
+import { PHASES } from './config.js?v=lx20261019s';
+import { fetchState } from './api.js?v=lx20261019s';
+import { isSocketOpen } from './sockets.js?v=lx20261019s';
+import { state } from './state.js?v=lx20261019s';
+import { getRevealTimings, nowMs, ts } from './utils.js?v=lx20261019s';
 
 let tickCount = 0;
 let watchdogDelay = 0;

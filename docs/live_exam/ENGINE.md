@@ -158,3 +158,27 @@ klientə qoşur, `personal` açarı heç vaxt klientə getmir.
   düymələri dəqiq anda açılır. State/answer sorğularının 6 s timeout-u var; WS ilişəndə cavab dərhal HTTP ilə.
 - Ölçmə (4 telefon, proksi ilə gecikmə/kəsinti): yavaş 3G-də düymələrin gecikməsi 457 → 10 ms, ilk sual
   5.9 → 2.9 s; 8 s kəsintidə itən cavab 2/6 → 0.
+
+## Təqdimat üslubu: «Rəsmi» / «Qeyri-rəsmi» (2026-10-19)
+
+Sahib: «müəllimlər ciddi mühitdə ikonlar olaraq uşaq əyləncəli olanlar yox, rəsmilər görünsün».
+
+* **Harada saxlanır:** `LiveSession.presentation_style` (`formal` | `playful`), miqrasiya `0006`. `host_settings`
+  JSON-da DEYİL — `get_host_session_settings` / `get_session_settings` onu `presentation_style` açarı ilə əlavə edir,
+  ona görə state JSON, `lobby_state`, `session_settings` WS və səhifə kontekstləri (səhnə, telefon, qoşulma, gözləmə
+  otağı) onu avtomatik daşıyır. Açar yoxdursa (köhnə keş / klient) müştəri oyunbaz götürür.
+* **Defolt:** YENİ sessiya imtahanın SON sessiyasının seçimini götürür; imtahanın heç sessiyası yoxdursa — **«Rəsmi»**
+  (`session_settings.default_style_for_exam`). Miqrasiyadan əvvəlki bütün sessiyalar `playful` doldurulub, yəni
+  əvvəl canlı keçirilmiş imtahanlar dəyişdirilməyənə qədər əvvəlki görünüşdə qalır.
+* **Harada seçilir:** sessiya yaratma təsdiqi (`create_session_confirm.html`, radio kartlar), lobbidə aparıcının idarə
+  paneli və «Tənzimləmələr» çekməcəsi (`data-setting-choice="presentation_style"`). Yalnız sessiyanın host-u
+  (host RBAC — `_host_session_or_404`) və yalnız **lobbidə** dəyişir; oyun başlayandan sonra fərqli dəyər → 400
+  (eyni dəyər zərərsizdir), yararsız dəyər → 400.
+* **«Rəsmi» nə edir:** `body[data-lx-style="formal"]` + `css/live_formal/*.css` qatı (universitet tokenləri, sakit
+  tünd-göy fon, eyni rəngli plitələr); JS keçidləri `host_lobby/style_mode.js`-dədir (host və telefon qrafı paylaşır):
+  variantlar A/B/C/D hərfləri, xətti ikonlar (`icons.js` FORMAL_SWAP), avatar əvəzinə baş hərflər
+  (`LiveAvatarRenderer.setFormal`), konfetti/fişəng/rəqs/pərdə yoxdur, bütün səs effektləri və musiqi susur, emoji
+  reaksiyaları göstərilmir və server onları qəbul etmir (403), qoşulmada avatar seçilmir, tərcümə mətnlərindəki emoji
+  çıxarılır, liderlik sətirləri sürüşmür, final — sakit sıralama cədvəli (`formal_stage.js`), telefonda — yer, xal,
+  statistika və ilk 5. Kod nümunələrinin göstərilməsi (`code_text.js`, `live_code_text.css`) dəyişmir.
+* **«Qeyri-rəsmi»:** əvvəlki davranış dəyişməyib.

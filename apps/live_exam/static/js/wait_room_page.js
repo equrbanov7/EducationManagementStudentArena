@@ -199,8 +199,14 @@
         function applySettings(next) {
             state.settings = Object.assign({}, state.settings, next || {});
             document.body.dataset.liveTheme = state.settings.theme_key || "aurora";
-            reactions.setEnabled(state.settings.reactions_enabled !== false && !state.done);
-            const characters = state.settings.characters_enabled !== false;
+            // 2026-10-19: «Rəsmi» üslub — baş hərflər, reaksiya/avatar seçimi yoxdur (server də qəbul etmir).
+            const formal = state.settings.presentation_style === "formal";
+            const styleChanged = document.body.dataset.lxStyle !== (formal ? "formal" : "playful");
+            document.body.dataset.lxStyle = formal ? "formal" : "playful";
+            window.LiveAvatarRenderer?.setFormal?.(formal);
+            if (styleChanged && dom.heroAvatar) renderHero();
+            reactions.setEnabled(state.settings.reactions_enabled !== false && !formal && !state.done);
+            const characters = state.settings.characters_enabled !== false && !formal;
             if (dom.appearance) dom.appearance.hidden = !characters;
             if (dom.avatarPanel && !characters) dom.avatarPanel.hidden = true;
             if (dom.accessoryPanel && !characters) dom.accessoryPanel.hidden = true;

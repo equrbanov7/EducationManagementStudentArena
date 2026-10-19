@@ -4,15 +4,20 @@
 // stage.js-i) həmin yeri AÇAN anda göstərilir. Səhnənin zaman xətti aparıcının saf
 // stage_logic.js modulundan götürülür (tək həqiqət mənbəyi — iki yerdə təkrarlanmır).
 // Server də son sualın reveal paketində `top`/`rank` göndərmir (reveal.py).
-import { PHASES } from './config.js?v=lx20261019';
-import { state } from './state.js?v=lx20261019';
-import { announce, setQuestionChip, setRank, setTimer, stopTimeBar } from './ui.js?v=lx20261019';
-import { esc, isOwnRow, normalizeTopRows, toInt, tr } from './utils.js?v=lx20261019';
-import { mountView } from './views.js?v=lx20261019';
-import { buildStageModel, stageTimeline } from '../host_lobby/stage_logic.js?v=lx20261019';
+// 2026-10-19: «Rəsmi» üslubda səhnə şousu yoxdur (cədvəl dərhal görünür) — telefon da gözləmir.
+import { PHASES } from './config.js?v=lx20261019s';
+import { state } from './state.js?v=lx20261019s';
+import { announce, setQuestionChip, setRank, setTimer, stopTimeBar } from './ui.js?v=lx20261019s';
+import { esc, isOwnRow, normalizeTopRows, toInt, tr } from './utils.js?v=lx20261019s';
+import { mountView } from './views.js?v=lx20261019s';
+import { buildStageModel, stageTimeline } from '../host_lobby/stage_logic.js?v=lx20261019s';
+import { isFormal } from '../host_lobby/style_mode.js?v=lx20261019s';
 
 const TROPHY_SVG =
     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 3.5h10v5a5 5 0 0 1-10 0z" fill="currentColor"/><path d="M7 5.5H4v1.5A3.5 3.5 0 0 0 7.4 10.5M17 5.5h3v1.5a3.5 3.5 0 0 1-3.4 3.5M12 13.5v3.5M8 20.5h8M9.5 17h5v3.5h-5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+const CHART_SVG =
+    '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h16M7 17v-6M12 17V6M17 17v-3.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
 
 // Görünüş açarı sabitdir: son reveal → finished keçidində görünüş YENİDƏN qurulmur (ikiqat animasiya yox).
 const SUSPENSE_KEY = "final-suspense";
@@ -30,13 +35,14 @@ export function isFinalReveal(payload) {
 }
 
 export function renderFinalSuspense() {
+    const formal = isFormal();
     const title = tr("finalSuspenseTitle", "Nəticələr ekranda!");
     const { created } = mountView(
         SUSPENSE_KEY,
         `<div class="lxp-suspense">` +
-            `<div class="lxp-suspense__badge" aria-hidden="true">${TROPHY_SVG}</div>` +
+            `<div class="lxp-suspense__badge" aria-hidden="true">${formal ? CHART_SVG : TROPHY_SVG}</div>` +
             `<h1 class="lxp-title">${esc(title)}</h1>` +
-            `<p class="lxp-sub">${esc(tr("finalSuspenseBody", "Yerin final səhnəsində açılacaq — gözün böyük ekranda olsun 👀"))}</p>` +
+            `<p class="lxp-sub">${esc(formal ? tr("formalSuspenseSub", "Yekun nəticələr hazırlanır") : tr("finalSuspenseBody", "Yerin final səhnəsində açılacaq — gözün böyük ekranda olsun 👀"))}</p>` +
             `<div class="lxp-dots lxp-dots--lg" aria-hidden="true"><span></span><span></span><span></span></div>` +
             `</div>`,
         { tone: "suspense" }
@@ -59,6 +65,7 @@ function ownRank(payload) {
 
 /** Final səhnəsinin başlanğıcından (ms) bu oyunçunun yerinin açıldığı ana qədər. */
 export function stageRevealOffsetMs(payload) {
+    if (isFormal()) return 0;
     const top = Array.isArray(payload && payload.top) ? payload.top : [];
     const model = buildStageModel(top, { totalPlayers: payload && payload.total_players });
     const steps = stageTimeline(model, { reduced: false });

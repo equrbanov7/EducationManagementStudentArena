@@ -2,13 +2,14 @@
 // Yalnız serverin göndərdiyi məlumat göstərilir: şəxsi nəticə (`player_answer`), `rank`,
 // `gap_to_next`, `next_nickname`, `streak`, multi üçün `correct_selected/total_correct`,
 // yazılı cavab üçün `your_text`/`accepted_answers`. Sahə yoxdursa — o hissə sadəcə göstərilmir.
-import { LEADERBOARD_LIMIT, PHASES, prefersReducedMotion } from './config.js?v=lx20261019';
-import { playSound } from './audio.js?v=lx20261019';
-import { buzz, HAPTIC } from './haptics.js?v=lx20261019';
-import { shapeKey, shapeLabel, shapeSvg, toneIndex } from './shapes.js?v=lx20261019';
-import { state } from './state.js?v=lx20261019';
-import { previousRank, rememberRank } from './stats.js?v=lx20261019';
-import { announce, setQuestionChip, setRank, setScore, setTimer, stopTimeBar } from './ui.js?v=lx20261019';
+import { LEADERBOARD_LIMIT, PHASES, prefersReducedMotion } from './config.js?v=lx20261019s';
+import { playSound } from './audio.js?v=lx20261019s';
+import { buzz, HAPTIC } from './haptics.js?v=lx20261019s';
+import { optionLabel, optionMark, toneIndex } from './shapes.js?v=lx20261019s';
+import { isFormal } from '../host_lobby/style_mode.js?v=lx20261019s';
+import { state } from './state.js?v=lx20261019s';
+import { previousRank, rememberRank } from './stats.js?v=lx20261019s';
+import { announce, setQuestionChip, setRank, setScore, setTimer, stopTimeBar } from './ui.js?v=lx20261019s';
 import {
     esc,
     fmt,
@@ -25,9 +26,9 @@ import {
     showQuestionsOnDevices,
     toInt,
     tr,
-} from './utils.js?v=lx20261019';
-import { mountView } from './views.js?v=lx20261019';
-import { CHECK_SVG } from './render_round.js?v=lx20261019';
+} from './utils.js?v=lx20261019s';
+import { mountView } from './views.js?v=lx20261019s';
+import { CHECK_SVG } from './render_round.js?v=lx20261019s';
 
 const CROSS_SVG =
     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg>';
@@ -134,9 +135,8 @@ function correctAnswerMarkup(payload, question) {
         .map((option, index) => ({ option, index }))
         .filter(({ option }) => ids.has(Number(option.id)))
         .map(({ option, index }) => {
-            const key = shapeKey(option, index);
-            const label = show && option.text ? option.text : shapeLabel(key);
-            return `<span class="lxp-chip" data-tone="${toneIndex(option, index)}">${shapeSvg(key, "lxp-chip__shape")}<span>${esc(label)}</span></span>`;
+            const label = show && option.text ? option.text : optionLabel(option, index);
+            return `<span class="lxp-chip" data-tone="${toneIndex(option, index)}">${optionMark(option, index, "lxp-chip__shape")}<span>${esc(label)}</span></span>`;
         })
         .join("");
     const label = ids.size > 1 ? tr("resultCorrectAnswers", "Düzgün cavablar") : tr("resultCorrectAnswer", "Düzgün cavab");
@@ -175,12 +175,12 @@ export function renderResult(payload) {
     }
     if (streak >= 2) {
         chips.push(
-            `<span class="lxp-pill lxp-pill--streak">${FLAME_SVG}<span>${esc(fmt(tr("streakLabel", "{count} ardıcıl düzgün!"), { count: streak }))}</span></span>`
+            `<span class="lxp-pill lxp-pill--streak">${isFormal() ? CHECK_SVG : FLAME_SVG}<span>${esc(fmt(tr("streakLabel", "{count} ardıcıl düzgün!"), { count: streak }))}</span></span>`
         );
     }
     if (result && hasNumber(result.answer_ms) && outcome !== "none") {
         chips.push(
-            `<span class="lxp-pill">${BOLT_SVG}<span>${esc(fmt(tr("resultSpeed", "{seconds} san"), { seconds: formatSeconds(result.answer_ms) }))}</span></span>`
+            `<span class="lxp-pill">${isFormal() ? CLOCK_SVG : BOLT_SVG}<span>${esc(fmt(tr("resultSpeed", "{seconds} san"), { seconds: formatSeconds(result.answer_ms) }))}</span></span>`
         );
     }
     const typedAnswer = result && isTextQuestion(question) ? String(result.your_text || result.text || "") : "";

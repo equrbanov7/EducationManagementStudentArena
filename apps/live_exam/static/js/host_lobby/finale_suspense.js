@@ -1,10 +1,11 @@
-import { UI } from './dom.js?v=lx20261019';
-import { FINAL_SUSPENSE_MS, PHASES } from './constants.js?v=lx20261019';
-import { state } from './state.js?v=lx20261019';
-import { playRiser } from './audio.js?v=lx20261019';
-import { icon } from './icons.js?v=lx20261019';
-import { setPresentationMarkup } from './presentation.js?v=lx20261019';
-import { controlsEnabled, esc, tr } from './utils.js?v=lx20261019';
+import { UI } from './dom.js?v=lx20261019s';
+import { FINAL_SUSPENSE_MS, PHASES } from './constants.js?v=lx20261019s';
+import { state } from './state.js?v=lx20261019s';
+import { playRiser } from './audio.js?v=lx20261019s';
+import { icon } from './icons.js?v=lx20261019s';
+import { setPresentationMarkup } from './presentation.js?v=lx20261019s';
+import { isFormal } from './style_mode.js?v=lx20261019s';
+import { controlsEnabled, esc, tr } from './utils.js?v=lx20261019s';
 
 /* Sahib 2026-09-30: SON sualdan sonra liderlər lövhəsi göstərilmir — yerlər final səhnəsində
  * sürpriz kimi açılır. Son sualın nəticə fazasından sonra bu qısa «Nəticələr…» səhnəsi gəlir
@@ -33,7 +34,7 @@ export function renderFinalSuspenseStage(payload) {
                 <div class="hx-suspense__glow" aria-hidden="true"></div>
                 <span class="hx-suspense__trophy" aria-hidden="true">${icon("trophy")}</span>
                 <h1 class="hx-suspense__title">${esc(tr("finalSuspenseTitle", "Nəticələr…"))}</h1>
-                <p class="hx-suspense__sub">${esc(tr("finalSuspenseSub", "Kim qalib gəldi? Final səhnəsi başlayır!"))}</p>
+                <p class="hx-suspense__sub">${esc(isFormal() ? tr("formalSuspenseSub", "Yekun nəticələr hazırlanır") : tr("finalSuspenseSub", "Kim qalib gəldi? Final səhnəsi başlayır!"))}</p>
                 <span class="hx-dots" aria-hidden="true"><i></i><i></i><i></i></span>
                 ${manual ? `<p class="hx-suspense__hint">${esc(tr("finalSuspenseHint", "Final səhnəsini açmaq üçün «Növbəti» düyməsini basın"))}</p>` : ""}
             </section>

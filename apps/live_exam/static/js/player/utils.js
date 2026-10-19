@@ -5,20 +5,22 @@ import {
     I18N,
     LANG,
     SESSION_SETTINGS,
-} from './config.js?v=lx20261019';
-import { clockOffsetMs, recordPush, recordRoundTrip } from './clock.js?v=lx20261019';
-import { state } from './state.js?v=lx20261019';
+} from './config.js?v=lx20261019s';
+import { clockOffsetMs, recordPush, recordRoundTrip } from './clock.js?v=lx20261019s';
+import { state } from './state.js?v=lx20261019s';
+import { plainText } from '../host_lobby/style_mode.js?v=lx20261019s';
 
 // Tərcümə hələ kompilyasiya olunmayıbsa {% trans %} msgid-i («answer_locked») qaytarır —
 // belə açarı xam göstərmirik, JS-dəki (az) ehtiyat mətni işlədirik.
 const UNTRANSLATED_KEY = /^[a-z][a-z0-9]*(?:_[a-z0-9]+)+$/;
 
+// 2026-10-19: «Rəsmi» üslubda emoji mətndən çıxarılır (plainText; oyunbazda mətn olduğu kimi).
 export function tr(key, fallback) {
     const value = I18N[key];
-    if (typeof value !== "string") return fallback;
+    if (typeof value !== "string") return plainText(fallback);
     const trimmed = value.trim();
-    if (!trimmed || UNTRANSLATED_KEY.test(trimmed)) return fallback;
-    return value;
+    if (!trimmed || UNTRANSLATED_KEY.test(trimmed)) return plainText(fallback);
+    return plainText(value);
 }
 
 export const fmt = (template, values) =>

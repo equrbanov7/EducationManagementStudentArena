@@ -1,9 +1,10 @@
-import { PHASES, SCOREBOARD_ROWS } from './constants.js?v=lx20261019';
-import { state } from './state.js?v=lx20261019';
-import { playScoreboardSound } from './audio.js?v=lx20261019';
-import { icon } from './icons.js?v=lx20261019';
-import { setPresentationMarkup } from './presentation.js?v=lx20261019';
-import { avatarImageMarkup, countUp, esc, fmt, formatNumber, progressLabel, reducedMotion, tr } from './utils.js?v=lx20261019';
+import { PHASES, SCOREBOARD_ROWS } from './constants.js?v=lx20261019s';
+import { state } from './state.js?v=lx20261019s';
+import { playScoreboardSound } from './audio.js?v=lx20261019s';
+import { icon } from './icons.js?v=lx20261019s';
+import { setPresentationMarkup } from './presentation.js?v=lx20261019s';
+import { isFormal } from './style_mode.js?v=lx20261019s';
+import { avatarImageMarkup, countUp, esc, fmt, formatNumber, progressLabel, reducedMotion, tr } from './utils.js?v=lx20261019s';
 
 /* Liderlər lövhəsi: sətirlər YENİ sırada render olunur, sonra hər biri köhnə
  * yerindən (previous_top) yeni yerinə «FLIP» ilə sürüşür; xal əvvəlki xaldan
@@ -51,10 +52,11 @@ function animateRows(root) {
         const scoreEl = row.querySelector("[data-lb-score]");
         const target = Number(row.dataset.score || 0);
         const start = Number(row.dataset.prevScore || 0);
-        if (reducedMotion()) countUp(scoreEl, target, target, 0);
+        // 2026-10-19: «Rəsmi» üslubda sıralama cədvəli sakitdir — sürüşmə/sayma animasiyası yoxdur.
+        if (reducedMotion() || isFormal()) countUp(scoreEl, target, target, 0);
         else window.setTimeout(() => countUp(scoreEl, start, target, 900), 450 + index * 70);
     });
-    root.classList.add("is-animating");
+    if (!isFormal()) root.classList.add("is-animating");
 }
 
 export function renderScoreboardStage(payload, question) {

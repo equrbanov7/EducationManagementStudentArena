@@ -199,6 +199,12 @@ class SharedIpFairnessTest(_RateBase):
 
 
 class ReactionFanOutTest(_RateBase):
+    def setUp(self):
+        super().setUp()
+        # 2026-10-19: avatar/reaksiya «Qeyri-rəsmi» üslubun xüsusiyyətidir (yeni sessiyanın defoltu «Rəsmi»).
+        self.session.presentation_style = "playful"
+        self.session.save(update_fields=["presentation_style"])
+
     @override_settings(LIVE_REACTION_SESSION_RATE_LIMIT="3/10s")
     def test_session_wide_reaction_cap(self):
         """LXS-11: hər oyunçu 3/10s — atılan oyunçularla fan-out (reaksiya × soket) sərhədsiz idi."""

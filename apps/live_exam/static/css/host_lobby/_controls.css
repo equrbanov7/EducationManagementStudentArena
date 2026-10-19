@@ -375,3 +375,24 @@ body.host-players-open .host-players-drawer {
     }
     body.host-presentation-page:has(.hx-sound__hint:not([hidden])) .hx-lobby { padding-top: 144px; }
 }
+
+/* 2026-10-19: «Görünüş üslubu» (Rəsmi / Qeyri-rəsmi) — idarə panelində, vaxt seçicisinin altında. */
+.control-style {
+    display: grid;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--hx-line);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.control-style__label { font: 800 13px/1.2 var(--hx-font); color: var(--hx-muted); }
+.control-style__seg .hx-seg__btn { min-height: 38px; padding: 0 6px; white-space: nowrap; }
+[data-lobby-only].is-locked { opacity: 0.6; }
+
+/* Tənzimləmə çekməcəsi açılanda «İştirakçılar» çekməcəsi (eyni .host-settings-drawer çərçivəsi) onu ÖRTMƏSİN —
+ * əvvəl `body.host-settings-open .host-settings-drawer` hər iki çekməcəni açırdı, üstdə iştirakçılar qalırdı. */
+body.host-settings-open:not(.host-players-open) .host-players-drawer {
+    transform: translate3d(calc(100% + 32px), 0, 0);
+    visibility: hidden;
+}
