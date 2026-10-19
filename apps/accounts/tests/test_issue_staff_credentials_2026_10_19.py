@@ -123,6 +123,22 @@ class IssueStaffCredentialsTest(TestCase):
         with self.assertRaises(CommandError):
             self._run(faculty="Yüksək", apply=True, reason="x" * 25, i_know_this_is_production=True)
 
+    def test_center_unit_is_accepted(self):
+        with bypass_rls():
+            center = OrgUnit.objects.create(
+                organization=self.org, name="İngilis dili mərkəzi", slug="isc-ce", unit_type=OrgUnitType.CENTER
+            )
+            user = User.objects.create_user("isc.center", "isc.center@isc.test", "old-pass")
+            Membership.objects.create(
+                user=user,
+                organization=self.org,
+                role=self.org.roles.get(name="teacher"),
+                scope_unit=center,
+                is_active=True,
+            )
+        _out, rows, _c, _ = self._run(faculty="İngilis dili mərkəzi")
+        self.assertEqual([r["username"] for r in rows], ["isc.center"])
+
     def test_ambiguous_faculty_is_refused(self):
         with self.assertRaises(CommandError):
             self._run(faculty="a")

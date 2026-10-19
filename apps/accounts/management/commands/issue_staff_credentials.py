@@ -50,6 +50,8 @@ _PASSWORD_ALPHABET = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789"
 _NON_STAFF_ROLES = ("student", "lead_student", "alumni", "member")
 _REHEARSAL_GUC = "emsarena.rehearsal_target"
 _REASON_MIN = 20
+#: Kollec, İngilis dili mərkəzi və s. «fakültə» tipində olmaya bilər — qrup/ixtisas/kafedra/lab xaric hər vahid.
+_LEAF_UNIT_TYPES = ("group", "specialty", "chair", "lab")
 
 STATE_ACTIVATED = "aktivləşib"
 STATE_PENDING = "aktivləşməyib"
@@ -166,9 +168,14 @@ class Command(BaseCommand):
         wanted = fold(query)
         matches = [
             unit
-            for unit in OrgUnit.objects.filter(organization=organization, unit_type="faculty", is_active=True)
+            for unit in OrgUnit.objects.filter(organization=organization, is_active=True).exclude(
+                unit_type__in=_LEAF_UNIT_TYPES
+            )
             if wanted in fold(unit.name)
         ]
+        exact = [unit for unit in matches if fold(unit.name) == wanted]
+        if len(matches) > 1 and len(exact) == 1:
+            matches = exact  # «Kollec» həm «Kollec», həm «Kollec (köhnə)» ola bilər — dəqiq ad üstündür
         if len(matches) != 1:
             raise CommandError(f"faculty_not_unique: {len(matches)} fakültə uyğun gəldi — adı dəqiqləşdirin.")
         return matches[0]
