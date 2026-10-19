@@ -17,6 +17,12 @@ da sistemə əlavə et — dekan və dekan müavininə fakültə üzrə paylanac
 ``--find-name`` «Ad Soyad» hissələri ilə üzv axtarır və tapılanların rolunu/fakültəsini hesabata yazır
 (fakültə bilinməyəndə — məs. dekan müavininin fakültəsini tapmaq üçün).
 
+**Tələbələr** (``--audience students``, sahib 2026-10-19 axşam): fakültə üzrə OXUYAN (akademik status «enrolled»,
+hesab və tələbə üzvlüyü aktiv) tələbələr. Siyahı faylında sətir ``username<TAB>parol`` ola bilər — onda siyahıdakı
+parol bazadakı hash ilə YOXLANILIR (yazmadan); aktivləşməmiş hesabda parol artıq uyğun deyilsə (sonradan sıfırlanıb),
+ona da yeni ilkin parol verilir. ``--faculty`` boşdursa bütün fakültələr. PBKDF2 hesablaması paralel axınlarla gedir
+(hashlib GIL-i buraxır).
+
 İstifadə::
 
     manage.py issue_staff_credentials --org qku --faculty "Yüksək texnologiyalar" \\
@@ -28,11 +34,14 @@ da sistemə əlavə et — dekan və dekan müavininə fakültə üzrə paylanac
 
 from __future__ import annotations
 
+import os
 import pathlib
 import unicodedata
+from concurrent.futures import ThreadPoolExecutor
 
 from django.apps import apps as django_apps
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import check_password, make_password
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connection, transaction
 from django.utils.crypto import get_random_string
@@ -48,6 +57,7 @@ User = get_user_model()
 #: ``provision_student_credentials`` ilə eyni oxunaqlı əlifba (0/O, 1/l/I yox).
 _PASSWORD_ALPHABET = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789"
 _NON_STAFF_ROLES = ("student", "lead_student", "alumni", "member")
+_STUDENT_ROLES = ("student", "lead_student")
 _REHEARSAL_GUC = "emsarena.rehearsal_target"
 _REASON_MIN = 20
 #: Kollec, İngilis dili mərkəzi və s. «fakültə» tipində olmaya bilər — qrup/ixtisas/kafedra/lab xaric hər vahid.
@@ -81,6 +91,14 @@ def _ancestors(unit) -> dict:
     return names
 
 
+def _parallel(fn, items):
+    """PBKDF2 (check/make_password) CPU-yə bağlıdır, amma hashlib GIL-i buraxır — axınlar real paralellik verir."""
+    if not items:
+        return []
+    with ThreadPoolExecutor(max_workers=max(2, min(16, (os.cpu_count() or 2) * 2))) as pool:
+        return list(pool.map(fn, items))
+
+
 def _activated(profile) -> bool:
     return bool(profile is not None and profile.email_verified and not profile.password_change_required)
 
@@ -94,6 +112,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--known-usernames", default="", help="Artıq ilkin parolu olan istifadəçi adları (sətirdə bir)"
         )
+        parser.add_argument("--audience", choices=("staff", "students"), default="staff")
         parser.add_argument("--find-name", default="", help="Ad hissələri ilə üzv axtarışı (rol + fakültə hesabata)")
         parser.add_argument("--report-out", default="", help="Hesabat CSV (parolsuz)")
         parser.add_argument("--apply", action="store_true")
@@ -108,7 +127,7 @@ class Command(BaseCommand):
                 raise CommandError("--apply üçün --credentials-out məcburidir (parollar bir daha görünmür).")
             if len(opts["reason"].strip()) < _REASON_MIN:
                 raise CommandError(f"--apply üçün --reason ən azı {_REASON_MIN} simvol olmalıdır.")
-            if not opts["faculty"].strip():
+            if not opts["faculty"].strip() and opts["audience"] != "students":
                 raise CommandError("--apply üçün --faculty məcburidir.")
         with rls_worker_atomic(), bypass_rls():
             if opts["apply"] and not (_disposable_database() or opts["i_know_this_is_production"]):
@@ -121,6 +140,8 @@ class Command(BaseCommand):
         if organization is None:
             raise CommandError(f"Təşkilat tapılmadı: {opts['org']!r}")
         known = self._known(opts["known_usernames"])
+        if opts["audience"] == "students":
+            return self._run_students(organization, known, opts)
         rows: list[dict] = []
         if opts["find_name"].strip():
             rows.extend(self._find(organization, opts["find_name"]))
@@ -154,13 +175,19 @@ class Command(BaseCommand):
 
     # ── köməkçilər ───────────────────────────────────────────────────────────
     @staticmethod
-    def _known(path: str) -> set[str]:
+    def _known(path: str) -> dict[str, str]:
+        """istifadəçi adı → siyahıdakı parol («» = parol verilməyib, yalnız ad)."""
         if not path:
-            return set()
+            return {}
         file = pathlib.Path(path)
         if not file.exists():
             raise CommandError("--known-usernames faylı tapılmadı.")
-        return {line.strip().casefold() for line in file.read_text(encoding="utf-8").splitlines() if line.strip()}
+        known: dict[str, str] = {}
+        for line in file.read_text(encoding="utf-8").splitlines():
+            username, _, password = line.partition("\t")
+            if username.strip():
+                known[username.strip().casefold()] = password.strip()
+        return known
 
     @staticmethod
     def _faculty(organization, query: str):
@@ -257,16 +284,172 @@ class Command(BaseCommand):
             )
         return found
 
-    def _issue(self, organization, targets, reason):
+    # ── tələbələr ────────────────────────────────────────────────────────────
+    def _run_students(self, organization, known, opts):
+        faculty = self._faculty(organization, opts["faculty"]) if opts["faculty"].strip() else None
+        rows = self._students(organization, faculty)
+        pending = [r for r in rows if r["state"] == STATE_PENDING and known.get(r["username"].casefold())]
+        verdicts = _parallel(lambda r: check_password(known[r["username"].casefold()], r["user"].password), pending)
+        valid_ids = {r["user_id"] for r, ok in zip(pending, verdicts) if ok}
+        targets = []
+        for row in rows:
+            in_list = row["username"].casefold() in known
+            row["in_list"] = "bəli" if in_list else "xeyr"
+            if row["state"] == STATE_ACTIVATED:
+                row["action"] = "öz parolu ilə işləyir — parol verilmir"
+            elif row["user_id"] in valid_ids:
+                row["action"] = "siyahıdakı ilkin parol (yoxlanıldı)"
+            elif in_list and not known[row["username"].casefold()]:
+                row["action"] = "siyahıdakı ilkin parol"
+            else:
+                row["action"] = "yeni ilkin parol veriləcək"
+                row["reason_new"] = "siyahıdakı parol uyğun deyil" if in_list else "siyahıda yoxdur"
+                targets.append(row)
         issued = []
+        if opts["apply"] and targets:
+            issued = self._issue(organization, targets, opts["reason"].strip(), verb="issue_student_credentials")
+            issued_ids = {item["user_id"] for item in issued}
+            for row in rows:
+                if row["user_id"] in issued_ids:
+                    row["action"] = "yeni ilkin parol verildi"
+        if opts["report_out"]:
+            self._write_student_report(opts["report_out"], rows)
+        if opts["credentials_out"] and issued:
+            self._write_student_credentials(opts["credentials_out"], issued)
+        self.stdout.write(
+            "staff_credentials: "
+            f"audience=STUDENTS faculty_found={int(faculty is not None)} students={len(rows)} "
+            f"in_known_list={sum(1 for r in rows if r['in_list'] == 'bəli')} "
+            f"activated={sum(1 for r in rows if r['state'] == STATE_ACTIVATED)} "
+            f"list_password_valid={len(valid_ids)} "
+            f"list_password_stale={sum(1 for r in targets if r['in_list'] == 'bəli')} "
+            f"no_faculty={sum(1 for r in rows if not r['faculty'])} "
+            f"new_targets={len(targets)} issued={len(issued)} "
+            f"mode={'APPLY' if opts['apply'] else 'DRY-RUN'}"
+        )
+
+    @staticmethod
+    def _placement(group):
+        """Qrup → (fakültə vahidi, əsas qrup adı, alt qrup adı, ixtisas adı)."""
+        top_group, specialty, faculty, current, depth = group, "", None, group, 0
+        while current is not None and depth < 8:
+            if current.unit_type == "group":
+                top_group = current
+            elif current.unit_type == "specialty" and not specialty:
+                specialty = current.name
+            elif current.unit_type not in _LEAF_UNIT_TYPES:
+                faculty = current
+                break
+            current = current.parent
+            depth += 1
+        subgroup = group.name if top_group.pk != group.pk else ""
+        return faculty, top_group.name, subgroup, specialty
+
+    def _students(self, organization, faculty):
+        Membership = django_apps.get_model("organizations", "Membership")
+        Record = django_apps.get_model("registrar", "StudentAcademicRecord")
+        student_ids = Membership.objects.filter(
+            organization=organization, is_active=True, role__name__in=_STUDENT_ROLES
+        ).values("user_id")
+        records = (
+            Record.objects.filter(
+                organization=organization,
+                is_active=True,
+                status="enrolled",
+                student__is_active=True,
+                student__is_superuser=False,
+                student_id__in=student_ids,
+            )
+            .select_related("student__profile", "program", "group__parent__parent__parent__parent__parent")
+            .order_by("student_id", "-created_at")
+        )
+        rows, seen = [], set()
+        for record in records:
+            if record.student_id in seen:
+                continue  # bir neçə aktiv proqram — ən son qeyd
+            seen.add(record.student_id)
+            unit, group_name, subgroup, specialty = (None, "", "", "")
+            if record.group_id:
+                unit, group_name, subgroup, specialty = self._placement(record.group)
+            if faculty is not None and (unit is None or unit.pk != faculty.pk):
+                continue
+            user = record.student
+            profile = getattr(user, "profile", None)
+            rows.append(
+                {
+                    "kind": "student",
+                    "user_id": user.pk,
+                    "user": user,
+                    "faculty": unit.name if unit is not None else "",
+                    "program": specialty or getattr(record.program, "name", "") or "",
+                    "group": group_name,
+                    "subgroup": subgroup,
+                    "code": getattr(profile, "institutional_identifier", "") or "",
+                    "full_name": (f"{user.last_name} {user.first_name}").strip() or user.username,
+                    "username": user.username,
+                    "state": STATE_ACTIVATED if _activated(profile) else STATE_PENDING,
+                }
+            )
+        rows.sort(key=lambda r: (fold(r["faculty"]), fold(r["group"]), fold(r["full_name"])))
+        return rows
+
+    @staticmethod
+    def _write_student_report(path, rows):
+        with open(path, "w", newline="", encoding="utf-8") as fh:
+            writer = safe_csv_writer(fh)
+            writer.writerow(
+                [
+                    "nov",
+                    "fakulte",
+                    "ixtisas",
+                    "qrup",
+                    "alt_qrup",
+                    "telebe_kodu",
+                    "ad_soyad",
+                    "username",
+                    "veziyyet",
+                    "siyahida",
+                    "emel",
+                ]
+            )
+            for r in rows:
+                writer.writerow(
+                    [
+                        r["kind"],
+                        r["faculty"],
+                        r["program"],
+                        r["group"],
+                        r["subgroup"],
+                        r["code"],
+                        r["full_name"],
+                        r["username"],
+                        r["state"],
+                        r["in_list"],
+                        r["action"],
+                    ]
+                )
+
+    @staticmethod
+    def _write_student_credentials(path, issued):
+        with open(path, "w", newline="", encoding="utf-8") as fh:
+            writer = safe_csv_writer(fh)
+            writer.writerow(["fakulte", "qrup", "ad_soyad", "username", "sebeb", "ilkin_parol"])
+            for r in issued:
+                writer.writerow(
+                    [r["faculty"], r["group"], r["full_name"], r["username"], r.get("reason_new", ""), r["password"]]
+                )
+
+    def _issue(self, organization, targets, reason, *, verb="issue_staff_credentials"):
+        issued = []
+        passwords = [get_random_string(10, _PASSWORD_ALPHABET) for _ in targets]
+        encoded = _parallel(make_password, passwords)
         with transaction.atomic():
-            for entry in targets:
+            for entry, password, hashed in zip(targets, passwords, encoded):
                 user = User.objects.select_for_update(of=("self",)).select_related("profile").get(pk=entry["user_id"])
                 profile = getattr(user, "profile", None)
                 if profile is None or _activated(profile):
                     continue  # yarışda aktivləşibsə toxunma
-                password = get_random_string(10, _PASSWORD_ALPHABET)
-                user.set_password(password)
+                user.password = hashed
                 user.save(update_fields=["password"])
                 profile.password_change_required = True
                 profile.email_verified = False
@@ -279,7 +462,7 @@ class Command(BaseCommand):
                     resource_type="accounts.initial_credentials",
                     resource_id=str(user.pk),
                     resource_repr=user.username,
-                    changes={"verb": "issue_staff_credentials", "faculty": entry["faculty"]},
+                    changes={"verb": verb, "faculty": entry["faculty"]},
                     reason=reason,
                 )
                 issued.append({**entry, "password": password})
