@@ -72,7 +72,8 @@
 #   issue_staff_credentials — fakültə heyətinin ilkin parol siyahısını tamamlayır (sahib 2026-10-19): `task_chair` =
 #       fakültə adı, `teacher` = ad axtarışı (fakültəni tapmaq üçün), `roster_tag` = `staff-known-…` (şifrəli, YALNIZ
 #       artıq paylanmış istifadəçi adları — parol yox). Parol YALNIZ siyahıda olmayan VƏ aktivləşməmiş hesablara;
-#       hesabat və yeni parollar şifrəli artifaktdadır, loga yalnız saylar düşür.
+#       hesabat və yeni parollar şifrəli artifaktdadır, loga yalnız saylar düşür. `student-known-…` tag-ı (asset
+#       sətirləri `username<TAB>parol`) → OXUYAN tələbələr; siyahıdakı parol hash ilə yoxlanılır, uyğun deyilsə yenisi.
 #   shrink_avatars — mövcud avatarlar ≤512 px WebP-yə (PERF-2 H5, 2026-10-17); orijinal fayllar SİLİNMİR,
 #       `updated_at` dəyişmir. Loga yalnız yekun saylar.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
@@ -312,7 +313,7 @@ jobs:
               match "$ROSTER_TAG" '^teaching-load-[0-9a-z-]+$' || { echo "roster_tag formatı: teaching-load-…" >&2; exit 1; }
               asset=forma1.docx.enc; target="/tmp/teaching_load_${GITHUB_RUN_ID}.docx" ;;
             issue_staff_credentials)
-              match "$ROSTER_TAG" '^staff-known-[0-9a-z-]+$' || { echo "roster_tag formatı: staff-known-…" >&2; exit 1; }
+              match "$ROSTER_TAG" '^(staff|student)-known-[0-9a-z-]+$' || { echo "roster_tag formatı: staff-known-… / student-known-…" >&2; exit 1; }
               asset=usernames.txt.enc; target="/tmp/staff_known_${GITHUB_RUN_ID}.txt" ;;
             *)
               match "$ROSTER_TAG" '^(staff|teacher)-roster-[0-9a-z-]+$' || { echo "roster_tag formatı: staff-roster-… / teacher-roster-…" >&2; exit 1; }
@@ -502,13 +503,17 @@ jobs:
                 || { echo "task_chair (fakültə) formatı yanlışdır" >&2; exit 2; }
               test -z "$TEACHER" || { [ "${#TEACHER}" -le 80 ] && match "$TEACHER" '^[[:alnum:]ƏəIıİiĞğŞşÇçÖöÜü .-]+$'; } \
                 || { echo "teacher (ad axtarışı) formatı yanlışdır" >&2; exit 2; }
-              test -n "$TASK_CHAIR" || test -n "$TEACHER" || { echo "task_chair (fakültə) və ya teacher (ad) verin" >&2; exit 2; }
+              # `student-known-…` tag-ı → tələbə rejimi (fakültə boşdursa bütün fakültələr; siyahıdakı parol yoxlanılır).
+              students=0
+              case "$ROSTER_TAG" in (student-known-*) students=1 ;; esac
+              test "$students" = 1 || test -n "$TASK_CHAIR" || test -n "$TEACHER" || { echo "task_chair (fakültə) və ya teacher (ad) verin" >&2; exit 2; }
               args=(--org "$ORG" --report-out "/tmp/roster_details_${GITHUB_RUN_ID}.csv")
+              test "$students" = 0 || args+=(--audience students)
               test -z "$TASK_CHAIR" || args+=(--faculty "$TASK_CHAIR")
               test -z "$TEACHER" || args+=(--find-name "$TEACHER")
               test -z "$ROSTER_TAG" || args+=(--known-usernames "/tmp/staff_known_${GITHUB_RUN_ID}.txt")
               if [ "$APPLY" = "true" ]; then
-                test -n "$TASK_CHAIR" || { echo "apply üçün task_chair (fakültə) məcburidir" >&2; exit 2; }
+                test "$students" = 1 || test -n "$TASK_CHAIR" || { echo "apply üçün task_chair (fakültə) məcburidir" >&2; exit 2; }
                 test -n "$ROSTER_TAG" || { echo "apply üçün roster_tag (staff-known-…) məcburidir" >&2; exit 2; }
                 args+=(--apply --credentials-out "/tmp/staff_creds_${GITHUB_RUN_ID}.csv"
                        --reason "Fakültə üzrə ilkin parol siyahısının tamamlanması — sahibin 2026-10-19 tapşırığı"
