@@ -1,4 +1,5 @@
-import { reducedMotion } from './utils.js?v=lx20261019';
+import { reducedMotion } from './utils.js?v=lx20261019s';
+import { isFormal } from './style_mode.js?v=lx20261019s';
 
 /* Suallar arası «pərdə» keçidi — TƏK süpürmə (sahib 2026-09-30, «animasiya iki dəfə oynayır»).
  *
@@ -27,7 +28,7 @@ export function playWipe(key, label) {
     if (!key || played.has(key)) return false;
     played.add(key);
     if (played.size > 120) played.delete(played.values().next().value);
-    if (reducedMotion()) return false;
+    if (reducedMotion() || isFormal()) return false; // 2026-10-19: «Rəsmi» üslubda pərdə keçidi yoxdur
     const el = ensureWipe();
     el.querySelector(".hx-wipe__label").textContent = label || "";
     el.classList.remove("is-running");

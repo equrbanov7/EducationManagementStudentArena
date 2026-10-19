@@ -360,8 +360,46 @@
         return renderSvg(profile, options || {}).markup;
     }
 
+    /* ── 2026-10-19: «Rəsmi» təqdimat üslubu — avatar əvəzinə BAŞ HƏRFLƏR (host_lobby/style_mode.js
+     * `setFormal(true)` çağırır). Bütün ekranlar (lobbi, liderlik, nəticə, telefon) eyni API-ni
+     * işlətdiyi üçün hamısı birdən dəyişir; oyunbaz rejimdə heç nə dəyişmir. */
+    let formal = false;
+
+    function initials(name) {
+        const words = String(name || "")
+            .trim()
+            .split(/[\s._-]+/)
+            .map((word) => Array.from(word.replace(/[^\p{L}\p{N}]/gu, "")))
+            .filter((chars) => chars.length);
+        if (!words.length) return "?";
+        const picked = words.length > 1 ? [words[0][0], words[1][0]] : [words[0][0]];
+        return picked.join("").toLocaleUpperCase("az");
+    }
+
+    function initialsName(profile, opts) {
+        return profile?.nickname || profile?.name || opts?.label || "";
+    }
+
+    function initialsMarkup(profile, opts) {
+        const size = Number(opts.size) > 0 ? Number(opts.size) : 72;
+        const name = initialsName(profile, opts);
+        const classes = ["live-avatar", "live-avatar--initials"];
+        if (opts.className) classes.push(opts.className);
+        return `<span class="${esc(classes.join(" "))}" style="--live-avatar-size:${size}px" role="img" aria-label="${esc(name || "Avatar")}">${esc(initials(name))}</span>`;
+    }
+
+    function initialsDataUrl(profile, opts) {
+        const text = esc(initials(initialsName(profile, opts)));
+        const fs = text.length > 1 ? 50 : 58;
+        const svg =
+            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="60" fill="#1e3a8a"/>` +
+            `<text x="60" y="61" fill="#ffffff" font-family="Manrope, Segoe UI, Roboto, Arial, sans-serif" font-size="${fs}" font-weight="600" text-anchor="middle" dominant-baseline="central">${text}</text></svg>`;
+        return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+    }
+
     function renderAvatarMarkup(profile, options) {
         const opts = options || {};
+        if (formal) return initialsMarkup(profile, opts);
         const rendered = renderSvg(profile, opts);
         const size = Number(opts.size) > 0 ? Number(opts.size) : 72;
         const label = esc(opts.label || catalog.avatars?.[rendered.profile.avatarKey]?.label || "Avatar");
@@ -382,6 +420,7 @@
 
     function renderAvatarDataUrl(profile, options) {
         const opts = Object.assign({ crop: "portrait" }, options || {});
+        if (formal) return initialsDataUrl(profile, opts);
         const normalized = getProfile(profile);
         const crop = opts.crop === "full" ? "full" : "portrait";
         const character = characterMarkup(normalized, crop);
@@ -443,5 +482,10 @@
         mountAvatar,
         setDance,
         DANCES: DANCES.slice(),
+        initials,
+        setFormal(value) {
+            formal = Boolean(value);
+        },
+        isFormal: () => formal,
     };
 })();

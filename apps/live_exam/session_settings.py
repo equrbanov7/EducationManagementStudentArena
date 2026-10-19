@@ -19,6 +19,7 @@ from typing import Any
 from django.utils.translation import pgettext
 
 from apps.accounts.public import ProfileRole
+from apps.live_exam.constants import DEFAULT_PRESENTATION_STYLE, PRESENTATION_FORMAL, PRESENTATION_STYLE_KEYS
 from apps.live_exam.domain.session import coerce_question_seconds
 from apps.live_exam.text_safety import sanitize_player_text
 from apps.live_exam.typed_answers import ACCEPTED_MAX_ITEMS, TEXT_MAX_LENGTH, dedupe_accepted, typed_eligibility
@@ -66,6 +67,10 @@ DEFAULT_SESSION_SETTINGS: dict[str, Any] = {
     # boşdursa 30 s); rəqəm = HƏR sual bu qədər saniyə (5–300). Növbəti sualdan tətbiq olunur.
     "question_time_seconds": None,
 }
+
+#: 2026-10-19: təqdimat üslubu ``LiveSession.presentation_style`` SÜTUNUNDADIR (host_settings JSON-da yox) —
+#: ayarlar görünüşünə bu açarla əlavə olunur, yazı da bu açarla gəlir (yalnız lobbidə).
+PRESENTATION_STYLE_KEY = "presentation_style"
 
 #: Oyunçulara / anonim izləyicilərə HEÇ VAXT göndərilməyən açarlar.
 PRIVATE_SETTING_KEYS = frozenset({"typed_questions"})
@@ -315,8 +320,52 @@ def public_session_settings(settings: dict[str, Any]) -> dict[str, Any]:
     return {key: value for key, value in (settings or {}).items() if key not in PRIVATE_SETTING_KEYS}
 
 
+def presentation_style_of(session) -> str:
+    """Sessiyanın təqdimat üslubu (``formal`` / ``playful``); yararsız dəyər → defolt (rəsmi)."""
+    value = str(getattr(session, "presentation_style", "") or "").strip().lower()
+    return value if value in PRESENTATION_STYLE_KEYS else DEFAULT_PRESENTATION_STYLE
+
+
+def is_formal_style(settings: dict[str, Any] | None) -> bool:
+    """Ayarlar görünüşü «Rəsmi» üslubdadırmı (açar yoxdursa — köhnə klient/keş: oyunbaz)."""
+    return str((settings or {}).get(PRESENTATION_STYLE_KEY) or "") == PRESENTATION_FORMAL
+
+
+def characters_allowed(settings: dict[str, Any] | None) -> bool:
+    """Avatar/aksesuar seçimi: aparıcı söndürməyib VƏ üslub rəsmi deyil (rəsmidə baş hərflər göstərilir)."""
+    return bool((settings or {}).get("characters_enabled", True)) and not is_formal_style(settings)
+
+
+def reactions_allowed(settings: dict[str, Any] | None) -> bool:
+    """Emoji reaksiyaları: aparıcı söndürməyib VƏ üslub rəsmi deyil."""
+    return bool((settings or {}).get("reactions_enabled", True)) and not is_formal_style(settings)
+
+
+def _presentation_style_update(session, updates: dict[str, Any] | None) -> str | None:
+    """Host yazısındakı ``presentation_style`` → yoxlanmış dəyər, yoxdursa ``None``.
+
+    Yararsız dəyər və ya oyun başlayandan SONRA dəyişiklik → ``SessionSettingsError`` (HTTP 400): səhnə və
+    telefonlar sual ortasında görünüşünü dəyişməsin. Eyni dəyərin təkrarı hər vəziyyətdə zərərsizdir.
+    """
+    if not isinstance(updates, dict) or PRESENTATION_STYLE_KEY not in updates:
+        return None
+    value = str(updates.get(PRESENTATION_STYLE_KEY) or "").strip().lower()
+    if value not in PRESENTATION_STYLE_KEYS:
+        raise SessionSettingsError(
+            pgettext("live_exam.host_settings", "Görünüş üslubu yalnız «Rəsmi» və ya «Qeyri-rəsmi» ola bilər.")
+        )
+    lobby = str(getattr(session, "state", "") or "") == "lobby"
+    if value != presentation_style_of(session) and not lobby:
+        raise SessionSettingsError(
+            pgettext("live_exam.host_settings", "Görünüş üslubu yalnız oyun başlamazdan əvvəl dəyişdirilə bilər.")
+        )
+    return value
+
+
 def get_host_session_settings(session) -> dict[str, Any]:
-    return normalize_session_settings(getattr(session, "host_settings", None) or {})
+    settings = normalize_session_settings(getattr(session, "host_settings", None) or {})
+    settings[PRESENTATION_STYLE_KEY] = presentation_style_of(session)
+    return settings
 
 
 def get_session_settings(session) -> dict[str, Any]:
@@ -333,9 +382,11 @@ def update_session_settings(
     """Ayarları yazır və TAM (host) görünüşü qaytarır.
 
     ``typed_questions`` verilibsə ciddi yoxlanır (``SessionSettingsError``).
+    ``presentation_style`` sütuna yazılır (yalnız lobbidə dəyişir).
     Mühərrikin gizli açarları (``_question_phase_override``, ``_question_config``)
     saxlanılır.
     """
+    style = _presentation_style_update(session, updates)
     raw = getattr(session, "host_settings", None) or {}
     if not isinstance(raw, dict):
         raw = {}
@@ -347,7 +398,11 @@ def update_session_settings(
         if key not in DEFAULT_SESSION_SETTINGS:
             merged[key] = value
     session.host_settings = merged
-    session.save(update_fields=["host_settings"])
+    update_fields = ["host_settings"]
+    if style is not None:
+        session.presentation_style = style
+        update_fields.append(PRESENTATION_STYLE_KEY)
+    session.save(update_fields=update_fields)
 
     # Invalidate the cache so the next read picks up the fresh settings.
     try:
@@ -357,7 +412,26 @@ def update_session_settings(
     except Exception:
         pass
 
-    return {key: value for key, value in merged.items() if key in DEFAULT_SESSION_SETTINGS}
+    result = {key: value for key, value in merged.items() if key in DEFAULT_SESSION_SETTINGS}
+    result[PRESENTATION_STYLE_KEY] = presentation_style_of(session)
+    return result
+
+
+def default_style_for_exam(exam) -> str:
+    """Yeni sessiyanın üslubu: bu imtahanın SON sessiyasının seçimi, sessiya yoxdursa «Rəsmi».
+
+    Beləliklə «imtahanın defoltu» ayrıca sahə olmadan saxlanır: müəllim bir dəfə «Qeyri-rəsmi»
+    seçibsə, növbəti sessiya da elə açılır; ilk dəfə canlı keçirilən imtahan rəsmidir.
+    """
+    from apps.live_exam.models import LiveSession
+
+    latest = (
+        LiveSession.objects.filter(exam_id=getattr(exam, "pk", exam))
+        .order_by("-created_at", "-id")
+        .values_list(PRESENTATION_STYLE_KEY, flat=True)
+        .first()
+    )
+    return latest if latest in PRESENTATION_STYLE_KEYS else DEFAULT_PRESENTATION_STYLE
 
 
 def host_question_catalog(session) -> list[dict[str, Any]]:

@@ -1,8 +1,10 @@
 // LX-FE-PLAYER (2026-09-29): cavab fiqurları (SVG) — host ekranı ilə eyni forma + rəng sırası:
 // 1 üçbucaq (qırmızı), 2 romb (mavi), 3 dairə (kəhrəba), 4 kvadrat (yaşıl), 5 ulduz (server açarı
 // «pentagon»), 6 altıbucaq (firuzəyi). Rəng yalnız köməkçidir — forma rəngkor oyunçu üçün əsasdır.
-import { OPTION_SHAPES } from './config.js?v=lx20261019';
-import { tr } from './utils.js?v=lx20261019';
+// 2026-10-19: «Rəsmi» üslubda fiqur əvəzinə HƏRF nişanı (A, B, C, D…) — host ekranı ilə eyni sıra.
+import { OPTION_SHAPES } from './config.js?v=lx20261019s';
+import { fmt, tr } from './utils.js?v=lx20261019s';
+import { isFormal, optionLetter } from '../host_lobby/style_mode.js?v=lx20261019s';
 
 const PATHS = {
     triangle:
@@ -46,4 +48,16 @@ export function shapeLabel(key) {
 export function shapeSvg(key, className = "lxp-shape") {
     const body = PATHS[key] || PATHS.circle;
     return `<svg class="${className}" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="currentColor">${body}</g></svg>`;
+}
+
+/** Variantın nişanı: oyunbazda fiqur SVG-si, rəsmidə hərf (A…); `className` hər ikisinə verilir. */
+export function optionMark(option, index, className = "lxp-shape") {
+    if (isFormal()) return `<span class="lxp-letter ${className}" aria-hidden="true">${optionLetter(index)}</span>`;
+    return shapeSvg(shapeKey(option, index), className);
+}
+
+/** Ekran oxuyucu / çip mətni: «Üçbucaq» və ya rəsmidə «Variant A». */
+export function optionLabel(option, index) {
+    if (isFormal()) return fmt(tr("optionLetter", "Variant {letter}"), { letter: optionLetter(index) });
+    return shapeLabel(shapeKey(option, index));
 }

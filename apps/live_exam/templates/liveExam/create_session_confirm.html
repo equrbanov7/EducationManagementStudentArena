@@ -9,7 +9,7 @@ təsdiq səhifəsinə düşür; forma CSRF-qorumalı POST göndərir.
 {% block title %}{% trans "create_confirm_title" context "live_exam.template.create_session_confirm" %} | {{ exam.title }}{% endblock %}
 
 {% block extraCss %}
-<link rel="stylesheet" href="{% static 'css/live_create_session_confirm.css' %}">
+<link rel="stylesheet" href="{% static 'css/live_create_session_confirm.css' %}?v=lx-20261019s">
 {% endblock %}
 
 {% block content %}
@@ -28,12 +28,33 @@ təsdiq səhifəsinə düşür; forma CSRF-qorumalı POST göndərir.
         <form method="post" action="{% url 'liveExam:create_session_slug' slug=exam.slug %}" class="live-create-confirm__actions">
             {% csrf_token %}
             {% if force_new %}<input type="hidden" name="force_new" value="1">{% endif %}
+            {% comment %}2026-10-19: təqdimat üslubu — defolt imtahanın son sessiyasının seçimi, ilk dəfə «Rəsmi».
+            Lobbidə (oyun başlamazdan əvvəl) «Tənzimləmələr»-dən də dəyişir.{% endcomment %}
+            <fieldset class="live-create-confirm__style">
+                <legend class="live-create-confirm__legend">{% trans "Görünüş üslubu" context "live_exam.presentation_style" %}</legend>
+                <label class="live-style-card">
+                    <input class="live-style-card__input" type="radio" name="presentation_style" value="formal"{% if presentation_style != "playful" %} checked{% endif %}>
+                    <span class="live-style-card__body">
+                        <span class="live-style-card__head"><i class="fas fa-building-columns" aria-hidden="true"></i><strong>{% trans "Rəsmi" context "live_exam.presentation_style" %}</strong></span>
+                        <span class="live-style-card__help">{% trans "A/B/C/D variantları, sakit ikonlar, baş hərflər və sıralama cədvəli. Konfetti, səs effektləri və emoji yoxdur." context "live_exam.presentation_style" %}</span>
+                    </span>
+                </label>
+                <label class="live-style-card">
+                    <input class="live-style-card__input" type="radio" name="presentation_style" value="playful"{% if presentation_style == "playful" %} checked{% endif %}>
+                    <span class="live-style-card__body">
+                        <span class="live-style-card__head"><i class="fas fa-shapes" aria-hidden="true"></i><strong>{% trans "Qeyri-rəsmi" context "live_exam.presentation_style" %}</strong></span>
+                        <span class="live-style-card__help">{% trans "Rəngli fiqurlar, avatarlar, reaksiyalar, musiqi və final səhnəsində konfetti." context "live_exam.presentation_style" %}</span>
+                    </span>
+                </label>
+            </fieldset>
+            <div class="live-create-confirm__buttons">
             <a href="{% url 'exams:teacher_exam_detail' slug=exam.slug %}" class="btn btn-outline-secondary">
                 {% trans "create_confirm_cancel" context "live_exam.template.create_session_confirm" %}
             </a>
             <button type="submit" class="btn btn-primary">
                 {% trans "create_confirm_submit" context "live_exam.template.create_session_confirm" %}
             </button>
+            </div>
         </form>
     </div>
 </section>

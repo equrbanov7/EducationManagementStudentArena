@@ -500,7 +500,8 @@ class LiveJoinTest(TestCase):
             author=self.teacher,
             is_active=True,
         )
-        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+        # 2026-10-19: avatar/reaksiya «Qeyri-rəsmi» üslubun xüsusiyyətidir (yeni sessiyanın defoltu «Rəsmi»).
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher, presentation_style="playful")
 
     def test_join_page_accessible(self):
         """Test that join page is accessible."""
@@ -1292,7 +1293,8 @@ class LiveWaitRoomInteractionTest(TestCase):
             author=self.teacher,
             is_active=True,
         )
-        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+        # 2026-10-19: avatar/reaksiya «Qeyri-rəsmi» üslubun xüsusiyyətidir (yeni sessiyanın defoltu «Rəsmi»).
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher, presentation_style="playful")
         self.player = LivePlayer.objects.create(
             session=self.session,
             nickname="Lobby Player",
@@ -1535,7 +1537,8 @@ class LiveWaitRoomReactionRateLimitTest(TestCase):
             author=self.teacher,
             is_active=True,
         )
-        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+        # 2026-10-19: avatar/reaksiya «Qeyri-rəsmi» üslubun xüsusiyyətidir (yeni sessiyanın defoltu «Rəsmi»).
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher, presentation_style="playful")
         self.player = LivePlayer.objects.create(
             session=self.session,
             nickname="Reaction Player",

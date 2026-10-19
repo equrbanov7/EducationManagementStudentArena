@@ -1,5 +1,6 @@
-import { UI } from './dom.js?v=lx20261019';
-import { state } from './state.js?v=lx20261019';
+import { UI } from './dom.js?v=lx20261019s';
+import { state } from './state.js?v=lx20261019s';
+import { plainText } from './style_mode.js?v=lx20261019s';
 
 export const I18N = window.LIVE_EXAM_HOST_I18N || {};
 export const hostShellSubscribers = new Set();
@@ -7,9 +8,10 @@ export const hostShellSubscribers = new Set();
 // Tərcümə hələ kompilyasiya olunmayıbsa şablon msgid-in özünü (məs. "stage_replay")
 // qaytarır — belə halda JS-dəki Azərbaycan dilində ehtiyat mətn göstərilir.
 const looksUntranslated = (value) => /^[a-z0-9]+(?:_[a-z0-9]+)+$/.test(value);
+// 2026-10-19: «Rəsmi» üslubda tərcümə mətnlərindəki emoji çıxarılır (plainText; oyunbazda olduğu kimi).
 export const tr = (key, fallback) => {
     const value = I18N[key];
-    return value && !looksUntranslated(value) ? value : fallback;
+    return plainText(value && !looksUntranslated(value) ? value : fallback);
 };
 export const controlsEnabled = () => CONFIG.controlsEnabled !== false;
 export const fmt = (template, values) =>

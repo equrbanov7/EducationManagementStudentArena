@@ -1,12 +1,12 @@
-import { $, UI } from './dom.js?v=lx20261019';
-import { PHASES } from './constants.js?v=lx20261019';
-import { state } from './state.js?v=lx20261019';
-import { playAllAnswered, playCountdownSound, playIntroSound, playTick, playTimeUp, playWhoosh } from './audio.js?v=lx20261019';
-import { icon } from './icons.js?v=lx20261019';
-import { answerTileMarkup, optionsLengthClass, tilesGridClass } from './options.js?v=lx20261019';
-import { revealQuestion } from './api.js?v=lx20261019';
-import { playWipe } from './transitions.js?v=lx20261019';
-import { secondsLabel } from './time_setting.js?v=lx20261019';
+import { $, UI } from './dom.js?v=lx20261019s';
+import { PHASES } from './constants.js?v=lx20261019s';
+import { state } from './state.js?v=lx20261019s';
+import { playAllAnswered, playCountdownSound, playIntroSound, playTick, playTimeUp, playWhoosh } from './audio.js?v=lx20261019s';
+import { icon } from './icons.js?v=lx20261019s';
+import { answerTileMarkup, optionsLengthClass, tilesGridClass } from './options.js?v=lx20261019s';
+import { revealQuestion } from './api.js?v=lx20261019s';
+import { playWipe } from './transitions.js?v=lx20261019s';
+import { secondsLabel } from './time_setting.js?v=lx20261019s';
 import {
     controlsEnabled,
     esc,
@@ -19,8 +19,8 @@ import {
     questionKey,
     toMs,
     tr,
-} from './utils.js?v=lx20261019';
-import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261019';
+} from './utils.js?v=lx20261019s';
+import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261019s';
 
 const isTextQuestion = (question) => String(question?.answer_input || "choice") === "text";
 

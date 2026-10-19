@@ -1,6 +1,8 @@
 // LX-FE-PLAYER (2026-09-29): telefon səsləri — WebAudio sintezi (xarici fayl yoxdur).
 // Musiqili, yumşaq zərf (attack/decay), low-pass süzgəc və kompressor; susdurma localStorage-da.
 // Brauzerin autoplay siyasətinə görə kontekst ilk toxunuşda açılır (unlockAudio).
+import { isFormal } from '../host_lobby/style_mode.js?v=lx20261019s';
+
 const AudioCtor = window.AudioContext || window.webkitAudioContext;
 const STORE_KEY = "lx.player.sound";
 const MASTER_LEVEL = 0.6;
@@ -235,7 +237,8 @@ const CUES = {
 // `key` verilərsə eyni səs eyni açarla ikinci dəfə çalınmır (eyni faza təkrar render olanda).
 export function playSound(name, key) {
     const cue = CUES[name];
-    if (!cue || muted || !ctx || ctx.state !== "running") return false;
+    // 2026-10-19: «Rəsmi» üslubda telefon səs effekti çalmır (səs düyməsi də gizlədilir).
+    if (!cue || muted || isFormal() || !ctx || ctx.state !== "running") return false;
     if (key !== undefined && key !== null) {
         const normalized = String(key);
         if (lastKeys[name] === normalized) return false;

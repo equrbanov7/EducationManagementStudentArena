@@ -3,12 +3,14 @@
 //  * 2-ci/3-cü: medal + rəqs; digərləri: «Əla oyun idi!» kartı + statistika (`my_stats`).
 // Rəqs LX-FE-STAGE-in API-si ilə (data-dance, live_avatar.css); o CSS yoxdursa öz ehtiyat
 // animasiyamız (.lxp-dance-fallback) işləyir. Yer/xal/statistika yalnız serverdən gəlir.
-import { PODIUM_SIZE, PHASES, prefersReducedMotion } from './config.js?v=lx20261019';
-import { playSound } from './audio.js?v=lx20261019';
-import { UI } from './dom.js?v=lx20261019';
-import { buzz, HAPTIC } from './haptics.js?v=lx20261019';
-import { state } from './state.js?v=lx20261019';
-import { announce, setQuestionChip, setRank, setScore, setTimer, stopTimeBar } from './ui.js?v=lx20261019';
+// 2026-10-19: «Rəsmi» üslubda (renderFormalFinal) — yer, xal, statistika və sakit sıralama siyahısı;
+// tac, medal, rəqs, konfetti, fanfar və vibrasiya YOXDUR.
+import { PODIUM_SIZE, PHASES, prefersReducedMotion } from './config.js?v=lx20261019s';
+import { playSound } from './audio.js?v=lx20261019s';
+import { UI } from './dom.js?v=lx20261019s';
+import { buzz, HAPTIC } from './haptics.js?v=lx20261019s';
+import { state } from './state.js?v=lx20261019s';
+import { announce, setQuestionChip, setRank, setScore, setTimer, stopTimeBar } from './ui.js?v=lx20261019s';
 import {
     esc,
     fmt,
@@ -22,8 +24,9 @@ import {
     pickFirst,
     toInt,
     tr,
-} from './utils.js?v=lx20261019';
-import { mountView } from './views.js?v=lx20261019';
+} from './utils.js?v=lx20261019s';
+import { mountView } from './views.js?v=lx20261019s';
+import { isFormal } from '../host_lobby/style_mode.js?v=lx20261019s';
 
 const CROWN_SVG =
     '<svg viewBox="0 0 64 44" aria-hidden="true" focusable="false"><path d="M6 14l13 11L32 5l13 20 13-11-5 26H11z" fill="#fcd34d" stroke="#b45309" stroke-width="3" stroke-linejoin="round"/><circle cx="32" cy="5" r="4" fill="#fb7185"/><circle cx="6" cy="14" r="3.5" fill="#38bdf8"/><circle cx="58" cy="14" r="3.5" fill="#34d399"/><rect x="11" y="34" width="42" height="6" rx="2" fill="#f59e0b"/></svg>';
@@ -115,7 +118,7 @@ function statsMarkup(myStats) {
         tiles.push([tr("statCorrect", "Düzgün cavab"), `${toInt(myStats.correct)}/${toInt(myStats.total)}`]);
     }
     if (hasNumber(myStats.best_streak)) {
-        tiles.push([tr("statBestStreak", "Ən uzun seriya"), `🔥 ${toInt(myStats.best_streak)}`]);
+        tiles.push([tr("statBestStreak", "Ən uzun seriya"), `${isFormal() ? "" : "🔥 "}${toInt(myStats.best_streak)}`]);
     }
     if (hasNumber(myStats.avg_answer_ms) && Number(myStats.avg_answer_ms) > 0) {
         tiles.push([
@@ -156,6 +159,58 @@ function podiumMarkup(rows) {
     );
 }
 
+const FORMAL_LIST_LIMIT = 5;
+
+function formalListMarkup(rows, ownIndex, rank) {
+    const items = rows.slice(0, FORMAL_LIST_LIMIT).map((row, index) => ({ row, place: index + 1 }));
+    if (ownIndex >= FORMAL_LIST_LIMIT) items.push({ row: rows[ownIndex], place: rank || ownIndex + 1, gap: true });
+    if (!items.length) return "";
+    return (
+        `<ol class="lxp-board__list lxp-final__list" aria-label="${esc(tr("formalResultsTitle", "Yekun nəticələr"))}">` +
+        items
+            .map(({ row, place, gap }) => {
+                const own = isOwnRow(row);
+                return (
+                    (gap ? `<li class="lxp-board__gap" aria-hidden="true">⋯</li>` : "") +
+                    `<li class="lxp-lrow${own ? " is-me" : ""}">` +
+                    `<span class="lxp-lrow__rank">${place}</span>` +
+                    `<span class="lxp-lrow__avatar">${miniAvatar(row, 34, "lxp-lrow__art")}</span>` +
+                    `<span class="lxp-lrow__name">${esc(row.nickname || tr("playerFallback", "Oyunçu"))}${own ? ` <em>(${esc(tr("youLabel", "Sən"))})</em>` : ""}</span>` +
+                    `<span class="lxp-lrow__score">${esc(formatNumber(row.score))}</span>` +
+                    `</li>`
+                );
+            })
+            .join("") +
+        `</ol>`
+    );
+}
+
+/** «Rəsmi» final: öz yerin + xalın + statistika + ilk 5 (sən siyahıdan kənardasansa — sən də). */
+function renderFormalFinal({ rows, ownIndex, rank, score, myStats, key }) {
+    const { el, created } = mountView(
+        `formal:${key}`,
+        `<div class="lxp-final lxp-final--formal" data-place="formal">` +
+            `<p class="lxp-kicker">${esc(tr("formalFinalKicker", "Oyun başa çatdı"))}</p>` +
+            `<div class="lxp-final__who">${miniAvatar(state.player, 56, "lxp-final__initials")}<strong>${esc(state.player.nickname || "")}</strong></div>` +
+            `<div class="lxp-final__summary">` +
+            (rank ? `<div class="lxp-final__place"><span>${esc(tr("finalYourPlace", "Sənin yerin"))}</span><strong>${esc(ordinal(rank) || `#${rank}`)}</strong></div>` : "") +
+            `<div class="lxp-final__score"><strong>${esc(formatNumber(score))}</strong><span>${esc(tr("pointsShort", "xal"))}</span></div>` +
+            `</div>` +
+            statsMarkup(myStats) +
+            formalListMarkup(rows, ownIndex, rank) +
+            `</div>`,
+        { tone: "final" }
+    );
+    state.phase = PHASES.FINAL;
+    if (!created || !el) return;
+    setQuestionChip(null);
+    setTimer(false);
+    stopTimeBar();
+    setScore(score);
+    setRank(rank || null);
+    announce(`${tr("formalResultsTitle", "Yekun nəticələr")}. ${rank ? fmt(tr("rankLine", "Sən {place} yerdəsən"), { place: ordinal(rank), rank }) : ""}`);
+}
+
 export function renderFinal(payload) {
     const rows = normalizeTopRows(payload && payload.top);
     const ownIndex = rows.findIndex(isOwnRow);
@@ -164,6 +219,10 @@ export function renderFinal(payload) {
     const score = ownIndex >= 0 ? rows[ownIndex].score : toInt(state.player.score, 0);
     const myStats = payload && payload.my_stats ? payload.my_stats : null;
     const key = `final:${(payload && payload.finished_at) || ""}:${rank}:${score}:${myStats ? "s" : "-"}:${rows.length}`;
+    if (isFormal()) {
+        renderFormalFinal({ rows, ownIndex, rank, score, myStats, key });
+        return;
+    }
     const place = rank >= 1 && rank <= 3 ? rank : 0;
     const name = state.player.nickname || tr("youLabel", "Sən");
 

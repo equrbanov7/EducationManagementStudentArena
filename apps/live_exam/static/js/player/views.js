@@ -2,10 +2,10 @@
 // Eyni açar (faza + sual + reveal) təkrar gələndə DOM yenidən qurulmur → ikiqat animasiya/səs yoxdur.
 // Keçid: köhnə view «is-leaving» (220 ms) ilə çıxır, yenisi «is-entering» ilə girir (yalnız
 // transform/opacity). Azaldılmış hərəkət rejimində dəyişmə anidir.
-import { prefersReducedMotion } from './config.js?v=lx20261019';
-import { UI } from './dom.js?v=lx20261019';
-import { state } from './state.js?v=lx20261019';
-import { hydrateCodeText } from '../host_lobby/code_text.js?v=lx20261019';
+import { prefersReducedMotion } from './config.js?v=lx20261019s';
+import { UI } from './dom.js?v=lx20261019s';
+import { state } from './state.js?v=lx20261019s';
+import { hydrateCodeText } from '../host_lobby/code_text.js?v=lx20261019s';
 
 const LEAVE_MS = 240;
 let current = null;

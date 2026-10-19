@@ -1,10 +1,11 @@
-import { UI } from './dom.js?v=lx20261019';
-import { LOBBY_MAX_BUBBLES, PHASES } from './constants.js?v=lx20261019';
-import { state } from './state.js?v=lx20261019';
-import { playJoin } from './audio.js?v=lx20261019';
-import { icon } from './icons.js?v=lx20261019';
-import { setPresentationMarkup } from './presentation.js?v=lx20261019';
-import { renderTimeSettings } from './time_setting.js?v=lx20261019';
+import { UI } from './dom.js?v=lx20261019s';
+import { LOBBY_MAX_BUBBLES, PHASES } from './constants.js?v=lx20261019s';
+import { state } from './state.js?v=lx20261019s';
+import { playJoin } from './audio.js?v=lx20261019s';
+import { icon } from './icons.js?v=lx20261019s';
+import { setPresentationMarkup } from './presentation.js?v=lx20261019s';
+import { renderTimeSettings } from './time_setting.js?v=lx20261019s';
+import { presentationStyle } from './style_mode.js?v=lx20261019s';
 import {
     avatarImageMarkup,
     buildJoinUrl,
@@ -17,7 +18,7 @@ import {
     notifyHostShell,
     pinMarkup,
     tr,
-} from './utils.js?v=lx20261019';
+} from './utils.js?v=lx20261019s';
 
 /* Lobbi: «qabıq» (qoşulma kartı, PIN, QR, başlıq) yalnız öz imzası dəyişəndə
  * yenidən çəkilir; oyunçu buludu isə id ilə fərq (diff) edilir — yeni gələn
@@ -119,7 +120,8 @@ function bubbleMarkup(player, removable) {
 }
 
 function bubbleKey(player) {
-    return [player?.nickname || "", player?.avatar_key || "", player?.accessory_key || ""].join("|");
+    // Üslub da açardadır: lobbidə «Rəsmi»/«Qeyri-rəsmi» dəyişəndə çiplər (avatar ↔ baş hərflər) yenilənir.
+    return [player?.nickname || "", player?.avatar_key || "", player?.accessory_key || "", presentationStyle()].join("|");
 }
 
 function updateStatus(root, count) {

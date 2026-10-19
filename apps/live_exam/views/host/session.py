@@ -12,8 +12,10 @@ from django.views.decorators.http import require_http_methods
 from apps.audit.public import log_action
 from apps.exams.models import Exam
 from apps.exams.public import is_teacher_user
+from apps.live_exam.constants import PRESENTATION_STYLE_KEYS
 from apps.live_exam.models import LiveSession
 from apps.live_exam.services import finish_session
+from apps.live_exam.session_settings import default_style_for_exam
 from core.constants import AuditAction
 
 from ._shared import (
@@ -78,24 +80,30 @@ def live_create_session_by_slug(request, slug):
     # Audit 2026-09-28 EX28-10: sessiya YARATMAQ (və ``force_new`` ilə köhnələri
     # bitirmək) vəziyyət dəyişikliyidir — yalnız CSRF-qorumalı POST. GET (köhnə
     # link / düymə) təsdiq səhifəsi göstərir; oradakı forma POST göndərir.
+    # 2026-10-19: təqdimat üslubu — təsdiq formasında seçilir; defolt imtahanın son sessiyasının
+    # seçimidir, ilk dəfə isə «Rəsmi» (session_settings.default_style_for_exam).
+    default_style = default_style_for_exam(exam)
     if request.method != "POST":
         return render(
             request,
             "liveExam/create_session_confirm.html",
-            {"exam": exam, "force_new": force_new_session},
+            {"exam": exam, "force_new": force_new_session, "presentation_style": default_style},
         )
+
+    posted_style = str(request.POST.get("presentation_style") or "").strip().lower()
+    style = posted_style if posted_style in PRESENTATION_STYLE_KEYS else default_style
 
     if force_new_session:
         for old_session in active_sessions:
             finish_session(old_session)
 
-    session = LiveSession.objects.create(exam=exam, host_user=request.user)
+    session = LiveSession.objects.create(exam=exam, host_user=request.user, presentation_style=style)
     log_action(
         action=AuditAction.CREATE,
         user=request.user,
         organization=exam.organization,
         obj=session,
-        new_values={"exam": str(exam.pk), "pin": session.pin},
+        new_values={"exam": str(exam.pk), "pin": session.pin, "presentation_style": style},
         request=request,
     )
     presentation_url = reverse("liveExam:host_presentation", kwargs={"pin": session.pin})

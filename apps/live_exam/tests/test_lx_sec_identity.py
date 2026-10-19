@@ -174,6 +174,12 @@ class ClientIdCookieTest(_JoinBase):
 
 
 class LobbyLifecycleTest(_JoinBase):
+    def setUp(self):
+        super().setUp()
+        # 2026-10-19: avatar/reaksiya «Qeyri-rəsmi» üslubun xüsusiyyətidir (yeni sessiyanın defoltu «Rəsmi»).
+        self.session.presentation_style = "playful"
+        self.session.save(update_fields=["presentation_style"])
+
     def test_profile_changes_only_in_lobby(self):
         """LXS-07: əvvəl oyun gedişində / bitəndən sonra da ad dəyişirdi (nəticə səhifəsinə düşürdü)."""
         player, client = player_client(self.session, "Vetted", "lxs-life-1")

@@ -1,9 +1,11 @@
-import { icon, shapeKey, shapeSvg, toneIndex } from './icons.js?v=lx20261019';
-import { esc, formatNumber, lengthClass, tr } from './utils.js?v=lx20261019';
+import { icon, shapeKey, shapeSvg, toneIndex } from './icons.js?v=lx20261019s';
+import { isFormal, optionLetter } from './style_mode.js?v=lx20261019s';
+import { esc, fmt, formatNumber, lengthClass, tr } from './utils.js?v=lx20261019s';
 
 /* Cavab plitələri — rəng (t1..t6) + FİQUR (rəng korları üçün), host və telefonda eyni:
  * 1 üçbucaq (qırmızı), 2 romb (göy), 3 dairə (kəhrəba), 4 kvadrat (yaşıl),
- * 5 ulduz (bənövşəyi; server açarı "pentagon"), 6 altıbucaq (firuzəyi). */
+ * 5 ulduz (bənövşəyi; server açarı "pentagon"), 6 altıbucaq (firuzəyi).
+ * 2026-10-19: «Rəsmi» üslubda fiqur əvəzinə HƏRF nişanı (A, B, C, D…) — rəng css/live_formal-dadır. */
 
 const SHAPE_LABELS = {
     triangle: ["shapeTriangle", "Üçbucaq"],
@@ -15,8 +17,14 @@ const SHAPE_LABELS = {
 };
 
 export function optionShapeLabel(option, index) {
+    if (isFormal()) return fmt(tr("optionLetter", "Variant {letter}"), { letter: optionLetter(index) });
     const [key, fallback] = SHAPE_LABELS[shapeKey(option, index)] || SHAPE_LABELS.circle;
     return tr(key, fallback);
+}
+
+/** Plitənin nişanı: oyunbazda fiqur SVG-si, rəsmidə hərf (A…). */
+export function optionMarkMarkup(option, index) {
+    return isFormal() ? `<span class="hx-letter">${esc(optionLetter(index))}</span>` : shapeSvg(shapeKey(option, index));
 }
 
 /** 2026-10-08 (L4): ən uzun variantın uzunluq sinfi — səhnə plitələrə hündürlüyün çox payını verir. */
@@ -34,14 +42,13 @@ export function tilesGridClass(count) {
 
 /** verdict: undefined (sual) | "correct" | "wrong" (reveal). */
 export function answerTileMarkup(option, index, verdict) {
-    const shape = shapeKey(option, index);
     const label = optionShapeLabel(option, index);
     const text = String(option?.text || "");
     const verdictClass = verdict === "correct" ? "is-correct" : verdict === "wrong" ? "is-wrong" : "";
     const verdictText = verdict === "correct" ? tr("correctTag", "Düzgün") : verdict === "wrong" ? tr("wrongTag", "Səhv") : "";
     return `
         <article class="hx-tile hx-tile--t${toneIndex(index)} ${verdictClass}" data-len="${lengthClass(text)}" data-option-id="${Number(option?.id || 0)}">
-            <span class="hx-tile__shape" role="img" aria-label="${esc(label)}">${shapeSvg(shape)}</span>
+            <span class="hx-tile__shape" role="img" aria-label="${esc(label)}">${optionMarkMarkup(option, index)}</span>
             <span class="hx-tile__text hx-scroll" data-code-text>${esc(text)}</span>
             ${
                 verdict
@@ -67,7 +74,7 @@ export function distributionBarsMarkup(options, distribution, correctIds) {
                     <span class="hx-bar__value"><strong data-bar-count>0</strong><small>${pct}%</small></span>
                     <span class="hx-bar__track"><span class="hx-bar__fill"></span></span>
                     <span class="hx-bar__foot">
-                        <span class="hx-bar__shape" role="img" aria-label="${esc(optionShapeLabel(option, index))}">${shapeSvg(shapeKey(option, index))}</span>
+                        <span class="hx-bar__shape" role="img" aria-label="${esc(optionShapeLabel(option, index))}">${optionMarkMarkup(option, index)}</span>
                         ${correct ? `<span class="hx-bar__check" role="img" aria-label="${esc(tr("correctTag", "Düzgün"))}">${icon("check")}</span>` : ""}
                     </span>
                     <span class="hx-sr">${esc(option?.text || "")}: ${formatNumber(count)} (${pct}%)</span>

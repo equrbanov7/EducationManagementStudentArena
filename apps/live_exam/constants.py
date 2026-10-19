@@ -33,6 +33,15 @@ QUESTION_SECONDS_MIN = 5
 QUESTION_SECONDS_MAX = 300
 QUESTION_SECONDS_PRESETS = (10, 20, 30, 60, 90, 120)
 
+# 2026-10-19: təqdimat üslubu (sahib: «ciddi mühitdə ikonlar uşaq əyləncəli yox, rəsmi görünsün»).
+# «formal» (Rəsmi) — A/B/C/D plitələri, xətti ikonlar, baş hərflər, konfetti/səs/emoji yoxdur, sakit
+# sıralama cədvəli; «playful» (Qeyri-rəsmi) — əvvəlki görünüş. YENİ sessiyanın defoltu «formal»-dır;
+# miqrasiyadan (0006) əvvəlki sessiyalar «playful» qalır (bax docs/live_exam/ENGINE.md «Təqdimat üslubu»).
+PRESENTATION_FORMAL = "formal"
+PRESENTATION_PLAYFUL = "playful"
+PRESENTATION_STYLE_KEYS = (PRESENTATION_FORMAL, PRESENTATION_PLAYFUL)
+DEFAULT_PRESENTATION_STYLE = PRESENTATION_FORMAL
+
 DEFAULT_AVATAR_KEY = "avatar_1"
 DEFAULT_ACCESSORY_KEY = "accessory_none"
 

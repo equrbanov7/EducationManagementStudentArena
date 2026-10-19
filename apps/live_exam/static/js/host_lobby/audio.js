@@ -1,4 +1,5 @@
-import { state } from './state.js?v=lx20261019';
+import { state } from './state.js?v=lx20261019s';
+import { isFormal } from './style_mode.js?v=lx20261019s';
 
 /* ═══════════════════════════════════════════════════════════════════
  *  SƏS MÜHƏRRİKİ (2026-09-29 LX-FE-STAGE) — yalnız WebAudio sintezi, fayl yoxdur.
@@ -129,6 +130,8 @@ function once(key) {
 }
 
 function live() {
+    // 2026-10-19: «Rəsmi» üslubda bütün səs effektləri, musiqi, barabam və fanfar susur.
+    if (isFormal()) return null;
     const c = ctx();
     return c && c.state === "running" ? c : null;
 }
@@ -420,7 +423,7 @@ export function stopLobbyMusic() { stopLoop("lobby", 0.6); }
 
 export function syncLobbyMusic() {
     const mode = String(state.sessionSettings?.lobby_music || "original");
-    if (state.sessionState !== "lobby" || mode === "silent" || !audioEnabled()) {
+    if (state.sessionState !== "lobby" || mode === "silent" || !audioEnabled() || isFormal()) {
         stopLobbyMusic();
         return;
     }

@@ -17,8 +17,11 @@
     <link rel="stylesheet" href="{% static 'css/live_avatar.css' %}?v=lx-20260929">
     <link rel="stylesheet" href="{% static 'css/live_theme.css' %}?v=lx-20260929">
     <link rel="stylesheet" href="{% static 'css/join/_base.css' %}?v=lxp-20260929">
+    {# 2026-10-19: «Rəsmi» təqdimat üslubu qatı (body[data-lx-style="formal"]) #}
+    <link rel="stylesheet" href="{% static 'css/live_formal/_base.css' %}?v=lx-20261019s">
+    <link rel="stylesheet" href="{% static 'css/live_formal/_player.css' %}?v=lx-20261019s">
 </head>
-<body class="lxj" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}">
+<body class="lxj" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}" data-lx-style="{{ session_settings.presentation_style|default:'playful' }}">
     {% comment %}LX-FE-PLAYER 2026-09-29: qoşulma — ad + təsadüfi avatar (🎲 dəyiş), sayğac, aydın xəta
     halları (kilid/başlayıb/çıxarılıb → blok kartı; ad məşğuldur → sahə altında).{% endcomment %}
     <div class="lxj-shell">
@@ -45,7 +48,11 @@
                     </button>
                 </div>
                 <h1 class="lxj-title">{% trans "title" context "live_exam.join" %}</h1>
+                {% if session_settings.presentation_style == "formal" %}{# 2026-10-19: «Rəsmi» üslubda zarafatsız mətn #}
+                <p class="lxj-sub">{% trans "Adınızı və soyadınızı yazın — oyun müəllim başladanda açılacaq." context "live_exam.presentation_style" %}</p>
+                {% else %}
                 <p class="lxj-sub">{% trans "fun_text_prefix" context "live_exam.join" %} <span>{% trans "fun_text_highlight" context "live_exam.join" %}</span> {% trans "fun_text_suffix" context "live_exam.join" %}</p>
+                {% endif %}
 
                 {% if remembered_player and remembered_join_copy %}
                 <div class="lxj-resume">
@@ -61,7 +68,7 @@
                     <label class="lxj-label" for="nickname">{% trans "nickname_label" context "live_exam.join" %}</label>
                     <div class="lxj-inputwrap">
                         <input id="nickname" class="lxj-input" type="text" maxlength="32" autocomplete="off" autocapitalize="words"
-                               spellcheck="false" enterkeyhint="go" placeholder="{% trans 'nickname_placeholder' context 'live_exam.join' %}"
+                               spellcheck="false" enterkeyhint="go" placeholder="{% if session_settings.presentation_style == 'formal' %}{% trans 'Ad və soyad' context 'live_exam.presentation_style' %}{% else %}{% trans 'nickname_placeholder' context 'live_exam.join' %}{% endif %}"
                                aria-describedby="joinNicknameError" autofocus>
                         <span id="joinNicknameCount" class="lxj-count" aria-hidden="true">0/32</span>
                     </div>
@@ -134,8 +141,8 @@
     <script src="{% static 'js/ems_ajax_init.js' %}"></script>
     <script src="{% static 'js/join_config.js' %}?v=lxp-20260929"></script>
     <script src="{% static 'js/live_avatar_catalog.js' %}?v=lx-20260929"></script>
-    <script src="{% static 'js/live_avatar_renderer.js' %}?v=lx-20260929"></script>
+    <script src="{% static 'js/live_avatar_renderer.js' %}?v=lx-20261019s"></script>
     <script src="{% static 'js/wait_room_nickname_editor.js' %}?v=lxp-20260929"></script>
-    <script src="{% static 'js/join.js' %}?v=lxp-20261008"></script>
+    <script src="{% static 'js/join.js' %}?v=lxp-20261019s"></script>
 </body>
 </html>
