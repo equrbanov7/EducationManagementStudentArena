@@ -107656,3 +107656,83 @@ msgstr "Wie viele Minuten nach Ende einer Final-/Zwischenprüfung ein aus dem Ho
 msgctxt "appeals.model.appeal.field"
 msgid "filed_onsite"
 msgstr "Direkt nach der Prüfung eingereicht"
+
+msgctxt "core.runtime_settings"
+msgid "Midterm imtahan mərkəzi vasitəsilə (/exams/midterm/)"
+msgstr "Zwischenprüfung über das Prüfungszentrum (/exams/midterm/)"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılıbsa midterm final kimi yalnız imtahan zalında /exams/midterm/ ünvanından verilir: istifadəçi adı + PIN, imtahan qaydaları, gözləmə otağı, nəzarətçinin startı, cihaz bağlantısı və 5 dəqiqəlik nəticə baxışı. Kabinetdən midterm başlamaq olmur. Söndürüləndə midterm əvvəlki kimi kabinetdən fərdi PIN ilə başlayır. Artıq başlamış midterm cəhdləri hər iki halda normal bitir."
+msgstr "Wenn aktiviert, wird die Zwischenprüfung wie die Abschlussprüfung nur im Prüfungssaal unter /exams/midterm/ abgelegt: Benutzername + PIN, Prüfungsregeln, Warteraum, Start durch die Aufsicht, Gerätebindung und 5-minütige Ergebnisansicht. Ein Start aus dem Kabinett ist nicht möglich. Wenn deaktiviert, beginnt die Zwischenprüfung wie bisher im Kabinett mit der persönlichen PIN. Bereits begonnene Versuche werden in beiden Fällen normal beendet."
+
+msgctxt "exams.center_exams"
+msgid "Midterm"
+msgstr "Zwischenprüfung"
+
+msgctxt "exams.center_exams"
+msgid "Final"
+msgstr "Abschlussprüfung"
+
+msgctxt "exams.center_exams"
+msgid "Bu imtahana imtahan zalında /exams/midterm/ ünvanından istifadəçi adınız və PIN ilə daxil olun."
+msgstr "Melden Sie sich zu dieser Prüfung im Prüfungssaal unter /exams/midterm/ mit Benutzername und PIN an."
+
+msgctxt "exams.center_exams"
+msgid "Bu imtahana imtahan zalında /exams/final/ ünvanından istifadəçi adınız və PIN ilə daxil olun."
+msgstr "Melden Sie sich zu dieser Prüfung im Prüfungssaal unter /exams/final/ mit Benutzername und PIN an."
+
+msgctxt "exams.center_exams"
+msgid "Bu, midterm imtahanıdır. İmtahana imtahan zalında /exams/midterm/ ünvanından istifadəçi adı və PIN ilə daxil olun. Kabinetdən birbaşa başlamaq mümkün deyil."
+msgstr "Dies ist eine Zwischenprüfung. Melden Sie sich im Prüfungssaal unter /exams/midterm/ mit Benutzername und PIN an. Ein direkter Start aus dem Kabinett ist nicht möglich."
+
+msgctxt "exams.center_exams"
+msgid "Bu, final imtahanıdır. İmtahan yalnız təyin olunmuş vaxt aralığında, imtahan giriş səhifəsindən istifadəçi adı və PIN ilə verilir. Kabinetdən birbaşa başlamaq mümkün deyil."
+msgstr "Dies ist eine Abschlussprüfung. Sie wird nur im festgelegten Zeitfenster über die Prüfungsanmeldeseite mit Benutzername und PIN abgelegt. Ein direkter Start aus dem Kabinett ist nicht möglich."
+
+msgctxt "exams.final_center.entry"
+msgid "Məlumatlar yanlışdır və ya aktiv midterm imtahanınız yoxdur."
+msgstr "Die Angaben sind falsch oder Sie haben keine aktive Zwischenprüfung."
+
+msgctxt "exams.final_center.entry"
+msgid "Bu PIN final imtahanına aiddir. Final imtahanına /exams/final/ ünvanından daxil olun."
+msgstr "Diese PIN gehört zu einer Abschlussprüfung. Melden Sie sich unter /exams/final/ an."
+
+msgctxt "exams.final_center.entry"
+msgid "Bu PIN midterm imtahanına aiddir. Midterm imtahanına /exams/midterm/ ünvanından daxil olun."
+msgstr "Diese PIN gehört zu einer Zwischenprüfung. Melden Sie sich unter /exams/midterm/ an."
+
+msgctxt "exams.final_center.entry"
+msgid "Midterm imtahanları hazırda imtahan mərkəzi vasitəsilə keçirilmir — imtahana kabinetinizdəki «Təyin olunmuş imtahanlar» bölməsindən başlayın."
+msgstr "Zwischenprüfungen werden derzeit nicht über das Prüfungszentrum durchgeführt — starten Sie die Prüfung im Bereich „Zugewiesene Prüfungen“ Ihres Kabinetts."
+
+msgctxt "exams.final_center.device"
+msgid "Bu midterm imtahanı başqa cihazda davam edir. Cihazı dəyişmək lazımdırsa, nəzarətçidən və ya imtahan mərkəzindən «cihaz dəyişikliyi» təsdiqi istəyin, sonra səhifəni yeniləyin."
+msgstr "Diese Zwischenprüfung wird auf einem anderen Gerät fortgesetzt. Wenn Sie das Gerät wechseln müssen, bitten Sie die Aufsicht oder das Prüfungszentrum um Freigabe eines „Gerätewechsels“ und laden Sie die Seite neu."
+
+msgctxt "exams.final_center.device"
+msgid "Tələbənin davam edən imtahan cəhdi yoxdur."
+msgstr "Die studierende Person hat keinen laufenden Prüfungsversuch."
+
+msgctxt "exams.final_center.reminder"
+msgid "Midterm imtahanınız sabah keçiriləcək"
+msgstr "Ihre Zwischenprüfung findet morgen statt"
+
+msgctxt "exams.final_center.reminder"
+msgid "Midterm imtahanınız yaxınlaşır"
+msgstr "Ihre Zwischenprüfung rückt näher"
+
+msgctxt "exams.final_center.reminder"
+msgid "{exam} midterm imtahanı {start} tarixində keçiriləcək. İmtahan zalındakı kompüterdən /exams/midterm/ ünvanından istifadəçi adınız və PIN ilə daxil olun."
+msgstr "Die Zwischenprüfung {exam} findet am {start} statt. Melden Sie sich an einem Computer im Prüfungssaal unter /exams/midterm/ mit Benutzername und PIN an."
+
+msgctxt "exams.final_center.report"
+msgid "İmtahan növü"
+msgstr "Prüfungsart"
+
+msgctxt "exams.template.final_entry"
+msgid "Midterm imtahan girişi"
+msgstr "Anmeldung zur Zwischenprüfung"
+
+msgctxt "exams.template.final_gate"
+msgid "Midterm imtahanı"
+msgstr "Zwischenprüfung"

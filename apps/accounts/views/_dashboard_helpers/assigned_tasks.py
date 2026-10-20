@@ -14,8 +14,11 @@ from apps.courses.models import CourseMembership
 from apps.exams.models import ExamAttempt, StudentExamAttemptGrant
 from apps.exams.public import (
     ATTEMPT_FINISHED_STATUSES,
+    cabinet_center_notice,
+    center_entry_url_for_exam,
     exam_network_allowed,
     exam_network_denied_message,
+    is_center_exam,
     start_intent_token,
     student_final_exam_context,
 )
@@ -167,11 +170,15 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
     from django.utils import timezone as _tz
 
     _today = _tz.localdate()
-    _active_exam_ids = set(
+    # 2026-10-20: (exam_id, bilet_id) — biletsiz açıq cəhd = kabinetdən başlamış köhnə midterm cəhdi
+    # (mərkəz açarı yandırılmazdan əvvəl); o, kabinetdən davam edib normal bitir.
+    _open_attempt_rows = list(
         ExamAttempt.objects.filter(user=user, status__in=("draft", "in_progress"), is_trial=False).values_list(
-            "exam_id", flat=True
+            "exam_id", "final_tickets__id"
         )
     )
+    _active_exam_ids = {exam_id for exam_id, _ticket in _open_attempt_rows}
+    _ticketless_open_exam_ids = {exam_id for exam_id, ticket_id in _open_attempt_rows if ticket_id is None}
     _today_official_ids = set(
         ExamAttempt.objects.filter(
             user=user,
@@ -214,10 +221,14 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
             # PIN-ini görür və imtahana `/exams/final/` səhifəsindən istifadəçi
             # adı + PIN ilə daxil olur. Bilet hələ təyin olunmayıbsa (otaq-oturum
             # yaradılmayıb) modal bunu bildirir; giriş kodu/PIN xanası göstərilmir.
-            is_final_exam = category == "final"
-            final_ctx = student_final_exam_context(user, exam) if is_final_exam else {}
+            # 2026-10-20 (sahib): midterm də («Sistem tənzimləmələri» → exam.midterm_via_center) final kimi
+            # yalnız zalda `/exams/midterm/` ünvanından — ``is_center_exam`` yeganə mənbədir. Köhnə (biletsiz)
+            # açıq midterm cəhdi kabinet axınında qalır ki, tələbə onu davam etdirib bitirə bilsin.
+            use_center_flow = is_center_exam(exam) and not (
+                category == "midterm" and exam.id in _ticketless_open_exam_ids
+            )
+            final_ctx = student_final_exam_context(user, exam) if use_center_flow else {}
             has_ticket = bool(final_ctx.get("has_ticket"))
-            use_center_flow = is_final_exam
 
             # Final/midterm: imtahan yaradılanda hər tələbəyə təyin olunan fərdi
             # PIN (dərhal görünür). Midterm bunu kabinet giriş xanasında, final
@@ -286,7 +297,8 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
                         "final_room": final_ctx.get("room_name"),
                         "final_entry_open": final_ctx.get("entry_open", False),
                         "final_status": final_ctx.get("status"),
-                        "final_entry_url": reverse("exams:final_exam_entry"),
+                        "final_entry_url": center_entry_url_for_exam(exam),
+                        "center_notice": cabinet_center_notice(exam),
                         # Modal/aralıq göstərişi üçün oturum vaxtları (exam tarixlərini əvəz edir).
                         "exam_start_at": final_ctx.get("window_start") or exam.start_datetime,
                         "exam_end_at": final_ctx.get("window_end") or exam.end_datetime,

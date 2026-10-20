@@ -107,6 +107,12 @@ FINAL_EXAM_ALLOWED_IPS = [item.strip() for item in os.getenv("FINAL_EXAM_ALLOWED
 # ASILI DEYİL. Test ayarları bunu import etmir (kod defoltu False); testlər override edir.
 EXAM_FINAL_INTERNAL_ONLY = _env_bool_setting("EXAM_FINAL_INTERNAL_ONLY", True)
 
+# --- Midterm imtahan mərkəzi vasitəsilə (/exams/midterm/, sahib 2026-10-20) ----
+# «Sistem tənzimləmələri» → ``exam.midterm_via_center`` açarının DEFOLTU (RİM rəhbəri dəyişə bilir).
+# True → midterm final kimi zal axını ilə verilir (kabinetdən başlamır). Test ayarları bunu import
+# etmir (kod defoltu False — köhnə kabinet axını); mərkəz testləri override edir.
+EXAM_MIDTERM_VIA_CENTER = _env_bool_setting("EXAM_MIDTERM_VIA_CENTER", True)
+
 # --- İmtahan zalı MAC yoxlaması (ARP agenti) ---------------------------------
 # "off" → köhnə IP-əsaslı kompüter yoxlaması (dev/test default).
 # "arp_agent" → müştəri MAC-ı host-un ARP cədvəlindən (docker/arp-agent

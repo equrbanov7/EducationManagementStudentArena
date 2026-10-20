@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{% trans "Final imtahan girişi" context "exams.template.final_entry" %}{% endblock %}
+{% block title %}{% if entry_is_midterm %}{% trans "Midterm imtahan girişi" context "exams.template.final_entry" %}{% else %}{% trans "Final imtahan girişi" context "exams.template.final_entry" %}{% endif %}{% endblock %}
 
 {% block route_progress %}{% endblock %}
 {% block navbar %}{% endblock %}
@@ -23,7 +23,7 @@
     <div class="fexc-brand">
       <span class="fexc-brand-badge"><i class="fas fa-graduation-cap" aria-hidden="true"></i></span>
       <div>
-        <h1 id="fexc-entry-title" class="fexc-title">{% trans "Final imtahan girişi" context "exams.template.final_entry" %}</h1>
+        <h1 id="fexc-entry-title" class="fexc-title">{% if entry_is_midterm %}{% trans "Midterm imtahan girişi" context "exams.template.final_entry" %}{% else %}{% trans "Final imtahan girişi" context "exams.template.final_entry" %}{% endif %}</h1>
         <p class="fexc-sub">{% trans "İstifadəçi adınızı və şəxsi imtahan PIN-inizi daxil edin" context "exams.template.final_entry" %}</p>
       </div>
     </div>
@@ -35,7 +35,8 @@
     </div>
     {% endif %}
 
-    <form method="post" action="{% url 'exams:final_exam_entry' %}" class="fexc-form" autocomplete="off">
+    {% if not entry_disabled %}
+    <form method="post" action="{{ entry_url }}" class="fexc-form" autocomplete="off">
       {% csrf_token %}
       <div class="fexc-field">
         <label for="fexc-username">{% trans "İstifadəçi adı" context "exams.template.final_entry" %}</label>
@@ -56,6 +57,7 @@
         {% trans "İmtahana daxil ol" context "exams.template.final_entry" %}
       </button>
     </form>
+    {% endif %}
 
     <p class="fexc-footnote">
       <i class="fas fa-shield-halved" aria-hidden="true"></i>
@@ -69,7 +71,7 @@
 <div class="fexc-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="fexc-modal-title">
   <div class="fexc-modal-panel fexc-gate">
     <header class="fexc-gate-head">
-      <span class="fexc-kicker">{% trans "Final imtahanı" context "exams.template.final_gate" %}</span>
+      <span class="fexc-kicker">{% if entry_is_midterm %}{% trans "Midterm imtahanı" context "exams.template.final_gate" %}{% else %}{% trans "Final imtahanı" context "exams.template.final_gate" %}{% endif %}</span>
       <h2 id="fexc-modal-title" class="fexc-title">{{ exam.title }}</h2>
       <p class="fexc-sub">
         {{ ticket.student.get_full_name|default:ticket.student.username }}
@@ -136,7 +138,7 @@
       {% endif %}
     </section>
 
-    <form method="post" class="fexc-form" action="{% url 'exams:final_exam_entry' %}">
+    <form method="post" class="fexc-form" action="{{ entry_url }}">
       {% csrf_token %}
 
       {% if language_options|length > 1 %}

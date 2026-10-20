@@ -58,6 +58,8 @@ ERROR_INVALID = "invalid_credentials"
 ERROR_RATE_LIMITED = "rate_limited"
 ERROR_LOCKED = "temporarily_locked"
 ERROR_NO_ACTIVE_SESSION = "no_active_session"
+#: Doğru PIN, amma digər növün (final ↔ midterm) imtahanı — view düzgün giriş ünvanını göstərir.
+ERROR_WRONG_KIND = "wrong_exam_kind"
 
 
 def _rate_key(kind: str, value: str) -> str:
@@ -93,11 +95,17 @@ def _candidate_tickets(user):
     İstifadəçi eyni anda birdən çox finala təyin ola bilər → HAMISI qaytarılır;
     PIN doğrulaması hansı biletə uyğun gəldiyini müəyyən edir (``validate_entry``).
     ``ACTIVE`` da daxildir — yenidən giriş üçün (nəzarətçi yeni PIN verib).
+
+    2026-10-20: yalnız hazırda mərkəz axınında olan növlər (final; açar yandırılıbsa midterm). Hər iki
+    giriş səhifəsi eyni namizəd hovuzunu yoxlayır (bir hash büdcəsi) — növ uyğunluğu view qatındadır.
     """
+    from apps.exams.services.center_exams import active_center_kinds
+
     now = timezone.now()
     return list(
         FinalExamTicket.objects.filter(
             student=user,
+            exam__exam_type_extended__in=sorted(active_center_kinds()),
             status__in=(
                 TICKET_STATUS_ASSIGNED,
                 TICKET_STATUS_WAITING,
@@ -113,7 +121,7 @@ def _candidate_tickets(user):
     )
 
 
-def validate_entry(request, username: str, raw_pin: str, *, budget=None):
+def validate_entry(request, username: str, raw_pin: str, *, budget=None, kind=None):
     """
     Final girişinin tam yoxlaması (yalnız PIN + istifadəçi — ZAL YOX).
 
@@ -126,6 +134,10 @@ def validate_entry(request, username: str, raw_pin: str, *, budget=None):
     ``budget`` (``PinHashBudget``) verilibsə uğursuz sonluğun vaxt-bərabərləşdirmə
     hash-i ÇAĞIRANIN işidir (view fərdi PIN yolu ilə davam edir və büdcəni
     bağlayır); verilməyibsə funksiya özü düz bir hash ilə bərabərləşdirir.
+
+    ``kind`` (2026-10-20) — giriş səhifəsinin növü (``final``/``midterm``). Uyğun gələn bilet digər
+    növün imtahanıdırsa ``(None, ERROR_WRONG_KIND)``: PIN düzgündür, ona görə uğursuz-cəhd sayılmır,
+    amma giriş qeydə alınmır (``entry_validated_at``/audit yazılmır) və tələbə login olunmur.
     """
     username = (username or "").strip()
     raw_pin = (raw_pin or "").strip()
@@ -176,6 +188,8 @@ def validate_entry(request, username: str, raw_pin: str, *, budget=None):
                 _log_suspicious(request, candidates[0], "pin_locked_attempt")
                 return _fail(ERROR_LOCKED)
             return _fail(ERROR_INVALID)
+        if kind and getattr(ticket.exam, "exam_type_extended", "") != kind:
+            return None, ERROR_WRONG_KIND
 
         now = timezone.now()
         if not ticket.entry_validated_at:
@@ -340,8 +354,10 @@ def claim_student_pin_entry(ticket, request=None):
 
 
 def final_attempt_entry_session_valid(request, attempt) -> bool:
-    """Final attempt URL/yazı endpoint-i yalnız aktiv giriş sessiyasına açıqdır."""
-    if getattr(attempt.exam, "exam_type_extended", "") != "final":
+    """Mərkəz (final/midterm) attempt URL/yazı endpoint-i yalnız aktiv giriş sessiyasına açıqdır."""
+    from apps.exams.services.center_exams import is_center_exam
+
+    if not is_center_exam(attempt.exam):
         return True
     with bypass_rls():
         ticket = (
@@ -516,6 +532,7 @@ __all__ = [
     "ERROR_LOCKED",
     "ERROR_NO_ACTIVE_SESSION",
     "ERROR_RATE_LIMITED",
+    "ERROR_WRONG_KIND",
     "STUDENT_PIN_ENTRY_REASON",
     "claim_student_pin_entry",
     "claim_ticket_pin_entry",

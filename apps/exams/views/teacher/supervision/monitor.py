@@ -12,7 +12,6 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import RequestDataTooBig
 from django.http import HttpResponseNotModified, JsonResponse
 from django.shortcuts import get_object_or_404
-from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
 
@@ -203,6 +202,7 @@ def supervision_status_api(request, attempt_id):
         id=attempt_id,
         user=request.user,
     )
+    from apps.exams.services.center_exams import entry_url_for_exam
     from apps.exams.services.final_center import clear_entry_session, final_attempt_entry_session_valid
 
     network_denied = attempt_api_gate(request, attempt, where="supervision_status", check_entry_session=False)
@@ -214,7 +214,7 @@ def supervision_status_api(request, attempt_id):
         return JsonResponse(
             {
                 "entry_session_valid": False,
-                "redirect_url": reverse("exams:final_exam_entry"),
+                "redirect_url": entry_url_for_exam(attempt.exam),
             },
             status=403,
         )

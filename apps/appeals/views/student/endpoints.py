@@ -11,6 +11,8 @@ from django.utils.translation import pgettext
 from apps.exams.models import ExamAttempt
 from apps.exams.public import (
     append_query_params,
+    attempt_in_center,
+    center_entry_url_for_exam,
     current_return_to,
     delivered_question_render,
     ensure_student_exam_tenant_context,
@@ -90,8 +92,9 @@ def _result_url(exam, attempt, request=None):
     return url
 
 
-def _is_final_exam(exam):
-    return getattr(exam, "exam_type_extended", "") == "final"
+def _is_center_attempt(attempt):
+    """Mərkəz (zal) cəhdi — final; açar yandırılıbsa zal girişli midterm (2026-10-20, ``attempt_in_center``)."""
+    return attempt_in_center(attempt)
 
 
 def _parse_items_from_post(request, delivered_question_ids):
@@ -149,7 +152,7 @@ def _render_appeal_window_closed(request, exam, attempt, *, window_closed, block
         "window_expired": window_closed,
         "attempt_appeals": _attempt_appeals_for_student(attempt),
         "result_url": _result_url(exam, attempt, request),
-        "is_final_exam": _is_final_exam(exam) and not is_profile_results_request,
+        "is_final_exam": _is_center_attempt(attempt) and not is_profile_results_request,
         # Read-only rejim üçün form dəyişənləri boş/deaktiv.
         "answers": [],
     }
@@ -209,7 +212,7 @@ def appeal_create(request, attempt_id):
                 request,
                 pgettext("appeals.view.message", "Apellyasiyanız qeydə alındı."),
             )
-            if _is_final_exam(exam) and not _is_profile_results_request(request):
+            if _is_center_attempt(attempt) and not _is_profile_results_request(request):
                 # Final imtahan: apellyasiyadan sonra tələbə zal rejimindən ÇIXARILIR.
                 # Giriş sessiyası təmizlənir və logout edilir ki, təkrar imtahan
                 # giriş QAYDALARI modalına yox, təmiz login səhifəsinə düşsün
@@ -220,7 +223,7 @@ def appeal_create(request, attempt_id):
 
                 clear_entry_session(request)
                 logout(request)
-                return redirect(reverse("exams:final_exam_entry"))
+                return redirect(center_entry_url_for_exam(exam))
             # Tələbə apellyasiyalarını dashboard bölməsində izləyir.
             return redirect(reverse("accounts:profile") + "?section=my-appeals")
 
@@ -274,7 +277,7 @@ def appeal_create(request, attempt_id):
         # Müəllim nəticəni gizlədibsə sual üzrə düz/səhv verdikti də göstərilmir.
         "hide_answer_verdicts": results_hidden,
         "answers_release_locked": answers_release_locked,
-        "is_final_exam": _is_final_exam(exam) and not is_profile_results_request,
+        "is_final_exam": _is_center_attempt(attempt) and not is_profile_results_request,
     }
     return render(request, "appeals/student/appeal_create.html", context)
 

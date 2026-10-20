@@ -23,12 +23,13 @@
         data-ws-path="{{ ws_path }}"
         data-state-url="{{ state_url }}"
         data-begin-url="{{ begin_url }}"
+        data-entry-url="{{ entry_url }}"
         data-heartbeat-seconds="{{ heartbeat_seconds }}"
         data-session-active="{% if session_already_active %}1{% else %}0{% endif %}"
         aria-labelledby="fexc-wait-title">
 
     <header class="fexc-gate-head">
-      <span class="fexc-kicker">{% trans "Gözləmə otağı" context "exams.template.final_waiting" %}</span>
+      <span class="fexc-kicker">{% if entry_kind == "midterm" %}{% trans "Midterm imtahanı" context "exams.template.final_gate" %}{% else %}{% trans "Final imtahanı" context "exams.template.final_gate" %}{% endif %} · {% trans "Gözləmə otağı" context "exams.template.final_waiting" %}</span>
       <h1 id="fexc-wait-title" class="fexc-title">{{ exam.title }}</h1>
       <p class="fexc-sub">
         {{ room.name }}{% if room.building %} · {{ room.building }}{% endif %}
@@ -92,5 +93,5 @@
 {% endblock %}
 
 {% block extraJs %}
-    <script src="{% static 'exams/js/final_center/waiting_room.js' %}?v=20260716-session-guard" defer></script>
+    <script src="{% static 'exams/js/final_center/waiting_room.js' %}?v=20261020-midterm" defer></script>
 {% endblock %}

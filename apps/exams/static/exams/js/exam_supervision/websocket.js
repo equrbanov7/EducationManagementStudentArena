@@ -97,7 +97,8 @@ Object.assign(ExamSupervision, {
                 this._showResumeFullscreenOverlay(null);
             } else if (data.action === "session_revoked") {
                 this._closeWebSocket();
-                window.location.replace("/exams/final/");
+                // 2026-10-20: midterm mərkəz cəhdi öz giriş səhifəsinə (/exams/midterm/) qayıdır.
+                window.location.replace(data.redirect_url || "/exams/final/");
             }
         },
 });

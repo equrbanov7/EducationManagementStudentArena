@@ -22,6 +22,7 @@ from apps.exams.services.attempts import (
     get_attempt_limit_result_redirect_url,
     get_effective_max_attempts,
 )
+from apps.exams.services.center_exams import center_entry_required_message, is_center_exam
 from apps.exams.services.exam_network import exam_network_allowed
 from apps.exams.services.question_timer import question_timer_expired
 from apps.exams.services.start_intent import has_valid_start_intent
@@ -182,6 +183,18 @@ def start_exam(request, slug):
         return exam_network_blocked_response(request, exam, where="start_exam", has_attempt=False)
     if not exam.is_active and not trial:
         raise Http404("Exam is not active.")
+
+    # 2026-10-20 (sahib): mərkəz imtahanı (final; açar yandırılıbsa midterm) kabinetdən / birbaşa URL ilə
+    # YENİ cəhd kimi başlamır — yalnız zal girişi (`/exams/final/`, `/exams/midterm/`). Davam edən cəhdə
+    # qayıtmaq (zal cəhdi — giriş sessiyası take səhifəsində yoxlanır; köhnə kabinet midterm cəhdi) açıqdır.
+    if (
+        not trial
+        and is_center_exam(exam)
+        and request.user.pk != exam.author_id
+        and get_active_attempt_for_user(exam, request.user) is None
+    ):
+        messages.error(request, center_entry_required_message(exam))
+        return redirect(resolve_exam_failure_redirect(request))
 
     # İcazə yoxlaması
     can_start, reason = exam.can_user_start(request.user, code=None, trial=trial)

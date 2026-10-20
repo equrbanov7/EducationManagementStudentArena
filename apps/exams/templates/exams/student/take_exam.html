@@ -4,12 +4,12 @@
 
 {% block title %}{{ exam.title }} - {% trans "title_exam" context "exams.template.take_exam" %}{% endblock %}
 
-{% block route_progress %}{% if exam.exam_type_extended != "final" %}{{ block.super }}{% endif %}{% endblock %}
-{% block navbar %}{% if exam.exam_type_extended != "final" %}{{ block.super }}{% endif %}{% endblock %}
-{% block view_as_banner %}{% if exam.exam_type_extended != "final" %}{{ block.super }}{% endif %}{% endblock %}
-{% block footer %}{% if exam.exam_type_extended != "final" %}{{ block.super }}{% endif %}{% endblock %}
-{% block global_search %}{% if exam.exam_type_extended != "final" %}{{ block.super }}{% endif %}{% endblock %}
-{% block global_search_js %}{% if exam.exam_type_extended != "final" %}{{ block.super }}{% endif %}{% endblock %}
+{% block route_progress %}{% if not exam|center_exam %}{{ block.super }}{% endif %}{% endblock %}
+{% block navbar %}{% if not exam|center_exam %}{{ block.super }}{% endif %}{% endblock %}
+{% block view_as_banner %}{% if not exam|center_exam %}{{ block.super }}{% endif %}{% endblock %}
+{% block footer %}{% if not exam|center_exam %}{{ block.super }}{% endif %}{% endblock %}
+{% block global_search %}{% if not exam|center_exam %}{{ block.super }}{% endif %}{% endblock %}
+{% block global_search_js %}{% if not exam|center_exam %}{{ block.super }}{% endif %}{% endblock %}
 {% block ai_assistant %}{% endblock %}
 {% block ai_assistant_js %}{% endblock %}
 
@@ -103,6 +103,7 @@
           data-attempt-id="{{ attempt.id }}"
           data-exam-type="{{ exam.exam_type }}"
           data-exam-type-extended="{{ exam.exam_type_extended }}"
+          data-center-exam="{{ exam|center_exam|yesno:'1,0' }}"
           data-autosave-interval-ms="{{ exam_autosave_interval_ms }}"
           data-autosave-jitter-ms="{{ exam_autosave_jitter_ms }}"
           data-autosave-binary-uploads-enabled="{{ exam_autosave_binary_uploads_enabled|yesno:'1,0' }}"

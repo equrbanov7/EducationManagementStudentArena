@@ -54,6 +54,7 @@
                 data-final-room="{{ item.final_room|default:'' }}"
                 data-final-entry-open="{% if item.final_entry_open %}1{% else %}0{% endif %}"
                 data-final-entry-url="{{ item.final_entry_url|default:'' }}"
+                data-center-notice="{{ item.center_notice|default:'' }}"
                 data-student-pin="{{ item.student_pin|default:'' }}"
                 data-start-block-reason="{{ item.start_block_reason|default:'' }}">
             <span>{% trans "open_task" context "profile.assigned_tasks" %}</span>

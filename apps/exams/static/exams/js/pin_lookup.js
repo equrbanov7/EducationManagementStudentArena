@@ -114,6 +114,8 @@
         ?'<div class="pl2-pinbox"><span class="pl2-pinbox__label">'+T.pin+'</span><span class="pl2-pin">'+esc(x.pin)+'</span></div>'
         :'<div class="pl2-pinbox"><span class="pl2-pin pl2-pin--none">'+T.noPin+'</span></div>';
       var meta=['<span class="pl2-status">'+esc(x.status)+'</span>'];
+      // 2026-10-20: midterm də zal axınındadır — imtahan növü (Final / Midterm) ayrıca nişan.
+      if (x.exam_kind_label) meta.unshift('<span class="pl2-status">'+esc(x.exam_kind_label)+'</span>');
       if (x.subject) meta.push('<span><b>'+T.subject+':</b> '+esc(x.subject)+'</span>');
       if (x.room) meta.push('<span><b>'+T.room+':</b> '+esc(x.room)+'</span>');
       if (x.scheduled_start) meta.push('<span><b>'+T.time+':</b> '+esc(x.scheduled_start)+(x.scheduled_end?('–'+esc(x.scheduled_end)):'')+'</span>');

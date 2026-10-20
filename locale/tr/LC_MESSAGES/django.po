@@ -106038,3 +106038,83 @@ msgstr "Final/ara sınav bittikten sonra kaç dakika içinde, üniversite ağın
 msgctxt "appeals.model.appeal.field"
 msgid "filed_onsite"
 msgstr "Sınav sonunda yapıldı"
+
+msgctxt "core.runtime_settings"
+msgid "Midterm imtahan mərkəzi vasitəsilə (/exams/midterm/)"
+msgstr "Ara sınav sınav merkezi üzerinden (/exams/midterm/)"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılıbsa midterm final kimi yalnız imtahan zalında /exams/midterm/ ünvanından verilir: istifadəçi adı + PIN, imtahan qaydaları, gözləmə otağı, nəzarətçinin startı, cihaz bağlantısı və 5 dəqiqəlik nəticə baxışı. Kabinetdən midterm başlamaq olmur. Söndürüləndə midterm əvvəlki kimi kabinetdən fərdi PIN ilə başlayır. Artıq başlamış midterm cəhdləri hər iki halda normal bitir."
+msgstr "Açıksa ara sınav final gibi yalnızca sınav salonunda /exams/midterm/ adresinden yapılır: kullanıcı adı + PIN, sınav kuralları, bekleme odası, gözetmenin başlatması, cihaz bağlantısı ve 5 dakikalık sonuç görüntüleme. Ara sınav kabinetten başlatılamaz. Kapalıysa ara sınav eskisi gibi kabinetten kişisel PIN ile başlar. Başlamış ara sınav denemeleri her iki durumda da normal şekilde biter."
+
+msgctxt "exams.center_exams"
+msgid "Midterm"
+msgstr "Ara sınav"
+
+msgctxt "exams.center_exams"
+msgid "Final"
+msgstr "Final"
+
+msgctxt "exams.center_exams"
+msgid "Bu imtahana imtahan zalında /exams/midterm/ ünvanından istifadəçi adınız və PIN ilə daxil olun."
+msgstr "Bu sınava sınav salonunda /exams/midterm/ adresinden kullanıcı adınız ve PIN ile girin."
+
+msgctxt "exams.center_exams"
+msgid "Bu imtahana imtahan zalında /exams/final/ ünvanından istifadəçi adınız və PIN ilə daxil olun."
+msgstr "Bu sınava sınav salonunda /exams/final/ adresinden kullanıcı adınız ve PIN ile girin."
+
+msgctxt "exams.center_exams"
+msgid "Bu, midterm imtahanıdır. İmtahana imtahan zalında /exams/midterm/ ünvanından istifadəçi adı və PIN ilə daxil olun. Kabinetdən birbaşa başlamaq mümkün deyil."
+msgstr "Bu bir ara sınavdır. Sınava sınav salonunda /exams/midterm/ adresinden kullanıcı adı ve PIN ile girin. Doğrudan kabinetten başlatılamaz."
+
+msgctxt "exams.center_exams"
+msgid "Bu, final imtahanıdır. İmtahan yalnız təyin olunmuş vaxt aralığında, imtahan giriş səhifəsindən istifadəçi adı və PIN ilə verilir. Kabinetdən birbaşa başlamaq mümkün deyil."
+msgstr "Bu bir final sınavıdır. Sınav yalnızca belirlenen zaman aralığında, sınav giriş sayfasından kullanıcı adı ve PIN ile yapılır. Doğrudan kabinetten başlatılamaz."
+
+msgctxt "exams.final_center.entry"
+msgid "Məlumatlar yanlışdır və ya aktiv midterm imtahanınız yoxdur."
+msgstr "Bilgiler hatalı veya aktif ara sınavınız yok."
+
+msgctxt "exams.final_center.entry"
+msgid "Bu PIN final imtahanına aiddir. Final imtahanına /exams/final/ ünvanından daxil olun."
+msgstr "Bu PIN bir final sınavına aittir. Final sınavına /exams/final/ adresinden girin."
+
+msgctxt "exams.final_center.entry"
+msgid "Bu PIN midterm imtahanına aiddir. Midterm imtahanına /exams/midterm/ ünvanından daxil olun."
+msgstr "Bu PIN bir ara sınava aittir. Ara sınava /exams/midterm/ adresinden girin."
+
+msgctxt "exams.final_center.entry"
+msgid "Midterm imtahanları hazırda imtahan mərkəzi vasitəsilə keçirilmir — imtahana kabinetinizdəki «Təyin olunmuş imtahanlar» bölməsindən başlayın."
+msgstr "Ara sınavlar şu anda sınav merkezi üzerinden yapılmıyor — sınava kabinetinizdeki «Atanmış sınavlar» bölümünden başlayın."
+
+msgctxt "exams.final_center.device"
+msgid "Bu midterm imtahanı başqa cihazda davam edir. Cihazı dəyişmək lazımdırsa, nəzarətçidən və ya imtahan mərkəzindən «cihaz dəyişikliyi» təsdiqi istəyin, sonra səhifəni yeniləyin."
+msgstr "Bu ara sınav başka bir cihazda devam ediyor. Cihaz değiştirmeniz gerekiyorsa gözetmenden veya sınav merkezinden «cihaz değişikliği» onayı isteyin, ardından sayfayı yenileyin."
+
+msgctxt "exams.final_center.device"
+msgid "Tələbənin davam edən imtahan cəhdi yoxdur."
+msgstr "Öğrencinin devam eden sınav denemesi yok."
+
+msgctxt "exams.final_center.reminder"
+msgid "Midterm imtahanınız sabah keçiriləcək"
+msgstr "Ara sınavınız yarın yapılacak"
+
+msgctxt "exams.final_center.reminder"
+msgid "Midterm imtahanınız yaxınlaşır"
+msgstr "Ara sınavınız yaklaşıyor"
+
+msgctxt "exams.final_center.reminder"
+msgid "{exam} midterm imtahanı {start} tarixində keçiriləcək. İmtahan zalındakı kompüterdən /exams/midterm/ ünvanından istifadəçi adınız və PIN ilə daxil olun."
+msgstr "{exam} ara sınavı {start} tarihinde yapılacak. Sınav salonundaki bilgisayardan /exams/midterm/ adresinden kullanıcı adınız ve PIN ile girin."
+
+msgctxt "exams.final_center.report"
+msgid "İmtahan növü"
+msgstr "Sınav türü"
+
+msgctxt "exams.template.final_entry"
+msgid "Midterm imtahan girişi"
+msgstr "Ara sınav girişi"
+
+msgctxt "exams.template.final_gate"
+msgid "Midterm imtahanı"
+msgstr "Ara sınav"

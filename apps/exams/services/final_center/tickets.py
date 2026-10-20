@@ -160,7 +160,13 @@ def regenerate_pin(ticket, by, *, request=None) -> str:
     if ticket.attempt_id:
         from apps.exams.services.supervision import notify_attempt_student
 
-        notify_attempt_student(ticket.attempt_id, {"action": "session_revoked"})
+        payload = {"action": "session_revoked"}
+        if getattr(ticket.exam, "exam_type_extended", "") == "midterm":
+            # 2026-10-20: midterm tələbəsi öz giriş səhifəsinə qayıtsın (final üçün JS defoltu /exams/final/).
+            from apps.exams.services.center_exams import entry_url_for_exam
+
+            payload["redirect_url"] = entry_url_for_exam(ticket.exam)
+        notify_attempt_student(ticket.attempt_id, payload)
     _audit_ticket(
         ticket,
         action=AuditAction.UPDATE,
