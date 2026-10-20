@@ -19,7 +19,7 @@ import logging
 
 from django.conf import settings
 from django.contrib import messages
-from django.http import HttpRequest, HttpResponse
+from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
@@ -53,6 +53,10 @@ def _client_ip(request: HttpRequest) -> str:
 @require_http_methods(["GET", "POST"])
 def contact_page(request: HttpRequest) -> HttpResponse:
     """Render the contact page and process submissions."""
+    from core.academic_rules import contact_page_enabled
+
+    if not contact_page_enabled():  # sahib 2026-10-20: «Sistem tənzimləmələri → Açıq səhifələr»
+        raise Http404
     brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
     seo_context = {
         "seo_title": _("Əlaqə – %(brand)s") % {"brand": brand},

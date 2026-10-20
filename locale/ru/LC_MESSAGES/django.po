@@ -106615,3 +106615,208 @@ msgstr "Официальный"
 msgctxt "live_exam.model.session.presentation_style"
 msgid "Qeyri-rəsmi"
 msgstr "Неофициальный"
+
+msgctxt "core.runtime_settings"
+msgid "Açıq səhifələr"
+msgstr "Публичные страницы"
+
+msgctxt "core.runtime_settings"
+msgid "«Əlaqə» səhifəsi (/contact/)"
+msgstr "Страница «Контакты» (/contact/)"
+
+msgctxt "core.runtime_settings"
+msgid "Söndürüləndə /contact/ ünvanı açılmır (404), menyu, footer və «Haqqımızda» səhifəsindəki «Əlaqə» keçidləri gizlənir. Əvvəl gəlmiş mesajlar silinmir. Yandırılanda səhifə və keçidlər geri qayıdır."
+msgstr "Если выключено, адрес /contact/ не открывается (404), ссылки «Контакты» в меню, футере и на странице «О нас» скрываются. Ранее полученные сообщения не удаляются. При включении страница и ссылки возвращаются."
+
+msgctxt "core.runtime_settings"
+msgid "İstifadəçi öz istifadəçi adını dəyişə bilər"
+msgstr "Пользователь может сам изменить своё имя пользователя"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılanda tələbə və əməkdaş «Profil redaktə» bölməsində mövcud parolu ilə təsdiqləyərək öz istifadəçi adını dəyişə bilir; köhnə ad dərhal işləməz olur. Söndürüləndə həmin hissə gizlənir və server dəyişikliyi qəbul etmir."
+msgstr "Если включено, студенты и сотрудники могут изменить своё имя пользователя в разделе «Редактирование профиля», подтвердив текущим паролем; старое имя сразу перестаёт работать. Если выключено, блок скрывается, а сервер отклоняет изменение."
+
+msgctxt "core.runtime_settings"
+msgid "İstifadəçi adı dəyişmələri arasındakı müddət"
+msgstr "Интервал между изменениями имени пользователя"
+
+msgctxt "core.runtime_settings"
+msgid "Uğurlu dəyişiklikdən sonra neçə gün keçməlidir ki, istifadəçi adını yenidən dəyişmək mümkün olsun. 0 — məhdudiyyət yoxdur."
+msgstr "Сколько дней должно пройти после успешного изменения, прежде чем имя пользователя можно будет изменить снова. 0 — без ограничений."
+
+msgctxt "accounts.username_change"
+msgid "Yeni istifadəçi adını yazın."
+msgstr "Введите новое имя пользователя."
+
+#, python-format
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adı %(min)s–%(max)s simvol olmalıdır."
+msgstr "Имя пользователя должно содержать %(min)s–%(max)s символов."
+
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adında yalnız latın hərfləri (a–z), rəqəmlər, nöqtə, alt xətt və defis ola bilər; ad hərflə başlamalı, hərf və ya rəqəmlə bitməlidir, iki ayırıcı yan-yana gələ bilməz."
+msgstr "Имя пользователя может содержать только латинские буквы (a–z), цифры, точку, подчёркивание и дефис; оно должно начинаться с буквы, заканчиваться буквой или цифрой, два разделителя подряд недопустимы."
+
+msgctxt "accounts.username_change"
+msgid "Bu istifadəçi adı sistem üçün ayrılıb, başqasını seçin."
+msgstr "Это имя пользователя зарезервировано системой, выберите другое."
+
+#, python-format
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adını yenidən %(date)s tarixindən sonra dəyişə bilərsiniz."
+msgstr "Вы сможете снова изменить имя пользователя после %(date)s."
+
+#, python-format
+msgctxt "accounts.username_change"
+msgid "Çox sayda cəhd edildi. %(minutes)s dəqiqə sonra yenidən yoxlayın."
+msgstr "Слишком много попыток. Повторите через %(minutes)s мин."
+
+msgctxt "accounts.username_change"
+msgid "Bu istifadəçi adı artıq istifadə olunur."
+msgstr "Это имя пользователя уже занято."
+
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adını dəyişmək hazırda mümkün deyil."
+msgstr "Изменение имени пользователя сейчас недоступно."
+
+msgctxt "accounts.username_change"
+msgid "Yeni istifadəçi adı cari addan fərqli olmalıdır."
+msgstr "Новое имя пользователя должно отличаться от текущего."
+
+msgctxt "accounts.username_change"
+msgid "Cari parol yanlışdır."
+msgstr "Текущий пароль неверен."
+
+#, python-format
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adınız «%(new)s» olaraq dəyişdirildi. Bundan sonra sistemə bu adla (və ya e-poçtunuzla) daxil olun — köhnə ad artıq işləmir."
+msgstr "Ваше имя пользователя изменено на «%(new)s». Теперь входите в систему с этим именем (или своей эл. почтой) — старое имя больше не работает."
+
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adınız dəyişdirildi"
+msgstr "Ваше имя пользователя изменено"
+
+#, python-format
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adınız dəyişdirildi: %(old)s → %(new)s."
+msgstr "Ваше имя пользователя изменено: %(old)s → %(new)s."
+
+msgctxt "accounts.username_change"
+msgid "Bundan sonra sistemə yeni adla və ya e-poçtunuzla daxil olun; köhnə ad artıq işləmir."
+msgstr "Теперь входите в систему с новым именем или своей эл. почтой; старое имя больше не работает."
+
+msgctxt "accounts.username_change"
+msgid "Bu dəyişikliyi siz etməmisinizsə, dərhal RİM-ə müraciət edin."
+msgstr "Если это изменение сделали не вы, немедленно обратитесь в RİM."
+
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adı"
+msgstr "Имя пользователя"
+
+#, python-format
+msgctxt "accounts.username_change"
+msgid "%(min)s–%(max)s simvol: latın hərfləri (a–z), rəqəmlər, nöqtə, alt xətt və defis; hərflə başlayır. Dəyişiklikdən sonra sistemə yeni adla və ya e-poçtunuzla daxil olursunuz, köhnə ad işləmir."
+msgstr "%(min)s–%(max)s символов: латинские буквы (a–z), цифры, точка, подчёркивание и дефис; начинается с буквы. После изменения вы входите с новым именем или своей эл. почтой, старое имя не работает."
+
+#, python-format
+msgctxt "accounts.username_change"
+msgid "Növbəti dəyişikliyə qədər gözləmə müddəti: %(days)s gün."
+msgstr "Интервал до следующего изменения: %(days)s дн."
+
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adınız dəyişdiriləcək. Bundan sonra sistemə yalnız yeni adla və ya e-poçtunuzla daxil ola biləcəksiniz. Davam edilsin?"
+msgstr "Ваше имя пользователя будет изменено. После этого вы сможете войти только с новым именем или своей эл. почтой. Продолжить?"
+
+msgctxt "accounts.username_change"
+msgid "Cari istifadəçi adı"
+msgstr "Текущее имя пользователя"
+
+msgctxt "accounts.username_change"
+msgid "Yeni istifadəçi adı"
+msgstr "Новое имя пользователя"
+
+msgctxt "accounts.username_change"
+msgid "məs.: ad.soyad"
+msgstr "напр.: imya.familiya"
+
+msgctxt "accounts.username_change"
+msgid "Cari parol"
+msgstr "Текущий пароль"
+
+msgctxt "accounts.username_change"
+msgid "Dəyişikliyi təsdiqləmək üçün mövcud parolunuzu yazın."
+msgstr "Введите текущий пароль, чтобы подтвердить изменение."
+
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adını dəyiş"
+msgstr "Изменить имя пользователя"
+
+msgctxt "accounts.username_change.email"
+msgid "Hörmətli"
+msgstr "Уважаемый(-ая)"
+
+msgctxt "accounts.username_change.email"
+msgid "Kabinetə keç"
+msgstr "Перейти в кабинет"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "İmtahanı tələbə kimi yoxlayın — deaktiv olsa və ya tarixi çatmasa da işləyir. Bu cəhd nəticələrə sayılmır."
+msgstr "Пройдите экзамен как студент — работает, даже если экзамен неактивен или его дата ещё не наступила. Эта попытка не учитывается в результатах."
+
+msgctxt "appeals.template"
+msgid "İmtahan sonunda apellyasiya"
+msgstr "Апелляция сразу после экзамена"
+
+msgctxt "appeals.template"
+msgid "İmtahan yenicə bitdiyi üçün hər sualın variantlarını, öz cavabınızı və düzgün cavabı görürsünüz."
+msgstr "Поскольку экзамен только что завершился, вы видите варианты каждого вопроса, свой ответ и правильный ответ."
+
+#, python-format
+msgctxt "appeals.template"
+msgid "Bu imkan %(until)s-dək davam edir; sonradan verilən apellyasiyada yalnız suallar göstərilir."
+msgstr "Эта возможность действует до %(until)s; в апелляции, поданной позже, показываются только вопросы."
+
+msgctxt "appeals.template"
+msgid "Sonradan verilən apellyasiya — yalnız suallar"
+msgstr "Апелляция, поданная позже, — только вопросы"
+
+msgctxt "appeals.template"
+msgid "Bu rejimdə yalnız sualların mətni göstərilir: variantlar və düzgün cavab göstərilmir. Etiraz etdiyiniz sualı seçin və səbəbini yazın."
+msgstr "В этом режиме показывается только текст вопросов: варианты и правильный ответ не показываются. Выберите оспариваемый вопрос и напишите причину."
+
+msgctxt "appeals.template"
+msgid "Sonradan verilən apellyasiyada yalnız sualların mətni göstərilir — variantlar və düzgün cavab göstərilmir."
+msgstr "В апелляции, поданной позже, показывается только текст вопросов — варианты и правильный ответ не показываются."
+
+msgctxt "appeals.template"
+msgid "İmtahan sonunda verilib"
+msgstr "Подана сразу после экзамена"
+
+msgctxt "appeals.template"
+msgid "Sonradan verilib"
+msgstr "Подана позже"
+
+msgctxt "appeals.template"
+msgid "Tələbə müraciəti imtahan bitən kimi verib — formada variantları və düzgün cavabı görürdü."
+msgstr "Студент подал апелляцию сразу после экзамена — в форме были видны варианты и правильный ответ."
+
+msgctxt "appeals.template"
+msgid "Tələbə müraciəti sonradan verib — formada yalnız sualları görürdü."
+msgstr "Студент подал апелляцию позже — в форме были видны только вопросы."
+
+#, python-format
+msgctxt "exams.template.student_exam_result"
+msgid "İmtahan bitəndən sonrakı %(minutes)s dəqiqə ərzində (universitet şəbəkəsində) verilən apellyasiyada suallarla yanaşı variantları və düzgün cavabı da görəcəksiniz. Sonradan verilən apellyasiyada yalnız suallar göstərilir."
+msgstr "В апелляции, поданной в течение %(minutes)s минут после экзамена (в сети университета), вместе с вопросами вы увидите варианты и правильный ответ. В апелляции, поданной позже, показываются только вопросы."
+
+msgctxt "core.runtime_settings"
+msgid "İmtahan sonunda apellyasiya müddəti"
+msgstr "Срок апелляции сразу после экзамена"
+
+msgctxt "core.runtime_settings"
+msgid "Final/midterm bitdikdən sonra neçə dəqiqə ərzində, universitet şəbəkəsindən və imtahanı verdiyi sessiyadan verilən apellyasiyada tələbə sualla yanaşı variantları, öz cavabını və düzgün cavabı görür. Bundan sonra (məsələn, evdən) verilən apellyasiyada yalnız suallar göstərilir. 0 — bu rejim söndürülür (həmişə yalnız suallar)."
+msgstr "В течение скольких минут после окончания финала/промежуточного экзамена в апелляции, поданной из сети университета и из сессии, в которой сдавался экзамен, студент видит вместе с вопросом варианты, свой ответ и правильный ответ. В апелляции, поданной позже (например, из дома), показываются только вопросы. 0 — режим отключён (всегда только вопросы)."
+
+msgctxt "appeals.model.appeal.field"
+msgid "filed_onsite"
+msgstr "Подана сразу после экзамена"

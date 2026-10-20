@@ -9,7 +9,7 @@ from django.conf import settings
 from django.utils import timezone
 
 from apps.appeals.constants import APPEAL_WINDOW_DAYS
-from apps.exams.public import ATTEMPT_FINISHED_STATUSES, exam_answers_release_locked
+from apps.exams.public import ATTEMPT_FINISHED_STATUSES, SECURE_EXAM_CATEGORIES, exam_answers_release_locked
 
 # Apellyasiyaya icazə verilən attempt statusları (bitmiş cəhdlər) — exams
 # fasadındakı tək mənbədən törədilir.
@@ -73,7 +73,11 @@ def appeal_window_start(attempt):
     if getattr(exam, "results_hidden_from_students", False):
         return None
     if _is_auto_graded(attempt):
-        if exam_answers_release_locked(exam):
+        # 2026-10-20 (sahib): final/midterm cavab baxışı tələbəyə KİLİDLİ olsa belə apellyasiya pəncərəsi
+        # bal məlum olan an (avtomatik: təhvil) açılır — tələbə «sonradan» rejimində yalnız sualları görür
+        # (``services/onsite.py``). Açar kilidi yalnız digər kateqoriyalarda pəncərəni bağlayır.
+        category = str(getattr(exam, "exam_type_extended", "") or "")
+        if category not in SECURE_EXAM_CATEGORIES and exam_answers_release_locked(exam):
             return None
         start = finished
     elif not getattr(attempt, "checked_by_teacher", False):

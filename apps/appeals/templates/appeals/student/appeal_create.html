@@ -26,7 +26,9 @@ Sıra: komponentlər → apellyasiya düzümü (part1 → part2 → part3).{% en
 <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2.css' %}?v=20260908-calm">
 <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2b.css' %}?v=20260908-calm">
 <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part3.css' %}?v=20260908-calm">
-<link rel="stylesheet" href="{% static 'appeals/css/appeals/_part4.css' %}?v=20261013-keyfix">
+<link rel="stylesheet" href="{% static 'appeals/css/appeals/_part4.css' %}?v=20261020-mode">
+<link rel="stylesheet" href="{% static 'css/ems_ui/code_text.css' %}?v=20261020-appeal">
+<link rel="stylesheet" href="{% static 'appeals/css/appeals/appeal_mode.css' %}?v=20261020-mode">
 {% endblock %}
 
 {% block content %}
@@ -154,6 +156,32 @@ Sıra: komponentlər → apellyasiya düzümü (part1 → part2 → part3).{% en
     </div>
     {% endif %}
 
+    {# 2026-10-20 (sahib): verilmə rejimi — serverdə qərarlaşdırılır (apps/appeals/services/onsite.py). #}
+    {% if not hide_answer_details %}
+    <div class="ems-banner ems-banner--success appeal-banner appeal-mode-banner" role="note" data-appeal-mode="onsite">
+        <i class="fas fa-building-columns appeal-banner__icon" aria-hidden="true"></i>
+        <div>
+            <div class="ems-banner__title">{% trans "İmtahan sonunda apellyasiya" context "appeals.template" %}</div>
+            <div class="ems-banner__body">
+                {% trans "İmtahan yenicə bitdiyi üçün hər sualın variantlarını, öz cavabınızı və düzgün cavabı görürsünüz." context "appeals.template" %}
+                {% if appeal_onsite_until %}
+                {% blocktrans trimmed context "appeals.template" with until=appeal_onsite_until|date:"H:i" %}
+                    Bu imkan {{ until }}-dək davam edir; sonradan verilən apellyasiyada yalnız suallar göstərilir.
+                {% endblocktrans %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="ems-banner ems-banner--info appeal-banner appeal-mode-banner" role="note" data-appeal-mode="later">
+        <i class="fas fa-eye-slash appeal-banner__icon" aria-hidden="true"></i>
+        <div>
+            <div class="ems-banner__title">{% trans "Sonradan verilən apellyasiya — yalnız suallar" context "appeals.template" %}</div>
+            <div class="ems-banner__body">{% trans "Bu rejimdə yalnız sualların mətni göstərilir: variantlar və düzgün cavab göstərilmir. Etiraz etdiyiniz sualı seçin və səbəbini yazın." context "appeals.template" %}</div>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="ems-banner ems-banner--info appeal-banner" role="note">
         <i class="fas fa-circle-info appeal-banner__icon" aria-hidden="true"></i>
         <div>
@@ -202,10 +230,24 @@ Sıra: komponentlər → apellyasiya düzümü (part1 → part2 → part3).{% en
                      data-appeal-text="{{ delivered.text|striptags }}{% if not hide_answer_details %} {{ answer.text_answer|default_if_none:''|striptags }} {{ delivered.correct_answer|default_if_none:''|striptags }}{% endif %}">
                 <div class="appeal-question-card__top">
                     <div class="appeal-question-card__main">
-                        <p class="appeal-question-title">
+                        <div class="appeal-question-title appeal-question-title--stem">
                             <span class="appeal-question-number">{{ forloop.counter }}</span>
-                            <span>{{ delivered.text|striptags|truncatechars:190 }}</span>
-                        </p>
+                            {% if not delivered.image_replaces_text or not delivered.image_url %}
+                            <div class="appeal-question-stem">{{ answer.stem_html }}</div>
+                            {% endif %}
+                        </div>
+                        {% if delivered.image_url %}
+                        <div class="appeal-question-media">
+                            <img src="{{ delivered.image_url }}" alt="{% if delivered.image_replaces_text %}{{ delivered.text }}{% endif %}" loading="lazy" class="appeal-question-media__image">
+                        </div>
+                        {% endif %}
+                        {% if delivered.video_url %}
+                        <div class="appeal-question-media">
+                            <video controls preload="metadata" playsinline class="appeal-question-media__video">
+                                <source src="{{ delivered.video_url }}">
+                            </video>
+                        </div>
+                        {% endif %}
                         {% if hide_answer_details and not answers_release_locked and not hide_answer_verdicts and exam.exam_type == "test" %}
                         <div class="appeal-meta">
                             {% if answer.is_correct %}

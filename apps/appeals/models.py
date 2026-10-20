@@ -86,6 +86,13 @@ class Appeal(models.Model):
         blank=True,
         verbose_name=pgettext_lazy("appeals.model.appeal.field", "reviewer_note"),
     )
+    # 2026-10-20 (sahib): müraciət «imtahan sonunda» (qısa müddət, universitet şəbəkəsi, eyni sessiya —
+    # tələbə variantları və düzgün cavabı görürdü) yoxsa «sonradan» (yalnız suallar) verilib. YARADILMA
+    # anında serverdə qərarlaşdırılır və bir daha dəyişmir (bax ``services/onsite.py``).
+    filed_onsite = models.BooleanField(
+        default=False,
+        verbose_name=pgettext_lazy("appeals.model.appeal.field", "filed_onsite"),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

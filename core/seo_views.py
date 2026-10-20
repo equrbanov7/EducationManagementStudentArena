@@ -247,7 +247,12 @@ def sitemap_xml(request):
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
     ]
     seen: set[str] = set()
+    from core.academic_rules import contact_page_enabled
+
+    hidden = set() if contact_page_enabled() else {"contact"}  # sahib 2026-10-20: tənzimləmə ilə gizli
     for key, priority, changefreq in SITEMAP_ENTRIES:
+        if key in hidden:
+            continue
         path = _resolve(key)
         if not path or path in seen:
             continue

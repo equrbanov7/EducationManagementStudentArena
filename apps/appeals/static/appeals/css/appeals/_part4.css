@@ -157,3 +157,31 @@
     font-weight: 600;
     color: var(--ems-warning-800);
 }
+
+/* ── Verilmə rejimi nişanı (2026-10-20): «İmtahan sonunda verilib» / «Sonradan verilib» ──
+   Yalnız əməkdaş görünüşlərində (`_mode_badge.html`); status nişanı ilə yan-yana, telefonda sarılır. */
+.appeal-head__aside {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--ems-sp-2);
+}
+
+.appeal-mode-badge {
+    white-space: nowrap;
+}
+
+.appeal-table .appeal-mode-badge {
+    margin-top: var(--ems-sp-2);
+}
+
+@media (max-width: 575.98px) {
+    .appeal-head__aside {
+        justify-content: flex-start;
+    }
+
+    .appeal-mode-badge {
+        white-space: normal;
+    }
+}

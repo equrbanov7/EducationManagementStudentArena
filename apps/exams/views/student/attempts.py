@@ -25,6 +25,7 @@ from apps.exams.services.attempts import (
 from apps.exams.services.exam_network import exam_network_allowed
 from apps.exams.services.question_timer import question_timer_expired
 from apps.exams.services.start_intent import has_valid_start_intent
+from apps.exams.services.trial_run import is_trial_run_request
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 
 from ._answer_writes import TestAnswerWriteBatch, _save_test_answer_if_changed, _save_written_answer_if_changed
@@ -166,25 +167,26 @@ def start_exam(request, slug):
     İmtahan başlatma view-ı
     """
     ensure_student_exam_tenant_context(request)
-    # Deaktiv (qaralama) imtahan hamı üçün 404 olaraq qalır — YALNIZ imtahanın
-    # öz müəllifi istisnadır: o, "Sınaq keç" düyməsindən bura gəlir və boş 404
-    # əvəzinə səbəbi izah edən mesaj almalıdır. Tenant scope-u və soft-delete
-    # filtri `tenant_scoped_exams`-də olduğu kimi qalır.
+    # Tenant scope-u və soft-delete filtri `tenant_scoped_exams`-də olduğu kimi qalır; deaktiv
+    # imtahan da tapılır ki, «Sınaq keç» onu aça bilsin (aşağıda).
     exam = get_object_or_404(tenant_scoped_exams(request, Exam.objects.all()), slug=slug)
+    # 2026-10-20 (sahib): «Sınaq keç» (``?trial=1`` + sınaq icazəsi — müəllif və ya sualları idarə
+    # edən imtahan mərkəzi) deaktiv imtahanda, başlanğıc tarixi çatmamış və ya bitmiş imtahanda da
+    # işləyir; final/midterm qapıları (şəbəkə, PIN, gündə bir rəsmi imtahan, qayıb buraxılışı) sınağa
+    # tətbiq olunmur — sınaq nəticəyə sayılmır. Qalan hamı üçün (tələbənin öz ``?trial=1``-i daxil)
+    # yol əvvəlki kimi sərtdir: deaktiv → 404, tarixlər yoxlanılır. Bax services/trial_run.py.
+    trial = is_trial_run_request(request, exam)
     # 2026-10-13 (gecə): final/midterm yalnız universitet şəbəkəsindən (müəllif azaddır) — start
     # niyyəti/təsdiq səhifəsi də kənardan açılmır (bax services/exam_network.py).
-    if not exam_network_allowed(request, exam):
+    if not trial and not exam_network_allowed(request, exam):
         return exam_network_blocked_response(request, exam, where="start_exam", has_attempt=False)
-    if not exam.is_active:
-        if exam.author_id != request.user.id:
-            raise Http404("Exam is not active.")
-        messages.error(request, pgettext("exams.view.access.message", "exam_inactive_trial_blocked"))
-        return redirect(resolve_author_failure_redirect(request, exam))
+    if not exam.is_active and not trial:
+        raise Http404("Exam is not active.")
 
     # İcazə yoxlaması
-    can_start, reason = exam.can_user_start(request.user, code=None)
+    can_start, reason = exam.can_user_start(request.user, code=None, trial=trial)
     if not can_start:
-        attempt_limit_result_url = get_attempt_limit_result_redirect_url(request, exam, request.user)
+        attempt_limit_result_url = "" if trial else get_attempt_limit_result_redirect_url(request, exam, request.user)
         if attempt_limit_result_url:
             messages.info(
                 request,
@@ -194,6 +196,8 @@ def start_exam(request, slug):
             )
             return redirect(attempt_limit_result_url)
         messages.error(request, reason or pgettext("exams.view.access.message", "exam_start_not_allowed"))
+        if trial:
+            return redirect(resolve_author_failure_redirect(request, exam))
         return redirect(resolve_exam_failure_redirect(request))
 
     if not exam.questions.filter(is_active=True).exists():
@@ -203,9 +207,10 @@ def start_exam(request, slug):
         return redirect(resolve_author_failure_redirect(request, exam))
 
     # Elektron jurnal buraxılış qapısı: qayıb limiti keçilibsə start olmaz (no-op if unlinked).
+    # Sınaq cəhdi jurnala yazılmır — qapı ona aid deyil.
     from apps.exams.services.journal_sync import registrar_block_reason
 
-    block_reason = registrar_block_reason(request, exam)
+    block_reason = None if trial else registrar_block_reason(request, exam)
     if block_reason:
         messages.error(request, block_reason)
         return redirect(resolve_exam_failure_redirect(request))
@@ -218,7 +223,8 @@ def start_exam(request, slug):
         and not has_valid_start_intent(request, exam)
         and get_active_attempt_for_user(exam, request.user) is None
     ):
-        context = {"exam": exam, "back_url": resolve_exam_failure_redirect(request)}
+        back_url = resolve_author_failure_redirect(request, exam) if trial else resolve_exam_failure_redirect(request)
+        context = {"exam": exam, "back_url": back_url}
         return render(request, "exams/student/exam_start_confirm.html", context)
     return _start_or_resume_attempt(request, exam)
 

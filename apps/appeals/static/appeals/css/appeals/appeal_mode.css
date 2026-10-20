@@ -1,0 +1,50 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   appeals/appeal_mode.css — apellyasiya verilmə rejimi (sahib 2026-10-20)
+
+   * «İmtahan sonunda» / «Sonradan» rejim bannerinin kiçik düzəlişləri;
+   * sual gövdəsi TAM (kod blokları `ems-code`, şəkil, video) — «sonradan» rejimində tələbə
+     yalnız bunu görür, ona görə qısaldılmış başlıq kifayət etmir;
+   Reviewer nişanı (`.appeal-mode-badge`) kabinetdə də lazımdır → `_part4.css`.
+   Mobil-öncəlikli: media eni konteynerə sığır, üfüqi sürüşmə yoxdur.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.appeal-question-title--stem {
+    font-weight: 500;
+}
+
+.appeal-question-stem {
+    min-width: 0;
+    flex: 1 1 auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.appeal-question-stem .ems-code {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.appeal-question-media {
+    margin-top: var(--ems-sp-4);
+}
+
+.appeal-question-media__image,
+.appeal-question-media__video {
+    display: block;
+    max-width: 100%;
+    max-height: 420px;
+    height: auto;
+    border: 1px solid var(--appeal-border, var(--ems-neutral-200));
+    border-radius: var(--ems-r-md);
+}
+
+.appeal-mode-banner .ems-banner__body {
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 575.98px) {
+    .appeal-question-media__image,
+    .appeal-question-media__video {
+        max-height: 280px;
+    }
+}

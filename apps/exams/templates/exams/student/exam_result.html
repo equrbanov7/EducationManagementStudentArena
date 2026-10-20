@@ -229,6 +229,15 @@ təhlili → digər cəhdlər (desktopda cədvəl, telefonda kart). Bütün aça
                 {% endblocktrans %}
             </small>
             {% endif %}
+            {% if can_appeal and appeal_onsite_minutes_hint %}
+            {# 2026-10-20 (sahib): imtahan bitən kimi verilən apellyasiyada düzgün cavablar da görünür; sonradan — yalnız suallar. #}
+            <small class="result-action-panel__deadline" data-appeal-onsite-hint>
+                <i class="fas fa-building-columns" aria-hidden="true"></i>
+                {% blocktrans trimmed context "exams.template.student_exam_result" with minutes=appeal_onsite_minutes_hint %}
+                    İmtahan bitəndən sonrakı {{ minutes }} dəqiqə ərzində (universitet şəbəkəsində) verilən apellyasiyada suallarla yanaşı variantları və düzgün cavabı da görəcəksiniz. Sonradan verilən apellyasiyada yalnız suallar göstərilir.
+                {% endblocktrans %}
+            </small>
+            {% endif %}
         </div>
         <div class="result-action-panel__actions">
             {% if can_appeal %}
