@@ -275,8 +275,8 @@ class ViewAsMiddleware:
     """
 
     SAFE_METHODS = {"GET", "HEAD", "OPTIONS", "TRACE"}
-    #: Hər iki rejimdə bloklanan həssas `profile_form` POST dəyərləri.
-    BLOCKED_PROFILE_FORMS = {"change-password", "update-avatar", "edit-profile"}
+    #: Hər iki rejimdə bloklanan həssas `profile_form` POST dəyərləri (2026-10-20: + istifadəçi adı).
+    BLOCKED_PROFILE_FORMS = {"change-password", "update-avatar", "edit-profile", "change-username"}
     #: Hesab ələ keçirmə yolları — view-as altında HƏR İKİ rejimdə bloklanır.
     #: İlk-giriş axını (parol təyini + e-poçt OTP) hədəfin kimlik sübutudur:
     #: aktor onu keçsə, hədəfin parolunu təyin edib hesabı tam ələ keçirə bilər.

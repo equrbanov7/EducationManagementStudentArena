@@ -1,0 +1,76 @@
+{% load i18n static username_change_tags %}
+{% comment %}
+2026-10-20 (sahib: «hər kəs öz username-ni dəyişə bilər — profil redaktədə hissə qoy»).
+ * Ayrıca forma (`profile_form=change-username`) — əsas «Yadda saxla» panelinə aid DEYİL; adi POST → redirect,
+   nəticə `messages` ilə göstərilir. Qayda / yoxlama / audit: services/username_change.py.
+ * «Sistem tənzimləmələri» → `profile.username_change_enabled` söndürülübsə kart render olunmur;
+   gözləmə müddəti bitməyibsə sahələr bağlıdır və növbəti tarix göstərilir.
+ * Təsdiq dialoqu deklarativdir (`data-ems-confirm`, static/js/csp_event_handlers.js) — ayrıca JS yoxdur.
+{% endcomment %}
+{% username_change_state as uc %}
+{% if uc.enabled %}
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_username.css' %}?v=20261020-1">
+<div class="section-card edit-profile-username" id="usernameChangeCard">
+    <h2 class="section-card__title">
+        <i class="fas fa-at" aria-hidden="true"></i>
+        {% trans 'İstifadəçi adı' context 'accounts.username_change' %}
+    </h2>
+    <p class="settings-note">
+        <i class="fas fa-circle-info" aria-hidden="true"></i>
+        {% blocktrans trimmed with min=uc.min_length max=uc.max_length context 'accounts.username_change' %}
+        {{ min }}–{{ max }} simvol: latın hərfləri (a–z), rəqəmlər, nöqtə, alt xətt və defis; hərflə başlayır. Dəyişiklikdən sonra sistemə yeni adla və ya e-poçtunuzla daxil olursunuz, köhnə ad işləmir.
+        {% endblocktrans %}
+        {% if uc.cooldown_days %}
+        {% blocktrans trimmed with days=uc.cooldown_days context 'accounts.username_change' %}
+        Növbəti dəyişikliyə qədər gözləmə müddəti: {{ days }} gün.
+        {% endblocktrans %}
+        {% endif %}
+    </p>
+
+    {% if uc.locked_until %}
+    <p class="edit-profile-locked-note">
+        <i class="fas fa-clock" aria-hidden="true"></i>
+        {% blocktrans trimmed with date=uc.locked_until context 'accounts.username_change' %}
+        İstifadəçi adını yenidən {{ date }} tarixindən sonra dəyişə bilərsiniz.
+        {% endblocktrans %}
+    </p>
+    {% endif %}
+
+    {% trans 'İstifadəçi adınız dəyişdiriləcək. Bundan sonra sistemə yalnız yeni adla və ya e-poçtunuzla daxil ola biləcəksiniz. Davam edilsin?' context 'accounts.username_change' as confirm_text %}
+    <form method="post" class="edit-profile-username__form" autocomplete="off">
+        {% csrf_token %}
+        <input type="hidden" name="profile_form" value="change-username">
+        <input type="hidden" name="section" value="edit-profile">
+        <div class="info-grid profile-form-grid">
+            <div class="info-item info-item--locked">
+                <div class="info-label"><i class="fas fa-user" aria-hidden="true"></i> {% trans 'Cari istifadəçi adı' context 'accounts.username_change' %}</div>
+                <div class="info-value info-value--readonly">{{ uc.current }}</div>
+            </div>
+            <div class="info-item">
+                <label class="info-label" for="new_username">{% trans 'Yeni istifadəçi adı' context 'accounts.username_change' %} *</label>
+                <input type="text" class="form-control" id="new_username" name="new_username"
+                       minlength="{{ uc.min_length }}" maxlength="{{ uc.max_length }}" required
+                       autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"
+                       placeholder="{% trans 'məs.: ad.soyad' context 'accounts.username_change' %}"
+                       {% if uc.locked_until %}disabled{% endif %}>
+            </div>
+            <div class="info-item">
+                <label class="info-label" for="username_current_password">{% trans 'Cari parol' context 'accounts.username_change' %} *</label>
+                <input type="password" class="form-control" id="username_current_password" name="current_password"
+                       required autocomplete="current-password" {% if uc.locked_until %}disabled{% endif %}>
+                <div class="edit-profile-field-hint">
+                    <i class="fas fa-lock" aria-hidden="true"></i>
+                    {% trans 'Dəyişikliyi təsdiqləmək üçün mövcud parolunuzu yazın.' context 'accounts.username_change' %}
+                </div>
+            </div>
+        </div>
+        <div class="edit-profile-username__actions">
+            <button type="submit" class="ems-btn ems-btn--primary"
+                    data-ems-confirm="{{ confirm_text }}" data-ems-confirm-danger="false"
+                    {% if uc.locked_until %}disabled{% endif %}>
+                <i class="fas fa-check" aria-hidden="true"></i> {% trans 'İstifadəçi adını dəyiş' context 'accounts.username_change' %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endif %}

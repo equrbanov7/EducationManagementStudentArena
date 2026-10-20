@@ -1,0 +1,24 @@
+/* «İstifadəçi adı» kartı — profil redaktəsi (sahib 2026-10-20).
+   Kart / sahə üslubu qonşu kartlarla eynidir (section-card, info-grid, edit_profile_v2.css);
+   burada yalnız düymə sırası. */
+
+.edit-profile-username {
+    margin-bottom: 20px;
+}
+
+.edit-profile-username .info-item input.form-control {
+    margin-top: 2px;
+}
+
+.edit-profile-username__actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+}
+
+@media (max-width: 575.98px) {
+    .edit-profile-username__actions .ems-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

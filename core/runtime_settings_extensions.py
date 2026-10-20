@@ -11,6 +11,8 @@ import importlib
 _MODULES = (
     "core.runtime_settings_hr_contracts",  # «Əmək müqavilələri» (2026-10-19)
     "core.runtime_settings_site",  # «Açıq səhifələr» (2026-10-20)
+    "core.runtime_settings_username",  # «profile» qrupuna istifadəçi adı açarları (2026-10-20)
+    "core.runtime_settings_appeals",  # «exam» qrupuna «imtahan sonunda» apellyasiya açarı (2026-10-20)
 )
 
 

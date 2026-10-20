@@ -259,6 +259,9 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
         </div>
     </div>
 
+    {# 2026-10-20: öz istifadəçi adını dəyişmək — ayrıca forma, «Sistem tənzimləmələri» ilə idarə olunur. #}
+    {% include "accounts/profile/sections/_username_change_card.html" %}
+
     {# ── Qeyd əlavə et / redaktə et modalı (overlay + fon scroll kilidi Bootstrap-dadır) ── #}
     <div class="modal fade" id="academicItemModal" tabindex="-1" aria-hidden="true" aria-labelledby="academicItemModalTitle"
          data-label-create="{% trans 'Yeni qeyd' context 'profile.academic_items' %}"
