@@ -42,6 +42,9 @@ def _window_end_applies(attempt) -> bool:
     started = attempt.started_at
     if not end or not started or getattr(attempt, "room_id", None):
         return False
+    # 2026-10-20 (sahib): müəllimin «Sınaq keç»i imtahanın tarix pəncərəsindən asılı deyil — yalnız öz müddəti.
+    if getattr(attempt, "is_trial", False):
+        return False
     return end > started
 
 

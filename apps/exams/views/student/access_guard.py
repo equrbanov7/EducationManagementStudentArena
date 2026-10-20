@@ -39,14 +39,24 @@ def active_attempt_access_denial_reason(attempt, user, *, user_excluded=None):
         return None
 
     exam = attempt.exam
-    if not exam.is_active or exam.is_archived or getattr(exam, "is_deleted", False):
+    if exam.is_archived or getattr(exam, "is_deleted", False):
         return pgettext("exams.model.access", "exam_not_active")
+    # 2026-10-20 (sahib): «Sınaq keç» cəhdi deaktiv (qaralama) imtahanda da davam edir — yalnız
+    # cəhdin sahibi sınaq icazəsini hələ daşıyırsa (bax services/trial_run.py). Adi cəhd üçün
+    # deaktivləşdirmə əvvəlki kimi yazını dərhal bağlayır. Sınaq yoxlaması yalnız deaktiv
+    # imtahanda işləyir — aktiv imtahanın autosave qaynar yoluna sorğu əlavə olunmur.
+    if not exam.is_active:
+        from apps.exams.services.trial_run import trial_attempt_ignores_exam_state
+
+        if not trial_attempt_ignores_exam_state(attempt, user):
+            return pgettext("exams.model.access", "exam_not_active")
 
     # Perf 2026-10-06: müəllif müqayisəsi id ilə — `exam.author` obyektini
     # yükləmək üçün ayrıca `auth_user` sorğusu getmir (Model `==` də pk müqayisəsidir).
     user_pk = getattr(user, "pk", None)
     is_author = user_pk is not None and user_pk == exam.author_id
-    if not is_author:
+    # Sınaq cəhdi yalnız sınaq icazəli istifadəçi tərəfindən yaranır (start yolu) — exclusion ona aid deyil.
+    if not is_author and not getattr(attempt, "is_trial", False):
         if user_excluded is None:
             user_excluded = exam.excluded_users.filter(pk=user_pk).exists()
         if user_excluded:
