@@ -29,6 +29,7 @@ from apps.exams.domain.final_center import (
     FinalExamTicket,
 )
 from apps.exams.models import StudentExamAttemptGrant
+from apps.exams.services.center_exams import CENTER_EXAM_KINDS
 from apps.exams.services.student_pins import exam_requires_student_pins, reissue_student_pin
 from core.audit import log_action
 from core.constants import AuditAction
@@ -129,7 +130,9 @@ def grant_second_chance(*, exam, students, extra=1, granted_by=None, request=Non
         if exam_requires_student_pins(exam):
             if reissue_student_pin(exam, student):
                 pins_reissued += 1
-        if exam.exam_type_extended == "final":
+        # 2026-10-20: midterm də zal axını ilə verilə bilir — bitmiş zal bileti (final/midterm) sıfırlanmasa
+        # tələbə yenidən zala girə bilmir (``ensure_pin_ticket``: «artıq bitirmisiniz»).
+        if exam.exam_type_extended in CENTER_EXAM_KINDS:
             if _reset_final_ticket(exam, student):
                 tickets_reset += 1
 

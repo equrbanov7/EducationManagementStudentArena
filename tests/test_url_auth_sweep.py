@@ -39,6 +39,7 @@ PUBLIC_ALLOWLIST = {
     # Bunlar qəsdən anonimdir — tələbə imtahan otağında hesabla deyil, biletlə
     # daxil olur. Qorunma PIN yoxlaması + kompüter/MAC qapısındadır.
     "exams:final_exam_entry",  # /exams/final/
+    "exams:midterm_exam_entry",  # /exams/midterm/ — final girişinin əkizi (2026-10-20)
     "liveExam:pin_entry",  # /live/
     "verification:home",  # /yoxla/ — publik sənəd yoxlaması (QR), girişsiz; sürət limiti + noindex
     # ── Operativ problar (monitorinq autentifikasiyasız vurur) ──────────────

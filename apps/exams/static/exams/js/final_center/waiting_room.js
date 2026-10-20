@@ -1,5 +1,5 @@
 /**
- * Final imtahan gözləmə otağı.
+ * İmtahan mərkəzi (final/midterm) gözləmə otağı.
  *
  * - WebSocket əsas kanaldır (yüksək tezlikli polling YOXDUR).
  * - Reconnect: eksponensial backoff + jitter.
@@ -19,6 +19,8 @@
     var beginUrl = root.dataset.beginUrl;
     var heartbeatMs = (parseInt(root.dataset.heartbeatSeconds, 10) || 30) * 1000;
     var sessionAlreadyActive = root.dataset.sessionActive === "1";
+    // 2026-10-20: giriş səhifəsi imtahan növünə görədir (/exams/final/ və ya /exams/midterm/).
+    var entryUrl = root.dataset.entryUrl || "/exams/final/";
 
     var connEl = document.getElementById("fexc-conn-state");
     var msgEl = document.getElementById("fexc-wait-message");
@@ -162,7 +164,7 @@
                 break;
             case "credential_rotated":
                 finished = true;
-                window.location.replace("/exams/final/");
+                window.location.replace(entryUrl);
                 break;
             default:
                 break;
@@ -196,7 +198,7 @@
                     if (resp.status === 403) {
                         finished = true;
                         stopFallbackPolling();
-                        window.location.replace("/exams/final/");
+                        window.location.replace(entryUrl);
                         return null;
                     }
                     return resp.json();
@@ -254,7 +256,7 @@
             if (evt && evt.code === 4403) {
                 finished = true;
                 stopFallbackPolling();
-                window.location.replace("/exams/final/");
+                window.location.replace(entryUrl);
                 return;
             }
             setConn("offline", i18n.reconnecting);

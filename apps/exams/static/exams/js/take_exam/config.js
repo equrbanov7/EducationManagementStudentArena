@@ -59,7 +59,8 @@
             var examId = examForm.dataset.examId;
             var attemptId = examForm.dataset.attemptId;
             var defaultAutoSaveIntervalMs = 300000;
-            var isFinalExam = examForm.dataset.examTypeExtended === "final";
+            // 2026-10-20: zal (mərkəz) midterm-i də final kimi — sürətli autosave, jitter-siz.
+            var isFinalExam = examForm.dataset.examTypeExtended === "final" || examForm.dataset.centerExam === "1";
             var serverAutoSaveIntervalMs = Math.max(
                 10000,
                 parseInt(examForm.dataset.autosaveIntervalMs || String(defaultAutoSaveIntervalMs), 10) ||

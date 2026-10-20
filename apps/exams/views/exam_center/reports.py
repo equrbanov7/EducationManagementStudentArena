@@ -12,6 +12,7 @@ from django.utils.http import content_disposition_header
 from django.utils.translation import pgettext
 
 from apps.exams.models import Exam, ExamRoom, ExamRoomSession
+from apps.exams.services.center_exams import CENTER_EXAM_KINDS, kind_label
 from apps.exams.services.final_center import (
     build_final_report_workbook,
     filter_sessions,
@@ -67,7 +68,8 @@ def exam_center_reports(request):
     query_string.pop("page", None)
     # "Sıfırla" düyməsi yalnız faktiki filtr varsa göstərilir (tab/page filtr deyil).
     has_filters = any(
-        (request.GET.get(key) or "").strip() for key in ("state", "room", "exam", "status", "date_from", "date_to", "q")
+        (request.GET.get(key) or "").strip()
+        for key in ("state", "room", "exam", "kind", "status", "date_from", "date_to", "q")
     )
 
     return render(
@@ -83,6 +85,8 @@ def exam_center_reports(request):
             "extra_query": query_string.urlencode(),
             "has_filters": has_filters,
             "kpis": _report_kpis(tab, queryset),
+            # 2026-10-20: midterm də zal axınındadır — növ filtri (Final / Midterm).
+            "kind_options": [(kind, kind_label(kind)) for kind in ("final", "midterm")],
         },
     )
 
@@ -153,6 +157,10 @@ def _filter_summary(params, organization):
         exam = Exam.objects.filter(organization=organization, pk=int(exam_id)).first()
         if exam:
             rows.append((pgettext("exams.final_center.report", "İmtahan"), exam.title))
+
+    kind = (params.get("kind") or "").strip()
+    if kind in CENTER_EXAM_KINDS:
+        rows.append((pgettext("exams.final_center.report", "İmtahan növü"), kind_label(kind)))
 
     status = (params.get("status") or "").strip()
     if status:

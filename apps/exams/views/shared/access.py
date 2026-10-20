@@ -14,6 +14,13 @@ from apps.exams.services.attempts import (
     get_attempt_limit_result_redirect_url,
     get_effective_max_attempts,
 )
+from apps.exams.services.center_exams import (
+    FINAL_KIND,
+    center_entry_required_message,
+    exam_kind,
+    is_center_exam,
+    legacy_open_attempt,
+)
 from apps.exams.services.exam_network import exam_network_allowed, exam_network_denied_message, record_network_denial
 from apps.exams.services.final_center import admission_block_reason
 from apps.exams.views.shared.tenant import tenant_scoped_exams
@@ -103,11 +110,20 @@ def exam_code_check(request):
     # ilə həmin qapıların hamısını keçib istənilən IP-dən cəhd yaradırdı.
     # Müəllif «Sınaq keç» yolu (is_trial) `start_exam`-dan gedir — burada
     # istisna lazım deyil.
-    if getattr(exam, "exam_type_extended", None) == "final" and request.user != exam.author:
-        return _code_check_failure(
-            request,
-            pgettext("exams.view.access.message", "final_exam_requires_center_entry"),
-        )
+    # 2026-10-20 (sahib): midterm də (``exam.midterm_via_center`` yandırılıbsa) final kimi YALNIZ zal
+    # axını ilə (`/exams/midterm/`) başlayır — ``center_exams.is_center_exam`` yeganə mənbədir. İSTİSNA:
+    # açar yandırılmazdan əvvəl kabinetdən başlamış, hələ açıq midterm cəhdi normal bitir (davam).
+    if is_center_exam(exam) and request.user != exam.author:
+        legacy_attempt = legacy_open_attempt(exam, request.user)
+        if legacy_attempt is not None:
+            response = redirect("exams:take_exam", slug=exam.slug, attempt_id=legacy_attempt.pk)
+            return _json_redirect_response(response) if _is_ajax_request(request) else response
+        if exam_kind(exam) == FINAL_KIND:
+            return _code_check_failure(
+                request,
+                pgettext("exams.view.access.message", "final_exam_requires_center_entry"),
+            )
+        return _code_check_failure(request, center_entry_required_message(exam))
 
     can_start, reason = exam.can_user_start(request.user, code=code)
     if not can_start:

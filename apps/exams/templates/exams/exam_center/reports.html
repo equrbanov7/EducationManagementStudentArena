@@ -117,6 +117,17 @@
         </div>
       </div>
       <div class="ems-field">
+        <label class="ems-field__label" for="fxc-f-kind">{% trans "İmtahan növü" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="fxc-f-kind" name="kind" class="ems-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+          <option value="">{% trans "Hamısı" %}</option>
+          {% for value, label in kind_options %}
+          <option value="{{ value }}" {% if params.kind == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        </div>
+      </div>
+      <div class="ems-field">
         <label class="ems-field__label" for="fxc-f-from">{% trans "Tarixdən" %}</label>
         <input type="date" id="fxc-f-from" name="date_from" value="{{ params.date_from }}" class="ems-input ems-input--date">
       </div>
@@ -233,7 +244,7 @@
         <tr>
           <th scope="row" class="fxc-strong">{{ t.student.get_full_name|default:t.student.username }}
             <span class="fxc-muted">({{ t.student.username }})</span></th>
-          <td>{{ t.exam.title }}</td>
+          <td>{{ t.exam.title }} <span class="fxc-muted">· {{ t.exam.get_exam_type_extended_display }}</span></td>
           <td>{{ t.session.room.name }}</td>
           <td><span class="fxc-pill fxc-pill--t-{{ t.status }}">{{ t.get_status_display }}</span></td>
           <td>{{ t.language|default:"—" }}</td>

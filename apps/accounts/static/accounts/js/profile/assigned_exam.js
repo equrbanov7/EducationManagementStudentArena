@@ -63,6 +63,15 @@
             var pin = trigger.getAttribute("data-final-pin") || "";
             var entryOpen = trigger.getAttribute("data-final-entry-open") === "1";
             assignedExamModalFinalEntryUrl = trigger.getAttribute("data-final-entry-url") || "";
+            // 2026-10-20: midterm də zal axınındadır — xəbərdarlıq mətni imtahan növünə görə serverdən gəlir.
+            var noticeEl = document.getElementById("assignedExamFinalNotice");
+            if (noticeEl) {
+                if (!noticeEl.hasAttribute("data-default-text")) {
+                    noticeEl.setAttribute("data-default-text", noticeEl.textContent);
+                }
+                noticeEl.textContent =
+                    trigger.getAttribute("data-center-notice") || noticeEl.getAttribute("data-default-text");
+            }
 
             if (assignedExamFinalBlock) {
                 assignedExamFinalBlock.hidden = false;

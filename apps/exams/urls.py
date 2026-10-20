@@ -14,6 +14,8 @@ urlpatterns = [
     # PIN yoxlamasından sonra HƏMİN səhifədə imtahan-öncəsi məlumat/qaydalar
     # modalı açılır → təsdiq → gözləmə otağı → nəzarətçi start-ı → attempt.
     path("final/", views.final_exam_entry, name="final_exam_entry"),
+    # 2026-10-20 (sahib): midterm də final kimi zal axını ilə — giriş ayrıca, gözləmə otağı URL-ləri ortaqdır.
+    path("midterm/", views.midterm_exam_entry, name="midterm_exam_entry"),
     path("final/waiting/<int:ticket_id>/", views.final_exam_waiting, name="final_exam_waiting"),
     path("final/waiting/<int:ticket_id>/cancel/", views.final_exam_cancel, name="final_exam_cancel"),
     path("final/waiting/<int:ticket_id>/begin/", views.final_exam_begin, name="final_exam_begin"),

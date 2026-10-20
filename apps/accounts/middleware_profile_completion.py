@@ -85,6 +85,7 @@ class ProfileCompletionMiddleware:
             "student_exam_history",
             "exam_code_check",
             "final_exam_entry",
+            "midterm_exam_entry",
             "final_exam_waiting",
             "final_exam_cancel",
             "final_exam_begin",

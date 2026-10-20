@@ -11,7 +11,7 @@ Qərar HƏMİŞƏ serverdə, bu modulda verilir; şablon yalnız nəticəni gös
     müddəti ``finished_at``-dan hələ keçməyib;
   - sorğu universitet şəbəkəsindəndir (imtahanın özü ilə EYNİ qayda — ``exam_network_allowed``);
   - **eyni sessiya**: bu sessiya həmin cəhdin təhvildən sonrakı nəticə ekranını görüb
-    (``post_finish_result_seen``) — və ya final mərkəzinin 5 dəqiqəlik nəticə baxışı hələ gedir
+    (``post_finish_result_seen``) — və ya mərkəzin (final/midterm) 5 dəqiqəlik nəticə baxışı hələ gedir
     (nəticə səhifəsi açarı onsuz da həmin anda göstərir, ``secure_answer_key_hidden``).
 * **sonradan** — qalan bütün hallar: forma/detal yalnız sualın mətnini (şəkil/video/kod blokları
   daxil) göstərir; variantlar, tələbənin seçimi, düzgün cavab, ideal cavab serverdən ÖTÜRÜLMÜR.
@@ -30,6 +30,7 @@ from django.utils import timezone
 
 from apps.exams.public import (
     attempt_answer_key_hidden,
+    attempt_in_center,
     exam_answers_release_locked,
     exam_network_allowed,
     post_finish_result_seen,
@@ -80,8 +81,11 @@ def remember_onsite_form(request, attempt):
 
 
 def _final_center_review_active(request, attempt, *, is_profile_results, now):
-    """Final mərkəzinin təhvildən sonrakı 5 dəqiqəlik nəticə baxışı (kabinet rejimi deyil)."""
-    if is_profile_results or getattr(attempt.exam, "exam_type_extended", "") != "final":
+    """Mərkəzin (final; açar yandırılıbsa zal girişli midterm) təhvildən sonrakı 5 dəqiqəlik nəticə baxışı.
+
+    2026-10-20: midterm də imtahan mərkəzi axını ilə verilir — zal girişindən yaranmış midterm cəhdinin
+    nəticə baxışı final kimi «imtahan sonunda» sayılır (``attempt_in_center``; kabinet rejimi deyil)."""
+    if is_profile_results or not attempt_in_center(attempt):
         return False
     return not secure_answer_key_hidden(attempt, is_profile_results=False, now=now)
 

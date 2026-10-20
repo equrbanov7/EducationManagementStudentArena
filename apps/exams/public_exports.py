@@ -21,6 +21,12 @@ from .navigation import current_return_to  # noqa: F401
 from .services.access_policy import SECURE_EXAM_CATEGORIES  # noqa: F401
 from .services.access_policy import is_exam_center_user  # noqa: F401
 from .services.ai_summary import generate_appeal_statistics_summary  # noqa: F401
+from .services.center_exams import CENTER_EXAM_KINDS  # noqa: F401
+from .services.center_exams import attempt_in_center  # noqa: F401
+from .services.center_exams import cabinet_center_notice  # noqa: F401
+from .services.center_exams import is_center_exam  # noqa: F401
+from .services.center_exams import entry_url_for_exam as center_entry_url_for_exam  # noqa: F401
+from .services.center_exams import legacy_open_attempt as legacy_open_center_attempt  # noqa: F401
 from .services.exam_network import exam_network_allowed  # noqa: F401
 from .services.exam_network import exam_network_denied_message  # noqa: F401
 from .services.final_center import clear_entry_session  # noqa: F401
@@ -34,6 +40,12 @@ from .views.student._helpers import ensure_student_exam_tenant_context  # noqa: 
 
 __all__ = [
     "ATTEMPT_FINISHED_STATUSES",
+    "CENTER_EXAM_KINDS",
+    "attempt_in_center",
+    "cabinet_center_notice",
+    "center_entry_url_for_exam",
+    "is_center_exam",
+    "legacy_open_center_attempt",
     "EXAM_LANGUAGE_CHOICES",
     "ExamRoomForm",
     "QUESTION_EXAM_KIND_CHOICES",

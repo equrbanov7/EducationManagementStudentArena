@@ -5,7 +5,7 @@ Bütün sorğular ``select_related`` ilə optimallaşdırılıb; siyahılar view
 qatında paginator-a verilir (yaddaşa tam yüklənmir).
 """
 
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
 from django.utils.dateparse import parse_date
 
 from apps.exams.models import ExamRoomSession, FinalExamTicket
@@ -22,10 +22,19 @@ def _report_date(params, key):
         return None
 
 
+def _report_kind(params):
+    """``kind`` filtri — yalnız mərkəz növləri (final/midterm); qalan dəyər nəzərə alınmır."""
+    from apps.exams.services.center_exams import CENTER_EXAM_KINDS
+
+    kind = (params.get("kind") or "").strip()
+    return kind if kind in CENTER_EXAM_KINDS else ""
+
+
 def filter_sessions(organization, params):
     """
     Zal oturumu tarixçəsi (imtahandan asılı deyil). Filtrlər: state, room (id),
-    invigilator (id), tarix aralığı (date_from/date_to, ISO), axtarış (q — zal).
+    invigilator (id), tarix aralığı (date_from/date_to, ISO), axtarış (q — zal),
+    kind (2026-10-20 — oturumda həmin növdən, final/midterm, ən azı bir bilet olsun).
     """
     qs = (
         ExamRoomSession.objects.filter(organization=organization)
@@ -51,6 +60,9 @@ def filter_sessions(organization, params):
     room_q = tolerant_q(query, ("room__name", "room__code"), compact=True)
     if room_q is not None:
         qs = qs.filter(room_q)
+    kind = _report_kind(params)
+    if kind:
+        qs = qs.filter(Exists(FinalExamTicket.objects.filter(session_id=OuterRef("pk"), exam__exam_type_extended=kind)))
     return session_list_annotations(qs)
 
 
@@ -96,6 +108,9 @@ def filter_tickets(organization, params):
     removal = (params.get("removal") or "").strip()
     if removal:
         qs = qs.filter(removal_action=removal)
+    kind = _report_kind(params)
+    if kind:
+        qs = qs.filter(exam__exam_type_extended=kind)
     date_from = _report_date(params, "date_from")
     if date_from:
         qs = qs.filter(

@@ -21,6 +21,7 @@ from django.views.decorators.http import require_GET
 
 from apps.exams.domain.final_center import TICKET_STATUS_ASSIGNED
 from apps.exams.models import ExamStudentPin, FinalExamTicket
+from apps.exams.services.center_exams import active_center_kinds, exam_kind, kind_label
 from apps.exams.services.final_center import decrypt_ticket_pin
 from apps.exams.services.student_pins import decrypt_student_pin_row
 from apps.organizations.public import organization_role_user_queryset
@@ -153,7 +154,7 @@ def _device_change_urls(organization, student) -> dict:
         ExamAttempt.objects.filter(
             user=student,
             exam__organization=organization,
-            exam__exam_type_extended="final",
+            exam__exam_type_extended__in=sorted(active_center_kinds()),
             status__in=("draft", "in_progress"),
             is_trial=False,
         ).values_list("exam_id", "id")
@@ -200,6 +201,9 @@ def exam_center_student_pins(request, student_id):
         items.append(
             {
                 "exam_title": ticket.exam.title,
+                # 2026-10-20: midterm də zal axınındadır — mərkəz növü etiketi (Final / Midterm).
+                "exam_kind": exam_kind(ticket.exam),
+                "exam_kind_label": kind_label(exam_kind(ticket.exam)),
                 "subject": (f"{subject.code} — {subject.name}" if subject else ""),
                 "room": (session.room.name if session and session.room else ""),
                 "scheduled_start": scheduled_start,
@@ -233,6 +237,8 @@ def exam_center_student_pins(request, student_id):
         items.append(
             {
                 "exam_title": exam.title,
+                "exam_kind": exam_kind(exam),
+                "exam_kind_label": kind_label(exam_kind(exam)),
                 "subject": (f"{subject.code} — {subject.name}" if subject else ""),
                 "room": "",
                 "scheduled_start": scheduled_start,
