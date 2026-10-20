@@ -1,0 +1,7 @@
+{% extends "emails/base_email.txt" %}{% load i18n %}
+{% block heading %}{{ heading }}{% endblock %}
+{% block content %}{% trans "Hörmətli" context "accounts.username_change.email" %} {{ name }},
+
+{% for line in lines %}{{ line }}
+{% endfor %}
+{% trans "Kabinetə keç" context "accounts.username_change.email" %}: {{ url }}{% endblock %}

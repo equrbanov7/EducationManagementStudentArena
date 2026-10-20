@@ -37,7 +37,7 @@ _NAV_SKIP = frozenset({"syllabus-editor", "curriculum-editor", "create-post", "c
 _NAV_KEYWORDS = {
     "change-password": "parol şifrə password dəyiş",
     "account-password-reset": "parol şifrə sıfırla reset unutdu",
-    "edit-profile": "profil redaktə email e-poçt poçt telefon şəkil",
+    "edit-profile": "profil redaktə email e-poçt poçt telefon şəkil istifadəçi adı username login",
     "surveys-inbox": "sorğu anket survey",
     "announcements": "elan elanlar xəbər bildiriş announcement",
     "surveys-builder": "sorğu anket survey qurucu yarat",

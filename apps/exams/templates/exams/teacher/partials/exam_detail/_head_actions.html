@@ -45,13 +45,14 @@ POST olunur — paralel tab double-flip etməsin), «Digər» menyusu (nəticə 
                 {% endif %}
             </form>
         </li>
-        {% comment %}Sınaq keç — müəllim imtahanı tələbə kimi yoxlayır (nəticələrə sayılmır). Sual yoxdursa
-        start_exam-a getmirik (qaralamada 404 idi) — izahlı dialoq açılır.{% endcomment %}
+        {% comment %}Sınaq keç — müəllim imtahanı tələbə kimi yoxlayır (nəticələrə sayılmır). 2026-10-20 (sahib):
+        deaktiv (qaralama) və tarixi çatmamış / bitmiş imtahanda da işləyir (bax services/trial_run.py).
+        Sual yoxdursa start_exam-a getmirik — izahlı dialoq açılır.{% endcomment %}
         {% if can_manage_exam_questions %}
         <li>
             {% if active_questions_count %}
                 <a href="{% url 'exams:start_exam' exam.slug %}?trial=1&si={% exam_start_intent exam %}" class="dropdown-item"
-                   title="{% trans 'trial_run_hint' context 'exams.template.teacher_exam_detail' %}">
+                   title="{% trans 'İmtahanı tələbə kimi yoxlayın — deaktiv olsa və ya tarixi çatmasa da işləyir. Bu cəhd nəticələrə sayılmır.' context 'exams.template.teacher_exam_detail' %}">
                     <i class="fas fa-vial" aria-hidden="true"></i>{% trans "trial_run" context "exams.template.teacher_exam_detail" %}
                 </a>
             {% else %}

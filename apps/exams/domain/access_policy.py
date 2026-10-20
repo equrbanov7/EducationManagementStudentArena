@@ -305,8 +305,16 @@ class ExamAccessPolicyMixin:
 
         return False
 
-    def can_user_start(self, user: User, code: str | None = None) -> tuple[bool, str | None]:
-        if not self.is_active:
+    def can_user_start(self, user: User, code: str | None = None, *, trial: bool = False) -> tuple[bool, str | None]:
+        """Yeni cəhd / davam icazəsi — ``(icazə, lokalizə-səbəb)``.
+
+        ``trial=True`` — 2026-10-20 (sahib): «Sınaq keç» deaktiv imtahanda və tarix pəncərəsindən
+        kənarda da işləyir; eyni anda/gündə bir imtahan, cəhd limiti, exclusion və PIN/kod qapıları
+        sınağa tətbiq olunmur. Çağıran ``trial``-ı YALNIZ ``services.trial_run.is_trial_run_request``
+        təsdiqləyəndə verir (tələbənin ``?trial=1``-i bura ``False`` kimi gəlir). Arxiv/silinmə və
+        dil parity-si sınaqda da yoxlanılır.
+        """
+        if not self.is_active and not trial:
             return False, pgettext("exams.model.access", "exam_not_active")
 
         # EXAM-P1-02: UI düymələrinin gizlənməsi sərhəd deyil — birbaşa URL ilə
@@ -314,11 +322,11 @@ class ExamAccessPolicyMixin:
         if self.is_archived or getattr(self, "is_deleted", False):
             return False, pgettext("exams.model.access", "exam_not_active")
 
-        if self.is_before_start():
+        if not trial and self.is_before_start():
             start_str = self.start_datetime.strftime("%d.%m.%Y %H:%M")
             return False, pgettext("exams.model.access", "exam_not_started").format(start_str=start_str)
 
-        if self.is_after_end():
+        if not trial and self.is_after_end():
             return False, pgettext("exams.model.access", "exam_ended")
 
         # EXAM-P1-03: exclusion public imtahanlara da şamildir və aktiv cəhdin
@@ -326,7 +334,8 @@ class ExamAccessPolicyMixin:
         # edə bilməz.
         # Perf 2026-10-06: müəllif yoxlaması pk ilə (`self.author` ayrıca sorğu idi).
         is_author = self._is_author(user)
-        if not is_author and self._user_is_excluded(user):
+        exempt = is_author or trial
+        if not exempt and self._user_is_excluded(user):
             return False, pgettext("exams.model.access", "no_exam_access")
 
         own_open, other_open = self._open_attempts_split(user)
@@ -336,7 +345,7 @@ class ExamAccessPolicyMixin:
         # YENİ cəhd (bu imtahanın aktiv cəhdi yoxdur). 2026-07 qaydaları:
         # (müəllif özü / sınaq bu qaydalardan azaddır — o, aşağıda user==author
         #  yolu ilə keçir; burada yalnız tələbələr yoxlanır.)
-        if not is_author:
+        if not exempt:
             blocked, block_reason = self._concurrent_or_same_day_block(user, other_active=other_open)
             if blocked:
                 return False, block_reason
@@ -349,6 +358,10 @@ class ExamAccessPolicyMixin:
         parity_error = language_parity_error_message(self)
         if parity_error:
             return False, parity_error
+
+        # Sınaq cəhdi limitə sayılmır (``attempts_left_for`` sınaqları çıxır) — limit onu da bağlamır.
+        if trial:
+            return True, None
 
         # Yuxarıdakı döngü bu imtahanın köhnəlmiş cəhdlərini artıq bağlayıb
         # və açıq cəhd qalmayıb — limit hesabı həmin döngünü təkrarlamır.

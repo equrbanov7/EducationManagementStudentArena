@@ -39,7 +39,7 @@
                 <ul class="ems-footer__list">
                     <li><a href="{{ home_url }}" class="ems-footer__link">{% trans "Ana səhifə" %}</a></li>
                     <li><a href="{{ about_url }}" class="ems-footer__link">{% trans "Haqqımızda" %}</a></li>
-                    <li><a href="{{ contact_url }}" class="ems-footer__link">{% trans "Əlaqə" %}</a></li>
+                    {% if academic_rules.contact_page %}<li><a href="{{ contact_url }}" class="ems-footer__link">{% trans "Əlaqə" %}</a></li>{% endif %}
                     {% if academic_rules.available_exams %}<li><a href="{% url 'exams:student_exam_list' %}" class="ems-footer__link">{% trans "İmtahanlar" %}</a></li>{% endif %}
                 </ul>
             </nav>
@@ -80,10 +80,12 @@
                         <span>{% trans 'Bakı, Azərbaycan' %}</span>
                     </li>
                 </ul>
+                {% if academic_rules.contact_page %}
                 <a href="{{ contact_url }}" class="ems-footer__cta">
                     <i class="fas fa-paper-plane" aria-hidden="true"></i>
                     {% trans "Bizə yazın" %}
                 </a>
+                {% endif %}
             </div>
         </div>
 

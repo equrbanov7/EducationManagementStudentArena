@@ -28,6 +28,7 @@ from apps.exams.services.language_variants import (
 from apps.exams.services.official_start import OfficialStartBlocked, lock_and_check_official_start
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.services.start_intent import exam_start_url
+from apps.exams.services.trial_run import is_trial_run_request
 from apps.exams.services.utils import _attempt_has_any_answer
 from core.settings_utils import safe_float_setting as _safe_float_setting
 from core.settings_utils import safe_int_setting as _safe_int_setting
@@ -484,9 +485,10 @@ def _start_or_resume_attempt(request, exam: Exam):
     user = request.user
     return_to = current_return_to(request)
 
-    # Müəllim "Sınaq keç" düyməsi ilə öz imtahanını yoxlaya bilər — bu cəhd
-    # yalnız imtahan müəllifinə açıqdır və nəticələrə sayılmır (is_trial).
-    is_trial = (request.GET.get("trial") == "1" or request.POST.get("trial") == "1") and user == exam.author
+    # Müəllim "Sınaq keç" düyməsi ilə imtahanı yoxlaya bilər — bu cəhd yalnız sınaq
+    # icazəsi olana (müəllif / sualları idarə edən imtahan mərkəzi) açıqdır və nəticələrə
+    # sayılmır (is_trial). Bax services/trial_run.py.
+    is_trial = is_trial_run_request(request, exam)
 
     # Perf 2026-10-06: aktiv cəhd yalnız start kilidi altında oxunur və dil
     # seçimi (yalnız YENİ cəhd üçün) də orada həll olunur — əvvəl kilidsiz
@@ -517,8 +519,11 @@ def _start_or_resume_attempt(request, exam: Exam):
             if language_redirect is not None:
                 return language_redirect
 
-            attempt_limit_result_url = get_attempt_limit_result_redirect_url(
-                request, exam, user, active_attempt_checked=True
+            # Sınaq cəhdi limitə sayılmır — limit yönləndirməsi ona aid deyil.
+            attempt_limit_result_url = (
+                ""
+                if is_trial
+                else get_attempt_limit_result_redirect_url(request, exam, user, active_attempt_checked=True)
             )
             if attempt_limit_result_url:
                 # Mesaj üçün effektiv limit (qlobal + qrant) — bounce yalnız effektiv

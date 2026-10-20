@@ -335,6 +335,16 @@ class UserProfile(models.Model):
         help_text="Rəsmi mənbə (ATİS / kadr idxalı) təsdiqləyənə qədər FİN təsdiqlənməmiş sayılır.",
     )
 
+    # Sahib 2026-10-20: istifadəçi adını özü sonuncu dəfə NƏ VAXT dəyişib — gözləmə müddəti buna görə hesablanır
+    # (bax ``services/username_change.py``). Operator / idxal dəyişiklikləri bunu YAZMIR.
+    username_changed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        default=None,
+        verbose_name="İstifadəçi adı dəyişdirilib",
+        help_text="İstifadəçinin öz istifadəçi adını sonuncu dəfə dəyişdiyi vaxt.",
+    )
+
     # Superadmin tərəfindən verilən "imtahan zalı idarəçisi" icazəsi: bu bayraq
     # açıq olan istifadəçi (superadmin olmasa da) imtahan zalı və zaldakı
     # kompüter/MAC qeydlərini yarada/redaktə edə bilir. Bax:

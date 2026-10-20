@@ -11,14 +11,13 @@ from django.utils.translation import pgettext
 from apps.exams.models import ExamAttempt
 from apps.exams.public import (
     append_query_params,
-    attempt_answer_key_hidden,
     current_return_to,
     delivered_question_render,
     ensure_student_exam_tenant_context,
     exam_answers_release_locked,
-    secure_answer_key_hidden,
     tenant_scoped_exams,
 )
+from core.code_text import render_code_text
 
 from ...constants import (
     APPEAL_MAX_COMMENT_LENGTH,
@@ -39,6 +38,15 @@ from ...services import (
     create_appeal,
     is_within_appeal_window,
     remaining_window_seconds,
+)
+from ...services.onsite import (
+    MODE_LATER,
+    MODE_ONSITE,
+    appeal_onsite_eligible,
+    onsite_deadline,
+    remember_onsite_form,
+    stem_only_render,
+    student_answer_details_visible,
 )
 from ..shared._helpers import _marked_question_map
 
@@ -183,10 +191,17 @@ def appeal_create(request, attempt_id):
         )
     )
 
+    is_profile_results_request = _is_profile_results_request(request)
+    # 2026-10-20 (sahib): rejim HƏR sorğuda serverdə qərarlaşdırılır — «imtahan sonunda» (variantlar +
+    # düzgün cavab) yoxsa «sonradan» (yalnız suallar). Göndərişdə başlığa yazılır (``filed_onsite``).
+    onsite = appeal_onsite_eligible(
+        request, attempt, is_profile_results=is_profile_results_request, for_submit=request.method == "POST"
+    )
+
     if request.method == "POST":
         items = _parse_items_from_post(request, delivered_question_ids)
         try:
-            create_appeal(attempt=attempt, student=request.user, items=items)
+            create_appeal(attempt=attempt, student=request.user, items=items, filed_onsite=onsite, request=request)
         except ValidationError as exc:
             messages.error(request, exc.messages[0])
         else:
@@ -209,8 +224,12 @@ def appeal_create(request, attempt_id):
             # Tələbə apellyasiyalarını dashboard bölməsində izləyir.
             return redirect(reverse("accounts:profile") + "?section=my-appeals")
 
+    show_answer_details = student_answer_details_visible(request, attempt, onsite=onsite)
+    if show_answer_details and request.method != "POST":
+        remember_onsite_form(request, attempt)
+
     for answer in delivered_answers:
-        answer.has_selection = bool(list(answer.selected_options.all()))
+        answer.has_selection = show_answer_details and bool(list(answer.selected_options.all()))
         # EXAM-P0-03: apellyasiya sübutu da çatdırılma anındakı dondurulmuş sual
         # görünüşündən render olunur (müəllif sonradan redaktə etsə də sabit
         # qalır); dondurulmuş seçim yoxdursa canlı seçimə düşülür.
@@ -219,12 +238,15 @@ def appeal_create(request, attempt_id):
             selected_ids = {int(option_id) for option_id in frozen_selection}
         else:
             selected_ids = {opt.id for opt in answer.selected_options.all()}
-        answer.delivered = delivered_question_render(answer, selected_ids)
+        delivered = delivered_question_render(answer, selected_ids)
+        # «Sonradan» rejimi: variantlar / açar / ideal cavab şablona HEÇ ÖTÜRÜLMÜR (yalnız sual gövdəsi).
+        answer.delivered = delivered if show_answer_details else stem_only_render(delivered)
+        # Sual gövdəsi tam (kod blokları ilə) — hər iki rejimdə; escape ``render_code_text``-in içindədir.
+        answer.stem_html = render_code_text(answer.delivered.text)
 
     marked_map = _marked_question_map(attempt)
     has_marked = any(marked_map.get(answer.question_id) for answer in delivered_answers)
 
-    is_profile_results_request = _is_profile_results_request(request)
     answers_release_locked = exam_answers_release_locked(exam)
     results_hidden = bool(getattr(exam, "results_hidden_from_students", False))
 
@@ -243,21 +265,12 @@ def appeal_create(request, attempt_id):
         "marked_question_by_qid": marked_map,
         "appealed_question_by_qid": {question_id: True for question_id in appealed_question_ids},
         "has_marked": has_marked,
-        # EXAM-P0-05: nəticə səhifəsindəki release kilidi appeal
-        # URL-indən yan keçilə bilməz. Eyni siyasət correctness variantlarını,
-        # ideal cavabı və tələbə seçimini birlikdə gizlədir.
-        "hide_answer_details": (
-            is_profile_results_request
-            or answers_release_locked
-            or results_hidden
-            # Audit 2026-09-28 EX28-03: cəhd qaldıqca açar apellyasiya səhifəsində də gizlidir.
-            or attempt_answer_key_hidden(attempt, user=request.user)
-            # Təhlükəsizlik auditi 2026-10-07: əvvəl qərar yalnız tələbənin idarə etdiyi
-            # ``from_section``/``return_to`` ilə verilirdi — parametrsiz URL midterm açarını
-            # həmişə, finalın açarını isə 3 günlük pəncərə boyu açırdı. Nəticə səhifəsi ilə
-            # eyni server qaydası (midterm gizli; final yalnız mərkəzin 5 dəq-lik baxışında).
-            or secure_answer_key_hidden(attempt, is_profile_results=is_profile_results_request)
-        ),
+        # EXAM-P0-05 / EX28-03 / təhlükəsizlik auditi 2026-10-07 → 2026-10-20: cavab detalları (variantlar,
+        # tələbənin seçimi, düzgün/ideal cavab) YALNIZ «imtahan sonunda» rejimində göstərilir — qərar
+        # ``services/onsite.py``-dədir (``from_section``/``return_to`` tələbənin əlindədir, sərhəd deyil).
+        "hide_answer_details": not show_answer_details,
+        "appeal_mode": MODE_ONSITE if onsite else MODE_LATER,
+        "appeal_onsite_until": onsite_deadline(attempt) if onsite else None,
         # Müəllim nəticəni gizlədibsə sual üzrə düz/səhv verdikti də göstərilmir.
         "hide_answer_verdicts": results_hidden,
         "answers_release_locked": answers_release_locked,

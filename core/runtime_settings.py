@@ -415,8 +415,8 @@ from core import runtime_settings_credits as _credits  # noqa: E402
 
 GROUPS = GROUPS[:1] + (_credits.GROUP,) + GROUPS[1:]
 SPECS.update({spec.key: spec for spec in _credits.build_specs(Spec)})
-# «Əmək müqavilələri» (2026-10-19) — ayrı modul; import ifadənin içindədir (fayl 600-sətir tavanındadır).
-GROUPS = __import__("core.runtime_settings_hr_contracts", fromlist=["register"]).register(GROUPS, SPECS, Spec)
+# «Əmək müqavilələri», «Açıq səhifələr» və s. — runtime_settings_extensions (fayl 600-sətir tavanındadır).
+GROUPS = __import__("core.runtime_settings_extensions", fromlist=["register"]).register(GROUPS, SPECS, Spec)
 
 
 def enabled() -> bool:

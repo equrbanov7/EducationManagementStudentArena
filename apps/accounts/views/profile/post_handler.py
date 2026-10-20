@@ -124,6 +124,22 @@ def handle_profile_post(
 
         messages.error(request, _("Şifrə yenilənmədi. Zəhmət olmasa formadakı xətaları düzəldin."))
         active_section = "change-password"
+    elif submitted_form == "change-username":
+        # Sahib 2026-10-20: öz istifadəçi adını dəyişmək — qayda, kilid, audit və bildiriş servisdədir.
+        from ...services.username_change import UsernameChangeError, change_own_username, success_message
+
+        try:
+            result = change_own_username(
+                user=request.user,
+                new_username=request.POST.get("new_username"),
+                password=request.POST.get("current_password"),
+                request=request,
+            )
+        except UsernameChangeError as exc:
+            messages.error(request, exc.message)
+        else:
+            messages.success(request, success_message(result))
+        return _result(redirect(f"{reverse('accounts:profile')}?section=edit-profile"))
     elif submitted_form == "publish-notification":
         if "publish-notification" not in allowed_sections:
             messages.error(request, _("Bu əməliyyatı yerinə yetirmək üçün icazəniz yoxdur."))

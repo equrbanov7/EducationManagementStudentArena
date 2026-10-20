@@ -106,6 +106,9 @@
                             Nəticə açıqlandıqdan sonra {{ days }} təqvim günü ərzində (son günün sonunadək, Bakı vaxtı) müraciət edə bilərsiniz — evdən də.
                         {% endblocktrans %}
                     </p>
+                    <p class="appeal-modal__sub" data-appeal-later-note>
+                        {% trans "Sonradan verilən apellyasiyada yalnız sualların mətni göstərilir — variantlar və düzgün cavab göstərilmir." context "appeals.template" %}
+                    </p>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'appeals.template' %}"></button>
             </div>

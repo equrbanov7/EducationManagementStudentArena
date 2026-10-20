@@ -221,6 +221,9 @@ SITE_URL = "http://testserver"
 # UNIVERSITY_MODE=True (login → cabinet only); the mode-specific behaviour is
 # covered by tests that opt in via @override_settings(UNIVERSITY_MODE=True).
 UNIVERSITY_MODE = False
+# Açıq «Əlaqə» səhifəsi prod-da defolt GİZLİDİR (sahib 2026-10-20); mövcud contact testləri açıq halda işləyir,
+# gizli hal apps/contact/test_hidden_2026_10_20.py-də override_settings ilə yoxlanılır.
+CONTACT_PAGE_ENABLED = True
 
 # Celery — run tasks synchronously (eagerly) in tests so that no broker
 # connection is required.  Email tasks will use the console backend above.

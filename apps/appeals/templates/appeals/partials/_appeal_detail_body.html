@@ -27,6 +27,7 @@
         </p>
     </div>
     <div class="appeal-head__aside">
+        {% if not is_owner %}{% include "appeals/partials/_mode_badge.html" %}{% endif %}
         {% include "appeals/partials/_status_badge.html" with status=appeal_display_status label=appeal_display_status_label %}
     </div>
 </header>
