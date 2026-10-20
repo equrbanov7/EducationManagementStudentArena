@@ -40,6 +40,60 @@ from ._helpers import (
 
 FINAL_RESULT_REVIEW_SECONDS = FINAL_CENTER_REVIEW_SECONDS
 
+#: Təhvildən dərhal sonrakı nəticə ekranını GÖRMÜŞ cəhdlər (bu sessiyada) — «imtahan sonunda» apellyasiya
+#: rejiminin «eyni sessiya» sübutu (2026-10-20, oxuyan: ``apps.appeals.services.onsite`` fasad ilə).
+POST_FINISH_RESULT_SESSION_KEY = "exams_post_finish_results"
+#: Yalnız bu qədər təzə bitmiş cəhd qeyd olunur («imtahan sonunda» müddətinin tavanı ilə eyni — 120 dəq).
+POST_FINISH_RESULT_MAX_AGE_SECONDS = 120 * 60
+_POST_FINISH_RESULT_MAX_ENTRIES = 10
+
+
+def _remember_post_finish_result(request, attempt):
+    """Təhvildən sonrakı nəticə ekranı bu sessiyada göstərildi — cəhd id-si sessiyaya yazılır (best-effort)."""
+    finished_at = getattr(attempt, "finished_at", None)
+    if not finished_at or getattr(attempt, "is_trial", False):
+        return
+    from django.utils import timezone
+
+    if (timezone.now() - finished_at).total_seconds() > POST_FINISH_RESULT_MAX_AGE_SECONDS:
+        return
+    try:
+        seen = [int(value) for value in (request.session.get(POST_FINISH_RESULT_SESSION_KEY) or [])]
+    except (TypeError, ValueError, AttributeError):
+        seen = []
+    if attempt.id in seen:
+        return
+    try:
+        request.session[POST_FINISH_RESULT_SESSION_KEY] = (seen + [attempt.id])[-_POST_FINISH_RESULT_MAX_ENTRIES:]
+    except Exception:  # noqa: BLE001 — sessiya yazılmasa nəticə səhifəsi sınmasın
+        return
+
+
+def post_finish_result_seen(request, attempt_id) -> bool:
+    """Bu sessiya ``attempt_id``-nin təhvildən sonrakı nəticə ekranını görübmü (fasad: ``apps.exams.public``)."""
+    session = getattr(request, "session", None)
+    if session is None:
+        return False
+    try:
+        return int(attempt_id) in {int(value) for value in (session.get(POST_FINISH_RESULT_SESSION_KEY) or [])}
+    except (TypeError, ValueError):
+        return False
+
+
+def _appeal_onsite_hint_minutes(attempt, *, is_profile_results):
+    """Nəticə panelində «indi versəniz düzgün cavabları da görəcəksiniz» izahı üçün qalan dəqiqə (yoxsa 0)."""
+    if is_profile_results or getattr(attempt, "is_trial", False) or not getattr(attempt, "finished_at", None):
+        return 0
+    from django.utils import timezone
+
+    from core.runtime_settings_appeals import appeal_onsite_minutes
+
+    minutes = appeal_onsite_minutes()
+    if minutes <= 0:
+        return 0
+    left = minutes * 60 - (timezone.now() - attempt.finished_at).total_seconds()
+    return minutes if left > 0 else 0
+
 
 def _is_final_exam(exam):
     return getattr(exam, "exam_type_extended", "") == "final"
@@ -285,7 +339,13 @@ def exam_result(request, slug, attempt_id):
             submission.file_items = _coding_submission_file_items(submission)
             coding_submissions_by_qid.setdefault(submission.question.question_id, submission)
 
+    if not is_profile_results:
+        _remember_post_finish_result(request, attempt)
     can_appeal = score_adjustments.can_create(request, attempt)
+    # 2026-10-20: «imtahan sonunda» apellyasiyada düzgün cavablar da görünür — panel izahı üçün.
+    appeal_onsite_minutes_hint = (
+        _appeal_onsite_hint_minutes(attempt, is_profile_results=is_profile_results) if can_appeal else 0
+    )
     # EXAMQA R6 (2026-10-02): apellyasiya olunmayan növdə (quiz/sınaq) panel «pəncərə bağlıdır» yazmasın.
     appeal_applicable = score_adjustments.is_applicable(attempt)
     appeal_create_url = reverse("appeals:appeal_create", kwargs={"attempt_id": attempt.id})
@@ -394,6 +454,7 @@ def exam_result(request, slug, attempt_id):
             "appeal_create_url": appeal_create_url,
             "appeal_remaining_seconds": appeal_remaining_seconds,
             "appeal_deadline": appeal_deadline,
+            "appeal_onsite_minutes_hint": appeal_onsite_minutes_hint,
             # "Apellyasiyalarım" keçidi yalnız profildən (my-results) baxılan
             # nəticədə görünür — imtahan yenicə bitəndə (midterm/final) yox.
             "my_appeals_url": (reverse("accounts:profile") + "?section=my-appeals") if is_profile_results else "",

@@ -1,0 +1,15 @@
+{% load i18n %}
+{% comment %}
+Apellyasiyanın verilmə rejimi nişanı (sahib 2026-10-20) — YALNIZ əməkdaş görünüşləri (mərkəz, dekan,
+koordinator): «İmtahan sonunda verilib» (tələbə variantları və düzgün cavabı görürdü) / «Sonradan verilib»
+(yalnız suallar). Kontekst: appeal.
+{% endcomment %}
+{% if appeal.filed_onsite %}
+<span class="ems-badge ems-badge--success appeal-mode-badge" data-appeal-filed-mode="onsite" title="{% trans 'Tələbə müraciəti imtahan bitən kimi verib — formada variantları və düzgün cavabı görürdü.' context 'appeals.template' %}">
+    <i class="fas fa-building-columns" aria-hidden="true"></i>{% trans "İmtahan sonunda verilib" context "appeals.template" %}
+</span>
+{% else %}
+<span class="ems-badge ems-badge--neutral appeal-mode-badge" data-appeal-filed-mode="later" title="{% trans 'Tələbə müraciəti sonradan verib — formada yalnız sualları görürdü.' context 'appeals.template' %}">
+    <i class="fas fa-house" aria-hidden="true"></i>{% trans "Sonradan verilib" context "appeals.template" %}
+</span>
+{% endif %}

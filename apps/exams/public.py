@@ -160,3 +160,8 @@ from .public_exports import __all__ as _api_exports  # noqa: E402
 __all__ += [name for name in _api_exports if name not in __all__]
 
 from .views.shared.breadcrumbs import exam_breadcrumbs  # noqa: E402,F401
+
+# 2026-10-20: «imtahan sonunda» apellyasiya rejiminin «eyni sessiya» sübutu (apps.appeals.services.onsite).
+from .views.student.results import post_finish_result_seen  # noqa: E402,F401
+
+__all__ += ["post_finish_result_seen"]

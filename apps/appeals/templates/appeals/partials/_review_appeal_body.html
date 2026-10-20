@@ -24,6 +24,7 @@
         </p>
     </div>
     <div class="appeal-head__aside">
+        {% include "appeals/partials/_mode_badge.html" %}
         {% include "appeals/partials/_status_badge.html" with status=appeal.status label=appeal.get_status_display %}
     </div>
 </header>

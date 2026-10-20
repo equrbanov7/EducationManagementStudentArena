@@ -94,13 +94,16 @@ def _clean_items(attempt, items):
 
 
 @transaction.atomic
-def create_appeal(*, attempt, student, items, org_unit=None):
+def create_appeal(*, attempt, student, items, org_unit=None, filed_onsite=False, request=None):
     """
     Bir attempt üzrə apellyasiya başlığı + item-lər yaradır.
 
     Qeyd: pəncərə (3 gün) və icazə yoxlaması çağıran view/servis tərəfindən
     (``services.permissions.can_create_appeal``) edilməlidir. Burada məzmun
     validasiyası aparılır.
+
+    ``filed_onsite`` (2026-10-20) — müraciət «imtahan sonunda» rejimində verilib (view serverdə
+    ``services.onsite.appeal_onsite_eligible`` ilə qərarlaşdırır); başlıqda saxlanılır və audit olunur.
     """
     from django.apps import apps as django_apps
 
@@ -135,6 +138,7 @@ def create_appeal(*, attempt, student, items, org_unit=None):
         organization=exam.organization,
         org_unit=org_unit,
         status=APPEAL_STATUS_PENDING,
+        filed_onsite=bool(filed_onsite),
     )
 
     AppealItem.objects.bulk_create(
@@ -149,8 +153,40 @@ def create_appeal(*, attempt, student, items, org_unit=None):
             for item in cleaned
         ]
     )
+    _audit_appeal_created(appeal, item_count=len(cleaned), request=request)
     _notify_exam_center_new_appeal(appeal, item_count=len(cleaned))
     return appeal
+
+
+def _audit_appeal_created(appeal, *, item_count, request=None):
+    """Apellyasiyanın yaradılması audit izi — verilmə rejimi daxil (2026-10-20). Xəta flow-u pozmur."""
+    try:
+        from apps.audit.public import log_action
+        from core.constants import AuditAction
+
+        # SAVEPOINT: audit yazısı düşərsə yalnız ÖZÜ geri qayıtsın (bax decisions._audit_score_change).
+        with transaction.atomic():
+            log_action(
+                action=AuditAction.CREATE,
+                user=appeal.student,
+                organization=appeal.organization,
+                obj=appeal,
+                reason="Appeal filed",
+                request=request,
+                resource_type="appeals.appeal",
+                resource_id=str(appeal.pk),
+                new_values={
+                    "attempt_id": appeal.attempt_id,
+                    "exam_id": appeal.exam_id,
+                    "item_count": item_count,
+                    "filed_onsite": bool(appeal.filed_onsite),
+                    "mode": "onsite" if appeal.filed_onsite else "later",
+                },
+            )
+    except Exception:
+        import logging
+
+        logging.getLogger(__name__).warning("Appeal creation audit log failed.", exc_info=True)
 
 
 def _exam_center_recipients(appeal):

@@ -105845,3 +105845,196 @@ msgstr "“İletişim” sayfası (/contact/)"
 msgctxt "core.runtime_settings"
 msgid "Söndürüləndə /contact/ ünvanı açılmır (404), menyu, footer və «Haqqımızda» səhifəsindəki «Əlaqə» keçidləri gizlənir. Əvvəl gəlmiş mesajlar silinmir. Yandırılanda səhifə və keçidlər geri qayıdır."
 msgstr "Kapatıldığında /contact/ adresi açılmaz (404); menüdeki, alt bilgideki ve “Hakkımızda” sayfasındaki “İletişim” bağlantıları gizlenir. Daha önce gelen mesajlar silinmez. Açıldığında sayfa ve bağlantılar geri gelir."
+
+msgctxt "core.runtime_settings"
+msgid "İstifadəçi öz istifadəçi adını dəyişə bilər"
+msgstr "Kullanıcı kendi kullanıcı adını değiştirebilir"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılanda tələbə və əməkdaş «Profil redaktə» bölməsində mövcud parolu ilə təsdiqləyərək öz istifadəçi adını dəyişə bilir; köhnə ad dərhal işləməz olur. Söndürüləndə həmin hissə gizlənir və server dəyişikliyi qəbul etmir."
+msgstr "Açıldığında öğrenciler ve personel “Profili düzenle” bölümünde mevcut parolalarıyla onaylayarak kendi kullanıcı adlarını değiştirebilir; eski ad hemen geçersiz olur. Kapatıldığında bu bölüm gizlenir ve sunucu değişikliği kabul etmez."
+
+msgctxt "core.runtime_settings"
+msgid "İstifadəçi adı dəyişmələri arasındakı müddət"
+msgstr "Kullanıcı adı değişiklikleri arasındaki süre"
+
+msgctxt "core.runtime_settings"
+msgid "Uğurlu dəyişiklikdən sonra neçə gün keçməlidir ki, istifadəçi adını yenidən dəyişmək mümkün olsun. 0 — məhdudiyyət yoxdur."
+msgstr "Başarılı bir değişiklikten sonra kullanıcı adının yeniden değiştirilebilmesi için kaç gün geçmesi gerektiği. 0 — sınır yok."
+
+msgctxt "accounts.username_change"
+msgid "Yeni istifadəçi adını yazın."
+msgstr "Yeni kullanıcı adını girin."
+
+#, python-format
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adı %(min)s–%(max)s simvol olmalıdır."
+msgstr "Kullanıcı adı %(min)s–%(max)s karakter olmalıdır."
+
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adında yalnız latın hərfləri (a–z), rəqəmlər, nöqtə, alt xətt və defis ola bilər; ad hərflə başlamalı, hərf və ya rəqəmlə bitməlidir, iki ayırıcı yan-yana gələ bilməz."
+msgstr "Kullanıcı adı yalnızca Latin harfleri (a–z), rakamlar, nokta, alt çizgi ve kısa çizgi içerebilir; harfle başlamalı, harf veya rakamla bitmelidir ve iki ayırıcı yan yana gelemez."
+
+msgctxt "accounts.username_change"
+msgid "Bu istifadəçi adı sistem üçün ayrılıb, başqasını seçin."
+msgstr "Bu kullanıcı adı sistem için ayrılmıştır, başka bir ad seçin."
+
+#, python-format
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adını yenidən %(date)s tarixindən sonra dəyişə bilərsiniz."
+msgstr "Kullanıcı adınızı %(date)s tarihinden sonra yeniden değiştirebilirsiniz."
+
+#, python-format
+msgctxt "accounts.username_change"
+msgid "Çox sayda cəhd edildi. %(minutes)s dəqiqə sonra yenidən yoxlayın."
+msgstr "Çok fazla deneme yapıldı. %(minutes)s dakika sonra tekrar deneyin."
+
+msgctxt "accounts.username_change"
+msgid "Bu istifadəçi adı artıq istifadə olunur."
+msgstr "Bu kullanıcı adı zaten kullanılıyor."
+
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adını dəyişmək hazırda mümkün deyil."
+msgstr "Kullanıcı adını değiştirmek şu anda mümkün değil."
+
+msgctxt "accounts.username_change"
+msgid "Yeni istifadəçi adı cari addan fərqli olmalıdır."
+msgstr "Yeni kullanıcı adı mevcut addan farklı olmalıdır."
+
+msgctxt "accounts.username_change"
+msgid "Cari parol yanlışdır."
+msgstr "Mevcut parola yanlış."
+
+#, python-format
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adınız «%(new)s» olaraq dəyişdirildi. Bundan sonra sistemə bu adla (və ya e-poçtunuzla) daxil olun — köhnə ad artıq işləmir."
+msgstr "Kullanıcı adınız “%(new)s” olarak değiştirildi. Bundan sonra sisteme bu adla (veya e-postanızla) giriş yapın — eski ad artık çalışmıyor."
+
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adınız dəyişdirildi"
+msgstr "Kullanıcı adınız değiştirildi"
+
+#, python-format
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adınız dəyişdirildi: %(old)s → %(new)s."
+msgstr "Kullanıcı adınız değiştirildi: %(old)s → %(new)s."
+
+msgctxt "accounts.username_change"
+msgid "Bundan sonra sistemə yeni adla və ya e-poçtunuzla daxil olun; köhnə ad artıq işləmir."
+msgstr "Bundan sonra sisteme yeni adla veya e-postanızla giriş yapın; eski ad artık çalışmıyor."
+
+msgctxt "accounts.username_change"
+msgid "Bu dəyişikliyi siz etməmisinizsə, dərhal RİM-ə müraciət edin."
+msgstr "Bu değişikliği siz yapmadıysanız hemen RİM’e başvurun."
+
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adı"
+msgstr "Kullanıcı adı"
+
+#, python-format
+msgctxt "accounts.username_change"
+msgid "%(min)s–%(max)s simvol: latın hərfləri (a–z), rəqəmlər, nöqtə, alt xətt və defis; hərflə başlayır. Dəyişiklikdən sonra sistemə yeni adla və ya e-poçtunuzla daxil olursunuz, köhnə ad işləmir."
+msgstr "%(min)s–%(max)s karakter: Latin harfleri (a–z), rakamlar, nokta, alt çizgi ve kısa çizgi; harfle başlar. Değişiklikten sonra sisteme yeni adla veya e-postanızla giriş yaparsınız, eski ad çalışmaz."
+
+#, python-format
+msgctxt "accounts.username_change"
+msgid "Növbəti dəyişikliyə qədər gözləmə müddəti: %(days)s gün."
+msgstr "Bir sonraki değişikliğe kadar bekleme süresi: %(days)s gün."
+
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adınız dəyişdiriləcək. Bundan sonra sistemə yalnız yeni adla və ya e-poçtunuzla daxil ola biləcəksiniz. Davam edilsin?"
+msgstr "Kullanıcı adınız değiştirilecek. Bundan sonra sisteme yalnızca yeni adla veya e-postanızla giriş yapabileceksiniz. Devam edilsin mi?"
+
+msgctxt "accounts.username_change"
+msgid "Cari istifadəçi adı"
+msgstr "Mevcut kullanıcı adı"
+
+msgctxt "accounts.username_change"
+msgid "Yeni istifadəçi adı"
+msgstr "Yeni kullanıcı adı"
+
+msgctxt "accounts.username_change"
+msgid "məs.: ad.soyad"
+msgstr "örn.: ad.soyad"
+
+msgctxt "accounts.username_change"
+msgid "Cari parol"
+msgstr "Mevcut parola"
+
+msgctxt "accounts.username_change"
+msgid "Dəyişikliyi təsdiqləmək üçün mövcud parolunuzu yazın."
+msgstr "Değişikliği onaylamak için mevcut parolanızı girin."
+
+msgctxt "accounts.username_change"
+msgid "İstifadəçi adını dəyiş"
+msgstr "Kullanıcı adını değiştir"
+
+msgctxt "accounts.username_change.email"
+msgid "Hörmətli"
+msgstr "Sayın"
+
+msgctxt "accounts.username_change.email"
+msgid "Kabinetə keç"
+msgstr "Hesabıma git"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "İmtahanı tələbə kimi yoxlayın — deaktiv olsa və ya tarixi çatmasa da işləyir. Bu cəhd nəticələrə sayılmır."
+msgstr "Sınavı öğrenci gibi deneyin — sınav pasif olsa veya tarihi gelmemiş olsa da çalışır. Bu deneme sonuçlara sayılmaz."
+
+msgctxt "appeals.template"
+msgid "İmtahan sonunda apellyasiya"
+msgstr "Sınav sonunda itiraz"
+
+msgctxt "appeals.template"
+msgid "İmtahan yenicə bitdiyi üçün hər sualın variantlarını, öz cavabınızı və düzgün cavabı görürsünüz."
+msgstr "Sınav yeni bittiği için her sorunun seçeneklerini, kendi cevabınızı ve doğru cevabı görüyorsunuz."
+
+#, python-format
+msgctxt "appeals.template"
+msgid "Bu imkan %(until)s-dək davam edir; sonradan verilən apellyasiyada yalnız suallar göstərilir."
+msgstr "Bu imkân %(until)s saatine kadar geçerlidir; daha sonra yapılan itirazda yalnızca sorular gösterilir."
+
+msgctxt "appeals.template"
+msgid "Sonradan verilən apellyasiya — yalnız suallar"
+msgstr "Sonradan yapılan itiraz — yalnızca sorular"
+
+msgctxt "appeals.template"
+msgid "Bu rejimdə yalnız sualların mətni göstərilir: variantlar və düzgün cavab göstərilmir. Etiraz etdiyiniz sualı seçin və səbəbini yazın."
+msgstr "Bu modda yalnızca soruların metni gösterilir: seçenekler ve doğru cevap gösterilmez. İtiraz ettiğiniz soruyu seçin ve gerekçenizi yazın."
+
+msgctxt "appeals.template"
+msgid "Sonradan verilən apellyasiyada yalnız sualların mətni göstərilir — variantlar və düzgün cavab göstərilmir."
+msgstr "Sonradan yapılan itirazda yalnızca soruların metni gösterilir — seçenekler ve doğru cevap gösterilmez."
+
+msgctxt "appeals.template"
+msgid "İmtahan sonunda verilib"
+msgstr "Sınav sonunda yapıldı"
+
+msgctxt "appeals.template"
+msgid "Sonradan verilib"
+msgstr "Sonradan yapıldı"
+
+msgctxt "appeals.template"
+msgid "Tələbə müraciəti imtahan bitən kimi verib — formada variantları və düzgün cavabı görürdü."
+msgstr "Öğrenci itirazı sınav biter bitmez yaptı — formda seçenekleri ve doğru cevabı görüyordu."
+
+msgctxt "appeals.template"
+msgid "Tələbə müraciəti sonradan verib — formada yalnız sualları görürdü."
+msgstr "Öğrenci itirazı sonradan yaptı — formda yalnızca soruları görüyordu."
+
+#, python-format
+msgctxt "exams.template.student_exam_result"
+msgid "İmtahan bitəndən sonrakı %(minutes)s dəqiqə ərzində (universitet şəbəkəsində) verilən apellyasiyada suallarla yanaşı variantları və düzgün cavabı da görəcəksiniz. Sonradan verilən apellyasiyada yalnız suallar göstərilir."
+msgstr "Sınavdan sonraki %(minutes)s dakika içinde (üniversite ağında) yapılan itirazda sorularla birlikte seçenekleri ve doğru cevabı da göreceksiniz. Sonradan yapılan itirazda yalnızca sorular gösterilir."
+
+msgctxt "core.runtime_settings"
+msgid "İmtahan sonunda apellyasiya müddəti"
+msgstr "Sınav sonunda itiraz süresi"
+
+msgctxt "core.runtime_settings"
+msgid "Final/midterm bitdikdən sonra neçə dəqiqə ərzində, universitet şəbəkəsindən və imtahanı verdiyi sessiyadan verilən apellyasiyada tələbə sualla yanaşı variantları, öz cavabını və düzgün cavabı görür. Bundan sonra (məsələn, evdən) verilən apellyasiyada yalnız suallar göstərilir. 0 — bu rejim söndürülür (həmişə yalnız suallar)."
+msgstr "Final/ara sınav bittikten sonra kaç dakika içinde, üniversite ağından ve sınavın verildiği oturumdan yapılan itirazda öğrenci soruyla birlikte seçenekleri, kendi cevabını ve doğru cevabı görür. Bundan sonra (örneğin evden) yapılan itirazda yalnızca sorular gösterilir. 0 — bu mod kapalıdır (her zaman yalnızca sorular)."
+
+msgctxt "appeals.model.appeal.field"
+msgid "filed_onsite"
+msgstr "Sınav sonunda yapıldı"

@@ -133,7 +133,10 @@
                     <th scope="row"><span class="appeal-table__title">{{ appeal.exam.title }}</span></th>
                     <td>{{ appeal.student.get_full_name|default:appeal.student.username }}</td>
                     <td class="ems-table__num">{{ appeal.items.all|length }}</td>
-                    <td class="ems-table__nowrap appeal-table__muted">{{ appeal.created_at|date:"d.m.Y H:i" }}</td>
+                    <td class="ems-table__nowrap appeal-table__muted">
+                        {{ appeal.created_at|date:"d.m.Y H:i" }}
+                        <div>{% include "appeals/partials/_mode_badge.html" %}</div>
+                    </td>
                     <td>
                         {% include "appeals/partials/_status_badge.html" with status=appeal.status label=appeal.get_status_display %}
                         {% if appeal.edit_seconds_left %}
