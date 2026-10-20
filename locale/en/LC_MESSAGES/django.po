@@ -106425,3 +106425,15 @@ msgstr "Formal"
 msgctxt "live_exam.model.session.presentation_style"
 msgid "Qeyri-rəsmi"
 msgstr "Informal"
+
+msgctxt "core.runtime_settings"
+msgid "Açıq səhifələr"
+msgstr "Public pages"
+
+msgctxt "core.runtime_settings"
+msgid "«Əlaqə» səhifəsi (/contact/)"
+msgstr "“Contact” page (/contact/)"
+
+msgctxt "core.runtime_settings"
+msgid "Söndürüləndə /contact/ ünvanı açılmır (404), menyu, footer və «Haqqımızda» səhifəsindəki «Əlaqə» keçidləri gizlənir. Əvvəl gəlmiş mesajlar silinmir. Yandırılanda səhifə və keçidlər geri qayıdır."
+msgstr "When turned off, /contact/ does not open (404) and the “Contact” links in the menu, the footer and the “About” page are hidden. Messages received earlier are not deleted. When turned on, the page and the links return."

@@ -62,6 +62,7 @@
                         {% trans "about" context "nav" %}
                     </a>
                 </li>
+                {% if academic_rules.contact_page %}
                 <li class="blog-header__nav-item">
                     <a href="{{ contact_url }}"
                        {% if request.resolver_match.url_name == 'contact' %}aria-current="page"{% endif %}
@@ -69,6 +70,7 @@
                         {% trans "contact" context "nav" %}
                     </a>
                 </li>
+                {% endif %}
                 {% if request.user.is_authenticated and academic_rules.available_exams %}{# sahib 2026-10-10: «Mövcud imtahanlar» tənzimləmə ilə #}
                 <li class="blog-header__nav-item">
                     <a href="{% url 'exams:student_exam_list' %}"
@@ -332,6 +334,7 @@
                 <span>{% trans "about" context "nav" %}</span>
             </a>
         </li>
+        {% if academic_rules.contact_page %}
         <li class="blog-header__nav-item">
             <a href="{{ contact_url }}"
                {% if request.resolver_match.url_name == 'contact' %}aria-current="page"{% endif %}
@@ -340,6 +343,7 @@
                 <span>{% trans "contact" context "nav" %}</span>
             </a>
         </li>
+        {% endif %}
         {% if request.user.is_authenticated and academic_rules.available_exams %}{# sahib 2026-10-10: «Mövcud imtahanlar» tənzimləmə ilə #}
         <li class="blog-header__nav-item">
             <a href="{% url 'exams:student_exam_list' %}"

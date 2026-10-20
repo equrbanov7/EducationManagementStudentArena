@@ -106615,3 +106615,15 @@ msgstr "Официальный"
 msgctxt "live_exam.model.session.presentation_style"
 msgid "Qeyri-rəsmi"
 msgstr "Неофициальный"
+
+msgctxt "core.runtime_settings"
+msgid "Açıq səhifələr"
+msgstr "Публичные страницы"
+
+msgctxt "core.runtime_settings"
+msgid "«Əlaqə» səhifəsi (/contact/)"
+msgstr "Страница «Контакты» (/contact/)"
+
+msgctxt "core.runtime_settings"
+msgid "Söndürüləndə /contact/ ünvanı açılmır (404), menyu, footer və «Haqqımızda» səhifəsindəki «Əlaqə» keçidləri gizlənir. Əvvəl gəlmiş mesajlar silinmir. Yandırılanda səhifə və keçidlər geri qayıdır."
+msgstr "Если выключено, адрес /contact/ не открывается (404), ссылки «Контакты» в меню, футере и на странице «О нас» скрываются. Ранее полученные сообщения не удаляются. При включении страница и ссылки возвращаются."

@@ -29,10 +29,12 @@
                     <i class="fas fa-right-to-bracket" aria-hidden="true"></i>
                     {% trans "Daxil ol" %}
                 </a>
+                {% if academic_rules.contact_page %}
                 <a href="{% url 'contact' %}" class="ems-btn ems-btn--ghost">
                     <i class="fas fa-envelope" aria-hidden="true"></i>
                     {% trans "Bizimlə əlaqə" %}
                 </a>
+                {% endif %}
             </div>
         </div>
         <div class="ems-hero__visual">
@@ -168,10 +170,12 @@
                 <i class="fas fa-right-to-bracket" aria-hidden="true"></i>
                 {% trans "Daxil ol" %}
             </a>
+            {% if academic_rules.contact_page %}
             <a href="{% url 'contact' %}" class="cta-button cta-button--outline">
                 <i class="fas fa-paper-plane" aria-hidden="true"></i>
                 {% trans "Demo tələb et" %}
             </a>
+            {% endif %}
         </div>
     </div>
 

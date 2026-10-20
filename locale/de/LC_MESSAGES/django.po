@@ -107451,3 +107451,15 @@ msgstr "Formell"
 msgctxt "live_exam.model.session.presentation_style"
 msgid "Qeyri-rəsmi"
 msgstr "Locker"
+
+msgctxt "core.runtime_settings"
+msgid "Açıq səhifələr"
+msgstr "Öffentliche Seiten"
+
+msgctxt "core.runtime_settings"
+msgid "«Əlaqə» səhifəsi (/contact/)"
+msgstr "„Kontakt“-Seite (/contact/)"
+
+msgctxt "core.runtime_settings"
+msgid "Söndürüləndə /contact/ ünvanı açılmır (404), menyu, footer və «Haqqımızda» səhifəsindəki «Əlaqə» keçidləri gizlənir. Əvvəl gəlmiş mesajlar silinmir. Yandırılanda səhifə və keçidlər geri qayıdır."
+msgstr "Wenn ausgeschaltet, öffnet sich /contact/ nicht (404), und die „Kontakt“-Links im Menü, in der Fußzeile und auf der Seite „Über uns“ werden ausgeblendet. Zuvor eingegangene Nachrichten werden nicht gelöscht. Beim Einschalten kehren Seite und Links zurück."

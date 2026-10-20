@@ -81,6 +81,11 @@ def available_exams_page_enabled() -> bool:
     return runtime_settings.get_bool("exam.available_page")
 
 
+def contact_page_enabled() -> bool:
+    """Açıq «Əlaqə» səhifəsi (``/contact/``) və ona aparan keçidlər (sahib 2026-10-20: hələlik gizli)."""
+    return runtime_settings.get_bool("site.contact_page")
+
+
 def midterm_from_year(organization=None) -> int:
     """Təşkilatın midterm başlanğıc ili — ``settings["registrar"]["midterm_from_year"]`` və ya 2026."""
     settings = getattr(organization, "settings", None)
@@ -162,6 +167,7 @@ def snapshot() -> dict:
         "lesson_activation": lesson_activation_enabled(),
         "ai_button": ai_assistant_button_enabled(),
         "available_exams": available_exams_page_enabled(),
+        "contact_page": contact_page_enabled(),
     }
 
 
@@ -178,6 +184,7 @@ __all__ = [
     "coursework_active_for_period",
     "coursework_enabled",
     "available_exams_page_enabled",
+    "contact_page_enabled",
     "lesson_activation_enabled",
     "midterm_from_year",
     "midterm_max",

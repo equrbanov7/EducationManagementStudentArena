@@ -105935,3 +105935,15 @@ msgstr "Rəsmi"
 msgctxt "live_exam.model.session.presentation_style"
 msgid "Qeyri-rəsmi"
 msgstr "Qeyri-rəsmi"
+
+msgctxt "core.runtime_settings"
+msgid "Açıq səhifələr"
+msgstr "Açıq səhifələr"
+
+msgctxt "core.runtime_settings"
+msgid "«Əlaqə» səhifəsi (/contact/)"
+msgstr "«Əlaqə» səhifəsi (/contact/)"
+
+msgctxt "core.runtime_settings"
+msgid "Söndürüləndə /contact/ ünvanı açılmır (404), menyu, footer və «Haqqımızda» səhifəsindəki «Əlaqə» keçidləri gizlənir. Əvvəl gəlmiş mesajlar silinmir. Yandırılanda səhifə və keçidlər geri qayıdır."
+msgstr "Söndürüləndə /contact/ ünvanı açılmır (404), menyu, footer və «Haqqımızda» səhifəsindəki «Əlaqə» keçidləri gizlənir. Əvvəl gəlmiş mesajlar silinmir. Yandırılanda səhifə və keçidlər geri qayıdır."
