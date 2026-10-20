@@ -41,3 +41,10 @@ class FirstLoginCenterExamTest(TestCase):
         response = self._call(reverse("accounts:profile"), ticket=True)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("accounts:set_initial_password"))
+
+
+def test_session_key_matches_exam_centre():
+    from apps.accounts.middleware_center_exam import CENTER_SESSION_KEY
+    from apps.exams.services.final_center.entry import ENTRY_SESSION_KEY
+
+    assert CENTER_SESSION_KEY == ENTRY_SESSION_KEY

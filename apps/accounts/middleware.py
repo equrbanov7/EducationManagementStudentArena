@@ -13,6 +13,8 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
 
+from apps.accounts.middleware_center_exam import is_center_exam_path
+
 logger = logging.getLogger(__name__)
 
 POST_LOGIN_REDIRECT_GUARD_SESSION_KEY = "post_login_redirect_guard"
@@ -231,40 +233,13 @@ class FirstLoginPasswordMiddleware:
         profile = getattr(user, "profile", None)
         return bool(profile is not None and getattr(profile, "password_change_required", False))
 
-    #: Sahib 2026-10-21: final/midterm (imtahan zalı) — istifadəçi adı + PIN ilə girən tələbə ilk girişi
-    #: bitirməyibsə belə imtahan ZAMANI parol təyini ekranına atılmır. Yalnız PIN giriş səhifələri və zal
-    #: sessiyası (doğrulanmış bilet) olan imtahan-verən yollar; kabinetin qalanı qapılı qalır.
-    CENTER_ENTRY_URL_NAMES = frozenset({"final_exam_entry", "midterm_exam_entry"})
-    CENTER_SESSION_KEY = "final_exam_ticket_id"
-
-    def _is_center_exam_path(self, request, path: str) -> bool:
-        if not path.startswith("/exams/"):
-            return False
-        from django.urls import Resolver404, resolve
-
-        from apps.accounts.middleware_profile_completion import ProfileCompletionMiddleware
-
-        try:
-            match = resolve(path)
-        except Resolver404:
-            return False
-        except Exception:  # noqa: BLE001 — URLconf hazır deyil
-            return False
-        if match.namespace != "exams":
-            return False
-        if match.url_name in self.CENTER_ENTRY_URL_NAMES:
-            return True
-        session = getattr(request, "session", None)
-        has_center_ticket = bool(session is not None and session.get(self.CENTER_SESSION_KEY))
-        return has_center_ticket and match.url_name in ProfileCompletionMiddleware.EXAM_TAKER_URL_NAMES
-
     def _is_exempt(self, request):
         path = request.path
         if any(path.startswith(prefix) for prefix in self.EXEMPT_PREFIXES):
             return True
         if path == self.LIVE_PIN_ENTRY_PATH or path.startswith(self.LIVE_PLAYER_PREFIXES):
             return True
-        if self._is_center_exam_path(request, path):
+        if is_center_exam_path(request, path):  # sahib 2026-10-21: zal imtahanı kəsilmir
             return True
         try:
             exempt_paths = {
