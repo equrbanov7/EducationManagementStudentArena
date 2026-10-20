@@ -31,6 +31,7 @@ from django.utils import timezone
 
 from apps.exams.domain.final_center import TICKET_STATUS_ASSIGNED
 from apps.exams.models import FinalExamTicket
+from apps.exams.services.center_exams import entry_url_for_exam
 
 logger = logging.getLogger("exams.final_center.reminders")
 
@@ -88,6 +89,7 @@ def notify_upcoming_final_exams(now=None, *, scope=None) -> int:
                 "exam",
                 "exam__title",
                 "exam__start_datetime",
+                "exam__exam_type_extended",
                 "organization",
                 "organization__slug",
             )
@@ -132,9 +134,9 @@ def _send_chunk(rows, threshold, scope) -> int:
             recipients = list(get_user_model().objects.filter(pk__in=[student for _pk, student in claimed]).only("pk"))
             create_notification_for_users(
                 recipients=recipients,
-                title=_reminder_title(threshold),
+                title=_reminder_title(threshold, _is_midterm(sample)),
                 message=_reminder_message(sample, threshold),
-                link="/exams/final/",
+                link=entry_url_for_exam(sample.exam),
                 notification_type="exam",
                 organization=sample.organization,
             )
@@ -147,9 +149,18 @@ def _send_chunk(rows, threshold, scope) -> int:
         return 0
 
 
-def _reminder_title(threshold: int) -> str:
+def _is_midterm(ticket) -> bool:
+    return getattr(ticket.exam, "exam_type_extended", "") == "midterm"
+
+
+def _reminder_title(threshold: int, midterm: bool = False) -> str:
     from django.utils.translation import pgettext
 
+    if midterm:
+        # 2026-10-20: midterm də zal axını ilə (``/exams/midterm/``).
+        if threshold <= 1:
+            return pgettext("exams.final_center.reminder", "Midterm imtahanınız sabah keçiriləcək")
+        return pgettext("exams.final_center.reminder", "Midterm imtahanınız yaxınlaşır")
     if threshold <= 1:
         return pgettext("exams.final_center.reminder", "Final imtahanınız sabah keçiriləcək")
     return pgettext("exams.final_center.reminder", "Final imtahanınız yaxınlaşır")
@@ -159,6 +170,12 @@ def _reminder_message(ticket, threshold: int) -> str:
     from django.utils.translation import pgettext
 
     start = timezone.localtime(ticket.exam.start_datetime).strftime("%d.%m.%Y %H:%M")
+    if _is_midterm(ticket):
+        return pgettext(
+            "exams.final_center.reminder",
+            "{exam} midterm imtahanı {start} tarixində keçiriləcək. İmtahan zalındakı "
+            "kompüterdən /exams/midterm/ ünvanından istifadəçi adınız və PIN ilə daxil olun.",
+        ).format(exam=ticket.exam.title, start=start)
     return pgettext(
         "exams.final_center.reminder",
         "{exam} final imtahanı {start} tarixində keçiriləcək. İmtahan zalındakı "

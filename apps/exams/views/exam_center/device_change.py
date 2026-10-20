@@ -18,6 +18,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from apps.exams.models import ExamAttempt, FinalExamTicket
+from apps.exams.services.center_exams import active_center_kinds
 from apps.exams.services.final_center import can_manage_final_center, can_supervise_session, supervision_scope
 from apps.exams.services.final_center.device_binding import approve_device_change, device_window_minutes
 
@@ -49,12 +50,13 @@ def exam_center_final_device_change(request, attempt_id):
         ExamAttempt.objects.select_related("exam", "exam__organization", "user"),
         pk=attempt_id,
         exam__organization=organization,
-        exam__exam_type_extended="final",
+        # 2026-10-20: midterm də zal axını ilə verilir (açar yandırılıbsa) — ``center_exams``.
+        exam__exam_type_extended__in=sorted(active_center_kinds()),
     )
     _ensure_can_approve(request.user, attempt)
     if attempt.is_finished:
         return JsonResponse(
-            {"success": False, "error": pgettext(_CTX, "Tələbənin davam edən final cəhdi yoxdur.")}, status=409
+            {"success": False, "error": pgettext(_CTX, "Tələbənin davam edən imtahan cəhdi yoxdur.")}, status=409
         )
     minutes = device_window_minutes()
     if approve_device_change(attempt, by=request.user, request=request):

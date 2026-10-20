@@ -1003,6 +1003,8 @@ class TestRLSExamGapTables:
         side_a = gap_table_graph["a"]
         student = side_a["exam"].excluded_users.first()
         ExamRoomSession.objects.filter(pk=side_a["session"].pk).update(state=ROOM_SESSION_STATE_ENTRY_OPEN)
+        # 2026-10-20: bilet namizədləri yalnız mərkəz növlərinin (final/midterm) imtahanlarındandır.
+        Exam.objects.filter(pk=side_a["exam"].pk).update(exam_type_extended="final")
         ticket = FinalExamTicket.objects.create(
             organization=side_a["org"],
             exam=side_a["exam"],

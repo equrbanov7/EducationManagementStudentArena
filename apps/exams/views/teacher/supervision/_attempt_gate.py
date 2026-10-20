@@ -13,7 +13,6 @@ Bitmiş cəhdə toxunmur (endpoint-lərin öz «finished» cavabı qalır).
 """
 
 from django.http import JsonResponse
-from django.urls import reverse
 
 from apps.exams.services.exam_network import attempt_network_allowed, exam_network_denied_message, record_network_denial
 
@@ -29,8 +28,10 @@ def attempt_api_gate(request, attempt, *, where: str, check_entry_session: bool 
         from apps.exams.services.final_center import final_attempt_entry_session_valid
 
         if not final_attempt_entry_session_valid(request, attempt):
+            from apps.exams.services.center_exams import entry_url_for_exam
+
             return JsonResponse(
-                {"entry_session_valid": False, "redirect_url": reverse("exams:final_exam_entry")}, status=403
+                {"entry_session_valid": False, "redirect_url": entry_url_for_exam(attempt.exam)}, status=403
             )
     return None
 

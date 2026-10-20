@@ -13,6 +13,7 @@ _MODULES = (
     "core.runtime_settings_site",  # «Açıq səhifələr» (2026-10-20)
     "core.runtime_settings_username",  # «profile» qrupuna istifadəçi adı açarları (2026-10-20)
     "core.runtime_settings_appeals",  # «exam» qrupuna «imtahan sonunda» apellyasiya açarı (2026-10-20)
+    "core.runtime_settings_midterm",  # «exam» qrupuna «midterm imtahan mərkəzi vasitəsilə» açarı (2026-10-20)
 )
 
 

@@ -47,10 +47,10 @@ from .exam_center.student_photo import proctor_student_photo
 from .shared.access import exam_code_check
 from .student.attempts import start_exam, take_exam
 from .student.coding import coding_autosave, coding_run, coding_submission_download, coding_submit
-from .student.final_center import (
+from .student.final_center import final_exam_entry, midterm_exam_entry
+from .student.final_center_waiting import (
     final_exam_begin,
     final_exam_cancel,
-    final_exam_entry,
     final_exam_waiting,
     final_ticket_state,
 )
@@ -269,6 +269,7 @@ __all__ = [
     "final_exam_entry",
     "final_exam_waiting",
     "final_ticket_state",
+    "midterm_exam_entry",
     # Exam Center - zallar / oturumlar / monitor / hesabat
     "exam_center_pin_search",
     "exam_center_stats_ai",

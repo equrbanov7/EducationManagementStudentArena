@@ -60,6 +60,17 @@ def _status_labels():
     }
 
 
+def _exam_cell(ticket) -> str:
+    """İmtahan sütunu — midterm (2026-10-20, zal axını) ayrıca etiketlənir; final əvvəlki kimi yalnız ad."""
+    if not ticket.exam_id:
+        return ""
+    if getattr(ticket.exam, "exam_type_extended", "") == "midterm":
+        from apps.exams.services.center_exams import MIDTERM_KIND, kind_label
+
+        return f"{ticket.exam.title} ({kind_label(MIDTERM_KIND)})"
+    return ticket.exam.title
+
+
 def _removal_labels():
     return {
         "removed": pgettext("exams.final_center.report", "İmtahandan çıxarılıb"),
@@ -292,7 +303,7 @@ def _collect(organization, tickets):
                 "values": [
                     None,  # № — vərəqə yazılanda doldurulur
                     _fmt_date(ticket.entry_validated_at or (session.scheduled_start if session else None)),
-                    ticket.exam.title if ticket.exam_id else "",
+                    _exam_cell(ticket),
                     ticket.exam.subject.name if ticket.exam_id and ticket.exam.subject_id else "",
                     ticket.exam.subject.code if ticket.exam_id and ticket.exam.subject_id else "",
                     _person(ticket.student),

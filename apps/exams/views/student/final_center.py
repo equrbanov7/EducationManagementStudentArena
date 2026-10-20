@@ -1,9 +1,14 @@
 """
-Final imtahan mərkəzi — tələbə axını.
+İmtahan mərkəzi — tələbə giriş axını (final + midterm).
 
-Axın: `/exams/final/` (fərdi PIN girişi) → uğurlu yoxlamadan sonra HƏMİN
-səhifədə imtahan məlumatı + qaydalar MODALI açılır → təsdiq → gözləmə otağı
-→ nəzarətçi otağı başladır → attempt avtomatik açılır (mövcud take_exam).
+Axın: `/exams/final/` və ya `/exams/midterm/` (sahib 2026-10-20 — «midterm də final kimidir») fərdi PIN
+girişi → uğurlu yoxlamadan sonra HƏMİN səhifədə imtahan məlumatı + qaydalar MODALI açılır → təsdiq →
+gözləmə otağı (``final_center_waiting.py``) → nəzarətçi otağı başladır → attempt avtomatik açılır.
+
+Növ uyğunluğu: hər giriş səhifəsi yalnız ÖZ növünün PIN-ini qəbul edir. Hər iki səhifə eyni namizəd
+hovuzunu (bir hash büdcəsi) yoxlayır; doğru PIN başqa növün imtahanına aiddirsə tələbə login OLUNMUR və
+düzgün ünvan göstərilir. Midterm mərkəz açarı (``exam.midterm_via_center``) söndürülübsə `/exams/midterm/`
+yalnız izah göstərir (midterm kabinetdən verilir).
 
 `/exams/final/` yalnız imtahana giriş üçün ayrıca login səhifəsidir (imtahan
 siyahısı YOXDUR — tələbə hansı imtahanın PIN-ini yazırsa o imtahana daxil
@@ -14,15 +19,9 @@ hər addımda bilet sahibliyi + oturum state-i backend-də yoxlanır.
 import logging
 
 from django.contrib.auth import login, logout
-from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
-from django.utils import timezone
+from django.shortcuts import redirect, render
 from django.utils.translation import pgettext
-from django.views.decorators.cache import never_cache
-from django.views.decorators.http import require_http_methods, require_POST
+from django.views.decorators.http import require_http_methods
 
 from apps.exams.domain.final_center import (
     ROOM_SESSION_STATE_ACTIVE,
@@ -35,21 +34,21 @@ from apps.exams.domain.final_center import (
     TICKET_STATUS_WAITING,
 )
 from apps.exams.models import FinalExamTicket
-from apps.exams.services.exam_center_gate import (
-    final_exam_access_allowed,
-    org_computer_access_allowed,
-    resolve_room_computer,
-    room_ip_access_allowed,
+from apps.exams.services.center_exams import (
+    FINAL_KIND,
+    MIDTERM_KIND,
+    entry_url,
+    entry_url_for_exam,
+    exam_kind,
+    is_center_kind,
 )
-from apps.exams.services.exam_network import ExamNetworkDenied, final_entry_network_allowed
+from apps.exams.services.exam_center_gate import org_computer_access_allowed, resolve_room_computer
 from apps.exams.services.final_center import (
     ERROR_LOCKED,
     ERROR_RATE_LIMITED,
-    HEARTBEAT_INTERVAL_SECONDS,
     PinHashBudget,
     TicketStateError,
     admission_block_reason,
-    begin_attempt_for_ticket,
     claim_student_pin_entry,
     claim_ticket_pin_entry,
     clear_entry_session,
@@ -58,56 +57,22 @@ from apps.exams.services.final_center import (
     entry_session_matches,
     entry_ticket_id,
     store_entry_session,
-    student_cancel_waiting,
-    sync_ticket_completion,
     validate_entry,
 )
+from apps.exams.services.final_center.entry import ERROR_WRONG_KIND
 from apps.exams.services.final_center.reentry import cabinet_pin_resume_denial
 from apps.exams.services.language_variants import available_language_options
 from apps.exams.views.student._final_device import final_entry_network_guarded
 from core.rls import bypass_rls
 
+from ._center_common import FEXC_UI_LANGUAGES, TICKET_SELECT_RELATED, ensure_hall_access
+from ._center_common import room_access_error as _room_access_error
+from ._center_common import room_access_ok as _room_access_ok
+
 logger = logging.getLogger("exams.final_center.student")
 
-# İmtahan zalı interfeys dilləri (chrome gizli olduğu üçün öz seçicimiz).
-FEXC_UI_LANGUAGES = (("az", "AZ"), ("en", "EN"), ("ru", "RU"))
 
-_TICKET_SELECT_RELATED = (
-    "session",
-    "session__room",
-    "session__invigilator",
-    "exam",
-    "organization",
-    "student",
-    "attempt",
-)
-
-
-def _ensure_hall_access(request):
-    """İmtahan zalı IP/CIDR qapısı (mövcud exam_center_gate xidməti).
-
-    2026-10-13 (gecə): əvvəlcə universitet şəbəkəsi (``EXAM_FINAL_INTERNAL_ONLY``) — kənar zona
-    ``ExamNetworkDenied`` alır, ``final_entry_network_guarded`` onu aydın 403 səhifəsinə/JSON-a çevirir.
-    """
-    if not final_entry_network_allowed(request):
-        raise ExamNetworkDenied()
-    if not final_exam_access_allowed(request):
-        raise PermissionDenied(pgettext("exams.view.final_center.permission", "final_center_ip_not_allowed"))
-
-
-def _room_access_ok(request, room) -> bool:
-    """Zalın qeydli kompüterlərinə görə IP qapısı (MAC identifikasiya, IP tətbiq)."""
-    return room_ip_access_allowed(request, room)
-
-
-def _room_access_error():
-    return pgettext(
-        "exams.final_center.entry",
-        "Bu kompüterdən imtahana giriş icazəsi yoxdur. Zəhmət olmasa zaldakı təyin olunmuş kompüterdən daxil olun.",
-    )
-
-
-def _entry_error_message(code):
+def _entry_error_message(code, kind=FINAL_KIND):
     if code == ERROR_RATE_LIMITED:
         return pgettext("exams.final_center.entry", "Çox sayda cəhd — bir dəqiqə sonra yenidən yoxlayın.")
     if code == ERROR_LOCKED:
@@ -116,10 +81,33 @@ def _entry_error_message(code):
             "Təhlükəsizlik səbəbindən giriş müvəqqəti kilidlənib. Nəzarətçiyə müraciət edin.",
         )
     # Generik mesaj — istifadəçi adı/PIN-in hansının səhv olduğu deyilmir.
+    if kind == MIDTERM_KIND:
+        return pgettext("exams.final_center.entry", "Məlumatlar yanlışdır və ya aktiv midterm imtahanınız yoxdur.")
     return pgettext("exams.final_center.entry", "Məlumatlar yanlışdır və ya aktiv final imtahanınız yoxdur.")
 
 
-def _claim_failure_message(room):
+def _wrong_kind_message(kind):
+    """Doğru PIN, amma digər növün imtahanı — düzgün giriş ünvanı göstərilir (login YOXDUR)."""
+    if kind == MIDTERM_KIND:
+        return pgettext(
+            "exams.final_center.entry",
+            "Bu PIN final imtahanına aiddir. Final imtahanına /exams/final/ ünvanından daxil olun.",
+        )
+    return pgettext(
+        "exams.final_center.entry",
+        "Bu PIN midterm imtahanına aiddir. Midterm imtahanına /exams/midterm/ ünvanından daxil olun.",
+    )
+
+
+def _midterm_entry_disabled_message():
+    return pgettext(
+        "exams.final_center.entry",
+        "Midterm imtahanları hazırda imtahan mərkəzi vasitəsilə keçirilmir — imtahana kabinetinizdəki "
+        "«Təyin olunmuş imtahanlar» bölməsindən başlayın.",
+    )
+
+
+def _claim_failure_message(room, kind=FINAL_KIND):
     """Claim uğursuzluğunun tələbəyə deyilə bilən səbəbini seç.
 
     Açıq oturumun olmaması nəzarətçi hərəkətidir — bunu deməkdə təhlükəsizlik
@@ -137,20 +125,27 @@ def _claim_failure_message(room):
             "exams.final_center.entry",
             "Bu zalda hazırda açıq imtahan oturumu yoxdur — nəzarətçinin oturumu açmasını gözləyin.",
         )
-    return _entry_error_message(None)
+    return _entry_error_message(None, kind)
 
 
-def _render_login(request, *, error="", username="", modal_ticket=None, modal_error=""):
+def _render_login(request, kind=FINAL_KIND, *, error="", username="", modal_ticket=None, modal_error=""):
     """
     Login səhifəsini render edir. ``modal_ticket`` verilibsə PIN yoxlamasından
     keçmiş biletin imtahan-öncəsi məlumat/qaydalar MODALI açıq göstərilir.
+    ``kind`` — giriş səhifəsinin növü (başlıq/forma ünvanı); modal həmişə biletin öz növündədir.
     """
+    if modal_ticket is not None:
+        kind = exam_kind(modal_ticket.exam) or kind
     context = {
         "error_message": error,
         "username_value": username,
         "show_gate_modal": modal_ticket is not None,
         "modal_error": modal_error,
         "fexc_ui_languages": FEXC_UI_LANGUAGES,
+        "entry_kind": kind,
+        "entry_is_midterm": kind == MIDTERM_KIND,
+        "entry_url": entry_url(kind),
+        "entry_disabled": not is_center_kind(kind),
     }
     if modal_ticket is not None:
         session = modal_ticket.session
@@ -178,10 +173,11 @@ def _route_validated_ticket(request, ticket):
     # modalını TƏKRAR göstərmə (oturum hələ açıq olsa belə). Tələbə imtahandan
     # çıxıb — sessiyanı təmizlə, logout et və təmiz login səhifəsinə qaytar.
     # (Məs. final apellyasiyasından sonra bura yönlənmə.)
+    kind = exam_kind(ticket.exam)
     if ticket.status in (TICKET_STATUS_COMPLETED, TICKET_STATUS_REMOVED, TICKET_STATUS_ABSENT):
         clear_entry_session(request)
         logout(request)
-        return redirect("exams:final_exam_entry")
+        return redirect(entry_url(kind))
 
     session = ticket.session
     if session is None:
@@ -189,15 +185,17 @@ def _route_validated_ticket(request, ticket):
         clear_entry_session(request)
         return _render_login(
             request,
+            kind,
             error=pgettext("exams.final_center.entry", "Zal oturumuna qoşulmayıb — yenidən daxil olun."),
         )
     if not _room_access_ok(request, session.room):
         clear_entry_session(request)
-        return _render_login(request, error=_room_access_error())
+        return _render_login(request, kind, error=_room_access_error())
     if session.state not in (ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE):
         clear_entry_session(request)
         return _render_login(
             request,
+            kind,
             error=pgettext("exams.final_center.entry", "Oturum hazırda giriş üçün açıq deyil."),
         )
     if ticket.status in (TICKET_STATUS_WAITING, TICKET_STATUS_READY):
@@ -213,29 +211,31 @@ def _validated_session_ticket(request):
     if not request.user.is_authenticated or not ticket_id:
         return None
     ticket = (
-        FinalExamTicket.objects.select_related(*_TICKET_SELECT_RELATED)
+        FinalExamTicket.objects.select_related(*TICKET_SELECT_RELATED)
         .filter(pk=ticket_id, student=request.user)
         .first()
     )
     return ticket if ticket is not None and entry_session_matches(request, ticket) else None
 
 
-@require_http_methods(["GET", "POST"])
-@final_entry_network_guarded
-def final_exam_entry(request):
+def _center_entry(request, kind):
     """
-    `/exams/final/` — fərdi PIN ilə imtahan girişi (imtahan siyahısı YOX).
+    Fərdi PIN ilə imtahan girişi (imtahan siyahısı YOX) — `/exams/final/` və `/exams/midterm/`.
 
     Platformanın normal autentifikasiyasını ƏVƏZ ETMİR — yalnız imtahan zalı
     axını üçündür. Uğurlu PIN yoxlamasından sonra sessiya həmin tələbəyə
     rotasiya olunur və (PRG ilə) imtahan-öncəsi modal açılır.
     """
-    _ensure_hall_access(request)
+    ensure_hall_access(request)
+
+    if not is_center_kind(kind):
+        # Midterm mərkəz açarı söndürülüb — midterm kabinetdən verilir; giriş formu YOXDUR.
+        return _render_login(request, kind, error=_midterm_entry_disabled_message())
 
     if request.method == "POST":
         action = request.POST.get("action")
         if action == "confirm":
-            return _handle_confirm(request)
+            return _handle_confirm(request, kind)
         if action == "back":
             # Modaldan geri qayıdanda istifadəçi adını saxla ki, login formasında
             # yenidən yazılmasın (PIN TƏHLÜKƏSİZLİK səbəbindən saxlanmır).
@@ -244,51 +244,71 @@ def final_exam_entry(request):
             logout(request)
             if kept_username:
                 request.session["final_entry_username"] = kept_username
-            return redirect("exams:final_exam_entry")
-        return _handle_login(request)
+            return redirect(entry_url(kind))
+        return _handle_login(request, kind)
 
     # GET — sessiyada təsdiqlənmiş bilet varsa uyğun mərhələyə yönləndir/modal göstər.
     ticket = _validated_session_ticket(request)
     if ticket is not None:
+        if exam_kind(ticket.exam) != kind:
+            # Təsdiqlənmiş bilet digər növün imtahanıdır — öz giriş səhifəsində davam etsin.
+            return redirect(entry_url_for_exam(ticket.exam))
         return _route_validated_ticket(request, ticket)
     if entry_ticket_id(request):
         # Sessiyada qalıq id var, amma bilet tapılmadı — təmizlə.
         clear_entry_session(request)
-    return _render_login(request, username=request.session.pop("final_entry_username", ""))
+    return _render_login(request, kind, username=request.session.pop("final_entry_username", ""))
 
 
-def _handle_login(request):
+@require_http_methods(["GET", "POST"])
+@final_entry_network_guarded
+def final_exam_entry(request):
+    """`/exams/final/` — final imtahanının zal girişi."""
+    return _center_entry(request, FINAL_KIND)
+
+
+@require_http_methods(["GET", "POST"])
+@final_entry_network_guarded
+def midterm_exam_entry(request):
+    """`/exams/midterm/` — midterm imtahanının zal girişi (sahib 2026-10-20: final ilə eyni proses)."""
+    return _center_entry(request, MIDTERM_KIND)
+
+
+def _handle_login(request, kind=FINAL_KIND):
     username = request.POST.get("username", "")
     raw_pin = request.POST.get("pin", "")
     # Tutum testi 2026-10-06: bilet və fərdi-PIN yolları BİR hash büdcəsini paylaşır —
     # hər sonluq (uğur/səhv/naməlum istifadəçi) ≈1 tam PBKDF2, 3–4 yox.
     budget = PinHashBudget()
-    ticket, error_code = validate_entry(request, username, raw_pin, budget=budget)
+    uname = (username or "").strip()
+    ticket, error_code = validate_entry(request, username, raw_pin, budget=budget, kind=kind)
     if ticket is None:
         # Audit 2026-09-13 EX-06 (P2): IP+istifadəçi limiteri dolanda bilet
         # yolu «rate_limited» qaytarır, amma fərdi-PIN yolu yenə işləyirdi —
         # limit yan keçilirdi. Limit aşımı hər iki yolu bağlayır.
         if error_code == ERROR_RATE_LIMITED:
-            return _render_login(request, error=_entry_error_message(error_code), username=(username or "").strip())
+            return _render_login(request, kind, error=_entry_error_message(error_code, kind), username=uname)
+        if error_code == ERROR_WRONG_KIND:
+            return _render_login(request, kind, error=_wrong_kind_message(kind), username=uname)
         # Bilet (otaq-oturum) sistemi olmayan finallar: tələbə username +
         # kabinetdə gördüyü fərdi PIN ilə birbaşa imtahana daxil olur.
-        pin_response = _handle_student_pin_login(request, username, raw_pin, budget=budget)
+        pin_response = _handle_student_pin_login(request, username, raw_pin, budget=budget, kind=kind)
         if pin_response is not None:
             return pin_response
-        return _render_login(request, error=_entry_error_message(error_code), username=(username or "").strip())
+        return _render_login(request, kind, error=_entry_error_message(error_code, kind), username=uname)
 
     # Kompüter IP → ZAL (oturum sisteminin ləğvi, 2026-07): bilet imtahana bağlıdır,
     # tələbə hansı zalda olduğunu qeydli kompüterin IP-si müəyyən edir. Qeydiyyatsız
     # kompüterdən giriş yoxdur (istifadəçini login DA ETMƏ).
     room, computer = resolve_room_computer(request, ticket.organization)
     if room is None:
-        return _render_login(request, error=_room_access_error(), username=(username or "").strip())
+        return _render_login(request, kind, error=_room_access_error(), username=uname)
 
     # Otağa bağlama + birdəfəlik PIN claim-i eyni ticket lock-u altında gedir:
     # paralel ikinci kompüter nə sessiya ala, nə də attempt location-ını dəyişə bilər.
     ticket = claim_ticket_pin_entry(ticket, room, computer)
     if ticket is None:
-        return _render_login(request, error=_claim_failure_message(room), username=(username or "").strip())
+        return _render_login(request, kind, error=_claim_failure_message(room, kind), username=uname)
 
     # Fərqli istifadəçi login-i varsa təmizlə, sonra bilet sahibini login et.
     if request.user.is_authenticated and request.user.pk != ticket.student_id:
@@ -298,11 +318,14 @@ def _handle_login(request):
     request.session["active_organization"] = ticket.organization.slug
     store_entry_session(request, ticket)
     # PRG: modal GET-də göstərilir (refresh təkrar POST etmir).
-    return redirect("exams:final_exam_entry")
+    return redirect(entry_url(kind))
 
 
-def _handle_student_pin_login(request, username, raw_pin, budget=None):
-    """Fərdi ExamStudentPin ilə final girişi — GÖZLƏMƏ OTAĞI axını.
+def _handle_student_pin_login(request, username, raw_pin, budget=None, kind=FINAL_KIND):
+    """Fərdi ExamStudentPin ilə final/midterm girişi — GÖZLƏMƏ OTAĞI axını.
+
+    2026-10-20: midterm də eyni kabinet PIN-i ilə girir (tələbə kabinetdə gördüyü PIN-i saxlayır).
+    PIN digər növün imtahanına aiddirsə login OLUNMUR — düzgün ünvan göstərilir.
 
     Uyğun imtahan tapılmasa ``None`` qaytarır (çağıran generik xəta göstərir).
     Tələbə qeydli zal kompüterindən girəndə imtahan DƏRHAL BAŞLAMIR: daxili
@@ -324,11 +347,13 @@ def _handle_student_pin_login(request, username, raw_pin, budget=None):
     # and stopping one student never blocks the rest.
     if uname and student_pin_login_rate_limited(uname):
         logger.warning("student_pin_login rate limited for username=%s", uname)
-        return _render_login(request, error=_entry_error_message(ERROR_RATE_LIMITED), username=uname)
+        return _render_login(request, kind, error=_entry_error_message(ERROR_RATE_LIMITED, kind), username=uname)
 
     exam, student = resolve_student_pin_login(username, raw_pin, budget=budget)
     if exam is None:
         return None
+    if exam_kind(exam) != kind:
+        return _render_login(request, kind, error=_wrong_kind_message(kind), username=uname)
     # Resolver PIN-i kəsilmiş (strip) formada yoxlayıb; eyni dəyər memo-ya düşür və
     # ``can_user_start`` təkrar tam hash etmir.
     raw_pin = (raw_pin or "").strip()
@@ -337,7 +362,7 @@ def _handle_student_pin_login(request, username, raw_pin, budget=None):
     # kompüterlərindən işləyir (org-da qeydli kompüter varsa). Bax
     # ``org_computer_access_allowed`` — MAC rejimində MAC, əks halda IP ilə.
     if not org_computer_access_allowed(request, exam.organization if exam.organization_id else None):
-        return _render_login(request, error=_room_access_error(), username=(username or "").strip())
+        return _render_login(request, kind, error=_room_access_error(), username=uname)
 
     # Kompüterin zalı (MAC/IP → zal). Cəhd aşağıda zal/kompüterlə möhürlənir ki,
     # zal monitoru biletsiz imtahanları da göstərsin.
@@ -362,20 +387,21 @@ def _handle_student_pin_login(request, username, raw_pin, budget=None):
         # (login-dən ƏVVƏL, credential-scoped bypass daxilində) — FAIL-CLOSED.
         admission_reason = admission_block_reason(student, exam) if can_start else None
     if not can_start:
-        return _render_login(request, error=reason or _entry_error_message(None), username=(username or "").strip())
+        return _render_login(request, kind, error=reason or _entry_error_message(None, kind), username=uname)
     if admission_reason:
-        return _render_login(request, error=admission_reason, username=(username or "").strip())
+        return _render_login(request, kind, error=admission_reason, username=uname)
 
     # Sual təyin olunmayıbsa imtahanı BAŞLATMA — tələbəni ümumi imtahan
     # siyahısına (exams/available) atmaq olmaz; giriş səhifəsində xəbərdarlıq göstər.
     if not has_active_questions:
         return _render_login(
             request,
+            kind,
             error=pgettext(
                 "exams.final_center.entry",
                 "İmtahana hələ sual əlavə olunmayıb. Zəhmət olmasa imtahan mərkəzi ilə əlaqə saxlayın.",
             ),
-            username=(username or "").strip(),
+            username=uname,
         )
 
     # Zal axını: bilet + oturum (login-dən ƏVVƏL — rədd halında istifadəçi
@@ -385,16 +411,16 @@ def _handle_student_pin_login(request, username, raw_pin, budget=None):
         # 2026-10-13 (gecə): davam edən cəhd — köhnə PIN (yeni PIN verilib) / başqa kompüter rədd olunur.
         resume_denial, move_attempt = cabinet_pin_resume_denial(request, exam, student, entry_computer)
         if resume_denial:
-            return _render_login(request, error=resume_denial, username=uname)
+            return _render_login(request, kind, error=resume_denial, username=uname)
         pin_ticket, ticket_error = ensure_pin_ticket(
             exam, student, entry_room, entry_computer, move_attempt=move_attempt
         )
         if pin_ticket is None:
-            return _render_login(request, error=ticket_error, username=(username or "").strip())
+            return _render_login(request, kind, error=ticket_error, username=uname)
         # W4 R7: claim + giriş audit hadisəsi (tarixçə «Girişlər» KPI-ı).
         pin_ticket = claim_student_pin_entry(pin_ticket, request=request)
         if pin_ticket is None:
-            return _render_login(request, error=_entry_error_message(None), username=(username or "").strip())
+            return _render_login(request, kind, error=_entry_error_message(None, kind), username=uname)
 
     # Fərqli istifadəçi login-i varsa təmizlə, sonra imtahan tələbəsini login et.
     if request.user.is_authenticated and request.user.pk != student.pk:
@@ -413,21 +439,24 @@ def _handle_student_pin_login(request, username, raw_pin, budget=None):
     # PRG: imtahan-öncəsi modal GET-də açılır → təsdiq → gözləmə otağı →
     # nəzarətçi startı (bax _route_validated_ticket / _handle_confirm).
     store_entry_session(request, pin_ticket)
-    return redirect("exams:final_exam_entry")
+    return redirect(entry_url(kind))
 
 
-def _handle_confirm(request):
+def _handle_confirm(request, kind=FINAL_KIND):
     """İmtahan-öncəsi modal təsdiqi: qaydalar + dil → gözləmə otağı."""
     ticket = _validated_session_ticket(request)
     if ticket is None:
         clear_entry_session(request)
-        return redirect("exams:final_exam_entry")
+        return redirect(entry_url(kind))
+    if exam_kind(ticket.exam) != kind:
+        return redirect(entry_url_for_exam(ticket.exam))
 
     session = ticket.session
     if session is None or session.state not in (ROOM_SESSION_STATE_ENTRY_OPEN, ROOM_SESSION_STATE_ACTIVE):
         clear_entry_session(request)
         return _render_login(
             request,
+            kind,
             error=pgettext("exams.final_center.entry", "Oturum hazırda giriş üçün açıq deyil."),
         )
 
@@ -444,146 +473,7 @@ def _handle_confirm(request):
     return redirect("exams:final_exam_waiting", ticket_id=ticket.pk)
 
 
-def _resolve_own_ticket(request, ticket_id):
-    """
-    Bilet sahibliyi + PIN girişindən keçmə yoxlaması. Girişsiz birbaşa URL
-    yığan istifadəçi login səhifəsinə qaytarılır.
-    """
-    ticket = get_object_or_404(
-        FinalExamTicket.objects.select_related(*_TICKET_SELECT_RELATED),
-        pk=ticket_id,
-        student=request.user,
-    )
-    if not entry_session_matches(request, ticket):
-        return ticket, redirect("exams:final_exam_entry")
-    return ticket, None
-
-
-@login_required
-@final_entry_network_guarded
-def final_exam_waiting(request, ticket_id):
-    """
-    Gözləmə otağı. Real vaxt WS ilə işləyir (yüksək tezlikli polling YOX);
-    WS mümkün olmayanda aşağı tezlikli fallback poll (state endpoint) var.
-    """
-    _ensure_hall_access(request)
-    ticket, deny = _resolve_own_ticket(request, ticket_id)
-    if deny is not None:
-        return deny
-    session = ticket.session
-    if session is None:
-        return redirect("exams:final_exam_entry")
-    if not _room_access_ok(request, session.room):
-        raise PermissionDenied(pgettext("exams.view.final_center.permission", "final_center_ip_not_allowed"))
-
-    if ticket.status == TICKET_STATUS_ACTIVE and ticket.attempt_id:
-        return redirect("exams:take_exam", slug=ticket.exam.slug, attempt_id=ticket.attempt_id)
-    if ticket.status not in (TICKET_STATUS_WAITING, TICKET_STATUS_READY):
-        # Hələ təsdiqlənməyib — login/modal səhifəsinə qaytar.
-        return redirect("exams:final_exam_entry")
-
-    return render(
-        request,
-        "exams/student/final_waiting.html",
-        {
-            "ticket": ticket,
-            "session": session,
-            "exam": ticket.exam,
-            "room": session.room,
-            "ws_path": f"/ws/exams/final/wait/{ticket.pk}/",
-            "heartbeat_seconds": HEARTBEAT_INTERVAL_SECONDS,
-            "state_url": reverse("exams:final_ticket_state", kwargs={"ticket_id": ticket.pk}),
-            "begin_url": reverse("exams:final_exam_begin", kwargs={"ticket_id": ticket.pk}),
-            "cancel_url": reverse("exams:final_exam_cancel", kwargs={"ticket_id": ticket.pk}),
-            "session_already_active": session.state == ROOM_SESSION_STATE_ACTIVE,
-        },
-    )
-
-
-@login_required
-@require_POST
-@final_entry_network_guarded
-def final_exam_cancel(request, ticket_id):
-    """Start-dan əvvəl gözləmə otağından imtina — cəhd haqqı yanmır."""
-    _ensure_hall_access(request)
-    ticket, deny = _resolve_own_ticket(request, ticket_id)
-    if deny is not None:
-        return deny
-    student_cancel_waiting(ticket, request=request)
-    clear_entry_session(request)
-    logout(request)
-    return redirect("exams:final_exam_entry")
-
-
-@login_required
-@require_POST
-@final_entry_network_guarded
-def final_exam_begin(request, ticket_id):
-    """
-    Oturum AKTİV olduqdan sonra attempt-in yaradılması. Sinxron startda hər
-    müştəri kiçik təsadüfi gecikmə ilə bu endpoint-i çağırır — sual seti
-    WS broadcast-ı ilə YOX, autentifikasiyalı HTTP ilə yüklənir.
-    """
-    _ensure_hall_access(request)
-    ticket, deny = _resolve_own_ticket(request, ticket_id)
-    if deny is not None:
-        return JsonResponse({"success": False, "redirect_url": reverse("exams:final_exam_entry")}, status=403)
-    if ticket.session is None or not _room_access_ok(request, ticket.session.room):
-        return JsonResponse(
-            {"success": False, "error": str(_room_access_error()), "redirect_url": reverse("exams:final_exam_entry")},
-            status=403,
-        )
-
-    try:
-        attempt = begin_attempt_for_ticket(ticket)
-    except TicketStateError as exc:
-        return JsonResponse({"success": False, "error": str(exc)}, status=409)
-
-    return JsonResponse(
-        {
-            "success": True,
-            "redirect_url": reverse("exams:take_exam", kwargs={"slug": ticket.exam.slug, "attempt_id": attempt.pk}),
-        }
-    )
-
-
-@login_required
-@never_cache
-@final_entry_network_guarded
-def final_ticket_state(request, ticket_id):
-    """
-    Aşağı tezlikli fallback poll (WS kəsiləndə). Kompakt payload — sual/cavab
-    məlumatı YOXDUR.
-    """
-    if not final_entry_network_allowed(request):
-        raise ExamNetworkDenied()
-    ticket, deny = _resolve_own_ticket(request, ticket_id)
-    if deny is not None:
-        return JsonResponse({"error": "entry_required"}, status=403)
-
-    session = ticket.session
-    if session is None:
-        return JsonResponse({"error": "entry_required", "ticket_status": ticket.status}, status=409)
-    session.refresh_from_db(fields=["state", "started_at", "ended_at"])
-    if ticket.status == TICKET_STATUS_ACTIVE:
-        sync_ticket_completion(ticket)
-
-    return JsonResponse(
-        {
-            "session_state": session.state,
-            "ticket_status": ticket.status,
-            "removal_action": ticket.removal_action,
-            "removal_reason": ticket.removal_reason,
-            "started_at": session.started_at.isoformat() if session.started_at else None,
-            "server_now": timezone.now().isoformat(),
-        }
-    )
-
-
 __all__ = [
-    "final_exam_begin",
-    "final_exam_cancel",
     "final_exam_entry",
-    "final_exam_waiting",
-    "final_ticket_state",
+    "midterm_exam_entry",
 ]

@@ -99,6 +99,7 @@
         return m ? decodeURIComponent(m[1]) : "";
     }
 
+    function kindSuffix(s) { return s.exam_kind_label ? " · " + s.exam_kind_label : ""; } // 2026-10-20: Final/Midterm
     function esc(t) {
         var d = document.createElement("div");
         d.textContent = t == null ? "" : String(t);
@@ -339,7 +340,7 @@
             // hücrəyə baxıb üzü yoxlayır; şübhəli / siqnalı kəsilmiş hücrə vurğulanır.
             var P = window.FXCProctor;
             var extra = proctorCellClass(s);
-            var title = s.name + (s.group ? " · " + s.group : "") + " · " + (s.exam_title || "");
+            var title = s.name + (s.group ? " · " + s.group : "") + " · " + (s.exam_title || "") + kindSuffix(s);
             return '<button type="button" class="fxc-cell fxc-cell--' + cellStateClass(s) + extra + '" ' +
                 ticketAttrs + attemptAttr +
                 'title="' + esc(title) + '">' +
@@ -396,7 +397,7 @@
                         '<span class="fxc-vio-count-badge">' + esc(s.violation_count || 0) + " " +
                             esc(t("violations.word", gettext("pozuntu"))) + "</span>" +
                     "</div>" +
-                    '<div class="fxc-vio-sub">' + esc(subj) +
+                    '<div class="fxc-vio-sub">' + esc(subj) + esc(kindSuffix(s)) +
                         (locked ? ' · <b>' + esc(t("violations.locked", gettext("Dayandırılıb"))) + "</b>" : "") + "</div>" +
                     pbadges + detailBtn +
                     "</div>";
@@ -414,7 +415,7 @@
                     '<span class="fxc-vio-count-badge">' + esc(s.violation_count || 0) + " " +
                         esc(t("violations.word", gettext("pozuntu"))) + "</span>" +
                 "</div>" +
-                '<div class="fxc-vio-sub">' + esc(subj) +
+                '<div class="fxc-vio-sub">' + esc(subj) + esc(kindSuffix(s)) +
                     (locked ? ' · <b>' + esc(t("violations.locked", gettext("Dayandırılıb"))) + "</b>" : "") + "</div>" +
                 pbadges +
                 '<div class="fxc-vio-actions">' +

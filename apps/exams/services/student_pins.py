@@ -299,7 +299,7 @@ def _pin_candidates_by_cipher(pins, raw_pin: str):
 
 
 def resolve_student_pin_login(username: str, raw_pin: str, *, budget=None):
-    """`/exams/final/` girişi: istifadəçi adı + fərdi PIN → (exam, user).
+    """`/exams/final/` / `/exams/midterm/` girişi: istifadəçi adı + fərdi PIN → (exam, user).
 
     Bilet (otaq-oturum) sistemi TƏLƏB OLUNMUR — imtahan yaradılanda təyin
     olunmuş ``ExamStudentPin`` ilə uyğun aktiv final imtahanını və tələbəni
@@ -332,14 +332,18 @@ def resolve_student_pin_login(username: str, raw_pin: str, *, budget=None):
 
     # Public girişdə tələbə hələ autentifikasiya/tenant seçimi etməyib, buna
     # görə RLS normal olaraq bütün ExamStudentPin sətirlərini gizlədir. Bypass
-    # yalnız username ilə tapılmış istifadəçinin aktiv final PIN-lərini
-    # materializasiya edir; xam PIN müqayisəsi və nəticə bypass-dan kənardadır.
+    # yalnız username ilə tapılmış istifadəçinin aktiv mərkəz (final; açar
+    # yandırılıbsa midterm — ``center_exams``) PIN-lərini materializasiya edir;
+    # xam PIN müqayisəsi və nəticə bypass-dan kənardadır. Növ uyğunluğu
+    # (``/exams/final/`` ↔ ``/exams/midterm/``) view qatında yoxlanır.
+    from apps.exams.services.center_exams import active_center_kinds
+
     with bypass_rls():
         pins = list(
             ExamStudentPin.objects.filter(
                 student=user,
                 exam__is_active=True,
-                exam__exam_type_extended="final",
+                exam__exam_type_extended__in=sorted(active_center_kinds()),
             )
             .select_related("exam", "exam__organization")
             .order_by("pk")

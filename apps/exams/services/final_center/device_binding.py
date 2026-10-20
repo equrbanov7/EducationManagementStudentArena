@@ -5,7 +5,8 @@ cəhdi biletsiz (fərdi PIN) axınla başlayır və giriş sessiyası yoxlaması
 işləyir — tələbə başqa cihazdan (telefon, ev kompüteri) adi login ilə cəhdi davam etdirə
 bilirdi.
 
-Qayda — tətbiq olunur: ``exam_type_extended == "final"``, cəhd bitməyib, sınaq deyil:
+Qayda — tətbiq olunur: mərkəz imtahanı (final; açar yandırılıbsa midterm — ``center_exams``), cəhd
+bitməyib, sınaq deyil:
 
 1. **İlk giriş bağlayır.** Cəhdin ilk açılışı (take səhifəsi, autosave, ``question-seen``)
    brauzerə imzalı, HttpOnly ``ems_final_device`` cookie-si (təsadüfi id) yazır və eyni id-ni
@@ -73,11 +74,18 @@ class FinalDeviceMismatch(PermissionDenied):
     """Cəhd başqa cihaza bağlıdır. ``PermissionDenied`` — tutulmasa belə 403 (fail-closed)."""
 
     def __init__(self, attempt):
-        super().__init__(device_blocked_message())
+        super().__init__(device_blocked_message(attempt))
         self.attempt = attempt
 
 
-def device_blocked_message() -> str:
+def device_blocked_message(attempt=None) -> str:
+    exam = getattr(attempt, "exam", None)
+    if getattr(exam, "exam_type_extended", "") == "midterm":
+        return pgettext(
+            _CTX,
+            "Bu midterm imtahanı başqa cihazda davam edir. Cihazı dəyişmək lazımdırsa, nəzarətçidən və ya "
+            "imtahan mərkəzindən «cihaz dəyişikliyi» təsdiqi istəyin, sonra səhifəni yeniləyin.",
+        )
     return pgettext(
         _CTX,
         "Bu final imtahanı başqa cihazda davam edir. Cihazı dəyişmək lazımdırsa, nəzarətçidən və ya "
@@ -90,10 +98,16 @@ def device_window_minutes() -> int:
 
 
 def device_binding_applies(attempt) -> bool:
+    """Final + (mərkəz açarı yandırılıbsa) midterm — ``center_exams.is_center_exam`` (sahib 2026-10-20).
+
+    Açar yandırılan anda kabinetdən başlamış, açıq midterm cəhdi də növbəti sorğuda — tələbənin İNDİKİ
+    cihazında — bağlanır (imtahan qırılmır, final yerləşdirməsi ilə eyni qayda)."""
+    from apps.exams.services.center_exams import is_center_exam
+
     exam = getattr(attempt, "exam", None)
     return bool(
         exam is not None
-        and getattr(exam, "exam_type_extended", "") == "final"
+        and is_center_exam(exam)
         and getattr(exam, "organization_id", None)
         and not getattr(attempt, "is_trial", False)
         and not attempt.is_finished

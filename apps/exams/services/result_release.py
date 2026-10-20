@@ -47,15 +47,21 @@ def secure_answer_key_hidden(attempt, *, is_profile_results, now=None) -> bool:
       səhifəsində isə bu vaxt sərhədi elə buradan tətbiq olunur — təhlükəsizlik
       auditi 2026-10-07: apellyasiya URL-i 3 günlük pəncərə boyu açarı açırdı);
     * müəllimin sınaq cəhdi (``is_trial``) mərkəz axınına aid deyil — vaxtla kəsilmir.
+    * 2026-10-20 (sahib): midterm imtahan mərkəzi axını ilə verilirsə (``exam.midterm_via_center``) zal
+      girişindən yaranmış midterm cəhdi final kimi 5 dəqiqəlik baxışa tabedir (``center_exams.attempt_in_center``);
+      kabinetdən başlamış köhnə midterm cəhdinin açarı əvvəlki kimi gizlidir.
     """
     from apps.exams.services.access_policy import SECURE_EXAM_CATEGORIES
+    from apps.exams.services.center_exams import FINAL_KIND, attempt_in_center
 
     category = getattr(attempt.exam, "exam_type_extended", "") or ""
     if category not in SECURE_EXAM_CATEGORIES:
         return False
-    if category == "final" and not is_profile_results:
-        if getattr(attempt, "is_trial", False):
-            return False
+    if is_profile_results:
+        return True
+    if category == FINAL_KIND and getattr(attempt, "is_trial", False):
+        return False
+    if attempt_in_center(attempt):
         return final_center_review_seconds_left(attempt, now=now) <= 0
     return True
 

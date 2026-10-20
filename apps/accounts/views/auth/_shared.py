@@ -279,7 +279,7 @@ def _sanitize_auth_redirect_target(request, candidate_url):
     # Final imtahan girişi ayrıca kiosk/PIN axınıdır. Normal kabinet login
     # formaları heç vaxt login sonrası istifadəçini ora aparmamalıdır.
     normalized_path = (safe_path.split("?", 1)[0] or "/").rstrip("/") + "/"
-    if normalized_path == "/exams/final/":
+    if normalized_path in ("/exams/final/", "/exams/midterm/"):
         return ""
 
     return safe_path

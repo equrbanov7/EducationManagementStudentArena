@@ -79,6 +79,12 @@ def _deadline_iso(attempt):
     return deadline.isoformat() if deadline else None
 
 
+def _kind_label(exam) -> str:
+    from apps.exams.services.center_exams import exam_kind, kind_label
+
+    return kind_label(exam_kind(exam))
+
+
 def _ticket_row(ticket, presence, exam_title=None):
     """Yalnız əməliyyat üçün lazım olan kompakt sahələr — cavablar/ballar YOX.
     ``exam_title`` biletin öz imtahanından götürülür (hər tələbə öz imtahanı) —
@@ -118,6 +124,8 @@ def _ticket_row(ticket, presence, exam_title=None):
         "session_id": ticket.session_id,
         "exam_id": ticket.exam_id,
         "exam_title": exam_title,
+        # 2026-10-20: midterm də zal axınındadır — nəzarətçi növü (Final / Midterm) ayırd etsin.
+        "exam_kind_label": _kind_label(ticket.exam) if ticket.exam_id else "",
     }
 
 
@@ -251,6 +259,7 @@ def _room_attempt_rows(room):
                 "session_id": f"exam-{attempt.exam_id}",
                 "exam_id": attempt.exam_id,
                 "exam_title": attempt.exam.title,
+                "exam_kind_label": _kind_label(attempt.exam),
             }
         )
     return rows, [attempt.user for attempt in attempts]

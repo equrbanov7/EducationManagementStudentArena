@@ -36,7 +36,7 @@ def _wants_json(request) -> bool:
 
 def final_device_blocked_response(request, attempt):
     record_device_mismatch(request, attempt)
-    message = device_blocked_message()
+    message = device_blocked_message(attempt)
     if _wants_json(request):
         return JsonResponse(
             {"success": False, "device_blocked": True, "error": message, "message": message}, status=403

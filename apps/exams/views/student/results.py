@@ -14,6 +14,7 @@ from django.utils.translation import gettext, pgettext
 from apps.exams import score_adjustments
 from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.models import CodingSubmission, ExamAttempt
+from apps.exams.services.center_exams import attempt_in_center, entry_url_for_exam
 from apps.exams.services.question_snapshot import delivered_question_render
 from apps.exams.services.result_calculation import attach_test_result_summaries, calculate_test_attempt_result
 from apps.exams.services.result_release import (
@@ -95,10 +96,6 @@ def _appeal_onsite_hint_minutes(attempt, *, is_profile_results):
     return minutes if left > 0 else 0
 
 
-def _is_final_exam(exam):
-    return getattr(exam, "exam_type_extended", "") == "final"
-
-
 # Profil kabinet bölmələri — həm "Nəticələrim", həm də "Apellyasiyalarım"-dan
 # nəticəyə baxış profil rejimidir (canlı final imtahan-mərkəzi deyil). my-appeals
 # tanınmadığından final nəticəsi kabinetdən açılanda is_final_center_result True
@@ -112,10 +109,6 @@ def _is_profile_results_request(request, return_to):
         return True
     return_to = return_to or ""
     return any(f"section={section}" in return_to for section in _PROFILE_CABINET_SECTIONS)
-
-
-def _final_entry_url():
-    return reverse("exams:final_exam_entry")
 
 
 def _final_result_timeout_url(request):
@@ -194,12 +187,12 @@ def exam_result(request, slug, attempt_id):
     return_to = current_return_to(request)
     back_url, history_url = _resolve_result_navigation(request, exam, return_to)
     is_profile_results = _is_profile_results_request(request, return_to)
-    is_final_exam_result = _is_final_exam(exam)
     # Müəllimin "Sınaq keç" cəhdi final-mərkəz axınının bir hissəsi DEYİL: geri
     # sayan zolaq onu /exams/final/ PIN səhifəsinə atırdı. Sınaqda yalnız
-    # məlumat xarakterli qeyd göstərilir.
+    # məlumat xarakterli qeyd göstərilir. 2026-10-20: zal girişindən yaranmış midterm
+    # cəhdi də (mərkəz açarı yandırılıbsa) eyni 5 dəqiqəlik baxışa tabedir — ``attempt_in_center``.
     is_trial_result = bool(getattr(attempt, "is_trial", False))
-    is_final_center_result = is_final_exam_result and not is_profile_results and not is_trial_result
+    is_final_center_result = not is_profile_results and attempt_in_center(attempt)
     answers_release_locked = exam_answers_release_locked(exam)
     # Audit 2026-09-28 EX28-03: cəhd haqqı qalıbsa açar gizli (verdikt/bal görünür).
     answer_key_hidden = attempt_answer_key_hidden(attempt, user=request.user)
@@ -218,8 +211,8 @@ def exam_result(request, slug, attempt_id):
         final_result_timeout_url = _final_result_timeout_url(request)
         if request.GET.get("final_timeout") == "1" or final_result_remaining_seconds <= 0:
             logout(request)
-            return redirect(_final_entry_url())
-        back_url = reverse("exams:final_exam_entry")
+            return redirect(entry_url_for_exam(exam))
+        back_url = entry_url_for_exam(exam)
         history_url = ""
 
     attempt = annotate_attempt_result_visibility([attempt])[0]

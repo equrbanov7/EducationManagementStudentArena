@@ -13,6 +13,17 @@ def protected_media_url(value):
     return _protected_media_url(value)
 
 
+@register.filter
+def center_exam(exam):
+    """İmtahan zal (mərkəz) axınındadırmı — final; açar yandırılıbsa midterm (``services.center_exams``).
+
+    Take səhifəsi bu halda sayt «chrome»-unu (menyu, footer, axtarış) gizlədir — 2026-10-20.
+    """
+    from apps.exams.services.center_exams import is_center_exam
+
+    return is_center_exam(exam)
+
+
 @register.filter(is_safe=True)
 def code_text(value):
     """Sual/variant mətni: kod nümunəsi (```…``` və ya yapışdırılmış kod) eyni enli blokda, girintisi ilə.
