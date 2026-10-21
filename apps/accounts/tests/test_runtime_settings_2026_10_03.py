@@ -165,6 +165,7 @@ class RuntimeSettingsTest(TestCase):
                 "accounting",
                 "hr_contracts",  # «Əmək müqavilələri» — xatırlatma hədləri (2026-10-19)
                 "site",  # «Açıq səhifələr» — «Əlaqə» səhifəsi (2026-10-20)
+                "monitoring",  # «Monitorinq» (2026-10-21)
             },
         )
 
