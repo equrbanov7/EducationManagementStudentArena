@@ -24,7 +24,7 @@ Kontekst: `s` (= exam_rooms_section).{% endcomment %}
 <button type="button" class="ems-btn" data-ems-overlay-open="sarManagersDrawer">
     <i class="fas fa-user-gear" aria-hidden="true"></i>
     {% trans "Zal idarəçiləri" context "accounts.superadmin_exam_rooms" %}
-    <span class="sar-count">{{ s.room_managers|length }}</span>
+    <span class="sar-count" data-sar-managers-count>{{ s.room_managers|length }}</span>
 </button>
 {% endif %}
 {% if s.selected_org %}

@@ -106654,3 +106654,164 @@ msgstr "Hamısını təsdiq edirəm"
 msgctxt "accounts.semester"
 msgid "Təsdiqlənməyən qrup üçün açılış yaradılmır və nəticədə adı ilə göstərilir. Semestr və ya ixtisas dəyişsə siyahı yenidən yoxlanılır."
 msgstr "Təsdiqlənməyən qrup üçün açılış yaradılmır və nəticədə adı ilə göstərilir. Semestr və ya ixtisas dəyişsə siyahı yenidən yoxlanılır."
+
+msgctxt "exams.template.take_exam"
+msgid "Bu imtahan başqa tabda və ya kompüterdə də yenilənib: eyni suallara fərqli cavab verilib. Digər cavablar saxlanıldı. Davam etmək üçün səhifəni yeniləyin."
+msgstr "Bu imtahan başqa tabda və ya kompüterdə də yenilənib: eyni suallara fərqli cavab verilib. Digər cavablar saxlanıldı. Davam etmək üçün səhifəni yeniləyin."
+
+msgctxt "exams.template.take_exam"
+msgid "Bu imtahan başqa tabda və ya kompüterdə də açıqdır. Cavablar birləşdirilir — yalnız bir tabda davam edin."
+msgstr "Bu imtahan başqa tabda və ya kompüterdə də açıqdır. Cavablar birləşdirilir — yalnız bir tabda davam edin."
+
+msgctxt "exams.template.take_exam"
+msgid "Səhifəni yenilə"
+msgstr "Səhifəni yenilə"
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "Apellyasiya tam ekranda verilir"
+msgstr "Apellyasiya tam ekranda verilir"
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "İmtahan zalında apellyasiya da imtahan kimi tam ekranda doldurulur. Davam etmək üçün düyməni basın."
+msgstr "İmtahan zalında apellyasiya da imtahan kimi tam ekranda doldurulur. Davam etmək üçün düyməni basın."
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "Tam ekran rejimindən çıxdınız"
+msgstr "Tam ekran rejimindən çıxdınız"
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "İmtahan bitib — bu, pozuntu sayılmır. Apellyasiyanı tam ekranda davam etdirin."
+msgstr "İmtahan bitib — bu, pozuntu sayılmır. Apellyasiyanı tam ekranda davam etdirin."
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "Tam ekranda davam et"
+msgstr "Tam ekranda davam et"
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "İndilik bağla"
+msgstr "İndilik bağla"
+
+msgctxt "exams.final_center.violations"
+msgid "Ad, istifadəçi adı, yer №…"
+msgstr "Ad, istifadəçi adı, yer №…"
+
+msgctxt "exams.final_center.violations"
+msgid "Qayda pozanlarda axtarış"
+msgstr "Qayda pozanlarda axtarış"
+
+msgctxt "exams.final_center.violations"
+msgid "Ciddilik"
+msgstr "Ciddilik"
+
+msgctxt "exams.final_center.violations"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "exams.final_center.violations"
+msgid "Pozuntu növü"
+msgstr "Pozuntu növü"
+
+msgctxt "exams.final_center.violations"
+msgid "Bütün növlər"
+msgstr "Bütün növlər"
+
+msgctxt "exams.final_center.violations"
+msgid "Sıralama"
+msgstr "Sıralama"
+
+msgctxt "exams.final_center.violations"
+msgid "Ciddiliyə görə"
+msgstr "Ciddiliyə görə"
+
+msgctxt "exams.final_center.violations"
+msgid "Ən yenilər"
+msgstr "Ən yenilər"
+
+msgctxt "exams.final_center.violations"
+msgid "Bu ekranda hələ açılmamış yeni hadisəsi olan tələbələr"
+msgstr "Bu ekranda hələ açılmamış yeni hadisəsi olan tələbələr"
+
+msgctxt "exams.final_center.violations"
+msgid "Yalnız yenilər"
+msgstr "Yalnız yenilər"
+
+msgctxt "exams.final_center.violations"
+msgid "Daha çox göstər"
+msgstr "Daha çox göstər"
+
+msgctxt "exams.final_center.violations"
+msgid "Hamısını göstər"
+msgstr "Hamısını göstər"
+
+msgctxt "exams.final_center.violations"
+msgid "Az göstər"
+msgstr "Az göstər"
+
+#, python-format
+msgctxt "exams.final_center.violations"
+msgid "%(shown)s / %(total)s göstərilir"
+msgstr "%(shown)s / %(total)s göstərilir"
+
+msgctxt "exams.final_center.violations"
+msgid "Süzgəcə uyğun tələbə yoxdur."
+msgstr "Süzgəcə uyğun tələbə yoxdur."
+
+msgctxt "exams.final_center.violations"
+msgid "Son hadisələr"
+msgstr "Son hadisələr"
+
+msgctxt "exams.final_center.violations"
+msgid "Hadisələr yüklənir…"
+msgstr "Hadisələr yüklənir…"
+
+msgctxt "exams.final_center.violations"
+msgid "Tam tarixçə və qeyd üçün «Bax» düyməsini basın."
+msgstr "Tam tarixçə və qeyd üçün «Bax» düyməsini basın."
+
+#, python-format
+msgctxt "exams.final_center.violations"
+msgid "+%(count)s növ"
+msgstr "+%(count)s növ"
+
+msgctxt "exams.final_center.violations"
+msgid "Son hadisə"
+msgstr "Son hadisə"
+
+msgctxt "exams.final_center.violations"
+msgid "Yeni"
+msgstr "Yeni"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Bu sahə məcburidir."
+msgstr "Bu sahə məcburidir."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Bu sahənin dəyəri düzgün deyil."
+msgstr "Bu sahənin dəyəri düzgün deyil."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Formada xəta var — qeyd olunmuş sahələri düzəldin."
+msgstr "Formada xəta var — qeyd olunmuş sahələri düzəldin."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Yadda saxlamaq alınmadı. Bağlantını yoxlayıb yenidən cəhd edin."
+msgstr "Yadda saxlamaq alınmadı. Bağlantını yoxlayıb yenidən cəhd edin."
+
+#, python-format
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Heç bir kompüter əlavə edilmədi — %(n)s sətirdə xəta var."
+msgstr "Heç bir kompüter əlavə edilmədi — %(n)s sətirdə xəta var."
+
+#, python-format
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "%(n)s sətir əlavə edilmədi — düzəldib yenidən göndərin."
+msgstr "%(n)s sətir əlavə edilmədi — düzəldib yenidən göndərin."
+
+#, python-format
+msgctxt "exams.final_center.room_admin"
+msgid "Bu IP artıq «%(room)s» zalında «%(label)s» kompüterinə verilib: %(ip)s"
+msgstr "Bu IP artıq «%(room)s» zalında «%(label)s» kompüterinə verilib: %(ip)s"
+
+msgctxt "exams.template.take_exam"
+msgid "Bu imtahan artıq başqa tabda açıqdır — bu tabdan cavablar yazılmır. İmtahanı həmin tabda davam etdirin və ya onu bağlayıb bu səhifəni yeniləyin."
+msgstr "Bu imtahan artıq başqa tabda açıqdır — bu tabdan cavablar yazılmır. İmtahanı həmin tabda davam etdirin və ya onu bağlayıb bu səhifəni yeniləyin."

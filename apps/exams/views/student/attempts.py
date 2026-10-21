@@ -30,6 +30,7 @@ from apps.exams.services.trial_run import is_trial_run_request
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 
 from ._answer_writes import TestAnswerWriteBatch, _save_test_answer_if_changed, _save_written_answer_if_changed
+from ._autosave_writer import current_writer_state
 from ._final_device import exam_network_blocked_response, final_device_guarded
 from ._helpers import (
     annotate_attempt_result_visibility,
@@ -543,6 +544,8 @@ def take_exam(request, slug, attempt_id):
         "exam_autosave_binary_uploads_enabled": settings.EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED,
         "marked_question_ids_json": json.dumps(getattr(attempt, "marked_question_ids", None) or []),
         "autosave_revision": getattr(attempt, "autosave_revision", 0),
+        # 2026-10-21: son yazının writer-i (yenilənmədən sonra eyni tabın lokal draft-ı bərpa olunsun).
+        "autosave_writer_state": current_writer_state(attempt) or {},
         "take_exam_script_data": take_exam_script_data(remaining_seconds),
     }
     return render(request, "exams/student/take_exam.html", context)

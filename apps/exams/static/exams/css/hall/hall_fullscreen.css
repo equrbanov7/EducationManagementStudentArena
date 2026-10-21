@@ -1,0 +1,67 @@
+/* İmtahan zalı — imtahandan sonrakı səhifələrin tam ekran qapısı (2026-10-21, apellyasiya).
+   JS: apps/exams/static/exams/js/hall_fullscreen/hall_fullscreen.js. Örtük bloklamır: imtahan bitib,
+   tam ekrandan çıxış pozuntu deyil — yalnız yenidən daxil olmaq təklifi. */
+.hall-fs-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(15, 23, 42, 0.72);
+}
+
+.hall-fs-gate[hidden] {
+    display: none;
+}
+
+.hall-fs-gate__card {
+    width: 100%;
+    max-width: 460px;
+    padding: 28px 24px 24px;
+    border-radius: 12px;
+    background: var(--ems-bg, #fff);
+    color: var(--ems-text, #111827);
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.hall-fs-gate__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 12px;
+    border-radius: 50%;
+    background: var(--ems-primary-subtle, #e0e7ff);
+    color: var(--ems-primary, #4338ca);
+    font-size: 1.5rem;
+}
+
+.hall-fs-gate__title {
+    margin: 0 0 8px;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.hall-fs-gate__body {
+    margin: 0 0 20px;
+    color: var(--ems-text-muted, #4b5563);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.hall-fs-gate__title[hidden],
+.hall-fs-gate__body[hidden],
+.hall-fs-gate__dismiss[hidden] {
+    display: none;
+}
+
+.hall-fs-gate__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+}

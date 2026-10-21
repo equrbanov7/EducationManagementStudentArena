@@ -2,7 +2,7 @@
 {% comment %}Zal çekmecəsinin altlığı — ZAL əməlləri: sil (solda, təsdiqli), deaktiv/aktiv
 et, redaktə (ortaq dialoq, prefill), bağla. Silmə/status adi POST-dur və
 `next` ilə eyni filtr/səhifəyə qayıdır. Kontekst: `room`, `s`.{% endcomment %}
-<form method="post" action="{{ s.action_url }}" class="sar-inline-form sar-foot__danger">
+<form method="post" action="{{ s.action_url }}" class="sar-inline-form sar-foot__danger" data-sar-ajax="1">
     {% csrf_token %}
     <input type="hidden" name="action" value="delete_room">
     <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">
@@ -14,7 +14,7 @@ et, redaktə (ortaq dialoq, prefill), bağla. Silmə/status adi POST-dur və
         {% trans "Zalı sil" context "accounts.superadmin_exam_rooms" %}
     </button>
 </form>
-<form method="post" action="{{ s.action_url }}" class="sar-inline-form">
+<form method="post" action="{{ s.action_url }}" class="sar-inline-form" data-sar-ajax="1">
     {% csrf_token %}
     <input type="hidden" name="action" value="toggle_room_active">
     <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">

@@ -29,6 +29,12 @@ def _enrich(rows, organization_id, users):
     return enrich_monitor_rows(rows, organization_id, {user.pk: user for user in users if user is not None})
 
 
+def _event_labels(rows):
+    from apps.exams.services.supervision.monitor_enrich import event_labels_for_rows
+
+    return event_labels_for_rows(rows)
+
+
 # Bitmiş tələbənin nəticəsi kompüter xəritəsində maks bu qədər saniyə görünür,
 # sonra hücrə boşalır (yeni tələbə üçün). Seat yeni aktiv tələbə ilə tutulubsa
 # köhnə nəticə DƏRHAL düşür.
@@ -328,6 +334,11 @@ def room_monitor_snapshot(room):
     counts["offline"] = max(0, counts["waiting"] + counts["ready"] + counts["active"] - counts["connected"])
     counts["participated"] = counts["active"] + counts["completed"]
     visible_tickets = _visible_grid_tickets(tickets)
+    students = _enrich(
+        [_ticket_row(t, presence) for t in visible_tickets] + attempt_rows,
+        room.organization_id,
+        [t.student for t in visible_tickets] + attempt_users,
+    )
 
     return {
         "room_id": room.pk,
@@ -356,11 +367,9 @@ def room_monitor_snapshot(room):
             }
             for sid, title in attempt_exams.items()
         ],
-        "students": _enrich(
-            [_ticket_row(t, presence) for t in visible_tickets] + attempt_rows,
-            room.organization_id,
-            [t.student for t in visible_tickets] + attempt_users,
-        ),
+        "students": students,
+        # 2026-10-21: «Qayda pozanlar» paneli — ``vio_types`` kodlarının etiketləri (sətirdə təkrar yox).
+        "event_labels": _event_labels(students),
     }
 
 

@@ -56,7 +56,6 @@
     var vioCountEl = document.getElementById("fxc-vio-count");
     var wsEl = document.getElementById("fxc-room-ws");
     var updatedEl = document.getElementById("fxc-room-updated");
-    var lastVioCount = -1;
 
     // Snapshot modalının şablonlarından bərpa/çıxarma URL-lərini götürürük.
     var snapModal = document.getElementById("fxc-snapshot-modal");
@@ -236,16 +235,6 @@
         return cls;
     }
 
-    function needsAttention(s) {
-        var hb = window.FXCProctor ? window.FXCProctor.heartbeatInfo(s.heartbeat) : null;
-        return (s.violation_count && s.violation_count > 0) || s.supervision_status === "locked" ||
-            s.flagged || !!hb || (s.signal_count && s.signal_count > 0);
-    }
-
-    function attentionRank(s) {
-        return (s.flagged ? 1000 : 0) + (s.risk_score || 0) * 10 + (s.violation_count || 0);
-    }
-
     function renderStats() {
         if (!snapshot || !statsEl) return;
         var c = snapshot.counts || {};
@@ -353,78 +342,15 @@
         if (window.FXCRoomLive) window.FXCRoomLive.decorate(mapEl, snapshot);
     }
 
-    function renderViolations() {
-        if (!vioListEl) return;
-        var list = (snapshot && snapshot.students || []).filter(needsAttention)
-            .sort(function (a, b) { return attentionRank(b) - attentionRank(a); });
+    // 2026-10-21: «Qayda pozanlar» paneli ayrıca modula köçdü (violations_panel.js) — tələbə başına
+    // qruplaşdırılmış sətir, süzgəc/axtarış/səhifələmə, açarlı diff (hər poll-da yenidən çəkmə yox).
+    var vioPanel = window.FXCVioPanel ? window.FXCVioPanel.create({
+        listEl: vioListEl, countEl: vioCountEl, panelEl: document.getElementById("fxc-violations-panel"),
+        t: t, kindSuffix: kindSuffix
+    }) : null;
 
-        if (vioCountEl) vioCountEl.textContent = list.length;
-        // Yeni pozuntu meydana çıxanda paneli bir anlıq vurğula (diqqət çək).
-        if (lastVioCount >= 0 && list.length > lastVioCount) {
-            var panel = document.getElementById("fxc-violations-panel");
-            if (panel) { panel.classList.remove("fxc-flash"); void panel.offsetWidth; panel.classList.add("fxc-flash"); }
-        }
-        lastVioCount = list.length;
-        if (!list.length) {
-            vioListEl.innerHTML = '<p class="fxc-vio-empty">' + esc(t("violations.empty", gettext("Qayda pozan yoxdur"))) + "</p>";
-            return;
-        }
-        vioListEl.innerHTML = list.map(function (s) {
-            var locked = s.supervision_status === "locked";
-            var subj = (s.exam_title || "");
-            if (subj.indexOf("—") !== -1) subj = subj.split("—").pop().trim();
-            // Biletsiz (PIN) cəhdlər: bilet-əsaslı əməliyyat düymələri yoxdur —
-            // pozuntu sayı yalnız məlumat üçün göstərilir.
-            var detailBtn = s.attempt_id
-                ? '<div class="fxc-vio-actions">' +
-                    '<button type="button" class="fxc-btn fxc-btn-sm fxc-btn-ghost" data-vio-act="detail" ' +
-                        'data-attempt="' + esc(s.attempt_id) + '">' +
-                        '<i class="fas fa-eye"></i> ' + esc(t("violations.view", gettext("Bax"))) + "</button></div>"
-                : "";
-            var P = window.FXCProctor;
-            var who = P
-                ? '<span class="fxc-vio-who">' + P.avatarHtml(s, "sm") +
-                    '<span class="fxc-vio-who__txt"><span class="fxc-vio-name">' + esc(s.name) + "</span>" +
-                    '<span class="fxc-vio-meta">' + P.metaLine(s) + "</span></span></span>"
-                : '<span class="fxc-vio-name">' + esc(s.name) + "</span>";
-            var pbadges = P ? '<div class="fxc-vio-pbadges">' + P.badgesHtml(s) + "</div>" : "";
-            if (!s.ticket_id) {
-                // Biletsiz (PIN) cəhd — bilet əməliyyatı yoxdur, amma "Bax" ilə
-                // hansı qaydaların pozulduğu detal modalında göstərilir.
-                return '<div class="fxc-vio-row' + (locked ? " fxc-vio-row--locked" : "") +
-                    (s.flagged ? " fxc-vio-row--flagged" : "") + '">' +
-                    '<div class="fxc-vio-top">' + who +
-                        '<span class="fxc-vio-count-badge">' + esc(s.violation_count || 0) + " " +
-                            esc(t("violations.word", gettext("pozuntu"))) + "</span>" +
-                    "</div>" +
-                    '<div class="fxc-vio-sub">' + esc(subj) + esc(kindSuffix(s)) +
-                        (locked ? ' · <b>' + esc(t("violations.locked", gettext("Dayandırılıb"))) + "</b>" : "") + "</div>" +
-                    pbadges + detailBtn +
-                    "</div>";
-            }
-            var mainBtn = locked
-                ? '<button type="button" class="fxc-btn fxc-btn-sm fxc-btn-success" data-vio-act="grant" ' +
-                    'data-session="' + esc(s.session_id) + '" data-ticket="' + esc(s.ticket_id) + '">' +
-                    '<i class="fas fa-rotate-left"></i> ' + esc(t("violations.grantChance", gettext("Bərpa et"))) + "</button>"
-                : '<button type="button" class="fxc-btn fxc-btn-sm fxc-btn-danger-ghost" data-vio-act="block" ' +
-                    'data-session="' + esc(s.session_id) + '" data-ticket="' + esc(s.ticket_id) + '">' +
-                    '<i class="fas fa-ban"></i> ' + esc(t("violations.block", gettext("Blokla"))) + "</button>";
-            return '<div class="fxc-vio-row' + (locked ? " fxc-vio-row--locked" : "") +
-                (s.flagged ? " fxc-vio-row--flagged" : "") + '">' +
-                '<div class="fxc-vio-top">' + who +
-                    '<span class="fxc-vio-count-badge">' + esc(s.violation_count || 0) + " " +
-                        esc(t("violations.word", gettext("pozuntu"))) + "</span>" +
-                "</div>" +
-                '<div class="fxc-vio-sub">' + esc(subj) + esc(kindSuffix(s)) +
-                    (locked ? ' · <b>' + esc(t("violations.locked", gettext("Dayandırılıb"))) + "</b>" : "") + "</div>" +
-                pbadges +
-                '<div class="fxc-vio-actions">' +
-                    '<button type="button" class="fxc-btn fxc-btn-sm fxc-btn-ghost" data-vio-act="detail" ' +
-                        'data-attempt="' + esc(s.attempt_id || "") + '">' +
-                        '<i class="fas fa-eye"></i> ' + esc(t("violations.view", gettext("Bax"))) + "</button>" +
-                    mainBtn +
-                "</div></div>";
-        }).join("");
+    function renderViolations() {
+        if (vioPanel) vioPanel.update(snapshot);
     }
 
     function renderAll() {

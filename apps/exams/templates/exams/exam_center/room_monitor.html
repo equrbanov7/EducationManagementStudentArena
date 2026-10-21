@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="{% static 'exams/css/final_center/room_monitor.css' %}?v=20261018-hint">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/proctor_identity.css' %}?v=20261017-pkgd">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/duties.css' %}?v=20261018-pkgd2">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/violations_panel.css' %}?v=20261021-vio">
 {% endblock %}
 
 {% block content %}
@@ -291,13 +292,54 @@
     </section>
 
     {# ── Qayda pozanlar paneli (canlı, sağ tərəf) ── #}
-    <aside class="fxc-violations-panel" id="fxc-violations-panel" aria-label="{% trans 'Qayda pozanlar' %}">
+    {% comment %}
+      2026-10-21 (sahib: «say çoxaldıqca baxmaq çətinləşə bilər»): tələbə başına bir sətir (növ üzrə
+      cəm, ciddilik, son an), süzgəc + axtarış + səhifələmə, açılan sətirdə son hadisələr (kursorlu
+      lent). Render + diff: violations_panel.js; əməliyyat düymələri: room_aggregate.js.
+    {% endcomment %}
+    <aside class="fxc-violations-panel" id="fxc-violations-panel" aria-label="{% trans 'Qayda pozanlar' %}"
+           data-violations-feed-url="{% url 'exams:exam_center_room_violation_feed' room_id=room.pk %}">
       <h3 class="fxc-violations-title">
         <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
         {% trans "Qayda pozanlar" %}
         <span class="fxc-vio-badge" id="fxc-vio-count">0</span>
       </h3>
-      <div class="fxc-violations-list" id="fxc-violations-list"></div>
+      <div class="fxc-vio-tools" role="search">
+        <input type="search" id="fxc-vio-search" class="ems-input fxc-vio-search" autocomplete="off"
+               placeholder="{% trans 'Ad, istifadəçi adı, yer №…' context 'exams.final_center.violations' %}"
+               aria-label="{% trans 'Qayda pozanlarda axtarış' context 'exams.final_center.violations' %}">
+        <div class="fxc-vio-sevs" role="group" aria-label="{% trans 'Ciddilik' context 'exams.final_center.violations' %}">
+          <button type="button" class="fxc-vio-sevbtn is-active" data-vio-sev="" aria-pressed="true">{% trans "Hamısı" context "exams.final_center.violations" %} <span data-vio-sev-count="">0</span></button>
+          <button type="button" class="fxc-vio-sevbtn fxc-vio-sevbtn--critical" data-vio-sev="critical" aria-pressed="false">{% proctor_severity_label "critical" %} <span data-vio-sev-count="critical">0</span></button>
+          <button type="button" class="fxc-vio-sevbtn fxc-vio-sevbtn--high" data-vio-sev="high" aria-pressed="false">{% proctor_severity_label "high" %} <span data-vio-sev-count="high">0</span></button>
+          <button type="button" class="fxc-vio-sevbtn fxc-vio-sevbtn--medium" data-vio-sev="medium" aria-pressed="false">{% proctor_severity_label "medium" %} <span data-vio-sev-count="medium">0</span></button>
+          <button type="button" class="fxc-vio-sevbtn fxc-vio-sevbtn--low" data-vio-sev="low" aria-pressed="false">{% proctor_severity_label "low" %} <span data-vio-sev-count="low">0</span></button>
+        </div>
+        <div class="fxc-vio-tools__row">
+          <div class="bootstrap-single-select bootstrap-single-select--ems fxc-vio-typeselect">
+            <select id="fxc-vio-type" class="ems-select bootstrap-single-select__native js-bootstrap-single-select"
+                    data-bootstrap-select aria-label="{% trans 'Pozuntu növü' context 'exams.final_center.violations' %}">
+              <option value="">{% trans "Bütün növlər" context "exams.final_center.violations" %}</option>
+            </select>
+          </div>
+          <div class="fxc-vio-sorts" role="group" aria-label="{% trans 'Sıralama' context 'exams.final_center.violations' %}">
+            <button type="button" class="fxc-vio-chip is-active" data-vio-sort="severity" aria-pressed="true">{% trans "Ciddiliyə görə" context "exams.final_center.violations" %}</button>
+            <button type="button" class="fxc-vio-chip" data-vio-sort="recent" aria-pressed="false">{% trans "Ən yenilər" context "exams.final_center.violations" %}</button>
+          </div>
+          <button type="button" class="fxc-vio-chip" id="fxc-vio-new" aria-pressed="false"
+                  title="{% trans 'Bu ekranda hələ açılmamış yeni hadisəsi olan tələbələr' context 'exams.final_center.violations' %}">
+            <i class="fas fa-bell" aria-hidden="true"></i> {% trans "Yalnız yenilər" context "exams.final_center.violations" %}
+          </button>
+        </div>
+      </div>
+      <div class="fxc-violations-list" id="fxc-violations-list" aria-live="off"></div>
+      <p class="fxc-vio-empty" id="fxc-vio-empty">{% trans "Qayda pozan yoxdur" %}</p>
+      <div class="fxc-vio-foot" id="fxc-vio-foot" hidden>
+        <span class="fxc-vio-foot__shown" id="fxc-vio-shown"></span>
+        <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-ghost" id="fxc-vio-more">{% trans "Daha çox göstər" context "exams.final_center.violations" %}</button>
+        <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-ghost" id="fxc-vio-all">{% trans "Hamısını göstər" context "exams.final_center.violations" %}</button>
+        <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-ghost" id="fxc-vio-less" hidden>{% trans "Az göstər" context "exams.final_center.violations" %}</button>
+      </div>
     </aside>
   </div>
 </div>
@@ -336,7 +378,8 @@
     <script src="{% static 'exams/js/final_center/proctor_identity.js' %}?v=20261013-note" defer></script>
     <script src="{% static 'exams/js/final_center/snapshot_modal.js' %}?v=20261001-proc" defer></script>
     <script src="{% static 'exams/js/final_center/room_live.js' %}?v=20261013-duty" defer></script>
-    <script src="{% static 'exams/js/final_center/room_aggregate.js' %}?v=20261020-midterm" defer></script>
+    <script src="{% static 'exams/js/final_center/violations_panel.js' %}?v=20261021-vio" defer></script>
+    <script src="{% static 'exams/js/final_center/room_aggregate.js' %}?v=20261021-vio" defer></script>
     <script src="{% static 'exams/js/final_center/panel_search.js' %}?v=20260926-search" defer></script>
     <script src="{% static 'exams/js/final_center/room_invigilators.js' %}?v=20261018-staff" defer></script>
 {% endblock %}

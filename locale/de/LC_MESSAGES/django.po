@@ -108170,3 +108170,164 @@ msgstr "Ich bestätige alle"
 msgctxt "accounts.semester"
 msgid "Təsdiqlənməyən qrup üçün açılış yaradılmır və nəticədə adı ilə göstərilir. Semestr və ya ixtisas dəyişsə siyahı yenidən yoxlanılır."
 msgstr "Für eine nicht bestätigte Gruppe werden keine Angebote erstellt; sie wird im Ergebnis namentlich aufgeführt. Ändern sich Semester oder Studiengang, wird die Liste erneut geprüft."
+
+msgctxt "exams.template.take_exam"
+msgid "Bu imtahan başqa tabda və ya kompüterdə də yenilənib: eyni suallara fərqli cavab verilib. Digər cavablar saxlanıldı. Davam etmək üçün səhifəni yeniləyin."
+msgstr "Diese Prüfung wurde auch in einem anderen Tab oder auf einem anderen Computer geändert: dieselben Fragen wurden unterschiedlich beantwortet. Ihre übrigen Antworten wurden gespeichert. Laden Sie die Seite neu, um fortzufahren."
+
+msgctxt "exams.template.take_exam"
+msgid "Bu imtahan başqa tabda və ya kompüterdə də açıqdır. Cavablar birləşdirilir — yalnız bir tabda davam edin."
+msgstr "Diese Prüfung ist auch in einem anderen Tab oder auf einem anderen Computer geöffnet. Die Antworten werden zusammengeführt – bitte arbeiten Sie nur in einem Tab weiter."
+
+msgctxt "exams.template.take_exam"
+msgid "Səhifəni yenilə"
+msgstr "Seite neu laden"
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "Apellyasiya tam ekranda verilir"
+msgstr "Der Einspruch wird im Vollbildmodus eingereicht"
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "İmtahan zalında apellyasiya da imtahan kimi tam ekranda doldurulur. Davam etmək üçün düyməni basın."
+msgstr "Im Prüfungssaal wird der Einspruch wie die Prüfung im Vollbildmodus ausgefüllt. Drücken Sie die Schaltfläche, um fortzufahren."
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "Tam ekran rejimindən çıxdınız"
+msgstr "Sie haben den Vollbildmodus verlassen"
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "İmtahan bitib — bu, pozuntu sayılmır. Apellyasiyanı tam ekranda davam etdirin."
+msgstr "Die Prüfung ist beendet – dies gilt nicht als Verstoß. Setzen Sie den Einspruch im Vollbildmodus fort."
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "Tam ekranda davam et"
+msgstr "Im Vollbildmodus fortfahren"
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "İndilik bağla"
+msgstr "Vorerst schließen"
+
+msgctxt "exams.final_center.violations"
+msgid "Ad, istifadəçi adı, yer №…"
+msgstr "Name, Benutzername, Platz-Nr.…"
+
+msgctxt "exams.final_center.violations"
+msgid "Qayda pozanlarda axtarış"
+msgstr "Regelverstöße durchsuchen"
+
+msgctxt "exams.final_center.violations"
+msgid "Ciddilik"
+msgstr "Schweregrad"
+
+msgctxt "exams.final_center.violations"
+msgid "Hamısı"
+msgstr "Alle"
+
+msgctxt "exams.final_center.violations"
+msgid "Pozuntu növü"
+msgstr "Verstoßart"
+
+msgctxt "exams.final_center.violations"
+msgid "Bütün növlər"
+msgstr "Alle Arten"
+
+msgctxt "exams.final_center.violations"
+msgid "Sıralama"
+msgstr "Sortierung"
+
+msgctxt "exams.final_center.violations"
+msgid "Ciddiliyə görə"
+msgstr "Nach Schweregrad"
+
+msgctxt "exams.final_center.violations"
+msgid "Ən yenilər"
+msgstr "Neueste"
+
+msgctxt "exams.final_center.violations"
+msgid "Bu ekranda hələ açılmamış yeni hadisəsi olan tələbələr"
+msgstr "Studierende mit neuen, auf diesem Bildschirm noch nicht geöffneten Ereignissen"
+
+msgctxt "exams.final_center.violations"
+msgid "Yalnız yenilər"
+msgstr "Nur neue"
+
+msgctxt "exams.final_center.violations"
+msgid "Daha çox göstər"
+msgstr "Mehr anzeigen"
+
+msgctxt "exams.final_center.violations"
+msgid "Hamısını göstər"
+msgstr "Alle anzeigen"
+
+msgctxt "exams.final_center.violations"
+msgid "Az göstər"
+msgstr "Weniger anzeigen"
+
+#, python-format
+msgctxt "exams.final_center.violations"
+msgid "%(shown)s / %(total)s göstərilir"
+msgstr "%(shown)s / %(total)s angezeigt"
+
+msgctxt "exams.final_center.violations"
+msgid "Süzgəcə uyğun tələbə yoxdur."
+msgstr "Keine Studierenden entsprechen dem Filter."
+
+msgctxt "exams.final_center.violations"
+msgid "Son hadisələr"
+msgstr "Letzte Ereignisse"
+
+msgctxt "exams.final_center.violations"
+msgid "Hadisələr yüklənir…"
+msgstr "Ereignisse werden geladen…"
+
+msgctxt "exams.final_center.violations"
+msgid "Tam tarixçə və qeyd üçün «Bax» düyməsini basın."
+msgstr "Für den vollständigen Verlauf und Notizen auf «Anzeigen» klicken."
+
+#, python-format
+msgctxt "exams.final_center.violations"
+msgid "+%(count)s növ"
+msgstr "+%(count)s Arten"
+
+msgctxt "exams.final_center.violations"
+msgid "Son hadisə"
+msgstr "Letztes Ereignis"
+
+msgctxt "exams.final_center.violations"
+msgid "Yeni"
+msgstr "Neu"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Bu sahə məcburidir."
+msgstr "Dieses Feld ist erforderlich."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Bu sahənin dəyəri düzgün deyil."
+msgstr "Der Wert dieses Feldes ist ungültig."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Formada xəta var — qeyd olunmuş sahələri düzəldin."
+msgstr "Das Formular enthält Fehler – korrigieren Sie die markierten Felder."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Yadda saxlamaq alınmadı. Bağlantını yoxlayıb yenidən cəhd edin."
+msgstr "Speichern fehlgeschlagen. Prüfen Sie die Verbindung und versuchen Sie es erneut."
+
+#, python-format
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Heç bir kompüter əlavə edilmədi — %(n)s sətirdə xəta var."
+msgstr "Es wurden keine Computer hinzugefügt – %(n)s Zeile(n) fehlerhaft."
+
+#, python-format
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "%(n)s sətir əlavə edilmədi — düzəldib yenidən göndərin."
+msgstr "%(n)s Zeile(n) nicht hinzugefügt – korrigieren und erneut senden."
+
+#, python-format
+msgctxt "exams.final_center.room_admin"
+msgid "Bu IP artıq «%(room)s» zalında «%(label)s» kompüterinə verilib: %(ip)s"
+msgstr "Diese IP ist bereits dem Computer «%(label)s» im Raum «%(room)s» zugewiesen: %(ip)s"
+
+msgctxt "exams.template.take_exam"
+msgid "Bu imtahan artıq başqa tabda açıqdır — bu tabdan cavablar yazılmır. İmtahanı həmin tabda davam etdirin və ya onu bağlayıb bu səhifəni yeniləyin."
+msgstr "Diese Prüfung ist bereits in einem anderen Tab geöffnet – Antworten aus diesem Tab werden nicht gespeichert. Setzen Sie die Prüfung in jenem Tab fort oder schließen Sie ihn und laden Sie diese Seite neu."

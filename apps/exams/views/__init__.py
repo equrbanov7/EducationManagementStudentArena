@@ -19,6 +19,7 @@ from .exam_center import (
     exam_center_room_open_all,
     exam_center_room_snapshot,
     exam_center_room_start_all,
+    exam_center_room_violation_feed,
     exam_center_session_cancel,
     exam_center_session_detail,
     exam_center_session_end,
@@ -45,6 +46,7 @@ from .exam_center import (
 )
 from .exam_center.student_photo import proctor_student_photo
 from .shared.access import exam_code_check
+from .student.answer_sync import take_exam_answers_state
 from .student.attempts import start_exam, take_exam
 from .student.coding import coding_autosave, coding_run, coding_submission_download, coding_submit
 from .student.final_center import final_exam_entry, midterm_exam_entry
@@ -257,6 +259,7 @@ __all__ = [
     # Student - Attempts
     "start_exam",
     "question_seen",
+    "take_exam_answers_state",
     "take_exam",
     "coding_autosave",
     "coding_run",
@@ -294,6 +297,7 @@ __all__ = [
     "exam_center_room_end_all",
     "exam_center_room_open_all",
     "exam_center_room_snapshot",
+    "exam_center_room_violation_feed",
     "exam_center_room_start_all",
     "exam_center_attempt_violations",
     "exam_center_session_cancel",

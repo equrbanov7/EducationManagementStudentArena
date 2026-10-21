@@ -11,7 +11,11 @@ class AutosaveOccFrontendContractTests(SimpleTestCase):
     def test_conflict_pauses_all_automatic_retry_paths(self):
         """409-dan sonra yeni base ilə stale draft avtomatik yazıla bilməz."""
         config_source = (JS_DIR / "config.js").read_text(encoding="utf-8")
-        draft_source = (JS_DIR / "draft.js").read_text(encoding="utf-8")
+        # 2026-10-21: yazı yolu draft_send.js-ə, konflikt bloku resync.js-ə, taymer 409-u timers.js-ə köçüb.
+        draft_source = "\n".join(
+            (JS_DIR / name).read_text(encoding="utf-8")
+            for name in ("draft.js", "draft_send.js", "resync.js", "timers.js")
+        )
 
         self.assertIn("autosaveConflict: false", config_source)
         self.assertIn("ctx.autosaveConflict = true", draft_source)

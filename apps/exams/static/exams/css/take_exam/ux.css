@@ -66,10 +66,33 @@
     color: var(--ems-warning-800);
 }
 
-.exam-sync-status--conflict {
+.exam-sync-status--conflict,
+.exam-sync-status--secondTab {
     background: var(--exam-red-soft);
     border-color: var(--exam-red);
     color: var(--ems-danger-strong);
+}
+
+/* 2026-10-21: başqa tab/cihaz da yazır — cavablar birləşdirilir, bloklanmır (xəbərdarlıq). */
+.exam-sync-status--shared {
+    background: var(--exam-amber-soft);
+    border-color: var(--exam-amber);
+    color: var(--ems-warning-800);
+}
+
+/* 2026-10-21: zal imtahanının bloklu ikinci tabı — cavab sahələri bağlıdır. */
+.exam-form--second-tab .question-stage .slides-wrapper,
+.exam-form--second-tab .question-sidebar {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+.exam-sync-reload {
+    margin: 0 auto 0.75rem;
+}
+
+.exam-sync-reload[hidden] {
+    display: none;
 }
 
 .exam-sync-status--ok {
