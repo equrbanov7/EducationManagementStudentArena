@@ -13,6 +13,7 @@ from django.views.decorators.http import require_GET
 
 from apps.exams.models import StudentGroup
 from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.lookup_search import legacy_group_lookup_q, subject_lookup_q, unit_lookup_q
 from apps.exams.services.subject_labels import subject_option
 from apps.organizations.public import organization_role_user_queryset
 from core.roles import ProfileRole
@@ -80,10 +81,11 @@ def subject_search(request):
     query = (request.GET.get("q") or "").strip()
     qs = Subject.objects.filter(organization=organization)
     name_q = word_prefix_q(query, ("name",))
-    # Kod — ayırıcıya dözümlü alt-sətir (sahib 2026-09-26): «1203» → «QKU-1203».
-    code_q = tolerant_q(query, (), compact_fields=("code",))
-    if name_q is not None:
-        qs = qs.filter(name_q | code_q).annotate(
+    # 2026-10-21 (sahib: «aralı yazarkən də tapılsın»): tokenlər ad və kod arasında paylana bilər, söz sırası,
+    # ayırıcı («/», «-»), bitişik «634Qrafik» fərq etmir; kod — ayırıcıya dözümlü alt-sətir («1203» → «QKU-1203»).
+    lookup_q = subject_lookup_q(query)
+    if lookup_q is not None:
+        qs = qs.filter(lookup_q).annotate(
             search_rank=Case(
                 When(starts_with_q(query, "name"), then=Value(0)),
                 When(name_q, then=Value(1)),
@@ -200,7 +202,8 @@ def group_search(request):
         unit_qs = _units.exam_unit_candidates(request, organization)
         # «234king»/«234k ing» → «234 K ing», «233KE» → «233 KE»: ayırıcıya/diakritikaya dözümlü
         # (sahib 2026-09-21, 2026-09-26).
-        unit_q = tolerant_q(query, ("name", "code"), compact=True)
+        # 2026-10-21: ixtisas (ana qrup) adı da — etiket «634 ing — Dizayn (Qrafik)»; «qrafik 634», «634Qrafik».
+        unit_q = unit_lookup_q(query)
         if unit_q is not None:
             unit_qs = unit_qs.filter(unit_q)
         offset, limit = _page_bounds(request)
@@ -222,7 +225,7 @@ def group_search(request):
         return JsonResponse({"results": results, "has_more": has_more})
 
     qs = StudentGroup.objects.filter(organization=organization)
-    group_q = tolerant_q(query, ("name",), compact=True)
+    group_q = legacy_group_lookup_q(query)
     if group_q is not None:
         qs = qs.filter(group_q)
     qs = qs.order_by("name")
