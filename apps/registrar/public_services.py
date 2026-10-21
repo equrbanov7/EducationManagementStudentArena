@@ -4,6 +4,7 @@ from . import analytics  # noqa: F401
 from . import catalog_console  # noqa: F401
 from . import cohort_plans  # noqa: F401 — qrupun öz qəbul ili planı (workload generation, 2026-10-19)
 from . import course_groups  # noqa: F401
+from . import credit_source  # noqa: F401 — tələbənin fənn krediti: plan (fənn + semestr) → kataloq (R01, 2026-10-21)
 from . import dashboard_data  # noqa: F401
 from . import entry_standard  # noqa: F401
 from . import gradebook  # noqa: F401
@@ -89,6 +90,7 @@ __all__ = [
     "build_subject_catalog",
     "catalog_console",
     "course_groups",
+    "credit_source",
     "dashboard_data",
     "eligibility_rules",
     "entry_standard",

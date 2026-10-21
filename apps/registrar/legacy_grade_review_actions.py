@@ -36,6 +36,7 @@ from core.audit import log_action
 from core.constants import AuditAction
 
 from . import exam_score_entry
+from .audit_write import AuditWriteFailed, audit_failure_message
 from .legacy_grade_review import encode_category_codes, matched_category_codes
 from .models import LegacyGradeFact, LegacyGradeReview, LegacyGradeReviewDecision
 
@@ -178,15 +179,18 @@ def apply_correction(*, organization, fact_id, score, reason, note, evidence, ac
     # Açılış əhatəsi: `exam.*` daşıyan unit-scoped aktor yalnız öz alt-ağacına
     # yaza bilər. Servis qatının öz fail-closed yoxlaması.
     exam_score_entry.assert_offering_in_actor_scope(actor, organization, enrollment.offering)
-    entry = exam_score_entry.record_exam_score(
-        enrollment=enrollment,
-        score=score,
-        by_user=actor,
-        reason=reason,
-        note=note,
-        evidence=evidence,
-        request=request,
-    )
+    try:
+        entry = exam_score_entry.record_exam_score(
+            enrollment=enrollment,
+            score=score,
+            by_user=actor,
+            reason=reason,
+            note=note,
+            evidence=evidence,
+            request=request,
+        )
+    except AuditWriteFailed:  # R08: bal audit izi olmadan yazılmır (savepoint geri qayıdıb)
+        raise LegacyReviewError(audit_failure_message()) from None
     if entry is None:
         raise LegacyReviewError(
             pgettext(

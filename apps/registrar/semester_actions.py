@@ -53,6 +53,10 @@ from .semester_period_windows import WindowError, read_windows, validate_windows
 
 _CTX = "accounts.semester"
 
+#: R06 təsdiq protokolu: önizləmə görülüb (``1``) + təsdiqlənən qrup id-ləri (çoxlu sahə).
+FALLBACK_REVIEWED_FIELD = "fallback_reviewed"
+FALLBACK_CONFIRM_FIELD = "confirm_fallback"
+
 
 def _error(message, *, status=400, code="invalid", field=""):
     payload = {"ok": False, "error": code, "message": message}
@@ -259,13 +263,14 @@ def _generate(request, organization):
     if not programs:
         return _error(pgettext(_CTX, "İxtisas seçilməyib."), code="programs_required", field="programs")
 
-    result = generate_offerings(
-        organization=organization,
-        period=period,
-        programs=programs,
-        semester_number=semester_number,
-        actor=request.user,
-    )
+    # Rəy 2026-10-21 (R06): ən son plana düşən qruplar YALNIZ açıq təsdiqlə açılır (qapı serverdədir).
+    params = {"organization": organization, "period": period, "programs": programs, "semester_number": semester_number}
+    if request.POST.get(FALLBACK_REVIEWED_FIELD) != "1":
+        preview = generate_offerings(**params, dry_run=True)
+        if preview["cohort_fallbacks"]:
+            return _fallback_confirmation_required(preview["cohort_fallbacks"])
+    confirmed = {value.strip() for value in request.POST.getlist(FALLBACK_CONFIRM_FIELD) if value.strip()}
+    result = generate_offerings(**params, actor=request.user, confirmed_fallbacks=confirmed)
     if period.opening_status == "not_started" and result["created"]:
         period.opening_status = "generated"
         period.save(update_fields=["opening_status", "updated_at"])
@@ -283,9 +288,33 @@ def _generate(request, organization):
             "existing": result["existing"],
             "blocked": [item["label"] for item in result["blocked_programs"]],
             "cohort_fallback_groups": [item["group"] for item in result["cohort_fallbacks"]],
+            # R06: istifadəçinin təsdiq etdiyi ən son plan tətbiqləri (qrup → plan) və atlanan qruplar.
+            "cohort_fallback_confirmed": [_fallback_audit(item) for item in result["cohort_fallbacks"]],
+            "cohort_fallback_skipped": [_fallback_audit(item) for item in result["cohort_fallback_skipped"]],
         },
     )
     return JsonResponse({"ok": True, **{key: result[key] for key in result if key != "offering_ids"}})
+
+
+def _fallback_audit(item) -> dict:
+    keys = ("group", "group_id", "admission_year", "plan_id", "plan_year", "plan_version", "reason")
+    return {key: item.get(key) for key in keys}
+
+
+def _fallback_confirmation_required(fallbacks):
+    """Önizləmə (heç nə yazılmayıb): ən son plana düşən qruplar — istifadəçi siyahını təsdiqləməlidir."""
+    payload = {
+        "ok": False,
+        "error": "fallback_confirmation_required",
+        "message": pgettext(
+            _CTX,
+            "%(n)d qrupun qəbul ili üçün təsdiqlənmiş plan yoxdur — onlara ən son plan tətbiq olunacaq. "
+            "Aşağıdakı siyahıda hər qrupu ayrıca təsdiqləyin; təsdiqlənməyən qrup üçün açılış yaradılmır.",
+        )
+        % {"n": len(fallbacks)},
+        "fallbacks": fallbacks,
+    }
+    return JsonResponse(payload, status=409)
 
 
 def _send_to_chairs(request, organization):

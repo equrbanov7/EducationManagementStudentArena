@@ -22,8 +22,13 @@ Qayda və ardıcıllıq ``record_exam_score`` ilə EYNİDİR — qərar kömək�
    yaddaşda verilir — xəta YALNIZ həmin sətri dayandırır və heç bir yazı yarımçıq
    qalmır (əvvəlki sətir savepoint-inin semantikası);
 5. yazılar toplu: ``FinalGrade`` (``bulk_update`` + ``bulk_create``), qiymət audit izi
-   (best-effort, öz savepoint-ində — ``log_grade_changes`` siyasəti), ``ResitRecord``
+   (FAIL-CLOSED, öz savepoint-ində — rəy 2026-10-21, R08), ``ResitRecord``
    (yarat / səbəbi yenilə / sil), ``ExamScoreEntry`` və ``log_action`` sətirləri.
+
+AUDIT FAIL-CLOSED (R08): audit sətirləri (qiymət izi və ya daxiletmə jurnalının ``log_action``-u)
+yazılmasa bütün toplu yazı geri qayıdır (bal audit izi olmadan commit olunmur) və nəticədə yazılacaq
+hər sətir ``failed`` kimi aydın mesajla qaytarılır — çağıranlar (forma, fayl idxalı) onu mövcud
+xəta siyahısı kimi göstərir. Sətir-sətir yolda yalnız həmin sətir geri qayıdır.
 
 Eyni qeydiyyat siyahıda iki dəfə gələrsə (forma və idxal bunu etmir — idxal dublikatı
 rədd edir) köhnə sətir-sətir yol (``record_exam_score``) işləyir.
@@ -31,8 +36,10 @@ rədd edir) köhnə sətir-sətir yol (``record_exam_score``) işləyir.
 
 from __future__ import annotations
 
+import logging
+
 from django.core.exceptions import ValidationError
-from django.db import transaction
+from django.db import DatabaseError, transaction
 from django.utils import timezone
 
 from core.audit import log_actions
@@ -40,7 +47,7 @@ from core.audit import log_actions
 from . import exam_score_entry as entry_service
 from . import exam_score_questions as questions
 from . import finals, finals_batch, grade_audit, gradebook
-from .audit_write import create_audit_rows
+from .audit_write import AuditWriteFailed, audit_failure_message, create_audit_rows
 from .corrections import correction_author_name
 from .models import Enrollment, ExamScoreEntry, FinalGrade, ResitRecord, ResitStatus
 
@@ -48,6 +55,8 @@ from .models import Enrollment, ExamScoreEntry, FinalGrade, ResitRecord, ResitSt
 #: və kilidlənmiş sətirlərdir (FK mövcudluq sorğusu lazımsızdır), ``entered_by`` / ``sheet``
 #: tək yolda da buraxılır. Fayl validatorları, seçimlər və ``clean()`` İŞLƏYİR.
 _CLEAN_EXCLUDE = ["entered_by", "sheet", "organization", "enrollment"]
+
+logger = logging.getLogger(__name__)
 
 _INACTIVE = "inactive"
 _FAILED = "failed"
@@ -66,8 +75,14 @@ def save_rows(*, offering, rows, by_user, request=None, sheet=None, policy):
         return _save_sequential(
             offering=offering, ordered=ordered, by_user=by_user, request=request, sheet=sheet, policy=policy
         )
-    with transaction.atomic():
-        return _BulkSave(offering=offering, by_user=by_user, request=request, sheet=sheet, policy=policy).run(ordered)
+    saver = _BulkSave(offering=offering, by_user=by_user, request=request, sheet=sheet, policy=policy)
+    try:
+        with transaction.atomic():
+            return saver.run(ordered)
+    except AuditWriteFailed:
+        # R08: savepoint bütün toplu yazını geri qaytarıb — heç bir bal audit izi olmadan qalmayıb.
+        logger.exception("exam_score_bulk: audit write failed — %d row(s) rolled back", len(ordered))
+        return saver.audit_failed_result()
 
 
 def _active_enrollments(offering, *related):
@@ -93,12 +108,20 @@ class _BulkSave:
         self.policy = policy
         self.scheme = gradebook.ensure_assessment_scheme(offering=offering)
         self.cap = finals.exam_score_max(self.scheme)
+        self.slots: list = []
+
+    def audit_failed_result(self) -> dict:
+        """Audit xətasından sonra (hamısı geri qayıdıb): yazılacaq sətirlər ``failed`` + aydın mesaj."""
+        for slot in self.slots:
+            if slot["state"] == _WRITTEN:
+                slot["state"], slot["message"] = _FAILED, audit_failure_message()
+        return _result(self.slots)
 
     # ── 1. sətirlər: aktivlik + balın təmizlənməsi (sorğusuz) ────────────────
 
     def run(self, ordered):
         enrollments = _active_enrollments(self.offering, "student", "organization")
-        slots, pending = [], []
+        slots, pending = self.slots, []
         for row in ordered:
             key = str(row.get("enrollment_id") or "")
             enrollment = enrollments.get(key)
@@ -259,20 +282,23 @@ class _BulkSave:
             FinalGrade.objects.bulk_create(created)
         if updated:
             FinalGrade.objects.bulk_update(updated, ["exam_score", "entered_by", "updated_at"])
-        create_audit_rows(grade_rows)  # best-effort — ``log_grade_changes`` ilə eyni siyasət
+        create_audit_rows(grade_rows, fail_closed=True)  # R08: rəsmi bal audit izi olmadan commit olunmur
         self._sync_resits(writes, batch)
         ExamScoreEntry.objects.bulk_create([slot["entry"] for slot in writes])
-        log_actions(
-            entry_service.entry_log(
-                slot["entry"],
-                by_user=self.by_user,
-                organization=slot["enrollment"].organization,
-                policy=self.policy,
-                request=self.request,
-                cleaned_questions=slot["questions"],
+        try:
+            log_actions(
+                entry_service.entry_log(
+                    slot["entry"],
+                    by_user=self.by_user,
+                    organization=slot["enrollment"].organization,
+                    policy=self.policy,
+                    request=self.request,
+                    cleaned_questions=slot["questions"],
+                )
+                for slot in writes
             )
-            for slot in writes
-        )
+        except DatabaseError as exc:  # savepoint-siz INSERT — xarici ``atomic`` hamısını geri qaytarır
+            raise AuditWriteFailed("exam score entry audit") from exc
 
     def _sync_resits(self, writes, batch):
         """``finals.evaluate_resit`` — eyni qərar (``resit_action``), yazılar toplu."""
@@ -373,6 +399,10 @@ def _save_sequential(*, offering, ordered, by_user, request, sheet, policy):
                 )
         except ValidationError as exc:
             _fail(slot, exc)
+            continue
+        except AuditWriteFailed:  # R08: yalnız bu sətrin savepoint-i geri qayıdıb
+            logger.exception("exam_score_bulk: audit write failed for enrollment %s", key)
+            slot["state"], slot["message"] = _FAILED, audit_failure_message()
             continue
         slot["state"] = _SKIPPED if entry is None else _WRITTEN
     return _result(slots)

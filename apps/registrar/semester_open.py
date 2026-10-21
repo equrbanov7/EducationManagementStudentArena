@@ -47,10 +47,18 @@ from django.utils.translation import pgettext
 from core.permissions import has_permission
 
 from . import services
-from .cohort_plans import COHORT, fallback_item, fallback_messages, period_cohort_warnings, plan_index_for
+from .cohort_plans import (
+    COHORT,
+    fallback_item,
+    fallback_messages,
+    period_cohort_warnings,
+    plan_index_for,
+    skipped_fallback_messages,
+)
 from .curriculum_registry import programs_without_approved_plan
 from .models import CourseOffering, CurriculumSubject, Program, StudentAcademicRecord
 from .read_scope import offering_scope_q, program_scope_q, semester_read_scope, unit_scope_q
+from .semester_howto import semester_howto  # noqa: F401 — re-eksport (2026-10-21 köçürülüb)
 from .semester_period_windows import period_edit_prefill
 from .semester_readiness import ISSUES, approved_syllabus_offering_ids, offering_issues, readiness_by_chair
 
@@ -121,20 +129,29 @@ def approved_plan_for(organization, program):
 
 
 @transaction.atomic
-def generate_offerings(*, organization, period, programs, semester_number, actor=None):
+def generate_offerings(
+    *, organization, period, programs, semester_number, actor=None, confirmed_fallbacks=None, dry_run=False
+):
     """Təsdiqlənmiş plandan açılış yaradır — İDEMPOTENT, heç nə silmir.
 
     Qaytarır: ``{"created", "existing", "skipped_no_plan", "skipped_no_group",
-    "skipped_electives", "enrolled", "blocked_programs", "offering_ids", "cohort_fallbacks", "warnings"}``.
+    "skipped_electives", "enrolled", "blocked_programs", "offering_ids", "cohort_fallbacks",
+    "cohort_fallback_skipped", "warnings"}``.
     ``skipped_no_group`` — ixtisasda bu semestri oxuyan (kursu uyğun) qrup yoxdur.
     2026-10-19: hər qrup ÖZ qəbul ilinin planından açılır (``cohort_plans``); kohort planı yoxdursa ən son
     plan + ``cohort_fallbacks`` / ``warnings``. Köhnə qayda ilə yaranmış açılışlara toxunulmur.
+
+    Rəy 2026-10-21 (R06): ``confirmed_fallbacks`` — istifadəçinin TƏSDİQ etdiyi qrup id-ləri (mətn). Verilibsə
+    ən son plana düşən, amma təsdiqlənməyən qrup ATLANIR (``cohort_fallback_skipped`` + xəbərdarlıq);
+    ``None`` — servis çağıranları üçün köhnə davranış (bütün fallback-lər tətbiq olunur). ``dry_run`` —
+    heç nə yazılmır, yalnız qərarlar (önizləmə: hansı qrup hansı plana düşür).
     """
     counters = {"created": 0, "existing": 0, "skipped_no_plan": 0, "skipped_no_group": 0, "skipped_electives": 0}
     blocked: list = []
     offering_ids: list = []
     to_enroll: list = []
     fallbacks: list = []
+    skipped_fallbacks: list = []
 
     for program in programs:
         index = plan_index_for(organization, program)
@@ -153,19 +170,26 @@ def generate_offerings(*, organization, period, programs, semester_number, actor
         by_plan: dict = {}
         for group in groups:
             plan, status, year = index.for_group(group)
-            by_plan.setdefault(plan.pk, (plan, []))[1].append(group)
             if status != COHORT:
-                fallbacks.append(fallback_item(program, group, year, plan, status))
+                item = fallback_item(program, group, year, plan, status)
+                if confirmed_fallbacks is not None and str(group.pk) not in confirmed_fallbacks:
+                    skipped_fallbacks.append(item)  # R06: təsdiqsiz ən son plan tətbiq olunmur
+                    continue
+                fallbacks.append(item)
+            by_plan.setdefault(plan.pk, (plan, []))[1].append(group)
+        if dry_run:
+            continue
         for plan, plan_groups in by_plan.values():
             _open_plan_rows(organization, period, plan, plan_groups, semester_number, counters, offering_ids, to_enroll)
 
-    counters["enrolled"] = _enroll_new_offerings(to_enroll, actor=actor)
+    counters["enrolled"] = _enroll_new_offerings(to_enroll, actor=actor) if not dry_run else 0
     return {
         **counters,
         "blocked_programs": blocked,
         "offering_ids": offering_ids,
         "cohort_fallbacks": fallbacks,
-        "warnings": fallback_messages(fallbacks),
+        "cohort_fallback_skipped": skipped_fallbacks,
+        "warnings": fallback_messages(fallbacks) + skipped_fallback_messages(skipped_fallbacks),
     }
 
 
@@ -219,75 +243,6 @@ def _enroll_new_offerings(pairs, *, actor) -> int:
         offerings=fresh, by_user=by_user, reason="Semestr açılışı: plandan açılış — qrupun tələbələri"
     )
     return int(report["created"]) + int(report["guest_added"])
-
-
-def semester_howto(steps: list) -> list:
-    """«Necə işləyir» kartı — hər addımda NƏ edilir, HANSI düymə, KİM edir.
-
-    Stepper yalnız vəziyyəti göstərir; bu mətnlər prosesi düymə axtarmadan
-    başa düşmək üçündür (sahib rəyi 2026-09-07: «izahı biraz çətindi»).
-    Vəziyyət (`done/current/todo/error`) stepper addımından götürülür.
-    """
-    items = [
-        {
-            "title": pgettext(_CTX, "Tədris dövrünü seçin və plandan açılış yaradın"),
-            "text": pgettext(
-                _CTX,
-                "Yuxarıdakı süzgəcdən semestri seçin. «Plandan açılış yarat» həmin semestri oxuyan (kursu uyğun) "
-                "hər qrup üçün qrupun ÖZ qəbul ilinin təsdiqlənmiş tədris planının (yoxdursa ən son planın) məcburi "
-                "fənlərindən açılış yaradır və qrupun aktiv "
-                "tələbələrini dərhal qeydiyyata alır; seçmə fənlər qrupun seçimi ilə açılır. Mövcud sətir "
-                "təkrarlanmır, heç nə silinmir. «Plan yoxdur» ixtisaslar üçün sətir yaranmır — əvvəlcə «Tədris "
-                "planı» bölməsində planı təsdiqləyin.",
-            ),
-            "button": pgettext(_CTX, "Plandan açılış yarat"),
-            "who": pgettext(_CTX, "Tədris şöbəsi"),
-        },
-        {
-            "title": pgettext(_CTX, "Kafedralara göndərin"),
-            "text": pgettext(
-                _CTX,
-                "Açılış sətirləri hazır olanda «Kafedraya göndər» kafedra rəhbərlərinə bildiriş göndərir — "
-                "bundan sonra onlar «Dərs yükü» bölməsində öz fənlərinə müəllim təyin edə bilir.",
-            ),
-            "button": pgettext(_CTX, "Kafedraya göndər"),
-            "who": pgettext(_CTX, "Tədris şöbəsi"),
-        },
-        {
-            "title": pgettext(_CTX, "Kafedra müəllim təyin edir"),
-            "text": pgettext(
-                _CTX,
-                "Hər açılışa müəllim təyin olunmalıdır. Aşağıdakı «Kafedralar üzrə açılış» cədvəli neçə sətrin "
-                "müəllim gözlədiyini göstərir; açılış sətrindəki «Müəllim» əməli ilə buradan da təyin etmək olar.",
-            ),
-            "button": pgettext(_CTX, "Dərs yükü → Müəllim təyin et"),
-            "who": pgettext(_CTX, "Kafedra rəhbəri"),
-        },
-        {
-            "title": pgettext(_CTX, "Jurnallar açılır"),
-            "text": pgettext(
-                _CTX,
-                "Müəllim təyin olunan kimi həmin fənnin elektron jurnalı avtomatik yaranır. "
-                "Jurnalı olmayan sətir müəllimi olmayan sətirdir — ayrıca əməl tələb olunmur.",
-            ),
-            "button": "",
-            "who": pgettext(_CTX, "Sistem (avtomatik)"),
-        },
-        {
-            "title": pgettext(_CTX, "Semestri kilidləyin"),
-            "text": pgettext(
-                _CTX,
-                "Üç şərt ödənəndə (plan təsdiqlənib, bütün açılışlara müəllim var, jurnallar açılıb) "
-                "«Semestri kilidlə» aktivləşir. Kilid açılış sətirlərini dondurur; onu yalnız ayrıca "
-                "səlahiyyətli şəxs səbəb yazmaqla aça bilər.",
-            ),
-            "button": pgettext(_CTX, "Semestri kilidlə"),
-            "who": pgettext(_CTX, "Tədris şöbəsi rəhbəri"),
-        },
-    ]
-    for item, step in zip(items, steps):
-        item["state"] = step.get("state", "todo")
-    return items
 
 
 def coverage(organization, period, *, scope_q=None) -> dict:

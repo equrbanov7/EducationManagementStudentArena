@@ -56,7 +56,7 @@ from apps.registrar.models import (
     ResitRecord,
     StudentAcademicRecord,
 )
-from apps.registrar.public import analytics
+from apps.registrar.public import analytics, credit_source
 from apps.registrar.public import eligibility_rules as exam_eligibility
 from apps.registrar.public import entry_standard, selfwork_points
 
@@ -73,6 +73,17 @@ _DEFAULT_SCHEME = (
     analytics._DEFAULT_MIN_EXAM,
 )
 _DEFAULT_ABSENCE_LIMIT = analytics._DEFAULT_ABSENCE_LIMIT
+
+
+class _PeriodFields:
+    """Kredit həlledicisinin dövrdən oxuduğu iki sahə (``academic_year``, ``start_date``) — model obyekti yox."""
+
+    __slots__ = ("academic_year", "start_date")
+
+    def __init__(self, academic_year, start_date):
+        self.academic_year = academic_year
+        self.start_date = start_date
+
 
 #: Giriş balına töhfə verən komponent növləri (generic = dərs cəmini ƏVƏZ edir,
 #: kollokvium = həmişə ÜSTƏGƏL) — ``analytics.build_evaluation_maps_for`` güzgüsü.
@@ -196,7 +207,8 @@ def _offering_info(offering_ids, *, with_bits=False) -> tuple[dict, list, dict]:
     """``offering_id`` (mətn) → açılışın bütün sabitləri, tək demət halında.
 
     Demət: ``(entry_max, pass_threshold, min_exam, komponentlidir?,
-    auditoriya_saatı, kredit, donmuşdur?, midterm_rejimi?, sərbəst_iş_komponenti_var?)``.
+    auditoriya_saatı, kredit, donmuşdur?, midterm_rejimi?, sərbəst_iş_komponenti_var?, fənn_id, dövr)``.
+    ``kredit`` KATALOQ dəyəridir — tələbənin plan krediti (R01) döngüdə :mod:`credit_source` ilə həll olunur.
     Rejim (:mod:`apps.registrar.entry_standard`) açılış sətrinin ÖZÜNDƏN — dövr sahələri və
     təşkilatın ``midterm_from_year`` açarı eyni sorğuda JOIN-lə oxunur (əlavə sorğu yoxdur).
 
@@ -243,9 +255,12 @@ def _offering_info(offering_ids, *, with_bits=False) -> tuple[dict, list, dict]:
             "period__academic_year",
             "period__start_date",
             "organization__settings__registrar__midterm_from_year",
+            "subject_id",
+            "period_id",
         )
     )
-    for offering_id, key, lesson_hours, ects, academic_year, start_date, from_year_raw in rows:
+    periods: dict = {}
+    for offering_id, key, lesson_hours, ects, academic_year, start_date, from_year_raw, subject_id, period_id in rows:
         entry_max, pass_threshold, min_exam = schemes.get(key, _DEFAULT_SCHEME)
         # ``exam_eligibility.lesson_hours_for`` güzgüsü: kanonik saat 0/None
         # olduqda açılışın bütün dərslərinin saat cəmi işlədilir.
@@ -268,6 +283,9 @@ def _offering_info(offering_ids, *, with_bits=False) -> tuple[dict, list, dict]:
             offering_id in frozen,
             midterm,
             key in with_selfwork,
+            subject_id,
+            # Dövrün iki sahəsi (kredit həlledicisinin semestr seçimi üçün) — sorğusuz obyekt-əvəzi, dövr başına bir.
+            periods.setdefault(period_id, _PeriodFields(academic_year, start_date)),
         )
     bits = entry_standard.activity_bits_map(midterm_keys) if with_bits and midterm_keys else {}
     return info, lesson_source_ids, {midterm_keys[oid]: value for oid, value in bits.items()}
@@ -300,6 +318,10 @@ def accumulate_summary(organization, enrollment_qs, acc) -> None:
     exams = _exam_map(enrollment_ids)
     resits = _resit_map(enrollment_ids)
     records = _record_map(organization, flat.values("student_id"))
+    # R01: tələbənin plan krediti (fənn + semestr → kataloq) — 2 sabit sorğu, sətir başına lüğət axtarışı.
+    credits = credit_source.resolver_for_students(
+        organization, flat.values("student_id"), subject_ids={row[9] for row in info.values()}
+    )
 
     # (açılış, hədd%) → (icazəli saat, məxrəc yararlıdır?) — ``resolve``-un
     # arifmetikası açılış başına təkrarlanmasın deyə yaddaşda saxlanılır.
@@ -327,8 +349,11 @@ def accumulate_summary(organization, enrollment_qs, acc) -> None:
             frozen,
             midterm,
             has_selfwork,
+            subject_id,
+            period,
         ) = info[offering_key]
         limit, exempt = records.get(student_key, (_DEFAULT_ABSENCE_LIMIT, False))
+        credit = credits.credit(student_key, subject_id, period=period, catalogue=credit)
 
         # ── Giriş balı (gradebook.entry_score_for güzgüsü) ────────────────────
         totals = lesson_totals.get(enrollment_key)

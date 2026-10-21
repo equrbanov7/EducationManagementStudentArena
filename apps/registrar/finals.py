@@ -343,7 +343,11 @@ def set_exam_score(*, enrollment, score, by_user=None, source_note=""):
     ``source_note`` — audit izində bal sətrinin yanına yazılan MƏNBƏ qeydi
     (məsələn "imtahan mərkəzi · avtomatik"): aktoru olmayan sistem yazılarının
     tarixçədə boş "kim?" xanası ilə qalmaması üçün (2026-08 auditi, G7).
-    İDEMPOTENT: ``get_or_create`` + yalnız real dəyişiklikdə audit."""
+    İDEMPOTENT: ``get_or_create`` + yalnız real dəyişiklikdə audit.
+
+    AUDIT FAIL-CLOSED (rəy 2026-10-21, R08): bal, təkrar balı və bonus audit sətri yazılmasa
+    ``audit_write.AuditWriteFailed`` atılır və bu funksiyanın tranzaksiyası (savepoint) geri qayıdır —
+    rəsmi bal izsiz qalmır. İstifadəçi yolları xətanı göstərir, fon körpüləri loglayıb sayır."""
     _lock_enrollment(enrollment)
     if not _is_current_enrollment(enrollment):
         return None
@@ -362,6 +366,7 @@ def set_exam_score(*, enrollment, score, by_user=None, source_note=""):
             by_user=by_user,
             kind="final",
             changes=[exam_score_change(enrollment, old_score, new_score, source_note=source_note)],
+            fail_closed=True,  # R08 (2026-10-21): rəsmi bal audit sətri olmadan commit olunmur
         )
     evaluate_resit(enrollment=enrollment, by_user=by_user)
     return final_grade
@@ -407,6 +412,7 @@ def set_resit_score(*, enrollment, score, by_user=None):
                     "new": grade_audit.score_repr(resit.resit_score),
                 }
             ],
+            fail_closed=True,
         )
     return resit
 
@@ -443,6 +449,7 @@ def set_final_extras(*, enrollment, bonus=None, comment=None, by_user=None):
                         "new": grade_audit.score_repr(value),
                     }
                 ],
+                fail_closed=True,
             )
             final_grade.bonus = value
             changed_fields.append("bonus")

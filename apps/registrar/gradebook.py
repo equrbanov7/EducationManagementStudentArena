@@ -19,7 +19,15 @@ from django.db.models import Count
 from django.utils import timezone
 
 from apps.registrar import grade_audit  # noqa: F401 — `gradebook.grade_audit` köhnə giriş yolu (testlər/çağıranlar)
-from apps.registrar import absence_limit, activity_kinds, exam_eligibility, journal_window, read_memo, services
+from apps.registrar import (
+    absence_limit,
+    activity_kinds,
+    credit_source,
+    exam_eligibility,
+    journal_window,
+    read_memo,
+    services,
+)
 from apps.registrar.models import (
     AssessmentScheme,
     AttendanceStatus,
@@ -347,7 +355,9 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
 # ── Tələbə görünüşü ("Qiymətlərim") ──────────────────────────────────────────
 
 
-def get_student_journal_summary(*, record, period, semester_number, enrollments=None, hours_map=None, frozen_ids=None):
+def get_student_journal_summary(
+    *, record, period, semester_number, enrollments=None, hours_map=None, frozen_ids=None, credits=None
+):
     """Per-subject entry score + attendance for the student view.
 
     ⚠️ **9-cu səth — QAYIB SAATI DENORMALLAŞMIŞ SAYĞACDAN GƏLİR.**
@@ -390,6 +400,12 @@ def get_student_journal_summary(*, record, period, semester_number, enrollments=
         row["offering_id"]: row["c"]
         for row in Lesson.objects.filter(offering_id__in=offering_ids).values("offering_id").annotate(c=Count("id"))
     }
+    # R01: tələbənin plan krediti (fənn + semestr → kataloq); «Fənlərim» onu ARTIQ hesablayıb ötürür.
+    if credits is None and record is not None:
+        credits = credit_source.credits_for_offerings_and_curriculum(
+            [e.offering for e in enrollments], record.curriculum_id, period=period
+        )
+    credits = credits or {}
 
     subjects = []
     for enrollment in enrollments:
@@ -416,7 +432,7 @@ def get_student_journal_summary(*, record, period, semester_number, enrollments=
             {
                 "enrollment": enrollment,
                 "subject": offering.subject,
-                "ects": offering.subject.ects,
+                "ects": credits.get(offering.id, offering.subject.ects),
                 "kind": enrollment.kind,
                 "journal": {
                     "lessons_held": lessons_held,

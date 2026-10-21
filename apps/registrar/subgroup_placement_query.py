@@ -56,7 +56,8 @@ def subject_outcomes(*, student, organization, exclude_period_id=None, subject_i
                 "subject_id": str(subject.pk),
                 "code": subject.code,
                 "name": subject.name,
-                "ects": int(subject.ects or 0),
+                # Tələbənin krediti (plan → kataloq, ``credit_source``) — ``evaluate_enrollment`` onu artıq həll edib.
+                "ects": int(result.get("credit") or 0),
                 "passed": False,
                 "failed": False,
                 "attempts": 0,
@@ -206,7 +207,7 @@ def candidate_offerings(*, organization, student, record, subject_id, period, ca
     own_slots = own_schedule(
         organization=organization, student=student, record=record, period=period, exclude_offering_ids=conflict_ids
     )
-    plan_credits = credit_load.plan_credit_map(record.curriculum_id, [subject_id])
+    plan_credits = credit_load.plan_credit_map(record.curriculum_id, [subject_id], period=period)
     period_open = guest_roster.period_allows_roster(period)
     rows = []
     for offering in offerings:

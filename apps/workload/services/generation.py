@@ -208,7 +208,7 @@ def generate_rows_from_plan(*, task, actor, program_ids=None, request=None) -> d
     if not programs:
         raise WorkloadDenied("workload.no_program", "İxtisas seçilməyib və ya aktiv ixtisas yoxdur.")
 
-    from apps.registrar.public import cohort_plans
+    from apps.registrar.public import cohort_plans, credit_source
 
     fallbacks: list = []
     group_map = _groups_by_specialty(organization, specialty_ids, task.academic_year)
@@ -247,7 +247,7 @@ def generate_rows_from_plan(*, task, actor, program_ids=None, request=None) -> d
         course = max(math.ceil(semester / 2), 1) if semester else 0
         groups = [unit for unit, group_course in group_map.get(program.specialty_unit_id, []) if group_course == course]
 
-        credits = int(plan_row.credits or getattr(plan_row.subject, "ects", 0) or 0)
+        credits = credit_source.plan_row_credit(plan_row)  # plan sətri (> 0) → kataloq (R01, registrar həlledicisi)
         row = TeachingTaskRow(
             organization=organization,
             task=task,

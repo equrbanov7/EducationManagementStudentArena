@@ -9,8 +9,9 @@ QAYDA
 ─────
 * Sayılan yazılışlar — dövrün ``enrolled`` / ``completed`` qeydiyyatları. ``dropped`` (geri götürülmüş, «Fəndən
   azad», birləşmədə əvəzlənmiş) və ``suspended`` (akademik məzuniyyət / xaric — dondurulmuş) SAYILMIR.
-* Fənnin krediti — tələbənin TƏDRİS PLANI sətrindəki kredit (``CurriculumSubject.credits`` > 0), yoxdursa
-  kataloq dəyəri ``Subject.ects`` (plan sətri kataloqu override edir — ``curriculum.py`` şərhi).
+* Fənnin krediti — tələbənin TƏDRİS PLANI sətrindəki kredit (həmin fənn + həmin SEMESTR, ``credits`` > 0), yoxdursa
+  kataloq dəyəri ``Subject.ects``. Qayda və semestr seçimi YEGANƏ yerdədir: :mod:`apps.registrar.credit_source`
+  (R01, 2026-10-21 — transkript / ÜOMG / 25% haqqı da eyni həlledicidən oxuyur).
 * «Alt qrup» — ``guest_roster.row_is_guest`` ilə EYNİ predikat: ``source_group`` dolu VƏ açılışın qrupu
   tələbənin CARİ qrupu deyil (rəsmi köçürmədən sonra provenans qalır, amma sətir artıq «öz» fənnidir).
 * Hədd — «Sistem tənzimləmələri» (``credits.max_per_semester`` / ``credits.max_with_subgroup``,
@@ -25,7 +26,8 @@ from __future__ import annotations
 
 from core import runtime_settings
 
-from .models import AcademicStatus, CurriculumSubject, Enrollment, StudentAcademicRecord
+from . import credit_source
+from .models import AcademicStatus, Enrollment, StudentAcademicRecord
 
 #: Kredit yükünə düşən qeydiyyat statusları (bax modul şərhi).
 LOAD_STATUSES = (Enrollment.Status.ENROLLED, Enrollment.Status.COMPLETED)
@@ -49,17 +51,21 @@ def active_record(student, organization, *, lock=False):
     return queryset.select_related("group", "program", "curriculum").order_by("-created_at").first()
 
 
-def plan_credit_map(curriculum_id, subject_ids) -> dict:
-    """``{subject_id: plan krediti}`` — tələbənin planındakı override (yalnız > 0), TƏK sorğu."""
+def plan_credit_map(curriculum_id, subject_ids, *, period=None) -> dict:
+    """``{subject_id: plan krediti}`` — planın override-ı (yalnız > 0), TƏK sorğu.
+
+    Semestrə həssasdır (R01 nit): fənn planda bir neçə semestrdədirsə *period*-un plan semestri seçilir
+    (:func:`credit_source.pick_credit`); ``period`` verilməsə ən kiçik semestr (köhnə davranış).
+    """
     subject_ids = [value for value in subject_ids if value]
     if not curriculum_id or not subject_ids:
         return {}
-    rows = CurriculumSubject.objects.filter(
-        curriculum_id=curriculum_id, subject_id__in=subject_ids, credits__gt=0
-    ).values_list("subject_id", "credits")
+    resolver = credit_source.resolver_for_curriculum(curriculum_id, subject_ids)
     result: dict = {}
-    for subject_id, credits in rows:
-        result.setdefault(subject_id, int(credits))
+    for subject_id in subject_ids:
+        value = resolver.curriculum_credit(curriculum_id, subject_id, period=period, catalogue=0)
+        if value > 0:
+            result[subject_id] = value
     return result
 
 
@@ -119,7 +125,7 @@ def credit_load(student, period, *, organization=None, record=None) -> dict:
         .select_related("offering__subject", "offering__group")
         .order_by("offering__subject__code")
     )
-    plan_credits = plan_credit_map(record.curriculum_id, [e.offering.subject_id for e in enrollments])
+    plan_credits = plan_credit_map(record.curriculum_id, [e.offering.subject_id for e in enrollments], period=period)
     items = []
     own = subgroup = 0
     for enrollment in enrollments:

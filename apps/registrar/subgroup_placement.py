@@ -135,7 +135,7 @@ def evaluate(*, student, offering, actor, release_source=False, record=None, che
         found.append(_error(errors.CAPACITY_FULL))
 
     load = credit_load.credit_load(student, period, organization=organization, record=record)
-    plan_credits = credit_load.plan_credit_map(record.curriculum_id, [offering.subject_id])
+    plan_credits = credit_load.plan_credit_map(record.curriculum_id, [offering.subject_id], period=period)
     credits = credit_load.offering_credit(offering, plan_credits)
     released = (
         sum(credit_load.offering_credit(row.offering, plan_credits) for row in conflicts) if release_source else 0

@@ -115,6 +115,10 @@ def other_period_subject_rows(organization, record, period, semester_number, exi
     frozen_ids = exam_eligibility.frozen_offering_ids(offering_ids)
     hours_map = exam_eligibility.lesson_hours_map(offering_ids)
     limit_percent = record.program.absence_limit_percent
+    # R01: hər dövrün öz plan semestri (açılışın dövrü keşdədir) — TƏK sorğu.
+    from apps.registrar import credit_source
+
+    credits = credit_source.credits_for_offerings_and_curriculum([e.offering for e in extra], record.curriculum_id)
     rows = []
     for enrollment in extra:
         subject = enrollment.offering.subject
@@ -122,7 +126,7 @@ def other_period_subject_rows(organization, record, period, semester_number, exi
             {
                 "enrollment": enrollment,
                 "subject": subject,
-                "ects": subject.ects,
+                "ects": credits.get(enrollment.offering_id, subject.ects),
                 "kind": enrollment.kind,
                 "course": enrollment.offering.course,
                 "offering": enrollment.offering,

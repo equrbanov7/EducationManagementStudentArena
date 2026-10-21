@@ -47,6 +47,9 @@ BASELINE = {
 #: per-request memo-dadır, bölmələr versiya obyektinə PREFETCH olunur və jurnalın mövzu
 #: mənbəyi eyni keşdən oxuyur — ona görə ``journal_selfwork_tab`` baseline-dən AŞAĞIDIR.
 BOARD_SYLLABUS_ALLOWANCE = 2
+#: 2026-10-21 (R01): vahid kredit mənbəyi kredit oxuyan səhifələrə SABİT 2 sorğu əlavə edir (toplu, N+1 deyil).
+CREDIT_SOURCE_ALLOWANCE = 2
+CREDIT_KEYS = ("period_analytics", "academic_summary", "student_subjects")
 
 
 class SelfWorkQueryBudgetTest(SelfWorkLegacyFixture, TestCase):
@@ -118,6 +121,7 @@ class SelfWorkQueryBudgetTest(SelfWorkLegacyFixture, TestCase):
         for state, counts in measured.items():
             for key, value in counts.items():
                 limit = BASELINE[state][key] + (BOARD_SYLLABUS_ALLOWANCE if key == "board" else 0)
+                limit += CREDIT_SOURCE_ALLOWANCE if key in CREDIT_KEYS else 0
                 self.assertLessEqual(value, limit, f"{state}/{key}: {value} > {limit}")
 
     def test_structured_board_reads_no_syllabus(self):

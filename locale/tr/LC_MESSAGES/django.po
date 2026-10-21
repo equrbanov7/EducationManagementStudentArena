@@ -106486,3 +106486,69 @@ msgstr "İtiraz kararında belge zorunludur"
 msgctxt "core.runtime_settings"
 msgid "Yandırılıbsa apellyasiya qərarı (qəbul/rədd) əsaslandırıcı sənəd (PDF, JPG və ya PNG, 10 MB-dək) yüklənmədən yadda saxlanılmır. Söndürüləndə sənəd yükləmək opsionaldır. Qərarı verən müəllimin seçilməsi hər iki halda məcburidir."
 msgstr "Açıksa itiraz kararı (kabul/ret) gerekçe belgesi (PDF, JPG veya PNG, 10 MB'a kadar) yüklenmeden kaydedilmez. Kapalıysa belge yüklemek isteğe bağlıdır. Kararı veren öğretmenin seçilmesi her iki durumda da zorunludur."
+
+msgctxt "profile.subjects"
+msgid "Kredit hədəfinə çatılıb"
+msgstr "Kredi hedefine ulaşıldı"
+
+msgctxt "registrar.audit"
+msgid "Audit izi yazıla bilmədi — bal saxlanmadı. Bir az sonra yenidən cəhd edin; təkrarlanarsa İKT şöbəsinə bildirin."
+msgstr "Denetim kaydı yazılamadı — puan kaydedilmedi. Biraz sonra yeniden deneyin; tekrarlanırsa BT birimine bildirin."
+
+msgctxt "accounts.semester"
+msgid "Qrupun qəbul ili bilinmir"
+msgstr "Grubun kabul yılı bilinmiyor"
+
+msgctxt "accounts.semester"
+msgid "Bu qəbul ili üçün təsdiqlənmiş plan yoxdur"
+msgstr "Bu kabul yılı için onaylanmış plan yok"
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "Ən son planın tətbiqi təsdiqlənmədiyi üçün %(n)d qrup atlandı (açılış yaradılmadı): %(groups)s. Lazımdırsa qrupun qəbul ili üçün planı təsdiqləyin və ya açılışı yenidən təsdiqlə başladın."
+msgstr "En son planın uygulanması onaylanmadığı için %(n)d grup atlandı (açılış oluşturulmadı): %(groups)s. Gerekirse grubun kabul yılı için planı onaylayın veya açılışı onayla yeniden başlatın."
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "%(n)d qrupun qəbul ili üçün təsdiqlənmiş plan yoxdur — onlara ən son plan tətbiq olunacaq. Aşağıdakı siyahıda hər qrupu ayrıca təsdiqləyin; təsdiqlənməyən qrup üçün açılış yaradılmır."
+msgstr "%(n)d grubun kabul yılı için onaylanmış plan yok — bunlara en son plan uygulanacak. Aşağıdaki listede her grubu ayrı ayrı onaylayın; onaylanmayan grup için açılış oluşturulmaz."
+
+msgctxt "accounts.semester"
+msgid "Yuxarıdakı süzgəcdən semestri seçin. «Plandan açılış yarat» həmin semestri oxuyan (kursu uyğun) hər qrup üçün qrupun ÖZ qəbul ilinin təsdiqlənmiş tədris planının (yoxdursa — təsdiqinizlə ən son planın) məcburi fənlərindən açılış yaradır və qrupun aktiv tələbələrini dərhal qeydiyyata alır; seçmə fənlər qrupun seçimi ilə açılır. Mövcud sətir təkrarlanmır, heç nə silinmir. «Plan yoxdur» ixtisaslar üçün sətir yaranmır — əvvəlcə «Tədris planı» bölməsində planı təsdiqləyin."
+msgstr "Yukarıdaki filtreden yarıyılı seçin. “Plandan açılış oluştur”, o yarıyılı okuyan (sınıfı uygun) her grup için grubun KENDİ kabul yılının onaylanmış öğretim planındaki (yoksa — onayınızla en son plandaki) zorunlu derslerden açılış oluşturur ve grubun aktif öğrencilerini hemen kaydeder; seçmeli dersler grubun seçimine göre açılır. Mevcut satır tekrarlanmaz, hiçbir şey silinmez. “Plan yok” programlar için satır oluşturulmaz — önce “Öğretim planı” bölümünde planı onaylayın."
+
+msgctxt "accounts.semester"
+msgid "Hər qrup üçün qrupun öz qəbul ilinin TƏSDİQLƏNMİŞ planından açılış sətirləri yaradılır (həmin il üçün plan yoxdursa — ən son plandan, yalnız siyahını təsdiqlədikdən sonra). Əməl idempotentdir — mövcud açılış təkrarlanmır və heç nə silinmir."
+msgstr "Her grup için grubun kendi kabul yılının ONAYLANMIŞ planından açılış satırları oluşturulur (o yıl için plan yoksa — en son plandan, yalnızca listeyi onayladıktan sonra). İşlem idempotenttir — mevcut açılış tekrarlanmaz ve hiçbir şey silinmez."
+
+msgctxt "accounts.semester"
+msgid "Qəbul ili"
+msgstr "Kabul yılı"
+
+msgctxt "accounts.semester"
+msgid "Səbəb"
+msgstr "Neden"
+
+msgctxt "accounts.semester"
+msgid "Tətbiq olunacaq plan"
+msgstr "Uygulanacak plan"
+
+msgctxt "accounts.semester"
+msgid "Planın qəbul ili"
+msgstr "Planın kabul yılı"
+
+msgctxt "accounts.semester"
+msgid "Təsdiq edirəm"
+msgstr "Onaylıyorum"
+
+msgctxt "accounts.semester"
+msgid "bilinmir"
+msgstr "bilinmiyor"
+
+msgctxt "accounts.semester"
+msgid "Hamısını təsdiq edirəm"
+msgstr "Tümünü onaylıyorum"
+
+msgctxt "accounts.semester"
+msgid "Təsdiqlənməyən qrup üçün açılış yaradılmır və nəticədə adı ilə göstərilir. Semestr və ya ixtisas dəyişsə siyahı yenidən yoxlanılır."
+msgstr "Onaylanmayan grup için açılış oluşturulmaz ve sonuçta adıyla gösterilir. Yarıyıl veya program değişirse liste yeniden kontrol edilir."
