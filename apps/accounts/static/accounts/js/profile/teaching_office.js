@@ -140,7 +140,10 @@
             if (el.name === "csrfmiddlewaretoken") {
                 continue;
             }
-            if (el.type === "checkbox") {
+            if (el.type === "checkbox" && el.hasAttribute("data-tof-list")) {
+                // 2026-10-21: dəyər SİYAHISI (məs. təsdiqlənən qruplar) — yalnız işarələnənlərin `value`-su.
+                payload[el.name] = [].concat(payload[el.name] || [], el.checked ? [el.value] : []);
+            } else if (el.type === "checkbox") {
                 payload[el.name] = el.checked ? "1" : "";
             } else if (el.tagName === "SELECT" && el.multiple) {
                 // Çoxlu seçim → massiv (server `getlist` oxuyur).
@@ -432,6 +435,8 @@
                 var payload = err && err.payload;
                 var message = (payload && payload.message) || form.getAttribute("data-tof-error-text") || "";
                 showFormError(form, message, payload && payload.field);
+                // Bölməyə xas əlavə addım (məs. semestr açılışında ən son planın təsdiq siyahısı).
+                form.dispatchEvent(new CustomEvent("tof:submit-error", { bubbles: true, detail: { payload: payload || {} } }));
             })
             .then(function () {
                 if (submit) {

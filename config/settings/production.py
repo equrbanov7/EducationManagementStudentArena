@@ -123,9 +123,13 @@ if LEGACY_MARIADB_SOURCE_ATTEST_ENABLED:
 # opt in, so this is a hard constant rather than an environment lookup.
 LEGACY_REHEARSAL_TARGET_DISPOSABLE = False
 
-# Heavy exam features are disabled in production to protect server resources.
-# This keeps practical/coding exams, Piston-backed code execution, WebSockets,
-# and teacher-side lock controls off.
+# Practical (coding) exams stay hidden in production by owner decision
+# (2026-10-10: «hələlik gizli qalsın, sonra baxacağıq») — the flag hides the
+# "coding" exam type in the exam form and 404s the student coding endpoints
+# (apps/exams/features.py), so no student code reaches the Piston runner.
+# It does NOT govern WebSockets: exam supervision / live-exam WebSockets are
+# served by the app's ASGI server and gated separately (EXAM_SUPERVISION_ENABLED
+# below, live-exam settings).
 PRACTICAL_EXAMS_ENABLED = False
 # Exam supervision (anti-cheat proctoring) now ships in production. It is the
 # default for final/midterm exams, so it must be on unless explicitly disabled

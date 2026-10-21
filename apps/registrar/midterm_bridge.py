@@ -24,6 +24,8 @@ Qaydalar:
   edilmiş qüvvədə olan düzəliş varsa həmin cəhdin təkrar sinxronizasiyası (apellyasiya, açar düzəlişi)
   onu əzmir (``overridden``); düzəlişdən sonra bitən YENİ cəhd yenə yazır.
 * **İdempotent** — bal və mənbə eynidirsə heç nə yazılmır; audit + bildiriş YALNIZ bal dəyişəndə.
+* **Audit fail-closed** (rəy 2026-10-21, R08) — audit sətri yazılmasa xana da yazılmır
+  (``audit_write.AuditWriteFailed``); exams tərəfi onu ``write_failed`` kimi sayır.
 """
 
 from __future__ import annotations
@@ -201,7 +203,11 @@ def _audit_and_notify(*, offering, component, enrollment, old_score, score, sour
     }
     if appeal_id is not None:
         change["appeal"] = str(appeal_id)
-    grade_audit.log_grade_changes(offering=offering, by_user=by_user, kind=AUDIT_KIND, changes=[change])
+    # R08 (2026-10-21): fail-closed — audit düşsə ``record_midterm_result``-un savepoint-i xananı geri qaytarır,
+    # exams körpüsü ``write_failed`` sayır; növbəti sinxronizasiya (idempotent) yenidən yazır.
+    grade_audit.log_grade_changes(
+        offering=offering, by_user=by_user, kind=AUDIT_KIND, changes=[change], fail_closed=True
+    )
     if not notify:
         return
     from apps.registrar import journal_notifications as jn

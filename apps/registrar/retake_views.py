@@ -22,6 +22,7 @@ from django.views.decorators.http import require_GET, require_POST
 from core.tenancy import get_request_organization, request_has_active_organization_context
 
 from . import retake_access, retake_decisions, retake_rules, retake_services
+from .audit_write import AuditWriteFailed, audit_failure_message
 from .models import CourseOffering, RetakeApplication
 
 _CTX = "registrar.retake"
@@ -91,6 +92,8 @@ def _run(callable_, *, success):
         raise Http404 from None
     except ValidationError as exc:
         return _error(_validation_message(exc), code=getattr(exc, "code", "") or "")
+    except AuditWriteFailed:  # R08: nəticə audit izi olmadan yazılmır — tranzaksiya geri qayıdıb
+        return _error(audit_failure_message(), status=503, code="audit_failed")
     return _ok(success)
 
 

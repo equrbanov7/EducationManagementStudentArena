@@ -175,6 +175,21 @@ DATABASES = {
     )
 }
 
+# Rəy 2026-10-21 (R05): testlər YALNIZ PostgreSQL-də işləyir — RLS siyasətləri, triggerlər, CHECK
+# məhdudiyyətləri və xam SQL miqrasiyaları SQLite-da yoxdur; orada testlər çaşdırıcı xətalar verir
+# (məs. trigger/RLS «yoxdur» deyə keçən və ya miqrasiyada yıxılan testlər). Fail-fast: aydın mesaj.
+_TEST_DB_ENGINE = str(DATABASES["default"].get("ENGINE") or "")
+if not any(name in _TEST_DB_ENGINE for name in ("postgresql", "postgis")):
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured(
+        "Testlər yalnız PostgreSQL ilə işləyir (RLS, triggerlər, CHECK-lər, miqrasiyalar) — "
+        f"DATABASE_URL mühərriki: {_TEST_DB_ENGINE or 'boş'}. DATABASE_URL=postgres://… verin "
+        "(lokal: scripts/claude_pg_sandbox.sh və ya agent Postgres :55432). / "
+        "Tests require PostgreSQL (RLS, triggers, CHECK constraints, migrations); "
+        f"got database engine {_TEST_DB_ENGINE or 'empty'}. Set DATABASE_URL=postgres://…"
+    )
+
 # CI (2026-09-25): repo private olandan sonra GitHub runner-ləri 2 vCPU-dur — 4 xdist worker-in
 # hər biri bütün miqrasiyaları AYRICA işlədəndə test DB qurulumu 300 s-lik pytest-timeout-u
 # keçirdi. CI job-u miqrasiyanı BİR dəfə şablon bazaya işlədir və `EMS_TEST_DB_TEMPLATE`-i

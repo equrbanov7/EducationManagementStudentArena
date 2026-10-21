@@ -1190,6 +1190,7 @@ Record the result below. RTO ≈ `restore_seconds` + swap/start (~5 min). The
 | Date | Dump | Size | restore_seconds | Notes |
 |---|---|---|---|---|
 | 2026-09-28 | toy dump (sandbox, script validation only) | 3 KB | 0–1 | plain `.sql.gz` + `-Fc`, DSN and container modes; not a real-size drill |
+| 2026-10-02 | production daily dump (`prod-restore-drill.yml`, GitHub run 36952865569) | 729 MB dump → 2925 MB restored | 393 | `RESTORE DRILL OK`: 204 tables, 9515 users; first real-size drill — RTO ≈ 6.5 min restore + swap/start (~5 min) ≈ 12 min |
 
 ---
 

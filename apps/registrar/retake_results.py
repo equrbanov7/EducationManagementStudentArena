@@ -15,6 +15,9 @@ balı qalır («əvvəlki nəticə»), qüvvədə olan nəticə ``compute_final_
 ``ResitRecord.resit_score``-dan gəlir.
 
 Bal sxemin tavanından (``exam_score_max``, adətən 50) böyükdürsə RƏDD edilir (səssiz kəsmə yoxdur — LOW-7).
+
+Audit fail-closed (rəy 2026-10-21, R08): ``ResitRecord`` balının audit sətri yazılmasa
+``audit_write.AuditWriteFailed`` atılır və hər iki yolun tranzaksiyası geri qayıdır (müraciət də dəyişmir).
 """
 
 from __future__ import annotations
@@ -105,6 +108,7 @@ def _write_resit(application, score, *, by_user, request=None):
                 }
             ],
             request=request,
+            fail_closed=True,  # R08 (2026-10-21): 25% balı audit sətri olmadan commit olunmur
         )
     return resit
 

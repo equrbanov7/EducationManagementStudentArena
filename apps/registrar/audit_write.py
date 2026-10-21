@@ -11,22 +11,52 @@ qiymətlər isə itirdi. İndi INSERT öz savepoint-ində gedir: audit düşərs
 
 ``AuditLog`` app registry ilə həll olunur — registrar audit moduluna statik
 import saxlamır (modul sərhədi).
+
+Rəy 2026-10-21 (R08): RƏSMİ bal yazıları (yekun imtahan / bonus / təkrar, midterm körpüsü, 25% nəticəsi,
+toplu imtahan balı) da ``fail_closed=True`` işlədir — bal audit sətri olmadan commit olunmur. Xəta
+:class:`AuditWriteFailed` kimi atılır (``DatabaseError`` alt sinfi — köhnə ``except DatabaseError``
+tutanlar işləyir); istifadəçi yolları onu :func:`audit_failure_message` ilə aydın xətaya çevirir,
+fon körpüləri isə loga + sayğaca yazır.
 """
 
 from __future__ import annotations
 
 import logging
 
-from django.db import transaction
+from django.db import DatabaseError, transaction
+from django.utils.translation import pgettext
 
 logger = logging.getLogger(__name__)
+
+
+class AuditWriteFailed(DatabaseError):
+    """Fail-closed audit sətri yazılmadı — çağıranın domen yazısı da geri qaytarılmalıdır.
+
+    Savepoint artıq geri qayıdıb, xarici tranzaksiya sağlamdır; istisna çağıranın ``atomic``
+    blokundan çıxanda domen yazısı da geri qayıdır (rəsmi bal audit izi olmadan qalmır).
+    """
+
+
+def audit_failure_message() -> str:
+    """İstifadəçiyə göstərilən mətn — audit izi yazılmadığı üçün bal saxlanmadı."""
+    return pgettext(
+        "registrar.audit",
+        "Audit izi yazıla bilmədi — bal saxlanmadı. Bir az sonra yenidən cəhd edin; "
+        "təkrarlanarsa İKT şöbəsinə bildirin.",
+    )
+
+
+def _reraise(exc, what):
+    if isinstance(exc, AuditWriteFailed):
+        raise exc
+    raise AuditWriteFailed(f"audit write failed ({what})") from exc
 
 
 def create_audit_row(*, fail_closed: bool = False, **fields) -> bool:
     """Bir ``AuditLog`` sətri yaz; uğurda ``True``.
 
-    ``fail_closed=True`` — xəta yenidən atılır (rəsmi düzəliş axınları: domen
-    dəyişikliyi və audit dəlili birlikdə commit/rollback olunur). Əks halda
+    ``fail_closed=True`` — xəta :class:`AuditWriteFailed` kimi atılır (rəsmi düzəliş və bal axınları:
+    domen dəyişikliyi və audit dəlili birlikdə commit/rollback olunur). Əks halda
     xəta loga yazılır və ``False`` qaytarılır; xarici tranzaksiya sağlam qalır.
     """
     try:
@@ -36,9 +66,9 @@ def create_audit_row(*, fail_closed: bool = False, **fields) -> bool:
         with transaction.atomic():
             AuditLog.objects.create(**fields)
         return True
-    except Exception:  # noqa: BLE001 — savepoint geri qayıdıb; siyasət çağırana aiddir
+    except Exception as exc:  # noqa: BLE001 — savepoint geri qayıdıb; siyasət çağırana aiddir
         if fail_closed:
-            raise
+            _reraise(exc, fields.get("resource_type"))
         logger.exception(
             "Registrar audit yazısı alınmadı (resource_type=%s, resource_id=%s).",
             fields.get("resource_type"),
@@ -63,9 +93,9 @@ def create_audit_rows(rows, *, fail_closed: bool = False) -> bool:
         with transaction.atomic():
             create_audit_logs(rows)
         return True
-    except Exception:  # noqa: BLE001 — savepoint geri qayıdıb; siyasət çağırana aiddir
+    except Exception as exc:  # noqa: BLE001 — savepoint geri qayıdıb; siyasət çağırana aiddir
         if fail_closed:
-            raise
+            _reraise(exc, rows[0].get("resource_type"))
         logger.exception(
             "Registrar audit yazısı alınmadı (resource_type=%s, %d sətir).",
             rows[0].get("resource_type"),
