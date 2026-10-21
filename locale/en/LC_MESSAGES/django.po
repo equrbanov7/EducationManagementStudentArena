@@ -107078,3 +107078,69 @@ msgstr "Document required for appeal decisions"
 msgctxt "core.runtime_settings"
 msgid "Yandırılıbsa apellyasiya qərarı (qəbul/rədd) əsaslandırıcı sənəd (PDF, JPG və ya PNG, 10 MB-dək) yüklənmədən yadda saxlanılmır. Söndürüləndə sənəd yükləmək opsionaldır. Qərarı verən müəllimin seçilməsi hər iki halda məcburidir."
 msgstr "When on, an appeal decision (accept/reject) cannot be saved without uploading a supporting document (PDF, JPG or PNG, up to 10 MB). When off, uploading a document is optional. Selecting the deciding teacher is required in both cases."
+
+msgctxt "profile.subjects"
+msgid "Kredit hədəfinə çatılıb"
+msgstr "Credit target reached"
+
+msgctxt "registrar.audit"
+msgid "Audit izi yazıla bilmədi — bal saxlanmadı. Bir az sonra yenidən cəhd edin; təkrarlanarsa İKT şöbəsinə bildirin."
+msgstr "The audit trail could not be written — the score was not saved. Please try again shortly; if it happens again, notify the IT department."
+
+msgctxt "accounts.semester"
+msgid "Qrupun qəbul ili bilinmir"
+msgstr "The group's admission year is unknown"
+
+msgctxt "accounts.semester"
+msgid "Bu qəbul ili üçün təsdiqlənmiş plan yoxdur"
+msgstr "There is no approved plan for this admission year"
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "Ən son planın tətbiqi təsdiqlənmədiyi üçün %(n)d qrup atlandı (açılış yaradılmadı): %(groups)s. Lazımdırsa qrupun qəbul ili üçün planı təsdiqləyin və ya açılışı yenidən təsdiqlə başladın."
+msgstr "%(n)d group(s) were skipped because applying the latest plan was not confirmed (no offerings were created): %(groups)s. If needed, approve the plan for the group's admission year or run the opening again and confirm."
+
+#, python-format
+msgctxt "accounts.semester"
+msgid "%(n)d qrupun qəbul ili üçün təsdiqlənmiş plan yoxdur — onlara ən son plan tətbiq olunacaq. Aşağıdakı siyahıda hər qrupu ayrıca təsdiqləyin; təsdiqlənməyən qrup üçün açılış yaradılmır."
+msgstr "%(n)d group(s) have no approved plan for their admission year — the latest plan would be applied to them. Confirm each group in the list below; no offerings are created for unconfirmed groups."
+
+msgctxt "accounts.semester"
+msgid "Yuxarıdakı süzgəcdən semestri seçin. «Plandan açılış yarat» həmin semestri oxuyan (kursu uyğun) hər qrup üçün qrupun ÖZ qəbul ilinin təsdiqlənmiş tədris planının (yoxdursa — təsdiqinizlə ən son planın) məcburi fənlərindən açılış yaradır və qrupun aktiv tələbələrini dərhal qeydiyyata alır; seçmə fənlər qrupun seçimi ilə açılır. Mövcud sətir təkrarlanmır, heç nə silinmir. «Plan yoxdur» ixtisaslar üçün sətir yaranmır — əvvəlcə «Tədris planı» bölməsində planı təsdiqləyin."
+msgstr "Select the semester in the filter above. “Create offerings from plan” creates offerings for every group studying that semester (matching year of study) from the compulsory subjects of the approved curriculum of the group's OWN admission year (if there is none — the latest plan, with your confirmation) and immediately enrols the group's active students; electives open according to the group's choice. Existing rows are not duplicated, nothing is deleted. No rows are created for programmes with “No plan” — approve the plan in the “Curriculum” section first."
+
+msgctxt "accounts.semester"
+msgid "Hər qrup üçün qrupun öz qəbul ilinin TƏSDİQLƏNMİŞ planından açılış sətirləri yaradılır (həmin il üçün plan yoxdursa — ən son plandan, yalnız siyahını təsdiqlədikdən sonra). Əməl idempotentdir — mövcud açılış təkrarlanmır və heç nə silinmir."
+msgstr "Offering rows are created for each group from the APPROVED plan of the group's own admission year (if there is no plan for that year — from the latest plan, only after you confirm the list). The action is idempotent — existing offerings are not duplicated and nothing is deleted."
+
+msgctxt "accounts.semester"
+msgid "Qəbul ili"
+msgstr "Admission year"
+
+msgctxt "accounts.semester"
+msgid "Səbəb"
+msgstr "Reason"
+
+msgctxt "accounts.semester"
+msgid "Tətbiq olunacaq plan"
+msgstr "Plan to be applied"
+
+msgctxt "accounts.semester"
+msgid "Planın qəbul ili"
+msgstr "Plan's admission year"
+
+msgctxt "accounts.semester"
+msgid "Təsdiq edirəm"
+msgstr "I confirm"
+
+msgctxt "accounts.semester"
+msgid "bilinmir"
+msgstr "unknown"
+
+msgctxt "accounts.semester"
+msgid "Hamısını təsdiq edirəm"
+msgstr "I confirm all"
+
+msgctxt "accounts.semester"
+msgid "Təsdiqlənməyən qrup üçün açılış yaradılmır və nəticədə adı ilə göstərilir. Semestr və ya ixtisas dəyişsə siyahı yenidən yoxlanılır."
+msgstr "No offerings are created for an unconfirmed group; it is listed by name in the result. If the semester or programme changes, the list is checked again."
