@@ -252,18 +252,38 @@ class PurgeTrialExamTests(_PurgeSetup):
         with self.assertRaisesMessage(CommandError, "trial_exam_reason_too_short"):
             self._call("--apply", "--reason", "qısa", "--i-know-this-is-production")
 
-    def test_grade_events_block_apply(self):
+    def test_grade_events_are_purged_with_narrow_trigger_exception(self):
+        """2026-10-21 (sahib): qəbul olunmuş appelyasiyanın reyestr sətirləri də silinir (organizations 0071)."""
         with bypass_rls():
             answer = ExamAnswer.objects.filter(attempt=self.second).order_by("pk").first()
-            ExamGradeEvent.objects.create(
+            event = ExamGradeEvent.objects.create(
                 attempt=self.second, question=answer.question, old_score=0, new_score=1, max_points=1
             )
-        self.assertIn("blocked_grade_events=1", self._call())
-        with self.assertRaisesMessage(CommandError, "trial_exam_refused: grade_events"):
-            self._apply()
+        out = self._call()
+        self.assertIn("grade_events=1", out)
+        self.assertIn("blocked=0", out)
+        self._apply()
         with bypass_rls():
-            self.assertEqual(ExamAttempt.objects.filter(exam=self.exam).count(), 2)
-        self.assertIsNotNone(self._score_row())
+            self.assertFalse(ExamGradeEvent.objects.filter(pk=event.pk).exists())
+            self.assertEqual(ExamAttempt.objects.filter(exam=self.exam).count(), 0)
+
+    def test_grade_event_trigger_still_blocks_outside_purge(self):
+        """İstisna dar qalır: imtahan silinməyibsə və ya bayraq yoxdursa reyestr silinmir."""
+        from django.db import DatabaseError, connection, transaction
+
+        if connection.vendor != "postgresql":
+            self.skipTest("Postgres trigger")
+        with bypass_rls():
+            answer = ExamAnswer.objects.filter(attempt=self.second).order_by("pk").first()
+            event = ExamGradeEvent.objects.create(
+                attempt=self.second, question=answer.question, old_score=0, new_score=1, max_points=1
+            )
+        for flag in ("off", "on"):  # «on» olsa da imtahan silinməyib → rədd
+            with self.assertRaises(DatabaseError), transaction.atomic(), connection.cursor() as cursor:
+                cursor.execute("SET LOCAL emsarena.trial_exam_purge = %s", [flag])
+                cursor.execute("DELETE FROM exams_examgradeevent WHERE id = %s", [event.pk])
+        with bypass_rls():
+            self.assertTrue(ExamGradeEvent.objects.filter(pk=event.pk).exists())
 
     def test_retake_link_blocks_unless_allowed(self):
         with bypass_rls():

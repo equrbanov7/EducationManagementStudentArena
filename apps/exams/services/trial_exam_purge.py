@@ -16,7 +16,8 @@ Rədd halları (``blockers`` — ``apply`` heç nə yazmır):
 
 * ``final_exam`` — final kateqoriyası ``FinalGrade`` / ``ResitRecord`` / ``ExamScoreEntry`` yazır, onların
   imtahana bağlantısı yoxdur → təhlükəsiz geri alınmır;
-* ``grade_events`` — ``ExamGradeEvent`` DB səviyyəsində append-only-dir (sənədli bypass YOXDUR);
+* ``grade_events`` — ``ExamGradeEvent`` DB səviyyəsində append-only-dir; 2026-10-21-dən dar istisna var (organizations
+  0071): imtahan əvvəl ``is_deleted`` işarələnir, sonra ``SET LOCAL emsarena.trial_exam_purge = 'on'`` ilə silinir;
 * ``retake_links`` — «İmtahan şansı» / 25% müraciəti izləri (append-only) imtahana bağlıdır
   (``allow_retake_links`` ilə: izlər qalır, qalan hər şey silinir);
 * ``journal_locked`` — avtomatik xana bağlanmış (dərc olunmuş) jurnaldadır.
@@ -28,7 +29,7 @@ import logging
 from dataclasses import dataclass, field
 
 from django.apps import apps as django_apps
-from django.db import transaction
+from django.db import connection, transaction
 from django.db.models import Q
 from django.utils import timezone
 
@@ -183,8 +184,6 @@ def build_plan(exam, *, allow_retake_links=False) -> PurgePlan:
     _collect_registrar_links(plan, ids, allow_retake_links=allow_retake_links)
     _collect_notifications(plan)
     c["audit_rows_kept"] = _audit_rows(exam, ids)
-    if c["grade_events"]:
-        plan.blockers.append("grade_events")
     return plan
 
 
@@ -419,6 +418,16 @@ def apply_purge(exam, *, reason: str, allow_retake_links=False) -> PurgePlan:
         if not plan.has_data and locked.is_deleted:
             return plan  # idempotent: artıq təmizdir — audit sətri də yazılmır
         ids = plan.attempt_ids
+        # İmtahan ƏVVƏLCƏ silinmiş işarələnir — reyestr triggerinin dar istisnası (organizations 0071) bunu yoxlayır.
+        locked.is_deleted = True
+        locked.deleted_at = locked.deleted_at or timezone.now()
+        locked.is_active = False
+        locked.save(update_fields=["is_deleted", "deleted_at", "is_active"])
+        if plan.counts.get("grade_events") and ids:
+            with connection.cursor() as cursor:
+                cursor.execute("SET LOCAL emsarena.trial_exam_purge = 'on'")
+                cursor.execute("DELETE FROM exams_examgradeevent WHERE attempt_id = ANY(%s)", [list(ids)])
+                cursor.execute("SET LOCAL emsarena.trial_exam_purge = 'off'")
         _model("notifications.InAppNotification").objects.filter(pk__in=plan.notification_ids).delete()
         _model("registrar.ComponentScore").objects.filter(pk__in=plan.component_score_ids).delete()
         _model("appeals.KeyCorrectionCredit").objects.filter(
@@ -437,10 +446,6 @@ def apply_purge(exam, *, reason: str, allow_retake_links=False) -> PurgePlan:
         CodingSubmission.objects.filter(Q(exam=locked) | Q(attempt_id__in=ids)).delete()
         ExamAttempt.objects.filter(pk__in=ids).delete()  # cavablar, fayl sətirləri — CASCADE
         _restore_other_sources(locked, plan)
-        locked.is_deleted = True
-        locked.deleted_at = locked.deleted_at or timezone.now()
-        locked.is_active = False
-        locked.save(update_fields=["is_deleted", "deleted_at", "is_active"])
         _audit(locked, plan, reason)
         transaction.on_commit(lambda: _after_commit(locked.pk, plan.file_names))
     return plan
