@@ -34,7 +34,8 @@ from apps.accounts.models import EmailOTP
 from core import runtime_settings
 from core.rate_limit import is_rate_limited, record_rate_limit_hit
 
-from ...services import send_otp_email, verify_email_otp
+from ...services import OTPRateLimitError, get_otp_timer_context, request_email_otp, verify_email_otp
+from ...services.otp_messages import otp_already_sent_message, otp_failure_message, otp_hourly_limit_message
 from ._shared import _otp_limit_key, _validate_otp_email
 from .constants import User
 
@@ -103,16 +104,16 @@ def set_initial_password_view(request):
                 return _handle_set_password_direct(request, user)
             return _handle_set_password(request, user)
 
-    return render(
-        request,
-        "accounts/first_login_set_password.html",
-        {
-            "email": prefilled_email,
-            "otp_sent": otp_sent,
-            "direct": direct,
-            "user_display": user.get_full_name() or user.username,
-        },
-    )
+    context = {
+        "email": prefilled_email,
+        "otp_sent": otp_sent,
+        "direct": direct,
+        "user_display": user.get_full_name() or user.username,
+    }
+    if otp_sent and not direct:
+        # Sahib 2026-10-21: 2-ci addımda kodun müddəti («14:35-ə qədər») və «Kodu yenidən göndər» gözləməsi.
+        context.update(get_otp_timer_context(user, email=prefilled_email, purpose=EmailOTP.Purpose.PASSWORD_RESET))
+    return render(request, "accounts/first_login_set_password.html", context)
 
 
 def _handle_change_email(request):
@@ -194,15 +195,24 @@ def _handle_send_otp(request, user):
         messages.error(request, _email_unavailable_message())
         return redirect("accounts:set_initial_password")
 
+    # Sahib 2026-10-21: ikiqat klik / səhifə keçidində təkrar göndəriş YENİ KOD YARATMIR — cooldown daxilində
+    # əvvəlki kod qüvvədədir (məktub da təkrar getmir); cooldown-dan sonra yeni kod, köhnəsi də qəbul olunur.
     try:
-        send_otp_email(email, user=user, purpose=EmailOTP.Purpose.PASSWORD_RESET, request=request)
+        result = request_email_otp(email, user=user, purpose=EmailOTP.Purpose.PASSWORD_RESET, request=request)
+    except OTPRateLimitError as exc:
+        messages.error(request, otp_hourly_limit_message(exc.retry_after))
+        return redirect("accounts:set_initial_password")
     except Exception:
         messages.error(request, pgettext(_CTX, "Kod göndərilə bilmədi. Zəhmət olmasa yenidən cəhd edin."))
         return redirect("accounts:set_initial_password")
 
-    record_rate_limit_hit("first_login_otp", rate, *limit_key)
     request.session[_OTP_SENT_SESSION_KEY] = email
     request.session.pop(_EMAIL_DRAFT_SESSION_KEY, None)
+    if result.reused:
+        messages.info(request, otp_already_sent_message(result.resend_available_in))
+        return redirect("accounts:set_initial_password")
+
+    record_rate_limit_hit("first_login_otp", rate, *limit_key)
     messages.success(request, pgettext(_CTX, "Təsdiq kodu email ünvanınıza göndərildi."))
     return redirect("accounts:set_initial_password")
 
@@ -220,7 +230,8 @@ def _handle_set_password(request, user):
 
     verification = verify_email_otp(email=email, code=code, user=user, purpose=EmailOTP.Purpose.PASSWORD_RESET)
     if not verification.success:
-        messages.error(request, pgettext(_CTX, "Kod yanlış və ya vaxtı keçib. Yenidən cəhd edin."))
+        # Sahib 2026-10-21: «səhvdir» / «vaxtı keçib» / «əvəzlənib» / «çox cəhd» ayrı-ayrı deyilir.
+        messages.error(request, otp_failure_message(verification))
         return redirect("accounts:set_initial_password")
 
     # Persist the new credential + verified email, then clear the flag.

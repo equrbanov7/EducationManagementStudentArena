@@ -107499,3 +107499,92 @@ msgstr "Этот IP уже назначен компьютеру «%(label)s» �
 msgctxt "exams.template.take_exam"
 msgid "Bu imtahan artıq başqa tabda açıqdır — bu tabdan cavablar yazılmır. İmtahanı həmin tabda davam etdirin və ya onu bağlayıb bu səhifəni yeniləyin."
 msgstr "Этот экзамен уже открыт в другой вкладке — ответы из этой вкладки не сохраняются. Продолжайте экзамен в той вкладке или закройте её и обновите эту страницу."
+
+#, python-format
+msgctxt "accounts.otp"
+msgid "Kod hələ %(minutes)s dəq. etibarlıdır (%(time)s-ə qədər)."
+msgstr "Код действителен ещё %(minutes)s мин. (до %(time)s)."
+
+msgctxt "accounts.otp"
+msgid "Kod səhvdir. Məktubdakı 6 rəqəmli kodu yoxlayıb yenidən daxil edin."
+msgstr "Неверный код. Проверьте 6-значный код в письме и введите его снова."
+
+#, python-format
+msgctxt "accounts.otp"
+msgid "Qalan cəhd: %(left)s."
+msgstr "Осталось попыток: %(left)s."
+
+msgctxt "accounts.otp"
+msgid "Bu kod artıq etibarsızdır — ondan sonra yeni kod göndərilib. Ən son məktubdakı kodu daxil edin."
+msgstr "Этот код больше не действителен — после него был отправлен новый. Введите код из последнего письма."
+
+msgctxt "accounts.otp"
+msgid "Kodun vaxtı keçib. Yeni kod istəyin."
+msgstr "Срок действия кода истёк. Запросите новый код."
+
+msgctxt "accounts.otp"
+msgid "Bu kod artıq istifadə olunub. Lazımdırsa yeni kod istəyin."
+msgstr "Этот код уже использован. При необходимости запросите новый код."
+
+msgctxt "accounts.otp"
+msgid "Çox sayda səhv cəhd edildi — kod bağlandı. Yeni kod istəyin."
+msgstr "Слишком много неверных попыток — код заблокирован. Запросите новый код."
+
+msgctxt "accounts.otp"
+msgid "Aktiv təsdiq kodu yoxdur. Yeni kod istəyin."
+msgstr "Активного кода подтверждения нет. Запросите новый код."
+
+msgctxt "accounts.otp"
+msgid "Kod 6 rəqəmdən ibarət olmalıdır."
+msgstr "Код должен состоять из 6 цифр."
+
+msgctxt "accounts.otp"
+msgid "Kodu yoxlamaq mümkün olmadı. Yenidən cəhd edin."
+msgstr "Не удалось проверить код. Попробуйте ещё раз."
+
+msgctxt "accounts.otp"
+msgid "Təsdiq kodu artıq göndərilib — e-poçtunuzu (həm də «Spam» qovluğunu) yoxlayın."
+msgstr "Код подтверждения уже отправлен — проверьте почту (в том числе папку «Спам»)."
+
+#, python-format
+msgctxt "accounts.otp"
+msgid "Yeni kodu %(seconds)s san. sonra istəyə bilərsiniz."
+msgstr "Новый код можно запросить через %(seconds)s с."
+
+#, python-format
+msgctxt "accounts.otp"
+msgid "Bu e-poçt üçün saatlıq kod limiti dolub. %(minutes)s dəq. sonra yenidən cəhd edin."
+msgstr "Часовой лимит кодов для этого адреса исчерпан. Повторите через %(minutes)s мин."
+
+msgctxt "accounts.otp"
+msgid "Yeni kod istə"
+msgstr "Запросить новый код"
+
+msgctxt "accounts.first_login"
+msgid "Göndərilir…"
+msgstr "Отправка…"
+
+msgctxt "accounts.first_login"
+msgid "Yoxlanılır…"
+msgstr "Проверка…"
+
+msgctxt "accounts.first_login"
+msgid "Kodun vaxtı keçib"
+msgstr "Срок действия кода истёк"
+
+#, python-format
+msgctxt "accounts.first_login"
+msgid "Kod %(minutes)s dəqiqə etibarlıdır — %(time)s-ə qədər."
+msgstr "Код действителен %(minutes)s мин. — до %(time)s."
+
+msgctxt "accounts.first_login"
+msgid "Qalan vaxt:"
+msgstr "Осталось:"
+
+msgctxt "accounts.first_login"
+msgid "Aşağıdakı «Kodu yenidən göndər» düyməsi ilə yeni kod istəyin."
+msgstr "Запросите новый код кнопкой «Отправить код повторно» ниже."
+
+msgctxt "accounts.first_login"
+msgid "Kodu yenidən göndər ({s} san.)"
+msgstr "Отправить код повторно ({s} с)"
