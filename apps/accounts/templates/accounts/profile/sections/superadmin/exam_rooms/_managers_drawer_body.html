@@ -3,7 +3,7 @@
 bayrağı olan istifadəçilər: siyahı + «Geri al» (təsdiqli POST) və altda
 «İdarəçi təyin et» forması (istifadəçi adı və ya email). Kontekst: `s`.{% endcomment %}
 <div class="sar-managers">
-    <form method="post" action="{{ s.action_url }}" class="sar-grant">
+    <form method="post" action="{{ s.action_url }}" class="sar-grant" data-sar-ajax="1">
         {% csrf_token %}
         <input type="hidden" name="action" value="grant_room_manager">
         <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">
@@ -28,7 +28,7 @@ bayrağı olan istifadəçilər: siyahı + «Geri al» (təsdiqli POST) və altd
                 <span class="sar-manager__name">{{ m.username }}{% if m.first_name or m.last_name %} — {{ m.first_name }} {{ m.last_name }}{% endif %}</span>
                 {% if m.email %}<span class="sar-manager__email">{{ m.email }}</span>{% endif %}
             </span>
-            <form method="post" action="{{ s.action_url }}" class="sar-inline-form">
+            <form method="post" action="{{ s.action_url }}" class="sar-inline-form" data-sar-ajax="1">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="revoke_room_manager">
                 <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">

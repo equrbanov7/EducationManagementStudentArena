@@ -14,7 +14,8 @@
    * təşkilat seçicisi dəyişəndə GET formasının avto-göndərilməsi
    * MAC sahəsinin canlı formatlanması (AA:BB:CC:DD:EE:FF) və kopyalanması
    * destruktiv POST-lardan əvvəl təsdiq (EMSConfirm — layihə standartı)
-   * dialoq formasının göndərişdən əvvəl HTML5 validasiyası (`novalidate`-dir)
+   * dialoq açılanda əvvəlki xətaların təmizlənməsi (göndəriş/xəta göstərmə —
+     `superadmin_exam_rooms_ajax.js`)
    * POST-dan sonra: `hl_room` → sətir vurğusu, `hl_comp` / `#sar-room-<id>`
      → həmin zalın çekmecəsi yenidən açılır (istifadəçi kontekstini itirmir)
 
@@ -48,6 +49,10 @@
         var dialog = document.getElementById(btn.getAttribute("data-tof-open") || "");
         if (!dialog) {
             return;
+        }
+        if (window.EMSExamRoomsAjax) {
+            // Əvvəlki göndərişin sahə xətaları yeni açılışda qalmasın.
+            window.EMSExamRoomsAjax.clearErrors(dialog.querySelector("form"));
         }
         var sub = dialog.querySelector(".ems-dialog__sub");
         if (sub) {
@@ -133,19 +138,10 @@
         });
     });
 
-    /* ---- Dialoq forması: HTML5 validasiya -------------------------------- */
+    /* ---- Dialoq forması: göndəriş ---------------------------------------- */
 
-    /* `_form_dialog.html` `novalidate` yazır (JSON dialoqları öz xətasını
-       göstərir); bizim formalar adi POST-dur — boş ad/MAC server dövrəsinə
-       getməsin, brauzerin öz ipucu görünsün. */
-    DELEGATE.on("submit", "form[data-sar-form]", function (event, form) {
-        if (typeof form.checkValidity === "function" && !form.checkValidity()) {
-            event.preventDefault();
-            if (typeof form.reportValidity === "function") {
-                form.reportValidity();
-            }
-        }
-    });
+    /* HTML5 yoxlaması + AJAX göndəriş + xətaların dialoqda göstərilməsi
+       `superadmin_exam_rooms_ajax.js`-dədir (`form[data-sar-ajax]`, 2026-10-21). */
 
     /* ---- POST-dan sonra: vurğu + çekmecənin yenidən açılması ------------- */
 
@@ -230,5 +226,5 @@
 
     window.EMSReady(afterPost);
 
-    window.EMSExamRooms = { afterPost: afterPost };
+    window.EMSExamRooms = { afterPost: afterPost, flashRow: flashRow, openDrawerFor: openDrawerFor };
 })(window, document);

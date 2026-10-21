@@ -107,7 +107,7 @@ ortaq `sarComputerDialog`-u prefill ilə açır. Kontekst: `room`, `s`.{% endcom
                                         aria-label="{% blocktrans with label=c.label context 'accounts.superadmin_exam_rooms' %}«{{ label }}» kompüterini redaktə et{% endblocktrans %}">
                                     <i class="fas fa-pen" aria-hidden="true"></i>
                                 </button>
-                                <form method="post" action="{{ s.action_url }}" class="sar-inline-form">
+                                <form method="post" action="{{ s.action_url }}" class="sar-inline-form" data-sar-ajax="1">
                                     {% csrf_token %}
                                     <input type="hidden" name="action" value="delete_computer">
                                     <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">
