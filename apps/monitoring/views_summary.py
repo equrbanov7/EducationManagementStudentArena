@@ -26,6 +26,7 @@ from core.rate_limit import parse_rate, record_rate_limit_hit
 from .ai_snapshot import build_ai_snapshot
 from .permissions import monitoring_view_required
 from .summary import build_summary
+from .switches import current_gate, monitoring_gate, paused_payload
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +64,7 @@ def _ai_state(user_id) -> dict:
 
 @require_GET
 @monitoring_view_required
+@monitoring_gate
 def summary_api(request):
     scope = request.monitoring_scope
     data = dict(build_summary(scope))
@@ -122,6 +124,14 @@ def ai_analysis_api(request):
         return _no_store({"error": "view_as", "message": _error_message("view_as")}, status=403)
 
     from apps.ai_assistant.public import analyze_monitoring_snapshot, monitoring_ai_status
+
+    gate = current_gate()
+    if not gate.active:
+        # 2026-10-21: monitorinq söndürülüb / server yüklüdür — xülasə (Prometheus) toplanmır, limit xərclənmir.
+        payload = paused_payload(gate)
+        return _no_store(
+            {"error": "monitoring_paused", "message": payload["message"], **_ai_quota(user.pk)}, status=503
+        )
 
     status = monitoring_ai_status()
     if not status["enabled"] or not status["configured"]:

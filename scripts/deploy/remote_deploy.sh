@@ -286,6 +286,19 @@ heal_promtail_proxy_link() {
     || echo "promtail/docker-socket-proxy recreate failed; loglar Loki-yə düşməyə bilər." >&2
 }
 
+clear_monitoring_pause_marker() {
+  # 2026-10-21: prod-host-maint `monitoring-pause` cadvisor/promtail/loki/grafana-nı dayandırıb node_exporter
+  # textfile markeri yazır (alerts.yml həmin hədəflərin TargetDown-unu susdurur). Yuxarıdakı tam `up -d` onları
+  # artıq qaldırıb — pauza deploy-la bitir, marker də silinir (scripts/ops/monitoring_pause.sh). Uğursuzluq
+  # deploy-u dayandırmır: qalan marker MonitoringPauseMarkerStale alerti ilə görünür.
+  local marker=/var/lib/node_exporter/textfile_collector/monitoring_pause.prom
+  [ -e "$marker" ] || return 0
+  echo "Monitoring pause marker found; deploy resumed the paused containers — removing the marker."
+  docker run --rm --user 0 --network none --entrypoint sh -v /var/lib/node_exporter/textfile_collector:/tf \
+      postgres:16-alpine -c 'rm -f /tf/monitoring_pause.prom /tf/.monitoring_pause.prom.tmp' \
+    || echo "WARNING: could not remove ${marker}; run prod-host-maint action=monitoring-resume." >&2
+}
+
 legacy_deploy() {
   if [ ! -x "${VENV_DIR}/bin/python" ]; then
     echo "Missing virtualenv at ${VENV_DIR}." >&2
@@ -1061,6 +1074,7 @@ docker_deploy() {
   reload_prometheus_config
   recreate_alertmanager
   heal_promtail_proxy_link
+  clear_monitoring_pause_marker
 
   wait_for_http "${APP_BASE_URL}${PING_PATH}" "200" "$PING_JSON" || {
     docker compose -f "$COMPOSE_FILE" ps >&2 || true

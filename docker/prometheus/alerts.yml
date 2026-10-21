@@ -12,7 +12,14 @@ groups:
   - name: emsarena-availability
     rules:
       - alert: TargetDown
-        expr: up == 0
+        # 2026-10-21: prod-host-maint `monitoring-pause` cadvisor/loki-ni QƏSDƏN dayandırır və node_exporter
+        # textfile markeri `emsarena_monitoring_paused 1` yazır — o müddətdə yalnız bu iki hədəf susdurulur
+        # (qalan hədəflər, o cümlədən app/postgres/redis/nginx/blackbox, həmişəki kimi). Marker deploy-da
+        # silinir; qalıb hədəflər işləyirsə MonitoringPauseMarkerStale yanır.
+        expr: |
+          (up{job!~"emsarena-cadvisor|emsarena-loki"} == 0)
+          or
+          (up{job=~"emsarena-cadvisor|emsarena-loki"} == 0 unless on() (max(emsarena_monitoring_paused) == 1))
         for: 3m
         labels:
           severity: critical
@@ -175,14 +182,19 @@ groups:
         # `container_last_seen` seriyası bir neçə dəqiqə «köhnəlmiş» qalır; ad üzrə qayda hər deploy-da
         # bütün xidmətlər üçün yalançı «itib» insidenti açırdı. İndi xidmətin (…-app-3 → …-app) ƏN SON
         # görünən konteyneri 60 s-dən köhnədirsə alert yanır. `docker compose run` birdəfəlik
-        # konteynerləri (…-app-run-<hash>) istisnadır.
+        # konteynerləri (…-app-run-<hash>) istisnadır. 2026-10-21: cadvisor `monitoring-pause` ilə QƏSDƏN
+        # dayandırılanda (marker + cadvisor up==0) son nümunələr köhnəlir — bütün xidmətlər üçün yalançı
+        # «itib» yanmasın deyə susdurulur; marker qalsa da cadvisor işləyirsə qayda həmişəki kimidir.
         expr: >
-          time() - max by (svc) (
-            label_replace(
-              container_last_seen{name=~"emsarena-.+|educationmanagementstudentarena-.+", name!~".+-run-.+"},
-              "svc", "$1", "name", "(.+?)(-[0-9]+)?"
-            )
-          ) > 60
+          (
+            time() - max by (svc) (
+              label_replace(
+                container_last_seen{name=~"emsarena-.+|educationmanagementstudentarena-.+", name!~".+-run-.+"},
+                "svc", "$1", "name", "(.+?)(-[0-9]+)?"
+              )
+            ) > 60
+          )
+          unless on() (max(emsarena_monitoring_paused) == 1 and on() max(up{job="emsarena-cadvisor"}) == 0)
         for: 1m
         labels:
           severity: critical
@@ -533,10 +545,48 @@ groups:
   - name: emsarena-logs
     rules:
       - alert: LogIngestionStalled
-        expr: sum(increase(loki_distributor_lines_received_total[1h])) < 1
+        # 2026-10-21: `monitoring-pause` (marker + loki up==0) zamanı loglar qəsdən toplanmır.
+        expr: >
+          sum(increase(loki_distributor_lines_received_total[1h])) < 1
+          unless on() (max(emsarena_monitoring_paused) == 1 and on() max(up{job="emsarena-loki"}) == 0)
         for: 15m
         labels:
           severity: warning
         annotations:
           summary: "Loki son 1 saatda heç bir log sətri qəbul etməyib"
           description: "promtail → docker-socket-proxy → Loki zənciri qırılıb; «Sistem monitorinqi → Loglar» boş görünür. prod-audit.yml scope=logs ilə yoxlayın."
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # Monitorinq pauzası (sahib 2026-10-21: «sistemi çox yükləsə, onu söndürmək də olsun»).
+  # prod-host-maint.yml `monitoring-pause` ağır, kritik olmayan konteynerləri (cadvisor, promtail,
+  # docker-socket-proxy, loki, grafana) dayandırır və node_exporter textfile markeri yazır:
+  #   emsarena_monitoring_paused 1 + emsarena_monitoring_paused_since_timestamp_seconds
+  # (/var/lib/node_exporter/textfile_collector/monitoring_pause.prom). `monitoring-resume` və hər deploy
+  # (remote_deploy.sh) konteynerləri qaldırıb markeri silir. Prometheus + Alertmanager + exporterlər +
+  # blackbox İŞLƏYİR — kəsinti alertləri və Watchdog pauzada da gəlir.
+  # ═════════════════════════════════════════════════════════════════════════
+  - name: emsarena-monitoring-pause
+    rules:
+      - alert: MonitoringPausedTooLong
+        expr: >
+          max(emsarena_monitoring_paused) == 1
+          and on() (time() - max(emsarena_monitoring_paused_since_timestamp_seconds)) > 12 * 3600
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Monitorinq konteynerləri 12 saatdan çoxdur pauzadadır"
+          description: "cadvisor/promtail/loki/grafana prod-host-maint monitoring-pause ilə dayandırılıb; konteyner metrikləri və mərkəzi loglar toplanmır. Ehtiyac qalmayıbsa prod-host-maint.yml action=monitoring-resume."
+
+      - alert: MonitoringPauseMarkerStale
+        # Marker qalıb, amma cadvisor və ya loki yenidən işləyir (reboot sonrası boot converge, əl ilə
+        # `compose up`) — TargetDown həmin iki hədəf üçün səhvən susdurulmuş qalır.
+        expr: >
+          max(emsarena_monitoring_paused) == 1
+          and on() (max(up{job="emsarena-cadvisor"}) == 1 or max(up{job="emsarena-loki"}) == 1)
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Monitorinq pauza markeri qalıb, konteynerlər isə işləyir"
+          description: "monitoring_pause.prom markeri silinməyib (cadvisor/loki artıq işləyir) — həmin hədəflərin TargetDown alerti susdurulub. prod-host-maint.yml action=monitoring-resume markeri silir."
