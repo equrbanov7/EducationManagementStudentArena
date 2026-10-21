@@ -88,7 +88,7 @@ def appeal_detail(request, appeal_id):
     # beləliklə silinmiş/özgə müraciət arasında fərq sızmır.
     appeal = (
         Appeal.objects.select_related("exam", "attempt", "reviewed_by", "student")
-        .prefetch_related("items__question", "items__score_adjustment")
+        .prefetch_related("items__question", "items__score_adjustment", "items__decided_by_teacher")
         .filter(id=appeal_id)
         .first()
     )

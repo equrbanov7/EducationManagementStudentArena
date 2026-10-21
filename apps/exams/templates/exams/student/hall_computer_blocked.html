@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% comment %}Sərt zal rejimi (sahib 2026-10-21): «Hansı kompüterlərin MAC ünvanlarını əlavə edəcəyəmsə, ancaq onlardan
+midterm və final səhifəsinə girmək mümkün olsun; digər halda xəbərdarlıq mesajı göstərilsin.» Açar
+`exam.hall_computer_check` açıqdırsa qeydsiz kompüterdə giriş forması ƏVƏZİNƏ bu səhifə (403) göstərilir.
+Diaqnostika qutusunda YALNIZ bu kompüterin öz LAN ünvanı (IP özəl şəbəkədəndirsə) və MAC-ı (ARP agentindən) —
+imtahan mərkəzi kompüteri qeydiyyata ala bilsin. View: views/student/_final_device.hall_computer_blocked_response.{% endcomment %}
+
+{% block title %}{% trans "Qeydiyyatsız kompüter" context "exams.final_center.hall_computer" %}{% endblock %}
+
+{% block route_progress %}{% endblock %}
+{% block navbar %}{% endblock %}
+{% block view_as_banner %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block global_search %}{% endblock %}
+{% block global_search_js %}{% endblock %}
+{% block ai_assistant %}{% endblock %}
+{% block ai_assistant_js %}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/student.css' %}?v=20261021-redesign">
+{% endblock %}
+
+{% block content %}
+<div class="fexc-shell fexc-shell--blocked">
+  <header class="fexc-topbar">
+    {% include "exams/student/partials/_final_langbar.html" %}
+  </header>
+
+  <div class="fexc-stage">
+    <section class="fexc-card fexc-entry fexc-blocked" aria-labelledby="fexc-blocked-title">
+      <div class="fexc-entry-head">
+        <img src="{% static 'brand/wcu-official-lockup.svg' %}?v=20261001" alt="{{ site_brand_name }}"
+             class="fexc-logo" width="303" height="66" loading="eager" decoding="async">
+        <span class="fexc-blocked-badge" aria-hidden="true"><i class="fas fa-desktop"></i></span>
+        <h1 id="fexc-blocked-title" class="fexc-title">{% trans "Qeydiyyatsız kompüter" context "exams.final_center.hall_computer" %}</h1>
+      </div>
+
+      <div class="fexc-alert fexc-alert-warning" role="alert">
+        <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+        <span>{{ message }}</span>
+      </div>
+
+      <dl class="fexc-diag" aria-label="{% trans 'Bu kompüterin ünvanı' context 'exams.final_center.hall_computer' %}">
+        <dt class="fexc-diag-title">{% trans "Bu kompüterin ünvanı" context "exams.final_center.hall_computer" %}</dt>
+        <dd class="fexc-diag-row">
+          <span class="fexc-diag-key">IP</span>
+          <code class="fexc-diag-value" data-fexc-client-ip>{% if client_ip %}{{ client_ip }}{% else %}{% trans "oxunmadı" context "exams.final_center.hall_computer" %}{% endif %}</code>
+        </dd>
+        <dd class="fexc-diag-row">
+          <span class="fexc-diag-key">MAC</span>
+          <code class="fexc-diag-value" data-fexc-client-mac>{% if client_mac %}{{ client_mac }}{% else %}{% trans "oxunmadı" context "exams.final_center.hall_computer" %}{% endif %}</code>
+        </dd>
+      </dl>
+      <p class="fexc-hint fexc-diag-hint">{% trans "Kompüterin qeydiyyatı üçün bu ünvanı imtahan mərkəzinə və ya zal nəzarətçisinə bildirin." context "exams.final_center.hall_computer" %}</p>
+
+      {% if retry_url %}
+      <a href="{{ retry_url }}" class="fexc-btn fexc-btn-ghost fexc-btn-block fexc-blocked-retry">
+        <i class="fas fa-rotate-right" aria-hidden="true"></i>
+        {% trans "Səhifəni yenilə" context "exams.network" %}
+      </a>
+      {% endif %}
+
+    </section>
+  </div>
+</div>
+{% endblock %}

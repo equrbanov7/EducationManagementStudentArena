@@ -59,6 +59,10 @@ def alert_title(rule: str, fallback: str = "") -> str:
         "PgBouncerClientsWaiting": pgettext(_ALERT, "Bazaya qoşulmaq üçün növbədə gözləyən sorğular var"),
         "PgBouncerMaxWaitHigh": pgettext(_ALERT, "Bazaya qoşulma növbəsində gözləmə uzanıb"),
         "LogIngestionStalled": pgettext(_ALERT, "Mərkəzi loglar toplanmır — «Loglar» bölməsi boş qalır"),
+        "MonitoringPausedTooLong": pgettext(_ALERT, "Monitorinq konteynerləri 12 saatdan çoxdur dayandırılıb"),
+        "MonitoringPauseMarkerStale": pgettext(
+            _ALERT, "Monitorinq pauzası bitib, amma pauza işarəsi qalıb — bəzi alertlər susdurulub"
+        ),
     }
     return titles.get(rule or "", "") or fallback or pgettext(_ALERT, "Naməlum xəbərdarlıq")
 

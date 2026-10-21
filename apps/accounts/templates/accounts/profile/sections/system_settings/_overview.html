@@ -1,0 +1,24 @@
+{% load i18n nav_icons %}
+{% comment %}«Sistem tənzimləmələri → Ümumi baxış» (sahib 2026-10-21): hər qrup bir kartdır — açar sayı və
+standartdan fərqlənən (dəyişdirilmiş) açar sayı. Kart qrupun alt səhifəsinə aparır (panel daxili link → AJAX).{% endcomment %}
+<ul class="sysset-cards" data-ss-cards>
+    {% for card in ss.cards %}
+    <li class="sysset-cards__item">
+        <a class="sysset-card{% if card.changed %} has-changes{% endif %}" href="{{ card.url }}" data-ss-card="{{ card.key }}">
+            <span class="sysset-card__icon">{% nav_icon card.icon "sysset-card__glyph" %}</span>
+            <span class="sysset-card__body">
+                <span class="sysset-card__title">{{ card.label }}</span>
+                <span class="sysset-card__meta">
+                    {% blocktrans trimmed count n=card.count context "accounts.runtime_settings" %}{{ n }} tənzimləmə{% plural %}{{ n }} tənzimləmə{% endblocktrans %}
+                    {% if card.changed %}
+                    <span class="sysset__badge">{% blocktrans trimmed count n=card.changed context "accounts.runtime_settings" %}{{ n }} dəyişdirilib{% plural %}{{ n }} dəyişdirilib{% endblocktrans %}</span>
+                    {% else %}
+                    <span class="sysset-card__default">{% trans "Hamısı standartdır" context "accounts.runtime_settings" %}</span>
+                    {% endif %}
+                </span>
+            </span>
+            <i class="fas fa-chevron-right sysset-card__arrow" aria-hidden="true"></i>
+        </a>
+    </li>
+    {% endfor %}
+</ul>

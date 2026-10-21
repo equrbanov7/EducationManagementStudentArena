@@ -1,0 +1,96 @@
+/* Zal apellyasiyası qəbul edildi — uğur ekranı (2026-10-21). Mobil-öncəlikli, tokenlər design-tokens.css-dən. */
+.appeal-hall-done {
+    display: flex;
+    justify-content: center;
+    padding: 32px 16px 48px;
+    min-height: calc(100dvh - 56px);
+    background: var(--ems-bg-subtle);
+}
+
+.appeal-hall-done__card {
+    width: 100%;
+    max-width: 560px;
+    align-self: flex-start;
+    padding: 32px 24px;
+    border: 1px solid var(--ems-border);
+    border-radius: 16px;
+    background: var(--ems-bg);
+    text-align: center;
+}
+
+.appeal-hall-done__icon {
+    display: inline-flex;
+    font-size: 2.75rem;
+    color: var(--ems-success-700);
+}
+
+.appeal-hall-done__title {
+    margin: 12px 0 8px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.appeal-hall-done__exam {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0 0 12px;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.appeal-hall-done__kind {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ems-text-muted);
+}
+
+.appeal-hall-done__count {
+    margin: 0 0 16px;
+    font-weight: 600;
+    color: var(--ems-text);
+}
+
+.appeal-hall-done__steps {
+    margin: 0 0 24px;
+    padding: 16px 16px 16px 32px;
+    border-radius: 12px;
+    background: var(--ems-bg-subtle);
+    text-align: left;
+    color: var(--ems-text);
+    font-size: 0.925rem;
+    line-height: 1.55;
+}
+
+.appeal-hall-done__steps li + li {
+    margin-top: 6px;
+}
+
+.appeal-hall-done__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 180px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    background: var(--ems-primary);
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.appeal-hall-done__btn:hover,
+.appeal-hall-done__btn:focus-visible {
+    background: var(--ems-link-hover);
+    color: #fff;
+}
+
+.appeal-hall-done__auto {
+    margin: 12px 0 0;
+    font-size: 0.85rem;
+    color: var(--ems-text-muted);
+}

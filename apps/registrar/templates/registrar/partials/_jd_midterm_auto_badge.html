@@ -1,0 +1,4 @@
+{% load i18n %}{% comment %}Midterm balı test imtahanından avtomatik (sahib 2026-10-21) — mənbə nişanı.
+``source`` = ComponentScore.exam_source: attempt_id, exam_title, exam_slug, percent. Jurnal yalnız
+əməkdaşa açıqdır, ona görə cəhdə keçid verilir (imtahana çıxışı olmayan əməkdaş üçün səhifə özü bağlıdır).
+{% endcomment %}{% blocktrans asvar auto_title with title=source.exam_title percent=source.percent context "registrar.journal" %}İmtahandan avtomatik — {{ title }} ({{ percent }}%){% endblocktrans %}{% if source.exam_slug and source.attempt_id %}<a class="jd2-auto-badge" href="{% url 'exams:teacher_view_attempt' source.exam_slug source.attempt_id %}" title="{{ auto_title }}" aria-label="{{ auto_title }}" data-jd-auto-source><i class="fas fa-robot" aria-hidden="true"></i></a>{% else %}<span class="jd2-auto-badge" title="{{ auto_title }}" aria-label="{{ auto_title }}" data-jd-auto-source><i class="fas fa-robot" aria-hidden="true"></i></span>{% endif %}

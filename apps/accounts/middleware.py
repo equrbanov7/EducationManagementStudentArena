@@ -13,6 +13,8 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
 
+from apps.accounts.middleware_center_exam import is_center_exam_path
+
 logger = logging.getLogger(__name__)
 
 POST_LOGIN_REDIRECT_GUARD_SESSION_KEY = "post_login_redirect_guard"
@@ -236,6 +238,8 @@ class FirstLoginPasswordMiddleware:
         if any(path.startswith(prefix) for prefix in self.EXEMPT_PREFIXES):
             return True
         if path == self.LIVE_PIN_ENTRY_PATH or path.startswith(self.LIVE_PLAYER_PREFIXES):
+            return True
+        if is_center_exam_path(request, path):  # sahib 2026-10-21: zal imtahanı kəsilmir
             return True
         try:
             exempt_paths = {

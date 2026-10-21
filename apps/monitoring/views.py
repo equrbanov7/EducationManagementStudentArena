@@ -7,7 +7,9 @@ təşkilatını + org-suz sətirləri görür; insident ƏMƏLLƏRİ superadmin-
 Log sətirləri UI-a getməzdən əvvəl ``scrub.scrub_log_line``-dan keçir (sirlər + şəxsi məlumat, SEC-1 F4).
 
 Frontend yalnız bu endpoint-lərə müraciət edir; Prometheus/Loki/Alertmanager
-heç vaxt birbaşa açılmır. Asılılıq əlçatmazdırsa cavab ``status="degraded"``
+heç vaxt birbaşa açılmır. 2026-10-21: Prometheus/Loki/Alertmanager-ə gedən endpoint-lər ``monitoring_gate``
+arxasındadır («Sistem tənzimləmələri → Monitorinq»: söndürülüb və ya server yüklüdür → sorğusuz degraded
+cavab); DB-dən oxuyan insident/təhlükəsizlik tabları və Alertmanager webhook-u qapıdan asılı deyil. Asılılıq əlçatmazdırsa cavab ``status="degraded"``
 olur — UI boz vəziyyət göstərir, imtahan sisteminə təsir yoxdur.
 """
 
@@ -30,6 +32,7 @@ from .pagination import clamp_page, paginated_data, parse_pagination
 from .permissions import monitoring_view_required, superadmin_monitoring_required
 from .scrub import redact_secrets
 from .security_ip import InvalidIpFilter, parse_ip_filter, successful_logins
+from .switches import monitoring_gate
 
 logger = logging.getLogger(__name__)
 
@@ -55,12 +58,14 @@ def _range_seconds(request) -> int:
 
 @require_GET
 @monitoring_view_required
+@monitoring_gate
 def server_api(request):
     return JsonResponse(queries.server_section(_range_seconds(request)))
 
 
 @require_GET
 @monitoring_view_required
+@monitoring_gate
 def containers_api(request):
     page, page_size = parse_pagination(request.GET)
     return JsonResponse(queries.containers_section(page=page, page_size=page_size))
@@ -68,24 +73,28 @@ def containers_api(request):
 
 @require_GET
 @monitoring_view_required
+@monitoring_gate
 def application_api(request):
     return JsonResponse(queries.application_section(_range_seconds(request)))
 
 
 @require_GET
 @monitoring_view_required
+@monitoring_gate
 def database_api(request):
     return JsonResponse(queries.database_section(_range_seconds(request)))
 
 
 @require_GET
 @monitoring_view_required
+@monitoring_gate
 def redis_celery_api(request):
     return JsonResponse(queries.redis_celery_section(_range_seconds(request)))
 
 
 @require_GET
 @monitoring_view_required
+@monitoring_gate
 def exams_api(request):
     scope = _scope(request)
     organization_id = None if scope is None or scope.platform else scope.organization_id
@@ -94,6 +103,7 @@ def exams_api(request):
 
 @require_GET
 @monitoring_view_required
+@monitoring_gate
 def alerts_api(request):
     client = AlertmanagerClient()
     alerts = client.alerts()
@@ -117,6 +127,7 @@ def alerts_api(request):
 
 @require_GET
 @monitoring_view_required
+@monitoring_gate
 def logs_api(request):
     """Loki log axtarışı: servis + severity + mətn filtri, sərt limitlərlə (``logs.py``).
 

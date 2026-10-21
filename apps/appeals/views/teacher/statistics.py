@@ -235,7 +235,15 @@ def _row(appeal):
         "status": appeal.get_status_display(),
         "status_code": appeal.status,
         "date": timezone.localtime(appeal.created_at).strftime("%d.%m.%Y %H:%M"),
+        # 2026-10-21 (sahib): «Qərarı verən müəllim» sütunu (item-lərdə qeyd olunmuş müəllimlər).
+        "decided_by_teacher": _decided_teachers(appeal),
     }
+
+
+def _decided_teachers(appeal):
+    from ._review_decision import decided_teacher_names
+
+    return decided_teacher_names(appeal)
 
 
 def _summary(qs):
@@ -266,7 +274,7 @@ def appeal_stats_data(request):
     # qurur; annotasiya ora düşsə qruplaşmanı pozardı).
     listed = (
         _sorted(appeals, request)
-        .prefetch_related("exam__allowed_groups", allowed_units_prefetch())
+        .prefetch_related("exam__allowed_groups", allowed_units_prefetch(), "items__decided_by_teacher")
         .annotate(item_count=Count("items", distinct=True))
     )
     page_obj = Paginator(listed, _PAGE_SIZE).get_page(request.GET.get("page"))

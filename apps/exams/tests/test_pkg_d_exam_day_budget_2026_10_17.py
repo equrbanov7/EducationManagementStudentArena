@@ -48,9 +48,11 @@ BUDGETS = {
     "session_detail": 17,
     "session_history": 19,
     "reports": 20,
-    "final_entry_anon": 1,
-    "final_entry_gate": 13,
-    "final_waiting": 12,
+    # 2026-10-21 sərt zal rejimi: qeydli kompüter axtarışı (RLS bypass get/set/reset + 1 SELECT) = +4
+    # (sorğu başına bir dəfə — exam_center_gate.registered_hall_computer nəticəni yadda saxlayır).
+    "final_entry_anon": 5,
+    "final_entry_gate": 17,
+    "final_waiting": 16,  # 2026-10-21: +4 sərt zal qapısı (yuxarıya bax)
     "start_confirm": 23,
     "take_exam": 21,
 }

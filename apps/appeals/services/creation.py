@@ -155,6 +155,10 @@ def create_appeal(*, attempt, student, items, org_unit=None, filed_onsite=False,
     )
     _audit_appeal_created(appeal, item_count=len(cleaned), request=request)
     _notify_exam_center_new_appeal(appeal, item_count=len(cleaned))
+    # 2026-10-21 (sahib): fənni tədris edən müəllim(lər) də bilsin (mərkəzdə olan ikinci dəfə almır).
+    from .notify import notify_appeal_filed_teachers
+
+    notify_appeal_filed_teachers(appeal, item_count=len(cleaned))
     return appeal
 
 

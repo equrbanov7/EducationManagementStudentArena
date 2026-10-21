@@ -165,7 +165,10 @@ class EffectiveDisplayTests(TestCase):
                 }
             ],
         )
-        self.assertEqual(InAppNotification.objects.filter(recipient=self.teacher).count(), 0)
+        # 2026-10-21 (sahib): fənni tədris edən müəllim (burada imtahan müəllifi) də bildiriş alır — bir dəfə.
+        teacher_notes = InAppNotification.objects.filter(recipient=self.teacher)
+        self.assertEqual(teacher_notes.count(), 1)
+        self.assertEqual(teacher_notes.first().title, "Tələbəniz apellyasiya verdi")
         exam_center_notes = InAppNotification.objects.filter(recipient=self.exam_center)
         self.assertEqual(exam_center_notes.count(), 1)
         self.assertIn("apellyasiya", exam_center_notes.first().title.lower())

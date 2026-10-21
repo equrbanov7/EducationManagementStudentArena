@@ -110,6 +110,7 @@ refresh_nginx_upstream() { echo "stub: refresh_nginx_upstream"; }
 reload_prometheus_config() { :; }
 recreate_alertmanager() { :; }
 heal_promtail_proxy_link() { :; }
+clear_monitoring_pause_marker() { :; }
 verify_running_build_sha() { echo "stub: verify_running_build_sha"; }
 wait_for_http() { return "${FAKE_HTTP_RC:-0}"; }
 app_replicas_ready() {

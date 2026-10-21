@@ -1,0 +1,267 @@
+/* İmtahan mərkəzi — gözləmə otağı (final_waiting.html). Qabıq/kart/düymə: student.css.
+   Redizayn 2026-10-21 (sahib): rəsmi status ekranı. Vəziyyət kökün `data-phase` atributundan gəlir
+   (waiting_room.js yazır): waiting → nəzarətçi gözlənilir (mavi, yavaş fırlanan halqa) · starting → imtahan
+   açılır (yaşıl) · paused → müvəqqəti dayandırılıb (sarı) · stopped → oturum bitdi/çıxarıldı (boz, hərəkətsiz).
+   Status bloku sabit minimum hündürlükdədir — polling/WS mətni dəyişəndə səhifə «tullanmır». */
+
+.fexc-waiting {
+    max-width: 580px;
+    --fexc-phase: var(--ems-primary-600);
+    --fexc-phase-soft: var(--ems-primary-50);
+    --fexc-phase-line: var(--ems-primary-100);
+}
+
+.fexc-waiting[data-phase="starting"] {
+    --fexc-phase: var(--ems-success-600);
+    --fexc-phase-soft: var(--ems-emerald-50);
+    --fexc-phase-line: var(--ems-emerald-200);
+}
+
+.fexc-waiting[data-phase="paused"] {
+    --fexc-phase: var(--ems-warning-600);
+    --fexc-phase-soft: var(--ems-warning-50);
+    --fexc-phase-line: var(--ems-warning-bd);
+}
+
+.fexc-waiting[data-phase="stopped"] {
+    --fexc-phase: var(--ems-neutral-500);
+    --fexc-phase-soft: var(--ems-neutral-50);
+    --fexc-phase-line: var(--ems-neutral-200);
+}
+
+/* ── Başlıq: universitet nişanı + «Gözləmə otağı» + növ ── */
+.fexc-wait-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.fexc-mark {
+    flex: none;
+    width: 44px;
+    height: 40px;
+    border-radius: var(--ems-r-md);
+    object-fit: cover;
+}
+
+.fexc-wait-head-text {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+    line-height: 1.3;
+}
+
+.fexc-wait-brand {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ems-neutral-500);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fexc-wait-kicker {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+
+.fexc-wait-title {
+    margin-bottom: 16px;
+}
+
+/* ── Status bloku ── */
+.fexc-wait-status {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 104px;
+    margin: 0 0 16px;
+    padding: 16px 18px;
+    background: var(--fexc-phase-soft);
+    border: 1px solid var(--fexc-phase-line);
+    border-radius: var(--ems-r-xl);
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.fexc-wait-indicator {
+    position: relative;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    color: var(--fexc-phase);
+}
+
+.fexc-wait-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3px solid color-mix(in srgb, var(--fexc-phase) 18%, transparent);
+    border-top-color: var(--fexc-phase);
+    animation: fexc-spin 1.8s linear infinite;
+}
+
+.fexc-wait-icon {
+    font-size: 1.15rem;
+}
+
+.fexc-waiting[data-phase="starting"] .fexc-wait-ring {
+    animation-duration: 0.9s;
+}
+
+.fexc-waiting[data-phase="paused"] .fexc-wait-ring,
+.fexc-waiting[data-phase="stopped"] .fexc-wait-ring {
+    animation: none;
+    border-color: color-mix(in srgb, var(--fexc-phase) 35%, transparent);
+}
+
+@keyframes fexc-spin {
+    to { transform: rotate(360deg); }
+}
+
+.fexc-wait-text {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.fexc-wait-message {
+    /* İki sətirlik yer həmişə ayrılıb — mətn qısalanda/uzananda blok hündürlüyü dəyişmir. */
+    min-height: 2.8em;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    font-size: 1.02rem;
+    font-weight: 650;
+    line-height: 1.4;
+    color: var(--ems-neutral-900);
+    overflow-wrap: anywhere;
+}
+
+.fexc-wait-hint {
+    margin: 4px 0 0;
+    font-size: 0.84rem;
+    line-height: 1.45;
+    color: var(--ems-neutral-600);
+}
+
+/* ── Faktlar ── */
+.fexc-wait-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 16px;
+    margin: 0 0 18px;
+    padding: 14px 16px;
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-xl);
+}
+
+.fexc-fact {
+    min-width: 0;
+}
+
+.fexc-fact--wide {
+    grid-column: 1 / -1;
+}
+
+.fexc-fact dt {
+    margin-bottom: 3px;
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.fexc-fact dd {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ems-neutral-900);
+    overflow-wrap: anywhere;
+}
+
+.fexc-fact .fexc-username {
+    font-weight: 500;
+}
+
+.fexc-conn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.fexc-conn::before {
+    content: "";
+    display: inline-block;
+    flex: none;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--ems-warning-500);
+}
+
+.fexc-conn[data-state="online"]::before { background: var(--ems-emerald-600); }
+.fexc-conn[data-state="offline"]::before { background: var(--ems-danger); }
+
+/* ── Əməllər: «İmtina et» solda, «İmtahana başla» (yalnız start olanda) sağda — eyni sətir, tullanma yox ── */
+.fexc-wait-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.fexc-cancel-form {
+    margin: 0;
+}
+
+.fexc-manual-start[hidden] {
+    display: none;
+}
+
+.fexc-waiting .fexc-footnote {
+    margin-top: 18px;
+}
+
+/* ── Alçaq ekran ── */
+@media (max-height: 720px) {
+    .fexc-wait-head { margin-bottom: 12px; }
+    .fexc-wait-title { margin-bottom: 12px; }
+    .fexc-wait-status { min-height: 92px; padding: 12px 16px; margin-bottom: 12px; }
+    .fexc-wait-facts { padding: 12px 14px; margin-bottom: 14px; gap: 10px 14px; }
+    .fexc-waiting .fexc-footnote { margin-top: 14px; }
+}
+
+@media (max-height: 560px) {
+    .fexc-wait-head { margin-bottom: 8px; }
+    .fexc-wait-title { margin-bottom: 8px; font-size: 1.22rem; }
+    .fexc-wait-status { min-height: 80px; padding: 10px 14px; margin-bottom: 10px; }
+    .fexc-wait-facts { padding: 10px 14px; margin-bottom: 10px; gap: 8px 14px; }
+    .fexc-waiting .fexc-footnote { margin-top: 10px; padding-top: 8px; }
+}
+
+/* ── Telefon ── */
+@media (max-width: 480px) {
+    .fexc-wait-head { flex-wrap: wrap; }
+    .fexc-wait-head .fexc-kind { order: 3; }
+    .fexc-wait-status { align-items: flex-start; gap: 12px; }
+    .fexc-wait-indicator { width: 46px; height: 46px; }
+    .fexc-wait-facts { grid-template-columns: minmax(0, 1fr); }
+    .fexc-wait-actions { flex-direction: column-reverse; align-items: stretch; }
+    .fexc-wait-actions .fexc-btn,
+    .fexc-cancel-form { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fexc-wait-ring { animation: none; }
+    .fexc-wait-status { transition: none; }
+}

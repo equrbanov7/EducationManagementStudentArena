@@ -1,4 +1,11 @@
-"""Sistem Monitorinqi Celery task-ları (beat cədvəli celery_cache.py-dadır)."""
+"""Sistem Monitorinqi Celery task-ları (beat cədvəli celery_cache.py-dadır).
+
+2026-10-21 («Sistem tənzimləmələri → Monitorinq»): in-app insident uzlaşdırması (``reconcile_incidents``)
+monitorinq söndürüləndə və ya server yüklü olanda Alertmanager-ə getmədən dərhal qayıdır. Celery/backup
+kollektorları isə QƏSDƏN qapıdan asılı deyil: onlar Prometheus alertlərinin (CeleryWorkersDown /
+CeleryBeatStale / CeleryHeavyWorkerDown / BackupTooOld) mənbəyidir — dayansalar alertlər yalançı yanar və ya
+real nasazlıq görünməz; dəyəri də ucuzdur (dəqiqədə bir broadcast ping + LLEN, 15 dəqiqədə bir qovluq siyahısı).
+"""
 
 from __future__ import annotations
 
@@ -24,7 +31,12 @@ def reconcile_incidents_task():
 
     from .clients import AlertmanagerClient
     from .incidents import reconcile_stale_incidents
+    from .switches import current_gate
 
+    with rls_worker_atomic():  # tənzimləmə oxusu (keş → baza) worker qaydasına tabe
+        gate = current_gate()
+    if not gate.active:
+        return {"skipped": gate.reason}
     active = AlertmanagerClient().alerts()
     with rls_worker_atomic():
         reconcile_stale_incidents(active)

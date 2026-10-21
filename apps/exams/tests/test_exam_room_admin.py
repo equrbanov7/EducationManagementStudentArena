@@ -339,11 +339,14 @@ class MacGateTests(_RoomBase):
         with self._with_client_mac("AA:AA:AA:AA:AA:01"):
             self.assertFalse(org_computer_access_allowed(self.request, self.org))
 
-    def test_org_gate_open_when_no_computers(self):
-        # Org-da qeydli kompüter yoxdursa biletsiz yol mövcud davranışda qalır.
+    def test_org_gate_closed_when_no_computers_in_strict_mode(self):
+        # 2026-10-21 (sahib, sərt zal rejimi): org-da qeydli kompüter yoxdursa giriş də YOXDUR; açar
+        # (exam.hall_computer_check) söndürüləndə kompüter tələbi düşür.
         with self._with_client_mac(None):
-            self.assertTrue(org_computer_access_allowed(self.request, self.org))
+            self.assertFalse(org_computer_access_allowed(self.request, self.org))
         self.assertTrue(org_computer_access_allowed(self.request, None))
+        with override_settings(EXAM_HALL_COMPUTER_CHECK=False):
+            self.assertTrue(org_computer_access_allowed(self.request, self.org))
 
 
 class RoomIsolationAndMonitorTests(_RoomBase):

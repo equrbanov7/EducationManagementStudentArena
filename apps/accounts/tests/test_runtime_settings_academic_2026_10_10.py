@@ -135,12 +135,14 @@ class AcademicRulesSettingsTest(TestCase):
         session = client.session
         session["active_organization"] = self.org.slug
         session.save()
-        response = client.get(reverse("accounts:profile_section_fragment", kwargs={"section": "system-settings"}))
+        # 2026-10-21: bölmə alt səhifələrə bölünüb — hər qrupun forması öz `ss_group` səhifəsindədir.
+        url = reverse("accounts:profile_section_fragment", kwargs={"section": "system-settings"})
+        response = client.get(url, {"ss_group": "academic"})
         self.assertEqual(response.status_code, 200)
         content = response.json()["html"]
         self.assertIn('name="academic.selfwork_enabled"', content)
         self.assertIn('type="checkbox" role="switch" id="ss-academic.selfwork_enabled"', content)
-        self.assertIn('id="ss-journal.lesson_activation"', content)
+        self.assertIn('id="ss-journal.lesson_activation"', client.get(url, {"ss_group": "journal"}).json()["html"])
         groups = {group["key"]: group for group in response.context["system_settings_section"]["groups"]}
         self.assertEqual(
             [field["key"] for field in groups["academic"]["fields"]],

@@ -24,6 +24,7 @@ from core.roles import ProfileRole
 from .coding import dump_test_cases, parse_test_cases
 from .exam_coding_fields import CodingExamFieldsMixin
 from .exam_exclusions import excluded_users_within_assignment, requested_unit_ids
+from .exam_question_count import category_counts, decorate_widget, initial_count, resolve_submitted_count
 
 User = get_user_model()
 
@@ -322,12 +323,14 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
 
         # Yeni imtahan yaradılarkən defaultlar (imtahan mərkəzi kabinetdə yaradarkən):
         #   • qaralama (publish yalnız sual qapısından sonra ayrıca edilir);
-        #   • sual sayı = 50;
+        #   • sual sayı = kateqoriyaya görə (final 50 / midterm 30 — «Sistem tənzimləmələri»), əks halda 50;
         #   • cəhd sayı = 1;
         #   • is_public = False → imtahan HAMIYA AÇIQ deyil, BAĞLI görünür.
+        self._question_counts = category_counts()
         if not self.instance.pk and not self.is_bound:
-            self.fields["random_question_count"].initial = 50
-            self.initial.setdefault("random_question_count", 50)
+            default_count = initial_count(self.initial.get("exam_type_extended"), self._question_counts)
+            self.fields["random_question_count"].initial = default_count
+            self.initial.setdefault("random_question_count", default_count)
             self.fields["max_attempts_per_user"].initial = 1
             self.initial.setdefault("max_attempts_per_user", 1)
             self.fields["is_public"].initial = False
@@ -377,6 +380,7 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
             self.fields["allowed_users"].queryset = user_qs.distinct().order_by("username")
             self.fields["excluded_users"].queryset = user_qs.distinct().order_by("username")
             self.fields["allowed_groups"].queryset = group_qs.order_by("name")
+        decorate_widget(self, self._question_counts)  # sahib 2026-10-21: kateqoriya → avtomatik sual sayı (JS)
 
     def _load_coding_question_initial(self):
         base_question = (
@@ -485,7 +489,12 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
         return code
 
     def clean_random_question_count(self):
-        value = self.cleaned_data.get("random_question_count")
+        value = resolve_submitted_count(
+            self.cleaned_data.get("random_question_count"),
+            category=self.cleaned_data.get("exam_type_extended"),
+            instance=self.instance,
+            counts=self._question_counts,
+        )
         if value in (None, ""):
             if self.instance.pk:
                 existing_value = self.instance.random_question_count

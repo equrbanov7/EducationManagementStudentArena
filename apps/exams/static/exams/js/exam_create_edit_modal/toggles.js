@@ -128,6 +128,57 @@
 
         syncCategoryVisibility();
         categorySelect.addEventListener("change", syncCategoryVisibility);
+        initQuestionCountAutofill(form, categorySelect);
+    }
+
+    /* Sahib 2026-10-21: «midterm seçərkən özü 30 sual gəlsin, yaddan çıxa bilər». Kateqoriya dəyişəndə
+       sual sayı «Sistem tənzimləmələri»ndəki dəyərə (input-un `data-qcount-final` / `data-qcount-midterm`,
+       ExamForm verir) qoyulur — YALNIZ son avtomatik doldurmadan (`data-qcount-auto`) bəri əl ilə başqa
+       rəqəm yazılmayıbsa. Əl ilə yazılmış say saxlanır; server də eyni qaydanı tətbiq edir
+       (apps/exams/forms/exam_question_count.py). İpucu: «Midterm üçün 30 sual (Sistem tənzimləmələri)». */
+    function initQuestionCountAutofill(form, categorySelect) {
+        var input = form.querySelector('input[name="random_question_count"]');
+        if (!input || input.getAttribute("data-qcount-bound") === "1") {
+            return;
+        }
+        input.setAttribute("data-qcount-bound", "1");
+        var hint = form.querySelector("[data-qcount-hint]");
+        var hintText = hint ? hint.querySelector("[data-qcount-hint-text]") : null;
+
+        function categoryCount(category) {
+            var raw = input.getAttribute("data-qcount-" + category);
+            return SECURE_CATEGORY_VALUES[category] && raw ? raw : "";
+        }
+
+        function syncHint(category) {
+            if (!hint) {
+                return;
+            }
+            var text = SECURE_CATEGORY_VALUES[category] ? input.getAttribute("data-qcount-hint-" + category) || "" : "";
+            if (hintText) {
+                hintText.textContent = text;
+            }
+            hint.hidden = !text;
+        }
+
+        function isAuto() {
+            var value = String(input.value || "").trim();
+            return value === "" || (input.hasAttribute("data-qcount-auto") && value === input.getAttribute("data-qcount-auto"));
+        }
+
+        categorySelect.addEventListener("change", function () {
+            var category = categorySelect.value;
+            var target = categoryCount(category);
+            if (target && isAuto()) {
+                input.setAttribute("data-qcount-auto", target);
+                if (String(input.value).trim() !== target) {
+                    input.value = target;
+                    input.dispatchEvent(new Event("input", { bubbles: true }));
+                }
+            }
+            syncHint(category);
+        });
+        syncHint(categorySelect.value);
     }
 
     function initExamTypePicker(form) {

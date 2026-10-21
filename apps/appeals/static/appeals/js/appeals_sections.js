@@ -428,11 +428,38 @@
 
     window.setInterval(tickCountdowns, 1000);
 
-    if (window.EMSReady) {
-        window.EMSReady(function () { scanCountdowns(document); });
-    } else if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", function () { scanCountdowns(document); });
-    } else {
+    /* ── 2026-10-21: bildiriş keçidi → qərar modalı (``?open_appeal=<id>``) ─ */
+    function openAppealFromLocation() {
+        var id = "";
+        try { id = new URLSearchParams(window.location.search).get("open_appeal") || ""; } catch (e) { id = ""; }
+        if (!/^[0-9]+$/.test(id)) { return; }
+        var holder = document.querySelector("[data-appeal-review-template]");
+        if (!holder) { return; }
+        var url = String(holder.getAttribute("data-appeal-review-template") || "").replace(/\/0\/$/, "/" + id + "/");
+        try {
+            var clean = new URL(window.location.href);
+            clean.searchParams.delete("open_appeal");
+            window.history.replaceState(window.history.state, "", clean.toString());
+        } catch (e) { /* ignore */ }
+        var trigger = document.createElement("a");
+        trigger.href = url;
+        trigger.hidden = true;
+        trigger.setAttribute("data-appeal-review-url", url);
+        holder.parentNode.insertBefore(trigger, holder);
+        trigger.click();
+        trigger.remove();
+    }
+
+    function onReady() {
         scanCountdowns(document);
+        openAppealFromLocation();
+    }
+
+    if (window.EMSReady) {
+        window.EMSReady(onReady);
+    } else if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", onReady);
+    } else {
+        onReady();
     }
 })();

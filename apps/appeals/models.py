@@ -24,6 +24,11 @@ from .constants import (
 
 User = settings.AUTH_USER_MODEL
 
+#: Apellyasiya qərarının əsaslandırıcı sənədi — PDF/JPG/PNG, 10 MB (qorunan media prefiksi).
+APPEAL_DOCUMENT_PREFIX = "appeal_documents/"
+APPEAL_DOCUMENT_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png"}
+APPEAL_DOCUMENT_MAX_MB = 10
+
 
 class Appeal(models.Model):
     """Bir imtahan attempt-i üzrə student apellyasiyasının başlığı."""
@@ -168,6 +173,16 @@ class AppealItem(models.Model):
         blank=True,
         verbose_name=pgettext_lazy("appeals.model.item.field", "resolved_at"),
     )
+    # 2026-10-21 (sahib): «hansı müəllim qəbul edib / bal artırıb, qeyd olsun» — qərarı verən MÜƏLLİM
+    # (yadda saxlayan əməkdaş ``resolved_by``-dadır; ikisi fərqli ola bilər). Qərar yazısı: ``AppealDecisionRecord``.
+    decided_by_teacher = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="appeal_items_decided_as_teacher",
+        verbose_name=pgettext_lazy("appeals.model.item.field", "decided_by_teacher"),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -250,6 +265,58 @@ class ScoreAdjustment(models.Model):
         return f"ScoreAdjustment#{self.pk} · item={self.appeal_item_id} · Δ{self.delta_points}"
 
 
+def appeal_document_path(instance, filename: str) -> str:
+    """``appeal_documents/<org>/<təsadüfi ad>`` — orijinal ad ``document_name``-dədir, yolda yox."""
+    from .services.documents import random_document_name
+
+    return f"{APPEAL_DOCUMENT_PREFIX}{instance.organization_id}/{random_document_name(filename)}"
+
+
+def appeal_document_validators():
+    from core.upload_security import FileUploadValidator
+
+    return [FileUploadValidator(allowed_extensions=APPEAL_DOCUMENT_EXTENSIONS, max_size_mb=APPEAL_DOCUMENT_MAX_MB)]
+
+
+class AppealDecisionRecord(models.Model):
+    """«Qərarları yadda saxla» əməliyyatının BİR yazısı — append-only (sahib 2026-10-21).
+
+    Sahib: «Apellyasiyaya baxıb qəbul edərkən orada seçim olsun ki, hansı müəllim qəbul edib. Hələlik məcburi
+    olmasa da sənəd yükləmə yeri olsun». Kim qərarı VERİB (``decided_by_teacher``), kim yadda SAXLAYIB
+    (``saved_by``), hansı suallar, bal əvvəl → sonra və əsaslandırıcı sənəd (opsional; «Sistem tənzimləmələri» →
+    ``exam.appeal_document_required`` yandırılıbsa məcburi). Sənəd qorunan mediadır (``appeal_documents/``) —
+    yalnız apellyasiya heyəti və RİM/superadmin endirir (``services/documents.py``).
+    """
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.CASCADE, related_name="appeal_decision_records"
+    )
+    appeal = models.ForeignKey("appeals.Appeal", on_delete=models.CASCADE, related_name="decision_records")
+    decided_by_teacher = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="appeal_decisions_as_teacher"
+    )
+    saved_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="appeal_decisions_saved"
+    )
+    item_ids = models.JSONField(default=list, blank=True)
+    accepted_count = models.PositiveSmallIntegerField(default=0)
+    rejected_count = models.PositiveSmallIntegerField(default=0)
+    score_before = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    score_after = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    document = models.FileField(
+        upload_to=appeal_document_path, blank=True, max_length=200, validators=appeal_document_validators()
+    )
+    document_name = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at", "id"]
+        indexes = [models.Index(fields=["appeal", "created_at"], name="appeal_decision_rec_idx")]
+
+    def __str__(self):
+        return f"AppealDecisionRecord#{self.pk} · appeal={self.appeal_id}"
+
+
 class AnswerKeyCorrection(models.Model):
     """Test sualının CAVAB AÇARININ düzəlişi — sualı cavablayan BÜTÜN tələbələr üçün (2026-10-13, gecə).
 
@@ -330,8 +397,10 @@ class KeyCorrectionCredit(models.Model):
 
 
 __all__ = [
+    "APPEAL_DOCUMENT_PREFIX",
     "AnswerKeyCorrection",
     "Appeal",
+    "AppealDecisionRecord",
     "AppealItem",
     "KeyCorrectionCredit",
     "ScoreAdjustment",

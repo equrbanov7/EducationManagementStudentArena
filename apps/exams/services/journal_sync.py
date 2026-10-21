@@ -25,8 +25,9 @@ imtahanın balıdır. Əvvəl fənnə bağlı HƏR bitmiş cəhd ora yazılırd�
 «midterm» (və ya müəllimin fənnə bağladığı quiz) tələbənin YEKUN imtahan balını
 əzirdi. İndi kateqoriyası açıq-aşkar final OLMAYAN cəhd (bax
 ``final_grade_skip_reason``) görünən skip kodu + sayğac + log ilə atlanır.
-Midterm balını jurnala avtomatik yazmırıq: sahibin qərarı ilə onu müəllim
-İmtahan Mərkəzinin pəncərəsində (0–20) özü yazır.
+Midterm balı ``FinalGrade``-ə HEÇ VAXT yazılmır. Sahib 2026-10-21: TEST formatlı midtermin balı
+jurnalın «Midterm» xanasına avtomatik düşür (``midterm_journal_sync`` — bu körpü ora yönləndirir);
+yazılı / kodlaşdırma midtermini müəllim əvvəlki kimi İmtahan Mərkəzinin pəncərəsində özü yazır.
 """
 
 from __future__ import annotations
@@ -227,7 +228,8 @@ def sync_attempt_to_journal(attempt, *, actor=None, appeal_id=None):
     """Bitmiş imtahan cəhdinin nəticəsini registrar ``FinalGrade``-ə yaz.
 
     İmtahan bir jurnal fənninə bağlı deyilsə (``exam.subject`` null) no-op.
-    Kateqoriyası final OLMAYAN imtahan (midterm, quiz, kateqoriyasız, …) YAZILMIR — görünən
+    TEST formatlı midterm jurnalın «Midterm» xanasına yazılır (``midterm_journal_sync``, sahib 2026-10-21).
+    Kateqoriyası final OLMAYAN digər imtahan (yazılı midterm, quiz, kateqoriyasız, …) YAZILMIR — görünən
     skip kodu ilə atlanır (bax ``final_grade_skip_reason``); qovulma da daxil, yəni
     midtermdən qovulma yekun imtahan balını 0-a endirmir.
     Proctordan qovulan (``supervision_status == "removed"``) → 0 = avtomatik F.
@@ -245,6 +247,11 @@ def sync_attempt_to_journal(attempt, *, actor=None, appeal_id=None):
     if not attempt.is_finished:
         # Audit 2026-09-28 EX28-02: yazmaqda olan tələbənin qismən balı rəsmi jurnala yazılmır.
         return _skip(SKIP_NOT_FINISHED, attempt)
+    from apps.exams.services import midterm_journal_sync
+
+    if midterm_journal_sync.is_auto_midterm_exam(exam):
+        # Sahib 2026-10-21: test midterm → jurnalın «Midterm» xanası (FinalGrade-ə yox).
+        return midterm_journal_sync.sync_midterm_attempt(attempt, actor=actor, appeal_id=appeal_id)[1]
     category_skip = final_grade_skip_reason(exam)
     if category_skip is not None:
         # Gözlənilən hal (xəta deyil) → INFO; sayğac etiketi monitorinqdə görünür.

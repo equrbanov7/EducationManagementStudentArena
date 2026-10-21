@@ -327,6 +327,45 @@ konteyner axını tanımırsa **promtail ipucu**. Zənciri yoxlamaq (oxu-yalnız
 Loki logundakı `recalculate_owned_streams … "zone not set"` tək-replika (`inmemory` ring)
 rejimində zərərsizdir.
 
+### 8.3 Monitorinq yükü: açarlar və pauza (2026-10-21)
+
+Sahib: «monitorinq sistemi çox yükləsə, onu söndürmək də olsun». İki səviyyə var:
+
+**1. Tətbiq daxili — «Sistem tənzimləmələri → Monitorinq»** (`core/runtime_settings_monitoring.py`,
+qapı `apps/monitoring/switches.py`):
+
+| Açar | Defolt | Təsiri |
+|---|---|---|
+| `monitoring.in_app_enabled` | açıq | Söndürüləndə «Sistem monitorinqi» API-ları Prometheus/Loki/Alertmanager-ə sorğu göndərmədən «Monitorinq söndürülüb» bannerini qaytarır; `reconcile_incidents` dərhal qayıdır |
+| `monitoring.auto_pause_on_load` | açıq | `load1 > əmsal × nüvə` olanda eyni qapı avtomatik bağlanır (yük azalan kimi açılır) |
+| `monitoring.load_pause_factor` | 1,5 | Hədd əmsalı (autoheal restartları 2 × nüvədə saxlayır — monitorinq ondan əvvəl çəkilir) |
+| `monitoring.ui_refresh_seconds` | 30 | Prometheus/Loki/Alertmanager cavablarının ortaq Redis keşi; range sorğularının sonu bu intervala yuvarlanır |
+
+Qapıdan asılı DEYİL: Prometheus alertləri + Watchdog, `/metrics/`, Celery/backup kollektorları
+(CeleryBeatStale/BackupTooOld mənbəyi), Alertmanager webhook-u, «İnsidentlər»/«Təhlükəsizlik» tabları (DB),
+imtahan nəzarəti (müəllim paneli, zal monitoru).
+
+**2. Konteynerlər — Actions → *Prod host maintenance***:
+
+- `action=monitoring-pause`, `confirm=PAUSE` — `scripts/ops/monitoring_pause.sh pause`: əvvəl node_exporter
+  textfile markeri (`/var/lib/node_exporter/textfile_collector/monitoring_pause.prom`,
+  `emsarena_monitoring_paused 1`) yazılır, 45 s sonra **cadvisor, promtail, docker-socket-proxy, loki,
+  grafana** dayandırılır. **İşləyir:** prometheus, alertmanager, node_exporter, blackbox, postgres/redis/
+  pgbouncer/nginx exporterləri — kəsinti alertləri (TargetDown app/DB/Redis/nginx, EndpointProbeFailed, Host*,
+  Celery*, Backup*) və Watchdog pauzada da gəlir. Marker cadvisor/loki üçün TargetDown, ContainerDown və
+  LogIngestionStalled-i susdurur; 12 saatdan sonra `MonitoringPausedTooLong` xatırladır.
+- `action=monitoring-resume` — konteynerləri `up -d --no-deps` ilə qaldırır, 45 s sonra markeri silir.
+- **Növbəti deploy pauzanı bitirir**: `remote_deploy.sh` tam `up -d` dayanan konteynerləri qaldırır və
+  `clear_monitoring_pause_marker` markeri silir. Reboot-dan sonra boot converge konteynerləri qaldırır, marker
+  isə qalır → 15 dəqiqədən sonra `MonitoringPauseMarkerStale` → `monitoring-resume` işlədin.
+- autoheal səliqəli dayandırılmış konteynerə toxunmur — pauza öz-özünə pozulmur.
+- Vəziyyət: `action=status` («monitorinq pauzası» sətri) və ya `monitoring_pause.sh status`.
+
+Pauzada itən: konteyner CPU/RAM/şəbəkə qrafikləri və ContainerDown/OOM/RestartLoop alertləri (app replikaları
+TargetDown + blackbox ilə izlənir), pauza müddətində «Loglar» tabı (promtail resume-dan sonra mövqe faylından
+davam edir və konteynerlərin `docker logs` fayllarında — 10m×3 — qalan sətirləri saniyədə ≤ 2000 sətir sürəti
+ilə sonradan göndərir; rotasiyaya düşənlər itir), Grafana UI.
+
 ---
 
 ## 9. Yoxlama siyahısı

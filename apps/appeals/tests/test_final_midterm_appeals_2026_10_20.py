@@ -204,17 +204,31 @@ class FinalMidtermWindowTests(_StudentSetup):
             reverse("exams:exam_result", kwargs={"slug": attempt.exam.slug, "attempt_id": attempt.id}),
             {"from_section": "my-results"},
         )
-        self.assertNotContains(later, "data-appeal-onsite-hint", html=False)
+        # 2026-10-21 (sahib): «düzgün/səhv cavab yalnız zal kompüterində» qeydi kabinetdə də göstərilir.
+        self.assertContains(later, "data-appeal-onsite-hint", html=False)
+        self.assertContains(later, "yalnız imtahan verdiyiniz zal kompüterində")
 
 
-@override_settings(**NETWORK_ON)
+@override_settings(**NETWORK_ON, EXAM_MIDTERM_VIA_CENTER=True)
 class OnsiteModeTests(_StudentSetup):
+    """2026-10-21: «imtahan sonunda» rejimi yalnız zalda — hər cəhd defolt olaraq zal sessiyasında yaradılır
+    (``hall_helpers.enter_hall``: bilet + sessiya markeri + bağlı cihaz); ``hall=False`` — zaldan kənar."""
+
+    def _attempt(self, category, *, hall=True, **kwargs):
+        attempt = super()._attempt(category, **kwargs)
+        if hall:
+            from apps.exams.tests.hall_helpers import enter_hall
+
+            enter_hall(self.client, attempt)
+        return attempt
+
     def test_onsite_midterm_shows_options_and_key_and_is_stored(self):
         attempt = self._attempt("midterm")
         self._result(attempt, REMOTE_ADDR=INTERNAL_IP)
         self.assertOnsiteContent(self._form(attempt, REMOTE_ADDR=INTERNAL_IP))
         response = self._post(attempt, REMOTE_ADDR=INTERNAL_IP)
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], reverse("appeals:hall_appeal_done"))
         appeal = Appeal.objects.get(attempt=attempt)
         self.assertTrue(appeal.filed_onsite)
 
@@ -235,11 +249,11 @@ class OnsiteModeTests(_StudentSetup):
         self.assertOnsiteContent(self._form(attempt, {"from_section": "my-appeals"}, REMOTE_ADDR=INTERNAL_IP))
 
     def test_without_post_finish_screen_is_later(self):
-        attempt = self._attempt("midterm")
+        attempt = self._attempt("midterm", hall=False)
         self.assertLaterContent(self._form(attempt, REMOTE_ADDR=INTERNAL_IP))
 
     def test_cabinet_result_view_does_not_grant_onsite(self):
-        attempt = self._attempt("midterm")
+        attempt = self._attempt("midterm", hall=False)
         self.client.get(
             reverse("exams:exam_result", kwargs={"slug": attempt.exam.slug, "attempt_id": attempt.id}),
             {"from_section": "my-results"},
@@ -249,14 +263,19 @@ class OnsiteModeTests(_StudentSetup):
 
     def test_external_network_is_later(self):
         attempt = self._attempt("midterm")
+        # Şəbəkə şərtini ayrıca yoxlamaq üçün xarici IP də qeydli zal kompüteridir (sərt zal qapısı keçilir).
+        from apps.exams.tests.hall_helpers import register_hall_computers
+
+        register_hall_computers(self.org, ips=(EXTERNAL_IP,))
         self._result(attempt, REMOTE_ADDR=INTERNAL_IP)
         self.assertLaterContent(self._form(attempt, REMOTE_ADDR=EXTERNAL_IP))
         self._post(attempt, REMOTE_ADDR=EXTERNAL_IP)
         self.assertFalse(Appeal.objects.get(attempt=attempt).filed_onsite)
 
     def test_after_grace_is_later(self):
-        attempt = self._attempt("midterm", finished_ago=timedelta(minutes=20))
+        attempt = self._attempt("midterm")
         self._result(attempt, REMOTE_ADDR=INTERNAL_IP)
+        ExamAttempt.objects.filter(pk=attempt.pk).update(finished_at=timezone.now() - timedelta(minutes=20))
         self.assertLaterContent(self._form(attempt, REMOTE_ADDR=INTERNAL_IP))
 
     def test_other_students_session_never_onsite(self):
@@ -270,7 +289,7 @@ class OnsiteModeTests(_StudentSetup):
         self.assertEqual(response.status_code, 404)
 
     def test_submit_slack_keeps_onsite_mode_once_form_opened(self):
-        attempt = self._attempt("midterm", finished_ago=timedelta(minutes=14))
+        attempt = self._attempt("midterm", finished_ago=timedelta(minutes=2))
         self._result(attempt, REMOTE_ADDR=INTERNAL_IP)
         self.assertOnsiteContent(self._form(attempt, REMOTE_ADDR=INTERNAL_IP))
         ExamAttempt.objects.filter(pk=attempt.pk).update(finished_at=timezone.now() - timedelta(minutes=25))
@@ -278,7 +297,7 @@ class OnsiteModeTests(_StudentSetup):
         self.assertTrue(Appeal.objects.get(attempt=attempt).filed_onsite)
 
     def test_post_after_grace_without_onsite_form_is_later(self):
-        attempt = self._attempt("midterm", finished_ago=timedelta(minutes=10))
+        attempt = self._attempt("midterm", finished_ago=timedelta(minutes=2))
         self._result(attempt, REMOTE_ADDR=INTERNAL_IP)
         ExamAttempt.objects.filter(pk=attempt.pk).update(finished_at=timezone.now() - timedelta(minutes=25))
         self._post(attempt, REMOTE_ADDR=INTERNAL_IP)
@@ -291,7 +310,7 @@ class OnsiteModeTests(_StudentSetup):
         self.assertLaterContent(self._form(attempt, REMOTE_ADDR=INTERNAL_IP))
 
     def test_owner_detail_view_never_shows_options(self):
-        attempt = self._attempt("midterm")
+        attempt = self._attempt("midterm", hall=False)
         self._result(attempt, REMOTE_ADDR=INTERNAL_IP)
         self._post(attempt, REMOTE_ADDR=INTERNAL_IP)
         appeal = Appeal.objects.get(attempt=attempt)

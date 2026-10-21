@@ -24,9 +24,15 @@ from .services.ai_summary import generate_appeal_statistics_summary  # noqa: F40
 from .services.center_exams import CENTER_EXAM_KINDS  # noqa: F401
 from .services.center_exams import attempt_in_center  # noqa: F401
 from .services.center_exams import cabinet_center_notice  # noqa: F401
+from .services.center_exams import end_hall_session  # noqa: F401
+from .services.center_exams import ensure_center_hall_computer  # noqa: F401
+from .services.center_exams import hall_review_open  # noqa: F401
+from .services.center_exams import hall_session_for_attempt  # noqa: F401
 from .services.center_exams import is_center_exam  # noqa: F401
 from .services.center_exams import entry_url_for_exam as center_entry_url_for_exam  # noqa: F401
+from .services.center_exams import exam_kind as center_exam_kind  # noqa: F401
 from .services.center_exams import legacy_open_attempt as legacy_open_center_attempt  # noqa: F401
+from .services.exam_center_gate import HallComputerDenied  # noqa: F401
 from .services.exam_network import exam_network_allowed  # noqa: F401
 from .services.exam_network import exam_network_denied_message  # noqa: F401
 from .services.final_center import clear_entry_session  # noqa: F401
@@ -36,6 +42,7 @@ from .services.question_chair_review import pending_chair_review_count  # noqa: 
 from .services.question_snapshot import delivered_question_render  # noqa: F401
 from .services.student_pins import student_visible_pin  # noqa: F401
 from .views.exam_center._shared import supervisor_org_or_403  # noqa: F401
+from .views.student._final_device import hall_computer_blocked_response  # noqa: F401
 from .views.student._helpers import ensure_student_exam_tenant_context  # noqa: F401
 
 __all__ = [
@@ -44,6 +51,13 @@ __all__ = [
     "attempt_in_center",
     "cabinet_center_notice",
     "center_entry_url_for_exam",
+    "center_exam_kind",
+    "end_hall_session",
+    "ensure_center_hall_computer",
+    "HallComputerDenied",
+    "hall_computer_blocked_response",
+    "hall_review_open",
+    "hall_session_for_attempt",
     "is_center_exam",
     "legacy_open_center_attempt",
     "EXAM_LANGUAGE_CHOICES",

@@ -343,6 +343,7 @@ class DeadlineGraceTests(TestCase):
     FINAL_EXAM_STUDENT_PIN_RATE_PER_MINUTE=10,
     FINAL_EXAM_ALLOWED_IPS=[],
 )
+@override_settings(EXAM_HALL_COMPUTER_CHECK=False)  # 2026-10-21: sərt zal qapısı bu testin mövzusu deyil
 class FinalEntryIpLimiterTests(TestCase):
     """EX-06."""
 

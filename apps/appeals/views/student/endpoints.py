@@ -10,16 +10,20 @@ from django.utils.translation import pgettext
 
 from apps.exams.models import ExamAttempt
 from apps.exams.public import (
+    HallComputerDenied,
     append_query_params,
     attempt_in_center,
-    center_entry_url_for_exam,
     current_return_to,
     delivered_question_render,
+    ensure_center_hall_computer,
     ensure_student_exam_tenant_context,
     exam_answers_release_locked,
+    hall_computer_blocked_response,
+    hall_session_for_attempt,
     tenant_scoped_exams,
 )
 from core.code_text import render_code_text
+from core.runtime_settings_appeals import appeal_onsite_minutes
 
 from ...constants import (
     APPEAL_MAX_COMMENT_LENGTH,
@@ -97,6 +101,14 @@ def _is_center_attempt(attempt):
     return attempt_in_center(attempt)
 
 
+def _is_hall_appeal(request, attempt):
+    """Zal rejimi (çərçivə, göndərişdən sonra uğur ekranı + çıxış): HƏMİN cəhdin aktiv zal sessiyası (2026-10-21)
+    və ya — əvvəlki kimi — kabinetdən gəlməyən mərkəz cəhdi."""
+    if hall_session_for_attempt(request, attempt):
+        return True
+    return _is_center_attempt(attempt) and not _is_profile_results_request(request)
+
+
 def _parse_items_from_post(request, delivered_question_ids):
     """
     POST-dan apellyasiya item-lərini çıxarır.
@@ -141,7 +153,6 @@ def _render_appeal_window_closed(request, exam, attempt, *, window_closed, block
     ``block_reason`` (Audit 2026-09-28 EXA-02/EXA-07) banner mətnini seçir:
     yoxlanmamış yazılı iş və apellyasiya verilməyən kateqoriya «müddət bitib»
     kimi göstərilmir."""
-    is_profile_results_request = _is_profile_results_request(request)
     context = {
         "exam": exam,
         "attempt": attempt,
@@ -152,7 +163,7 @@ def _render_appeal_window_closed(request, exam, attempt, *, window_closed, block
         "window_expired": window_closed,
         "attempt_appeals": _attempt_appeals_for_student(attempt),
         "result_url": _result_url(exam, attempt, request),
-        "is_final_exam": _is_center_attempt(attempt) and not is_profile_results_request,
+        "is_final_exam": _is_hall_appeal(request, attempt),
         # Read-only rejim üçün form dəyişənləri boş/deaktiv.
         "answers": [],
     }
@@ -170,6 +181,12 @@ def appeal_create(request, attempt_id):
     exam = attempt.exam
     if not tenant_scoped_exams(request).filter(id=exam.id).exists():
         raise Http404
+    # 2026-10-21: zal sessiyasındakı apellyasiya da yalnız qeydli zal kompüterindən (sərt zal rejimi).
+    if hall_session_for_attempt(request, attempt):
+        try:
+            ensure_center_hall_computer(request, attempt)
+        except HallComputerDenied:
+            return hall_computer_blocked_response(request)
 
     block_reason = appeal_block_reason(request, attempt)
     if block_reason is not None:
@@ -203,27 +220,24 @@ def appeal_create(request, attempt_id):
 
     if request.method == "POST":
         items = _parse_items_from_post(request, delivered_question_ids)
+        hall_appeal = _is_hall_appeal(request, attempt)
         try:
-            create_appeal(attempt=attempt, student=request.user, items=items, filed_onsite=onsite, request=request)
+            appeal = create_appeal(
+                attempt=attempt, student=request.user, items=items, filed_onsite=onsite, request=request
+            )
         except ValidationError as exc:
             messages.error(request, exc.messages[0])
         else:
+            if hall_appeal:
+                # Zal (final/midterm): uğur ekranı → «Bitir» → növün giriş səhifəsi; tələbə zal sessiyasından
+                # ÇIXARILIR (marker + logout) — kabinetə heç vaxt düşmür (sahib 2026-10-21, ``hall_done``).
+                from .hall_done import finish_hall_appeal
+
+                return finish_hall_appeal(request, exam=exam, appeal=appeal)
             messages.success(
                 request,
                 pgettext("appeals.view.message", "Apellyasiyanız qeydə alındı."),
             )
-            if _is_center_attempt(attempt) and not _is_profile_results_request(request):
-                # Final imtahan: apellyasiyadan sonra tələbə zal rejimindən ÇIXARILIR.
-                # Giriş sessiyası təmizlənir və logout edilir ki, təkrar imtahan
-                # giriş QAYDALARI modalına yox, təmiz login səhifəsinə düşsün
-                # (bilet artıq COMPLETED, amma zal oturumu hələ açıq ola bilər).
-                from django.contrib.auth import logout
-
-                from apps.exams.public import clear_entry_session
-
-                clear_entry_session(request)
-                logout(request)
-                return redirect(center_entry_url_for_exam(exam))
             # Tələbə apellyasiyalarını dashboard bölməsində izləyir.
             return redirect(reverse("accounts:profile") + "?section=my-appeals")
 
@@ -277,7 +291,9 @@ def appeal_create(request, attempt_id):
         # Müəllim nəticəni gizlədibsə sual üzrə düz/səhv verdikti də göstərilmir.
         "hide_answer_verdicts": results_hidden,
         "answers_release_locked": answers_release_locked,
-        "is_final_exam": _is_center_attempt(attempt) and not is_profile_results_request,
+        "is_final_exam": _is_hall_appeal(request, attempt),
+        # 2026-10-21: düzgün/səhv cavab yalnız zal kompüterində — qeyddə N (``exam.appeal_onsite_minutes``).
+        "appeal_onsite_minutes": appeal_onsite_minutes(),
     }
     return render(request, "appeals/student/appeal_create.html", context)
 

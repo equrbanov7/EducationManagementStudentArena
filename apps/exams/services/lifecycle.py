@@ -110,6 +110,11 @@ def set_results_hidden(exam, hidden, *, by_user=None, request=None):
         reason="exam_results_hidden" if hidden else "exam_results_published",
         new_values={"results_hidden_from_students": str(hidden)},
     )
+    if not hidden:
+        # Sahib 2026-10-21: gizli nəticəli test midterm balı jurnala nəticə AÇILANDA düşür.
+        from apps.exams.services.midterm_journal_sync import schedule_resync_exam
+
+        schedule_resync_exam(locked_exam)
     return True
 
 

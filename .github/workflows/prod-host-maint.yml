@@ -9,11 +9,16 @@ name: 🛠 Prod host maintenance
 #   selfheal — (2026-10-07, enerji kəsilməsi) boot converge + autoheal systemd vahidlərini
 #              idempotent quraşdırır: scripts/ops/selfheal/install.sh (docs/ops/POWER_OUTAGE_RECOVERY.md)
 #   selfheal-off — autoheal timer-i + boot converge-i söndürür (fayllar qalır; geri: selfheal)
+#   monitoring-pause — (2026-10-21, sahib: «monitorinq sistemi çox yükləsə söndürmək olsun») ağır, kritik olmayan
+#              monitorinq konteynerlərini (cadvisor, promtail, docker-socket-proxy, loki, grafana) dayandırır;
+#              prometheus + alertmanager + exporterlər + blackbox işləyir (kəsinti alertləri, Watchdog qalır).
+#              confirm=PAUSE tələb olunur. scripts/ops/monitoring_pause.sh, docs/operations/SISTEM_MONITORINQI.md §8.3
+#   monitoring-resume — onları yenidən qaldırır və pauza markerini silir (növbəti deploy da bunu edir)
 on:
   workflow_dispatch:
     inputs:
       action:
-        description: "status / backup-status (yalnız oxuma), tune (sysctl + docker live-restore), prune (köhnə build keşi), bridge-fw (ufw: körpü → gateway 9100/8953), selfheal / selfheal-off (boot converge + autoheal) və ya reboot"
+        description: "status / backup-status (yalnız oxuma), tune (sysctl + docker live-restore), prune (köhnə build keşi), bridge-fw (ufw: körpü → gateway 9100/8953), selfheal / selfheal-off (boot converge + autoheal), monitoring-pause / monitoring-resume (cadvisor/promtail/loki/grafana) və ya reboot"
         required: true
         default: status
         type: choice
@@ -25,9 +30,11 @@ on:
           - bridge-fw
           - selfheal
           - selfheal-off
+          - monitoring-pause
+          - monitoring-resume
           - reboot
       confirm:
-        description: "reboot üçün REBOOT yazın"
+        description: "reboot üçün REBOOT, monitoring-pause üçün PAUSE yazın"
         required: false
         default: ""
       force:
@@ -45,7 +52,9 @@ concurrency:
 
 jobs:
   host:
-    if: github.event.inputs.action != 'reboot' || github.event.inputs.confirm == 'REBOOT'
+    if: >-
+      (github.event.inputs.action != 'reboot' || github.event.inputs.confirm == 'REBOOT') &&
+      (github.event.inputs.action != 'monitoring-pause' || github.event.inputs.confirm == 'PAUSE')
     runs-on: [self-hosted]
     environment: production
     timeout-minutes: 10
@@ -83,6 +92,13 @@ jobs:
             echo "autoheal timer aktiv: $(host systemctl is-active emsarena-autoheal.timer 2>/dev/null || true)"
             host systemctl show -p ActiveState -p Result -p ExecMainExitTimestamp emsarena-converge.service 2>/dev/null | sed 's/^/converge /' || true
             if host test -e /run/emsarena/autoheal.pause; then echo "autoheal PAUZADA: /run/emsarena/autoheal.pause"; fi
+            echo "--- monitorinq pauzası (action=monitoring-pause / monitoring-resume)"
+            if host test -e /var/lib/node_exporter/textfile_collector/monitoring_pause.prom; then
+              echo "monitorinq PAUZADA: $(host grep -E '^emsarena_monitoring_paused_since' /var/lib/node_exporter/textfile_collector/monitoring_pause.prom || true)"
+            else
+              echo "monitorinq pauzası: yox"
+            fi
+            docker ps -a --filter name=emsarena-cadvisor --filter name=emsarena-promtail --filter name=emsarena-loki --filter name=emsarena-grafana --filter name=emsarena-docker-socket-proxy --format '{{.Names}}  {{.Status}}' || true
             echo "--- son autoheal əməliyyatları (jurnal, 7 gün)"
             host sh -c 'journalctl -u emsarena-autoheal.service --since -7d --no-pager -o short-iso 2>/dev/null | grep -E "ACTION|LIMIT|HOLD|ERROR|XƏTA" | tail -n 15' || true
             echo "--- son boot converge (jurnal)"
@@ -221,8 +237,10 @@ jobs:
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
 
-      - name: 📥 Checkout (selfheal skriptləri)
-        if: github.event.inputs.action == 'selfheal'
+      - name: 📥 Checkout (selfheal / monitorinq pauzası skriptləri)
+        if: >-
+          github.event.inputs.action == 'selfheal' || github.event.inputs.action == 'monitoring-pause' ||
+          github.event.inputs.action == 'monitoring-resume'
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
@@ -259,6 +277,35 @@ jobs:
             host systemctl disable emsarena-converge.service 2>&1 || true
             echo "emsarena-autoheal.timer: $(host systemctl is-enabled emsarena-autoheal.timer 2>/dev/null || true)"
             echo "emsarena-converge.service: $(host systemctl is-enabled emsarena-converge.service 2>/dev/null || true)"
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: 📉 Monitorinq pauzası / bərpası (2026-10-21)
+        if: github.event.inputs.action == 'monitoring-pause' || github.event.inputs.action == 'monitoring-resume'
+        env:
+          ACTION: ${{ github.event.inputs.action }}
+          CONFIRM: ${{ github.event.inputs.confirm }}
+        run: |
+          set -euo pipefail
+          # Sahib 2026-10-21: «monitorinq sistemi çox yükləsə, onu söndürmək də olsun». Web tətbiq konteyner
+          # dayandıra bilməz (docker-socket-proxy yalnız GET) — bu əməliyyat sahibin əl ilə işə saldığı yoldur.
+          # Dayanır: cadvisor, promtail, docker-socket-proxy, loki, grafana. İşləyir: prometheus, alertmanager,
+          # node_exporter, blackbox, postgres/redis/pgbouncer/nginx exporterləri (kəsinti alertləri + Watchdog).
+          # Pauza növbəti deploy-a qədərdir (remote_deploy.sh `up -d` qaldırır və markeri silir).
+          case "$ACTION" in
+            monitoring-pause)
+              mode=pause
+              if [ "$CONFIRM" != "PAUSE" ]; then echo "monitoring-pause üçün confirm=PAUSE yazın" >&2; exit 1; fi
+              ;;
+            monitoring-resume) mode=resume ;;
+            *) echo "naməlum əməliyyat: $ACTION" >&2; exit 1 ;;
+          esac
+          SCRIPT="$GITHUB_WORKSPACE/scripts/ops/monitoring_pause.sh"
+          bash -n "$SCRIPT"
+          {
+            echo "## 📉 Monitorinq: $mode"
+            echo '```'
+            APP_DIR=/home/wcu/EducationManagementStudentArena bash "$SCRIPT" "$mode"
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
 

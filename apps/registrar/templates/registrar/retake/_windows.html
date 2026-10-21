@@ -105,7 +105,7 @@ Data: `{% retake_windows as rw %}`; yazılar `retake.js` → JSON POST.{% endcom
                     <td data-label="{% trans 'Dövr' context 'registrar.retake' %}">{{ w.period.name }}</td>
                     <td data-label="{% trans 'Açılış' context 'registrar.retake' %}">{{ w.opens_at|date:"d.m.Y H:i" }}</td>
                     <td data-label="{% trans 'Bağlanış' context 'registrar.retake' %}">{% if w.closed_at %}{{ w.closed_at|date:"d.m.Y H:i" }}{% elif w.closes_at %}{{ w.closes_at|date:"d.m.Y H:i" }}{% else %}—{% endif %}</td>
-                    <td data-label="{% trans 'Açan' context 'registrar.retake' %}">{{ w.opened_by_name|default:"—" }}{% if w.note %}<span class="exch-ref">{{ w.note }}</span>{% endif %}</td>
+                    <td data-label="{% trans 'Açan' context 'registrar.retake' %}">{{ w.opened_by_name|default:"—" }}{% if w.note %}<span class="rt-ref">{{ w.note }}</span>{% endif %}</td>
                     <td data-label="{% trans 'Bağlayan' context 'registrar.retake' %}">{% if w.closed_at and not w.closed_by_name %}{% trans "sistem (vaxtı bitdi)" context "registrar.retake" %}{% else %}{{ w.closed_by_name|default:"—" }}{% endif %}</td>
                     <td class="rt-table-actions">
                         {% if not w.closed_at %}

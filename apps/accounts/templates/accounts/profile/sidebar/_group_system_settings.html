@@ -1,0 +1,45 @@
+{% load i18n nav_icons system_settings_nav %}
+{% comment %}«Sistem tənzimləmələri» qrupu (sahib 2026-10-21: «sidebarda onun ayrı başlığı olsun və alt hissələri,
+bir şeyi axtararkən rahatlıqla tapmaq üçün»). Əvvəl «İdarəetmə» qrupunda TƏK bənd idi.
+
+• Görünürlük bölmənin özü ilə EYNİDİR: `'system-settings' in allowed_sections` (rbac_sections.py — RİM rəhbəri /
+  superadmin). Tələbə/müəllimin düz menyusunda (compact) bu açar yoxdur → belə istifadəçi həmişə akkordeondadır.
+• Bəndlər DATA-dan gəlir: `core.runtime_settings.GROUPS` sırası (`system_settings_nav` teqi) — yeni qrup əlavə
+  olunanda bənd özü yaranır. Hamısı eyni `data-section="system-settings"`; alt səhifəni `data-section-sub`
+  ayırır — ui.js aktiv bəndi panelin `data-profile-section-sub`-u ilə tutuşdurur (AJAX, geri/irəli, tam GET).
+• «Ümumi baxış» birinci gəlir: QA süpürgəsi (`sidebar_sections`) eyni bölməni bir dəfə — ilk linklə — götürür.{% endcomment %}
+{% if 'system-settings' in allowed_sections %}
+{% system_settings_nav as ssnav %}
+<li class="sidebar-menu-group" data-sidebar-group="system-settings">
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|system-settings|" %} open{% endif %}>
+        {% trans "Sistem tənzimləmələri" context "profile.section" as group_label %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="sliders-horizontal" %}
+        <ul class="sidebar-menu-group-items">
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=system-settings"
+                   data-section="system-settings"
+                   data-section-sub="overview"
+                   data-title="{% trans 'Sistem tənzimləmələri' context 'profile.section' %}"
+                   data-source-url="{{ profile_base_url }}?section=system-settings"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'system-settings' and not ssnav.active %}active{% endif %}">
+                    {% nav_icon "layout-dashboard" "sidebar-menu-icon" %}
+                    <span class="sidebar-menu-text">{% trans "Ümumi baxış" context "accounts.runtime_settings" %}</span>
+                </a>
+            </li>
+            {% for group in ssnav.groups %}
+            <li class="sidebar-menu-item">
+                <a href="{{ group.url }}"
+                   data-section="system-settings"
+                   data-section-sub="{{ group.key }}"
+                   data-title="{% trans 'Sistem tənzimləmələri' context 'profile.section' %}"
+                   data-source-url="{{ group.url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'system-settings' and ssnav.active == group.key %}active{% endif %}">
+                    {% nav_icon group.icon "sidebar-menu-icon" %}
+                    <span class="sidebar-menu-text">{{ group.label }}</span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </details>
+</li>
+{% endif %}

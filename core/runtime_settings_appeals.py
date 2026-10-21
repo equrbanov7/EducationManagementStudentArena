@@ -21,10 +21,16 @@ KEY_ONSITE_MINUTES = "exam.appeal_onsite_minutes"
 ONSITE_MINUTES_DEFAULT = 15
 ONSITE_MINUTES_MIN = 0
 ONSITE_MINUTES_MAX = 120
+#: 2026-10-21 (sahib): «Hələlik məcburi olmasa da sənəd yükləmə yeri olsun, sonra məcburi edəcəyik».
+KEY_DOCUMENT_REQUIRED = "exam.appeal_document_required"
 
 
 def _default_onsite_minutes() -> int:
     return int(getattr(settings, "APPEAL_ONSITE_MINUTES", ONSITE_MINUTES_DEFAULT))
+
+
+def _default_document_required() -> bool:
+    return bool(getattr(settings, "APPEAL_DOCUMENT_REQUIRED", False))
 
 
 def build_specs(spec_cls) -> tuple:
@@ -40,6 +46,16 @@ def build_specs(spec_cls) -> tuple:
                 "0 — bu rejim söndürülür (həmişə yalnız suallar).",
             ),
             pgettext_lazy(_CTX, "dəqiqə"), min=ONSITE_MINUTES_MIN, max=ONSITE_MINUTES_MAX,
+        ),
+        spec_cls(
+            KEY_DOCUMENT_REQUIRED, GROUP_CODE, "bool", _default_document_required,
+            pgettext_lazy(_CTX, "Apellyasiya qərarında sənəd məcburidir"),
+            pgettext_lazy(
+                _CTX,
+                "Yandırılıbsa apellyasiya qərarı (qəbul/rədd) əsaslandırıcı sənəd (PDF, JPG və ya PNG, 10 MB-dək) "
+                "yüklənmədən yadda saxlanılmır. Söndürüləndə sənəd yükləmək opsionaldır. Qərarı verən müəllimin "
+                "seçilməsi hər iki halda məcburidir.",
+            ),
         ),
     )  # fmt: skip
 
@@ -64,8 +80,20 @@ def appeal_onsite_minutes() -> int:
     return max(ONSITE_MINUTES_MIN, min(ONSITE_MINUTES_MAX, value))
 
 
+def appeal_document_required() -> bool:
+    """Apellyasiya qərarında əsaslandırıcı sənəd məcburidirmi (defolt ``False``)."""
+    try:
+        from core import runtime_settings
+
+        return bool(runtime_settings.get_bool(KEY_DOCUMENT_REQUIRED))
+    except Exception:  # noqa: BLE001 — oxunmasa defolt
+        return _default_document_required()
+
+
 __all__ = [
     "GROUP_CODE",
+    "KEY_DOCUMENT_REQUIRED",
+    "appeal_document_required",
     "KEY_ONSITE_MINUTES",
     "ONSITE_MINUTES_DEFAULT",
     "appeal_onsite_minutes",

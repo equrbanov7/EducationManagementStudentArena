@@ -1,0 +1,27 @@
+{% load i18n static %}
+{% comment %}İmtahan zalı sessiyasının minimal çərçivəsi (sahib 2026-10-21: «yuxarıdakı header görünməməlidir, nəticəyə
+baxanda da olmaz»). `templates/base.html` sayt başlığının (axtarış ⌘K, «Qoşul», dil/istifadəçi menyusu) YERİNƏ bunu
+render edir — bayraq `hall_chrome` (apps/exams/context_processors.py). Kabinetə keçid YOXDUR; dil seçici eyni səhifəyə
+qayıdır (`next` = cari yol); «Zaldan çıx» — marker + logout → növün giriş səhifəsi (/exams/final/ | /exams/midterm/).
+Kontekst: `hall_exam_title` (yoxdursa `hall_chrome.exam_title`), `hall_frame_exit` (False → çıxış düyməsi yoxdur).{% endcomment %}
+<header class="hall-frame" data-hall-frame>
+    <div class="hall-frame__brand">
+        <img src="{% static 'brand/wcu-official-mark.png' %}?v=20261001" alt="" class="hall-frame__mark" width="36" height="33">
+        <span class="hall-frame__brand-name">{{ site_brand_name }}</span>
+    </div>
+    {% firstof hall_exam_title hall_chrome.exam_title as frame_title %}
+    {% if frame_title %}<p class="hall-frame__title" title="{{ frame_title }}">{{ frame_title }}</p>{% endif %}
+    <div class="hall-frame__actions">
+        {% include "exams/student/partials/_final_langbar.html" %}
+        {% if hall_frame_exit is not False and hall_chrome.active %}
+        <form method="post" action="{% url 'exams:hall_session_exit' %}" class="hall-frame__exit"
+              data-confirm-message="{% trans 'Zal sessiyası bağlansın? Yenidən daxil olmaq üçün nəzarətçinin verdiyi PIN lazım olacaq.' context 'exams.template.hall_frame' %}">
+            {% csrf_token %}
+            <button type="submit" class="hall-frame__exit-btn">
+                <i class="fas fa-right-from-bracket" aria-hidden="true"></i>
+                <span>{% trans 'Zaldan çıx' context 'exams.template.hall_frame' %}</span>
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</header>

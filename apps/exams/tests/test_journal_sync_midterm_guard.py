@@ -12,8 +12,9 @@ Qayda (``journal_sync.final_grade_skip_reason``):
 * ``midterm`` → ``SKIP_MIDTERM_CATEGORY``; ``quiz``/``placement``/``practice`` →
   ``SKIP_NON_FINAL_CATEGORY`` — sayğac + INFO log, ``FinalGrade``-ə toxunulmur.
 
-Midterm balı jurnala avtomatik YAZILMIR — sahibin qərarı ilə müəllim onu İmtahan
-Mərkəzinin pəncərəsində (0–20) özü yazır.
+Midterm balı ``FinalGrade``-ə HEÇ VAXT yazılmır. Sahib 2026-10-21: TEST formatlı midterm jurnalın
+«Midterm» xanasına gedir (``midterm_journal_sync``, testləri ``test_midterm_journal_sync_2026_10_21.py``);
+yazılı midterm əvvəlki kimi ``SKIP_MIDTERM_CATEGORY`` ilə atlanır (müəllim özü yazır).
 """
 
 from __future__ import annotations
@@ -67,13 +68,13 @@ class CategoryClassificationTests(SimpleTestCase):
 
 
 class MidtermGuardBridgeTests(_JournalBridgeSetup):
-    def _category_exam(self, category, *, title=None):
+    def _category_exam(self, category, *, title=None, exam_type="test"):
         exam = Exam.objects.create(
             title=title or f"JB {category or 'none'}",
             author=self.teacher,
             organization=self.org,
             subject=self.subject,
-            exam_type="test",
+            exam_type=exam_type,
             exam_type_extended=category,
             is_active=True,
         )
@@ -102,13 +103,14 @@ class MidtermGuardBridgeTests(_JournalBridgeSetup):
     def test_midterm_attempt_does_not_overwrite_the_final_exam_score(self):
         final_grade = self._write_final_score()
         exam, question, _correct, wrong = self._category_exam("midterm")
-        before = _counter(journal_sync.SKIP_MIDTERM_CATEGORY)
+        # 2026-10-21: test midterm «Midterm» xanasına gedir; bu (2024/2025) dövr kollokvium rejimindədir.
+        before = _counter("midterm_not_midterm_period")
 
         self._finish(exam, question, wrong)  # 0% midterm — əvvəl yekun balı 0-a salırdı
 
         final_grade.refresh_from_db()
         self.assertEqual(final_grade.exam_score, Decimal("50"))
-        self.assertEqual(_counter(journal_sync.SKIP_MIDTERM_CATEGORY), before + 1)
+        self.assertEqual(_counter("midterm_not_midterm_period"), before + 1)
 
     def test_midterm_attempt_alone_creates_no_final_grade(self):
         exam, question, correct, _wrong = self._category_exam("midterm")
@@ -123,7 +125,8 @@ class MidtermGuardBridgeTests(_JournalBridgeSetup):
         self.assertEqual(final_grade.exam_score, Decimal("50"))
 
     def test_midterm_skip_is_visible_in_logs_and_returns_none(self):
-        exam, question, correct, _wrong = self._category_exam("midterm")
+        # Yazılı midterm — müəllim əl ilə yazır (test midtermi 2026-10-21-dən avtomatikdir).
+        exam, question, correct, _wrong = self._category_exam("midterm", exam_type="written")
         attempt = ExamAttempt.objects.create(user=self.student, exam=exam, status="submitted")
         with self.assertLogs("apps.exams.services.journal_sync", level=logging.INFO) as captured:
             with bypass_rls():

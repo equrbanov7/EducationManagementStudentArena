@@ -168,6 +168,11 @@ qurulub, panel swap-da yenidən qoşulmağa ehtiyac yoxdur.{% endcomment %}
 {% if 'superadmin-users' in allowed_sections %}
     {# istifadəçi CRUD modalı superadmin idarəetməsinə aiddir #}
 <script src="{% static 'accounts/js/superadmin_user_management.js' %}"></script>
+{% endif %}
+{% comment %}Paylaşım formaları (yarat / redaktə / sil + kateqoriya seçicisi) — əvvəl YALNIZ superadmin
+qabığında yüklənirdi; «Paylaşımlarım», «Yeni paylaşım», «Təsdiq gözləyənlər» bölməsi olan adi
+istifadəçidə forma JS-siz qalırdı (asset auditi 2026-10-21).{% endcomment %}
+{% if 'superadmin-users' in allowed_sections or 'posts' in asset_sections or 'create-post' in asset_sections or 'pending-post-approvals' in asset_sections or 'create-category' in asset_sections %}
 <script src="{% static 'js/post_category_picker.js' %}"></script>
 <script src="{% static 'js/user_profile/namespace.js' %}?v=20260604-ajaxinit2"></script>
 <script src="{% static 'js/user_profile/context.js' %}?v=20260604-ajaxinit2"></script>
@@ -219,7 +224,7 @@ blokunda idi: bankı olan, amma «İmtahanlarım» bölməsi olmayan istifadəç
 yaratma/redaktə dialoqunu aça bilmirdi.{% endcomment %}
 <script src="{% static 'exams/js/questionBankList.js' %}?v=20260909-ems"></script>
 {% endif %}
-{% if 'my-appeals' in asset_sections or 'appeal-stats' in asset_sections %}
+{% if 'my-appeals' in asset_sections or 'appeal-stats' in asset_sections or 'manage-appeals' in asset_sections %}
 <script src="{% static 'appeals/js/appeals_review.js' %}?v=20260715-appeal-batch"></script>
 <script src="{% static 'appeals/js/appeals_sections.js' %}?v=20261014-searchux"></script>
 <script src="{% static 'appeals/js/appeals_key_fix.js' %}?v=20261013-keyfix2"></script>
@@ -230,7 +235,7 @@ yaratma/redaktə dialoqunu aça bilmirdi.{% endcomment %}
 {% comment %}Tədris şöbəsi bölmələri — server-render panellər; JS yalnız ağac
 seçimini, dialoq doldurulmasını və JSON POST-u idarə edir (EMSReady/EMSDelegate,
 `[data-tof-root]` yoxdursa heç nə etmir).{% endcomment %}
-{% if 'org-structure-tree' in asset_sections or 'chair-profile' in asset_sections or 'programs-registry' in asset_sections or 'subject-catalog' in asset_sections or 'curriculum-editor' in asset_sections or 'groups-registry' in asset_sections or 'semester-opening' in asset_sections or 'workload-center' in asset_sections or 'workload-visa' in asset_sections or 'workload-approval' in asset_sections or 'workload-overview' in asset_sections or 'my-workload' in asset_sections or 'workload-distribution' in asset_sections or 'org-faculties' in asset_sections or 'org-kafedras' in asset_sections or 'teaching-handover' in asset_sections %}
+{% if 'org-structure-tree' in asset_sections or 'chair-profile' in asset_sections or 'programs-registry' in asset_sections or 'subject-catalog' in asset_sections or 'curriculum-editor' in asset_sections or 'groups-registry' in asset_sections or 'semester-opening' in asset_sections or 'workload-center' in asset_sections or 'workload-visa' in asset_sections or 'workload-approval' in asset_sections or 'workload-overview' in asset_sections or 'my-workload' in asset_sections or 'workload-distribution' in asset_sections or 'org-faculties' in asset_sections or 'org-kafedras' in asset_sections or 'teaching-handover' in asset_sections or 'superadmin-exam-rooms' in asset_sections or 'lessons-log' in asset_sections or 'audit-log' in asset_sections %}
 <script src="{% static 'accounts/js/profile/teaching_office.js' %}?v=20261019-tofix"></script>
 {% endif %}
 {% if 'programs-registry' in asset_sections %}

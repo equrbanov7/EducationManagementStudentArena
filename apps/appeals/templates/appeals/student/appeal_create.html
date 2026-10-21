@@ -5,7 +5,8 @@
 
 {# Final imtahan apellyasiyası — nəzarətli mühit: sayt başlığı/naviqasiyası gizlədilir. #}
 {% block route_progress %}{% if not is_final_exam %}{{ block.super }}{% endif %}{% endblock %}
-{% block navbar %}{% if not is_final_exam %}{{ block.super }}{% endif %}{% endblock %}
+{# 2026-10-21: zal sessiyasında base.html başlıq yerinə minimal zal çərçivəsini verir (`hall_chrome`). #}
+{% block navbar %}{% if not is_final_exam or hall_chrome.active %}{{ block.super }}{% endif %}{% endblock %}
 {% block view_as_banner %}{% if not is_final_exam %}{{ block.super }}{% endif %}{% endblock %}
 {% block footer %}{% if not is_final_exam %}{{ block.super }}{% endif %}{% endblock %}
 {% block global_search %}{% if not is_final_exam %}{{ block.super }}{% endif %}{% endblock %}
@@ -28,7 +29,7 @@ Sıra: komponentlər → apellyasiya düzümü (part1 → part2 → part3).{% en
 <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part3.css' %}?v=20260908-calm">
 <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part4.css' %}?v=20261020-mode">
 <link rel="stylesheet" href="{% static 'css/ems_ui/code_text.css' %}?v=20261020-appeal">
-<link rel="stylesheet" href="{% static 'appeals/css/appeals/appeal_mode.css' %}?v=20261020-mode">
+<link rel="stylesheet" href="{% static 'appeals/css/appeals/appeal_mode.css' %}?v=20261021-hall">
 {% endblock %}
 
 {% block content %}
@@ -100,9 +101,11 @@ Sıra: komponentlər → apellyasiya düzümü (part1 → part2 → part3).{% en
             </li>
             {% endfor %}
         </ul>
+        {% if not is_final_exam %}
         <a href="{% url 'accounts:profile' %}?section=my-appeals" class="ems-btn">
             <i class="fas fa-list-ul" aria-hidden="true"></i>{% trans "Bütün apellyasiyalarım" context "appeals.template" %}
         </a>
+        {% endif %}
     </section>
     {% else %}
     <div class="ems-banner ems-banner--info appeal-banner" role="status">
@@ -182,6 +185,16 @@ Sıra: komponentlər → apellyasiya düzümü (part1 → part2 → part3).{% en
     </div>
     {% endif %}
 
+    {% if appeal_onsite_minutes %}
+    {# 2026-10-21 (sahib): düzgün/səhv cavab yalnız zal kompüterində (bağlı cihaz + aktiv zal sessiyası), N dəqiqə. #}
+    <p class="appeal-hall-note" data-appeal-hall-note>
+        <i class="fas fa-building-columns" aria-hidden="true"></i>
+        <span>{% blocktrans trimmed context "appeals.template" with minutes=appeal_onsite_minutes %}
+            Düzgün və səhv cavabları yalnız imtahan verdiyiniz zal kompüterində, imtahan bitəndən sonrakı {{ minutes }} dəqiqə ərzində görə bilərsiniz. Zalı tərk etdikdən sonra verilən apellyasiyada yalnız suallar göstərilir.
+        {% endblocktrans %}</span>
+    </p>
+    {% endif %}
+
     <div class="ems-banner ems-banner--info appeal-banner" role="note">
         <i class="fas fa-circle-info appeal-banner__icon" aria-hidden="true"></i>
         <div>
@@ -248,15 +261,8 @@ Sıra: komponentlər → apellyasiya düzümü (part1 → part2 → part3).{% en
                             </video>
                         </div>
                         {% endif %}
-                        {% if hide_answer_details and not answers_release_locked and not hide_answer_verdicts and exam.exam_type == "test" %}
-                        <div class="appeal-meta">
-                            {% if answer.is_correct %}
-                            <span class="appeal-chip appeal-chip--ok"><i class="fas fa-check-circle" aria-hidden="true"></i>{% trans "Cavabınız: düzgün" context "appeals.template" %}</span>
-                            {% else %}
-                            <span class="appeal-chip appeal-chip--bad"><i class="fas fa-times-circle" aria-hidden="true"></i>{% trans "Cavabınız: səhv" context "appeals.template" %}</span>
-                            {% endif %}
-                        </div>
-                        {% endif %}
+                        {% comment %}2026-10-21 (sahib): «Cavabınız: düzgün/səhv» verdikti də yalnız zalda — «sonradan» rejimində
+                        göstərilmir (zalda isə variantların özündə görünür).{% endcomment %}
                         {% if is_marked %}
                         <div class="appeal-meta">
                             <span class="appeal-chip appeal-chip--marked">

@@ -1,6 +1,11 @@
+# 2026-10-21 (sahib: «monitorinq sistemi yükləməsin»): 15 s → 30 s. Boş serverdə monitorinq yığını ən böyük
+# CPU istehlakçısı idi (promtail 7 %, prometheus 2.7 %); 14 app replikasının /metrics/ scrape-i (multiproc
+# registry birləşməsi app prosesində) və ~60 qaydanın qiymətləndirilməsi iki dəfə seyrəlir. Bütün qaydalar
+# 30 s ilə işləyir: ən qısa pəncərə rate(...[2m]) (4 nümunə), ən qısa `for: 1m` (2 qiymətləndirmə); aşkarlama
+# gecikməsi ən çox +15 s. Qrafiklərin ən incə addımı 30 s olur.
 global:
-  scrape_interval: 15s
-  evaluation_interval: 15s
+  scrape_interval: 30s
+  evaluation_interval: 30s
 
 # Faza 1 (audit 2026-07-02): alert qaydaları + Alertmanager marşrutu.
 rule_files:
@@ -36,7 +41,7 @@ scrape_configs:
       - names: ["app"]
         type: A
         port: 8000
-        refresh_interval: 15s
+        refresh_interval: 30s
     http_headers:
       X-Forwarded-Host:
         values: ["localhost"]
@@ -55,16 +60,36 @@ scrape_configs:
           # docker körpüsünün gateway-inə bind olur — compose DNS adı yoxdur (bax compose şərhi).
           - 172.18.0.1:9100
 
+  # 2026-10-21: monitorinq stekinin ÖZ metrikləri (prometheus/alertmanager/loki/cadvisor) minlərlə seriya verir,
+  # amma alertlər / Monitorinq səhifəsi / Grafana / prod-audit (scripts/ops/prod_audit.sh, prod_logs_probe.py)
+  # yalnız aşağıdakı ailələri oxuyur — qalanı scrape-də atılır (TSDB yaddaşı + ingest). `up` sintetikdir,
+  # metric_relabel ona təsir etmir (TargetDown işləyir). Yeni sorğu/alert əlavə edəndə siyahını genişləndirin
+  # (tests/test_infra_monitoring_load_2026_10_21.py hər istifadə olunan ailənin saxlanıldığını yoxlayır).
   - job_name: emsarena-prometheus
     static_configs:
       - targets:
           - prometheus:9090
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        action: keep
+        regex: "prometheus_(tsdb_head_series|tsdb_storage_blocks_bytes|tsdb_head_samples_appended_total|rule_evaluation_failures_total|rule_group_last_duration_seconds|notifications_dropped_total|notifications_errors_total|config_last_reload_successful|target_scrapes_exceeded_sample_limit_total)"
 
   # ── Sistem Monitorinqi (superadmin mərkəzi) əlavə mənbələri ──────────────
   - job_name: emsarena-cadvisor
     static_configs:
       - targets:
           - cadvisor:8080
+    # 2026-10-21: cadvisor konteyner başına ~60 seriya verir (yaddaş təfərrüatı, fs, paket/xəta sayğacları,
+    # spec, tasks_state …); istifadə olunan 8 ailədir (queries.py containers_section, summary_metrics,
+    # alerts.yml emsarena-containers, prod_audit.sh). Yalnız bu layihənin konteynerləri saxlanılır — bütün
+    # sorğular `name=~"emsarena-.+|educationmanagementstudentarena-.+"` ilə filtrlənir.
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        action: keep
+        regex: "container_(last_seen|cpu_usage_seconds_total|memory_working_set_bytes|spec_memory_limit_bytes|start_time_seconds|network_receive_bytes_total|network_transmit_bytes_total|oom_events_total)"
+      - source_labels: [name]
+        action: keep
+        regex: "emsarena-.+|educationmanagementstudentarena-.+"
 
   - job_name: emsarena-redis
     static_configs:
@@ -85,11 +110,19 @@ scrape_configs:
     static_configs:
       - targets:
           - alertmanager:9093
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        action: keep
+        regex: "alertmanager_(notifications_total|notifications_failed_total|alerts|alerts_received_total|alerts_invalid_total|config_last_reload_successful|silences)"
 
   - job_name: emsarena-loki
     static_configs:
       - targets:
           - loki:3100
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        action: keep
+        regex: "loki_(distributor_lines_received_total|distributor_bytes_received_total|discarded_samples_total|ingester_memory_streams|request_duration_seconds_bucket|request_duration_seconds_count|request_duration_seconds_sum)"
 
   # LAN endpoint sağlamlığı (blackbox): ping/health/login nginx üzərindən.
   - job_name: emsarena-blackbox

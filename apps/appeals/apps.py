@@ -50,3 +50,11 @@ class AppealsConfig(AppConfig):
         score_adjustments.register("remaining_window_seconds", remaining_window_seconds)
         score_adjustments.register("is_applicable", appeal_applicable)
         score_adjustments.register("deadline", appeal_deadline)
+
+        # 2026-10-21: qərarın əsaslandırıcı sənədi — qorunan media (yalnız apellyasiya heyəti / superadmin).
+        from core.media_policies import register_media_policy
+
+        from .models import APPEAL_DOCUMENT_PREFIX
+        from .services.documents import check_document_access
+
+        register_media_policy(APPEAL_DOCUMENT_PREFIX, check_document_access)
