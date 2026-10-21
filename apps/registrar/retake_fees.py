@@ -13,6 +13,12 @@ verildiyi köhnə dövrün ili DEYİL. İstifadə olunan il və mənbəyi ``inpu
 göstərilir. Kredit ≤ 0 (illik kredit > 0 ikən) → məbləğ ``None`` («0 AZN» göstərilmir). Sətir tapılmasa məbləğ ``None`` — tələbə «Məbləği Mühasibatlıqdan
 öyrənin» görür. Dəqiq məbləği Mühasibatlıq təsdiqləyir; fərq xəbərdarlıqdır, blok DEYİL.
 
+KREDİT (R01, 2026-10-21): tələbənin TƏDRİS PLANI krediti (fənn + semestr, > 0), yoxdursa kataloq —
+:mod:`apps.registrar.credit_source`. Müraciətin məbləği müraciət anının SNAPSHOT-udur: ``expected_fee`` +
+``fee_inputs`` (``credits`` daxil). Ödəniş təsdiqində yenidən hesab snapshot-dakı krediti işlədir (tədris ili kimi),
+təsdiqlənmiş (``expected_fee`` dolu) məbləğ heç vaxt yenidən hesablanmır — köhnə müraciətlərin məbləği səssizcə
+dəyişmir; yeni müraciətlər yeni krediti alır.
+
 Cədvəli Mühasibatlıq saxlayır: ``retake.payment_verify`` və ya ``accounting.manage_fees`` (kataloqa əlavəsi
 «Mühasibatlıq» paketinin işidir; burada yalnız adla istinad olunur).
 """
@@ -29,7 +35,7 @@ from django.utils.translation import pgettext
 from core.audit import log_action
 from core.constants import AuditAction
 
-from . import retake_access, retake_rules
+from . import credit_source, retake_access, retake_rules
 from .models import Program, RetakeTuition, StudentAcademicRecord
 
 _CTX = "registrar.retake"
@@ -128,13 +134,30 @@ def _record(student, organization):
 
 
 def student_context(student, organization) -> dict:
-    """Tələbə paneli üçün: akademik qeyd + cari tədris ili + təhsil haqqı xəritəsi (sabit sorğu sayı)."""
+    """Tələbə paneli üçün: akademik qeyd + cari tədris ili + təhsil haqqı xəritəsi + kredit həlledicisi
+    (sabit sorğu sayı — fənn sayından asılı deyil)."""
     year, source = current_academic_year(organization)
     record = _record(student, organization)
     base = {"academic_year": year, "year_source": source, "settings": settings_snapshot()}
     if record is None:
-        return {**base, "record": None, "rows": {}}
-    return {**base, "record": record, "rows": tuition_map(organization, [record.admission_year])}
+        return {**base, "record": None, "rows": {}, "credits": None}
+    return {
+        **base,
+        "record": record,
+        "rows": tuition_map(organization, [record.admission_year]),
+        # Tələbənin bütün plan sətirləri (fənn süzgəcsiz) — 2 sorğu; hər ``estimate`` sorğusuz oxuyur.
+        "credits": credit_source.resolver_for_students(organization, [record.student_id]),
+    }
+
+
+def credits_for(context, *, subject, period) -> int:
+    """Tələbənin fənn krediti (plan → kataloq); kontekstdə həlledici yoxdursa kataloq."""
+    resolver = context.get("credits")
+    catalogue = int(getattr(subject, "ects", 0) or 0)
+    record = context.get("record")
+    if resolver is None or record is None or subject is None:
+        return catalogue
+    return resolver.credit(record.student_id, subject.pk, period=period, catalogue=catalogue)
 
 
 def _year_for(context, period, override=None) -> tuple:
@@ -145,8 +168,9 @@ def _year_for(context, period, override=None) -> tuple:
     return getattr(period, "academic_year", "") or "", YEAR_FAILED
 
 
-def estimate(*, context, period, subject, academic_year=None) -> dict:
-    """``academic_year`` verilibsə (müraciətin snapshot-u) o istifadə olunur; yoxsa cari dövrün ili."""
+def estimate(*, context, period, subject, academic_year=None, credits=None) -> dict:
+    """``academic_year`` / ``credits`` verilibsə (müraciətin snapshot-u) onlar istifadə olunur; yoxsa cari dövrün ili
+    və tələbənin plan krediti (:func:`credits_for`)."""
     year, source = _year_for(context, period, academic_year)
     record = context["record"]
     if record is None:
@@ -155,7 +179,7 @@ def estimate(*, context, period, subject, academic_year=None) -> dict:
         academic_year=year,
         admission_year=record.admission_year,
         program_id=record.program_id,
-        credits=getattr(subject, "ects", 0),
+        credits=credits if credits is not None else credits_for(context, subject=subject, period=period),
         rows=context["rows"],
         settings=context["settings"],
         year_source=source,
@@ -166,14 +190,24 @@ def _submitted_year(application):
     return (application.fee_inputs or {}).get("academic_year") or None
 
 
+def _submitted_credits(application):
+    """Müraciət anında hesablanmış kredit (``fee_inputs.credits`` > 0); yoxdursa ``None`` — həlledici işləyir."""
+    try:
+        value = int((application.fee_inputs or {}).get("credits") or 0)
+    except (TypeError, ValueError):
+        return None
+    return value if value > 0 else None
+
+
 def for_application(application) -> dict:
-    """Müraciət üçün təsdiq anındakı hesab — tədris ili MÜRACİƏT anının ili (snapshot), cədvəl / faiz cari."""
+    """Müraciət üçün təsdiq anındakı hesab — tədris ili və KREDİT müraciət anının snapshot-u, cədvəl / faiz cari."""
     context = student_context(application.student, application.organization)
     return estimate(
         context=context,
         period=application.period,
         subject=application.subject,
         academic_year=_submitted_year(application),
+        credits=_submitted_credits(application),
     )
 
 
@@ -194,6 +228,9 @@ def expected_map(applications) -> dict:
     ).order_by("is_active", "created_at"):
         records[record.student_id] = record  # sonuncu (aktiv, ən yeni) qalır
     rows = tuition_map(organization, [r.admission_year for r in records.values()])
+    resolver = credit_source.resolver_for_students(
+        organization, {a.student_id for a in missing}, subject_ids={a.subject_id for a in missing}
+    )
     settings = settings_snapshot()
     current_year, _source = current_academic_year(organization)
     for application in missing:
@@ -204,7 +241,13 @@ def expected_map(applications) -> dict:
             academic_year=_submitted_year(application) or current_year or application.period.academic_year,
             admission_year=record.admission_year,
             program_id=record.program_id,
-            credits=application.subject.ects,
+            credits=_submitted_credits(application)
+            or resolver.credit(
+                application.student_id,
+                application.subject_id,
+                period=application.period,
+                catalogue=application.subject.ects,
+            ),
             rows=rows,
             settings=settings,
         )

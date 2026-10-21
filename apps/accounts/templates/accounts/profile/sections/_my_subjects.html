@@ -46,7 +46,7 @@ yox; hədəf `style-src-attr`-dan tam çıxmaqdır, bax csp.py).{% endcomment %}
         {# ── Boloniya kredit tərəqqisi (ECTS) ────────────────────────────────── #}
         {% with cs=sec.credit_summary %}
         {% if cs %}
-        <section class="credit-progress-card msx-credit {% if cs.can_graduate %}is-complete{% endif %}" aria-labelledby="msx-credit-title">
+        <section class="credit-progress-card msx-credit {% if cs.credit_target_reached %}is-complete{% endif %}" aria-labelledby="msx-credit-title">
             <div class="msx-credit__head">
                 <h2 class="msx-credit__title" id="msx-credit-title">
                     <i class="fas fa-award" aria-hidden="true"></i>
@@ -60,8 +60,9 @@ yox; hədəf `style-src-attr`-dan tam çıxmaqdır, bax csp.py).{% endcomment %}
                 <li class="msx-pill msx-pill--earned">{% trans "Toplanmış" context "profile.subjects" %}: <strong>{{ cs.earned }}</strong></li>
                 <li class="msx-pill msx-pill--progress">{% trans "Davam edən" context "profile.subjects" %}: <strong>{{ cs.in_progress }}</strong></li>
                 <li class="msx-pill msx-pill--remaining">{% trans "Qalan" context "profile.subjects" %}: <strong>{{ cs.remaining }}</strong></li>
-                {% if cs.can_graduate %}
-                <li class="msx-pill msx-pill--ok"><i class="fas fa-check-circle" aria-hidden="true"></i> {% trans "Məzuniyyət yükü tamamlandı" context "profile.subjects" %}</li>
+                {# R02: kredit tərəqqisidir, məzuniyyət qərarı DEYİL (bax services.get_credit_summary) #}
+                {% if cs.credit_target_reached %}
+                <li class="msx-pill msx-pill--ok"><i class="fas fa-check-circle" aria-hidden="true"></i> {% trans "Kredit hədəfinə çatılıb" context "profile.subjects" %}</li>
                 {% endif %}
             </ul>
             <p class="msx-credit__hint">{% trans "Kredit yalnız keçilmiş fənlərdən toplanır; «davam edən» — hələ yekunlaşmamış cari fənlərin krediti." context "profile.subjects" %}</p>

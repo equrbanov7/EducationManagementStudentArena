@@ -17,6 +17,17 @@ from apps.registrar.tests.entry_standard_fixture import EntryStandardFixture
 from apps.registrar.tests.entry_standard_probe import MirrorProbe
 
 BASELINE = json.loads(Path(__file__).with_name("entry_standard_baseline.json").read_text())
+#: 2026-10-21 (R01): vahid kredit mənbəyi (``apps.registrar.credit_source``) kredit oxuyan səhifələrə SABİT 2 sorğu
+#: əlavə edir (akademik qeydlər + plan sətirləri, toplu — tələbə/açılış sayı ilə böyümür). Baseline ölçümləri qalır.
+CREDIT_SOURCE_ALLOWANCE = 2
+CREDIT_SURFACES = (
+    "transcript/",
+    "period_analytics/",
+    "academic_summary/",
+    "credit_totals/",
+    "student_subjects/",
+    "evaluation_maps",
+)
 # YENİ QAYDA (M1 — 3 seminar + 1 lab: aktivlik 5 + 5; sərbəst iş sayılmır; midterm ≤ 30):
 # M1/s0: 9.33 + (round2(8.33/2)=4.17 + 9/2=4.50) + 17 = 35.00 → 35.
 # M1/s1: buraxılmır → 0 + (0 + 10/2) + 20 = 25 (lab balı var, seminar balı yox → seminar payı 0).
@@ -74,7 +85,8 @@ class _ParityChecks:
         if connection.vendor == "postgresql":
             for surface, count in probe.queries.items():
                 with self.subTest(query_budget=surface):
-                    self.assertLessEqual(count, BASELINE["queries"][surface])
+                    allowance = CREDIT_SOURCE_ALLOWANCE if surface.startswith(CREDIT_SURFACES) else 0
+                    self.assertLessEqual(count, BASELINE["queries"][surface] + allowance)
 
 
 class EntryStandardParityTest(_ParityChecks, EntryStandardFixture, TestCase):

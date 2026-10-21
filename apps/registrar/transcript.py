@@ -27,7 +27,15 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.utils import timezone
 
-from apps.registrar import analytics, exam_eligibility, finals, finals_batch, legacy_grade_read, retake_queries
+from apps.registrar import (
+    analytics,
+    credit_source,
+    exam_eligibility,
+    finals,
+    finals_batch,
+    legacy_grade_read,
+    retake_queries,
+)
 from apps.registrar.models import Enrollment, StudentAcademicRecord
 
 _TWO_PLACES = Decimal("0.01")
@@ -38,7 +46,10 @@ def _round2(value: Decimal) -> Decimal:
 
 
 def _credit_for(offering) -> int:
-    """ECTS credit of the offering's subject (0 if somehow unset)."""
+    """KATALOQ krediti (``Subject.ects``) — yalnız həlledici nəticəsi verilməyəndə geri çəkilmə.
+
+    R01 (2026-10-21): transkriptin krediti tələbənin TƏDRİS PLANI sətrindəndir (fənn + semestr, > 0), yoxdursa
+    kataloq — :func:`credit_source.credits_for_enrollments` (``build_student_transcript`` onu bir dəfə qurur)."""
     return int(getattr(offering.subject, "ects", 0) or 0)
 
 
@@ -46,12 +57,12 @@ def _grade_point(result) -> Decimal:
     return Decimal(str(result.get("gpa") or "0"))
 
 
-def _build_row(enrollment, organization=None, *, exempt=False, hours_map=None, batch=None):
+def _build_row(enrollment, organization=None, *, exempt=False, hours_map=None, batch=None, credit=None):
     offering = enrollment.offering
     result = finals.compute_final_result(
         enrollment=enrollment, organization=organization, exempt=exempt, hours_map=hours_map, batch=batch
     )
-    credit = _credit_for(offering)
+    credit = _credit_for(offering) if credit is None else int(credit)
     # Definite outcome → contributes to GPA; still-open course is excluded.
     in_gpa = bool(result["passed"] or result["failed"])
     return {
@@ -217,7 +228,9 @@ def build_student_transcript(*, student, organization, program=None):
     # ``compute_final_result`` ``hours_map=None`` olduqda ``batch.hours_map``-a
     # geri çəkilir — əvvəl eyni ``SUM(lesson.hours)`` sorğusu İKİ dəfə gedirdi
     # (transkript, transkript PDF-i və akademik-qeyd drill-down-u üçün).
-    rows = [_build_row(e, organization, exempt=exempt, batch=batch) for e in enrollments]
+    # Kredit: tələbənin planı (fənn + semestr) → kataloq — 2 sabit sorğu (R01, ``credit_source``).
+    credits = credit_source.credits_for_enrollments(enrollments, organization=organization)
+    rows = [_build_row(e, organization, exempt=exempt, batch=batch, credit=credits.get(e.pk)) for e in enrollments]
     # Köçürülmüş qiymət nişanı BURADA qoşulur — transkript ekranı, transkript
     # PDF-i və «Ümumi tədris məlumatı» üçün TƏK mənbə.  Hər səth özü qoşsaydı
     # eyni sətir bir ekranda nişanlı, digərində nişansız görünərdi (məhz bu
