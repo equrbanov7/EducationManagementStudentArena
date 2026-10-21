@@ -107144,3 +107144,164 @@ msgstr "I confirm all"
 msgctxt "accounts.semester"
 msgid "Təsdiqlənməyən qrup üçün açılış yaradılmır və nəticədə adı ilə göstərilir. Semestr və ya ixtisas dəyişsə siyahı yenidən yoxlanılır."
 msgstr "No offerings are created for an unconfirmed group; it is listed by name in the result. If the semester or programme changes, the list is checked again."
+
+msgctxt "exams.template.take_exam"
+msgid "Bu imtahan başqa tabda və ya kompüterdə də yenilənib: eyni suallara fərqli cavab verilib. Digər cavablar saxlanıldı. Davam etmək üçün səhifəni yeniləyin."
+msgstr "This exam was also updated in another tab or on another computer: the same questions were answered differently. Your other answers were saved. Reload the page to continue."
+
+msgctxt "exams.template.take_exam"
+msgid "Bu imtahan başqa tabda və ya kompüterdə də açıqdır. Cavablar birləşdirilir — yalnız bir tabda davam edin."
+msgstr "This exam is also open in another tab or on another computer. Answers are being merged — please continue in one tab only."
+
+msgctxt "exams.template.take_exam"
+msgid "Səhifəni yenilə"
+msgstr "Reload the page"
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "Apellyasiya tam ekranda verilir"
+msgstr "The appeal is filed in full screen"
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "İmtahan zalında apellyasiya da imtahan kimi tam ekranda doldurulur. Davam etmək üçün düyməni basın."
+msgstr "In the exam hall, the appeal is filled in full screen, just like the exam. Press the button to continue."
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "Tam ekran rejimindən çıxdınız"
+msgstr "You have left full-screen mode"
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "İmtahan bitib — bu, pozuntu sayılmır. Apellyasiyanı tam ekranda davam etdirin."
+msgstr "The exam is over, so this is not a violation. Please continue the appeal in full screen."
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "Tam ekranda davam et"
+msgstr "Continue in full screen"
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "İndilik bağla"
+msgstr "Close for now"
+
+msgctxt "exams.final_center.violations"
+msgid "Ad, istifadəçi adı, yer №…"
+msgstr "Name, username, seat no.…"
+
+msgctxt "exams.final_center.violations"
+msgid "Qayda pozanlarda axtarış"
+msgstr "Search rule violators"
+
+msgctxt "exams.final_center.violations"
+msgid "Ciddilik"
+msgstr "Severity"
+
+msgctxt "exams.final_center.violations"
+msgid "Hamısı"
+msgstr "All"
+
+msgctxt "exams.final_center.violations"
+msgid "Pozuntu növü"
+msgstr "Violation type"
+
+msgctxt "exams.final_center.violations"
+msgid "Bütün növlər"
+msgstr "All types"
+
+msgctxt "exams.final_center.violations"
+msgid "Sıralama"
+msgstr "Sorting"
+
+msgctxt "exams.final_center.violations"
+msgid "Ciddiliyə görə"
+msgstr "By severity"
+
+msgctxt "exams.final_center.violations"
+msgid "Ən yenilər"
+msgstr "Most recent"
+
+msgctxt "exams.final_center.violations"
+msgid "Bu ekranda hələ açılmamış yeni hadisəsi olan tələbələr"
+msgstr "Students with new events not yet opened on this screen"
+
+msgctxt "exams.final_center.violations"
+msgid "Yalnız yenilər"
+msgstr "New only"
+
+msgctxt "exams.final_center.violations"
+msgid "Daha çox göstər"
+msgstr "Show more"
+
+msgctxt "exams.final_center.violations"
+msgid "Hamısını göstər"
+msgstr "Show all"
+
+msgctxt "exams.final_center.violations"
+msgid "Az göstər"
+msgstr "Show less"
+
+#, python-format
+msgctxt "exams.final_center.violations"
+msgid "%(shown)s / %(total)s göstərilir"
+msgstr "Showing %(shown)s / %(total)s"
+
+msgctxt "exams.final_center.violations"
+msgid "Süzgəcə uyğun tələbə yoxdur."
+msgstr "No students match the filter."
+
+msgctxt "exams.final_center.violations"
+msgid "Son hadisələr"
+msgstr "Latest events"
+
+msgctxt "exams.final_center.violations"
+msgid "Hadisələr yüklənir…"
+msgstr "Loading events…"
+
+msgctxt "exams.final_center.violations"
+msgid "Tam tarixçə və qeyd üçün «Bax» düyməsini basın."
+msgstr "Press «View» for the full history and notes."
+
+#, python-format
+msgctxt "exams.final_center.violations"
+msgid "+%(count)s növ"
+msgstr "+%(count)s types"
+
+msgctxt "exams.final_center.violations"
+msgid "Son hadisə"
+msgstr "Last event"
+
+msgctxt "exams.final_center.violations"
+msgid "Yeni"
+msgstr "New"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Bu sahə məcburidir."
+msgstr "This field is required."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Bu sahənin dəyəri düzgün deyil."
+msgstr "This field's value is not valid."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Formada xəta var — qeyd olunmuş sahələri düzəldin."
+msgstr "The form has errors — correct the marked fields."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Yadda saxlamaq alınmadı. Bağlantını yoxlayıb yenidən cəhd edin."
+msgstr "Could not save. Check your connection and try again."
+
+#, python-format
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Heç bir kompüter əlavə edilmədi — %(n)s sətirdə xəta var."
+msgstr "No computers were added — %(n)s line(s) have errors."
+
+#, python-format
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "%(n)s sətir əlavə edilmədi — düzəldib yenidən göndərin."
+msgstr "%(n)s line(s) were not added — fix them and submit again."
+
+#, python-format
+msgctxt "exams.final_center.room_admin"
+msgid "Bu IP artıq «%(room)s» zalında «%(label)s» kompüterinə verilib: %(ip)s"
+msgstr "This IP is already assigned to computer «%(label)s» in room «%(room)s»: %(ip)s"
+
+msgctxt "exams.template.take_exam"
+msgid "Bu imtahan artıq başqa tabda açıqdır — bu tabdan cavablar yazılmır. İmtahanı həmin tabda davam etdirin və ya onu bağlayıb bu səhifəni yeniləyin."
+msgstr "This exam is already open in another tab — answers are not saved from this tab. Continue the exam in that tab, or close it and reload this page."

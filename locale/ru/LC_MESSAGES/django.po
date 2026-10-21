@@ -107338,3 +107338,164 @@ msgstr "Подтверждаю все"
 msgctxt "accounts.semester"
 msgid "Təsdiqlənməyən qrup üçün açılış yaradılmır və nəticədə adı ilə göstərilir. Semestr və ya ixtisas dəyişsə siyahı yenidən yoxlanılır."
 msgstr "Для неподтверждённой группы открытия не создаются, в результате она указывается по названию. Если семестр или специальность меняются, список проверяется заново."
+
+msgctxt "exams.template.take_exam"
+msgid "Bu imtahan başqa tabda və ya kompüterdə də yenilənib: eyni suallara fərqli cavab verilib. Digər cavablar saxlanıldı. Davam etmək üçün səhifəni yeniləyin."
+msgstr "Этот экзамен также был изменён в другой вкладке или на другом компьютере: на одни и те же вопросы даны разные ответы. Остальные ответы сохранены. Обновите страницу, чтобы продолжить."
+
+msgctxt "exams.template.take_exam"
+msgid "Bu imtahan başqa tabda və ya kompüterdə də açıqdır. Cavablar birləşdirilir — yalnız bir tabda davam edin."
+msgstr "Этот экзамен открыт также в другой вкладке или на другом компьютере. Ответы объединяются — продолжайте только в одной вкладке."
+
+msgctxt "exams.template.take_exam"
+msgid "Səhifəni yenilə"
+msgstr "Обновить страницу"
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "Apellyasiya tam ekranda verilir"
+msgstr "Апелляция подаётся в полноэкранном режиме"
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "İmtahan zalında apellyasiya da imtahan kimi tam ekranda doldurulur. Davam etmək üçün düyməni basın."
+msgstr "В экзаменационном зале апелляция, как и экзамен, заполняется в полноэкранном режиме. Нажмите кнопку, чтобы продолжить."
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "Tam ekran rejimindən çıxdınız"
+msgstr "Вы вышли из полноэкранного режима"
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "İmtahan bitib — bu, pozuntu sayılmır. Apellyasiyanı tam ekranda davam etdirin."
+msgstr "Экзамен окончен — это не считается нарушением. Продолжите апелляцию в полноэкранном режиме."
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "Tam ekranda davam et"
+msgstr "Продолжить в полноэкранном режиме"
+
+msgctxt "appeals.template.hall_fullscreen"
+msgid "İndilik bağla"
+msgstr "Пока закрыть"
+
+msgctxt "exams.final_center.violations"
+msgid "Ad, istifadəçi adı, yer №…"
+msgstr "Имя, логин, № места…"
+
+msgctxt "exams.final_center.violations"
+msgid "Qayda pozanlarda axtarış"
+msgstr "Поиск среди нарушителей"
+
+msgctxt "exams.final_center.violations"
+msgid "Ciddilik"
+msgstr "Серьёзность"
+
+msgctxt "exams.final_center.violations"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "exams.final_center.violations"
+msgid "Pozuntu növü"
+msgstr "Тип нарушения"
+
+msgctxt "exams.final_center.violations"
+msgid "Bütün növlər"
+msgstr "Все типы"
+
+msgctxt "exams.final_center.violations"
+msgid "Sıralama"
+msgstr "Сортировка"
+
+msgctxt "exams.final_center.violations"
+msgid "Ciddiliyə görə"
+msgstr "По серьёзности"
+
+msgctxt "exams.final_center.violations"
+msgid "Ən yenilər"
+msgstr "Самые новые"
+
+msgctxt "exams.final_center.violations"
+msgid "Bu ekranda hələ açılmamış yeni hadisəsi olan tələbələr"
+msgstr "Студенты с новыми событиями, ещё не открытыми на этом экране"
+
+msgctxt "exams.final_center.violations"
+msgid "Yalnız yenilər"
+msgstr "Только новые"
+
+msgctxt "exams.final_center.violations"
+msgid "Daha çox göstər"
+msgstr "Показать ещё"
+
+msgctxt "exams.final_center.violations"
+msgid "Hamısını göstər"
+msgstr "Показать все"
+
+msgctxt "exams.final_center.violations"
+msgid "Az göstər"
+msgstr "Показать меньше"
+
+#, python-format
+msgctxt "exams.final_center.violations"
+msgid "%(shown)s / %(total)s göstərilir"
+msgstr "Показано %(shown)s / %(total)s"
+
+msgctxt "exams.final_center.violations"
+msgid "Süzgəcə uyğun tələbə yoxdur."
+msgstr "Нет студентов, соответствующих фильтру."
+
+msgctxt "exams.final_center.violations"
+msgid "Son hadisələr"
+msgstr "Последние события"
+
+msgctxt "exams.final_center.violations"
+msgid "Hadisələr yüklənir…"
+msgstr "Загрузка событий…"
+
+msgctxt "exams.final_center.violations"
+msgid "Tam tarixçə və qeyd üçün «Bax» düyməsini basın."
+msgstr "Нажмите «Открыть», чтобы увидеть полную историю и заметки."
+
+#, python-format
+msgctxt "exams.final_center.violations"
+msgid "+%(count)s növ"
+msgstr "+%(count)s типов"
+
+msgctxt "exams.final_center.violations"
+msgid "Son hadisə"
+msgstr "Последнее событие"
+
+msgctxt "exams.final_center.violations"
+msgid "Yeni"
+msgstr "Новое"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Bu sahə məcburidir."
+msgstr "Это поле обязательно."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Bu sahənin dəyəri düzgün deyil."
+msgstr "Значение этого поля недопустимо."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Formada xəta var — qeyd olunmuş sahələri düzəldin."
+msgstr "В форме есть ошибки — исправьте отмеченные поля."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Yadda saxlamaq alınmadı. Bağlantını yoxlayıb yenidən cəhd edin."
+msgstr "Не удалось сохранить. Проверьте подключение и повторите попытку."
+
+#, python-format
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Heç bir kompüter əlavə edilmədi — %(n)s sətirdə xəta var."
+msgstr "Ни один компьютер не добавлен — ошибки в строках: %(n)s."
+
+#, python-format
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "%(n)s sətir əlavə edilmədi — düzəldib yenidən göndərin."
+msgstr "Не добавлено строк: %(n)s — исправьте и отправьте снова."
+
+#, python-format
+msgctxt "exams.final_center.room_admin"
+msgid "Bu IP artıq «%(room)s» zalında «%(label)s» kompüterinə verilib: %(ip)s"
+msgstr "Этот IP уже назначен компьютеру «%(label)s» в зале «%(room)s»: %(ip)s"
+
+msgctxt "exams.template.take_exam"
+msgid "Bu imtahan artıq başqa tabda açıqdır — bu tabdan cavablar yazılmır. İmtahanı həmin tabda davam etdirin və ya onu bağlayıb bu səhifəni yeniləyin."
+msgstr "Этот экзамен уже открыт в другой вкладке — ответы из этой вкладки не сохраняются. Продолжайте экзамен в той вкладке или закройте её и обновите эту страницу."
