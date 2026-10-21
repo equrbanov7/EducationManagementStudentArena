@@ -5,12 +5,13 @@ Authentication-related OTP services for accounts.
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
-from django.db import transaction
+from django.db import connection, transaction
 from django.template.loader import render_to_string
 from django.utils import timezone, translation
 from django.utils.translation import pgettext_lazy
@@ -59,11 +60,33 @@ class OTPResendCooldownError(OTPServiceError):
 
 @dataclass(frozen=True)
 class OTPVerificationResult:
+    """``reason``: ``invalid`` (səhv kod), ``expired``, ``superseded`` (yenisi ilə əvəzlənib),
+    ``already_used``, ``max_attempts``, ``missing``, ``invalid_format``, ``access_denied``."""
+
     success: bool
     otp: EmailOTP | None = None
     reason: str = ""
     retry_after: int | None = None
     remaining_attempts: int | None = None
+    expires_at: datetime | None = None
+
+
+@dataclass(frozen=True)
+class OTPSendResult:
+    """``request_email_otp`` nəticəsi: ``reused`` → yeni kod/məktub YOXDUR, əvvəlki kod qüvvədədir."""
+
+    reused: bool
+    expires_at: datetime
+    resend_available_in: int
+
+
+#: Sahib 2026-10-21 («2 dəfə OTP göndərəndə problem olur»): ard-arda göndərilmiş SON N kod (hər biri öz
+#: müddətinə qədər) qəbul olunur — istifadəçi hansı məktubu açsa, o kod işləyir. Səhv cəhd sayğacı ən
+#: son kodda gedir və o bağlananda HAMISI bağlanır (təxmin büdcəsi artmır).
+OTP_ACCEPTED_RECENT_CODES = 3
+
+#: Köhnə kodun səbəbini (vaxtı keçib / istifadə olunub / əvəzlənib) tanımaq üçün baxılan pəncərə.
+_STALE_LOOKBACK = timedelta(hours=24)
 
 
 def _normalize_email(email: str) -> str:
@@ -174,14 +197,44 @@ def _count_recent_sends(*, email: str) -> tuple[int, EmailOTP | None]:
     return recent_qs.count(), oldest_recent
 
 
+def _lock_otp_scope(*, email: str, purpose: str) -> None:
+    """Eyni (məqsəd, e-poçt) üçün paralel kod buraxılışını ardıcıllaşdır (tranzaksiya sonunadək).
+
+    ``select_for_update`` yalnız MÖVCUD sətirləri kilidləyir — hələ kod yoxdursa iki paralel sorğu
+    (ikiqat klik) hər biri «kod yoxdur» görüb iki kod yaradırdı. Advisory xact-kilid PgBouncer-in
+    tranzaksiya rejimində də təhlükəsizdir.
+    """
+    if connection.vendor != "postgresql":
+        return
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))",
+            [f"accounts.email_otp:{purpose}:{email}"],
+        )
+
+
+def _resend_wait_seconds(otp: EmailOTP | None, *, now=None) -> int:
+    """Bu koddan sonra yeni kod nə vaxt istənə bilər (saniyə, 0 = indi)."""
+    if otp is None:
+        return 0
+    elapsed = ((now or timezone.now()) - otp.created_at).total_seconds()
+    return max(0, math.ceil(get_auth_otp_resend_cooldown_seconds() - elapsed))
+
+
 def issue_email_otp(
     user=None,
     *,
     email: str | None = None,
     purpose: str = EmailOTP.Purpose.SIGNUP,
     enforce_cooldown: bool = False,
+    reuse_recent: bool = False,
 ):
-    """Create a fresh OTP and invalidate older pending OTPs for the same purpose."""
+    """Create a fresh OTP; keep the last ``OTP_ACCEPTED_RECENT_CODES`` live codes, retire older ones.
+
+    ``reuse_recent=True`` (sahib 2026-10-21): resend cooldown daxilində eyni istifadəçi + məqsəd +
+    e-poçt üçün qüvvədə kod varsa YENİ KOD YARADILMIR — ``(None, expires_at, mövcud_kod)`` qaytarılır
+    (çağıran məktub göndərmir). İkiqat klik / səhifə keçidində təkrar göndəriş beləcə bir kod verir.
+    """
 
     if user is not None:
         assert_account_access_allowed(user)
@@ -193,14 +246,17 @@ def issue_email_otp(
         raise ValueError("A valid email address is required to issue an OTP.")
 
     with transaction.atomic():
-        pending_qs = EmailOTP.pending_queryset(user=user, email=normalized_email, purpose=purpose).select_for_update()
-        latest_pending = pending_qs.first()
+        _lock_otp_scope(email=normalized_email, purpose=purpose)
+        pending_qs = EmailOTP.pending_queryset(user=user, email=normalized_email, purpose=purpose)
         now = timezone.now()
+        live = [otp for otp in pending_qs.select_for_update() if otp.expires_at > now]
+        latest_live = live[0] if live else None
 
-        if enforce_cooldown and latest_pending and not latest_pending.is_expired():
-            elapsed = int((now - latest_pending.created_at).total_seconds())
-            retry_after = get_auth_otp_resend_cooldown_seconds() - elapsed
-            if retry_after > 0:
+        retry_after = _resend_wait_seconds(latest_live, now=now)
+        if retry_after > 0:
+            if reuse_recent:
+                return None, latest_live.expires_at, latest_live
+            if enforce_cooldown:
                 raise OTPResendCooldownError(retry_after=retry_after)
 
         recent_count, oldest_recent = _count_recent_sends(email=normalized_email)
@@ -210,7 +266,8 @@ def issue_email_otp(
                 retry_after = max(1, int((oldest_recent.created_at + timedelta(hours=1) - now).total_seconds()))
             raise OTPRateLimitError(retry_after=retry_after)
 
-        pending_qs.update(is_used=True)
+        keep = [otp.pk for otp in live[: OTP_ACCEPTED_RECENT_CODES - 1]]
+        pending_qs.exclude(pk__in=keep).update(is_used=True)
 
         code = generate_otp()
         expires_at = now + timedelta(seconds=get_auth_otp_expiry_seconds())
@@ -225,6 +282,26 @@ def issue_email_otp(
     return code, expires_at, otp_record
 
 
+def _deliver_otp(*, code, expires_at, otp_record, email, user, purpose, request=None) -> None:
+    """Kodu SİNXRON göndər; uğursuz olsa yaradılmış qeyd silinir (istifadəçi «göndərildi» görməsin)."""
+    context = _build_email_context(
+        user=user,
+        email=email,
+        purpose=purpose,
+        code=code,
+        request=request,
+        expires_at=expires_at,
+    )
+    context["from_email"] = sender_for(purpose)
+    try:
+        _send_otp_message(email=email, purpose=purpose, context=context)
+        logger.info("OTP email sent synchronously to %s for purpose %s", email, purpose)
+    except Exception:
+        otp_record.delete()
+        logger.exception("OTP email delivery failed for %s", email)
+        raise
+
+
 def send_otp_email(
     email: str,
     *,
@@ -235,32 +312,46 @@ def send_otp_email(
 ):
     """Generate, persist, and send an OTP email."""
 
-    code, expires_at, _otp_record = issue_email_otp(
+    code, expires_at, otp_record = issue_email_otp(
         user,
         email=email,
         purpose=purpose,
         enforce_cooldown=enforce_cooldown,
     )
     normalized_email = _normalize_email(email or getattr(user, "email", ""))
-    context = _build_email_context(
-        user=user,
-        email=normalized_email,
-        purpose=purpose,
+    _deliver_otp(
         code=code,
-        request=request,
         expires_at=expires_at,
+        otp_record=otp_record,
+        email=normalized_email,
+        user=user,
+        purpose=purpose,
+        request=request,
     )
+    return code
 
-    context["from_email"] = sender_for(purpose)
 
-    try:
-        _send_otp_message(email=normalized_email, purpose=purpose, context=context)
-        logger.info("OTP email sent synchronously to %s for purpose %s", normalized_email, purpose)
-        return code
-    except Exception:
-        _otp_record.delete()
-        logger.exception("OTP email delivery failed for %s", normalized_email)
-        raise
+def request_email_otp(email: str, *, user=None, purpose: str, request=None) -> OTPSendResult:
+    """İdempotent göndəriş (sahib 2026-10-21): cooldown daxilində təkrar sorğu YENİ KOD/MƏKTUB vermir.
+
+    Cooldown keçəndən sonra yeni kod göndərilir, əvvəlki kod(lar) isə öz müddətinə qədər qəbul olunur
+    (``OTP_ACCEPTED_RECENT_CODES``). Saatlıq limit ``OTPRateLimitError`` ilə qalır.
+    """
+    code, expires_at, otp_record = issue_email_otp(user, email=email, purpose=purpose, reuse_recent=True)
+    if code is None:
+        return OTPSendResult(reused=True, expires_at=expires_at, resend_available_in=_resend_wait_seconds(otp_record))
+    _deliver_otp(
+        code=code,
+        expires_at=expires_at,
+        otp_record=otp_record,
+        email=_normalize_email(email or getattr(user, "email", "")),
+        user=user,
+        purpose=purpose,
+        request=request,
+    )
+    return OTPSendResult(
+        reused=False, expires_at=expires_at, resend_available_in=get_auth_otp_resend_cooldown_seconds()
+    )
 
 
 def send_verification_otp(user, *, request=None, enforce_cooldown: bool = False):
@@ -291,11 +382,62 @@ def get_otp_timer_context(user=None, *, email=None, purpose: str = EmailOTP.Purp
     """Build OTP-expiry metadata for templates."""
 
     otp = get_latest_pending_otp(user, email=email, purpose=purpose)
+    expires_at = getattr(otp, "expires_at", None)
+    now = timezone.now()
     return {
-        "otp_expires_at": getattr(otp, "expires_at", None),
+        "otp_expires_at": expires_at,
+        # Sahib 2026-10-21: geri sayım SERVER saniyəsi ilə (istifadəçinin saatı səhvdirsə «vaxtı keçib» erkən görünmürdü).
+        "otp_remaining_seconds": max(0, math.ceil((expires_at - now).total_seconds())) if expires_at else 0,
+        "otp_resend_available_in": _resend_wait_seconds(otp, now=now) if expires_at and expires_at > now else 0,
         "otp_expiry_minutes": get_auth_otp_expiry_minutes(),
         "otp_expiry_seconds": get_auth_otp_expiry_seconds(),
     }
+
+
+def _stale_code_reason(*, user, email: str, purpose: str, candidate: str, now) -> tuple[str, bool]:
+    """Qüvvədə olmayan, amma ƏSL göndərilmiş kod daxil edilibsə səbəbi; ikinci dəyər — ən son kod
+    çox səhv cəhdlə bağlanıbmı.
+
+    Sahib 2026-10-21: əvəzlənmiş/istifadə olunmuş kod «vaxtı keçib» kimi göstərilirdi. Səbəb dəqiq
+    deyilir; əsl kod olduğu üçün bu, səhv cəhd sayılmır (təxmin deyil).
+    """
+    recent = EmailOTP.objects.filter(email=email, purpose=purpose, created_at__gte=now - _STALE_LOOKBACK)
+    if user is not None:
+        recent = recent.filter(user=user)
+    rows = list(recent.order_by("-created_at")[:10])
+    max_attempts = get_auth_otp_max_attempts()
+    newest = rows[0] if rows else None
+    locked = bool(
+        newest is not None
+        and not newest.is_verified
+        and newest.expires_at > now
+        and int(newest.attempts_count or 0) >= max_attempts
+    )
+    for otp in rows:
+        if not otp.matches_code(candidate):
+            continue
+        if otp.is_verified:
+            return "already_used", locked
+        if otp.expires_at <= now:
+            return "expired", locked
+        if locked or int(otp.attempts_count or 0) >= max_attempts:
+            return "max_attempts", locked
+        return "superseded", locked
+    return "", locked
+
+
+def _retire(otps) -> None:
+    pks = [otp.pk for otp in otps if not otp.is_used]
+    if pks:
+        EmailOTP.objects.filter(pk__in=pks).update(is_used=True)
+
+
+def consume_email_otp(otp: EmailOTP) -> None:
+    """Uğurlu yoxlamadan sonra kodu işlət və eyni ünvan/məqsədin qalan kodlarını bağla."""
+    EmailOTP.pending_queryset(user=otp.user, email=otp.email, purpose=otp.purpose).exclude(pk=otp.pk).update(
+        is_used=True
+    )
+    otp.mark_verified()
 
 
 def verify_email_otp(
@@ -304,8 +446,12 @@ def verify_email_otp(
     code: str,
     user=None,
     purpose: str = EmailOTP.Purpose.SIGNUP,
+    consume: bool = True,
 ) -> OTPVerificationResult:
-    """Verify the provided OTP against the latest active record for an email/purpose."""
+    """Kodu ünvan/məqsəd üçün qüvvədə olan son ``OTP_ACCEPTED_RECENT_CODES`` koddan biri ilə yoxla.
+
+    ``consume=False`` — yalnız yoxla (parol validasiyası sonra gedən formalar ``consume_email_otp`` çağırır).
+    """
 
     if user is not None:
         try:
@@ -323,34 +469,47 @@ def verify_email_otp(
     with transaction.atomic():
         pending_qs = EmailOTP.pending_queryset(user=user, email=normalized_email, purpose=purpose).select_for_update()
         pending = list(pending_qs[:10])
-        latest = pending[0] if pending else None
-        if latest is None:
-            return OTPVerificationResult(success=False, reason="missing")
+        now = timezone.now()
+        live = [otp for otp in pending if otp.expires_at > now][:OTP_ACCEPTED_RECENT_CODES]
+        expired = [otp for otp in pending if otp.expires_at <= now]
+        _retire(expired)
 
-        if latest.is_expired():
-            latest.invalidate()
-            return OTPVerificationResult(success=False, reason="expired")
-
-        if int(latest.attempts_count or 0) >= get_auth_otp_max_attempts():
-            latest.invalidate()
-            return OTPVerificationResult(
-                success=False,
-                reason="max_attempts",
-                remaining_attempts=0,
+        if not live:
+            reason, locked = _stale_code_reason(
+                user=user, email=normalized_email, purpose=purpose, candidate=candidate, now=now
             )
+            if not reason:
+                reason = "expired" if expired else ("max_attempts" if locked else "missing")
+            return OTPVerificationResult(success=False, reason=reason)
 
-        matched = next((otp for otp in pending if otp.matches_code(candidate)), None)
+        latest = live[0]
+        if int(latest.attempts_count or 0) >= get_auth_otp_max_attempts():
+            _retire(live)
+            return OTPVerificationResult(success=False, reason="max_attempts", remaining_attempts=0)
+
+        matched = next((otp for otp in live if otp.matches_code(candidate)), None)
         if matched is None:
+            stale, _locked = _stale_code_reason(
+                user=user, email=normalized_email, purpose=purpose, candidate=candidate, now=now
+            )
+            if stale:
+                return OTPVerificationResult(success=False, reason=stale, expires_at=latest.expires_at)
             latest.register_failed_attempt()
+            if latest.remaining_attempts <= 0:
+                _retire(live)
+                return OTPVerificationResult(success=False, reason="max_attempts", remaining_attempts=0)
             return OTPVerificationResult(
                 success=False,
                 reason="invalid",
                 remaining_attempts=latest.remaining_attempts,
+                expires_at=latest.expires_at,
             )
 
-        pending_qs.exclude(pk=matched.pk).update(is_used=True)
-        matched.mark_verified()
-        return OTPVerificationResult(success=True, otp=matched, remaining_attempts=matched.remaining_attempts)
+        if consume:
+            consume_email_otp(matched)
+        return OTPVerificationResult(
+            success=True, otp=matched, remaining_attempts=matched.remaining_attempts, expires_at=matched.expires_at
+        )
 
 
 def verify_otp_code(user, code, *, purpose: str = EmailOTP.Purpose.SIGNUP):
@@ -375,12 +534,16 @@ def activate_user_account(user):
 
 
 __all__ = [
+    "OTP_ACCEPTED_RECENT_CODES",
     "OTPRateLimitError",
     "OTPResendCooldownError",
+    "OTPSendResult",
     "OTPVerificationResult",
     "activate_user_account",
+    "consume_email_otp",
     "get_otp_timer_context",
     "issue_email_otp",
+    "request_email_otp",
     "send_login_otp",
     "send_otp_email",
     "send_verification_otp",

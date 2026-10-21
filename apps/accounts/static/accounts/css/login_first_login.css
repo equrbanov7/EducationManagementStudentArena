@@ -292,3 +292,40 @@
     opacity: 0.55;
     cursor: not-allowed;
 }
+
+/* Sahib 2026-10-21: 2-ci addımda kodun müddəti («… 14:35-ə qədər» + geri sayım, otp_timer.js). */
+.auth-otp-validity {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px 12px;
+    margin: -10px 0 20px;
+    padding: 9px 13px;
+    border-radius: 10px;
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
+    color: var(--ems-neutral-700);
+    font-size: 0.84rem;
+    line-height: 1.45;
+}
+.auth-otp-validity__left strong {
+    font-variant-numeric: tabular-nums;
+    color: var(--ems-neutral-900);
+}
+.auth-otp-validity__note {
+    flex-basis: 100%;
+}
+.auth-otp-validity.is-expired {
+    background: var(--ems-danger-100);
+    border-color: var(--ems-danger-200);
+    color: var(--ems-danger-700);
+}
+.auth-otp-validity.is-expired .auth-otp-validity__left strong {
+    color: var(--ems-danger-700);
+}
+.auth-link-btn:disabled {
+    color: var(--ems-neutral-500);
+    cursor: not-allowed;
+    text-decoration: none;
+}

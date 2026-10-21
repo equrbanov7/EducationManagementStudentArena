@@ -8,16 +8,15 @@ or account-recovery flow.
 from django import forms
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import SetPasswordForm
-from django.utils import timezone
 from django.utils.functional import lazy
 from django.utils.translation import pgettext_lazy
 
 from apps.accounts.identity import user_access_is_login_blocked
 from apps.accounts.models import EmailOTP
-from core.utils import get_auth_otp_max_attempts
 
 from ..password_policy import help_text as _password_help_text
-from ..services import verify_otp_code
+from ..services import verify_email_otp
+from ..services.otp_messages import otp_failure_message
 
 # Sahib 2026-10-15 «sadə parol»: yeni parol sahəsinin altındakı ipucu siyasətin özündən (hədd işləmə vaxtında oxunur).
 _PASSWORD_HELP = lazy(_password_help_text, str)()
@@ -107,10 +106,18 @@ class OTPPasswordResetConfirmForm(SetPasswordForm):
 
     def clean_otp_code(self):
         candidate = (self.cleaned_data.get("otp_code") or "").strip()
-        success, otp = verify_otp_code(self.user, candidate, purpose=EmailOTP.Purpose.PASSWORD_RESET)
-        if not success or otp is None:
-            raise forms.ValidationError(pgettext_lazy("accounts.form.password_reset_otp.error", "otp_invalid"))
-        self.matched_otp = otp
+        # Sahib 2026-10-21: kod yalnız YOXLANIR (consume=False) — parol validatoru sonra yıxılsa kod «yanmır»;
+        # işlətmə ``save()``-dədir. Xəta mətni səbəbə görədir («səhvdir» / «vaxtı keçib» / «əvəzlənib»).
+        result = verify_email_otp(
+            email=getattr(self.user, "email", ""),
+            code=candidate,
+            user=self.user,
+            purpose=EmailOTP.Purpose.PASSWORD_RESET,
+            consume=False,
+        )
+        if not result.success or result.otp is None:
+            raise forms.ValidationError(otp_failure_message(result), code=result.reason or "otp_invalid")
+        self.matched_otp = result.otp
         return candidate
 
     def save(self, commit=True):
@@ -204,9 +211,10 @@ class OTPPasswordResetCodeForm(forms.Form):
             self.add_error("new_password2", self.error_messages["password_mismatch"])
             return cleaned_data
 
-        matched_otp = self._get_valid_otp(email=email, code=otp_code)
+        result = verify_email_otp(email=email, code=otp_code, purpose=EmailOTP.Purpose.PASSWORD_RESET, consume=False)
+        matched_otp = result.otp if result.success else None
         if matched_otp is None:
-            self.add_error("otp_code", self.error_messages["otp_invalid"])
+            self.add_error("otp_code", otp_failure_message(result))
             return cleaned_data
 
         # R-8: ``has_usable_password()`` QƏSDƏN yoxlanmır — köçürülmüş hesabın
@@ -228,34 +236,6 @@ class OTPPasswordResetCodeForm(forms.Form):
         self.user = user
         self.matched_otp = matched_otp
         return cleaned_data
-
-    def _get_valid_otp(self, *, email, code):
-        pending = list(
-            EmailOTP.pending_queryset(
-                email=email,
-                purpose=EmailOTP.Purpose.PASSWORD_RESET,
-            )
-            .select_related("user")
-            .order_by("-created_at")[:10]
-        )
-        latest = pending[0] if pending else None
-        if latest is None:
-            return None
-
-        if latest.is_expired():
-            latest.invalidate()
-            return None
-
-        if int(latest.attempts_count or 0) >= get_auth_otp_max_attempts():
-            latest.invalidate()
-            return None
-
-        matched = next((otp for otp in pending if otp.expires_at >= timezone.now() and otp.matches_code(code)), None)
-        if matched is None:
-            latest.register_failed_attempt()
-            return None
-
-        return matched
 
     def save(self, commit=True):
         if self.user is None:
