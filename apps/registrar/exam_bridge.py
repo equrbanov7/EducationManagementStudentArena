@@ -229,7 +229,11 @@ def exam_eligibility_batch(*, student, subject_ids, organization) -> dict:
 
 def _to_exam_scale(percent, scheme) -> int:
     """Xam faiz (0–100) → fənnin imtahan şkalası (0..exam_score_max), TAM ədəd."""
-    cap = finals.exam_score_max(scheme)  # adətən 50
+    return scale_percent(percent, finals.exam_score_max(scheme))  # tavan adətən 50
+
+
+def scale_percent(percent, cap) -> int:
+    """Xam faiz (0–100) → ``0..cap`` TAM bal, ROUND_HALF_UP — yekun və midterm körpüsünün ORTAQ qaydası."""
     try:
         pct = Decimal(str(percent or 0))
     except (TypeError, ValueError):

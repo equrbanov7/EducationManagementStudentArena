@@ -16,6 +16,12 @@ qalığı (nəzəri hal) oxu-rejimli əlavə sütun kimi görünür.
         {% trans "Kollokvium bal-yazma aralığını İmtahan Mərkəzi təyin edir. Pəncərə açıq olduqca balı sərbəst yaza/dəyişə bilərsiniz; bağlanandan sonra kilidlənir. Boş buraxılan bal 0 sayılır." context "registrar.journal" %}
         {% endif %}
     </p>
+    {% if kollokvium_grid.any_auto %}
+    <p class="jd2-panel-hint jd2-kwin-note jd2-auto-note">
+        <i class="fas fa-robot"></i>
+        {% trans "Test formatında keçirilən midterm balı imtahandan avtomatik yazılır və burada əl ilə dəyişdirilmir. Düzəliş yalnız apellyasiya və ya sənədli düzəliş ilə mümkündür." context "registrar.journal" %}
+    </p>
+    {% endif %}
 
     <div class="journal-grid-wrap jd2-grid-wrap" data-journal-grid>
         <table class="jd2-table" data-jd-hint>
@@ -67,7 +73,7 @@ qalığı (nəzəri hal) oxu-rejimli əlavə sütun kimi görünür.
                                 data-cm-score="{% if cell.score is not None %}{{ cell.score|floatformat:'-2' }}{% endif %}"
                                 {% if cell.corrected %}data-history="{{ cell.corr_key }}"{% endif %}>
                             {% if cell.score is not None %}{{ cell.score|floatformat:'-2' }}{% else %}—{% endif %}{% if cell.corrected %}<span class="corr-fixed-badge">✎</span>{% endif %}
-                        </button>
+                        </button>{% if cell.auto %}{% include "registrar/partials/_jd_midterm_auto_badge.html" with source=cell.auto %}{% endif %}
                         {% elif can_edit and cell.editable %}
                         <div class="bootstrap-single-select jd2-semselect jd2-kselect">
                             <select class="bootstrap-single-select__native jd2-semnative" data-bootstrap-select data-jd-kscore
@@ -79,7 +85,7 @@ qalığı (nəzəri hal) oxu-rejimli əlavə sütun kimi görünür.
                             </select>
                         </div>
                         {% else %}
-                        <span class="jd2-ro {% if cell.score is not None %}jd2-ro--ie{% else %}jd2-ro--empty{% endif %}{% if cell.corrected %} corr-fixed{% endif %}">{% if cell.score is not None %}{{ cell.score|floatformat:'-2' }}{% else %}—{% endif %}{% if cell.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ cell.corr_key }}" data-corr-type="component" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% endif %}</span>
+                        {% if cell.auto %}<span class="jd2-auto-cell">{% endif %}<span class="jd2-ro {% if cell.score is not None %}jd2-ro--ie{% else %}jd2-ro--empty{% endif %}{% if cell.corrected %} corr-fixed{% endif %}">{% if cell.score is not None %}{{ cell.score|floatformat:'-2' }}{% else %}—{% endif %}{% if cell.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ cell.corr_key }}" data-corr-type="component" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% endif %}</span>{% if cell.auto %}{% include "registrar/partials/_jd_midterm_auto_badge.html" with source=cell.auto %}</span>{% endif %}
                         {% endif %}
                     </td>
                     {% endfor %}

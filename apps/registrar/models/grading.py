@@ -343,6 +343,10 @@ class ComponentScore(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedMod
     entered_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
+    #: Sahib 2026-10-21: test formatlı midterm cəhdindən AVTOMATİK yazılmış balın mənbəyi
+    #: (``{"attempt_id", "exam_id", "exam_title", "exam_slug", "percent"}``); NULL = əl ilə yazılıb.
+    #: Dolu olan xananı müəllim / generic yazı yolları dəyişmir (``midterm_bridge``).
+    exam_source = models.JSONField(null=True, blank=True, editable=False)
 
     objects = models.Manager()
 

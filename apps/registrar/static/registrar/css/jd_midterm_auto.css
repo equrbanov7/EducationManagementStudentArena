@@ -1,0 +1,11 @@
+/* Midterm balı test imtahanından AVTOMATİK (sahib 2026-10-21) — müəllimə oxu-rejimli xana + mənbə nişanı. */
+.jd2-auto-cell { display: inline-flex; align-items: center; gap: 4px; }
+.jd2-auto-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 999px;
+    background: #ede9fe; color: #6d28d9; font-size: 9px; text-decoration: none;
+}
+a.jd2-auto-badge:hover, a.jd2-auto-badge:focus-visible { background: #ddd6fe; color: #5b21b6; outline: none; }
+.jd2-auto-note { background: #f5f3ff; color: #5b21b6; border-color: #ddd6fe; }
+.jd2-auto-note i { color: #6d28d9; }
+

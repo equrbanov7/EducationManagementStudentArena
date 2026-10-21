@@ -387,6 +387,15 @@ def save_component_scores(
                     )
                 continue
             existing = state.get(target)
+            if existing is not None and existing.exam_source:
+                # Sahib 2026-10-21: test midterm balı imtahandan AVTOMATİKDİR — müəllim / generic yol dəyişmir
+                # (düzəliş yalnız apellyasiya / sənədli düzəliş ilə, bax ``midterm_bridge``).
+                if require_all:
+                    raise ValidationError(
+                        "Midterm balı imtahandan avtomatik yazılıb — əl ilə dəyişmək olmaz.",
+                        code="component_score_batch_rejected",
+                    )
+                continue
             if (
                 not bypass_edit_window
                 and existing is not None

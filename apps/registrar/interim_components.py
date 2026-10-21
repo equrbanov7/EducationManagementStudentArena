@@ -229,8 +229,12 @@ def get_kollokvium_grid(offering):
 
     enrollments = read_memo.enrolled_roster(offering)  # jurnal GET-də tablar arasında bir sorğu (PERF-1 F-06)
     score_map = {}
+    # Sahib 2026-10-21: test midterm cəhdindən avtomatik yazılmış xana (``exam_source``) müəllimə OXU-rejimlidir.
+    auto_map = {}
     for cs in ComponentScore.objects.filter(component__in=components, enrollment__offering=offering):
         score_map[(cs.enrollment_id, cs.component_id)] = cs.score
+        if cs.exam_source:
+            auto_map[(cs.enrollment_id, cs.component_id)] = cs.exam_source
     rows = [
         {
             "enrollment": e,
@@ -239,7 +243,8 @@ def get_kollokvium_grid(offering):
                 {
                     "component": c,
                     "score": score_map.get((e.id, c.id)),
-                    "editable": open_by_comp[c.id],
+                    "editable": open_by_comp[c.id] and (e.id, c.id) not in auto_map,
+                    "auto": auto_map.get((e.id, c.id)),
                 }
                 for c in components
             ],
@@ -252,6 +257,7 @@ def get_kollokvium_grid(offering):
         "columns": columns,
         "rows": rows,
         "any_open": any(col["open"] for col in columns),
+        "any_auto": bool(auto_map),
         # «CƏMİ» sütunu yalnız bir neçə sütun olanda mənalıdır (kollokvium: /30).
         "show_total": len(columns) > 1,
         "total_max": sum(int(c.max_score) for c in components),
