@@ -11,6 +11,11 @@ Həmin kohort üçün plan yoxdursa (və ya qəbul ili bilinmirsə) ixtisasın �
 (``-admission_year, -version``) və semestr açılışında xəbərdarlıq verilir:
 «Bu qəbul ili üçün təsdiqlənmiş plan yoxdur — ən son plan tətbiq olundu».
 
+Rəy 2026-10-21 (R06): «Semestr açılışı» ekranında ən son plan YALNIZ istifadəçinin açıq təsdiqi ilə tətbiq
+olunur — əməl əvvəlcə önizləmə verir (qrup, qəbul ili, tətbiq olunacaq plan + ili), təsdiqlənməyən qrup
+atlanır (``semester_open.generate_offerings(confirmed_fallbacks=…)``, qapı serverdədir). Dərs yükü
+(``workload.services.generation``) hələ köhnə qayda ilə (xəbərdarlıqla) işləyir.
+
 İSTEHLAKÇILAR: ``semester_open.generate_offerings`` (açılış), ``plan_hours.plan_hours_for_offering``
 (sillabus saatı), ``workload.services.generation`` (dərs yükü tapşırığı — kohort semestr nömrəsindən: tədris
 ilinin başlanğıcı − ``ceil(N/2)`` + 1). Fərdi tədris planı (``individual_plan``) tələbənin ÖZ
@@ -93,14 +98,25 @@ def plan_index_for(organization, program) -> PlanIndex:
 
 
 def fallback_item(program, group, year, plan, status) -> dict:
+    """Ən son plana düşən qrupun sətri — önizləmə (təsdiq siyahısı), nəticə və audit üçün (JSON-safe)."""
     return {
         "program": program.display_label,
         "group": group.name,
         "group_id": str(group.pk),
         "admission_year": year or 0,
+        "plan_id": str(plan.pk) if plan is not None else "",
+        "plan_label": (plan.name or f"{program.display_label} {plan.admission_year}") if plan is not None else "",
+        "plan_version": int(getattr(plan, "version", 0) or 0) if plan is not None else 0,
         "plan_year": int(plan.admission_year) if plan is not None else 0,
         "reason": status,
+        "reason_label": fallback_reason_label(status),
     }
+
+
+def fallback_reason_label(status) -> str:
+    if status == FALLBACK_UNKNOWN_YEAR:
+        return pgettext(_CTX, "Qrupun qəbul ili bilinmir")
+    return pgettext(_CTX, "Bu qəbul ili üçün təsdiqlənmiş plan yoxdur")
 
 
 def semester_label(program, year, semester) -> str:
@@ -136,6 +152,20 @@ def fallback_messages(items) -> list:
             % {"groups": _names(unknown)}
         )
     return messages
+
+
+def skipped_fallback_messages(items) -> list:
+    """Rəy 2026-10-21 (R06): ən son plana düşən, amma TƏSDİQLƏNMƏYƏN qruplar — açılış yaradılmadı."""
+    if not items:
+        return []
+    return [
+        pgettext(
+            _CTX,
+            "Ən son planın tətbiqi təsdiqlənmədiyi üçün %(n)d qrup atlandı (açılış yaradılmadı): %(groups)s. "
+            "Lazımdırsa qrupun qəbul ili üçün planı təsdiqləyin və ya açılışı yenidən təsdiqlə başladın.",
+        )
+        % {"n": len({item["group_id"] for item in items}), "groups": _names(items)}
+    ]
 
 
 # ── Dövr üzrə xəbərdarlıqlar (semestr açılışı ekranı) ────────────────────────
@@ -274,9 +304,11 @@ __all__ = [
     "cohort_for_semester",
     "fallback_item",
     "fallback_messages",
+    "fallback_reason_label",
     "group_cohort_year",
     "period_cohort_warnings",
     "plan_index_for",
     "semester_label",
     "semester_number_for",
+    "skipped_fallback_messages",
 ]

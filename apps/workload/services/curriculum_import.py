@@ -1,18 +1,15 @@
 """Tədris planından sətir təklifi (spec §7, NK №348 zənciri).
 
-⚠️ MÖVCUD SXEMİN HƏQİQƏTİ (2026-09 auditi): ``registrar.CurriculumSubject``-də
-NƏ kredit, NƏ saat sütunu var — plan sətri yalnız ``subject`` + ``semester_number``
-+ seçmə blok məlumatını daşıyır. Ona görə idxal DEQRADASİYA İLƏ işləyir:
+Kredit (R01, 2026-10-21): plan sətrinin ÖZ krediti (``CurriculumSubject.credits`` > 0), yoxdursa fənn
+kataloqunun ``Subject.ects``-i — qayda registrar-ın YEGANƏ həlledicisindədir
+(``registrar.public.credit_source.plan_row_credit``; tələbə krediti də oradan oxunur).
 
-* kredit ``Subject.ects``-dən götürülür (fənn kataloqunun dəyəri);
+* kredit — yuxarıdakı qayda;
 * saat TƏKLİF olunur: ``credits × 30`` (1 kredit = 30 saat ümumi tədris yükü)
   — bu KONTAKT saatı DEYİL, ona görə ``suggested_total_hours`` ayrıca sahədə
   qaytarılır və sətrə AVTOMATİK yazılmır: kafedra mühazirə/seminar/lab bölgüsünü
   özü doldurur;
 * fəsil semestr nömrəsinin paritetindən təklif olunur (tək → Payız, cüt → Yaz).
-
-``CurriculumSubject``-ə kredit/saat sütunları əlavə olunanda burada YALNIZ
-``_credits_for`` dəyişir (çağıran səth eyni qalır).
 """
 
 from __future__ import annotations
@@ -45,13 +42,10 @@ def chair_specialty_ids(organization, chair) -> list:
 
 
 def _credits_for(plan_row) -> int:
-    """Kredit dəyəri — plan sətrində sütun yoxdursa fənn kataloqundan."""
-    for attribute in ("credits", "ects", "credit_value"):
-        value = getattr(plan_row, attribute, None)
-        if value:
-            return int(value)
-    subject = getattr(plan_row, "subject", None)
-    return int(getattr(subject, "ects", 0) or 0)
+    """Kredit dəyəri — plan sətrinin krediti (> 0), yoxdursa fənn kataloqundan (``credit_source.plan_row_credit``)."""
+    from apps.registrar.public import credit_source
+
+    return credit_source.plan_row_credit(plan_row)
 
 
 def curriculum_row_suggestions(*, organization, chair, limit: int = 200) -> list[dict]:

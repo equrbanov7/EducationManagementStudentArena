@@ -556,7 +556,9 @@ class SemesterOpeningTest(Stage2BaseTest):
         return self._client(role).post(reverse("registrar:semester_action"), payload)
 
     def _approved_plan(self):
-        plan = self._plan(status=PlanStatus.APPROVED)
+        # Rəy 2026-10-21 (R06): plan qrupun ÖZ qəbul ili (2024) üçündür — ən son plana düşmə (fallback) yalnız
+        # açıq təsdiqlə olur və ayrıca test olunur (registrar/tests/test_review_2026_10_21_cohort_fallback_confirm).
+        plan = self._plan(status=PlanStatus.APPROVED, year=2024)
         self._balanced_row(plan, self.subject, semester=1, credits=15)
         self._balanced_row(plan, self.subject_b, semester=1, credits=15)
         return plan

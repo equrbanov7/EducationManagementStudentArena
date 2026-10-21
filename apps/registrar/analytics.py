@@ -20,11 +20,12 @@ from decimal import ROUND_HALF_UP, Decimal
 from django.db.models import Count, DecimalField, F, Sum
 from django.db.models.functions import Cast, Least
 
-from apps.registrar import entry_standard, exam_eligibility, finals, gradebook
+from apps.registrar import credit_source, entry_standard, exam_eligibility, finals, gradebook
 from apps.registrar.models import (
     AssessmentComponent,
     AssessmentScheme,
     ComponentScore,
+    CourseOffering,
     FinalGrade,
     LessonMark,
     ResitRecord,
@@ -157,13 +158,26 @@ def _resit_map(enrollment_ids):
     }
 
 
-def _record_map(organization, student_ids):
-    return {
-        r.student_id: r
-        for r in StudentAcademicRecord.objects.filter(
-            organization=organization, student_id__in=student_ids
-        ).select_related("program", "group")
-    }
+def _records(organization, student_ids) -> list:
+    return list(
+        StudentAcademicRecord.objects.filter(organization=organization, student_id__in=student_ids).select_related(
+            "program", "group"
+        )
+    )
+
+
+def _record_map(organization, student_ids, records=None):
+    records = _records(organization, student_ids) if records is None else records
+    return {r.student_id: r for r in records}
+
+
+def _credit_resolver(records, offering_ids, offerings=None):
+    """Tələbənin fənn krediti (plan → kataloq, :mod:`credit_source`) — qeydlər hazırdır, +1 sorğu (plan sətirləri)."""
+    if offerings is not None:
+        subject_ids = {o.subject_id for o in offerings}
+    else:
+        subject_ids = CourseOffering.objects.filter(id__in=offering_ids).values("subject_id")
+    return credit_source.resolver_from_records(records, subject_ids=subject_ids)
 
 
 # ── Per-enrollment result (mirrors finals.compute_final_result) ─────────────
@@ -264,7 +278,12 @@ def _evaluate(enrollment, maps):
         # Görünən sahələr də resolver-dən — çağıran heç nə yenidən hesablamır.
         "attendance_score": eligibility["attendance_score"],
         "exempt": eligibility["exempt"],
-        "credit": int(getattr(offering.subject, "ects", 0) or 0),
+        # R01 (2026-10-21): tələbənin TƏDRİS PLANI krediti (fənn + semestr), yoxdursa kataloq — ``credit_source``.
+        "credit": (
+            maps["credits"].for_enrollment(enrollment)
+            if maps.get("credits") is not None
+            else int(getattr(offering.subject, "ects", 0) or 0)
+        ),
         "absence_hours": enrollment.absence_hours or 0,
         "lesson_hours": lesson_hours,
     }
@@ -416,6 +435,7 @@ def build_evaluation_maps_for(organization, *, enrollment_ids, offering_ids, stu
     activity_bits = (
         entry_standard.activity_bits_map(midterm_offerings) if rule_flags.activity_split and midterm_offerings else {}
     )
+    records = _records(organization, student_ids)
     return {
         "schemes": _scheme_map(offering_ids),
         # Buraxılış statusu DONDURULMUŞ açılışlar (tarixi/köçürülmüş + bağlı
@@ -435,7 +455,8 @@ def build_evaluation_maps_for(organization, *, enrollment_ids, offering_ids, stu
         "lesson_totals": _lesson_sum_map(enrollment_ids),
         "exams": _exam_map(enrollment_ids),
         "resits": _resit_map(enrollment_ids),
-        "records": _record_map(organization, student_ids),
+        "records": _record_map(organization, student_ids, records),
+        "credits": _credit_resolver(records, offering_ids, offerings),
         "organization": organization,  # U17: tenant hərf şkalası
     }
 

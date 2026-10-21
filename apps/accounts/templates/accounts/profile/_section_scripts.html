@@ -236,7 +236,11 @@ yaratma/redaktə dialoqunu aça bilmirdi.{% endcomment %}
 seçimini, dialoq doldurulmasını və JSON POST-u idarə edir (EMSReady/EMSDelegate,
 `[data-tof-root]` yoxdursa heç nə etmir).{% endcomment %}
 {% if 'org-structure-tree' in asset_sections or 'chair-profile' in asset_sections or 'programs-registry' in asset_sections or 'subject-catalog' in asset_sections or 'curriculum-editor' in asset_sections or 'groups-registry' in asset_sections or 'semester-opening' in asset_sections or 'workload-center' in asset_sections or 'workload-visa' in asset_sections or 'workload-approval' in asset_sections or 'workload-overview' in asset_sections or 'my-workload' in asset_sections or 'workload-distribution' in asset_sections or 'org-faculties' in asset_sections or 'org-kafedras' in asset_sections or 'teaching-handover' in asset_sections or 'superadmin-exam-rooms' in asset_sections or 'lessons-log' in asset_sections or 'audit-log' in asset_sections %}
-<script src="{% static 'accounts/js/profile/teaching_office.js' %}?v=20261019-tofix"></script>
+<script src="{% static 'accounts/js/profile/teaching_office.js' %}?v=20261021-fallback"></script>
+{% endif %}
+{% comment %}Rəy 2026-10-21 (R06): «Plandan açılış yarat» — ən son planın təsdiq siyahısı (409 önizləməsi).{% endcomment %}
+{% if 'semester-opening' in asset_sections %}
+<script src="{% static 'accounts/js/profile/semester_fallback_confirm.js' %}?v=20261021-1"></script>
 {% endif %}
 {% if 'programs-registry' in asset_sections %}
 {% comment %}«İxtisas haqqında» çekmecəsi — YALNIZ oxu (registrar:program_detail).{% endcomment %}

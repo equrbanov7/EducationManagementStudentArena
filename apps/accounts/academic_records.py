@@ -255,7 +255,7 @@ def _load_enrollments(organization, enrollment_qs):
         o.id: o
         for o in CourseOffering.objects.filter(id__in=enrollment_qs.order_by().values("offering_id"))
         .select_related("subject")
-        .only("id", "lesson_hours", "subject__ects")
+        .only("id", "lesson_hours", "subject__ects", "period")
     }
     enrollments = list(enrollment_qs.only("id", "student_id", "offering_id", "absence_hours"))
     for enrollment in enrollments:

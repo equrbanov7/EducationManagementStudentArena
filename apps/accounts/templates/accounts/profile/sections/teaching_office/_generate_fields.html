@@ -3,7 +3,13 @@
 
 İxtisas seçimi ÇOXLU seçicidir (`name="programs"` — server `getlist` oxuyur);
 boş buraxılsa BÜTÜN aktiv ixtisaslar götürülür. «Plan yoxdur» olanlar server
-tərəfdə atlanır və nəticədə adları qaytarılır.{% endcomment %}
+tərəfdə atlanır və nəticədə adları qaytarılır.
+
+Rəy 2026-10-21 (R06): qəbul ili üçün planı olmayan qruplara ən son plan YALNIZ açıq təsdiqlə tətbiq
+olunur. İlk göndərişdə server heç nə yazmadan siyahını qaytarır (409 `fallback_confirmation_required`);
+`semester_fallback_confirm.js` onu aşağıdakı bloka çəkir (hər qrup üçün «Təsdiq edirəm» + «Hamısını
+təsdiqlə»), `fallback_reviewed=1` qoyur və ikinci göndərişdə yalnız işarələnən qruplar açılır.
+Təsdiqlənməyən qrup serverdə atlanır — qapı yalnız kliyentdə deyil.{% endcomment %}
 <div class="tof-form">
     <div class="ems-field">
         <label class="ems-field__label" for="tof-gn-sem">{% trans "Planın neçənci semestri?" context "accounts.semester" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
@@ -21,5 +27,27 @@ tərəfdə atlanır və nəticədə adları qaytarılır.{% endcomment %}
             {% endfor %}
         </select>
         <p class="ems-field__hint" id="tof-gn-programs-hint">{% trans "Boş buraxılsa bütün aktiv ixtisaslar götürülür; təsdiqlənmiş planı olmayanlar atlanır." context "accounts.semester" %}</p>
+    </div>
+    <input type="hidden" name="fallback_reviewed" value="">
+    <div class="ems-field tof-form__full tof-fallback" data-tof-fallback-confirm hidden
+         data-label-group="{% trans 'Qrup' context 'accounts.semester' %}"
+         data-label-year="{% trans 'Qəbul ili' context 'accounts.semester' %}"
+         data-label-reason="{% trans 'Səbəb' context 'accounts.semester' %}"
+         data-label-plan="{% trans 'Tətbiq olunacaq plan' context 'accounts.semester' %}"
+         data-label-plan-year="{% trans 'Planın qəbul ili' context 'accounts.semester' %}"
+         data-label-confirm="{% trans 'Təsdiq edirəm' context 'accounts.semester' %}"
+         data-label-unknown="{% trans 'bilinmir' context 'accounts.semester' %}">
+        <p class="ems-msg ems-msg--warning tof-fallback__intro" data-tof-fallback-message role="status"></p>
+        <label class="tof-fallback__all">
+            <input type="checkbox" data-tof-fallback-all>
+            {% trans "Hamısını təsdiq edirəm" context "accounts.semester" %}
+        </label>
+        <div class="tof-fallback__scroll">
+            <table class="ems-table ems-table--zebra tof-fallback__table">
+                <thead data-tof-fallback-head></thead>
+                <tbody data-tof-fallback-rows></tbody>
+            </table>
+        </div>
+        <p class="ems-field__hint">{% trans "Təsdiqlənməyən qrup üçün açılış yaradılmır və nəticədə adı ilə göstərilir. Semestr və ya ixtisas dəyişsə siyahı yenidən yoxlanılır." context "accounts.semester" %}</p>
     </div>
 </div>

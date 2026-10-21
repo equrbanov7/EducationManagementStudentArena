@@ -339,3 +339,45 @@
 .tof-fact__value--name {
     font-size: 1rem;
 }
+
+/* «Plandan açılış yarat» — ən son planın təsdiq siyahısı (rəy 2026-10-21, R06; semester_fallback_confirm.js). */
+.tof-fallback[hidden] {
+    display: none;
+}
+
+.tof-fallback {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2, 8px);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg, 14px);
+    padding: var(--ems-pad-card, 16px);
+}
+
+.tof-fallback__intro {
+    margin: 0;
+}
+
+.tof-fallback__all,
+.tof-fallback__pick {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: var(--ems-text);
+    cursor: pointer;
+}
+
+.tof-fallback__pick {
+    font-weight: 400;
+    white-space: nowrap;
+}
+
+.tof-fallback__scroll {
+    max-height: 280px;
+    overflow: auto;
+}
+
+.tof-fallback__table {
+    width: 100%;
+}

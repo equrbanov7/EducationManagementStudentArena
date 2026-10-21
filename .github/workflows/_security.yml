@@ -118,6 +118,9 @@ jobs:
           DEBUG: "False"
           ALLOWED_HOSTS: "localhost,127.0.0.1"
           ADMIN_ALLOWED_IPS: "127.0.0.1"
+          # verification.E001 (2026-10-21): the QR verify base must be a public https URL —
+          # production's SITE_URL default (https://127.0.0.1) intentionally fails the deploy check.
+          DOCUMENT_VERIFY_BASE_URL: "https://ems-ci.example.org"
           # The owner channel provisions a restricted runtime role below; the
           # deployment check itself must fail if that split regresses.
           EMS_DB_ROLE_ENFORCE: "error"

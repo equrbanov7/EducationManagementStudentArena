@@ -62,7 +62,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from django.db.models import Count, DecimalField, F, IntegerField, Q, Sum, TextField, Value
 from django.db.models.functions import Cast, Least
 
-from apps.registrar import analytics, entry_standard, exam_eligibility, selfwork_points
+from apps.registrar import analytics, credit_source, entry_standard, exam_eligibility, selfwork_points
 from apps.registrar.models import (
     AssessmentComponent,
     AssessmentScheme,
@@ -225,7 +225,8 @@ def _offering_info(offering_ids, *, midterm=False, with_bits=False) -> tuple[dic
 
     Demət: ``(entry_max, pass_threshold, min_exam, komponentlidir?,
     auditoriya_saatı, kredit, donmuşdur?, offering_id, group_id, qrup_adı,
-    fənn_adı, fənn_şifri, sərbəst_iş_komponenti_var?, seminar/lab maskası)``.  ``midterm`` — dövr Midterm
+    fənn_adı, fənn_şifri, sərbəst_iş_komponenti_var?, seminar/lab maskası, fənn_id)``. ``kredit`` KATALOQ
+    dəyəridir — tələbənin plan krediti dövrə (R01) :mod:`credit_source` ilə döngüdə həll olunur.  ``midterm`` — dövr Midterm
     rejimindədir (:mod:`apps.registrar.entry_standard`): dərs balları bütün açılışlar üçün oxunur.
     ``with_bits`` — 5 + 5 aktivlik üçün açılışın maskası EYNİ açılış sorğusunda (sahib 2026-10-10; əlavə sorğu yox).
 
@@ -252,6 +253,7 @@ def _offering_info(offering_ids, *, midterm=False, with_bits=False) -> tuple[dic
             "group_id",
             "group__name",
             "ems_activity_bits",
+            "subject_id",
         )
     )
     if not rows:
@@ -280,7 +282,18 @@ def _offering_info(offering_ids, *, midterm=False, with_bits=False) -> tuple[dic
 
     info: dict = {}
     lesson_source_ids: list = []
-    for offering_id, key, lesson_hours, ects, subject_name, subject_code, group_id, group_name, activity_bits in rows:
+    for (
+        offering_id,
+        key,
+        lesson_hours,
+        ects,
+        subject_name,
+        subject_code,
+        group_id,
+        group_name,
+        activity_bits,
+        subject_id,
+    ) in rows:
         entry_max, pass_threshold, min_exam = schemes.get(key, _DEFAULT_SCHEME)
         # ``exam_eligibility.lesson_hours_for`` güzgüsü: kanonik saat 0/None
         # olduqda açılışın bütün dərslərinin saat cəmi işlədilir.
@@ -305,6 +318,7 @@ def _offering_info(offering_ids, *, midterm=False, with_bits=False) -> tuple[dic
             subject_code,
             key in with_selfwork,
             int(activity_bits or 0),
+            subject_id,
         )
     return info, lesson_source_ids
 
@@ -345,6 +359,10 @@ def build_period_analytics(*, organization, period, scope_q=None) -> dict:
     exams = _exam_map(enrollment_ids)
     resits = _resit_map(enrollment_ids)
     records = _record_map(organization, flat.values("student_id"))
+    # R01: tələbənin plan krediti (fənn + semestr → kataloq) — 2 sabit sorğu, sətir başına lüğət axtarışı.
+    credits = credit_source.resolver_for_students(
+        organization, flat.values("student_id"), subject_ids={row[14] for row in info.values()}
+    )
 
     overall = analytics._Bucket("overall", "")
     programs: dict = {}
@@ -380,8 +398,10 @@ def build_period_analytics(*, organization, period, scope_q=None) -> dict:
             subject_code,
             has_selfwork,
             activity_bits,
+            subject_id,
         ) = info[offering_key]
         limit, exempt, program_id, program_name, program_code = records.get(student_key, _NO_RECORD)
+        credit = credits.credit(student_key, subject_id, period=period, catalogue=credit)
 
         # ── Giriş balı (gradebook.entry_score_for güzgüsü) ────────────────────
         totals = lesson_totals.get(enrollment_key)

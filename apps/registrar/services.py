@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from django.db import IntegrityError, transaction
 
-from . import exam_eligibility, journal_hygiene_guard
+from . import credit_source, exam_eligibility, journal_hygiene_guard
 from .integrity import (
     validate_group_elective_target,
     validate_offering_target,
@@ -244,12 +244,16 @@ def get_student_semester_enrollments(*, record, period):
 
 
 def get_credit_summary(*, record, today=None):
-    """Bologna ECTS graduation progress for a student's program.
+    """Bologna ECTS credit progress for a student's program.
 
     Earned = ECTS of **passed** subjects, in-progress = ECTS of not-yet-passed
     subjects in a period that has not ended; required = ``program.ects_total``.
-    ``can_graduate`` is True once earned ≥ required (mandatory-pass checks live
-    in the grading layer, U3).
+    Kredit hər fənn üçün tələbənin planından (fənn + semestr) → kataloq (R01, :mod:`credit_source`).
+
+    ⚠️ ``can_graduate`` (R02, 2026-10-21) — adı geriyə-uyğunluq üçün qalır, amma mənası YALNIZ «kredit
+    hədəfinə çatılıb» (earned ≥ required): məzuniyyət QƏRARI deyil (məcburi fənlər, yekun attestasiya, borclar
+    burada yoxlanılmır). UI onu «Kredit hədəfinə çatılıb» kimi göstərir; yeni kod ``credit_target_reached``
+    açarını oxusun.
 
     Kredit ``Enrollment.status``-dan DEYİL, qiymətlərdən oxunur — transkript
     qatı ilə eyni mənbədən, ona görə «Fənlərim» ECTS qutusu ilə «Ümumi tədris
@@ -274,6 +278,7 @@ def get_credit_summary(*, record, today=None):
         "remaining": remaining,
         "percent": percent,
         "can_graduate": required > 0 and earned >= required,
+        "credit_target_reached": required > 0 and earned >= required,
     }
 
 
@@ -327,6 +332,10 @@ def get_student_cabinet_data(*, record, period, semester_number):
     # Məxrəc fallback-ı da toplu (tək aqreqat sorğu) — 25,314 köçürülmüş
     # yazılışda ``lesson_hours=0`` olduğu üçün sətir-sətir oxumaq N+1 olardı.
     hours_map = exam_eligibility.lesson_hours_map(offering_ids)
+    # R01: fənnin krediti tələbənin planından (fənn + bu semestr), yoxdursa kataloq — TƏK sorğu, jurnal xülasəsi də oxuyur.
+    credits = credit_source.credits_for_offerings_and_curriculum(
+        [e.offering for e in plan["enrollments"]], record.curriculum_id, period=period
+    )
     subjects = []
     for enrollment in plan["enrollments"]:
         subject = enrollment.offering.subject
@@ -341,7 +350,7 @@ def get_student_cabinet_data(*, record, period, semester_number):
             {
                 "enrollment": enrollment,
                 "subject": subject,
-                "ects": subject.ects,
+                "ects": credits.get(enrollment.offering_id, subject.ects),
                 "kind": enrollment.kind,
                 "course": enrollment.offering.course,
                 "offering": enrollment.offering,
@@ -355,7 +364,12 @@ def get_student_cabinet_data(*, record, period, semester_number):
         "group_decisions": plan["group_decisions"],
         "credit_summary": get_credit_summary(record=record),
         # Eyni sorğunun toplu dəstləri — «Fənlərim» jurnal xülasəsi onları TƏKRAR oxumasın.
-        "batch_inputs": {"enrollments": plan["enrollments"], "hours_map": hours_map, "frozen_ids": frozen_ids},
+        "batch_inputs": {
+            "enrollments": plan["enrollments"],
+            "hours_map": hours_map,
+            "frozen_ids": frozen_ids,
+            "credits": credits,
+        },
     }
 
 

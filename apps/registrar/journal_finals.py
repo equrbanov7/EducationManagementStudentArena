@@ -24,6 +24,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import pgettext
 
 from . import exam_score_entry, finals, journal_scope
+from .audit_write import AuditWriteFailed, audit_failure_message
 
 _CTX = "registrar.journal_finals"
 
@@ -101,6 +102,8 @@ def handle_save_finals(request, offering):
             finals.set_resit_score(enrollment=enrollment, score=raw, by_user=request.user)
         except ValidationError as exc:
             errors.append((_student_label(enrollment), " ".join(exc.messages)))
+        except AuditWriteFailed:  # R08: sətrin savepoint-i geri qayıdıb — bal izsiz yazılmadı
+            errors.append((_student_label(enrollment), audit_failure_message()))
     # Bonus/cərimə + rəy (U15) — bal daxil edilməsindən SONRA yazılır ki,
     # evaluate_resit yekun vəziyyəti bonuslu total ilə görsün.
     for data in extras.values():
@@ -113,6 +116,8 @@ def handle_save_finals(request, offering):
             )
         except ValidationError as exc:
             errors.append((_student_label(data["enrollment"]), " ".join(exc.messages)))
+        except AuditWriteFailed:
+            errors.append((_student_label(data["enrollment"]), audit_failure_message()))
     _report(request, refused_scores=refused_scores, errors=errors)
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 

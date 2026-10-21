@@ -8,3 +8,7 @@ class VerificationConfig(AppConfig):
     name = "apps.verification"
     label = "verification"
     verbose_name = "Sənəd yoxlaması"
+
+    def ready(self):
+        # Deploy check-i: QR yoxlama ünvanının kökü boş / loopback / http olmasın (rəy 2026-10-21).
+        from . import checks  # noqa: F401

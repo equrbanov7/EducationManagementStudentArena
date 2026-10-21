@@ -1,11 +1,9 @@
 """«Müəllim — Sillabus redaktoru» bölməsinin CONTEXT MÜQAVİLƏSİ (dizayn §3.2).
 
-10 bölmə (``id``-lər dizayn paketi ilə EYNİ) profil shell-inin içində açılır —
-SOL SIDEBAR QALIR. Bölmələr bir dəfə render olunur, sol naviqasiya isə aktiv
-bölməni yalnız CSS ilə dəyişir (server round-trip yoxdur); autosave hər bölmə
-üçün ayrıca PATCH göndərir (``.api.syllabus_section_save``).
+10 bölmə (``id``-lər dizayn paketi ilə EYNİ) profil shell-inin içində açılır — SOL SIDEBAR QALIR. Bölmələr bir
+dəfə render olunur, sol naviqasiya aktiv bölməni yalnız CSS ilə dəyişir; autosave hər bölmə üçün ayrıca PATCH
+göndərir (``.api.syllabus_section_save``). Kredit — qrupun TƏDRİS PLANI (``credit_source``, R01) → kataloq.
 
-──────────────────────────────────────────────────────────────────────────────
 CONTEXT MÜQAVİLƏSİ — ``syllabus_editor_section`` (dict)
 ──────────────────────────────────────────────────────────────────────────────
     view_state   "normal" | "readonly" | "permission" | "missing"
@@ -30,6 +28,7 @@ from __future__ import annotations
 from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
+from apps.registrar.public import credit_source
 from apps.syllabus.public import (
     MIN_DESCRIPTION_CHARS,
     MIN_GOAL_CHARS,
@@ -295,7 +294,7 @@ def _locked_rows(syllabus, hours):
         # gələn RƏSMİ dəyəri göstərir, ona görə şifrsiz ad kifayət etmir.
         "program": syllabus.program.display_label if syllabus.program_id else "",
         "period": (f"{syllabus.period.year_display} · {syllabus.period.name}" if syllabus.period_id else ""),
-        "credit": str(subject.ects or ""),
+        "credit": str(hours.get("credit", subject.ects) or ""),
         "split": " · ".join(str(row["planned"]) for row in hours["rows"]) if hours["planned"] else "",
         "group": (syllabus.offering.group.name if syllabus.offering_id and syllabus.offering.group_id else ""),
     }
@@ -326,7 +325,7 @@ def _summary(*, syllabus, version, panels, completion, hours, selfwork_view, sec
     bad = "warning"
     return [
         {"label": _SUMMARY_LABELS["code"], "value": subject.code, "tone": "default"},
-        {"label": _SUMMARY_LABELS["credit"], "value": subject.ects, "tone": "default"},
+        {"label": _SUMMARY_LABELS["credit"], "value": hours.get("credit", subject.ects), "tone": "default"},
         {
             "label": _SUMMARY_LABELS["hours"],
             "value": str(_UNIT_HOURS) % {"count": hours["have"]},
@@ -491,6 +490,7 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
     week_rows = _week_rows(week_data, tags, plan_hours)
     hours = _hour_totals(week_rows, plan_hours)
     hours["has_plan"] = bool(plan_hours)
+    hours["credit"] = credit_source.plan_credit_for_offering(syllabus.offering) or syllabus.subject.ects
     # Əl ilə daxil edilən saat: forma həmişə görünür (seçilmiş dəyərlərlə) — sonradan düzəltmək olur.
     hours["manual"] = plan_manual and context["view_state"] == "normal"
     hours["options"] = PLAN_HOUR_OPTIONS
@@ -516,7 +516,7 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
                 "name": syllabus.subject.name,
                 "program": syllabus.program.display_label if syllabus.program_id else "",
                 "period": syllabus.period.year_display + " · " + syllabus.period.name if syllabus.period_id else "",
-                "credit": syllabus.subject.ects,
+                "credit": hours["credit"],
                 "status_key": version_row.status,
                 "status_label": SyllabusStatus(version_row.status).label,
                 "status_tone": STATUS_TONES.get(version_row.status, "neutral"),
