@@ -83,6 +83,7 @@ ki, gələcəkdə hər biri qəsdən və əsaslandırılmış qalsın.
 | `apps/ai_assistant/retention.py` | 1 | D — dövri log saxlama süpürgəsi (yalnız müddət üzrə DELETE) |
 | `apps/audit/views_filters.py` | 1 | C — superadmin audit görünüşü |
 | `apps/exams/management/commands/mark_exam_halls.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
+| `apps/exams/management/commands/purge_trial_exam.py` | 1 | C — idarə əmri (--org + dəqiq --slug + --expect-title; dry-run defolt, prod kill-switch-li) · 2026-10-21 |
 | `apps/exams/management/commands/seed_demo_hierarchy.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
 | `apps/exams/management/commands/seed_final_exam_demo.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
 | `apps/exams/management/commands/seed_group_demo_data.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |

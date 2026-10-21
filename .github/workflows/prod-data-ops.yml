@@ -74,6 +74,12 @@
 #       artıq paylanmış istifadəçi adları — parol yox). Parol YALNIZ siyahıda olmayan VƏ aktivləşməmiş hesablara;
 #       hesabat və yeni parollar şifrəli artifaktdadır, loga yalnız saylar düşür. `student-known-…` tag-ı (asset
 #       sətirləri `username<TAB>parol`) → OXUYAN tələbələr; siyahıdakı parol hash ilə yoxlanılır, uyğun deyilsə yenisi.
+#   purge_trial_exam — real olmayan SINAQ imtahanı (sahib 2026-10-21: «233IT ing üçün Cloud-dan sınaq midterm») hamıdan
+#       silir: `teacher` = imtahanın slug-ı (DƏQİQ, məs. cloud-computing-51K75E), `task_chair` = imtahanın adı (BƏRABƏR
+#       olmalıdır — təhlükəsizlik). Cəhdlər + cavablar, apellyasiyalar (+ qərar/sənəd), bilet/PIN, zal pozuntuları,
+#       imtahandan avtomatik yazılmış jurnal «Midterm» xanaları, bildirişlər silinir; imtahan yumşaq silinir; audit
+#       tarixçəsi qalır (+1 sətir). Final / append-only ledger (bal hadisəsi, 25% izi) / bağlı jurnal → RƏDD (heç nə
+#       yazılmır). Səbəb sabitdir. Loga YALNIZ bir sayların sətri düşür. İdempotent.
 #   shrink_avatars — mövcud avatarlar ≤512 px WebP-yə (PERF-2 H5, 2026-10-17); orijinal fayllar SİLİNMİR,
 #       `updated_at` dəyişmir. Loga yalnız yekun saylar.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
@@ -126,6 +132,7 @@ on:
           - archive_junk_groups
           - shrink_avatars
           - issue_staff_credentials
+          - purge_trial_exam
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -171,7 +178,7 @@ on:
         required: false
         default: "Proqramlaşdırma"
       task_chair:
-        description: "import_teaching_load_form1 / fix_task_row_hours: kafedra adı · resync_task_offerings: boş = bütün kafedralar"
+        description: "import_teaching_load_form1 / fix_task_row_hours: kafedra adı · resync_task_offerings: boş = bütün kafedralar · purge_trial_exam: imtahanın adı (təsdiq)"
         required: false
         default: ""
       row_group:
@@ -229,7 +236,7 @@ on:
         type: boolean
         default: false
       teacher:
-        description: "backfill_teacher_lessons: müəllimin istifadəçi adı (ad.soyad)"
+        description: "backfill_teacher_lessons: müəllimin istifadəçi adı (ad.soyad) · purge_trial_exam: imtahanın slug-ı"
         required: false
         default: ""
       date_from:
@@ -521,6 +528,20 @@ jobs:
               fi
               custom_apply=1
               ;;
+            purge_trial_exam)
+              # Sahib 2026-10-21: sınaq midterm-in silinməsi. `teacher` = slug (dəqiq), `task_chair` = imtahanın adı
+              # (əmr özü bərabərliyi yoxlayır). Yeni giriş yoxdur (25 limit) — mövcud girişlər təkrar istifadə olunur.
+              { [ "${#TEACHER}" -le 220 ] && match "$TEACHER" '^[a-z0-9_-]{0,200}-[A-Za-z0-9]{6}$'; } \
+                || { echo "teacher (imtahanın slug-ı) formatı: ad-XXXXXX" >&2; exit 2; }
+              { [ "${#TASK_CHAIR}" -le 120 ] && match "$TASK_CHAIR" '^[[:alnum:]ƏəIıİiĞğŞşÇçÖöÜü .()-]+$'; } \
+                || { echo "task_chair (imtahanın adı) formatı: hərf/rəqəm/boşluq" >&2; exit 2; }
+              # `--x=dəyər` forması: tamamilə qeyri-latın adlı imtahanın slug-ı «-XXXXXX» ola bilər (argparse onu bayraq sanmasın).
+              args=(--org "$ORG" "--slug=$TEACHER" "--expect-title=$TASK_CHAIR")
+              if [ "$APPLY" = "true" ]; then
+                args+=(--apply --reason "Sınaq midterm-in silinməsi — sahibin 2026-10-21 tapşırığı" --i-know-this-is-production)
+              fi
+              custom_apply=1
+              ;;
             *)
               echo "icazəsiz əmr: $COMMAND" >&2; exit 2
               ;;
@@ -546,6 +567,17 @@ jobs:
             grep -E '^staff_credentials: [a-z_]+=[0-9A-Z-]+( [a-z_]+=[0-9A-Z-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             test "${status:-0}" = 0 || { grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true; exit "$status"; }
+          elif [ "$COMMAND" = "purge_trial_exam" ]; then
+            # Loga YALNIZ sayların sətri (əmr şəxs adı çap etmir; yenə də süzülür) və rədd kodu.
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^trial_exam_purge: [a-z_]+=[0-9A-Z-]+( [a-z_]+=[0-9A-Z-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+(: [a-z_,]+)?' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
           elif [ "$COMMAND" = "reconcile_teacher_roster" ]; then
             # Hesabatda şəxs adları var → loga yalnız «Nümunələr»-ə qədərki saylar + paket id-si düşür;
             # tam hesabat/CSV şifrəli artifaktdadır (aşağıdakı addım).
