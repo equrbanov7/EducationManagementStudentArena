@@ -1,0 +1,26 @@
+{% load i18n %}
+{% comment %}Zal apellyasiyasının tam ekran qapısı (sahib 2026-10-21: «Appelyasiya zamanı da full screen açılsın»).
+Yalnız HƏMİN cəhdin aktiv zal sessiyasında render olunur (`hall_fullscreen`, apps/appeals/views/student/endpoints.py).
+JS: exams/js/hall_fullscreen/hall_fullscreen.js — tam ekran deyilsə örtük; çıxış pozuntu sayılmır, sorğu göndərilmir.{% endcomment %}
+<div class="hall-fs-root" data-hall-fullscreen="1">
+    <div class="hall-fs-gate" data-hall-fullscreen-overlay hidden
+         role="dialog" aria-modal="true" aria-labelledby="hallFsGateTitle">
+        <div class="hall-fs-gate__card">
+            <span class="hall-fs-gate__icon" aria-hidden="true"><i class="fas fa-expand"></i></span>
+            <div id="hallFsGateTitle">
+                <h2 class="hall-fs-gate__title" data-hall-fullscreen-when="start">{% trans "Apellyasiya tam ekranda verilir" context "appeals.template.hall_fullscreen" %}</h2>
+                <h2 class="hall-fs-gate__title" data-hall-fullscreen-when="exit" hidden>{% trans "Tam ekran rejimindən çıxdınız" context "appeals.template.hall_fullscreen" %}</h2>
+            </div>
+            <p class="hall-fs-gate__body" data-hall-fullscreen-when="start">{% trans "İmtahan zalında apellyasiya da imtahan kimi tam ekranda doldurulur. Davam etmək üçün düyməni basın." context "appeals.template.hall_fullscreen" %}</p>
+            <p class="hall-fs-gate__body" data-hall-fullscreen-when="exit" hidden>{% trans "İmtahan bitib — bu, pozuntu sayılmır. Apellyasiyanı tam ekranda davam etdirin." context "appeals.template.hall_fullscreen" %}</p>
+            <div class="hall-fs-gate__actions">
+                <button type="button" class="ems-btn ems-btn--primary" data-hall-fullscreen-enter>
+                    <i class="fas fa-expand" aria-hidden="true"></i>{% trans "Tam ekranda davam et" context "appeals.template.hall_fullscreen" %}
+                </button>
+                <button type="button" class="ems-btn hall-fs-gate__dismiss" data-hall-fullscreen-dismiss hidden>
+                    {% trans "İndilik bağla" context "appeals.template.hall_fullscreen" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

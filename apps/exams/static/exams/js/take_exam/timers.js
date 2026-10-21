@@ -139,7 +139,8 @@
         // qeyd edir və countdown-un SERVER qalığını qaytarır; local deadline onunla
         // əvəzlənir (devtools ilə uzatma, reload-da sıfırlanma aradan qalxır).
         syncQuestionTimerWithServer: function (ctx, slideElement) {
-            if (!ctx.questionSeenUrl || !window.fetch) {
+            // 2026-10-21: bloklu ikinci tab serverdə heç nə yazmır (sual taymerini də başlatmır).
+            if (!ctx.questionSeenUrl || !window.fetch || ctx.secondTabBlocked) {
                 return Promise.resolve(null);
             }
             var questionId = slideElement ? slideElement.getAttribute("data-question-id") : "";
@@ -285,6 +286,38 @@
             } else {
                 document.getElementById("timer-value").textContent = "00:00";
             }
+        },
+
+        // 409 `question_timer_not_started` (draft.js-dən köçürülüb, 2026-10-21): server start-ı
+        // təsdiqləyəndə dirty cavab qısa gecikmə ilə eyni revision-dan yenidən sınanır.
+        handleTimerNotStarted: function (ctx, data, action, options) {
+            ns.notifications.show(
+                data.message || gettext("Sual taymeri serverlə sinxronlaşmayıb; yenidən yoxlanılır."),
+                "error",
+                8000
+            );
+            ctx.hasUnsavedChanges = true;
+            ns.draft.persistLocalDraft(ctx);
+            var timerSlide = document.querySelector(
+                '.question-slide[data-question-id="' + String(data.question_id || "") + '"]'
+            );
+            return ns.timers.syncQuestionTimerWithServer(ctx, timerSlide).then(function (syncData) {
+                if (syncData && syncData.success) {
+                    if (action === "autosave") {
+                        ctx.autoSaveTimer = setTimeout(function () {
+                            ctx.autoSaveTimer = null;
+                            ns.draft.flushAutoSave(ctx);
+                        }, 500);
+                    } else {
+                        setTimeout(function () {
+                            ns.draft.sendDraft(ctx, action, options).catch(function () {});
+                        }, 500);
+                    }
+                } else {
+                    ns.draft.queueAutoSave(ctx);
+                }
+                throw new Error("question_timer_sync_required");
+            });
         },
 
         initVisibilityRefresh: function (ctx) {

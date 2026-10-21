@@ -64,6 +64,11 @@ urlpatterns = [
         views.exam_center_attempt_violations,
         name="exam_center_attempt_violations",
     ),
+    path(
+        "center/rooms/<int:room_id>/api/violations/feed/",
+        views.exam_center_room_violation_feed,
+        name="exam_center_room_violation_feed",
+    ),
     # İmtahan zalı bayrağı (qeyd et / çıxar) — AJAX, JSON (sahib 2026-10-01).
     path(
         "center/rooms/<int:room_id>/exam-hall/",
@@ -339,6 +344,11 @@ urlpatterns = [
         "<slug:slug>/attempt/<int:attempt_id>/question-seen/",
         views.question_seen,
         name="question_seen",
+    ),
+    path(
+        "<slug:slug>/attempt/<int:attempt_id>/answers-state/",
+        views.take_exam_answers_state,
+        name="take_exam_answers_state",
     ),
     # ==========================
     # SLUG - Teacher Question Bank

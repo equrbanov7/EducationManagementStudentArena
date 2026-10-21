@@ -26,6 +26,7 @@ from .room_monitor import (
     exam_center_room_snapshot,
     exam_center_room_start_all,
 )
+from .room_violations import exam_center_room_violation_feed
 from .rooms import exam_center_room_list
 from .sessions import (
     exam_center_session_detail,
@@ -66,6 +67,7 @@ __all__ = [
     "exam_center_room_end_all",
     "exam_center_room_open_all",
     "exam_center_room_snapshot",
+    "exam_center_room_violation_feed",
     "exam_center_attempt_violations",
     "exam_center_room_start_all",
     "exam_center_session_cancel",

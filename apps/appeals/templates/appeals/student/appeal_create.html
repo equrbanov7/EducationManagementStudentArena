@@ -30,6 +30,7 @@ Sıra: komponentlər → apellyasiya düzümü (part1 → part2 → part3).{% en
 <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part4.css' %}?v=20261020-mode">
 <link rel="stylesheet" href="{% static 'css/ems_ui/code_text.css' %}?v=20261020-appeal">
 <link rel="stylesheet" href="{% static 'appeals/css/appeals/appeal_mode.css' %}?v=20261021-hall">
+{% if hall_fullscreen %}<link rel="stylesheet" href="{% static 'exams/css/hall/hall_fullscreen.css' %}?v=20261021-appealfs">{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -439,8 +440,11 @@ Sıra: komponentlər → apellyasiya düzümü (part1 → part2 → part3).{% en
     </div>
     {% endif %}
 </div>
+{# 2026-10-21 (sahib): «Apellyasiya zamanı da full screen açılsın» — yalnız həmin cəhdin zal sessiyasında. #}
+{% if hall_fullscreen %}{% include "appeals/partials/_hall_fullscreen_gate.html" %}{% endif %}
 {% endblock %}
 
 {% block extraJs %}
 <script src="{% static 'appeals/js/appeals_form.js' %}?v=20260926-search"></script>
+{% if hall_fullscreen %}<script src="{% static 'exams/js/hall_fullscreen/hall_fullscreen.js' %}?v=20261021-appealfs"></script>{% endif %}
 {% endblock %}

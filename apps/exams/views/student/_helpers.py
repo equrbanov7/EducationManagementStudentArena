@@ -116,6 +116,8 @@ def autosave_occ_conflict_response(request, attempt, action):
 
     from apps.exams.metrics import record_autosave
 
+    from ._autosave_writer import center_owner_lease_held, conflict_reason, own_stale_write_allowed
+
     base_raw = (request.POST.get("autosave_revision") or "").strip()
     if not base_raw:
         return None
@@ -123,9 +125,14 @@ def autosave_occ_conflict_response(request, attempt, action):
         base_revision = int(base_raw)
     except (TypeError, ValueError):
         return None
-    if base_revision == attempt.autosave_revision:
+    # 2026-10-21 (sahib): zal imtahanında aktiv tabın yazısı arada olmasa da başqa tab yaza bilməz.
+    lease_held = center_owner_lease_held(request, attempt)
+    if base_revision == attempt.autosave_revision and not lease_held:
         return None
-    replay = _autosave_replay_response(request, attempt, action, base_revision)
+    # 2026-10-21: aradakı yazıların hamısı bu tabın özünündürsə konflikt deyil (bax _autosave_writer).
+    if not lease_held and own_stale_write_allowed(request, attempt, base_revision):
+        return None
+    replay = None if lease_held else _autosave_replay_response(request, attempt, action, base_revision)
     if replay is not None:
         return replay
     if action == "autosave":
@@ -145,6 +152,7 @@ def autosave_occ_conflict_response(request, attempt, action):
             "success": False,
             "conflict": True,
             "server_revision": attempt.autosave_revision,
+            "reason": conflict_reason(request, attempt),
             "message": message,
         },
         status=409,
@@ -168,7 +176,17 @@ def _autosave_replay_key(attempt):
 #: ``q_*`` sayılırdı və eyni mətnli, fərqli rəsmli/işarəli təkrar yazısız «replay» olurdu
 #: (review 2026-10-07). Naməlum yeni sahə → fərqli iz → köhnə 409 (fail-closed).
 _AUTOSAVE_FINGERPRINT_IGNORED = frozenset(
-    {"csrfmiddlewaretoken", "autosave_revision", "submit_action", "return_to", "next", "from_section", "assigned_type"}
+    {
+        "csrfmiddlewaretoken",
+        "autosave_revision",
+        "autosave_writer",
+        "autosave_seq",
+        "submit_action",
+        "return_to",
+        "next",
+        "from_section",
+        "assigned_type",
+    }
 )
 
 
@@ -184,7 +202,10 @@ def _autosave_fingerprint(request):
 
 
 def remember_autosave_write(request, attempt, action):
-    """Uğurlu autosave-in (revision, barmaq izi) qeydi — təkrar göndərişi tanımaq üçün."""
+    """Uğurlu yazının qeydi: writer (hər action) + autosave (revision, barmaq izi) — təkrarı tanımaq üçün."""
+    from ._autosave_writer import remember_writer
+
+    remember_writer(request, attempt)
     if action != "autosave" or request.FILES:
         return
     from django.core.cache import cache

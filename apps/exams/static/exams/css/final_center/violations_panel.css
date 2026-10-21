@@ -1,0 +1,154 @@
+/* Zal monitoru — «Qayda pozanlar» paneli (2026-10-21): süzgəc zolağı, qruplaşdırılmış sətirlər,
+   açılan son hadisələr, səhifələmə. Əsas sətir üslubu monitor.css / proctor_identity.css-dədir. */
+
+/* Süzgəc zolağı panelin öz sürüşməsində yuxarıda qalır (siyahı uzananda da əlçatan). */
+.fxc-vio-tools {
+    position: sticky;
+    top: -14px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: -4px -16px 10px;
+    padding: 6px 16px 10px;
+    background: var(--ems-neutral-0);
+    border-bottom: 1px solid var(--ems-neutral-100);
+}
+.fxc-violations-panel.is-empty .fxc-vio-tools { display: none; }
+.fxc-vio-search { width: 100%; min-height: 34px; font-size: .84rem; }
+
+.fxc-vio-sevs,
+.fxc-vio-sorts { display: flex; flex-wrap: wrap; gap: 4px; }
+.fxc-vio-tools__row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.fxc-vio-typeselect { flex: 1 1 140px; min-width: 0; }
+
+.fxc-vio-sevbtn,
+.fxc-vio-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 26px;
+    padding: 2px 9px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 999px;
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-700);
+    font-size: .74rem;
+    font-weight: 700;
+    line-height: 1.2;
+    cursor: pointer;
+}
+.fxc-vio-sevbtn span { font-variant-numeric: tabular-nums; color: var(--ems-neutral-500); font-weight: 800; }
+.fxc-vio-sevbtn:hover,
+.fxc-vio-chip:hover { background: var(--ems-neutral-50); }
+.fxc-vio-sevbtn:focus-visible,
+.fxc-vio-chip:focus-visible,
+.fxc-vio-toggle:focus-visible { outline: none; box-shadow: var(--ems-sh-focus); }
+.fxc-vio-sevbtn.is-active,
+.fxc-vio-chip.is-active { border-color: var(--ems-primary-600); background: var(--ems-primary-50); color: var(--ems-primary-800); }
+.fxc-vio-sevbtn--critical.is-active,
+.fxc-vio-sevbtn--high.is-active { border-color: var(--ems-danger); background: var(--ems-danger-100); color: var(--ems-danger-strong); }
+.fxc-vio-sevbtn--medium.is-active { border-color: var(--ems-warning-500); background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.fxc-vio-sevbtn.is-active span { color: inherit; }
+
+/* ── Sətir ── */
+.fxc-vio-row { border-left-width: 4px; }
+.fxc-vio-row--sev-critical,
+.fxc-vio-row--sev-high { border-left-color: var(--ems-danger); }
+.fxc-vio-row--sev-medium { border-left-color: var(--ems-warning-500); }
+.fxc-vio-row--sev-low { border-left-color: var(--ems-sky-400); }
+.fxc-vio-row--unseen { box-shadow: inset 0 0 0 1px var(--ems-danger-200); }
+
+.fxc-vio-toggle {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+    border-radius: 8px;
+}
+.fxc-vio-chev { flex: none; width: 10px; font-size: .7rem; color: var(--ems-neutral-400); transition: transform .15s ease; }
+.fxc-vio-row.is-open .fxc-vio-chev { transform: rotate(90deg); }
+.fxc-vio-side { display: inline-flex; flex: none; flex-direction: column; align-items: flex-end; gap: 3px; }
+
+.fxc-vio-sevchip {
+    font-size: .66rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    border-radius: 6px;
+    padding: 1px 6px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+.fxc-vio-sevchip--critical { background: var(--ems-danger); color: var(--ems-neutral-0); }
+.fxc-vio-sevchip--high { background: var(--ems-danger-100); color: var(--ems-danger-strong); }
+.fxc-vio-sevchip--medium { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.fxc-vio-sevchip--low { background: var(--ems-sky-100); color: var(--ems-sky-900); }
+
+.fxc-vio-last { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.fxc-vio-new {
+    display: inline-block;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--ems-danger);
+    color: var(--ems-neutral-0);
+    font-size: .66rem;
+    font-weight: 800;
+}
+
+.fxc-vio-types { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 7px; }
+.fxc-vio-type {
+    font-size: .7rem;
+    font-weight: 600;
+    color: var(--ems-neutral-700);
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 6px;
+    padding: 1px 6px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.fxc-vio-type b { font-weight: 800; color: var(--ems-neutral-900); }
+.fxc-vio-type--critical,
+.fxc-vio-type--high { border-color: var(--ems-danger-200); }
+.fxc-vio-type--more { color: var(--ems-neutral-500); background: none; }
+.fxc-vio-type.is-match { border-color: var(--ems-primary-600); background: var(--ems-primary-50); }
+
+.fxc-vio-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.fxc-vio-bar .fxc-vio-pbadges { flex: 1 1 0; min-width: 0; margin: 0; }
+.fxc-vio-bar .fxc-vio-actions { flex: none; margin-left: auto; }
+.fxc-vio-bar .fxc-vio-actions .fxc-btn { flex: none; }
+.fxc-vio-row .fxc-vio-sub { margin-bottom: 6px; }
+
+/* ── Açılan hissə ── */
+.fxc-vio-detail { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--ems-neutral-200); }
+.fxc-vio-detail[hidden] { display: none; }
+.fxc-vio-detail__title { font-size: .74rem; font-weight: 800; color: var(--ems-neutral-700); margin: 0 0 6px; }
+.fxc-vio-detail .fxc-tl { max-height: 200px; }
+.fxc-vio-detail__msg,
+.fxc-vio-detail__hint { margin: 6px 0 0; font-size: .74rem; color: var(--ems-neutral-500); }
+
+/* Yeni hadisə gələndə sətir bir anlıq vurğulanır. */
+.fxc-vio-row--pulse { animation: fxc-vio-pulse 1.2s ease-out 1; }
+@keyframes fxc-vio-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, .4); }
+    100% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .fxc-vio-row--pulse { animation: none; }
+    .fxc-vio-chev { transition: none; }
+}
+
+.fxc-vio-empty[hidden] { display: none; }
+
+/* ── Səhifələmə ── */
+.fxc-vio-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; }
+.fxc-vio-foot[hidden] { display: none; }
+.fxc-vio-foot__shown { flex: 1 1 100%; font-size: .74rem; color: var(--ems-neutral-500); font-variant-numeric: tabular-nums; }
+.fxc-vio-foot .fxc-btn[hidden] { display: none; }

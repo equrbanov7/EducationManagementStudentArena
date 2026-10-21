@@ -7,7 +7,11 @@ ayrılmasın. Əlavə olunan sahələr (yalnız nəzarətçi view-larında qayta
 * kimlik: ``photo_url`` · ``initials`` · ``group`` · ``student_number``;
 * risk: ``risk_score`` · ``risk_threshold`` · ``flagged`` · ``signal_count`` ·
   ``max_severity``;
-* canlılıq: ``supervised`` · ``heartbeat`` ({"status", "age", …}).
+* canlılıq: ``supervised`` · ``heartbeat`` ({"status", "age", …});
+* «Qayda pozanlar» paneli (2026-10-21): ``vio_types`` — növ üzrə kompakt cəm
+  ``[[kod, say, ciddilik], …]`` (ən çox ``VIO_TYPES_LIMIT``, qalanı ``vio_types_more``) ·
+  ``last_event_at`` (ən son qayda/siqnal anı). Etiketlər sətirdə təkrarlanmır —
+  snapshot-un yuxarı səviyyəsində bir dəfə (``event_labels_for_rows``).
 
 Sorğu büdcəsi sabitdir (sətir sayından asılı deyil): profil + qrup + imtahan
 seçimləri + nəzarət konfiqi + 2 risk aqreqatı + 1 cache ``get_many`` + 1 irəliləyiş
@@ -24,7 +28,43 @@ from ._shared import get_supervision_config
 from .heartbeat import heartbeat_map, heartbeat_state
 from .identity import attach_identity, student_identity
 from .proctoring_options import DEFAULT_FLAG_THRESHOLD, proctoring_options, proctoring_options_for_exams
-from .risk import attempt_risk, attempt_timeline, attempts_risk, timeline_as_json
+from .risk import SEVERITY_POINTS, attempt_risk, attempt_timeline, attempts_risk, timeline_as_json
+from .signals import SIGNAL_LABELS, signal_label
+
+#: Sətir başına növ cəmi tavanı — payload tələbə × növ ilə böyüməsin (qalanı ``vio_types_more``).
+VIO_TYPES_LIMIT = 4
+
+
+def _compact_types(types: dict) -> tuple[list, int]:
+    """{kod: {"n", "severity", "last"}} → ([[kod, say, ciddilik], …] (say↓, ciddilik↓), artıq növ sayı)."""
+    ordered = sorted(
+        types.items(),
+        key=lambda item: (-item[1]["n"], -SEVERITY_POINTS.get(item[1]["severity"], 0), item[0]),
+    )
+    compact = [[code, entry["n"], entry["severity"]] for code, entry in ordered[:VIO_TYPES_LIMIT]]
+    return compact, max(0, len(ordered) - VIO_TYPES_LIMIT)
+
+
+def event_label(code: str) -> str:
+    """Qayda (``SupervisionIncident``) və ya siqnal (``ProctoringLog``) kodunun tərcümə olunmuş adı."""
+    from apps.exams.models import ProctoringLog, SupervisionIncident
+
+    rule = dict(SupervisionIncident.EVENT_TYPE_CHOICES).get(code)
+    if rule is not None:
+        return str(rule)
+    if code in SIGNAL_LABELS:
+        return signal_label(code)
+    legacy = dict(ProctoringLog.EVENT_TYPE_CHOICES).get(code)
+    return str(legacy) if legacy is not None else code
+
+
+def event_labels_for_codes(codes) -> dict:
+    return {code: event_label(code) for code in sorted({str(code) for code in codes if code})}
+
+
+def event_labels_for_rows(rows) -> dict:
+    """Snapshot-dakı bütün ``vio_types`` kodları üçün {kod: etiket} (sorğu yoxdur)."""
+    return event_labels_for_codes(entry[0] for row in rows for entry in (row.get("vio_types") or []))
 
 
 def _supervised_exam_ids(exam_ids) -> set:
@@ -101,6 +141,9 @@ def enrich_monitor_rows(rows, organization, users_by_id) -> list:
         row["flagged"] = bool(info.get("flagged"))
         row["signal_count"] = info.get("signals", 0)
         row["max_severity"] = info.get("max_severity", "")
+        row["vio_types"], row["vio_types_more"] = _compact_types(info.get("types") or {})
+        last_at = info.get("last_at")
+        row["last_event_at"] = last_at.isoformat() if last_at else None
         answered, total = progress.get(attempt_id, (None, None))
         row["answered"] = answered
         row["question_total"] = total
@@ -131,4 +174,12 @@ def attempt_proctor_detail(attempt, organization_id, *, timeline_limit: int = 10
     }
 
 
-__all__ = ["attempt_proctor_detail", "attempts_progress", "enrich_monitor_rows"]
+__all__ = [
+    "VIO_TYPES_LIMIT",
+    "attempt_proctor_detail",
+    "attempts_progress",
+    "enrich_monitor_rows",
+    "event_label",
+    "event_labels_for_codes",
+    "event_labels_for_rows",
+]
