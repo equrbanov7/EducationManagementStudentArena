@@ -37,16 +37,30 @@ from .state_machine import assert_transition, can_transition
 logger = logging.getLogger(__name__)
 
 
-def _mark_item_resolved(item, status, reviewer, response_text):
+def _mark_item_resolved(item, status, reviewer, response_text, decided_by_teacher=None):
     item.status = status
     if response_text:
         item.reviewer_response = response_text
     item.resolved_by = reviewer
     item.resolved_at = timezone.now()
-    item.save(update_fields=["status", "reviewer_response", "resolved_by", "resolved_at", "updated_at"])
+    fields = ["status", "reviewer_response", "resolved_by", "resolved_at", "updated_at"]
+    if decided_by_teacher is not None:
+        # 2026-10-21 (sahib): «hansı müəllim qəbul edib / bal artırıb» — qərarı verən müəllim.
+        item.decided_by_teacher = decided_by_teacher
+        fields.append("decided_by_teacher")
+    item.save(update_fields=fields)
 
 
-def _audit_score_change(request, reviewer, attempt, *, appeal, adjustment):
+def _teacher_audit_fields(teacher):
+    if teacher is None:
+        return {}
+    return {
+        "decided_by_teacher_id": teacher.pk,
+        "decided_by_teacher": (teacher.get_full_name() or teacher.get_username()).strip(),
+    }
+
+
+def _audit_score_change(request, reviewer, attempt, *, appeal, adjustment, decided_by_teacher=None):
     try:
         from apps.audit.public import log_action
         from core.constants import AuditAction
@@ -69,6 +83,7 @@ def _audit_score_change(request, reviewer, attempt, *, appeal, adjustment):
                     "delta_points": str(adjustment.delta_points),
                     "previous_score": str(adjustment.previous_score),
                     "new_score": str(adjustment.new_score),
+                    **_teacher_audit_fields(decided_by_teacher),
                 },
             )
     except Exception:
@@ -188,7 +203,7 @@ def _schedule_journal_sync(attempt, *, actor, appeal_id=None):
 # Qərar əməliyyatları
 # ---------------------------------------------------------------------------
 @transaction.atomic
-def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarded_points=None):
+def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarded_points=None, decided_by_teacher=None):
     """
     Bir AppealItem-i qəbul edir və idempotent bal düzəlişi tətbiq edir.
 
@@ -216,7 +231,7 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarde
     if existing and not existing.reverted:
         # Artıq tətbiq olunub — ikiqat artımın qarşısını alırıq (bal dəyişmir,
         # ona görə nə yeni ledger sətri, nə də yeni jurnal yazısı lazımdır).
-        _mark_item_resolved(item, APPEAL_ITEM_STATUS_ACCEPTED, reviewer, response_text)
+        _mark_item_resolved(item, APPEAL_ITEM_STATUS_ACCEPTED, reviewer, response_text, decided_by_teacher)
         recompute_appeal_status(appeal, reviewer=reviewer)
         return existing
 
@@ -329,8 +344,10 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarde
             applied_by=reviewer,
         )
 
-    _mark_item_resolved(item, APPEAL_ITEM_STATUS_ACCEPTED, reviewer, response_text)
-    _audit_score_change(request, reviewer, attempt, appeal=appeal, adjustment=adjustment)
+    _mark_item_resolved(item, APPEAL_ITEM_STATUS_ACCEPTED, reviewer, response_text, decided_by_teacher)
+    _audit_score_change(
+        request, reviewer, attempt, appeal=appeal, adjustment=adjustment, decided_by_teacher=decided_by_teacher
+    )
     # 2026-08 auditi (G10): qərar RƏSMİ qiymətə (elektron jurnal) də çatmalıdır —
     # əvvəl bal yalnız ScoreAdjustment-da qalırdı. Aktor = reviewer.
     _schedule_journal_sync(attempt, actor=reviewer, appeal_id=appeal.pk)
@@ -339,7 +356,7 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarde
 
 
 @transaction.atomic
-def reject_appeal_item(item, *, reviewer, response_text="", request=None):
+def reject_appeal_item(item, *, reviewer, response_text="", request=None, decided_by_teacher=None):
     """
     Bir AppealItem-i rədd edir. Əvvəl qəbul olunub bal verilibsə, həmin düzəliş
     revert olunur (bal geri alınır). Bal dəyişmir (rədd halında).
@@ -347,7 +364,7 @@ def reject_appeal_item(item, *, reviewer, response_text="", request=None):
     _lock_appeal(item.appeal_id)
     item = AppealItem.objects.select_for_update(of=("self",)).select_related("appeal").get(pk=item.pk)
     revert_item_adjustment(item, reviewer=reviewer, request=request)
-    _mark_item_resolved(item, APPEAL_ITEM_STATUS_REJECTED, reviewer, response_text)
+    _mark_item_resolved(item, APPEAL_ITEM_STATUS_REJECTED, reviewer, response_text, decided_by_teacher)
     recompute_appeal_status(item.appeal, reviewer=reviewer)
     return item
 

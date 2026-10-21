@@ -14,8 +14,20 @@ server:
 positions:
   filename: /positions/positions.yaml
 
+# 2026-10-21 (monitorinq yükü): göndəriş partiyası 1 s → 5 s — Loki-yə push sorğuları ~5 dəfə azdır
+# (hər push promtail + Loki-də TLS-siz HTTP + protobuf/snappy işidir); loglar Loki-də ən çox 5 s gec görünür.
 clients:
   - url: http://loki:3100/loki/api/v1/push
+    batchwait: 5s
+    batchsize: 1048576
+
+# Pik yükdə (imtahan) promtail CPU-nu məhdudlaşdırır: saniyədə 2000 sətirdən çoxu ATILMIR, oxunuşu yavaşladır
+# (readline_rate_drop: false — docker json-file faylları 10m×3 rotasiyasına qədər tampon rolunu oynayır).
+limits_config:
+  readline_rate_enabled: true
+  readline_rate: 2000
+  readline_burst: 10000
+  readline_rate_drop: false
 
 scrape_configs:
   - job_name: docker
@@ -24,7 +36,11 @@ scrape_configs:
       # (docker-compose.prod.yml `docker-socket-proxy`, internal `docker-api` şəbəkəsi).
       # Eyni host həm kəşf (containers/networks), həm də log axını (containers/{id}/logs) üçündür.
       - host: tcp://docker-socket-proxy:2375
-        refresh_interval: 15s
+        # 2026-10-21: 15 s → 60 s. Hər refresh proxy üzərindən bütün konteynerlərin siyahısı + şəbəkələr
+        # (~40 konteyner JSON-u) deməkdir; konteyner dəsti yalnız deploy-da dəyişir. Yeni konteynerin logu
+        # itmir — mövqe faylı olmayan hədəf əvvəldən oxunur; kəsilən axın (proxy `timeout server 10m`) son
+        # mövqedən ən çox 60 s sonra davam edir.
+        refresh_interval: 60s
     relabel_configs:
       # "/emsarena-nginx" → "emsarena-nginx"
       - source_labels: ["__meta_docker_container_name"]
@@ -36,3 +52,16 @@ scrape_configs:
         target_label: stream
       - target_label: job
         replacement: docker
+    # 2026-10-21: sağlamlıq/scrape səs-küyü Loki-yə göndərilmir. Boş serverdə qəbul olunan sətirlərin böyük
+    # hissəsi bunlar idi: Prometheus 14 app replikasının /metrics/-ini, Docker healthcheck /ping/-i, blackbox
+    # isə nginx üzərindən /ping/, /health/, /accounts/login/-u yoxlayır. Yalnız UĞURLU cavablar atılır —
+    # 4xx/5xx (/health/ 207 = degraded daxil) Loki-də qalır. Real istifadəçi sorğularına toxunulmur.
+    pipeline_stages:
+      # Daphne access log: `172.18.0.5:41234 - - [21/Oct/2026:06:05:00] "GET /metrics/" 200 51234`
+      - drop:
+          expression: '"(?:GET|HEAD) /(?:(?:metrics|ping)/" 2\d\d|health/" 200) '
+          drop_counter_reason: healthcheck_noise
+      # nginx access log (emsarena_main formatı), blackbox exporter-in user-agent-i ilə uğurlu probe-lar.
+      - drop:
+          expression: '" [23]\d\d \d+ "[^"]*" "Blackbox Exporter/'
+          drop_counter_reason: blackbox_probe

@@ -21,6 +21,7 @@ from django.http import JsonResponse
 from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.translation import gettext as _
+from django.utils.translation import pgettext
 
 from core.program_codes import PROGRAM_CODE_SEARCH_FIELDS
 from core.search_text import tolerant_match, tolerant_q
@@ -188,6 +189,29 @@ def _journal_group(user, organization, query):
     ]
 
 
+def _settings_group(request, caps, query):
+    """«Sistem tənzimləmələri» açarları (sahib 2026-10-21) — ad + izah + açar → qrupun alt səhifəsi (açar vurğulanır).
+
+    Qapı bölmənin özü ilə EYNİDİR: menyuda ``system-settings`` + ``runtime_settings_admin.can_manage`` (RİM rəhbəri /
+    superadmin, view-as yox). İndeks ``core.runtime_settings.SPECS``-dəndir — bazaya getmir.
+    """
+    if "system-settings" not in caps.get("allowed_sections", set()):
+        return []
+    from apps.accounts.services import runtime_settings_admin, system_settings_pages
+
+    if not runtime_settings_admin.can_manage(request.user, request):
+        return []
+    return [
+        {
+            "title": hit["label"],
+            "subtitle": f"{hit['group_label']} · {hit['key']}",
+            "icon": "fa-sliders",
+            "url": hit["url"],
+        }
+        for hit in system_settings_pages.search(query, limit=MAX_PER_GROUP)
+    ]
+
+
 def _section_url(section, params=None):
     """Kabinet bölməsinə keçid — lazım olsa bölmənin ÖZ süzgəc parametri ilə.
 
@@ -314,6 +338,16 @@ def global_search(request):
         journals = _journal_group(request.user, organization, query)
         if journals:
             groups.append({"key": "journals", "label": _("Jurnallarım"), "items": journals})
+
+        settings_items = _settings_group(request, caps, query)
+        if settings_items:
+            groups.append(
+                {
+                    "key": "settings",
+                    "label": pgettext("profile.section", "Sistem tənzimləmələri"),
+                    "items": settings_items,
+                }
+            )
 
         can_search_people = (
             caps.get("can_search_directory")

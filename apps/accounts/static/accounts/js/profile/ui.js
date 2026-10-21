@@ -370,16 +370,30 @@
                SPA keçidi onu SİLƏ BİLMİRDİ, nəticədə iki bölmə eyni anda mavi
                qalırdı. Ona görə əvvəlcə sidebar-dakı BÜTÜN bölmə linklərindən
                `active` götürülür, sonra uyğun olan yenidən qoyulur. */
+            /* 2026-10-21 («Sistem tənzimləmələri» alt səhifələri): bir bölmənin bir neçə alt bəndi ola bilər
+               (eyni `data-section`, fərqli `data-section-sub`). Aktiv alt səhifəni render olunmuş PANEL deyir
+               (`data-profile-section-sub`) — AJAX klik, geri/irəli və tam GET-də eyni mənbə. */
+            var activePanel = ctx.sectionsHost
+                ? ctx.sectionsHost.querySelector('[data-profile-section-panel="' + section + '"]')
+                : null;
+            var activeSub = activePanel ? (activePanel.getAttribute("data-profile-section-sub") || "") : "";
+            function linkMatches(link) {
+                if (link.getAttribute("data-section") !== section) {
+                    return false;
+                }
+                var sub = link.getAttribute("data-section-sub");
+                return sub === null || sub === activeSub;
+            }
             if (ctx.sidebar) {
                 ctx.sidebar.querySelectorAll(".sidebar-menu-link[data-section]").forEach(function (link) {
-                    if (link.getAttribute("data-section") !== section) {
+                    if (!linkMatches(link)) {
                         link.classList.remove("active");
                         link.removeAttribute("aria-current");
                     }
                 });
             }
             ctx.sidebarSectionLinks.forEach(function (link) {
-                var isMatch = link.getAttribute("data-section") === section;
+                var isMatch = linkMatches(link);
                 link.classList.toggle("active", isMatch);
                 // A11y (U18): aktiv bölmə screen-reader-ə "cari səhifə" kimi bildirilir.
                 if (isMatch) {

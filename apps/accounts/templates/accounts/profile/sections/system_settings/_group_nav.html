@@ -1,0 +1,10 @@
+{% load i18n %}
+{% comment %}«Sistem tənzimləmələri» — qrup səhifələri arasında sürətli keçid (sahib 2026-10-21). Mobil ekranda sol menyu
+şkafdadır; bu sətir üfüqi sürüşür və alt səhifəni bir toxunuşla dəyişir. Linklər panelin içindədir → ajax.js
+onları AJAX bölmə keçidi kimi açır (tarixçə / geri düyməsi işləyir).{% endcomment %}
+<nav class="sysset-nav" aria-label="{% trans 'Tənzimləmə qrupları' context 'accounts.runtime_settings' %}">
+    <a class="sysset-nav__chip" href="{{ ss.overview_url }}">{% trans "Ümumi baxış" context "accounts.runtime_settings" %}</a>
+    {% for item in ss.nav %}
+    <a class="sysset-nav__chip{% if item.current %} is-current{% endif %}" href="{{ item.url }}"{% if item.current %} aria-current="page"{% endif %}>{{ item.label }}</a>
+    {% endfor %}
+</nav>

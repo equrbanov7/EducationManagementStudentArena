@@ -127,6 +127,10 @@ class ProfileCompletionMiddleware:
         path = request.path_info or request.path
         if self._is_exempt_path(path) or self._is_exam_cabinet_section(request, path):
             return self.get_response(request)
+        from apps.accounts.middleware_center_exam import is_center_exam_path
+
+        if is_center_exam_path(request, path):  # 2026-10-21: zal sessiyası (appelyasiya / zaldan çıxış) kəsilmir
+            return self.get_response(request)
         if policy.skipped_in_session(request):
             # «Hələlik keç» — yalnız bu sessiya; növbəti girişdə səhifə yenə gəlir.
             return self.get_response(request)

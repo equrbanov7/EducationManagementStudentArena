@@ -179,6 +179,10 @@ class AppealCreateViewTests(TestCase):
         baxışında (təhvildən sonrakı 5 dəq) göstərir; midterm-də açar həmişə gizlidir."""
         self.exam.exam_type_extended = "final"
         self.exam.save(update_fields=["exam_type_extended"])
+        # 2026-10-21 (sahib): açar yalnız zalda — həmin cəhdin aktiv zal sessiyası + bağlı cihaz.
+        from apps.exams.tests.hall_helpers import enter_hall
+
+        enter_hall(self.client, self.attempt)
 
     def test_create_page_shows_student_and_correct_answer_and_search(self):
         self._as_final_center_review()
@@ -323,7 +327,8 @@ class AppealCreateViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "GDPR sualı")
-        self.assertContains(response, "Cavabınız: səhv")
+        # 2026-10-21 (sahib): düz/səhv verdikti də yalnız zalda — «sonradan» rejimində yoxdur.
+        self.assertNotContains(response, "Cavabınız: səhv")
         self.assertNotContains(response, "Variantlar")
         self.assertNotContains(response, "Tələbənin cavabı")
         self.assertNotContains(response, "Yanlış cavab")
@@ -405,8 +410,14 @@ class AppealCreateViewTests(TestCase):
             },
         )
 
+        # 2026-10-21 (sahib): əvvəl uğur ekranı (tələbə artıq çıxış edib), «Bitir» → giriş səhifəsi.
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["Location"], reverse("exams:final_exam_entry"))
+        self.assertEqual(response["Location"], reverse("appeals:hall_appeal_done"))
+        done = self.client.get(response["Location"])
+        self.assertEqual(done.status_code, 200)
+        self.assertContains(done, "Apellyasiyanız qəbul edildi")
+        self.assertContains(done, f'href="{reverse("exams:final_exam_entry")}"', html=False)
+        self.assertNotIn("_auth_user_id", self.client.session)
 
     def test_final_exam_from_profile_results_returns_to_my_appeals_after_submit(self):
         self.exam.exam_type_extended = "final"

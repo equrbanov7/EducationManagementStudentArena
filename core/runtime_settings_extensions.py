@@ -14,6 +14,8 @@ _MODULES = (
     "core.runtime_settings_username",  # «profile» qrupuna istifadəçi adı açarları (2026-10-20)
     "core.runtime_settings_appeals",  # «exam» qrupuna «imtahan sonunda» apellyasiya açarı (2026-10-20)
     "core.runtime_settings_midterm",  # «exam» qrupuna «midterm imtahan mərkəzi vasitəsilə» açarı (2026-10-20)
+    "core.runtime_settings_exam_center",  # «exam» qrupuna zal kompüteri yoxlaması + sual sayı açarları (2026-10-21)
+    "core.runtime_settings_monitoring",  # «Monitorinq» — in-app söndürmə, yükdə avto-pauza, keş intervalı (2026-10-21)
 )
 
 

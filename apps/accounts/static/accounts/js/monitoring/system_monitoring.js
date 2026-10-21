@@ -358,6 +358,8 @@
                 .then(function (payload) {
                     if (destroyed || sequence !== requestSequence ||
                             tab !== activeTab || !scope.isConnected) return payload;
+                    // 2026-10-21: monitorinq söndürülüb / yükə görə dayandırılıbsa avtomatik yeniləmə seyrəlir.
+                    pausedReason = (payload && payload.paused) || "";
                     if (payload.status !== "degraded") {
                         cache[requestKey] = { payload: payload, savedAt: Date.now() };
                     }
@@ -407,12 +409,16 @@
             load(activeTab, { force: true, silent: true });
         }
 
+        var pausedReason = "";
+
         function schedule() {
             // 30 s addım: xülasə hər addımda, ağır ətraflı tablar hər 2-ci addımda (60 s).
             timer = window.setInterval(function () {
                 tick += 1;
                 if (!scope.isConnected) {
                     destroy();
+                } else if (pausedReason && tick % 10 !== 0) {
+                    // Dayandırılıb: hər addımda boş sorğu göndərmə — 5 dəqiqədən bir yoxla (yük düşübmü / açar açılıbmı).
                 } else if (started && autoRefresh.checked && visible() && (activeTab === "summary" || tick % 2 === 0)) {
                     refreshActiveSilently();
                 }

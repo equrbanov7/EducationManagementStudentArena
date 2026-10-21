@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% comment %}Zal apellyasiyası qəbul edildi (sahib 2026-10-21) — tələbə artıq zal sessiyasından çıxıb (logout).
+Kabinet «chrome»-u və kabinetə keçid YOXDUR; «Bitir» və avtomatik keçid (`data-hall-done-seconds`) növün giriş
+səhifəsinə aparır. View: apps/appeals/views/student/hall_done.py.{% endcomment %}
+
+{% block title %}{% trans "Apellyasiyanız qəbul edildi" context "appeals.template.hall_done" %} — {{ summary.exam_title }}{% endblock %}
+
+{% block route_progress %}{% endblock %}
+{% block navbar %}{% include "exams/student/partials/_hall_frame.html" %}{% endblock %}
+{% block view_as_banner %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block global_search %}{% endblock %}
+{% block global_search_js %}{% endblock %}
+{% block ai_assistant %}{% endblock %}
+{% block ai_assistant_js %}{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'exams/css/hall/hall_frame.css' %}?v=20261021-hall">
+<link rel="stylesheet" href="{% static 'appeals/css/appeals/hall_done.css' %}?v=20261021-hall">
+{% endblock %}
+
+{% block content %}
+<div class="appeal-hall-done">
+    <section class="appeal-hall-done__card" role="status" aria-live="polite" aria-labelledby="appealHallDoneTitle"
+             data-hall-done
+             data-hall-done-url="{{ entry_url }}"
+             data-hall-done-seconds="{{ redirect_seconds }}">
+        <span class="appeal-hall-done__icon" aria-hidden="true"><i class="fas fa-circle-check"></i></span>
+        <h1 class="appeal-hall-done__title" id="appealHallDoneTitle">{% trans "Apellyasiyanız qəbul edildi" context "appeals.template.hall_done" %}</h1>
+        <p class="appeal-hall-done__exam">
+            <span class="appeal-hall-done__kind">{% if is_midterm %}{% trans "Midterm imtahanı" context "appeals.template.hall_done" %}{% else %}{% trans "Final imtahanı" context "appeals.template.hall_done" %}{% endif %}</span>
+            <strong>{{ summary.exam_title }}</strong>
+        </p>
+        <p class="appeal-hall-done__count" data-hall-done-count>
+            {% blocktrans trimmed with count=summary.item_count context "appeals.template.hall_done" %}
+                {{ count }} sual üzrə etiraz qeydə alındı.
+            {% endblocktrans %}
+        </p>
+        <ul class="appeal-hall-done__steps">
+            <li>{% trans "Apellyasiya komissiyası müraciətinizə baxacaq; qərar kabinetinizdə «Apellyasiyalarım» bölməsində görünəcək." context "appeals.template.hall_done" %}</li>
+            <li>{% trans "Bal dəyişərsə, nəticəniz və jurnal avtomatik yenilənəcək." context "appeals.template.hall_done" %}</li>
+            <li>{% trans "Zal sessiyanız bağlandı — kompüteri növbəti tələbə üçün bu vəziyyətdə saxlayın." context "appeals.template.hall_done" %}</li>
+        </ul>
+        <a href="{{ entry_url }}" class="appeal-hall-done__btn" data-hall-done-finish>
+            <i class="fas fa-flag-checkered" aria-hidden="true"></i>{% trans "Bitir" context "appeals.template.hall_done" %}
+        </a>
+        <p class="appeal-hall-done__auto">
+            {% blocktrans trimmed context "appeals.template.hall_done" with seconds=redirect_seconds %}
+                <span data-hall-done-countdown>{{ seconds }}</span> saniyədən sonra giriş səhifəsinə qayıdacaqsınız.
+            {% endblocktrans %}
+        </p>
+    </section>
+</div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'appeals/js/hall_done.js' %}?v=20261021-hall"></script>
+{% endblock %}

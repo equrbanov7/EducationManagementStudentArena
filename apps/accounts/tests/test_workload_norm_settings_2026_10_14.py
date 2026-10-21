@@ -111,8 +111,10 @@ class WorkloadNormSettingsTest(TestCase):
         )
         self.assertTrue(AuditLog.objects.filter(resource_type="core.runtime_settings").exists())
 
+        # 2026-10-21: alt səhifələr — «Dərs yükü» forması `ss_group=workload` səhifəsindədir.
         fragment = self._client(self.rim).get(
-            reverse("accounts:profile_section_fragment", kwargs={"section": "system-settings"})
+            reverse("accounts:profile_section_fragment", kwargs={"section": "system-settings"}),
+            {"ss_group": "workload"},
         )
         groups = {group["key"]: group for group in fragment.context["system_settings_section"]["groups"]}
         keys = [field["key"] for field in groups["workload"]["fields"]]

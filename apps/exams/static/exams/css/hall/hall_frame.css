@@ -1,0 +1,87 @@
+/* İmtahan zalı sessiyasının minimal çərçivəsi (2026-10-21) — templates/base.html `hall_chrome` bayrağı.
+   Sayt başlığının yerində: nişan + brend · imtahan adı · dil seçici + «Zaldan çıx». Kabinet naviqasiyası YOXDUR. */
+.hall-frame {
+    display: flex;
+    align-items: center;
+    gap: 12px 16px;
+    flex-wrap: wrap;
+    padding: 10px 16px;
+    background: var(--ems-bg, #fff);
+    border-bottom: 1px solid var(--ems-border, #e5e7eb);
+    min-height: 56px;
+}
+
+.hall-frame__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex: 0 0 auto;
+    min-width: 0;
+}
+
+.hall-frame__mark {
+    width: 36px;
+    height: auto;
+    flex: 0 0 auto;
+}
+
+.hall-frame__brand-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--ems-text, #111827);
+    white-space: nowrap;
+}
+
+.hall-frame__title {
+    flex: 1 1 200px;
+    min-width: 0;
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ems-text-muted, #4b5563);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hall-frame__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.hall-frame__exit {
+    margin: 0;
+}
+
+.hall-frame__exit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--ems-border, #e5e7eb);
+    border-radius: 8px;
+    background: var(--ems-bg, #fff);
+    color: var(--ems-text, #111827);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.hall-frame__exit-btn:hover,
+.hall-frame__exit-btn:focus-visible {
+    border-color: var(--ems-danger, #dc2626);
+    color: var(--ems-danger, #dc2626);
+}
+
+@media (max-width: 575.98px) {
+    .hall-frame__brand-name {
+        display: none;
+    }
+
+    .hall-frame__title {
+        flex-basis: 100%;
+        order: 3;
+    }
+}

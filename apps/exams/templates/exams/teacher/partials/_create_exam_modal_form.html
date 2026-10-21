@@ -196,6 +196,8 @@
                         <div class="form-group form-group-full" data-random-question-group data-test-random-question-group>
                             <label class="ew-label" for="{{ form.random_question_count.id_for_label }}">{{ form.random_question_count.label }}</label>
                             {{ form.random_question_count }}
+                            {# Sahib 2026-10-21: final/midterm seçiləndə say avtomatik — toggles.js mətni kateqoriyaya görə dəyişir. #}
+                            <small class="form-text ew-qcount-hint" data-qcount-hint aria-live="polite"{% if not form.question_count_hint %} hidden{% endif %}><i class="fas fa-magic" aria-hidden="true"></i> <span data-qcount-hint-text>{{ form.question_count_hint }}</span></small>
                             {% if form.random_question_count.help_text %}
                                 <small class="form-text">{{ form.random_question_count.help_text }}</small>
                             {% endif %}

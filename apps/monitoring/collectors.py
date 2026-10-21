@@ -28,6 +28,8 @@ CACHE_TTL = 15 * 60
 BACKUP_CACHE_TTL = 2 * 60 * 60
 
 BACKUP_DIR = os.environ.get("MONITORING_BACKUP_DIR", "/backups")
+#: Celery broadcast cavab gözləmə müddəti (ping-ə cavab verməyən worker «oflayn» sayılır).
+INSPECT_TIMEOUT_SECONDS = 5
 
 #: 2026-09-13 infra auditi P2-8: ölçülən broker növbələri. Əvvəl yalnız
 #: `celery` (defolt) növbəsi `llen` ilə oxunurdu — `heavy` (OCR/AI/export,
@@ -43,8 +45,13 @@ def collect_celery_stats() -> dict:
 
     stats: dict = {"collected_at": time.time()}
     try:
-        inspect = current_app.control.inspect(timeout=5)
+        inspect = current_app.control.inspect(timeout=INSPECT_TIMEOUT_SECONDS)
         ping = inspect.ping() or {}
+        if ping:
+            # 2026-10-21: limitsiz broadcast cavabları TAM timeout qədər gözləyir — 5 sorğu × 5 s = hər dəqiqə
+            # ~25 s bir worker prosesi məşğul qalırdı. Ping cavab verən worker sayını bilir; qalan sorğular
+            # hamı cavab verən kimi qayıdır (worker-in cavab verməməsi ping-də onsuz da görünür).
+            inspect = current_app.control.inspect(timeout=INSPECT_TIMEOUT_SECONDS, limit=len(ping))
         active = inspect.active() or {}
         reserved = inspect.reserved() or {}
         scheduled = inspect.scheduled() or {}

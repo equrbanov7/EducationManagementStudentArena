@@ -8,7 +8,7 @@
 """
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from apps.exams.models import Exam
@@ -79,6 +79,7 @@ class TrialRunStartGuardTests(TestCase):
         self.assertEqual(response["Location"], reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}))
 
 
+@override_settings(EXAM_HALL_COMPUTER_CHECK=False)  # 2026-10-21: sərt zal qapısı bu testin mövzusu deyil
 class TrialResultExitBarTests(TestCase):
     """Sınaq nəticəsi final-mərkəz çıxış zolağını GÖSTƏRMİR."""
 

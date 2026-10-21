@@ -7,7 +7,7 @@ istifadə etdiyi build_*_context / _can_open_appeal_management daxil) dəyişmir
 """
 
 from .shared import appeal_detail
-from .student import appeal_create, build_my_appeals_context, my_appeals
+from .student import appeal_create, build_my_appeals_context, hall_appeal_done, my_appeals
 from .teacher import (
     _can_open_appeal_management,
     appeal_stats_ai,
@@ -20,14 +20,19 @@ from .teacher import (
     key_correction_revoke,
     manage_appeals,
     review_appeal,
+    teaching_appeals,
 )
+from .teacher.teaching import build_teaching_appeals_context
 
 __all__ = [
     "appeal_create",
+    "hall_appeal_done",
     "my_appeals",
     "appeal_detail",
     "manage_appeals",
     "review_appeal",
+    "teaching_appeals",
+    "build_teaching_appeals_context",
     "key_correction_apply",
     "key_correction_revoke",
     "build_my_appeals_context",

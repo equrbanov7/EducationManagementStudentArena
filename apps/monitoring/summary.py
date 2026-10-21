@@ -323,8 +323,19 @@ def build_summary(scope, *, use_cache: bool = True) -> dict:
         "down_jobs": metrics.get("down_jobs") or [],
     }
     data["health"] = evaluate_health(data)
-    cache.set(cache_key, data, SUMMARY_TTL)
+    data["refresh_seconds"] = _summary_ttl()
+    cache.set(cache_key, data, data["refresh_seconds"])
     return data
+
+
+def _summary_ttl() -> int:
+    """Xülasə keşi: ``SUMMARY_TTL`` və ya «Monitorinq → yenilənmə intervalı», hansı böyükdürsə (2026-10-21)."""
+    from .switches import cache_ttl
+
+    try:
+        return max(SUMMARY_TTL, int(cache_ttl()))
+    except Exception:  # noqa: BLE001
+        return SUMMARY_TTL
 
 
 __all__ = ["SUMMARY_TTL", "build_summary"]

@@ -23,7 +23,8 @@ logger = logging.getLogger(__name__)
 #: Monitorinq backend sorğuları üçün qısa timeout — istifadəçi səhifəsi
 #: asılılıq problemində maksimum bu qədər gözləyir.
 REQUEST_TIMEOUT_SECONDS = 5
-#: Eyni sorğunun cache müddəti (auto-refresh fırtınasının qarşısı).
+#: Eyni sorğunun cache müddətinin ALT həddi (auto-refresh fırtınasının qarşısı). Faktiki müddət
+#: «Sistem tənzimləmələri → Monitorinq → yenilənmə intervalı»dır (defolt 30 s, :func:`_cache_ttl`), 2026-10-21.
 CACHE_TTL_SECONDS = 10
 #: Loki sorğularının sərt limitləri (performans tələbi).
 LOKI_MAX_LINES = 500
@@ -72,6 +73,15 @@ def describe_request_error(exc: Exception) -> dict[str, Any]:
     return {"kind": "error", "status": None, "detail": type(exc).__name__}
 
 
+def _cache_ttl() -> int:
+    from .switches import cache_ttl
+
+    try:
+        return max(CACHE_TTL_SECONDS, int(cache_ttl()))
+    except Exception:  # noqa: BLE001 — tənzimləmə oxunmasa köhnə qısa keş
+        return CACHE_TTL_SECONDS
+
+
 def _get_json(
     service: str,
     path: str,
@@ -105,7 +115,7 @@ def _get_json(
             error_sink.update(describe_request_error(exc))
         return None
 
-    cache.set(cache_key, payload, CACHE_TTL_SECONDS)
+    cache.set(cache_key, payload, _cache_ttl())
     cache.set(f"monitoring:last_ok:{service}", time.strftime("%Y-%m-%dT%H:%M:%S%z"), None)
     return payload
 

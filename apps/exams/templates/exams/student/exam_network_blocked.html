@@ -1,10 +1,16 @@
 {% extends "errors/_base.html" %}
-{% load i18n %}
+{% load i18n static %}
 {% comment %}
 2026-10-13 (gecə): final/midterm imtahanı yalnız universitet şəbəkəsindən verilir
 (apps/exams/services/exam_network.py). Kənar şəbəkədən açılanda bu səhifə göstərilir —
 sual məzmunu YOXDUR. Cavablar serverdədir; daxili şəbəkədən «Səhifəni yenilə» davam etdirir.
 {% endcomment %}
+{% block head_extra %}
+    {# 2026-10-21: interfeys dili seçicisi (settings.LANGUAGES) — xəta qabığı Bootstrap yükləmir, dropdown üçün lazımdır. #}
+    <link rel="stylesheet" href="{% static 'css/language-switcher.css' %}?v=20260925-1">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/student_notice.css' %}?v=20261021-redesign">
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}" defer></script>
+{% endblock %}
 {% block page_title %}{% trans 'Yalnız universitet şəbəkəsindən' context 'exams.network' %}{% endblock %}
 {% block code %}403{% endblock %}
 {% block code_label %}403{% endblock %}
@@ -26,5 +32,6 @@ sual məzmunu YOXDUR. Cavablar serverdədir; daxili şəbəkədən «Səhifəni 
         {% trans 'Səhifəni yenilə' context 'exams.network' %}
     </a>
     {% endif %}
+    {% include "exams/student/partials/_final_langbar.html" %}
 {% endblock %}
 {% block footer_note %}{% trans 'Şəbəkə yoxlaması serverdə aparılır və rəd hadisəsi jurnalda qeyd olunur.' context 'exams.network' %}{% endblock %}

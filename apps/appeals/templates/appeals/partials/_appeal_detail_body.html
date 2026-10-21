@@ -1,4 +1,4 @@
-{% load i18n get_item %}
+{% load i18n get_item static %}
 {% comment %}
   Ortaq apellyasiya detal gövdəsi (DRY) — kabinet modalı (AJAX fraqment) üçün.
   Kontekst: appeal, items, score_info, item_stats, marked_question_by_qid,
@@ -9,6 +9,8 @@
   başlığı artıq var — burada h1 yazılmır), xülasə `appeal-stats`, bal
   bildirişi `ems-banner`, sual kartları neytral, status `ems-badge`.
 {% endcomment %}
+
+<link rel="stylesheet" href="{% static 'appeals/css/appeals/review_decider.css' %}?v=20261021-decider">
 
 {% if appeal_detail_back_url %}
 <div class="appeal-detail-back">
@@ -98,9 +100,15 @@ tələbəyə (sahibə) göstərilmir; yalnız mərkəz / dekan / koordinator gö
             {% include "appeals/partials/_status_badge.html" with status=item.student_display_status label=item.student_display_status_label family="appeal_item" %}
         </div>
 
+        {% if is_owner %}{% trans "Şərhiniz" context "appeals.template" as comment_label %}{% else %}{% trans "Tələbənin şərhi" context "appeals.template" as comment_label %}{% endif %}
+        {% include "appeals/partials/_comment_block.html" with comment=item.comment comment_label=comment_label %}
+
         <dl class="appeal-detail-grid">
-            <dt>{% trans "Şərhiniz" context "appeals.template" %}</dt>
-            <dd>{{ item.comment|linebreaksbr }}</dd>
+            {% if item.decided_by_teacher and not item.student_result_hidden %}
+            {# 2026-10-21 (sahib): «hansı müəllim qəbul edib / bal artırıb, qeyd olsun». #}
+            <dt>{% trans "Qərarı verən" context "appeals.template" %}</dt>
+            <dd data-appeal-decided-by>{{ item.decided_by_teacher.get_full_name|default:item.decided_by_teacher.username }}</dd>
+            {% endif %}
 
             {% if item.reviewer_response and not item.student_result_hidden %}
             <dt>{% trans "Cavab" context "appeals.template" %}</dt>

@@ -25,6 +25,7 @@ from apps.exams.domain.final_center import (
 )
 from apps.exams.models import FinalExamTicket
 from apps.exams.services.center_exams import entry_url_for_exam, exam_kind
+from apps.exams.services.exam_center_gate import ensure_hall_computer
 from apps.exams.services.exam_network import ExamNetworkDenied, final_entry_network_allowed
 from apps.exams.services.final_center import (
     HEARTBEAT_INTERVAL_SECONDS,
@@ -66,6 +67,7 @@ def final_exam_waiting(request, ticket_id):
     ticket, deny = _resolve_own_ticket(request, ticket_id)
     if deny is not None:
         return deny
+    ensure_hall_computer(request, ticket.organization)
     entry_url = entry_url_for_exam(ticket.exam)
     session = ticket.session
     if session is None:
@@ -108,6 +110,7 @@ def final_exam_cancel(request, ticket_id):
     ticket, deny = _resolve_own_ticket(request, ticket_id)
     if deny is not None:
         return deny
+    ensure_hall_computer(request, ticket.organization)
     entry_url = entry_url_for_exam(ticket.exam)
     student_cancel_waiting(ticket, request=request)
     clear_entry_session(request)
@@ -128,6 +131,7 @@ def final_exam_begin(request, ticket_id):
     ticket, deny = _resolve_own_ticket(request, ticket_id)
     if deny is not None:
         return JsonResponse({"success": False, "redirect_url": entry_url_for_exam(ticket.exam)}, status=403)
+    ensure_hall_computer(request, ticket.organization)
     if ticket.session is None or not room_access_ok(request, ticket.session.room):
         return JsonResponse(
             {"success": False, "error": str(room_access_error()), "redirect_url": entry_url_for_exam(ticket.exam)},
@@ -160,6 +164,7 @@ def final_ticket_state(request, ticket_id):
     ticket, deny = _resolve_own_ticket(request, ticket_id)
     if deny is not None:
         return JsonResponse({"error": "entry_required"}, status=403)
+    ensure_hall_computer(request, ticket.organization)
 
     session = ticket.session
     if session is None:

@@ -1,0 +1,12 @@
+{% load i18n %}
+{% comment %}Tələbənin şərhi — oxunaqlı etiketli blok (sahib 2026-10-21: etiket kiçik, sola «üzən», uzun sətir
+qırılmırdı). Etiket qərar sahələrinin etiketi ilə eyni üslubdadır (`ems-field__label`), mətn normal ölçüdə,
+`white-space: pre-line` + `overflow-wrap: anywhere` (review_decider.css). Kontekst: `comment`, `comment_label`.{% endcomment %}
+<div class="appeal-comment" data-appeal-comment-block>
+    <div class="ems-field__label appeal-comment__label">{{ comment_label }}</div>
+    {% if comment %}
+    <div class="appeal-comment__text">{{ comment }}</div>
+    {% else %}
+    <div class="appeal-comment__text appeal-comment__text--empty">{% trans "Şərh yazılmayıb" context "appeals.template" %}</div>
+    {% endif %}
+</div>

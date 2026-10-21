@@ -55,7 +55,8 @@ def _make_final(org, teacher, title, n_questions):
     return exam
 
 
-@override_settings(CACHES=LOCMEM_CACHE)
+# 2026-10-21: sərt zal qapısı (``exam.hall_computer_check``) bu testlərin mövzusu deyil — cihaz bağlantısı yoxlanır.
+@override_settings(CACHES=LOCMEM_CACHE, EXAM_HALL_COMPUTER_CHECK=False)
 class FinalAttemptDeviceBindingTests(TestCase):
     @classmethod
     def setUpTestData(cls):

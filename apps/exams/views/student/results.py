@@ -14,7 +14,7 @@ from django.utils.translation import gettext, pgettext
 from apps.exams import score_adjustments
 from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.models import CodingSubmission, ExamAttempt
-from apps.exams.services.center_exams import attempt_in_center, entry_url_for_exam
+from apps.exams.services.center_exams import attempt_in_center, entry_url_for_exam, hall_review_open
 from apps.exams.services.question_snapshot import delivered_question_render
 from apps.exams.services.result_calculation import attach_test_result_summaries, calculate_test_attempt_result
 from apps.exams.services.result_release import (
@@ -81,19 +81,16 @@ def post_finish_result_seen(request, attempt_id) -> bool:
         return False
 
 
-def _appeal_onsite_hint_minutes(attempt, *, is_profile_results):
-    """Nəticə panelində «indi versəniz düzgün cavabları da görəcəksiniz» izahı üçün qalan dəqiqə (yoxsa 0)."""
-    if is_profile_results or getattr(attempt, "is_trial", False) or not getattr(attempt, "finished_at", None):
-        return 0
-    from django.utils import timezone
+def _appeal_onsite_hint_minutes(attempt):
+    """Apellyasiya panelindəki «düzgün/səhv cavab yalnız zal kompüterində, N dəqiqə» qeydi üçün N (söndürülübsə 0).
 
+    2026-10-21 (sahib): qeyd HƏR yerdə (zalda da, kabinetdə də) göstərilir — tələbə kənarda niyə yalnız
+    sualları gördüyünü bilsin."""
+    if getattr(attempt, "is_trial", False) or not getattr(attempt, "finished_at", None):
+        return 0
     from core.runtime_settings_appeals import appeal_onsite_minutes
 
-    minutes = appeal_onsite_minutes()
-    if minutes <= 0:
-        return 0
-    left = minutes * 60 - (timezone.now() - attempt.finished_at).total_seconds()
-    return minutes if left > 0 else 0
+    return max(0, appeal_onsite_minutes())
 
 
 # Profil kabinet bölmələri — həm "Nəticələrim", həm də "Apellyasiyalarım"-dan
@@ -109,6 +106,19 @@ def _is_profile_results_request(request, return_to):
         return True
     return_to = return_to or ""
     return any(f"section={section}" in return_to for section in _PROFILE_CABINET_SECTIONS)
+
+
+def _hall_computer_denied(request, attempt):
+    from apps.exams.services.center_exams import ensure_center_hall_computer
+    from apps.exams.services.exam_center_gate import HallComputerDenied
+
+    try:
+        ensure_center_hall_computer(request, attempt)
+    except HallComputerDenied:
+        from ._final_device import hall_computer_blocked_response
+
+        return hall_computer_blocked_response(request)
+    return None
 
 
 def _final_result_timeout_url(request):
@@ -199,7 +209,13 @@ def exam_result(request, slug, attempt_id):
     # Təhlükəsizlik auditi 2026-10-05 / 2026-10-07: final/midterm açarı serverdə, kateqoriyaya
     # görə gizlədilir — test variantları VƏ yazılı imtahanın «ideal cavab» nümunəsi (əvvəl yazılı
     # midterm-in ideal cavabı təhvildən dərhal sonra göstərilirdi).
-    secure_key_hidden = secure_answer_key_hidden(attempt, is_profile_results=is_profile_results)
+    # 2026-10-21 (sahib): «düzgün/səhv cavabı ancaq zalda, imtahan verdiyi kompüterdə görə bilər» — mərkəz nəticəsində
+    # açar yalnız HƏMİN cəhdin aktiv zal sessiyası + bağlı cihazda açılır (``center_exams.hall_review_open``);
+    # kənarda (başqa cihaz / sessiya bitib / kabinet) yalnız bal cəmi və sualların mətni qalır.
+    hall_review = is_final_center_result and hall_review_open(request, attempt)
+    secure_key_hidden = secure_answer_key_hidden(
+        attempt, is_profile_results=is_profile_results or (is_final_center_result and not hall_review)
+    )
     is_test_exam = getattr(exam, "exam_type", "") == "test"
     hide_test_answer_correctness = is_test_exam and (secure_key_hidden or answers_release_locked)
     ideal_answer_hidden = secure_key_hidden or answer_key_hidden or answers_release_locked
@@ -207,6 +223,10 @@ def exam_result(request, slug, attempt_id):
     final_result_timeout_url = ""
 
     if is_final_center_result:
+        # 2026-10-21: sərt zal rejimi — mərkəz nəticəsi (kabinet rejimi deyil) yalnız qeydli zal kompüterindən.
+        denied = _hall_computer_denied(request, attempt)
+        if denied is not None:
+            return denied
         final_result_remaining_seconds = final_center_review_seconds_left(attempt)
         final_result_timeout_url = _final_result_timeout_url(request)
         if request.GET.get("final_timeout") == "1" or final_result_remaining_seconds <= 0:
@@ -291,7 +311,8 @@ def exam_result(request, slug, attempt_id):
     answer_verdict_by_qid = {}
     # EXAM-P0-05: pəncərə açıq olduqca verdikt də (düz/səhv) sızıntıdır —
     # tələbə öz seçiminin düzgünlüyünü bilib paylaşa bilər.
-    if exam.exam_type == "test" and not answers_release_locked:
+    # 2026-10-21: final/midterm-də açar gizlidirsə (zaldan kənar) sual üzrə düz/səhv verdikti də göstərilmir.
+    if exam.exam_type == "test" and not answers_release_locked and not secure_key_hidden:
         for answer in answers:
             # EXAM-P0-03: verdikt də dondurulmuş seçimdən hesablanır ki,
             # bal ilə eyni mənbədən gəlsin.
@@ -336,9 +357,7 @@ def exam_result(request, slug, attempt_id):
         _remember_post_finish_result(request, attempt)
     can_appeal = score_adjustments.can_create(request, attempt)
     # 2026-10-20: «imtahan sonunda» apellyasiyada düzgün cavablar da görünür — panel izahı üçün.
-    appeal_onsite_minutes_hint = (
-        _appeal_onsite_hint_minutes(attempt, is_profile_results=is_profile_results) if can_appeal else 0
-    )
+    appeal_onsite_minutes_hint = _appeal_onsite_hint_minutes(attempt) if can_appeal else 0
     # EXAMQA R6 (2026-10-02): apellyasiya olunmayan növdə (quiz/sınaq) panel «pəncərə bağlıdır» yazmasın.
     appeal_applicable = score_adjustments.is_applicable(attempt)
     appeal_create_url = reverse("appeals:appeal_create", kwargs={"attempt_id": attempt.id})
@@ -433,6 +452,8 @@ def exam_result(request, slug, attempt_id):
             "history_url": history_url,
             "back_url": back_url,
             "is_final_exam_result": is_final_center_result,
+            # Zal çərçivəsində «Zaldan çıx» yoxdur — aşağıdakı çıxış zolağı onsuz da var.
+            "hall_frame_exit": not is_final_center_result,
             "is_trial_result": is_trial_result,
             "hide_test_answer_correctness": hide_test_answer_correctness,
             "answers_release_locked": answers_release_locked,

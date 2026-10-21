@@ -50,9 +50,23 @@ def clamp_range(seconds: int) -> tuple[int, str]:
     return best, RANGE_STEPS[best]
 
 
+def aligned_end(now: float | None = None) -> float:
+    """Range sorğusunun sonu keş intervalına (defolt 30 s) aşağı yuvarlanır (2026-10-21).
+
+    Əvvəl ``end = time.time()`` idi — sorğu parametrləri hər çağırışda fərqli olduğu üçün range sorğularının
+    keşi HEÇ VAXT tutmurdu (hər auto-refresh və hər açıq səhifə Prometheus-a yeni sorğu göndərirdi). İndi eyni
+    intervaldakı bütün çağırışlar eyni açarı işlədir; qrafikin son nöqtəsi ən çox bir interval gecikir.
+    """
+    from .clients import _cache_ttl
+
+    step = max(1, _cache_ttl())
+    now = time.time() if now is None else now
+    return float(int(now // step) * step)
+
+
 def _series(prom: PrometheusClient, promql: str, range_seconds: int) -> list[dict] | None:
     range_seconds, step = clamp_range(range_seconds)
-    end = time.time()
+    end = aligned_end()
     result = prom.query_range(promql, start=end - range_seconds, end=end, step=step)
     if result is None:
         return None

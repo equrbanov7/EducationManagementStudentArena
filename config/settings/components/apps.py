@@ -123,6 +123,8 @@ TEMPLATES = [
                 "apps.accounts.context_processors.view_as_context",
                 "core.context_processors.seo_context",
                 "core.context_processors.feature_flags",
+                # 2026-10-21: imtahan zalı sessiyasında sayt «chrome»-u gizlədilir (templates/base.html).
+                "apps.exams.context_processors.hall_session_chrome",
             ],
         },
     },

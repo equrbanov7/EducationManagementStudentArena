@@ -8,8 +8,11 @@ Performans qaydaları:
   (dev-klonda və ya metrik stek dayananda səhifə 5 s × N gözləməsin);
 * skalyar sorğular kiçik thread hovuzunda PARALEL gedir (hər biri
   ``clients.REQUEST_TIMEOUT_SECONDS`` ilə məhduddur);
-* nəticə ``SUMMARY_METRICS_TTL`` saniyə keşdə qalır — auto-refresh fırtınası
-  Prometheus-a çatmır.
+* nəticə ``SUMMARY_METRICS_TTL`` saniyə (və ya «yenilənmə intervalı», hansı böyükdürsə) keşdə qalır —
+  auto-refresh fırtınası Prometheus-a çatmır;
+* 2026-10-21: UZUN pəncərəli sorğular (``[24h]`` / ``[7d]`` — 7 günlük ``http_requests_total`` skanı ən
+  bahalısıdır) və 24 saatlıq qrafik ayrıca, ``SLOW_METRICS_TTL`` (5 dəq) keşlənir — onların dəyəri 30 s-də
+  praktiki dəyişmir, amma hər yenilənmədə Prometheus-un ən ağır işi idi.
 
 Heç bir istifadəçi/PIN/IP etiketi sorğulanmır — yalnız aqreqat saylar.
 """
@@ -28,7 +31,10 @@ from .clients import PrometheusClient
 logger = logging.getLogger(__name__)
 
 SUMMARY_METRICS_TTL = 20
+#: Uzun pəncərəli (24 saat / 7 gün) skalyarlar və 24 saatlıq qrafik üçün keş (2026-10-21).
+SLOW_METRICS_TTL = 300
 _CACHE_KEY = "monitoring:summary:metrics:v1"
+_SLOW_CACHE_KEY = "monitoring:summary:metrics:slow:v1"
 _MAX_WORKERS = 6
 
 _5XX = 'status_code=~"5.."'
@@ -74,6 +80,9 @@ SCALAR_QUERIES: dict[str, str] = {
     "celery_workers": "emsarena_celery_workers_online",
     "celery_queue": "sum(emsarena_celery_queue_length)",
     "celery_collected_at": "emsarena_celery_stats_collected_timestamp",
+    # 2026-10-21: prod-host-maint `monitoring-pause` node_exporter textfile markeri (1 = cadvisor/loki/promtail/
+    # grafana qəsdən dayandırılıb) — həmin hədəflər «dayanan xidmət» kimi göstərilmir.
+    "monitoring_paused": "max(emsarena_monitoring_paused)",
 }
 
 # 2026-10-02: hadisə SAYĞACLARI — heç baş verməyibsə seriya yoxdur və sorğu boş qaytarır; panel bunu
@@ -100,6 +109,16 @@ _SLOW_PROMQL = (
 )
 _ERROR_PROMQL = f"topk(6, sum by (path) (increase(http_requests_total{{{_5XX}}}[24h])) > 0)"
 _IGNORED_PATHS = frozenset({"/metrics/", "/health/", "/ping/"})
+#: `monitoring-pause` zamanı qəsdən dayanan scrape hədəfləri (docker-compose `cadvisor`, `loki`).
+PAUSED_JOBS = frozenset({"emsarena-cadvisor", "emsarena-loki"})
+
+
+def _is_slow(promql: str) -> bool:
+    return "[24h]" in promql or "[7d]" in promql
+
+
+SLOW_SCALARS = tuple(name for name, promql in SCALAR_QUERIES.items() if _is_slow(promql))
+FAST_SCALARS = tuple(name for name in SCALAR_QUERIES if name not in SLOW_SCALARS)
 
 
 def _rows(result, *, scale: float = 1.0) -> list[dict]:
@@ -128,8 +147,8 @@ def _down_jobs(targets) -> list[str]:
     return sorted(job for job, ok in status.items() if not ok)
 
 
-def _scalars(prom: PrometheusClient) -> dict:
-    names = list(SCALAR_QUERIES)
+def _scalars(prom: PrometheusClient, names=None) -> dict:
+    names = list(SCALAR_QUERIES if names is None else names)
     with ThreadPoolExecutor(max_workers=_MAX_WORKERS, thread_name_prefix="mon-summary") as pool:
         values = list(pool.map(lambda name: prom.scalar(SCALAR_QUERIES[name]), names))
     result = {}
@@ -146,35 +165,65 @@ def _series(prom: PrometheusClient, promql: str) -> list[list[float]]:
     return data[0]["points"] if data else []
 
 
-def collect_metrics() -> dict:
-    """Prometheus blokunu qaytarır: ``{"available": bool, ...}`` (keşli)."""
-    cached = cache.get(_CACHE_KEY)
+def _fast_ttl() -> int:
+    from .switches import cache_ttl
+
+    try:
+        return max(SUMMARY_METRICS_TTL, int(cache_ttl()))
+    except Exception:  # noqa: BLE001
+        return SUMMARY_METRICS_TTL
+
+
+def _slow_block(prom: PrometheusClient) -> dict:
+    """Uzun pəncərəli skalyarlar + 24 saatlıq qrafik (``SLOW_METRICS_TTL`` keşli)."""
+    cached = cache.get(_SLOW_CACHE_KEY)
     if cached is not None:
         return cached
-
-    prom = PrometheusClient()
-    targets = prom.query("up")
-    if targets is None:
-        block = {"available": False}
-        # Əlçatmazlıq da qısa keşlənir — hər auto-refresh yenidən timeout gözləməsin.
-        cache.set(_CACHE_KEY, block, SUMMARY_METRICS_TTL)
-        return block
-
-    started = time.monotonic()
     block = {
-        "available": True,
-        "down_jobs": _down_jobs(targets),
-        "values": _scalars(prom),
-        "slow_endpoints": _rows(prom.query(_SLOW_PROMQL), scale=1000.0),
+        "values": _scalars(prom, SLOW_SCALARS),
         "error_endpoints": _rows(prom.query(_ERROR_PROMQL)),
         "series": {
             "requests": _series(prom, "sum(rate(http_requests_total[15m]))"),
             "errors": _series(prom, f"sum(rate(http_requests_total{{{_5XX}}}[15m]))"),
         },
     }
-    logger.debug("Monitorinq xülasə metrikaları %.0f ms", (time.monotonic() - started) * 1000)
-    cache.set(_CACHE_KEY, block, SUMMARY_METRICS_TTL)
+    cache.set(_SLOW_CACHE_KEY, block, max(SLOW_METRICS_TTL, _fast_ttl()))
     return block
 
 
-__all__ = ["SCALAR_QUERIES", "SUMMARY_METRICS_TTL", "collect_metrics"]
+def collect_metrics() -> dict:
+    """Prometheus blokunu qaytarır: ``{"available": bool, ...}`` (keşli)."""
+    cached = cache.get(_CACHE_KEY)
+    if cached is not None:
+        return cached
+
+    ttl = _fast_ttl()
+    prom = PrometheusClient()
+    targets = prom.query("up")
+    if targets is None:
+        block = {"available": False}
+        # Əlçatmazlıq da qısa keşlənir — hər auto-refresh yenidən timeout gözləməsin.
+        cache.set(_CACHE_KEY, block, ttl)
+        return block
+
+    started = time.monotonic()
+    slow = _slow_block(prom)
+    values = {**_scalars(prom, FAST_SCALARS), **slow["values"]}
+    down_jobs = _down_jobs(targets)
+    if values.get("monitoring_paused") == 1.0:
+        down_jobs = [job for job in down_jobs if job not in PAUSED_JOBS]
+    block = {
+        "available": True,
+        "down_jobs": down_jobs,
+        "monitoring_paused": values.get("monitoring_paused") == 1.0,
+        "values": values,
+        "slow_endpoints": _rows(prom.query(_SLOW_PROMQL), scale=1000.0),
+        "error_endpoints": slow["error_endpoints"],
+        "series": slow["series"],
+    }
+    logger.debug("Monitorinq xülasə metrikaları %.0f ms", (time.monotonic() - started) * 1000)
+    cache.set(_CACHE_KEY, block, ttl)
+    return block
+
+
+__all__ = ["PAUSED_JOBS", "SCALAR_QUERIES", "SLOW_METRICS_TTL", "SUMMARY_METRICS_TTL", "collect_metrics"]

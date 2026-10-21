@@ -113,6 +113,7 @@ qəsdən YOXDUR, dəyişiklikləri appeal_stats.js özü tutur), KPI kartları v
           <th scope="col" class="is-sortable" data-sort="type">{% trans "Tip" %}<i class="fas fa-sort aps-arrow" aria-hidden="true"></i></th>
           <th scope="col">{% trans "Sual" %}</th>
           <th scope="col" class="is-sortable" data-sort="status">{% trans "Status" %}<i class="fas fa-sort aps-arrow" aria-hidden="true"></i></th>
+          <th scope="col">{% trans "Qərarı verən müəllim" context "appeals.template" %}</th>
           <th scope="col" class="is-sortable" data-sort="date">{% trans "Tarix" %}<i class="fas fa-sort aps-arrow" aria-hidden="true"></i></th>
           <th scope="col">{% trans "Detal" %}</th>
         </tr></thead>
@@ -165,7 +166,7 @@ qəsdən YOXDUR, dəyişiklikləri appeal_stats.js özü tutur), KPI kartları v
   </div>
 </div>
 
-<script defer src="{% static 'accounts/js/profile/appeal_stats.js' %}?v=20261014-searchux"></script>
+<script defer src="{% static 'accounts/js/profile/appeal_stats.js' %}?v=20261021-teacher"></script>
 
 {# Reviewer qərar modalı — statistika səhifəsindən naviqasiyasız açılır (manage-appeals ilə eyni maşınalıq). #}
 <div class="modal fade appeal-modal appeal-modal--review"

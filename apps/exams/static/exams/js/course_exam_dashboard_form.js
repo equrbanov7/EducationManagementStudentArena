@@ -14,13 +14,26 @@
 
   // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
   // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+  // 2026-10-21 (sahib: «aralı yazarkən də tapılsın»): sorğu həm də hərf/rəqəm qaçışlarına bölünüb yoxlanır —
+  // «634Qrafik», «qrafik/634», «qrafik-dizayn» → «634 qrafik» → «634 ing — Dizayn (Qrafik)» (server əkizi:
+  // apps/exams/services/lookup_search.py). Söz sırası fərq etmir (tokenlər arası VƏ).
+  function splitQuery(query) {
+    var runs = String(query || "").replace(/\u0307/g, "").match(/\p{L}+|\p{N}+/gu);
+    return runs ? runs.join(" ") : "";
+  }
+
   function searchMatcher(query) {
     var q = String(query || "").trim();
     var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+    var split = splitQuery(q);
+    var mSplit = window.EMSSearch && split && split !== q ? window.EMSSearch.matcher(split) : null;
     var low = q.toLowerCase();
     return function (text) {
       var t = String(text || "").replace(/\u0307/g, "");
-      return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+      if (m) {
+        return m(t) || Boolean(mSplit && mSplit(t));
+      }
+      return !low || t.toLowerCase().indexOf(low) !== -1;
     };
   }
 
@@ -363,6 +376,7 @@
   }
 
   namespace.form = {
+    searchMatcher: searchMatcher,
     initSearchableSelect: initSearchableSelect,
     initGroupUserSelectionSync: initGroupUserSelectionSync,
     initAccessToggle: initAccessToggle,

@@ -19,6 +19,7 @@ from apps.registrar.exam_bridge import (
     record_exam_result,
 )
 from apps.registrar.integrity import eligible_instructor_user_ids
+from apps.registrar.midterm_bridge import record_midterm_result, student_interim_rows
 from apps.registrar.models import StudentAcademicRecord
 from apps.registrar.services import enroll_student_in_subject
 from apps.registrar.signals import student_group_changed
@@ -38,6 +39,7 @@ __all__ = [
     "exam_eligibility_batch",
     "exam_result_summary",
     "record_exam_result",
+    "record_midterm_result",
     "student_group_changed",
 ]
 
@@ -238,7 +240,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     from apps.registrar import entry_standard, exam_eligibility, gradebook, gradebook_components, journal_extras
     from apps.registrar import student_journal_context as _jsc
     from apps.registrar import subject_exempt as _subject_exempt
-    from apps.registrar.models import ComponentScore, Enrollment, LessonMark
+    from apps.registrar.models import Enrollment, LessonMark
 
     if organization is None or not getattr(request.user, "is_authenticated", False):
         return None
@@ -333,18 +335,9 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     )
     hidden_today = False
 
-    kollokviums = []
     # Aralıq qiymətləndirmə: keçmiş dövrlərdə K1–K3, 2026/2027-dən tək Midterm (0–30; sərbəst iş açıqdırsa 0–20).
     interim, kcomps = journal_extras.display_components(offering)
-    if kcomps:
-        score_by = {
-            cs.component_id: cs.score
-            for cs in ComponentScore.objects.filter(component__in=kcomps, enrollment=enrollment)
-        }
-        kollokviums = [
-            {"component": c, "score": score_by.get(c.id), "held_on": c.held_on, "label": interim.label_for(i)}
-            for i, c in enumerate(kcomps)
-        ]
+    kollokviums = student_interim_rows(interim, kcomps, enrollment)  # ``auto`` — test midterm (2026-10-21)
 
     # Rəsmi düzəliş almış xanalar (tələbə tərəfdə sarı + tarixçə üçün, sənədsiz).
     from apps.registrar import corrections as _corrections

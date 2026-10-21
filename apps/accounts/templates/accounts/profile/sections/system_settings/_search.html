@@ -1,0 +1,33 @@
+{% load i18n %}
+{% comment %}«Sistem tənzimləmələri» — BÜTÜN qruplar üzrə axtarış (sahib 2026-10-21). İndeks server-render olunur (hər açar:
+ad, izah, açar adı, qrup), süzgəc brauzerdədir — system_settings_search.js, EMSSearch (az/ing hərf qatlama, tokenli:
+söz sırası fərq etmir). Nəticə linki qrupun alt səhifəsinə `ss_key` ilə aparır; açar vurğulanır.{% endcomment %}
+<div class="sysset-search" role="search">
+    <label class="sr-only" for="ssSearch">{% trans "Tənzimləmələrdə axtar" context "accounts.runtime_settings" %}</label>
+    <i class="fas fa-magnifying-glass sysset-search__icon" aria-hidden="true"></i>
+    <input type="search" class="ems-input sysset-search__input" id="ssSearch"
+           placeholder="{% trans 'Tənzimləmələrdə axtar: ad, izah və ya açar' context 'accounts.runtime_settings' %}"
+           autocomplete="off" spellcheck="false" enterkeyhint="search"
+           aria-controls="ssSearchResults" data-ss-search>
+</div>
+<div class="sysset-results" id="ssSearchResults" data-ss-results hidden>
+    <p class="sysset-results__status" role="status" aria-live="polite" data-ss-results-status
+       data-empty-text="{% trans 'Heç nə tapılmadı' context 'accounts.runtime_settings' %}"
+       data-count-text="{% trans 'Tapıldı: {n}' context 'accounts.runtime_settings' %}"></p>
+    {% for g in ss.search_groups %}
+    <section class="sysset-results__group" data-ss-result-group="{{ g.key }}">
+        <h3 class="sysset-results__title">{{ g.label }}</h3>
+        <ul class="sysset-results__list">
+            {% for item in g.items %}
+            <li class="sysset-results__item" data-ss-hit data-ss-hit-group="{{ g.key }}" data-ss-hit-key="{{ item.key }}" data-ss-text="{{ item.label }} {{ item.help }} {{ item.key }} {{ g.label }}">
+                <a class="sysset-results__link" href="{{ item.url }}" data-ss-hit-link>
+                    <span class="sysset-results__label">{{ item.label }}{% if item.overridden %} <span class="sysset__badge">{% trans "Dəyişdirilib" context "accounts.runtime_settings" %}</span>{% endif %}</span>
+                    {% if item.help %}<span class="sysset-results__help">{{ item.help }}</span>{% endif %}
+                    <code class="sysset-results__key">{{ item.key }}</code>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endfor %}
+</div>

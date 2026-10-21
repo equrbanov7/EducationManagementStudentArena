@@ -76,18 +76,18 @@
     });
   }
   function skeletonRows(){
-    var tr=""; for(var i=0;i<8;i++){ tr+='<tr>'; for(var c=0;c<10;c++){ tr+='<td><div class="aps-skel"></div></td>'; } tr+='</tr>'; }
+    var tr=""; for(var i=0;i<8;i++){ tr+='<tr>'; for(var c=0;c<11;c++){ tr+='<td><div class="aps-skel"></div></td>'; } tr+='</tr>'; }
     rows.innerHTML=tr;
   }
   function renderRows(data){
     var list=data.results||[];
-    if(!list.length){ rows.innerHTML='<tr><td colspan="10"><div class="aps-state"><i class="fas fa-folder-open"></i>'+T.none+'</div></td></tr>'; pager.innerHTML=""; return; }
+    if(!list.length){ rows.innerHTML='<tr><td colspan="11"><div class="aps-state"><i class="fas fa-folder-open"></i>'+T.none+'</div></td></tr>'; pager.innerHTML=""; return; }
     function clip(v){ v=v||"—"; return '<td class="aps-clip" title="'+esc(v)+'">'+esc(v)+'</td>'; }
     rows.innerHTML=list.map(function(r){
       var badge='<span class="aps-badge aps-badge--'+esc(r.status_code)+'">'+esc(r.status)+'</span>';
       return '<tr><td><b>'+esc(r.student)+'</b><br><span class="aps-uname">@'+esc(r.username)+'</span></td>'+
         clip(r.group)+clip(r.teacher)+clip(r.exam)+clip(r.subject)+
-        '<td>'+esc(r.type||"—")+'</td><td>'+esc(r.items)+'</td><td>'+badge+'</td><td>'+esc(r.date)+'</td>'+
+        '<td>'+esc(r.type||"—")+'</td><td>'+esc(r.items)+'</td><td>'+badge+'</td>'+clip(r.decided_by_teacher)+'<td>'+esc(r.date)+'</td>'+
         '<td><a class="aps-view" href="'+reviewUrl(r.appeal_id)+'" data-appeal-review-url="'+reviewUrl(r.appeal_id)+'" data-no-route-loading><i class="fas fa-eye"></i> '+T.view+'</a></td></tr>';
     }).join("");
     var pg=data.pagination;

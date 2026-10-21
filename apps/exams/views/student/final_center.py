@@ -42,7 +42,11 @@ from apps.exams.services.center_exams import (
     exam_kind,
     is_center_kind,
 )
-from apps.exams.services.exam_center_gate import org_computer_access_allowed, resolve_room_computer
+from apps.exams.services.exam_center_gate import (
+    hall_computer_check_enabled,
+    org_computer_access_allowed,
+    resolve_room_computer,
+)
 from apps.exams.services.final_center import (
     ERROR_LOCKED,
     ERROR_RATE_LIMITED,
@@ -104,6 +108,13 @@ def _midterm_entry_disabled_message():
         "exams.final_center.entry",
         "Midterm imtahanları hazırda imtahan mərkəzi vasitəsilə keçirilmir — imtahana kabinetinizdəki "
         "«Təyin olunmuş imtahanlar» bölməsindən başlayın.",
+    )
+
+
+def _no_room_message():
+    return pgettext(
+        "exams.final_center.entry",
+        "Zal müəyyən edilmədi — imtahan zalının nəzarətçisinə müraciət edin.",
     )
 
 
@@ -301,6 +312,12 @@ def _handle_login(request, kind=FINAL_KIND):
     # tələbə hansı zalda olduğunu qeydli kompüterin IP-si müəyyən edir. Qeydiyyatsız
     # kompüterdən giriş yoxdur (istifadəçini login DA ETMƏ).
     room, computer = resolve_room_computer(request, ticket.organization)
+    if room is None and not hall_computer_check_enabled():
+        # Zal kompüteri yoxlaması söndürülüb (sahib 2026-10-21): kompüter zalı müəyyən etmirsə biletin artıq
+        # təyin olunduğu zal oturumu götürülür; o da yoxdursa tələbə nəzarətçiyə yönləndirilir.
+        if ticket.session_id is None:
+            return _render_login(request, kind, error=_no_room_message(), username=uname)
+        room = ticket.session.room
     if room is None:
         return _render_login(request, kind, error=_room_access_error(), username=uname)
 

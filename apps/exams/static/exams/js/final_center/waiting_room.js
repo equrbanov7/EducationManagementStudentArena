@@ -7,6 +7,8 @@
  * - "room_started" gələndə hər müştəri KİÇİK təsadüfi gecikmə ilə begin
  *   endpoint-inə POST edir — start anında server yükü yayılır.
  * - WS uzun müddət qopuq qalsa, aşağı tezlikli fallback poll (state URL).
+ * - Redizayn 2026-10-21: kökün `data-phase` atributu (waiting|starting|paused|stopped) yalnız status
+ *   indikatorunun görünüşüdür (student_waiting.css) — mətn hələ də `#fexc-wait-message`-dədir (aria-live).
  */
 (function () {
     "use strict";
@@ -60,6 +62,10 @@
         if (msgEl) msgEl.textContent = text;
     }
 
+    function setPhase(phase) {
+        root.dataset.phase = phase;
+    }
+
     function bumpChecks() {
         checkCount += 1;
         if (checkEl) checkEl.textContent = String(checkCount);
@@ -95,6 +101,7 @@
         showManualStart();
         if (beginRequested || finished) return;
         beginRequested = true;
+        setPhase("starting");
         setMessage(i18n.starting);
         var jitter = Math.floor(Math.random() * BEGIN_JITTER_MS);
         window.setTimeout(function () { requestBegin(); }, jitter);
@@ -104,6 +111,7 @@
         manualStartBtn.addEventListener("click", function () {
             // Əl ilə cəhd: davam edən avtomatik cəhdi sıfırla və yenidən başlat.
             beginRequested = true;
+            setPhase("starting");
             setMessage(i18n.starting);
             requestBegin();
         });
@@ -149,17 +157,21 @@
                 break;
             case "room_ended":
                 finished = true;
+                setPhase("stopped");
                 setMessage(i18n.ended);
                 break;
             case "session_cancelled":
                 finished = true;
+                setPhase("stopped");
                 setMessage(i18n.cancelled);
                 break;
             case "removed":
                 finished = true;
+                setPhase("stopped");
                 setMessage(interventionMessage(i18n.removed, data.reason));
                 break;
             case "suspended":
+                setPhase("paused");
                 setMessage(interventionMessage(gettext("İmtahanınız müvəqqəti dayandırıldı."), data.reason));
                 break;
             case "credential_rotated":
@@ -209,11 +221,13 @@
                     if (data.session_state === "active") scheduleBegin();
                     if (data.session_state === "ended" || data.session_state === "cancelled") {
                         finished = true;
+                        setPhase("stopped");
                         setMessage(data.session_state === "ended" ? i18n.ended : i18n.cancelled);
                         stopFallbackPolling();
                     }
                     if (data.ticket_status === "removed") {
                         finished = true;
+                        setPhase("stopped");
                         setMessage(interventionMessage(i18n.removed, data.removal_reason));
                         stopFallbackPolling();
                     }

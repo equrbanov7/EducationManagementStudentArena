@@ -1,0 +1,280 @@
+/* İmtahan mərkəzi — PIN-dən sonrakı məlumat + qaydalar modalı (partials/_final_gate_modal.html).
+   Redizayn 2026-10-21: panel ekrana sığır (max-height 100dvh − boşluq); başlıq və alt zolaq sabitdir,
+   yalnız ORTA hissə (meta, qaydalar, dil seçimi) sürüşür → təsdiq qutusu və «Geri»/«Davam et» həmişə
+   görünür (əvvəl 1366×768-də düymələr ekranın altında qalırdı). Yalnız dizayn tokenləri. */
+
+.fexc-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    background: color-mix(in srgb, var(--ems-neutral-900) 55%, transparent);
+    backdrop-filter: blur(2px);
+}
+
+.fexc-modal-panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 680px;
+    max-height: calc(100vh - 48px);
+    max-height: calc(100dvh - 48px);
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-2xl);
+    box-shadow: var(--ems-sh-dialog);
+    overflow: hidden;
+    animation: fexc-modal-in 0.18s ease-out;
+}
+
+.fexc-modal-panel::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--ems-primary-600);
+    z-index: 1;
+}
+
+@keyframes fexc-modal-in {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.fexc-gate-form {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* ── Başlıq ── */
+.fexc-gate-head {
+    flex: none;
+    padding: 24px 28px 16px;
+    border-bottom: 1px solid var(--ems-neutral-100);
+}
+
+.fexc-gate-head .fexc-kind {
+    margin-bottom: 10px;
+}
+
+.fexc-gate-head .fexc-title {
+    font-size: 1.3rem;
+    outline: none;
+}
+
+.fexc-gate-head .fexc-sub {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Sürüşən məzmun ── */
+.fexc-gate-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 18px 28px;
+}
+
+.fexc-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px 16px;
+    margin: 0 0 16px;
+    padding: 14px 16px;
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-xl);
+}
+
+.fexc-meta dt {
+    margin-bottom: 3px;
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.fexc-meta dd {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ems-neutral-900);
+}
+
+.fexc-rules {
+    margin: 0 0 16px;
+    padding: 14px 18px;
+    background: var(--ems-warning-50);
+    border: 1px solid var(--ems-warning-bd);
+    border-radius: var(--ems-r-xl);
+}
+
+.fexc-rules h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--ems-warning-800);
+}
+
+.fexc-rules ul {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding-left: 18px;
+    list-style: disc;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--ems-neutral-800);
+}
+
+.fexc-rules li::marker {
+    color: var(--ems-warning-600);
+}
+
+.fexc-rules-extra {
+    margin: 10px 0 0;
+    padding-top: 10px;
+    border-top: 1px dashed var(--ems-warning-bd);
+    font-size: 0.88rem;
+    color: var(--ems-neutral-700);
+}
+
+/* ── İmtahan dili ── */
+.fexc-langs {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.fexc-langs legend {
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+
+.fexc-lang-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+}
+
+.fexc-lang-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 10px;
+    font-weight: 600;
+    color: var(--ems-neutral-700);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.fexc-lang-option:hover {
+    border-color: var(--ems-primary-300);
+}
+
+.fexc-lang-option:has(input:checked) {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.fexc-lang-option:has(input:focus-visible) {
+    box-shadow: var(--ems-sh-focus);
+}
+
+.fexc-lang-option input {
+    accent-color: var(--ems-primary-600);
+}
+
+.fexc-lang-single {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 0.88rem;
+}
+
+/* ── Sabit alt zolaq: təsdiq + düymələr ── */
+.fexc-gate-foot {
+    flex: none;
+    padding: 14px 28px 18px;
+    background: var(--ems-neutral-50);
+    border-top: 1px solid var(--ems-neutral-200);
+}
+
+.fexc-confirm {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0 0 14px;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    color: var(--ems-neutral-800);
+    cursor: pointer;
+}
+
+.fexc-confirm input {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    accent-color: var(--ems-primary-600);
+}
+
+.fexc-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+/* ── Alçaq ekran ── */
+@media (max-height: 640px) {
+    .fexc-modal-backdrop { padding: 12px; }
+    .fexc-modal-panel { max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); }
+    .fexc-gate-head { padding: 18px 24px 12px; }
+    .fexc-gate-body { padding: 14px 24px; }
+    .fexc-gate-foot { padding: 12px 24px 14px; }
+    .fexc-confirm { margin-bottom: 10px; }
+}
+
+/* ── Telefon: tam ekran vərəq ── */
+@media (max-width: 560px) {
+    .fexc-modal-backdrop { padding: 0; align-items: stretch; }
+    .fexc-modal-panel {
+        max-width: none;
+        max-height: none;
+        height: 100vh;
+        height: 100dvh;
+        border: none;
+        border-radius: 0;
+    }
+    .fexc-gate-head,
+    .fexc-gate-body,
+    .fexc-gate-foot { padding-left: 18px; padding-right: 18px; }
+    .fexc-actions { flex-direction: column-reverse; }
+    .fexc-actions .fexc-btn { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fexc-modal-panel { animation: none; }
+    .fexc-lang-option { transition: none; }
+}

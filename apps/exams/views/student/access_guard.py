@@ -111,6 +111,11 @@ def ensure_active_attempt_access(attempt, user, *, request=None, user_excluded=N
         from apps.exams.services.exam_network import enforce_attempt_network
 
         enforce_attempt_network(request, attempt)
+        # 2026-10-21 (sahib, sərt zal rejimi): mərkəz cəhdi yalnız qeydli zal kompüterindən (sınaq istisna);
+        # ``HallComputerDenied`` → ``final_device_guarded`` 403 xəbərdarlıq səhifəsi / JSON.
+        from apps.exams.services.center_exams import ensure_center_hall_computer
+
+        ensure_center_hall_computer(request, attempt)
     if final_entry_session_revoked(request, attempt):
         revoke_final_entry_session(request)
     from apps.exams.services.final_center.device_binding import enforce_final_device

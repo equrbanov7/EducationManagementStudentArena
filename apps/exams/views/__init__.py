@@ -54,12 +54,13 @@ from .student.final_center_waiting import (
     final_exam_waiting,
     final_ticket_state,
 )
-from .student.lists import assigned_student_exam_list, student_exam_list
-from .student.question_timer import question_seen
 
 # ═══════════════════════════════════════════════════════════════
 # STUDENT VIEWS
 # ═══════════════════════════════════════════════════════════════
+from .student.hall_session import hall_session_exit
+from .student.lists import assigned_student_exam_list, student_exam_list
+from .student.question_timer import question_seen
 from .student.results import exam_result, student_exam_history
 from .teacher.exams import (
     assigned_student_count,
@@ -184,6 +185,7 @@ __all__ = [
     "toggle_exam_active",
     "toggle_exam_archive",
     "toggle_exam_results_visibility",
+    "hall_session_exit",
     "delete_exam",
     "restore_exam",
     "permanent_delete_exam",

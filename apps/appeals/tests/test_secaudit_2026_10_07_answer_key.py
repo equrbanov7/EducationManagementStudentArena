@@ -125,9 +125,14 @@ class AppealPageAnswerKeyTests(TestCase):
         self.assertNotContains(response, "appeal-option is-correct", html=False)
 
     def test_final_key_visible_inside_center_review_window(self):
-        """Qəbul edilmiş dizayn: mərkəzin 5 dəq-lik baxışında (nəticə səhifəsi kimi) açar görünür."""
-        response = self._get(self._test_attempt("final", finished_ago=timedelta(minutes=1)))
-        self.assertContains(response, KEY_OPTION)
+        """Qəbul edilmiş dizayn: mərkəzin 5 dəq-lik baxışında (nəticə səhifəsi kimi) açar görünür —
+        2026-10-21: yalnız HƏMİN cəhdin zal sessiyasında və bağlı cihazda; zaldan kənar eyni URL açarı vermir."""
+        from apps.exams.tests.hall_helpers import enter_hall
+
+        attempt = self._test_attempt("final", finished_ago=timedelta(minutes=1))
+        self.assertNotContains(self._get(attempt), KEY_OPTION)
+        enter_hall(self.client, attempt)
+        self.assertContains(self._get(attempt), KEY_OPTION)
 
     def test_written_midterm_ideal_answer_hidden(self):
         response = self._get(self._written_attempt("midterm"))

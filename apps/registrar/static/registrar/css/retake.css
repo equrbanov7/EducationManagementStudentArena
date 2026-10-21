@@ -454,3 +454,10 @@
     flex: 0 0 auto;
     accent-color: var(--ems-primary-600);
 }
+
+/* «Pəncərələr» cədvəlində açanın qeydi (əvvəl exam_chance.css-in .exch-ref-i idi — o fayl bu bölmədə yüklənmir). */
+.rt-ref {
+    display: block;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-xs);
+}
