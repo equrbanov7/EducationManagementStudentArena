@@ -52,6 +52,16 @@ onlar məzmun hazırlığıdır, qiymətləndirmə deyil. İcazə şərtləri D�
                 </a>
             </li>
             {% endif %}
+            {% comment %}2026-10-21: müəllimin öz fənninə aid apellyasiyaları (yalnız-oxu, /appeals/teaching/) — qərar
+            hüququ olanlar «Apellyasiyalar» bölməsindən hamısını görür.{% endcomment %}
+            {% if not role_capabilities.can_manage_appeals and 'my-exams' in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{% url 'appeals:teaching_appeals' %}" class="sidebar-menu-link">
+                    {% nav_icon "scale" "sidebar-menu-icon" %}
+                    <span class="sidebar-menu-text">{% trans "Fənnimə aid apellyasiyalar" context "appeals.template.teaching" %}</span>
+                </a>
+            </li>
+            {% endif %}
         </ul>
     </details>
 </li>

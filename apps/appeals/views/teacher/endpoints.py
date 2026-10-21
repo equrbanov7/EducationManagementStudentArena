@@ -43,6 +43,14 @@ from ...services import (
 )
 from ..shared._helpers import _marked_question_map
 from ._review_context import KEY_CORRECTION_MIN_REASON, appeal_timeline, attach_item_comparison
+from ._review_decision import (
+    attach_list_teachers,
+    decision_timeline_events,
+    notify_after_commit,
+    parse_decision_extras,
+    record_decision,
+    review_teacher_context,
+)
 
 
 def _format_seconds(seconds):
@@ -119,7 +127,9 @@ def build_manage_appeals_context(request, *, list_action, section=""):
         )
     )
 
-    appeals = Appeal.objects.select_related("exam", "attempt", "student", "reviewed_by").prefetch_related("items")
+    appeals = Appeal.objects.select_related("exam", "attempt", "student", "reviewed_by").prefetch_related(
+        "items", "items__decided_by_teacher"
+    )
 
     if organization is not None:
         appeals = appeals.filter(organization=organization)
@@ -172,6 +182,8 @@ def build_manage_appeals_context(request, *, list_action, section=""):
     for appeal in page_obj.object_list:
         appeal.edit_seconds_left = _appeal_edit_seconds_left(appeal, now)
         appeal.edit_time_label = _format_seconds(appeal.edit_seconds_left)
+    # 2026-10-21 (sahib): «Fənni tədris edən» + «Qərarı verən müəllim» sütunları.
+    attach_list_teachers(page_obj.object_list)
 
     return {
         "appeal_page_obj": page_obj,
@@ -216,7 +228,7 @@ def manage_appeals(request):
     return render(request, "appeals/partials/_manage_appeals_body.html", context)
 
 
-def _apply_review_decisions(request, appeal, decisions):
+def _apply_review_decisions(request, appeal, decisions, *, teacher=None):
     """Bütün qərarları TƏK tranzaksiyada tətbiq et (Audit 2026-09-28 EXA-05).
 
     5 dəqiqəlik redaktə pəncərəsində yenidən qərar: əvvəlki bal düzəlişinin geri
@@ -236,13 +248,45 @@ def _apply_review_decisions(request, appeal, decisions):
                 revert_item_adjustment(item, reviewer=request.user, request=request)
             if decision == "accept":
                 # Qəbul → sabit +1 bal (bax scoring.accept_appeal_item).
-                accept_appeal_item(item, reviewer=request.user, response_text=response_text, request=request)
+                accept_appeal_item(
+                    item,
+                    reviewer=request.user,
+                    response_text=response_text,
+                    request=request,
+                    decided_by_teacher=teacher,
+                )
             else:
-                reject_appeal_item(item, reviewer=request.user, response_text=response_text, request=request)
+                reject_appeal_item(
+                    item,
+                    reviewer=request.user,
+                    response_text=response_text,
+                    request=request,
+                    decided_by_teacher=teacher,
+                )
         note = (request.POST.get("reviewer_note") or "").strip()
         if note:
             appeal.reviewer_note = note
             appeal.save(update_fields=["reviewer_note", "updated_at"])
+
+
+def _save_review(request, appeal, decisions, *, is_test, score_before):
+    """Qərarlar + qərar yazısı TƏK tranzaksiyada; bildiriş təsdiqdən sonra bir dəfə (``decision_event``)."""
+    from ...services.notify import decision_event
+
+    teacher, document = parse_decision_extras(request, appeal)
+    with transaction.atomic(), decision_event():
+        _apply_review_decisions(request, appeal, decisions, teacher=teacher)
+        score_after, _, _ = _current_review_score(appeal, is_test)
+        record = record_decision(
+            request,
+            appeal,
+            teacher=teacher,
+            document=document,
+            decisions=decisions,
+            score_before=score_before,
+            score_after=score_after,
+        )
+        notify_after_commit(appeal, record)
 
 
 @login_required
@@ -281,7 +325,12 @@ def review_appeal(request, appeal_id):
 
     items = list(
         appeal.items.select_related(
-            "question", "answer", "score_adjustment", "resolved_by", "score_adjustment__applied_by"
+            "question",
+            "answer",
+            "score_adjustment",
+            "resolved_by",
+            "score_adjustment__applied_by",
+            "decided_by_teacher",
         )
         .prefetch_related("question__options", "answer__selected_options")
         .all()
@@ -299,7 +348,8 @@ def review_appeal(request, appeal_id):
     # verilir; birbaşa URL sidebar-lı siyahı bölməsinə yönləndirilir.
     dashboard_url = reverse("accounts:profile") + "?section=manage-appeals"
     if not is_fragment and request.method != "POST":
-        return redirect(dashboard_url)
+        # 2026-10-21: bildiriş keçidi qərar modalını birbaşa açır (appeals_sections.js → ``open_appeal``).
+        return redirect(f"{dashboard_url}&open_appeal={appeal.id}")
 
     final_item_statuses = {APPEAL_ITEM_STATUS_ACCEPTED, APPEAL_ITEM_STATUS_REJECTED}
     now = timezone.now()
@@ -347,8 +397,10 @@ def review_appeal(request, appeal_id):
             error_message = pgettext("appeals.view.message", "Hər qərar üçün izah/cavab mətni yazmalısınız.")
 
         if not error_message:
+            # 2026-10-21 (sahib): qərarı verən müəllim (məcburi) + əsaslandırıcı sənəd (tənzimləməyə görə).
             try:
-                _apply_review_decisions(request, appeal, decisions)
+                if decisions:
+                    _save_review(request, appeal, decisions, is_test=is_test, score_before=score_before)
             except ValidationError as exc:
                 error_message = exc.messages[0] if exc.messages else str(exc)
 
@@ -438,7 +490,9 @@ def review_appeal(request, appeal_id):
     # final-dır: "yadda saxla" düyməsi və ümumi qeyd sahəsi gizlədilir.
     review_has_editable = review_can_decide and any(not item.is_locked for item in items)
 
+    timeline = sorted(appeal_timeline(appeal, items) + decision_timeline_events(request, appeal), key=lambda e: e["at"])
     context = {
+        **review_teacher_context(request, appeal, items),
         "appeal": appeal,
         "items": items,
         "is_test": is_test,
@@ -448,7 +502,7 @@ def review_appeal(request, appeal_id):
         "review_has_editable": review_has_editable,
         "review_can_decide": review_can_decide,
         "marked_question_by_qid": _marked_question_map(appeal.attempt),
-        "review_timeline": appeal_timeline(appeal, items),
+        "review_timeline": timeline,
         "key_min_reason": KEY_CORRECTION_MIN_REASON,
     }
     return render(request, "appeals/partials/_review_appeal_body.html", context)

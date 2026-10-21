@@ -13,6 +13,11 @@ Qərar HƏMİŞƏ serverdə, bu modulda verilir; şablon yalnız nəticəni gös
   - **eyni sessiya**: bu sessiya həmin cəhdin təhvildən sonrakı nəticə ekranını görüb
     (``post_finish_result_seen``) — və ya mərkəzin (final/midterm) 5 dəqiqəlik nəticə baxışı hələ gedir
     (nəticə səhifəsi açarı onsuz da həmin anda göstərir, ``secure_answer_key_hidden``).
+* **2026-10-21 (sahib): «düzgün və səhv cavabı ancaq həmin zaldakı imtahan verdiyi kompüterdə görə bilər»** — yuxarıdakılara
+  ƏLAVƏ olaraq: cəhd mərkəz (zal) cəhdidir, sorğu HƏMİN cəhdin aktiv zal sessiyasındadır (bilet markeri + ən son giriş
+  nəsli; logout / 5 dəqiqəlik baxışın sonu / zal apellyasiyası onu silir) VƏ cəhdin bağlı olduğu cihazdandır
+  (``device_binding`` cookie/sessiya) — ``apps.exams.public.hall_review_open``. Zalı tərk edən (başqa cihaz, yeni
+  sessiya, kabinetdən biletsiz midterm) həmişə «sonradan» rejimindədir.
 * **sonradan** — qalan bütün hallar: forma/detal yalnız sualın mətnini (şəkil/video/kod blokları
   daxil) göstərir; variantlar, tələbənin seçimi, düzgün cavab, ideal cavab serverdən ÖTÜRÜLMÜR.
 
@@ -33,6 +38,7 @@ from apps.exams.public import (
     attempt_in_center,
     exam_answers_release_locked,
     exam_network_allowed,
+    hall_review_open,
     post_finish_result_seen,
     secure_answer_key_hidden,
 )
@@ -108,7 +114,7 @@ def appeal_onsite_eligible(request, attempt, *, is_profile_results=False, for_su
     same_session = post_finish_result_seen(request, attempt.id) or _final_center_review_active(
         request, attempt, is_profile_results=is_profile_results, now=current
     )
-    if not same_session:
+    if not same_session or not hall_review_open(request, attempt):
         return False
     return exam_network_allowed(request, attempt.exam, user=user)
 

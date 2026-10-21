@@ -16,6 +16,7 @@ from apps.appeals.views import _can_open_appeal_management as can_open_appeal_ma
 from apps.appeals.views import (  # noqa: F401
     build_manage_appeals_context,
     build_my_appeals_context,
+    build_teaching_appeals_context,
     count_pending_manage_appeals,
 )
 
@@ -26,6 +27,7 @@ __all__ = [
     "can_open_appeal_management",
     "apply_bonus_to_test_result",
     "build_manage_appeals_context",
+    "build_teaching_appeals_context",
     "build_my_appeals_context",
     "count_pending_manage_appeals",
     "student_visible_appeal_bonus_map",

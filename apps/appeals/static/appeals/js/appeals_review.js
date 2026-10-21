@@ -271,6 +271,11 @@
                 if (invalid[0].scrollIntoView) {
                     invalid[0].scrollIntoView({ behavior: "smooth", block: "center" });
                 }
+                return;
+            }
+            // 3) 2026-10-21: «Qərarı verən müəllim» məcburi; sənəd — tənzimləmə yandırılıbsa (server də yoxlayır).
+            if (!validateDecider(form)) {
+                e.preventDefault();
             }
         });
 
@@ -299,6 +304,32 @@
         });
 
         updateSummary();
+    }
+
+    function setDeciderError(box, message) {
+        var error = box ? box.querySelector("[data-review-decider-error]") : null;
+        if (!error) { return; }
+        error.textContent = message || "";
+        error.hidden = !message;
+        box.classList.toggle("has-error", Boolean(message));
+    }
+
+    function validateDecider(form) {
+        var box = form.querySelector("[data-review-decider]");
+        if (!box) { return true; }
+        var teacher = box.querySelector("[data-review-teacher]");
+        var doc = box.querySelector("[data-review-document]");
+        var message = "";
+        if (teacher && !teacher.value) {
+            message = box.getAttribute("data-i18n-need-teacher") || "";
+        } else if (doc && doc.hasAttribute("data-required") && !(doc.files && doc.files.length)) {
+            message = box.getAttribute("data-i18n-need-document") || "";
+        }
+        setDeciderError(box, message);
+        if (message && box.scrollIntoView) {
+            box.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        return !message;
     }
 
     function initAll() {

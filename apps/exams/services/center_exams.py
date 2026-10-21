@@ -157,6 +157,122 @@ def attempt_in_center(attempt) -> bool:
     return attempt_has_center_ticket(attempt)
 
 
+# ── Zal sessiyası (2026-10-21, sahib) ────────────────────────────────────────────────────────────────
+# «İmtahan zalında midterm/final verərkən — nəticəyə baxanda da — sayt başlığı görünməməlidir» və «düzgün/səhv
+# cavabı ancaq imtahan verdiyi zal kompüterində görə bilər». Zal sessiyası = PIN girişindən sonra sessiyada
+# saxlanan bilet markeri (``final_center.entry.ENTRY_SESSION_KEY``); logout / 5 dəqiqəlik baxışın sonu / zal
+# apellyasiyası onu silir.
+
+
+def hall_session_ticket_id(request):
+    """Doğrulanmış zal biletinin id-si (giriş edilmiş istifadəçi + sessiya markeri) və ya ``None``."""
+    from apps.exams.services.final_center.entry import ENTRY_SESSION_KEY
+
+    user = getattr(request, "user", None)
+    if request is None or not getattr(user, "is_authenticated", False):
+        return None
+    session = getattr(request, "session", None)
+    if session is None:
+        return None
+    try:
+        return int(session.get(ENTRY_SESSION_KEY) or 0) or None
+    except (TypeError, ValueError):
+        return None
+
+
+def hall_session_active(request) -> bool:
+    """Sorğu imtahan zalı sessiyasındadırmı — sayt «chrome»-u (başlıq, axtarış, «Qoşul», AI) gizlədilir."""
+    return hall_session_ticket_id(request) is not None
+
+
+def hall_session_ticket(request):
+    """Zal sessiyasının bileti (imtahanı ilə) və ya ``None`` — dar, bilet + sahib süzgəcli oxu."""
+    ticket_id = hall_session_ticket_id(request)
+    if ticket_id is None:
+        return None
+    from apps.exams.models import FinalExamTicket
+    from core.rls import bypass_rls
+
+    with bypass_rls():
+        return (
+            FinalExamTicket.objects.select_related("exam")
+            .filter(pk=ticket_id, student_id=request.user.id)
+            .only(
+                "id",
+                "attempt_id",
+                "pin_issued_at",
+                "entry_validated_at",
+                "exam__id",
+                "exam__title",
+                "exam__exam_type_extended",
+            )
+            .first()
+        )
+
+
+def hall_session_for_attempt(request, attempt) -> bool:
+    """Bu sorğu HƏMİN cəhdin zal sessiyasındadırmı: marker cəhdin biletinə və onun ən son giriş nəslinə bağlıdır."""
+    if attempt is None or getattr(attempt, "is_trial", False):
+        return False
+    ticket = hall_session_ticket(request)
+    if ticket is None or ticket.attempt_id != attempt.pk or attempt.user_id != request.user.id:
+        return False
+    from apps.exams.services.final_center.entry import entry_session_matches
+
+    return entry_session_matches(request, ticket)
+
+
+def hall_device_matches(request, attempt) -> bool:
+    """Sorğu cəhdin bağlı olduğu cihazdandır (cookie/sessiya — ``device_binding``). Bağlantı yoxdursa ``False``."""
+    from apps.exams.services.final_center.device_binding import request_matches_bound_device
+
+    return request_matches_bound_device(request, attempt) is True
+
+
+def hall_review_open(request, attempt) -> bool:
+    """Düzgün/səhv cavab (açar) yalnız ZALDA: mərkəz cəhdi + həmin cəhdin aktiv zal sessiyası + bağlı cihaz.
+
+    Vaxt sərhədləri (5 dəqiqəlik nəticə baxışı, apellyasiyanın «imtahan sonunda» müddəti) çağıranda yoxlanır."""
+    return (
+        attempt_in_center(attempt)
+        and hall_session_for_attempt(request, attempt)
+        and hall_device_matches(request, attempt)
+    )
+
+
+def ensure_center_hall_computer(request, attempt) -> None:
+    """Sərt zal rejimi (``exam.hall_computer_check``): mərkəz cəhdinin take/yazı/nəticə/zal-apellyasiya sorğusu yalnız
+    qeydli zal kompüterindən (``exam_center_gate.ensure_hall_computer`` → ``HallComputerDenied``).
+
+    Sınaq cəhdi, kabinetdən başlamış köhnə (biletsiz) midterm və heyət səhifələri bu qapıdan keçmir. Sorğu başına
+    bir dəfə (nəticə ``request``-də yadda saxlanır)."""
+    if request is None or attempt is None or getattr(attempt, "is_trial", False):
+        return
+    if getattr(request, "_ems_hall_computer_ok", None) == attempt.pk:
+        return
+    if not attempt_in_center(attempt):
+        return
+    from apps.exams.services.exam_center_gate import ensure_hall_computer
+
+    ensure_hall_computer(request, getattr(attempt.exam, "organization", None))
+    try:
+        request._ems_hall_computer_ok = attempt.pk
+    except AttributeError:
+        pass
+
+
+def end_hall_session(request, kind) -> str:
+    """Zal sessiyasını bağlayır (marker + logout) və növün giriş ünvanını qaytarır (``/exams/final/`` | ``/midterm/``)."""
+    from django.contrib.auth import logout
+
+    from apps.exams.services.final_center.entry import clear_entry_session
+
+    url = entry_url(kind)
+    clear_entry_session(request)
+    logout(request)
+    return url
+
+
 __all__ = [
     "CENTER_EXAM_KINDS",
     "FINAL_KIND",
@@ -166,10 +282,18 @@ __all__ = [
     "attempt_in_center",
     "cabinet_center_notice",
     "center_entry_required_message",
+    "end_hall_session",
+    "ensure_center_hall_computer",
     "entry_url",
     "entry_url_for_exam",
     "entry_url_name",
     "exam_kind",
+    "hall_device_matches",
+    "hall_review_open",
+    "hall_session_active",
+    "hall_session_for_attempt",
+    "hall_session_ticket",
+    "hall_session_ticket_id",
     "is_center_exam",
     "is_center_kind",
     "kind_label",

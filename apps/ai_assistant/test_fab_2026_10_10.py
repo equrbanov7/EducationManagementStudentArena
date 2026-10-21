@@ -152,11 +152,11 @@ class AiFabBaseTemplateTests(SimpleTestCase):
     def test_both_scripts_and_the_partial_sit_inside_the_switched_blocks(self):
         base = (ROOT / "templates/base.html").read_text(encoding="utf-8")
         js_block = re.search(r"\{% block ai_assistant_js %\}(.*?)\{% endblock %\}", base, re.S).group(1)
-        self.assertIn("{% if academic_rules.ai_button %}", js_block)
+        self.assertIn("{% if academic_rules.ai_button and not hall_chrome.active %}", js_block)
         self.assertIn("js/ai_assistant_fab.js", js_block)
         self.assertIn("js/ai_assistant.js", js_block)
         widget_block = re.search(r"\{% block ai_assistant %\}(.*?)\{% endblock %\}", base, re.S).group(1)
-        self.assertIn("{% if academic_rules.ai_button %}", widget_block)
+        self.assertIn("{% if academic_rules.ai_button and not hall_chrome.active %}", widget_block)
         self.assertIn('{% include "partials/_ai_assistant.html" %}', widget_block)
         for rel in (
             "apps/exams/templates/exams/student/take_exam.html",

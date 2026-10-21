@@ -79,7 +79,19 @@ class SecureCategoryAnswerKeyTest(TestCase):
         """Parametrsiz final nəticəsi mərkəz rejimidir: açar server tərəfindən 5 dəq-lik
         pəncərədə qəsdən görünür (sonra sessiya bağlanır) — qəbul edilmiş dizayn."""
         exam, attempt, _correct = self._exam_with_attempt("final")
-        response = self.client.get(reverse("exams:exam_result", args=[exam.slug, attempt.id]))
+        url = reverse("exams:exam_result", args=[exam.slug, attempt.id])
+        # 2026-10-21 (sahib): zaldan kənar (zal sessiyası / bağlı cihaz yoxdur) açar gizlidir — qeydli zal
+        # kompüterindən olsa belə (sərt zal qapısı keçilir, amma bu cəhdin zal sessiyası yoxdur).
+        from apps.exams.tests.hall_helpers import register_hall_computers
+
+        register_hall_computers(exam.organization)
+        outside = self.client.get(url)
+        self.assertEqual(outside.status_code, 200)
+        self.assertTrue(outside.context["hide_test_answer_correctness"])
+        from apps.exams.tests.hall_helpers import enter_hall
+
+        enter_hall(self.client, attempt)
+        response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context["hide_test_answer_correctness"])
         self.assertIsNotNone(response.context.get("final_result_remaining_seconds"))

@@ -113,6 +113,8 @@
     </div>
 </form>
 
+{# 2026-10-21: bildiriş keçidi (?open_appeal=<id>) qərar modalını açır — appeals_sections.js. #}
+<span hidden data-appeal-review-template="{% url 'appeals:review_appeal' 0 %}"></span>
 {% if appeal_list %}
 <div class="ems-tablewrap appeal-tablewrap">
     <div class="ems-tablescroll">
@@ -121,6 +123,8 @@
                 <tr>
                     <th scope="col">{% trans "İmtahan" context "appeals.template" %}</th>
                     <th scope="col">{% trans "Tələbə" context "appeals.template" %}</th>
+                    <th scope="col">{% trans "Fənni tədris edən" context "appeals.template" %}</th>
+                    <th scope="col">{% trans "Qərarı verən müəllim" context "appeals.template" %}</th>
                     <th scope="col" class="appeal-table__num">{% trans "Suallar" context "appeals.template" %}</th>
                     <th scope="col">{% trans "Tarix" context "appeals.template" %}</th>
                     <th scope="col">{% trans "Status" context "appeals.template" %}</th>
@@ -132,6 +136,8 @@
                 <tr>
                     <th scope="row"><span class="appeal-table__title">{{ appeal.exam.title }}</span></th>
                     <td>{{ appeal.student.get_full_name|default:appeal.student.username }}</td>
+                    <td data-appeal-subject-teachers>{{ appeal.subject_teacher_names|default:"—" }}</td>
+                    <td data-appeal-decided-by>{{ appeal.decided_teacher_names|default:"—" }}</td>
                     <td class="ems-table__num">{{ appeal.items.all|length }}</td>
                     <td class="ems-table__nowrap appeal-table__muted">
                         {{ appeal.created_at|date:"d.m.Y H:i" }}

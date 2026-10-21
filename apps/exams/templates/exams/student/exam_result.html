@@ -13,7 +13,8 @@ təhlili → digər cəhdlər (desktopda cədvəl, telefonda kart). Bütün aça
 {% block title %}{{ exam.title }} - {% trans "title_result" context "exams.template.student_exam_result" %}{% endblock %}
 
 {% block route_progress %}{% if not is_final_exam_result %}{{ block.super }}{% endif %}{% endblock %}
-{% block navbar %}{% if not is_final_exam_result %}{{ block.super }}{% endif %}{% endblock %}
+{# 2026-10-21: zal sessiyasında base.html başlıq yerinə minimal zal çərçivəsini verir (`hall_chrome`). #}
+{% block navbar %}{% if not is_final_exam_result or hall_chrome.active %}{{ block.super }}{% endif %}{% endblock %}
 {% block view_as_banner %}{% if not is_final_exam_result %}{{ block.super }}{% endif %}{% endblock %}
 {% block footer %}{% if not is_final_exam_result %}{{ block.super }}{% endif %}{% endblock %}
 {% block global_search %}{% if not is_final_exam_result %}{{ block.super }}{% endif %}{% endblock %}
@@ -230,11 +231,11 @@ təhlili → digər cəhdlər (desktopda cədvəl, telefonda kart). Bütün aça
             </small>
             {% endif %}
             {% if can_appeal and appeal_onsite_minutes_hint %}
-            {# 2026-10-20 (sahib): imtahan bitən kimi verilən apellyasiyada düzgün cavablar da görünür; sonradan — yalnız suallar. #}
+            {# 2026-10-21 (sahib): düzgün/səhv cavab yalnız zal kompüterində (bağlı cihaz + aktiv zal sessiyası), N dəqiqə. #}
             <small class="result-action-panel__deadline" data-appeal-onsite-hint>
                 <i class="fas fa-building-columns" aria-hidden="true"></i>
                 {% blocktrans trimmed context "exams.template.student_exam_result" with minutes=appeal_onsite_minutes_hint %}
-                    İmtahan bitəndən sonrakı {{ minutes }} dəqiqə ərzində (universitet şəbəkəsində) verilən apellyasiyada suallarla yanaşı variantları və düzgün cavabı da görəcəksiniz. Sonradan verilən apellyasiyada yalnız suallar göstərilir.
+                    Düzgün və səhv cavabları yalnız imtahan verdiyiniz zal kompüterində, imtahan bitəndən sonrakı {{ minutes }} dəqiqə ərzində görə bilərsiniz. Zalı tərk etdikdən sonra verilən apellyasiyada yalnız suallar göstərilir.
                 {% endblocktrans %}
             </small>
             {% endif %}

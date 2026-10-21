@@ -84,6 +84,9 @@
     <link rel="stylesheet" href="{% static 'css/view_as.css' %}?v=20261019-mob">
     {% endif %}
 
+    {# 2026-10-21: imtahan zalı sessiyasının minimal çərçivəsi (apps/exams/context_processors.py → `hall_chrome`) #}
+    {% if hall_chrome.active %}<link rel="stylesheet" href="{% static 'exams/css/hall/hall_frame.css' %}?v=20261021-hall">{% endif %}
+
     {% block extraCss %}{% endblock %}
 
     {% comment %}
@@ -122,13 +125,16 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
     Sits outside the navbar so it overlays at the very top even when the
     header has its own shadow.
     {% endcomment %}
-    {% block route_progress %}<div class="route-progress" role="presentation"></div>{% endblock %}
+    {% comment %}2026-10-21 (sahib): imtahan zalı sessiyasında (`hall_chrome.active` — doğrulanmış bilet markeri) sayt
+    «chrome»-u — başlıq (axtarış ⌘K, «Qoşul», dil/istifadəçi menyusu), view-as, footer, ⌘K, AI, elan popup-u — render
+    olunmur; başlığın yerinə minimal zal çərçivəsi gəlir. Qərar: apps/exams/services/center_exams.hall_session_active.{% endcomment %}
+    {% block route_progress %}{% if not hall_chrome.active %}<div class="route-progress" role="presentation"></div>{% endif %}{% endblock %}
 
     {# Navbar partial #}
-    {% block navbar %}{% include "partials/_navbar.html" %}{% endblock %}
+    {% block navbar %}{% if hall_chrome.active %}{% include "exams/student/partials/_hall_frame.html" %}{% else %}{% include "partials/_navbar.html" %}{% endif %}{% endblock %}
 
     {# "View as" — başqa istifadəçinin profilinə baxış banneri/çərçivəsi #}
-    {% block view_as_banner %}{% include "partials/_view_as_banner.html" %}{% endblock %}
+    {% block view_as_banner %}{% if not hall_chrome.active %}{% include "partials/_view_as_banner.html" %}{% endif %}{% endblock %}
 
     {# Django messages - Toast şəklində, sağ üstdə (navbar-dan aşağı) #}
     {% if messages %}
@@ -162,24 +168,24 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
 
     {# Footer partial — hidden in UNIVERSITY_MODE (marketing surface) #}
     {% block footer %}
-        {% if not university_mode %}
+        {% if not university_mode and not hall_chrome.active %}
         {% include "partials/_footer.html" %}
         {% endif %}
     {% endblock %}
 
     {# Global ⌘K search overlay (authenticated users only) #}
     {% block global_search %}
-        {% if request.user.is_authenticated %}{% include "partials/_global_search.html" %}{% endif %}
+        {% if request.user.is_authenticated and not hall_chrome.active %}{% include "partials/_global_search.html" %}{% endif %}
     {% endblock %}
 
     {# AI Assistant Widget (authenticated users only) — override with empty block to hide; RİM açarı söndürülüdə heç kimə render olunmur #}
-    {% block ai_assistant %}{% if academic_rules.ai_button %}{% include "partials/_ai_assistant.html" %}{% endif %}{% endblock %}
+    {% block ai_assistant %}{% if academic_rules.ai_button and not hall_chrome.active %}{% include "partials/_ai_assistant.html" %}{% endif %}{% endblock %}
 
     {# UX-15: qlobal təsdiq dialoqu markup-ı — bax static/js/ems_ui/confirm.js #}
     {% include "partials/_ems_confirm_modal.html" %}
 
     {# «Elanlar» birdəfəlik popup-u — gözləyən yoxdursa heç nə render olunmur (sıfır sorğu; imtahan səhifələrində yox) #}
-    {% if request.user.is_authenticated %}{% include "announcements/popup/_mount.html" %}{% endif %}
+    {% if request.user.is_authenticated and not hall_chrome.active %}{% include "announcements/popup/_mount.html" %}{% endif %}
 
     <!-- Bootstrap 5 JS -->
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
@@ -208,7 +214,7 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
     <script src="{% static 'js/footer_year.js' %}"></script>
     <script src="{% static 'js/route_loading.js' %}?v=20260713-spa-progress"></script>
     {% block global_search_js %}
-        {% if request.user.is_authenticated %}
+        {% if request.user.is_authenticated and not hall_chrome.active %}
         <script src="{% static 'js/global_search.js' %}?v=20261014-searchux"></script>
         {% endif %}
     {% endblock %}
@@ -220,7 +226,7 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
 
     <!-- AI Assistant Widget -->
     {# ai_assistant_fab.js (gizlətmək/sürüşdürmək, `EMSAiFab`) ai_assistant.js-dən ƏVVƏL gəlməlidir #}
-    {% block ai_assistant_js %}{% if academic_rules.ai_button %}<script src="{% static 'js/ai_assistant_fab.js' %}?v=20261010-wp5ai"></script>
+    {% block ai_assistant_js %}{% if academic_rules.ai_button and not hall_chrome.active %}<script src="{% static 'js/ai_assistant_fab.js' %}?v=20261010-wp5ai"></script>
     <script src="{% static 'js/ai_assistant.js' %}?v=20261019-mob"></script>{% endif %}{% endblock %}
 
     <!-- Toast auto-hide -->

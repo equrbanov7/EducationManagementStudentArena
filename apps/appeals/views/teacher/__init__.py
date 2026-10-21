@@ -14,8 +14,11 @@ from .statistics import (
     appeal_stats_data,
     appeal_stats_filters,
 )
+from .teaching import build_teaching_appeals_context, teaching_appeals
 
 __all__ = [
+    "build_teaching_appeals_context",
+    "teaching_appeals",
     "key_correction_apply",
     "key_correction_revoke",
     "build_manage_appeals_context",

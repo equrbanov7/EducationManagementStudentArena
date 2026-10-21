@@ -1,0 +1,118 @@
+/* «Fənnimə aid apellyasiyalar» — müəllimin yalnız-oxu siyahısı (2026-10-21). */
+.teaching-appeals {
+    padding: 16px;
+}
+
+.teaching-appeals__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 16px;
+}
+
+.teaching-appeals__chip {
+    padding: 4px 12px;
+    border: 1px solid var(--ems-border);
+    border-radius: 999px;
+    color: var(--ems-text);
+    font-size: 0.875rem;
+    text-decoration: none;
+}
+
+.teaching-appeals__chip[aria-current="true"] {
+    border-color: var(--ems-primary);
+    color: var(--ems-primary);
+    font-weight: 600;
+}
+
+.teaching-appeal {
+    margin-bottom: 12px;
+    border: 1px solid var(--ems-border);
+    border-radius: 12px;
+    background: var(--ems-bg);
+}
+
+.teaching-appeal__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.teaching-appeal__main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.teaching-appeal__exam {
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.teaching-appeal__meta {
+    font-size: 0.85rem;
+    color: var(--ems-text-muted);
+}
+
+.teaching-appeal__body {
+    padding: 0 16px 16px;
+    border-top: 1px solid var(--ems-border);
+}
+
+.teaching-appeal__facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px 16px;
+    margin: 12px 0;
+}
+
+.teaching-appeal__facts dt {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--ems-text-muted);
+}
+
+.teaching-appeal__facts dd {
+    margin: 2px 0 0;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.teaching-appeal__items {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.teaching-appeal__item {
+    padding: 12px 0;
+    border-top: 1px dashed var(--ems-border);
+}
+
+.teaching-appeal__item-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+.teaching-appeal__q {
+    min-width: 0;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.teaching-appeals__pages {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 16px;
+}

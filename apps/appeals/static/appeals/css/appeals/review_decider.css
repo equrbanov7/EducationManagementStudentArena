@@ -1,0 +1,127 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   appeals/review_decider.css — apellyasiya qərar dialoqu əlavələri (sahib 2026-10-21)
+
+   * «Fənni tədris edən» başlıq sətri;
+   * «Qərarı verən müəllim» seçicisi + «Əsaslandırıcı sənəd» yükləmə bloku;
+   * «Tələbənin şərhi» oxunaqlı etiketli blok (review / tələbə detalı / müəllim siyahısı);
+   * tarixçədə qərar yazısı (müəllim + sənəd linki).
+   Fraqment (AJAX modal) içindən <link> ilə yüklənir — tokenlər design-tokens.css-dən.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.appeal-head__teachers {
+    margin: 4px 0 0;
+    font-size: 0.875rem;
+    color: var(--ems-text-muted);
+    overflow-wrap: anywhere;
+}
+
+.appeal-head__teachers strong {
+    color: var(--ems-text);
+    font-weight: 600;
+}
+
+/* ── Tələbənin şərhi ─────────────────────────────────────────────────────── */
+.appeal-comment {
+    margin-top: var(--ems-sp-3, 12px);
+    padding: var(--ems-sp-3, 12px) var(--ems-sp-4, 16px);
+    border: 1px solid var(--ems-border);
+    border-radius: 10px;
+    background: var(--ems-bg-subtle);
+    min-width: 0;
+}
+
+.appeal-comment__label {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.appeal-comment__text {
+    color: var(--ems-text);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.appeal-comment__text--empty {
+    color: var(--ems-text-muted);
+    font-style: italic;
+}
+
+/* ── Qərarı verən müəllim + sənəd ────────────────────────────────────────── */
+.appeal-decider {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--ems-sp-3, 12px) var(--ems-sp-4, 16px);
+    margin-top: var(--ems-sp-4, 16px);
+    padding: var(--ems-sp-4, 16px);
+    border: 1px solid var(--ems-border);
+    border-radius: 12px;
+    background: var(--ems-bg);
+}
+
+.appeal-decider.has-error {
+    border-color: var(--ems-danger);
+}
+
+.appeal-decider__title {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ems-text);
+}
+
+.appeal-decider__hint {
+    margin: 4px 0 0;
+    font-size: 0.8rem;
+    color: var(--ems-text-muted);
+}
+
+.appeal-decider__file {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    font-size: 0.875rem;
+}
+
+.appeal-decider__error {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--ems-danger);
+    font-size: 0.875rem;
+}
+
+@media (max-width: 640px) {
+    .appeal-decider {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ── Qərarı verən (kilidli panel, tələbə detalı) ─────────────────────────── */
+.appeal-decided-by {
+    margin: 8px 0 0;
+    font-size: 0.875rem;
+    color: var(--ems-text-muted);
+}
+
+.appeal-decided-by strong {
+    color: var(--ems-text);
+}
+
+/* ── Tarixçə: qərar yazısının sənədi ─────────────────────────────────────── */
+.appeal-timeline__doc {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 6px;
+    font-size: 0.85rem;
+    color: var(--ems-link);
+    overflow-wrap: anywhere;
+}
+
+.appeal-timeline__doc:hover,
+.appeal-timeline__doc:focus-visible {
+    color: var(--ems-link-hover);
+}

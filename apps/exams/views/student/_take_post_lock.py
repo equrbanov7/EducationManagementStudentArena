@@ -129,6 +129,10 @@ def _run_locked(request, *, slug, attempt_id, write_answers):
         # ``ExamNetworkDenied`` tranzaksiyanı geri qaytarır, 403 view qatında (``final_device_guarded``).
         if not attempt.is_finished:
             enforce_attempt_network(request, attempt)
+            # 2026-10-21: sərt zal rejimi — yazı da yalnız qeydli zal kompüterindən (``HallComputerDenied`` → 403).
+            from apps.exams.services.center_exams import ensure_center_hall_computer
+
+            ensure_center_hall_computer(request, attempt)
         if final_entry_session_revoked(request, attempt):
             raise _EntrySessionRevoked
         # 2026-10-08: final cəhdi başladığı cihaza bağlıdır (başqa cihaz → FinalDeviceMismatch,

@@ -1,4 +1,4 @@
-{% load i18n get_item l10n %}
+{% load i18n get_item l10n static exam_filters %}
 {% comment %}
   Ortaq reviewer qərar gövdəsi (DRY) — kabinet modalında AJAX fraqmenti kimi açılır.
   Kontekst: appeal, items (is_locked/is_decided/max_points/current_decision/
@@ -14,6 +14,9 @@
   `.appeal-review-panel` (is-decided / is-expired), `has-error`, `is-undecided`.
 {% endcomment %}
 
+{# 2026-10-21: qərarı verən müəllim / sənəd / şərh bloku üslubu — fraqmentin öz faylı (CSP: xarici). #}
+<link rel="stylesheet" href="{% static 'appeals/css/appeals/review_decider.css' %}?v=20261021-decider">
+
 <header class="appeal-head">
     <div class="appeal-head__main">
         <p class="appeal-head__title">{{ appeal.exam.title }}</p>
@@ -22,6 +25,12 @@
             <span class="appeal-head__sep" aria-hidden="true">·</span>
             {% trans "Göndərilib" context "appeals.template" %}: {{ appeal.created_at|date:"d.m.Y H:i" }}
         </p>
+        {# 2026-10-21 (sahib): sistem özü göstərir — tələbənin qrupunda bu fənni tədris edən aktiv müəllim(lər). #}
+        <p class="appeal-head__teachers" data-review-subject-teachers>
+            <i class="fas fa-chalkboard-user" aria-hidden="true"></i>
+            {% trans "Fənni tədris edən" context "appeals.template" %}:
+            {% for teacher in review_subject_teachers %}<strong>{{ teacher.get_full_name|default:teacher.username }}</strong>{% if not forloop.last %}, {% endif %}{% empty %}<span>{% trans "təyin edilməyib" context "appeals.template" %}</span>{% endfor %}
+        </p>
     </div>
     <div class="appeal-head__aside">
         {% include "appeals/partials/_mode_badge.html" %}
@@ -29,7 +38,7 @@
     </div>
 </header>
 
-<form method="post" action="{% url 'appeals:review_appeal' appeal.id %}" novalidate
+<form method="post" action="{% url 'appeals:review_appeal' appeal.id %}" novalidate enctype="multipart/form-data"
       data-appeals-review-form
       data-current-score="{{ review_current_score|default:0|unlocalize }}"
       data-max-score="{{ review_max_score|default:''|unlocalize }}"
@@ -187,10 +196,8 @@
             </details>
             {% endif %}
 
-            <dl class="appeal-detail-grid">
-                <dt>{% trans "Tələbənin şərhi" context "appeals.template" %}</dt>
-                <dd>{{ item.comment|linebreaksbr }}</dd>
-            </dl>
+            {% trans "Tələbənin şərhi" context "appeals.template" as comment_label %}
+            {% include "appeals/partials/_comment_block.html" with comment=item.comment comment_label=comment_label %}
 
             {% if item.is_locked %}
             {# ── Kilidli: 5 dəq keçib, dəyişdirilə bilməz ── #}
@@ -205,6 +212,9 @@
                     <dd class="appeal-detail-grid__gain">+{{ item.score_adjustment.delta_points }} {% trans "bal" context "appeals.template" %}</dd>
                     {% endif %}
                 </dl>
+                {% if item.decided_by_teacher %}
+                <p class="appeal-decided-by">{% trans "Qərarı verən müəllim" context "appeals.template" %}: <strong>{{ item.decided_by_teacher.get_full_name|default:item.decided_by_teacher.username }}</strong></p>
+                {% endif %}
                 <div class="appeal-locked-note">
                     <i class="fas fa-lock" aria-hidden="true"></i>{% trans "Qərar verilib — dəyişdirilə bilməz" context "appeals.template" %}
                 </div>
@@ -275,6 +285,53 @@
     </div>
 
     {% if review_has_editable %}
+    {# 2026-10-21 (sahib): «hansı müəllim qəbul edib» — məcburi seçim; sənəd opsional (tənzimləmə ilə məcburi). #}
+    <section class="appeal-decider" data-review-decider
+             data-i18n-need-teacher="{% trans 'Qərarı verən müəllimi seçin.' context 'appeals.view.message' %}"
+             data-i18n-need-document="{% trans 'Qərar üçün əsaslandırıcı sənəd yükləmək məcburidir.' context 'appeals.document' %}">
+        <h3 class="appeal-decider__title">{% trans "Qərarın sahibi" context "appeals.template" %}</h3>
+        <div class="ems-field">
+            <label class="ems-field__label" for="review_teacher">
+                {% trans "Qərarı verən müəllim" context "appeals.template" %}<span class="appeal-required-star">*</span>
+            </label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select class="ems-select bootstrap-single-select__native" id="review_teacher"
+                        name="{{ review_teacher_field }}" data-review-teacher data-bootstrap-select
+                        data-live-search="true"
+                        data-live-search-placeholder="{% trans 'Müəllim axtar…' context 'appeals.template' %}"
+                        data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'ui.filters' %}"
+                        required>
+                    <option value="">{% trans "Müəllim seçin" context "appeals.template" %}</option>
+                    {% if review_teacher_options.subject %}
+                    <optgroup label="{% trans 'Fənni tədris edən' context 'appeals.template' %}">
+                        {% for option in review_teacher_options.subject %}
+                        <option value="{{ option.id }}"{% if option.id == review_teacher_selected %} selected{% endif %}>{{ option.label }} — {% trans "fənni tədris edir" context "appeals.template" %}</option>
+                        {% endfor %}
+                    </optgroup>
+                    {% endif %}
+                    {% if review_teacher_options.others %}
+                    <optgroup label="{% trans 'Digər müəllimlər' context 'appeals.template' %}">
+                        {% for option in review_teacher_options.others %}
+                        <option value="{{ option.id }}"{% if option.id == review_teacher_selected %} selected{% endif %}>{{ option.label }}</option>
+                        {% endfor %}
+                    </optgroup>
+                    {% endif %}
+                </select>
+            </div>
+            <p class="appeal-decider__hint">{% trans "Yadda saxlayan siz olsanız da, qərarı (bal artımını) verən müəllim qeyd olunur." context "appeals.template" %}</p>
+        </div>
+        <div class="ems-field">
+            <label class="ems-field__label" for="review_document">
+                {% trans "Əsaslandırıcı sənəd" context "appeals.template" %}{% if review_document_required %}<span class="appeal-required-star">*</span>{% endif %}
+            </label>
+            <input type="file" class="appeal-decider__file" id="review_document" name="{{ review_document_field }}"
+                   accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" data-review-document
+                   {% if review_document_required %}data-required required{% endif %}>
+            <p class="appeal-decider__hint">{% if review_document_required %}{% trans "Məcburidir: PDF, JPG və ya PNG, 10 MB-dək." context "appeals.template" %}{% else %}{% trans "Opsional: PDF, JPG və ya PNG, 10 MB-dək." context "appeals.template" %}{% endif %}</p>
+        </div>
+        <p class="appeal-decider__error" data-review-decider-error hidden role="alert"></p>
+    </section>
+
     <section class="appeal-note appeal-note--form">
         <label class="ems-field__label" for="reviewer_note">
             {% trans "Ümumi qeyd" context "appeals.template" %}
@@ -291,7 +348,10 @@
             {% for event in review_timeline %}
             <li class="appeal-timeline__item">
                 <i class="fas {{ event.icon }} appeal-timeline__icon" aria-hidden="true"></i>
-                <span class="appeal-timeline__text">{{ event.text }}</span>
+                <span class="appeal-timeline__text">{{ event.text }}{% if event.record.can_download %}
+                    <a class="appeal-timeline__doc" href="{{ event.record.document|protected_media_url }}" target="_blank" rel="noopener" data-appeal-decision-document>
+                        <i class="fas fa-paperclip" aria-hidden="true"></i>{% if event.record.document_name %}{{ event.record.document_name }}{% else %}{% trans "Sənəd" context "appeals.template" %}{% endif %}
+                    </a>{% endif %}</span>
                 <span class="appeal-timeline__meta">{% if event.actor %}{{ event.actor }} · {% endif %}{{ event.at|date:"d.m.Y H:i" }}</span>
             </li>
             {% endfor %}

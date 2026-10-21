@@ -48,3 +48,23 @@
         max-height: 280px;
     }
 }
+
+/* 2026-10-21 (sahib): «düzgün/səhv cavab yalnız zal kompüterində» qeydi. */
+.appeal-hall-note {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-2, 8px);
+    margin: 0 0 var(--ems-sp-4, 16px);
+    padding: var(--ems-sp-3, 12px) var(--ems-sp-4, 16px);
+    border: 1px solid var(--ems-border);
+    border-radius: 10px;
+    background: var(--ems-bg-subtle);
+    color: var(--ems-text);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.appeal-hall-note .fas {
+    margin-top: 3px;
+    color: var(--ems-text-muted);
+}

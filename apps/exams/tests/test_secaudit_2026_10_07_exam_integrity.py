@@ -72,8 +72,14 @@ class WrittenSecureIdealAnswerTests(TestCase):
         self.assertNotContains(self._result(exam, attempt, "?from_section=my-results"), IDEAL_ANSWER)
 
     def test_written_final_center_review_keeps_time_boxed_ideal_answer(self):
-        """Qəbul edilmiş dizayn (test açarı kimi): mərkəzin 5 dəq-lik baxışında görünür."""
+        """Qəbul edilmiş dizayn (test açarı kimi): mərkəzin 5 dəq-lik baxışında görünür — 2026-10-21: yalnız
+        həmin cəhdin zal sessiyasında və bağlı cihazda."""
+        from apps.exams.tests.hall_helpers import enter_hall, register_hall_computers
+
         exam, attempt = self._attempt("final")
+        register_hall_computers(exam.organization)
+        self.assertNotContains(self._result(exam, attempt), IDEAL_ANSWER)
+        enter_hall(self.client, attempt)
         self.assertContains(self._result(exam, attempt), IDEAL_ANSWER)
 
     def test_written_quiz_still_shows_ideal_answer(self):

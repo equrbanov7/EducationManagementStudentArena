@@ -16,6 +16,8 @@ Bütün funksiyalar BEST-EFFORT-dur: bildiriş xətası qərar tranzaksiyasını
 from __future__ import annotations
 
 import logging
+from contextlib import contextmanager
+from contextvars import ContextVar
 
 from django.apps import apps as django_apps
 from django.urls import reverse
@@ -24,6 +26,10 @@ from django.utils.translation import pgettext
 from apps.appeals.constants import PERM_APPEAL_RESPOND
 
 logger = logging.getLogger(__name__)
+
+#: 2026-10-21: «Qərarları yadda saxla» hadisəsi bütöv bildiriş göndərir (:func:`notify_decision_saved`) —
+#: həmin sorğuda ``recompute_appeal_status``-un köhnə müəllim bildirişi susur (bir alıcıya bir hadisə = bir bildiriş).
+_DECISION_EVENT_ACTIVE = ContextVar("appeals_decision_event_active", default=False)
 
 #: Açar tapılmayanda geri düşmə (köhnə davranış) — İmtahan Mərkəzi TƏK roldur (miqrasiya 0046).
 _LEGACY_EXAM_CENTER_ROLES = ("exam_center_head", "exam_center")
@@ -113,10 +119,20 @@ def _journal_hint(exam):
     return pgettext("appeals.notification", "Elektron jurnalda imtahan balı avtomatik yeniləndi.")
 
 
+@contextmanager
+def decision_event():
+    """Bu blokda verilən qərarların bildirişi blokdan sonra :func:`notify_decision_saved` ilə BİR dəfə gedir."""
+    token = _DECISION_EVENT_ACTIVE.set(True)
+    try:
+        yield
+    finally:
+        _DECISION_EVENT_ACTIVE.reset(token)
+
+
 def notify_teachers_appeal_resolved(appeal, *, delta_points):
     """Apellyasiya qərarı balı DƏYİŞDİRƏNDƏ fənn müəlliminə bildiriş (dəyişməyibsə susur)."""
     try:
-        if not delta_points:
+        if not delta_points or _DECISION_EVENT_ACTIVE.get():
             return
         from apps.notifications.public import create_notification_for_users
 
@@ -203,7 +219,116 @@ def notify_key_correction(correction, *, credited_attempts, question_no, revoked
         logger.warning("Answer-key correction notification failed.", exc_info=True)
 
 
+def _display(user):
+    return (user.get_full_name() or user.get_username()).strip() if user is not None else ""
+
+
+def _review_link(appeal):
+    return reverse("appeals:review_appeal", kwargs={"appeal_id": appeal.id})
+
+
+def _teaching_link(appeal):
+    return reverse("appeals:teaching_appeals") + f"?open={appeal.id}#appeal-{appeal.id}"
+
+
+def _split_recipients(appeal, *, exclude_ids=()):
+    """``(mərkəz alıcıları, yalnız-müəllim alıcıları)`` — təkrarsız; mərkəzdə olan müəllim ikinci dəfə almır."""
+    from .teachers import subject_teachers
+
+    excluded = {pk for pk in exclude_ids if pk} | {appeal.student_id}
+    center = [user for user in exam_center_recipients(appeal) if user.pk not in excluded]
+    center_ids = {user.pk for user in center}
+    teachers, seen = [], set(center_ids) | excluded
+    for user in subject_teachers(appeal):
+        if user.pk not in seen:
+            seen.add(user.pk)
+            teachers.append(user)
+    return center, teachers
+
+
+def notify_appeal_filed_teachers(appeal, *, item_count):
+    """Yeni apellyasiya → fənni tədris edən müəllim(lər)ə bildiriş (mərkəzə ayrıca ``creation`` göndərir)."""
+    try:
+        from apps.notifications.public import create_notification_for_users
+
+        _center, teachers = _split_recipients(appeal)
+        if not teachers:
+            return
+        create_notification_for_users(
+            recipients=teachers,
+            title=pgettext("appeals.notification", "Tələbəniz apellyasiya verdi"),
+            message=pgettext(
+                "appeals.notification",
+                '{student} "{exam}" imtahanı üzrə {count} sual üçün apellyasiya verdi. Qərarı imtahan mərkəzi verir.',
+            ).format(student=_display(appeal.student), exam=appeal.exam.title, count=item_count),
+            link=_teaching_link(appeal),
+            notification_type="exam",
+            metadata={"appeal_id": appeal.id, "attempt_id": appeal.attempt_id, "exam_id": appeal.exam_id},
+            organization=appeal.organization,
+        )
+    except Exception:
+        logger.warning("Appeal filed teacher notification failed.", exc_info=True)
+
+
+def _score_text(value):
+    if value is None:
+        return "—"
+    from decimal import Decimal
+
+    text = format(Decimal(str(value)).normalize(), "f")
+    return text
+
+
+def notify_decision_saved(appeal, record):
+    """«Qərarları yadda saxla» → fənn müəllim(lər)i + imtahan mərkəzi/RİM (saxlayan çıxmaqla) — bir bildiriş.
+
+    Mətn: «Qərarı verən müəllim: X, bal: A → B» (+ bal dəyişibsə jurnal izahı)."""
+    try:
+        from apps.notifications.public import create_notification_for_users
+
+        center, teachers = _split_recipients(appeal, exclude_ids=[record.saved_by_id])
+        if not center and not teachers:
+            return
+        changed = record.score_before is not None and record.score_after != record.score_before
+        message = pgettext(
+            "appeals.notification",
+            '{student} — "{exam}": {accepted} qəbul, {rejected} rədd. Qərarı verən müəllim: {teacher}, bal: {before} → {after}.',
+        ).format(
+            student=_display(appeal.student),
+            exam=appeal.exam.title,
+            accepted=record.accepted_count,
+            rejected=record.rejected_count,
+            teacher=_display(record.decided_by_teacher) or "—",
+            before=_score_text(record.score_before),
+            after=_score_text(record.score_after),
+        )
+        if changed:
+            message = f"{message} {_journal_hint(appeal.exam)}"
+        common = {
+            "title": pgettext("appeals.notification", "Apellyasiya qərarı verildi"),
+            "message": message,
+            "notification_type": "grade",
+            "metadata": {
+                "appeal_id": appeal.id,
+                "attempt_id": appeal.attempt_id,
+                "exam_id": appeal.exam_id,
+                "decision_record_id": record.id,
+                "decided_by_teacher_id": record.decided_by_teacher_id,
+            },
+            "organization": appeal.organization,
+        }
+        if center:
+            create_notification_for_users(recipients=center, link=_review_link(appeal), **common)
+        if teachers:
+            create_notification_for_users(recipients=teachers, link=_teaching_link(appeal), **common)
+    except Exception:
+        logger.warning("Appeal decision notification failed.", exc_info=True)
+
+
 __all__ = [
+    "decision_event",
+    "notify_appeal_filed_teachers",
+    "notify_decision_saved",
     "exam_center_recipients",
     "notify_key_correction",
     "notify_teachers_appeal_resolved",

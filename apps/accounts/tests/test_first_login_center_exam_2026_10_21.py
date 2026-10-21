@@ -48,3 +48,14 @@ def test_session_key_matches_exam_centre():
     from apps.exams.services.final_center.entry import ENTRY_SESSION_KEY
 
     assert CENTER_SESSION_KEY == ENTRY_SESSION_KEY
+
+
+class HallSessionAppealPathsTest(FirstLoginCenterExamTest):
+    def test_hall_appeal_and_exit_reachable_only_with_ticket(self):
+        for path in (
+            reverse("appeals:appeal_create", args=[5]),
+            reverse("appeals:hall_appeal_done"),
+            reverse("exams:hall_session_exit"),
+        ):
+            self.assertEqual(self._call(path, ticket=True), "passed", path)
+            self.assertEqual(self._call(path).status_code, 302, path)
