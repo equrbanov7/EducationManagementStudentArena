@@ -14,6 +14,25 @@ host ARP agentindən (bax docker/arp-agent) soruşulur və kompüter yoxlamalar�
 IP əvəzinə MAC ilə aparılır — DHCP-də IP dəyişəndə giriş pozulmur. Rejim
 "off" olduqda köhnə IP-əsaslı yoxlama qalır (dev/test). Kənar (marşrutlanmış)
 sorğular üçün ARP qeydi yoxdur → MAC rejimi fail-closed işləyir.
+
+Açar (sahib 2026-10-21): «Sistem tənzimləmələri» → ``exam.hall_computer_check``
+(:func:`hall_computer_check_enabled`). Yandırılıbsa (defolt) yuxarıdakı hər şey
+əvvəlki kimidir. Söndürüləndə HEÇ BİR kompüter/MAC/IP-allowlist tələbi yoxdur —
+``final_exam_access_allowed`` / ``room_ip_access_allowed`` /
+``org_computer_access_allowed`` həmişə ``True``; ``resolve_room_computer`` isə
+yalnız MƏLUMAT üçün işləyir (org-da qeydli kompüter varsa və müştəri ona
+uyğundursa zal qaytarılır — gözləmə otağı / zal monitoru işləməyə davam edir;
+uyğun deyilsə rədd YOX, «qeydli kompüter yoxdur» yolu: birbaşa başlama).
+Universitet şəbəkəsi qaydası (``exam_network``) bu açardan ASILI DEYİL.
+
+SƏRT REJİM (sahib 2026-10-21, ikinci qərar): «Hansı kompüterlərin MAC ünvanlarını əlavə edəcəyəmsə, ancaq
+onlardan midterm və final səhifəsinə girmək mümkün olsun; digər halda xəbərdarlıq mesajı göstərilsin. Sistem
+tənzimləmələrindən açmadığım müddətcə heç kim kənar kompüterlə o səhifəni belə aça bilməsin.» → açar
+YANDIRILIBSA (defolt) zal səhifələri (giriş GET/POST, gözləmə otağı, state/begin/cancel) YALNIZ AKTİV qeydli
+``ExamRoomComputer``-dən açılır (:func:`ensure_hall_computer`; MAC rejimində ARP MAC-ı, əks halda IP). Qeydsiz
+kompüter → :class:`HallComputerDenied` → 403 xəbərdarlıq səhifəsi (giriş forması YOXDUR) + bu kompüterin öz
+ünvanı (:func:`client_address_diagnostic`). Org-da HEÇ qeydli kompüter yoxdursa da bloklanır (əvvəlki «qeyd
+yoxdursa açıq» istisnası sərt rejimdə YOXDUR). Sınaq cəhdi və mərkəz əməkdaşı səhifələri bu qapıdan keçmir.
 """
 
 import ipaddress
@@ -27,12 +46,40 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 
+def hall_computer_check_enabled() -> bool:
+    """Zal kompüteri (MAC/IP) yoxlaması aktivdirmi — «Sistem tənzimləmələri» açarı (defolt: bəli)."""
+    from core.runtime_settings_exam_center import hall_computer_check
+
+    return hall_computer_check()
+
+
 def mac_enforcement_active() -> bool:
     """Kompüter yoxlamaları MAC (ARP agenti) rejimindədirmi?"""
     return getattr(settings, "EXAM_CLIENT_MAC_RESOLUTION", "off") == "arp_agent"
 
 
+_UNSET = object()
+
+
 def resolve_client_mac(request) -> str | None:
+    """Müştəri IP-sinin MAC-ı (yalnız MAC rejimi) — sorğu başına BİR dəfə ARP agentinə müraciət.
+
+    Sərt zal qapısı, diaqnostika və otaq yoxlaması eyni sorğuda MAC-ı bir neçə dəfə soruşur; nəticə
+    ``request``-də yadda saxlanır (agent 0,5 s gözləmə ilə çağırılır).
+    """
+    cached = getattr(request, "_exam_client_mac", _UNSET) if request is not None else _UNSET
+    if cached is not _UNSET:
+        return cached
+    mac = _lookup_client_mac(request)
+    if request is not None:
+        try:
+            request._exam_client_mac = mac
+        except AttributeError:
+            pass
+    return mac
+
+
+def _lookup_client_mac(request) -> str | None:
     """Müştəri IP-sinin MAC-ını host ARP agentindən alır (yalnız MAC rejimi).
 
     Qaytarır: kanonik ``AA:BB:CC:DD:EE:FF`` formatında MAC, tapılmayanda /
@@ -139,6 +186,8 @@ def final_exam_access_allowed(request) -> bool:
     sorğunu bloklamır — sadəcə ötürülür və log-a yazılır ki, konfiq səhvi
     bütün imtahan zalını kilidləməsin.
     """
+    if not hall_computer_check_enabled():
+        return True
     entries = _allowed_entries()
     if not entries:
         return True
@@ -173,7 +222,10 @@ def room_ip_access_allowed(request, room) -> bool:
       ``final_exam_access_allowed`` artıq qərar verib).
     * Qeydlər varsa → müştəri onlardan birinə uyğun gəlməlidir; MAC/IP
       oxunmursa → ``False`` (fail-closed).
+    * Zal kompüteri yoxlaması söndürülübsə (``exam.hall_computer_check``) → ``True``.
     """
+    if not hall_computer_check_enabled():
+        return True
     if mac_enforcement_active():
         raw_values = list(room.computers.filter(is_active=True).values_list("mac_address", flat=True))
         if not raw_values:
@@ -222,12 +274,16 @@ def org_computer_access_allowed(request, organization) -> bool:
     from apps.exams.models import ExamRoomComputer
     from core.rls import bypass_rls
 
-    if organization is None:
+    if organization is None or not hall_computer_check_enabled():
         return True
     with bypass_rls():
         qs = ExamRoomComputer.objects.filter(organization=organization, is_active=True)
         if not qs.exists():
-            return True
+            # Sərt rejim (2026-10-21): qeydli kompüter yoxdursa giriş də YOXDUR.
+            logger.warning(
+                "org_computer_access: org=%s üçün aktiv qeydli zal kompüteri yoxdur — rədd.", organization.pk
+            )
+            return False
         if mac_enforcement_active():
             client_mac = resolve_client_mac(request)
             if client_mac is None:
@@ -253,6 +309,28 @@ def org_computer_access_allowed(request, organization) -> bool:
 
 
 def resolve_room_computer(request, organization):
+    """Müştəri sorğusundan ZALI və kompüteri həll et — ``(room, computer)`` və ya ``(None, None)``.
+
+    Zal kompüteri yoxlaması söndürülübsə (``exam.hall_computer_check``) nəticə yalnız MƏLUMATDIR: org-da aktiv
+    qeydli kompüter yoxdursa ARP agentinə də müraciət olunmur; uyğunsuzluq «rədd» kimi loglanmır. Çağıran
+    ``(None, None)``-da mövcud «qeydli kompüter yoxdur» yolunu işlədir.
+    """
+    if hall_computer_check_enabled():
+        return _resolve_room_computer(request, organization, log_misses=True)
+    if organization is None or not _org_has_active_computers(organization):
+        return None, None
+    return _resolve_room_computer(request, organization, log_misses=False)
+
+
+def _org_has_active_computers(organization) -> bool:
+    from apps.exams.models import ExamRoomComputer
+    from core.rls import bypass_rls
+
+    with bypass_rls():
+        return ExamRoomComputer.objects.filter(organization=organization, is_active=True).exists()
+
+
+def _resolve_room_computer(request, organization, *, log_misses: bool):
     """
     Müştəri sorğusundan ZALI və kompüteri həll et (oturum sisteminin ləğvi, 2026-07).
 
@@ -267,21 +345,27 @@ def resolve_room_computer(request, organization):
     from apps.exams.models import ExamRoomComputer
     from core.rls import bypass_rls
 
+    def _scope(queryset):
+        # ``organization=None`` — giriş səhifəsinin GET-i (imtahan/org hələ bilinmir): istənilən org-un zalı.
+        return queryset if organization is None else queryset.filter(organization=organization)
+
     # Final girişi PUBLIC axındır (tələbə hələ login olmayıb, aktiv-org RLS
     # konteksti yoxdur). Kompüter axtarışı ``organization``-a görə AÇIQ filtrlənir
     # (biletin org-u), ona görə RLS bypass ilə işlədirik — tenant sızması yoxdur.
     if mac_enforcement_active():
         client_mac = resolve_client_mac(request)
         if client_mac is None:
-            logger.warning("resolve_room_computer: müştəri MAC-ı tapılmadı — kompüter uyğunlaşdırılmadı.")
+            if log_misses:
+                logger.warning("resolve_room_computer: müştəri MAC-ı tapılmadı — kompüter uyğunlaşdırılmadı.")
             return None, None
         with bypass_rls():
             comp = _find_active_computer_by_mac(
-                ExamRoomComputer.objects.filter(organization=organization, is_active=True).select_related("room"),
+                _scope(ExamRoomComputer.objects.filter(is_active=True)).select_related("room"),
                 client_mac,
             )
         if comp is None:
-            _log_unregistered_mac("resolve_room_computer", request, client_mac)
+            if log_misses:
+                _log_unregistered_mac("resolve_room_computer", request, client_mac)
             return None, None
         return comp.room, comp
 
@@ -297,9 +381,8 @@ def resolve_room_computer(request, organization):
     # sətirləri düşürür, ona görə yalnız ``isnull=False`` filtri işlədilir.
     with bypass_rls():
         computers = list(
-            ExamRoomComputer.objects.filter(
-                organization=organization, is_active=True, ip_address__isnull=False
-            ).select_related("room")
+            # Sərt zal qapısı hər zal sorğusunda işləyir — sətirlər DB-də müştəri IP-si ilə süzülür (inet bərabərliyi).
+            _scope(ExamRoomComputer.objects.filter(is_active=True, ip_address=str(client_ip))).select_related("room")
         )
     for comp in computers:
         try:
@@ -311,9 +394,89 @@ def resolve_room_computer(request, organization):
     return None, None
 
 
+class HallComputerDenied(Exception):
+    """Sərt zal rejimi: sorğu aktiv qeydli zal kompüterindən gəlmir — 403 xəbərdarlıq səhifəsi/JSON."""
+
+
+def registered_hall_computer(request, organization=None):
+    """Müştəriyə uyğun AKTİV qeydli zal kompüteri (``organization`` verilməyibsə istənilən org) və ya ``None``.
+
+    Eyni sorğuda tapılmış kompüter yadda saxlanır: gözləmə otağı əvvəl ümumi (``None``), sonra biletin org-u ilə
+    yoxlayır — kompüter həmin org-dadırsa ikinci axtarış (RLS bypass + SELECT) edilmir.
+    """
+    cached = getattr(request, "_exam_hall_computer", None)
+    if cached is not None and (organization is None or cached.organization_id == getattr(organization, "pk", None)):
+        return cached
+    computer = _resolve_room_computer(request, organization, log_misses=True)[1]
+    if computer is not None and request is not None:
+        try:
+            request._exam_hall_computer = computer
+        except AttributeError:
+            pass
+    return computer
+
+
+def hall_computer_gate_allows(request, organization=None) -> bool:
+    """Sərt zal qapısı: açar söndürülübsə həmişə ``True``; yandırılıbsa yalnız qeydli aktiv kompüterdən."""
+    if not hall_computer_check_enabled():
+        return True
+    return registered_hall_computer(request, organization) is not None
+
+
+def ensure_hall_computer(request, organization=None) -> None:
+    """Zal səhifələrinin ortaq qapısı — qeydsiz kompüterdə :class:`HallComputerDenied`.
+
+    Çağırış yerləri: imtahan zalı giriş/gözləmə view-ları (``views/student/_center_common.ensure_hall_access``).
+    Mərkəz (zal) cəhdinin take/nəticə səhifələri üçün də eyni funksiya çağırılmalıdır (sınaq cəhdi istisna) —
+    ``final_device_guarded`` istisnanı 403 xəbərdarlıq səhifəsinə çevirir.
+    """
+    if not hall_computer_gate_allows(request, organization):
+        raise HallComputerDenied()
+
+
+_LAN_NETWORKS = tuple(
+    ipaddress.ip_network(net) for net in ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7")
+)
+
+
+def _is_lan_address(ip_text: str) -> bool:
+    """RFC 1918 / ULA / loopback / link-local və ya ``INTERNAL_NETWORKS`` (universitet CIDR-ləri)."""
+    try:
+        parsed = ipaddress.ip_address(ip_text)
+    except ValueError:
+        return False
+    if parsed.is_loopback or parsed.is_link_local or any(parsed in net for net in _LAN_NETWORKS):
+        return True
+    for entry in getattr(settings, "INTERNAL_NETWORKS", []) or []:
+        try:
+            if parsed in ipaddress.ip_network(entry, strict=False):
+                return True
+        except ValueError:
+            continue
+    return False
+
+
+def client_address_diagnostic(request) -> dict:
+    """Xəbərdarlıq səhifəsi üçün YALNIZ müştərinin öz LAN ünvanı: ``{"ip": str, "mac": str}``.
+
+    İP yalnız özəl/lokal şəbəkə ünvanıdırsa göstərilir (publik və ya server ünvanı YOX); MAC yalnız MAC
+    rejimində ARP agentindən oxunur, oxunmayanda boş sətir.
+    """
+    ip_text = get_client_ip(request)
+    shown_ip = ip_text if _is_lan_address(ip_text) else ""
+    mac = resolve_client_mac(request) if mac_enforcement_active() else None
+    return {"ip": shown_ip, "mac": mac or ""}
+
+
 __all__ = [
+    "HallComputerDenied",
+    "client_address_diagnostic",
+    "ensure_hall_computer",
     "final_exam_access_allowed",
+    "hall_computer_gate_allows",
+    "registered_hall_computer",
     "get_client_ip",
+    "hall_computer_check_enabled",
     "mac_enforcement_active",
     "org_computer_access_allowed",
     "resolve_client_mac",

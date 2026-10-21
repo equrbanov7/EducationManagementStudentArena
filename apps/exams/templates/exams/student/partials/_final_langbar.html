@@ -1,17 +1,50 @@
-{% load i18n %}
-{# İmtahan zalı rejimində interfeys dili seçici (chrome gizlidir, ona görə ayrıca). #}
+{% load i18n static %}
+{% comment %}İmtahan zalı rejimində interfeys dili seçici (chrome gizlidir, ona görə ayrıca yer).
+Redizayn 2026-10-21 (sahib: «dil əlavəsi yerində düzəlt», sağ kənarda «RU» kəsilirdi; «sistemdə alman dili də
+var — siyahı sistemin dillərindən gəlsin»): öz «AZ/EN/RU» həb zolağımız (`position: fixed`, sabit 3 dil) əvəzinə
+saytın dil seçicisinin KOMPONENTİ (`language-switcher` sinifləri, «floating» görünüşü, static/css/language-switcher.css
++ static/js/language_switcher.js — canlı imtahan PIN girişi ilə eyni). Dillər `settings.LANGUAGES`-dən gəlir
+(`LANGUAGES` — django i18n context processor; login səhifəsinin seçicisi ilə eyni mənbə, adlar dilin ÖZ adıdır:
+«Русский», «Deutsch») — sistemə dil əlavə olunanda burada avtomatik görünür, şablonda/JS-də siyahı YOXDUR.
+Seçici qabığın yuxarı zolağında, normal axındadır (.fexc-topbar) — ekranın içində qalır; Bootstrap dropdown
+klaviatura ilə (Enter/Space/oxlar/Esc) işləyir.{% endcomment %}
 {% get_current_language as CURRENT_LANGUAGE %}
-{% with cur=CURRENT_LANGUAGE|slice:":2"|lower %}
-<div class="fexc-langbar" role="group" aria-label="{% trans 'İnterfeys dili' context 'exams.template.final_entry' %}">
-  <span class="fexc-langbar-icon" aria-hidden="true"><i class="fas fa-globe"></i></span>
-  {% for code, label in fexc_ui_languages %}
-  <form method="post" action="{% url 'set_language' %}" class="fexc-langbar-form">
-    {% csrf_token %}
-    <input type="hidden" name="next" value="{{ request.get_full_path }}">
-    <input type="hidden" name="language" value="{{ code }}">
-    <button type="submit" class="fexc-langbar-pill {% if cur == code %}is-active{% endif %}"
-            {% if cur == code %}aria-current="true"{% endif %}>{{ label }}</button>
-  </form>
-  {% endfor %}
+{% with current_lang=CURRENT_LANGUAGE|slice:":2"|lower %}
+<div class="fexc-topbar-lang">
+<div class="dropdown language-switcher language-switcher--floating" data-fexc-langs>
+    <button type="button"
+            class="language-switcher__trigger dropdown-toggle"
+            data-bs-toggle="dropdown"
+            data-bs-display="static"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-label="{% trans 'İnterfeys dili' context 'exams.template.final_entry' %}">
+        <span class="language-switcher__icon" aria-hidden="true"><i class="fas fa-globe"></i></span>
+        <span class="language-switcher__value">{{ current_lang|upper }}</span>
+        <i class="fas fa-chevron-down language-switcher__caret" aria-hidden="true"></i>
+    </button>
+
+    <div class="language-switcher__menu dropdown-menu dropdown-menu-end"
+         role="listbox"
+         aria-label="{% trans 'selection' context 'language' %}">
+        {% for code, name in LANGUAGES %}
+        <form action="{% url 'set_language' %}" method="post" class="language-switcher__form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <input type="hidden" name="language" value="{{ code }}">
+            <button type="submit" lang="{{ code }}"
+                    class="language-switcher__option dropdown-item{% if current_lang == code %} is-active{% endif %}"
+                    role="option" aria-selected="{% if current_lang == code %}true{% else %}false{% endif %}">
+                <span class="language-switcher__option-code">{{ code|upper }}</span>
+                <span class="language-switcher__option-label">{{ name }}</span>
+                <span class="language-switcher__option-check" aria-hidden="true">✓</span>
+            </button>
+        </form>
+        {% endfor %}
+    </div>
+</div>
+{% comment %}language_switcher.js öz dropdown-unu `document.currentScript.previousElementSibling` ilə tapır —
+skript teqi dropdown-un DƏRHAL ARDINCA, defer-siz qalmalıdır (partials/_language_switcher.html ilə eyni).{% endcomment %}
+<script src="{% static 'js/language_switcher.js' %}?v=20260921-1"></script>
 </div>
 {% endwith %}

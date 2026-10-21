@@ -1085,7 +1085,10 @@ class TestRLSExamGapTables:
         assert ExamStudentPin.objects.count() == 0
 
         client = Client()
-        with override_settings(FINAL_EXAM_ALLOWED_IPS=[], EXAM_CLIENT_MAC_RESOLUTION="off"):
+        # 2026-10-21: zal kompüteri yoxlaması (qeydiyyatlı kompüter) bu testin mövzusu deyil — söndürülür.
+        with override_settings(
+            FINAL_EXAM_ALLOWED_IPS=[], EXAM_CLIENT_MAC_RESOLUTION="off", EXAM_HALL_COMPUTER_CHECK=False
+        ):
             response = client.post(
                 reverse("exams:final_exam_entry"),
                 {"username": student.username, "pin": raw_pin},

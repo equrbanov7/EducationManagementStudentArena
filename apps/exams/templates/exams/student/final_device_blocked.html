@@ -1,11 +1,17 @@
 {% extends "errors/_base.html" %}
-{% load i18n %}
+{% load i18n static %}
 {% comment %}
 Təhlükəsizlik dizaynı 2026-10-08: davam edən final cəhdi başladığı cihaza bağlıdır
 (apps/exams/services/final_center/device_binding.py). Başqa cihazdan açılanda bu səhifə
 göstərilir — sual məzmunu YOXDUR. Nəzarətçi «cihaz dəyişikliyi»ni təsdiqləyəndən sonra
 «Səhifəni yenilə» imtahanı bu cihazda davam etdirir.
 {% endcomment %}
+{% block head_extra %}
+    {# 2026-10-21: interfeys dili seçicisi (settings.LANGUAGES) — xəta qabığı Bootstrap yükləmir, dropdown üçün lazımdır. #}
+    <link rel="stylesheet" href="{% static 'css/language-switcher.css' %}?v=20260925-1">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/student_notice.css' %}?v=20261021-redesign">
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}" defer></script>
+{% endblock %}
 {% block page_title %}{% trans 'İmtahan başqa cihazda davam edir' context 'exams.final_center.device' %}{% endblock %}
 {% block code %}403{% endblock %}
 {% block code_label %}403{% endblock %}
@@ -25,5 +31,6 @@ göstərilir — sual məzmunu YOXDUR. Nəzarətçi «cihaz dəyişikliyi»ni t�
         <i class="fas fa-rotate-right" aria-hidden="true"></i>
         {% trans 'Səhifəni yenilə' context 'exams.final_center.device' %}
     </a>
+    {% include "exams/student/partials/_final_langbar.html" %}
 {% endblock %}
 {% block footer_note %}{% trans 'Hər cihaz dəyişikliyi nəzarətçi tərəfindən təsdiqlənir və jurnalda qeyd olunur.' context 'exams.final_center.device' %}{% endblock %}

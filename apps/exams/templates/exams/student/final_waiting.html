@@ -13,85 +13,115 @@
 {% block ai_assistant_js %}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/student.css' %}?v=20261017-pkgd">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/student.css' %}?v=20261021-redesign">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/student_waiting.css' %}?v=20261021-redesign">
 {% endblock %}
 
 {% block content %}
-<div class="fexc-shell">
-  <main class="fexc-card fexc-waiting"
-        id="fexc-waiting-root"
-        data-ws-path="{{ ws_path }}"
-        data-state-url="{{ state_url }}"
-        data-begin-url="{{ begin_url }}"
-        data-entry-url="{{ entry_url }}"
-        data-heartbeat-seconds="{{ heartbeat_seconds }}"
-        data-session-active="{% if session_already_active %}1{% else %}0{% endif %}"
-        aria-labelledby="fexc-wait-title">
+{% comment %}Redizayn 2026-10-21 (sahib: «gözləmə yerini redizayn et ki, normal görüntü olsun»): rəsmi status ekranı —
+tələbə, imtahan, növ nişanı, zal/yer/dil, cari vəziyyət (aria-live) + sakit gözləmə indikatoru.
+JS müqaviləsi dəyişməyib: kök `#fexc-waiting-root` data-* atributları, `#fexc-wait-message`, `#fexc-conn-state`,
+`#fexc-manual-start`, `.fexc-cancel-form[data-confirm]`. Yeni: kökdə `data-phase` (waiting|starting|paused|stopped)
+— yalnız indikatorun görünüşü üçün (waiting_room.js yazır). Status bloku sabit hündürlükdədir — mətn dəyişəndə
+səhifə «tullanmır».{% endcomment %}
+<div class="fexc-shell fexc-shell--waiting">
+  <header class="fexc-topbar">
+    {% include "exams/student/partials/_final_langbar.html" %}
+  </header>
 
-    <header class="fexc-gate-head">
-      <span class="fexc-kicker">{% if entry_kind == "midterm" %}{% trans "Midterm imtahanı" context "exams.template.final_gate" %}{% else %}{% trans "Final imtahanı" context "exams.template.final_gate" %}{% endif %} · {% trans "Gözləmə otağı" context "exams.template.final_waiting" %}</span>
-      <h1 id="fexc-wait-title" class="fexc-title">{{ exam.title }}</h1>
-      <p class="fexc-sub">
-        {{ room.name }}{% if room.building %} · {{ room.building }}{% endif %}
+  <div class="fexc-stage">
+    <section class="fexc-card fexc-waiting"
+             id="fexc-waiting-root"
+             data-ws-path="{{ ws_path }}"
+             data-state-url="{{ state_url }}"
+             data-begin-url="{{ begin_url }}"
+             data-entry-url="{{ entry_url }}"
+             data-heartbeat-seconds="{{ heartbeat_seconds }}"
+             data-session-active="{% if session_already_active %}1{% else %}0{% endif %}"
+             data-phase="{% if session_already_active %}starting{% else %}waiting{% endif %}"
+             aria-labelledby="fexc-wait-title">
+
+      <header class="fexc-wait-head">
+        <img src="{% static 'brand/wcu-official-mark.png' %}?v=20261001" alt="" class="fexc-mark" width="44" height="40">
+        <div class="fexc-wait-head-text">
+          <span class="fexc-wait-brand">{{ site_brand_name }}</span>
+          <span class="fexc-wait-kicker">{% trans "Gözləmə otağı" context "exams.template.final_waiting" %}</span>
+        </div>
+        <span class="fexc-kind{% if entry_kind == "midterm" %} fexc-kind--midterm{% endif %}">
+          <i class="fas fa-file-signature" aria-hidden="true"></i>
+          {% if entry_kind == "midterm" %}{% trans "Midterm imtahanı" context "exams.template.final_gate" %}{% else %}{% trans "Final imtahanı" context "exams.template.final_gate" %}{% endif %}
+        </span>
+      </header>
+
+      <h1 id="fexc-wait-title" class="fexc-title fexc-wait-title">{{ exam.title }}</h1>
+
+      <div class="fexc-wait-status">
+        <div class="fexc-wait-indicator" aria-hidden="true">
+          <span class="fexc-wait-ring"></span>
+          <i class="fas fa-hourglass-half fexc-wait-icon"></i>
+        </div>
+        <div class="fexc-wait-text">
+          <p class="fexc-wait-message" id="fexc-wait-message" role="status" aria-live="polite">
+            {% trans "Nəzarətçinin imtahanı başlatması gözlənilir…" context "exams.template.final_waiting" %}
+          </p>
+          <p class="fexc-wait-hint">{% trans "Səhifəni bağlamayın — nəzarətçi imtahanı başladanda imtahan avtomatik açılacaq." context "exams.template.final_waiting" %}</p>
+        </div>
+      </div>
+
+      <dl class="fexc-wait-facts">
+        <div class="fexc-fact fexc-fact--wide">
+          <dt>{% trans "Tələbə" context "exams.template.final_waiting" %}</dt>
+          <dd>
+            <span>{{ ticket.student.get_full_name|default:ticket.student.username }}</span>
+            <span class="fexc-username">{{ ticket.student.username }}</span>
+          </dd>
+        </div>
+        <div class="fexc-fact">
+          <dt>{% trans "Zal" context "exams.template.final_gate" %}</dt>
+          <dd>{{ room.name }}{% if room.building %} · {{ room.building }}{% endif %}</dd>
+        </div>
         {% if ticket.seat_number %}
-        <span class="fexc-dot" aria-hidden="true"></span>
-        {% trans "Yer" context "exams.template.final_waiting" %} {{ ticket.seat_number }}
+        <div class="fexc-fact">
+          <dt>{% trans "Yer" context "exams.template.final_waiting" %}</dt>
+          <dd>{{ ticket.seat_number }}</dd>
+        </div>
         {% endif %}
         {% if ticket.language %}
-        <span class="fexc-dot" aria-hidden="true"></span>
-        {{ ticket.get_language_display }}
+        <div class="fexc-fact">
+          <dt>{% trans "Seçdiyiniz imtahan dili" context "exams.template.final_waiting" %}</dt>
+          <dd>{{ ticket.get_language_display }}</dd>
+        </div>
         {% endif %}
-      </p>
-    </header>
+        <div class="fexc-fact">
+          <dt>{% trans "Server bağlantısı" context "exams.template.final_waiting" %}</dt>
+          <dd><span class="fexc-conn" id="fexc-conn-state" data-state="connecting">{% trans "Qoşulur…" context "exams.template.final_waiting" %}</span></dd>
+        </div>
+      </dl>
 
-    <div class="fexc-wait-visual" aria-hidden="true">
-      <div class="fexc-pulse-ring"><i class="fas fa-hourglass-half"></i></div>
-    </div>
-
-    <p class="fexc-wait-message" id="fexc-wait-message" role="status" aria-live="polite">
-      {% trans "Nəzarətçinin imtahanı başlatması gözlənilir…" context "exams.template.final_waiting" %}
-    </p>
-
-    {% if ticket.language %}
-    <div class="fexc-lang-banner" role="note">
-      <i class="fas fa-language" aria-hidden="true"></i>
-      <span>
-        {% trans "Seçdiyiniz imtahan dili" context "exams.template.final_waiting" %}:
-        <b>{{ ticket.get_language_display }}</b>
-      </span>
-    </div>
-    {% endif %}
-
-    <dl class="fexc-wait-status">
-      <div>
-        <dt>{% trans "Server bağlantısı" context "exams.template.final_waiting" %}</dt>
-        <dd><span class="fexc-conn" id="fexc-conn-state" data-state="connecting">
-          {% trans "Qoşulur…" context "exams.template.final_waiting" %}</span></dd>
+      <div class="fexc-wait-actions">
+        <form method="post" action="{{ cancel_url }}" class="fexc-cancel-form"
+              data-confirm="{% trans 'Gözləmə otağından çıxmaq istədiyinizə əminsiniz? İmtahan cəhdiniz yanmayacaq.' context 'exams.template.final_waiting' %}">
+          {% csrf_token %}
+          <button type="submit" class="fexc-btn fexc-btn-ghost">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i>
+            {% trans "İmtina et və çıx" context "exams.template.final_waiting" %}
+          </button>
+        </form>
+        <button type="button" class="fexc-btn fexc-btn-primary fexc-manual-start" id="fexc-manual-start" hidden>
+          <i class="fas fa-play" aria-hidden="true"></i>
+          {% trans "İmtahana başla" context "exams.template.final_waiting" %}
+        </button>
       </div>
-    </dl>
 
-    <button type="button" class="fexc-btn fexc-btn-primary fexc-btn-block fexc-manual-start" id="fexc-manual-start" hidden>
-      <i class="fas fa-play" aria-hidden="true"></i>
-      {% trans "İmtahana başla" context "exams.template.final_waiting" %}
-    </button>
-
-    <form method="post" action="{{ cancel_url }}" class="fexc-cancel-form"
-          data-confirm="{% trans 'Gözləmə otağından çıxmaq istədiyinizə əminsiniz? İmtahan cəhdiniz yanmayacaq.' context 'exams.template.final_waiting' %}">
-      {% csrf_token %}
-      <button type="submit" class="fexc-btn fexc-btn-ghost">
-        <i class="fas fa-arrow-left" aria-hidden="true"></i>
-        {% trans "İmtina et və çıx" context "exams.template.final_waiting" %}
-      </button>
-    </form>
-
-    <p class="fexc-footnote">
-      <i class="fas fa-headset" aria-hidden="true"></i>
-      {% trans "Texniki problem yaranarsa, əlinizi qaldıraraq zal nəzarətçisinə müraciət edin." context "exams.template.final_waiting" %}
-    </p>
-  </main>
+      <p class="fexc-footnote">
+        <i class="fas fa-headset" aria-hidden="true"></i>
+        <span>{% trans "Texniki problem yaranarsa, əlinizi qaldıraraq zal nəzarətçisinə müraciət edin." context "exams.template.final_waiting" %}</span>
+      </p>
+    </section>
+  </div>
 </div>
 {% endblock %}
 
 {% block extraJs %}
-    <script src="{% static 'exams/js/final_center/waiting_room.js' %}?v=20261020-midterm" defer></script>
+    <script src="{% static 'exams/js/final_center/waiting_room.js' %}?v=20261021-redesign" defer></script>
 {% endblock %}

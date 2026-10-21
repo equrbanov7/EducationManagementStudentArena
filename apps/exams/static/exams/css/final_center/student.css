@@ -1,216 +1,266 @@
-/* Final imtahan mərkəzi — tələbə axını (entry / gate / waiting).
-   Mövcud dizayn tokenləri: brand #2C5BFF, mətn #0F172A/#475569,
-   sərhəd #E2E8F0, radius 14-16px (student_exam_list ilə uyğun). */
+/* İmtahan mərkəzi — tələbə axını: ORTAQ qabıq + giriş səhifəsi (/exams/final/, /exams/midterm/).
+   Qaydalar modalı: student_gate.css · gözləmə otağı: student_waiting.css.
+
+   Redizayn 2026-10-21 (sahib): login səhifəsi (apps/accounts/static/accounts/css/login.css) ilə eyni dil —
+   neytral fon, ağ kart + yuxarıda nazik brend zolağı, rəsmi loqo, 10px radiuslu sahə/düymə, sakit kölgə.
+   Yalnız dizayn tokenləri (var(--ems-*), static/css/design-tokens.css); şəffaflıq color-mix ilə.
+
+   SCROLL KÖK SƏBƏBİ: main.css `#main-content { padding-bottom: 110px }` (AI FAB son sətri örtməsin deyə) +
+   `.fexc-shell { min-height: 100vh }` → HƏR ekranda düz 110px artıq şaquli scroll (ölçü: scrollHeight =
+   innerHeight + 110). Zal səhifələrində FAB yoxdur → həmin boşluq burada sıfırlanır; qabıq 100dvh-dır.
+   `overflow: hidden` QOYULMUR — məzmun ekrana sığmayanda (çox alçaq pəncərə) səhifə normal sürüşür.
+
+   DİL SEÇİCİ: əvvəl `position: fixed` həb zolağı idi (axından kənar, Windows zal kompüterində sağ kənarda
+   «RU» kəsilirdi). İndi saytın ortaq seçicisi qabığın yuxarı zolağında, normal axında (.fexc-topbar). */
+
+#main-content:has(> .fexc-shell) {
+    padding-bottom: 0;
+}
+
+/* Qabıq və modal (modal qabıqdan KƏNARDADIR — dəyişənlər hər ikisində). */
+.fexc-shell,
+.fexc-modal-backdrop {
+    --fexc-gutter: clamp(16px, 3vw, 32px);
+    --fexc-radius: var(--ems-r-2xl);
+    --fexc-control-radius: 10px;
+}
 
 .fexc-shell {
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px 16px;
+    min-height: 100dvh;
+    width: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr;
     background:
-        radial-gradient(1000px 500px at 85% -10%, rgba(44, 91, 255, .08), transparent 60%),
-        radial-gradient(800px 400px at -10% 110%, rgba(190, 52, 85, .06), transparent 60%),
+        radial-gradient(1100px 460px at 50% -220px, var(--ems-primary-50), transparent 70%),
         var(--ems-neutral-50);
+    color: var(--ems-neutral-900);
 }
 
+/* ── Yuxarı zolaq: yalnız dil seçici (sağda, ekranın içində) ── */
+.fexc-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    min-width: 0;
+    padding: 14px var(--fexc-gutter) 0;
+}
+
+.fexc-topbar-lang {
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+.fexc-topbar .language-switcher__trigger {
+    min-height: 40px;
+    background: var(--ems-neutral-0);
+    border-color: var(--ems-neutral-200);
+    box-shadow: var(--ems-sh-raised);
+}
+
+.fexc-topbar .language-switcher__trigger:focus-visible {
+    border-color: var(--ems-primary-600);
+    box-shadow: var(--ems-sh-focus);
+}
+
+.fexc-topbar .language-switcher__menu {
+    max-width: calc(100vw - 2 * var(--fexc-gutter));
+}
+
+/* ── Səhnə: kart qalan sahədə şaquli + üfüqi mərkəzdə ── */
+.fexc-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    padding: 16px var(--fexc-gutter) 32px;
+}
+
+/* ── Kart (login kartı ilə eyni) ── */
 .fexc-card {
+    position: relative;
     width: 100%;
-    max-width: 520px;
+    max-width: 440px;
+    min-width: 0;
+    padding: 36px 36px 26px;
     background: var(--ems-neutral-0);
     border: 1px solid var(--ems-neutral-200);
-    border-radius: 16px;
-    box-shadow: 0 16px 48px rgba(15, 23, 42, .08);
-    padding: 32px 28px;
+    border-radius: var(--fexc-radius);
+    box-shadow: var(--ems-sh-raised);
 }
 
-/* ── İmtahan zalı dil seçici (login səhifəsinin yuxarısında) ── */
-.fexc-langbar {
-    position: fixed;
-    top: 18px;
-    right: 18px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 5px 8px;
-    background: var(--ems-neutral-0);
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: 999px;
-    box-shadow: 0 6px 20px rgba(15, 23, 42, .06);
-    z-index: 20;
+.fexc-card::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    height: 3px;
+    background: var(--ems-primary-600);
+    border-radius: var(--fexc-radius) var(--fexc-radius) 0 0;
 }
 
-.fexc-langbar-icon {
-    color: var(--ems-neutral-500);
-    font-size: .82rem;
-    padding: 0 3px 0 5px;
+/* ── Giriş kartının başlığı ── */
+.fexc-entry-head {
+    text-align: center;
+    margin-bottom: 24px;
 }
 
-.fexc-langbar-form { margin: 0; }
-
-.fexc-langbar-pill {
-    border: none;
-    background: transparent;
-    color: var(--ems-neutral-500);
-    font-size: .78rem;
-    font-weight: 700;
-    padding: 5px 10px;
-    border-radius: 999px;
-    cursor: pointer;
-    transition: background .15s, color .15s;
-}
-
-.fexc-langbar-pill:hover { color: var(--ems-neutral-900); background: var(--ems-neutral-100); }
-.fexc-langbar-pill.is-active { background: var(--ems-primary-600); color: var(--ems-neutral-0); }
-.fexc-langbar-pill:focus-visible { outline: 3px solid rgba(44, 91, 255, .35); outline-offset: 2px; }
-
-@media (max-width: 560px) {
-    .fexc-langbar { top: 10px; right: 10px; }
-}
-
-.fexc-gate { max-width: 640px; }
-
-/* ── İmtahan-öncəsi modal (login səhifəsinin üstündə açılır) ── */
-.fexc-modal-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 1100;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 32px 16px;
-    overflow-y: auto;
-    background: rgba(15, 23, 42, .55);
-    backdrop-filter: blur(2px);
-}
-
-.fexc-modal-panel {
-    width: 100%;
-    max-width: 640px;
-    background: var(--ems-neutral-0);
-    border-radius: 16px;
-    box-shadow: 0 24px 64px rgba(15, 23, 42, .28);
-    padding: 30px 28px;
-    margin: auto;
-    animation: fexc-modal-in .18s ease-out;
-}
-
-@keyframes fexc-modal-in {
-    from { transform: translateY(12px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .fexc-modal-panel { animation: none; }
-}
-
-.fexc-brand {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 22px;
-}
-
-.fexc-brand-badge {
-    width: 46px;
-    height: 46px;
-    border-radius: 12px;
-    background: var(--ems-blue-100-soft);
-    color: var(--ems-primary-600);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    flex: none;
+.fexc-logo {
+    display: block;
+    width: min(260px, 72vw);
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 303 / 66;
+    margin: 0 auto 22px;
 }
 
 .fexc-title {
     margin: 0;
-    font-size: 1.35rem;
-    font-weight: 800;
+    font-size: 1.45rem;
+    font-weight: 650;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
     color: var(--ems-neutral-900);
-    letter-spacing: -.01em;
+    overflow-wrap: anywhere;
 }
 
 .fexc-sub {
-    margin: 4px 0 0;
+    margin: 6px 0 0;
     color: var(--ems-neutral-500);
-    font-size: .92rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.fexc-kicker {
-    display: inline-block;
-    font-size: .74rem;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: var(--ems-rose-600);
-    margin-bottom: 6px;
+    font-size: 0.93rem;
+    line-height: 1.5;
 }
 
 .fexc-dot {
+    display: inline-block;
     width: 4px;
     height: 4px;
     border-radius: 50%;
     background: var(--ems-neutral-300);
-    display: inline-block;
+    vertical-align: middle;
 }
 
-/* ── Alertlər ── */
+.fexc-username {
+    font-family: var(--ems-ff-mono);
+    font-size: 0.88em;
+    color: var(--ems-neutral-600);
+}
+
+/* Final / Midterm nişanı (modal + gözləmə otağı) */
+.fexc-kind {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 11px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-primary-100);
+    color: var(--ems-primary-700);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+.fexc-kind--midterm {
+    background: var(--ems-indigo-50);
+    border-color: var(--ems-indigo-100);
+    color: var(--ems-indigo-800);
+}
+
+/* ── Bildirişlər ── */
 .fexc-alert {
     display: flex;
-    gap: 10px;
     align-items: flex-start;
-    border-radius: 10px;
+    gap: 10px;
+    margin: 0 0 18px;
     padding: 12px 14px;
-    font-size: .92rem;
-    margin: 14px 0;
+    border-radius: var(--fexc-control-radius);
+    font-size: 0.9rem;
+    line-height: 1.45;
+    text-align: left;
+}
+
+.fexc-alert i {
+    margin-top: 3px;
+    flex: none;
 }
 
 .fexc-alert-error {
     background: var(--ems-danger-100);
     border: 1px solid var(--ems-danger-200);
-    color: var(--ems-danger-strong);
+    color: var(--ems-danger-700);
 }
 
-/* ── Form ── */
-.fexc-form { margin-top: 18px; }
+.fexc-alert-info {
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-primary-100);
+    border-left: 3px solid var(--ems-primary-600);
+    color: var(--ems-neutral-800);
+}
 
-.fexc-field { margin-bottom: 16px; }
+.fexc-alert-info i {
+    color: var(--ems-primary-600);
+}
+
+/* ── Forma (login.css .auth-form ilə eyni ölçülər) ── */
+.fexc-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.fexc-field {
+    text-align: left;
+}
 
 .fexc-field label {
     display: block;
-    font-weight: 600;
-    font-size: .9rem;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
     color: var(--ems-neutral-700);
-    margin-bottom: 6px;
 }
 
 .fexc-field input[type="text"],
 .fexc-field input[type="password"] {
     width: 100%;
-    border: 1px solid var(--ems-neutral-300);
-    border-radius: 10px;
+    min-height: 46px;
     padding: 11px 14px;
     font-size: 1rem;
     color: var(--ems-neutral-900);
     background: var(--ems-neutral-0);
-    transition: border-color .15s, box-shadow .15s;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--fexc-control-radius);
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.fexc-field input::placeholder {
+    color: var(--ems-neutral-400);
 }
 
 .fexc-field input:focus {
-    outline: none;
     border-color: var(--ems-primary-600);
-    box-shadow: 0 0 0 3px rgba(44, 91, 255, .15);
+    box-shadow: var(--ems-sh-focus);
+}
+
+/* PIN: nöqtələr arasında hava — rəqəm sayı göz ilə izlənir */
+.fexc-pin-input {
+    letter-spacing: 0.22em;
+    font-variant-numeric: tabular-nums;
+}
+
+.fexc-pin-input::placeholder {
+    letter-spacing: 0.22em;
 }
 
 .fexc-hint {
-    margin: 6px 0 0;
-    font-size: .8rem;
+    margin: 7px 0 0;
+    font-size: 0.8rem;
+    line-height: 1.45;
     color: var(--ems-neutral-500);
 }
 
@@ -220,275 +270,195 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    border-radius: 10px;
-    padding: 11px 18px;
-    font-size: .95rem;
-    font-weight: 700;
+    min-height: var(--ems-h-action);
+    padding: 10px 18px;
     border: 1px solid transparent;
-    cursor: pointer;
+    border-radius: var(--fexc-control-radius);
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.2;
     text-decoration: none;
-    transition: background .15s, border-color .15s, color .15s;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-.fexc-btn-block { width: 100%; }
+.fexc-btn-block {
+    width: 100%;
+    min-height: 48px;
+    font-size: 1rem;
+}
 
 .fexc-btn-primary {
     background: var(--ems-primary-600);
     color: var(--ems-neutral-0);
 }
 
-.fexc-btn-primary:hover { background: var(--ems-primary-700); color: var(--ems-neutral-0); }
+.fexc-btn-primary:hover {
+    background: var(--ems-primary-700);
+    color: var(--ems-neutral-0);
+}
+
+.fexc-btn-primary:active {
+    background: var(--ems-primary-800);
+}
 
 .fexc-btn-ghost {
     background: var(--ems-neutral-0);
     border-color: var(--ems-neutral-300);
-    color: var(--ems-neutral-600);
+    color: var(--ems-neutral-700);
 }
 
-.fexc-btn-ghost:hover { border-color: var(--ems-neutral-400); color: var(--ems-neutral-900); }
+.fexc-btn-ghost:hover {
+    border-color: var(--ems-neutral-400);
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-900);
+}
 
 .fexc-btn:focus-visible {
-    outline: 3px solid rgba(44, 91, 255, .35);
+    outline: 3px solid var(--ems-primary-200);
     outline-offset: 2px;
 }
 
+/* ── Alt qeyd (təhlükəsizlik) ── */
 .fexc-footnote {
-    margin: 18px 0 0;
-    font-size: .8rem;
-    color: var(--ems-neutral-500);
     display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-/* ── Gate meta ── */
-.fexc-gate-head { margin-bottom: 6px; }
-
-.fexc-meta {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 12px;
-    margin: 18px 0;
-    padding: 16px;
-    background: var(--ems-neutral-50);
-    border: 1px solid var(--ems-neutral-100);
-    border-radius: 12px;
-}
-
-.fexc-meta dt {
-    font-size: .74rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    color: var(--ems-neutral-500);
-    margin-bottom: 3px;
-}
-
-.fexc-meta dd {
-    margin: 0;
-    font-weight: 600;
-    color: var(--ems-neutral-900);
-    font-size: .95rem;
-}
-
-.fexc-rules {
-    border: 1px solid var(--ems-warning-bd);
-    background: var(--ems-warning-100);
-    border-radius: 12px;
-    padding: 16px 18px;
-    margin-bottom: 18px;
-}
-
-.fexc-rules h2 {
-    font-size: .95rem;
-    font-weight: 800;
-    color: var(--ems-warning-800);
-    margin: 0 0 10px;
-}
-
-.fexc-rules ul {
-    margin: 0;
-    padding-left: 18px;
-    color: var(--ems-warning-800);
-    font-size: .9rem;
-    display: grid;
-    gap: 6px;
-}
-
-.fexc-rules-extra {
-    margin: 10px 0 0;
-    font-size: .88rem;
-    color: var(--ems-warning-800);
-}
-
-/* ── Dil seçimi ── */
-.fexc-langs {
-    border: none;
-    padding: 0;
-    margin: 0 0 16px;
-}
-
-.fexc-langs legend {
-    font-weight: 700;
-    font-size: .95rem;
-    color: var(--ems-neutral-900);
-    margin-bottom: 10px;
-}
-
-.fexc-lang-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 10px;
-}
-
-.fexc-lang-option {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border: 1px solid var(--ems-neutral-300);
-    border-radius: 10px;
-    padding: 12px 14px;
-    cursor: pointer;
-    font-weight: 600;
-    color: var(--ems-neutral-700);
-    transition: border-color .15s, background .15s;
-}
-
-.fexc-lang-option:has(input:checked) {
-    border-color: var(--ems-primary-600);
-    background: var(--ems-blue-100-soft);
-    color: var(--ems-primary-800);
-}
-
-.fexc-lang-option input { accent-color: var(--ems-primary-600); }
-
-.fexc-confirm {
-    display: flex;
-    gap: 10px;
     align-items: flex-start;
-    font-size: .92rem;
-    color: var(--ems-neutral-700);
-    margin: 4px 0 18px;
-    cursor: pointer;
-}
-
-.fexc-confirm input {
-    margin-top: 3px;
-    accent-color: var(--ems-primary-600);
-}
-
-.fexc-actions {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-/* ── Gözləmə otağı ── */
-.fexc-waiting { text-align: center; max-width: 560px; }
-
-.fexc-waiting .fexc-gate-head { text-align: left; }
-
-.fexc-wait-visual {
-    display: flex;
     justify-content: center;
-    margin: 26px 0 14px;
+    gap: 8px;
+    margin: 22px 0 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--ems-neutral-100);
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--ems-neutral-500);
+    text-align: left;
 }
 
-.fexc-pulse-ring {
-    width: 84px;
-    height: 84px;
-    border-radius: 50%;
-    background: var(--ems-blue-100-soft);
-    color: var(--ems-primary-600);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 30px;
-    position: relative;
+.fexc-footnote i {
+    margin-top: 2px;
+    color: var(--ems-neutral-400);
 }
 
-.fexc-pulse-ring::after {
-    content: "";
-    position: absolute;
-    inset: -8px;
-    border-radius: 50%;
-    border: 2px solid rgba(44, 91, 255, .35);
-    animation: fexc-pulse 2s ease-out infinite;
+/* ── Alçaq ekranlar (1366×768 / 1536×864 @125%): kart yığcamlaşır, scroll yaranmır ── */
+@media (max-height: 720px) {
+    .fexc-topbar { padding-top: 10px; }
+    .fexc-stage { padding-top: 10px; padding-bottom: 18px; }
+    .fexc-card { padding: 26px 32px 20px; }
+    .fexc-entry-head { margin-bottom: 18px; }
+    .fexc-logo { width: min(220px, 64vw); margin-bottom: 14px; }
+    .fexc-title { font-size: 1.32rem; }
+    .fexc-form { gap: 14px; }
+    .fexc-field label { margin-bottom: 6px; }
+    .fexc-footnote { margin-top: 16px; padding-top: 12px; }
 }
 
-@keyframes fexc-pulse {
-    0% { transform: scale(.9); opacity: 1; }
-    100% { transform: scale(1.25); opacity: 0; }
+@media (max-height: 560px) {
+    .fexc-topbar { padding-top: 8px; }
+    .fexc-stage { padding-top: 4px; padding-bottom: 10px; }
+    .fexc-card { padding: 20px 28px 14px; }
+    .fexc-logo { width: 170px; margin-bottom: 8px; }
+    .fexc-entry-head { margin-bottom: 12px; }
+    .fexc-title { font-size: 1.22rem; }
+    .fexc-sub { margin-top: 2px; font-size: 0.86rem; }
+    .fexc-form { gap: 10px; }
+    .fexc-hint { margin-top: 4px; }
+    .fexc-footnote { margin-top: 12px; padding-top: 10px; }
+}
+
+/* ── Telefon ── */
+@media (max-width: 480px) {
+    .fexc-topbar { padding: 10px 12px 0; }
+    .fexc-stage { padding: 12px 12px 20px; }
+    .fexc-card { padding: 28px 20px 20px; border-radius: 14px; }
+    .fexc-card::before { border-radius: 14px 14px 0 0; }
+    .fexc-title { font-size: 1.3rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .fexc-pulse-ring::after { animation: none; }
+    .fexc-btn,
+    .fexc-field input { transition: none; }
 }
 
-.fexc-wait-message {
-    font-size: 1.02rem;
-    font-weight: 600;
-    color: var(--ems-neutral-900);
-    margin: 0 0 18px;
+/* ── Qeydiyyatsız kompüter xəbərdarlığı (hall_computer_blocked.html, sərt zal rejimi 2026-10-21) ── */
+.fexc-blocked {
+    max-width: 520px;
 }
 
-.fexc-lang-banner {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    margin: 0 auto 18px;
-    padding: 10px 16px;
-    border-radius: 999px;
-    background: var(--ems-blue-100-soft);
-    border: 1px solid var(--ems-primary-200);
-    color: var(--ems-primary-800);
-    font-size: .92rem;
+.fexc-diag {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 22px;
 }
 
-.fexc-lang-banner i { font-size: 1rem; }
-.fexc-lang-banner b { font-weight: 800; }
-
-.fexc-wait-status {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin: 0 0 20px;
-    padding: 14px;
-    background: var(--ems-neutral-50);
-    border: 1px solid var(--ems-neutral-100);
-    border-radius: 12px;
+.fexc-diag .fexc-diag-title {
+    flex: 1 0 100%;
 }
 
-.fexc-wait-status dt {
-    font-size: .74rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    color: var(--ems-neutral-500);
-    margin-bottom: 3px;
-}
-
-.fexc-wait-status dd { margin: 0; font-weight: 700; color: var(--ems-neutral-900); }
-
-.fexc-conn { display: inline-flex; align-items: center; gap: 7px; }
-
-.fexc-conn::before {
-    content: "";
-    width: 9px;
-    height: 9px;
+.fexc-blocked-badge {
+    display: inline-grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 12px;
     border-radius: 50%;
-    background: var(--ems-warning-500);
-    display: inline-block;
+    background: var(--ems-warning-50);
+    border: 1px solid var(--ems-warning-bd);
+    color: var(--ems-warning-700);
+    font-size: 1.25rem;
 }
 
-.fexc-conn[data-state="online"]::before { background: var(--ems-emerald-600); }
-.fexc-conn[data-state="offline"]::before { background: var(--ems-danger); }
+.fexc-alert-warning {
+    background: var(--ems-warning-50);
+    border: 1px solid var(--ems-warning-bd);
+    color: var(--ems-warning-800);
+}
 
-.fexc-cancel-form { margin: 6px 0 0; }
+.fexc-diag {
+    margin: 0;
+    padding: 12px 14px;
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--fexc-control-radius);
+}
 
-@media (max-width: 560px) {
-    .fexc-card { padding: 24px 18px; }
-    .fexc-actions { flex-direction: column-reverse; }
-    .fexc-actions .fexc-btn { width: 100%; }
+.fexc-diag-title {
+    margin-bottom: 6px;
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.fexc-diag-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 0;
+    padding: 3px 0;
+}
+
+.fexc-diag-key {
+    flex: none;
+    width: 40px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--ems-neutral-600);
+}
+
+.fexc-diag-value {
+    font-family: var(--ems-ff-mono);
+    font-size: 0.95rem;
+    color: var(--ems-neutral-900);
+    overflow-wrap: anywhere;
+}
+
+.fexc-diag-hint {
+    margin-bottom: 16px;
+}
+
+@media (max-height: 720px) {
+    .fexc-blocked-badge { display: none; }
+    .fexc-blocked .fexc-alert { margin-bottom: 12px; }
 }

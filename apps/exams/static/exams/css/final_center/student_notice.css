@@ -1,0 +1,35 @@
+/* İmtahan zalı bildiriş səhifələri (errors/_base.html qabığı: şəbəkə 403, cihaz 403) — interfeys dili seçicisi.
+   2026-10-21: dillər settings.LANGUAGES-dən (partials/_final_langbar.html); seçici əməl düymələrinin yanındadır,
+   hündürlüyü .error-btn ilə eynidir. Yalnız dizayn tokenləri. */
+
+.error-actions .fexc-topbar-lang {
+    display: inline-flex;
+    justify-content: center;
+}
+
+.error-actions .language-switcher__trigger {
+    min-height: 44px;
+    background: var(--ems-neutral-0);
+    border-color: var(--ems-neutral-200);
+    border-radius: 12px;
+    box-shadow: none;
+}
+
+.error-actions .language-switcher__trigger:focus-visible {
+    border-color: var(--ems-primary-600);
+    box-shadow: var(--ems-sh-focus);
+}
+
+.error-actions .language-switcher__menu {
+    text-align: left;
+}
+
+/* Seçici kartın ortasındadır: menyu YUXARI və mərkəzə açılır — sağa bağlı menyu 375px-də ekrandan solda
+   çıxırdı, aşağı açılanda isə səhifəni uzadırdı. `!important` — language-switcher.css-in ümumi
+   `[data-bs-popper]` qaydası mövqeyi `!important` ilə qoyur; eyni gücdə, daha spesifik qayda lazımdır. */
+.error-actions .language-switcher__menu,
+.error-actions .language-switcher__menu[data-bs-popper] {
+    inset: auto auto calc(100% + 0.4rem) 50% !important;
+    transform: translateX(-50%) !important;
+    max-width: calc(100vw - 32px);
+}

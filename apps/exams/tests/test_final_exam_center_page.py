@@ -14,7 +14,15 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
-from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, ExamQuestionOption
+from apps.exams.models import (
+    Exam,
+    ExamAnswer,
+    ExamAttempt,
+    ExamQuestion,
+    ExamQuestionOption,
+    ExamRoom,
+    ExamRoomComputer,
+)
 from apps.exams.services.exam_center_gate import final_exam_access_allowed, get_client_ip
 from apps.exams.tests.test_exam_center_policy import PASSWORD, _assign_user_to_org
 from apps.organizations.models import Organization
@@ -56,6 +64,12 @@ class FinalExamCenterPageTests(TestCase):
             is_public=True,
         )
         cls.url = reverse("exams:final_exam_entry")
+        # 2026-10-21 sərt zal rejimi: /exams/final/ yalnız qeydli zal kompüterindən açılır — test müştərisi 127.0.0.1.
+        cls.room = ExamRoom.objects.create(organization=cls.org, name="FEP Zal", code="FEPZ", capacity=10)
+        ExamRoomComputer.objects.create(
+            organization=cls.org, room=cls.room, label="PC-1", seat_number=1, mac_address="AA:BB:CC:FE:00:01",
+            ip_address="127.0.0.1",
+        )  # fmt: skip
 
     def _client(self):
         client = Client()
@@ -183,6 +197,10 @@ class FinalExamCenterPageTests(TestCase):
         attempt = self._finished_attempt()
         client = self._client()
         result_url = reverse("exams:exam_result", args=[self.final_exam.slug, attempt.id])
+        # 2026-10-21 (sahib): açar yalnız həmin cəhdin zal sessiyasında + bağlı cihazda.
+        from apps.exams.tests.hall_helpers import enter_hall
+
+        enter_hall(client, attempt)
 
         center_response = client.get(result_url)
         self.assertEqual(center_response.status_code, 200)

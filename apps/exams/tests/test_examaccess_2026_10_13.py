@@ -107,6 +107,12 @@ class NetworkGateTests(TestCase):
         cls.final = _make_official(cls.org, cls.teacher, "NW1013 Final")
         cls.midterm = _make_official(cls.org, cls.teacher, "NW1013 Midterm", kind="midterm")
         cls.quiz = _make_quiz(cls.org, cls.teacher, n_questions=1, title="NW1013 Quiz")
+        # 2026-10-21 sərt zal rejimi: daxili şəbəkədəki giriş səhifəsi yalnız qeydli zal kompüterindən açılır.
+        room = ExamRoom.objects.create(organization=cls.org, name="NW Zal", code="NWZ", capacity=10)
+        ExamRoomComputer.objects.create(
+            organization=cls.org, room=room, label="PC-1", seat_number=1, mac_address="AA:BB:CC:13:10:01",
+            ip_address=INTERNAL_IP,
+        )  # fmt: skip
 
     def setUp(self):
         from django.core.cache import cache
@@ -236,7 +242,8 @@ class NetworkGateTests(TestCase):
         # Başlığa etibar yoxdursa müştərinin yazdığı «internal» kənar IP-ni daxili etmir.
         self.assertEqual(self.client.get(url, REMOTE_ADDR=EXTERNAL_IP, HTTP_X_EMS_ZONE="internal").status_code, 403)
 
-    @override_settings(EXAM_FINAL_INTERNAL_ONLY=False)
+    # 2026-10-21: sərt zal qapısı da (qeydsiz kompüter → 403) ayrıca açardır — «əvvəlki davranış» ikisi də sönülüdür.
+    @override_settings(EXAM_FINAL_INTERNAL_ONLY=False, EXAM_HALL_COMPUTER_CHECK=False)
     def test_setting_off_keeps_previous_behaviour(self):
         attempt = self._attempt(self.final)
         url = reverse("exams:take_exam", kwargs={"slug": self.final.slug, "attempt_id": attempt.id})
