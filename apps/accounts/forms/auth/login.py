@@ -1,5 +1,7 @@
 """accounts auth forms paketi — login."""
 
+import logging
+
 from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -15,7 +17,9 @@ from core.utils import build_absolute_url, get_auth_otp_expiry_minutes
 
 from ...identity import canonical_identity_queryset, email_is_placeholder, user_access_is_login_blocked
 from ...models import EmailOTP
-from ...services import issue_email_otp
+from ...services import OTPRateLimitError, issue_email_otp
+
+logger = logging.getLogger(__name__)
 
 
 class CustomLoginForm(AuthenticationForm):
@@ -159,8 +163,20 @@ class CustomPasswordResetForm(PasswordResetForm):
         from_email = from_email or sender_for(EmailOTP.Purpose.PASSWORD_RESET)
         self.password_reset_users = []
         for user in self.get_users(email):
-            code, expires_at, _otp = issue_email_otp(user, purpose=EmailOTP.Purpose.PASSWORD_RESET)
+            # Sahib 2026-10-21: ikiqat klik / təkrar POST cooldown daxilində YENİ KOD və ikinci məktub vermir —
+            # əvvəlki məktubdakı kod qüvvədədir. Saatlıq limit dolubsa 500 yox: «done» səhifəsi (hesab orakulu
+            # yaranmasın), məktub getmir.
+            try:
+                code, expires_at, _otp = issue_email_otp(
+                    user, purpose=EmailOTP.Purpose.PASSWORD_RESET, reuse_recent=True
+                )
+            except OTPRateLimitError:
+                logger.info("Password-reset OTP hourly limit reached for user %s", user.pk)
+                self.password_reset_users.append(user)
+                continue
             self.password_reset_users.append(user)
+            if code is None:
+                continue
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = token_generator.make_token(user)
             reset_url = build_absolute_url(

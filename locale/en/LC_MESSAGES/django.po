@@ -107305,3 +107305,92 @@ msgstr "This IP is already assigned to computer «%(label)s» in room «%(room)s
 msgctxt "exams.template.take_exam"
 msgid "Bu imtahan artıq başqa tabda açıqdır — bu tabdan cavablar yazılmır. İmtahanı həmin tabda davam etdirin və ya onu bağlayıb bu səhifəni yeniləyin."
 msgstr "This exam is already open in another tab — answers are not saved from this tab. Continue the exam in that tab, or close it and reload this page."
+
+#, python-format
+msgctxt "accounts.otp"
+msgid "Kod hələ %(minutes)s dəq. etibarlıdır (%(time)s-ə qədər)."
+msgstr "The code is valid for another %(minutes)s min (until %(time)s)."
+
+msgctxt "accounts.otp"
+msgid "Kod səhvdir. Məktubdakı 6 rəqəmli kodu yoxlayıb yenidən daxil edin."
+msgstr "The code is incorrect. Check the 6-digit code in the e-mail and enter it again."
+
+#, python-format
+msgctxt "accounts.otp"
+msgid "Qalan cəhd: %(left)s."
+msgstr "Attempts left: %(left)s."
+
+msgctxt "accounts.otp"
+msgid "Bu kod artıq etibarsızdır — ondan sonra yeni kod göndərilib. Ən son məktubdakı kodu daxil edin."
+msgstr "This code is no longer valid — a newer code was sent after it. Enter the code from the latest e-mail."
+
+msgctxt "accounts.otp"
+msgid "Kodun vaxtı keçib. Yeni kod istəyin."
+msgstr "The code has expired. Request a new code."
+
+msgctxt "accounts.otp"
+msgid "Bu kod artıq istifadə olunub. Lazımdırsa yeni kod istəyin."
+msgstr "This code has already been used. Request a new code if needed."
+
+msgctxt "accounts.otp"
+msgid "Çox sayda səhv cəhd edildi — kod bağlandı. Yeni kod istəyin."
+msgstr "Too many wrong attempts — the code has been blocked. Request a new code."
+
+msgctxt "accounts.otp"
+msgid "Aktiv təsdiq kodu yoxdur. Yeni kod istəyin."
+msgstr "There is no active verification code. Request a new code."
+
+msgctxt "accounts.otp"
+msgid "Kod 6 rəqəmdən ibarət olmalıdır."
+msgstr "The code must consist of 6 digits."
+
+msgctxt "accounts.otp"
+msgid "Kodu yoxlamaq mümkün olmadı. Yenidən cəhd edin."
+msgstr "The code could not be checked. Please try again."
+
+msgctxt "accounts.otp"
+msgid "Təsdiq kodu artıq göndərilib — e-poçtunuzu (həm də «Spam» qovluğunu) yoxlayın."
+msgstr "The verification code has already been sent — check your e-mail (including the Spam folder)."
+
+#, python-format
+msgctxt "accounts.otp"
+msgid "Yeni kodu %(seconds)s san. sonra istəyə bilərsiniz."
+msgstr "You can request a new code in %(seconds)s s."
+
+#, python-format
+msgctxt "accounts.otp"
+msgid "Bu e-poçt üçün saatlıq kod limiti dolub. %(minutes)s dəq. sonra yenidən cəhd edin."
+msgstr "The hourly code limit for this e-mail has been reached. Try again in %(minutes)s min."
+
+msgctxt "accounts.otp"
+msgid "Yeni kod istə"
+msgstr "Request a new code"
+
+msgctxt "accounts.first_login"
+msgid "Göndərilir…"
+msgstr "Sending…"
+
+msgctxt "accounts.first_login"
+msgid "Yoxlanılır…"
+msgstr "Checking…"
+
+msgctxt "accounts.first_login"
+msgid "Kodun vaxtı keçib"
+msgstr "The code has expired"
+
+#, python-format
+msgctxt "accounts.first_login"
+msgid "Kod %(minutes)s dəqiqə etibarlıdır — %(time)s-ə qədər."
+msgstr "The code is valid for %(minutes)s minutes — until %(time)s."
+
+msgctxt "accounts.first_login"
+msgid "Qalan vaxt:"
+msgstr "Time left:"
+
+msgctxt "accounts.first_login"
+msgid "Aşağıdakı «Kodu yenidən göndər» düyməsi ilə yeni kod istəyin."
+msgstr "Request a new code with the «Resend code» button below."
+
+msgctxt "accounts.first_login"
+msgid "Kodu yenidən göndər ({s} san.)"
+msgstr "Resend code ({s} s)"

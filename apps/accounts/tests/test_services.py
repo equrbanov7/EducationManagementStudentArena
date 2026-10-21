@@ -252,22 +252,33 @@ class OTPDeliveryServiceTest(TestCase):
         self.assertTrue(otp_record.matches_code(code))
 
     def test_issue_email_otp_invalidates_previous_codes(self):
-        """A fresh OTP must mark older pending OTPs as used."""
-        from apps.accounts.services import issue_email_otp
+        """A fresh OTP retires older pending OTPs beyond the accepted window.
 
-        # Create two stale OTPs
-        EmailOTP.objects.create(user=self.user, code="111111")
-        EmailOTP.objects.create(user=self.user, code="222222")
+        Sahib 2026-10-21: ikiqat göndərişdə əvvəlki məktubun kodu da işləməlidir — son
+        ``OTP_ACCEPTED_RECENT_CODES`` qüvvədə kod saxlanılır, daha köhnələri və vaxtı keçənlər bağlanır.
+        """
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from apps.accounts.services import issue_email_otp
+        from apps.accounts.services.auth import OTP_ACCEPTED_RECENT_CODES
+
+        expired = EmailOTP.objects.create(
+            user=self.user, code="999999", expires_at=timezone.now() - timedelta(seconds=1)
+        )
+        for code in ("111111", "222222", "333333"):  # + 1 vaxtı keçmiş = 4 (saatlıq 5 limitindən az)
+            EmailOTP.objects.create(user=self.user, code=code)
 
         issue_email_otp(self.user)
 
-        # Existing records are now is_used=True – the raw code values are no longer
-        # stored verbatim (they are hashed), so we check via is_used flag.
         self.assertEqual(
             EmailOTP.objects.filter(user=self.user, is_used=False).count(),
-            1,
-            "Only the freshly issued OTP should remain active",
+            OTP_ACCEPTED_RECENT_CODES,
+            "Only the freshly issued OTP and the newest live predecessors should remain active",
         )
+        expired.refresh_from_db()
+        self.assertTrue(expired.is_used)
 
     def test_verify_otp_code_valid(self):
         """verify_otp_code returns True and the OTP object for a valid code."""
