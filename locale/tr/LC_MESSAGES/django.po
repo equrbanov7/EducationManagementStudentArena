@@ -106118,3 +106118,371 @@ msgstr "Ara sınav girişi"
 msgctxt "exams.template.final_gate"
 msgid "Midterm imtahanı"
 msgstr "Ara sınav"
+
+msgctxt "core.runtime_settings"
+msgid "Zal kompüteri yoxlaması (MAC/IP)"
+msgstr "Sınav salonu bilgisayar kontrolü (MAC/IP)"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılıbsa (defolt) final və midterm girişində zal kompüteri yoxlanır: harada konfiqurasiya olunubsa qeydli zal kompüterləri, ARP agenti ilə MAC ünvanı və IP siyahısı tələb olunur. Söndürüləndə kompüter/MAC/IP tələbi YOXDUR — tələbə universitet şəbəkəsindəki istənilən kompüterdən daxil ola bilər. Universitet şəbəkəsi qaydası, istifadəçi adı + PIN və cəhdin ilk cihaza bağlanması hər iki halda qalır."
+msgstr "Açıksa (varsayılan) final ve ara sınav girişinde salon bilgisayarı kontrol edilir: yapılandırıldığı yerlerde kayıtlı salon bilgisayarları, ARP ajanı ile MAC adresi ve IP listesi gerekir. Kapalıysa bilgisayar/MAC/IP şartı YOKTUR — öğrenci üniversite ağındaki herhangi bir bilgisayardan giriş yapabilir. Üniversite ağı kuralı, kullanıcı adı + PIN ve denemenin ilk cihaza bağlanması her iki durumda da geçerlidir."
+
+msgctxt "core.runtime_settings"
+msgid "Final imtahanında sual sayı"
+msgstr "Final sınavındaki soru sayısı"
+
+msgctxt "core.runtime_settings"
+msgid "Yeni imtahanda «Final» kateqoriyası seçiləndə sual sayı avtomatik bu dəyərə qoyulur. Müəllif sayı əl ilə dəyişə bilər; mövcud imtahanların sayı dəyişmir."
+msgstr "Yeni sınavda «Final» kategorisi seçildiğinde soru sayısı otomatik olarak bu değere ayarlanır. Yazar sayıyı elle değiştirebilir; mevcut sınavların sayısı değişmez."
+
+msgctxt "core.runtime_settings"
+msgid "Midterm imtahanında sual sayı"
+msgstr "Ara sınavdaki soru sayısı"
+
+msgctxt "core.runtime_settings"
+msgid "Yeni imtahanda «Midterm» kateqoriyası seçiləndə sual sayı avtomatik bu dəyərə qoyulur. Müəllif sayı əl ilə dəyişə bilər; mövcud imtahanların sayı dəyişmir."
+msgstr "Yeni sınavda «Ara sınav» kategorisi seçildiğinde soru sayısı otomatik olarak bu değere ayarlanır. Yazar sayıyı elle değiştirebilir; mevcut sınavların sayısı değişmez."
+
+msgctxt "core.runtime_settings"
+msgid "sual"
+msgstr "soru"
+
+#, python-format
+msgctxt "exams.form.exam.help"
+msgid "Midterm üçün %(count)s sual (Sistem tənzimləmələri)"
+msgstr "Ara sınav için %(count)s soru (Sistem ayarları)"
+
+#, python-format
+msgctxt "exams.form.exam.help"
+msgid "Final üçün %(count)s sual (Sistem tənzimləmələri)"
+msgstr "Final için %(count)s soru (Sistem ayarları)"
+
+msgctxt "exams.final_center.entry"
+msgid "Zal müəyyən edilmədi — imtahan zalının nəzarətçisinə müraciət edin."
+msgstr "Sınav salonu belirlenemedi — lütfen salon gözetmenine başvurun."
+
+msgctxt "accounts.runtime_settings"
+msgid "Ümumi baxış"
+msgstr "Genel bakış"
+
+msgctxt "accounts.runtime_settings"
+msgid "Tənzimləmə qrupları"
+msgstr "Ayar grupları"
+
+msgctxt "accounts.runtime_settings"
+msgid "Hamısı standartdır"
+msgstr "Tümü varsayılan"
+
+msgctxt "accounts.runtime_settings"
+msgid "Tənzimləmələrdə axtar"
+msgstr "Ayarlarda ara"
+
+msgctxt "accounts.runtime_settings"
+msgid "Tənzimləmələrdə axtar: ad, izah və ya açar"
+msgstr "Ayarlarda ara: ad, açıklama veya anahtar"
+
+msgctxt "accounts.runtime_settings"
+msgid "Heç nə tapılmadı"
+msgstr "Hiçbir şey bulunamadı"
+
+msgctxt "accounts.runtime_settings"
+msgid "Tapıldı: {n}"
+msgstr "Bulundu: {n}"
+
+#, python-format
+msgctxt "accounts.runtime_settings"
+msgid "%(n)s tənzimləmə"
+msgid_plural "%(n)s tənzimləmə"
+msgstr[0] "%(n)s ayar"
+msgstr[1] "%(n)s ayar"
+
+#, python-format
+msgctxt "accounts.runtime_settings"
+msgid "%(n)s dəyişdirilib"
+msgid_plural "%(n)s dəyişdirilib"
+msgstr[0] "%(n)s değiştirildi"
+msgstr[1] "%(n)s değiştirildi"
+
+msgctxt "core.runtime_settings"
+msgid "Monitorinq"
+msgstr "İzleme"
+
+msgctxt "core.runtime_settings"
+msgid "Tətbiq daxili monitorinq («Sistem monitorinqi» səhifəsi)"
+msgstr "Uygulama içi izleme («Sistem izleme» sayfası)"
+
+msgctxt "core.runtime_settings"
+msgid "Söndürüləndə «Sistem monitorinqi» səhifəsi «Monitorinq söndürülüb» bildirişi göstərir və Prometheus/Loki/Alertmanager-ə heç bir sorğu göndərmir; in-app insident uzlaşdırması dayanır. Alertlər (e-poçt), Watchdog və imtahan nəzarəti işləməyə davam edir. Monitorinq konteynerlərini dayandırmaq üçün «Prod host maintenance» → monitoring-pause əməliyyatı var."
+msgstr "Kapalıyken «Sistem izleme» sayfası «İzleme kapatıldı» bildirimi gösterir ve Prometheus/Loki/Alertmanager'a hiçbir sorgu göndermez; uygulama içi olay uzlaştırması durur. Uyarılar (e-posta), Watchdog ve sınav gözetimi çalışmaya devam eder. İzleme konteynerlerini durdurmak için «Prod host maintenance» → monitoring-pause işlemi vardır."
+
+msgctxt "core.runtime_settings"
+msgid "Server yüklü olanda monitorinqi avtomatik dayandır"
+msgstr "Sunucu yüklüyken izlemeyi otomatik olarak duraklat"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılıbsa server yükü (son 1 dəqiqənin orta yükü) aşağıdakı həddi keçəndə «Sistem monitorinqi» səhifəsinin sorğuları və in-app insident uzlaşdırması müvəqqəti dayanır; yük azalan kimi özü bərpa olunur. Alertlər bundan asılı deyil."
+msgstr "Açıksa sunucu yükü (son 1 dakikanın ortalama yükü) aşağıdaki eşiği aştığında «Sistem izleme» sayfasının sorguları ve uygulama içi olay uzlaştırması geçici olarak durur; yük azalınca kendiliğinden devam eder. Uyarılar buna bağlı değildir."
+
+msgctxt "core.runtime_settings"
+msgid "Avtomatik dayandırma həddi (yük ÷ nüvə sayı)"
+msgstr "Otomatik duraklatma eşiği (yük ÷ çekirdek sayısı)"
+
+msgctxt "core.runtime_settings"
+msgid "Son 1 dəqiqənin orta yükü «bu dəyər × prosessor nüvələrinin sayı»nı keçəndə monitorinq dayandırılır. Məs. 1,5 və 10 nüvədə hədd 15-dir. Avtomatik bərpa (autoheal) yük altında restartları 2 × nüvədə dayandırır — monitorinq ondan əvvəl geri çəkilsin deyə defolt 1,5-dir."
+msgstr "Son 1 dakikanın ortalama yükü «bu değer × işlemci çekirdeği sayısı»nı aştığında izleme durdurulur. Örn. 1,5 ve 10 çekirdekte eşik 15'tir. Otomatik kurtarma (autoheal) yük altında yeniden başlatmaları 2 × çekirdekte durdurur — izleme ondan önce geri çekilsin diye varsayılan 1,5'tir."
+
+msgctxt "core.runtime_settings"
+msgid "× nüvə"
+msgstr "× çekirdek"
+
+msgctxt "core.runtime_settings"
+msgid "Monitorinq məlumatının yenilənmə intervalı"
+msgstr "İzleme verilerinin yenilenme aralığı"
+
+msgctxt "core.runtime_settings"
+msgid "Prometheus/Loki/Alertmanager cavabları bu müddət ərzində ortaq keşdən verilir — səhifəni neçə nəfər açıq saxlasa da, eyni sorğu bu intervalda bir dəfədən çox göndərilmir. Böyük dəyər yükü azaldır, qrafiklər isə bir o qədər gec yenilənir."
+msgstr "Prometheus/Loki/Alertmanager yanıtları bu süre boyunca ortak önbellekten verilir — sayfayı kaç kişi açık tutarsa tutsun, aynı sorgu bu aralıkta bir kereden fazla gönderilmez. Büyük değer yükü azaltır, grafikler ise o kadar geç yenilenir."
+
+#, python-format
+msgctxt "monitoring.switch"
+msgid "Server yüklüdür (yük %(load)s > hədd %(threshold)s) — monitorinq sorğuları yük azalana qədər avtomatik dayandırılıb. Alertlər işləyir."
+msgstr "Sunucu yüklü (yük %(load)s > eşik %(threshold)s) — izleme sorguları yük azalana kadar otomatik olarak durduruldu. Uyarılar çalışıyor."
+
+msgctxt "monitoring.switch"
+msgid "Monitorinq söndürülüb («Sistem tənzimləmələri → Monitorinq»). Prometheus/Loki sorğuları göndərilmir; alertlər (e-poçt) və imtahan nəzarəti işləyir."
+msgstr "İzleme kapatıldı («Sistem ayarları → İzleme»). Prometheus/Loki sorguları gönderilmiyor; uyarılar (e-posta) ve sınav gözetimi çalışıyor."
+
+msgctxt "monitoring.alert"
+msgid "Monitorinq konteynerləri 12 saatdan çoxdur dayandırılıb"
+msgstr "İzleme konteynerleri 12 saatten uzun süredir durduruldu"
+
+msgctxt "monitoring.alert"
+msgid "Monitorinq pauzası bitib, amma pauza işarəsi qalıb — bəzi alertlər susdurulub"
+msgstr "İzleme duraklatması bitti ama duraklatma işareti kaldı — bazı uyarılar susturuldu"
+
+msgctxt "registrar.journal"
+msgid "Test formatında keçirilən midterm balı imtahandan avtomatik yazılır və burada əl ilə dəyişdirilmir. Düzəliş yalnız apellyasiya və ya sənədli düzəliş ilə mümkündür."
+msgstr "Test olarak yapılan ara sınavın puanı sınavdan otomatik yazılır ve burada elle değiştirilemez. Düzeltme yalnızca itiraz veya belgeli düzeltme ile yapılabilir."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "İmtahandan avtomatik — %(title)s (%(percent)s%%)"
+msgstr "Sınavdan otomatik — %(title)s (%(percent)s%%)"
+
+msgctxt "registrar.journal"
+msgid "test imtahanından avtomatik"
+msgstr "test sınavından otomatik"
+
+msgctxt "exams.template.final_waiting"
+msgid "Tələbə"
+msgstr "Öğrenci"
+
+msgctxt "exams.template.final_waiting"
+msgid "Səhifəni bağlamayın — nəzarətçi imtahanı başladanda imtahan avtomatik açılacaq."
+msgstr "Bu sayfayı kapatmayın — gözetmen sınavı başlattığında sınav otomatik olarak açılacaktır."
+
+msgctxt "exams.final_center.hall_computer"
+msgid "Bu kompüter imtahan zalı kompüteri kimi qeydiyyatdan keçməyib. Final və midterm imtahanlarına yalnız imtahan zalındakı qeydiyyatlı kompüterlərdən daxil olmaq olar."
+msgstr "Bu bilgisayar sınav salonu bilgisayarı olarak kayıtlı değil. Final ve ara sınavlara yalnızca sınav salonundaki kayıtlı bilgisayarlardan girilebilir."
+
+msgctxt "exams.final_center.hall_computer"
+msgid "Qeydiyyatsız kompüter"
+msgstr "Kayıtsız bilgisayar"
+
+msgctxt "exams.final_center.hall_computer"
+msgid "Bu kompüterin ünvanı"
+msgstr "Bu bilgisayarın adresi"
+
+msgctxt "exams.final_center.hall_computer"
+msgid "oxunmadı"
+msgstr "okunamadı"
+
+msgctxt "exams.final_center.hall_computer"
+msgid "Kompüterin qeydiyyatı üçün bu ünvanı imtahan mərkəzinə və ya zal nəzarətçisinə bildirin."
+msgstr "Bilgisayarın kaydı için bu adresi sınav merkezine veya salon gözetmenine bildirin."
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılıbsa (defolt) final və midterm səhifələrini YALNIZ imtahan zalının qeydiyyatlı kompüterləri (MAC ünvanı ARP agenti ilə, əks halda IP) aça bilər; qeydiyyatsız kompüterdə giriş forması əvəzinə xəbərdarlıq və həmin kompüterin ünvanı göstərilir. Heç bir kompüter qeydiyyatda deyilsə, heç kim daxil ola bilmir. Söndürüləndə kompüter tələbi YOXDUR — universitet şəbəkəsindəki istənilən kompüterdən daxil olmaq olar. Universitet şəbəkəsi qaydası, istifadəçi adı + PIN və cəhdin ilk cihaza bağlanması hər iki halda qalır."
+msgstr "Açıksa (varsayılan) final ve ara sınav sayfaları YALNIZCA sınav salonunun kayıtlı bilgisayarlarından (ARP ajanı ile MAC adresi, aksi halde IP) açılabilir; kayıtsız bilgisayarda giriş formu yerine uyarı ve o bilgisayarın adresi gösterilir. Hiçbir bilgisayar kayıtlı değilse kimse giriş yapamaz. Kapalıysa bilgisayar şartı YOKTUR — üniversite ağındaki herhangi bir bilgisayardan girilebilir. Üniversite ağı kuralı, kullanıcı adı + PIN ve denemenin ilk cihaza bağlanması her iki durumda da geçerlidir."
+
+msgctxt "appeals.model.item.field"
+msgid "decided_by_teacher"
+msgstr "kararı veren öğretmen"
+
+msgctxt "exams.template.hall_frame"
+msgid "Zal sessiyası bağlansın? Yenidən daxil olmaq üçün nəzarətçinin verdiyi PIN lazım olacaq."
+msgstr "Salon oturumu kapatılsın mı? Yeniden giriş için gözetmenin vereceği PIN gerekecek."
+
+msgctxt "exams.template.hall_frame"
+msgid "Zaldan çıx"
+msgstr "Salondan çık"
+
+#, python-format
+msgctxt "exams.template.student_exam_result"
+msgid "Düzgün və səhv cavabları yalnız imtahan verdiyiniz zal kompüterində, imtahan bitəndən sonrakı %(minutes)s dəqiqə ərzində görə bilərsiniz. Zalı tərk etdikdən sonra verilən apellyasiyada yalnız suallar göstərilir."
+msgstr "Doğru ve yanlış cevapları yalnızca sınava girdiğiniz salon bilgisayarında, sınav bittikten sonraki %(minutes)s dakika içinde görebilirsiniz. Salondan ayrıldıktan sonra yapılan itirazda yalnızca sorular gösterilir."
+
+#, python-format
+msgctxt "appeals.template"
+msgid "Düzgün və səhv cavabları yalnız imtahan verdiyiniz zal kompüterində, imtahan bitəndən sonrakı %(minutes)s dəqiqə ərzində görə bilərsiniz. Zalı tərk etdikdən sonra verilən apellyasiyada yalnız suallar göstərilir."
+msgstr "Doğru ve yanlış cevapları yalnızca sınava girdiğiniz salon bilgisayarında, sınav bittikten sonraki %(minutes)s dakika içinde görebilirsiniz. Salondan ayrıldıktan sonra yapılan itirazda yalnızca sorular gösterilir."
+
+msgctxt "appeals.template"
+msgid "Fənni tədris edən"
+msgstr "Dersi veren"
+
+msgctxt "appeals.template"
+msgid "təyin edilməyib"
+msgstr "atanmamış"
+
+msgctxt "appeals.template"
+msgid "Qərarı verən müəllim"
+msgstr "Kararı veren öğretmen"
+
+msgctxt "appeals.template"
+msgid "Qərarı verən"
+msgstr "Kararı veren"
+
+msgctxt "appeals.template"
+msgid "Qərarın sahibi"
+msgstr "Kararın sahibi"
+
+msgctxt "appeals.template"
+msgid "Müəllim axtar…"
+msgstr "Öğretmen ara…"
+
+msgctxt "appeals.template"
+msgid "Müəllim seçin"
+msgstr "Öğretmen seçin"
+
+msgctxt "appeals.template"
+msgid "Digər müəllimlər"
+msgstr "Diğer öğretmenler"
+
+msgctxt "appeals.template"
+msgid "fənni tədris edir"
+msgstr "dersi veriyor"
+
+msgctxt "appeals.template"
+msgid "Yadda saxlayan siz olsanız da, qərarı (bal artımını) verən müəllim qeyd olunur."
+msgstr "Kaydeden siz olsanız da kararı (puan artışını) veren öğretmen kaydedilir."
+
+msgctxt "appeals.template"
+msgid "Əsaslandırıcı sənəd"
+msgstr "Gerekçe belgesi"
+
+msgctxt "appeals.template"
+msgid "Məcburidir: PDF, JPG və ya PNG, 10 MB-dək."
+msgstr "Zorunlu: PDF, JPG veya PNG, 10 MB'a kadar."
+
+msgctxt "appeals.template"
+msgid "Opsional: PDF, JPG və ya PNG, 10 MB-dək."
+msgstr "İsteğe bağlı: PDF, JPG veya PNG, 10 MB'a kadar."
+
+msgctxt "appeals.template"
+msgid "Sənəd"
+msgstr "Belge"
+
+msgctxt "appeals.template"
+msgid "Şərh yazılmayıb"
+msgstr "Yorum yazılmamış"
+
+msgctxt "appeals.view.message"
+msgid "Qərarı verən müəllimi seçin."
+msgstr "Kararı veren öğretmeni seçin."
+
+msgctxt "appeals.document"
+msgid "Qərar üçün əsaslandırıcı sənəd yükləmək məcburidir."
+msgstr "Karar için gerekçe belgesi yüklemek zorunludur."
+
+msgctxt "appeals.template.hall_done"
+msgid "Apellyasiyanız qəbul edildi"
+msgstr "İtirazınız alındı"
+
+msgctxt "appeals.template.hall_done"
+msgid "Midterm imtahanı"
+msgstr "Ara sınav"
+
+msgctxt "appeals.template.hall_done"
+msgid "Final imtahanı"
+msgstr "Final sınavı"
+
+#, python-format
+msgctxt "appeals.template.hall_done"
+msgid "%(count)s sual üzrə etiraz qeydə alındı."
+msgstr "%(count)s soru için itiraz kaydedildi."
+
+msgctxt "appeals.template.hall_done"
+msgid "Apellyasiya komissiyası müraciətinizə baxacaq; qərar kabinetinizdə «Apellyasiyalarım» bölməsində görünəcək."
+msgstr "İtiraz komisyonu başvurunuzu inceleyecek; karar hesabınızda «İtirazlarım» bölümünde görünecek."
+
+msgctxt "appeals.template.hall_done"
+msgid "Bal dəyişərsə, nəticəniz və jurnal avtomatik yenilənəcək."
+msgstr "Puan değişirse sonucunuz ve not defteri otomatik güncellenecek."
+
+msgctxt "appeals.template.hall_done"
+msgid "Zal sessiyanız bağlandı — kompüteri növbəti tələbə üçün bu vəziyyətdə saxlayın."
+msgstr "Salon oturumunuz kapandı — bilgisayarı bir sonraki öğrenci için bu şekilde bırakın."
+
+msgctxt "appeals.template.hall_done"
+msgid "Bitir"
+msgstr "Bitir"
+
+#, python-format
+msgctxt "appeals.template.hall_done"
+msgid "<span data-hall-done-countdown>%(seconds)s</span> saniyədən sonra giriş səhifəsinə qayıdacaqsınız."
+msgstr "<span data-hall-done-countdown>%(seconds)s</span> saniye sonra giriş sayfasına döneceksiniz."
+
+msgctxt "appeals.template.teaching"
+msgid "Fənnimə aid apellyasiyalar"
+msgstr "Derslerimle ilgili itirazlar"
+
+msgctxt "appeals.template.teaching"
+msgid "Tədris etdiyiniz qrupların tələbələrinin bu fənlər üzrə apellyasiyaları. Qərarı imtahan mərkəzi verir — burada yalnız baxış var."
+msgstr "Ders verdiğiniz grupların öğrencilerinin bu derslerle ilgili itirazları. Kararı sınav merkezi verir — burada yalnızca görüntüleme vardır."
+
+#, python-format
+msgctxt "appeals.template.teaching"
+msgid "%(count)s sual"
+msgstr "%(count)s soru"
+
+#, python-format
+msgctxt "appeals.template.teaching"
+msgid "%(accepted)s qəbul, %(rejected)s rədd"
+msgstr "%(accepted)s kabul, %(rejected)s ret"
+
+msgctxt "appeals.template.teaching"
+msgid "Apellyasiya yoxdur"
+msgstr "İtiraz yok"
+
+msgctxt "appeals.template.teaching"
+msgid "Tədris etdiyiniz fənlər üzrə tələbələrinizin apellyasiyası olanda burada görünəcək."
+msgstr "Ders verdiğiniz derslerde öğrencilerinizin itirazları burada görünecek."
+
+msgctxt "appeals.notification"
+msgid "Tələbəniz apellyasiya verdi"
+msgstr "Öğrenciniz itiraz etti"
+
+msgctxt "appeals.notification"
+msgid "{student} \"{exam}\" imtahanı üzrə {count} sual üçün apellyasiya verdi. Qərarı imtahan mərkəzi verir."
+msgstr "{student}, \"{exam}\" sınavında {count} soru için itiraz etti. Kararı sınav merkezi verir."
+
+msgctxt "appeals.notification"
+msgid "Apellyasiya qərarı verildi"
+msgstr "İtiraz kararı verildi"
+
+msgctxt "appeals.notification"
+msgid "{student} — \"{exam}\": {accepted} qəbul, {rejected} rədd. Qərarı verən müəllim: {teacher}, bal: {before} → {after}."
+msgstr "{student} — \"{exam}\": {accepted} kabul, {rejected} ret. Kararı veren öğretmen: {teacher}, puan: {before} → {after}."
+
+msgctxt "appeals.history"
+msgid "Qərar yadda saxlanıldı — qərarı verən müəllim: {teacher} ({accepted} qəbul, {rejected} rədd)"
+msgstr "Karar kaydedildi — kararı veren öğretmen: {teacher} ({accepted} kabul, {rejected} ret)"
+
+msgctxt "core.runtime_settings"
+msgid "Apellyasiya qərarında sənəd məcburidir"
+msgstr "İtiraz kararında belge zorunludur"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılıbsa apellyasiya qərarı (qəbul/rədd) əsaslandırıcı sənəd (PDF, JPG və ya PNG, 10 MB-dək) yüklənmədən yadda saxlanılmır. Söndürüləndə sənəd yükləmək opsionaldır. Qərarı verən müəllimin seçilməsi hər iki halda məcburidir."
+msgstr "Açıksa itiraz kararı (kabul/ret) gerekçe belgesi (PDF, JPG veya PNG, 10 MB'a kadar) yüklenmeden kaydedilmez. Kapalıysa belge yüklemek isteğe bağlıdır. Kararı veren öğretmenin seçilmesi her iki durumda da zorunludur."
