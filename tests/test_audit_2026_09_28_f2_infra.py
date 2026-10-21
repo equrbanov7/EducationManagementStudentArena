@@ -127,6 +127,13 @@ def test_nginx_config_parses(tmp_path):
         .replace("/etc/nginx/certs/origin.key", str(tmp_path / "k.key"))
         .replace("/var/log/nginx/access.log", str(tmp_path / "logs/a.log"))
     )
+    # 2026-10-21: GitHub runner-də nginx kök olmadan işləyir — `nginx -t` 80/443-ə bind edə bilmir
+    # («Permission denied»). Yalnız TEST nüsxəsində imtiyazlı portlar yüksək portlara köçürülür.
+    site = re.sub(
+        r"(\blisten\s+(?:\[::\]:)?)(80|443)\b",
+        lambda m: m.group(1) + ("18080" if m.group(2) == "80" else "18443"),
+        site,
+    )
     (tmp_path / "site.conf").write_text(site, encoding="utf-8")
     (tmp_path / "main.conf").write_text(
         f"pid {tmp_path}/n.pid;\nerror_log {tmp_path}/logs/e.log;\nevents {{}}\nhttp {{\n include {tmp_path}/site.conf;\n}}\n",
