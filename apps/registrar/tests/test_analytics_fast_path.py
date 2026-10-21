@@ -458,7 +458,8 @@ class FastPathParityTest(_AnalyticsBase):
         with bypass_rls():
             with CaptureQueriesContext(connection) as ctx:
                 analytics.build_period_analytics(organization=self.org, period=self.period)
-        self.assertLessEqual(len(ctx.captured_queries), 13, [q["sql"][:120] for q in ctx.captured_queries])
+        # 13 + 2: vahid kredit mənbəyi (R01, 2026-10-21) — akademik qeydlər + plan sətirləri, toplu (sabit).
+        self.assertLessEqual(len(ctx.captured_queries), 15, [q["sql"][:120] for q in ctx.captured_queries])
 
 
 class FastPathHelpersTest(_AnalyticsBase):
