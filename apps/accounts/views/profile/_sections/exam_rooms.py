@@ -31,6 +31,8 @@ _LIVE_STATES = ("entry_open", "active")
 #: «Yalnız imtahan zalları» — 25 sətir; «Hamısı» (bütün otaq reyestri) — daha böyük səhifə.
 _PAGE_SIZE = {"halls": 25, "all": 60}
 _CELL_DIR = "accounts/profile/sections/superadmin/exam_rooms/"
+#: JS-siz (adi POST) xətada dialoq vəziyyəti — view yazır, bölmə render olunanda BİR DƏFƏ oxunur (2026-10-21).
+FORM_STATE_SESSION_KEY = "sar_form_state"
 
 #: Sütun sıralaması — açar ↔ `order_by` (ikinci açar sabit sıra üçündür).
 _SORTS = {
@@ -97,6 +99,9 @@ def build_exam_rooms_section(request, section, *, is_superadmin, active_organiza
         **query,
         **({"xr_page": filters["page"]} if filters["page"] else {}),
     )
+    session = getattr(request, "session", None)
+    state = session.pop(FORM_STATE_SESSION_KEY, None) if session is not None else None
+    section["form_state"] = state if isinstance(state, dict) else None
     section["rooms"] = []
     section["table_rows"] = []
     section["room_managers"] = []
@@ -191,7 +196,7 @@ def build_exam_rooms_section(request, section, *, is_superadmin, active_organiza
     # (`data-tof-keep` — açılışda sıfırlanmır); `action`/`room_id`/`computer_id`
     # isə HƏR prefill-də açıq verilir ki, əvvəlki açılışın dəyəri qalmasın.
     # `data-sar-form`: göndərişdən əvvəl HTML5 validasiya (dialoq `novalidate`-dir).
-    section["form_data"] = {"data-sar-form": "1"}
+    section["form_data"] = {"data-sar-form": "1", "data-sar-ajax": "1"}
     org_field = {"name": "organization_id", "value": str(selected_org.pk), "keep": True}
     next_field = {"name": "next", "value": section["post_next_url"], "keep": True}
     section["room_hidden"] = [

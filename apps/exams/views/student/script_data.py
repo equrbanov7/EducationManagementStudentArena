@@ -22,9 +22,20 @@ def take_exam_script_data(remaining_seconds):
                 "Cavablar hələ serverə yazılmayıb. Onlar brauzerdə saxlanılır və bağlantı bərpa olunanda avtomatik göndəriləcək — internet bağlantısını yoxlayın, səhifəni bağlamayın.",
             ),
             "autosaveRecovered": pgettext("exams.template.take_exam", "Cavablarınız yenidən saxlanılır."),
+            # 2026-10-21: yalnız HƏQİQİ konflikt (başqa tab/kompüter eyni sualı fərqli cavablayıb) bloklayır.
             "autosaveConflict": pgettext(
                 "exams.template.take_exam",
-                "Bu imtahan başqa tabda yenilənib — cavablar bu tabdan saxlanılmır. Səhifəni yeniləyin.",
+                "Bu imtahan başqa tabda və ya kompüterdə də yenilənib: eyni suallara fərqli cavab verilib. "
+                "Digər cavablar saxlanıldı. Davam etmək üçün səhifəni yeniləyin.",
+            ),
+            "autosaveShared": pgettext(
+                "exams.template.take_exam",
+                "Bu imtahan başqa tabda və ya kompüterdə də açıqdır. Cavablar birləşdirilir — yalnız bir tabda davam edin.",
+            ),
+            "autosaveSecondTab": pgettext(
+                "exams.template.take_exam",
+                "Bu imtahan artıq başqa tabda açıqdır — bu tabdan cavablar yazılmır. "
+                "İmtahanı həmin tabda davam etdirin və ya onu bağlayıb bu səhifəni yeniləyin.",
             ),
             "btnSaving": pgettext("exams.template.take_exam", "btn_saving"),
             "btnSaved": pgettext("exams.template.take_exam", "btn_saved"),

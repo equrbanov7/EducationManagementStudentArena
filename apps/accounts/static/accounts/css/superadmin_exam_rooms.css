@@ -472,3 +472,24 @@
 .sar-bld-list .fxc-hall-toggle {
     max-width: 220px;
 }
+
+/* ── AJAX dialoqları (2026-10-21) ─────────────────────────────────────── */
+
+/* Fraqmentdən yerində əvəzlənən hissələrin sarğısı — düzümə təsir etmir. */
+.sar-region {
+    display: contents;
+}
+
+/* Sahənin yanındakı xəta (`superadmin_exam_rooms_ajax.js`); toplu əlavədə çoxsətirli. */
+.sar-field-error {
+    white-space: pre-line;
+}
+
+/* Dialoqun başındakı xülasənin sətir-sətir siyahısı (toplu əlavə). */
+.sar-error-list {
+    margin: 0 0 var(--ems-sp-4);
+    padding-left: 1.25em;
+    color: var(--ems-danger-strong);
+    font-size: var(--ems-fs-sm);
+    line-height: 1.5;
+}

@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from django.db.models import Count
+from django.db.models import Count, Max
 
 from .constants import NON_COUNTING_EVENT_TYPES, VIOLATION_EVENT_TYPES
 from .proctoring_options import DEFAULT_FLAG_THRESHOLD
@@ -39,11 +39,25 @@ def _score(counts: dict) -> int:
     return sum(SEVERITY_POINTS.get(severity, 0) * number for severity, number in counts.items())
 
 
+def _add_type(types: dict, code: str, severity: str, number: int, last) -> None:
+    """Növ üzrə cəm: say + ən yüksək ciddilik + son an (2026-10-21, «Qayda pozanlar» paneli)."""
+    entry = types.setdefault(code, {"n": 0, "severity": severity, "last": last})
+    entry["n"] += number
+    if SEVERITY_POINTS.get(severity, 0) > SEVERITY_POINTS.get(entry["severity"], 0):
+        entry["severity"] = severity
+    if last is not None and (entry["last"] is None or last > entry["last"]):
+        entry["last"] = last
+
+
 def attempts_risk(attempt_ids, thresholds=None) -> dict:
-    """{attempt_id: {"score", "flagged", "threshold", "rules", "signals", "max_severity"}}.
+    """{attempt_id: {"score", "flagged", "threshold", "rules", "signals", "max_severity", "types", "last_at"}}.
 
     İki aqreqat sorğu (qayda + siqnal), N+1 yoxdur. ``thresholds`` —
     {attempt_id: flag_threshold}; verilməyən cəhd üçün defolt hədd.
+
+    2026-10-21: eyni iki sorğu növ (``event_type`` / siqnalın ``kind``-i) üzrə də qruplaşdırılır —
+    ``types`` = {kod: {"n", "severity", "last"}}, ``last_at`` = ən son hadisənin anı. Əlavə sorğu
+    YOXDUR; sətir sayı «cəhd × növ × ciddilik» ilə məhduddur (hadisə sayından asılı deyil).
     """
     from apps.exams.models import ProctoringLog, SupervisionIncident
 
@@ -51,26 +65,32 @@ def attempts_risk(attempt_ids, thresholds=None) -> dict:
     thresholds = thresholds or {}
     rules = defaultdict(_empty_counts)
     signals = defaultdict(_empty_counts)
+    types = defaultdict(dict)
     if ids:
         incident_rows = (
             SupervisionIncident.objects.filter(attempt_id__in=ids, event_type__in=RISK_INCIDENT_TYPES)
-            .values("attempt_id", "severity")
-            .annotate(n=Count("id"))
+            .values("attempt_id", "severity", "event_type")
+            .annotate(n=Count("id"), last=Max("timestamp"))
+            .order_by()
         )
         for row in incident_rows:
             severity = row["severity"] if row["severity"] in SEVERITY_POINTS else "medium"
             rules[row["attempt_id"]][severity] += row["n"]
+            _add_type(types[row["attempt_id"]], row["event_type"], severity, row["n"], row["last"])
         signal_rows = (
             ProctoringLog.objects.filter(exam_attempt_id__in=ids)
             # Nəzarətçi qeydi siqnal deyil — «diqqət tələb edir» sayğacını şişirtməsin (2026-10-13).
             .exclude(details__contains={"kind": NOTE_KIND})
-            .values("exam_attempt_id", "details__severity")
-            .annotate(n=Count("id"))
+            .values("exam_attempt_id", "details__severity", "details__kind", "event_type")
+            .annotate(n=Count("id"), last=Max("timestamp"))
+            .order_by()
         )
         for row in signal_rows:
             severity = row["details__severity"]
             severity = severity if severity in SEVERITY_POINTS else "low"
             signals[row["exam_attempt_id"]][severity] += row["n"]
+            code = str(row["details__kind"] or row["event_type"] or "other")
+            _add_type(types[row["exam_attempt_id"]], code, severity, row["n"], row["last"])
 
     result = {}
     for attempt_id in ids:
@@ -83,6 +103,8 @@ def attempts_risk(attempt_ids, thresholds=None) -> dict:
             if rule_counts[severity] or signal_counts[severity]:
                 max_severity = severity
                 break
+        attempt_types = types.get(attempt_id) or {}
+        lasts = [entry["last"] for entry in attempt_types.values() if entry["last"] is not None]
         result[attempt_id] = {
             "score": score,
             "threshold": threshold,
@@ -91,6 +113,8 @@ def attempts_risk(attempt_ids, thresholds=None) -> dict:
             "signals": sum(signal_counts.values()),
             "signal_counts": dict(signal_counts),
             "max_severity": max_severity,
+            "types": attempt_types,
+            "last_at": max(lasts) if lasts else None,
         }
     return result
 
@@ -105,6 +129,8 @@ def attempt_risk(attempt, threshold=None) -> dict:
         "signals": 0,
         "signal_counts": _empty_counts(),
         "max_severity": "",
+        "types": {},
+        "last_at": None,
     }
 
 

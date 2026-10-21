@@ -77,6 +77,8 @@ def _monitor_labels():
     """
     from django.utils.translation import gettext as _
 
+    from .room_violations import violation_panel_labels
+
     return {
         "stat": {
             "total": _("Təyin olunmuş"),
@@ -130,6 +132,8 @@ def _monitor_labels():
             "removedBanner": _("İmtahandan uzaqlaşdırılıb"),
             "noRules": _("Qeydə alınmış qayda pozuntusu yoxdur."),
             "loadError": _("Məlumat yüklənmədi."),
+            # 2026-10-21: qruplaşdırılmış panel (violations_panel.js).
+            "panel": violation_panel_labels(),
         },
         "loading": _("Yüklənir…"),
     }

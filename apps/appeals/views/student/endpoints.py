@@ -147,7 +147,7 @@ def _attempt_appeals_for_student(attempt):
     return appeals
 
 
-def _render_appeal_window_closed(request, exam, attempt, *, window_closed, block_reason=""):
+def _render_appeal_window_closed(request, exam, attempt, *, window_closed, block_reason="", hall_fullscreen=False):
     """Pəncərə bağlı (və ya icazə yox) — read-only appeal səhifəsi.
 
     ``block_reason`` (Audit 2026-09-28 EXA-02/EXA-07) banner mətnini seçir:
@@ -164,6 +164,7 @@ def _render_appeal_window_closed(request, exam, attempt, *, window_closed, block
         "attempt_appeals": _attempt_appeals_for_student(attempt),
         "result_url": _result_url(exam, attempt, request),
         "is_final_exam": _is_hall_appeal(request, attempt),
+        "hall_fullscreen": hall_fullscreen,
         # Read-only rejim üçün form dəyişənləri boş/deaktiv.
         "answers": [],
     }
@@ -182,7 +183,10 @@ def appeal_create(request, attempt_id):
     if not tenant_scoped_exams(request).filter(id=exam.id).exists():
         raise Http404
     # 2026-10-21: zal sessiyasındakı apellyasiya da yalnız qeydli zal kompüterindən (sərt zal rejimi).
-    if hall_session_for_attempt(request, attempt):
+    # 2026-10-21 (sahib): «Apellyasiya zamanı da full screen açılsın» — yalnız HƏMİN cəhdin aktiv zal sessiyasında
+    # (``hall_fullscreen`` → şablonda tam ekran qapısı); kabinetdən / evdən açılan apellyasiyada tam ekran YOXDUR.
+    in_hall_session = hall_session_for_attempt(request, attempt)
+    if in_hall_session:
         try:
             ensure_center_hall_computer(request, attempt)
         except HallComputerDenied:
@@ -196,7 +200,12 @@ def appeal_create(request, attempt_id):
         # 3-gün qaydası aydın UX formatında görünür.
         window_closed = not is_within_appeal_window(attempt)
         return _render_appeal_window_closed(
-            request, exam, attempt, window_closed=window_closed, block_reason=block_reason
+            request,
+            exam,
+            attempt,
+            window_closed=window_closed,
+            block_reason=block_reason,
+            hall_fullscreen=in_hall_session,
         )
 
     delivered_answers = list(
@@ -292,6 +301,7 @@ def appeal_create(request, attempt_id):
         "hide_answer_verdicts": results_hidden,
         "answers_release_locked": answers_release_locked,
         "is_final_exam": _is_hall_appeal(request, attempt),
+        "hall_fullscreen": in_hall_session,
         # 2026-10-21: düzgün/səhv cavab yalnız zal kompüterində — qeyddə N (``exam.appeal_onsite_minutes``).
         "appeal_onsite_minutes": appeal_onsite_minutes(),
     }

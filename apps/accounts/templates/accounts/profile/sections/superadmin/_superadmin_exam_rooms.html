@@ -14,8 +14,9 @@ içində ikinci «İmtahan zalları» başlığı yazırdı (sahib şikayəti). 
 Davranış: çekmecə/dialoq ortaq `ems_ui/overlay.js`; dialoq sahələrinin sətir
 dəyərləri ilə doldurulması qabıqdan yüklənən `teaching_office.js`-in
 `data-tof-open` + `data-tof-prefill` mexanizmidir (JSON viewda qurulur). Formalar
-ADİ POST-dur (`accounts:superadmin_exam_rooms` → mesaj + `next` ilə geri) —
-`data-tof-form` QƏSDƏN yoxdur. Bölmə-xas kiçik davranışlar (org seçici, MAC
+`data-sar-ajax` ilə AJAX göndərilir (`superadmin_exam_rooms_ajax.js`, 2026-10-21): xəta dialoqda sahənin
+yanında, uğurda çekmecə/siyahı YERİNDƏ yenilənir. JS-siz yol adi POST-dur (mesaj + `next` ilə geri; xətada
+dialoq `#sar-form-state` ilə yenidən açılır) — `data-tof-form` QƏSDƏN yoxdur. Bölmə-xas kiçik davranışlar (org seçici, MAC
 formatı, kopyalama, təsdiq, POST-dan sonra vurğu/çekmecənin yenidən açılması)
 `superadmin_exam_rooms.js`-dədir. CSS/JS xarici fayldadır (CSP).
 {% endcomment %}
@@ -33,10 +34,15 @@ formatı, kopyalama, təsdiq, POST-dan sonra vurğu/çekmecənin yenidən açıl
 <section class="profile-section-panel profile-section--superadmin-exam-rooms {% if active_section == 'superadmin-exam-rooms' %}is-active{% endif %}"
          data-profile-section-panel="superadmin-exam-rooms"
          data-source-url="{{ profile_base_url }}?section=superadmin-exam-rooms">
-<link rel="stylesheet" href="{% static 'accounts/css/superadmin_exam_rooms.css' %}?v=20261001-1">
+<link rel="stylesheet" href="{% static 'accounts/css/superadmin_exam_rooms.css' %}?v=20261021-1">
 <link rel="stylesheet" href="{% static 'exams/css/final_center/exam_halls.css' %}?v=20261001-1">
 {% with s=exam_rooms_section %}
-<div class="sar" data-sar-root>
+<div class="sar" data-sar-root
+     data-sar-fragment-url="{% url 'accounts:profile_section_fragment' section='superadmin-exam-rooms' %}"
+     data-sar-msg-required="{% trans 'Bu sahə məcburidir.' context 'accounts.superadmin_exam_rooms' %}"
+     data-sar-msg-invalid="{% trans 'Bu sahənin dəyəri düzgün deyil.' context 'accounts.superadmin_exam_rooms' %}"
+     data-sar-msg-check="{% trans 'Formada xəta var — qeyd olunmuş sahələri düzəldin.' context 'accounts.superadmin_exam_rooms' %}"
+     data-sar-msg-failed="{% trans 'Yadda saxlamaq alınmadı. Bağlantını yoxlayıb yenidən cəhd edin.' context 'accounts.superadmin_exam_rooms' %}">
 
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=s.subtitle header_actions_include="accounts/profile/sections/superadmin/exam_rooms/_header_actions.html" %}
 
@@ -44,7 +50,10 @@ formatı, kopyalama, təsdiq, POST-dan sonra vurğu/çekmecənin yenidən açıl
         {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-building" state_title=xr_no_org %}
     {% else %}
 
+    {% comment %}`data-sar-region` — AJAX uğurundan sonra fraqmentdən YERİNDƏ əvəzlənən hissələr.{% endcomment %}
+    <div class="sar-region" data-sar-region="kpi">
     {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=s.kpi_tiles kpi_variant="5" %}
+    </div>
 
     {% comment %}Avto rejim: select dəyişən kimi, axtarış debounce ilə tətbiq olunur;
     bölmə `AJAX_SAFE_SECTIONS`-dadır ki, panel yerində yenilənsin.{% endcomment %}
@@ -53,6 +62,7 @@ formatı, kopyalama, təsdiq, POST-dan sonra vurğu/çekmecənin yenidən açıl
     {% comment %}Korpus qrupları (sahib 2026-10-01): hər korpus öz başlığı (otaq / imtahan
     zalı sayları — süzülmüş BÜTÜN siyahı üzrə) + cədvəli. Sətirdəki «İmtahan zalı kimi
     qeyd et» / «İmtahan zallarından çıxar» düyməsi AJAX-dır (`exam_hall_toggle.js`).{% endcomment %}
+    <div class="sar-region" data-sar-region="list">
     {% if s.table_groups %}
     <div class="fxc-bld-list sar-bld-list">
         {% for group in s.table_groups %}
@@ -73,6 +83,7 @@ formatı, kopyalama, təsdiq, POST-dan sonra vurğu/çekmecənin yenidən açıl
     {% endif %}
 
     {% include "partials/_pagination.html" with page_obj=s.page_obj page_param="xr_page" extra_query=s.pagination_query %}
+    </div>
 
     {% comment %}Zal çekmecələri — səhifədəki hər zal üçün bir dənə (server-render;
     kompüter cədvəli və zal əməlləri buradadır). «Ətraflı» `data-ems-overlay-open`
@@ -93,9 +104,11 @@ formatı, kopyalama, təsdiq, POST-dan sonra vurğu/çekmecənin yenidən açıl
     {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="sarBulkDialog" form_dialog_title=xr_bulk_title form_dialog_subtitle=xr_bulk_sub form_dialog_submit_label=xr_bulk_btn form_dialog_wide=True form_dialog_body_include="accounts/profile/sections/superadmin/exam_rooms/_bulk_fields.html" form_dialog_action=s.action_url form_dialog_hidden=s.bulk_hidden form_dialog_data=s.form_data %}
 
     {% endif %}
+    {% if s.form_state %}{{ s.form_state|json_script:"sar-form-state" }}{% endif %}
 </div>
 {% endwith %}
-<script src="{% static 'accounts/js/superadmin_exam_rooms.js' %}?v=20261001-1" defer></script>
+<script src="{% static 'accounts/js/superadmin_exam_rooms.js' %}?v=20261021-1" defer></script>
+<script src="{% static 'accounts/js/superadmin_exam_rooms_ajax.js' %}?v=20261021-1" defer></script>
 <script src="{% static 'exams/js/final_center/exam_hall_toggle.js' %}?v=20261001-2" defer></script>
 </section>
 {% endif %}
