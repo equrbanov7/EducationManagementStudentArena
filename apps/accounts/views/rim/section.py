@@ -11,6 +11,7 @@ from __future__ import annotations
 from datetime import date
 
 from django.urls import reverse
+from django.utils.translation import pgettext
 
 from apps.accounts.services import intake
 from apps.accounts.services.rim import (
@@ -21,11 +22,16 @@ from apps.accounts.services.rim import (
     PERM_SOFT_DELETE,
     resolve_actor,
 )
+from apps.accounts.services.rim.activation import QUERY_PARAM as ACTIVATION_QUERY_PARAM
+from apps.accounts.services.rim.activation import activation_counts
 from apps.accounts.services.rim.create import MAX_NOTE_LENGTH, creatable_kinds
 from apps.accounts.services.rim.create_unit import admin_unit_type_choices, can_create_unit
 from apps.accounts.services.rim.lifecycle import MAX_REASON_LENGTH, MIN_REASON_LENGTH
 from apps.accounts.services.rim.profile_edit import FIELD_LABELS
+from apps.accounts.services.rim.search import normalize_query
 from apps.organizations.public import get_permission_label as permission_label
+
+_CTX = "profile.rim"
 
 #: Qəbul ili seçicisinin əhatəsi — cari ildən neçə il geriyə göstərilir.
 ADMISSION_YEAR_SPAN = 8
@@ -108,6 +114,41 @@ def _unit_context(actor) -> dict:
     }
 
 
+def _activation_tiles(actor) -> list:
+    """Sahib 2026-10-23: «neçə nəfər profilini aktivləşdirib» — cəmi + tələbə / müəllim / əməkdaş (TƏK sorğu)."""
+    if not (actor.can_use_rim and actor.has(PERM_SEARCH)) or actor.organization is None:
+        return []
+    counts = activation_counts(actor.organization)
+    total = counts["total"]
+    tiles = [
+        {
+            "label": pgettext(_CTX, "PROFİLİNİ AKTİVLƏŞDİRİB"),
+            "value": total["done"],
+            "note": pgettext(_CTX, "%(total)d nəfərdən · %(pct)s%%")
+            % {"total": total["total"], "pct": f"{total['pct']:g}".replace(".", ",")},
+            "tone": "accent-primary",
+            "has_bar": True,
+            "pct": total["pct"],
+        }
+    ]
+    labels = {
+        "student": pgettext(_CTX, "TƏLƏBƏ"),
+        "teacher": pgettext(_CTX, "MÜƏLLİM"),
+        "staff": pgettext(_CTX, "ƏMƏKDAŞ"),
+    }
+    for kind, label in labels.items():
+        row = counts[kind]
+        tiles.append(
+            {
+                "label": label,
+                "value": row["done"],
+                "unit": f" / {row['total']}",
+                "note": pgettext(_CTX, "aktivləşdirib · %(pct)s%%") % {"pct": f"{row['pct']:g}".replace(".", ",")},
+            }
+        )
+    return tiles
+
+
 def build_rim_center_section(request) -> dict:
     """«RİM mərkəzi» bölməsi üçün context (bax `context_builder/_stage3.py`)."""
     actor = resolve_actor(request)
@@ -132,6 +173,9 @@ def build_rim_center_section(request) -> dict:
         "min_reason_length": MIN_REASON_LENGTH,
         "max_reason_length": MAX_REASON_LENGTH,
         "access_denied_message": ("" if actor.can_use_rim else "Bu bölmə üçün icazəniz yoxdur."),
+        # Bildirişdən keçid (`?rim_q=<istifadəçi adı>`): axtarış sahəsi dolu açılır, JS ilk sorğunu onunla edir.
+        "initial_query": normalize_query(request.GET.get(ACTIVATION_QUERY_PARAM, "")),
+        "activation_tiles": _activation_tiles(actor),
         **_create_context(actor),
         **_unit_context(actor),
     }

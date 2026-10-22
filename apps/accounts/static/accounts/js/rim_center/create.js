@@ -19,11 +19,12 @@
 
     var form = (ns.form = {});
     var FIN_RE = /^[A-Za-z0-9]{7}$/;
-    /* Doğum tarixi HƏR İKİ növdə məcburidir — toplu idxal da boş tarixi rədd
-     * edir (bax services/rim/create_form.py şərhi); iki səth ayrılmasın. */
+    /* FİN və doğum tarixi TƏLƏBƏDƏ məcburidir (toplu idxalla eyni qayda). Müəllim/əməkdaş hesabı
+     * onlarsız açıla bilər (sahib 2026-10-23) — FİN-i ilk girişdə «Məcburi profil məlumatları»
+     * qapısı istəyir. Server qaydası: services/rim/create_form.py. */
     var REQUIRED = {
         student: ["fin", "first_name", "last_name", "birth_date", "group", "admission_year"],
-        teacher: ["fin", "first_name", "last_name", "birth_date"]
+        teacher: ["first_name", "last_name"]
     };
 
     var state = { kind: "student", busy: false };
@@ -170,6 +171,13 @@
     }
 
     function toggleKindFields(kind) {
+        var strict = kind === "student";
+        document.querySelectorAll("[data-rimc-student-required]").forEach(function (input) {
+            input.required = strict;
+        });
+        document.querySelectorAll("[data-rimc-student-mark]").forEach(function (mark) {
+            mark.hidden = !strict;
+        });
         var blocks = document.querySelectorAll("[data-rimc-only]");
         Array.prototype.forEach.call(blocks, function (block) {
             var visible = block.getAttribute("data-rimc-only") === kind;
