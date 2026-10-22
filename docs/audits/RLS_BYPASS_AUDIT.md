@@ -8,10 +8,10 @@
 `core.rls.bypass_rls()` / `set_rls_bypass()` PostgreSQL Row-Level Security
 siyasətlərini **müvəqqəti söndürür** — yəni sorğu bütün tenant-ların sətirlərini
 görür. Hər istifadə potensial cross-tenant sızıntı nöqtəsidir. Kod bazasında
-**215 çağırış / 106 fayl** var (test faylları xaric; 2026-10-08, skriptlə sayılıb; CI qapısı `core/tests/test_secaudit_2026_10_07_rls_bypass_inventory.py` — aşağıya bax). Bu sənəd onları kateqoriyalaşdırır
+**250 çağırış / 139 fayl** var (test faylları xaric; 2026-10-23, skriptlə sayılıb; CI qapısı `core/tests/test_secaudit_2026_10_07_rls_bypass_inventory.py` — aşağıya bax). Bu sənəd onları kateqoriyalaşdırır
 ki, gələcəkdə hər biri qəsdən və əsaslandırılmış qalsın.
 
-## Sayım (fayl üzrə, test xaric) — 2026-10-07 yeniləməsi
+## Sayım (fayl üzrə, test xaric) — 2026-10-23 yeniləməsi
 
 > **Mənbə:** `venv/bin/python scripts/rls_bypass_inventory.py --markdown` — cədvəl
 > ƏLLƏ yazılmayıb (audit `access` 2026-09-13, F-13: 2026-05 sayımı «~85» əllə
@@ -29,49 +29,60 @@ ki, gələcəkdə hər biri qəsdən və əsaslandırılmış qalsın.
 | `apps/notifications/services/read_state.py` | 7 | A — recipient-scoped bildiriş |
 | `apps/organizations/middleware.py` | 6 | D — tenant kontekst qurma |
 | `apps/accounts/services/view_as.py` | 5 | C — view-as (hədəf yoxlaması ilə) |
+| `apps/exams/services/final_center/device_binding.py` | 5 | B — final mərkəzi PIN axını |
 | `apps/notifications/services/crud.py` | 5 | A — recipient-scoped bildiriş |
 | `core/rls.py` | 5 | D — RLS infrastrukturunun özü (kontekst menecerləri) |
 | `apps/accounts/services/organization_requests.py` | 4 | C — üzvlük sorğusu axını |
-| `apps/accounts/views/_helpers/org_sections/request_section.py` | 4 | C — superadmin / admin cross-org əməliyyatı |
 | `apps/blog/signals.py` | 4 | A — qlobal blog (tenant-suz) |
-| `apps/exams/services/final_center/device_binding.py` | 4 | B — final mərkəzi PIN axını |
+| `apps/exams/services/exam_center_gate.py` | 4 | B — imtahan mərkəzi qapısı |
 | `apps/live_exam/views/player/join.py` | 4 | B — public PIN/token girişi |
 | `apps/subject_folder/tasks.py` | 4 | D — Celery (rls_worker_atomic; sətrin öz təşkilatı) |
 | `core/tenancy.py` | 4 | D — tenant kontekst qurma |
 | `apps/accounts/views/organization/_management_flow/_invites.py` | 3 | C — superadmin / admin cross-org əməliyyatı |
 | `apps/accounts/views/organization/_management_flow/flow.py` | 3 | C — superadmin / admin cross-org əməliyyatı |
-| `apps/accounts/views/organization/requests.py` | 3 | C — superadmin / admin cross-org əməliyyatı |
 | `apps/accounts/views/profile/view_as.py` | 3 | C — superadmin / admin cross-org əməliyyatı |
 | `apps/accounts/ws_gate.py` | 3 | D — WebSocket giriş qapısı (istifadəçinin öz sətirləri + audit) |
-| `apps/exams/services/exam_center_gate.py` | 3 | B — imtahan mərkəzi qapısı |
 | `apps/live_exam/consumers.py` | 3 | B — public PIN/token girişi |
 | `apps/live_exam/scoring.py` | 3 | B — public PIN/token girişi |
 | `apps/live_exam/views/player/_shared.py` | 3 | B — public PIN/token girişi |
 | `apps/live_exam/views/player/wait.py` | 3 | B — public PIN/token girişi |
-| `apps/notifications/views.py` | 3 | A — recipient-scoped bildiriş |
+| `apps/accounts/management/commands/shrink_avatars.py` | 2 | C — idarə əmrləri (prod kill-switch-li) |
+| `apps/accounts/password_policy.py` | 2 | C — superadmin / admin cross-org əməliyyatı |
+| `apps/accounts/services/rim/activation.py` | 2 | A — recipient-scoped bildiriş (RİM rolları, öz təşkilat) |
 | `apps/accounts/tasks.py` | 2 | C — superadmin / admin cross-org əməliyyatı |
 | `apps/accounts/views/_helpers/org_sections/_members_registry.py` | 2 | C — superadmin / admin cross-org əməliyyatı |
 | `apps/accounts/views/organization/_management_flow/_members.py` | 2 | C — superadmin / admin cross-org əməliyyatı |
 | `apps/exams/consumers.py` | 2 | C — imtahan mərkəzi / müəllim cross-org əməli |
+| `apps/exams/services/center_exams.py` | 2 | C — imtahan mərkəzi / müəllim cross-org əməli |
+| `apps/exams/services/final_center/reentry.py` | 2 | B — final mərkəzi PIN axını |
 | `apps/exams/views/student/final_center.py` | 2 | B — final mərkəzi PIN axını |
 | `apps/live_exam/auth.py` | 2 | B — public PIN/token girişi |
 | `apps/live_exam/views/api.py` | 2 | B — public PIN/token girişi |
 | `apps/monitoring/permissions.py` | 2 | C — superadmin monitorinq |
 | `apps/notifications/management/commands/purge_notifications.py` | 2 | A — recipient-scoped bildiriş |
+| `apps/notifications/views.py` | 2 | A — recipient-scoped bildiriş |
+| `apps/organizations/holidays.py` | 2 | C — təşkilat idarəetməsi |
 | `apps/registrar/management/commands/normalize_interim_components.py` | 2 | C — idarə əmrləri |
 | `apps/registrar/management/commands/set_program_official_codes.py` | 2 | C — idarə əmrləri |
 | `apps/surveys/services/pending.py` | 2 | D — anonim cavab buferi köçürməsi (artıq icazəli kampaniya id-si) |
 | `apps/surveys/tasks.py` | 2 | D — Celery (rls_worker_atomic; sorğunun öz təşkilatı) |
+| `apps/accounts/management/commands/blocked_accounts_report.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
 | `apps/accounts/management/commands/finalize_university_identity.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
 | `apps/accounts/management/commands/import_legacy_staff_positions.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
 | `apps/accounts/management/commands/import_students_atis.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
 | `apps/accounts/management/commands/import_users_from_excel.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
+| `apps/accounts/management/commands/issue_staff_credentials.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
+| `apps/accounts/management/commands/profile_completion_report.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
 | `apps/accounts/management/commands/provision_student_credentials.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
+| `apps/accounts/management/commands/reconcile_teacher_roster.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
 | `apps/accounts/management/commands/rename_legacy_usernames.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
+| `apps/accounts/management/commands/repair_group_leads.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
+| `apps/accounts/management/commands/retire_qa_accounts.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
 | `apps/accounts/management/commands/seed_staff_roster.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
 | `apps/accounts/middleware.py` | 1 | D — ilk-giriş / sessiya qapısı |
 | `apps/accounts/network_zone.py` | 1 | C — superadmin / admin cross-org əməliyyatı |
 | `apps/accounts/retention.py` | 1 | C — superadmin / admin cross-org əməliyyatı |
+| `apps/accounts/services/account_block_notice.py` | 1 | C — superadmin / admin cross-org əməliyyatı |
 | `apps/accounts/services/registration.py` | 1 | C — qeydiyyat (org seçimi öncəsi) |
 | `apps/accounts/services/rim/policy.py` | 1 | C — superadmin / admin cross-org əməliyyatı |
 | `apps/accounts/views/_helpers/superadmin_inspector.py` | 1 | C — superadmin / admin cross-org əməliyyatı |
@@ -83,23 +94,31 @@ ki, gələcəkdə hər biri qəsdən və əsaslandırılmış qalsın.
 | `apps/ai_assistant/retention.py` | 1 | D — dövri log saxlama süpürgəsi (yalnız müddət üzrə DELETE) |
 | `apps/audit/views_filters.py` | 1 | C — superadmin audit görünüşü |
 | `apps/exams/management/commands/mark_exam_halls.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
-| `apps/exams/management/commands/purge_trial_exam.py` | 1 | C — idarə əmri (--org + dəqiq --slug + --expect-title; dry-run defolt, prod kill-switch-li) · 2026-10-21 |
+| `apps/exams/management/commands/purge_trial_exam.py` | 1 | C — idarə əmri (--org + dəqiq --slug + --expect-title; dry-run defolt, prod kill-switch-li) |
 | `apps/exams/management/commands/seed_demo_hierarchy.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
 | `apps/exams/management/commands/seed_final_exam_demo.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
 | `apps/exams/management/commands/seed_group_demo_data.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
 | `apps/exams/management/commands/seed_room_monitor_demo.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
 | `apps/exams/management/commands/seed_stress_exam_journal.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
 | `apps/exams/management/commands/seed_stress_test.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
+| `apps/exams/management/commands/sync_midterm_scores.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
 | `apps/exams/services/attempts.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
+| `apps/exams/services/exam_network.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
 | `apps/exams/services/final_center/reminders.py` | 1 | B — final mərkəzi PIN axını |
 | `apps/exams/services/student_pin_hashing.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
 | `apps/exams/services/student_pins.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
 | `apps/exams/services/sweep_guard.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
+| `apps/hr_contracts/management/commands/send_contract_reminders.py` | 1 | C — idarə əmrləri (--org / --dry-run) |
+| `apps/hr_contracts/services/files.py` | 1 | D — commit-dən sonra yetim fayl təmizliyi (yol üzrə EXISTS) |
+| `apps/hr_contracts/services/notify.py` | 1 | D — bildiriş alıcıları (açıq təşkilat süzgəcli üzvlük oxusu) |
+| `apps/hr_contracts/tasks.py` | 1 | D — Celery (rls_worker_atomic; müqavilənin öz təşkilatı) |
 | `apps/live_exam/cache.py` | 1 | B — public PIN/token girişi |
 | `apps/live_exam/management/commands/seed_live_demo.py` | 1 | B — public PIN/token girişi |
+| `apps/live_exam/poll_cache.py` | 1 | B — public PIN/token girişi |
 | `apps/live_exam/socket_coordination.py` | 1 | B — public PIN/token girişi |
 | `apps/live_exam/text_safety.py` | 1 | B — public PIN/token girişi |
 | `apps/monitoring/security_ip.py` | 1 | C — superadmin monitorinq |
+| `apps/notifications/management/commands/dedupe_notifications.py` | 1 | A — recipient-scoped bildiriş |
 | `apps/notifications/retention.py` | 1 | A — recipient-scoped bildiriş |
 | `apps/notifications/services/profile_state.py` | 1 | A — recipient-scoped bildiriş |
 | `apps/notifications/services/queries.py` | 1 | A — recipient-scoped bildiriş |
@@ -110,8 +129,15 @@ ki, gələcəkdə hər biri qəsdən və əsaslandırılmış qalsın.
 | `apps/organizations/management/commands/seed_ci_e2e_scenario.py` | 1 | C — təşkilat idarəetməsi |
 | `apps/organizations/management/commands/seed_ci_e2e_user.py` | 1 | C — təşkilat idarəetməsi |
 | `apps/organizations/services.py` | 1 | C — təşkilat idarəetməsi |
+| `apps/registrar/management/commands/archive_junk_groups.py` | 1 | C — idarə əmrləri |
 | `apps/registrar/management/commands/archive_non_program_rows.py` | 1 | C — idarə əmrləri |
+| `apps/registrar/management/commands/backfill_teacher_lessons.py` | 1 | C — idarə əmrləri |
+| `apps/registrar/management/commands/ensure_parent_groups.py` | 1 | C — idarə əmrləri |
+| `apps/registrar/management/commands/import_timetable_docx.py` | 1 | C — idarə əmrləri |
+| `apps/registrar/management/commands/merge_subjects.py` | 1 | C — idarə əmrləri |
+| `apps/registrar/management/commands/report_duplicate_subjects.py` | 1 | C — idarə əmrləri |
 | `apps/registrar/management/commands/seed_western_caspian.py` | 1 | C — idarə əmrləri |
+| `apps/registrar/management/commands/undo_subject_merge.py` | 1 | C — idarə əmrləri |
 | `apps/registrar/page_contexts.py` | 1 | D — tenant konteksti itmiş səhifə fallback-i (şərhli) |
 | `apps/subject_folder/management/commands/subject_folder_digest.py` | 1 | C — idarə əmrləri |
 | `apps/subject_folder/management/commands/subject_folder_similarity.py` | 1 | C — idarə əmrləri |
@@ -122,15 +148,21 @@ ki, gələcəkdə hər biri qəsdən və əsaslandırılmış qalsın.
 | `apps/surveys/management/commands/surveys_open_campaign.py` | 1 | C — idarə əmrləri |
 | `apps/surveys/management/commands/surveys_shuffle_responses.py` | 1 | C — idarə əmrləri |
 | `apps/surveys/services/survey_buffer.py` | 1 | D — anonim cavab buferi köçürməsi (artıq icazəli sorğu id-si) |
+| `apps/syllabus/management/commands/recompute_syllabus_completion.py` | 1 | C — idarə əmrləri |
 | `apps/syllabus/management/commands/syllabus_repair_chair_units.py` | 1 | C — idarə əmrləri |
 | `apps/timetable/tasks.py` | 1 | D — Celery (cədvəl generatoru, run sətrinin təşkilatı) |
+| `apps/verification/lookup.py` | 1 | B — public sənəd yoxlaması (kod üzrə tək sətir) |
+| `apps/workload/management/commands/assign_task_rows_from_timetable.py` | 1 | C — idarə əmrləri (--org ilə) |
+| `apps/workload/management/commands/fix_task_row_hours.py` | 1 | C — idarə əmrləri (--org ilə) |
+| `apps/workload/management/commands/import_teaching_load_form1.py` | 1 | C — idarə əmrləri (--org ilə) |
 | `apps/workload/management/commands/import_teaching_task_workbook.py` | 1 | C — idarə əmrləri (--org ilə) |
+| `apps/workload/management/commands/resync_task_offerings.py` | 1 | C — idarə əmrləri (--org ilə) |
 | `apps/workload/management/commands/sync_plan_offerings.py` | 1 | C — idarə əmrləri (--org ilə) |
 | `core/batch_purge.py` | 1 | D — infrastruktur |
 | `core/moderation/enforcement.py` | 1 | D — infrastruktur |
 | `core/rls_pooling.py` | 1 | D — infrastruktur |
 
-**Cəmi:** 215 çağırış / 106 fayl · kateqoriya üzrə — A: 41, B: 41, C: 87, D: 46.
+**Cəmi:** 250 çağırış / 139 fayl · kateqoriya üzrə — A: 43, B: 47, C: 111, D: 49.
 
 Yeni böyük istifadəçilər (2026-05-dən sonra): `apps/exams/tasks.py` (Celery —
 sorğu konteksti yoxdur, job sətirləri `ExamExportJob`/`AIGenerationJob` org FK ilə

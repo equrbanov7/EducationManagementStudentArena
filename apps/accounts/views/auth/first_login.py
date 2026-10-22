@@ -149,10 +149,17 @@ def _finish(request, user, *, verified_email=False):
     profile = user.profile
     profile.password_change_required = False
     fields = ["password_change_required", "updated_at"]
+    newly_verified = verified_email and not profile.email_verified
     if verified_email:
         profile.email_verified = True
         fields.append("email_verified")
     profile.save(update_fields=fields)
+    if newly_verified:
+        # Sahib 2026-10-23: kim profilini aktivləşdirdisə RİM-ə bildiriş (commit-dən sonra, best-effort).
+        # Lazy import: ``services.rim`` paketi ``views``/``forms`` yüklənəndə dövri importa düşür.
+        from ...services.rim.activation import notify_rim_of_activation
+
+        notify_rim_of_activation(user)
     request.session.pop(_OTP_SENT_SESSION_KEY, None)
     request.session.pop(_EMAIL_DRAFT_SESSION_KEY, None)
     messages.success(request, pgettext(_CTX, "Parolunuz təyin olundu. Sistemə xoş gəlmisiniz!"))

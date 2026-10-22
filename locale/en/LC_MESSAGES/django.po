@@ -107394,3 +107394,68 @@ msgstr "Request a new code with the «Resend code» button below."
 msgctxt "accounts.first_login"
 msgid "Kodu yenidən göndər ({s} san.)"
 msgstr "Resend code ({s} s)"
+
+msgctxt "core.runtime_settings"
+msgid "Profil aktivləşdiriləndə RİM-ə bildiriş"
+msgstr "Notify the Digital Development Centre when a profile is activated"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılanda istifadəçi e-poçtunu təsdiqləyib öz parolunu quranda (ilk giriş və ya parol bərpası) RİM mərkəzinin bütün üzvlərinə bildiriş gedir: kim aktivləşdirdi və cəmi neçə nəfər aktivləşdirib. Toplu aktivləşdirmə günlərində bildiriş çox olarsa söndürün — say RİM mərkəzində görünməyə davam edir."
+msgstr "When turned on, every member of the Digital Development Centre is notified when a user confirms their email and sets their own password (first login or password recovery): who activated and how many people have activated in total. Turn it off if there are too many notifications on mass activation days — the count stays visible in the centre's panel."
+
+msgctxt "accounts.rim_activation"
+msgid "Tələbə"
+msgstr "Student"
+
+msgctxt "accounts.rim_activation"
+msgid "Müəllim"
+msgstr "Teacher"
+
+msgctxt "accounts.rim_activation"
+msgid "Əməkdaş"
+msgstr "Staff"
+
+#, python-format
+msgctxt "accounts.rim_activation"
+msgid "Cəmi aktivləşdirən: %(done)d / %(total)d (%(pct)s%%)"
+msgstr "Activated in total: %(done)d / %(total)d (%(pct)s%%)"
+
+#, python-format
+msgctxt "accounts.rim_activation"
+msgid "tələbə %(s)d / %(st)d, müəllim %(t)d / %(tt)d, əməkdaş %(e)d / %(et)d"
+msgstr "students %(s)d / %(st)d, teachers %(t)d / %(tt)d, staff %(e)d / %(et)d"
+
+#, python-format
+msgctxt "accounts.rim_activation"
+msgid "Profilini aktivləşdirdi: %(name)s"
+msgstr "Profile activated: %(name)s"
+
+msgctxt "accounts.rim_activation"
+msgid "RİM mərkəzində aç"
+msgstr "Open in the Digital Development Centre"
+
+msgctxt "profile.rim"
+msgid "PROFİLİNİ AKTİVLƏŞDİRİB"
+msgstr "PROFILE ACTIVATED"
+
+#, python-format
+msgctxt "profile.rim"
+msgid "%(total)d nəfərdən · %(pct)s%%"
+msgstr "of %(total)d people · %(pct)s%%"
+
+msgctxt "profile.rim"
+msgid "TƏLƏBƏ"
+msgstr "STUDENTS"
+
+msgctxt "profile.rim"
+msgid "MÜƏLLİM"
+msgstr "TEACHERS"
+
+msgctxt "profile.rim"
+msgid "ƏMƏKDAŞ"
+msgstr "STAFF"
+
+#, python-format
+msgctxt "profile.rim"
+msgid "aktivləşdirib · %(pct)s%%"
+msgstr "activated · %(pct)s%%"

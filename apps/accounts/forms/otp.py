@@ -52,7 +52,8 @@ def mark_self_service_password_set(user):
     if profile.password_change_required:
         profile.password_change_required = False
         changed.append("password_change_required")
-    if not profile.email_verified:
+    newly_verified = not profile.email_verified
+    if newly_verified:
         profile.email_verified = True
         changed.append("email_verified")
     # Sahib 2026-10-02: parol bərpasından sonra ilk girişdə köçürülmüş ballar barədə bir dəfəlik xəbərdarlıq.
@@ -61,6 +62,12 @@ def mark_self_service_password_set(user):
         changed.append("grades_notice_pending")
     if changed:
         profile.save(update_fields=changed + ["updated_at"])
+    if newly_verified:
+        # Sahib 2026-10-23: kim profilini aktivləşdirdisə RİM-ə bildiriş (commit-dən sonra, best-effort).
+        # Lazy import: ``services.rim`` paketi ``views``/``forms`` yüklənəndə dövri importa düşür.
+        from ..services.rim.activation import notify_rim_of_activation
+
+        notify_rim_of_activation(user)
 
 
 def _password_reset_otp_attrs():
