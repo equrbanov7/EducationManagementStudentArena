@@ -108485,3 +108485,11 @@ msgstr "MITARBEITENDE"
 msgctxt "profile.rim"
 msgid "aktivləşdirib · %(pct)s%%"
 msgstr "aktiviert · %(pct)s%%"
+
+msgctxt "profile.rim"
+msgid "FİN yoxdur — istifadəçi ilk girişdə «Məcburi profil məlumatları»nda özü yazacaq."
+msgstr "Keine FIN — die Person trägt sie bei der ersten Anmeldung unter „Pflichtangaben im Profil“ selbst ein."
+
+msgctxt "profile.rim"
+msgid "Müəllim hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq."
+msgstr "Bei Lehrkräften darf das Feld leer bleiben — die Person trägt es bei der ersten Anmeldung selbst ein."

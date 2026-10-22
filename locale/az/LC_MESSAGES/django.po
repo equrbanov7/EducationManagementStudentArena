@@ -106969,3 +106969,11 @@ msgstr "ƏMƏKDAŞ"
 msgctxt "profile.rim"
 msgid "aktivləşdirib · %(pct)s%%"
 msgstr "aktivləşdirib · %(pct)s%%"
+
+msgctxt "profile.rim"
+msgid "FİN yoxdur — istifadəçi ilk girişdə «Məcburi profil məlumatları»nda özü yazacaq."
+msgstr "FİN yoxdur — istifadəçi ilk girişdə «Məcburi profil məlumatları»nda özü yazacaq."
+
+msgctxt "profile.rim"
+msgid "Müəllim hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq."
+msgstr "Müəllim hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq."

@@ -125,12 +125,14 @@ Django şablon mühərrikindən keçmir).
             <div class="rimc-grid">
               <div class="ems-field">
                 <label class="ems-field__label" for="rimc-fin">
-                  {% trans "FİN" context "profile.rim" %} <span class="ems-field__req" aria-hidden="true">*</span>
+                  {% trans "FİN" context "profile.rim" %} <span class="ems-field__req" aria-hidden="true" data-rimc-student-mark>*</span>
                 </label>
                 <input class="ems-input rimc-mono" id="rimc-fin" type="text" name="fin" required
-                       maxlength="7" autocomplete="off" spellcheck="false"
+                       maxlength="7" autocomplete="off" spellcheck="false" data-rimc-student-required
                        data-rimc-field="fin" aria-describedby="rimc-fin-hint">
                 <p class="ems-field__hint" id="rimc-fin-hint">{% trans "7 simvol, yalnız A–Z və 0–9." context "profile.rim" %}</p>
+                {% comment %}Sahib 2026-10-23: müəllim/əməkdaş hesabı FİN-siz açıla bilər — FİN-i ilk girişdə «Məcburi profil məlumatları» qapısı istəyir.{% endcomment %}
+                <p class="ems-field__hint" data-rimc-only="teacher" hidden>{% trans "Müəllim hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq." context "profile.rim" %}</p>
                 <p class="ems-msg ems-msg--error" data-rimc-error="fin" role="alert" hidden></p>
               </div>
 
@@ -161,10 +163,10 @@ Django şablon mühərrikindən keçmir).
 
               <div class="ems-field">
                 <label class="ems-field__label" for="rimc-birth-date">
-                  {% trans "Doğum tarixi" context "profile.rim" %} <span class="ems-field__req" aria-hidden="true">*</span>
+                  {% trans "Doğum tarixi" context "profile.rim" %} <span class="ems-field__req" aria-hidden="true" data-rimc-student-mark>*</span>
                 </label>
                 <input class="ems-input" id="rimc-birth-date" type="date" name="birth_date" required
-                       data-rimc-field="birth_date">
+                       data-rimc-student-required data-rimc-field="birth_date">
                 <p class="ems-msg ems-msg--error" data-rimc-error="birth_date" role="alert" hidden></p>
               </div>
 

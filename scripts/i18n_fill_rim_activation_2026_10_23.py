@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""EMSArena i18n — profil aktivləşdirəndə RİM-ə bildiriş + RİM mərkəzinin aktivləşdirmə sayı (2026-10-23).
+"""EMSArena i18n — profil aktivləşdirəndə RİM-ə bildiriş + RİM mərkəzinin aktivləşdirmə sayı + FİN-siz müəllim hesabı (2026-10-23).
 
 msgid AZ cümlədir → az msgstr = msgid. İdempotentdir; sonra `compilemessages -i .claude -i venv`.
 """
@@ -87,6 +87,18 @@ ENTRIES = {
             "из %(total)d человек · %(pct)s%%",
             "%(total)d kişiden · %%%(pct)s",
             "von %(total)d Personen · %(pct)s%%",
+        ),
+        "FİN yoxdur — istifadəçi ilk girişdə «Məcburi profil məlumatları»nda özü yazacaq.": t(
+            "No PIN — the user will enter it at first login under “Mandatory profile information”.",
+            "ФИН не указан — пользователь введёт его сам при первом входе в разделе «Обязательные данные профиля».",
+            "FİN yok — kullanıcı ilk girişte “Zorunlu profil bilgileri” bölümünde kendisi yazacak.",
+            "Keine FIN — die Person trägt sie bei der ersten Anmeldung unter „Pflichtangaben im Profil“ selbst ein.",
+        ),
+        "Müəllim hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq.": t(
+            "May be left empty for a teacher account — the user will enter it at first login.",
+            "Для учётной записи преподавателя можно оставить пустым — пользователь введёт сам при первом входе.",
+            "Öğretim elemanı hesabında boş bırakılabilir — kullanıcı ilk girişte kendisi yazacak.",
+            "Bei Lehrkräften darf das Feld leer bleiben — die Person trägt es bei der ersten Anmeldung selbst ein.",
         ),
         "TƏLƏBƏ": t("STUDENTS", "СТУДЕНТЫ", "ÖĞRENCİ", "STUDIERENDE"),
         "MÜƏLLİM": t("TEACHERS", "ПРЕПОДАВАТЕЛИ", "ÖĞRETİM ELEMANI", "LEHRKRÄFTE"),

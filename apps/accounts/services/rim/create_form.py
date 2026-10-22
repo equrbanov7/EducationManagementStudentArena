@@ -98,6 +98,15 @@ class AccountDraft:
         return not self.errors
 
 
+def _strict(draft: AccountDraft) -> bool:
+    """FİN və doğum tarixi məcburidirmi — YALNIZ tələbədə (toplu idxalla eyni qayda).
+
+    Sahib 2026-10-23: müəllim / əməkdaş hesabı FİN-siz açıla bilər; FİN-i istifadəçi ilk girişdə
+    «Məcburi profil məlumatları» qapısında (``profile_completion``) özü yazır.
+    """
+    return draft.kind == intake_create.KIND_STUDENT
+
+
 def _fail(draft: AccountDraft, name: str, message: str) -> None:
     # İlk mesaj qalır: eyni sahə üçün ikinci yoxlama daha ümumi mətn verə bilər.
     draft.errors.setdefault(name, message)
@@ -120,7 +129,12 @@ def _validate_identity(draft: AccountDraft, data: dict, context: IntakeContext) 
     patronymic = normalize_text(data.get("patronymic"))
 
     if not fin:
-        _fail(draft, "fin", pgettext(_CTX, "FİN boşdur."))
+        if _strict(draft):
+            _fail(draft, "fin", pgettext(_CTX, "FİN boşdur."))
+        else:
+            draft.warnings.append(
+                pgettext(_CTX, "FİN yoxdur — istifadəçi ilk girişdə «Məcburi profil məlumatları»nda özü yazacaq.")
+            )
     else:
         try:
             validate_fin(fin)
@@ -144,7 +158,8 @@ def _validate_identity(draft: AccountDraft, data: dict, context: IntakeContext) 
 
     draft.values.update(
         {
-            "fin": fin,
+            # FİN unikal + nullable sahədir: boş sətir iki FİN-siz hesabı toqquşdurardı.
+            "fin": fin or None,
             "first_name": first_name,
             "last_name": last_name,
             "patronymic": patronymic,
@@ -160,10 +175,13 @@ def _validate_person(draft: AccountDraft, data: dict) -> None:
     # səth arasında məhz qaçındığımız drift yaranardı; ona görə burada da
     # məcburidir və şablonda `*` ilə işarələnib. Boş dəyər üçün mesaj
     # AYRIDIR — «format tanınmadı» boş sahə üçün yanıltıcıdır.
+    #
+    # Sahib 2026-10-23: müəllim / əməkdaş hesabında doğum tarixi də FİN kimi OPSİONALDIR (``_strict``).
     raw = normalize_text(data.get("birth_date"))
     birth_date, ok = parse_birth_date(raw)
     if not raw:
-        _fail(draft, "birth_date", pgettext(_CTX, "Doğum tarixi məcburidir."))
+        if _strict(draft):
+            _fail(draft, "birth_date", pgettext(_CTX, "Doğum tarixi məcburidir."))
     elif not ok:
         _fail(draft, "birth_date", pgettext(_CTX, "Doğum tarixi tanınmadı (gg.aa.iiii formatını işlədin)."))
     elif birth_date is not None and not (date(1900, 1, 1) <= birth_date <= date.today()):
@@ -335,14 +353,22 @@ def _validate_credentials(draft: AccountDraft, data: dict, context: IntakeContex
     if code and code in context.existing_codes:
         _fail(draft, "code", pgettext(_CTX, "Bu kod artıq istifadə olunub."))
 
-    fin = draft.values.get("fin", "")
+    fin = draft.values.get("fin") or ""
     if fin:
         draft.values["username"] = intake_create.claim_username(
             intake_create.username_base(draft.kind, code=code, fin=fin)
         )
+    elif not _strict(draft) and (draft.values.get("first_name") or draft.values.get("last_name")):
+        # FİN-siz müəllim: ``ad.soyad`` (``ad.soyad2`` …) — «Müəllim əlavəsi (toplu)»nun FİN-siz yolu ilə eyni.
+        from ..teacher_roster.create import claim_name_username
+        from ..username_repair import name_base
+
+        draft.values["username"] = claim_name_username(
+            name_base(draft.values.get("first_name"), draft.values.get("last_name")) or "isci"
+        )
 
     email = normalize_text(data.get("email"))
-    placeholder = "intake.%s@%s" % (fin.lower(), PLACEHOLDER_DOMAIN)
+    placeholder = "intake.%s@%s" % ((fin or draft.values.get("username", "")).lower(), PLACEHOLDER_DOMAIN)
     if not email:
         draft.values["email"] = placeholder
         draft.warnings.append(pgettext(_CTX, "E-poçt yoxdur — placeholder yazılır (ilk girişdə istifadəçi özü yazır)."))
