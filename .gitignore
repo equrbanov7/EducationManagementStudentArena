@@ -226,3 +226,8 @@ scripts/data/*.csv
 !scripts/data/qku_legacy_rooms.csv
 .env
 db.sqlite3
+
+# Sillabus e2e node qoşqularının iş vaxtı çıxışı (_drive / test_empty_outcomes yazır)
+apps/syllabus/tests/e2e/*.html
+apps/syllabus/tests/e2e/*_texts.json
+apps/syllabus/tests/e2e/*_out.json

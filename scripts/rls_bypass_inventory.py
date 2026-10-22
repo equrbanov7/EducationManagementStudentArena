@@ -54,6 +54,8 @@ CATEGORY_RULES = (
         "idarə əmri (--org + dəqiq --slug + --expect-title; dry-run defolt, prod kill-switch-li)",
     ),
     ("apps/exams/", "C", "imtahan mərkəzi / müəllim cross-org əməli"),
+    # 2026-10-23: aktivləşdirmə bildirişi — alıcılar sabit RİM rolları + aktivləşdirənin ÖZ təşkilatı, sətir qayıtmır.
+    ("apps/accounts/services/rim/activation.py", "A", "recipient-scoped bildiriş (RİM rolları, öz təşkilat)"),
     ("apps/accounts/services/view_as.py", "C", "view-as (hədəf yoxlaması ilə)"),
     ("apps/accounts/services/organization_requests.py", "C", "üzvlük sorğusu axını"),
     ("apps/accounts/services/registration.py", "C", "qeydiyyat (org seçimi öncəsi)"),

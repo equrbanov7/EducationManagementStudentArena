@@ -107588,3 +107588,76 @@ msgstr "Запросите новый код кнопкой «Отправить
 msgctxt "accounts.first_login"
 msgid "Kodu yenidən göndər ({s} san.)"
 msgstr "Отправить код повторно ({s} с)"
+
+msgctxt "core.runtime_settings"
+msgid "Profil aktivləşdiriləndə RİM-ə bildiriş"
+msgstr "Уведомлять ЦЦР об активации профиля"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılanda istifadəçi e-poçtunu təsdiqləyib öz parolunu quranda (ilk giriş və ya parol bərpası) RİM mərkəzinin bütün üzvlərinə bildiriş gedir: kim aktivləşdirdi və cəmi neçə nəfər aktivləşdirib. Toplu aktivləşdirmə günlərində bildiriş çox olarsa söndürün — say RİM mərkəzində görünməyə davam edir."
+msgstr "Если включено, все сотрудники ЦЦР получают уведомление, когда пользователь подтверждает e-mail и задаёт свой пароль (первый вход или восстановление пароля): кто активировал и сколько человек активировали всего. Выключите, если в дни массовой активации уведомлений слишком много — счётчик по-прежнему виден в панели ЦЦР."
+
+msgctxt "accounts.rim_activation"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "accounts.rim_activation"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+msgctxt "accounts.rim_activation"
+msgid "Əməkdaş"
+msgstr "Сотрудник"
+
+#, python-format
+msgctxt "accounts.rim_activation"
+msgid "Cəmi aktivləşdirən: %(done)d / %(total)d (%(pct)s%%)"
+msgstr "Всего активировали: %(done)d / %(total)d (%(pct)s%%)"
+
+#, python-format
+msgctxt "accounts.rim_activation"
+msgid "tələbə %(s)d / %(st)d, müəllim %(t)d / %(tt)d, əməkdaş %(e)d / %(et)d"
+msgstr "студенты %(s)d / %(st)d, преподаватели %(t)d / %(tt)d, сотрудники %(e)d / %(et)d"
+
+#, python-format
+msgctxt "accounts.rim_activation"
+msgid "Profilini aktivləşdirdi: %(name)s"
+msgstr "Профиль активирован: %(name)s"
+
+msgctxt "accounts.rim_activation"
+msgid "RİM mərkəzində aç"
+msgstr "Открыть в ЦЦР"
+
+msgctxt "profile.rim"
+msgid "PROFİLİNİ AKTİVLƏŞDİRİB"
+msgstr "АКТИВИРОВАЛИ ПРОФИЛЬ"
+
+#, python-format
+msgctxt "profile.rim"
+msgid "%(total)d nəfərdən · %(pct)s%%"
+msgstr "из %(total)d человек · %(pct)s%%"
+
+msgctxt "profile.rim"
+msgid "TƏLƏBƏ"
+msgstr "СТУДЕНТЫ"
+
+msgctxt "profile.rim"
+msgid "MÜƏLLİM"
+msgstr "ПРЕПОДАВАТЕЛИ"
+
+msgctxt "profile.rim"
+msgid "ƏMƏKDAŞ"
+msgstr "СОТРУДНИКИ"
+
+#, python-format
+msgctxt "profile.rim"
+msgid "aktivləşdirib · %(pct)s%%"
+msgstr "активировали · %(pct)s%%"
+
+msgctxt "profile.rim"
+msgid "FİN yoxdur — istifadəçi ilk girişdə «Məcburi profil məlumatları»nda özü yazacaq."
+msgstr "ФИН не указан — пользователь введёт его сам при первом входе в разделе «Обязательные данные профиля»."
+
+msgctxt "profile.rim"
+msgid "Müəllim hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq."
+msgstr "Для учётной записи преподавателя можно оставить пустым — пользователь введёт сам при первом входе."

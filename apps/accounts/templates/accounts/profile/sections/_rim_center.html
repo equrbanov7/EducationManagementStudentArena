@@ -43,6 +43,11 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
     {% trans "İstifadəçini ad, soyad və ata adı ilə tapın — istifadəçi adını bilməyə ehtiyac yoxdur. Email, FİN və ya istifadəçi adı ilə də axtara bilərsiniz. Bütün əməliyyatlar audit jurnalına düşür." context "profile.rim" as rim_subtitle %}
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=rim_subtitle header_actions_include="accounts/profile/sections/partials/_rim_header_actions.html" %}
 
+    {% comment %}Sahib 2026-10-23: «neçə nəfər profilini aktivləşdirib» — cəmi + növlər üzrə (views/rim/section.py).{% endcomment %}
+    {% if rim_center_section.activation_tiles %}
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=rim_center_section.activation_tiles kpi_variant="4" %}
+    {% endif %}
+
     {% if rim_center_section.granted_permissions %}
     <div class="rim-head">
       <div class="rim-perms" aria-label="{% trans 'Sizin səlahiyyətləriniz' context 'profile.rim' %}">
@@ -64,6 +69,7 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
                id="rim-search-input"
                class="rim-search-input"
                data-rim-search
+               value="{{ rim_center_section.initial_query }}"
                autocomplete="off"
                placeholder="{% trans 'məs: Əliyev Elvin Səməd — və ya email / FİN / istifadəçi adı' context 'profile.rim' %}">
         <button type="button" class="rim-search-clear" data-rim-search-clear hidden

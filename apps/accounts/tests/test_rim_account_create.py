@@ -240,8 +240,43 @@ class RimCreateCollisionTest(RimCreateBase):
 
     def test_missing_names_collect_all_field_errors_at_once(self):
         with self.assertRaises(rim_create.RimCreateError) as caught:
-            self.create(self.rim, "teacher", fin="", first_name="", last_name="")
+            self.create(self.rim, "student", fin="", first_name="", last_name="", group=str(self.group.pk))
         self.assertEqual(set(caught.exception.fields), {"fin", "first_name", "last_name"})
+
+
+class RimCreateTeacherWithoutFinTest(RimCreateBase):
+    """Sahib 2026-10-23: müəllim / əməkdaş hesabı FİN-siz və doğum tarixsiz açılır; tələbə yox."""
+
+    def test_teacher_without_fin_and_birth_date_is_created(self):
+        result = self.create(
+            self.rim, "teacher", fin="", birth_date="", first_name="Fidan", last_name="Əliyeva", patronymic="Mahir"
+        )
+        created = User.objects.get(pk=result["user_id"])
+        profile = UserProfile.objects.get(user=created)
+        self.assertIsNone(profile.fin)
+        self.assertIsNone(profile.birth_date)
+        self.assertEqual(created.username, "fidan.eliyeva")
+        self.assertTrue(created.email.startswith("intake.fidan.eliyeva@"))
+        self.assertTrue(profile.password_change_required)
+        self.assertFalse(profile.email_verified)
+
+    def test_two_fin_less_teachers_do_not_collide(self):
+        first = self.create(self.rim, "teacher", fin="", birth_date="", first_name="Aysel", last_name="Quliyeva")
+        second = self.create(self.rim, "teacher", fin="", birth_date="", first_name="Aysel", last_name="Quliyeva")
+        self.assertEqual(
+            [first["username"], second["username"]],
+            ["aysel.quliyeva", "aysel.quliyeva2"],
+        )
+
+    def test_student_still_requires_fin_and_birth_date(self):
+        with self.assertRaises(rim_create.RimCreateError) as caught:
+            self.create(self.rim, "student", fin="", birth_date="", group=str(self.group.pk))
+        self.assertTrue({"fin", "birth_date"} <= set(caught.exception.fields))
+
+    def test_invalid_fin_is_still_rejected_for_teachers(self):
+        with self.assertRaises(rim_create.RimCreateError) as caught:
+            self.create(self.rim, "teacher", fin="short", birth_date="")
+        self.assertIn("fin", caught.exception.fields)
 
     def test_email_collision_falls_back_to_placeholder(self):
         result = self.create(self.rim, "teacher", fin="7GGGGG7", email=self.teacher.email)

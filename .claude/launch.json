@@ -136,6 +136,16 @@
         "set -a && . .claude/dev-clone.env && set +a && DEBUG=False LOCAL_USE_SMTP_EMAIL=0 EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend EMS_DB_ROLE_ENFORCE=error USE_REDIS=False exec venv/bin/python manage.py runserver 8014 --noreload --insecure"
       ],
       "port": 8014
+    },
+    {
+      "name": "emsarena-dev-clone-qa",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": [
+        "-c",
+        "set -a && . .claude/dev-clone.env && set +a && ALLOWED_HOSTS=qa.localhost,127.0.0.1,localhost CSRF_TRUSTED_ORIGINS=http://qa.localhost:8023 EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend LOCAL_USE_SMTP_EMAIL=0 EMS_DB_ROLE_ENFORCE=error USE_REDIS=False exec venv/bin/python manage.py runserver 127.0.0.1:8023 --noreload"
+      ],
+      "port": 8023,
+      "url": "http://qa.localhost:8023"
     }
   ]
 }
