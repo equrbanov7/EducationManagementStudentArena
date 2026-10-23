@@ -107467,3 +107467,15 @@ msgstr "No PIN — the user will enter it at first login under “Mandatory prof
 msgctxt "profile.rim"
 msgid "Müəllim hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq."
 msgstr "May be left empty for a teacher account — the user will enter it at first login."
+
+msgctxt "accounts.first_login"
+msgid "Diqqət:"
+msgstr "Note:"
+
+msgctxt "accounts.first_login"
+msgid "kod gəlməsə e-poçtunuzun «Spam» (Junk / Lazımsız) qovluğuna mütləq baxın."
+msgstr "if the code does not arrive, be sure to check your “Spam” (Junk) folder."
+
+msgctxt "accounts.first_login"
+msgid "«Gələnlər» qovluğunda yoxdursa, e-poçtunuzun «Spam» (Junk / Lazımsız) qovluğuna baxın — kod çox vaxt ora düşür."
+msgstr "If it is not in your Inbox, check your “Spam” (Junk) folder — the code often lands there."
