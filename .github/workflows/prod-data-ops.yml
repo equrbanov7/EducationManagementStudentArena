@@ -272,7 +272,8 @@ jobs:
     if: github.event.inputs.apply != 'true' || github.event.inputs.confirm == 'APPLY'
     runs-on: [self-hosted]
     environment: production
-    timeout-minutes: 30
+    # legacy_delta_apply (tək tranzaksiya, ~2 000 jurnal + dərs yükü) prod-da ~20 dəq + backup çəkir.
+    timeout-minutes: 75
     env:
       APP_CONTAINER: educationmanagementstudentarena-app-1
       BACKUP_CONTAINER: emsarena-postgres-backup

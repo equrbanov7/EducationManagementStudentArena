@@ -73,10 +73,13 @@ def _teacher_text(user) -> str:
 
 
 def _chair_for(offering, chairs_of) -> object:
+    """Fənnin AKTİV kafedrası, yoxdursa müəllimin aktiv kafedra üzvlüyü (deaktiv kafedraya yük yazılmır)."""
+
     subject = offering.subject
-    if subject.chair_unit_id and subject.chair_unit.unit_type == "chair":
+    if subject.chair_unit_id and subject.chair_unit.unit_type == "chair" and subject.chair_unit.is_active:
         return subject.chair_unit
-    return chairs_of.get(offering.instructor_id)
+    chair = chairs_of.get(offering.instructor_id)
+    return chair if chair is not None and chair.is_active else None
 
 
 def build_workload(run, slices: dict) -> None:
@@ -123,7 +126,9 @@ def _workload_pass(run, slices: dict, *, only) -> tuple[int, set]:
         covered.add((subject_id, period_id, group_id))
     chairs_of = {}
     for user_id, unit in (
-        Membership.objects.filter(organization=org, is_active=True, scope_unit__unit_type="chair")
+        Membership.objects.filter(
+            organization=org, is_active=True, scope_unit__unit_type="chair", scope_unit__is_active=True
+        )
         .order_by("-is_primary", "pk")
         .values_list("user_id", "scope_unit")
     ):
@@ -226,6 +231,8 @@ def _workload_pass(run, slices: dict, *, only) -> tuple[int, set]:
                 report = legacy_loads.apply_legacy_loads(
                     organization=org, chair=chair, actor_user=run.actor, entries=entries, year=year
                 )
+                if report.get("denied"):
+                    raise _ChairRejected(f"denied:{report['denied']}")
                 _verify(org, year, before_assign, before_offerings, Assignment, CourseOffering, intended)
                 _verify_enrollments(org, year, before_enrollments, Enrollment)
         except _ChairRejected as rejected:
