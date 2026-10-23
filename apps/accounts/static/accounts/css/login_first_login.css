@@ -329,3 +329,19 @@
     cursor: not-allowed;
     text-decoration: none;
 }
+
+/* Sahib 2026-10-23: «Spam qovluğuna baxın» — görünən xəbərdarlıq (ilk giriş, hər iki addım). */
+.auth-spam-note {
+    margin: 12px 0 0;
+    padding: 10px 13px;
+    border-radius: 10px;
+    background: var(--ems-warning-50, #fffbeb);
+    border: 1px solid var(--ems-warning-200, #fde68a);
+    color: var(--ems-neutral-800);
+    font-size: 0.86rem;
+    line-height: 1.45;
+}
+
+.auth-info-line + .auth-spam-note {
+    margin: -12px 0 20px;
+}

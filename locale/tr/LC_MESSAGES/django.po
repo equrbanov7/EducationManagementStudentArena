@@ -106875,3 +106875,15 @@ msgstr "FİN yok — kullanıcı ilk girişte “Zorunlu profil bilgileri” bö
 msgctxt "profile.rim"
 msgid "Müəllim hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq."
 msgstr "Öğretim elemanı hesabında boş bırakılabilir — kullanıcı ilk girişte kendisi yazacak."
+
+msgctxt "accounts.first_login"
+msgid "Diqqət:"
+msgstr "Dikkat:"
+
+msgctxt "accounts.first_login"
+msgid "kod gəlməsə e-poçtunuzun «Spam» (Junk / Lazımsız) qovluğuna mütləq baxın."
+msgstr "kod gelmezse e-postanızın “Spam” (Gereksiz) klasörüne mutlaka bakın."
+
+msgctxt "accounts.first_login"
+msgid "«Gələnlər» qovluğunda yoxdursa, e-poçtunuzun «Spam» (Junk / Lazımsız) qovluğuna baxın — kod çox vaxt ora düşür."
+msgstr "“Gelen kutusu”nda yoksa “Spam” (Gereksiz) klasörüne bakın — kod çoğu zaman oraya düşer."

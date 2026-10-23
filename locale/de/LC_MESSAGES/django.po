@@ -108493,3 +108493,15 @@ msgstr "Keine FIN — die Person trägt sie bei der ersten Anmeldung unter „Pf
 msgctxt "profile.rim"
 msgid "Müəllim hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq."
 msgstr "Bei Lehrkräften darf das Feld leer bleiben — die Person trägt es bei der ersten Anmeldung selbst ein."
+
+msgctxt "accounts.first_login"
+msgid "Diqqət:"
+msgstr "Hinweis:"
+
+msgctxt "accounts.first_login"
+msgid "kod gəlməsə e-poçtunuzun «Spam» (Junk / Lazımsız) qovluğuna mütləq baxın."
+msgstr "falls der Code nicht ankommt, sehen Sie unbedingt im Ordner „Spam“ (Junk) nach."
+
+msgctxt "accounts.first_login"
+msgid "«Gələnlər» qovluğunda yoxdursa, e-poçtunuzun «Spam» (Junk / Lazımsız) qovluğuna baxın — kod çox vaxt ora düşür."
+msgstr "Wenn sie nicht im Posteingang ist, sehen Sie im Ordner „Spam“ (Junk) nach — der Code landet oft dort."

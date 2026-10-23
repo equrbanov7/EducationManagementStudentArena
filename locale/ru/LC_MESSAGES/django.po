@@ -107661,3 +107661,15 @@ msgstr "ФИН не указан — пользователь введёт ег�
 msgctxt "profile.rim"
 msgid "Müəllim hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq."
 msgstr "Для учётной записи преподавателя можно оставить пустым — пользователь введёт сам при первом входе."
+
+msgctxt "accounts.first_login"
+msgid "Diqqət:"
+msgstr "Внимание:"
+
+msgctxt "accounts.first_login"
+msgid "kod gəlməsə e-poçtunuzun «Spam» (Junk / Lazımsız) qovluğuna mütləq baxın."
+msgstr "если код не пришёл, обязательно проверьте папку «Спам» (Нежелательная почта)."
+
+msgctxt "accounts.first_login"
+msgid "«Gələnlər» qovluğunda yoxdursa, e-poçtunuzun «Spam» (Junk / Lazımsız) qovluğuna baxın — kod çox vaxt ora düşür."
+msgstr "Если письма нет во «Входящих», проверьте папку «Спам» (Нежелательная почта) — код часто попадает туда."
