@@ -4,7 +4,7 @@ Bütün fazalar BİR tranzaksiyadadır: ya hamısı yazılır, ya heç nə. Dry-
 tranzaksiyanı GERİ QAYTARIR — hesabatdakı saylar «tətbiq etsək nə olardı»nın dəqiq sayıdır (təxmin yox).
 
 Fazalar: tələbələr (iki keçid: tutuşdur, sonra yarat) → açılış (fənn/qrup/müəllim) → qeydiyyat → dərs + xana →
-yekun/təkrar imtahan → sillabus → tələbə profilində boş sahələr. Sonda bir audit sətri (manifest:
+yekun/təkrar imtahan → sillabus → dərs yükü (rəsmi «Dərs yükü faylı» axını) → tələbə profilində boş sahələr. Sonda bir audit sətri (manifest:
 saylar + yaradılmış kiçik obyektlərin id-ləri) — ``resource_type=legacy_import.delta_batch``.
 """
 
@@ -23,12 +23,13 @@ from .lessons import build_lessons_and_marks
 from .people import StudentMapper, TeacherMapper, student_gender
 from .resolve import Catalog, lesson_date, text
 from .syllabi import import_syllabi
+from .workload import build_workload
 
 BATCH_RESOURCE = "legacy_import.delta_batch"
 BULK_CHUNK = 2000
 #: Manifestdə id-ləri saxlanılan (az saylı) növlər; qalanı yalnız say.
-MANIFEST_KINDS = ("groups", "subjects", "offerings", "teachers", "students", "syllabus_versions")
-PHASES = ("offerings", "enrollments", "students", "lessons", "finals", "syllabi", "profiles")
+MANIFEST_KINDS = ("groups", "subjects", "offerings", "teachers", "students", "syllabus_versions", "workload_chairs")
+PHASES = ("students", "offerings", "enrollments", "lessons", "finals", "syllabi", "workload", "profiles")
 
 
 def new_tag() -> str:
@@ -141,6 +142,8 @@ class DeltaRun:
             apply_finals(self, enrollments)
         if "syllabi" in phases:
             import_syllabi(self, slices)
+        if "workload" in phases:
+            build_workload(self, slices)
         if "profiles" in phases:
             self._profiles()
         for _legacy_id, user_pk in self.teachers.created:

@@ -45,8 +45,14 @@ Alətlər: `legacy_delta_extract` (lokal, MariaDB → şifrələnəcək paket) v
 9. Çatışmayan qrup → cutover forması (`myedu-grp-<id>`, ixtisas altında), alt qrupa `parent_group` izi.
 10. Sillabus → açılışa **APPROVED** (`approval_source=migration`), açılışın sillabusu yoxdursa;
     müəllimə iş yaranmır. Baza sillabus — (fənn, müəllim) üçün yoxdursa.
-11. Tapılmış tələbənin profilində yalnız BOŞ ata adı / doğum tarixi / cins doldurulur.
-12. Bütün fazalar BİR tranzaksiyadadır; idempotentdir (təkrar qaçış = 0 yazı). Audit: bir sətir
+11. **Dərs yükü** («Mənim dərs yüküm» `TeacherAssignment`-dən qurulur): müəllimi olan, amma heç bir tapşırıq
+    sətrinin əhatə etmədiyi legacy jurnalı tədris şöbəsinin rəsmi «Dərs yükü faylı» axınından keçir (kafedra
+    tapşırığı → sətir → bölgü → təsdiq). Saat = `fenn_saati`, fəaliyyətlərə sillabus payı ilə. Yalnız tapşırığı
+    OLMAYAN və ya bölgüsü TƏSDİQLƏNMİŞ kafedralar; hər sətir əvvəlcədən yoxlanılır (fənn/qrup/müəllim mətni başqa
+    sətrə düşürsə və ya oxşar mövcud sətir varsa — ötürülür); kafedra savepoint-dədir və mövcud bölgü / açılış
+    müəllimi / qeydiyyat statusu dəyişərsə və ya eyni fənnin ikinci açılışı yaranarsa — kafedra geri qaytarılır.
+12. Tapılmış tələbənin profilində yalnız BOŞ ata adı / doğum tarixi / cins doldurulur.
+13. Bütün fazalar BİR tranzaksiyadadır; idempotentdir (təkrar qaçış = 0 yazı). Audit: bir sətir
     `resource_type=legacy_import.delta_batch` (saylar + yaradılan qrup/fənn/açılış/hesab/sillabus id-ləri).
 
 ### Sahib qərarı gözləyən (alət YAZMIR, yalnız sayır)
@@ -73,12 +79,13 @@ Alətlər: `legacy_delta_extract` (lokal, MariaDB → şifrələnəcək paket) v
 | Qeydiyyat / dərs / xana | 25 774 / 13 325 / 217 654 |
 | Təkrar imtahan / imtahan balı | 1 191 / 19 |
 | Təsdiqlənmiş sillabus versiyası | 1 297 |
+| Dərs yükü: kafedra / yeni yük sətri (bölgü ilə) | 14 / 733 (4 kafedra bölgü üzərində işləyir — toxunulmadı) |
 | **İkinci qaçış** | **0 yazı** |
 
 Dry-run sayları tətbiqlə EYNİDİR (dry-run eyni kodu işlədib geri qaytarır). İdxal olunmuş jurnal
 səhifəsi 200 ilə açılır.
 
-### Prod nüsxəsi (22 okt backup → `ems_delta_prodcopy`, dry-run)
+### Prod nüsxəsi (22 okt backup, təmiz bərpa → tətbiq; ikinci qaçış 0 yazı)
 
 | | Say |
 |---|---:|
@@ -88,10 +95,11 @@ səhifəsi 200 ilə açılır.
 | Qeydiyyat / dərs / xana | 19 767 / 13 546 / 217 834 |
 | Təkrar imtahan / imtahan balı | 1 191 / 19 |
 | Sillabus (açılışa / baza) | 1 239 / 75 |
+| Dərs yükü: kafedra / yeni yük sətri (bölgü ilə) | 20 / 783 (ehtiyatla ötürülən 144, kafedrası tapılmayan 14) |
 | Üzərinə yazılmayan fərq (xana / müəllim / yekun) | 88 / 185 / 6 |
 | Həll olunmayan xana (tələbə tapılmadı / gələcək tarix) | 6 083 / 714 |
 
-Müddət ~3–4 dəqiqə (tək tranzaksiya).
+Müddət ~8 dəqiqə (tək tranzaksiya; dərs yükü fazası ~4 dəq).
 
 ## 4. Prod addımları (HƏR BİRİ sahibin açıq «hə»sı ilə)
 

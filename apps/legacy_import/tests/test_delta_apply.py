@@ -257,7 +257,10 @@ class DeltaApplyTests(TestCase):
                 end_date=dt.date(2027, 1, 31),
                 is_current=True,
             )
-            Subject.objects.create(organization=cls.org, code="QKU-5", name="Riyaziyyat")
+            cls.chair = OrgUnit.objects.create(
+                organization=cls.org, name="Riyaziyyat kafedrası", slug="d-chair", unit_type="chair", parent=faculty
+            )
+            Subject.objects.create(organization=cls.org, code="QKU-5", name="Riyaziyyat", chair_unit=cls.chair)
             cls.existing = User.objects.create_user(
                 "aysel.movcud", "a@example.test", "x", first_name="Aysel", last_name="Mövcud"
             )
@@ -330,6 +333,13 @@ class DeltaApplyTests(TestCase):
             self.assertEqual(syllabus.approved_version.status, "approved")
             self.assertEqual(syllabus.approved_version.approval_source, "migration")
             self.assertTrue(AuditLog.objects.filter(resource_type=BATCH_RESOURCE, resource_id="delta-test").exists())
+            # «Mənim dərs yüküm»: kafedranın tapşırığında sətir + müəllim bölgüsü (təsdiqlənmiş sənəd).
+            from apps.workload.models import TeacherAssignment
+
+            assignments = TeacherAssignment.objects.filter(teacher=teacher, row__subject__code="QKU-5")
+            self.assertEqual({a.activity for a in assignments}, {"lecture", "seminar"})
+            self.assertIn(assignments[0].row.task.status, ("distributed", "amended"))
+            self.assertEqual(sum(TeacherAssignment.objects.filter(teacher=teacher).values_list("hours", flat=True)), 45)
         self.assertEqual(run.counters["lesson.future_skipped"], 1)
         self.assertEqual(run.counters["final.resit.enrollment_unresolved"], 1)
         again = self._run(apply=True)
