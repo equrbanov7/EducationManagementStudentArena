@@ -180,3 +180,15 @@ class BuildBundleTests(SimpleTestCase):
         self.assertIn(("students", {7, 8}), calls)
         self.assertIn(("workers", {9}), calls)
         self.assertIn(("groups", {3}), calls)
+
+
+class WorkloadChairTests(SimpleTestCase):
+    def test_inactive_chair_is_never_chosen(self):
+        from apps.legacy_import.services.delta.workload import _chair_for, _scaled
+
+        inactive = SimpleNamespace(unit_type="chair", is_active=False)
+        active = SimpleNamespace(unit_type="chair", is_active=True)
+        offering = SimpleNamespace(subject=SimpleNamespace(chair_unit_id=1, chair_unit=inactive), instructor_id=7)
+        self.assertIsNone(_chair_for(offering, {7: inactive}))
+        self.assertIs(_chair_for(offering, {7: active}), active)
+        self.assertEqual(_scaled({"lecture": 2, "seminar": 2}, 45), {"lecture": 23, "seminar": 22})
