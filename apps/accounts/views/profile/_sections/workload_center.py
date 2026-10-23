@@ -123,6 +123,7 @@ def build_workload_center_section(request, section, *, active_organization, allo
         for key, label in (
             ("dashboard", pgettext(_CTX, "İdarə paneli")),
             ("tasks", pgettext(_CTX, "Tapşırıqlar")),
+            ("load", pgettext(_CTX, "Dərs yükü faylı")),
             ("import", pgettext(_CTX, "Excel import")),
             ("reports", pgettext(_CTX, "Hesabatlar")),
             ("settings", pgettext(_CTX, "Parametrlər")),
@@ -207,6 +208,10 @@ def build_workload_center_section(request, section, *, active_organization, allo
         for item in payload.get("slices", [])
     ]
     section["page_urls"] = _pager(base, payload)
+    # Sahib 2026-10-23: Tədris şöbəsinin «Dərs yükü faylı» (kafedra → fayl → önizləmə → tətbiq).
+    from .workload_load import load_context
+
+    section["load"] = load_context(payload.get("load"), year=payload["year"])
     section["import_steps_label"] = pgettext(_CTX, "Excel idxalının mərhələləri")
     has_preview = bool(payload.get("import_preview"))
     section["import_steps"] = [

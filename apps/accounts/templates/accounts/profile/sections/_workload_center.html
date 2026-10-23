@@ -91,6 +91,8 @@ Arxiv: keçmiş tədris ili yalnız oxunuş — yazma düymələri render OLUNMU
             {% include "accounts/profile/sections/workload/_center_editor.html" %}
         {% endif %}
 
+    {% elif workload_center_section.view == "load" %}
+        {% include "accounts/profile/sections/workload/_center_load.html" %}
     {% elif workload_center_section.view == "import" %}
         {% include "accounts/profile/sections/workload/_center_import.html" %}
 

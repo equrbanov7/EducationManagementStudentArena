@@ -17,6 +17,7 @@ from django.views.decorators.http import require_POST
 
 from .center_registry import is_archive_year
 from .constants import ObjectionStatus, RowReviewStatus
+from .load_actions import LOAD_HANDLERS
 from .models import LoadObjection, TaskFacultySlice, TeachingTask, TeachingTaskRow
 from .services import (
     WorkloadDenied,
@@ -291,6 +292,8 @@ _HANDLERS = {
     "object": _object,
     "confirm_load": _confirm_load,
     "resolve_objection": _resolve_objection,
+    # Sahib 2026-10-23: Tədris şöbəsinin «Dərs yükü faylı» (load_upload / load_apply / load_cancel).
+    **LOAD_HANDLERS,
 }
 
 

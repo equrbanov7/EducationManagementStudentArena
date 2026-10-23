@@ -20,6 +20,8 @@ PERM_APPROVE = "workload.approve"
 PERM_DISTRIBUTE = "workload.distribute"
 PERM_REPORT = "workload.report"
 PERM_OBJECT = "workload.object"
+#: Sahib 2026-10-23: Tədris şöbəsinin «Dərs yükü faylı» (bölgü + açılış avtomatik) — ``services.load_upload``.
+PERM_LOAD_IMPORT = "workload.load_import"
 
 
 class TaskStatus(models.TextChoices):
@@ -234,6 +236,7 @@ __all__ = [
     "LOCKED_STATUSES",
     "PERM_APPROVE",
     "PERM_DISTRIBUTE",
+    "PERM_LOAD_IMPORT",
     "PERM_MANAGE",
     "PERM_OBJECT",
     "PERM_REPORT",

@@ -8,6 +8,7 @@ from django.urls import path
 
 from . import views
 from .actions import workload_action
+from .load_actions import load_template
 
 app_name = "workload"
 
@@ -28,6 +29,8 @@ urlpatterns = [
     path("duzelis/", views.amend, name="amend"),
     # Mərhələ 4 — zəncirin bütün mutasiyaları (tək endpoint)
     path("emel/", workload_action, name="action"),
+    # Sahib 2026-10-23: Tədris şöbəsinin «Dərs yükü faylı» Excel şablonu
+    path("yuk-sablonu/", load_template, name="load_template"),
     # Müəllim səthi
     path("mene/setirler/", views.my_rows, name="my_rows"),
     path("mene/ixrac/", views.my_export, name="my_export"),

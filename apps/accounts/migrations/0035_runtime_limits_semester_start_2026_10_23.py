@@ -39,14 +39,26 @@ PREVIOUS = {
 }
 
 
+def _realign_sequence(schema_editor):
+    """Serial sequence ``max(id)``-yə — miqrasiya round-trip testləri sequence-i 1-ə salır (yeni sətir toqquşmasın)."""
+    if schema_editor.connection.vendor != "postgresql":
+        return
+    schema_editor.execute(
+        "SELECT setval(pg_get_serial_sequence('accounts_runtimesetting', 'id'), "
+        "GREATEST((SELECT COALESCE(MAX(id), 1) FROM accounts_runtimesetting), 1))"
+    )
+
+
 def raise_limits(apps, schema_editor):
     RuntimeSetting = apps.get_model("accounts", "RuntimeSetting")
+    _realign_sequence(schema_editor)
     for key, value in SEMESTER_START_MAXIMUMS.items():
         RuntimeSetting.objects.update_or_create(key=key, defaults={"value": value})
 
 
 def restore_limits(apps, schema_editor):
     RuntimeSetting = apps.get_model("accounts", "RuntimeSetting")
+    _realign_sequence(schema_editor)
     for key in SEMESTER_START_MAXIMUMS:
         if key in PREVIOUS:
             RuntimeSetting.objects.update_or_create(key=key, defaults={"value": PREVIOUS[key]})

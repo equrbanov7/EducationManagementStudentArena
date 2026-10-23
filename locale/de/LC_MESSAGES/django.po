@@ -108505,3 +108505,290 @@ msgstr "falls der Code nicht ankommt, sehen Sie unbedingt im Ordner „Spam“ (
 msgctxt "accounts.first_login"
 msgid "«Gələnlər» qovluğunda yoxdursa, e-poçtunuzun «Spam» (Junk / Lazımsız) qovluğuna baxın — kod çox vaxt ora düşür."
 msgstr "Wenn sie nicht im Posteingang ist, sehen Sie im Ordner „Spam“ (Junk) nach — der Code landet oft dort."
+
+msgctxt "accounts.workload_center"
+msgid "Dərs yükü faylı"
+msgstr "Lehrdeputat-Datei"
+
+msgctxt "organizations.permission.label"
+msgid "Dərs yükü faylını yükləmək (bölgü, açılış və tələbə qeydiyyatı avtomatik)"
+msgstr "Lehrdeputat-Datei hochladen (Verteilung, Kurseröffnung und Einschreibung automatisch)"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "%(chair)s — «%(file)s». Aşağıdakı nəticəni yoxlayın və «Tətbiq et» basın. Qırmızı sətirlər yazılmayacaq (müəllim vakant qalır və ya sətir yaradılmır) — faylı düzəldib yenidən yükləyə bilərsiniz."
+msgstr "%(chair)s — „%(file)s“. Prüfen Sie das Ergebnis unten und klicken Sie auf „Anwenden“. Rote Zeilen werden nicht geschrieben (Lehrkraft bleibt unbesetzt oder Zeile wird nicht angelegt) — Sie können die Datei korrigieren und erneut hochladen."
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "%(chair)s — «%(file)s». Müəllimlərə bildiriş getdi, fənlər tələbələrin kabinetində görünür."
+msgstr "%(chair)s — „%(file)s“. Die Lehrkräfte wurden benachrichtigt, die Fächer sind in den Studierendenkonten sichtbar."
+
+msgctxt "accounts.workload_load"
+msgid "Açılacaq yeni müəllim hesabları"
+msgstr "Neu anzulegende Lehrkraft-Konten"
+
+msgctxt "accounts.workload_load"
+msgid "Açılmış yeni müəllim hesabları"
+msgstr "Neu angelegte Lehrkraft-Konten"
+
+msgctxt "accounts.workload_load"
+msgid "Bir neçə uyğun hesab — vakant qalır"
+msgstr "Mehrere passende Konten — bleibt unbesetzt"
+
+msgctxt "accounts.workload_load"
+msgid "Bölgü"
+msgstr "Verteilung"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Daha %(count)s sətir göstərilmir (problemli sətirlər yuxarıdadır)."
+msgstr "Weitere %(count)s Zeilen werden nicht angezeigt (Problemzeilen stehen oben)."
+
+msgctxt "accounts.workload_load"
+msgid "DƏYİŞMƏYƏN"
+msgstr "UNVERÄNDERT"
+
+msgctxt "accounts.workload_load"
+msgid "Dəqiq tapılmadı — vakant qalır"
+msgstr "Nicht eindeutig gefunden — bleibt unbesetzt"
+
+msgctxt "accounts.workload_load"
+msgid "Dərs deyil (dissertasiya rəhbərliyi və s.)"
+msgstr "Keine Lehrveranstaltung (Betreuung von Abschlussarbeiten usw.)"
+
+msgctxt "accounts.workload_load"
+msgid "Dərs yükü faylı"
+msgstr "Lehrdeputat-Datei"
+
+msgctxt "accounts.workload_load"
+msgid "Dərs yükü faylını yükləmək üçün icazə yoxdur"
+msgstr "Keine Berechtigung zum Hochladen der Lehrdeputat-Datei"
+
+msgctxt "accounts.workload_load"
+msgid "Dərs yükü sistemə yazıldı"
+msgstr "Das Lehrdeputat wurde ins System übernommen"
+
+msgctxt "accounts.workload_load"
+msgid "Dərs yükü sistemə yazılsın? Müəllimlərə bildiriş gedəcək, fənlər tələbələrin kabinetinə düşəcək. Bu bir neçə dəqiqə çəkə bilər."
+msgstr "Lehrdeputat ins System übernehmen? Die Lehrkräfte werden benachrichtigt, die Fächer erscheinen in den Studierendenkonten. Das kann einige Minuten dauern."
+
+msgctxt "accounts.workload_load"
+msgid "Dəyişiklik yoxdur"
+msgstr "Keine Änderung"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Excel şablonu (.xlsx) və ya kafedranın «Forma 1» sənədi (.docx) · %(year)s tədris ili · maksimum 10 MB. Yoxlama bir neçə dəqiqə çəkə bilər."
+msgstr "Excel-Vorlage (.xlsx) oder das „Formular 1“ des Lehrstuhls (.docx) · Studienjahr %(year)s · max. 10 MB. Die Prüfung kann einige Minuten dauern."
+
+msgctxt "accounts.workload_load"
+msgid "Excel şablonunu yüklə"
+msgstr "Excel-Vorlage herunterladen"
+
+msgctxt "accounts.workload_load"
+msgid "FAYL SƏTRİ"
+msgstr "DATEIZEILEN"
+
+msgctxt "accounts.workload_load"
+msgid "Fayldakı hər sətir — müəllim, qrup, fənn, saatlar — kafedranın tapşırığına yazılır, müəllimə bölünür, fənn qrupun tələbələrinin kabinetinə düşür və müəllim elektron jurnalı yaza bilir. Əvvəlcə önizləmə göstərilir — «Tətbiq et» basılmayınca heç nə yazılmır. Eyni faylı təkrar yükləmək heç nəyi ikiqat etmir."
+msgstr "Jede Zeile der Datei — Lehrkraft, Gruppe, Fach, Stunden — wird in den Lehrauftrag des Lehrstuhls geschrieben, der Lehrkraft zugeteilt, das Fach erscheint in den Konten der Studierenden der Gruppe und die Lehrkraft kann das elektronische Journal führen. Zuerst gibt es eine Vorschau — vor „Anwenden“ wird nichts geschrieben. Ein erneutes Hochladen derselben Datei verdoppelt nichts."
+
+msgctxt "accounts.workload_load"
+msgid "Faylı oxu və yoxla"
+msgstr "Datei lesen und prüfen"
+
+msgctxt "accounts.workload_load"
+msgid "FİN və e-poçt sonra: müəllim ilk girişdə özü yazır. Birdəfəlik parolu RİM mərkəzi «Parol təyini» ilə verir."
+msgstr "FIN und E-Mail später: Die Lehrkraft gibt sie bei der ersten Anmeldung selbst ein. Das Einmalpasswort vergibt das Digitalzentrum über „Passwort festlegen“."
+
+msgctxt "accounts.workload_load"
+msgid "Fənn"
+msgstr "Fach"
+
+msgctxt "accounts.workload_load"
+msgid "Fənn müəyyən olunmadı"
+msgstr "Fach konnte nicht bestimmt werden"
+
+msgctxt "accounts.workload_load"
+msgid "Fənnin adı boşdur"
+msgstr "Fachname ist leer"
+
+msgctxt "accounts.workload_load"
+msgid "Hesab bloklanıb — RİM aktivləşdirməlidir"
+msgstr "Konto gesperrt — das Digitalzentrum muss es reaktivieren"
+
+msgctxt "accounts.workload_load"
+msgid "HƏLL OLUNMAYAN"
+msgstr "UNGELÖST"
+
+msgctxt "accounts.workload_load"
+msgid "Kafedra"
+msgstr "Lehrstuhl"
+
+msgctxt "accounts.workload_load"
+msgid "Kafedra adı ilə axtar…"
+msgstr "Nach Lehrstuhl suchen…"
+
+msgctxt "accounts.workload_load"
+msgid "Kafedranın dərs yükünü bir faylla sistemə yükləyin"
+msgstr "Laden Sie das Lehrdeputat des Lehrstuhls mit einer Datei hoch"
+
+msgctxt "accounts.workload_load"
+msgid "Ləğv et"
+msgstr "Abbrechen"
+
+msgctxt "accounts.workload_load"
+msgid "Mövcud sətir"
+msgstr "Bestehende Zeile"
+
+msgctxt "accounts.workload_load"
+msgid "Müəllim"
+msgstr "Lehrkraft"
+
+msgctxt "accounts.workload_load"
+msgid "Müəllim dəyişdirildi"
+msgstr "Lehrkraft geändert"
+
+msgctxt "accounts.workload_load"
+msgid "Müəllim yazılmayıb"
+msgstr "Keine Lehrkraft angegeben"
+
+msgctxt "accounts.workload_load"
+msgid "Müəllimin adı oxunmadı"
+msgstr "Name der Lehrkraft nicht lesbar"
+
+msgctxt "accounts.workload_load"
+msgid "Namizədlər:"
+msgstr "Kandidaten:"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Qrup sistemdə tapılmadı: %(groups)s"
+msgstr "Gruppe im System nicht gefunden: %(groups)s"
+
+msgctxt "accounts.workload_load"
+msgid "Qrup(lar)"
+msgstr "Gruppe(n)"
+
+msgctxt "accounts.workload_load"
+msgid "Saat"
+msgstr "Stunden"
+
+msgctxt "accounts.workload_load"
+msgid "Saat yoxdur"
+msgstr "Keine Stunden"
+
+msgctxt "accounts.workload_load"
+msgid "Sem."
+msgstr "Semester"
+
+msgctxt "accounts.workload_load"
+msgid "Seçin"
+msgstr "Auswählen"
+
+msgctxt "accounts.workload_load"
+msgid "Seçmə bloku — seçilmiş fənni yazın"
+msgstr "Wahlblock — tragen Sie das gewählte Fach ein"
+
+msgctxt "accounts.workload_load"
+msgid "Sətir"
+msgstr "Zeile"
+
+msgctxt "accounts.workload_load"
+msgid "Sətir tapılmadı"
+msgstr "Zeile nicht gefunden"
+
+msgctxt "accounts.workload_load"
+msgid "Tapıldı"
+msgstr "Gefunden"
+
+msgctxt "accounts.workload_load"
+msgid "Tapıldı (inisiallarla)"
+msgstr "Gefunden (über Initialen)"
+
+msgctxt "accounts.workload_load"
+msgid "Tapıldı (yazı səhvi nəzərə alındı)"
+msgstr "Gefunden (Tippfehler berücksichtigt)"
+
+msgctxt "accounts.workload_load"
+msgid "Tapıldı — ata adı fərqli yazılıb, yoxlayın"
+msgstr "Gefunden — Vatersname anders geschrieben, bitte prüfen"
+
+msgctxt "accounts.workload_load"
+msgid "Tapşırıq bu statusda yeni sətir qəbul etmir"
+msgstr "Der Lehrauftrag nimmt in diesem Status keine neuen Zeilen an"
+
+msgctxt "accounts.workload_load"
+msgid "Tapşırıq sətri"
+msgstr "Auftragszeile"
+
+msgctxt "accounts.workload_load"
+msgid "TƏLƏBƏ QEYDİYYATI"
+msgstr "EINSCHREIBUNGEN"
+
+msgctxt "accounts.workload_load"
+msgid "TƏYİN / DƏYİŞİKLİK"
+msgstr "ZUGEWIESEN / GEÄNDERT"
+
+msgctxt "accounts.workload_load"
+msgid "Tətbiq et"
+msgstr "Anwenden"
+
+msgctxt "accounts.workload_load"
+msgid "Təyin olundu"
+msgstr "Zugewiesen"
+
+msgctxt "accounts.workload_load"
+msgid "Uyğun kafedra tapılmadı"
+msgstr "Kein passender Lehrstuhl gefunden"
+
+msgctxt "accounts.workload_load"
+msgid "YENİ JURNAL (AÇILIŞ)"
+msgstr "NEUE JOURNALE (ERÖFFNUNGEN)"
+
+msgctxt "accounts.workload_load"
+msgid "YENİ MÜƏLLİM"
+msgstr "NEUE LEHRKRÄFTE"
+
+msgctxt "accounts.workload_load"
+msgid "YENİ SƏTİR"
+msgstr "NEUE ZEILEN"
+
+msgctxt "accounts.workload_load"
+msgid "Yeni fayl yüklə"
+msgstr "Neue Datei hochladen"
+
+msgctxt "accounts.workload_load"
+msgid "Yeni hesab — eyni adlı başqa şəxs var, yoxlayın"
+msgstr "Neues Konto — es gibt eine andere Person mit gleichem Namen, bitte prüfen"
+
+msgctxt "accounts.workload_load"
+msgid "Yeni müəllim hesabı"
+msgstr "Neues Lehrkraft-Konto"
+
+msgctxt "accounts.workload_load"
+msgid "Yeni sətir"
+msgstr "Neue Zeile"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Yeni sətir; tapılmayan qrup: %(groups)s"
+msgstr "Neue Zeile; Gruppe nicht gefunden: %(groups)s"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "müəllim: %(n)d"
+msgstr "Lehrkräfte: %(n)d"
+
+msgctxt "accounts.workload_load"
+msgid "«Dərs yükü faylını yükləmək» açarı Tədris şöbəsinə və RİM-ə verilir. Lazımdırsa rolunuza əlavə etdirin."
+msgstr "Die Berechtigung „Lehrdeputat-Datei hochladen“ erhalten das Studienbüro und das Digitalzentrum. Lassen Sie sie bei Bedarf Ihrer Rolle hinzufügen."
+
+msgctxt "accounts.workload_load"
+msgid "Önizləmə — hələ heç nə yazılmayıb"
+msgstr "Vorschau — es wurde noch nichts geschrieben"
+
+msgctxt "accounts.workload_load"
+msgid "Ötürülən sətirlər"
+msgstr "Übersprungene Zeilen"
