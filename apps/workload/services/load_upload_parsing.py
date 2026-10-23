@@ -84,10 +84,12 @@ def build_template(chair_name: str = "") -> bytes:
     from openpyxl.styles import Alignment, Font, PatternFill
     from openpyxl.worksheet.datavalidation import DataValidation
 
+    from core.export_safety import sheet_append
+
     book = Workbook()
     sheet = book.active
     sheet.title = SHEET_TITLE
-    sheet.append(list(TEMPLATE_HEADERS))
+    sheet_append(sheet, TEMPLATE_HEADERS)
     head_fill = PatternFill("solid", fgColor="DBEAFE")
     for cell in sheet[1]:
         cell.font = Font(bold=True)
@@ -122,15 +124,15 @@ def build_template(chair_name: str = "") -> bytes:
         "Nümunə (bu vərəq oxunmur):",
     ]
     for line in lines:
-        help_sheet.append([line])
+        sheet_append(help_sheet, [line])
     help_sheet["A1"].font = Font(bold=True, size=13)
-    help_sheet.append(list(TEMPLATE_HEADERS))
+    sheet_append(help_sheet, TEMPLATE_HEADERS)
     for cell in help_sheet[help_sheet.max_row]:
         cell.font = Font(bold=True)
-    help_sheet.append(
-        ["b.ü.f.d. Məmmədov Ayaz Məmməd oğlu", "235 BİO İNG", "Genetika", 5, 23, "", 45, 30, "", "", "", ""]
+    sheet_append(
+        help_sheet, ["b.ü.f.d. Məmmədov Ayaz Məmməd oğlu", "235 BİO İNG", "Genetika", 5, 23, "", 45, 30, "", "", "", ""]
     )
-    help_sheet.append(["", "233 BİO, 233 SBİO", "Bioinformatika", 4, 37, "", "", "", "", 30, "", 30])
+    sheet_append(help_sheet, ["", "233 BİO, 233 SBİO", "Bioinformatika", 4, 37, "", "", "", "", 30, "", 30])
     help_sheet.column_dimensions["A"].width = 110
     out = io.BytesIO()
     book.save(out)
