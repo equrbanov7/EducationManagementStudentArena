@@ -107960,3 +107960,47 @@ msgstr "Предпросмотр — пока ничего не записано
 msgctxt "accounts.workload_load"
 msgid "Ötürülən sətirlər"
 msgstr "Пропущенные строки"
+
+msgctxt "accounts.workload_load"
+msgid "Bir sətir — bir müəllimin bir fənni: müəllim, qrup(lar), fənn, kredit, I və II semestrin saatları. Kafedranın Word «Forma 1» faylı da olar — onda bu addımı keçin."
+msgstr "Одна строка — одна дисциплина одного преподавателя: преподаватель, группа(ы), дисциплина, кредиты, часы I и II семестров. Подойдёт и Word-файл кафедры «Форма 1» — тогда пропустите этот шаг."
+
+msgctxt "accounts.workload_load"
+msgid "Doldurulmuş faylı seçin"
+msgstr "Выберите заполненный файл"
+
+msgctxt "accounts.workload_load"
+msgid "Excel şablonunu yükləyin və doldurun"
+msgstr "Скачайте и заполните шаблон Excel"
+
+msgctxt "accounts.workload_load"
+msgid "Kafedra və ya fakültə adı ilə axtar…"
+msgstr "Поиск по кафедре или факультету…"
+
+msgctxt "accounts.workload_load"
+msgid "Kafedranı seçin"
+msgstr "Выберите кафедру"
+
+msgctxt "accounts.workload_load"
+msgid "Siyahıda kafedra adı və fakültəsi göstərilir — yazmağa başlayın, axtarış süzür."
+msgstr "В списке указаны кафедра и факультет — начните вводить, поиск отфильтрует."
+
+msgctxt "accounts.workload_load"
+msgid "Yoxlanılır… (bir neçə dəqiqə çəkə bilər)"
+msgstr "Проверка… (может занять несколько минут)"
+
+msgctxt "accounts.workload_load"
+msgid "Yoxlayın — hələ heç nə yazılmır"
+msgstr "Проверьте — пока ничего не записывается"
+
+msgctxt "exams.template.final_entry"
+msgid "İstifadəçi adı və ya e-poçt"
+msgstr "Имя пользователя или e-mail"
+
+msgctxt "exams.template.final_entry"
+msgid "istifadəçi adı və ya e-poçt ünvanı"
+msgstr "имя пользователя или адрес e-mail"
+
+msgctxt "exams.template.final_entry"
+msgid "İstifadəçi adınızı (və ya e-poçtunuzu) və şəxsi imtahan PIN-inizi daxil edin"
+msgstr "Введите имя пользователя (или e-mail) и личный PIN экзамена"

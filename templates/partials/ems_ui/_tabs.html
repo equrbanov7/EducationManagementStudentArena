@@ -1,10 +1,13 @@
 {% comment %}
 Tab-lar — handoff §7 (`aria-current`). Panellər `data-ems-tabpanel="<key>"`.
-Kontekst: `tabs` = [{key, label, count, current}], `tabs_label` (aria-label).
+Kontekst: `tabs` = [{key, label, count, current, url}], `tabs_label` (aria-label).
+`url` verilibsə və həmin açarla `data-ems-tabpanel` yoxdursa, tab bölməni o URL ilə yenidən yükləyir
+(server tərəfli görünüş tab-ları — `teaching_office.js`, 2026-10-23).
 {% endcomment %}
 <nav class="ems-tabs" data-ems-tabs aria-label="{{ tabs_label }}">
     {% for tab in tabs %}
         <button type="button" class="ems-tabs__btn" data-ems-tab="{{ tab.key }}"
+                {% if tab.url %}data-ems-tab-url="{{ tab.url }}"{% endif %}
                 {% if tab.current %}aria-current="page"{% endif %}>
             {{ tab.label }}
             {% if tab.count %}<span class="ems-tabs__count">{{ tab.count }}</span>{% endif %}

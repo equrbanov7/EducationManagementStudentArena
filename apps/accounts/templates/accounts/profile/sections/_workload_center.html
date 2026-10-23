@@ -45,7 +45,10 @@ Arxiv: keçmiş tədris ili yalnız oxunuş — yazma düymələri render OLUNMU
         {% include "partials/ems_ui/_banner.html" with banner_kind="warning" banner_title=wc_arch_title banner_body=wc_arch_body %}
     {% endif %}
 
+    {% comment %}2026-10-23: «Dərs yükü faylı» görünüşündə il/fakültə/status filtri lazımsızdır (kafedra formda seçilir) — çaşdırırdı.{% endcomment %}
+    {% if workload_center_section.view != "load" %}
     {% include "partials/ems_ui/_filter_bar.html" with filter_section="workload-center" filter_prefix="wc_" filter_fields=workload_center_section.filter_fields filter_count_label=workload_center_section.filter_count_label filter_auto=True filter_bootstrap=True %}
+    {% endif %}
 
     {% if workload_center_section.view == "dashboard" %}
         {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=workload_center_section.kpi_tiles %}

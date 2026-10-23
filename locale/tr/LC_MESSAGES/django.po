@@ -107174,3 +107174,47 @@ msgstr "Ön izleme — henüz hiçbir şey yazılmadı"
 msgctxt "accounts.workload_load"
 msgid "Ötürülən sətirlər"
 msgstr "Atlanan satırlar"
+
+msgctxt "accounts.workload_load"
+msgid "Bir sətir — bir müəllimin bir fənni: müəllim, qrup(lar), fənn, kredit, I və II semestrin saatları. Kafedranın Word «Forma 1» faylı da olar — onda bu addımı keçin."
+msgstr "Bir satır — bir öğretim elemanının bir dersi: öğretim elemanı, grup(lar), ders, kredi, I ve II dönem saatleri. Bölümün Word “Form 1” dosyası da olur — o zaman bu adımı atlayın."
+
+msgctxt "accounts.workload_load"
+msgid "Doldurulmuş faylı seçin"
+msgstr "Doldurulmuş dosyayı seçin"
+
+msgctxt "accounts.workload_load"
+msgid "Excel şablonunu yükləyin və doldurun"
+msgstr "Excel şablonunu indirip doldurun"
+
+msgctxt "accounts.workload_load"
+msgid "Kafedra və ya fakültə adı ilə axtar…"
+msgstr "Bölüm veya fakülte adıyla ara…"
+
+msgctxt "accounts.workload_load"
+msgid "Kafedranı seçin"
+msgstr "Bölümü seçin"
+
+msgctxt "accounts.workload_load"
+msgid "Siyahıda kafedra adı və fakültəsi göstərilir — yazmağa başlayın, axtarış süzür."
+msgstr "Listede bölüm ve fakültesi gösterilir — yazmaya başlayın, arama süzer."
+
+msgctxt "accounts.workload_load"
+msgid "Yoxlanılır… (bir neçə dəqiqə çəkə bilər)"
+msgstr "Kontrol ediliyor… (birkaç dakika sürebilir)"
+
+msgctxt "accounts.workload_load"
+msgid "Yoxlayın — hələ heç nə yazılmır"
+msgstr "Kontrol edin — henüz hiçbir şey yazılmaz"
+
+msgctxt "exams.template.final_entry"
+msgid "İstifadəçi adı və ya e-poçt"
+msgstr "Kullanıcı adı veya e-posta"
+
+msgctxt "exams.template.final_entry"
+msgid "istifadəçi adı və ya e-poçt ünvanı"
+msgstr "kullanıcı adı veya e-posta adresi"
+
+msgctxt "exams.template.final_entry"
+msgid "İstifadəçi adınızı (və ya e-poçtunuzu) və şəxsi imtahan PIN-inizi daxil edin"
+msgstr "Kullanıcı adınızı (veya e-postanızı) ve kişisel sınav PIN'inizi girin"
