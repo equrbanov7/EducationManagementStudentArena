@@ -1,0 +1,147 @@
+{% load i18n %}
+{% comment %}Sahib 2026-10-23 — Tədris şöbəsinin «Dərs yükü faylı»: kafedra + fayl (Excel şablonu və ya Forma 1) →
+önizləmə (heç nə yazılmır) → «Tətbiq et» (tapşırıq sətirləri, müəllim bölgüsü, jurnal açılışı, tələbə qeydiyyatı).
+Məntiq: apps/workload/services/load_upload.py · kontekst: views/profile/_sections/workload_load.py.
+Yükləmə formu `workload_chain.js`-in `[data-wl-upload]` axınıdır; düymələr `teaching_office.js`-in `data-tof-submit`-i.{% endcomment %}
+{% with load=workload_center_section.load %}
+{% if not load.allowed %}
+    {% trans "Dərs yükü faylını yükləmək üçün icazə yoxdur" context "accounts.workload_load" as wl_load_denied %}
+    {% trans "«Dərs yükü faylını yükləmək» açarı Tədris şöbəsinə və RİM-ə verilir. Lazımdırsa rolunuza əlavə etdirin." context "accounts.workload_load" as wl_load_denied_body %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=wl_load_denied state_body=wl_load_denied_body %}
+{% elif not load.stored %}
+    {% trans "Kafedranın dərs yükünü bir faylla sistemə yükləyin" context "accounts.workload_load" as wl_load_intro_title %}
+    {% trans "Fayldakı hər sətir — müəllim, qrup, fənn, saatlar — kafedranın tapşırığına yazılır, müəllimə bölünür, fənn qrupun tələbələrinin kabinetinə düşür və müəllim elektron jurnalı yaza bilir. Əvvəlcə önizləmə göstərilir — «Tətbiq et» basılmayınca heç nə yazılmır. Eyni faylı təkrar yükləmək heç nəyi ikiqat etmir." context "accounts.workload_load" as wl_load_intro_body %}
+    {% include "partials/ems_ui/_banner.html" with banner_kind="info" banner_title=wl_load_intro_title banner_body=wl_load_intro_body %}
+
+    <form class="wl-upload" method="post" enctype="multipart/form-data"
+          action="{{ workload_center_section.action_url }}"
+          data-wl-upload
+          data-wl-section="workload-center">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="load_upload">
+        <input type="hidden" name="academic_year" value="{{ load.year }}">
+        <p class="ems-msg ems-msg--error" data-ems-form-error role="alert" hidden></p>
+
+        <div class="ems-field">
+            <label class="ems-field__label" for="wl-load-chair">{% trans "Kafedra" context "accounts.workload_load" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select class="ems-select bootstrap-single-select__native" id="wl-load-chair" name="chair" required
+                        data-bootstrap-select data-live-search="true"
+                        data-live-search-placeholder="{% trans 'Kafedra adı ilə axtar…' context 'accounts.workload_load' %}"
+                        data-live-search-empty="{% trans 'Uyğun kafedra tapılmadı' context 'accounts.workload_load' %}">
+                    <option value="">{% trans "Seçin" context "accounts.workload_load" %}</option>
+                    {% for option in load.chair_options %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="ems-field">
+            <label class="ems-field__label" for="wl-load-file">{% trans "Dərs yükü faylı" context "accounts.workload_load" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+            <input class="ems-input" type="file" id="wl-load-file" name="file" accept=".xlsx,.xlsm,.docx" required>
+            <p class="ems-field__hint">
+                {% blocktrans trimmed with year=load.year context "accounts.workload_load" %}
+                Excel şablonu (.xlsx) və ya kafedranın «Forma 1» sənədi (.docx) · {{ year }} tədris ili · maksimum 10 MB.
+                Yoxlama bir neçə dəqiqə çəkə bilər.
+                {% endblocktrans %}
+            </p>
+        </div>
+
+        <div class="wl-actions wl-actions--start">
+            <a class="ems-btn" href="{{ load.template_url }}" download>
+                <i class="fas fa-file-excel" aria-hidden="true"></i> {% trans "Excel şablonunu yüklə" context "accounts.workload_load" %}
+            </a>
+            <button type="submit" class="ems-btn ems-btn--primary">{% trans "Faylı oxu və yoxla" context "accounts.workload_load" %}</button>
+        </div>
+    </form>
+{% else %}
+    {% with stored=load.stored %}
+    {% if stored.applied %}
+        {% trans "Dərs yükü sistemə yazıldı" context "accounts.workload_load" as wl_load_done_title %}
+        {% blocktrans trimmed asvar wl_load_done_body with chair=stored.chair_name file=stored.file_name context "accounts.workload_load" %}{{ chair }} — «{{ file }}». Müəllimlərə bildiriş getdi, fənlər tələbələrin kabinetində görünür.{% endblocktrans %}
+        {% include "partials/ems_ui/_banner.html" with banner_kind="success" banner_title=wl_load_done_title banner_body=wl_load_done_body %}
+    {% else %}
+        {% trans "Önizləmə — hələ heç nə yazılmayıb" context "accounts.workload_load" as wl_load_prev_title %}
+        {% blocktrans trimmed asvar wl_load_prev_body with chair=stored.chair_name file=stored.file_name context "accounts.workload_load" %}{{ chair }} — «{{ file }}». Aşağıdakı nəticəni yoxlayın və «Tətbiq et» basın. Qırmızı sətirlər yazılmayacaq (müəllim vakant qalır və ya sətir yaradılmır) — faylı düzəldib yenidən yükləyə bilərsiniz.{% endblocktrans %}
+        {% include "partials/ems_ui/_banner.html" with banner_kind=stored.problems|yesno:"warning,info" banner_title=wl_load_prev_title banner_body=wl_load_prev_body %}
+    {% endif %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=stored.tiles kpi_variant="4" %}
+
+    {% if stored.new_teachers %}
+    <section class="wl-load-block">
+        <h3 class="wl-load-block__title">
+            {% if stored.applied %}{% trans "Açılmış yeni müəllim hesabları" context "accounts.workload_load" %}{% else %}{% trans "Açılacaq yeni müəllim hesabları" context "accounts.workload_load" %}{% endif %}
+            <span class="ems-badge ems-badge--primary">{{ stored.new_teachers|length }}</span>
+        </h3>
+        <p class="ems-field__hint">{% trans "FİN və e-poçt sonra: müəllim ilk girişdə özü yazır. Birdəfəlik parolu RİM mərkəzi «Parol təyini» ilə verir." context "accounts.workload_load" %}</p>
+        <ul class="wl-load-list">
+            {% for teacher in stored.new_teachers %}
+            <li><strong>{{ teacher.display }}</strong> <span class="wl-load-muted">@{{ teacher.username }}</span></li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+
+    <div class="ems-tablescroll">
+        <table class="ems-table ems-table--zebra wl-load-table">
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Sətir" context "accounts.workload_load" %}</th>
+                    <th scope="col">{% trans "Sem." context "accounts.workload_load" %}</th>
+                    <th scope="col">{% trans "Müəllim" context "accounts.workload_load" %}</th>
+                    <th scope="col">{% trans "Qrup(lar)" context "accounts.workload_load" %}</th>
+                    <th scope="col">{% trans "Fənn" context "accounts.workload_load" %}</th>
+                    <th scope="col">{% trans "Saat" context "accounts.workload_load" %}</th>
+                    <th scope="col">{% trans "Tapşırıq sətri" context "accounts.workload_load" %}</th>
+                    <th scope="col">{% trans "Bölgü" context "accounts.workload_load" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in stored.lines %}
+                <tr{% if line.problem %} class="wl-load-row--problem"{% endif %}>
+                    <td class="ems-num">{{ line.line }}</td>
+                    <td>{{ line.season_label }}</td>
+                    <td>
+                        <div>{{ line.teacher }}{% if line.username %} <span class="wl-load-muted">@{{ line.username }}</span>{% endif %}</div>
+                        <span class="ems-badge ems-badge--{{ line.teacher_tone }} ems-badge--wrap">{{ line.teacher_label }}</span>
+                        {% if line.candidates %}<div class="wl-load-muted">{% trans "Namizədlər:" context "accounts.workload_load" %} {{ line.candidates|join:", " }}</div>{% endif %}
+                    </td>
+                    <td>{{ line.groups }}</td>
+                    <td>{{ line.subject }}</td>
+                    <td class="wl-load-muted">{{ line.hours }}</td>
+                    <td><span class="ems-badge ems-badge--{{ line.row_tone }} ems-badge--wrap">{{ line.row_label }}</span></td>
+                    <td>{{ line.assignment_label }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if stored.lines_hidden %}
+    <p class="ems-field__hint">{% blocktrans trimmed with count=stored.lines_hidden context "accounts.workload_load" %}Daha {{ count }} sətir göstərilmir (problemli sətirlər yuxarıdadır).{% endblocktrans %}</p>
+    {% endif %}
+
+    {% if stored.skipped %}
+    <section class="wl-load-block">
+        <h3 class="wl-load-block__title">{% trans "Ötürülən sətirlər" context "accounts.workload_load" %} <span class="ems-badge ems-badge--neutral">{{ stored.skipped|length }}</span></h3>
+        <ul class="wl-load-list">
+            {% for item in stored.skipped|slice:":100" %}
+            <li>{% trans "Sətir" context "accounts.workload_load" %} {{ item.line }}: {{ item.subject|default:"—" }} — <span class="wl-load-muted">{{ item.reason }}</span></li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+
+    <div class="wl-actions">
+        {% if stored.applied %}
+            <button type="button" class="ems-btn ems-btn--primary" data-tof-submit='{"action": "load_cancel"}'>{% trans "Yeni fayl yüklə" context "accounts.workload_load" %}</button>
+        {% else %}
+            <button type="button" class="ems-btn" data-tof-submit='{"action": "load_cancel"}'>{% trans "Ləğv et" context "accounts.workload_load" %}</button>
+            {% trans "Dərs yükü sistemə yazılsın? Müəllimlərə bildiriş gedəcək, fənlər tələbələrin kabinetinə düşəcək. Bu bir neçə dəqiqə çəkə bilər." context "accounts.workload_load" as wl_load_confirm %}
+            <button type="button" class="ems-btn ems-btn--primary" data-tof-submit='{"action": "load_apply"}' data-tof-confirm="{{ wl_load_confirm }}">{% trans "Tətbiq et" context "accounts.workload_load" %}</button>
+        {% endif %}
+    </div>
+    {% endwith %}
+{% endif %}
+{% endwith %}

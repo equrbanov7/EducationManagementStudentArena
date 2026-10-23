@@ -19,6 +19,7 @@ from .permissions_document_seal import apply_document_seal_grants
 from .permissions_hr import apply_hr_grants
 from .permissions_hr_contracts import apply_hr_contract_grants
 from .permissions_transcript import apply_transcript_grants
+from .permissions_workload_load import apply_workload_load_grants
 
 #: Akademik kurasiya açarları — `program_coordinator` VƏ `tutor` üçün ORTAQ.
 #:
@@ -569,6 +570,8 @@ _grant_application_permissions(UNIVERSITY_ROLES)
 
 # «Sənəd yoxlaması» (2026-10-18): `document_seal.manage`. Mövcud: verification/0002.
 apply_document_seal_grants(UNIVERSITY_ROLES)
+# «Dərs yükü faylı» (2026-10-23): `workload.load_import`. Mövcud: workload miqrasiyası.
+apply_workload_load_grants(UNIVERSITY_ROLES)
 # «Əmək müqavilələri» (2026-10-19): `hr.contracts_*` — hr, ikt_rehber; qəyyum yalnız oxu. Mövcud: organizations/0069.
 apply_hr_contract_grants(UNIVERSITY_ROLES)
 # «Transkript və arayış vermək» (2026-10-19): `transcript.issue`. Mövcud: verification/0004.

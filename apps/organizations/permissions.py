@@ -33,6 +33,7 @@ from .permissions_stage2 import merge_stage2
 from .permissions_stage3 import merge_stage3
 from .permissions_system import merge_system_permissions
 from .permissions_transcript import merge_transcript_permissions
+from .permissions_workload_load import merge_workload_load_permissions
 
 # Permission definitions by category
 #
@@ -476,6 +477,7 @@ merge_document_seal_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABEL
 # «Əmək müqavilələri» (2026-10-19) — `hr.contracts_view` / `hr.contracts_manage` (apps.hr_contracts).
 merge_hr_contract_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
 merge_transcript_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)  # 2026-10-19
+merge_workload_load_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)  # 2026-10-23
 
 
 def get_permission_label(permission: str) -> str:

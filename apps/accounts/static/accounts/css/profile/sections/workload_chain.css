@@ -186,3 +186,51 @@
     font-weight: 600;
     color: var(--ems-neutral-900, #0f172a);
 }
+
+/* Sahib 2026-10-23 — «Dərs yükü faylı» (Tədris şöbəsi): önizləmə / nəticə. */
+.wl-actions--start {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.wl-load-block {
+    margin-block: var(--ems-sp-4, 14px);
+}
+
+.wl-load-block__title {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-2, 8px);
+    margin: 0 0 var(--ems-sp-2, 8px);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.wl-load-list {
+    margin: 0;
+    padding-left: 1.1rem;
+    columns: 2 18rem;
+    column-gap: var(--ems-sp-5, 20px);
+}
+
+.wl-load-list li {
+    break-inside: avoid;
+    margin-bottom: 4px;
+}
+
+.wl-load-muted {
+    color: var(--ems-neutral-500, #64748b);
+    font-size: 0.85em;
+}
+
+.wl-load-table td {
+    vertical-align: top;
+}
+
+.wl-load-table .ems-badge {
+    margin-top: 4px;
+}
+
+.wl-load-row--problem td:first-child {
+    box-shadow: inset 3px 0 0 var(--ems-danger-500, #ef4444);
+}

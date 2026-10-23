@@ -106989,3 +106989,290 @@ msgstr "kod gəlməsə e-poçtunuzun «Spam» (Junk / Lazımsız) qovluğuna mü
 msgctxt "accounts.first_login"
 msgid "«Gələnlər» qovluğunda yoxdursa, e-poçtunuzun «Spam» (Junk / Lazımsız) qovluğuna baxın — kod çox vaxt ora düşür."
 msgstr "«Gələnlər» qovluğunda yoxdursa, e-poçtunuzun «Spam» (Junk / Lazımsız) qovluğuna baxın — kod çox vaxt ora düşür."
+
+msgctxt "accounts.workload_center"
+msgid "Dərs yükü faylı"
+msgstr "Dərs yükü faylı"
+
+msgctxt "organizations.permission.label"
+msgid "Dərs yükü faylını yükləmək (bölgü, açılış və tələbə qeydiyyatı avtomatik)"
+msgstr "Dərs yükü faylını yükləmək (bölgü, açılış və tələbə qeydiyyatı avtomatik)"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "%(chair)s — «%(file)s». Aşağıdakı nəticəni yoxlayın və «Tətbiq et» basın. Qırmızı sətirlər yazılmayacaq (müəllim vakant qalır və ya sətir yaradılmır) — faylı düzəldib yenidən yükləyə bilərsiniz."
+msgstr "%(chair)s — «%(file)s». Aşağıdakı nəticəni yoxlayın və «Tətbiq et» basın. Qırmızı sətirlər yazılmayacaq (müəllim vakant qalır və ya sətir yaradılmır) — faylı düzəldib yenidən yükləyə bilərsiniz."
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "%(chair)s — «%(file)s». Müəllimlərə bildiriş getdi, fənlər tələbələrin kabinetində görünür."
+msgstr "%(chair)s — «%(file)s». Müəllimlərə bildiriş getdi, fənlər tələbələrin kabinetində görünür."
+
+msgctxt "accounts.workload_load"
+msgid "Açılacaq yeni müəllim hesabları"
+msgstr "Açılacaq yeni müəllim hesabları"
+
+msgctxt "accounts.workload_load"
+msgid "Açılmış yeni müəllim hesabları"
+msgstr "Açılmış yeni müəllim hesabları"
+
+msgctxt "accounts.workload_load"
+msgid "Bir neçə uyğun hesab — vakant qalır"
+msgstr "Bir neçə uyğun hesab — vakant qalır"
+
+msgctxt "accounts.workload_load"
+msgid "Bölgü"
+msgstr "Bölgü"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Daha %(count)s sətir göstərilmir (problemli sətirlər yuxarıdadır)."
+msgstr "Daha %(count)s sətir göstərilmir (problemli sətirlər yuxarıdadır)."
+
+msgctxt "accounts.workload_load"
+msgid "DƏYİŞMƏYƏN"
+msgstr "DƏYİŞMƏYƏN"
+
+msgctxt "accounts.workload_load"
+msgid "Dəqiq tapılmadı — vakant qalır"
+msgstr "Dəqiq tapılmadı — vakant qalır"
+
+msgctxt "accounts.workload_load"
+msgid "Dərs deyil (dissertasiya rəhbərliyi və s.)"
+msgstr "Dərs deyil (dissertasiya rəhbərliyi və s.)"
+
+msgctxt "accounts.workload_load"
+msgid "Dərs yükü faylı"
+msgstr "Dərs yükü faylı"
+
+msgctxt "accounts.workload_load"
+msgid "Dərs yükü faylını yükləmək üçün icazə yoxdur"
+msgstr "Dərs yükü faylını yükləmək üçün icazə yoxdur"
+
+msgctxt "accounts.workload_load"
+msgid "Dərs yükü sistemə yazıldı"
+msgstr "Dərs yükü sistemə yazıldı"
+
+msgctxt "accounts.workload_load"
+msgid "Dərs yükü sistemə yazılsın? Müəllimlərə bildiriş gedəcək, fənlər tələbələrin kabinetinə düşəcək. Bu bir neçə dəqiqə çəkə bilər."
+msgstr "Dərs yükü sistemə yazılsın? Müəllimlərə bildiriş gedəcək, fənlər tələbələrin kabinetinə düşəcək. Bu bir neçə dəqiqə çəkə bilər."
+
+msgctxt "accounts.workload_load"
+msgid "Dəyişiklik yoxdur"
+msgstr "Dəyişiklik yoxdur"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Excel şablonu (.xlsx) və ya kafedranın «Forma 1» sənədi (.docx) · %(year)s tədris ili · maksimum 10 MB. Yoxlama bir neçə dəqiqə çəkə bilər."
+msgstr "Excel şablonu (.xlsx) və ya kafedranın «Forma 1» sənədi (.docx) · %(year)s tədris ili · maksimum 10 MB. Yoxlama bir neçə dəqiqə çəkə bilər."
+
+msgctxt "accounts.workload_load"
+msgid "Excel şablonunu yüklə"
+msgstr "Excel şablonunu yüklə"
+
+msgctxt "accounts.workload_load"
+msgid "FAYL SƏTRİ"
+msgstr "FAYL SƏTRİ"
+
+msgctxt "accounts.workload_load"
+msgid "Fayldakı hər sətir — müəllim, qrup, fənn, saatlar — kafedranın tapşırığına yazılır, müəllimə bölünür, fənn qrupun tələbələrinin kabinetinə düşür və müəllim elektron jurnalı yaza bilir. Əvvəlcə önizləmə göstərilir — «Tətbiq et» basılmayınca heç nə yazılmır. Eyni faylı təkrar yükləmək heç nəyi ikiqat etmir."
+msgstr "Fayldakı hər sətir — müəllim, qrup, fənn, saatlar — kafedranın tapşırığına yazılır, müəllimə bölünür, fənn qrupun tələbələrinin kabinetinə düşür və müəllim elektron jurnalı yaza bilir. Əvvəlcə önizləmə göstərilir — «Tətbiq et» basılmayınca heç nə yazılmır. Eyni faylı təkrar yükləmək heç nəyi ikiqat etmir."
+
+msgctxt "accounts.workload_load"
+msgid "Faylı oxu və yoxla"
+msgstr "Faylı oxu və yoxla"
+
+msgctxt "accounts.workload_load"
+msgid "FİN və e-poçt sonra: müəllim ilk girişdə özü yazır. Birdəfəlik parolu RİM mərkəzi «Parol təyini» ilə verir."
+msgstr "FİN və e-poçt sonra: müəllim ilk girişdə özü yazır. Birdəfəlik parolu RİM mərkəzi «Parol təyini» ilə verir."
+
+msgctxt "accounts.workload_load"
+msgid "Fənn"
+msgstr "Fənn"
+
+msgctxt "accounts.workload_load"
+msgid "Fənn müəyyən olunmadı"
+msgstr "Fənn müəyyən olunmadı"
+
+msgctxt "accounts.workload_load"
+msgid "Fənnin adı boşdur"
+msgstr "Fənnin adı boşdur"
+
+msgctxt "accounts.workload_load"
+msgid "Hesab bloklanıb — RİM aktivləşdirməlidir"
+msgstr "Hesab bloklanıb — RİM aktivləşdirməlidir"
+
+msgctxt "accounts.workload_load"
+msgid "HƏLL OLUNMAYAN"
+msgstr "HƏLL OLUNMAYAN"
+
+msgctxt "accounts.workload_load"
+msgid "Kafedra"
+msgstr "Kafedra"
+
+msgctxt "accounts.workload_load"
+msgid "Kafedra adı ilə axtar…"
+msgstr "Kafedra adı ilə axtar…"
+
+msgctxt "accounts.workload_load"
+msgid "Kafedranın dərs yükünü bir faylla sistemə yükləyin"
+msgstr "Kafedranın dərs yükünü bir faylla sistemə yükləyin"
+
+msgctxt "accounts.workload_load"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "accounts.workload_load"
+msgid "Mövcud sətir"
+msgstr "Mövcud sətir"
+
+msgctxt "accounts.workload_load"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "accounts.workload_load"
+msgid "Müəllim dəyişdirildi"
+msgstr "Müəllim dəyişdirildi"
+
+msgctxt "accounts.workload_load"
+msgid "Müəllim yazılmayıb"
+msgstr "Müəllim yazılmayıb"
+
+msgctxt "accounts.workload_load"
+msgid "Müəllimin adı oxunmadı"
+msgstr "Müəllimin adı oxunmadı"
+
+msgctxt "accounts.workload_load"
+msgid "Namizədlər:"
+msgstr "Namizədlər:"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Qrup sistemdə tapılmadı: %(groups)s"
+msgstr "Qrup sistemdə tapılmadı: %(groups)s"
+
+msgctxt "accounts.workload_load"
+msgid "Qrup(lar)"
+msgstr "Qrup(lar)"
+
+msgctxt "accounts.workload_load"
+msgid "Saat"
+msgstr "Saat"
+
+msgctxt "accounts.workload_load"
+msgid "Saat yoxdur"
+msgstr "Saat yoxdur"
+
+msgctxt "accounts.workload_load"
+msgid "Sem."
+msgstr "Sem."
+
+msgctxt "accounts.workload_load"
+msgid "Seçin"
+msgstr "Seçin"
+
+msgctxt "accounts.workload_load"
+msgid "Seçmə bloku — seçilmiş fənni yazın"
+msgstr "Seçmə bloku — seçilmiş fənni yazın"
+
+msgctxt "accounts.workload_load"
+msgid "Sətir"
+msgstr "Sətir"
+
+msgctxt "accounts.workload_load"
+msgid "Sətir tapılmadı"
+msgstr "Sətir tapılmadı"
+
+msgctxt "accounts.workload_load"
+msgid "Tapıldı"
+msgstr "Tapıldı"
+
+msgctxt "accounts.workload_load"
+msgid "Tapıldı (inisiallarla)"
+msgstr "Tapıldı (inisiallarla)"
+
+msgctxt "accounts.workload_load"
+msgid "Tapıldı (yazı səhvi nəzərə alındı)"
+msgstr "Tapıldı (yazı səhvi nəzərə alındı)"
+
+msgctxt "accounts.workload_load"
+msgid "Tapıldı — ata adı fərqli yazılıb, yoxlayın"
+msgstr "Tapıldı — ata adı fərqli yazılıb, yoxlayın"
+
+msgctxt "accounts.workload_load"
+msgid "Tapşırıq bu statusda yeni sətir qəbul etmir"
+msgstr "Tapşırıq bu statusda yeni sətir qəbul etmir"
+
+msgctxt "accounts.workload_load"
+msgid "Tapşırıq sətri"
+msgstr "Tapşırıq sətri"
+
+msgctxt "accounts.workload_load"
+msgid "TƏLƏBƏ QEYDİYYATI"
+msgstr "TƏLƏBƏ QEYDİYYATI"
+
+msgctxt "accounts.workload_load"
+msgid "TƏYİN / DƏYİŞİKLİK"
+msgstr "TƏYİN / DƏYİŞİKLİK"
+
+msgctxt "accounts.workload_load"
+msgid "Tətbiq et"
+msgstr "Tətbiq et"
+
+msgctxt "accounts.workload_load"
+msgid "Təyin olundu"
+msgstr "Təyin olundu"
+
+msgctxt "accounts.workload_load"
+msgid "Uyğun kafedra tapılmadı"
+msgstr "Uyğun kafedra tapılmadı"
+
+msgctxt "accounts.workload_load"
+msgid "YENİ JURNAL (AÇILIŞ)"
+msgstr "YENİ JURNAL (AÇILIŞ)"
+
+msgctxt "accounts.workload_load"
+msgid "YENİ MÜƏLLİM"
+msgstr "YENİ MÜƏLLİM"
+
+msgctxt "accounts.workload_load"
+msgid "YENİ SƏTİR"
+msgstr "YENİ SƏTİR"
+
+msgctxt "accounts.workload_load"
+msgid "Yeni fayl yüklə"
+msgstr "Yeni fayl yüklə"
+
+msgctxt "accounts.workload_load"
+msgid "Yeni hesab — eyni adlı başqa şəxs var, yoxlayın"
+msgstr "Yeni hesab — eyni adlı başqa şəxs var, yoxlayın"
+
+msgctxt "accounts.workload_load"
+msgid "Yeni müəllim hesabı"
+msgstr "Yeni müəllim hesabı"
+
+msgctxt "accounts.workload_load"
+msgid "Yeni sətir"
+msgstr "Yeni sətir"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Yeni sətir; tapılmayan qrup: %(groups)s"
+msgstr "Yeni sətir; tapılmayan qrup: %(groups)s"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "müəllim: %(n)d"
+msgstr "müəllim: %(n)d"
+
+msgctxt "accounts.workload_load"
+msgid "«Dərs yükü faylını yükləmək» açarı Tədris şöbəsinə və RİM-ə verilir. Lazımdırsa rolunuza əlavə etdirin."
+msgstr "«Dərs yükü faylını yükləmək» açarı Tədris şöbəsinə və RİM-ə verilir. Lazımdırsa rolunuza əlavə etdirin."
+
+msgctxt "accounts.workload_load"
+msgid "Önizləmə — hələ heç nə yazılmayıb"
+msgstr "Önizləmə — hələ heç nə yazılmayıb"
+
+msgctxt "accounts.workload_load"
+msgid "Ötürülən sətirlər"
+msgstr "Ötürülən sətirlər"
