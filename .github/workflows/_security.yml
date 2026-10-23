@@ -84,9 +84,9 @@ jobs:
             # conch telnet — bizdə heç biri işlədilmir) və CVE-2026-115877 (twisted.web başlıq dəyərində çılpaq CR/LF;
             # daphne nginx-in ARXASINDADIR, nginx başlıqları yenidən qurub ötürür — smuggling çərçivəsi yaranmır).
             # Düzəliş yalnız 26.10.0rc1-dədir (sabit buraxılış yox); 26.10.0 çıxan kimi istisnaları silib qaldırın.
-            pip-audit -r "$lock" --require-hashes --disable-pip --desc on --ignore-vuln CVE-2026-106454 \
-              --ignore-vuln CVE-2026-115774 --ignore-vuln CVE-2026-115775 --ignore-vuln CVE-2026-115776 \
-              --ignore-vuln CVE-2026-115778 --ignore-vuln CVE-2026-115877 || {
+            ignores=(--ignore-vuln CVE-2026-106454 --ignore-vuln CVE-2026-115774 --ignore-vuln CVE-2026-115775
+                     --ignore-vuln CVE-2026-115776 --ignore-vuln CVE-2026-115778 --ignore-vuln CVE-2026-115877)
+            pip-audit -r "$lock" --require-hashes --disable-pip --desc on "${ignores[@]}" || {
               echo "::error::❌ pip-audit found vulnerable dependencies in ${lock}! Fix them before merging."
               exit 1
             }
