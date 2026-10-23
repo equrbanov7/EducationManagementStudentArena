@@ -248,11 +248,18 @@ def _load_view(request, actor) -> dict:
     """«Dərs yükü faylı» (sahib 2026-10-23) — kafedra seçimi + sessiyadakı önizləmə/nəticə (yazma yoxdur)."""
     from .load_actions import LOAD_SESSION_KEY, load_chairs
 
-    chairs = list(load_chairs(actor).only("id", "name"))
+    # Yalnız KAFEDRALAR (inzibati şöbələr — «Arxiv şöbəsi» və s. — dərs yükü daşımır); fakültə adı ilə, axtarışda tapılsın.
+    chairs = list(load_chairs(actor).select_related("parent").only("id", "name", "parent__name"))
     stored = request.session.get(LOAD_SESSION_KEY) or {}
     return {
         "allowed": actor.has(PERM_LOAD_IMPORT) and bool(chairs),
-        "chair_options": [{"value": str(chair.pk), "label": chair.name} for chair in chairs],
+        "chair_options": [
+            {
+                "value": str(chair.pk),
+                "label": f"{chair.name} — {chair.parent.name}" if chair.parent_id else chair.name,
+            }
+            for chair in sorted(chairs, key=lambda unit: ((unit.parent.name if unit.parent_id else ""), unit.name))
+        ],
         "stored": stored if stored.get("report") else None,
     }
 

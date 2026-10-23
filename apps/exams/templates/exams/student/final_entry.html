@@ -31,7 +31,7 @@ Qabıq 100dvh-dır; qaydalar modalı açıq olanda arxa plan `inert`-dir (Tab mo
         <img src="{% static 'brand/wcu-official-lockup.svg' %}?v=20261001" alt="{{ site_brand_name }}"
              class="fexc-logo" width="303" height="66" loading="eager" decoding="async">
         <h1 id="fexc-entry-title" class="fexc-title">{% if entry_is_midterm %}{% trans "Midterm imtahan girişi" context "exams.template.final_entry" %}{% else %}{% trans "Final imtahan girişi" context "exams.template.final_entry" %}{% endif %}</h1>
-        <p class="fexc-sub">{% trans "İstifadəçi adınızı və şəxsi imtahan PIN-inizi daxil edin" context "exams.template.final_entry" %}</p>
+        <p class="fexc-sub">{% trans "İstifadəçi adınızı (və ya e-poçtunuzu) və şəxsi imtahan PIN-inizi daxil edin" context "exams.template.final_entry" %}</p>
       </div>
 
       {% if error_message %}
@@ -52,11 +52,12 @@ Qabıq 100dvh-dır; qaydalar modalı açıq olanda arxa plan `inert`-dir (Tab mo
       <form method="post" action="{{ entry_url }}" class="fexc-form" autocomplete="off">
         {% csrf_token %}
         <div class="fexc-field">
-          <label for="fexc-username">{% trans "İstifadəçi adı" context "exams.template.final_entry" %}</label>
+          {# Sahib 2026-10-23: istifadəçi adı VƏ YA e-poçt (services/login_identity.py). #}
+          <label for="fexc-username">{% trans "İstifadəçi adı və ya e-poçt" context "exams.template.final_entry" %}</label>
           <input type="text" id="fexc-username" name="username" required
                  value="{{ username_value }}"
                  autocomplete="username" autocapitalize="none" spellcheck="false"
-                 placeholder="{% trans 'tələbə istifadəçi adı' context 'exams.template.final_entry' %}"
+                 placeholder="{% trans 'istifadəçi adı və ya e-poçt ünvanı' context 'exams.template.final_entry' %}"
                  {% if not username_value and not show_gate_modal %}autofocus{% endif %}>
         </div>
         <div class="fexc-field">

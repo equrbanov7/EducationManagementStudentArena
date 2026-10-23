@@ -13,48 +13,75 @@ Yükləmə formu `workload_chain.js`-in `[data-wl-upload]` axınıdır; düyməl
     {% trans "Fayldakı hər sətir — müəllim, qrup, fənn, saatlar — kafedranın tapşırığına yazılır, müəllimə bölünür, fənn qrupun tələbələrinin kabinetinə düşür və müəllim elektron jurnalı yaza bilir. Əvvəlcə önizləmə göstərilir — «Tətbiq et» basılmayınca heç nə yazılmır. Eyni faylı təkrar yükləmək heç nəyi ikiqat etmir." context "accounts.workload_load" as wl_load_intro_body %}
     {% include "partials/ems_ui/_banner.html" with banner_kind="info" banner_title=wl_load_intro_title banner_body=wl_load_intro_body %}
 
-    <form class="wl-upload" method="post" enctype="multipart/form-data"
-          action="{{ workload_center_section.action_url }}"
-          data-wl-upload
-          data-wl-section="workload-center">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="load_upload">
-        <input type="hidden" name="academic_year" value="{{ load.year }}">
-        <p class="ems-msg ems-msg--error" data-ems-form-error role="alert" hidden></p>
-
-        <div class="ems-field">
-            <label class="ems-field__label" for="wl-load-chair">{% trans "Kafedra" context "accounts.workload_load" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-            <div class="bootstrap-single-select bootstrap-single-select--ems">
-                <select class="ems-select bootstrap-single-select__native" id="wl-load-chair" name="chair" required
-                        data-bootstrap-select data-live-search="true"
-                        data-live-search-placeholder="{% trans 'Kafedra adı ilə axtar…' context 'accounts.workload_load' %}"
-                        data-live-search-empty="{% trans 'Uyğun kafedra tapılmadı' context 'accounts.workload_load' %}">
-                    <option value="">{% trans "Seçin" context "accounts.workload_load" %}</option>
-                    {% for option in load.chair_options %}
-                    <option value="{{ option.value }}">{{ option.label }}</option>
-                    {% endfor %}
-                </select>
+    <ol class="wl-load-steps">
+        <li class="wl-load-step">
+            <div class="wl-load-step__head">
+                <span class="wl-load-step__num">1</span>
+                <div>
+                    <div class="wl-load-step__title">{% trans "Excel şablonunu yükləyin və doldurun" context "accounts.workload_load" %}</div>
+                    <p class="ems-field__hint">{% trans "Bir sətir — bir müəllimin bir fənni: müəllim, qrup(lar), fənn, kredit, I və II semestrin saatları. Kafedranın Word «Forma 1» faylı da olar — onda bu addımı keçin." context "accounts.workload_load" %}</p>
+                </div>
             </div>
-        </div>
-
-        <div class="ems-field">
-            <label class="ems-field__label" for="wl-load-file">{% trans "Dərs yükü faylı" context "accounts.workload_load" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-            <input class="ems-input" type="file" id="wl-load-file" name="file" accept=".xlsx,.xlsm,.docx" required>
-            <p class="ems-field__hint">
-                {% blocktrans trimmed with year=load.year context "accounts.workload_load" %}
-                Excel şablonu (.xlsx) və ya kafedranın «Forma 1» sənədi (.docx) · {{ year }} tədris ili · maksimum 10 MB.
-                Yoxlama bir neçə dəqiqə çəkə bilər.
-                {% endblocktrans %}
-            </p>
-        </div>
-
-        <div class="wl-actions wl-actions--start">
             <a class="ems-btn" href="{{ load.template_url }}" download>
                 <i class="fas fa-file-excel" aria-hidden="true"></i> {% trans "Excel şablonunu yüklə" context "accounts.workload_load" %}
             </a>
-            <button type="submit" class="ems-btn ems-btn--primary">{% trans "Faylı oxu və yoxla" context "accounts.workload_load" %}</button>
-        </div>
-    </form>
+        </li>
+
+        <li class="wl-load-step">
+            <form class="wl-upload wl-load-form" method="post" enctype="multipart/form-data"
+                  action="{{ workload_center_section.action_url }}"
+                  data-wl-upload
+                  data-wl-section="workload-center">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="load_upload">
+                <input type="hidden" name="academic_year" value="{{ load.year }}">
+                <div class="wl-load-step__head">
+                    <span class="wl-load-step__num">2</span>
+                    <div class="wl-load-step__title">{% trans "Kafedranı seçin" context "accounts.workload_load" %}</div>
+                </div>
+                <div class="ems-field">
+                    <label class="ems-field__label" for="wl-load-chair">{% trans "Kafedra" context "accounts.workload_load" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select class="ems-select bootstrap-single-select__native" id="wl-load-chair" name="chair" required
+                                data-bootstrap-select data-live-search="true"
+                                data-live-search-placeholder="{% trans 'Kafedra və ya fakültə adı ilə axtar…' context 'accounts.workload_load' %}"
+                                data-live-search-empty="{% trans 'Uyğun kafedra tapılmadı' context 'accounts.workload_load' %}">
+                            <option value="">{% trans "Seçin" context "accounts.workload_load" %}</option>
+                            {% for option in load.chair_options %}
+                            <option value="{{ option.value }}">{{ option.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <p class="ems-field__hint">{% trans "Siyahıda kafedra adı və fakültəsi göstərilir — yazmağa başlayın, axtarış süzür." context "accounts.workload_load" %}</p>
+                </div>
+
+                <div class="wl-load-step__head">
+                    <span class="wl-load-step__num">3</span>
+                    <div class="wl-load-step__title">{% trans "Doldurulmuş faylı seçin" context "accounts.workload_load" %}</div>
+                </div>
+                <div class="ems-field">
+                    <label class="ems-field__label" for="wl-load-file">{% trans "Dərs yükü faylı" context "accounts.workload_load" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+                    <input class="ems-input" type="file" id="wl-load-file" name="file" accept=".xlsx,.xlsm,.docx" required>
+                    <p class="ems-field__hint">
+                        {% blocktrans trimmed with year=load.year context "accounts.workload_load" %}
+                        Excel şablonu (.xlsx) və ya kafedranın «Forma 1» sənədi (.docx) · {{ year }} tədris ili · maksimum 10 MB.
+                        Yoxlama bir neçə dəqiqə çəkə bilər.
+                        {% endblocktrans %}
+                    </p>
+                </div>
+
+                <div class="wl-load-step__head">
+                    <span class="wl-load-step__num">4</span>
+                    <div class="wl-load-step__title">{% trans "Yoxlayın — hələ heç nə yazılmır" context "accounts.workload_load" %}</div>
+                </div>
+                <p class="ems-msg ems-msg--error" data-ems-form-error role="alert" hidden></p>
+                <div class="wl-actions wl-actions--start">
+                    {% trans "Yoxlanılır… (bir neçə dəqiqə çəkə bilər)" context "accounts.workload_load" as wl_load_busy %}
+                    <button type="submit" class="ems-btn ems-btn--primary" data-wl-busy-label="{{ wl_load_busy }}">{% trans "Faylı oxu və yoxla" context "accounts.workload_load" %}</button>
+                </div>
+            </form>
+        </li>
+    </ol>
 {% else %}
     {% with stored=load.stored %}
     {% if stored.applied %}

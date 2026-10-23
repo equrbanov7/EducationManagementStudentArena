@@ -156,7 +156,10 @@ def validate_entry(request, username: str, raw_pin: str, *, budget=None, kind=No
     if not username or not raw_pin:
         return _fail(ERROR_INVALID)
 
-    user = User.objects.filter(Q(username__iexact=username) | Q(email__iexact=username)).first()
+    # Sahib 2026-10-23: istifadəçi adı VƏ YA e-poçt (kanonik forma; iki hesaba uyğun gələn dəyər → heç biri).
+    from ..login_identity import find_login_user
+
+    user = find_login_user(username)
     # Auditi 2026-10-07 AUTH-03: girişi bağlanmış (staged/archived) hesab bilet PIN-i ilə də girmir.
     if not final_entry_login_allowed(user):
         return _fail(ERROR_INVALID)

@@ -29,8 +29,10 @@ _XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def load_chairs(actor):
-    """Aktorun fayl yükləyə bildiyi kafedralar (``workload.load_import`` əhatəsi)."""
-    return manageable_chairs(actor, permission=PERM_LOAD_IMPORT)
+    """Aktorun fayl yükləyə bildiyi KAFEDRALAR (``workload.load_import`` əhatəsi; inzibati şöbələr yox)."""
+    from core.constants import OrgUnitType
+
+    return manageable_chairs(actor, permission=PERM_LOAD_IMPORT).filter(unit_type=OrgUnitType.CHAIR)
 
 
 def _chair(actor, chair_id):
