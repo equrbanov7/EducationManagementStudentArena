@@ -80,7 +80,13 @@ jobs:
             # İstisna (2026-10-15): CVE-2026-106454 — twisted.mail.imap4 `wildcardToRegexp` ReDoS. Düzəlmiş
             # versiya hələ YOXDUR (26.4.0 sonuncudur); Twisted bizdə yalnız daphne/channels üçündür, IMAP serveri
             # (twisted.mail) heç yerdə işlədilmir. Twisted düzəliş buraxan kimi bu istisnanı silib versiyanı qaldırın.
-            pip-audit -r "$lock" --require-hashes --disable-pip --desc on --ignore-vuln CVE-2026-106454 || {
+            # İstisna (2026-10-24): CVE-2026-115774/115775/115776/115778 (twisted mail.imap4 / words xish / words IRC /
+            # conch telnet — bizdə heç biri işlədilmir) və CVE-2026-115877 (twisted.web başlıq dəyərində çılpaq CR/LF;
+            # daphne nginx-in ARXASINDADIR, nginx başlıqları yenidən qurub ötürür — smuggling çərçivəsi yaranmır).
+            # Düzəliş yalnız 26.10.0rc1-dədir (sabit buraxılış yox); 26.10.0 çıxan kimi istisnaları silib qaldırın.
+            pip-audit -r "$lock" --require-hashes --disable-pip --desc on --ignore-vuln CVE-2026-106454 \
+              --ignore-vuln CVE-2026-115774 --ignore-vuln CVE-2026-115775 --ignore-vuln CVE-2026-115776 \
+              --ignore-vuln CVE-2026-115778 --ignore-vuln CVE-2026-115877 || {
               echo "::error::❌ pip-audit found vulnerable dependencies in ${lock}! Fix them before merging."
               exit 1
             }
