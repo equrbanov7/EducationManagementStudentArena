@@ -234,3 +234,60 @@
 .wl-load-row--problem td:first-child {
     box-shadow: inset 3px 0 0 var(--ems-danger-500, #ef4444);
 }
+
+/* 2026-10-23 (sahib: «hardan yükləyim anlamıram»): «Dərs yükü faylı» — nömrəli addımlar. */
+.wl-load-steps {
+    list-style: none;
+    margin: var(--ems-sp-4, 14px) 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3, 12px);
+    max-width: 760px;
+}
+
+.wl-load-step {
+    background: var(--ems-surface, #fff);
+    border: 1px solid var(--ems-neutral-200, #e2e8f0);
+    border-radius: 10px;
+    padding: var(--ems-sp-4, 14px);
+}
+
+.wl-load-step__head {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-3, 12px);
+    margin-bottom: var(--ems-sp-2, 8px);
+}
+
+.wl-load-form .wl-load-step__head:not(:first-of-type) {
+    margin-top: var(--ems-sp-4, 14px);
+}
+
+.wl-load-step__num {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--ems-primary-600, #2563eb);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.wl-load-step__title {
+    font-weight: 600;
+    line-height: 26px;
+}
+
+.wl-load-step .ems-field__hint {
+    margin: 0;
+}
+
+.wl-load-form.wl-upload {
+    max-width: none;
+    margin: 0;
+}

@@ -48,8 +48,13 @@
         event.preventDefault();
         var section = form.getAttribute("data-wl-section") || "workload-center";
         var submit = form.querySelector('[type="submit"]');
+        var idleLabel = submit ? submit.textContent : "";
         if (submit) {
             submit.disabled = true;
+            // 2026-10-23: «Dərs yükü faylı» yoxlaması uzun çəkir — düymə nə baş verdiyini göstərsin.
+            if (submit.getAttribute("data-wl-busy-label")) {
+                submit.textContent = submit.getAttribute("data-wl-busy-label");
+            }
         }
         showError(form, "");
 
@@ -68,6 +73,7 @@
                 showError(form, (payload && payload.message) || "");
                 if (submit) {
                     submit.disabled = false;
+                    submit.textContent = idleLabel;
                 }
             });
     });

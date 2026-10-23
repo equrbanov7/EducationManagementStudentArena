@@ -312,19 +312,18 @@ def resolve_student_pin_login(username: str, raw_pin: str, *, budget=None):
     seçilir və hər sonluq (uğur / səhv PIN / PIN-siz / naməlum istifadəçi) düz
     BİR tam hash edir. ``budget`` (``PinHashBudget``) bilet yolu ilə paylaşılır.
     """
-    from django.contrib.auth import get_user_model
-    from django.db.models import Q
-
     if budget is None:
         budget = PinHashBudget()
-    user_model = get_user_model()
     username = (username or "").strip()
     raw_pin = (raw_pin or "").strip()
     if not username or not raw_pin:
         budget.equalize(raw_pin)
         return None, None
 
-    user = user_model.objects.filter(Q(username__iexact=username) | Q(email__iexact=username)).first()
+    # Sahib 2026-10-23: istifadəçi adı VƏ YA e-poçt (kanonik forma; iki hesaba uyğun gələn dəyər → heç biri).
+    from .login_identity import find_login_user
+
+    user = find_login_user(username)
     # Auditi 2026-10-07 AUTH-03: ``is_active`` + ``access_state`` (arxiv hesabda is_active True qalır).
     if not final_entry_login_allowed(user):
         budget.equalize(raw_pin)

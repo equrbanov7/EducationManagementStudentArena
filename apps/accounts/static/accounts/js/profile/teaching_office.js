@@ -500,5 +500,27 @@
         });
     });
 
+    /* 2026-10-23 (sahib: «seçirəm, gəlmir»): server tərəfli görünüş tab-ları (məs. Dərs yükü mərkəzinin
+       `wc_view` tab-ları) yalnız `aria-current`-i dəyişirdi — `data-ems-tabpanel` paneli olmayan tab-da
+       məzmun yüklənmirdi. Tab düyməsində `data-ems-tab-url` varsa və o açarla panel YOXDURSA bölmə həmin
+       URL ilə yenidən yüklənir (panelli tab-lar əvvəlki kimi yerində dəyişir). */
+    document.addEventListener("ems:tab", function (event) {
+        var btn = event.target;
+        var url = btn && btn.getAttribute ? btn.getAttribute("data-ems-tab-url") : "";
+        if (!url) {
+            return;
+        }
+        var host = btn.closest("[data-tof-root]");
+        if (!host) {
+            return;
+        }
+        var key = btn.getAttribute("data-ems-tab");
+        var scope = btn.closest("[data-profile-section-panel]") || document;
+        if (key && scope.querySelector('[data-ems-tabpanel="' + key + '"]')) {
+            return;
+        }
+        reload(host.getAttribute("data-tof-section"), url);
+    });
+
     window.EMSTeachingOffice = { post: post, sectionUrl: sectionUrl, root: root, reload: reload };
 })(window, document);

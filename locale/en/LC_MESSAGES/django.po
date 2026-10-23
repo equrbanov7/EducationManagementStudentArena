@@ -107766,3 +107766,47 @@ msgstr "Preview — nothing has been written yet"
 msgctxt "accounts.workload_load"
 msgid "Ötürülən sətirlər"
 msgstr "Skipped rows"
+
+msgctxt "accounts.workload_load"
+msgid "Bir sətir — bir müəllimin bir fənni: müəllim, qrup(lar), fənn, kredit, I və II semestrin saatları. Kafedranın Word «Forma 1» faylı da olar — onda bu addımı keçin."
+msgstr "One row — one subject of one teacher: teacher, group(s), subject, credits, hours of semesters I and II. The chair's Word “Form 1” file also works — then skip this step."
+
+msgctxt "accounts.workload_load"
+msgid "Doldurulmuş faylı seçin"
+msgstr "Choose the filled-in file"
+
+msgctxt "accounts.workload_load"
+msgid "Excel şablonunu yükləyin və doldurun"
+msgstr "Download and fill in the Excel template"
+
+msgctxt "accounts.workload_load"
+msgid "Kafedra və ya fakültə adı ilə axtar…"
+msgstr "Search by chair or faculty name…"
+
+msgctxt "accounts.workload_load"
+msgid "Kafedranı seçin"
+msgstr "Choose the chair"
+
+msgctxt "accounts.workload_load"
+msgid "Siyahıda kafedra adı və fakültəsi göstərilir — yazmağa başlayın, axtarış süzür."
+msgstr "The list shows the chair and its faculty — start typing to filter."
+
+msgctxt "accounts.workload_load"
+msgid "Yoxlanılır… (bir neçə dəqiqə çəkə bilər)"
+msgstr "Checking… (may take a few minutes)"
+
+msgctxt "accounts.workload_load"
+msgid "Yoxlayın — hələ heç nə yazılmır"
+msgstr "Check — nothing is written yet"
+
+msgctxt "exams.template.final_entry"
+msgid "İstifadəçi adı və ya e-poçt"
+msgstr "Username or e-mail"
+
+msgctxt "exams.template.final_entry"
+msgid "istifadəçi adı və ya e-poçt ünvanı"
+msgstr "username or e-mail address"
+
+msgctxt "exams.template.final_entry"
+msgid "İstifadəçi adınızı (və ya e-poçtunuzu) və şəxsi imtahan PIN-inizi daxil edin"
+msgstr "Enter your username (or e-mail) and personal exam PIN"
