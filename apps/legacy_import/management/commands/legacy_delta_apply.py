@@ -11,7 +11,6 @@ doldurulur), idempotentdir (ikinci qaçış 0 yazı), bütün fazalar BİR tranz
 
 from __future__ import annotations
 
-import csv
 import datetime
 import json
 import os
@@ -26,6 +25,7 @@ from apps.legacy_import.services.repair_support import (
     resolve_actor,
     resolve_organization,
 )
+from core.export_safety import safe_csv_writer
 from core.rls_pooling import rls_worker_atomic
 
 
@@ -98,6 +98,6 @@ class Command(BaseCommand):
                 json.dump(summary, handle, ensure_ascii=False, indent=2, default=str)
         if options["names_out"]:
             with _open_private(options["names_out"]) as handle:
-                writer = csv.writer(handle)
+                writer = safe_csv_writer(handle)
                 writer.writerow(["növ", "ad", "qeyd"])
                 writer.writerows(run.name_rows)
