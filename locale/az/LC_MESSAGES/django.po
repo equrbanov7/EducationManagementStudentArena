@@ -106977,3 +106977,15 @@ msgstr "FİN yoxdur — istifadəçi ilk girişdə «Məcburi profil məlumatlar
 msgctxt "profile.rim"
 msgid "Müəllim hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq."
 msgstr "Müəllim hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq."
+
+msgctxt "accounts.first_login"
+msgid "Diqqət:"
+msgstr "Diqqət:"
+
+msgctxt "accounts.first_login"
+msgid "kod gəlməsə e-poçtunuzun «Spam» (Junk / Lazımsız) qovluğuna mütləq baxın."
+msgstr "kod gəlməsə e-poçtunuzun «Spam» (Junk / Lazımsız) qovluğuna mütləq baxın."
+
+msgctxt "accounts.first_login"
+msgid "«Gələnlər» qovluğunda yoxdursa, e-poçtunuzun «Spam» (Junk / Lazımsız) qovluğuna baxın — kod çox vaxt ora düşür."
+msgstr "«Gələnlər» qovluğunda yoxdursa, e-poçtunuzun «Spam» (Junk / Lazımsız) qovluğuna baxın — kod çox vaxt ora düşür."
