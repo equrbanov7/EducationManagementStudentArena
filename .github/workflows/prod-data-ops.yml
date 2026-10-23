@@ -80,6 +80,12 @@
 #       imtahandan avtomatik yazılmış jurnal «Midterm» xanaları, bildirişlər silinir; imtahan yumşaq silinir; audit
 #       tarixçəsi qalır (+1 sətir). Final / append-only ledger (bal hadisəsi, 25% izi) / bağlı jurnal → RƏDD (heç nə
 #       yazılmır). Səbəb sabitdir. Loga YALNIZ bir sayların sətri düşür. İdempotent.
+#   legacy_delta_apply — köhnə sistemin (myedu) cutover-dən SONRAKI deltası (sahib 2026-10-23): ŞİFRƏLİ release
+#       asset (`roster_tag` = `legacy-delta-…` → delta.json.gz.enc, `legacy_delta_extract` çıxışı; `batch` = paketin
+#       sha256-sı, verilsə yoxlanılır). Yeni sistem qalibdir — yalnız BOŞ doldurulur (jurnal, dərs, q/b, i/e, bal,
+#       təkrar imtahan, açılış müəllimi, təsdiqlənmiş sillabus); çatışmayan müəllim FİN-siz, tələbə/qrup/açılış
+#       yaradılır; bütün fazalar BİR tranzaksiyadadır, idempotentdir. `date_to` → --lessons-until (boş = bu gün).
+#       Loga YALNIZ saylar; adlı siyahı + hesabat şifrəli artifaktdadır.
 #   shrink_avatars — mövcud avatarlar ≤512 px WebP-yə (PERF-2 H5, 2026-10-17); orijinal fayllar SİLİNMİR,
 #       `updated_at` dəyişmir. Loga yalnız yekun saylar.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
@@ -133,6 +139,7 @@ on:
           - shrink_avatars
           - issue_staff_credentials
           - purge_trial_exam
+          - legacy_delta_apply
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -147,7 +154,7 @@ on:
         required: false
         default: "2026/2027"
       roster_tag:
-        description: "seed_staff_roster / reconcile_teacher_roster / import_teaching_* / *timetable* / backfill_teacher_lessons (lesson-slots-…): şifrəli faylın release tag-ı"
+        description: "seed_staff_roster / reconcile_teacher_roster / import_teaching_* / *timetable* / backfill_teacher_lessons (lesson-slots-…) / legacy_delta_apply (legacy-delta-…): şifrəli faylın release tag-ı"
         required: false
         default: ""
       hygiene_category:
@@ -165,7 +172,7 @@ on:
         required: false
         default: ""
       batch:
-        description: "reconcile_teacher_roster: geri qaytarılacaq paket id-si (undo)"
+        description: "reconcile_teacher_roster: geri qaytarılacaq paket id-si (undo) · legacy_delta_apply: paketin gözlənilən sha256-sı"
         required: false
         default: ""
       create_missing:
@@ -244,7 +251,7 @@ on:
         required: false
         default: ""
       date_to:
-        description: "backfill_teacher_lessons / dedupe_notifications: son tarix (YYYY-MM-DD, bu gündən sonra yox; dedupe-da boş = bu gün)"
+        description: "backfill_teacher_lessons / dedupe_notifications: son tarix (YYYY-MM-DD, bu gündən sonra yox; dedupe-da boş = bu gün) · legacy_delta_apply: --lessons-until"
         required: false
         default: ""
       replace_teacher_slots:
@@ -339,7 +346,7 @@ jobs:
           # reconcile_teacher_roster eyni faylı oxuyur (ad fərqi yalnız aydınlıq üçün deyil — təmizlik eyni qlobdur).
           rm -f "$RUNNER_TEMP/input.bin" "$RUNNER_TEMP/input.enc"
       - name: 🧰 Run
-        if: github.event.inputs.command != 'import_timetable_docx' && github.event.inputs.command != 'assign_task_rows_from_timetable' && github.event.inputs.command != 'backfill_teacher_lessons' && github.event.inputs.command != 'ensure_parent_groups' && github.event.inputs.command != 'blocked_accounts_report' && github.event.inputs.command != 'archive_junk_groups' && github.event.inputs.command != 'shrink_avatars'
+        if: github.event.inputs.command != 'import_timetable_docx' && github.event.inputs.command != 'assign_task_rows_from_timetable' && github.event.inputs.command != 'backfill_teacher_lessons' && github.event.inputs.command != 'ensure_parent_groups' && github.event.inputs.command != 'blocked_accounts_report' && github.event.inputs.command != 'archive_junk_groups' && github.event.inputs.command != 'shrink_avatars' && github.event.inputs.command != 'legacy_delta_apply'
         run: |
           set -euo pipefail
           # SEC-1 F7 (2026-10-17): TAM dəyər yoxlaması. `grep` sətir-sətir işləyir — API ilə göndərilən, sətir sonu
@@ -873,6 +880,94 @@ jobs:
         run: |
           docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/lesson_slots_*.json; rm -rf /tmp/lesson_backfill_report_*' || true
           rm -rf "$RUNNER_TEMP/bf-out" "$RUNNER_TEMP/slots.enc" "$RUNNER_TEMP/slots.json" || true
+      # ── legacy_delta_apply (köhnə sistem deltası; öz addımları). Paket ŞƏXSİ datadır: yalnız şifrəli gəlir,
+      #    konteynerdə 0600, iş bitəndə silinir; loga YALNIZ saylar, adlı siyahı şifrəli artifaktdadır. ──
+      - name: 🗃️ Köhnə sistem deltası
+        if: github.event.inputs.command == 'legacy_delta_apply'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
+        run: |
+          set -euo pipefail
+          match() { case "$1" in (*$'\n'*|*$'\r'*) return 1 ;; esac; printf '%s' "$1" | grep -Eq -- "$2"; }
+          match "$ROSTER_TAG" '^legacy-delta-[0-9a-z-]+$' || { echo "roster_tag formatı: legacy-delta-…" >&2; exit 2; }
+          test -n "$STAFF_PLAN_KEY" || { echo "STAFF_PLAN_KEY sirri yoxdur" >&2; exit 1; }
+          args=(--organization "$ORG" --bundle "/tmp/legacy_delta_${GITHUB_RUN_ID}.json.gz"
+                --report-out "/tmp/legacy_delta_report_${GITHUB_RUN_ID}.json"
+                --names-out "/tmp/legacy_delta_names_${GITHUB_RUN_ID}.csv")
+          if [ -n "$BATCH" ]; then
+            match "$BATCH" '^[0-9a-f]{64}$' || { echo "batch = paketin sha256-sı (64 hex)" >&2; exit 2; }
+            args+=(--expected-sha256 "$BATCH")
+          fi
+          if [ -n "$DATE_TO" ]; then
+            match "$DATE_TO" '^20[0-9]{2}-[01][0-9]-[0-3][0-9]$' || { echo "date_to formatı: YYYY-MM-DD" >&2; exit 2; }
+            args+=(--lessons-until "$DATE_TO")
+          fi
+          umask 077
+          curl -sSfL -H "Authorization: Bearer $GH_TOKEN" \
+            "https://github.com/${GITHUB_REPOSITORY}/releases/download/${ROSTER_TAG}/delta.json.gz.enc" \
+            -o "$RUNNER_TEMP/delta.enc"
+          openssl enc -d -aes-256-cbc -md sha256 -pbkdf2 -iter 200000 -pass env:STAFF_PLAN_KEY \
+            -in "$RUNNER_TEMP/delta.enc" -out "$RUNNER_TEMP/delta.json.gz"
+          docker exec -i "$APP_CONTAINER" sh -c "umask 077; cat > /tmp/legacy_delta_${GITHUB_RUN_ID}.json.gz" < "$RUNNER_TEMP/delta.json.gz"
+          rm -f "$RUNNER_TEMP/delta.json.gz" "$RUNNER_TEMP/delta.enc"
+          actor="$(docker exec -i "$APP_CONTAINER" python manage.py shell -c \
+            "from django.contrib.auth import get_user_model as g; u=g().objects.filter(is_superuser=True, is_active=True).order_by('date_joined').first(); print(u.username if u else '')" | tail -n1)"
+          test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+          echo "::add-mask::$actor"
+          args+=(--actor "$actor")
+          if [ "$APPLY" = "true" ]; then
+            echo "::group::💾 Ehtiyat nüsxə (postgres-backup /backup.sh)"
+            docker exec "$BACKUP_CONTAINER" /backup.sh
+            echo "::endgroup::"
+            args+=(--apply --i-know-this-is-production)
+          fi
+          # Əmrin stdout-u YALNIZ saylardır (ad yoxdur) — loga və xülasəyə düşə bilər.
+          docker exec -i "$APP_CONTAINER" python manage.py legacy_delta_apply "${args[@]}" > "$RUNNER_TEMP/delta_out.log" 2>&1 || status=$?
+          for f in "legacy_delta_report_${GITHUB_RUN_ID}.json" "legacy_delta_names_${GITHUB_RUN_ID}.csv"; do
+            if docker exec "$APP_CONTAINER" test -s "/tmp/$f"; then
+              docker exec "$APP_CONTAINER" cat "/tmp/$f" > "$RUNNER_TEMP/$f"
+            fi
+          done
+          grep -E '^(===|  [a-z_.]+ +[0-9]+$|  yaradılan: )' "$RUNNER_TEMP/delta_out.log" | cut -c1-200 > "$RUNNER_TEMP/delta_summary.log" || true
+          cat "$RUNNER_TEMP/delta_summary.log"
+          {
+            echo "## 🗃️ legacy_delta_apply — $([ "$APPLY" = "true" ] && echo APPLY || echo dry-run)"
+            echo '```'
+            cat "$RUNNER_TEMP/delta_summary.log"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          test "${status:-0}" = 0 || { tail -n 5 "$RUNNER_TEMP/delta_out.log" | grep -E 'CommandError|Error|Exception' | cut -c1-200 || true; exit "$status"; }
+      - name: 🔑 Köhnə sistem deltası — hesabat (şifrəli)
+        id: delta_report
+        if: always() && github.event.inputs.command == 'legacy_delta_apply'
+        env:
+          STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
+        run: |
+          set -euo pipefail
+          enc() { openssl enc -aes-256-cbc -md sha256 -pbkdf2 -iter 200000 -salt -pass env:STAFF_PLAN_KEY -in "$1" -out "$2"; }
+          mkdir -p "$RUNNER_TEMP/delta-out"
+          if [ -n "$STAFF_PLAN_KEY" ]; then
+            for f in delta_out.log "legacy_delta_report_${GITHUB_RUN_ID}.json" "legacy_delta_names_${GITHUB_RUN_ID}.csv"; do
+              if [ -s "$RUNNER_TEMP/$f" ]; then
+                enc "$RUNNER_TEMP/$f" "$RUNNER_TEMP/delta-out/$f.enc"
+                echo "saved=1" >> "$GITHUB_OUTPUT"
+              fi
+            done
+          fi
+          rm -f "$RUNNER_TEMP/delta_out.log" "$RUNNER_TEMP/delta_summary.log" "$RUNNER_TEMP"/legacy_delta_*
+      - name: 📦 Şifrəli köhnə sistem deltası hesabatı
+        if: always() && steps.delta_report.outputs.saved != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: legacy-delta-encrypted
+          path: ${{ runner.temp }}/delta-out/
+          retention-days: 1
+      - name: 🧹 Köhnə sistem deltası — müvəqqəti faylları sil
+        if: always() && github.event.inputs.command == 'legacy_delta_apply'
+        run: |
+          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/legacy_delta_*' || true
+          rm -rf "$RUNNER_TEMP/delta-out" "$RUNNER_TEMP/delta.enc" "$RUNNER_TEMP/delta.json.gz" || true
       # ── ensure_parent_groups / blocked_accounts_report (ortaq ana qruplar + bloklanmış hesablar; öz addımları —
       #    digər əmrlərin axınına toxunmur). CSV hesabat şifrəli artifaktdadır (blocked_accounts.csv ŞƏXSİ datadır). ──
       - name: 👥 Ortaq ana qruplar / bloklanmış hesablar
