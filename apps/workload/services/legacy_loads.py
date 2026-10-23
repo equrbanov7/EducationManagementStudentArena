@@ -82,17 +82,25 @@ def preview_legacy_entries(*, organization, chair, actor_user, year: str, entrie
 
 
 def apply_legacy_loads(*, organization, chair, actor_user, entries, year: str) -> dict:
-    """Bir kafedranın legacy yazıları — «Dərs yükü faylı» axını (yazır; tranzaksiyanı çağıran idarə edir)."""
+    """Bir kafedranın legacy yazıları — «Dərs yükü faylı» axını (yazır; tranzaksiyanı çağıran idarə edir).
 
-    return run_load_upload(
-        organization=organization,
-        chair=chair,
-        actor_user=actor_user,
-        entries=list(entries),
-        skipped=[],
-        year=year,
-        apply=True,
-    )
+    Axın qapısı rədd edərsə ``{"denied": kod}`` qaytarır (heç nə yazılmır)."""
+
+    from .scoping import WorkloadDenied
+
+    try:
+        return run_load_upload(
+            organization=organization,
+            chair=chair,
+            actor_user=actor_user,
+            entries=list(entries),
+            skipped=[],
+            year=year,
+            apply=True,
+        )
+    except WorkloadDenied as exc:
+        # Axının öz qapısı (məs. deaktiv kafedra) — onun savepoint-i artıq geri qayıdıb; çağıran kafedranı ötürür.
+        return {"denied": exc.code, "counters": {}}
 
 
 __all__ = ["apply_legacy_loads", "legacy_load_entry", "preview_legacy_entries"]
