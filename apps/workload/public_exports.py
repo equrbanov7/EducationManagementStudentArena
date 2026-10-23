@@ -13,6 +13,7 @@ from .services.norms import (  # noqa: F401
     staff_rate_error,
 )
 from .services.roster_profile import restore_roster_profile, sync_roster_profile  # noqa: F401
+from .teacher_hooks import register_chair_teacher_resolver  # noqa: F401
 
 __all__ = [
     "StaffRateError",
@@ -24,6 +25,7 @@ __all__ = [
     "current_rule",
     "norm_rule_note",
     "norms_for",
+    "register_chair_teacher_resolver",
     "restore_roster_profile",
     "staff_rate_error",
     "sync_roster_profile",

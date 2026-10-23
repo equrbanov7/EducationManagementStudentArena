@@ -107479,3 +107479,290 @@ msgstr "if the code does not arrive, be sure to check your “Spam” (Junk) fol
 msgctxt "accounts.first_login"
 msgid "«Gələnlər» qovluğunda yoxdursa, e-poçtunuzun «Spam» (Junk / Lazımsız) qovluğuna baxın — kod çox vaxt ora düşür."
 msgstr "If it is not in your Inbox, check your “Spam” (Junk) folder — the code often lands there."
+
+msgctxt "accounts.workload_center"
+msgid "Dərs yükü faylı"
+msgstr "Teaching load file"
+
+msgctxt "organizations.permission.label"
+msgid "Dərs yükü faylını yükləmək (bölgü, açılış və tələbə qeydiyyatı avtomatik)"
+msgstr "Upload the teaching load file (distribution, course openings and student enrolment are automatic)"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "%(chair)s — «%(file)s». Aşağıdakı nəticəni yoxlayın və «Tətbiq et» basın. Qırmızı sətirlər yazılmayacaq (müəllim vakant qalır və ya sətir yaradılmır) — faylı düzəldib yenidən yükləyə bilərsiniz."
+msgstr "%(chair)s — “%(file)s”. Check the result below and press “Apply”. Red rows will not be written (the teacher stays vacant or the row is not created) — you can fix the file and upload it again."
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "%(chair)s — «%(file)s». Müəllimlərə bildiriş getdi, fənlər tələbələrin kabinetində görünür."
+msgstr "%(chair)s — “%(file)s”. Teachers have been notified; the subjects are visible in the students' accounts."
+
+msgctxt "accounts.workload_load"
+msgid "Açılacaq yeni müəllim hesabları"
+msgstr "New teacher accounts to be created"
+
+msgctxt "accounts.workload_load"
+msgid "Açılmış yeni müəllim hesabları"
+msgstr "New teacher accounts created"
+
+msgctxt "accounts.workload_load"
+msgid "Bir neçə uyğun hesab — vakant qalır"
+msgstr "Several matching accounts — stays vacant"
+
+msgctxt "accounts.workload_load"
+msgid "Bölgü"
+msgstr "Distribution"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Daha %(count)s sətir göstərilmir (problemli sətirlər yuxarıdadır)."
+msgstr "%(count)s more rows are not shown (problem rows are at the top)."
+
+msgctxt "accounts.workload_load"
+msgid "DƏYİŞMƏYƏN"
+msgstr "UNCHANGED"
+
+msgctxt "accounts.workload_load"
+msgid "Dəqiq tapılmadı — vakant qalır"
+msgstr "Not found exactly — stays vacant"
+
+msgctxt "accounts.workload_load"
+msgid "Dərs deyil (dissertasiya rəhbərliyi və s.)"
+msgstr "Not a class (thesis supervision, etc.)"
+
+msgctxt "accounts.workload_load"
+msgid "Dərs yükü faylı"
+msgstr "Teaching load file"
+
+msgctxt "accounts.workload_load"
+msgid "Dərs yükü faylını yükləmək üçün icazə yoxdur"
+msgstr "You are not allowed to upload the teaching load file"
+
+msgctxt "accounts.workload_load"
+msgid "Dərs yükü sistemə yazıldı"
+msgstr "The teaching load has been written to the system"
+
+msgctxt "accounts.workload_load"
+msgid "Dərs yükü sistemə yazılsın? Müəllimlərə bildiriş gedəcək, fənlər tələbələrin kabinetinə düşəcək. Bu bir neçə dəqiqə çəkə bilər."
+msgstr "Write the teaching load to the system? Teachers will be notified and the subjects will appear in the students' accounts. This may take a few minutes."
+
+msgctxt "accounts.workload_load"
+msgid "Dəyişiklik yoxdur"
+msgstr "No change"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Excel şablonu (.xlsx) və ya kafedranın «Forma 1» sənədi (.docx) · %(year)s tədris ili · maksimum 10 MB. Yoxlama bir neçə dəqiqə çəkə bilər."
+msgstr "Excel template (.xlsx) or the chair's “Form 1” document (.docx) · academic year %(year)s · max 10 MB. The check may take a few minutes."
+
+msgctxt "accounts.workload_load"
+msgid "Excel şablonunu yüklə"
+msgstr "Download the Excel template"
+
+msgctxt "accounts.workload_load"
+msgid "FAYL SƏTRİ"
+msgstr "FILE ROWS"
+
+msgctxt "accounts.workload_load"
+msgid "Fayldakı hər sətir — müəllim, qrup, fənn, saatlar — kafedranın tapşırığına yazılır, müəllimə bölünür, fənn qrupun tələbələrinin kabinetinə düşür və müəllim elektron jurnalı yaza bilir. Əvvəlcə önizləmə göstərilir — «Tətbiq et» basılmayınca heç nə yazılmır. Eyni faylı təkrar yükləmək heç nəyi ikiqat etmir."
+msgstr "Every row of the file — teacher, group, subject, hours — is written to the chair's assignment, distributed to the teacher, the subject appears in the group's student accounts and the teacher can keep the e-journal. A preview comes first — nothing is written until you press “Apply”. Uploading the same file again duplicates nothing."
+
+msgctxt "accounts.workload_load"
+msgid "Faylı oxu və yoxla"
+msgstr "Read and check the file"
+
+msgctxt "accounts.workload_load"
+msgid "FİN və e-poçt sonra: müəllim ilk girişdə özü yazır. Birdəfəlik parolu RİM mərkəzi «Parol təyini» ilə verir."
+msgstr "PIN and e-mail come later: the teacher enters them at first login. The Digital Development Centre issues the one-time password via “Set password”."
+
+msgctxt "accounts.workload_load"
+msgid "Fənn"
+msgstr "Subject"
+
+msgctxt "accounts.workload_load"
+msgid "Fənn müəyyən olunmadı"
+msgstr "Subject could not be determined"
+
+msgctxt "accounts.workload_load"
+msgid "Fənnin adı boşdur"
+msgstr "Subject name is empty"
+
+msgctxt "accounts.workload_load"
+msgid "Hesab bloklanıb — RİM aktivləşdirməlidir"
+msgstr "Account is blocked — the Digital Development Centre must reactivate it"
+
+msgctxt "accounts.workload_load"
+msgid "HƏLL OLUNMAYAN"
+msgstr "UNRESOLVED"
+
+msgctxt "accounts.workload_load"
+msgid "Kafedra"
+msgstr "Chair"
+
+msgctxt "accounts.workload_load"
+msgid "Kafedra adı ilə axtar…"
+msgstr "Search by chair name…"
+
+msgctxt "accounts.workload_load"
+msgid "Kafedranın dərs yükünü bir faylla sistemə yükləyin"
+msgstr "Upload the chair's teaching load with one file"
+
+msgctxt "accounts.workload_load"
+msgid "Ləğv et"
+msgstr "Cancel"
+
+msgctxt "accounts.workload_load"
+msgid "Mövcud sətir"
+msgstr "Existing row"
+
+msgctxt "accounts.workload_load"
+msgid "Müəllim"
+msgstr "Teacher"
+
+msgctxt "accounts.workload_load"
+msgid "Müəllim dəyişdirildi"
+msgstr "Teacher changed"
+
+msgctxt "accounts.workload_load"
+msgid "Müəllim yazılmayıb"
+msgstr "No teacher given"
+
+msgctxt "accounts.workload_load"
+msgid "Müəllimin adı oxunmadı"
+msgstr "Teacher's name could not be read"
+
+msgctxt "accounts.workload_load"
+msgid "Namizədlər:"
+msgstr "Candidates:"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Qrup sistemdə tapılmadı: %(groups)s"
+msgstr "Group not found in the system: %(groups)s"
+
+msgctxt "accounts.workload_load"
+msgid "Qrup(lar)"
+msgstr "Group(s)"
+
+msgctxt "accounts.workload_load"
+msgid "Saat"
+msgstr "Hours"
+
+msgctxt "accounts.workload_load"
+msgid "Saat yoxdur"
+msgstr "No hours"
+
+msgctxt "accounts.workload_load"
+msgid "Sem."
+msgstr "Semester"
+
+msgctxt "accounts.workload_load"
+msgid "Seçin"
+msgstr "Select"
+
+msgctxt "accounts.workload_load"
+msgid "Seçmə bloku — seçilmiş fənni yazın"
+msgstr "Elective block — write the chosen subject"
+
+msgctxt "accounts.workload_load"
+msgid "Sətir"
+msgstr "Row"
+
+msgctxt "accounts.workload_load"
+msgid "Sətir tapılmadı"
+msgstr "Row not found"
+
+msgctxt "accounts.workload_load"
+msgid "Tapıldı"
+msgstr "Found"
+
+msgctxt "accounts.workload_load"
+msgid "Tapıldı (inisiallarla)"
+msgstr "Found (by initials)"
+
+msgctxt "accounts.workload_load"
+msgid "Tapıldı (yazı səhvi nəzərə alındı)"
+msgstr "Found (typo taken into account)"
+
+msgctxt "accounts.workload_load"
+msgid "Tapıldı — ata adı fərqli yazılıb, yoxlayın"
+msgstr "Found — patronymic is spelled differently, please check"
+
+msgctxt "accounts.workload_load"
+msgid "Tapşırıq bu statusda yeni sətir qəbul etmir"
+msgstr "The assignment does not accept new rows in this status"
+
+msgctxt "accounts.workload_load"
+msgid "Tapşırıq sətri"
+msgstr "Assignment row"
+
+msgctxt "accounts.workload_load"
+msgid "TƏLƏBƏ QEYDİYYATI"
+msgstr "STUDENT ENROLMENTS"
+
+msgctxt "accounts.workload_load"
+msgid "TƏYİN / DƏYİŞİKLİK"
+msgstr "ASSIGNED / CHANGED"
+
+msgctxt "accounts.workload_load"
+msgid "Tətbiq et"
+msgstr "Apply"
+
+msgctxt "accounts.workload_load"
+msgid "Təyin olundu"
+msgstr "Assigned"
+
+msgctxt "accounts.workload_load"
+msgid "Uyğun kafedra tapılmadı"
+msgstr "No matching chair found"
+
+msgctxt "accounts.workload_load"
+msgid "YENİ JURNAL (AÇILIŞ)"
+msgstr "NEW JOURNALS (OPENINGS)"
+
+msgctxt "accounts.workload_load"
+msgid "YENİ MÜƏLLİM"
+msgstr "NEW TEACHERS"
+
+msgctxt "accounts.workload_load"
+msgid "YENİ SƏTİR"
+msgstr "NEW ROWS"
+
+msgctxt "accounts.workload_load"
+msgid "Yeni fayl yüklə"
+msgstr "Upload a new file"
+
+msgctxt "accounts.workload_load"
+msgid "Yeni hesab — eyni adlı başqa şəxs var, yoxlayın"
+msgstr "New account — another person with the same name exists, please check"
+
+msgctxt "accounts.workload_load"
+msgid "Yeni müəllim hesabı"
+msgstr "New teacher account"
+
+msgctxt "accounts.workload_load"
+msgid "Yeni sətir"
+msgstr "New row"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Yeni sətir; tapılmayan qrup: %(groups)s"
+msgstr "New row; group not found: %(groups)s"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "müəllim: %(n)d"
+msgstr "teachers: %(n)d"
+
+msgctxt "accounts.workload_load"
+msgid "«Dərs yükü faylını yükləmək» açarı Tədris şöbəsinə və RİM-ə verilir. Lazımdırsa rolunuza əlavə etdirin."
+msgstr "The “Upload the teaching load file” permission is given to the Teaching Office and the Digital Development Centre. Ask for it to be added to your role if needed."
+
+msgctxt "accounts.workload_load"
+msgid "Önizləmə — hələ heç nə yazılmayıb"
+msgstr "Preview — nothing has been written yet"
+
+msgctxt "accounts.workload_load"
+msgid "Ötürülən sətirlər"
+msgstr "Skipped rows"

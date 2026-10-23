@@ -35,6 +35,14 @@ class AccountsConfig(AppConfig):
 
         register_cabinet_section_resolver(_cabinet_section_allowed)
 
+        # 2026-10-23: «Dərs yükü faylı» — müəllim adı → hesab / FİN-siz yeni hesab (workload → accounts importu
+        # modul dövrü yaradır; həlledici workload-a buradan qeydiyyatdan keçir).
+        from apps.workload.public import register_chair_teacher_resolver
+
+        from .services.teacher_roster.chair_teachers import ChairTeacherResolver
+
+        register_chair_teacher_resolver(ChairTeacherResolver)
+
         # 2026-10-01: «Akademik fəaliyyət» qoşmaları — məxfi media prefiksinin
         # icazə siyasəti (core deny-by-default-dur) + qeyd silinəndə faylların
         # təmizlənməsi (istifadəçi kaskadı da daxil).

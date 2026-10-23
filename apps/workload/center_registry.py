@@ -19,7 +19,7 @@ from __future__ import annotations
 from django.apps import apps as django_apps
 from django.db.models import Count, Q, Sum
 
-from .constants import PERM_MANAGE, PERM_SUBMIT, Season, TaskStatus
+from .constants import PERM_LOAD_IMPORT, PERM_MANAGE, PERM_SUBMIT, Season, TaskStatus
 from .models import TaskFacultySlice, TeachingTask, TeachingTaskRow
 from .services import (
     distributable_chair_ids,
@@ -31,7 +31,7 @@ from .services import (
     submit_summary,
 )
 
-VIEWS = ("dashboard", "tasks", "import", "reports", "settings")
+VIEWS = ("dashboard", "tasks", "load", "import", "reports", "settings")
 TABS = ("editor", "tracking")
 PAGE_SIZE = 25
 
@@ -240,7 +240,21 @@ def build_center(request, organization) -> dict:
     }
     payload.update(_task_view(request, organization, actor, payload))
     payload["import_preview"] = _import_preview(request, organization) if view == "import" else None
+    payload["load"] = _load_view(request, actor) if view == "load" else None
     return payload
+
+
+def _load_view(request, actor) -> dict:
+    """«Dərs yükü faylı» (sahib 2026-10-23) — kafedra seçimi + sessiyadakı önizləmə/nəticə (yazma yoxdur)."""
+    from .load_actions import LOAD_SESSION_KEY, load_chairs
+
+    chairs = list(load_chairs(actor).only("id", "name"))
+    stored = request.session.get(LOAD_SESSION_KEY) or {}
+    return {
+        "allowed": actor.has(PERM_LOAD_IMPORT) and bool(chairs),
+        "chair_options": [{"value": str(chair.pk), "label": chair.name} for chair in chairs],
+        "stored": stored if stored.get("report") else None,
+    }
 
 
 def _import_preview(request, organization) -> dict | None:
