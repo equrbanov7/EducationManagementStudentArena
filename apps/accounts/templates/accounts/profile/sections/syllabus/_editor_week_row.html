@@ -11,8 +11,13 @@ atributu özü qoyur.{% endcomment %}
 <tr {% if row.is_template %}data-syl-week-row-template{% else %}data-syl-week-row="{{ row.index }}"{% endif %}{% if row.extra %} data-extra="{{ row.extra }}"{% endif %}
     class="{% if row.is_extra %}syl-weeks__row--extra{% endif %}">
   <th scope="row">
-    {{ row.index }}
-    {% if row.is_extra %}<span class="syl-tagx">{% if se.hours.has_plan %}{% trans "əlavə" context "accounts.syllabus" %}{% else %}{% trans "plandan artıq" context "accounts.syllabus" %}{% endif %}</span>{% endif %}
+    <span data-syl-week-num>{{ row.index }}</span>
+    {% if row.is_extra %}<span class="syl-tagx">{% if se.hours.has_plan %}{% trans "əlavə" context "accounts.syllabus" %}{% else %}{% trans "plandan artıq" context "accounts.syllabus" %}{% endif %}</span>
+    {% comment %}Sahib 2026-10-23: «sətir əlavə et var, amma əlavə olunmuş sətri silmək olmur» — yalnız planın
+    ÜSTÜNDƏN əlavə olunan sətir silinir (plan sətirləri qalır).{% endcomment %}
+    {% if not se.readonly %}<button type="button" class="syl-weeks__remove" data-syl-week-remove
+            title="{% trans 'Sətri sil' context 'accounts.syllabus' %}"
+            aria-label="{% trans 'Sətri sil' context 'accounts.syllabus' %}">&times;</button>{% endif %}{% endif %}
   </th>
   <td>
     {% comment %}Mövzu TƏK SƏTİRDİR: köçürmə burada `clean_text` işlədir

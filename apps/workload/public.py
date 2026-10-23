@@ -163,8 +163,20 @@ def build_distribution_context(
     if not base["has_access"]:
         return base
 
-    chairs = list(manageable_chairs(actor, permission=PERM_MANAGE if can_manage else PERM_DISTRIBUTE))
-    base["chairs"] = [{"id": str(unit.pk), "name": unit.name} for unit in chairs]
+    # Sahib 2026-10-23: siyahıda YALNIZ kafedralar (inzibati şöbə — «Arxiv şöbəsi» — dərs yükü daşımır), fakültə
+    # adı ilə və fakültə üzrə sıralı — axtarışla tapılsın.
+    from core.constants import OrgUnitType
+
+    chairs = sorted(
+        manageable_chairs(actor, permission=PERM_MANAGE if can_manage else PERM_DISTRIBUTE)
+        .filter(unit_type=OrgUnitType.CHAIR)
+        .select_related("parent"),
+        key=lambda unit: ((unit.parent.name if unit.parent_id else ""), unit.name),
+    )
+    base["chairs"] = [
+        {"id": str(unit.pk), "name": f"{unit.name} — {unit.parent.name}" if unit.parent_id else unit.name}
+        for unit in chairs
+    ]
     chair = None
     if chair_id:
         chair = next((unit for unit in chairs if str(unit.pk) == str(chair_id)), None)
