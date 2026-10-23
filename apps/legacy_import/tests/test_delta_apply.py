@@ -347,6 +347,27 @@ class DeltaApplyTests(TestCase):
         self.assertEqual(written, {})
         self.assertEqual(again.counters["mark.same"], 4)
 
+    def test_teacher_lesson_absorbs_legacy_slot_and_rerun_is_stable(self):
+        """Müəllimin yeni sistemdə açdığı eyni gün dərsi bir legacy slotunu udur; ikinci qaçış eyni nəticə."""
+        with bypass_rls():
+            offering = CourseOffering.objects.create(
+                organization=self.org, subject=Subject.objects.get(code="QKU-5"), period=self.period, group=self.group
+            )
+            Lesson.objects.create(
+                organization=self.org,
+                offering=offering,
+                date=dt.date(2026, 10, 6),
+                kind="seminar",
+                start_time=dt.time(13, 0),
+                created_by=self.actor,
+            )
+        self._run(apply=True)
+        with bypass_rls():
+            times = sorted(Lesson.objects.filter(offering=offering).values_list("start_time", flat=True))
+        self.assertEqual(times, [dt.time(10, 30), dt.time(13, 0)], "09:00 slotu müəllimin 13:00 dərsinə düşüb")
+        again = self._run(apply=True)
+        self.assertEqual({k: v for k, v in again.counters.items() if k.startswith("written.")}, {})
+
     def test_existing_values_are_never_overwritten(self):
         self._run(apply=True)
         with bypass_rls():

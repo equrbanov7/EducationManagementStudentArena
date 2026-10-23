@@ -77,8 +77,8 @@ def mark_value(point: str):
 class LessonBook:
     """(açılış, tarix, saat) → ``Lesson``; mövcudu tapır, çatışmayanı növbəyə qoyur.
 
-    Eyni gün + eyni növdə, amma BAŞQA saatda olan dərs yalnız YENİ SİSTEMDƏ ƏVVƏLCƏDƏN VAR olan dərsdirsə
-    (müəllim jurnalı yeni sistemdə açıb) legacy slotu ona bağlanır — hər mövcud dərs ən çox BİR legacy
+    Eyni gün + eyni növdə, amma BAŞQA saatda olan dərs yalnız müəllimin YENİ SİSTEMDƏ açdığı dərsdirsə
+    (``created_by`` dolu) legacy slotu ona bağlanır — hər mövcud dərs ən çox BİR legacy
     slotunu udur. Legacy-nin öz cüt dərsləri (eyni gün iki para) ayrı-ayrı dərs kimi qalır.
     """
 
@@ -92,7 +92,11 @@ class LessonBook:
             "date", "start_time", "created_at"
         ):
             self.by_slot[(lesson.offering_id, lesson.date, lesson.start_time)] = lesson
-            self.unclaimed.setdefault((lesson.offering_id, lesson.date, lesson.kind), []).append(lesson)
+            # Yalnız MÜƏLLİMİN yeni sistemdə açdığı dərs (``created_by`` dolu) birləşmə hovuzundadır. Köçürmənin
+            # öz dərsləri (``created_by`` boş) yalnız dəqiq slotla tapılır — yoxsa təkrar qaçışda hovuz böyüyür,
+            # emal sırası başqa dərsi «udur» və nəticə qaçışdan-qaçışa dəyişir.
+            if lesson.created_by_id is not None:
+                self.unclaimed.setdefault((lesson.offering_id, lesson.date, lesson.kind), []).append(lesson)
         self.pending: list = []
 
     def ensure(self, offering_id, date, start, kind, *, synthesised: bool):
