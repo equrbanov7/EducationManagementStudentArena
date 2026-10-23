@@ -36,9 +36,20 @@ def task_rows(task, *, season: str = "", search: str = ""):
     )
     if season:
         queryset = queryset.filter(season=season)
-    search_q = tolerant_q(search, ("subject__name", "subject_text"), compact_fields=("subject__code", "groups_text"))
+    # Sahib 2026-10-23: «müəllimə görə də axtarmaq lazımdır» — fənn / qrup / müəllim (ad, soyad, istifadəçi adı).
+    search_q = tolerant_q(
+        search,
+        (
+            "subject__name",
+            "subject_text",
+            "assignments__teacher__first_name",
+            "assignments__teacher__last_name",
+            "assignments__teacher__username",
+        ),
+        compact_fields=("subject__code", "groups_text"),
+    )
     if search_q is not None:
-        queryset = queryset.filter(search_q)
+        queryset = queryset.filter(search_q).distinct()
     return queryset
 
 

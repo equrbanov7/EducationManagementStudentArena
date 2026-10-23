@@ -107218,3 +107218,11 @@ msgstr "kullanıcı adı veya e-posta adresi"
 msgctxt "exams.template.final_entry"
 msgid "İstifadəçi adınızı (və ya e-poçtunuzu) və şəxsi imtahan PIN-inizi daxil edin"
 msgstr "Kullanıcı adınızı (veya e-postanızı) ve kişisel sınav PIN'inizi girin"
+
+msgctxt "accounts.syllabus"
+msgid "Sətri sil"
+msgstr "Satırı sil"
+
+msgctxt "accounts.workload"
+msgid "fənn, qrup və ya müəllim"
+msgstr "ders, grup veya öğretim elemanı"

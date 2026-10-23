@@ -20,6 +20,15 @@ def t(en, ru, tr, de):
 
 
 ENTRIES = {
+    "accounts.syllabus": {"Sətri sil": t("Delete row", "Удалить строку", "Satırı sil", "Zeile löschen")},
+    "accounts.workload": {
+        "fənn, qrup və ya müəllim": t(
+            "subject, group or teacher",
+            "дисциплина, группа или преподаватель",
+            "ders, grup veya öğretim elemanı",
+            "Fach, Gruppe oder Lehrkraft",
+        )
+    },
     WL: {
         "Bir sətir — bir müəllimin bir fənni: müəllim, qrup(lar), fənn, kredit, I və II semestrin saatları. Kafedranın Word «Forma 1» faylı da olar — onda bu addımı keçin.": t(
             "One row — one subject of one teacher: teacher, group(s), subject, credits, hours of semesters I and II. The chair's Word “Form 1” file also works — then skip this step.",
