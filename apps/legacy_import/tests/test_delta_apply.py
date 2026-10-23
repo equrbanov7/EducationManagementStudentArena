@@ -1,0 +1,384 @@
+"""Köhnə sistem DELTA tətbiqi — uçdan-uca (sintetik paket, real modellər və DB qapıları).
+
+Yoxlanılır: dry-run heç nə yazmır; tətbiq çatışmayanı yaradır (FİN-siz müəllim, tələbə, alt qrup,
+açılış, qeydiyyat, dərs, xana, təsdiqlənmiş sillabus, təkrar imtahan); yeni sistemin mövcud dəyəri
+ÜZƏRİNƏ YAZILMIR; ikinci qaçış 0 yazı verir (idempotent).
+"""
+
+import datetime as dt
+import os
+import stat
+from decimal import Decimal
+
+from django.contrib.auth import get_user_model
+from django.core.management import call_command
+from django.test import TestCase
+
+from apps.accounts.models import UserProfile
+from apps.audit.models import AuditLog
+from apps.legacy_import.services.delta.apply import BATCH_RESOURCE, execute
+from apps.legacy_import.services.delta.bundle import BundleError, read_bundle, write_bundle
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
+from apps.registrar.models import (
+    CourseOffering,
+    Curriculum,
+    Enrollment,
+    Lesson,
+    LessonMark,
+    Program,
+    StudentAcademicRecord,
+    Subject,
+)
+from apps.syllabus.models import Syllabus
+from core.constants import AcademicPeriodType, OrganizationType
+from core.rls import bypass_rls
+
+User = get_user_model()
+UNTIL = dt.date(2026, 10, 21)
+
+
+def _bundle(**overrides):
+    data = {
+        "snapshot": {"sha256": "0" * 64, "full_semesters": [14], "since": "2026-08-01"},
+        "periods": [{"id": 14, "name": "2026/2027 Payız", "type": "autumn", "is_current": 1}],
+        "departments": [],
+        "specialities": [],
+        "groups": [
+            {
+                "id": 900,
+                "name": "101 A",
+                "speciality_id": 5,
+                "department_id": 3,
+                "start_year": 2026,
+                "eyani_qiyabi": "Əyani",
+                "bak_or_mag": "bak",
+                "sector": "az",
+                "kollec_or_uni": "University",
+                "is_new": False,
+            },
+            {
+                "id": 901,
+                "name": "101 A1",
+                "speciality_id": 5,
+                "department_id": 3,
+                "start_year": 2026,
+                "eyani_qiyabi": "Əyani",
+                "bak_or_mag": "bak",
+                "sector": "az",
+                "kollec_or_uni": "University",
+                "is_new": True,
+            },
+        ],
+        "subjects": [{"id": 5, "name": "Riyaziyyat", "lesson_code": "", "department_id": 3, "type": ""}],
+        "workers": [
+            {
+                "id": 77,
+                "first_name": "Kamran",
+                "last_name": "Delta",
+                "father_name": "Vüqar",
+                "department_id": 3,
+                "teacher_type": 1,
+                "inzibati": 0,
+                "kollec_or_uni": "University",
+            }
+        ],
+        "students": [
+            {
+                "id": 1,
+                "first_name": "Aysel",
+                "last_name": "Mövcud",
+                "father_name": "Tural",
+                "fincode": "AAA1111",
+                "sex": 2,
+                "gender": None,
+                "birthday": "",
+                "group_id": 900,
+                "speciality_id": 5,
+                "entry_year": "2026",
+                "azadedildi": 0,
+                "education_level": "Bakalavr",
+                "education_type": "Əyani",
+                "payment_type": "Ödənişli",
+                "is_new": True,
+            },
+            {
+                "id": 2,
+                "first_name": "Nicat",
+                "last_name": "Yenizadə",
+                "father_name": "Orxan",
+                "fincode": "BBB2222",
+                "sex": 0,
+                "gender": "Kişi",
+                "birthday": "2007-05-04",
+                "group_id": 901,
+                "speciality_id": 5,
+                "entry_year": "2026",
+                "azadedildi": 0,
+                "education_level": "Bakalavr",
+                "education_type": "Əyani",
+                "payment_type": "Dövlət Sifarişi",
+                "is_new": True,
+            },
+            {
+                "id": 3,
+                "first_name": "Azad",
+                "last_name": "Edilmiş",
+                "father_name": "",
+                "fincode": "",
+                "sex": 1,
+                "gender": None,
+                "birthday": "",
+                "group_id": 900,
+                "speciality_id": 5,
+                "entry_year": "2026",
+                "azadedildi": 1,
+                "education_level": "",
+                "education_type": "",
+                "payment_type": "",
+                "is_new": True,
+            },
+        ],
+        "journals": [
+            {
+                "id": 11,
+                "uniqid": "abcDEF1234",
+                "lesson_id": 5,
+                "teacher_id": 77,
+                "groups_id": '["900"]',
+                "students_id": '["1","2","3"]',
+                "semestr": 14,
+                "fake": 0,
+                "sonra_sil": 0,
+                "active": 1,
+                "fenn_saati": 45,
+                "kredit": 5,
+                "sillabus_id": 500,
+            },
+        ],
+        "lesson_dates": [
+            {"id": 21, "journal_id": 11, "month": 10, "day": 6, "time": "09:00", "sem_muh": 2},
+            {"id": 22, "journal_id": 11, "month": 10, "day": 6, "time": "10:30", "sem_muh": 2},
+            {"id": 23, "journal_id": 11, "month": 11, "day": 10, "time": "09:00", "sem_muh": 2},
+        ],
+        "points": [
+            _point(1, "1", "06", "09:00", "8"),
+            _point(2, "2", "06", "09:00", "qb"),
+            _point(3, "1", "06", "10:30", "ie"),
+            _point(4, "2", "06", "10:30", "ie"),
+            _point(5, "1", "10", "09:00", "ie", month="11"),
+            _point(6, "1", "06", "09:00", "6", counter=0),  # J-V4: köhnə təkrar uduzur
+            _point(7, "2", "", "", "55", month="im2", uniqid="oldJOURNAL"),
+        ],
+        "excuse_windows": [],
+        "syllabi": [
+            {
+                "id": 500,
+                "uniqid": "syl500",
+                "lesson_id": 5,
+                "teacher_id": 77,
+                "ders_saati": 45,
+                "language": "az",
+                "active": 1,
+                "is_new": True,
+                "is_changed": False,
+                "week": [
+                    {
+                        "id": 1,
+                        "uniqid": "syl500",
+                        "movzu": "Giri&ccedil;",
+                        "muh_saat": "2",
+                        "sem_saat": "2",
+                        "praktiki_saat": "",
+                        "lab_saat": "",
+                        "qeyd": "",
+                    }
+                ],
+                "sections": {"sillabus_tesviri_ve_meqsedi": [[1, "Təsvir"]]},
+            },
+        ],
+    }
+    data.update(overrides)
+    return data
+
+
+def _point(pk, student, day, time, point, *, month="10", counter=1, uniqid="abcDEF1234"):
+    return {
+        "id": pk,
+        "journal_uniqid": uniqid,
+        "month_id": month,
+        "day_number": day,
+        "student_id": int(student),
+        "point": point,
+        "time": time,
+        "excusable": 0,
+        "sem_muh": 2,
+        "lab": 0,
+        "update_counter": counter,
+        "updated_at": None,
+        "delta": "full",
+    }
+
+
+class DeltaApplyTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.actor = User.objects.create_superuser("delta_actor", "delta-actor@example.test", "x")
+        with bypass_rls():
+            cls.org = Organization.objects.create(
+                name="Delta Univ",
+                slug="delta-univ",
+                org_type=OrganizationType.UNIVERSITY,
+                owner=cls.actor,
+                status="active",
+                is_active=True,
+            )
+            faculty = OrgUnit.objects.create(organization=cls.org, name="Fakültə", slug="d-fac", unit_type="faculty")
+            cls.specialty = OrgUnit.objects.create(
+                organization=cls.org, name="Riyaziyyat ixtisası", slug="d-spec", unit_type="specialty", parent=faculty
+            )
+            cls.group = OrgUnit.objects.create(
+                organization=cls.org,
+                name="101 A",
+                slug="d-g",
+                unit_type="group",
+                parent=cls.specialty,
+                settings={"admission_year": 2026},
+            )
+            cls.program = Program.objects.create(
+                organization=cls.org, code="DRY", name="Riyaziyyat", specialty_unit=cls.specialty
+            )
+            Curriculum.objects.create(organization=cls.org, program=cls.program, admission_year=2026)
+            cls.period = AcademicPeriod.objects.create(
+                organization=cls.org,
+                name="Payız",
+                academic_year="2026/2027",
+                period_type=AcademicPeriodType.SEMESTER,
+                start_date=dt.date(2026, 9, 15),
+                end_date=dt.date(2027, 1, 31),
+                is_current=True,
+            )
+            Subject.objects.create(organization=cls.org, code="QKU-5", name="Riyaziyyat")
+            cls.existing = User.objects.create_user(
+                "aysel.movcud", "a@example.test", "x", first_name="Aysel", last_name="Mövcud"
+            )
+            UserProfile.objects.filter(user=cls.existing).update(fin="AAA1111")
+            Membership.objects.create(
+                user=cls.existing,
+                organization=cls.org,
+                role=cls.org.roles.get(name="student"),
+                is_primary=True,
+                is_active=True,
+            )
+            StudentAcademicRecord.objects.create(
+                organization=cls.org,
+                student=cls.existing,
+                program=cls.program,
+                curriculum=Curriculum.objects.get(program=cls.program),
+                group=cls.group,
+                admission_year=2026,
+                status="enrolled",
+                is_active=True,
+            )
+
+    def _run(self, *, apply, bundle=None):
+        with bypass_rls():
+            return execute(
+                organization=self.org,
+                actor=self.actor,
+                bundle=bundle or _bundle(),
+                apply=apply,
+                until=UNTIL,
+                tag="delta-test",
+            )
+
+    def test_dry_run_writes_nothing(self):
+        run = self._run(apply=False)
+        self.assertEqual(run.counters["written.marks"], 4)
+        with bypass_rls():
+            self.assertFalse(CourseOffering.objects.filter(organization=self.org).exists())
+            self.assertFalse(User.objects.filter(username__startswith="nicat").exists())
+            self.assertFalse(AuditLog.objects.filter(resource_type=BATCH_RESOURCE).exists())
+
+    def test_apply_creates_missing_and_second_run_is_noop(self):
+        run = self._run(apply=True)
+        with bypass_rls():
+            offering = CourseOffering.objects.get(organization=self.org, group=self.group, period=self.period)
+            self.assertEqual(offering.lesson_hours, 45)
+            teacher = offering.instructor
+            self.assertIsNotNone(teacher, "FİN-siz müəllim yaradılıb və açılışa yazılıb")
+            self.assertIsNone(teacher.profile.fin)
+            self.assertFalse(teacher.has_usable_password())
+            created = User.objects.get(profile__institutional_identifier="2")
+            self.assertFalse(created.has_usable_password())
+            self.assertTrue(created.email.endswith("@placeholder.invalid"))
+            subgroup = OrgUnit.objects.get(organization=self.org, slug="myedu-grp-901")
+            self.assertEqual(subgroup.settings["parent_group"], str(self.group.pk))
+            guest = Enrollment.objects.get(offering=offering, student=created)
+            self.assertEqual(guest.source_group_id, subgroup.pk)
+            self.assertTrue(Enrollment.objects.filter(offering=offering, student=self.existing).exists())
+            self.assertFalse(User.objects.filter(last_name="Edilmiş").exists(), "azad edilmiş tələbə yaradılmır")
+            lessons = Lesson.objects.filter(offering=offering).order_by("start_time")
+            self.assertEqual([lesson.start_time for lesson in lessons], [dt.time(9, 0), dt.time(10, 30)])
+            self.assertEqual({lesson.kind for lesson in lessons}, {"seminar"})
+            score = LessonMark.objects.get(lesson=lessons[0], enrollment__student=self.existing)
+            self.assertEqual((score.status, score.score), ("present", Decimal("8")))
+            absent = LessonMark.objects.get(lesson=lessons[0], enrollment=guest)
+            self.assertEqual(absent.status, "absent")
+            guest.refresh_from_db()
+            self.assertEqual(guest.absence_hours, 2)
+            syllabus = Syllabus.objects.get(organization=self.org, offering=offering)
+            self.assertEqual(syllabus.approved_version.status, "approved")
+            self.assertEqual(syllabus.approved_version.approval_source, "migration")
+            self.assertTrue(AuditLog.objects.filter(resource_type=BATCH_RESOURCE, resource_id="delta-test").exists())
+        self.assertEqual(run.counters["lesson.future_skipped"], 1)
+        self.assertEqual(run.counters["final.resit.enrollment_unresolved"], 1)
+        again = self._run(apply=True)
+        written = {key: value for key, value in again.counters.items() if key.startswith(("written.", "touched."))}
+        self.assertEqual(written, {})
+        self.assertEqual(again.counters["mark.same"], 4)
+
+    def test_existing_values_are_never_overwritten(self):
+        self._run(apply=True)
+        with bypass_rls():
+            offering = CourseOffering.objects.get(organization=self.org, group=self.group, period=self.period)
+            mark = LessonMark.objects.get(lesson__start_time=dt.time(9, 0), enrollment__student=self.existing)
+            LessonMark.objects.filter(pk=mark.pk).update(score=Decimal("3"))
+            other = User.objects.create_user("other_teacher", "o@example.test", "x")
+            Membership.objects.create(
+                user=other, organization=self.org, role=self.org.roles.get(name="teacher"), is_active=True
+            )
+            CourseOffering.objects.filter(pk=offering.pk).update(instructor=other)
+        run = self._run(apply=True)
+        with bypass_rls():
+            mark.refresh_from_db()
+            offering.refresh_from_db()
+        self.assertEqual(mark.score, Decimal("3"))
+        self.assertEqual(offering.instructor_id, other.pk)
+        self.assertEqual(run.counters["mark.conflict_kept"], 1)
+        self.assertEqual(run.counters["offering.instructor_conflict_kept"], 1)
+
+
+class DeltaBundleTests(TestCase):
+    def test_round_trip_is_private_and_versioned(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "delta.json.gz")
+            write_bundle(path, _bundle())
+            self.assertEqual(stat.S_IMODE(os.stat(path).st_mode), 0o600)
+            self.assertEqual(read_bundle(path)["journals"][0]["uniqid"], "abcDEF1234")
+            broken = _bundle()
+            del broken["points"]
+            with self.assertRaises(BundleError):
+                write_bundle(path, broken)
+
+    def test_command_refuses_digest_mismatch(self):
+        import tempfile
+
+        from django.core.management.base import CommandError
+
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "delta.json.gz")
+            write_bundle(path, _bundle())
+            with self.assertRaises(CommandError):
+                call_command("legacy_delta_apply", "--bundle", path, "--expected-sha256", "f" * 64)
