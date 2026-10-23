@@ -83,7 +83,10 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
     <div class="wl-field">
       <label for="wl-chair">{% trans "Kafedra" context "accounts.workload" %}</label>
       <div class="bootstrap-single-select">
-        <select id="wl-chair" name="chair" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wl-chair>
+        <select id="wl-chair" name="chair" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wl-chair
+                data-live-search="true"
+                data-live-search-placeholder="{% trans 'Kafedra və ya fakültə adı ilə axtar…' context 'accounts.workload_load' %}"
+                data-live-search-empty="{% trans 'Uyğun kafedra tapılmadı' context 'accounts.workload_load' %}">
           {% for chair in workload_distribution_section.chairs %}
           <option value="{{ chair.id }}" {% if chair.id == workload_distribution_section.chair_id %}selected{% endif %}>{{ chair.name }}</option>
           {% empty %}
@@ -118,7 +121,7 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
     <div class="wl-field wl-field--search">
       <label for="wl-q">{% trans "Axtarış" context "accounts.workload" %}</label>
       <input type="search" id="wl-q" name="q" autocomplete="off"
-             placeholder="{% trans 'fənn və ya qrup' context 'accounts.workload' %}" data-wl-search>
+             placeholder="{% trans 'fənn, qrup və ya müəllim' context 'accounts.workload' %}" data-wl-search>
     </div>
     <div class="wl-filters__actions">
       <button type="button" class="wl-btn wl-btn--ghost" data-wl-create-task>

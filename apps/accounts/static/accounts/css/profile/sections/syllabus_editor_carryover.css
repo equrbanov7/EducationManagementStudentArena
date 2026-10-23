@@ -177,3 +177,21 @@
     font-weight: 700;
     overflow-wrap: anywhere;
 }
+
+/* Sahib 2026-10-23: əlavə həftə sətrini silmək düyməsi. */
+.syl-weeks__remove {
+    margin-left: 4px;
+    border: 0;
+    background: transparent;
+    color: var(--ems-danger-600, #dc2626);
+    font-size: 1.05rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+    border-radius: 4px;
+}
+
+.syl-weeks__remove:hover,
+.syl-weeks__remove:focus-visible {
+    background: var(--ems-danger-50, #fef2f2);
+}

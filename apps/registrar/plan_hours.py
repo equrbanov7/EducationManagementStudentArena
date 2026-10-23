@@ -115,16 +115,23 @@ def workload_hours_for_offering(offering) -> dict:
     )
     if offering.group_id:
         rows = rows.filter(groups=offering.group_id)
-    row = (
-        rows.order_by("-updated_at")
-        .values("lecture_plan", "lecture_total", "seminar_plan", "seminar_total", "lab_plan", "lab_total")
-        .first()
-    )
-    if not row:
+    row = rows.order_by("-updated_at").first()
+    if row is None:
         return {}
+    # Sahib 2026-10-23: potok (235 K + 235 İT) — mühazirə 45 saat BİRLİKDƏ, seminar hər qrupa ayrıca 30 → yük
+    # 45 + 60 = 105, sillabus isə 45 + 30 = 75 olmalıdır. Sillabus BİR qrupun saatıdır: mühazirə olduğu kimi,
+    # seminar/lab — ``*_plan`` (qrup başına) cəmdən kiçikdirsə o, əks halda cəm ÷ (qrup × yarımqrup).
+    groups = max(int(row.union_count or 1), row.groups.count(), 1) * max(int(row.subgroup_count or 1), 1)
     hours = {}
     for kind in ("lecture", "seminar", "lab"):
-        value = int(row[f"{kind}_plan"] or 0) or int(row[f"{kind}_total"] or 0)
+        plan = int(getattr(row, f"{kind}_plan") or 0)
+        total = int(getattr(row, f"{kind}_total") or 0)
+        if kind == "lecture" or groups == 1:
+            value = plan or total
+        elif plan and (not total or plan < total):
+            value = plan
+        else:
+            value = round((total or plan) / groups)
         if value > 0:
             hours[kind] = value
     return hours
