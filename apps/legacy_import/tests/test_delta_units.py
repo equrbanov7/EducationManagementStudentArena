@@ -152,6 +152,10 @@ class BuildBundleTests(SimpleTestCase):
             def lesson_dates(self, ids):
                 return []
 
+            def lesson_topics(self, ids):
+                calls.append(("lesson_topics", set(ids)))
+                return []
+
             def points(self, uniqids):
                 return [{"student_id": 8, "journal_uniqid": "old"}]
 

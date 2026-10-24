@@ -25,13 +25,25 @@ from .lessons import build_lessons_and_marks
 from .people import StudentMapper, TeacherMapper, student_gender
 from .resolve import Catalog, lesson_date, text
 from .syllabi import import_syllabi
+from .topics import apply_topics
 from .workload import build_workload
 
 BATCH_RESOURCE = "legacy_import.delta_batch"
 BULK_CHUNK = 2000
 #: Manifestdə id-ləri saxlanılan (az saylı) növlər; qalanı yalnız say.
 MANIFEST_KINDS = ("groups", "subjects", "offerings", "teachers", "students", "syllabus_versions", "workload_chairs")
-PHASES = ("students", "offerings", "enrollments", "lessons", "finals", "syllabi", "workload", "dedupe", "profiles")
+PHASES = (
+    "students",
+    "offerings",
+    "enrollments",
+    "lessons",
+    "topics",
+    "finals",
+    "syllabi",
+    "workload",
+    "dedupe",
+    "profiles",
+)
 
 
 def new_tag() -> str:
@@ -140,6 +152,8 @@ class DeltaRun:
         enrollments = build_enrollments(self, slices) if "enrollments" in phases else {}
         if "lessons" in phases:
             build_lessons_and_marks(self, slices, enrollments, until=self.until)
+        if "topics" in phases:
+            apply_topics(self, slices)
         if "finals" in phases:
             apply_finals(self, enrollments)
         if "syllabi" in phases:

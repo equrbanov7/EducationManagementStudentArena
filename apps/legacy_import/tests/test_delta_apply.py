@@ -363,6 +363,31 @@ class DeltaApplyTests(TestCase):
         again = self._run(apply=True, bundle=bundle)
         self.assertEqual({k: v for k, v in again.counters.items() if k.startswith("written.")}, {})
 
+    def test_lesson_topics_fill_only_blank_and_rerun_is_stable(self):
+        """Köhnə dərs tarixinin sillabus mövzusu dərsə yazılır; müəllimin yazdığı mövzuya toxunulmur."""
+        self._run(apply=True)
+        with bypass_rls():
+            offering = CourseOffering.objects.get(organization=self.org, group=self.group, period=self.period)
+            Lesson.objects.filter(offering=offering, start_time=dt.time(10, 30)).update(topic="Müəllimin mövzusu")
+        bundle = _bundle(
+            lesson_topics=[
+                {"id": 1, "journal_uniqid": "abcDEF1234", "month": 10, "day": 6, "times": "09:00", "movzu": " Giriş  "},
+                {"id": 2, "journal_uniqid": "abcDEF1234", "month": 10, "day": 6, "times": "10:30", "movzu": "Başqa"},
+                {"id": 3, "journal_uniqid": "abcDEF1234", "month": 10, "day": 9, "times": "09:00", "movzu": "Yoxdur"},
+                {"id": 4, "journal_uniqid": "unknownJRN", "month": 10, "day": 6, "times": "09:00", "movzu": "X"},
+            ]
+        )
+        run = self._run(apply=True, bundle=bundle)
+        with bypass_rls():
+            topics = dict(Lesson.objects.filter(offering=offering).values_list("start_time", "topic"))
+        self.assertEqual(topics, {dt.time(9, 0): "Giriş", dt.time(10, 30): "Müəllimin mövzusu"})
+        self.assertEqual(run.counters["topic.filled"], 1)
+        self.assertEqual(run.counters["topic.kept_existing"], 1)
+        self.assertEqual(run.counters["topic.lesson_unmatched"], 1)
+        self.assertEqual(run.counters["topic.offering_unresolved"], 1)
+        again = self._run(apply=True, bundle=bundle)
+        self.assertEqual({k: v for k, v in again.counters.items() if k.startswith(("written.", "touched."))}, {})
+
     def test_teacher_lesson_absorbs_legacy_slot_and_rerun_is_stable(self):
         """Müəllimin yeni sistemdə açdığı eyni gün dərsi bir legacy slotunu udur; ikinci qaçış eyni nəticə."""
         with bypass_rls():

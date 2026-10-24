@@ -16,6 +16,7 @@ import os
 
 from django.core.management.base import BaseCommand, CommandError
 
+from apps.legacy_import.services.delta.apply import PHASES
 from apps.legacy_import.services.delta.bundle import file_sha256, write_bundle
 from apps.legacy_import.services.delta.extract import DeltaExtractor, build_bundle
 from core.rls_pooling import rls_worker_atomic
@@ -45,6 +46,13 @@ class Command(BaseCommand):
         )
         parser.add_argument("--snapshot-file", default="", help="Mənbə dump faylı — yalnız sha256/ölçü provenansı")
         parser.add_argument("--out", required=True, help="Paket faylı (.json.gz, 0600)")
+        parser.add_argument(
+            "--phases",
+            nargs="+",
+            choices=PHASES,
+            default=[],
+            help="Paketin tətbiqdə işlədəcəyi fazalar (snapshot.phases; məs. offerings topics) — default: hamısı",
+        )
 
     def handle(self, *args, **options):
         import pymysql
@@ -79,6 +87,8 @@ class Command(BaseCommand):
                 full_semesters=options["full_semester"],
             )
             bundle = build_bundle(extractor, snapshot=snapshot, since=options["since"])
+            if options["phases"]:
+                bundle["snapshot"]["phases"] = list(options["phases"])
             cursor.execute("ROLLBACK")
         connection.close()
         digest = write_bundle(options["out"], bundle)
@@ -96,6 +106,7 @@ class Command(BaseCommand):
             "points",
             "excuse_windows",
             "syllabi",
+            "lesson_topics",
         ):
             self.stdout.write(f"  {name:15s}: {len(bundle[name])}")
         self.stdout.write(f"Paket: sha256={digest} (0600; şəxsi məlumat — yalnız şifrəli ötürün)")

@@ -48,7 +48,11 @@ class Command(BaseCommand):
             help="Bu tarixdən (YYYY-MM-DD) SONRAKI dərs/xanalar atılır (default: bu gün)",
         )
         parser.add_argument(
-            "--phase", action="append", choices=PHASES, default=[], help="Yalnız bu faza(lar) (default: hamısı)"
+            "--phase",
+            action="append",
+            choices=PHASES,
+            default=[],
+            help="Yalnız bu faza(lar) (default: paketin snapshot.phases-i, yoxdursa hamısı)",
         )
         parser.add_argument("--report-out", default="", help="Saylar (JSON, adsız)")
         parser.add_argument("--names-out", default="", help="Adlı siyahı (CSV, 0600) — yaradılan/ambiqü hesablar")
@@ -80,7 +84,7 @@ class Command(BaseCommand):
                 bundle=bundle,
                 apply=bool(options["apply"]),
                 until=until,
-                phases=tuple(options["phase"] or PHASES),
+                phases=tuple(options["phase"] or (bundle.get("snapshot") or {}).get("phases") or PHASES),
             )
         summary = run.summary()
         summary.update(

@@ -226,6 +226,24 @@ class DeltaExtractor:
             )
         return out
 
+    def lesson_topics(self, journal_ids) -> list[dict]:
+        """Dərs tarixinin sillabus mövzusu (``journals_dates_rooms.sillabus`` → ``sillabus_sem_muh.movzu``)."""
+
+        ids = sorted(journal_ids)
+        out: list[dict] = []
+        for start in range(0, len(ids), self.chunk):
+            part = ids[start : start + self.chunk]
+            marks = ", ".join(["%s"] * len(part))
+            out += self._rows(
+                "SELECT r.id, j.uniqid AS journal_uniqid, r.month, r.day, r.times, r.sem_muh, s.movzu "
+                f"FROM {self.src}.journals_dates_rooms r "
+                f"JOIN {self.src}.journals j ON j.id = r.journal_id "
+                f"JOIN {self.src}.sillabus_sem_muh s ON s.id = r.sillabus "
+                f"WHERE r.journal_id IN ({marks}) AND COALESCE(r.fake, 0) = 0 ORDER BY r.id",
+                part,
+            )
+        return out
+
     def points(self, full_uniqids) -> list[dict]:
         cols = ", ".join(f"p.{_ident(column)}" for column in POINT_COLUMNS)
         out: list[dict] = []
@@ -366,6 +384,7 @@ def build_bundle(extractor: DeltaExtractor, *, snapshot: dict, since: str) -> di
         "points": points,
         "excuse_windows": x.excuse_windows({row["id"] for row in students}, since),
         "syllabi": syllabi,
+        "lesson_topics": x.lesson_topics({row["id"] for row in journals}),
     }
 
 
