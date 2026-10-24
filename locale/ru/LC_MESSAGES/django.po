@@ -108012,3 +108012,43 @@ msgstr "Удалить строку"
 msgctxt "accounts.workload"
 msgid "fənn, qrup və ya müəllim"
 msgstr "дисциплина, группа или преподаватель"
+
+msgctxt "exams.model.exam.field"
+msgid "Müəllim (jurnal)"
+msgstr "Преподаватель (журнал)"
+
+msgctxt "exams.model.exam.field"
+msgid "Bağlı jurnallar"
+msgstr "Связанные журналы"
+
+msgctxt "exams.form.exam.label"
+msgid "Müəllim (jurnal)"
+msgstr "Преподаватель (журнал)"
+
+msgctxt "exams.form.exam.help"
+msgid "Müəllimi seçsəniz, fənn siyahısı onun cari dövrdə tədris etdiyi fənlərlə məhdudlaşır və midterm nəticəsi həmin fənnin qrup jurnallarına yazılır. Boş qalarsa bütün fənlər göstərilir."
+msgstr "Если выбрать преподавателя, список предметов ограничится предметами, которые он ведёт в текущем периоде, а результат промежуточного экзамена будет записан в журналы групп по этому предмету. Если оставить пустым, показываются все предметы."
+
+msgctxt "exams.form.exam.error"
+msgid "Seçilmiş müəllim bu fənni cari dövrdə tədris etmir."
+msgstr "Выбранный преподаватель не ведёт этот предмет в текущем периоде."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Müəllim tapılmadı"
+msgstr "Преподаватель не найден"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Müəllim axtar…"
+msgstr "Поиск преподавателя…"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Seçilmiş müəllim"
+msgstr "Выбранный преподаватель"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Təmizlə (bütün fənlər)"
+msgstr "Очистить (все предметы)"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu müəllimin cari dövrdə tədris etdiyi fənn tapılmadı"
+msgstr "Не найдено предметов, которые этот преподаватель ведёт в текущем периоде"

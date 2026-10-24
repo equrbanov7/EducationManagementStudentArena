@@ -24,6 +24,7 @@ from .lookups import (  # noqa: F401
     subject_search,
     user_search,
 )
+from .lookups_journal import journal_teacher_subjects  # noqa: F401
 
 __all__ = [
     "assigned_student_count",
@@ -37,6 +38,7 @@ __all__ = [
     "grant_extra_attempt",
     "grant_extra_attempt_group",
     "group_search",
+    "journal_teacher_subjects",
     "subject_search",
     "teacher_exam_detail",
     "teacher_exam_detail_questions_page",

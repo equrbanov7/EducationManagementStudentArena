@@ -107226,3 +107226,43 @@ msgstr "Satırı sil"
 msgctxt "accounts.workload"
 msgid "fənn, qrup və ya müəllim"
 msgstr "ders, grup veya öğretim elemanı"
+
+msgctxt "exams.model.exam.field"
+msgid "Müəllim (jurnal)"
+msgstr "Öğretmen (yoklama defteri)"
+
+msgctxt "exams.model.exam.field"
+msgid "Bağlı jurnallar"
+msgstr "Bağlı defterler"
+
+msgctxt "exams.form.exam.label"
+msgid "Müəllim (jurnal)"
+msgstr "Öğretmen (yoklama defteri)"
+
+msgctxt "exams.form.exam.help"
+msgid "Müəllimi seçsəniz, fənn siyahısı onun cari dövrdə tədris etdiyi fənlərlə məhdudlaşır və midterm nəticəsi həmin fənnin qrup jurnallarına yazılır. Boş qalarsa bütün fənlər göstərilir."
+msgstr "Öğretmen seçerseniz ders listesi onun mevcut dönemde verdiği derslerle sınırlanır ve ara sınav sonucu o dersin grup defterlerine yazılır. Boş bırakılırsa tüm dersler gösterilir."
+
+msgctxt "exams.form.exam.error"
+msgid "Seçilmiş müəllim bu fənni cari dövrdə tədris etmir."
+msgstr "Seçilen öğretmen bu dersi mevcut dönemde vermiyor."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Müəllim tapılmadı"
+msgstr "Öğretmen bulunamadı"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Müəllim axtar…"
+msgstr "Öğretmen ara…"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Seçilmiş müəllim"
+msgstr "Seçilen öğretmen"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Təmizlə (bütün fənlər)"
+msgstr "Temizle (tüm dersler)"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu müəllimin cari dövrdə tədris etdiyi fənn tapılmadı"
+msgstr "Bu öğretmenin mevcut dönemde verdiği ders bulunamadı"

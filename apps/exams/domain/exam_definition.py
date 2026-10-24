@@ -148,6 +148,25 @@ class Exam(ExamAccessPolicyMixin, models.Model):
         related_name="exams",
         verbose_name=pgettext_lazy("exams.model.exam.field", "subject"),
     )
+    # 2026-10-24 (sahib, «JS Loop» halı): imtahanın elektron jurnalla AÇIQ bağlantısı. Yaradan əvvəl
+    # MÜƏLLİMİ seçir (fənn siyahısı onun cari dövrdə tədris etdiyi fənlərə daralır), sonra fənni;
+    # ``journal_offerings`` — fənn + qruplar (+ müəllim) üzrə hər qrupun ÖZ jurnal açılışı
+    # (``services.exam_journal_link``). Test midterminin balı tələbənin bağlı jurnalına yazılır.
+    journal_teacher = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="journal_linked_exams",
+        verbose_name=pgettext_lazy("exams.model.exam.field", "Müəllim (jurnal)"),
+    )
+    journal_offerings = models.ManyToManyField(
+        "registrar.CourseOffering",
+        related_name="linked_exams",
+        blank=True,
+        editable=False,
+        verbose_name=pgettext_lazy("exams.model.exam.field", "Bağlı jurnallar"),
+    )
     organization = models.ForeignKey(
         "organizations.Organization",
         on_delete=models.CASCADE,

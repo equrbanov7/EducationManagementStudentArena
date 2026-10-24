@@ -107328,3 +107328,43 @@ msgstr "Sətri sil"
 msgctxt "accounts.workload"
 msgid "fənn, qrup və ya müəllim"
 msgstr "fənn, qrup və ya müəllim"
+
+msgctxt "exams.model.exam.field"
+msgid "Müəllim (jurnal)"
+msgstr "Müəllim (jurnal)"
+
+msgctxt "exams.model.exam.field"
+msgid "Bağlı jurnallar"
+msgstr "Bağlı jurnallar"
+
+msgctxt "exams.form.exam.label"
+msgid "Müəllim (jurnal)"
+msgstr "Müəllim (jurnal)"
+
+msgctxt "exams.form.exam.help"
+msgid "Müəllimi seçsəniz, fənn siyahısı onun cari dövrdə tədris etdiyi fənlərlə məhdudlaşır və midterm nəticəsi həmin fənnin qrup jurnallarına yazılır. Boş qalarsa bütün fənlər göstərilir."
+msgstr "Müəllimi seçsəniz, fənn siyahısı onun cari dövrdə tədris etdiyi fənlərlə məhdudlaşır və midterm nəticəsi həmin fənnin qrup jurnallarına yazılır. Boş qalarsa bütün fənlər göstərilir."
+
+msgctxt "exams.form.exam.error"
+msgid "Seçilmiş müəllim bu fənni cari dövrdə tədris etmir."
+msgstr "Seçilmiş müəllim bu fənni cari dövrdə tədris etmir."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Müəllim tapılmadı"
+msgstr "Müəllim tapılmadı"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Müəllim axtar…"
+msgstr "Müəllim axtar…"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Seçilmiş müəllim"
+msgstr "Seçilmiş müəllim"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Təmizlə (bütün fənlər)"
+msgstr "Təmizlə (bütün fənlər)"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu müəllimin cari dövrdə tədris etdiyi fənn tapılmadı"
+msgstr "Bu müəllimin cari dövrdə tədris etdiyi fənn tapılmadı"

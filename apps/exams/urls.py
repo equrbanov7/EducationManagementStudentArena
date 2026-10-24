@@ -164,6 +164,8 @@ urlpatterns = [
     path("create/", views.createAndEditExamView, name="create_exam"),
     # Sehrbaz axtarışlı select-ləri üçün AJAX lookup endpoint-ləri.
     path("lookups/subjects/", views.subject_search, name="subject_search"),
+    # 2026-10-24: müəllim → fənn asılı seçimi (müəllimin cari dövrdə tədris etdiyi fənlər).
+    path("lookups/teacher-subjects/", views.journal_teacher_subjects, name="journal_teacher_subjects"),
     path("lookups/bank-teachers/", views.bank_teacher_search, name="bank_teacher_search"),
     path("lookups/groups/", views.group_search, name="group_search"),
     path("lookups/faculties/", views.stats_faculty_search, name="stats_faculty_search"),
