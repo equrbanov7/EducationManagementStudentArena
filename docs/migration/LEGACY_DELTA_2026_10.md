@@ -117,6 +117,12 @@ tag `delta-20261024-032938-7b58`. Əvvəl backup: `/backups/last/emsarena-202610
 | Toxunulmayan fərq (xana / açılış müəllimi / yekun) | 89 / 185 / 6 |
 | Müəllimi DB qapısından keçmədi (müəllimsiz açılış) | 17 |
 
+**Tamamlayıcı tətbiq (05:34, run 40050138608, backup `emsarena-20261024-053110`):** dərs yükü axını 273 tələbəni
+eyni fənnin öz qrup jurnalına da yazmışdı (legacy xanaları alt qrup jurnalındadır). `dedupe` fazası boş öz-qrup
+sətirlərini rəsmi «alt qrup birləşməsi» ilə tarixçəyə keçirdi (**238**; `restore_source` ilə geri qaytarıla bilər),
+**520** xana alt qrup jurnalında tamamlandı; hər iki jurnalda xanası olan **35** tələbəyə toxunulmadı (hesabat).
+**Yoxlama dry-run-u (run 40050567621): 0 yazı.** Release, `STAFF_PLAN_KEY` sirri, artifaktlar silinib.
+
 Adlı siyahı (yaradılan hesablar, ambiqü tələbələr, legacy qrup/azad fərqləri) yalnız lokal:
 `~/EMSArena-backups/legacy-delta-2026-10/prod-apply-20261024/` (0600).
 
