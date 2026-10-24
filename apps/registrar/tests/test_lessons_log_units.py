@@ -1,8 +1,9 @@
 """«Keçilmiş dərslər» — «Fakültə» və «Kafedra» filtrləri (sahib, 2026-09-25).
 
-Fakültə = qrupun struktur əcdadı; Kafedra = müəllimin kafedra üzvlüyü VƏ YA fənnin aparıcı
-kafedrası (``Subject.chair_unit``); fakültə seçimi kafedra siyahısını daraldır; siyahılar
-aktorun əhatəsinə görədir; KPI, siyahı, CSV və «qeydə alınmayıb» sayğacı eyni filtrdən keçir."""
+Fakültə = qrupun struktur əcdadı; Kafedra = açılışın kafedrası (``offering_chairs``: dərs yükü →
+``Subject.chair_unit`` → … → müəllimin ştat kafedrası; 2026-10-25); fakültə seçimi kafedra siyahısını
+daraldır; fakültə siyahısı aktorun əhatəsinə görədir; KPI, siyahı, CSV və «qeydə alınmayıb» sayğacı eyni
+filtrdən keçir."""
 
 import datetime as dt
 import uuid
@@ -145,9 +146,11 @@ class LessonsLogUnitFiltersTest(TestCase):
         self.assertEqual(self._codes(self._section(self.rim, ll_faculty=str(self.f1.pk))), ["LLF-A", "LLF-C"])
         self.assertEqual(self._codes(self._section(self.rim, ll_faculty=str(self.f2.pk))), ["LLF-B"])
 
-    def test_kafedra_is_the_teachers_chair_or_the_subjects_chair(self):
-        self.assertEqual(self._codes(self._section(self.rim, ll_kafedra=str(self.c1.pk))), ["LLF-A"])  # müəllim
+    def test_kafedra_is_the_subjects_chair_not_the_teachers_staff_chair(self):
+        # LLF-A: müəllim ştatca c1-də, fənn c2-nindir → yalnız c2 (2026-10-25).
+        self.assertEqual(self._codes(self._section(self.rim, ll_kafedra=str(self.c1.pk))), [])
         self.assertEqual(self._codes(self._section(self.rim, ll_kafedra=str(self.c2.pk))), ["LLF-A"])  # fənn
+        # LLF-B: fənnin kafedrası/yükü yoxdur → müəllimin ştat kafedrası; LLF-C: fənn.
         self.assertEqual(self._codes(self._section(self.rim, ll_kafedra=str(self.c3.pk))), ["LLF-B", "LLF-C"])
 
     def test_totals_follow_the_filter(self):
@@ -161,13 +164,12 @@ class LessonsLogUnitFiltersTest(TestCase):
         faculties = [o["value"] for o in self._field(everything, "faculty")["options"]]
         kafedras = [o["value"] for o in self._field(everything, "kafedra")["options"]]
         self.assertEqual(set(faculties), {"", str(self.f1.pk), str(self.f2.pk)})
-        self.assertEqual(set(kafedras), {"", str(self.c1.pk), str(self.c2.pk), str(self.c3.pk)})
+        # Kafedra siyahısı = dərslərin kafedraları (c1-in fənni yoxdur — onun müəllimi c2-nin fənnini aparır).
+        self.assertEqual(set(kafedras), {"", str(self.c2.pk), str(self.c3.pk)})
         self.assertTrue(self._field(everything, "kafedra")["searchable"])
 
         narrowed = self._section(self.rim, ll_faculty=str(self.f1.pk), ll_kafedra=str(self.c3.pk))
-        self.assertEqual(
-            {o["value"] for o in self._field(narrowed, "kafedra")["options"]}, {"", str(self.c1.pk), str(self.c2.pk)}
-        )
+        self.assertEqual({o["value"] for o in self._field(narrowed, "kafedra")["options"]}, {"", str(self.c2.pk)})
         # Fakültəyə aid olmayan kafedra atılır — nəticə boş qalmır, ixrac URL-i də təmizdir.
         self.assertEqual(self._field(narrowed, "kafedra")["value"], "")
         self.assertEqual(self._codes(narrowed), ["LLF-A", "LLF-C"])
@@ -182,9 +184,12 @@ class LessonsLogUnitFiltersTest(TestCase):
         # Əhatədə tək fakültə — avtomatik seçilib, sahə gizlidir (sahib, 2026-10-14).
         faculty = self._field(section, "faculty")
         self.assertEqual((faculty["kind"], faculty["value"]), ("hidden", str(self.f1.pk)))
-        self.assertEqual(
-            {o["value"] for o in self._field(section, "kafedra")["options"]}, {"", str(self.c1.pk), str(self.c2.pk)}
-        )
+        # Fakültə ilə daralmış tək kafedra AVTOMATİK seçilmir: dekanın qruplarına başqa fakültənin
+        # kafedrası (c3 — LLF-C) da dərs keçir, kilid onları gizlədərdi (2026-10-25).
+        kafedra = self._field(section, "kafedra")
+        self.assertEqual({o["value"] for o in kafedra["options"]}, {"", str(self.c2.pk)})
+        self.assertEqual(kafedra["kind"], "select")
+        self.assertEqual(self._codes(self._section(self.dean, ll_kafedra=str(self.c2.pk))), ["LLF-A"])
 
     # ── Əhatədə tək seçim → avtomatik seçim + gizli sahə (sahib, 2026-10-14) ──
 
@@ -209,6 +214,18 @@ class LessonsLogUnitFiltersTest(TestCase):
         self.assertEqual(self._field(section, "kafedra")["value"], str(self.c3.pk))
 
     def test_teacher_with_two_kafedra_options_keeps_the_select(self):
+        with bypass_rls():
+            extra = CourseOffering.objects.create(
+                organization=self.org,
+                subject=Subject.objects.create(organization=self.org, code="LLF-D", name="Fənn D", chair_unit=self.c1),
+                period=self.o1.period,
+                group=self.g1,
+                instructor=self.t1,
+                lesson_hours=60,
+            )
+            Lesson.objects.create(
+                organization=self.org, offering=extra, date=dt.date(2025, 10, 13), kind=LessonKind.LECTURE, hours=2
+            )
         section = self._section(self.t1)
         self.assertEqual(self._field(section, "faculty")["kind"], "hidden")
         kafedra = self._field(section, "kafedra")
@@ -216,7 +233,7 @@ class LessonsLogUnitFiltersTest(TestCase):
         self.assertEqual({o["value"] for o in kafedra["options"]}, {"", str(self.c1.pk), str(self.c2.pk)})
         # Kilidli fakültəyə aid olmayan (əhatədən kənar) kafedra atılır — nəticə öz dərsləridir, ad sızmır.
         section = self._section(self.t1, ll_kafedra=str(self.c3.pk))
-        self.assertEqual(self._codes(section), ["LLF-A"])
+        self.assertEqual(self._codes(section), ["LLF-A", "LLF-D"])
         self.assertEqual(self._field(section, "kafedra")["value"], "")
         chips = {chip["name"]: chip["value_label"] for chip in section["filters"]["applied"]}
         self.assertNotEqual(chips.get("ll_kafedra"), "Maliyyə kafedrası")
@@ -262,7 +279,7 @@ class LessonsLogUnitFiltersTest(TestCase):
 
     def test_csv_export_applies_the_filters(self):
         response = self._client(self.rim).get(
-            reverse("registrar:lessons_log_csv"), dict(WINDOW, ll_kafedra=str(self.c1.pk))
+            reverse("registrar:lessons_log_csv"), dict(WINDOW, ll_kafedra=str(self.c2.pk))
         )
         self.assertEqual(response.status_code, 200)
         body = response.content.decode("utf-8")
@@ -288,7 +305,7 @@ class LessonsLogUnitFiltersTest(TestCase):
         self.assertEqual(count(), 2)  # 10.10 və 17.10 cümə — dərs yazılmayıb
         self.assertEqual(count(faculty_unit=self.f2), 2)
         self.assertEqual(count(faculty_unit=self.f1), 0)
-        self.assertEqual(count(kafedra_unit=self.c3), 2)  # müəllim (t2) Maliyyə kafedrasındadır
+        self.assertEqual(count(kafedra_unit=self.c3), 2)  # fənnin kafedrası yoxdur → müəllimin (t2) ştatı
         self.assertEqual(count(kafedra_unit=self.c1), 0)
         self.assertEqual(count(invalid_unit=True), 0)
 

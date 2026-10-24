@@ -78,7 +78,7 @@ def _kafedra_roots(user, organization, scope) -> list:
     ]
 
 
-def _unit_view_q(organization, scope, kafedras):
+def _unit_view_q(organization, scope, kafedras, within=None):
     """UNIT əhatəsinin açılış Q-su: qrup alt-ağacı VƏ YA (kafedra kökü üçün) kafedraya aid açılış."""
     from django.apps import apps as django_apps
     from django.db.models import Q
@@ -89,7 +89,7 @@ def _unit_view_q(organization, scope, kafedras):
     units = org_unit_model.objects.filter(organization=organization).filter(scope.unit_subtree_q()).values("pk")
     query = Q(group__in=units)
     for unit in kafedras:
-        query |= kafedra_offering_q(unit)
+        query |= kafedra_offering_q(unit, within=within)
     return query
 
 
@@ -103,10 +103,9 @@ def journal_view_q(user, organization):
 
     2026-10-24 (sahib): köçürülmüş strukturda qrup fakültə → ixtisas → qrup altındadır, kafedra
     fakültənin AYRICA uşağıdır — kafedra əhatəli daşıyıcı heç nə görmürdü. Kökü kafedra olan əhatə
-    ƏLAVƏ olaraq kafedraya aid açılışları görür (``lessons_log_units.kafedra_offering_q`` — müəllimin
-    kafedra üzvlüyü və ya fənnin aparıcı kafedrası; jurnal siyahısının «Kafedra» süzgəci ilə eyni
-    tərif). Başqa kafedranın açılışı düşmür; fakültə / org-wide əhatə dəyişmir. Əlavə sorğu yoxdur
-    (alt-sorğular).
+    ƏLAVƏ olaraq kafedraya aid açılışları görür (``lessons_log_units.kafedra_offering_q`` — fənnin
+    tədris yükünün kafedrası, tərif ``offering_chairs``-dədir; jurnal siyahısının «Kafedra» süzgəci ilə
+    eyni tərif). Başqa kafedranın açılışı düşmür; fakültə / org-wide əhatə dəyişmir.
     """
     from django.db.models import Q
 
@@ -122,7 +121,7 @@ def offering_in_journal_view_scope(user, organization, offering) -> bool:
     """Detal-səviyyə qarşılığı :func:`journal_view_q`: bu açılış ``journal.view`` əhatəsindədirmi.
 
     Org-wide → sorğusuz bəli; fakültə kökü → əvvəlki kimi qrupun alt-ağacı (:func:`offering_in_actor_scope`);
-    kafedra kökü → siyahı ilə EYNİ Q (tək ``EXISTS`` sorğusu). Siyahı ilə detal ayrılmasın deyə hər ikisi
+    kafedra kökü → siyahı ilə EYNİ Q (həll yalnız bu açılış üçün). Siyahı ilə detal ayrılmasın deyə hər ikisi
     bu modulun eyni köməkçilərindən qurulur.
     """
     scope = _permission_scope(user, organization, JOURNAL_VIEW_PERMISSION)
@@ -136,11 +135,8 @@ def offering_in_journal_view_scope(user, organization, offering) -> bool:
     from django.apps import apps as django_apps
 
     offering_model = django_apps.get_model("registrar", "CourseOffering")
-    return (
-        offering_model.objects.filter(organization=organization, pk=offering.pk)
-        .filter(_unit_view_q(organization, scope, kafedras))
-        .exists()
-    )
+    single = offering_model.objects.filter(organization=organization, pk=offering.pk)
+    return single.filter(_unit_view_q(organization, scope, kafedras, within=single)).exists()
 
 
 def permission_scope_for(user, organization, permission):
