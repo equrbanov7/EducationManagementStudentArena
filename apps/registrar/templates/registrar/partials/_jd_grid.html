@@ -86,14 +86,14 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                             <th class="jd2-th-lesson {% if lm.is_today %}is-today{% endif %}{% if not lm.editable %} jd2-th-lesson--locked{% endif %}{% if lm.lesson.off_schedule_reason %} is-offsched{% endif %}"
                                 id="jd-lesson-{{ lm.lesson.id }}"
                                 data-jd-hint-col="{{ lm.lesson.date|date:'d.m.Y' }} · {{ lm.lesson.get_kind_display }}"
-                                title="{{ lm.lesson.get_kind_display }}{% if lm.lesson.topic %} — {{ lm.lesson.topic }}{% endif %}{% if lm.lesson.start_time %} · {{ lm.lesson.start_time|time:'H:i' }}{% endif %}{% if lm.lesson.off_schedule_reason %} · {% trans 'cədvəldən kənar' context 'registrar.journal_activation' %}: {{ lm.lesson.off_schedule_reason }}{% endif %}">
+                                title="{{ lm.lesson.get_kind_display }}{% if lm.lesson.display_topic %} — {{ lm.lesson.display_topic }}{% endif %}{% if lm.lesson.start_time %} · {{ lm.lesson.start_time|time:'H:i' }}{% endif %}{% if lm.lesson.off_schedule_reason %} · {% trans 'cədvəldən kənar' context 'registrar.journal_activation' %}: {{ lm.lesson.off_schedule_reason }}{% endif %}">
                                 {% if not lm.editable %}
                                 {# Redaktə pəncərəsi keçib → tarixə klik oxu-rejimi GÜN ÖZƏTİ modalını açır. #}
                                 <button type="button" class="jd2-th-date-btn" data-jd-day-summary
                                         data-date="{{ lm.lesson.date|date:'d.m.Y' }}"
                                         data-iso="{{ lm.lesson.date|date:'Y-m-d' }}"
                                         data-kind="{{ lm.lesson.get_kind_display }}"
-                                        data-topic="{{ lm.lesson.topic }}"
+                                        data-topic="{{ lm.lesson.display_topic }}"
                                         data-ie="{{ lm.summary.ie }}" data-qb="{{ lm.summary.qb }}"
                                         data-uq="{{ lm.summary.uq }}" data-scored="{{ lm.summary.scored }}"
                                         data-total="{{ lm.summary.total }}" data-marked="{{ lm.summary.marked }}"
@@ -108,7 +108,7 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                                         data-lesson-id="{{ lm.lesson.id }}"
                                         data-lesson-date="{{ lm.lesson.date|date:'Y-m-d' }}"
                                         data-lesson-kind="{{ lm.lesson.kind }}"
-                                        data-lesson-topic="{{ lm.lesson.topic }}"
+                                        data-lesson-topic="{{ lm.lesson.display_topic }}"
                                         data-lesson-hours="{{ lm.lesson.hours }}"
                                         data-lesson-locked="{% if not lm.editable %}1{% endif %}"
                                         data-lesson-instructor="{{ lm.lesson.instructor_id|default:'' }}"

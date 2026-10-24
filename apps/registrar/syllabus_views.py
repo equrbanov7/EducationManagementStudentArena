@@ -30,6 +30,10 @@ from .audit_write import create_audit_row
 
 MODE_STAFF = "staff"
 MODE_STUDENT = "student"
+#: Yalnız-oxu jurnal girişi (``journal_access.can_observe_journal`` — kafedra müdiri / ``journal.view`` əhatəsi,
+#: təhvil vermiş köhnə müəllim). Jurnal səhifəsində «Sillabusa bax» düyməsini görürdülər, amma panel 404
+#: verirdi (2026-10-25). Tələbə kimi YALNIZ təsdiqlənmiş versiyanı görürlər.
+MODE_OBSERVER = "observer"
 
 
 def _(text):
@@ -37,7 +41,7 @@ def _(text):
 
 
 def _viewer_mode(request, offering) -> str | None:
-    """``staff`` / ``student`` / ``None`` — qeydiyyat və redaktə qapıları."""
+    """``staff`` / ``student`` / ``observer`` / ``None`` — redaktə, qeydiyyat və yalnız-oxu qapıları."""
     from apps.registrar import corrections as corrections_service
 
     if journal_access.can_edit_journal(request.user, offering) or corrections_service.can_correct_journal(request):
@@ -50,7 +54,9 @@ def _viewer_mode(request, offering) -> str | None:
         student=request.user,
         organization=offering.organization,
     ).exists()
-    return MODE_STUDENT if enrolled else None
+    if enrolled:
+        return MODE_STUDENT
+    return MODE_OBSERVER if journal_access.can_observe_journal(request.user, offering) else None
 
 
 def _resolve(request, offering_id):
@@ -70,7 +76,7 @@ def _resolve(request, offering_id):
     if syllabus is None:
         raise Http404
 
-    if mode == MODE_STUDENT:
+    if mode in (MODE_STUDENT, MODE_OBSERVER):
         version = syllabus_services.approved_version_for(syllabus)
     else:
         state = syllabus_services.offering_syllabus_state(syllabus)
@@ -100,9 +106,36 @@ def offering_syllabus_json(request, offering_id):
                 else ""
             ),
             "pdf_url": _pdf_url(offering_id),
+            # Həftəlik planın hər sətri üçün «keçilib» (tarixlərlə) / «keçilməyib» — sahib 2026-10-25.
+            "week_progress": _week_progress(offering),
             **document,
         }
     )
+
+
+def _week_progress(offering) -> dict:
+    """TƏSDİQLƏNMİŞ planın sətirləri ↔ jurnal dərsləri (``journal_topics.week_progress``); plan yoxdursa boş.
+
+    Göstərilən versiyadan (müəllim üçün açıq versiya ola bilər) asılı deyil: ``Lesson.syllabus_week`` qüvvədə
+    olan təsdiqlənmiş planın sətir nömrəsidir."""
+    from . import journal_topics
+
+    week_rows = journal_topics.syllabus_week_rows(offering)
+    if not week_rows:
+        return {"rows": [], "covered": 0, "total": 0}
+    lessons = list(offering.lessons.only("date", "topic", "syllabus_week"))
+    rows = [
+        {
+            "week": row["week"],
+            "title": row["title"] or "—",
+            "covered": row["covered"],
+            "planned": row["planned"],
+            "dates": [day.strftime("%d.%m.%Y") for day in row["dates"]],
+            "upcoming": [day.strftime("%d.%m.%Y") for day in row["upcoming"]],
+        }
+        for row in journal_topics.week_progress(offering, lessons, week_rows=week_rows)
+    ]
+    return {"rows": rows, "covered": sum(1 for row in rows if row["covered"]), "total": len(rows)}
 
 
 def _document(offering, syllabus, version) -> dict:
@@ -161,4 +194,4 @@ def _audit_download(offering, version, by_user):
     )
 
 
-__all__ = ["MODE_STAFF", "MODE_STUDENT", "offering_syllabus_json", "offering_syllabus_pdf"]
+__all__ = ["MODE_OBSERVER", "MODE_STAFF", "MODE_STUDENT", "offering_syllabus_json", "offering_syllabus_pdf"]

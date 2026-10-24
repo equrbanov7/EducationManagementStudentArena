@@ -108093,3 +108093,35 @@ msgstr "Save planned hours"
 msgctxt "accounts.syllabus"
 msgid "Avtomatik hesaba qayıt"
 msgstr "Back to automatic calculation"
+
+msgctxt "registrar.journal_topics"
+msgid "…və ya planda olmayan mövzunu özünüz yazın"
+msgstr "…or type a topic that is not in the plan"
+
+msgctxt "registrar.journal_topics"
+msgid "Planda olmayan mövzu"
+msgstr "Topic not in the plan"
+
+msgctxt "registrar.journal_topics"
+msgid "Plandan seçilən mövzu sillabusun həftəlik planında «keçilib» kimi işarələnir."
+msgstr "A topic chosen from the plan is marked as «covered» in the syllabus weekly plan."
+
+msgctxt "registrar.syllabus_progress"
+msgid "Keçilib"
+msgstr "Covered"
+
+msgctxt "registrar.syllabus_progress"
+msgid "Keçilməyib"
+msgstr "Not covered"
+
+msgctxt "registrar.syllabus_progress"
+msgid "Planlaşdırılıb"
+msgstr "Scheduled"
+
+msgctxt "registrar.syllabus_progress"
+msgid "{covered} / {total} mövzu keçilib"
+msgstr "{covered} / {total} topics covered"
+
+msgctxt "registrar.syllabus_progress"
+msgid "Mövzuların keçilməsi (jurnal üzrə)"
+msgstr "Topic coverage (from the journal)"

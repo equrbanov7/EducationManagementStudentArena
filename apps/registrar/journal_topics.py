@@ -22,18 +22,13 @@ from django.db.models import prefetch_related_objects
 SYLLABUS_HOUR_KINDS = ("lecture", "seminar", "lab")
 
 
-def syllabus_topic_rows(offering):
-    """TƏSDİQLƏNMİŞ sillabusun mövzu planı — mövzu bir dəfə, saat növ üzrə.
+def normalize_topic(text) -> str:
+    """Mövzu müqayisəsi üçün: boşluqlar sıxılır, registr nəzərə alınmır (``casefold``)."""
+    return " ".join(str(text or "").split()).casefold()
 
-    Dizayn qaydası §8/0: «Sillabusun həftəlik planında mövzu BİR DƏFƏ yazılır,
-    saat isə mühazirə / seminar / laboratoriya üzrə AYRICA saxlanılır.  Jurnalda
-    həmin mövzu hər növ üçün ayrı dərs sətri kimi açılır — başlıq eynidir,
-    ``kind`` fərqlidir.»
 
-    Nəticə: ``[{"title": str, "kinds": (…)}]``.  Yalnız ``APPROVED`` versiya
-    oxunur (§8/9 və §6.5) — qaralama versiyanın mövzuları jurnala sızmır.
-    Sillabus yoxdursa BOŞ siyahı (çağıran LMS kursuna geri çəkilir).
-    """
+def _approved_plan_rows(offering) -> list:
+    """Açılışın TƏSDİQLƏNMİŞ sillabusunun ``week.rows`` lüğət sətirləri (sıra saxlanılır)."""
     from apps.syllabus import public as syllabus_services
 
     syllabus = syllabus_services.syllabus_for_offering_obj(offering)
@@ -45,18 +40,151 @@ def syllabus_topic_rows(offering):
     # olunubsa — məs. ``selfwork_structure`` — sorğu yoxdur).
     prefetch_related_objects([version], "sections")
     week = next((row.data or {} for row in version.sections.all() if row.section_id == "week"), {})
+    return syllabus_services.week_plan_rows(week)
+
+
+def _week_entry(index, entry) -> dict:
+    kinds = tuple(kind for kind in SYLLABUS_HOUR_KINDS if _positive(entry.get(kind)))
+    return {"week": index, "title": str(entry.get("topic") or "").strip()[:255], "kinds": kinds}
+
+
+def syllabus_week_rows(offering, *, plan_rows=None) -> list:
+    """Həftəlik planın HƏR sətri nömrəsi ilə: ``[{"week": n, "title": str, "kinds": (…)}]``.
+
+    ``week`` — ``Lesson.syllabus_week``-in semantikası: ``week.rows``-da 1-dən sıra, boş mövzulu sətirlər
+    də sayılır (``title`` boş qalır). Yalnız ``APPROVED`` versiya; yoxdursa boş siyahı."""
+    rows = _approved_plan_rows(offering) if plan_rows is None else plan_rows
+    return [_week_entry(index, entry) for index, entry in enumerate(rows, start=1)]
+
+
+def syllabus_topic_rows(offering):
+    """TƏSDİQLƏNMİŞ sillabusun mövzu planı — mövzu bir dəfə, saat növ üzrə.
+
+    Dizayn qaydası §8/0: «Sillabusun həftəlik planında mövzu BİR DƏFƏ yazılır,
+    saat isə mühazirə / seminar / laboratoriya üzrə AYRICA saxlanılır.  Jurnalda
+    həmin mövzu hər növ üçün ayrı dərs sətri kimi açılır — başlıq eynidir,
+    ``kind`` fərqlidir.»
+
+    Nəticə: ``[{"title": str, "kinds": (…), "week": n}]`` — ``week`` başlığın İLK sətrinin nömrəsidir.
+    Yalnız ``APPROVED`` versiya oxunur (§8/9 və §6.5) — qaralama versiyanın mövzuları jurnala sızmır.
+    Sillabus yoxdursa BOŞ siyahı (çağıran LMS kursuna geri çəkilir).
+    """
     rows = []
     seen = set()
-    for entry in week.get("rows") or []:
-        if not isinstance(entry, dict):
-            continue
-        title = (entry.get("topic") or "").strip()
+    for entry in syllabus_week_rows(offering):
+        title = entry["title"]
         if not title or title in seen:
             continue
-        kinds = tuple(kind for kind in SYLLABUS_HOUR_KINDS if _positive(entry.get(kind)))
         seen.add(title)
-        rows.append({"title": title, "kinds": kinds})
+        rows.append({"title": title, "kinds": entry["kinds"], "week": entry["week"]})
     return rows
+
+
+def resolve_syllabus_week(offering, topic, *, current=None, week_rows=None):
+    """Dərs mövzusunun bağlandığı plan sətri və ya ``None`` (uydurma bağ yoxdur).
+
+    * mövzu ``current`` sətrinin başlığı ilə eynidirsə (normallaşdırılmış) — bağ QALIR (təkrar başlıq);
+    * əks halda başlığı DƏQİQ (boşluq/registr normallaşdırılmış) uyğun gələn İLK sətir;
+    * uyğun sətir yoxdursa (sərbəst mətn) və ya mövzu boşdursa — ``None``."""
+    key = normalize_topic(topic)
+    if not key:
+        return None
+    rows = syllabus_week_rows(offering) if week_rows is None else week_rows
+    matches = [row["week"] for row in rows if row["title"] and normalize_topic(row["title"]) == key]
+    if current in matches:
+        return current
+    return matches[0] if matches else None
+
+
+def posted_topic(post):
+    """Modalın mövzusu: sərbəst mətn (``lesson_topic_custom``) doludursa o, yoxdursa plan seçimi.
+
+    ``None`` — sahə ümumiyyətlə göndərilməyib (redaktədə «dəyişmə»)."""
+    custom = (post.get("lesson_topic_custom") or "").strip()
+    if custom:
+        return custom
+    return post.get("lesson_topic")
+
+
+def shown_topic(lesson) -> str:
+    """Dərsin göstərilən mövzusu (``Lesson.display_topic``); sadə test obyektlərində ``topic``."""
+    return getattr(lesson, "display_topic", None) or getattr(lesson, "topic", "") or ""
+
+
+def attach_syllabus_topics(lessons, *, offering=None):
+    """Mövzusu BOŞ, amma ``syllabus_week``-i olan dərslərə sətrin mövzusunu qoyur (``display_topic``).
+
+    ``offering`` verilsə hamısı o açılışdandır (memo-lanmış sillabus — jurnal səhifəsi); verilməsə
+    açılışlar üzrə TOPLU (``approved_week_rows_for_offerings``, ≤ 3 sorğu). Bağlı mövzusuz dərs yoxdursa
+    sorğu YOXDUR. Təxirə salınmış (``only``) sahələr oxunmur — dərs başına əlavə sorğu yaranmasın."""
+    need = []
+    for lesson in lessons:
+        state = vars(lesson)
+        if state.get("topic") or not state.get("syllabus_week"):
+            continue
+        need.append(lesson)
+    if not need:
+        return lessons
+    if offering is not None:
+        plans = {offering.pk: _approved_plan_rows(offering)}
+    else:
+        from apps.syllabus import public as syllabus_services
+
+        offerings = {lesson.offering_id: lesson.offering for lesson in need}
+        plans = syllabus_services.approved_week_rows_for_offerings(offerings.values())
+    for lesson in need:
+        rows = plans.get(lesson.offering_id if offering is None else offering.pk) or []
+        index = lesson.syllabus_week
+        if 1 <= index <= len(rows):
+            lesson._syllabus_topic = str(rows[index - 1].get("topic") or "").strip()[:255]
+    return lessons
+
+
+def week_progress(offering, lessons, *, today=None, week_rows=None) -> list:
+    """Sillabus planının HƏR sətri üçün «keçilib» statusu (sahib 2026-10-25).
+
+    Dərs sətrə ``syllabus_week`` ilə bağlanır; bağı olmayan dərs mövzusu sətrin başlığı ilə DƏQİQ
+    (normallaşdırılmış) eynidirsə həmin başlığın İLK sətrinə sayılır. ``covered`` — bu günə qədər (daxil)
+    keçirilmiş ən azı bir dərs; ``planned`` — yalnız gələcək tarixli dərs. Mövzusu boş və heç bir dərsə
+    bağlı olmayan sətir göstərilmir. Nəticə: ``[{"week", "title", "kinds", "covered", "planned", "dates",
+    "upcoming"}]`` (``dates`` — keçirilmiş dərslərin tarixləri, artan)."""
+    from django.utils import timezone
+
+    today = today or timezone.localdate()
+    rows = syllabus_week_rows(offering) if week_rows is None else week_rows
+    if not rows:
+        return []
+    first_by_title = {}
+    for row in rows:
+        if row["title"]:
+            first_by_title.setdefault(normalize_topic(row["title"]), row["week"])
+    held: dict = {}
+    upcoming: dict = {}
+    for lesson in lessons:
+        linked = getattr(lesson, "syllabus_week", None) or 0
+        week = linked if 1 <= linked <= len(rows) else None
+        if week is None:
+            week = first_by_title.get(normalize_topic(lesson.topic))
+        if week is None:
+            continue
+        (held if lesson.date <= today else upcoming).setdefault(week, set()).add(lesson.date)
+    out = []
+    for row in rows:
+        dates = sorted(held.get(row["week"], ()))
+        later = sorted(upcoming.get(row["week"], ()))
+        if not row["title"] and not dates and not later:
+            continue
+        out.append(
+            {
+                **row,
+                "kinds": list(row["kinds"]),
+                "covered": bool(dates),
+                "planned": not dates and bool(later),
+                "dates": dates,
+                "upcoming": later,
+            }
+        )
+    return out
 
 
 def _positive(value) -> bool:
@@ -105,13 +233,14 @@ def lesson_topic_meta(offering, lessons):
     covered = {}
     covered_kinds = {}
     for lesson in lessons:
-        if not lesson.topic:
+        topic = shown_topic(lesson)  # mövzusuz, sillabus sətrinə bağlı dərs də sayılır (2026-10-25)
+        if not topic:
             continue
-        covered.setdefault(lesson.topic, lesson.date)
-        covered_kinds.setdefault(lesson.topic, set()).add(lesson.kind)
+        covered.setdefault(topic, lesson.date)
+        covered_kinds.setdefault(topic, set()).add(lesson.kind)
     rows = syllabus_topic_rows(offering)
     if not rows:
-        rows = [{"title": title, "kinds": ()} for title in _course_topic_titles(offering)]
+        rows = [{"title": title, "kinds": (), "week": None} for title in _course_topic_titles(offering)]
     return [
         {
             "title": row["title"],
@@ -120,6 +249,7 @@ def lesson_topic_meta(offering, lessons):
             "kinds": list(row["kinds"]),
             "kinds_attr": " ".join(row["kinds"]),
             "covered_kinds": sorted(covered_kinds.get(row["title"], ())),
+            "week": row.get("week"),
         }
         for row in rows
     ]
@@ -127,7 +257,14 @@ def lesson_topic_meta(offering, lessons):
 
 __all__ = [
     "SYLLABUS_HOUR_KINDS",
+    "attach_syllabus_topics",
     "lesson_topic_choices",
     "lesson_topic_meta",
+    "normalize_topic",
+    "posted_topic",
+    "resolve_syllabus_week",
+    "shown_topic",
     "syllabus_topic_rows",
+    "syllabus_week_rows",
+    "week_progress",
 ]

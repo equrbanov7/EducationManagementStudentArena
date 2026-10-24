@@ -329,6 +329,10 @@ def build_rows(lessons_qs, *, limit=ROW_CAP) -> list:
         ).order_by("-date", "-start_time", "-created_at")[:limit]
     )
     stats = marks_by_lesson([lesson.id for lesson in lessons])
+    # Mövzusuz, sillabus sətrinə bağlı (köçürülmüş) dərsin mövzusu sətirdən — toplu, ≤ 3 sorğu (2026-10-25).
+    from apps.registrar.journal_topics import attach_syllabus_topics
+
+    attach_syllabus_topics(lessons)
     kind_labels = dict(LessonKind.choices)
     rows = []
     for lesson in lessons:
@@ -344,8 +348,8 @@ def build_rows(lessons_qs, *, limit=ROW_CAP) -> list:
                 "end_time": lesson.end_time,
                 "kind": lesson.kind,
                 "kind_label": kind_labels.get(lesson.kind, lesson.kind),
-                "topic": lesson.topic or "",
-                "has_topic": bool(lesson.topic),
+                "topic": lesson.display_topic,
+                "has_topic": bool(lesson.display_topic),
                 "hours": int(lesson.hours or 0),
                 "room": _room_label(lesson.room),
                 "subject_code": getattr(lesson.offering.subject, "code", "") or "",

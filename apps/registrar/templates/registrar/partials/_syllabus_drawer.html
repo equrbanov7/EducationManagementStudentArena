@@ -40,6 +40,18 @@ açan düymənin `data-sylv-open` atributundan gəlir (bir panel, çox düymə).
                 {% trans "Sillabus açıla bilmədi. Səhifəni yeniləyib yenidən cəhd edin." context "registrar.syllabus" %}
             </p>
             <div data-sylv-blocks></div>
+            {% comment %}Sahib 2026-10-25: həftəlik planın HƏR sətri — jurnalda keçilibmi (tarixlərlə). Sətir dərsə
+            `Lesson.syllabus_week` ilə bağlanır (bax journal_topics.week_progress); JSON `week_progress`, render
+            syllabus_view.js. Mətnlər data-atributlardadır (xarici JS şablondan keçmir).{% endcomment %}
+            <section class="sylv-block sylv-progress" data-sylv-progress hidden
+                     data-label-covered="{% trans 'Keçilib' context 'registrar.syllabus_progress' %}"
+                     data-label-pending="{% trans 'Keçilməyib' context 'registrar.syllabus_progress' %}"
+                     data-label-planned="{% trans 'Planlaşdırılıb' context 'registrar.syllabus_progress' %}"
+                     data-label-summary="{% trans '{covered} / {total} mövzu keçilib' context 'registrar.syllabus_progress' %}">
+                <h4 class="sylv-block__title">{% trans "Mövzuların keçilməsi (jurnal üzrə)" context "registrar.syllabus_progress" %}</h4>
+                <p class="sylv-progress__summary" data-sylv-progress-summary></p>
+                <ol class="sylv-progress__list" data-sylv-progress-list></ol>
+            </section>
         </div>
         <footer class="sylv__foot">
             <a class="sylv__pdf" data-sylv-pdf href="#" hidden>

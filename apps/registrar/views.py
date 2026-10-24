@@ -487,7 +487,7 @@ def _handle_add_lesson(request, offering):
             offering=offering,
             date=date,
             kind=kind,
-            topic=(request.POST.get("lesson_topic") or "").strip(),
+            topic=(_je.posted_topic(request.POST) or "").strip(),  # plan seçimi və ya sərbəst mətn
             hours=hours,
             start_time=start_time,
             end_time=end_time,

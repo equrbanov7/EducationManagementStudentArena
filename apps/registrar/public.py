@@ -342,6 +342,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
         .order_by("-lesson__date", "-lesson__created_at")
     )
     hidden_today = False
+    journal_extras.attach_syllabus_topics([m.lesson for m in marks], offering=offering)  # sillabus mövzusu
 
     # Aralıq qiymətləndirmə: keçmiş dövrlərdə K1–K3, 2026/2027-dən tək Midterm (0–30; sərbəst iş açıqdırsa 0–20).
     interim, kcomps = journal_extras.display_components(offering)

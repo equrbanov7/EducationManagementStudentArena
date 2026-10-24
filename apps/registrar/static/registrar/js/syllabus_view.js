@@ -60,6 +60,51 @@
         });
     }
 
+    /* Həftəlik plan ↔ jurnal (sahib 2026-10-25): hər sətir «Keçilib» + tarix(lər) / «Keçilməyib». */
+    function renderProgress(root, progress) {
+        var box = q(root, "progress");
+        if (!box) {
+            return;
+        }
+        var list = q(box, "progress-list");
+        var rows = (progress && progress.rows) || [];
+        if (list) {
+            list.textContent = "";
+        }
+        show(box, rows.length > 0);
+        if (!rows.length || !list) {
+            return;
+        }
+        var summary = box.getAttribute("data-label-summary") || "";
+        setText(
+            box,
+            "progress-summary",
+            summary.replace("{covered}", String(progress.covered || 0)).replace("{total}", String(progress.total || 0))
+        );
+        rows.forEach(function (row) {
+            var state = row.covered ? "covered" : row.planned ? "planned" : "pending";
+            var item = document.createElement("li");
+            item.className = "sylv-progress__row is-" + state;
+            var num = document.createElement("span");
+            num.className = "sylv-progress__num";
+            num.textContent = String(row.week) + ".";
+            var title = document.createElement("span");
+            title.className = "sylv-progress__title";
+            title.textContent = row.title || "—";
+            var badge = document.createElement("span");
+            badge.className = "sylv-progress__badge";
+            badge.textContent = box.getAttribute("data-label-" + state) || "";
+            var dates = row.covered ? row.dates : row.upcoming;
+            if (dates && dates.length) {
+                badge.textContent += " · " + dates.join(", ");
+            }
+            item.appendChild(num);
+            item.appendChild(title);
+            item.appendChild(badge);
+            list.appendChild(item);
+        });
+    }
+
     function render(root, data) {
         setText(root, "code", data.code);
         setText(root, "name", data.name || data.subject);
@@ -92,6 +137,7 @@
             show(pdf, Boolean(data.pdf_url));
         }
         renderBlocks(root, data.blocks);
+        renderProgress(root, data.week_progress);
     }
 
     function open(url, trigger) {
@@ -105,6 +151,7 @@
         show(q(root, "loading"), true);
         show(q(root, "error"), false);
         renderBlocks(root, []);
+        renderProgress(root, null);
 
         var box = root.querySelector(".sylv__panel");
         if (box) {

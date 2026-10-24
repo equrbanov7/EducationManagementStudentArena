@@ -117,6 +117,10 @@
 #       gələn, iki kafedrada eyni fənn+qrup sətri, fənni kataloqda başqa kafedranın olan sətir (qərar siyahısı —
 #       dəyişdirilmir). `apply` — YALNIZ başqa kafedrada bölgüsü olub orada üzvlüyü olmayan müəllimə ƏLAVƏ
 #       (is_primary=False) müəllim üzvlüyü (ştat dəyişmir, audit); idempotent. `year` istifadə olunur.
+#       hesabat (müəllim adları) şifrəli artifaktdadır.
+#   link_lesson_syllabus_weeks — jurnal dərsini sillabusun həftəlik plan SƏTRİNƏ bağlayır (sahib 2026-10-25): mövzu
+#       mətni açılışın təsdiqlənmiş sillabus planındakı sətrin mövzusu ilə DƏQİQ (boşluq/registr normallaşdırılmış)
+#       eynidirsə və `syllabus_week` boşdursa → sətir nömrəsi. Mövzuya toxunulmur; idempotent. Loga YALNIZ saylar.
 #   shrink_avatars — mövcud avatarlar ≤512 px WebP-yə (PERF-2 H5, 2026-10-17); orijinal fayllar SİLİNMİR,
 #       `updated_at` dəyişmir. Loga yalnız yekun saylar.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
@@ -177,6 +181,7 @@ on:
           - sync_midterm_scores
           - infer_timetable_from_lessons
           - audit_cross_chair_loads
+          - link_lesson_syllabus_weeks
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -648,6 +653,10 @@ jobs:
               echo "::add-mask::$actor"
               args=(--org "$ORG" --year "$YEAR" --actor "$actor")
               ;;
+            link_lesson_syllabus_weeks)
+              # Sahib 2026-10-25: dərs ↔ sillabus plan sətri (mövzu mətni DƏQİQ uyğun gəlirsə). Loga yalnız saylar.
+              args=(--org "$ORG")
+              ;;
             *)
               echo "icazəsiz əmr: $COMMAND" >&2; exit 2
               ;;
@@ -753,6 +762,17 @@ jobs:
             grep -E '^timetable_infer: [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             docker exec "$APP_CONTAINER" cat "/tmp/timetable_infer_${GITHUB_RUN_ID}.csv" > "$RUNNER_TEMP/details.csv" 2>/dev/null || true
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "link_lesson_syllabus_weeks" ]; then
+            # Loga YALNIZ «syllabus_week_link: açar=say …» sətirləri və rədd kodu (əmr mövzu/ad çap etmir).
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^syllabus_week_link: [a-z_]+=[0-9a-z_]+( [a-z_]+=[0-9a-z_]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
               rm -f "$RUNNER_TEMP/out.log"

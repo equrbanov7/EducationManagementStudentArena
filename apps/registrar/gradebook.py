@@ -170,6 +170,10 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
     """
     scheme = ensure_assessment_scheme(offering=offering)
     all_lessons = list(offering.lessons.order_by("date", "created_at"))
+    # Mövzusuz, sillabus sətrinə bağlı dərsin başlığı sətrin mövzusudur (``display_topic``, 2026-10-25).
+    from apps.registrar.journal_topics import attach_syllabus_topics
+
+    attach_syllabus_topics(all_lessons, offering=offering)
     lessons = [lesson for lesson in all_lessons if lesson.kind == lesson_kind] if lesson_kind else list(all_lessons)
     if newest_first:
         lessons.reverse()

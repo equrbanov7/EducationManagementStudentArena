@@ -317,8 +317,10 @@ def locked_lesson_kind(offering):
 # buradan da import oluna bilər.
 from .journal_topics import (  # noqa: E402,F401  (modulun sonunda — dövr yoxdur)
     SYLLABUS_HOUR_KINDS,
+    attach_syllabus_topics,
     lesson_topic_choices,
     lesson_topic_meta,
+    posted_topic,
     syllabus_topic_rows,
 )
 
@@ -330,11 +332,15 @@ def calendar_plan(offering, lessons, today):
     """Sol panel "TƏQVİM PLANI — MÖVZULAR": kursun mövzu planı + hansının
     keçirildiyi (yanında tarix). Planda olmayan mövzulu/mövzusuz dərslər sona
     xronoloji əlavə olunur — müəllim nəyi keçdiyini bir baxışda görür."""
+    from .journal_topics import shown_topic
+
     chrono = sorted(lessons, key=lambda item: (item.date, item.created_at))
     lesson_by_topic = {}
     for lesson in chrono:
-        if lesson.topic and lesson.topic not in lesson_by_topic:
-            lesson_by_topic[lesson.topic] = lesson
+        # Mövzusu boş, amma sillabus sətrinə bağlı (köçürülmüş) dərs sətrin mövzusu ilə sayılır (2026-10-25).
+        topic = shown_topic(lesson)
+        if topic and topic not in lesson_by_topic:
+            lesson_by_topic[topic] = lesson
 
     plan = []
     seen = set()
@@ -352,21 +358,22 @@ def calendar_plan(offering, lessons, today):
         )
         seen.add(title)
     for lesson in chrono:
-        if lesson.topic and lesson.topic in seen:
+        topic = shown_topic(lesson)
+        if topic and topic in seen:
             continue
         # Mövzu qeyd olunmayan dərs: panel MÖVZULAR-dır — dərs tipini (Lecture/
         # Seminar) BAŞLIQ kimi göstərmirik. Mövzu yoxdursa neytral etiket.
         plan.append(
             {
-                "title": lesson.topic or _("Mövzu qeyd olunmayıb"),
+                "title": topic or _("Mövzu qeyd olunmayıb"),
                 "lesson": lesson,
                 "covered": lesson.date <= today,
                 "planned": lesson.date > today,
                 "is_today": lesson.date == today,
             }
         )
-        if lesson.topic:
-            seen.add(lesson.topic)
+        if topic:
+            seen.add(topic)
     return plan
 
 

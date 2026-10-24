@@ -24,6 +24,7 @@ from core.http_ids import parse_uuid
 from . import gradebook, journal_extras
 from .journal_access import offering_or_404 as scoped_offering_or_404
 from .journal_access import writable_offering_or_404
+from .journal_topics import posted_topic
 from .models import Lesson, SelfWorkTopic
 from .views import _can_edit_journal, _is_direct_editor
 
@@ -204,7 +205,7 @@ def lesson_action(request, offering_id, lesson_id):
                     new_hours=hours,
                     new_start_time=start_time or "",
                     new_end_time=end_time or "",
-                    new_topic=request.POST.get("lesson_topic"),
+                    new_topic=posted_topic(request.POST),
                     new_instructor=instructor,
                     reason=request.POST.get("correction_reason") or "",
                     note=request.POST.get("correction_note") or "",
@@ -231,7 +232,7 @@ def lesson_action(request, offering_id, lesson_id):
                 lesson=lesson,
                 date=request.POST.get("lesson_date") or None,
                 kind=kind,
-                topic=request.POST.get("lesson_topic"),
+                topic=posted_topic(request.POST),
                 hours=hours,
                 start_time=start_time or "",
                 end_time=end_time or "",

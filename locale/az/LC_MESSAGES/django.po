@@ -107603,3 +107603,35 @@ msgstr "Plan saatını yadda saxla"
 msgctxt "accounts.syllabus"
 msgid "Avtomatik hesaba qayıt"
 msgstr "Avtomatik hesaba qayıt"
+
+msgctxt "registrar.journal_topics"
+msgid "…və ya planda olmayan mövzunu özünüz yazın"
+msgstr "…və ya planda olmayan mövzunu özünüz yazın"
+
+msgctxt "registrar.journal_topics"
+msgid "Planda olmayan mövzu"
+msgstr "Planda olmayan mövzu"
+
+msgctxt "registrar.journal_topics"
+msgid "Plandan seçilən mövzu sillabusun həftəlik planında «keçilib» kimi işarələnir."
+msgstr "Plandan seçilən mövzu sillabusun həftəlik planında «keçilib» kimi işarələnir."
+
+msgctxt "registrar.syllabus_progress"
+msgid "Keçilib"
+msgstr "Keçilib"
+
+msgctxt "registrar.syllabus_progress"
+msgid "Keçilməyib"
+msgstr "Keçilməyib"
+
+msgctxt "registrar.syllabus_progress"
+msgid "Planlaşdırılıb"
+msgstr "Planlaşdırılıb"
+
+msgctxt "registrar.syllabus_progress"
+msgid "{covered} / {total} mövzu keçilib"
+msgstr "{covered} / {total} mövzu keçilib"
+
+msgctxt "registrar.syllabus_progress"
+msgid "Mövzuların keçilməsi (jurnal üzrə)"
+msgstr "Mövzuların keçilməsi (jurnal üzrə)"
