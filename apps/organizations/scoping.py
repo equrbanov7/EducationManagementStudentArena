@@ -365,9 +365,20 @@ def permission_scope_unit_types(user, organization, permission: str) -> frozense
     əhatənin NÖVÜNƏ baxır. Üzvlük sətirləri ``get_permission_scope``-un memoizasiya etdiyi
     (``scope_unit`` yüklü) siyahıdandır — kabinet qabığına əlavə sorğu YOXDUR.
     """
+    return frozenset(unit.unit_type for unit in permission_scope_units(user, organization, permission))
+
+
+def permission_scope_units(user, organization, permission: str) -> tuple:
+    """``permission`` açarını daşıyan UNIT üzvlüklərinin AKTİV ``scope_unit`` obyektləri (sorğusuz, təkrarsız).
+
+    2026-10-24 (sahib): əhatənin kökü KAFEDRA olanda (``journal.view`` — jurnal siyahısı/müşahidə) qrup
+    alt-ağacı boşdur — çağıran kökün tipinə görə əlavə qayda qurur. Sətirlər ``get_permission_scope``-un
+    memoizasiya etdiyi (``scope_unit`` yüklü) üzvlüklərdəndir — əlavə sorğu YOXDUR. Org-wide qərarını
+    VERMİR: çağıran əvvəl ``get_permission_scope`` ilə yoxlamalıdır.
+    """
     if not permission or organization is None or not getattr(user, "is_authenticated", False):
-        return frozenset()
-    types = set()
+        return ()
+    units: dict = {}
     for membership in _permission_scope_memberships(user, organization):
         role = membership.role
         if role.scope_type != RoleScopeType.UNIT or not membership.scope_unit_id:
@@ -376,8 +387,8 @@ def permission_scope_unit_types(user, organization, permission: str) -> frozense
             continue
         unit = membership.scope_unit
         if unit is not None and unit.is_active:
-            types.add(unit.unit_type)
-    return frozenset(types)
+            units.setdefault(unit.pk, unit)
+    return tuple(units.values())
 
 
 def scope_org_units(queryset: QuerySet, scope: UnitScope) -> QuerySet:
@@ -419,6 +430,7 @@ __all__ = [
     "get_permission_scope",
     "invalidate_permission_scope_cache",
     "permission_scope_unit_types",
+    "permission_scope_units",
     "scope_memberships_by_unit",
     "scope_org_units",
     "unit_in_scope",

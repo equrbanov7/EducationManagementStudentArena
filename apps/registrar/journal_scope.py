@@ -57,25 +57,90 @@ def offering_in_actor_scope(user, organization, offering, *, permission=JOURNAL_
     return org_unit_model.objects.filter(organization=organization, pk=group_id).filter(scope.unit_subtree_q()).exists()
 
 
+#: Jurnal müşahidəsi (siyahı + detal, YALNIZ-OXU) — ``journal_access.VIEW_PERMISSION`` ilə eyni açar.
+JOURNAL_VIEW_PERMISSION = "journal.view"
+
+
+def _kafedra_roots(user, organization, scope) -> list:
+    """``journal.view`` əhatəsinin KAFEDRA tipli kökləri (sorğusuz — memoizasiya olunmuş üzvlüklərdən).
+
+    Yalnız əhatənin ÖZ kökü kafedradırsa (``CHAIR``/``DEPARTMENT``); fakültə kökünün altındakı kafedralar
+    QƏSDƏN sayılmır — fakültə əhatəsi qrup alt-ağacı ilə qalır (davranışı dəyişmir).
+    """
+    from apps.organizations.public import permission_scope_units
+
+    from .lessons_log_units import CHAIR_TYPES
+
+    return [
+        unit
+        for unit in permission_scope_units(user, organization, JOURNAL_VIEW_PERMISSION)
+        if unit.unit_type in CHAIR_TYPES and unit.pk in scope.unit_ids
+    ]
+
+
+def _unit_view_q(organization, scope, kafedras):
+    """UNIT əhatəsinin açılış Q-su: qrup alt-ağacı VƏ YA (kafedra kökü üçün) kafedraya aid açılış."""
+    from django.apps import apps as django_apps
+    from django.db.models import Q
+
+    from .lessons_log_units import kafedra_offering_q
+
+    org_unit_model = django_apps.get_model("organizations", "OrgUnit")
+    units = org_unit_model.objects.filter(organization=organization).filter(scope.unit_subtree_q()).values("pk")
+    query = Q(group__in=units)
+    for unit in kafedras:
+        query |= kafedra_offering_q(unit)
+    return query
+
+
 def journal_view_q(user, organization):
     """``journal.view`` əhatəsinin :class:`CourseOffering` Q-su; əhatə yoxdursa ``None``.
 
     Audit 2026-09-13 `access` F-06 (2026-09-14): açar əvvəl heç yerdə yoxlanmırdı.
     İndi ORGANIZATION daşıyıcısı bütün təşkilatın, UNIT daşıyıcısı öz alt-ağacındakı
     qrupların jurnallarını SİYAHIDA görür (detal səhifəsi eyni əhatəni
-    :func:`apps.registrar.journal_access.can_observe_journal` ilə yoxlayır).
+    :func:`offering_in_journal_view_scope` ilə yoxlayır).
+
+    2026-10-24 (sahib): köçürülmüş strukturda qrup fakültə → ixtisas → qrup altındadır, kafedra
+    fakültənin AYRICA uşağıdır — kafedra əhatəli daşıyıcı heç nə görmürdü. Kökü kafedra olan əhatə
+    ƏLAVƏ olaraq kafedraya aid açılışları görür (``lessons_log_units.kafedra_offering_q`` — müəllimin
+    kafedra üzvlüyü və ya fənnin aparıcı kafedrası; jurnal siyahısının «Kafedra» süzgəci ilə eyni
+    tərif). Başqa kafedranın açılışı düşmür; fakültə / org-wide əhatə dəyişmir. Əlavə sorğu yoxdur
+    (alt-sorğular).
     """
-    from django.apps import apps as django_apps
     from django.db.models import Q
 
-    scope = _permission_scope(user, organization, "journal.view")
+    scope = _permission_scope(user, organization, JOURNAL_VIEW_PERMISSION)
     if not scope.has_structure_access:
         return None
     if scope.is_org_wide:
         return Q(organization=organization)
-    org_unit_model = django_apps.get_model("organizations", "OrgUnit")
-    units = org_unit_model.objects.filter(organization=organization).filter(scope.unit_subtree_q()).values("pk")
-    return Q(group__in=units)
+    return _unit_view_q(organization, scope, _kafedra_roots(user, organization, scope))
+
+
+def offering_in_journal_view_scope(user, organization, offering) -> bool:
+    """Detal-səviyyə qarşılığı :func:`journal_view_q`: bu açılış ``journal.view`` əhatəsindədirmi.
+
+    Org-wide → sorğusuz bəli; fakültə kökü → əvvəlki kimi qrupun alt-ağacı (:func:`offering_in_actor_scope`);
+    kafedra kökü → siyahı ilə EYNİ Q (tək ``EXISTS`` sorğusu). Siyahı ilə detal ayrılmasın deyə hər ikisi
+    bu modulun eyni köməkçilərindən qurulur.
+    """
+    scope = _permission_scope(user, organization, JOURNAL_VIEW_PERMISSION)
+    if not scope.has_structure_access:
+        return False
+    if scope.is_org_wide:
+        return True
+    kafedras = _kafedra_roots(user, organization, scope)
+    if not kafedras:
+        return offering_in_actor_scope(user, organization, offering, permission=JOURNAL_VIEW_PERMISSION)
+    from django.apps import apps as django_apps
+
+    offering_model = django_apps.get_model("registrar", "CourseOffering")
+    return (
+        offering_model.objects.filter(organization=organization, pk=offering.pk)
+        .filter(_unit_view_q(organization, scope, kafedras))
+        .exists()
+    )
 
 
 def permission_scope_for(user, organization, permission):
