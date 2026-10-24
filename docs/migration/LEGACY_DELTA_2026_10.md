@@ -161,3 +161,26 @@ python manage.py legacy_delta_extract --password-file <fayl> --source myedu_new 
   --since 2026-08-01 --snapshot-file "<yeni dump>" --out ~/EMSArena-backups/legacy-delta-2026-10/delta.json.gz
 python manage.py legacy_delta_apply --bundle <paket> --organization qku --lessons-until <tarix>   # dry-run
 ```
+
+## 6. Dərs mövzuları və tədris rolu bərpası (2026-10-25)
+
+Sahibin sualı: «Mövzu yazılmayıb olan yerlərdə sənmi mövzu tapmamısan, həqiqətən mövzumu yox idi?» — köhnə
+sistemdə **mövzu var idi**: hər dərs tarixi (`journals_dates_rooms.sillabus`) sillabusun həftəlik mövzu sətrinə
+(`sillabus_sem_muh.movzu`) bağlıdır (2026/2027 payız: 11 214 tarix). Nə cutover, nə ilk delta bunu gətirmişdi.
+
+* **`topics` fazası** (`services/delta/topics.py`): paketin `lesson_topics` bölməsi → dərs (eyni ay + gün + saat;
+  saat tutmursa günün TƏK dərsi). Yalnız BOŞ mövzu doldurulur, bağlı açılış ötürülür. `syllabus_week` bağlantısı
+  ayrıca — mövzu mətninin sillabus planı ilə dəqiq tutuşdurulması ilə.
+* **Paket öz fazalarını daşıyır:** `legacy_delta_extract --phases offerings topics` → `snapshot.phases`;
+  `legacy_delta_apply` `--phase` verilməyəndə onları götürür. Belə paket dərs/xana fazasını İŞLƏTMİR — bu vacibdir,
+  çünki `legacy_repair_empty_lessons` sildiyi «yalnız qb» sütunlarını lessons fazası yenidən yaradardı.
+* **Tədris rolu bərpası** (`legacy_loads.restore_teacher_role`): müəllim bu semestr köhnə jurnal yazıb, amma
+  aktiv müəllim üzvlüyü yoxdur (köhnə «İngilis dili mərkəzi (Kafedra)» üzvlüyü sönülü) → açılışa yazıla bilmirdi
+  (`offering.instructor_blocked` 17). Ən son sönülü üzvlük AKTİV kafedradadırsa `join_chair_as_teacher` ilə bərpa
+  (audit), sonra müəllim yazılır.
+* **Sıra (prod):** deploy → `legacy_repair_empty_lessons` (dry-run → apply) → `legacy_delta_apply` mövzu paketi
+  (dry-run → apply) → `syllabus_week` backfill.
+
+Prod kopyasında (2026-10-24 22:06 export): boş sütun silinməsi 26 300 (köçürülmüş tam boş 23 498 + yalnız «qb»
+2 801 + müəllimin tam boş 1; 7 490 «qb» xanası / 14 980 qayıb saatı, 4 137 qeydiyyatın qayıbı yenidən hesablandı),
+sonra mövzu 11 926 dərsə, rolu bərpa olunan 3 müəllim, 16 açılışa müəllim.
