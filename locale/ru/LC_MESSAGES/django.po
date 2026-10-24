@@ -108319,3 +108319,7 @@ msgstr "Пройдено тем: {covered} / {total}"
 msgctxt "registrar.syllabus_progress"
 msgid "Mövzuların keçilməsi (jurnal üzrə)"
 msgstr "Прохождение тем (по журналу)"
+
+msgctxt "core.runtime_settings"
+msgid "Sillabus"
+msgstr "Силлабус"

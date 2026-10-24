@@ -107533,3 +107533,7 @@ msgstr "{covered} / {total} konu işlendi"
 msgctxt "registrar.syllabus_progress"
 msgid "Mövzuların keçilməsi (jurnal üzrə)"
 msgstr "Konuların işlenmesi (deftere göre)"
+
+msgctxt "core.runtime_settings"
+msgid "Sillabus"
+msgstr "Müfredat belgesi (sillabus)"

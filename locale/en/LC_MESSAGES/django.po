@@ -108125,3 +108125,7 @@ msgstr "{covered} / {total} topics covered"
 msgctxt "registrar.syllabus_progress"
 msgid "Mövzuların keçilməsi (jurnal üzrə)"
 msgstr "Topic coverage (from the journal)"
+
+msgctxt "core.runtime_settings"
+msgid "Sillabus"
+msgstr "Syllabus"
