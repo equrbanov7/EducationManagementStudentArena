@@ -78,6 +78,13 @@ class PeopleRuleTests(SimpleTestCase):
         same_birth = {"father_name": "Orxan", "birthday": "2007-05-04"}
         self.assertEqual(_narrow([(12, person_key("Başqa"), dt.date(2007, 5, 4))], same_birth, None, {}), [12])
 
+    def test_many_patronymic_matches_prefer_single_one_in_legacy_group(self):
+        group = SimpleNamespace(pk="g")
+        row = {"father_name": "Emin", "birthday": ""}
+        candidates = [(20, person_key("EMİN QIZI"), None), (21, person_key("Emin"), None)]
+        self.assertEqual(_narrow(candidates, row, group, {20: "g", 21: "other"}), [20])
+        self.assertEqual(sorted(_narrow(candidates, row, None, {})), [20, 21])
+
     def test_gender_from_code_or_text(self):
         self.assertEqual(student_gender({"sex": 1, "gender": None}), "male")
         self.assertEqual(student_gender({"sex": 0, "gender": "Qadın"}), "female")

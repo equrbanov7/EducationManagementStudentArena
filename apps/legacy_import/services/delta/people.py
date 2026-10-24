@@ -373,6 +373,11 @@ def _narrow(candidates, row: dict, group, group_of) -> list:
         same_group = group is not None and group_of.get(user_id) == group.pk
         if same_patronymic or same_birth or (same_group and not contradicts):
             out.append(user_id)
+    if len(out) > 1 and group is not None:
+        # Bir neçə adaş ata adı ilə uyğun gəlir — legacy qrupunda olan TƏK namizəd üstündür.
+        in_group = [user_id for user_id in out if group_of.get(user_id) == group.pk]
+        if len(in_group) == 1:
+            return in_group
     return out
 
 
