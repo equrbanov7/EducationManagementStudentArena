@@ -107906,3 +107906,31 @@ msgstr "Clear (all subjects)"
 msgctxt "exams.template.create_exam_modal_form"
 msgid "Bu müəllimin cari dövrdə tədris etdiyi fənn tapılmadı"
 msgstr "No subject taught by this teacher in the current period was found"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu midterm imtahanının nəticəsi tələbə imtahanı bitirən kimi seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq."
+msgstr "The result of this midterm will be written automatically to the group journals of the selected subject (Midterm /30) as soon as the student finishes the exam."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu midterm imtahanının nəticəsi yoxlanıldıqdan sonra seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq."
+msgstr "The result of this midterm will be written automatically to the group journals of the selected subject (Midterm /30) once it has been graded."
+
+msgctxt "exams.teacher.grading"
+msgid "Bal jurnala avtomatik yazılır"
+msgstr "The score is written to the journal automatically"
+
+msgctxt "exams.teacher.grading"
+msgid "Bu midterm imtahanıdır. Bütün suallar qiymətləndirilib yadda saxlananda bal fənnin jurnalına (Midterm) avtomatik yazılır — jurnalda əl ilə yazmaq lazım deyil."
+msgstr "This is a midterm exam. When all questions are graded and saved, the score is written automatically to the subject journal (Midterm) — there is no need to enter it in the journal manually."
+
+msgctxt "exams.teacher.grading"
+msgid "Bu midterm imtahanıdır. Nəticə hazırda tələbədən gizlədilib — saxladığınız bal fənnin jurnalına (Midterm) nəticə tələbəyə açılanda avtomatik yazılacaq."
+msgstr "This is a midterm exam. The result is currently hidden from the student — the score you save will be written automatically to the subject journal (Midterm) when the result is released to the student."
+
+msgctxt "registrar.journal"
+msgid "İmtahan Mərkəzində keçirilən midterm balı imtahandan avtomatik yazılır (test — tələbə bitirən kimi, yazılı / praktiki — yoxlanıldıqdan sonra) və burada əl ilə dəyişdirilmir. Düzəliş yalnız apellyasiya və ya sənədli düzəliş ilə mümkündür."
+msgstr "The midterm score of an exam held in the Exam Center is written automatically from the exam (test — as soon as the student finishes, written / practical — after grading) and cannot be changed manually here. It can be corrected only through an appeal or a documented correction."
+
+msgctxt "registrar.journal"
+msgid "imtahandan avtomatik"
+msgstr "automatically from the exam"

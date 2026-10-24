@@ -34,6 +34,14 @@
     <small class="form-text">{{ form.journal_teacher.help_text }}</small>
     {% if form.journal_teacher.errors %}<div class="field-error">{{ form.journal_teacher.errors.0 }}</div>{% endif %}
 </div>
+{# Midterm → jurnal məlumat qeydi (sahib 2026-10-24): format üzrə mətn (test — bitən kimi; yazılı/praktiki — yoxlanandan sonra). #}
+{% with exam_format=form.exam_type.value|default:"test" %}
+<div class="ew-journal-note" role="note" data-ew-midterm-journal-note{% if category != "midterm" %} hidden{% endif %}>
+    <i class="fas fa-book-open ew-journal-note__icon" aria-hidden="true"></i>
+    <p class="ew-journal-note__text" data-ew-journal-note-format="test"{% if exam_format != "test" %} hidden{% endif %}>{% trans "Bu midterm imtahanının nəticəsi tələbə imtahanı bitirən kimi seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq." context "exams.template.create_exam_modal_form" %}</p>
+    <p class="ew-journal-note__text" data-ew-journal-note-format="graded"{% if exam_format == "test" %} hidden{% endif %}>{% trans "Bu midterm imtahanının nəticəsi yoxlanıldıqdan sonra seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq." context "exams.template.create_exam_modal_form" %}</p>
+</div>
+{% endwith %}
 {% endwith %}
 
 <div class="form-group form-group-full" data-ew-subject-group>

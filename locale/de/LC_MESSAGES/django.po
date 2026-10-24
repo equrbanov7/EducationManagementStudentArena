@@ -108932,3 +108932,31 @@ msgstr "Leeren (alle Fächer)"
 msgctxt "exams.template.create_exam_modal_form"
 msgid "Bu müəllimin cari dövrdə tədris etdiyi fənn tapılmadı"
 msgstr "Kein Fach gefunden, das diese Lehrkraft im aktuellen Zeitraum unterrichtet"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu midterm imtahanının nəticəsi tələbə imtahanı bitirən kimi seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq."
+msgstr "Das Ergebnis dieser Zwischenprüfung wird automatisch in die Gruppenjournale des ausgewählten Fachs (Midterm /30) eingetragen, sobald der Studierende die Prüfung beendet."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu midterm imtahanının nəticəsi yoxlanıldıqdan sonra seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq."
+msgstr "Das Ergebnis dieser Zwischenprüfung wird nach der Bewertung automatisch in die Gruppenjournale des ausgewählten Fachs (Midterm /30) eingetragen."
+
+msgctxt "exams.teacher.grading"
+msgid "Bal jurnala avtomatik yazılır"
+msgstr "Die Punktzahl wird automatisch ins Journal eingetragen"
+
+msgctxt "exams.teacher.grading"
+msgid "Bu midterm imtahanıdır. Bütün suallar qiymətləndirilib yadda saxlananda bal fənnin jurnalına (Midterm) avtomatik yazılır — jurnalda əl ilə yazmaq lazım deyil."
+msgstr "Dies ist eine Zwischenprüfung. Sobald alle Fragen bewertet und gespeichert sind, wird die Punktzahl automatisch ins Fachjournal (Midterm) eingetragen — eine manuelle Eingabe im Journal ist nicht nötig."
+
+msgctxt "exams.teacher.grading"
+msgid "Bu midterm imtahanıdır. Nəticə hazırda tələbədən gizlədilib — saxladığınız bal fənnin jurnalına (Midterm) nəticə tələbəyə açılanda avtomatik yazılacaq."
+msgstr "Dies ist eine Zwischenprüfung. Das Ergebnis ist derzeit für den Studierenden verborgen — die gespeicherte Punktzahl wird automatisch ins Fachjournal (Midterm) eingetragen, sobald das Ergebnis freigegeben wird."
+
+msgctxt "registrar.journal"
+msgid "İmtahan Mərkəzində keçirilən midterm balı imtahandan avtomatik yazılır (test — tələbə bitirən kimi, yazılı / praktiki — yoxlanıldıqdan sonra) və burada əl ilə dəyişdirilmir. Düzəliş yalnız apellyasiya və ya sənədli düzəliş ilə mümkündür."
+msgstr "Die Zwischenprüfungspunktzahl einer im Prüfungszentrum durchgeführten Prüfung wird automatisch übernommen (Test — sobald der Studierende fertig ist, schriftlich / praktisch — nach der Bewertung) und kann hier nicht manuell geändert werden. Eine Korrektur ist nur über einen Widerspruch oder eine dokumentierte Korrektur möglich."
+
+msgctxt "registrar.journal"
+msgid "imtahandan avtomatik"
+msgstr "automatisch aus der Prüfung"

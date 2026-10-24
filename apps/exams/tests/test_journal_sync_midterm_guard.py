@@ -14,7 +14,7 @@ Qayda (``journal_sync.final_grade_skip_reason``):
 
 Midterm balı ``FinalGrade``-ə HEÇ VAXT yazılmır. Sahib 2026-10-21: TEST formatlı midterm jurnalın
 «Midterm» xanasına gedir (``midterm_journal_sync``, testləri ``test_midterm_journal_sync_2026_10_21.py``);
-yazılı midterm əvvəlki kimi ``SKIP_MIDTERM_CATEGORY`` ilə atlanır (müəllim özü yazır).
+sahib 2026-10-24: yazılı / kodlaşdırma midtermi də — yoxlanılandan sonra (``test_midterm_graded_journal_2026_10_24.py``).
 """
 
 from __future__ import annotations
@@ -124,14 +124,21 @@ class MidtermGuardBridgeTests(_JournalBridgeSetup):
         final_grade.refresh_from_db()
         self.assertEqual(final_grade.exam_score, Decimal("50"))
 
-    def test_midterm_skip_is_visible_in_logs_and_returns_none(self):
-        # Yazılı midterm — müəllim əl ilə yazır (test midtermi 2026-10-21-dən avtomatikdir).
+    def test_ungraded_written_midterm_returns_none_and_never_touches_final_grade(self):
+        # Sahib 2026-10-24: yazılı midterm də «Midterm» xanasına gedir (yoxlanılandan sonra) — FinalGrade-ə HEÇ VAXT.
         exam, question, correct, _wrong = self._category_exam("midterm", exam_type="written")
+        attempt = ExamAttempt.objects.create(user=self.student, exam=exam, status="submitted")
+        with bypass_rls():
+            self.assertIsNone(journal_sync.sync_attempt_to_journal(attempt))
+        self.assertIsNone(self._final_grade())
+
+    def test_non_midterm_skip_is_visible_in_logs_and_returns_none(self):
+        exam, question, correct, _wrong = self._category_exam("quiz", exam_type="written")
         attempt = ExamAttempt.objects.create(user=self.student, exam=exam, status="submitted")
         with self.assertLogs("apps.exams.services.journal_sync", level=logging.INFO) as captured:
             with bypass_rls():
                 self.assertIsNone(journal_sync.sync_attempt_to_journal(attempt))
-        self.assertIn(f"attempt {attempt.id} skipped (midterm_category)", "\n".join(captured.output))
+        self.assertIn(f"attempt {attempt.id} skipped (non_final_category)", "\n".join(captured.output))
 
     def test_other_non_final_categories_are_skipped(self):
         for category in ("quiz", "placement", "practice"):

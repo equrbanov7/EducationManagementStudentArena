@@ -310,7 +310,38 @@
             }
         }
 
+        bindMidtermJournalNote(form);
         subject.reload(); // ilk 10 fənni dərhal yüklə
+    }
+
+    /* 2026-10-24 (sahib): «nəticə jurnala avtomatik yazılacaq» qeydi yalnız Midterm-də görünür; mətn formatdan
+       asılıdır — test: bitən kimi, yazılı / praktiki: yoxlanandan sonra (`data-ew-journal-note-format`). */
+    function bindMidtermJournalNote(form) {
+        var note = form.querySelector("[data-ew-midterm-journal-note]");
+        var category = form.querySelector('[name="exam_type_extended"]');
+        if (!note || !category) {
+            return;
+        }
+        function examFormat() {
+            var radio = form.querySelector(".js-create-exam-type-option:checked");
+            var native = form.querySelector('select[name="exam_type"]');
+            return (radio && radio.value) || (native && native.value) || "test";
+        }
+        function sync() {
+            note.hidden = category.value !== "midterm";
+            var key = examFormat() === "test" ? "test" : "graded";
+            note.querySelectorAll("[data-ew-journal-note-format]").forEach(function (text) {
+                text.hidden = text.getAttribute("data-ew-journal-note-format") !== key;
+            });
+        }
+        form.addEventListener("change", function (event) {
+            var target = event.target;
+            if (target === category || (target && target.matches &&
+                    target.matches('.js-create-exam-type-option, select[name="exam_type"]'))) {
+                sync();
+            }
+        });
+        sync();
     }
 
     /* Müəllim sahəsi yalnız Final / Midterm-də görünür; başqa kateqoriyaya keçəndə müəllim təmizlənir

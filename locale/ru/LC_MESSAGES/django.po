@@ -108100,3 +108100,31 @@ msgstr "Очистить (все предметы)"
 msgctxt "exams.template.create_exam_modal_form"
 msgid "Bu müəllimin cari dövrdə tədris etdiyi fənn tapılmadı"
 msgstr "Не найдено предметов, которые этот преподаватель ведёт в текущем периоде"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu midterm imtahanının nəticəsi tələbə imtahanı bitirən kimi seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq."
+msgstr "Результат этого промежуточного экзамена будет автоматически записан в журналы групп выбранного предмета (Midterm /30) сразу после того, как студент завершит экзамен."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu midterm imtahanının nəticəsi yoxlanıldıqdan sonra seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq."
+msgstr "Результат этого промежуточного экзамена будет автоматически записан в журналы групп выбранного предмета (Midterm /30) после проверки."
+
+msgctxt "exams.teacher.grading"
+msgid "Bal jurnala avtomatik yazılır"
+msgstr "Балл автоматически записывается в журнал"
+
+msgctxt "exams.teacher.grading"
+msgid "Bu midterm imtahanıdır. Bütün suallar qiymətləndirilib yadda saxlananda bal fənnin jurnalına (Midterm) avtomatik yazılır — jurnalda əl ilə yazmaq lazım deyil."
+msgstr "Это промежуточный экзамен. Когда все вопросы оценены и сохранены, балл автоматически записывается в журнал предмета (Midterm) — вводить его в журнал вручную не нужно."
+
+msgctxt "exams.teacher.grading"
+msgid "Bu midterm imtahanıdır. Nəticə hazırda tələbədən gizlədilib — saxladığınız bal fənnin jurnalına (Midterm) nəticə tələbəyə açılanda avtomatik yazılacaq."
+msgstr "Это промежуточный экзамен. Сейчас результат скрыт от студента — сохранённый вами балл будет автоматически записан в журнал предмета (Midterm), когда результат откроют студенту."
+
+msgctxt "registrar.journal"
+msgid "İmtahan Mərkəzində keçirilən midterm balı imtahandan avtomatik yazılır (test — tələbə bitirən kimi, yazılı / praktiki — yoxlanıldıqdan sonra) və burada əl ilə dəyişdirilmir. Düzəliş yalnız apellyasiya və ya sənədli düzəliş ilə mümkündür."
+msgstr "Балл промежуточного экзамена, проведённого в Экзаменационном центре, записывается автоматически (тест — сразу после завершения студентом, письменный / практический — после проверки) и здесь вручную не изменяется. Исправление возможно только через апелляцию или документальную поправку."
+
+msgctxt "registrar.journal"
+msgid "imtahandan avtomatik"
+msgstr "автоматически из экзамена"
