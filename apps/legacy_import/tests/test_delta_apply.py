@@ -368,6 +368,26 @@ class DeltaApplyTests(TestCase):
         again = self._run(apply=True)
         self.assertEqual({k: v for k, v in again.counters.items() if k.startswith("written.")}, {})
 
+    def test_empty_own_group_duplicate_is_released_into_subgroup_row(self):
+        """Tələbə legacy-də alt qrup jurnalındadır; öz qrupunun eyni fənn jurnalındakı BOŞ sətri tarixçəyə keçir."""
+        self._run(apply=True)
+        with bypass_rls():
+            created = User.objects.get(profile__institutional_identifier="2")
+            subgroup = OrgUnit.objects.get(organization=self.org, slug="myedu-grp-901")
+            record = StudentAcademicRecord.objects.get(student=created)
+            self.assertEqual(record.group_id, subgroup.pk)
+            own = CourseOffering.objects.create(
+                organization=self.org, subject=Subject.objects.get(code="QKU-5"), period=self.period, group=subgroup
+            )
+            duplicate = Enrollment.objects.create(organization=self.org, student=created, offering=own)
+        run = self._run(apply=True)
+        with bypass_rls():
+            duplicate.refresh_from_db()
+            guest = Enrollment.objects.get(student=created, source_group=subgroup)
+        self.assertEqual((duplicate.status, duplicate.superseded_by_id), ("dropped", guest.pk))
+        self.assertEqual(run.counters["dedupe.released"], 1)
+        self.assertEqual(self._run(apply=True).counters["dedupe.released"], 0)
+
     def test_existing_values_are_never_overwritten(self):
         self._run(apply=True)
         with bypass_rls():
