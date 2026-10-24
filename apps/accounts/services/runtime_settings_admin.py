@@ -174,6 +174,8 @@ def save_values(*, actor, data, request=None) -> dict:
                 errors[spec.key] = pgettext(_CTX, "Siyahıdan seçin.")
             elif spec.kind == "bool":
                 errors[spec.key] = pgettext(_CTX, "Yandırılmış və ya söndürülmüş olmalıdır.")
+            elif spec.kind == "date":
+                errors[spec.key] = pgettext(_CTX, "Tarix seçin (gün.ay.il).")
             elif spec.kind == "rate" and not _rate_window_ok(incoming):
                 # QA-2 F-09: səhv PƏNCƏRƏDƏ say aralığı mesajı göstərilirdi.
                 errors[spec.key] = pgettext(_CTX, "Müddət 1–1440 dəqiqə (24 saat) aralığında olmalıdır.")

@@ -16,7 +16,9 @@ məlumat mövcud ``Lesson`` / ``LessonMark`` sətirlərindən hesablanır.
   sorğu YOXDUR (test ``CaptureQueriesContext`` ilə kilidləyir).
 * **«Gec yazılıb» tərifi:** dərsin İLK xanası dərs tarixindən
   :data:`LATE_AFTER_HOURS` saat sonra yazılıbsa. Model dəyişikliyi tələb
-  etmir — ``LessonMark.created_at`` vs ``Lesson.date``. Köhnə sistemdən
+  etmir — ``LessonMark.created_at`` vs ``Lesson.date``. TƏK qayda
+  :mod:`apps.registrar.lessons_late_rule`-dadır (2026-10-25: tarixi
+  ``journal.late_check_from``-dan əvvəl olan dərs heç vaxt «gec» deyil). Köhnə sistemdən
   köçürülmüş dərs/xana bu hesaba GİRMİR (idxal anı yazı anı deyil) — tərif
   :mod:`apps.registrar.lessons_log_totals` «KÖÇÜRMƏ» bölməsindədir.
 
@@ -30,13 +32,12 @@ hər ikisinin adları buradan yenidən ixrac olunur (``service.*`` yolu dəyişm
 
 from __future__ import annotations
 
-import datetime as _dt
-
 from django.db.models import Count, Min, Q, Sum
 from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.registrar import lessons_log_units
+from apps.registrar.lessons_late_rule import is_late
 from apps.registrar.lessons_log_periods import (  # noqa: F401 — geri-uyğun re-export
     ALL,
     RANGE_CUSTOM,
@@ -206,13 +207,15 @@ def note_state(*, lesson_date, marks_count: int, first_mark) -> str:
 
     ``first_mark`` — yeni sistemdə yazılmış İLK xananın vaxtı; xanalar var, amma
     hamısı köçürülübsə (və ya dərsin özü köçürülübsə) ``None`` → «vaxtında».
+    Tarixi ``journal.late_check_from``-dan əvvəl olan dərs də «vaxtında»dır
+    (qayda: :mod:`apps.registrar.lessons_late_rule`).
     """
     if not marks_count:
         return NOTE_EMPTY
     if first_mark is None:
         return NOTE_ON_TIME
     written = timezone.localtime(first_mark).date() if timezone.is_aware(first_mark) else first_mark.date()
-    if (written - lesson_date) > _dt.timedelta(hours=LATE_AFTER_HOURS):
+    if is_late(lesson_date=lesson_date, written_date=written):
         return NOTE_LATE
     return NOTE_ON_TIME
 

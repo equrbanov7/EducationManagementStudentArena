@@ -32,6 +32,10 @@ yalnız YENİ SİSTEMDƏ yazılmış xanaya tətbiq olunur:
   ``entered_by``-sız yaradır — o, YENİ sistemin yazısıdır və sayılır.
 
 Hər iki şərt eyni aqreqat sorğunun içindədir (əlavə sorğu yoxdur).
+
+BAŞLANĞIC TARİXİ (2026-10-25, sahib: «datanı inteqrasiya etmişik, "Gec yazılıb" gələn həftədən ola bilər»):
+tarixi ``journal.late_check_from``-dan (defolt 2026-10-26) əvvəl olan dərs heç vaxt «gec» deyil —
+qayda :mod:`apps.registrar.lessons_late_rule`-dadır (Python və SQL forması eyni yerdə).
 """
 
 from __future__ import annotations
@@ -43,10 +47,8 @@ from django.core.cache import cache
 from django.db.models import Count, DateField, Exists, ExpressionWrapper, F, Min, OuterRef, Q, Sum, Value
 from django.db.models.functions import TruncDate
 
+from apps.registrar.lessons_late_rule import LATE_AFTER_HOURS, late_check_from, late_q
 from apps.registrar.models import AttendanceStatus, JournalCorrection, LessonMark
-
-#: «Gec yazılıb» həddi — dizayn: «dərsdən 48 saat sonra».
-LATE_AFTER_HOURS = 48
 
 #: `range_totals` keşinin müddəti (saniyə) — `analytics_cache` ilə eyni siyasət:
 #: hesabat səthidir, bir neçə dəqiqəlik köhnəlmə qəbul olunur.
@@ -87,7 +89,8 @@ def totals_cache_key(lessons_qs) -> str:
     """Dövr KPI-larının keş açarı — sorğunun ÖZÜ (əhatə + tarix aralığı +
     bütün filtrlər parametrlərlə birlikdə) hash-lənir, yəni fərqli əhatəli iki
     aktor heç vaxt eyni açarı paylaşmır (tenant/scope sızması yoxdur)."""
-    raw = str(lessons_qs.order_by().values("id").query)
+    # «Gec» başlanğıc tarixi sorğuda yoxdur — açara əlavə olunur ki, tənzimləmə dəyişəndə keş köhnəlməsin.
+    raw = f"{lessons_qs.order_by().values('id').query}|late_from={late_check_from().isoformat()}"
     return "registrar:lessons_log_totals:" + hashlib.sha1(raw.encode("utf-8"), usedforsecurity=False).hexdigest()
 
 
@@ -122,6 +125,7 @@ def _compute_range_totals(lessons_qs) -> dict:
         F("date") + Value(_dt.timedelta(hours=LATE_AFTER_HOURS + 24)), output_field=DateField()
     )
     counted = ~imported_lesson_q() & lesson_new_system_mark_q()
+    check_from = late_check_from()  # tarixi bundan əvvəl olan dərs «gec» deyil (`lessons_late_rule`)
     lesson_totals = (
         lessons_qs.order_by()
         .annotate(marks_total=Count("marks__id"), first_mark=Min("marks__created_at", filter=counted))
@@ -130,7 +134,7 @@ def _compute_range_totals(lessons_qs) -> dict:
             lessons=Count("id"),
             hours=Sum("hours"),
             empty=Count("id", filter=Q(marks_total=0)),
-            late=Count("id", filter=Q(first_mark__isnull=False, first_mark_day__gte=F("late_from"))),
+            late=Count("id", filter=late_q(check_from=check_from)),
         )
     )
     total = int(lesson_totals["lessons"] or 0)

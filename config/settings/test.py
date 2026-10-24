@@ -222,6 +222,11 @@ CACHES = {
 # testləri pozulmur. Xüsusiyyətin öz testləri `override_settings(RUNTIME_SETTINGS_ENABLED=True)` ilə açır.
 RUNTIME_SETTINGS_ENABLED = False
 
+# «Gec yazılıb» nəzarətinin başlanğıc tarixi (journal.late_check_from, 2026-10-25): istehsal defoltu 2026-10-26-dır,
+# amma köhnə tarixli test datası (2025) «gec» qaydasını yoxlayır — testlərdə qayda hər tarix üçün işləsin.
+# Başlanğıc tarixinin öz testləri `override_settings(JOURNAL_LATE_CHECK_FROM=...)` ilə qoyur.
+JOURNAL_LATE_CHECK_FROM = "2000-01-01"
+
 # Məcburi profil məlumatları qapısı (2026-10-17, apps/accounts/profile_completion.py): fixture istifadəçilərinin
 # əksəriyyətində FİN / telefon yoxdur — qapı testlərdə defolt SÖNÜLÜDÜR ki, giriş axını testləri pozulmasın.
 # Qapının öz testləri `override_settings(PROFILE_COMPLETION_ENABLED=True)` ilə açır.

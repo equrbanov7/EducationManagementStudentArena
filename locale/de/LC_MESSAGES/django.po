@@ -108996,3 +108996,15 @@ msgstr "Die Zwischenprüfungspunktzahl einer im Prüfungszentrum durchgeführten
 msgctxt "registrar.journal"
 msgid "imtahandan avtomatik"
 msgstr "automatisch aus der Prüfung"
+
+msgctxt "core.runtime_settings"
+msgid "«Gec yazılıb» nəzarətinin başlanğıc tarixi"
+msgstr "Startdatum der Prüfung „Verspätet eingetragen“"
+
+msgctxt "core.runtime_settings"
+msgid "Tarixi bu gündən əvvəl olan dərs heç vaxt «Gec yazılıb» sayılmır — nişanda, «Keçilmiş dərslər» sayında, KPI-da və ixracda. Bu tarixdən (və sonrakı) dərslər üçün qayda dəyişmir: dərsin ilk xanası dərs tarixindən 48 saatdan gec yazılıbsa «gec»dir. Köhnə sistemdən köçürülmüş data üçün tarixi köçürmə sonrası ilk iş gününə qoyun."
+msgstr "Eine Stunde mit einem Datum vor diesem Tag gilt nie als „Verspätet eingetragen“ — weder im Kennzeichen noch in der Zahl „Gehaltene Stunden“, im KPI oder im Export. Für Stunden ab diesem Datum bleibt die Regel: Eine Stunde ist „verspätet“, wenn der erste Eintrag mehr als 48 Stunden nach dem Stundendatum erfolgte. Für aus dem Altsystem übernommene Daten setzen Sie den ersten Werktag nach der Übernahme."
+
+msgctxt "accounts.runtime_settings"
+msgid "Tarix seçin (gün.ay.il)."
+msgstr "Wählen Sie ein Datum (Tag.Monat.Jahr)."
