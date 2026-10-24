@@ -40,9 +40,11 @@
         getDependValue: function () { return faculty.value(); },
         onChange: function () { submitFor("department", dept); },
     });
+    // Qrup FAKÜLTƏDƏN asılıdır (kafedradan yox): köçürülmüş strukturda qrup kafedranın
+    // altında deyil (ixtisas → fakültə) — kafedra seçiləndə qrup siyahısı boş qalırdı.
     var group = SS.create(form.querySelector(".js-jl-group"), {
-        url: U.group, dependParam: "department",
-        getDependValue: function () { return dept.value(); },
+        url: U.group, dependParam: "faculty",
+        getDependValue: function () { return faculty.value(); },
         onChange: function () { submitFor("group", group); },
     });
     var teacher = SS.create(form.querySelector(".js-jl-teacher"), {
