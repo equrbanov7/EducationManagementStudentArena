@@ -51,6 +51,19 @@ def _audit_rows(version):
 # ── Bağla ────────────────────────────────────────────────────────────────────
 
 
+def test_link_to_auto_approved_source_works(world):
+    """Sahib 2026-10-25: kafedra təsdiqi söndürülüb — ``auto`` təsdiqli sillabus bağlana bilir."""
+    source, source_version = approved_syllabus(world, "o1")
+    SyllabusVersion.objects.filter(pk=source_version.pk).update(approval_source=ApprovalSource.AUTO, approved_by=None)
+    source.refresh_from_db()
+    syllabus, version = services.reuse.link(source=source, target=target(world, "o2"), actor=actor(world))
+    version.refresh_from_db()
+    assert syllabus.reused_from_id == source.pk
+    assert version.status == SyllabusStatus.APPROVED
+    assert version.approval_source == ApprovalSource.REUSE
+    assert version.source_version_id == source_version.pk
+
+
 def test_link_to_approved_source_approves_without_inventing_an_approver(world):
     source, source_version = approved_syllabus(world, "o1")
     syllabus, version = services.reuse.link(source=source, target=target(world, "o2"), actor=actor(world))

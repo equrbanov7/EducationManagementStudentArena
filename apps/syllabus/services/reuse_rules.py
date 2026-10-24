@@ -19,8 +19,10 @@ Bağlamanın şərtləri (hamısı ödənməlidir, əks halda səbəb kodu qayta
 
 1. mənbənin müəllifi aktorun ÖZÜDÜR (``is_author``) — ``info`` bölməsi (müəllim,
    məsləhət saatı) şəxsi məlumatdır, başqasının adı tələbəyə getməsin;
-2. mənbənin QÜVVƏDƏ olan versiyası var və o, İNSAN qərarı ilə təsdiqlənib
-   (``approval_source = human``) — köçürmə/bağlama damğalı təsdiq zəncirlənmir;
+2. mənbənin QÜVVƏDƏ olan versiyası var və o, İNSAN qərarı ilə (``approval_source = human``)
+   və ya RİM «Sillabus təsdiqi tələb olunur» açarı sönülü olanda sistemin avtomatik
+   təsdiqi ilə (``auto``, sahib 2026-10-25) təsdiqlənib — köçürmə (``migration``) və
+   bağlama (``reuse``) damğalı təsdiq zəncirlənmir;
 3. hədəfin saatı MƏLUMDUR və mənbə versiyanın ``plan_hours``-u ilə EYNİDİR
    (növ-növ; 1 dərs = 2 saat, sətir sayı ``ceil(max/2)`` — saat eynidirsə həftəlik
    cədvəlin forması da eynidir);
@@ -46,6 +48,9 @@ from .scoping import is_author
 CODE_NOT_OWN = "reuse.not_own_source"
 CODE_SOURCE_NOT_APPROVED = "reuse.source_not_approved"
 CODE_SOURCE_NOT_HUMAN = "reuse.source_not_human_approved"
+#: Bağlana bilən mənbənin təsdiq mənbələri: insan qərarı və sistemin avtomatik təsdiqi (sahib 2026-10-25,
+#: kafedra təsdiqi söndürülüb). ``migration`` və ``reuse`` QƏSDƏN yoxdur — köçürmə/bağlama zəncirlənmir.
+LINKABLE_APPROVAL_SOURCES = frozenset({ApprovalSource.HUMAN.value, ApprovalSource.AUTO.value})
 CODE_HOURS_UNKNOWN = "reuse.hours_unknown"
 CODE_HOURS_DIFFER = "reuse.hours_differ"
 CODE_CHAIR_DIFFERS = "reuse.chair_differs"
@@ -123,7 +128,7 @@ def link_base(source):
     version = getattr(source, "approved_version", None)
     if version is None or version.status != SyllabusStatus.APPROVED.value:
         return None
-    if version.approval_source != ApprovalSource.HUMAN.value:
+    if version.approval_source not in LINKABLE_APPROVAL_SOURCES:
         return None
     return version
 
@@ -223,7 +228,7 @@ def link_code(
     approved = getattr(source, "approved_version", None)
     if approved is None or approved.status != SyllabusStatus.APPROVED.value:
         return CODE_SOURCE_NOT_APPROVED
-    if approved.approval_source != ApprovalSource.HUMAN.value:
+    if approved.approval_source not in LINKABLE_APPROVAL_SOURCES:
         return CODE_SOURCE_NOT_HUMAN
     if not normalize_hours(target_hours):
         return CODE_HOURS_UNKNOWN
