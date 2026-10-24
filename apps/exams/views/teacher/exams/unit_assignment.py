@@ -28,7 +28,7 @@ UNITS_FIELD_NAME = "allowed_units"
 
 #: Sehrbaz addımı ↔ forma sahələri (şablondakı `data-ew-panel` sırası ilə).
 WIZARD_STEP_FIELDS = {
-    0: ("organization", "title", "description", "exam_type", "exam_type_extended", "subject"),
+    0: ("organization", "title", "description", "exam_type", "exam_type_extended", "journal_teacher", "subject"),
     1: (
         "random_question_count",
         "start_datetime",

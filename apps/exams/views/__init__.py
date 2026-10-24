@@ -74,6 +74,7 @@ from .teacher.exams import (
     grant_extra_attempt_group,
     group_search,
     invigilator_search,
+    journal_teacher_subjects,
     permanent_delete_exam,
     restore_exam,
     subject_search,
@@ -198,6 +199,7 @@ __all__ = [
     "group_search",
     "invigilator_search",
     "bank_teacher_search",
+    "journal_teacher_subjects",
     "subject_search",
     "user_search",
     # Teacher - Questions

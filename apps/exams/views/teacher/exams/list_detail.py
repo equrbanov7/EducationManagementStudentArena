@@ -14,6 +14,7 @@ from django.views.decorators.http import require_GET
 
 from apps.exams.constants import get_live_active_states, get_live_session_model
 from apps.exams.forms import ExamForm
+from apps.exams.services import exam_journal_link as _journal_link
 from apps.exams.services.access_policy import _ensure_teacher, can_manage_exam_questions
 from apps.exams.views.shared.breadcrumbs import exam_breadcrumbs
 from apps.exams.views.shared.tenant import get_active_organization, get_teacher_exam_or_404
@@ -125,6 +126,9 @@ def createAndEditExamView(request, slug=None):
     allowed_units_error = None
     if request.method == "POST":
         previous_is_active = exam.is_active if is_editing else False
+        # 2026-10-24: forma `is_valid()` instansı dəyişir — jurnal bağlantısının KÖHNƏ halı əvvəlcədən.
+        previous_subject_id = exam.subject_id if is_editing else None
+        previous_link_ids = _journal_link.linked_offering_ids(exam) if is_editing else []
         previous_recipient_ids = set()
         if is_editing and exam is not None:
             from apps.notifications.public import get_exam_assigned_user_ids
@@ -179,6 +183,13 @@ def createAndEditExamView(request, slug=None):
             form.save_m2m()  # ManyToMany field-ləri saxla
             _units.apply_allowed_units(
                 request, organization, exam_instance, allowed_units, permission=required_permission
+            )
+            # Fənn + qruplar (+ müəllim) → hər qrupun jurnal açılışı; fənn dəyişibsə bitmiş cəhdlər yeni jurnala.
+            _journal_link.after_exam_saved(
+                exam_instance,
+                previous_subject_id=previous_subject_id,
+                previous_link_ids=previous_link_ids,
+                by_user=request.user,
             )
 
             # Save supervision config from POST data

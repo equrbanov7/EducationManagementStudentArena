@@ -10,7 +10,14 @@ from __future__ import annotations
 
 from django.apps import apps as django_apps
 
-from apps.registrar import absence_limit, analytics, exam_score_entry, exam_score_import, exam_score_sheets
+from apps.registrar import (
+    absence_limit,
+    analytics,
+    exam_journal_link,
+    exam_score_entry,
+    exam_score_import,
+    exam_score_sheets,
+)
 from apps.registrar.cabinet_policy import TRANSCRIPT_APPLICATION_KIND, transcript_policy
 from apps.registrar.exam_bridge import (
     exam_eligibility,
@@ -30,6 +37,7 @@ __all__ = [
     "eligible_instructor_user_ids",
     "enroll_student_in_subject",
     "analytics",
+    "exam_journal_link",
     "exam_score_entry",
     "exam_score_import",
     "exam_score_sheets",

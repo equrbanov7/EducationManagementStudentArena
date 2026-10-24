@@ -108892,3 +108892,43 @@ msgstr "Klicken Sie auf eine Zeile — das Formular „Versuch gewähren“ wird
 msgctxt "accounts.exam_chance"
 msgid "Əmr / sərəncam, ərizə və ya qərarın surəti — PDF, JPG və ya PNG, ən çox 10 MB. Sənədsiz cəhd hüququ verilmir."
 msgstr "Kopie der Anordnung / Verfügung, des Antrags oder der Entscheidung — PDF, JPG oder PNG, höchstens 10 MB. Ohne Dokument wird kein weiterer Versuch gewährt."
+
+msgctxt "exams.model.exam.field"
+msgid "Müəllim (jurnal)"
+msgstr "Lehrkraft (Journal)"
+
+msgctxt "exams.model.exam.field"
+msgid "Bağlı jurnallar"
+msgstr "Verknüpfte Journale"
+
+msgctxt "exams.form.exam.label"
+msgid "Müəllim (jurnal)"
+msgstr "Lehrkraft (Journal)"
+
+msgctxt "exams.form.exam.help"
+msgid "Müəllimi seçsəniz, fənn siyahısı onun cari dövrdə tədris etdiyi fənlərlə məhdudlaşır və midterm nəticəsi həmin fənnin qrup jurnallarına yazılır. Boş qalarsa bütün fənlər göstərilir."
+msgstr "Wenn Sie eine Lehrkraft auswählen, wird die Fächerliste auf die Fächer beschränkt, die sie im aktuellen Zeitraum unterrichtet, und das Ergebnis der Zwischenprüfung wird in die Gruppenjournale dieses Fachs geschrieben. Bleibt das Feld leer, werden alle Fächer angezeigt."
+
+msgctxt "exams.form.exam.error"
+msgid "Seçilmiş müəllim bu fənni cari dövrdə tədris etmir."
+msgstr "Die ausgewählte Lehrkraft unterrichtet dieses Fach im aktuellen Zeitraum nicht."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Müəllim tapılmadı"
+msgstr "Keine Lehrkraft gefunden"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Müəllim axtar…"
+msgstr "Lehrkraft suchen…"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Seçilmiş müəllim"
+msgstr "Ausgewählte Lehrkraft"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Təmizlə (bütün fənlər)"
+msgstr "Leeren (alle Fächer)"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu müəllimin cari dövrdə tədris etdiyi fənn tapılmadı"
+msgstr "Kein Fach gefunden, das diese Lehrkraft im aktuellen Zeitraum unterrichtet"

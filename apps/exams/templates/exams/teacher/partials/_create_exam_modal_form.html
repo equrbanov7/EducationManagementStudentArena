@@ -159,32 +159,8 @@
                         {# Kateqoriya: tək icazəli kateqoriyada (Sınaq) select yox, oxunan həb — bax partial. #}
                         {% include "exams/teacher/partials/_exam_category_field.html" %}
 
-                        {# Fənn — tək seçimli axtarışlı siyahı (qrup/tələbə axtarışı ilə eyni üslub). Final/midterm-də məcburidir. #}
-                        <div class="form-group form-group-full" data-ew-subject-group>
-                            <label class="ew-label create-exam-searchable-label" for="createExamSubjectSearch">{{ form.subject.label }} <span class="ew-req" aria-hidden="true" data-ew-subject-req hidden>*</span></label>
-                            <div class="create-exam-searchable-select create-exam-subject-select" data-exam-subject-control
-                                 data-search-url="{% url 'exams:subject_search' %}">
-                                <div class="create-exam-search-wrap">
-                                    <i class="fas fa-search" aria-hidden="true"></i>
-                                    <input type="text" id="createExamSubjectSearch" class="create-exam-search-input"
-                                           placeholder="{% trans 'subject_search_placeholder' context 'exams.template.create_exam_modal_form' %}"
-                                           autocomplete="off">
-                                </div>
-                                <div id="createExamSubjectResults" class="create-exam-search-list" data-exam-subject-results></div>
-                                <div class="create-exam-selection-counter">
-                                    {% trans "selected_subject" context "exams.template.create_exam_modal_form" %}:
-                                    <span data-exam-subject-selected-text>—</span>
-                                </div>
-                                <select name="{{ form.subject.html_name }}" class="d-none" data-exam-subject-native>
-                                    {% if form.instance.subject %}
-                                        <option value="{{ form.instance.subject.pk }}" selected>{{ form.instance.subject.name }} ({{ form.instance.subject.code }})</option>
-                                    {% elif form.subject.value %}
-                                        <option value="{{ form.subject.value }}" selected>{{ form.subject.value }}</option>
-                                    {% endif %}
-                                </select>
-                            </div>
-                            {% if form.subject.errors %}<div class="field-error">{{ form.subject.errors.0 }}</div>{% endif %}
-                        </div>
+                        {# Müəllim (jurnal) → Fənn asılı seçimi (2026-10-24). Final/midterm-də fənn məcburidir. #}
+                        {% include "exams/teacher/partials/_exam_journal_link_fields.html" %}
                     </div>
                 </section>
 

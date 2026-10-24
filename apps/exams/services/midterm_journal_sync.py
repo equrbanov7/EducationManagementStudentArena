@@ -156,6 +156,8 @@ def sync_midterm_attempt(attempt, *, actor=None, appeal_id=None, notify=True):
             by_user=journal_sync._resolve_actor(attempt, actor),
             appeal_id=appeal_id,
             notify=notify,
+            # 2026-10-24: imtahanın açıq bağlandığı jurnallar (``exam_journal_link``) — tələbə onlarda olarsa.
+            offering_ids=list(exam.journal_offerings.values_list("pk", flat=True)) if exam.pk else None,
         )
     except Exception:  # körpü heç vaxt imtahanı sındırmır
         logger.exception("midterm_journal_sync: failed to write attempt %s", getattr(attempt, "id", "?"))
