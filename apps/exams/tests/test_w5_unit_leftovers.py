@@ -365,6 +365,8 @@ class TeacherResultsUnitGroupTests(_RegistryFixture):
         self.assertEqual(by_username["w5l_outsider"], "701 biz, Kohort-A")  # kohort + cari reyestr qrupu
 
     def test_group_second_chance_accepts_registry_group(self):
+        # 2026-10-24: midterm / final üçün birbaşa qrup cəhdi yoxdur (rəsmi axın) — quiz imtahanı ilə yoxlanır.
+        self.exam = self._exam(title="W5L Quiz", exam_type_extended="quiz")
         response = self.client.post(
             reverse("exams:grant_extra_attempt_group", args=[self.exam.slug]),
             {"group_id": unit_filter_value(self.group.pk), "extra_attempts": "1"},

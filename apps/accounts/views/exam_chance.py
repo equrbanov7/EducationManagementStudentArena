@@ -5,7 +5,8 @@ POST: seçilmiş final/midterm imtahanı üzrə KONKRET tələbələrə yenidən
 2026-10-18 (sahib): şans RƏSMİDİR — səbəb növü məcburidir (25% müraciəti / universitet güzəşti /
 texniki problem / apellyasiya qərarı / digər), əsas (əmr №, tarix, qeyd) səbəbə görə yoxlanır və hər
 tələbə üçün append-only qeyd yazılır (``registrar.retake_chance``); «25% müraciəti» yalnız ödənişi
-təsdiqlənmiş + buraxılmış müraciəti olan tələbəyə verilir və müraciəti ``exam_granted`` edir. GET: profil SPA bölməsini render edir —
+təsdiqlənmiş + buraxılmış müraciəti olan tələbəyə verilir və müraciəti ``exam_granted`` edir. 2026-10-24: əsas sənəd
+(PDF / şəkil) hər səbəb üçün məcburidir. GET: profil SPA bölməsini render edir —
 sidebar itmir (superadmin_exam_rooms / kollokvium_windows pattern-i).
 """
 
@@ -57,6 +58,16 @@ def _exam_info(exam) -> dict:
     }
 
 
+def _keep_selection(next_url, exam, students):
+    """Xəta halında forma boş açılmasın — imtahan və seçilmiş tələbələr geri ön-doldurulur (2026-10-24)."""
+    return _append_query_params(
+        next_url,
+        chance_exam=str(exam.pk),
+        chance_student=",".join(str(student.pk) for student in students[:20]),
+        chance_focus="grant",
+    )
+
+
 @login_required
 def exam_chance(request):
     """«İmtahan şansı ver» bölməsi (GET render + POST grant)."""
@@ -101,6 +112,8 @@ def exam_chance(request):
                 reference_number=request.POST.get("reference_number"),
                 reference_date=request.POST.get("reference_date"),
                 note=request.POST.get("note"),
+                # 2026-10-24 (sahib): əsas sənəd məcburidir (server yoxlayır — UI `required` yalnız köməkçidir).
+                document=request.FILES.get("document"),
             )
             # Şans + rəsmi qeyd (səbəb, əsas, müraciət keçidi) BİR tranzaksiyada — biri alınmasa heç biri yazılmır.
             with transaction.atomic():
@@ -122,10 +135,10 @@ def exam_chance(request):
                 )
         except ValidationError as exc:
             messages.error(request, "; ".join(str(m) for m in exc.messages))
-            return redirect(next_url)
+            return redirect(_keep_selection(next_url, exam, students))
         except SecondChanceError as exc:
             messages.error(request, str(exc))
-            return redirect(next_url)
+            return redirect(_keep_selection(next_url, exam, students))
 
         message = pgettext(
             "accounts.exam_chance",

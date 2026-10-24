@@ -42,7 +42,7 @@ class ExamChanceRetakeReasonTest(RetakeBase):
         cls.exam.allowed_users.add(cls.student, cls.other)
 
     def _post(self, **data):
-        payload = {"exam_id": str(self.exam.pk), "extra_attempts": "1", **data}
+        payload = {"exam_id": str(self.exam.pk), "extra_attempts": "1", "document": pdf("emr.pdf"), **data}
         return self.client_for(self.center).post(reverse("accounts:exam_chance"), payload)
 
     def _admit(self):

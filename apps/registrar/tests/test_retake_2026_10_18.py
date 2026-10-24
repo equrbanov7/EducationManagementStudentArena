@@ -355,7 +355,7 @@ class FlowTest(_Helpers):
                 retake_chance.validate(organization=self.org, exam=exam, students=[self.student], reason="retake_25")
             app = self._admitted()
             cleaned = retake_chance.validate(
-                organization=self.org, exam=exam, students=[self.student], reason="retake_25"
+                organization=self.org, exam=exam, students=[self.student], reason="retake_25", document=pdf("emr.pdf")
             )
             grants = retake_chance.record(
                 organization=self.org, exam=exam, students=[self.student], cleaned=cleaned, extra=1, actor=self.dean
@@ -391,6 +391,7 @@ class FlowTest(_Helpers):
                 reference_number="12/R",
                 reference_date="2026-10-01",
                 note="Rektor əmri ilə güzəşt",
+                document=pdf("emr.pdf"),
             )
             self.assertEqual(ok["reference_number"], "12/R")
             with self.assertRaises(ValidationError):
@@ -401,6 +402,7 @@ class FlowTest(_Helpers):
                 students=[self.student],
                 reason="technical",
                 note="Kompüter imtahan zamanı söndü",
+                document=pdf("akt.pdf"),
             )
 
     @override_settings(RETAKE_MAX_ATTEMPTS=2)

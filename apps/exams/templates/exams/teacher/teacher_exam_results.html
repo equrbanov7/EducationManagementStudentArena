@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="{% static 'css/ems_ui/badge.css' %}?v=20260903-3">
     <link rel="stylesheet" href="{% static 'css/ems_ui/table.css' %}?v=20261018-pkga">
     <link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
-    <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results_page.css' %}?v=20261019-mob">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results_page.css' %}?v=20261024-formal">
 {% endblock %}
 
 {% block content %}
@@ -131,7 +131,38 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
             </form>
         </section>
 
-        {% if available_groups %}
+        {% if available_groups and formal_retake %}
+        {# 2026-10-24 (sahib): midterm / final — qrupa birbaşa cəhd YOXDUR. GET forma rəsmi «Yenidən imtahan cəhdi»
+           səhifəsini imtahan + qrup axtarışı ilə ön-doldurur (hər tələbə orada əsas, əmr və sənədlə ayrıca seçilir). #}
+        <section class="ems-card etr-grant etr-grant--formal">
+            {% if formal_retake_open %}
+            <form method="get" action="{{ formal_retake_action }}" class="etr-grant__form">
+                <input type="hidden" name="section" value="exam-chance">
+                <input type="hidden" name="chance_exam" value="{{ exam.pk }}">
+                <input type="hidden" name="chance_focus" value="grant">
+                <div class="etr-grant__copy">
+                    <h2 class="etr-grant__title"><i class="fas fa-file-signature" aria-hidden="true"></i> {% trans "Qrupa yenidən imtahan cəhdi" context "exams.template.teacher_exam_results" %}</h2>
+                    <p class="etp-hint">{% trans "Midterm/final üçün cəhd hüququ birbaşa verilmir: «Yenidən imtahan cəhdi» səhifəsində əsas, əmr / sərəncam №, tarix, sənəd və qeyd ilə rəsmi qeyd yazılır." context "exams.template.teacher_exam_results" %}</p>
+                </div>
+                <div class="etr-grant__field">
+                    <label class="visually-hidden" for="resultsGroupFormalSelect">{% trans "Qrup" context "exams.template.teacher_exam_results" %}</label>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select name="chance_student_q" id="resultsGroupFormalSelect" class="ems-select bootstrap-single-select__native" data-bootstrap-select required>
+                            <option value="">{% trans 'Qrup seçin…' context 'exams.template.teacher_exam_results' %}</option>
+                            {% for grp in available_groups %}<option value="{{ grp.name }}">{{ grp.name }}</option>{% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="ems-btn">{% trans "Rəsmi cəhd səhifəsinə keç" context "exams.template.teacher_exam_results" %}</button>
+            </form>
+            {% else %}
+            <div class="etr-grant__copy">
+                <h2 class="etr-grant__title"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "Qrupa yenidən imtahan cəhdi" context "exams.template.teacher_exam_results" %}</h2>
+                <p class="etp-hint">{% trans "Midterm/final üçün yenidən cəhd hüququnu yalnız İmtahan Mərkəzi «Yenidən imtahan cəhdi» səhifəsində rəsmi əsasla (əmr, sənəd, qeyd) verir." context "exams.template.teacher_exam_results" %}</p>
+            </div>
+            {% endif %}
+        </section>
+        {% elif available_groups %}
         {# Bütöv qrupa yenidən imtahan cəhdi — filtr formasından AYRI form (iç-içə form HTML-də etibarsızdır). #}
         <section class="ems-card etr-grant">
             <form method="post" action="{% url 'exams:grant_extra_attempt_group' slug=exam.slug %}" class="etr-grant__form">

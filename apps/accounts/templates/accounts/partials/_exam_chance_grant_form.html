@@ -2,9 +2,10 @@
 {% comment %}«Yenidən imtahan cəhdi» — RƏSMİ cəhd hüququ forması (sahib 2026-10-18). Addımlar: 1) əsas (filtr panelindəki
 «Cəhdin əsası» — server vəziyyəti), 2) tələbə (axtarış → konkret tələbə; «25% müraciəti» səbəbində yalnız
 ödənişi təsdiqlənmiş + buraxılmış müraciəti olanlar seçilə bilir, müraciət linki ilə), 3) imtahan (25%-də
-seçilmiş tələbələrin fənlərinə görə süzülür — `exam_chance.js`), 4) əsas (əmr №/tarix, qeyd), 5) təsdiq.
+seçilmiş tələbələrin fənlərinə görə süzülür — `exam_chance.js`), 4) əsas (əmr №/tarix, SƏNƏD — 2026-10-24-dən
+məcburi, qeyd), 5) təsdiq. Çiplərdə ata adı + qrup (eyni adlı tələbələr); `chance_student` ön-doldurması çipi işarələyir.
 Server HƏR qaydanı yenidən yoxlayır (`registrar.retake_chance.validate`). Kontekst: `s` = exam_chance_section.{% endcomment %}
-<section class="ems-card exch-card">
+<section class="ems-card exch-card exch-grant-card" id="exchGrantCard"{% if s.focus_grant %} data-exch-focus{% endif %}>
   <div class="ems-card__head">
     <div>
       <h2 class="ems-card__title">{% trans "Cəhd hüququ ver" context "accounts.exam_chance" %}</h2>
@@ -18,14 +19,14 @@ Server HƏR qaydanı yenidən yoxlayır (`registrar.retake_chance.validate`). Ko
       <div>{% trans "1-ci addım: yuxarıdakı süzgəcdə «Cəhdin əsası»nı seçin — əsassız cəhd hüququ verilmir." context "accounts.exam_chance" %}</div>
     </div>
   {% else %}
-  <form method="post" action="{% url 'accounts:exam_chance' %}" class="exch-form" data-exch-grant data-exch-reason="{{ s.selected_reason }}">
+  <form method="post" action="{% url 'accounts:exam_chance' %}" class="exch-form" enctype="multipart/form-data" data-exch-grant data-exch-reason="{{ s.selected_reason }}">
     {% csrf_token %}
     <input type="hidden" name="next" value="{{ s.post_next_url }}&amp;chance_reason={{ s.selected_reason }}">
     <input type="hidden" name="reason" value="{{ s.selected_reason }}">
 
     <fieldset class="exch-step exch-field--full">
       <legend class="exch-step__title"><span class="exch-step__no">2</span> {% trans "Tələbə" context "accounts.exam_chance" %}</legend>
-      {% if not s.filters.student_q %}
+      {% if not s.filters.student_q and not s.student_results %}
         <p class="ems-field__hint">{% trans "Yuxarıdakı «Tələbə axtarışı» sahəsinə ad, istifadəçi adı və ya qrup yazın." context "accounts.exam_chance" %}</p>
       {% elif s.student_results %}
       <div class="exch-students">
@@ -35,14 +36,15 @@ Server HƏR qaydanı yenidən yoxlayır (`registrar.retake_chance.validate`). Ko
         <div class="exch-stu is-disabled" aria-disabled="true">
           <span class="exch-stu__box"><i class="fas fa-ban"></i></span>
           <span class="exch-stu__name">{{ student.get_full_name|default:student.username }}</span>
+          {% include "accounts/partials/_exam_chance_identity.html" with patronymic=row.patronymic group_name=row.group_name username=student.username %}
           <span class="exch-stu__user">{% trans "25% müraciəti yoxdur (ödəniş təsdiqlənib + buraxılıb)" context "accounts.exam_chance" %}</span>
         </div>
         {% else %}
         <label class="exch-stu">
-          <input type="checkbox" name="student_ids" value="{{ student.pk }}" data-exch-subjects="{{ row.subject_ids }}">
+          <input type="checkbox" name="student_ids" value="{{ student.pk }}" data-exch-subjects="{{ row.subject_ids }}"{% if row.selected %} checked{% endif %}>
           <span class="exch-stu__box"><i class="fas fa-check"></i></span>
           <span class="exch-stu__name">{{ student.get_full_name|default:student.username }}</span>
-          <span class="exch-stu__user">{{ student.username }}</span>
+          {% include "accounts/partials/_exam_chance_identity.html" with patronymic=row.patronymic group_name=row.group_name username=student.username %}
           {% if row.retake_apps %}
           <ul class="exch-apps">
             {% for app in row.retake_apps %}
@@ -99,6 +101,11 @@ Server HƏR qaydanı yenidən yoxlayır (`registrar.retake_chance.validate`). Ko
           <label class="ems-field__label" for="exchExtra">{% trans "Əlavə cəhd sayı" context "accounts.exam_chance" %}</label>
           <input type="number" id="exchExtra" name="extra_attempts" class="ems-input" min="1" max="10" value="1">
         </div>
+      </div>
+      <div class="ems-field">
+        <label class="ems-field__label" for="exchDocument">{% trans "Sənəd" context "accounts.exam_chance" %} <span class="ems-field__req">*</span></label>
+        <input type="file" id="exchDocument" name="document" class="ems-input exch-file" required accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" aria-describedby="exchDocumentHint">
+        <span class="ems-field__hint" id="exchDocumentHint">{% trans "Əmr / sərəncam, ərizə və ya qərarın surəti — PDF, JPG və ya PNG, ən çox 10 MB. Sənədsiz cəhd hüququ verilmir." context "accounts.exam_chance" %}</span>
       </div>
       <div class="ems-field">
         <label class="ems-field__label" for="exchNote">{% trans "Qeyd" context "accounts.exam_chance" %}

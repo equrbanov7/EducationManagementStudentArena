@@ -108012,3 +108012,51 @@ msgstr "Удалить строку"
 msgctxt "accounts.workload"
 msgid "fənn, qrup və ya müəllim"
 msgstr "дисциплина, группа или преподаватель"
+
+msgctxt "exams.view.exams.message"
+msgid "Midterm və final imtahanları üçün yenidən cəhd hüququ yalnız «Yenidən imtahan cəhdi» səhifəsində rəsmi əsasla (əmr, sənəd, qeyd) verilir."
+msgstr "Для промежуточных и итоговых экзаменов повторная попытка предоставляется только на странице «Повторная попытка экзамена» на официальном основании (приказ, документ, примечание)."
+
+msgctxt "registrar.retake"
+msgid "Əsas sənədi (əmr / sərəncam / ərizə) yükləyin — sənədsiz cəhd hüququ verilmir."
+msgstr "Загрузите документ-основание (приказ / распоряжение / заявление) — без документа попытка не предоставляется."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final: cəhd hüququ rəsmi əsasla (əmr, sənəd, qeyd) «Yenidən imtahan cəhdi» səhifəsində verilir."
+msgstr "Промежуточный/итоговый: попытка предоставляется на официальном основании (приказ, документ, примечание) на странице «Повторная попытка экзамена»."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün yenidən cəhd hüququnu yalnız İmtahan Mərkəzi rəsmi əsasla verir."
+msgstr "Для промежуточных/итоговых экзаменов повторную попытку предоставляет только Экзаменационный центр на официальном основании."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün cəhd hüququ birbaşa verilmir: «Yenidən imtahan cəhdi» səhifəsində əsas, əmr / sərəncam №, tarix, sənəd və qeyd ilə rəsmi qeyd yazılır."
+msgstr "Для промежуточных/итоговых экзаменов попытка не предоставляется напрямую: на странице «Повторная попытка экзамена» составляется официальная запись с основанием, № приказа / распоряжения, датой, документом и примечанием."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Rəsmi cəhd səhifəsinə keç"
+msgstr "Перейти на страницу официальной попытки"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün yenidən cəhd hüququnu yalnız İmtahan Mərkəzi «Yenidən imtahan cəhdi» səhifəsində rəsmi əsasla (əmr, sənəd, qeyd) verir."
+msgstr "Для промежуточных/итоговых экзаменов повторную попытку предоставляет только Экзаменационный центр на странице «Повторная попытка экзамена» на официальном основании (приказ, документ, примечание)."
+
+msgctxt "accounts.exam_chance"
+msgid "Sənəd"
+msgstr "Документ"
+
+msgctxt "accounts.exam_chance"
+msgid "Ata adı"
+msgstr "Отчество"
+
+msgctxt "accounts.exam_chance"
+msgid "Bu tələbə və imtahan üçün «Cəhd hüququ ver» formasını doldur"
+msgstr "Заполнить форму «Предоставить попытку» для этого студента и экзамена"
+
+msgctxt "accounts.exam_chance"
+msgid "Sətrə klikləyin — həmin tələbə və imtahan üçün «Cəhd hüququ ver» forması doldurulur."
+msgstr "Нажмите на строку — форма «Предоставить попытку» заполнится для этого студента и экзамена."
+
+msgctxt "accounts.exam_chance"
+msgid "Əmr / sərəncam, ərizə və ya qərarın surəti — PDF, JPG və ya PNG, ən çox 10 MB. Sənədsiz cəhd hüququ verilmir."
+msgstr "Копия приказа / распоряжения, заявления или решения — PDF, JPG или PNG, не более 10 МБ. Без документа попытка не предоставляется."

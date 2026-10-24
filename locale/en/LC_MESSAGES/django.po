@@ -107818,3 +107818,51 @@ msgstr "Delete row"
 msgctxt "accounts.workload"
 msgid "fənn, qrup və ya müəllim"
 msgstr "subject, group or teacher"
+
+msgctxt "exams.view.exams.message"
+msgid "Midterm və final imtahanları üçün yenidən cəhd hüququ yalnız «Yenidən imtahan cəhdi» səhifəsində rəsmi əsasla (əmr, sənəd, qeyd) verilir."
+msgstr "For midterm and final exams a re-attempt can only be granted on the “Exam re-attempt” page with an official basis (order, document, note)."
+
+msgctxt "registrar.retake"
+msgid "Əsas sənədi (əmr / sərəncam / ərizə) yükləyin — sənədsiz cəhd hüququ verilmir."
+msgstr "Upload the supporting document (order / decree / application) — no re-attempt is granted without it."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final: cəhd hüququ rəsmi əsasla (əmr, sənəd, qeyd) «Yenidən imtahan cəhdi» səhifəsində verilir."
+msgstr "Midterm/final: a re-attempt is granted with an official basis (order, document, note) on the “Exam re-attempt” page."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün yenidən cəhd hüququnu yalnız İmtahan Mərkəzi rəsmi əsasla verir."
+msgstr "For midterm/final exams only the Exam Centre grants a re-attempt, with an official basis."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün cəhd hüququ birbaşa verilmir: «Yenidən imtahan cəhdi» səhifəsində əsas, əmr / sərəncam №, tarix, sənəd və qeyd ilə rəsmi qeyd yazılır."
+msgstr "Midterm/final re-attempts are not granted directly: on the “Exam re-attempt” page an official record is written with the basis, order / decree No., date, document and note."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Rəsmi cəhd səhifəsinə keç"
+msgstr "Go to the official re-attempt page"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün yenidən cəhd hüququnu yalnız İmtahan Mərkəzi «Yenidən imtahan cəhdi» səhifəsində rəsmi əsasla (əmr, sənəd, qeyd) verir."
+msgstr "For midterm/final exams only the Exam Centre grants a re-attempt, on the “Exam re-attempt” page with an official basis (order, document, note)."
+
+msgctxt "accounts.exam_chance"
+msgid "Sənəd"
+msgstr "Document"
+
+msgctxt "accounts.exam_chance"
+msgid "Ata adı"
+msgstr "Patronymic"
+
+msgctxt "accounts.exam_chance"
+msgid "Bu tələbə və imtahan üçün «Cəhd hüququ ver» formasını doldur"
+msgstr "Fill in the “Grant a re-attempt” form for this student and exam"
+
+msgctxt "accounts.exam_chance"
+msgid "Sətrə klikləyin — həmin tələbə və imtahan üçün «Cəhd hüququ ver» forması doldurulur."
+msgstr "Click a row to fill in the “Grant a re-attempt” form for that student and exam."
+
+msgctxt "accounts.exam_chance"
+msgid "Əmr / sərəncam, ərizə və ya qərarın surəti — PDF, JPG və ya PNG, ən çox 10 MB. Sənədsiz cəhd hüququ verilmir."
+msgstr "A copy of the order / decree, application or decision — PDF, JPG or PNG, up to 10 MB. No re-attempt is granted without a document."

@@ -107226,3 +107226,51 @@ msgstr "Satırı sil"
 msgctxt "accounts.workload"
 msgid "fənn, qrup və ya müəllim"
 msgstr "ders, grup veya öğretim elemanı"
+
+msgctxt "exams.view.exams.message"
+msgid "Midterm və final imtahanları üçün yenidən cəhd hüququ yalnız «Yenidən imtahan cəhdi» səhifəsində rəsmi əsasla (əmr, sənəd, qeyd) verilir."
+msgstr "Ara sınav ve final sınavları için yeniden deneme hakkı yalnızca “Sınav yeniden denemesi” sayfasında resmî gerekçeyle (karar, belge, not) verilir."
+
+msgctxt "registrar.retake"
+msgid "Əsas sənədi (əmr / sərəncam / ərizə) yükləyin — sənədsiz cəhd hüququ verilmir."
+msgstr "Dayanak belgesini (karar / yönerge / dilekçe) yükleyin — belge olmadan deneme hakkı verilmez."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final: cəhd hüququ rəsmi əsasla (əmr, sənəd, qeyd) «Yenidən imtahan cəhdi» səhifəsində verilir."
+msgstr "Ara sınav/final: deneme hakkı resmî gerekçeyle (karar, belge, not) “Sınav yeniden denemesi” sayfasında verilir."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün yenidən cəhd hüququnu yalnız İmtahan Mərkəzi rəsmi əsasla verir."
+msgstr "Ara sınav/final için yeniden deneme hakkını yalnızca Sınav Merkezi resmî gerekçeyle verir."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün cəhd hüququ birbaşa verilmir: «Yenidən imtahan cəhdi» səhifəsində əsas, əmr / sərəncam №, tarix, sənəd və qeyd ilə rəsmi qeyd yazılır."
+msgstr "Ara sınav/final için deneme hakkı doğrudan verilmez: “Sınav yeniden denemesi” sayfasında gerekçe, karar / yönerge no., tarih, belge ve not ile resmî kayıt yazılır."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Rəsmi cəhd səhifəsinə keç"
+msgstr "Resmî deneme sayfasına git"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün yenidən cəhd hüququnu yalnız İmtahan Mərkəzi «Yenidən imtahan cəhdi» səhifəsində rəsmi əsasla (əmr, sənəd, qeyd) verir."
+msgstr "Ara sınav/final için yeniden deneme hakkını yalnızca Sınav Merkezi “Sınav yeniden denemesi” sayfasında resmî gerekçeyle (karar, belge, not) verir."
+
+msgctxt "accounts.exam_chance"
+msgid "Sənəd"
+msgstr "Belge"
+
+msgctxt "accounts.exam_chance"
+msgid "Ata adı"
+msgstr "Baba adı"
+
+msgctxt "accounts.exam_chance"
+msgid "Bu tələbə və imtahan üçün «Cəhd hüququ ver» formasını doldur"
+msgstr "Bu öğrenci ve sınav için “Deneme hakkı ver” formunu doldur"
+
+msgctxt "accounts.exam_chance"
+msgid "Sətrə klikləyin — həmin tələbə və imtahan üçün «Cəhd hüququ ver» forması doldurulur."
+msgstr "Satıra tıklayın — o öğrenci ve sınav için “Deneme hakkı ver” formu doldurulur."
+
+msgctxt "accounts.exam_chance"
+msgid "Əmr / sərəncam, ərizə və ya qərarın surəti — PDF, JPG və ya PNG, ən çox 10 MB. Sənədsiz cəhd hüququ verilmir."
+msgstr "Karar / yönerge, dilekçe veya kararın kopyası — PDF, JPG ya da PNG, en fazla 10 MB. Belge olmadan deneme hakkı verilmez."

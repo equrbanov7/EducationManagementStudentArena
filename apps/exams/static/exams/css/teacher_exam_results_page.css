@@ -100,6 +100,15 @@
     min-width: 180px;
 }
 
+/* Midterm / final — rəsmi «Yenidən imtahan cəhdi» (2026-10-24): birbaşa şans yox, kilid qeydi. */
+.etr-formal-note {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    font-size: var(--ems-fs-sm);
+    white-space: nowrap;
+}
+
 /* ── Nəticələr cədvəli ─────────────────────────────────────────────────── */
 .etr-results__head {
     display: flex;

@@ -14,7 +14,8 @@ from django.views.decorators.http import require_POST
 from apps.exams.domain.unit_assignment import unit_student_record_filter
 from apps.exams.domain.unit_scope_filters import parse_unit_value, unit_filter_value
 from apps.exams.models import StudentExamAttemptGrant, StudentGroup
-from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.access_policy import _ensure_teacher, is_exam_center_user
+from apps.exams.services.formal_retake import formal_retake_url, requires_formal_retake
 from apps.organizations.models import Membership, OrgUnit
 from core.audit import log_action
 from core.cache import invalidate_profile_badge_counts_cache
@@ -32,6 +33,26 @@ User = get_user_model()
 
 def _is_ajax(request):
     return request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+
+def _formal_retake_refusal(request, exam, back_url):
+    """Midterm / final — birbaşa əlavə cəhd YOXDUR (sahib 2026-10-24): 403 (AJAX) və ya xəta + geri.
+
+    Rəsmi axın (əsas, əmr №/tarix, sənəd, qeyd → silinməyən qeyd) yalnız İmtahan Mərkəzinin
+    «Yenidən imtahan cəhdi» səhifəsindədir; köhnə forma / əl ilə POST bu yoxlamadan keçmir."""
+    error = pgettext(
+        "exams.view.exams.message",
+        "Midterm və final imtahanları üçün yenidən cəhd hüququ yalnız «Yenidən imtahan cəhdi» səhifəsində "
+        "rəsmi əsasla (əmr, sənəd, qeyd) verilir.",
+    )
+    formal_url = formal_retake_url(exam) if is_exam_center_user(request.user) else ""
+    if _is_ajax(request):
+        return JsonResponse(
+            {"success": False, "error": "formal_retake_required", "message": error, "redirect_url": formal_url},
+            status=403,
+        )
+    messages.error(request, error)
+    return redirect(back_url)
 
 
 @login_required
@@ -59,6 +80,9 @@ def grant_extra_attempt(request, slug):
         return _safe_same_origin_redirect_path(request, request.META.get("HTTP_REFERER")) or reverse(
             "exams:teacher_exam_results", kwargs={"slug": exam.slug}
         )
+
+    if requires_formal_retake(exam):
+        return _formal_retake_refusal(request, exam, _back_url())
 
     raw_student_id = (request.POST.get("student_id") or "").strip()
     if not raw_student_id.isdigit():
@@ -184,6 +208,9 @@ def grant_extra_attempt_group(request, slug):
             return JsonResponse({"success": False, "error": error}, status=status)
         messages.error(request, error)
         return redirect(_back_url())
+
+    if requires_formal_retake(exam):
+        return _formal_retake_refusal(request, exam, _back_url())
 
     raw_group_id = (request.POST.get("group_id") or request.POST.get("group") or "").strip()
     # 2026-09-14 (W5 `w5left`, tapşırıq 1): nəticələr səhifəsinin qrup seçicisi

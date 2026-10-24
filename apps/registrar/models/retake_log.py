@@ -18,9 +18,17 @@ from django.db import models
 from django.utils.translation import pgettext_lazy
 
 from .corrections import ImmutableCorrectionEvidence
-from .retake import RetakeStatus, retake_file_validators, retake_receipt_path
+from .retake import RetakeStatus, _random_name, retake_file_validators, retake_receipt_path
 
 _CTX = "registrar.retake"
+
+#: «Yenidən imtahan cəhdi»nin əsas sənədi (əmr / sərəncam / ərizə) — qorunan media (``retake_media``).
+EXAM_CHANCE_DOCUMENT_PREFIX = "exam_chance_documents/"
+
+
+def exam_chance_document_path(instance, filename: str) -> str:
+    """``exam_chance_documents/<org>/<təsadüfi ad>`` — orijinal ad ``document_name`` sahəsindədir."""
+    return f"{EXAM_CHANCE_DOCUMENT_PREFIX}{instance.organization_id}/{_random_name(filename)}"
 
 
 class RetakeEventAction(models.TextChoices):
@@ -116,6 +124,12 @@ class ExamChanceGrant(ImmutableCorrectionEvidence):
     reference_number = models.CharField(max_length=80, blank=True)
     reference_date = models.DateField(null=True, blank=True)
     note = models.TextField(blank=True)
+    #: 2026-10-24 (sahib): əsas sənəd MƏCBURİDİR (``retake_chance.validate``); köhnə qeydlərdə boş qalır. Bir
+    #: təqdimatda bir neçə tələbə seçiləndə fayl BİR dəfə yazılır, sətirlər eyni yolu paylaşır.
+    document = models.FileField(
+        upload_to=exam_chance_document_path, blank=True, max_length=200, validators=retake_file_validators()
+    )
+    document_name = models.CharField(max_length=255, blank=True)
     application = models.ForeignKey(
         "registrar.RetakeApplication", null=True, blank=True, on_delete=models.PROTECT, related_name="chance_grants"
     )
@@ -139,10 +153,12 @@ class ExamChanceGrant(ImmutableCorrectionEvidence):
 
 
 __all__ = [
+    "EXAM_CHANCE_DOCUMENT_PREFIX",
     "ExamChanceGrant",
     "ExamChanceReason",
     "RetakeActorRole",
     "RetakeApplicationEvent",
     "RetakeEventAction",
     "RetakeReceipt",
+    "exam_chance_document_path",
 ]
