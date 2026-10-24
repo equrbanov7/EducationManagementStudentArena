@@ -1,11 +1,19 @@
-"""``legacy_repair_empty_lessons`` — köçürmədən qalan TAM BOŞ jurnal sütunlarını silir.
+"""``legacy_repair_empty_lessons`` — jurnalın MƏZMUNSUZ keçmiş sütunlarını silir.
 
-Dry-run DEFAULT-dur (yalnız saylar + açılış cədvəli). Qayda, təhlükəsizlik və audit:
-``apps.legacy_import.services.repair_empty_lessons``.
+Dry-run DEFAULT-dur (yalnız saylar + açılış cədvəli). Qayda: ``apps.legacy_import.services.repair_empty_lessons``;
+silmə, aqreqatlar və audit: ``apps.legacy_import.services.repair_empty_lessons_apply``.
+
+Defolt yalnız köçürülmüş TAM BOŞ sütun; genişləndirmə AÇIQ bayraqladır (review olunsun):
+
+* ``--include-absent-only``     — xanaları yalnız balsız «qb» olan sütun da (xanalar da silinir, qayıb saatı
+  yenidən hesablanır);
+* ``--include-teacher-lessons`` — müəllimin yeni sistemdə açdığı keçmiş sütun da (bu gün yaradılan istisna);
+* ``--include-locked``          — kilidli (təsdiqlənmiş/dərc olunmuş) jurnallar da.
 
     manage.py legacy_repair_empty_lessons --organization qku
     manage.py legacy_repair_empty_lessons --organization qku --apply --i-know-this-is-production
-    manage.py legacy_repair_empty_lessons --organization qku --include-locked --apply --i-know-this-is-production
+    manage.py legacy_repair_empty_lessons --organization qku --include-locked --include-absent-only \
+        --include-teacher-lessons --apply --i-know-this-is-production
 """
 
 from __future__ import annotations
@@ -16,6 +24,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 from apps.legacy_import.services import repair_empty_lessons as service
+from apps.legacy_import.services import repair_empty_lessons_apply as deletion
 from apps.legacy_import.services.repair_support import (
     add_repair_arguments,
     build_context,
@@ -42,8 +51,9 @@ def _before(raw: str) -> datetime.date:
 
 class Command(BaseCommand):
     help = (
-        "Köhnə sistemdən köçürülmüş, heç bir xanası və mövzusu olmayan keçmiş dərsləri (tam boş jurnal "
-        "sütunlarını) silir. Müəllimin yeni sistemdə açdığı dərsə toxunulmur. Dry-run default."
+        "Heç bir real xanası (bal / iə / ü/q), mövzusu və düzəlişi olmayan keçmiş dərsləri (boş jurnal "
+        "sütunlarını) silir. Defolt: yalnız köçürülmüş tam boş sütun; «qb»-li və müəllimin sütunu açıq "
+        "bayraqla. Bu gün/gələcək toxunulmaz. Dry-run default."
     )
 
     def add_arguments(self, parser):
@@ -58,44 +68,78 @@ class Command(BaseCommand):
             action="store_true",
             help="Kilidli (təsdiqlənmiş/dərc olunmuş) jurnalların boş sütunlarını da sil (default: toxunma)",
         )
+        parser.add_argument(
+            "--include-absent-only",
+            action="store_true",
+            help="Xanaları YALNIZ balsız «qb» olan sütunları da sil (xanalarla; qayıb saatı yenidən hesablanır)",
+        )
+        parser.add_argument(
+            "--include-teacher-lessons",
+            action="store_true",
+            help="Müəllimin yeni sistemdə açdığı keçmiş sütunları da sil (bu gün yaradılan dərs istisna)",
+        )
         parser.add_argument("--batch-size", type=int, default=service.DEFAULT_BATCH_SIZE, help="Dəstə ölçüsü")
         parser.add_argument("--show", type=int, default=20, help="Cədvəldə göstəriləcək açılış sayı")
 
     def handle(self, *args, **options):
-        before = _before(options["before"])
-        include_locked = bool(options["include_locked"])
+        scope = service.Scope(
+            before=_before(options["before"]),
+            include_locked=bool(options["include_locked"]),
+            include_absent_only=bool(options["include_absent_only"]),
+            include_teacher_lessons=bool(options["include_teacher_lessons"]),
+        )
         if int(options["batch_size"]) < 1:
             raise CommandError("legacy_repair_empty_lessons_batch_invalid")
         with rls_worker_atomic():
             context = build_context(options)
             with scoped_atomic(context):
-                stats = service.survey(context.organization, before=before, include_locked=include_locked)
-                candidates = service.candidate_lessons(
-                    context.organization, before=before, include_locked=include_locked
-                )
+                stats = service.survey(context.organization, scope)
+                candidates = service.candidate_lessons(context.organization, scope)
                 table = service.per_offering(candidates, limit=int(options["show"]))
             self.stdout.write(render_table(service.TABLE_HEADERS, table, max_rows=int(options["show"])))
 
-            result = service.DeleteResult()
+            result = deletion.DeleteResult()
             if context.apply:
-                result = service.delete_empty_lessons(
-                    context,
-                    before=before,
-                    include_locked=include_locked,
-                    batch_size=int(options["batch_size"]),
-                )
+                result = deletion.delete_empty_lessons(context, scope, batch_size=int(options["batch_size"]))
 
-        summary = {
-            "tarix həddi (bu tarixdən əvvəl)": before.isoformat(),
-            "köçürülmüş, xanasız keçmiş dərs": stats["empty"],
-            "  ↳ məzmunlu (mövzu/düzəliş) — saxlanır": stats["with_content"],
-            "  ↳ kilidli jurnalda": f"{stats['locked']} ({'silinir' if include_locked else 'saxlanır; --include-locked'})",
-            "  ↳ bərpa olunmuş (is_legacy_synthesised)": stats["synthesised"],
-            "  ↳ otağı olan (slot metadatası)": stats["with_room"],
-            "SİLİNƏCƏK namizəd": stats["deletable"],
-            "toxunulmaz: müəllimin boş dərsi": stats["teacher_empty"],
-            "toxunulmaz: köçürülmüş, bu gün/gələcək": stats["imported_today_or_later"],
-            "FAKTİKİ silinən": result.deleted,
-            "açılış / dəstə": f"{result.offerings} / {result.batches}",
-        }
-        self.stdout.write(render_summary("legacy_repair_empty_lessons", context, summary))
+        self.stdout.write(render_summary("legacy_repair_empty_lessons", context, _summary(scope, stats, result)))
+
+
+def _flag(enabled: bool, name: str) -> str:
+    return "silinir" if enabled else f"saxlanır; {name}"
+
+
+def _summary(scope, stats: dict, result) -> dict:
+    """Operator xülasəsi. Açarlarda «:» OLMAMALIDIR — prod-data-ops loq süzgəci ``  açar : dəyər`` formasını tutur."""
+
+    teacher_on = scope.include_teacher_lessons
+    teacher_absent_on = teacher_on and scope.include_absent_only
+    by_category = result.by_category
+    return {
+        "tarix həddi (bu tarixdən əvvəl)": scope.before.isoformat(),
+        "köçürülmüş, tam boş (xanasız) keçmiş dərs": stats["empty"],
+        "köçürülmüş, yalnız «qb» xanalı keçmiş dərs": (
+            f"{stats['absent_only']} ({_flag(scope.include_absent_only, '--include-absent-only')})"
+        ),
+        "müəllimin tam boş keçmiş dərsi": f"{stats['teacher_empty']} ({_flag(teacher_on, '--include-teacher-lessons')})",
+        "müəllimin yalnız «qb» xanalı keçmiş dərsi": (
+            f"{stats['teacher_absent_only']} "
+            f"({_flag(teacher_absent_on, '--include-teacher-lessons + --include-absent-only')})"
+        ),
+        "  ↳ kilidli jurnalda": f"{stats['locked']} ({_flag(scope.include_locked, '--include-locked')})",
+        "  ↳ bərpa olunmuş (is_legacy_synthesised)": stats["synthesised"],
+        "  ↳ otağı olan (slot metadatası)": stats["with_room"],
+        "SİLİNƏCƏK namizəd": stats["deletable"],
+        "  ↳ silinəcək «qb» xanası / qayıb saatı": f"{stats['absent_marks']} / {stats['absent_hours']}",
+        "toxunulmaz — məzmunlu (mövzu/düzəliş)": stats["with_content"],
+        "toxunulmaz — müəllimin həddən sonra yaratdığı": stats["teacher_recent"],
+        "toxunulmaz — bu gün/gələcək (real xanasız)": stats["today_or_later"],
+        "FAKTİKİ silinən": result.deleted,
+        "  ↳ tam boş / yalnız «qb» / müəllimin": (
+            f"{by_category[service.CATEGORY_EMPTY]} / {by_category[service.CATEGORY_ABSENT_ONLY]} / "
+            f"{by_category[service.CATEGORY_TEACHER]}"
+        ),
+        "  ↳ silinən «qb» xanası / qayıb saatı": f"{result.marks} / {result.absence_hours}",
+        "qayıb saatı yenidən hesablanan qeydiyyat": result.enrollments_recomputed,
+        "açılış / dəstə": f"{result.offerings} / {result.batches}",
+    }

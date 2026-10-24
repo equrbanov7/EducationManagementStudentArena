@@ -1,4 +1,4 @@
-"""Köçürmədən qalan TAM BOŞ jurnal sütunlarının (dərslərin) təmizlənməsi.
+"""Jurnalın MƏZMUNSUZ keçmiş sütunlarının (dərslərin) təmizlənməsi — qayda + hesabat.
 
 Qüsur (sahib, 2026-10-24): «Keçilmiş dərslər»də və jurnalda köhnə sistemdən gələn
 çoxlu «Jurnal boşdur» (0/0) sütunu görünür. Mənbəyi: köhnə sistemdə müəllim günü
@@ -8,34 +8,40 @@ J3 (``journal_lessons``) və ``legacy_delta_apply`` HƏR dərs tarixini ``Lesson
 kodu ilə qeyd edir). Delta artıq belə sütun yaratmır (``delta/lessons.py``); bu
 modul ƏVVƏLCƏDƏN yaranmışları silir.
 
-Silinən dərs — HAMISI eyni anda doğru olmalıdır
------------------------------------------------
-* **köçürülüb** — ``created_by`` boşdur (üç idxal yazıçısının ortaq izi; yeni
-  sistemdə dərsi yalnız ``create_lesson`` yaradır və aktoru HƏMİŞƏ yazır — bax
-  ``apps.registrar.lessons_log_totals`` «KÖÇÜRMƏ»). Müəllimin bu gün açıb hələ
-  işarələmədiyi dərs ``created_by`` daşıyır → HEÇ VAXT namizəd deyil;
-* **keçmişdədir** — ``date < --before`` (defolt: bu gün, yəni bu günün və
-  gələcəyin dərsi toxunulmazdır);
-* **heç bir xanası yoxdur** — ``LessonMark`` sətri YOXDUR (status daşıyan hər xana,
-  «iə» də daxil, məzmundur);
+Sahib (2026-10-24, əlavə): «gün yazılıb, içində heç nə yoxdursa silinsin. Bir neçə
+tələbəyə “qb” yazılıbsa belə o sütun silinsin, olmamalıdır» — həm köçürülmüş, həm
+müəllimin yeni sistemdə açdığı KEÇMİŞ dərs.
+
+Sütunun növü (hamısı keçmiş + məzmunsuz)
+-----------------------------------------
+* **tam boş** (``empty``) — köçürülmüş, ``LessonMark`` sətri YOXDUR. Həmişə namizəddir.
+* **yalnız «qb»** (``absent_only``) — köçürülmüş, xanaları VAR, amma HAMISI ``absent``
+  və balsızdır. YALNIZ ``--include-absent-only`` ilə; «qb» xanaları dərslə birlikdə
+  silinir və qayıb saatı (``Enrollment.absence_hours``) yenidən hesablanır.
+* **müəllimin** (``teacher``) — ``created_by`` doludur (yeni sistemdə ``create_lesson``
+  ilə açılıb). YALNIZ ``--include-teacher-lessons`` ilə; tam boş olanı həmin bayraqla,
+  yalnız «qb» olanı İKİ bayraqla. Bu gün (``--before`` günü) və sonra YARADILAN dərs
+  (keçmiş tarixə olsa da) toxunulmazdır — müəllim onu hələ doldura bilər.
+
+Ortaq şərtlər — HAMISI eyni anda doğru olmalıdır
+------------------------------------------------
+* **keçmişdədir** — ``date < --before`` (defolt: bu gün; bu günün/gələcəyin dərsi toxunulmaz);
+* **real xana yoxdur** — heç bir xanada bal yoxdur və ``absent``-dən başqa status
+  (``present``/«iə», ``excused``/«ü/q») yoxdur;
 * **müəllim məzmunu yoxdur** — mövzu boşdur, «cədvəldən kənar» səbəbi boşdur, dərsə
   bağlı rəsmi düzəliş (``LessonCorrection``) və ya xana düzəlişi
-  (``JournalCorrection.lesson_ref`` — silinmiş xananın izi) yoxdur;
+  (``JournalCorrection.lesson_ref`` — silinmiş xananın izi də) yoxdur. Bu şərt həm də
+  DB qoruyucusunu təmin edir: düzəliş cədvəlləri UPDATE/DELETE-ə bağlıdır (0043) və
+  xananın silinməsi ``JournalCorrection.lesson_mark``-ı ``SET NULL`` edərdi;
 * **jurnal kilidli deyil** — ``AssessmentScheme`` təsdiqlənib/dərc olunubsa sütun
   YALNIZ ``--include-locked`` ilə silinir (``gradebook.delete_lesson`` kilidli
   jurnalda heç vaxt silmir; tarixi jurnal J7 ilə kilidlənib, ona görə bu qərar
-  operatorundur — dry-run hər iki sayı göstərir).
+  operatorundur — dry-run hər sayı göstərir).
 
 Otaq / saat / növ / müəllim sütunun məzmunu SAYILMIR — onlar köhnə cədvəldən gələn
 slot metadatasıdır (J11), boş sütunu dolu etmir.
 
-Təhlükəsizlik: dəstə-dəstə (``batch_size``), hər dəstə öz atomik blokunda (``scoped_atomic``); sətirlər əvvəl
-``SELECT … FOR UPDATE`` ilə kilidlənir və şərtlər KİLİD ALTINDA yenidən yoxlanır
-(paralel xana yazısı FK kilidində gözləyir və uğursuz olur — sətir itmir). Hər
-dəstə açılış başına bir ``AuditLog`` (``resource_type=legacy_import.empty_lesson``)
-yazır: silinən dərsin id/tarix/saat/növ/saat/otaq/müəllim izi ``old_values``-dədir.
-Ledger (``LegacyEntityMap.target_pk``) silinmir — o, silinməyən sübut qatıdır.
-İdempotentdir: ikinci icra 0 namizəd tapır.
+Silmə, kilid, audit və aqreqatlar: :mod:`.repair_empty_lessons_apply`.
 
 Tələbə SƏTİRLƏRİ (boş qeydiyyatlar) bu əmrdə SİLİNMİR: idxalın yaratdığı yeganə
 dəqiq hal (eyni fənnin boş öz-qrup təkrarı) ``delta/dedupe.py``-da rəsmi «alt qrup
@@ -46,30 +52,54 @@ aşkarlama/qərar axınındadır.
 from __future__ import annotations
 
 import datetime
-from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from django.apps import apps as django_apps
-from django.db.models import BooleanField, Count, Exists, ExpressionWrapper, OuterRef, Q
+from django.db.models import BooleanField, Count, Exists, ExpressionWrapper, OuterRef, Q, Sum
 from django.db.models.functions import Trim
-
-from core.audit import log_actions
-from core.constants import AuditAction
-
-from .repair_support import RepairContext, scoped_atomic
+from django.utils import timezone
 
 AUDIT_REASON = "legacy_repair:empty_lessons"
 AUDIT_RESOURCE = "legacy_import.empty_lesson"
 DEFAULT_BATCH_SIZE = 500
 
+#: ``AttendanceStatus.ABSENT`` («qb») — registrar modellərini birbaşa import etmirik (context_map).
+ABSENT = "absent"
+
 #: ``gradebook._CLOSED_STATUSES`` ilə eyni (kilid: təsdiqlənmiş və ya dərc olunmuş sxem).
 _LOCKED_APPROVAL_STATUSES = ("approved",)
 
-TABLE_HEADERS = ("Açılış", "Fənn", "Qrup", "Boş sütun")
+CATEGORY_EMPTY = "empty"
+CATEGORY_ABSENT_ONLY = "absent_only"
+CATEGORY_TEACHER = "teacher"
+
+TABLE_HEADERS = ("Açılış", "Fənn", "Qrup", "Silinəcək sütun")
+
+
+@dataclass(frozen=True)
+class Scope:
+    """Hansı sütunlar namizəddir — əmrin bayraqları bir yerdə."""
+
+    before: datetime.date
+    include_locked: bool = False
+    include_absent_only: bool = False
+    include_teacher_lessons: bool = False
+
+    @property
+    def created_cutoff(self) -> datetime.datetime:
+        """Müəllimin dərsi bu andan ƏVVƏL yaradılmalıdır (``before`` gününün başlanğıcı, yerli vaxt)."""
+
+        return timezone.make_aware(datetime.datetime.combine(self.before, datetime.time.min))
 
 
 def _model(name: str):
     return django_apps.get_model("registrar", name)
+
+
+def category_of(*, created_by_id, has_marks: bool) -> str:
+    if created_by_id is not None:
+        return CATEGORY_TEACHER
+    return CATEGORY_ABSENT_ONLY if has_marks else CATEGORY_EMPTY
 
 
 def _locked_journal() -> Exists:
@@ -87,58 +117,109 @@ def _has_content() -> Q:
     )
 
 
-def empty_imported_lessons(organization, *, before: datetime.date):
-    """Köçürülmüş, keçmiş, xanasız dərslər — məzmun/kilid süzgəcindən ƏVVƏL."""
+def content_mark_q() -> Q:
+    """Real xana: bal VAR və ya status «qb» DEYİL (iə, ü/q…)."""
+
+    return Q(score__isnull=False) | ~Q(status=ABSENT)
+
+
+def markless_past_lessons(organization, *, before: datetime.date):
+    """Keçmiş, REAL xanası olmayan dərslər (tam boş + yalnız «qb»), mənşədən/məzmundan/kilidindən ƏVVƏL.
+
+    ``has_marks`` = ən azı bir («qb») xana var.
+    """
 
     marks = _model("LessonMark").objects.filter(lesson_id=OuterRef("pk"))
     return (
         _model("Lesson")
-        .objects.filter(organization=organization, created_by__isnull=True, date__lt=before)
-        .filter(~Exists(marks))
-        .annotate(topic_trimmed=Trim("topic"))
+        .objects.filter(organization=organization, date__lt=before)
+        .filter(~Exists(marks.filter(content_mark_q())))
+        .annotate(topic_trimmed=Trim("topic"), has_marks=Exists(marks))
     )
 
 
-def candidate_lessons(organization, *, before: datetime.date, include_locked: bool = False):
-    """Silinəcək dərslər (modul sənədindəki BÜTÜN şərtlər)."""
+def empty_imported_lessons(organization, *, before: datetime.date):
+    """Köçürülmüş, keçmiş, TAM xanasız dərslər — məzmun/kilid süzgəcindən ƏVVƏL (köhnə səth)."""
 
-    queryset = empty_imported_lessons(organization, before=before).exclude(_has_content())
-    if not include_locked:
+    return markless_past_lessons(organization, before=before).filter(created_by__isnull=True, has_marks=False)
+
+
+def _origin_q(scope: Scope) -> Q:
+    allowed = Q(created_by__isnull=True)
+    if scope.include_teacher_lessons:
+        allowed |= Q(created_by__isnull=False, created_at__lt=scope.created_cutoff)
+    return allowed
+
+
+def candidate_lessons(organization, scope: Scope):
+    """Silinəcək dərslər (modul sənədindəki BÜTÜN şərtlər + bayraqlar)."""
+
+    queryset = markless_past_lessons(organization, before=scope.before).filter(_origin_q(scope))
+    queryset = queryset.exclude(_has_content())
+    if not scope.include_absent_only:
+        queryset = queryset.filter(has_marks=False)
+    if not scope.include_locked:
         queryset = queryset.filter(~_locked_journal())
     return queryset
 
 
-def survey(organization, *, before: datetime.date, include_locked: bool) -> dict:
-    """Operator hesabatı — iki aqreqat sorğu, heç nə yazılmır."""
+def survey(organization, scope: Scope) -> dict:
+    """Operator hesabatı — dörd aqreqat + bir say sorğusu, heç nə yazılmır.
 
-    lesson_model = _model("Lesson")
-    base = empty_imported_lessons(organization, before=before).annotate(
-        has_content=ExpressionWrapper(_has_content(), output_field=BooleanField()),
-        in_locked_journal=_locked_journal(),
+    Növ sayları (``empty`` / ``absent_only`` / ``teacher_*``) bayraqdan ASILI DEYİL — dry-run
+    bayraq verilməsə nəyin silinəcəyini də göstərir; ``deletable`` isə bayraqlara görədir.
+    """
+
+    cutoff = scope.created_cutoff
+    imported = Q(created_by__isnull=True)
+    teacher = Q(created_by__isnull=False, created_at__lt=cutoff)
+    base = markless_past_lessons(organization, before=scope.before).annotate(
+        has_content=ExpressionWrapper(_has_content(), output_field=BooleanField())
     )
+    free = Q(has_content=False)
     # Aqreqat adları annotasiya adları ilə TOQQUŞMAMALIDIR (Django adı əvəzləyir).
     counts = base.aggregate(
-        empty=Count("id"),
+        empty=Count("id", filter=free & imported & Q(has_marks=False)),
+        absent_only=Count("id", filter=free & imported & Q(has_marks=True)),
+        teacher_empty=Count("id", filter=free & teacher & Q(has_marks=False)),
+        teacher_absent_only=Count("id", filter=free & teacher & Q(has_marks=True)),
+        teacher_recent=Count("id", filter=free & Q(created_by__isnull=False, created_at__gte=cutoff)),
         with_content=Count("id", filter=Q(has_content=True)),
-        locked=Count("id", filter=Q(has_content=False, in_locked_journal=True)),
-        synthesised=Count("id", filter=Q(has_content=False, is_legacy_synthesised=True)),
-        with_room=Count("id", filter=Q(has_content=False, room__isnull=False)),
     )
-    marks = _model("LessonMark").objects.filter(lesson_id=OuterRef("pk"))
-    untouched = (
-        lesson_model.objects.filter(organization=organization)
-        .filter(~Exists(marks))
-        .aggregate(
-            teacher_empty=Count("id", filter=Q(created_by__isnull=False)),
-            imported_today_or_later=Count("id", filter=Q(created_by__isnull=True, date__gte=before)),
-        )
+    # Kilid sayı bayraqdan asılı olmasın: kilidli jurnalda nə qədər namizəd var (silinir / saxlanır).
+    wide = candidate_lessons(organization, replace(scope, include_locked=True)).annotate(
+        in_locked_journal=_locked_journal()
     )
-    deletable = counts["empty"] - counts["with_content"] - (0 if include_locked else counts["locked"])
-    return {**counts, **untouched, "deletable": deletable}
+    chosen = Q(pk__isnull=False) if scope.include_locked else Q(in_locked_journal=False)
+    picked = wide.aggregate(
+        locked=Count("id", filter=Q(in_locked_journal=True)),
+        deletable=Count("id", filter=chosen),
+        synthesised=Count("id", filter=chosen & Q(is_legacy_synthesised=True)),
+        with_room=Count("id", filter=chosen & Q(room__isnull=False)),
+    )
+    candidates = candidate_lessons(organization, scope)
+    marks = (
+        _model("LessonMark")
+        .objects.filter(lesson__in=candidates.values("pk"))
+        .aggregate(absent_marks=Count("id"), absent_hours=Sum("lesson__hours"))
+    )
+    future = (
+        _model("Lesson")
+        .objects.filter(organization=organization, date__gte=scope.before)
+        .filter(~Exists(_model("LessonMark").objects.filter(lesson_id=OuterRef("pk")).filter(content_mark_q())))
+        .count()
+    )
+    return {
+        **counts,
+        **picked,
+        "absent_marks": marks["absent_marks"] or 0,
+        "absent_hours": marks["absent_hours"] or 0,
+        "today_or_later": future,
+    }
 
 
 def per_offering(queryset, *, limit: int = 0) -> list[tuple]:
-    """Ən çox boş sütunu olan açılışlar (cədvəl üçün; adsız — fənn/qrup)."""
+    """Ən çox silinəcək sütunu olan açılışlar (cədvəl üçün; adsız — fənn/qrup)."""
 
     rows = (
         queryset.order_by()
@@ -153,104 +234,21 @@ def per_offering(queryset, *, limit: int = 0) -> list[tuple]:
     ]
 
 
-_SNAPSHOT_FIELDS = (
-    "id",
-    "offering_id",
-    "date",
-    "start_time",
-    "end_time",
-    "kind",
-    "hours",
-    "room_id",
-    "instructor_id",
-    "is_legacy_synthesised",
-    "created_at",
-)
-
-
-def _snapshot(row: dict) -> dict:
-    return {
-        key: (value if isinstance(value, (bool, int)) or value is None else str(value)) for key, value in row.items()
-    }
-
-
-@dataclass
-class DeleteResult:
-    deleted: int = 0
-    offerings: int = 0
-    batches: int = 0
-
-
-def delete_empty_lessons(
-    context: RepairContext,
-    *,
-    before: datetime.date,
-    include_locked: bool = False,
-    batch_size: int = DEFAULT_BATCH_SIZE,
-) -> DeleteResult:
-    """Namizədləri dəstə-dəstə sil + açılış başına audit (modul sənədi «Təhlükəsizlik»)."""
-
-    lesson_model = _model("Lesson")
-    batch_size = max(1, int(batch_size))
-    result = DeleteResult()
-    touched_offerings: set = set()
-    while True:
-        remaining = context.limit - result.deleted if context.limit else batch_size
-        size = min(batch_size, remaining)
-        if size <= 0:
-            break
-        with scoped_atomic(context):
-            candidates = candidate_lessons(context.organization, before=before, include_locked=include_locked)
-            ids = list(
-                candidates.order_by("offering_id", "date", "start_time", "id").values_list("id", flat=True)[:size]
-            )
-            if not ids:
-                break
-            # Kilid altında yenidən yoxla: arada xana/mövzu yazılmış sətir düşür.
-            locked = list(
-                candidate_lessons(context.organization, before=before, include_locked=include_locked)
-                .filter(pk__in=ids)
-                .select_for_update(of=("self",))
-                .values_list("id", flat=True)
-            )
-            rows = list(
-                lesson_model.objects.filter(pk__in=locked).order_by("date", "start_time").values(*_SNAPSHOT_FIELDS)
-            )
-            if not rows:
-                continue  # dəstənin hamısı arada məzmun alıb — növbəti namizədlər
-            by_offering: dict = defaultdict(list)
-            for row in rows:
-                by_offering[row["offering_id"]].append(_snapshot(row))
-            log_actions(
-                {
-                    "action": AuditAction.DELETE,
-                    "user": context.actor,
-                    "organization": context.organization,
-                    "old_values": {"lessons": lessons, "count": len(lessons)},
-                    "reason": AUDIT_REASON,
-                    "resource_type": AUDIT_RESOURCE,
-                    "resource_id": str(offering_id),
-                    "resource_repr": f"{len(lessons)} boş köçürmə sütunu",
-                }
-                for offering_id, lessons in by_offering.items()
-            )
-            lesson_model.objects.filter(pk__in=[row["id"] for row in rows]).delete()
-        result.deleted += len(rows)
-        result.batches += 1
-        touched_offerings.update(by_offering)
-    result.offerings = len(touched_offerings)
-    return result
-
-
 __all__ = [
+    "ABSENT",
     "AUDIT_REASON",
     "AUDIT_RESOURCE",
+    "CATEGORY_ABSENT_ONLY",
+    "CATEGORY_EMPTY",
+    "CATEGORY_TEACHER",
     "DEFAULT_BATCH_SIZE",
     "TABLE_HEADERS",
-    "DeleteResult",
+    "Scope",
     "candidate_lessons",
-    "delete_empty_lessons",
+    "category_of",
+    "content_mark_q",
     "empty_imported_lessons",
+    "markless_past_lessons",
     "per_offering",
     "survey",
 ]
