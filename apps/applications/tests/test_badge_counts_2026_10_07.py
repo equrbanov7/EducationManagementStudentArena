@@ -109,6 +109,9 @@ def test_handler_counts_match_old_distinct_formula(world):
             for tab in ("mine", "inbox", "watching")
         }
         old_tabs["archive"] = _old_count(queries.base_queryset(org).filter(queries._tab_q(handler, org, "archive")))
+        if access.can_oversee(handler, org):
+            # 2026-10-24: «Bütün müraciətlər» (RİM nəzarəti) — təşkilatın açıq müraciətləri.
+            old_tabs["all"] = _old_count(queries.base_queryset(org).filter(status__in=OPEN_STATUSES))
         assert queries.tab_counts(organization=org, user=handler) == old_tabs, handler.username
     coordinator_kpis = queries.handler_kpis(organization=org, user=world["coordinator"])
     assert coordinator_kpis["watching"] == 2  # hər iki RİM müraciətini izləyir

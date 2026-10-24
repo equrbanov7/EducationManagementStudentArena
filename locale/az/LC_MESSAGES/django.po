@@ -107416,3 +107416,39 @@ msgstr "Təmizlə (bütün fənlər)"
 msgctxt "exams.template.create_exam_modal_form"
 msgid "Bu müəllimin cari dövrdə tədris etdiyi fənn tapılmadı"
 msgstr "Bu müəllimin cari dövrdə tədris etdiyi fənn tapılmadı"
+
+msgctxt "applications"
+msgid "Bütün müraciətlər"
+msgstr "Bütün müraciətlər"
+
+msgctxt "applications"
+msgid "Şöbə (ünvan)"
+msgstr "Şöbə (ünvan)"
+
+msgctxt "applications"
+msgid "Bütün şöbələr"
+msgstr "Bütün şöbələr"
+
+msgctxt "applications"
+msgid "Göndərənin bölməsi"
+msgstr "Göndərənin bölməsi"
+
+msgctxt "applications"
+msgid "Bütün göndərənlər"
+msgstr "Bütün göndərənlər"
+
+msgctxt "applications"
+msgid "Fakültələr"
+msgstr "Fakültələr"
+
+msgctxt "applications"
+msgid "Kafedralar"
+msgstr "Kafedralar"
+
+msgctxt "applications"
+msgid "Mərkəz və digər bölmələr"
+msgstr "Mərkəz və digər bölmələr"
+
+msgctxt "organizations.permission.label"
+msgid "Bütün müraciətlərə baxmaq (yalnız oxu)"
+msgstr "Bütün müraciətlərə baxmaq (yalnız oxu)"

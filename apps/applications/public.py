@@ -20,10 +20,12 @@ CONTEXT QURUCUSU — ``build_applications_context(request, organization)``
     "can_create": bool,          # application.create + aktiv üzvlük
     "is_handler": bool,          # ən azı bir şöbənin emalçısıdır
     "can_manage": bool,          # application.manage (RİM/rektor/prorektor)
+    "can_oversee": bool,         # «Bütün müraciətlər» tabı (application.view_all / manage) — YALNIZ OXU
+    "sender_units": [{"label", "units": [{"id", "name"}]}…],  # nəzarət süzgəci; digərlərinə []
     "kinds": [kind payload…],    # yalnız bu ailəyə açıq növlər + hesablanmış ünvan
     "units": [unit payload…],    # yönləndirmə dialoqu üçün
     "statuses": [status payload…],
-    "counts": {"mine","inbox","watching","archive"},
+    "counts": {"mine","inbox","watching","archive"[,"all"]},
     "kpis": {"sender": {…}, "handler": {…}|None},
     "endpoints": {…},            # UI-nin çağıracağı JSON marşrutları
     "rules": {"min_subject_length": 5, "min_body_length": 20, "min_note_length": 10},
@@ -39,7 +41,7 @@ from __future__ import annotations
 
 from django.urls import reverse
 
-from .constants import PERM_CREATE, PERM_HANDLE, PERM_MANAGE, ApplicationStatus, SenderFamily
+from .constants import PERM_CREATE, PERM_HANDLE, PERM_MANAGE, PERM_VIEW_ALL, ApplicationStatus, SenderFamily
 from .payloads import (
     STATUS_CATALOG,
     detail_payload,
@@ -48,7 +50,7 @@ from .payloads import (
     rules_payload,
     unit_payload,
 )
-from .services import access, queries, routing
+from .services import access, oversight, queries, routing
 from .services.catalog import seed_catalog
 from .services.maintenance import close_stale_resolved
 from .services.notify import PROFILE_SECTION
@@ -94,6 +96,8 @@ def build_applications_context(request, *, organization) -> dict:
         "can_create": can_create,
         "is_handler": is_handler,
         "can_manage": access.has_app_permission(user, organization, PERM_MANAGE),
+        "can_oversee": access.can_oversee(user, organization),
+        "sender_units": oversight.sender_unit_options(user, organization),
         "kinds": kinds,
         "units": [unit_payload(unit) for unit in units],
         "statuses": list(STATUS_CATALOG),
@@ -184,12 +188,12 @@ def submit_linked_application(*, organization, user, kind, subject, body, unit=N
 
 
 def can_use_applications(user, organization) -> bool:
-    """Menyu görünürlüyü: üç açardan HƏR HANSI BİRİ bölməni açır."""
+    """Menyu görünürlüyü: dörd açardan HƏR HANSI BİRİ bölməni açır."""
     if organization is None:
         return False
     return any(
         access.has_app_permission(user, organization, permission)
-        for permission in (PERM_CREATE, PERM_HANDLE, PERM_MANAGE)
+        for permission in (PERM_CREATE, PERM_HANDLE, PERM_MANAGE, PERM_VIEW_ALL)
     )
 
 
@@ -199,6 +203,7 @@ __all__ = [
     "PERM_CREATE",
     "PERM_HANDLE",
     "PERM_MANAGE",
+    "PERM_VIEW_ALL",
     "PROFILE_SECTION",
     "STATUS_CATALOG",
     "SenderFamily",

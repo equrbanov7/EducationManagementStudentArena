@@ -162,14 +162,16 @@ def apply_permission_section_gates(
     # `apps/accounts/services/intake/policy.py`-da fail-closed yenidən yoxlanılır.
     can_import_students = privileged or has_permission(permissions, "user.import")
 
-    # «Müraciətlərim» — ÜÇ açardan hər hansı biri bölməni açır: göndərən
+    # «Müraciətlərim» — DÖRD açardan hər hansı biri bölməni açır: göndərən
     # (`application.create`), emalçı (`application.handle`) və ya nəzarətçi
-    # (`application.manage`). Praktikada bu, AKTİV ÜZVLÜYÜ olan hər rol deməkdir
+    # (`application.manage` / yalnız-oxu `application.view_all` — «Bütün müraciətlər»).
+    # Praktikada bu, AKTİV ÜZVLÜYÜ olan hər rol deməkdir
     # (`alumni` / `member` istisna) — panelin özü ailəyə/emalçı bayrağına görə
     # daxildən budaqlanır, ona görə bölmə açarı BİRDİR. Aktiv üzvlüyü olmayan
     # istifadəçidə `permissions` boşdur → bölmə görünmür (fail-closed).
     can_use_applications = privileged or any(
-        has_permission(permissions, key) for key in ("application.create", "application.handle", "application.manage")
+        has_permission(permissions, key)
+        for key in ("application.create", "application.handle", "application.manage", "application.view_all")
     )
 
     # «Köçürülmüş nəticələrin dəqiqləşdirilməsi» — SAHİBİN QƏRARI (2026-09-26):

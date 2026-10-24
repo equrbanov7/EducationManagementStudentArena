@@ -107906,3 +107906,39 @@ msgstr "Clear (all subjects)"
 msgctxt "exams.template.create_exam_modal_form"
 msgid "Bu müəllimin cari dövrdə tədris etdiyi fənn tapılmadı"
 msgstr "No subject taught by this teacher in the current period was found"
+
+msgctxt "applications"
+msgid "Bütün müraciətlər"
+msgstr "All applications"
+
+msgctxt "applications"
+msgid "Şöbə (ünvan)"
+msgstr "Department (addressee)"
+
+msgctxt "applications"
+msgid "Bütün şöbələr"
+msgstr "All departments"
+
+msgctxt "applications"
+msgid "Göndərənin bölməsi"
+msgstr "Sender's unit"
+
+msgctxt "applications"
+msgid "Bütün göndərənlər"
+msgstr "All senders"
+
+msgctxt "applications"
+msgid "Fakültələr"
+msgstr "Faculties"
+
+msgctxt "applications"
+msgid "Kafedralar"
+msgstr "Departments (chairs)"
+
+msgctxt "applications"
+msgid "Mərkəz və digər bölmələr"
+msgstr "Centres and other units"
+
+msgctxt "organizations.permission.label"
+msgid "Bütün müraciətlərə baxmaq (yalnız oxu)"
+msgstr "View all applications (read-only)"

@@ -108932,3 +108932,39 @@ msgstr "Leeren (alle Fächer)"
 msgctxt "exams.template.create_exam_modal_form"
 msgid "Bu müəllimin cari dövrdə tədris etdiyi fənn tapılmadı"
 msgstr "Kein Fach gefunden, das diese Lehrkraft im aktuellen Zeitraum unterrichtet"
+
+msgctxt "applications"
+msgid "Bütün müraciətlər"
+msgstr "Alle Anträge"
+
+msgctxt "applications"
+msgid "Şöbə (ünvan)"
+msgstr "Abteilung (Empfänger)"
+
+msgctxt "applications"
+msgid "Bütün şöbələr"
+msgstr "Alle Abteilungen"
+
+msgctxt "applications"
+msgid "Göndərənin bölməsi"
+msgstr "Einheit des Absenders"
+
+msgctxt "applications"
+msgid "Bütün göndərənlər"
+msgstr "Alle Absender"
+
+msgctxt "applications"
+msgid "Fakültələr"
+msgstr "Fakultäten"
+
+msgctxt "applications"
+msgid "Kafedralar"
+msgstr "Lehrstühle"
+
+msgctxt "applications"
+msgid "Mərkəz və digər bölmələr"
+msgstr "Zentren und andere Einheiten"
+
+msgctxt "organizations.permission.label"
+msgid "Bütün müraciətlərə baxmaq (yalnız oxu)"
+msgstr "Alle Anträge einsehen (nur lesen)"

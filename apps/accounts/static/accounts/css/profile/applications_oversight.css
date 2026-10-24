@@ -1,0 +1,66 @@
+/* «Müraciətlərim» — «Bütün müraciətlər» (RİM nəzarəti) tabının şöbə süzgəcləri.
+ *
+ * Ayrı fayl, çünki `applications.css` ölçü büdcəsinin (600 sətir) həddindədir. Seçicilər
+ * layihənin `bootstrap-single-select` komponentidir (`static/css/bootstrap-select.css`);
+ * burada yalnız onu süzgəc zolağının (`.apx-chip` / `.apx-dates`) kompakt ölçüsünə salırıq,
+ * aktiv seçim isə tarix aralığının «is-active» dili ilə vurğulanır.
+ */
+
+.apx-oversight {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+/* `display` atributu `[hidden]`-i üstələyir — tab «all» deyilsə həqiqətən gizlənsin. */
+.apx-oversight[hidden] {
+    display: none;
+}
+
+.apx-oversight .apx-oversight__field {
+    width: auto;
+    min-width: 190px;
+    max-width: 260px;
+}
+
+.apx-oversight .bootstrap-single-select__toggle {
+    min-height: 34px;
+    padding: 0 12px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 999px;
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-700);
+    font-size: 0.78rem;
+    font-weight: 600;
+    box-shadow: none;
+}
+
+.apx-oversight .bootstrap-single-select__label-text {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.apx-oversight .apx-oversight__field.is-active .bootstrap-single-select__toggle {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+/* Dar ekranda hər seçici öz sətrini alır (tarix aralığı ilə eyni qayda). */
+@media (max-width: 720px) {
+    .apx-oversight {
+        width: 100%;
+    }
+
+    .apx-oversight .apx-oversight__field {
+        flex: 1 1 100%;
+        max-width: none;
+    }
+
+    .apx-oversight .bootstrap-single-select__toggle {
+        min-height: 40px;
+        font-size: 16px;
+    }
+}

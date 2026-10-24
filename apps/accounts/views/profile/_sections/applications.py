@@ -18,6 +18,9 @@ CONTEXT MÜQAVİLƏSİ (şablon buna söykənir — açar adları dəyişməz)
     can_create   bool  — «Yeni müraciət» düyməsi + «Müraciətlərim» tabı
     is_handler   bool  — «Mənə gələnlər» / «İzlədiklərim» tabları
     can_manage   bool  — `application.manage` (yalnız oxu genişlənməsi)
+    can_oversee  bool  — «Bütün müraciətlər» tabı + şöbə süzgəcləri (`application.view_all` / `manage`)
+    units        list  — şöbə (ünvan) süzgəcinin seçimləri (`unit_payload`)
+    sender_units list  — göndərən bölməsi süzgəci: `[{"label", "units": [{"id", "name"}]}]`
     endpoints    dict  — list/catalog/kpis/create/detail/action
     rules        dict  — min_subject_length / min_body_length / min_note_length
     who          str   — kontekst zolağının sol adı (kabinet və ya şöbə adları)
@@ -85,6 +88,9 @@ def build_applications_section(
             "can_create": bool(payload.get("can_create")),
             "is_handler": bool(payload.get("is_handler")),
             "can_manage": bool(payload.get("can_manage")),
+            "can_oversee": bool(payload.get("can_oversee")),
+            "units": payload.get("units") or [],
+            "sender_units": payload.get("sender_units") or [],
             "endpoints": payload.get("endpoints") or {},
             "rules": payload.get("rules") or {},
             "role_label": _role_label(request.user, active_organization),

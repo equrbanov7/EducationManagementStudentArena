@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from apps.applications.constants import PERM_CREATE, PERM_HANDLE, PERM_MANAGE
+from apps.applications.constants import PERM_CREATE, PERM_HANDLE, PERM_MANAGE, PERM_VIEW_ALL
 from apps.organizations.default_roles_university import UNIVERSITY_ROLES
 from apps.organizations.permissions import (
     PERMISSION_CATEGORIES,
@@ -14,7 +14,7 @@ from apps.organizations.permissions import (
 )
 from core.permissions import has_permission
 
-ALL_APPLICATION_PERMS = [PERM_CREATE, PERM_HANDLE, PERM_MANAGE]
+ALL_APPLICATION_PERMS = [PERM_CREATE, PERM_HANDLE, PERM_MANAGE, PERM_VIEW_ALL]
 
 
 def _role(name):
@@ -73,6 +73,7 @@ def test_teachers_and_students_never_decide():
     for name in ("student", "lead_student", "teacher", "assistant", "lab_assistant"):
         assert not has_permission(_role(name)["permissions"], PERM_HANDLE), name
         assert not has_permission(_role(name)["permissions"], PERM_MANAGE), name
+        assert not has_permission(_role(name)["permissions"], PERM_VIEW_ALL), name
 
 
 def test_only_rim_and_vice_rector_manage_the_catalog():
@@ -80,6 +81,7 @@ def test_only_rim_and_vice_rector_manage_the_catalog():
         assert has_permission(_role(name)["permissions"], PERM_MANAGE), name
     for name in ("dean", "chair_head", "program_coordinator", "hr", "exam_center_head"):
         assert not has_permission(_role(name)["permissions"], PERM_MANAGE), name
+        assert not has_permission(_role(name)["permissions"], PERM_VIEW_ALL), name
 
 
 def test_rector_wildcard_covers_applications():
@@ -90,3 +92,24 @@ def test_rector_wildcard_covers_applications():
 def test_prefix_isolation_from_unrelated_wildcards():
     """`exam.*` / `grade.*` daşıyan rol müraciət qərarını AVTOMATİK ALMIR."""
     assert not has_permission(["exam.*", "grade.*", "course.*", "syllabus.*"], PERM_HANDLE)
+
+
+def test_rim_staff_reads_every_application_but_never_decides():
+    """2026-10-24: RİM əməkdaşı «Bütün müraciətlər»i görür — YALNIZ OXU (qərar/kataloq açarı yox)."""
+    permissions = _role("rim_staff")["permissions"]
+    assert has_permission(permissions, PERM_VIEW_ALL)
+    assert not has_permission(permissions, PERM_HANDLE)
+    assert not has_permission(permissions, PERM_MANAGE)
+
+
+def test_trustee_reads_every_application_read_only():
+    """Qəyyum «hər oxu açarını» daşıyır (sahib 2026-10-17) — `view_all` da; qərar açarı yox."""
+    permissions = _role("trustee")["permissions"]
+    assert has_permission(permissions, PERM_VIEW_ALL)
+    assert not has_permission(permissions, PERM_HANDLE)
+    assert not has_permission(permissions, PERM_MANAGE)
+
+
+def test_department_roles_do_not_read_the_whole_organization():
+    for name in ("dean", "chair_head", "program_coordinator", "hr", "exam_center_head", "student_services"):
+        assert not has_permission(_role(name)["permissions"], PERM_VIEW_ALL), name

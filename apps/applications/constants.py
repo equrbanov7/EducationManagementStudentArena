@@ -28,6 +28,9 @@ _CTX = "applications"
 PERM_CREATE = "application.create"
 PERM_HANDLE = "application.handle"
 PERM_MANAGE = "application.manage"
+#: «Bütün müraciətlər» tabı — təşkilat üzrə YALNIZ OXU nəzarəti (RİM). `manage` bunu ehtiva edir;
+#: əməl (cavab/yönləndirmə) və daxili qeydlər VERMİR (bax ``services.access.can_oversee``).
+PERM_VIEW_ALL = "application.view_all"
 
 
 class SenderFamily(models.TextChoices):
@@ -430,6 +433,7 @@ __all__ = [
     "PERM_CREATE",
     "PERM_HANDLE",
     "PERM_MANAGE",
+    "PERM_VIEW_ALL",
     "RESOLVE_BY_FALLBACK_UNIT_TYPES",
     "RESOLVE_BY_UNIT_TYPE",
     "ResolveBy",

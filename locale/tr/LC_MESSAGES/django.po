@@ -107314,3 +107314,39 @@ msgstr "Temizle (tüm dersler)"
 msgctxt "exams.template.create_exam_modal_form"
 msgid "Bu müəllimin cari dövrdə tədris etdiyi fənn tapılmadı"
 msgstr "Bu öğretmenin mevcut dönemde verdiği ders bulunamadı"
+
+msgctxt "applications"
+msgid "Bütün müraciətlər"
+msgstr "Tüm başvurular"
+
+msgctxt "applications"
+msgid "Şöbə (ünvan)"
+msgstr "Birim (muhatap)"
+
+msgctxt "applications"
+msgid "Bütün şöbələr"
+msgstr "Tüm birimler"
+
+msgctxt "applications"
+msgid "Göndərənin bölməsi"
+msgstr "Gönderenin birimi"
+
+msgctxt "applications"
+msgid "Bütün göndərənlər"
+msgstr "Tüm gönderenler"
+
+msgctxt "applications"
+msgid "Fakültələr"
+msgstr "Fakülteler"
+
+msgctxt "applications"
+msgid "Kafedralar"
+msgstr "Bölümler"
+
+msgctxt "applications"
+msgid "Mərkəz və digər bölmələr"
+msgstr "Merkezler ve diğer birimler"
+
+msgctxt "organizations.permission.label"
+msgid "Bütün müraciətlərə baxmaq (yalnız oxu)"
+msgstr "Tüm başvuruları görüntüleme (salt okunur)"
