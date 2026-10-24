@@ -194,9 +194,29 @@ def _ensure_offering(run, index, subject, period, unit, teacher, journal):
             run.count("offering.filled")
             run.touched("offerings", offering.pk, fields)
         except IntegrityError:
-            run.count("offering.instructor_blocked")
             offering.refresh_from_db()
+            if "instructor" in fields and _restore_role(run, teacher):
+                return _ensure_offering(run, index, subject, period, unit, teacher, journal)
+            run.count("offering.instructor_blocked")
     return offering
+
+
+def _restore_role(run, teacher) -> bool:
+    """Müəllim açılışa yazıla bilmir (aktiv müəllim üzvlüyü yoxdur) — sönülü üzvlüyü bir dəfə bərpa et."""
+
+    from apps.workload.public import legacy_loads
+
+    tried = run.__dict__.setdefault("_role_restore_tried", set())
+    if teacher.pk in tried:
+        return False
+    tried.add(teacher.pk)
+    with transaction.atomic():
+        chair = legacy_loads.restore_teacher_role(organization=run.organization, user=teacher, actor_user=run.actor)
+    if chair is None:
+        return False
+    run.count("teacher.role_restored")
+    run.names("teacher_role_restored", teacher.get_full_name(), chair.name)
+    return True
 
 
 def _pick(candidates, journal_offering_ids):

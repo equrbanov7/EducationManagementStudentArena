@@ -103,4 +103,41 @@ def apply_legacy_loads(*, organization, chair, actor_user, entries, year: str) -
         return {"denied": exc.code, "counters": {}}
 
 
-__all__ = ["apply_legacy_loads", "legacy_load_entry", "preview_legacy_entries"]
+def restore_teacher_role(*, organization, user, actor_user):
+    """Köhnə sistemdə bu semestr jurnal yazan, amma yeni sistemdə müəllim üzvlüyü SÖNÜLÜ olan hesab — ən son
+    sönülü ``teacher`` üzvlüyü AKTİV kafedradadırsa həmin kafedrada bərpa olunur (``join_chair_as_teacher``:
+    əlavə üzvlük, audit). Qaytarır: kafedra (``OrgUnit``) və ya ``None`` (bərpa ediləcək üzvlük yoxdur)."""
+
+    from django.apps import apps as django_apps
+
+    from .people import CHAIR_TYPES, join_chair_as_teacher
+
+    Membership = django_apps.get_model("organizations", "Membership")
+    if Membership.objects.filter(organization=organization, user=user, role__name="teacher", is_active=True).exists():
+        return None
+    previous = (
+        Membership.objects.filter(
+            organization=organization,
+            user=user,
+            role__name="teacher",
+            is_active=False,
+            scope_unit__is_active=True,
+            scope_unit__unit_type__in=CHAIR_TYPES,
+        )
+        .select_related("scope_unit")
+        .order_by("-updated_at", "-pk")
+        .first()
+    )
+    if previous is None:
+        return None
+    join_chair_as_teacher(
+        organization=organization,
+        user=user,
+        chair=previous.scope_unit,
+        actor_user=actor_user,
+        reason="Köhnə sistemdən köçürmə: müəllim bu semestr jurnal yazıb — sönülü müəllim üzvlüyü bərpa olundu",
+    )
+    return previous.scope_unit
+
+
+__all__ = ["apply_legacy_loads", "legacy_load_entry", "preview_legacy_entries", "restore_teacher_role"]
