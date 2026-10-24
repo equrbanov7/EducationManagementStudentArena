@@ -267,6 +267,88 @@ class InferTimetableFromLessonsTest(TestCase):
         self.assertEqual(self._slots(), [])
 
 
+class MovedClassLatestWinsTest(TestCase):
+    """«Sonuncu qalib»: B.e. 08:30 (1–4-cü həftə) → B.e. 10:10 (5–8-ci həftə) köçürülüb — yalnız 10:10 yazılır;
+    başqa qrupun B.e. + C.a. mühazirələri (aralıqlar kəsişir) hər ikisi qalır."""
+
+    @classmethod
+    def setUpTestData(cls):
+        today = timezone.localdate()
+        cls.start = today - datetime.timedelta(days=today.weekday() + 63)  # 9 həftə əvvəl, 1-ci (üst) həftə
+        owner = User.objects.create_user("mv_owner", "mv_owner@qku.edu.az", "pw")
+        cls.teacher = User.objects.create_user("mv.teacher", "mv_teacher@qku.edu.az", "pw")
+        with bypass_rls():
+            cls.org = Organization.objects.create(
+                name="MV Univ",
+                slug="mv-univ",
+                org_type=OrganizationType.UNIVERSITY,
+                owner=owner,
+                status="active",
+                is_active=True,
+            )
+            cls.period = AcademicPeriod.objects.create(
+                organization=cls.org,
+                name="Payız",
+                period_type=AcademicPeriodType.SEMESTER,
+                academic_year="2026/2027",
+                start_date=cls.start,
+                end_date=today + datetime.timedelta(days=60),
+                is_current=True,
+            )
+            Membership.objects.create(
+                user=cls.teacher, organization=cls.org, role=cls.org.roles.get(name="teacher"), is_primary=True
+            )
+            subject = Subject.objects.create(organization=cls.org, code="MV101", name="Riyaziyyat")
+            offerings = []
+            for index in (1, 2):
+                group = OrgUnit.objects.create(
+                    organization=cls.org, name=f"24{index} M", slug=f"mv-24{index}m", unit_type=OrgUnitType.GROUP
+                )
+                offering = services.get_or_create_offering(
+                    organization=cls.org, subject=subject, period=cls.period, group=group
+                )
+                offering.instructor = cls.teacher
+                offering.save(update_fields=["instructor"])
+                offerings.append(offering)
+            cls.moved, cls.twice = offerings
+
+            def lessons(offering, weekday, start, end, weeks):
+                for week in weeks:
+                    Lesson.objects.create(
+                        organization=cls.org,
+                        offering=offering,
+                        date=cls.start + datetime.timedelta(days=7 * (week - 1) + weekday - 1),
+                        kind=LessonKind.LECTURE,
+                        start_time=start,
+                        end_time=end,
+                    )
+
+            lessons(cls.moved, 1, T(8, 30), T(10, 0), range(1, 5))
+            lessons(cls.moved, 1, T(10, 10), T(11, 40), range(5, 9))
+            lessons(cls.twice, 1, T(13, 35), T(15, 5), range(1, 9))
+            lessons(cls.twice, 4, T(13, 35), T(15, 5), range(1, 9))
+
+    def test_moved_class_superseded_overlapping_kept(self):
+        out = StringIO()
+        call_command(
+            "infer_timetable_from_lessons",
+            "--org",
+            "mv-univ",
+            "--period",
+            "Payız 2026/2027",
+            "--apply",
+            "--i-know-this-is-production",
+            stdout=out,
+        )
+        counts = InferTimetableFromLessonsTest._counts(out.getvalue())
+        self.assertEqual((counts["create"], counts["superseded"], counts["reason_moved_later"]), ("3", "1", "1"))
+        with bypass_rls():
+            moved = list(ScheduleSlot.objects.filter(offering=self.moved).values_list("weekday", "start_time"))
+            twice = set(ScheduleSlot.objects.filter(offering=self.twice).values_list("weekday", "start_time"))
+        self.assertEqual(moved, [(1, T(10, 10))])
+        self.assertEqual(twice, {(1, T(13, 35)), (4, T(13, 35))})
+
+
 class ParityRuleTest(TestCase):
     def test_decide_week_type(self):
         decide = timetable_inference.decide_week_type

@@ -26,6 +26,10 @@ QAYDALAR
   ikisi də → ``all``; azlıq paritet təkdirsə və çoxluğun yarısından azdırsa (məs. 1 alt + 3 üst) —
   ``parity_mixed`` (təsadüfi dərs, yoxsa buraxılmış həftələr — bilinmir), yazılmır.
 * BİTMƏ SAATI: ən çox rast gələn; yoxdursa universitetin standart zəngi; o da yoxdursa ``no_end_time``.
+* KÖÇÜRÜLMÜŞ DƏRS («sonuncu qalib», sahib 2026-10-24): eyni müəllim × eyni qrup dəsti (qrup / axın) × eyni növ
+  üçün iki yararlı vahidin tarix aralıqları KƏSİŞMİRSƏ (birinin son tarixi digərinin ilk tarixindən əvvəldir),
+  köhnəsi köçürülmüş dərsdir — yazılmır (``superseded`` / ``moved_later``). Aralıqları kəsişən vahidlər (məs.
+  qrupun həqiqətən B.e. və C.a. mühazirəsi var) hər ikisi qalır.
 * OTAQ: dərslərin yarıdan çoxunda eyni otaqdırsa o, əks halda boş (sonra redaktorda doldurulur).
 """
 
@@ -46,6 +50,7 @@ DEFAULT_MIN_OCCURRENCES = 2
 READY = "ready"
 BELOW_THRESHOLD = "below_threshold"
 AMBIGUOUS = "ambiguous"
+SUPERSEDED = "superseded"
 
 #: Fakt sayğacının açarları (stdout sırası).
 FACT_KEYS = ("lessons", "used", "no_time", "off_schedule", "no_teacher", "inactive_offering", "unknown_kind", "legacy")
@@ -287,13 +292,31 @@ def build_units(facts, *, period, min_occurrences: int = DEFAULT_MIN_OCCURRENCES
             unit.subject_ids = {fact.subject_id for fact in unit.facts}
             _classify(unit, period=period, min_occurrences=max(1, int(min_occurrences)))
             units.append(unit)
+    mark_superseded(units)
     units.sort(key=Unit.sort_key)
     return units
+
+
+def mark_superseded(units) -> None:
+    """«Sonuncu qalib»: eyni müəllim × qrup dəsti × növ üzrə SONRA başlayan vahiddən tam əvvəl bitən yararlı
+    vahid köçürülmüş dərsdir (``superseded`` / ``moved_later``); aralıqları kəsişənlər toxunulmaz qalır."""
+    families: dict = defaultdict(list)
+    for unit in units:
+        if unit.status == READY:
+            families[(str(unit.teacher_id), frozenset(str(pk) for pk in unit.active_ids), unit.kind)].append(unit)
+    for family in families.values():
+        if len(family) < 2:
+            continue
+        spans = [(min(unit.dates), max(unit.dates)) for unit in family]
+        for unit, (_first, last) in zip(family, spans):
+            if any(first > last for first, _last in spans):
+                unit.status, unit.reason = SUPERSEDED, "moved_later"
 
 
 __all__ = [
     "AMBIGUOUS",
     "BELOW_THRESHOLD",
+    "SUPERSEDED",
     "DEFAULT_MIN_OCCURRENCES",
     "FACT_KEYS",
     "READY",
@@ -302,5 +325,6 @@ __all__ = [
     "build_units",
     "decide_week_type",
     "load_facts",
+    "mark_superseded",
     "parity_counts",
 ]

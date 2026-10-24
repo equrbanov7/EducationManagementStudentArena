@@ -36,6 +36,7 @@ from apps.registrar.timetable_inference import (
     BELOW_THRESHOLD,
     DEFAULT_MIN_OCCURRENCES,
     READY,
+    SUPERSEDED,
     build_units,
     load_facts,
 )
@@ -44,7 +45,7 @@ CREATE = "create"
 EXISTS = "exists"
 CONFLICT = "conflict"
 SKIPPED = "skipped"
-ACTIONS = (CREATE, EXISTS, CONFLICT, BELOW_THRESHOLD, AMBIGUOUS, SKIPPED)
+ACTIONS = (CREATE, EXISTS, CONFLICT, SUPERSEDED, BELOW_THRESHOLD, AMBIGUOUS, SKIPPED)
 
 REPORT_HEADER = (
     "teacher",
