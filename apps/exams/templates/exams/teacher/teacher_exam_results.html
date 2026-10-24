@@ -132,8 +132,8 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
         </section>
 
         {% if available_groups and formal_retake %}
-        {# 2026-10-24 (sahib): midterm / final — qrupa birbaşa cəhd YOXDUR. GET forma rəsmi «Yenidən imtahan cəhdi»
-           səhifəsini imtahan + qrup axtarışı ilə ön-doldurur (hər tələbə orada əsas, əmr və sənədlə ayrıca seçilir). #}
+        {% comment %}2026-10-24 (sahib): midterm / final — qrupa birbaşa cəhd YOXDUR. GET forma rəsmi «Yenidən imtahan cəhdi»
+           səhifəsini imtahan + qrup axtarışı ilə ön-doldurur (hər tələbə orada əsas, əmr və sənədlə ayrıca seçilir).{% endcomment %}
         <section class="ems-card etr-grant etr-grant--formal">
             {% if formal_retake_open %}
             <form method="get" action="{{ formal_retake_action }}" class="etr-grant__form">
