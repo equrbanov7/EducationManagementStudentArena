@@ -107818,3 +107818,39 @@ msgstr "Delete row"
 msgctxt "accounts.workload"
 msgid "fənn, qrup və ya müəllim"
 msgstr "subject, group or teacher"
+
+msgctxt "applications"
+msgid "Bütün müraciətlər"
+msgstr "All applications"
+
+msgctxt "applications"
+msgid "Şöbə (ünvan)"
+msgstr "Department (addressee)"
+
+msgctxt "applications"
+msgid "Bütün şöbələr"
+msgstr "All departments"
+
+msgctxt "applications"
+msgid "Göndərənin bölməsi"
+msgstr "Sender's unit"
+
+msgctxt "applications"
+msgid "Bütün göndərənlər"
+msgstr "All senders"
+
+msgctxt "applications"
+msgid "Fakültələr"
+msgstr "Faculties"
+
+msgctxt "applications"
+msgid "Kafedralar"
+msgstr "Departments (chairs)"
+
+msgctxt "applications"
+msgid "Mərkəz və digər bölmələr"
+msgstr "Centres and other units"
+
+msgctxt "organizations.permission.label"
+msgid "Bütün müraciətlərə baxmaq (yalnız oxu)"
+msgstr "View all applications (read-only)"

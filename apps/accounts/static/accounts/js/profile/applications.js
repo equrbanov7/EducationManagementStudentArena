@@ -103,13 +103,13 @@
             classes.push("apx-row--overdue");
         }
         // Sağ etiket: emalçıya «sizdədir / <şöbə>-də» (server hesablayır),
-        // göndərənə isə normanın özü — norma kataloqdakı növdən oxunur.
+        // göndərənə normanın özü (kataloqdan); «Bütün müraciətlər» (RİM) tabı emalçı kimi oxunur.
         var ownerLabel = row.owner_label;
-        if (!NS.isHandler) {
+        if (!NS.isHandler && NS.state.tab !== "all") {
             var norm = NS.kindSlaDays(row.kind.code);
             ownerLabel = !row.is_open ? NS.t("rowClosed") : norm ? NS.t("rowSla", { n: norm }) : row.owner_label;
         }
-        var fromLine = NS.isHandler
+        var fromLine = NS.isHandler || NS.state.tab === "all"
             ? NS.esc(row.requester.name) + (row.requester_scope ? " · " + NS.esc(row.requester_scope) : "")
             : NS.esc(row.current_unit.name);
         return (
@@ -153,7 +153,7 @@
 
     function emptyHtml() {
         var title = NS.t("emptyTitle");
-        var note = NS.isHandler ? NS.t("emptyHandlerNote") : NS.t("emptySenderNote");
+        var note = NS.isHandler || NS.state.tab === "all" ? NS.t("emptyHandlerNote") : NS.t("emptySenderNote");
         if (NS.state.tab === "watching") {
             title = NS.t("emptyWatchingTitle");
             note = NS.t("emptyWatchingNote");
@@ -329,7 +329,7 @@
         if (!panel || !NS.catalog) {
             return;
         }
-        var options = [{ code: "", label: NS.t("kindAll") }].concat(NS.catalog.kinds || []);
+        var options = [{ code: "", label: NS.t("kindAll") }].concat(NS.catalog.filter_kinds || NS.catalog.kinds || []);
         panel.innerHTML = options
             .map(function (kind) {
                 return (
@@ -350,7 +350,7 @@
     function setKind(code) {
         NS.state.kind = code;
         var label = NS.root.querySelector("[data-apx-kind-label]");
-        var chosen = (NS.catalog && NS.catalog.kinds ? NS.catalog.kinds : []).filter(function (kind) {
+        var chosen = ((NS.catalog && (NS.catalog.filter_kinds || NS.catalog.kinds)) || []).filter(function (kind) {
             return kind.code === code;
         })[0];
         if (label) {

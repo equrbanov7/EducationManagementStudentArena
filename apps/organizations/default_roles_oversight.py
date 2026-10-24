@@ -84,6 +84,8 @@ _TRUSTEE_PERMISSIONS = [
     *TRUSTEE_READ_ALL_2026_10_17,
     # Sahib 2026-10-18: «Mühasibatlıq» bölməsi qəyyumlara da açıqdır (yalnız oxu; miqrasiya 0067).
     "accounting.view",
+    # 2026-10-24: «Müraciətlərim → Bütün müraciətlər» — YALNIZ OXU (əməl/daxili qeyd yox; applications 0006).
+    "application.view_all",
 ]
 
 #: İnzibati şöbə müdiri: öz vahidi + kataloq oxusu.

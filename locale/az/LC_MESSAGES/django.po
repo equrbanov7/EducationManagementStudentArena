@@ -107328,3 +107328,39 @@ msgstr "Sətri sil"
 msgctxt "accounts.workload"
 msgid "fənn, qrup və ya müəllim"
 msgstr "fənn, qrup və ya müəllim"
+
+msgctxt "applications"
+msgid "Bütün müraciətlər"
+msgstr "Bütün müraciətlər"
+
+msgctxt "applications"
+msgid "Şöbə (ünvan)"
+msgstr "Şöbə (ünvan)"
+
+msgctxt "applications"
+msgid "Bütün şöbələr"
+msgstr "Bütün şöbələr"
+
+msgctxt "applications"
+msgid "Göndərənin bölməsi"
+msgstr "Göndərənin bölməsi"
+
+msgctxt "applications"
+msgid "Bütün göndərənlər"
+msgstr "Bütün göndərənlər"
+
+msgctxt "applications"
+msgid "Fakültələr"
+msgstr "Fakültələr"
+
+msgctxt "applications"
+msgid "Kafedralar"
+msgstr "Kafedralar"
+
+msgctxt "applications"
+msgid "Mərkəz və digər bölmələr"
+msgstr "Mərkəz və digər bölmələr"
+
+msgctxt "organizations.permission.label"
+msgid "Bütün müraciətlərə baxmaq (yalnız oxu)"
+msgstr "Bütün müraciətlərə baxmaq (yalnız oxu)"

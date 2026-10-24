@@ -108012,3 +108012,39 @@ msgstr "Удалить строку"
 msgctxt "accounts.workload"
 msgid "fənn, qrup və ya müəllim"
 msgstr "дисциплина, группа или преподаватель"
+
+msgctxt "applications"
+msgid "Bütün müraciətlər"
+msgstr "Все обращения"
+
+msgctxt "applications"
+msgid "Şöbə (ünvan)"
+msgstr "Отдел (адресат)"
+
+msgctxt "applications"
+msgid "Bütün şöbələr"
+msgstr "Все отделы"
+
+msgctxt "applications"
+msgid "Göndərənin bölməsi"
+msgstr "Подразделение отправителя"
+
+msgctxt "applications"
+msgid "Bütün göndərənlər"
+msgstr "Все отправители"
+
+msgctxt "applications"
+msgid "Fakültələr"
+msgstr "Факультеты"
+
+msgctxt "applications"
+msgid "Kafedralar"
+msgstr "Кафедры"
+
+msgctxt "applications"
+msgid "Mərkəz və digər bölmələr"
+msgstr "Центры и другие подразделения"
+
+msgctxt "organizations.permission.label"
+msgid "Bütün müraciətlərə baxmaq (yalnız oxu)"
+msgstr "Просмотр всех обращений (только чтение)"

@@ -107226,3 +107226,39 @@ msgstr "Satırı sil"
 msgctxt "accounts.workload"
 msgid "fənn, qrup və ya müəllim"
 msgstr "ders, grup veya öğretim elemanı"
+
+msgctxt "applications"
+msgid "Bütün müraciətlər"
+msgstr "Tüm başvurular"
+
+msgctxt "applications"
+msgid "Şöbə (ünvan)"
+msgstr "Birim (muhatap)"
+
+msgctxt "applications"
+msgid "Bütün şöbələr"
+msgstr "Tüm birimler"
+
+msgctxt "applications"
+msgid "Göndərənin bölməsi"
+msgstr "Gönderenin birimi"
+
+msgctxt "applications"
+msgid "Bütün göndərənlər"
+msgstr "Tüm gönderenler"
+
+msgctxt "applications"
+msgid "Fakültələr"
+msgstr "Fakülteler"
+
+msgctxt "applications"
+msgid "Kafedralar"
+msgstr "Bölümler"
+
+msgctxt "applications"
+msgid "Mərkəz və digər bölmələr"
+msgstr "Merkezler ve diğer birimler"
+
+msgctxt "organizations.permission.label"
+msgid "Bütün müraciətlərə baxmaq (yalnız oxu)"
+msgstr "Tüm başvuruları görüntüleme (salt okunur)"

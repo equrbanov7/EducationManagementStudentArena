@@ -112,6 +112,8 @@
     /* ── HTTP ───────────────────────────────────────────────────────────── */
     NS.api = {
         list: function (params) {
+            // «Bütün müraciətlər» şöbə süzgəcləri (`applications_oversight.js`; yalnız nəzarətçidə yüklənir).
+            params = NS.oversight ? Object.assign({}, params, NS.oversight.params()) : params;
             var query = Object.keys(params)
                 .filter(function (key) {
                     return params[key] !== "" && params[key] !== null && params[key] !== undefined;

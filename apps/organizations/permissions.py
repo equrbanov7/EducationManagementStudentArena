@@ -191,17 +191,16 @@ PERMISSION_CATEGORIES = {
         "group.view",
         "group.manage",
     ],
-    # Müraciətlər (apps.applications) — universitet üzrə elektron sənəd dövriyyəsi.
-    # `application.create` — müraciət göndərmək (demək olar hər rol);
-    # `application.handle` — GƏLƏN müraciətə qərar vermək (yalnız şöbə rolları);
-    # `application.manage` — kataloq konfiqurasiyası + org-wide oxu (RİM/rektorat).
-    # ⚠️ `handle` açarı TƏK BAŞINA kifayət etmir: əməl həm də müraciətin CARİ
-    # şöbəsinin `handler_role_names` siyahısında olmağı tələb edir (bax
-    # apps/applications/services/access.py) — açar səthi açır, əhatəni yox.
+    # Müraciətlər (apps.applications) — elektron sənəd dövriyyəsi. `create` — göndərmək (demək olar hər rol);
+    # `handle` — GƏLƏN müraciətə qərar (şöbə rolları; ⚠️ TƏK BAŞINA kifayət etmir — müraciətin CARİ şöbəsinin
+    # `handler_role_names`-i də lazımdır, bax apps/applications/services/access.py); `manage` — kataloq +
+    # org-wide oxu (RİM rəhbəri/rektorat); `view_all` (2026-10-24) — «Bütün müraciətlər»: org-wide YALNIZ
+    # OXU (RİM əməkdaşı), əməl və daxili qeyd VERMİR; `manage` onu ehtiva edir.
     "applications": [
         "application.create",
         "application.handle",
         "application.manage",
+        "application.view_all",
     ],
     # `final_score.entry` (2026-08): KAĞIZ üzərində keçən yazılı/praktiki imtahanın
     # YEKUN balının sistemə əl ilə köçürülməsi (İmtahan Mərkəzi → «İmtahan balının
@@ -403,6 +402,7 @@ PERMISSION_LABELS = {
     "application.create": pgettext_lazy(_PERM_CTX, "Müraciət göndərmək"),
     "application.handle": pgettext_lazy(_PERM_CTX, "Gələn müraciətə baxmaq və qərar vermək"),
     "application.manage": pgettext_lazy(_PERM_CTX, "Müraciət kataloqunu idarə etmək və hamısına baxmaq"),
+    "application.view_all": pgettext_lazy(_PERM_CTX, "Bütün müraciətlərə baxmaq (yalnız oxu)"),
     # workload
     "workload.view": pgettext_lazy(_PERM_CTX, "Dərs yükünə baxış"),
     "workload.manage": pgettext_lazy(_PERM_CTX, "Tədris tapşırığını yaratmaq/redaktə etmək"),

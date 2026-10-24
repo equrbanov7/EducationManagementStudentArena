@@ -3,8 +3,9 @@
 İki ayrı sual var və onları qarışdırmaq təhlükəlidir:
 
 ``can_view``  — «bu müraciəti OXUYA bilərmi?» Sahib, cari şöbənin əhatəli
-                emalçısı, İZLƏYƏN şöbənin əhatəli emalçısı, ``application.manage``
-                daşıyan (RİM/rektor/prorektor), superuser və təşkilat sahibi.
+                emalçısı, İZLƏYƏN şöbənin əhatəli emalçısı, təşkilat üzrə nəzarətçi
+                (``can_oversee``: ``application.view_all`` / ``application.manage`` —
+                RİM/rektor/prorektor), superuser və təşkilat sahibi.
 ``can_act``   — «bu müraciətə QƏRAR verə bilərmi?» YALNIZ CARİ şöbənin əhatəli
                 emalçısı və müraciət AÇIQ olduqda. İzləyən şöbə OXUYUR, ƏMƏL ETMİR.
 
@@ -21,7 +22,7 @@ from apps.organizations.public import ancestor_unit_ids, request_active_membersh
 from core.constants import RoleScopeType
 from core.permissions import has_permission
 
-from ..constants import PERM_MANAGE, ResolveBy
+from ..constants import PERM_MANAGE, PERM_VIEW_ALL, ResolveBy
 from ..models import ApplicationUnit
 
 
@@ -101,6 +102,21 @@ def has_app_permission(user, organization, permission: str) -> bool:
     return has_permission(user_permissions(user, organization), permission)
 
 
+def can_oversee(user, organization) -> bool:
+    """«Bütün müraciətlər» — təşkilatın HƏR müraciətini OXUMAQ (nəzarət, RİM).
+
+    ``application.view_all`` (RİM əməkdaşı, qəyyum) və ya onu ehtiva edən ``application.manage``
+    (RİM rəhbəri / rektorat), superuser, təşkilat sahibi. Bu YALNIZ OXUDUR: qərar
+    hüququ (``can_act``) və daxili qeydlər (``can_see_internal`` — yalnız ``manage``) vermir.
+    """
+    if organization is None:
+        return False
+    if _is_privileged(user, organization):
+        return True
+    permissions = user_permissions(user, organization)
+    return has_permission(permissions, PERM_VIEW_ALL) or has_permission(permissions, PERM_MANAGE)
+
+
 def _covers(membership, scope_unit_id, scope_unit_path) -> bool:
     """Üzvlük verilmiş aidiyyət bölməsini örtürmü."""
     if membership.role.scope_type == RoleScopeType.ORGANIZATION:
@@ -164,7 +180,7 @@ def can_view(user, application) -> bool:
         return False
     if application.created_by_id == user.pk:
         return True
-    if has_permission(user_permissions(user, organization), PERM_MANAGE):
+    if can_oversee(user, organization):
         return True
     if handles_unit(user, organization, application.current_unit, application.current_scope_unit):
         return True
@@ -262,7 +278,7 @@ def watching_q(user, organization) -> Q:
 
 def visible_q(user, organization) -> Q:
     """İstifadəçinin ÜMUMİYYƏTLƏ görə bildiyi müraciətlər (bütün tablar)."""
-    if _is_privileged(user, organization) or has_permission(user_permissions(user, organization), PERM_MANAGE):
+    if can_oversee(user, organization):
         return Q()
     return Q(created_by=user) | inbox_q(user, organization) | watching_q(user, organization)
 
@@ -271,6 +287,7 @@ __all__ = [
     "active_memberships",
     "active_units",
     "can_act",
+    "can_oversee",
     "can_view",
     "can_view_attachment",
     "handled_unit_ids",
