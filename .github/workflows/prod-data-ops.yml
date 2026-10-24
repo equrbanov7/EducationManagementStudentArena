@@ -9,6 +9,11 @@
 #       sərbəst işsiz qaydaya görə 30-a QALDIRIR (mövcud ballar qalır).
 #   recompute_syllabus_completion — açıq sillabus versiyalarının tamamlanma faizini cari qaydaya görə
 #       yenidən hesablayır (sərbəst iş söndürülüb → 7 bölmə; təsdiqlənmişlərə toxunmur).
+#   fix_syllabus_plan_hours — sillabusun PLAN SAATI bir qrupun saatına (sahib 2026-10-25: «yük 105, sillabus 75»):
+#       qrupun ixtisas planı → yükdə bir qrupa düşən pay (birgə mühazirə bir dəfə, seminar/lab bir qrupun payı) →
+#       istənilən plan; kafedranın əl ilə düzəlişi üstündür. Arxivdən başqa versiyalar (təsdiqlənmiş DAXİL), YALNIZ
+#       plan sahəsi — həftəlik bölgüyə toxunulmur. Plan saatı BOŞ təsdiqlənmiş versiyalar yalnız `create_missing`
+#       (--fill-empty) ilə. Loga yalnız saylar; hər yazı audit jurnalındadır.
 #   journal_hygiene_report — «Jurnal təmizliyi»: ayrılmış tələbələr (left) / boş fənlər (empty) /
 #       qrupun keçmədiyi fənlər (not_held). Loga yalnız saylar düşür (--show 0); apply → DROPPED/SUSPENDED,
 #       hər qərar ledger-dədir və «Bərpa et» ilə geri qayıdır.
@@ -137,6 +142,7 @@ on:
           - surveys_shuffle_responses
           - superadmin_role_count
           - recompute_syllabus_completion
+          - fix_syllabus_plan_hours
           - journal_hygiene_report
           - reconcile_teacher_roster
           - import_teaching_task_workbook
@@ -195,7 +201,7 @@ on:
         required: false
         default: ""
       create_missing:
-        description: "reconcile_teacher_roster: «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı yarat · blocked_accounts_report (apply ilə): yükü olan bloklanmış müəllimlərin blokunu aç · assign_task_rows_from_timetable: dərs yükündə olmayan dərsə yeni tapşırıq sətri (--create-missing-rows)"
+        description: "reconcile_teacher_roster: «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı yarat · blocked_accounts_report (apply ilə): yükü olan bloklanmış müəllimlərin blokunu aç · assign_task_rows_from_timetable: dərs yükündə olmayan dərsə yeni tapşırıq sətri (--create-missing-rows) · fix_syllabus_plan_hours: plan saatı BOŞ olan təsdiqlənmiş versiyaları da doldur (--fill-empty)"
         required: false
         type: boolean
         default: false
@@ -405,6 +411,12 @@ jobs:
               ;;
             recompute_syllabus_completion)
               args=(--org "$ORG")
+              ;;
+            fix_syllabus_plan_hours)
+              args=(--org "$ORG")
+              if [ "$CREATE_MISSING" = "true" ]; then
+                args+=(--fill-empty)
+              fi
               ;;
             journal_hygiene_report)
               case "$HYGIENE_CATEGORY" in (all|left|empty|not_held) ;; (*) echo "hygiene_category yanlışdır" >&2; exit 2;; esac

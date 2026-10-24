@@ -274,9 +274,9 @@ def syllabus_action(request):
                 return _fail(transition_text("transition.author_only"), status=403)
             # Təhlükəsizlik yoxlaması (2026-09-25): UI rəsmi plan saatı olanda formanı gizlədir, API
             # isə müəllifin RƏSMİ plan saatını üstələməsinə icazə verirdi — bölgünün mənbəyi tədris planıdır.
-            from apps.registrar.public import plan_hours_for_offering
+            from .plan_hours_source import official_plan_hours
 
-            if plan_hours_for_offering(getattr(version.syllabus, "offering", None)):
+            if official_plan_hours(version.syllabus):
                 return _fail(_OFFICIAL_HOURS, status=409, code="plan_hours.official")
             hours = {}
             for kind in ("lecture", "seminar", "lab"):

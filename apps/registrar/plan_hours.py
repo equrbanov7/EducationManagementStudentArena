@@ -17,6 +17,7 @@ bölgünü sillabusa ÖTÜRƏN tərəf registrar/accounts qatıdır.
 from __future__ import annotations
 
 from .models import Curriculum, CurriculumSubject, PlanStatus
+from .plan_hours_load import workload_hours_for_offering  # noqa: F401 — köhnə idxal yolu (public_services)
 
 #: Plan sətrindəki saat sahəsi → sillabusun saat növü açarı.
 HOUR_FIELDS = (
@@ -35,7 +36,7 @@ def _row_hours(row) -> dict:
     return hours
 
 
-def plan_hours_for_subject(*, organization, subject, program=None, admission_year=None):
+def plan_hours_for_subject(*, organization, subject, program=None, admission_year=None, program_only=False):
     """Fənn üçün təsdiqlənmiş plan sətrinin saat bölgüsü (``{}`` — tapılmadı).
 
     ``program`` verilibsə həmin ixtisasın planına üstünlük verilir; ``admission_year`` (qrupun kohortu,
@@ -43,8 +44,9 @@ def plan_hours_for_subject(*, organization, subject, program=None, admission_yea
     ya tapılmasa) təşkilatın ən yeni qəbul ilinə aid təsdiqlənmiş planı
     götürülür.  Kredit/saat İXTİSASA görə dəyişdiyi üçün (layihə yaddaşı) proqram
     uyğunluğu ƏHƏMİYYƏTLİDİR — geri çəkilmə yalnız heç nə tapılmayanda işə düşür.
+    ``program_only`` — geri çəkilmə YOXDUR: yalnız qrupun öz ixtisasının planı (sahib 2026-10-25).
     """
-    if subject is None:
+    if subject is None or (program_only and program is None):
         return {}
     base = CurriculumSubject.objects.filter(
         organization=organization,
@@ -60,12 +62,14 @@ def plan_hours_for_subject(*, organization, subject, program=None, admission_yea
         row = ordered.filter(curriculum__program=program).first()
         if row is not None:
             return _row_hours(row)
+    if program_only:
+        return {}
     row = ordered.first()
     return _row_hours(row) if row is not None else {}
 
 
 def plan_hours_for_offering(offering):
-    """Açılışdan (``CourseOffering``) saat bölgüsü — əvvəl kafedra yükü, sonra plan (ixtisas qrupdan).
+    """Açılışın sillabus saatı — BİR QRUPUN bölgüsü (müəllimin ümumi yükü DEYİL).
 
     Qrup ``OrgUnit``-dir və onun valideyni adətən İXTİSAS bölməsidir; ixtisas
     bölməsi ilə ``registrar.Program.specialty_unit`` arasındakı bağ proqramı
@@ -75,66 +79,28 @@ def plan_hours_for_offering(offering):
         return {}
     from core.academic_rules import syllabus_hours_from_load
 
-    def from_plan():
+    def from_plan(program_only=False):
         from .cohort_plans import group_cohort_year
 
+        program = program_for_offering(offering)
+        if program_only and program is None:
+            return {}
         return plan_hours_for_subject(
             organization=offering.organization,
             subject=offering.subject,
-            program=program_for_offering(offering),
+            program=program,
             admission_year=group_cohort_year(offering.group) if offering.group_id else None,
+            program_only=program_only,
         )
 
-    # Sahib 2026-10-12: «sillabus dərs saatı YÜKƏ görə tənzimlənsin — müəllim əl ilə yazmasın». RİM açarı
-    # `syllabus.hours_from_load` (defolt yanılı): kafedranın paylanmış yükü (TAPŞIRIQ sətri: eyni fənn + dövr +
-    # qrup) əsasdır, plan ikinci; söndürülüdə əvvəlki sıra (plan → yük).
+    # Sahib 2026-10-12: «sillabus dərs saatı YÜKƏ görə tənzimlənsin — müəllim əl ilə yazmasın» (RİM açarı
+    # `syllabus.hours_from_load`, defolt yanılı). Sahib 2026-10-25: sillabus fənnin BİR QRUP üçün saatıdır —
+    # (1) qrupun ÖZ ixtisasının təsdiqlənmiş planı (fənn + ixtisas + kohort), (2) yük sətirlərində bir qrupa düşən
+    # pay (``plan_hours_load``: birgə mühazirə bir dəfə, seminar/lab bir qrupun payı), (3) fənnin istənilən
+    # təsdiqlənmiş planı. Söndürülüdə əvvəlki sıra (plan → yük).
     if syllabus_hours_from_load():
-        return workload_hours_for_offering(offering) or from_plan()
+        return from_plan(program_only=True) or workload_hours_for_offering(offering) or from_plan()
     return from_plan() or workload_hours_for_offering(offering)
-
-
-def workload_hours_for_offering(offering) -> dict:
-    """Təsdiqlənmiş plan sətri YOXDURSA — dərs yükü (TAPŞIRIQ) sətrindən bölgü.
-
-    Sahib 2026-09-20: «tədrisdən gələn yük saatı sillabuslarda görünmür».
-    Kafedra tapşırığının sətri (eyni fənn + dövr + qrup) mühazirə/seminar/lab
-    saatını daşıyır — ``*_plan`` (plan saatı), yoxdursa ``*_total``.  Model
-    ``get_model`` ilə həll olunur: registrar → workload Python import kənarı
-    yaranmır (modul-sərhəd qapısı; workload onsuz da registrar.public-i oxuyur).
-    """
-    from django.apps import apps as django_apps
-
-    if offering is None or not (offering.subject_id and offering.period_id):
-        return {}
-    try:
-        TaskRow = django_apps.get_model("workload", "TeachingTaskRow")
-    except LookupError:
-        return {}
-    rows = TaskRow.objects.filter(
-        organization_id=offering.organization_id, subject_id=offering.subject_id, period_id=offering.period_id
-    )
-    if offering.group_id:
-        rows = rows.filter(groups=offering.group_id)
-    row = rows.order_by("-updated_at").first()
-    if row is None:
-        return {}
-    # Sahib 2026-10-23: potok (235 K + 235 İT) — mühazirə 45 saat BİRLİKDƏ, seminar hər qrupa ayrıca 30 → yük
-    # 45 + 60 = 105, sillabus isə 45 + 30 = 75 olmalıdır. Sillabus BİR qrupun saatıdır: mühazirə olduğu kimi,
-    # seminar/lab — ``*_plan`` (qrup başına) cəmdən kiçikdirsə o, əks halda cəm ÷ (qrup × yarımqrup).
-    groups = max(int(row.union_count or 1), row.groups.count(), 1) * max(int(row.subgroup_count or 1), 1)
-    hours = {}
-    for kind in ("lecture", "seminar", "lab"):
-        plan = int(getattr(row, f"{kind}_plan") or 0)
-        total = int(getattr(row, f"{kind}_total") or 0)
-        if kind == "lecture" or groups == 1:
-            value = plan or total
-        elif plan and (not total or plan < total):
-            value = plan
-        else:
-            value = round((total or plan) / groups)
-        if value > 0:
-            hours[kind] = value
-    return hours
 
 
 def program_for_offering(offering):

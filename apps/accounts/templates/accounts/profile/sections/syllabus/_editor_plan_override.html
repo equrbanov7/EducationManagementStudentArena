@@ -1,0 +1,35 @@
+{% load i18n %}
+{% comment %}
+Sahib 2026-10-25: «Fənn 75 saatdır … müəllimin dərs yükü 105 saat olsa da, sillabus olaraq 75 saat yazmalıdır.
+Bu tip məsələləri tənzimləmək olsun.» Kafedra müdiri / tədris şöbəsi (icazə: `syllabus.approve` kafedra
+əhatəsi, `syllabus.manage` və ya `workload.manage`) sillabusun plan saatını BİR QRUP üçün əl ilə düzəldir;
+düzəliş dosyenin bütün (arxivdən başqa) versiyalarının plan saatına yazılır, həftəlik bölgüyə toxunulmur.
+«Avtomatik hesaba qayıt» düzəlişi silir. Forma `syllabus_plan_hours.js` ilə göndərilir (JSON, EMSDelegate).
+{% endcomment %}
+{% with o=se.hours.override %}
+<form class="syl-planhours syl-planhours--override" data-syl-planhours data-action-url="{{ o.url }}" data-version="{{ se.version_id }}"
+      data-empty-message="{% trans 'Ən azı bir dərs növü üçün saat seçin.' context 'accounts.syllabus' %}">
+  <p class="syl-planhours__text">
+    {% if o.active %}{% trans "Plan saatı kafedra tərəfindən əl ilə düzəldilib (bir qrup üçün):" context "accounts.syllabus" %}
+    {% else %}{% trans "Plan saatını düzəlt — sillabusda fənnin BİR qrup üçün saatı yazılır (müəllimin ümumi dərs yükü deyil):" context "accounts.syllabus" %}{% endif %}
+  </p>
+  {% if o.auto %}<p class="syl-planhours__auto">{% blocktrans context "accounts.syllabus" with auto=o.auto %}Avtomatik hesab (tədris planı / dərs yükü): {{ auto }}{% endblocktrans %}</p>{% endif %}
+  <div class="syl-planhours__fields">
+    {% for field in o.fields %}
+    <label class="syl-planhours__field"><span>{{ field.label }}</span>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select name="{{ field.kind }}" class="ems-select bootstrap-single-select__native" data-bootstrap-select>
+          {% for option in o.options %}
+          <option value="{{ option }}"{% if option == field.value %} selected{% endif %}>{{ option }} {% trans "saat" context "accounts.syllabus" %}</option>
+          {% endfor %}
+          {% if field.value and field.value not in o.options %}<option value="{{ field.value }}" selected>{{ field.value }} {% trans "saat" context "accounts.syllabus" %}</option>{% endif %}
+        </select>
+      </div>
+    </label>
+    {% endfor %}
+    <button type="submit" class="ems-btn ems-btn--primary">{% trans "Plan saatını yadda saxla" context "accounts.syllabus" %}</button>
+    {% if o.active %}<button type="submit" class="ems-btn ems-btn--ghost" data-syl-planhours-reset>{% trans "Avtomatik hesaba qayıt" context "accounts.syllabus" %}</button>{% endif %}
+  </div>
+  <p class="syl-planhours__msg" data-syl-planhours-msg role="status" hidden></p>
+</form>
+{% endwith %}

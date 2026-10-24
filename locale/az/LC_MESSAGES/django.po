@@ -107480,3 +107480,33 @@ msgstr "İmtahan Mərkəzində keçirilən midterm balı imtahandan avtomatik ya
 msgctxt "registrar.journal"
 msgid "imtahandan avtomatik"
 msgstr "imtahandan avtomatik"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Plan saatı düzəldildi — %(count)s versiya yeniləndi."
+msgstr "Plan saatı düzəldildi — %(count)s versiya yeniləndi."
+
+msgctxt "accounts.syllabus"
+msgid "Əl ilə düzəliş silindi — saat yenidən tədris planı / dərs yükündən gəlir."
+msgstr "Əl ilə düzəliş silindi — saat yenidən tədris planı / dərs yükündən gəlir."
+
+msgctxt "accounts.syllabus"
+msgid "Plan saatı kafedra tərəfindən əl ilə düzəldilib (bir qrup üçün):"
+msgstr "Plan saatı kafedra tərəfindən əl ilə düzəldilib (bir qrup üçün):"
+
+msgctxt "accounts.syllabus"
+msgid "Plan saatını düzəlt — sillabusda fənnin BİR qrup üçün saatı yazılır (müəllimin ümumi dərs yükü deyil):"
+msgstr "Plan saatını düzəlt — sillabusda fənnin BİR qrup üçün saatı yazılır (müəllimin ümumi dərs yükü deyil):"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Avtomatik hesab (tədris planı / dərs yükü): %(auto)s"
+msgstr "Avtomatik hesab (tədris planı / dərs yükü): %(auto)s"
+
+msgctxt "accounts.syllabus"
+msgid "Plan saatını yadda saxla"
+msgstr "Plan saatını yadda saxla"
+
+msgctxt "accounts.syllabus"
+msgid "Avtomatik hesaba qayıt"
+msgstr "Avtomatik hesaba qayıt"

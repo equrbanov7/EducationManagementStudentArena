@@ -78,6 +78,10 @@ gəlir; RİM `academic.selfwork_enabled` yandırılanda midterm 20 + sərbəst i
   </form>
   {% endif %}
 
+  {% if se.hours.override.allowed %}
+  {% include "accounts/profile/sections/syllabus/_editor_plan_override.html" with se=se %}
+  {% endif %}
+
   {% if se.week_extra_count and not se.hours.has_plan %}
   {% comment %}Köçürülmüş cədvəl tədris planının 16 həftəsindən uzun ola bilər
   (canlı mənbədə 120 sətrə qədər). Artıq sətirlər KƏSİLMİR — kəsmək ilk

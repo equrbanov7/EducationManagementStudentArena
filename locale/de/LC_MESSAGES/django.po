@@ -108996,3 +108996,33 @@ msgstr "Die Zwischenprüfungspunktzahl einer im Prüfungszentrum durchgeführten
 msgctxt "registrar.journal"
 msgid "imtahandan avtomatik"
 msgstr "automatisch aus der Prüfung"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Plan saatı düzəldildi — %(count)s versiya yeniləndi."
+msgstr "Planstunden korrigiert — %(count)s Version(en) aktualisiert."
+
+msgctxt "accounts.syllabus"
+msgid "Əl ilə düzəliş silindi — saat yenidən tədris planı / dərs yükündən gəlir."
+msgstr "Manuelle Korrektur entfernt — die Stunden kommen wieder aus dem Lehrplan / Lehrdeputat."
+
+msgctxt "accounts.syllabus"
+msgid "Plan saatı kafedra tərəfindən əl ilə düzəldilib (bir qrup üçün):"
+msgstr "Die Planstunden wurden vom Lehrstuhl manuell korrigiert (für eine Gruppe):"
+
+msgctxt "accounts.syllabus"
+msgid "Plan saatını düzəlt — sillabusda fənnin BİR qrup üçün saatı yazılır (müəllimin ümumi dərs yükü deyil):"
+msgstr "Planstunden korrigieren — der Syllabus zeigt die Stunden des Fachs für EINE Gruppe (nicht das Gesamtdeputat der Lehrkraft):"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Avtomatik hesab (tədris planı / dərs yükü): %(auto)s"
+msgstr "Automatische Berechnung (Lehrplan / Lehrdeputat): %(auto)s"
+
+msgctxt "accounts.syllabus"
+msgid "Plan saatını yadda saxla"
+msgstr "Planstunden speichern"
+
+msgctxt "accounts.syllabus"
+msgid "Avtomatik hesaba qayıt"
+msgstr "Zurück zur automatischen Berechnung"

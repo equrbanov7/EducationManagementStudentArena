@@ -408,6 +408,12 @@ urlpatterns = [
         views.syllabus_decision,
         name="syllabus_decision",
     ),
+    # Sahib 2026-10-25: kafedra / tədris şöbəsi sillabusun plan saatını (bir qrup üçün) əl ilə düzəldir.
+    path(
+        "profile/syllabus/version/<uuid:version_id>/plan-hours/",
+        views.syllabus_plan_hours_override,
+        name="syllabus_plan_hours_override",
+    ),
     # Post management
     path("superadmin/post-management/", views.superadmin_post_management, name="superadmin_post_management"),
     path(

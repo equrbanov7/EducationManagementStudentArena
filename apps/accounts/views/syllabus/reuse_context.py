@@ -82,7 +82,8 @@ def _offering_target(offering, *, syllabus=None, hours=None, program=None):
     from apps.registrar.public import plan_hours_for_offering, program_for_offering
 
     if hours is None:
-        hours = plan_hours_for_offering(offering)
+        override = services.clean_override_hours(getattr(syllabus, "plan_hours_override", None))
+        hours = override or plan_hours_for_offering(offering)
     if not hours and syllabus is not None and syllabus.current_version_id:
         # Rəsmi plan tapılmayanda müəllimin əl ilə seçdiyi saat (redaktordakı forma).
         hours = syllabus.current_version.plan_hours or {}
@@ -165,7 +166,7 @@ def candidate_targets(organization, actor, *, subject_id, period_id, exclude_off
         target = services.ReuseTarget(
             offering=offering,
             syllabus=existing.get(offering.pk),
-            plan_hours=hours.get(offering.pk) or {},
+            plan_hours=_override_or(existing.get(offering.pk), hours.get(offering.pk)),
             program=programs.get(offering.pk),
             unit_hint=offering.group.parent if offering.group_id else None,
         )
@@ -174,6 +175,12 @@ def candidate_targets(organization, actor, *, subject_id, period_id, exclude_off
             chair_memo[key] = services.reuse.target_chair_unit_id(target, actor)
         result.append((target, chair_memo[key]))
     return result
+
+
+def _override_or(syllabus, hours) -> dict:
+    """Kafedranın plan saatı düzəlişi (sahib 2026-10-25) varsa o, yoxdursa hesablanmış saat."""
+    override = services.clean_override_hours(getattr(syllabus, "plan_hours_override", None))
+    return override or dict(hours or {})
 
 
 def _candidate_public(target) -> dict:
