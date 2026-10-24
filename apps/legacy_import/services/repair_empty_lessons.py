@@ -20,8 +20,9 @@ Sütunun növü (hamısı keçmiş + məzmunsuz)
   silinir və qayıb saatı (``Enrollment.absence_hours``) yenidən hesablanır.
 * **müəllimin** (``teacher``) — ``created_by`` doludur (yeni sistemdə ``create_lesson``
   ilə açılıb). YALNIZ ``--include-teacher-lessons`` ilə; tam boş olanı həmin bayraqla,
-  yalnız «qb» olanı İKİ bayraqla. Bu gün (``--before`` günü) və sonra YARADILAN dərs
-  (keçmiş tarixə olsa da) toxunulmazdır — müəllim onu hələ doldura bilər.
+  yalnız «qb» olanı İKİ bayraqla. Təhlükəsizlik buferi (``TEACHER_GRACE_DAYS`` = 3, sahib
+  2026-10-24): ``--before``-dan əvvəlki son 3 gündə (``before − 3`` günü və sonra) YARADILAN və ya
+  TARİXLİ müəllim dərsi toxunulmazdır — müəllim onu hələ doldura bilər.
 
 Ortaq şərtlər — HAMISI eyni anda doğru olmalıdır
 ------------------------------------------------
@@ -73,6 +74,9 @@ CATEGORY_EMPTY = "empty"
 CATEGORY_ABSENT_ONLY = "absent_only"
 CATEGORY_TEACHER = "teacher"
 
+#: Müəllimin dərsi üçün bufer: ``before − N`` günü və sonra yaradılan VƏ YA tarixli dərs silinmir.
+TEACHER_GRACE_DAYS = 3
+
 TABLE_HEADERS = ("Açılış", "Fənn", "Qrup", "Silinəcək sütun")
 
 
@@ -86,10 +90,28 @@ class Scope:
     include_teacher_lessons: bool = False
 
     @property
-    def created_cutoff(self) -> datetime.datetime:
-        """Müəllimin dərsi bu andan ƏVVƏL yaradılmalıdır (``before`` gününün başlanğıcı, yerli vaxt)."""
+    def teacher_grace_start(self) -> datetime.date:
+        """Bufer günü: müəllimin dərsi bu tarixdən ƏVVƏL həm yaradılmalı, həm tarixli olmalıdır."""
 
-        return timezone.make_aware(datetime.datetime.combine(self.before, datetime.time.min))
+        return self.before - datetime.timedelta(days=TEACHER_GRACE_DAYS)
+
+    @property
+    def created_cutoff(self) -> datetime.datetime:
+        """Müəllimin dərsi bu andan ƏVVƏL yaradılmalıdır (bufer gününün başlanğıcı, yerli vaxt)."""
+
+        return timezone.make_aware(datetime.datetime.combine(self.teacher_grace_start, datetime.time.min))
+
+    def teacher_settled_q(self) -> Q:
+        """Buferdən kənar müəllim dərsi (silinə bilər)."""
+
+        return Q(created_by__isnull=False, created_at__lt=self.created_cutoff, date__lt=self.teacher_grace_start)
+
+    def teacher_grace_q(self) -> Q:
+        """Buferdəki müəllim dərsi (toxunulmaz)."""
+
+        return Q(created_by__isnull=False) & (
+            Q(created_at__gte=self.created_cutoff) | Q(date__gte=self.teacher_grace_start)
+        )
 
 
 def _model(name: str):
@@ -147,7 +169,7 @@ def empty_imported_lessons(organization, *, before: datetime.date):
 def _origin_q(scope: Scope) -> Q:
     allowed = Q(created_by__isnull=True)
     if scope.include_teacher_lessons:
-        allowed |= Q(created_by__isnull=False, created_at__lt=scope.created_cutoff)
+        allowed |= scope.teacher_settled_q()
     return allowed
 
 
@@ -170,9 +192,8 @@ def survey(organization, scope: Scope) -> dict:
     bayraq verilməsə nəyin silinəcəyini də göstərir; ``deletable`` isə bayraqlara görədir.
     """
 
-    cutoff = scope.created_cutoff
     imported = Q(created_by__isnull=True)
-    teacher = Q(created_by__isnull=False, created_at__lt=cutoff)
+    teacher = scope.teacher_settled_q()
     base = markless_past_lessons(organization, before=scope.before).annotate(
         has_content=ExpressionWrapper(_has_content(), output_field=BooleanField())
     )
@@ -183,7 +204,7 @@ def survey(organization, scope: Scope) -> dict:
         absent_only=Count("id", filter=free & imported & Q(has_marks=True)),
         teacher_empty=Count("id", filter=free & teacher & Q(has_marks=False)),
         teacher_absent_only=Count("id", filter=free & teacher & Q(has_marks=True)),
-        teacher_recent=Count("id", filter=free & Q(created_by__isnull=False, created_at__gte=cutoff)),
+        teacher_recent=Count("id", filter=free & scope.teacher_grace_q()),
         with_content=Count("id", filter=Q(has_content=True)),
     )
     # Kilid sayı bayraqdan asılı olmasın: kilidli jurnalda nə qədər namizəd var (silinir / saxlanır).
@@ -243,6 +264,7 @@ __all__ = [
     "CATEGORY_TEACHER",
     "DEFAULT_BATCH_SIZE",
     "TABLE_HEADERS",
+    "TEACHER_GRACE_DAYS",
     "Scope",
     "candidate_lessons",
     "category_of",

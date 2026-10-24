@@ -90,8 +90,9 @@
 #       məzmunsuz sütunlarını) silir (sahib 2026-10-24: «boşdursa silinsin; bir neçə tələbəyə “qb” yazılıbsa belə
 #       silinsin»): köçürülmüş tam boş sütun + yalnız balsız «qb» xanalı sütun (--include-absent-only; xanalar da
 #       silinir, qayıb saatı yenidən hesablanır) + müəllimin yeni sistemdə açdığı keçmiş sütun
-#       (--include-teacher-lessons) + bağlı jurnallar (--include-locked). Bu gün/gələcək dərsə və müəllimin bu gün
-#       yaratdığı dərsə toxunulmur; hər dəstə açılış üzrə AuditLog snapshot-u (silinən «qb» xanaları daxil) yazır.
+#       (--include-teacher-lessons) + bağlı jurnallar (--include-locked). Bu gün/gələcək dərsə və son 3 gündə
+#       yaradılan / tarixli müəllim dərsinə (TEACHER_GRACE_DAYS) toxunulmur; hər dəstə açılış üzrə AuditLog
+#       snapshot-u (silinən «qb» xanaları daxil) yazır.
 #       Loga YALNIZ saylar (--show 0, aktor maskalanır).
 #   sync_midterm_scores — midterm nəticələrini imtahanın jurnal bağlantısı ilə Midterm xanasına yazır, fənn
 #       dəyişibsə köhnə jurnalda bu imtahanın yazdığı xanaları silir. `teacher` = imtahanın slug-ı (boş = bütün

@@ -7,7 +7,8 @@ Defolt yalnız köçürülmüş TAM BOŞ sütun; genişləndirmə AÇIQ bayraqla
 
 * ``--include-absent-only``     — xanaları yalnız balsız «qb» olan sütun da (xanalar da silinir, qayıb saatı
   yenidən hesablanır);
-* ``--include-teacher-lessons`` — müəllimin yeni sistemdə açdığı keçmiş sütun da (bu gün yaradılan istisna);
+* ``--include-teacher-lessons`` — müəllimin yeni sistemdə açdığı keçmiş sütun da (son ``TEACHER_GRACE_DAYS``
+  gündə yaradılan və ya tarixli istisna);
 * ``--include-locked``          — kilidli (təsdiqlənmiş/dərc olunmuş) jurnallar da.
 
     manage.py legacy_repair_empty_lessons --organization qku
@@ -76,7 +77,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--include-teacher-lessons",
             action="store_true",
-            help="Müəllimin yeni sistemdə açdığı keçmiş sütunları da sil (bu gün yaradılan dərs istisna)",
+            help="Müəllimin yeni sistemdə açdığı keçmiş sütunları da sil (son 3 gündə yaradılan/tarixli istisna)",
         )
         parser.add_argument("--batch-size", type=int, default=service.DEFAULT_BATCH_SIZE, help="Dəstə ölçüsü")
         parser.add_argument("--show", type=int, default=20, help="Cədvəldə göstəriləcək açılış sayı")
@@ -132,7 +133,11 @@ def _summary(scope, stats: dict, result) -> dict:
         "SİLİNƏCƏK namizəd": stats["deletable"],
         "  ↳ silinəcək «qb» xanası / qayıb saatı": f"{stats['absent_marks']} / {stats['absent_hours']}",
         "toxunulmaz — məzmunlu (mövzu/düzəliş)": stats["with_content"],
-        "toxunulmaz — müəllimin həddən sonra yaratdığı": stats["teacher_recent"],
+        "müəllim dərsi buferi (gün)": (
+            f"{service.TEACHER_GRACE_DAYS} ({scope.teacher_grace_start.isoformat()} və sonra yaradılan "
+            "və ya tarixli müəllim dərsi saxlanır)"
+        ),
+        "toxunulmaz — müəllimin buferdəki dərsi": stats["teacher_recent"],
         "toxunulmaz — bu gün/gələcək (real xanasız)": stats["today_or_later"],
         "FAKTİKİ silinən": result.deleted,
         "  ↳ tam boş / yalnız «qb» / müəllimin": (

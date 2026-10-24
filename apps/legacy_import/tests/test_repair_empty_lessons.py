@@ -22,7 +22,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from apps.audit.models import AuditLog
-from apps.legacy_import.services.repair_empty_lessons import AUDIT_RESOURCE
+from apps.legacy_import.services.repair_empty_lessons import AUDIT_RESOURCE, TEACHER_GRACE_DAYS
 from apps.organizations.models import OrgUnit, OrgUnitType
 from apps.registrar.gradebook import recompute_absence_hours_many
 from apps.registrar.models import (
@@ -88,9 +88,8 @@ class LegacyRepairEmptyLessonsTest(TestCase):
             students[3], cls.source_offering, status=Enrollment.Status.DROPPED, superseded_by=cls.guest
         )
         cls.past = timezone.localdate() - dt.timedelta(days=30)
-        long_ago = timezone.now() - dt.timedelta(days=20)
 
-        def lesson(day, *, offering=None, teacher_made=False, **extra):
+        def lesson(day, *, offering=None, teacher_made=False, created_days_ago=20, **extra):
             row = Lesson.objects.create(
                 organization=cls.org,
                 offering=offering or cls.offering,
@@ -101,7 +100,8 @@ class LegacyRepairEmptyLessonsTest(TestCase):
                 **extra,
             )
             if teacher_made:
-                Lesson.objects.filter(pk=row.pk).update(created_at=long_ago)
+                created_at = timezone.now() - dt.timedelta(days=created_days_ago)
+                Lesson.objects.filter(pk=row.pk).update(created_at=created_at)
             return row
 
         def mark(lesson_row, enrollment, status=AttendanceStatus.ABSENT, score=None):
@@ -122,8 +122,13 @@ class LegacyRepairEmptyLessonsTest(TestCase):
         mark(cls.source_absent_only, cls.predecessor)
         # Müəllimin (--include-teacher-lessons; «qb»-li olan İKİ bayraqla).
         cls.teacher_empty = lesson(5, teacher_made=True)
-        cls.teacher_absent_only = lesson(6, teacher_made=True)
+        # 10 gün əvvəl tarixli + 10 gün əvvəl yaradılıb — buferdən (TEACHER_GRACE_DAYS=3) kənar.
+        cls.teacher_absent_only = lesson(20, teacher_made=True, created_days_ago=10)
         mark(cls.teacher_absent_only, cls.first)
+        # Bufer: 2 gün əvvəl TARİXLİ (çoxdan yaradılıb) və 2 gün əvvəl YARADILAN (köhnə tarixli) — toxunulmaz.
+        cls.teacher_absent_recent = lesson(28, teacher_made=True, created_days_ago=10)
+        mark(cls.teacher_absent_recent, cls.second)
+        cls.teacher_created_recently = lesson(15, teacher_made=True, created_days_ago=2)
         # Kilidli jurnal (--include-locked).
         cls.locked_empty = lesson(7, offering=cls.locked_offering)
         cls.locked_absent_only = lesson(8, offering=cls.locked_offering)
@@ -195,6 +200,8 @@ class LegacyRepairEmptyLessonsTest(TestCase):
             self.with_excused,
             self.with_correction_trace,
             self.teacher_recent,
+            self.teacher_absent_recent,
+            self.teacher_created_recently,
             self.today_imported,
             self.today_teacher,
         ]
@@ -213,7 +220,8 @@ class LegacyRepairEmptyLessonsTest(TestCase):
     def test_fixture_absence_hours(self):
         # 2 saatlıq dərslər: first = absent_only + teacher_absent_only + with_present + with_score + today.
         self.assertEqual(self._hours(self.first), 10)
-        self.assertEqual(self._hours(self.second), 4 + 2)  # absent_only + with_score («qb» balla) + today_teacher
+        # absent_only + with_score («qb» balla) + teacher_absent_recent + today_teacher.
+        self.assertEqual(self._hours(self.second), 8)
         self.assertEqual(self._hours(self.guest), 2)  # sələfin mənbə jurnalındakı «qb»-si köçür
 
     def test_dry_run_is_the_default_and_deletes_nothing(self):
@@ -234,7 +242,8 @@ class LegacyRepairEmptyLessonsTest(TestCase):
         self.assertRegex(output, r"yalnız «qb» xanalı keçmiş dərs\s*: 3 \(saxlanır; --include-absent-only\)")
         self.assertRegex(output, r"müəllimin tam boş keçmiş dərsi\s*: 1 \(saxlanır; --include-teacher-lessons\)")
         self.assertRegex(output, r"kilidli jurnalda\s*: 1 \(saxlanır")
-        self.assertRegex(output, r"müəllimin həddən sonra yaratdığı\s*: 1\b")
+        self.assertRegex(output, r"müəllim dərsi buferi \(gün\)\s*: 3 \(")
+        self.assertRegex(output, r"müəllimin buferdəki dərsi\s*: 3\b")
         # Xülasə açarlarında «:» yoxdur — prod-data-ops loq süzgəci (`  açar : dəyər`) hamısını saxlayır.
         summary = output.split("===", 2)[2]
         rows = [line for line in summary.splitlines() if line.startswith("  ") and " : " in line]
@@ -273,7 +282,7 @@ class LegacyRepairEmptyLessonsTest(TestCase):
         # Real xanalı sütunların xanaları toxunulmazdır.
         self.assertEqual(LessonMark.objects.filter(lesson__in=[self.with_present, self.with_score]).count(), 4)
         self.assertEqual(self._hours(self.first), 8)
-        self.assertEqual(self._hours(self.second), 4)
+        self.assertEqual(self._hours(self.second), 6)
         self.assertEqual(self._hours(self.predecessor), 0)
         self.assertEqual(self._hours(self.guest), 0)  # sələfin xanası silindi → köçən saat da
 
@@ -305,6 +314,16 @@ class LegacyRepairEmptyLessonsTest(TestCase):
         row = audit.old_values["lessons"][0]
         self.assertEqual((row["category"], row["created_by_id"]), ("teacher", self.teacher.pk))
 
+    def test_teacher_grace_buffer_protects_recently_dated_or_created_lessons(self):
+        self.assertEqual(TEACHER_GRACE_DAYS, 3)
+        output = self._apply(TEACHER, ABSENT_ONLY)
+        self.assertRegex(output, r"müəllimin buferdəki dərsi\s*: 3\b")
+        # 10 gün əvvəl tarixli + yaradılan «qb»-li dərs silinir; 2 gün əvvəl tarixli / yaradılan qalır.
+        self._assert_deleted([self.teacher_empty, self.teacher_absent_only])
+        self._assert_kept([self.teacher_absent_recent, self.teacher_created_recently, self.teacher_recent])
+        self.assertEqual(LessonMark.objects.filter(lesson=self.teacher_absent_recent).count(), 1)
+        self.assertEqual(self._hours(self.second), 6)  # yalnız absent_only-nin 2 saatı düşdü
+
     def test_locked_journals_need_an_explicit_flag(self):
         self._apply(ABSENT_ONLY)
         self._assert_kept([self.locked_empty, self.locked_absent_only])
@@ -325,7 +344,7 @@ class LegacyRepairEmptyLessonsTest(TestCase):
         self._assert_kept(self._always_kept())
         self.assertEqual(LessonMark.objects.filter(lesson=self.today_imported).count(), 1)
         self.assertEqual(self._hours(self.first), 6)  # with_present + with_score + today
-        self.assertEqual(self._hours(self.second), 4)  # with_score («qb» balla) + today_teacher
+        self.assertEqual(self._hours(self.second), 6)  # with_score («qb» balla) + buferdəki müəllim dərsi + today
         self.assertRegex(self._apply(LOCKED, ABSENT_ONLY, TEACHER), r"FAKTİKİ silinən\s*: 0\b")
 
     def test_limit_caps_the_number_of_deleted_lessons(self):
