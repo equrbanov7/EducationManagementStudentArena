@@ -86,6 +86,13 @@
 #       təkrar imtahan, açılış müəllimi, təsdiqlənmiş sillabus); çatışmayan müəllim FİN-siz, tələbə/qrup/açılış
 #       yaradılır; bütün fazalar BİR tranzaksiyadadır, idempotentdir. `date_to` → --lessons-until (boş = bu gün).
 #       Loga YALNIZ saylar; adlı siyahı + hesabat şifrəli artifaktdadır.
+#   legacy_repair_empty_lessons — köhnə sistemdən köçürülmüş, heç bir xanası/mövzusu/düzəlişi olmayan KEÇMİŞ dərsləri
+#       (jurnalın tam boş sütunlarını) silir (sahib 2026-10-24: «boşdursa silinsin» — bağlı jurnallar da,
+#       --include-locked). Müəllimin yeni sistemdə açdığı dərsə və bu gün/gələcək dərsə toxunulmur; hər dəstə
+#       açılış üzrə AuditLog snapshot-u yazır. Loga YALNIZ saylar (--show 0, aktor maskalanır).
+#   sync_midterm_scores — midterm nəticələrini imtahanın jurnal bağlantısı ilə Midterm xanasına yazır, fənn
+#       dəyişibsə köhnə jurnalda bu imtahanın yazdığı xanaları silir. `teacher` = imtahanın slug-ı (boş = bütün
+#       midterm imtahanları). Bildiriş göndərilmir; idempotent. Loga yalnız sayların sətri.
 #   shrink_avatars — mövcud avatarlar ≤512 px WebP-yə (PERF-2 H5, 2026-10-17); orijinal fayllar SİLİNMİR,
 #       `updated_at` dəyişmir. Loga yalnız yekun saylar.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
@@ -140,6 +147,8 @@ on:
           - issue_staff_credentials
           - purge_trial_exam
           - legacy_delta_apply
+          - legacy_repair_empty_lessons
+          - sync_midterm_scores
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -243,7 +252,7 @@ on:
         type: boolean
         default: false
       teacher:
-        description: "backfill_teacher_lessons: müəllimin istifadəçi adı (ad.soyad) · purge_trial_exam: imtahanın slug-ı"
+        description: "backfill_teacher_lessons: müəllimin istifadəçi adı (ad.soyad) · purge_trial_exam / sync_midterm_scores: imtahanın slug-ı"
         required: false
         default: ""
       date_from:
@@ -550,6 +559,26 @@ jobs:
               fi
               custom_apply=1
               ;;
+            legacy_repair_empty_lessons)
+              # Sahib 2026-10-24: köçürülmüş tam boş dərs sütunları — bağlı jurnallar da («boşdursa silinsin»).
+              # Loga ŞƏXS ADI düşməsin: cədvəl yox (--show 0), aktor maskalanır.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--organization "$ORG" --include-locked --show 0 --actor "$actor")
+              if [ "$APPLY" = "true" ]; then
+                args+=(--apply --i-know-this-is-production)
+              fi
+              custom_apply=1
+              ;;
+            sync_midterm_scores)
+              # Sahib 2026-10-24: midterm → jurnal (fənn sonradan dəyişən «JS Loop» halı). `teacher` = imtahanın slug-ı.
+              args=(--org "$ORG")
+              if [ -n "$TEACHER" ]; then
+                { [ "${#TEACHER}" -le 220 ] && match "$TEACHER" '^[a-z0-9_-]{0,200}-[A-Za-z0-9]{6}$'; } \
+                  || { echo "teacher (imtahanın slug-ı) formatı: ad-XXXXXX" >&2; exit 2; }
+                args+=("--exam=$TEACHER")
+              fi
+              ;;
             *)
               echo "icazəsiz əmr: $COMMAND" >&2; exit 2
               ;;
@@ -637,6 +666,18 @@ jobs:
             sed -E -e 's/^[^ []+ (\[[a-z_]+\])/*** \1/' -e 's/\([^ ()]+\.[^ ()]+\)/(***)/g' "$RUNNER_TEMP/out.log" | cut -c1-200 | tail -n 200 > "$RUNNER_TEMP/summary.log"
             cat "$RUNNER_TEMP/summary.log"
             test "${status:-0}" = 0 || exit "$status"
+          elif [ "$COMMAND" = "legacy_repair_empty_lessons" ] || [ "$COMMAND" = "sync_midterm_scores" ]; then
+            # Loga YALNIZ saylar: aktor sətri atılır, xəta olarsa yalnız CommandError kodu.
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^(===.*===|  [^:]+ : .*|  \(DRY-RUN.*|(YAZILDI|DRY-RUN).*: rəsmi .*)$' "$RUNNER_TEMP/out.log" \
+              | grep -v 'Aktor:' | cut -c1-300 > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: .{0,160}' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
           else
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" 2>&1 | tee "$RUNNER_TEMP/out.log"
             tail -n 120 "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log"
