@@ -105,6 +105,11 @@
 #       üst/alt həftə tarixlərin paritetindən; `period`, `teacher` (boş = hamı), `date_from` / `date_to` (boş = semestr
 #       əvvəli / bu gün). Mövcud slot silinmir/dəyişmir, toqquşan yazılmır; idempotent. Loga YALNIZ saylar; CSV
 #       hesabat (müəllim adları) şifrəli artifaktdadır.
+#   audit_cross_chair_loads — kafedralar arası dərs yükü (sahib 2026-10-25: ştat bir kafedrada, saathesabı başqa
+#       kafedranın tapşırığında). Dry-run YALNIZ saylar: kənar müəllim/bölgü/saat, ştatı yalnız əlavə üzvlükdən
+#       gələn, iki kafedrada eyni fənn+qrup sətri, fənni kataloqda başqa kafedranın olan sətir (qərar siyahısı —
+#       dəyişdirilmir). `apply` — YALNIZ başqa kafedrada bölgüsü olub orada üzvlüyü olmayan müəllimə ƏLAVƏ
+#       (is_primary=False) müəllim üzvlüyü (ştat dəyişmir, audit); idempotent. `year` istifadə olunur.
 #   shrink_avatars — mövcud avatarlar ≤512 px WebP-yə (PERF-2 H5, 2026-10-17); orijinal fayllar SİLİNMİR,
 #       `updated_at` dəyişmir. Loga yalnız yekun saylar.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
@@ -163,6 +168,7 @@ on:
           - legacy_repair_empty_lessons
           - sync_midterm_scores
           - infer_timetable_from_lessons
+          - audit_cross_chair_loads
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -622,6 +628,12 @@ jobs:
               fi
               custom_apply=1
               ;;
+            audit_cross_chair_loads)
+              # Sahib 2026-10-25: kafedralar arası yük — saylar; apply yalnız çatışmayan ƏLAVƏ üzvlük (ştat dəyişmir).
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --year "$YEAR" --actor "$actor")
+              ;;
             *)
               echo "icazəsiz əmr: $COMMAND" >&2; exit 2
               ;;
@@ -709,6 +721,17 @@ jobs:
             sed -E -e 's/^[^ []+ (\[[a-z_]+\])/*** \1/' -e 's/\([^ ()]+\.[^ ()]+\)/(***)/g' "$RUNNER_TEMP/out.log" | cut -c1-200 | tail -n 200 > "$RUNNER_TEMP/summary.log"
             cat "$RUNNER_TEMP/summary.log"
             test "${status:-0}" = 0 || exit "$status"
+          elif [ "$COMMAND" = "audit_cross_chair_loads" ]; then
+            # Loga YALNIZ «cross_chair: açar=say …» sətri (əmr ad çap etmir; yenə də süzülür) və rədd kodu.
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^cross_chair: [a-z_]+=[0-9a-z_]+( [a-z_]+=[0-9a-z_]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
           elif [ "$COMMAND" = "infer_timetable_from_lessons" ]; then
             # Loga YALNIZ «timetable_infer: açar=say …» sətirləri (əmr ad çap etmir; yenə də süzülür) və rədd kodu;
             # sətir-sətir CSV (müəllim adları) şifrəli artifakta gedir (aşağıdakı addım).

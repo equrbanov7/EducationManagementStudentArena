@@ -33,7 +33,7 @@ tarixçəsini (bütün illərin yük profilləri) və inzibati vəzifələri aç
                     <td class="hr-people__admin">
                         {% for item in row.admin_roles %}<span class="ems-badge ems-badge--info ems-badge--wrap hr-admin">{{ item.label }}{% if item.unit %} <span class="hr-admin__unit">· {{ item.unit }}</span>{% endif %}</span>{% empty %}{% if row.staff_position %}<span class="ems-badge ems-badge--neutral ems-badge--wrap hr-admin">{{ row.staff_position }}</span>{% else %}<span class="hr-muted">—</span>{% endif %}{% endfor %}
                     </td>
-                    <td>{% if row.load_band == "none" %}<span class="hr-muted">—</span>{% else %}{{ row.planned_load }} / {{ row.norm_hours }} <small class="hr-muted">({{ row.fill_percent }}%)</small>{% endif %}</td>
+                    <td>{% if row.load_band == "none" %}<span class="hr-muted">—</span>{% else %}{{ row.planned_load }} / {{ row.norm_hours }} <small class="hr-muted">({{ row.fill_percent }}%)</small>{% if row.other_chair_hours %}<small class="hr-muted hr-block" title="{% for item in row.other_chairs %}{{ item.name }}: {{ item.hours }}{% if not forloop.last %}; {% endif %}{% endfor %}">{% blocktrans trimmed with hours=row.other_chair_hours context "accounts.hr_analytics" %}başqa kafedrada: {{ hours }} saat{% endblocktrans %}</small>{% endif %}{% endif %}</td>
                     <td class="ems-table__num">{{ row.journals }} / {{ row.lessons }}</td>
                     <td>
                         <span class="ems-badge {% if row.status == 'active' %}ems-badge--success{% else %}ems-badge--danger{% endif %}">{{ row.status_label }}</span>

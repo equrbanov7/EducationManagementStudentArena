@@ -25,6 +25,7 @@ def _teacher_labels() -> dict:
         "review": (pgettext(_CTX, "Dəqiq tapılmadı — vakant qalır"), "danger"),
         "blocked": (pgettext(_CTX, "Hesab bloklanıb — RİM aktivləşdirməlidir"), "danger"),
         "name_unreadable": (pgettext(_CTX, "Müəllimin adı oxunmadı"), "danger"),
+        "other_chair": (pgettext(_CTX, "Yoxlanmadı — sətir başqa kafedranındır"), "neutral"),
     }
 
 
@@ -46,6 +47,19 @@ def _row_label(value: str) -> tuple[str, str]:
         return pgettext(_CTX, "Fənn müəyyən olunmadı"), "danger"
     if head == "row_blocked":
         return pgettext(_CTX, "Tapşırıq bu statusda yeni sətir qəbul etmir"), "danger"
+    if head == "other_chair_row":
+        # Sahib 2026-10-25: başqa kafedranın fənni bu kafedraya yazılmır (saat iki dəfə sayılmasın).
+        return (
+            pgettext(_CTX, "Fənn başqa kafedraya aiddir: %(chair)s — sətir o kafedranın yükündədir, burada yazılmadı")
+            % {"chair": detail},
+            "warning",
+        )
+    if head == "other_chair_subject":
+        return (
+            pgettext(_CTX, "Fənn başqa kafedraya aiddir: %(chair)s — o kafedranın faylı ilə yüklənməlidir")
+            % {"chair": detail},
+            "warning",
+        )
     if head == "no_task_row":
         return pgettext(_CTX, "Sətir tapılmadı"), "danger"
     return value, "neutral"
@@ -116,6 +130,7 @@ def load_context(load: dict | None, *, year: str) -> dict:
     lines.sort(key=lambda item: (not item["problem"], item.get("line") or 0))
     new_teachers = report.get("new_teachers") or []
     created_rows = int(counters.get("row_created", 0))
+    other_chair = int(counters.get("other_chair_row", 0)) + int(counters.get("other_chair_subject", 0))
     unresolved = sum(int(counters.get(f"teacher_{key}", 0)) for key in _UNRESOLVED_TEACHER)
     applied = bool(report.get("applied"))
     context["stored"] = {
@@ -137,6 +152,12 @@ def load_context(load: dict | None, *, year: str) -> dict:
         "tiles": [
             {"label": pgettext(_CTX, "FAYL SƏTRİ"), "value": report.get("entries", 0)},
             {"label": pgettext(_CTX, "YENİ SƏTİR"), "value": created_rows, "tone": "accent-primary"},
+            {
+                "label": pgettext(_CTX, "BAŞQA KAFEDRANIN FƏNNİ"),
+                "value": other_chair,
+                "note": pgettext(_CTX, "bu kafedraya yazılmır"),
+                "tone": "accent-warning" if other_chair else "",
+            },
             {"label": pgettext(_CTX, "YENİ MÜƏLLİM"), "value": len(new_teachers), "tone": "accent-primary"},
             {
                 "label": pgettext(_CTX, "HƏLL OLUNMAYAN"),

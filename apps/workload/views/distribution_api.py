@@ -159,7 +159,7 @@ def rows(request) -> JsonResponse:
 @login_required
 @require_GET
 def teachers(request) -> JsonResponse:
-    """Kafedranın müəllim hovuzu (axtarışlı) + hər birinin cari yükü."""
+    """Kafedranın müəllim hovuzu (axtarışlı) + hər birinin cari yükü (bütün kafedralar üzrə)."""
     organization = active_organization(request)
     if organization is None:
         return no_org()
@@ -170,7 +170,13 @@ def teachers(request) -> JsonResponse:
         ensure_can_manage(actor, chair.pk)
     except WorkloadDenied as exc:
         return denied(exc)
-    pool = teacher_pool(organization, chair, search=(request.GET.get("q") or "").strip())
+    # ``outside=1`` — başqa kafedraların müəllimləri də (ştat kafedrası yazılı; təyinatda ƏLAVƏ üzvlük alır).
+    pool = teacher_pool(
+        organization,
+        chair,
+        search=(request.GET.get("q") or "").strip(),
+        include_outside=request.GET.get("outside") == "1",
+    )
     year = request.GET.get("year") or ""
     if year:
         loads = {}

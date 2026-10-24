@@ -3162,3 +3162,7 @@ msgstr "This file type is not supported — choose PDF, TXT, PNG or JPG."
 
 msgid "Fayl çıxarıldı."
 msgstr "File removed."
+
+#, python-format
+msgid "kənar, ştat: %(chair)s"
+msgstr "external, staff post: %(chair)s"

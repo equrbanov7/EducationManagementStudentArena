@@ -3147,3 +3147,7 @@ msgstr "Bu fayl növü dəstəklənmir — PDF, TXT, PNG və ya JPG seçin."
 
 msgid "Fayl çıxarıldı."
 msgstr "Fayl çıxarıldı."
+
+#, python-format
+msgid "kənar, ştat: %(chair)s"
+msgstr "kənar, ştat: %(chair)s"

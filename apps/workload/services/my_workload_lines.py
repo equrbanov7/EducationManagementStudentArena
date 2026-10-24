@@ -51,6 +51,7 @@ def group_workload_lines(rows, *, edit_chair_ids=None) -> list[dict]:
                 "row_id": row.get("row_id", ""),
                 "task_id": row.get("task_id", ""),
                 "chair_id": chair_id,
+                "chair_name": row.get("chair_name", ""),
                 "academic_year": row.get("academic_year", ""),
                 "season": row.get("season", ""),
                 "season_label": row.get("season_label", ""),

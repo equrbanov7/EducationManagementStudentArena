@@ -26,6 +26,7 @@ _EXPORT_HEADERS = (
     "Forma",
     "Səviyyə",
     "Saathesabı",
+    "Kafedra",
 )
 
 
@@ -99,12 +100,13 @@ def my_export(request):
                 line["education_form_label"],
                 line["degree_level_label"],
                 "Bəli" if line["is_hourly_paid"] else "",
+                line["chair_name"],
             ],
         )
-    sheet_append(sheet, ["", "", "", "", "CƏMİ", total, "", "", ""])
+    sheet_append(sheet, ["", "", "", "", "CƏMİ", total, "", "", "", ""])
     sheet[sheet.max_row][4].font = Font(bold=True)
     sheet[sheet.max_row][5].font = Font(bold=True)
-    for column, width in zip("ABCDEFGHI", (12, 10, 40, 26, 34, 8, 12, 12, 12)):
+    for column, width in zip("ABCDEFGHIJ", (12, 10, 40, 26, 34, 8, 12, 12, 12, 34)):
         sheet.column_dimensions[column].width = width
 
     buffer = BytesIO()

@@ -108199,3 +108199,61 @@ msgstr "Утверждение: автоматическое (системная
 msgctxt "accounts.syllabus"
 msgid "Sillabus göndərildi və avtomatik təsdiqləndi."
 msgstr "Силлабус отправлен и автоматически утверждён."
+
+msgctxt "accounts.workload"
+msgid "Müəllim axtar…"
+msgstr "Поиск преподавателя…"
+
+msgctxt "accounts.chair_profile"
+msgid "Kənar kafedradan"
+msgstr "С другой кафедры"
+
+#, python-format
+msgctxt "accounts.chair_profile"
+msgid "Ştat: %(chair)s"
+msgstr "Штатная кафедра: %(chair)s"
+
+msgctxt "accounts.chair_profile"
+msgid "bu kafedrada"
+msgstr "на этой кафедре"
+
+#, python-format
+msgctxt "accounts.chair_profile"
+msgid "başqa kafedrada: %(hours)s saat"
+msgstr "на других кафедрах: %(hours)s ч"
+
+#, python-format
+msgctxt "accounts.chair_profile"
+msgid "+ %(count)d kənar kafedradan (saathesabı)"
+msgstr "+ %(count)d с других кафедр (почасовая)"
+
+#, python-format
+msgctxt "accounts.hr_analytics"
+msgid "başqa kafedrada: %(hours)s saat"
+msgstr "на других кафедрах: %(hours)s ч"
+
+msgctxt "accounts.hr_analytics"
+msgid "O cümlədən başqa kafedrada (saat)"
+msgstr "В том числе на других кафедрах (ч)"
+
+msgctxt "accounts.workload_load"
+msgid "Yoxlanmadı — sətir başqa kafedranındır"
+msgstr "Не проверялось — строка относится к другой кафедре"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Fənn başqa kafedraya aiddir: %(chair)s — sətir o kafedranın yükündədir, burada yazılmadı"
+msgstr "Предмет относится к другой кафедре: %(chair)s — строка есть в нагрузке этой кафедры, здесь не записана"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Fənn başqa kafedraya aiddir: %(chair)s — o kafedranın faylı ilə yüklənməlidir"
+msgstr "Предмет относится к другой кафедре: %(chair)s — его нужно загрузить файлом этой кафедры"
+
+msgctxt "accounts.workload_load"
+msgid "BAŞQA KAFEDRANIN FƏNNİ"
+msgstr "ПРЕДМЕТ ДРУГОЙ КАФЕДРЫ"
+
+msgctxt "accounts.workload_load"
+msgid "bu kafedraya yazılmır"
+msgstr "не записывается на эту кафедру"

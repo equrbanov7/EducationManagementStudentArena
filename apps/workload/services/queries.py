@@ -214,7 +214,7 @@ def teacher_workload_rows(*, organization, teacher, academic_year: str = "", sea
             teacher=teacher,
             row__task__status__in=(TaskStatus.DISTRIBUTED, TaskStatus.AMENDED),
         )
-        .select_related("row", "row__subject", "row__task", "row__period", "row__specialty")
+        .select_related("row", "row__subject", "row__task", "row__task__chair", "row__period", "row__specialty")
         .prefetch_related("row__groups")
         .order_by("row__season", "row__subject__name", "activity")
     )
@@ -244,6 +244,9 @@ def teacher_workload_rows(*, organization, teacher, academic_year: str = "", sea
                 "row_id": str(row.pk),
                 "task_id": str(row.task_id),
                 "chair_id": str(row.task.chair_id),
+                # Sahib 2026-10-25: yük bütün kafedralardan gəlir (ştat bir kafedrada, saathesabı başqasında) —
+                # hər sətirdə yükü verən kafedra yazılır.
+                "chair_name": row.task.chair.name if row.task.chair_id else "",
                 "academic_year": row.task.academic_year,
                 "season": row.season,
                 "season_label": _label(_SEASON_LABELS, row.season),
@@ -350,15 +353,25 @@ def teacher_workload_summaries(*, organization, teacher_ids, academic_year: str 
     )
     if academic_year:
         queryset = queryset.filter(row__task__academic_year=academic_year)
-    sums = {
-        row["teacher_id"]: row
-        for row in queryset.values("teacher_id").annotate(
+    # Kafedra üzrə də bölünür (sahib 2026-10-25: ştat bir kafedrada, saathesabı başqasında) — eyni BİR sorğu.
+    sums: dict = {}
+    by_chair: dict = {}
+    for row in (
+        queryset.values("teacher_id", "row__task__chair_id")
+        .annotate(
             total=Sum("hours"),
             hourly=Sum("hours", filter=Q(is_hourly_paid=True)),
             fall=Sum("hours", filter=Q(row__season=Season.FALL)),
             spring=Sum("hours", filter=Q(row__season=Season.SPRING)),
         )
-    }
+        .order_by()
+    ):
+        bucket = sums.setdefault(row["teacher_id"], {"total": 0, "hourly": 0, "fall": 0, "spring": 0})
+        for key in bucket:
+            bucket[key] += int(row[key] or 0)
+        chair_hours = by_chair.setdefault(row["teacher_id"], {})
+        chair_key = str(row["row__task__chair_id"])
+        chair_hours[chair_key] = chair_hours.get(chair_key, 0) + int(row["total"] or 0)
     profiles = {
         profile.teacher_id: profile
         for profile in TeacherWorkloadProfile.objects.filter(
@@ -382,6 +395,7 @@ def teacher_workload_summaries(*, organization, teacher_ids, academic_year: str 
             "is_over_norm": bool(norm and total > norm),
             "position": profile.position if profile else "",
             "staff_fraction": str(profile.staff_fraction) if profile else "",
+            "hours_by_chair": by_chair.get(teacher_id, {}),
         }
     return out
 

@@ -13,6 +13,7 @@ from .services.norms import (  # noqa: F401
     norms_for,
     staff_rate_error,
 )
+from .services.people import home_chair_rank, home_chairs  # noqa: F401
 from .services.roster_profile import restore_roster_profile, sync_roster_profile  # noqa: F401
 from .teacher_hooks import register_chair_teacher_resolver  # noqa: F401
 
@@ -24,6 +25,8 @@ __all__ = [
     "build_overview_section",
     "build_visa",
     "current_rule",
+    "home_chair_rank",
+    "home_chairs",
     "legacy_loads",
     "norm_rule_note",
     "norms_for",

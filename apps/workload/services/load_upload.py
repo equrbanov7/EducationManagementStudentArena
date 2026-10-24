@@ -23,6 +23,16 @@ Tədris şöbəsinin rolunda ``workload.distribute`` YOXDUR (bölgü kafedranın
 ``workload.load_import`` açarı ilə açılır və seçilmiş KAFEDRA ÜÇÜN bir dəfəlik genişləndirilmiş aktorla işləyir —
 audit sətirlərində real istifadəçi qalır.
 
+4. **Başqa kafedranın fənni** (sahib 2026-10-25: «Ümumi iqtisadiyyat» faylında müəllimin 4 fənnindən 3-ü İT
+   kafedrasının idi) — bu kafedranın tapşırığında tutuşmayan sətir YARADILMAZDAN əvvəl yoxlanır: həmin il başqa
+   kafedranın tapşırığında eyni semestr + qrup + fənn sətri varsa (``other_chair_row``) və ya fənn kataloqda
+   başqa kafedranındırsa (``Subject.chair_unit`` — ``other_chair_subject``), sətir bu kafedraya YAZILMIR, müəllimi
+   də həll edilmir (hesab açılmır, kənar üzvlük verilmir); önizləmədə «Fənn başqa kafedraya aiddir: X» kimi
+   görünür. Başqa kafedranın sənədinə BURADAN yazılmır (yönləndirmə yox): aktor yalnız seçilmiş kafedra üçün
+   genişləndirilib, o kafedranın bölgüsü (``reassign``) isə öz faylı ilə idarə olunur — saat iki dəfə sayılmasın
+   və bir kafedranın faylı digərinin təsdiqlənmiş bölgüsünü əzməsin. Müəllim başqa kafedradan saathesabı dərs
+   alırsa, həmin sətir o kafedranın faylında yazılır və müəllim orada kənar üzv kimi təyin olunur.
+
 ÖNİZLƏMƏ = eyni axın savepoint-də işləyir və GERİ QAYTARILIR (``transaction.set_rollback``): saylar real tətbiqlə
 eynidir, heç nə qalmır (``on_commit`` bildirişləri də atılır).
 """
@@ -37,14 +47,19 @@ from django.db import transaction
 from core.constants import OrgUnitType
 
 from ..constants import PERM_DISTRIBUTE, PERM_LOAD_IMPORT, PERM_MANAGE, PERM_VIEW, AmendmentReason, TaskStatus
+from ..models import TeachingTask
 from .distribution import teacher_loads
+from .people import CHAIR_TYPES
 from .scoping import WorkloadActor, WorkloadDenied
 from .task_form1_import import Form1Importer, _RowIndex, subject_slug
 from .task_workbook_choice import CHOSEN_NONE
+from .task_workbook_parsing import clean_subject_name
 from .tasks import get_or_create_task
 
 ROW_NOTE = "Dərs yükü faylından əlavə olundu (Tədris şöbəsi)"
 ROW_CREATED = "row_created"
+OTHER_CHAIR_ROW = "other_chair_row"
+OTHER_CHAIR_SUBJECT = "other_chair_subject"
 
 
 def import_actor(actor_user, organization) -> WorkloadActor:
@@ -66,6 +81,7 @@ class LoadUploadImporter(Form1Importer):
         self.row_status: dict = {}  # (line, season) → yeni sətir statusu
         self.rows_created = 0
         self.confirmed = False
+        self._foreign_indexes = None  # [(kafedra adı, _RowIndex)] — eyni ilin digər tapşırıqları (tənbəl)
 
     # ── müəllim ───────────────────────────────────────────────────────────
     def resolve_teacher(self, words: tuple) -> tuple:
@@ -90,8 +106,11 @@ class LoadUploadImporter(Form1Importer):
     # ── əsas ──────────────────────────────────────────────────────────────
     def run(self, task, entries: list, skipped: list) -> None:
         self.texts = {entry.name_words: entry.teacher_text for entry in entries}
-        self._create_missing_rows(task, entries)
-        super().run(task, entries, skipped)
+        foreign = self._create_missing_rows(task, entries)
+        super().run(task, [entry for entry in entries if (entry.line, entry.season) not in foreign], skipped)
+        for entry in entries:
+            if (entry.line, entry.season) in foreign:
+                self._report_foreign(entry)
 
     def _apply(self, task, rows_by_pk, contributions, entry_reports, index) -> None:
         loads_before = teacher_loads(task)
@@ -115,13 +134,21 @@ class LoadUploadImporter(Form1Importer):
                 self.confirmed = True
 
     # ── yeni sətir ────────────────────────────────────────────────────────
-    def _create_missing_rows(self, task, entries) -> None:
+    def _create_missing_rows(self, task, entries) -> set:
+        """Tutuşmayan sətirləri yaradır; başqa kafedraya aid olanları ötürür → ötürülən ``(line, season)``-lar."""
         index = _RowIndex(task)
         specs: dict = {}
+        foreign: set = set()
         for entry in entries:
             if entry.chosen_by == CHOSEN_NONE:
                 continue
             if index.match(entry)[0]:
+                continue
+            owner = self._foreign_owner(task, entry)
+            if owner:
+                foreign.add((entry.line, entry.season))
+                self.row_status[(entry.line, entry.season)] = owner
+                self.counters[owner.split(":", 1)[0]] += 1
                 continue
             key = (entry.season, subject_slug(entry.subject_text), entry.group_keys)
             spec = specs.setdefault(key, {"entry": entry, "hours": {}, "lines": []})
@@ -133,6 +160,43 @@ class LoadUploadImporter(Form1Importer):
             self.counters[status.split(":")[0]] += 1
             for line in spec["lines"]:
                 self.row_status[line] = status
+        return foreign
+
+    def _foreign_owner(self, task, entry) -> str:
+        """``"other_chair_row:<kafedra>"`` / ``"other_chair_subject:<kafedra>"`` və ya ``""`` (bu kafedranındır)."""
+        if self._foreign_indexes is None:
+            others = (
+                TeachingTask.objects.filter(organization=task.organization_id, academic_year=task.academic_year)
+                .exclude(pk=task.pk)
+                .select_related("chair")
+                .order_by("chair__name")
+            )
+            self._foreign_indexes = [(other.chair.name, _RowIndex(other)) for other in others]
+        for chair_name, other_index in self._foreign_indexes:
+            if other_index.match(entry)[0]:
+                return f"{OTHER_CHAIR_ROW}:{chair_name}"
+        subject = self.importer.find_subject(entry.subject_text, entry.chosen_subject or "")[0]
+        owner_id = getattr(subject, "chair_unit_id", None)
+        if owner_id and owner_id != self.chair.pk:
+            owner = subject.chair_unit
+            if getattr(owner, "is_active", False) and owner.unit_type in CHAIR_TYPES:
+                return f"{OTHER_CHAIR_SUBJECT}:{owner.name}"
+        return ""
+
+    def _report_foreign(self, entry) -> None:
+        self.report_rows.append(
+            {
+                "line": entry.line,
+                "season": entry.season,
+                "teacher": entry.teacher_text or " ".join(entry.name_words),
+                "teacher_action": "other_chair",
+                "username": "",
+                "groups": entry.groups_text.replace("\n", " | "),
+                "subject": clean_subject_name(entry.subject_text),
+                "hours": " ".join(f"{a}={h}" for a, h in sorted(entry.hours.items())),
+                "rows": self.row_status.get((entry.line, entry.season), ""),
+            }
+        )
 
     def _groups(self, entry) -> tuple[list, list]:
         from .task_form1_parsing import group_tokens
@@ -197,7 +261,8 @@ class LoadUploadImporter(Form1Importer):
         lines = []
         for item in self.report_rows:
             words = tuple(item.get("teacher", "").split())
-            teacher = self.teacher_reports.get(words, {})
+            # Başqa kafedraya aid sətrin müəllimi HƏLL EDİLMİR — eyni adın bu faylda başqa sətri olsa da göstərilmir.
+            teacher = {} if item.get("teacher_action") == "other_chair" else self.teacher_reports.get(words, {})
             lines.append(
                 {
                     "line": item.get("line"),
@@ -278,4 +343,11 @@ def run_load_upload(*, organization, chair, actor_user, entries, skipped, year: 
     return report
 
 
-__all__ = ["PERM_LOAD_IMPORT", "LoadUploadImporter", "import_actor", "run_load_upload"]
+__all__ = [
+    "OTHER_CHAIR_ROW",
+    "OTHER_CHAIR_SUBJECT",
+    "PERM_LOAD_IMPORT",
+    "LoadUploadImporter",
+    "import_actor",
+    "run_load_upload",
+]

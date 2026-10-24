@@ -163,7 +163,8 @@ def assign_teacher(
         teacher = get_user_model().objects.filter(pk=teacher_id, is_active=True).first()
         if teacher is None:
             raise WorkloadDenied("workload.teacher_not_found", "Müəllim tapılmadı.")
-        ensure_assignable_teacher(task.organization, task.chair, teacher)
+        # Başqa kafedranın müəllimi (saathesabı) — bu kafedrada ƏLAVƏ üzvlük alır, ştatı dəyişmir (2026-10-25).
+        ensure_assignable_teacher(task.organization, task.chair, teacher, actor_user=getattr(actor, "user", None))
 
     if assignment is None:
         assignment = TeacherAssignment(organization=task.organization, row=locked)

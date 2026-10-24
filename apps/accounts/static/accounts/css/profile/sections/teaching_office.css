@@ -381,3 +381,9 @@
 .tof-fallback__table {
     width: 100%;
 }
+
+/* «Kafedra profili» — kənar kafedradan saathesabı / başqa kafedradakı saat (sahib 2026-10-25). */
+.cp-muted {
+    font-size: 0.75rem;
+    color: var(--ems-neutral-600, #475569);
+}
