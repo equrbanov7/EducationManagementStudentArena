@@ -216,6 +216,12 @@ class StudentMapper:
             for candidate in self.by_name.get((person_key(row.get("last_name")), person_key(row.get("first_name"))), [])
             if not (fin and self.fin_of.get(candidate[0]) and self.fin_of[candidate[0]] != fin)
         ]
+        if candidates and _all_other_people(candidates, row, group, self.group_of):
+            # Eyni ad-soyad, amma hər namizədin ata adı (və doğum tarixi) FƏRQLİDİR və heç biri bu qrupda deyil —
+            # başqa adamlardır; legacy tələbə sistemdə yoxdur (sahib 2026-10-25: «nə yazmışdısa hamısı orda olsun»).
+            if create:
+                self.run.count("student.name_other_person")
+            candidates = []
         if candidates:
             narrowed = _narrow(candidates, row, group, self.group_of)
             claimed = self._name_claims.get(narrowed[0]) if len(narrowed) == 1 else None
@@ -335,6 +341,23 @@ def _narrow(candidates, row: dict, group, group_of) -> list:
         if same_patronymic or same_birth or (same_group and not contradicts):
             out.append(user_id)
     return out
+
+
+def _all_other_people(candidates, row: dict, group, group_of) -> bool:
+    """HƏR namizəd başqa adamdır: ata adı iki tərəfdə dolu və fərqli, doğum tarixi eyni deyil, qrup başqadır."""
+
+    patronymic = person_key(row.get("father_name"))
+    if not patronymic:
+        return False
+    birth = legacy_birth_date(row.get("birthday") or None)
+    for user_id, their_patronymic, their_birth in candidates:
+        if not their_patronymic or patronymic[:5] == their_patronymic[:5]:
+            return False
+        if birth is not None and birth == their_birth:
+            return False
+        if group is not None and group_of.get(user_id) == group.pk:
+            return False
+    return True
 
 
 def _ambiguity(candidates, row: dict, narrowed) -> str:

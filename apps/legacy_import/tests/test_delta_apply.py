@@ -363,6 +363,37 @@ class DeltaApplyTests(TestCase):
         again = self._run(apply=True, bundle=bundle)
         self.assertEqual({k: v for k, v in again.counters.items() if k.startswith("written.")}, {})
 
+    def test_same_name_with_other_patronymic_is_another_person_and_is_created(self):
+        """Sistemdə eyni ad-soyadlı, amma ata adı fərqli (başqa qrupda) tələbə var — legacy tələbə ayrıca yaradılır."""
+        with bypass_rls():
+            namesake = User.objects.create_user(
+                "nicat.yenizade", "ny@example.test", "x", first_name="Nicat", last_name="Yenizadə"
+            )
+            UserProfile.objects.filter(user=namesake).update(patronymic="Elşən")
+            Membership.objects.create(
+                user=namesake, organization=self.org, role=self.org.roles.get(name="student"), is_active=True
+            )
+        run = self._run(apply=True)
+        self.assertEqual(run.counters["student.name_other_person"], 1)
+        with bypass_rls():
+            created = User.objects.get(profile__institutional_identifier="2")
+            self.assertNotEqual(created.pk, namesake.pk)
+            self.assertTrue(LessonMark.objects.filter(enrollment__student=created).exists())
+            self.assertFalse(Enrollment.objects.filter(student=namesake).exists())
+
+    def test_new_absent_only_column_is_not_created(self):
+        """Yeni legacy sütununda YALNIZ «qb» varsa dərs yaradılmır (boş/«qb»-only sütun təmizliyi ilə eyni qayda)."""
+        bundle = _bundle()
+        bundle["points"] += [_point(20, "1", "13", "09:00", "qb"), _point(21, "2", "13", "09:00", "qb")]
+        run = self._run(apply=True, bundle=bundle)
+        with bypass_rls():
+            offering = CourseOffering.objects.get(organization=self.org, group=self.group, period=self.period)
+            self.assertFalse(Lesson.objects.filter(offering=offering, date=dt.date(2026, 10, 13)).exists())
+        self.assertEqual(run.counters["lesson.absent_only_not_created"], 1)
+        self.assertEqual(run.counters["mark.absent_only_lesson_skipped"], 2)
+        again = self._run(apply=True, bundle=bundle)
+        self.assertEqual({k: v for k, v in again.counters.items() if k.startswith("written.")}, {})
+
     def test_lesson_topics_fill_only_blank_and_rerun_is_stable(self):
         """Köhnə dərs tarixinin sillabus mövzusu dərsə yazılır; müəllimin yazdığı mövzuya toxunulmur."""
         self._run(apply=True)

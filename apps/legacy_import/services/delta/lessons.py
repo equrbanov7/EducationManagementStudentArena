@@ -132,15 +132,23 @@ class LessonBook:
         if bucket and lesson in bucket:
             bucket.remove(lesson)
 
-    def flush(self, used_lesson_ids) -> None:
-        """Yalnız ən azı bir YENİ xana alan təzə dərslər yazılır (boş sütun yaradılmır)."""
+    def flush(self, used_lesson_ids, real_lesson_ids) -> set:
+        """Yalnız ən azı bir REAL (bal / iştirak / üzrlü) yeni xana alan təzə dərslər yazılır — boş və yalnız «qb»
+        sütun yaradılmır (sahib 2026-10-25; ``legacy_repair_empty_lessons`` ilə eyni qayda). Qaytarır: atılan
+        təzə dərslərin pk-ları (onların xanaları da yazılmır)."""
 
-        kept = [lesson for lesson in self.pending if lesson.pk in used_lesson_ids]
-        self.run.count("lesson.empty_not_created", len(self.pending) - len(kept))
+        kept = [lesson for lesson in self.pending if lesson.pk in real_lesson_ids]
+        absent_only = sum(
+            1 for lesson in self.pending if lesson.pk in used_lesson_ids and lesson.pk not in real_lesson_ids
+        )
+        self.run.count("lesson.empty_not_created", len(self.pending) - len(kept) - absent_only)
+        self.run.count("lesson.absent_only_not_created", absent_only)
         for lesson in kept:
             self.run.count("lesson.created_synthesised" if lesson.is_legacy_synthesised else "lesson.created")
         self.run.bulk_create(self.Lesson, kept, "lessons")
+        dropped = {lesson.pk for lesson in self.pending} - {lesson.pk for lesson in kept}
         self.pending = []
+        return dropped
 
 
 def build_lessons_and_marks(run, slices: dict, enrollments: dict, *, until: datetime.date) -> None:
@@ -250,7 +258,13 @@ def build_lessons_and_marks(run, slices: dict, enrollments: dict, *, until: date
         )
         touched[enrollment.pk] = enrollment
         run.count(f"mark.created_{status}")
-    book.flush({mark.lesson_id for mark in pending})
+    dropped = book.flush(
+        {mark.lesson_id for mark in pending}, {mark.lesson_id for mark in pending if mark.status != "absent"}
+    )
+    if dropped:
+        run.count("mark.absent_only_lesson_skipped", sum(1 for mark in pending if mark.lesson_id in dropped))
+        pending = [mark for mark in pending if mark.lesson_id not in dropped]
+        touched = {mark.enrollment_id: touched[mark.enrollment_id] for mark in pending}
     run.bulk_create(LessonMark, pending, "marks")
     if touched:
         from apps.registrar.public import gradebook
