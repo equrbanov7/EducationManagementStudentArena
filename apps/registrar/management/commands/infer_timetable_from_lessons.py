@@ -15,7 +15,8 @@ bilək ki, bu müəllim bu saatda dərs deyir; üst/alt həftə, mühazirə, sem
 İstifadə::
 
     manage.py infer_timetable_from_lessons --org qku --period "Payız 2026/2027" [--teacher ad.soyad] \\
-        [--date-from 2026-09-15] [--date-to 2026-10-24] [--min-occurrences 2] [--report /tmp/tt.csv] \\
+        [--date-from 2026-09-15] [--date-to 2026-10-24] [--min-occurrences 2] [--parity-tolerance 0.25] \\
+        [--snap-minutes 25] [--no-hours-cap] [--recent-days 14] [--report /tmp/tt.csv] \\
         [--apply --actor <istifadəçi> --i-know-this-is-production]
 """
 
@@ -29,7 +30,14 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 from apps.registrar.management.commands.import_timetable_docx import _disposable_database, resolve_period
-from apps.registrar.timetable_inference import DEFAULT_MIN_OCCURRENCES, FACT_KEYS
+from apps.registrar.timetable_inference import (
+    DEFAULT_MIN_OCCURRENCES,
+    DEFAULT_PARITY_TOLERANCE,
+    DEFAULT_RECENT_DAYS,
+    DEFAULT_SNAP_MINUTES,
+    FACT_KEYS,
+    Rules,
+)
 from apps.registrar.timetable_inference_plan import ACTIONS, REPORT_HEADER, run_inference, usernames_for
 from core.export_safety import safe_csv_writer
 from core.rls import apply_rls_request_context, bypass_rls
@@ -68,6 +76,29 @@ class Command(BaseCommand):
             default=DEFAULT_MIN_OCCURRENCES,
             help="Slot üçün minimum fərqli tarix (defolt 2 — birdəfəlik/kompensasiya dərsi slot olmasın)",
         )
+        parser.add_argument(
+            "--parity-tolerance",
+            type=float,
+            default=DEFAULT_PARITY_TOLERANCE,
+            help="Çoxluq qaydası: azlıq paritetin payı bundan çox deyilsə üst/alt (defolt 0.25 — 3 üst + 1 alt = üst)",
+        )
+        parser.add_argument(
+            "--snap-minutes",
+            type=int,
+            default=DEFAULT_SNAP_MINUTES,
+            help="Standartdan kənar başlamanı bu qədər dəqiqə daxilində ən yaxın zəngə çək (0 = çəkmə; defolt 25)",
+        )
+        parser.add_argument(
+            "--no-hours-cap",
+            action="store_true",
+            help="Plan / yük saatına görə həftəlik slot həddini SÖNDÜR (defolt: artıq vahid kompensasiya sayılır)",
+        )
+        parser.add_argument(
+            "--recent-days",
+            type=int,
+            default=DEFAULT_RECENT_DAYS,
+            help="Son N gündə başlamış açılışın tək dərsi də slot olur (0 = söndür; defolt 14)",
+        )
         parser.add_argument("--report", default="", help="Sətir-sətir CSV hesabat faylının yolu")
         parser.add_argument("--apply", action="store_true", help="Faktiki yaz (defolt: dry-run)")
         parser.add_argument("--actor", default="", help="Aktorun istifadəçi adı (defolt: təşkilatın sahibi)")
@@ -76,6 +107,19 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if not 1 <= int(options["min_occurrences"]) <= 52:
             raise CommandError("timetable_infer_bad_min_occurrences: 1..52")
+        if not 0 <= float(options["parity_tolerance"]) < 0.5:
+            raise CommandError("timetable_infer_bad_parity_tolerance: 0 <= x < 0.5")
+        if not 0 <= int(options["snap_minutes"]) <= 45:
+            raise CommandError("timetable_infer_bad_snap_minutes: 0..45")
+        if not 0 <= int(options["recent_days"]) <= 60:
+            raise CommandError("timetable_infer_bad_recent_days: 0..60")
+        rules = Rules(
+            min_occurrences=int(options["min_occurrences"]),
+            parity_tolerance=float(options["parity_tolerance"]),
+            snap_minutes=int(options["snap_minutes"]),
+            hours_cap=not options["no_hours_cap"],
+            recent_days=int(options["recent_days"]),
+        )
         Organization = django_apps.get_model("organizations", "Organization")
         user_model = django_apps.get_model("auth", "User")
         with rls_worker_atomic(), bypass_rls():
@@ -108,7 +152,7 @@ class Command(BaseCommand):
                 date_from=date_from,
                 date_to=date_to,
                 teacher=teacher,
-                min_occurrences=int(options["min_occurrences"]),
+                rules=rules,
                 actor=actor,
                 apply=options["apply"],
             )

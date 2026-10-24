@@ -30,13 +30,14 @@ QAYDALAR
   çatmayan hissəsi): (1) ``period_id`` verilibsə yalnız EYNİ semestrin slotları —
   keçən semestrin silinməmiş cədvəli bu semestrin saatını bloklamır (dövr yoxdursa
   köhnə davranış); (2) birləşmiş mühazirə (axın): eyni effektiv müəllim + eyni fənn +
-  hər ikisi mühazirə + eyni (və ya boş) otaq, qruplar FƏRQLİ → toqquşma deyil
+  EYNİ növ (2026-10-25-dən birgə məşğələ də) + eyni (və ya boş) otaq, qruplar FƏRQLİ → toqquşma deyil
   (generatorun dərc etdiyi axınlar redaktorda «müəllim toqquşması» görünürdü);
   qrup toqquşması HƏMİŞƏ toqquşmadır (``schedule.is_joint_lecture``);
 * PARALEL ALT QRUP (2026-10-14): EYNİ açılışın iki məşğələ/laboratoriya slotu eyni saatda,
   FƏRQLİ effektiv müəllimlərlə — qrup yarıya bölünüb (alt qruplar) paralel oturur; bu, qrup
   toqquşması deyil (müəllim və otaq yoxlaması yenə işləyir). ``offering_id`` verilməyibsə qayda
-  işləmir (köhnə davranış);
+  işləmir (köhnə davranış). 2026-10-25: EYNİ fənn ailəsinin səviyyə variantları da (``subject_family``:
+  «Xarici dil-1(elementary)» / «…(intermediate)») — qrup səviyyəyə görə bölünüb (``subject_id`` lazımdır);
 * ƏHATƏDƏN KƏNAR toqquşma (2026-10-14): ``visible(slot)`` False qaytaran slot (redaktorun
   ``schedule.manage`` əhatəsindən kənar — başqa fakültə/kafedra) MİNİMAL açıqlama ilə qaytarılır:
   yalnız «fənn · qrup» (müəllim adı, otaq, slot id-si YOX) və ``can_force=False`` — onu parklamaq
@@ -46,6 +47,7 @@ QAYDALAR
 
 from __future__ import annotations
 
+import re
 from collections import namedtuple
 
 from django.core.exceptions import ValidationError
@@ -183,17 +185,32 @@ def describe(slot, kind, *, in_scope=True) -> dict:
     }
 
 
-def is_parallel_subgroup(*, offering_id, kind, teacher_id, slot) -> bool:
-    """EYNİ açılışın paralel məşğələ/laboratoriyası (alt qruplar), FƏRQLİ müəllimlə — qrup toqquşması deyil."""
-    return bool(
-        offering_id
-        and same_id(offering_id, slot.offering_id)
-        and kind
+def subject_family(name) -> str:
+    """Fənnin «ailəsi» — mötərizədəki səviyyə / variant atılır: «Xarici dil-1(elementary)» = «Xarici dil-1»."""
+    return re.sub(r"\s*\(.*$", "", str(name or "")).strip().lower()
+
+
+def is_parallel_subgroup(*, offering_id, kind, teacher_id, slot, family=None) -> bool:
+    """Qrupun PARALEL məşğələ/laboratoriyası (alt qruplar), FƏRQLİ müəllimlə — qrup toqquşması deyil.
+
+    * EYNİ açılış (qrup yarıya bölünüb, 2026-10-14);
+    * EYNİ fənn ailəsinin səviyyə variantı (2026-10-25: xarici dil «elementary / pre-intermediate /
+      intermediate» — qrupun tələbələri səviyyəyə görə eyni saatda fərqli müəllimlərdə oturur). ``family`` —
+      yerləşdirilən fənnin ailəsi (mətn və ya onu qaytaran callable — yalnız lazım olanda hesablanır)."""
+    if not (
+        kind
         and kind != SlotKind.LECTURE
         and slot.kind != SlotKind.LECTURE
         and teacher_id
         and not same_id(teacher_id, effective_instructor_id(slot))
-    )
+    ):
+        return False
+    if offering_id and same_id(offering_id, slot.offering_id):
+        return True
+    if family is None:
+        return False
+    own = family() if callable(family) else family
+    return bool(own) and own == subject_family(getattr(slot.offering.subject, "name", ""))
 
 
 def live_slots(organization, *, weekday=None, period_id=None):
@@ -297,6 +314,16 @@ def detect(
     room_norm = (room or "").strip().lower()
     rows = candidates if candidates is not None else live_slots(organization, weekday=weekday, period_id=period_id)
 
+    memo: dict = {}
+
+    def family() -> str:
+        if "family" not in memo:
+            from apps.registrar.models import Subject
+
+            name = Subject.objects.filter(pk=subject_id).values_list("name", flat=True).first() if subject_id else ""
+            memo["family"] = subject_family(name)
+        return memo["family"]
+
     found: dict = {}
     for slot in rows:
         if slot.weekday != weekday or str(slot.pk) in excluded:
@@ -308,7 +335,7 @@ def detect(
         if not week_types_overlap(week_type, slot.week_type):
             continue
         same_group = same_id(group_id, slot.offering.group_id) and not is_parallel_subgroup(
-            offering_id=offering_id, kind=kind, teacher_id=instructor_id, slot=slot
+            offering_id=offering_id, kind=kind, teacher_id=instructor_id, slot=slot, family=family
         )
         if not same_group and is_joint_lecture(
             kind=kind, subject_id=subject_id, teacher_id=instructor_id, room=room_norm, slot=slot
@@ -446,6 +473,7 @@ __all__ = [
     "describe",
     "detect",
     "is_parallel_subgroup",
+    "subject_family",
     "live_slots",
     "suggest",
     "time_ranges_overlap",

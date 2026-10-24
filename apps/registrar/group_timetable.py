@@ -4,7 +4,7 @@ Adi tələbənin «Cədvəlim»-i yalnız ÖZ qeydiyyatlarını göstərir; star
 
 * qrupun öz açılışlarının slotları + qrup tələbələrinin oxuduğu BAŞQA qrup jurnallarının slotları
   (alt qrup birləşməsi, seçmə) — ``group_academic.group_subjects`` müəyyən etdiyi açılışlar;
-* AXIN (birləşmiş mühazirə): eyni gün + başlama vaxtı + fənn + effektiv müəllim, hər ikisi mühazirə
+* AXIN (birləşmiş mühazirə / birgə məşğələ): eyni gün + başlama vaxtı + fənn + effektiv müəllim + EYNİ növ
   (``schedule.is_joint_lecture`` qaydası) olan BAŞQA qrupların adları slotun yanında;
 * qrupun bir HİSSƏSİNİN getdiyi dərs (seçmə / alt qrup) — «N tələbə» qeydi.
 
@@ -22,7 +22,7 @@ from django.apps import apps as django_apps
 from django.db.models import Q
 from django.utils import timezone
 
-from apps.registrar.models import ScheduleSlot, SlotKind
+from apps.registrar.models import ScheduleSlot
 from apps.registrar.schedule import WEEKDAYS, effective_instructor_id
 
 #: Yaxın imtahan pəncərəsi və siyahı həddi (kabinet paneli — tam siyahı «İmtahanlar» bölməsindədir).
@@ -37,7 +37,7 @@ def _person(user) -> str:
 
 
 def _slot_key(slot):
-    return (slot.weekday, slot.start_time, slot.offering.subject_id, effective_instructor_id(slot))
+    return (slot.weekday, slot.start_time, slot.kind, slot.offering.subject_id, effective_instructor_id(slot))
 
 
 def group_timetable(group, *, period, subjects) -> list:
@@ -61,18 +61,17 @@ def group_timetable(group, *, period, subjects) -> list:
     if not slots:
         return []
 
-    # Axın: eyni dövrdə BAŞQA açılışların mühazirə slotları (eyni fənlər, eyni günlər) — TƏK sorğu.
-    lecture_slots = [slot for slot in slots if slot.kind == SlotKind.LECTURE]
+    # Axın: eyni dövrdə BAŞQA açılışların EYNİ növlü slotları (eyni fənlər, eyni günlər) — TƏK sorğu.
+    # 2026-10-25: birgə məşğələ də axındır (``schedule.is_joint_lecture`` — eyni növ, eyni müəllim + fənn).
     joint: dict = {}
-    if lecture_slots:
+    if slots:
         candidates = (
             ScheduleSlot.objects.filter(
                 organization_id=group.organization_id,
                 offering__period=period,
                 is_parked=False,
-                kind=SlotKind.LECTURE,
-                offering__subject_id__in={slot.offering.subject_id for slot in lecture_slots},
-                weekday__in={slot.weekday for slot in lecture_slots},
+                offering__subject_id__in={slot.offering.subject_id for slot in slots},
+                weekday__in={slot.weekday for slot in slots},
             )
             .exclude(offering_id__in=list(subjects["offering_ids"]))
             .select_related("offering", "offering__group")
@@ -88,8 +87,7 @@ def group_timetable(group, *, period, subjects) -> list:
         subject = by_offering.get(slot.offering_id, {})
         teacher = slot.instructor if slot.instructor_id else slot.offering.instructor
         other_groups = set(subject.get("other_groups") or [])
-        if slot.kind == SlotKind.LECTURE:
-            other_groups |= joint.get(_slot_key(slot), set())
+        other_groups |= joint.get(_slot_key(slot), set())
         other_groups.discard(group.name)
         days.setdefault(slot.weekday, []).append(
             {

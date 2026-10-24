@@ -357,7 +357,12 @@ class ParityRuleTest(TestCase):
         self.assertEqual(decide(3, 3), WeekType.ALL)
         self.assertEqual(decide(1, 2), WeekType.ALL)
         self.assertEqual(decide(2, 5), WeekType.ALL)
-        self.assertEqual(decide(1, 3), "")  # təsadüfi dərs, yoxsa buraxılmış həftələr — qərar yoxdur
+        # 2026-10-25 çoxluq qaydası: azlıq paritet ≤ 25 % → kompensasiya, çoxluq qalib.
+        self.assertEqual(decide(1, 3), WeekType.EVEN)
+        self.assertEqual(decide(3, 1), WeekType.ODD)
+        self.assertEqual(decide(2, 1), WeekType.ALL)
+        self.assertEqual(decide(1, 3, 0.2), WeekType.ALL)
+        self.assertEqual(decide(0, 0), "")
 
 
 class InferTimetableWorkflowTest(TestCase):

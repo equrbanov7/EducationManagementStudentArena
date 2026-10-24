@@ -223,15 +223,20 @@ def same_id(left, right) -> bool:
 
 
 def is_joint_lecture(*, kind, subject_id, teacher_id, room, slot) -> bool:
-    """Axın: eyni (effektiv) müəllim + eyni fənn + hər ikisi mühazirə + eyni (və ya boş) otaq.
+    """Axın: eyni (effektiv) müəllim + eyni fənn + EYNİ dərs növü + eyni (və ya boş) otaq.
+
+    2026-10-25 (sahib: «müəllimin dərsi bir neçə qrupa birgə (patok)»): əvvəl yalnız mühazirə idi; jurnallar
+    göstərdi ki, birgə MƏŞĞƏLƏ də realdır (xarici dil səviyyə qrupları, kiçik qrupların birləşmiş seminarı —
+    payız 2026: 871 qrup-sətri, hər biri 6 həftə ərzində eyni tarixlərdə birlikdə). Növlər fərqlidirsə
+    (mühazirə + seminar) axın deyil — müəllim eyni anda iki fərqli dərs keçə bilməz.
 
     TƏK qayda — ``find_conflict`` və redaktorun ``schedule_conflicts.detect``-i bunu işlədir.
     Qrup toqquşması bundan ƏVVƏL ayrıca yoxlanır: eyni qrup HƏMİŞƏ toqquşmadır."""
     room_norm = (room or "").strip().lower()
     slot_room = (slot.room or "").strip().lower()
     return bool(
-        kind == SlotKind.LECTURE
-        and slot.kind == SlotKind.LECTURE
+        kind
+        and kind == slot.kind
         and same_id(teacher_id, effective_instructor_id(slot))
         and same_id(subject_id, slot.offering.subject_id)
         and (not room_norm or not slot_room or room_norm == slot_room)
