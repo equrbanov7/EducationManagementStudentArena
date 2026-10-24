@@ -85,6 +85,8 @@ class Scope:
     """Hansı sütunlar namizəddir — əmrin bayraqları bir yerdə."""
 
     before: datetime.date
+    #: Yalnız bu tarixdən (daxil) SONRAKI dərslər; ``None`` = hamısı (sahib 2026-10-25: əvvəl cari semestr).
+    since: datetime.date | None = None
     include_locked: bool = False
     include_absent_only: bool = False
     include_teacher_lessons: bool = False
@@ -145,16 +147,18 @@ def content_mark_q() -> Q:
     return Q(score__isnull=False) | ~Q(status=ABSENT)
 
 
-def markless_past_lessons(organization, *, before: datetime.date):
+def markless_past_lessons(organization, *, before: datetime.date, since: datetime.date | None = None):
     """Keçmiş, REAL xanası olmayan dərslər (tam boş + yalnız «qb»), mənşədən/məzmundan/kilidindən ƏVVƏL.
 
     ``has_marks`` = ən azı bir («qb») xana var.
     """
 
     marks = _model("LessonMark").objects.filter(lesson_id=OuterRef("pk"))
+    window = Q(date__lt=before) & (Q(date__gte=since) if since else Q())
     return (
         _model("Lesson")
-        .objects.filter(organization=organization, date__lt=before)
+        .objects.filter(organization=organization)
+        .filter(window)
         .filter(~Exists(marks.filter(content_mark_q())))
         .annotate(topic_trimmed=Trim("topic"), has_marks=Exists(marks))
     )
@@ -176,7 +180,7 @@ def _origin_q(scope: Scope) -> Q:
 def candidate_lessons(organization, scope: Scope):
     """Silinəcək dərslər (modul sənədindəki BÜTÜN şərtlər + bayraqlar)."""
 
-    queryset = markless_past_lessons(organization, before=scope.before).filter(_origin_q(scope))
+    queryset = markless_past_lessons(organization, before=scope.before, since=scope.since).filter(_origin_q(scope))
     queryset = queryset.exclude(_has_content())
     if not scope.include_absent_only:
         queryset = queryset.filter(has_marks=False)
@@ -194,7 +198,7 @@ def survey(organization, scope: Scope) -> dict:
 
     imported = Q(created_by__isnull=True)
     teacher = scope.teacher_settled_q()
-    base = markless_past_lessons(organization, before=scope.before).annotate(
+    base = markless_past_lessons(organization, before=scope.before, since=scope.since).annotate(
         has_content=ExpressionWrapper(_has_content(), output_field=BooleanField())
     )
     free = Q(has_content=False)

@@ -50,6 +50,15 @@ def _before(raw: str) -> datetime.date:
     return value
 
 
+def _since(raw: str):
+    if not raw:
+        return None
+    try:
+        return datetime.date.fromisoformat(str(raw).strip())
+    except ValueError:
+        raise CommandError("legacy_repair_empty_lessons_since_invalid: --since YYYY-MM-DD olmalıdır") from None
+
+
 class Command(BaseCommand):
     help = (
         "Heç bir real xanası (bal / iə / ü/q), mövzusu və düzəlişi olmayan keçmiş dərsləri (boş jurnal "
@@ -63,6 +72,11 @@ class Command(BaseCommand):
             "--before",
             default="",
             help="Yalnız bu tarixdən ƏVVƏLKİ dərslər (YYYY-MM-DD, default: bu gün — bu gün/gələcək toxunulmaz)",
+        )
+        parser.add_argument(
+            "--since",
+            default="",
+            help="Yalnız bu tarixdən (YYYY-MM-DD, daxil) SONRAKI dərslər (default: hamısı)",
         )
         parser.add_argument(
             "--include-locked",
@@ -85,6 +99,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         scope = service.Scope(
             before=_before(options["before"]),
+            since=_since(options["since"]),
             include_locked=bool(options["include_locked"]),
             include_absent_only=bool(options["include_absent_only"]),
             include_teacher_lessons=bool(options["include_teacher_lessons"]),
@@ -118,6 +133,7 @@ def _summary(scope, stats: dict, result) -> dict:
     by_category = result.by_category
     return {
         "tarix həddi (bu tarixdən əvvəl)": scope.before.isoformat(),
+        "başlanğıc (bu tarixdən etibarən)": scope.since.isoformat() if scope.since else "hamısı",
         "köçürülmüş, tam boş (xanasız) keçmiş dərs": stats["empty"],
         "köçürülmüş, yalnız «qb» xanalı keçmiş dərs": (
             f"{stats['absent_only']} ({_flag(scope.include_absent_only, '--include-absent-only')})"

@@ -610,6 +610,12 @@ jobs:
               echo "::add-mask::$actor"
               args=(--organization "$ORG" --include-locked --include-absent-only --include-teacher-lessons
                     --show 0 --actor "$actor")
+              # date_from → yalnız bu tarixdən sonrakı dərslər (2026-10-25: əvvəl cari semestr; tarixi semestrlərdə
+              # köhnə xanası yeni sistemə gəlməmiş dərslər var — onlar ayrıca yoxlanılır).
+              if [ -n "$DATE_FROM" ]; then
+                match "$DATE_FROM" '^20[0-9]{2}-[01][0-9]-[0-3][0-9]$' || { echo "date_from formatı: YYYY-MM-DD" >&2; exit 2; }
+                args+=(--since "$DATE_FROM")
+              fi
               if [ "$APPLY" = "true" ]; then
                 args+=(--apply --i-know-this-is-production)
               fi

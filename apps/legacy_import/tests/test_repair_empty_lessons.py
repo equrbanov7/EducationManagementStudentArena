@@ -250,6 +250,17 @@ class LegacyRepairEmptyLessonsTest(TestCase):
         self.assertTrue(rows)
         self.assertTrue(all(":" not in line.split(" : ", 1)[0] for line in rows), rows)
 
+    def test_since_limits_the_window(self):
+        """``--since``: yalnız bu tarixdən sonrakı dərslər (sahib 2026-10-25 — əvvəl cari semestr)."""
+        self.assertRegex(self._call("--since", "2000-01-01"), r"SİLİNƏCƏK namizəd\s*: 3\b")
+        today = timezone.localdate().isoformat()
+        output = self._apply("--since", today)
+        self.assertRegex(output, r"SİLİNƏCƏK namizəd\s*: 0\b")
+        self.assertRegex(output, r"FAKTİKİ silinən\s*: 0\b")
+        self._assert_kept(self._default_targets())
+        with self.assertRaises(CommandError):
+            self._call("--since", "dünən")
+
     def test_apply_deletes_only_empty_imported_lessons_and_is_idempotent(self):
         output = self._apply()
         self.assertRegex(output, r"FAKTİKİ silinən\s*: 3\b")
