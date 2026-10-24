@@ -23,6 +23,7 @@ tutuşdurulur:
 
 from __future__ import annotations
 
+import datetime as dt
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 
@@ -34,9 +35,9 @@ from apps.registrar.models import CourseOffering, ScheduleSlot
 from apps.registrar.timetable_inference import (
     AMBIGUOUS,
     BELOW_THRESHOLD,
-    DEFAULT_MIN_OCCURRENCES,
     READY,
     SUPERSEDED,
+    Rules,
     build_units,
     load_facts,
 )
@@ -142,8 +143,10 @@ class Plan:
         return counter
 
 
-def _identity(offering_id, weekday, start, kind, teacher_id) -> tuple:
-    return (str(offering_id), weekday, start, kind, str(teacher_id or ""))
+def _identity(offering_id, weekday, start, teacher_id) -> tuple:
+    """Mövcud slotun tanınması: açılış + gün + başlama + effektiv müəllim. NÖV daxil DEYİL (2026-10-25): rəsmi
+    cədvəldə «mühazirə», jurnalda «seminar» yazılan eyni saat yeni slot / toqquşma deyil — ``exists_other_kind``."""
+    return (str(offering_id), weekday, start, str(teacher_id or ""))
 
 
 class _Planner:
@@ -164,9 +167,7 @@ class _Planner:
         self.identity: dict = defaultdict(list)
         self.by_day: dict = defaultdict(list)
         for slot in live:
-            key = _identity(
-                slot.offering_id, slot.weekday, slot.start_time, slot.kind, schedule.effective_instructor_id(slot)
-            )
+            key = _identity(slot.offering_id, slot.weekday, slot.start_time, schedule.effective_instructor_id(slot))
             self.identity[key].append(slot)
             if not slot.is_parked:
                 self.by_day[slot.weekday].append(slot)
@@ -235,7 +236,7 @@ class _Planner:
             if stored and stored not in self.authorized:
                 rows.append(MemberRow(unit, offering, SKIPPED, "teacher_not_authorized"))
                 continue
-            key = _identity(pk, unit.weekday, unit.start, unit.kind, unit.teacher_id)
+            key = _identity(pk, unit.weekday, unit.start, unit.teacher_id)
             hits = [
                 slot
                 for slot in self.identity.get(key, [])
@@ -263,9 +264,9 @@ class _Planner:
             return rows
         for (offering, _stored, row), slot in zip(pending, slots):
             row.slot = slot
-            row.reason = "room_dropped" if dropped_room else ""
+            row.reason = "room_dropped" if dropped_room else unit.reason
             self.by_day[unit.weekday].append(slot)
-            key = _identity(offering.pk, unit.weekday, unit.start, unit.kind, unit.teacher_id)
+            key = _identity(offering.pk, unit.weekday, unit.start, unit.teacher_id)
             self.identity[key].append(slot)
         return rows
 
@@ -273,6 +274,8 @@ class _Planner:
 def _exists_reason(slot, unit) -> str:
     if slot.is_parked:
         return "exists_parked"
+    if slot.kind != unit.kind:
+        return "exists_other_kind"
     if slot.week_type != unit.week_type:
         return "exists_other_week_type"
     if slot.end_time != unit.end:
@@ -319,6 +322,27 @@ def _write(plan: Plan, *, organization, period, actor, source: str) -> None:
     )
 
 
+def weekly_budgets(offering_ids) -> dict:
+    """``{(açılış id, növ): həftəlik slot}`` — açılışın plan / kafedra yükü saatından (``plan_hours``).
+
+    1 dərs = 2 akademik saat, semestr = ``EFFECTIVE_WEEKS`` (15) həftə: 30 saat → 1 (hər həftə), 15 → 0.5 (üst
+    və ya alt), 45 → 1.5; ən yaxın 0.5-ə yuvarlanır. Saatı məlum olmayan açılış lüğətdə yoxdur (məhdudiyyət yox).
+    """
+    from apps.registrar.models.curriculum_meta import EFFECTIVE_WEEKS
+    from apps.registrar.plan_hours import plan_hours_for_offering
+
+    budgets = {}
+    offerings = CourseOffering.objects.filter(pk__in=list(offering_ids)).select_related(
+        "organization", "subject", "group", "period"
+    )
+    for offering in offerings:
+        for kind, hours in (plan_hours_for_offering(offering) or {}).items():
+            weekly = round(float(hours) / 2 / EFFECTIVE_WEEKS * 2) / 2
+            if hours and kind in ("lecture", "seminar", "lab"):
+                budgets[(str(offering.pk), kind)] = max(weekly, 0.5)
+    return budgets
+
+
 def run_inference(
     *,
     organization,
@@ -326,16 +350,30 @@ def run_inference(
     date_from,
     date_to,
     teacher=None,
-    min_occurrences: int = DEFAULT_MIN_OCCURRENCES,
+    rules: Rules | None = None,
     actor=None,
     apply: bool = False,
     source: str = "infer_timetable_from_lessons",
 ) -> Plan:
     """Dry-run (defolt — heç nə yazılmır) və ya yazı (kilid altında yenidən qurulan plan)."""
+    rules = rules or Rules()
     facts, stats = load_facts(
-        organization=organization, period=period, date_from=date_from, date_to=date_to, teacher=teacher
+        organization=organization,
+        period=period,
+        date_from=date_from,
+        date_to=date_to,
+        teacher=teacher,
+        snap_minutes=rules.snap_minutes,
     )
-    units = build_units(facts, period=period, min_occurrences=min_occurrences)
+    budgets = weekly_budgets({fact.offering_id for fact in facts}) if rules.hours_cap else None
+    units = build_units(
+        facts,
+        period=period,
+        min_occurrences=rules.min_occurrences,
+        parity_tolerance=rules.parity_tolerance,
+        budgets=budgets,
+        recent_since=date_to - dt.timedelta(days=rules.recent_days - 1) if rules.recent_days > 0 else None,
+    )
     if not apply:
         return build_plan(organization=organization, period=period, units=units, facts=stats, actor=actor)
     with transaction.atomic():
@@ -364,4 +402,5 @@ __all__ = [
     "build_plan",
     "run_inference",
     "usernames_for",
+    "weekly_budgets",
 ]

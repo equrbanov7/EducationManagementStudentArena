@@ -280,7 +280,7 @@ class _Plan:
         )
 
     def partners(self, weekday, start, end):
-        """Axın yoldaşları: eyni müəllim + fənn, hər ikisi mühazirə, BAŞQA qrup (``is_joint_lecture``)."""
+        """Axın yoldaşları: eyni müəllim + fənn + EYNİ növ, BAŞQA qrup (``is_joint_lecture``)."""
         return [
             slot
             for slot in self.mine
