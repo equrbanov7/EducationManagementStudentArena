@@ -108063,3 +108063,33 @@ msgstr "OTHER DEPARTMENT'S SUBJECT"
 msgctxt "accounts.workload_load"
 msgid "bu kafedraya yazılmır"
 msgstr "not written to this department"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Plan saatı düzəldildi — %(count)s versiya yeniləndi."
+msgstr "Planned hours corrected — %(count)s version(s) updated."
+
+msgctxt "accounts.syllabus"
+msgid "Əl ilə düzəliş silindi — saat yenidən tədris planı / dərs yükündən gəlir."
+msgstr "Manual correction removed — hours come from the curriculum / teaching load again."
+
+msgctxt "accounts.syllabus"
+msgid "Plan saatı kafedra tərəfindən əl ilə düzəldilib (bir qrup üçün):"
+msgstr "Planned hours were corrected manually by the chair (for one group):"
+
+msgctxt "accounts.syllabus"
+msgid "Plan saatını düzəlt — sillabusda fənnin BİR qrup üçün saatı yazılır (müəllimin ümumi dərs yükü deyil):"
+msgstr "Correct the planned hours — the syllabus shows the subject's hours for ONE group (not the teacher's total load):"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Avtomatik hesab (tədris planı / dərs yükü): %(auto)s"
+msgstr "Automatic calculation (curriculum / teaching load): %(auto)s"
+
+msgctxt "accounts.syllabus"
+msgid "Plan saatını yadda saxla"
+msgstr "Save planned hours"
+
+msgctxt "accounts.syllabus"
+msgid "Avtomatik hesaba qayıt"
+msgstr "Back to automatic calculation"

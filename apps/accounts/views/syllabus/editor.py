@@ -49,6 +49,7 @@ from apps.syllabus.public import (
 
 from . import editor_panels as panels_builder
 from .labels import HOUR_KIND_LABELS, STATUS_TONES, issue_text
+from .plan_hours_source import ensure_plan_hours, override_state
 from .preview import build_preview_blocks
 from .reuse_context import editor_reuse_state
 
@@ -251,35 +252,6 @@ _LOCKED_SOURCES = {
 PLAN_HOUR_OPTIONS = tuple(range(0, 61, 5)) + (75, 90, 105, 120)
 
 
-def _ensure_plan_hours(syllabus, context) -> tuple[dict, bool]:
-    """Plan saatı + «müəllim əl ilə dəyişə bilərmi» bayrağı.
-
-    Sahib 2026-09-20: «tədrisdən gələn yük saatı sillabuslarda görünmür» — plan saatı boşdursa
-    (köçürülmüş/yükdən açılan açılış) tədris yükündən doldurulur. Rəsmi plan TAPILMAYANDA
-    müəllim saatı özü seçir (``syllabus_action`` → ``plan_hours``) və sahib 2026-09-25: «bir dəfə
-    yazandan sonra edit etmək olmur, səhv yazılsa itdi getdi» — ona görə əl ilə daxil edilmiş
-    saat redaktəyə açıq versiyada HƏMİŞƏ yenidən seçilə bilir. Rəsmi plandan gələn saat
-    dəyişdirilmir (bölgünün mənbəyi tədris planıdır). Yalnız REDAKTƏYƏ AÇIQ versiyaya yazılır.
-    """
-    plan_hours = dict(context.get("plan_hours") or {})
-    if context.get("view_state") != "normal":
-        return plan_hours, False
-    from apps.registrar.public import plan_hours_for_offering
-
-    # Audit 2026-09-28 SYL-7: müəllif olmayanın (kafedra) GET-i YAZMIR — plan
-    # saatı yalnız göstərilir, əl ilə seçim forması da açılmır.
-    author = bool(context.get("is_author"))
-    found = plan_hours_for_offering(getattr(syllabus, "offering", None))
-    if found:
-        # Sahib 2026-10-12: yük dəyişibsə müəllifin açıq qaralaması uyğunlaşır (təsdiqlənmişə yazılmır).
-        if dict(found) != plan_hours:
-            if author:
-                set_plan_hours(context["version"], found)
-            return dict(found), False
-        return plan_hours, False
-    return plan_hours, author
-
-
 def _locked_rows(syllabus, hours):
     """`info` bölməsinin KİLİDLİ sətirləri — tədris planı/strukturdan gələn dəyərlər.
 
@@ -423,7 +395,7 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
         }
 
     syllabus = context["syllabus"]
-    plan_hours, plan_manual = _ensure_plan_hours(syllabus, context)
+    plan_hours, plan_manual = ensure_plan_hours(syllabus, context, write=set_plan_hours)
     # Sahib 2026-09-21: təzə qaralamada saat bölgüsü plandan ÖZÜ düzülür
     # (2-2-…-qalıq).  Yazıldısa context yenidən qurulur ki, revision/tamamlanma
     # şablona təzə getsin (optimistik kilid köhnə revision ilə qalmasın).
@@ -498,6 +470,8 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
         {"kind": kind, "label": HOUR_KIND_LABELS[kind], "value": int((plan_hours or {}).get(kind) or 0)}
         for kind in ("lecture", "seminar", "lab")
     ]
+    # Sahib 2026-10-25: kafedra / tədris şöbəsi plan saatını (BİR qrup üçün) əl ilə düzəldə bilir.
+    hours["override"] = override_state(request, organization, syllabus, context["version"], PLAN_HOUR_OPTIONS)
     selfwork_view = _selfwork(section_map.get(SectionKey.SELF.value, {})) if rule.selfwork else None
     assessment_view = _assessment(section_map.get(SectionKey.ASSESS.value, {}), syllabus, rule, organization)
     step = request.GET.get("step") or SectionKey.INFO.value

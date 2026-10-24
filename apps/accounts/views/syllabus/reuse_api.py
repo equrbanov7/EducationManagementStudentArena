@@ -169,9 +169,9 @@ def _bulk(request, organization, actor, payload):
 
 def _hours_for(syllabus) -> dict:
     """Bağlı hədəfin CARİ rəsmi saatı (yoxdursa qüvvədə olan nüsxənin saatı)."""
-    from apps.registrar.public import plan_hours_for_offering
+    from .plan_hours_source import official_plan_hours
 
-    hours = plan_hours_for_offering(syllabus.offering) if syllabus.offering_id else {}
+    hours = official_plan_hours(syllabus)
     if not hours and syllabus.approved_version_id:
         hours = syllabus.approved_version.plan_hours or {}
     return hours

@@ -107471,3 +107471,33 @@ msgstr "BAŞKA BÖLÜMÜN DERSİ"
 msgctxt "accounts.workload_load"
 msgid "bu kafedraya yazılmır"
 msgstr "bu bölüme yazılmaz"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Plan saatı düzəldildi — %(count)s versiya yeniləndi."
+msgstr "Plan saatleri düzeltildi — %(count)s sürüm güncellendi."
+
+msgctxt "accounts.syllabus"
+msgid "Əl ilə düzəliş silindi — saat yenidən tədris planı / dərs yükündən gəlir."
+msgstr "Elle düzeltme kaldırıldı — saatler yeniden öğretim planından / ders yükünden gelir."
+
+msgctxt "accounts.syllabus"
+msgid "Plan saatı kafedra tərəfindən əl ilə düzəldilib (bir qrup üçün):"
+msgstr "Plan saatleri bölüm tarafından elle düzeltildi (bir grup için):"
+
+msgctxt "accounts.syllabus"
+msgid "Plan saatını düzəlt — sillabusda fənnin BİR qrup üçün saatı yazılır (müəllimin ümumi dərs yükü deyil):"
+msgstr "Plan saatlerini düzelt — izlencede dersin BİR grup için saatleri yazılır (öğretim elemanının toplam yükü değil):"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Avtomatik hesab (tədris planı / dərs yükü): %(auto)s"
+msgstr "Otomatik hesap (öğretim planı / ders yükü): %(auto)s"
+
+msgctxt "accounts.syllabus"
+msgid "Plan saatını yadda saxla"
+msgstr "Plan saatlerini kaydet"
+
+msgctxt "accounts.syllabus"
+msgid "Avtomatik hesaba qayıt"
+msgstr "Otomatik hesaba dön"

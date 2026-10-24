@@ -150,6 +150,14 @@ class Syllabus(UUIDModel, TimeStampedModel):
             "Bağ ulduz formalıdır: mənbənin özü heç vaxt başqasına bağlı olmur."
         ),
     )
+    plan_hours_override = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text=(
+            "Kafedranın / tədris şöbəsinin əl ilə düzəltdiyi plan saatı (BİR qrup üçün): "
+            "{'lecture': .., 'seminar': .., 'lab': ..}. Boşdursa saat tədris planı / dərs yükündən hesablanır."
+        ),
+    )
     is_active = models.BooleanField(default=True, db_index=True)
 
     objects = models.Manager()

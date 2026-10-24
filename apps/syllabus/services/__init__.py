@@ -46,6 +46,12 @@ from .offerings import (  # noqa: F401
     syllabus_for_offering_obj,
 )
 from .plan_hours import seed_week_hours, set_plan_hours  # noqa: F401
+from .plan_override import (  # noqa: F401
+    can_override_plan_hours,
+    clean_override_hours,
+    set_plan_hours_override,
+    write_version_plan_hours,
+)
 from .queries import (  # noqa: F401
     QUEUE_SORT_KEYS,
     audit_entries,
@@ -152,6 +158,10 @@ __all__ = [
     "seed_week_hours",
     "section_data_map",
     "set_plan_hours",
+    "set_plan_hours_override",
+    "can_override_plan_hours",
+    "clean_override_hours",
+    "write_version_plan_hours",
     "sibling_queryset",
     "start_review",
     "structural_changes",

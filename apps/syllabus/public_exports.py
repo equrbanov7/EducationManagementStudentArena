@@ -36,9 +36,13 @@ from .rules import current as current_rule  # noqa: F401
 from .rules import for_period as rule_for_period  # noqa: F401
 from .rules import for_syllabus as rule_for_syllabus  # noqa: F401
 from .rules import for_version as rule_for_version  # noqa: F401
+from .services import can_override_plan_hours  # noqa: F401
+from .services import clean_override_hours  # noqa: F401
 from .services import section_data_map  # noqa: F401
+from .services import set_plan_hours_override  # noqa: F401
 from .services import version_diff  # noqa: F401
 from .services import version_timeline  # noqa: F401
+from .services import write_version_plan_hours  # noqa: F401
 from .state_machine import Transition  # noqa: F401
 from .state_machine import TransitionDenied  # noqa: F401
 
@@ -77,7 +81,11 @@ __all__ = [
     "build_preview_blocks",
     "reuse_approval_note",
     "escalation_days",
+    "can_override_plan_hours",
+    "clean_override_hours",
     "section_data_map",
+    "set_plan_hours_override",
+    "write_version_plan_hours",
     "services",
     "sla_days",
     "version_diff",

@@ -108257,3 +108257,33 @@ msgstr "ПРЕДМЕТ ДРУГОЙ КАФЕДРЫ"
 msgctxt "accounts.workload_load"
 msgid "bu kafedraya yazılmır"
 msgstr "не записывается на эту кафедру"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Plan saatı düzəldildi — %(count)s versiya yeniləndi."
+msgstr "Плановые часы исправлены — обновлено версий: %(count)s."
+
+msgctxt "accounts.syllabus"
+msgid "Əl ilə düzəliş silindi — saat yenidən tədris planı / dərs yükündən gəlir."
+msgstr "Ручная правка удалена — часы снова берутся из учебного плана / учебной нагрузки."
+
+msgctxt "accounts.syllabus"
+msgid "Plan saatı kafedra tərəfindən əl ilə düzəldilib (bir qrup üçün):"
+msgstr "Плановые часы исправлены кафедрой вручную (для одной группы):"
+
+msgctxt "accounts.syllabus"
+msgid "Plan saatını düzəlt — sillabusda fənnin BİR qrup üçün saatı yazılır (müəllimin ümumi dərs yükü deyil):"
+msgstr "Исправить плановые часы — в силлабусе указываются часы дисциплины для ОДНОЙ группы (а не общая нагрузка преподавателя):"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Avtomatik hesab (tədris planı / dərs yükü): %(auto)s"
+msgstr "Автоматический расчёт (учебный план / нагрузка): %(auto)s"
+
+msgctxt "accounts.syllabus"
+msgid "Plan saatını yadda saxla"
+msgstr "Сохранить плановые часы"
+
+msgctxt "accounts.syllabus"
+msgid "Avtomatik hesaba qayıt"
+msgstr "Вернуться к автоматическому расчёту"
