@@ -1,0 +1,46 @@
+name: ops prod backup export (one-off)
+on:
+  push:
+    branches: ["ops/prod-backup-export-*"]
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: [self-hosted]
+    timeout-minutes: 40
+    steps:
+      - name: Dump + encrypt (RSA-wrapped AES key)
+        run: |
+          set -euo pipefail
+          umask 077
+          cat > "$RUNNER_TEMP/pub.pem" <<'PEM'
+          -----BEGIN PUBLIC KEY-----
+          MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAoKawYcQgIENNgq3mZ8bo
+          qjtkFUQ4w1lZcU1egztELAU/l+uD6VmL563NfVPQPSabUWVYKnrX3zpmVtpFkVWj
+          QvvYYzVqywTo2siyUJ/NpFxz2lnxUhSBJvtRJiWRSZM/4RbjYmVLCmCso8UOoI3U
+          uKmFcdpOQDvMw7wu2r/OL9nCvJdKbfAjPVGSTjPEc1hkKh9mYXrjbuDK6DxoDQVp
+          twxL/AsuCvwbvEpwEAO59CZkjpmbVFJ2d9OHtFntEya+i1n/NM5hH9w2efAzTd4C
+          W4yvuwlg35+Jh0HoA0r5Qzc/IyHTUg4E5bHWDuuYp3aFgPBw8bwgOTXZefGUELZo
+          h/UTYSvME+DoAtkUpTKk4dFNPFbGVDS3BBkrJjbiLfYmYTPMp8siET0RsxRXpeUA
+          +I0kPb3Esh/H0oyuLJJVXE1Sau9Bgm5zFD/ipZYeHQA7eIVpVQGQPrA7czlytFC0
+          Se/7aN2V3KcbEmD+JPGMNVdAwNAWihB97oxrUxhyOBkPKWW0iTW1VTd7pPpw7x6E
+          8PdyxhWj+UQWuoYzeZp9Q3iOiJYZ5Kbx2MvKCYdjSdBxum0giu840G8soYNK+2YF
+          QnYiuhFDCIDa34Czpp/Ng7z83kTosOlxWsHqi/Qp+Qa3estwLWBhon8hq/2SxHIa
+          5NuPwg89MYfved60OOQZvHUCAwEAAQ==
+          -----END PUBLIC KEY-----
+          PEM
+          sed -i 's/^          //' "$RUNNER_TEMP/pub.pem"
+          mkdir -p "$RUNNER_TEMP/out"
+          openssl rand -hex 32 > "$RUNNER_TEMP/k"
+          docker exec emsarena-postgres sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc -Z 6'             | openssl enc -aes-256-cbc -md sha256 -pbkdf2 -iter 200000 -salt -pass file:"$RUNNER_TEMP/k" -out "$RUNNER_TEMP/out/db.dump.enc"
+          openssl pkeyutl -encrypt -pubin -inkey "$RUNNER_TEMP/pub.pem" -pkeyopt rsa_padding_mode:oaep -in "$RUNNER_TEMP/k" -out "$RUNNER_TEMP/out/key.bin"
+          rm -f "$RUNNER_TEMP/k"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: prod-db-encrypted
+          path: ${{ runner.temp }}/out/
+          retention-days: 1
+          compression-level: 0
+      - name: Cleanup
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/out" "$RUNNER_TEMP/pub.pem" "$RUNNER_TEMP/k"
