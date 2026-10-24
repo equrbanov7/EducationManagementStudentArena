@@ -7,7 +7,10 @@ Dərs
     Açılışda eyni tarix + saatda dərs VARSA o istifadə olunur; yeni sistemdə əvvəlcədən açılmış eyni gün +
     eyni növ dərs (başqa saatda) bir legacy slotunu udur — ikiqat qayıb saatının qarşısı alınır.
     ``--lessons-until``-dan SONRAKI tarixlər (gələcək) atılır. Xanası olub dərs sətri olmayan slot cutover
-    J12 kimi ``is_legacy_synthesised=True`` ilə bərpa olunur.
+    J12 kimi ``is_legacy_synthesised=True`` ilə bərpa olunur. HEÇ BİR xanası olmayan legacy dərs tarixi
+    (müəllim köhnə sistemdə günü əlavə edib, heç nə yazmayıb) YENİ dərs kimi yaradılmır — jurnalda tam boş
+    sütun olurdu (sahib 2026-10-24: «tam boş xana varsa sil»); sonrakı delta xana gətirsə dərs onda yaranır.
+    Mövcud dərsə toxunulmur; əvvəlcədən yaranmış boş sütunlar ``legacy_repair_empty_lessons`` ilə təmizlənir.
 
 Xana
     ``ie`` → iştirak, ``qb`` → qayıb (``excusable=1`` və ya üzrlü pəncərədə → üzrlü), 0–10 → iştirak + bal.
@@ -122,7 +125,6 @@ class LessonBook:
         )
         self.by_slot[(offering_id, date, start)] = lesson
         self.pending.append(lesson)
-        self.run.count("lesson.created_synthesised" if synthesised else "lesson.created")
         return lesson
 
     def _claim(self, lesson) -> None:
@@ -130,8 +132,14 @@ class LessonBook:
         if bucket and lesson in bucket:
             bucket.remove(lesson)
 
-    def flush(self) -> None:
-        self.run.bulk_create(self.Lesson, self.pending, "lessons")
+    def flush(self, used_lesson_ids) -> None:
+        """Yalnız ən azı bir YENİ xana alan təzə dərslər yazılır (boş sütun yaradılmır)."""
+
+        kept = [lesson for lesson in self.pending if lesson.pk in used_lesson_ids]
+        self.run.count("lesson.empty_not_created", len(self.pending) - len(kept))
+        for lesson in kept:
+            self.run.count("lesson.created_synthesised" if lesson.is_legacy_synthesised else "lesson.created")
+        self.run.bulk_create(self.Lesson, kept, "lessons")
         self.pending = []
 
 
@@ -242,7 +250,7 @@ def build_lessons_and_marks(run, slices: dict, enrollments: dict, *, until: date
         )
         touched[enrollment.pk] = enrollment
         run.count(f"mark.created_{status}")
-    book.flush()
+    book.flush({mark.lesson_id for mark in pending})
     run.bulk_create(LessonMark, pending, "marks")
     if touched:
         from apps.registrar.public import gradebook
