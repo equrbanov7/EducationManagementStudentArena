@@ -544,6 +544,12 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Sahib 2026-10-25: yükü verən kafedra (ştat bir kafedrada, saathesabı başqasında ola bilər). */
+.wlm-table__chair {
+  font-size: 0.75rem;
+  color: var(--ems-neutral-600, #5b6b7c);
+}
+
 .wlm-table tfoot th,
 .wlm-table tfoot td {
   font-weight: 700;

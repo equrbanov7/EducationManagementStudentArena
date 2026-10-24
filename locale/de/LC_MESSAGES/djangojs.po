@@ -3215,3 +3215,7 @@ msgstr "Dieser Dateityp wird nicht unterstützt — wählen Sie PDF, TXT, PNG od
 
 msgid "Fayl çıxarıldı."
 msgstr "Datei entfernt."
+
+#, python-format
+msgid "kənar, ştat: %(chair)s"
+msgstr "extern, Planstelle: %(chair)s"

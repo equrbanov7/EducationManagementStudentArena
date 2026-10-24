@@ -101,16 +101,24 @@ def build_chair_profile_section(request, section, *, active_organization, allowe
 
     memberships = detail.get("teacher_memberships") or []
     teacher_ids = [membership.user_id for membership in memberships]
+    # ``chair_id`` — ştatı BAŞQA kafedrada olub bu kafedradan yalnız saat alan müəllim («kənar») ayrıca
+    # işarələnir və ştat/norma cəmlərinə düşmür; öz müəllimin başqa kafedradakı saatı ayrıca yazılır (2026-10-25).
     load = chair_staff_load(
         organization=active_organization,
         teacher_ids=teacher_ids,
         academic_year=section["academic_year"],
+        chair_id=chair.id,
     )
     coverage = _syllabus_coverage(active_organization, chair, teacher_ids)
 
     staff_rows = []
     employment_counts = {"stat": 0, "evezcilik": 0, "saathesabi": 0}
+    outside_count = 0
+    seen_teachers = set()
     for membership in memberships:
+        if membership.user_id in seen_teachers:
+            continue  # bir müəllimin kafedrada iki müəllim üzvlüyü (məs. teacher + assistant) — bir sətir
+        seen_teachers.add(membership.user_id)
         summary = load["by_teacher"].get(membership.user_id, {})
         syllabus_bucket = coverage["by_teacher"].get(membership.user_id, {"total": 0, "approved": 0})
         # Ştat növü: `staff_fraction` < 1 → əvəzçilik, saathesabı saatı varsa
@@ -120,21 +128,31 @@ def build_chair_profile_section(request, section, *, active_organization, allowe
             fraction = float(summary.get("staff_fraction") or 0)
         except (TypeError, ValueError):
             fraction = 0.0
-        if summary.get("hourly_paid_hours"):
+        is_outside = bool(summary.get("is_outside"))
+        if is_outside:
+            employment = "kenar"
+            outside_count += 1
+        elif summary.get("hourly_paid_hours"):
             employment = "saathesabi"
         elif fraction and fraction < 1:
             employment = "evezcilik"
         else:
             employment = "stat"
-        employment_counts[employment] += 1
+        if not is_outside:
+            employment_counts[employment] += 1
         staff_rows.append(
             {
                 "user_id": str(membership.user_id),
                 "name": membership.user.get_full_name() or membership.user.username,
                 "position_label": summary.get("position_label") or "",
                 "employment": employment,
-                "staff_fraction": summary.get("staff_fraction") or "",
-                "hours": summary.get("total_hours") or 0,
+                "is_outside": is_outside,
+                "home_chair_name": summary.get("home_chair_name") or "",
+                "staff_fraction": "" if is_outside else summary.get("staff_fraction") or "",
+                # Kənar müəllim — yalnız bu kafedranın saatı; öz müəllim — ümumi saat + başqa kafedralardakı.
+                "hours": summary.get("chair_hours", 0) if is_outside else summary.get("total_hours") or 0,
+                "other_chair_hours": 0 if is_outside else summary.get("other_chair_hours") or 0,
+                "other_chairs": [] if is_outside else summary.get("other_chairs") or [],
                 "norm_hours": summary.get("norm_hours") or 0,
                 "fill_percent": summary.get("fill_percent") or 0,
                 "load_band": summary.get("load_band") or "free",
@@ -189,7 +207,15 @@ def build_chair_profile_section(request, section, *, active_organization, allowe
     ]
     section["filter_count_label"] = pgettext(_CTX, "Nəticə: %(count)d müəllim") % {"count": len(staff_rows)}
     section["kpi_tiles"] = [
-        {"label": pgettext(_CTX, "MÜƏLLİM"), "value": detail.get("total_teacher_count", 0)},
+        {
+            "label": pgettext(_CTX, "MÜƏLLİM"),
+            "value": len(seen_teachers) - outside_count,
+            "note": (
+                pgettext(_CTX, "+ %(count)d kənar kafedradan (saathesabı)") % {"count": outside_count}
+                if outside_count
+                else ""
+            ),
+        },
         {
             "label": pgettext(_CTX, "ŞTAT VAHİDİ CƏMİ"),
             "value": load["staff_fraction_total"],

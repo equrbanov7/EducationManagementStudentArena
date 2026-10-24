@@ -327,7 +327,7 @@ def _confirmation_block(actor, organization, user, year: str, rows) -> dict:
 # ── Kafedra profili (ekran 02) — ştat və yük xülasəsi ────────────────────────
 
 
-def chair_staff_load(*, organization, teacher_ids, academic_year: str = "") -> dict:
+def chair_staff_load(*, organization, teacher_ids, academic_year: str = "", chair_id=None) -> dict:
     """Kafedra profilinin ştat/yük qatı — müəllim id → xülasə + kafedra cəmi.
 
     NİYƏ BURADA? «Kafedra profili» ekranı ``apps.accounts``-dadır və dərs yükü
@@ -339,19 +339,38 @@ def chair_staff_load(*, organization, teacher_ids, academic_year: str = "") -> d
     ``dept_load`` status ailəsi (``core/ui/status_catalog.py``) üçün hər müəllimə
     bant açarı da verilir: `free` (<70%), `normal` (70–100%), `loaded` (100–120%),
     `risk` (>120%).
+
+    KAFEDRALAR ARASI (sahib 2026-10-25): müəllim ştat olaraq bir kafedrada, saathesabı başqa kafedranın
+    tapşırığında ola bilər. Hər xülasədə ``hours_by_chair`` (kafedra id → saat) və nəticədə ``chair_names``
+    var — oxucu «başqa kafedrada: N saat»ı öz kafedrasına görə hesablayır. ``chair_id`` verilərsə (kafedra
+    profili) əlavə olaraq: ``home_chair_id``/``home_chair_name`` (ştat kafedrası), ``is_outside`` (ştatı başqa
+    kafedradadır — bu kafedraya yalnız saat verir), ``chair_hours`` (bu kafedradakı saat), ``other_chair_hours``
+    və ``other_chairs`` (ştat kafedrasından kənar saatlar); kənar müəllim ştat/norma cəmlərinə DÜŞMÜR.
     """
+    from django.apps import apps as django_apps
     from django.contrib.auth import get_user_model
 
     ids = [tid for tid in teacher_ids if tid]
     summaries: dict = {}
     totals = {"teachers": len(ids), "hours": 0, "norm_hours": 0, "hourly_paid_hours": 0}
     if not ids:
-        return {"by_teacher": summaries, "totals": totals, "staff_fraction_total": 0.0}
+        return {"by_teacher": summaries, "totals": totals, "staff_fraction_total": 0.0, "chair_names": {}}
 
     users = {user.pk: user for user in get_user_model().objects.filter(pk__in=ids)}
     staff_fraction_total = 0.0
     # Toplu aqreqat: hər müəllimə 5 sorğu əvəzinə cəmi 2 sorğu (QA 2026-09-05 P2-3).
     bulk = teacher_workload_summaries(organization=organization, teacher_ids=ids, academic_year=academic_year)
+    from .services.people import home_chairs
+
+    homes = home_chairs(organization, ids) if chair_id else {}
+    chair_ids = {key for item in bulk.values() for key in (item.get("hours_by_chair") or {})}
+    chair_ids |= {home["id"] for home in homes.values()}
+    chair_names = {
+        str(pk): name
+        for pk, name in django_apps.get_model("organizations", "OrgUnit")
+        .objects.filter(organization=organization, pk__in=chair_ids)
+        .values_list("pk", "name")
+    }
     for teacher_id in ids:
         user = users.get(teacher_id)
         if user is None:
@@ -369,6 +388,9 @@ def chair_staff_load(*, organization, teacher_ids, academic_year: str = "") -> d
         summary["load_band"] = band
         summary["position_label"] = str(dict(TeacherPosition.choices).get(summary.get("position"), ""))
         summaries[teacher_id] = summary
+        if chair_id and _attach_cross_chair(summary, homes.get(teacher_id), str(chair_id), chair_names):
+            totals["teachers"] -= 1
+            continue  # kənar müəllim: ştatı başqa kafedradadır — bu kafedranın ştat/norma cəmlərinə düşmür
         totals["hours"] += int(summary.get("total_hours") or 0)
         totals["norm_hours"] += int(summary.get("norm_hours") or 0)
         totals["hourly_paid_hours"] += int(summary.get("hourly_paid_hours") or 0)
@@ -378,7 +400,36 @@ def chair_staff_load(*, organization, teacher_ids, academic_year: str = "") -> d
             pass
 
     totals["fill_percent"] = int(round(totals["hours"] * 100 / totals["norm_hours"])) if totals["norm_hours"] else 0
-    return {"by_teacher": summaries, "totals": totals, "staff_fraction_total": round(staff_fraction_total, 2)}
+    return {
+        "by_teacher": summaries,
+        "totals": totals,
+        "staff_fraction_total": round(staff_fraction_total, 2),
+        "chair_names": chair_names,
+    }
+
+
+def other_chair_hours(summary: dict, home_chair_id, chair_names: dict) -> tuple[int, list[dict]]:
+    """(ştat kafedrasından kənar saat, [{"name", "hours"}]) — ``chair_staff_load`` xülasəsindən."""
+    home = str(home_chair_id or "")
+    others = [
+        {"name": chair_names.get(key, ""), "hours": hours}
+        for key, hours in (summary.get("hours_by_chair") or {}).items()
+        if key != home and hours
+    ]
+    others.sort(key=lambda item: (-item["hours"], item["name"]))
+    return sum(item["hours"] for item in others), others
+
+
+def _attach_cross_chair(summary: dict, home, chair_id: str, chair_names: dict) -> bool:
+    """Kafedra profili sətri: ştat kafedrası, bu kafedradakı saat, kənar saatlar. Qaytarır: müəllim kənardırmı."""
+    home_id = (home or {}).get("id", "")
+    is_outside = bool(home_id and home_id != chair_id)
+    summary["home_chair_id"] = home_id
+    summary["home_chair_name"] = (home or {}).get("name", "")
+    summary["is_outside"] = is_outside
+    summary["chair_hours"] = int((summary.get("hours_by_chair") or {}).get(chair_id, 0))
+    summary["other_chair_hours"], summary["other_chairs"] = other_chair_hours(summary, home_id or chair_id, chair_names)
+    return is_outside
 
 
 def position_labels() -> dict:
@@ -391,6 +442,7 @@ __all__ = [
     "build_distribution_context",
     "build_my_workload_context",
     "chair_staff_load",
+    "other_chair_hours",
     "position_labels",
     "teachers_for_offering",
     "teachers_for_offerings",

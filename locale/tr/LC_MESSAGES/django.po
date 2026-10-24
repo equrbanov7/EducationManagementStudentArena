@@ -107378,3 +107378,61 @@ msgstr "Sınav Merkezinde yapılan ara sınav puanı sınavdan otomatik olarak y
 msgctxt "registrar.journal"
 msgid "imtahandan avtomatik"
 msgstr "sınavdan otomatik"
+
+msgctxt "accounts.workload"
+msgid "Müəllim axtar…"
+msgstr "Öğretim üyesi ara…"
+
+msgctxt "accounts.chair_profile"
+msgid "Kənar kafedradan"
+msgstr "Başka bölümden"
+
+#, python-format
+msgctxt "accounts.chair_profile"
+msgid "Ştat: %(chair)s"
+msgstr "Kadro: %(chair)s"
+
+msgctxt "accounts.chair_profile"
+msgid "bu kafedrada"
+msgstr "bu bölümde"
+
+#, python-format
+msgctxt "accounts.chair_profile"
+msgid "başqa kafedrada: %(hours)s saat"
+msgstr "diğer bölümlerde: %(hours)s saat"
+
+#, python-format
+msgctxt "accounts.chair_profile"
+msgid "+ %(count)d kənar kafedradan (saathesabı)"
+msgstr "+ %(count)d başka bölümden (ders saati ücretli)"
+
+#, python-format
+msgctxt "accounts.hr_analytics"
+msgid "başqa kafedrada: %(hours)s saat"
+msgstr "diğer bölümlerde: %(hours)s saat"
+
+msgctxt "accounts.hr_analytics"
+msgid "O cümlədən başqa kafedrada (saat)"
+msgstr "Bunun diğer bölümlerdeki kısmı (saat)"
+
+msgctxt "accounts.workload_load"
+msgid "Yoxlanmadı — sətir başqa kafedranındır"
+msgstr "Kontrol edilmedi — satır başka bölüme ait"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Fənn başqa kafedraya aiddir: %(chair)s — sətir o kafedranın yükündədir, burada yazılmadı"
+msgstr "Ders başka bölüme ait: %(chair)s — satır o bölümün yükünde, buraya yazılmadı"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Fənn başqa kafedraya aiddir: %(chair)s — o kafedranın faylı ilə yüklənməlidir"
+msgstr "Ders başka bölüme ait: %(chair)s — o bölümün dosyasıyla yüklenmelidir"
+
+msgctxt "accounts.workload_load"
+msgid "BAŞQA KAFEDRANIN FƏNNİ"
+msgstr "BAŞKA BÖLÜMÜN DERSİ"
+
+msgctxt "accounts.workload_load"
+msgid "bu kafedraya yazılmır"
+msgstr "bu bölüme yazılmaz"

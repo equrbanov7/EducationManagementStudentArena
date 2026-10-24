@@ -79,14 +79,25 @@ yüklü / risk — rəng + MƏTN (handoff §7).
                             <th scope="row">{{ row.name }}</th>
                             <td>{{ row.position_label|default:"—" }}</td>
                             <td>
-                                {% if row.employment == "stat" %}{% trans "Ştat" context "accounts.chair_profile" %}
+                                {% if row.is_outside %}{% trans "Kənar kafedradan" context "accounts.chair_profile" %}
+                                <div class="cp-muted">{% blocktrans trimmed with chair=row.home_chair_name|default:"—" context "accounts.chair_profile" %}Ştat: {{ chair }}{% endblocktrans %}</div>
+                                {% elif row.employment == "stat" %}{% trans "Ştat" context "accounts.chair_profile" %}
                                 {% elif row.employment == "evezcilik" %}{% trans "Əvəzçilik" context "accounts.chair_profile" %}
                                 {% else %}{% trans "Saathesabı" context "accounts.chair_profile" %}{% endif %}
                             </td>
                             <td class="ems-table__num">{{ row.staff_fraction|default:"—" }}</td>
-                            <td class="ems-table__num">{{ row.hours }}</td>
+                            <td class="ems-table__num">
+                                {{ row.hours }}
+                                {% if row.is_outside %}<div class="cp-muted">{% trans "bu kafedrada" context "accounts.chair_profile" %}</div>
+                                {% elif row.other_chair_hours %}<div class="cp-muted" title="{% for item in row.other_chairs %}{{ item.name }}: {{ item.hours }}{% if not forloop.last %}; {% endif %}{% endfor %}">{% blocktrans trimmed with hours=row.other_chair_hours context "accounts.chair_profile" %}başqa kafedrada: {{ hours }} saat{% endblocktrans %}</div>{% endif %}
+                            </td>
+                            {% if row.is_outside %}
+                            <td class="ems-table__num">—</td>
+                            <td>—</td>
+                            {% else %}
                             <td class="ems-table__num">{{ row.norm_hours }}</td>
                             <td>{% ems_status_badge "dept_load" row.load_band %} <span class="ems-table__num">{{ row.fill_percent }}%</span></td>
+                            {% endif %}
                             <td class="ems-table__num">{{ row.syllabus_approved }} / {{ row.syllabus_total }}</td>
                         </tr>
                         {% endfor %}

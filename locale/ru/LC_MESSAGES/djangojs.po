@@ -3162,3 +3162,7 @@ msgstr "Этот тип файла не поддерживается — выб�
 
 msgid "Fayl çıxarıldı."
 msgstr "Файл удалён."
+
+#, python-format
+msgid "kənar, ştat: %(chair)s"
+msgstr "внешний, штат: %(chair)s"

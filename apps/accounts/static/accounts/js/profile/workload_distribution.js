@@ -548,7 +548,8 @@
                 "?chair=" +
                 encodeURIComponent(params.chair) +
                 "&year=" +
-                encodeURIComponent(params.year)
+                encodeURIComponent(params.year) +
+                "&outside=1"
         )
             .then(function (payload) {
                 var select = q("[data-wl-assign-teacher]");
@@ -556,7 +557,13 @@
                 var html = '<option value="">' + esc(gettext("Vakant (müəllim təyin edilməyib)")) + "</option>";
                 (payload.results || []).forEach(function (item) {
                     var suffix = item.current_hours != null ? " · " + item.current_hours + "s" : "";
-                    var mark = item.is_chair_member ? "" : " " + gettext("(kafedraya bağlanmamış)");
+                    // Başqa kafedranın müəllimi (saathesabı): ştat kafedrası yazılır; təyinatda bu kafedrada
+                    // ƏLAVƏ üzvlük alır, ştatı dəyişmir (sahib 2026-10-25).
+                    var mark = item.is_outside
+                        ? " — " + fmt(gettext("kənar, ştat: %(chair)s"), { chair: item.home_chair || "—" })
+                        : item.is_chair_member
+                          ? ""
+                          : " " + gettext("(kafedraya bağlanmamış)");
                     html +=
                         '<option value="' +
                         esc(item.id) +

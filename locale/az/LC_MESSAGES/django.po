@@ -107480,3 +107480,61 @@ msgstr "İmtahan Mərkəzində keçirilən midterm balı imtahandan avtomatik ya
 msgctxt "registrar.journal"
 msgid "imtahandan avtomatik"
 msgstr "imtahandan avtomatik"
+
+msgctxt "accounts.workload"
+msgid "Müəllim axtar…"
+msgstr "Müəllim axtar…"
+
+msgctxt "accounts.chair_profile"
+msgid "Kənar kafedradan"
+msgstr "Kənar kafedradan"
+
+#, python-format
+msgctxt "accounts.chair_profile"
+msgid "Ştat: %(chair)s"
+msgstr "Ştat: %(chair)s"
+
+msgctxt "accounts.chair_profile"
+msgid "bu kafedrada"
+msgstr "bu kafedrada"
+
+#, python-format
+msgctxt "accounts.chair_profile"
+msgid "başqa kafedrada: %(hours)s saat"
+msgstr "başqa kafedrada: %(hours)s saat"
+
+#, python-format
+msgctxt "accounts.chair_profile"
+msgid "+ %(count)d kənar kafedradan (saathesabı)"
+msgstr "+ %(count)d kənar kafedradan (saathesabı)"
+
+#, python-format
+msgctxt "accounts.hr_analytics"
+msgid "başqa kafedrada: %(hours)s saat"
+msgstr "başqa kafedrada: %(hours)s saat"
+
+msgctxt "accounts.hr_analytics"
+msgid "O cümlədən başqa kafedrada (saat)"
+msgstr "O cümlədən başqa kafedrada (saat)"
+
+msgctxt "accounts.workload_load"
+msgid "Yoxlanmadı — sətir başqa kafedranındır"
+msgstr "Yoxlanmadı — sətir başqa kafedranındır"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Fənn başqa kafedraya aiddir: %(chair)s — sətir o kafedranın yükündədir, burada yazılmadı"
+msgstr "Fənn başqa kafedraya aiddir: %(chair)s — sətir o kafedranın yükündədir, burada yazılmadı"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Fənn başqa kafedraya aiddir: %(chair)s — o kafedranın faylı ilə yüklənməlidir"
+msgstr "Fənn başqa kafedraya aiddir: %(chair)s — o kafedranın faylı ilə yüklənməlidir"
+
+msgctxt "accounts.workload_load"
+msgid "BAŞQA KAFEDRANIN FƏNNİ"
+msgstr "BAŞQA KAFEDRANIN FƏNNİ"
+
+msgctxt "accounts.workload_load"
+msgid "bu kafedraya yazılmır"
+msgstr "bu kafedraya yazılmır"

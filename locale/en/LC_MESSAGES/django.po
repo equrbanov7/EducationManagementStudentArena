@@ -107970,3 +107970,61 @@ msgstr "The midterm score of an exam held in the Exam Center is written automati
 msgctxt "registrar.journal"
 msgid "imtahandan avtomatik"
 msgstr "automatically from the exam"
+
+msgctxt "accounts.workload"
+msgid "Müəllim axtar…"
+msgstr "Search teacher…"
+
+msgctxt "accounts.chair_profile"
+msgid "Kənar kafedradan"
+msgstr "From another department"
+
+#, python-format
+msgctxt "accounts.chair_profile"
+msgid "Ştat: %(chair)s"
+msgstr "Staff post: %(chair)s"
+
+msgctxt "accounts.chair_profile"
+msgid "bu kafedrada"
+msgstr "in this department"
+
+#, python-format
+msgctxt "accounts.chair_profile"
+msgid "başqa kafedrada: %(hours)s saat"
+msgstr "in other departments: %(hours)s h"
+
+#, python-format
+msgctxt "accounts.chair_profile"
+msgid "+ %(count)d kənar kafedradan (saathesabı)"
+msgstr "+ %(count)d from other departments (hourly)"
+
+#, python-format
+msgctxt "accounts.hr_analytics"
+msgid "başqa kafedrada: %(hours)s saat"
+msgstr "in other departments: %(hours)s h"
+
+msgctxt "accounts.hr_analytics"
+msgid "O cümlədən başqa kafedrada (saat)"
+msgstr "Of which in other departments (hours)"
+
+msgctxt "accounts.workload_load"
+msgid "Yoxlanmadı — sətir başqa kafedranındır"
+msgstr "Not checked — the line belongs to another department"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Fənn başqa kafedraya aiddir: %(chair)s — sətir o kafedranın yükündədir, burada yazılmadı"
+msgstr "The subject belongs to another department: %(chair)s — the line is in that department's load and was not written here"
+
+#, python-format
+msgctxt "accounts.workload_load"
+msgid "Fənn başqa kafedraya aiddir: %(chair)s — o kafedranın faylı ilə yüklənməlidir"
+msgstr "The subject belongs to another department: %(chair)s — it must be uploaded with that department's file"
+
+msgctxt "accounts.workload_load"
+msgid "BAŞQA KAFEDRANIN FƏNNİ"
+msgstr "OTHER DEPARTMENT'S SUBJECT"
+
+msgctxt "accounts.workload_load"
+msgid "bu kafedraya yazılmır"
+msgstr "not written to this department"

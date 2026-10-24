@@ -109,18 +109,18 @@ def _placement(unit_id, unit_path: str, unit_type: str, units: dict) -> tuple[st
 
 
 def _pick_membership(rows: list[dict]) -> dict | None:
-    """Müəllimin «əsas» üzvlüyü: akademik rol → kafedra vahidi → əsas → yüksək səviyyə → köhnə."""
+    """Müəllimin ŞTAT üzvlüyü — dərs yükü modulunun qaydası (``workload.public.home_chair_rank``).
+
+    Sahib 2026-10-25: başqa kafedranın yükünü alan müəllimə həmin kafedrada ƏLAVƏ (``is_primary=False``)
+    müəllim üzvlüyü verilir. Əvvəlki sıra «akademik rol» ilə başlayırdı — əsas üzvlüyü ``chair_head`` olan kafedra
+    müdiri, vahidsiz (``scope_unit`` boş) müəllim və s. ştatda saathesabı kafedrasına düşürdü. İndi: kafedra
+    vahidi → əsas → akademik rol → yüksək səviyyə → köhnə; kafedrasızlar üçün əvvəlki kimi akademik rol önə."""
     if not rows:
         return None
+    from apps.workload.public import home_chair_rank
 
     def rank(row):
-        return (
-            row["role__name"] not in _TEACHER_ROLES,
-            row["scope_unit__unit_type"] not in _CHAIR_TYPES,
-            not row["is_primary"],
-            -(row["role__level"] or 0),
-            row["created_at"],
-        )
+        return (*home_chair_rank(row), row["role__name"] not in _TEACHER_ROLES)
 
     return sorted(rows, key=rank)[0]
 
@@ -357,13 +357,20 @@ def _admin_label(admin_roles, staff_position: str) -> str:
 
 
 def _attach_load(rows, organization, academic_year, chair_staff_load) -> None:
-    load = chair_staff_load(
+    from apps.workload.public import other_chair_hours
+
+    result = chair_staff_load(
         organization=organization, teacher_ids=[row["id"] for row in rows], academic_year=academic_year
-    )["by_teacher"]
+    )
+    load, chair_names = result["by_teacher"], result.get("chair_names") or {}
     for row in rows:
         summary = load.get(row["id"]) or {}
         hours = int(summary.get("total_hours") or 0)
         row["planned_load"] = hours
+        # Sahib 2026-10-25: ümumi saat ştat kafedrasındadır; başqa kafedranın tapşırığından gələn saat ayrıca.
+        row["other_chair_hours"], row["other_chairs"] = (
+            other_chair_hours(summary, row["chair_id"], chair_names) if row["chair_id"] else (0, [])
+        )
         row["norm_hours"] = int(summary.get("norm_hours") or 0)
         row["hourly_paid_hours"] = int(summary.get("hourly_paid_hours") or 0)
         row["fill_percent"] = int(summary.get("fill_percent") or 0)

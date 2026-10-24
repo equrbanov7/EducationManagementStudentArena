@@ -95,7 +95,9 @@
                     : "";
                 return (
                     "<tr>" +
-                    "<td>" + esc(row.subject) + "</td>" +
+                    "<td>" + esc(row.subject) +
+                    (row.chair_name ? '<div class="wlm-table__chair">' + esc(row.chair_name) + "</div>" : "") +
+                    "</td>" +
                     "<td>" + esc(row.groups) + "</td>" +
                     "<td>" + esc(row.activity_label) + "</td>" +
                     '<td class="wlm-table__num">' + esc(row.hours) + "</td>" +
