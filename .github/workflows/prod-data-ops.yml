@@ -86,13 +86,22 @@
 #       təkrar imtahan, açılış müəllimi, təsdiqlənmiş sillabus); çatışmayan müəllim FİN-siz, tələbə/qrup/açılış
 #       yaradılır; bütün fazalar BİR tranzaksiyadadır, idempotentdir. `date_to` → --lessons-until (boş = bu gün).
 #       Loga YALNIZ saylar; adlı siyahı + hesabat şifrəli artifaktdadır.
-#   legacy_repair_empty_lessons — köhnə sistemdən köçürülmüş, heç bir xanası/mövzusu/düzəlişi olmayan KEÇMİŞ dərsləri
-#       (jurnalın tam boş sütunlarını) silir (sahib 2026-10-24: «boşdursa silinsin» — bağlı jurnallar da,
-#       --include-locked). Müəllimin yeni sistemdə açdığı dərsə və bu gün/gələcək dərsə toxunulmur; hər dəstə
-#       açılış üzrə AuditLog snapshot-u yazır. Loga YALNIZ saylar (--show 0, aktor maskalanır).
+#   legacy_repair_empty_lessons — real xanası (bal / iə / ü/q), mövzusu və düzəlişi olmayan KEÇMİŞ dərsləri (jurnalın
+#       məzmunsuz sütunlarını) silir (sahib 2026-10-24: «boşdursa silinsin; bir neçə tələbəyə “qb” yazılıbsa belə
+#       silinsin»): köçürülmüş tam boş sütun + yalnız balsız «qb» xanalı sütun (--include-absent-only; xanalar da
+#       silinir, qayıb saatı yenidən hesablanır) + müəllimin yeni sistemdə açdığı keçmiş sütun
+#       (--include-teacher-lessons) + bağlı jurnallar (--include-locked). Bu gün/gələcək dərsə və son 3 gündə
+#       yaradılan / tarixli müəllim dərsinə (TEACHER_GRACE_DAYS) toxunulmur; hər dəstə açılış üzrə AuditLog
+#       snapshot-u (silinən «qb» xanaları daxil) yazır.
+#       Loga YALNIZ saylar (--show 0, aktor maskalanır).
 #   sync_midterm_scores — midterm nəticələrini imtahanın jurnal bağlantısı ilə Midterm xanasına yazır, fənn
 #       dəyişibsə köhnə jurnalda bu imtahanın yazdığı xanaları silir. `teacher` = imtahanın slug-ı (boş = bütün
 #       midterm imtahanları). Bildiriş göndərilmir; idempotent. Loga yalnız sayların sətri.
+#   infer_timetable_from_lessons — müəllimlərin FAKTİKİ keçdiyi dərslərdən (jurnal `Lesson`) canlı cədvəl slotları
+#       (sahib 2026-10-24): müəllim × gün × saat × növ; eyni tarixdə birlikdə keçən qruplar = BİR axın (patok, bölünmür);
+#       üst/alt həftə tarixlərin paritetindən; `period`, `teacher` (boş = hamı), `date_from` / `date_to` (boş = semestr
+#       əvvəli / bu gün). Mövcud slot silinmir/dəyişmir, toqquşan yazılmır; idempotent. Loga YALNIZ saylar; CSV
+#       hesabat (müəllim adları) şifrəli artifaktdadır.
 #   shrink_avatars — mövcud avatarlar ≤512 px WebP-yə (PERF-2 H5, 2026-10-17); orijinal fayllar SİLİNMİR,
 #       `updated_at` dəyişmir. Loga yalnız yekun saylar.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
@@ -149,6 +158,7 @@ on:
           - legacy_delta_apply
           - legacy_repair_empty_lessons
           - sync_midterm_scores
+          - infer_timetable_from_lessons
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -243,7 +253,7 @@ on:
         type: boolean
         default: false
       period:
-        description: "import_timetable_docx / assign_task_rows_from_timetable / backfill_teacher_lessons: semestr (məs. Payız 2026/2027)"
+        description: "import_timetable_docx / assign_task_rows_from_timetable / backfill_teacher_lessons / infer_timetable_from_lessons: semestr (məs. Payız 2026/2027)"
         required: false
         default: "Payız 2026/2027"
       replace_group_slots:
@@ -252,15 +262,15 @@ on:
         type: boolean
         default: false
       teacher:
-        description: "backfill_teacher_lessons: müəllimin istifadəçi adı (ad.soyad) · purge_trial_exam / sync_midterm_scores: imtahanın slug-ı"
+        description: "backfill_teacher_lessons / infer_timetable_from_lessons (boş = hamı): müəllimin istifadəçi adı (ad.soyad) · purge_trial_exam / sync_midterm_scores: imtahanın slug-ı"
         required: false
         default: ""
       date_from:
-        description: "backfill_teacher_lessons / dedupe_notifications: başlanğıc tarix (YYYY-MM-DD)"
+        description: "backfill_teacher_lessons / dedupe_notifications / infer_timetable_from_lessons (boş = semestr əvvəli): başlanğıc tarix (YYYY-MM-DD)"
         required: false
         default: ""
       date_to:
-        description: "backfill_teacher_lessons / dedupe_notifications: son tarix (YYYY-MM-DD, bu gündən sonra yox; dedupe-da boş = bu gün) · legacy_delta_apply: --lessons-until"
+        description: "backfill_teacher_lessons / dedupe_notifications / infer_timetable_from_lessons: son tarix (YYYY-MM-DD, bu gündən sonra yox; dedupe / infer-də boş = bu gün) · legacy_delta_apply: --lessons-until"
         required: false
         default: ""
       replace_teacher_slots:
@@ -560,11 +570,13 @@ jobs:
               custom_apply=1
               ;;
             legacy_repair_empty_lessons)
-              # Sahib 2026-10-24: köçürülmüş tam boş dərs sütunları — bağlı jurnallar da («boşdursa silinsin»).
+              # Sahib 2026-10-24: məzmunsuz keçmiş sütunlar — bağlı jurnallar, yalnız «qb» xanalı və müəllimin
+              # açdığı sütunlar da («boşdursa silinsin; “qb” yazılıbsa belə silinsin»).
               # Loga ŞƏXS ADI düşməsin: cədvəl yox (--show 0), aktor maskalanır.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
-              args=(--organization "$ORG" --include-locked --show 0 --actor "$actor")
+              args=(--organization "$ORG" --include-locked --include-absent-only --include-teacher-lessons
+                    --show 0 --actor "$actor")
               if [ "$APPLY" = "true" ]; then
                 args+=(--apply --i-know-this-is-production)
               fi
@@ -578,6 +590,29 @@ jobs:
                   || { echo "teacher (imtahanın slug-ı) formatı: ad-XXXXXX" >&2; exit 2; }
                 args+=("--exam=$TEACHER")
               fi
+              ;;
+            infer_timetable_from_lessons)
+              # Sahib 2026-10-24: keçirilmiş dərslərdən cədvəl. CSV (müəllim adları) → şifrəli artifakt; loga yalnız saylar.
+              match "$PERIOD" '^(Payız|Yaz|Yay) 20[0-9]{2}/20[0-9]{2}$' || { echo "period formatı: «Payız 2026/2027»" >&2; exit 2; }
+              args=(--org "$ORG" --period "$PERIOD" --report "/tmp/timetable_infer_${GITHUB_RUN_ID}.csv")
+              if [ -n "$TEACHER" ]; then
+                match "$TEACHER" '^[A-Za-z0-9._-]{1,150}$' || { echo "teacher formatı: ^[A-Za-z0-9._-]+$" >&2; exit 2; }
+                args+=("--teacher=$TEACHER")
+              fi
+              if [ -n "$DATE_FROM" ]; then
+                match "$DATE_FROM" '^20[0-9]{2}-[01][0-9]-[0-3][0-9]$' || { echo "date_from formatı: YYYY-MM-DD" >&2; exit 2; }
+                args+=(--date-from "$DATE_FROM")
+              fi
+              if [ -n "$DATE_TO" ]; then
+                match "$DATE_TO" '^20[0-9]{2}-[01][0-9]-[0-3][0-9]$' || { echo "date_to formatı: YYYY-MM-DD" >&2; exit 2; }
+                args+=(--date-to "$DATE_TO")
+              fi
+              if [ "$APPLY" = "true" ]; then
+                actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+                echo "::add-mask::$actor"
+                args+=(--apply --actor "$actor" --i-know-this-is-production)
+              fi
+              custom_apply=1
               ;;
             *)
               echo "icazəsiz əmr: $COMMAND" >&2; exit 2
@@ -666,8 +701,22 @@ jobs:
             sed -E -e 's/^[^ []+ (\[[a-z_]+\])/*** \1/' -e 's/\([^ ()]+\.[^ ()]+\)/(***)/g' "$RUNNER_TEMP/out.log" | cut -c1-200 | tail -n 200 > "$RUNNER_TEMP/summary.log"
             cat "$RUNNER_TEMP/summary.log"
             test "${status:-0}" = 0 || exit "$status"
+          elif [ "$COMMAND" = "infer_timetable_from_lessons" ]; then
+            # Loga YALNIZ «timetable_infer: açar=say …» sətirləri (əmr ad çap etmir; yenə də süzülür) və rədd kodu;
+            # sətir-sətir CSV (müəllim adları) şifrəli artifakta gedir (aşağıdakı addım).
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^timetable_infer: [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            docker exec "$APP_CONTAINER" cat "/tmp/timetable_infer_${GITHUB_RUN_ID}.csv" > "$RUNNER_TEMP/details.csv" 2>/dev/null || true
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
           elif [ "$COMMAND" = "legacy_repair_empty_lessons" ] || [ "$COMMAND" = "sync_midterm_scores" ]; then
             # Loga YALNIZ saylar: aktor sətri atılır, xəta olarsa yalnız CommandError kodu.
+            # Xülasə açarlarında «:» olmamalıdır (`  açar : dəyər`) — test: test_repair_empty_lessons.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^(===.*===|  [^:]+ : .*|  \(DRY-RUN.*|(YAZILDI|DRY-RUN).*: rəsmi .*)$' "$RUNNER_TEMP/out.log" \
               | grep -v 'Aktor:' | cut -c1-300 > "$RUNNER_TEMP/summary.log" || true
@@ -692,7 +741,7 @@ jobs:
           rm -f "$RUNNER_TEMP/summary.log"
       - name: 🔑 Hesabat + parollar (serverdə saxla, şifrəli artifakt)
         id: creds
-        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'reconcile_teacher_roster' || startsWith(github.event.inputs.command, 'import_teaching_') || github.event.inputs.command == 'issue_staff_credentials')
+        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'reconcile_teacher_roster' || startsWith(github.event.inputs.command, 'import_teaching_') || github.event.inputs.command == 'issue_staff_credentials' || github.event.inputs.command == 'infer_timetable_from_lessons')
         env:
           STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
         run: |
@@ -726,10 +775,10 @@ jobs:
           path: ${{ runner.temp }}/staff-out/
           retention-days: 1
       - name: 🧹 Konteynerdə müvəqqəti faylları sil
-        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'reconcile_teacher_roster' || startsWith(github.event.inputs.command, 'import_teaching_') || github.event.inputs.command == 'issue_staff_credentials')
+        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'reconcile_teacher_roster' || startsWith(github.event.inputs.command, 'import_teaching_') || github.event.inputs.command == 'issue_staff_credentials' || github.event.inputs.command == 'infer_timetable_from_lessons')
         run: |
           # root kimi: fərqli UID-li qalıqlar (sticky /tmp) app istifadəçisi ilə silinmir.
-          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/staff_roster*.xlsx /tmp/staff_known_*.txt /tmp/staff_creds*.csv /tmp/org_structure.json /tmp/roster_report_*.md /tmp/roster_details_*.csv /tmp/teaching_task_*.xlsx /tmp/teaching_load_*.docx; rm -rf /tmp/teaching_report_*' || true
+          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/staff_roster*.xlsx /tmp/staff_known_*.txt /tmp/staff_creds*.csv /tmp/org_structure.json /tmp/roster_report_*.md /tmp/roster_details_*.csv /tmp/teaching_task_*.xlsx /tmp/teaching_load_*.docx /tmp/timetable_infer_*.csv; rm -rf /tmp/teaching_report_*' || true
           rm -rf "$RUNNER_TEMP/staff-out" "$RUNNER_TEMP/out.log" || true
       # ── import_timetable_docx / assign_task_rows_from_timetable (dərs cədvəli; öz addımları — digər əmrlərin
       #    axınına toxunmur). Hər ikisi eyni şifrəli timetable.docx.enc faylını oxuyur. ──────────────────────
