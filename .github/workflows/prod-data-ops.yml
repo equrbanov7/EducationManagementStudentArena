@@ -86,10 +86,14 @@
 #       təkrar imtahan, açılış müəllimi, təsdiqlənmiş sillabus); çatışmayan müəllim FİN-siz, tələbə/qrup/açılış
 #       yaradılır; bütün fazalar BİR tranzaksiyadadır, idempotentdir. `date_to` → --lessons-until (boş = bu gün).
 #       Loga YALNIZ saylar; adlı siyahı + hesabat şifrəli artifaktdadır.
-#   legacy_repair_empty_lessons — köhnə sistemdən köçürülmüş, heç bir xanası/mövzusu/düzəlişi olmayan KEÇMİŞ dərsləri
-#       (jurnalın tam boş sütunlarını) silir (sahib 2026-10-24: «boşdursa silinsin» — bağlı jurnallar da,
-#       --include-locked). Müəllimin yeni sistemdə açdığı dərsə və bu gün/gələcək dərsə toxunulmur; hər dəstə
-#       açılış üzrə AuditLog snapshot-u yazır. Loga YALNIZ saylar (--show 0, aktor maskalanır).
+#   legacy_repair_empty_lessons — real xanası (bal / iə / ü/q), mövzusu və düzəlişi olmayan KEÇMİŞ dərsləri (jurnalın
+#       məzmunsuz sütunlarını) silir (sahib 2026-10-24: «boşdursa silinsin; bir neçə tələbəyə “qb” yazılıbsa belə
+#       silinsin»): köçürülmüş tam boş sütun + yalnız balsız «qb» xanalı sütun (--include-absent-only; xanalar da
+#       silinir, qayıb saatı yenidən hesablanır) + müəllimin yeni sistemdə açdığı keçmiş sütun
+#       (--include-teacher-lessons) + bağlı jurnallar (--include-locked). Bu gün/gələcək dərsə və son 3 gündə
+#       yaradılan / tarixli müəllim dərsinə (TEACHER_GRACE_DAYS) toxunulmur; hər dəstə açılış üzrə AuditLog
+#       snapshot-u (silinən «qb» xanaları daxil) yazır.
+#       Loga YALNIZ saylar (--show 0, aktor maskalanır).
 #   sync_midterm_scores — midterm nəticələrini imtahanın jurnal bağlantısı ilə Midterm xanasına yazır, fənn
 #       dəyişibsə köhnə jurnalda bu imtahanın yazdığı xanaları silir. `teacher` = imtahanın slug-ı (boş = bütün
 #       midterm imtahanları). Bildiriş göndərilmir; idempotent. Loga yalnız sayların sətri.
@@ -566,11 +570,13 @@ jobs:
               custom_apply=1
               ;;
             legacy_repair_empty_lessons)
-              # Sahib 2026-10-24: köçürülmüş tam boş dərs sütunları — bağlı jurnallar da («boşdursa silinsin»).
+              # Sahib 2026-10-24: məzmunsuz keçmiş sütunlar — bağlı jurnallar, yalnız «qb» xanalı və müəllimin
+              # açdığı sütunlar da («boşdursa silinsin; “qb” yazılıbsa belə silinsin»).
               # Loga ŞƏXS ADI düşməsin: cədvəl yox (--show 0), aktor maskalanır.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
-              args=(--organization "$ORG" --include-locked --show 0 --actor "$actor")
+              args=(--organization "$ORG" --include-locked --include-absent-only --include-teacher-lessons
+                    --show 0 --actor "$actor")
               if [ "$APPLY" = "true" ]; then
                 args+=(--apply --i-know-this-is-production)
               fi
@@ -710,6 +716,7 @@ jobs:
             rm -f "$RUNNER_TEMP/out.log"
           elif [ "$COMMAND" = "legacy_repair_empty_lessons" ] || [ "$COMMAND" = "sync_midterm_scores" ]; then
             # Loga YALNIZ saylar: aktor sətri atılır, xəta olarsa yalnız CommandError kodu.
+            # Xülasə açarlarında «:» olmamalıdır (`  açar : dəyər`) — test: test_repair_empty_lessons.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^(===.*===|  [^:]+ : .*|  \(DRY-RUN.*|(YAZILDI|DRY-RUN).*: rəsmi .*)$' "$RUNNER_TEMP/out.log" \
               | grep -v 'Aktor:' | cut -c1-300 > "$RUNNER_TEMP/summary.log" || true
