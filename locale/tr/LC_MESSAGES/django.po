@@ -107226,3 +107226,155 @@ msgstr "Satırı sil"
 msgctxt "accounts.workload"
 msgid "fənn, qrup və ya müəllim"
 msgstr "ders, grup veya öğretim elemanı"
+
+msgctxt "exams.view.exams.message"
+msgid "Midterm və final imtahanları üçün yenidən cəhd hüququ yalnız «Yenidən imtahan cəhdi» səhifəsində rəsmi əsasla (əmr, sənəd, qeyd) verilir."
+msgstr "Ara sınav ve final sınavları için yeniden deneme hakkı yalnızca “Sınav yeniden denemesi” sayfasında resmî gerekçeyle (karar, belge, not) verilir."
+
+msgctxt "registrar.retake"
+msgid "Əsas sənədi (əmr / sərəncam / ərizə) yükləyin — sənədsiz cəhd hüququ verilmir."
+msgstr "Dayanak belgesini (karar / yönerge / dilekçe) yükleyin — belge olmadan deneme hakkı verilmez."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final: cəhd hüququ rəsmi əsasla (əmr, sənəd, qeyd) «Yenidən imtahan cəhdi» səhifəsində verilir."
+msgstr "Ara sınav/final: deneme hakkı resmî gerekçeyle (karar, belge, not) “Sınav yeniden denemesi” sayfasında verilir."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün yenidən cəhd hüququnu yalnız İmtahan Mərkəzi rəsmi əsasla verir."
+msgstr "Ara sınav/final için yeniden deneme hakkını yalnızca Sınav Merkezi resmî gerekçeyle verir."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün cəhd hüququ birbaşa verilmir: «Yenidən imtahan cəhdi» səhifəsində əsas, əmr / sərəncam №, tarix, sənəd və qeyd ilə rəsmi qeyd yazılır."
+msgstr "Ara sınav/final için deneme hakkı doğrudan verilmez: “Sınav yeniden denemesi” sayfasında gerekçe, karar / yönerge no., tarih, belge ve not ile resmî kayıt yazılır."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Rəsmi cəhd səhifəsinə keç"
+msgstr "Resmî deneme sayfasına git"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün yenidən cəhd hüququnu yalnız İmtahan Mərkəzi «Yenidən imtahan cəhdi» səhifəsində rəsmi əsasla (əmr, sənəd, qeyd) verir."
+msgstr "Ara sınav/final için yeniden deneme hakkını yalnızca Sınav Merkezi “Sınav yeniden denemesi” sayfasında resmî gerekçeyle (karar, belge, not) verir."
+
+msgctxt "accounts.exam_chance"
+msgid "Sənəd"
+msgstr "Belge"
+
+msgctxt "accounts.exam_chance"
+msgid "Ata adı"
+msgstr "Baba adı"
+
+msgctxt "accounts.exam_chance"
+msgid "Bu tələbə və imtahan üçün «Cəhd hüququ ver» formasını doldur"
+msgstr "Bu öğrenci ve sınav için “Deneme hakkı ver” formunu doldur"
+
+msgctxt "accounts.exam_chance"
+msgid "Sətrə klikləyin — həmin tələbə və imtahan üçün «Cəhd hüququ ver» forması doldurulur."
+msgstr "Satıra tıklayın — o öğrenci ve sınav için “Deneme hakkı ver” formu doldurulur."
+
+msgctxt "accounts.exam_chance"
+msgid "Əmr / sərəncam, ərizə və ya qərarın surəti — PDF, JPG və ya PNG, ən çox 10 MB. Sənədsiz cəhd hüququ verilmir."
+msgstr "Karar / yönerge, dilekçe veya kararın kopyası — PDF, JPG ya da PNG, en fazla 10 MB. Belge olmadan deneme hakkı verilmez."
+
+msgctxt "exams.model.exam.field"
+msgid "Müəllim (jurnal)"
+msgstr "Öğretmen (yoklama defteri)"
+
+msgctxt "exams.model.exam.field"
+msgid "Bağlı jurnallar"
+msgstr "Bağlı defterler"
+
+msgctxt "exams.form.exam.label"
+msgid "Müəllim (jurnal)"
+msgstr "Öğretmen (yoklama defteri)"
+
+msgctxt "exams.form.exam.help"
+msgid "Müəllimi seçsəniz, fənn siyahısı onun cari dövrdə tədris etdiyi fənlərlə məhdudlaşır və midterm nəticəsi həmin fənnin qrup jurnallarına yazılır. Boş qalarsa bütün fənlər göstərilir."
+msgstr "Öğretmen seçerseniz ders listesi onun mevcut dönemde verdiği derslerle sınırlanır ve ara sınav sonucu o dersin grup defterlerine yazılır. Boş bırakılırsa tüm dersler gösterilir."
+
+msgctxt "exams.form.exam.error"
+msgid "Seçilmiş müəllim bu fənni cari dövrdə tədris etmir."
+msgstr "Seçilen öğretmen bu dersi mevcut dönemde vermiyor."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Müəllim tapılmadı"
+msgstr "Öğretmen bulunamadı"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Müəllim axtar…"
+msgstr "Öğretmen ara…"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Seçilmiş müəllim"
+msgstr "Seçilen öğretmen"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Təmizlə (bütün fənlər)"
+msgstr "Temizle (tüm dersler)"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu müəllimin cari dövrdə tədris etdiyi fənn tapılmadı"
+msgstr "Bu öğretmenin mevcut dönemde verdiği ders bulunamadı"
+
+msgctxt "applications"
+msgid "Bütün müraciətlər"
+msgstr "Tüm başvurular"
+
+msgctxt "applications"
+msgid "Şöbə (ünvan)"
+msgstr "Birim (muhatap)"
+
+msgctxt "applications"
+msgid "Bütün şöbələr"
+msgstr "Tüm birimler"
+
+msgctxt "applications"
+msgid "Göndərənin bölməsi"
+msgstr "Gönderenin birimi"
+
+msgctxt "applications"
+msgid "Bütün göndərənlər"
+msgstr "Tüm gönderenler"
+
+msgctxt "applications"
+msgid "Fakültələr"
+msgstr "Fakülteler"
+
+msgctxt "applications"
+msgid "Kafedralar"
+msgstr "Bölümler"
+
+msgctxt "applications"
+msgid "Mərkəz və digər bölmələr"
+msgstr "Merkezler ve diğer birimler"
+
+msgctxt "organizations.permission.label"
+msgid "Bütün müraciətlərə baxmaq (yalnız oxu)"
+msgstr "Tüm başvuruları görüntüleme (salt okunur)"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu midterm imtahanının nəticəsi tələbə imtahanı bitirən kimi seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq."
+msgstr "Bu ara sınavın sonucu, öğrenci sınavı bitirir bitirmez seçilen dersin grup defterlerine (Midterm /30) otomatik olarak yazılacaktır."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu midterm imtahanının nəticəsi yoxlanıldıqdan sonra seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq."
+msgstr "Bu ara sınavın sonucu, değerlendirildikten sonra seçilen dersin grup defterlerine (Midterm /30) otomatik olarak yazılacaktır."
+
+msgctxt "exams.teacher.grading"
+msgid "Bal jurnala avtomatik yazılır"
+msgstr "Puan deftere otomatik olarak yazılır"
+
+msgctxt "exams.teacher.grading"
+msgid "Bu midterm imtahanıdır. Bütün suallar qiymətləndirilib yadda saxlananda bal fənnin jurnalına (Midterm) avtomatik yazılır — jurnalda əl ilə yazmaq lazım deyil."
+msgstr "Bu bir ara sınavdır. Tüm sorular puanlanıp kaydedildiğinde puan dersin defterine (Midterm) otomatik olarak yazılır — deftere elle girmeye gerek yoktur."
+
+msgctxt "exams.teacher.grading"
+msgid "Bu midterm imtahanıdır. Nəticə hazırda tələbədən gizlədilib — saxladığınız bal fənnin jurnalına (Midterm) nəticə tələbəyə açılanda avtomatik yazılacaq."
+msgstr "Bu bir ara sınavdır. Sonuç şu anda öğrenciden gizlenmiştir — kaydettiğiniz puan, sonuç öğrenciye açıldığında dersin defterine (Midterm) otomatik olarak yazılacaktır."
+
+msgctxt "registrar.journal"
+msgid "İmtahan Mərkəzində keçirilən midterm balı imtahandan avtomatik yazılır (test — tələbə bitirən kimi, yazılı / praktiki — yoxlanıldıqdan sonra) və burada əl ilə dəyişdirilmir. Düzəliş yalnız apellyasiya və ya sənədli düzəliş ilə mümkündür."
+msgstr "Sınav Merkezinde yapılan ara sınav puanı sınavdan otomatik olarak yazılır (test — öğrenci bitirir bitirmez, yazılı / uygulamalı — değerlendirildikten sonra) ve burada elle değiştirilemez. Düzeltme yalnızca itiraz veya belgeli düzeltme ile mümkündür."
+
+msgctxt "registrar.journal"
+msgid "imtahandan avtomatik"
+msgstr "sınavdan otomatik"

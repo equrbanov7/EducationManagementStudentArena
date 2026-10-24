@@ -84,7 +84,20 @@ JS qarmaqları: `tr[data-seconds-remaining] .timer-display` (geri sayım),
                     <i class="fas fa-trash" aria-hidden="true"></i>{% trans "action_delete" context "exams.template.teacher_exam_results" %}
                 </button>
             {% endif %}
-            {% if item.attempts_left is not None %}
+            {% if item.attempts_left is not None and formal_retake %}
+                {# 2026-10-24 (sahib): midterm / final — birbaşa şans YOXDUR; rəsmi «Yenidən imtahan cəhdi» (əsas, əmr, sənəd). #}
+                {% if formal_retake_open %}
+                <a href="{{ item.formal_retake_url }}" class="ems-btn ems-btn--ghost" data-formal-retake
+                   title="{% trans 'Midterm/final: cəhd hüququ rəsmi əsasla (əmr, sənəd, qeyd) «Yenidən imtahan cəhdi» səhifəsində verilir.' context 'exams.template.teacher_exam_results' %}">
+                    <i class="fas fa-file-signature" aria-hidden="true"></i>{% trans "grant_extra_attempt" context "exams.template.teacher_exam_results" %}
+                    <span class="etr-muted">({% trans "attempts_left_short" context "exams.template.teacher_exam_results" %}: {{ item.attempts_left }})</span>
+                </a>
+                {% else %}
+                <span class="etr-muted etr-formal-note" title="{% trans 'Midterm/final üçün yenidən cəhd hüququnu yalnız İmtahan Mərkəzi rəsmi əsasla verir.' context 'exams.template.teacher_exam_results' %}">
+                    <i class="fas fa-lock" aria-hidden="true"></i> {% trans "attempts_left_short" context "exams.template.teacher_exam_results" %}: {{ item.attempts_left }}
+                </span>
+                {% endif %}
+            {% elif item.attempts_left is not None %}
                 <form method="post" action="{% url 'exams:grant_extra_attempt' slug=exam.slug %}" class="etr-inline-form">
                     {% csrf_token %}
                     <input type="hidden" name="student_id" value="{{ item.student_id }}">

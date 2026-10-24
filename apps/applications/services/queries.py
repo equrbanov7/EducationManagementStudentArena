@@ -10,9 +10,10 @@ from core.search_text import tolerant_q
 from ..constants import CLOSED_STATUSES, OPEN_STATUSES, ApplicationStatus
 from ..models import Application, ApplicationAttachment
 from ..sla import calendar_for, working_days_between
-from . import access
+from . import access, oversight
 
-TABS = ("mine", "inbox", "watching", "archive")
+#: ``all`` — «Bütün müraciətlər» (RİM nəzarəti): təşkilatın hamısı, YALNIZ ``access.can_oversee``-ə.
+TABS = ("mine", "inbox", "watching", "archive", "all")
 STATS = ("open", "overdue", "closed", "all")
 
 
@@ -29,6 +30,9 @@ def _tab_q(user, organization, tab: str) -> Q:
         return access.inbox_q(user, organization)
     if tab == "watching":
         return access.watching_q(user, organization)
+    if tab == "all":
+        # Fail-closed: nəzarətçi olmayana BOŞ dəst (endpoint onsuz da 403 verir).
+        return Q() if access.can_oversee(user, organization) else Q(pk__in=[])
     # archive = görünən hər şey, yalnız bağlı statuslar
     return access.visible_q(user, organization) & Q(status__in=CLOSED_STATUSES)
 
@@ -74,9 +78,23 @@ def date_q(date_from=None, date_to=None) -> Q:
 
 
 def list_applications(
-    *, organization, user, tab="mine", stat="open", kind_code="", search="", date_from=None, date_to=None
+    *,
+    organization,
+    user,
+    tab="mine",
+    stat="open",
+    kind_code="",
+    search="",
+    date_from=None,
+    date_to=None,
+    unit_code="",
+    sender_unit="",
 ):
-    """Filtrlənmiş siyahı. Görünüş qapısı HƏMİŞƏ tətbiq olunur."""
+    """Filtrlənmiş siyahı. Görünüş qapısı HƏMİŞƏ tətbiq olunur.
+
+    ``unit_code`` (cari şöbə) və ``sender_unit`` (göndərənin bölməsi, alt-ağac) —
+    ``services.oversight`` süzgəcləri; görünən dəstə tətbiq olunur, onu GENİŞLƏNDİRMİR.
+    """
     tab = tab if tab in TABS else "mine"
     stat = stat if stat in STATS else "open"
     queryset = base_queryset(organization).filter(_tab_q(user, organization, tab))
@@ -85,6 +103,7 @@ def list_applications(
     if kind_code:
         queryset = queryset.filter(kind__code=kind_code)
     queryset = queryset.filter(search_q(search)).filter(date_q(date_from, date_to))
+    queryset = queryset.filter(oversight.unit_q(unit_code)).filter(oversight.sender_unit_q(organization, sender_unit))
     # Siyahı sətri (``row_payload``) göndərənin bölməsini və sənəd sayını oxuyur — əvvəl
     # hər sətir üçün 2 sorğu idi (orgunit SELECT + attachments COUNT; 20-lik səhifədə
     # +40). İndi JOIN + səhifə üçün tək prefetch (yalnız id-lər; say = prefetch uzunluğu).
@@ -183,6 +202,9 @@ def tab_counts(*, organization, user) -> dict:
         queryset = base_queryset(organization).filter(_tab_q(user, organization, tab))
         counts[tab] = _count(queryset.filter(status__in=OPEN_STATUSES))
     counts["archive"] = _count(base_queryset(organization).filter(_tab_q(user, organization, "archive")))
+    if access.can_oversee(user, organization):
+        # «Bütün müraciətlər» — təşkilatın AÇIQ müraciətləri (JOIN-siz tək COUNT).
+        counts["all"] = Application.objects.filter(organization=organization, status__in=OPEN_STATUSES).count()
     return counts
 
 

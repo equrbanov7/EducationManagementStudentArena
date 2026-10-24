@@ -89,9 +89,20 @@ def kafedra_lesson_q(unit) -> Q:
     )
 
 
+def kafedra_offering_q(unit, *, offering="") -> Q:
+    """Açılış kafedraya aiddir: müəllimi kafedranın üzvüdür VƏ YA fənni kafedranındır.
+
+    ``offering`` — sahə prefiksi: ``""`` birbaşa ``CourseOffering`` queryset-i üçün (jurnal
+    siyahısının «Kafedra» filtri — ``journal_list_query.apply_unit_filters``), ``"offering__"``
+    slot / dərs kimi açılışa FK daşıyan modellər üçün."""
+    return Q(**{f"{offering}instructor_id__in": _chair_teacher_ids(unit)}) | _subtree(
+        f"{offering}subject__chair_unit", unit
+    )
+
+
 def kafedra_slot_q(unit) -> Q:
     """Cədvəl slotu kafedraya aiddir (slotun müəllimi açılışın müəllimidir)."""
-    return Q(offering__instructor_id__in=_chair_teacher_ids(unit)) | _subtree("offering__subject__chair_unit", unit)
+    return kafedra_offering_q(unit, offering="offering__")
 
 
 def _in_scopes(path, unit_id, scopes) -> bool:
@@ -262,6 +273,7 @@ __all__ = [
     "filter_state",
     "is_within",
     "kafedra_lesson_q",
+    "kafedra_offering_q",
     "kafedra_slot_q",
     "resolve_unit",
     "unit_options",

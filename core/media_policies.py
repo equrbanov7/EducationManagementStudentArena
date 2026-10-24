@@ -374,7 +374,7 @@ def check_application_attachment_access(user, path: str) -> bool:
 
     Qərar ``apps.applications`` modulunun ÖZ ``can_view_attachment`` siyasətinə
     həvalə olunur (göndərən, cari şöbənin əhatəli emalçısı, izləyən şöbə,
-    ``application.manage`` daşıyan, superuser/təşkilat sahibi; daxili qeydin
+    ``application.manage`` / ``application.view_all`` daşıyan, superuser/təşkilat sahibi; daxili qeydin
     sənədi yalnız daxili qeydləri görənlərə — audit 2026-10-07 SEC-04)."""
     ApplicationAttachment = django_apps.get_model("applications", "ApplicationAttachment")
     attachment = _get_single(

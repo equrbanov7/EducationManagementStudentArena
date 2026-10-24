@@ -115,7 +115,7 @@ class ClosedApplicationAttemptTest(_Base):
             # Real axın: «Yenidən imtahan cəhdi» (grant + PIN) + rəsmi qeyd bir tranzaksiyada.
             grant_second_chance(exam=self.exam, students=[self.student], extra=1, granted_by=self.dean)
             cleaned = retake_chance.validate(
-                organization=self.org, exam=exam, students=[self.student], reason="retake_25"
+                organization=self.org, exam=exam, students=[self.student], reason="retake_25", document=pdf("emr.pdf")
             )
             retake_chance.record(
                 organization=self.org, exam=exam, students=[self.student], cleaned=cleaned, extra=1, actor=self.dean

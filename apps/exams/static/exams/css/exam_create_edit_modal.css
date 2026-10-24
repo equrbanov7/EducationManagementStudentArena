@@ -433,3 +433,30 @@
 .create-exam-list-item.is-active .create-exam-subject-check { opacity: 1; }
 /* Lazy siyahıda seçili sətirlərlə nəticələr arasında yüngül ayrıcı. */
 .create-exam-selected-rows:not(:empty) { border-bottom: 1px dashed var(--ems-neutral-300); }
+
+/* 2026-10-24: «Müəllim (jurnal)» seçicisinin «Təmizlə» düyməsi — sayğac sətrində. */
+.create-exam-teacher-clear {
+    padding: 0 0 0 0.4rem;
+    font-size: 0.82rem;
+    vertical-align: baseline;
+}
+
+/* 2026-10-24: Midterm → jurnal məlumat qeydi (ems-banner--info üslubu; validation.css hər səhifədə yüklənmir). */
+.ew-journal-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    grid-column: 1 / -1;
+    margin: 0 0 0.9rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--ems-primary-200);
+    border-radius: var(--ems-r-xl, 12px);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+.ew-journal-note[hidden],
+.ew-journal-note__text[hidden] { display: none; }
+.ew-journal-note__icon { margin-top: 0.2rem; flex-shrink: 0; }
+.ew-journal-note__text { margin: 0; }

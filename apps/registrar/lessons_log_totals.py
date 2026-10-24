@@ -9,6 +9,29 @@ açılışda təkrarlanırdı — səhifə 1 038 ms. İndi «boş» / «gec» t�
 Ayrıca modul: `lessons_log.py` modul-ölçü qapısında dondurulub (634 sətir) —
 yeni kod ora əlavə edilmir; `lessons_log` bu adları geri-uyğunluq üçün
 re-export edir (`service.range_totals` çağıranları dəyişmir).
+
+KÖÇÜRMƏ (2026-10-24, sahib: «demək olar hər dərs “Gec yazılıb” görünür»)
+-----------------------------------------------------------------------
+Köhnə sistemdən köçürülən jurnalın xanası hədəfdə İDXAL ANINDA yaranır
+(``LessonMark.created_at`` = köçürmə vaxtı, dərs tarixindən aylar sonra) — yəni
+«ilk xana 48 saatdan gec» qaydası köçürülmüş HƏR dərsi «gec» sayırdı. Qayda
+yalnız YENİ SİSTEMDƏ yazılmış xanaya tətbiq olunur:
+
+* **Köçürülmüş dərs** (:func:`imported_lesson_q`) — ``Lesson.created_by`` BOŞDUR.
+  Üç idxal yazıçısının hamısı (cutover J3 ``journal_lessons``, J12 bərpası
+  ``is_legacy_synthesised``, ``legacy_delta_apply``) dərsi ``created_by=None`` ilə
+  yazır («import heç kimin adından yazmır»); yeni sistemin YEGANƏ yaratma yolu
+  ``gradebook_lessons.create_lesson`` isə hər çağırışda aktoru verir (jurnal
+  POST-u, «Aktivləşdir», backfill — ``--actor`` məcburidir). Delta-nın özü də
+  eyni ayrımı işlədir (``LessonBook``: müəllimin dərsi = ``created_by`` dolu).
+  Belə dərs HEÇ VAXT «gec» deyil (boşdursa yenə «boş»dur).
+* **Köçürülmüş xana** — ``entered_by`` BOŞ və rəsmi düzəlişin yaratdığı xana
+  DEYİL (:func:`new_system_mark_q` / :func:`lesson_new_system_mark_q`). Delta
+  köhnə sistemin xanasını müəllimin yeni sistemdə açdığı dərsə də yaza bilər;
+  həmin xana gecikmə hesabına girmir. Rəsmi düzəliş (``JournalCorrection.created_mark``) boş xananı
+  ``entered_by``-sız yaradır — o, YENİ sistemin yazısıdır və sayılır.
+
+Hər iki şərt eyni aqreqat sorğunun içindədir (əlavə sorğu yoxdur).
 """
 
 from __future__ import annotations
@@ -17,10 +40,10 @@ import datetime as _dt
 import hashlib
 
 from django.core.cache import cache
-from django.db.models import Count, DateField, ExpressionWrapper, F, Min, Q, Sum, Value
+from django.db.models import Count, DateField, Exists, ExpressionWrapper, F, Min, OuterRef, Q, Sum, Value
 from django.db.models.functions import TruncDate
 
-from apps.registrar.models import AttendanceStatus, LessonMark
+from apps.registrar.models import AttendanceStatus, JournalCorrection, LessonMark
 
 #: «Gec yazılıb» həddi — dizayn: «dərsdən 48 saat sonra».
 LATE_AFTER_HOURS = 48
@@ -28,6 +51,36 @@ LATE_AFTER_HOURS = 48
 #: `range_totals` keşinin müddəti (saniyə) — `analytics_cache` ilə eyni siyasət:
 #: hesabat səthidir, bir neçə dəqiqəlik köhnəlmə qəbul olunur.
 TOTALS_CACHE_TTL = 300
+
+
+def imported_lesson_q(prefix: str = "") -> Q:
+    """Köhnə sistemdən köçürülmüş dərs — ``created_by`` boşdur (modul sənədi)."""
+    return Q(**{f"{prefix}created_by__isnull": True})
+
+
+def is_imported_lesson(lesson) -> bool:
+    """:func:`imported_lesson_q`-nin obyekt forması (səhifə sətirləri üçün)."""
+    return getattr(lesson, "created_by_id", None) is None
+
+
+def new_system_mark_q() -> Q:
+    """``LessonMark`` sorğusunun öz sətri üçün: yeni sistemdə yazılmış xana.
+
+    Aktoru var (``entered_by``) VƏ YA onu rəsmi düzəliş yaradıb — düzəliş şərti
+    ``Exists``-dir (JOIN yox), ona görə say aqreqatları təkrarlanmır.
+    """
+    created_by_correction = JournalCorrection.objects.filter(lesson_mark_id=OuterRef("id"), created_mark=True)
+    return Q(entered_by__isnull=False) | Q(Exists(created_by_correction))
+
+
+def lesson_new_system_mark_q() -> Q:
+    """:func:`new_system_mark_q`-nin DƏRSDƏN baxan forması (``marks__`` yolu).
+
+    Düzəliş şərti burada LEFT JOIN-dir: bir xananın bir neçə düzəlişi sətri
+    təkrarlaya bilər — ``Min`` və «sıfırdırmı» yoxlaması buna həssas deyil.
+    Korrelyasiyalı alt-sorğu (dövrdə ~500 k xana) əvəzinə hash join seçilib.
+    """
+    return Q(marks__entered_by__isnull=False) | Q(marks__corrections__created_mark=True)
 
 
 def totals_cache_key(lessons_qs) -> str:
@@ -62,17 +115,21 @@ def _compute_range_totals(lessons_qs) -> dict:
     # `note_state`: `(written - lesson_date) > 48 saat`, `written` tam TARİXDİR
     # (`localtime(first_mark).date()`) → fərq ≥ 3 gün ⇔ `written >= date + 3 gün`.
     # `TruncDate` cari saat qurşağında kəsir — `timezone.localtime` ilə eyni.
+    # `first_mark` YALNIZ yeni sistemin dərsində yeni sistemin xanasıdır (modul
+    # sənədi «KÖÇÜRMƏ»): köçürülmüş dərsdə/xanada NULL qalır → «gec» sayılmır;
+    # «boş» isə xana SAYI ilə qərarlaşır (köçürülmüş xana da xanadır).
     late_from = ExpressionWrapper(
         F("date") + Value(_dt.timedelta(hours=LATE_AFTER_HOURS + 24)), output_field=DateField()
     )
+    counted = ~imported_lesson_q() & lesson_new_system_mark_q()
     lesson_totals = (
         lessons_qs.order_by()
-        .annotate(first_mark=Min("marks__created_at"))
+        .annotate(marks_total=Count("marks__id"), first_mark=Min("marks__created_at", filter=counted))
         .annotate(first_mark_day=TruncDate("first_mark"), late_from=late_from)
         .aggregate(
             lessons=Count("id"),
             hours=Sum("hours"),
-            empty=Count("id", filter=Q(first_mark__isnull=True)),
+            empty=Count("id", filter=Q(marks_total=0)),
             late=Count("id", filter=Q(first_mark__isnull=False, first_mark_day__gte=F("late_from"))),
         )
     )
@@ -102,4 +159,13 @@ def _compute_range_totals(lessons_qs) -> dict:
     }
 
 
-__all__ = ["LATE_AFTER_HOURS", "TOTALS_CACHE_TTL", "range_totals", "totals_cache_key"]
+__all__ = [
+    "LATE_AFTER_HOURS",
+    "TOTALS_CACHE_TTL",
+    "imported_lesson_q",
+    "is_imported_lesson",
+    "lesson_new_system_mark_q",
+    "new_system_mark_q",
+    "range_totals",
+    "totals_cache_key",
+]

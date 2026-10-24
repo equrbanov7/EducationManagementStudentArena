@@ -71,6 +71,7 @@ köhnə JS müqaviləsinə görə saxlanılıb — indi görünən sahədir.
             <div class="ems-banner__body">{% blocktrans %}Tələbə adı anonim qalır. Qalan vaxt: <span data-review-countdown="{{ identity_window_seconds_left }}">--:--:--</span>{% endblocktrans %}</div>
         </div>
         {% endif %}
+        {% include "exams/teacher/partials/check_attempt/_midterm_journal_note.html" %}
 
         <form method="post" id="gradingForm" class="tca-form" novalidate>
             {% csrf_token %}

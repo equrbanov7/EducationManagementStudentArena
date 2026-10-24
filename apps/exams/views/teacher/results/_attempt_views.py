@@ -14,6 +14,7 @@ from django.views.decorators.http import require_http_methods
 
 from apps.exams.models import ExamAttempt
 from apps.exams.services.access_policy import _ensure_can_view_attempt_results, _ensure_teacher
+from apps.exams.services.midterm_journal_sync import grading_note_state
 from apps.exams.services.result_calculation import calculate_test_attempt_result
 from apps.exams.services.retention import delete_retention_safe_attempts
 from apps.exams.services.review_visibility import attempt_review_window_locked as _attempt_review_window_locked
@@ -342,6 +343,8 @@ def teacher_check_attempt(request, slug, attempt_id):
         "exam_creator_display": _user_display_name(exam.author),
         "can_view_student_identity": can_view_name,
         "identity_window_seconds_left": identity_window_seconds,
+        # 2026-10-24 (sahib): yazılı / kodlaşdırma midtermi — «saxlanan bal jurnala avtomatik yazılır» qeydi.
+        "midterm_journal_note": grading_note_state(exam),
     }
     return render(request, "exams/teacher/teacher_check_attempt.html", context)
 

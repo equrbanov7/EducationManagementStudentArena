@@ -61,11 +61,19 @@ class RangeTotalsSqlTest(TestCase):
             topic=f"Mövzu {day_offset}",
             hours=hours,
             instructor=self.teacher,
+            # Yeni sistemin dərsi/xanası HƏMİŞƏ aktorlu yazılır (`create_lesson` / `save_marks`);
+            # aktorsuz sətir köçürmədir və «gec» sayılmır (`lessons_log_totals` «KÖÇÜRMƏ»).
+            created_by=self.teacher,
         )
 
     def _mark(self, lesson, *, created_at, status=AttendanceStatus.PRESENT, score=None):
         mark = LessonMark.objects.create(
-            organization=self.org, lesson=lesson, enrollment=self.enrollment, status=status, score=score
+            organization=self.org,
+            lesson=lesson,
+            enrollment=self.enrollment,
+            status=status,
+            score=score,
+            entered_by=self.teacher,
         )
         LessonMark.objects.filter(pk=mark.pk).update(created_at=created_at)
         return mark

@@ -49,7 +49,7 @@ Qeyd (2026-09-14): «Question Bank» sətrində RİM sütunları `qa.*` çıxar�
 | syllabus | syllabus.view, syllabus.edit, syllabus.submit, syllabus.review, syllabus.approve, syllabus.revise, syllabus.reject, syllabus.manage |
 | workload | workload.view, workload.manage, workload.submit, workload.review, workload.approve, workload.distribute, workload.report, workload.object |
 | groups | group.view, group.manage |
-| applications | application.create, application.handle, application.manage |
+| applications | application.create, application.handle, application.manage, application.view_all |
 | exams | exam.view, exam.create, exam.edit, exam.manage, exam.host, exam.delete, final_score.entry, question.chair_review |
 | appeal | appeal.create, appeal.respond, appeal.decide |
 | analytics | analytics.view_own, analytics.view_unit, analytics.view_all |

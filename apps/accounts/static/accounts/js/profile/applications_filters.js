@@ -53,6 +53,10 @@
         NS.state.from = "";
         NS.state.to = "";
         sync();
+        // «Sıfırla» şöbə süzgəclərini də təmizləyir (`applications_oversight.js`, yalnız nəzarətçidə).
+        if (NS.oversight) {
+            NS.oversight.reset();
+        }
     }
 
     NS.filters = { sync: sync, apply: apply, reset: reset };

@@ -108012,3 +108012,155 @@ msgstr "Удалить строку"
 msgctxt "accounts.workload"
 msgid "fənn, qrup və ya müəllim"
 msgstr "дисциплина, группа или преподаватель"
+
+msgctxt "exams.view.exams.message"
+msgid "Midterm və final imtahanları üçün yenidən cəhd hüququ yalnız «Yenidən imtahan cəhdi» səhifəsində rəsmi əsasla (əmr, sənəd, qeyd) verilir."
+msgstr "Для промежуточных и итоговых экзаменов повторная попытка предоставляется только на странице «Повторная попытка экзамена» на официальном основании (приказ, документ, примечание)."
+
+msgctxt "registrar.retake"
+msgid "Əsas sənədi (əmr / sərəncam / ərizə) yükləyin — sənədsiz cəhd hüququ verilmir."
+msgstr "Загрузите документ-основание (приказ / распоряжение / заявление) — без документа попытка не предоставляется."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final: cəhd hüququ rəsmi əsasla (əmr, sənəd, qeyd) «Yenidən imtahan cəhdi» səhifəsində verilir."
+msgstr "Промежуточный/итоговый: попытка предоставляется на официальном основании (приказ, документ, примечание) на странице «Повторная попытка экзамена»."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün yenidən cəhd hüququnu yalnız İmtahan Mərkəzi rəsmi əsasla verir."
+msgstr "Для промежуточных/итоговых экзаменов повторную попытку предоставляет только Экзаменационный центр на официальном основании."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün cəhd hüququ birbaşa verilmir: «Yenidən imtahan cəhdi» səhifəsində əsas, əmr / sərəncam №, tarix, sənəd və qeyd ilə rəsmi qeyd yazılır."
+msgstr "Для промежуточных/итоговых экзаменов попытка не предоставляется напрямую: на странице «Повторная попытка экзамена» составляется официальная запись с основанием, № приказа / распоряжения, датой, документом и примечанием."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Rəsmi cəhd səhifəsinə keç"
+msgstr "Перейти на страницу официальной попытки"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün yenidən cəhd hüququnu yalnız İmtahan Mərkəzi «Yenidən imtahan cəhdi» səhifəsində rəsmi əsasla (əmr, sənəd, qeyd) verir."
+msgstr "Для промежуточных/итоговых экзаменов повторную попытку предоставляет только Экзаменационный центр на странице «Повторная попытка экзамена» на официальном основании (приказ, документ, примечание)."
+
+msgctxt "accounts.exam_chance"
+msgid "Sənəd"
+msgstr "Документ"
+
+msgctxt "accounts.exam_chance"
+msgid "Ata adı"
+msgstr "Отчество"
+
+msgctxt "accounts.exam_chance"
+msgid "Bu tələbə və imtahan üçün «Cəhd hüququ ver» formasını doldur"
+msgstr "Заполнить форму «Предоставить попытку» для этого студента и экзамена"
+
+msgctxt "accounts.exam_chance"
+msgid "Sətrə klikləyin — həmin tələbə və imtahan üçün «Cəhd hüququ ver» forması doldurulur."
+msgstr "Нажмите на строку — форма «Предоставить попытку» заполнится для этого студента и экзамена."
+
+msgctxt "accounts.exam_chance"
+msgid "Əmr / sərəncam, ərizə və ya qərarın surəti — PDF, JPG və ya PNG, ən çox 10 MB. Sənədsiz cəhd hüququ verilmir."
+msgstr "Копия приказа / распоряжения, заявления или решения — PDF, JPG или PNG, не более 10 МБ. Без документа попытка не предоставляется."
+
+msgctxt "exams.model.exam.field"
+msgid "Müəllim (jurnal)"
+msgstr "Преподаватель (журнал)"
+
+msgctxt "exams.model.exam.field"
+msgid "Bağlı jurnallar"
+msgstr "Связанные журналы"
+
+msgctxt "exams.form.exam.label"
+msgid "Müəllim (jurnal)"
+msgstr "Преподаватель (журнал)"
+
+msgctxt "exams.form.exam.help"
+msgid "Müəllimi seçsəniz, fənn siyahısı onun cari dövrdə tədris etdiyi fənlərlə məhdudlaşır və midterm nəticəsi həmin fənnin qrup jurnallarına yazılır. Boş qalarsa bütün fənlər göstərilir."
+msgstr "Если выбрать преподавателя, список предметов ограничится предметами, которые он ведёт в текущем периоде, а результат промежуточного экзамена будет записан в журналы групп по этому предмету. Если оставить пустым, показываются все предметы."
+
+msgctxt "exams.form.exam.error"
+msgid "Seçilmiş müəllim bu fənni cari dövrdə tədris etmir."
+msgstr "Выбранный преподаватель не ведёт этот предмет в текущем периоде."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Müəllim tapılmadı"
+msgstr "Преподаватель не найден"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Müəllim axtar…"
+msgstr "Поиск преподавателя…"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Seçilmiş müəllim"
+msgstr "Выбранный преподаватель"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Təmizlə (bütün fənlər)"
+msgstr "Очистить (все предметы)"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu müəllimin cari dövrdə tədris etdiyi fənn tapılmadı"
+msgstr "Не найдено предметов, которые этот преподаватель ведёт в текущем периоде"
+
+msgctxt "applications"
+msgid "Bütün müraciətlər"
+msgstr "Все обращения"
+
+msgctxt "applications"
+msgid "Şöbə (ünvan)"
+msgstr "Отдел (адресат)"
+
+msgctxt "applications"
+msgid "Bütün şöbələr"
+msgstr "Все отделы"
+
+msgctxt "applications"
+msgid "Göndərənin bölməsi"
+msgstr "Подразделение отправителя"
+
+msgctxt "applications"
+msgid "Bütün göndərənlər"
+msgstr "Все отправители"
+
+msgctxt "applications"
+msgid "Fakültələr"
+msgstr "Факультеты"
+
+msgctxt "applications"
+msgid "Kafedralar"
+msgstr "Кафедры"
+
+msgctxt "applications"
+msgid "Mərkəz və digər bölmələr"
+msgstr "Центры и другие подразделения"
+
+msgctxt "organizations.permission.label"
+msgid "Bütün müraciətlərə baxmaq (yalnız oxu)"
+msgstr "Просмотр всех обращений (только чтение)"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu midterm imtahanının nəticəsi tələbə imtahanı bitirən kimi seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq."
+msgstr "Результат этого промежуточного экзамена будет автоматически записан в журналы групп выбранного предмета (Midterm /30) сразу после того, как студент завершит экзамен."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu midterm imtahanının nəticəsi yoxlanıldıqdan sonra seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq."
+msgstr "Результат этого промежуточного экзамена будет автоматически записан в журналы групп выбранного предмета (Midterm /30) после проверки."
+
+msgctxt "exams.teacher.grading"
+msgid "Bal jurnala avtomatik yazılır"
+msgstr "Балл автоматически записывается в журнал"
+
+msgctxt "exams.teacher.grading"
+msgid "Bu midterm imtahanıdır. Bütün suallar qiymətləndirilib yadda saxlananda bal fənnin jurnalına (Midterm) avtomatik yazılır — jurnalda əl ilə yazmaq lazım deyil."
+msgstr "Это промежуточный экзамен. Когда все вопросы оценены и сохранены, балл автоматически записывается в журнал предмета (Midterm) — вводить его в журнал вручную не нужно."
+
+msgctxt "exams.teacher.grading"
+msgid "Bu midterm imtahanıdır. Nəticə hazırda tələbədən gizlədilib — saxladığınız bal fənnin jurnalına (Midterm) nəticə tələbəyə açılanda avtomatik yazılacaq."
+msgstr "Это промежуточный экзамен. Сейчас результат скрыт от студента — сохранённый вами балл будет автоматически записан в журнал предмета (Midterm), когда результат откроют студенту."
+
+msgctxt "registrar.journal"
+msgid "İmtahan Mərkəzində keçirilən midterm balı imtahandan avtomatik yazılır (test — tələbə bitirən kimi, yazılı / praktiki — yoxlanıldıqdan sonra) və burada əl ilə dəyişdirilmir. Düzəliş yalnız apellyasiya və ya sənədli düzəliş ilə mümkündür."
+msgstr "Балл промежуточного экзамена, проведённого в Экзаменационном центре, записывается автоматически (тест — сразу после завершения студентом, письменный / практический — после проверки) и здесь вручную не изменяется. Исправление возможно только через апелляцию или документальную поправку."
+
+msgctxt "registrar.journal"
+msgid "imtahandan avtomatik"
+msgstr "автоматически из экзамена"

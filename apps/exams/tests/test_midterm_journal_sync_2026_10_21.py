@@ -129,14 +129,16 @@ class MidtermAutoWriteTests(_MidtermSetup):
         self._finish(*self._exam(), correct=3, is_trial=True)
         self.assertIsNone(self._score_row())
 
-    def test_written_midterm_is_not_written(self):
+    def test_graded_written_midterm_is_written_since_2026_10_24(self):
+        # Sahib 2026-10-24: yazılı midterm də yoxlanılandan sonra yazılır (əvvəl əl ilə idi) — bax
+        # ``test_midterm_graded_journal_2026_10_24.py``.
         exam, _options = self._exam(exam_type="written", questions=1)
         with bypass_rls():
             attempt = ExamAttempt.objects.create(
                 user=self.student, exam=exam, status="submitted", teacher_score=Decimal("1"), checked_by_teacher=True
             )
         self._resync(attempt, actor=self.teacher)
-        self.assertIsNone(self._score_row())
+        self.assertEqual(self._score_row().score, Decimal("30"))
 
     def test_old_kollokvium_period_is_not_written(self):
         with bypass_rls():
@@ -310,7 +312,7 @@ class SyncMidtermScoresCommandTests(_MidtermSetup):
 
     def test_other_org_filter_touches_nothing(self):
         self._seed_old_attempt()
-        self.assertIn("rəsmi test midterm cəhdi 0", self._run("--org", "no-such-org", "--apply"))
+        self.assertIn("rəsmi midterm cəhdi 0", self._run("--org", "no-such-org", "--apply"))
         with bypass_rls():
             self.assertFalse(FinalGrade.objects.exists())
         self.assertIsNone(self._score_row())

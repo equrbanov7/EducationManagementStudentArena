@@ -107818,3 +107818,155 @@ msgstr "Delete row"
 msgctxt "accounts.workload"
 msgid "fənn, qrup və ya müəllim"
 msgstr "subject, group or teacher"
+
+msgctxt "exams.view.exams.message"
+msgid "Midterm və final imtahanları üçün yenidən cəhd hüququ yalnız «Yenidən imtahan cəhdi» səhifəsində rəsmi əsasla (əmr, sənəd, qeyd) verilir."
+msgstr "For midterm and final exams a re-attempt can only be granted on the “Exam re-attempt” page with an official basis (order, document, note)."
+
+msgctxt "registrar.retake"
+msgid "Əsas sənədi (əmr / sərəncam / ərizə) yükləyin — sənədsiz cəhd hüququ verilmir."
+msgstr "Upload the supporting document (order / decree / application) — no re-attempt is granted without it."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final: cəhd hüququ rəsmi əsasla (əmr, sənəd, qeyd) «Yenidən imtahan cəhdi» səhifəsində verilir."
+msgstr "Midterm/final: a re-attempt is granted with an official basis (order, document, note) on the “Exam re-attempt” page."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün yenidən cəhd hüququnu yalnız İmtahan Mərkəzi rəsmi əsasla verir."
+msgstr "For midterm/final exams only the Exam Centre grants a re-attempt, with an official basis."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün cəhd hüququ birbaşa verilmir: «Yenidən imtahan cəhdi» səhifəsində əsas, əmr / sərəncam №, tarix, sənəd və qeyd ilə rəsmi qeyd yazılır."
+msgstr "Midterm/final re-attempts are not granted directly: on the “Exam re-attempt” page an official record is written with the basis, order / decree No., date, document and note."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Rəsmi cəhd səhifəsinə keç"
+msgstr "Go to the official re-attempt page"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün yenidən cəhd hüququnu yalnız İmtahan Mərkəzi «Yenidən imtahan cəhdi» səhifəsində rəsmi əsasla (əmr, sənəd, qeyd) verir."
+msgstr "For midterm/final exams only the Exam Centre grants a re-attempt, on the “Exam re-attempt” page with an official basis (order, document, note)."
+
+msgctxt "accounts.exam_chance"
+msgid "Sənəd"
+msgstr "Document"
+
+msgctxt "accounts.exam_chance"
+msgid "Ata adı"
+msgstr "Patronymic"
+
+msgctxt "accounts.exam_chance"
+msgid "Bu tələbə və imtahan üçün «Cəhd hüququ ver» formasını doldur"
+msgstr "Fill in the “Grant a re-attempt” form for this student and exam"
+
+msgctxt "accounts.exam_chance"
+msgid "Sətrə klikləyin — həmin tələbə və imtahan üçün «Cəhd hüququ ver» forması doldurulur."
+msgstr "Click a row to fill in the “Grant a re-attempt” form for that student and exam."
+
+msgctxt "accounts.exam_chance"
+msgid "Əmr / sərəncam, ərizə və ya qərarın surəti — PDF, JPG və ya PNG, ən çox 10 MB. Sənədsiz cəhd hüququ verilmir."
+msgstr "A copy of the order / decree, application or decision — PDF, JPG or PNG, up to 10 MB. No re-attempt is granted without a document."
+
+msgctxt "exams.model.exam.field"
+msgid "Müəllim (jurnal)"
+msgstr "Teacher (journal)"
+
+msgctxt "exams.model.exam.field"
+msgid "Bağlı jurnallar"
+msgstr "Linked journals"
+
+msgctxt "exams.form.exam.label"
+msgid "Müəllim (jurnal)"
+msgstr "Teacher (journal)"
+
+msgctxt "exams.form.exam.help"
+msgid "Müəllimi seçsəniz, fənn siyahısı onun cari dövrdə tədris etdiyi fənlərlə məhdudlaşır və midterm nəticəsi həmin fənnin qrup jurnallarına yazılır. Boş qalarsa bütün fənlər göstərilir."
+msgstr "If you select a teacher, the subject list is limited to the subjects they teach in the current period and the midterm result is written to that subject's group journals. If left empty, all subjects are shown."
+
+msgctxt "exams.form.exam.error"
+msgid "Seçilmiş müəllim bu fənni cari dövrdə tədris etmir."
+msgstr "The selected teacher does not teach this subject in the current period."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Müəllim tapılmadı"
+msgstr "No teacher found"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Müəllim axtar…"
+msgstr "Search teacher…"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Seçilmiş müəllim"
+msgstr "Selected teacher"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Təmizlə (bütün fənlər)"
+msgstr "Clear (all subjects)"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu müəllimin cari dövrdə tədris etdiyi fənn tapılmadı"
+msgstr "No subject taught by this teacher in the current period was found"
+
+msgctxt "applications"
+msgid "Bütün müraciətlər"
+msgstr "All applications"
+
+msgctxt "applications"
+msgid "Şöbə (ünvan)"
+msgstr "Department (addressee)"
+
+msgctxt "applications"
+msgid "Bütün şöbələr"
+msgstr "All departments"
+
+msgctxt "applications"
+msgid "Göndərənin bölməsi"
+msgstr "Sender's unit"
+
+msgctxt "applications"
+msgid "Bütün göndərənlər"
+msgstr "All senders"
+
+msgctxt "applications"
+msgid "Fakültələr"
+msgstr "Faculties"
+
+msgctxt "applications"
+msgid "Kafedralar"
+msgstr "Departments (chairs)"
+
+msgctxt "applications"
+msgid "Mərkəz və digər bölmələr"
+msgstr "Centres and other units"
+
+msgctxt "organizations.permission.label"
+msgid "Bütün müraciətlərə baxmaq (yalnız oxu)"
+msgstr "View all applications (read-only)"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu midterm imtahanının nəticəsi tələbə imtahanı bitirən kimi seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq."
+msgstr "The result of this midterm will be written automatically to the group journals of the selected subject (Midterm /30) as soon as the student finishes the exam."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu midterm imtahanının nəticəsi yoxlanıldıqdan sonra seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq."
+msgstr "The result of this midterm will be written automatically to the group journals of the selected subject (Midterm /30) once it has been graded."
+
+msgctxt "exams.teacher.grading"
+msgid "Bal jurnala avtomatik yazılır"
+msgstr "The score is written to the journal automatically"
+
+msgctxt "exams.teacher.grading"
+msgid "Bu midterm imtahanıdır. Bütün suallar qiymətləndirilib yadda saxlananda bal fənnin jurnalına (Midterm) avtomatik yazılır — jurnalda əl ilə yazmaq lazım deyil."
+msgstr "This is a midterm exam. When all questions are graded and saved, the score is written automatically to the subject journal (Midterm) — there is no need to enter it in the journal manually."
+
+msgctxt "exams.teacher.grading"
+msgid "Bu midterm imtahanıdır. Nəticə hazırda tələbədən gizlədilib — saxladığınız bal fənnin jurnalına (Midterm) nəticə tələbəyə açılanda avtomatik yazılacaq."
+msgstr "This is a midterm exam. The result is currently hidden from the student — the score you save will be written automatically to the subject journal (Midterm) when the result is released to the student."
+
+msgctxt "registrar.journal"
+msgid "İmtahan Mərkəzində keçirilən midterm balı imtahandan avtomatik yazılır (test — tələbə bitirən kimi, yazılı / praktiki — yoxlanıldıqdan sonra) və burada əl ilə dəyişdirilmir. Düzəliş yalnız apellyasiya və ya sənədli düzəliş ilə mümkündür."
+msgstr "The midterm score of an exam held in the Exam Center is written automatically from the exam (test — as soon as the student finishes, written / practical — after grading) and cannot be changed manually here. It can be corrected only through an appeal or a documented correction."
+
+msgctxt "registrar.journal"
+msgid "imtahandan avtomatik"
+msgstr "automatically from the exam"

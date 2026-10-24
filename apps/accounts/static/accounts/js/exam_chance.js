@@ -1,4 +1,4 @@
-/* «İmtahan şansı ver» — filtr formunun avto-submit-i.
+/* «Yenidən imtahan cəhdi» — filtr formunun avto-submit-i, grant formasının xülasəsi və ön-doldurma.
  *
  * Select dəyişən kimi forma göndərilir (fakültə dəyişəndə kafedra sıfırlanır —
  * server onsuz da yad kafedranı rədd edir, URL təmiz qalsın); axtarış
@@ -77,10 +77,65 @@
         }
     }
 
+    /* 2026-10-24: ön-doldurma süzgəc dəyişəndə itməsin — seçilmiş imtahan və işarələnmiş tələbələr süzgəc
+     * formasının gizli `chance_exam` / `chance_student` sahələrinə yazılır (server çipləri yenidən işarələyir). */
+    function keepSelection(form) {
+        var filter = document.querySelector("form.js-exch-filter");
+        if (!filter) {
+            return;
+        }
+        var examKeep = filter.querySelector("[data-exch-keep-exam]");
+        var select = form.querySelector("[data-exch-exam]");
+        if (examKeep && select) {
+            examKeep.value = select.value || "";
+        }
+        var studentsKeep = filter.querySelector("[data-exch-keep-students]");
+        if (studentsKeep) {
+            studentsKeep.value = Array.prototype.map.call(
+                form.querySelectorAll('input[name="student_ids"]:checked'),
+                function (box) { return box.value; }
+            ).slice(0, 20).join(",");
+        }
+    }
+
     document.addEventListener("change", function (event) {
         var form = event.target && event.target.closest ? event.target.closest("form[data-exch-grant]") : null;
         if (form) {
             syncGrant(form);
+            keepSelection(form);
+        }
+    });
+
+    /* «Son verilən cəhd hüquqları» sətri → həmin tələbə + imtahan üçün grant forması (cari əsas saxlanılır;
+     * əsas seçilməyibsə forma 1-ci addımı göstərir). Sənəd linki öz işini görür. */
+    window.EMSDelegate.on("click", "tr[data-exch-prefill]", function (event, row) {
+        var link = event.target.closest ? event.target.closest("a") : null;
+        if (link && !link.classList.contains("exch-prefill")) {
+            return;
+        }
+        var url = row.getAttribute("data-exch-prefill");
+        if (!url) {
+            return;
+        }
+        event.preventDefault();
+        if (typeof window.EMSProfileLoadSection === "function") {
+            window.EMSProfileLoadSection("exam-chance", url);
+        } else {
+            window.location.assign(url);
+        }
+    });
+
+    /* Ön-doldurulmuş açılış (`chance_focus=grant`): forma görünən yerə sürüşür — hər URL üçün bir dəfə
+     * (sonrakı süzgəc yükləmələri səhifəni yerindən oynatmır). */
+    window.EMSReady(function () {
+        Array.prototype.forEach.call(document.querySelectorAll("form[data-exch-grant]"), syncGrant);
+        var card = document.querySelector("#exchGrantCard[data-exch-focus]");
+        if (!card || window.__exchFocusedHref === window.location.href) {
+            return;
+        }
+        window.__exchFocusedHref = window.location.href;
+        if (typeof card.scrollIntoView === "function") {
+            card.scrollIntoView({ behavior: "smooth", block: "start" });
         }
     });
 

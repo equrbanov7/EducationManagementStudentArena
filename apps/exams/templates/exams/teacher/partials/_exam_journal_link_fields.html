@@ -1,0 +1,73 @@
+{% load i18n %}
+{% comment %}
+  Sehrbazın «Əsaslar» addımı — MÜƏLLİM (jurnal) → FƏNN asılı seçimi (sahib 2026-10-24, «JS Loop» halı).
+
+  * Müəllim seçicisi yalnız Final / Midterm kateqoriyasında görünür (`data-ew-journal-teacher-group`,
+    görünürlüyü subject_select.js idarə edir). Müəllim seçiləndə fənn siyahısı
+    `exams:journal_teacher_subjects`-dən — yalnız onun cari dövrdə tədris etdiyi fənlər (seçilmiş
+    reyestr qrupları ilə süzülür); boşdursa bütün fənlər (`exams:subject_search`, əvvəlki kimi).
+  * Dinamik dəyərlər data-atributlardadır; JS: exam_create_edit_modal/subject_select.js (inline JS yoxdur).
+  * Fənn — tək seçimli axtarışlı siyahı; Final/midterm-də məcburidir.
+{% endcomment %}
+{% with teacher_choice=form.journal_teacher_selected category=form.exam_type_extended.value %}
+<div class="form-group form-group-full" data-ew-journal-teacher-group{% if category != "midterm" and category != "final" %} hidden{% endif %}>
+    <label class="ew-label create-exam-searchable-label" for="createExamTeacherSearch">{{ form.journal_teacher.label }}</label>
+    <div class="create-exam-searchable-select create-exam-subject-select" data-exam-teacher-control
+         data-search-url="{% url 'exams:bank_teacher_search' %}"
+         data-empty-text="{% trans 'Müəllim tapılmadı' context 'exams.template.create_exam_modal_form' %}">
+        <div class="create-exam-search-wrap">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input type="text" id="createExamTeacherSearch" class="create-exam-search-input"
+                   placeholder="{% trans 'Müəllim axtar…' context 'exams.template.create_exam_modal_form' %}"
+                   autocomplete="off">
+        </div>
+        <div class="create-exam-search-list" data-exam-teacher-results></div>
+        <div class="create-exam-selection-counter">
+            {% trans "Seçilmiş müəllim" context "exams.template.create_exam_modal_form" %}:
+            <span data-exam-teacher-selected-text>{% if teacher_choice %}{{ teacher_choice.text }}{% else %}—{% endif %}</span>
+            <button type="button" class="btn btn-link btn-sm create-exam-teacher-clear" data-exam-teacher-clear{% if not teacher_choice %} hidden{% endif %}>{% trans "Təmizlə (bütün fənlər)" context "exams.template.create_exam_modal_form" %}</button>
+        </div>
+        <select name="{{ form.journal_teacher.html_name }}" class="d-none" data-exam-teacher-native>
+            {% if teacher_choice %}<option value="{{ teacher_choice.id }}" selected>{{ teacher_choice.text }}</option>{% endif %}
+        </select>
+    </div>
+    <small class="form-text">{{ form.journal_teacher.help_text }}</small>
+    {% if form.journal_teacher.errors %}<div class="field-error">{{ form.journal_teacher.errors.0 }}</div>{% endif %}
+</div>
+{# Midterm → jurnal məlumat qeydi (sahib 2026-10-24): format üzrə mətn (test — bitən kimi; yazılı/praktiki — yoxlanandan sonra). #}
+{% with exam_format=form.exam_type.value|default:"test" %}
+<div class="ew-journal-note" role="note" data-ew-midterm-journal-note{% if category != "midterm" %} hidden{% endif %}>
+    <i class="fas fa-book-open ew-journal-note__icon" aria-hidden="true"></i>
+    <p class="ew-journal-note__text" data-ew-journal-note-format="test"{% if exam_format != "test" %} hidden{% endif %}>{% trans "Bu midterm imtahanının nəticəsi tələbə imtahanı bitirən kimi seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq." context "exams.template.create_exam_modal_form" %}</p>
+    <p class="ew-journal-note__text" data-ew-journal-note-format="graded"{% if exam_format == "test" %} hidden{% endif %}>{% trans "Bu midterm imtahanının nəticəsi yoxlanıldıqdan sonra seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq." context "exams.template.create_exam_modal_form" %}</p>
+</div>
+{% endwith %}
+{% endwith %}
+
+<div class="form-group form-group-full" data-ew-subject-group>
+    <label class="ew-label create-exam-searchable-label" for="createExamSubjectSearch">{{ form.subject.label }} <span class="ew-req" aria-hidden="true" data-ew-subject-req hidden>*</span></label>
+    <div class="create-exam-searchable-select create-exam-subject-select" data-exam-subject-control
+         data-search-url="{% url 'exams:subject_search' %}"
+         data-teacher-url="{% url 'exams:journal_teacher_subjects' %}"
+         data-teacher-empty-text="{% trans 'Bu müəllimin cari dövrdə tədris etdiyi fənn tapılmadı' context 'exams.template.create_exam_modal_form' %}">
+        <div class="create-exam-search-wrap">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input type="text" id="createExamSubjectSearch" class="create-exam-search-input"
+                   placeholder="{% trans 'subject_search_placeholder' context 'exams.template.create_exam_modal_form' %}"
+                   autocomplete="off">
+        </div>
+        <div id="createExamSubjectResults" class="create-exam-search-list" data-exam-subject-results></div>
+        <div class="create-exam-selection-counter">
+            {% trans "selected_subject" context "exams.template.create_exam_modal_form" %}:
+            <span data-exam-subject-selected-text>—</span>
+        </div>
+        <select name="{{ form.subject.html_name }}" class="d-none" data-exam-subject-native>
+            {% if form.instance.subject %}
+                <option value="{{ form.instance.subject.pk }}" selected>{{ form.instance.subject.name }} ({{ form.instance.subject.code }})</option>
+            {% elif form.subject.value %}
+                <option value="{{ form.subject.value }}" selected>{{ form.subject.value }}</option>
+            {% endif %}
+        </select>
+    </div>
+    {% if form.subject.errors %}<div class="field-error">{{ form.subject.errors.0 }}</div>{% endif %}
+</div>

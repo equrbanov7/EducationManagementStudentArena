@@ -10,6 +10,7 @@ from __future__ import annotations
 import datetime
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
@@ -50,6 +51,7 @@ class SecondChanceDecisionKeyTests(_ChanceBase):
                 "student_ids": [str(self.student.pk)],
                 "reason": "other",  # 2026-10-18: səbəbsiz şans yoxdur
                 "note": "Rəhbərin qərarı ilə əlavə cəhd",
+                "document": SimpleUploadedFile("emr.pdf", b"%PDF-1.4\n%%EOF\n", content_type="application/pdf"),
             },
         )
 

@@ -32,6 +32,9 @@ def _date_param(request, name):
 def application_list(request, *, organization):
     user = request.user
     tab = request.GET.get("tab", "mine")
+    if tab == "all" and not access.can_oversee(user, organization):
+        # «Bütün müraciətlər» yalnız nəzarətçiyə (RİM) — URL-i əl ilə yazan 403 alır.
+        return error("Bu siyahıya baxmaq üçün icazəniz yoxdur.", status=403)
     queryset = queries.list_applications(
         organization=organization,
         user=user,
@@ -43,6 +46,9 @@ def application_list(request, *, organization):
         # sadəcə tətbiq olunmur — 400 vermək filtrləri «qırıq» göstərərdi.
         date_from=_date_param(request, "from"),
         date_to=_date_param(request, "to"),
+        # Şöbə / göndərən bölməsi (RİM nəzarəti): görünən dəsti yalnız DARALDIR.
+        unit_code=(request.GET.get("unit") or "").strip(),
+        sender_unit=(request.GET.get("sender_unit") or "").strip(),
     )
     paginator = Paginator(queryset, PAGE_SIZE)
     page = paginator.get_page(request.GET.get("page") or 1)
@@ -103,18 +109,23 @@ def application_catalog(request, *, organization):
     # ``access.active_units`` təşkilat üzrə keşlənib (bax P2-26/P2-6) — yuxarıdakı
     # dövr də daxil olmaqla eyni kataloqu artıq təkrar sorğulamır.
     units = access.active_units(organization)
-    return ok(
-        {
-            "family": family,
-            "can_create": can_create,
-            "is_handler": access.is_handler_anywhere(user, organization),
-            "can_manage": access.has_app_permission(user, organization, PERM_MANAGE),
-            "kinds": kinds,
-            "units": [unit_payload(unit) for unit in units],
-            "statuses": list(STATUS_CATALOG),
-            "rules": rules_payload(),
-        }
-    )
+    can_oversee = access.can_oversee(user, organization)
+    payload = {
+        "family": family,
+        "can_create": can_create,
+        "is_handler": access.is_handler_anywhere(user, organization),
+        "can_manage": access.has_app_permission(user, organization, PERM_MANAGE),
+        "can_oversee": can_oversee,
+        "kinds": kinds,
+        "units": [unit_payload(unit) for unit in units],
+        "statuses": list(STATUS_CATALOG),
+        "rules": rules_payload(),
+    }
+    if can_oversee:
+        # «Bütün müraciətlər» növ süzgəci göndərənin ailəsindən asılı deyil — BÜTÜN aktiv növlər.
+        active_kinds = ApplicationKind.objects.filter(organization=organization, is_active=True)
+        payload["filter_kinds"] = [kind_payload(kind) for kind in active_kinds.order_by("order", "label")]
+    return ok(payload)
 
 
 @require_POST

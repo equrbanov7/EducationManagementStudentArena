@@ -1,4 +1,4 @@
-"""Test formatlı midterm → elektron jurnalın «Midterm» xanası (sahib 2026-10-21).
+"""Midterm → elektron jurnalın «Midterm» xanası (sahib 2026-10-21: test; 2026-10-24: yazılı / kodlaşdırma da).
 
 Sahib: «Midterm test olaraq verənlərdə avtomatik olaraq jurnala da düşsün, tələbənin balı əl ilə
 doldurulmasın, tələbədə görünsün». Bu modul registrar tərəfidir — exams tərəfi
@@ -36,7 +36,13 @@ from django.db import transaction
 
 from apps.registrar import exam_bridge, grade_audit, interim_assessment, interim_components
 from apps.registrar.gradebook import journal_is_locked
-from apps.registrar.models import ComponentKind, ComponentScore, ComponentScoreCorrection, CourseOffering
+from apps.registrar.models import (
+    ComponentKind,
+    ComponentScore,
+    ComponentScoreCorrection,
+    CourseOffering,
+    Enrollment,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +59,7 @@ AUDIT_KIND = "midterm-auto"
 
 
 def is_auto_score(score_row) -> bool:
-    """Xana test midterm cəhdindən avtomatik yazılıbmı (müəllim dəyişə bilməz)."""
+    """Xana midterm cəhdindən (imtahandan) avtomatik yazılıbmı (müəllim dəyişə bilməz)."""
     return bool(getattr(score_row, "exam_source", None))
 
 
@@ -93,6 +99,23 @@ def _writer(organization, by_user):
     return None
 
 
+def _linked_enrollment(student, organization, offering_ids):
+    """Tələbənin imtahanın bağlı jurnallarından birindəki aktiv qeydiyyatı (yoxdursa ``None``)."""
+    if not offering_ids or student is None:
+        return None
+    return (
+        Enrollment.objects.filter(
+            student=student,
+            offering_id__in=list(offering_ids),
+            offering__organization=organization,
+            status=Enrollment.Status.ENROLLED,
+        )
+        .select_related("offering", "offering__period")
+        .order_by("pk")
+        .first()
+    )
+
+
 def record_midterm_result(
     *,
     student,
@@ -108,12 +131,17 @@ def record_midterm_result(
     by_user=None,
     appeal_id=None,
     notify=True,
+    offering_ids=None,
 ):
-    """Test midterm cəhdinin nəticəsini jurnalın «Midterm» xanasına yaz → ``(status, ComponentScore | None)``.
+    """Midterm cəhdinin nəticəsini jurnalın «Midterm» xanasına yaz → ``(status, ComponentScore | None)``.
 
     Çağıran (exams) cəhdin RƏSMİ olduğunu (bitib, sınaq deyil, sonrakı cəhdlə əvəzlənməyib, nəticə
-    tələbəyə açıqdır) artıq yoxlayıb. ``notify=False`` — toplu bərpa (``sync_midterm_scores``) üçün."""
-    enrollment = exam_bridge.resolve_enrollment(student=student, subject_id=subject_id, organization=organization)
+    tələbəyə açıqdır) artıq yoxlayıb. ``notify=False`` — toplu bərpa (``sync_midterm_scores``) üçün.
+    ``offering_ids`` — imtahanın AÇIQ bağlandığı jurnallar (``Exam.journal_offerings``, 2026-10-24): tələbə
+    onlardan birində qeydiyyatdadırsa bal ORAYA yazılır, yoxsa fənn üzrə qeydiyyat (əvvəlki qayda)."""
+    enrollment = _linked_enrollment(student, organization, offering_ids) or exam_bridge.resolve_enrollment(
+        student=student, subject_id=subject_id, organization=organization
+    )
     if enrollment is None:
         return NO_ENROLLMENT, None
     offering = enrollment.offering
@@ -192,6 +220,15 @@ def _write(
     return WRITTEN, existing
 
 
+def _audit_note(by_user, appeal_id) -> str:
+    """Audit mənbə qeydi: apellyasiya / müəllim yoxlaması (yazılı, kodlaşdırma midtermi) / sistem."""
+    if appeal_id is not None:
+        return "imtahan mərkəzi · apellyasiya"
+    if by_user is None:
+        return "imtahan mərkəzi · avtomatik"
+    return "imtahan mərkəzi · yoxlama"
+
+
 def _audit_and_notify(*, offering, component, enrollment, old_score, score, source, by_user, appeal_id, notify):
     change = {
         "student": grade_audit.student_label(enrollment),
@@ -199,7 +236,7 @@ def _audit_and_notify(*, offering, component, enrollment, old_score, score, sour
         "old": grade_audit.score_repr(old_score),
         "new": grade_audit.score_repr(score),
         "source": f"exam_attempt:{source['attempt_id']}",
-        "note": "imtahan mərkəzi · avtomatik" if by_user is None else "imtahan mərkəzi · apellyasiya",
+        "note": _audit_note(by_user, appeal_id),
     }
     if appeal_id is not None:
         change["appeal"] = str(appeal_id)
@@ -231,7 +268,7 @@ def auto_sources_for(components, enrollment_ids=None) -> dict:
 
 
 def student_interim_rows(interim, components, enrollment) -> list[dict]:
-    """Tələbə jurnalının aralıq qiymətləndirmə sətirləri (1 sorğu); ``auto`` — balı test midtermindən avtomatik."""
+    """Tələbə jurnalının aralıq qiymətləndirmə sətirləri (1 sorğu); ``auto`` — balı midterm imtahanından avtomatik."""
     if not components:
         return []
     rows = {

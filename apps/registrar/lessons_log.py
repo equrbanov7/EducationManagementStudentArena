@@ -16,7 +16,9 @@ məlumat mövcud ``Lesson`` / ``LessonMark`` sətirlərindən hesablanır.
   sorğu YOXDUR (test ``CaptureQueriesContext`` ilə kilidləyir).
 * **«Gec yazılıb» tərifi:** dərsin İLK xanası dərs tarixindən
   :data:`LATE_AFTER_HOURS` saat sonra yazılıbsa. Model dəyişikliyi tələb
-  etmir — ``LessonMark.created_at`` vs ``Lesson.date``.
+  etmir — ``LessonMark.created_at`` vs ``Lesson.date``. Köhnə sistemdən
+  köçürülmüş dərs/xana bu hesaba GİRMİR (idxal anı yazı anı deyil) — tərif
+  :mod:`apps.registrar.lessons_log_totals` «KÖÇÜRMƏ» bölməsindədir.
 
 Modul sərhədi: ``apps.organizations`` statik İMPORT EDİLMİR (``module_deps``
 qapısı) — struktur əhatəsi ``journal_scope.permission_scope_q`` üzərindən gəlir.
@@ -59,6 +61,8 @@ from apps.registrar.lessons_log_periods import (  # noqa: F401 — geri-uyğun r
 from apps.registrar.lessons_log_totals import (  # noqa: F401 — geri-uyğun re-export
     LATE_AFTER_HOURS,
     TOTALS_CACHE_TTL,
+    is_imported_lesson,
+    new_system_mark_q,
     range_totals,
     totals_cache_key,
 )
@@ -198,7 +202,11 @@ def apply_filters(
 
 
 def note_state(*, lesson_date, marks_count: int, first_mark) -> str:
-    """`on_time` / `late` / `empty` — dizayn §21 «Jurnal qeydi» sütunu."""
+    """`on_time` / `late` / `empty` — dizayn §21 «Jurnal qeydi» sütunu.
+
+    ``first_mark`` — yeni sistemdə yazılmış İLK xananın vaxtı; xanalar var, amma
+    hamısı köçürülübsə (və ya dərsin özü köçürülübsə) ``None`` → «vaxtında».
+    """
     if not marks_count:
         return NOTE_EMPTY
     if first_mark is None:
@@ -215,7 +223,11 @@ def note_state(*, lesson_date, marks_count: int, first_mark) -> str:
 
 
 def marks_by_lesson(lesson_ids) -> dict:
-    """``{lesson_id: {present, absent, excused, graded, total, first_mark}}`` — TƏK sorğu."""
+    """``{lesson_id: {present, absent, excused, graded, total, first_mark}}`` — TƏK sorğu.
+
+    ``first_mark`` yalnız YENİ SİSTEMDƏ yazılmış xanalardan hesablanır (köçürülmüş
+    xananın ``created_at``-ı idxal anıdır, bax ``lessons_log_totals``).
+    """
     if not lesson_ids:
         return {}
     rows = (
@@ -227,7 +239,7 @@ def marks_by_lesson(lesson_ids) -> dict:
             excused=Count("id", filter=Q(status=AttendanceStatus.EXCUSED)),
             graded=Count("id", filter=Q(score__isnull=False)),
             total=Count("id"),
-            first_mark=Min("created_at"),
+            first_mark=Min("created_at", filter=new_system_mark_q()),
         )
     )
     return {row["lesson_id"]: row for row in rows}
@@ -347,7 +359,8 @@ def build_rows(lessons_qs, *, limit=ROW_CAP) -> list:
                 "note": note_state(
                     lesson_date=lesson.date,
                     marks_count=marks_total,
-                    first_mark=bucket.get("first_mark"),
+                    # Köçürülmüş dərs heç vaxt «gec» deyil (`lessons_log_totals` «KÖÇÜRMƏ»).
+                    first_mark=None if is_imported_lesson(lesson) else bucket.get("first_mark"),
                 ),
                 "is_legacy": bool(lesson.is_legacy_synthesised),
                 # «Cədvəldən kənar» (UNEC P1-1): dərs cədvəl slotuna uyğun gəlmədən, səbəblə açılıb.

@@ -24,12 +24,13 @@ from core.roles import ProfileRole
 from .coding import dump_test_cases, parse_test_cases
 from .exam_coding_fields import CodingExamFieldsMixin
 from .exam_exclusions import excluded_users_within_assignment, requested_unit_ids
+from .exam_journal_teacher import JournalTeacherFieldMixin
 from .exam_question_count import category_counts, decorate_widget, initial_count, resolve_submitted_count
 
 User = get_user_model()
 
 
-class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
+class ExamForm(JournalTeacherFieldMixin, CodingExamFieldsMixin, forms.ModelForm):
     organization = forms.ModelChoiceField(
         queryset=apps.get_model("organizations", "Organization").objects.none(),
         required=False,
@@ -45,6 +46,7 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
             "description",
             "exam_type",
             "exam_type_extended",
+            "journal_teacher",
             "subject",
             "is_active",
             "start_datetime",
@@ -363,6 +365,7 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
             else:
                 self.fields["subject"].queryset = Subject.objects.none()
             self.fields["subject"].required = False
+        self._init_journal_teacher(organization)  # 2026-10-24: müəllim → fənn asılı seçimi
 
         # Əgər teacher məlumatı gəlirsə, onu nəzərə alaq
         if user is not None:
@@ -561,6 +564,7 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
                 "subject",
                 pgettext_lazy("exams.form.exam.error", "subject_required_for_final_midterm"),
             )
+        self._clean_journal_link(cleaned_data)  # müəllim seçilibsə fənn onun cari dövr fənlərindən olmalıdır
         # H-1 (2026-09-25): jurnala YALNIZ «Final» yazılır — fənnə bağlanan imtahanda kateqoriya
         # məcburidir ki, unudulmuş kateqoriya balı səssizcə itirməsin (və əvvəlki kimi əzməsin).
         if cleaned_data.get("subject") and not exam_type_extended:

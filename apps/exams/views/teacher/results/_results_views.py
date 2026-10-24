@@ -13,8 +13,9 @@ from django.utils import timezone
 from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.models import ExamAnswer, ExamAttempt
-from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.access_policy import _ensure_teacher, is_exam_center_user
 from apps.exams.services.attempt_budget import attempts_left_map
+from apps.exams.services.formal_retake import formal_retake_url, requires_formal_retake
 from apps.exams.services.manual_grading import (
     ManualGradingAttemptNotFinished,
     ManualGradingWindowClosed,
@@ -234,6 +235,8 @@ def teacher_exam_results(request, slug):
     # (cəhd başına 3 sorğu, 12-lik səhifədə ~36) — indi səhifənin bütün
     # tələbələri üçün 3 sabit sorğu, eyni məntiqlə (audit P1-9, 2026-09-12).
     attempts_left_by_user = attempts_left_map(exam, [att.user_id for att in attempts_page])
+    # 2026-10-24 (sahib): midterm / final — «Yenidən şans ver» rəsmi «Yenidən imtahan cəhdi» səhifəsinə aparır.
+    formal_retake = requires_formal_retake(exam)
 
     for att in attempts_page:
         anonymous_name = _build_anonymous_name(attempt_id=att.id, user_id=att.user_id, exam_id=exam.id)
@@ -274,6 +277,7 @@ def teacher_exam_results(request, slug):
                 "real_name": real_name,
                 "student_id": att.user_id,
                 "attempts_left": attempts_left_by_user.get(att.user_id),
+                "formal_retake_url": formal_retake_url(exam, student=att.user_id) if formal_retake else "",
                 "can_view_name": can_view_name,
                 "seconds_remaining": review_window_seconds or identity_window_seconds or 0,
                 "action_code": action_state["code"],
@@ -396,6 +400,11 @@ def teacher_exam_results(request, slug):
             "can_delete_attempts": can_delete_attempts,
             "available_groups": available_groups,
             "group_filter": group_filter_value,
+            # Midterm / final: birbaşa əlavə cəhd yoxdur — rəsmi səhifə (yalnız İmtahan Mərkəzi açır).
+            "formal_retake": formal_retake,
+            "formal_retake_open": formal_retake and is_exam_center_user(request.user),
+            "formal_retake_action": reverse("accounts:profile"),
+            "formal_retake_exam_url": formal_retake_url(exam) if formal_retake else "",
             "export_xlsx_url": export_xlsx_url,
             "teacher_display": teacher_display,
             "teacher_username": teacher_username,

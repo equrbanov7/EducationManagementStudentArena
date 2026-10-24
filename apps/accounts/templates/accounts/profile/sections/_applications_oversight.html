@@ -1,0 +1,37 @@
+{% load i18n %}
+{% comment %}«Bütün müraciətlər» (RİM nəzarəti) — şöbə süzgəcləri.
+
+Yalnız `applications_section.can_oversee` olanda daxil edilir və YALNIZ «Bütün müraciətlər»
+tabında görünür (`applications_oversight.js` tab dəyişəndə `hidden`-i idarə edir). Seçimlər
+serverdən gəlir: şöbə = müraciətin CARİ ünvanı (`ApplicationUnit.code`), göndərənin bölməsi =
+`OrgUnit` (fakültə seçiləndə alt-ağacı da daxildir — `services.oversight.sender_unit_q`).
+Layihə qaydası ilə `bootstrap-single-select` komponenti (`static/js/bootstrap_select.js` swap-dan
+sonra özü qoşulur); seçim native `<select>`-ə yazılır və `change` hadisəsi ilə gəlir.
+{% endcomment %}
+<div class="apx-oversight" data-apx-oversight hidden>
+  <div class="bootstrap-single-select bootstrap-single-select--ems apx-oversight__field" data-apx-oversight-field="unit">
+    <label class="apx__sr" for="apx-unit">{% trans "Şöbə (ünvan)" context "applications" %}</label>
+    <select id="apx-unit" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-apx-oversight-unit>
+      <option value="">{% trans "Bütün şöbələr" context "applications" %}</option>
+      {% for unit in applications_section.units %}
+      <option value="{{ unit.code }}">{{ unit.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  {% if applications_section.sender_units %}
+  <div class="bootstrap-single-select bootstrap-single-select--ems apx-oversight__field" data-apx-oversight-field="sender">
+    <label class="apx__sr" for="apx-sender-unit">{% trans "Göndərənin bölməsi" context "applications" %}</label>
+    <select id="apx-sender-unit" class="ems-select bootstrap-single-select__native" data-bootstrap-select
+            data-live-search="true" data-apx-oversight-sender>
+      <option value="">{% trans "Bütün göndərənlər" context "applications" %}</option>
+      {% for group in applications_section.sender_units %}
+      <optgroup label="{{ group.label }}">
+        {% for unit in group.units %}
+        <option value="{{ unit.id }}">{{ unit.name }}</option>
+        {% endfor %}
+      </optgroup>
+      {% endfor %}
+    </select>
+  </div>
+  {% endif %}
+</div>

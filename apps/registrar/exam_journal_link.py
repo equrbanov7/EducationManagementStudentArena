@@ -1,0 +1,206 @@
+"""İmtahan ↔ elektron jurnal (açılış) bağlantısı — registrar tərəfi (sahib 2026-10-24).
+
+Sahib: «Midterm yaradılıb tələbələr verəndə nəticə jurnalın «Midterm» xanasına avtomatik düşsün». Prod
+halı («JS Loop»): imtahan əvvəl YANLIŞ fənnə bağlanmış, tələbələr imtahanı verəndən SONRA fənn
+«Mobil proqramlaşdırma»ya dəyişdirilmişdi — cəhdlər bitəndə körpü yanlış fənn üzrə qeydiyyat tapmadı
+(``no_enrollment``), fənn dəyişəndə isə heç nə yenidən sinxronlaşmadı → jurnalda «Midterm» 0 qaldı.
+
+Bu modul exams tərəfinə (``apps.registrar.public`` fasadı ilə) üç şey verir:
+
+* **Müəllimin fənləri** — :func:`teacher_offerings` / :func:`teacher_subject_ids`: cari dövrdə müəllimin
+  TƏDRİS ETDİYİ açılışlar (jurnal sahibi ``CourseOffering.instructor`` və ya həmin jurnalda dərs aparmış
+  ``Lesson.instructor``), istəyə görə imtahanın qruplarına (alt / ana qrup daxil) görə süzülmüş.
+* **Bağlantı** — :func:`link_offering_ids`: imtahanın fənni + qrupları (+ müəllim) → hər qrupun ÖZ
+  açılışı (açılış ``(fənn, dövr, qrup)`` üzrə unikaldır, yəni qrup başına ən çox bir jurnal).
+* **Köhnə bağlantının təmizlənməsi** — :func:`clear_stale_midterm_scores`: bu imtahanın
+  (``exam_source.exam_id``) yazdığı, amma artıq imtahanın fənninə / bağlı jurnalına aid olmayan
+  avtomatik xanalar silinir (yalnız BU imtahanın yazdıqları; əl ilə yazılmış xanaya toxunulmur).
+  Bağlanmış jurnal və sənədli düzəlişli xana toxunulmur; hər silinmə audit izinə yazılır
+  (fail-closed — audit düşsə silinmə də geri qayıdır).
+"""
+
+from __future__ import annotations
+
+import logging
+from collections import Counter
+
+from django.apps import apps as django_apps
+from django.db import transaction
+from django.db.models import Q
+
+from apps.registrar import exam_bridge, grade_audit, midterm_bridge, subgroup_rollup
+from apps.registrar.audit_write import AuditWriteFailed
+from apps.registrar.gradebook import journal_is_locked
+from apps.registrar.models import ComponentScore, ComponentScoreCorrection, CourseOffering, Enrollment, Subject
+
+logger = logging.getLogger(__name__)
+
+#: ``clear_stale_midterm_scores`` statusları.
+CLEARED = "cleared"
+KEPT_LOCKED = "kept_journal_locked"
+KEPT_CORRECTED = "kept_corrected"
+CLEAR_FAILED = "clear_failed"
+
+
+def current_period(organization):
+    """İmtahan körpüsünün işlətdiyi dövr (cari, yoxdursa ən son) — ``resolve_enrollment`` ilə EYNİ."""
+    if organization is None:
+        return None
+    return exam_bridge._current_period(organization)
+
+
+def expand_group_ids(organization, group_ids) -> set:
+    """Qrup id-ləri + alt qrupları («234 K az» → 234 K-1/-2) + ana qrup namizədləri (alt qrup → ana)."""
+    ids = {str(value) for value in group_ids or () if value}
+    if not ids or organization is None:
+        return set()
+    OrgUnit = django_apps.get_model("organizations", "OrgUnit")
+    units = list(OrgUnit.objects.filter(organization=organization, pk__in=ids, unit_type="group"))
+    out = {unit.pk for unit in units}
+    out |= {unit.pk for unit in subgroup_rollup.subgroup_units(organization, units)}
+    for unit in units:
+        out |= {parent.pk for parent in subgroup_rollup.parent_group_candidates(organization, unit)}
+    return out
+
+
+def _period_offerings(organization, period):
+    return CourseOffering.objects.filter(organization=organization, period=period, is_active=True)
+
+
+def teacher_offerings(organization, teacher, *, group_ids=None, period=None):
+    """Müəllimin cari dövrdə tədris etdiyi açılışlar (jurnal sahibi və ya həmin jurnalda dərs aparan).
+
+    ``group_ids`` verilibsə (``None`` deyil) yalnız həmin qrupların (alt / ana qrup daxil) açılışları."""
+    period = period or current_period(organization)
+    if organization is None or teacher is None or period is None:
+        return CourseOffering.objects.none()
+    teacher_id = getattr(teacher, "pk", teacher)
+    offerings = _period_offerings(organization, period).filter(
+        Q(instructor_id=teacher_id) | Q(lessons__instructor_id=teacher_id)
+    )
+    if group_ids is not None:
+        offerings = offerings.filter(group_id__in=expand_group_ids(organization, group_ids))
+    return offerings.distinct()
+
+
+def teacher_subject_ids(organization, teacher, *, group_ids=None, period=None) -> set:
+    """Müəllimin cari dövrdə tədris etdiyi fənlərin id-ləri."""
+    return set(
+        teacher_offerings(organization, teacher, group_ids=group_ids, period=period).values_list(
+            "subject_id", flat=True
+        )
+    )
+
+
+def teacher_subjects(organization, teacher, *, group_ids=None, period=None):
+    """Müəllimin cari dövrdə tədris etdiyi fənlər (``Subject`` queryset — exams seçicisi süzür / sıralayır)."""
+    if organization is None:
+        return Subject.objects.none()
+    return Subject.objects.filter(
+        organization=organization,
+        pk__in=teacher_subject_ids(organization, teacher, group_ids=group_ids, period=period),
+    )
+
+
+def link_offering_ids(organization, *, subject_id, group_ids=(), teacher=None, period=None) -> list:
+    """İmtahanın bağlanacağı jurnal açılışları (pk siyahısı).
+
+    * qruplar seçilibsə — fənnin cari dövrdə HƏR qrupun (alt / ana qrup daxil) öz açılışı;
+    * qrup yoxdur, müəllim var — müəllimin həmin fənn üzrə açılışları;
+    * heç biri yoxdur — boş (körpü tələbənin fənn üzrə qeydiyyatına düşür, əvvəlki kimi)."""
+    period = period or current_period(organization)
+    if organization is None or not subject_id or period is None:
+        return []
+    offerings = _period_offerings(organization, period).filter(subject_id=subject_id)
+    expanded = expand_group_ids(organization, group_ids)
+    if expanded:
+        offerings = offerings.filter(group_id__in=expanded)
+    elif teacher is not None:
+        offerings = teacher_offerings(organization, teacher, period=period).filter(subject_id=subject_id)
+    else:
+        return []
+    return sorted(offerings.values_list("pk", flat=True).distinct(), key=str)
+
+
+def _is_stale(row, *, subject_id, offering_ids) -> bool:
+    offering = row.enrollment.offering
+    if not subject_id or offering.subject_id != subject_id:
+        return True  # imtahanın fənni dəyişib — bal köhnə fənnin jurnalındadır
+    if not offering_ids or offering.pk in offering_ids:
+        return False
+    # Eyni fənnin BAŞQA jurnalı: tələbə bağlı jurnalda qeydiyyatdadırsa bal oraya köçür.
+    return Enrollment.objects.filter(
+        student_id=row.enrollment.student_id,
+        offering_id__in=list(offering_ids),
+        status=Enrollment.Status.ENROLLED,
+    ).exists()
+
+
+def stale_midterm_rows(*, organization, exam_id, subject_id, offering_ids=()) -> list:
+    """Bu imtahanın yazdığı, amma artıq onun fənninə / bağlı jurnalına aid olmayan avtomatik xanalar."""
+    offering_ids = set(offering_ids or ())
+    rows = ComponentScore.objects.filter(organization=organization, exam_source__exam_id=int(exam_id)).select_related(
+        "component", "enrollment", "enrollment__offering", "enrollment__student"
+    )
+    return [row for row in rows if _is_stale(row, subject_id=subject_id, offering_ids=offering_ids)]
+
+
+def _clear_one(row, *, exam_id, by_user) -> str:
+    offering = row.enrollment.offering
+    with transaction.atomic():
+        CourseOffering.objects.select_for_update().filter(pk=offering.pk).exists()
+        if journal_is_locked(offering):
+            return KEPT_LOCKED  # bağlanmış jurnalın giriş balı dəyişmir — RİM sənədli düzəlişi ilə
+        if ComponentScoreCorrection.objects.filter(
+            component_id=row.component_id, enrollment_id=row.enrollment_id, reversal__isnull=True
+        ).exists():
+            return KEPT_CORRECTED  # RİM-in sənədli düzəlişi qalib gəlir
+        old_score = row.score
+        # DELETE 2 saat trigger-inə düşmür (o yalnız UPDATE-i bağlayır, bax registrar 0024).
+        ComponentScore.objects.filter(pk=row.pk).delete()
+        change = {
+            "student": grade_audit.student_label(row.enrollment),
+            "item": row.component.name,
+            "old": grade_audit.score_repr(old_score),
+            "new": grade_audit.score_repr(None),
+            "source": f"exam:{exam_id}",
+            "note": "imtahan mərkəzi · fənn / jurnal bağlantısı dəyişdi — avtomatik bal köhnə jurnaldan silindi",
+        }
+        grade_audit.log_grade_changes(
+            offering=offering, by_user=by_user, kind=midterm_bridge.AUDIT_KIND, changes=[change], fail_closed=True
+        )
+    return CLEARED
+
+
+def clear_stale_midterm_scores(*, organization, exam_id, subject_id, offering_ids=(), by_user=None) -> Counter:
+    """Köhnə bağlantıdan qalan avtomatik midterm xanalarını sil → status sayları (``Counter``)."""
+    counts: Counter = Counter()
+    if organization is None or exam_id is None:
+        return counts
+    writer = midterm_bridge._writer(organization, by_user)
+    for row in stale_midterm_rows(
+        organization=organization, exam_id=exam_id, subject_id=subject_id, offering_ids=offering_ids
+    ):
+        try:
+            status = _clear_one(row, exam_id=exam_id, by_user=writer)
+        except AuditWriteFailed:
+            logger.exception("exam_journal_link: audit failed while clearing score %s", row.pk)
+            status = CLEAR_FAILED
+        counts[status] += 1
+    return counts
+
+
+__all__ = [
+    "CLEARED",
+    "CLEAR_FAILED",
+    "KEPT_CORRECTED",
+    "KEPT_LOCKED",
+    "clear_stale_midterm_scores",
+    "current_period",
+    "expand_group_ids",
+    "link_offering_ids",
+    "stale_midterm_rows",
+    "teacher_offerings",
+    "teacher_subject_ids",
+    "teacher_subjects",
+]

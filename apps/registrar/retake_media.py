@@ -8,6 +8,10 @@ ad yalnız Mühasibatlıq növbəsində göstərilir.
 (``decision_document``), ödənişdən sonra bağlanış qərarı (``closure_document``) və «Ödənişin qaytarılması qərarı»
 (``refund_document``). Hamısı eyni iz açarları ilə (``TRAIL_KEYS``) açılır; qaytarılma qərarını əlavə olaraq
 Mühasibatlıq (``retake.payment_verify``) görür — «Qaytarılacaq ödənişlər» növbəsində icra üçün lazımdır.
+
+``exam_chance_documents/`` (2026-10-24) — «Yenidən imtahan cəhdi»nin məcburi əsas sənədi (``ExamChanceGrant``).
+Görür: qeydin tələbəsi, superadmin, həmin təşkilatın İmtahan Mərkəzi və 25% izini görən heyət (müraciətə bağlı
+qeyddə müraciətin əhatəsi, əks halda təşkilat-geniş iz açarı).
 """
 
 from __future__ import annotations
@@ -15,7 +19,7 @@ from __future__ import annotations
 from django.db.models import Q
 
 from . import retake_access
-from .models import RetakeApplication, RetakeReceipt
+from .models import ExamChanceGrant, RetakeApplication, RetakeReceipt
 
 
 def _single(queryset, **lookup):
@@ -55,4 +59,39 @@ def check_document_access(user, path: str) -> bool:
     return _allowed(user, application, _document_keys(application, path))
 
 
-__all__ = ["check_document_access", "check_receipt_access"]
+def _exam_center_member(user, organization) -> bool:
+    from core.media_policies import EXAM_CENTER_ROLE_NAMES, user_has_org_membership
+
+    if getattr(user, "is_exam_center", False) and user_has_org_membership(user, organization):
+        return True
+    return user.memberships.filter(
+        organization=organization, is_active=True, role__name__in=EXAM_CENTER_ROLE_NAMES
+    ).exists()
+
+
+def check_chance_document_access(user, path: str) -> bool:
+    if not path or not getattr(user, "is_authenticated", False):
+        return False
+    grants = list(
+        ExamChanceGrant.objects.filter(document=path).select_related("organization", "application__organization")[:50]
+    )
+    if not grants:
+        return False
+    organization = grants[0].organization
+    if any(grant.organization_id != organization.pk for grant in grants):
+        return False  # eyni yol iki təşkilatda — heç vaxt olmamalıdır; default DENY
+    if any(grant.student_id == user.pk for grant in grants):
+        return True
+    if user.is_superuser or getattr(user, "is_superadmin", False):
+        return True
+    if _exam_center_member(user, organization):
+        return True
+    for grant in grants:
+        if grant.application is not None and retake_access.application_in_scope(
+            user, grant.application, retake_access.TRAIL_KEYS
+        ):
+            return True
+    return any(retake_access.has_org_wide_key(user, organization, key) for key in retake_access.TRAIL_KEYS)
+
+
+__all__ = ["check_chance_document_access", "check_document_access", "check_receipt_access"]

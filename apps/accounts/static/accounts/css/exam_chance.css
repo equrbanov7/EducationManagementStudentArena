@@ -263,3 +263,56 @@
     flex-wrap: wrap;
     border-radius: var(--ems-r-lg);
 }
+
+/* ── 2026-10-24: kimlik (ata adı · qrup · istifadəçi adı), məcburi sənəd, sətirdən ön-doldurma ── */
+.exch-who {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0 var(--ems-sp-2);
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-xs);
+    font-weight: 500;
+}
+
+.exch-who__item + .exch-who__item::before {
+    content: "·";
+    margin-right: var(--ems-sp-2);
+}
+
+.exch-who strong {
+    color: var(--ems-neutral-700);
+    font-weight: 700;
+}
+
+th .exch-who {
+    display: flex;
+    margin-top: 2px;
+}
+
+.exch-doc {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-1);
+    margin-top: 2px;
+    font-size: var(--ems-fs-xs);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.exch-file {
+    padding-block: 6px;
+}
+
+.exch-row--prefill {
+    cursor: pointer;
+}
+
+.exch-row--prefill:hover > th,
+.exch-row--prefill:hover > td {
+    background: var(--ems-primary-50);
+}
+
+.exch-prefill {
+    color: inherit;
+    font-weight: 700;
+}

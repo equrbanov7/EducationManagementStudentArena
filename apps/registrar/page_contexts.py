@@ -209,10 +209,8 @@ def journal_list_context(user, request=None) -> dict:
     if selected_group:
         group_pk = jlq.uuid_or_none(selected_group)
         qs = qs.filter(group_id=group_pk) if group_pk is not None else qs.none()
-    if selected_faculty:
-        qs = qs.filter(jlq.path_segment_q("group__path", selected_faculty))
-    if selected_dept:
-        qs = qs.filter(jlq.path_segment_q("group__path", selected_dept))
+    # Fakültə = qrupun alt-ağacı; kafedra = müəllim/fənn/qrup (bax `jlq.apply_unit_filters`).
+    qs, selected_faculty, selected_dept = jlq.apply_unit_filters(qs, organization, selected_faculty, selected_dept)
     if query:
         qs = jlq.apply_text_query(qs, query)
 

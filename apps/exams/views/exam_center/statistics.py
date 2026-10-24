@@ -444,15 +444,22 @@ def stats_faculty_search(request):
 @login_required
 @require_GET
 def stats_department_search(request):
-    """Kafedra/bölmə axtarışı — `?faculty=<id>` verilibsə həmin fakültəyə görə daralır."""
+    """Kafedra/bölmə axtarışı — `?faculty=<id,...>` verilibsə həmin fakültə(lər)in ALT-AĞACINDA.
+
+    2026-10-24: əvvəl ``parent_id`` (yalnız birbaşa uşaq) idi — fakültə ilə kafedra arasında ara
+    səviyyə olanda seçici boş qalırdı; pozuq / naməlum id hamısını yox, BOŞ nəticə verir (fail-closed)."""
     organization = _stats_org(request)
     from apps.organizations.models import OrgUnit
 
     query = (request.GET.get("q") or "").strip()
     qs = OrgUnit.objects.filter(organization=organization, is_active=True, unit_type__in=("chair", "department"))
-    faculty_ids = _csv_uuids(request.GET.get("faculty"))
-    if faculty_ids:
-        qs = qs.filter(parent_id__in=faculty_ids)
+    if (request.GET.get("faculty") or "").strip():
+        faculty_ids = _csv_uuids(request.GET.get("faculty"))
+        roots = OrgUnit.objects.filter(organization=organization, pk__in=faculty_ids).values_list("pk", "path")
+        sub = Q(pk__in=[])
+        for pk, path in roots:  # pozuq id-lər `_csv_uuids`-də atılır → kök yoxdur → boş
+            sub |= Q(path__startswith=f"{path}/") if path else Q(parent_id=pk)
+        qs = qs.filter(sub)
     name_q = tolerant_q(query, ("name",))
     if name_q is not None:
         qs = qs.filter(name_q)

@@ -1,25 +1,29 @@
-"""Test formatlı midterm cəhdi → elektron jurnalın «Midterm» xanası (exams tərəf, sahib 2026-10-21).
+"""Midterm cəhdi → elektron jurnalın «Midterm» xanası (exams tərəf, sahib 2026-10-21 / 2026-10-24).
 
-Sahib: «Midterm test olaraq verənlərdə avtomatik olaraq jurnala da düşsün, tələbənin balı əl ilə
+Sahib 2026-10-21: «Midterm test olaraq verənlərdə avtomatik olaraq jurnala da düşsün, tələbənin balı əl ilə
 doldurulmasın, tələbədə görünsün». Bu, 2026-09-25 qərarının («midterm balını müəllim İmtahan Mərkəzinin
-pəncərəsində özü yazır») TEST formatı üçün geri alınmasıdır; yazılı / kodlaşdırma midtermi əvvəlki kimi
-əl ilə yazılır (``journal_sync.SKIP_MIDTERM_CATEGORY``).
+pəncərəsində özü yazır») TEST formatı üçün geri alınması idi. Sahib 2026-10-24: YAZILI və KODLAŞDIRMA
+(praktiki) midtermi də eyni yolla jurnala düşür — cəhd TAM yoxlanılandan sonra (``grading_complete``).
 
 Qərar zənciri (hamısı ``sync_midterm_attempt``-də, hər addım sayılan status qaytarır):
 
 1. fənnə bağlı, sınaq olmayan (``is_trial`` HEÇ VAXT yazılmır), BİTMİŞ cəhd;
-2. ``exam_type == "test"`` və ``exam_type_extended == "midterm"``;
+2. ``exam_type_extended == "midterm"`` (format: test / yazılı / kodlaşdırma — ``AUTO_MIDTERM_EXAM_TYPES``);
 3. nəticə tələbədən GİZLƏDİLMƏYİB (``results_hidden_from_students``) — gizlidirsə jurnala da düşmür;
    müəllim nəticəni açanda (``lifecycle.set_results_hidden``) ``resync_exam`` bütün rəsmi cəhdləri yazır.
    Nəticə sonradan yenidən gizlədilsə jurnaldakı bal QALIR (artıq rəsmi jurnal qeydidir);
-4. RƏSMİ cəhd — eyni tələbə + fənn üzrə DAHA SONRA başlamış bitmiş test midterm cəhdi yoxdur
+4. RƏSMİ cəhd — eyni tələbə + fənn üzrə DAHA SONRA başlamış bitmiş midterm cəhdi (istənilən format) yoxdur
    (yekun körpüsünün ``SKIP_SUPERSEDED_ATTEMPT`` qaydası, ``started_at`` + ``pk``);
-5. faiz yekun körpüsü ilə EYNİ mənbədən (``journal_sync._attempt_percent`` — apellyasiya bonusu daxil),
-   qovulma → 0; registrar şkalaya çevirir (``midterm_bridge``).
+5. yazılı / kodlaşdırma cəhdi TAM yoxlanılıb (``grading_complete``) — qismən yoxlanmış cəhd YAZILMIR
+   (``grading_pending``, gözlənilən hal, sayılmır); qovulma → 0 yoxlamadan asılı deyil (yekun körpüsü kimi);
+6. faiz yekun körpüsü ilə EYNİ mənbədən (``journal_sync._attempt_percent`` — test: apellyasiya bonusu
+   daxil; yazılı / kodlaşdırma: ``teacher_score`` / çatdırılan sualların bal cəmi), qovulma → 0;
+   registrar şkalaya çevirir (``midterm_bridge``).
 
-Tətik nöqtələri ``journal_sync.sync_attempt_to_journal``-dan keçir (cəhdin bitməsi, apellyasiya qərarı və
-bal düzəlişi — ``appeals.services.decisions``, cavab açarı düzəlişi — ``appeals.services.key_corrections``);
-ona görə yenidən qiymətləndirmə öz-özünə yenidən sinxronlaşır. Yazı best-effort-dur (imtahanı sındırmır).
+Tətik nöqtələri ``journal_sync.sync_attempt_to_journal``-dan keçir (cəhdin bitməsi — kodlaşdırmanın avtomatik
+balı da burada, əl ilə yoxlama — ``manual_grading._mark_attempt_graded``, apellyasiya qərarı və bal düzəlişi —
+``appeals.services.decisions``, cavab açarı düzəlişi — ``appeals.services.key_corrections``); ona görə yenidən
+qiymətləndirmə öz-özünə yenidən sinxronlaşır. Yazı best-effort-dur (imtahanı sındırmır).
 """
 
 from __future__ import annotations
@@ -28,7 +32,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-AUTO_MIDTERM_EXAM_TYPE = "test"
+#: Jurnala avtomatik düşən midterm formatları (2026-10-24: yazılı və kodlaşdırma da — yoxlanılandan sonra).
+AUTO_MIDTERM_EXAM_TYPES = ("test", "written", "coding")
+#: Balı müəllimin yoxlamasından (və ya kodlaşdırmanın test keyslərindən) gələn formatlar.
+GRADED_MIDTERM_EXAM_TYPES = frozenset({"written", "coding"})
 
 #: Exams tərəfinin statusları (registrar statusları ``midterm_bridge``-dədir).
 UNLINKED = "unlinked"
@@ -39,6 +46,8 @@ NO_ORGANIZATION = "no_organization"
 RESULTS_HIDDEN = "results_hidden"
 SUPERSEDED = "superseded"
 PERCENT_UNAVAILABLE = "percent_unavailable"
+#: Yazılı / kodlaşdırma cəhdi hələ TAM yoxlanılmayıb — normal gözləmə (sayılmır; yoxlama bitəndə yazılır).
+GRADING_PENDING = "grading_pending"
 WRITE_FAILED = "write_failed"
 
 #: Sayğaca (``ems_journal_sync_skips_total``) yazılan midterm atlamaları — etiket ``midterm_<status>``.
@@ -61,11 +70,16 @@ _EXPECTED = frozenset({RESULTS_HIDDEN, SUPERSEDED, "overridden", "not_midterm_pe
 
 
 def is_auto_midterm_exam(exam) -> bool:
-    """İmtahan TEST formatlı midtermdirmi (balı jurnala avtomatik düşür)."""
+    """İmtahan midtermdirmi (test / yazılı / kodlaşdırma — balı jurnala avtomatik düşür)."""
     from apps.exams.services.journal_sync import MIDTERM_EXAM_CATEGORY
 
     category = str(getattr(exam, "exam_type_extended", None) or "").strip()
-    return category == MIDTERM_EXAM_CATEGORY and getattr(exam, "exam_type", None) == AUTO_MIDTERM_EXAM_TYPE
+    return category == MIDTERM_EXAM_CATEGORY and getattr(exam, "exam_type", None) in AUTO_MIDTERM_EXAM_TYPES
+
+
+def is_graded_midterm_exam(exam) -> bool:
+    """Midterm yazılı / kodlaşdırma formatındadırmı (bal yoxlamadan SONRA jurnala düşür)."""
+    return is_auto_midterm_exam(exam) and getattr(exam, "exam_type", None) in GRADED_MIDTERM_EXAM_TYPES
 
 
 def _later_attempts_q(attempt):
@@ -76,14 +90,14 @@ def _later_attempts_q(attempt):
 
 
 def _official_filter(subject_id):
-    """Rəsmi test midterm cəhdlərinin ortaq süzgəci (fənn üzrə)."""
+    """Rəsmi midterm cəhdlərinin ortaq süzgəci (fənn üzrə; bütün avtomatik formatlar — fənnin TƏK xanası)."""
     from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
     from apps.exams.services.journal_sync import MIDTERM_EXAM_CATEGORY
 
     return {
         "exam__subject_id": subject_id,
         "exam__exam_type_extended": MIDTERM_EXAM_CATEGORY,
-        "exam__exam_type": AUTO_MIDTERM_EXAM_TYPE,
+        "exam__exam_type__in": AUTO_MIDTERM_EXAM_TYPES,
         "exam__is_deleted": False,
         "is_trial": False,
         "status__in": ATTEMPT_FINISHED_STATUSES,
@@ -91,7 +105,7 @@ def _official_filter(subject_id):
 
 
 def superseded_by_later_midterm(attempt, subject_id) -> bool:
-    """Eyni tələbənin eyni fənn üzrə bu cəhddən SONRA başlamış bitmiş test midterm cəhdi varmı."""
+    """Eyni tələbənin eyni fənn üzrə bu cəhddən SONRA başlamış bitmiş midterm cəhdi varmı (format fərq etmir)."""
     from apps.exams.models import ExamAttempt
 
     if getattr(attempt, "started_at", None) is None:
@@ -114,7 +128,10 @@ def _status(status, attempt, row=None):
 
 
 def sync_midterm_attempt(attempt, *, actor=None, appeal_id=None, notify=True):
-    """Test midterm cəhdinin balını jurnala yaz → ``(status, ComponentScore | None)``. Heç vaxt istisna atmır."""
+    """Midterm cəhdinin balını jurnala yaz → ``(status, ComponentScore | None)``. Heç vaxt istisna atmır.
+
+    Yazılı / kodlaşdırma cəhdi TAM yoxlanılmayıbsa ``GRADING_PENDING`` (heç nə yazılmır, jurnaldakı əvvəlki
+    bal toxunulmaz qalır); yoxlama bitəndə ``manual_grading`` körpünü yenidən çağırır."""
     exam = getattr(attempt, "exam", None)
     subject_id = getattr(exam, "subject_id", None)
     if exam is None or not subject_id:
@@ -136,8 +153,12 @@ def sync_midterm_attempt(attempt, *, actor=None, appeal_id=None, notify=True):
     from apps.exams.services import journal_sync
 
     is_expelled = getattr(attempt, "supervision_status", "") == "removed"
+    if not is_expelled and is_graded_midterm_exam(exam) and not grading_complete(attempt):
+        return GRADING_PENDING, None  # qismən / heç yoxlanmayıb — gözlənilən hal, sayılmır
     percent = 0 if is_expelled else journal_sync._attempt_percent(attempt)
-    if percent is None or percent is journal_sync.PERCENT_PENDING:
+    if percent is journal_sync.PERCENT_PENDING:
+        return GRADING_PENDING, None
+    if percent is None:
         return _status(PERCENT_UNAVAILABLE, attempt)
     try:
         from apps.registrar.public import record_midterm_result
@@ -156,6 +177,8 @@ def sync_midterm_attempt(attempt, *, actor=None, appeal_id=None, notify=True):
             by_user=journal_sync._resolve_actor(attempt, actor),
             appeal_id=appeal_id,
             notify=notify,
+            # 2026-10-24: imtahanın açıq bağlandığı jurnallar (``exam_journal_link``) — tələbə onlarda olarsa.
+            offering_ids=list(exam.journal_offerings.values_list("pk", flat=True)) if exam.pk else None,
         )
     except Exception:  # körpü heç vaxt imtahanı sındırmır
         logger.exception("midterm_journal_sync: failed to write attempt %s", getattr(attempt, "id", "?"))
@@ -163,8 +186,29 @@ def sync_midterm_attempt(attempt, *, actor=None, appeal_id=None, notify=True):
     return _status(status, attempt, row)
 
 
+def grading_note_state(exam):
+    """Yoxlama ekranındakı «bal jurnala avtomatik yazılır» qeydi → ``None`` | ``"auto"`` | ``"hidden"``.
+
+    Yalnız fənnə bağlı yazılı / kodlaşdırma midtermi üçün; nəticə tələbədən gizlidirsə (``"hidden"``) bal
+    jurnala nəticə açılanda düşür (``resync_exam``)."""
+    if not getattr(exam, "subject_id", None) or not is_graded_midterm_exam(exam):
+        return None
+    return "hidden" if getattr(exam, "results_hidden_from_students", False) else "auto"
+
+
+def grading_complete(attempt) -> bool:
+    """Yazılı / kodlaşdırma cəhdi TAM yoxlanılıbmı (yekun bal məlumdur) — bax ``manual_grading.grading_complete``."""
+    from apps.exams.services.manual_grading import grading_complete as _complete
+
+    try:
+        return _complete(attempt)
+    except Exception:  # noqa: BLE001 — yoxlanış xətası jurnala qismən bal yazdırmasın (fail-closed)
+        logger.exception("midterm_journal_sync: grading state failed for attempt %s", getattr(attempt, "id", "?"))
+        return False
+
+
 def official_attempts(queryset):
-    """``queryset``-dəki bitmiş test midterm cəhdlərindən (tələbə, fənn) üzrə RƏSMİ olanları (ən son başlamış)."""
+    """``queryset``-dəki bitmiş midterm cəhdlərindən (tələbə, fənn) üzrə RƏSMİ olanları (ən son başlamış)."""
     from django.db.models import F
 
     from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
@@ -174,7 +218,7 @@ def official_attempts(queryset):
         queryset.filter(
             exam__subject__isnull=False,
             exam__exam_type_extended=MIDTERM_EXAM_CATEGORY,
-            exam__exam_type=AUTO_MIDTERM_EXAM_TYPE,
+            exam__exam_type__in=AUTO_MIDTERM_EXAM_TYPES,
             exam__is_deleted=False,
             is_trial=False,
             status__in=ATTEMPT_FINISHED_STATUSES,
@@ -192,7 +236,7 @@ def official_attempts(queryset):
 
 
 def resync_exam(exam, *, notify=True) -> dict:
-    """İmtahanın bütün rəsmi test midterm cəhdlərini yenidən yaz (nəticə tələbəyə AÇILANDA). → status sayları."""
+    """İmtahanın bütün rəsmi midterm cəhdlərini yenidən yaz (nəticə tələbəyə AÇILANDA). → status sayları."""
     from apps.exams.models import ExamAttempt
 
     counts: dict = {}
@@ -218,7 +262,12 @@ def schedule_resync_exam(exam) -> None:
 
 
 __all__ = [
+    "AUTO_MIDTERM_EXAM_TYPES",
+    "GRADING_PENDING",
+    "grading_complete",
+    "grading_note_state",
     "is_auto_midterm_exam",
+    "is_graded_midterm_exam",
     "official_attempts",
     "resync_exam",
     "schedule_resync_exam",

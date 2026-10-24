@@ -152,6 +152,13 @@ sonra da işləsin (docs/frontend/AJAX_SAFE_JS_PATTERN.md). Dinamik dəyərlər
       <span class="apx-tab__count" data-apx-tab-count hidden></span>
     </button>
     {% endif %}
+    {% if applications_section.can_oversee %}
+    {# RİM nəzarəti: təşkilatın BÜTÜN müraciətləri — yalnız oxu (server `access.can_oversee`). #}
+    <button type="button" class="apx-tab" role="tab" data-apx-tab="all" aria-current="false">
+      {% trans "Bütün müraciətlər" context "applications" %}
+      <span class="apx-tab__count" data-apx-tab-count hidden></span>
+    </button>
+    {% endif %}
     <button type="button" class="apx-tab" role="tab" data-apx-tab="archive" aria-current="false">
       {% trans "Arxiv" context "applications" %}
       <span class="apx-tab__count" data-apx-tab-count hidden></span>
@@ -194,6 +201,9 @@ sonra da işləsin (docs/frontend/AJAX_SAFE_JS_PATTERN.md). Dinamik dəyərlər
       <div class="apx-kind__panel" role="listbox" data-apx-kind-panel hidden
            aria-label="{% trans 'Müraciətin növü' context 'applications' %}"></div>
     </div>
+    {% if applications_section.can_oversee %}
+    {% include "accounts/profile/sections/_applications_oversight.html" %}
+    {% endif %}
     <button type="button" class="apx-btn apx-btn--ghost" data-apx-reset>{% trans "Sıfırla" context "applications" %}</button>
   </div>
 
@@ -223,15 +233,19 @@ sonra da işləsin (docs/frontend/AJAX_SAFE_JS_PATTERN.md). Dinamik dəyərlər
 ad fəzasına yazır; nüvə funksiyaları ÇAĞIRIŞ anında oxuyur, ona görə sıra pozulsa
 da uçmur. Script-lər panelin İÇİNDƏDİR — `section_loader.executeInlineScripts`
 onları swap-dan sonra yenidən icra edir (init idempotentdir).{% endcomment %}
-<script defer src="{% static 'accounts/js/profile/applications_core.js' %}?v=20260907-modal"></script>
+<script defer src="{% static 'accounts/js/profile/applications_core.js' %}?v=20261024-oversight"></script>
 <script defer src="{% static 'accounts/js/profile/applications_dialogs.js' %}?v=20260909-empty"></script>
-<script defer src="{% static 'accounts/js/profile/applications_filters.js' %}?v=20260907-modal"></script>
+<script defer src="{% static 'accounts/js/profile/applications_filters.js' %}?v=20261024-oversight"></script>
+{% if applications_section.can_oversee %}
+<link rel="stylesheet" href="{% static 'accounts/css/profile/applications_oversight.css' %}?v=20261024-oversight">
+<script defer src="{% static 'accounts/js/profile/applications_oversight.js' %}?v=20261024-oversight"></script>
+{% endif %}
 <script defer src="{% static 'accounts/js/profile/applications_thread.js' %}?v=20260907-modal"></script>
 <script defer src="{% static 'accounts/js/profile/applications_detail.js' %}?v=20261019-arayis"></script>
 {# 2026-10-19: «Arayış sorğusu» → «Arayışı hazırla və əlavə et» (emalçı + `transcript.issue`). #}
 <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_arayis.css' %}?v=20261019-arayis3">
 <script defer src="{% static 'accounts/js/profile/applications_arayis.js' %}?v=20261019-arayis3"></script>
-<script defer src="{% static 'accounts/js/profile/applications.js' %}?v=20261014-searchux"></script>
+<script defer src="{% static 'accounts/js/profile/applications.js' %}?v=20261024-oversight"></script>
 {% endif %}
 </section>
 {% endif %}

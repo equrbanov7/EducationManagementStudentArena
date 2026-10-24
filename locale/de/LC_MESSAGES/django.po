@@ -108844,3 +108844,155 @@ msgstr "Zeile löschen"
 msgctxt "accounts.workload"
 msgid "fənn, qrup və ya müəllim"
 msgstr "Fach, Gruppe oder Lehrkraft"
+
+msgctxt "exams.view.exams.message"
+msgid "Midterm və final imtahanları üçün yenidən cəhd hüququ yalnız «Yenidən imtahan cəhdi» səhifəsində rəsmi əsasla (əmr, sənəd, qeyd) verilir."
+msgstr "Für Zwischen- und Abschlussprüfungen wird ein weiterer Versuch nur auf der Seite „Prüfungswiederholung“ mit offizieller Grundlage (Anordnung, Dokument, Vermerk) gewährt."
+
+msgctxt "registrar.retake"
+msgid "Əsas sənədi (əmr / sərəncam / ərizə) yükləyin — sənədsiz cəhd hüququ verilmir."
+msgstr "Laden Sie das Grundlagendokument hoch (Anordnung / Verfügung / Antrag) — ohne Dokument wird kein weiterer Versuch gewährt."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final: cəhd hüququ rəsmi əsasla (əmr, sənəd, qeyd) «Yenidən imtahan cəhdi» səhifəsində verilir."
+msgstr "Zwischen-/Abschlussprüfung: Ein weiterer Versuch wird mit offizieller Grundlage (Anordnung, Dokument, Vermerk) auf der Seite „Prüfungswiederholung“ gewährt."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün yenidən cəhd hüququnu yalnız İmtahan Mərkəzi rəsmi əsasla verir."
+msgstr "Für Zwischen-/Abschlussprüfungen gewährt nur das Prüfungszentrum einen weiteren Versuch mit offizieller Grundlage."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün cəhd hüququ birbaşa verilmir: «Yenidən imtahan cəhdi» səhifəsində əsas, əmr / sərəncam №, tarix, sənəd və qeyd ilə rəsmi qeyd yazılır."
+msgstr "Bei Zwischen-/Abschlussprüfungen wird kein Versuch direkt gewährt: Auf der Seite „Prüfungswiederholung“ wird ein offizieller Eintrag mit Grundlage, Anordnungs-/Verfügungs-Nr., Datum, Dokument und Vermerk angelegt."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Rəsmi cəhd səhifəsinə keç"
+msgstr "Zur offiziellen Wiederholungsseite"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün yenidən cəhd hüququnu yalnız İmtahan Mərkəzi «Yenidən imtahan cəhdi» səhifəsində rəsmi əsasla (əmr, sənəd, qeyd) verir."
+msgstr "Für Zwischen-/Abschlussprüfungen gewährt nur das Prüfungszentrum auf der Seite „Prüfungswiederholung“ einen weiteren Versuch mit offizieller Grundlage (Anordnung, Dokument, Vermerk)."
+
+msgctxt "accounts.exam_chance"
+msgid "Sənəd"
+msgstr "Dokument"
+
+msgctxt "accounts.exam_chance"
+msgid "Ata adı"
+msgstr "Vatersname"
+
+msgctxt "accounts.exam_chance"
+msgid "Bu tələbə və imtahan üçün «Cəhd hüququ ver» formasını doldur"
+msgstr "Formular „Versuch gewähren“ für diese:n Studierende:n und Prüfung ausfüllen"
+
+msgctxt "accounts.exam_chance"
+msgid "Sətrə klikləyin — həmin tələbə və imtahan üçün «Cəhd hüququ ver» forması doldurulur."
+msgstr "Klicken Sie auf eine Zeile — das Formular „Versuch gewähren“ wird für diese:n Studierende:n und Prüfung ausgefüllt."
+
+msgctxt "accounts.exam_chance"
+msgid "Əmr / sərəncam, ərizə və ya qərarın surəti — PDF, JPG və ya PNG, ən çox 10 MB. Sənədsiz cəhd hüququ verilmir."
+msgstr "Kopie der Anordnung / Verfügung, des Antrags oder der Entscheidung — PDF, JPG oder PNG, höchstens 10 MB. Ohne Dokument wird kein weiterer Versuch gewährt."
+
+msgctxt "exams.model.exam.field"
+msgid "Müəllim (jurnal)"
+msgstr "Lehrkraft (Journal)"
+
+msgctxt "exams.model.exam.field"
+msgid "Bağlı jurnallar"
+msgstr "Verknüpfte Journale"
+
+msgctxt "exams.form.exam.label"
+msgid "Müəllim (jurnal)"
+msgstr "Lehrkraft (Journal)"
+
+msgctxt "exams.form.exam.help"
+msgid "Müəllimi seçsəniz, fənn siyahısı onun cari dövrdə tədris etdiyi fənlərlə məhdudlaşır və midterm nəticəsi həmin fənnin qrup jurnallarına yazılır. Boş qalarsa bütün fənlər göstərilir."
+msgstr "Wenn Sie eine Lehrkraft auswählen, wird die Fächerliste auf die Fächer beschränkt, die sie im aktuellen Zeitraum unterrichtet, und das Ergebnis der Zwischenprüfung wird in die Gruppenjournale dieses Fachs geschrieben. Bleibt das Feld leer, werden alle Fächer angezeigt."
+
+msgctxt "exams.form.exam.error"
+msgid "Seçilmiş müəllim bu fənni cari dövrdə tədris etmir."
+msgstr "Die ausgewählte Lehrkraft unterrichtet dieses Fach im aktuellen Zeitraum nicht."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Müəllim tapılmadı"
+msgstr "Keine Lehrkraft gefunden"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Müəllim axtar…"
+msgstr "Lehrkraft suchen…"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Seçilmiş müəllim"
+msgstr "Ausgewählte Lehrkraft"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Təmizlə (bütün fənlər)"
+msgstr "Leeren (alle Fächer)"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu müəllimin cari dövrdə tədris etdiyi fənn tapılmadı"
+msgstr "Kein Fach gefunden, das diese Lehrkraft im aktuellen Zeitraum unterrichtet"
+
+msgctxt "applications"
+msgid "Bütün müraciətlər"
+msgstr "Alle Anträge"
+
+msgctxt "applications"
+msgid "Şöbə (ünvan)"
+msgstr "Abteilung (Empfänger)"
+
+msgctxt "applications"
+msgid "Bütün şöbələr"
+msgstr "Alle Abteilungen"
+
+msgctxt "applications"
+msgid "Göndərənin bölməsi"
+msgstr "Einheit des Absenders"
+
+msgctxt "applications"
+msgid "Bütün göndərənlər"
+msgstr "Alle Absender"
+
+msgctxt "applications"
+msgid "Fakültələr"
+msgstr "Fakultäten"
+
+msgctxt "applications"
+msgid "Kafedralar"
+msgstr "Lehrstühle"
+
+msgctxt "applications"
+msgid "Mərkəz və digər bölmələr"
+msgstr "Zentren und andere Einheiten"
+
+msgctxt "organizations.permission.label"
+msgid "Bütün müraciətlərə baxmaq (yalnız oxu)"
+msgstr "Alle Anträge einsehen (nur lesen)"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu midterm imtahanının nəticəsi tələbə imtahanı bitirən kimi seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq."
+msgstr "Das Ergebnis dieser Zwischenprüfung wird automatisch in die Gruppenjournale des ausgewählten Fachs (Midterm /30) eingetragen, sobald der Studierende die Prüfung beendet."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu midterm imtahanının nəticəsi yoxlanıldıqdan sonra seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq."
+msgstr "Das Ergebnis dieser Zwischenprüfung wird nach der Bewertung automatisch in die Gruppenjournale des ausgewählten Fachs (Midterm /30) eingetragen."
+
+msgctxt "exams.teacher.grading"
+msgid "Bal jurnala avtomatik yazılır"
+msgstr "Die Punktzahl wird automatisch ins Journal eingetragen"
+
+msgctxt "exams.teacher.grading"
+msgid "Bu midterm imtahanıdır. Bütün suallar qiymətləndirilib yadda saxlananda bal fənnin jurnalına (Midterm) avtomatik yazılır — jurnalda əl ilə yazmaq lazım deyil."
+msgstr "Dies ist eine Zwischenprüfung. Sobald alle Fragen bewertet und gespeichert sind, wird die Punktzahl automatisch ins Fachjournal (Midterm) eingetragen — eine manuelle Eingabe im Journal ist nicht nötig."
+
+msgctxt "exams.teacher.grading"
+msgid "Bu midterm imtahanıdır. Nəticə hazırda tələbədən gizlədilib — saxladığınız bal fənnin jurnalına (Midterm) nəticə tələbəyə açılanda avtomatik yazılacaq."
+msgstr "Dies ist eine Zwischenprüfung. Das Ergebnis ist derzeit für den Studierenden verborgen — die gespeicherte Punktzahl wird automatisch ins Fachjournal (Midterm) eingetragen, sobald das Ergebnis freigegeben wird."
+
+msgctxt "registrar.journal"
+msgid "İmtahan Mərkəzində keçirilən midterm balı imtahandan avtomatik yazılır (test — tələbə bitirən kimi, yazılı / praktiki — yoxlanıldıqdan sonra) və burada əl ilə dəyişdirilmir. Düzəliş yalnız apellyasiya və ya sənədli düzəliş ilə mümkündür."
+msgstr "Die Zwischenprüfungspunktzahl einer im Prüfungszentrum durchgeführten Prüfung wird automatisch übernommen (Test — sobald der Studierende fertig ist, schriftlich / praktisch — nach der Bewertung) und kann hier nicht manuell geändert werden. Eine Korrektur ist nur über einen Widerspruch oder eine dokumentierte Korrektur möglich."
+
+msgctxt "registrar.journal"
+msgid "imtahandan avtomatik"
+msgstr "automatisch aus der Prüfung"

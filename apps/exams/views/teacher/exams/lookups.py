@@ -79,13 +79,23 @@ def subject_search(request):
     from apps.registrar.models import Subject
 
     query = (request.GET.get("q") or "").strip()
-    qs = Subject.objects.filter(organization=organization)
+    qs = ranked_subject_queryset(Subject.objects.filter(organization=organization), query)
+    offset, limit = _page_bounds(request)
+    results, has_more = _paginate(qs, offset, limit, subject_option)
+    return JsonResponse({"results": results, "has_more": has_more})
+
+
+def ranked_subject_queryset(qs, query):
+    """Fənn axtarışı süzgəci + sıralaması (``subject_search`` və müəllimin fənləri üçün ORTAQ)."""
     name_q = word_prefix_q(query, ("name",))
     # 2026-10-21 (sahib: «aralı yazarkən də tapılsın»): tokenlər ad və kod arasında paylana bilər, söz sırası,
     # ayırıcı («/», «-»), bitişik «634Qrafik» fərq etmir; kod — ayırıcıya dözümlü alt-sətir («1203» → «QKU-1203»).
     lookup_q = subject_lookup_q(query)
-    if lookup_q is not None:
-        qs = qs.filter(lookup_q).annotate(
+    if lookup_q is None:
+        return qs.order_by("name", "code")
+    return (
+        qs.filter(lookup_q)
+        .annotate(
             search_rank=Case(
                 When(starts_with_q(query, "name"), then=Value(0)),
                 When(name_q, then=Value(1)),
@@ -93,13 +103,8 @@ def subject_search(request):
                 output_field=IntegerField(),
             )
         )
-        qs = qs.order_by("search_rank", "name", "code")
-    else:
-        qs = qs.order_by("name", "code")
-
-    offset, limit = _page_bounds(request)
-    results, has_more = _paginate(qs, offset, limit, subject_option)
-    return JsonResponse({"results": results, "has_more": has_more})
+        .order_by("search_rank", "name", "code")
+    )
 
 
 @login_required

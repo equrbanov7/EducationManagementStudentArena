@@ -53,6 +53,11 @@ _RIM_STAFF_PERMISSIONS = [
     "audit.export",
     # Şəxs kataloqu — YALNIZ OXU (əməl açarları `people.manage_*` qəsdən yoxdur).
     *PEOPLE_DIRECTORY_READ,
+    # «Müraciətlərim → Bütün müraciətlər» (sahib 2026-10-24: RİM sistemə gələn BÜTÜN
+    # müraciətləri görməlidir) — YALNIZ OXU: cavab/yönləndirmə (`application.handle` +
+    # şöbə rolu) və daxili qeydlər (`application.manage`) VERİLMİR. Mövcud tenantlar:
+    # `applications 0006`.
+    "application.view_all",
 ]
 
 RIM_STAFF_ROLES = [
