@@ -18,8 +18,12 @@ Rədd halları (``blockers`` — ``apply`` heç nə yazmır):
   imtahana bağlantısı yoxdur → təhlükəsiz geri alınmır;
 * ``grade_events`` — ``ExamGradeEvent`` DB səviyyəsində append-only-dir; 2026-10-21-dən dar istisna var (organizations
   0071): imtahan əvvəl ``is_deleted`` işarələnir, sonra ``SET LOCAL emsarena.trial_exam_purge = 'on'`` ilə silinir;
-* ``retake_links`` — «İmtahan şansı» / 25% müraciəti izləri (append-only) imtahana bağlıdır
+* ``retake_links`` — 25% müraciətinə bağlı izlər (append-only) imtahana bağlıdır
   (``allow_retake_links`` ilə: izlər qalır, qalan hər şey silinir);
+
+2026-10-24 (sahib, «JS Loop»): müraciətə BAĞLI OLMAYAN «İmtahan şansı» qeydləri (``ExamChanceGrant``,
+``application`` boş) sınaq imtahanının bir hissəsidir — onlar da silinir (registrar 0097: append-only
+qoruyucusuna dar istisna, ``chance_grants_deleted``) və artıq rədd səbəbi deyil.
 * ``journal_locked`` — avtomatik xana bağlanmış (dərc olunmuş) jurnaldadır.
 """
 
@@ -77,6 +81,7 @@ COUNT_KEYS = (
     "journal_locked",
     "final_grades_from_exam",
     "chance_grants",
+    "chance_grants_deleted",
     "retake_links",
     "notifications",
     "audit_rows_kept",
@@ -114,6 +119,7 @@ class PurgePlan:
     component_score_ids: list = field(default_factory=list)
     notification_ids: list = field(default_factory=list)
     file_names: list = field(default_factory=list)
+    chance_grant_ids: list = field(default_factory=list)
     affected_user_ids: set = field(default_factory=set)
     journal_rows: list = field(default_factory=list)
 
@@ -291,13 +297,19 @@ def _collect_registrar_links(plan, attempt_ids, *, allow_retake_links):
     exam = plan.exam
     grants = _model("registrar.ExamChanceGrant").objects.filter(organization_id=exam.organization_id, exam_id=exam.pk)
     plan.counts["chance_grants"] = grants.count()
+    # Müraciətə bağlı olmayan şans qeydləri sınaq imtahanı ilə birlikdə silinir (registrar 0097).
+    loose = grants.filter(application__isnull=True)
+    plan.chance_grant_ids = [str(pk) for pk in loose.values_list("pk", flat=True)]
+    plan.counts["chance_grants_deleted"] = len(plan.chance_grant_ids)
+    plan.file_names.extend(name for name in loose.exclude(document="").values_list("document", flat=True) if name)
+    plan.affected_user_ids |= set(loose.values_list("student_id", flat=True))
     events = _model("registrar.RetakeApplicationEvent").objects.filter(organization_id=exam.organization_id)
     event_match = Q(metadata__exam_id=exam.pk)
     if attempt_ids:
         event_match |= Q(metadata__attempt_id__in=list(attempt_ids))
     links = grants.exclude(application__isnull=True).count() + events.filter(event_match).count()
     plan.counts["retake_links"] = links
-    if (links or plan.counts["chance_grants"]) and not allow_retake_links:
+    if links and not allow_retake_links:
         plan.blockers.append("retake_links")
 
 
@@ -427,6 +439,15 @@ def apply_purge(exam, *, reason: str, allow_retake_links=False) -> PurgePlan:
             with connection.cursor() as cursor:
                 cursor.execute("SET LOCAL emsarena.trial_exam_purge = 'on'")
                 cursor.execute("DELETE FROM exams_examgradeevent WHERE attempt_id = ANY(%s)", [list(ids)])
+                cursor.execute("SET LOCAL emsarena.trial_exam_purge = 'off'")
+        if plan.chance_grant_ids:
+            # registrar 0097: append-only qoruyucusu yalnız bayraq + silinmiş imtahan + müraciətsiz sətirə icazə verir.
+            with connection.cursor() as cursor:
+                cursor.execute("SET LOCAL emsarena.trial_exam_purge = 'on'")
+                cursor.execute(
+                    "DELETE FROM registrar_examchancegrant WHERE id::text = ANY(%s) AND application_id IS NULL",
+                    [plan.chance_grant_ids],
+                )
                 cursor.execute("SET LOCAL emsarena.trial_exam_purge = 'off'")
         _model("notifications.InAppNotification").objects.filter(pk__in=plan.notification_ids).delete()
         _model("registrar.ComponentScore").objects.filter(pk__in=plan.component_score_ids).delete()
