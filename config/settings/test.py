@@ -221,6 +221,9 @@ CACHES = {
 # «Sistem tənzimləmələri» (core.runtime_settings): testlərdə bazaya baxılmır — defoltlar işləyir, sorğu büdcəsi
 # testləri pozulmur. Xüsusiyyətin öz testləri `override_settings(RUNTIME_SETTINGS_ENABLED=True)` ilə açır.
 RUNTIME_SETTINGS_ENABLED = False
+# Sillabus kafedra təsdiqi (sahib 2026-10-25: prod defoltu SÖNÜLÜ = avtomatik təsdiq). Testlərdə mövcud kafedra
+# iş axını qalır; avtomatik yolu testlər `override_settings(SYLLABUS_APPROVAL_REQUIRED=False)` ilə yoxlayır.
+SYLLABUS_APPROVAL_REQUIRED = True
 
 # Məcburi profil məlumatları qapısı (2026-10-17, apps/accounts/profile_completion.py): fixture istifadəçilərinin
 # əksəriyyətində FİN / telefon yoxdur — qapı testlərdə defolt SÖNÜLÜDÜR ki, giriş axını testləri pozulmasın.

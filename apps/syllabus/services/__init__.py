@@ -77,8 +77,10 @@ from .versioning import (  # noqa: F401
     structural_changes,
 )
 from .workflow import (  # noqa: F401
+    AUTO_APPROVAL_COMMENT,
     approve,
     archive,
+    auto_approve,
     available_actions,
     reject,
     request_revision,

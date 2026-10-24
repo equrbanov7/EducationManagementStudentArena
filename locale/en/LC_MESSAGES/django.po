@@ -107970,3 +107970,27 @@ msgstr "The midterm score of an exam held in the Exam Center is written automati
 msgctxt "registrar.journal"
 msgid "imtahandan avtomatik"
 msgstr "automatically from the exam"
+
+msgctxt "core.runtime_settings"
+msgid "Sillabus"
+msgstr "Syllabus"
+
+msgctxt "core.runtime_settings"
+msgid "Sillabus təsdiqi tələb olunur (kafedra müdiri)"
+msgstr "Syllabus approval required (head of department)"
+
+msgctxt "core.runtime_settings"
+msgid "Söndürülübsə (defolt) müəllim sillabusu təsdiqə göndərən kimi o avtomatik təsdiqlənir: kafedra müdirinin təsdiq növbəsində gözləyən sillabus olmur, tarixçədə «avtomatik təsdiq (sistem tənzimləməsi)» görünür. Yandırılanda əvvəlki qayda qayıdır: sillabus kafedra müdirinin təsdiqini gözləyir. Açarı dəyişmək artıq göndərilmiş sillabusların statusunu dəyişmir — söndürülü vəziyyətdə gözləyənləri toplu təsdiqləmək üçün «syllabus_auto_approve_pending» əməliyyatı var."
+msgstr "When off (default), a syllabus is approved automatically the moment the teacher submits it: nothing waits in the head of department's approval queue, and the history shows “automatic approval (system setting)”. When on, the previous rule returns: the syllabus waits for the head of department's approval. Changing the switch does not change syllabuses that were already submitted — to approve those waiting while it is off there is the “syllabus_auto_approve_pending” operation."
+
+msgctxt "syllabus.model"
+msgid "Avtomatik təsdiq (sistem tənzimləməsi)"
+msgstr "Automatic approval (system setting)"
+
+msgctxt "syllabus.document"
+msgid "Təsdiq: avtomatik (sistem tənzimləməsi)"
+msgstr "Approval: automatic (system setting)"
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus göndərildi və avtomatik təsdiqləndi."
+msgstr "The syllabus was submitted and approved automatically."

@@ -50,6 +50,7 @@ GROUP_ICONS = {
     "hr_contracts": "signature",
     "site": "monitor",
     "monitoring": "activity",
+    "syllabus": "file-check",
 }
 DEFAULT_ICON = "sliders-horizontal"
 OVERVIEW_ICON = "layout-dashboard"
