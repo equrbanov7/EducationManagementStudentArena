@@ -194,3 +194,22 @@ def test_link_code_explains_every_refusal(world):
     assert rules.link_code(source, actor=act, target_hours=PLAN_HOURS, target_chair_unit_id=chair_id) == (
         rules.CODE_SOURCE_NOT_HUMAN
     )
+
+
+def test_auto_approved_source_is_linkable_but_migration_and_reuse_are_not(world):
+    source, _version = approved_syllabus(world, "o1")
+    act = actor(world)
+    chair_id = source.chair_unit_id
+
+    def code():
+        return rules.link_code(source, actor=act, target_hours=PLAN_HOURS, target_chair_unit_id=chair_id)
+
+    # Sahib 2026-10-25: kafedra təsdiqi söndürülüb — avtomatik təsdiqlənmiş sillabus bağlana bilər.
+    source.approved_version.approval_source = "auto"
+    assert code() == ""
+    assert rules.link_base(source) is source.approved_version
+    # Köçürmə və bağlama damğalı təsdiq əvvəlki kimi zəncirlənmir.
+    for stamp in ("migration", "reuse"):
+        source.approved_version.approval_source = stamp
+        assert code() == rules.CODE_SOURCE_NOT_HUMAN
+        assert rules.link_base(source) is None
