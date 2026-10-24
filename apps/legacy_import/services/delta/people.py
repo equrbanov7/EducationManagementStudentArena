@@ -15,6 +15,7 @@ Tələbə
 
 from __future__ import annotations
 
+import re
 from collections import Counter, defaultdict
 
 from django.apps import apps as django_apps
@@ -225,6 +226,8 @@ class StudentMapper:
         if candidates:
             narrowed = _narrow(candidates, row, group, self.group_of)
             claimed = self._name_claims.get(narrowed[0]) if len(narrowed) == 1 else None
+            if claimed is not None and self._same_legacy_person(claimed, row):
+                claimed = legacy_id  # legacy-də eyni adamın ikinci sətri (başqa alt qrup) — eyni hesab
             if len(narrowed) == 1 and claimed in (None, legacy_id):
                 self._name_claims[narrowed[0]] = legacy_id
                 return narrowed[0], "name"
@@ -239,6 +242,20 @@ class StudentMapper:
         if group is None:
             return None, "group_unresolved"
         return self._create(legacy_id, row, group, fin)
+
+    def _same_legacy_person(self, other_legacy_id, row) -> bool:
+        """İki legacy sətri eyni adamdır: soyad + ad + ata adı eyni, doğum tarixi (hər ikisində varsa) eyni."""
+
+        other = self.students.get(other_legacy_id)
+        if other is None or not person_key(row.get("father_name")):
+            return False
+        for field in ("last_name", "first_name"):
+            if person_key(other.get(field)) != person_key(row.get(field)):
+                return False
+        if not same_father(person_key(other.get("father_name")), person_key(row.get("father_name"))):
+            return False
+        births = {legacy_birth_date(item.get("birthday") or None) for item in (other, row)} - {None}
+        return len(births) <= 1
 
     def _group(self, row, *, create: bool = False):
         legacy_group = self.run.legacy_groups.get(row.get("group_id"))
@@ -323,6 +340,22 @@ def _fin(row) -> str:
     return str((row or {}).get("fincode") or "").strip().upper()
 
 
+_FATHER_SUFFIX = re.compile(r"(qizi|oglu|ogli|kizi|oglu)$")
+
+
+def same_father(one: str, other: str) -> bool:
+    """Ata adı açarları (``person_key``) eyni adamındır: «qızı/oğlu» sonluğu atılır; ilk 5 hərf və ya qısa
+    olanın tamamı (≥3 hərf) üst-üstə düşür («ŞAİQ» = «ŞAİQ QIZI», «Əli» = «ƏLİ QIZI»)."""
+
+    one, other = _FATHER_SUFFIX.sub("", one or ""), _FATHER_SUFFIX.sub("", other or "")
+    if not one or not other:
+        return False
+    if one[:5] == other[:5]:
+        return True
+    short, long_ = sorted((one, other), key=len)
+    return len(short) >= 3 and long_.startswith(short)
+
+
 def _narrow(candidates, row: dict, group, group_of) -> list:
     """Ad + soyad namizədlərindən EYNİ adam olanlar.
 
@@ -334,7 +367,7 @@ def _narrow(candidates, row: dict, group, group_of) -> list:
     birth = legacy_birth_date(row.get("birthday") or None)
     out = []
     for user_id, their_patronymic, their_birth in candidates:
-        same_patronymic = bool(patronymic and their_patronymic and patronymic[:5] == their_patronymic[:5])
+        same_patronymic = same_father(patronymic, their_patronymic)
         contradicts = bool(patronymic and their_patronymic and not same_patronymic)
         same_birth = birth is not None and birth == their_birth
         same_group = group is not None and group_of.get(user_id) == group.pk
@@ -351,7 +384,7 @@ def _all_other_people(candidates, row: dict, group, group_of) -> bool:
         return False
     birth = legacy_birth_date(row.get("birthday") or None)
     for user_id, their_patronymic, their_birth in candidates:
-        if not their_patronymic or patronymic[:5] == their_patronymic[:5]:
+        if not their_patronymic or same_father(patronymic, their_patronymic):
             return False
         if birth is not None and birth == their_birth:
             return False

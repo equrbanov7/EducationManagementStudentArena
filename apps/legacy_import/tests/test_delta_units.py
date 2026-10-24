@@ -196,3 +196,25 @@ class WorkloadChairTests(SimpleTestCase):
         self.assertIsNone(_chair_for(offering, {7: inactive}))
         self.assertIs(_chair_for(offering, {7: active}), active)
         self.assertEqual(_scaled({"lecture": 2, "seminar": 2}, 45), {"lecture": 23, "seminar": 22})
+
+
+class FatherNameTests(SimpleTestCase):
+    def test_suffix_and_short_names_match_and_other_names_do_not(self):
+        from apps.legacy_import.services.delta.people import same_father
+        from apps.legacy_import.services.delta.resolve import person_key as key
+
+        self.assertTrue(same_father(key("ŞAİQ"), key("ŞAİQ QIZI")))
+        self.assertTrue(same_father(key("Əli"), key("ƏLİ QIZI")))
+        self.assertTrue(same_father(key("HƏBİB"), key("Həbib oğlu")))
+        self.assertFalse(same_father(key("Mahir"), key("Müşviq")))
+        self.assertFalse(same_father(key("Azər"), key("Emin")))
+        self.assertFalse(same_father("", key("Emin")))
+
+    def test_pick_lesson_prefers_exact_time_then_single_lesson(self):
+        from apps.legacy_import.services.delta.topics import pick_lesson
+
+        nine, ten = dt.time(9, 0), dt.time(10, 30)
+        self.assertEqual(pick_lesson([(1, nine, ""), (2, ten, "")], ten)[0], 2)
+        self.assertEqual(pick_lesson([(1, nine, "")], ten)[0], 1)
+        self.assertIsNone(pick_lesson([(1, nine, ""), (2, dt.time(13, 0), "")], ten))
+        self.assertIsNone(pick_lesson([], ten))
