@@ -43,6 +43,7 @@ _DRAFT_CREATED = pgettext_lazy(_CTX, "Qaralama yaradıldı — məzmunu doldurub
 _COPIED = pgettext_lazy(_CTX, "Keçmiş versiyanın məzmunu köçürüldü, yeni QARALAMA açıldı.")
 _VERSION_CREATED = pgettext_lazy(_CTX, "Yeni versiya qaralaması yaradıldı. Təsdiqlənmiş versiya aktiv qalır.")
 _SUBMITTED = pgettext_lazy(_CTX, "Sillabus kafedra müdirinin təsdiq növbəsinə göndərildi.")
+_AUTO_APPROVED = pgettext_lazy(_CTX, "Sillabus göndərildi və avtomatik təsdiqləndi.")
 _WITHDRAWN = pgettext_lazy(_CTX, "Təqdimat geri çağırıldı, status qaralamaya qaytarıldı.")
 _RESUMED = pgettext_lazy(_CTX, "Düzəlişə başlandı — bölmələr yenidən redaktə oluna bilər.")
 
@@ -294,7 +295,7 @@ def syllabus_action(request):
                 return _fail(_NOT_FOUND, status=404)
             if action == "submit":
                 version = services.submit(version=version, actor=actor, request=request)
-                message = _SUBMITTED
+                message = _AUTO_APPROVED if version.status == SyllabusStatus.APPROVED.value else _SUBMITTED
                 # README §10.3: struktur dəyişikliyi versiyanı avtomatik BÖYÜK
                 # versiyaya qaldırır — istifadəçi bunu SƏSSİZ öyrənməməlidir.
                 if getattr(version, "escalated_sections", ()):

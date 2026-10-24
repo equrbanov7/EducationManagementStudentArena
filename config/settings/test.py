@@ -221,6 +221,9 @@ CACHES = {
 # «Sistem tənzimləmələri» (core.runtime_settings): testlərdə bazaya baxılmır — defoltlar işləyir, sorğu büdcəsi
 # testləri pozulmur. Xüsusiyyətin öz testləri `override_settings(RUNTIME_SETTINGS_ENABLED=True)` ilə açır.
 RUNTIME_SETTINGS_ENABLED = False
+# Sillabus kafedra təsdiqi (sahib 2026-10-25: prod defoltu SÖNÜLÜ = avtomatik təsdiq). Testlərdə mövcud kafedra
+# iş axını qalır; avtomatik yolu testlər `override_settings(SYLLABUS_APPROVAL_REQUIRED=False)` ilə yoxlayır.
+SYLLABUS_APPROVAL_REQUIRED = True
 
 # «Gec yazılıb» nəzarətinin başlanğıc tarixi (journal.late_check_from, 2026-10-25): istehsal defoltu 2026-10-26-dır,
 # amma köhnə tarixli test datası (2025) «gec» qaydasını yoxlayır — testlərdə qayda hər tarix üçün işləsin.

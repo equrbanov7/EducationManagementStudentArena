@@ -51,11 +51,16 @@ class ApprovalSource(models.TextChoices):
     İNSAN TƏRƏFİNDƏN təsdiqlənmiş versiyasının EYNİ nüsxəsidir (eyni saatlar).
     Burada da təsdiqləyən UYDURULMUR — ``approved_by`` NULL qalır, mənbə versiya
     ``source_version``-dadır və UI «Təsdiq: <qrup> sillabusundan» yazır.
+
+    ``auto`` (2026-10-25): RİM «Sistem tənzimləmələri»ndə «Sillabus təsdiqi tələb olunur» SÖNÜLÜ olanda
+    göndərilən versiya sistem tərəfindən dərhal təsdiqlənir — ``approved_by`` NULL qalır, tarixçədə
+    «avtomatik təsdiq (sistem tənzimləməsi)» görünür. Reuse mənbəyi kimi YALNIZ ``human`` sayılır.
     """
 
     HUMAN = "human", pgettext_lazy(_CTX, "İnsan qərarı")
     MIGRATION = "migration", pgettext_lazy(_CTX, "Sistem / köçürmə")
     REUSE = "reuse", pgettext_lazy(_CTX, "Bağlı sillabusdan (eyni məzmun)")
+    AUTO = "auto", pgettext_lazy(_CTX, "Avtomatik təsdiq (sistem tənzimləməsi)")
 
 
 class Syllabus(UUIDModel, TimeStampedModel):

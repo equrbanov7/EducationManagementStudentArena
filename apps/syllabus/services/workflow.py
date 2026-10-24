@@ -13,6 +13,7 @@ from __future__ import annotations
 from django.db import transaction
 from django.utils import timezone
 
+from core import runtime_settings_syllabus
 from core.audit import log_action
 from core.constants import AuditAction
 
@@ -210,8 +211,16 @@ def submit(*, version, actor, request=None):
             reviewer=None,
             review_started_at=None,
         )
-    Syllabus.objects.filter(pk=updated.syllabus_id).update(current_version=updated)
-    syllabus_notifications.notify_submitted(updated)
+        # Sahib 2026-10-25: «Sillabus təsdiqi tələb olunur» SÖNÜLÜdürsə (defolt) göndərmə EYNİ tranzaksiyada
+        # sistem tərəfindən təsdiqlənir — kafedra növbəsində heç vaxt gözləyən qalmır.
+        auto_approved = not runtime_settings_syllabus.approval_required()
+        if auto_approved:
+            updated = auto_approve(version=updated, request=request, notify=False)
+    if auto_approved:
+        syllabus_notifications.notify_approved(updated)
+    else:
+        Syllabus.objects.filter(pk=updated.syllabus_id).update(current_version=updated)
+        syllabus_notifications.notify_submitted(updated)
     # UI mesajı üçün: qaldırma baş veribsə hansı bölmələr səbəb olub.
     updated.escalated_sections = tuple(escalated)
     return updated
@@ -283,6 +292,63 @@ def approve(*, version, actor, comment: str = "", section_comments=None, request
     return updated
 
 
+#: «Avtomatik təsdiq» keçidinin tarixçə (``SyllabusReview``) və audit izahı.
+AUTO_APPROVAL_COMMENT = "Avtomatik təsdiq (sistem tənzimləməsi)"
+
+
+def auto_approve(*, version, request=None, notify: bool = True):
+    """SUBMITTED/REVIEW → APPROVED SİSTEM adından (kafedra qərarı YOX).
+
+    Mövcud təsdiq qaydasını (state maşını + köhnə APPROVED-un arxivlənməsi + göstəricilər + audit)
+    təkrarlayır, lakin aktor yoxdur: ``approved_by`` NULL qalır, ``approval_source = auto``,
+    tarixçədə (``SyllabusReview``) və auditdə :data:`AUTO_APPROVAL_COMMENT` görünür. Çağıran
+    ``runtime_settings_syllabus.approval_required()`` yoxlamasına cavabdehdir (``submit`` və
+    ``syllabus_auto_approve_pending`` əmri). ``notify=False`` — çağıran bildirişi özü göndərir.
+    """
+    now = timezone.now()
+    with transaction.atomic():
+        locked = SyllabusVersion.objects.select_for_update(of=("self",)).get(pk=version.pk)
+        locked.syllabus = version.syllabus
+        # Sistem aktoru: bütün icazələr, əhatə ödənmiş, müəllif qadağası tətbiq edilmir (aktor müəllif deyil).
+        rule = check(name=Transition.APPROVE, status=locked.status, permissions=["*"], is_author=False, in_scope=True)
+        old_status = locked.status
+        _archive_superseded(locked, actor=None, request=request, now=now)
+        locked.status = rule.target
+        locked.approved_at = now
+        locked.approved_by = None
+        locked.approval_source = ApprovalSource.AUTO
+        locked.decided_at = now
+        locked.locked_at = now
+        locked.decision_reason = ""
+        locked.save()
+        SyllabusReview.objects.create(
+            organization_id=locked.organization_id,
+            version=locked,
+            decision=ReviewDecision.APPROVED.value,
+            reason=AUTO_APPROVAL_COMMENT,  # xronologiya (``version_timeline``) məhz ``reason``-u göstərir
+            comment=AUTO_APPROVAL_COMMENT,
+            actor=None,
+        )
+        log_action(
+            AuditAction.UPDATE,
+            user=None,
+            organization=locked.organization,
+            obj=locked,
+            request=request,
+            resource_type="syllabus.version",
+            resource_id=str(locked.pk),
+            resource_repr=f"{locked.syllabus_id} {locked.label}",
+            old_values={"status": old_status},
+            new_values={"status": locked.status, "approval_source": ApprovalSource.AUTO.value},
+            changes={"transition": Transition.APPROVE, "approval_source": ApprovalSource.AUTO.value},
+            reason=AUTO_APPROVAL_COMMENT,
+        )
+        Syllabus.objects.filter(pk=locked.syllabus_id).update(approved_version=locked, current_version=locked)
+    if notify:
+        syllabus_notifications.notify_approved(locked)
+    return locked
+
+
 def request_revision(*, version, actor, reason: str, comment: str = "", section_comments=None, request=None):
     """SUBMITTED/REVIEW → REVISION. Səbəb MƏCBURİDİR (DB check ilə də)."""
     updated = _apply(
@@ -350,7 +416,7 @@ def archive(*, version, actor, request=None):
 
 
 def _archive_superseded(new_version, *, actor, request=None, now=None):
-    """Yeni versiya təsdiqlənəndə köhnə APPROVED-ları arxivləyir."""
+    """Yeni versiya təsdiqlənəndə köhnə APPROVED-ları arxivləyir (``actor=None`` — sistem)."""
     stale = SyllabusVersion.objects.filter(syllabus_id=new_version.syllabus_id, status=SyllabusStatus.APPROVED).exclude(
         pk=new_version.pk
     )
@@ -362,7 +428,7 @@ def _archive_superseded(new_version, *, actor, request=None, now=None):
         old.save(update_fields=["status", "archived_at", "updated_at"])
         log_action(
             AuditAction.UPDATE,
-            user=actor.user,
+            user=getattr(actor, "user", None),
             organization=old.organization,
             obj=old,
             request=request,
@@ -397,7 +463,9 @@ def available_actions(*, version, actor) -> tuple:
 
 
 __all__ = [
+    "AUTO_APPROVAL_COMMENT",
     "approve",
+    "auto_approve",
     "archive",
     "available_actions",
     "reject",

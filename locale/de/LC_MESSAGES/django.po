@@ -109008,3 +109008,26 @@ msgstr "Eine Stunde mit einem Datum vor diesem Tag gilt nie als „Verspätet ei
 msgctxt "accounts.runtime_settings"
 msgid "Tarix seçin (gün.ay.il)."
 msgstr "Wählen Sie ein Datum (Tag.Monat.Jahr)."
+
+msgid "Sillabus"
+msgstr "Syllabus"
+
+msgctxt "core.runtime_settings"
+msgid "Sillabus təsdiqi tələb olunur (kafedra müdiri)"
+msgstr "Genehmigung des Syllabus erforderlich (Lehrstuhlleiter)"
+
+msgctxt "core.runtime_settings"
+msgid "Söndürülübsə (defolt) müəllim sillabusu təsdiqə göndərən kimi o avtomatik təsdiqlənir: kafedra müdirinin təsdiq növbəsində gözləyən sillabus olmur, tarixçədə «avtomatik təsdiq (sistem tənzimləməsi)» görünür. Yandırılanda əvvəlki qayda qayıdır: sillabus kafedra müdirinin təsdiqini gözləyir. Açarı dəyişmək artıq göndərilmiş sillabusların statusunu dəyişmir — söndürülü vəziyyətdə gözləyənləri toplu təsdiqləmək üçün «syllabus_auto_approve_pending» əməliyyatı var."
+msgstr "Wenn aus (Standard), wird ein Syllabus automatisch genehmigt, sobald die Lehrkraft ihn einreicht: in der Genehmigungswarteschlange des Lehrstuhlleiters wartet nichts, im Verlauf steht „automatische Genehmigung (Systemeinstellung)“. Wenn an, gilt wieder die bisherige Regel: Der Syllabus wartet auf die Genehmigung des Lehrstuhlleiters. Das Umschalten ändert bereits eingereichte Syllabi nicht — um wartende bei ausgeschaltetem Schalter zu genehmigen, gibt es die Operation „syllabus_auto_approve_pending“."
+
+msgctxt "syllabus.model"
+msgid "Avtomatik təsdiq (sistem tənzimləməsi)"
+msgstr "Automatische Genehmigung (Systemeinstellung)"
+
+msgctxt "syllabus.document"
+msgid "Təsdiq: avtomatik (sistem tənzimləməsi)"
+msgstr "Genehmigung: automatisch (Systemeinstellung)"
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus göndərildi və avtomatik təsdiqləndi."
+msgstr "Der Syllabus wurde eingereicht und automatisch genehmigt."

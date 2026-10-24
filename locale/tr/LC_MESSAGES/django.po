@@ -107390,3 +107390,26 @@ msgstr "Bu günden önce tarihli bir ders asla “Geç yazıldı” sayılmaz �
 msgctxt "accounts.runtime_settings"
 msgid "Tarix seçin (gün.ay.il)."
 msgstr "Bir tarih seçin (gün.ay.yıl)."
+
+msgid "Sillabus"
+msgstr "Müfredat belgesi (sillabus)"
+
+msgctxt "core.runtime_settings"
+msgid "Sillabus təsdiqi tələb olunur (kafedra müdiri)"
+msgstr "Sillabus onayı gerekli (bölüm başkanı)"
+
+msgctxt "core.runtime_settings"
+msgid "Söndürülübsə (defolt) müəllim sillabusu təsdiqə göndərən kimi o avtomatik təsdiqlənir: kafedra müdirinin təsdiq növbəsində gözləyən sillabus olmur, tarixçədə «avtomatik təsdiq (sistem tənzimləməsi)» görünür. Yandırılanda əvvəlki qayda qayıdır: sillabus kafedra müdirinin təsdiqini gözləyir. Açarı dəyişmək artıq göndərilmiş sillabusların statusunu dəyişmir — söndürülü vəziyyətdə gözləyənləri toplu təsdiqləmək üçün «syllabus_auto_approve_pending» əməliyyatı var."
+msgstr "Kapalıysa (varsayılan) öğretim elemanı sillabusu onaya gönderdiği anda otomatik onaylanır: bölüm başkanının onay kuyruğunda bekleyen sillabus olmaz, geçmişte «otomatik onay (sistem ayarı)» görünür. Açıkken önceki kural geri gelir: sillabus bölüm başkanının onayını bekler. Anahtarı değiştirmek zaten gönderilmiş sillabusların durumunu değiştirmez — kapalıyken bekleyenleri toplu onaylamak için «syllabus_auto_approve_pending» işlemi vardır."
+
+msgctxt "syllabus.model"
+msgid "Avtomatik təsdiq (sistem tənzimləməsi)"
+msgstr "Otomatik onay (sistem ayarı)"
+
+msgctxt "syllabus.document"
+msgid "Təsdiq: avtomatik (sistem tənzimləməsi)"
+msgstr "Onay: otomatik (sistem ayarı)"
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus göndərildi və avtomatik təsdiqləndi."
+msgstr "Sillabus gönderildi ve otomatik onaylandı."

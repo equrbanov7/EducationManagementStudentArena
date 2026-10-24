@@ -9,6 +9,9 @@
 #       sərbəst işsiz qaydaya görə 30-a QALDIRIR (mövcud ballar qalır).
 #   recompute_syllabus_completion — açıq sillabus versiyalarının tamamlanma faizini cari qaydaya görə
 #       yenidən hesablayır (sərbəst iş söndürülüb → 7 bölmə; təsdiqlənmişlərə toxunmur).
+#   syllabus_auto_approve_pending — «Sillabus təsdiqi tələb olunur» açarı SÖNÜLÜ olanda (RİM «Sistem tənzimləmələri»,
+#       sahib 2026-10-25) kafedra növbəsində qalmış submitted/review sillabusları EYNİ servislə (approval_source=auto)
+#       təsdiqləyir; revision/rejected/draft toxunulmur; açar yandırılıbsa apply rədd edilir. Loga yalnız saylar.
 #   journal_hygiene_report — «Jurnal təmizliyi»: ayrılmış tələbələr (left) / boş fənlər (empty) /
 #       qrupun keçmədiyi fənlər (not_held). Loga yalnız saylar düşür (--show 0); apply → DROPPED/SUSPENDED,
 #       hər qərar ledger-dədir və «Bərpa et» ilə geri qayıdır.
@@ -137,6 +140,7 @@ on:
           - surveys_shuffle_responses
           - superadmin_role_count
           - recompute_syllabus_completion
+          - syllabus_auto_approve_pending
           - journal_hygiene_report
           - reconcile_teacher_roster
           - import_teaching_task_workbook
@@ -404,6 +408,10 @@ jobs:
               exit 0
               ;;
             recompute_syllabus_completion)
+              args=(--org "$ORG")
+              ;;
+            syllabus_auto_approve_pending)
+              # Sahib 2026-10-25: yalnız saylar çap olunur (ad/FİN yoxdur); açar yandırılıbsa apply CommandError verir.
               args=(--org "$ORG")
               ;;
             journal_hygiene_report)

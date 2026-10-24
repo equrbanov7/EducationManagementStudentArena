@@ -107492,3 +107492,26 @@ msgstr "Tarixi bu gündən əvvəl olan dərs heç vaxt «Gec yazılıb» sayıl
 msgctxt "accounts.runtime_settings"
 msgid "Tarix seçin (gün.ay.il)."
 msgstr "Tarix seçin (gün.ay.il)."
+
+msgid "Sillabus"
+msgstr "Sillabus"
+
+msgctxt "core.runtime_settings"
+msgid "Sillabus təsdiqi tələb olunur (kafedra müdiri)"
+msgstr "Sillabus təsdiqi tələb olunur (kafedra müdiri)"
+
+msgctxt "core.runtime_settings"
+msgid "Söndürülübsə (defolt) müəllim sillabusu təsdiqə göndərən kimi o avtomatik təsdiqlənir: kafedra müdirinin təsdiq növbəsində gözləyən sillabus olmur, tarixçədə «avtomatik təsdiq (sistem tənzimləməsi)» görünür. Yandırılanda əvvəlki qayda qayıdır: sillabus kafedra müdirinin təsdiqini gözləyir. Açarı dəyişmək artıq göndərilmiş sillabusların statusunu dəyişmir — söndürülü vəziyyətdə gözləyənləri toplu təsdiqləmək üçün «syllabus_auto_approve_pending» əməliyyatı var."
+msgstr "Söndürülübsə (defolt) müəllim sillabusu təsdiqə göndərən kimi o avtomatik təsdiqlənir: kafedra müdirinin təsdiq növbəsində gözləyən sillabus olmur, tarixçədə «avtomatik təsdiq (sistem tənzimləməsi)» görünür. Yandırılanda əvvəlki qayda qayıdır: sillabus kafedra müdirinin təsdiqini gözləyir. Açarı dəyişmək artıq göndərilmiş sillabusların statusunu dəyişmir — söndürülü vəziyyətdə gözləyənləri toplu təsdiqləmək üçün «syllabus_auto_approve_pending» əməliyyatı var."
+
+msgctxt "syllabus.model"
+msgid "Avtomatik təsdiq (sistem tənzimləməsi)"
+msgstr "Avtomatik təsdiq (sistem tənzimləməsi)"
+
+msgctxt "syllabus.document"
+msgid "Təsdiq: avtomatik (sistem tənzimləməsi)"
+msgstr "Təsdiq: avtomatik (sistem tənzimləməsi)"
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus göndərildi və avtomatik təsdiqləndi."
+msgstr "Sillabus göndərildi və avtomatik təsdiqləndi."

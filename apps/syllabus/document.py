@@ -68,12 +68,16 @@ _EMPTY = pgettext_lazy(_CTX, "— doldurulmayıb —")
 #: Bağlı (``approval_source = reuse``) versiyanın təsdiq izahı — təsdiqləyən UYDURULMUR.
 REUSE_APPROVAL_NOTE = pgettext_lazy(_CTX, "Təsdiq: %(group)s sillabusundan (eyni məzmun, eyni saatlar)")
 REUSE_APPROVAL_NOTE_PLAIN = pgettext_lazy(_CTX, "Təsdiq: bağlı sillabusdan (eyni məzmun, eyni saatlar)")
+#: ``approval_source = auto`` (sahib 2026-10-25) — kafedra təsdiqi söndürülüb, təsdiqləyən UYDURULMUR.
+AUTO_APPROVAL_NOTE = pgettext_lazy(_CTX, "Təsdiq: avtomatik (sistem tənzimləməsi)")
 
 
 def reuse_approval_note(version) -> str:
-    """«Təsdiq: <qrup> sillabusundan …» — adi təsdiqdə boş sətir."""
+    """«Təsdiq: <qrup> sillabusundan …» / «avtomatik» — adi təsdiqdə boş sətir."""
     from .services.reuse_rules import reuse_origin
 
+    if getattr(version, "approval_source", "") == "auto" and getattr(version, "approved_by_id", None) is None:
+        return str(AUTO_APPROVAL_NOTE)
     origin = reuse_origin(version)
     if origin is None:
         return ""
