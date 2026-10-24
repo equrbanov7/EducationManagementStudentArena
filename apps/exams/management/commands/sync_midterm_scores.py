@@ -1,7 +1,9 @@
-"""Bitmiş TEST formatlı midterm cəhdlərinin balını jurnalın «Midterm» xanasına yazır (sahib 2026-10-21).
+"""Bitmiş midterm cəhdlərinin balını jurnalın «Midterm» xanasına yazır (sahib 2026-10-21 / 2026-10-24).
 
-Yeni cəhdlər bitəndə avtomatik yazılır (``midterm_journal_sync``); bu komanda qaydadan ƏVVƏL bitmiş
-cəhdlər və fənni / qrupları SONRADAN dəyişdirilmiş imtahanlar («JS Loop», 2026-10-24) üçün bərpadır.
+Format: test, yazılı və kodlaşdırma (2026-10-24-dən) — yazılı / kodlaşdırma cəhdi yalnız TAM yoxlanılıbsa
+yazılır (qalanı ``grading_pending`` sayılır). Yeni cəhdlər bitəndə / yoxlanılanda avtomatik yazılır
+(``midterm_journal_sync``); bu komanda qaydadan ƏVVƏL bitmiş / yoxlanmış cəhdlər və fənni / qrupları
+SONRADAN dəyişdirilmiş imtahanlar («JS Loop», 2026-10-24) üçün bərpadır.
 Yalnız SAYLAR çap olunur (ad / bal yoxdur — workflow loguna uyğun).
 
     manage.py sync_midterm_scores                          # DRY-RUN (defolt) — heç nə yazılmır
@@ -11,7 +13,7 @@ Yalnız SAYLAR çap olunur (ad / bal yoxdur — workflow loguna uyğun).
 
 Addımlar (hamısı bir tranzaksiyada; dry-run sonda geri qaytarılır):
 
-1. **Bağlantı** — hər test midterminin jurnal bağlantısı (``Exam.journal_offerings``: fənn + qruplar üzrə hər
+1. **Bağlantı** — hər midtermin jurnal bağlantısı (``Exam.journal_offerings``: fənn + qruplar üzrə hər
    qrupun öz açılışı) yenidən hesablanır (``exam_journal_link.refresh_links``).
 2. **Yazı** — hər (tələbə, fənn) üçün yalnız RƏSMİ (ən son başlamış, bitmiş, sınaq olmayan) cəhd yazılır;
    qaydalar canlı körpü ilə EYNİDİR (gizli nəticə, sənədli düzəliş, bağlı jurnal, keçmiş dövr → atlanır).
@@ -53,7 +55,7 @@ def _exam_filter(values) -> Q:
 
 class Command(BaseCommand):
     help = (
-        "Test formatlı midterm cəhdlərinin balını jurnalın Midterm xanasına yazır, imtahanın jurnal "
+        "Midterm (test / yazılı / kodlaşdırma) cəhdlərinin balını jurnalın Midterm xanasına yazır, imtahanın jurnal "
         "bağlantısını yeniləyir və köhnə fənnin jurnalındakı avtomatik balı silir (defolt: dry-run)."
     )
 
@@ -70,14 +72,14 @@ class Command(BaseCommand):
         exams = Exam.objects.filter(
             is_deleted=False,
             exam_type_extended=MIDTERM_EXAM_CATEGORY,
-            exam_type=midterm_journal_sync.AUTO_MIDTERM_EXAM_TYPE,
+            exam_type__in=midterm_journal_sync.AUTO_MIDTERM_EXAM_TYPES,
         ).select_related("organization", "journal_teacher")
         if options["org"]:
             exams = exams.filter(organization__slug=options["org"])
         if options["exam"]:
             exams = exams.filter(_exam_filter(options["exam"]))
             if not exams.exists():
-                raise CommandError("Uyğun test midterm imtahanı tapılmadı (--exam / --org).")
+                raise CommandError("Uyğun midterm imtahanı tapılmadı (--exam / --org).")
         return list(exams.order_by("pk"))
 
     def handle(self, *args, **options):
@@ -112,6 +114,6 @@ class Command(BaseCommand):
         parts = ", ".join(f"{status} {count}" for status, count in sorted(counts.items())) or "—"
         cleaned = ", ".join(f"{status} {count}" for status, count in sorted(cleanup.items())) or "—"
         self.stdout.write(
-            f"{mode}: rəsmi test midterm cəhdi {total}; {parts} | imtahan {len(exams)}, "
+            f"{mode}: rəsmi midterm cəhdi {total}; {parts} | imtahan {len(exams)}, "
             f"jurnal bağlantısı yenilənən {relinked} | köhnə jurnal xanaları: {cleaned}"
         )

@@ -62,11 +62,40 @@ def _mark_attempt_graded(attempt, *, grader, total_score, checked, now):
         update_fields.append("graded_by")
     attempt.save(update_fields=update_fields)
     # Yazılı imtahan yoxlanıb bitəndə nəticəni elektron jurnala yaz (best-effort).
-    # Aktor YOXLAYAN MÜƏLLİMdir — tələbə deyil (2026-08 auditi, G7).
+    # Aktor YOXLAYAN MÜƏLLİMdir — tələbə deyil (2026-08 auditi, G7). Yazılı / kodlaşdırma MIDTERM də buradan
+    # jurnalın «Midterm» xanasına düşür (sahib 2026-10-24) — yalnız TAM yoxlanılıbsa (``grading_complete``).
     if checked:
         from apps.exams.services.journal_sync import schedule_journal_sync
 
         schedule_journal_sync(attempt, actor=grader)
+
+
+def _answer_has_content(answer) -> bool:
+    """Tələbə bu suala nəsə yazıb / yükləyib (boş cavab yoxlanmasa da 0 sayılır)."""
+    from apps.exams.services.ai_grading import has_written_answer_content
+
+    return has_written_answer_content(
+        student_answer=answer.text_answer or "",
+        answer_files=list(answer.files.all()),
+        paint_image=getattr(answer, "paint_image", None),
+    )
+
+
+def grading_complete(attempt) -> bool:
+    """Yazılı / kodlaşdırma cəhdi TAM yoxlanılıb — yekun bal məlumdur (sahib 2026-10-24, midterm → jurnal).
+
+    * ``checked_by_teacher`` + ``teacher_score`` dolu olmalıdır;
+    * heç bir cavabın sual-səviyyəli balı yoxdursa bal CƏHD səviyyəsindədir (kodlaşdırmanın test keyslərindən
+      avtomatik balı, köhnə cəhd-səviyyəli yoxlama) — tamdır;
+    * sual-səviyyəli bal varsa, məzmunlu (boş olmayan) HƏR cavab qiymətləndirilməlidir — qismən yoxlanmış
+      cəhdin ``teacher_score``-u yalnız yoxlanmış sualların cəmidir və rəsmi jurnala yazılmamalıdır.
+      Boş (cavabsız) sual yoxlanmasa da 0 sayılır (yoxlama xəritəsinin «Cavabsız» halı)."""
+    if not getattr(attempt, "checked_by_teacher", False) or getattr(attempt, "teacher_score", None) is None:
+        return False
+    answers = list(attempt.answers.prefetch_related("files"))
+    if not any(answer.teacher_score is not None for answer in answers):
+        return True
+    return all(answer.teacher_score is not None or not _answer_has_content(answer) for answer in answers)
 
 
 def _log_score_changes(attempt, *, grader, events, request=None):
@@ -293,4 +322,5 @@ __all__ = [
     "apply_attempt_grade",
     "apply_manual_grading",
     "apply_single_answer_grade",
+    "grading_complete",
 ]

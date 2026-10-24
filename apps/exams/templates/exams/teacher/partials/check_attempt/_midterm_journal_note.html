@@ -1,0 +1,22 @@
+{% load i18n %}
+{% comment %}
+Yazılı / kodlaşdırma MIDTERM cəhdinin yoxlama səhifəsi — məlumat qeydi (sahib 2026-10-24).
+`midterm_journal_note` (view: midterm_journal_sync.grading_note_state): "auto" — saxlanan bal (bütün suallar
+qiymətləndirilibsə) fənnin jurnalının «Midterm» xanasına avtomatik yazılır; "hidden" — nəticə tələbədən
+gizlidir, jurnala nəticə açılanda düşür. Üslub: ortaq ems-banner--info (validation.css).
+{% endcomment %}
+{% if midterm_journal_note %}
+<div class="ems-banner ems-banner--info tca-banner" role="note" data-tca-midterm-journal-note="{{ midterm_journal_note }}">
+    <i class="fas fa-book-open tca-banner__icon" aria-hidden="true"></i>
+    <div>
+        <div class="ems-banner__title">{% trans "Bal jurnala avtomatik yazılır" context "exams.teacher.grading" %}</div>
+        <div class="ems-banner__body">
+            {% if midterm_journal_note == "hidden" %}
+                {% trans "Bu midterm imtahanıdır. Nəticə hazırda tələbədən gizlədilib — saxladığınız bal fənnin jurnalına (Midterm) nəticə tələbəyə açılanda avtomatik yazılacaq." context "exams.teacher.grading" %}
+            {% else %}
+                {% trans "Bu midterm imtahanıdır. Bütün suallar qiymətləndirilib yadda saxlananda bal fənnin jurnalına (Midterm) avtomatik yazılır — jurnalda əl ilə yazmaq lazım deyil." context "exams.teacher.grading" %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}

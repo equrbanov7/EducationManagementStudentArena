@@ -107350,3 +107350,31 @@ msgstr "Merkezler ve diğer birimler"
 msgctxt "organizations.permission.label"
 msgid "Bütün müraciətlərə baxmaq (yalnız oxu)"
 msgstr "Tüm başvuruları görüntüleme (salt okunur)"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu midterm imtahanının nəticəsi tələbə imtahanı bitirən kimi seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq."
+msgstr "Bu ara sınavın sonucu, öğrenci sınavı bitirir bitirmez seçilen dersin grup defterlerine (Midterm /30) otomatik olarak yazılacaktır."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Bu midterm imtahanının nəticəsi yoxlanıldıqdan sonra seçilmiş fənnin qrup jurnallarına (Midterm /30) avtomatik yazılacaq."
+msgstr "Bu ara sınavın sonucu, değerlendirildikten sonra seçilen dersin grup defterlerine (Midterm /30) otomatik olarak yazılacaktır."
+
+msgctxt "exams.teacher.grading"
+msgid "Bal jurnala avtomatik yazılır"
+msgstr "Puan deftere otomatik olarak yazılır"
+
+msgctxt "exams.teacher.grading"
+msgid "Bu midterm imtahanıdır. Bütün suallar qiymətləndirilib yadda saxlananda bal fənnin jurnalına (Midterm) avtomatik yazılır — jurnalda əl ilə yazmaq lazım deyil."
+msgstr "Bu bir ara sınavdır. Tüm sorular puanlanıp kaydedildiğinde puan dersin defterine (Midterm) otomatik olarak yazılır — deftere elle girmeye gerek yoktur."
+
+msgctxt "exams.teacher.grading"
+msgid "Bu midterm imtahanıdır. Nəticə hazırda tələbədən gizlədilib — saxladığınız bal fənnin jurnalına (Midterm) nəticə tələbəyə açılanda avtomatik yazılacaq."
+msgstr "Bu bir ara sınavdır. Sonuç şu anda öğrenciden gizlenmiştir — kaydettiğiniz puan, sonuç öğrenciye açıldığında dersin defterine (Midterm) otomatik olarak yazılacaktır."
+
+msgctxt "registrar.journal"
+msgid "İmtahan Mərkəzində keçirilən midterm balı imtahandan avtomatik yazılır (test — tələbə bitirən kimi, yazılı / praktiki — yoxlanıldıqdan sonra) və burada əl ilə dəyişdirilmir. Düzəliş yalnız apellyasiya və ya sənədli düzəliş ilə mümkündür."
+msgstr "Sınav Merkezinde yapılan ara sınav puanı sınavdan otomatik olarak yazılır (test — öğrenci bitirir bitirmez, yazılı / uygulamalı — değerlendirildikten sonra) ve burada elle değiştirilemez. Düzeltme yalnızca itiraz veya belgeli düzeltme ile mümkündür."
+
+msgctxt "registrar.journal"
+msgid "imtahandan avtomatik"
+msgstr "sınavdan otomatik"
