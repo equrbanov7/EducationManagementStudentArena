@@ -5,7 +5,8 @@
 * :func:`can_edit_journal` — GİRİŞ + korrektor səlahiyyəti. Müəllim / org sahibi /
   superuser / İKT Rəhbəri jurnalı aça bilər. İKT texniki super-operatordur.
 * :func:`can_observe_journal` — YALNIZ-OXU: fənni TƏHVİL VERMİŞ köhnə müəllim
-  VƏ YA əhatəsi açılışın qrupunu örtən ``journal.view`` daşıyıcısı (2026-09-14).
+  VƏ YA əhatəsi açılışın qrupunu örtən ``journal.view`` daşıyıcısı (2026-09-14; kafedra
+  kökü kafedraya aid açılışları da örtür — 2026-10-24, ``journal_scope.journal_view_q``).
   Yazma hüququ dərhal gedir, görünüş qalır (bax :func:`apps.registrar.handover.
   is_handover_observer` şərhi: apellyasiya/komissiya sualı təhvildən sonra da gəlir).
 * :func:`is_direct_editor` — BİRBAŞA (audit-siz) redaktə hüququ: müəllim, org
@@ -138,9 +139,11 @@ def can_observe_journal(user, offering) -> bool:
 
     if is_handover_observer(user, offering):
         return True
-    from .journal_scope import offering_in_actor_scope
+    from .journal_scope import offering_in_journal_view_scope
 
-    return offering_in_actor_scope(user, offering.organization, offering, permission=VIEW_PERMISSION)
+    # Siyahı (``journal_scope.journal_view_q``) ilə EYNİ əhatə: kafedra kökü kafedraya aid açılışları da
+    # örtür (2026-10-24). Yalnız OXU — yazma qapıları (``is_direct_editor``) bu açara baxmır.
+    return offering_in_journal_view_scope(user, offering.organization, offering)
 
 
 def offering_accepts_writes(offering) -> bool:
