@@ -8,6 +8,9 @@ sabitdir (``ExamChanceReason``):
 * **Universitet güzəşti** — əmr / sərəncam № + tarix + qeyd məcburidir;
 * **Texniki problem**, **Apellyasiya qərarı**, **Digər** — qeyd məcburidir.
 
+2026-10-24 (sahib): HƏR səbəb üçün əsas SƏNƏD (əmr / sərəncam / ərizə — PDF və ya şəkil, 10 MB) məcburidir.
+Fayl bir dəfə yazılır; eyni təqdimatda seçilmiş bütün tələbələrin qeydləri həmin yolu paylaşır.
+
 Yazılı, test və praktiki (kod) imtahanlar üçün eynidir — imtahan növü qeydə snapshot kimi düşür. Exams
 modulu registrar-ı çağırır (əksinə yox): imtahan ``exam`` lüğəti kimi gəlir (id, başlıq, növ, kateqoriya,
 fənn). Qeyd append-only ``ExamChanceGrant`` sətridir və tələbənin 25% izində görünür.
@@ -21,9 +24,9 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import pgettext
 
-from . import retake_decisions
+from . import retake_decisions, retake_files
 from .models import ExamChanceGrant, ExamChanceReason, Subject
-from .retake_services import actor_label
+from .retake_services import actor_label, clean_upload
 
 _CTX = "registrar.retake"
 
@@ -60,8 +63,23 @@ def _clean_date(raw):
         raise ValidationError(pgettext(_CTX, "Əmr tarixi düzgün deyil.")) from None
 
 
-def validate(*, organization, exam, students, reason, reference_number="", reference_date=None, note="") -> dict:
-    """Səbəbin tələblərini yoxla; ``{"reason", "reference_number", "reference_date", "note", "applications"}``."""
+def _clean_document(document):
+    """Əsas sənəd məcburidir; uzantı / ölçü / imza-MIME yoxlaması 25% qəbzi ilə eynidir (``clean_upload``)."""
+    if not document or not getattr(document, "name", ""):
+        raise ValidationError(
+            pgettext(_CTX, "Əsas sənədi (əmr / sərəncam / ərizə) yükləyin — sənədsiz cəhd hüququ verilmir.")
+        )
+    clean_upload(document)
+    if hasattr(document, "seek"):
+        document.seek(0)
+    return document
+
+
+def validate(
+    *, organization, exam, students, reason, reference_number="", reference_date=None, note="", document=None
+) -> dict:
+    """Səbəbin tələblərini yoxla; ``{"reason", "reference_number", "reference_date", "note", "document",
+    "applications"}``."""
     if reason not in ExamChanceReason.values:
         raise ValidationError(pgettext(_CTX, "Cəhdin əsasını seçin."))
     students = [s for s in students if getattr(s, "pk", None)]
@@ -75,6 +93,7 @@ def validate(*, organization, exam, students, reason, reference_number="", refer
         raise ValidationError(pgettext(_CTX, "Universitet güzəşti üçün əmr / sərəncam nömrəsi və tarixi məcburidir."))
     if needs_note and len(text) < NOTE_MIN:
         raise ValidationError(pgettext(_CTX, "Bu səbəb üçün qeyd məcburidir (ən azı {n} simvol).").format(n=NOTE_MIN))
+    document = _clean_document(document)
     applications: dict = {}
     if reason == ExamChanceReason.RETAKE_25:
         if exam.get("category") != "final":
@@ -104,6 +123,7 @@ def validate(*, organization, exam, students, reason, reference_number="", refer
         "reference_number": number,
         "reference_date": date,
         "note": text,
+        "document": document,
         "applications": applications,
     }
 
@@ -114,30 +134,55 @@ def record(*, organization, exam, students, cleaned, extra, actor, request=None)
     subject_id = exam.get("subject_id")
     if subject_id and not Subject.objects.filter(pk=subject_id, organization=organization).exists():
         subject_id = None
+    document = cleaned.get("document")
+    document_name = str(getattr(document, "name", "") or "")[:255]
     rows = []
-    for student in students:
-        application = cleaned["applications"].get(student.pk)
-        grant = ExamChanceGrant.objects.create(
-            organization=organization,
-            student=student,
-            subject_id=subject_id,
-            exam_id=int(exam["id"]),
-            exam_title=str(exam.get("title") or "")[:300],
-            exam_type=str(exam.get("exam_type") or "")[:20],
-            exam_category=str(exam.get("category") or "")[:20],
-            reason=cleaned["reason"],
-            reference_number=cleaned["reference_number"],
-            reference_date=cleaned["reference_date"],
-            note=cleaned["note"],
-            application=application,
-            extra_attempts=max(1, int(extra or 1)),
-            granted_by=actor,
-            granted_by_name=actor_label(actor),
-        )
-        if application is not None:
-            retake_decisions.mark_exam_granted(application=application, actor=actor, grant=grant, request=request)
-        rows.append(grant)
+    with retake_files.discard_on_error():
+        for student in students:
+            rows.append(
+                _record_one(
+                    organization=organization,
+                    exam=exam,
+                    student=student,
+                    subject_id=subject_id,
+                    cleaned=cleaned,
+                    extra=extra,
+                    actor=actor,
+                    request=request,
+                    # Fayl ilk sətirdə storage-ə yazılır; qalanları eyni yolu paylaşır (təkrar nüsxə yox).
+                    document=rows[0].document.name if rows else document,
+                    document_name=document_name,
+                )
+            )
     return rows
+
+
+def _record_one(*, organization, exam, student, subject_id, cleaned, extra, actor, request, document, document_name):
+    application = cleaned["applications"].get(student.pk)
+    grant = ExamChanceGrant.objects.create(
+        organization=organization,
+        student=student,
+        subject_id=subject_id,
+        exam_id=int(exam["id"]),
+        exam_title=str(exam.get("title") or "")[:300],
+        exam_type=str(exam.get("exam_type") or "")[:20],
+        exam_category=str(exam.get("category") or "")[:20],
+        reason=cleaned["reason"],
+        reference_number=cleaned["reference_number"],
+        reference_date=cleaned["reference_date"],
+        note=cleaned["note"],
+        document=document or "",
+        document_name=document_name,
+        application=application,
+        extra_attempts=max(1, int(extra or 1)),
+        granted_by=actor,
+        granted_by_name=actor_label(actor),
+    )
+    if not isinstance(document, str):
+        retake_files.track(grant.document)
+    if application is not None:
+        retake_decisions.mark_exam_granted(application=application, actor=actor, grant=grant, request=request)
+    return grant
 
 
 def recent(*, organization, limit=15) -> list:

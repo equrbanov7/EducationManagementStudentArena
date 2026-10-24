@@ -108844,3 +108844,51 @@ msgstr "Zeile löschen"
 msgctxt "accounts.workload"
 msgid "fənn, qrup və ya müəllim"
 msgstr "Fach, Gruppe oder Lehrkraft"
+
+msgctxt "exams.view.exams.message"
+msgid "Midterm və final imtahanları üçün yenidən cəhd hüququ yalnız «Yenidən imtahan cəhdi» səhifəsində rəsmi əsasla (əmr, sənəd, qeyd) verilir."
+msgstr "Für Zwischen- und Abschlussprüfungen wird ein weiterer Versuch nur auf der Seite „Prüfungswiederholung“ mit offizieller Grundlage (Anordnung, Dokument, Vermerk) gewährt."
+
+msgctxt "registrar.retake"
+msgid "Əsas sənədi (əmr / sərəncam / ərizə) yükləyin — sənədsiz cəhd hüququ verilmir."
+msgstr "Laden Sie das Grundlagendokument hoch (Anordnung / Verfügung / Antrag) — ohne Dokument wird kein weiterer Versuch gewährt."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final: cəhd hüququ rəsmi əsasla (əmr, sənəd, qeyd) «Yenidən imtahan cəhdi» səhifəsində verilir."
+msgstr "Zwischen-/Abschlussprüfung: Ein weiterer Versuch wird mit offizieller Grundlage (Anordnung, Dokument, Vermerk) auf der Seite „Prüfungswiederholung“ gewährt."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün yenidən cəhd hüququnu yalnız İmtahan Mərkəzi rəsmi əsasla verir."
+msgstr "Für Zwischen-/Abschlussprüfungen gewährt nur das Prüfungszentrum einen weiteren Versuch mit offizieller Grundlage."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün cəhd hüququ birbaşa verilmir: «Yenidən imtahan cəhdi» səhifəsində əsas, əmr / sərəncam №, tarix, sənəd və qeyd ilə rəsmi qeyd yazılır."
+msgstr "Bei Zwischen-/Abschlussprüfungen wird kein Versuch direkt gewährt: Auf der Seite „Prüfungswiederholung“ wird ein offizieller Eintrag mit Grundlage, Anordnungs-/Verfügungs-Nr., Datum, Dokument und Vermerk angelegt."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Rəsmi cəhd səhifəsinə keç"
+msgstr "Zur offiziellen Wiederholungsseite"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Midterm/final üçün yenidən cəhd hüququnu yalnız İmtahan Mərkəzi «Yenidən imtahan cəhdi» səhifəsində rəsmi əsasla (əmr, sənəd, qeyd) verir."
+msgstr "Für Zwischen-/Abschlussprüfungen gewährt nur das Prüfungszentrum auf der Seite „Prüfungswiederholung“ einen weiteren Versuch mit offizieller Grundlage (Anordnung, Dokument, Vermerk)."
+
+msgctxt "accounts.exam_chance"
+msgid "Sənəd"
+msgstr "Dokument"
+
+msgctxt "accounts.exam_chance"
+msgid "Ata adı"
+msgstr "Vatersname"
+
+msgctxt "accounts.exam_chance"
+msgid "Bu tələbə və imtahan üçün «Cəhd hüququ ver» formasını doldur"
+msgstr "Formular „Versuch gewähren“ für diese:n Studierende:n und Prüfung ausfüllen"
+
+msgctxt "accounts.exam_chance"
+msgid "Sətrə klikləyin — həmin tələbə və imtahan üçün «Cəhd hüququ ver» forması doldurulur."
+msgstr "Klicken Sie auf eine Zeile — das Formular „Versuch gewähren“ wird für diese:n Studierende:n und Prüfung ausgefüllt."
+
+msgctxt "accounts.exam_chance"
+msgid "Əmr / sərəncam, ərizə və ya qərarın surəti — PDF, JPG və ya PNG, ən çox 10 MB. Sənədsiz cəhd hüququ verilmir."
+msgstr "Kopie der Anordnung / Verfügung, des Antrags oder der Entscheidung — PDF, JPG oder PNG, höchstens 10 MB. Ohne Dokument wird kein weiterer Versuch gewährt."

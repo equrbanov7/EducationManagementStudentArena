@@ -18,10 +18,12 @@ def _register_retake_media():
     from core.media_policies import register_media_policy
 
     from .models.retake import RETAKE_DOCUMENT_PREFIX, RETAKE_RECEIPT_PREFIX
-    from .retake_media import check_document_access, check_receipt_access
+    from .models.retake_log import EXAM_CHANCE_DOCUMENT_PREFIX
+    from .retake_media import check_chance_document_access, check_document_access, check_receipt_access
 
     register_media_policy(RETAKE_RECEIPT_PREFIX, check_receipt_access)
     register_media_policy(RETAKE_DOCUMENT_PREFIX, check_document_access)
+    register_media_policy(EXAM_CHANCE_DOCUMENT_PREFIX, check_chance_document_access)
 
 
 def _transfer_student_group(**kwargs):

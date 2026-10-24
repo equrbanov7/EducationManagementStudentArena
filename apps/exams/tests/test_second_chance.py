@@ -9,6 +9,7 @@
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -22,6 +23,12 @@ from apps.exams.services.student_pins import provision_exam_student_pins, revoke
 from apps.exams.tests.test_exam_center_policy import PASSWORD, _assign_user_to_org
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
+
+
+def _pdf():
+    """2026-10-24: «Yenidən imtahan cəhdi»ndə əsas sənəd məcburidir."""
+    return SimpleUploadedFile("emr.pdf", b"%PDF-1.4\n1 0 obj<<>>endobj\n%%EOF\n", content_type="application/pdf")
+
 
 User = get_user_model()
 
@@ -209,6 +216,7 @@ class ExamChanceViewTests(_Base):
                 "reason": "technical",
                 "note": "İmtahan zamanı kompüter söndü",
                 "extra_attempts": "1",
+                "document": _pdf(),
             },
         )
         self.assertEqual(response.status_code, 302)
@@ -383,6 +391,7 @@ class ExamChanceFilterTests(_Base):
                 "extra_attempts": "1",
                 "reason": "other",
                 "note": "Dekanlığın şifahi qərarı ilə",
+                "document": _pdf(),
             },
         )
         self.assertEqual(response.status_code, 302)
