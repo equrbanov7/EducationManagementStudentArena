@@ -199,6 +199,23 @@ def _ensure_offering(run, index, subject, period, unit, teacher, journal):
     return offering
 
 
+def _pick(candidates, journal_offering_ids):
+    """Eyni fənn+dövr üzrə bir neçə qeydiyyat varsa DETERMİNİSTİK seçim: aktiv olan, legacy jurnalın öz
+    açılışındakı, ən erkən yaradılmış (sıra qaçışdan-qaçışa dəyişmir)."""
+
+    if not candidates:
+        return None
+    enrolled = [e for e in candidates if e.status == "enrolled"]
+    for pool in (
+        [e for e in enrolled if e.offering_id in journal_offering_ids],
+        enrolled,
+        list(candidates),
+    ):
+        if pool:
+            return pool[0]
+    return None
+
+
 def build_enrollments(run, slices: dict) -> dict:
     """``(uniqid, legacy_student_id) → Enrollment`` — mövcudu tapır, çatışmayanı yaradır."""
 
@@ -206,15 +223,17 @@ def build_enrollments(run, slices: dict) -> dict:
     offerings = {offering.pk: offering for entry in slices.values() for offering in entry.offerings}
     subject_period = {(o.subject_id, o.period_id) for o in offerings.values()}
     existing: dict = {}
-    for enrollment in Enrollment.objects.filter(
-        organization=run.organization,
-        offering__subject_id__in={key[0] for key in subject_period},
-        offering__period_id__in={key[1] for key in subject_period},
-    ).select_related("offering"):
+    for enrollment in (
+        Enrollment.objects.filter(
+            organization=run.organization,
+            offering__subject_id__in={key[0] for key in subject_period},
+            offering__period_id__in={key[1] for key in subject_period},
+        )
+        .select_related("offering")
+        .order_by("created_at", "pk")
+    ):
         key = (enrollment.student_id, enrollment.offering.subject_id, enrollment.offering.period_id)
-        current = existing.get(key)
-        if current is None or (current.status != "enrolled" and enrollment.status == "enrolled"):
-            existing[key] = enrollment
+        existing.setdefault(key, []).append(enrollment)
     points_by_journal: dict = {}
     for point in run.bundle["points"]:
         points_by_journal.setdefault(point["journal_uniqid"], set()).add(point["student_id"])
@@ -234,7 +253,7 @@ def build_enrollments(run, slices: dict) -> dict:
             if offering is None:
                 continue
             key = (user_id, offering.subject_id, offering.period_id)
-            found = existing.get(key)
+            found = _pick(existing.get(key), {o.pk for o in entry.offerings})
             if found is not None:
                 result[(uniqid, legacy_id)] = found
                 run.count("enrollment.existing" if found.status == "enrolled" else "enrollment.existing_not_enrolled")
@@ -256,7 +275,7 @@ def build_enrollments(run, slices: dict) -> dict:
                 added_by=run.actor if guest else None,
                 added_at=now if guest else None,
             )
-            existing[key] = enrollment
+            existing.setdefault(key, []).append(enrollment)
             result[(uniqid, legacy_id)] = enrollment
             pending.append(enrollment)
             run.count("enrollment.created_guest" if guest else "enrollment.created")

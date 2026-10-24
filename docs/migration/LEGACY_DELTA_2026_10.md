@@ -101,6 +101,25 @@ səhifəsi 200 ilə açılır.
 
 Müddət ~8 dəqiqə (tək tranzaksiya; dərs yükü fazası ~4 dəq).
 
+### PROD — TƏTBİQ OLUNUB (2026-10-24 03:29, sahibin «hə»sı ilə)
+
+`prod-data-ops` → `legacy_delta_apply`, run 40039680313, paket sha256 `54886afa…4fbde9`, `--lessons-until 2026-10-23`,
+tag `delta-20261024-032938-7b58`. Əvvəl backup: `/backups/last/emsarena-20261024-032640.sql.gz`.
+
+| | Say |
+|---|---:|
+| Jurnal → açılış (yaradılan / mövcud / eyni adlı) | 1 099 / 730 / 24 |
+| FİN-siz müəllim / tələbə hesabı / qrup | 40 / 644 / 57 |
+| Qeydiyyat / dərs / xana | 19 774 / 13 548 / 217 903 |
+| Təkrar imtahan / imtahan balı | 1 191 / 19 |
+| Sillabus (açılışa APPROVED / baza) | 1 235 / 75 |
+| Dərs yükü: kafedra / yeni yük sətri | 20 / 765 |
+| Toxunulmayan fərq (xana / açılış müəllimi / yekun) | 89 / 185 / 6 |
+| Müəllimi DB qapısından keçmədi (müəllimsiz açılış) | 17 |
+
+Adlı siyahı (yaradılan hesablar, ambiqü tələbələr, legacy qrup/azad fərqləri) yalnız lokal:
+`~/EMSArena-backups/legacy-delta-2026-10/prod-apply-20261024/` (0600).
+
 ## 4. Prod addımları (HƏR BİRİ sahibin açıq «hə»sı ilə)
 
 1. Kodu prod-a çatdır: Develop → Staging → main (`legacy_delta_*` əmrləri + `prod-data-ops` addımı).

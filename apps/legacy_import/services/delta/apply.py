@@ -4,7 +4,8 @@ Bütün fazalar BİR tranzaksiyadadır: ya hamısı yazılır, ya heç nə. Dry-
 tranzaksiyanı GERİ QAYTARIR — hesabatdakı saylar «tətbiq etsək nə olardı»nın dəqiq sayıdır (təxmin yox).
 
 Fazalar: tələbələr (iki keçid: tutuşdur, sonra yarat) → açılış (fənn/qrup/müəllim) → qeydiyyat → dərs + xana →
-yekun/təkrar imtahan → sillabus → dərs yükü (rəsmi «Dərs yükü faylı» axını) → tələbə profilində boş sahələr. Sonda bir audit sətri (manifest:
+yekun/təkrar imtahan → sillabus → dərs yükü (rəsmi «Dərs yükü faylı» axını) → eyni fənnin ikinci (boş) öz-qrup qeydiyyatı «alt qrup
+birləşməsi» ilə tarixçəyə → tələbə profilində boş sahələr. Sonda bir audit sətri (manifest:
 saylar + yaradılmış kiçik obyektlərin id-ləri) — ``resource_type=legacy_import.delta_batch``.
 """
 
@@ -17,6 +18,7 @@ from django.apps import apps as django_apps
 from django.db import transaction
 from django.utils import timezone
 
+from .dedupe import dedupe_enrollments
 from .finals import apply_finals
 from .journals import build_enrollments, build_offerings
 from .lessons import build_lessons_and_marks
@@ -29,7 +31,7 @@ BATCH_RESOURCE = "legacy_import.delta_batch"
 BULK_CHUNK = 2000
 #: Manifestdə id-ləri saxlanılan (az saylı) növlər; qalanı yalnız say.
 MANIFEST_KINDS = ("groups", "subjects", "offerings", "teachers", "students", "syllabus_versions", "workload_chairs")
-PHASES = ("students", "offerings", "enrollments", "lessons", "finals", "syllabi", "workload", "profiles")
+PHASES = ("students", "offerings", "enrollments", "lessons", "finals", "syllabi", "workload", "dedupe", "profiles")
 
 
 def new_tag() -> str:
@@ -144,6 +146,9 @@ class DeltaRun:
             import_syllabi(self, slices)
         if "workload" in phases:
             build_workload(self, slices)
+        if "dedupe" in phases:
+            full = (self.bundle.get("snapshot") or {}).get("full_semesters") or []
+            dedupe_enrollments(self, [getattr(self.period_of(semestr), "pk", None) for semestr in full])
         if "profiles" in phases:
             self._profiles()
         for _legacy_id, user_pk in self.teachers.created:

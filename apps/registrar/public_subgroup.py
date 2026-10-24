@@ -13,6 +13,7 @@ Kənar modullar (accounts kabineti, 25% təkrar imtahan axını) YALNIZ bu adlar
 from __future__ import annotations
 
 from . import credit_load as _credit_load
+from . import guest_merge  # noqa: F401 — «alt qrup birləşməsi» (release_source); legacy delta dedupe işlədir
 from . import subgroup_access, subgroup_placement_history, subgroup_placement_lookups, subgroup_placement_query
 from .subgroup_documents import PlacementDocument
 from .subgroup_placement import evaluate as evaluate_subgroup_placement
@@ -34,6 +35,7 @@ student_active_record = _credit_load.active_record
 
 __all__ = [
     "PlacementDocument",
+    "guest_merge",
     "SUBGROUP_PLACEMENT_PERMISSION",
     "SubgroupPlacementError",
     "credit_limits",
