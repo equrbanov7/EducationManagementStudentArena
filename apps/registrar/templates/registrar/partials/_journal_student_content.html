@@ -228,7 +228,7 @@ Bu günün qeydləri də DƏRHAL görünür (sahib 2026-10-15). Azad fənlər (F
                         data-date="{{ h.mark.lesson.date|date:'d.m.Y' }}"
                         data-kind-label="{{ h.kind_display }}"
                         data-teacher="{% if h.teacher %}{{ h.teacher.get_full_name|default:h.teacher.username }}{% endif %}"
-                        data-topic="{{ h.mark.lesson.topic|default:h.kind_display }}"
+                        data-topic="{{ h.mark.lesson.display_topic|default:h.kind_display }}"
                         data-room="{{ h.room_label|default:'—' }}"
                         data-att="{% if h.mark.status == 'absent' %}q/b{% elif h.mark.status == 'excused' %}üq{% else %}i/e{% endif %}"
                         data-score="{% if h.kollokvium and h.kollokvium.score is not None %}{{ h.kollokvium.label }}: {{ h.kollokvium.score|floatformat:0 }}{% elif h.mark.score is not None %}{{ h.mark.score|floatformat:0 }}{% else %}—{% endif %}"
@@ -241,7 +241,7 @@ Bu günün qeydləri də DƏRHAL görünür (sahib 2026-10-15). Azad fənlər (F
                         <td data-label="{% trans 'TİP' context 'registrar.journal' %}"><span class="sjx-kind sjx-kind--{{ h.kind }}">{{ h.kind_display }}</span></td>
                         <td data-label="{% trans 'MÖVZU' context 'registrar.journal' %}" class="sj-table__topic">
                             <span>
-                            {{ h.mark.lesson.topic|default:h.mark.lesson.get_kind_display }}
+                            {{ h.mark.lesson.display_topic|default:h.mark.lesson.get_kind_display }}
                             {% if h.kollokvium %} — <span class="sjx-kollmark">{{ h.kollokvium.component.name|lower }}</span>{% endif %}
                             {% if h.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ h.mark.id }}" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}" aria-label="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% elif h.legacy_excuse %}<button type="button" class="corr-fixed-badge corr-excuse-badge" data-corr-history="{{ h.mark.id }}" title="{% trans 'Üzrlü qayıb sənədi var — bax' context 'registrar.legacy_excuse' %}" aria-label="{% trans 'Üzrlü qayıb sənədi var — bax' context 'registrar.legacy_excuse' %}">✎</button>{% endif %}
                             </span>

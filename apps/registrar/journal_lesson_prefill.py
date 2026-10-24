@@ -38,7 +38,7 @@ import datetime as _dt
 
 from django.utils import timezone
 
-from . import dashboard_data, journal_activation, lesson_rooms, schedule
+from . import dashboard_data, journal_activation, journal_topics, lesson_rooms, schedule
 from .journal_list_schedule import GRACE
 
 #: Jurnal dərs tipləri (``LessonKind``) — modalın tip seçimi ilə eyni sıra.
@@ -220,14 +220,15 @@ def topics_covered_by(rows, lessons) -> list:
     upcoming: dict = {}  # mövzu → gələcək tarixli ən yaxın dərs
     kinds: dict = {}  # mövzu → KEÇİRİLMİŞ dərs növləri
     for lesson in lessons:
-        if not lesson.topic:
+        topic = journal_topics.shown_topic(lesson)  # sillabus sətrinə bağlı mövzusuz dərs də (2026-10-25)
+        if not topic:
             continue
         if lesson.date <= today:
-            if lesson.topic not in held or lesson.date > held[lesson.topic]:
-                held[lesson.topic] = lesson.date
-            kinds.setdefault(lesson.topic, set()).add(lesson.kind)
-        elif lesson.topic not in upcoming or lesson.date < upcoming[lesson.topic]:
-            upcoming[lesson.topic] = lesson.date
+            if topic not in held or lesson.date > held[topic]:
+                held[topic] = lesson.date
+            kinds.setdefault(topic, set()).add(lesson.kind)
+        elif topic not in upcoming or lesson.date < upcoming[topic]:
+            upcoming[topic] = lesson.date
     # «keçirilib» = mövzunun HƏR HANSI dərsi bu gün və ya əvvəl; «planlaşdırılıb» = keçirilməyib, amma gələcək dərs var
     # (QA-1 F13; ``journal_extras.calendar_plan`` ilə eyni qayda). Mühazirəsi keçilmiş, seminarı gələcəkdə olan mövzu keçirilib.
     return [

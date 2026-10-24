@@ -81,6 +81,15 @@ def clean_topic(topic) -> str:
     return text
 
 
+def _syllabus_week_for(offering, topic, *, current=None):
+    """Mövzunun təsdiqlənmiş sillabus planındakı sətri (``journal_topics.resolve_syllabus_week``)."""
+    if not topic:
+        return None
+    from apps.registrar.journal_topics import resolve_syllabus_week
+
+    return resolve_syllabus_week(offering, topic, current=current)
+
+
 #: Dövr bitibsə üst hədd: bu gündən bir tədris ili irəli (sağlamlıq qapısı).
 MAX_FUTURE_LESSON_DAYS = 365
 
@@ -170,12 +179,15 @@ def create_lesson(
     if start_time and Lesson.objects.filter(offering=offering, date=parsed, start_time=start_time).exists():
         raise LessonRuleError("Eyni gündə eyni dərs saatına artıq dərs var — üst-üstə düşür.")
     ensure_assessment_scheme(offering=offering)
+    topic = clean_topic(topic)
     lesson = Lesson.objects.create(
         organization=offering.organization,
         offering=offering,
         date=parsed,
         kind=kind,
-        topic=clean_topic(topic),
+        topic=topic,
+        # Plandan seçilmiş (və ya plan başlığı ilə DƏQİQ eyni yazılmış) mövzu sillabus sətrinə bağlanır.
+        syllabus_week=_syllabus_week_for(offering, topic),
         hours=new_hours,
         start_time=start_time,
         end_time=end_time,
@@ -250,7 +262,13 @@ def update_lesson(
         lesson.kind = kind
         fields.append("kind")
     if topic is not None:
-        lesson.topic = clean_topic(topic)
+        new_topic = clean_topic(topic)
+        if new_topic != lesson.topic:
+            # Mövzu DƏYİŞİBSƏ bağ yenidən həll olunur (eyni başlıqlı cari sətir saxlanılır); mövzu dəyişməyibsə
+            # köçürülmüş dərsin ``syllabus_week`` bağına toxunulmur (mövzusuz dərsin saatı düzələndə itməsin).
+            lesson.syllabus_week = _syllabus_week_for(offering, new_topic, current=lesson.syllabus_week)
+            fields.append("syllabus_week")
+        lesson.topic = new_topic
         fields.append("topic")
     if hours is not None:
         lesson.hours = _validated_hours(offering, lesson, hours)

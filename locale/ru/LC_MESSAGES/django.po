@@ -108164,3 +108164,35 @@ msgstr "Балл промежуточного экзамена, проведён
 msgctxt "registrar.journal"
 msgid "imtahandan avtomatik"
 msgstr "автоматически из экзамена"
+
+msgctxt "registrar.journal_topics"
+msgid "…və ya planda olmayan mövzunu özünüz yazın"
+msgstr "…или впишите тему, которой нет в плане"
+
+msgctxt "registrar.journal_topics"
+msgid "Planda olmayan mövzu"
+msgstr "Тема вне плана"
+
+msgctxt "registrar.journal_topics"
+msgid "Plandan seçilən mövzu sillabusun həftəlik planında «keçilib» kimi işarələnir."
+msgstr "Тема, выбранная из плана, отмечается в недельном плане силлабуса как «пройдена»."
+
+msgctxt "registrar.syllabus_progress"
+msgid "Keçilib"
+msgstr "Пройдена"
+
+msgctxt "registrar.syllabus_progress"
+msgid "Keçilməyib"
+msgstr "Не пройдена"
+
+msgctxt "registrar.syllabus_progress"
+msgid "Planlaşdırılıb"
+msgstr "Запланирована"
+
+msgctxt "registrar.syllabus_progress"
+msgid "{covered} / {total} mövzu keçilib"
+msgstr "Пройдено тем: {covered} / {total}"
+
+msgctxt "registrar.syllabus_progress"
+msgid "Mövzuların keçilməsi (jurnal üzrə)"
+msgstr "Прохождение тем (по журналу)"

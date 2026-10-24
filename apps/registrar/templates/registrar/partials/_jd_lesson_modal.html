@@ -77,9 +77,17 @@ varsa dərs tipi kilidlidir.
                     <div class="bootstrap-single-select bootstrap-single-select--ems">
                         <select name="lesson_topic" class="ems-select bootstrap-single-select__native" data-jd-lesson-topic data-bootstrap-select>
                             <option value="">{% trans "Mövzunu seçin…" context "registrar.journal" %}</option>
-                            {% for t in topic_choices_meta %}<option value="{{ t.title }}" data-kinds="{{ t.kinds_attr }}"{% if t.covered %} class="jd-topic-covered"{% endif %}>{{ t.title }}{% if t.kinds %} · {% for k in t.kinds %}{% if k == 'lecture' %}{% trans "mühazirə" context "registrar.journal" %}{% elif k == 'seminar' %}{% trans "seminar" context "registrar.journal" %}{% else %}{% trans "laboratoriya" context "registrar.journal" %}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}{% if t.covered %} — ✓ {% trans "keçirilib" context "registrar.journal" %}{% if t.date %} ({{ t.date|date:"d.m" }}){% endif %}{% elif t.planned %} — {% trans "planlaşdırılıb" context "registrar.journal" %}{% if t.date %} ({{ t.date|date:"d.m" }}){% endif %}{% endif %}</option>{% endfor %}
+                            {% for t in topic_choices_meta %}<option value="{{ t.title }}" data-kinds="{{ t.kinds_attr }}"{% if t.week %} data-week="{{ t.week }}"{% endif %}{% if t.covered %} class="jd-topic-covered"{% endif %}>{{ t.title }}{% if t.kinds %} · {% for k in t.kinds %}{% if k == 'lecture' %}{% trans "mühazirə" context "registrar.journal" %}{% elif k == 'seminar' %}{% trans "seminar" context "registrar.journal" %}{% else %}{% trans "laboratoriya" context "registrar.journal" %}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}{% if t.covered %} — ✓ {% trans "keçirilib" context "registrar.journal" %}{% if t.date %} ({{ t.date|date:"d.m" }}){% endif %}{% elif t.planned %} — {% trans "planlaşdırılıb" context "registrar.journal" %}{% if t.date %} ({{ t.date|date:"d.m" }}){% endif %}{% endif %}</option>{% endfor %}
                         </select>
                     </div>
+                    {% comment %}Sahib 2026-10-25: plandan seçilən mövzu sillabusun həftəlik SƏTRİNƏ bağlanır
+                    (``Lesson.syllabus_week`` — sillabusda «keçilib» statusu); planda olmayan mövzu sərbəst yazılır
+                    (sərbəst mətn doludursa o götürülür — journal_topics.posted_topic). Sahələrin qarşılıqlı
+                    təmizlənməsi və redaktədə plandan kənar mövzunun bura düşməsi: journal_lesson_topic.js.{% endcomment %}
+                    <input type="text" name="lesson_topic_custom" maxlength="255" data-jd-lesson-topic-custom
+                           placeholder="{% trans '…və ya planda olmayan mövzunu özünüz yazın' context 'registrar.journal_topics' %}"
+                           aria-label="{% trans 'Planda olmayan mövzu' context 'registrar.journal_topics' %}">
+                    <small class="jd-field-hint">{% trans "Plandan seçilən mövzu sillabusun həftəlik planında «keçilib» kimi işarələnir." context "registrar.journal_topics" %}</small>
                     {% else %}
                     <input type="text" name="lesson_topic" maxlength="255" data-jd-lesson-topic
                            placeholder="{% trans 'Mövzunu yazın…' context 'registrar.journal' %}" aria-label="{% trans 'Mövzunu yazın…' context 'registrar.journal' %}">

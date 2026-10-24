@@ -15,7 +15,7 @@
     `rubric_grade.css` yalnız rubrik səhifəsinin özündə yüklənir (jurnalda heç bir rubrik sinfi yoxdur).{% endcomment %}
     <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260831-excuse">
     {% if selfwork_active %}<link rel="stylesheet" href="{% static 'registrar/css/selfwork_archive.css' %}?v=20260827-1">{% endif %}
-    <link rel="stylesheet" href="{% static 'registrar/css/syllabus_view.css' %}?v=20260830-syl1">
+    <link rel="stylesheet" href="{% static 'registrar/css/syllabus_view.css' %}?v=20261025-weeks">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_guest.css' %}?v=20260926-close">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_subject_exempt.css' %}?v=20261015-exempt">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_history.css' %}?v=20261019-mob">
@@ -317,7 +317,7 @@
 
 {% block extraJs %}
     <script src="{% static 'registrar/js/journal_detail.js' %}?v=20260715-jbatch2"></script>
-    <script src="{% static 'registrar/js/syllabus_view.js' %}?v=20261008-reuse"></script>
+    <script src="{% static 'registrar/js/syllabus_view.js' %}?v=20261025-weeks"></script>
     {# Korpus → otaq kaskadı journal_grid.js-dən ƏVVƏL yüklənir (o, modulu boot-da oxuyur). #}
     {# Seçilmiş tarixin cədvəl slotu (otaq + saat, sahib 2026-10-17) — otaq kaskadı ondan oxuyur. #}
     <script src="{% static 'registrar/js/journal_lesson_schedule.js' %}?v=20261017-room"></script>
@@ -327,6 +327,7 @@
     <script src="{% static 'registrar/js/journal_grid.js' %}?v=20261014-auto"></script>
     <script src="{% static 'registrar/js/journal_grid_lesson_modal.js' %}?v=20260921-split"></script>
     <script src="{% static 'registrar/js/journal_lesson_prefill.js' %}?v=20261010-wp4lesson"></script>{# «Yeni dərs» dolu açılır (sahib 2026-10-10) #}
+    <script src="{% static 'registrar/js/journal_lesson_topic.js' %}?v=20261025-topic"></script>{# plan seçimi ↔ sərbəst mövzu (2026-10-25) #}
     {# Sağdakı «N q/b» sayğacı davamiyyət dəyişəndə canlı yenilənir (UX2 2026-10-05). #}
     <script src="{% static 'registrar/js/journal_grid_absence.js' %}?v=20261005-live2"></script>
     <script src="{% static 'registrar/js/journal_cell_hint.js' %}?v=20261014-notip"></script>

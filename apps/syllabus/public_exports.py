@@ -39,6 +39,10 @@ from .rules import for_version as rule_for_version  # noqa: F401
 from .services import section_data_map  # noqa: F401
 from .services import version_diff  # noqa: F401
 from .services import version_timeline  # noqa: F401
+
+# Sahib 2026-10-25: jurnal dərsinin ``syllabus_week`` sətri → mövzu (toplu, bax ``services.week_rows``).
+from .services.week_rows import approved_week_rows_for_offerings  # noqa: F401
+from .services.week_rows import plan_rows as week_plan_rows  # noqa: F401
 from .state_machine import Transition  # noqa: F401
 from .state_machine import TransitionDenied  # noqa: F401
 
@@ -48,6 +52,8 @@ __all__ = [
     "blocks_by_key",
     "SyllabusRule",
     "activity_kinds_for_offering",
+    "approved_week_rows_for_offerings",
+    "week_plan_rows",
     "current_rule",
     "rule_for_period",
     "rule_for_syllabus",

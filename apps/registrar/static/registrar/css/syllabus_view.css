@@ -339,6 +339,69 @@
     overflow-wrap: anywhere;
 }
 
+/* Həftəlik plan ↔ jurnal: hər sətir «Keçilib · tarix» / «Keçilməyib» (sahib 2026-10-25). */
+.sylv-progress[hidden] {
+    display: none;
+}
+
+.sylv-progress__summary {
+    margin: 0 0 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--ems-text-muted);
+}
+
+.sylv-progress__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sylv-progress__row {
+    display: grid;
+    grid-template-columns: 2.2em minmax(0, 1fr);
+    gap: 2px 8px;
+    padding: 7px 0;
+    border-top: 1px solid var(--ems-border);
+    font-size: 0.83rem;
+    line-height: 1.45;
+    color: var(--ems-text);
+}
+
+.sylv-progress__row:first-child {
+    border-top: none;
+}
+
+.sylv-progress__num {
+    font-weight: 800;
+    color: var(--ems-text-muted);
+}
+
+.sylv-progress__title {
+    overflow-wrap: anywhere;
+}
+
+.sylv-progress__badge {
+    grid-column: 2;
+    justify-self: start;
+    padding: 1px 10px;
+    border-radius: 999px;
+    font-size: 0.71rem;
+    font-weight: 800;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
+.sylv-progress__row.is-covered .sylv-progress__badge {
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+.sylv-progress__row.is-planned .sylv-progress__badge {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+}
+
 .sylv__foot {
     display: flex;
     align-items: center;

@@ -108996,3 +108996,35 @@ msgstr "Die Zwischenprüfungspunktzahl einer im Prüfungszentrum durchgeführten
 msgctxt "registrar.journal"
 msgid "imtahandan avtomatik"
 msgstr "automatisch aus der Prüfung"
+
+msgctxt "registrar.journal_topics"
+msgid "…və ya planda olmayan mövzunu özünüz yazın"
+msgstr "…oder geben Sie ein Thema ein, das nicht im Plan steht"
+
+msgctxt "registrar.journal_topics"
+msgid "Planda olmayan mövzu"
+msgstr "Thema außerhalb des Plans"
+
+msgctxt "registrar.journal_topics"
+msgid "Plandan seçilən mövzu sillabusun həftəlik planında «keçilib» kimi işarələnir."
+msgstr "Ein aus dem Plan gewähltes Thema wird im Wochenplan des Syllabus als «behandelt» markiert."
+
+msgctxt "registrar.syllabus_progress"
+msgid "Keçilib"
+msgstr "Behandelt"
+
+msgctxt "registrar.syllabus_progress"
+msgid "Keçilməyib"
+msgstr "Nicht behandelt"
+
+msgctxt "registrar.syllabus_progress"
+msgid "Planlaşdırılıb"
+msgstr "Geplant"
+
+msgctxt "registrar.syllabus_progress"
+msgid "{covered} / {total} mövzu keçilib"
+msgstr "{covered} / {total} Themen behandelt"
+
+msgctxt "registrar.syllabus_progress"
+msgid "Mövzuların keçilməsi (jurnal üzrə)"
+msgstr "Behandlung der Themen (laut Journal)"

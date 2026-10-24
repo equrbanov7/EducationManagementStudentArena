@@ -111,6 +111,15 @@ class Lesson(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     date = models.DateField(help_text="Dərsin keçirildiyi tarix.")
     kind = models.CharField(max_length=16, choices=LessonKind.choices, default=LessonKind.LECTURE)
     topic = models.CharField(max_length=255, blank=True, help_text="Mövzu (opsional).")
+    #: Açılışın TƏSDİQLƏNMİŞ sillabusunun həftəlik planındakı SƏTİR nömrəsi (1-dən, ``week.rows``
+    #: sırası ilə; boş mövzulu sətirlər də sayılır). ``topic`` boşdursa jurnal mövzunu bu sətirdən
+    #: göstərir; sillabusun «keçilib / keçilməyib» statusu da buna söykənir (sahib 2026-10-25).
+    #: Bax ``apps/registrar/journal_topics.py``.
+    syllabus_week = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        help_text="Sillabusun həftəlik planındakı sətir nömrəsi (1-dən). Boş = sillabus sətrinə bağlı deyil.",
+    )
     hours = models.PositiveSmallIntegerField(default=2, help_text="Bu dərsin akademik saatı (qayıb hesabı üçün).")
     start_time = models.TimeField(null=True, blank=True, help_text="Dərs saatı (cədvəl slotundan seçilir — opsional).")
     end_time = models.TimeField(null=True, blank=True)
@@ -194,6 +203,14 @@ class Lesson(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"{self.offering_id} · {self.date} ({self.kind})"
+
+    @property
+    def display_topic(self) -> str:
+        """Göstərilən mövzu: yazılmış ``topic``, yoxdursa bağlı sillabus sətrinin mövzusu.
+
+        Sillabus mövzusu sorğu ilə gəlmir — ``journal_topics.attach_syllabus_topics`` toplu
+        şəkildə ``_syllabus_topic`` qoyur; qoyulmayıbsa boş qalır (uydurma mövzu yoxdur)."""
+        return self.topic or getattr(self, "_syllabus_topic", "") or ""
 
 
 class LessonMark(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):

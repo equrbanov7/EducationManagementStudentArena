@@ -46,7 +46,7 @@ from django.views.decorators.http import require_POST
 
 from core import academic_rules
 
-from . import dashboard_data, lesson_rooms
+from . import dashboard_data, journal_topics, lesson_rooms
 from .journal_access import is_direct_editor, offering_or_404
 
 _CTX = "registrar.journal_activation"
@@ -206,6 +206,7 @@ def lesson_rows(offering, *, memo: bool = False) -> list:
         offering.lessons.select_related("instructor")
         .only(
             "topic",
+            "syllabus_week",
             "kind",
             "date",
             "hours",
@@ -219,6 +220,8 @@ def lesson_rows(offering, *, memo: bool = False) -> list:
         )
         .order_by("-date", "-created_at")
     )
+    # Mövzusuz, sillabus sətrinə bağlı (köçürülmüş) dərs «keçilib» sayılsın — ``display_topic`` (2026-10-25).
+    journal_topics.attach_syllabus_topics(rows, offering=offering)
     if memo:
         setattr(offering, _LESSONS_ATTR, rows)
     return rows
@@ -230,8 +233,8 @@ def lesson_facts(offering, today, *, memo: bool = False):
     last_instructor: dict = {}
     todays = []
     for lesson in lesson_rows(offering, memo=memo):
-        if lesson.topic:
-            covered.setdefault(lesson.topic, set()).add(lesson.kind)
+        if lesson.display_topic:
+            covered.setdefault(lesson.display_topic, set()).add(lesson.kind)
         if lesson.instructor_id and lesson.kind not in last_instructor:
             last_instructor[lesson.kind] = lesson.instructor
         if lesson.date == today:
@@ -387,7 +390,7 @@ def strip_context(offering, context) -> dict:
                 "teacher": _teacher_name(teacher),
                 "topic": next_topic(topic_rows, covered, slot.kind),
                 "lesson_id": str(lesson.pk) if lesson is not None else "",
-                "lesson_topic": lesson.topic if lesson is not None else "",
+                "lesson_topic": lesson.display_topic if lesson is not None else "",
                 "state": _state(slot, lesson, now),
                 "activate_url": reverse("registrar:journal_activate_slot", args=[offering.pk, slot.pk]),
             }
