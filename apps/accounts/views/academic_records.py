@@ -24,6 +24,7 @@ from apps.organizations.models import OrgUnit
 from apps.organizations.public import get_permission_scope, scope_org_units
 from apps.registrar.models import Program, StudentAcademicRecord
 from apps.registrar.public import transcript
+from core.http_ids import parse_uuid
 from core.program_codes import PROGRAM_CODE_SEARCH_FIELDS
 from core.search_text import tolerant_q
 
@@ -277,15 +278,21 @@ def faculty_search(request):
 @login_required
 @require_GET
 def department_search(request):
-    """Kafedra/bölmə axtarışı — `?faculty=` verilibsə həmin fakültəyə görə."""
+    """Kafedra/bölmə axtarışı — `?faculty=` verilibsə həmin fakültənin ALT-AĞACINDA.
+
+    2026-10-24: əvvəl ``parent_id=faculty`` (yalnız birbaşa uşaq) idi — fakültə ilə kafedra
+    arasında ara səviyyə olanda seçici boş qalırdı; pozuq id isə 500 verirdi."""
     organization, scope = _scope(request)
     if organization is None or not scope.has_structure_access:
         return JsonResponse({"results": [], "has_more": False})
     qs = OrgUnit.objects.filter(organization=organization, is_active=True, unit_type__in=("chair", "department"))
     qs = scope_org_units(qs, scope)
-    faculty = (request.GET.get("faculty") or "").strip()
-    if faculty:
-        qs = qs.filter(parent_id=faculty)
+    faculty = parse_uuid(request.GET.get("faculty"))
+    if faculty is not None:
+        sub = _subtree_filter(organization, faculty, "path")
+        qs = qs.filter(sub) if sub is not None else qs.none()
+    elif (request.GET.get("faculty") or "").strip():
+        qs = qs.none()
     qs = _search(qs, request, ("name",))
     return _page(qs.order_by("name"), request, lambda u: {"id": str(u.id), "text": u.name})
 

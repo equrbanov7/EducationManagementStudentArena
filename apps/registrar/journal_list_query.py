@@ -43,18 +43,46 @@ def uuid_or_none(value):
         return None
 
 
-def path_segment_q(field: str, unit_id: str) -> Q:
-    """``unit_id in path.split("/")`` şərtinin SQL güzgüsü.
+def _org_unit(organization, raw):
+    """Seçilmiş id → təşkilatın bölməsi (tip məhdudiyyəti YOX — «məktəb»/«fakültə» adlandırması
+    fərqi süzgəci boşaltmasın); pozuq / naməlum / başqa təşkilat → ``None``."""
+    from core.http_ids import parse_uuid
 
-    ``OrgUnit.path`` "/" ilə ayrılmış id zənciridir (kök → özü). Sərhədli
-    LIKE variantları (tam, əvvəl, son, orta seqment) `unit_id`-nin path-ın
-    HƏR HANSI seqmentinə (alt sətir kimi deyil) düşdüyünü tapır."""
-    return (
-        Q(**{field: unit_id})
-        | Q(**{f"{field}__startswith": f"{unit_id}/"})
-        | Q(**{f"{field}__endswith": f"/{unit_id}"})
-        | Q(**{f"{field}__contains": f"/{unit_id}/"})
-    )
+    unit_id = parse_uuid(raw)
+    if unit_id is None or organization is None:
+        return None
+    org_unit_model = django_apps.get_model("organizations", "OrgUnit")
+    return org_unit_model.objects.filter(organization=organization, pk=unit_id).only("id", "path").first()
+
+
+def apply_unit_filters(qs, organization, faculty_raw: str, department_raw: str):
+    """«Fakültə» / «Kafedra» süzgəcləri → ``(qs, effektiv_fakültə, effektiv_kafedra)``.
+
+    TƏRİFLƏR (``lessons_log_units`` ilə EYNİ mənbə — bax onun modul şərhi):
+
+    * **Fakültə** — açılışın QRUPU fakültənin alt-ağacındadır (ara səviyyələr daxil).
+    * **Kafedra** — açılışın MÜƏLLİMİ kafedranın (alt-bölməsinin) aktiv üzvüdür, VƏ YA fənni
+      kafedranındır (``Subject.chair_unit``), VƏ YA qrupu kafedranın alt-ağacındadır (kafedra →
+      ixtisas → qrup quruluşu). Köçürülmüş strukturda qrup kafedranın altında DEYİL (ixtisas
+      birbaşa fakültəyə bağlıdır) — əvvəllər kafedra YALNIZ qrup yolunda axtarılırdı və həm
+      «yalnız kafedra», həm «fakültə + kafedra» seçimi boş siyahı verirdi (sahib, 2026-10-24).
+    * **Kaskad** — kafedra seçilmiş fakültənin alt-ağacında deyilsə (UI fakültə dəyişəndə
+      kafedranı sıfırlayır), köhnə kafedra seçimi atılır — boş nəticə yox, fakültə nəticəsi.
+    * Pozuq / naməlum id → boş nəticə (fail-closed, əvvəlki davranış).
+    """
+    from apps.registrar import lessons_log_units as units
+
+    faculty = _org_unit(organization, faculty_raw) if faculty_raw else None
+    department = _org_unit(organization, department_raw) if department_raw else None
+    if (faculty_raw and faculty is None) or (department_raw and department is None):
+        return qs.none(), faculty_raw, department_raw
+    if faculty is not None and department is not None and not units.is_within(department, faculty):
+        department, department_raw = None, ""
+    if faculty is not None:
+        qs = qs.filter(units.faculty_q(faculty, offering=""))
+    if department is not None:
+        qs = qs.filter(units.kafedra_offering_q(department) | units.faculty_q(department, offering=""))
+    return qs, faculty_raw, department_raw
 
 
 def label_for_selection(kind: str, value: str) -> str:
