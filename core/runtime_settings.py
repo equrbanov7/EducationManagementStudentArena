@@ -39,7 +39,7 @@ def _setting(name: str, fallback):
 class Spec:
     key: str
     group: str
-    kind: str  # "int" | "decimal" | "rate" | "choice" | "bool"
+    kind: str  # "int" | "decimal" | "rate" | "choice" | "bool" | "date" (ISO)
     default: Callable[[], Any]
     label: Any
     help: Any = ""
@@ -546,7 +546,7 @@ def coerce(spec: Spec, raw):
         if text in _FALSE_TEXT:
             return False
         return None
-    return None
+    return __import__("core.runtime_settings_journal_late", fromlist=["coerce_date"]).coerce_date(spec, raw)
 
 
 def override(key: str):

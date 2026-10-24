@@ -24,6 +24,7 @@
 .sysset__error { margin: 4px 0 0; font-size: 12.5px; font-weight: 600; color: #b91c1c; }
 .sysset__control { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .sysset__num { width: 92px; }
+.sysset__date { width: 160px; }
 .sysset__unit { font-size: 12.5px; color: var(--ems-text-muted, #64748b); white-space: nowrap; }
 .sysset__select { min-width: 220px; }
 /* Bayraq açarı (switch) — 2026-10-10 akademik qaydalar. Mətn vəziyyətə görə dəyişir (CSS, JS-siz). */

@@ -41,6 +41,8 @@ Sətir markup-ı əvvəlki tək səhifəlik formanın eynisidir (badge, defolt, 
                         {% endfor %}
                     </select>
                 </div>
+                {% elif f.kind == "date" %}
+                <input class="ems-input sysset__date" type="date" id="ss-{{ f.key }}" name="{{ f.key }}" value="{{ f.value }}" data-default="{{ f.default }}">
                 {% else %}
                 <input class="ems-input sysset__num" type="number" id="ss-{{ f.key }}" name="{{ f.key }}" min="{{ f.min|stringformat:'s' }}" max="{{ f.max|stringformat:'s' }}" step="{{ f.step }}" value="{{ f.value }}" data-default="{{ f.default }}"{% if f.kind == "decimal" %} inputmode="decimal"{% endif %}>
                 <span class="sysset__unit">{{ f.unit }}</span>

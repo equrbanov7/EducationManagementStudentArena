@@ -108164,3 +108164,15 @@ msgstr "Балл промежуточного экзамена, проведён
 msgctxt "registrar.journal"
 msgid "imtahandan avtomatik"
 msgstr "автоматически из экзамена"
+
+msgctxt "core.runtime_settings"
+msgid "«Gec yazılıb» nəzarətinin başlanğıc tarixi"
+msgstr "Дата начала контроля «Записано с опозданием»"
+
+msgctxt "core.runtime_settings"
+msgid "Tarixi bu gündən əvvəl olan dərs heç vaxt «Gec yazılıb» sayılmır — nişanda, «Keçilmiş dərslər» sayında, KPI-da və ixracda. Bu tarixdən (və sonrakı) dərslər üçün qayda dəyişmir: dərsin ilk xanası dərs tarixindən 48 saatdan gec yazılıbsa «gec»dir. Köhnə sistemdən köçürülmüş data üçün tarixi köçürmə sonrası ilk iş gününə qoyun."
+msgstr "Занятие с датой раньше этого дня никогда не считается «Записано с опозданием» — ни в метке, ни в счётчике «Проведённые занятия», ни в KPI, ни в экспорте. Для занятий с этой даты и позже правило прежнее: занятие «позднее», если первая отметка внесена позже чем через 48 часов после даты занятия. Для данных, перенесённых из старой системы, поставьте первый рабочий день после переноса."
+
+msgctxt "accounts.runtime_settings"
+msgid "Tarix seçin (gün.ay.il)."
+msgstr "Выберите дату (день.месяц.год)."
