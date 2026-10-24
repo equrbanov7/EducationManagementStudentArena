@@ -285,18 +285,43 @@ class PurgeTrialExamTests(_PurgeSetup):
         with bypass_rls():
             self.assertTrue(ExamGradeEvent.objects.filter(pk=event.pk).exists())
 
-    def test_retake_link_blocks_unless_allowed(self):
+    def test_loose_chance_grant_is_purged_with_exam(self):
+        """2026-10-24 (sahib, «JS Loop»): müraciətə bağlı olmayan şans qeydi sınaq imtahanı ilə birlikdə silinir."""
         with bypass_rls():
-            ExamChanceGrant.objects.create(
+            grant = ExamChanceGrant.objects.create(
                 organization=self.org, student=self.student, exam_id=self.exam.pk, exam_title=TITLE, reason="technical"
             )
-        with self.assertRaisesMessage(CommandError, "trial_exam_refused: retake_links"):
-            self._apply()
-        counts = self._counts(self._apply("--allow-retake-links"))
-        self.assertEqual(counts["chance_grants"], "1")
+            other = ExamChanceGrant.objects.create(
+                organization=self.org, student=self.student, exam_id=self.other.pk, reason="technical"
+            )
+        dry = self._counts(self._call())
+        self.assertEqual(dry["chance_grants_deleted"], "1")
+        self.assertEqual(dry["retake_links"], "0")
+        self.assertEqual(dry["blocked"], "0")
+        counts = self._counts(self._apply())
+        self.assertEqual(counts["chance_grants_deleted"], "1")
         with bypass_rls():
             self.assertFalse(ExamAttempt.objects.filter(exam=self.exam).exists())
-            self.assertTrue(ExamChanceGrant.objects.filter(exam_id=self.exam.pk).exists())  # append-only iz qalır
+            self.assertFalse(ExamChanceGrant.objects.filter(pk=grant.pk).exists())
+            self.assertTrue(ExamChanceGrant.objects.filter(pk=other.pk).exists())  # başqa imtahanın izi qalır
+
+    def test_chance_grant_trigger_still_blocks_outside_purge(self):
+        """İstisna dar qalır (registrar 0097): bayraq yoxdursa və ya imtahan silinməyibsə şans qeydi silinmir."""
+        from django.db import DatabaseError, connection, transaction
+
+        if connection.vendor != "postgresql":
+            self.skipTest("Postgres trigger")
+        with bypass_rls():
+            grant = ExamChanceGrant.objects.create(
+                organization=self.org, student=self.student, exam_id=self.exam.pk, reason="technical"
+            )
+        for flag in ("off", "on"):  # «on» olsa da imtahan silinməyib → rədd
+            with self.assertRaises(DatabaseError), transaction.atomic(), connection.cursor() as cursor:
+                cursor.execute("SET LOCAL app.bypass_rls = 'on'")
+                cursor.execute("SET LOCAL emsarena.trial_exam_purge = %s", [flag])
+                cursor.execute("DELETE FROM registrar_examchancegrant WHERE id = %s", [grant.pk])
+        with bypass_rls():
+            self.assertTrue(ExamChanceGrant.objects.filter(pk=grant.pk).exists())
 
     def test_final_exam_is_refused(self):
         final, options = self._exam(title="Final Sınaq", category="final")
