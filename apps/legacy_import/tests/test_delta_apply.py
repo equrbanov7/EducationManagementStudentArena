@@ -347,6 +347,22 @@ class DeltaApplyTests(TestCase):
         self.assertEqual(written, {})
         self.assertEqual(again.counters["mark.same"], 4)
 
+    def test_legacy_lesson_date_without_cells_is_not_materialised(self):
+        """Köhnə sistemdə əlavə olunub heç nə yazılmayan gün jurnalda TAM BOŞ sütun yaratmır."""
+        bundle = _bundle()
+        bundle["lesson_dates"].append(
+            {"id": 24, "journal_id": 11, "month": 10, "day": 8, "time": "09:00", "sem_muh": 2}
+        )
+        run = self._run(apply=True, bundle=bundle)
+        with bypass_rls():
+            offering = CourseOffering.objects.get(organization=self.org, group=self.group, period=self.period)
+            self.assertFalse(Lesson.objects.filter(offering=offering, date=dt.date(2026, 10, 8)).exists())
+            self.assertEqual(Lesson.objects.filter(offering=offering).count(), 2)
+        self.assertEqual(run.counters["lesson.empty_not_created"], 1)
+        self.assertEqual(run.counters["lesson.created"], 2)
+        again = self._run(apply=True, bundle=bundle)
+        self.assertEqual({k: v for k, v in again.counters.items() if k.startswith("written.")}, {})
+
     def test_teacher_lesson_absorbs_legacy_slot_and_rerun_is_stable(self):
         """Müəllimin yeni sistemdə açdığı eyni gün dərsi bir legacy slotunu udur; ikinci qaçış eyni nəticə."""
         with bypass_rls():
