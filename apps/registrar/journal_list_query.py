@@ -61,11 +61,12 @@ def apply_unit_filters(qs, organization, faculty_raw: str, department_raw: str):
     TƏRİFLƏR (``lessons_log_units`` ilə EYNİ mənbə — bax onun modul şərhi):
 
     * **Fakültə** — açılışın QRUPU fakültənin alt-ağacındadır (ara səviyyələr daxil).
-    * **Kafedra** — açılışın MÜƏLLİMİ kafedranın (alt-bölməsinin) aktiv üzvüdür, VƏ YA fənni
-      kafedranındır (``Subject.chair_unit``), VƏ YA qrupu kafedranın alt-ağacındadır (kafedra →
-      ixtisas → qrup quruluşu). Köçürülmüş strukturda qrup kafedranın altında DEYİL (ixtisas
-      birbaşa fakültəyə bağlıdır) — əvvəllər kafedra YALNIZ qrup yolunda axtarılırdı və həm
-      «yalnız kafedra», həm «fakültə + kafedra» seçimi boş siyahı verirdi (sahib, 2026-10-24).
+    * **Kafedra** — açılışın kafedrası = fənnin TƏDRİS YÜKÜNÜN kafedrası (dərs yükü sətri →
+      ``TeachingTask.chair``, yoxdursa ``Subject.chair_unit``; köçürülmüş açılışda fənnin yükü /
+      qrup yolu / müəllimin ştat kafedrası) — tək tərif :mod:`apps.registrar.offering_chairs`-dədir.
+      Köçürülmüş strukturda qrup kafedranın altında DEYİL (2026-10-24: yalnız qrup yolu boş
+      verirdi); 2026-10-25: müəllimin istənilən kafedra üzvlüyü də YOX — saat hesabı ilə başqa
+      kafedrada dərs deyən müəllimin bütün fənləri o kafedraya düşürdü («Mülki müdafiə»).
     * **Kaskad** — kafedra seçilmiş fakültənin alt-ağacında deyilsə (UI fakültə dəyişəndə
       kafedranı sıfırlayır), köhnə kafedra seçimi atılır — boş nəticə yox, fakültə nəticəsi.
     * Pozuq / naməlum id → boş nəticə (fail-closed, əvvəlki davranış).
@@ -81,7 +82,7 @@ def apply_unit_filters(qs, organization, faculty_raw: str, department_raw: str):
     if faculty is not None:
         qs = qs.filter(units.faculty_q(faculty, offering=""))
     if department is not None:
-        qs = qs.filter(units.kafedra_offering_q(department) | units.faculty_q(department, offering=""))
+        qs = qs.filter(units.kafedra_offering_q(department, within=qs))
     return qs, faculty_raw, department_raw
 
 

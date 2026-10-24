@@ -8,8 +8,8 @@ Sahibin şikayəti (ekran görüntüləri): kafedra seçiləndə siyahı boş qa
 
 Kök səbəb: kafedra süzgəci açılışın QRUP yolunda kafedra id-sini axtarırdı. Real (köçürülmüş)
 strukturda qrup kafedranın altında DEYİL — fakültə → ixtisas → qrup; kafedra fakültənin ayrıca
-uşağıdır. Kafedra açılışa MÜƏLLİMİN kafedra üzvlüyü və fənnin aparıcı kafedrası
-(``Subject.chair_unit``) ilə bağlıdır — «Keçilmiş dərslər»in ``lessons_log_units`` tərifi.
+uşağıdır. Kafedra açılışa fənnin tədris yükü / aparıcı kafedrası (``Subject.chair_unit``), köçürülmüş
+açılışda qrup yolu və ya müəllimin ştat kafedrası ilə bağlıdır — tək tərif ``offering_chairs`` (2026-10-25).
 """
 
 from django.contrib.auth import get_user_model
@@ -118,7 +118,7 @@ class JournalListUnitFiltersTest(TestCase):
 
     def test_department_without_faculty_lists_kafedra_offerings(self):
         codes = self._codes(f"{RAW_PERIOD_QS}&faculty=&department={self.kafedra.pk}&group=&teacher=&q=")
-        # Müəllim üzvlüyü + fənnin aparıcı kafedrası + (seed) qrup yolu — üçü də kafedranındır.
+        # Müəllimin ştatı + fənnin aparıcı kafedrası + (seed) qrup yolu — üçü də kafedranındır.
         self.assertEqual(codes, {"JLUF-MP", "JLUF-IT", "JLUF-KT"})
 
     # ── (b) fakültə + kafedra ─────────────────────────────────────────────────

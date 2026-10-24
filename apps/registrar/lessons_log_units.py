@@ -5,13 +5,12 @@ TƏRİFLƏR — kodun qalanı ilə EYNİ mənbələr:
 * **Fakültə** — dərsin QRUPUNUN struktur əcdadı (``FACULTY``/``DEANERY``): jurnal siyahısının
   «Fakültə» filtri (``journal_list_query.faculty_department_choices_for`` + qrup yolu) və
   ``journal.roster`` / RİM əhatəsi (qrupun ``OrgUnit.path`` alt-ağacı) ilə eyni qayda.
-* **Kafedra** — dərsi keçən MÜƏLLİMİN kafedrası: aktiv ``Membership.scope_unit`` (``CHAIR`` /
-  ``DEPARTMENT`` və ya onun alt-bölməsi) — dərs yükünün «kafedra müəllimləri» qaydası
-  (``workload/services/people.py``) və sillabus müəllifinin kafedrası
-  (``syllabus/services/units.author_chair_unit``) ilə eyni mənbə; ƏLAVƏ olaraq fənnin aparıcı
-  kafedrası (``Subject.chair_unit``). Köçürülmüş strukturda qrup kafedranın altında DEYİL
-  (ixtisas birbaşa fakültəyə bağlıdır) — ona görə kafedra qrup yolundan yox, müəllim + fəndən
-  gəlir. Dərsin müəllimi ``Lesson.instructor``, boşdursa açılışın müəllimidir (``scoped_lessons``).
+* **Kafedra** — dərsin AÇILIŞININ kafedrası = fənnin tədris yükünün aid olduğu kafedra
+  (dərs yükü sətri → ``TeachingTask.chair``, yoxdursa ``Subject.chair_unit``, köçürülmüş açılışda
+  fənnin yükü / qrup yolu / müəllimin ştat kafedrası). Tərif TƏKDİR və
+  :mod:`apps.registrar.offering_chairs`-dədir — jurnal siyahısı ``/jurnal/`` də onu işlədir. Müəllimin
+  başqa kafedradakı (saat hesabı) üzvlüyü dərsi o kafedraya KEÇİRMİR (sahib, 2026-10-25: «Mülki
+  müdafiə» Proqramlaşdırma süzgəcində çıxırdı).
 * **Kaskad** — fakültə seçiləndə kafedra siyahısı həmin fakültənin alt-ağacındakı kafedralarla
   daralır (fakültəyə uyğun gəlməyən köhnə kafedra seçimi atılır); fənn / qrup / müəllim
   siyahıları seçilmiş fakültə və kafedraya görə daralır.
@@ -28,6 +27,8 @@ from django.db.models import Q
 from core.constants import OrgUnitType
 from core.http_ids import parse_uuid
 
+from . import offering_chairs
+
 FACULTY_TYPES = (OrgUnitType.FACULTY, OrgUnitType.DEANERY)
 CHAIR_TYPES = (OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT)
 #: Seçim siyahılarının tavanı (bölmənin digər seçiciləri ilə eyni).
@@ -36,10 +37,6 @@ OPTION_CAP = 300
 
 def _org_units():
     return django_apps.get_model("organizations", "OrgUnit").objects
-
-
-def _memberships():
-    return django_apps.get_model("organizations", "Membership").objects
 
 
 def resolve_unit(organization, raw_id, types):
@@ -69,40 +66,25 @@ def faculty_q(unit, *, offering="offering__") -> Q:
     return _subtree(f"{offering}group", unit)
 
 
-def _chair_teacher_ids(unit):
-    """Kafedranın (və alt-bölmələrinin) aktiv üzvləri — alt-sorğu (``IN (SELECT …)``)."""
-    return (
-        _memberships()
-        .filter(organization_id=unit.organization_id, is_active=True)
-        .filter(_subtree("scope_unit", unit))
-        .values("user_id")
-    )
+def kafedra_lesson_q(unit, *, within=None) -> Q:
+    """Dərs kafedraya aiddir: açılışının kafedrası ``unit``-in alt-ağacındadır (``offering_chairs``).
+
+    ``within`` — süzüləcək dərs queryset-i (həll yalnız onun açılışları üçün; ``None`` → təşkilat)."""
+    return offering_chairs.kafedra_q(unit, offering="offering__", within=within)
 
 
-def kafedra_lesson_q(unit) -> Q:
-    """Dərs kafedraya aiddir: müəllimi kafedranın üzvüdür VƏ YA fənni kafedranındır."""
-    teachers = _chair_teacher_ids(unit)
-    return (
-        Q(instructor_id__in=teachers)
-        | Q(instructor__isnull=True, offering__instructor_id__in=teachers)
-        | _subtree("offering__subject__chair_unit", unit)
-    )
-
-
-def kafedra_offering_q(unit, *, offering="") -> Q:
-    """Açılış kafedraya aiddir: müəllimi kafedranın üzvüdür VƏ YA fənni kafedranındır.
+def kafedra_offering_q(unit, *, offering="", within=None) -> Q:
+    """Açılış kafedraya aiddir (``offering_chairs`` tərifi).
 
     ``offering`` — sahə prefiksi: ``""`` birbaşa ``CourseOffering`` queryset-i üçün (jurnal
     siyahısının «Kafedra» filtri — ``journal_list_query.apply_unit_filters``), ``"offering__"``
     slot / dərs kimi açılışa FK daşıyan modellər üçün."""
-    return Q(**{f"{offering}instructor_id__in": _chair_teacher_ids(unit)}) | _subtree(
-        f"{offering}subject__chair_unit", unit
-    )
+    return offering_chairs.kafedra_q(unit, offering=offering, within=within)
 
 
-def kafedra_slot_q(unit) -> Q:
-    """Cədvəl slotu kafedraya aiddir (slotun müəllimi açılışın müəllimidir)."""
-    return kafedra_offering_q(unit, offering="offering__")
+def kafedra_slot_q(unit, *, within=None) -> Q:
+    """Cədvəl slotu kafedraya aiddir (slotun açılışının kafedrası)."""
+    return offering_chairs.kafedra_q(unit, offering="offering__", within=within)
 
 
 def _in_scopes(path, unit_id, scopes) -> bool:
@@ -137,29 +119,10 @@ def _unit_candidates(option_source, organization) -> tuple[dict, dict]:
             if nearest is not None:
                 faculties[nearest] = found[nearest]
 
-    chairs: dict = {}
-    teacher_ids = Q(user_id__in=option_source.values("instructor_id")) | Q(
-        user_id__in=option_source.values("offering__instructor_id")
+    offerings = django_apps.get_model("registrar", "CourseOffering").objects.filter(
+        pk__in=option_source.order_by().values("offering_id")
     )
-    for uid, name, path in (
-        _memberships()
-        .filter(organization=organization, is_active=True, scope_unit__unit_type__in=CHAIR_TYPES)
-        .filter(teacher_ids)
-        .values_list("scope_unit_id", "scope_unit__name", "scope_unit__path")
-        .distinct()[:OPTION_CAP]
-    ):
-        chairs[str(uid)] = (name, path)
-    for uid, name, path in (
-        option_source.exclude(offering__subject__chair_unit__isnull=True)
-        .order_by()
-        .values_list(
-            "offering__subject__chair_unit_id",
-            "offering__subject__chair_unit__name",
-            "offering__subject__chair_unit__path",
-        )
-        .distinct()[:OPTION_CAP]
-    ):
-        chairs.setdefault(str(uid), (name, path))
+    chairs = offering_chairs.chair_candidates(offerings, organization.pk)
     return faculties, chairs
 
 
@@ -182,19 +145,22 @@ def unit_options(option_source, organization, *, faculty=None, scopes=None) -> t
     if scopes is not None and any(scope.is_org_wide for scope in scopes):
         scopes = None
     faculties, chairs = _unit_candidates(option_source, organization)
-    return _options(faculties, scopes=scopes), _options(chairs, scopes=scopes, under=faculty)
+    # Kafedra siyahısı əhatəyə görə YOX, görünən dərslərin kafedralarına görədir (dərslər onsuz da
+    # əhatəlidir): dekanın qruplarına başqa fakültənin kafedrası da dərs keçir («Mülki müdafiə»).
+    return _options(faculties, scopes=scopes), _options(chairs, under=faculty)
 
 
-def _settle(organization, unit, raw, options, types, *, scoped) -> tuple:
+def _settle(organization, unit, raw, options, types, *, scoped, lockable=True) -> tuple:
     """Bir seçicinin effektiv bölməsi: ``(bölmə, kilidli?, etibarsız?)`` (sahib, 2026-10-14).
 
     Əhatəli aktorda (kafedra müdiri, dekan, müəllim) TƏK seçim varsa o, avtomatik seçilir və
     sahə gizlənir — URL-dəki başqa id SƏSSİZ nəzərə alınmır. Əhatədən kənar id (siyahıda yoxdur)
     «etibarsız» sayılır → nəticə boşdur və bölmənin adı açılmır. Org-wide aktorda dəyişiklik yoxdur.
+    ``lockable=False`` — tək seçim avtomatik seçilmir (kafedra: görünən dərslər bir neçə kafedranındır).
     """
     if not scoped:
         return unit, False, bool(raw and unit is None)
-    if len(options) == 1:
+    if lockable and len(options) == 1:
         if unit is not None and str(unit.pk) == options[0]["value"]:
             return unit, True, False
         return resolve_unit(organization, options[0]["value"], types), True, False
@@ -239,12 +205,16 @@ def filter_state(user, organization, option_source, *, supervisor, faculty_raw="
         # Kaskad: fakültə dəyişəndə ona aid olmayan köhnə kafedra seçimi atılır (boş nəticə olmasın).
         kafedra, dropped, kafedra_invalid = None, True, False
     if candidates is not None:
-        kafedra_options = _options(candidates[1], scopes=scopes, under=faculty)
+        # Kafedra siyahısı = görünən dərslərin kafedraları (əhatə süzgəci yox — bax ``unit_options``).
+        # Kilid yalnız aktorun BÜTÜN dərsləri bir kafedranındırsa: fakültə ilə daralmış tək seçim
+        # (dekanın fakültəsində bir kafedra) başqa kafedraların dərslərini gizlətməsin.
+        kafedra_options = _options(candidates[1], under=faculty)
+        lockable = len(candidates[1]) == 1
         if not dropped:
             kafedra, kafedra_locked, kafedra_invalid = _settle(
-                organization, kafedra, kafedra_raw, kafedra_options, CHAIR_TYPES, scoped=scoped
+                organization, kafedra, kafedra_raw, kafedra_options, CHAIR_TYPES, scoped=scoped, lockable=lockable
             )
-        elif scoped and len(kafedra_options) == 1:
+        elif scoped and lockable and len(kafedra_options) == 1:
             kafedra = resolve_unit(organization, kafedra_options[0]["value"], CHAIR_TYPES)
             kafedra_locked = True
 

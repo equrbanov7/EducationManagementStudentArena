@@ -90,7 +90,7 @@ def apply_slot_filters(slots, filters, *, supervisor):
     if filters.get("faculty_unit") is not None:
         slots = slots.filter(lessons_log_units.faculty_q(filters["faculty_unit"]))
     if filters.get("kafedra_unit") is not None:
-        slots = slots.filter(lessons_log_units.kafedra_slot_q(filters["kafedra_unit"]))
+        slots = slots.filter(lessons_log_units.kafedra_slot_q(filters["kafedra_unit"], within=slots))
     if filters.get("invalid_unit"):
         slots = slots.filter(pk__isnull=True)  # `.none()` SQL vermir — keş açarı onun mətnindən qurulur
     return slots

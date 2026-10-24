@@ -192,7 +192,7 @@ def apply_filters(
     if faculty_unit is not None:
         lessons = lessons.filter(lessons_log_units.faculty_q(faculty_unit))
     if kafedra_unit is not None:
-        lessons = lessons.filter(lessons_log_units.kafedra_lesson_q(kafedra_unit))
+        lessons = lessons.filter(lessons_log_units.kafedra_lesson_q(kafedra_unit, within=lessons))
     return lessons
 
 

@@ -4,7 +4,7 @@ Köçürülmüş strukturda qrup fakültə → ixtisas → qrup altındadır, ka
 Əvvəl ``journal_scope.journal_view_q`` və ``journal_access.can_observe_journal`` yalnız qrupun
 alt-ağacına baxırdı — kafedra əhatəli daşıyıcı (``Membership.scope_unit`` = kafedra) heç bir jurnal
 görmürdü. İndi kökü kafedra olan əhatə ƏLAVƏ olaraq kafedraya aid açılışları görür
-(``lessons_log_units.kafedra_offering_q`` — müəllimin kafedra üzvlüyü / fənnin aparıcı kafedrası),
+(``lessons_log_units.kafedra_offering_q`` — açılışın kafedrası, tərif ``offering_chairs``-dədir),
 başqa kafedranınkını yox. Fakültə əhatəsi dəyişmir. Yalnız OXU — yazma hüququ verilmir.
 """
 
@@ -173,13 +173,25 @@ class JournalViewKafedraScopeTest(TestCase):
                     journal_access.can_observe_journal(user, offering), offering.pk in listed, offering.subject_id
                 )
 
-    def test_scope_checks_add_no_queries(self):
+    def test_scope_check_queries_do_not_grow_with_offerings(self):
         user = User.objects.get(pk=self.chair_head.pk)
         journal_scope.journal_view_q(user, self.org)  # üzvlük + bölmə yolları memoizasiya olunur
         offering = CourseOffering.objects.select_related("organization").get(pk=self.by_teacher.pk)
-        with CaptureQueriesContext(connection) as ctx:
-            journal_scope.journal_view_q(user, self.org)
-        self.assertEqual(len(ctx.captured_queries), 0)  # Q alt-sorğulardan qurulur
-        with CaptureQueriesContext(connection) as ctx:
-            self.assertTrue(journal_scope.offering_in_journal_view_scope(user, self.org, offering))
-        self.assertEqual(len(ctx.captured_queries), 1)  # tək EXISTS
+
+        def measure():
+            with CaptureQueriesContext(connection) as listed:
+                journal_scope.journal_view_q(user, self.org)
+            with CaptureQueriesContext(connection) as detail:
+                self.assertTrue(journal_scope.offering_in_journal_view_scope(user, self.org, offering))
+            return len(listed.captured_queries), len(detail.captured_queries)
+
+        before = measure()
+        with bypass_rls():
+            for index in range(6):
+                subject = Subject.objects.create(organization=self.org, code=f"JVKS-N{index}", name="N")
+                CourseOffering.objects.create(
+                    organization=self.org, subject=subject, period=self.period, group=self.group, instructor=self.t_prog
+                )
+        # Kafedra həlli toplu sorğularladır (offering_chairs) — açılış sayından asılı deyil.
+        self.assertEqual(measure(), before)
+        self.assertLessEqual(before[1], 8)
