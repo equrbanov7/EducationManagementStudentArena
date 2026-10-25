@@ -186,7 +186,8 @@ class InferTimetableFromLessonsTest(TestCase):
         self.assertEqual(tuesday[g1.pk].week_type, WeekType.ODD)
         self.assertEqual(tuesday[g2.pk].week_type, WeekType.EVEN)
         self.assertEqual({slot.kind for slot in tuesday.values()}, {SlotKind.SEMINAR})
-        self.assertEqual(tuesday[g1.pk].room, "")  # otaq məlum deyil → boş
+        # Seminarın öz otağı yoxdur → müəllimin ən çox yazdığı otaq (2026-10-25 qaydası).
+        self.assertEqual(tuesday[g1.pk].room, "A-101")
         (wednesday,) = self._slots(weekday=3)
         self.assertEqual((wednesday.offering_id, wednesday.week_type), (g3.pk, WeekType.ALL))
         self.assertEqual(self._slots(weekday=4), [])  # birdəfəlik dərs

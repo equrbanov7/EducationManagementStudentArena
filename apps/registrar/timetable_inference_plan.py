@@ -16,6 +16,9 @@ tutuşdurulur:
 * MÜƏLLİM: slot müəllimi jurnal sahibi ilə eynidirsə NULL (``schedule.stored_instructor_id``); fərqlidirsə
   həmin müəllimin təşkilatda AKTİV ``grade.input`` üzvlüyü olmalıdır (DB qoruyucusu ilə eyni şərt) —
   yoxdursa ``teacher_not_authorized``.
+* OTAQ DOLDURMA (2026-10-25, defolt): bu əmrin əvvəl yaratdığı (audit ``created_ids``) və otağı BOŞ olan slot
+  mövcud vahidə uyğun gəlirsə ona vahidin otağı yazılır (``room_filled``); otaq eyni vaxt başqa slotda tutulubsa
+  yazılmır (``room_fill_clash``). Rəsmi docx / əl ilə qoyulmuş slotlara toxunulmur. İdempotent.
 * YAZI: ``apply=True`` — bir tranzaksiya, semestr cədvəl kilidi (``schedule_lock.lock_schedule``) altında,
   plan kilid ALTINDA yenidən qurulur; slot ``save()`` ilə (referans-kimlik yoxlaması); bir audit sətri
   (saylar + slot id-ləri) — ``schedule_docx_import`` ilə eyni üsul. Bildiriş göndərilmir.
@@ -36,11 +39,17 @@ from apps.registrar.timetable_inference import (
     AMBIGUOUS,
     BELOW_THRESHOLD,
     READY,
+    ROOM_FROM_LESSONS,
+    ROOM_FROM_TEACHER,
+    ROOM_FROM_TEACHER_SLOT,
     SUPERSEDED,
     Rules,
     build_units,
     load_facts,
 )
+
+#: Axının artıq cədvəldə olan qrupunun otağı (birgə dərs eyni otaqdadır).
+ROOM_FROM_EXISTING = "existing"
 
 CREATE = "create"
 EXISTS = "exists"
@@ -67,6 +76,7 @@ REPORT_HEADER = (
     "last_date",
     "action",
     "reason",
+    "room_source",
 )
 
 
@@ -79,6 +89,8 @@ class MemberRow:
     action: str
     reason: str = ""
     slot: object = None
+    fill_room: str = ""
+    room_source: str = ""
 
     def csv_row(self, usernames: dict) -> list:
         unit, offering = self.unit, self.offering
@@ -103,6 +115,7 @@ class MemberRow:
             dates[-1].isoformat() if dates else "",
             self.action,
             self.reason,
+            self.room_source if (slot.room if slot is not None else unit.room) else "",
         ]
 
 
@@ -112,6 +125,7 @@ class Plan:
     units: list = field(default_factory=list)
     rows: list[MemberRow] = field(default_factory=list)
     created_ids: list = field(default_factory=list)
+    filled_ids: list = field(default_factory=list)
 
     @property
     def counts(self) -> Counter:
@@ -132,10 +146,16 @@ class Plan:
         )
 
     def created_counts(self) -> Counter:
-        created = [row.slot for row in self.rows if row.action == CREATE]
+        created_rows = [row for row in self.rows if row.action == CREATE]
+        created = [row.slot for row in created_rows]
         counter = Counter({f"week_{value}": 0 for value in ("all", "odd", "even")})
         counter.update(f"week_{slot.week_type}" for slot in created)
         counter["room_set"] = sum(1 for slot in created if slot.room)
+        for source in (ROOM_FROM_EXISTING, ROOM_FROM_LESSONS, ROOM_FROM_TEACHER_SLOT, ROOM_FROM_TEACHER):
+            counter[f"room_from_{source}"] = sum(
+                1 for row in created_rows if row.slot.room and row.room_source == source
+            )
+        counter["room_filled"] = sum(1 for row in self.rows if row.fill_room)
         counter["room_empty"] = sum(1 for slot in created if not slot.room)
         counter["lecture"] = sum(1 for slot in created if slot.kind == "lecture")
         counter["seminar"] = sum(1 for slot in created if slot.kind == "seminar")
@@ -152,8 +172,9 @@ def _identity(offering_id, weekday, start, teacher_id) -> tuple:
 class _Planner:
     """Canlı cədvəl (bir dəfə yüklənir) + bu planın qəbul etdiyi slotlar üzərində qərar."""
 
-    def __init__(self, *, organization, period, units, actor=None):
+    def __init__(self, *, organization, period, units, actor=None, fill_rooms=False, source=""):
         self.organization, self.period, self.actor = organization, period, actor
+        self.inferred_ids = inferred_slot_ids(organization, source) if fill_rooms else set()
         ids = {pk for unit in units for pk in unit.members}
         self.offerings = {
             offering.pk: offering
@@ -225,7 +246,7 @@ class _Planner:
         rows = []
         if unit.status != READY:
             return [MemberRow(unit, offering, unit.status, unit.reason) for _pk, offering in members if offering]
-        pending, existing_rooms = [], []
+        pending, existing_rooms, fills = [], [], []
         for pk, offering in members:
             if offering is None:
                 continue
@@ -244,14 +265,25 @@ class _Planner:
             ]
             if hits:
                 existing_rooms.append(hits[0].room or "")
-                rows.append(MemberRow(unit, offering, EXISTS, _exists_reason(hits[0], unit), slot=hits[0]))
+                row = MemberRow(unit, offering, EXISTS, _exists_reason(hits[0], unit), slot=hits[0])
+                rows.append(row)
+                if not hits[0].room and str(hits[0].pk) in self.inferred_ids:
+                    fills.append(row)
                 continue
             row = MemberRow(unit, offering, CREATE)
             pending.append((offering, stored, row))
             rows.append(row)
-        if not pending:
-            return rows
-        room = next((value for value in existing_rooms if value), "") or unit.room
+        existing_room = next((value for value in existing_rooms if value), "")
+        room = existing_room or unit.room
+        for row in rows:
+            row.room_source = ROOM_FROM_EXISTING if existing_room else unit.room_source
+        if pending:
+            self._create(unit, pending, room)
+        if room:
+            self._fill(fills, room)
+        return rows
+
+    def _create(self, unit, pending, room) -> None:
         kinds, slots = self._check(unit, pending, room)
         dropped_room = False
         if kinds == {schedule_conflicts.KIND_ROOM} and room:
@@ -261,14 +293,41 @@ class _Planner:
             reason = "clash_" + next(kind for kind in schedule_conflicts.KIND_ORDER if kind in kinds)
             for _offering, _stored, row in pending:
                 row.action, row.reason = CONFLICT, reason
-            return rows
+            return
         for (offering, _stored, row), slot in zip(pending, slots):
             row.slot = slot
             row.reason = "room_dropped" if dropped_room else unit.reason
             self.by_day[unit.weekday].append(slot)
             key = _identity(offering.pk, unit.weekday, unit.start, unit.teacher_id)
             self.identity[key].append(slot)
-        return rows
+
+    def _fill(self, fills, room) -> None:
+        """Bu əmrin ƏVVƏL yazdığı, otağı BOŞ slota otaq (rəsmi / əl ilə qoyulmuş slotlara toxunulmur).
+
+        Otaq eyni vaxtda başqa slotda tutulubsa (``schedule_conflicts.detect`` — otaq növü) doldurulmur."""
+        for row in fills:
+            slot = row.slot
+            clashes = schedule_conflicts.detect(
+                organization=self.organization,
+                weekday=slot.weekday,
+                start_time=slot.start_time,
+                end_time=slot.end_time,
+                week_type=slot.week_type,
+                room=room,
+                group_id=slot.offering.group_id,
+                instructor_id=schedule.effective_instructor_id(slot),
+                exclude_ids=[slot.pk],
+                candidates=self.by_day[slot.weekday],
+                period_id=self.period.pk,
+                subject_id=slot.offering.subject_id,
+                kind=slot.kind,
+                offering_id=slot.offering_id,
+            )
+            if any(clash["kind"] == schedule_conflicts.KIND_ROOM for clash in clashes):
+                row.reason = "room_fill_clash"
+                continue
+            slot.room = room
+            row.fill_room, row.reason = room, "room_filled"
 
 
 def _exists_reason(slot, unit) -> str:
@@ -283,10 +342,35 @@ def _exists_reason(slot, unit) -> str:
     return ""
 
 
-def build_plan(*, organization, period, units, facts=None, actor=None) -> Plan:
+def inferred_slot_ids(organization, source: str) -> set:
+    """Bu əmrin (``source``) əvvəlki işlərində yaratdığı slotların id-ləri — audit sətirlərinin ``created_ids``-i.
+
+    Otaq doldurma YALNIZ bunlara toxunur: rəsmi docx idxalı və redaktorda əl ilə qoyulmuş slotlar dəyişmir."""
+    if not source:
+        return set()
+    audit_log = django_apps.get_model("audit", "AuditLog")
+    ids = set()
+    rows = audit_log.objects.filter(
+        organization=organization, resource_type="registrar.ScheduleSlot", resource_id=source
+    ).values_list("new_values", flat=True)
+    for values in rows:
+        ids.update(str(pk) for pk in (values or {}).get("created_ids") or ())
+    return ids
+
+
+def build_plan(
+    *, organization, period, units, facts=None, actor=None, fill_rooms=False, source="infer_timetable_from_lessons"
+) -> Plan:
     """Heç nə yazmadan plan (``apply`` da bunu kilid altında çağırır)."""
     plan = Plan(facts=Counter(facts or {}), units=list(units))
-    planner = _Planner(organization=organization, period=period, units=plan.units, actor=actor)
+    planner = _Planner(
+        organization=organization,
+        period=period,
+        units=plan.units,
+        actor=actor,
+        fill_rooms=fill_rooms,
+        source=source,
+    )
     for unit in plan.units:
         plan.rows.extend(planner.plan_unit(unit))
     return plan
@@ -297,11 +381,14 @@ def _write(plan: Plan, *, organization, period, actor, source: str) -> None:
     from core.constants import AuditAction
 
     for row in plan.rows:
+        if row.fill_room:
+            row.slot.save(update_fields=["room", "updated_at"])
+            plan.filled_ids.append(str(row.slot.pk))
         if row.action != CREATE:
             continue
         row.slot.save()
         plan.created_ids.append(str(row.slot.pk))
-    if not plan.created_ids:
+    if not (plan.created_ids or plan.filled_ids):
         return
     log_action(
         AuditAction.UPDATE,
@@ -314,6 +401,7 @@ def _write(plan: Plan, *, organization, period, actor, source: str) -> None:
             "counts": dict(plan.counts),
             "units": dict(plan.unit_counts()),
             "created_ids": plan.created_ids,
+            "room_filled_ids": plan.filled_ids,
         },
         reason="Dərs cədvəli jurnalın keçirilmiş dərslərindən çıxarıldı",
         resource_type="registrar.ScheduleSlot",
@@ -374,11 +462,12 @@ def run_inference(
         budgets=budgets,
         recent_since=date_to - dt.timedelta(days=rules.recent_days - 1) if rules.recent_days > 0 else None,
     )
+    options = {"facts": stats, "actor": actor, "fill_rooms": rules.fill_rooms, "source": source}
     if not apply:
-        return build_plan(organization=organization, period=period, units=units, facts=stats, actor=actor)
+        return build_plan(organization=organization, period=period, units=units, **options)
     with transaction.atomic():
         schedule_lock.lock_schedule(organization.pk, period.pk)
-        plan = build_plan(organization=organization, period=period, units=units, facts=stats, actor=actor)
+        plan = build_plan(organization=organization, period=period, units=units, **options)
         _write(plan, organization=organization, period=period, actor=actor, source=source)
     return plan
 
@@ -400,6 +489,7 @@ __all__ = [
     "MemberRow",
     "Plan",
     "build_plan",
+    "inferred_slot_ids",
     "run_inference",
     "usernames_for",
     "weekly_budgets",

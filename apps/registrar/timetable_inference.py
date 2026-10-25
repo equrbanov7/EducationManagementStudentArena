@@ -41,7 +41,8 @@ QAYDALAR
   Müntəzəm (güclü) vahid plan saatından artıq olsa da qalır — jurnal faktdır. Bax :func:`apply_weekly_budget`.
 * YENİ BAŞLAMIŞ AÇILIŞ: ilk dərsi aralığın son ``recent_days`` (defolt 14) günündədirsə və heç bir yararlı
   vahidi yoxdursa son dərsinin günü / saatı hər həftə slotu olur (``recent_start``) — :func:`promote_recent`.
-* OTAQ: dərslərin yarıdan çoxunda eyni otaqdırsa o, əks halda boş (sonra redaktorda doldurulur).
+* OTAQ (2026-10-25): vahidin dərslərində ən çox yazılan otaq (bərabərlikdə ən son istifadə olunan); yoxdursa
+  müəllimin həmin gün/saatdakı, sonra ümumən ən çox yazdığı otaq — :func:`assign_rooms`. Toqquşursa otaqsız.
 """
 
 from __future__ import annotations
@@ -61,6 +62,11 @@ DEFAULT_SNAP_MINUTES = 25
 DEFAULT_RECENT_DAYS = 14
 #: Cədvəl şəbəkəsinin günləri (B.e. … Şənbə — ``schedule_grid.TEACHING_WEEKDAYS``); bazar günü çəkilmir.
 GRID_WEEKDAYS = frozenset(range(1, 7))
+
+# Otağın mənbəyi (hesabat)
+ROOM_FROM_LESSONS = "lessons"
+ROOM_FROM_TEACHER_SLOT = "teacher_slot"
+ROOM_FROM_TEACHER = "teacher"
 
 # Vahid / sətir statusları
 READY = "ready"
@@ -90,6 +96,7 @@ class Rules:
     parity_tolerance: float = DEFAULT_PARITY_TOLERANCE
     snap_minutes: int = DEFAULT_SNAP_MINUTES
     hours_cap: bool = True
+    fill_rooms: bool = True
     recent_days: int = DEFAULT_RECENT_DAYS
 
 
@@ -122,6 +129,7 @@ class Unit:
     end: dt.time | None = None
     week_type: str = ""
     room: str = ""
+    room_source: str = ""
     odd: int = 0
     even: int = 0
 
@@ -313,15 +321,49 @@ def _decide_end(unit: Unit):
     return fallback_end(unit.start)
 
 
-def _decide_room(unit: Unit) -> str:
-    rooms = Counter(fact.room.lower() for fact in unit.facts)
-    labels = {}
-    for fact in unit.facts:
-        labels.setdefault(fact.room.lower(), fact.room)
-    for key, count in sorted(rooms.items(), key=lambda item: (-item[1], item[0])):
-        if key and count * 2 > len(unit.facts):
-            return labels[key]
-    return ""
+def most_used_room(facts) -> str:
+    """Ən çox yazılan otaq (böyük/kiçik hərf fərqi yox); bərabərlikdə ƏN SON istifadə olunan; otaq yoxdursa ``""``."""
+    counts: Counter = Counter()
+    last: dict = {}
+    labels: dict = {}
+    for fact in facts:
+        key = fact.room.strip().lower()
+        if not key:
+            continue
+        counts[key] += 1
+        if fact.date >= last.get(key, dt.date.min):
+            last[key], labels[key] = fact.date, fact.room.strip()
+    if not counts:
+        return ""
+    best = max(counts, key=lambda key: (counts[key], last[key], key))
+    return labels[best]
+
+
+def assign_rooms(units, facts) -> None:
+    """Yararlı vahidin otağı (sahib 2026-10-25: «müəllimin ən çox yazdığı otağı çıxardaq ki, harada dərs keçir»).
+
+    1. vahidin ÖZ dərslərində ən çox yazılan otaq (``room_source = "lessons"``);
+    2. yoxdursa — müəllimin HƏMİN gün + başlama saatındakı bütün dərslərində ən çox otaq (``teacher_slot``);
+    3. o da yoxdursa — müəllimin bu aralıqdakı bütün dərslərində ən çox otaq (``teacher``).
+    Otaq toqquşması (eyni otaq, eyni vaxt) plan qatında ``schedule_conflicts.detect`` ilə yoxlanır."""
+    by_slot: dict = defaultdict(list)
+    by_teacher: dict = defaultdict(list)
+    for fact in facts:
+        if fact.room.strip():
+            by_slot[(fact.teacher_id, fact.date.isoweekday(), fact.start)].append(fact)
+            by_teacher[fact.teacher_id].append(fact)
+    for unit in units:
+        if unit.status != READY:
+            continue
+        for source, pool in (
+            (ROOM_FROM_LESSONS, unit.facts),
+            (ROOM_FROM_TEACHER_SLOT, by_slot.get((unit.teacher_id, unit.weekday, unit.start), ())),
+            (ROOM_FROM_TEACHER, by_teacher.get(unit.teacher_id, ())),
+        ):
+            room = most_used_room(pool)
+            if room:
+                unit.room, unit.room_source = room[:64], source
+                break
 
 
 def _classify(unit: Unit, *, period, min_occurrences: int, parity_tolerance: float) -> None:
@@ -340,7 +382,6 @@ def _classify(unit: Unit, *, period, min_occurrences: int, parity_tolerance: flo
     if unit.end is None or unit.end <= unit.start:
         unit.status, unit.reason = AMBIGUOUS, "no_end_time"
         return
-    unit.room = _decide_room(unit)
 
 
 def build_units(
@@ -377,6 +418,7 @@ def build_units(
         apply_weekly_budget(units, budgets)
     if recent_since is not None:
         promote_recent(units, period=period, since=recent_since)
+    assign_rooms(units, facts)
     units.sort(key=Unit.sort_key)
     return units
 
@@ -410,7 +452,6 @@ def promote_recent(units, *, period, since) -> None:
             unit.status, unit.reason = AMBIGUOUS, "no_end_time"
             continue
         unit.status, unit.reason = READY, "recent_start"
-        unit.room = _decide_room(unit)
 
 
 def mark_superseded(units) -> None:
@@ -492,16 +533,21 @@ __all__ = [
     "FACT_KEYS",
     "GRID_WEEKDAYS",
     "READY",
+    "ROOM_FROM_LESSONS",
+    "ROOM_FROM_TEACHER",
+    "ROOM_FROM_TEACHER_SLOT",
     "SUPERSEDED",
     "LessonFact",
     "Rules",
     "Unit",
     "apply_weekly_budget",
+    "assign_rooms",
     "build_units",
     "decide_week_type",
     "fallback_end",
     "load_facts",
     "mark_superseded",
+    "most_used_room",
     "parity_counts",
     "promote_recent",
     "snap_to_bell",
