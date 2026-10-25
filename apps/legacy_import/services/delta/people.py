@@ -301,6 +301,18 @@ class StudentMapper:
         matching = [program for program in programs if program.degree_level == degree] or programs
         return matching[0] if len(matching) == 1 else None
 
+    def _education_form(self, row, group) -> str:
+        """Sahib 2026-10-25: qrup kodu (3 rəqəm əyani, 4 rəqəm qiyabi) legacy ``education_type``-dan üstündür."""
+        from apps.organizations.public import group_rule_form
+
+        legacy = "part_time" if "qiyabi" in person_key(row.get("education_type")) else "full_time"
+        form, _reason = group_rule_form(group)
+        if form is None:
+            return legacy
+        if form != legacy:
+            self.run.count("student.form_rule_override")
+        return form
+
     def _create(self, legacy_id, row, group, fin):
         from apps.accounts.public import legacy_accounts
 
@@ -326,7 +338,7 @@ class StudentMapper:
             group=group,
             program=program,
             admission_year=admission_year,
-            education_form="part_time" if "qiyabi" in person_key(row.get("education_type")) else "full_time",
+            education_form=self._education_form(row, group),
             funding_type="state" if "dovlet" in person_key(row.get("payment_type")) else "paid",
             tag=self.run.tag,
         )

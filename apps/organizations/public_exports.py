@@ -10,6 +10,10 @@ from .cabinet_modules import set_module_enabled  # noqa: F401
 from .default_roles import get_default_roles_for_org_type  # noqa: F401
 from .group_cohort import group_admission_year  # noqa: F401
 from .group_cohort import group_cohort_year  # noqa: F401
+from .group_education_form import chain_names as group_chain_names  # noqa: F401
+from .group_education_form import education_form_from_group_name  # noqa: F401
+from .group_education_form import group_rule_form  # noqa: F401
+from .group_education_form import rule_form_for as group_rule_form_for  # noqa: F401
 from .groups_registry import build_groups_registry  # noqa: F401
 from .groups_registry import student_record_scope_q  # noqa: F401
 from .holidays import HolidayError  # noqa: F401
@@ -86,6 +90,10 @@ __all__ = [
     "delete_holiday",
     "group_admission_year",
     "group_cohort_year",
+    "group_chain_names",
+    "education_form_from_group_name",
+    "group_rule_form",
+    "group_rule_form_for",
     "holiday_academic_year_bounds",
     "holiday_academic_year_label",
     "holiday_academic_year_start",
