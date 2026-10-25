@@ -26,7 +26,6 @@ ATTRIBUTE_CONTEXT_ESCAPERS = [
     # 2026-10-05 (ikinci dalğa): düzəliş, dərs yükü, sistem monitorinqi, view-as.
     ("apps/registrar/static/registrar/js/correction.js", "esc"),
     ("apps/registrar/static/registrar/js/correction_history.js", "esc"),
-    ("apps/accounts/static/accounts/js/profile/workload_distribution.js", "esc"),
     ("apps/accounts/static/accounts/js/profile/workload_distribution_render.js", "esc"),
     ("apps/accounts/static/accounts/js/profile/workload_my.js", "esc"),
     ("apps/accounts/static/accounts/js/monitoring/system_monitoring_format.js", "escapeHtml"),
