@@ -63,7 +63,7 @@ CASES = (
 STUDENT_FRAGMENT_BUDGET = {
     ("dashboard", ""): 22,
     ("profile-info", ""): 32,
-    ("my-journal", ""): 22,
+    ("my-journal", ""): 23,  # 2026-10-25: +1 sabit (xarici nəticənin tanınması nişanı)
     ("my-journal", "&subject={enrollment}&period={period}"): 40,
     ("my-subjects", ""): 46,
     ("overall-academic", ""): 24,

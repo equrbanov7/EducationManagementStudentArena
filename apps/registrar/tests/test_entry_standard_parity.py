@@ -20,6 +20,8 @@ BASELINE = json.loads(Path(__file__).with_name("entry_standard_baseline.json").r
 #: 2026-10-21 (R01): vahid kredit mənbəyi (``apps.registrar.credit_source``) kredit oxuyan səhifələrə SABİT 2 sorğu
 #: əlavə edir (akademik qeydlər + plan sətirləri, toplu — tələbə/açılış sayı ilə böyümür). Baseline ölçümləri qalır.
 CREDIT_SOURCE_ALLOWANCE = 2
+#: 2026-10-25: xarici nəticənin tanınması transkriptə SABİT 1 sorğu əlavə edir (tələbənin tanınmaları, toplu).
+RECOGNITION_ALLOWANCE = 1
 CREDIT_SURFACES = (
     "transcript/",
     "period_analytics/",
@@ -86,6 +88,8 @@ class _ParityChecks:
             for surface, count in probe.queries.items():
                 with self.subTest(query_budget=surface):
                     allowance = CREDIT_SOURCE_ALLOWANCE if surface.startswith(CREDIT_SURFACES) else 0
+                    if surface.startswith("transcript/"):
+                        allowance += RECOGNITION_ALLOWANCE
                     self.assertLessEqual(count, BASELINE["queries"][surface] + allowance)
 
 
