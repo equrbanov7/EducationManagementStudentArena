@@ -108378,3 +108378,28 @@ msgstr "E-posta gönderilemedi. Birkaç dakika sonra tekrar deneyin."
 msgctxt "accounts.password_reset_done_page"
 msgid "Kod gəlmirsə, hesabınızda başqa e-poçt qeydə alınmış ola bilər — RİM-ə müraciət edin."
 msgstr "Kod gelmiyorsa hesabınızda farklı bir e-posta kayıtlı olabilir — RİM'e başvurun."
+
+#, python-format
+msgctxt "registrar.notify"
+msgid "Qayıb (q/b) qeyd edildi: %(date)s"
+msgstr "Devamsızlık (q/b) kaydedildi: %(date)s"
+
+msgctxt "core.runtime_settings"
+msgid "Bildirişlər"
+msgstr "Bildirimler"
+
+msgctxt "core.runtime_settings"
+msgid "Push bildirişləri aktivdir (telefona göndər)"
+msgstr "Anlık bildirimler etkin (telefona gönder)"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılanda yeni bildiriş (q/b, bal, imtahan, elan və s.) mobil tətbiqi quraşdırıb hesabına daxil olmuş istifadəçinin telefonunda bildiriş kimi görünür. Söndürüləndə bildirişlər yalnız kabinetdə qalır. Firebase açarı serverdə qoşulmayıbsa bu açar heç nəyi dəyişmir."
+msgstr "Açıkken her yeni bildirim (devamsızlık, puan, sınav, duyuru vb.) mobil uygulamayı kurup hesabına giriş yapmış kullanıcının telefonunda da bildirim olarak görünür. Kapalıyken bildirimler yalnızca kabinette kalır. Sunucuda Firebase anahtarı bağlı değilse bu anahtar hiçbir şeyi değiştirmez."
+
+msgctxt "notifications.push"
+msgid "Test bildirişi"
+msgstr "Test bildirimi"
+
+msgctxt "notifications.push"
+msgid "Push bildirişləri bu cihazda işləyir."
+msgstr "Anlık bildirimler bu cihazda çalışıyor."

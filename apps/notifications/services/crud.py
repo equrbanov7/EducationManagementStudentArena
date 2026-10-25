@@ -3,12 +3,16 @@ Notification create / delete primitives.
 
 The low-level building blocks every ``notify_*`` event function builds on,
 plus the soft-delete helpers used by the notification views.
+
+Push (2026-10-25): hər yaradılışdan sonra ``schedule_push`` — push söndürülübsə / FCM kredensialı yoxdursa
+no-op; əks halda commit-dən sonra telefona göndərilir (``apps/notifications/push``).
 """
 
 from django.utils import timezone
 
 from apps.notifications.i18n import build_i18n_metadata
 from apps.notifications.models import InAppNotification, NotificationType
+from apps.notifications.push.dispatch import schedule as schedule_push
 from core.rls import bypass_rls
 
 from .helpers import _assert_owner, _resolve_organization_id, _serialize_metadata, org_scoped_link
@@ -44,7 +48,7 @@ def create_notification(
     """
     title, message, metadata = build_i18n_metadata(title, message, metadata)
     with bypass_rls():
-        return InAppNotification.objects.create(
+        notification = InAppNotification.objects.create(
             recipient=recipient,
             organization_id=_resolve_organization_id(organization, metadata),
             title=title,
@@ -53,6 +57,8 @@ def create_notification(
             notification_type=notification_type,
             metadata=_serialize_metadata(metadata or {}),
         )
+    schedule_push([notification])
+    return notification
 
 
 def create_notification_for_users(
@@ -100,7 +106,9 @@ def create_notification_for_users(
     if not notifications:
         return []
     with bypass_rls():
-        return InAppNotification.objects.bulk_create(notifications)
+        created = InAppNotification.objects.bulk_create(notifications)
+    schedule_push(created)
+    return created
 
 
 def create_notifications(items) -> list[InAppNotification]:
@@ -129,7 +137,9 @@ def create_notifications(items) -> list[InAppNotification]:
     if not rows:
         return []
     with bypass_rls():
-        return InAppNotification.objects.bulk_create(rows)
+        created = InAppNotification.objects.bulk_create(rows)
+    schedule_push(created)
+    return created
 
 
 def delete_notification(*, notification: InAppNotification, user) -> None:

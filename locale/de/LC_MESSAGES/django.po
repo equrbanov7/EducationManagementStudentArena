@@ -109996,3 +109996,28 @@ msgstr "Die E-Mail konnte nicht gesendet werden. Bitte versuchen Sie es in einig
 msgctxt "accounts.password_reset_done_page"
 msgid "Kod gəlmirsə, hesabınızda başqa e-poçt qeydə alınmış ola bilər — RİM-ə müraciət edin."
 msgstr "Kommt der Code nicht an, ist in Ihrem Konto möglicherweise eine andere E-Mail-Adresse hinterlegt — wenden Sie sich an das RİM."
+
+#, python-format
+msgctxt "registrar.notify"
+msgid "Qayıb (q/b) qeyd edildi: %(date)s"
+msgstr "Fehlzeit (q/b) erfasst: %(date)s"
+
+msgctxt "core.runtime_settings"
+msgid "Bildirişlər"
+msgstr "Benachrichtigungen"
+
+msgctxt "core.runtime_settings"
+msgid "Push bildirişləri aktivdir (telefona göndər)"
+msgstr "Push-Benachrichtigungen aktiv (an das Telefon senden)"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılanda yeni bildiriş (q/b, bal, imtahan, elan və s.) mobil tətbiqi quraşdırıb hesabına daxil olmuş istifadəçinin telefonunda bildiriş kimi görünür. Söndürüləndə bildirişlər yalnız kabinetdə qalır. Firebase açarı serverdə qoşulmayıbsa bu açar heç nəyi dəyişmir."
+msgstr "Wenn aktiviert, erscheint jede neue Benachrichtigung (Fehlzeit, Punkte, Prüfung, Ankündigung usw.) auch als Mitteilung auf dem Telefon von Nutzern, die die mobile App installiert und sich angemeldet haben. Wenn deaktiviert, bleiben Benachrichtigungen nur im Kabinett. Ist der Firebase-Schlüssel auf dem Server nicht eingerichtet, hat dieser Schalter keine Wirkung."
+
+msgctxt "notifications.push"
+msgid "Test bildirişi"
+msgstr "Testbenachrichtigung"
+
+msgctxt "notifications.push"
+msgid "Push bildirişləri bu cihazda işləyir."
+msgstr "Push-Benachrichtigungen funktionieren auf diesem Gerät."

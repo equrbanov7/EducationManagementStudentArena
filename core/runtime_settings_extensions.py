@@ -19,6 +19,7 @@ _MODULES = (
     "core.runtime_settings_journal_late",  # «journal» qrupuna «Gec yazılıb» başlanğıc tarixi (2026-10-25)
     "core.runtime_settings_rim_activation",  # «login» qrupuna «aktivləşdirəndə RİM-ə bildiriş» açarı (2026-10-23)
     "core.runtime_settings_syllabus",  # «Sillabus» — kafedra təsdiqi tələb olunur/avtomatik təsdiq (2026-10-25)
+    "core.runtime_settings_push",  # «Bildirişlər» — telefona push (FCM) açarı (2026-10-25)
 )
 
 

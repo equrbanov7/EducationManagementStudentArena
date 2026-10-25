@@ -108,3 +108,23 @@ MONITORING_ALERTMANAGER_URL = os.getenv("MONITORING_ALERTMANAGER_URL", "http://a
 # Alertmanager webhook-unun paylaşılan tokeni (docker-compose alertmanager
 # servisi eyni dəyəri __WEBHOOK_TOKEN__ kimi alır). Boşdursa webhook bağlıdır.
 ALERTMANAGER_WEBHOOK_TOKEN = os.getenv("ALERTMANAGER_WEBHOOK_TOKEN", "")
+
+# ---------------------------------------------------------------------------
+# Push bildirişləri — Firebase Cloud Messaging HTTP v1 (sahib 2026-10-25)
+# ---------------------------------------------------------------------------
+# Bildiriş yarananda istifadəçinin qeydiyyatlı telefonlarına (Android + iOS, FCM vasitəsilə) push gedir.
+# FCM_SERVICE_ACCOUNT_JSON: Firebase service account açarı — FAYL YOLU, base64 və ya xam JSON. Boşdursa
+# push NO-OP-dur (bildirişlər əvvəlki kimi yalnız kabinetdə). FCM_PROJECT_ID boşdursa JSON-dakı project_id.
+# Söndürmə: «Sistem tənzimləmələri» → «Bildirişlər» → «Push bildirişləri aktivdir» (defolt bu dəyər).
+FCM_PROJECT_ID = os.getenv("FCM_PROJECT_ID", "").strip()
+FCM_SERVICE_ACCOUNT_JSON = os.getenv("FCM_SERVICE_ACCOUNT_JSON", "").strip()
+PUSH_NOTIFICATIONS_ENABLED = os.getenv("PUSH_NOTIFICATIONS_ENABLED", "true").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
+# Bir Celery işində ən çox bu qədər bildiriş (toplu bildiriş — məs. 500 tələbə — hissələrə bölünür).
+PUSH_SEND_CHUNK = _env_int_setting("PUSH_SEND_CHUNK", 100, minimum=1)
+# Push-dakı mütləq keçidin (`data.url`) kökü. Boşdursa DOCUMENT_VERIFY_BASE_URL (publik domen), sonra SITE_URL.
+PUSH_LINK_BASE_URL = os.getenv("PUSH_LINK_BASE_URL", "").strip()

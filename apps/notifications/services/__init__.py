@@ -40,7 +40,7 @@ from .events import (
 )
 from .helpers import get_membership_request_role_label
 from .profile_state import build_profile_notification_state
-from .queries import get_user_notifications
+from .queries import get_user_notifications, notified_metadata_values
 from .read_state import (
     get_unread_count,
     mark_all_notifications_read,
@@ -62,6 +62,7 @@ __all__ = [
     "get_unread_count",
     # queries
     "get_user_notifications",
+    "notified_metadata_values",
     # helpers
     "get_membership_request_role_label",
     # events

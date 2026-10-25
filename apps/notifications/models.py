@@ -181,3 +181,52 @@ class InAppNotification(models.Model):
 
     def get_metadata_json(self) -> str:
         return json.dumps(self.metadata)
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Push (telefon bildirişi) — sahib 2026-10-25
+# ────────────────────────────────────────────────────────────────────────────
+
+
+class PushPlatform(models.TextChoices):
+    ANDROID = "android", "Android"
+    IOS = "ios", "iOS"
+    WEB = "web", "Web"
+
+
+class PushDevice(models.Model):
+    """Mobil tətbiqin (və ya brauzerin) FCM qeydiyyat tokeni — bildiriş yarananda telefona push gedir.
+
+    Cihaz İSTİFADƏÇİYƏ bağlıdır, təşkilata yox: iki təşkilatda üzv olan istifadəçi hər ikisinin bildirişini
+    eyni telefonda alır (``InAppNotification``-ın ``recipient`` qaydası ilə eyni). Ona görə ``organization_id``
+    sütunu və tenant RLS siyasəti yoxdur; sətrə YALNIZ ``apps.notifications.push`` xidmətləri ``user`` süzgəci
+    ilə toxunur. ``token`` unikaldır — eyni tətbiq quraşdırması başqa hesabla qeydiyyatdan keçəndə sətir yeni
+    istifadəçiyə keçir (köhnə hesabın bildirişi o telefona getmir).
+    """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="push_devices",
+        db_index=False,  # (user, is_active) kompozitinin prefiksi
+    )
+    token = models.CharField(max_length=512, unique=True)
+    platform = models.CharField(max_length=10, choices=PushPlatform.choices, default=PushPlatform.ANDROID)
+    app_version = models.CharField(max_length=40, blank=True, default="")
+    #: Push mətninin dili (``az``/``en``/``ru``/``tr``/``de``); boşdursa kanonik dil (az).
+    language = models.CharField(max_length=10, blank=True, default="")
+    #: Bu cihaza GÖNDƏRİLMƏYƏN bildiriş növləri (``NotificationType`` dəyərləri) — tətbiqin öz tənzimləməsi.
+    muted_types = models.JSONField(default=list, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_seen = models.DateTimeField(default=timezone.now)
+    last_success_at = models.DateTimeField(null=True, blank=True)
+    deactivated_at = models.DateTimeField(null=True, blank=True)
+    #: ``logout`` / ``unregistered`` (FCM tokeni tanımır) / ``invalid`` / ``sender_mismatch`` / ``limit``.
+    deactivated_reason = models.CharField(max_length=40, blank=True, default="")
+
+    class Meta:
+        indexes = [models.Index(fields=["user", "is_active"], name="push_device_user_active_idx")]
+
+    def __str__(self):
+        return f"{self.platform} → {self.user_id} ({'aktiv' if self.is_active else 'deaktiv'})"

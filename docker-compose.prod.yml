@@ -161,6 +161,12 @@ x-app-env: &app-env
   EMAIL_REPLY_TO: ${EMAIL_REPLY_TO:-}
   GEMINI_API_KEY: ${GEMINI_API_KEY:-}
   GEMINI_MODEL: ${GEMINI_MODEL:-}
+  # 2026-10-25: telefona push (FCM HTTP v1). Boş = no-op. Dəyəri prod-push-key.yml yazır (secret, loqda görünmür).
+  FCM_SERVICE_ACCOUNT_JSON: ${FCM_SERVICE_ACCOUNT_JSON:-}
+  FCM_PROJECT_ID: ${FCM_PROJECT_ID:-}
+  PUSH_NOTIFICATIONS_ENABLED: ${PUSH_NOTIFICATIONS_ENABLED:-true}
+  PUSH_LINK_BASE_URL: ${PUSH_LINK_BASE_URL:-}
+  PUSH_SEND_CHUNK: ${PUSH_SEND_CHUNK:-100}
   # Sahib 2026-10-01: cavab tavanı 2048 token — müəllimin sual toplusu sığsın, xərc məhdud qalsın.
   GEMINI_MAX_OUTPUT_TOKENS: ${GEMINI_MAX_OUTPUT_TOKENS:-2048}
   AI_RATE_LIMIT: ${AI_RATE_LIMIT:-100/1h}

@@ -167,6 +167,7 @@ class RuntimeSettingsTest(TestCase):
                 "site",  # «Açıq səhifələr» — «Əlaqə» səhifəsi (2026-10-20)
                 "monitoring",  # «Monitorinq» (2026-10-21)
                 "syllabus",  # «Sillabus» — kafedra təsdiqi tələb olunur (2026-10-25)
+                "notifications",  # «Bildirişlər» — telefona push (2026-10-25)
             },
         )
 
