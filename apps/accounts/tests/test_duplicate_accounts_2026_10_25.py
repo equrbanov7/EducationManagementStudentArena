@@ -164,6 +164,10 @@ class DuplicatePlanTests(_World):
             self.assertIn(f"Dublikat hesab — əsas hesab: {kept.username}", frozen.profile.block_reason)
         for untouched in (self.f_other, self.k_login, self.f_login, self.r_partial):
             self.assertTrue(self.refresh(untouched).is_active)
+        # Sahib 2026-10-25: «tam adları əlavə edilsin» — natamam saxlanılan hesab dublikatın soyad/ata adını alır.
+        partial = self.refresh(self.r_partial)
+        self.assertEqual((partial.last_name, partial.profile.patronymic), ("Qocayeva", "Rauf"))
+        self.assertEqual(len(result["names"]), 1)
 
     def test_reapply_is_noop_and_undo_restores(self):
         batch = self.execute()["batch"]
@@ -182,6 +186,8 @@ class DuplicatePlanTests(_World):
             self.assertTrue(Membership.objects.filter(user=self.f_dean, role__name="dean", is_active=True).exists())
         for user in (self.k_journal, self.f_dean, self.r_full):
             self.assertTrue(self.refresh(user).is_active)
+        self.assertEqual(outcome["names_restored"], 1)
+        self.assertEqual(self.refresh(self.r_partial).last_name, "")
         self.assertGreater(self.build().writes, 0)
 
     def test_command_dry_run_by_default_names_only_in_private_report(self):

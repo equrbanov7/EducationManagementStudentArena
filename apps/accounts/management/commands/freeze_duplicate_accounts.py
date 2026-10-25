@@ -99,6 +99,7 @@ class Command(BaseCommand):
                 "heads_moved": sum(len(item["heads"]) for item in result["pairs"]),
                 "journals_moved": sum(len(item["handovers"]) for item in result["pairs"]),
                 "memberships_off": sum(len(item["deactivated"]) for item in result["pairs"]),
+                "names_filled": len(result.get("names", [])),
                 "failed": len(result["failed"]),
             }
             self.stdout.write(f"YAZILDI: {_counts(written)}")

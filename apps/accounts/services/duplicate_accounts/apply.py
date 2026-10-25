@@ -146,6 +146,21 @@ def _apply_dup(organization, action, kept, users, *, actor, note) -> dict:
     return entry
 
 
+def _fill_name(organization, kept, fill: dict, *, actor, note) -> dict:
+    """Yalnız BOŞ soyad / ata adı yazılır (audit); geri qaytarmada boşa qaytarılır."""
+
+    old = {"last_name": kept.last_name, "patronymic": getattr(kept.profile, "patronymic", "")}
+    if fill.get("last") and not kept.last_name.strip():
+        kept.last_name = fill["last"]
+        kept.save(update_fields=["last_name"])
+    if fill.get("patronymic") and not (kept.profile.patronymic or "").strip():
+        kept.profile.patronymic = fill["patronymic"]
+        kept.profile.save(update_fields=["patronymic"])
+    new = {"last_name": kept.last_name, "patronymic": kept.profile.patronymic}
+    _audit(actor, organization, kept, reason=note, old=old, new=new)
+    return {"kept": kept.pk, "from": fill.get("from"), "old": old, "new": new}
+
+
 def execute(plan, *, actor, reason: str = "", batch_id: str = "") -> dict:
     """Planı yazır (çağıran ``rls_worker_atomic`` + RLS konteksti içindədir)."""
     from apps.registrar.public import handover_actions
@@ -163,6 +178,10 @@ def execute(plan, *, actor, reason: str = "", batch_id: str = "") -> dict:
     manifest = {"academic_year": plan.academic_year, "pairs": [], "failed": []}
     for cluster in clusters:
         kept = users[cluster.kept.user_id]
+        if cluster.name_fill:
+            manifest.setdefault("names", []).append(
+                _fill_name(organization, kept, cluster.name_fill, actor=actor, note=note)
+            )
         for action in cluster.dups:
             if action.skip or not action.writes:
                 continue
@@ -249,6 +268,19 @@ def undo(batch_id: str, *, actor, reason: str = "") -> dict:
                 _undo_pair(organization, item, users, actor=actor, note=note, result=result)
         except (AccountDeletionError, DatabaseError):
             result["failed"] += 1
+    result["names_restored"] = 0
+    named = (
+        get_user_model().objects.select_related("profile").in_bulk([item["kept"] for item in manifest.get("names", [])])
+    )
+    for item in manifest.get("names", []):
+        user = named.get(item["kept"])
+        if user is None:
+            continue
+        user.last_name = item["old"].get("last_name", "")
+        user.save(update_fields=["last_name"])
+        user.profile.patronymic = item["old"].get("patronymic", "")
+        user.profile.save(update_fields=["patronymic"])
+        result["names_restored"] += 1
     log_action(
         AuditAction.UPDATE,
         user=actor,

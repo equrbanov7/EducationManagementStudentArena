@@ -93,10 +93,13 @@ class Cluster:
     dups: list = field(default_factory=list)  # [DupAction]
     excluded: list = field(default_factory=list)  # [(Person, səbəb)] — eyni adlı, amma başqa adam
     notes: list = field(default_factory=list)
+    #: Saxlanılan hesabda soyad/ata adı BOŞDURSA eyni adamın dublikatından (sahib 2026-10-25: «tam adları əlavə
+    #: edilsin») — {"last": …, "patronymic": …, "from": user_id}.
+    name_fill: dict = field(default_factory=dict)
 
     @property
     def writes(self) -> int:
-        return sum(action.writes for action in self.dups)
+        return sum(action.writes for action in self.dups) + int(bool(self.name_fill))
 
 
 @dataclass
@@ -221,6 +224,23 @@ def _dup_action(person, kept, planned: set, blocked_offerings: set) -> DupAction
     return action
 
 
+def _name_fill(kept, members) -> dict:
+    """Saxlanılan hesabın BOŞ soyadı / ata adı — eyni ad, tam yazılmış dublikatdan (yalnız boş sahə)."""
+
+    fill = {}
+    donors = [p for p in members if p is not kept and p.first_key == kept.first_key and p.last.strip()]
+    if not donors:
+        return fill
+    donor = donors[0]
+    if not kept.last.strip():
+        fill["last"] = donor.last.strip()
+    if not kept.patronymic.strip() and donor.patronymic.strip():
+        fill["patronymic"] = donor.patronymic.strip()
+    if fill:
+        fill["from"] = donor.user_id
+    return fill
+
+
 def _decide(cluster: Cluster, organization, today) -> None:
     members = cluster.members
     if sum(1 for person in members if person.has_fin) > 1:
@@ -252,6 +272,7 @@ def _decide(cluster: Cluster, organization, today) -> None:
                 cluster.mode = MODE_RIM_PASSWORD
                 cluster.notes.append("kept_has_load" if kept.load else "handover_blocked")
     cluster.kept = kept
+    cluster.name_fill = _name_fill(kept, members)
     planned = {(membership["role_id"], membership["unit"]) for membership in kept.memberships}
     others = [person for person in members if person is not kept]
     blocked = _blocked_offerings(organization, [pk for person in others for pk in person.owned], today)
@@ -306,6 +327,7 @@ def summary(plan: Plan) -> dict:
         if cluster.status != STATUS_OK:
             continue
         counts[f"mode_{cluster.mode}"] += 1
+        counts["names_filled"] += int(bool(cluster.name_fill))
         for action in cluster.dups:
             if action.skip:
                 counts[f"skip_{action.skip}"] += 1
