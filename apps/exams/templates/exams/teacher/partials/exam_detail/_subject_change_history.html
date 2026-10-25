@@ -1,0 +1,45 @@
+{% load i18n %}
+{% comment %}
+  İmtahan tarixçəsi — təsdiqlənmiş fənn dəyişiklikləri (sahib 2026-10-25). Mənbə: AuditLog
+  (`exam_subject_change` + köçürmə sayları `exam_subject_change_resync`), bax services/exam_subject_change.history.
+  Stil: exams/css/teacher_exam_detail/subject_history.css (inline CSS yoxdur).
+{% endcomment %}
+<section class="ems-card ted-subject-history" aria-labelledby="ted-subject-history-title">
+    <h2 class="ted-subject-history__title" id="ted-subject-history-title">
+        <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+        {% trans "Fənn dəyişikliyi tarixçəsi" context "exams.subject_change" %}
+    </h2>
+    <ol class="ted-subject-history__list">
+        {% for row in subject_change_history %}
+        <li class="ted-subject-history__item">
+            <div class="ted-subject-history__meta">
+                <time datetime="{{ row.at|date:'c' }}">{{ row.at|date:"d.m.Y H:i" }}</time>
+                <span class="ted-subject-history__user"><i class="fas fa-user" aria-hidden="true"></i> {{ row.user }}</span>
+            </div>
+            <p class="ted-subject-history__move">
+                <span class="ted-subject-history__subject">{{ row.old_subject }}</span>
+                <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                <span class="ted-subject-history__subject ted-subject-history__subject--new">{{ row.new_subject }}</span>
+            </p>
+            <p class="ted-subject-history__reason">
+                <strong>{% trans "Səbəb" context "exams.subject_change" %}:</strong> {{ row.reason }}
+            </p>
+            <p class="ted-subject-history__counts">
+                {% blocktrans trimmed with students=row.students context "exams.subject_change" %}
+                    Nəticəsi olan tələbə: {{ students }}
+                {% endblocktrans %}
+                {% if row.moved is not None %}
+                    · {% blocktrans trimmed with moved=row.moved cleared=row.cleared context "exams.subject_change" %}
+                        Yeni jurnala köçürülən: {{ moved }} · köhnə jurnaldan silinən: {{ cleared }}
+                    {% endblocktrans %}
+                    {% if row.not_enrolled %}
+                        · {% blocktrans trimmed with n=row.not_enrolled context "exams.subject_change" %}
+                            yeni fənn üzrə jurnalda qeydiyyatı olmayan: {{ n }}
+                        {% endblocktrans %}
+                    {% endif %}
+                {% endif %}
+            </p>
+        </li>
+        {% endfor %}
+    </ol>
+</section>

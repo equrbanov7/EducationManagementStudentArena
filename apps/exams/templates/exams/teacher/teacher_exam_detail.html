@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
     <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_detail/detail.css' %}?v=20261019-code">
     <link rel="stylesheet" href="{% static 'css/ems_ui/code_text.css' %}?v=20261019-tok">
+    {% if subject_change_history %}<link rel="stylesheet" href="{% static 'exams/css/teacher_exam_detail/subject_history.css' %}?v=20261025-subjguard">{% endif %}
     {# «Yeni sual əlavə et» modalı (tez-tez) — forma CSS-i dərhal; imtahan sehrbazı paketi isə «Redaktə»-də tənbəl yüklənir. #}
     <link rel="stylesheet" href="{% static 'exams/css/question_form.css' %}?v=20261014-modalux">
     <link rel="stylesheet" href="{% static 'exams/css/question_form_media.css' %}?v=20261010-wp3exams">
@@ -47,6 +48,10 @@ data-question-*) dəyişməyib. Sehrbaz paketi (≈14 fayl) ilk «Redaktə» kli
         {% comment %}Canlı başlat — YALNIZ adi test (quiz). Final/midterm İmtahan Mərkəzi axını ilə keçirilir.{% endcomment %}
         {% if exam.exam_type == "test" and exam.exam_type_extended != "final" and exam.exam_type_extended != "midterm" %}
             {% include "exams/teacher/partials/exam_detail/_live.html" %}
+        {% endif %}
+
+        {% if subject_change_history %}
+            {% include "exams/teacher/partials/exam_detail/_subject_change_history.html" %}
         {% endif %}
 
         {% include "exams/teacher/partials/exam_detail/_questions.html" %}
@@ -123,7 +128,7 @@ data-question-*) dəyişməyib. Sehrbaz paketi (≈14 fayl) ilk «Redaktə» kli
 <script id="ted-wizard-assets" type="application/json">
 {
     "css": [
-        "{% static 'exams/css/exam_create_edit_modal.css' %}?v=20261024-mtnote",
+        "{% static 'exams/css/exam_create_edit_modal.css' %}?v=20261025-subjguard",
         "{% static 'exams/css/exam_wizard.css' %}?v=20261014-uifix",
         "{% static 'css/ems_datetime.css' %}?v=20261008-1"
     ],
@@ -131,7 +136,7 @@ data-question-*) dəyişməyib. Sehrbaz paketi (≈14 fayl) ilk «Redaktə» kli
         "{% static 'exams/js/exam_create_edit_modal/namespace.js' %}?v=20260707-wizard2",
         "{% static 'exams/js/exam_create_edit_modal/markup.js' %}?v=20260707-wizard2",
         "{% static 'exams/js/exam_create_edit_modal/searchable_select.js' %}?v=20261017-fixa2",
-        "{% static 'exams/js/exam_create_edit_modal/subject_select.js' %}?v=20261024-mtnote",
+        "{% static 'exams/js/exam_create_edit_modal/subject_select.js' %}?v=20261025-subjguard",
         "{% static 'exams/js/exam_create_edit_modal/toggles.js' %}?v=20261021-qcount",
         "{% static 'exams/js/exam_create_edit_modal/form.js' %}?v=20261014-uifix",
         "{% static 'exams/js/exam_create_edit_modal/entry.js' %}?v=20260914-1",

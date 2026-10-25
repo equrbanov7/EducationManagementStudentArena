@@ -311,7 +311,32 @@
         }
 
         bindMidtermJournalNote(form);
+        bindSubjectChangeGuard(form, control);
         subject.reload(); // ilk 10 fənni dərhal yüklə
+    }
+
+    /* 2026-10-25 (sahib): nəticəli midtermdə fənn dəyişəndə təsdiq + səbəb bloku görünür (köhnə → yeni fənn,
+       tələbə sayı serverdən). Server avtoritetdir — blok gizli olsa da təsdiqsiz dəyişiklik 409 ilə qayıdır;
+       server tələb edibsə (`data-server-required`) blok açıq qalır. */
+    function bindSubjectChangeGuard(form, control) {
+        var guard = form.querySelector("[data-ew-subject-guard]");
+        var nativeSelect = control.querySelector("[data-exam-subject-native]");
+        if (!guard || !nativeSelect) {
+            return;
+        }
+        var original = guard.getAttribute("data-original-subject") || "";
+        var serverRequired = guard.getAttribute("data-server-required") === "1";
+        var newLabel = guard.querySelector("[data-ew-subject-guard-new]");
+        function sync() {
+            var opt = nativeSelect.querySelector("option[value]");
+            var current = opt ? String(opt.value) : "";
+            if (newLabel && (current || !serverRequired)) {
+                newLabel.textContent = opt ? (opt.textContent || "—") : "—";
+            }
+            guard.hidden = !(serverRequired || current !== original);
+        }
+        nativeSelect.addEventListener("change", sync);
+        sync();
     }
 
     /* 2026-10-24 (sahib): «nəticə jurnala avtomatik yazılacaq» qeydi yalnız Midterm-də görünür; mətn formatdan

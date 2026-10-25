@@ -1,0 +1,71 @@
+/* İmtahan detalı — «Fənn dəyişikliyi tarixçəsi» kartı (2026-10-25, _subject_change_history.html). */
+.ted-subject-history {
+    padding: 18px 20px;
+}
+
+.ted-subject-history__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 var(--ems-sp-4, 16px);
+    font-size: var(--ems-fs-xl, 1.25rem);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.ted-subject-history__list {
+    display: grid;
+    gap: var(--ems-sp-3, 12px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ted-subject-history__item {
+    display: grid;
+    gap: 6px;
+    padding: 12px 14px;
+    border: 1px solid var(--ems-border);
+    border-radius: 12px;
+    background: var(--ems-bg-subtle, var(--ems-bg));
+}
+
+.ted-subject-history__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    color: var(--ems-text-muted, var(--ems-text));
+    font-size: var(--ems-fs-sm, 0.85rem);
+}
+
+.ted-subject-history__move,
+.ted-subject-history__reason,
+.ted-subject-history__counts {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.ted-subject-history__move {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.ted-subject-history__subject {
+    padding: 2px 10px;
+    border: 1px solid var(--ems-border);
+    border-radius: 999px;
+    background: var(--ems-bg);
+    font-weight: 600;
+}
+
+.ted-subject-history__subject--new {
+    border-color: var(--ems-primary-500, #3b82f6);
+    color: var(--ems-primary-800, #1e40af);
+}
+
+.ted-subject-history__counts {
+    color: var(--ems-text-muted, var(--ems-text));
+    font-size: var(--ems-fs-sm, 0.85rem);
+}

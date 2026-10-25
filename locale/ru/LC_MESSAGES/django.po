@@ -108339,3 +108339,65 @@ msgstr "Подходящая тема не найдена"
 msgctxt "accounts.student_registry"
 msgid "Cari semestrdə bu alt qrup(lar)ın jurnalında oxuyur"
 msgstr "В текущем семестре учится в журнале этой подгруппы (этих подгрупп)"
+
+msgctxt "exams.subject_change"
+msgid "Bu imtahanda tələbə nəticələri var — fənn dəyişikliyini təsdiqləyin və səbəbini yazın."
+msgstr "У этого экзамена уже есть результаты студентов — подтвердите смену предмета и укажите причину."
+
+msgctxt "exams.subject_change"
+msgid "Fənn dəyişikliyini təsdiqləyin («Təsdiq edirəm»)."
+msgstr "Подтвердите смену предмета («Подтверждаю»)."
+
+#, python-format
+msgctxt "exams.subject_change"
+msgid "Səbəb ən azı %(min)d simvol olmalıdır."
+msgstr "Причина должна содержать не менее %(min)d символов."
+
+msgctxt "exams.subject_change"
+msgid "Fənn dəyişikliyi təsdiq tələb edir"
+msgstr "Смена предмета требует подтверждения"
+
+#, python-format
+msgctxt "exams.subject_change"
+msgid "Bu imtahanda %(students)s tələbənin nəticəsi var."
+msgstr "Студентов с результатами в этом экзамене: %(students)s."
+
+msgctxt "exams.subject_change"
+msgid "Saxladıqdan sonra nəticələr yeni fənnin jurnalına köçürüləcək, köhnə fənnin jurnalındakı bu imtahanın balları silinəcək."
+msgstr "После сохранения результаты будут перенесены в журнал нового предмета, а баллы этого экзамена в журнале прежнего предмета будут удалены."
+
+msgctxt "exams.subject_change"
+msgid "Təsdiq edirəm: nəticələr yeni fənnə köçürülsün"
+msgstr "Подтверждаю: перенести результаты в новый предмет"
+
+msgctxt "exams.subject_change"
+msgid "Səbəb"
+msgstr "Причина"
+
+msgctxt "exams.subject_change"
+msgid "Məsələn: imtahan yaradılarkən fənn səhv seçilmişdi"
+msgstr "Например: при создании экзамена был выбран неверный предмет"
+
+#, python-format
+msgctxt "exams.subject_change"
+msgid "Ən azı %(min)s simvol. Dəyişiklik, səbəb və köçürülən nəticələrin sayı imtahan tarixçəsinə yazılır."
+msgstr "Не менее %(min)s символов. Изменение, причина и число перенесённых результатов записываются в историю экзамена."
+
+msgctxt "exams.subject_change"
+msgid "Fənn dəyişikliyi tarixçəsi"
+msgstr "История смены предмета"
+
+#, python-format
+msgctxt "exams.subject_change"
+msgid "Nəticəsi olan tələbə: %(students)s"
+msgstr "Студентов с результатами: %(students)s"
+
+#, python-format
+msgctxt "exams.subject_change"
+msgid "Yeni jurnala köçürülən: %(moved)s · köhnə jurnaldan silinən: %(cleared)s"
+msgstr "Перенесено в новый журнал: %(moved)s · удалено из прежнего журнала: %(cleared)s"
+
+#, python-format
+msgctxt "exams.subject_change"
+msgid "yeni fənn üzrə jurnalda qeydiyyatı olmayan: %(n)s"
+msgstr "не записаны в журнал нового предмета: %(n)s"

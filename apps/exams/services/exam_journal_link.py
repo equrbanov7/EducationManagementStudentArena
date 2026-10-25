@@ -100,9 +100,11 @@ def _has_finished_attempts(exam) -> bool:
     return exam.attempts.filter(status__in=ATTEMPT_FINISHED_STATUSES, is_trial=False).exists()
 
 
-def after_exam_saved(exam, *, previous_subject_id=None, previous_link_ids=(), by_user=None) -> bool:
+def after_exam_saved(exam, *, previous_subject_id=None, previous_link_ids=(), by_user=None, change_log_id=None) -> bool:
     """Yaratma / redaktədən sonra: bağlantını yenilə; fənn və ya jurnal dəyişibsə on_commit yenidən sinxron.
 
+    ``change_log_id`` — təsdiqlənmiş fənn dəyişikliyinin audit sətri (``exam_subject_change``, 2026-10-25):
+    verilibsə köçürmənin faktiki sayları da audit olunur (imtahan tarixçəsində görünür).
     → yenidən sinxronizasiya planlaşdırıldımı. Best-effort: imtahanın saxlanmasını heç vaxt sındırmır."""
     try:
         _old, new_ids = refresh_links(exam)
@@ -119,6 +121,10 @@ def after_exam_saved(exam, *, previous_subject_id=None, previous_link_ids=(), by
         try:
             counts = resync_exam_journal(exam, by_user=by_user)
             logger.info("exam_journal_link: exam %s re-linked, resync %s", exam.pk, dict(counts))
+            if change_log_id is not None:
+                from apps.exams.services import exam_subject_change
+
+                exam_subject_change.record_resync(exam, counts, decision_log_id=change_log_id, user=by_user)
         except Exception:  # noqa: BLE001
             logger.exception("exam_journal_link: resync failed for exam %s", getattr(exam, "pk", "?"))
 

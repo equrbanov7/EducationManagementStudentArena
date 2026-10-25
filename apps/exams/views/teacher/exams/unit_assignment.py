@@ -162,16 +162,21 @@ def _with_subgroups(organization, units):
     return units
 
 
-def apply_allowed_units(request, organization, exam, units, *, permission="exam.edit") -> None:
-    """`exam.allowed_units`-i yeni seçimlə əvəz edir; əhatədən KƏNAR mövcud
-    qruplar qorunur (unit-skoplu redaktor onları görmür, deməli silə də bilməz)."""
+def final_unit_ids(request, organization, exam, units, *, permission="exam.edit") -> set:
+    """`apply_allowed_units`-in yazacağı qrup id-ləri: yeni seçim + əhatədən KƏNAR mövcud qruplar."""
     keep_ids = set()
     if exam.pk:
         visible_ids = set(
             exam_unit_candidates(request, organization, permission=permission).values_list("pk", flat=True)
         )
         keep_ids = {pk for pk in exam.allowed_units.values_list("pk", flat=True) if pk not in visible_ids}
-    exam.allowed_units.set(list(keep_ids | {unit.pk for unit in units}))
+    return keep_ids | {unit.pk for unit in units}
+
+
+def apply_allowed_units(request, organization, exam, units, *, permission="exam.edit") -> None:
+    """`exam.allowed_units`-i yeni seçimlə əvəz edir; əhatədən KƏNAR mövcud
+    qruplar qorunur (unit-skoplu redaktor onları görmür, deməli silə də bilməz)."""
+    exam.allowed_units.set(list(final_unit_ids(request, organization, exam, units, permission=permission)))
 
 
 def legacy_groups_available(form, selected_groups) -> bool:
