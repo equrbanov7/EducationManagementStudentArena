@@ -70,6 +70,7 @@ ki, gələcəkdə hər biri qəsdən və əsaslandırılmış qalsın.
 | `apps/accounts/management/commands/finalize_university_identity.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
 | `apps/accounts/management/commands/import_legacy_staff_positions.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
 | `apps/accounts/management/commands/import_students_atis.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
+| `apps/legacy_import/management/commands/legacy_journal_teachers_extract.py` | 1 | C — idarə əmri (yalnız oxu; sübut faylı) |
 | `apps/accounts/management/commands/import_users_from_excel.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
 | `apps/accounts/management/commands/issue_staff_credentials.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
 | `apps/accounts/management/commands/profile_completion_report.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |

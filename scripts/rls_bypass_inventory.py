@@ -82,6 +82,12 @@ CATEGORY_RULES = (
     ("apps/hr_contracts/services/notify.py", "D", "bildiriş alıcıları (açıq təşkilat süzgəcli üzvlük oxusu)"),
     ("apps/hr_contracts/services/files.py", "D", "commit-dən sonra yetim fayl təmizliyi (yol üzrə EXISTS)"),
     ("apps/workload/management/", "C", "idarə əmrləri (--org ilə)"),
+    # 2026-10-25: köhnə jurnal müəllim sübutu — yalnız oxu (lokal prod kopyası), çıxış şifrəli sübut faylıdır.
+    (
+        "apps/legacy_import/management/commands/legacy_journal_teachers_extract.py",
+        "C",
+        "idarə əmri (yalnız oxu; sübut faylı)",
+    ),
     # 2026-10-08: WS qapısı — tenant GUC-suz ASGI scope; yalnız qoşulan istifadəçinin öz
     # profil/üzvlük oxusu (pk süzgəcli) + rədd audit sətri.
     ("apps/accounts/ws_gate.py", "D", "WebSocket giriş qapısı (istifadəçinin öz sətirləri + audit)"),
