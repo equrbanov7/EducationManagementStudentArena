@@ -51,6 +51,10 @@ class AppealsConfig(AppConfig):
         score_adjustments.register("is_applicable", appeal_applicable)
         score_adjustments.register("deadline", appeal_deadline)
 
+        from .services.summary import appeal_status_by_attempt
+
+        score_adjustments.register("status_by_attempt", appeal_status_by_attempt)
+
         # 2026-10-21: qərarın əsaslandırıcı sənədi — qorunan media (yalnız apellyasiya heyəti / superadmin).
         from core.media_policies import register_media_policy
 

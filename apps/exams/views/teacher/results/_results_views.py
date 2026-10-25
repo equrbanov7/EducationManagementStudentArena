@@ -12,6 +12,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext, pgettext_lazy
 
+from apps.exams import score_adjustments
 from apps.exams.models import ExamAnswer, ExamAttempt
 from apps.exams.services.access_policy import _ensure_teacher, is_exam_center_user
 from apps.exams.services.attempt_budget import attempts_left_map
@@ -33,6 +34,7 @@ from apps.exams.views.shared.breadcrumbs import exam_breadcrumbs
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 from core.permissions import request_has_permission
 
+from ._filter_context import results_filter_context, results_per_page
 from ._helpers import (
     _appeal_bonus_map_for,
     _append_query_params,
@@ -40,11 +42,11 @@ from ._helpers import (
     _apply_results_filters,
     _attempt_effective_duration,
     _attempt_effective_finish,
-    _available_groups_for_exam,
     _build_anonymous_name,
     _resolve_attempt_action_state,
     _resolve_profile_navigation,
 )
+from ._test_scores import attach_legacy_selected_options
 
 
 def _explicit_return_url(request):
@@ -164,14 +166,8 @@ def teacher_exam_results(request, slug):
             )
 
     attempts, filter_state = _apply_results_filters(exam, request)
-    search_query = filter_state["search_query"]
-    status_filter = filter_state["status_filter"]
-    checked_filter = filter_state["checked_filter"]
-    date_from_raw = filter_state["date_from_raw"]
-    date_to_raw = filter_state["date_to_raw"]
-    group_id = filter_state["group_id"]
-    sort_by = filter_state["sort_by"]
-    sort_dir = filter_state["sort_dir"]
+    group_index = filter_state["group_index"]
+    per_page = results_per_page(request.GET.get("per_page"))
 
     max_score = 100 if exam.exam_type == "test" else exam.questions.aggregate(total=Sum("points")).get("total") or 0
     # Eyni filtrlənmiş çoxluq üzərində əvvəllər 4 ayrı COUNT (+ Paginator-un
@@ -189,12 +185,13 @@ def teacher_exam_results(request, slug):
         "graded": graded_count,
         "max_score": max_score,
     }
-    paginator = Paginator(attempts, 12)
+    paginator = Paginator(attempts, per_page)
     # Paginator-un sayı elə həmin çoxluğun ölçüsüdür — ikinci dəfə saymırıq
     # (legacy_review._paginator ilə eyni üsul).
     paginator.count = total_count
     page_obj = paginator.get_page(request.GET.get("page"))
     attempts_page = list(page_obj.object_list)
+    attach_legacy_selected_options(attempts_page)
     can_delete_attempts = bool(
         request_has_permission(request, "exam.delete")
         and not exam.is_deleted
@@ -230,6 +227,8 @@ def teacher_exam_results(request, slug):
     # İmtahandan uzaqlaşdırılmış tələbələr cədvəldə qırmızı görünsün + səbəb
     # (N+1-siz). `att.exam_intervention` = {action, reason, is_terminal}.
     attach_attempt_interventions(attempts_page)
+    # Apellyasiya nişanı (cəhdin son apellyasiyası) — səhifə üçün tək sorğu (appeals hook-u).
+    appeal_status_map = score_adjustments.status_by_attempt([att.id for att in attempts_page])
 
     # Qalan cəhd sayı: əvvəllər hər sətirdə ``exam.attempts_left_for(att.user)``
     # (cəhd başına 3 sorğu, 12-lik səhifədə ~36) — indi səhifənin bütün
@@ -292,74 +291,17 @@ def teacher_exam_results(request, slug):
                 "finish_inferred": finish_inferred,
                 "effective_duration_seconds": effective_duration,
                 "intervention": getattr(att, "exam_intervention", None),
+                "group": group_index.user_group.get(att.user_id),
+                "cohorts": group_index.user_cohorts.get(att.user_id, ()),
+                "appeal": appeal_status_map.get(att.id),
             }
         )
 
-    # Perf: əvvəl burada `list(attempts)` bütün filtrlənmiş cəhdləri (bütün
-    # cavab+option prefetch-ləri ilə) yaddaşa yükləyirdi və fastest_attempts/
-    # hardest_questions hesablanırdı — template-də heç istifadə olunmurdu.
-    # Silindi: səhifə yalnız 12 cəhdlik paginated dataset yükləyir.
-    group_filter_value = str(group_id) if group_id else ""
-    pagination_query = urlencode(
-        {
-            key: value
-            for key, value in {
-                "q": search_query,
-                "status": status_filter,
-                "checked": checked_filter,
-                "date_from": date_from_raw,
-                "date_to": date_to_raw,
-                "group": group_filter_value,
-                "sort_by": sort_by,
-                "sort_dir": sort_dir,
-                "attempt": (request.GET.get("attempt") or "").strip(),
-                "from_section": (request.GET.get("from_section") or "").strip(),
-                "return_to": (request.GET.get("return_to") or "").strip(),
-            }.items()
-            if value not in ("", None)
-        }
-    )
-
-    sort_base_query = urlencode(
-        {
-            key: value
-            for key, value in {
-                "q": search_query,
-                "status": status_filter,
-                "checked": checked_filter,
-                "date_from": date_from_raw,
-                "date_to": date_to_raw,
-                "group": group_filter_value,
-                "attempt": (request.GET.get("attempt") or "").strip(),
-                "from_section": (request.GET.get("from_section") or "").strip(),
-                "return_to": (request.GET.get("return_to") or "").strip(),
-            }.items()
-            if value not in ("", None)
-        }
-    )
-
-    # Export URL — bütün filtrlər saxlanılır, pagination çıxarılır
-    export_query = urlencode(
-        {
-            key: value
-            for key, value in {
-                "q": search_query,
-                "status": status_filter,
-                "checked": checked_filter,
-                "date_from": date_from_raw,
-                "date_to": date_to_raw,
-                "group": group_filter_value,
-                "sort_by": sort_by,
-                "sort_dir": sort_dir,
-            }.items()
-            if value not in ("", None)
-        }
-    )
+    # Perf: səhifə yalnız cari səhifənin cəhdlərini yükləyir (bax audit P1-9).
+    filter_context = results_filter_context(exam, filter_state, request=request, per_page=per_page)
     export_xlsx_url = reverse("exams:export_exam_results_xlsx", kwargs={"slug": exam.slug})
-    if export_query:
-        export_xlsx_url = f"{export_xlsx_url}?{export_query}"
-
-    available_groups = _available_groups_for_exam(exam)
+    if filter_context["export_query"]:
+        export_xlsx_url = f"{export_xlsx_url}?{filter_context['export_query']}"
     teacher_display = exam.author.get_full_name() or exam.author.username
     teacher_username = exam.author.username
 
@@ -386,20 +328,12 @@ def teacher_exam_results(request, slug):
             "exam_navigation_query": exam_navigation_query,
             "source_back_label": pgettext("exams.template.teacher_exam_detail", "action_back"),
             "review_stats": review_stats,
-            "search_query": search_query,
-            "status_filter": status_filter,
-            "checked_filter": checked_filter,
-            "date_from": date_from_raw,
-            "date_to": date_to_raw,
-            "sort_by": sort_by,
-            "sort_dir": sort_dir,
-            "sort_base_query": sort_base_query,
-            "pagination_query": pagination_query,
+            **filter_context,
             # Silinmiş imtahan yalnız-oxu göstərilir: qiymət/silmə/redaktə gizlədilir.
             "exam_is_deleted": exam.is_deleted,
             "can_delete_attempts": can_delete_attempts,
-            "available_groups": available_groups,
-            "group_filter": group_filter_value,
+            "available_groups": group_index.options,
+            "grant_groups": group_index.grant_options,
             # Midterm / final: birbaşa əlavə cəhd yoxdur — rəsmi səhifə (yalnız İmtahan Mərkəzi açır).
             "formal_retake": formal_retake,
             "formal_retake_open": formal_retake and is_exam_center_user(request.user),
@@ -427,23 +361,22 @@ def export_exam_results_xlsx(request, slug):
     from apps.exams.views.teacher.extract_jobs import start_export_job
 
     from ._export_builder import build_exam_results_xlsx_export
+    from ._filters import FILTER_KEYS, param_list
 
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
 
-    attempts_qs, _ = _apply_results_filters(exam, request)
+    attempts_qs, state = _apply_results_filters(exam, request)
     threshold = getattr(settings, "EXPORT_SYNC_MAX_ROWS", 500)
     if attempts_qs.count() <= threshold:
-        filename, content_type, data = build_exam_results_xlsx_export(exam, list(attempts_qs))
+        filename, content_type, data = build_exam_results_xlsx_export(
+            exam, list(attempts_qs), group_index=state["group_index"]
+        )
         response = HttpResponse(data, content_type=content_type)
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
         return response
 
-    filter_params = {
-        key: request.GET.get(key)
-        for key in ("q", "status", "checked", "date_from", "date_to", "group", "sort_by", "sort_dir")
-        if request.GET.get(key)
-    }
+    filter_params = {key: ",".join(param_list(request.GET, key)) for key in FILTER_KEYS if param_list(request.GET, key)}
     return start_export_job(
         request,
         export_name="exam_results_xlsx",

@@ -22,6 +22,8 @@
  *   * `option.selected = …` PROPERTY yazısı mutasiya vermir → `EMSMultiSelect.refresh(select)` çağırın
  *     (və ya native-də `change` atın). `EMSBootstrapSelect.refresh/sync/init` `multiple` seçicini bura ötürür.
  *
+ * Menyu bağlananda native-də `ems-multi-select:close` (bubbles) atılır (2026-10-25).
+ *
  * API: `window.EMSMultiSelect = { enhance(select), init(root), refresh(select), sync(select) }`.
  * AJAX-safe: `EMSReady` ilə hər bölmə swap-ından sonra `[data-ems-multi-select]` qoşulur (idempotent).
  */
@@ -341,6 +343,9 @@
             window.removeEventListener("scroll", onScroll, true);
             window.removeEventListener("resize", onResize);
             if (restoreFocus) toggle.focus();
+            // 2026-10-25: «seçim bitdi» siqnalı — səhifə (məs. nəticə süzgəci) hər klikdə yox,
+            // menyu bağlananda tətbiq etsin.
+            select.dispatchEvent(new CustomEvent("ems-multi-select:close", { bubbles: true }));
         }
 
         function move(from, delta) {

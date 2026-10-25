@@ -322,3 +322,64 @@
     .etr-table .etr-actions .etr-inline-form,
     .etr-table .etr-actions .etr-inline-form .ems-btn { flex: 1 1 100%; justify-content: center; min-height: 44px; }
 }
+
+/* ── 2026-10-25: qrup sütunu, çoxlu qrup seçimi, bal aralığı, süzgəcə uyğun say ───────── */
+.etr-field--group {
+    flex: 1 1 220px;
+    min-width: 200px;
+    max-width: 320px;
+}
+
+.etr-group {
+    min-width: 110px;
+}
+
+.etr-group__name {
+    display: block;
+    font-weight: 600;
+    color: var(--ems-text);
+    white-space: nowrap;
+}
+
+.etr-group__meta {
+    display: block;
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-text-muted);
+    white-space: nowrap;
+}
+
+.etr-kpi-of {
+    margin-left: 2px;
+    font-size: 0.6em;
+    font-weight: 600;
+    color: var(--ems-text-muted);
+}
+
+.etr-score {
+    flex: 0 1 180px;
+}
+
+.etr-score__pair {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+}
+
+.etr-score__pair .ems-input {
+    min-width: 0;
+    width: 100%;
+}
+
+.etr-score__sep {
+    color: var(--ems-text-muted);
+}
+
+@media (max-width: 768px) {
+    .etr-field--group,
+    .etr-score {
+        flex: 1 1 100%;
+        max-width: none;
+    }
+
+    .etr-table .etr-group { min-width: 0; text-align: right; }
+}

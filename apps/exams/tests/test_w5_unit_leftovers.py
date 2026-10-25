@@ -359,8 +359,8 @@ class TeacherResultsUnitGroupTests(_RegistryFixture):
         response = self.client.get(reverse("exams:export_exam_results_xlsx", args=[self.exam.slug]))
         self.assertEqual(response.status_code, 200)
         ws = load_workbook(BytesIO(response.content)).active
-        # Sütunlar: #, Qruplar, Ad Soyad, İstifadəçi adı, …
-        by_username = {row[3]: row[1] for row in ws.iter_rows(min_row=2, values_only=True)}
+        # Sütunlar: #, Qruplar, Ana qrup (2026-10-25), Ad Soyad, İstifadəçi adı, …
+        by_username = {row[4]: row[1] for row in ws.iter_rows(min_row=2, values_only=True)}
         self.assertEqual(by_username["w5l_student"], "634 ing")
         self.assertEqual(by_username["w5l_outsider"], "701 biz, Kohort-A")  # kohort + cari reyestr qrupu
 

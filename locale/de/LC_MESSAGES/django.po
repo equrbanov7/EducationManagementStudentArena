@@ -109611,3 +109611,99 @@ msgstr "Lehrdeputat zugewiesen: %(head)s — %(hours)d Stunden"
 msgctxt "workload.notify"
 msgid "%(year)s tədris ili üçün dərs yükünüz təsdiqləndi. Fənn sayı: %(count)d, cəmi %(hours)d saat. «Dərs yüküm» bölməsindən baxa bilərsiniz."
 msgstr "Ihr Lehrdeputat für das Studienjahr %(year)s wurde bestätigt. Anzahl der Fächer: %(count)d, insgesamt %(hours)d Stunden. Sie finden es im Bereich „Mein Lehrdeputat“."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Süzgəcə uyğun"
+msgstr "Gefiltert"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bütün qruplar"
+msgstr "Alle Gruppen"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "{count} qrup seçilib"
+msgstr "{count} Gruppen ausgewählt"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Alt qruplar"
+msgstr "Untergruppen"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Ad, istifadəçi adı, e-poçt və ya FİN"
+msgstr "Name, Benutzername, E-Mail oder FIN"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Qrupsuz"
+msgstr "Ohne Gruppe"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiya"
+msgstr "Einspruch"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiya verib"
+msgstr "Einspruch eingelegt"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiya: baxılır"
+msgstr "Einspruch: in Prüfung"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiya: qərar verilib"
+msgstr "Einspruch: entschieden"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiyasız"
+msgstr "Ohne Einspruch"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Gün"
+msgstr "Tag"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bütün günlər"
+msgstr "Alle Tage"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Zal"
+msgstr "Raum"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bütün zallar"
+msgstr "Alle Räume"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Zalsız (onlayn)"
+msgstr "Ohne Raum (online)"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bal: -dan"
+msgstr "Punkte: ab"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bal: -dək"
+msgstr "Punkte: bis"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bal aralığı"
+msgstr "Punktebereich"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Sətir"
+msgstr "Zeilen"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Ana qrup"
+msgstr "Hauptgruppe"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "ana qrup"
+msgstr "Hauptgruppe"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "qeyd aktiv deyil"
+msgstr "Eintrag inaktiv"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Tələbənin akademik qeydində qrup yoxdur"
+msgstr "Im Studiendatensatz ist keine Gruppe hinterlegt"

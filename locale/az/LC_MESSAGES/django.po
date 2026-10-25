@@ -108095,3 +108095,99 @@ msgstr "Dərs yükü təyin edildi: %(head)s — %(hours)d saat"
 msgctxt "workload.notify"
 msgid "%(year)s tədris ili üçün dərs yükünüz təsdiqləndi. Fənn sayı: %(count)d, cəmi %(hours)d saat. «Dərs yüküm» bölməsindən baxa bilərsiniz."
 msgstr "%(year)s tədris ili üçün dərs yükünüz təsdiqləndi. Fənn sayı: %(count)d, cəmi %(hours)d saat. «Dərs yüküm» bölməsindən baxa bilərsiniz."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Süzgəcə uyğun"
+msgstr "Süzgəcə uyğun"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bütün qruplar"
+msgstr "Bütün qruplar"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "{count} qrup seçilib"
+msgstr "{count} qrup seçilib"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Alt qruplar"
+msgstr "Alt qruplar"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Ad, istifadəçi adı, e-poçt və ya FİN"
+msgstr "Ad, istifadəçi adı, e-poçt və ya FİN"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Qrupsuz"
+msgstr "Qrupsuz"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiya"
+msgstr "Apellyasiya"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiya verib"
+msgstr "Apellyasiya verib"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiya: baxılır"
+msgstr "Apellyasiya: baxılır"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiya: qərar verilib"
+msgstr "Apellyasiya: qərar verilib"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiyasız"
+msgstr "Apellyasiyasız"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Gün"
+msgstr "Gün"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bütün günlər"
+msgstr "Bütün günlər"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Zal"
+msgstr "Zal"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bütün zallar"
+msgstr "Bütün zallar"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Zalsız (onlayn)"
+msgstr "Zalsız (onlayn)"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bal: -dan"
+msgstr "Bal: -dan"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bal: -dək"
+msgstr "Bal: -dək"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bal aralığı"
+msgstr "Bal aralığı"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Sətir"
+msgstr "Sətir"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Ana qrup"
+msgstr "Ana qrup"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "ana qrup"
+msgstr "ana qrup"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "qeyd aktiv deyil"
+msgstr "qeyd aktiv deyil"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Tələbənin akademik qeydində qrup yoxdur"
+msgstr "Tələbənin akademik qeydində qrup yoxdur"

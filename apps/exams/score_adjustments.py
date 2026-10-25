@@ -63,6 +63,10 @@ def _default_deadline(attempt):
     return None
 
 
+def _default_status_by_attempt(attempt_ids):
+    return {}
+
+
 _HOOKS = {
     "bonus_map": _default_bonus_map,
     "apply_bonus": _default_apply_bonus,
@@ -76,6 +80,7 @@ _HOOKS = {
     "remaining_window_seconds": _default_remaining_window_seconds,
     "is_applicable": _default_is_applicable,
     "deadline": _default_deadline,
+    "status_by_attempt": _default_status_by_attempt,
 }
 
 
@@ -134,3 +139,11 @@ def is_applicable(attempt):
 def deadline(attempt):
     """Apellyasiya son tarixi (aware datetime) və ya ``None`` — nəticə səhifəsində göstərmək üçün (2026-10-13)."""
     return _HOOKS["deadline"](attempt)
+
+
+def status_by_attempt(attempt_ids):
+    """``attempt_id`` → ``{"status", "label", "is_final"}`` (cəhdin ən son apellyasiyası; müəllim səthi).
+
+    2026-10-25: nəticə cədvəlində «Apellyasiya» nişanı + süzgəci — appeals qoşulmayıbsa ``{}``.
+    """
+    return _HOOKS["status_by_attempt"](attempt_ids)
