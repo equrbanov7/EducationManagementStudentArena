@@ -17,7 +17,7 @@ import os
 
 from django.core.management.base import BaseCommand, CommandError
 
-from apps.legacy_import.services.delta.apply import PHASES, execute
+from apps.legacy_import.services.delta.apply import DEFAULT_PHASES, PHASES, execute
 from apps.legacy_import.services.delta.bundle import BundleError, file_sha256, read_bundle
 from apps.legacy_import.services.repair_support import (
     add_repair_arguments,
@@ -52,7 +52,7 @@ class Command(BaseCommand):
             action="append",
             choices=PHASES,
             default=[],
-            help="Yalnız bu faza(lar) (default: paketin snapshot.phases-i, yoxdursa hamısı)",
+            help="Yalnız bu faza(lar) (default: paketin snapshot.phases-i, yoxdursa registry_sync-dən başqa hamısı)",
         )
         parser.add_argument("--report-out", default="", help="Saylar (JSON, adsız)")
         parser.add_argument("--names-out", default="", help="Adlı siyahı (CSV, 0600) — yaradılan/ambiqü hesablar")
@@ -84,7 +84,7 @@ class Command(BaseCommand):
                 bundle=bundle,
                 apply=bool(options["apply"]),
                 until=until,
-                phases=tuple(options["phase"] or (bundle.get("snapshot") or {}).get("phases") or PHASES),
+                phases=tuple(options["phase"] or (bundle.get("snapshot") or {}).get("phases") or DEFAULT_PHASES),
             )
         summary = run.summary()
         summary.update(

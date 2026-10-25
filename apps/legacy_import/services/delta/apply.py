@@ -6,7 +6,8 @@ tranzaksiyanı GERİ QAYTARIR — hesabatdakı saylar «tətbiq etsək nə olard
 Fazalar: tələbələr (iki keçid: tutuşdur, sonra yarat) → açılış (fənn/qrup/müəllim) → qeydiyyat → dərs + xana →
 yekun/təkrar imtahan → sillabus → dərs yükü (rəsmi «Dərs yükü faylı» axını) → eyni fənnin ikinci (boş) öz-qrup qeydiyyatı «alt qrup
 birləşməsi» ilə tarixçəyə → legacy alt qrup tələbələrinə rəsmi işarə (ana qrup izi + «Alt qrupa
-yerləşdirildi» sətri, ``subgroups``) → tələbə profilində boş sahələr. Sonda bir audit sətri (manifest:
+yerləşdirildi» sətri, ``subgroups``) → tələbə profilində boş sahələr → (yalnız açıq seçiləndə) aktiv reyestrin
+köhnə sistemlə rəsmi köçürmə/xaric əmrləri ilə nizamlanması (``registry_sync``). Sonda bir audit sətri (manifest:
 saylar + yaradılmış kiçik obyektlərin id-ləri) — ``resource_type=legacy_import.delta_batch``.
 """
 
@@ -24,6 +25,7 @@ from .finals import apply_finals
 from .journals import build_enrollments, build_offerings
 from .lessons import build_lessons_and_marks
 from .people import StudentMapper, TeacherMapper, student_gender
+from .registry_sync import sync_registry
 from .resolve import Catalog, lesson_date, text
 from .subgroups import mark_subgroups
 from .syllabi import import_syllabi
@@ -46,7 +48,11 @@ PHASES = (
     "dedupe",
     "subgroups",
     "profiles",
+    "registry_sync",
 )
+#: Yalnız AÇIQ seçiləndə (``--phase`` və ya paketin ``snapshot.phases``-i) işləyən fazalar — reyestr əmrləri yazır.
+OPT_IN_PHASES = ("registry_sync",)
+DEFAULT_PHASES = tuple(phase for phase in PHASES if phase not in OPT_IN_PHASES)
 
 
 def new_tag() -> str:
@@ -148,7 +154,7 @@ class DeltaRun:
         return excused
 
     # ── fazalar ───────────────────────────────────────────────────────────
-    def run(self, phases=PHASES) -> None:
+    def run(self, phases=DEFAULT_PHASES) -> None:
         if "enrollments" in phases or "students" in phases:
             self.students.prepare()
         slices = build_offerings(self) if "offerings" in phases else {}
@@ -170,6 +176,8 @@ class DeltaRun:
             mark_subgroups(self, [getattr(self.period_of(semestr), "pk", None) for semestr in full])
         if "profiles" in phases:
             self._profiles()
+        if "registry_sync" in phases:
+            sync_registry(self)
         for _legacy_id, user_pk in self.teachers.created:
             self.created("teachers", user_pk)
         for _legacy_id, user_pk in self.students.created:
@@ -246,7 +254,7 @@ class DeltaRun:
         }
 
 
-def execute(*, organization, actor, bundle: dict, apply: bool, until, tag: str = "", phases=PHASES) -> DeltaRun:
+def execute(*, organization, actor, bundle: dict, apply: bool, until, tag: str = "", phases=DEFAULT_PHASES) -> DeltaRun:
     """Bir tranzaksiyada bütün fazalar; ``apply=False`` → sonda geri qaytarılır."""
 
     from core.rls import apply_rls_request_context
@@ -286,4 +294,4 @@ def _display(row: dict) -> str:
     return " ".join(part for part in (text(row.get("last_name")), text(row.get("first_name"))) if part)
 
 
-__all__ = ["BATCH_RESOURCE", "PHASES", "DeltaRun", "execute", "lesson_date", "new_tag"]
+__all__ = ["BATCH_RESOURCE", "DEFAULT_PHASES", "PHASES", "DeltaRun", "execute", "lesson_date", "new_tag"]

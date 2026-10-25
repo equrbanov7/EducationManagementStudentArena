@@ -212,3 +212,34 @@ amma «Alt qrupa yerləşdir» tarixçəsi (`SubgroupPlacementEvent`) boş idi, 
 * **Prod:** paket yalnız bu fazanı daşıyır (`snapshot.phases = ["subgroups"]`; `legacy_delta_extract --phases
   subgroups` və ya mövcud delta2 paketinin yenidən yığılması) → şifrəli asset `legacy-delta-subgroups-…` →
   `prod-data-ops` `legacy_delta_apply` (dry-run → apply, `batch` = sha256).
+
+## 8. Aktiv tələbə reyestrinin nizamlanması — `registry_sync` fazası (2026-10-25)
+
+Sahib: «yeni jurnal datalarında analiz çıxardarsa, aktiv tələbə sayında nizamlamağa çalış». Köhnə sistemin
+2026-10-21 snapshot-u qrup üzvlüyü və azad edilmə üçün cari vəziyyətdir. Faza (`services/delta/registry_sync.py`)
+**yalnız açıq seçiləndə** işləyir (`DEFAULT_PHASES`-də yoxdur; paket `--phases registry_sync` ilə qurulur) və
+fərqləri YALNIZ rəsmi reyestr əmrləri ilə tətbiq edir (`registrar.movements.create_movement`):
+
+* **qrup** — köhnə sistemdə qrup cutover-DƏN SONRA dəyişibsə (`baseline` fərqi) və ya tələbə yenidirsə → `group_transfer`
+  (əmr `KS-SINX-20261021`, səbəb «Köhnə sistemdən sinxron: 2026-10-21 vəziyyəti»); jurnal qeydiyyatları rəsmi
+  köçürmə qaydası ilə yeni qrupun açılışına keçir (lazım olsa açılış yaranır);
+* **azad edilmə** — `azadedildi=1` → `expulsion` (köhnə `order_no` / `order_date`; gələcək/boş tarix → snapshot
+  tarixi). Paketin yeni `expelled_students` bölməsi cari semestrdə OLMAYAN azad edilmişləri də daşıyır (yalnız güclü
+  sübutla — ledger / identifikator / FİN; eyni FİN-in azad edilməmiş sətri varsa, yəni yenidən qəbul — toxunulmur).
+
+Toxunulmur (sayılır, adlı siyahıda): yeni sistemdə cutover-dən sonra əl ilə hərəkət/köçürmə/status izi; köhnə
+qrup dəyişməyib (yeni sistem qalibdir); alt qrup ↔ ana qrup (`parent_group` izi və ya ad şablonu, I/İ eyniləşdirilir);
+başqa ixtisasın qrupu (proqram köçürməsi qərarıdır); legacy-də eyni adamın iki sətri fərqli qrupda; hədəf «silinməli».
+
+Prod nüsxəsində (`ems_prodlive_1025` kopyası): 141 köçürmə (48 köhnə sistemdə köçürülmüş + 93 yeni tələbənin
+yerləşdirilməsi), 200 xaric (9 cari semestrdən + 191 cutover-dən əvvəl azad edilmiş, statusu «enrolled» qalmışdı),
+aktiv qeyd 9 333 → 9 133; ikinci qaçış 0 yazı. Sahib qərarı gözləyən: 235 alt qrup yerləşdirməsi, 67 başqa ixtisas,
+21 dublikat sətir və **~4 250 aktiv qeyd köhnə sistemin cari semestr jurnallarında yoxdur** (əsasən məzun kohortlar —
+yeni sistemdə «məzun» əmri yoxdur).
+
+```bash
+python manage.py legacy_delta_extract --password-file <fayl> --source myedu_new --baseline myedu_old \
+  --full-semester 14 --since 2026-08-01 --phases registry_sync --snapshot-file "<yeni dump>" \
+  --out ~/EMSArena-backups/legacy-delta-2026-10/delta3-registry-20261025.json.gz
+python manage.py legacy_delta_apply --bundle <paket> --organization qku   # dry-run; --apply ilə yazır
+```
