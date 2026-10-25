@@ -109996,3 +109996,31 @@ msgstr "Die E-Mail konnte nicht gesendet werden. Bitte versuchen Sie es in einig
 msgctxt "accounts.password_reset_done_page"
 msgid "Kod gəlmirsə, hesabınızda başqa e-poçt qeydə alınmış ola bilər — RİM-ə müraciət edin."
 msgstr "Kommt der Code nicht an, ist in Ihrem Konto möglicherweise eine andere E-Mail-Adresse hinterlegt — wenden Sie sich an das RİM."
+
+msgctxt "accounts.workload"
+msgid "Müəllim süzgəci:"
+msgstr "Lehrkraft-Filter:"
+
+msgctxt "accounts.workload"
+msgid "Müəllim süzgəcini götür"
+msgstr "Lehrkraft-Filter entfernen"
+
+msgctxt "accounts.workload"
+msgid "Süzgəcə uyğun sətir tapılmadı"
+msgstr "Keine Zeilen entsprechen dem Filter"
+
+msgctxt "accounts.workload"
+msgid "Müəllim süzgəcini götürün, axtarışı təmizləyin və ya semestri «Hamısı» seçin."
+msgstr "Entfernen Sie den Lehrkraft-Filter, leeren Sie die Suche oder wählen Sie das Semester „Alle“."
+
+msgctxt "accounts.workload"
+msgid "Daha çox göstər"
+msgstr "Mehr anzeigen"
+
+msgctxt "accounts.workload"
+msgid "Növbəti sətirlər yüklənmədi — yenidən cəhd edin."
+msgstr "Die nächsten Zeilen konnten nicht geladen werden — bitte erneut versuchen."
+
+msgctxt "accounts.workload"
+msgid "Müəllimin üstünə vurun — solda yalnız ona bölgüsü olan sətirlər qalsın. Təkrar vurun və ya × ilə süzgəci götürün."
+msgstr "Klicken Sie auf eine Lehrkraft — links bleiben nur die ihr zugeteilten Zeilen. Erneut klicken oder × entfernt den Filter."

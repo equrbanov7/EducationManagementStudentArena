@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from django.apps import apps as django_apps
+from django.core.exceptions import ValidationError
 from django.db.models import Q, Sum
 
 from core.search_text import tolerant_q
@@ -33,15 +34,36 @@ def _label(labels: dict, value: str) -> str:
     return str(label) if label is not None else value
 
 
-def task_rows(task, *, season: str = "", search: str = ""):
+#: «Vakant» kartı (sağ panel) üçün süzgəc açarı — müəllimi olmayan bölgü sətirləri.
+VACANT_FILTER = "vacant"
+#: Səhifələmənin üst həddi (``rows`` endpoint-i): bir cavab bundan çox sətir daşımır.
+MAX_PAGE_LIMIT = 300
+
+
+def _teacher_row_ids(task, teacher: str):
+    """Sağ paneldə seçilmiş müəllimin (və ya «Vakant»ın) bölgüsü olan sətir id-ləri (alt sorğu, JOIN-suz)."""
+    assignments = TeacherAssignment.objects.filter(row__task=task)
+    if teacher == VACANT_FILTER:
+        return assignments.filter(teacher__isnull=True).values("row_id")
+    try:
+        teacher_pk = TeacherAssignment._meta.get_field("teacher").related_model._meta.pk.to_python(teacher)
+    except (ValidationError, ValueError, TypeError):
+        return assignments.none().values("row_id")
+    return assignments.filter(teacher_id=teacher_pk).values("row_id")
+
+
+def task_rows(task, *, season: str = "", search: str = "", teacher: str = ""):
     queryset = (
         TeachingTaskRow.objects.filter(task=task)
         .select_related("subject", "specialty", "period", "intensive_offering")
         .prefetch_related("groups", "assignments__teacher")
-        .order_by("season", "order", "created_at")
+        # `pk` — səhifələmə sabit olsun (eyni `order` dəyəri olan sətirlər yerini dəyişməsin).
+        .order_by("season", "order", "created_at", "pk")
     )
     if season:
         queryset = queryset.filter(season=season)
+    if teacher:
+        queryset = queryset.filter(pk__in=_teacher_row_ids(task, teacher))
     # Sahib 2026-10-23: «müəllimə görə də axtarmaq lazımdır» — fənn / qrup / müəllim (ad, soyad, istifadəçi adı).
     search_q = tolerant_q(
         search,
@@ -106,9 +128,35 @@ def serialize_rows_state(task, *, season: str = "", search: str = "") -> tuple[l
     `rows` endpoint-i hazırlıq xülasəsini (``distribution_readiness``) eyni sorğunun sətirləri ilə qurur —
     süzgəcsiz görünüşdə sətirlər, qruplar və balans ikinci dəfə oxunmur.
     """
+    return _serialize(task, list(task_rows(task, season=season, search=search)))
+
+
+def rows_page(
+    task, *, season: str = "", search: str = "", teacher: str = "", offset: int = 0, limit: int = 0, focus_row=None
+) -> dict:
+    """Tənbəl yükləmə (2026-10-25): süzgəcə uyğun sətirlərin ``offset`` / ``limit`` dilimi + cəmi say.
+
+    Sorğu sayı sətir sayından asılı deyil (dilim + qruplar + təyinatlar prefetch, balans BİR GROUP BY).
+    ``limit=0`` — sətir oxunmur (yalnız say). ``focus_row`` (ilk dilim) — «Redaktə et» keçidinin sətri dilimdən
+    kənardadırsa, dilim ona qədər genişləndirilir ki, JS ona sürüşə bilsin.
+    """
+    queryset = task_rows(task, season=season, search=search, teacher=teacher)
+    total = queryset.count()
+    offset = max(int(offset or 0), 0)
+    limit = min(max(int(limit or 0), 0), MAX_PAGE_LIMIT)
+    if focus_row and limit and offset == 0:
+        position = next((i for i, pk in enumerate(queryset.values_list("pk", flat=True)) if pk == focus_row), None)
+        if position is not None:
+            limit = min(max(limit, position + 1), MAX_PAGE_LIMIT)
+    rows = list(queryset[offset : offset + limit]) if limit else []
+    payload, _rows, _balance = _serialize(task, rows)
+    next_offset = offset + len(rows)
+    return {"rows": payload, "total": total, "next_offset": next_offset, "has_more": next_offset < total}
+
+
+def _serialize(task, rows: list) -> tuple[list[dict], list, dict]:
     from .tasks import _amendment_target_row_ids
 
-    rows = list(task_rows(task, season=season, search=search))
     balance = balance_for_rows(rows)
     amend_targets = _amendment_target_row_ids(task) if task.status == TaskStatus.AMENDED else set()
     payload = []
@@ -433,7 +481,10 @@ def chair_tasks(*, organization, chair_ids, academic_year: str = ""):
 
 
 __all__ = [
+    "MAX_PAGE_LIMIT",
+    "VACANT_FILTER",
     "chair_tasks",
+    "rows_page",
     "serialize_rows",
     "serialize_rows_state",
     "task_rows",

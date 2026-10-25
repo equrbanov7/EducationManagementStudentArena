@@ -3166,3 +3166,9 @@ msgstr "Əvvəlcə kafedranı seçin."
 
 msgid "İntensiv kurs ləğv edilsin? (yalnız jurnalda dərs yoxdursa mümkündür)"
 msgstr "İntensiv kurs ləğv edilsin? (yalnız jurnalda dərs yoxdursa mümkündür)"
+
+msgid "Göstərilir: %(shown)s / %(total)s sətir"
+msgstr "Göstərilir: %(shown)s / %(total)s sətir"
+
+msgid "Seçilmiş müəllim"
+msgstr "Seçilmiş müəllim"

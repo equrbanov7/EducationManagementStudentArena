@@ -148,6 +148,16 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
   <div class="wl__layout">
     {# ── Sol: sətirlər ──────────────────────────────────────────────── #}
     <div class="wl__main">
+      {% comment %}2026-10-25: sağ paneldən seçilmiş müəllim süzgəci (× ilə götürülür) + «göstərilir N / M» sayğacı.
+      Mətnlər şablondadır; ad/say `workload_distribution_list.js`-dən doldurulur.{% endcomment %}
+      <div class="wl-active-filter" data-wl-teacher-filter hidden>
+        <span class="wl-active-filter__label">{% trans "Müəllim süzgəci:" context "accounts.workload" %}</span>
+        <strong class="wl-active-filter__name" data-wl-teacher-filter-name></strong>
+        <button type="button" class="wl-active-filter__clear" data-wl-teacher-clear
+                aria-label="{% trans 'Müəllim süzgəcini götür' context 'accounts.workload' %}"
+                title="{% trans 'Müəllim süzgəcini götür' context 'accounts.workload' %}">&times;</button>
+      </div>
+      <p class="wl-count" data-wl-count role="status" aria-live="polite" hidden></p>
       <div class="wl-skeleton" data-wl-skeleton hidden aria-hidden="true">
         <span class="wl-skeleton__bar"></span><span class="wl-skeleton__bar"></span><span class="wl-skeleton__bar"></span>
       </div>
@@ -156,13 +166,27 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
         <p class="ems-empty-title">{% trans "Bu il üçün tapşırıq yoxdur" context "accounts.workload" %}</p>
         <p class="ems-empty-hint">{% trans "«Tapşırıq yarat» düyməsi ilə kafedranın illik tapşırığını açın, sonra sətirləri əlavə edin və ya tədris planından gətirin." context "accounts.workload" %}</p>
       </div>
+      <div class="ems-empty wl__empty" data-wl-nomatch hidden>
+        <i class="fas fa-filter-circle-xmark ems-empty-icon" aria-hidden="true"></i>
+        <p class="ems-empty-title">{% trans "Süzgəcə uyğun sətir tapılmadı" context "accounts.workload" %}</p>
+        <p class="ems-empty-hint">{% trans "Müəllim süzgəcini götürün, axtarışı təmizləyin və ya semestri «Hamısı» seçin." context "accounts.workload" %}</p>
+      </div>
       <div class="wl-rows" data-wl-rows role="list"></div>
+      {% comment %}Tənbəl yükləmə: bu zolaq görünəndə növbəti dilim gəlir (IntersectionObserver); düymə klaviatura/ehtiyat yoludur.{% endcomment %}
+      <div class="wl-more" data-wl-more hidden>
+        <button type="button" class="wl-btn wl-btn--ghost" data-wl-load-more>
+          <i class="fas fa-angles-down" aria-hidden="true"></i>
+          <span>{% trans "Daha çox göstər" context "accounts.workload" %}</span>
+        </button>
+        <p class="wl-more__error" data-wl-more-error role="alert" hidden>{% trans "Növbəti sətirlər yüklənmədi — yenidən cəhd edin." context "accounts.workload" %}</p>
+      </div>
     </div>
 
     {# ── Sağ: müəllim yük paneli ────────────────────────────────────── #}
     <aside class="wl__aside" aria-label="{% trans 'Müəllim yükü' context 'accounts.workload' %}">
       <h3 class="wl-aside__title">{% trans "Müəllim yükü" context "accounts.workload" %}</h3>
       <p class="wl-aside__hint">{{ workload_distribution_section.norm_note }}</p>
+      <p class="wl-aside__hint">{% trans "Müəllimin üstünə vurun — solda yalnız ona bölgüsü olan sətirlər qalsın. Təkrar vurun və ya × ilə süzgəci götürün." context "accounts.workload" %}</p>
       <div class="wl-teachers" data-wl-teacher-panel></div>
     </aside>
   </div>

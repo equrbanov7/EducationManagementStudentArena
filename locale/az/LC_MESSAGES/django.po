@@ -108480,3 +108480,31 @@ msgstr "Məktub göndərilə bilmədi. Bir neçə dəqiqə sonra yenidən cəhd 
 msgctxt "accounts.password_reset_done_page"
 msgid "Kod gəlmirsə, hesabınızda başqa e-poçt qeydə alınmış ola bilər — RİM-ə müraciət edin."
 msgstr "Kod gəlmirsə, hesabınızda başqa e-poçt qeydə alınmış ola bilər — RİM-ə müraciət edin."
+
+msgctxt "accounts.workload"
+msgid "Müəllim süzgəci:"
+msgstr "Müəllim süzgəci:"
+
+msgctxt "accounts.workload"
+msgid "Müəllim süzgəcini götür"
+msgstr "Müəllim süzgəcini götür"
+
+msgctxt "accounts.workload"
+msgid "Süzgəcə uyğun sətir tapılmadı"
+msgstr "Süzgəcə uyğun sətir tapılmadı"
+
+msgctxt "accounts.workload"
+msgid "Müəllim süzgəcini götürün, axtarışı təmizləyin və ya semestri «Hamısı» seçin."
+msgstr "Müəllim süzgəcini götürün, axtarışı təmizləyin və ya semestri «Hamısı» seçin."
+
+msgctxt "accounts.workload"
+msgid "Daha çox göstər"
+msgstr "Daha çox göstər"
+
+msgctxt "accounts.workload"
+msgid "Növbəti sətirlər yüklənmədi — yenidən cəhd edin."
+msgstr "Növbəti sətirlər yüklənmədi — yenidən cəhd edin."
+
+msgctxt "accounts.workload"
+msgid "Müəllimin üstünə vurun — solda yalnız ona bölgüsü olan sətirlər qalsın. Təkrar vurun və ya × ilə süzgəci götürün."
+msgstr "Müəllimin üstünə vurun — solda yalnız ona bölgüsü olan sətirlər qalsın. Təkrar vurun və ya × ilə süzgəci götürün."

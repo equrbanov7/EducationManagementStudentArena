@@ -69,7 +69,13 @@
             .join("");
     }
 
-    function assignmentChips(row) {
+    /** Sağ paneldə seçilmiş müəllimin (və ya «Vakant»ın) təyinatı mı — çip vurğulanır. */
+    function isMatch(item, teacher) {
+        if (!teacher) return false;
+        return teacher === "vacant" ? !!item.is_vacant : String(item.teacher_id) === String(teacher);
+    }
+
+    function assignmentChips(row, teacher) {
         if (!row.assignments || !row.assignments.length) return "";
         return (
             '<ul class="wl-assign-list">' +
@@ -78,6 +84,7 @@
                     return (
                         '<li class="wl-assign-chip' +
                         (item.is_vacant ? " is-vacant" : "") +
+                        (isMatch(item, teacher) ? " is-match" : "") +
                         '">' +
                         esc(item.teacher_name) +
                         " · " +
@@ -131,81 +138,107 @@
         );
     }
 
-    /** Sətir kartlarını cədvəl sahəsinə yazır. */
-    Render.rows = function renderRows(host, rows, labels) {
+    function rowHtml(row, labels, teacher) {
+        if (row.intensive) return intensiveRow(row);
+        return (
+            '<article class="wl-row' +
+            (row.teaching_complete ? " is-complete" : "") +
+            '" role="listitem" data-wl-row data-row-id="' +
+            esc(row.id) +
+            '">' +
+            '<div class="wl-row__head">' +
+            '<h3 class="wl-row__subject">' +
+            esc(row.subject) +
+            "</h3>" +
+            '<div class="wl-row__actions">' +
+            '<button type="button" class="wl-btn wl-btn--ghost" data-wl-row-edit data-row-id="' +
+            esc(row.id) +
+            '">' + esc(gettext("Redaktə")) + "</button>" +
+            '<button type="button" class="wl-btn wl-btn--danger" data-wl-row-remove data-row-id="' +
+            esc(row.id) +
+            '">' + esc(gettext("Sil")) + "</button>" +
+            "</div>" +
+            "</div>" +
+            '<div class="wl-row__meta">' +
+            (row.is_amend_target
+                ? '<span class="wl-row__amend">' + esc(gettext("Düzəliş açıqdır")) + "</span>"
+                : "") +
+            "<span>" +
+            esc(row.season_label) +
+            "</span>" +
+            (row.specialty ? "<span>" + esc(row.specialty) + "</span>" : "") +
+            (row.groups_text ? "<span>" + esc(row.groups_text) + "</span>" : "") +
+            "<span>" +
+            row.total_hours +
+            " saat</span>" +
+            (row.credits ? "<span>" + esc(row.credits) + " kredit</span>" : "") +
+            "</div>" +
+            activityBlock(row, labels) +
+            assignmentChips(row, teacher) +
+            "</article>"
+        );
+    }
+
+    /**
+     * Sətir kartlarını cədvəl sahəsinə yazır. ``opts.append`` — mövcud kartların ARDINA əlavə (tənbəl yükləmə,
+     * 2026-10-25); ``opts.teacher`` — seçilmiş müəllimin çipləri vurğulanır.
+     */
+    Render.rows = function renderRows(host, rows, labels, opts) {
         if (!host) return;
+        opts = opts || {};
         labels = labels || {};
-        host.innerHTML = (rows || [])
+        var html = (rows || [])
             .map(function (row) {
-                if (row.intensive) return intensiveRow(row);
-                return (
-                    '<article class="wl-row' +
-                    (row.teaching_complete ? " is-complete" : "") +
-                    '" role="listitem" data-wl-row data-row-id="' +
-                    esc(row.id) +
-                    '">' +
-                    '<div class="wl-row__head">' +
-                    '<h3 class="wl-row__subject">' +
-                    esc(row.subject) +
-                    "</h3>" +
-                    '<div class="wl-row__actions">' +
-                    '<button type="button" class="wl-btn wl-btn--ghost" data-wl-row-edit data-row-id="' +
-                    esc(row.id) +
-                    '">' + esc(gettext("Redaktə")) + "</button>" +
-                    '<button type="button" class="wl-btn wl-btn--danger" data-wl-row-remove data-row-id="' +
-                    esc(row.id) +
-                    '">' + esc(gettext("Sil")) + "</button>" +
-                    "</div>" +
-                    "</div>" +
-                    '<div class="wl-row__meta">' +
-                    (row.is_amend_target
-                        ? '<span class="wl-row__amend">' + esc(gettext("Düzəliş açıqdır")) + "</span>"
-                        : "") +
-                    "<span>" +
-                    esc(row.season_label) +
-                    "</span>" +
-                    (row.specialty ? "<span>" + esc(row.specialty) + "</span>" : "") +
-                    (row.groups_text ? "<span>" + esc(row.groups_text) + "</span>" : "") +
-                    "<span>" +
-                    row.total_hours +
-                    " saat</span>" +
-                    (row.credits ? "<span>" + esc(row.credits) + " kredit</span>" : "") +
-                    "</div>" +
-                    activityBlock(row, labels) +
-                    assignmentChips(row) +
-                    "</article>"
-                );
+                return rowHtml(row, labels, opts.teacher || "");
             })
             .join("");
+        if (opts.append) {
+            host.insertAdjacentHTML("beforeend", html);
+        } else {
+            host.innerHTML = html;
+        }
     };
 
-    /** Sağ paneldəki müəllim kartları. */
-    Render.teachers = function renderTeachers(host, cards) {
+    /**
+     * Sağ paneldəki müəllim kartları. Hər kart DÜYMƏDİR (``aria-pressed``): klik sol siyahını həmin müəllimə
+     * süzür (``workload_distribution_list.js``); ``opts.active`` — seçilmiş müəllim ("vacant" — Vakant kartı).
+     */
+    Render.teachers = function renderTeachers(host, cards, opts) {
         if (!host) return;
+        var active = (opts && opts.active) || "";
         if (!cards || !cards.length) {
             host.innerHTML = '<p class="wl-teacher__numbers">' + esc(gettext("Hələ bölgü yoxdur.")) + "</p>";
             return;
         }
         host.innerHTML = cards
             .map(function (card) {
+                var key = card.is_vacant ? "vacant" : String(card.teacher_id);
                 var cls = card.is_vacant ? " is-vacant" : card.is_over_norm ? " is-over" : "";
+                var on = key === String(active);
                 return (
-                    '<div class="wl-teacher' +
+                    '<button type="button" class="wl-teacher' +
                     cls +
-                    '">' +
-                    '<div class="wl-teacher__name">' +
+                    (on ? " is-active" : "") +
+                    '" data-wl-teacher-id="' +
+                    esc(key) +
+                    '" data-wl-teacher-name="' +
                     esc(card.name) +
-                    "</div>" +
-                    '<div class="wl-teacher__numbers">' +
+                    '" aria-pressed="' +
+                    (on ? "true" : "false") +
+                    '">' +
+                    '<span class="wl-teacher__name">' +
+                    esc(card.name) +
+                    "</span>" +
+                    '<span class="wl-teacher__numbers">' +
                     card.hours +
                     (card.norm_hours ? " / " + card.norm_hours : "") +
                     " saat · " +
                     card.fill_percent +
-                    "%</div>" +
-                    '<div class="wl-teacher__bar"><span class="wl-teacher__fill" style="--wl-fill:' +
+                    "%</span>" +
+                    '<span class="wl-teacher__bar"><span class="wl-teacher__fill" style="--wl-fill:' +
                     Math.min(100, card.fill_percent || 0) +
-                    '%"></span></div>' +
-                    "</div>"
+                    '%"></span></span>' +
+                    "</button>"
                 );
             })
             .join("");
@@ -231,6 +264,25 @@
             '<div class="wl-confirm__stat"><span>' + esc(gettext("Yarımçıq sətir")) + "</span><b>" +
             (readiness.incomplete_rows || []).length +
             "</b></div>";
+    };
+
+    /** Bölgü modalının müəllim siyahısı: «Vakant» + hovuz (cari saat, kənar/bağlanmamış qeydi). */
+    Render.teacherPicker = function teacherPicker(select, results) {
+        if (!select) return;
+        var html = '<option value="">' + esc(gettext("Vakant (müəllim təyin edilməyib)")) + "</option>";
+        (results || []).forEach(function (item) {
+            var suffix = item.current_hours != null ? " · " + item.current_hours + "s" : "";
+            // Başqa kafedranın müəllimi (saathesabı): ştat kafedrası yazılır; təyinatda bu kafedrada
+            // ƏLAVƏ üzvlük alır, ştatı dəyişmir (sahib 2026-10-25).
+            var mark = item.is_outside
+                ? " — " + gettext("kənar, ştat: %(chair)s").replace("%(chair)s", item.home_chair || "—")
+                : item.is_chair_member
+                  ? ""
+                  : " " + gettext("(kafedraya bağlanmamış)");
+            html += '<option value="' + esc(item.id) + '">' + esc(item.full_name) + suffix + esc(mark) + "</option>";
+        });
+        select.innerHTML = html;
+        if (window.EMSBootstrapSelect) window.EMSBootstrapSelect.refresh(select);
     };
 
     Render.options = function fillOptions(select, items, opts) {

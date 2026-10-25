@@ -3181,3 +3181,9 @@ msgstr "Select the department first."
 
 msgid "İntensiv kurs ləğv edilsin? (yalnız jurnalda dərs yoxdursa mümkündür)"
 msgstr "Cancel the intensive course? (only possible if no lessons are recorded)"
+
+msgid "Göstərilir: %(shown)s / %(total)s sətir"
+msgstr "Showing %(shown)s of %(total)s rows"
+
+msgid "Seçilmiş müəllim"
+msgstr "Selected teacher"
