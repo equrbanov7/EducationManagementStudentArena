@@ -32,6 +32,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.utils.translation import pgettext
 
+from core import phone as phone_lib
 from core.constants import OrgUnitType
 from core.validators import validate_fin
 
@@ -325,10 +326,22 @@ def _validate_identity(plan: RowPlan, row: dict, context: IntakeContext) -> bool
             "first_name": first_name,
             "last_name": last_name,
             "patronymic": _text(row.get("patronymic")),
-            "phone": _text(row.get("phone"))[:20],
+            "phone": _normalized_phone(row.get("phone")),
         }
     )
     return True
+
+
+def _normalized_phone(raw) -> str:
+    """Excel-dəki telefon: oxunursa E.164 (Azərbaycan defolt, ``+`` ilə xarici); oxunmursa olduğu kimi saxlanır.
+
+    Sütun ixtiyaridir və əvvəl heç yoxlanmırdı — burada yalnız normallaşdırılır, sətri rədd etmir (``core.phone``).
+    """
+    text = _text(raw)
+    try:
+        return phone_lib.clean_phone(text)
+    except ValidationError:
+        return text[:20]
 
 
 def _validate_structure(plan: RowPlan, row: dict, context: IntakeContext) -> bool:

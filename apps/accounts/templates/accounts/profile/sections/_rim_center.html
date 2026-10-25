@@ -1,4 +1,4 @@
-{% load static i18n %}
+{% load static i18n phone_tags %}
 {% comment %}
 «RİM mərkəzi» — hesab idarəetməsi (axtarış / parol bərpası / blok / soft-delete /
 şəxsi məlumat redaktəsi).
@@ -146,6 +146,11 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
     {% endcomment %}
     {% if rim_center_section.can_create or rim_center_section.can_create_unit %}
       {% include "accounts/profile/sections/partials/_rim_create.html" %}
+    {% endif %}
+
+    {% if rim_center_section.can_edit %}
+    {% comment %}Redaktə panelində telefon xanası JS-lə qurulur (render.js → EMSPhoneField): şablon burada hazır durur.{% endcomment %}
+    <template data-rim-phone-template>{% phone_field name="phone" value="" field_id="rim-edit-phone" input_class="rim-input" data_attr="data-rim-edit-field" %}</template>
     {% endif %}
 
     <div class="rim-results" data-rim-results aria-live="polite">

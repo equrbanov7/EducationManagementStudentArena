@@ -416,7 +416,9 @@ class EditProfileSecondPhoneTest(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         user.profile.refresh_from_db()
-        self.assertEqual(user.profile.phone_secondary, "+994 55 000 00 02")
+        # Sahib 2026-10-25: telefonlar E.164-də saxlanır (core.phone).
+        self.assertEqual(user.profile.phone, "+994500000001")
+        self.assertEqual(user.profile.phone_secondary, "+994550000002")
 
 
 class AuditTrailTest(TestCase):

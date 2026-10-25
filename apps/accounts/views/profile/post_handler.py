@@ -13,12 +13,14 @@ Behavior is identical to the original inline block — this is a pure extraction
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model, update_session_auth_hash
+from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.utils.translation import pgettext_lazy
 
 from apps.audit.public import log_action
+from core import phone as phone_lib
 from core.moderation.enforcement import screen_names
 from core.upload_security import randomize_uploaded_filename
 
@@ -28,6 +30,13 @@ from ...services.profile_actions import publish_system_notification
 from .._helpers import _user_has_any_role
 
 User = get_user_model()
+
+
+def _resolve_phone(request, name, current):
+    """Formada ``name`` göndərilməyibsə mövcud dəyər qalır; göndərilibsə ölkəyə görə yoxlanıb E.164 olur."""
+    if name not in request.POST:
+        return current
+    return phone_lib.resolve_phone_update(request.POST, name, current)
 
 
 def _log_password_change(request, *, method):
@@ -190,6 +199,15 @@ def handle_profile_post(
             messages.error(request, pgettext_lazy("accounts.profile_edit.message", "email_already_in_use"))
             return _result(redirect(f"{reverse('accounts:profile')}?section=edit-profile"))
 
+        # Sahib 2026-10-25: telefon ölkəyə görə yoxlanır və E.164-ə gətirilir (``core.phone``); dəyişməyibsə
+        # köhnə (oxunmayan) dəyər bloklamır. Xəta varsa heç nə saxlanmır.
+        try:
+            new_phone = _resolve_phone(request, "phone", profile.phone)
+            new_phone_secondary = _resolve_phone(request, "phone_secondary", profile.phone_secondary)
+        except ValidationError as exc:
+            messages.error(request, exc.messages[0])
+            return _result(redirect(f"{reverse('accounts:profile')}?section=edit-profile"))
+
         # Sahib 2026-09-30: DƏYİŞƏN ad/soyadda nalayiq ifadə → rədd + audit (IP, vaxt, sahə).
         name_rejection = screen_names(
             request,
@@ -216,8 +234,8 @@ def handle_profile_post(
 
         # Update profile. Uzunluqlar model max_length-ə server tərəfdə kəsilir —
         # maxlength yalnız client atributudur, birbaşa POST DataError verərdi.
-        profile.phone = (request.POST.get("phone", profile.phone) or "").strip()[:20]
-        profile.phone_secondary = (request.POST.get("phone_secondary", profile.phone_secondary) or "").strip()[:20]
+        profile.phone = new_phone
+        profile.phone_secondary = new_phone_secondary
         profile.bio = (request.POST.get("bio", profile.bio) or "").strip()
         profile.location = (request.POST.get("location", profile.location) or "").strip()[:100]
 

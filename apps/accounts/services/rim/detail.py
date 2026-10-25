@@ -20,6 +20,7 @@ from __future__ import annotations
 
 from django.urls import reverse
 
+from core import phone as phone_lib
 from core.staff_position import visible_role_label
 
 from .policy import RimActor, target_level
@@ -97,6 +98,8 @@ def serialize_row(user, actor: RimActor):
     """Axtarış siyahısının bir sətri — username AÇIQ göstərilir (əsas tələb)."""
     profile = _profile_of(user)
     status = account_status(user)
+    # Redaktə formasında telefon (ölkə, yerli nömrə) cütü kimi göstərilir (``core.phone``, sahib 2026-10-25).
+    phone_parts = phone_lib.split_phone(getattr(profile, "phone", "") or "")
     return {
         "id": user.pk,
         # Operator username-i BİLMİR — axtarışın bütün mənası onu tapmaqdır.
@@ -108,6 +111,8 @@ def serialize_row(user, actor: RimActor):
         "email": user.email or "",
         "fin": getattr(profile, "fin", "") or "",
         "phone": getattr(profile, "phone", "") or "",
+        "phone_country": phone_parts.region,
+        "phone_national": phone_parts.national,
         "staff_position": getattr(profile, "staff_position", "") or "",
         "status": status,
         "status_label": {

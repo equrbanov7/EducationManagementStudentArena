@@ -47,10 +47,16 @@
         var needed = Math.min(desiredMax, menuH);
         var openUp = spaceBelow < needed && spaceAbove > spaceBelow;
 
+        // `data-menu-min-width` (ixtiyari, px): dar düymə + geniş menyu (məs. telefon ölkə seçicisi).
+        var holder = toggle.closest(".bootstrap-single-select");
+        var minWidth = holder ? Number(holder.getAttribute("data-menu-min-width")) || 0 : 0;
+        var menuWidth = Math.min(Math.max(rect.width, minWidth), window.innerWidth - 16);
+        var menuLeft = Math.max(8, Math.min(rect.left, window.innerWidth - menuWidth - 8));
+
         menu.classList.add("is-fixed");
         menu.style.position = "fixed";
-        menu.style.left = rect.left + "px";
-        menu.style.width = rect.width + "px";
+        menu.style.left = (minWidth ? menuLeft : rect.left) + "px";
+        menu.style.width = (minWidth ? menuWidth : rect.width) + "px";
         menu.style.right = "auto";
         menu.style.transform = "none";
 
@@ -164,7 +170,8 @@
                   };
             var visible = 0;
             menu.querySelectorAll(".bootstrap-single-select__option").forEach(function (button) {
-                var match = !needle || hitTest(button.textContent || "");
+                // `data-search` (ixtiyari): variantın əlavə axtarış mətni (məs. diakritiksiz / ingiliscə ölkə adı).
+                var match = !needle || hitTest((button.textContent || "") + " " + (button.dataset.search || ""));
                 button.hidden = !match;
                 if (match) {
                     visible += 1;
@@ -199,9 +206,12 @@
             var selectedOption = select.options[select.selectedIndex] || select.options[0];
             var hasValue = Boolean(select.value);
 
-            label.textContent = selectedOption ? selectedOption.textContent : "";
+            // `data-toggle-label` (ixtiyari): düymədə qısa etiket (məs. telefon kodu «🇦🇿 +994»), menyuda tam mətn.
+            label.textContent = selectedOption
+                ? selectedOption.getAttribute("data-toggle-label") || selectedOption.textContent
+                : "";
             // Dar sahədə yazı «…» ilə kəsiləndə tam mətn ipucunda görünsün (məs. uzun korpus adı).
-            label.title = label.textContent;
+            label.title = selectedOption ? selectedOption.textContent : "";
             toggle.classList.toggle("is-placeholder", !hasValue);
             toggle.classList.toggle("is-disabled", select.disabled);
             toggle.disabled = select.disabled;
@@ -249,6 +259,9 @@
                 optionButton.type = "button";
                 optionButton.className = "dropdown-item bootstrap-single-select__option";
                 optionButton.dataset.value = option.value;
+                if (option.getAttribute("data-search")) {
+                    optionButton.dataset.search = option.getAttribute("data-search");
+                }
                 optionButton.disabled = option.disabled;
                 optionButton.classList.toggle("is-placeholder", isPlaceholder);
                 // Option-un öz class-larını menyu düyməsinə köçür (məs.

@@ -387,7 +387,7 @@ class ProfilePostHandlingTest(TestCase):
                 "first_name": "New",
                 "last_name": "Person",
                 "email": "newperson@example.com",
-                "phone": "555000",
+                "phone": "050 123 45 67",
                 "bio": "hello bio",
                 "location": "Baku",
             },
@@ -399,7 +399,7 @@ class ProfilePostHandlingTest(TestCase):
         self.assertEqual(self.user.last_name, "Person")
         self.assertEqual(self.user.email, "newperson@example.com")
         profile = UserProfile.objects.get(user=self.user)
-        self.assertEqual(profile.phone, "555000")
+        self.assertEqual(profile.phone, "+994501234567")  # 2026-10-25: E.164
         self.assertEqual(profile.bio, "hello bio")
         self.assertEqual(profile.location, "Baku")
 

@@ -81,38 +81,15 @@
     margin-top: 6px;
 }
 
-/* Telefon: operator seçimi (050, 055 …) + qalan 7 rəqəm — sahib 2026-10-17. */
-.pc-phone {
-    display: flex;
-    gap: 8px;
-    align-items: stretch;
-}
-
-/* .bootstrap-single-select defoltu width:100% — burada sabit en (nömrə xanası qalan yeri tutur). */
-.pc-phone .pc-phone__operator {
-    flex: 0 0 104px;
-    width: 104px;
-    min-width: 0;
-}
-
-.pc-phone--other .pc-phone__operator {
-    flex-basis: 156px;
-    width: 156px;
-}
-
-.pc-phone .pc-phone__operator .bootstrap-single-select__toggle {
+/* Telefon: ölkə seçicisi + yerli nömrə (sahib 2026-10-25). Komponent: static/css/phone_field.css. */
+.phone-field .phone-field__country .bootstrap-single-select__toggle {
     min-height: 46px;
-    height: 100%;
     border-radius: 10px;
     font-weight: 600;
-    font-variant-numeric: tabular-nums;
 }
 
-.pc-phone input[type="tel"] {
-    flex: 1 1 auto;
-    min-width: 0;
-    letter-spacing: 0.04em;
-    font-variant-numeric: tabular-nums;
+.phone-field input[type="tel"] {
+    letter-spacing: 0.02em;
 }
 
 /* «Hələlik keç» — ikinci dərəcəli düymə (sahib 2026-10-17). */
@@ -145,10 +122,9 @@
     text-align: center;
 }
 
-/* 320–360px: operator seçimi 104px nömrə xanasını sıxırdı (nümunə «məs: 123 45 67» kəsilirdi). */
+/* 320–360px: ölkə seçicisi daha dar (nömrə xanası sıxılmasın). */
 @media (max-width: 360px) {
-    .pc-phone .pc-phone__operator {
-        flex-basis: 92px;
-        width: 92px;
+    .phone-field .phone-field__country {
+        width: 100px;
     }
 }

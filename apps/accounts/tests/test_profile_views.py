@@ -856,7 +856,9 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, 'value="Elvin"')
         self.assertContains(response, 'value="Qurbanov"')
         self.assertContains(response, 'value="elvin@example.com"')
-        self.assertContains(response, 'value="+994501112233"')
+        # Sahib 2026-10-25: nömrə ölkə seçicisi + yerli formada göstərilir (+994501112233 → AZ, 050 111 22 33).
+        self.assertContains(response, 'value="050 111 22 33"')
+        self.assertContains(response, "selected>🇦🇿 Azərbaycan +994</option>")
         self.assertContains(response, 'value="Baku"')
         self.assertContains(response, "Bio test text")
         # 2026-08-15 redesign: təşkilat üzvündə müəssisə sahəsi sərbəst mətn

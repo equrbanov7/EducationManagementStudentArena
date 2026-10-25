@@ -229,33 +229,51 @@ class ProfileCompletionGateTest(TestCase):
         self.student.profile.refresh_from_db()
         self.assertIsNone(self.student.profile.fin)
 
-    def test_phone_operator_select_is_combined(self):
-        # Sahib 2026-10-17: operator (050, 055 …) seçilir, xanaya qalan 7 rəqəm yazılır.
+    def test_phone_country_picker_defaults_to_azerbaijan(self):
+        # Sahib 2026-10-25: ölkə seçilir (defolt Azərbaycan +994), nömrə yerli formada yazılır.
         self.client.force_login(self.teacher)
         page = self.client.get(self.url)
-        self.assertContains(page, 'name="phone_operator"')
-        self.assertContains(page, '<option value="055"')
-        self.assertContains(page, "123 45 67")
-        response = self.client.post(self.url, {"fin": "6TCH002", "phone_operator": "055", "phone": "123 45 67"})
+        self.assertContains(page, 'name="phone_country"')
+        self.assertContains(page, '<option value="AZ" data-dial="994"')
+        self.assertContains(page, "selected>🇦🇿 Azərbaycan +994</option>")
+        self.assertContains(page, '<option value="TR" data-dial="90"')
+        self.assertContains(page, 'placeholder="050 123 45 67"')
+        self.assertNotContains(page, "phone_operator")
+        response = self.client.post(self.url, {"fin": "6TCH002", "phone_country": "AZ", "phone": "055 123 45 67"})
         self.assertEqual(response.status_code, 302)
         self.teacher.profile.refresh_from_db()
         self.assertEqual(self.teacher.profile.phone, "+994551234567")
 
-    def test_phone_operator_requires_seven_digits_and_keeps_choice(self):
+    def test_phone_country_missing_from_post_means_azerbaijan(self):
         self.client.force_login(self.teacher)
-        response = self.client.post(self.url, {"fin": "6TCH003", "phone_operator": "070", "phone": "12345"})
+        response = self.client.post(self.url, {"fin": "6TCH005", "phone": "0551234567"})
+        self.assertEqual(response.status_code, 302)
+        self.teacher.profile.refresh_from_db()
+        self.assertEqual(self.teacher.profile.phone, "+994551234567")
+
+    def test_phone_wrong_length_keeps_choice_and_text(self):
+        self.client.force_login(self.teacher)
+        response = self.client.post(self.url, {"fin": "6TCH003", "phone_country": "TR", "phone": "555 12"})
         self.assertEqual(response.status_code, 200)
         errors = {field["name"]: field["error"] for field in response.context["fields"]}
-        self.assertIn("7 rəqəm", errors["phone"])
-        self.assertEqual(response.context["phone_operator"], "070")
+        self.assertIn("qısadır", errors["phone"])
+        self.assertEqual(response.context["phone_country"], "TR")
+        # Seçim və yazılan mətn yenidən göstərilir; ölkənin nümunəsi placeholder-dir.
+        self.assertContains(response, "selected>🇹🇷 Türkiyə +90</option>")
+        self.assertContains(response, 'value="555 12"')
         self.teacher.profile.refresh_from_db()
         self.assertIsNone(self.teacher.profile.fin)
 
-    def test_foreign_phone_with_other_operator(self):
+    def test_foreign_country_selected_with_local_number(self):
         self.client.force_login(self.teacher)
-        response = self.client.post(
-            self.url, {"fin": "6TCH004", "phone_operator": "other", "phone": "+90 555 123 45 67"}
-        )
+        response = self.client.post(self.url, {"fin": "6TCH004", "phone_country": "TR", "phone": "0555 123 45 67"})
+        self.assertEqual(response.status_code, 302)
+        self.teacher.profile.refresh_from_db()
+        self.assertEqual(self.teacher.profile.phone, "+905551234567")
+
+    def test_international_number_overrides_selected_country(self):
+        self.client.force_login(self.teacher)
+        response = self.client.post(self.url, {"fin": "6TCH006", "phone_country": "AZ", "phone": "+90 555 123 45 67"})
         self.assertEqual(response.status_code, 302)
         self.teacher.profile.refresh_from_db()
         self.assertEqual(self.teacher.profile.phone, "+905551234567")
@@ -406,16 +424,6 @@ class ProfileCompletionGateTest(TestCase):
 
 
 class ProfileCompletionCleanersTest(SimpleTestCase):
-    def test_combine_phone(self):
-        self.assertEqual(policy.combine_phone({"phone_operator": "050", "phone": "1234567"}), "0501234567")
-        self.assertEqual(policy.combine_phone({"phone_operator": "050", "phone": "050 123 45 67"}), "0501234567")
-        self.assertEqual(policy.combine_phone({"phone_operator": "099", "phone": "99 123 45 67"}), "0991234567")
-        self.assertEqual(policy.combine_phone({"phone": "050 123 45 67"}), "050 123 45 67")  # köhnə forma
-        self.assertEqual(policy.combine_phone({"phone_operator": "050", "phone": ""}), "")
-        for bad in ("123456", "12345678", "12a4567"):
-            with self.assertRaises(ValidationError):
-                policy.combine_phone({"phone_operator": "050", "phone": bad})
-
     def test_phone_normalisation(self):
         cases = {
             "050 123 45 67": "+994501234567",
@@ -426,9 +434,15 @@ class ProfileCompletionCleanersTest(SimpleTestCase):
         }
         for raw, expected in cases.items():
             self.assertEqual(policy.clean_phone(raw), expected, raw)
-        for bad in ("", "123", "abc 123 45 67", "05012345678901234"):
+        for bad in ("", "123", "abc 123 45 67", "05012345678901234", "1234567"):
             with self.assertRaises(ValidationError, msg=bad):
                 policy.clean_phone(bad)
+
+    def test_clean_phone_post_reads_country_field(self):
+        self.assertEqual(policy.clean_phone_post({"phone": "532 123 45 67", "phone_country": "TR"}), "+905321234567")
+        self.assertEqual(policy.clean_phone_post({"phone": "050 123 45 67"}), "+994501234567")
+        with self.assertRaises(ValidationError):
+            policy.clean_phone_post({"phone": "", "phone_country": "TR"})
 
     def test_fin_normalisation(self):
         self.assertEqual(policy.clean_fin(" 5abc12d "), "5ABC12D")

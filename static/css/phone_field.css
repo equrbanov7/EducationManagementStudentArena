@@ -1,0 +1,54 @@
+/*
+ * static/css/phone_field.css — telefon sahəsi: ölkə seçicisi + yerli nömrə (sahib 2026-10-25).
+ * Markup: templates/partials/_phone_field.html. Seçici layihənin `bootstrap-single-select` komponentidir
+ * (static/css/bootstrap-select.css) — burada yalnız yan-yana düzülüş və ölçü.
+ */
+.phone-field {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+    width: 100%;
+}
+
+/* .bootstrap-single-select defoltu width:100% — burada qısa etiket («🇦🇿 +994») üçün sabit en. */
+.phone-field .phone-field__country {
+    flex: 0 0 auto;
+    width: 118px;
+    min-width: 0;
+}
+
+/* Seçici nömrə xanasının hündürlüyünü tutsun (düymə kapsayıcıları flex ilə uzanır). */
+.phone-field .phone-field__country,
+.phone-field .phone-field__country .bootstrap-single-select__dropdown {
+    display: flex;
+}
+
+.phone-field .phone-field__country .bootstrap-single-select__dropdown {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.phone-field .phone-field__country .bootstrap-single-select__toggle {
+    width: 100%;
+    height: auto;
+    min-height: 40px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.phone-field > input[type="tel"] {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Menyuda ölkə adı uzun ola bilər — sətirə sığsın, kod sağda qalsın. */
+.phone-field .bootstrap-single-select__option-label {
+    white-space: normal;
+}
+
+@media (max-width: 360px) {
+    .phone-field .phone-field__country {
+        width: 104px;
+    }
+}

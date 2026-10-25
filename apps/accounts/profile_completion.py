@@ -32,6 +32,7 @@ from django.core.validators import validate_email
 from django.db.models import Q
 from django.utils.translation import pgettext, pgettext_lazy
 
+from core import phone as phone_lib
 from core import runtime_settings
 from core.roles import ProfileRole
 from core.validators import FIN_PATTERN, normalize_fin
@@ -96,12 +97,12 @@ FIELDS: dict[str, FieldSpec] = {
             "profile.require_phone",
             pgettext_lazy(_CTX, "Mobil telefon"),
             pgettext_lazy(_CTX, "Təcili xəbərdarlıqlar və hesabın bərpası üçün."),
-            # Operator (050, 055 …) ayrıca seçilir — xanaya yalnız qalan 7 rəqəm yazılır (sahib 2026-10-17).
-            pgettext_lazy(_CTX, "məs: 123 45 67"),
+            # Placeholder seçilmiş ölkədən gəlir (``core.phone.example_national``, sahə komponenti) — burada boşdur.
+            "",
             "tel",
+            "tel-national",
             "tel",
-            "tel",
-            20,
+            24,
         ),
         FieldSpec(
             FIELD_EMAIL,
@@ -125,18 +126,6 @@ ROLE_REQUIREMENTS: dict[str, tuple[str, ...]] = {
     ROLE_STUDENT: (FIELD_FIN, FIELD_PHONE, FIELD_EMAIL),
     ROLE_STAFF: (FIELD_FIN, FIELD_PHONE, FIELD_EMAIL),
 }
-
-#: Azərbaycan mobil operator kodları — telefon xanasının yanında seçilir (sahib 2026-10-17: «050, 055 kimi
-#: ordan seçib yazsın»). ``OPERATOR_OTHER`` → xarici nömrə, tam ``+`` formatında yazılır.
-AZ_MOBILE_OPERATORS = ("050", "051", "055", "099", "070", "077", "010", "060")
-OPERATOR_OTHER = "other"
-PHONE_OPERATOR_FIELD = "phone_operator"
-_LOCAL_DIGITS = 7
-
-#: Mobil nömrədə ən az / ən çox rəqəm (ölkə kodu daxil).
-_PHONE_MIN_DIGITS = 9
-_PHONE_MAX_DIGITS = 15
-_PHONE_ALLOWED = re.compile(r"^\+?[0-9()\-\s.]+$")
 
 
 # ── Açarlar ─────────────────────────────────────────────────────────────────────────────────────────────
@@ -285,45 +274,18 @@ def clean_fin(raw) -> str:
     return value
 
 
-def clean_phone(raw) -> str:
-    """Azərbaycan nömrəsi ``+994XXXXXXXXX`` şəklinə gətirilir; xarici nömrə ``+`` ilə qəbul olunur."""
-    text = " ".join(str(raw or "").split())
-    if not text:
-        raise ValidationError(pgettext(_CTX, "Mobil telefon nömrəsini yazın."), code="required")
-    digits = re.sub(r"\D", "", text)
-    if not _PHONE_ALLOWED.match(text) or not (_PHONE_MIN_DIGITS <= len(digits) <= _PHONE_MAX_DIGITS):
-        raise ValidationError(pgettext(_CTX, "Telefon nömrəsi düzgün deyil (məs. 050 123 45 67)."), code="invalid")
-    if text.startswith("+"):
-        return "+" + digits
-    if digits.startswith("994") and len(digits) == 12:
-        return "+" + digits
-    if digits.startswith("0") and len(digits) == 10:
-        return "+994" + digits[1:]
-    if len(digits) == 9:
-        return "+994" + digits
-    raise ValidationError(pgettext(_CTX, "Telefon nömrəsi düzgün deyil (məs. 050 123 45 67)."), code="invalid")
+def clean_phone(raw, region=None) -> str:
+    """Nömrəni ``region``-a (ISO-2, defolt Azərbaycan) görə yoxlayıb E.164-ə (``+994501234567``) gətirir.
 
-
-def combine_phone(data) -> str:
-    """Operator seçimi + qalan rəqəmlər → ``clean_phone``-un qəbul etdiyi tam nömrə.
-
-    Operator seçilibsə xanada düz 7 rəqəm olmalıdır (``050`` + ``1234567``). Operator gəlməyibsə (köhnə forma,
-    API) və ya «Xarici nömrə» seçilibsə xananın özü tam nömrə kimi yoxlanılır.
+    ``+`` ilə başlayan nömrə beynəlxalq oxunur və ölkə seçimini üstələyir. Uzunluq ölkəyə görə yoxlanır
+    (``core.phone``); sahib 2026-10-25: xarici vətəndaşlar üçün ölkə seçilir, defolt Azərbaycandır.
     """
-    operator = str(data.get(PHONE_OPERATOR_FIELD) or "").strip()
-    raw = str(data.get(FIELD_PHONE) or "")
-    if operator not in AZ_MOBILE_OPERATORS:
-        return raw
-    digits = re.sub(r"\D", "", raw)
-    if not digits:
-        return ""
-    if len(digits) == 9 and digits[:2] == operator[1:]:
-        digits = digits[2:]  # «50 123 45 67» yazılıbsa operator təkrarı atılır
-    elif len(digits) == 10 and digits[:3] == operator:
-        digits = digits[3:]
-    if len(digits) != _LOCAL_DIGITS or not _PHONE_ALLOWED.match(raw.strip()):
-        raise ValidationError(pgettext(_CTX, "Operator kodundan sonra 7 rəqəm yazın (məs. 123 45 67)."), code="invalid")
-    return operator + digits
+    return phone_lib.clean_phone(raw, region, required=True)
+
+
+def clean_phone_post(data) -> str:
+    """Forma verilənindən ``phone`` (yerli nömrə) + ``phone_country`` (ISO-2) oxuyub E.164 qaytarır."""
+    return phone_lib.clean_phone_field(data, FIELD_PHONE, required=True)
 
 
 def clean_email(raw) -> str:
@@ -346,7 +308,6 @@ CLEANERS = {FIELD_FIN: clean_fin, FIELD_PHONE: clean_phone, FIELD_EMAIL: clean_e
 
 
 __all__ = [
-    "AZ_MOBILE_OPERATORS",
     "CLEANERS",
     "ENABLED_KEY",
     "FIELDS",
@@ -354,14 +315,12 @@ __all__ = [
     "FIELD_FIN",
     "FIELD_PHONE",
     "FieldSpec",
-    "OPERATOR_OTHER",
-    "PHONE_OPERATOR_FIELD",
     "ROLE_REQUIREMENTS",
     "ROLE_STAFF",
     "ROLE_STUDENT",
     "SKIP_KEY",
     "SKIP_SESSION_KEY",
-    "combine_phone",
+    "clean_phone_post",
     "field_enabled",
     "gate_enabled",
     "has_value",

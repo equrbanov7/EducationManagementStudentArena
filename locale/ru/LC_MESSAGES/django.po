@@ -108738,3 +108738,34 @@ msgstr "Основной документ обязателен. В открыт�
 msgctxt "registrar.recognition"
 msgid "Əsas sənədi yükləyin (transkript, Learning Agreement və ya əmr) — sənədsiz tanınma olmur."
 msgstr "Загрузите основной документ (транскрипт, Learning Agreement или приказ) — без документа признание невозможно."
+
+msgctxt "core.phone"
+msgid "Telefon nömrəsini yazın."
+msgstr "Введите номер телефона."
+
+#, python-format
+msgctxt "core.phone"
+msgid "Telefon nömrəsi düzgün deyil (məs. %(example)s)."
+msgstr "Номер телефона указан неверно (напр. %(example)s)."
+
+#, python-format
+msgctxt "core.phone"
+msgid "Nömrə çox qısadır (məs. %(example)s)."
+msgstr "Номер слишком короткий (напр. %(example)s)."
+
+#, python-format
+msgctxt "core.phone"
+msgid "Nömrə çox uzundur (məs. %(example)s)."
+msgstr "Номер слишком длинный (напр. %(example)s)."
+
+msgctxt "core.phone"
+msgid "Ölkə və ya kod axtar…"
+msgstr "Поиск страны или кода…"
+
+msgctxt "core.phone"
+msgid "Uyğun ölkə tapılmadı"
+msgstr "Подходящая страна не найдена"
+
+msgctxt "core.phone"
+msgid "Ölkə və zəng kodu"
+msgstr "Страна и телефонный код"
