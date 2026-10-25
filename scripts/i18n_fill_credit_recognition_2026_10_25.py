@@ -53,6 +53,17 @@ ENTRIES = {
         ),
     },
     "registrar.pdf": {
+        "%(mark)s Başqa təhsil proqramında keçilmiş fənnin tanınmış nəticəsi; bal universitetin 100 ballıq "
+        "şkalasına çevrilib. Proqramlar:": t(
+            "%(mark)s Recognised result of a course taken in another study programme; the score has been converted "
+            "to the university's 100-point scale. Programmes:",
+            "%(mark)s Признанный результат дисциплины, пройденной в другой образовательной программе; балл переведён "
+            "в 100-балльную шкалу университета. Программы:",
+            "%(mark)s Başka bir eğitim programında alınan dersin tanınmış sonucu; puan üniversitenin 100'lük ölçeğine "
+            "dönüştürülmüştür. Programlar:",
+            "%(mark)s Anerkanntes Ergebnis eines in einem anderen Studienprogramm belegten Fachs; die Punktzahl wurde "
+            "auf die 100-Punkte-Skala der Universität umgerechnet. Programme:",
+        ),
         "%(mark)s Başqa ali məktəbdə (Erasmus+, mübadilə və s.) keçilmiş fənnin tanınmış nəticəsi; bal universitetin "
         "100 ballıq şkalasına çevrilib.": t(
             "%(mark)s Recognised result of a course taken at another higher education institution (Erasmus+, "
@@ -74,6 +85,16 @@ ENTRIES = {
         ),
     },
     "organizations.permission.label": {
+        "Xarici nəticəni tanımaq (Erasmus+, mübadilə, başqa ali məktəb, yay məktəbi və s.) və tələbəni fəndən azad "
+        "etmək": t(
+            "Recognise external results (Erasmus+, exchange, another university, summer school, etc.) and exempt the "
+            "student from the course",
+            "Признавать внешние результаты (Erasmus+, обмен, другой вуз, летняя школа и т. п.) и освобождать студента "
+            "от дисциплины",
+            "Dış sonuçları tanımak (Erasmus+, değişim, başka üniversite, yaz okulu vb.) ve öğrenciyi dersten muaf tutmak",
+            "Externe Leistungen anerkennen (Erasmus+, Austausch, andere Hochschule, Sommerschule usw.) und Studierende "
+            "vom Fach befreien",
+        ),
         "Xarici nəticəni tanımaq (Erasmus+, mübadilə, başqa ali məktəb) və tələbəni fəndən azad etmək": t(
             "Recognise external results (Erasmus+, exchange, another university) and exempt the student from the "
             "course",
@@ -83,6 +104,56 @@ ENTRIES = {
         ),
     },
     R: {
+        "Digər (adını yazın)": t(
+            "Other (enter the name)", "Другое (укажите название)", "Diğer (adını yazın)", "Sonstiges (Namen angeben)"
+        ),
+        "Proqram / səbəb": t("Programme / reason", "Программа / основание", "Program / gerekçe", "Programm / Grund"),
+        "Proqramın / səbəbin adı": t(
+            "Programme / reason name",
+            "Название программы / основания",
+            "Programın / gerekçenin adı",
+            "Name des Programms / Grundes",
+        ),
+        "məs. Yay məktəbi, onlayn kurs, Erasmus+ KA171": t(
+            "e.g. Summer school, online course, Erasmus+ KA171",
+            "напр. летняя школа, онлайн-курс, Erasmus+ KA171",
+            "örn. Yaz okulu, çevrimiçi kurs, Erasmus+ KA171",
+            "z. B. Sommerschule, Online-Kurs, Erasmus+ KA171",
+        ),
+        "«Digər» seçilibsə məcburidir; digər növlərdə dəqiqləşdirmə üçündür.": t(
+            "Required when “Other” is selected; for other types it is an optional refinement.",
+            "Обязательно, если выбрано «Другое»; для остальных типов — уточнение.",
+            "«Diğer» seçildiyse zorunludur; diğer türlerde açıklama içindir.",
+            "Pflicht bei „Sonstiges“; bei anderen Arten eine optionale Präzisierung.",
+        ),
+        "«Digər» seçilibsə proqramın / səbəbin adını yazın (məs. yay məktəbi, onlayn kurs).": t(
+            "If “Other” is selected, enter the programme / reason name (e.g. summer school, online course).",
+            "Если выбрано «Другое», укажите название программы / основания (напр. летняя школа, онлайн-курс).",
+            "«Diğer» seçildiyse programın / gerekçenin adını yazın (örn. yaz okulu, çevrimiçi kurs).",
+            "Bei „Sonstiges“ den Namen des Programms / Grundes angeben (z. B. Sommerschule, Online-Kurs).",
+        ),
+        "Başqa təhsil proqramında keçilmiş fənnin nəticəsi (Erasmus+, mübadilə, başqa ali məktəb, yay məktəbi, onlayn "
+        "kurs və s.) sənədlə tanınır: tələbə bizim fənndən azad olur (jurnal, davamiyyət limiti və imtahan tələbi ona "
+        "aid olmur), transkriptdə tanınmış bal göstərilir. Tanınma səbəblə ləğv edilə bilər; hər addım audit izinə "
+        "düşür.": t(
+            "The result of a course taken in another study programme (Erasmus+, exchange, another university, summer "
+            "school, online course, etc.) is recognised with a document: the student is exempted from our course "
+            "(journal, attendance limit and exam requirement no longer apply), and the transcript shows the recognised "
+            "score. A recognition can be revoked with a reason; every step is audited.",
+            "Результат дисциплины, пройденной в другой образовательной программе (Erasmus+, обмен, другой вуз, летняя "
+            "школа, онлайн-курс и т. п.), признаётся по документу: студент освобождается от нашей дисциплины (журнал, "
+            "лимит пропусков и требование экзамена на него не распространяются), в транскрипте показывается признанный "
+            "балл. Признание можно отменить с указанием причины; каждый шаг попадает в аудит.",
+            "Başka bir eğitim programında alınan dersin sonucu (Erasmus+, değişim, başka üniversite, yaz okulu, "
+            "çevrimiçi kurs vb.) belgeyle tanınır: öğrenci bizim dersten muaf olur (yoklama defteri, devamsızlık sınırı "
+            "ve sınav şartı ona uygulanmaz), transkriptte tanınan puan gösterilir. Tanıma gerekçeyle iptal edilebilir; "
+            "her adım denetim kaydına düşer.",
+            "Das Ergebnis eines in einem anderen Studienprogramm belegten Fachs (Erasmus+, Austausch, andere "
+            "Hochschule, Sommerschule, Online-Kurs usw.) wird mit Nachweis anerkannt: Die/der Studierende wird von "
+            "unserem Fach befreit (Journal, Fehlzeitenlimit und Prüfungspflicht entfallen), im Transcript erscheint die "
+            "anerkannte Punktzahl. Eine Anerkennung kann mit Begründung widerrufen werden; jeder Schritt wird "
+            "protokolliert.",
+        ),
         "%(floor)s–100; hərf universitetin şkalasından avtomatik.": t(
             "%(floor)s–100; the letter comes automatically from the university scale.",
             "%(floor)s–100; буква определяется автоматически по шкале университета.",

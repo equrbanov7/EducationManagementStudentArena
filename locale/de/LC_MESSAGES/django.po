@@ -109749,3 +109749,40 @@ msgstr "Eintragungsfenster (Standard 7 Tage): Eine Lehrkraft kann bis zu N Tage 
 msgctxt "registrar.subject_merge"
 msgid "Xarici nəticənin tanınması qeydləri (dəyişməz tarixçə)"
 msgstr "Anerkennungen externer Leistungen (unveränderliche Historie)"
+
+#, python-format
+msgctxt "registrar.pdf"
+msgid "%(mark)s Başqa təhsil proqramında keçilmiş fənnin tanınmış nəticəsi; bal universitetin 100 ballıq şkalasına çevrilib. Proqramlar:"
+msgstr "%(mark)s Anerkanntes Ergebnis eines in einem anderen Studienprogramm belegten Fachs; die Punktzahl wurde auf die 100-Punkte-Skala der Universität umgerechnet. Programme:"
+
+msgctxt "organizations.permission.label"
+msgid "Xarici nəticəni tanımaq (Erasmus+, mübadilə, başqa ali məktəb, yay məktəbi və s.) və tələbəni fəndən azad etmək"
+msgstr "Externe Leistungen anerkennen (Erasmus+, Austausch, andere Hochschule, Sommerschule usw.) und Studierende vom Fach befreien"
+
+msgctxt "registrar.recognition"
+msgid "Digər (adını yazın)"
+msgstr "Sonstiges (Namen angeben)"
+
+msgctxt "registrar.recognition"
+msgid "Proqram / səbəb"
+msgstr "Programm / Grund"
+
+msgctxt "registrar.recognition"
+msgid "Proqramın / səbəbin adı"
+msgstr "Name des Programms / Grundes"
+
+msgctxt "registrar.recognition"
+msgid "məs. Yay məktəbi, onlayn kurs, Erasmus+ KA171"
+msgstr "z. B. Sommerschule, Online-Kurs, Erasmus+ KA171"
+
+msgctxt "registrar.recognition"
+msgid "«Digər» seçilibsə məcburidir; digər növlərdə dəqiqləşdirmə üçündür."
+msgstr "Pflicht bei „Sonstiges“; bei anderen Arten eine optionale Präzisierung."
+
+msgctxt "registrar.recognition"
+msgid "«Digər» seçilibsə proqramın / səbəbin adını yazın (məs. yay məktəbi, onlayn kurs)."
+msgstr "Bei „Sonstiges“ den Namen des Programms / Grundes angeben (z. B. Sommerschule, Online-Kurs)."
+
+msgctxt "registrar.recognition"
+msgid "Başqa təhsil proqramında keçilmiş fənnin nəticəsi (Erasmus+, mübadilə, başqa ali məktəb, yay məktəbi, onlayn kurs və s.) sənədlə tanınır: tələbə bizim fənndən azad olur (jurnal, davamiyyət limiti və imtahan tələbi ona aid olmur), transkriptdə tanınmış bal göstərilir. Tanınma səbəblə ləğv edilə bilər; hər addım audit izinə düşür."
+msgstr "Das Ergebnis eines in einem anderen Studienprogramm belegten Fachs (Erasmus+, Austausch, andere Hochschule, Sommerschule, Online-Kurs usw.) wird mit Nachweis anerkannt: Die/der Studierende wird von unserem Fach befreit (Journal, Fehlzeitenlimit und Prüfungspflicht entfallen), im Transcript erscheint die anerkannte Punktzahl. Eine Anerkennung kann mit Begründung widerrufen werden; jeder Schritt wird protokolliert."

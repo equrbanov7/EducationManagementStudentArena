@@ -37,6 +37,7 @@ _CTX = "registrar.recognition"
 AUDIT_RESOURCE = "registrar.credit_recognition"
 REVOKE_REASON_MIN = 10
 FOREIGN_CREDIT_MAX = Decimal("60")
+PROGRAM_NAME_MAX = 150
 _LIMITS = {
     "institution": 255,
     "country": 100,
@@ -121,7 +122,13 @@ def validate(*, organization, student_id, data, document) -> dict:
     program = str(data.get("program") or "").strip()
     if program not in RecognitionProgram.values:
         raise RecognitionError("program", pgettext(_CTX, "Proqramı seçin."))
-    cleaned = {"program": program, **_required_texts(data)}
+    program_name = _text(data.get("program_name"), PROGRAM_NAME_MAX)
+    if program == RecognitionProgram.OTHER and not program_name:
+        raise RecognitionError(
+            "program_name",
+            pgettext(_CTX, "«Digər» seçilibsə proqramın / səbəbin adını yazın (məs. yay məktəbi, onlayn kurs)."),
+        )
+    cleaned = {"program": program, "program_name": program_name, **_required_texts(data)}
     cleaned["foreign_credit"] = _foreign_credit(data.get("foreign_credit"))
     cleaned["recognized_score"] = _score(data.get("recognized_score"))
     cleaned["note"] = str(data.get("note") or "").strip()[:2000]
@@ -166,8 +173,9 @@ def _exempt(enrollment, recognition_ref, cleaned, actor, request):
     offering = enrollment.offering
     if enrollment.status != Enrollment.Status.ENROLLED or guest_roster.roster_block_reason(offering):
         return None
+    draft = ExternalCreditRecognition(program=cleaned["program"], program_name=cleaned["program_name"])
     reason = pgettext(_CTX, "Xarici nəticə tanınıb: %(program)s · %(institution)s · %(subject)s") % {
-        "program": RecognitionProgram(cleaned["program"]).label,
+        "program": draft.program_label,
         "institution": cleaned["institution"],
         "subject": cleaned["foreign_subject"],
     }
@@ -209,6 +217,7 @@ def create(*, organization, student_id, cleaned, actor, request=None) -> dict:
             enrollment=enrollment,
             exempt_decision_id=decision_id,
             program=cleaned["program"],
+            program_name=cleaned["program_name"],
             institution=cleaned["institution"],
             country=cleaned["country"],
             foreign_subject=cleaned["foreign_subject"],
@@ -285,6 +294,7 @@ def _audit(recognition, actor, request, *, action, reason, revoked=False):
             "subject_id": str(recognition.subject_id),
             "period_id": str(recognition.period_id),
             "program": recognition.program,
+            "program_name": recognition.program_name,
             "recognized_score": recognition.recognized_score,
             "credit": recognition.credit,
             "exempt_decision_id": str(recognition.exempt_decision_id or ""),

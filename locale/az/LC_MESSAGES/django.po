@@ -108233,3 +108233,40 @@ msgstr "Yazma pəncərəsi (defolt 7 gün): müəllim dərs tarixindən ən çox
 msgctxt "registrar.subject_merge"
 msgid "Xarici nəticənin tanınması qeydləri (dəyişməz tarixçə)"
 msgstr "Xarici nəticənin tanınması qeydləri (dəyişməz tarixçə)"
+
+#, python-format
+msgctxt "registrar.pdf"
+msgid "%(mark)s Başqa təhsil proqramında keçilmiş fənnin tanınmış nəticəsi; bal universitetin 100 ballıq şkalasına çevrilib. Proqramlar:"
+msgstr "%(mark)s Başqa təhsil proqramında keçilmiş fənnin tanınmış nəticəsi; bal universitetin 100 ballıq şkalasına çevrilib. Proqramlar:"
+
+msgctxt "organizations.permission.label"
+msgid "Xarici nəticəni tanımaq (Erasmus+, mübadilə, başqa ali məktəb, yay məktəbi və s.) və tələbəni fəndən azad etmək"
+msgstr "Xarici nəticəni tanımaq (Erasmus+, mübadilə, başqa ali məktəb, yay məktəbi və s.) və tələbəni fəndən azad etmək"
+
+msgctxt "registrar.recognition"
+msgid "Digər (adını yazın)"
+msgstr "Digər (adını yazın)"
+
+msgctxt "registrar.recognition"
+msgid "Proqram / səbəb"
+msgstr "Proqram / səbəb"
+
+msgctxt "registrar.recognition"
+msgid "Proqramın / səbəbin adı"
+msgstr "Proqramın / səbəbin adı"
+
+msgctxt "registrar.recognition"
+msgid "məs. Yay məktəbi, onlayn kurs, Erasmus+ KA171"
+msgstr "məs. Yay məktəbi, onlayn kurs, Erasmus+ KA171"
+
+msgctxt "registrar.recognition"
+msgid "«Digər» seçilibsə məcburidir; digər növlərdə dəqiqləşdirmə üçündür."
+msgstr "«Digər» seçilibsə məcburidir; digər növlərdə dəqiqləşdirmə üçündür."
+
+msgctxt "registrar.recognition"
+msgid "«Digər» seçilibsə proqramın / səbəbin adını yazın (məs. yay məktəbi, onlayn kurs)."
+msgstr "«Digər» seçilibsə proqramın / səbəbin adını yazın (məs. yay məktəbi, onlayn kurs)."
+
+msgctxt "registrar.recognition"
+msgid "Başqa təhsil proqramında keçilmiş fənnin nəticəsi (Erasmus+, mübadilə, başqa ali məktəb, yay məktəbi, onlayn kurs və s.) sənədlə tanınır: tələbə bizim fənndən azad olur (jurnal, davamiyyət limiti və imtahan tələbi ona aid olmur), transkriptdə tanınmış bal göstərilir. Tanınma səbəblə ləğv edilə bilər; hər addım audit izinə düşür."
+msgstr "Başqa təhsil proqramında keçilmiş fənnin nəticəsi (Erasmus+, mübadilə, başqa ali məktəb, yay məktəbi, onlayn kurs və s.) sənədlə tanınır: tələbə bizim fənndən azad olur (jurnal, davamiyyət limiti və imtahan tələbi ona aid olmur), transkriptdə tanınmış bal göstərilir. Tanınma səbəblə ləğv edilə bilər; hər addım audit izinə düşür."

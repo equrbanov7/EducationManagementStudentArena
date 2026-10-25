@@ -43,7 +43,8 @@ STAGE3_PERMISSION_LABELS = {
     "student.assign_group": pgettext_lazy(_PERM_CTX, "Qəbulda tələbəni qrupa təyin etmək və qrup yaratmaq"),
     # 2026-10-25 (sahib): Erasmus+ / mübadilə / başqa ali məktəbdə keçilmiş fənnin tanınması → fəndən azad.
     "student.credit_recognition": pgettext_lazy(
-        _PERM_CTX, "Xarici nəticəni tanımaq (Erasmus+, mübadilə, başqa ali məktəb) və tələbəni fəndən azad etmək"
+        _PERM_CTX,
+        "Xarici nəticəni tanımaq (Erasmus+, mübadilə, başqa ali məktəb, yay məktəbi və s.) və tələbəni fəndən azad etmək",
     ),
 }
 

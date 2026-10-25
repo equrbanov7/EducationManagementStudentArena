@@ -517,6 +517,7 @@ def _draw_footer(sheet, data, generated_at, seal_mark=None):
     # Nişanların izahı (köçürülmüş qiymət «*», tanınmış xarici nəticə «**») — rəsmi sənəd nədən ibarət
     # olduğunu ÖZÜ deməlidir; qeyd yalnız nişanlanmış sətir varsa çap olunur (``mark_notes``).
     for index, note in enumerate(mark_notes(data)):
+        sheet.ensure(16)
         sheet.y += 0 if index else 6
         sheet.text(_MARGIN, note, size=7.4, color=_MUTED)
         sheet.y += 14

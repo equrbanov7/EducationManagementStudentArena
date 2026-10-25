@@ -108131,3 +108131,40 @@ msgstr "Yazma aralığı (varsayılan 7 gün): öğretim elemanı ders tarihinde
 msgctxt "registrar.subject_merge"
 msgid "Xarici nəticənin tanınması qeydləri (dəyişməz tarixçə)"
 msgstr "Dış sonuç tanıma kayıtları (değiştirilemez geçmiş)"
+
+#, python-format
+msgctxt "registrar.pdf"
+msgid "%(mark)s Başqa təhsil proqramında keçilmiş fənnin tanınmış nəticəsi; bal universitetin 100 ballıq şkalasına çevrilib. Proqramlar:"
+msgstr "%(mark)s Başka bir eğitim programında alınan dersin tanınmış sonucu; puan üniversitenin 100'lük ölçeğine dönüştürülmüştür. Programlar:"
+
+msgctxt "organizations.permission.label"
+msgid "Xarici nəticəni tanımaq (Erasmus+, mübadilə, başqa ali məktəb, yay məktəbi və s.) və tələbəni fəndən azad etmək"
+msgstr "Dış sonuçları tanımak (Erasmus+, değişim, başka üniversite, yaz okulu vb.) ve öğrenciyi dersten muaf tutmak"
+
+msgctxt "registrar.recognition"
+msgid "Digər (adını yazın)"
+msgstr "Diğer (adını yazın)"
+
+msgctxt "registrar.recognition"
+msgid "Proqram / səbəb"
+msgstr "Program / gerekçe"
+
+msgctxt "registrar.recognition"
+msgid "Proqramın / səbəbin adı"
+msgstr "Programın / gerekçenin adı"
+
+msgctxt "registrar.recognition"
+msgid "məs. Yay məktəbi, onlayn kurs, Erasmus+ KA171"
+msgstr "örn. Yaz okulu, çevrimiçi kurs, Erasmus+ KA171"
+
+msgctxt "registrar.recognition"
+msgid "«Digər» seçilibsə məcburidir; digər növlərdə dəqiqləşdirmə üçündür."
+msgstr "«Diğer» seçildiyse zorunludur; diğer türlerde açıklama içindir."
+
+msgctxt "registrar.recognition"
+msgid "«Digər» seçilibsə proqramın / səbəbin adını yazın (məs. yay məktəbi, onlayn kurs)."
+msgstr "«Diğer» seçildiyse programın / gerekçenin adını yazın (örn. yaz okulu, çevrimiçi kurs)."
+
+msgctxt "registrar.recognition"
+msgid "Başqa təhsil proqramında keçilmiş fənnin nəticəsi (Erasmus+, mübadilə, başqa ali məktəb, yay məktəbi, onlayn kurs və s.) sənədlə tanınır: tələbə bizim fənndən azad olur (jurnal, davamiyyət limiti və imtahan tələbi ona aid olmur), transkriptdə tanınmış bal göstərilir. Tanınma səbəblə ləğv edilə bilər; hər addım audit izinə düşür."
+msgstr "Başka bir eğitim programında alınan dersin sonucu (Erasmus+, değişim, başka üniversite, yaz okulu, çevrimiçi kurs vb.) belgeyle tanınır: öğrenci bizim dersten muaf olur (yoklama defteri, devamsızlık sınırı ve sınav şartı ona uygulanmaz), transkriptte tanınan puan gösterilir. Tanıma gerekçeyle iptal edilebilir; her adım denetim kaydına düşer."

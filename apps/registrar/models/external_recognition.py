@@ -45,7 +45,7 @@ class RecognitionProgram(models.TextChoices):
     ERASMUS = "erasmus", pgettext_lazy(_CTX, "Erasmus+")
     EXCHANGE = "exchange", pgettext_lazy(_CTX, "Mübadilə proqramı")
     OTHER_UNIVERSITY = "other_university", pgettext_lazy(_CTX, "Başqa ali məktəb")
-    OTHER = "other", pgettext_lazy(_CTX, "Digər")
+    OTHER = "other", pgettext_lazy(_CTX, "Digər (adını yazın)")
 
 
 class ExternalCreditRecognition(UUIDModel, TimeStampedModel):
@@ -70,6 +70,9 @@ class ExternalCreditRecognition(UUIDModel, TimeStampedModel):
     )
 
     program = models.CharField(max_length=24, choices=RecognitionProgram.choices)
+    #: Proqramın / səbəbin adı (sahib 2026-10-25: «təkcə Erasmus deyil — proqramın adı başqa da ola bilər»):
+    #: «Digər»də MƏCBURİ (yay məktəbi, onlayn kurs, ikili diplom …), digər növlərdə dəqiqləşdirmə (məs. «KA171»).
+    program_name = models.CharField(max_length=150, blank=True, default="")
     institution = models.CharField(max_length=255)
     country = models.CharField(max_length=100)
     foreign_subject = models.CharField(max_length=300)
@@ -123,6 +126,9 @@ class ExternalCreditRecognition(UUIDModel, TimeStampedModel):
             models.CheckConstraint(
                 condition=Q(program__in=[choice.value for choice in RecognitionProgram]), name="reg_recog_program"
             ),
+            models.CheckConstraint(
+                condition=~Q(program=RecognitionProgram.OTHER) | ~Q(program_name=""), name="reg_recog_other_named"
+            ),
             # Ləğv ya tam yoxdur, ya da vaxtı + səbəbi ilə birlikdədir.
             models.CheckConstraint(
                 condition=(
@@ -138,6 +144,15 @@ class ExternalCreditRecognition(UUIDModel, TimeStampedModel):
     @property
     def is_active(self) -> bool:
         return self.revoked_at is None
+
+    @property
+    def program_label(self) -> str:
+        """Göstərilən ad: «Digər» → sərbəst ad; başqa növ + dəqiqləşdirmə → «Erasmus+ — KA171»."""
+        name = (self.program_name or "").strip()
+        if self.program == RecognitionProgram.OTHER and name:
+            return name
+        label = str(self.get_program_display())
+        return f"{label} — {name}" if name else label
 
     def save(self, *args, **kwargs):
         """Tətbiq qatının qapısı (PG trigger-i əsasdır): yeni sətir və ya yalnız bir dəfəlik ləğv sahələri."""
