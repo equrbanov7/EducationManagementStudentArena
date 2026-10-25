@@ -16,7 +16,7 @@ bilək ki, bu müəllim bu saatda dərs deyir; üst/alt həftə, mühazirə, sem
 
     manage.py infer_timetable_from_lessons --org qku --period "Payız 2026/2027" [--teacher ad.soyad] \\
         [--date-from 2026-09-15] [--date-to 2026-10-24] [--min-occurrences 2] [--parity-tolerance 0.25] \\
-        [--snap-minutes 25] [--no-hours-cap] [--recent-days 14] [--report /tmp/tt.csv] \\
+        [--snap-minutes 25] [--no-hours-cap] [--no-fill-rooms] [--recent-days 14] [--report /tmp/tt.csv] \\
         [--apply --actor <istifadəçi> --i-know-this-is-production]
 """
 
@@ -94,6 +94,11 @@ class Command(BaseCommand):
             help="Plan / yük saatına görə həftəlik slot həddini SÖNDÜR (defolt: artıq vahid kompensasiya sayılır)",
         )
         parser.add_argument(
+            "--no-fill-rooms",
+            action="store_true",
+            help="Bu əmrin əvvəl yazdığı otaqsız slotlara otaq YAZMA (defolt: yazılır; rəsmi slotlara toxunulmur)",
+        )
+        parser.add_argument(
             "--recent-days",
             type=int,
             default=DEFAULT_RECENT_DAYS,
@@ -118,6 +123,7 @@ class Command(BaseCommand):
             parity_tolerance=float(options["parity_tolerance"]),
             snap_minutes=int(options["snap_minutes"]),
             hours_cap=not options["no_hours_cap"],
+            fill_rooms=not options["no_fill_rooms"],
             recent_days=int(options["recent_days"]),
         )
         Organization = django_apps.get_model("organizations", "Organization")
@@ -193,7 +199,7 @@ class Command(BaseCommand):
         if reasons:
             write(_line((f"reason_{reason}", count) for reason, count in reasons))
         if options["apply"]:
-            write(_line([("written", len(plan.created_ids))]))
+            write(_line([("written", len(plan.created_ids)), ("rooms_filled", len(plan.filled_ids))]))
 
     def _write_report(self, plan, path_text, usernames):
         target = pathlib.Path(path_text).expanduser()

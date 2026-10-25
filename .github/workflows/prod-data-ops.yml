@@ -112,6 +112,8 @@
 #       hesabat (müəllim adları) şifrəli artifaktdadır. 2026-10-25 çoxluq qaydaları (defoltlar, input lazım deyil):
 #       birgə məşğələ də axın, səviyyə qrupları (Dil-1(elementary)/(intermediate)) paralel, 3 üst + 1 alt = üst,
 #       11:30 → 11:50 standart zəng, plan saatı dolubsa azlıq slot kompensasiya, yeni başlamış açılışın son dərsi.
+#       Otaq: slot dərslərində ən çox otaq → müəllimin həmin saatda → ümumən ən çox otağı (toqquşursa boş); əmrin
+#       ƏVVƏL yazdığı otaqsız slotlar doldurulur (rəsmi slotlara toxunulmur). Sıra: əvvəl Lesson.room köçürməsi, sonra bu.
 #   audit_cross_chair_loads — kafedralar arası dərs yükü (sahib 2026-10-25: ştat bir kafedrada, saathesabı başqa
 #       kafedranın tapşırığında). Dry-run YALNIZ saylar: kənar müəllim/bölgü/saat, ştatı yalnız əlavə üzvlükdən
 #       gələn, iki kafedrada eyni fənn+qrup sətri, fənni kataloqda başqa kafedranın olan sətir (qərar siyahısı —
