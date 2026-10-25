@@ -25,13 +25,13 @@ yazı/metrik/jurnal sinxronu yaranmır) və yeni expire olunmuş cəhdlər
 
 from __future__ import annotations
 
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Q
 from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.domain.unit_assignment import unit_assigned_exams_q
-from apps.exams.models import Exam, ExamAttempt, ExamQuestion, StudentExamAttemptGrant
+from apps.exams.models import Exam, ExamAttempt, StudentExamAttemptGrant
 from apps.exams.services.journal_sync import registrar_block_reasons
 from apps.exams.services.language_variants import (
     active_question_counts_for_exams,
@@ -163,12 +163,9 @@ class StudentExamListBatch:
         ]
         self._variant_totals = {}
         if multi_variant_ids:
-            rows = (
-                ExamQuestion.objects.filter(language_variant_id__in=multi_variant_ids, is_active=True)
-                .values("language_variant_id")
-                .annotate(cnt=Count("id"), total=Sum("points"))
-            )
-            self._variant_totals = {row["language_variant_id"]: (row["cnt"], row["total"] or 0) for row in rows}
+            from apps.exams.services.language_parity import variant_stats
+
+            self._variant_totals = variant_stats(multi_variant_ids)
 
     # ── yan təsir: lazy expire (model ilə eyni nöqtələrdə) ───────────────────
     def _expire(self, attempt):
@@ -325,39 +322,11 @@ class StudentExamListBatch:
         return True, None
 
     def language_parity_error_message(self, exam):
-        """``language_parity.language_parity_error_message(exam)`` güzgüsü.
+        """``language_parity.language_parity_error_message(exam)`` güzgüsü — EYNİ saf qayda
+        (``language_parity.parity_issues``), fərq yalnız məlumatın prefetch-dən gəlməsidir."""
+        from apps.exams.services.language_parity import parity_issues
 
-        Kanonik mənbə ``apps.exams.services.language_parity``-dir (mesajlar və
-        müqayisə oradan birə-bir götürülüb); fərq yalnız məlumatın prefetch-dən
-        gəlməsidir.  Orada dəyişiklik olsa bu güzgü də yenilənməlidir — test
-        iki yolun bərabərliyini yoxlayır.
-        """
-        variants = self._variants.get(exam.pk, [])
-        if len(variants) < 2:
-            return ""
-
-        reference = variants[0]
-        ref_count, ref_points = self._variant_totals.get(reference.id, (0, 0))
-        ref_label = reference.display_name or reference.get_language_display()
-
-        issues = []
-        for variant in variants[1:]:
-            count, points = self._variant_totals.get(variant.id, (0, 0))
-            label = variant.display_name or variant.get_language_display()
-            if count != ref_count:
-                issues.append(
-                    pgettext(
-                        "exams.service.language_parity",
-                        "'{lang}' variantında {count} aktiv sual var, '{ref}' variantında isə {ref_count}.",
-                    ).format(lang=label, count=count, ref=ref_label, ref_count=ref_count)
-                )
-            if points != ref_points:
-                issues.append(
-                    pgettext(
-                        "exams.service.language_parity",
-                        "'{lang}' variantının ümumi balı {points}, '{ref}' variantınınkı isə {ref_points}.",
-                    ).format(lang=label, points=points, ref=ref_label, ref_points=ref_points)
-                )
+        issues = parity_issues(exam, self._variants.get(exam.pk, []), self._variant_totals)
         if not issues:
             return ""
         return pgettext(

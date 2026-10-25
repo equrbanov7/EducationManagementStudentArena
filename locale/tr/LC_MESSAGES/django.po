@@ -108824,3 +108824,7 @@ msgstr "Değişiklik yalnızca itiraz yoluyla — Sınav Merkezi başkanına ba�
 msgctxt "exams.template.student_exam_list"
 msgid "İmtahan dili"
 msgstr "Sınav dili"
+
+msgctxt "exams.service.language_parity"
+msgid "'{lang}' variantında hər tələbəyə {count} sual verilir, '{ref}' variantında isə {ref_count}."
+msgstr "'{lang}' varyantında her öğrenciye {count} soru verilir, '{ref}' varyantında ise {ref_count}."

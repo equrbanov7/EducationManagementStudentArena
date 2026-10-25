@@ -109610,3 +109610,7 @@ msgstr "Изменение только через апелляцию — обр
 msgctxt "exams.template.student_exam_list"
 msgid "İmtahan dili"
 msgstr "Язык экзамена"
+
+msgctxt "exams.service.language_parity"
+msgid "'{lang}' variantında hər tələbəyə {count} sual verilir, '{ref}' variantında isə {ref_count}."
+msgstr "В варианте '{lang}' каждый студент получает {count} вопросов, в варианте '{ref}' — {ref_count}."

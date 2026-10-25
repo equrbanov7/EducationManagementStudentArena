@@ -109416,3 +109416,7 @@ msgstr "Changes only through an appeal — contact the head of the Exam Center."
 msgctxt "exams.template.student_exam_list"
 msgid "İmtahan dili"
 msgstr "Exam language"
+
+msgctxt "exams.service.language_parity"
+msgid "'{lang}' variantında hər tələbəyə {count} sual verilir, '{ref}' variantında isə {ref_count}."
+msgstr "The '{lang}' variant gives each student {count} questions, the '{ref}' variant {ref_count}."

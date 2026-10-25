@@ -110442,3 +110442,7 @@ msgstr "Änderungen nur per Widerspruch — wenden Sie sich an die Leitung des P
 msgctxt "exams.template.student_exam_list"
 msgid "İmtahan dili"
 msgstr "Prüfungssprache"
+
+msgctxt "exams.service.language_parity"
+msgid "'{lang}' variantında hər tələbəyə {count} sual verilir, '{ref}' variantında isə {ref_count}."
+msgstr "Die Variante '{lang}' gibt jedem Studierenden {count} Fragen, die Variante '{ref}' {ref_count}."

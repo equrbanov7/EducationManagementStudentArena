@@ -108926,3 +108926,7 @@ msgstr "Dəyişiklik yalnız apellyasiya ilə — İmtahan Mərkəzinin rəhbər
 msgctxt "exams.template.student_exam_list"
 msgid "İmtahan dili"
 msgstr "İmtahan dili"
+
+msgctxt "exams.service.language_parity"
+msgid "'{lang}' variantında hər tələbəyə {count} sual verilir, '{ref}' variantında isə {ref_count}."
+msgstr "'{lang}' variantında hər tələbəyə {count} sual verilir, '{ref}' variantında isə {ref_count}."

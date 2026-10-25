@@ -13,6 +13,14 @@ BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOCALES = ["az", "en", "ru", "tr", "de"]
 
 ENTRIES = {
+    "exams.service.language_parity": {
+        "'{lang}' variantında hər tələbəyə {count} sual verilir, '{ref}' variantında isə {ref_count}.": {
+            "en": "The '{lang}' variant gives each student {count} questions, the '{ref}' variant {ref_count}.",
+            "ru": "В варианте '{lang}' каждый студент получает {count} вопросов, в варианте '{ref}' — {ref_count}.",
+            "tr": "'{lang}' varyantında her öğrenciye {count} soru verilir, '{ref}' varyantında ise {ref_count}.",
+            "de": "Die Variante '{lang}' gibt jedem Studierenden {count} Fragen, die Variante '{ref}' {ref_count}.",
+        },
+    },
     "exams.template.student_exam_list": {
         "İmtahan dili": {"en": "Exam language", "ru": "Язык экзамена", "tr": "Sınav dili", "de": "Prüfungssprache"},
     },

@@ -143,6 +143,23 @@ class MultiLanguageExamTests(TestCase):
 
         self.assertEqual(check_language_variant_parity(self.exam), [])
 
+    def test_parity_ok_for_random_sample_with_different_pool_sizes(self):
+        """Sahib 2026-10-26: fonddan təsadüfi N sual (eyni bal) — dil fondlarının ölçüsü fərqli ola bilər."""
+        from apps.exams.services.language_parity import check_language_variant_parity
+
+        type(self.exam).objects.filter(pk=self.exam.pk).update(random_question_count=2)
+        self.exam.refresh_from_db()
+        az = ExamLanguageVariant.objects.create(exam=self.exam, language="az", is_active=True)
+        ru = ExamLanguageVariant.objects.create(exam=self.exam, language="ru", is_active=True)
+        for order in range(1, 6):
+            self._variant_question(az, order=order, points=1)
+        for order in range(6, 10):
+            self._variant_question(ru, order=order, points=1)
+        self.assertEqual(check_language_variant_parity(self.exam), [])
+        # Ballar fərqlidirsə tələbələrin cəmi fərqli ola bilər — köhnə (ciddi) qayda qüvvədədir.
+        self._variant_question(ru, order=10, points=3)
+        self.assertTrue(check_language_variant_parity(self.exam))
+
     def test_parity_flags_question_count_mismatch(self):
         from apps.exams.services.language_parity import check_language_variant_parity
 
