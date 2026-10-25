@@ -92,7 +92,8 @@ class ResetLinkLifetimeTests(_ResetBase):
 
         token = default_token_generator.make_token(self.user)
         self.assertTrue(password_reset_token_generator.check_token(self.user, token))
-        self.assertFalse(password_reset_token_generator.check_token(self.user, token[:-1] + "0"))
+        tampered = token[:-1] + ("1" if token.endswith("0") else "0")  # son simvol HƏMİŞƏ dəyişsin (flaky idi)
+        self.assertFalse(password_reset_token_generator.check_token(self.user, tampered))
         self.assertFalse(password_reset_token_generator.check_token(self.user, "bad-token-shape-x"))
 
 
