@@ -14,6 +14,7 @@ from django.views.decorators.http import require_GET
 
 from apps.exams.constants import get_live_active_states, get_live_session_model
 from apps.exams.forms import ExamForm
+from apps.exams.services import exam_journal_coverage as _journal_coverage
 from apps.exams.services import exam_journal_link as _journal_link
 from apps.exams.services import exam_subject_change as _exam_subject_change
 from apps.exams.services.access_policy import _ensure_teacher, can_manage_exam_questions
@@ -293,6 +294,9 @@ def createAndEditExamView(request, slug=None):
                     else pgettext_lazy("exams.view.exams.message", "exam_created")
                 ),
             )
+            # Sahib 2026-10-26: nəticə jurnala düşməyəcəksə (jurnalsız / iki jurnallı tələbə) — bloklamayan xəbərdarlıq.
+            for warning in _journal_coverage.exam_coverage_warnings(exam_instance):
+                messages.warning(request, warning)
             return JsonResponse({"success": True, "slug": exam_instance.slug, "notice": publish_notice})
         selected_groups, selected_users, selected_excluded_users = _selected_access_entities(form)
         # R1: xətanın OLDUĞU addım/sahə — sehrbaz həmin addıma keçib sahəni fokuslayır.

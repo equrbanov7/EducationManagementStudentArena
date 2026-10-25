@@ -153,6 +153,23 @@
             return rows;
         }
 
+        // Sahib 2026-10-26: «nəticə jurnala düşəcəkmi?» — server tərcümə olunmuş, BLOKLAMAYAN
+        // xəbərdarlıqları qaytarır (jurnalsız / iki jurnallı tələbələr, qrup üçün jurnal tapılmadı).
+        function renderConfirmWarnings(overlay, warnings) {
+            var box = overlay.querySelector("[data-cc-warnings]");
+            if (!box) {
+                return;
+            }
+            box.innerHTML = "";
+            (warnings || []).forEach(function (text) {
+                var p = document.createElement("p");
+                p.className = "ew-confirm-warn__item";
+                p.textContent = String(text || "");
+                box.appendChild(p);
+            });
+            box.hidden = !box.childNodes.length;
+        }
+
         function renderConfirmSummary(overlay, totalText) {
             var summary = overlay.querySelector("[data-cc-summary]");
             if (!summary) {
@@ -184,14 +201,21 @@
                 renderConfirmSummary(overlay, "0");
                 return;
             }
+            var subjectEl = form.querySelector("[data-exam-subject-native]");
+            var categoryEl = form.querySelector('[name="exam_type_extended"]');
             var q = url + (url.indexOf("?") === -1 ? "?" : "&") +
                 "groups=" + encodeURIComponent(groups.join(",")) +
                 "&units=" + encodeURIComponent(units.join(",")) +
                 "&users=" + encodeURIComponent(users.join(",")) +
-                "&excluded=" + encodeURIComponent(excluded.join(","));
+                "&excluded=" + encodeURIComponent(excluded.join(",")) +
+                "&subject=" + encodeURIComponent(subjectEl ? (subjectEl.value || "") : "") +
+                "&category=" + encodeURIComponent(categoryEl ? (categoryEl.value || "") : "");
             fetch(q, { headers: { "X-Requested-With": "XMLHttpRequest" } })
                 .then(function (r) { return r.ok ? r.json() : { total: 0 }; })
-                .then(function (d) { renderConfirmSummary(overlay, String((d && d.total) || 0)); })
+                .then(function (d) {
+                    renderConfirmSummary(overlay, String((d && d.total) || 0));
+                    renderConfirmWarnings(overlay, d && d.warnings);
+                })
                 .catch(function () { renderConfirmSummary(overlay, "—"); });
         }
 
@@ -215,6 +239,7 @@
                 '<h4>' + t("confirmTitle", gettext("İmtahanı təsdiqlə")) + "</h4>" +
                 "<p>" + t("confirmBody", gettext("İmtahan aşağıdakı məlumatlarla yaradılıb təyin olunacaq.")) + "</p>" +
                 '<dl class="ew-confirm-summary" data-cc-summary></dl>' +
+                '<div class="ew-confirm-warn" data-cc-warnings role="status" hidden></div>' +
                 '<div class="ew-confirm-actions">' +
                 '<button type="button" class="ew-btn ew-btn--ghost" data-cc-back>' + t("confirmBack", gettext("Geri")) + "</button>" +
                 '<button type="button" class="ew-btn ew-btn--primary" data-cc-ok>' + t("confirmOk", gettext("Təsdiqlə və yarat")) + "</button>" +

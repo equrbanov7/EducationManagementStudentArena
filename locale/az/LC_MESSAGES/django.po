@@ -108947,3 +108947,26 @@ msgstr "Xətasız, xəbərdarlıqsız və dublikatsız sualları seçir, qalanla
 msgctxt "exams.template.test_question_bank"
 msgid "Seçildi: {count} təmiz sual"
 msgstr "Seçildi: {count} təmiz sual"
+
+msgctxt "exams.journal_coverage"
+msgid "Seçilmiş qruplar üçün bu fənnin cari semestr jurnalı tapılmadı — nəticə jurnala düşməyə bilər. Fənni və qrupları yoxlayın."
+msgstr "Seçilmiş qruplar üçün bu fənnin cari semestr jurnalı tapılmadı — nəticə jurnala düşməyə bilər. Fənni və qrupları yoxlayın."
+
+#, python-format
+msgctxt "exams.journal_coverage"
+msgid "%(count)s tələbənin bu fənn üzrə cari semestr jurnalı yoxdur — nəticə jurnala düşməyəcək."
+msgstr "%(count)s tələbənin bu fənn üzrə cari semestr jurnalı yoxdur — nəticə jurnala düşməyəcək."
+
+#, python-format
+msgctxt "exams.journal_coverage"
+msgid "%(count)s tələbə bu fəndən birdən çox jurnaldadır — nəticə imtahanın qrupunun jurnalına (yoxdursa tələbənin öz qrupunun jurnalına) yazılacaq."
+msgstr "%(count)s tələbə bu fəndən birdən çox jurnaldadır — nəticə imtahanın qrupunun jurnalına (yoxdursa tələbənin öz qrupunun jurnalına) yazılacaq."
+
+#, python-format
+msgctxt "exams.subject_picker"
+msgid "%(count)s jurnal"
+msgstr "%(count)s jurnal"
+
+msgctxt "exams.subject_picker"
+msgid "jurnal yoxdur"
+msgstr "jurnal yoxdur"

@@ -25,6 +25,7 @@ from apps.registrar.exam_bridge import (
     exam_eligibility_batch,
     exam_result_summary,
     record_exam_result,
+    record_final_result,
 )
 from apps.registrar.integrity import eligible_instructor_user_ids
 from apps.registrar.midterm_bridge import record_midterm_result, student_interim_rows
@@ -49,6 +50,7 @@ __all__ = [
     "exam_eligibility_batch",
     "exam_result_summary",
     "record_exam_result",
+    "record_final_result",
     "record_midterm_result",
     "student_group_changed",
 ]
@@ -72,11 +74,8 @@ __all__ = [
 #: Müraciət axını hazır olanda: burada ``True`` + müraciət təsdiqi yoxlaması.
 STUDENT_TRANSCRIPT_SELF_SERVICE = False
 
-# ``AcademicPeriod`` lives in the organizations module. Registrar already
-# references organizations models only via string FKs (no Python import), which
-# keeps the module-dependency graph acyclic (organizations → registrar via the
-# seed command, but not back). We resolve it through the app registry to keep
-# that property instead of a static ``from apps.organizations`` import.
+# ``AcademicPeriod`` (organizations) is resolved via the app registry — registrar never imports organizations
+# statically, which keeps the module-dependency graph acyclic.
 
 
 def _academic_period_model():

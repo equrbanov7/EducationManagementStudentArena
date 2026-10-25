@@ -419,7 +419,10 @@ def exam_result(request, slug, attempt_id):
         try:
             from apps.registrar.public import exam_result_summary
 
-            summary = exam_result_summary(student=attempt.user, subject_id=subject_id, organization=exam.organization)
+            links = list(exam.journal_offerings.values_list("pk", flat=True))  # körpü ilə EYNİ jurnal (2026-10-26)
+            summary = exam_result_summary(
+                student=attempt.user, subject_id=subject_id, organization=exam.organization, offering_ids=links
+            )
             journal_result = summary if summary.get("linked") else None
         except Exception:
             journal_result = None
