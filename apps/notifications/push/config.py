@@ -3,8 +3,8 @@
 ``FCM_SERVICE_ACCOUNT_JSON`` üç formada qəbul olunur (deploy-a uyğun olanı seçilir):
 
 * fayl yolu (``/run/secrets/fcm.json``) — konteynerə mount edilmiş fayl;
-* base64 (``ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIs…``) — ``.env``-də tək sətir (prod workflow bunu yazır);
-* xam JSON (``{"type": "service_account", …}``) — lokal sınaq.
+* base64 — JSON faylının base64 kodu, ``.env``-də tək sətir (prod workflow bunu yazır);
+* xam JSON — faylın məzmunu olduğu kimi (lokal sınaq).
 
 Kredensial yoxdur / yararsızdırsa push NO-OP-dur: bildirişlər yaranır, telefona göndərilmir (loqda yalnız say).
 Açarın özü heç vaxt loqa yazılmır.
