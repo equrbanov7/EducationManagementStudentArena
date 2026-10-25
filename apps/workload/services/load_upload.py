@@ -228,7 +228,9 @@ class LoadUploadImporter(Form1Importer):
             "subject_text": entry.subject_text[:255],
             "groups_text": entry.groups_text[:255],
             "group_ids": [str(unit.pk) for unit in groups],
-            "union_count": len(groups),
+            # Faylın mühazirə saatı BİR axındır (çox qruplu sətir = birgə mühazirə, «A-axın», sahib 2026-10-25) —
+            # əvvəl qrup sayı yazılırdı və ``row_warnings`` saxta «lecture_total_mismatch» göstərirdi.
+            "union_count": 1,
             "subgroup_count": 1,
             "student_count_text": (entry.students or "")[:100],
             "credits": (entry.credits or "")[:20],

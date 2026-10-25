@@ -47,6 +47,20 @@ def subject_slug(text: str) -> str:
     return slug_name(_TAG_RE.sub("", text))
 
 
+#: Səviyyə qrupları («Dil-1(elementary)» / «(intermediate)») — mötərizə fənnin özüdür, atılmır.
+_LEVEL_WORDS = ("elementary", "intermediate", "beginner", "advanced", "upper", "pre", "a1", "a2", "b1", "b2", "c1")
+
+
+def subject_key(text: str) -> str:
+    """Fənn açarı: «X (English title)» = «X» (sahib 2026-10-25: «… (Digital Forensics …)» / «… (Malware analysis)»
+    adlı tapşırıq sətrini köhnə sistem deltası tanımayıb İKİNCİ sətir açmışdı); səviyyə mötərizəsi saxlanılır."""
+    text = str(text or "")
+    head, paren, tail = text.partition("(")
+    if paren and head.strip() and not any(subject_slug(tail).startswith(word) for word in _LEVEL_WORDS):
+        text = head
+    return subject_slug(text)
+
+
 def find_chair(organization, name: str):
     wanted = normalize(re.sub(r"(?i)\s*kafedras[ıi]\s*$", "", name or ""))
     chairs = OrgUnit.objects.filter(organization=organization, unit_type=OrgUnitType.CHAIR, is_active=True)
@@ -62,9 +76,9 @@ class _RowIndex:
         self.rows = list(task.rows.select_related("subject").prefetch_related("groups"))
         self.labels, self.option_labels, self.group_keys = {}, {}, {}
         for row in self.rows:
-            labels = {subject_slug(row.subject_text)}
+            labels = {subject_slug(row.subject_text), subject_key(row.subject_text)}
             if row.subject_id:
-                labels.add(subject_slug(row.subject.name))
+                labels |= {subject_slug(row.subject.name), subject_key(row.subject.name)}
             elif is_block(row.subject_text):
                 options, _ = block_options(rich_lines(row.subject_text))
                 self.option_labels[row.pk] = {subject_slug(o.text): o.text for o in options}
@@ -79,14 +93,19 @@ class _RowIndex:
 
     def match(self, entry) -> tuple[list, float]:
         """→ ([(sətir, fənni boş blok sətri üçün uyğun bənd mətni | ""), ...], oxşarlıq)."""
-        wanted = subject_slug(entry.chosen_subject or entry.subject_text)
+        raw = entry.chosen_subject or entry.subject_text
+        wanted = subject_slug(raw)
+        wanted_key = subject_key(raw)
         scored = []
         for row in self.rows:
             if row.season != entry.season:
                 continue
             if entry.group_keys and not (entry.group_keys & self.group_keys[row.pk]):
                 continue
-            score, option = self._score(wanted, self.labels[row.pk]), ""
+            score, option = (
+                max(self._score(wanted, self.labels[row.pk]), self._score(wanted_key, self.labels[row.pk])),
+                "",
+            )
             options = self.option_labels.get(row.pk, {})
             option_score = self._score(wanted, options)
             if option_score > score:
