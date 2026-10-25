@@ -172,13 +172,15 @@ def _sort_options():
 
 
 def _apply_common_filters(queryset, *, search, head, with_head_ids=None):
-    """Ad/kod axtarışı + «rəhbəri var/yox» süzgəci.
+    """Ad/kod/əvvəlki ad axtarışı + «rəhbəri var/yox» süzgəci.
 
     Rəhbər süzgəci `head__isnull` ilə DEYİL, ƏVVƏLCƏDƏN hesablanmış effektiv
     rəhbər dəsti ilə tətbiq olunur (`_role_heads`): rəhbər rol üzvlüyü ilə də
     verilə bilər, FK isə boş qalır — əks halda süzgəc KPI ilə ziddiyyət yaradır.
     """
-    search_q = tolerant_q(search, ("name",), compact_fields=("code",))
+    # 2026-10-25: köhnə ad da tapılsın — qovuşmuş/adı dəyişmiş vahidin əvvəlki adı ``settings.aliases``-dədir
+    # (``chair_merge`` / ``structure_plan``): «İngilis dili mərkəzi» → «Xarici dillər kafedrası».
+    search_q = tolerant_q(search, ("name", "settings__aliases"), compact_fields=("code",))
     if search_q is not None:
         queryset = queryset.filter(search_q)
     if with_head_ids is None:
