@@ -54,3 +54,16 @@ CVE-2025-47273
 # Yenidən baxış: 2026-12-15 (yuxarıdakı pip-çıxarma planı ilə birlikdə).
 CVE-2026-97687
 CVE-2026-97689
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 2026-10-25: Twisted 26.4.0 (channels/daphne asılılığı) — mail.imap4 / words / conch / web başlıq advisory-ləri, stabil düzəliş YOXDUR
+# ─────────────────────────────────────────────────────────────────────────────
+# Trivy «fixed: 26.10.0rc1» göstərir — yalnız release candidate. pip-audit-də eyni CVE-lər artıq istisnadadır
+# (.github/workflows/_security.yml `ignores`). Websocket qatı yalnız daxili canlı imtahan kanalıdır, nginx
+# limitləri arxasındadır. 26.10.0 stabil çıxanda twisted qaldırılır və bu sətirlər silinir.
+# Yenidən baxış: 2026-11-15.
+CVE-2026-115774
+CVE-2026-115775
+CVE-2026-115776
+CVE-2026-115778
+CVE-2026-115877
