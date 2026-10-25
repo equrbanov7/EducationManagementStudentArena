@@ -523,6 +523,8 @@ body.ex-live-pin-modal-open { overflow: hidden; }
 .exam-start-modal__language-icon { width: 48px; height: 48px; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--ems-neutral-0); background: linear-gradient(135deg, #4f6df5 0%, var(--ems-primary-600) 100%); box-shadow: 0 14px 24px rgba(37, 99, 235, 0.22); }
 .exam-start-modal__language-text { min-width: 0; }
 .exam-start-modal__language-label { display: block; margin: 0; color: var(--ems-neutral-900); font-size: 1.05rem; font-weight: 850; line-height: 1.25; }
+.exam-start-modal__language--single { grid-template-columns: minmax(0, 1fr); }
+.exam-start-modal__language-name { display: block; margin-top: 0.2rem; color: var(--ems-primary-700, #1d4ed8); font-size: 1.2rem; font-weight: 850; line-height: 1.3; overflow-wrap: anywhere; }
 .exam-start-modal__language-text p { margin: 0.25rem 0 0; color: var(--ems-neutral-600); font-size: 0.9rem; line-height: 1.45; }
 .exam-start-modal__language-select-wrap,
 .exam-start-modal__language-select-wrap .form-select,

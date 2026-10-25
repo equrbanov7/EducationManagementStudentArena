@@ -108922,3 +108922,7 @@ msgstr "Apellyasiya əsasında dəyişiklik yalnız İmtahan Mərkəzinin rəhb�
 msgctxt "registrar.exam_score_entry"
 msgid "Dəyişiklik yalnız apellyasiya ilə — İmtahan Mərkəzinin rəhbərinə müraciət edin."
 msgstr "Dəyişiklik yalnız apellyasiya ilə — İmtahan Mərkəzinin rəhbərinə müraciət edin."
+
+msgctxt "exams.template.student_exam_list"
+msgid "İmtahan dili"
+msgstr "İmtahan dili"

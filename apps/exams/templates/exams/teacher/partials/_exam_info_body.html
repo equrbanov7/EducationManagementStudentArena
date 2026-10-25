@@ -13,6 +13,13 @@
         </div>
     </div>
 
+    {# Sahib 2026-10-25: tək dil — seçim yox, dil aydın məlumat kimi. #}
+    <div class="cx-lang cx-lang--single" id="courseExamLanguageInfo" hidden>
+        <i class="fas fa-language" aria-hidden="true"></i>
+        <span class="cx-lang__label">{% trans "İmtahan dili" context "exams.template.student_exam_list" %}</span>
+        <strong class="cx-lang__name" id="courseExamLanguageInfoName"></strong>
+    </div>
+
     <dl class="cx-facts">
         <div><dt>{% trans "modal_label_type" context "exams.partial.exam_section" %}</dt><dd id="courseExamInfoType">-</dd></div>
         <div><dt>{% trans "modal_label_duration" context "exams.partial.exam_section" %}</dt><dd id="courseExamInfoDuration">-</dd></div>

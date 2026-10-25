@@ -20,6 +20,24 @@
     overflow-wrap: anywhere;
 }
 
+.cx-lang--single {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--ems-primary-200);
+    border-radius: 12px;
+    background: var(--ems-primary-50, #eef4ff);
+}
+
+.cx-lang__name {
+    color: var(--ems-primary-700, #1d4ed8);
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.cx-lang--single[hidden],
 .cx-lang[hidden],
 .cx-code[hidden] {
     display: none;

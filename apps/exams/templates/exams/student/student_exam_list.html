@@ -388,6 +388,19 @@
                     </div>
                 </div>
 
+                {# Sahib 2026-10-25: imtahanın TƏK dili varsa seçim yox — dil aydın məlumat kimi göstərilir. #}
+                <div class="exam-start-modal__language exam-start-modal__language--single d-none" id="examStartLanguageInfo">
+                    <div class="exam-start-modal__language-copy">
+                        <span class="exam-start-modal__language-icon">
+                            <i class="fas fa-language" aria-hidden="true"></i>
+                        </span>
+                        <div class="exam-start-modal__language-text">
+                            <span class="exam-start-modal__language-label">{% trans "İmtahan dili" context "exams.template.student_exam_list" %}</span>
+                            <strong class="exam-start-modal__language-name" id="examStartLanguageInfoName"></strong>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="exam-start-modal__grid">
                     <div class="exam-start-modal__info-card">
                         <span class="label">{% trans "modal_label_type" context "exams.partial.exam_section" %}</span>

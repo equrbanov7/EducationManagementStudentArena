@@ -26,6 +26,8 @@
     var codeError = document.getElementById("courseExamCodeError");
     var languageBlock = document.getElementById("courseExamLanguageBlock");
     var languageSelect = document.getElementById("courseExamLanguageSelect");
+    var languageInfo = document.getElementById("courseExamLanguageInfo");
+    var languageInfoName = document.getElementById("courseExamLanguageInfoName");
     var startUrl = "";
     var requiresCode = false;
     var codeSubmitInFlight = false;
@@ -122,6 +124,19 @@
         languageBlock.hidden = options.length <= 1;
         languageSelect.required = options.length > 1;
         refreshLanguageSelect();
+        showSingleLanguage(options.length === 1 ? options[0] : null);
+    }
+
+    // Tək dil — seçici yox, «İmtahan dili: …» məlumatı (sahib 2026-10-25).
+    function showSingleLanguage(option) {
+        if (!languageInfo) {
+            return;
+        }
+        var name = option ? option.display_name || option.language || "" : "";
+        if (languageInfoName) {
+            languageInfoName.textContent = name;
+        }
+        languageInfo.hidden = !name;
     }
 
     function openModal(trigger) {

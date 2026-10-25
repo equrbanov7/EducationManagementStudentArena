@@ -33,6 +33,8 @@
         const codeLanguageInput = document.getElementById("examStartModalCodeLanguage");
         const languageBlock = document.getElementById("examStartLanguageBlock");
         const languageSelect = document.getElementById("examStartLanguageSelect");
+        const languageInfo = document.getElementById("examStartLanguageInfo");
+        const languageInfoName = document.getElementById("examStartLanguageInfoName");
         const actionBtn = document.getElementById("examStartModalActionBtn");
         const livePinModal = document.querySelector("[data-live-pin-modal]");
         const livePinForm = livePinModal ? livePinModal.querySelector("[data-live-pin-form]") : null;
@@ -214,6 +216,19 @@
             languageBlock.classList.toggle("d-none", options.length <= 1);
             languageSelect.required = options.length > 1;
             refreshLanguageSelect();
+            showSingleLanguage(options.length === 1 ? options[0] : null);
+        }
+
+        // Tək dil — seçici yox, «İmtahan dili: …» məlumatı (sahib 2026-10-25).
+        function showSingleLanguage(option) {
+            if (!languageInfo) {
+                return;
+            }
+            const name = option ? option.display_name || option.language || "" : "";
+            if (languageInfoName) {
+                languageInfoName.textContent = name;
+            }
+            languageInfo.classList.toggle("d-none", !name);
         }
 
         function resetModalState() {
@@ -227,6 +242,7 @@
             if (languageBlock) {
                 languageBlock.classList.add("d-none");
             }
+            showSingleLanguage(null);
             if (languageSelect) {
                 languageSelect.innerHTML = "";
                 languageSelect.required = false;

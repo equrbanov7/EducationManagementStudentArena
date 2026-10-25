@@ -108820,3 +108820,7 @@ msgstr "İtiraz üzerine değişiklik yalnızca Sınav Merkezi başkanı tarafı
 msgctxt "registrar.exam_score_entry"
 msgid "Dəyişiklik yalnız apellyasiya ilə — İmtahan Mərkəzinin rəhbərinə müraciət edin."
 msgstr "Değişiklik yalnızca itiraz yoluyla — Sınav Merkezi başkanına başvurun."
+
+msgctxt "exams.template.student_exam_list"
+msgid "İmtahan dili"
+msgstr "Sınav dili"

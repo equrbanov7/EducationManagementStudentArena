@@ -110438,3 +110438,7 @@ msgstr "Eine Änderung aufgrund eines Widerspruchs darf nur die Leitung des Prü
 msgctxt "registrar.exam_score_entry"
 msgid "Dəyişiklik yalnız apellyasiya ilə — İmtahan Mərkəzinin rəhbərinə müraciət edin."
 msgstr "Änderungen nur per Widerspruch — wenden Sie sich an die Leitung des Prüfungszentrums."
+
+msgctxt "exams.template.student_exam_list"
+msgid "İmtahan dili"
+msgstr "Prüfungssprache"

@@ -109412,3 +109412,7 @@ msgstr "An appeal-based change can only be made by the head of the Exam Center."
 msgctxt "registrar.exam_score_entry"
 msgid "Dəyişiklik yalnız apellyasiya ilə — İmtahan Mərkəzinin rəhbərinə müraciət edin."
 msgstr "Changes only through an appeal — contact the head of the Exam Center."
+
+msgctxt "exams.template.student_exam_list"
+msgid "İmtahan dili"
+msgstr "Exam language"
