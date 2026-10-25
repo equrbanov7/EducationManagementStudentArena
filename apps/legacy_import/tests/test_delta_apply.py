@@ -381,6 +381,28 @@ class DeltaApplyTests(TestCase):
             self.assertTrue(LessonMark.objects.filter(enrollment__student=created).exists())
             self.assertFalse(Enrollment.objects.filter(student=namesake).exists())
 
+    def test_ambiguous_namesake_is_created_only_with_explicit_flag(self):
+        """Adaş eyni qrupdadır, ata adı yoxdur → ambiqü; ``snapshot.create_ambiguous`` ilə yeni hesab yaranır."""
+        with bypass_rls():
+            namesake = User.objects.create_user(
+                "nicat.y2", "n2@example.test", "x", first_name="Nicat", last_name="Yenizadə"
+            )
+            Membership.objects.create(
+                user=namesake, organization=self.org, role=self.org.roles.get(name="student"), is_active=True
+            )
+            UserProfile.objects.filter(user=namesake).update(birth_date=dt.date(2001, 1, 1))
+        bundle = _bundle()
+        bundle["students"][1]["father_name"] = ""
+        first = self._run(apply=False, bundle=bundle)
+        self.assertEqual(first.counters["student.name_ambiguous.no_patronymic_other_group"], 1)
+        bundle["snapshot"] = {**bundle["snapshot"], "create_ambiguous": True}
+        run = self._run(apply=True, bundle=bundle)
+        self.assertEqual(run.counters["student.ambiguous_created"], 1)
+        with bypass_rls():
+            created = User.objects.get(profile__institutional_identifier="2")
+        self.assertNotEqual(created.pk, namesake.pk)
+        self.assertIn(("student_ambiguous_created", "Yenizadə Nicat", "1"), run.name_rows)
+
     def test_new_absent_only_column_is_not_created(self):
         """Yeni legacy sütununda YALNIZ «qb» varsa dərs yaradılmır (boş/«qb»-only sütun təmizliyi ilə eyni qayda)."""
         bundle = _bundle()

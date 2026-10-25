@@ -47,6 +47,11 @@ class Command(BaseCommand):
         parser.add_argument("--snapshot-file", default="", help="Mənbə dump faylı — yalnız sha256/ölçü provenansı")
         parser.add_argument("--out", required=True, help="Paket faylı (.json.gz, 0600)")
         parser.add_argument(
+            "--create-ambiguous",
+            action="store_true",
+            help="Adaşlardan HEÇ BİRİ tutmayan legacy tələbə yeni hesab kimi yaradılır (sahibin açıq qərarı)",
+        )
+        parser.add_argument(
             "--phases",
             nargs="+",
             choices=PHASES,
@@ -89,6 +94,8 @@ class Command(BaseCommand):
             bundle = build_bundle(extractor, snapshot=snapshot, since=options["since"])
             if options["phases"]:
                 bundle["snapshot"]["phases"] = list(options["phases"])
+            if options["create_ambiguous"]:
+                bundle["snapshot"]["create_ambiguous"] = True
             cursor.execute("ROLLBACK")
         connection.close()
         digest = write_bundle(options["out"], bundle)

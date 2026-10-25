@@ -148,6 +148,8 @@ class StudentMapper:
         self._cache: dict = {}
         #: ad ilə tutuşdurulmuş hesab → legacy id: iki legacy adam EYNİ hesaba ad ilə bağlanmır.
         self._name_claims: dict = {}
+        #: Paket ``snapshot.create_ambiguous`` — adaşlardan heç biri tutmayan tələbə yaradılır (açıq qərar).
+        self.create_ambiguous = bool((run.bundle.get("snapshot") or {}).get("create_ambiguous"))
         self.created: list = []
 
     def resolve(self, legacy_id, *, create: bool = True):
@@ -231,9 +233,17 @@ class StudentMapper:
             if len(narrowed) == 1 and claimed in (None, legacy_id):
                 self._name_claims[narrowed[0]] = legacy_id
                 return narrowed[0], "name"
-            self.run.names("student_ambiguous", _display(row), str(len(candidates)))
-            reason = "claimed_by_other" if claimed is not None else _ambiguity(candidates, row, narrowed)
-            return None, f"name_ambiguous.{reason}"
+            if not narrowed and self.create_ambiguous:
+                # Sahib 2026-10-25 «12 tələbə gəlsin geri»: heç bir adaş bu adam deyil (ata adı / doğum / qrup
+                # tutmur) — legacy qrupu ilə yeni hesab; adlı hesabatda ayrıca (RİM birləşdirə bilər).
+                if create:
+                    self.run.names("student_ambiguous_created", _display(row), str(len(candidates)))
+                    self.run.count("student.ambiguous_created")
+                candidates = []
+            else:
+                self.run.names("student_ambiguous", _display(row), str(len(candidates)))
+                reason = "claimed_by_other" if claimed is not None else _ambiguity(candidates, row, narrowed)
+                return None, f"name_ambiguous.{reason}"
         if not create:
             return None, "not_found"
         if int(row.get("azadedildi") or 0) == 1:
