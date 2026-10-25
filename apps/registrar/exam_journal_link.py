@@ -122,6 +122,69 @@ def link_offering_ids(organization, *, subject_id, group_ids=(), teacher=None, p
     return sorted(offerings.values_list("pk", flat=True).distinct(), key=str)
 
 
+def enrollment_coverage(organization, subject_id, student_ids, period=None) -> dict:
+    """Tələbələrin fənn üzrə CARİ dövr jurnalı → ``{"ok": n, "none": [id], "multiple": [id]}`` (≤ 2 sorğu).
+
+    Sahib 2026-10-26: «tələbənin imtahan nəticəsi sistemə düşəcəkmi?» — imtahan yaradılanda / saxlananda /
+    aktivləşdiriləndə müəllimə bloklamayan xəbərdarlıq: ``none`` — bu fənn üzrə cari semestr jurnalında
+    ``enrolled`` qeydiyyatı yoxdur (nəticə jurnala düşməyəcək); ``multiple`` — iki (və daha çox) jurnalda
+    (körpü ``exam_bridge.pick_enrollment`` qaydası ilə birini seçir: bağlı jurnal → öz qrup → ən son)."""
+    student_ids = sorted({int(value) for value in student_ids or () if value is not None})
+    empty = {"ok": 0, "none": [], "multiple": []}
+    if organization is None or not subject_id or not student_ids:
+        return empty
+    period = period or current_period(organization)
+    if period is None:
+        return {**empty, "none": student_ids}
+    counts = Counter(
+        Enrollment.objects.filter(
+            organization=organization,
+            student_id__in=student_ids,
+            offering__subject_id=subject_id,
+            offering__period=period,
+            status=Enrollment.Status.ENROLLED,
+        ).values_list("student_id", flat=True)
+    )
+    return {
+        "ok": sum(1 for sid in student_ids if counts.get(sid) == 1),
+        "none": [sid for sid in student_ids if not counts.get(sid)],
+        "multiple": [sid for sid in student_ids if counts.get(sid, 0) > 1],
+    }
+
+
+def subject_journal_hints(organization, subject_ids, *, teacher=None, period=None) -> dict:
+    """Fənn seçicisinin ayırd edici işarəsi → ``{subject_id: {"teacher_groups": [ad], "count": n}}`` (≤ 3 sorğu).
+
+    ``teacher_groups`` — müəllimin cari dövrdə bu fənn üzrə jurnallarının qrup adları; ``count`` — fənnin cari
+    dövrdəki aktiv jurnal sayı (bütün müəllimlər). Sahib 2026-10-26: «təkrar fənn varsa göstərməsin» —
+    eyni görünən iki fənn adı seçicidə ayırd edilsin (məlumat birləşdirilmir)."""
+    subject_ids = [value for value in subject_ids or () if value]
+    period = period or current_period(organization)
+    if organization is None or period is None or not subject_ids:
+        return {}
+    rows = list(
+        _period_offerings(organization, period)
+        .filter(subject_id__in=subject_ids)
+        .values_list("pk", "subject_id", "group__name")
+    )
+    mine = set()
+    if teacher is not None:
+        mine = set(
+            teacher_offerings(organization, teacher, period=period)
+            .filter(subject_id__in=subject_ids)
+            .values_list("pk", flat=True)
+        )
+    hints = {sid: {"teacher_groups": [], "count": 0} for sid in subject_ids}
+    for offering_id, subject_id, group_name in rows:
+        hint = hints.setdefault(subject_id, {"teacher_groups": [], "count": 0})
+        hint["count"] += 1
+        if offering_id in mine and group_name and group_name not in hint["teacher_groups"]:
+            hint["teacher_groups"].append(group_name)
+    for hint in hints.values():
+        hint["teacher_groups"].sort()
+    return hints
+
+
 def _is_stale(row, *, subject_id, offering_ids) -> bool:
     offering = row.enrollment.offering
     if not subject_id or offering.subject_id != subject_id:
@@ -197,9 +260,11 @@ __all__ = [
     "KEPT_LOCKED",
     "clear_stale_midterm_scores",
     "current_period",
+    "enrollment_coverage",
     "expand_group_ids",
     "link_offering_ids",
     "stale_midterm_rows",
+    "subject_journal_hints",
     "teacher_offerings",
     "teacher_subject_ids",
     "teacher_subjects",

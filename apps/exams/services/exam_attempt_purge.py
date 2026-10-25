@@ -306,6 +306,7 @@ def _final_source(attempt):
 
 
 def _collect_final(plan):
+    from apps.exams.services import exam_journal_link
     from apps.registrar.public import exam_result_trace
 
     attempt = plan.attempt
@@ -321,6 +322,7 @@ def _collect_final(plan):
         score_percent=percent,
         is_expelled=expelled,
         attempt=attempt,
+        offering_ids=exam_journal_link.linked_offering_ids(exam),
     )
     if not trace["matches"]:
         return  # jurnaldakı bal bu cəhdin deyil (əl ilə daxiletmə / 25% / qeydiyyat yoxdur) — toxunulmur
@@ -420,6 +422,7 @@ def apply_purge(attempt, *, reason: str, allow_retake_links=False) -> AttemptPur
 
 def _restore_journal(attempt, plan):
     """Silinmədən SONRA: midterm xanasına / yekun bala başqa rəsmi cəhdi yaz, yoxdursa yekun balı boşalt."""
+    from apps.exams.services import exam_journal_link
     from apps.exams.services.journal_sync import sync_attempt_to_journal
     from apps.exams.services.midterm_journal_sync import sync_midterm_attempt
     from apps.registrar.public import exam_result_trace
@@ -442,6 +445,7 @@ def _restore_journal(attempt, plan):
             subject_id=exam.subject_id,
             organization=exam.organization,
             expected_score=plan.final_expected,
+            offering_ids=exam_journal_link.linked_offering_ids(exam),
         )
     plan.counts["journal_final_cleared"] = int(cleared)
 

@@ -32,35 +32,122 @@ logger = logging.getLogger(__name__)
 
 
 def _current_period(organization):
+    """İmtahan körpüsünün dövrü: ``is_current`` → yoxdursa BAŞLAMIŞ ən son dövr → yoxdursa ən son dövr.
+
+    2026-10-26 (sahib: «nəticə doğru jurnala düşsün»): əvvəlki ehtiyat yol ``-start_date`` üzrə İLK dövrü
+    götürürdü — gələcək semestr (prod: «Yaz 2027», 8k ``enrolled`` sətir) cari kimi seçilə bilirdi."""
     from django.apps import apps as django_apps
+    from django.utils import timezone
 
     AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
+    periods = AcademicPeriod.objects.filter(organization=organization)
     return (
-        AcademicPeriod.objects.filter(organization=organization, is_current=True).first()
-        or AcademicPeriod.objects.filter(organization=organization).order_by("-start_date").first()
+        periods.filter(is_current=True).first()
+        or periods.filter(start_date__lte=timezone.localdate()).order_by("-start_date").first()
+        or periods.order_by("-start_date").first()
     )
 
 
-def resolve_enrollment(*, student, subject_id, organization):
-    """Tələbənin bu fənn üzrə aktiv qeydiyyatını tap (cari semestr üstünlüklə).
+def _linked_key(value) -> str:
+    return str(value)
+
+
+def pick_enrollment(candidates, linked_offering_ids=()):
+    """Bir neçə namizəd qeydiyyatdan BİRİNİ seç (yekun + midterm körpüsünün ORTAQ qaydası).
+
+    Sıra (sahib 2026-10-26: «təkrar fənn varsa göstərməsin» — nəticə təsadüfi jurnala düşməsin):
+
+    1. imtahanın AÇIQ bağlandığı jurnal (``Exam.journal_offerings``);
+    2. tələbənin ÖZ qrupunun qeydiyyatı (``source_group IS NULL`` — alt qrupdan əlavə olunmuş deyil);
+    3. ən son yaradılmış qeydiyyat (bərabərlikdə ``pk`` — deterministik).
+
+    Birdən çox namizəd varsa WARNING loglanır (monitorinq: eyni fənn iki jurnalda)."""
+    candidates = list(candidates or ())
+    if not candidates:
+        return None
+    if len(candidates) == 1:
+        return candidates[0]
+    linked = {_linked_key(value) for value in linked_offering_ids or ()}
+
+    def _rank(enrollment):
+        return (
+            _linked_key(enrollment.offering_id) in linked,
+            enrollment.source_group_id is None,
+            enrollment.created_at.timestamp() if enrollment.created_at else 0.0,
+            _linked_key(enrollment.pk),
+        )
+
+    chosen = max(candidates, key=_rank)
+    logger.warning(
+        "exam_bridge: student %s has %s enrollments for subject %s — chose %s (offering %s)",
+        chosen.student_id,
+        len(candidates),
+        getattr(chosen.offering, "subject_id", "?"),
+        chosen.pk,
+        chosen.offering_id,
+    )
+    return chosen
+
+
+def choose_enrollment(candidates, period, linked_offering_ids=()):
+    """Namizədlərdən (bir tələbə + bir fənn) körpünün qeydiyyatı — tək və toplu yolun ORTAQ qərarı.
+
+    Cari dövrün qeydiyyatı varsa ondan (``pick_enrollment``); yoxdursa YALNIZ keçmiş dövrlər (cari dövrdən
+    ƏVVƏL başlamış; cari dövr yoxdursa bu gün və ya daha əvvəl başlamış), ən son başlamış dövr — gələcək
+    semestrin qeydiyyatı HEÇ VAXT seçilmir."""
+    candidates = list(candidates or ())
+    if not candidates:
+        return None
+    if period is not None:
+        current = [e for e in candidates if e.offering.period_id == period.pk]
+        if current:
+            return pick_enrollment(current, linked_offering_ids)
+        past = [e for e in candidates if e.offering.period.start_date < period.start_date]
+    else:
+        from django.utils import timezone
+
+        today = timezone.localdate()
+        past = [e for e in candidates if e.offering.period.start_date <= today]
+    if not past:
+        return None
+    latest = max(e.offering.period.start_date for e in past)
+    return pick_enrollment([e for e in past if e.offering.period.start_date == latest], linked_offering_ids)
+
+
+def linked_enrollment(student, organization, offering_ids):
+    """Tələbənin imtahanın bağlı jurnallarından birindəki aktiv qeydiyyatı (yoxdursa ``None``)."""
+    if not offering_ids or student is None:
+        return None
+    candidates = Enrollment.objects.filter(
+        student=student,
+        offering_id__in=list(offering_ids),
+        offering__organization=organization,
+        status=Enrollment.Status.ENROLLED,
+    ).select_related("offering", "offering__period")
+    return pick_enrollment(candidates, offering_ids)
+
+
+def resolve_enrollment(*, student, subject_id, organization, offering_ids=()):
+    """Tələbənin bu fənn üzrə aktiv qeydiyyatını tap.
+
+    ``offering_ids`` — imtahanın AÇIQ bağlandığı jurnallar (``Exam.journal_offerings``, 2026-10-24): tələbə
+    onlardan birində qeydiyyatdadırsa o qaytarılır; yoxdursa fənn üzrə qeydiyyat (``choose_enrollment``:
+    cari dövr, sonra yalnız keçmiş dövrlər).
 
     İmtahan bir fənnə bağlı olmaya bilər (``subject`` null) — o halda ``None``
     (körpü sadəcə no-op olur, mövcud davranış pozulmur)."""
     if not subject_id or student is None:
         return None
-    base = Enrollment.objects.filter(
+    linked = linked_enrollment(student, organization, offering_ids)
+    if linked is not None:
+        return linked
+    candidates = Enrollment.objects.filter(
         student=student,
         offering__subject_id=subject_id,
         offering__organization=organization,
         status=Enrollment.Status.ENROLLED,
     ).select_related("offering", "offering__period")
-    period = _current_period(organization)
-    if period is not None:
-        match = base.filter(offering__period=period).first()
-        if match is not None:
-            return match
-    # Cari semestr uyğunluğu yoxdursa — ən son açılış.
-    return base.order_by("-offering__period__start_date").first()
+    return choose_enrollment(candidates, _current_period(organization), offering_ids)
 
 
 def exam_eligibility(*, student, subject_id, organization):
@@ -123,8 +210,7 @@ def _eligibility_payload(elig):
 def _resolve_enrollments_batch(*, student, subject_ids, organization):
     """``resolve_enrollment``-in toplu güzgüsü: ``{subject_id: Enrollment}`` (2 sorğu).
 
-    Seçim qaydası tək variantla eynidir: cari dövrün açılışı (pk üzrə ilk),
-    yoxdursa ən son dövr (``-start_date``; bərabərlikdə kiçik pk).
+    Seçim qaydası tək variantla eynidir (``choose_enrollment``): cari dövr, yoxdursa yalnız keçmiş dövrlər.
     """
     period = _current_period(organization)
     rows = list(
@@ -133,9 +219,7 @@ def _resolve_enrollments_batch(*, student, subject_ids, organization):
             offering__subject_id__in=list(subject_ids),
             offering__organization=organization,
             status=Enrollment.Status.ENROLLED,
-        )
-        .select_related("offering", "offering__period")
-        .order_by("pk")
+        ).select_related("offering", "offering__period")
     )
     by_subject: dict = {}
     for enrollment in rows:
@@ -143,12 +227,9 @@ def _resolve_enrollments_batch(*, student, subject_ids, organization):
 
     resolved = {}
     for subject_id, candidates in by_subject.items():
-        chosen = None
-        if period is not None:
-            chosen = next((e for e in candidates if e.offering.period_id == period.pk), None)
-        if chosen is None:
-            chosen = max(candidates, key=lambda e: (e.offering.period.start_date, -e.pk))
-        resolved[subject_id] = chosen
+        chosen = choose_enrollment(candidates, period)
+        if chosen is not None:
+            resolved[subject_id] = chosen
     return resolved
 
 
@@ -309,7 +390,16 @@ def _retake_attempt_result(
 
 
 def record_exam_result(
-    *, student, subject_id, organization, score_percent, is_expelled=False, by_user=None, appeal_id=None, attempt=None
+    *,
+    student,
+    subject_id,
+    organization,
+    score_percent,
+    is_expelled=False,
+    by_user=None,
+    appeal_id=None,
+    attempt=None,
+    offering_ids=None,
 ):
     """İmtahan nəticəsini jurnala yaz (``FinalGrade.exam_score``).
 
@@ -330,7 +420,47 @@ def record_exam_result(
     SONRA başlayıbsa bu, 25% cəhdidir — bal ``FinalGrade.exam_score``-a (əsas imtahanın balı) YAZILMIR,
     ``retake_results.record_attempt_result`` ilə ``ResitRecord``-a + müraciətə yazılır (ilk yazı, təkrar
     yoxlama və apellyasiya — hamısı bu yolla). Nəticə: ``ResitRecord``.
+
+    ``offering_ids`` (2026-10-26) — imtahanın AÇIQ bağlandığı jurnallar (``Exam.journal_offerings``), midterm
+    körpüsü ilə EYNİ qayda: tələbə onlardan birindədirsə bal ORAYA yazılır. Statusu da lazım olan çağıran
+    (``exams.journal_sync`` — ``no_enrollment`` sayğacı) :func:`record_final_result` işlədir.
     """
+    return record_final_result(
+        student=student,
+        subject_id=subject_id,
+        organization=organization,
+        score_percent=score_percent,
+        is_expelled=is_expelled,
+        by_user=by_user,
+        appeal_id=appeal_id,
+        attempt=attempt,
+        offering_ids=offering_ids,
+    )[1]
+
+
+#: ``record_final_result`` statusları.
+FINAL_WRITTEN = "written"
+FINAL_NO_ENROLLMENT = "no_enrollment"
+FINAL_RETAKE = "retake"
+FINAL_RETAKE_CLOSED = "retake_closed"
+
+
+def record_final_result(
+    *,
+    student,
+    subject_id,
+    organization,
+    score_percent,
+    is_expelled=False,
+    by_user=None,
+    appeal_id=None,
+    attempt=None,
+    offering_ids=None,
+):
+    """:func:`record_exam_result` + status → ``(status, FinalGrade | ResitRecord | None)``.
+
+    ``no_enrollment`` — tələbənin bu fənn üzrə qeydiyyatı (bağlı jurnalda da) yoxdur: bal HEÇ YERƏ yazılmadı
+    (əvvəl bu hal səssiz ``None`` idi — exams tərəfi indi onu sayğac + WARNING ilə görünən edir)."""
     retake = _retake_attempt_result(
         student=student,
         subject_id=subject_id,
@@ -342,10 +472,12 @@ def record_exam_result(
         appeal_id=appeal_id,
     )
     if retake is not _NOT_RETAKE:
-        return retake
-    enrollment = resolve_enrollment(student=student, subject_id=subject_id, organization=organization)
+        return (FINAL_RETAKE if retake is not None else FINAL_RETAKE_CLOSED), retake
+    enrollment = resolve_enrollment(
+        student=student, subject_id=subject_id, organization=organization, offering_ids=offering_ids
+    )
     if enrollment is None:
-        return None
+        return FINAL_NO_ENROLLMENT, None
     if by_user is not None and not _actor_can_write(organization, by_user):
         logger.warning(
             "exam_bridge: actor %s cannot write for organization %s — falling back to system actor",
@@ -357,7 +489,8 @@ def record_exam_result(
     exam_score = 0 if is_expelled else _to_exam_scale(score_percent, scheme)
     note = "imtahan mərkəzi" if by_user is not None else "imtahan mərkəzi · avtomatik"
     if appeal_id is None:
-        return finals.set_exam_score(enrollment=enrollment, score=exam_score, by_user=by_user, source_note=note)
+        grade = finals.set_exam_score(enrollment=enrollment, score=exam_score, by_user=by_user, source_note=note)
+        return FINAL_WRITTEN, grade
     # Audit 2026-09-28 EXA-03: apellyasiya qərarı balı dəyişirsə ledger-də «apellyasiya» sətri.
     from apps.registrar.exam_score_entry import record_appeal_score_change
     from apps.registrar.models import FinalGrade
@@ -373,16 +506,19 @@ def record_exam_result(
                 by_user=by_user,
                 appeal_id=appeal_id,
             )
-    return grade
+    return FINAL_WRITTEN, grade
 
 
-def exam_result_summary(*, student, subject_id, organization):
+def exam_result_summary(*, student, subject_id, organization, offering_ids=()):
     """Tələbə nəticə səhifəsi üçün: giriş+imtahan cəmi, hərf qiyməti (A–F).
 
     ``{"linked": bool, "entry_score", "exam_score", "total", "letter", "gpa",
     "passed", "barred"}``; ``linked=False`` → imtahan jurnala bağlı deyil.
+    ``offering_ids`` — imtahanın bağlı jurnalları (körpü ilə EYNİ qeydiyyat göstərilsin).
     """
-    enrollment = resolve_enrollment(student=student, subject_id=subject_id, organization=organization)
+    enrollment = resolve_enrollment(
+        student=student, subject_id=subject_id, organization=organization, offering_ids=offering_ids
+    )
     if enrollment is None:
         return {"linked": False}
     result = finals.compute_final_result(enrollment=enrollment, organization=organization)

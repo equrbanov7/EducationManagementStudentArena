@@ -433,6 +433,11 @@ html.exam-modal-open, html.exam-modal-open body { overflow: hidden !important; }
 .ew-confirm-summary { display: grid; grid-template-columns: minmax(110px, auto) 1fr; gap: 7px 14px; flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 2px 0 16px; padding: 12px 14px; border: 1px solid var(--ems-border); border-radius: var(--ems-r-xl); background: var(--ems-bg-subtle); text-align: left; font-size: var(--ems-fs-base); }
 .ew-confirm-summary dt { color: var(--ems-text-muted); font-weight: 600; }
 .ew-confirm-summary dd { margin: 0; color: var(--ems-text); font-weight: 700; word-break: break-word; }
+/* Sahib 2026-10-26: «nəticə jurnala düşəcəkmi?» — bloklamayan xəbərdarlıq (təsdiq modalı). */
+.ew-confirm-warn { flex: none; margin: -6px 0 16px; padding: 10px 12px; border: 1px solid var(--ems-warning-bd); border-radius: var(--ems-r-xl); background: var(--ems-warning-bg); color: var(--ems-warning-700); text-align: left; font-size: var(--ems-fs-base); }
+.ew-confirm-warn[hidden] { display: none; }
+.ew-confirm-box .ew-confirm-warn__item { margin: 0; color: inherit; font-size: inherit; line-height: 1.45; }
+.ew-confirm-box .ew-confirm-warn__item + .ew-confirm-warn__item { margin-top: 6px; }
 
 /* ── Responsiv: rel → üst proqres zolağı; telefonda tam ekran ───────────
    «Qısa landşaft» (telefon yan: hündürlük ≤ 520px) də eyni sxemdədir — əks halda

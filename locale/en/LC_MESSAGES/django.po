@@ -109437,3 +109437,26 @@ msgstr "Selects questions without errors, warnings or duplicates and deselects t
 msgctxt "exams.template.test_question_bank"
 msgid "Seçildi: {count} təmiz sual"
 msgstr "Selected: {count} clean questions"
+
+msgctxt "exams.journal_coverage"
+msgid "Seçilmiş qruplar üçün bu fənnin cari semestr jurnalı tapılmadı — nəticə jurnala düşməyə bilər. Fənni və qrupları yoxlayın."
+msgstr "No current-semester journal of this subject was found for the selected groups — the result may not reach the journal. Check the subject and the groups."
+
+#, python-format
+msgctxt "exams.journal_coverage"
+msgid "%(count)s tələbənin bu fənn üzrə cari semestr jurnalı yoxdur — nəticə jurnala düşməyəcək."
+msgstr "%(count)s student(s) have no current-semester journal for this subject — the result will not reach the journal."
+
+#, python-format
+msgctxt "exams.journal_coverage"
+msgid "%(count)s tələbə bu fəndən birdən çox jurnaldadır — nəticə imtahanın qrupunun jurnalına (yoxdursa tələbənin öz qrupunun jurnalına) yazılacaq."
+msgstr "%(count)s student(s) are in more than one journal of this subject — the result will be written to the journal of the exam's group (otherwise to the student's own group's journal)."
+
+#, python-format
+msgctxt "exams.subject_picker"
+msgid "%(count)s jurnal"
+msgstr "%(count)s journal(s)"
+
+msgctxt "exams.subject_picker"
+msgid "jurnal yoxdur"
+msgstr "no journal"

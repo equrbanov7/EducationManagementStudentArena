@@ -12,9 +12,9 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
 from apps.exams.models import StudentGroup
+from apps.exams.services import exam_journal_coverage, subject_picker_hints
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.lookup_search import legacy_group_lookup_q, subject_lookup_q, unit_lookup_q
-from apps.exams.services.subject_labels import subject_option
 from apps.organizations.public import organization_role_user_queryset
 from core.roles import ProfileRole
 from core.search_text import starts_with_q, tolerant_q, word_prefix_q
@@ -56,10 +56,20 @@ def _page_bounds(request):
     return offset, limit
 
 
-def _paginate(qs, offset, limit, serializer):
+def _page(qs, offset, limit):
+    """(səhifənin obyektləri, has_more) — ``limit + 1`` gətirilir."""
     window = list(qs[offset : offset + limit + 1])
-    has_more = len(window) > limit
-    return [serializer(obj) for obj in window[:limit]], has_more
+    return window[:limit], len(window) > limit
+
+
+def _paginate(qs, offset, limit, serializer):
+    page, has_more = _page(qs, offset, limit)
+    return [serializer(obj) for obj in page], has_more
+
+
+def selectable_subjects(qs):
+    """Seçicidə göstərilən fənlər — aktiv və arxivlənməmiş (sahib 2026-10-26)."""
+    return qs.filter(is_active=True, is_archived=False)
 
 
 @login_required
@@ -79,9 +89,11 @@ def subject_search(request):
     from apps.registrar.models import Subject
 
     query = (request.GET.get("q") or "").strip()
-    qs = ranked_subject_queryset(Subject.objects.filter(organization=organization), query)
+    qs = ranked_subject_queryset(selectable_subjects(Subject.objects.filter(organization=organization)), query)
     offset, limit = _page_bounds(request)
-    results, has_more = _paginate(qs, offset, limit, subject_option)
+    page, has_more = _page(qs, offset, limit)
+    # Sahib 2026-10-26: eyni görünən iki fənn — kod + müəllimin jurnal qrupları ilə ayırd edilir.
+    results = subject_picker_hints.subject_options(page, qs, organization=organization, teacher=request.user)
     return JsonResponse({"results": results, "has_more": has_more})
 
 
@@ -387,6 +399,11 @@ def assigned_student_count(request):
 
     Yaratma təsdiqi modalı üçün: "qrupda tələbələrin sayı toplamı". Qrup üzvləri
     ilə fərdi seçilən tələbələr birləşdirilir və təkrarlar sayılmır.
+
+    2026-10-26 (sahib: «nəticə sistemə düşəcəkmi?»): reyestr qrupu ``unit_assigned_student_ids`` semantikası
+    ilə sayılır (alt qruplar + fənnin cari jurnal tələbələri — giriş siyasəti ilə EYNİ); ``subject`` +
+    ``category`` (final / midterm) verilibsə ``no_journal`` / ``multiple_journals`` sayları və bloklamayan
+    ``warnings`` mətnləri də qaytarılır (``exam_journal_coverage``).
     """
     _ensure_teacher(request.user)
     organization = _resolve_required_organization(request)
@@ -400,22 +417,26 @@ def assigned_student_count(request):
     if not group_ids and not unit_ids and not user_ids:
         return JsonResponse({"total": 0})
 
+    subject_id = _uuid_param(request, "subject")
     cond = Q()
     if group_ids:
         cond |= Q(student_groups_as_student__id__in=group_ids)
     if unit_ids:
-        # R2: reyestr qrupu tələbələri — `unit_assigned_exams_q` ilə eyni şərt.
-        from apps.exams.domain.unit_assignment import unit_student_record_filter
-
-        record_path = "academic_records__"
-        cond |= Q(
-            **{f"{record_path}group__in": _units.exam_unit_candidates(request, organization).filter(pk__in=unit_ids)},
-            **unit_student_record_filter(record_path),
-        )
+        cond |= Q(id__in=_unit_member_ids(request, organization, unit_ids, subject_id=subject_id))
     if user_ids:
         cond |= Q(id__in=user_ids)
     qs = _org_user_queryset(request, organization).filter(cond)
     if excluded_user_ids:
         qs = qs.exclude(id__in=excluded_user_ids)
-    total = qs.distinct().count()
-    return JsonResponse({"total": total})
+    student_ids = set(qs.values_list("id", flat=True))
+    payload = {"total": len(student_ids)}
+    payload.update(
+        exam_journal_coverage.confirm_payload(
+            organization,
+            subject_id,
+            student_ids,
+            category=(request.GET.get("category") or "").strip(),
+            unit_ids=unit_ids,
+        )
+    )
+    return JsonResponse(payload)

@@ -108845,3 +108845,26 @@ msgstr "Hatasız, uyarısız ve yinelenmeyen soruları seçer, diğerlerinin se�
 msgctxt "exams.template.test_question_bank"
 msgid "Seçildi: {count} təmiz sual"
 msgstr "Seçildi: {count} temiz soru"
+
+msgctxt "exams.journal_coverage"
+msgid "Seçilmiş qruplar üçün bu fənnin cari semestr jurnalı tapılmadı — nəticə jurnala düşməyə bilər. Fənni və qrupları yoxlayın."
+msgstr "Seçilen gruplar için bu dersin bu dönemki defteri bulunamadı — sonuç deftere düşmeyebilir. Dersi ve grupları kontrol edin."
+
+#, python-format
+msgctxt "exams.journal_coverage"
+msgid "%(count)s tələbənin bu fənn üzrə cari semestr jurnalı yoxdur — nəticə jurnala düşməyəcək."
+msgstr "%(count)s öğrencinin bu ders için bu dönemki defteri yok — sonuç deftere düşmeyecek."
+
+#, python-format
+msgctxt "exams.journal_coverage"
+msgid "%(count)s tələbə bu fəndən birdən çox jurnaldadır — nəticə imtahanın qrupunun jurnalına (yoxdursa tələbənin öz qrupunun jurnalına) yazılacaq."
+msgstr "%(count)s öğrenci bu dersin birden fazla defterinde — sonuç sınavın grubunun defterine (yoksa öğrencinin kendi grubunun defterine) yazılacak."
+
+#, python-format
+msgctxt "exams.subject_picker"
+msgid "%(count)s jurnal"
+msgstr "%(count)s defter"
+
+msgctxt "exams.subject_picker"
+msgid "jurnal yoxdur"
+msgstr "defter yok"

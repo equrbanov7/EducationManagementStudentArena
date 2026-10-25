@@ -15,13 +15,13 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
 from apps.exams.forms.exam_journal_teacher import journal_teacher_queryset
+from apps.exams.services import subject_picker_hints
 from apps.exams.services.access_policy import _ensure_teacher
-from apps.exams.services.subject_labels import subject_option
 from apps.organizations.public import get_permission_scope
 
 from . import unit_assignment as _units
 from ._shared import _resolve_required_organization
-from .lookups import _page_bounds, _paginate, _unit_ids_param, ranked_subject_queryset
+from .lookups import _page, _page_bounds, _unit_ids_param, ranked_subject_queryset, selectable_subjects
 
 _EMPTY = {"results": [], "has_more": False, "selected_ok": False}
 
@@ -56,10 +56,13 @@ def journal_teacher_subjects(request):
         organization, teacher, group_ids=_scoped_group_ids(request, organization)
     )
     selected = (request.GET.get("selected") or "").strip()
+    # ``selected_ok`` arxivlənmiş fənni də tanıyır (redaktədə mövcud seçim düşməsin); siyahı isə yalnız aktivlər.
     subject_ids = {str(pk) for pk in subjects.values_list("pk", flat=True)}
-    qs = ranked_subject_queryset(subjects, (request.GET.get("q") or "").strip()[:120])
+    qs = ranked_subject_queryset(selectable_subjects(subjects), (request.GET.get("q") or "").strip()[:120])
     offset, limit = _page_bounds(request)
-    results, has_more = _paginate(qs, offset, limit, subject_option)
+    page, has_more = _page(qs, offset, limit)
+    # Sahib 2026-10-26: eyni görünən iki fənn — kod + bu müəllimin jurnal qrupları ilə ayırd edilir.
+    results = subject_picker_hints.subject_options(page, qs, organization=organization, teacher=teacher)
     return JsonResponse(
         {
             "results": results,

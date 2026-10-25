@@ -27,15 +27,21 @@ from apps.registrar.models import AssessmentScheme, FinalGrade
 CLEAR_SOURCE_NOTE = "imtahan mərkəzi · səhv cəhd silindi"
 
 
-def final_exam_trace(*, student, subject_id, organization, score_percent, is_expelled=False, attempt=None) -> dict:
-    """→ ``{"enrollment": bool, "retake": bool, "current", "expected", "matches": bool}`` (heç nə yazmır)."""
+def final_exam_trace(
+    *, student, subject_id, organization, score_percent, is_expelled=False, attempt=None, offering_ids=()
+) -> dict:
+    """→ ``{"enrollment": bool, "retake": bool, "current", "expected", "matches": bool}`` (heç nə yazmır).
+
+    ``offering_ids`` — imtahanın bağlı jurnalları (körpü ilə EYNİ qeydiyyat, 2026-10-26)."""
     trace = {"enrollment": False, "retake": False, "current": None, "expected": None, "matches": False}
     if attempt is not None and retake_results.application_for_attempt(
         student=student, subject_id=subject_id, organization=organization, attempt=attempt
     ):
         trace["retake"] = True
         return trace
-    enrollment = resolve_enrollment(student=student, subject_id=subject_id, organization=organization)
+    enrollment = resolve_enrollment(
+        student=student, subject_id=subject_id, organization=organization, offering_ids=offering_ids
+    )
     if enrollment is None:
         return trace
     trace["enrollment"] = True
@@ -51,9 +57,11 @@ def final_exam_trace(*, student, subject_id, organization, score_percent, is_exp
     return trace
 
 
-def clear_exam_result(*, student, subject_id, organization, expected_score) -> bool:
+def clear_exam_result(*, student, subject_id, organization, expected_score, offering_ids=()) -> bool:
     """Jurnaldakı yekun imtahan balı hələ ``expected_score``-dursa boşalt (sistem aktoru). → boşaldıldımı."""
-    enrollment = resolve_enrollment(student=student, subject_id=subject_id, organization=organization)
+    enrollment = resolve_enrollment(
+        student=student, subject_id=subject_id, organization=organization, offering_ids=offering_ids
+    )
     if enrollment is None or expected_score is None:
         return False
     current = FinalGrade.objects.filter(enrollment=enrollment).values_list("exam_score", flat=True).first()

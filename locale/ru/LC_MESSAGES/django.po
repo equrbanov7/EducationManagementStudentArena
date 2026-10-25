@@ -109631,3 +109631,26 @@ msgstr "Выбирает вопросы без ошибок, предупреж�
 msgctxt "exams.template.test_question_bank"
 msgid "Seçildi: {count} təmiz sual"
 msgstr "Выбрано чистых вопросов: {count}"
+
+msgctxt "exams.journal_coverage"
+msgid "Seçilmiş qruplar üçün bu fənnin cari semestr jurnalı tapılmadı — nəticə jurnala düşməyə bilər. Fənni və qrupları yoxlayın."
+msgstr "Для выбранных групп не найден журнал этого предмета в текущем семестре — результат может не попасть в журнал. Проверьте предмет и группы."
+
+#, python-format
+msgctxt "exams.journal_coverage"
+msgid "%(count)s tələbənin bu fənn üzrə cari semestr jurnalı yoxdur — nəticə jurnala düşməyəcək."
+msgstr "Студентов без журнала этого предмета в текущем семестре: %(count)s — результат не попадёт в журнал."
+
+#, python-format
+msgctxt "exams.journal_coverage"
+msgid "%(count)s tələbə bu fəndən birdən çox jurnaldadır — nəticə imtahanın qrupunun jurnalına (yoxdursa tələbənin öz qrupunun jurnalına) yazılacaq."
+msgstr "Студентов в нескольких журналах этого предмета: %(count)s — результат будет записан в журнал группы экзамена (иначе — в журнал собственной группы студента)."
+
+#, python-format
+msgctxt "exams.subject_picker"
+msgid "%(count)s jurnal"
+msgstr "журналов: %(count)s"
+
+msgctxt "exams.subject_picker"
+msgid "jurnal yoxdur"
+msgstr "нет журнала"

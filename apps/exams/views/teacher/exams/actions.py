@@ -82,6 +82,10 @@ def toggle_exam_active(request, slug):
                     user_ids=get_exam_assigned_user_ids(exam),
                     task_kind="exam",
                 )
+                from apps.exams.services.exam_journal_coverage import exam_coverage_warnings
+
+                for warning in exam_coverage_warnings(exam):  # sahib 2026-10-26 — bloklamayan xəbərdarlıq
+                    messages.warning(request, warning)
         else:
             unpublish_exam(exam, by_user=request.user, request=request)
     return redirect(detail_url)

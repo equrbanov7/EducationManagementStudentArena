@@ -65,6 +65,10 @@ SKIP_NOT_FINISHED = "attempt_not_finished"
 #: rəsmi nəticə ən son bitmiş (sınaq olmayan) final cəhdidir; köhnə cəhdin gecikmiş yoxlaması
 #: və ya apellyasiyası yeni cəhdin jurnal balını əzmir.
 SKIP_SUPERSEDED_ATTEMPT = "superseded_attempt"
+#: 2026-10-26 (sahib: «tələbənin imtahan nəticəsi sistemə düşəcəkmi?»): tələbənin imtahanın fənni üzrə
+#: qeydiyyatı (bağlı jurnalda da) yoxdur — bal HEÇ YERƏ yazılmadı. Əvvəl bu hal səssiz no-op idi; midterm
+#: körpüsü kimi (``midterm_no_enrollment``) indi WARNING + sayğac. Bərpa: ``manage.py sync_final_scores``.
+SKIP_NO_ENROLLMENT = "no_enrollment"
 
 #: ``Exam.exam_type_extended`` → ``FinalGrade``-ə yazılırmı (tək təsnifat mənbəyi):
 #:
@@ -253,30 +257,51 @@ def sync_attempt_to_journal(attempt, *, actor=None, appeal_id=None):
     if midterm_journal_sync.is_auto_midterm_exam(exam):
         # Sahib 2026-10-21 / 2026-10-24: midterm (test / yazılı / kodlaşdırma) → jurnalın «Midterm» xanası.
         return midterm_journal_sync.sync_midterm_attempt(attempt, actor=actor, appeal_id=appeal_id)[1]
+    return sync_final_attempt(attempt, actor=actor, appeal_id=appeal_id)[1]
+
+
+#: ``sync_final_attempt`` statusları (skip kodlarından əlavə): yazılı cəhd hələ yoxlanmayıb (sayılmır).
+STATUS_GRADING_PENDING = "grading_pending"
+
+
+def _skipped(reason, attempt, *, level=logging.WARNING):
+    _skip(reason, attempt, level=level)
+    return reason, None
+
+
+def sync_final_attempt(attempt, *, actor=None, appeal_id=None):
+    """Fənnə bağlı, sınaq olmayan, BİTMİŞ cəhdin yekun balı → ``(status, FinalGrade | ResitRecord | None)``.
+
+    Status: skip kodu (``SKIP_*`` — sayğac + log), ``grading_pending`` və ya registrar statusu
+    (``written`` / ``retake`` / ``retake_closed``). Canlı körpü (``sync_attempt_to_journal``) və bərpa əmri
+    (``sync_final_scores``) EYNİ yoldan keçir."""
+    exam = attempt.exam
+    subject_id = exam.subject_id
     category_skip = final_grade_skip_reason(exam)
     if category_skip is not None:
         # Gözlənilən hal (xəta deyil) → INFO; sayğac etiketi monitorinqdə görünür.
-        return _skip(category_skip, attempt, level=logging.INFO)
+        return _skipped(category_skip, attempt, level=logging.INFO)
     organization = getattr(exam, "organization", None)
     if organization is None:
-        return _skip(SKIP_NO_ORGANIZATION, attempt)
+        return _skipped(SKIP_NO_ORGANIZATION, attempt)
     if _superseded_by_later_final_attempt(attempt, subject_id):
         # Audit 2026-09-28 EXA-01 / EX28-06: köhnə cəhdin apellyasiyası / gecikmiş
         # yoxlaması sonrakı (rəsmi) cəhdin balını əzməsin — gözlənilən hal, INFO.
-        return _skip(SKIP_SUPERSEDED_ATTEMPT, attempt, level=logging.INFO)
+        return _skipped(SKIP_SUPERSEDED_ATTEMPT, attempt, level=logging.INFO)
 
     is_expelled = getattr(attempt, "supervision_status", "") == "removed"
     percent = 0 if is_expelled else _attempt_percent(attempt)
     if percent is PERCENT_PENDING:
-        return None  # yazılı imtahan hələ yoxlanılmayıb — körpü sonra yenidən çağırılır
+        return STATUS_GRADING_PENDING, None  # yazılı imtahan hələ yoxlanılmayıb — körpü sonra yenidən çağırılır
     if percent is None:
-        return _skip(SKIP_PERCENT_UNAVAILABLE, attempt)  # F-08: faiz alınmadı → görünən atlama
+        return _skipped(SKIP_PERCENT_UNAVAILABLE, attempt)  # F-08: faiz alınmadı → görünən atlama
 
     by_user = _resolve_actor(attempt, actor)
     try:
-        from apps.registrar.public import record_exam_result
+        from apps.exams.services.exam_journal_link import linked_offering_ids
+        from apps.registrar.public import record_final_result
 
-        return record_exam_result(
+        status, row = record_final_result(
             student=attempt.user,
             subject_id=subject_id,
             organization=organization,
@@ -287,10 +312,16 @@ def sync_attempt_to_journal(attempt, *, actor=None, appeal_id=None):
             appeal_id=appeal_id,
             # 2026-10-18: 25% cəhdi (şans qeydindən sonra) ResitRecord-a gedir, əsas imtahan balına yox.
             attempt=attempt,
+            # 2026-10-26: imtahanın bağlı jurnalları — midterm körpüsü ilə EYNİ qayda (tələbə oradadırsa oraya).
+            offering_ids=linked_offering_ids(exam),
         )
     except Exception:  # körpü heç vaxt imtahanı sındırmır
         logger.exception("journal_sync: failed to write attempt %s to FinalGrade", getattr(attempt, "id", "?"))
-        return _skip(SKIP_WRITE_FAILED, attempt, level=None)
+        return _skipped(SKIP_WRITE_FAILED, attempt, level=None)
+    if status == SKIP_NO_ENROLLMENT:
+        # 2026-10-26: əvvəl səssiz no-op idi — tələbə jurnalda yoxdur, bal itir → WARNING + sayğac.
+        return _skipped(SKIP_NO_ENROLLMENT, attempt)
+    return status, row
 
 
 def schedule_journal_sync(attempt, *, actor=None, appeal_id=None):
