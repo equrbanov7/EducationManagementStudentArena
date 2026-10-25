@@ -269,6 +269,26 @@ kəsilib, 24 jurnal tarixçəsi yoxdur, 40 «silinməli» qrup, 23 tutuşmayan l
 
 ⚠️ `history` fazası alumni üçün `enrolled` SAR yaradır — graduation onlardan SONRA yenidən işlədilə bilər (idempotent).
 
+### 8b. Sahibin ikinci qərarı — opt-in bayraqlar (2026-10-25)
+
+Prod tətbiqindən (1 048 məzun, 201 xaric) sonra qalan «yoxlanmalı»lar üçün paketin `snapshot`-unda bayraqlar
+(`services/delta/graduation_owner.py`; bayraqsız paket köhnə davranışdadır):
+
+* `graduate_year_unknown` — `year_unknown` (köhnə «0000» qrupları, qəbul ili 1950/≤2000) → «Məzun etmə»
+  (`MZN-SINX-2026`, 2026-07-01, səbəb «…qəbul ili məlum deyil — sahibin 2026-10-25 qərarı»); tutuşmayan legacy
+  sətri ilə eyni FİN/ad olan yenə yoxlanmalı qalır.
+* `leave_unfinished` — `period_not_ended`, `left_before_final_year`, `no_journal_history` → «Akademik məzuniyyət»
+  (`AM-SINX-2026`, 2026-10-25, bitmə 2027-06-30; status `academic_leave`, aktiv sayda deyil, «Bərpa» ilə qayıdır;
+  dekanlıq təsdiqləməlidir). Kateqoriyalar hesabatda ayrıca: `graduation.leave.<kateqoriya>`.
+* `deactivate_emptied_groups` — yuxarıdakı məzunların qrupları arxivlənir (`is_active=False` +
+  `settings.graduation_archived` + «groups: archived — …» audit sətri; reyestrdə «arxivdən qaytar») — yalnız qrupda
+  `enrolled`/`academic_leave` qeyd, cari/gələcək dövr açılışı/qeydiyyatı və aktiv alt vahid yoxdursa.
+* `junk_group` («Silinməlidir») toxunulmur.
+
+Paket: `delta5-graduation-owner-20261025.json.gz` (delta4 + `phases=["graduation"]` + üç bayraq). Təzə prod
+nüsxəsində: 2 304 məzun (bakalavr 2 131, magistr 173), 656 akademik məzuniyyət (446 / 190 / 20), 182 qrup arxivləndi,
+24 qrup aktiv qeydə görə qaldı, 40 «silinməli» + 1 tutuşmayan legacy sətri toxunulmadı; ikinci qaçış 0 yazı.
+
 ## 9. Tarixi semestrlərin boşluqları — `history` / `history_topics` fazaları (2026-10-25)
 
 Sahib: «Köçürülməmiş heç bir data problem yaratmasın, köhnə datadan nəyisə bərpa olunası bir şey varsa et.»
