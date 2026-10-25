@@ -166,11 +166,21 @@ def _unit_ids_param(request, name="units"):
     return ids
 
 
-def _unit_member_ids(request, organization, unit_ids):
-    """Seçilmiş reyestr qruplarının cari tələbə id-ləri (əhatə ilə skoplanmış)."""
+def _uuid_param(request, name):
+    from uuid import UUID
+
+    try:
+        return str(UUID((request.GET.get(name) or "").strip()))
+    except ValueError:
+        return ""
+
+
+def _unit_member_ids(request, organization, unit_ids, *, subject_id=""):
+    """Seçilmiş reyestr qruplarının cari tələbə id-ləri (əhatə ilə skoplanmış) + fənn seçilibsə həmin fənnin bu
+    qruplardakı CARİ jurnal tələbələri (giriş siyasəti ilə eyni: ``unit_assignment.journal_student_ids``)."""
     if not unit_ids:
         return set()
-    from apps.exams.domain.unit_assignment import unit_student_record_filter
+    from apps.exams.domain.unit_assignment import journal_student_ids, unit_student_record_filter
     from apps.registrar.public import subgroup_rollup
 
     units = list(_units.exam_unit_candidates(request, organization).filter(pk__in=unit_ids))
@@ -178,12 +188,13 @@ def _unit_member_ids(request, organization, unit_ids):
     # «qrupla daxildir» kimi işarələnir.
     group_ids = {unit.pk for unit in units} | {u.pk for u in subgroup_rollup.subgroup_units(organization, units)}
     record_path = "academic_records__"
-    return set(
+    registry = set(
         User.objects.filter(
             **{f"{record_path}group__in": list(group_ids)},
             **unit_student_record_filter(record_path),
         ).values_list("id", flat=True)
     )
+    return registry | journal_student_ids(subject_id, [unit.pk for unit in units])
 
 
 @login_required
@@ -240,6 +251,14 @@ def group_search(request):
     return JsonResponse({"results": results, "has_more": has_more})
 
 
+def _student_label(user, group_name: str = "") -> str:
+    """«Ad Soyad Ata adı · qrup» — eyni adlı tələbələri ayırmaq üçün (sahib 2026-10-26)."""
+    profile = getattr(user, "profile", None)
+    name = (getattr(profile, "full_name_with_patronymic", "") if profile is not None else "") or user.get_full_name()
+    name = name or user.username
+    return f"{name} · {group_name}" if group_name else name
+
+
 @login_required
 @require_GET
 def user_search(request):
@@ -265,7 +284,9 @@ def user_search(request):
         )
     # R2: seçilmiş reyestr qruplarının (`units`) tələbələri də «qrupla daxildir»
     # kimi işarələnir — müəllim onları ayrı-ayrı istisna edə bilsin.
-    group_member_ids |= _unit_member_ids(request, organization, _unit_ids_param(request))
+    group_member_ids |= _unit_member_ids(
+        request, organization, _unit_ids_param(request), subject_id=_uuid_param(request, "subject")
+    )
 
     if len(query) < USER_SEARCH_MIN_QUERY:
         # Qısa/boş sorğu: kataloq YOX — yalnız seçilmiş qrupların üzvləri (yoxdursa boş siyahı).
@@ -273,10 +294,11 @@ def user_search(request):
             return JsonResponse({"results": [], "has_more": False, "min_query": USER_SEARCH_MIN_QUERY})
         qs = qs.filter(id__in=group_member_ids)
     else:
-        search_q = tolerant_q(query, ("username", "first_name", "last_name", "email"))
+        # Sahib 2026-10-26: eyni adlı tələbələr (3 × «Aynur Məmmədova») — ata adı ilə də axtarılır.
+        search_q = tolerant_q(query, ("username", "first_name", "last_name", "email", "profile__patronymic"))
         if search_q is not None:
             qs = qs.filter(search_q)
-    qs = qs.distinct()
+    qs = qs.select_related("profile").distinct()
     if group_member_ids:
         qs = qs.annotate(
             group_member_rank=Case(
@@ -292,16 +314,16 @@ def user_search(request):
     if offset >= USER_SEARCH_MAX_OFFSET:
         return JsonResponse({"results": [], "has_more": False, "min_query": USER_SEARCH_MIN_QUERY})
     limit = min(limit, USER_SEARCH_PAGE_MAX, USER_SEARCH_MAX_OFFSET - offset)
-    results, has_more = _paginate(
-        qs,
-        offset,
-        limit,
-        lambda u: {
-            "id": str(u.id),
-            "text": u.get_full_name() or u.username,
-            "group_member": u.id in group_member_ids,
-        },
-    )
+    window = list(qs[offset : offset + limit + 1])
+    has_more = len(window) > limit
+    window = window[:limit]
+    from apps.registrar.public import student_group_names
+
+    groups = student_group_names.current_group_names(u.id for u in window)
+    results = [
+        {"id": str(u.id), "text": _student_label(u, groups.get(u.id, "")), "group_member": u.id in group_member_ids}
+        for u in window
+    ]
     has_more = has_more and offset + len(results) < USER_SEARCH_MAX_OFFSET
     return JsonResponse({"results": results, "has_more": has_more, "min_query": USER_SEARCH_MIN_QUERY})
 

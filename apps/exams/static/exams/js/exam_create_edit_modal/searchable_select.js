@@ -430,6 +430,11 @@
             }
             if (uids.length) {
                 extra += "&units=" + encodeURIComponent(uids.join(","));
+                // 2026-10-26: fənn seçilibsə həmin fənnin qrup jurnalındakı tələbələr də «qrupla daxildir».
+                var subjectSelect = form ? form.querySelector("[data-exam-subject-native]") : null;
+                if (subjectSelect && subjectSelect.value) {
+                    extra += "&subject=" + encodeURIComponent(subjectSelect.value);
+                }
             }
             return extra;
         });
