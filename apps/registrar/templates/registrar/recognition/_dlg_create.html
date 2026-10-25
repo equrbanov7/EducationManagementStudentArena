@@ -15,12 +15,18 @@
 </div>
 <div class="cr-grid">
     <div class="ems-field">
-        <label class="ems-field__label" for="crProgram">{% trans "Proqram" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <label class="ems-field__label" for="crProgram">{% trans "Proqram / səbəb" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
         <div class="bootstrap-single-select bootstrap-single-select--ems">
             <select class="ems-select bootstrap-single-select__native" id="crProgram" name="program" required data-bootstrap-select>
                 {% for value, label in cr.programs %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
             </select>
         </div>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="crProgramName">{% trans "Proqramın / səbəbin adı" context "registrar.recognition" %}</label>
+        <input class="ems-input" type="text" id="crProgramName" name="program_name" maxlength="150" autocomplete="off"
+               placeholder="{% trans 'məs. Yay məktəbi, onlayn kurs, Erasmus+ KA171' context 'registrar.recognition' %}">
+        <span class="ems-field__hint">{% trans "«Digər» seçilibsə məcburidir; digər növlərdə dəqiqləşdirmə üçündür." context "registrar.recognition" %}</span>
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="crStudyPeriod">{% trans "Təhsil müddəti / semestr" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>

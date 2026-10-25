@@ -108723,3 +108723,40 @@ msgstr "Entry window (default 7 days): a teacher can open a class for a date up 
 msgctxt "registrar.subject_merge"
 msgid "Xarici nəticənin tanınması qeydləri (dəyişməz tarixçə)"
 msgstr "External credit recognition records (immutable history)"
+
+#, python-format
+msgctxt "registrar.pdf"
+msgid "%(mark)s Başqa təhsil proqramında keçilmiş fənnin tanınmış nəticəsi; bal universitetin 100 ballıq şkalasına çevrilib. Proqramlar:"
+msgstr "%(mark)s Recognised result of a course taken in another study programme; the score has been converted to the university's 100-point scale. Programmes:"
+
+msgctxt "organizations.permission.label"
+msgid "Xarici nəticəni tanımaq (Erasmus+, mübadilə, başqa ali məktəb, yay məktəbi və s.) və tələbəni fəndən azad etmək"
+msgstr "Recognise external results (Erasmus+, exchange, another university, summer school, etc.) and exempt the student from the course"
+
+msgctxt "registrar.recognition"
+msgid "Digər (adını yazın)"
+msgstr "Other (enter the name)"
+
+msgctxt "registrar.recognition"
+msgid "Proqram / səbəb"
+msgstr "Programme / reason"
+
+msgctxt "registrar.recognition"
+msgid "Proqramın / səbəbin adı"
+msgstr "Programme / reason name"
+
+msgctxt "registrar.recognition"
+msgid "məs. Yay məktəbi, onlayn kurs, Erasmus+ KA171"
+msgstr "e.g. Summer school, online course, Erasmus+ KA171"
+
+msgctxt "registrar.recognition"
+msgid "«Digər» seçilibsə məcburidir; digər növlərdə dəqiqləşdirmə üçündür."
+msgstr "Required when “Other” is selected; for other types it is an optional refinement."
+
+msgctxt "registrar.recognition"
+msgid "«Digər» seçilibsə proqramın / səbəbin adını yazın (məs. yay məktəbi, onlayn kurs)."
+msgstr "If “Other” is selected, enter the programme / reason name (e.g. summer school, online course)."
+
+msgctxt "registrar.recognition"
+msgid "Başqa təhsil proqramında keçilmiş fənnin nəticəsi (Erasmus+, mübadilə, başqa ali məktəb, yay məktəbi, onlayn kurs və s.) sənədlə tanınır: tələbə bizim fənndən azad olur (jurnal, davamiyyət limiti və imtahan tələbi ona aid olmur), transkriptdə tanınmış bal göstərilir. Tanınma səbəblə ləğv edilə bilər; hər addım audit izinə düşür."
+msgstr "The result of a course taken in another study programme (Erasmus+, exchange, another university, summer school, online course, etc.) is recognised with a document: the student is exempted from our course (journal, attendance limit and exam requirement no longer apply), and the transcript shows the recognised score. A recognition can be revoked with a reason; every step is audited."

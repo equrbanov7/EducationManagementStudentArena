@@ -121,12 +121,28 @@ def mark_notes(data) -> list[str]:
         notes.append(
             pgettext(
                 "registrar.pdf",
-                "%(mark)s Başqa ali məktəbdə (Erasmus+, mübadilə və s.) keçilmiş fənnin tanınmış nəticəsi; "
-                "bal universitetin 100 ballıq şkalasına çevrilib.",
+                "%(mark)s Başqa təhsil proqramında keçilmiş fənnin tanınmış nəticəsi; bal universitetin 100 ballıq "
+                "şkalasına çevrilib. Proqramlar:",
             )
             % {"mark": RECOGNIZED_MARK}
         )
+        # Proqramın adı (sahib 2026-10-25: «təkcə Erasmus deyil») — hər fərqli proqram / qurum bir sətir.
+        notes.extend(f"    {program}" for program in _recognized_programs(data))
     return notes
+
+
+def _recognized_programs(data) -> list[str]:
+    seen: list[str] = []
+    for year in data.get("years", ()):
+        for semester in year.get("semesters", ()):
+            for row in semester.get("rows", ()):
+                badge = row.get("recognition")
+                if not badge:
+                    continue
+                text = f"{badge['program_label']} — {badge['institution']} ({badge['country']})"
+                if text not in seen:
+                    seen.append(text)
+    return seen
 
 
 __all__ = [

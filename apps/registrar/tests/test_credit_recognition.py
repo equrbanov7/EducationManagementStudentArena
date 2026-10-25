@@ -262,8 +262,32 @@ class TranscriptTest(_RecognitionBase):
         marks = {transcript_pdf_text.row_mark(row) for row in rows}
         self.assertIn(transcript_pdf_text.RECOGNIZED_MARK, marks)
         notes = transcript_pdf_text.mark_notes(data)
-        self.assertEqual(len(notes), 1)
+        self.assertEqual(len(notes), 2)
         self.assertTrue(notes[0].startswith(transcript_pdf_text.RECOGNIZED_MARK))
+        self.assertIn("Erasmus+ — Universität Test (Almaniya)", notes[1])
+
+    def test_other_program_requires_and_shows_its_name(self):
+        """Sahib 2026-10-25: «təkcə Erasmus deyil» — «Digər»də proqramın / səbəbin adı məcburidir və görünür."""
+        response = self._create(program="other", program_name="  ")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["code"], "program_name")
+        response = self._create(program="other", program_name="Yay məktəbi — Data Science")
+        self.assertEqual(response.status_code, 200, response.content)
+        recognition = self._recognition()
+        self.assertEqual(recognition.program_label, "Yay məktəbi — Data Science")
+        data = self._transcript()
+        rows = [row for sem in data["semesters"] for row in sem["rows"] if row.get("recognition")]
+        self.assertEqual(rows[0]["recognition"]["program_label"], "Yay məktəbi — Data Science")
+        from apps.registrar import transcript_pdf_text
+
+        self.assertIn("Yay məktəbi — Data Science", transcript_pdf_text.mark_notes(data)[1])
+        with bypass_rls():
+            with self.assertRaises(DatabaseError), transaction.atomic():
+                ExternalCreditRecognition.objects.filter(pk=recognition.pk).update(program_name="")
+
+    def test_program_name_refines_known_program(self):
+        self.assertEqual(self._create(program_name="KA171").status_code, 200)
+        self.assertEqual(self._recognition().program_label, "Erasmus+ — KA171")
 
     def test_cabinet_exempt_list_shows_recognized_score(self):
         self.assertEqual(self._create().status_code, 200)

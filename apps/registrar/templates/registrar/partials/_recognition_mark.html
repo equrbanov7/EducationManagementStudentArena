@@ -6,5 +6,5 @@ Detal (proqram, qurum, ölkə, xarici fənn / kredit / qiymət) `title`-dadır; 
 <span class="recognition-mark" tabindex="0" role="note"
       title="{{ recognition.program_label }} · {{ recognition.institution }} ({{ recognition.country }})
 {% trans "Xarici fənn" context "registrar.recognition" %}: {{ recognition.foreign_subject }} · {% trans "kredit" context "registrar.recognition" %} {{ recognition.foreign_credit|floatformat:'-2' }} · {% trans "qiymət" context "registrar.recognition" %} {{ recognition.foreign_grade }}
-{% trans "Təhsil müddəti" context "registrar.recognition" %}: {{ recognition.study_period }}"><i class="fas fa-earth-europe" aria-hidden="true"></i> {{ recognition.label }}</span>
+{% trans "Təhsil müddəti" context "registrar.recognition" %}: {{ recognition.study_period }}"><i class="fas fa-earth-europe" aria-hidden="true"></i> {{ recognition.label }} · {{ recognition.program_label }}</span>
 {% endif %}

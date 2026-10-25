@@ -10,7 +10,7 @@ tanınmaları + «Yeni tanınma» dialoqu; heç biri yoxdursa son qərarlar. Axt
 {% else %}
 <div class="cr" data-cr-root data-cr-section="credit-recognition"
      data-cr-error-generic="{% trans 'Əməl yerinə yetirilmədi — icazənizi yoxlayın və ya səhifəni yeniləyin.' context 'registrar.recognition' %}">
-    {% trans "Erasmus+, mübadilə proqramı və ya başqa ali məktəbdə keçilmiş fənnin nəticəsi sənədlə tanınır: tələbə bizim fənndən azad olur (jurnal, davamiyyət limiti və imtahan tələbi ona aid olmur), transkriptdə tanınmış bal göstərilir. Tanınma səbəblə ləğv edilə bilər; hər addım audit izinə düşür." context "registrar.recognition" as cr_sub %}
+    {% trans "Başqa təhsil proqramında keçilmiş fənnin nəticəsi (Erasmus+, mübadilə, başqa ali məktəb, yay məktəbi, onlayn kurs və s.) sənədlə tanınır: tələbə bizim fənndən azad olur (jurnal, davamiyyət limiti və imtahan tələbi ona aid olmur), transkriptdə tanınmış bal göstərilir. Tanınma səbəblə ləğv edilə bilər; hər addım audit izinə düşür." context "registrar.recognition" as cr_sub %}
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=cr_sub %}
 
     {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=cr.kpis %}
