@@ -93,7 +93,9 @@
 #       sha256-sı, verilsə yoxlanılır). Yeni sistem qalibdir — yalnız BOŞ doldurulur (jurnal, dərs, q/b, i/e, bal,
 #       təkrar imtahan, açılış müəllimi, təsdiqlənmiş sillabus); çatışmayan müəllim FİN-siz, tələbə/qrup/açılış
 #       yaradılır; bütün fazalar BİR tranzaksiyadadır, idempotentdir. `date_to` → --lessons-until (boş = bu gün).
-#       Loga YALNIZ saylar; adlı siyahı + hesabat şifrəli artifaktdadır.
+#       Loga YALNIZ saylar; adlı siyahı + hesabat şifrəli artifaktdadır. `--phases registry_sync` ilə qurulmuş paket
+#       (sahib 2026-10-25) aktiv reyestri köhnə sistemlə nizamlayır: rəsmi `group_transfer` / `expulsion` əmrləri
+#       (yeni sistemdə əl ilə dəyişiklik, alt qrup ↔ ana qrup, başqa ixtisas — toxunulmur); bildiriş getmir.
 #   legacy_repair_empty_lessons — real xanası (bal / iə / ü/q), mövzusu və düzəlişi olmayan KEÇMİŞ dərsləri (jurnalın
 #       məzmunsuz sütunlarını) silir (sahib 2026-10-24: «boşdursa silinsin; bir neçə tələbəyə “qb” yazılıbsa belə
 #       silinsin»): köçürülmüş tam boş sütun + yalnız balsız «qb» xanalı sütun (--include-absent-only; xanalar da

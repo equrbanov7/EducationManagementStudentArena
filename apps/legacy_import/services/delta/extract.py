@@ -41,6 +41,19 @@ STUDENT_COLUMNS = (
     "education_level",
     "education_type",
     "payment_type",
+    "order_no",
+    "order_date",
+)
+EXPELLED_COLUMNS = (
+    "id",
+    "first_name",
+    "last_name",
+    "father_name",
+    "fincode",
+    "group_id",
+    "azadedildi",
+    "order_no",
+    "order_date",
 )
 STUDENT_DIFF_COLUMNS = ("group_id", "azadedildi", "first_name", "last_name", "father_name", "fincode")
 WORKER_COLUMNS = (
@@ -280,6 +293,18 @@ class DeltaExtractor:
         wanted = set(student_ids)
         return [row for row in rows if row["student_id"] in wanted]
 
+    def expelled_students(self, exclude) -> list[dict]:
+        """Azad edilmiş (``azadedildi=1``), ``students`` bölməsinə düşməyən BÜTÜN tələbələr — ``registry_sync`` üçün."""
+
+        cols = ", ".join(_ident(column) for column in EXPELLED_COLUMNS)
+        # Eyni FİN-in azad EDİLMƏMİŞ başqa sətri varsa (yenidən qəbul) — adam aktivdir, siyahıya düşmür.
+        rows = self._rows(
+            f"SELECT {cols} FROM {self.src}.students WHERE azadedildi = 1 AND (fincode = '' OR fincode NOT IN "
+            f"(SELECT fincode FROM {self.src}.students WHERE azadedildi = 0 AND fincode <> '')) ORDER BY id"
+        )
+        skip = set(exclude)
+        return [row for row in rows if row["id"] not in skip]
+
     def students(self, referenced) -> list[dict]:
         new, changed = self._new_or_changed("students", STUDENT_DIFF_COLUMNS)
         rows = self._by_ids("students", STUDENT_COLUMNS, set(referenced) | new | changed)
@@ -379,6 +404,7 @@ def build_bundle(extractor: DeltaExtractor, *, snapshot: dict, since: str) -> di
         "subjects": subjects,
         "workers": workers,
         "students": students,
+        "expelled_students": x.expelled_students({row["id"] for row in students}),
         "journals": journals,
         "lesson_dates": lesson_dates,
         "points": points,

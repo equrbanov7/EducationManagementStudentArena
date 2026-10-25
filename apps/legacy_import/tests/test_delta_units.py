@@ -173,6 +173,10 @@ class BuildBundleTests(SimpleTestCase):
             def syllabi(self, ids):
                 return []
 
+            def expelled_students(self, exclude):
+                calls.append(("expelled_students", set(exclude)))
+                return []
+
             def _new_or_changed(self, table, columns):
                 return set(), set()
 
@@ -191,6 +195,7 @@ class BuildBundleTests(SimpleTestCase):
         self.assertIn(("students", {7, 8}), calls)
         self.assertIn(("workers", {9}), calls)
         self.assertIn(("groups", {3}), calls)
+        self.assertIn(("expelled_students", {7}), calls)
 
 
 class WorkloadChairTests(SimpleTestCase):
