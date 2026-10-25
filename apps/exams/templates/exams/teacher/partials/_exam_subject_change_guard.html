@@ -1,0 +1,50 @@
+{% load i18n %}
+{% comment %}
+  Nəticəli midtermin fənn dəyişikliyi — TƏSDİQ + SƏBƏB bloku (sahib 2026-10-25).
+
+  * Yalnız redaktədə və imtahanda tələbə nəticəsi/cəhdi olanda render olunur (`form.subject_change_info`).
+  * Gizli gəlir; fənn orijinaldan fərqli seçiləndə subject_select.js (`bindSubjectChangeGuard`) göstərir və
+    yeni fənnin adını yazır. Server təsdiq tələb edibsə (409) açıq gəlir (`data-server-required`).
+  * Server avtoritetdir (services/exam_subject_change.py): təsdiq + ən azı N simvol səbəb olmadan saxlanmır.
+  * Inline JS/CSS yoxdur — stil exam_create_edit_modal.css (`.ew-subject-guard`).
+{% endcomment %}
+{% with guard=form.subject_change_info %}
+{% if guard %}
+<div class="ew-subject-guard" role="group" aria-labelledby="ewSubjectGuardTitle"
+     data-ew-subject-guard
+     data-original-subject="{{ guard.old_subject_id }}"
+     {% if guard.required %}data-server-required="1"{% else %}hidden{% endif %}>
+    <p class="ew-subject-guard__title" id="ewSubjectGuardTitle">
+        <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+        {% trans "Fənn dəyişikliyi təsdiq tələb edir" context "exams.subject_change" %}
+    </p>
+    <p class="ew-subject-guard__text">
+        {% blocktrans trimmed with students=guard.students context "exams.subject_change" %}
+            Bu imtahanda {{ students }} tələbənin nəticəsi var.
+        {% endblocktrans %}
+        {% trans "Saxladıqdan sonra nəticələr yeni fənnin jurnalına köçürüləcək, köhnə fənnin jurnalındakı bu imtahanın balları silinəcək." context "exams.subject_change" %}
+    </p>
+    <p class="ew-subject-guard__move">
+        <span class="ew-subject-guard__subject">{{ guard.old_subject }}</span>
+        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+        <span class="ew-subject-guard__subject ew-subject-guard__subject--new" data-ew-subject-guard-new>{{ guard.new_subject|default:"—" }}</span>
+    </p>
+    <label class="ew-subject-guard__confirm">
+        <input type="checkbox" name="subject_change_confirm" value="1"{% if guard.confirm %} checked{% endif %}>
+        <span>{% trans "Təsdiq edirəm: nəticələr yeni fənnə köçürülsün" context "exams.subject_change" %}</span>
+    </label>
+    <label class="ew-label" for="ewSubjectChangeReason">
+        {% trans "Səbəb" context "exams.subject_change" %} <span class="ew-req" aria-hidden="true">*</span>
+    </label>
+    <textarea class="form-control ew-subject-guard__reason" id="ewSubjectChangeReason" name="subject_change_reason"
+              rows="3" maxlength="{{ guard.max_length }}"
+              placeholder="{% trans 'Məsələn: imtahan yaradılarkən fənn səhv seçilmişdi' context 'exams.subject_change' %}">{{ guard.reason }}</textarea>
+    <small class="form-text">
+        {% blocktrans trimmed with min=guard.min_length context "exams.subject_change" %}
+            Ən azı {{ min }} simvol. Dəyişiklik, səbəb və köçürülən nəticələrin sayı imtahan tarixçəsinə yazılır.
+        {% endblocktrans %}
+    </small>
+    {% if guard.error %}<div class="field-error" role="alert">{{ guard.error }}</div>{% endif %}
+</div>
+{% endif %}
+{% endwith %}

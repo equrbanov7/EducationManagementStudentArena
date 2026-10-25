@@ -15,12 +15,14 @@ from django.views.decorators.http import require_GET
 from apps.exams.constants import get_live_active_states, get_live_session_model
 from apps.exams.forms import ExamForm
 from apps.exams.services import exam_journal_link as _journal_link
+from apps.exams.services import exam_subject_change as _exam_subject_change
 from apps.exams.services.access_policy import _ensure_teacher, can_manage_exam_questions
 from apps.exams.views.shared.breadcrumbs import exam_breadcrumbs
 from apps.exams.views.shared.tenant import get_active_organization, get_teacher_exam_or_404
 from core.permissions import is_superadmin_user
 from core.tenancy import get_request_organization, request_has_active_organization_context
 
+from . import subject_change_guard as _subject_guard
 from . import unit_assignment as _units
 from ._shared import (
     _bind_selected_organization,
@@ -129,6 +131,8 @@ def createAndEditExamView(request, slug=None):
         # 2026-10-24: forma `is_valid()` instansı dəyişir — jurnal bağlantısının KÖHNƏ halı əvvəlcədən.
         previous_subject_id = exam.subject_id if is_editing else None
         previous_link_ids = _journal_link.linked_offering_ids(exam) if is_editing else []
+        # 2026-10-25: nəticəli midtermin fənn / jurnal dəyişikliyi təsdiq + səbəb tələb edir (KÖHNƏ hal).
+        subject_snapshot = _exam_subject_change.take_snapshot(exam) if is_editing else None
         previous_recipient_ids = set()
         if is_editing and exam is not None:
             from apps.notifications.public import get_exam_assigned_user_ids
@@ -166,7 +170,13 @@ def createAndEditExamView(request, slug=None):
                 request, organization, request.POST, permission=required_permission
             )
 
+        subject_decision, subject_reason, subject_blocked = None, "", False
         if form.is_valid() and not allowed_units_error:
+            subject_decision, subject_reason, subject_blocked = _subject_guard.check(
+                request, organization, subject_snapshot, form, allowed_units, permission=required_permission
+            )
+
+        if form.is_valid() and not allowed_units_error and not subject_blocked:
             if not is_editing and linked_course is None:
                 linked_course = _get_requested_course_for_exam(request)
 
@@ -184,12 +194,18 @@ def createAndEditExamView(request, slug=None):
             _units.apply_allowed_units(
                 request, organization, exam_instance, allowed_units, permission=required_permission
             )
+            change_log = None
+            if subject_decision is not None:  # təsdiqlənmiş dəyişiklik — kim / nə vaxt / köhnə→yeni / səbəb
+                change_log = _exam_subject_change.record_decision(
+                    exam_instance, subject_decision, reason=subject_reason, user=request.user, request=request
+                )
             # Fənn + qruplar (+ müəllim) → hər qrupun jurnal açılışı; fənn dəyişibsə bitmiş cəhdlər yeni jurnala.
             _journal_link.after_exam_saved(
                 exam_instance,
                 previous_subject_id=previous_subject_id,
                 previous_link_ids=previous_link_ids,
                 by_user=request.user,
+                change_log_id=getattr(change_log, "pk", None),
             )
 
             # Save supervision config from POST data
@@ -281,6 +297,8 @@ def createAndEditExamView(request, slug=None):
         selected_groups, selected_users, selected_excluded_users = _selected_access_entities(form)
         # R1: xətanın OLDUĞU addım/sahə — sehrbaz həmin addıma keçib sahəni fokuslayır.
         error_step, error_field = _units.first_error_target(form, allowed_units_error=allowed_units_error)
+        if subject_blocked:
+            error_step, error_field = _subject_guard.ERROR_STEP, _subject_guard.ERROR_FIELD
         html = render_to_string(
             "exams/teacher/partials/_create_exam_modal_form.html",
             {
@@ -302,10 +320,10 @@ def createAndEditExamView(request, slug=None):
             },
             request=request,
         )
-        return JsonResponse(
-            {"success": False, "html": html, "step": error_step, "field": error_field},
-            status=400,
-        )
+        payload = {"success": False, "html": html, "step": error_step, "field": error_field}
+        if subject_blocked:  # 409: dəyişiklik yalnız açıq təsdiq + səbəb ilə (API birbaşa çağırılsa da)
+            payload["subject_change_required"] = form.subject_change_info()
+        return JsonResponse(payload, status=409 if subject_blocked else 400)
     else:
         # GET request
         if is_editing:
@@ -403,6 +421,8 @@ def teacher_exam_detail(request, slug):
             "can_manage_exam_questions": can_manage_exam_questions(request.user, exam),
             # R2 (W4 `w4wizard`): təyin olunmuş reyestr qrupları — tək sorğu, ad siyahısı.
             "assigned_unit_names": list(exam.allowed_units.order_by("name").values_list("name", flat=True)),
+            # 2026-10-25: təsdiqlənmiş fənn dəyişiklikləri (kim, nə vaxt, köhnə → yeni, səbəb, köçən nəticələr).
+            "subject_change_history": _exam_subject_change.history(exam),
         },
     )
 

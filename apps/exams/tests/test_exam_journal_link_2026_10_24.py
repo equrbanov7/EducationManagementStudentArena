@@ -256,6 +256,9 @@ class ResyncOnSubjectChangeTests(_LinkSetup):
 
     def _edit(self, exam, **extra):
         client = _login(self.center, self.org)
+        # 2026-10-25: nəticəli midtermin fənn dəyişikliyi açıq təsdiq + səbəb tələb edir (test_exam_subject_change).
+        extra.setdefault("subject_change_confirm", "1")
+        extra.setdefault("subject_change_reason", "Fənn imtahan yaradılarkən səhv seçilmişdi")
         with self.captureOnCommitCallbacks(execute=True):
             response = client.post(
                 reverse("exams:edit_exam", kwargs={"slug": exam.slug}) + "?modal=1",

@@ -107639,3 +107639,65 @@ msgstr "Mövzuların keçilməsi (jurnal üzrə)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Sillabus"
+
+msgctxt "exams.subject_change"
+msgid "Bu imtahanda tələbə nəticələri var — fənn dəyişikliyini təsdiqləyin və səbəbini yazın."
+msgstr "Bu imtahanda tələbə nəticələri var — fənn dəyişikliyini təsdiqləyin və səbəbini yazın."
+
+msgctxt "exams.subject_change"
+msgid "Fənn dəyişikliyini təsdiqləyin («Təsdiq edirəm»)."
+msgstr "Fənn dəyişikliyini təsdiqləyin («Təsdiq edirəm»)."
+
+#, python-format
+msgctxt "exams.subject_change"
+msgid "Səbəb ən azı %(min)d simvol olmalıdır."
+msgstr "Səbəb ən azı %(min)d simvol olmalıdır."
+
+msgctxt "exams.subject_change"
+msgid "Fənn dəyişikliyi təsdiq tələb edir"
+msgstr "Fənn dəyişikliyi təsdiq tələb edir"
+
+#, python-format
+msgctxt "exams.subject_change"
+msgid "Bu imtahanda %(students)s tələbənin nəticəsi var."
+msgstr "Bu imtahanda %(students)s tələbənin nəticəsi var."
+
+msgctxt "exams.subject_change"
+msgid "Saxladıqdan sonra nəticələr yeni fənnin jurnalına köçürüləcək, köhnə fənnin jurnalındakı bu imtahanın balları silinəcək."
+msgstr "Saxladıqdan sonra nəticələr yeni fənnin jurnalına köçürüləcək, köhnə fənnin jurnalındakı bu imtahanın balları silinəcək."
+
+msgctxt "exams.subject_change"
+msgid "Təsdiq edirəm: nəticələr yeni fənnə köçürülsün"
+msgstr "Təsdiq edirəm: nəticələr yeni fənnə köçürülsün"
+
+msgctxt "exams.subject_change"
+msgid "Səbəb"
+msgstr "Səbəb"
+
+msgctxt "exams.subject_change"
+msgid "Məsələn: imtahan yaradılarkən fənn səhv seçilmişdi"
+msgstr "Məsələn: imtahan yaradılarkən fənn səhv seçilmişdi"
+
+#, python-format
+msgctxt "exams.subject_change"
+msgid "Ən azı %(min)s simvol. Dəyişiklik, səbəb və köçürülən nəticələrin sayı imtahan tarixçəsinə yazılır."
+msgstr "Ən azı %(min)s simvol. Dəyişiklik, səbəb və köçürülən nəticələrin sayı imtahan tarixçəsinə yazılır."
+
+msgctxt "exams.subject_change"
+msgid "Fənn dəyişikliyi tarixçəsi"
+msgstr "Fənn dəyişikliyi tarixçəsi"
+
+#, python-format
+msgctxt "exams.subject_change"
+msgid "Nəticəsi olan tələbə: %(students)s"
+msgstr "Nəticəsi olan tələbə: %(students)s"
+
+#, python-format
+msgctxt "exams.subject_change"
+msgid "Yeni jurnala köçürülən: %(moved)s · köhnə jurnaldan silinən: %(cleared)s"
+msgstr "Yeni jurnala köçürülən: %(moved)s · köhnə jurnaldan silinən: %(cleared)s"
+
+#, python-format
+msgctxt "exams.subject_change"
+msgid "yeni fənn üzrə jurnalda qeydiyyatı olmayan: %(n)s"
+msgstr "yeni fənn üzrə jurnalda qeydiyyatı olmayan: %(n)s"

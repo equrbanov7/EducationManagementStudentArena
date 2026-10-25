@@ -26,11 +26,12 @@ from .exam_coding_fields import CodingExamFieldsMixin
 from .exam_exclusions import excluded_users_within_assignment, requested_unit_ids
 from .exam_journal_teacher import JournalTeacherFieldMixin
 from .exam_question_count import category_counts, decorate_widget, initial_count, resolve_submitted_count
+from .exam_subject_change import SubjectChangeGuardMixin
 
 User = get_user_model()
 
 
-class ExamForm(JournalTeacherFieldMixin, CodingExamFieldsMixin, forms.ModelForm):
+class ExamForm(SubjectChangeGuardMixin, JournalTeacherFieldMixin, CodingExamFieldsMixin, forms.ModelForm):
     organization = forms.ModelChoiceField(
         queryset=apps.get_model("organizations", "Organization").objects.none(),
         required=False,
@@ -366,6 +367,7 @@ class ExamForm(JournalTeacherFieldMixin, CodingExamFieldsMixin, forms.ModelForm)
                 self.fields["subject"].queryset = Subject.objects.none()
             self.fields["subject"].required = False
         self._init_journal_teacher(organization)  # 2026-10-24: müəllim → fənn asılı seçimi
+        self._init_subject_change_guard()  # 2026-10-25: nəticəli midtermin fənn dəyişikliyi — təsdiq + səbəb
 
         # Əgər teacher məlumatı gəlirsə, onu nəzərə alaq
         if user is not None:
