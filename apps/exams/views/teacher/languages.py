@@ -17,6 +17,7 @@ from django.utils.translation import pgettext
 
 from apps.exams.constants import DEFAULT_EXAM_LANGUAGE, EXAM_LANGUAGE_CHOICES, EXAM_LANGUAGE_VALUES
 from apps.exams.services.access_policy import _ensure_teacher, ensure_can_manage_exam_questions
+from apps.exams.services.bulk_confidence import finalize_analysis
 from apps.exams.services.bulk_workbench import (
     analyze_mcq_bulk,
     exam_question_fp_map,
@@ -162,6 +163,8 @@ def exam_language_manager(request, slug):
                         owner_id=request.user.pk,
                         organization_id=exam.organization_id,
                     )
+                    # 2026-10-26: bağlama xəbərdarlıqları → meta (is_clean) + sayğaclar yenilənir.
+                    analysis = finalize_analysis(parsed, analysis["test_level_warnings"])
                 except (OSError, ValueError) as exc:
                     messages.error(request, str(exc))
                     if action == "save":

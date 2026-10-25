@@ -110446,3 +110446,20 @@ msgstr "Prüfungssprache"
 msgctxt "exams.service.language_parity"
 msgid "'{lang}' variantında hər tələbəyə {count} sual verilir, '{ref}' variantında isə {ref_count}."
 msgstr "Die Variante '{lang}' gibt jedem Studierenden {count} Fragen, die Variante '{ref}' {ref_count}."
+
+#, python-format
+msgctxt "exams.template.test_question_bank"
+msgid "Təmiz: %(clean)s / %(total)s"
+msgstr "Fehlerfrei: %(clean)s / %(total)s"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Yalnız təmiz sualları seç"
+msgstr "Nur fehlerfreie Fragen auswählen"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Xətasız, xəbərdarlıqsız və dublikatsız sualları seçir, qalanlarının seçimini götürür"
+msgstr "Wählt Fragen ohne Fehler, Warnungen und Duplikate aus und hebt die Auswahl der übrigen auf"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Seçildi: {count} təmiz sual"
+msgstr "Ausgewählt: {count} fehlerfreie Fragen"

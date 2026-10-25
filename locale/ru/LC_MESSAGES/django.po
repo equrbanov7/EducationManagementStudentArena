@@ -109614,3 +109614,20 @@ msgstr "Язык экзамена"
 msgctxt "exams.service.language_parity"
 msgid "'{lang}' variantında hər tələbəyə {count} sual verilir, '{ref}' variantında isə {ref_count}."
 msgstr "В варианте '{lang}' каждый студент получает {count} вопросов, в варианте '{ref}' — {ref_count}."
+
+#, python-format
+msgctxt "exams.template.test_question_bank"
+msgid "Təmiz: %(clean)s / %(total)s"
+msgstr "Чистые: %(clean)s / %(total)s"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Yalnız təmiz sualları seç"
+msgstr "Выбрать только чистые вопросы"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Xətasız, xəbərdarlıqsız və dublikatsız sualları seçir, qalanlarının seçimini götürür"
+msgstr "Выбирает вопросы без ошибок, предупреждений и дубликатов, с остальных снимает выбор"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Seçildi: {count} təmiz sual"
+msgstr "Выбрано чистых вопросов: {count}"

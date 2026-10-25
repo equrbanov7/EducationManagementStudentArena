@@ -234,6 +234,14 @@
 .bulk-page-wrapper .btn-action.confirm-default-a { border-color: var(--ems-warning-bd); background: var(--ems-warning-bg); color: var(--ems-warning-800); }
 .bulk-page-wrapper .btn-action.confirm-default-a:hover { border-color: var(--ems-warning-500); color: var(--ems-warning-800); }
 
+/* ── «Yalnız təmiz sualları seç» + «Təmiz: N / M» (sahib 2026-10-26) ── */
+.bulk-page-wrapper .wb-clean-count { display: inline-flex; align-items: center; gap: 6px; min-height: var(--ems-h-xs); padding: 0 12px; border: 1px solid var(--ems-success-bd); border-radius: var(--ems-r-lg); background: var(--ems-success-bg); color: var(--ems-success-700); font-size: var(--ems-fs-base); font-weight: 700; white-space: nowrap; }
+.bulk-page-wrapper .btn-action.select-clean { border-color: var(--ems-success-bd); color: var(--ems-success-700); }
+.bulk-page-wrapper .btn-action.select-clean:hover { border-color: var(--ems-success-700); background: var(--ems-success-bg); color: var(--ems-success-700); }
+.bulk-page-wrapper .btn-action.select-clean:disabled { opacity: .55; cursor: not-allowed; }
+.bulk-page-wrapper .wb-select-clean-status { align-self: center; font-size: var(--ems-fs-sm); font-weight: 600; color: var(--ems-success-700); }
+.bulk-page-wrapper .wb-select-clean-status[hidden] { display: none; }
+
 /* Profil örtüyündə (sual göndərişi) qabıq artıq kənar boşluğu verir. */
 .profile-sections--embed .bulk-page-wrapper {
     padding: 0;

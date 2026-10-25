@@ -12,6 +12,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.exams.constants import EXAM_LANGUAGE_CHOICES, QUESTION_EXAM_KIND_CHOICES
+from apps.exams.services.bulk_confidence import finalize_analysis
 from apps.exams.services.bulk_workbench import (
     analyze_mcq_bulk,
     parse_points_payload,
@@ -72,6 +73,8 @@ def process_workbench_post(request, organization, form_state):
                 owner_id=request.user.pk,
                 organization_id=organization.pk,
             )
+            # 2026-10-26: bağlama xəbərdarlıqları → meta (is_clean) + sayğaclar yenilənir.
+            analysis = finalize_analysis(parsed, analysis["test_level_warnings"])
         except (OSError, ValueError) as exc:
             messages.error(request, str(exc))
             action = "preview"
@@ -122,6 +125,8 @@ def initial_workbench_state(request, organization, *, raw_text, math_token):
                 owner_id=request.user.pk,
                 organization_id=organization.pk,
             )
+            # 2026-10-26: bağlama xəbərdarlıqları → meta (is_clean) + sayğaclar yenilənir.
+            analysis = finalize_analysis(parsed, analysis["test_level_warnings"])
         except (OSError, ValueError):
             math_token = ""
     return {
