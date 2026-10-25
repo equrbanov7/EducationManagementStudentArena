@@ -116,11 +116,24 @@ def _grid_from_params(params, *, defaults=None) -> dict:
     if not kind_raw:
         kind_raw = defaults.get("exam_kind")
     question_count, question_max = questions.clean_question_grid(count_raw, max_raw)
+    # 2026-10-25: vərəq kartının sütun redaktoru (``question_maxes``) üstündür — sütun-sütun tavan.
+    maxes = service.exam_score_assessment.parse_column_maxes(params.get("question_maxes"))
+    if maxes:
+        question_count, question_max = len(maxes), max(maxes)
     return {
         "question_count": question_count,
         "question_max": question_max,
+        "question_maxes": maxes,
         "exam_kind": sheets_service.clean_exam_kind(kind_raw),
     }
+
+
+def _enforce_column_sum(grid, cap) -> dict:
+    """Sütunların maks cəmi = tavan (sahib 2026-10-25) — tətbiqdəki ``sheet_metadata_from_post`` ilə eyni qayda."""
+    if grid["question_count"]:
+        raw = grid.get("question_maxes") or [grid["question_max"]] * grid["question_count"]
+        grid["question_maxes"] = service.exam_score_assessment.clean_column_maxes(raw, cap)
+    return grid
 
 
 @never_cache
@@ -143,6 +156,7 @@ def exam_score_import_template(request):
     except ValidationError as exc:
         return _bad("validation_error", " ".join(exc.messages))
     roster = service.roster_for_offering(offering=offering)
+    grid.pop("question_maxes", None)
     payload, content_type, filename = importer.build_template(roster=roster, fmt=fmt, **grid)
     response = HttpResponse(payload, content_type=content_type)
     response["Content-Disposition"] = 'attachment; filename="%s"' % filename
@@ -167,6 +181,10 @@ def _plan_from_request(request, offering):
     except ValidationError as exc:
         return None, None, _bad("validation_error", " ".join(exc.messages))
     roster = service.roster_for_offering(offering=offering)
+    try:
+        grid = _enforce_column_sum(grid, roster["exam_score_max"])
+    except ValidationError as exc:
+        return None, None, _bad("validation_error", " ".join(exc.messages))
     return roster, importer.build_plan(roster=roster, rows=rows, **grid), None
 
 

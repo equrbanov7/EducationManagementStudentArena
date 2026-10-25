@@ -10,6 +10,7 @@ from .views import academic_records as academic_records_views
 from .views import account_password_reset as password_reset_views
 from .views import accounting as accounting_views
 from .views import accounting_rates as accounting_rates_views
+from .views import exam_score_draft as exam_score_draft_views
 from .views import exam_score_entry_changes as exam_score_changes_views
 from .views import exam_score_import as exam_score_import_views
 from .views import group_lead as group_lead_views
@@ -207,6 +208,8 @@ urlpatterns = [
     path("exam-chance/", views.exam_chance, name="exam_chance"),
     # İmtahan Mərkəzi — kağız (yazılı/praktiki) imtahan balının daxil edilməsi
     path("imtahan-bali/", views.exam_score_entry, name="exam_score_entry"),
+    # 2026-10-25 — qaralama (avtomatik saxlanma): səhifə yenilənsə də daxil edilən ballar itməsin.
+    path("imtahan-bali/qaralama/", exam_score_draft_views.exam_score_draft, name="exam_score_draft"),
     # 2026-09-12 — balların FAYLDAN (XLSX/CSV) köçürülməsi: doldurulmuş şablon,
     # quru icra (heç nə yazmır) və tətbiq (yazı yalnız registrar servisindən).
     path(

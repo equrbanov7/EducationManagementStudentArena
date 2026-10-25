@@ -56,11 +56,28 @@ class ExamScoreEntryKind(models.TextChoices):
     INITIAL = "initial", pgettext_lazy("registrar.exam_score_entry_kind", "Initial entry")
     CORRECTION = "correction", pgettext_lazy("registrar.exam_score_entry_kind", "Documented change")
     APPEAL = "appeal", pgettext_lazy("registrar.exam_score_entry_kind", "Appeal result")
+    # 2026-10-25 (sahib): təsdiqdən sonrakı 15 dəqiqə ərzində DAXİL EDƏNİN öz düzəlişi — sənədsiz,
+    # amma tarixçədə ayrıca görünür (``exam_score_assessment.EditWindow``).
+    WINDOW_EDIT = "window_edit", pgettext_lazy("registrar.exam_score_entry_kind", "Edit within 15 minutes")
 
     @classmethod
     def change_kinds(cls) -> tuple:
         """İlkin olmayan (dəyişiklik) növləri — dialoqda seçilə bilənlər."""
         return (cls.CORRECTION, cls.APPEAL)
+
+
+class ExamAssessment(models.TextChoices):
+    """Bal hansı imtahana aiddir — 2026-10-25 (sahib: «İmtahan növü: midterm / final»).
+
+    * ``FINAL`` — yekun imtahan → ``FinalGrade.exam_score`` (maks 50, sxemdən);
+    * ``MIDTERM`` — aralıq imtahan → jurnalın «Midterm» xanası (``ComponentScore``, maks 30 —
+      ``core.academic_rules.midterm_max``). Yalnız Midterm rejimli dövrlərdə (2026/2027-dən).
+
+    Köhnə sətir/vərəqlər yekun imtahana aiddir (miqrasiya defoltu ``final``).
+    """
+
+    FINAL = "final", pgettext_lazy("registrar.exam_assessment", "Final")
+    MIDTERM = "midterm", pgettext_lazy("registrar.exam_assessment", "Midterm")
 
 
 #: Sual sayı üçün yuxarı hədd (sahib 2026-09-14: «hər sualdan max 10»; kağız
@@ -84,6 +101,12 @@ class ExamScoreEntry(ImmutableCorrectionEvidence):
     )
     enrollment = models.ForeignKey("registrar.Enrollment", on_delete=models.PROTECT, related_name="exam_score_entries")
     kind = models.CharField(max_length=12, choices=ExamScoreEntryKind.choices, default=ExamScoreEntryKind.INITIAL)
+    assessment = models.CharField(
+        max_length=10,
+        choices=ExamAssessment.choices,
+        default=ExamAssessment.FINAL,
+        help_text="Midterm (jurnalın Midterm xanası) və ya final (yekun imtahan balı) — 2026-10-25.",
+    )
     old_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     new_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     reason = models.CharField(
@@ -135,6 +158,19 @@ class ExamScoreEntry(ImmutableCorrectionEvidence):
         indexes = [
             models.Index(fields=["organization", "enrollment"]),
             models.Index(fields=["organization", "-created_at"]),
+            models.Index(fields=["enrollment", "assessment", "kind"], name="reg_ese_enr_assess_kind_idx"),
+        ]
+        constraints = [
+            # 2026-10-25: bal sahəsi DB səviyyəsində də 0..100 (midterm ≤ 30 / final ≤ 50 servis + komponent
+            # qoruyucusu ilə; burada yalnız zibil tutulur — ``FinalGrade`` CHECK-i ilə eyni hədd).
+            models.CheckConstraint(
+                condition=models.Q(new_score__isnull=True) | models.Q(new_score__gte=0, new_score__lte=100),
+                name="registrar_ese_new_score_range",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(assessment__in=["final", "midterm"]),
+                name="registrar_ese_assessment_valid",
+            ),
         ]
 
     def __str__(self):
@@ -230,6 +266,12 @@ class ExamScoreSheet(UUIDModel, TimeStampedModel):
     )
     offering = models.ForeignKey("registrar.CourseOffering", on_delete=models.PROTECT, related_name="exam_score_sheets")
     source = models.CharField(max_length=12, choices=ExamScoreSheetSource.choices, default=ExamScoreSheetSource.MANUAL)
+    assessment = models.CharField(
+        max_length=10,
+        choices=ExamAssessment.choices,
+        default=ExamAssessment.FINAL,
+        help_text="Midterm və ya final — vərəqin bütün sətirləri eyni imtahana aiddir (2026-10-25).",
+    )
     exam_kind = models.CharField(
         max_length=12,
         choices=ExamScoreSheetKind.choices,
@@ -237,6 +279,8 @@ class ExamScoreSheet(UUIDModel, TimeStampedModel):
         help_text="Kağız imtahanın növü — yazılı / praktiki (2026-09-14).",
     )
     exam_date = models.DateField(null=True, blank=True, help_text="Kağız imtahanın keçirildiyi tarix.")
+    # 2026-10-25 (sahib): «imtahanın yoxlanma tarixi» — təsdiq dialoqunda daxil edən seçir (defolt bu gün).
+    checked_on = models.DateField(null=True, blank=True, help_text="İmtahan vərəqlərinin yoxlandığı tarix.")
     examiner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
@@ -279,6 +323,13 @@ class ExamScoreSheet(UUIDModel, TimeStampedModel):
         validators=[MinValueValidator(1), MaxValueValidator(100)],
         help_text="Bir sualın maksimum balı.",
     )
+    # 2026-10-25 (sahib): hər SÜTUNUN (sualın) öz maksimumu — ``[6, 6, 6, 6, 6]``; cəmi HƏMİŞƏ imtahanın
+    # tavanıdır (midterm 30 / final 50). ``NULL`` = köhnə bərabər şəbəkə (``question_count × question_max``).
+    question_maxes = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="Sütunların (sualların) maksimum balları — cəmi imtahan tavanına bərabərdir.",
+    )
     rows_total = models.PositiveIntegerField(default=0)
     rows_written = models.PositiveIntegerField(default=0)
     rows_skipped = models.PositiveIntegerField(default=0)
@@ -297,6 +348,12 @@ class ExamScoreSheet(UUIDModel, TimeStampedModel):
         indexes = [
             models.Index(fields=["organization", "offering", "-created_at"], name="reg_ess_org_off_created_idx"),
             models.Index(fields=["organization", "-created_at"], name="reg_ess_org_created_idx"),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(assessment__in=["final", "midterm"]),
+                name="registrar_ess_assessment_valid",
+            ),
         ]
 
     def __str__(self):

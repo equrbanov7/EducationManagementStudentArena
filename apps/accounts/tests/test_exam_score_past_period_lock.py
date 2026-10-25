@@ -15,7 +15,9 @@ Yoxlanan müqavilə (server tərəfdə — UI yalnız əks etdirir):
 """
 
 import datetime
+from datetime import timedelta
 from decimal import Decimal
+from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
@@ -374,13 +376,16 @@ class PastPeriodLockTest(TestCase):
     def test_current_period_change_requires_scan_and_accepts_dialog_file(self):
         self._unlock_period()
         self._post(self.center)
+        # 2026-10-25: təsdiqdən 15 dəqiqə sonra yazılmış bal yalnız apellyasiya (sənəd MƏCBURİ) ilə dəyişir.
         change = {
             f"score__{self.enrollment.id}": "30",
-            "reason": CorrectionReason.APPEAL,
+            "kind": "appeal",
             "note": "Apellyasiya",
         }
-        self._post(self.center, **change)  # skan yoxdur → rədd
-        self.assertEqual(self._score(), Decimal("45"))
-        self._post(self.center, **change, justification_evidence=fixtures._pdf())
+        later = timezone.now() + timedelta(minutes=16)
+        with mock.patch("django.utils.timezone.now", return_value=later):
+            self._post(self.center, **change)  # skan yoxdur → rədd
+            self.assertEqual(self._score(), Decimal("45"))
+            self._post(self.center, **change, justification_evidence=fixtures._pdf())
         self.assertEqual(self._score(), Decimal("30"))
         self.assertEqual(len(self._entries()), 2)

@@ -100,7 +100,7 @@ def is_blank_list(raw_scores) -> bool:
     return all(str(value if value is not None else "").strip() == "" for value in raw_scores)
 
 
-def clean_question_scores(raw_scores, *, question_count: int, question_max: int, cap) -> tuple:
+def clean_question_scores(raw_scores, *, question_count: int, question_max: int, cap, question_maxes=None) -> tuple:
     """Bir tələbənin sual balları → ``(scores, total)``; hamısı boşdursa ``(None, None)``.
 
     Qaydalar (sahib 2026-09-14, hamısı fail-closed):
@@ -112,7 +112,12 @@ def clean_question_scores(raw_scores, *, question_count: int, question_max: int,
 
     ``question_count == 0`` olan vərəqdə sual balı QƏBUL OLUNMUR — tək yekun bal
     rejimidir (çağıran ``exam_score_entry._clean_score`` ilə gedir).
+
+    2026-10-25: ``question_maxes`` (vərəqin SÜTUN-SÜTUN maksimumları) verilərsə sual sayı onun
+    uzunluğu, hər sualın tavanı isə öz sütununun maksimumudur (``question_max`` nəzərə alınmır).
     """
+    if question_maxes:
+        question_count = len(question_maxes)
     if is_blank_list(raw_scores):
         return None, None
     raw_scores = list(raw_scores)
@@ -133,10 +138,11 @@ def clean_question_scores(raw_scores, *, question_count: int, question_max: int,
             ) from None
         if value is None:
             value = 0
-        if value < 0 or value > int(question_max):
+        limit = int(question_maxes[index - 1]) if question_maxes else int(question_max)
+        if value < 0 or value > limit:
             raise ValidationError(
                 pgettext(_CTX, "%(label)s balı 0 ilə %(max)s arasında olmalıdır.")
-                % {"label": f"{QUESTION_LABEL_PREFIX}{index}", "max": int(question_max)}
+                % {"label": f"{QUESTION_LABEL_PREFIX}{index}", "max": limit}
             )
         scores.append(value)
     total = sum(scores)

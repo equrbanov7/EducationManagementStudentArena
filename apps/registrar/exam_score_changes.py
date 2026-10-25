@@ -190,6 +190,8 @@ def change_row(entry) -> dict:
         "exam_kind": exam_kind,
         "exam_kind_label": str(ExamScoreSheetKind(exam_kind).label),
         "is_practical": exam_kind == ExamScoreSheetKind.PRACTICAL,
+        "assessment": entry.assessment,  # 2026-10-25: midterm / final
+        "assessment_label": str(entry.get_assessment_display()),
         "date": entry.created_at.strftime("%d.%m.%Y %H:%M"),
         "date_iso": entry.created_at.isoformat(),
         "student": student.get_full_name() or student.username,

@@ -18,15 +18,11 @@
  *   2. «İmtahan balı» sual rejimində yalnız-oxunan CANLI CƏMDİR, «Yekun» =
  *      giriş + cəm (+ bonus), «Hərf» server şkalası ilə (F qırmızı) — server
  *      hamısını yenidən hesablayır, bu yalnız UX;
- *   3. «Sual sayı» sütunları açıb-bağlayır (artıq sahələr `disabled` → POST-a
- *      düşmür), «Bir sualın maksimumu» seçim variantlarını yenidən qurur;
- *   4. hər sətrin VƏZİYYƏT nişanı (boş / yazılıb / dəyişdirilib / dəyişiklik ·
- *      səbəb / xəta) + «Dəyişdirilib» KPI kartı;
- *   5. «Balları yadda saxla» → TƏSDİQ dialoqu — qardaş faylda
- *      (`exam_score_entry_confirm.js`, `window.EMSExamScoreEntry` API-si ilə;
- *      modul-ölçü büdcəsi SOFT_CAP=600);
- *   6. tarixçə çekmecəsi, görünüş / sıra / çip linkləri (SPA), «İmtahan növü»
- *      çipi və «Sıfırla» — qardaş faylda (`exam_score_entry_nav.js`).
+ *   3. sütunlar (2026-10-25: hər sütunun öz maksimumu, `[data-ese-question-maxes]`) açılıb-bağlanır
+ *      (artıq sahələr `disabled` → POST-a düşmür); «Yekun» sətir yalnız rejimdə açılır;
+ *   4. hər sətrin VƏZİYYƏT nişanı (boş / yazılıb / Yekun / 15 dəq / dəyişdirilib / xəta) + KPI;
+ *   5. qardaş fayllar (`window.EMSExamScoreEntry` API-si): təsdiq dialoqu `_confirm.js`, naviqasiya
+ *      `_nav.js`, sütun redaktoru + rejimlər `_columns.js`, qaralama + geri sayım `_draft.js`.
  *
  * Qaydalar (CLAUDE.md + docs/frontend/AJAX_SAFE_JS_PATTERN.md): `EMSDelegate.on`
  * (swap-safe), `EMSReady` (idempotent), null-safe. ⚠️ DELEQAT AÇARLARI
@@ -71,18 +67,38 @@
 
     /* ---- Sual şəbəkəsi (S1..Sn) --------------------------------------------- */
 
-    function questionCount(host) {
-        var select = host.querySelector("[data-ese-question-count]");
-        var raw = select ? select.value : host.getAttribute("data-question-count");
-        var n = parseInt(raw || "0", 10);
-        return isNaN(n) || n < 0 ? 0 : n;
+    /* 2026-10-25: hər SÜTUNUN öz maksimumu — `[data-ese-question-maxes]` gizli sahəsi ("10,10,10"),
+       sütun redaktoru (`exam_score_entry_columns.js`) yeniləyir; cəmi imtahanın tavanıdır. */
+    function columnMaxes(host) {
+        var input = host.querySelector("[data-ese-question-maxes]");
+        var raw = input ? input.value : "";
+        return String(raw || "").split(",").map(function (part) {
+            return parseInt(part, 10);
+        }).filter(function (n) {
+            return !isNaN(n) && n > 0;
+        });
     }
 
-    function questionMax(host) {
-        var input = host.querySelector("[data-ese-question-max]");
-        var raw = input ? input.value : host.getAttribute("data-question-max");
-        var n = parseInt(raw || "10", 10);
-        return isNaN(n) || n < 1 ? 10 : Math.min(100, n);
+    function questionCount(host) {
+        return columnMaxes(host).length;
+    }
+
+    /* Bir sütunun maksimumu (1-dən); naməlum sütun → ən böyük sütun. */
+    function questionMax(host, column) {
+        var maxes = columnMaxes(host);
+        var index = Number(column || 0) - 1;
+        if (index >= 0 && index < maxes.length) {
+            return maxes[index];
+        }
+        return maxes.length ? Math.max.apply(null, maxes) : 10;
+    }
+
+    /* «Yekun» sətir (təsdiqdən 15 dəq keçib) yalnız apellyasiya / RİM rejimində açılır. */
+    function rowLocked(row, host) {
+        if (row.getAttribute("data-locked") === "1") {
+            return true;
+        }
+        return row.getAttribute("data-final") === "1" && !(host && host.getAttribute("data-change-mode"));
     }
 
     function questionSelects(row) {
@@ -163,8 +179,8 @@
     function questionState(row, host) {
         var selects = questionSelects(row);
         var state = { count: selects.length, sum: 0, filled: 0, invalid: false, dirty: false };
-        var max = questionMax(host);
         selects.forEach(function (select) {
+            var max = questionMax(host, select.getAttribute("data-ese-q"));
             var value = (select.value || "").trim();
             var initial = (select.getAttribute("data-initial") || "").trim();
             if (value !== initial) {
@@ -188,20 +204,28 @@
        qoyur — ilk render-də (EMSReady) bu funksiya hər xananın 0..max variantlarını qurur. */
     function applyQuestionGrid(host) {
         var count = questionCount(host);
-        var max = questionMax(host);
         host.querySelectorAll("[data-ese-qcol]").forEach(function (th) {
-            th.hidden = Number(th.getAttribute("data-ese-qcol")) > count;
-        });
-        host.querySelectorAll("[data-ese-qmax-label]").forEach(function (el) {
-            el.textContent = String(max);
+            var column = Number(th.getAttribute("data-ese-qcol"));
+            th.hidden = column > count;
+            var label = th.querySelector("[data-ese-qmax-label]");
+            if (label) {
+                label.textContent = String(questionMax(host, column));
+            }
         });
         host.querySelectorAll("[data-ese-qcell]").forEach(function (td) {
-            var off = Number(td.getAttribute("data-ese-qcell")) > count;
+            var column = Number(td.getAttribute("data-ese-qcell"));
+            var off = column > count;
+            var max = questionMax(host, column);
             td.hidden = off;
             var select = td.querySelector("[data-ese-q]");
             if (select) {
-                // Bitmiş dövrdə yazılmış bal olan sətir (2026-09-26) — `data-locked`.
-                select.disabled = off || td.parentNode.getAttribute("data-locked") === "1";
+                // Bitmiş dövr (2026-09-26, `data-locked`) və «Yekun» sətir (2026-10-25, `data-final`).
+                var locked = rowLocked(td.parentNode, host);
+                select.disabled = off || locked;
+                var toggle = td.querySelector("[data-ese-qtoggle], .bootstrap-single-select__toggle");
+                if (toggle) {
+                    toggle.disabled = locked;
+                }
                 if (String(select.getAttribute("data-max") || "") !== String(max)) {
                     rebuildOptions(select, max);
                 }
@@ -210,6 +234,7 @@
         rows(host).forEach(function (row) {
             var total = scoreInput(row);
             if (total) {
+                total.disabled = rowLocked(row, host);
                 total.readOnly = count > 0;
                 total.tabIndex = count > 0 ? -1 : 0;
                 total.classList.toggle("is-readonly", count > 0);
@@ -340,6 +365,10 @@
             setBadge(badge, "warning", t("status-change"));
         } else if (state.dirty) {
             setBadge(badge, "warning", t("status-dirty"));
+        } else if (row.getAttribute("data-final") === "1") {
+            setBadge(badge, "success", t("status-final"));
+        } else if (row.getAttribute("data-edit-until")) {
+            setBadge(badge, "info", t("status-window"));
         } else if (row.getAttribute("data-is-changed") === "1") {
             setBadge(badge, "warning", t("status-dirty"));
         } else if (row.getAttribute("data-has-score") === "1") {
@@ -465,7 +494,7 @@
     function typeDigit(select, key, host) {
         var now = Date.now();
         var text = digitBuffer.select === select && now - digitBuffer.at < 400 ? digitBuffer.text + key : key;
-        var max = questionMax(host);
+        var max = questionMax(host, select.getAttribute("data-ese-q"));
         var value = Number(text);
         if (value > max) {
             text = key;
@@ -535,21 +564,6 @@
         onRowInput(input);
     });
 
-    DELEGATE.on("change", "[data-ese-question-count]", function () {
-        var host = root();
-        if (host) {
-            applyQuestionGrid(host);
-            syncAll(host);
-        }
-    });
-
-    DELEGATE.on("input", "[data-ese-question-max]", function () {
-        var host = root();
-        if (host) {
-            applyQuestionGrid(host);
-            syncAll(host);
-        }
-    });
 
     /* ---- Qardaş modul üçün ortaq API (`exam_score_entry_confirm.js`) ---------- */
 
@@ -563,6 +577,9 @@
         syncAll: syncAll,
         syncPlaceholderToggle: syncPlaceholderToggle,
         questionCount: questionCount,
+        columnMaxes: columnMaxes,
+        applyQuestionGrid: applyQuestionGrid,
+        rowLocked: rowLocked,
         grade: grade,
         config: config,
     };

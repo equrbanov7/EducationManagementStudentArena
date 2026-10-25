@@ -118,7 +118,8 @@ class ImportViewGridTest(TestCase):
         )
 
     def test_preview_with_three_questions_rejects_s4_exactly_like_apply(self):
-        grid = {"question_count": "3", "question_max": "10"}
+        # 2026-10-25: sütunların maks cəmi = tavan (50) — 3 sütun 17 + 17 + 16.
+        grid = {"question_maxes": "17,17,16"}
         preview = self._post("preview", self._csv("5", "5", "5", "5"), **grid)
         self.assertEqual(preview.status_code, 200)
         row = preview.json()["rows"][0]
@@ -136,7 +137,7 @@ class ImportViewGridTest(TestCase):
         self.assertEqual((sheet.rows_written, sheet.rows_failed, sheet.question_count), (0, 1, 3))
 
     def test_preview_and_apply_agree_on_question_max(self):
-        grid = {"question_count": "3", "question_max": "5"}
+        grid = {"question_maxes": "5,25,20"}  # 2026-10-25: S1-in öz tavanı 5, cəm 50
         preview = self._post("preview", self._csv("6", "1", "1"), **grid).json()
         self.assertEqual(preview["rows"][0]["status"], "error")
         self.assertIn("S1", preview["rows"][0]["message"])
@@ -149,7 +150,7 @@ class ImportViewGridTest(TestCase):
         self.assertEqual(FinalGrade.objects.get(enrollment=self.enrollment).exam_score, Decimal(12))
         self.assertEqual(ExamScoreEntry.objects.get().question_scores, [5, 4, 3])
         sheet = ExamScoreSheet.objects.get()
-        self.assertEqual((sheet.question_count, sheet.question_max), (3, 5))
+        self.assertEqual((sheet.question_count, sheet.question_max, sheet.question_maxes), (3, 25, [5, 25, 20]))
 
     def test_preview_rejects_invalid_grid_before_building_plan(self):
         response = self._post("preview", self._csv("1"), question_count="12")
@@ -162,9 +163,9 @@ class ImportViewGridTest(TestCase):
             "QA_TEST_nov.csv",
             f"username,İmtahan növü,S1\n{self.student.username},{PRACTICAL_LABEL},7\n".encode(),
         )
-        preview = self._post("preview", upload, exam_kind="written", question_count="1").json()
+        preview = self._post("preview", upload, exam_kind="written", question_maxes="50").json()
         self.assertEqual(preview["rows"][0]["status"], "error")
         self.assertIn(WRITTEN_LABEL, preview["rows"][0]["message"])
         upload.seek(0)
-        ok = self._post("preview", upload, exam_kind="practical", question_count="1").json()
+        ok = self._post("preview", upload, exam_kind="practical", question_maxes="50").json()
         self.assertEqual(ok["rows"][0]["status"], "new")

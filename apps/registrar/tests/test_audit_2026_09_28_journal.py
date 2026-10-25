@@ -220,8 +220,15 @@ class SaveFinalsLedgerTest(_JournalFixture):
             self.assertEqual(ExamScoreEntry.objects.filter(enrollment=self.enrollment).count(), 1)
 
     def test_change_without_submission_is_rejected(self):
+        # 2026-10-25: daxil edən 15 dəqiqə ərzində sənədsiz dəyişə bilər — burada pəncərə bitib.
+        from datetime import timedelta
+        from unittest import mock
+
+        from django.utils import timezone
+
         self._post(self.offering, {f"exam__{self.enrollment.id}": "40"})
-        resp = self._post(self.offering, {f"exam__{self.enrollment.id}": "45"})
+        with mock.patch("django.utils.timezone.now", return_value=timezone.now() + timedelta(minutes=16)):
+            resp = self._post(self.offering, {f"exam__{self.enrollment.id}": "45"})
         self.assertEqual(resp.status_code, 302)
         with bypass_rls():
             self.assertEqual(FinalGrade.objects.get(enrollment=self.enrollment).exam_score, Decimal("40"))

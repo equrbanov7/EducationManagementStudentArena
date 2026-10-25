@@ -16,24 +16,36 @@ SECTION = "exam-score-entry"
 _CTX = "registrar.exam_score_entry"
 
 
-def _fill_offering(section, offering, period, service, sheets_service, selected_org, is_superadmin, sheet_kind=""):
+def _fill_offering(
+    section, offering, period, service, sheets_service, selected_org, is_superadmin, sheet_kind="", assessment="final"
+):
     """Seçilmiş açılış: metadata (müəllim, qrup, fənn), siyahı, KPI, partiyalar, idxal URL-ləri.
 
     ``sheet_kind`` — partiya siyahısının növ çipi (``written`` / ``practical`` / boş = hamısı).
     Formanın defoltları (o cümlədən ``exam_kind``) SÜZÜLMƏMİŞ sonuncu vərəqdən gəlir.
+
+    2026-10-25: ``assessment`` — midterm / final. Midterm siyahısı jurnalın «Midterm» xanasından
+    (``exam_score_midterm.roster_for_offering``), vərəqlər və sütun defoltları imtahana görə; fayl
+    idxalı yalnız final üçündür.
     """
     from apps.registrar.public import exam_score_import as importer
 
-    roster = service.roster_for_offering(offering=offering)
+    is_midterm = assessment == service.exam_score_assessment.MIDTERM
+    roster = (
+        service.exam_score_midterm.roster_for_offering(offering=offering)
+        if is_midterm
+        else service.roster_for_offering(offering=offering)
+    )
     section["rows"] = roster["rows"]
     section["exam_score_max"] = roster["exam_score_max"]
     section["journal_locked"] = _journal_locked(offering)
     section.update(_roster_kpis(roster["rows"]))
     section["kpi_tiles"] = _kpi_tiles(section)
-    section["tabs"] = [
-        {"key": "manual", "label": pgettext(_CTX, "Əl ilə daxil et"), "current": True},
-        {"key": "import", "label": pgettext(_CTX, "Fayldan yüklə (XLSX / CSV)"), "current": False},
-    ]
+    section["tabs"] = [{"key": "manual", "label": pgettext(_CTX, "Əl ilə daxil et"), "current": True}]
+    if not is_midterm:
+        section["tabs"].append(
+            {"key": "import", "label": pgettext(_CTX, "Fayldan yüklə (XLSX / CSV)"), "current": False}
+        )
     section["offering_meta"] = {
         "subject_code": offering.subject.code,
         "subject_name": offering.subject.name,
@@ -41,8 +53,10 @@ def _fill_offering(section, offering, period, service, sheets_service, selected_
         "instructor": sheets_service.instructor_label(offering) or "—",
         "period_label": f"{period.season_label} — {period.name}",
     }
-    sheets = sheets_service.sheets_for_offering(offering=offering)
-    section["sheet_defaults"] = sheets_service.latest_sheet_defaults(sheets)
+    sheets = sheets_service.sheets_for_offering(offering=offering, assessment=assessment)
+    section["sheet_defaults"] = sheets_service.latest_sheet_defaults(
+        sheets, assessment=assessment, cap=roster["exam_score_max"]
+    )
     section["sheets_total"] = len(sheets)
     section["sheets"] = [row for row in sheets if not sheet_kind or row["exam_kind"] == sheet_kind]
     section["sheet_kind"] = sheet_kind
@@ -66,14 +80,13 @@ def _fill_offering(section, offering, period, service, sheets_service, selected_
         (o["label"] for o in section["exam_kind_options"] if o["value"] == defaults["exam_kind"]), ""
     )
     section["steps"] = _steps(offering=offering, saved=section["saved_flag"])
-    grid = section["sheet_defaults"]
-    section["question_count"] = int(grid.get("question_count") or 0)
-    section["question_max"] = int(grid.get("question_max") or service.exam_score_questions.QUESTION_MAX_DEFAULT)
-    section["question_count_options"] = [
-        {"value": str(n), "label": str(n) if n else pgettext(_CTX, "0 — yalnız yekun bal")}
-        for n in range(0, service.exam_score_questions.QUESTION_COUNT_MAX + 1)
-    ]
-    _attach_question_cells(roster["rows"], service.exam_score_questions.QUESTION_COUNT_MAX, section["question_count"])
+    # 2026-10-25: sütun-sütun maksimumlar (cəmi = tavan); köhnə «sual sayı × bir sualın maks» onlardan çıxır.
+    maxes = list(section["sheet_defaults"].get("question_maxes") or [])
+    section["column_maxes"] = maxes
+    section["column_maxes_csv"] = ",".join(str(v) for v in maxes)
+    section["question_count"] = len(maxes)
+    section["question_max"] = max(maxes) if maxes else service.exam_score_questions.QUESTION_MAX_DEFAULT
+    _attach_question_cells(roster["rows"], service.exam_score_questions.QUESTION_COUNT_MAX, maxes)
     # Təsdiq dialoqu üçün server şkalası (json_script) — hərf/keçid JS-də eyni qayda ilə.
     section["confirm_config"] = {
         "letter_bands": roster["letter_bands"],
@@ -97,7 +110,7 @@ def _fill_offering(section, offering, period, service, sheets_service, selected_
     section["import_apply_url"] = reverse("accounts:exam_score_import_apply")
 
 
-def _attach_question_cells(rows, question_count_max, question_count) -> None:
+def _attach_question_cells(rows, question_count_max, maxes) -> None:
     """Hər sətrə S1..S10 xanaları (`index`, `label`, `value`, `off`) — şablonda iç-içə döngü əvəzinə hazır siyahı.
 
     Sual sayından artıq xanalar (`off`) şablonda `hidden` + `disabled` render olunur; JS
@@ -107,6 +120,7 @@ def _attach_question_cells(rows, question_count_max, question_count) -> None:
     (`_roster.html` şərhinə bax) — `question_score_options` siyahısı artıq yoxdur;
     imtahan balının göstərişi (`exam_display`, `floatformat:0` ilə eyni) bir dəfə hesablanır.
     """
+    question_count = len(maxes)
     for row in rows:
         values = [str(v) for v in (row.get("question_scores") or [])]
         row["question_cells"] = [
@@ -115,6 +129,7 @@ def _attach_question_cells(rows, question_count_max, question_count) -> None:
                 "label": f"S{index}",
                 "value": values[index - 1] if index <= len(values) else "",
                 "off": index > question_count,
+                "max": maxes[index - 1] if index <= question_count else "",
             }
             for index in range(1, question_count_max + 1)
         ]

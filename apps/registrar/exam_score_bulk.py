@@ -49,7 +49,7 @@ from . import exam_score_questions as questions
 from . import finals, finals_batch, grade_audit, gradebook
 from .audit_write import AuditWriteFailed, audit_failure_message, create_audit_rows
 from .corrections import correction_author_name
-from .models import Enrollment, ExamScoreEntry, FinalGrade, ResitRecord, ResitStatus
+from .models import Enrollment, ExamAssessment, ExamScoreEntry, FinalGrade, ResitRecord, ResitStatus
 
 #: ``full_clean``-də buraxılan sahələr: ``organization`` / ``enrollment`` bu sorğuda oxunmuş
 #: və kilidlənmiş sətirlərdir (FK mövcudluq sorğusu lazımsızdır), ``entered_by`` / ``sheet``
@@ -64,8 +64,12 @@ _SKIPPED = "skipped"
 _WRITTEN = "written"
 
 
-def save_rows(*, offering, rows, by_user, request=None, sheet=None, policy):
-    """``save_roster_scores``-un yazısı (siyasət və partiya yoxlaması çağırandadır)."""
+def save_rows(*, offering, rows, by_user, request=None, sheet=None, policy, rules=None):
+    """``save_roster_scores``-un yazısı (siyasət, partiya yoxlaması və ``rules`` çağırandadır).
+
+    ``rules`` — ``exam_score_assessment.ChangeRules`` (2026-10-25: 15 dəqiqə / RİM / apellyasiya);
+    ``None`` — köhnə təqdimatlı düzəliş müqaviləsi.
+    """
     # Tutum testi 2026-10-05 (deadlock düzəlişi — SAXLANILIR): qeydiyyat kilidi çağıranın
     # tranzaksiyası boyu qalır; iki işçi eyni siyahını fərqli ardıcıllıqla saxlayanda deadlock
     # alınırdı — sətirlər sabit (enrollment_id) ardıcıllıqla emal olunur, kilid də o sıra ilə.
@@ -73,9 +77,16 @@ def save_rows(*, offering, rows, by_user, request=None, sheet=None, policy):
     keys = [str(row.get("enrollment_id") or "") for row in ordered]
     if len(set(keys)) != len(keys):
         return _save_sequential(
-            offering=offering, ordered=ordered, by_user=by_user, request=request, sheet=sheet, policy=policy
+            offering=offering,
+            ordered=ordered,
+            by_user=by_user,
+            request=request,
+            sheet=sheet,
+            policy=policy,
+            rules=rules,
         )
     saver = _BulkSave(offering=offering, by_user=by_user, request=request, sheet=sheet, policy=policy)
+    saver.rules = rules
     try:
         with transaction.atomic():
             return saver.run(ordered)
@@ -106,6 +117,7 @@ class _BulkSave:
         self.request = request
         self.sheet = sheet
         self.policy = policy
+        self.rules = None
         self.scheme = gradebook.ensure_assessment_scheme(offering=offering)
         self.cap = finals.exam_score_max(self.scheme)
         self.slots: list = []
@@ -181,7 +193,7 @@ class _BulkSave:
                     enrollment, self.scheme.entry_score_max, **batch.entry_kwargs(enrollment)
                 )
                 questions.assert_total_within_hundred(entry_score, slot["score"])
-                is_correction = entry_service.change_decision(
+                entry_kind = entry_service.change_decision(
                     old_score=old_score,
                     new_score=slot["score"],
                     cleaned_questions=slot["questions"],
@@ -191,15 +203,17 @@ class _BulkSave:
                     note=row.get("note") or "",
                     evidence=row.get("evidence"),
                     sheet=self.sheet,
+                    kind=row.get("kind") or "",
+                    rules=self.rules,
+                    enrollment_id=enrollment.pk,
                 )
-                if is_correction is None:
+                if entry_kind is None:
                     slot["state"] = _SKIPPED  # eyni bal → nə dublikat sətir, nə audit
                     continue
                 entry = entry_service.new_entry(
                     enrollment=enrollment,
                     organization=enrollment.organization,
-                    is_correction=is_correction,
-                    kind=row.get("kind") or "",
+                    entry_kind=entry_kind,
                     old_score=old_score,
                     new_score=slot["score"],
                     cleaned_questions=slot["questions"],
@@ -211,7 +225,8 @@ class _BulkSave:
                     sheet=self.sheet,
                 )
                 # Fayl (şəkil/PDF) ölçü + tip validatorları BAL YAZILMAMIŞDAN ƏVVƏL işləsin.
-                entry.full_clean(exclude=_CLEAN_EXCLUDE, validate_unique=False)
+                # CHECK-lər (0104) DB-dədir — ``validate_constraints`` sətir başına sorğu edərdi (tutum büdcəsi).
+                entry.full_clean(exclude=_CLEAN_EXCLUDE, validate_unique=False, validate_constraints=False)
                 if status_by_id.get(enrollment.pk) != Enrollment.Status.ENROLLED:
                     # Kilidli (təzə) sətir: qeydiyyat artıq aktiv deyil — sətir yazılmır.
                     raise ValidationError(entry_service.inactive_enrollment_message())
@@ -234,7 +249,7 @@ class _BulkSave:
         latest: dict = {}
         if wanted:
             rows = (
-                ExamScoreEntry.objects.filter(enrollment_id__in=wanted)
+                ExamScoreEntry.objects.filter(enrollment_id__in=wanted, assessment=ExamAssessment.FINAL)
                 .order_by("-created_at")
                 .values_list("enrollment_id", "question_scores")
             )
@@ -363,7 +378,7 @@ def _result(slots) -> dict:
     }
 
 
-def _save_sequential(*, offering, ordered, by_user, request, sheet, policy):
+def _save_sequential(*, offering, ordered, by_user, request, sheet, policy, rules=None):
     """Köhnə sətir-sətir yol (eyni qeydiyyat iki dəfə gələndə): hər sətir öz savepoint-ində."""
     enrollments = _active_enrollments(offering, "student", "offering")
     scheme = gradebook.ensure_assessment_scheme(offering=offering)
@@ -396,6 +411,7 @@ def _save_sequential(*, offering, ordered, by_user, request, sheet, policy):
                     kind=row.get("kind") or "",
                     entry_score=entry_scores.get(key),
                     period_policy=policy,
+                    rules=rules,
                 )
         except ValidationError as exc:
             _fail(slot, exc)

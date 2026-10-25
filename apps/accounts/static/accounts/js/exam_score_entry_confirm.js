@@ -14,6 +14,10 @@
  *   · `data-submission-required="1"` (RİM düzəliş rejimi və ya 60 gündən köhnə
  *     bitmiş dövr) — HƏR yazı (ilk daxiletmə də) eyni təqdimatı tələb edir;
  *   · YALNIZ dialoqun «Təsdiq et» düyməsi POST edir (Enter / kənar submit bloklanır).
+ *   · 2026-10-25 (sahib): YEKUN TƏSDİQ — fənn/semestr/qrup/yoxlayan/YOXLANMA TARİXİ (məcburi, gələcək olmaz)/
+ *     daxil edən; cədvəl tələbə × sual balları × cəm. Təqdimat tələbi rejimdən: «Apellyasiya» — yalnız SƏNƏD,
+ *     «RİM təqdimatı» və bitmiş dövr — səbəb + qeyd + sənəd; 15 dəq pəncərəsində heç biri. Sütunların cəmi
+ *     tavana bərabər deyilsə dialoq açılmır (`EMSExamScoreEntryColumns.invalid`).
  *
  * CSP: inline yoxdur; i18n `#eseI18n`. AJAX-safe: `EMSDelegate` (açarlar
  * `data-ese-save`, `data-ese-meta-file`, `form[data-ese-form]` — yalnız burada).
@@ -55,8 +59,17 @@
         return host.getAttribute("data-submission-required") === "1";
     }
 
-    function needsJustification(host, summary) {
-        return !!(summary.changes || (submissionRequired(host) && summary.writes));
+    function changeMode(host) {
+        return window.EMSExamScoreEntryColumns ? window.EMSExamScoreEntryColumns.mode(host) : "";
+    }
+
+    /* Hansı təqdimat lazımdır: "period" (bitmiş dövr), "appeal", "correction" və ya "" (heç biri). */
+    function justificationNeed(host, summary) {
+        if (submissionRequired(host) && summary.writes) {
+            return "period";
+        }
+        var mode = changeMode(host);
+        return mode && summary.changes ? mode : "";
     }
 
     function syncScanStatus(host) {
@@ -84,10 +97,42 @@
         status.classList.toggle("is-missing", !ok);
     }
 
-    function justificationComplete(host) {
+    function justificationComplete(host, need) {
+        if (need === "appeal") {
+            return scanSelected(host);
+        }
         var reason = host.querySelector("[data-ese-reason]");
         var note = host.querySelector("[data-ese-note]");
         return !!(reason && reason.value && note && (note.value || "").trim() && scanSelected(host));
+    }
+
+    /* Təqdimat blokunun görünüşü: apellyasiyada səbəb gizli, qeyd opsional; mətn rejimə görə. */
+    function showJustification(host, need) {
+        var just = host.querySelector("[data-ese-just]");
+        if (just) {
+            just.hidden = !need;
+        }
+        host.querySelectorAll("[data-ese-just-text]").forEach(function (span) {
+            span.hidden = span.getAttribute("data-ese-just-text") !== need;
+        });
+        var reasonWrap = host.querySelector("[data-ese-just-reason-wrap]");
+        if (reasonWrap) {
+            reasonWrap.hidden = need === "appeal";
+        }
+        var noteReq = host.querySelector("[data-ese-note-req]");
+        if (noteReq) {
+            noteReq.hidden = need === "appeal";
+        }
+    }
+
+    function checkedOnValid(host) {
+        var input = host.querySelector("[data-ese-checked-on]");
+        if (!input) {
+            return true;
+        }
+        var value = input.value || "";
+        var max = input.getAttribute("max") || "";
+        return /^\d{4}-\d{2}-\d{2}$/.test(value) && (!max || value <= max);
     }
 
     function summaryItem(list, count, label, warning) {
@@ -130,9 +175,22 @@
     }
 
     /* Dialoqun başlığı + cədvəli: yazılacaq hər tələbə, hərf, kəsilən sayı. */
+    /* Sətrin sual balları mətni — «6 + 5 + 7» (sual rejimi deyilsə «—»). */
+    function questionsText(row) {
+        var parts = [];
+        row.querySelectorAll("[data-ese-q]").forEach(function (select) {
+            if (!select.disabled) {
+                parts.push(select.value === "" ? "0" : select.value);
+            }
+        });
+        return parts.length ? parts.join(" + ") : "—";
+    }
+
+    /* Dialoqun başlığı + cədvəli: yazılacaq hər tələbə × sual balları × cəm (final: giriş/yekun/hərf). */
     function fillConfirm(host, summary) {
         var cfg = api().config();
         var body = host.querySelector("[data-ese-confirm-rows]");
+        var midterm = body && body.getAttribute("data-midterm") === "1";
         var failedBox = host.querySelector("[data-ese-confirm-failed]");
         var failedCount = host.querySelector("[data-ese-confirm-failed-count]");
         var failed = 0;
@@ -143,27 +201,34 @@
                 if (!state.dirty || state.invalid) {
                     return;
                 }
-                var result = api().grade(row, Number(state.value), cfg);
                 var tr = document.createElement("tr");
-                tr.className = result.failed ? "is-failed" : "";
                 var th = document.createElement("th");
                 th.scope = "row";
                 th.textContent = row.getAttribute("data-student") || "";
                 tr.appendChild(th);
-                tr.appendChild(cell(String(result.entry), true));
-                tr.appendChild(cell(state.value, true));
-                tr.appendChild(cell(String(result.total), true));
-                var letterTd = document.createElement("td");
-                letterTd.className = "ems-table__num ese-td--num";
-                var badge = document.createElement("span");
-                badge.className = "ems-badge ese-letter-badge " + (result.failed ? "ems-badge--danger" : "ems-badge--success");
-                badge.textContent = result.letter;
-                letterTd.appendChild(badge);
-                tr.appendChild(letterTd);
-                body.appendChild(tr);
-                if (result.failed) {
-                    failed += 1;
+                tr.appendChild(cell(questionsText(row), true));
+                var scoreTd = cell("", true);
+                var strong = document.createElement("b");
+                strong.textContent = state.value;
+                scoreTd.appendChild(strong);
+                tr.appendChild(scoreTd);
+                if (!midterm) {
+                    var result = api().grade(row, Number(state.value), cfg);
+                    tr.className = result.failed ? "is-failed" : "";
+                    tr.appendChild(cell(String(result.entry), true));
+                    tr.appendChild(cell(String(result.total), true));
+                    var letterTd = document.createElement("td");
+                    letterTd.className = "ems-table__num ese-td--num";
+                    var badge = document.createElement("span");
+                    badge.className = "ems-badge ese-letter-badge " + (result.failed ? "ems-badge--danger" : "ems-badge--success");
+                    badge.textContent = result.letter;
+                    letterTd.appendChild(badge);
+                    tr.appendChild(letterTd);
+                    if (result.failed) {
+                        failed += 1;
+                    }
                 }
+                body.appendChild(tr);
             });
         }
         if (failedBox) {
@@ -173,9 +238,9 @@
             failedCount.textContent = String(failed);
         }
         var kind = host.querySelector("[data-ese-confirm-kind]");
-        var kindSelect = host.querySelector("[data-ese-exam-kind]");
+        var kindInput = host.querySelector("[data-ese-exam-kind]");
         if (kind) {
-            kind.textContent = selectedLabel(kindSelect) || (kindSelect ? kindSelect.getAttribute("data-ese-exam-kind-label") : "") || "";
+            kind.textContent = kindInput ? kindInput.getAttribute("data-ese-exam-kind-label") || "" : "";
         }
         var date = host.querySelector("[data-ese-confirm-date]");
         var dateInput = host.querySelector('[name="exam_date"]');
@@ -192,19 +257,32 @@
         }
     }
 
+    function saveLine(host, text) {
+        var line = host.querySelector("[data-ese-summary]");
+        if (line) {
+            line.textContent = text;
+            line.classList.add("is-dirty");
+        }
+    }
+
     DELEGATE.on("click", "[data-ese-save]", function (event) {
         event.preventDefault();
         var host = root();
         if (!host) {
             return;
         }
-        var summary = api().syncAll(host);
-        var line = host.querySelector("[data-ese-summary]");
-        if (summary.invalid) {
-            if (line) {
-                line.textContent = summary.overCap ? t("question-sum") : api().questionCount(host) > 0 ? t("question-invalid") : t("invalid");
-                line.classList.add("is-dirty");
+        var columns = window.EMSExamScoreEntryColumns;
+        if (columns && (columns.sync(host) === false || columns.invalid(host))) {
+            saveLine(host, t("cols-blocked"));
+            var colInput = host.querySelector("[data-ese-col-max].is-invalid, [data-ese-col-max]");
+            if (colInput) {
+                colInput.focus();
             }
+            return;
+        }
+        var summary = api().syncAll(host);
+        if (summary.invalid) {
+            saveLine(host, summary.overCap ? t("question-sum") : api().questionCount(host) > 0 ? t("question-invalid") : t("invalid"));
             var badRow = host.querySelector("[data-ese-row].is-invalid");
             var bad = badRow ? badRow.querySelector(".bootstrap-single-select__toggle, [data-ese-score]") : null;
             if (bad) {
@@ -213,9 +291,7 @@
             return;
         }
         if (!summary.writes) {
-            if (line) {
-                line.textContent = t("nothing");
-            }
+            saveLine(host, t("nothing"));
             return;
         }
         var list = host.querySelector("[data-ese-dialog-summary]");
@@ -229,10 +305,7 @@
             summaryItem(list, summary.untouched, t("summary-untouched"));
         }
         fillConfirm(host, summary);
-        var just = host.querySelector("[data-ese-just]");
-        if (just) {
-            just.hidden = !needsJustification(host, summary);
-        }
+        showJustification(host, justificationNeed(host, summary));
         showDialogError(host, "");
         syncScanStatus(host);
         var confirm = host.querySelector("[data-ese-confirm]");
@@ -289,9 +362,19 @@
             showDialogError(host, t("invalid"));
             return;
         }
-        if (needsJustification(host, summary) && !justificationComplete(host)) {
+        if (!checkedOnValid(host)) {
             event.preventDefault();
-            showDialogError(host, t(submissionRequired(host) ? "need-submission" : "need-justification"));
+            showDialogError(host, t("need-checked-on"));
+            var checkedOn = host.querySelector("[data-ese-checked-on]");
+            if (checkedOn) {
+                checkedOn.focus();
+            }
+            return;
+        }
+        var need = justificationNeed(host, summary);
+        if (need && !justificationComplete(host, need)) {
+            event.preventDefault();
+            showDialogError(host, t(need === "period" ? "need-submission" : need === "appeal" ? "need-appeal" : "need-justification"));
             syncScanStatus(host);
             var reason = host.querySelector("[data-ese-reason]");
             if (reason && !reason.value) {
@@ -300,7 +383,8 @@
             }
             return;
         }
-        // İkiqat göndərişin qarşısı: təsdiq düyməsi kilidlənir.
+        // İkiqat göndərişin qarşısı: təsdiq düyməsi kilidlənir; «Yadda saxlamamısınız» xəbərdarlığı susur.
+        host.setAttribute("data-submitting", "1");
         var confirm = form.querySelector("[data-ese-confirm]");
         if (confirm) {
             confirm.disabled = true;

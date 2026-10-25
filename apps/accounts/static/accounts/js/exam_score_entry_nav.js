@@ -33,25 +33,25 @@
 
     /* ---- İmtahan növü çipi + toggle etiketi (sahibin «boş select» şikayəti) ---- */
 
+    /* 2026-10-25: yazılı / praktiki — iki düymə (radio); dəyər gizli `exam_kind` sahəsinə yazılır
+       (forma + fayl idxalı onu oxuyur), etiket çipə və `data-ese-exam-kind-label`-ə. */
     function syncExamKind(host) {
-        var select = host.querySelector("[data-ese-exam-kind]");
+        var input = host.querySelector("[data-ese-exam-kind]");
         var chip = host.querySelector("[data-ese-exam-kind-chip]");
-        if (!select) {
+        if (!input) {
             return;
         }
-        var option = select.options[select.selectedIndex];
-        var label = option && option.textContent.trim() ? option.textContent.trim() : select.getAttribute("data-ese-exam-kind-label") || "";
-        if (chip) {
-            chip.textContent = label;
+        var checked = host.querySelector("[data-ese-exam-kind-radio]:checked");
+        if (checked) {
+            input.value = checked.value;
+            input.setAttribute("data-ese-exam-kind-label", checked.getAttribute("data-label") || "");
         }
-        var wrap = select.closest(".bootstrap-single-select");
-        var text = wrap ? wrap.querySelector(".bootstrap-single-select__label-text") : null;
-        if (text && !text.textContent.trim()) {
-            text.textContent = label;
+        if (chip) {
+            chip.textContent = input.getAttribute("data-ese-exam-kind-label") || "";
         }
     }
 
-    DELEGATE.on("change", "[data-ese-exam-kind]", function () {
+    DELEGATE.on("change", "[data-ese-exam-kind-radio]", function () {
         var host = root();
         if (host) {
             syncExamKind(host);

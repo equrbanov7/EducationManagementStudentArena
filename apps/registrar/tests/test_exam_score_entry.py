@@ -13,12 +13,15 @@ sonradan İmtahan Mərkəzi sistemə köçürür. Burada yoxlanan müqavilə:
 
 import datetime
 import tempfile
+from datetime import timedelta
 from decimal import Decimal
+from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
+from django.utils import timezone
 
 from apps.audit.models import AuditLog
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
@@ -315,14 +318,17 @@ class ExamScoreEntryServiceTest(TestCase):
             enrollment_a2 = self.students["a2"].enrollments.get()
             service.record_exam_score(enrollment=enrollment_a2, score="20", by_user=self.center)
 
-            result = service.save_roster_scores(
-                offering=self.offering_a,
-                rows=[
-                    {"enrollment_id": str(self.enrollment_a1.id), "score": "35"},
-                    {"enrollment_id": str(enrollment_a2.id), "score": "44"},  # sənədsiz DƏYİŞİKLİK
-                ],
-                by_user=self.center,
-            )
+            # 2026-10-25: təsdiqdən 15 dəqiqə SONRA sənədsiz dəyişiklik rədd olunur (pəncərədə sərbəstdir).
+            later = timezone.now() + timedelta(minutes=16)
+            with mock.patch("django.utils.timezone.now", return_value=later):
+                result = service.save_roster_scores(
+                    offering=self.offering_a,
+                    rows=[
+                        {"enrollment_id": str(self.enrollment_a1.id), "score": "35"},
+                        {"enrollment_id": str(enrollment_a2.id), "score": "44"},  # sənədsiz DƏYİŞİKLİK
+                    ],
+                    by_user=self.center,
+                )
 
             self.assertEqual(result["written"], 1)
             self.assertEqual(len(result["errors"]), 1)

@@ -33,6 +33,7 @@ from django.utils.translation import pgettext_lazy
 
 from apps.registrar import (
     exam_attempt_history,
+    exam_score_release,
     finals,
     finals_batch,
     gradebook,
@@ -166,6 +167,8 @@ def enrich_subject_rows(*, organization, record, rows, journal_by_enrollment, pe
         return totals
 
     batch = finals_batch.build(enrollments, selfwork_loader=_selfwork_loader, organization=organization, period=period)
+    # Sahib 2026-10-25: kağız midterm/final nəticəsi təsdiqdən ``exam.score_release_hours`` sonra görünür.
+    release_pending = exam_score_release.mask_for_student(batch, enrollments)
     approved_ids = approved_syllabus_offerings(organization, offerings)
     attempts_by_subject = exam_attempt_history.attempt_rows_by_subject(
         student=record.student,
@@ -193,6 +196,7 @@ def enrich_subject_rows(*, organization, record, rows, journal_by_enrollment, pe
             selfwork_slots=selfwork_slots,
         )
         row["attempts"] = attempts_by_subject.get(offering.subject_id, [])
+        row["release_pending"] = release_pending.get(enrollment.id, {})
         row["ui"] = {"status": eligibility_status(row.get("eligibility"))}
 
 

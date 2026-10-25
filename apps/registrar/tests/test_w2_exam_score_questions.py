@@ -272,10 +272,14 @@ class QuestionScoreServiceTest(fixtures.ExamScoreEntryServiceTest):
         self.assertIn("S2", result["errors"][0][1])
 
     def test_sheet_metadata_carries_grid_and_defaults_from_last_sheet(self):
+        # 2026-10-25 (sahib): sütunların maks cəmi HƏMİŞƏ tavandır (final 50) — 5 × 10 keçir, 3 × 8 = 24 yox.
         meta = sheets.sheet_metadata_from_post(
-            {"question_count": "3", "question_max": "8"}, {}, offering=self.offering_a
+            {"question_count": "5", "question_max": "10"}, {}, offering=self.offering_a
         )
-        self.assertEqual((meta["question_count"], meta["question_max"]), (3, 8))
+        self.assertEqual((meta["question_count"], meta["question_max"]), (5, 10))
+        self.assertEqual(meta["question_maxes"], [10, 10, 10, 10, 10])
+        with self.assertRaises(ValidationError):
+            sheets.sheet_metadata_from_post({"question_count": "3", "question_max": "8"}, {}, offering=self.offering_a)
         with self.assertRaises(ValidationError):
             sheets.sheet_metadata_from_post({"question_count": "11"}, {}, offering=self.offering_a)
         self.assertEqual(sheets.latest_sheet_defaults([])["question_count"], 5)

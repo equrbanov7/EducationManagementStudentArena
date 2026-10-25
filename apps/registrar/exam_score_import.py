@@ -322,7 +322,7 @@ def _question_list(record) -> list:
     return [cells.get(number, "") for number in range(1, max(cells) + 1)]
 
 
-def build_plan(*, roster, rows, question_count=None, question_max=None, exam_kind=None) -> list:
+def build_plan(*, roster, rows, question_count=None, question_max=None, exam_kind=None, question_maxes=None) -> list:
     """Quru icra: hər fayl sətri üçün vəziyyət + mesaj. HEÇ NƏ YAZMIR.
 
     ``roster`` — ``exam_score_entry.roster_for_offering`` nəticəsi (cari ballar
@@ -343,6 +343,7 @@ def build_plan(*, roster, rows, question_count=None, question_max=None, exam_kin
     grid = {
         "question_count": int(question_count) if question_count is not None else file_question_count,
         "question_max": int(question_max) if question_max is not None else questions.QUESTION_MAX_DEFAULT,
+        "question_maxes": question_maxes or None,  # 2026-10-25: sütun-sütun tavan (vərəq kartından)
     }
     seen: set = set()
     plan = []

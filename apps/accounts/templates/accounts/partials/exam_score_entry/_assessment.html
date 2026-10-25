@@ -1,0 +1,44 @@
+{% load i18n %}
+{% comment %}İMTAHAN NÖVÜ — midterm / final (sahib 2026-10-25: «ekranın başında, AYDIN görünsün — böyük nişan
+«MİDTERM (maks 30)» / «FİNAL (maks 50)»; sistem semestr təqviminə görə defolt seçir, daxil edən dəyişə bilər»).
+
+İki böyük seçim düyməsi SPA linkidir (`data-ese-nav` → `?ese_assessment=`): server siyahını seçilmiş imtahana görə
+yenidən qurur (midterm — jurnalın «Midterm» xanası, final — yekun imtahan balı). Defolt təqvimdəndir
+(`exam_score_assessment.default_assessment`); keçmiş (kollokvium) dövrlərdə midterm düyməsi söndürülüb.
+Qaydalar zolağı: 15 dəqiqə pəncərəsi və tələbəyə görünmə gecikməsi — faktiki tənzimləmədən.{% endcomment %}
+{% if s.assessment_options %}
+<section class="ese-assess ese-assess--{{ s.assessment }}" data-ese-assessment="{{ s.assessment }}">
+  <div class="ese-assess__switch" role="group" aria-label="{% trans 'İmtahan növü' context 'registrar.exam_score_entry' %}">
+    {% for option in s.assessment_options %}
+      {% if option.available %}
+      <a class="ese-assess__btn ese-assess__btn--{{ option.value }}{% if option.current %} is-current{% endif %}"
+         href="{{ option.url }}" data-ese-nav aria-pressed="{% if option.current %}true{% else %}false{% endif %}">
+        <i class="fas {% if option.value == 'midterm' %}fa-hourglass-half{% else %}fa-flag-checkered{% endif %} ese-assess__icon" aria-hidden="true"></i>
+        <span class="ese-assess__name">{{ option.label }}</span>
+        {% if option.is_default %}<span class="ese-assess__auto">{% trans "təqvimə görə" context "registrar.exam_score_entry" %}</span>{% endif %}
+      </a>
+      {% else %}
+      <span class="ese-assess__btn ese-assess__btn--{{ option.value }} is-disabled" aria-disabled="true">
+        <i class="fas fa-hourglass-half ese-assess__icon" aria-hidden="true"></i>
+        <span class="ese-assess__name">{{ option.label }}</span>
+        <span class="ese-assess__auto">{% trans "bu semestrdə yoxdur" context "registrar.exam_score_entry" %}</span>
+      </span>
+      {% endif %}
+    {% endfor %}
+  </div>
+  <div class="ese-assess__info">
+    <p class="ese-assess__hint">
+      {% if s.assessment_is_default %}
+        {% blocktrans with name=s.assessment_default_label context "registrar.exam_score_entry" %}Sistem semestr təqviminə görə «{{ name }}» seçdi — lazım olsa dəyişin.{% endblocktrans %}
+      {% else %}
+        {% blocktrans with name=s.assessment_default_label context "registrar.exam_score_entry" %}Təqvimə görə defolt: «{{ name }}». Siz başqa imtahanı seçmisiniz.{% endblocktrans %}
+      {% endif %}
+    </p>
+    <ul class="ese-assess__rules">
+      <li><i class="fas fa-stopwatch" aria-hidden="true"></i> {% blocktrans with w=s.edit_window_label context "registrar.exam_score_entry" %}Təsdiqdən sonra {{ w }} ərzində balı dəyişə bilərsiniz; sonra yalnız apellyasiya (sənəd məcburi) və ya RİM rəhbərinin təqdimatı ilə.{% endblocktrans %}</li>
+      <li><i class="fas fa-eye" aria-hidden="true"></i> {% if s.release_hours %}{% blocktrans with h=s.release_hours context "registrar.exam_score_entry" %}Nəticə tələbə kabinetində təsdiqdən {{ h }} saat sonra görünür.{% endblocktrans %}{% else %}{% trans "Nəticə tələbə kabinetində təsdiqdən dərhal sonra görünür." context "registrar.exam_score_entry" %}{% endif %}</li>
+      {% if s.is_midterm %}<li><i class="fas fa-book-open" aria-hidden="true"></i> {% trans "Midterm balı elektron jurnalın «Midterm» xanasına yazılır — müəllim onu jurnalda dəyişə bilmir." context "registrar.exam_score_entry" %}</li>{% endif %}
+    </ul>
+  </div>
+</section>
+{% endif %}

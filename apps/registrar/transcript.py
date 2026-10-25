@@ -188,7 +188,7 @@ def count_student_record_rows(*, student, organization) -> int:
     return sum(1 for pair in pairs if pair not in overridden) + len(recognitions)
 
 
-def build_student_transcript(*, student, organization, program=None):
+def build_student_transcript(*, student, organization, program=None, student_view=False):
     """Full transcript for one student: chronological semesters + cumulative GPA.
 
     Only the requesting student's own enrollments are read; tenant isolation is
@@ -237,6 +237,11 @@ def build_student_transcript(*, student, organization, program=None):
     # ``FinalGrade``/``ResitRecord``, donma dəsti, qayıb həddi, məxrəc fallback-ı)
     # BİR dəfə: 59 fənnli real tələbədə ~690 sorğu idi (2026-09-02 ölçməsi).
     batch = finals_batch.build(enrollments, organization=organization) if enrollments else None
+    if student_view and batch is not None:
+        # Sahib 2026-10-25: kağız imtahan nəticəsi tələbəyə təsdiqdən ``exam.score_release_hours`` sonra görünür.
+        from . import exam_score_release
+
+        exam_score_release.mask_for_student(batch, enrollments)
     # ⚠️ 2026-09-10: ``hours_map`` ayrıca OXUNMUR. ``finals_batch.build`` eyni
     # açılış id-ləri üçün onsuz da ``lesson_hours_map``-i qurur və
     # ``compute_final_result`` ``hours_map=None`` olduqda ``batch.hours_map``-a
@@ -374,7 +379,17 @@ def _fail_reason_code(result) -> str:
     return exam_eligibility.fail_reason_code(result)
 
 
-def build_student_overall_record(*, student, organization):
+def build_student_own_transcript(*, student, organization, program=None):
+    """Tələbənin ÖZ transkripti — kağız imtahan nəticəsi gecikməsi ilə (``exam_score_release``, 2026-10-25)."""
+    return build_student_transcript(student=student, organization=organization, program=program, student_view=True)
+
+
+def build_student_own_record(*, student, organization):
+    """Tələbənin ÖZ «Ümumi tədris məlumatı» / «Nəticələrim» — eyni gecikmə ilə."""
+    return build_student_overall_record(student=student, organization=organization, student_view=True)
+
+
+def build_student_overall_record(*, student, organization, student_view=False):
     """Per-subject academic record for the "Ümumi tədris məlumatı" (overall
     academic record) cabinet section — every subject the student has ever
     taken, flattened + decorated with the teacher name and a fail-reason code,
@@ -385,7 +400,7 @@ def build_student_overall_record(*, student, organization):
     transcript's pass/fail/letter logic. Also returns the distinct
     (year, season) option lists the cabinet's filter dropdowns need.
     """
-    data = build_student_transcript(student=student, organization=organization)
+    data = build_student_transcript(student=student, organization=organization, student_view=student_view)
     if not data["has_record"]:
         return {"has_record": False, "semesters": [], "year_options": [], "season_options": []}
 

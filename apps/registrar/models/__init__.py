@@ -41,6 +41,7 @@ from .curriculum import Curriculum, CurriculumSubject
 from .curriculum_meta import AssessmentForm, PlanStatus
 from .exam_score_entry import (
     EVIDENCE_EXTENSIONS,
+    ExamAssessment,
     ExamScoreEntry,
     ExamScoreEntryKind,
     ExamScoreSheet,
@@ -149,6 +150,7 @@ __all__ = [
     "Enrollment",
     "EnrollmentKind",
     "EVIDENCE_EXTENSIONS",
+    "ExamAssessment",
     "ExamScoreEntry",
     "ExamScoreEntryKind",
     "ExamScoreSheetKind",

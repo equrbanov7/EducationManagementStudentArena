@@ -16,7 +16,8 @@ Zona necə tapılır
 Nə bloklanır (``NETWORK_ZONE_ENFORCED=True`` olanda; defolt False — LAN
 yerləşdirməsi dəyişmir)
 -------------------------
-* ``/jurnal/`` (registrar — elektron jurnal): kənar zonadan HƏR KƏSƏ 403.
+* ``/jurnal/`` (registrar — elektron jurnal): kənar zonadan HƏR KƏSƏ 403. 2026-10-25: «İmtahan balının
+  daxil edilməsi» ekranı (:data:`EXAM_SCORE_PREFIXES` + ``?section=exam-score-entry``) eyni qaydadadır.
 * İnzibati hesab (tələbə/müəllim ailəsindən KƏNAR hər hansı aktiv rol, org sahibi,
   superuser) — YALNIZ ``NETWORK_ZONE_STAFF_INTERNAL_ONLY=True`` olanda (sahib 2026-09-29: defolt
   söndürülüb, kənardan yalnız jurnal bağlıdır): kənar zonadan bütün səhifələr 403 — yalnız çıxış, statik/media,
@@ -168,7 +169,18 @@ def _is_logout_path(path: str) -> bool:
 JOURNAL_EXTERNAL_OPEN_PATHS = frozenset({"/jurnal/cedvel/", "/jurnal/transkript.pdf"})
 
 
-def _journal_path(path: str) -> bool:
+#: Sahib 2026-10-25: «İmtahan balının daxil edilməsi» ekranı və onun API-ləri (forma, qaralama, fayl idxalı,
+#: «Dəyişən nəticələr» CSV-si, bölmə fraqmenti) elektron jurnal kimi YALNIZ universitet şəbəkəsində işləyir.
+#: Kabinetin tam səhifəsi (``/accounts/profile/?section=exam-score-entry``) sorğu parametri ilə tanınır.
+EXAM_SCORE_PREFIXES = ("/accounts/imtahan-bali/", "/accounts/profile/api/sections/exam-score-entry/")
+EXAM_SCORE_SECTION = "exam-score-entry"
+
+
+def _journal_path(path: str, section: str = "") -> bool:
+    if path.startswith(EXAM_SCORE_PREFIXES):
+        return True
+    if section == EXAM_SCORE_SECTION and path.startswith("/accounts/profile"):
+        return True
     return path.startswith("/jurnal/") and path not in JOURNAL_EXTERNAL_OPEN_PATHS
 
 
@@ -181,7 +193,7 @@ def _superadmin_gate_enabled() -> bool:
     return bool(getattr(settings, "NETWORK_ZONE_SUPERADMIN_INTERNAL_ONLY", True))
 
 
-def zone_policy_denial(*, zone: str, path: str, is_superadmin, account_kind_of):
+def zone_policy_denial(*, zone: str, path: str, is_superadmin, account_kind_of, section: str = ""):
     """ŞƏBƏKƏ ZONASI qaydası — HTTP middleware-i və WebSocket qapısı üçün TƏK mənbə.
 
     Təhlükəsizlik dizaynı 2026-10-08: əvvəl qayda yalnız ``NetworkZoneMiddleware.__call__``-
@@ -192,11 +204,13 @@ def zone_policy_denial(*, zone: str, path: str, is_superadmin, account_kind_of):
     çatanda hesablanır (daxili zonada və ya enforce söndürüləndə heç biri çağırılmır).
     Hər ikisi zona qaydasının aid olduğu ƏSL hesabı (view-as altında aktoru) qiymətləndirir.
 
+    ``section`` — kabinetin ``?section=`` parametri (HTTP; «İmtahan balının daxil edilməsi» bölməsi, 2026-10-25).
+
     Qaytarır: ``(reason, account_kind)`` rədd üçün, keçidə ``None``.
     """
     if not getattr(settings, "NETWORK_ZONE_ENFORCED", False) or zone == ZONE_INTERNAL:
         return None
-    if _journal_path(path):
+    if _journal_path(path, section):
         return REASON_JOURNAL, account_kind_of()
     if _superadmin_gate_enabled() and not _is_logout_path(path) and is_superadmin():
         return REASON_SUPERADMIN, "staff"
@@ -263,7 +277,13 @@ class NetworkZoneMiddleware:
 
         path = request.path_info
         facts = _HttpGateFacts(request)
-        denial = zone_policy_denial(zone=zone, path=path, is_superadmin=facts.superadmin, account_kind_of=facts.kind)
+        denial = zone_policy_denial(
+            zone=zone,
+            path=path,
+            is_superadmin=facts.superadmin,
+            account_kind_of=facts.kind,
+            section=(request.GET.get("section") or "").strip(),
+        )
         if denial is not None:
             reason, kind = denial
             if reason == REASON_SUPERADMIN:

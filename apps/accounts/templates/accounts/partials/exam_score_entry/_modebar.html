@@ -1,0 +1,29 @@
+{% load i18n %}
+{% comment %}«Yekun» ballar üçün DƏYİŞİKLİK REJİMİ (sahib 2026-10-25): təsdiqdən 15 dəqiqə sonra bal yalnız
+(a) RİM rəhbərinin təqdimatı (səbəb + qeyd + sənəd) və ya (b) APELLYASİYA (apellyasiya sənədi məcburi) ilə dəyişir.
+Rejim düyməsi kilidli sətirləri açır və formaya `kind` (appeal / correction) qoşur — `exam_score_entry_columns.js`;
+server qaydanı yenə tətbiq edir (`exam_score_assessment.decide_after_window`). Bitmiş dövrün düzəliş rejimi
+(`_period_lock.html`) ayrıdır və bu zolaq orada göstərilmir.{% endcomment %}
+{% if s.final_count and not s.correction_mode %}
+<div class="ese-modebar" data-ese-modebar role="group" aria-label="{% trans 'Dəyişiklik rejimi' context 'registrar.exam_score_entry' %}">
+  <p class="ese-modebar__text">
+    <i class="fas fa-lock" aria-hidden="true"></i>
+    {% blocktrans with n=s.final_count context "registrar.exam_score_entry" %}«Yekun» bal: {{ n }} tələbə.{% endblocktrans %}
+    <span data-ese-mode-hint>{% trans "Dəyişmək üçün rejim seçin:" context "registrar.exam_score_entry" %}</span>
+  </p>
+  <div class="ese-modebar__btns">
+    <button type="button" class="ems-btn ems-btn--sm" data-ese-mode="appeal" aria-pressed="false">
+      <i class="fas fa-scale-balanced" aria-hidden="true"></i> {% trans "Apellyasiya ilə dəyiş" context "registrar.exam_score_entry" %}
+    </button>
+    {% if s.can_rim_correct %}
+    <button type="button" class="ems-btn ems-btn--sm" data-ese-mode="correction" aria-pressed="false">
+      <i class="fas fa-file-signature" aria-hidden="true"></i> {% trans "RİM təqdimatı ilə düzəliş" context "registrar.exam_score_entry" %}
+    </button>
+    {% endif %}
+    <button type="button" class="ems-btn ems-btn--sm ems-btn--ghost" data-ese-mode-off hidden>
+      <i class="fas fa-lock" aria-hidden="true"></i> {% trans "Rejimdən çıx" context "registrar.exam_score_entry" %}
+    </button>
+  </div>
+  <p class="ese-modebar__note" data-ese-mode-note hidden></p>
+</div>
+{% endif %}

@@ -297,7 +297,7 @@ class W2ExamScoreEntrySectionTest(fixtures.ExamScoreEntrySectionTest):
             self.assertEqual(sheet.exam_kind, "practical")
         resp = self._get(client)
         self.assertContains(resp, 'name="exam_kind"')
-        self.assertContains(resp, 'value="practical" selected')  # sonuncu vərəqdən defolt
+        self.assertContains(resp, 'value="practical" checked')  # sonuncu vərəqdən defolt (2026-10-25: radio düymələr)
         self.assertContains(resp, PRACTICAL_LABEL)
         # Yad növ → xəta, vərəq yaranmır, bal yazılmır.
         resp = self._save(client, questions=["10", "6"], exam_kind="oral")
@@ -442,12 +442,12 @@ class W2ExamScoreEntrySectionTest(fixtures.ExamScoreEntrySectionTest):
         self.assertIn("data-ese-confirm-rows", html)
         self.assertIn("data-ese-confirm-failed-count", html)
         self.assertIn("data-ese-confirm", html)
-        # İmtahan növü — seçilmiş etiket server tərəfdən (JS-dən əvvəl) + `required`.
+        # İmtahan növü — seçilmiş etiket server tərəfdən (JS-dən əvvəl); 2026-10-25: yazılı / praktiki iki düymə
+        # (radio) + formaya bağlı gizli `exam_kind` sahəsi (native select yoxdur).
         self.assertIn("data-ese-exam-kind-chip", html)
         self.assertIn('data-ese-exam-kind-label="', html)
-        self.assertIn(
-            'name="exam_kind" form="ese-roster-form" class="ems-select bootstrap-single-select__native" required', html
-        )
+        self.assertIn('name="exam_kind" form="ese-roster-form"', html)
+        self.assertIn("data-ese-exam-kind-radio", html)
 
     def test_confirm_config_uses_organisation_scale(self):
         resp = self._get(self._client(self.center))
@@ -483,7 +483,7 @@ class W2ExamScoreEntrySectionTest(fixtures.ExamScoreEntrySectionTest):
         resp = self._get(client)
         html = resp.content.decode()
         self.assertIn(f'<option value="{other.id}" selected>', html)  # nəzarətçi yenidən seçili
-        self.assertIn('value="practical" selected', html)
+        self.assertIn('value="practical" checked', html)
         self.assertIn("ems-badge--", html)
         # Yad istifadəçi → vərəq yaranmır, bal yazılmır.
         with bypass_rls():
