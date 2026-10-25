@@ -137,20 +137,19 @@ def notify_schedule_change(*, offering, row, removed=False, old_row=None) -> int
     """Cədvəl dəyişikliyi barədə in-app bildiriş (toplu, tək insert).
 
     Slotu aparan müəllim (``row``/``old_row`` → ``slot_instructor_id``) də alıcıdır."""
-    from apps.notifications.public import create_notification_for_users
+    from apps.notifications.public import LText, create_notification_for_users, lformat, ltext_of
 
     teacher_ids = [(item or {}).get("slot_instructor_id") for item in (row, old_row)]
     recipients = _recipients(offering, teacher_ids)
     if not recipients:
         return 0
     subject = row["subject_name"] or row["subject_code"]
-    detail = "%s %s–%s" % (row["weekday_label"], row["start_time"], row["end_time"])
-    title = pgettext(_CTX, "Dərs cədvəli dəyişdi: %(subject)s %(when)s") % {"subject": subject, "when": detail}
-    message = (
-        pgettext(_CTX, "Slot cədvəldən silindi.") if removed else pgettext(_CTX, "Cədvələ yeni slot əlavə edildi.")
-    )
+    detail = lformat("{0} {1}–{2}", ltext_of(row["weekday_label"]), row["start_time"], row["end_time"])
+    title = LText("Dərs cədvəli dəyişdi: %(subject)s %(when)s", _CTX, subject=subject, when=detail)
+    # Mətnlər oxuyanın dilində göstərilir (``LText`` — bax `apps/notifications/i18n.py`).
+    message = LText("Slot cədvəldən silindi.", _CTX) if removed else LText("Cədvələ yeni slot əlavə edildi.", _CTX)
     if row["room"]:
-        message = "%s (%s: %s)" % (message, pgettext(_CTX, "auditoriya"), row["room"])
+        message = lformat("{0} ({1}: {2})", message, LText("auditoriya", _CTX), row["room"])
     link = "%s?section=my-schedule" % reverse("accounts:profile")
     created = create_notification_for_users(
         recipients=recipients,

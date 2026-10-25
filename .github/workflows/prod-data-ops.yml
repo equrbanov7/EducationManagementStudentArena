@@ -121,6 +121,9 @@
 #   link_lesson_syllabus_weeks — jurnal dərsini sillabusun həftəlik plan SƏTRİNƏ bağlayır (sahib 2026-10-25): mövzu
 #       mətni açılışın təsdiqlənmiş sillabus planındakı sətrin mövzusu ilə DƏQİQ (boşluq/registr normallaşdırılmış)
 #       eynidirsə və `syllabus_week` boşdursa → sətir nömrəsi. Mövzuya toxunulmur; idempotent. Loga YALNIZ saylar.
+#   backfill_notification_i18n — köhnə bildirişlərə dil-müstəqil deskriptor (metadata.i18n) əlavə edir (sahib 2026-10-25
+#       «bildirişlərin dili hərəsi bir cür»): siyahı onları oxuyanın dilində göstərir. YALNIZ metadata-ya açar
+#       əlavə olunur (başlıq/mətn/keçid/oxunma dəyişmir); idempotent. Giriş yoxdur. Loga YALNIZ saylar.
 #   shrink_avatars — mövcud avatarlar ≤512 px WebP-yə (PERF-2 H5, 2026-10-17); orijinal fayllar SİLİNMİR,
 #       `updated_at` dəyişmir. Loga yalnız yekun saylar.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
@@ -182,6 +185,7 @@ on:
           - infer_timetable_from_lessons
           - audit_cross_chair_loads
           - link_lesson_syllabus_weeks
+          - backfill_notification_i18n
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -663,6 +667,10 @@ jobs:
               # Sahib 2026-10-25: dərs ↔ sillabus plan sətri (mövzu mətni DƏQİQ uyğun gəlirsə). Loga yalnız saylar.
               args=(--org "$ORG")
               ;;
+            backfill_notification_i18n)
+              # Sahib 2026-10-25: köhnə bildirişlərə metadata.i18n (bütün təşkilatlar; giriş yoxdur). Loga yalnız saylar.
+              args=()
+              ;;
             *)
               echo "icazəsiz əmr: $COMMAND" >&2; exit 2
               ;;
@@ -732,7 +740,7 @@ jobs:
             grep -E '^(Şəxs:|Yaradılacaq|✓|Vahidi tapılmayan|Təşkilatda OLMAYAN|DRY-RUN|   [a-z_]+ +[0-9]+$)' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             test "${status:-0}" = 0 || { tail -n 5 "$RUNNER_TEMP/out.log" | grep -E 'Error|Exception' || true; exit "$status"; }
-          elif [ "$COMMAND" = "resync_task_offerings" ] || [ "$COMMAND" = "dedupe_notifications" ]; then
+          elif [ "$COMMAND" = "resync_task_offerings" ] || [ "$COMMAND" = "dedupe_notifications" ] || [ "$COMMAND" = "backfill_notification_i18n" ]; then
             # Loga YALNIZ saylar: əmr yalnız say çap edir; xəbərdarlıq/traceback sətirləri süzülür.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^(tasks=[0-9]+ · tasks_not_reached_chair=[0-9]+|(APPLY|DRY-RUN \(heç nə yazılmadı\)): [a-z_]+=[0-9]+( · [a-z_]+=[0-9]+)*)$' \

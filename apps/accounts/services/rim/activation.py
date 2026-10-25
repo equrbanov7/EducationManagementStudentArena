@@ -27,8 +27,8 @@ from urllib.parse import urlencode
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.urls import reverse
-from django.utils.translation import pgettext
 
+from apps.notifications.public import LText, lformat
 from core import runtime_settings
 from core.rls import bypass_rls
 
@@ -102,7 +102,7 @@ def activation_counts(organization) -> dict:
     return {key: {**row, "pct": _pct(row["done"], row["total"])} for key, row in buckets.items()}
 
 
-def _kind_label(user, organization) -> str:
+def _kind_label(user, organization) -> LText | None:
     from apps.organizations.models import Membership
 
     names = set(
@@ -111,36 +111,42 @@ def _kind_label(user, organization) -> str:
         )
     )
     if names & set(STUDENT_ROLE_NAMES):
-        return pgettext(_CTX, "Tələbə")
+        return LText("Tələbə", _CTX)
     if names & set(TEACHING_ROLE_NAMES):
-        return pgettext(_CTX, "Müəllim")
+        return LText("Müəllim", _CTX)
     if names - {"member"}:
-        return pgettext(_CTX, "Əməkdaş")
-    return ""
+        return LText("Əməkdaş", _CTX)
+    return None
 
 
 def _number(value: float) -> str:
     return f"{value:g}".replace(".", ",")
 
 
-def _message(user, organization, kind_label: str) -> str:
+def _message(user, organization, kind_label: LText | None) -> LText:
+    """Mətn ``LText`` kimi qurulur: oxuyan (RİM işçisi) öz dilində görür, aktivləşdirənin dilində yox."""
     counts = activation_counts(organization)
     total = counts["total"]
-    head = " · ".join(part for part in (kind_label, f"@{user.username}") if part)
-    summary = pgettext(_CTX, "Cəmi aktivləşdirən: %(done)d / %(total)d (%(pct)s%%)") % {
-        "done": total["done"],
-        "total": total["total"],
-        "pct": _number(total["pct"]),
-    }
-    kinds = pgettext(_CTX, "tələbə %(s)d / %(st)d, müəllim %(t)d / %(tt)d, əməkdaş %(e)d / %(et)d") % {
-        "s": counts["student"]["done"],
-        "st": counts["student"]["total"],
-        "t": counts["teacher"]["done"],
-        "tt": counts["teacher"]["total"],
-        "e": counts["staff"]["done"],
-        "et": counts["staff"]["total"],
-    }
-    return f"{head}. {summary} — {kinds}."
+    username = f"@{user.username}"
+    head = lformat("{0} · {1}", kind_label, username) if kind_label else lformat("{0}", username)
+    summary = LText(
+        "Cəmi aktivləşdirən: %(done)d / %(total)d (%(pct)s%%)",
+        _CTX,
+        done=total["done"],
+        total=total["total"],
+        pct=_number(total["pct"]),
+    )
+    kinds = LText(
+        "tələbə %(s)d / %(st)d, müəllim %(t)d / %(tt)d, əməkdaş %(e)d / %(et)d",
+        _CTX,
+        s=counts["student"]["done"],
+        st=counts["student"]["total"],
+        t=counts["teacher"]["done"],
+        tt=counts["teacher"]["total"],
+        e=counts["staff"]["done"],
+        et=counts["staff"]["total"],
+    )
+    return lformat("{0}. {1} — {2}.", head, summary, kinds)
 
 
 def _organization_of(user):
@@ -195,15 +201,15 @@ def _deliver(user) -> None:
                 return
             create_notification_for_users(
                 recipients=get_user_model().objects.filter(pk__in=recipient_ids, is_active=True),
-                title=(pgettext(_CTX, "Profilini aktivləşdirdi: %(name)s") % {"name": name})[:255],
-                message=_message(user, organization, _kind_label(user, organization))[:2000],
+                title=LText("Profilini aktivləşdirdi: %(name)s", _CTX, name=name),
+                message=_message(user, organization, _kind_label(user, organization)),
                 link=link,
                 notification_type="system",
                 metadata={
                     "kind": "profile_activated",
                     "user_id": user.pk,
                     "organization_id": organization.pk,
-                    "link_label": pgettext(_CTX, "RİM mərkəzində aç"),
+                    "link_label": LText("RİM mərkəzində aç", _CTX),
                 },
                 organization=organization,
             )

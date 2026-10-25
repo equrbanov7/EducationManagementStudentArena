@@ -7,6 +7,7 @@ plus the soft-delete helpers used by the notification views.
 
 from django.utils import timezone
 
+from apps.notifications.i18n import build_i18n_metadata
 from apps.notifications.models import InAppNotification, NotificationType
 from core.rls import bypass_rls
 
@@ -41,6 +42,7 @@ def create_notification(
     Returns:
         The newly created :class:`InAppNotification` instance.
     """
+    title, message, metadata = build_i18n_metadata(title, message, metadata)
     with bypass_rls():
         return InAppNotification.objects.create(
             recipient=recipient,
@@ -80,6 +82,7 @@ def create_notification_for_users(
     Returns:
         List of created :class:`InAppNotification` instances.
     """
+    title, message, metadata = build_i18n_metadata(title, message, metadata)
     payload = _serialize_metadata(metadata or {})
     org_id = _resolve_organization_id(organization, metadata)
     notifications = [
@@ -109,18 +112,20 @@ def create_notifications(items) -> list[InAppNotification]:
     fərq yalnız sorğu sayıdır (tutum 2026-10-07: jurnal yazısından sonra tələbə başına
     4 ifadə — 40 tələbəlik qrupda 160 — gedirdi).
     """
-    rows = [
-        InAppNotification(
-            recipient=item["recipient"],
-            organization_id=_resolve_organization_id(item.get("organization"), item.get("metadata")),
-            title=item["title"],
-            message=item.get("message", ""),
-            link=org_scoped_link(item.get("link", ""), item.get("organization")),
-            notification_type=item.get("notification_type", NotificationType.SYSTEM),
-            metadata=_serialize_metadata(item.get("metadata") or {}),
+    rows = []
+    for item in items:
+        title, message, metadata = build_i18n_metadata(item["title"], item.get("message", ""), item.get("metadata"))
+        rows.append(
+            InAppNotification(
+                recipient=item["recipient"],
+                organization_id=_resolve_organization_id(item.get("organization"), metadata),
+                title=title,
+                message=message,
+                link=org_scoped_link(item.get("link", ""), item.get("organization")),
+                notification_type=item.get("notification_type", NotificationType.SYSTEM),
+                metadata=_serialize_metadata(metadata or {}),
+            )
         )
-        for item in items
-    ]
     if not rows:
         return []
     with bypass_rls():

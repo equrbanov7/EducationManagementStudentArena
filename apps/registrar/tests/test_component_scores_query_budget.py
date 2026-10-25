@@ -206,7 +206,11 @@ class ComponentScoresQueryBudgetTest(TestCase):
         sample = rows[0]
         self.assertEqual(sample.organization_id, self.org.pk)
         self.assertIn(self.large["offering"].subject.name, sample.title)
-        self.assertEqual(sample.metadata, {"event": "journal_update", "offering_id": str(self.large["offering"].id)})
+        # `i18n` — oxuyanın dilində göstərmək üçün deskriptor (apps/notifications/i18n.py); qalanı dəyişməzdir.
+        self.assertEqual(
+            {key: value for key, value in sample.metadata.items() if key != "i18n"},
+            {"event": "journal_update", "offering_id": str(self.large["offering"].id)},
+        )
         self.assertIn("section%3Dmy-journal", sample.link)  # org-scoped keçid (organizations:switch?next=…)
         self.assertTrue(sample.message)
 

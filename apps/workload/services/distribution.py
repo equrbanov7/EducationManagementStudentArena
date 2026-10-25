@@ -26,6 +26,8 @@ from .scoping import WorkloadDenied, ensure_can_distribute
 
 logger = logging.getLogger(__name__)
 
+_NOTIFY_CTX = "workload.notify"
+
 
 def distribution_readiness(task, *, rows=None, balance=None) -> dict:
     """Bölgü təsdiqə hazırdırmı — sətir-sətir qalıq xülasəsi.
@@ -126,7 +128,7 @@ def _notify_teachers(task, only: set | None = None) -> int:
         return 0
     try:
         from apps.notifications.models import NotificationType
-        from apps.notifications.public import create_notification
+        from apps.notifications.public import LText, create_notification
     except Exception:  # pragma: no cover — bildiriş modulu yoxdursa axın dayanmır
         logger.warning("workload: notifications unavailable")
         return 0
@@ -153,11 +155,18 @@ def _notify_teachers(task, only: set | None = None) -> int:
                 recipient=teacher,
                 # `InAppNotification.title` = CharField(max_length=255) — fənn adları
                 # uzun ola bildiyi üçün başlıq kəsilir (mətnin özü `message`-dədir).
-                title=f"Dərs yükü təyin edildi: {head} — {payload['hours']} saat"[:255],
-                message=(
-                    f"{task.academic_year} tədris ili üçün dərs yükünüz təsdiqləndi. "
-                    f"Fənn sayı: {len(subjects)}, cəmi {payload['hours']} saat. "
-                    "«Dərs yüküm» bölməsindən baxa bilərsiniz."
+                # Mətn oxuyanın dilində göstərilir (``LText`` — bax `apps/notifications/i18n.py`); `title` sütunu
+                # (255) üçün kəsmə crud-dadır, mətnin özü `message`-dədir.
+                title=LText(
+                    "Dərs yükü təyin edildi: %(head)s — %(hours)d saat", _NOTIFY_CTX, head=head, hours=payload["hours"]
+                ),
+                message=LText(
+                    "%(year)s tədris ili üçün dərs yükünüz təsdiqləndi. Fənn sayı: %(count)d, cəmi %(hours)d saat. "
+                    "«Dərs yüküm» bölməsindən baxa bilərsiniz.",
+                    _NOTIFY_CTX,
+                    year=task.academic_year,
+                    count=len(subjects),
+                    hours=payload["hours"],
                 ),
                 link="/accounts/profile/?section=my-workload",
                 notification_type=NotificationType.ASSIGNMENT,

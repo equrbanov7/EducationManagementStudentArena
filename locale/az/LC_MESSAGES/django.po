@@ -107639,3 +107639,13 @@ msgstr "Mövzuların keçilməsi (jurnal üzrə)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Sillabus"
+
+#, python-format
+msgctxt "workload.notify"
+msgid "Dərs yükü təyin edildi: %(head)s — %(hours)d saat"
+msgstr "Dərs yükü təyin edildi: %(head)s — %(hours)d saat"
+
+#, python-format
+msgctxt "workload.notify"
+msgid "%(year)s tədris ili üçün dərs yükünüz təsdiqləndi. Fənn sayı: %(count)d, cəmi %(hours)d saat. «Dərs yüküm» bölməsindən baxa bilərsiniz."
+msgstr "%(year)s tədris ili üçün dərs yükünüz təsdiqləndi. Fənn sayı: %(count)d, cəmi %(hours)d saat. «Dərs yüküm» bölməsindən baxa bilərsiniz."

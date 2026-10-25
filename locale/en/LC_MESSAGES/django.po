@@ -108129,3 +108129,13 @@ msgstr "Topic coverage (from the journal)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Syllabus"
+
+#, python-format
+msgctxt "workload.notify"
+msgid "Dərs yükü təyin edildi: %(head)s — %(hours)d saat"
+msgstr "Teaching load assigned: %(head)s — %(hours)d hours"
+
+#, python-format
+msgctxt "workload.notify"
+msgid "%(year)s tədris ili üçün dərs yükünüz təsdiqləndi. Fənn sayı: %(count)d, cəmi %(hours)d saat. «Dərs yüküm» bölməsindən baxa bilərsiniz."
+msgstr "Your teaching load for the %(year)s academic year has been confirmed. Number of subjects: %(count)d, %(hours)d hours in total. You can view it in the “My teaching load” section."
