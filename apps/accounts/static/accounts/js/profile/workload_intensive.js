@@ -25,9 +25,12 @@
     }
 
     function esc(value) {
-        var node = document.createElement("span");
-        node.textContent = value == null ? "" : String(value);
-        return node.innerHTML;
+        return String(value == null ? "" : value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
     }
 
     function showError(text) {
@@ -161,7 +164,16 @@
 
     function cancel(button) {
         var el = modalEl();
-        if (!el || !window.confirm(gettext("İntensiv kurs ləğv edilsin? (yalnız jurnalda dərs yoxdursa mümkündür)"))) return;
+        if (!el) return;
+        var question = gettext("İntensiv kurs ləğv edilsin? (yalnız jurnalda dərs yoxdursa mümkündür)");
+        if (window.EMSConfirm && typeof window.EMSConfirm.open === "function") {
+            window.EMSConfirm.open({ body: question, danger: true }).then(function (ok) {
+                if (ok) sendCancel(el, button);
+            });
+        }
+    }
+
+    function sendCancel(el, button) {
         var data = new FormData();
         data.append("action", "intensive_cancel");
         data.append("row", button.dataset.rowId || "");
