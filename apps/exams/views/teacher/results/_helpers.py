@@ -13,7 +13,6 @@ from apps.exams.models import ExamAnswer
 from apps.exams.services.ai_grading import has_ai_gradeable_answer_content, has_written_answer_content
 from apps.exams.services.manual_grading import answer_max_points as _answer_max_points
 from core.datetime_input import DateTimeTextError, parse_datetime_text
-from core.search_text import tolerant_q
 
 ANONYMOUS_NAME_TOKEN_SALT = "exams.teacher_results.anonymous_name"  # nosec B105
 
@@ -289,11 +288,9 @@ def _build_anonymous_name(*, attempt_id: int, user_id: int, exam_id: int) -> str
 
 
 def _available_groups_for_exam(exam):
-    """İmtahanın iştirakçılarının üzv olduğu qruplar + təyin olunmuş qruplar (tenant-scoped).
+    """İmtahanın qrup seçimləri (kohort + reyestr + ana qrup + «Qrupsuz», cəhd sayı ilə).
 
-    2026-09-14 (W5 `w5left`, tapşırıq 1): kohortlarla (`allowed_groups`) yanaşı
-    reyestr qrupları (`allowed_units` + cəhd edənlərin cari qrupu) da siyahıdadır —
-    `GroupOption` (`id` = `"<int>"` / `"unit:<uuid>"`, `name`). Bax `_group_options`.
+    2026-10-25: `_group_index` — sətir qrup sütunu ilə eyni qayda (bax orada kök səbəb).
     """
     from ._group_options import available_group_options
 
@@ -384,93 +381,7 @@ def _apply_results_filters(exam, request):
 
 
 def _apply_results_filters_from_params(exam, params):
-    """Filter məntiqi düz mapping üzərində — export job worker-i də çağıra bilir."""
-    # Lazy expire: vaxtı keçmiş "davam edir" cəhdləri filter/siyahıdan ƏVVƏL
-    # expired-ə çevir ki, status həm cədvəldə, həm filterlərdə düzgün görünsün.
-    _expire_overdue_attempts(exam)
+    """Filter məntiqi düz mapping üzərində — export job worker-i də çağırır (bax `_filters`)."""
+    from ._filters import apply_results_filters_from_params
 
-    # ``exam`` select_related-də YOXDUR: ``exam.attempts`` hər sətrə eyni ``exam``
-    # instansını qoyur (known related object). Əvvəl JOIN hər sətrə ayrıca instans
-    # verirdi və ad-görünürlüyü qərarı (``attempt.exam.organization``) yazılı
-    # imtahanın 12-lik səhifəsində 12 təşkilat SELECT-i atırdı.
-    attempts = (
-        exam.attempts.exclude(is_trial=True)
-        .select_related("user")
-        .prefetch_related(
-            "answers__question__options",
-            "answers__selected_options",
-        )
-    )
-
-    search_query = (params.get("q") or "").strip()
-    student_q = tolerant_q(search_query, ("user__username", "user__first_name", "user__last_name"))
-    if student_q is not None:
-        attempts = attempts.filter(student_q)
-
-    status_filter = (params.get("status") or "all").strip().lower()
-    allowed_status_filters = {"all", "draft", "in_progress", "submitted", "expired"}
-    if status_filter not in allowed_status_filters:
-        status_filter = "all"
-    if status_filter != "all":
-        attempts = attempts.filter(status=status_filter)
-
-    checked_filter = (params.get("checked") or "all").strip().lower()
-    if checked_filter == "checked":
-        attempts = attempts.filter(checked_by_teacher=True)
-    elif checked_filter == "unchecked":
-        attempts = attempts.filter(checked_by_teacher=False)
-    else:
-        checked_filter = "all"
-
-    date_from_raw, date_from = _parse_filter_date(params.get("date_from"))
-    date_to_raw, date_to = _parse_filter_date(params.get("date_to"))
-    if date_from:
-        attempts = attempts.filter(started_at__date__gte=date_from)
-    if date_to:
-        attempts = attempts.filter(started_at__date__lte=date_to)
-
-    # Group filter — imtahanın iştirakçılarının üzvü olduğu istənilən qrupdan.
-    # W5 `w5left`: `unit:<uuid>` (reyestr qrupu) dəyəri də qəbul olunur; cəhdlər
-    # tələbənin cari aktiv `StudentAcademicRecord.group`-una görə süzülür.
-    from ._group_options import attempts_in_group_q, resolve_group_option
-
-    group_option = resolve_group_option(exam, params.get("group"))
-    group_id = None
-    if group_option is not None:
-        attempts = attempts.filter(attempts_in_group_q(group_option)).distinct()
-        group_id = group_option.id
-
-    sort_by = (params.get("sort_by") or "").strip()
-    sort_dir = (params.get("sort_dir") or "").strip()
-    ALLOWED_SORT_FIELDS = {
-        "user": "user__first_name",
-        "username": "user__username",
-        "email": "user__email",
-        "status": "status",
-        "correct": "correct_count",
-        "wrong": "wrong_count",
-        "score": "teacher_score",
-        "start": "started_at",
-        "end": "finished_at",
-        "duration": "duration_seconds",
-    }
-    if sort_by in ALLOWED_SORT_FIELDS and sort_dir in ("asc", "desc"):
-        order_field = ALLOWED_SORT_FIELDS[sort_by]
-        if sort_dir == "desc":
-            order_field = f"-{order_field}"
-        attempts = attempts.order_by(order_field)
-    else:
-        sort_by = ""
-        sort_dir = ""
-        attempts = attempts.order_by("-started_at")
-
-    return attempts, {
-        "search_query": search_query,
-        "status_filter": status_filter,
-        "checked_filter": checked_filter,
-        "date_from_raw": date_from_raw,
-        "date_to_raw": date_to_raw,
-        "group_id": group_id,
-        "sort_by": sort_by,
-        "sort_dir": sort_dir,
-    }
+    return apply_results_filters_from_params(exam, params, parse_date=_parse_filter_date)

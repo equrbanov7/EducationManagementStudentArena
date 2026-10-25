@@ -108129,3 +108129,99 @@ msgstr "Topic coverage (from the journal)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Syllabus"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Süzgəcə uyğun"
+msgstr "Matching filters"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bütün qruplar"
+msgstr "All groups"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "{count} qrup seçilib"
+msgstr "{count} groups selected"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Alt qruplar"
+msgstr "Subgroups"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Ad, istifadəçi adı, e-poçt və ya FİN"
+msgstr "Name, username, email or PIN"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Qrupsuz"
+msgstr "No group"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiya"
+msgstr "Appeal"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiya verib"
+msgstr "Appeal filed"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiya: baxılır"
+msgstr "Appeal: under review"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiya: qərar verilib"
+msgstr "Appeal: decided"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiyasız"
+msgstr "No appeal"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Gün"
+msgstr "Day"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bütün günlər"
+msgstr "All days"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Zal"
+msgstr "Room"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bütün zallar"
+msgstr "All rooms"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Zalsız (onlayn)"
+msgstr "No room (online)"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bal: -dan"
+msgstr "Score: from"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bal: -dək"
+msgstr "Score: to"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bal aralığı"
+msgstr "Score range"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Sətir"
+msgstr "Rows"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Ana qrup"
+msgstr "Parent group"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "ana qrup"
+msgstr "parent group"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "qeyd aktiv deyil"
+msgstr "record inactive"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Tələbənin akademik qeydində qrup yoxdur"
+msgstr "The student's academic record has no group"

@@ -209,15 +209,16 @@ class TeacherResultsQueryBudgetTest(_ResultsBase):
             len(large),
             f"2 cəhd: {len(small)} sorğu, 8 cəhd: {len(large)} sorğu",
         )
-        # Cəhd cədvəlləri üzrə büdcə — 6 sorğu, sətir sayından asılı deyil:
+        # Cəhd cədvəlləri üzrə büdcə — 7 sorğu, sətir sayından asılı deyil:
         #   1 vaxtı keçmiş cəhdlərin toplu UPDATE-i (_expire_overdue_attempts)
         #   2 stat aqreqatı — total + graded (əvvəl 3-4 ayrı COUNT + Paginator COUNT idi)
         #   3 səhifə sətirləri (user/exam select_related)
         #   4 qalan cəhd: köhnəlmiş draft/in_progress SELECT (səhifənin tələbələri)
         #   5 qalan cəhd: bitmiş cəhdlər GROUP BY user_id
         #   6 qalan cəhd: fərdi qrantlar
+        #   7 qrup indeksi: cəhd edənlər GROUP BY user_id (2026-10-25 — qrup sütunu/süzgəci/sayları)
         attempt_queries = self._attempt_queries(large)
-        self.assertEqual(len(attempt_queries), 6, attempt_queries)
+        self.assertEqual(len(attempt_queries), 7, attempt_queries)
         self.assertEqual(sum(sql.startswith('SELECT "exams_studentexamattemptgrant"') for sql in attempt_queries), 1)
         self.assertEqual(sum(sql.startswith("SELECT COUNT(") for sql in attempt_queries), 1)
         # Paginator öz COUNT(*)-unu təkrar etmir — say aqreqatdan verilir.

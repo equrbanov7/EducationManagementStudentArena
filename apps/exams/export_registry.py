@@ -29,8 +29,8 @@ def _build_exam_results_xlsx(*, user, organization, params):
     exam = Exam.objects.select_related("organization").get(pk=params["exam_id"])
     _guard_org(exam.organization_id, organization)
 
-    attempts_qs, _ = _apply_results_filters_from_params(exam, params.get("filters") or {})
-    return build_exam_results_xlsx_export(exam, list(attempts_qs))
+    attempts_qs, state = _apply_results_filters_from_params(exam, params.get("filters") or {})
+    return build_exam_results_xlsx_export(exam, list(attempts_qs), group_index=state["group_index"])
 
 
 def _build_bank_word(*, user, organization, params):

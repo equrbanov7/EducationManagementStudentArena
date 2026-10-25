@@ -3,6 +3,7 @@
  *
  *  - Sətir geri sayımları (`tr[data-seconds-remaining] .timer-display`); 0-da səhifə yenilənir.
  *  - Sınaq cəhdlərinin toplu silinməsi — ortaq `results_bulk_actions.js` (id/class qarmaqları eyni).
+ *  - Qrup süzgəci çoxlu seçimdir (EMSMultiSelect): menyu bağlananda bir dəfə göndərilir.
  *  - Tarix filtri «gg.aa.iiii» (brauzer dilindən asılı native date input əvəzinə): dəyər
  *    kanonik formaya salınır (6.10.26 → 06.10.2026), səhv dəyər göndərilmir və sahənin
  *    altında aydın mesaj görünür. Server də həm gün-əvvəl, həm ISO qəbul edir.
@@ -16,6 +17,7 @@
     var DAY_FIRST = /^(\d{1,2})[./-](\d{1,2})[./-](\d{4}|\d{2})$/;
     var ISO = /^(\d{4})-(\d{1,2})-(\d{1,2})$/;
     var DATE_SELECTOR = "[data-etr-date]";
+    var GROUP_SELECTOR = "select[data-etr-group-filter]";
 
     function pad(n) {
         return (n < 10 ? "0" : "") + n;
@@ -137,6 +139,33 @@
         }, true);
     }
 
+    /* 2026-10-25: qrup çoxlu seçimi — hər klikdə yox, menyu bağlananda (dəyişiklik varsa) tətbiq. */
+    function bindGroupFilter() {
+        document.addEventListener("change", function (event) {
+            var select = event.target;
+            if (select && select.matches && select.matches(GROUP_SELECTOR)) {
+                select.setAttribute("data-etr-dirty", "1");
+            }
+        });
+        document.addEventListener("ems-multi-select:close", function (event) {
+            var select = event.target;
+            if (!select || !select.matches || !select.matches(GROUP_SELECTOR) ||
+                select.getAttribute("data-etr-dirty") !== "1" || !select.form) {
+                return;
+            }
+            select.removeAttribute("data-etr-dirty");
+            var target = document.querySelector("[data-results-skeleton-target]");
+            if (target) {
+                target.classList.add("ems-search-pending");
+            }
+            if (typeof select.form.requestSubmit === "function") {
+                select.form.requestSubmit();
+            } else {
+                select.form.submit();
+            }
+        });
+    }
+
     function initCountdowns(root) {
         root.querySelectorAll("tr[data-seconds-remaining]").forEach(function (row) {
             var secondsLeft = parseInt(row.getAttribute("data-seconds-remaining"), 10) || 0;
@@ -188,6 +217,7 @@
             return;
         }
         window.EMSReady.once("etr-document-listeners", bindDocumentListeners);
+        window.EMSReady.once("etr-group-filter", bindGroupFilter);
         initCountdowns(root);
         initBulkActions(root);
     }

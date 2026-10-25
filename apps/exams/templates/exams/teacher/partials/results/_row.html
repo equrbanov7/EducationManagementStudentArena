@@ -23,6 +23,15 @@ JS qarmaqları: `tr[data-seconds-remaining] .timer-display` (geri sayım),
             <span class="etr-user__meta">{% trans "label_anonymous_view" context "exams.template.teacher_exam_results" %}</span>
         {% endif %}
     </th>
+    <td data-label="{{ l_group }}" class="etr-group">
+        {% if item.group %}
+            <span class="etr-group__name">{{ item.group.name }}</span>
+            {% if item.group.parent_name %}<span class="etr-group__meta" title="{% trans 'Ana qrup' context 'exams.template.teacher_exam_results' %}">{% trans "ana qrup" context "exams.template.teacher_exam_results" %}: {{ item.group.parent_name }}</span>{% endif %}
+            {% if not item.group.is_active_record %}<span class="etr-group__meta">{% trans "qeyd aktiv deyil" context "exams.template.teacher_exam_results" %}</span>{% endif %}
+        {% elif item.cohorts %}
+            <span class="etr-group__name">{{ item.cohorts|join:", " }}</span>
+        {% else %}<span class="etr-muted" title="{% trans 'Tələbənin akademik qeydində qrup yoxdur' context 'exams.template.teacher_exam_results' %}">—</span>{% endif %}
+    </td>
     <td data-label="{{ l_user }}">{% if item.can_view_name %}<span class="ems-mono">@{{ att.user.username }}</span>{% else %}<span class="etr-muted">—</span>{% endif %}</td>
     <td data-label="{{ l_email }}">{% if item.can_view_name and att.user.email %}<span class="etr-email">{{ att.user.email }}</span>{% else %}<span class="etr-muted">—</span>{% endif %}</td>
     <td data-label="{{ l_status }}">
@@ -36,6 +45,9 @@ JS qarmaqları: `tr[data-seconds-remaining] .timer-display` (geri sayım),
             <span class="ems-badge ems-badge--success"><i class="fas fa-circle-check" aria-hidden="true"></i>{{ att.get_status_display }}</span>
         {% else %}
             <span class="ems-badge ems-badge--info"><i class="fas fa-circle-half-stroke" aria-hidden="true"></i>{{ att.get_status_display }}</span>
+        {% endif %}
+        {% if item.appeal %}
+            <span class="ems-badge {% if item.appeal.is_final %}ems-badge--neutral{% else %}ems-badge--warning{% endif %}" title="{% trans 'Apellyasiya' context 'exams.template.teacher_exam_results' %}: {{ item.appeal.label }}"><i class="fas fa-scale-balanced" aria-hidden="true"></i>{% trans "Apellyasiya" context "exams.template.teacher_exam_results" %}: {{ item.appeal.label }}</span>
         {% endif %}
         {% if att.checked_by_teacher %}
             <span class="ems-badge ems-badge--primary"><i class="fas fa-check-double" aria-hidden="true"></i>{% trans "badge_checked" context "exams.template.teacher_exam_results" %}</span>

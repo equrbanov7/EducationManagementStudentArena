@@ -20,14 +20,17 @@ from ._helpers import (
     _apply_appeal_bonus,
     _attempt_effective_duration,
     _attempt_effective_finish,
-    _available_groups_for_exam,
 )
 
 XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
-def build_exam_results_xlsx_export(exam, attempts_list):
-    """(filename, content_type, bytes) qaytarır — attachment üçün hazır."""
+def build_exam_results_xlsx_export(exam, attempts_list, *, group_index=None):
+    """(filename, content_type, bytes) qaytarır — attachment üçün hazır.
+
+    2026-10-25: «Qruplar» / «Ana qrup» sətir sütunu ilə eyni indeksdən (`_group_index`);
+    sonda «Zal» və «Apellyasiya». Sıra = ekrandakı süzgəc + sıralama (çağıran verir).
+    """
     try:
         from openpyxl import Workbook
         from openpyxl.styles import Alignment, Font, PatternFill
@@ -39,6 +42,9 @@ def build_exam_results_xlsx_export(exam, attempts_list):
     from apps.exams.services.supervision import attach_attempt_interventions
 
     attach_attempt_interventions(attempts_list)
+    from ._test_scores import attach_legacy_selected_options
+
+    attach_legacy_selected_options(attempts_list)
 
     wb = Workbook()
     ws = wb.active
@@ -58,6 +64,7 @@ def build_exam_results_xlsx_export(exam, attempts_list):
     headers = [
         "#",
         "Qruplar",
+        "Ana qrup",
         "Ad Soyad",
         "İstifadəçi adı",
         "E-poçt",
@@ -73,6 +80,7 @@ def build_exam_results_xlsx_export(exam, attempts_list):
         headers += ["Düzgün", "Səhv", "Cavabsız", "Verilmiş sual", "Bal", "Maks. bal", "Faiz", "Apel. bonus"]
     else:
         headers += ["Düzgün", "Səhv", "Verilmiş sual"]
+    headers += ["Zal", "Apellyasiya"]
 
     for col_idx, title in enumerate(headers, start=1):
         cell = sheet_cell(ws, row=1, column=col_idx, value=title)
@@ -82,25 +90,24 @@ def build_exam_results_xlsx_export(exam, attempts_list):
     ws.row_dimensions[1].height = 28
 
     now = timezone.now()
-    # Loop-invariant precompute (əvvəl export loop-u içində N+1 idi):
-    #  • iştirakçı qruplarının id-ləri — bir dəfə (əvvəl hər attempt-də təkrar).
-    #  • hər user üçün üzv olduğu qrup adları — TƏK sorğu ilə dict (əvvəl hər
-    #    attempt üçün ayrıca sorğu = N+1).
-    #  • W5 `w5left` (2026-09-14): reyestr qrupları (`allowed_units`) da «Qruplar»
-    #    sütununa düşür — `group_names_by_user` kohort + reyestr üçün 2 sorğu.
-    from ._group_options import group_names_by_user
+    # Loop-invariant precompute (sətir başına sorğu yoxdur): qrup indeksi (kohort + reyestr +
+    # ana qrup, sabit sorğu sayı), apellyasiya bonusu və statusu (hər biri tək sorğu).
+    from apps.exams import score_adjustments
 
-    _attempt_user_ids = {att.user_id for att in attempts_list}
+    from ._group_index import build_group_index
+
+    if group_index is None:
+        group_index = build_group_index(exam)
     # Apellyasiya bonusları (tək sorğu) — export-dakı Bal/Faiz effektiv olsun.
     appeal_bonus_by_attempt = _appeal_bonus_map_for(attempts_list) if is_test else {}
-    groups_by_user = group_names_by_user(_available_groups_for_exam(exam), _attempt_user_ids)
+    appeal_status_map = score_adjustments.status_by_attempt([att.id for att in attempts_list])
     for row_idx, att in enumerate(attempts_list, start=2):
         effective_finish, _ = _attempt_effective_finish(att, now=now)
         effective_duration = _attempt_effective_duration(att, effective_finish)
 
-        # İştirakçı qruplardan user-in üzv olduqları — loop-dan əvvəl tək sorğu
-        # ilə qurulmuş dict-dən (per-attempt sorğu yox).
-        user_groups = ", ".join(groups_by_user.get(att.user_id, []))
+        user_groups = ", ".join(group_index.group_names(att.user_id))
+        user_group = group_index.user_group.get(att.user_id)
+        parent_group = user_group.parent_name if user_group is not None else ""
 
         # Müddəti hh:mm:ss formatına çevir
         if effective_duration is not None:
@@ -117,6 +124,7 @@ def build_exam_results_xlsx_export(exam, attempts_list):
         row = [
             row_idx - 1,
             user_groups,
+            parent_group,
             att.user.get_full_name() or att.user.username,
             att.user.username,
             att.user.email or "",
@@ -153,10 +161,12 @@ def build_exam_results_xlsx_export(exam, attempts_list):
         else:
             delivered = att.correct_count + att.wrong_count
             row += [att.correct_count, att.wrong_count, delivered]
+        appeal = appeal_status_map.get(att.id)
+        row += [att.room.name if att.room_id and att.room else "", appeal["label"] if appeal else ""]
 
-        # Sola düzlənən sütunlar: Qruplar (2), Ad Soyad (3), İstifadəçi adı (4),
-        # E-poçt (5), Uzaqlaşdırma səbəbi (7), Başlama (8), Bitmə (9).
-        left_columns = {2, 3, 4, 5, 7, 8, 9}
+        # Sola düzlənən sütunlar: Qruplar (2), Ana qrup (3), Ad Soyad (4), İstifadəçi adı (5),
+        # E-poçt (6), Uzaqlaşdırma səbəbi (8), Başlama (9), Bitmə (10), Zal + Apellyasiya (son iki).
+        left_columns = {2, 3, 4, 5, 6, 8, 9, 10, len(row) - 1, len(row)}
         # 2026-09-14 (audit F-07): ad/qrup/uzaqlaşdırma səbəbi kimi mətn xanaları
         # formula kimi şərh olunmasın — `sheet_cell` `'` prefiksi qoyur, ədədlər
         # və tarixlər dəyişmir.
@@ -167,14 +177,15 @@ def build_exam_results_xlsx_export(exam, attempts_list):
                 cell.number_format = "DD.MM.YYYY HH:MM"
 
     # Sütun genişlikləri (header sırasına uyğun)
-    # #, Qruplar, Ad Soyad, İstifadəçi adı, E-poçt, Status, Uzaqlaşdırma səbəbi, Başlama, Bitmə, Müddət
-    widths = [5, 26, 26, 20, 28, 16, 30, 20, 20, 16]
+    # #, Qruplar, Ana qrup, Ad Soyad, İstifadəçi adı, E-poçt, Status, Uzaqlaşdırma səbəbi, Başlama, Bitmə, Müddət
+    widths = [5, 26, 18, 26, 20, 28, 16, 30, 20, 20, 16]
     if is_written_or_coding:
         widths += [14, 12]  # Müəllim balı, Yoxlanıb
     if is_test:
         widths += [10, 10, 12, 16, 8, 12, 8, 12]  # Düzgün, Səhv, Cavabsız, Verilmiş, Bal, Maks, Faiz, Apel.
     else:
         widths += [10, 10, 14]  # Düzgün, Səhv, Verilmiş sual
+    widths += [18, 18]  # Zal, Apellyasiya
     for idx, width in enumerate(widths, start=1):
         ws.column_dimensions[get_column_letter(idx)].width = width
 

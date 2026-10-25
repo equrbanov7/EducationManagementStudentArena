@@ -1,0 +1,63 @@
+{% load i18n %}
+{% comment %}2026-10-25: nəticə süzgəcinin əlavə sahələri — apellyasiya, gün (imtahan bir neçə gündə
+keçibsə), zal (qeydli kompüterdən verilibsə), bal aralığı, səhifədə sətir sayı. Hamısı URL-də
+saxlanılır, dəyişəndə dərhal tətbiq olunur (`js-auto-filter`, results_filter_ui.js).{% endcomment %}
+<div class="etp-toolbar__field">
+    <label class="etp-label" for="resultsFilterAppealSelect">{% trans "Apellyasiya" context "exams.template.teacher_exam_results" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select name="appeal" id="resultsFilterAppealSelect" class="ems-select bootstrap-single-select__native js-auto-filter js-filter-resettable" data-bootstrap-select data-reset-value="">
+            <option value="" {% if not appeal_filter %}selected{% endif %}>{% trans "Hamısı" context "exams.template.teacher_exam_results" %}</option>
+            <option value="any" {% if appeal_filter == 'any' %}selected{% endif %}>{% trans "Apellyasiya verib" context "exams.template.teacher_exam_results" %}</option>
+            <option value="open" {% if appeal_filter == 'open' %}selected{% endif %}>{% trans "Apellyasiya: baxılır" context "exams.template.teacher_exam_results" %}</option>
+            <option value="closed" {% if appeal_filter == 'closed' %}selected{% endif %}>{% trans "Apellyasiya: qərar verilib" context "exams.template.teacher_exam_results" %}</option>
+            <option value="none" {% if appeal_filter == 'none' %}selected{% endif %}>{% trans "Apellyasiyasız" context "exams.template.teacher_exam_results" %}</option>
+        </select>
+    </div>
+</div>
+{% if day_options|length > 1 or day_filter %}
+<div class="etp-toolbar__field">
+    <label class="etp-label" for="resultsFilterDaySelect">{% trans "Gün" context "exams.template.teacher_exam_results" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select name="day" id="resultsFilterDaySelect" class="ems-select bootstrap-single-select__native js-auto-filter js-filter-resettable" data-bootstrap-select data-reset-value="">
+            <option value="" {% if not day_filter %}selected{% endif %}>{% trans "Bütün günlər" context "exams.template.teacher_exam_results" %}</option>
+            {% for day in day_options %}
+            <option value="{{ day.value }}" {% if day_filter == day.value %}selected{% endif %}>{{ day.value }} ({{ day.count }})</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+{% endif %}
+{% if room_options %}
+<div class="etp-toolbar__field">
+    <label class="etp-label" for="resultsFilterRoomSelect">{% trans "Zal" context "exams.template.teacher_exam_results" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select name="room" id="resultsFilterRoomSelect" class="ems-select bootstrap-single-select__native js-auto-filter js-filter-resettable" data-bootstrap-select data-reset-value="">
+            <option value="" {% if not room_filter %}selected{% endif %}>{% trans "Bütün zallar" context "exams.template.teacher_exam_results" %}</option>
+            {% for room in room_options %}
+            <option value="{{ room.value }}" {% if room_filter == room.value %}selected{% endif %}>{% if room.is_none %}{% trans "Zalsız (onlayn)" context "exams.template.teacher_exam_results" %}{% else %}{{ room.name }}{% endif %} ({{ room.count }})</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+{% endif %}
+{% trans "Bal: -dan" context "exams.template.teacher_exam_results" as l_score_min %}
+{% trans "Bal: -dək" context "exams.template.teacher_exam_results" as l_score_max %}
+<div class="etp-toolbar__field etr-score">
+    <span class="etp-label" id="resultsScoreLabel">{% trans "Bal aralığı" context "exams.template.teacher_exam_results" %}</span>
+    <div class="etr-score__pair" role="group" aria-labelledby="resultsScoreLabel">
+        <input type="text" name="score_min" id="resultsFilterScoreMin" value="{{ score_min }}" inputmode="decimal" autocomplete="off" maxlength="8"
+               class="ems-input js-auto-filter js-filter-resettable" placeholder="0" aria-label="{{ l_score_min }}">
+        <span class="etr-score__sep" aria-hidden="true">–</span>
+        <input type="text" name="score_max" id="resultsFilterScoreMax" value="{{ score_max }}" inputmode="decimal" autocomplete="off" maxlength="8"
+               class="ems-input js-auto-filter js-filter-resettable" placeholder="{{ review_stats.max_score|default:100 }}" aria-label="{{ l_score_max }}">
+    </div>
+</div>
+<div class="etp-toolbar__field">
+    <label class="etp-label" for="resultsFilterPerPage">{% trans "Sətir" context "exams.template.teacher_exam_results" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select name="per_page" id="resultsFilterPerPage" class="ems-select bootstrap-single-select__native js-auto-filter" data-bootstrap-select>
+            {% for size in per_page_choices %}<option value="{{ size }}" {% if per_page == size %}selected{% endif %}>{{ size }}</option>{% endfor %}
+        </select>
+    </div>
+</div>
+{% if sort_by %}<input type="hidden" name="sort_by" value="{{ sort_by }}"><input type="hidden" name="sort_dir" value="{{ sort_dir }}">{% endif %}

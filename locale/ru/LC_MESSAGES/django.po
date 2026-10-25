@@ -108323,3 +108323,99 @@ msgstr "Прохождение тем (по журналу)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Силлабус"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Süzgəcə uyğun"
+msgstr "По фильтрам"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bütün qruplar"
+msgstr "Все группы"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "{count} qrup seçilib"
+msgstr "Выбрано групп: {count}"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Alt qruplar"
+msgstr "Подгруппы"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Ad, istifadəçi adı, e-poçt və ya FİN"
+msgstr "Имя, логин, эл. почта или ФИН"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Qrupsuz"
+msgstr "Без группы"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiya"
+msgstr "Апелляция"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiya verib"
+msgstr "Подана апелляция"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiya: baxılır"
+msgstr "Апелляция: на рассмотрении"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiya: qərar verilib"
+msgstr "Апелляция: решение принято"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Apellyasiyasız"
+msgstr "Без апелляции"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Gün"
+msgstr "День"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bütün günlər"
+msgstr "Все дни"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Zal"
+msgstr "Зал"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bütün zallar"
+msgstr "Все залы"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Zalsız (onlayn)"
+msgstr "Без зала (онлайн)"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bal: -dan"
+msgstr "Балл: от"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bal: -dək"
+msgstr "Балл: до"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bal aralığı"
+msgstr "Диапазон баллов"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Sətir"
+msgstr "Строк"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Ana qrup"
+msgstr "Основная группа"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "ana qrup"
+msgstr "основная группа"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "qeyd aktiv deyil"
+msgstr "запись неактивна"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Tələbənin akademik qeydində qrup yoxdur"
+msgstr "В академической записи студента нет группы"

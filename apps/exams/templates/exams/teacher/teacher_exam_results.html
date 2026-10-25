@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="{% static 'css/ems_ui/badge.css' %}?v=20260903-3">
     <link rel="stylesheet" href="{% static 'css/ems_ui/table.css' %}?v=20261018-pkga">
     <link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
-    <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results_page.css' %}?v=20261024-formal">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results_page.css' %}?v=20261025-filters">
 {% endblock %}
 
 {% block content %}
@@ -33,7 +33,7 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
         <section class="etp-kpis" aria-label="{% trans 'Xülasə' context 'exams.template.teacher_exam_results' %}">
             <div class="etp-kpi etp-kpi--primary">
                 <span class="etp-kpi__icon"><i class="fas fa-users" aria-hidden="true"></i></span>
-                <span class="etp-kpi__body"><span class="etp-kpi__value">{{ review_stats.total }}</span><span class="etp-kpi__label">{% trans "İştirakçı" context "exams.template.teacher_exam_results" %}</span></span>
+                <span class="etp-kpi__body"><span class="etp-kpi__value">{{ review_stats.total }}{% if overall_total is not None %}<span class="etr-kpi-of" title="{% trans 'Süzgəcə uyğun' context 'exams.template.teacher_exam_results' %}: {{ review_stats.total }} / {{ overall_total }}">/{{ overall_total }}</span>{% endif %}</span><span class="etp-kpi__label">{% trans "İştirakçı" context "exams.template.teacher_exam_results" %}</span></span>
             </div>
             <div class="etp-kpi etp-kpi--success">
                 <span class="etp-kpi__icon"><i class="fas fa-circle-check" aria-hidden="true"></i></span>
@@ -60,23 +60,24 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
                         <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
                         <input type="search" id="resultsFilterSearchInput" name="q" value="{{ search_query }}"
                                class="ems-input js-filter-resettable js-auto-filter-search" autocomplete="off"
-                               placeholder="{% trans 'Ad, soyad və ya istifadəçi adı' context 'exams.template.teacher_exam_results' %}">
+                               placeholder="{% trans 'Ad, istifadəçi adı, e-poçt və ya FİN' context 'exams.template.teacher_exam_results' %}">
                     </div>
                 </div>
                 {% if available_groups %}
-                <div class="etp-toolbar__field">
+                <div class="etp-toolbar__field etr-field--group">
                     <label class="etp-label" for="resultsFilterGroupSelect">{% trans "Qrup" context "exams.template.teacher_exam_results" %}</label>
-                    <div class="bootstrap-single-select bootstrap-single-select--ems">
-                        <select name="group" id="resultsFilterGroupSelect" class="ems-select bootstrap-single-select__native js-auto-filter js-filter-resettable"
-                                data-bootstrap-select data-reset-value="all" data-live-search="true"
-                                data-live-search-placeholder="{% trans 'Qrup axtar…' context 'exams.template.teacher_exam_results' %}"
-                                data-live-search-empty="{% trans 'Uyğun qrup yoxdur' context 'exams.template.teacher_exam_results' %}">
-                            <option value="all" {% if not group_filter %}selected{% endif %}>{% trans 'Bütün qruplar' %}</option>
-                            {% for grp in available_groups %}
-                            <option value="{{ grp.id }}" {% if group_filter == grp.id|stringformat:"s" %}selected{% endif %}>{{ grp.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                    {# Çoxlu seçim: menyu bağlananda tətbiq olunur (teacher_exam_results.js); ana qrup alt qrupları da əhatə edir. #}
+                    <select name="group" id="resultsFilterGroupSelect" multiple class="ems-select js-filter-resettable"
+                            data-ems-multi-select data-etr-group-filter data-reset-value=""
+                            data-ms-placeholder="{% trans 'Bütün qruplar' context 'exams.template.teacher_exam_results' %}"
+                            data-ms-count-format="{% trans '{count} qrup seçilib' context 'exams.template.teacher_exam_results' %}"
+                            data-ms-search="true" data-ms-max-labels="2"
+                            data-live-search-placeholder="{% trans 'Qrup axtar…' context 'exams.template.teacher_exam_results' %}"
+                            data-live-search-empty="{% trans 'Uyğun qrup yoxdur' context 'exams.template.teacher_exam_results' %}">
+                        {% for grp in available_groups %}
+                        <option value="{{ grp.id }}"{% if grp.id in group_filter_values %} selected{% endif %}{% if grp.subgroup_names %} title="{% trans 'Alt qruplar' context 'exams.template.teacher_exam_results' %}: {{ grp.subgroup_names|join:', ' }}"{% endif %}>{{ grp.name }} ({{ grp.count }})</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 {% endif %}
                 <div class="etp-toolbar__field">
@@ -91,6 +92,7 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
                         </select>
                     </div>
                 </div>
+                {% if not is_test_exam %}
                 <div class="etp-toolbar__field">
                     <label class="etp-label" for="resultsFilterCheckedSelect">{% trans "Yoxlanma" context "exams.template.teacher_exam_results" %}</label>
                     <div class="bootstrap-single-select bootstrap-single-select--ems">
@@ -101,6 +103,8 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
                         </select>
                     </div>
                 </div>
+                {% endif %}
+                {% include "exams/teacher/partials/results/_filters_extra.html" %}
                 {% trans "Tarixi gg.aa.iiii formatında yazın (məs. 06.10.2026)." context "exams.template.teacher_exam_results" as date_error %}
                 <div class="etp-toolbar__field etr-date">
                     <label class="etp-label" for="resultsFilterDateFromInput">{% trans "Başlama: -dan" context "exams.template.teacher_exam_results" %}</label>
@@ -131,7 +135,7 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
             </form>
         </section>
 
-        {% if available_groups and formal_retake %}
+        {% if grant_groups and formal_retake %}
         {% comment %}2026-10-24 (sahib): midterm / final — qrupa birbaşa cəhd YOXDUR. GET forma rəsmi «Yenidən imtahan cəhdi»
            səhifəsini imtahan + qrup axtarışı ilə ön-doldurur (hər tələbə orada əsas, əmr və sənədlə ayrıca seçilir).{% endcomment %}
         <section class="ems-card etr-grant etr-grant--formal">
@@ -149,7 +153,7 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
                     <div class="bootstrap-single-select bootstrap-single-select--ems">
                         <select name="chance_student_q" id="resultsGroupFormalSelect" class="ems-select bootstrap-single-select__native" data-bootstrap-select required>
                             <option value="">{% trans 'Qrup seçin…' context 'exams.template.teacher_exam_results' %}</option>
-                            {% for grp in available_groups %}<option value="{{ grp.name }}">{{ grp.name }}</option>{% endfor %}
+                            {% for grp in grant_groups %}<option value="{{ grp.name }}">{{ grp.name }}</option>{% endfor %}
                         </select>
                     </div>
                 </div>
@@ -162,7 +166,7 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
             </div>
             {% endif %}
         </section>
-        {% elif available_groups %}
+        {% elif grant_groups %}
         {# Bütöv qrupa yenidən imtahan cəhdi — filtr formasından AYRI form (iç-içə form HTML-də etibarsızdır). #}
         <section class="ems-card etr-grant">
             <form method="post" action="{% url 'exams:grant_extra_attempt_group' slug=exam.slug %}" class="etr-grant__form">
@@ -176,7 +180,7 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
                     <div class="bootstrap-single-select bootstrap-single-select--ems">
                         <select name="group_id" id="resultsGroupGrantSelect" class="ems-select bootstrap-single-select__native" data-bootstrap-select required>
                             <option value="">{% trans 'Qrup seçin…' context 'exams.template.teacher_exam_results' %}</option>
-                            {% for grp in available_groups %}<option value="{{ grp.id }}">{{ grp.name }}</option>{% endfor %}
+                            {% for grp in grant_groups %}<option value="{{ grp.id }}">{{ grp.name }}</option>{% endfor %}
                         </select>
                     </div>
                 </div>
@@ -214,6 +218,8 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
                 {% trans "Müddət" context "exams.template.teacher_exam_results" as l_duration %}
                 {% trans "Cavabsız" context "exams.template.teacher_exam_results" as l_unanswered %}
                 {% trans "Faiz" context "exams.template.teacher_exam_results" as l_percent %}
+                {% trans "Qrup" context "exams.template.teacher_exam_results" as l_group %}
+                {% trans "Bal" context "exams.template.teacher_exam_results" as l_points %}
                 {% trans "saat:dəq:san" as t_duration %}
                 <div class="etp-tablescroll">
                     <table class="ems-table ems-table--stack etr-table">
@@ -222,6 +228,7 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
                                 {% if can_delete_attempts %}<th scope="col" class="etr-col-check"><span class="visually-hidden">{% trans "Seçim" context "exams.template.teacher_exam_results" %}</span></th>{% endif %}
                                 <th scope="col">#</th>
                                 {% include "exams/teacher/partials/results/_sort_th.html" with sort_key="user" sort_label=l_name sort_title="" %}
+                                {% include "exams/teacher/partials/results/_sort_th.html" with sort_key="group" sort_label=l_group sort_title="" %}
                                 {% include "exams/teacher/partials/results/_sort_th.html" with sort_key="username" sort_label=l_user sort_title="" %}
                                 {% include "exams/teacher/partials/results/_sort_th.html" with sort_key="email" sort_label=l_email sort_title="" %}
                                 {% include "exams/teacher/partials/results/_sort_th.html" with sort_key="status" sort_label=l_status sort_title="" %}
@@ -229,7 +236,7 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
                                 {% include "exams/teacher/partials/results/_sort_th.html" with sort_key="wrong" sort_label=l_wrong sort_title=t_wrong %}
                                 {% if exam.exam_type == 'test' %}
                                     <th scope="col">{% trans "Cavabsız" context "exams.template.teacher_exam_results" %}</th>
-                                    <th scope="col">{% trans "Bal" context "exams.template.teacher_exam_results" %}</th>
+                                    {% include "exams/teacher/partials/results/_sort_th.html" with sort_key="score" sort_label=l_points sort_title="" %}
                                     <th scope="col">{% trans "Faiz" context "exams.template.teacher_exam_results" %}</th>
                                 {% endif %}
                                 {% if exam.exam_type == 'written' or exam.exam_type == 'coding' %}
@@ -247,7 +254,7 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
                     </table>
                 </div>
                 {% include "partials/_pagination.html" with page_obj=page_obj extra_query=pagination_query %}
-            {% elif search_query or status_filter != 'all' or checked_filter != 'all' or date_from or date_to or group_filter %}
+            {% elif filters_active %}
                 {% trans "Filtrlərə uyğun nəticə yoxdur" context "exams.template.teacher_exam_results" as state_title %}
                 {% trans "Axtarışı dəyişin və ya filtrləri sıfırlayın." context "exams.template.teacher_exam_results" as state_body %}
                 {% include "partials/ems_ui/_empty.html" with state_icon="fa-filter-circle-xmark" %}
@@ -296,5 +303,5 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
 {% block extraJs %}
 <script src="{% static 'js/results_filter_ui.js' %}?v=20261014-searchux"></script>
 <script src="{% static 'js/results_bulk_actions.js' %}"></script>
-<script src="{% static 'exams/js/teacher_exam_results.js' %}?v=20261010-wp3exams"></script>
+<script src="{% static 'exams/js/teacher_exam_results.js' %}?v=20261025-filters"></script>
 {% endblock %}
