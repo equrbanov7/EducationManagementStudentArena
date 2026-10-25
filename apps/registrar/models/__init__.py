@@ -49,6 +49,7 @@ from .exam_score_entry import (
     exam_score_evidence_path,
     exam_score_sheet_path,
 )
+from .external_recognition import RECOGNITION_DOCUMENT_PREFIX, ExternalCreditRecognition, RecognitionProgram
 from .grading import (
     ApprovalStatus,
     AssessmentComponent,
@@ -206,6 +207,9 @@ __all__ = [
     "RetakeTuition",
     "RetakeWindow",
     "ExamChanceGrant",
+    "ExternalCreditRecognition",
+    "RECOGNITION_DOCUMENT_PREFIX",
+    "RecognitionProgram",
     "ExamChanceReason",
     "Rubric",
     "RubricCriterion",

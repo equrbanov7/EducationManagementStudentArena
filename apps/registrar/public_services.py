@@ -4,6 +4,7 @@ from . import analytics  # noqa: F401
 from . import catalog_console  # noqa: F401
 from . import cohort_plans  # noqa: F401 — qrupun öz qəbul ili planı (workload generation, 2026-10-19)
 from . import course_groups  # noqa: F401
+from . import credit_recognition_read  # noqa: F401 — «Xarici nəticənin tanınması»: açar + əhatə (2026-10-25)
 from . import credit_source  # noqa: F401 — tələbənin fənn krediti: plan (fənn + semestr) → kataloq (R01, 2026-10-21)
 from . import dashboard_data  # noqa: F401
 from . import entry_standard  # noqa: F401
@@ -127,6 +128,7 @@ __all__ = [
     "recompute_absence_hours",
     "render_syllabus_pdf",
     "retake_access",
+    "credit_recognition_read",
     "retake_chance",
     "retake_fees",
     "retake_window",

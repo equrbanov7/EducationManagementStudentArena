@@ -23,12 +23,14 @@ semester columns each) can be rendered directly off the returned structure.
 
 from __future__ import annotations
 
+import datetime as dt
 from decimal import ROUND_HALF_UP, Decimal
 
 from django.utils import timezone
 
 from apps.registrar import (
     analytics,
+    credit_recognition_read,
     credit_source,
     exam_eligibility,
     finals,
@@ -176,7 +178,14 @@ def count_student_record_rows(*, student, organization) -> int:
     """
     if organization is None or student is None:
         return 0
-    return student_record_enrollments(student=student, organization=organization).count()
+    enrollments = student_record_enrollments(student=student, organization=organization)
+    recognitions = credit_recognition_read.active_for_student(organization, getattr(student, "pk", None))
+    if not recognitions:
+        return enrollments.count()
+    # Tanınma jurnal sətrini əvəz edir (``build_student_transcript``) — əvəzlənən sətir sayılmır.
+    overridden = credit_recognition_read.override_keys(recognitions)
+    pairs = enrollments.values_list("offering__subject_id", "offering__period_id")
+    return sum(1 for pair in pairs if pair not in overridden) + len(recognitions)
 
 
 def build_student_transcript(*, student, organization, program=None):
@@ -197,7 +206,12 @@ def build_student_transcript(*, student, organization, program=None):
         )
         .order_by("offering__period__start_date", "offering__subject__code")
     )
-    if not enrollments:
+    # «Xarici nəticə tanınıb» (2026-10-25): qüvvədə olan tanınma (fənn + semestr) həmin cütün jurnal sətrini
+    # ƏVƏZ edir — sətir tanınmış balla aşağıda əlavə olunur, ÜOMG / kredit ondan hesablanır.
+    recognitions = credit_recognition_read.active_for_student(organization, getattr(student, "pk", None))
+    overridden = credit_recognition_read.override_keys(recognitions)
+    enrollments = [e for e in enrollments if (e.offering.subject_id, e.offering.period_id) not in overridden]
+    if not enrollments and not recognitions:
         return {
             "has_record": False,
             "student": student,
@@ -222,7 +236,7 @@ def build_student_transcript(*, student, organization, program=None):
     # Sətir-sətir oxumalar (komponent balları, sərbəst iş sayğacı,
     # ``FinalGrade``/``ResitRecord``, donma dəsti, qayıb həddi, məxrəc fallback-ı)
     # BİR dəfə: 59 fənnli real tələbədə ~690 sorğu idi (2026-09-02 ölçməsi).
-    batch = finals_batch.build(enrollments, organization=organization)
+    batch = finals_batch.build(enrollments, organization=organization) if enrollments else None
     # ⚠️ 2026-09-10: ``hours_map`` ayrıca OXUNMUR. ``finals_batch.build`` eyni
     # açılış id-ləri üçün onsuz da ``lesson_hours_map``-i qurur və
     # ``compute_final_result`` ``hours_map=None`` olduqda ``batch.hours_map``-a
@@ -244,6 +258,8 @@ def build_student_transcript(*, student, organization, program=None):
     )
     for row in rows:
         row["retake"] = lines.get(row["enrollment_id"])
+    rows.extend(credit_recognition_read.transcript_row(item, organization) for item in recognitions)
+    rows.sort(key=lambda row: (row["period"].start_date or dt.date.min, row["subject"].code or ""))
 
     # Group into semesters, preserving the chronological (period) order.
     semesters: list[dict] = []
@@ -323,11 +339,16 @@ def student_credit_totals(*, student, organization, today=None) -> dict:
         .exclude(status=Enrollment.Status.DROPPED)
         .select_related("offering", "offering__subject", "offering__period")
     )
+    # Tanınmış xarici nəticə (2026-10-25) — kredit TOPLANMIŞDIR; əvəz etdiyi jurnal sətri sayılmır.
+    recognitions = credit_recognition_read.active_for_student(organization, getattr(student, "pk", None))
+    overridden = credit_recognition_read.override_keys(recognitions)
+    enrollments = [e for e in enrollments if (e.offering.subject_id, e.offering.period_id) not in overridden]
+    recognized = sum(int(item.credit or 0) for item in recognitions)
     if not enrollments:
-        return {"earned": 0, "in_progress": 0}
+        return {"earned": recognized, "in_progress": 0}
 
     maps = analytics.build_evaluation_maps(organization, enrollments)
-    earned = 0
+    earned = recognized
     in_progress = 0
     for enrollment in enrollments:
         result = analytics.evaluate_enrollment(enrollment, maps)
@@ -389,6 +410,8 @@ def build_student_overall_record(*, student, organization):
             teacher_name = ""
             if instructor is not None:
                 teacher_name = (instructor.get_full_name() or "").strip() or instructor.username
+            if row.get("recognition"):  # tanınmış xarici nəticə — «Müəllim» sütununda qurum
+                teacher_name = row["recognition"]["institution"]
             rows.append(
                 {
                     # Legacy qiymət sübutları bu stabil FK ilə bulk şəkildə
@@ -409,6 +432,7 @@ def build_student_overall_record(*, student, organization):
                     "in_gpa": row["in_gpa"],
                     "fail_reason": _fail_reason_code(result) if result["failed"] else "",
                     "retake": row.get("retake"),
+                    "recognition": row.get("recognition"),
                 }
             )
         semesters.append(

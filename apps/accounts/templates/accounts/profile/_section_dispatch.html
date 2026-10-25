@@ -148,6 +148,8 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_retake_windows.html" %}
             {% elif active_section == "subgroup-placement" and 'subgroup-placement' in allowed_sections %}
                 {% include "accounts/profile/sections/_subgroup_placement.html" %}
+            {% elif active_section == "credit-recognition" and 'credit-recognition' in allowed_sections %}
+                {% include "accounts/profile/sections/_credit_recognition.html" %}
             {% elif active_section == "surveys-builder" and 'surveys-builder' in allowed_sections %}
                 {% include "accounts/profile/sections/_surveys_builder.html" %}
             {% elif active_section == "subject-folders" and 'subject-folders' in allowed_sections %}

@@ -9,6 +9,7 @@ from django.urls import path
 from . import (
     catalog_actions,
     correction_views,
+    credit_recognition_views,
     curriculum_actions,
     guest_roster_views,
     holiday_actions,
@@ -62,6 +63,11 @@ urlpatterns = [
     # Ekran 21 — «Keçilmiş dərslər» hesabatının CSV ixracı (oxu-only, əhatəli).
     path("kecilmis-dersler/export.csv", lessons_log_views.lessons_log_csv, name="lessons_log_csv"),
     path("transkript.pdf", pdf_views.my_transcript_pdf, name="my_transcript_pdf"),
+    # «Xarici nəticənin tanınması» (Erasmus+ / mübadilə / başqa ali məktəb → fəndən azad, sahib 2026-10-25).
+    path("xarici-netice/telebe/<int:student_id>/", credit_recognition_views.create, name="credit_recognition_create"),
+    path(
+        "xarici-netice/<uuid:recognition_id>/legv/", credit_recognition_views.revoke, name="credit_recognition_revoke"
+    ),
     path("cedvel/", schedule_views.schedule_view, name="schedule"),
     # URL auditi A11 (2026-10-10): `teqvim/` (kabinet `?section=academic-calendar`),
     # `cedvel/export.ics` (sahib: iCal ləğv — jurnal yekunu jurnalın «Export» xlsx-i ilə) və

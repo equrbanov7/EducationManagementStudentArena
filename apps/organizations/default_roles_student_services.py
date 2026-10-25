@@ -65,9 +65,15 @@ STUDENT_SERVICES_ROLES = [
 #:   tabedir (dekan öz fakültəsi, koordinator öz ixtisası) — §8/8.
 #: * prorektor — nəzarət baxışı.
 #: * rektorda `*` var, siyahıda yoxdur.
+#: * 2026-10-25: ``student.credit_recognition`` («Xarici nəticənin tanınması» — Erasmus+ / mübadilə / başqa ali
+#:   məktəb) — dekanlıq (dekan, dekan müavini), tədris şöbəsi, RİM; ``retake.manage`` ilə EYNİ dəst.
+#:   Mövcud tenantlar: miqrasiya ``organizations/0072``.
 STUDENT_SERVICES_GRANTS: dict[str, tuple[str, ...]] = {
-    "ikt_rehber": ("student.registry_view", "student.movement", "student.assign_group"),
-    "dean": ("student.registry_view",),
+    "ikt_rehber": ("student.registry_view", "student.movement", "student.assign_group", "student.credit_recognition"),
+    "dean": ("student.registry_view", "student.credit_recognition"),
+    "vice_dean": ("student.credit_recognition",),
+    "teaching_office_head": ("student.credit_recognition",),
+    "teaching_office_staff": ("student.credit_recognition",),
     # 2026-09-07: koordinator tələbənin qrupunu da təyin edir/dəyişir.
     "program_coordinator": ("student.registry_view", "student.assign_group"),
     "vice_rector": ("student.registry_view",),

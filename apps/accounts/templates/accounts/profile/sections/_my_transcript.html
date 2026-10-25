@@ -185,6 +185,7 @@
                                             <span class="transcript-subject-code">{{ row.subject.code }}</span>
                                             <span class="transcript-subject-name">{{ row.subject.name }}</span>
                                             {% include "registrar/partials/_legacy_grade_mark.html" with legacy=row.legacy %}
+                                            {% include "registrar/partials/_recognition_mark.html" with recognition=row.recognition %}
                                         </td>
                                         <td>{{ row.credit }}</td>
                                         <td>{% if row.result.passed or row.result.failed %}<strong>{{ row.result.total|floatformat:'-2' }}</strong>{% else %}—{% endif %}</td>

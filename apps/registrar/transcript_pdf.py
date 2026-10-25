@@ -29,7 +29,15 @@ from django.utils.translation import pgettext
 from apps.registrar import exam_eligibility
 
 # ── Layout constants (A4 = 595 × 842 pt) ────────────────────────────────────
-from apps.registrar.transcript_pdf_text import ROW_LINE_H, ROW_SIZE, line_height, row_height, wrap_lines
+from apps.registrar.transcript_pdf_text import (
+    ROW_LINE_H,
+    ROW_SIZE,
+    line_height,
+    mark_notes,
+    row_height,
+    row_mark,
+    wrap_lines,
+)
 from core.constants import OrgUnitType
 
 # Every label below is looked up under the "registrar.pdf" context: short words
@@ -345,29 +353,13 @@ def _draw_student_info(sheet, record, student, document_number):
     sheet.y += 18
 
 
-#: Rəsmi transkriptdə köçürülmüş sətrin nişanı (ekranın qlifi PDF şriftində yoxdur).
-_LEGACY_MARK = "*"
-
-
-def _has_legacy_rows(data) -> bool:
-    """Sənəddə ən azı bir köçürülmüş qiymət varmı — izah qeydi yalnız o zaman çap olunur."""
-    for year in data.get("years", ()):
-        for semester in year.get("semesters", ()):
-            for row in semester.get("rows", ()):
-                if row.get("legacy"):
-                    return True
-    return False
-
-
 def _row_name_lines(row, *, width: float) -> list[str]:
-    """«ŞİFR  Ad [*]» — sütunun eninə ÖLÇÜLƏRƏK bölünmüş sətirlər (kəsilmir).
+    """«ŞİFR  Ad [*|**]» — sütunun eninə ÖLÇÜLƏRƏK bölünmüş sətirlər (kəsilmir).
 
-    «*» köçürülmüş qiymət nişanıdır — ekrandakı ``_legacy_grade_mark.html``
-    qlifi ilə eyni ``row["legacy"]`` mənbəyindən çıxır, sürüşə bilməz.
+    «*» köçürülmüş qiymət, «**» tanınmış xarici nəticə nişanıdır — ekrandakı qliflərlə eyni sətir
+    açarlarından (``legacy`` / ``recognition``) çıxır, sürüşə bilməz (``transcript_pdf_text.row_mark``).
     """
-    code_name = f"{row['subject'].code}  {row['subject'].name}"
-    if row.get("legacy"):
-        code_name = f"{code_name} {_LEGACY_MARK}"
+    code_name = f"{row['subject'].code}  {row['subject'].name} {row_mark(row)}".rstrip()
     return wrap_lines(code_name, width=width, measure=lambda t: _text_width(t, size=ROW_SIZE))
 
 
@@ -522,17 +514,11 @@ def _draw_footer(sheet, data, generated_at, seal_mark=None):
         sheet.text(_MARGIN, f"{ects_label}: {data['ects_total']}", size=8.3, color=_MUTED)
         sheet.y += 17
 
-    # Köçürülmüş qiymətlərin izahı — rəsmi sənəd nədən ibarət olduğunu ÖZÜ deməlidir.
-    # Qeyd yalnız nişanlanmış sətir varsa çap olunur ki, təmiz transkriptdə
-    # mənasız hüquqi mətn yaranmasın.
-    if _has_legacy_rows(data):
-        sheet.y += 6
-        legacy_note = pgettext(
-            "registrar.pdf",
-            "%(mark)s Bu qiymət köhnə universitet sistemindən köçürülüb; dəyər mənbədən "
-            "olduğu kimi gətirilib və yenidən hesablanmayıb.",
-        ) % {"mark": _LEGACY_MARK}
-        sheet.text(_MARGIN, legacy_note, size=7.4, color=_MUTED)
+    # Nişanların izahı (köçürülmüş qiymət «*», tanınmış xarici nəticə «**») — rəsmi sənəd nədən ibarət
+    # olduğunu ÖZÜ deməlidir; qeyd yalnız nişanlanmış sətir varsa çap olunur (``mark_notes``).
+    for index, note in enumerate(mark_notes(data)):
+        sheet.y += 0 if index else 6
+        sheet.text(_MARGIN, note, size=7.4, color=_MUTED)
         sheet.y += 14
 
     sheet.ensure(96)

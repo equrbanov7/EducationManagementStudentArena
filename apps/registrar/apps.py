@@ -25,6 +25,12 @@ def _register_retake_media():
     register_media_policy(RETAKE_DOCUMENT_PREFIX, check_document_access)
     register_media_policy(EXAM_CHANCE_DOCUMENT_PREFIX, check_chance_document_access)
 
+    # «Xarici nəticənin tanınması» sənədi (2026-10-25) — tələbə + açarlı heyət (struktur əhatəsi).
+    from .credit_recognition import check_document_access as check_recognition_document_access
+    from .models.external_recognition import RECOGNITION_DOCUMENT_PREFIX
+
+    register_media_policy(RECOGNITION_DOCUMENT_PREFIX, check_recognition_document_access)
+
 
 def _transfer_student_group(**kwargs):
     # Resolve the owning service at call time; tests and overrides keep working.

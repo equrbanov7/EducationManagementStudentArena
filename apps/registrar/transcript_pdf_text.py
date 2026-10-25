@@ -80,4 +80,64 @@ def row_height(line_count: int) -> float:
     return 12 + (max(1, line_count) - 1) * ROW_LINE_H
 
 
-__all__ = ["LINE_FACTOR", "ROW_LINE_H", "ROW_SIZE", "line_height", "row_height", "wrap_lines"]
+#: Rəsmi transkriptdə köçürülmüş sətrin nişanı (ekranın qlifi PDF şriftində yoxdur).
+LEGACY_MARK = "*"
+#: Tanınmış xarici nəticə (Erasmus+ / mübadilə / başqa ali məktəb — ``credit_recognition``), 2026-10-25.
+RECOGNIZED_MARK = "**"
+
+
+def row_mark(row) -> str:
+    """Sətrin nişanı: köçürülmüş qiymət «*», tanınmış xarici nəticə «**», əks halda boş."""
+    if row.get("legacy"):
+        return LEGACY_MARK
+    return RECOGNIZED_MARK if row.get("recognition") else ""
+
+
+def _marks_in(data) -> set:
+    return {
+        row_mark(row)
+        for year in data.get("years", ())
+        for semester in year.get("semesters", ())
+        for row in semester.get("rows", ())
+    }
+
+
+def mark_notes(data) -> list[str]:
+    """Sənəddə işlənmiş nişanların izah cümlələri (yalnız nişanlanmış sətir varsa)."""
+    from django.utils.translation import pgettext
+
+    marks = _marks_in(data)
+    notes = []
+    if LEGACY_MARK in marks:
+        notes.append(
+            pgettext(
+                "registrar.pdf",
+                "%(mark)s Bu qiymət köhnə universitet sistemindən köçürülüb; dəyər mənbədən "
+                "olduğu kimi gətirilib və yenidən hesablanmayıb.",
+            )
+            % {"mark": LEGACY_MARK}
+        )
+    if RECOGNIZED_MARK in marks:
+        notes.append(
+            pgettext(
+                "registrar.pdf",
+                "%(mark)s Başqa ali məktəbdə (Erasmus+, mübadilə və s.) keçilmiş fənnin tanınmış nəticəsi; "
+                "bal universitetin 100 ballıq şkalasına çevrilib.",
+            )
+            % {"mark": RECOGNIZED_MARK}
+        )
+    return notes
+
+
+__all__ = [
+    "LEGACY_MARK",
+    "LINE_FACTOR",
+    "RECOGNIZED_MARK",
+    "ROW_LINE_H",
+    "ROW_SIZE",
+    "line_height",
+    "mark_notes",
+    "row_height",
+    "row_mark",
+    "wrap_lines",
+]

@@ -141,7 +141,7 @@ yox; hədəf `style-src-attr`-dan tam çıxmaqdır, bax csp.py).{% endcomment %}
             <h2 class="msx-electives__title" id="msx-exempt-title"><i class="fas fa-user-check" aria-hidden="true"></i> {% trans "Azad edildiyiniz fənlər" context "profile.subjects" %}</h2>
             <ul class="msx-elective__options">
                 {% for item in sec.exempt_subjects %}
-                <li class="msx-elective__option">{{ item.name }} · <b>{% trans "Azad edilib" context "profile.subjects" %}</b></li>
+                <li class="msx-elective__option">{{ item.name }} · {% if item.recognized %}{% include "registrar/partials/_recognition_mark.html" with recognition=item.recognized %} <b>{{ item.recognized.score }} ({{ item.recognized.letter }})</b>{% else %}<b>{% trans "Azad edilib" context "profile.subjects" %}</b>{% endif %}</li>
                 {% endfor %}
             </ul>
             <p class="msx-elective__note"><i class="fas fa-circle-info" aria-hidden="true"></i> {% trans "Bu fənlər üzrə jurnal, davamiyyət və imtahan tələbi sizə aid deyil; qrupunuz dəyişmir. Sual yaranarsa dekanlığa müraciət edin." context "profile.subjects" %}</p>

@@ -15,8 +15,9 @@ jurnalından çıxır. Siyahını jurnalı açan hər kəs görür; «Bərpa et�
         {% for item in exempt_rows %}
         <li class="jse-item">
             <span class="jse-item__name">{{ item.student|journal_name }}</span>
+            {% if item.recognized %}<span class="recognition-mark"><i class="fas fa-earth-europe" aria-hidden="true"></i> {% trans "Azad (xarici nəticə tanınıb)" context "registrar.recognition" %}</span>{% endif %}
             <span class="jse-item__meta">{{ item.reason }} · {{ item.decided_by|default:"—" }} · {{ item.decided_at|date:"d.m.Y H:i" }}</span>
-            {% if can_exempt %}
+            {% if can_exempt and not item.recognized %}
             <button type="button" class="jse-restore" data-jse-restore="{{ item.decision_id }}">
                 <i class="fas fa-rotate-left" aria-hidden="true"></i>
                 <span data-jse-restore-label>{% trans "Bərpa et" context "registrar.subject_exempt" %}</span>

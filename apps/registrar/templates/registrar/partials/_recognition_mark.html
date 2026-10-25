@@ -1,0 +1,10 @@
+{% load i18n %}
+{% comment %}«Xarici nəticə tanınıb» nişanı (2026-10-25) — transkript, «Ümumi tədris məlumatı», «Fənlərim».
+Çağırış: {% include "registrar/partials/_recognition_mark.html" with recognition=row.recognition %}
+Detal (proqram, qurum, ölkə, xarici fənn / kredit / qiymət) `title`-dadır; üslub `static/css/recognition_mark.css` (base.html).{% endcomment %}
+{% if recognition %}
+<span class="recognition-mark" tabindex="0" role="note"
+      title="{{ recognition.program_label }} · {{ recognition.institution }} ({{ recognition.country }})
+{% trans "Xarici fənn" context "registrar.recognition" %}: {{ recognition.foreign_subject }} · {% trans "kredit" context "registrar.recognition" %} {{ recognition.foreign_credit|floatformat:'-2' }} · {% trans "qiymət" context "registrar.recognition" %} {{ recognition.foreign_grade }}
+{% trans "Təhsil müddəti" context "registrar.recognition" %}: {{ recognition.study_period }}"><i class="fas fa-earth-europe" aria-hidden="true"></i> {{ recognition.label }}</span>
+{% endif %}
