@@ -32,6 +32,7 @@ from __future__ import annotations
 import datetime
 
 from django.apps import apps as django_apps
+from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import pgettext
@@ -419,21 +420,50 @@ def check_slot(*, offering, cleaned, exclude_id=None) -> dict:
     return errors
 
 
-def scoped_teacher_rows(offerings) -> list[dict]:
-    """«Müəllim cədvəli» seçicisi: açılışların jurnal sahibləri + slotlarını aparan müəllimlər (TƏK sorğu).
+def scoped_assignments(user, organization, *, period, permission=SCHEDULE_PERMISSION, widened=False):
+    """Aktorun əhatəsinə düşən dövr bölgüsü (``workload.TeacherAssignment``) — müəllim seçicisinin (a) qolu.
+
+    Əhatə :func:`scoped_offerings` ilə eyni məntiqdədir: org-geniş / sahib / superuser — dövrün bütün bölgüsü;
+    unit əhatəsi — sətrin qrupu alt-ağacda olan (və ya ``widened``: fənni aktorun kafedrasına aid olan) bölgü.
+    Əhatəsiz aktor üçün ``none()`` (fail-closed); təşkilat / dövr yoxdursa ``None``."""
+    from . import schedule_teachers
+
+    if organization is None or period is None:
+        return None
+    queryset = schedule_teachers.assignments_for_period(organization, period)
+    if getattr(user, "is_superuser", False) or getattr(organization, "owner_id", None) == getattr(user, "pk", None):
+        return queryset
+    scope = actor_scope(user, organization, permission)
+    if not scope.has_structure_access:
+        return queryset.none()
+    if scope.is_org_wide:
+        return queryset
+    units = _org_unit_model().objects.filter(organization=organization).filter(scope.unit_subtree_q())
+    assignments_q = Q(row__groups__in=units.values("pk"))
+    if widened:
+        chair_q = _chair_subject_q(organization, scope, prefix="row__subject__")
+        if chair_q is not None:
+            assignments_q |= chair_q
+    return queryset.filter(assignments_q)
+
+
+def scoped_teacher_rows(offerings, *, organization=None, period=None, assignments=None, today=None) -> list[dict]:
+    """«Müəllim cədvəli» seçicisi: seçilmiş DÖVRDƏ aktiv müəllimlər (sahib 2026-10-25, bax :mod:`schedule_teachers`).
 
     ``offerings`` — aktorun əhatəsindəki açılış queryset-i (``scoped_offerings``). Bölünmüş tədrisdə
     seminarı aparan assistentin öz açılışı olmaya bilər; o da siyahıda olmalıdır ki, koordinator onun
-    həftəsini görsün (``get_teacher_schedule`` effektiv müəllimə görə süzür)."""
-    from django.contrib.auth import get_user_model
-    from django.db.models import Q
+    həftəsini görsün (``get_teacher_schedule`` effektiv müəllimə görə süzür).
 
-    slot_teachers = ScheduleSlot.objects.filter(
-        offering__in=offerings.values("pk"), instructor__isnull=False, is_parked=False
-    ).values("instructor_id")
-    users = get_user_model().objects.filter(
-        Q(pk__in=offerings.exclude(instructor__isnull=True).values("instructor_id")) | Q(pk__in=slot_teachers)
-    )
+    ``organization`` + ``period`` verilibsə: cari/gələcək dövrdə yalnız aktiv hesab + aktiv müəllim üzvlüyü olanlar,
+    bitmiş dövrdə o vaxt dərs deyən hər kəs; ``assignments`` — (a) qolu (``scoped_assignments``). Dövrsüz çağırış
+    əvvəlki davranışı saxlayır (qapısız, yalnız açılış + slot müəllimləri)."""
+    from . import schedule_teachers
+
+    if organization is not None and period is not None:
+        return schedule_teachers.period_teacher_rows(
+            organization=organization, period=period, offerings=offerings, assignments=assignments, today=today
+        )
+    users = get_user_model().objects.filter(schedule_teachers.period_teacher_q(offerings=offerings))
     rows = {}
     for user in users:
         full = (user.get_full_name() or "").strip()
@@ -456,6 +486,7 @@ __all__ = [
     "parse_payload",
     "period_window_error",
     "read_permission",
+    "scoped_assignments",
     "scoped_groups",
     "scoped_offerings",
     "scoped_teacher_rows",

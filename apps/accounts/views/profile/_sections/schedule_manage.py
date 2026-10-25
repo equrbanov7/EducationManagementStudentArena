@@ -98,12 +98,15 @@ def _periods(section, request, organization):
     return period
 
 
-def _teachers_in_scope(offerings_qs):
-    """Əhatədəki açılışların müəllimləri + slotlarını aparan müəllimlər (müəllim görünüşü seçicisi).
+def _teachers_in_scope(offerings_qs, *, organization=None, period=None, assignments=None):
+    """Seçilmiş dövrdə AKTİV müəllimlər (müəllim görünüşü seçicisi; sahib 2026-10-25).
 
-    2026-09-25 (bölünmüş tədris): seminarı aparan assistentin öz açılışı olmaya bilər — o da
-    siyahıdadır; hesab registrar-dadır (TƏK sorğu, əvvəlki kimi)."""
-    return schedule_manage.scoped_teacher_rows(offerings_qs)
+    Dövrün bölgüsü / jurnal sahibi / dərsi / slotu olan müəllimlər; cari dövrdə əlavə olaraq aktiv hesab +
+    aktiv müəllim üzvlüyü, bitmiş dövrdə o vaxt dərs deyən hər kəs. 2026-09-25 (bölünmüş tədris): seminarı
+    aparan assistentin öz açılışı olmaya bilər — o da siyahıdadır. Hesab registrar-dadır (``schedule_teachers``)."""
+    return schedule_manage.scoped_teacher_rows(
+        offerings_qs, organization=organization, period=period, assignments=assignments
+    )
 
 
 def _filter_fields(section, *, groups, teachers, view_mode, group, teacher):
@@ -223,7 +226,10 @@ def _selection(section, request, organization, period, *, permission):
     scoped = schedule_manage.scoped_offerings(
         request.user, organization, period=period, permission=permission, widened=True
     )
-    teachers = _teachers_in_scope(scoped)
+    assignments = schedule_manage.scoped_assignments(
+        request.user, organization, period=period, permission=permission, widened=True
+    )
+    teachers = _teachers_in_scope(scoped, organization=organization, period=period, assignments=assignments)
     section["scope_teachers"] = teachers
 
     view_mode = "teacher" if (request.GET.get(PREFIX + "view") or "").strip() == "teacher" else "group"
