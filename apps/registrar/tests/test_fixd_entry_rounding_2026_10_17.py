@@ -41,6 +41,9 @@ class EntryRoundingDisplayTest(SimpleTestCase):
         self.assertIsNone(parts.rounded_from)
         html = render_to_string("registrar/partials/_entry_parts.html", {"parts": parts})
         self.assertNotIn("data-entry-rounding", html)
+        # Sahib 2026-10-26: cəm (midterm daxil) yuvarlaqlaşdırma olmasa da HƏMİŞƏ görünür.
+        self.assertIn("data-entry-total", html)
+        self.assertIn("<strong>30</strong>", html)
 
     def test_capped_sum_is_not_shown_as_rounding(self):
         parts = _parts("10", activity="10", midterm="25.5", cap=40)
