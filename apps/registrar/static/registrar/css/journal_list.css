@@ -236,3 +236,6 @@
     .jl-page .jl-skel .jl-table tbody tr.jl-skel-row td { display: none; padding: 0; border: none; height: auto; }
     .jl-page .jl-skel .jl-table tbody tr.jl-skel-row td:nth-child(2) { display: block; }
 }
+
+/* İntensiv kurs (2026-10-25): qrupsuz jurnalın nişanı. */
+.jl-intensive { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--ems-warning-50, #fffbeb); color: var(--ems-warning-700, #b45309); border: 1px solid var(--ems-warning-200, #fde68a); }

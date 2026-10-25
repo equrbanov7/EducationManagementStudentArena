@@ -3151,3 +3151,18 @@ msgstr "Fayl çıxarıldı."
 #, python-format
 msgid "kənar, ştat: %(chair)s"
 msgstr "kənar, ştat: %(chair)s"
+
+msgid "İntensiv"
+msgstr "İntensiv"
+
+msgid "Jurnal"
+msgstr "Jurnal"
+
+msgid "saat"
+msgstr "saat"
+
+msgid "Əvvəlcə kafedranı seçin."
+msgstr "Əvvəlcə kafedranı seçin."
+
+msgid "İntensiv kurs ləğv edilsin? (yalnız jurnalda dərs yoxdursa mümkündür)"
+msgstr "İntensiv kurs ləğv edilsin? (yalnız jurnalda dərs yoxdursa mümkündür)"

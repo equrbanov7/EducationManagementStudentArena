@@ -1,0 +1,81 @@
+{% load i18n %}
+{% comment %}
+«İntensiv kurs» dialoqu (sahib 2026-10-25) — «Yük bölgüsü» bölməsinin İÇİNDƏ (AJAX swap-da itməsin).
+
+Bir addımda: tapşırıq sətri (row_kind=intensive) + müəllim bölgüsü + qrupsuz jurnal (tarix aralığı, saat) +
+seçilmiş tələbələrin qeydiyyatı. Seçicilər server-backed `EMSSearchableSelect`-dir (native select yox);
+məntiq `workload_intensive.js`-dədir, URL-lər data-atributlardadır (xarici JS template engine-dən keçmir).
+{% endcomment %}
+<div class="modal fade wl-modal wli" id="wlIntensiveModal" tabindex="-1" aria-hidden="true" aria-labelledby="wlIntensiveTitle"
+     data-wli-modal
+     data-lookup-url="{{ workload_distribution_section.intensive_lookup_url }}"
+     data-action-url="{{ workload_distribution_section.action_url }}"
+     data-text-ok="{% trans 'Yazılacaq' context 'accounts.workload_intensive' %}"
+     data-text-retake="{% trans 'təkrar (əvvəl kəsilib)' context 'accounts.workload_intensive' %}"
+     data-text-error="{% trans 'Əməl alınmadı — yenidən cəhd edin.' context 'accounts.workload_intensive' %}"
+     data-text-done="{% trans 'İntensiv kurs açıldı: jurnal yaradıldı, tələbələr yazıldı, müəllimin yükünə əlavə olundu.' context 'accounts.workload_intensive' %}">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="wlIntensiveTitle">{% trans "İntensiv kurs" context "accounts.workload_intensive" %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'accounts.workload' %}"></button>
+      </div>
+      <div class="modal-body">
+        <p class="wli__intro">{% trans "Az saatlı, 1–2 tələbə üçün qısa kurs. Saat müəllimin yükünə «İntensiv» kimi düşür, jurnal açılır və tələbələr yazılır. Müəllim dərsləri tarix aralığında istədiyi günlərə yazır (bir gündə bir neçə dərs də olar); cədvəl tələb olunmur." context "accounts.workload_intensive" %}</p>
+        <form class="wl-form" data-wli-form novalidate>
+          <div class="wl-form__grid">
+            <div class="wl-form__field wli__wide">
+              <span>{% trans "Fənn" context "accounts.workload_intensive" %}</span>
+              {% trans "Fənn adı və ya kodu…" context "accounts.workload_intensive" as wli_subject_ph %}
+              {% include "accounts/profile/sections/_searchable_picker.html" with prefix="wli" hook="wli-subject" placeholder=wli_subject_ph %}
+            </div>
+            <div class="wl-form__field wli__wide">
+              <span>{% trans "Müəllim" context "accounts.workload_intensive" %}</span>
+              {% trans "Müəllimin adı…" context "accounts.workload_intensive" as wli_teacher_ph %}
+              {% include "accounts/profile/sections/_searchable_picker.html" with prefix="wli" hook="wli-teacher" placeholder=wli_teacher_ph %}
+            </div>
+            <div class="wl-form__field wli__wide">
+              <span>{% trans "Tələbələr" context "accounts.workload_intensive" %}</span>
+              {% trans "Ad, soyad və ya qrup…" context "accounts.workload_intensive" as wli_students_ph %}
+              {% include "accounts/profile/sections/_searchable_picker.html" with prefix="wli" hook="wli-students" placeholder=wli_students_ph %}
+            </div>
+            <label class="wl-form__field">
+              <span>{% trans "Mühazirə saatı" context "accounts.workload_intensive" %}</span>
+              <input type="number" name="lecture_hours" min="0" max="120" step="1" value="0" inputmode="numeric">
+            </label>
+            <label class="wl-form__field">
+              <span>{% trans "Seminar saatı" context "accounts.workload_intensive" %}</span>
+              <input type="number" name="seminar_hours" min="0" max="120" step="1" value="10" inputmode="numeric">
+            </label>
+            <label class="wl-form__field">
+              <span>{% trans "Başlama tarixi" context "accounts.workload_intensive" %}</span>
+              <input type="date" name="starts_on" required>
+            </label>
+            <label class="wl-form__field">
+              <span>{% trans "Bitmə tarixi" context "accounts.workload_intensive" %}</span>
+              <input type="date" name="ends_on" required>
+            </label>
+            <label class="wl-form__field wli__wide">
+              <span>{% trans "Səbəb" context "accounts.workload_intensive" %}</span>
+              <input type="text" name="note" maxlength="255" required
+                     placeholder="{% trans 'məs. yenidən tədris, akademik fərq' context 'accounts.workload_intensive' %}">
+            </label>
+          </div>
+          <label class="wli__release">
+            <input type="checkbox" name="release_source" value="1">
+            <span>{% trans "Tələbə bu fənni bu semestr adi jurnalda keçirsə — oradan intensivə köçür (ikiqat qiymət olmasın; köhnə bal mənbədə saxlanılır, qayıb saatı köçür)" context "accounts.workload_intensive" %}</span>
+          </label>
+          <ul class="wli__students" data-wli-students aria-live="polite"></ul>
+          <p class="wli__error" role="alert" data-wli-error hidden></p>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="wl-btn wl-btn--ghost" data-bs-dismiss="modal">{% trans "İmtina" context "accounts.workload_intensive" %}</button>
+        <button type="button" class="wl-btn wl-btn--primary" data-wli-submit>
+          <i class="fas fa-bolt" aria-hidden="true"></i>
+          <span>{% trans "İntensiv kursu aç" context "accounts.workload_intensive" %}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

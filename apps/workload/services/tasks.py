@@ -23,6 +23,7 @@ from ..constants import (
     TaskStatus,
 )
 from ..models import TeacherAssignment, TeachingTask, TeachingTaskRow, WorkloadAmendment
+from .intensive import ensure_not_intensive
 from .people import resolve_chair
 from .plan_calendar import season_from_period as _season_from_period
 from .scoping import WorkloadDenied, ensure_can_manage
@@ -60,7 +61,8 @@ ROW_SCALAR_FIELDS = (
 
 _CHOICE_FIELDS = {
     "season": {value for value, _ in Season.choices},
-    "row_kind": {value for value, _ in RowKind.choices},
+    # intensiv sətir yalnız services.intensive ilə yaranır (2026-10-25)
+    "row_kind": {value for value, _ in RowKind.choices if value != RowKind.INTENSIVE},
     "education_form": {value for value, _ in EducationForm.choices},
     "degree_level": {value for value, _ in DegreeLevel.choices},
 }
@@ -338,6 +340,7 @@ def save_row(
 ) -> TeachingTaskRow:
     """Sətir yaradır və ya redaktə edir (draft/returned; amended — yalnız düzəlişin hədəf sətri)."""
     ensure_can_manage(actor, task.chair_id)
+    ensure_not_intensive(row)  # intensiv kurs sətri yalnız services.intensive ilə (2026-10-25)
     _ensure_editable(task, row, new_row_in_amendment=new_row_in_amendment)
 
     row = row or TeachingTaskRow(organization=task.organization, task=task)
@@ -440,6 +443,7 @@ def save_row(
 @transaction.atomic
 def delete_row(*, task: TeachingTask, row: TeachingTaskRow, actor, request=None) -> None:
     ensure_can_manage(actor, task.chair_id)
+    ensure_not_intensive(row)
     _ensure_editable(task, row)
     if row.task_id != task.pk:
         raise WorkloadDenied("workload.row_foreign", "Sətir bu tapşırığa aid deyil.")

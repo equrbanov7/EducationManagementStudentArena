@@ -3155,3 +3155,18 @@ msgstr "Dosya kaldırıldı."
 #, python-format
 msgid "kənar, ştat: %(chair)s"
 msgstr "dış, kadro: %(chair)s"
+
+msgid "İntensiv"
+msgstr "Yoğun"
+
+msgid "Jurnal"
+msgstr "Defter"
+
+msgid "saat"
+msgstr "saat"
+
+msgid "Əvvəlcə kafedranı seçin."
+msgstr "Önce bölümü seçin."
+
+msgid "İntensiv kurs ləğv edilsin? (yalnız jurnalda dərs yoxdursa mümkündür)"
+msgstr "Yoğun ders iptal edilsin mi? (yalnızca defterde ders yoksa mümkündür)"

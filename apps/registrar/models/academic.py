@@ -28,6 +28,7 @@ from .catalog_meta import (
     owning_chair_field,
     subject_kind_field,
 )
+from .offering_format import OfferingFormatFields, offering_format_constraints
 
 
 class DegreeLevel(models.TextChoices):
@@ -252,7 +253,7 @@ class StudentAcademicRecord(ReferenceIdentityValidationMixin, AdmissionRecordFie
         return f"{self.student_id} · {self.program.display_label}"
 
 
-class CourseOffering(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
+class CourseOffering(ReferenceIdentityValidationMixin, OfferingFormatFields, UUIDModel, TimeStampedModel):
     """A subject taught in a specific semester for a specific group (a section).
 
     Optionally links to the LMS ``courses.Course`` so the subject's content
@@ -302,6 +303,7 @@ class CourseOffering(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedMod
             models.UniqueConstraint(
                 fields=["organization", "subject", "period", "group"], name="uniq_offering_subject_period_group"
             ),
+            *offering_format_constraints(),  # intensiv kurs: qrupsuz + tarix aralığı (offering_format.py)
         ]
         indexes = [models.Index(fields=["organization", "period"])]
 

@@ -96,6 +96,7 @@
                 return (
                     "<tr>" +
                     "<td>" + esc(row.subject) +
+                    (row.is_intensive ? ' <span class="wlm-intensive">' + esc(gettext("İntensiv")) + "</span>" : "") +
                     (row.chair_name ? '<div class="wlm-table__chair">' + esc(row.chair_name) + "</div>" : "") +
                     "</td>" +
                     "<td>" + esc(row.groups) + "</td>" +

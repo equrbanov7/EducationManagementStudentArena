@@ -592,3 +592,7 @@ from .public_documents import *  # noqa: E402,F401,F403
 from .public_documents import __all__ as _document_exports  # noqa: E402
 
 __all__ += [name for name in _document_exports if name not in __all__]
+from .public_intensive import *  # noqa: E402,F401,F403 — «İntensiv kurs» (2026-10-25)
+from .public_intensive import __all__ as _intensive_exports  # noqa: E402
+
+__all__ += [name for name in _intensive_exports if name not in __all__]

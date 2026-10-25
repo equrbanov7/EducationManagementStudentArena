@@ -183,6 +183,15 @@ class TeachingTaskRow(UUIDModel, TimeStampedModel, OrderedModel):
         max_length=16, choices=RowReviewStatus.choices, default=RowReviewStatus.PENDING, db_index=True
     )
     note = models.TextField(blank=True)
+    # Sahib 2026-10-25: «İntensiv kurs» sətrinin YEGANƏ jurnalı (qrupsuz açılış — fənn+dövr+qrup açarı onu tapmır).
+    intensive_offering = models.ForeignKey(
+        "registrar.CourseOffering",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="intensive_rows",
+        help_text="Yalnız row_kind=intensive: bu sətrin intensiv kurs açılışı.",
+    )
 
     class Meta:
         verbose_name = pgettext_lazy(_CTX, "tapşırıq sətri")
@@ -195,6 +204,10 @@ class TeachingTaskRow(UUIDModel, TimeStampedModel, OrderedModel):
 
     def __str__(self):
         return self.subject_label
+
+    @property
+    def is_intensive(self) -> bool:
+        return self.row_kind == RowKind.INTENSIVE
 
     # ── Göstəriş köməkçiləri ────────────────────────────────────────────────
     @property

@@ -433,6 +433,8 @@ def journal_teaching_summary(offering):
         "total": total,
         "remaining": max(0, total - scheduled_total) if total else None,
         "over": bool(total and scheduled_total > total),
+        # İntensiv kurs (2026-10-25): keçirilmiş saat plan saatına çatıb — başlıqda «Kurs tamamlandı».
+        "completed": bool(total and held_total >= total),
     }
 
 

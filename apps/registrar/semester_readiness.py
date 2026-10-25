@@ -100,6 +100,7 @@ def offering_issues(organization, period, *, offering_ids=None, today=None, scop
             "group__name",
             "subject__chair_unit_id",
             "subject__chair_unit__name",
+            "course_format",
         )
     )
     if not offerings:
@@ -123,7 +124,7 @@ def offering_issues(organization, period, *, offering_ids=None, today=None, scop
             issues.append("no_teacher")
         if row["id"] not in approved:
             issues.append("no_syllabus")
-        if row["id"] not in scheduled:
+        if row["id"] not in scheduled and row["course_format"] != "intensive":  # intensivdə cədvəl tələb olunmur
             issues.append("no_schedule")
         if check_journal:
             last = last_lesson.get(row["id"])

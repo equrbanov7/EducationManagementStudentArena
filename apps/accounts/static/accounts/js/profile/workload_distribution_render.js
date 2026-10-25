@@ -100,12 +100,44 @@
         );
     }
 
+    /** İntensiv kurs sətri (2026-10-25): redaktə/bölgü düymələri YOX — jurnal keçidi + «Ləğv et». */
+    function intensiveRow(row) {
+        var info = row.intensive || {};
+        var chips = (row.assignments || [])
+            .map(function (item) {
+                return '<li class="wl-assign-chip">' + esc(item.teacher_name) + " · " + esc(item.activity_label) +
+                    " · " + item.hours + "s</li>";
+            })
+            .join("");
+        return (
+            '<article class="wl-row wl-row--intensive is-complete" role="listitem" data-wl-row data-row-id="' +
+            esc(row.id) + '">' +
+            '<div class="wl-row__head"><h3 class="wl-row__subject">' + esc(row.subject) +
+            ' <span class="wl-intensive-badge">' + esc(gettext("İntensiv")) + "</span></h3>" +
+            '<div class="wl-row__actions">' +
+            (info.journal_url ? '<a class="wl-btn wl-btn--ghost" href="' + esc(info.journal_url) + '">' +
+                esc(gettext("Jurnal")) + "</a>" : "") +
+            '<button type="button" class="wl-btn wl-btn--danger" data-wl-intensive-cancel data-row-id="' +
+            esc(row.id) + '">' + esc(gettext("Ləğv et")) + "</button>" +
+            "</div></div>" +
+            '<div class="wl-row__meta"><span>' + esc(info.starts_on) + " – " + esc(info.ends_on) + "</span>" +
+            "<span>" + row.total_hours + " " + esc(gettext("saat")) + "</span>" +
+            "<span>" + esc(info.students) + " " + esc(gettext("tələbə")) + "</span>" +
+            (row.groups_text ? "<span>" + esc(row.groups_text) + "</span>" : "") +
+            (info.note ? "<span>" + esc(info.note) + "</span>" : "") +
+            "</div>" +
+            (chips ? '<ul class="wl-assign-list">' + chips + "</ul>" : "") +
+            "</article>"
+        );
+    }
+
     /** Sətir kartlarını cədvəl sahəsinə yazır. */
     Render.rows = function renderRows(host, rows, labels) {
         if (!host) return;
         labels = labels || {};
         host.innerHTML = (rows || [])
             .map(function (row) {
+                if (row.intensive) return intensiveRow(row);
                 return (
                     '<article class="wl-row' +
                     (row.teaching_complete ? " is-complete" : "") +

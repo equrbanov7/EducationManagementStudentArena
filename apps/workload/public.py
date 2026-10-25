@@ -64,6 +64,7 @@ from django.urls import reverse
 from .center_registry import known_years
 from .constants import (
     PERM_DISTRIBUTE,
+    PERM_LOAD_IMPORT,
     PERM_MANAGE,
     PERM_VIEW,
     Activity,
@@ -132,11 +133,14 @@ def build_distribution_context(
         "teachers_url": reverse("workload:teachers"),
         "options_url": reverse("workload:options"),
         "curriculum_url": reverse("workload:curriculum"),
+        # Sahib 2026-10-25: «İntensiv kurs» (kafedranın bölgü açarı və ya Tədris şöbəsinin «Dərs yükü faylı» açarı).
+        "intensive_lookup_url": reverse("workload:intensive_lookup"),
+        "can_intensive": bool(can_distribute or actor.has(PERM_LOAD_IMPORT)),
         "activities": _choice_payload(Activity.choices),
         "seasons": _choice_payload(Season.choices),
         "education_forms": _choice_payload(EducationForm.choices),
         "degree_levels": _choice_payload(DegreeLevel.choices),
-        "row_kinds": _choice_payload(RowKind.choices),
+        "row_kinds": _choice_payload([c for c in RowKind.choices if c[0] != RowKind.INTENSIVE]),
         "amendment_reasons": _choice_payload(AmendmentReason.choices),
         "norm_note": norm_rule_note(),
         "focus_row": str(parse_uuid(focus_row) or "") if focus_row else "",

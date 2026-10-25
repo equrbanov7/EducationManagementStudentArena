@@ -31,6 +31,8 @@ urlpatterns = [
     path("emel/", workload_action, name="action"),
     # Sahib 2026-10-23: Tədris şöbəsinin «Dərs yükü faylı» Excel şablonu
     path("yuk-sablonu/", load_template, name="load_template"),
+    # Sahib 2026-10-25: «İntensiv kurs» dialoqunun axtarışları (fənn / müəllim / tələbə)
+    path("intensiv/axtar/", views.intensive_lookup, name="intensive_lookup"),
     # Müəllim səthi
     path("mene/setirler/", views.my_rows, name="my_rows"),
     path("mene/ixrac/", views.my_export, name="my_export"),

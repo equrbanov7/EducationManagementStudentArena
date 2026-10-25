@@ -3219,3 +3219,18 @@ msgstr "Datei entfernt."
 #, python-format
 msgid "kənar, ştat: %(chair)s"
 msgstr "extern, Planstelle: %(chair)s"
+
+msgid "İntensiv"
+msgstr "Intensiv"
+
+msgid "Jurnal"
+msgstr "Journal"
+
+msgid "saat"
+msgstr "Std."
+
+msgid "Əvvəlcə kafedranı seçin."
+msgstr "Wählen Sie zuerst den Lehrstuhl."
+
+msgid "İntensiv kurs ləğv edilsin? (yalnız jurnalda dərs yoxdursa mümkündür)"
+msgstr "Intensivkurs stornieren? (nur möglich, wenn keine Stunden erfasst sind)"

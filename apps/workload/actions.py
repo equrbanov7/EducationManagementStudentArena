@@ -17,6 +17,7 @@ from django.views.decorators.http import require_POST
 
 from .center_registry import is_archive_year
 from .constants import ObjectionStatus, RowReviewStatus
+from .intensive_actions import INTENSIVE_HANDLERS
 from .load_actions import LOAD_HANDLERS
 from .models import LoadObjection, TaskFacultySlice, TeachingTask, TeachingTaskRow
 from .services import (
@@ -66,7 +67,8 @@ def _denied(exc: WorkloadDenied):
         "workload.no_rows",
         "workload.no_faculty_slice",
         "workload.invalid_review_state",
-    ):
+        "workload.invalid_number",
+    ) or exc.code.startswith("workload.intensive_"):
         status = 400
     return JsonResponse({"ok": False, "error": exc.code, "message": exc.message}, status=status)
 
@@ -294,6 +296,8 @@ _HANDLERS = {
     "resolve_objection": _resolve_objection,
     # Sahib 2026-10-23: Tədris şöbəsinin «Dərs yükü faylı» (load_upload / load_apply / load_cancel).
     **LOAD_HANDLERS,
+    # Sahib 2026-10-25: «İntensiv kurs» (intensive_preview / intensive_create / intensive_cancel).
+    **INTENSIVE_HANDLERS,
 }
 
 

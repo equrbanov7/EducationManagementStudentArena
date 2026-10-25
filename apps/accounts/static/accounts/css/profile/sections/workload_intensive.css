@@ -1,0 +1,93 @@
+/* «İntensiv kurs» (sahib 2026-10-25) — «Yük bölgüsü» dialoqu, sətir kartı və «Mənim dərs yüküm» nişanı.
+   Tokenlər layihənin dizayn sistemindəndir; fallback rəngləri yalnız token yoxdursa işləyir. */
+
+.wl-intensive-badge,
+.wlm-intensive {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  vertical-align: middle;
+  background: var(--ems-warning-50, #fffbeb);
+  color: var(--ems-warning-700, #b45309);
+  border: 1px solid var(--ems-warning-200, #fde68a);
+}
+
+.wl-row--intensive {
+  border-left: 3px solid var(--ems-warning-400, #f59e0b);
+}
+
+.wli__intro {
+  margin: 0 0 12px;
+  color: var(--ems-neutral-600, #4b5563);
+  font-size: 0.86rem;
+}
+
+.wli .wl-form__field.wli__wide {
+  grid-column: 1 / -1;
+}
+
+.wli .wl-form__field > span {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.wli__release {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 12px 0 4px;
+  font-size: 0.84rem;
+  color: var(--ems-neutral-700, #374151);
+}
+
+.wli__release input {
+  margin-top: 3px;
+}
+
+.wli__students {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.wli__student {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  align-items: baseline;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  border: 1px solid var(--ems-neutral-200, #e5e7eb);
+}
+
+.wli__student--ok {
+  background: var(--ems-success-50, #f0fdf4);
+  border-color: var(--ems-success-200, #bbf7d0);
+}
+
+.wli__student--conflict {
+  background: var(--ems-warning-50, #fffbeb);
+  border-color: var(--ems-warning-200, #fde68a);
+}
+
+.wli__student--blocked {
+  background: var(--ems-danger-50, #fef2f2);
+  border-color: var(--ems-danger-200, #fecaca);
+}
+
+.wli__student-note {
+  color: var(--ems-neutral-600, #4b5563);
+}
+
+.wli__error {
+  margin: 10px 0 0;
+  color: var(--ems-danger-700, #b91c1c);
+  font-size: 0.86rem;
+}

@@ -13,6 +13,7 @@ from .distribution_api import (
     teachers,
     unassign_view,
 )
+from .intensive_api import intensive_lookup
 from .teacher_api import my_export, my_rows
 
 __all__ = [
@@ -20,6 +21,7 @@ __all__ = [
     "assign",
     "confirm",
     "curriculum",
+    "intensive_lookup",
     "my_export",
     "my_rows",
     "options",

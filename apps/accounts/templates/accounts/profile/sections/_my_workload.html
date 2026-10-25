@@ -143,7 +143,7 @@ CSS/JS XARİCİ fayllardadır və `profile.html`-dən yüklənir.
       <tbody data-wlm-rows>
         {% for line in my_workload_section.lines %}
         <tr>
-          <td>{{ line.subject }}{% if line.chair_name %}<div class="wlm-table__chair">{{ line.chair_name }}</div>{% endif %}</td>
+          <td>{{ line.subject }}{% if line.is_intensive %} <span class="wlm-intensive">{% trans "İntensiv" context "registrar.intensive" %}</span>{% endif %}{% if line.chair_name %}<div class="wlm-table__chair">{{ line.chair_name }}</div>{% endif %}</td>
           <td>{{ line.groups }}</td>
           <td>{{ line.activity_label }}</td>
           <td class="wlm-table__num">{{ line.hours }}</td>
