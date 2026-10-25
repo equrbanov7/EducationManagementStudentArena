@@ -137,6 +137,13 @@
 #       dəyişdirilmir). `apply` — YALNIZ başqa kafedrada bölgüsü olub orada üzvlüyü olmayan müəllimə ƏLAVƏ
 #       (is_primary=False) müəllim üzvlüyü (ştat dəyişmir, audit); idempotent. `year` istifadə olunur.
 #       hesabat (müəllim adları) şifrəli artifaktdadır.
+#   fix_workload_overcount — dərs yükündə ARTIQ sayılan saatlar (sahib 2026-10-25: «patok dərsi olanda 30 saat 2-yə
+#       vurulmur», «seminarda da patok ola bilər», «mühazirə bir müəllimdə, seminar digərində»). Dry-run: loga YALNIZ
+#       «overcount: açar=say …»; adlı hesabat (müəllim × əvvəl/sonra yük, kateqoriyalar, qərar siyahısı) şifrəli
+#       artifaktdadır. `apply` — rəsmi düzəliş axını ilə: təkrar/vakant dublikat sətir silinir, SÜBUTLU birgə dərsin
+#       (cədvəl slotu / jurnalda eyni tarix+saat+növ, eyni müəllim) lövbərdən başqa sətirlərində həmin növ saatı 0
+#       (plan saxlanılır — jurnal saatı/sahibi dəyişmir); paylanmış sənəd yenidən təsdiqlənir (bildiriş yalnız
+#       yükü dəyişənə). `batch` = `overcount-…` + apply → həmin paketi snapshot-dan GERİ QAYTARIR. `year` istifadə olunur.
 #   audit_staff_placement — heyət yerləşdirmə auditi (sahib 2026-10-25): ŞİFRƏLİ release asset (`roster_tag` =
 #       `staff-placement-…` → bundle.zip.enc: Forma 7 + struktur siyahısı + kafedra yük faylları + manifest.json).
 #       Dry-run: loga YALNIZ saylar, adlı hesabat/CSV şifrəli artifaktda. `apply` — Forma 7 kafedrasında ƏLAVƏ
@@ -223,6 +230,7 @@ on:
           - sync_midterm_scores
           - infer_timetable_from_lessons
           - audit_cross_chair_loads
+          - fix_workload_overcount
           - audit_staff_placement
           - merge_chair_units
           - link_lesson_syllabus_weeks
@@ -260,7 +268,7 @@ on:
         required: false
         default: ""
       batch:
-        description: "reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…): geri qaytarılacaq paket id-si (undo) · legacy_delta_apply: paketin gözlənilən sha256-sı"
+        description: "reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…): geri qaytarılacaq paket id-si (undo) · legacy_delta_apply: paketin gözlənilən sha256-sı"
         required: false
         default: ""
       create_missing:
@@ -708,6 +716,17 @@ jobs:
               echo "::add-mask::$actor"
               args=(--org "$ORG" --year "$YEAR" --actor "$actor")
               ;;
+            fix_workload_overcount)
+              # Sahib 2026-10-25: artıq sayılan yük (dublikat + sübutlu birgə dərs). Adlı hesabat şifrəli artifakta.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --year "$YEAR" --actor "$actor" --report "/tmp/overcount_report_${GITHUB_RUN_ID}.md")
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^overcount-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch formatı: overcount-…" >&2; exit 2; }
+                test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
+                args=(--org "$ORG" --year "$YEAR" --actor "$actor" --undo "$BATCH")
+              fi
+              ;;
             audit_staff_placement)
               # Sahib 2026-10-25: heyət yerləşdirməsi. Adlı hesabat şifrəli artifakta; loga yalnız saylar.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -855,6 +874,18 @@ jobs:
               exit "$status"
             fi
             rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "fix_workload_overcount" ]; then
+            # Loga YALNIZ «overcount: açar=say …» sətirləri və rədd kodu; adlı hesabat şifrəli artifakta gedir.
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^overcount: [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            docker exec "$APP_CONTAINER" cat "/tmp/overcount_report_${GITHUB_RUN_ID}.md" > "$RUNNER_TEMP/report.md" 2>/dev/null || true
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
           elif [ "$COMMAND" = "infer_timetable_from_lessons" ]; then
             # Loga YALNIZ «timetable_infer: açar=say …» sətirləri (əmr ad çap etmir; yenə də süzülür) və rədd kodu;
             # sətir-sətir CSV (müəllim adları) şifrəli artifakta gedir (aşağıdakı addım).
@@ -906,7 +937,7 @@ jobs:
           rm -f "$RUNNER_TEMP/summary.log"
       - name: 🔑 Hesabat + parollar (serverdə saxla, şifrəli artifakt)
         id: creds
-        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'reconcile_teacher_roster' || github.event.inputs.command == 'audit_staff_placement' || startsWith(github.event.inputs.command, 'import_teaching_') || github.event.inputs.command == 'issue_staff_credentials' || github.event.inputs.command == 'infer_timetable_from_lessons')
+        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'reconcile_teacher_roster' || github.event.inputs.command == 'audit_staff_placement' || startsWith(github.event.inputs.command, 'import_teaching_') || github.event.inputs.command == 'issue_staff_credentials' || github.event.inputs.command == 'infer_timetable_from_lessons' || github.event.inputs.command == 'fix_workload_overcount')
         env:
           STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
         run: |
@@ -940,10 +971,10 @@ jobs:
           path: ${{ runner.temp }}/staff-out/
           retention-days: 1
       - name: 🧹 Konteynerdə müvəqqəti faylları sil
-        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'reconcile_teacher_roster' || github.event.inputs.command == 'audit_staff_placement' || startsWith(github.event.inputs.command, 'import_teaching_') || github.event.inputs.command == 'issue_staff_credentials' || github.event.inputs.command == 'infer_timetable_from_lessons')
+        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'reconcile_teacher_roster' || github.event.inputs.command == 'audit_staff_placement' || startsWith(github.event.inputs.command, 'import_teaching_') || github.event.inputs.command == 'issue_staff_credentials' || github.event.inputs.command == 'infer_timetable_from_lessons' || github.event.inputs.command == 'fix_workload_overcount')
         run: |
           # root kimi: fərqli UID-li qalıqlar (sticky /tmp) app istifadəçisi ilə silinmir.
-          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/staff_roster*.xlsx /tmp/staff_known_*.txt /tmp/staff_creds*.csv /tmp/org_structure.json /tmp/roster_report_*.md /tmp/roster_details_*.csv /tmp/teaching_task_*.xlsx /tmp/teaching_load_*.docx /tmp/timetable_infer_*.csv /tmp/staff_placement_*.zip /tmp/placement_report_*.md /tmp/placement_details_*.csv; rm -rf /tmp/teaching_report_*' || true
+          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/staff_roster*.xlsx /tmp/staff_known_*.txt /tmp/staff_creds*.csv /tmp/org_structure.json /tmp/roster_report_*.md /tmp/roster_details_*.csv /tmp/teaching_task_*.xlsx /tmp/teaching_load_*.docx /tmp/timetable_infer_*.csv /tmp/staff_placement_*.zip /tmp/placement_report_*.md /tmp/placement_details_*.csv /tmp/overcount_report_*.md; rm -rf /tmp/teaching_report_*' || true
           rm -rf "$RUNNER_TEMP/staff-out" "$RUNNER_TEMP/out.log" || true
       # ── import_timetable_docx / assign_task_rows_from_timetable (dərs cədvəli; öz addımları — digər əmrlərin
       #    axınına toxunmur). Hər ikisi eyni şifrəli timetable.docx.enc faylını oxuyur. ──────────────────────
