@@ -37,46 +37,15 @@ def transcript_policy(*, self_service: bool) -> dict:
 
 
 def approved_syllabus_offerings(organization, offerings) -> set:
-    """Təsdiqlənmiş sillabusu OLAN açılışların id dəsti — TƏK sorğu.
+    """Tələbəyə təsdiqlənmiş sillabusu GÖSTƏRİLƏN açılışların id dəsti — TƏK sorğu.
 
-    Ekran 10 (tələbə kabineti) fənn kartlarında «Sillabusa bax» keçidi
-    göstərir; sətir-sətir ``_student_syllabus_available`` çağırmaq hər fənn
-    üçün 2–3 sorğu deməkdir (N+1). Burada dosye axtarışının İLK İKİ pilləsi
-    (offering üzrə, sonra subject+period üzrə) toplu şəkildə həll olunur;
-    üçüncü (semestrsiz legacy) pillə kabinet kartında QƏSDƏN axtarılmır — o,
-    jurnalın öz banneri üçündür.
-
-    README §8/9: yalnız ``APPROVED`` versiya sayılır.
+    Ekran 10 (tələbə kabineti) fənn kartlarında «Sillabus (təsdiqlənmiş)» keçidi. Qayda oxu səthi ilə EYNİDİR
+    (``apps.syllabus.public.student_syllabus_map``, sahib 2026-10-26): açılış → fənn + dövr → fənn + müəllim →
+    eyni müəllimin eyni dövrdəki başqa açılışı (ana qrup ↔ bölmə qrupu); yalnız təsdiqlənmiş versiya.
     """
-    from django.db.models import Q
+    from apps.syllabus.public import student_syllabus_map
 
-    from apps.syllabus.models import Syllabus
-    from apps.syllabus.public import SyllabusStatus
-
-    offerings = [offering for offering in offerings if offering is not None]
-    if organization is None or not offerings:
-        return set()
-    offering_ids = {offering.id for offering in offerings}
-    subject_ids = {offering.subject_id for offering in offerings}
-    rows = (
-        Syllabus.objects.filter(organization=organization, is_active=True)
-        .filter(Q(offering_id__in=offering_ids) | Q(offering__isnull=True, subject_id__in=subject_ids))
-        .values_list("offering_id", "subject_id", "period_id", "approved_version__status")
-    )
-    by_offering: set = set()
-    by_subject_period: set = set()
-    for offering_id, subject_id, period_id, status in rows:
-        if status != SyllabusStatus.APPROVED.value:
-            continue
-        if offering_id is not None:
-            by_offering.add(offering_id)
-        else:
-            by_subject_period.add((subject_id, period_id))
-    return {
-        offering.id
-        for offering in offerings
-        if offering.id in by_offering or (offering.subject_id, offering.period_id) in by_subject_period
-    }
+    return set(student_syllabus_map(organization, offerings))
 
 
 def other_period_subject_rows(organization, record, period, semester_number, existing_rows):

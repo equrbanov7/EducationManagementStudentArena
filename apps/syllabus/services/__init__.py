@@ -75,6 +75,7 @@ from .scoping import (  # noqa: F401
     resolve_actor,
 )
 from .section_shape import SectionShapeError, normalize_section_data  # noqa: F401
+from .student_lookup import student_syllabus_for_offering, student_syllabus_map  # noqa: F401
 from .versioning import (  # noqa: F401
     ESCALATION_CODE,
     STRUCTURAL_SECTIONS,
@@ -97,6 +98,8 @@ from .workflow import (  # noqa: F401
 )
 
 __all__ = [
+    "student_syllabus_for_offering",
+    "student_syllabus_map",
     "ACTION_STATES",
     "ESCALATION_CODE",
     "GROUP_CHAIR",

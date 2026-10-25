@@ -500,8 +500,7 @@ def _student_syllabus_available(offering) -> bool:
     """
     from apps.syllabus import public as syllabus_services
 
-    syllabus = syllabus_services.syllabus_for_offering_obj(offering)
-    return syllabus_services.approved_version_for(syllabus) is not None
+    return offering.id in syllabus_services.student_syllabus_map(offering.organization_id, [offering])
 
 
 def _empty_section() -> dict:

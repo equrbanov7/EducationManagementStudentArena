@@ -64,7 +64,13 @@ class ZoneMiddlewareTest(ViewAsTestBase):
 
     @override_settings(**ZONE)
     def test_own_schedule_calendar_transcript_stay_open_outside(self):
-        for path in ("/jurnal/cedvel/", "/jurnal/transkript.pdf"):
+        for path in (
+            "/jurnal/cedvel/",
+            "/jurnal/transkript.pdf",
+            # Sahib 2026-10-26: kabinetdəki «Sillabus (təsdiqlənmiş)» kənardan da açılır (view icazəni yoxlayır).
+            "/jurnal/00000000-0000-0000-0000-000000000001/sillabus.pdf",
+            "/jurnal/00000000-0000-0000-0000-000000000001/sillabus.json",
+        ):
             response = self._get(self.student, path, self.EXT)
             self.assertNotEqual(response.status_code, 403, path)
         for path in (
@@ -75,6 +81,8 @@ class ZoneMiddlewareTest(ViewAsTestBase):
             # URL auditi A11 (2026-10-10): silinmiş yollar allow-list-dən də çıxdı.
             "/jurnal/teqvim/",
             "/jurnal/cedvel/export.ics",
+            "/jurnal/00000000-0000-0000-0000-000000000001/sillabus.pdf/x",
+            "/jurnal/00000000-0000-0000-0000-000000000001/export.xlsx",
         ):
             self.assertEqual(self._get(self.teacher, path, self.EXT).status_code, 403, path)
 

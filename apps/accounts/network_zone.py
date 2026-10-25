@@ -36,6 +36,7 @@ Kənar qat (nginx) eyni iki qaydanı IP-yə görə TƏKRAR tətbiq edir (defense
 from __future__ import annotations
 
 import logging
+import re
 
 from django.conf import settings
 from django.http import HttpResponseForbidden, JsonResponse
@@ -167,6 +168,9 @@ def _is_logout_path(path: str) -> bool:
 #: nginx `docker/nginx/nginx.conf`-da eyni siyahı saxlanır. URL auditi A11 (2026-10-10):
 #: `teqvim/` (təqvim kabinetdədir) və `cedvel/export.ics` (iCal ləğv edildi) silindi.
 JOURNAL_EXTERNAL_OPEN_PATHS = frozenset({"/jurnal/cedvel/", "/jurnal/transkript.pdf"})
+#: Sahib 2026-10-26: tələbə kabinetindəki «Sillabus (təsdiqlənmiş)» kənardan açılmırdı («universitet şəbəkəsi»).
+#: Təsdiqlənmiş sillabusun OXUNUŞU jurnal deyil — view özü icazəni (qeydiyyat / müəllim) fail-closed yoxlayır.
+JOURNAL_EXTERNAL_OPEN_RE = re.compile(r"^/jurnal/[0-9a-f-]{36}/sillabus\.(pdf|json)$")
 
 
 #: Sahib 2026-10-25: «İmtahan balının daxil edilməsi» ekranı və onun API-ləri (forma, qaralama, fayl idxalı,
@@ -181,7 +185,9 @@ def _journal_path(path: str, section: str = "") -> bool:
         return True
     if section == EXAM_SCORE_SECTION and path.startswith("/accounts/profile"):
         return True
-    return path.startswith("/jurnal/") and path not in JOURNAL_EXTERNAL_OPEN_PATHS
+    if path in JOURNAL_EXTERNAL_OPEN_PATHS or JOURNAL_EXTERNAL_OPEN_RE.match(path):
+        return False
+    return path.startswith("/jurnal/")
 
 
 REASON_JOURNAL = "journal_internal_only"

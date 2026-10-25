@@ -66,13 +66,17 @@ def _resolve(request, offering_id):
     if mode is None:
         raise Http404
 
-    syllabus = syllabus_services.syllabus_for_offering(
-        organization=offering.organization,
-        offering_id=offering.id,
-        subject_id=offering.subject_id,
-        period_id=offering.period_id,
-        instructor_id=offering.instructor_id,
-    )
+    if mode in (MODE_STUDENT, MODE_OBSERVER):
+        # Kabinet keçidi ilə EYNİ qayda — yalnız təsdiqlənmiş dosyelər arasında pillə seçimi (2026-10-26).
+        syllabus = syllabus_services.student_syllabus_for_offering(offering.organization, offering)
+    else:
+        syllabus = syllabus_services.syllabus_for_offering(
+            organization=offering.organization,
+            offering_id=offering.id,
+            subject_id=offering.subject_id,
+            period_id=offering.period_id,
+            instructor_id=offering.instructor_id,
+        )
     if syllabus is None:
         raise Http404
 

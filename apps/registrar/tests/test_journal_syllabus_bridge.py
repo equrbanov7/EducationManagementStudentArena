@@ -479,3 +479,45 @@ class JournalSyllabusBridgeTest(TestCase):
 
         self.assertIn(ASSESSMENT_NOTE_UNSURFACED, codes)
         self.assertIn(EXAM_QUESTIONS_UNSURFACED, codes)
+
+
+class StudentSyllabusTiersTest(JournalSyllabusBridgeTest):
+    """Sahib 2026-10-26: digər fənlərdə də sillabus görünsün — tələbə qaydası (təsdiqlənmiş + pillələr)."""
+
+    def test_split_group_sibling_offering_syllabus_is_shown(self):
+        """Tələbə ana qrupun jurnalındadır, sillabus eyni müəllimin bölmə qrupunun açılışına bağlıdır."""
+        with bypass_rls():
+            parent = OrgUnit.objects.create(
+                organization=self.org, name="JSB-G", slug="jsb-g", unit_type=OrgUnitType.GROUP
+            )
+            parent_offering = registrar_services.get_or_create_offering(
+                organization=self.org, subject=self.subject, period=self.period, group=parent
+            )
+            parent_offering.instructor = self.teacher
+            parent_offering.save(update_fields=["instructor"])
+            Enrollment.objects.create(organization=self.org, student=self.student, offering=parent_offering)
+        self._approved()  # self.offering-ə (bölmə qrupu) bağlı
+        from apps.registrar.cabinet_policy import approved_syllabus_offerings
+
+        with bypass_rls():
+            self.assertIn(parent_offering.id, approved_syllabus_offerings(self.org, [parent_offering]))
+        url = reverse("registrar:offering_syllabus_pdf", args=[parent_offering.id])
+        self.assertEqual(self._client(self.student).get(url).status_code, 200)
+
+    def test_other_teachers_syllabus_is_never_borrowed(self):
+        with bypass_rls():
+            other = User.objects.create_user("jsb_other", "jsb_other@qku.edu.az", "pw")
+            self._member(other, "teacher", TEACHER_PERMS)
+            parent = OrgUnit.objects.create(
+                organization=self.org, name="JSB-G", slug="jsb-g", unit_type=OrgUnitType.GROUP
+            )
+            parent_offering = registrar_services.get_or_create_offering(
+                organization=self.org, subject=self.subject, period=self.period, group=parent
+            )
+            parent_offering.instructor = other
+            parent_offering.save(update_fields=["instructor"])
+        self._approved()
+        from apps.registrar.cabinet_policy import approved_syllabus_offerings
+
+        with bypass_rls():
+            self.assertNotIn(parent_offering.id, approved_syllabus_offerings(self.org, [parent_offering]))
