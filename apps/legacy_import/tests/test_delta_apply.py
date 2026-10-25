@@ -422,9 +422,21 @@ class DeltaApplyTests(TestCase):
         with bypass_rls():
             offering = CourseOffering.objects.get(organization=self.org, group=self.group, period=self.period)
             Lesson.objects.filter(offering=offering, start_time=dt.time(10, 30)).update(topic="Müəllimin mövzusu")
+        from apps.exams.models import ExamRoom
+
+        with bypass_rls():
+            room = ExamRoom.objects.create(organization=self.org, name="204", code="myedu-room-5", building="1")
         bundle = _bundle(
             lesson_topics=[
-                {"id": 1, "journal_uniqid": "abcDEF1234", "month": 10, "day": 6, "times": "09:00", "movzu": " Giriş  "},
+                {
+                    "id": 1,
+                    "journal_uniqid": "abcDEF1234",
+                    "month": 10,
+                    "day": 6,
+                    "times": "09:00",
+                    "movzu": " Giriş  ",
+                    "room": 5,
+                },
                 {"id": 2, "journal_uniqid": "abcDEF1234", "month": 10, "day": 6, "times": "10:30", "movzu": "Başqa"},
                 {"id": 3, "journal_uniqid": "abcDEF1234", "month": 10, "day": 9, "times": "09:00", "movzu": "Yoxdur"},
                 {"id": 4, "journal_uniqid": "unknownJRN", "month": 10, "day": 6, "times": "09:00", "movzu": "X"},
@@ -434,6 +446,9 @@ class DeltaApplyTests(TestCase):
         with bypass_rls():
             topics = dict(Lesson.objects.filter(offering=offering).values_list("start_time", "topic"))
         self.assertEqual(topics, {dt.time(9, 0): "Giriş", dt.time(10, 30): "Müəllimin mövzusu"})
+        with bypass_rls():
+            self.assertEqual(Lesson.objects.get(offering=offering, start_time=dt.time(9, 0)).room_id, room.pk)
+        self.assertEqual(run.counters["room.filled"], 1)
         self.assertEqual(run.counters["topic.filled"], 1)
         self.assertEqual(run.counters["topic.kept_existing"], 1)
         self.assertEqual(run.counters["topic.lesson_unmatched"], 1)

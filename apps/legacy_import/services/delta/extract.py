@@ -227,7 +227,7 @@ class DeltaExtractor:
         return out
 
     def lesson_topics(self, journal_ids) -> list[dict]:
-        """Dərs tarixinin sillabus mövzusu (``journals_dates_rooms.sillabus`` → ``sillabus_sem_muh.movzu``)."""
+        """Dərs tarixinin sillabus mövzusu (``journals_dates_rooms.sillabus`` → ``sillabus_sem_muh.movzu``) və otağı."""
 
         ids = sorted(journal_ids)
         out: list[dict] = []
@@ -235,10 +235,10 @@ class DeltaExtractor:
             part = ids[start : start + self.chunk]
             marks = ", ".join(["%s"] * len(part))
             out += self._rows(
-                "SELECT r.id, j.uniqid AS journal_uniqid, r.month, r.day, r.times, r.sem_muh, s.movzu "
+                "SELECT r.id, j.uniqid AS journal_uniqid, r.month, r.day, r.times, r.sem_muh, r.room, s.movzu "
                 f"FROM {self.src}.journals_dates_rooms r "
                 f"JOIN {self.src}.journals j ON j.id = r.journal_id "
-                f"JOIN {self.src}.sillabus_sem_muh s ON s.id = r.sillabus "
+                f"LEFT JOIN {self.src}.sillabus_sem_muh s ON s.id = r.sillabus "
                 f"WHERE r.journal_id IN ({marks}) AND COALESCE(r.fake, 0) = 0 ORDER BY r.id",
                 part,
             )
