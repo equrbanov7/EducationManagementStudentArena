@@ -108533,3 +108533,39 @@ msgstr "Test bildirişi"
 msgctxt "notifications.push"
 msgid "Push bildirişləri bu cihazda işləyir."
 msgstr "Push bildirişləri bu cihazda işləyir."
+
+msgctxt "accounts.workload"
+msgid "Uyğun müəllim tapılmadı"
+msgstr "Uyğun müəllim tapılmadı"
+
+msgctxt "accounts.workload"
+msgid "Vəziyyət"
+msgstr "Vəziyyət"
+
+msgctxt "accounts.workload"
+msgid "Vakantı olan"
+msgstr "Vakantı olan"
+
+msgctxt "accounts.workload"
+msgid "Tam bölünmüş"
+msgstr "Tam bölünmüş"
+
+msgctxt "accounts.workload"
+msgid "Qismən bölünmüş"
+msgstr "Qismən bölünmüş"
+
+msgctxt "accounts.workload"
+msgid "Heç bölünməmiş"
+msgstr "Heç bölünməmiş"
+
+msgctxt "accounts.workload"
+msgid "İntensiv"
+msgstr "İntensiv"
+
+msgctxt "accounts.workload"
+msgid "Filtrləri sıfırla"
+msgstr "Filtrləri sıfırla"
+
+msgctxt "accounts.workload"
+msgid "Süzgəcləri dəyişin və ya «Filtrləri sıfırla» düyməsinə basın."
+msgstr "Süzgəcləri dəyişin və ya «Filtrləri sıfırla» düyməsinə basın."

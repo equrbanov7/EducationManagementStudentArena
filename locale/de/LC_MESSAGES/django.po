@@ -110049,3 +110049,39 @@ msgstr "Testbenachrichtigung"
 msgctxt "notifications.push"
 msgid "Push bildirişləri bu cihazda işləyir."
 msgstr "Push-Benachrichtigungen funktionieren auf diesem Gerät."
+
+msgctxt "accounts.workload"
+msgid "Uyğun müəllim tapılmadı"
+msgstr "Keine passende Lehrkraft"
+
+msgctxt "accounts.workload"
+msgid "Vəziyyət"
+msgstr "Status"
+
+msgctxt "accounts.workload"
+msgid "Vakantı olan"
+msgstr "Mit vakanten Stunden"
+
+msgctxt "accounts.workload"
+msgid "Tam bölünmüş"
+msgstr "Vollständig verteilt"
+
+msgctxt "accounts.workload"
+msgid "Qismən bölünmüş"
+msgstr "Teilweise verteilt"
+
+msgctxt "accounts.workload"
+msgid "Heç bölünməmiş"
+msgstr "Gar nicht verteilt"
+
+msgctxt "accounts.workload"
+msgid "İntensiv"
+msgstr "Intensiv"
+
+msgctxt "accounts.workload"
+msgid "Filtrləri sıfırla"
+msgstr "Filter zurücksetzen"
+
+msgctxt "accounts.workload"
+msgid "Süzgəcləri dəyişin və ya «Filtrləri sıfırla» düyməsinə basın."
+msgstr "Ändern Sie die Filter oder klicken Sie auf „Filter zurücksetzen“."

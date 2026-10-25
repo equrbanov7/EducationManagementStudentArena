@@ -118,12 +118,56 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
         </select>
       </div>
     </div>
+    {% comment %}2026-10-25: müəllimə görə axtarışlı seçici (kart süzgəci ilə SİNXRON — eyni `wl_teacher`), bölgü
+    vəziyyəti və fəaliyyət növü süzgəci. Süzgəc SERVERDƏDİR (səhifələmə + `total` süzgəcə uyğundur); seçimlər
+    `workload_distribution_list.js` ilə URL-də (`wl_teacher` / `wl_status` / `wl_activity`) saxlanılır.{% endcomment %}
+    <div class="wl-field">
+      <label for="wl-teacher">{% trans "Müəllim" context "accounts.workload" %}</label>
+      <div class="bootstrap-single-select">
+        <select id="wl-teacher" name="teacher" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wl-teacher-select
+                data-live-search="true"
+                data-live-search-placeholder="{% trans 'Müəllim axtar…' context 'accounts.workload' %}"
+                data-live-search-empty="{% trans 'Uyğun müəllim tapılmadı' context 'accounts.workload' %}">
+          <option value="">{% trans "Hamısı" context "accounts.workload" %}</option>
+        </select>
+      </div>
+    </div>
+    <div class="wl-field">
+      <label for="wl-status">{% trans "Vəziyyət" context "accounts.workload" %}</label>
+      <div class="bootstrap-single-select">
+        <select id="wl-status" name="status" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wl-status>
+          <option value="">{% trans "Hamısı" context "accounts.workload" %}</option>
+          <option value="vacant">{% trans "Vakantı olan" context "accounts.workload" %}</option>
+          <option value="full">{% trans "Tam bölünmüş" context "accounts.workload" %}</option>
+          <option value="partial">{% trans "Qismən bölünmüş" context "accounts.workload" %}</option>
+          <option value="unassigned">{% trans "Heç bölünməmiş" context "accounts.workload" %}</option>
+          <option value="hourly">{% trans "Saathesabı" context "accounts.workload" %}</option>
+          <option value="intensive">{% trans "İntensiv" context "accounts.workload" %}</option>
+        </select>
+      </div>
+    </div>
+    <div class="wl-field">
+      <label for="wl-activity">{% trans "Fəaliyyət" context "accounts.workload" %}</label>
+      <div class="bootstrap-single-select">
+        <select id="wl-activity" name="activity" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wl-activity>
+          <option value="">{% trans "Hamısı" context "accounts.workload" %}</option>
+          {# Dərs növləri (mühazirə / seminar / laboratoriya) — kataloqda ilk üçüdür. #}
+          {% for activity in workload_distribution_section.activities|slice:":3" %}
+          <option value="{{ activity.key }}">{{ activity.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
     <div class="wl-field wl-field--search">
       <label for="wl-q">{% trans "Axtarış" context "accounts.workload" %}</label>
       <input type="search" id="wl-q" name="q" autocomplete="off"
              placeholder="{% trans 'fənn, qrup və ya müəllim' context 'accounts.workload' %}" data-wl-search>
     </div>
     <div class="wl-filters__actions">
+      <button type="button" class="wl-btn wl-btn--ghost" data-wl-reset-filters hidden>
+        <i class="fas fa-rotate-left" aria-hidden="true"></i>
+        <span>{% trans "Filtrləri sıfırla" context "accounts.workload" %}</span>
+      </button>
       <button type="button" class="wl-btn wl-btn--ghost" data-wl-create-task>
         <i class="fas fa-plus" aria-hidden="true"></i>
         <span>{% trans "Tapşırıq yarat" context "accounts.workload" %}</span>
@@ -169,7 +213,7 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
       <div class="ems-empty wl__empty" data-wl-nomatch hidden>
         <i class="fas fa-filter-circle-xmark ems-empty-icon" aria-hidden="true"></i>
         <p class="ems-empty-title">{% trans "Süzgəcə uyğun sətir tapılmadı" context "accounts.workload" %}</p>
-        <p class="ems-empty-hint">{% trans "Müəllim süzgəcini götürün, axtarışı təmizləyin və ya semestri «Hamısı» seçin." context "accounts.workload" %}</p>
+        <p class="ems-empty-hint">{% trans "Süzgəcləri dəyişin və ya «Filtrləri sıfırla» düyməsinə basın." context "accounts.workload" %}</p>
       </div>
       <div class="wl-rows" data-wl-rows role="list"></div>
       {% comment %}Tənbəl yükləmə: bu zolaq görünəndə növbəti dilim gəlir (IntersectionObserver); düymə klaviatura/ehtiyat yoludur.{% endcomment %}
