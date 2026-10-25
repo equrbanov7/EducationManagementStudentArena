@@ -243,3 +243,67 @@ python manage.py legacy_delta_extract --password-file <fayl> --source myedu_new 
   --out ~/EMSArena-backups/legacy-delta-2026-10/delta3-registry-20261025.json.gz
 python manage.py legacy_delta_apply --bundle <paket> --organization qku   # dry-run; --apply ilə yazır
 ```
+
+## 9. Tarixi semestrlərin boşluqları — `history` / `history_topics` fazaları (2026-10-25)
+
+Sahib: «Köçürülməmiş heç bir data problem yaratmasın, köhnə datadan nəyisə bərpa olunası bir şey varsa et.»
+Audit (`legacy_gap_audit_20261025.md`, şəxsi): legacy semestr 1–13-də gəlməyən real xanaların HAMISI qeydiyyat
+(`Enrollment`) yoxluğundandır — cutover-də hesabı açılmayan tələbələr, K9 qrup uyğunsuzluğu, karantin (qrupu
+silinmiş) jurnallar, siyahıdankənar xanası olan tələbələr. Ortaq nişan: `(uniqid, tələbə)` cütünün cutover
+ledger-ində (`journal_enrollment`) `migrated` sətri yoxdur. Repair əmrləri canlı MariaDB istədiyi üçün bərpa delta
+PAKETİ ilə gedir (`services/delta/history*.py`); qaydalar mövcud repair qaydalarıdır (yeni paralel qayda yoxdur):
+
+* **Paket** (`legacy_delta_extract --history-semester …`): Django bazası = prod NÜSXƏSİ (ledger yalnız OXUNUR) —
+  ~4,9 mln tarixi xanadan yalnız köçməmiş cütlərin xanaları (~0,32 mln; J-V7 arxiv sətirləri daxil), karantin
+  jurnallarının dərs tarixləri, boşluq tələbələrinin bütün üzrlü pəncərələri, FİN sayları və «fəaliyyət» (bütün
+  jurnallardan, E2/E3 sübutu). Fake/`sonra_sil` jurnallar (sahib qərarı gözləyir, §2.3) paketə DÜŞMÜR.
+* **Hesab** (`history_accounts`): delta `StudentMapper` (ledger → identifikator → FİN → ad); tapılmayan və
+  *hazırda oxuyan* (E2/E3 — `repair_enrollments_select`; E4 — legacy qrupunun yeni sistemdəki tələbələrinin çoxu aktiv
+  `student`) → delta yolu (`create_legacy_student`); qalanı (məzun / xaric / keçmiş) → `repair_accounts` formasında
+  staged hesab (`myedu.student.<id>`, yer-tutucu e-poçt, parolsuz) → `alumni` arxivi (`archive_staged_account`:
+  üzvlük aktiv, GİRİŞ BAĞLI) + SAR `repair_sar.materialise` ilə. Ambiqü ad heç vaxt təxmin edilmir.
+* **Qeydiyyat** (`history_plan`): mövcud yazılış (jurnalın öz açılışında) → əkiz (eyni fənn/ad + dövr, başqa
+  açılış) BƏRPA OLUNMUR → yalnız «qb» olan cüt yeni yazılış açmır → dilim `_choose_slice` (SAR qrupu → dövrün digər
+  qrupu → ilk dilim; fərqli dilim = qonaq `source_group`) → karantin: `_evidence_slice` (dövrdəki TƏK qrup; açılış
+  yoxdursa yaradılır və J7 kimi kilidlənir — `apply_lock`). DB qapısı: aktiv üzvlük (student/alumni).
+* **Xana + yekun**: delta-nın öz kodu (`lessons`, `finals` → J6 `write_exam_score`/`write_resit_score`) adapterlə;
+  bağlı (təhvil verilmiş) jurnala YALNIZ ƏLAVƏ — mövcud xana/bal dəyişmir (`trg_journal_mark_guard` yalnız
+  UPDATE-dədir, `journal_unlock` lazım deyil). Komponentlər (k1–k3, si) köçmür (delta qaydası).
+* **`history_topics`**: tarixi dərslərin BOŞ mövzu/otağı (`topics.apply_topics`), ledger açılışlarında, bağlı
+  jurnallarda da (metadata).
+* Audit: hər qaçış bir `legacy_import.delta_batch` sətri — saylar + yaradılmış yazılış/açılış/hesab id-ləri
+  (`history_enrollments`, `history_offerings`, `students`) — geri qaytarmaq üçün. Adlar yalnız `--names-out`.
+
+Yaddaş: əmr app konteynerində (limit 2 GB) işləyir — paketlər ayrıdır (pik RSS ≤ ~0,75 GB): boşluqlar `1-6` və
+`7-13`, mövzular ayrıca. Hesab qərarı bölgüdən asılı deyil (fəaliyyət bütün jurnallardan; eyni adamın ikinci legacy
+sətri artıq yaradılmış hesaba bağlanır).
+
+Prod nüsxəsində (`ems_prodlive_1025` kopyası, migrate + 3 paket, sonra təkrar): 16 739 cüt → 6 590 yeni yazılış
+(2 184 qonaq), 4 425 mövcud yazılışa xana; 147 133 xana (iştirak/bal 104 246, üzrlü 114, qayıb 42 773), 2 699 `im`
++ 176 `im2`; 85 hesab (79 arxiv + 6 cari), 56 kilidli karantin açılışı; mövzu 272 744, otaq 275 594. İkinci
+qaçış: 0 yazı. Bərpa olunmayan (adlı siyahıda): əkiz 1 294 cüt, karantin sübutsuz/çoxqruplu 787, tələbə həll
+olunmur 1 161 (legacy `students`-də sətri olmayan 100 id + 2 ambiqü + 1 qəbul ili), aktiv üzvlüyü yoxdur 22.
+
+Auditin ölçmə skripti ilə (fənn adında HTML entity-si açılaraq — audit «Xarici dildə işg&amp;uuml;zar…» kimi adları
+tutuşdura bilmədiyi üçün 09-25 K9 təmirinin artıq bərpa etdiyi ~43 min xana-günü də boşluq sayırdı): real boşluq
+**104 172 → 24 790 xana-gün (79 382 bərpa, 76 %)**, bal xanası 8 502 → 2 130. Qalan: legacy tələbəsi ledger-də/
+identifikatorla tapılmayan 11 129 (ölçmə FİN/ad tutuşdurmasını görmür), karantin sübutsuz 6 877, e-poçt kohortunun
+ambiqü/qalan hissəsi 2 609, əkiz/siyahıdankənar 3 290, digər 885.
+
+```bash
+# LOKAL (MariaDB + prod nüsxəsi ledger üçün; yalnız oxu)
+export DATABASE_URL=postgres://…/ems_prodlive_1025 PGOPTIONS="-c default_transaction_read_only=on"
+for spec in "a 1-6 history" "b 7-13 history" "topics 1-13 history_topics"; do set -- $spec
+  python manage.py legacy_delta_extract --password-file <fayl> --source myedu_new --organization qku \
+    --history-semester $2 --phases $3 --out ~/EMSArena-backups/legacy-delta-2026-10/hist/delta-hist-$1-20261025.json.gz
+done
+# hər paket: şifrələ → release (asset adı MƏHZ delta.json.gz.enc) → prod-data-ops legacy_delta_apply
+openssl enc -aes-256-cbc -md sha256 -pbkdf2 -iter 200000 -salt -pass env:STAFF_PLAN_KEY \
+  -in delta-hist-a-20261025.json.gz -out delta.json.gz.enc
+gh release create legacy-delta-hist-a-20261025 delta.json.gz.enc --draft --title legacy-delta-hist-a-20261025
+# workflow: command=legacy_delta_apply, roster_tag=legacy-delta-hist-a-20261025, batch=<paketin sha256-sı>,
+#           date_to boş; əvvəl dry-run, sonra apply=true + confirm=APPLY. Sıra: a → b → topics.
+```
+
+⚠️ Bu fazalar `legacy_repair_empty_lessons --include-locked`-dən ƏVVƏL işləməlidir (audit §2.6: tarixi «boş»
+sütunların çoxu bərpa olunacaq xanaların dərsləridir).
