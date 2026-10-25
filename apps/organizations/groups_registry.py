@@ -135,6 +135,8 @@ def group_meta(unit) -> dict:
     """`settings` JSON-unu normallaşdırır (boş/korlanmış dəyər UI-ı pozmasın)."""
     raw = unit.settings if isinstance(unit.settings, dict) else {}
     meta = {key: raw.get(key, "") for key in SETTING_KEYS}
+    # Köhnə datadan gələn qruplarda dil ``sector`` açarındadır (sahib 2026-10-26: «boş xana qalmasın»).
+    meta["language_sector"] = str(meta["language_sector"] or raw.get("sector") or "").strip()
     try:
         meta["course_year"] = int(meta["course_year"]) if meta["course_year"] not in ("", None) else 0
     except (TypeError, ValueError):
@@ -195,7 +197,7 @@ def language_options(organization, scope=None, *, settings_rows=None) -> list:
     values = set()
     for raw in _group_settings(organization, scope) if settings_rows is None else settings_rows:
         if isinstance(raw, dict):
-            value = (raw.get("language_sector") or "").strip()
+            value = (raw.get("language_sector") or raw.get("sector") or "").strip()
             if value:
                 values.add(value)
     return [{"value": value, "label": value} for value in sorted(values)]

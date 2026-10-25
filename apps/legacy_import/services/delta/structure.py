@@ -63,6 +63,8 @@ def ensure_group(run, legacy: dict):
             "imported_by": "legacy_delta",
         },
         "sector": legacy.get("sector") if legacy.get("sector") in _SECTORS else "az",
+        # Reyestr dili ``language_sector``-dan oxuyur (sahib 2026-10-26: qrup kartında boş dil xanası).
+        "language_sector": legacy.get("sector") if legacy.get("sector") in _SECTORS else "az",
         "degree_level": _DEGREE.get(str(legacy.get("bak_or_mag") or "").strip().lower(), "bachelor"),
         "education_form": _FORM.get(text(legacy.get("eyani_qiyabi")).casefold(), "full_time"),
     }

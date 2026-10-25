@@ -185,6 +185,14 @@
 #       eyani/qiyabi olur. Magistr («409/6MBA»), kollec («1226 A», «1025»), «3/336 F» kimi adlar DƏYİŞMİR. Əyani
 #       qrupdakı «qiyabi» tələbə qeydi (yerləşdirmə sualı) dəyişmir — yalnız sayılır. Audit; idempotent. Loga
 #       YALNIZ saylar.
+#   place_parent_group_students — ana qrupda qalmış tələbə → alt qrup (sahib 2026-10-26: «göndərişdə olana baxaraq
+#       alt qrupa yığ»). Sübut: cari dövrün alt qrup jurnallarındakı xanalar (xarici dil SƏVİYYƏ fənləri xaric), ≥75 %
+#       tək alt qrupda; ana qrupun ÖZ jurnalında datası olan / xanası olmayan tələbəyə toxunulmur. Yazı rəsmi köçürmə
+#       xidməti ilə (reyestrin «Qrupu dəyiş»i); ana qrupun boş, alt qrupda açılışı olmayan qeydiyyatı «Jurnal təmizliyi»
+#       qərarı ilə düşür (geri qaytarılır). Loga YALNIZ saylar.
+#   fill_group_settings_gaps — qrup kartının BOŞ dil / forma xanaları (sahib 2026-10-26: «alt qrup ana qrupdan, boş
+#       xana qalmasın»): köhnə datanın `sector` açarı → `language_sector`, alt qrup ana qrupdan, ana qrup alt
+#       qrupların yekdil dəyərindən / koddan / tələbə qeydlərindən. Dolu dəyər dəyişmir. Audit; idempotent. Saylar.
 #   shrink_avatars — mövcud avatarlar ≤512 px WebP-yə (PERF-2 H5, 2026-10-17); orijinal fayllar SİLİNMİR,
 #       `updated_at` dəyişmir. Loga yalnız yekun saylar.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
@@ -254,6 +262,8 @@ on:
           - link_lesson_syllabus_weeks
           - backfill_notification_i18n
           - fix_group_education_form
+          - place_parent_group_students
+          - fill_group_settings_gaps
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -829,6 +839,16 @@ jobs:
               # Əyani qrupdakı «qiyabi» qeydlər (--align-part-to-full) BURADA YOXDUR — yerləşdirmə sahibin qərarıdır.
               args=(--org "$ORG" --task-rows)
               ;;
+            place_parent_group_students)
+              # Sahib 2026-10-26: ana qrupda qalmış tələbə jurnal xanalarına görə alt qrupa (rəsmi köçürmə xidməti).
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              ;;
+            fill_group_settings_gaps)
+              # Sahib 2026-10-26: qrup kartında boş dil / forma xanası qalmasın (alt qrup ana qrupdan).
+              args=(--org "$ORG")
+              ;;
             *)
               echo "icazəsiz əmr: $COMMAND" >&2; exit 2
               ;;
@@ -979,6 +999,17 @@ jobs:
             grep -E '^timetable_infer: [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             docker exec "$APP_CONTAINER" cat "/tmp/timetable_infer_${GITHUB_RUN_ID}.csv" > "$RUNNER_TEMP/details.csv" 2>/dev/null || true
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "place_parent_group_students" ] || [ "$COMMAND" = "fill_group_settings_gaps" ]; then
+            # Loga YALNIZ «<prefiks>: açar=say …» sətirləri və rədd kodu (--list ötürülmür — adlar çap olunmur).
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^(subgroup_placement|group_settings_gaps): [a-z_]+=[0-9a-z_]+( [a-z_]+=[0-9a-z_]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
               rm -f "$RUNNER_TEMP/out.log"
