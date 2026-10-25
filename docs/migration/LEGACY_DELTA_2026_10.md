@@ -235,7 +235,7 @@ Prod nüsxəsində (`ems_prodlive_1025` kopyası): 141 köçürmə (48 köhnə s
 yerləşdirilməsi), 200 xaric (9 cari semestrdən + 191 cutover-dən əvvəl azad edilmiş, statusu «enrolled» qalmışdı),
 aktiv qeyd 9 333 → 9 133; ikinci qaçış 0 yazı. Sahib qərarı gözləyən: 235 alt qrup yerləşdirməsi, 67 başqa ixtisas,
 21 dublikat sətir və **~4 250 aktiv qeyd köhnə sistemin cari semestr jurnallarında yoxdur** (əsasən məzun kohortlar —
-yeni sistemdə «məzun» əmri yoxdur).
+§8a `graduation` fazası).
 
 ```bash
 python manage.py legacy_delta_extract --password-file <fayl> --source myedu_new --baseline myedu_old \
@@ -243,6 +243,31 @@ python manage.py legacy_delta_extract --password-file <fayl> --source myedu_new 
   --out ~/EMSArena-backups/legacy-delta-2026-10/delta3-registry-20261025.json.gz
 python manage.py legacy_delta_apply --bundle <paket> --organization qku   # dry-run; --apply ilə yazır
 ```
+
+## 8a. Məzun etmə — `graduation` fazası (2026-10-25)
+
+Sahib: «Əgər bu ilin jurnalında onların adı yoxdursa — MƏZUN ET; yoxsa ola bilər kimsə kəsilib, bitirməyib — onu
+məzun etmə.» Reyestrə yeni hərəkət növü əlavə olundu: **«Məzun etmə»** (`graduation`, `enrolled → graduated`; cari/
+gələcək dövrün açıq qeydiyyatları dondurulur, giriş bağlanır — eyni adamın başqa aktiv qeydi varsa toxunulmur;
+«Bərpa» əmri `graduated`-dən də qaytarır). RİM/tələbə şöbəsi «Tələbə reyestri» → «Hərəkət» dialoqunda tək tələbə üçün
+seçir; qrup çekmecəsində məzunlar «qrupdan çıxanlar» siyahısındadır («Bərpa et» ilə geri).
+
+Toplu faza (`services/delta/graduation.py`, **yalnız açıq seçiləndə**, `registry_sync`-dən SONRA işləyir). Namizəd:
+`enrolled` qeyd + yeni sistemdə cari/gələcək dövr qeydiyyatı YOX + köhnə sistemin cari semestr jurnallarında YOX
+(paketin `journals`-ı; tutuşmayan legacy sətrinin FİN/adı eynidirsə — yoxlanmalı) + köhnə sistemdə azad edilməyib +
+cutover-dən sonra əl ilə hərəkət izi yox + qrup «silinməli» qabı deyil + **müddət bitib** (qəbul ili + ceil(ECTS/60) ≤
+cari tədris ili, 2026) + **son kurs jurnalı var** (yeni sistemdə son jurnal semestri proqramın son tədris ilindədir;
+tarixçədən — 2021/2022 — əvvəl bitənlər bu yoxlamadan azaddır). Əmr `MZN-SINX-2026`, tarix `2026-07-01` (sabit),
+səbəb «Köhnə sistemdən sinxron: məzun — …». Qalanlar adlı «yoxlanmalı» siyahısındadır: `period_not_ended`,
+`year_unknown` (1950 sentineli / ≤2000), `left_before_final_year`, `no_journal_history`, `junk_group`,
+`legacy_unresolved_match`, `system_changed`.
+
+Prod nüsxəsində (registry_sync + graduation birlikdə, `delta4-graduation-20261025.json.gz`): 996 məzun (bakalavr
+2017–2022, magistr 2018/2022–2024), yoxlanmalı: 446 müddəti bitməyib, 2 227 qəbul ili bilinmir, 209 son kursdan əvvəl
+kəsilib, 24 jurnal tarixçəsi yoxdur, 40 «silinməli» qrup, 23 tutuşmayan legacy sətri ilə eyni FİN/ad; toxunulmaz:
+5 155 cari jurnalda, 13 köhnə sistemin cari jurnalında. Aktiv qeyd 9 333 → 8 137; ikinci qaçış 0 yazı.
+
+⚠️ `history` fazası alumni üçün `enrolled` SAR yaradır — graduation onlardan SONRA yenidən işlədilə bilər (idempotent).
 
 ## 9. Tarixi semestrlərin boşluqları — `history` / `history_topics` fazaları (2026-10-25)
 

@@ -481,6 +481,20 @@ class MovementStateMachineTest(StudentServicesBase):
         # Akademik qeyd qayıdır və giriş də sübutlu səthdən açılır → xəbərdarlıq yoxdur.
         self.assertEqual(response.json()["movement"]["access_notice"], "")
 
+    def test_graduation_and_undo_through_the_registry(self):
+        """«Məzun etmə» (2026-10-25): status ``graduated``, sonra «Bərpa» ilə öz qrupuna qaytarılır."""
+        response = self._post_movement(kind="graduation", target_group="", order_number="MZN-1")
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.json()["movement"]["kind"], "graduation")
+        self.record.refresh_from_db()
+        self.assertEqual((self.record.status, self.record.is_active), (AcademicStatus.GRADUATED, False))
+        response = self._post_movement(
+            kind="reinstatement", target_group=str(self.record.group_id), order_number="MZN-1-B"
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        self.record.refresh_from_db()
+        self.assertEqual(self.record.status, AcademicStatus.ENROLLED)
+
     def test_reinstatement_into_the_same_group_is_allowed(self):
         """Audit 2026-09-13 F-T2: xaric edilmiş tələbə öz köhnə qrupuna bərpa olunur."""
         self._post_movement(kind="expulsion", target_group="", order_number="R-147")
@@ -892,7 +906,7 @@ class ContractTest(StudentServicesBase):
 
         catalog_keys = set(status_catalog.keys("student_movement"))
         self.assertEqual(catalog_keys, set(RULES))
-        self.assertEqual(len(catalog_keys), 6)
+        self.assertEqual(len(catalog_keys), 7)  # + «Məzun etmə» (2026-10-25)
 
 
 class MovementGuardsTest(StudentServicesBase):

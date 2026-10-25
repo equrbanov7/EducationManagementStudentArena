@@ -74,7 +74,7 @@
             out.push(expelButton(row));
         }
         // «Bərpa et» (2026-10-15): bu qrupa qaytarır — arxiv qrupa yox (server də hədəfi əhatədə yoxlayır).
-        if (state.canMove && state.groupActive && (row.status === "academic_leave" || row.status === "expelled")) {
+        if (state.canMove && state.groupActive && (row.status === "academic_leave" || row.status === "expelled" || row.status === "graduated")) {
             out.push('<button type="button" class="ems-btn ems-btn--sm ems-btn--primary" data-tof-open="' + REINSTATE_DIALOG_ID + '" data-tof-student-name="' + esc(row.name) + '" data-tof-prefill=\'' + esc(prefill({ record_id: row.id, kind: "reinstatement", target_group: state.groupId || "" })) + '\'><i class="fas fa-rotate-left" aria-hidden="true"></i> ' + esc(t("reinstate")) + "</button>");
             if (row.status === "academic_leave") { out.push(expelButton(row)); }
         }

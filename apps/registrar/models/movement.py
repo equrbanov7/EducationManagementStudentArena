@@ -65,7 +65,7 @@ def movement_document_path(instance, filename: str) -> str:
 
 
 class MovementKind(models.TextChoices):
-    """6 hərəkət növü — etiketlər TƏK mənbədən (``core.ui.status_catalog``).
+    """7 hərəkət növü — etiketlər TƏK mənbədən (``core.ui.status_catalog``).
 
     Enum burada TƏKRAR YAZILMIR: kataloq həm badge-in, həm modelin, həm də
     filtr seçicisinin mənbəyidir — əks halda etiket üç yerdə sürüşərdi.
@@ -77,6 +77,8 @@ class MovementKind(models.TextChoices):
     ACADEMIC_LEAVE = "academic_leave", status_catalog.label("student_movement", "academic_leave")
     REINSTATEMENT = "reinstatement", status_catalog.label("student_movement", "reinstatement")
     EXPULSION = "expulsion", status_catalog.label("student_movement", "expulsion")
+    #: Məzun etmə (sahib 2026-10-25) — status ``graduated``; bərpa əmri ilə geri qaytarılır.
+    GRADUATION = "graduation", status_catalog.label("student_movement", "graduation")
 
 
 class StudentMovement(ImmutableCorrectionEvidence):

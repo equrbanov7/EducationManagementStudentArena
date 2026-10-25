@@ -22,8 +22,16 @@ tələbə növbəti semestrin jurnalında qalırdı. Açar: ``journal_hygiene_gu
 
 TOXUNULMAYANLAR: keçmiş dövrlər, ``completed`` / ``dropped`` sətirlər,
 jurnalı BAĞLI (``assessment_scheme.is_published``) açılışlar — yekunlaşmış
-jurnalın tərkibi sonradan dəyişmir. Məzuniyyət (graduated) qeydiyyatları
-dondurmur: məzun tələbənin son semestr jurnalı olduğu kimi qalmalıdır.
+jurnalın tərkibi sonradan dəyişmir.
+
+MƏZUN (sahib 2026-10-25, «Məzun etmə» əmri): xaric etmə kimi cari/gələcək dövrün AÇIQ
+qeydiyyatlarını dondurur. Son semestrin jurnalı adətən artıq bağlıdır (yuxarıdakı istisna) —
+yəni məzunun yekun jurnalı olduğu kimi qalır; açıq qalan (məs. əvvəlcədən açılmış növbəti
+semestr) qeydiyyatlar isə aktiv siyahılardan çıxır. Bərpa əmri onları geri qaytarır.
+
+BAŞQA AKTİV QEYD: qeydiyyat tələbəyə bağlıdır, akademik qeydə yox. Eyni adamın başqa ``enrolled``
+qeydi varsa (bakalavr bağlanır, magistrdə oxuyur) dondurma EDİLMİR — əks halda aktiv proqramın
+jurnalı da donardı.
 
 Hər dəyişiklik bir audit sətri yazır (fail-closed, çağıranın tranzaksiyasında).
 """
@@ -36,8 +44,8 @@ from apps.registrar.models import AcademicStatus, Enrollment
 from core import audit as audit_service
 from core.constants import AuditAction
 
-#: Qeydiyyatı DONDURAN akademik statuslar (məzun QƏSDƏN yoxdur — modul şərhi).
-SUSPENDING_STATUSES = frozenset({AcademicStatus.ACADEMIC_LEAVE, AcademicStatus.EXPELLED})
+#: Qeydiyyatı DONDURAN akademik statuslar (modul şərhi; məzun 2026-10-25-dən daxildir).
+SUSPENDING_STATUSES = frozenset({AcademicStatus.ACADEMIC_LEAVE, AcademicStatus.EXPELLED, AcademicStatus.GRADUATED})
 
 AUDIT_RESOURCE = "registrar.enrollment_suspension"
 
@@ -69,6 +77,19 @@ def current_period_enrollments(record, status):
     return queryset.exclude(offering__assessment_scheme__is_published=True)
 
 
+def has_other_active_record(record) -> bool:
+    """Eyni tələbənin bu qeyddən BAŞQA ``enrolled`` akademik qeydi varmı."""
+    from apps.registrar.models import StudentAcademicRecord
+
+    return (
+        StudentAcademicRecord.objects.filter(
+            organization_id=record.organization_id, student_id=record.student_id, status=AcademicStatus.ENROLLED
+        )
+        .exclude(pk=record.pk)
+        .exists()
+    )
+
+
 def sync_enrollments_for_status(*, record, previous, to_status, actor=None, reason="") -> dict:
     """Status keçidinə görə cari dövr qeydiyyatlarını dondurur / bərpa edir.
 
@@ -80,6 +101,8 @@ def sync_enrollments_for_status(*, record, previous, to_status, actor=None, reas
     if direction is None:
         return result
     source, target = direction
+    if target == Enrollment.Status.SUSPENDED and has_other_active_record(record):
+        return result
     ids = list(
         current_period_enrollments(record, source)
         .select_for_update(of=("self",))
@@ -114,5 +137,6 @@ __all__ = [
     "AUDIT_RESOURCE",
     "SUSPENDING_STATUSES",
     "current_period_enrollments",
+    "has_other_active_record",
     "sync_enrollments_for_status",
 ]

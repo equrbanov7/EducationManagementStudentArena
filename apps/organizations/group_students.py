@@ -132,8 +132,9 @@ def group_students(request, slug, unit_id):
 
 
 #: Qrupun aktiv siyahısından ÇIXMIŞ, amma qeydi bu qrupda qalan statuslar (bərpa oluna bilər).
-REMOVED_STATUSES = ("academic_leave", "expelled")
-_REMOVING_KINDS = ("academic_leave", "expulsion")
+#: Məzun (2026-10-25) da burada görünür — «Bərpa et» səhv məzun etməni geri qaytarır.
+REMOVED_STATUSES = ("academic_leave", "expelled", "graduated")
+_REMOVING_KINDS = ("academic_leave", "expulsion", "graduation")
 
 
 def _removed_rows(organization, unit, record_model) -> list:

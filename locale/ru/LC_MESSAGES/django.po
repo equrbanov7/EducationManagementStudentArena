@@ -109148,3 +109148,11 @@ msgstr "Короткий курс с малым числом часов для 1
 msgctxt "accounts.workload_intensive"
 msgid "Tələbə bu fənni bu semestr adi jurnalda keçirsə — oradan intensivə köçür (ikiqat qiymət olmasın; köhnə bal mənbədə saxlanılır, qayıb saatı köçür)"
 msgstr "Если студент проходит эту дисциплину в обычном журнале в этом семестре — перевести в интенсив (без двойной оценки; старые баллы остаются в источнике, часы пропусков переносятся)"
+
+msgctxt "ui.status"
+msgid "Məzun etmə"
+msgstr "Выпуск (окончание обучения)"
+
+msgctxt "accounts.groups"
+msgid "%%d qrupdan çıxıb (məzuniyyət / xaric / məzun)"
+msgstr "%%d выбыли из группы (отпуск / отчисление / выпуск)"

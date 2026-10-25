@@ -109980,3 +109980,11 @@ msgstr "Kurzer Kurs mit wenigen Stunden für 1–2 Studierende. Die Stunden gehe
 msgctxt "accounts.workload_intensive"
 msgid "Tələbə bu fənni bu semestr adi jurnalda keçirsə — oradan intensivə köçür (ikiqat qiymət olmasın; köhnə bal mənbədə saxlanılır, qayıb saatı köçür)"
 msgstr "Belegt die studierende Person dieses Fach in diesem Semester in einem regulären Journal — in den Intensivkurs verschieben (keine Doppelnote; alte Noten bleiben in der Quelle, Fehlstunden werden übertragen)"
+
+msgctxt "ui.status"
+msgid "Məzun etmə"
+msgstr "Studienabschluss"
+
+msgctxt "accounts.groups"
+msgid "%%d qrupdan çıxıb (məzuniyyət / xaric / məzun)"
+msgstr "%%d haben die Gruppe verlassen (Beurlaubung / Exmatrikulation / Abschluss)"

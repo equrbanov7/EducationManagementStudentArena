@@ -22,7 +22,11 @@ State maşını (handoff §5/09 + §6.2):
     enrolled ──form_change───────> enrolled        (yeni forma MƏCBURİ, fərqli)
     enrolled ──academic_leave────> academic_leave  (müddət MƏCBURİ)
     enrolled | academic_leave ──expulsion──> expelled
-    academic_leave | expelled ──reinstatement──> enrolled  (qrup MƏCBURİ)
+    enrolled ──graduation────────> graduated       (sahib 2026-10-25)
+    academic_leave | expelled | graduated ──reinstatement──> enrolled  (qrup MƏCBURİ)
+
+Məzun etmə xaric etmə ilə EYNİ yan təsirləri daşıyır: cari/gələcək dövrün açıq qeydiyyatları dondurulur
+(``enrollment_suspension``), hesabın girişi bağlanır; bərpa əmri hər ikisini geri qaytarır (undo).
 
 Qanunsuz keçid SƏSSİZ keçmir — :class:`MovementError` atılır.
 """
@@ -35,7 +39,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 
-from apps.registrar.enrollment_suspension import sync_enrollments_for_status
+from apps.registrar.enrollment_suspension import has_other_active_record, sync_enrollments_for_status
 from apps.registrar.models import (
     AcademicStatus,
     MovementKind,
@@ -106,7 +110,8 @@ RULES: dict[str, MovementRule] = {
     ),
     MovementKind.REINSTATEMENT: MovementRule(
         kind=MovementKind.REINSTATEMENT,
-        from_statuses=(AcademicStatus.ACADEMIC_LEAVE, AcademicStatus.EXPELLED),
+        # Məzun da bərpa oluna bilər — səhv/toplu məzun etmənin geri qaytarılması (sahib 2026-10-25).
+        from_statuses=(AcademicStatus.ACADEMIC_LEAVE, AcademicStatus.EXPELLED, AcademicStatus.GRADUATED),
         to_status=AcademicStatus.ENROLLED,
         requires_group=True,
     ),
@@ -114,6 +119,11 @@ RULES: dict[str, MovementRule] = {
         kind=MovementKind.EXPULSION,
         from_statuses=(AcademicStatus.ENROLLED, AcademicStatus.ACADEMIC_LEAVE),
         to_status=AcademicStatus.EXPELLED,
+    ),
+    MovementKind.GRADUATION: MovementRule(
+        kind=MovementKind.GRADUATION,
+        from_statuses=(AcademicStatus.ENROLLED,),
+        to_status=AcademicStatus.GRADUATED,
     ),
 }
 
@@ -284,6 +294,9 @@ def _sync_access_state(record, *, to_status) -> None:
     )
     if profile is None or profile.access_state == profile_model.AccessState.ARCHIVED:
         return
+    if has_other_active_record(record):
+        # Eyni adamın BAŞQA aktiv qeydi var (məs. bakalavr bağlanır, magistrdə oxuyur) — giriş bağlanmır.
+        return
     profile.access_state = profile_model.AccessState.ARCHIVED
     profile.save(update_fields=["access_state"])
 
@@ -394,7 +407,7 @@ def create_movement(
         _apply_group(record, new_group=new_group, period=period, actor=actor, reason=reason)
         to_parts = [_group_label(new_group)]
     else:
-        # Akademik məzuniyyət / xaric etmə — yalnız status dəyişir.
+        # Akademik məzuniyyət / xaric etmə / məzun etmə — yalnız status dəyişir.
         from_parts = [_status_label(from_status)]
         _apply_status(record, to_status=rule.to_status, actor=actor, reason=reason)
         to_parts = [_status_label(record.status)]

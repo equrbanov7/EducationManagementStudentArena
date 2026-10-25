@@ -108954,3 +108954,11 @@ msgstr "A short course with few hours for 1–2 students. The hours go to the te
 msgctxt "accounts.workload_intensive"
 msgid "Tələbə bu fənni bu semestr adi jurnalda keçirsə — oradan intensivə köçür (ikiqat qiymət olmasın; köhnə bal mənbədə saxlanılır, qayıb saatı köçür)"
 msgstr "If the student takes this subject in a regular journal this semester — move them to the intensive course (no double grade; old marks stay in the source, absence hours are carried over)"
+
+msgctxt "ui.status"
+msgid "Məzun etmə"
+msgstr "Graduation"
+
+msgctxt "accounts.groups"
+msgid "%%d qrupdan çıxıb (məzuniyyət / xaric / məzun)"
+msgstr "%%d left the group (leave / expelled / graduated)"
