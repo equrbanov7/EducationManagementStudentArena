@@ -183,19 +183,10 @@ def _teacher_choices(organization) -> list[dict]:
     (`CHOICE_LIMIT`, indi yoxdur) — 871 heyətli təşkilatda əlifbanın sonundakı müəllimlər redaktorda yox idi; tələbə rolları
     ad ilə çıxarılırdı. İndi kəsilmir, soyad → ad üzrə sıralanır (seçicidə axtarış var). İki yüngül sorğu
     (rol icazəsi rol başına bir dəfə), nəticə ``teacher_choices``-də 5 dəqiqə keşlənir."""
-    from core.permissions import has_permission
+    from .schedule_teachers import instructor_role_ids
 
-    from .integrity import INSTRUCTOR_PERMISSION
-
-    Role = django_apps.get_model("organizations", "Role")
     Membership = django_apps.get_model("organizations", "Membership")
-    role_ids = [
-        role_id
-        for role_id, permissions in Role.objects.filter(organization=organization, is_active=True).values_list(
-            "id", "permissions"
-        )
-        if has_permission(list(permissions or []), INSTRUCTOR_PERMISSION)
-    ]
+    role_ids = instructor_role_ids(organization)
     if not role_ids:
         return []
     member_ids = Membership.objects.filter(
