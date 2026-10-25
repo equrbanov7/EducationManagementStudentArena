@@ -5,7 +5,7 @@ W3 2026-09-14: toplu sual workbench-inin BİR sual kartı — `_bulk_question_wo
 (1-based sıra), selected, dp_value, math_token. Düsturlar `data-ems-math` ilə (KaTeX).
 {% endcomment %}
 <div class="q-card{% if q_index in selected %} is-selected{% endif %} q-card--sev-{{ q.meta.top_severity|default:'none' }} {{ q.meta.flags }}"
-     id="qcard-{{ q_index }}" data-q-index="{{ q_index }}" data-q-flags="{{ q.meta.flags }}" data-toggle-row-card>
+     id="qcard-{{ q_index }}" data-q-index="{{ q_index }}" data-q-flags="{{ q.meta.flags }}" data-q-clean="{% if q.meta.is_clean %}1{% else %}0{% endif %}" data-toggle-row-card>
     <div class="q-checkbox-wrapper">
         <input class="custom-checkbox qcheck" type="checkbox" name="selected" value="{{ q_index }}"
                aria-label="#{{ q_index }} — {{ q.text|striptags|truncatechars:60 }}"

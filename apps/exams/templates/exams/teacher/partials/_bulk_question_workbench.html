@@ -10,7 +10,7 @@ göndərişdən əvvəl təsdiq xülasəsi — 5 səhifədə eyni (workbench_con
 <link rel="stylesheet" href="{% static 'css/ems_ui/header.css' %}?v=20260903-3">
 {% endif %}
 <link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
-<link rel="stylesheet" href="{% static 'exams/css/workbench_theme.css' %}?v=20261017-pkgc">
+<link rel="stylesheet" href="{% static 'exams/css/workbench_theme.css' %}?v=20261026-clean">
 <link rel="stylesheet" href="{% static 'exams/css/ai_generator_panel.css' %}?v=20261019-ui">
 {% include "partials/ems_ui/_math_assets.html" %}
 
@@ -404,6 +404,19 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                     <i class="fas fa-check-double"></i> {% blocktrans with count=defaulted_count context "exams.template.test_question_bank" %}Hamısını təsdiqlə — A düzgündür ({{ count }}){% endblocktrans %}
                 </button>
                 {% endif %}
+                {% comment %}2026-10-26 (sahib): «Yalnız təmiz sualları seç» — təmizləri işarələyir, qalanlarını
+                götürür (meta.is_clean → kartın data-q-clean-i). JS: workbench_select_clean.js{% endcomment %}
+                <span class="wb-clean-count" id="wbCleanCount" data-clean-count="{{ category_counts.clean|default:0 }}" data-total-count="{{ parsed|length }}">
+                    <i class="fas fa-check-circle" aria-hidden="true"></i>
+                    {% blocktrans with clean=category_counts.clean|default:0 total=parsed|length context "exams.template.test_question_bank" %}Təmiz: {{ clean }} / {{ total }}{% endblocktrans %}
+                </span>
+                <button type="button" class="btn-action select-clean" data-wb-select-clean
+                        title="{% trans 'Xətasız, xəbərdarlıqsız və dublikatsız sualları seçir, qalanlarının seçimini götürür' context 'exams.template.test_question_bank' %}"
+                        {% if not category_counts.clean %}disabled{% endif %}>
+                    <i class="fas fa-broom" aria-hidden="true"></i> {% trans "Yalnız təmiz sualları seç" context "exams.template.test_question_bank" %}
+                </button>
+                <span class="wb-select-clean-status" id="wbSelectCleanStatus" role="status" aria-live="polite" hidden
+                      data-msg-template="{% trans 'Seçildi: {count} təmiz sual' context 'exams.template.test_question_bank' %}"></span>
                 <button type="button" class="btn-action select-all" data-toggle-all="true">
                     <i class="fas fa-check-double"></i> {% trans "action_select_all" context "exams.template.test_question_bank" %}
                 </button>
@@ -466,6 +479,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
             </div>
         </div>
 
+        <script defer src="{% static 'exams/js/workbench_select_clean.js' %}?v=20261026-1"></script>
         <form method="post" id="saveForm" {% if wb_show_settings %}data-sync-bank-settings{% endif %}>
             {% csrf_token %}
             <input type="hidden" name="action" value="save"/>

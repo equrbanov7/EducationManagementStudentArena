@@ -11,6 +11,7 @@ from django.utils.translation import pgettext
 
 from apps.exams.models import ExamQuestion, ExamQuestionOption, QuestionBlock
 from apps.exams.services.access_policy import _ensure_teacher, ensure_can_manage_exam_questions
+from apps.exams.services.bulk_confidence import finalize_analysis
 from apps.exams.services.bulk_workbench import analyze_mcq_bulk, exam_question_fp_map
 from apps.exams.services.import_media import (
     attach_import_media_batch,
@@ -236,6 +237,13 @@ def test_question_bank(request, slug):
                     owner_id=request.user.pk,
                     organization_id=exam.organization_id,
                 )
+                # 2026-10-26: DOCX bağlaması xəbərdarlıq əlavə edə bilər (naməlum şəkil,
+                # düstur fallback) — meta (is_clean) və sayğaclar yenilənir.
+                analysis = finalize_analysis(parsed, test_level_warnings)
+                category_counts = analysis["category_counts"]
+                warning_count = analysis["warning_count"]
+                duplicate_count = analysis["duplicate_count"]
+                error_count = analysis["error_count"]
             except (OSError, ValueError) as exc:
                 messages.error(request, str(exc))
                 if action == "save":

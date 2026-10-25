@@ -19,6 +19,9 @@ STRUCTURE_TYPES = {"missing_option", "option_count_recommend_5", "option_count_t
 BALANCE_TYPES = {"correct_too_long", "correct_too_short"}
 FORMULA_ISSUE_TYPES = {"formula_too_long", "formula_denied", "formula_fallback"}
 MEDIA_ISSUE_TYPES = {"image_ref_unknown"}
+# 2026-10-26 (sahib): «Yalnız təmiz sualları seç» — bu tiplərdən biri varsa sual təmiz deyil,
+# hətta severity «info» olsa belə (balans qeydləri parserdə info səviyyəsindədir).
+UNCLEAN_TYPES = DUP_TYPES | STRUCTURE_TYPES | BALANCE_TYPES | FORMULA_ISSUE_TYPES | MEDIA_ISSUE_TYPES
 
 
 def _formula_count(question: dict) -> int:
@@ -60,6 +63,11 @@ def refresh_question_meta(question: dict) -> dict:
     media_refs = question.get("media_refs") or {}
     image_pending = bool(media_refs) and not question.get("has_media")
 
+    # 2026-10-26 (sahib): «təmiz» sual — xəta/xəbərdarlıq yoxdur, problem kateqoriyası
+    # (dublikat, struktur, balans, düstur, naməlum şəkil) yoxdur. Digər «info» qeydləri
+    # sualı natəmiz etmir. JS qaydanı yenidən hesablamır — kartın data-q-clean-i bundan gəlir.
+    is_clean = not counts["error"] and not counts["warning"] and not (UNCLEAN_TYPES & types) and not formula_fallback
+
     # İnam: image > formula_fallback > formula_ok > text (kartın nişanı üçün)
     if formula_fallback:
         confidence = "formula_fallback"
@@ -83,6 +91,7 @@ def refresh_question_meta(question: dict) -> dict:
         "has_image": has_image,
         "image_pending": image_pending,
         "confidence": confidence,
+        "is_clean": is_clean,
         "flags": " ".join(
             filter(
                 None,
@@ -94,7 +103,7 @@ def refresh_question_meta(question: dict) -> dict:
                     "has-error" if counts["error"] else "",
                     "has-warning" if counts["warning"] else "",
                     "has-info" if counts["info"] else "",
-                    "is-clean" if not warnings else "",
+                    "is-clean" if is_clean else "",
                     "has-formula" if formula_count else "",
                     "has-formula-fallback" if formula_fallback else "",
                     "has-image" if has_image else "",
@@ -136,7 +145,7 @@ def finalize_analysis(parsed: list, test_level_warnings: list | None = None) -> 
             category_counts["formula"] += 1
         if meta["has_image"]:
             category_counts["image"] += 1
-        if not question["warnings"]:
+        if meta["is_clean"]:
             category_counts["clean"] += 1
 
     warning_count = sum(
@@ -161,6 +170,7 @@ __all__ = [
     "BALANCE_TYPES",
     "DUP_TYPES",
     "STRUCTURE_TYPES",
+    "UNCLEAN_TYPES",
     "finalize_analysis",
     "refresh_question_meta",
 ]
