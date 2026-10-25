@@ -350,8 +350,9 @@ def _subgroup_journals(organization, records, period) -> dict:
     """``{record_id: [alt qrup adları]}`` — səhifədəki tələbələrin cari dövrdə «alt qrupdan əlavə» olunduğu
     jurnalların qrupları (``guest_roster.row_is_guest`` predikatı: ``source_group`` dolu VƏ jurnalın qrupu
     tələbənin cari qrupu deyil). BİR sorğu."""
-    from apps.registrar.models import Enrollment
+    from django.apps import apps as django_apps
 
+    Enrollment = django_apps.get_model("registrar", "Enrollment")
     by_student = {record.student_id: record for record in records}
     if period is None or not by_student:
         return {}
