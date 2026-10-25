@@ -109192,3 +109192,28 @@ msgstr "Не удалось загрузить следующие строки �
 msgctxt "accounts.workload"
 msgid "Müəllimin üstünə vurun — solda yalnız ona bölgüsü olan sətirlər qalsın. Təkrar vurun və ya × ilə süzgəci götürün."
 msgstr "Нажмите на преподавателя — слева останутся только строки с его нагрузкой. Нажмите ещё раз или × — фильтр снимется."
+
+#, python-format
+msgctxt "registrar.notify"
+msgid "Qayıb (q/b) qeyd edildi: %(date)s"
+msgstr "Пропуск (q/b) отмечен: %(date)s"
+
+msgctxt "core.runtime_settings"
+msgid "Bildirişlər"
+msgstr "Уведомления"
+
+msgctxt "core.runtime_settings"
+msgid "Push bildirişləri aktivdir (telefona göndər)"
+msgstr "Push-уведомления включены (отправлять на телефон)"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılanda yeni bildiriş (q/b, bal, imtahan, elan və s.) mobil tətbiqi quraşdırıb hesabına daxil olmuş istifadəçinin telefonunda bildiriş kimi görünür. Söndürüləndə bildirişlər yalnız kabinetdə qalır. Firebase açarı serverdə qoşulmayıbsa bu açar heç nəyi dəyişmir."
+msgstr "Если включено, каждое новое уведомление (пропуск, балл, экзамен, объявление и т. д.) появляется и на телефоне пользователя, который установил мобильное приложение и вошёл в аккаунт. Если выключено, уведомления остаются только в кабинете. Если ключ Firebase на сервере не подключён, переключатель ни на что не влияет."
+
+msgctxt "notifications.push"
+msgid "Test bildirişi"
+msgstr "Тестовое уведомление"
+
+msgctxt "notifications.push"
+msgid "Push bildirişləri bu cihazda işləyir."
+msgstr "Push-уведомления на этом устройстве работают."

@@ -1,0 +1,109 @@
+name: 📱 Prod push açarı (Firebase FCM)
+
+# Sahib 2026-10-25: bildiriş yarananda telefonun bildiriş panelində görünsün (mobil tətbiq, FCM HTTP v1).
+# Firebase service account açarı HEÇ VAXT workflow input-u deyil (input-lar run loqunda görünür) — GitHub
+# «production» mühitinin ŞİFRƏLİ secret-indən oxunur (base64, tək sətir):
+#
+#   base64 -i ems-firebase-adminsdk.json | tr -d '\n' | gh secret set FCM_SERVICE_ACCOUNT_JSON_B64 --env production
+#
+# Rejimlər:
+#   verify  — açarla Google-dan OAuth access token alınır (push GÖNDƏRİLMİR, .env-ə toxunulmur).
+#   apply   — verify + .env-ə FCM_SERVICE_ACCOUNT_JSON (base64) yazılır (ehtiyat nüsxə), config-only redeploy.
+#   remove  — açar .env-dən silinir, redeploy (push NO-OP vəziyyətinə qayıdır; bildirişlər kabinetdə qalır).
+# Redeploy app-ı yenidən başladır — imtahan gedirsə əvvəl prod-exam-ops exam_activity_probe!
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "verify / apply / remove"
+        type: choice
+        options: [verify, apply, remove]
+        default: verify
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  push-key:
+    runs-on: [self-hosted]
+    environment: production
+    env:
+      APP_DIR: /home/wcu/EducationManagementStudentArena
+      MODE: ${{ inputs.mode }}
+      FCM_B64: ${{ secrets.FCM_SERVICE_ACCOUNT_JSON_B64 }}
+    steps:
+      - name: 🔎 Açar yoxlaması (OAuth token; push göndərilmir)
+        if: ${{ inputs.mode != 'remove' }}
+        run: |
+          set -euo pipefail
+          if [ -z "${FCM_B64:-}" ]; then
+            echo "::error::FCM_SERVICE_ACCOUNT_JSON_B64 secret-i 'production' mühitində yoxdur (bax workflow başlığı)."
+            exit 1
+          fi
+          case "$FCM_B64" in (*[!A-Za-z0-9+/=]*) echo "::error::Secret base64 deyil (sətir sonu / boşluq olmamalıdır)."; exit 1 ;; esac
+          cd "$APP_DIR"
+          # Açar stdin ilə ötürülür — nə komanda sətrində, nə loqda görünür.
+          printf '%s' "$FCM_B64" | docker compose -f docker-compose.prod.yml exec -T app python -c "
+          import sys, django
+          django.setup()
+          from apps.notifications.push.config import _load
+          from apps.notifications.push.fcm import AuthError, access_token
+          creds = _load(sys.stdin.read().strip(), '')
+          if creds is None:
+              print('::error::Service account JSON oxunmadı (client_email / private_key / token_uri / project_id).')
+              sys.exit(1)
+          try:
+              access_token(creds, force_refresh=True)
+          except AuthError as exc:
+              print('::error::Google açarı rədd etdi:', exc)
+              sys.exit(1)
+          print('✅ Açar etibarlıdır. Firebase layihəsi:', creds.project_id, '| hesab:', creds.client_email)
+          "
+
+      - name: 📝 .env yenilənməsi (ehtiyat nüsxə ilə)
+        if: ${{ inputs.mode == 'apply' || inputs.mode == 'remove' }}
+        run: |
+          set -euo pipefail
+          umask 077
+          cd "$APP_DIR"
+          test -f .env || { echo "Missing $APP_DIR/.env" >&2; exit 1; }
+          ts="$(date +%Y%m%d-%H%M%S)"
+          cp -p .env ".env.bak.push.${ts}"
+          chmod 600 ".env.bak.push.${ts}"
+          ls -t .env.bak.push.* 2>/dev/null | tail -n +6 | xargs -r rm -- || true
+          grep -v "^FCM_SERVICE_ACCOUNT_JSON=" .env > .env.tmp || true
+          if [ "$MODE" = "apply" ]; then
+            printf 'FCM_SERVICE_ACCOUNT_JSON=%s\n' "$FCM_B64" >> .env.tmp
+            echo "upserted: FCM_SERVICE_ACCOUNT_JSON (gizli)"
+          else
+            echo "removed: FCM_SERVICE_ACCOUNT_JSON"
+          fi
+          mv .env.tmp .env
+          chmod 600 .env
+          echo "backup: .env.bak.push.${ts}"
+
+      - name: 🚢 Config-only redeploy
+        if: ${{ inputs.mode == 'apply' || inputs.mode == 'remove' }}
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
+          bash scripts/deploy/remote_deploy.sh
+
+      - name: ✅ Effektiv konfiqurasiya (açar çap olunmur)
+        if: ${{ inputs.mode != 'verify' }}
+        run: |
+          set -uo pipefail
+          cd "$APP_DIR"
+          for svc in app celery_worker; do
+            docker compose -f docker-compose.prod.yml exec -T "$svc" python -c "
+          import django; django.setup()
+          from apps.notifications.push import config as c
+          creds = c.credentials()
+          print('$svc', '| push configured:', creds is not None, '| enabled:', c.push_enabled(), '| project:', getattr(creds, 'project_id', None))
+          " 2>/dev/null || echo "$svc: config check skipped"
+          done

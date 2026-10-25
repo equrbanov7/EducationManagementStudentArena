@@ -236,7 +236,7 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
             )
             # Tələbə bildirişləri: q/b qeydi və yeni/dəyişmiş bal.
             if status == AttendanceStatus.ABSENT and old_status != AttendanceStatus.ABSENT:
-                notify_events.append({"enrollment": enrollment, "kind": jn.EVENT_ABSENT})
+                notify_events.append({"enrollment": enrollment, "kind": jn.EVENT_ABSENT, "lesson": lesson})
             if score is not None and score != old_score:
                 notify_events.append({"enrollment": enrollment, "kind": jn.EVENT_SCORE, "score": score})
         if enrollment.id not in touched:

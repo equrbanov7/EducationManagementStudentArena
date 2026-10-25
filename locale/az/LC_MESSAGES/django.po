@@ -108508,3 +108508,28 @@ msgstr "Növbəti sətirlər yüklənmədi — yenidən cəhd edin."
 msgctxt "accounts.workload"
 msgid "Müəllimin üstünə vurun — solda yalnız ona bölgüsü olan sətirlər qalsın. Təkrar vurun və ya × ilə süzgəci götürün."
 msgstr "Müəllimin üstünə vurun — solda yalnız ona bölgüsü olan sətirlər qalsın. Təkrar vurun və ya × ilə süzgəci götürün."
+
+#, python-format
+msgctxt "registrar.notify"
+msgid "Qayıb (q/b) qeyd edildi: %(date)s"
+msgstr "Qayıb (q/b) qeyd edildi: %(date)s"
+
+msgctxt "core.runtime_settings"
+msgid "Bildirişlər"
+msgstr "Bildirişlər"
+
+msgctxt "core.runtime_settings"
+msgid "Push bildirişləri aktivdir (telefona göndər)"
+msgstr "Push bildirişləri aktivdir (telefona göndər)"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılanda yeni bildiriş (q/b, bal, imtahan, elan və s.) mobil tətbiqi quraşdırıb hesabına daxil olmuş istifadəçinin telefonunda bildiriş kimi görünür. Söndürüləndə bildirişlər yalnız kabinetdə qalır. Firebase açarı serverdə qoşulmayıbsa bu açar heç nəyi dəyişmir."
+msgstr "Yandırılanda yeni bildiriş (q/b, bal, imtahan, elan və s.) mobil tətbiqi quraşdırıb hesabına daxil olmuş istifadəçinin telefonunda bildiriş kimi görünür. Söndürüləndə bildirişlər yalnız kabinetdə qalır. Firebase açarı serverdə qoşulmayıbsa bu açar heç nəyi dəyişmir."
+
+msgctxt "notifications.push"
+msgid "Test bildirişi"
+msgstr "Test bildirişi"
+
+msgctxt "notifications.push"
+msgid "Push bildirişləri bu cihazda işləyir."
+msgstr "Push bildirişləri bu cihazda işləyir."

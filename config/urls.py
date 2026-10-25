@@ -124,6 +124,11 @@ urlpatterns = [
         "notifications/",
         include(("apps.notifications.urls", "notifications"), namespace="notifications"),
     ),
+    # Mobil tətbiq: bildiriş qutusu JSON + push cihaz qeydiyyatı (2026-10-25, docs/api/PUSH_NOTIFICATIONS.md)
+    path(
+        "api/notifications/",
+        include(("apps.notifications.api_urls", "notifications_api"), namespace="notifications_api"),
+    ),
     # AI assistant API
     path("api/ai-assistant/", include(("apps.ai_assistant.urls", "ai_assistant"), namespace="ai_assistant")),
     # Sistem Monitorinqi (superadmin-only; server-side icazə + audit).

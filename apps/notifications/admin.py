@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import InAppNotification, StudentOrganizationRequest
+from .models import InAppNotification, PushDevice, StudentOrganizationRequest
 
 
 @admin.register(StudentOrganizationRequest)
@@ -25,3 +25,13 @@ class InAppNotificationAdmin(admin.ModelAdmin):
     search_fields = ["recipient__username", "title", "message"]
     date_hierarchy = "created_at"
     readonly_fields = ["created_at", "read_at", "deleted_at"]
+
+
+@admin.register(PushDevice)
+class PushDeviceAdmin(admin.ModelAdmin):
+    list_display = ["user", "platform", "app_version", "language", "is_active", "last_seen", "last_success_at"]
+    list_filter = ["platform", "is_active", "deactivated_reason"]
+    search_fields = ["user__username"]
+    raw_id_fields = ["user"]
+    # Token sirr deyil, amma admin siyahısında göstərməyə ehtiyac yoxdur — yalnız redaktə formunda.
+    readonly_fields = ["created_at", "last_seen", "last_success_at", "deactivated_at"]

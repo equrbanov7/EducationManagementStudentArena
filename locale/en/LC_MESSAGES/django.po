@@ -108998,3 +108998,28 @@ msgstr "The next rows could not be loaded — try again."
 msgctxt "accounts.workload"
 msgid "Müəllimin üstünə vurun — solda yalnız ona bölgüsü olan sətirlər qalsın. Təkrar vurun və ya × ilə süzgəci götürün."
 msgstr "Click a teacher to keep only the rows assigned to them on the left. Click again or use × to remove the filter."
+
+#, python-format
+msgctxt "registrar.notify"
+msgid "Qayıb (q/b) qeyd edildi: %(date)s"
+msgstr "Absence (q/b) recorded: %(date)s"
+
+msgctxt "core.runtime_settings"
+msgid "Bildirişlər"
+msgstr "Notifications"
+
+msgctxt "core.runtime_settings"
+msgid "Push bildirişləri aktivdir (telefona göndər)"
+msgstr "Push notifications enabled (send to phone)"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılanda yeni bildiriş (q/b, bal, imtahan, elan və s.) mobil tətbiqi quraşdırıb hesabına daxil olmuş istifadəçinin telefonunda bildiriş kimi görünür. Söndürüləndə bildirişlər yalnız kabinetdə qalır. Firebase açarı serverdə qoşulmayıbsa bu açar heç nəyi dəyişmir."
+msgstr "When enabled, every new notification (absence, score, exam, announcement, etc.) also appears as a notification on the phone of a user who installed the mobile app and signed in. When disabled, notifications stay in the cabinet only. If the Firebase key is not configured on the server, this switch has no effect."
+
+msgctxt "notifications.push"
+msgid "Test bildirişi"
+msgstr "Test notification"
+
+msgctxt "notifications.push"
+msgid "Push bildirişləri bu cihazda işləyir."
+msgstr "Push notifications work on this device."

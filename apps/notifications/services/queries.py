@@ -41,3 +41,28 @@ def get_user_notifications(*, user, filter_by: str = "all", notification_type: s
         qs = qs.filter(search_q)
 
     return qs
+
+
+def notified_metadata_values(*, recipient_ids, key: str, match: dict | None = None) -> dict:
+    """``{recipient_id: {dəyər, …}}`` — alıcıların bildirişlərindəki ``metadata[key]`` siyahılarının birləşməsi.
+
+    Təkrar bildirişin qarşısı üçün (məs. jurnal: eyni dərsin q/b-si ikinci dəfə bildirilməsin — müəllim
+    q/b → i/e → q/b etsə də). ``match`` — ``metadata`` alt-çoxluğu süzgəci (``{"event": …, "offering_id": …}``).
+    Silinmiş (``deleted_at``) bildirişlər də sayılır: istifadəçi sildisə, hadisə yenə «bildirilib».
+    ``recipient_id`` süzgəci sərhəddir — ``bypass_rls`` (bildiriş istənilən tenant-da ola bilər).
+    """
+    from core.rls import bypass_rls
+
+    ids = sorted({int(pk) for pk in recipient_ids or [] if pk is not None})
+    result: dict = {}
+    if not ids or not key:
+        return result
+    qs = InAppNotification.objects.filter(recipient_id__in=ids, metadata__has_key=key)
+    if match:
+        qs = qs.filter(metadata__contains=match)
+    with bypass_rls():
+        rows = list(qs.values_list("recipient_id", f"metadata__{key}"))
+    for recipient_id, values in rows:
+        if isinstance(values, list):
+            result.setdefault(recipient_id, set()).update(str(value) for value in values)
+    return result
