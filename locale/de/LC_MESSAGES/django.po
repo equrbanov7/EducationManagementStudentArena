@@ -109155,3 +109155,15 @@ msgstr "Behandlung der Themen (laut Journal)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Syllabus"
+
+msgctxt "registrar.journal_topics"
+msgid "növbəti mövzu"
+msgstr "nächstes Thema"
+
+msgctxt "registrar.journal_topics"
+msgid "Mövzu adı ilə axtar…"
+msgstr "Nach Themenname suchen…"
+
+msgctxt "registrar.journal_topics"
+msgid "Uyğun mövzu tapılmadı"
+msgstr "Kein passendes Thema gefunden"

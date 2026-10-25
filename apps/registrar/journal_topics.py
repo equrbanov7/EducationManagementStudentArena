@@ -241,7 +241,7 @@ def lesson_topic_meta(offering, lessons):
     rows = syllabus_topic_rows(offering)
     if not rows:
         rows = [{"title": title, "kinds": (), "week": None} for title in _course_topic_titles(offering)]
-    return [
+    meta = [
         {
             "title": row["title"],
             "covered": row["title"] in covered,
@@ -253,11 +253,43 @@ def lesson_topic_meta(offering, lessons):
         }
         for row in rows
     ]
+    return decorate_topic_choices(meta)
+
+
+def decorate_topic_choices(rows) -> list:
+    """Modal seçicisinin görünüşü (sahib 2026-10-25: «keçirilmiş mövzular səliqəli görünsün»).
+
+    Hər sətrə ``next`` (keçirilməmiş və planlaşdırılmamış İLK mövzu — vurğulanır) və ``subtext`` (seçici
+    menyusunda başlığın altındakı sönük sətir: dərs növləri + «✓ keçirilib 04.10» / «planlaşdırılıb» /
+    «növbəti mövzu») qoyur. Başlıq (``title``) toxunulmur — seçimin dəyəri odur. ``covered`` dəyişən hər
+    yerdən sonra (``journal_lesson_prefill.topics_covered_by``) yenidən çağırılır."""
+    from django.utils.translation import pgettext
+
+    labels = {
+        "lecture": pgettext("registrar.journal", "mühazirə"),
+        "seminar": pgettext("registrar.journal", "seminar"),
+        "lab": pgettext("registrar.journal", "laboratoriya"),
+    }
+    next_index = next((i for i, row in enumerate(rows) if not row.get("covered") and not row.get("planned")), None)
+    out = []
+    for index, row in enumerate(rows):
+        parts = [", ".join(labels[kind] for kind in row.get("kinds") or () if kind in labels)]
+        date = row.get("date")
+        stamp = f" {date:%d.%m}" if date else ""
+        if row.get("covered"):
+            parts.append("✓ " + pgettext("registrar.journal", "keçirilib") + stamp)
+        elif row.get("planned"):
+            parts.append(pgettext("registrar.journal", "planlaşdırılıb") + stamp)
+        elif index == next_index:
+            parts.append(pgettext("registrar.journal_topics", "növbəti mövzu"))
+        out.append({**row, "next": index == next_index, "subtext": " · ".join(part for part in parts if part)})
+    return out
 
 
 __all__ = [
     "SYLLABUS_HOUR_KINDS",
     "attach_syllabus_topics",
+    "decorate_topic_choices",
     "lesson_topic_choices",
     "lesson_topic_meta",
     "normalize_topic",

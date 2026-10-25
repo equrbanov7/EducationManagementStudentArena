@@ -108129,3 +108129,15 @@ msgstr "Topic coverage (from the journal)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Syllabus"
+
+msgctxt "registrar.journal_topics"
+msgid "növbəti mövzu"
+msgstr "next topic"
+
+msgctxt "registrar.journal_topics"
+msgid "Mövzu adı ilə axtar…"
+msgstr "Search by topic name…"
+
+msgctxt "registrar.journal_topics"
+msgid "Uyğun mövzu tapılmadı"
+msgstr "No matching topic found"

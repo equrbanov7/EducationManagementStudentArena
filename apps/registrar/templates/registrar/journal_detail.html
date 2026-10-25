@@ -6,7 +6,7 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_detail.css' %}?v=20260928-1">
-    <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20261017-fixg">
+    <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20261025-topic">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2_theme.css' %}?v=20260926-close">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2_kselect.css' %}?v=20260926-1">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2_window.css' %}?v=20260925-audit">
@@ -25,6 +25,8 @@
     {% comment %}Sakit düzüm qatı — HƏMİŞƏ SONUNCU yüklənir ki, yuxarıdakı
     fayllardakı düzüm fərqlərini üstələsin; rəng palitrasına toxunmur.{% endcomment %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal_layout.css' %}?v=20261019-head">
+    {# Dərs modalı: korpus/otaq cütünün sarınması + mövzu seçicisinin «keçirilib / növbəti» görünüşü (2026-10-25). #}
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_lesson_modal.css' %}?v=20261025-1">
 {% endblock %}
 
 {% block content %}

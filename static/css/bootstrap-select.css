@@ -166,6 +166,15 @@
     line-height: 1.35;
 }
 
+/* `<option data-subtext="…">` — əsas mətnin altında sönük ikinci sətir (bootstrap_select.js). */
+.bootstrap-single-select__option-sub {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.8em;
+    font-weight: 500;
+    color: var(--ems-text-muted, #6b7b97);
+}
+
 .bootstrap-single-select__option-check {
     opacity: 0;
     color: #325dc4;

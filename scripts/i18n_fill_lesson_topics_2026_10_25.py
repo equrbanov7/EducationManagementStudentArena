@@ -30,6 +30,16 @@ ENTRIES = {
             "…veya planda olmayan konuyu kendiniz yazın",
             "…oder geben Sie ein Thema ein, das nicht im Plan steht",
         ),
+        "növbəti mövzu": t("next topic", "следующая тема", "sıradaki konu", "nächstes Thema"),
+        "Mövzu adı ilə axtar…": t(
+            "Search by topic name…", "Поиск по названию темы…", "Konu adına göre ara…", "Nach Themenname suchen…"
+        ),
+        "Uyğun mövzu tapılmadı": t(
+            "No matching topic found",
+            "Подходящая тема не найдена",
+            "Eşleşen konu bulunamadı",
+            "Kein passendes Thema gefunden",
+        ),
         "Planda olmayan mövzu": t(
             "Topic not in the plan", "Тема вне плана", "Planda olmayan konu", "Thema außerhalb des Plans"
         ),

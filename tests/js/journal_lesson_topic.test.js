@@ -161,3 +161,34 @@ test("the syllabus panel lists every plan row with its coverage status", async (
     assert.ok(rows[1].classList.contains("is-pending"));
     assert.equal(rows[1].querySelector(".sylv-progress__badge").textContent, "Keçilməyib");
 });
+
+test("topic options keep a clean title and show kinds + status as a muted second line", () => {
+    const dom = new JSDOM(
+        '<!doctype html><html><body><div class="bootstrap-single-select">' +
+            '<select data-bootstrap-select name="lesson_topic"><option value="">Seçin…</option>' +
+            '<option value="Giriş" class="jd-topic-covered" data-subtext="mühazirə · ✓ keçirilib 04.10" selected>Giriş</option>' +
+            '<option value="Massivlər" class="jd-topic-next" data-subtext="mühazirə, seminar · növbəti mövzu">Massivlər</option>' +
+            "</select></div></body></html>",
+        { runScripts: "outside-only", pretendToBeVisual: true }
+    );
+    const { window } = dom;
+    window.eval(fs.readFileSync(path.join(ROOT, "static/js/bootstrap_select.js"), "utf8"));
+    window.EMSBootstrapSelect.init(window.document);
+    const wrap = window.document.querySelector(".bootstrap-single-select");
+    const toggle = wrap.querySelector(".bootstrap-single-select__toggle");
+    const label = toggle.querySelector(".bootstrap-single-select__label-text");
+    assert.equal(label.textContent, "Giriş", "düymədə yalnız başlıq");
+    assert.equal(label.title, "Giriş", "kəsilən yazının tam mətni ipucunda");
+    toggle.dispatchEvent(new window.Event("show.bs.dropdown", { bubbles: true }));
+    const buttons = [...wrap.querySelectorAll(".bootstrap-single-select__option")];
+    const covered = buttons.find((b) => b.dataset.value === "Giriş");
+    const next = buttons.find((b) => b.dataset.value === "Massivlər");
+    assert.ok(covered.classList.contains("jd-topic-covered"));
+    assert.equal(covered.querySelector(".bootstrap-single-select__option-sub").textContent, "mühazirə · ✓ keçirilib 04.10");
+    assert.ok(next.classList.contains("jd-topic-next"));
+    assert.equal(
+        next.querySelector(".bootstrap-single-select__option-sub").textContent,
+        "mühazirə, seminar · növbəti mövzu"
+    );
+    assert.equal(buttons[0].querySelector(".bootstrap-single-select__option-sub"), null, "subtext-siz variantda alt sətir yoxdur");
+});

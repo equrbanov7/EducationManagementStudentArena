@@ -107639,3 +107639,15 @@ msgstr "Mövzuların keçilməsi (jurnal üzrə)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Sillabus"
+
+msgctxt "registrar.journal_topics"
+msgid "növbəti mövzu"
+msgstr "növbəti mövzu"
+
+msgctxt "registrar.journal_topics"
+msgid "Mövzu adı ilə axtar…"
+msgstr "Mövzu adı ilə axtar…"
+
+msgctxt "registrar.journal_topics"
+msgid "Uyğun mövzu tapılmadı"
+msgstr "Uyğun mövzu tapılmadı"

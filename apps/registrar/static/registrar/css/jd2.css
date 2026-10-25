@@ -476,13 +476,7 @@ td.jd2-fb-qeyd { text-align: left; padding: 9px 14px; }
 /* ✓ işarəsi seçim yazısına yapışmasın (i/e ✓ arasında boşluq). */
 .jd2-semselect .dropdown-menu .bootstrap-single-select__option-check { margin-left: .35rem; }
 
-/* Keçirilmiş (istifadə olunmuş) mövzular — "Mövzunu seçin…" dropdown-unda yaşıl.
-   bootstrap_select.js option-un "jd-topic-covered" class-ını menyu düyməsinə köçürür. */
-.bootstrap-single-select__option.jd-topic-covered,
-.bootstrap-single-select__option.jd-topic-covered .bootstrap-single-select__option-label {
-    color: #15803d; font-weight: 600;
-}
-option.jd-topic-covered { color: #15803d; }
+/* Mövzu seçicisinin «keçirilib / növbəti» görünüşü → journal_lesson_modal.css (2026-10-25). */
 
 /* ═══ Kollokvium pəncərə vəziyyəti (İmtahan Mərkəzi idarə edir) ═══ */
 .jd2-kwin-k { font-weight: 800; }
