@@ -323,7 +323,9 @@ class ProdDataOpsWhitelistTest(SimpleTestCase):
         self.assertIn('args=(--org "$ORG" --task-rows)', text)
         block = text.split("            fix_group_education_form)\n")[1].split(";;")[0]
         self.assertNotIn("--align-part-to-full", block.split("args=")[1])
-        pattern = re.compile(r"^(syllabus_week_link|group_education_form): [a-z_]+=[0-9a-z_]+( [a-z_]+=[0-9a-z_]+)*$")
+        pattern = re.compile(
+            r"^(syllabus_week_link|group_education_form|chair_merge): [a-z_]+=[0-9a-z_]+( [a-z_]+=[0-9a-z_]+)*$"
+        )
         self.assertIn(pattern.pattern, text.replace("'", ""))
         for line in (
             "group_education_form: mode=dry_run",
