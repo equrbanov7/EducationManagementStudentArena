@@ -113,6 +113,37 @@ def plan(organization) -> list[Row]:
     return rows
 
 
+IDLE_REASON = "idle_under"
+
+
+def plan_idle_under(organization, parent_name: str) -> list[Row]:
+    """Göstərilən vahidin (fakültə) alt-ağacında BOŞ qruplar (sahib 2026-10-25, «İngilis dili mərkəzi»): aktiv
+    (enrolled / academic_leave) tələbə qeydi yoxdur və cari/gələcək dövrdə açılışı yoxdur. Tarixi istinadlar
+    (köhnə açılış, qeydiyyat, qiymət) QALIR — vahid yalnız deaktiv olur (``junk_archived`` izi ilə geri qayıdır)."""
+
+    OrgUnit = django_apps.get_model("organizations", "OrgUnit")
+    Record = django_apps.get_model("registrar", "StudentAcademicRecord")
+    Offering = django_apps.get_model("registrar", "CourseOffering")
+    roots = list(OrgUnit.objects.filter(organization=organization, name=parent_name, is_active=True))
+    if len(roots) != 1:
+        return []
+    today = timezone.localdate()
+    rows = []
+    for unit in OrgUnit.objects.filter(
+        organization=organization, unit_type="group", path__startswith=roots[0].path
+    ).order_by("path"):
+        if not unit.is_active:
+            rows.append(Row(unit, IDLE_REASON, {}, "already_inactive"))
+            continue
+        refs = {
+            "active_records": Record.objects.filter(group=unit, status__in=("enrolled", "academic_leave")).count(),
+            "live_offerings": Offering.objects.filter(group=unit, period__end_date__gte=today).count(),
+        }
+        refs = {key: value for key, value in refs.items() if value}
+        rows.append(Row(unit, IDLE_REASON, refs, "skip_in_use" if refs else "archive"))
+    return rows
+
+
 def apply(rows) -> int:
     done = 0
     stamp = timezone.now().isoformat()
@@ -141,6 +172,8 @@ def counters(rows) -> dict:
 
 __all__ = [
     "CANDIDATE_TYPES",
+    "IDLE_REASON",
+    "plan_idle_under",
     "JUNK_SETTING",
     "REPORT_HEADER",
     "apply",

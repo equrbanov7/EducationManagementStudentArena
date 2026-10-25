@@ -1255,6 +1255,12 @@ jobs:
               # QA-2 F-16 (2026-10-17): test / zibil qruplar — yalnız istifadə olunmayan deaktiv, heç nə silinmir.
               report_csv=junk_groups.csv
               test "$CREATE_MISSING" != "true" || { echo "create_missing bu əmr üçün deyil" >&2; exit 2; }
+              # 2026-10-25: `task_chair` = fakültənin adı → onun alt-ağacında boş qruplar (--idle-under).
+              if [ -n "$TASK_CHAIR" ]; then
+                { [ "${#TASK_CHAIR}" -le 120 ] && match "$TASK_CHAIR" '^[[:alnum:]ƏəIıİiĞğŞşÇçÖöÜü .()-]+$'; } \
+                  || { echo "task_chair (vahidin adı) formatı: hərf/rəqəm/boşluq" >&2; exit 2; }
+                args+=("--idle-under=$TASK_CHAIR")
+              fi
               test "$APPLY" != "true" || args+=(--apply)
               ;;
             shrink_avatars)

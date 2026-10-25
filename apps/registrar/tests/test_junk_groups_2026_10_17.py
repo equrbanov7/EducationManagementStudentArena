@@ -115,3 +115,38 @@ class GroupsRegistryParentLinkTest(TestCase):
             names, counts = _parent_links(org, [parent, *subs])
         self.assertEqual(names, {str(parent.pk): "234 K az"})
         self.assertEqual(counts, {str(parent.pk): 2})
+
+
+class IdleUnderFacultyTest(ArchiveJunkGroupsTest):
+    """Sahib 2026-10-25: fakültənin alt-ağacında aktiv tələbəsi və cari açılışı OLMAYAN qruplar deaktiv olunur."""
+
+    def test_idle_groups_under_faculty_are_archived_live_ones_kept(self):
+        import datetime
+
+        from apps.organizations.models import AcademicPeriod
+        from apps.registrar.models import CourseOffering, Subject
+        from core.constants import AcademicPeriodType
+
+        with bypass_rls():
+            period = AcademicPeriod.objects.create(
+                organization=self.org,
+                name="Payız",
+                academic_year="2026/2027",
+                period_type=AcademicPeriodType.SEMESTER,
+                start_date=datetime.date(2026, 9, 15),
+                end_date=datetime.date(2099, 1, 31),
+            )
+            subject = Subject.objects.create(organization=self.org, code="JG-1", name="Fənn")
+            CourseOffering.objects.create(organization=self.org, subject=subject, period=period, group=self.real)
+        output, rows = self._run("--idle-under", "Fak", "--apply")
+        self.assertIn("candidates=3 · archive=2 · skip_in_use=1", output)
+        self.assertIn("live_offerings=1", rows)
+        self._refresh()
+        self.assertFalse(self.empty_junk.is_active)
+        self.assertFalse(self.dot.is_active)
+        self.assertTrue(self.real.is_active)
+        self.assertTrue(self.used_specialty.is_active)  # yalnız QRUPLAR
+        again, _rows = self._run("--idle-under", "Fak", "--apply")
+        self.assertIn("archive=0", again)
+        unknown, _rows = self._run("--idle-under", "Yoxdur")
+        self.assertIn("candidates=0", unknown)

@@ -39,6 +39,11 @@ class Command(BaseCommand):
         parser.add_argument("--org", default="qku", help="Təşkilatın slug-ı")
         parser.add_argument("--report", default="", help=f"Hesabat qovluğu ({REPORT_NAME} yazılır)")
         parser.add_argument("--apply", action="store_true", help="Faktiki yaz (defolt: dry-run)")
+        parser.add_argument(
+            "--idle-under",
+            default="",
+            help="Bu adlı vahidin (fakültə) alt-ağacında aktiv tələbəsi və cari açılışı OLMAYAN qrupları deaktiv et",
+        )
 
     def handle(self, *args, **options):
         self.rows: list = []
@@ -58,7 +63,10 @@ class Command(BaseCommand):
             organization = Organization.objects.filter(slug=str(options["org"]).strip()).first()
             if organization is None:
                 raise CommandError("organization_not_found")
-            rows = junk_groups.plan(organization)
+            if options["idle_under"]:
+                rows = junk_groups.plan_idle_under(organization, options["idle_under"].strip())
+            else:
+                rows = junk_groups.plan(organization)
             junk_groups.apply(rows)
             self.counts = junk_groups.counters(rows)
             self.rows = [row.csv_row() for row in rows]
