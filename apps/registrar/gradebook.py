@@ -202,6 +202,10 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
     # Birləşmə ilə gələn əvvəlki jurnal işi (yalnız qonaq sətirlər üçün, tək sorğu).
     carry_map = guest_merge.carry_over_map(guest_ids)
     guest_docs = guest_roster.guest_document_map(guest_ids)  # alt-qrup sənədi (təqdimat)
+    # «Alt qrup» çipi yalnız sənədli yerləşdirməyə (sahib 2026-10-25: köçürmənin sənədsiz sətirlərini göstərmə).
+    from .subgroup_evidence import documented_subgroup_ids
+
+    documented_guests = documented_subgroup_ids(guest_ids)
     # Rəsmi düzəliş almış xanalar (sarı + kilidli göstəriş üçün).
     from .models import JournalCorrection
 
@@ -321,7 +325,8 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
                 "eligibility": eligibility,
                 # Alt qrupdan əlavə olunmuş tələbə: sətirdə çip + geri götürmə.
                 # Şərt CARİ vəziyyətə baxır — rəsmi köçürmədən sonra çip susur.
-                "is_guest": guest_roster.row_is_guest(
+                "is_guest": enrollment.id in documented_guests
+                and guest_roster.row_is_guest(
                     enrollment,
                     offering=offering,
                     current_group_id=current_groups.get(enrollment.student_id),

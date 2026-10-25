@@ -99,7 +99,7 @@ sahələr `disabled` (POST-a düşmür); düzəliş rejimində forma `correction
                 <span class="ese-idx">{{ forloop.counter }}</span>
                 <span class="ese-student">{{ row.name }}</span>
                 <span class="ese-username">{{ row.student.username }}</span>
-                {% if row.enrollment.is_guest %}<span class="ems-badge ems-badge--muted ese-guest">{% trans "alt qrupdan" context "registrar.exam_score_entry" %}</span>{% endif %}
+                {% if row.is_subgroup %}<span class="ems-badge ems-badge--muted ese-guest">{% trans "alt qrupdan" context "registrar.exam_score_entry" %}</span>{% endif %}
               </th>
               {% if not s.is_midterm %}{% with entry=row.entry_score|floatformat:0 %}<td class="ems-table__num ese-td--num" data-ese-entry="{{ entry }}">{{ entry }}</td>{% endwith %}{% endif %}
               {% ese_question_cells row %}

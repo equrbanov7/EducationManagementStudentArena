@@ -35,6 +35,7 @@ from apps.registrar.models import (
     StudentAcademicRecord,
     Subject,
 )
+from apps.registrar.tests.subgroup_evidence_fixture import attach_guest_document
 from core.constants import OrgUnitType, RoleScopeType
 from core.rls import bypass_rls
 
@@ -304,13 +305,19 @@ class StudentCardTest(TestCase):
     def test_card_marks_guest_enrollment_from_another_group(self):
         """Alt qrupdan əlavə olunmuş sətir kartda AYRICA işarələnir."""
         with bypass_rls():
-            Enrollment.objects.create(
+            guest = Enrollment.objects.create(
                 organization=self.fx.org,
                 student=self.fx.student_a,
                 offering=self.fx.offering_math_a2,
                 source_group=self.fx.group_a1,
             )
+            card_without_document = people.build_student_card(
+                actor=self._actor(self.fx.dean_m), user_id=self.fx.student_a.pk
+            )
+            attach_guest_document(guest)
             card = people.build_student_card(actor=self._actor(self.fx.dean_m), user_id=self.fx.student_a.pk)
+        # Sənədsiz (köçürmə) sətir nişansızdır — sahib 2026-10-25: «bilməsən yazma».
+        self.assertFalse([row for row in card_without_document["records"][0]["enrollments"] if row["is_guest"]])
         guests = [row for row in card["records"][0]["enrollments"] if row["is_guest"]]
         self.assertEqual(len(guests), 1)
         self.assertEqual(guests[0]["source_group_name"], "Qrup A1-1")

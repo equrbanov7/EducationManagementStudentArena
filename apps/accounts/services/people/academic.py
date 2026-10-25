@@ -168,6 +168,10 @@ def _enrollment_rows(record, period, *, limit=MAX_PREVIEW_ROWS):
         .select_related("offering__subject", "offering__group", "source_group")
         .order_by("offering__subject__code")[:limit]
     )
+    from apps.registrar.public import documented_subgroup_ids
+
+    enrollments = list(enrollments)
+    documented = documented_subgroup_ids([e.pk for e in enrollments if e.source_group_id is not None])
     return [
         {
             "id": str(enrollment.pk),
@@ -178,7 +182,7 @@ def _enrollment_rows(record, period, *, limit=MAX_PREVIEW_ROWS):
             "kind": enrollment.kind,
             # Alt qrupdan əlavə olunmuş sətir — köçürmə ona TOXUNMUR (o, öz
             # qrupunun açılışı deyil), ona görə kartda ayrıca işarələnir.
-            "is_guest": enrollment.source_group_id is not None,
+            "is_guest": enrollment.pk in documented,  # yalnız sənədli yerləşdirmə (sahib 2026-10-25)
             "source_group_name": getattr(enrollment.source_group, "name", "") or "",
         }
         for enrollment in enrollments

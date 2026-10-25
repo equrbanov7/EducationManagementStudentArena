@@ -36,6 +36,7 @@ from apps.registrar.models import (
     StudentAcademicRecord,
     Subject,
 )
+from apps.registrar.tests.subgroup_evidence_fixture import attach_guest_document
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
@@ -198,7 +199,10 @@ class GuestModelDecisionTest(_GuestRosterBase):
     def test_journal_row_carries_guest_flag_and_source(self):
         self._drop_own_history(self.guest)
         with bypass_rls():
-            guest_roster.add_guest_student(offering=self.offering, student=self.guest, by_user=self.coordinator)
+            enrollment = guest_roster.add_guest_student(
+                offering=self.offering, student=self.guest, by_user=self.coordinator
+            )
+            attach_guest_document(enrollment, self.coordinator)
             journal = gradebook.get_offering_journal(offering=self.offering)
         rows = {row["student"].id: row for row in journal["rows"]}
         self.assertTrue(rows[self.guest.id]["is_guest"])

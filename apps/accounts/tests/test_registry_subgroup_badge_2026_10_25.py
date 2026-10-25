@@ -11,6 +11,7 @@ from datetime import date
 
 from apps.organizations.models import AcademicPeriod
 from apps.registrar.models import CourseOffering, Enrollment, Subject
+from apps.registrar.tests.subgroup_evidence_fixture import attach_guest_document
 from core.constants import AcademicPeriodType
 
 from .test_student_services_sections import StudentServicesBase
@@ -37,7 +38,7 @@ class RegistrySubgroupBadgeTest(StudentServicesBase):
         own_offering = CourseOffering.objects.create(
             organization=cls.org, subject=own, period=period, group=cls.group_a
         )
-        Enrollment.objects.create(
+        cls.guest_enrollment = Enrollment.objects.create(
             organization=cls.org, student=cls.pupil, offering=sub_offering, source_group=cls.group_a
         )
         Enrollment.objects.create(organization=cls.org, student=cls.pupil, offering=own_offering)
@@ -49,7 +50,13 @@ class RegistrySubgroupBadgeTest(StudentServicesBase):
             row["data"]["user_id"]: row for row in response.context["student_registry_section"]["table_rows"]
         }
 
+    def test_undocumented_import_row_has_no_badge(self):
+        """Sahib 2026-10-25: köçürmənin sənədsiz «alt qrupdan əlavə» sətri nişan DAŞIMIR («bilməsən yazma»)."""
+        _response, rows = self._rows()
+        self.assertEqual(rows[self.pupil.pk]["data"]["subgroup_names"], [])
+
     def test_subgroup_student_row_carries_badge(self):
+        attach_guest_document(self.guest_enrollment)
         response, rows = self._rows()
         row = rows[self.pupil.pk]
         self.assertEqual(row["data"]["subgroup_names"], [self.group_b.name])

@@ -224,6 +224,11 @@ def roster_for_offering(*, offering):
         organization=offering.organization,
     )
 
+    # «alt qrupdan» nişanı yalnız sənədli yerləşdirməyə (sahib 2026-10-25).
+    from .subgroup_evidence import documented_subgroup_ids
+
+    documented = documented_subgroup_ids([e.pk for e in enrollments if e.source_group_id is not None])
+
     rows = []
     for enrollment in enrollments:
         result = finals.compute_final_result(enrollment=enrollment, scheme=scheme, batch=batch)
@@ -234,6 +239,7 @@ def roster_for_offering(*, offering):
             {
                 "enrollment": enrollment,
                 "student": student,
+                "is_subgroup": enrollment.pk in documented,
                 # Göstərilən ad BİR dəfə (şablon sətir başına ~25 dəfə işlədir — 2026-10-08 tutum).
                 "name": student.get_full_name() or student.username,
                 "exam_score": result["exam_score"],

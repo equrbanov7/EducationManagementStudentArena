@@ -34,6 +34,7 @@ from apps.registrar.models import (
     LessonMark,
     StudentAcademicRecord,
 )
+from apps.registrar.tests.subgroup_evidence_fixture import attach_guest_document
 from core.rls import bypass_rls
 
 from .test_guest_roster import _GuestRosterBase
@@ -149,6 +150,7 @@ class MergeServiceTest(_MergeBase):
                 reason=REASON,
                 release_source=True,
             )
+            attach_guest_document(target, self.coordinator)
             target.refresh_from_db()
             journal = gradebook.get_offering_journal(offering=self.offering)
             preserved = LessonMark.objects.filter(enrollment=source).count()
@@ -361,7 +363,7 @@ class ProvenanceAfterTransferTest(_MergeBase):
             )
 
     def test_chip_is_shown_while_the_student_belongs_elsewhere(self):
-        self._add_guest()
+        attach_guest_document(self._add_guest(), self.coordinator)
         self.assertTrue(self._guest_row()["is_guest"])
 
     def test_chip_goes_silent_after_the_official_transfer(self):

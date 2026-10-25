@@ -349,29 +349,29 @@ def _movement_counts(organization, records) -> dict:
 def _subgroup_journals(organization, records, period) -> dict:
     """``{record_id: [alt qrup adları]}`` — səhifədəki tələbələrin cari dövrdə «alt qrupdan əlavə» olunduğu
     jurnalların qrupları (``guest_roster.row_is_guest`` predikatı: ``source_group`` dolu VƏ jurnalın qrupu
-    tələbənin cari qrupu deyil). BİR sorğu."""
+    tələbənin cari qrupu deyil) + yalnız SƏNƏDLİ yerləşdirmə (sahib 2026-10-25). ≤ 3 sorğu."""
     from django.apps import apps as django_apps
 
     Enrollment = django_apps.get_model("registrar", "Enrollment")
     by_student = {record.student_id: record for record in records}
     if period is None or not by_student:
         return {}
-    rows = (
-        Enrollment.objects.filter(
-            organization=organization,
-            student_id__in=list(by_student),
-            offering__period=period,
-            status__in=(Enrollment.Status.ENROLLED, Enrollment.Status.COMPLETED),
-            source_group__isnull=False,
-            offering__group__isnull=False,
-        )
-        .values_list("student_id", "offering__group_id", "offering__group__name")
-        .distinct()
-    )
+    rows = Enrollment.objects.filter(
+        organization=organization,
+        student_id__in=list(by_student),
+        offering__period=period,
+        status__in=(Enrollment.Status.ENROLLED, Enrollment.Status.COMPLETED),
+        source_group__isnull=False,
+        offering__group__isnull=False,
+    ).values_list("pk", "student_id", "offering__group_id", "offering__group__name")
+    from apps.registrar.public import documented_subgroup_ids
+
+    rows = list(rows)
+    documented = documented_subgroup_ids([row[0] for row in rows])
     out: dict = {}
-    for student_id, group_id, group_name in rows:
+    for pk, student_id, group_id, group_name in rows:
         record = by_student[student_id]
-        if group_id != record.group_id and group_name:
+        if pk in documented and group_id != record.group_id and group_name:
             out.setdefault(str(record.pk), set()).add(group_name)
     return {key: sorted(names) for key, names in out.items()}
 

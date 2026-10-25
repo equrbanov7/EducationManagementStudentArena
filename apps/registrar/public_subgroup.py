@@ -9,6 +9,7 @@ Kənar modullar (accounts kabineti, 25% təkrar imtahan axını) YALNIZ bu adlar
 * ``undo_subgroup_placement(*, event_id, actor, reason, organization, request=None)``;
 * ``record_imported_placement(*, enrollment, actor, reason, details=None, load=None)`` — köçürmənin yazdığı
   «alt qrupdan əlavə» qeydiyyatına tarixçə sətri (legacy delta ``subgroups`` fazası);
+* ``documented_subgroup_ids(enrollment_ids) -> set`` — «Alt qrup» nişanı yalnız sənədli yerləşdirməyə (2026-10-25);
 * oxu köməkçiləri: önbaxış (``evaluate_subgroup_placement``), uyğun jurnallar, tarixçə, əhatə qapısı.
 """
 
@@ -18,6 +19,7 @@ from . import credit_load as _credit_load
 from . import guest_merge  # noqa: F401 — «alt qrup birləşməsi» (release_source); legacy delta dedupe işlədir
 from . import subgroup_access, subgroup_placement_history, subgroup_placement_lookups, subgroup_placement_query
 from .subgroup_documents import PlacementDocument
+from .subgroup_evidence import documented_subgroup_ids
 from .subgroup_placement import evaluate as evaluate_subgroup_placement
 from .subgroup_placement import place_in_subgroup
 from .subgroup_placement import undo_placement as undo_subgroup_placement
@@ -43,6 +45,7 @@ __all__ = [
     "SubgroupPlacementError",
     "credit_limits",
     "credit_load",
+    "documented_subgroup_ids",
     "evaluate_subgroup_placement",
     "place_in_subgroup",
     "record_imported_placement",

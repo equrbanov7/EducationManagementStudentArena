@@ -12,21 +12,23 @@ QAYDA
 * Fənnin krediti — tələbənin TƏDRİS PLANI sətrindəki kredit (həmin fənn + həmin SEMESTR, ``credits`` > 0), yoxdursa
   kataloq dəyəri ``Subject.ects``. Qayda və semestr seçimi YEGANƏ yerdədir: :mod:`apps.registrar.credit_source`
   (R01, 2026-10-21 — transkript / ÜOMG / 25% haqqı da eyni həlledicidən oxuyur).
-* «Alt qrup» — ``guest_roster.row_is_guest`` ilə EYNİ predikat: ``source_group`` dolu VƏ açılışın qrupu
-  tələbənin CARİ qrupu deyil (rəsmi köçürmədən sonra provenans qalır, amma sətir artıq «öz» fənnidir).
+* «Alt qrup» — ``source_group`` dolu VƏ açılışın qrupu tələbənin CARİ qrupu deyil VƏ yerləşdirmə SƏNƏDLƏ
+  təsdiqlənib (:mod:`apps.registrar.subgroup_evidence`, sahib 2026-10-25: «bilməsən yazma»). Köçürmənin sənədsiz
+  sətirləri (ana qrup / bölgü jurnalı) «öz» fənni sayılır.
+* Eyni fənn dövrdə bir neçə jurnalda (mühazirə ana qrupda, seminar bölgüdə) — kredit BİR dəfə sayılır.
 * Hədd — «Sistem tənzimləmələri» (``credits.max_per_semester`` / ``credits.max_with_subgroup``,
   :mod:`core.runtime_settings_credits`). Alt qrup krediti olan (və ya alınacaq) tələbəyə «alt qrupla birlikdə»
   həddi tətbiq olunur; o 0-dırsa adi hədd. Öz fənləri (tədris planı) heç vaxt bloklanmır — yalnız
   ``over_limit`` xəbərdarlığı.
 
-Sorğu büdcəsi: 3 sabit sorğu (qeyd + yazılışlar + plan kreditləri) — yazılış sayından asılı deyil.
+Sorğu büdcəsi: 3 sabit sorğu (qeyd + yazılışlar + plan kreditləri; sənəd yoxlaması EXISTS ilə yazılış sorğusundadır).
 """
 
 from __future__ import annotations
 
 from core import runtime_settings
 
-from . import credit_source
+from . import credit_source, subgroup_evidence
 from .models import AcademicStatus, Enrollment, StudentAcademicRecord
 
 #: Kredit yükünə düşən qeydiyyat statusları (bax modul şərhi).
@@ -119,22 +121,26 @@ def credit_load(student, period, *, organization=None, record=None) -> dict:
     if record is None:
         return _empty(limit_values)
     enrollments = list(
-        Enrollment.objects.filter(
-            organization_id=organization_id, student=student, offering__period=period, status__in=LOAD_STATUSES
-        )
+        subgroup_evidence.annotate_documented(Enrollment.objects)
+        .filter(organization_id=organization_id, student=student, offering__period=period, status__in=LOAD_STATUSES)
         .select_related("offering__subject", "offering__group")
         .order_by("offering__subject__code")
     )
     plan_credits = plan_credit_map(record.curriculum_id, [e.offering.subject_id for e in enrollments], period=period)
     items = []
     own = subgroup = 0
+    counted_subjects: set = set()
     for enrollment in enrollments:
         credits = offering_credit(enrollment.offering, plan_credits)
-        guest = is_subgroup_row(enrollment, record.group_id)
-        if guest:
+        guest = enrollment.subgroup_documented and is_subgroup_row(enrollment, record.group_id)
+        subject_id = enrollment.offering.subject_id
+        if subject_id in counted_subjects:
+            pass  # eyni fənnin ikinci jurnalı — kredit artıq sayılıb
+        elif guest:
             subgroup += credits
         else:
             own += credits
+        counted_subjects.add(subject_id)
         offering = enrollment.offering
         items.append(
             {
