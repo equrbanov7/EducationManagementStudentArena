@@ -109156,3 +109156,11 @@ msgstr "Выпуск (окончание обучения)"
 msgctxt "accounts.groups"
 msgid "%%d qrupdan çıxıb (məzuniyyət / xaric / məzun)"
 msgstr "%%d выбыли из группы (отпуск / отчисление / выпуск)"
+
+msgctxt "accounts.form.password_reset.error"
+msgid "Məktub göndərilə bilmədi. Bir neçə dəqiqə sonra yenidən cəhd edin."
+msgstr "Не удалось отправить письмо. Повторите попытку через несколько минут."
+
+msgctxt "accounts.password_reset_done_page"
+msgid "Kod gəlmirsə, hesabınızda başqa e-poçt qeydə alınmış ola bilər — RİM-ə müraciət edin."
+msgstr "Если код не приходит, в вашей учётной записи может быть указан другой e-mail — обратитесь в RİM."

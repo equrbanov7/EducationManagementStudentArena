@@ -151,6 +151,8 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Password reset token expiry defaults to the same short-lived OTP window.
+# 2026-10-25: EMS bərpa linki bunu yox, işləmə vaxtındakı OTP ömrünü işlədir (apps/accounts/tokens.py) —
+# «Sistem tənzimləmələri»ndə 60 dəq olanda link 5 dəqiqədə ölürdü. Bu dəyər yalnız Django defoltu üçün qalır.
 PASSWORD_RESET_TIMEOUT = int(os.getenv("PASSWORD_RESET_TIMEOUT", str(AUTH_OTP_EXPIRY_SECONDS)))
 
 # ── Şəbəkə zonası (publik domen çıxışı, sahib 2026-09-21) — bax apps/accounts/network_zone.py

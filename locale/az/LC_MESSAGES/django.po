@@ -108472,3 +108472,11 @@ msgstr "Məzun etmə"
 msgctxt "accounts.groups"
 msgid "%%d qrupdan çıxıb (məzuniyyət / xaric / məzun)"
 msgstr "%%d qrupdan çıxıb (məzuniyyət / xaric / məzun)"
+
+msgctxt "accounts.form.password_reset.error"
+msgid "Məktub göndərilə bilmədi. Bir neçə dəqiqə sonra yenidən cəhd edin."
+msgstr "Məktub göndərilə bilmədi. Bir neçə dəqiqə sonra yenidən cəhd edin."
+
+msgctxt "accounts.password_reset_done_page"
+msgid "Kod gəlmirsə, hesabınızda başqa e-poçt qeydə alınmış ola bilər — RİM-ə müraciət edin."
+msgstr "Kod gəlmirsə, hesabınızda başqa e-poçt qeydə alınmış ola bilər — RİM-ə müraciət edin."
