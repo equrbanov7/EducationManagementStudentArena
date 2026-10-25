@@ -294,11 +294,15 @@ def get_student_schedule(organization, student, group, period):
     released = Enrollment.objects.filter(
         organization=organization, student=student, offering__period=period, superseded_by__isnull=False
     ).values("offering_id")
-    return _slots_for(
-        ScheduleSlot.objects.filter(organization=organization, offering__period=period)
-        .filter(scope)
-        .exclude(offering_id__in=_exempt_offering_ids(student, period))
-        .exclude(offering_id__in=released)
+    from .schedule_dedupe import merge_duplicate_slots  # ana qrup + bölgü jurnalı — eyni dərs bir dəfə
+
+    return merge_duplicate_slots(
+        _slots_for(
+            ScheduleSlot.objects.filter(organization=organization, offering__period=period)
+            .filter(scope)
+            .exclude(offering_id__in=_exempt_offering_ids(student, period))
+            .exclude(offering_id__in=released)
+        )
     )
 
 

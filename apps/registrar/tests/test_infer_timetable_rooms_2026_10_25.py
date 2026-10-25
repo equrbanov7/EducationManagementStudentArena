@@ -131,12 +131,13 @@ class InferTimetableRoomsTest(TestCase):
         self.assertEqual(counts["written"], "4")
         self.assertEqual(
             (counts["room_from_lessons"], counts["room_from_teacher"], counts["room_from_teacher_slot"]),
-            ("1", "1", "1"),
+            ("1", "2", "1"),
         )
-        self.assertEqual(counts["reason_room_dropped"], "1")
+        self.assertNotIn("reason_room_dropped", counts)
         self.assertEqual(self._room(1), ["B-202"])  # 2 : 2 — ən son istifadə olunan
         self.assertEqual(self._room(2), ["A-101"])  # müəllimin ən çox otağı
-        self.assertEqual(self._room(3), [""])  # A-101 həmin saat tutulub
+        # A-101 həmin saat tutulub → müəllimin növbəti otağı (sahib 2026-10-25: «bəzi otaqlar düşməyib»)
+        self.assertNotIn(self._room(3), ([""], ["A-101"]))
         self.assertEqual(self._room(4), ["C-303"])  # müəllimin həmin gün/saat otağı
         self.assertEqual(self._room(6), [""])  # rəsmi slota toxunulmur
 

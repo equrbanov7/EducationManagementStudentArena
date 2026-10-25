@@ -60,6 +60,7 @@ DEFAULT_MIN_OCCURRENCES = 2
 DEFAULT_PARITY_TOLERANCE = 0.25
 DEFAULT_SNAP_MINUTES = 25
 DEFAULT_RECENT_DAYS = 14
+MAX_ROOM_CANDIDATES = 8  # əsas + 7 növbəti otaq (tutulubsa)
 #: Cədvəl şəbəkəsinin günləri (B.e. … Şənbə — ``schedule_grid.TEACHING_WEEKDAYS``); bazar günü çəkilmir.
 GRID_WEEKDAYS = frozenset(range(1, 7))
 
@@ -130,6 +131,8 @@ class Unit:
     week_type: str = ""
     room: str = ""
     room_source: str = ""
+    # Əsas otaq eyni vaxt başqa dərsdə tutulubsa sınanan növbəti otaqlar: [(otaq, mənbə)], ən çox yazılandan.
+    room_alternatives: list = field(default_factory=list)
     odd: int = 0
     even: int = 0
 
@@ -323,6 +326,12 @@ def _decide_end(unit: Unit):
 
 def most_used_room(facts) -> str:
     """Ən çox yazılan otaq (böyük/kiçik hərf fərqi yox); bərabərlikdə ƏN SON istifadə olunan; otaq yoxdursa ``""``."""
+    ranked = ranked_rooms(facts)
+    return ranked[0] if ranked else ""
+
+
+def ranked_rooms(facts) -> list:
+    """Otaqlar ən çox yazılandan azına (bərabərlikdə ƏN SON istifadə olunan əvvəl); boş otaqlar sayılmır."""
     counts: Counter = Counter()
     last: dict = {}
     labels: dict = {}
@@ -333,10 +342,8 @@ def most_used_room(facts) -> str:
         counts[key] += 1
         if fact.date >= last.get(key, dt.date.min):
             last[key], labels[key] = fact.date, fact.room.strip()
-    if not counts:
-        return ""
-    best = max(counts, key=lambda key: (counts[key], last[key], key))
-    return labels[best]
+    order = sorted(counts, key=lambda key: (counts[key], last[key], key), reverse=True)
+    return [labels[key] for key in order]
 
 
 def assign_rooms(units, facts) -> None:
@@ -345,7 +352,9 @@ def assign_rooms(units, facts) -> None:
     1. vahidin ÖZ dərslərində ən çox yazılan otaq (``room_source = "lessons"``);
     2. yoxdursa — müəllimin HƏMİN gün + başlama saatındakı bütün dərslərində ən çox otaq (``teacher_slot``);
     3. o da yoxdursa — müəllimin bu aralıqdakı bütün dərslərində ən çox otaq (``teacher``).
-    Otaq toqquşması (eyni otaq, eyni vaxt) plan qatında ``schedule_conflicts.detect`` ilə yoxlanır."""
+    Otaq toqquşması (eyni otaq, eyni vaxt) plan qatında ``schedule_conflicts.detect`` ilə yoxlanır; əsas otaq tutulubsa
+    plan eyni sıra ilə növbəti otaqları sınayır (``room_alternatives``, sahib 2026-10-25: «bəzi müəllimlərin otaqları
+    düşməyib»)."""
     by_slot: dict = defaultdict(list)
     by_teacher: dict = defaultdict(list)
     for fact in facts:
@@ -355,15 +364,19 @@ def assign_rooms(units, facts) -> None:
     for unit in units:
         if unit.status != READY:
             continue
+        candidates, seen = [], set()
         for source, pool in (
             (ROOM_FROM_LESSONS, unit.facts),
             (ROOM_FROM_TEACHER_SLOT, by_slot.get((unit.teacher_id, unit.weekday, unit.start), ())),
             (ROOM_FROM_TEACHER, by_teacher.get(unit.teacher_id, ())),
         ):
-            room = most_used_room(pool)
-            if room:
-                unit.room, unit.room_source = room[:64], source
-                break
+            for room in ranked_rooms(pool):
+                key = room.strip().lower()
+                if key not in seen:
+                    seen.add(key)
+                    candidates.append((room[:64], source))
+        if candidates:
+            (unit.room, unit.room_source), unit.room_alternatives = candidates[0], candidates[1:MAX_ROOM_CANDIDATES]
 
 
 def _classify(unit: Unit, *, period, min_occurrences: int, parity_tolerance: float) -> None:

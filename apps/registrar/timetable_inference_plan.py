@@ -274,21 +274,35 @@ class _Planner:
             pending.append((offering, stored, row))
             rows.append(row)
         existing_room = next((value for value in existing_rooms if value), "")
-        room = existing_room or unit.room
         for row in rows:
             row.room_source = ROOM_FROM_EXISTING if existing_room else unit.room_source
+        # Axının cədvəldəki qrupunun otağı varsa YALNIZ o (birgə dərs eyni otaqdadır); yoxdursa sıra ilə namizədlər.
+        candidates = (
+            [(existing_room, ROOM_FROM_EXISTING)]
+            if existing_room
+            else ([(unit.room, unit.room_source)] + list(unit.room_alternatives) if unit.room else [])
+        )
         if pending:
-            self._create(unit, pending, room)
-        if room:
-            self._fill(fills, room)
+            self._create(unit, pending, candidates)
+        if candidates:
+            self._fill(fills, candidates)
         return rows
 
-    def _create(self, unit, pending, room) -> None:
+    def _create(self, unit, pending, candidates) -> None:
+        room, source = candidates[0] if candidates else ("", "")
         kinds, slots = self._check(unit, pending, room)
+        for alternative, alt_source in candidates[1:]:
+            if kinds != {schedule_conflicts.KIND_ROOM}:
+                break
+            kinds, slots = self._check(unit, pending, alternative)
+            room, source = alternative, alt_source
         dropped_room = False
         if kinds == {schedule_conflicts.KIND_ROOM} and room:
             kinds, slots = self._check(unit, pending, "")
             dropped_room = True
+        elif room:
+            for _offering, _stored, row in pending:
+                row.room_source = source
         if kinds:
             reason = "clash_" + next(kind for kind in schedule_conflicts.KIND_ORDER if kind in kinds)
             for _offering, _stored, row in pending:
@@ -301,33 +315,38 @@ class _Planner:
             key = _identity(offering.pk, unit.weekday, unit.start, unit.teacher_id)
             self.identity[key].append(slot)
 
-    def _fill(self, fills, room) -> None:
+    def _fill(self, fills, candidates) -> None:
         """Bu əmrin ƏVVƏL yazdığı, otağı BOŞ slota otaq (rəsmi / əl ilə qoyulmuş slotlara toxunulmur).
 
-        Otaq eyni vaxtda başqa slotda tutulubsa (``schedule_conflicts.detect`` — otaq növü) doldurulmur."""
+        Namizədlər sıra ilə sınanır; otaq eyni vaxtda başqa slotda tutulubsa (``schedule_conflicts.detect`` — otaq
+        növü) növbətisi; heç biri boş deyilsə doldurulmur (``room_fill_clash``)."""
         for row in fills:
-            slot = row.slot
-            clashes = schedule_conflicts.detect(
-                organization=self.organization,
-                weekday=slot.weekday,
-                start_time=slot.start_time,
-                end_time=slot.end_time,
-                week_type=slot.week_type,
-                room=room,
-                group_id=slot.offering.group_id,
-                instructor_id=schedule.effective_instructor_id(slot),
-                exclude_ids=[slot.pk],
-                candidates=self.by_day[slot.weekday],
-                period_id=self.period.pk,
-                subject_id=slot.offering.subject_id,
-                kind=slot.kind,
-                offering_id=slot.offering_id,
-            )
-            if any(clash["kind"] == schedule_conflicts.KIND_ROOM for clash in clashes):
+            for room, source in candidates:
+                if not self._room_clashes(row.slot, room):
+                    row.slot.room = room
+                    row.fill_room, row.reason, row.room_source = room, "room_filled", source
+                    break
+            else:
                 row.reason = "room_fill_clash"
-                continue
-            slot.room = room
-            row.fill_room, row.reason = room, "room_filled"
+
+    def _room_clashes(self, slot, room) -> bool:
+        clashes = schedule_conflicts.detect(
+            organization=self.organization,
+            weekday=slot.weekday,
+            start_time=slot.start_time,
+            end_time=slot.end_time,
+            week_type=slot.week_type,
+            room=room,
+            group_id=slot.offering.group_id,
+            instructor_id=schedule.effective_instructor_id(slot),
+            exclude_ids=[slot.pk],
+            candidates=self.by_day[slot.weekday],
+            period_id=self.period.pk,
+            subject_id=slot.offering.subject_id,
+            kind=slot.kind,
+            offering_id=slot.offering_id,
+        )
+        return any(clash["kind"] == schedule_conflicts.KIND_ROOM for clash in clashes)
 
 
 def _exists_reason(slot, unit) -> str:
