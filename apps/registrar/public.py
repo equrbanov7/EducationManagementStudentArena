@@ -14,6 +14,7 @@ from apps.registrar import (
     absence_limit,
     analytics,
     exam_journal_link,
+    exam_result_trace,
     exam_score_entry,
     exam_score_import,
     exam_score_sheets,
@@ -38,6 +39,7 @@ __all__ = [
     "enroll_student_in_subject",
     "analytics",
     "exam_journal_link",
+    "exam_result_trace",
     "exam_score_entry",
     "exam_score_import",
     "exam_score_sheets",
@@ -52,11 +54,9 @@ __all__ = [
 ]
 
 #: Tələbənin kabinetdən ÖZ transkriptini görməsi/yükləməsi.
-#:
 #: 2026-08 qərarı (sahib): transkript tələbəyə birbaşa verilmir — rəsmi sənəd
 #: kimi MÜRACİƏT (ərizə) pəncərəsindən keçməlidir. Müraciət axını hələ
 #: qurulmayıb, ona görə səth tam bağlıdır.
-#:
 #: Bu bayraq İKİ qapının TƏK mənbəyidir və onların bir-birindən ayrılmasının
 #: qarşısını alır:
 #:   1) menyu/bölmə — ``apps.accounts.views._helpers.rbac`` ``my-transcript``

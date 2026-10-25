@@ -360,8 +360,10 @@ def _title_notifications(model, plan) -> set:
     return set(rows.values_list("pk", flat=True))
 
 
-def _journal_notifications(model, plan) -> set:
-    """Avtomatik midterm yazısının «Midterm balı yazıldı: N» bildirişi (yalnız həmin sətirdən ibarət olanlar)."""
+def _journal_notifications(model, plan, *, since=None) -> set:
+    """Avtomatik midterm yazısının «Midterm balı yazıldı: N» bildirişi (yalnız həmin sətirdən ibarət olanlar).
+
+    ``since`` — alt sərhəd (defolt imtahanın yaradılması; tək cəhdin silinməsində cəhdin başlanğıcı)."""
     rows = plan.journal_rows
     if not rows:
         return set()
@@ -375,7 +377,7 @@ def _journal_notifications(model, plan) -> set:
         metadata__event="journal_update",
         metadata__offering_id__in=sorted({key[0] for key in names_by_key}),
         recipient_id__in={key[1] for key in names_by_key},
-        created_at__gte=exam.created_at,
+        created_at__gte=since or exam.created_at,
     ).only("pk", "metadata", "recipient_id", "message")
     found = set()
     for note in candidates:

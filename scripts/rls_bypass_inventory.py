@@ -53,6 +53,12 @@ CATEGORY_RULES = (
         "C",
         "idarə əmri (--org + dəqiq --slug + --expect-title; dry-run defolt, prod kill-switch-li)",
     ),
+    # 2026-10-25: tələbənin səhv cəhdinin silinməsi — --org + dəqiq --username + cəhd + --expect-exam-slug, dry-run defolt.
+    (
+        "apps/exams/management/commands/purge_exam_attempt.py",
+        "C",
+        "idarə əmri (--org + dəqiq --username + cəhd + --expect-exam-slug; dry-run defolt, prod kill-switch-li)",
+    ),
     ("apps/exams/", "C", "imtahan mərkəzi / müəllim cross-org əməli"),
     # 2026-10-23: aktivləşdirmə bildirişi — alıcılar sabit RİM rolları + aktivləşdirənin ÖZ təşkilatı, sətir qayıtmır.
     ("apps/accounts/services/rim/activation.py", "A", "recipient-scoped bildiriş (RİM rolları, öz təşkilat)"),
