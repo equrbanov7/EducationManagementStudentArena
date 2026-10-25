@@ -2,7 +2,8 @@
 
 Kilidlənən qaydalar:
 
-* düzəliş pəncərələri DƏQİQƏ ilə (``journal.mark_edit_minutes`` / ``journal.lesson_edit_minutes``, defolt 120);
+* düzəliş pəncərələri DƏQİQƏ ilə (``journal.mark_edit_minutes`` defolt 15 — 2026-10-25, ``journal.lesson_edit_minutes``
+  defolt 120);
   dəqiqə yoxdursa köhnə saat açarı (×60), o da yoxdursa 120 — servis və DB trigger-i eyni ardıcıllıqla;
 * ``journal.late_entry_days`` (defolt 0 = yalnız dərs günü): N gün geriyə dərs açmaq və yeni qeyd yazmaq olur,
   sonra açıq Azərbaycan mesajı ilə bağlanır; ``allow_past`` / ``enforce_day=False`` bypass-ları işləyir;
@@ -49,9 +50,9 @@ class EditWindowMinutesTest(TestCase):
     def tearDown(self):
         rs.invalidate()
 
-    def test_default_is_120_minutes(self):
+    def test_defaults_lesson_120_mark_15_minutes(self):
         _settings()
-        self.assertEqual(journal_edit_windows.mark_edit_window(), timedelta(minutes=120))
+        self.assertEqual(journal_edit_windows.mark_edit_window(), timedelta(minutes=15))
         self.assertEqual(journal_edit_windows.lesson_edit_window(), timedelta(minutes=120))
 
     def test_minutes_override_wins_over_hours(self):
@@ -126,8 +127,8 @@ class MarkTriggerMinutesTest(TestCase):
         self.assertFalse(self._raw_update_fails(self._stale_mark(45)))
         self.assertTrue(self._raw_update_fails(self._stale_mark(75)))
         RuntimeSetting.objects.all().delete()
-        self.assertFalse(self._raw_update_fails(self._stale_mark(100)))  # defolt 120 dəqiqə
-        self.assertTrue(self._raw_update_fails(self._stale_mark(130)))
+        self.assertFalse(self._raw_update_fails(self._stale_mark(10)))  # defolt 15 dəqiqə (0099, sahib 2026-10-25)
+        self.assertTrue(self._raw_update_fails(self._stale_mark(20)))
 
 
 class LateEntryDaysTest(TestCase):
@@ -147,6 +148,7 @@ class LateEntryDaysTest(TestCase):
             offering=self.offering, date=TODAY() - timedelta(days=days), created_by=self.teacher, allow_past=True
         )
 
+    @override_settings(JOURNAL_LATE_ENTRY_DAYS=0)
     def test_zero_days_keeps_lesson_day_rule(self):
         with bypass_rls():
             with self.assertRaisesMessage(gradebook.LessonRuleError, "Keçmiş tarixə dərs əlavə etmək olmaz."):
@@ -196,8 +198,9 @@ class LateEntryDaysTest(TestCase):
 
     def test_future_lesson_still_blocked(self):
         with bypass_rls():
+            # Müəllim gələcək tarixə dərs aça bilmir (2026-10-25); RİM/İKT override açsa da qeyd hələ yazılmır.
             future = gradebook.create_lesson(
-                offering=self.offering, date=TODAY() + timedelta(days=1), created_by=self.teacher
+                offering=self.offering, date=TODAY() + timedelta(days=1), created_by=self.teacher, allow_past=True
             )
             self.assertEqual(self._mark(future)["written"], 0)
 

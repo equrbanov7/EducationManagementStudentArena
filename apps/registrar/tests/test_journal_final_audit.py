@@ -84,7 +84,7 @@ class FinalBreakdownAuditColumnsTest(TestCase):
                 for days in (21, 14, 7)
             ]
             # Gələcək tarixli dərs PLANLAŞDIRILIB, amma «keçirilib» sayılmır.
-            gradebook.create_lesson(offering=cls.offering, date=today + datetime.timedelta(days=7))
+            gradebook.create_lesson(allow_past=True, offering=cls.offering, date=today + datetime.timedelta(days=7))
             # 1-ci tələbə iki dərsdə qayıb → 4 saat.
             gradebook.save_marks(
                 enforce_day=False,

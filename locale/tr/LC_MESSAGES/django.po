@@ -108089,3 +108089,40 @@ msgstr "kayıt aktif değil"
 msgctxt "exams.template.teacher_exam_results"
 msgid "Tələbənin akademik qeydində qrup yoxdur"
 msgstr "Öğrencinin akademik kaydında grup yok"
+
+msgctxt "registrar.journal_timing"
+msgid "Gələcək tarixə dərs əlavə etmək olmaz."
+msgstr "Gelecek bir tarihe ders eklenemez."
+
+msgctxt "registrar.journal_timing"
+msgid "Bu qeyd köhnə sistemdən köçürülüb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Bu kayıt eski sistemden aktarıldı ve değiştirilemez. Değişiklik için RİM'e başvurup dilekçe yazın."
+
+msgctxt "registrar.journal_timing"
+msgid "Bu xanaya rəsmi düzəliş edilib və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Bu hücreye resmî düzeltme yapıldı ve değiştirilemez. Değişiklik için RİM'e başvurup dilekçe yazın."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Bu qiymət %(m)s dəqiqədən çox əvvəl yazılıb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Bu not %(m)s dakikadan daha önce yazıldı ve değiştirilemez. Değişiklik için RİM'e başvurup dilekçe yazın."
+
+msgctxt "registrar.journal_timing"
+msgid "Xana kilidlidir"
+msgstr "Hücre kilitli"
+
+msgctxt "registrar.journal_timing"
+msgid "RİM-ə müraciət yaz"
+msgstr "RİM'e başvur"
+
+msgctxt "registrar.journal_timing"
+msgid "Bağla"
+msgstr "Kapat"
+
+msgctxt "core.runtime_settings"
+msgid "Müəllimin yazdığı q/b, i/e və bal İLK yazılışdan bu qədər dəqiqə sonra donur (defolt 15); sonra yalnız RİM-in rəsmi düzəlişi. Köçürülmüş xana həmişə kilidlidir. Verilənlər bazası da eyni müddəti yoxlayır."
+msgstr "Öğretim elemanının yazdığı devamsızlık, katılım ve puan İLK yazılıştan bu kadar dakika sonra donar (varsayılan 15); sonra yalnız RİM'in resmî düzeltmesi. Aktarılan hücre her zaman kilitlidir. Veritabanı da aynı süreyi denetler."
+
+msgctxt "core.runtime_settings"
+msgid "Yazma pəncərəsi (defolt 7 gün): müəllim dərs tarixindən ən çox N gün sonra həmin tarixə dərs aça və boş xanaya q/b, i/e, bal yaza bilər; müddət bitəndə yazı bağlanır. Gələcək tarixə dərs açılmır. 0 — yalnız dərsin öz günü. RİM rəhbərinin rəsmi düzəliş yolu bu həddə tabe deyil."
+msgstr "Yazma aralığı (varsayılan 7 gün): öğretim elemanı ders tarihinden en çok N gün sonra o tarihe ders açıp boş hücrelere devamsızlık, katılım, puan yazabilir; süre bitince yazma kapanır. Gelecek tarihe ders açılmaz. 0 — yalnız dersin kendi günü. RİM başkanının resmî düzeltme yolu bu sınıra tabi değildir."

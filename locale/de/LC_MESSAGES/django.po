@@ -109707,3 +109707,40 @@ msgstr "Eintrag inaktiv"
 msgctxt "exams.template.teacher_exam_results"
 msgid "Tələbənin akademik qeydində qrup yoxdur"
 msgstr "Im Studiendatensatz ist keine Gruppe hinterlegt"
+
+msgctxt "registrar.journal_timing"
+msgid "Gələcək tarixə dərs əlavə etmək olmaz."
+msgstr "Für ein zukünftiges Datum kann keine Lehrveranstaltung angelegt werden."
+
+msgctxt "registrar.journal_timing"
+msgid "Bu qeyd köhnə sistemdən köçürülüb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Dieser Eintrag wurde aus dem alten System übernommen und kann nicht geändert werden. Für eine Änderung reichen Sie beim RİM einen schriftlichen Antrag ein."
+
+msgctxt "registrar.journal_timing"
+msgid "Bu xanaya rəsmi düzəliş edilib və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Diese Zelle wurde offiziell korrigiert und kann nicht geändert werden. Für eine Änderung reichen Sie beim RİM einen schriftlichen Antrag ein."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Bu qiymət %(m)s dəqiqədən çox əvvəl yazılıb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Diese Bewertung wurde vor mehr als %(m)s Minuten eingetragen und kann nicht geändert werden. Für eine Änderung reichen Sie beim RİM einen schriftlichen Antrag ein."
+
+msgctxt "registrar.journal_timing"
+msgid "Xana kilidlidir"
+msgstr "Zelle ist gesperrt"
+
+msgctxt "registrar.journal_timing"
+msgid "RİM-ə müraciət yaz"
+msgstr "Antrag an RİM stellen"
+
+msgctxt "registrar.journal_timing"
+msgid "Bağla"
+msgstr "Schließen"
+
+msgctxt "core.runtime_settings"
+msgid "Müəllimin yazdığı q/b, i/e və bal İLK yazılışdan bu qədər dəqiqə sonra donur (defolt 15); sonra yalnız RİM-in rəsmi düzəlişi. Köçürülmüş xana həmişə kilidlidir. Verilənlər bazası da eyni müddəti yoxlayır."
+msgstr "Von Lehrkräften eingetragene Fehlzeiten, Anwesenheiten und Punkte werden so viele Minuten nach der ERSTEN Eingabe eingefroren (Standard 15); danach nur die offizielle Korrektur durch das RİM. Übernommene Zellen sind immer gesperrt. Die Datenbank prüft dieselbe Frist."
+
+msgctxt "core.runtime_settings"
+msgid "Yazma pəncərəsi (defolt 7 gün): müəllim dərs tarixindən ən çox N gün sonra həmin tarixə dərs aça və boş xanaya q/b, i/e, bal yaza bilər; müddət bitəndə yazı bağlanır. Gələcək tarixə dərs açılmır. 0 — yalnız dərsin öz günü. RİM rəhbərinin rəsmi düzəliş yolu bu həddə tabe deyil."
+msgstr "Eintragungsfenster (Standard 7 Tage): Eine Lehrkraft kann bis zu N Tage nach dem Termin eine Lehrveranstaltung für dieses Datum anlegen und leere Zellen (Fehlzeit, Anwesenheit, Punkte) ausfüllen; danach ist die Eingabe geschlossen. Für zukünftige Daten werden keine Veranstaltungen angelegt. 0 — nur am Veranstaltungstag selbst. Der offizielle Korrekturweg der RİM-Leitung unterliegt dieser Grenze nicht."

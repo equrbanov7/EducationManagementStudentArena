@@ -105,18 +105,23 @@ class LessonWindowRulesTest(TestCase):
             _setup_offering(cls, "jrl")
 
     def test_create_lesson_past_date_rejected(self):
+        # Yazma pəncərəsi (sahib 2026-10-25): defolt 7 gün geriyə — 8 gün əvvəl rədd olunur.
         with bypass_rls():
             with self.assertRaises(gradebook.LessonRuleError):
                 gradebook.create_lesson(
-                    offering=self.offering, date=TODAY() - datetime.timedelta(days=1), created_by=self.teacher
+                    offering=self.offering, date=TODAY() - datetime.timedelta(days=8), created_by=self.teacher
                 )
 
-    def test_create_lesson_today_and_future_ok(self):
+    def test_create_lesson_today_and_window_ok_future_refused(self):
         with bypass_rls():
             gradebook.create_lesson(offering=self.offering, date=TODAY(), created_by=self.teacher)
             gradebook.create_lesson(
-                offering=self.offering, date=TODAY() + datetime.timedelta(days=7), created_by=self.teacher
+                offering=self.offering, date=TODAY() - datetime.timedelta(days=7), created_by=self.teacher
             )
+            with self.assertRaises(gradebook.LessonRuleError):  # gələcək tarix olmaz (2026-10-25)
+                gradebook.create_lesson(
+                    offering=self.offering, date=TODAY() + datetime.timedelta(days=7), created_by=self.teacher
+                )
             self.assertEqual(Lesson.objects.filter(offering=self.offering).count(), 2)
 
     def test_delete_lesson_only_within_window(self):
@@ -153,8 +158,11 @@ class MarkRulesTest(TestCase):
 
     def test_new_mark_only_on_lesson_day(self):
         with bypass_rls():
-            future = gradebook.create_lesson(
-                offering=self.offering, date=TODAY() + datetime.timedelta(days=3), created_by=self.teacher
+            future = gradebook.create_lesson(  # RİM/İKT override ilə açılmış gələcək dərs
+                offering=self.offering,
+                date=TODAY() + datetime.timedelta(days=3),
+                created_by=self.teacher,
+                allow_past=True,
             )
             self.assertEqual(self._mark(future), 0)  # sabahkı dərsə bu gün yazmaq olmaz
             today_lesson = gradebook.create_lesson(offering=self.offering, date=TODAY(), created_by=self.teacher)

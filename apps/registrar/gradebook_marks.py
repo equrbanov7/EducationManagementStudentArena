@@ -23,6 +23,12 @@ Qaydalar dəyişməyib: kilidli jurnal, açılış ``FOR UPDATE`` kilidi (yarı�
 rəsmi düzəlişli xana kilidi, xana pəncərəsi (DB trigger də qoruyur), yeni
 işarə yalnız dərs günündə (+ gecikmiş yazı günləri, aktivləşdirmə pəncərəsi), bal yalnız seminar/lab-da (0..10, səhv dəyər
 yazılmır), audit sətri, bildirişlər (``on_commit``), qayıb həddi keçidləri.
+
+XANA KİLİDİ (sahib 2026-10-25): müəllimin yazdığı xana İLK yazılışdan ``journal.mark_edit_minutes`` (defolt 15)
+sonra, köçürülmüş xana (``entered_by`` boş) isə həmişə kilidlidir (:func:`journal_edit_windows.mark_lock_reason`).
+Kilidli xanaya FƏRQLİ dəyər gəlsə yazılmır və ``report=True`` cavabında ``locked`` (say) + ``locked_reason``
+(«RİM-ə müraciət edib təqdimat yazın» mətni) qayıdır — view avtomatik yadda saxlamada 409 verir. Grid-in geri
+göndərdiyi DƏYİŞMƏYƏN dəyər kilid sayılmır. Toplu doldurma kilidli xanaya toxunmur (o, yalnız-oxu render olunur).
 """
 
 from __future__ import annotations
@@ -151,6 +157,9 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
     entry_rule = journal_edit_windows.EntryRule.current(now=now) if enforce_day else None
     blocked = 0
     blocked_reason = ""
+    locked = 0
+    locked_reason = ""
+    lock_window = journal_edit_windows.mark_edit_window()
     by_user_id = getattr(by_user, "pk", None)
     for (lesson_id, enrollment_id), entry in cells.items():
         lesson = lessons.get(lesson_id)
@@ -158,10 +167,17 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
         if lesson is None or enrollment is None:
             continue
         mark = existing.get((lesson.id, enrollment.id))
+        lock = ""
         if mark is not None and mark.pk in corrected_ids:
-            continue  # rəsmi düzəlişli xana — müəllim üçün kilidli
-        if not gradebook.can_edit_mark(mark, now=now):
-            continue  # locked — no back-dated tampering
+            lock = journal_edit_windows.LOCK_CORRECTED  # rəsmi düzəlişli xana — müəllim üçün kilidli
+        elif mark is not None:
+            lock = journal_edit_windows.mark_lock_reason(mark, now=now, window=lock_window)
+        if lock:
+            # Kilidli xana yazılmır. Grid-in geri göndərdiyi EYNİ dəyər səssiz keçir; fərqli dəyər — kilid cavabı.
+            if _differs(mark, entry, lesson):
+                locked += 1
+                locked_reason = locked_reason or journal_edit_windows.lock_message(lock, window=lock_window)
+            continue
         if entry_rule is not None and mark is None:
             reason = entry_rule.block_reason(lesson)
             if reason:
@@ -268,7 +284,27 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
     if blocked:
         # Açar yalnız qayda xananı saxlayanda var (çağıranlar köhnə ``{"written", "rejected"}`` formasını gözləyir).
         result.update(blocked=blocked, blocked_reason=blocked_reason)
+    if locked:
+        result.update(locked=locked, locked_reason=locked_reason)
     return result
+
+
+def _differs(mark, entry, lesson) -> bool:
+    """Gələn dəyər kilidli xananın saxlanmış dəyərindən fərqlidirmi (status və ya bal)."""
+    from apps.registrar import gradebook
+    from apps.registrar.gradebook_lessons import parse_lesson_score
+
+    status = entry.get("status")
+    if status not in (AttendanceStatus.PRESENT, AttendanceStatus.ABSENT):
+        status = AttendanceStatus.PRESENT
+    if status != mark.status:
+        return True
+    raw = entry.get("score")
+    if status == AttendanceStatus.ABSENT or not gradebook.lesson_allows_score(lesson) or raw in (None, ""):
+        score = None
+    else:
+        score = parse_lesson_score(raw)
+    return score != mark.score
 
 
 def recompute_absence_hours_many(enrollments) -> dict:

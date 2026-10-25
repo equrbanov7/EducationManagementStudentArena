@@ -55,9 +55,9 @@ varsa dərs tipi kilidlidir.
                     <span class="jd2-field-label">{% trans "TARİX" context "registrar.journal" %}</span>
                     <span class="jd2-date-row">
                         {# İKT Rəhbəri istənilən (keçmiş) tarixə dərs aça bilər — min qoyulmur. #}
-                        {# Müəllim üçün min = bu gün − journal.late_entry_days (servis eyni həddi yoxlayır). #}
+                        {# Müəllim üçün min = bu gün − journal.late_entry_days, max = bu gün (servis eyni həddi yoxlayır). #}
                         <input type="date" name="lesson_date" required
-                               {% if not request.user.is_ikt_rehber %}min="{{ lesson_date_min|default:journal.today|date:'Y-m-d' }}"{% endif %}
+                               {% if not request.user.is_ikt_rehber %}min="{{ lesson_date_min|default:journal.today|date:'Y-m-d' }}" max="{{ lesson_date_max|default:journal.today|date:'Y-m-d' }}"{% endif %}
                                value="{{ journal.today|date:'Y-m-d' }}" data-jd-lesson-date>
                         <span class="jd2-parity-badge" data-jd-parity-badge hidden></span>
                     </span>

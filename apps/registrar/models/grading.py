@@ -104,7 +104,9 @@ class Lesson(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     SEMINAR/LAB → attendance + a score. Ordering by date gives the running
     sequence (neçənci dərs). The lesson row (date/time/kind/topic) is editable
     or deletable only within a short window after creation (service layer);
-    marks are writable only on the lesson's own day."""
+    new marks are writable within ``journal.late_entry_days`` (default 7) after the
+    lesson date, never for a future date; a written mark freezes ``journal.mark_edit_minutes``
+    (default 15) after it was first entered (``journal_edit_windows``)."""
 
     organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="lessons")
     offering = models.ForeignKey(CourseOffering, on_delete=models.CASCADE, related_name="lessons")

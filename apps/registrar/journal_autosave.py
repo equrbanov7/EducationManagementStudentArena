@@ -41,6 +41,15 @@ def saved(*, sent: int, written: int, rejected: int = 0, blocked: bool = False) 
     )
 
 
+def marks_response(result: dict, *, sent: int) -> JsonResponse:
+    """``save_marks(report=True)`` nəticəsi → JSON. Kilidli xanaya dəyişiklik gəlib və heç nə yazılmayıbsa
+    409 (``code="mark_locked"``) — API birbaşa çağırılsa da kilid server qərarıdır (sahib 2026-10-25)."""
+    written, rejected = result["written"], result["rejected"]
+    if result.get("locked") and not written:
+        return refused(result["locked_reason"], code="mark_locked")
+    return saved(sent=sent, written=written, rejected=rejected)
+
+
 def refused(message, *, code: str = "refused", status: int = 409) -> JsonResponse:
     """Heç nə yazılmadı və təkrar cəhd kömək etməz (jurnal bağlı, pəncərə bağlı…)."""
     return JsonResponse({"ok": False, "code": code, "message": str(message)}, status=status)
