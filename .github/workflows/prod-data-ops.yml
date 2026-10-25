@@ -1257,7 +1257,7 @@ jobs:
               test "$CREATE_MISSING" != "true" || { echo "create_missing bu əmr üçün deyil" >&2; exit 2; }
               # 2026-10-25: `task_chair` = fakültənin adı → onun alt-ağacında boş qruplar (--idle-under).
               if [ -n "$TASK_CHAIR" ]; then
-                { [ "${#TASK_CHAIR}" -le 120 ] && match "$TASK_CHAIR" '^[[:alnum:]ƏəIıİiĞğŞşÇçÖöÜü .()-]+$'; } \
+                { [ "${#TASK_CHAIR}" -le 120 ] && printf '%s' "$TASK_CHAIR" | grep -Eq '^[[:alnum:]ƏəIıİiĞğŞşÇçÖöÜü .()-]+$'; } \
                   || { echo "task_chair (vahidin adı) formatı: hərf/rəqəm/boşluq" >&2; exit 2; }
                 args+=("--idle-under=$TASK_CHAIR")
               fi
