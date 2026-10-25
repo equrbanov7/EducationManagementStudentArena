@@ -28,6 +28,7 @@ from datetime import date
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 
+from apps.organizations.public import kafedra_unit_types
 from core.constants import OrgUnitType
 from core.person_names import clean_name_part
 
@@ -83,7 +84,9 @@ def _structure(organization) -> dict:
     """Fakültə / kafedra vahidləri — {id: (ad, tip, path)} (1 sorğu, struktur ölçüsü qədər)."""
     from apps.organizations.models import OrgUnit
 
-    rows = OrgUnit.objects.filter(organization=organization, unit_type__in=(*_FACULTY_TYPES, *_CHAIR_TYPES))
+    chair_types = set(kafedra_unit_types(organization))
+    rows = OrgUnit.objects.filter(organization=organization, unit_type__in=(*_FACULTY_TYPES, *chair_types))
+    # İnzibati şöbə (``department`` — təşkilatda ``chair`` varsa) kafedra deyil: lüğətə düşmür.
     return {
         str(pk): (name, unit_type, path)
         for pk, name, unit_type, path in rows.values_list("pk", "name", "unit_type", "path")
@@ -108,7 +111,7 @@ def _placement(unit_id, unit_path: str, unit_type: str, units: dict) -> tuple[st
     return faculty_id, faculty, chair_id, chair
 
 
-def _pick_membership(rows: list[dict]) -> dict | None:
+def _pick_membership(rows: list[dict], chair_types=_CHAIR_TYPES) -> dict | None:
     """Müəllimin ŞTAT üzvlüyü — dərs yükü modulunun qaydası (``workload.public.home_chair_rank``).
 
     Sahib 2026-10-25: başqa kafedranın yükünü alan müəllimə həmin kafedrada ƏLAVƏ (``is_primary=False``)
@@ -120,7 +123,7 @@ def _pick_membership(rows: list[dict]) -> dict | None:
     from apps.workload.public import home_chair_rank
 
     def rank(row):
-        return (*home_chair_rank(row), row["role__name"] not in _TEACHER_ROLES)
+        return (*home_chair_rank(row, chair_types), row["role__name"] not in _TEACHER_ROLES)
 
     return sorted(rows, key=rank)[0]
 
@@ -275,13 +278,14 @@ def build_rows(actor, academic_year: str, *, today: date | None = None) -> list[
     if not candidate_ids:
         return []
     units = _structure(organization)
+    chair_types = kafedra_unit_types(organization)  # inzibati şöbə ştat kafedrası seçilməsin
     admin = _admin_memberships(organization, candidate_ids)
     users = list(User.objects.filter(pk__in=candidate_ids, is_superuser=False).values(*_USER_FIELDS))
     year_start, year_end = year_bounds(academic_year)
 
     rows = []
     for values in users:
-        picked = _pick_membership(memberships.get(values["pk"], []))
+        picked = _pick_membership(memberships.get(values["pk"], []), chair_types)
         unit_id = picked["scope_unit_id"] if picked else None
         unit_path = (picked or {}).get("scope_unit__path") or ""
         if not actor.unit_visible(unit_id, unit_path):

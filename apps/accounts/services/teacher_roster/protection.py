@@ -7,7 +7,9 @@ Sahib: siyahıda olmayan MÜƏLLİM hesabları dayandırılır. HEÇ VAXT blokla
   rektor, HR, imtahan mərkəzi, tədris şöbəsi, tyutor …) — rol adı ``TEACHING_ROLE_NAMES``/tələbə rolları
   xaricindədirsə qorunur; ``member`` rolu yalnız vəzifə yazılıbsa (heyət) qoruyur;
 * bölmə rəhbəri (``OrgUnit.head``), profil rolu inzibati olanlar;
-* tələbələr (tələbə/məzun rolu və ya profil rolu) — onlar müəllim kimi heç vaxt namizəd deyil.
+* tələbələr (tələbə/məzun rolu və ya profil rolu) — onlar müəllim kimi heç vaxt namizəd deyil;
+* bu tədris ilində DƏRS YÜKÜ bölgüsü və ya cari semestrdə aktiv JURNALI olanlar (sahib 2026-10-25: «aktiv
+  olmayanları blokla» — dərs deyən müəllim siyahıda olmasa da bloklanmır, hesabatda ayrıca göstərilir).
 """
 
 from __future__ import annotations
@@ -15,7 +17,7 @@ from __future__ import annotations
 from apps.organizations.models import Membership, OrgUnit
 
 from ..people.constants import TEACHER_ROLE_NAMES
-from .matching import CHAIR_UNIT_TYPES, Account
+from .matching import Account
 
 TEACHING_ROLE_NAMES = frozenset(TEACHER_ROLE_NAMES) | {"professor", "associate_professor"}
 STUDENT_ROLE_NAMES = frozenset({"student", "lead_student", "alumni", "parent", "applicant"})
@@ -44,6 +46,7 @@ PROTECT_PROFILE_ROLE = "profile_role"
 PROTECT_UNIT_HEAD = "unit_head"
 PROTECT_STAFF_POSITION = "staff_position"
 PROTECT_STUDENT = "student"
+PROTECT_TEACHING_NOW = "teaching_now"
 
 
 def is_student(account: Account) -> bool:
@@ -65,9 +68,11 @@ def _position_is_staff(text: str) -> bool:
     return bool(folded) and not any(word in folded for word in _TEACHING_POSITION_WORDS)
 
 
-def protection_reasons(account: Account, *, owner_ids=(), explicit_ids=()) -> list:
+def protection_reasons(account: Account, *, owner_ids=(), explicit_ids=(), teaching_ids=()) -> list:
     """Hesabın bloklanmasına MANE olan səbəblər (boş siyahı = qoruma yoxdur)."""
     reasons = []
+    if account.user_id in teaching_ids:
+        reasons.append(PROTECT_TEACHING_NOW)
     if account.is_superuser or account.is_staff:
         reasons.append(PROTECT_SUPERUSER)
     if account.user_id in owner_ids:
@@ -92,6 +97,9 @@ def protection_reasons(account: Account, *, owner_ids=(), explicit_ids=()) -> li
 
 
 def _chair_resolver(organization):
+    from apps.organizations.public import kafedra_unit_types
+
+    chair_types = kafedra_unit_types(organization)
     units = {
         row[0]: row
         for row in OrgUnit.objects.filter(organization=organization).values_list("id", "unit_type", "parent_id")
@@ -104,7 +112,7 @@ def _chair_resolver(organization):
             row = units.get(unit_id)
             if row is None:
                 return None
-            if row[1] in CHAIR_UNIT_TYPES:
+            if row[1] in chair_types:
                 return unit_id
             unit_id = row[2]
         return None
@@ -187,12 +195,21 @@ def load_accounts(organization) -> list:
     return accounts
 
 
+def teaching_now_ids(organization, academic_year: str) -> set:
+    """Tədris ilində dərs yükü bölgüsü və ya cari semestrdə aktiv jurnalı olan istifadəçilər (bloklanmır)."""
+    from ..staff_placement.facts import current_period_ids, teaching_user_ids
+
+    return teaching_user_ids(organization, academic_year, current_period_ids(organization))
+
+
 __all__ = [
     "ADMIN_PROFILE_ROLES",
+    "PROTECT_TEACHING_NOW",
     "STUDENT_ROLE_NAMES",
     "TEACHING_ROLE_NAMES",
     "is_student",
     "is_teaching",
     "load_accounts",
     "protection_reasons",
+    "teaching_now_ids",
 ]

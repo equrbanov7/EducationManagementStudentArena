@@ -58,11 +58,9 @@ def _visible_chairs(actor):
     OrgUnit = django_apps.get_model("organizations", "OrgUnit")
     if not actor.has(PERM_REPORT):
         return OrgUnit.objects.none()
-    base = OrgUnit.objects.filter(
-        organization=actor.organization,
-        is_active=True,
-        unit_type__in=(OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT),
-    )
+    from apps.organizations.public import kafedra_q
+
+    base = OrgUnit.objects.filter(kafedra_q(), organization=actor.organization, is_active=True)
     scope = actor.scope_for(PERM_REPORT)
     if scope.is_org_wide:
         return base

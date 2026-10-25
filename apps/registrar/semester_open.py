@@ -74,6 +74,12 @@ PERM_UNLOCK = "semester.unlock"
 PAGE_SIZE = 25
 
 
+def _kafedra_types(organization):
+    from apps.organizations.public import kafedra_unit_types
+
+    return kafedra_unit_types(organization)
+
+
 def actor_permissions(request) -> list:
     return list(getattr(request, "org_permissions", []) or [])
 
@@ -473,7 +479,7 @@ def build_semester_opening(request, organization) -> dict:
             "chair_options": [
                 {"value": str(unit.id), "label": unit.name}
                 for unit in _org_unit_model()
-                .objects.filter(organization=organization, is_active=True, unit_type__in=("chair", "department"))
+                .objects.filter(organization=organization, is_active=True, unit_type__in=_kafedra_types(organization))
                 .filter(unit_scope_q(scope))
                 .order_by("name")
             ],

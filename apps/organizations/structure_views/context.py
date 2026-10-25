@@ -8,6 +8,7 @@ from django.urls import reverse
 
 from core.search_text import tolerant_q
 
+from ..kafedra_units import kafedra_unit_types
 from ..models import OrgUnit
 from ..scoping import get_permission_scope
 from ..views import _can_view_structure
@@ -25,7 +26,6 @@ from .constants import (
     _SORT_OPTIONS,
     FACULTY_PAGE_SIZE,
     KAFEDRA_PAGE_SIZE,
-    KAFEDRA_UNIT_TYPES,
     TEACHER_PREVIEW_LIMIT,
 )
 
@@ -49,13 +49,14 @@ def build_organization_faculties_context(request, organization, *, form_errors=N
     search = (request.GET.get("faculty_search") or "").strip()[:120]
     sort = _clean_sort(request.GET.get("faculty_sort"))
 
+    kafedra_types = kafedra_unit_types(organization)
     faculties = (
         _visible_faculties_qs(organization, scope)
         .select_related("head")
         .annotate(
             kafedra_count=Count(
                 "children",
-                filter=Q(children__is_active=True, children__unit_type__in=KAFEDRA_UNIT_TYPES),
+                filter=Q(children__is_active=True, children__unit_type__in=kafedra_types),
                 distinct=True,
             )
         )
@@ -82,7 +83,7 @@ def build_organization_faculties_context(request, organization, *, form_errors=N
         for kafedra_id, parent_id in OrgUnit.objects.filter(
             organization=organization,
             is_active=True,
-            unit_type__in=KAFEDRA_UNIT_TYPES,
+            unit_type__in=kafedra_types,
             parent_id__in=page_faculty_ids,
         ).values_list("id", "parent_id"):
             kafedra_ids_by_faculty.setdefault(parent_id, []).append(kafedra_id)

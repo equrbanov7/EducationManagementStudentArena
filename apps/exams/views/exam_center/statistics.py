@@ -450,9 +450,12 @@ def stats_department_search(request):
     səviyyə olanda seçici boş qalırdı; pozuq / naməlum id hamısını yox, BOŞ nəticə verir (fail-closed)."""
     organization = _stats_org(request)
     from apps.organizations.models import OrgUnit
+    from apps.organizations.public import kafedra_unit_types
 
     query = (request.GET.get("q") or "").strip()
-    qs = OrgUnit.objects.filter(organization=organization, is_active=True, unit_type__in=("chair", "department"))
+    qs = OrgUnit.objects.filter(
+        organization=organization, is_active=True, unit_type__in=kafedra_unit_types(organization)
+    )
     if (request.GET.get("faculty") or "").strip():
         faculty_ids = _csv_uuids(request.GET.get("faculty"))
         roots = OrgUnit.objects.filter(organization=organization, pk__in=faculty_ids).values_list("pk", "path")
@@ -508,6 +511,7 @@ def exam_center_stats_filters(request):
     organization = _stats_org(request)
     from apps.exams.models import Exam
     from apps.organizations.models import OrgUnit
+    from apps.organizations.public import narrow_kafedra_rows
 
     exam_type_choices = Exam.EXAM_TYPE_EXTENDED_CHOICES
 
@@ -530,12 +534,11 @@ def exam_center_stats_filters(request):
     # Fakültə (faculty/deanery) və kafedra (chair/department) ayrı siyahılara bölünür
     # ki, iki müstəqil filtr olsun (kaskad üçün kafedrada parent_id qalır).
     faculty_types = {"faculty", "deanery"}
-    department_types = {"chair", "department"}
     faculties = [{"id": u["id"], "name": u["name"]} for u in units if u["unit_type"] in faculty_types]
+    # İnzibati şöbə (``department``) kafedra deyil, təşkilatda ``chair`` varsa (``organizations.kafedra_units``).
     departments = [
         {"id": u["id"], "name": u["name"], "parent_id": u["parent_id"]}
-        for u in units
-        if u["unit_type"] in department_types
+        for u in narrow_kafedra_rows(units, lambda row: row["unit_type"])
     ]
 
     teachers = [

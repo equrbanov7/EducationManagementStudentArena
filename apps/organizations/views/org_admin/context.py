@@ -14,6 +14,7 @@ from django.urls import reverse
 from core.constants import OrgUnitType
 from core.search_text import tolerant_q
 
+from ...kafedra_units import kafedra_unit_types
 from ...models import OrgUnit
 from ..shared._helpers import (
     _can_manage_organization,
@@ -73,7 +74,7 @@ def build_organization_structure_context(
         .order_by("name")
     )
     kafedras = list(
-        visible_units.filter(unit_type__in=[OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT])
+        visible_units.filter(unit_type__in=kafedra_unit_types(organization))
         .select_related("parent")
         .only(
             "id",

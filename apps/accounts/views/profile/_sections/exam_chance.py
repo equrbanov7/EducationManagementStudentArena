@@ -188,7 +188,7 @@ def build_exam_chance_section(request, section, *, active_organization, allowed_
     from apps.exams.models import Exam
     from apps.exams.public import SECURE_EXAM_CATEGORIES
     from apps.organizations.models import AcademicPeriod, OrgUnit
-    from apps.organizations.public import KAFEDRA_UNIT_TYPES
+    from apps.organizations.public import kafedra_unit_types
     from apps.registrar.public import retake_chance
     from core.constants import OrgUnitType
     from core.search_text import tolerant_q
@@ -220,7 +220,7 @@ def build_exam_chance_section(request, section, *, active_organization, allowed_
     faculty = _pick(faculties, filters["faculty"])
     if faculty is None:
         filters["faculty"] = ""
-    kafedra_qs = OrgUnit.active.filter(organization=organization, unit_type__in=KAFEDRA_UNIT_TYPES)
+    kafedra_qs = OrgUnit.active.filter(organization=organization, unit_type__in=kafedra_unit_types(organization))
     if faculty is not None:
         kafedra_qs = kafedra_qs.filter(parent=faculty)
     kafedras = list(kafedra_qs.order_by("name"))

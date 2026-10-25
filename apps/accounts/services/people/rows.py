@@ -12,7 +12,7 @@ from datetime import date
 
 from core.person_names import clean_name_part
 
-from .constants import FACULTY_UNIT_TYPES, KAFEDRA_UNIT_TYPES
+from .constants import FACULTY_UNIT_TYPES
 from .filters import account_status_of
 
 
@@ -71,7 +71,9 @@ def resolve_unit_ancestors(units, *, organization):
         return {}
 
     from apps.organizations.models import OrgUnit
+    from apps.organizations.public import kafedra_unit_types
 
+    kafedra_types = kafedra_unit_types(organization)
     wanted_ids: set[str] = set()
     for unit in units:
         for segment in (unit.path or "").split("/"):
@@ -101,7 +103,7 @@ def resolve_unit_ancestors(units, *, organization):
             name, unit_type = row
             if not faculty_name and unit_type in FACULTY_UNIT_TYPES:
                 faculty_name = name
-            elif not kafedra_name and unit_type in KAFEDRA_UNIT_TYPES:
+            elif not kafedra_name and unit_type in kafedra_types:
                 kafedra_name = name
         resolved[unit.pk] = {
             "faculty": faculty_name,

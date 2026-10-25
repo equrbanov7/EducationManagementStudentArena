@@ -156,7 +156,7 @@ def _chair_subject_q(organization, scope, *, prefix="subject__"):
     Yalnız ``chair`` / ``department`` tipli köklər (``Subject.chair_unit`` ikisini də qəbul edir);
     fakültə / ixtisas / qrup kökləri əvvəlki kimi qrup alt-ağacı ilə qalır.
     """
-    from core.constants import OrgUnitType
+    from apps.organizations.public import kafedra_unit_types
 
     if not scope.is_unit_scoped or not scope.unit_ids:
         return None
@@ -165,7 +165,7 @@ def _chair_subject_q(organization, scope, *, prefix="subject__"):
         .objects.filter(
             organization=organization,
             pk__in=list(scope.unit_ids),
-            unit_type__in=(OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT),
+            unit_type__in=kafedra_unit_types(organization),
             is_active=True,
         )
         .values_list("pk", "path")

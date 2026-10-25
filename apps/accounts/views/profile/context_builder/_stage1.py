@@ -484,7 +484,9 @@ class _Stage1Mixin:
                     OrgUnitType.RECTORATE,
                     OrgUnitType.VICE_RECTORATE,
                 }
-                department_types = {OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT}
+                from apps.organizations.public import kafedra_unit_types
+
+                department_types = set(kafedra_unit_types(self.active_organization))
 
                 seen_units = set()
                 # 2026-09-13 (audit §14/§21): aktiv org üzvlükləri middleware-dən

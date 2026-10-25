@@ -59,13 +59,16 @@ def teacher_chair_unit(teacher, organization):
     """Müəllimin AKTİV kafedra üzvlüyünün bölməsi (struktur bağı olmayan hal)."""
     if teacher is None or organization is None:
         return None
+    from apps.organizations.public import kafedra_unit_types
+
     Membership = django_apps.get_model("organizations", "Membership")
     membership = (
         Membership.objects.filter(
             organization=organization,
             user=teacher,
             is_active=True,
-            scope_unit__unit_type__in=CHAIR_UNIT_TYPES,
+            # İnzibati şöbə (``department``) kafedra deyil — bax ``organizations.kafedra_units``.
+            scope_unit__unit_type__in=kafedra_unit_types(organization),
         )
         .select_related("scope_unit")
         .order_by("-is_primary", "pk")

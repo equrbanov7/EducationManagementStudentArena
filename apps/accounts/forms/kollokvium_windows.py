@@ -136,7 +136,9 @@ class KollokviumExtraGrantForm(forms.ModelForm):
         # Əhatə ↔ bölmə tipi uyğunluğu: fakültə əhatəsi ancaq fakültə, kafedra
         # əhatəsi ancaq kafedra (chair/department) seçə bilər.
         if org_unit is not None:
-            kafedra_types = (OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT)
+            from apps.organizations.public import kafedra_unit_types
+
+            kafedra_types = kafedra_unit_types(org_unit.organization_id)
             if scope == KollokviumExtraGrant.Scope.FACULTY and org_unit.unit_type != OrgUnitType.FACULTY:
                 self.add_error(
                     "org_unit",

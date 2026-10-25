@@ -5,6 +5,7 @@ from .center_registry import build_center  # noqa: F401
 from .overview_registry import build_overview_section  # noqa: F401
 from .review_registry import build_visa  # noqa: F401
 from .services import legacy_loads  # noqa: F401
+from .services.load_upload_parsing import parse_workbook as parse_load_workbook  # noqa: F401
 from .services.norms import (  # noqa: F401
     StaffRateError,
     admin_teacher_ids,
@@ -13,7 +14,7 @@ from .services.norms import (  # noqa: F401
     norms_for,
     staff_rate_error,
 )
-from .services.people import home_chair_rank, home_chairs  # noqa: F401
+from .services.people import home_chair_rank, home_chairs, join_chair_as_teacher  # noqa: F401
 from .services.roster_profile import restore_roster_profile, sync_roster_profile  # noqa: F401
 from .teacher_hooks import register_chair_teacher_resolver  # noqa: F401
 
@@ -27,9 +28,11 @@ __all__ = [
     "current_rule",
     "home_chair_rank",
     "home_chairs",
+    "join_chair_as_teacher",
     "legacy_loads",
     "norm_rule_note",
     "norms_for",
+    "parse_load_workbook",
     "register_chair_teacher_resolver",
     "restore_roster_profile",
     "staff_rate_error",

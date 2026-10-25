@@ -64,6 +64,7 @@ def build_journal_close_section(
         return
 
     from apps.organizations.models import AcademicPeriod, OrgUnit
+    from apps.organizations.public import kafedra_unit_types
     from apps.registrar.models import JournalCloseNotice
     from apps.registrar.public import journal_close as journal_close_service
     from core.constants import OrgUnitType
@@ -108,7 +109,7 @@ def build_journal_close_section(
         OrgUnit.objects.filter(
             organization=selected_org,
             is_active=True,
-            unit_type__in=[OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT],
+            unit_type__in=kafedra_unit_types(selected_org),
         )
         .order_by("name")
         .values("id", "name", "parent_id")

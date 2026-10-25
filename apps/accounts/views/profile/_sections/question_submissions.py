@@ -249,12 +249,12 @@ def _reviewer_sources(organization, filters, scoped):
     from django.contrib.auth import get_user_model
 
     from apps.organizations.models import AcademicPeriod, OrgUnit
-    from apps.organizations.public import KAFEDRA_UNIT_TYPES
+    from apps.organizations.public import kafedra_unit_types
     from core.constants import OrgUnitType
 
     faculties = list(OrgUnit.active.filter(organization=organization, unit_type=OrgUnitType.FACULTY).order_by("name"))
     faculty = _pick(faculties, filters["faculty"])
-    kafedra_qs = OrgUnit.active.filter(organization=organization, unit_type__in=KAFEDRA_UNIT_TYPES)
+    kafedra_qs = OrgUnit.active.filter(organization=organization, unit_type__in=kafedra_unit_types(organization))
     if faculty is not None:
         kafedra_qs = kafedra_qs.filter(parent=faculty)
     kafedras = list(kafedra_qs.order_by("name"))

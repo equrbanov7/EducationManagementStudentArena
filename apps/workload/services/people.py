@@ -68,7 +68,14 @@ def chair_teacher_memberships(organization, chair, *, include_unscoped: bool = T
     return base.filter(_chair_subtree_q(chair) | Q(scope_unit__isnull=True))
 
 
-def home_chair_rank(row: dict) -> tuple:
+def _kafedra_types(organization) -> tuple:
+    """Təşkilatda kafedra sayılan tiplər — inzibati şöbə (``department``) ``chair`` olan təşkilatda kafedra deyil."""
+    from apps.organizations.public import kafedra_unit_types
+
+    return kafedra_unit_types(organization)
+
+
+def home_chair_rank(row: dict, chair_types=CHAIR_TYPES) -> tuple:
     """Müəllimin ŞTAT (əsas) kafedrasını seçən sıralama açarı — kiçik açar üstündür.
 
     ``row`` — ``Membership.values(...)`` sətri (``scope_unit__unit_type``, ``is_primary``, ``role__name``,
@@ -78,7 +85,7 @@ def home_chair_rank(row: dict) -> tuple:
     kafedrada saathesabı dərs alanda ştatı həmin kafedraya «köçürdü» (sahib 2026-10-25)."""
     created = row.get("created_at")
     return (
-        row.get("scope_unit__unit_type") not in CHAIR_TYPES,
+        row.get("scope_unit__unit_type") not in chair_types,
         not row.get("is_primary"),
         row.get("role__name") not in TEACHER_ROLE_NAMES,
         -(row.get("role__level") or 0),
@@ -99,7 +106,7 @@ def home_chairs(organization, user_ids) -> dict:
             user_id__in=ids,
             is_active=True,
             role__is_active=True,
-            scope_unit__unit_type__in=CHAIR_TYPES,
+            scope_unit__unit_type__in=_kafedra_types(organization),
         )
         .values(
             "user_id",
@@ -289,7 +296,7 @@ def resolve_chair(organization, chair_id):
             organization=organization,
             pk=chair_id,
             is_active=True,
-            unit_type__in=CHAIR_TYPES,
+            unit_type__in=_kafedra_types(organization),
         )
         .first()
     )

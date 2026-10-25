@@ -23,6 +23,11 @@ from .holidays import academic_year_bounds as holiday_academic_year_bounds  # no
 from .holidays import academic_year_label as holiday_academic_year_label  # noqa: F401
 from .holidays import academic_year_start as holiday_academic_year_start  # noqa: F401
 from .holidays import current_academic_year_start as holiday_current_academic_year  # noqa: F401
+from .kafedra_units import is_kafedra_type  # noqa: F401
+from .kafedra_units import is_kafedra_unit  # noqa: F401
+from .kafedra_units import kafedra_q  # noqa: F401
+from .kafedra_units import kafedra_unit_types  # noqa: F401
+from .kafedra_units import narrow_kafedra_rows  # noqa: F401
 from .overview import build_overview_data  # noqa: F401
 from .permissions import get_permission_label  # noqa: F401
 from .request_memberships import drop_request_memberships  # noqa: F401
@@ -111,7 +116,12 @@ __all__ = [
     "get_permission_scope",
     "has_org_permission",
     "holds_student_key",
+    "is_kafedra_type",
+    "is_kafedra_unit",
     "is_module_enabled",
+    "kafedra_q",
+    "kafedra_unit_types",
+    "narrow_kafedra_rows",
     "members_covering_unit",
     "module_items",
     "permission_scope_unit_types",

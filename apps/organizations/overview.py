@@ -59,7 +59,8 @@ def structure_counts(organization) -> dict:
     by_type = {unit_type: total for unit_type, total in rows}
     return {
         "faculties": by_type.get(OrgUnitType.FACULTY, 0),
-        "kafedras": sum(by_type.get(code, 0) for code in KAFEDRA_UNIT_TYPES),
+        # İnzibati şöbə (``department``) ``chair`` olan təşkilatda kafedra sayılmır (``kafedra_units``).
+        "kafedras": by_type.get(OrgUnitType.CHAIR, 0) or sum(by_type.get(code, 0) for code in KAFEDRA_UNIT_TYPES),
         "specialties": by_type.get(OrgUnitType.SPECIALTY, 0),
         "groups": by_type.get(OrgUnitType.GROUP, 0),
         "units": sum(by_type.values()),

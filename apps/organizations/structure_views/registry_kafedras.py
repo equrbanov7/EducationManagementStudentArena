@@ -17,13 +17,13 @@ from django.db.models import Count
 from django.urls import reverse
 from django.utils.translation import pgettext
 
+from ..kafedra_units import kafedra_unit_types
 from ..views import _visible_units_queryset
 from ._shared import (
     _active_teacher_user_ids,
     _current_academic_year_period_ids,
     _teacher_memberships_qs,
 )
-from .constants import KAFEDRA_UNIT_TYPES
 from .registry_base import (
     CHAIR_HEAD_ROLE,
     PAGE_SIZE,
@@ -70,7 +70,7 @@ def build_kafedras_section(request, organization) -> dict:
 
     base_qs = (
         _visible_units_queryset(organization, scope)
-        .filter(unit_type__in=KAFEDRA_UNIT_TYPES)
+        .filter(unit_type__in=kafedra_unit_types(organization))
         .select_related("head", "parent")
     )
     all_chairs = list(base_qs.order_by("name"))

@@ -339,7 +339,9 @@ def _validate_teacher_structure(draft: AccountDraft, data: dict, context: Intake
         # Kafedra OPSİONALDIR: org-səviyyə müəllim (kafedrası sonradan təyin
         # olunan) qanuni haldır — `people.set_teacher_role` ilə eyni qayda.
         return
-    unit = _resolve_unit(context.organization, raw, CHAIR_UNIT_TYPES)
+    from apps.organizations.public import kafedra_unit_types
+
+    unit = _resolve_unit(context.organization, raw, kafedra_unit_types(context.organization))
     if unit is None:
         _fail(draft, "unit", pgettext(_CTX, "Kafedra tapılmadı."))
         return

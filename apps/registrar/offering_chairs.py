@@ -66,12 +66,15 @@ def _nearest(path, known) -> str | None:
 
 def _chair_units(organization_id) -> dict:
     """Təşkilatın kafedra tipli bölmələri: ``{id: path}``."""
+    from apps.organizations.public import narrow_kafedra_rows
+
     rows = (
         _model("organizations", "OrgUnit")
         .objects.filter(organization_id=organization_id, unit_type__in=CHAIR_TYPES)
-        .values_list("id", "path")
+        .values_list("id", "path", "unit_type")
     )
-    return {str(uid): path or "" for uid, path in rows}
+    # İnzibati şöbə (``department``) kafedra deyil — təşkilatda ``chair`` varsa (bax ``organizations.kafedra_units``).
+    return {str(uid): path or "" for uid, path, _type in narrow_kafedra_rows(rows, lambda row: row[2])}
 
 
 def _load_index(organization_id, offerings):

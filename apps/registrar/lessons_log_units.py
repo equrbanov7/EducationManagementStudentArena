@@ -39,6 +39,12 @@ def _org_units():
     return django_apps.get_model("organizations", "OrgUnit").objects
 
 
+def _kafedra_types(organization):
+    from apps.organizations.public import kafedra_unit_types
+
+    return kafedra_unit_types(organization) if organization is not None else CHAIR_TYPES
+
+
 def resolve_unit(organization, raw_id, types):
     """Seçilmiş id → təşkilatın bu tipdən bölməsi; pozuq / naməlum / başqa tip → ``None``."""
     unit_id = parse_uuid(raw_id)
@@ -180,7 +186,8 @@ def filter_state(user, organization, option_source, *, supervisor, faculty_raw="
     Əhatəli aktorda siyahılar ``with_options=False`` (CSV) olsa da qurulur — kilid və əhatə
     yoxlaması bölmə ilə EYNİ olsun."""
     faculty = resolve_unit(organization, faculty_raw, FACULTY_TYPES) if faculty_raw else None
-    kafedra = resolve_unit(organization, kafedra_raw, CHAIR_TYPES) if kafedra_raw else None
+    kafedra_types = _kafedra_types(organization)
+    kafedra = resolve_unit(organization, kafedra_raw, kafedra_types) if kafedra_raw else None
     scopes = None
     if supervisor:
         from apps.registrar.lessons_log import _supervision_scopes
@@ -212,10 +219,10 @@ def filter_state(user, organization, option_source, *, supervisor, faculty_raw="
         lockable = len(candidates[1]) == 1
         if not dropped:
             kafedra, kafedra_locked, kafedra_invalid = _settle(
-                organization, kafedra, kafedra_raw, kafedra_options, CHAIR_TYPES, scoped=scoped, lockable=lockable
+                organization, kafedra, kafedra_raw, kafedra_options, kafedra_types, scoped=scoped, lockable=lockable
             )
         elif scoped and lockable and len(kafedra_options) == 1:
-            kafedra = resolve_unit(organization, kafedra_options[0]["value"], CHAIR_TYPES)
+            kafedra = resolve_unit(organization, kafedra_options[0]["value"], kafedra_types)
             kafedra_locked = True
 
     def _value(unit, raw, invalid):

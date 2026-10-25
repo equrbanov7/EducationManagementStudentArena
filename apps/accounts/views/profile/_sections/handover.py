@@ -40,6 +40,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.accounts.views.handover import filters as handover_filters
+from apps.organizations.public import kafedra_unit_types
 from apps.registrar.public import handover as handover_read
 from apps.registrar.public import handover_query
 
@@ -142,7 +143,7 @@ def _build_transfer(request, section, *, actor, organization, scope):
         sources=ui.source_teacher_options(base, values["teacher"]),
         periods=ui.period_options(organization, values["period"]),
         faculties=ui.unit_options(organization, scope, (OrgUnitType.FACULTY,), values["faculty"]),
-        kafedras=ui.unit_options(organization, scope, (OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT), values["kafedra"]),
+        kafedras=ui.unit_options(organization, scope, kafedra_unit_types(organization), values["kafedra"]),
     )
     section["filter_count_label"] = pgettext(_CTX, "Nəticə: %(n)d fənn") % {"n": facets["total"]}
     section["columns"] = rows_ui.columns()

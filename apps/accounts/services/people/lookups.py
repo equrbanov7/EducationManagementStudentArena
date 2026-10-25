@@ -14,10 +14,10 @@ from __future__ import annotations
 
 from django.db.models import Count, Q
 
-from apps.organizations.public import scope_org_units
+from apps.organizations.public import kafedra_unit_types, scope_org_units
 from core.program_codes import program_display_label
 
-from .constants import FACULTY_UNIT_TYPES, GENDER_BUCKETS, GROUP_UNIT_TYPES, KAFEDRA_UNIT_TYPES
+from .constants import FACULTY_UNIT_TYPES, GENDER_BUCKETS, GROUP_UNIT_TYPES
 from .filters import (
     STATUS_ACTIVE,
     STATUS_ARCHIVED,
@@ -206,7 +206,7 @@ def build_filter_options(*, actor, kind: str, filters=None, request=None) -> dic
     options = {
         "has_access": True,
         "faculties": _unit_options(organization, scope, FACULTY_UNIT_TYPES),
-        "kafedras": _unit_options(organization, scope, KAFEDRA_UNIT_TYPES, parent_unit_id=faculty_filter),
+        "kafedras": _unit_options(organization, scope, kafedra_unit_types(organization), parent_unit_id=faculty_filter),
         "groups": [],
         "programs": [],
         "subjects": _subject_options(organization, scope),
