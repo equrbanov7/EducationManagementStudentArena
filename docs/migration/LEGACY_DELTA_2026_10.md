@@ -184,3 +184,31 @@ sistemdə **mövzu var idi**: hər dərs tarixi (`journals_dates_rooms.sillabus`
 Prod kopyasında (2026-10-24 22:06 export): boş sütun silinməsi 26 300 (köçürülmüş tam boş 23 498 + yalnız «qb»
 2 801 + müəllimin tam boş 1; 7 490 «qb» xanası / 14 980 qayıb saatı, 4 137 qeydiyyatın qayıbı yenidən hesablandı),
 sonra mövzu 11 926 dərsə, rolu bərpa olunan 3 müəllim, 16 açılışa müəllim.
+
+## 7. Alt qrup tələbələrinə rəsmi işarə (2026-10-25)
+
+Sahib: «Alt qrup tələbələrini tapsan işarələ — yeni sistemdə işarələyərək göndər, görünsün ki alt qrupdur.»
+
+Köhnə sistemdə alt qrup ayrıca qrupdur («536 MU1», «135 Si-1», «3/336F2»; `groups`-da ana qrup sütunu yoxdur, yalnız
+ad naxışı), tələbənin `students.group_id`-si alt qrupa baxır. Yeni sistemdə həmin tələbə çox vaxt ANA qrupdadır,
+delta isə onu alt qrupun jurnalına «alt qrupdan əlavə» (`Enrollment.source_group`) kimi yazıb — jurnal çipi var idi,
+amma «Alt qrupa yerləşdir» tarixçəsi (`SubgroupPlacementEvent`) boş idi, bəzi alt qrupların ana qrup izi yox idi
+(«Bi» ↔ «Bİ»: `casefold("İ")` nöqtəli «i̇» verir, ad naxışı tutmurdu).
+
+* **`subgroups` fazası** (`services/delta/subgroups.py`, `PHASES`-də `dedupe`-dan sonra): (1) paket tələbələrinin
+  legacy qrup vahidinin izi yoxdursa, EYNİ ixtisasda ad ailəsinə uyğun TƏK ana qrupa `settings.parent_group` yazılır
+  (audit); (2) legacy-də alt qrupda (S), yeni sistemdə başqa qrupda olan tələbənin S jurnalındakı canlı «alt
+  qrupdan əlavə» qeydiyyatına rəsmi `place` sətri — `registrar.public.record_imported_placement`, səbəb «Köhnə
+  sistemdən köçürmə: alt qrup», `details.via=import` (qeydiyyata/bala toxunulmur, bildiriş yoxdur; alətin «geri
+  götür» axını işləyir). Dövr = `snapshot.full_semesters`. İdempotent.
+* **Yalnız sayılır:** legacy qrupu alt qrup deyil, amma fərqlidir (`group_differs_report_only`); alt qrup fənnini
+  ana qrupun jurnalında keçir (`subject_in_other_journal` — xanalar oradadır, köçürmək balları gizlədərdi);
+  alt qrup jurnalında qeydiyyatı yoxdur (`student_without_subgroup_journal`). Adlar yalnız `--names-out`-da.
+* **UI:** jurnal çipi (mövcud) + tələbə reyestrində «Proqram · qrup» xanasında «alt qrup: <qrup>» nişanı (cari
+  semestr, jurnal çipi ilə eyni predikat) + reyestr kartında yerləşdirmə tarixçəsi + qrup reyestrində ana qrup.
+* **Prod kopyası (ems_prodlive_1025):** 12 alt qrup ana qrupa bağlandı (21 artıq bağlı idi), 277 tələbə üzrə
+  1 365 «Alt qrupa yerləşdirildi» sətri; 52 tələbənin alt qrup jurnalında qeydiyyatı yoxdur, 482 tələbə×fənn ana
+  qrup jurnalındadır, 139 tələbənin legacy qrupu fərqlidir (alt qrup deyil). İkinci qaçış: 0 yazı.
+* **Prod:** paket yalnız bu fazanı daşıyır (`snapshot.phases = ["subgroups"]`; `legacy_delta_extract --phases
+  subgroups` və ya mövcud delta2 paketinin yenidən yığılması) → şifrəli asset `legacy-delta-subgroups-…` →
+  `prod-data-ops` `legacy_delta_apply` (dry-run → apply, `batch` = sha256).

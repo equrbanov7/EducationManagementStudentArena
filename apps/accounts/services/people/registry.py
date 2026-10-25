@@ -215,7 +215,7 @@ def _sector_group_ids(organization, wanted: str) -> list:
     ]
 
 
-def _row(record, *, ancestors, period, movement_counts) -> dict:
+def _row(record, *, ancestors, period, movement_counts, subgroups=None) -> dict:
     student = record.student
     unit = ancestors.get(str(record.group_id), {}) if record.group_id else {}
     group = record.group
@@ -229,6 +229,8 @@ def _row(record, *, ancestors, period, movement_counts) -> dict:
         "fin": str(getattr(getattr(student, "profile", None), "fin", "") or ""),
         "program_label": program_display_label(record.program.name, record.program.display_code),
         "group_name": str(getattr(group, "name", "") or ""),
+        # Cari semestrdə «alt qrupdan əlavə» olunduğu jurnalların qrupları (sahib 2026-10-25: «görünsün ki alt qrupdur»).
+        "subgroup_names": (subgroups or {}).get(str(record.pk), []),
         "sector": sector,
         "faculty_name": unit.get("faculty", ""),
         "kafedra_name": unit.get("kafedra", ""),
@@ -292,11 +294,13 @@ def build_registry_page(*, actor, request=None, values=None, page_size: int = DE
     ancestors = _ancestors_for(page_records, organization=actor.organization)
     period = _current_period(actor.organization)
     movement_counts = _movement_counts(actor.organization, page_records)
+    subgroups = _subgroup_journals(actor.organization, page_records, period)
 
     return {
         "has_access": True,
         "rows": [
-            _row(record, ancestors=ancestors, period=period, movement_counts=movement_counts) for record in page_records
+            _row(record, ancestors=ancestors, period=period, movement_counts=movement_counts, subgroups=subgroups)
+            for record in page_records
         ],
         # `page_obj` şablona OLDUĞU KİMİ ötürülür — `partials/_pagination.html`
         # Django Page müqaviləsini gözləyir (yeni pager yazılmır).
@@ -340,6 +344,35 @@ def _movement_counts(organization, records) -> dict:
         .annotate(total=Count("id"))
     )
     return {str(row["record_id"]): row["total"] for row in rows}
+
+
+def _subgroup_journals(organization, records, period) -> dict:
+    """``{record_id: [alt qrup adları]}`` — səhifədəki tələbələrin cari dövrdə «alt qrupdan əlavə» olunduğu
+    jurnalların qrupları (``guest_roster.row_is_guest`` predikatı: ``source_group`` dolu VƏ jurnalın qrupu
+    tələbənin cari qrupu deyil). BİR sorğu."""
+    from apps.registrar.models import Enrollment
+
+    by_student = {record.student_id: record for record in records}
+    if period is None or not by_student:
+        return {}
+    rows = (
+        Enrollment.objects.filter(
+            organization=organization,
+            student_id__in=list(by_student),
+            offering__period=period,
+            status__in=(Enrollment.Status.ENROLLED, Enrollment.Status.COMPLETED),
+            source_group__isnull=False,
+            offering__group__isnull=False,
+        )
+        .values_list("student_id", "offering__group_id", "offering__group__name")
+        .distinct()
+    )
+    out: dict = {}
+    for student_id, group_id, group_name in rows:
+        record = by_student[student_id]
+        if group_id != record.group_id and group_name:
+            out.setdefault(str(record.pk), set()).add(group_name)
+    return {key: sorted(names) for key, names in out.items()}
 
 
 def _ancestors_for(records, *, organization):

@@ -5,7 +5,8 @@ tranzaksiyanı GERİ QAYTARIR — hesabatdakı saylar «tətbiq etsək nə olard
 
 Fazalar: tələbələr (iki keçid: tutuşdur, sonra yarat) → açılış (fənn/qrup/müəllim) → qeydiyyat → dərs + xana →
 yekun/təkrar imtahan → sillabus → dərs yükü (rəsmi «Dərs yükü faylı» axını) → eyni fənnin ikinci (boş) öz-qrup qeydiyyatı «alt qrup
-birləşməsi» ilə tarixçəyə → tələbə profilində boş sahələr. Sonda bir audit sətri (manifest:
+birləşməsi» ilə tarixçəyə → legacy alt qrup tələbələrinə rəsmi işarə (ana qrup izi + «Alt qrupa
+yerləşdirildi» sətri, ``subgroups``) → tələbə profilində boş sahələr. Sonda bir audit sətri (manifest:
 saylar + yaradılmış kiçik obyektlərin id-ləri) — ``resource_type=legacy_import.delta_batch``.
 """
 
@@ -24,6 +25,7 @@ from .journals import build_enrollments, build_offerings
 from .lessons import build_lessons_and_marks
 from .people import StudentMapper, TeacherMapper, student_gender
 from .resolve import Catalog, lesson_date, text
+from .subgroups import mark_subgroups
 from .syllabi import import_syllabi
 from .topics import apply_topics
 from .workload import build_workload
@@ -42,6 +44,7 @@ PHASES = (
     "syllabi",
     "workload",
     "dedupe",
+    "subgroups",
     "profiles",
 )
 
@@ -160,9 +163,11 @@ class DeltaRun:
             import_syllabi(self, slices)
         if "workload" in phases:
             build_workload(self, slices)
+        full = (self.bundle.get("snapshot") or {}).get("full_semesters") or []
         if "dedupe" in phases:
-            full = (self.bundle.get("snapshot") or {}).get("full_semesters") or []
             dedupe_enrollments(self, [getattr(self.period_of(semestr), "pk", None) for semestr in full])
+        if "subgroups" in phases:
+            mark_subgroups(self, [getattr(self.period_of(semestr), "pk", None) for semestr in full])
         if "profiles" in phases:
             self._profiles()
         for _legacy_id, user_pk in self.teachers.created:

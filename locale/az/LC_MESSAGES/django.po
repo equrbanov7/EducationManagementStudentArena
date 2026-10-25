@@ -107639,3 +107639,7 @@ msgstr "Mövzuların keçilməsi (jurnal üzrə)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Sillabus"
+
+msgctxt "accounts.student_registry"
+msgid "Cari semestrdə bu alt qrup(lar)ın jurnalında oxuyur"
+msgstr "Cari semestrdə bu alt qrup(lar)ın jurnalında oxuyur"

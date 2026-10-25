@@ -107537,3 +107537,7 @@ msgstr "Konuların işlenmesi (deftere göre)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Müfredat belgesi (sillabus)"
+
+msgctxt "accounts.student_registry"
+msgid "Cari semestrdə bu alt qrup(lar)ın jurnalında oxuyur"
+msgstr "Bu dönem bu alt grubun (alt grupların) defterinde okuyor"

@@ -109155,3 +109155,7 @@ msgstr "Behandlung der Themen (laut Journal)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Syllabus"
+
+msgctxt "accounts.student_registry"
+msgid "Cari semestrdə bu alt qrup(lar)ın jurnalında oxuyur"
+msgstr "Lernt in diesem Semester im Journal dieser Untergruppe(n)"

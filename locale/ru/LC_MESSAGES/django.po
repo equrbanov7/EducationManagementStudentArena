@@ -108323,3 +108323,7 @@ msgstr "Прохождение тем (по журналу)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Силлабус"
+
+msgctxt "accounts.student_registry"
+msgid "Cari semestrdə bu alt qrup(lar)ın jurnalında oxuyur"
+msgstr "В текущем семестре учится в журнале этой подгруппы (этих подгрупп)"
