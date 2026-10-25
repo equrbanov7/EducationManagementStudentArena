@@ -7,6 +7,8 @@ from .cabinet_modules import disabled_sections  # noqa: F401
 from .cabinet_modules import is_module_enabled  # noqa: F401
 from .cabinet_modules import module_items  # noqa: F401
 from .cabinet_modules import set_module_enabled  # noqa: F401
+from .chair_merge import merge_chair_unit  # noqa: F401
+from .chair_merge import resolve_merge_units as resolve_chair_merge_units  # noqa: F401
 from .default_roles import get_default_roles_for_org_type  # noqa: F401
 from .group_cohort import group_admission_year  # noqa: F401
 from .group_cohort import group_cohort_year  # noqa: F401
@@ -131,11 +133,13 @@ __all__ = [
     "kafedra_unit_types",
     "narrow_kafedra_rows",
     "members_covering_unit",
+    "merge_chair_unit",
     "module_items",
     "permission_scope_unit_types",
     "permission_scope_units",
     "register_cabinet_section_resolver",
     "register_managed_settings_key",
+    "resolve_chair_merge_units",
     "request_active_memberships",
     "request_holds_student_key",
     "resolve_ancestor",
