@@ -3170,3 +3170,9 @@ msgstr "Önce bölümü seçin."
 
 msgid "İntensiv kurs ləğv edilsin? (yalnız jurnalda dərs yoxdursa mümkündür)"
 msgstr "Yoğun ders iptal edilsin mi? (yalnızca defterde ders yoksa mümkündür)"
+
+msgid "Göstərilir: %(shown)s / %(total)s sətir"
+msgstr "%(total)s satırdan %(shown)s tanesi gösteriliyor"
+
+msgid "Seçilmiş müəllim"
+msgstr "Seçilen öğretmen"

@@ -101,9 +101,11 @@ xülasə və çekmecə məntiqi qalır. Göndəriş ortaq `teaching_office.js`-d
 {% comment %}Saf render alt modulu əsas moduldan ƏVVƏL yüklənir; əsas modul onu
 `window.EMSWorkloadRender` üzərindən null-safe oxuyur (sıra pozulsa səhifə
 çökmür — sadəcə bölmə init olunmur).{% endcomment %}
-<script src="{% static 'accounts/js/profile/workload_distribution_render.js' %}?v=20261025-intensive"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution_render.js' %}?v=20261025-lazy"></script>
+{# 2026-10-25: tənbəl yükləmə + müəllimə görə süzgəc — əsas moduldan ƏVVƏL (o, `EMSWorkloadList`-i null-safe oxuyur). #}
+<script src="{% static 'accounts/js/profile/workload_distribution_list.js' %}?v=20261025-lazy2"></script>
 <script src="{% static 'accounts/js/profile/workload_distribution_forms.js' %}?v=20261016-ms"></script>
-<script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20261025-outside"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20261025-lazy"></script>
 {% comment %}2026-10-15: təsdiqlənmiş bölgünün redaktəsi (düzəliş dialoqu + təkrar sorğu), fəaliyyətin
 çıxarılması, bölgünün redaktəsi, «Redaktə et» keçidinin sətir fokusu — əsas moduldan SONRA.{% endcomment %}
 <script src="{% static 'accounts/js/profile/workload_distribution_amend.js' %}?v=20261015-amend"></script>

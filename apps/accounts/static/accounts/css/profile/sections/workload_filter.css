@@ -1,0 +1,167 @@
+/* «Yük bölgüsü» — müəllimə görə süzgəc + tənbəl yükləmə (2026-10-25).
+   Sağ paneldəki müəllim kartı DÜYMƏDİR (`aria-pressed`); aktiv kart vurğulanır, solda süzgəc zolağı çıxır.
+   `workload_base.css`-dən SONRA yüklənir (kartın `div` üslubunu düymə üçün tamamlayır). */
+
+/* ── Müəllim kartı = düymə ─────────────────────────────────────────────── */
+.wl-teacher {
+  display: block;
+  width: 100%;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.wl-teacher > span {
+  display: block;
+}
+
+.wl-teacher:hover {
+  border-color: var(--ems-primary-300, #9db8e8);
+  background: var(--ems-primary-50, #eef4ff);
+}
+
+.wl-teacher:focus-visible {
+  outline: 2px solid var(--ems-primary-500, #2f6fdb);
+  outline-offset: 2px;
+}
+
+.wl-teacher.is-active {
+  border-color: var(--ems-primary-500, #2f6fdb);
+  background: var(--ems-primary-50, #eef4ff);
+  box-shadow: 0 0 0 3px var(--ems-primary-100, #d5e3fb);
+}
+
+.wl-teacher.is-active .wl-teacher__name::after {
+  content: "\2713";
+  margin-inline-start: 6px;
+  color: var(--ems-primary-700, #1b4fa0);
+}
+
+/* Çox müəllim olanda panel özü sürüşür (sticky panel ekrandan hündür olub dibi əlçatmaz qalmasın). */
+.wl__aside {
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
+}
+
+.wl__main {
+  scroll-margin-top: calc(var(--ems-header-h, 0px) + 12px);
+}
+
+/* ── Aktiv süzgəc zolağı + sayğac ──────────────────────────────────────── */
+.wl-active-filter {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 10px;
+  padding: 8px 12px;
+  font-size: 0.84rem;
+  background: var(--ems-primary-50, #eef4ff);
+  border: 1px solid var(--ems-primary-100, #d5e3fb);
+  border-radius: 10px;
+  color: var(--ems-primary-700, #1b4fa0);
+}
+
+.wl-active-filter[hidden] {
+  display: none;
+}
+
+.wl-active-filter__clear {
+  margin-inline-start: auto;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  line-height: 1;
+  color: inherit;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.wl-active-filter__clear:hover,
+.wl-active-filter__clear:focus-visible {
+  background: #fff;
+  border-color: var(--ems-primary-100, #d5e3fb);
+}
+
+.wl-count {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  color: var(--ems-neutral-600, #5b6b7c);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Seçilmiş müəllimin çipi süzülmüş sətirlərdə seçilir. */
+.wl-assign-chip.is-match {
+  background: var(--ems-primary-500, #2f6fdb);
+  border-color: var(--ems-primary-500, #2f6fdb);
+  color: #fff;
+}
+
+.wl-assign-chip.is-match.is-vacant {
+  background: var(--ems-warning-bd, #f0c36d);
+  border-color: var(--ems-warning-bd, #f0c36d);
+  color: #4a3000;
+}
+
+/* ── «Daha çox göstər» zolağı (IntersectionObserver hədəfi) ─────────────── */
+.wl-more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 8px 0 16px;
+}
+
+.wl-more[hidden] {
+  display: none;
+}
+
+.wl-more.is-loading .wl-btn i {
+  animation: wl-more-spin 0.9s linear infinite;
+}
+
+.wl-more__error {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ems-danger, #b3261e);
+}
+
+@keyframes wl-more-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wl-teacher {
+    transition: none;
+  }
+
+  .wl-more.is-loading .wl-btn i {
+    animation: none;
+  }
+}
+
+/* ── Dar ekran: müəllim paneli siyahının ÜSTÜNDƏ (aşağıda sonsuz siyahının dibinə çatmaq lazım olmasın) ── */
+@media (max-width: 992px) {
+  .wl__aside {
+    order: -1;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .wl-teachers {
+    max-height: 260px;
+    overflow-y: auto;
+  }
+}

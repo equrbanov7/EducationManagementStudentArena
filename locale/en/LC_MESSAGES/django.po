@@ -108970,3 +108970,31 @@ msgstr "The email could not be sent. Please try again in a few minutes."
 msgctxt "accounts.password_reset_done_page"
 msgid "Kod gəlmirsə, hesabınızda başqa e-poçt qeydə alınmış ola bilər — RİM-ə müraciət edin."
 msgstr "If the code does not arrive, a different email may be registered on your account — contact the RİM office."
+
+msgctxt "accounts.workload"
+msgid "Müəllim süzgəci:"
+msgstr "Teacher filter:"
+
+msgctxt "accounts.workload"
+msgid "Müəllim süzgəcini götür"
+msgstr "Remove the teacher filter"
+
+msgctxt "accounts.workload"
+msgid "Süzgəcə uyğun sətir tapılmadı"
+msgstr "No rows match the filter"
+
+msgctxt "accounts.workload"
+msgid "Müəllim süzgəcini götürün, axtarışı təmizləyin və ya semestri «Hamısı» seçin."
+msgstr "Remove the teacher filter, clear the search or set the semester to “All”."
+
+msgctxt "accounts.workload"
+msgid "Daha çox göstər"
+msgstr "Show more"
+
+msgctxt "accounts.workload"
+msgid "Növbəti sətirlər yüklənmədi — yenidən cəhd edin."
+msgstr "The next rows could not be loaded — try again."
+
+msgctxt "accounts.workload"
+msgid "Müəllimin üstünə vurun — solda yalnız ona bölgüsü olan sətirlər qalsın. Təkrar vurun və ya × ilə süzgəci götürün."
+msgstr "Click a teacher to keep only the rows assigned to them on the left. Click again or use × to remove the filter."

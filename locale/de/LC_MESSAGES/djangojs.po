@@ -3234,3 +3234,9 @@ msgstr "Wählen Sie zuerst den Lehrstuhl."
 
 msgid "İntensiv kurs ləğv edilsin? (yalnız jurnalda dərs yoxdursa mümkündür)"
 msgstr "Intensivkurs stornieren? (nur möglich, wenn keine Stunden erfasst sind)"
+
+msgid "Göstərilir: %(shown)s / %(total)s sətir"
+msgstr "%(shown)s von %(total)s Zeilen angezeigt"
+
+msgid "Seçilmiş müəllim"
+msgstr "Ausgewählte Lehrkraft"

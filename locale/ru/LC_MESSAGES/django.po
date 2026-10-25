@@ -109164,3 +109164,31 @@ msgstr "Не удалось отправить письмо. Повторите 
 msgctxt "accounts.password_reset_done_page"
 msgid "Kod gəlmirsə, hesabınızda başqa e-poçt qeydə alınmış ola bilər — RİM-ə müraciət edin."
 msgstr "Если код не приходит, в вашей учётной записи может быть указан другой e-mail — обратитесь в RİM."
+
+msgctxt "accounts.workload"
+msgid "Müəllim süzgəci:"
+msgstr "Фильтр по преподавателю:"
+
+msgctxt "accounts.workload"
+msgid "Müəllim süzgəcini götür"
+msgstr "Снять фильтр по преподавателю"
+
+msgctxt "accounts.workload"
+msgid "Süzgəcə uyğun sətir tapılmadı"
+msgstr "Строк, соответствующих фильтру, нет"
+
+msgctxt "accounts.workload"
+msgid "Müəllim süzgəcini götürün, axtarışı təmizləyin və ya semestri «Hamısı» seçin."
+msgstr "Снимите фильтр по преподавателю, очистите поиск или выберите семестр «Все»."
+
+msgctxt "accounts.workload"
+msgid "Daha çox göstər"
+msgstr "Показать ещё"
+
+msgctxt "accounts.workload"
+msgid "Növbəti sətirlər yüklənmədi — yenidən cəhd edin."
+msgstr "Не удалось загрузить следующие строки — повторите попытку."
+
+msgctxt "accounts.workload"
+msgid "Müəllimin üstünə vurun — solda yalnız ona bölgüsü olan sətirlər qalsın. Təkrar vurun və ya × ilə süzgəci götürün."
+msgstr "Нажмите на преподавателя — слева останутся только строки с его нагрузкой. Нажмите ещё раз или × — фильтр снимется."

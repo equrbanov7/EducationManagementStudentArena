@@ -12,7 +12,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
 
-from core.http_ids import parse_uuid
+from core.http_ids import parse_int, parse_uuid
 from core.search_text import tolerant_q
 from core.write_rate_limit import score_write_rate_limited
 
@@ -35,6 +35,7 @@ from ..services import (
     open_amendment,
     resolve_chair,
     row_warnings,
+    rows_page,
     save_row_amended,
     serialize_rows_state,
     teacher_load_panel,
@@ -62,6 +63,10 @@ _INPUT_CODES = frozenset(
         "workload.note_required",
     }
 )
+
+
+#: ``limit`` verilib, amma oxunmursa (``limit=abc``) — ilk dilimin ölçüsü.
+_DEFAULT_PAGE = 30
 
 
 def _write_denied(exc: WorkloadDenied) -> JsonResponse:
@@ -133,10 +138,23 @@ def rows(request) -> JsonResponse:
         task = _resolve_task(request, actor, task_id=task_id, chair_id=chair_id, year=year)
     except WorkloadDenied as exc:
         if exc.code == "workload.task_not_found":
-            return JsonResponse({"ok": True, "task": None, "rows": [], "teachers": [], "readiness": None})
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "task": None,
+                    "rows": [],
+                    "total": 0,
+                    "next_offset": 0,
+                    "has_more": False,
+                    "teachers": [],
+                    "readiness": None,
+                }
+            )
         return denied(exc)
     season = request.GET.get("season") or ""
     search = request.GET.get("q") or ""
+    if "limit" in request.GET:
+        return _rows_paged(request, task, season=season, search=search)
     payload_rows, loaded_rows, balance = serialize_rows_state(task, season=season, search=search)
     # PERF-1 F-09: süzgəcsiz görünüşdə hazırlıq eyni sətirlərdən; süzgəc varsa — tapşırığın hamısı yenidən.
     readiness = (
@@ -149,10 +167,40 @@ def rows(request) -> JsonResponse:
             "ok": True,
             "task": _task_payload(task),
             "rows": payload_rows,
+            "total": len(payload_rows),
+            "next_offset": len(payload_rows),
+            "has_more": False,
             "teachers": teacher_load_panel(task),
             "readiness": readiness,
         }
     )
+
+
+def _rows_paged(request, task, *, season: str, search: str) -> JsonResponse:
+    """Tənbəl yükləmə (2026-10-25): ``limit`` / ``offset`` dilimi + ``teacher`` süzgəci.
+
+    * ``teacher`` — sağ paneldəki müəllimin id-si və ya ``vacant``: yalnız ona bölgüsü olan sətirlər;
+    * ``panel`` — müəllim yük paneli YALNIZ ilk dilimdə (``offset=0``) gəlir, ``panel=0`` onu da söndürür;
+    * ``readiness=1`` — təsdiq dialoqu üçün tapşırığın BÜTÜN sətirləri üzrə hazırlıq (dilimlə gəlmir);
+    * ``focus`` — «Redaktə et» keçidinin sətri ilk dilimdə olsun.
+    """
+    limit = parse_int(request.GET.get("limit"))
+    offset = parse_int(request.GET.get("offset")) or 0
+    page = rows_page(
+        task,
+        season=season,
+        search=search,
+        teacher=(request.GET.get("teacher") or "").strip(),
+        offset=offset,
+        limit=_DEFAULT_PAGE if limit is None else limit,
+        focus_row=parse_uuid(request.GET.get("focus")),
+    )
+    payload = {"ok": True, "task": _task_payload(task), **page}
+    if offset <= 0 and request.GET.get("panel") != "0":
+        payload["teachers"] = teacher_load_panel(task)
+    if request.GET.get("readiness") == "1":
+        payload["readiness"] = distribution_readiness(task)
+    return JsonResponse(payload)
 
 
 @never_cache

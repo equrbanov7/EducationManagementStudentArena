@@ -108378,3 +108378,31 @@ msgstr "E-posta gönderilemedi. Birkaç dakika sonra tekrar deneyin."
 msgctxt "accounts.password_reset_done_page"
 msgid "Kod gəlmirsə, hesabınızda başqa e-poçt qeydə alınmış ola bilər — RİM-ə müraciət edin."
 msgstr "Kod gelmiyorsa hesabınızda farklı bir e-posta kayıtlı olabilir — RİM'e başvurun."
+
+msgctxt "accounts.workload"
+msgid "Müəllim süzgəci:"
+msgstr "Öğretmen filtresi:"
+
+msgctxt "accounts.workload"
+msgid "Müəllim süzgəcini götür"
+msgstr "Öğretmen filtresini kaldır"
+
+msgctxt "accounts.workload"
+msgid "Süzgəcə uyğun sətir tapılmadı"
+msgstr "Filtreye uyan satır bulunamadı"
+
+msgctxt "accounts.workload"
+msgid "Müəllim süzgəcini götürün, axtarışı təmizləyin və ya semestri «Hamısı» seçin."
+msgstr "Öğretmen filtresini kaldırın, aramayı temizleyin veya dönemi «Tümü» seçin."
+
+msgctxt "accounts.workload"
+msgid "Daha çox göstər"
+msgstr "Daha fazla göster"
+
+msgctxt "accounts.workload"
+msgid "Növbəti sətirlər yüklənmədi — yenidən cəhd edin."
+msgstr "Sonraki satırlar yüklenemedi — yeniden deneyin."
+
+msgctxt "accounts.workload"
+msgid "Müəllimin üstünə vurun — solda yalnız ona bölgüsü olan sətirlər qalsın. Təkrar vurun və ya × ilə süzgəci götürün."
+msgstr "Bir öğretmene tıklayın — solda yalnızca ona dağıtılan satırlar kalsın. Tekrar tıklayın veya × ile filtreyi kaldırın."

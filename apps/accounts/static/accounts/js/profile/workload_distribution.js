@@ -23,13 +23,6 @@
         return document.querySelector('[data-profile-section-panel="workload-distribution"]');
     }
 
-    /** HTML-ə yazılan hər istifadəçi mətni bundan keçir (ad/soyad XSS qapısı). */
-    function esc(value) {
-        var node = document.createElement("span");
-        node.textContent = value == null ? "" : String(value);
-        return node.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-    }
-
     function q(selector) {
         var host = panel();
         return host ? host.querySelector(selector) : null;
@@ -65,6 +58,7 @@
     }
 
     function setBusy(busy) {
+        STATE.loading = busy; // tənbəl yükləmə (`workload_distribution_list.js`) yüklənmə zamanı ikinci dilim istəmir
         var skeleton = q("[data-wl-skeleton]");
         if (skeleton) skeleton.hidden = !busy;
         var rowsHost = q("[data-wl-rows]");
@@ -114,10 +108,17 @@
         chip.setAttribute("data-state", STATE.task.status);
     }
 
-    /** Sətirləri (və panelləri) serverdən yenidən yüklə. */
-    function loadRows() {
+    /**
+     * Sətirləri serverdən yenidən yüklə (tənbəl yükləmə, 2026-10-25: ilk dilim 30 sətir, qalanı aşağı
+     * sürüşdükcə — `workload_distribution_list.js`). `{fresh: true}` — süzgəc/axtarış dəyişib, siyahı SIFIRDAN;
+     * əks halda (yazıdan sonrakı yenidən yükləmə) artıq açılmış sətir sayı qədəri qaytarılır, sürüşmə yeri qalır;
+     * `{panel: false}` — müəllim paneli yenilənmir (yalnız süzgəc dəyişib).
+     */
+    function loadRows(arg) {
         var host = root();
-        if (!host) return;
+        var List = window.EMSWorkloadList;
+        if (!host || !List) return;
+        var fresh = !!(arg && arg.fresh === true);
         var params = filters();
         if (!params.chair || !params.year) {
             STATE.rows = [];
@@ -129,16 +130,10 @@
             if (rowsHost0) rowsHost0.innerHTML = "";
             return;
         }
-        var url =
-            host.dataset.rowsUrl +
-            "?chair=" +
-            encodeURIComponent(params.chair) +
-            "&year=" +
-            encodeURIComponent(params.year) +
-            "&season=" +
-            encodeURIComponent(params.season) +
-            "&q=" +
-            encodeURIComponent(params.q);
+        var url = List.url(host.dataset.rowsUrl, params, {
+            keep: fresh ? 0 : STATE.rows.length,
+            panel: !(arg && arg.panel === false),
+        });
         setBusy(true);
         var mine = (STATE.rowsSeq = (STATE.rowsSeq || 0) + 1); // köhnə cavab atılır
         window.EMSCore.fetchJSON(url)
@@ -146,15 +141,15 @@
                 if (mine !== STATE.rowsSeq) return;
                 STATE.rows = payload.rows || [];
                 STATE.task = payload.task || null;
-                STATE.readiness = payload.readiness || null;
-                STATE.teachers = payload.teachers || [];
+                if (payload.teachers) STATE.teachers = payload.teachers; // yalnız ilk dilimdə gəlir
                 var Render = window.EMSWorkloadRender;
                 if (Render) {
-                    Render.rows(q("[data-wl-rows]"), STATE.rows, activityLabels());
-                    Render.teachers(q("[data-wl-teacher-panel]"), STATE.teachers);
+                    Render.rows(q("[data-wl-rows]"), STATE.rows, activityLabels(), { teacher: List.teacher() });
+                    if (payload.teachers) {
+                        Render.teachers(q("[data-wl-teacher-panel]"), STATE.teachers, { active: List.teacher() });
+                    }
                 }
-                var empty = q("[data-wl-empty]");
-                if (empty) empty.hidden = STATE.rows.length > 0;
+                List.afterLoad(payload);
                 renderStatus();
                 if (window.EMSWorkloadAmend) window.EMSWorkloadAmend.afterRows();
             })
@@ -253,12 +248,14 @@
         var EMSDelegate = window.EMSDelegate;
         if (!EMSDelegate) return;
 
-        EMSDelegate.on("change", "[data-wl-chair], [data-wl-season]", function () {
-            loadRows();
-            loadOptions();
+        // Kafedra/il dəyişəndə müəllim süzgəci təmizlənir (başqa kafedranın müəllimi burada heç nə göstərməz).
+        EMSDelegate.on("change", "[data-wl-chair], [data-wl-season], [data-wl-year]", function (event, field) {
+            if (!field.matches("[data-wl-season]") && window.EMSWorkloadList) window.EMSWorkloadList.setTeacher("");
+            loadRows({ fresh: true });
+            if (!field.matches("[data-wl-year]")) loadOptions();
         });
-        EMSDelegate.on("change", "[data-wl-year]", loadRows);
-        window.EMSSearchInput.delegate("[data-wl-search]", { onSearch: loadRows }); // 2026-10-14: 1500 ms, ≥2, Enter, IME
+        // 2026-10-14: 1500 ms, ≥2, Enter, IME
+        window.EMSSearchInput.delegate("[data-wl-search]", { onSearch: function () { loadRows({ fresh: true }); } });
 
         EMSDelegate.on("click", "[data-wl-create-task]", function () {
             var host = root();
@@ -370,7 +367,16 @@
         // ── Təsdiq ─────────────────────────────────────────────────────────
         EMSDelegate.on("click", "[data-wl-open-confirm]", function () {
             var Render = window.EMSWorkloadRender;
-            if (Render) Render.readiness(q("[data-wl-confirm-stats]"), STATE.readiness);
+            var host = root();
+            var stats = q("[data-wl-confirm-stats]");
+            if (Render && stats) Render.readiness(stats, null);
+            // Sətirlər dilimlə gəldiyi üçün hazırlıq xülasəsi tapşırığın HAMISI üzrə ayrıca soruşulur.
+            if (Render && host && window.EMSWorkloadList) {
+                window.EMSWorkloadList.loadReadiness(host.dataset.rowsUrl, filters()).then(function (readiness) {
+                    STATE.readiness = readiness;
+                    Render.readiness(q("[data-wl-confirm-stats]"), readiness);
+                });
+            }
             showError(q("[data-wl-confirm-error]"), "");
             var instance = modal("[data-wl-confirm-modal]");
             if (instance) instance.show();
@@ -507,6 +513,8 @@
         modal: modal,
         rowById: rowById,
         loadRows: loadRows,
+        filters: filters,
+        labels: activityLabels,
         showError: showError,
         messageFor: messageFor,
         openAssign: function (rowId, assignmentId) {
@@ -552,29 +560,9 @@
                 "&outside=1"
         )
             .then(function (payload) {
-                var select = q("[data-wl-assign-teacher]");
-                if (!select) return;
-                var html = '<option value="">' + esc(gettext("Vakant (müəllim təyin edilməyib)")) + "</option>";
-                (payload.results || []).forEach(function (item) {
-                    var suffix = item.current_hours != null ? " · " + item.current_hours + "s" : "";
-                    // Başqa kafedranın müəllimi (saathesabı): ştat kafedrası yazılır; təyinatda bu kafedrada
-                    // ƏLAVƏ üzvlük alır, ştatı dəyişmir (sahib 2026-10-25).
-                    var mark = item.is_outside
-                        ? " — " + fmt(gettext("kənar, ştat: %(chair)s"), { chair: item.home_chair || "—" })
-                        : item.is_chair_member
-                          ? ""
-                          : " " + gettext("(kafedraya bağlanmamış)");
-                    html +=
-                        '<option value="' +
-                        esc(item.id) +
-                        '">' +
-                        esc(item.full_name) +
-                        suffix +
-                        mark +
-                        "</option>";
-                });
-                select.innerHTML = html;
-                if (window.EMSBootstrapSelect) window.EMSBootstrapSelect.refresh(select);
+                if (window.EMSWorkloadRender) {
+                    window.EMSWorkloadRender.teacherPicker(q("[data-wl-assign-teacher]"), payload.results);
+                }
             })
             .catch(function () {
                 /* səssiz — Vakant seçimi hər halda qalır */
@@ -586,8 +574,11 @@
         window.EMSReady(function () {
             if (!root()) return; // bölmə swap olunmayıb — null-safe
             STATE.catalog = null;
+            STATE.rows = [];
+            STATE.focusedRow = "";
+            if (window.EMSWorkloadList) window.EMSWorkloadList.restore(); // müəllim süzgəci URL-dən qayıdır
             fillCatalogSelects();
-            loadRows();
+            loadRows({ fresh: true });
             loadOptions();
         });
     }

@@ -25,6 +25,7 @@ from .people import (
 )
 from .queries import (
     chair_tasks,
+    rows_page,
     serialize_rows,
     serialize_rows_state,
     task_rows,
@@ -161,6 +162,7 @@ __all__ = [
     "review_queue",
     "row_remarks",
     "row_warnings",
+    "rows_page",
     "save_row",
     "save_row_amended",
     "serialize_rows",
