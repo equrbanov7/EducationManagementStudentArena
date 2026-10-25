@@ -7,7 +7,8 @@ Fazalar: tələbələr (iki keçid: tutuşdur, sonra yarat) → açılış (fən
 yekun/təkrar imtahan → sillabus → dərs yükü (rəsmi «Dərs yükü faylı» axını) → eyni fənnin ikinci (boş) öz-qrup qeydiyyatı «alt qrup
 birləşməsi» ilə tarixçəyə → legacy alt qrup tələbələrinə rəsmi işarə (ana qrup izi + «Alt qrupa
 yerləşdirildi» sətri, ``subgroups``) → tələbə profilində boş sahələr → (yalnız açıq seçiləndə) aktiv reyestrin
-köhnə sistemlə rəsmi köçürmə/xaric əmrləri ilə nizamlanması (``registry_sync``). Sonda bir audit sətri (manifest:
+köhnə sistemlə rəsmi köçürmə/xaric əmrləri ilə nizamlanması (``registry_sync``) → (yalnız açıq seçiləndə) cari
+semestr jurnallarında olmayan, proqram müddəti bitmiş tələbələrin rəsmi «Məzun etmə» əmri (``graduation``). Sonda bir audit sətri (manifest:
 saylar + yaradılmış kiçik obyektlərin id-ləri) — ``resource_type=legacy_import.delta_batch``.
 """
 
@@ -22,6 +23,7 @@ from django.utils import timezone
 
 from .dedupe import dedupe_enrollments
 from .finals import apply_finals
+from .graduation import sync_graduation
 from .history import HISTORY_PHASES, HistoryPhaseMismatch, apply_history, apply_history_topics
 from .journals import build_enrollments, build_offerings
 from .lessons import build_lessons_and_marks
@@ -60,12 +62,13 @@ PHASES = (
     "subgroups",
     "profiles",
     "registry_sync",
+    "graduation",
     "history",
     "history_topics",
 )
-#: Yalnız AÇIQ seçiləndə (``--phase`` və ya paketin ``snapshot.phases``-i) işləyən fazalar — reyestr əmrləri yazır;
-#: ``history*`` tarixi (bağlı) jurnallara əlavə edir (``delta/history.py``).
-OPT_IN_PHASES = ("registry_sync", "history", "history_topics")
+#: Yalnız AÇIQ seçiləndə (``--phase`` və ya paketin ``snapshot.phases``-i) işləyən fazalar — reyestr əmrləri yazır
+#: (``registry_sync``, ``graduation``); ``history*`` tarixi (bağlı) jurnallara əlavə edir (``delta/history.py``).
+OPT_IN_PHASES = ("registry_sync", "graduation", "history", "history_topics")
 DEFAULT_PHASES = tuple(phase for phase in PHASES if phase not in OPT_IN_PHASES)
 
 
@@ -192,6 +195,8 @@ class DeltaRun:
             self._profiles()
         if "registry_sync" in phases:
             sync_registry(self)
+        if "graduation" in phases:
+            sync_graduation(self)
         if "history" in phases:
             apply_history(self)
         if "history_topics" in phases:

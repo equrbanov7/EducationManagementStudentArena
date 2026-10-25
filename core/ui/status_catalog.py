@@ -308,7 +308,7 @@ STUDENT_STUDY_STATE: tuple[Status, ...] = (
     _s("graduated", _t("Məzun"), "info", order=6),
 )
 
-#: Ekran 09 — 6 hərəkət növü (enum kimi saxlanılır).
+#: Ekran 09 — 7 hərəkət növü (enum kimi saxlanılır). «Məzun etmə» — sahib 2026-10-25.
 STUDENT_MOVEMENT: tuple[Status, ...] = (
     _s("group_transfer", _t("Qrupdan qrupa köçürmə"), "info", order=0),
     _s("program_transfer", _t("İxtisasdan ixtisasa köçürmə"), "info", order=1),
@@ -316,6 +316,7 @@ STUDENT_MOVEMENT: tuple[Status, ...] = (
     _s("academic_leave", _t("Akademik məzuniyyət"), "warning", order=3),
     _s("reinstatement", _t("Bərpa"), "success", order=4),
     _s("expulsion", _t("Xaric etmə"), "danger", order=5),
+    _s("graduation", _t("Məzun etmə"), "info", order=6),
 )
 
 # --------------------------------------------------------------------------- #

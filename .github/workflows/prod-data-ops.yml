@@ -107,6 +107,10 @@
 #       fazalarını daşıyır (snapshot.phases; adi fazalarla birgə RƏDD olunur): cutover-in buraxdığı (jurnal, tələbə)
 #       cütləri üçün qeydiyyat + xana + im/im2 bağlı tarixi jurnallara YALNIZ ƏLAVƏ; hesabı olmayan keçmiş tələbə
 #       — `alumni` arxivi (giriş bağlı); `history_topics` — tarixi dərslərin BOŞ mövzu/otağı.
+#       `--phases graduation` (sahib 2026-10-25, opt-in): cari semestrin (yeni + köhnə sistem) jurnallarında OLMAYAN,
+#       proqram müddəti bitmiş (qəbul ili + ECTS/60 ≤ cari tədris ili) və son kurs jurnalı olan tələbələrə rəsmi
+#       «Məzun etmə» əmri (MZN-SINX-2026, 2026-07-01); müddəti bitməyən / qəbul ili bilinməyən / əvvəl kəsilən /
+#       köhnə sistemdə azad edilən — toxunulmur (adlı «yoxlanmalı» siyahısı şifrəli artifaktda). Geri: «Bərpa» əmri.
 #   legacy_repair_empty_lessons — real xanası (bal / iə / ü/q), mövzusu və düzəlişi olmayan KEÇMİŞ dərsləri (jurnalın
 #       məzmunsuz sütunlarını) silir (sahib 2026-10-24: «boşdursa silinsin; bir neçə tələbəyə “qb” yazılıbsa belə
 #       silinsin»): köçürülmüş tam boş sütun + yalnız balsız «qb» xanalı sütun (--include-absent-only; xanalar da
