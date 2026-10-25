@@ -200,6 +200,8 @@
             var hasValue = Boolean(select.value);
 
             label.textContent = selectedOption ? selectedOption.textContent : "";
+            // Dar sahədə yazı «…» ilə kəsiləndə tam mətn ipucunda görünsün (məs. uzun korpus adı).
+            label.title = label.textContent;
             toggle.classList.toggle("is-placeholder", !hasValue);
             toggle.classList.toggle("is-disabled", select.disabled);
             toggle.disabled = select.disabled;
@@ -260,6 +262,15 @@
                 var optionLabel = document.createElement("span");
                 optionLabel.className = "bootstrap-single-select__option-label";
                 optionLabel.textContent = option.textContent;
+                // İkinci (sönük) sətir: `<option data-subtext="…">` — məs. jurnal mövzusunun dərs növləri
+                // və «✓ keçirilib · tarix» (2026-10-25). Düymənin yazısı (toggle) yalnız əsas mətni göstərir.
+                var subtext = option.getAttribute("data-subtext");
+                if (subtext) {
+                    var optionSub = document.createElement("span");
+                    optionSub.className = "bootstrap-single-select__option-sub";
+                    optionSub.textContent = subtext;
+                    optionLabel.appendChild(optionSub);
+                }
                 optionButton.appendChild(optionLabel);
 
                 var optionCheck = document.createElement("span");

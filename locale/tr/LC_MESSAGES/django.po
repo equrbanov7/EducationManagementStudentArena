@@ -107537,3 +107537,15 @@ msgstr "Konuların işlenmesi (deftere göre)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Müfredat belgesi (sillabus)"
+
+msgctxt "registrar.journal_topics"
+msgid "növbəti mövzu"
+msgstr "sıradaki konu"
+
+msgctxt "registrar.journal_topics"
+msgid "Mövzu adı ilə axtar…"
+msgstr "Konu adına göre ara…"
+
+msgctxt "registrar.journal_topics"
+msgid "Uyğun mövzu tapılmadı"
+msgstr "Eşleşen konu bulunamadı"

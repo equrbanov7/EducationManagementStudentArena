@@ -1,0 +1,84 @@
+/* «Yeni dərs / Dərsi redaktə et» modalı — sahə düzülüşü və mövzu seçicisi (sahib 2026-10-25).
+ *
+ * 1) Korpus / Otaq (və Dərs tipi / Saat) cütü: `1fr 1fr` grid izləri `min-width: auto` ilə məzmuna görə
+ *    böyüyürdü — uzun korpus adı seçiləndə sol sütun genişlənir, sağdakı otaq seçicisi sıxılıb modalın
+ *    sağ kənarından çıxırdı. İzlər `minmax(0, 1fr)`, sahə və seçici `min-width: 0`, düymə yazısı bir
+ *    sətirdə «…» ilə kəsilir (tam ad title/menyuda görünür). Dar ekranda (≤ 480px) cüt alt-alta düşür.
+ * 2) Mövzu seçicisi: başlıq təmiz qalır, dərs növləri + «✓ keçirilib 04.10» / «planlaşdırılıb» /
+ *    «növbəti mövzu» ikinci sönük sətirdədir (`<option data-subtext>`, bootstrap_select.js); keçirilmiş
+ *    mövzular yaşıl, növbəti keçiriləcək mövzu mavi fonla vurğulanır.
+ */
+
+.jd-modal .jd2-field-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.jd-modal .jd2-field,
+.jd-modal .jd2-field .bootstrap-single-select,
+.jd-modal .jd2-field .bootstrap-single-select__dropdown {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.jd-modal .jd2-field .bootstrap-single-select__toggle {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.jd-modal .jd2-field .bootstrap-single-select__label-text {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.jd-modal .jd2-field .bootstrap-single-select__caret {
+    flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+    .jd-modal .jd2-field-pair {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+    }
+}
+
+/* ── Mövzu seçicisi ─────────────────────────────────────────────────────── */
+.bootstrap-single-select__option.jd-topic-covered .bootstrap-single-select__option-label {
+    color: var(--ems-text, #1f2937);
+    font-weight: 600;
+}
+
+.bootstrap-single-select__option.jd-topic-covered .bootstrap-single-select__option-sub {
+    color: var(--ems-success-700, #15803d);
+    font-weight: 700;
+}
+
+.bootstrap-single-select__option.jd-topic-planned .bootstrap-single-select__option-sub {
+    color: var(--ems-primary-700, #1d4ed8);
+}
+
+.bootstrap-single-select__option.jd-topic-next {
+    background: var(--ems-primary-50, #eff6ff);
+    box-shadow: inset 3px 0 0 var(--ems-primary-500, #3b82f6);
+}
+
+.bootstrap-single-select__option.jd-topic-next .bootstrap-single-select__option-label {
+    color: var(--ems-primary-800, #1e40af);
+    font-weight: 700;
+}
+
+.bootstrap-single-select__option.jd-topic-next .bootstrap-single-select__option-sub {
+    color: var(--ems-primary-700, #1d4ed8);
+    font-weight: 700;
+}
+
+option.jd-topic-covered {
+    color: var(--ems-success-700, #15803d);
+}
+
+/* Plan seçimi ilə sərbəst mətn qutusu bir blok kimi oxunsun. */
+.jd-modal [data-jd-lesson-topic-custom] {
+    font-weight: 500;
+}

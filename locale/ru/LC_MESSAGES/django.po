@@ -108323,3 +108323,15 @@ msgstr "Прохождение тем (по журналу)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Силлабус"
+
+msgctxt "registrar.journal_topics"
+msgid "növbəti mövzu"
+msgstr "следующая тема"
+
+msgctxt "registrar.journal_topics"
+msgid "Mövzu adı ilə axtar…"
+msgstr "Поиск по названию темы…"
+
+msgctxt "registrar.journal_topics"
+msgid "Uyğun mövzu tapılmadı"
+msgstr "Подходящая тема не найдена"

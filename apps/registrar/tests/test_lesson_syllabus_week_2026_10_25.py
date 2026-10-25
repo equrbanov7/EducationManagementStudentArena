@@ -321,6 +321,42 @@ class LessonSyllabusWeekTest(TestCase):
         self.assertContains(response, 'name="lesson_topic_custom"')
         self.assertContains(response, 'data-week="4"')
         self.assertContains(response, "registrar/js/journal_lesson_topic.js")
+        self.assertContains(response, "registrar/css/journal_lesson_modal.css")
+
+    def test_modal_topic_options_are_clean_titles_with_status_subtext(self):
+        """Sahib 2026-10-25 (2-ci dalğa): başlıq təmiz, növlər + «✓ keçirilib tarix» / «növbəti mövzu» alt sətirdə."""
+        held = self._lesson(topic="", week=1, days_ago=5)
+        response = self._client(self.teacher).get(reverse("registrar:journal_detail", args=[self.offering.id]))
+        html = response.content.decode()
+        stamp = held.date.strftime("%d.%m")
+        self.assertRegex(
+            html,
+            r'<option value="Giriş və məqsədlər"[^>]*data-subtext="mühazirə · ✓ keçirilib '
+            + stamp
+            + r'"[^>]*class="jd-topic-covered">Giriş və məqsədlər</option>',
+        )
+        self.assertRegex(
+            html,
+            r'<option value="Massivlər"[^>]*data-subtext="mühazirə, seminar · növbəti mövzu"[^>]*'
+            r'class="jd-topic-next">Massivlər</option>',
+        )
+        self.assertEqual(html.count('class="jd-topic-next"'), 1)
+
+    def test_decorate_marks_only_the_first_open_topic_as_next(self):
+        today = self.today
+        rows = journal_topics.decorate_topic_choices(
+            [
+                {"title": "A", "kinds": ["lecture"], "covered": True, "date": today},
+                {"title": "B", "kinds": [], "covered": False, "planned": True, "date": today},
+                {"title": "C", "kinds": ["lab"], "covered": False},
+                {"title": "D", "kinds": ["lab"], "covered": False},
+            ]
+        )
+        self.assertEqual([row["next"] for row in rows], [False, False, True, False])
+        self.assertEqual(rows[0]["subtext"], f"mühazirə · ✓ keçirilib {today:%d.%m}")
+        self.assertEqual(rows[1]["subtext"], f"planlaşdırılıb {today:%d.%m}")
+        self.assertEqual(rows[2]["subtext"], "laboratoriya · növbəti mövzu")
+        self.assertEqual(rows[3]["subtext"], "laboratoriya")
 
     # ── backfill əmri ────────────────────────────────────────────────────────
     def _run(self, *args):

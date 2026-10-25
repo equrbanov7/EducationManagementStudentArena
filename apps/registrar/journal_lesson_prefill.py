@@ -231,16 +231,18 @@ def topics_covered_by(rows, lessons) -> list:
             upcoming[topic] = lesson.date
     # «keçirilib» = mövzunun HƏR HANSI dərsi bu gün və ya əvvəl; «planlaşdırılıb» = keçirilməyib, amma gələcək dərs var
     # (QA-1 F13; ``journal_extras.calendar_plan`` ilə eyni qayda). Mühazirəsi keçilmiş, seminarı gələcəkdə olan mövzu keçirilib.
-    return [
-        {
-            **row,
-            "covered": row["title"] in held,
-            "planned": row["title"] not in held and row["title"] in upcoming,
-            "date": held.get(row["title"]) or upcoming.get(row["title"]),
-            "covered_kinds": sorted(kinds.get(row["title"], ())),
-        }
-        for row in rows
-    ]
+    return journal_topics.decorate_topic_choices(
+        [
+            {
+                **row,
+                "covered": row["title"] in held,
+                "planned": row["title"] not in held and row["title"] in upcoming,
+                "date": held.get(row["title"]) or upcoming.get(row["title"]),
+                "covered_kinds": sorted(kinds.get(row["title"], ())),
+            }
+            for row in rows
+        ]
+    )
 
 
 def posted_slot(offering, data, *, date, kind):

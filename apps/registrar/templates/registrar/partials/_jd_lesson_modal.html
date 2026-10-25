@@ -75,9 +75,11 @@ varsa dərs tipi kilidlidir.
                     <span class="jd2-field-label">{% trans "MÖVZU — TƏQVİM PLANINDAN" context "registrar.journal" %}</span>
                     {% if topic_choices_meta %}
                     <div class="bootstrap-single-select bootstrap-single-select--ems">
-                        <select name="lesson_topic" class="ems-select bootstrap-single-select__native" data-jd-lesson-topic data-bootstrap-select>
+                        <select name="lesson_topic" class="ems-select bootstrap-single-select__native" data-jd-lesson-topic data-bootstrap-select{% if topic_choices_meta|length > 8 %}
+                                data-live-search="true" data-live-search-placeholder="{% trans 'Mövzu adı ilə axtar…' context 'registrar.journal_topics' %}" data-live-search-empty="{% trans 'Uyğun mövzu tapılmadı' context 'registrar.journal_topics' %}"{% endif %}>
                             <option value="">{% trans "Mövzunu seçin…" context "registrar.journal" %}</option>
-                            {% for t in topic_choices_meta %}<option value="{{ t.title }}" data-kinds="{{ t.kinds_attr }}"{% if t.week %} data-week="{{ t.week }}"{% endif %}{% if t.covered %} class="jd-topic-covered"{% endif %}>{{ t.title }}{% if t.kinds %} · {% for k in t.kinds %}{% if k == 'lecture' %}{% trans "mühazirə" context "registrar.journal" %}{% elif k == 'seminar' %}{% trans "seminar" context "registrar.journal" %}{% else %}{% trans "laboratoriya" context "registrar.journal" %}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}{% if t.covered %} — ✓ {% trans "keçirilib" context "registrar.journal" %}{% if t.date %} ({{ t.date|date:"d.m" }}){% endif %}{% elif t.planned %} — {% trans "planlaşdırılıb" context "registrar.journal" %}{% if t.date %} ({{ t.date|date:"d.m" }}){% endif %}{% endif %}</option>{% endfor %}
+                            {% for t in topic_choices_meta %}<option value="{{ t.title }}" data-kinds="{{ t.kinds_attr }}"{% if t.week %} data-week="{{ t.week }}"{% endif %}{% if t.subtext %} data-subtext="{{ t.subtext }}"{% endif %}{% if t.covered %} class="jd-topic-covered"{% elif t.planned %} class="jd-topic-planned"{% elif t.next %} class="jd-topic-next"{% endif %}>{{ t.title }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     {% comment %}Sahib 2026-10-25: plandan seçilən mövzu sillabusun həftəlik SƏTRİNƏ bağlanır
