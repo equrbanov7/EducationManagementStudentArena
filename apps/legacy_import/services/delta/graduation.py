@@ -29,6 +29,10 @@ prefiksdədir (``SYNC_REASON``) — sinxronun öz izi «əl ilə dəyişiklik» 
 (``registrar.movements.create_movement(kind=graduation)``): status ``graduated``, açıq qeydiyyatlar dondurulur, giriş
 bağlanır (başqa aktiv qeydi olan istisna). Geri qaytarma — hər tələbə üçün «Bərpa» əmri. Bildiriş GETMİR.
 İdempotentdir: ikinci qaçışda məzunlar artıq ``graduated`` — 0 yazı.
+
+Sahibin 2026-10-25 ikinci qərarı (paketin ``snapshot``-unda opt-in bayraqlar, ``graduation_owner.py``):
+``graduate_year_unknown`` (qəbul ili bilinməyənlər → məzun), ``leave_unfinished`` (bitirməyib, jurnalda yoxdur →
+akademik məzuniyyət ``AM-SINX-2026``), ``deactivate_emptied_groups`` (boşalan qrupların arxivlənməsi).
 """
 
 from __future__ import annotations
@@ -40,6 +44,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import OuterRef, Q, Subquery
 
+from .graduation_owner import YEAR_UNKNOWN_REASON, OwnerDecisions
 from .registry_sync import SYNC_REASON, RegistrySync, _junk
 from .resolve import person_key, text
 
@@ -198,14 +203,27 @@ class GraduationSync:
         touched = RegistrySync(self.run)._manually_changed({record.pk for record in records})
         self.run.count("graduation.info.cutoff_year", self.cutoff_year)
         self.run.count("graduation.info.history_start_year", self.history_start)
+        owner = OwnerDecisions(self)
         for record in records:
             kind = self._decide(record, in_journal, expelled, fins, names, touched)
+            action = owner.action_for(kind)
+            if action and _legacy_unresolved_match(record, fins, names):
+                kind, action = "review.legacy_unresolved_match", ""
+            if action == "graduate":
+                if self._graduate(record, reason=YEAR_UNKNOWN_REASON, names_kind="graduation_graduated_year_unknown"):
+                    self.run.count("graduation.graduated_year_unknown")
+                    owner.graduated(record)
+                continue
+            if action == "leave":
+                owner.leave(record, kind)
+                continue
             if kind != "graduate":
                 self.run.count(f"graduation.{kind}")
                 if kind.startswith("review."):
                     self.run.names(f"graduation_{kind}", _person(record), self._label(record))
                 continue
             self._graduate(record)
+        owner.finish()
 
     def _decide(self, record, in_journal, expelled, fins, names, touched) -> str:
         if record.student_id in in_journal:
@@ -228,13 +246,11 @@ class GraduationSync:
         if last is not None and last < final_year:
             return "review.left_before_final_year"
         # Köhnə sistemin cari jurnalında tutuşdurula bilməyən sətrin FİN-i / adı bu adamla eynidir — o ola bilər.
-        profile = getattr(record.student, "profile", None)
-        fin = str(getattr(profile, "fin", "") or "").strip().upper()
-        if (fin and fin in fins) or _name_key(record.student.last_name, record.student.first_name) in names:
+        if _legacy_unresolved_match(record, fins, names):
             return "review.legacy_unresolved_match"
         return "graduate"
 
-    def _graduate(self, record) -> None:
+    def _graduate(self, record, *, reason: str = REASON, names_kind: str = "graduation_graduated") -> bool:
         from apps.registrar.public import movements
 
         try:
@@ -244,18 +260,26 @@ class GraduationSync:
                     kind=movements.MovementKind.GRADUATION,
                     order_number=ORDER_NUMBER,
                     order_date=ORDER_DATE,
-                    reason=REASON,
+                    reason=reason,
                     actor=self.run.actor,
                 )
         except (movements.MovementError, ValidationError) as error:
             code = getattr(error, "code", "") or error.__class__.__name__
             self.run.count("graduation.failed")
             self.run.names("graduation_failed", _person(record), f"{self._label(record)} · {code}")
-            return
+            return False
         self.run.count("graduation.graduated")
         self.run.count(f"graduation.graduated.{record.program.degree_level}.year_{record.admission_year}")
         self.run.count("written.student_movements")
-        self.run.names("graduation_graduated", _person(record), self._label(record))
+        self.run.names(names_kind, _person(record), self._label(record))
+        return True
+
+    # ``OwnerDecisions`` (``graduation_owner``) üçün açıq adlar.
+    def person(self, record) -> str:
+        return _person(record)
+
+    def label(self, record) -> str:
+        return self._label(record)
 
     def _label(self, record) -> str:
         group = getattr(record.group, "name", "") or "—"
@@ -272,6 +296,14 @@ def _year_start(academic_year):
 
     head = str(academic_year or "")[:4]
     return int(head) if head.isdigit() else None
+
+
+def _legacy_unresolved_match(record, fins, names) -> bool:
+    """Köhnə sistemin cari jurnalında tutuşdurula bilməyən sətrin FİN-i / adı bu adamla eynidir — o ola bilər."""
+
+    profile = getattr(record.student, "profile", None)
+    fin = str(getattr(profile, "fin", "") or "").strip().upper()
+    return bool(fin and fin in fins) or _name_key(record.student.last_name, record.student.first_name) in names
 
 
 def _name_key(last_name, first_name) -> str:
