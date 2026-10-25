@@ -205,6 +205,26 @@
         );
     }
 
+    // Redaktə formasında telefon: server şablonu (`{% phone_field %}`) klonlanır, ölkə + yerli nömrə təyin olunur.
+    function mountPhone(bodyEl, user) {
+        var slot = bodyEl.querySelector("[data-rim-phone-slot]");
+        var tpl = document.querySelector("template[data-rim-phone-template]");
+        if (!slot || !tpl) {
+            return;
+        }
+        slot.appendChild(tpl.content.cloneNode(true));
+        var box = slot.querySelector("[data-phone-field]");
+        if (!box) {
+            return;
+        }
+        if (window.EMSBootstrapSelect) {
+            window.EMSBootstrapSelect.init(slot);
+        }
+        if (window.EMSPhoneField) {
+            window.EMSPhoneField.set(box, user.phone_country, user.phone_national != null ? user.phone_national : user.phone);
+        }
+    }
+
     function editForm(user) {
         var fields = [
             ["first_name", user.first_name],
@@ -224,6 +244,14 @@
             fields
                 .map(function (pair) {
                     var name = pair[0];
+                    if (name === "phone") {
+                        // Telefon: ölkə seçicisi + yerli nömrə — xana detal çəkildikdən sonra mountPhone ilə qurulur.
+                        return (
+                            '<div><label class="rim-field-label" for="rim-edit-phone">' +
+                            esc(ns.t(name)) +
+                            '</label><div data-rim-phone-slot></div></div>'
+                        );
+                    }
                     return (
                         '<div><label class="rim-field-label" for="rim-edit-' +
                         esc(name) +
@@ -329,5 +357,6 @@
             html += editForm(user);
         }
         bodyEl.innerHTML = html;
+        mountPhone(bodyEl, user);
     };
 })(window, document);

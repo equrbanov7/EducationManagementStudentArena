@@ -21,6 +21,7 @@ from django.core.validators import validate_email
 from django.db import transaction
 
 from apps.audit.public import log_action
+from core import phone as phone_lib
 from core.constants import AuditAction
 
 from .policy import (
@@ -71,7 +72,6 @@ _MAX_LENGTHS = {
 #: FİN — kanonik forma `core.validators`-dadır (7 simvol, A-Z0-9, NULL-unique).
 #: Buradakı naxış yalnız erkən istifadəçi rəyi üçündür; yekun yoxlama modeldədir.
 _FIN_PATTERN = re.compile(r"^[A-Za-z0-9]{7}$")
-_PHONE_PATTERN = re.compile(r"^[0-9+()\-\s]{5,20}$")
 
 
 def _clean_value(field_name: str, raw_value) -> str:
@@ -88,9 +88,18 @@ def _validate(field_name: str, value: str) -> str:
         return value.lower()
     if field_name == "fin" and value and not _FIN_PATTERN.match(value):
         raise RimAccessError("invalid_fin", "FİN 7 simvol olmalıdır (yalnız hərf və rəqəm).", status=400)
-    if field_name == "phone" and value and not _PHONE_PATTERN.match(value):
-        raise RimAccessError("invalid_phone", "Telefon nömrəsi düzgün deyil.", status=400)
     return value
+
+
+def _resolve_phone(data, profile) -> str:
+    """Telefon: ``phone`` (yerli nömrə) + ``phone_country`` (ISO-2) → E.164 (``core.phone``, sahib 2026-10-25).
+
+    Forma dəyişməyibsə köhnə (oxunmayan) dəyər toxunulmaz qalır — başqa sahənin redaktəsini bloklamasın.
+    """
+    try:
+        return phone_lib.resolve_phone_update(data, "phone", getattr(profile, "phone", ""))
+    except ValidationError as exc:
+        raise RimAccessError("invalid_phone", exc.messages[0], status=400) from exc
 
 
 def _assert_email_available(email: str, target_user) -> None:
@@ -179,7 +188,10 @@ def update_user_fields(actor: RimActor, target_user, *, data, request=None, reas
     for field_name in EDITABLE_FIELDS:
         if field_name not in data:
             continue
-        new_value = _validate(field_name, _clean_value(field_name, data[field_name]))
+        if field_name == "phone":
+            new_value = _resolve_phone(data, profile)
+        else:
+            new_value = _validate(field_name, _clean_value(field_name, data[field_name]))
         owner = target_user if field_name in USER_FIELDS else profile
         old_value = str(getattr(owner, field_name, "") or "")
         if field_name == "email":

@@ -27,6 +27,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.utils.translation import pgettext
 
+from core import phone as phone_lib
 from core.constants import OrgUnitType
 from core.validators import validate_fin
 
@@ -53,6 +54,7 @@ COMMON_FIELDS = (
     "gender",
     "email",
     "phone",
+    "phone_country",
     "code",
     # Sahib istəyi (2026-09-08): ünvan hər iki növdə; sonra lazım olan datalar.
     "address",
@@ -76,8 +78,6 @@ TEACHER_FIELDS = ("unit", "title", "academic_degree", "academic_title")
 
 #: Müəllim üzvlüyünün scope bölməsi kimi qəbul edilən tiplər.
 CHAIR_UNIT_TYPES = (OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT)
-
-_PHONE_MAX = 20
 
 
 @dataclass
@@ -156,6 +156,13 @@ def _validate_identity(draft: AccountDraft, data: dict, context: IntakeContext) 
                 pgettext(_CTX, "Ən çox %(n)s simvol ola bilər.") % {"n": MAX_NAME_LENGTH},
             )
 
+    # Telefon ixtiyaridir; yazılıbsa seçilmiş ölkəyə görə yoxlanıb E.164-ə gətirilir (``core.phone``).
+    phone = ""
+    try:
+        phone = phone_lib.clean_phone_field(data, "phone")
+    except ValidationError as exc:
+        _fail(draft, "phone", exc.messages[0])
+
     draft.values.update(
         {
             # FİN unikal + nullable sahədir: boş sətir iki FİN-siz hesabı toqquşdurardı.
@@ -163,7 +170,7 @@ def _validate_identity(draft: AccountDraft, data: dict, context: IntakeContext) 
             "first_name": first_name,
             "last_name": last_name,
             "patronymic": patronymic,
-            "phone": normalize_text(data.get("phone"))[:_PHONE_MAX],
+            "phone": phone,
         }
     )
 

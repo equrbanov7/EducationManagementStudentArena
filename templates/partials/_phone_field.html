@@ -1,0 +1,24 @@
+{% load i18n %}{% comment %}
+Telefon sahəsi (sahib 2026-10-25): ölkə seçicisi (layihənin axtarışlı seçici komponenti, native <select> YOX) +
+yerli nömrə xanası. Çağırış: apps/accounts/templatetags/phone_tags.py (`{% phone_field %}`).
+Davranış: static/js/phone_field.js (ölkə dəyişəndə placeholder, «+kod» yapışdırılanda ölkə avtomatik seçilir).
+{% endcomment %}<div class="phone-field{% if css_class %} {{ css_class }}{% endif %}" data-phone-field>
+    <span class="phone-field__country bootstrap-single-select bootstrap-single-select--ems" data-menu-min-width="300">
+        <select name="{{ name }}_country" id="{{ field_id }}-country"
+                class="form-select bootstrap-single-select__native"
+                data-bootstrap-select data-live-search="true" data-phone-country
+                data-live-search-placeholder="{% trans 'Ölkə və ya kod axtar…' context 'core.phone' %}"
+                data-live-search-empty="{% trans 'Uyğun ölkə tapılmadı' context 'core.phone' %}"
+                aria-label="{% trans 'Ölkə və zəng kodu' context 'core.phone' %}"{% if data_attr %} {{ data_attr }}="{{ name }}_country"{% endif %}>
+            {% for option in options %}<option value="{{ option.iso }}" data-dial="{{ option.dial }}" data-example="{{ option.example }}" data-search="{{ option.search }}"{% if option.main %} data-main{% endif %} data-toggle-label="{{ option.flag }} +{{ option.dial }}"{% if option.iso == iso %} selected{% endif %}>{{ option.flag }} {{ option.name }} +{{ option.dial }}</option>
+            {% endfor %}
+        </select>
+    </span>
+    <input type="tel" id="{{ field_id }}" name="{{ name }}" value="{{ national }}"
+           class="{{ input_class }}{% if invalid %} is-invalid{% endif %}" placeholder="{{ placeholder }}"
+           maxlength="24" inputmode="tel" autocomplete="tel-national" autocapitalize="none" autocorrect="off" spellcheck="false"
+           data-phone-input{% if data_attr %} {{ data_attr }}="{{ name }}"{% endif %}
+           {% if required %}required{% endif %}{% if autofocus %} autofocus{% endif %}
+           {% if describedby %}aria-describedby="{{ describedby }}"{% endif %}{% if invalid %} aria-invalid="true"{% endif %}
+           {% if aria_label %}aria-label="{{ aria_label }}"{% endif %}>
+</div>

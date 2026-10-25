@@ -109155,3 +109155,34 @@ msgstr "Behandlung der Themen (laut Journal)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Syllabus"
+
+msgctxt "core.phone"
+msgid "Telefon nömrəsini yazın."
+msgstr "Geben Sie die Telefonnummer ein."
+
+#, python-format
+msgctxt "core.phone"
+msgid "Telefon nömrəsi düzgün deyil (məs. %(example)s)."
+msgstr "Die Telefonnummer ist ungültig (z. B. %(example)s)."
+
+#, python-format
+msgctxt "core.phone"
+msgid "Nömrə çox qısadır (məs. %(example)s)."
+msgstr "Die Nummer ist zu kurz (z. B. %(example)s)."
+
+#, python-format
+msgctxt "core.phone"
+msgid "Nömrə çox uzundur (məs. %(example)s)."
+msgstr "Die Nummer ist zu lang (z. B. %(example)s)."
+
+msgctxt "core.phone"
+msgid "Ölkə və ya kod axtar…"
+msgstr "Land oder Vorwahl suchen…"
+
+msgctxt "core.phone"
+msgid "Uyğun ölkə tapılmadı"
+msgstr "Kein passendes Land gefunden"
+
+msgctxt "core.phone"
+msgid "Ölkə və zəng kodu"
+msgstr "Land und Vorwahl"

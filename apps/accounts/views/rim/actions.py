@@ -167,7 +167,8 @@ def rim_action(request):
             extra["restore_notices"] = list(result.notices)
             message = " ".join(("Hesab bərpa edildi.", *result.notices))
         else:  # action == "edit"
-            fields = {name: payload[name] for name in EDITABLE_FIELDS if name in payload}
+            # ``phone_country`` — telefon xanasının ölkə seçimi (``core.phone``); ayrıca sahə kimi saxlanmır.
+            fields = {name: payload[name] for name in (*EDITABLE_FIELDS, "phone_country") if name in payload}
             changes = update_user_fields(actor, target, data=fields, request=request, reason=reason)
             extra["changed_fields"] = sorted(changes)
             message = "Məlumatlar yeniləndi." if changes else "Dəyişiklik yoxdur."

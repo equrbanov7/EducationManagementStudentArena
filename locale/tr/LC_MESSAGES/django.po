@@ -107537,3 +107537,34 @@ msgstr "Konuların işlenmesi (deftere göre)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Müfredat belgesi (sillabus)"
+
+msgctxt "core.phone"
+msgid "Telefon nömrəsini yazın."
+msgstr "Telefon numarasını yazın."
+
+#, python-format
+msgctxt "core.phone"
+msgid "Telefon nömrəsi düzgün deyil (məs. %(example)s)."
+msgstr "Telefon numarası geçerli değil (örn. %(example)s)."
+
+#, python-format
+msgctxt "core.phone"
+msgid "Nömrə çox qısadır (məs. %(example)s)."
+msgstr "Numara çok kısa (örn. %(example)s)."
+
+#, python-format
+msgctxt "core.phone"
+msgid "Nömrə çox uzundur (məs. %(example)s)."
+msgstr "Numara çok uzun (örn. %(example)s)."
+
+msgctxt "core.phone"
+msgid "Ölkə və ya kod axtar…"
+msgstr "Ülke veya kod ara…"
+
+msgctxt "core.phone"
+msgid "Uyğun ölkə tapılmadı"
+msgstr "Eşleşen ülke bulunamadı"
+
+msgctxt "core.phone"
+msgid "Ölkə və zəng kodu"
+msgstr "Ülke ve arama kodu"

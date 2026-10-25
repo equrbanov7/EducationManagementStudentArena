@@ -17,6 +17,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.audit.public import log_action
+from core import phone as phone_lib
 from core.constants import AuditAction
 from core.helpers import _safe_same_origin_redirect_path
 
@@ -73,12 +74,11 @@ def complete_profile_view(request):
         return _leave(request)
 
     errors, submitted = {}, {}
-    operator = policy.AZ_MOBILE_OPERATORS[0]
+    phone_country = ""
     if request.method == "POST":
         submitted = {spec.key: (request.POST.get(spec.key) or "").strip()[: spec.max_length] for spec in missing}
-        posted_operator = (request.POST.get(policy.PHONE_OPERATOR_FIELD) or "").strip()
-        if posted_operator in policy.AZ_MOBILE_OPERATORS or posted_operator == policy.OPERATOR_OTHER:
-            operator = posted_operator
+        # Xəta ilə yenidən göstərəndə istifadəçinin seçdiyi ölkə saxlanır (boşdursa dəyər nömrədən tanınır).
+        phone_country = (request.POST.get(phone_lib.country_field_name(policy.FIELD_PHONE)) or "").strip()
         result = complete_profile(request, request.POST)
         if result.ok:
             messages.success(request, pgettext(_CTX, "Məlumatlarınız saxlanıldı. Təşəkkür edirik!"))
@@ -104,8 +104,6 @@ def complete_profile_view(request):
             "user_display": user.get_full_name() or user.username,
             "has_errors": bool(errors),
             "can_skip": policy.skip_allowed(),
-            "phone_operators": policy.AZ_MOBILE_OPERATORS,
-            "phone_operator": operator,
-            "phone_operator_other": policy.OPERATOR_OTHER,
+            "phone_country": phone_country,
         },
     )

@@ -4,7 +4,8 @@ Validation rules
 ----------------
 * Name: 2–120 chars, no URLs (common spam pattern).
 * Email: standard EmailField + length cap.
-* Phone: optional, max 32 chars, only digits / +/-/space/parentheses.
+* Phone: optional; country picked via ``phone_country`` (default AZ), validated per country and stored as E.164
+  (``core.phone``).
 * Subject: must be one of the model's SUBJECT_CHOICES.
 * Message: 10–5000 chars, no more than 3 URLs (anti-spam heuristic).
 * Honeypot: a hidden `website` field that real users won't fill in;
@@ -16,12 +17,14 @@ from __future__ import annotations
 import re
 
 from django import forms
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils.translation import gettext_lazy as _
+
+from core import phone as phone_lib
 
 from .models import ContactMessage
 
 _URL_RE = re.compile(r"https?://|www\.", re.IGNORECASE)
-_PHONE_RE = re.compile(r"^[0-9+\-\s()]{6,32}$")
 
 
 class ContactForm(forms.ModelForm):
@@ -62,9 +65,8 @@ class ContactForm(forms.ModelForm):
             "phone": forms.TextInput(
                 attrs={
                     "class": "ems-contact__input",
-                    "placeholder": "+994 ...",
-                    "autocomplete": "tel",
-                    "maxlength": "32",
+                    "autocomplete": "tel-national",
+                    "maxlength": "24",
                 }
             ),
             "subject": forms.Select(attrs={"class": "ems-contact__input ems-contact__select"}),
@@ -90,12 +92,14 @@ class ContactForm(forms.ModelForm):
         return name
 
     def clean_phone(self) -> str:
+        # Sahib 2026-10-25: ölkə seçilir (``phone_country``, defolt Azərbaycan); nömrə ölkəyə görə yoxlanıb E.164 olur.
         phone = (self.cleaned_data.get("phone") or "").strip()
-        if phone and not _PHONE_RE.match(phone):
-            raise forms.ValidationError(
-                _("Telefon nömrəsi yalnız rəqəm və +, -, (, ) simvollarından ibarət ola bilər.")
-            )
-        return phone
+        if not phone:
+            return ""
+        try:
+            return phone_lib.clean_phone(phone, self.data.get(phone_lib.country_field_name("phone")))
+        except DjangoValidationError as exc:
+            raise forms.ValidationError(exc.messages[0]) from exc
 
     def clean_message(self) -> str:
         message = (self.cleaned_data.get("message") or "").strip()

@@ -51,6 +51,7 @@
     yüklənməlidir (bax static/css/navbar_brand.css).{% endcomment %}
     <link rel="stylesheet" href="{% static 'css/navbar_brand.css' %}?v=20261001-1">
     <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}?v=20260911-1">
+    <link rel="stylesheet" href="{% static 'css/phone_field.css' %}?v=20261025-2">
     <link rel="stylesheet" href="{% static 'css/ems_multi_select.css' %}?v=20261016-1">
     {% comment %}Axtarışlı seçici (EMSSearchableSelect) — VAHİD komponent üslubu;
     əvvəllər altı ayrı fayla kopyalanmışdı. Bax: static/css/searchable_select.css.{% endcomment %}
@@ -206,7 +207,9 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
     <script src="{% static 'js/debounced_search_forms.js' %}?v=20261014-searchux"></script>
     <script src="{% static 'js/search_controls.js' %}?v=20261014-searchux"></script>
     <script src="{% static 'js/ems_table.js' %}?v=20260926-search"></script>
-    <script src="{% static 'js/bootstrap_select.js' %}?v=20261017-lazy"></script>
+    <script src="{% static 'js/bootstrap_select.js' %}?v=20261025-phone2"></script>
+    {# Telefon sahəsi (ölkə seçicisi + yerli nömrə) — phone_field şablon teqi; delegə hadisələri, init lazım deyil. #}
+    <script src="{% static 'js/phone_field.js' %}?v=20261025-1"></script>
     {# EMSMultiSelect — `<select multiple data-ems-multi-select>` üçün stilli çoxseçim (axtarış, Hamısı/Təmizlə). #}
     <script src="{% static 'js/ems_multi_select.js' %}?v=20261016-1"></script>
     <script src="{% static 'js/search_field.js' %}?v=20261014-searchux"></script>

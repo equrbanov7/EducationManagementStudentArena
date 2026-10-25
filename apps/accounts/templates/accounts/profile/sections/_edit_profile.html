@@ -1,4 +1,4 @@
-{% load i18n static %}
+{% load i18n static phone_tags %}
 {% comment %}
 2026-08-15 redesign: rol-yönlü profil redaktəsi.
  * Təşkilat üzvündə akademik struktur (təşkilat/fakültə/kafedra/ixtisas/qrup)
@@ -65,9 +65,7 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
                 </div>
                 <div class="info-item">
                     <label class="info-label" for="phone">{% trans "phone" context "profile.edit" %}</label>
-                    <input type="tel" class="form-control" id="phone" name="phone"
-                           value="{{ profile.phone|default:'' }}" maxlength="20"
-                           placeholder="{% trans 'placeholder_phone' context 'profile.edit' %}">
+                    {% phone_field name="phone" value=profile.phone field_id="phone" input_class="form-control" %}
                     <div class="edit-profile-field-hint">
                         <i class="fas fa-lock"></i>
                         {% trans 'Nömrələr yalnız əməkdaş səviyyəli baxanlara görünür, tələbələrə yox.' context 'profile.edit_v2' %}
@@ -75,9 +73,7 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
                 </div>
                 <div class="info-item">
                     <label class="info-label" for="phone_secondary">{% trans 'Əlavə telefon' context 'profile.edit_v2' %}</label>
-                    <input type="tel" class="form-control" id="phone_secondary" name="phone_secondary"
-                           value="{{ profile.phone_secondary|default:'' }}" maxlength="20"
-                           placeholder="{% trans 'placeholder_phone' context 'profile.edit' %}">
+                    {% phone_field name="phone_secondary" value=profile.phone_secondary field_id="phone_secondary" input_class="form-control" %}
                 </div>
                 <div class="info-item">
                     <label class="info-label" for="location">{% trans "location" context "profile.edit" %}</label>

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static i18n %}
+{% load static i18n phone_tags %}
 
 {% block title %}{{ seo_title }}{% endblock %}
 
@@ -123,7 +123,7 @@
                                 <label for="{{ form.phone.id_for_label }}" class="ems-contact__label">
                                     {% trans "Telefon" %}
                                 </label>
-                                {{ form.phone }}
+                                {% phone_field name="phone" value=form.phone.value country=form.data.phone_country field_id=form.phone.id_for_label input_class="ems-contact__input" invalid=form.phone.errors %}
                                 {% if form.phone.errors %}<small class="ems-contact__error">{{ form.phone.errors.0 }}</small>{% endif %}
                             </div>
                             <div class="ems-contact__field">

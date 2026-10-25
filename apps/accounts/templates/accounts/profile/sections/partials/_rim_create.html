@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n phone_tags %}
 {% comment %}
 «Yeni hesab» — RİM mərkəzinin yaratma axını (tək-tək + toplu).
 
@@ -191,8 +191,7 @@ Django şablon mühərrikindən keçmir).
 
               <div class="ems-field">
                 <label class="ems-field__label" for="rimc-phone">{% trans "Telefon" context "profile.rim" %}</label>
-                <input class="ems-input" id="rimc-phone" type="tel" name="phone" maxlength="20"
-                       autocomplete="off" data-rimc-field="phone">
+                {% phone_field name="phone" value="" field_id="rimc-phone" input_class="ems-input" data_attr="data-rimc-field" %}
                 <p class="ems-msg ems-msg--error" data-rimc-error="phone" role="alert" hidden></p>
               </div>
               <div class="ems-field rimc-field--full">

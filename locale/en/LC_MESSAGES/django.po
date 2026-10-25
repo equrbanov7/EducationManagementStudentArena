@@ -108129,3 +108129,34 @@ msgstr "Topic coverage (from the journal)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Syllabus"
+
+msgctxt "core.phone"
+msgid "Telefon nömrəsini yazın."
+msgstr "Enter the phone number."
+
+#, python-format
+msgctxt "core.phone"
+msgid "Telefon nömrəsi düzgün deyil (məs. %(example)s)."
+msgstr "The phone number is not valid (e.g. %(example)s)."
+
+#, python-format
+msgctxt "core.phone"
+msgid "Nömrə çox qısadır (məs. %(example)s)."
+msgstr "The number is too short (e.g. %(example)s)."
+
+#, python-format
+msgctxt "core.phone"
+msgid "Nömrə çox uzundur (məs. %(example)s)."
+msgstr "The number is too long (e.g. %(example)s)."
+
+msgctxt "core.phone"
+msgid "Ölkə və ya kod axtar…"
+msgstr "Search country or code…"
+
+msgctxt "core.phone"
+msgid "Uyğun ölkə tapılmadı"
+msgstr "No matching country"
+
+msgctxt "core.phone"
+msgid "Ölkə və zəng kodu"
+msgstr "Country and dialling code"
