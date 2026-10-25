@@ -27,7 +27,13 @@ const LIST = fs.readFileSync(path.join(JS_DIR, "workload_distribution_list.js"),
 
 const HTML = `<!doctype html><html><body>
 <section data-profile-section-panel="workload-distribution">
-  <div class="wl" data-wl-root data-rows-url="/ders-yuku/setirler/" data-focus-row="">
+  <div class="wl" data-wl-root data-rows-url="/ders-yuku/setirler/" data-teachers-url="/ders-yuku/muellimler/" data-focus-row="">
+    <select data-wl-season><option value="">Hamısı</option><option value="fall">Payız</option></select>
+    <input type="search" data-wl-search>
+    <select data-wl-teacher-select><option value="">Hamısı</option></select>
+    <select data-wl-status><option value="">Hamısı</option><option value="vacant">v</option><option value="full">f</option><option value="hourly">h</option></select>
+    <select data-wl-activity><option value="">Hamısı</option><option value="lecture">l</option></select>
+    <button type="button" data-wl-reset-filters hidden>reset</button>
     <div data-wl-teacher-filter hidden>
       <b data-wl-teacher-filter-name></b>
       <button type="button" data-wl-teacher-clear>x</button>
@@ -93,13 +99,23 @@ function setup(options) {
         state,
         q: (sel) => q(sel),
         root: () => q("[data-wl-root]"),
-        filters: () => ({ chair: "c1", year: "2026/2027", season: options.season || "", q: options.search || "" }),
+        filters: () => ({
+            chair: "c1",
+            year: "2026/2027",
+            season: options.season !== undefined ? options.season : (q("[data-wl-season]") || {}).value || "",
+            q: options.search !== undefined ? options.search : (q("[data-wl-search]") || {}).value || "",
+        }),
         labels: () => ({}),
         loadRows: (arg) => loadCalls.push(arg),
     };
     win.eval(RENDER);
     win.eval(LIST);
-    return { win, q, handlers, fetched, loadCalls, observed, state };
+    const change = (selector, value) => {
+        const field = q(selector);
+        field.value = value;
+        handlers["change|" + selector](new win.Event("change"), field);
+    };
+    return { change, win, q, handlers, fetched, loadCalls, observed, state };
 }
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));

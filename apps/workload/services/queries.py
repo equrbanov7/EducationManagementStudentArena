@@ -17,6 +17,7 @@ from ..constants import (
 from ..models import TeacherAssignment, TeacherWorkloadProfile, TeachingTask, TeachingTaskRow
 from .assignments import balance_for_rows
 from .norms import norm_hours_for, norms_for
+from .row_filters import apply_row_filters
 
 # ⚠️ Etiketlər LAZY qalır (import anında `str()` dili dondururdu — QA-1 F3); mətnə çevirmə çağırış anındadır.
 _ACTIVITY_LABELS = {str(value): label for value, label in Activity.choices}
@@ -52,7 +53,7 @@ def _teacher_row_ids(task, teacher: str):
     return assignments.filter(teacher_id=teacher_pk).values("row_id")
 
 
-def task_rows(task, *, season: str = "", search: str = "", teacher: str = ""):
+def task_rows(task, *, season: str = "", search: str = "", teacher: str = "", status: str = "", activity: str = ""):
     queryset = (
         TeachingTaskRow.objects.filter(task=task)
         .select_related("subject", "specialty", "period", "intensive_offering")
@@ -64,6 +65,8 @@ def task_rows(task, *, season: str = "", search: str = "", teacher: str = ""):
         queryset = queryset.filter(season=season)
     if teacher:
         queryset = queryset.filter(pk__in=_teacher_row_ids(task, teacher))
+    # 2026-10-25: bölgü vəziyyəti (vakantlı / tam / qismən …) və fəaliyyət növü — `row_filters` (server tərəfi).
+    queryset = apply_row_filters(queryset, task, status=status, activity=activity)
     # Sahib 2026-10-23: «müəllimə görə də axtarmaq lazımdır» — fənn / qrup / müəllim (ad, soyad, istifadəçi adı).
     search_q = tolerant_q(
         search,
@@ -132,7 +135,16 @@ def serialize_rows_state(task, *, season: str = "", search: str = "") -> tuple[l
 
 
 def rows_page(
-    task, *, season: str = "", search: str = "", teacher: str = "", offset: int = 0, limit: int = 0, focus_row=None
+    task,
+    *,
+    season: str = "",
+    search: str = "",
+    teacher: str = "",
+    status: str = "",
+    activity: str = "",
+    offset: int = 0,
+    limit: int = 0,
+    focus_row=None,
 ) -> dict:
     """Tənbəl yükləmə (2026-10-25): süzgəcə uyğun sətirlərin ``offset`` / ``limit`` dilimi + cəmi say.
 
@@ -140,7 +152,7 @@ def rows_page(
     ``limit=0`` — sətir oxunmur (yalnız say). ``focus_row`` (ilk dilim) — «Redaktə et» keçidinin sətri dilimdən
     kənardadırsa, dilim ona qədər genişləndirilir ki, JS ona sürüşə bilsin.
     """
-    queryset = task_rows(task, season=season, search=search, teacher=teacher)
+    queryset = task_rows(task, season=season, search=search, teacher=teacher, status=status, activity=activity)
     total = queryset.count()
     offset = max(int(offset or 0), 0)
     limit = min(max(int(limit or 0), 0), MAX_PAGE_LIMIT)

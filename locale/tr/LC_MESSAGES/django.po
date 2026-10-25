@@ -108431,3 +108431,39 @@ msgstr "Test bildirimi"
 msgctxt "notifications.push"
 msgid "Push bildirişləri bu cihazda işləyir."
 msgstr "Anlık bildirimler bu cihazda çalışıyor."
+
+msgctxt "accounts.workload"
+msgid "Uyğun müəllim tapılmadı"
+msgstr "Uygun öğretmen bulunamadı"
+
+msgctxt "accounts.workload"
+msgid "Vəziyyət"
+msgstr "Durum"
+
+msgctxt "accounts.workload"
+msgid "Vakantı olan"
+msgstr "Boş saati olan"
+
+msgctxt "accounts.workload"
+msgid "Tam bölünmüş"
+msgstr "Tam dağıtılmış"
+
+msgctxt "accounts.workload"
+msgid "Qismən bölünmüş"
+msgstr "Kısmen dağıtılmış"
+
+msgctxt "accounts.workload"
+msgid "Heç bölünməmiş"
+msgstr "Hiç dağıtılmamış"
+
+msgctxt "accounts.workload"
+msgid "İntensiv"
+msgstr "Yoğun"
+
+msgctxt "accounts.workload"
+msgid "Filtrləri sıfırla"
+msgstr "Filtreleri sıfırla"
+
+msgctxt "accounts.workload"
+msgid "Süzgəcləri dəyişin və ya «Filtrləri sıfırla» düyməsinə basın."
+msgstr "Filtreleri değiştirin veya «Filtreleri sıfırla» düğmesine basın."

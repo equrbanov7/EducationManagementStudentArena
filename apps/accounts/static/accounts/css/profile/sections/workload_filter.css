@@ -165,3 +165,8 @@
     overflow-y: auto;
   }
 }
+
+/* `.wl-btn { display: inline-flex }` `hidden` atributunu əzirdi («Filtrləri sıfırla» süzgəc yoxkən də görünürdü). */
+.wl-btn[hidden] {
+  display: none;
+}

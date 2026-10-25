@@ -180,6 +180,8 @@ def _rows_paged(request, task, *, season: str, search: str) -> JsonResponse:
     """Tənbəl yükləmə (2026-10-25): ``limit`` / ``offset`` dilimi + ``teacher`` süzgəci.
 
     * ``teacher`` — sağ paneldəki müəllimin id-si və ya ``vacant``: yalnız ona bölgüsü olan sətirlər;
+    * ``status`` — bölgü vəziyyəti (``vacant`` / ``full`` / ``partial`` / ``unassigned`` / ``hourly`` /
+      ``intensive``), ``activity`` — fəaliyyət növü (``lecture`` / ``seminar`` / ``lab``); bax ``row_filters``;
     * ``panel`` — müəllim yük paneli YALNIZ ilk dilimdə (``offset=0``) gəlir, ``panel=0`` onu da söndürür;
     * ``readiness=1`` — təsdiq dialoqu üçün tapşırığın BÜTÜN sətirləri üzrə hazırlıq (dilimlə gəlmir);
     * ``focus`` — «Redaktə et» keçidinin sətri ilk dilimdə olsun.
@@ -191,6 +193,8 @@ def _rows_paged(request, task, *, season: str, search: str) -> JsonResponse:
         season=season,
         search=search,
         teacher=(request.GET.get("teacher") or "").strip(),
+        status=(request.GET.get("status") or "").strip(),
+        activity=(request.GET.get("activity") or "").strip(),
         offset=offset,
         limit=_DEFAULT_PAGE if limit is None else limit,
         focus_row=parse_uuid(request.GET.get("focus")),
