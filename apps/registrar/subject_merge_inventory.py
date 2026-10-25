@@ -56,6 +56,12 @@ RELATIONS: tuple[Relation, ...] = (
     Relation(
         "registrar.ExamChanceGrant", "subject", KEEP, pgettext_lazy(_CTX, "İmtahan şansı qeydləri (dəyişməz tarixçə)")
     ),
+    Relation(
+        "registrar.ExternalCreditRecognition",
+        "subject",
+        KEEP,
+        pgettext_lazy(_CTX, "Xarici nəticənin tanınması qeydləri (dəyişməz tarixçə)"),
+    ),
     Relation("syllabus.Syllabus", "subject", REPOINT, pgettext_lazy(_CTX, "Sillabuslar")),
     Relation("workload.TeachingTaskRow", "subject", REPOINT, pgettext_lazy(_CTX, "Tədris tapşırığı sətirləri")),
     Relation("exams.StudentGroup", "subjects", M2M, pgettext_lazy(_CTX, "İmtahan qrupları (əlaqə)")),

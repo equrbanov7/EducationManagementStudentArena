@@ -194,7 +194,12 @@ class ExtraFiltersAndSortTests(ResultsGroupFixture):
         response = self._get({"sort_by": "group", "sort_dir": "asc"})
         groups = [row["group"].name if row["group"] else "" for row in response.context["attempts_data"]]
         self.assertEqual(groups[-1], "")  # qrupsuz sonda (NULL)
-        self.assertEqual(groups[:3], ["234 K-1", "234 K-1", "234 K-1"])
+        # Qrup adlarının nisbi sırası DB collation-undan asılıdır («İ» vs «K»): yalnız eyni qrupun ardıcıl
+        # gəldiyini və qrupların say tərkibini yoxla.
+        named = [name for name in groups if name]
+        runs = [name for index, name in enumerate(named) if index == 0 or named[index - 1] != name]
+        self.assertEqual(len(runs), len(set(runs)), named)
+        self.assertEqual(named.count("234 K-1"), 3)
 
     def test_appeal_filter_and_badge(self):
         Appeal.objects.create(

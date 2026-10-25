@@ -108718,3 +108718,8 @@ msgstr "Absences, attendance and scores entered by a teacher freeze this many mi
 msgctxt "core.runtime_settings"
 msgid "Yazma pəncərəsi (defolt 7 gün): müəllim dərs tarixindən ən çox N gün sonra həmin tarixə dərs aça və boş xanaya q/b, i/e, bal yaza bilər; müddət bitəndə yazı bağlanır. Gələcək tarixə dərs açılmır. 0 — yalnız dərsin öz günü. RİM rəhbərinin rəsmi düzəliş yolu bu həddə tabe deyil."
 msgstr "Entry window (default 7 days): a teacher can open a class for a date up to N days after the class date and enter absences, attendance and scores into empty cells; after that, entry closes. Classes cannot be opened for future dates. 0 — only on the class day itself. The RİM head's official correction path is not subject to this limit."
+
+#: apps/registrar/subject_merge_inventory.py
+msgctxt "registrar.subject_merge"
+msgid "Xarici nəticənin tanınması qeydləri (dəyişməz tarixçə)"
+msgstr "External credit recognition records (immutable history)"

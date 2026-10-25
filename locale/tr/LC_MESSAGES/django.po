@@ -108126,3 +108126,8 @@ msgstr "Öğretim elemanının yazdığı devamsızlık, katılım ve puan İLK 
 msgctxt "core.runtime_settings"
 msgid "Yazma pəncərəsi (defolt 7 gün): müəllim dərs tarixindən ən çox N gün sonra həmin tarixə dərs aça və boş xanaya q/b, i/e, bal yaza bilər; müddət bitəndə yazı bağlanır. Gələcək tarixə dərs açılmır. 0 — yalnız dərsin öz günü. RİM rəhbərinin rəsmi düzəliş yolu bu həddə tabe deyil."
 msgstr "Yazma aralığı (varsayılan 7 gün): öğretim elemanı ders tarihinden en çok N gün sonra o tarihe ders açıp boş hücrelere devamsızlık, katılım, puan yazabilir; süre bitince yazma kapanır. Gelecek tarihe ders açılmaz. 0 — yalnız dersin kendi günü. RİM başkanının resmî düzeltme yolu bu sınıra tabi değildir."
+
+#: apps/registrar/subject_merge_inventory.py
+msgctxt "registrar.subject_merge"
+msgid "Xarici nəticənin tanınması qeydləri (dəyişməz tarixçə)"
+msgstr "Dış sonuç tanıma kayıtları (değiştirilemez geçmiş)"

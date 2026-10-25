@@ -109744,3 +109744,8 @@ msgstr "Von Lehrkräften eingetragene Fehlzeiten, Anwesenheiten und Punkte werde
 msgctxt "core.runtime_settings"
 msgid "Yazma pəncərəsi (defolt 7 gün): müəllim dərs tarixindən ən çox N gün sonra həmin tarixə dərs aça və boş xanaya q/b, i/e, bal yaza bilər; müddət bitəndə yazı bağlanır. Gələcək tarixə dərs açılmır. 0 — yalnız dərsin öz günü. RİM rəhbərinin rəsmi düzəliş yolu bu həddə tabe deyil."
 msgstr "Eintragungsfenster (Standard 7 Tage): Eine Lehrkraft kann bis zu N Tage nach dem Termin eine Lehrveranstaltung für dieses Datum anlegen und leere Zellen (Fehlzeit, Anwesenheit, Punkte) ausfüllen; danach ist die Eingabe geschlossen. Für zukünftige Daten werden keine Veranstaltungen angelegt. 0 — nur am Veranstaltungstag selbst. Der offizielle Korrekturweg der RİM-Leitung unterliegt dieser Grenze nicht."
+
+#: apps/registrar/subject_merge_inventory.py
+msgctxt "registrar.subject_merge"
+msgid "Xarici nəticənin tanınması qeydləri (dəyişməz tarixçə)"
+msgstr "Anerkennungen externer Leistungen (unveränderliche Historie)"

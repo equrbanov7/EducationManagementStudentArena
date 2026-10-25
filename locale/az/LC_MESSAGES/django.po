@@ -108228,3 +108228,8 @@ msgstr "Müəllimin yazdığı q/b, i/e və bal İLK yazılışdan bu qədər d�
 msgctxt "core.runtime_settings"
 msgid "Yazma pəncərəsi (defolt 7 gün): müəllim dərs tarixindən ən çox N gün sonra həmin tarixə dərs aça və boş xanaya q/b, i/e, bal yaza bilər; müddət bitəndə yazı bağlanır. Gələcək tarixə dərs açılmır. 0 — yalnız dərsin öz günü. RİM rəhbərinin rəsmi düzəliş yolu bu həddə tabe deyil."
 msgstr "Yazma pəncərəsi (defolt 7 gün): müəllim dərs tarixindən ən çox N gün sonra həmin tarixə dərs aça və boş xanaya q/b, i/e, bal yaza bilər; müddət bitəndə yazı bağlanır. Gələcək tarixə dərs açılmır. 0 — yalnız dərsin öz günü. RİM rəhbərinin rəsmi düzəliş yolu bu həddə tabe deyil."
+
+#: apps/registrar/subject_merge_inventory.py
+msgctxt "registrar.subject_merge"
+msgid "Xarici nəticənin tanınması qeydləri (dəyişməz tarixçə)"
+msgstr "Xarici nəticənin tanınması qeydləri (dəyişməz tarixçə)"

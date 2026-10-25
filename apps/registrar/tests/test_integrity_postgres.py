@@ -502,7 +502,8 @@ class RegistrarMigrationTargetGuardTests(TestCase):
         # + 0091 25% / alt qrup müraciəti: 12 FK (müraciət ×8, hadisə, qəbz, imtahan şansı ×2), 2026-10-18
         # + 0093 25% pəncərəsi (dövr) + təhsil haqqı cədvəli (ixtisas): 2 FK, 2026-10-19.
         self.assertEqual(immutable_trigger_count, 30)
-        self.assertEqual(same_org_trigger_count, 57)
+        # + 0099 xarici nəticənin tanınması: 4 FK (tələbə qeydiyyatı, fənn, dövr, akademik qeyd), 2026-10-25.
+        self.assertEqual(same_org_trigger_count, 61)
 
     def test_precheck_stops_instead_of_rewriting_existing_violation(self):
         with self.assertRaises(IntegrityError):

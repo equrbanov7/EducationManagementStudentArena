@@ -108912,3 +108912,8 @@ msgstr "Отметки «н/б», «п» и баллы, внесённые пр�
 msgctxt "core.runtime_settings"
 msgid "Yazma pəncərəsi (defolt 7 gün): müəllim dərs tarixindən ən çox N gün sonra həmin tarixə dərs aça və boş xanaya q/b, i/e, bal yaza bilər; müddət bitəndə yazı bağlanır. Gələcək tarixə dərs açılmır. 0 — yalnız dərsin öz günü. RİM rəhbərinin rəsmi düzəliş yolu bu həddə tabe deyil."
 msgstr "Окно записи (по умолчанию 7 дней): преподаватель может открыть занятие на дату не позднее чем через N дней после неё и заполнить пустые ячейки («н/б», «п», балл); затем запись закрывается. Занятие на будущую дату не открывается. 0 — только в день занятия. Официальное исправление руководителем РИМ этим лимитом не ограничено."
+
+#: apps/registrar/subject_merge_inventory.py
+msgctxt "registrar.subject_merge"
+msgid "Xarici nəticənin tanınması qeydləri (dəyişməz tarixçə)"
+msgstr "Записи о признании внешних результатов (неизменяемая история)"
