@@ -104,6 +104,7 @@ from .movement import (
     StudentMovement,
     movement_document_path,
 )
+from .offering_format import CourseFormat
 from .retake import ACTIVE_STATUSES as RETAKE_ACTIVE_STATUSES
 from .retake import CONSUMED_STATUSES as RETAKE_CONSUMED_STATUSES
 from .retake import RetakeApplication, RetakeKind, RetakeRefundState, RetakeResultSource, RetakeStatus
@@ -120,6 +121,7 @@ from .subgroup_placement import SubgroupPlacementEvent, SubgroupPlacementKind
 from .transfer_evidence import GroupTransferEvidence
 
 __all__ = [
+    "CourseFormat",
     "AcademicStatus",
     "ApprovalStatus",
     "AssessmentComponent",

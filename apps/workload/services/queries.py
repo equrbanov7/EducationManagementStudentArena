@@ -9,6 +9,7 @@ from core.search_text import tolerant_q
 
 from ..constants import (
     Activity,
+    RowKind,
     Season,
     TaskStatus,
 )
@@ -21,6 +22,11 @@ _ACTIVITY_LABELS = {str(value): label for value, label in Activity.choices}
 _SEASON_LABELS = {str(value): label for value, label in Season.choices}
 
 
+def _visible_q() -> Q:
+    """Müəllimə görünən bölgü: təsdiqlənmiş sənəd VƏ ya intensiv kurs (o, zəncirdən keçmir — 2026-10-25)."""
+    return Q(row__task__status__in=(TaskStatus.DISTRIBUTED, TaskStatus.AMENDED)) | Q(row__row_kind=RowKind.INTENSIVE)
+
+
 def _label(labels: dict, value: str) -> str:
     """Seçim etiketi AKTİV dildə (çağırış anında); naməlum dəyər — olduğu kimi."""
     label = labels.get(value)
@@ -30,7 +36,7 @@ def _label(labels: dict, value: str) -> str:
 def task_rows(task, *, season: str = "", search: str = ""):
     queryset = (
         TeachingTaskRow.objects.filter(task=task)
-        .select_related("subject", "specialty", "period")
+        .select_related("subject", "specialty", "period", "intensive_offering")
         .prefetch_related("groups", "assignments__teacher")
         .order_by("season", "order", "created_at")
     )
@@ -70,6 +76,24 @@ _ROW_HOUR_FIELDS = (
     "practice_production_hours",
     "credits_value",
 )
+
+
+def _intensive_payload(row) -> dict | None:
+    """İntensiv kurs sətrinin kartı: tarixlər, səbəb, tələbə sayı, jurnal keçidi."""
+    offering = row.intensive_offering if row.row_kind == RowKind.INTENSIVE else None
+    if offering is None:
+        return None
+    from django.urls import reverse
+
+    return {
+        "offering_id": str(offering.pk),
+        "starts_on": f"{offering.starts_on:%d.%m.%Y}" if offering.starts_on else "",
+        "ends_on": f"{offering.ends_on:%d.%m.%Y}" if offering.ends_on else "",
+        "note": offering.format_note,
+        "students": row.student_count,
+        "is_active": offering.is_active,
+        "journal_url": reverse("registrar:journal_detail", args=[offering.pk]),
+    }
 
 
 def serialize_rows(task, *, season: str = "", search: str = "") -> list[dict]:
@@ -116,6 +140,7 @@ def serialize_rows_state(task, *, season: str = "", search: str = "") -> tuple[l
                 "credits": row.credits or (str(row.credits_value) if row.credits_value else ""),
                 "total_hours": row.total_hours,
                 "row_kind": row.row_kind,
+                "intensive": _intensive_payload(row),
                 "activities": info.get("activities", {}),
                 "teaching_complete": info.get("teaching_complete", True),
                 "assignments": [
@@ -212,8 +237,8 @@ def teacher_workload_rows(*, organization, teacher, academic_year: str = "", sea
         TeacherAssignment.objects.filter(
             organization=organization,
             teacher=teacher,
-            row__task__status__in=(TaskStatus.DISTRIBUTED, TaskStatus.AMENDED),
         )
+        .filter(_visible_q())
         .select_related("row", "row__subject", "row__task", "row__task__chair", "row__period", "row__specialty")
         .prefetch_related("row__groups")
         .order_by("row__season", "row__subject__name", "activity")
@@ -228,7 +253,7 @@ def teacher_workload_rows(*, organization, teacher, academic_year: str = "", sea
     for assignment in queryset:
         row = assignment.row
         group_ids = [group.pk for group in row.groups.all()] or [None]
-        offering_id = next(
+        offering_id = str(row.intensive_offering_id or "") or next(
             (
                 offering_map[key]
                 for key in ((row.subject_id, row.period_id, gid) for gid in group_ids)
@@ -260,6 +285,7 @@ def teacher_workload_rows(*, organization, teacher, academic_year: str = "", sea
                 "is_hourly_paid": assignment.is_hourly_paid,
                 "groups_note": assignment.groups_note,
                 "offering_id": offering_id,
+                "is_intensive": row.row_kind == RowKind.INTENSIVE,
             }
         )
     return rows
@@ -286,6 +312,7 @@ def _offering_links(organization, assignments) -> dict:
     rows = (
         CourseOffering.objects.filter(organization=organization)
         .filter(lookup)
+        .exclude(course_format="intensive")  # intensiv jurnal öz sətrinə bağlıdır (intensive_offering)
         .values("id", "subject_id", "period_id", "group_id")
     )
     return {(row["subject_id"], row["period_id"], row["group_id"]): str(row["id"]) for row in rows}
@@ -302,8 +329,7 @@ def teacher_workload_summary(*, organization, teacher, academic_year: str = "", 
     queryset = TeacherAssignment.objects.filter(
         organization=organization,
         teacher=teacher,
-        row__task__status__in=(TaskStatus.DISTRIBUTED, TaskStatus.AMENDED),
-    )
+    ).filter(_visible_q())
     if academic_year:
         queryset = queryset.filter(row__task__academic_year=academic_year)
     by_season = {
@@ -349,8 +375,7 @@ def teacher_workload_summaries(*, organization, teacher_ids, academic_year: str 
     queryset = TeacherAssignment.objects.filter(
         organization=organization,
         teacher_id__in=ids,
-        row__task__status__in=(TaskStatus.DISTRIBUTED, TaskStatus.AMENDED),
-    )
+    ).filter(_visible_q())
     if academic_year:
         queryset = queryset.filter(row__task__academic_year=academic_year)
     # Kafedra üzrə də bölünür (sahib 2026-10-25: ştat bir kafedrada, saathesabı başqasında) — eyni BİR sorğu.

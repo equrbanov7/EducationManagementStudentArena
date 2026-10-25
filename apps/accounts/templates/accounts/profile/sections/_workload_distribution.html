@@ -132,6 +132,12 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
         <i class="fas fa-table-list" aria-hidden="true"></i>
         <span>{% trans "Sətir əlavə et" context "accounts.workload" %}</span>
       </button>
+      {% if workload_distribution_section.can_intensive %}
+      <button type="button" class="wl-btn wl-btn--ghost" data-wl-open-intensive>
+        <i class="fas fa-bolt" aria-hidden="true"></i>
+        <span>{% trans "İntensiv kurs" context "accounts.workload_intensive" %}</span>
+      </button>
+      {% endif %}
       <button type="button" class="wl-btn wl-btn--primary" data-wl-open-confirm>
         <i class="fas fa-circle-check" aria-hidden="true"></i>
         <span>{% trans "Bölgünü təsdiqlə" context "accounts.workload" %}</span>
@@ -160,6 +166,8 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
       <div class="wl-teachers" data-wl-teacher-panel></div>
     </aside>
   </div>
+
+  {% if workload_distribution_section.can_intensive %}{% include "accounts/profile/sections/workload/_intensive_modal.html" %}{% endif %}
 
   {# ══ MODAL — sətir yaratma/redaktə ══════════════════════════════════ #}
   <div class="modal fade wl-modal" id="wlRowModal" tabindex="-1" aria-hidden="true" data-wl-row-modal>

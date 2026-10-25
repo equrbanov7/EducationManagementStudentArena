@@ -62,6 +62,7 @@ def group_workload_lines(rows, *, edit_chair_ids=None) -> list[dict]:
                 "degree_level": row.get("degree_level", ""),
                 "degree_level_label": _label(_LEVEL_LABELS, row.get("degree_level", "")),
                 "offering_id": row.get("offering_id", ""),
+                "is_intensive": bool(row.get("is_intensive")),
                 "is_hourly_paid": False,
                 "hours": 0,
                 "activities": [],

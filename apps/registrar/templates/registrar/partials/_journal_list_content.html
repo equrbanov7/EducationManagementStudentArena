@@ -172,7 +172,7 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
                     <td class="jl-col-no">{{ row_offset|add:forloop.counter }}</td>
                     <td>
                         <div class="jl-group-line">
-                            <span class="jl-group">{% if offering.group %}{{ offering.group.name }}{% else %}{% trans "Bütün ixtisas" context "registrar.journal" %}{% endif %}</span>
+                            <span class="jl-group">{% if offering.group %}{{ offering.group.name }}{% elif offering.is_intensive %}<span class="jl-intensive">{% trans "İntensiv" context "registrar.intensive" %}</span>{% else %}{% trans "Bütün ixtisas" context "registrar.journal" %}{% endif %}</span>
                             <span class="jl-subject">{{ offering.subject.name }}</span>
                             {% if offering.next_lesson %}{% with nl=offering.next_lesson %}
                             {% comment %}Cədvəldəki növbəti / hazırda gedən dərs (journal_list_schedule) —

@@ -20,7 +20,9 @@ imtahana buraxılıram? (status badge — rəng + MƏTN, handoff §7) → sillab
         {% else %}
         <span class="msx-kind msx-kind--mandatory">{% trans "Məcburi" context "profile.subjects" %}</span>
         {% endif %}
-        {% if scl and row.enrollment.id|stringformat:"s" in scl.subgroup_enrollment_ids %}
+        {% if row.enrollment.offering.is_intensive %}
+        <span class="msx-kind msx-kind--period" title="{{ row.enrollment.offering.starts_on|date:'d.m.Y' }} – {{ row.enrollment.offering.ends_on|date:'d.m.Y' }}">{% trans "İntensiv" context "registrar.intensive" %} · {{ row.enrollment.offering.starts_on|date:"d.m" }}–{{ row.enrollment.offering.ends_on|date:"d.m" }}</span>
+        {% elif scl and row.enrollment.id|stringformat:"s" in scl.subgroup_enrollment_ids %}
         <span class="msx-kind msx-kind--period" title="{% trans 'Bu fənni başqa qrupun jurnalında (alt qrupda) keçirsiniz' context 'profile.subjects' %}">{% trans "Alt qrup" context "profile.subjects" %}</span>
         {% endif %}
         {% if row.enrollment.offering.period_id != student_subjects_section.period.id %}

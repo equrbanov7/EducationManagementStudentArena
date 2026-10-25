@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20261025-topic">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2_theme.css' %}?v=20260926-close">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2_kselect.css' %}?v=20260926-1">
-    <link rel="stylesheet" href="{% static 'registrar/css/jd2_window.css' %}?v=20260925-audit">
+    <link rel="stylesheet" href="{% static 'registrar/css/jd2_window.css' %}?v=20261025-intensive">
     <link rel="stylesheet" href="{% static 'registrar/css/jd_midterm_auto.css' %}?v=20261021-auto">
     {% comment %}Sahib 2026-10-10: rubrik qiymətləndirməsi gizlidir (`REGISTRAR_RUBRICS_ENABLED`) —
     `rubric_grade.css` yalnız rubrik səhifəsinin özündə yüklənir (jurnalda heç bir rubrik sinfi yoxdur).{% endcomment %}
@@ -97,6 +97,7 @@
             <div class="jd2-winhead-left">
                 <span class="jd2-wintitle">{% trans "Jurnal" context "registrar.journal" %}</span>
                 {% if offering.group %}<span class="jd2-wincode">{{ offering.group.name }}</span>{% endif %}
+                {% if offering.is_intensive %}<span class="jd2-wincode jd2-intensive" title="{{ offering.format_note }}">{% trans "İntensiv" context "registrar.intensive" %} · {{ offering.starts_on|date:"d.m" }}–{{ offering.ends_on|date:"d.m.Y" }}</span>{% endif %}
                 <span class="jd2-winsub">{{ offering.subject.name }} · {{ journal.rows|length }} {% trans "tələbə" context "registrar.journal" %}</span>
                 {% if journal.scheme.is_published %}<span class="jd2-winlock"><i class="fas fa-lock"></i> {% trans "Yekunlaşdırılıb" context "registrar.journal" %}</span>{% endif %}
             </div>
@@ -116,7 +117,7 @@
             </span>
             {% endfor %}
             <span class="jd2-teach-total{% if teaching_summary.over %} is-over{% endif %}">
-                {% trans "Keçirilmiş" context "registrar.journal" %}: <b>{{ teaching_summary.held_total }}</b>{% if teaching_summary.total %} / {{ teaching_summary.total }} {% trans "saat" context "registrar.journal" %} · {% trans "qalan" context "registrar.journal" %} <b>{{ teaching_summary.remaining }}</b>{% if teaching_summary.over %} — {% trans "hədd keçilib!" context "registrar.journal" %}{% endif %}{% else %} {% trans "saat" context "registrar.journal" %}{% endif %}
+                {% trans "Keçirilmiş" context "registrar.journal" %}: <b>{{ teaching_summary.held_total }}</b>{% if teaching_summary.total %} / {{ teaching_summary.total }} {% trans "saat" context "registrar.journal" %} · {% trans "qalan" context "registrar.journal" %} <b>{{ teaching_summary.remaining }}</b>{% if teaching_summary.over %} — {% trans "hədd keçilib!" context "registrar.journal" %}{% endif %}{% if offering.is_intensive and teaching_summary.completed %} · <b class="jd2-intensive-done"><i class="fas fa-circle-check" aria-hidden="true"></i> {% trans "Kurs tamamlandı" context "registrar.intensive" %}</b>{% endif %}{% else %} {% trans "saat" context "registrar.journal" %}{% endif %}
             </span>
         </div>
         {% endif %}

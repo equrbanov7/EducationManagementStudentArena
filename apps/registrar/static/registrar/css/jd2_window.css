@@ -111,3 +111,14 @@
 .jd2-fb-pct { font-weight: 800; white-space: nowrap; }
 .jd2-fb-pct.is-warning { background: var(--ems-warning-bg); color: var(--ems-warning-800); }
 .jd2-fb-pct.is-barred { background: var(--ems-danger-bg); color: var(--ems-danger-strong); }
+
+/* İntensiv kurs (2026-10-25): başlıq nişanı + «Kurs tamamlandı». */
+.jd2-wincode.jd2-intensive {
+    font-family: inherit;
+    color: var(--ems-warning-800, #92400e);
+    background: var(--ems-warning-bg, #fffbeb);
+    border: 1px solid var(--ems-warning-200, #fde68a);
+    padding: 1px 8px;
+    border-radius: 999px;
+}
+.jd2-intensive-done { color: var(--ems-success-700, #15803d); white-space: nowrap; }

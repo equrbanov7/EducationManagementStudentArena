@@ -109786,3 +109786,197 @@ msgstr "Bei „Sonstiges“ den Namen des Programms / Grundes angeben (z. B. Som
 msgctxt "registrar.recognition"
 msgid "Başqa təhsil proqramında keçilmiş fənnin nəticəsi (Erasmus+, mübadilə, başqa ali məktəb, yay məktəbi, onlayn kurs və s.) sənədlə tanınır: tələbə bizim fənndən azad olur (jurnal, davamiyyət limiti və imtahan tələbi ona aid olmur), transkriptdə tanınmış bal göstərilir. Tanınma səbəblə ləğv edilə bilər; hər addım audit izinə düşür."
 msgstr "Das Ergebnis eines in einem anderen Studienprogramm belegten Fachs (Erasmus+, Austausch, andere Hochschule, Sommerschule, Online-Kurs usw.) wird mit Nachweis anerkannt: Die/der Studierende wird von unserem Fach befreit (Journal, Fehlzeitenlimit und Prüfungspflicht entfallen), im Transcript erscheint die anerkannte Punktzahl. Eine Anerkennung kann mit Begründung widerrufen werden; jeder Schritt wird protokolliert."
+
+msgctxt "registrar.course_format"
+msgid "Adi"
+msgstr "Regulär"
+
+msgctxt "registrar.course_format"
+msgid "İntensiv"
+msgstr "Intensiv"
+
+msgctxt "workload"
+msgid "İntensiv kurs"
+msgstr "Intensivkurs"
+
+msgctxt "registrar.intensive"
+msgid "İntensiv"
+msgstr "Intensiv"
+
+msgctxt "registrar.intensive"
+msgid "Kurs tamamlandı"
+msgstr "Kurs abgeschlossen"
+
+msgctxt "registrar.intensive"
+msgid "Başlama və bitmə tarixi seçilməlidir."
+msgstr "Wählen Sie Beginn- und Enddatum."
+
+msgctxt "registrar.intensive"
+msgid "Bitmə tarixi başlama tarixindən əvvəl ola bilməz."
+msgstr "Das Enddatum darf nicht vor dem Beginndatum liegen."
+
+msgctxt "registrar.intensive"
+msgid "Bu açılış intensiv kurs deyil."
+msgstr "Dieses Angebot ist kein Intensivkurs."
+
+#, python-format
+msgctxt "registrar.intensive"
+msgid "Bu semestrdə «%(group)s» jurnalında aktivdir — «Adi jurnaldan intensivə köçür» seçilməlidir."
+msgstr "In diesem Semester im Journal „%(group)s“ aktiv — „aus dem regulären Journal in den Intensivkurs verschieben“ auswählen."
+
+msgctxt "registrar.intensive"
+msgid "Fənn tapılmadı."
+msgstr "Fach nicht gefunden."
+
+msgctxt "registrar.intensive"
+msgid "Jurnalda dərs yazılıb — intensiv kursu ləğv etmək olmaz."
+msgstr "Im Journal sind Stunden erfasst — der Intensivkurs kann nicht storniert werden."
+
+msgctxt "registrar.intensive"
+msgid "Kursun açılma səbəbini yazın (məs. yenidən tədris)."
+msgstr "Geben Sie den Grund für den Kurs an (z. B. Wiederholungsunterricht)."
+
+#, python-format
+msgctxt "registrar.intensive"
+msgid "Kursun saatı %(lo)s–%(hi)s arasında olmalıdır."
+msgstr "Die Kursstunden müssen zwischen %(lo)s und %(hi)s liegen."
+
+msgctxt "registrar.intensive"
+msgid "Seçilmiş müəllimin bu təşkilatda bal yazmaq səlahiyyəti (müəllim rolu) yoxdur."
+msgstr "Die gewählte Lehrkraft darf in dieser Organisation keine Noten eintragen (keine Lehrkraftrolle)."
+
+#, python-format
+msgctxt "registrar.intensive"
+msgid "Tarixlər semestrin daxilində olmalıdır (%(lo)s – %(hi)s)."
+msgstr "Die Daten müssen im Semester liegen (%(lo)s – %(hi)s)."
+
+msgctxt "registrar.intensive"
+msgid "Tələbə bu fənn üzrə artıq başqa intensiv kursdadır."
+msgstr "Die studierende Person ist für dieses Fach bereits in einem anderen Intensivkurs."
+
+msgctxt "registrar.intensive"
+msgid "Tələbə bu fənni artıq keçib."
+msgstr "Die studierende Person hat dieses Fach bereits bestanden."
+
+msgctxt "registrar.intensive"
+msgid "Tələbə bu semestrdə bu fəndən azad edilib."
+msgstr "Die studierende Person ist in diesem Semester von diesem Fach befreit."
+
+msgctxt "registrar.intensive"
+msgid "Tələbənin aktiv akademik qeydi (qrupu) yoxdur."
+msgstr "Die studierende Person hat keinen aktiven Studiendatensatz (Gruppe)."
+
+msgctxt "registrar.intensive"
+msgid "Tələbənin bu fənn üzrə birdən çox aktiv jurnalı var — əvvəlcə dekanlıq həll etməlidir."
+msgstr "Die studierende Person hat mehrere aktive Journale für dieses Fach — zuerst muss das Dekanat das klären."
+
+msgctxt "registrar.intensive"
+msgid "İntensiv kurs ləğv edildi"
+msgstr "Intensivkurs storniert"
+
+msgctxt "registrar.intensive"
+msgid "İntensiv kurs yalnız cari aktiv semestrdə açılır."
+msgstr "Ein Intensivkurs kann nur im aktuellen aktiven Semester eröffnet werden."
+
+#, python-format
+msgctxt "registrar.intensive"
+msgid "İntensiv kurs: %(note)s"
+msgstr "Intensivkurs: %(note)s"
+
+#, python-format
+msgctxt "registrar.intensive"
+msgid "İntensiv kursa ən çox %(n)s tələbə yazılır."
+msgstr "Höchstens %(n)s Studierende können an einem Intensivkurs teilnehmen."
+
+#, python-format
+msgctxt "registrar.intensive"
+msgid "İntensiv kursun dərsi %(lo)s – %(hi)s aralığında olmalıdır."
+msgstr "Stunden des Intensivkurses müssen zwischen %(lo)s und %(hi)s liegen."
+
+msgctxt "registrar.intensive"
+msgid "Ən azı bir tələbə seçin."
+msgstr "Wählen Sie mindestens eine studierende Person."
+
+msgctxt "accounts.workload_intensive"
+msgid "İntensiv kurs"
+msgstr "Intensivkurs"
+
+msgctxt "accounts.workload_intensive"
+msgid "İntensiv kursu aç"
+msgstr "Intensivkurs eröffnen"
+
+msgctxt "accounts.workload_intensive"
+msgid "İmtina"
+msgstr "Abbrechen"
+
+msgctxt "accounts.workload_intensive"
+msgid "Fənn"
+msgstr "Fach"
+
+msgctxt "accounts.workload_intensive"
+msgid "Müəllim"
+msgstr "Lehrkraft"
+
+msgctxt "accounts.workload_intensive"
+msgid "Tələbələr"
+msgstr "Studierende"
+
+msgctxt "accounts.workload_intensive"
+msgid "Mühazirə saatı"
+msgstr "Vorlesungsstunden"
+
+msgctxt "accounts.workload_intensive"
+msgid "Seminar saatı"
+msgstr "Seminarstunden"
+
+msgctxt "accounts.workload_intensive"
+msgid "Başlama tarixi"
+msgstr "Beginndatum"
+
+msgctxt "accounts.workload_intensive"
+msgid "Bitmə tarixi"
+msgstr "Enddatum"
+
+msgctxt "accounts.workload_intensive"
+msgid "Səbəb"
+msgstr "Grund"
+
+msgctxt "accounts.workload_intensive"
+msgid "Fənn adı və ya kodu…"
+msgstr "Fachname oder -code…"
+
+msgctxt "accounts.workload_intensive"
+msgid "Müəllimin adı…"
+msgstr "Name der Lehrkraft…"
+
+msgctxt "accounts.workload_intensive"
+msgid "Ad, soyad və ya qrup…"
+msgstr "Vorname, Nachname oder Gruppe…"
+
+msgctxt "accounts.workload_intensive"
+msgid "məs. yenidən tədris, akademik fərq"
+msgstr "z. B. Wiederholungsunterricht, akademische Differenz"
+
+msgctxt "accounts.workload_intensive"
+msgid "Yazılacaq"
+msgstr "Wird eingeschrieben"
+
+msgctxt "accounts.workload_intensive"
+msgid "təkrar (əvvəl kəsilib)"
+msgstr "Wiederholung (zuvor nicht bestanden)"
+
+msgctxt "accounts.workload_intensive"
+msgid "Əməl alınmadı — yenidən cəhd edin."
+msgstr "Aktion fehlgeschlagen — bitte erneut versuchen."
+
+msgctxt "accounts.workload_intensive"
+msgid "İntensiv kurs açıldı: jurnal yaradıldı, tələbələr yazıldı, müəllimin yükünə əlavə olundu."
+msgstr "Intensivkurs eröffnet: Journal angelegt, Studierende eingeschrieben, Stunden dem Deputat der Lehrkraft hinzugefügt."
+
+msgctxt "accounts.workload_intensive"
+msgid "Az saatlı, 1–2 tələbə üçün qısa kurs. Saat müəllimin yükünə «İntensiv» kimi düşür, jurnal açılır və tələbələr yazılır. Müəllim dərsləri tarix aralığında istədiyi günlərə yazır (bir gündə bir neçə dərs də olar); cədvəl tələb olunmur."
+msgstr "Kurzer Kurs mit wenigen Stunden für 1–2 Studierende. Die Stunden gehen als „Intensiv“ in das Deputat der Lehrkraft ein, ein Journal wird eröffnet und die Studierenden werden eingeschrieben. Die Lehrkraft erfasst Stunden an beliebigen Tagen im Zeitraum (mehrere Stunden pro Tag möglich); kein Stundenplan erforderlich."
+
+msgctxt "accounts.workload_intensive"
+msgid "Tələbə bu fənni bu semestr adi jurnalda keçirsə — oradan intensivə köçür (ikiqat qiymət olmasın; köhnə bal mənbədə saxlanılır, qayıb saatı köçür)"
+msgstr "Belegt die studierende Person dieses Fach in diesem Semester in einem regulären Journal — in den Intensivkurs verschieben (keine Doppelnote; alte Noten bleiben in der Quelle, Fehlstunden werden übertragen)"

@@ -25,6 +25,7 @@ from ..constants import (
     TaskStatus,
 )
 from ..models import TeacherAssignment, TeachingTaskRow
+from .intensive import ensure_not_intensive
 from .offering_rules import UNKNOWN, plan_reached_chair
 from .offering_sync import compact, owner_snapshot, run_safely, sync_row_offerings
 from .people import ensure_assignable_teacher
@@ -133,6 +134,7 @@ def assign_teacher(
     """Bir fəaliyyət üzrə saatı müəllimə (və ya «Vakant»a) bağlayır."""
     task = row.task
     ensure_can_distribute(actor, task.chair_id)
+    ensure_not_intensive(row)  # intensiv kursun müəllimi services.intensive ilə (2026-10-25)
     _ensure_assignable(task)
 
     if activity not in _ACTIVITY_VALUES:
@@ -223,6 +225,7 @@ def unassign(*, assignment: TeacherAssignment, actor, request=None) -> dict:
     row = assignment.row
     task = row.task
     ensure_can_distribute(actor, task.chair_id)
+    ensure_not_intensive(row)
     _ensure_assignable(task)
     payload = {
         "activity": assignment.activity,

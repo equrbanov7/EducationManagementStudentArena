@@ -83,6 +83,9 @@ class RowKind(models.TextChoices):
     THESIS = "thesis", pgettext_lazy(_CTX, "Buraxılış/dissertasiya işi")
     POSTGRAD = "postgrad", pgettext_lazy(_CTX, "Dissertant/doktorant")
     OTHER = "other", pgettext_lazy(_CTX, "Digər")
+    #: Sahib 2026-10-25: qrupsuz qısa kurs (1–2 tələbə) — sətir ``services.intensive`` ilə yaranır və
+    #: ``TeachingTaskRow.intensive_offering`` jurnalına bağlıdır; ümumi sətir redaktoru ona toxunmur.
+    INTENSIVE = "intensive", pgettext_lazy(_CTX, "İntensiv kurs")
 
 
 class EducationForm(models.TextChoices):

@@ -106,6 +106,11 @@ def ensure_date_within_period(offering, parsed) -> None:
 
     RİM/superuser override-i (``allow_past``) bu qapını da keçir.
     """
+    from apps.registrar.intensive import lesson_date_error as intensive_date_error
+
+    error = intensive_date_error(offering, parsed)  # intensiv kurs: yalnız öz tarix aralığı (sahib 2026-10-25)
+    if error:
+        raise LessonRuleError(error)
     # `end_date` obyektdə hələ sətir ola bilər (yeni yaradılmış, refresh olunmamış dövr).
     end_date = _coerce_date(getattr(getattr(offering, "period", None), "end_date", None))
     today = timezone.localdate()
