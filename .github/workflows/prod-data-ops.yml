@@ -94,6 +94,13 @@
 #       imtahandan avtomatik yazılmış jurnal «Midterm» xanaları, bildirişlər silinir; imtahan yumşaq silinir; audit
 #       tarixçəsi qalır (+1 sətir). Final / append-only ledger (bal hadisəsi, 25% izi) / bağlı jurnal → RƏDD (heç nə
 #       yazılmır). Səbəb sabitdir. Loga YALNIZ bir sayların sətri düşür. İdempotent.
+#   purge_exam_attempt — bir tələbənin SƏHV imtahan cəhdi (sahib 2026-10-25: «Şirməmməd üçün olan son imtahan nəticəsini
+#       sil, o səhvən olub»): `teacher` = tələbənin istifadəçi adı (DƏQİQ), `batch` = cəhdin id-si (boş = tələbənin ƏN SON
+#       cəhdi), `task_chair` = imtahanın slug-ı (apply üçün MƏCBURİ, BƏRABƏR olmalıdır — təhlükəsizlik). Cəhd + cavablar,
+#       bu cəhdin apellyasiyaları (+ qərar/sənəd), bal hadisələri (organizations 0073 dar istisnası), zal pozuntuları,
+#       bildirişlər silinir; jurnal izi geri alınır (midterm xanası / yekun imtahan balı: başqa rəsmi cəhd varsa onun
+#       balı, yoxdursa boş). İmtahan və digər tələbələrin cəhdləri qalır. Bağlı jurnal / 25% izi → RƏDD. Səbəb sabitdir.
+#       Loga YALNIZ bir `attempt_purge:` sətri (id-lər, slug, saylar). İdempotent (ikinci qaçış NOOP).
 #   legacy_delta_apply — köhnə sistemin (myedu) cutover-dən SONRAKI deltası (sahib 2026-10-23): ŞİFRƏLİ release
 #       asset (`roster_tag` = `legacy-delta-…` → delta.json.gz.enc, `legacy_delta_extract` çıxışı; `batch` = paketin
 #       sha256-sı, verilsə yoxlanılır). Yeni sistem qalibdir — yalnız BOŞ doldurulur (jurnal, dərs, q/b, i/e, bal,
@@ -234,6 +241,7 @@ on:
           - shrink_avatars
           - issue_staff_credentials
           - purge_trial_exam
+          - purge_exam_attempt
           - legacy_delta_apply
           - legacy_repair_empty_lessons
           - sync_midterm_scores
@@ -278,7 +286,7 @@ on:
         required: false
         default: ""
       batch:
-        description: "reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…): geri qaytarılacaq paket id-si (undo) · legacy_delta_apply: paketin gözlənilən sha256-sı"
+        description: "reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…): geri qaytarılacaq paket id-si (undo) · legacy_delta_apply: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd)"
         required: false
         default: ""
       create_missing:
@@ -291,7 +299,7 @@ on:
         required: false
         default: "Proqramlaşdırma"
       task_chair:
-        description: "import_teaching_load_form1 / fix_task_row_hours: kafedra adı · resync_task_offerings: boş = bütün kafedralar · purge_trial_exam: imtahanın adı (təsdiq)"
+        description: "import_teaching_load_form1 / fix_task_row_hours: kafedra adı · resync_task_offerings: boş = bütün kafedralar · purge_trial_exam: imtahanın adı (təsdiq) · purge_exam_attempt: imtahanın slug-ı (təsdiq)"
         required: false
         default: ""
       row_group:
@@ -349,7 +357,7 @@ on:
         type: boolean
         default: false
       teacher:
-        description: "backfill_teacher_lessons / infer_timetable_from_lessons (boş = hamı): müəllimin istifadəçi adı (ad.soyad) · purge_trial_exam / sync_midterm_scores: imtahanın slug-ı"
+        description: "backfill_teacher_lessons / infer_timetable_from_lessons (boş = hamı): müəllimin istifadəçi adı (ad.soyad) · purge_trial_exam / sync_midterm_scores: imtahanın slug-ı · purge_exam_attempt: tələbənin istifadəçi adı"
         required: false
         default: ""
       date_from:
@@ -672,6 +680,31 @@ jobs:
               fi
               custom_apply=1
               ;;
+            purge_exam_attempt)
+              # Sahib 2026-10-25: tələbənin səhv imtahan cəhdi. `teacher` = tələbənin istifadəçi adı (dəqiq), `batch` = cəhdin
+              # id-si (boş = ən son cəhd), `task_chair` = imtahanın slug-ı (apply üçün məcburi; əmr bərabərliyi yoxlayır).
+              # Yeni giriş yoxdur (25 limit) — mövcud girişlər təkrar istifadə olunur.
+              { [ "${#TEACHER}" -le 150 ] && match "$TEACHER" '^[A-Za-z0-9._-]{1,150}$'; } \
+                || { echo "teacher (tələbənin istifadəçi adı) formatı: ad.soyad" >&2; exit 2; }
+              args=(--org "$ORG" "--username=$TEACHER")
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^[0-9]{1,12}$' || { echo "batch (cəhdin id-si) rəqəm olmalıdır" >&2; exit 2; }
+                args+=("--attempt=$BATCH")
+              else
+                args+=(--latest)
+              fi
+              if [ -n "$TASK_CHAIR" ]; then
+                { [ "${#TASK_CHAIR}" -le 220 ] && match "$TASK_CHAIR" '^[a-z0-9_-]{0,200}-[A-Za-z0-9]{6}$'; } \
+                  || { echo "task_chair (imtahanın slug-ı) formatı: ad-XXXXXX" >&2; exit 2; }
+                # `--x=dəyər` forması: «-XXXXXX» slug-ı argparse bayraq sanmasın.
+                args+=("--expect-exam-slug=$TASK_CHAIR")
+              fi
+              if [ "$APPLY" = "true" ]; then
+                test -n "$TASK_CHAIR" || { echo "apply üçün task_chair (imtahanın slug-ı) məcburidir" >&2; exit 2; }
+                args+=(--apply --reason "Səhv imtahan cəhdinin silinməsi — sahibin 2026-10-25 tapşırığı" --i-know-this-is-production)
+              fi
+              custom_apply=1
+              ;;
             legacy_repair_empty_lessons)
               # Sahib 2026-10-24: məzmunsuz keçmiş sütunlar — bağlı jurnallar, yalnız «qb» xanalı və müəllimin
               # açdığı sütunlar da («boşdursa silinsin; “qb” yazılıbsa belə silinsin»).
@@ -825,6 +858,17 @@ jobs:
             # Loga YALNIZ sayların sətri (əmr şəxs adı çap etmir; yenə də süzülür) və rədd kodu.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^trial_exam_purge: [a-z_]+=[0-9A-Z-]+( [a-z_]+=[0-9A-Z-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+(: [a-z_,]+)?' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "purge_exam_attempt" ]; then
+            # Loga YALNIZ sayların sətri (id-lər, slug, saylar; əmr ad / bal çap etmir; yenə də süzülür) və rədd kodu.
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^attempt_purge: [a-z_]+=[0-9A-Za-z_.:-]+( [a-z_]+=[0-9A-Za-z_.:-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+(: [a-z_,]+)?' "$RUNNER_TEMP/out.log" | head -n 1 || true
