@@ -29,7 +29,9 @@ from apps.registrar.tests.test_student_sections_redesign import _build_tenant, _
 from core.ui import status_catalog
 
 #: Büdcələr (2026-10-18 ölçmə + ehtiyat). Rəqəm aşılırsa — yeni N+1 və ya tam tarixçə yüklənməsi.
-MY_RESULTS_EXAMS_BUDGET = 64  # 2026-10-25: +1 sabit; 2026-10-26: +2 sabit (fənn jurnalı ilə imtahan təyinatı) — tarixçə ilə artmır
+MY_RESULTS_EXAMS_BUDGET = (
+    64  # 2026-10-25: +1 sabit; 2026-10-26: +2 sabit (fənn jurnalı ilə imtahan təyinatı) — tarixçə ilə artmır
+)
 EXAM_RESULT_BUDGET = 38
 HISTORY_BUDGET = 26
 
