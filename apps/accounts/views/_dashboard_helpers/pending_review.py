@@ -26,6 +26,7 @@ from .._helpers import (
 )
 from .._helpers.task_kind_visibility import hidden_task_filters, visible_task_filter
 from .formatters import (
+    _attach_registry_groups,
     _build_student_group_map_and_available,
     _normalize_pending_review_status,
     _normalize_pending_review_type,
@@ -58,9 +59,8 @@ def _collect_pending_review_items(
         default="oldest",
     )
 
-    student_group_map, available_groups = _build_student_group_map_and_available(request.user)
-    if selected_group and selected_group not in available_groups:
-        selected_group = ""
+    # Qrup seçimi sətirlər yığılandan SONRA yoxlanılır — qrup reyestrdən gəlir (``_attach_registry_groups``).
+    student_group_map, legacy_groups = _build_student_group_map_and_available(request.user)
 
     profile_return_url = _append_query_params(
         reverse("accounts:profile"),
@@ -351,6 +351,9 @@ def _collect_pending_review_items(
     if normalized_status != "all":
         items = [item for item in items if item["status"] == normalized_status]
 
+    available_groups = _attach_registry_groups(items, legacy_groups)
+    if selected_group and selected_group not in available_groups:
+        selected_group = ""
     if selected_group:
         items = [item for item in items if item.get("group_name") == selected_group]
 

@@ -32,6 +32,24 @@ def _build_student_group_map_and_available(teacher):
     return student_group_map, available_groups
 
 
+def _attach_registry_groups(items, legacy_available):
+    """Sətirlərə tələbənin CARİ reyestr qrupunu yaz; qrup siyahısı = sətirlərdəki qruplar (sahib 2026-10-25).
+
+    Köhnə ``StudentGroup`` xəritəsi yalnız reyestrdə qrupu olmayan tələbə üçün ehtiyatdır. Qaytarır: seçicinin
+    sıralanmış qrup adları (sətirlərdə görünən + köhnə kurs qrupları)."""
+    from apps.registrar.public import student_group_names
+
+    names = student_group_names.current_group_names(
+        getattr(item.get("student"), "pk", None) for item in items if item.get("student") is not None
+    )
+    for item in items:
+        student_id = getattr(item.get("student"), "pk", None)
+        if student_id in names:
+            item["group_name"] = names[student_id]
+    groups = {item["group_name"] for item in items if item.get("group_name")} | set(legacy_available)
+    return sorted(groups, key=str.lower)
+
+
 def _standard_item_type_meta(raw_type):
     normalized = (raw_type or "").lower()
     mapping = {

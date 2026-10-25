@@ -46,6 +46,7 @@ from . import schedule_suggest  # noqa: F401 — «Uyğun vaxtlar» + otaq tövs
 from . import selfwork_points  # noqa: F401
 from . import services  # noqa: F401
 from . import status  # noqa: F401
+from . import student_group_names  # noqa: F401 — tələbənin cari reyestr qrupunun adı (süzgəclər, 2026-10-25)
 from . import subgroup_rollup  # noqa: F401
 from . import transcript  # noqa: F401
 from . import transfer  # noqa: F401
@@ -148,6 +149,7 @@ __all__ = [
     "selfwork_points",
     "services",
     "status",
+    "student_group_names",
     "subgroup_rollup",
     "transcript",
     "transcript_policy",
