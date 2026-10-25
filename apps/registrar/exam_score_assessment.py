@@ -9,7 +9,7 @@ SAHİBİN TƏLƏBİ (2026-10-25, «İmtahan balının daxil edilməsi» ekranı)
    «bərabər böl» — tam ədədlər, qalıq sonuncu sütuna (:func:`equal_split`).
 3. **15 dəqiqə qaydası** — təsdiqdən sonra DAXİL EDƏN balı sənədsiz dəyişə bilər (:class:`ChangeRules`,
    ``exam.score_edit_minutes``); sonra yalnız (a) RİM rəhbəri — təqdimat (səbəb + qeyd + sənəd) və ya
-   (b) APELLYASİYA — apellyasiya sənədi MƏCBURİ (:func:`decide_change`). Hər dəyişiklik append-only
+   (b) APELLYASİYA — yalnız İmtahan Mərkəzinin rəhbəri, apellyasiya sənədi MƏCBURİ (:func:`decide_change`). Hər dəyişiklik append-only
    ``ExamScoreEntry`` sətridir (kim, köhnə → yeni, nə vaxt, sənəd) — paralel apellyasiya mexanizmi yoxdur:
    rəqəmsal apellyasiyanın jurnal təsiri də eyni ``kind=appeal`` sətri ilə yazılır
    (``exam_score_entry.record_appeal_score_change``).
@@ -259,17 +259,20 @@ class ChangeRules:
 
     user_id: object = None
     can_rim_correct: bool = False
+    can_appeal: bool = False
     window: timedelta = field(default_factory=lambda: edit_window())
     initial: dict = field(default_factory=dict)
     now: datetime.datetime = field(default_factory=lambda: timezone.now())
 
     @classmethod
     def build(cls, *, user, organization, enrollment_ids, assessment) -> "ChangeRules":
-        from .exam_score_period_lock import can_unlock_past_period
+        from .exam_score_period_lock import change_permissions
 
+        can_rim_correct, can_appeal = change_permissions(user, organization)
         return cls(
             user_id=getattr(user, "pk", None),
-            can_rim_correct=can_unlock_past_period(user, organization),
+            can_rim_correct=can_rim_correct,
+            can_appeal=can_appeal,
             initial=initial_entries(enrollment_ids, assessment),
         )
 
@@ -304,6 +307,12 @@ def rim_only_error() -> ValidationError:
     )
 
 
+def appeal_head_only_error() -> ValidationError:
+    return ValidationError(
+        pgettext(_CTX, "Apellyasiya əsasında dəyişiklik yalnız İmtahan Mərkəzinin rəhbəri tərəfindən edilir.")
+    )
+
+
 def appeal_document_error() -> ValidationError:
     return ValidationError(pgettext(_CTX, "Apellyasiya ilə dəyişiklik üçün apellyasiya sənədi yüklənməlidir."))
 
@@ -311,11 +320,14 @@ def appeal_document_error() -> ValidationError:
 def decide_after_window(*, rules, enrollment_id, kind, reason, note, evidence, sheet, require_justification):
     """Yazılmış balın dəyişdirilməsi (cari dövr) → yazılacaq sətrin növü; qadağandırsa ``ValidationError``.
 
-    * ``kind=appeal`` — APELLYASİYA: sənəd (sətrin və ya vərəqin faylı) MƏCBURİ;
+    * ``kind=appeal`` — APELLYASİYA: yalnız İmtahan Mərkəzinin rəhbəri / RİM rəhbəri / superadmin, sənəd (sətrin
+      və ya vərəqin faylı) MƏCBURİ;
     * ``kind=correction`` — yalnız RİM rəhbəri / superadmin, tam təqdimatla (səbəb + qeyd + sənəd);
     * növ yoxdursa — daxil edənin öz pəncərəsi açıqdırsa ``window_edit`` (sənədsiz), yoxsa rədd.
     """
     if kind == ExamScoreEntryKind.APPEAL:
+        if not rules.can_appeal:
+            raise appeal_head_only_error()
         if not evidence and not (sheet is not None and sheet.evidence):
             raise appeal_document_error()
         return ExamScoreEntryKind.APPEAL
@@ -335,6 +347,7 @@ __all__ = [
     "FINAL",
     "MIDTERM",
     "appeal_document_error",
+    "appeal_head_only_error",
     "assert_assessment_allowed",
     "available_assessments",
     "cap_for",

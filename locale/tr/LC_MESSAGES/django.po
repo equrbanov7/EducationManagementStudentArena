@@ -108812,3 +108812,11 @@ msgstr "En az bir sütun (soru) olmalıdır."
 msgctxt "registrar.exam_score_entry"
 msgid "Ən azı bir sütun qalmalıdır."
 msgstr "En az bir sütun kalmalıdır."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya əsasında dəyişiklik yalnız İmtahan Mərkəzinin rəhbəri tərəfindən edilir."
+msgstr "İtiraz üzerine değişiklik yalnızca Sınav Merkezi başkanı tarafından yapılabilir."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Dəyişiklik yalnız apellyasiya ilə — İmtahan Mərkəzinin rəhbərinə müraciət edin."
+msgstr "Değişiklik yalnızca itiraz yoluyla — Sınav Merkezi başkanına başvurun."

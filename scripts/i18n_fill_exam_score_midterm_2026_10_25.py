@@ -91,6 +91,18 @@ ENTRIES = {
         ),
     },
     ESE: {
+        "Apellyasiya əsasında dəyişiklik yalnız İmtahan Mərkəzinin rəhbəri tərəfindən edilir.": t(
+            "An appeal-based change can only be made by the head of the Exam Center.",
+            "Изменение по апелляции может внести только руководитель Экзаменационного центра.",
+            "İtiraz üzerine değişiklik yalnızca Sınav Merkezi başkanı tarafından yapılabilir.",
+            "Eine Änderung aufgrund eines Widerspruchs darf nur die Leitung des Prüfungszentrums vornehmen.",
+        ),
+        "Dəyişiklik yalnız apellyasiya ilə — İmtahan Mərkəzinin rəhbərinə müraciət edin.": t(
+            "Changes only through an appeal — contact the head of the Exam Center.",
+            "Изменение только через апелляцию — обратитесь к руководителю Экзаменационного центра.",
+            "Değişiklik yalnızca itiraz yoluyla — Sınav Merkezi başkanına başvurun.",
+            "Änderungen nur per Widerspruch — wenden Sie sich an die Leitung des Prüfungszentrums.",
+        ),
         "%(t)s-dək": t("until %(t)s", "до %(t)s", "%(t)s'e kadar", "bis %(t)s"),
         "Apellyasiya ilə dəyiş": t(
             "Change by appeal", "Изменить по апелляции", "İtirazla değiştir", "Per Einspruch ändern"

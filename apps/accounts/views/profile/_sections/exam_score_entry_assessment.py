@@ -84,6 +84,7 @@ def _fill_row_states(request, section, *, organization, service, assessment) -> 
         assessment=assessment,
     )
     section["can_rim_correct"] = rules.can_rim_correct
+    section["can_appeal"] = rules.can_appeal
     correction_mode = bool(section.get("correction_mode"))
     final_count = 0
     for row in section.get("rows", []):

@@ -109404,3 +109404,11 @@ msgstr "There must be at least one column (question)."
 msgctxt "registrar.exam_score_entry"
 msgid "Ən azı bir sütun qalmalıdır."
 msgstr "At least one column must remain."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya əsasında dəyişiklik yalnız İmtahan Mərkəzinin rəhbəri tərəfindən edilir."
+msgstr "An appeal-based change can only be made by the head of the Exam Center."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Dəyişiklik yalnız apellyasiya ilə — İmtahan Mərkəzinin rəhbərinə müraciət edin."
+msgstr "Changes only through an appeal — contact the head of the Exam Center."

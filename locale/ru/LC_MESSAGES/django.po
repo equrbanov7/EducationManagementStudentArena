@@ -109598,3 +109598,11 @@ msgstr "Должен быть хотя бы один столбец (вопро�
 msgctxt "registrar.exam_score_entry"
 msgid "Ən azı bir sütun qalmalıdır."
 msgstr "Должен остаться хотя бы один столбец."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya əsasında dəyişiklik yalnız İmtahan Mərkəzinin rəhbəri tərəfindən edilir."
+msgstr "Изменение по апелляции может внести только руководитель Экзаменационного центра."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Dəyişiklik yalnız apellyasiya ilə — İmtahan Mərkəzinin rəhbərinə müraciət edin."
+msgstr "Изменение только через апелляцию — обратитесь к руководителю Экзаменационного центра."

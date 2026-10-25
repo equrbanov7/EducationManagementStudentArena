@@ -139,21 +139,41 @@ def _is_superadmin(user) -> bool:
     return bool(getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False))
 
 
-def can_unlock_past_period(user, organization) -> bool:
-    """Superadmin və ya ``organization``-da AKTİV ``ikt_rehber`` üzvlüyü (BİR sorğu)."""
-    if user is None or not getattr(user, "is_authenticated", False):
-        return False
-    if _is_superadmin(user):
-        return True
-    if organization is None:
-        return False
+def active_role_names(user, organization) -> set:
+    """İstifadəçinin ``organization``-dakı AKTİV rollarının normallaşdırılmış adları (BİR sorğu)."""
+    if user is None or not getattr(user, "is_authenticated", False) or organization is None:
+        return set()
     from django.apps import apps as django_apps
 
     membership_model = django_apps.get_model("organizations", "Membership")
     role_names = membership_model.objects.filter(
         user=user, organization=organization, is_active=True, role__is_active=True
     ).values_list("role__name", flat=True)
-    return any(ProfileRole.normalize_membership_role_name(name) == ProfileRole.IKT_REHBER for name in role_names)
+    return {ProfileRole.normalize_membership_role_name(name) for name in role_names}
+
+
+def can_unlock_past_period(user, organization) -> bool:
+    """Superadmin və ya ``organization``-da AKTİV ``ikt_rehber`` üzvlüyü (BİR sorğu)."""
+    if user is None or not getattr(user, "is_authenticated", False):
+        return False
+    if _is_superadmin(user):
+        return True
+    return ProfileRole.IKT_REHBER in active_role_names(user, organization)
+
+
+def change_permissions(user, organization) -> tuple[bool, bool]:
+    """``(RİM təqdimatı, apellyasiya ilə dəyişiklik)`` icazələri — BİR sorğu.
+
+    Sahib 2026-10-25: «Apellyasiyaya gələni İmtahan Mərkəzi düzəldə bilər, ancaq RƏHBƏR access-i olsun».
+    Apellyasiya — ``exam_center_head`` (İmtahan Mərkəzinin rəhbəri), RİM rəhbəri (``ikt_rehber``) və superadmin;
+    təqdimat düzəlişi — yalnız RİM rəhbəri və superadmin."""
+    if user is None or not getattr(user, "is_authenticated", False):
+        return False, False
+    if _is_superadmin(user):
+        return True, True
+    roles = active_role_names(user, organization)
+    rim = ProfileRole.IKT_REHBER in roles
+    return rim, rim or ProfileRole.EXAM_CENTER_HEAD in roles
 
 
 def correction_mode_requested(data) -> bool:

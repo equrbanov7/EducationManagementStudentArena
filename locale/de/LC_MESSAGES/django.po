@@ -110430,3 +110430,11 @@ msgstr "Es muss mindestens eine Spalte (Frage) geben."
 msgctxt "registrar.exam_score_entry"
 msgid "Ən azı bir sütun qalmalıdır."
 msgstr "Mindestens eine Spalte muss bleiben."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya əsasında dəyişiklik yalnız İmtahan Mərkəzinin rəhbəri tərəfindən edilir."
+msgstr "Eine Änderung aufgrund eines Widerspruchs darf nur die Leitung des Prüfungszentrums vornehmen."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Dəyişiklik yalnız apellyasiya ilə — İmtahan Mərkəzinin rəhbərinə müraciət edin."
+msgstr "Änderungen nur per Widerspruch — wenden Sie sich an die Leitung des Prüfungszentrums."

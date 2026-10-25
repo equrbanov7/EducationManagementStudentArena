@@ -282,16 +282,20 @@ class AssessmentRulesTest(MidtermPeriodFixture, TestCase):
             self._final("40", self.center)
             later = timezone.now() + timedelta(minutes=16)
             with mock.patch("django.utils.timezone.now", return_value=later):
-                no_doc = self._final("45", self.staff, kind="appeal")
+                # Sahib 2026-10-25: apellyasiya ilə dəyişiklik — YALNIZ İmtahan Mərkəzinin rəhbəri.
+                staff = self._final("45", self.staff, kind="appeal", sheet_evidence=_pdf())
+                self.assertEqual(staff["written"], 0)
+                self.assertIn("rəhbəri", staff["errors"][0][1])
+                no_doc = self._final("45", self.center, kind="appeal")
                 self.assertEqual(no_doc["written"], 0)
                 self.assertIn("apellyasiya sənədi", no_doc["errors"][0][1])
-                ok = self._final("45", self.staff, kind="appeal", sheet_evidence=_pdf())
+                ok = self._final("45", self.center, kind="appeal", sheet_evidence=_pdf())
             self.assertEqual(ok["written"], 1, ok)
             self.assertEqual(self._score(), Decimal("45"))
             appeal = ExamScoreEntry.objects.get(kind=ExamScoreEntryKind.APPEAL)
             self.assertEqual((appeal.old_score, appeal.new_score), (Decimal("40"), Decimal("45")))
             self.assertEqual(appeal.reason, CorrectionReason.APPEAL)
-            self.assertEqual(appeal.entered_by, self.staff)
+            self.assertEqual(appeal.entered_by, self.center)
             self.assertTrue(appeal.sheet.evidence)
 
     def test_rim_correction_only_for_rim_head_with_full_submission(self):
