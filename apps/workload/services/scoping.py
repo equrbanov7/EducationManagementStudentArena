@@ -129,7 +129,7 @@ def manageable_chairs(actor: WorkloadActor, *, permission: str = PERM_MANAGE):
     """Aktorun idarə edə bildiyi kafedra ``OrgUnit`` queryset-i (fail-closed)."""
     from django.apps import apps as django_apps
 
-    from core.constants import OrgUnitType
+    from apps.organizations.public import kafedra_unit_types
 
     if not actor.has(permission):
         return _empty_units()
@@ -137,7 +137,7 @@ def manageable_chairs(actor: WorkloadActor, *, permission: str = PERM_MANAGE):
     base = OrgUnit.objects.filter(
         organization=actor.organization,
         is_active=True,
-        unit_type__in=(OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT),
+        unit_type__in=kafedra_unit_types(actor.organization),
     )
     scope = actor.scope_for(permission)
     if scope.is_org_wide:

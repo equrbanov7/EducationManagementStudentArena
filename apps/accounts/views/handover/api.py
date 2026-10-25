@@ -231,6 +231,7 @@ def handover_options(request):
 
     from django.apps import apps as django_apps
 
+    from apps.organizations.public import kafedra_unit_types
     from core.constants import OrgUnitType
 
     academic_period = django_apps.get_model("organizations", "AcademicPeriod")
@@ -249,7 +250,7 @@ def handover_options(request):
             "has_access": True,
             "periods": periods,
             "faculties": _unit_rows(units, OrgUnitType.FACULTY),
-            "kafedras": _unit_rows(units, OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT),
+            "kafedras": _unit_rows(units, *kafedra_unit_types(actor.organization)),
         }
     )
 

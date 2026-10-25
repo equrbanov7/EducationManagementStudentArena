@@ -73,6 +73,9 @@ _STOPWORDS = frozenset(
         "baskicik", "kicik", "elmi", "isci", "stat", "yarimstat", "yarim", "saat", "hesabi", "saathesabi",
         "ilden", "isleyir", "ve", "assistent", "laborant", "dekan", "muavini", "phd", "dr", "akad", "akademik",
         "elmler", "doktoru", "namizedi", "felsefe", "sh",
+        # 2026-10-25 kafedra faylları: «Dokturant QKU …», «DİA-nın dissertantı …», «QKU mütəxəssis …»
+        "doktorant", "dokturant", "doktrant", "dissertant", "dissertanti", "doktranti", "doktoranti", "qku",
+        "dianin", "mutexessis",
     }
 )  # fmt: skip
 _SUFFIXES = frozenset({"oglu", "ogly", "qizi", "kizi", "gizi"})

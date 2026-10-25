@@ -21,7 +21,7 @@ from django.views.decorators.http import require_GET
 
 from apps.accounts import academic_records
 from apps.organizations.models import OrgUnit
-from apps.organizations.public import get_permission_scope, scope_org_units
+from apps.organizations.public import get_permission_scope, kafedra_unit_types, scope_org_units
 from apps.registrar.models import Program, StudentAcademicRecord
 from apps.registrar.public import transcript
 from core.http_ids import parse_uuid
@@ -285,7 +285,9 @@ def department_search(request):
     organization, scope = _scope(request)
     if organization is None or not scope.has_structure_access:
         return JsonResponse({"results": [], "has_more": False})
-    qs = OrgUnit.objects.filter(organization=organization, is_active=True, unit_type__in=("chair", "department"))
+    qs = OrgUnit.objects.filter(
+        organization=organization, is_active=True, unit_type__in=kafedra_unit_types(organization)
+    )
     qs = scope_org_units(qs, scope)
     faculty = parse_uuid(request.GET.get("faculty"))
     if faculty is not None:

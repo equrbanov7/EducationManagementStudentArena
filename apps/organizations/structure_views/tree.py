@@ -25,6 +25,7 @@ from django.utils.translation import pgettext, pgettext_lazy
 from core.constants import OrgUnitType
 from core.search_text import tolerant_match
 
+from ..kafedra_units import kafedra_unit_types, narrow_kafedra_rows
 from ..scoping import faculty_read_scope, get_permission_scope
 from ..unit_types import UNIT_TYPES_BY_ORG
 from ..views import _has_org_permission, _visible_units_queryset
@@ -279,7 +280,7 @@ def build_structure_tree_context(request, organization) -> dict:
         },
         {
             "label": pgettext(_CTX, "KAFEDRA"),
-            "value": sum(1 for unit in units if unit.unit_type in KAFEDRA_UNIT_TYPES),
+            "value": len(narrow_kafedra_rows(units, lambda unit: unit.unit_type)),
         },
         {
             "label": pgettext(_CTX, "RƏHBƏRİ YOXDUR"),
@@ -372,7 +373,7 @@ def visible_chairs(request, organization) -> list:
         return []
     return list(
         _visible_units_queryset(organization, scope)
-        .filter(unit_type__in=KAFEDRA_UNIT_TYPES)
+        .filter(unit_type__in=kafedra_unit_types(organization))
         .select_related("parent", "head")
         .order_by("name")
     )

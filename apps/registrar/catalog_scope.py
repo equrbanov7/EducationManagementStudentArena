@@ -107,8 +107,12 @@ def scoped_chair_options(organization, scope, *, extra_unit_ids=None) -> list:
     koordinatoru öz kafedrasını seçə bilsin) + ``extra_unit_ids`` (məs. görünən
     fənlərin sahibi kafedraları). Org əhatəsi → hamısı; əhatəsiz → boş.
     """
+    from apps.organizations.public import kafedra_unit_types
+
     OrgUnit = _org_unit_model()
-    queryset = OrgUnit.objects.filter(organization=organization, is_active=True, unit_type__in=CHAIR_UNIT_TYPES)
+    queryset = OrgUnit.objects.filter(
+        organization=organization, is_active=True, unit_type__in=kafedra_unit_types(organization)
+    )
     if not scope.is_org_wide:
         if not scope.is_unit_scoped:
             return []

@@ -130,11 +130,10 @@ def build_kollokvium_windows_section(
         return
 
     from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
+    from apps.organizations.public import kafedra_unit_types
     from apps.registrar.models import KollokviumWindow
     from apps.registrar.public import interim_assessment
     from core.constants import OrgUnitType
-
-    kafedra_types = [OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT]
 
     # ── Hədəf təşkilat ─────────────────────────────────────────────────────
     if is_superadmin:
@@ -295,7 +294,9 @@ def build_kollokvium_windows_section(
         .values("id", "name")
     )
     section["departments"] = list(
-        OrgUnit.objects.filter(organization=selected_org, is_active=True, unit_type__in=kafedra_types)
+        OrgUnit.objects.filter(
+            organization=selected_org, is_active=True, unit_type__in=kafedra_unit_types(selected_org)
+        )
         .order_by("name")
         .values("id", "name")
     )

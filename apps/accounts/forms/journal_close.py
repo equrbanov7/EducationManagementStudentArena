@@ -35,7 +35,9 @@ def _validate_scope_unit(form, cleaned):
         form.add_error("org_unit", pgettext_lazy(_CTX, "Fakültə/kafedra əhatəsi üçün bölmə seçilməlidir."))
         return cleaned
     if org_unit is not None:
-        kafedra_types = (OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT)
+        from apps.organizations.public import kafedra_unit_types
+
+        kafedra_types = kafedra_unit_types(org_unit.organization_id)
         if scope == JournalCloseScope.FACULTY and org_unit.unit_type != OrgUnitType.FACULTY:
             form.add_error("org_unit", pgettext_lazy(_CTX, "Fakültə əhatəsi üçün fakültə seçilməlidir."))
         elif scope == JournalCloseScope.DEPARTMENT and org_unit.unit_type not in kafedra_types:

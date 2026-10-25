@@ -63,8 +63,10 @@ def _years_between(start: date, today: date) -> float:
 
 def structure_block(target, organization, *, today: date | None = None) -> dict:
     from apps.organizations.models import Membership, OrgUnit
+    from apps.organizations.public import kafedra_unit_types
 
     today = today or timezone.localdate()
+    kafedra_types = kafedra_unit_types(organization)
     memberships = list(
         Membership.objects.filter(user=target, organization=organization, is_active=True)
         .select_related("role", "scope_unit")
@@ -88,7 +90,7 @@ def structure_block(target, organization, *, today: date | None = None) -> dict:
                 "faculty": chain.get("faculty", "") if unit is not None and unit.unit_type != "faculty" else "",
                 "kafedra": (
                     chain.get("kafedra", "")
-                    if unit is not None and unit.unit_type not in ("faculty", "chair", "department")
+                    if unit is not None and unit.unit_type != "faculty" and unit.unit_type not in kafedra_types
                     else ""
                 ),
                 "since": membership.created_at.date() if membership.created_at else None,
@@ -114,7 +116,7 @@ def structure_block(target, organization, *, today: date | None = None) -> dict:
     if first_unit is not None:
         if first_unit.unit_type == "faculty":
             faculty = first_unit.name
-        elif first_unit.unit_type in ("chair", "department"):
+        elif first_unit.unit_type in kafedra_types:
             kafedra = first_unit.name
     return {
         "memberships": rows,

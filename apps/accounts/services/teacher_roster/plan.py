@@ -9,9 +9,9 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 
 from apps.organizations.models import OrgUnit
+from apps.organizations.public import kafedra_unit_types
 
 from .matching import (
-    CHAIR_UNIT_TYPES,
     MATCHED_STATUSES,
     STATUS_NOT_FOUND,
     STATUS_REVIEW,
@@ -20,7 +20,7 @@ from .matching import (
     match_row,
 )
 from .parsing import DEGREE_RANK, RATE_HOURLY, RATE_UNKNOWN, TITLE_RANK
-from .protection import is_student, is_teaching, load_accounts, protection_reasons
+from .protection import is_student, is_teaching, load_accounts, protection_reasons, teaching_now_ids
 
 #: Profil elmi adı → yük profilinin vəzifəsi (``workload.constants.TeacherPosition``).
 TITLE_TO_POSITION = {
@@ -142,7 +142,9 @@ def build_plan(organization, roster, *, academic_year: str, chair_overrides=None
     accounts = load_accounts(organization)
     index = AccountIndex(accounts, is_student=is_student)
     units = list(
-        OrgUnit.objects.filter(organization=organization, is_active=True, unit_type__in=CHAIR_UNIT_TYPES)
+        OrgUnit.objects.filter(
+            organization=organization, is_active=True, unit_type__in=kafedra_unit_types(organization)
+        )
         .order_by("name")
         .values_list("id", "name")
     )
@@ -184,11 +186,14 @@ def build_plan(organization, roster, *, academic_year: str, chair_overrides=None
             )
 
     owner_ids = {organization.owner_id} if organization.owner_id else set()
+    teaching_ids = teaching_now_ids(organization, academic_year)
     block, protected, already_blocked = [], [], []
     for account in accounts:
         if not is_teaching(account) or account.user_id in candidate_ids:
             continue
-        reasons = protection_reasons(account, owner_ids=owner_ids, explicit_ids=set(protect_ids))
+        reasons = protection_reasons(
+            account, owner_ids=owner_ids, explicit_ids=set(protect_ids), teaching_ids=teaching_ids
+        )
         if reasons:
             protected.append((account, reasons))
         elif not account.is_active or account.is_deleted:

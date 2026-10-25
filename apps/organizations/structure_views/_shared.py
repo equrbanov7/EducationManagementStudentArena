@@ -87,7 +87,9 @@ def _visible_faculties_qs(organization, scope):
 
 
 def _visible_kafedras_qs(organization, scope):
-    return _visible_units_queryset(organization, scope).filter(unit_type__in=KAFEDRA_UNIT_TYPES)
+    from ..kafedra_units import kafedra_unit_types
+
+    return _visible_units_queryset(organization, scope).filter(unit_type__in=kafedra_unit_types(organization))
 
 
 def _teacher_memberships_qs(organization):

@@ -89,10 +89,12 @@ def _base_queryset(actor, catalog: str, request=None):
         return parent_units_queryset(actor, request=request)
 
     from apps.organizations.models import OrgUnit
+    from apps.organizations.public import kafedra_unit_types
 
+    unit_types = kafedra_unit_types(actor.organization) if catalog == CATALOG_UNIT else _UNIT_TYPES[catalog]
     return OrgUnit.objects.filter(
         organization=actor.organization,
-        unit_type__in=_UNIT_TYPES[catalog],
+        unit_type__in=unit_types,
         is_active=True,
     )
 

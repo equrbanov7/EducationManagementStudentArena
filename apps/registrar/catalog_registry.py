@@ -98,11 +98,13 @@ def _org_unit_model():
 
 def chair_options(organization) -> list:
     """Kafedra seçicisi — `chair` və `department` tipli aktiv vahidlər."""
+    from apps.organizations.public import kafedra_unit_types
+
     OrgUnit = _org_unit_model()
     return [
         {"value": str(unit.id), "label": unit.name}
         for unit in OrgUnit.objects.filter(
-            organization=organization, is_active=True, unit_type__in=("chair", "department")
+            organization=organization, is_active=True, unit_type__in=kafedra_unit_types(organization)
         ).order_by("name")
     ]
 

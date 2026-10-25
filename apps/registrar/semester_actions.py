@@ -476,9 +476,11 @@ def _notify_chairs(organization, period, *, actor=None) -> int:
     except Exception:  # pragma: no cover
         return 0
 
+    from apps.organizations.public import kafedra_unit_types
+
     OrgUnit = django_apps.get_model("organizations", "OrgUnit")
     chairs = OrgUnit.objects.filter(
-        organization=organization, is_active=True, unit_type__in=("chair", "department")
+        organization=organization, is_active=True, unit_type__in=kafedra_unit_types(organization)
     ).select_related("head")
     owned = set(
         CourseOffering.objects.filter(
@@ -528,9 +530,11 @@ def _remind_readiness(request, organization):
             chair_id = str(uuid.UUID(chair_id))
         except ValueError:
             return _error(pgettext(_CTX, "Kafedra tapılmadı."), status=404, code="not_found")
+        from apps.organizations.public import kafedra_unit_types
+
         chair = (
             django_apps.get_model("organizations", "OrgUnit")
-            .objects.filter(organization=organization, pk=chair_id, unit_type__in=("chair", "department"))
+            .objects.filter(organization=organization, pk=chair_id, unit_type__in=kafedra_unit_types(organization))
             .first()
         )
         if chair is None:

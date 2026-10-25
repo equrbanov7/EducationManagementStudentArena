@@ -53,6 +53,7 @@ from django.utils.translation import pgettext
 from core.constants import OrgUnitType, RoleScopeType
 from core.search_text import tolerant_q
 
+from ..kafedra_units import narrow_kafedra_rows
 from .constants import KAFEDRA_UNIT_TYPES
 from .members_base import (  # noqa: F401 — yenidən ixrac
     HEAD_PREVIEW,
@@ -138,6 +139,10 @@ def _unit_options(units):
         units.filter(unit_type__in=(OrgUnitType.FACULTY, *KAFEDRA_UNIT_TYPES))
         .order_by()
         .values_list("id", "name", "unit_type", "parent_id")
+    )
+    # İnzibati şöbə (``department``) ``chair`` olan təşkilatda kafedra deyil — sorğusuz daraltma.
+    rows = [r for r in rows if r[2] == OrgUnitType.FACULTY] + narrow_kafedra_rows(
+        [r for r in rows if r[2] != OrgUnitType.FACULTY], lambda r: r[2]
     )
     faculties = sorted((r for r in rows if r[2] == OrgUnitType.FACULTY), key=lambda r: r[1].lower())
     chairs_by_parent = defaultdict(list)

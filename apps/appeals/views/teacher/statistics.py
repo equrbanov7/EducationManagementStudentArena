@@ -379,6 +379,7 @@ def appeal_stats_filters(request):
     organization = _stats_org(request)
     from apps.exams.models import Exam
     from apps.organizations.models import OrgUnit
+    from apps.organizations.public import narrow_kafedra_rows
 
     # Tədris illəri (2025/2026 formatı) — apellyasiya tarixlərindən sentyabr sərhədi ilə.
     year_starts = sorted(
@@ -397,12 +398,11 @@ def appeal_stats_filters(request):
     # Fakültə (faculty/deanery) və kafedra (chair/department) ayrı — iki müstəqil
     # filtr + kaskad (imtahan statistikası ilə eyni sxem). Müəllim = Exam.author.
     faculty_types = {"faculty", "deanery"}
-    department_types = {"chair", "department"}
     faculties = [{"id": u["id"], "name": u["name"]} for u in units if u["unit_type"] in faculty_types]
+    # İnzibati şöbə (``department``) kafedra deyil, təşkilatda ``chair`` varsa (``organizations.kafedra_units``).
     departments = [
         {"id": u["id"], "name": u["name"], "parent_id": u["parent_id"]}
-        for u in units
-        if u["unit_type"] in department_types
+        for u in narrow_kafedra_rows(units, lambda row: row["unit_type"])
     ]
     teachers = [
         {

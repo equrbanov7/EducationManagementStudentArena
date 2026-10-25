@@ -209,9 +209,19 @@ class AccountIndex:
         return found
 
 
+#: Köçürmədən qalmış «saxta» ata adları («AAAA», «Aa», «xxx», «---» → boş açar) — ata adı YOXDUR sayılır.
+_PLACEHOLDER_PATRONYMICS = frozenset({"xxx", "yox", "nan", "none", "test"})
+
+
+def _is_placeholder(value: str) -> bool:
+    return len(set(value)) <= 1 or value in _PLACEHOLDER_PATRONYMICS
+
+
 def _patronymic_state(row_key: str, account: Account) -> str:
     """``same`` / ``similar`` (bir hərf və ya yazılış fərqi) / ``missing`` (bir tərəfdə yoxdur) / ``different``."""
     account_key = account.patronymic_key
+    if account_key and _is_placeholder(account_key):
+        account_key = ""
     if not row_key or not account_key:
         return "missing"
     if row_key == account_key or row_key.startswith(account_key) or account_key.startswith(row_key):

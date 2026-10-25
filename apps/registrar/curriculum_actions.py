@@ -72,9 +72,11 @@ def _int_or(value, default, *, low, high):
 def _chair_unit(organization, unit_id):
     if not unit_id:
         return None
+    from apps.organizations.public import kafedra_unit_types
+
     OrgUnit = django_apps.get_model("organizations", "OrgUnit")
     return OrgUnit.objects.filter(
-        organization=organization, is_active=True, pk=unit_id, unit_type__in=("chair", "department")
+        organization=organization, is_active=True, pk=unit_id, unit_type__in=kafedra_unit_types(organization)
     ).first()
 
 

@@ -132,13 +132,16 @@ def teacher_chair_units(organization, teacher_ids) -> dict:
     teacher_ids = [pk for pk in set(teacher_ids) if pk]
     if not teacher_ids:
         return {}
+    from apps.organizations.public import kafedra_unit_types
+
     rows = (
         _model("organizations", "Membership")
         .objects.filter(
             organization=organization,
             user_id__in=teacher_ids,
             is_active=True,
-            scope_unit__unit_type__in=CHAIR_UNIT_TYPES,
+            # İnzibati şöbə (``department``) kafedra deyil — bax ``organizations.kafedra_units``.
+            scope_unit__unit_type__in=kafedra_unit_types(organization),
         )
         .order_by("user_id", "-is_primary", "pk")
         .values_list("user_id", "scope_unit_id")
