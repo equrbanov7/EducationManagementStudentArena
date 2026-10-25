@@ -22,6 +22,7 @@ from django.utils import timezone
 
 from .dedupe import dedupe_enrollments
 from .finals import apply_finals
+from .history import HISTORY_PHASES, HistoryPhaseMismatch, apply_history, apply_history_topics
 from .journals import build_enrollments, build_offerings
 from .lessons import build_lessons_and_marks
 from .people import StudentMapper, TeacherMapper, student_gender
@@ -35,7 +36,17 @@ from .workload import build_workload
 BATCH_RESOURCE = "legacy_import.delta_batch"
 BULK_CHUNK = 2000
 #: Manifestdə id-ləri saxlanılan (az saylı) növlər; qalanı yalnız say.
-MANIFEST_KINDS = ("groups", "subjects", "offerings", "teachers", "students", "syllabus_versions", "workload_chairs")
+MANIFEST_KINDS = (
+    "groups",
+    "subjects",
+    "offerings",
+    "teachers",
+    "students",
+    "syllabus_versions",
+    "workload_chairs",
+    "history_enrollments",
+    "history_offerings",
+)
 PHASES = (
     "students",
     "offerings",
@@ -49,9 +60,12 @@ PHASES = (
     "subgroups",
     "profiles",
     "registry_sync",
+    "history",
+    "history_topics",
 )
-#: Yalnız AÇIQ seçiləndə (``--phase`` və ya paketin ``snapshot.phases``-i) işləyən fazalar — reyestr əmrləri yazır.
-OPT_IN_PHASES = ("registry_sync",)
+#: Yalnız AÇIQ seçiləndə (``--phase`` və ya paketin ``snapshot.phases``-i) işləyən fazalar — reyestr əmrləri yazır;
+#: ``history*`` tarixi (bağlı) jurnallara əlavə edir (``delta/history.py``).
+OPT_IN_PHASES = ("registry_sync", "history", "history_topics")
 DEFAULT_PHASES = tuple(phase for phase in PHASES if phase not in OPT_IN_PHASES)
 
 
@@ -178,6 +192,10 @@ class DeltaRun:
             self._profiles()
         if "registry_sync" in phases:
             sync_registry(self)
+        if "history" in phases:
+            apply_history(self)
+        if "history_topics" in phases:
+            apply_history_topics(self)
         for _legacy_id, user_pk in self.teachers.created:
             self.created("teachers", user_pk)
         for _legacy_id, user_pk in self.students.created:
@@ -261,6 +279,9 @@ def execute(*, organization, actor, bundle: dict, apply: bool, until, tag: str =
 
     from ..repair_support import disable_parallel_query
 
+    if bundle.get("history") and set(phases) - set(HISTORY_PHASES):
+        # Tarixi paketin tələbə bölməsi boşluq tələbələridir — adi fazalar onlar üçün hesab YARADARDI.
+        raise HistoryPhaseMismatch("legacy_delta_history_bundle_phase_mismatch")
     with transaction.atomic():
         apply_rls_request_context(user_id=actor.pk, org_id=organization.pk)
         disable_parallel_query(local=True)

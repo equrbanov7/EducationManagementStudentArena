@@ -19,6 +19,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 from apps.legacy_import.services.delta.apply import DEFAULT_PHASES, PHASES, execute
 from apps.legacy_import.services.delta.bundle import BundleError, file_sha256, read_bundle
+from apps.legacy_import.services.delta.history import HistoryPhaseMismatch
 from apps.legacy_import.services.repair_support import (
     add_repair_arguments,
     assert_writable_target,
@@ -52,7 +53,7 @@ class Command(BaseCommand):
             action="append",
             choices=PHASES,
             default=[],
-            help="Yalnız bu faza(lar) (default: paketin snapshot.phases-i, yoxdursa registry_sync-dən başqa hamısı)",
+            help="Yalnız bu faza(lar) (default: paketin snapshot.phases-i, yoxdursa opt-in fazalardan — registry_sync, history* — başqa hamısı)",
         )
         parser.add_argument("--report-out", default="", help="Saylar (JSON, adsız)")
         parser.add_argument("--names-out", default="", help="Adlı siyahı (CSV, 0600) — yaradılan/ambiqü hesablar")
@@ -78,14 +79,17 @@ class Command(BaseCommand):
                 assert_writable_target(allow_production=bool(options["i_know_this_is_production"]))
             organization = resolve_organization(options["organization"])
             actor = resolve_actor(organization, options["actor"])
-            run = execute(
-                organization=organization,
-                actor=actor,
-                bundle=bundle,
-                apply=bool(options["apply"]),
-                until=until,
-                phases=tuple(options["phase"] or (bundle.get("snapshot") or {}).get("phases") or DEFAULT_PHASES),
-            )
+            try:
+                run = execute(
+                    organization=organization,
+                    actor=actor,
+                    bundle=bundle,
+                    apply=bool(options["apply"]),
+                    until=until,
+                    phases=tuple(options["phase"] or (bundle.get("snapshot") or {}).get("phases") or DEFAULT_PHASES),
+                )
+            except HistoryPhaseMismatch as error:
+                raise CommandError(str(error)) from None
         summary = run.summary()
         summary.update(
             mode="APPLY" if options["apply"] else "DRY-RUN (geri qaytarıldı)",

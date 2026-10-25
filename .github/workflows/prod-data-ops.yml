@@ -96,6 +96,11 @@
 #       Loga YALNIZ saylar; adlı siyahı + hesabat şifrəli artifaktdadır. `--phases registry_sync` ilə qurulmuş paket
 #       (sahib 2026-10-25) aktiv reyestri köhnə sistemlə nizamlayır: rəsmi `group_transfer` / `expulsion` əmrləri
 #       (yeni sistemdə əl ilə dəyişiklik, alt qrup ↔ ana qrup, başqa ixtisas — toxunulmur); bildiriş getmir.
+#       TARİXİ boşluq paketi (`roster_tag` = `legacy-delta-hist-…`, sahib 2026-10-25: «köçməmiş data problem yaratmasın»;
+#       `legacy_delta_extract --history-semester 1-13 [--history-topics]`) yalnız `history` / `history_topics`
+#       fazalarını daşıyır (snapshot.phases; adi fazalarla birgə RƏDD olunur): cutover-in buraxdığı (jurnal, tələbə)
+#       cütləri üçün qeydiyyat + xana + im/im2 bağlı tarixi jurnallara YALNIZ ƏLAVƏ; hesabı olmayan keçmiş tələbə
+#       — `alumni` arxivi (giriş bağlı); `history_topics` — tarixi dərslərin BOŞ mövzu/otağı.
 #   legacy_repair_empty_lessons — real xanası (bal / iə / ü/q), mövzusu və düzəlişi olmayan KEÇMİŞ dərsləri (jurnalın
 #       məzmunsuz sütunlarını) silir (sahib 2026-10-24: «boşdursa silinsin; bir neçə tələbəyə “qb” yazılıbsa belə
 #       silinsin»): köçürülmüş tam boş sütun + yalnız balsız «qb» xanalı sütun (--include-absent-only; xanalar da

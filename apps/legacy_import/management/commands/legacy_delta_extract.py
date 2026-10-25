@@ -6,6 +6,17 @@ Lokal, izolə MariaDB konteynerində (dump-lar yüklənmiş) işlədilir; Django
         --source myedu_new --baseline myedu_old --since 2026-08-01 \\
         --snapshot-file "~/Desktop/myedudb (1).sql" --out ~/EMSArena-backups/legacy-delta/delta.json.gz
 
+TARİXİ boşluq paketi (sahib 2026-10-25, ``services/delta/history.py``) — Django bazası prod NÜSXƏSİ olmalıdır
+(cutover ledger-i yalnız OXUNUR: köçmüş (jurnal, tələbə) cütləri paketə düşmür)::
+
+    DATABASE_URL=postgres://…/ems_prodlive_1025 manage.py legacy_delta_extract --port 50330 \
+        --password-file <fayl> --source myedu_new --history-semester 1-6 --phases history \
+        --organization qku --out ~/EMSArena-backups/legacy-delta/delta-hist-a.json.gz
+
+Yaddaş üçün (əmr app konteynerində işləyir, limit 2 GB) paketlər ayrıdır: boşluqlar semestr dəstələri ilə
+(``1-6``, ``7-13``; ``--phases history``), tarixi mövzu/otaq ayrıca (``--history-semester 1-13 --phases
+history_topics``). Hesab qərarının sübutu bütün jurnallardan qurulur — bölgü nəticəni dəyişmir.
+
 Çıxış 0600 rejimli JSON.gz-dir (şəxsi məlumat var) — serverə yalnız ŞİFRƏLİ release asset kimi
 gedir (bax ``docs/migration/LEGACY_DELTA_2026_10.md``). Ekrana yalnız SAYLAR çıxır.
 """
@@ -19,6 +30,9 @@ from django.core.management.base import BaseCommand, CommandError
 from apps.legacy_import.services.delta.apply import PHASES
 from apps.legacy_import.services.delta.bundle import file_sha256, write_bundle
 from apps.legacy_import.services.delta.extract import DeltaExtractor, build_bundle
+from apps.legacy_import.services.delta.history import HISTORY_PHASES
+from apps.legacy_import.services.delta.history_extract import build_history_bundle, ledger_sets, parse_semesters
+from apps.legacy_import.services.repair_support import resolve_organization
 from core.rls_pooling import rls_worker_atomic
 
 
@@ -52,6 +66,14 @@ class Command(BaseCommand):
             help="Adaşlardan HEÇ BİRİ tutmayan legacy tələbə yeni hesab kimi yaradılır (sahibin açıq qərarı)",
         )
         parser.add_argument(
+            "--history-semester",
+            default="",
+            help="TARİXİ boşluq paketi (məs. 1-6): yalnız cutover ledger-ində köçməmiş (jurnal, tələbə) cütləri; "
+            "ledger Django bazasından (prod NÜSXƏSİ, yalnız oxu) oxunur — --organization tələb olunur; "
+            "--phases history (default) və/və ya history_topics",
+        )
+        parser.add_argument("--organization", default="", help="--history-semester: ledger-in təşkilatı (slug)")
+        parser.add_argument(
             "--phases",
             nargs="+",
             choices=PHASES,
@@ -81,7 +103,8 @@ class Command(BaseCommand):
             )
         except pymysql.MySQLError as error:
             raise CommandError(f"legacy_delta_source_unavailable: {error.__class__.__name__}") from None
-        # Django bazasına toxunulmur; rls_worker_atomic yalnız entry-point qaydası üçündür (tranzaksiya boşdur).
+        history = self._history_options(options)
+        # Adi delta Django bazasına toxunmur; tarixi paket yalnız ledger-i OXUYUR (rls_worker_atomic + tenant konteksti).
         with rls_worker_atomic(), connection.cursor() as cursor:
             cursor.execute("SET SESSION TRANSACTION READ ONLY")
             cursor.execute("START TRANSACTION WITH CONSISTENT SNAPSHOT")
@@ -91,7 +114,10 @@ class Command(BaseCommand):
                 baseline=options["baseline"],
                 full_semesters=options["full_semester"],
             )
-            bundle = build_bundle(extractor, snapshot=snapshot, since=options["since"])
+            if history:
+                bundle = self._history_bundle(extractor, snapshot, history, options)
+            else:
+                bundle = build_bundle(extractor, snapshot=snapshot, since=options["since"])
             if options["phases"]:
                 bundle["snapshot"]["phases"] = list(options["phases"])
             if options["create_ambiguous"]:
@@ -116,4 +142,49 @@ class Command(BaseCommand):
             "lesson_topics",
         ):
             self.stdout.write(f"  {name:15s}: {len(bundle[name])}")
+        for name, rows in sorted((bundle.get("history") or {}).items()):
+            if isinstance(rows, list) and name != "semesters":
+                self.stdout.write(f"  history.{name:22s}: {len(rows)}")
+        for name, value in sorted(((bundle.get("history") or {}).get("stats") or {}).items()):
+            self.stdout.write(f"  history.stats.{name:30s}: {value}")
+        if history:
+            self.stdout.write(f"Fazalar: {bundle['snapshot'].get('phases')}")
         self.stdout.write(f"Paket: sha256={digest} (0600; şəxsi məlumat — yalnız şifrəli ötürün)")
+
+    @staticmethod
+    def _history_options(options):
+        if not options["history_semester"]:
+            return None
+        if options["baseline"] or options["full_semester"]:
+            raise CommandError(
+                "legacy_delta_history_exclusive: --history-semester --baseline/--full-semester ilə birgə verilmir"
+            )
+        if not options["organization"]:
+            raise CommandError("legacy_delta_history_organization_required")
+        try:
+            semesters = parse_semesters(options["history_semester"])
+        except ValueError as error:
+            raise CommandError(str(error)) from None
+        allowed = set(HISTORY_PHASES)
+        phases = list(options["phases"]) or ["history"]
+        if set(phases) - allowed:
+            raise CommandError("legacy_delta_history_bundle_phase_mismatch: yalnız history / history_topics")
+        options["phases"] = phases
+        return semesters
+
+    @staticmethod
+    def _history_bundle(extractor, snapshot, semesters, options):
+        from core.rls import apply_rls_request_context
+
+        organization = resolve_organization(options["organization"])
+        apply_rls_request_context(user_id=0, org_id=organization.pk)
+        pairs, journals = ledger_sets(organization)
+        return build_history_bundle(
+            extractor,
+            snapshot={**snapshot, "organization": organization.slug},
+            semesters=semesters,
+            migrated_pairs=pairs,
+            migrated_journals=journals,
+            gaps="history" in options["phases"],
+            topics="history_topics" in options["phases"],
+        )
