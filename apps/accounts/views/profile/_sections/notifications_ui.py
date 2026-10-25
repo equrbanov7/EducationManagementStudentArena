@@ -16,6 +16,8 @@ from django.utils import timezone
 from django.utils.timesince import timesince
 from django.utils.translation import pgettext
 
+from apps.notifications.public import localize_notification
+
 _CTX = "profile.notifications"
 
 #: Bildiriş növü → (Font Awesome ikonu, palitra tonu).
@@ -51,7 +53,7 @@ def _bucket(days_ago: int) -> str:
 
 
 def decorate(notifications) -> list:
-    """Hər bildirişə ``ui_icon`` / ``ui_tone`` / ``ui_bucket`` / ``ui_time`` yazır.
+    """Hər bildirişə ``ui_icon`` / ``ui_tone`` / ``ui_bucket`` / ``ui_time`` yazır və mətni oxuyanın dilinə çevirir.
 
     Obyektlər DB-yə yazılmır — sadəcə şablon üçün keçici atributlar.
     """
@@ -59,6 +61,8 @@ def decorate(notifications) -> list:
     today = now.date()
     items = list(notifications)
     for notification in items:
+        # Başlıq/mətn oxuyanın CARİ dilində (yaradılan anın dilində yox) — bax `apps/notifications/i18n.py`.
+        localize_notification(notification)
         icon, tone = TYPE_UI.get(notification.notification_type, DEFAULT_TYPE_UI)
         notification.ui_icon = icon
         notification.ui_tone = tone

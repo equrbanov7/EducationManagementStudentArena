@@ -210,6 +210,13 @@ def python_msgids(source: str) -> set:
         if not isinstance(node, ast.Call):
             continue
         name = _func_name(node.func)
+        if name == "LText":
+            # `apps/notifications/i18n.LText(msgid, context="", **params)` — pgettext-in kontekst-SONRA variantı.
+            msg = _const_str(node.args[0]) if node.args else None
+            ctx = _const_str(node.args[1], constants) if len(node.args) > 1 else ""
+            if msg and ctx is not None:
+                found.add((ctx, msg))
+            continue
         if name not in PY_FUNCS:
             continue
         pair = _pair_from_call(name, node.args, constants)

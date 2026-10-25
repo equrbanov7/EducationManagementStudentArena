@@ -108769,3 +108769,13 @@ msgstr "Подходящая страна не найдена"
 msgctxt "core.phone"
 msgid "Ölkə və zəng kodu"
 msgstr "Страна и телефонный код"
+
+#, python-format
+msgctxt "workload.notify"
+msgid "Dərs yükü təyin edildi: %(head)s — %(hours)d saat"
+msgstr "Назначена учебная нагрузка: %(head)s — %(hours)d ч."
+
+#, python-format
+msgctxt "workload.notify"
+msgid "%(year)s tədris ili üçün dərs yükünüz təsdiqləndi. Fənn sayı: %(count)d, cəmi %(hours)d saat. «Dərs yüküm» bölməsindən baxa bilərsiniz."
+msgstr "Ваша учебная нагрузка на %(year)s учебный год утверждена. Количество дисциплин: %(count)d, всего %(hours)d ч. Посмотреть можно в разделе «Моя учебная нагрузка»."
