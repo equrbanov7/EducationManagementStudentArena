@@ -36,6 +36,7 @@ class PreviewTest(SubjectMergeBase):
                 "registrar.GroupElectiveChoice.chosen_subject": 1,
                 "registrar.RetakeApplication.subject": 1,
                 "registrar.ExamChanceGrant.subject": 1,
+                "registrar.ExternalCreditRecognition.subject": 1,
                 "syllabus.Syllabus.subject": 2,
                 "workload.TeachingTaskRow.subject": 1,
                 "exams.StudentGroup.subjects": 2,
@@ -47,7 +48,8 @@ class PreviewTest(SubjectMergeBase):
                 "soft_json": 1,
             },
         )
-        self.assertEqual(payload["total"], sum(counts.values()) - counts["registrar.ExamChanceGrant.subject"])
+        kept = counts["registrar.ExamChanceGrant.subject"] + counts["registrar.ExternalCreditRecognition.subject"]
+        self.assertEqual(payload["total"], sum(counts.values()) - kept)
         self.assertTrue(payload["can_apply"], payload["blocking"])
         self.assertEqual(payload["archive_reason"], "Birləşdirildi → QA-SM-T")
         self.assertFalse(Subject.objects.get(pk=self.source.pk).is_archived)

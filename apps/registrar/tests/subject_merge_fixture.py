@@ -12,6 +12,7 @@ from decimal import Decimal
 
 from django.apps import apps as django_apps
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit, Role
@@ -21,6 +22,7 @@ from apps.registrar.models import (
     CurriculumSubject,
     Enrollment,
     ExamChanceGrant,
+    ExternalCreditRecognition,
     GroupElectiveChoice,
     Program,
     RetakeApplication,
@@ -224,6 +226,22 @@ class SubjectMergeBase(TestCase):
             )
             built["chance"] = ExamChanceGrant.objects.create(
                 organization=self.org, student=self.student, subject=self.source, exam_id=1, reason="other"
+            )
+            built["recognition"] = ExternalCreditRecognition.objects.create(
+                organization=self.org,
+                student=self.student,
+                subject=self.source,
+                period=self.period,
+                enrollment=built["enrollment"],
+                program="exchange",
+                institution="QA University",
+                country="QA",
+                foreign_subject="QA Subject",
+                foreign_credit=Decimal("5"),
+                foreign_grade="A",
+                study_period="2025/2026",
+                recognized_score=90,
+                document=SimpleUploadedFile("qa.pdf", b"%PDF-1.4 qa", content_type="application/pdf"),
             )
             built["syllabus"] = self.syllabus(self.source, period=self.period, author=self.teacher)
             built["offering_syllabus"] = self.syllabus(self.source, offering=built["offering"], author=self.teacher)
