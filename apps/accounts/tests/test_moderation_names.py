@@ -77,7 +77,9 @@ class ProfileEditModerationTest(TestCase):
         User.objects.filter(pk=self.user.pk).update(last_name="Siktirov")
         response = self._post(last_name="Siktirov", phone="0501234567")
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(UserProfile.objects.get(user=self.user).phone, "+994501234567")  # E.164 (telefon sahəsi, 2026-10-25)
+        self.assertEqual(
+            UserProfile.objects.get(user=self.user).phone, "+994501234567"
+        )  # E.164 (telefon sahəsi, 2026-10-25)
         self.assertFalse(_rows().exists())
 
 
