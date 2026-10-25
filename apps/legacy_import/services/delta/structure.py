@@ -4,7 +4,7 @@ Qrup
     Cutover-in ``academic_structure`` fazası ilə eyni: ``OrgUnit(unit_type=group)``, slug
     ``myedu-grp-<legacy id>`` (təkrar qaçışda bu slug ilə tapılır), ata = legacy ixtisasın ledger
     vahidi (yoxdursa kafedra/fakültə). ``settings``: ``legacy`` izi + ``sector`` / ``degree_level`` /
-    ``admission_year`` / ``education_form``. Ad alt qrup şablonuna uyğundursa («536 TB1» ← «536 TB»)
+    ``admission_year`` / ``education_form`` (forma qrup kodundan — ``group_rule_form``, sahib 2026-10-25). Ad alt qrup şablonuna uyğundursa («536 TB1» ← «536 TB»)
     ``parent_group`` izi yazılır — qrup bölgüsü (``group_split``) ilə eyni açar, jurnal birləşik görünür.
     YALNIZ istinad olunan (jurnalı və ya yaradılacaq tələbəsi olan) qruplar yaradılır.
 
@@ -66,6 +66,7 @@ def ensure_group(run, legacy: dict):
         "degree_level": _DEGREE.get(str(legacy.get("bak_or_mag") or "").strip().lower(), "bachelor"),
         "education_form": _FORM.get(text(legacy.get("eyani_qiyabi")).casefold(), "full_time"),
     }
+    _apply_form_rule(run, name, parent, settings)
     year = str(legacy.get("start_year") or "")[:4]
     if year.isdigit() and int(year) > 1990:
         settings["admission_year"] = int(year)
@@ -87,6 +88,20 @@ def ensure_group(run, legacy: dict):
     run.count("group.created")
     run.names("group_created", name, parent.name)
     return unit
+
+
+def _apply_form_rule(run, name: str, parent, settings: dict) -> None:
+    """Sahib 2026-10-25: forma qrup kodundan (3 rəqəm əyani, 4 rəqəm qiyabi) — legacy ``eyani_qiyabi`` ziddirsə
+    qayda qalibdir (``group.form_rule_override`` sayılır). Magistr/kollec/qeyri-standart adda legacy dəyəri qalır."""
+
+    from apps.organizations.public import group_chain_names, group_rule_form_for
+
+    form, _reason = group_rule_form_for(name, settings=settings, names=group_chain_names(parent))
+    if form is None:
+        return
+    if form != settings["education_form"]:
+        run.count("group.form_rule_override")
+        settings["education_form"] = form
 
 
 def _base_group(catalog, name: str):

@@ -126,6 +126,12 @@
 #   backfill_notification_i18n — köhnə bildirişlərə dil-müstəqil deskriptor (metadata.i18n) əlavə edir (sahib 2026-10-25
 #       «bildirişlərin dili hərəsi bir cür»): siyahı onları oxuyanın dilində göstərir. YALNIZ metadata-ya açar
 #       əlavə olunur (başlıq/mətn/keçid/oxunma dəyişmir); idempotent. Giriş yoxdur. Loga YALNIZ saylar.
+#   fix_group_education_form — təhsil forması qrup kodundan (sahib 2026-10-25: «4 rəqəm («2232 K») — QİYABİ,
+#       3 rəqəm («234 KE») — ƏYANİ»): birmənalı bakalavr qrupunun `settings.education_form`-u düzəldilir/doldurulur,
+#       qiyabi qrupdakı «əyani» tələbə qeydləri qiyabi olur, dərs yükü sətri (bütün qrupları eyni formadadırsa)
+#       eyani/qiyabi olur. Magistr («409/6MBA»), kollec («1226 A», «1025»), «3/336 F» kimi adlar DƏYİŞMİR. Əyani
+#       qrupdakı «qiyabi» tələbə qeydi (yerləşdirmə sualı) dəyişmir — yalnız sayılır. Audit; idempotent. Loga
+#       YALNIZ saylar.
 #   shrink_avatars — mövcud avatarlar ≤512 px WebP-yə (PERF-2 H5, 2026-10-17); orijinal fayllar SİLİNMİR,
 #       `updated_at` dəyişmir. Loga yalnız yekun saylar.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
@@ -188,6 +194,7 @@ on:
           - audit_cross_chair_loads
           - link_lesson_syllabus_weeks
           - backfill_notification_i18n
+          - fix_group_education_form
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -673,6 +680,11 @@ jobs:
               # Sahib 2026-10-25: köhnə bildirişlərə metadata.i18n (bütün təşkilatlar; giriş yoxdur). Loga yalnız saylar.
               args=()
               ;;
+            fix_group_education_form)
+              # Sahib 2026-10-25: 3 rəqəmli qrup kodu əyani, 4 rəqəmli qiyabi — qrup + tələbə qeydi + dərs yükü sətri.
+              # Əyani qrupdakı «qiyabi» qeydlər (--align-part-to-full) BURADA YOXDUR — yerləşdirmə sahibin qərarıdır.
+              args=(--org "$ORG" --task-rows)
+              ;;
             *)
               echo "icazəsiz əmr: $COMMAND" >&2; exit 2
               ;;
@@ -784,10 +796,10 @@ jobs:
               exit "$status"
             fi
             rm -f "$RUNNER_TEMP/out.log"
-          elif [ "$COMMAND" = "link_lesson_syllabus_weeks" ]; then
-            # Loga YALNIZ «syllabus_week_link: açar=say …» sətirləri və rədd kodu (əmr mövzu/ad çap etmir).
+          elif [ "$COMMAND" = "link_lesson_syllabus_weeks" ] || [ "$COMMAND" = "fix_group_education_form" ]; then
+            # Loga YALNIZ «<prefiks>: açar=say …» sətirləri və rədd kodu (əmrlər mövzu/ad çap etmir).
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
-            grep -E '^syllabus_week_link: [a-z_]+=[0-9a-z_]+( [a-z_]+=[0-9a-z_]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            grep -E '^(syllabus_week_link|group_education_form): [a-z_]+=[0-9a-z_]+( [a-z_]+=[0-9a-z_]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true

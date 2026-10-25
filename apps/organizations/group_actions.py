@@ -37,6 +37,7 @@ from django.views.decorators.http import require_POST
 from core.audit import log_action
 from core.constants import AuditAction, OrgUnitType
 
+from .group_education_form import group_rule_form
 from .groups_registry import (
     can_manage_groups,
     can_view_groups,
@@ -101,6 +102,11 @@ def _apply_meta(unit, request):
     education_form = (request.POST.get("education_form") or "").strip()
     allowed_forms = {option["value"] for option in education_form_choices()}
     settings_blob["education_form"] = education_form if education_form in allowed_forms else ""
+    # Sahib 2026-10-25: birmənalı bakalavr kodunda forma ADDAN gəlir (3 rəqəm əyani, 4 rəqəm qiyabi) — qayda
+    # formadakı seçimdən üstündür (yeni qrup da, adı dəyişən qrup da). Magistr/kollec/qeyri-standart ad → seçim qalır.
+    rule_form, _reason = group_rule_form(unit)
+    if rule_form in allowed_forms:
+        settings_blob["education_form"] = rule_form
     # 2026-10-19: forma `curriculum_id` GÖNDƏRMİR — əvvəl hər yazı bağlantını "" edirdi.
     # İndi «tutor» kimi: yalnız sahə POST-da VARSA dəyişir (boş dəyər = bağlantını sil).
     if "curriculum_id" in request.POST:
