@@ -69,6 +69,12 @@
 #       bloklanmış MÜƏLLİM, aktiv qeydi olan bloklanmış TƏLƏBƏ; qa.* sayılmır. Defolt YALNIZ hesabat;
 #       `apply` + `create_missing` → YALNIZ yükü olan bloklanmış müəllimlərin bloku rəsmi servislə açılır
 #       (audit); tələbə heç vaxt avtomatik açılmır. Loga yalnız saylar; CSV (istifadəçi adları) şifrəlidir.
+#   freeze_duplicate_accounts — dublikat heyət hesabları (sahib 2026-10-25 «jurnalı yazdığı hesabı saxla, digərlərini
+#       dondur»): dublikatları DB-dən özü tapır (soyad+ad diakritik dözümlü, ata adı ziddiyyətsiz, FİN). Saxlanılan:
+#       cari jurnal → dərs yükü → son giriş → rol. Dondurulan hesabın rolları/rəhbərliyi saxlanılana, cari jurnalları
+#       rəsmi «Fənn təhvili» ilə saxlanılana keçir, üzvlükləri deaktiv, hesab «Hesabı dayandır» ilə bloklanır (paket
+#       `dupacct-…`). `apply` → yazı; `batch` (apply ilə) → həmin paket geri qaytarılır. Loga YALNIZ saylar + paket
+#       id-si; adlı CSV şifrəli artifaktdadır.
 #   dedupe_notifications — təkrar «Dərs yükü təyin edildi» (tip `assignment`, sahib 2026-10-17 «İkinci bildirişləri
 #       oxunmuş et»): `date_from` … `date_to` (YYYY-MM-DD, `date_to` boş = bu gün) aralığında eyni alıcı + başlıq +
 #       mətn + keçid + metadata ilə 120 dəqiqə içində təkrarlanan OXUNMAMIŞ bildirişlərdən ən erkəni saxlanılır,
@@ -202,6 +208,7 @@ on:
           - retire_qa_accounts
           - ensure_parent_groups
           - blocked_accounts_report
+          - freeze_duplicate_accounts
           - dedupe_notifications
           - archive_junk_groups
           - shrink_avatars
@@ -249,7 +256,7 @@ on:
         required: false
         default: ""
       batch:
-        description: "reconcile_teacher_roster / audit_staff_placement (placement-…): geri qaytarılacaq paket id-si (undo) · legacy_delta_apply: paketin gözlənilən sha256-sı"
+        description: "reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…): geri qaytarılacaq paket id-si (undo) · legacy_delta_apply: paketin gözlənilən sha256-sı"
         required: false
         default: ""
       create_missing:
@@ -427,7 +434,7 @@ jobs:
           # reconcile_teacher_roster eyni faylı oxuyur (ad fərqi yalnız aydınlıq üçün deyil — təmizlik eyni qlobdur).
           rm -f "$RUNNER_TEMP/input.bin" "$RUNNER_TEMP/input.enc"
       - name: 🧰 Run
-        if: github.event.inputs.command != 'import_timetable_docx' && github.event.inputs.command != 'assign_task_rows_from_timetable' && github.event.inputs.command != 'backfill_teacher_lessons' && github.event.inputs.command != 'ensure_parent_groups' && github.event.inputs.command != 'blocked_accounts_report' && github.event.inputs.command != 'archive_junk_groups' && github.event.inputs.command != 'shrink_avatars' && github.event.inputs.command != 'legacy_delta_apply'
+        if: github.event.inputs.command != 'import_timetable_docx' && github.event.inputs.command != 'assign_task_rows_from_timetable' && github.event.inputs.command != 'backfill_teacher_lessons' && github.event.inputs.command != 'ensure_parent_groups' && github.event.inputs.command != 'blocked_accounts_report' && github.event.inputs.command != 'archive_junk_groups' && github.event.inputs.command != 'shrink_avatars' && github.event.inputs.command != 'legacy_delta_apply' && github.event.inputs.command != 'freeze_duplicate_accounts'
         run: |
           set -euo pipefail
           # SEC-1 F7 (2026-10-17): TAM dəyər yoxlaması. `grep` sətir-sətir işləyir — API ilə göndərilən, sətir sonu
@@ -1216,7 +1223,7 @@ jobs:
       # ── ensure_parent_groups / blocked_accounts_report (ortaq ana qruplar + bloklanmış hesablar; öz addımları —
       #    digər əmrlərin axınına toxunmur). CSV hesabat şifrəli artifaktdadır (blocked_accounts.csv ŞƏXSİ datadır). ──
       - name: 👥 Ortaq ana qruplar / bloklanmış hesablar
-        if: github.event.inputs.command == 'ensure_parent_groups' || github.event.inputs.command == 'blocked_accounts_report' || github.event.inputs.command == 'archive_junk_groups' || github.event.inputs.command == 'shrink_avatars'
+        if: github.event.inputs.command == 'ensure_parent_groups' || github.event.inputs.command == 'blocked_accounts_report' || github.event.inputs.command == 'archive_junk_groups' || github.event.inputs.command == 'shrink_avatars' || github.event.inputs.command == 'freeze_duplicate_accounts'
         run: |
           set -euo pipefail
           report_dir="/tmp/groups_accounts_report_${GITHUB_RUN_ID}"
@@ -1253,6 +1260,25 @@ jobs:
               args=()
               test "$APPLY" != "true" || args+=(--apply)
               ;;
+            freeze_duplicate_accounts)
+              # Sahib 2026-10-25: dublikat heyət hesabı — jurnal yazılan hesab saxlanılır, digərləri dondurulur.
+              report_csv=duplicate_accounts.csv
+              test "$CREATE_MISSING" != "true" || { echo "create_missing bu əmr üçün deyil" >&2; exit 2; }
+              if [ "$APPLY" = "true" ] || [ -n "$BATCH" ]; then
+                test "$APPLY" = "true" || { echo "yazı / undo üçün apply=true + confirm=APPLY verin" >&2; exit 2; }
+                actor="$(docker exec -i "$APP_CONTAINER" python manage.py shell -c \
+                  "from django.contrib.auth import get_user_model as g; u=g().objects.filter(is_superuser=True, is_active=True).order_by('date_joined').first(); print(u.username if u else '')" | tail -n1)"
+                test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+                echo "::add-mask::$actor"
+                args+=(--actor "$actor" --i-know-this-is-production)
+                if [ -n "$BATCH" ]; then
+                  [[ "$BATCH" =~ ^dupacct-[0-9a-z-]+$ ]] || { echo "batch formatı: dupacct-…" >&2; exit 2; }
+                  args+=(--undo "$BATCH")
+                else
+                  args+=(--apply)
+                fi
+              fi
+              ;;
             *) echo "icazəsiz əmr: $COMMAND" >&2; exit 2 ;;
           esac
           if [ "$APPLY" = "true" ]; then
@@ -1265,7 +1291,7 @@ jobs:
           if docker exec "$APP_CONTAINER" test -s "${report_dir}/${report_csv}"; then
             docker exec "$APP_CONTAINER" cat "${report_dir}/${report_csv}" > "$RUNNER_TEMP/ga_details.csv"
           fi
-          grep -E '^(DRY-RUN \(heç nə yazılmadı\)|HESABAT \(heç nə yazılmadı\)|YAZILDI): [a-z_]+=[0-9]+( · [a-z_]+=[0-9]+)*$|^Hesabat: [a-z_]+\.csv \([0-9]+ sətir\)$|^(TƏTBİQ OLUNDU|QURU QAÇIŞ \(heç nə yazılmadı; --apply ilə yazılır\)): çevriləcək/çevrilən [0-9]+, ötürülən [0-9]+, fayl yoxdur [0-9]+, xəta [0-9]+; qənaət ≈ [0-9.]+ [KM]B$' \
+          grep -E '^(DRY-RUN \(heç nə yazılmadı\)|HESABAT \(heç nə yazılmadı\)|YAZILDI): [a-z_]+=[0-9]+( · [a-z_]+=[0-9]+)*$|^Hesabat: [a-z_]+\.csv \([0-9]+ sətir\)$|^Paket: dupacct-[0-9a-z-]+$|^(TƏTBİQ OLUNDU|QURU QAÇIŞ \(heç nə yazılmadı; --apply ilə yazılır\)): çevriləcək/çevrilən [0-9]+, ötürülən [0-9]+, fayl yoxdur [0-9]+, xəta [0-9]+; qənaət ≈ [0-9.]+ [KM]B$' \
             "$RUNNER_TEMP/ga_out.log" | cut -c1-600 > "$RUNNER_TEMP/ga_summary.log" || true
           cat "$RUNNER_TEMP/ga_summary.log"
           {
@@ -1277,7 +1303,7 @@ jobs:
           test "${status:-0}" = 0 || { grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/ga_out.log" | head -n 1 || true; exit "$status"; }
       - name: 🔑 Ortaq ana qruplar / bloklanmış hesablar hesabatı (şifrəli)
         id: ga_report
-        if: always() && (github.event.inputs.command == 'ensure_parent_groups' || github.event.inputs.command == 'blocked_accounts_report' || github.event.inputs.command == 'archive_junk_groups' || github.event.inputs.command == 'shrink_avatars')
+        if: always() && (github.event.inputs.command == 'ensure_parent_groups' || github.event.inputs.command == 'blocked_accounts_report' || github.event.inputs.command == 'archive_junk_groups' || github.event.inputs.command == 'shrink_avatars' || github.event.inputs.command == 'freeze_duplicate_accounts')
         env:
           STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
         run: |
@@ -1299,11 +1325,11 @@ jobs:
         if: always() && steps.ga_report.outputs.saved != ''
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: ${{ github.event.inputs.command == 'blocked_accounts_report' && 'blocked-accounts-encrypted' || 'parent-groups-encrypted' }}
+          name: ${{ github.event.inputs.command == 'blocked_accounts_report' && 'blocked-accounts-encrypted' || github.event.inputs.command == 'freeze_duplicate_accounts' && 'duplicate-accounts-encrypted' || 'parent-groups-encrypted' }}
           path: ${{ runner.temp }}/ga-out/
           retention-days: 1
       - name: 🧹 Ortaq ana qruplar / bloklanmış hesablar — müvəqqəti faylları sil
-        if: always() && (github.event.inputs.command == 'ensure_parent_groups' || github.event.inputs.command == 'blocked_accounts_report' || github.event.inputs.command == 'archive_junk_groups' || github.event.inputs.command == 'shrink_avatars')
+        if: always() && (github.event.inputs.command == 'ensure_parent_groups' || github.event.inputs.command == 'blocked_accounts_report' || github.event.inputs.command == 'archive_junk_groups' || github.event.inputs.command == 'shrink_avatars' || github.event.inputs.command == 'freeze_duplicate_accounts')
         run: |
           docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -rf /tmp/groups_accounts_report_*' || true
           rm -rf "$RUNNER_TEMP/ga-out" "$RUNNER_TEMP/ga_out.log" "$RUNNER_TEMP/ga_details.csv" || true
