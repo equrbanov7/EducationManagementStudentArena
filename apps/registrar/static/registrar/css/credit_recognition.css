@@ -1,0 +1,206 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   «Xarici nəticələrin tanınması» (`credit-recognition`) — sahib 2026-10-25.
+   Şablonlar: registrar/recognition/*.html. KPI / dialoq / filtr / badge ems_ui-dandır; burada yalnız bölməyə
+   xas düzülüş. Mobil-öncəlikli (375 px: tək sütun). Rənglər YALNIZ --ems-* tokenləri.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.cr {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4);
+    min-width: 0;
+}
+
+.cr-block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    min-width: 0;
+}
+
+.cr-block__title {
+    margin: 0;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-lg);
+    font-weight: 700;
+}
+
+/* ── Axtarış nəticəsi ───────────────────────────────────────────────────── */
+.cr-matches {
+    display: grid;
+    gap: var(--ems-sp-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.cr-match {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--ems-sp-3);
+    color: var(--ems-text);
+    text-decoration: none;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+}
+
+.cr-match:hover,
+.cr-match:focus-visible {
+    border-color: var(--ems-primary-300);
+    background: var(--ems-primary-50);
+}
+
+.cr-match__meta,
+.cr-student__meta {
+    margin: 0;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+/* ── Seçilmiş tələbə ────────────────────────────────────────────────────── */
+.cr-student__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ems-sp-3);
+}
+
+/* ── Tanınma kartları ───────────────────────────────────────────────────── */
+.cr-cards {
+    display: grid;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.cr-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    padding: var(--ems-sp-4);
+    border: 1px solid var(--ems-border);
+    border-left: 4px solid var(--ems-success-600);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+    min-width: 0;
+}
+
+.cr-card--revoked {
+    border-left-color: var(--ems-neutral-300);
+    opacity: 0.85;
+}
+
+.cr-card__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ems-sp-2);
+}
+
+.cr-card__title {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.cr-card__student {
+    color: var(--ems-primary-700);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.cr-card__period,
+.cr-card__by,
+.cr-card__credit {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.cr-card__score {
+    display: flex;
+    align-items: baseline;
+    gap: var(--ems-sp-2);
+    font-variant-numeric: tabular-nums;
+}
+
+.cr-card__score-value {
+    color: var(--ems-text);
+    font-size: var(--ems-fs-xl);
+    font-weight: 800;
+}
+
+.cr-card__letter {
+    font-weight: 800;
+}
+
+.cr-card__facts {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--ems-sp-2);
+    margin: 0;
+}
+
+.cr-card__facts dt {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.cr-card__facts dd {
+    margin: 0;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.cr-card__note {
+    margin: 0;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    overflow-wrap: anywhere;
+}
+
+.cr-card__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+}
+
+.cr-card__foot .ems-btn {
+    margin-inline-start: auto;
+}
+
+/* ── Dialoq sahələri ────────────────────────────────────────────────────── */
+.cr-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--ems-sp-3);
+}
+
+@media (min-width: 640px) {
+    .cr-card__facts {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cr-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cr-grid--3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .cr-card__facts {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}

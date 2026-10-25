@@ -1,0 +1,14 @@
+{% load i18n nav_icons %}
+{# «Xarici nəticələrin tanınması» — Erasmus+ / mübadilə / başqa ali məktəb → fəndən azad (sahib 2026-10-25; qapı: rbac_sections). #}
+{% if "credit-recognition" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=credit-recognition"
+       data-section="credit-recognition"
+       data-title="{% trans 'Xarici nəticələrin tanınması' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'credit-recognition' %}active{% endif %}">
+        {% nav_icon "badge-check" "sidebar-menu-icon" %}
+        <span class="sidebar-menu-text">{% trans "Xarici nəticələrin tanınması" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}

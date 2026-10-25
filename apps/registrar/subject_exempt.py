@@ -42,6 +42,8 @@ from .models import Enrollment, HygieneCategory, JournalHygieneDecision
 _CTX = "registrar.subject_exempt"
 EXEMPT = HygieneCategory.SUBJECT_EXEMPT.value
 REASON_CODE = "subject_exempt"
+#: «Xarici nəticənin tanınması» ilə yaranan azadlığın səbəb kodu (``credit_recognition``).
+RECOGNITION_REASON_CODE = "external_recognition"
 DOC_NUMBER_MAX = 64
 REASON_MAX = actions.MAX_REASON_LENGTH
 HygieneError = actions.HygieneError
@@ -100,8 +102,22 @@ def decision_reason(reason: str, document: dict) -> str:
 # ── Əməllər ──────────────────────────────────────────────────────────────────
 
 
-def exempt_student(*, offering, enrollment_id, actor, reason="", doc_number="", doc_date="", request=None) -> dict:
-    """Tələbəni BU açılışın jurnalından «Fəndən azad» edir (qərar jurnalı + audit, bir tranzaksiya)."""
+def exempt_student(
+    *,
+    offering,
+    enrollment_id,
+    actor,
+    reason="",
+    doc_number="",
+    doc_date="",
+    request=None,
+    reason_code=REASON_CODE,
+    evidence_extra=None,
+) -> dict:
+    """Tələbəni BU açılışın jurnalından «Fəndən azad» edir (qərar jurnalı + audit, bir tranzaksiya).
+
+    ``reason_code`` / ``evidence_extra`` — «Xarici nəticənin tanınması» (``credit_recognition``) eyni qərar
+    qatını ``external_recognition`` səbəb kodu və tanınma izi ilə işlədir (paralel mexanizm yoxdur)."""
     document = clean_document(doc_number, doc_date)
     text = decision_reason(clean_text(reason), document)
     with transaction.atomic():
@@ -118,13 +134,13 @@ def exempt_student(*, offering, enrollment_id, actor, reason="", doc_number="", 
         row = {
             "id": key,
             "status": enrollment.status,
-            "reason": REASON_CODE,
+            "reason": reason_code,
             "tags": [],
             "strong": False,
             "absence_hours": int(enrollment.absence_hours or 0),
         }
         row["evidence"] = actions.row_evidence(row, EXEMPT, rows_service.evidence_counts([key]).get(key))
-        row["evidence"].update({"offering": str(offering.pk), "document": document})
+        row["evidence"].update({"offering": str(offering.pk), "document": document, **(evidence_extra or {})})
         result = actions.record_decisions(
             organization=offering.organization,
             category=EXEMPT,
@@ -137,8 +153,11 @@ def exempt_student(*, offering, enrollment_id, actor, reason="", doc_number="", 
     return {"decision_id": result["decision_ids"][0], "changed": result["changed"]}
 
 
-def restore_student(*, offering, decision_id, actor, reason="", request=None) -> dict:
-    """«Bərpa et»: bu açılışdakı qüvvədə olan azadlıq qərarını geri qaytarır."""
+def restore_student(*, offering, decision_id, actor, reason="", request=None, allow_recognition=False) -> dict:
+    """«Bərpa et»: bu açılışdakı qüvvədə olan azadlıq qərarını geri qaytarır.
+
+    Xarici nəticənin tanınmasına bağlı azadlıq (``external_recognition``) jurnaldan geri qaytarılmır — tanınma
+    qüvvədə qalardı; o, «Xarici nəticələrin tanınması» bölməsində ləğv olunur (``allow_recognition=True``)."""
     text = clean_text(reason) or pgettext(_CTX, "Fəndən azadlıq geri alındı")
     with transaction.atomic():
         decision = (
@@ -155,6 +174,16 @@ def restore_student(*, offering, decision_id, actor, reason="", request=None) ->
         if decision is None:
             raise HygieneError(
                 "not_revertable", pgettext(_CTX, "Qərar tapılmadı və ya artıq geri qaytarılıb."), status=404
+            )
+        if decision.reason_code == RECOGNITION_REASON_CODE and not allow_recognition:
+            raise HygieneError(
+                "recognition_linked",
+                pgettext(
+                    _CTX,
+                    "Bu azadlıq xarici nəticənin tanınmasına bağlıdır — «Xarici nəticələrin tanınması» bölməsində "
+                    "tanınmanı ləğv edin.",
+                ),
+                status=409,
             )
         enrollment = (
             Enrollment.objects.select_for_update(of=("self",)).select_related("offering").get(pk=decision.enrollment_id)
@@ -203,6 +232,7 @@ def exempt_rows(offering) -> list:
             "reason": item.reason,
             "decided_by": item.decided_by_name,
             "decided_at": item.created_at,
+            "recognized": item.reason_code == RECOGNITION_REASON_CODE,
         }
         for item in decisions
     ]
@@ -222,12 +252,28 @@ def student_exempt_subjects(record, period) -> list:
             enrollment__offering__period=period,
         )
         .order_by("enrollment__offering__subject__name")
-        .values("enrollment__offering__subject__code", "enrollment__offering__subject__name")
+        .values(
+            "enrollment__offering__subject_id",
+            "enrollment__offering__subject__code",
+            "enrollment__offering__subject__name",
+        )
     )
-    return [
-        {"code": row["enrollment__offering__subject__code"], "name": row["enrollment__offering__subject__name"]}
+    items = {
+        row["enrollment__offering__subject_id"]: {
+            "code": row["enrollment__offering__subject__code"],
+            "name": row["enrollment__offering__subject__name"],
+            "recognized": None,
+        }
         for row in rows
-    ]
+    }
+    # «Xarici nəticə tanınıb» (2026-10-25): tanınmış fənn nişanı + bal; jurnal bağlı olduğundan azadlıq qərarı
+    # yazılmamış tanınma da burada görünür (transkriptdə qüvvədədir).
+    from .credit_recognition_read import student_period_badges
+
+    for subject_id, badge in student_period_badges(record, period).items():
+        item = items.setdefault(subject_id, {"code": badge["code"], "name": badge["name"]})
+        item["recognized"] = badge
+    return sorted(items.values(), key=lambda item: str(item["name"]))
 
 
 def is_exempt_from_subject(record, period, subject_id) -> bool:
@@ -261,6 +307,7 @@ __all__ = [
     "EXEMPT",
     "HygieneError",
     "REASON_CODE",
+    "RECOGNITION_REASON_CODE",
     "block_reason",
     "can_exempt",
     "clean_document",

@@ -1,0 +1,67 @@
+{% load i18n %}
+{% comment %}«Xarici nəticəni tanı» dialoqunun sahələri — `cr.selected.targets` (tələbənin jurnal qeydiyyatları), `cr.programs`,
+`cr.pass_score`. Server hər sahəni yenidən yoxlayır (`credit_recognition.validate`); sənəd məcburidir.{% endcomment %}
+<div class="ems-field">
+    <label class="ems-field__label" for="crTarget">{% trans "Bizim fənn (semestr · fənn)" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="crTarget" name="enrollment" required data-bootstrap-select
+                data-live-search="true"
+                data-live-search-placeholder="{% trans 'Axtar…' context 'registrar.recognition' %}"
+                data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'registrar.recognition' %}">
+            <option value="">{% trans "Seçin" context "registrar.recognition" %}</option>
+            {% for t in cr.selected.targets %}<option value="{{ t.id }}">{{ t.label }}</option>{% endfor %}
+        </select>
+    </div>
+</div>
+<div class="cr-grid">
+    <div class="ems-field">
+        <label class="ems-field__label" for="crProgram">{% trans "Proqram" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="crProgram" name="program" required data-bootstrap-select>
+                {% for value, label in cr.programs %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="crStudyPeriod">{% trans "Təhsil müddəti / semestr" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="text" id="crStudyPeriod" name="study_period" maxlength="100" required autocomplete="off"
+               placeholder="{% trans 'məs. 2025/2026 yaz semestri' context 'registrar.recognition' %}">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="crInstitution">{% trans "Qurum (universitet)" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="text" id="crInstitution" name="institution" maxlength="255" required autocomplete="off">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="crCountry">{% trans "Ölkə" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="text" id="crCountry" name="country" maxlength="100" required autocomplete="off">
+    </div>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="crForeignSubject">{% trans "Xarici fənnin adı" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <input class="ems-input" type="text" id="crForeignSubject" name="foreign_subject" maxlength="300" required autocomplete="off">
+</div>
+<div class="cr-grid cr-grid--3">
+    <div class="ems-field">
+        <label class="ems-field__label" for="crForeignCredit">{% trans "Xarici kredit (ECTS)" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="number" id="crForeignCredit" name="foreign_credit" min="0.5" max="60" step="0.5" inputmode="decimal" required>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="crForeignGrade">{% trans "Xarici qiymət" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="text" id="crForeignGrade" name="foreign_grade" maxlength="32" required autocomplete="off"
+               placeholder="{% trans 'məs. B, 8/10, 1.7' context 'registrar.recognition' %}">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="crScore">{% trans "Bizim şkalada (100 bal)" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="number" id="crScore" name="recognized_score" min="{{ cr.pass_score }}" max="100" step="1" inputmode="numeric" required>
+        <span class="ems-field__hint">{% blocktrans with floor=cr.pass_score context "registrar.recognition" %}{{ floor }}–100; hərf universitetin şkalasından avtomatik.{% endblocktrans %}</span>
+    </div>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="crDocument">{% trans "Əsas sənəd (transkript, Learning Agreement və ya əmr)" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <input class="ems-input" type="file" id="crDocument" name="document" accept=".pdf,.jpg,.jpeg,.png" required>
+    <span class="ems-field__hint">{% trans "PDF, JPG və ya PNG · ən çox 10 MB" context "registrar.recognition" %}</span>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="crNote">{% trans "Qeyd" context "registrar.recognition" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "registrar.recognition" %}</span></label>
+    <textarea class="ems-textarea" id="crNote" name="note" rows="2" maxlength="2000"></textarea>
+</div>

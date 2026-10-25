@@ -108401,3 +108401,340 @@ msgstr "Перенесено в новый журнал: %(moved)s · удале
 msgctxt "exams.subject_change"
 msgid "yeni fənn üzrə jurnalda qeydiyyatı olmayan: %(n)s"
 msgstr "не записаны в журнал нового предмета: %(n)s"
+
+msgctxt "registrar.model.recognition.meta"
+msgid "external credit recognition"
+msgstr "признание внешнего результата"
+
+msgctxt "registrar.model.recognition.meta"
+msgid "external credit recognitions"
+msgstr "признания внешних результатов"
+
+msgctxt "registrar.subject_exempt"
+msgid "Bu azadlıq xarici nəticənin tanınmasına bağlıdır — «Xarici nəticələrin tanınması» bölməsində tanınmanı ləğv edin."
+msgstr "Это освобождение связано с признанием внешнего результата — отмените признание в разделе «Признание внешних результатов»."
+
+#, python-format
+msgctxt "registrar.pdf"
+msgid "%(mark)s Başqa ali məktəbdə (Erasmus+, mübadilə və s.) keçilmiş fənnin tanınmış nəticəsi; bal universitetin 100 ballıq şkalasına çevrilib."
+msgstr "%(mark)s Признанный результат дисциплины, пройденной в другом вузе (Erasmus+, обмен и т. п.); балл переведён в 100-балльную шкалу университета."
+
+msgctxt "profile.sidebar"
+msgid "Xarici nəticələrin tanınması"
+msgstr "Признание внешних результатов"
+
+msgctxt "organizations.permission.label"
+msgid "Xarici nəticəni tanımaq (Erasmus+, mübadilə, başqa ali məktəb) və tələbəni fəndən azad etmək"
+msgstr "Признавать внешние результаты (Erasmus+, обмен, другой вуз) и освобождать студента от дисциплины"
+
+#, python-format
+msgctxt "registrar.recognition"
+msgid "%(floor)s–100; hərf universitetin şkalasından avtomatik."
+msgstr "%(floor)s–100; буква определяется автоматически по шкале университета."
+
+#, python-format
+msgctxt "registrar.recognition"
+msgid "%(n)s kredit"
+msgstr "%(n)s кредитов"
+
+msgctxt "registrar.recognition"
+msgid "(istəyə bağlı)"
+msgstr "(необязательно)"
+
+msgctxt "registrar.recognition"
+msgid "Ad, soyad və ya tələbə nömrəsi"
+msgstr "Имя, фамилия или номер студента"
+
+msgctxt "registrar.recognition"
+msgid "Axtar"
+msgstr "Найти"
+
+msgctxt "registrar.recognition"
+msgid "Axtarış nəticəsi"
+msgstr "Результаты поиска"
+
+msgctxt "registrar.recognition"
+msgid "Axtar…"
+msgstr "Поиск…"
+
+msgctxt "registrar.recognition"
+msgid "Azad (xarici nəticə tanınıb)"
+msgstr "Освобождён (внешний результат признан)"
+
+msgctxt "registrar.recognition"
+msgid "Bağlı azadlıq geri açılır — tələbə fənnin jurnalına qayıdır; transkriptdə yenidən jurnal nəticəsi göstərilir. Qeyd silinmir, ləğv tarixçədə qalır."
+msgstr "Связанное освобождение снимается — студент возвращается в журнал дисциплины; в транскрипте снова показывается результат журнала. Запись не удаляется, отмена остаётся в истории."
+
+msgctxt "registrar.recognition"
+msgid "Başqa ali məktəb"
+msgstr "Другой вуз"
+
+msgctxt "registrar.recognition"
+msgid "Başqasının adından baxış rejimində dəyişiklik etmək olmaz."
+msgstr "В режиме просмотра от имени другого пользователя изменения невозможны."
+
+msgctxt "registrar.recognition"
+msgid "Bizim fənn (semestr · fənn)"
+msgstr "Наша дисциплина (семестр · дисциплина)"
+
+msgctxt "registrar.recognition"
+msgid "Bizim fənni (jurnal qeydiyyatını) seçin."
+msgstr "Выберите нашу дисциплину (запись в журнале)."
+
+msgctxt "registrar.recognition"
+msgid "Bizim şkalada (100 bal)"
+msgstr "По нашей шкале (100 баллов)"
+
+#, python-format
+msgctxt "registrar.recognition"
+msgid "Bizim şkalada qarşılıq %(floor)s–100 arası tam bal olmalıdır (tanınma keçmiş nəticəyədir)."
+msgstr "Эквивалент по нашей шкале должен быть целым числом от %(floor)s до 100 (признаётся только сданный результат)."
+
+msgctxt "registrar.recognition"
+msgid "Bu bölmə dekanlıq, tədris şöbəsi və RİM üçündür."
+msgstr "Этот раздел предназначен для деканата, учебного отдела и ДИТ."
+
+msgctxt "registrar.recognition"
+msgid "Bu fənn üzrə bu semestrdə qüvvədə olan tanınma artıq var — əvvəlcə onu ləğv edin."
+msgstr "По этой дисциплине в этом семестре уже есть действующее признание — сначала отмените его."
+
+msgctxt "registrar.recognition"
+msgid "Bu tanınma artıq ləğv edilib."
+msgstr "Это признание уже отменено."
+
+msgctxt "registrar.recognition"
+msgid "Bu tələbə üçün hələ tanınma yoxdur."
+msgstr "Для этого студента признаний пока нет."
+
+msgctxt "registrar.recognition"
+msgid "Digər"
+msgstr "Другое"
+
+msgctxt "registrar.recognition"
+msgid "Erasmus+"
+msgstr "Erasmus+"
+
+msgctxt "registrar.recognition"
+msgid "Erasmus+, mübadilə proqramı və ya başqa ali məktəbdə keçilmiş fənnin nəticəsi sənədlə tanınır: tələbə bizim fənndən azad olur (jurnal, davamiyyət limiti və imtahan tələbi ona aid olmur), transkriptdə tanınmış bal göstərilir. Tanınma səbəblə ləğv edilə bilər; hər addım audit izinə düşür."
+msgstr "Результат дисциплины, пройденной по Erasmus+, программе обмена или в другом вузе, признаётся по документу: студент освобождается от нашей дисциплины (журнал, лимит пропусков и требование экзамена на него не распространяются), в транскрипте показывается признанный балл. Признание можно отменить с указанием причины; каждый шаг попадает в аудит."
+
+msgctxt "registrar.recognition"
+msgid "Hələ tanınma yoxdur. Tələbəni axtarın və «Yeni tanınma» ilə xarici nəticəni əlavə edin."
+msgstr "Признаний пока нет. Найдите студента и добавьте внешний результат кнопкой «Новое признание»."
+
+msgctxt "registrar.recognition"
+msgid "Ləğv edilib"
+msgstr "Отменено"
+
+msgctxt "registrar.recognition"
+msgid "Ləğv et"
+msgstr "Отменить"
+
+#, python-format
+msgctxt "registrar.recognition"
+msgid "Ləğvin səbəbini yazın (ən azı %(n)s simvol)."
+msgstr "Укажите причину отмены (не менее %(n)s символов)."
+
+msgctxt "registrar.recognition"
+msgid "Mübadilə proqramı"
+msgstr "Программа обмена"
+
+msgctxt "registrar.recognition"
+msgid "PDF, JPG və ya PNG · ən çox 10 MB"
+msgstr "PDF, JPG или PNG · не более 10 МБ"
+
+msgctxt "registrar.recognition"
+msgid "Proqram"
+msgstr "Программа"
+
+msgctxt "registrar.recognition"
+msgid "Proqramı seçin."
+msgstr "Выберите программу."
+
+msgctxt "registrar.recognition"
+msgid "Qeyd"
+msgstr "Примечание"
+
+msgctxt "registrar.recognition"
+msgid "Qurum"
+msgstr "Учреждение"
+
+msgctxt "registrar.recognition"
+msgid "Qurum (universitet)"
+msgstr "Учреждение (вуз)"
+
+msgctxt "registrar.recognition"
+msgid "Qüvvədə olan tanınma"
+msgstr "Действующие признания"
+
+msgctxt "registrar.recognition"
+msgid "Qüvvədə · fəndən azad edilib"
+msgstr "Действует · освобождён от дисциплины"
+
+msgctxt "registrar.recognition"
+msgid "Qüvvədə · jurnal bağlı idi (yalnız transkript)"
+msgstr "Действует · журнал был закрыт (только транскрипт)"
+
+msgctxt "registrar.recognition"
+msgid "Seçin"
+msgstr "Выберите"
+
+msgctxt "registrar.recognition"
+msgid "Son tanınmalar"
+msgstr "Последние признания"
+
+msgctxt "registrar.recognition"
+msgid "Sənəd"
+msgstr "Документ"
+
+msgctxt "registrar.recognition"
+msgid "Tanı və azad et"
+msgstr "Признать и освободить"
+
+msgctxt "registrar.recognition"
+msgid "Tanınma ləğv edildi — tələbə fənnin jurnalına qaytarıldı."
+msgstr "Признание отменено — студент возвращён в журнал дисциплины."
+
+msgctxt "registrar.recognition"
+msgid "Tanınma ləğv edildi."
+msgstr "Признание отменено."
+
+msgctxt "registrar.recognition"
+msgid "Tanınma tapılmadı."
+msgstr "Признание не найдено."
+
+msgctxt "registrar.recognition"
+msgid "Tanınmanı ləğv et"
+msgstr "Отменить признание"
+
+msgctxt "registrar.recognition"
+msgid "Tanınmış bal"
+msgstr "Признанный балл"
+
+msgctxt "registrar.recognition"
+msgid "Təhsil müddəti"
+msgstr "Период обучения"
+
+msgctxt "registrar.recognition"
+msgid "Təhsil müddəti / semestr"
+msgstr "Период обучения / семестр"
+
+msgctxt "registrar.recognition"
+msgid "Tələbə axtarışı"
+msgstr "Поиск студента"
+
+msgctxt "registrar.recognition"
+msgid "Tələbənin tanınma üçün açıq jurnal qeydiyyatı yoxdur (bütün fənlər ya tanınıb, ya da semestr hələ açılmayıb)."
+msgstr "У студента нет записи в журнале, доступной для признания (все дисциплины уже признаны или семестр ещё не открыт)."
+
+msgctxt "registrar.recognition"
+msgid "Uyğun nəticə yoxdur"
+msgstr "Нет совпадений"
+
+msgctxt "registrar.recognition"
+msgid "Xarici fənn"
+msgstr "Внешняя дисциплина"
+
+msgctxt "registrar.recognition"
+msgid "Xarici fənnin adı"
+msgstr "Название внешней дисциплины"
+
+msgctxt "registrar.recognition"
+msgid "Xarici kredit (ECTS)"
+msgstr "Внешние кредиты (ECTS)"
+
+msgctxt "registrar.recognition"
+msgid "Xarici kredit / qiymət"
+msgstr "Внешние кредиты / оценка"
+
+msgctxt "registrar.recognition"
+msgid "Xarici kredit 0-dan böyük rəqəm olmalıdır (ən çox 60)."
+msgstr "Внешние кредиты должны быть числом больше 0 (не более 60)."
+
+msgctxt "registrar.recognition"
+msgid "Xarici nəticə tanındı — tələbə bu fəndən azad edildi (jurnaldan çıxdı)."
+msgstr "Внешний результат признан — студент освобождён от этой дисциплины (исключён из журнала)."
+
+msgctxt "registrar.recognition"
+msgid "Xarici nəticə tanındı. Jurnal bağlı olduğundan jurnal sətri dəyişmədi — transkriptdə tanınmış nəticə göstərilir."
+msgstr "Внешний результат признан. Журнал закрыт, поэтому строка журнала не изменилась — в транскрипте показывается признанный результат."
+
+msgctxt "registrar.recognition"
+msgid "Xarici nəticə tanınıb"
+msgstr "Внешний результат признан"
+
+#, python-format
+msgctxt "registrar.recognition"
+msgid "Xarici nəticə tanınıb: %(program)s · %(institution)s · %(subject)s"
+msgstr "Внешний результат признан: %(program)s · %(institution)s · %(subject)s"
+
+#, python-format
+msgctxt "registrar.recognition"
+msgid "Xarici nəticə tanınıb: %(score)s (%(letter)s)"
+msgstr "Внешний результат признан: %(score)s (%(letter)s)"
+
+msgctxt "registrar.recognition"
+msgid "Xarici nəticəni tanı"
+msgstr "Признать внешний результат"
+
+msgctxt "registrar.recognition"
+msgid "Xarici nəticəni tanımaq üçün səlahiyyətiniz yoxdur."
+msgstr "У вас нет прав на признание внешних результатов."
+
+#, python-format
+msgctxt "registrar.recognition"
+msgid "Xarici nəticənin tanınması ləğv edildi: %(reason)s"
+msgstr "Признание внешнего результата отменено: %(reason)s"
+
+msgctxt "registrar.recognition"
+msgid "Xarici qiymət"
+msgstr "Внешняя оценка"
+
+msgctxt "registrar.recognition"
+msgid "Yeni tanınma"
+msgstr "Новое признание"
+
+msgctxt "registrar.recognition"
+msgid "kredit"
+msgstr "кредитов"
+
+msgctxt "registrar.recognition"
+msgid "məs. 2025/2026 yaz semestri"
+msgstr "напр. весенний семестр 2025/2026"
+
+msgctxt "registrar.recognition"
+msgid "məs. B, 8/10, 1.7"
+msgstr "напр. B, 8/10, 1.7"
+
+msgctxt "registrar.recognition"
+msgid "qiymət"
+msgstr "оценка"
+
+#, python-format
+msgctxt "registrar.recognition"
+msgid "«%(field)s» doldurulmalıdır."
+msgstr "Поле «%(field)s» обязательно."
+
+msgctxt "registrar.recognition"
+msgid "Ölkə"
+msgstr "Страна"
+
+msgctxt "registrar.recognition"
+msgid "Əhatənizdə uyğun tələbə tapılmadı."
+msgstr "В вашей зоне ответственности подходящий студент не найден."
+
+msgctxt "registrar.recognition"
+msgid "Əməl yerinə yetirilmədi — icazənizi yoxlayın və ya səhifəni yeniləyin."
+msgstr "Действие не выполнено — проверьте права или обновите страницу."
+
+msgctxt "registrar.recognition"
+msgid "Əsas sənəd (transkript, Learning Agreement və ya əmr)"
+msgstr "Основной документ (транскрипт, Learning Agreement или приказ)"
+
+msgctxt "registrar.recognition"
+msgid "Əsas sənəd məcburidir. Açıq jurnalda tələbə bu fəndən dərhal azad edilir; bağlı jurnalda yalnız transkript dəyişir."
+msgstr "Основной документ обязателен. В открытом журнале студент сразу освобождается от дисциплины; в закрытом меняется только транскрипт."
+
+msgctxt "registrar.recognition"
+msgid "Əsas sənədi yükləyin (transkript, Learning Agreement və ya əmr) — sənədsiz tanınma olmur."
+msgstr "Загрузите основной документ (транскрипт, Learning Agreement или приказ) — без документа признание невозможно."

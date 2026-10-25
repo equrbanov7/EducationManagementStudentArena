@@ -330,6 +330,8 @@ def apply_permission_section_gates(
         (_retake_desk_visible(user, organization), "retake-desk"),
         # «25% müraciət pəncərəsi» (sahib 2026-10-19: «İmtahan mərkəzi açsın») — `exam_center.decide`.
         (_retake_windows_visible(user, organization), "retake-windows"),
+        # «Xarici nəticələrin tanınması» (sahib 2026-10-25) — `student.credit_recognition` struktur əhatəsi.
+        (_credit_recognition_visible(user, organization), "credit-recognition"),
         # «Alt qrupa tələbə əlavə et» (sahib 2026-10-18) — `retake.manage`; əhatə hər endpoint-də registrar-da.
         (privileged or has_permission(permissions, "retake.manage"), "subgroup-placement"),
         (can_view_syllabus, "syllabus-list"),
@@ -468,3 +470,12 @@ def _retake_windows_visible(user, organization) -> bool:
     from apps.registrar.public import retake_window
 
     return retake_window.can_manage(user, organization)
+
+
+def _credit_recognition_visible(user, organization) -> bool:
+    """`student.credit_recognition` struktur əhatəsi (dekanlıq, tədris şöbəsi, RİM; rektor `*`)."""
+    if organization is None:
+        return False
+    from apps.registrar.public import credit_recognition_read
+
+    return credit_recognition_read.can_manage(user, organization)

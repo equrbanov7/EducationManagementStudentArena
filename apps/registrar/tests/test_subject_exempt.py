@@ -273,7 +273,7 @@ class SubjectExemptCabinetTest(_ExemptBase):
         after = self._section()
         self.assertNotIn(self.physics.id, [row["subject"].id for row in after["subjects"]])
         self.assertIn(self.math.id, [row["subject"].id for row in after["subjects"]])
-        self.assertEqual(after["exempt_subjects"], [{"code": "FIZ101", "name": "Fizika"}])
+        self.assertEqual(after["exempt_subjects"], [{"code": "FIZ101", "name": "Fizika", "recognized": None}])
         with override_settings(UNIVERSITY_MODE=True):
             with bypass_rls():
                 profile = self.student.profile

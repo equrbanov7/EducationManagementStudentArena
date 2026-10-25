@@ -205,11 +205,12 @@ decoration over the same enrollment aggregation the "Transkript" section uses
                                 <span class="oa-reason-badge is-total"><i class="fas fa-calculator"></i> {% trans "Ümumi baldan kəsilib" context "profile.overall_academic" %}</span>
                                 {% endif %}
                                 {% if row.retake %}<span class="oa-reason-badge"><i class="fas fa-rotate-right"></i> {{ row.retake.text }}</span>{% endif %}
+                                {% include "registrar/partials/_recognition_mark.html" with recognition=row.recognition %}
                             </td>
                             <td data-label="{% trans 'Kredit' context 'profile.overall_academic' %}">{{ row.credit }}</td>
                             <td class="ta-left oa-cell--teacher" data-label="{% trans 'Müəllim' context 'profile.overall_academic' %}">{{ row.teacher_name|default:"—" }}</td>
-                            <td data-label="{% trans 'Giriş balı' context 'profile.overall_academic' %}">{{ row.result.entry_score|floatformat:'-2' }}</td>
-                            <td data-label="{% trans 'Çıxış balı' context 'profile.overall_academic' %}">{% if row.result.graded %}{{ row.result.effective_exam|floatformat:'-2' }}{% else %}—{% endif %}</td>
+                            <td data-label="{% trans 'Giriş balı' context 'profile.overall_academic' %}">{% if row.recognition %}—{% else %}{{ row.result.entry_score|floatformat:'-2' }}{% endif %}</td>
+                            <td data-label="{% trans 'Çıxış balı' context 'profile.overall_academic' %}">{% if row.result.graded and not row.recognition %}{{ row.result.effective_exam|floatformat:'-2' }}{% else %}—{% endif %}</td>
                             {# Qlif HƏR köçürülmüş sətirdə — semestr qeydindəki «nişanlı» sözünün qarşılığıdır. #}
                             <td data-label="{% trans 'Nəticə' context 'profile.overall_academic' %}">{% if row.result.passed or row.result.failed %}<strong>{{ row.result.total|floatformat:'-2' }}</strong>{% else %}—{% endif %}{% include "registrar/partials/_legacy_grade_mark.html" with legacy=row.legacy %}</td>
                             <td data-label="{% trans 'Dərəcə' context 'profile.overall_academic' %}">

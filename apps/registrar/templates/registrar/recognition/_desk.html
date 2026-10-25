@@ -1,0 +1,99 @@
+{% load i18n registrar_recognition %}
+{% comment %}«Xarici nəticələrin tanınması» — heyət paneli (sahib 2026-10-25). Data: `{% credit_recognition_desk as cr %}`
+(`credit_recognition_read.build`). `?cr_q=` tələbə axtarışı (aktorun əhatəsində), `?cr_student=<id>` — tələbənin
+tanınmaları + «Yeni tanınma» dialoqu; heç biri yoxdursa son qərarlar. Axtarış / linklər paneli yerində yeniləyir
+(AJAX-safe); yaratma və ləğv `credit_recognition.js` → multipart POST.{% endcomment %}
+{% credit_recognition_desk as cr %}
+{% if not cr.has_access %}
+    {% trans "Bu bölmə dekanlıq, tədris şöbəsi və RİM üçündür." context "registrar.recognition" as cr_denied %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="error" state_icon="fa-lock" state_title=cr_denied %}
+{% else %}
+<div class="cr" data-cr-root data-cr-section="credit-recognition"
+     data-cr-error-generic="{% trans 'Əməl yerinə yetirilmədi — icazənizi yoxlayın və ya səhifəni yeniləyin.' context 'registrar.recognition' %}">
+    {% trans "Erasmus+, mübadilə proqramı və ya başqa ali məktəbdə keçilmiş fənnin nəticəsi sənədlə tanınır: tələbə bizim fənndən azad olur (jurnal, davamiyyət limiti və imtahan tələbi ona aid olmur), transkriptdə tanınmış bal göstərilir. Tanınma səbəblə ləğv edilə bilər; hər addım audit izinə düşür." context "registrar.recognition" as cr_sub %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=cr_sub %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=cr.kpis %}
+
+    <form method="get" action="" class="ems-filters cr-search" role="search" data-profile-ajax-form data-section="credit-recognition">
+        <input type="hidden" name="section" value="credit-recognition">
+        <div class="ems-field ems-field--wide">
+            <label class="ems-field__label" for="crQ">{% trans "Tələbə axtarışı" context "registrar.recognition" %}</label>
+            <input type="search" class="ems-input" id="crQ" name="cr_q" value="{{ cr.query }}" autocomplete="off" maxlength="100"
+                   placeholder="{% trans 'Ad, soyad və ya tələbə nömrəsi' context 'registrar.recognition' %}">
+        </div>
+        <div class="ems-filters__actions">
+            <button type="submit" class="ems-btn ems-btn--primary"><i class="fas fa-magnifying-glass" aria-hidden="true"></i> {% trans "Axtar" context "registrar.recognition" %}</button>
+            <a class="ems-btn" href="{{ profile_base_url }}?section=credit-recognition" data-section="credit-recognition"><i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Sıfırla" context "ui.filters" %}</a>
+        </div>
+    </form>
+
+    {% if cr.query %}
+    <section class="cr-block" aria-labelledby="crMatchesTitle">
+        <h3 class="cr-block__title" id="crMatchesTitle">{% trans "Axtarış nəticəsi" context "registrar.recognition" %}</h3>
+        {% if cr.matches %}
+        <ul class="cr-matches">
+            {% for m in cr.matches %}
+            <li><a class="cr-match" href="{{ profile_base_url }}?section=credit-recognition&amp;cr_student={{ m.student.pk }}" data-section="credit-recognition">
+                <strong>{{ m.label }}</strong>
+                <span class="cr-match__meta">{{ m.student.username }}{% if m.record.group %} · {{ m.record.group.name }}{% endif %} · {{ m.record.program.display_label }}</span>
+            </a></li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        {% trans "Əhatənizdə uyğun tələbə tapılmadı." context "registrar.recognition" as cr_none %}
+        {% include "partials/ems_ui/_empty.html" with state_icon="fa-user-slash" state_title=cr_none %}
+        {% endif %}
+    </section>
+    {% endif %}
+
+    {% if cr.selected %}
+    {% with sel=cr.selected %}
+    <section class="cr-block cr-student" aria-labelledby="crStudentTitle">
+        <div class="cr-student__head">
+            <div>
+                <h3 class="cr-block__title" id="crStudentTitle">{{ sel.label }}</h3>
+                <p class="cr-student__meta">{{ sel.student.username }}{% if sel.record.group %} · {{ sel.record.group.name }}{% endif %} · {{ sel.record.program.display_label }}</p>
+            </div>
+            {% if sel.targets %}
+            <button type="button" class="ems-btn ems-btn--primary" data-ems-overlay-open="crCreateDialog">
+                <i class="fas fa-plus" aria-hidden="true"></i> {% trans "Yeni tanınma" context "registrar.recognition" %}
+            </button>
+            {% endif %}
+        </div>
+        {% if not sel.targets %}
+        <p class="ems-msg ems-msg--info">{% trans "Tələbənin tanınma üçün açıq jurnal qeydiyyatı yoxdur (bütün fənlər ya tanınıb, ya da semestr hələ açılmayıb)." context "registrar.recognition" %}</p>
+        {% endif %}
+        {% if sel.rows %}
+        {% include "registrar/recognition/_rows.html" with rows=sel.rows show_student=False %}
+        {% else %}
+        {% trans "Bu tələbə üçün hələ tanınma yoxdur." context "registrar.recognition" as cr_empty %}
+        {% include "partials/ems_ui/_empty.html" with state_icon="fa-earth-europe" state_title=cr_empty %}
+        {% endif %}
+    </section>
+    {% if sel.targets %}
+    {% url 'registrar:credit_recognition_create' sel.student.pk as cr_create_url %}
+    {% trans "Xarici nəticəni tanı" context "registrar.recognition" as cr_create_title %}
+    {% trans "Əsas sənəd məcburidir. Açıq jurnalda tələbə bu fəndən dərhal azad edilir; bağlı jurnalda yalnız transkript dəyişir." context "registrar.recognition" as cr_create_sub %}
+    {% trans "Tanı və azad et" context "registrar.recognition" as cr_create_submit %}
+    {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="crCreateDialog" form_dialog_title=cr_create_title form_dialog_subtitle=cr_create_sub form_dialog_body_include="registrar/recognition/_dlg_create.html" form_dialog_action=cr_create_url form_dialog_submit_label=cr_create_submit form_dialog_wide=True %}
+    {% endif %}
+    {% endwith %}
+    {% elif not cr.query %}
+    <section class="cr-block" aria-labelledby="crRecentTitle">
+        <h3 class="cr-block__title" id="crRecentTitle">{% trans "Son tanınmalar" context "registrar.recognition" %}</h3>
+        {% if cr.recent %}
+        {% include "registrar/recognition/_rows.html" with rows=cr.recent show_student=True %}
+        {% else %}
+        {% trans "Hələ tanınma yoxdur. Tələbəni axtarın və «Yeni tanınma» ilə xarici nəticəni əlavə edin." context "registrar.recognition" as cr_none_yet %}
+        {% include "partials/ems_ui/_empty.html" with state_icon="fa-earth-europe" state_title=cr_none_yet %}
+        {% endif %}
+    </section>
+    {% endif %}
+
+    {% trans "Tanınmanı ləğv et" context "registrar.recognition" as cr_revoke_title %}
+    {% trans "Bağlı azadlıq geri açılır — tələbə fənnin jurnalına qayıdır; transkriptdə yenidən jurnal nəticəsi göstərilir. Qeyd silinmir, ləğv tarixçədə qalır." context "registrar.recognition" as cr_revoke_sub %}
+    {% trans "Ləğv et" context "registrar.recognition" as cr_revoke_submit %}
+    {% include "partials/ems_ui/_reason_dialog.html" with reason_id="crRevokeDialog" reason_title=cr_revoke_title reason_subtitle=cr_revoke_sub reason_submit_label=cr_revoke_submit reason_submit_tone="danger" reason_min=10 %}
+</div>
+{% endif %}

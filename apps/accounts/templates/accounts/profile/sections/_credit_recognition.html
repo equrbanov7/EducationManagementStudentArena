@@ -1,0 +1,14 @@
+{% load static %}
+{% comment %}«Xarici nəticələrin tanınması» (`credit-recognition`) — Erasmus+ / mübadilə / başqa ali məktəbdə keçilmiş
+fənn → bizim fənn üzrə tanınma + fəndən azad (sahib 2026-10-25). Açar `student.credit_recognition` (dekanlıq, tədris
+şöbəsi, RİM); data qapısı registrar tag-ındadır (`{% credit_recognition_desk %}` açar + əhatəni render vaxtı YENİDƏN
+yoxlayır). CSS/JS panelin içində (AJAX swap).{% endcomment %}
+{% if 'credit-recognition' in allowed_sections %}
+<section class="profile-section-panel profile-section--credit-recognition {% if active_section == 'credit-recognition' %}is-active{% endif %}"
+         data-profile-section-panel="credit-recognition"
+         data-source-url="{{ profile_base_url }}?section=credit-recognition">
+    <link rel="stylesheet" href="{% static 'registrar/css/credit_recognition.css' %}?v=20261025-1">
+    {% include "registrar/recognition/_desk.html" %}
+    <script src="{% static 'registrar/js/credit_recognition.js' %}?v=20261025-1" defer></script>
+</section>
+{% endif %}

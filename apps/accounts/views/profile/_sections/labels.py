@@ -189,6 +189,7 @@ def build_section_titles() -> dict:
         "retake-desk": pgettext_lazy("profile.sidebar", "25% müraciətləri"),
         "retake-windows": pgettext_lazy("profile.sidebar", "25% müraciət pəncərəsi"),
         "subgroup-placement": pgettext_lazy("profile.sidebar", "Alt qrupa tələbə əlavə et"),
+        "credit-recognition": pgettext_lazy("profile.sidebar", "Xarici nəticələrin tanınması"),
         "my-group": pgettext_lazy("profile.sidebar", "Starosta"),  # B10; 2026-10-13 (gecə) «Qrupum» → «Starosta»
         "surveys-builder": pgettext_lazy("profile.sidebar", "Sorğu qurucusu"),
         # «Fənn qovluğu» (apps.subject_folder) — sidebar bəndləri ilə eyni mətnlər.

@@ -41,7 +41,7 @@ from core.logging_utils import safe_log_value
 from .._dashboard_helpers.cheap_counts import compute_profile_badge_counts, count_assigned_tasks
 from .._helpers import _get_active_organization, _load_user_profile, _role_capabilities
 from .section_assets import section_assets_payload
-from .sections_hr_contracts import HR_CONTRACT_AJAX_SECTIONS, HR_CONTRACT_SECTION_PARTIALS
+from .sections_recognition import EXTRA_AJAX_SECTIONS, EXTRA_SECTION_PARTIALS
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,7 @@ LEAN_FRAGMENT_CONTEXT = True  # qabıq dəyərləri tənbəl (``context_builder/
 # --------------------------------------------------------------------------- #
 
 # Bütün mövcud profile section-ları → partial template adı.
-SECTION_PARTIALS: dict[str, str] = HR_CONTRACT_SECTION_PARTIALS | {
+SECTION_PARTIALS: dict[str, str] = EXTRA_SECTION_PARTIALS | {
     # «Ana səhifə» — kabinetin default bölməsi (FAZA 22).
     "dashboard": "accounts/profile/sections/_dashboard.html",
     "profile-info": "accounts/profile/sections/_profile_info.html",
@@ -209,7 +209,7 @@ SECTION_PARTIALS: dict[str, str] = HR_CONTRACT_SECTION_PARTIALS | {
 }
 
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin bölmələri normal full-page naviqasiyada qalır.
-AJAX_SAFE_SECTIONS: frozenset[str] = HR_CONTRACT_AJAX_SECTIONS | frozenset(
+AJAX_SAFE_SECTIONS: frozenset[str] = EXTRA_AJAX_SECTIONS | frozenset(
     {
         # «Ana səhifə» tam server-render, YALNIZ-OXU xülasədir → AJAX-safe.
         "dashboard",

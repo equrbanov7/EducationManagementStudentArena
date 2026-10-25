@@ -1,0 +1,49 @@
+{% load i18n %}
+{% comment %}Tanınma kartları — `rows` (`credit_recognition_read._rows`), `show_student` (son qərarlar siyahısında).
+«Ləğv et» düyməsi `crRevokeDialog`-u açır; URL `data-cr-url` ilə formaya yazılır (`credit_recognition.js`).{% endcomment %}
+<ul class="cr-cards">
+    {% for row in rows %}
+    {% with item=row.item b=row.badge %}
+    <li class="cr-card{% if not item.is_active %} cr-card--revoked{% endif %}">
+        <div class="cr-card__head">
+            <div class="cr-card__title">
+                {% if show_student %}<a class="cr-card__student" href="{{ profile_base_url }}?section=credit-recognition&amp;cr_student={{ item.student_id }}" data-section="credit-recognition">{{ row.student_label }}</a>{% endif %}
+                <strong>{{ b.code }} {{ b.name }}</strong>
+                <span class="cr-card__period">{{ item.period.name }}</span>
+            </div>
+            <div class="cr-card__score" aria-label="{% trans 'Tanınmış bal' context 'registrar.recognition' %}">
+                <span class="cr-card__score-value">{{ b.score }}</span>
+                <span class="grade-{{ b.letter }} cr-card__letter">{{ b.letter }}</span>
+                <span class="cr-card__credit">{% blocktrans with n=b.credit context "registrar.recognition" %}{{ n }} kredit{% endblocktrans %}</span>
+            </div>
+        </div>
+        <dl class="cr-card__facts">
+            <div><dt>{% trans "Proqram" context "registrar.recognition" %}</dt><dd>{{ b.program_label }}</dd></div>
+            <div><dt>{% trans "Qurum" context "registrar.recognition" %}</dt><dd>{{ b.institution }} · {{ b.country }}</dd></div>
+            <div><dt>{% trans "Xarici fənn" context "registrar.recognition" %}</dt><dd>{{ b.foreign_subject }}</dd></div>
+            <div><dt>{% trans "Xarici kredit / qiymət" context "registrar.recognition" %}</dt><dd>{{ b.foreign_credit|floatformat:'-2' }} · {{ b.foreign_grade }}</dd></div>
+            <div><dt>{% trans "Təhsil müddəti" context "registrar.recognition" %}</dt><dd>{{ b.study_period }}</dd></div>
+            <div><dt>{% trans "Sənəd" context "registrar.recognition" %}</dt><dd>{% if item.document %}<a href="{{ item.document.url }}" target="_blank" rel="noopener"><i class="fas fa-file-lines" aria-hidden="true"></i> {{ item.document_name|default:"PDF" }}</a>{% else %}—{% endif %}</dd></div>
+        </dl>
+        {% if item.note %}<p class="cr-card__note">{{ item.note }}</p>{% endif %}
+        <div class="cr-card__foot">
+            {% if item.is_active %}
+                {% if row.exempted %}
+                <span class="ems-badge ems-badge--success">{% trans "Qüvvədə · fəndən azad edilib" context "registrar.recognition" %}</span>
+                {% else %}
+                <span class="ems-badge ems-badge--info">{% trans "Qüvvədə · jurnal bağlı idi (yalnız transkript)" context "registrar.recognition" %}</span>
+                {% endif %}
+                <span class="cr-card__by">{{ item.created_by_name|default:"—" }} · {{ item.created_at|date:"d.m.Y H:i" }}</span>
+                <button type="button" class="ems-btn ems-btn--sm ems-btn--danger" data-ems-overlay-open="crRevokeDialog"
+                        data-cr-revoke data-cr-url="{% url 'registrar:credit_recognition_revoke' item.pk %}">
+                    <i class="fas fa-ban" aria-hidden="true"></i> {% trans "Ləğv et" context "registrar.recognition" %}
+                </button>
+            {% else %}
+                <span class="ems-badge ems-badge--neutral">{% trans "Ləğv edilib" context "registrar.recognition" %}</span>
+                <span class="cr-card__by">{{ item.revoked_by_name|default:"—" }} · {{ item.revoked_at|date:"d.m.Y H:i" }} — {{ item.revoke_reason }}</span>
+            {% endif %}
+        </div>
+    </li>
+    {% endwith %}
+    {% endfor %}
+</ul>

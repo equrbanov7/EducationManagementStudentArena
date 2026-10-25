@@ -92,7 +92,7 @@ Bu günün qeydləri də DƏRHAL görünür (sahib 2026-10-15). Azad fənlər (F
     <div class="ems-state journal-empty" role="status">
         <i class="fas fa-user-check ems-state__icon" aria-hidden="true"></i>
         <p class="ems-state__title">{% trans "Bu semestrdə jurnalı aktiv fənniniz yoxdur — qeydiyyatda olduğunuz fənlərdən azad edilmisiniz. Qrupunuz dəyişmir." context "registrar.journal_exempt" %}</p>
-        <ul class="sjx-exempt-list sj-exempt">{% for item in sec.exempt_subjects %}<li>{{ item.name }} · <b>{% trans "Azad edilib" context "profile.subjects" %}</b></li>{% endfor %}</ul>
+        <ul class="sjx-exempt-list sj-exempt">{% for item in sec.exempt_subjects %}<li>{{ item.name }} · {% if item.recognized %}<b>{% blocktrans with score=item.recognized.score letter=item.recognized.letter context "registrar.recognition" %}Xarici nəticə tanınıb: {{ score }} ({{ letter }}){% endblocktrans %}</b>{% else %}<b>{% trans "Azad edilib" context "profile.subjects" %}</b>{% endif %}</li>{% endfor %}</ul>
     </div>
     {% else %}
     <div class="ems-state journal-empty" role="status">

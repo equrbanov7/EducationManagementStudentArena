@@ -29,6 +29,7 @@ STAGE3_PERMISSION_CATEGORIES = {
         "student.registry_view",
         "student.movement",
         "student.assign_group",
+        "student.credit_recognition",
     ],
 }
 
@@ -40,6 +41,10 @@ STAGE3_PERMISSION_LABELS = {
     "student.registry_view": pgettext_lazy(_PERM_CTX, "Tələbə reyestrinə baxış (hərəkət tarixçəsi və ixrac)"),
     "student.movement": pgettext_lazy(_PERM_CTX, "Tələbə hərəkəti əmri yazmaq (köçürmə, məzuniyyət, bərpa, xaric)"),
     "student.assign_group": pgettext_lazy(_PERM_CTX, "Qəbulda tələbəni qrupa təyin etmək və qrup yaratmaq"),
+    # 2026-10-25 (sahib): Erasmus+ / mübadilə / başqa ali məktəbdə keçilmiş fənnin tanınması → fəndən azad.
+    "student.credit_recognition": pgettext_lazy(
+        _PERM_CTX, "Xarici nəticəni tanımaq (Erasmus+, mübadilə, başqa ali məktəb) və tələbəni fəndən azad etmək"
+    ),
 }
 
 
