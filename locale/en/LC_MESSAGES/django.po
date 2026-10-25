@@ -108129,3 +108129,40 @@ msgstr "Topic coverage (from the journal)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Syllabus"
+
+msgctxt "registrar.journal_timing"
+msgid "Gələcək tarixə dərs əlavə etmək olmaz."
+msgstr "A class cannot be added for a future date."
+
+msgctxt "registrar.journal_timing"
+msgid "Bu qeyd köhnə sistemdən köçürülüb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "This entry was migrated from the old system and cannot be changed. To change it, submit a request to the Registrar's Office (RİM) with a written statement."
+
+msgctxt "registrar.journal_timing"
+msgid "Bu xanaya rəsmi düzəliş edilib və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "This cell has an official correction and cannot be changed. To change it, submit a request to the Registrar's Office (RİM) with a written statement."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Bu qiymət %(m)s dəqiqədən çox əvvəl yazılıb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "This mark was entered more than %(m)s minutes ago and cannot be changed. To change it, submit a request to the Registrar's Office (RİM) with a written statement."
+
+msgctxt "registrar.journal_timing"
+msgid "Xana kilidlidir"
+msgstr "Cell is locked"
+
+msgctxt "registrar.journal_timing"
+msgid "RİM-ə müraciət yaz"
+msgstr "Write to the RİM"
+
+msgctxt "registrar.journal_timing"
+msgid "Bağla"
+msgstr "Close"
+
+msgctxt "core.runtime_settings"
+msgid "Müəllimin yazdığı q/b, i/e və bal İLK yazılışdan bu qədər dəqiqə sonra donur (defolt 15); sonra yalnız RİM-in rəsmi düzəlişi. Köçürülmüş xana həmişə kilidlidir. Verilənlər bazası da eyni müddəti yoxlayır."
+msgstr "Absences, attendance and scores entered by a teacher freeze this many minutes after they were FIRST entered (default 15); after that only the RİM's official correction. Migrated cells are always locked. The database enforces the same period."
+
+msgctxt "core.runtime_settings"
+msgid "Yazma pəncərəsi (defolt 7 gün): müəllim dərs tarixindən ən çox N gün sonra həmin tarixə dərs aça və boş xanaya q/b, i/e, bal yaza bilər; müddət bitəndə yazı bağlanır. Gələcək tarixə dərs açılmır. 0 — yalnız dərsin öz günü. RİM rəhbərinin rəsmi düzəliş yolu bu həddə tabe deyil."
+msgstr "Entry window (default 7 days): a teacher can open a class for a date up to N days after the class date and enter absences, attendance and scores into empty cells; after that, entry closes. Classes cannot be opened for future dates. 0 — only on the class day itself. The RİM head's official correction path is not subject to this limit."

@@ -3,8 +3,8 @@
 Müəllim hər dərs günü iştirak/qayıbı (iə/qb), seminar/lab-da isə balı (``LessonMark``)
 yazır; sistem keçirilmiş dərsləri, qayıb saatını və "giriş balı"nı avtomatik hesablayır.
 Kilid qaydaları (geriyə-dönük dəyişiklik olmasın): dərs sətri + yazılmış xana yaranışdan
-``journal.*_edit_minutes`` (defolt 120 dəqiqə; xana üçün DB trigger + servis) sonra dondurulur;
-keçmiş tarixə dərs və yeni işarə yalnız ``journal.late_entry_days`` (defolt 0 = yalnız dərs günü)
+``journal.*_edit_minutes`` (dərs sətri 120, xana 15 dəqiqə; xana üçün DB trigger + servis) sonra dondurulur;
+keçmiş tarixə dərs və yeni işarə yalnız ``journal.late_entry_days`` (defolt 7 gün; gələcək tarix yox)
 həddində; «Aktivləşdir» yanılıdırsa yeni işarə aktivləşdirmədən sonrakı pəncərədə (bax
 :mod:`apps.registrar.journal_edit_windows`); bal 0-10 clamp. Qayıb saatı proqramın
 ``absence_limit_percent``-i × fənn saatını keçirsə tələbə "kəsilir" (imtahana buraxılmır).
@@ -37,6 +37,7 @@ from apps.registrar.models import (
 )
 
 # Redaktə pəncərələri (defolt 120 dəqiqə; RİM rəhbəri «Sistem tənzimləmələri»ndən dəyişir; DB trigger də qoruyur).
+from . import journal_edit_windows  # noqa: E402
 from .journal_edit_windows import LESSON_EDIT_WINDOW, EntryRule, lesson_edit_window, mark_edit_window  # noqa: E402,F401
 
 DEFAULT_LESSON_HOURS = 2
@@ -113,12 +114,10 @@ def can_edit_lesson(lesson, *, now=None) -> bool:
 can_edit_lesson_date = can_edit_lesson
 
 
-def can_edit_mark(mark, *, now=None) -> bool:
-    """A missing mark is always writable; an existing one only within the window."""
-    if mark is None:
-        return True
-    now = now or timezone.now()
-    return (now - mark.created_at) <= mark_edit_window()
+def can_edit_mark(mark, *, now=None, window=None) -> bool:
+    """Boş xana həmişə yazılır; mövcud xana yalnız müəllimin İLK yazılışından pəncərə (defolt 15 dəqiqə)
+    ərzində dəyişir. Köçürülmüş xana (``entered_by`` boş) həmişə kilidlidir (sahib 2026-10-25)."""
+    return not journal_edit_windows.mark_lock_reason(mark, now=now, window=window)
 
 
 # Hədd resolver-ləri TƏK mənbədədir (:mod:`apps.registrar.absence_limit`, F-06 / 2026-09-14);
@@ -239,6 +238,7 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
     # Yeni işarə: dərs günü (+ gecikmiş yazı günləri) və aktivləşdirmə pəncərəsi — servis qaydası ilə EYNİ.
     entry_rule = EntryRule.current(now=now)
     markable = {lesson.id: entry_rule.allows(lesson) for lesson in lessons}
+    lock_window = mark_edit_window()  # xana kilidi — bir dəfə oxunur (xana-xana runtime oxunuşu yox)
     lesson_meta = [
         {
             "lesson": lesson,
@@ -267,13 +267,16 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
         for lesson in lessons:
             mark = mark_map.get((enrollment.id, lesson.id))
             corrected = mark is not None and mark.id in corrected_mark_ids
-            locked = corrected or (mark is not None and not can_edit_mark(mark, now=now))
+            lock_reason = journal_edit_windows.mark_lock_reason(mark, now=now, window=lock_window)
+            locked = corrected or bool(lock_reason)
             cells.append(
                 {
                     "lesson": lesson,
                     "mark": mark,
                     "allows_score": lesson_allows_score(lesson),
                     "locked": locked,
+                    # «time» (15 dəq. keçib) / «legacy» (köçürülüb) — kilidli xana dialoqu (journal_mark_lock.js).
+                    "lock_reason": "" if corrected else lock_reason,
                     # Rəsmi düzəlişli xana müəllim üçün kilidli (yalnız admin düzəlişi dəyişir).
                     "corrected": corrected,
                     # yazıla bilən: mövcud işarə pəncərə içində, YA boş xana yeni qeyd qəbul edən dərsdə

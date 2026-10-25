@@ -156,8 +156,8 @@ def create_lesson(
     if parsed is None:
         raise LessonRuleError("Dərs tarixi düzgün deyil.")
     if not allow_past:
-        # Gecikmiş yazı həddi (``journal.late_entry_days``, defolt 0 = yalnız bu gün və irəli).
-        error = journal_edit_windows.past_date_error(parsed)
+        # Yazma pəncərəsi (``journal.late_entry_days``, defolt 7 gün geriyə; gələcək tarix olmaz).
+        error = journal_edit_windows.lesson_date_error(parsed)
         if error:
             raise LessonRuleError(error)
         ensure_date_within_period(offering, parsed)
@@ -252,7 +252,7 @@ def update_lesson(
         if parsed is None:
             raise LessonRuleError("Dərs tarixi düzgün deyil.")
         if not allow_past:
-            error = journal_edit_windows.past_date_error(parsed)
+            error = journal_edit_windows.lesson_date_error(parsed)
             if error:
                 raise LessonRuleError(error)
             ensure_date_within_period(lesson.offering, parsed)

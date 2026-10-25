@@ -499,10 +499,16 @@ class LessonDateUpperBoundTest(JournalViewTest):
                     date=datetime.date.today() + datetime.timedelta(days=30),
                     created_by=self.teacher,
                 )
+            # Sahib 2026-10-25: müəllim gələcək tarixə (dövr daxilində də) dərs aça bilmir — yalnız bu gün və
+            # yazma pəncərəsi (7 gün geriyə).
+            with self.assertRaises(LessonRuleError):
+                gradebook.create_lesson(
+                    offering=self.offering,
+                    date=datetime.date.today() + datetime.timedelta(days=5),
+                    created_by=self.teacher,
+                )
             lesson = gradebook.create_lesson(
-                offering=self.offering,
-                date=datetime.date.today() + datetime.timedelta(days=5),
-                created_by=self.teacher,
+                offering=self.offering, date=datetime.date.today(), created_by=self.teacher
             )
         self.assertIsNotNone(lesson.pk)
 

@@ -52,9 +52,10 @@ class ScheduleRoomTest(LessonPrefillBase):
         self.assertEqual(lesson.off_schedule_reason, "")
 
     def test_other_week_parity_does_not_take_that_slot_room(self):
-        # Bir həftə sonra paritet tərsdir: 10:10 seminarı o gün keçirilmir → cədvəldən kənar, otaq «305» deyil.
-        next_week = (self.today + datetime.timedelta(days=7)).isoformat()
-        self._seminar(lesson_date=next_week, off_schedule_reason="Kompensasiya dərsi")
+        # Bir həftə əvvəl paritet tərsdir: 10:10 seminarı o gün keçirilmir → cədvəldən kənar, otaq «305» deyil.
+        # (Gələcək tarixə dərs açılmır — sahib 2026-10-25; keçən həftə yazma pəncərəsindədir.)
+        last_week = (self.today - datetime.timedelta(days=7)).isoformat()
+        self._seminar(lesson_date=last_week, off_schedule_reason="Kompensasiya dərsi")
         (lesson,) = self._lessons()
         self.assertIsNone(lesson.room_id)  # həmin günün yeganə slotu (laboratoriya) otaqsızdır
 

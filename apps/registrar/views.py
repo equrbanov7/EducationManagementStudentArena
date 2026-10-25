@@ -562,9 +562,10 @@ def _handle_save_marks(request, offering):
         offering=offering, entries=entries, by_user=request.user, report=True, request=request
     )
     written, rejected = result["written"], result["rejected"]
-    if autosave:
-        return journal_autosave.saved(sent=len(entries), written=written, rejected=rejected)
-    blocked_reason = result.get("blocked_reason")  # dərs günü / gecikmiş yazı / aktivləşdirmə pəncərəsi
+    if autosave:  # kilidli xanaya dəyişiklik → 409 + «RİM-ə müraciət» mətni (sahib 2026-10-25)
+        return journal_autosave.marks_response(result, sent=len(entries))
+    # dərs günü / yazma pəncərəsi / aktivləşdirmə pəncərəsi; kilidli xana (15 dəq. / köçürülmüş / düzəliş)
+    blocked_reason = " ".join(filter(None, (result.get("blocked_reason"), result.get("locked_reason"))))
     if entries and not written:
         messages.warning(
             request,

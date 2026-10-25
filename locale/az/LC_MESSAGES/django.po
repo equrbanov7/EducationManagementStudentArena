@@ -107639,3 +107639,40 @@ msgstr "Mövzuların keçilməsi (jurnal üzrə)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Sillabus"
+
+msgctxt "registrar.journal_timing"
+msgid "Gələcək tarixə dərs əlavə etmək olmaz."
+msgstr "Gələcək tarixə dərs əlavə etmək olmaz."
+
+msgctxt "registrar.journal_timing"
+msgid "Bu qeyd köhnə sistemdən köçürülüb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Bu qeyd köhnə sistemdən köçürülüb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+
+msgctxt "registrar.journal_timing"
+msgid "Bu xanaya rəsmi düzəliş edilib və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Bu xanaya rəsmi düzəliş edilib və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Bu qiymət %(m)s dəqiqədən çox əvvəl yazılıb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Bu qiymət %(m)s dəqiqədən çox əvvəl yazılıb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+
+msgctxt "registrar.journal_timing"
+msgid "Xana kilidlidir"
+msgstr "Xana kilidlidir"
+
+msgctxt "registrar.journal_timing"
+msgid "RİM-ə müraciət yaz"
+msgstr "RİM-ə müraciət yaz"
+
+msgctxt "registrar.journal_timing"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "core.runtime_settings"
+msgid "Müəllimin yazdığı q/b, i/e və bal İLK yazılışdan bu qədər dəqiqə sonra donur (defolt 15); sonra yalnız RİM-in rəsmi düzəlişi. Köçürülmüş xana həmişə kilidlidir. Verilənlər bazası da eyni müddəti yoxlayır."
+msgstr "Müəllimin yazdığı q/b, i/e və bal İLK yazılışdan bu qədər dəqiqə sonra donur (defolt 15); sonra yalnız RİM-in rəsmi düzəlişi. Köçürülmüş xana həmişə kilidlidir. Verilənlər bazası da eyni müddəti yoxlayır."
+
+msgctxt "core.runtime_settings"
+msgid "Yazma pəncərəsi (defolt 7 gün): müəllim dərs tarixindən ən çox N gün sonra həmin tarixə dərs aça və boş xanaya q/b, i/e, bal yaza bilər; müddət bitəndə yazı bağlanır. Gələcək tarixə dərs açılmır. 0 — yalnız dərsin öz günü. RİM rəhbərinin rəsmi düzəliş yolu bu həddə tabe deyil."
+msgstr "Yazma pəncərəsi (defolt 7 gün): müəllim dərs tarixindən ən çox N gün sonra həmin tarixə dərs aça və boş xanaya q/b, i/e, bal yaza bilər; müddət bitəndə yazı bağlanır. Gələcək tarixə dərs açılmır. 0 — yalnız dərsin öz günü. RİM rəhbərinin rəsmi düzəliş yolu bu həddə tabe deyil."

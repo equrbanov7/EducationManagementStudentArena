@@ -1,0 +1,25 @@
+/* Jurnal: KİLİDLİ xana nişanı (sahib 2026-10-25) — 15 dəqiqə keçmiş / köçürülmüş xana.
+   Dəyər eyni rəngdə qalır; yanında kiçik kilid işarəsi, klikdə izah dialoqu (journal_mark_lock.js).
+   Bütün keçmiş xanalar kilidli olduğundan nişan sakitdir — üzərinə gələndə qabarır. */
+.jd2-ro--locked {
+    cursor: pointer;
+    position: relative;
+    padding-right: 9px;
+}
+
+.jd2-ro--locked::after {
+    content: "\f023"; /* fa-lock */
+    font-family: "Font Awesome 6 Free", "Font Awesome 5 Free";
+    font-weight: 900;
+    font-size: 7px;
+    position: absolute;
+    top: -2px;
+    right: 0;
+    color: var(--jd-lock-color, #94a3b8);
+    opacity: 0.55;
+}
+
+.jd2-ro--locked:hover::after {
+    opacity: 1;
+    color: var(--jd-lock-color-strong, #475569);
+}

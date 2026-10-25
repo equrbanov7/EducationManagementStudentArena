@@ -7,7 +7,8 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
 {% comment %}AVTOMATİK YADDA SAXLAMA (sahib 2026-10-14): `data-jd-autosave` — dəyişən xanalar ~0.8 san.
 sonra eyni ünvana (`action=save_marks`, `autosave=1` → JSON) gedir; «Yadda saxla» düyməsi ehtiyat
 yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.py.{% endcomment %}
-<form method="post" class="journal-form" data-jd-marks-form data-jd-draft="grid"{% if can_edit and journal.lessons and not correction_mode %} data-jd-autosave data-jd-autosave-url="{% url 'registrar:journal_detail' offering.id %}"{% endif %}>
+<form method="post" class="journal-form" data-jd-marks-form data-jd-draft="grid"{% if can_edit and journal.lessons and not correction_mode %} data-jd-autosave data-jd-autosave-url="{% url 'registrar:journal_detail' offering.id %}"{% endif %}
+      {% if can_edit and not correction_mode %}data-jd-lock-msg-time="{{ mark_lock_messages.time }}" data-jd-lock-msg-legacy="{{ mark_lock_messages.legacy }}" data-jd-lock-url="{{ mark_lock_request_url }}" data-jd-lock-title="{% trans 'Xana kilidlidir' context 'registrar.journal_timing' %}" data-jd-lock-confirm="{% trans 'RİM-ə müraciət yaz' context 'registrar.journal_timing' %}" data-jd-lock-cancel="{% trans 'Bağla' context 'registrar.journal_timing' %}"{% endif %}>
     {% csrf_token %}
     <input type="hidden" name="action" value="save_marks">
 
@@ -243,10 +244,19 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                                 {% endif %}
                                 {% else %}
                                 {% if cell.mark %}
+                                    {% comment %}Kilidli xana (sahib 2026-10-25): 15 dəq. keçib / köçürülüb — kilid nişanı, klikdə
+                                    «RİM-ə müraciət edib təqdimat yazın» dialoqu (journal_mark_lock.js). Mətn formadadır — xanada yox.{% endcomment %}
+                                    {% if can_edit and cell.lock_reason %}{% with lk=cell.lock_reason %}
+                                    {% if cell.mark.status == 'absent' %}<span class="jd2-ro jd2-ro--qb jd2-ro--locked" data-jd-lock="{{ lk }}">q/b</span>
+                                    {% elif cell.mark.status == 'excused' %}<span class="jd2-ro jd2-ro--uq jd2-ro--locked" data-jd-lock="{{ lk }}">üq</span>
+                                    {% elif cell.allows_score and cell.mark.score is not None %}<span class="jd2-ro jd2-ro--ie jd2-ro--locked" data-jd-lock="{{ lk }}">{{ cell.mark.score|floatformat:'-2' }}</span>
+                                    {% else %}<span class="jd2-ro jd2-ro--ie jd2-ro--locked" data-jd-lock="{{ lk }}">i/e</span>{% endif %}
+                                    {% endwith %}{% else %}
                                     {% if cell.mark.status == 'absent' %}<span class="jd2-ro jd2-ro--qb">q/b</span>
                                     {% elif cell.mark.status == 'excused' %}<span class="jd2-ro jd2-ro--uq">üq</span>
                                     {% elif cell.allows_score and cell.mark.score is not None %}<span class="jd2-ro jd2-ro--ie">{{ cell.mark.score|floatformat:'-2' }}</span>
                                     {% else %}<span class="jd2-ro jd2-ro--ie">i/e</span>{% endif %}
+                                    {% endif %}
                                 {% else %}<span class="jd2-ro jd2-ro--empty">—</span>{% endif %}
                                 {% if cell.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ cell.mark.id }}" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% elif cell.legacy_excuse %}<button type="button" class="corr-fixed-badge corr-excuse-badge" data-corr-history="{{ cell.mark.id }}" title="{% trans 'Üzrlü qayıb sənədi var — bax' context 'registrar.legacy_excuse' %}">✎</button>{% endif %}
                                 {% endif %}

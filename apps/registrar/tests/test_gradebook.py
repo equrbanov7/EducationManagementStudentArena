@@ -250,16 +250,17 @@ class JournalServiceTest(TestCase):
         with bypass_rls():
             today = timezone.localdate()
             lesson = self._lesson(day=1)
-            # Pəncərə içində redaktə mümkündür (tarix bu gündən əvvəl ola bilməz).
-            self.assertTrue(gradebook.update_lesson_date(lesson=lesson, date=today + datetime.timedelta(days=1)))
-            # Keçmiş tarixə çəkmək pəncərə içində də qadağandır.
-            self.assertFalse(gradebook.update_lesson_date(lesson=lesson, date=today - datetime.timedelta(days=1)))
+            # Pəncərə içində redaktə mümkündür (yazma pəncərəsi: bu gün − 7 … bu gün, sahib 2026-10-25).
+            self.assertTrue(gradebook.update_lesson_date(lesson=lesson, date=today - datetime.timedelta(days=1)))
+            # Gələcək tarixə və pəncərədən köhnə tarixə çəkmək qadağandır.
+            self.assertFalse(gradebook.update_lesson_date(lesson=lesson, date=today + datetime.timedelta(days=1)))
+            self.assertFalse(gradebook.update_lesson_date(lesson=lesson, date=today - datetime.timedelta(days=8)))
             # 2 saatlıq pəncərə bitdi → dondurulur.
             Lesson.objects.filter(pk=lesson.pk).update(created_at=timezone.now() - datetime.timedelta(hours=3))
             lesson.refresh_from_db()
-            self.assertFalse(gradebook.update_lesson_date(lesson=lesson, date=today + datetime.timedelta(days=2)))
+            self.assertFalse(gradebook.update_lesson_date(lesson=lesson, date=today - datetime.timedelta(days=2)))
             lesson.refresh_from_db()
-            self.assertEqual(lesson.date, today + datetime.timedelta(days=1))  # unchanged — window closed
+            self.assertEqual(lesson.date, today - datetime.timedelta(days=1))  # unchanged — window closed
 
     # ── student view ─────────────────────────────────────────────────────────
     def test_student_journal_summary_shape(self):

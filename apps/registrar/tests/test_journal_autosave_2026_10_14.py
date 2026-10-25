@@ -45,7 +45,7 @@ class JournalAutosaveTest(TestCase):
             cls.old_lesson = gradebook.create_lesson(
                 allow_past=True,
                 offering=cls.offering,
-                date=timezone.localdate() - datetime.timedelta(days=7),
+                date=timezone.localdate() - datetime.timedelta(days=8),
                 kind=LessonKind.LECTURE,
             )
 
@@ -95,7 +95,7 @@ class JournalAutosaveTest(TestCase):
     def test_server_rules_still_apply_and_skips_are_reported(self):
         resp = self._autosave(
             **{
-                f"att__{self.old_lesson.id}__{self.enrollment.id}": "absent",  # keçmiş dərs — yeni işarə yox
+                f"att__{self.old_lesson.id}__{self.enrollment.id}": "absent",  # yazma pəncərəsindən (7 gün) köhnə dərs — yeni işarə yox
                 f"att__{self.lesson.id}__{self.enrollment.id}": "present",
                 f"score__{self.lesson.id}__{self.enrollment.id}": "15",  # 0–10 xaricində — rədd
             }

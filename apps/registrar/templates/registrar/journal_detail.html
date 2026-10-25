@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal_activation.css' %}?v=20261017-room">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_cell_hint.css' %}?v=20261014-notip">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_autosave.css' %}?v=20261014-auto">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_mark_lock.css' %}?v=20261025-lock">
     {% comment %}Sakit düzüm qatı — HƏMİŞƏ SONUNCU yüklənir ki, yuxarıdakı
     fayllardakı düzüm fərqlərini üstələsin; rəng palitrasına toxunmur.{% endcomment %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal_layout.css' %}?v=20261019-head">
@@ -331,6 +332,8 @@
     {# Sağdakı «N q/b» sayğacı davamiyyət dəyişəndə canlı yenilənir (UX2 2026-10-05). #}
     <script src="{% static 'registrar/js/journal_grid_absence.js' %}?v=20261005-live2"></script>
     <script src="{% static 'registrar/js/journal_cell_hint.js' %}?v=20261014-notip"></script>
+    {# Kilidli xana (15 dəq. / köçürülmüş) → «RİM-ə müraciət edib təqdimat yazın» dialoqu (sahib 2026-10-25). #}
+    <script src="{% static 'registrar/js/journal_mark_lock.js' %}?v=20261025-lock"></script>
     {# Yapışqan başlıq sətri — daxili şaquli scroll olmadan (journal_layout.css §8, 2026-10-19). #}
     <script src="{% static 'registrar/js/journal_sticky_head.js' %}?v=20261019-1"></script>
     {# Avtomatik yadda saxlama — journal_grid.js-dən SONRA (qaralama bərpası + `EMSJournalGrid.clearDraft`), sahib 2026-10-14. #}

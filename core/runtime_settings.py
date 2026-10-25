@@ -267,23 +267,23 @@ SPECS: dict[str, Spec] = {
             pgettext_lazy(_CTX, "dəqiqə"), min=1, max=4320, legacy_key="journal.lesson_edit_hours",
         ),
         Spec(
-            "journal.mark_edit_minutes", "journal", "int", _setting("JOURNAL_MARK_EDIT_MINUTES", 120),
+            "journal.mark_edit_minutes", "journal", "int", _setting("JOURNAL_MARK_EDIT_MINUTES", 15),
             pgettext_lazy(_CTX, "q/b, i/e və balı dəyişmə müddəti"),
             pgettext_lazy(
                 _CTX,
-                "Müəllimin yazdığı q/b, i/e və bal yazıldıqdan bu qədər dəqiqə sonra donur — sonra yalnız rəsmi "
-                "düzəliş yolu. Verilənlər bazası da eyni müddəti yoxlayır (120 dəqiqə = 2 saat).",
+                "Müəllimin yazdığı q/b, i/e və bal İLK yazılışdan bu qədər dəqiqə sonra donur (defolt 15); sonra yalnız "
+                "RİM-in rəsmi düzəlişi. Köçürülmüş xana həmişə kilidlidir. Verilənlər bazası da eyni müddəti yoxlayır.",
             ),
             pgettext_lazy(_CTX, "dəqiqə"), min=1, max=4320, legacy_key="journal.mark_edit_hours",
         ),
         Spec(
-            "journal.late_entry_days", "journal", "int", _setting("JOURNAL_LATE_ENTRY_DAYS", 0),
+            "journal.late_entry_days", "journal", "int", _setting("JOURNAL_LATE_ENTRY_DAYS", 7),
             pgettext_lazy(_CTX, "Dərs tarixindən sonra gecikmiş yazı müddəti"),
             pgettext_lazy(
                 _CTX,
-                "0 — dərs və yeni q/b, i/e, bal yalnız dərsin öz günündə yazılır. N — müəllim dərs tarixindən ən "
-                "çox N gün sonra həmin tarixə dərs aça və yeni qeyd yaza bilər; müddət bitəndə yazı bağlanır. "
-                "RİM rəhbərinin rəsmi düzəliş yolu bu həddə tabe deyil.",
+                "Yazma pəncərəsi (defolt 7 gün): müəllim dərs tarixindən ən çox N gün sonra həmin tarixə dərs aça "
+                "və boş xanaya q/b, i/e, bal yaza bilər; müddət bitəndə yazı bağlanır. Gələcək tarixə dərs açılmır. "
+                "0 — yalnız dərsin öz günü. RİM rəhbərinin rəsmi düzəliş yolu bu həddə tabe deyil.",
             ),
             pgettext_lazy(_CTX, "gün"), min=0, max=30,
         ),

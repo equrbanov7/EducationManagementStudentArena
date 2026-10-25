@@ -108323,3 +108323,40 @@ msgstr "Прохождение тем (по журналу)"
 msgctxt "core.runtime_settings"
 msgid "Sillabus"
 msgstr "Силлабус"
+
+msgctxt "registrar.journal_timing"
+msgid "Gələcək tarixə dərs əlavə etmək olmaz."
+msgstr "Нельзя добавить занятие на будущую дату."
+
+msgctxt "registrar.journal_timing"
+msgid "Bu qeyd köhnə sistemdən köçürülüb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Эта запись перенесена из старой системы и не может быть изменена. Для изменения обратитесь в РИМ с письменным представлением."
+
+msgctxt "registrar.journal_timing"
+msgid "Bu xanaya rəsmi düzəliş edilib və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "В эту ячейку внесено официальное исправление, её нельзя изменить. Для изменения обратитесь в РИМ с письменным представлением."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Bu qiymət %(m)s dəqiqədən çox əvvəl yazılıb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Эта отметка внесена более %(m)s минут назад и не может быть изменена. Для изменения обратитесь в РИМ с письменным представлением."
+
+msgctxt "registrar.journal_timing"
+msgid "Xana kilidlidir"
+msgstr "Ячейка заблокирована"
+
+msgctxt "registrar.journal_timing"
+msgid "RİM-ə müraciət yaz"
+msgstr "Обратиться в РИМ"
+
+msgctxt "registrar.journal_timing"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "core.runtime_settings"
+msgid "Müəllimin yazdığı q/b, i/e və bal İLK yazılışdan bu qədər dəqiqə sonra donur (defolt 15); sonra yalnız RİM-in rəsmi düzəlişi. Köçürülmüş xana həmişə kilidlidir. Verilənlər bazası da eyni müddəti yoxlayır."
+msgstr "Отметки «н/б», «п» и баллы, внесённые преподавателем, замораживаются через указанное число минут после ПЕРВОГО внесения (по умолчанию 15); далее только официальное исправление через РИМ. Перенесённые ячейки всегда заблокированы. База данных проверяет тот же срок."
+
+msgctxt "core.runtime_settings"
+msgid "Yazma pəncərəsi (defolt 7 gün): müəllim dərs tarixindən ən çox N gün sonra həmin tarixə dərs aça və boş xanaya q/b, i/e, bal yaza bilər; müddət bitəndə yazı bağlanır. Gələcək tarixə dərs açılmır. 0 — yalnız dərsin öz günü. RİM rəhbərinin rəsmi düzəliş yolu bu həddə tabe deyil."
+msgstr "Окно записи (по умолчанию 7 дней): преподаватель может открыть занятие на дату не позднее чем через N дней после неё и заполнить пустые ячейки («н/б», «п», балл); затем запись закрывается. Занятие на будущую дату не открывается. 0 — только в день занятия. Официальное исправление руководителем РИМ этим лимитом не ограничено."
