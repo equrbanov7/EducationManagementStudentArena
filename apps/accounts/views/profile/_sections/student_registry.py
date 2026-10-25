@@ -32,6 +32,7 @@ from apps.registrar.public import (
 from . import student_activation
 
 _CTX = "accounts.student_registry"
+REGISTRY_GROUP_CELL = "accounts/profile/sections/student_services/_registry_group_cell.html"
 
 
 def _sort_url(base_params: dict, *, key: str, current: str) -> str:
@@ -87,7 +88,12 @@ def _table_row(row, *, can_actions):
         "row_head": row["student_code"] or "—",
         "cells": [
             {"text": row["name"]},
-            {"text": " · ".join(part for part in (row["program_label"], row["group_name"]) if part) or "—"},
+            {
+                "text": " · ".join(part for part in (row["program_label"], row["group_name"]) if part) or "—",
+                # «alt qrup» nişanı — cari semestrdə başqa (alt) qrupun jurnalında oxuyursa (sahib 2026-10-25).
+                "include": REGISTRY_GROUP_CELL if row.get("subgroup_names") else "",
+                "subgroups": row.get("subgroup_names") or [],
+            },
             {"text": row["course_label"] or "—"},
             {"text": row["form_label"]},
             {"text": row["funding_label"]},

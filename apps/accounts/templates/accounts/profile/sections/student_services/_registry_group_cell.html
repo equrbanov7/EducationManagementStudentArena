@@ -1,0 +1,9 @@
+{% load i18n %}{% comment %}
+Tələbə reyestri — «Proqram · qrup» xanası + «alt qrup» nişanı (sahib 2026-10-25: «görünsün ki alt qrupdur»).
+Nişan tələbə cari semestrdə başqa (alt) qrupun jurnalında «alt qrupdan əlavə» olunubsa görünür; mətn həmin
+qrupların adlarıdır (jurnal çipi ilə eyni predikat — registry._subgroup_journals).
+{% endcomment %}{{ cell.text }}
+<span class="ems-badge ems-badge--muted" title="{% trans 'Cari semestrdə bu alt qrup(lar)ın jurnalında oxuyur' context 'accounts.student_registry' %}">
+    <i class="fas fa-user-plus" aria-hidden="true"></i>
+    {% trans "alt qrup" context "accounts.student_registry" %}: {{ cell.subgroups|join:", " }}
+</span>

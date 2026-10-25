@@ -7,6 +7,8 @@ Kənar modullar (accounts kabineti, 25% təkrar imtahan axını) YALNIZ bu adlar
 * ``place_in_subgroup(*, student, offering, document, actor, reason, request=None)`` —
   :class:`SubgroupPlacementError` (``code``, ``message``) atır;
 * ``undo_subgroup_placement(*, event_id, actor, reason, organization, request=None)``;
+* ``record_imported_placement(*, enrollment, actor, reason, details=None, load=None)`` — köçürmənin yazdığı
+  «alt qrupdan əlavə» qeydiyyatına tarixçə sətri (legacy delta ``subgroups`` fazası);
 * oxu köməkçiləri: önbaxış (``evaluate_subgroup_placement``), uyğun jurnallar, tarixçə, əhatə qapısı.
 """
 
@@ -20,6 +22,7 @@ from .subgroup_placement import evaluate as evaluate_subgroup_placement
 from .subgroup_placement import place_in_subgroup
 from .subgroup_placement import undo_placement as undo_subgroup_placement
 from .subgroup_placement_errors import SubgroupPlacementError
+from .subgroup_placement_import import record_imported_placement
 
 #: Yerləşdirmə açarı (``retake.manage``) — menyu və HTTP qapısı eyni sabiti işlədir.
 SUBGROUP_PLACEMENT_PERMISSION = subgroup_access.PLACEMENT_PERMISSION
@@ -42,6 +45,7 @@ __all__ = [
     "credit_load",
     "evaluate_subgroup_placement",
     "place_in_subgroup",
+    "record_imported_placement",
     "student_active_record",
     "subgroup_access",
     "subgroup_placement_history",

@@ -107549,3 +107549,7 @@ msgstr "Konu adına göre ara…"
 msgctxt "registrar.journal_topics"
 msgid "Uyğun mövzu tapılmadı"
 msgstr "Eşleşen konu bulunamadı"
+
+msgctxt "accounts.student_registry"
+msgid "Cari semestrdə bu alt qrup(lar)ın jurnalında oxuyur"
+msgstr "Bu dönem bu alt grubun (alt grupların) defterinde okuyor"

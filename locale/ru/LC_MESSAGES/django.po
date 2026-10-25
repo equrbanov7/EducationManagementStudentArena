@@ -108335,3 +108335,7 @@ msgstr "Поиск по названию темы…"
 msgctxt "registrar.journal_topics"
 msgid "Uyğun mövzu tapılmadı"
 msgstr "Подходящая тема не найдена"
+
+msgctxt "accounts.student_registry"
+msgid "Cari semestrdə bu alt qrup(lar)ın jurnalında oxuyur"
+msgstr "В текущем семестре учится в журнале этой подгруппы (этих подгрупп)"
