@@ -6,7 +6,8 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
-from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import EmailMultiAlternatives
+from django.template import loader
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
@@ -18,6 +19,7 @@ from core.utils import build_absolute_url, get_auth_otp_expiry_minutes
 from ...identity import canonical_identity_queryset, email_is_placeholder, user_access_is_login_blocked
 from ...models import EmailOTP
 from ...services import OTPRateLimitError, issue_email_otp
+from ...tokens import password_reset_token_generator
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +96,17 @@ class CustomPasswordResetForm(PasswordResetForm):
         "Hesabınızda real e-poçt ünvanı qeydə alınmayıb — e-poçt qeydiyyatı üçün RİM-ə müraciət edin.",
     )
 
+    #: SMTP məktubu qəbul etmədi — «göndərdik» demək yalan olardı (2026-10-25).
+    delivery_failed_message = pgettext_lazy(
+        "accounts.form.password_reset.error",
+        "Məktub göndərilə bilmədi. Bir neçə dəqiqə sonra yenidən cəhd edin.",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.password_reset_users = []
+        self.delivery_failed = False
+
     def clean_email(self):
         """Yer-tutucu domen → poçt yox, RİM göstərişi.
 
@@ -152,7 +165,7 @@ class CustomPasswordResetForm(PasswordResetForm):
         subject_template_name="accounts/password_reset_subject.txt",
         email_template_name="accounts/password_reset_email.txt",
         use_https=False,
-        token_generator=default_token_generator,
+        token_generator=password_reset_token_generator,
         from_email=None,
         request=None,
         html_email_template_name="accounts/password_reset_email.html",
@@ -195,11 +208,37 @@ class CustomPasswordResetForm(PasswordResetForm):
                 "otp_expires_at": expires_at,
                 **(extra_email_context or {}),
             }
-            self.send_mail(
-                subject_template_name,
-                email_template_name,
-                context,
-                from_email,
-                user.email,
-                html_email_template_name=html_email_template_name,
-            )
+            try:
+                self.send_mail(
+                    subject_template_name,
+                    email_template_name,
+                    context,
+                    from_email,
+                    user.email,
+                    html_email_template_name=html_email_template_name,
+                )
+            except Exception:  # noqa: BLE001 — SMTP xətasının növü fərq etmir: məktub getməyib
+                # 2026-10-25: Django 5.x ``send_mail`` xətanı UDURDU → «göndərdik» səhifəsi + qüvvədə kod
+                # (cooldown daxilində təkrar sorğu yeni məktub vermirdi). İndi kod silinir (``_deliver_otp`` kimi)
+                # və view istifadəçiyə «göndərilə bilmədi» deyir.
+                logger.exception("Password-reset email delivery failed for user %s", user.pk)
+                _otp.delete()
+                self.delivery_failed = True
+
+    def send_mail(
+        self,
+        subject_template_name,
+        email_template_name,
+        context,
+        from_email,
+        to_email,
+        html_email_template_name=None,
+    ):
+        """Django-nun ``send_mail``-i ilə eyni, amma SMTP xətasını UDMUR — ``save()`` onu emal edir."""
+
+        subject = "".join(loader.render_to_string(subject_template_name, context).splitlines())
+        body = loader.render_to_string(email_template_name, context)
+        message = EmailMultiAlternatives(subject, body, from_email, [to_email])
+        if html_email_template_name is not None:
+            message.attach_alternative(loader.render_to_string(html_email_template_name, context), "text/html")
+        message.send()

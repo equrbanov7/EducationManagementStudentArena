@@ -11,7 +11,7 @@ from django.contrib.auth.forms import SetPasswordForm
 from django.utils.functional import lazy
 from django.utils.translation import pgettext_lazy
 
-from apps.accounts.identity import user_access_is_login_blocked
+from apps.accounts.identity import canonical_identity, user_access_is_login_blocked
 from apps.accounts.models import EmailOTP
 
 from ..password_policy import help_text as _password_help_text
@@ -230,6 +230,13 @@ class OTPPasswordResetCodeForm(forms.Form):
         # OTP-nin özü e-poçt sahibliyinin sübutudur.
         user = getattr(matched_otp, "user", None)
         if user is None or not user.is_active or user_access_is_login_blocked(user):
+            self.add_error("otp_code", self.error_messages["otp_invalid"])
+            return cleaned_data
+        # 2026-10-25: ilk-giriş axını da ``PASSWORD_RESET`` məqsədli kod buraxır — istifadəçinin YAZDIĞI (hələ
+        # hesaba yazılmamış) ünvana. Belə kod anonim bərpa formasında qəbul olunmamalıdır: bu forma yalnız
+        # HESABDAKI e-poçta göndərilmiş kodla işləyir (əks halda parol qoyulur, e-poçt isə «təsdiqli» işarələnir,
+        # halbuki hesabdakı ünvan dəyişməyib — yer-tutucu ola bilər).
+        if canonical_identity(getattr(user, "email", "")) != canonical_identity(email):
             self.add_error("otp_code", self.error_messages["otp_invalid"])
             return cleaned_data
 

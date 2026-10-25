@@ -18,6 +18,7 @@ from ...forms import CustomLoginForm, CustomPasswordResetForm, OTPPasswordResetC
 from ...middleware import POST_LOGIN_REDIRECT_GUARD_SESSION_KEY
 from ...services import get_otp_timer_context
 from ...services.account_block_notice import blocked_login_notice
+from ...tokens import password_reset_token_generator
 from ._shared import (
     _clear_login_rate_limits_after_password_reset,
     _ensure_auth_device_cookie,
@@ -378,6 +379,8 @@ class NamespacedPasswordResetView(PasswordResetView):
     email_template_name = "accounts/password_reset_email.txt"
     html_email_template_name = "accounts/password_reset_email.html"
     success_url = reverse_lazy("accounts:password_reset_done")
+    # 2026-10-25: linkin ömrü = OTP ömrü (``apps/accounts/tokens.py``); əvvəl mühitin 300 saniyəsi idi.
+    token_generator = password_reset_token_generator
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -394,6 +397,12 @@ class NamespacedPasswordResetView(PasswordResetView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
+        if getattr(form, "delivery_failed", False):
+            # SMTP məktubu qəbul etmədi — «göndərdik» səhifəsinə aparmırıq (kod da silinib, təkrar cəhd dərhal
+            # yeni məktub verir). Bu cavab yalnız real SMTP nasazlığında fərqlənir; hücumçu onu yarada bilmir.
+            self.request.session.pop(PASSWORD_RESET_EMAIL_SESSION_KEY, None)
+            form.add_error(None, form.delivery_failed_message)
+            return self.form_invalid(form)
         reset_users = getattr(form, "password_reset_users", [])
         if reset_users:
             reset_email = EmailOTP.normalize_email(form.cleaned_data["email"])
@@ -454,6 +463,7 @@ class NamespacedPasswordResetConfirmView(PasswordResetConfirmView):
 
     template_name = "accounts/password_reset_confirm.html"
     form_class = OTPPasswordResetConfirmForm
+    token_generator = password_reset_token_generator
     success_url = reverse_lazy("accounts:password_reset_complete")
 
     def get_context_data(self, **kwargs):

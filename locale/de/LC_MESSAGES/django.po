@@ -109988,3 +109988,11 @@ msgstr "Studienabschluss"
 msgctxt "accounts.groups"
 msgid "%%d qrupdan çıxıb (məzuniyyət / xaric / məzun)"
 msgstr "%%d haben die Gruppe verlassen (Beurlaubung / Exmatrikulation / Abschluss)"
+
+msgctxt "accounts.form.password_reset.error"
+msgid "Məktub göndərilə bilmədi. Bir neçə dəqiqə sonra yenidən cəhd edin."
+msgstr "Die E-Mail konnte nicht gesendet werden. Bitte versuchen Sie es in einigen Minuten erneut."
+
+msgctxt "accounts.password_reset_done_page"
+msgid "Kod gəlmirsə, hesabınızda başqa e-poçt qeydə alınmış ola bilər — RİM-ə müraciət edin."
+msgstr "Kommt der Code nicht an, ist in Ihrem Konto möglicherweise eine andere E-Mail-Adresse hinterlegt — wenden Sie sich an das RİM."

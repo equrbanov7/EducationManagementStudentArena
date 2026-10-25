@@ -108962,3 +108962,11 @@ msgstr "Graduation"
 msgctxt "accounts.groups"
 msgid "%%d qrupdan çıxıb (məzuniyyət / xaric / məzun)"
 msgstr "%%d left the group (leave / expelled / graduated)"
+
+msgctxt "accounts.form.password_reset.error"
+msgid "Məktub göndərilə bilmədi. Bir neçə dəqiqə sonra yenidən cəhd edin."
+msgstr "The email could not be sent. Please try again in a few minutes."
+
+msgctxt "accounts.password_reset_done_page"
+msgid "Kod gəlmirsə, hesabınızda başqa e-poçt qeydə alınmış ola bilər — RİM-ə müraciət edin."
+msgstr "If the code does not arrive, a different email may be registered on your account — contact the RİM office."
