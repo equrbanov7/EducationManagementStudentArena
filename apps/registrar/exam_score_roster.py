@@ -23,7 +23,7 @@ from django.utils.translation import pgettext
 from core.search_text import tokens_of, tolerant_match
 
 from . import exam_attempt_history, finals, gradebook
-from .models import CourseOffering, Enrollment, ExamScoreEntry, ExamScoreEntryKind
+from .models import CourseOffering, Enrollment, ExamAssessment, ExamScoreEntry, ExamScoreEntryKind
 from .models.exam_score_entry import ExamScoreSheetKind
 
 _CTX = "registrar.exam_score_entry"
@@ -163,6 +163,10 @@ def entry_row(entry) -> dict:
         "kind": entry.kind,
         "kind_label": str(entry.get_kind_display()),
         "is_correction": entry.kind == ExamScoreEntryKind.CORRECTION,
+        "is_window_edit": entry.kind == ExamScoreEntryKind.WINDOW_EDIT,
+        "assessment": entry.assessment,
+        "assessment_label": str(entry.get_assessment_display()),
+        "checked_on": sheet.checked_on.strftime("%d.%m.%Y") if sheet is not None and sheet.checked_on else "",
         "is_appeal": entry.kind == ExamScoreEntryKind.APPEAL,
         "is_change": entry.kind != ExamScoreEntryKind.INITIAL,
         "old": str(int(entry.old_score)) if entry.old_score is not None else "—",
@@ -200,7 +204,9 @@ def roster_for_offering(*, offering):
     )
     entries_by_enrollment: dict[str, list] = {}
     # Model ``ordering = ["-created_at"]`` → hər tələbənin siyahısı ən yenidən köhnəyə.
-    for entry in ExamScoreEntry.objects.filter(enrollment__in=enrollments).select_related("entered_by", "sheet"):
+    for entry in ExamScoreEntry.objects.filter(
+        enrollment__in=enrollments, assessment=ExamAssessment.FINAL
+    ).select_related("entered_by", "sheet"):
         entries_by_enrollment.setdefault(str(entry.enrollment_id), []).append(entry)
 
     # Komponent/bal/FinalGrade/ResitRecord oxumaları BİR dəfə toplu (əvvəl hər

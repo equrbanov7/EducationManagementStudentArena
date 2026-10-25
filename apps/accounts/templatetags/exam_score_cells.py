@@ -56,7 +56,9 @@ def ese_question_cells(row) -> str:
     """
     enrollment_id = row["enrollment"].id
     name = row.get("name") or ""
-    locked = bool(row.get("locked"))
+    # 2026-10-25: «Yekun» sətir (təsdiqdən 15 dəqiqə keçib) də kilidli render olunur — JS yalnız
+    # «Apellyasiya» / «RİM təqdimatı» rejimində açır (server qaydanı yenə tətbiq edir).
+    locked = bool(row.get("locked") or row.get("final_locked"))
     parts = []
     for cell in row.get("question_cells") or ():
         value = cell["value"]

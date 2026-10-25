@@ -30,6 +30,8 @@ from django.utils.translation import pgettext
 
 from apps.accounts.views._helpers.formatting import _append_query_params
 
+from .exam_score_entry_assessment import QUERY as ASSESSMENT_QUERY
+from .exam_score_entry_assessment import fill_assessment, resolve_assessment
 from .exam_score_entry_lock import fill_period_lock
 from .exam_score_entry_offering import _fill_offering, _steps
 from .kollokvium_windows import _current_semester, _season_label
@@ -325,12 +327,32 @@ def build_exam_score_entry_section(
         return
 
     sheet_kind = _resolve_exam_kind(request, "ese_sheet_kind")
-    _fill_offering(section, offering, period, service, sheets_service, selected_org, is_superadmin, sheet_kind)
+    # 2026-10-25: midterm / final — `?ese_assessment=` və ya semestr təqviminə görə defolt.
+    assessment, default, available = resolve_assessment(
+        request, offering=offering, period=period, organization=selected_org, service=service
+    )
+    choice_params = dict(roster_params)
+    roster_params[ASSESSMENT_QUERY] = assessment
+    section["post_next_url"] = _append_query_params(reverse("accounts:profile"), section=SECTION, **roster_params)
+    _fill_offering(
+        section, offering, period, service, sheets_service, selected_org, is_superadmin, sheet_kind, assessment
+    )
     fill_period_lock(  # bitmiş dövr kilidi + RİM düzəliş rejimi (2026-09-26)
         request, section, period=period, organization=selected_org, service=service, is_superadmin=is_superadmin
     )
     if section["correction_mode"]:  # çiplər / süzgəc keçidləri rejimi saxlasın
         roster_params[service.exam_score_period_lock.CORRECTION_MODE_QUERY] = "1"
+    fill_assessment(
+        request,
+        section,
+        offering=offering,
+        organization=selected_org,
+        service=service,
+        selected=assessment,
+        default=default,
+        available=available,
+        params=choice_params,
+    )
     _apply_roster_filters(request, section, filter_fields, service, roster_params)
     section["sheet_kind_chips"] = _exam_kind_chips(
         service,

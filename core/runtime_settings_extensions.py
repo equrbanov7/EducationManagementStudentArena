@@ -20,6 +20,7 @@ _MODULES = (
     "core.runtime_settings_rim_activation",  # «login» qrupuna «aktivləşdirəndə RİM-ə bildiriş» açarı (2026-10-23)
     "core.runtime_settings_syllabus",  # «Sillabus» — kafedra təsdiqi tələb olunur/avtomatik təsdiq (2026-10-25)
     "core.runtime_settings_push",  # «Bildirişlər» — telefona push (FCM) açarı (2026-10-25)
+    "core.runtime_settings_exam_scores",  # «exam» qrupuna kağız bal 15 dəq / tələbəyə 24 saat açarları (2026-10-25)
 )
 
 

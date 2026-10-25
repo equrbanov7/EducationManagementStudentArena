@@ -20,31 +20,16 @@ Qaydalar:
   dəyişdirilirsə səbəb + qeyd + SƏNƏD üçü də məcburidir
   (``apps/registrar/corrections.py`` ilə eyni müqavilə).
 
-Sübut sətirləri append-only ``ExamScoreEntry`` jurnalındadır.
+Sübut sətirləri append-only ``ExamScoreEntry`` jurnalındadır. Tarixçə (qısa):
 
-2026-09-12 (sahibin tələbi — «qrup seçilsin, müəllim, tarix… balları sistemə
-yüklənsin»): hər toplu yazı bir KÖÇÜRMƏ VƏRƏQİNƏ (``ExamScoreSheet`` partiyası:
-imtahan tarixi, yoxlayan müəllim, nəzarətçi, protokol №, skan) bağlanır —
-``sheet`` parametri. Partiyanın skanı düzəliş üçün SƏNƏD sayılır: sətir-səviyyə
-fayl olmasa da ``sheet.evidence`` təqdimat tələbini ödəyir. Qrup-əvvəl seçim və
-partiya köməkçiləri ``exam_score_sheets``-də, fayl idxalı ``exam_score_import``-da
-— hər ikisi YALNIZ buradakı ``record_exam_score`` ilə yazır (tək yazı yolu).
-
-2026-09-14 (W2 `w2paper`, sahib: «hər sualdan max 10, imtahandan max 50, yekun
-100-dən çox ola bilməz; apellyasiyadan sonra DƏYİŞƏN nəticələr izlənsin»):
-``record_exam_score`` sual-sual balları (``question_scores``) qəbul edir —
-validasiya ``exam_score_questions``-dadır, cəm imtahan balı olur; giriş +
-imtahan ≤ 100 açıq yoxlanır; dəyişiklik növü ``correction`` və ya ``appeal``
-ola bilər (``kind``). Oxu köməkçiləri (siyahı, tarixçə sətri, filtrlər)
-``exam_score_roster``-dədir və buradan re-eksport olunur.
-
-2026-09-26 (sahib: «köhnə ilin balını dəyişmək olmamalıdır, ancaq RİM rəhbəri
-tərəfindən təqdimat əsasında»; «İM də edə bilsin, lakin nəticə çox köhnənindirsə
-köçürüləndə sənədlə olsun»): BİTMİŞ dövrün açılışına toplu yazı
-(``save_roster_scores`` — əl ilə forma və fayl idxalı ikisi də buradan keçir)
-``exam_score_period_lock.write_policy`` ilə qurulan qaydaya tabedir: ilk
-daxiletmə açıqdır (60 gündən köhnə dövrdə sənədlə), yazılmış balın
-dəyişdirilməsi isə yalnız RİM rəhbəri / superadmin düzəliş rejimində (təqdimatla).
+* 2026-09-12 — hər toplu yazı KÖÇÜRMƏ VƏRƏQİNƏ (``ExamScoreSheet``: tarix, yoxlayan,
+  nəzarətçi, protokol №, skan) bağlanır; vərəqin skanı düzəliş SƏNƏDİ sayılır
+  (``exam_score_sheets``, fayl idxalı ``exam_score_import`` — tək yazı yolu buradadır);
+* 2026-09-14 — sual-sual ballar (``exam_score_questions``), giriş + imtahan ≤ 100,
+  dəyişiklik növü ``correction`` / ``appeal``; oxu köməkçiləri ``exam_score_roster``-dədir;
+* 2026-09-26 — BİTMİŞ dövr qaydası ``exam_score_period_lock.write_policy`` ilə;
+* 2026-10-25 — MİDTERM / FİNAL (``exam_score_assessment``; midterm yazısı
+  ``exam_score_midterm``), sütun-sütun tavan, 15 dəqiqə / RİM / apellyasiya qaydası.
 """
 
 from __future__ import annotations
@@ -58,7 +43,11 @@ from django.utils.translation import pgettext
 from core.audit import log_action
 from core.constants import AuditAction
 
+from . import exam_score_assessment  # noqa: F401 — public fasad (accounts `service.exam_score_assessment.*`)
+from . import exam_score_assessment as assessment_rules
 from . import exam_score_changes  # noqa: F401 — public fasad (`registrar.public`) üzərindən çatım
+from . import exam_score_midterm  # noqa: F401 — eyni səbəb (midterm siyahısı, tələbə gecikməsi)
+from . import exam_score_release  # noqa: F401 — eyni səbəb (tələbəyə görünmə gecikməsi — `registrar.public`)
 from . import exam_score_period_lock  # noqa: F401 — eyni səbəb (accounts `service.exam_score_period_lock.*`)
 from . import exam_score_period_lock as period_lock
 from . import exam_score_questions  # noqa: F401 — eyni səbəb (accounts `service.exam_score_questions.*`)
@@ -86,6 +75,7 @@ from .exam_score_roster import (  # noqa: F401 — re-eksport (public fasad `exa
 from .models import (
     CorrectionReason,
     Enrollment,
+    ExamAssessment,
     ExamScoreEntry,
     ExamScoreEntryKind,
     FinalGrade,
@@ -242,10 +232,10 @@ def _change_kind(kind) -> str:
     return kind if kind in ExamScoreEntryKind.change_kinds() else ExamScoreEntryKind.CORRECTION
 
 
-def _latest_question_scores(enrollment):
+def _latest_question_scores(enrollment, assessment=ExamAssessment.FINAL):
     """Sonuncu daxiletmənin sual balları (yoxdursa / tək bal rejimidirsə ``None``)."""
     row = (
-        ExamScoreEntry.objects.filter(enrollment=enrollment)
+        ExamScoreEntry.objects.filter(enrollment=enrollment, assessment=assessment)
         .order_by("-created_at")
         .values_list("question_scores", flat=True)
         .first()
@@ -275,6 +265,7 @@ def record_exam_score(
     kind="",
     entry_score=None,
     period_policy=None,
+    rules=None,
 ):
     """Bir tələbənin imtahan balını yaz (ilkin daxiletmə və ya sənədli düzəliş / apellyasiya).
 
@@ -300,6 +291,9 @@ def record_exam_score(
     dəyişdirilməsi sətir xətasıdır; düzəliş rejimində HƏR yazı təqdimatlıdır və
     düzəliş növü ilə yazılır; «çox köhnə» dövrdə ilk daxiletmə də təqdimatlıdır.
     ``None`` = cari dövr qaydası (birbaşa çağıranlar, məs. köhnə nəticə baxışı).
+
+    2026-10-25: ``rules`` (``exam_score_assessment.ChangeRules``) — «İmtahan balının daxil edilməsi»
+    ekranının 15 dəqiqə / RİM / apellyasiya qaydası; ``None`` = köhnə sənədli düzəliş müqaviləsi.
     """
     # Lock the durable parent even when no FinalGrade exists yet. Concurrent
     # first writes must re-read the score and require correction evidence.
@@ -322,7 +316,7 @@ def record_exam_score(
     current = FinalGrade.objects.filter(enrollment=enrollment).first()
     old_score = current.exam_score if current is not None else None
     policy = period_policy or period_lock.CURRENT_PERIOD
-    is_correction = change_decision(
+    entry_kind = change_decision(
         old_score=old_score,
         new_score=new_score,
         cleaned_questions=cleaned_questions,
@@ -332,15 +326,17 @@ def record_exam_score(
         note=note,
         evidence=evidence,
         sheet=sheet,
+        kind=kind,
+        rules=rules,
+        enrollment_id=enrollment.pk,
     )
-    if is_correction is None:
+    if entry_kind is None:
         return None  # eyni bal → nə dublikat sətir, nə audit
 
     entry = new_entry(
         enrollment=enrollment,
         organization=enrollment.organization,
-        is_correction=is_correction,
-        kind=kind,
+        entry_kind=entry_kind,
         old_score=old_score,
         new_score=new_score,
         cleaned_questions=cleaned_questions,
@@ -352,7 +348,7 @@ def record_exam_score(
         sheet=sheet,
     )
     # Fayl (şəkil/PDF) ölçü + tip validatorları BAL YAZILMAMIŞDAN ƏVVƏL işləsin.
-    entry.full_clean(exclude=["entered_by", "sheet"])
+    entry.full_clean(exclude=["entered_by", "sheet"], validate_constraints=False)  # CHECK-lər DB-dədir (0104)
 
     final_grade = finals.set_exam_score(
         enrollment=enrollment, score=new_score, by_user=by_user, source_note=SOURCE_NOTE
@@ -390,7 +386,11 @@ def clean_row_score(*, score, question_scores, sheet, cap):
     """
     if not questions.is_blank_list(question_scores):
         grid = (
-            {"question_count": sheet.question_count, "question_max": sheet.question_max}
+            {
+                "question_count": sheet.question_count,
+                "question_max": sheet.question_max,
+                "question_maxes": sheet.question_maxes,  # 2026-10-25: sütun-sütun tavan
+            }
             if sheet is not None
             else questions.question_defaults()
         )
@@ -399,35 +399,61 @@ def clean_row_score(*, score, question_scores, sheet, cap):
 
 
 def change_decision(
-    *, old_score, new_score, cleaned_questions, latest_question_scores, policy, reason, note, evidence, sheet
+    *,
+    old_score,
+    new_score,
+    cleaned_questions,
+    latest_question_scores,
+    policy,
+    reason,
+    note,
+    evidence,
+    sheet,
+    kind="",
+    rules=None,
+    enrollment_id=None,
 ):
-    """Yazı lazımdırmı: ``None`` — eyni bal (toxunma); əks halda ``is_correction`` (bool).
+    """Yazı lazımdırmı: ``None`` — eyni bal (toxunma); əks halda yazılacaq sətrin NÖVÜ (``ExamScoreEntryKind``).
 
     Eyni cəm, amma sual bölgüsü fərqlidirsə bu da DƏYİŞİKLİKDİR (kağız qeydi dəyişir) —
     ``latest_question_scores()`` yalnız o halda çağırılır. Bitmiş dövr qaydası və
     təqdimat tələbi (səbəb + qeyd + sənəd) burada yoxlanır (``ValidationError``).
+
+    2026-10-25: cari dövrdə yazılmış balın dəyişdirilməsi ``rules`` ilə — 15 dəqiqə pəncərəsi
+    (``window_edit``), sonra apellyasiya (sənəd məcburi) və ya RİM rəhbərinin təqdimatı
+    (``exam_score_assessment.decide_after_window``); ``rules=None`` köhnə təqdimatlı müqavilədir.
     """
     if _same_score(old_score, new_score):
         if cleaned_questions is None or questions.same_question_scores(latest_question_scores(), cleaned_questions):
             return None
     if old_score is not None and policy.changes_blocked:
         raise period_lock.change_blocked_error()
-    is_correction = old_score is not None or policy.correction_mode
-    if is_correction:
+    if old_score is None and not policy.correction_mode:
+        if policy.every_write_needs_submission:  # «çox köhnə» dövrə ilk köçürmə — sənədlə
+            period_lock.require_submission(
+                reason=reason, note=note, evidence=evidence or (sheet.evidence if sheet is not None else None)
+            )
+        return ExamScoreEntryKind.INITIAL
+    if old_score is None or policy.correction_mode or rules is None:
         _require_justification(reason=reason, note=note, evidence=evidence, sheet=sheet)
-    elif policy.every_write_needs_submission:  # «çox köhnə» dövrə ilk köçürmə — sənədlə
-        period_lock.require_submission(
-            reason=reason, note=note, evidence=evidence or (sheet.evidence if sheet is not None else None)
-        )
-    return is_correction
+        return _change_kind(kind)
+    return assessment_rules.decide_after_window(
+        rules=rules,
+        enrollment_id=enrollment_id,
+        kind=kind,
+        reason=reason,
+        note=note,
+        evidence=evidence,
+        sheet=sheet,
+        require_justification=_require_justification,
+    )
 
 
 def new_entry(
     *,
     enrollment,
     organization,
-    is_correction,
-    kind,
+    entry_kind,
     old_score,
     new_score,
     cleaned_questions,
@@ -437,16 +463,20 @@ def new_entry(
     by_user,
     author_name,
     sheet,
+    assessment=ExamAssessment.FINAL,
 ):
-    """Yazılacaq (hələ saxlanmamış) ``ExamScoreEntry`` sətri."""
+    """Yazılacaq (hələ saxlanmamış) ``ExamScoreEntry`` sətri (``entry_kind`` — ``change_decision`` nəticəsi)."""
+    if reason not in CorrectionReason.values:
+        reason = CorrectionReason.APPEAL if entry_kind == ExamScoreEntryKind.APPEAL else ""
     return ExamScoreEntry(
         organization=organization,
         enrollment=enrollment,
-        kind=_change_kind(kind) if is_correction else ExamScoreEntryKind.INITIAL,
+        kind=entry_kind,
+        assessment=assessment,
         old_score=old_score,
         new_score=new_score,
         question_scores=cleaned_questions,
-        reason=reason if reason in CorrectionReason.values else "",
+        reason=reason,
         note=(note or "").strip(),
         evidence=evidence or "",
         entered_by=by_user,
@@ -462,7 +492,7 @@ def entry_log(entry, *, by_user, organization, policy, request, cleaned_question
         "user": by_user,
         "organization": organization,
         "obj": entry,
-        "reason": f"exam score entry: {entry.kind}" + _period_audit_suffix(policy),
+        "reason": f"exam score entry: {entry.assessment} {entry.kind}" + _period_audit_suffix(policy),
         "request": request,
         "resource_type": "registrar.exam_score_entry",
         "resource_id": str(entry.pk),
@@ -514,7 +544,7 @@ def _period_audit_suffix(policy) -> str:
     return " · past-period first entry" if policy.locked else ""
 
 
-def save_roster_scores(*, offering, rows, by_user, request=None, sheet=None, correction_mode=False):
+def save_roster_scores(*, offering, rows, by_user, request=None, sheet=None, correction_mode=False, rules=None):
     """Formadan gələn sətirləri toplu yaz.
 
     ``rows`` — ``{"enrollment_id", "score", "reason", "note", "evidence",
@@ -536,15 +566,31 @@ def save_roster_scores(*, offering, rows, by_user, request=None, sheet=None, cor
     2026-10-08 (tutum testi — 25 sətir ≈ 1 190 sorğu, p50 1.2 s): yazı TOPLUDUR,
     sorğu sayı sətir sayından asılı deyil — ``exam_score_bulk`` (qayda və qərarlar
     ``record_exam_score`` ilə ortaq köməkçilərdən; kilid sırası ``enrollment_id``).
+
+    2026-10-25: vərəqin ``assessment``-i midterm-dirsə yazı jurnalın «Midterm» xanasına gedir
+    (``exam_score_midterm``); dəyişiklik qaydası (15 dəqiqə / RİM / apellyasiya) hər ikisində
+    ``ChangeRules`` ilə (``rules=None`` → bu sorğu üçün qurulur).
     """
     policy = period_lock.write_policy(user=by_user, offering=offering, correction_mode=correction_mode)
     # Yad partiya = bütün toplu yazı DAYANIR (sətir-sətir N eyni xəta əvəzinə
     # bir aydın xəta; heç bir savepoint açılmır) — P2-09, 2026-09-13.
     assert_sheet_matches(sheet, organization_id=offering.organization_id, offering_id=offering.pk)
-    from . import exam_score_bulk
+    assessment = getattr(sheet, "assessment", None) or ExamAssessment.FINAL
+    assessment_rules.assert_assessment_allowed(offering, assessment)
+    if rules is None:
+        rules = assessment_rules.ChangeRules.build(
+            user=by_user,
+            organization=offering.organization,
+            enrollment_ids=[row.get("enrollment_id") for row in rows],
+            assessment=assessment,
+        )
+    if assessment == ExamAssessment.MIDTERM:
+        from . import exam_score_midterm as writer
+    else:
+        from . import exam_score_bulk as writer
 
-    return exam_score_bulk.save_rows(
-        offering=offering, rows=rows, by_user=by_user, request=request, sheet=sheet, policy=policy
+    return writer.save_rows(
+        offering=offering, rows=rows, by_user=by_user, request=request, sheet=sheet, policy=policy, rules=rules
     )
 
 

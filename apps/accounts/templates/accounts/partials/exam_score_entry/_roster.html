@@ -27,12 +27,15 @@ dəyişiklik varsa səbəb + növ + qeyd dialoqda, skan vərəq kartında. Dialo
 formanın İÇİNDƏDİR — yalnız dialoqun «Təsdiq et» düyməsi POST edir.
 Vəziyyət çipləri SERVER tərəfdə süzür — göstərilməyən sətir POST-a düşmür.
 2026-09-26: bitmiş dövrdə rejimsiz yazılmış bal olan sətir (`row.locked`) —
-sahələr `disabled` (POST-a düşmür); düzəliş rejimində forma `correction_mode=1` daşıyır.{% endcomment %}
+sahələr `disabled` (POST-a düşmür); düzəliş rejimində forma `correction_mode=1` daşıyır.
+2026-10-25 (sahib): midterm siyahısında giriş/yekun/hərf sütunları yoxdur; sətir «Yekun» (`row.final_locked`, təsdiqdən
+15 dəq keçib) — sahələr kilidli, yalnız «Apellyasiya» / «RİM təqdimatı» rejimində açılır (`_modebar.html`,
+`exam_score_entry_columns.js`); daxil edənin açıq pəncərəsi `data-edit-until` (geri sayım — `_draft.js`).{% endcomment %}
 <section class="ems-card ese-card ese-roster">
   <div class="ems-card__head">
     <div>
       <h2 class="ems-card__title">{% trans "Tələbə balları" context "registrar.exam_score_entry" %}</h2>
-      <p class="ems-card__sub">{% trans "Boş buraxılan sahə toxunulmur. İlk daxiletmə sərbəstdir; artıq yazılmış balı dəyişmək təqdimatlıdır." context "registrar.exam_score_entry" %}</p>
+      <p class="ems-card__sub">{% blocktrans with w=s.edit_window_label context "registrar.exam_score_entry" %}Boş buraxılan sahə toxunulmur. Təsdiqdən sonra {{ w }} ərzində dəyişə bilərsiniz; sonra yalnız apellyasiya və ya RİM təqdimatı ilə.{% endblocktrans %}</p>
     </div>
   </div>
 
@@ -60,6 +63,9 @@ sahələr `disabled` (POST-a düşmür); düzəliş rejimində forma `correction
     <input type="hidden" name="offering_id" value="{{ s.offering.id }}">
     {% if s.correction_mode %}<input type="hidden" name="{{ s.correction_mode_field }}" value="1">{% endif %}
     {{ s.confirm_config|json_script:"ese-confirm-config" }}
+    {# Dəyişiklik növü — yalnız rejim aktivdirsə göndərilir (appeal / correction); JS açır. #}
+    <input type="hidden" name="kind" value="" data-ese-kind-field disabled>
+    {% include "accounts/partials/exam_score_entry/_modebar.html" %}
 
     <div class="ems-tablewrap ese-tablewrap">
       <div class="ems-tablescroll ese-tablescroll">
@@ -67,13 +73,15 @@ sahələr `disabled` (POST-a düşmür); düzəliş rejimində forma `correction
           <thead>
             <tr>
               <th scope="col">{% trans "Tələbə" context "registrar.exam_score_entry" %}</th>
-              <th scope="col" class="ese-th--num">{% trans "Giriş balı" context "registrar.exam_score_entry" %}</th>
+              {% if not s.is_midterm %}<th scope="col" class="ese-th--num">{% trans "Giriş balı" context "registrar.exam_score_entry" %}</th>{% endif %}
               {% for label in s.question_labels %}
               <th scope="col" class="ese-th--num ese-th--q" data-ese-qcol="{{ forloop.counter }}"{% if forloop.counter > s.question_count %} hidden{% endif %}>{{ label }} <span class="ese-th__max">/ <span data-ese-qmax-label>{{ s.question_max }}</span></span></th>
               {% endfor %}
-              <th scope="col" class="ese-th--num">{% trans "İmtahan balı" context "registrar.exam_score_entry" %} <span class="ese-th__max">/ {{ s.exam_score_max }}</span></th>
+              <th scope="col" class="ese-th--num">{% if s.is_midterm %}{% trans "Midterm balı" context "registrar.exam_score_entry" %}{% else %}{% trans "İmtahan balı" context "registrar.exam_score_entry" %}{% endif %} <span class="ese-th__max">/ {{ s.exam_score_max }}</span></th>
+              {% if not s.is_midterm %}
               <th scope="col" class="ese-th--num">{% trans "Yekun" context "registrar.exam_score_entry" %}</th>
               <th scope="col" class="ese-th--num">{% trans "Hərf" context "registrar.exam_score_entry" %}</th>
+              {% endif %}
               <th scope="col">{% trans "Vəziyyət" context "registrar.exam_score_entry" %}</th>
               <th scope="col"><span class="sr-only">{% trans "Tarixçə" context "registrar.exam_score_entry" %}</span></th>
             </tr>
@@ -82,7 +90,8 @@ sahələr `disabled` (POST-a düşmür); düzəliş rejimində forma `correction
             {% trans "İmtahan balı" context "registrar.exam_score_entry" as ese_score_aria %}
             {% trans "Bal tarixçəsi" context "registrar.exam_score_entry" as ese_history_aria %}
             {% for row in s.rows %}
-            <tr class="ese-row {% if row.has_score %}is-recorded{% endif %}{% if row.locked %} is-locked{% endif %}" data-ese-row data-locked="{% if row.locked %}1{% else %}0{% endif %}" data-enrollment="{{ row.enrollment.id }}"
+            <tr class="ese-row {% if row.has_score %}is-recorded{% endif %}{% if row.locked %} is-locked{% endif %}{% if row.final_locked %} is-final{% endif %}" data-ese-row data-locked="{% if row.locked %}1{% else %}0{% endif %}" data-enrollment="{{ row.enrollment.id }}"
+                data-final="{% if row.final_locked %}1{% else %}0{% endif %}" data-edit-until="{{ row.edit_until }}"
                 data-student="{{ row.name }}"
                 data-has-score="{% if row.has_score %}1{% else %}0{% endif %}" data-is-changed="{% if row.is_changed %}1{% else %}0{% endif %}"
                 data-barred="{% if row.barred %}1{% else %}0{% endif %}" data-bonus="{{ row.bonus|floatformat:0 }}">
@@ -92,24 +101,27 @@ sahələr `disabled` (POST-a düşmür); düzəliş rejimində forma `correction
                 <span class="ese-username">{{ row.student.username }}</span>
                 {% if row.enrollment.is_guest %}<span class="ems-badge ems-badge--muted ese-guest">{% trans "alt qrupdan" context "registrar.exam_score_entry" %}</span>{% endif %}
               </th>
-              {% with entry=row.entry_score|floatformat:0 %}<td class="ems-table__num ese-td--num" data-ese-entry="{{ entry }}">{{ entry }}</td>{% endwith %}
+              {% if not s.is_midterm %}{% with entry=row.entry_score|floatformat:0 %}<td class="ems-table__num ese-td--num" data-ese-entry="{{ entry }}">{{ entry }}</td>{% endwith %}{% endif %}
               {% ese_question_cells row %}
               <td class="ese-td--num">
                 <input type="number" class="ems-input ese-score ese-total{% if s.question_count %} is-readonly{% endif %}" name="score__{{ row.enrollment.id }}"
                        aria-label="{{ ese_score_aria }} — {{ row.name }}"
                        min="0" max="{{ row.exam_score_max }}" step="1" inputmode="numeric" autocomplete="off"
-                       {% if s.question_count %}readonly tabindex="-1"{% endif %}{% if row.locked %} disabled{% endif %}
+                       {% if s.question_count %}readonly tabindex="-1"{% endif %}{% if row.locked or row.final_locked %} disabled{% endif %}
                        value="{{ row.exam_display }}"
                        data-ese-score data-initial="{{ row.exam_display }}">
               </td>
+              {% if not s.is_midterm %}
               <td class="ems-table__num ese-td--num" data-ese-total-cell>
                 {% if row.graded %}{% with total=row.total|floatformat:0 %}<b data-ese-total data-initial="{{ total }}">{{ total }}</b>{% endwith %}{% else %}<b data-ese-total data-initial="—">—</b>{% endif %}
               </td>
               <td class="ese-td--num">
                 <span class="ems-badge ese-letter-badge {% if not row.graded %}ems-badge--muted{% elif row.failed %}ems-badge--danger{% else %}ems-badge--success{% endif %}" data-ese-letter data-initial="{% if row.graded %}{{ row.letter }}{% endif %}" data-initial-tone="{% if not row.graded %}ems-badge--muted{% elif row.failed %}ems-badge--danger{% else %}ems-badge--success{% endif %}">{% if row.graded %}{{ row.letter }}{% else %}—{% endif %}</span>
               </td>
+              {% endif %}
               <td>
-                <span class="ems-badge {% if row.is_changed %}ems-badge--warning{% elif row.has_score %}ems-badge--success{% else %}ems-badge--muted{% endif %}" data-ese-status>{% if row.is_changed %}{% trans "dəyişdirilib" context "registrar.exam_score_entry" %}{% elif row.has_score %}{% trans "yazılıb" context "registrar.exam_score_entry" %}{% else %}{% trans "boş" context "registrar.exam_score_entry" %}{% endif %}</span>
+                <span class="ems-badge {% if row.final_locked %}ems-badge--success{% elif row.edit_until %}ems-badge--info{% elif row.is_changed %}ems-badge--warning{% elif row.has_score %}ems-badge--success{% else %}ems-badge--muted{% endif %}" data-ese-status>{% if row.final_locked %}{% trans "Yekun" context "registrar.exam_score_entry.state" %}{% elif row.edit_until %}{% trans "dəyişmək olar" context "registrar.exam_score_entry" %}{% elif row.is_changed %}{% trans "dəyişdirilib" context "registrar.exam_score_entry" %}{% elif row.has_score %}{% trans "yazılıb" context "registrar.exam_score_entry" %}{% else %}{% trans "boş" context "registrar.exam_score_entry" %}{% endif %}</span>
+                {% if row.edit_until %}<span class="ese-window" data-ese-window>{% blocktrans with t=row.edit_until_label context "registrar.exam_score_entry" %}{{ t }}-dək{% endblocktrans %}</span>{% endif %}
               </td>
               <td>
                 <div class="ems-rowactions">
@@ -131,6 +143,7 @@ sahələr `disabled` (POST-a düşmür); düzəliş rejimində forma `correction
 
     <div class="ese-actions">
       <p class="ese-actions__summary" data-ese-summary aria-live="polite"></p>
+      <span class="ese-draft-status" data-ese-draft-status aria-live="polite"></span>
       <div class="ese-actions__btns">
         <button type="button" class="ems-btn ems-btn--ghost" data-ese-reset>
           <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Dəyişiklikləri sıfırla" context "registrar.exam_score_entry" %}
@@ -142,7 +155,7 @@ sahələr `disabled` (POST-a düşmür); düzəliş rejimində forma `correction
     </div>
 
     {% trans "Balları sistemə yaz" context "registrar.exam_score_entry" as ese_dialog_title %}
-    {% trans "Yazılacaq balların icmalı. Dəyişdirilən ballar səbəb, qeyd və skan ilə audit olunur." context "registrar.exam_score_entry" as ese_dialog_sub %}
+    {% trans "Yekun təsdiq: yoxlayın, yoxlanma tarixini seçin və təsdiq edin — ballar sistemə (jurnala) yazılır." context "registrar.exam_score_entry" as ese_dialog_sub %}
     {% include "partials/ems_ui/_dialog.html" with dialog_id="eseSaveDialog" dialog_title=ese_dialog_title dialog_subtitle=ese_dialog_sub dialog_static=True dialog_wide=True dialog_body_include="accounts/partials/exam_score_entry/_save_dialog_body.html" dialog_foot_include="accounts/partials/exam_score_entry/_save_dialog_foot.html" %}
   </form>
   {% endif %}

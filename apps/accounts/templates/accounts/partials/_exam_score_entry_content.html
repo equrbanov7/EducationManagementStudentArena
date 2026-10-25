@@ -25,10 +25,15 @@ dəyərlər `data-*` atributları ilə ötürülür. Bölmə skriptləri panel �
 2026-09-26 (sahib): BİTMİŞ dövr — `_period_lock.html` bannerı; rejimsiz
 (`s.changes_locked`) yazılmış bal olan sətirlər yalnız oxunur, boş bal yazılır
 (60 gündən köhnə dövrdə sənədlə — kök `data-submission-required`); RİM rəhbəri
-«Düzəliş rejimini aktivləşdir» ilə (`?ese_correct=1`) açır — kök `data-correction-mode`.{% endcomment %}
+«Düzəliş rejimini aktivləşdir» ilə (`?ese_correct=1`) açır — kök `data-correction-mode`.
+
+2026-10-25 (sahib): MİDTERM / FİNAL seçimi başda (`_assessment.html`), sütun redaktoru (`_columns.html`, cəm =
+tavan), «Yekun» sətirlər + apellyasiya / RİM rejimi (`_modebar.html`), qaralama + «Yadda saxlamamısınız»
+(`exam_score_entry_draft.js`), yekun təsdiq dialoqu (yoxlanma tarixi). Ekran yalnız daxili şəbəkədə açılır.{% endcomment %}
 <link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry.css' %}?v=20260914-3">
 <link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry_w2.css' %}?v=20260930-resp">
 <link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry_lock.css' %}?v=20260926-2">
+<link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry_assessment.css' %}?v=20261025-1">
 
 {% trans "Yazılı imtahan kağız üzərində keçir — nəticəni sistemə İmtahan Mərkəzi köçürür. Qrupu və fənni seçin, vərəq məlumatlarını (tarix, müəllim, protokol) yazın, sonra balları siyahıda daxil edin və ya XLSX/CSV faylından yükləyin." context "registrar.exam_score_entry" as ese_subtitle %}
 {% trans "Köçürmə addımları" context "registrar.exam_score_entry" as ese_steps_label %}
@@ -42,7 +47,11 @@ dəyərlər `data-*` atributları ilə ötürülür. Bölmə skriptləri panel �
      data-question-max="{{ s.question_max|default:10 }}"
      data-changes-locked="{% if s.changes_locked %}1{% else %}0{% endif %}"
      data-correction-mode="{% if s.correction_mode %}1{% else %}0{% endif %}"
-     data-submission-required="{% if s.submission_required %}1{% else %}0{% endif %}">
+     data-submission-required="{% if s.submission_required %}1{% else %}0{% endif %}"
+     data-assessment="{{ s.assessment|default:'' }}"
+     data-offering="{% if s.offering %}{{ s.offering.id }}{% endif %}"
+     data-draft-url="{{ s.draft_url|default:'' }}"
+     data-user="{{ request.user.pk }}">
   {% include "partials/ems_ui/_content_header.html" with header_subtitle=ese_subtitle %}
 
   {% if s.steps %}{% include "partials/ems_ui/_stepper.html" with steps=s.steps steps_label=ese_steps_label %}{% endif %}
@@ -97,6 +106,7 @@ dəyərlər `data-*` atributları ilə ötürülür. Bölmə skriptləri panel �
   {% else %}
 
   <div class="ese-body" data-ems-filter-target>
+    {% include "accounts/partials/exam_score_entry/_assessment.html" %}
     {% include "accounts/partials/exam_score_entry/_period_lock.html" %}
     {% include "accounts/partials/exam_score_entry/_meta.html" %}
 
@@ -162,8 +172,31 @@ dəyərlər `data-*` atributları ilə ötürülür. Bölmə skriptləri panel �
      data-import-total="{% trans 'sətir' context 'registrar.exam_score_entry' %}"
      data-question-invalid="{% trans 'Xətalı sual balı var — hər sual 0 ilə maksimum arasında tam ədəd olmalıdır.' context 'registrar.exam_score_entry' %}"
      data-dialog-title="{% trans 'Balları sistemə yaz' context 'registrar.exam_score_entry' %}"
-     data-question-sum="{% trans 'Sualların cəmi imtahan balının tavanını aşa bilməz.' context 'registrar.exam_score_entry' %}"></div>
-<script defer src="{% static 'accounts/js/exam_score_entry.js' %}?v=20260926-2"></script>
-<script defer src="{% static 'accounts/js/exam_score_entry_confirm.js' %}?v=20260926-2"></script>
-<script defer src="{% static 'accounts/js/exam_score_entry_nav.js' %}?v=20260914-3"></script>
+     data-question-sum="{% trans 'Sualların cəmi imtahan balının tavanını aşa bilməz.' context 'registrar.exam_score_entry' %}"
+     data-status-final="{% trans 'Yekun' context 'registrar.exam_score_entry.state' %}"
+     data-status-window="{% trans 'dəyişmək olar' context 'registrar.exam_score_entry' %}"
+     data-window-left="{% trans 'dəyişmək üçün qalıb' context 'registrar.exam_score_entry' %}"
+     data-cols-sum-bad="{% trans 'Sütunların maksimum cəmi tavana bərabər olmalıdır — indi' context 'registrar.exam_score_entry' %}"
+     data-cols-bad-value="{% trans 'Hər sütunun maksimumu 1 ilə tavan arasında tam ədəd olmalıdır.' context 'registrar.exam_score_entry' %}"
+     data-cols-limit="{% trans 'Sütun sayı 10-dan çox ola bilməz.' context 'registrar.exam_score_entry' %}"
+     data-cols-min="{% trans 'Ən azı bir sütun qalmalıdır.' context 'registrar.exam_score_entry' %}"
+     data-cols-blocked="{% trans 'Sütunların cəmi tavana bərabər deyil — əvvəlcə sütunları düzəldin.' context 'registrar.exam_score_entry' %}"
+     data-col-remove="{% trans 'Sütunu sil' context 'registrar.exam_score_entry' %}"
+     data-col-max="{% trans 'Sütunun maksimum balı' context 'registrar.exam_score_entry' %}"
+     data-mode-appeal="{% trans 'Apellyasiya rejimi: «Yekun» ballar açıldı. Yadda saxlayanda apellyasiya sənədi məcburidir.' context 'registrar.exam_score_entry' %}"
+     data-mode-correction="{% trans 'RİM təqdimatı rejimi: «Yekun» ballar açıldı. Yadda saxlayanda səbəb, qeyd və sənəd məcburidir.' context 'registrar.exam_score_entry' %}"
+     data-need-appeal="{% trans 'Apellyasiya ilə dəyişiklik üçün apellyasiya sənədini seçin.' context 'registrar.exam_score_entry' %}"
+     data-need-checked-on="{% trans 'İmtahanın yoxlanma tarixini seçin (gələcək tarix olmaz).' context 'registrar.exam_score_entry' %}"
+     data-draft-restored="{% trans 'Yadda saxlanmamış qaralama bərpa olundu' context 'registrar.exam_score_entry' %}"
+     data-draft-saved="{% trans 'Qaralama saxlanıldı' context 'registrar.exam_score_entry' %}"
+     data-draft-discard="{% trans 'Qaralamanı sil' context 'registrar.exam_score_entry' %}"
+     data-leave-title="{% trans 'Yadda saxlamamısınız' context 'registrar.exam_score_entry' %}"
+     data-leave-body="{% trans 'Daxil etdiyiniz ballar hələ sistemə yazılmayıb (qaralama saxlanılıb). Səhifədən çıxmaq istəyirsiniz?' context 'registrar.exam_score_entry' %}"
+     data-leave-confirm="{% trans 'Çıx' context 'registrar.exam_score_entry' %}"
+     data-leave-cancel="{% trans 'Qal' context 'registrar.exam_score_entry' %}"></div>
+<script defer src="{% static 'accounts/js/exam_score_entry.js' %}?v=20261025-1"></script>
+<script defer src="{% static 'accounts/js/exam_score_entry_columns.js' %}?v=20261025-1"></script>
+<script defer src="{% static 'accounts/js/exam_score_entry_confirm.js' %}?v=20261025-1"></script>
+<script defer src="{% static 'accounts/js/exam_score_entry_nav.js' %}?v=20261025-1"></script>
+<script defer src="{% static 'accounts/js/exam_score_entry_draft.js' %}?v=20261025-1"></script>
 <script defer src="{% static 'accounts/js/profile/exam_score_import.js' %}?v=20260926-2"></script>

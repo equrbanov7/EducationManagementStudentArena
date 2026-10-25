@@ -23,23 +23,29 @@ tərəfdən də verilir (JS gücləndirməsindən əvvəl də oxunur — sahibin
         <span class="ese-meta__chip"><i class="fas fa-users" aria-hidden="true"></i> {{ s.offering_meta.group_label }}</span>
         <span class="ese-meta__chip"><i class="fas fa-chalkboard-user" aria-hidden="true"></i> {% trans "Müəllim" context "registrar.exam_score_entry" %}: <b>{{ s.offering_meta.instructor }}</b></span>
         <span class="ese-meta__chip"><i class="fas fa-calendar" aria-hidden="true"></i> {{ s.offering_meta.period_label }}</span>
-        <span class="ese-meta__chip"><i class="fas fa-gauge-high" aria-hidden="true"></i> {% trans "maksimum" context "registrar.exam_score_entry" %} <b>{{ s.exam_score_max }}</b></span>
+        <span class="ese-meta__chip ese-meta__chip--assess"><i class="fas fa-gauge-high" aria-hidden="true"></i> <b>{{ s.assessment_label }}</b></span>
         <span class="ese-meta__chip ese-meta__chip--kind"><i class="fas fa-file-pen" aria-hidden="true"></i> <b data-ese-exam-kind-chip>{{ s.exam_kind_label }}</b></span>
       </p>
     </div>
   </div>
   <div class="ems-card__body ese-meta__grid">
+    {# 2026-10-25 (sahib: «yazılı / praktiki seçimi — dizaynca rahatlaşdır»): iki böyük düymə (radio); #}
+    {# dəyər gizli `exam_kind` sahəsinə yazılır (forma + fayl idxalı onu oxuyur — `exam_score_entry_nav.js`). #}
     <div class="ems-field">
-      <label class="ems-field__label" for="ese-exam-kind">{% trans "İmtahan növü" context "registrar.exam_score_entry" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-      <div class="bootstrap-single-select bootstrap-single-select--ems ese-selectwrap">
-        <select id="ese-exam-kind" name="exam_kind" form="ese-roster-form" class="ems-select bootstrap-single-select__native" required
-                data-bootstrap-select data-ese-meta-field data-ese-exam-kind data-ese-exam-kind-label="{{ s.exam_kind_label }}">
-          {% for option in s.exam_kind_options %}
-          <option value="{{ option.value }}"{% if option.value == s.sheet_defaults.exam_kind %} selected{% endif %}>{{ option.label|default:option.value }}</option>
-          {% endfor %}
-        </select>
+      <span class="ems-field__label" id="ese-exam-kind-label">{% trans "Yazılı / praktiki" context "registrar.exam_score_entry" %} <span class="ems-field__req" aria-hidden="true">*</span></span>
+      <div class="ese-kind" role="radiogroup" aria-labelledby="ese-exam-kind-label">
+        {% for option in s.exam_kind_options %}
+        <label class="ese-kind__opt">
+          <input type="radio" class="ese-kind__input" name="ese_exam_kind_choice" value="{{ option.value }}"{% if option.value == s.sheet_defaults.exam_kind %} checked{% endif %}
+                 data-ese-exam-kind-radio data-label="{{ option.label|default:option.value }}">
+          <span class="ese-kind__btn"><i class="fas {% if option.value == 'practical' %}fa-laptop-code{% else %}fa-pen-nib{% endif %}" aria-hidden="true"></i> {{ option.label|default:option.value }}</span>
+        </label>
+        {% endfor %}
       </div>
-      <span class="ems-field__hint">{% trans "Yazılı və ya praktiki — vərəqin və bütün sətirlərinin növü." context "registrar.exam_score_entry" %}</span>
+      <input type="hidden" name="exam_kind" form="ese-roster-form" value="{{ s.sheet_defaults.exam_kind }}"
+             data-ese-meta-field data-ese-exam-kind data-ese-exam-kind-label="{{ s.exam_kind_label }}">
+      <input type="hidden" name="assessment" form="ese-roster-form" value="{{ s.assessment }}" data-ese-meta-field data-ese-assessment-field>
+      <span class="ems-field__hint">{% trans "Vərəqin və bütün sətirlərinin növü." context "registrar.exam_score_entry" %}</span>
     </div>
     <div class="ems-field">
       <label class="ems-field__label" for="ese-exam-date">{% trans "İmtahan tarixi" context "registrar.exam_score_entry" %}</label>
@@ -77,25 +83,7 @@ tərəfdən də verilir (JS gücləndirməsindən əvvəl də oxunur — sahibin
       <input type="text" id="ese-protocol" name="protocol_number" form="ese-roster-form" class="ems-input" maxlength="64"
              value="{{ s.sheet_defaults.protocol_number }}" data-ese-meta-field>
     </div>
-    <div class="ems-field ese-meta__grid-pair">
-      <div class="ems-field">
-        <label class="ems-field__label" for="ese-question-count">{% trans "Sual sayı" context "registrar.exam_score_entry" %}</label>
-        <div class="bootstrap-single-select bootstrap-single-select--ems ese-selectwrap">
-          <select id="ese-question-count" name="question_count" form="ese-roster-form" class="ems-select bootstrap-single-select__native"
-                  data-bootstrap-select data-ese-meta-field data-ese-question-count>
-            {% for option in s.question_count_options %}
-            <option value="{{ option.value }}"{% if option.value|stringformat:'s' == s.question_count|stringformat:'s' %} selected{% endif %}>{{ option.label }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-      <div class="ems-field">
-        <label class="ems-field__label" for="ese-question-max">{% trans "Bir sualın maksimumu" context "registrar.exam_score_entry" %}</label>
-        <input type="number" id="ese-question-max" name="question_max" form="ese-roster-form" class="ems-input ese-qmax"
-               min="1" max="10" step="1" inputmode="numeric" value="{{ s.question_max }}" data-ese-meta-field data-ese-question-max>
-      </div>
-      <span class="ems-field__hint ese-meta__grid-pair-hint">{% trans "0 seçilsə yalnız yekun imtahan balı yazılır (köhnə vərəqlər)." context "registrar.exam_score_entry" %} {% trans "Sualların cəmi imtahan balının tavanını aşa bilməz." context "registrar.exam_score_entry" %} (<b>{{ s.exam_score_max }}</b>)</span>
-    </div>
+    {% include "accounts/partials/exam_score_entry/_columns.html" %}
     <div class="ems-field">
       <label class="ems-field__label" for="ese-sheet-note">{% trans "Qeyd" context "registrar.exam_score_entry" %}</label>
       <input type="text" id="ese-sheet-note" name="sheet_note" form="ese-roster-form" class="ems-input" maxlength="500" data-ese-meta-field>
@@ -104,7 +92,7 @@ tərəfdən də verilir (JS gücləndirməsindən əvvəl də oxunur — sahibin
       <label class="ems-field__label" for="ese-sheet-evidence">{% trans "Skan edilmiş protokol / vərəq (PDF və ya şəkil)" context "registrar.exam_score_entry" %}</label>
       <input type="file" id="ese-sheet-evidence" name="sheet_evidence" form="ese-roster-form" class="ese-file"
              accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif" data-ese-meta-file>
-      <span class="ems-field__hint">{% trans "İlk daxiletmədə opsionaldır; artıq yazılmış balı dəyişəndə MƏCBURİDİR (səbəb və qeydlə birlikdə). Bir partiyanın bütün dəyişikliklərinə eyni skan aiddir." context "registrar.exam_score_entry" %}</span>
+      <span class="ems-field__hint">{% trans "İlk daxiletmədə opsionaldır; apellyasiya və ya RİM təqdimatı ilə dəyişiklikdə MƏCBURİDİR (təsdiq dialoqunda da seçmək olar)." context "registrar.exam_score_entry" %}</span>
     </div>
   </div>
 </section>

@@ -109023,3 +109023,348 @@ msgstr "Test notification"
 msgctxt "notifications.push"
 msgid "Push bildirişləri bu cihazda işləyir."
 msgstr "Push notifications work on this device."
+
+msgctxt "core.runtime_settings"
+msgid "Kağız imtahan nəticəsinin tələbəyə görünmə gecikməsi"
+msgstr "Delay before a paper exam result is shown to the student"
+
+msgctxt "core.runtime_settings"
+msgid "Yazılı / praktiki (kağız) midterm və final nəticəsi təsdiqdən bu qədər saat sonra tələbə kabinetində görünür. 0 — dərhal."
+msgstr "A written / practical (paper) midterm or final result appears in the student cabinet this many hours after confirmation. 0 — immediately."
+
+msgctxt "core.runtime_settings"
+msgid "«İmtahan balının daxil edilməsi» ekranında balı daxil edən təsdiqdən sonra bu qədər dəqiqə ərzində onu sənədsiz dəyişə bilər. Müddət bitəndən sonra bal yalnız apellyasiya (sənəd məcburi) və ya RİM rəhbərinin təqdimat əsasında düzəlişi ilə dəyişir."
+msgstr "On the «Entry of exam score» screen the person who entered a score can change it without a document for this many minutes after confirmation. Afterwards the score changes only through an appeal (document required) or a correction by the head of RİM based on a submission."
+
+msgctxt "core.runtime_settings"
+msgid "İmtahan balını təsdiqdən sonra dəyişmə müddəti"
+msgstr "Time to change an exam score after confirmation"
+
+msgctxt "registrar.exam_assessment"
+msgid "Final"
+msgstr "Final"
+
+msgctxt "registrar.exam_assessment"
+msgid "Midterm"
+msgstr "Midterm"
+
+msgctxt "registrar.exam_score_entry_kind"
+msgid "Edit within 15 minutes"
+msgstr "Edit within 15 minutes"
+
+msgctxt "registrar.exam_score_entry.state"
+msgid "Yekun"
+msgstr "Final"
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "nəticə %(when)s-də görünəcək"
+msgstr "result visible at %(when)s"
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "%(t)s-dək"
+msgstr "until %(t)s"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya ilə dəyiş"
+msgstr "Change by appeal"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya ilə dəyişiklik üçün apellyasiya sənədi yüklənməlidir."
+msgstr "A change by appeal requires the appeal document to be uploaded."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya ilə dəyişiklik üçün apellyasiya sənədini seçin."
+msgstr "Select the appeal document for a change by appeal."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya ilə dəyişiklik — apellyasiya sənədi (qərar / ərizə) MƏCBURİDİR. Dəyişiklik «apellyasiya» kimi işarələnir: kim, köhnə → yeni bal, nə vaxt — tarixçədə görünür."
+msgstr "Change by appeal — the appeal document (decision / application) is REQUIRED. The change is marked as «appeal»: who, old → new score and when are shown in the history."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya rejimi: «Yekun» ballar açıldı. Yadda saxlayanda apellyasiya sənədi məcburidir."
+msgstr "Appeal mode: «Final» scores are unlocked. The appeal document is required when saving."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Balı daxil edən"
+msgstr "Entered by"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Balın daxil edilmə tarixi"
+msgstr "Date of entry"
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Boş buraxılan sahə toxunulmur. Təsdiqdən sonra %(w)s ərzində dəyişə bilərsiniz; sonra yalnız apellyasiya və ya RİM təqdimatı ilə."
+msgstr "Empty fields are left untouched. You can change scores for %(w)s after confirmation; afterwards only by appeal or a RİM submission."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bu semestrdə midterm yoxdur (kollokvium rejimi) — yalnız final."
+msgstr "This semester has no midterm (colloquium mode) — final only."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bərabər böl"
+msgstr "Split equally"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Cəm"
+msgstr "Total"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Daxil etdiyiniz ballar hələ sistemə yazılmayıb (qaralama saxlanılıb). Səhifədən çıxmaq istəyirsiniz?"
+msgstr "The scores you entered are not recorded yet (a draft is saved). Do you want to leave the page?"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Dəyişiklik rejimi"
+msgstr "Change mode"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Dəyişmək üçün rejim seçin:"
+msgstr "Choose a mode to change them:"
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "FİNAL (maks %(cap)s)"
+msgstr "FINAL (max %(cap)s)"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Hər sütunun maksimum balı yazılmalıdır."
+msgstr "Enter the maximum score of every column."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Hər sütunun maksimumu 1 ilə tavan arasında tam ədəd olmalıdır."
+msgstr "Each column maximum must be a whole number between 1 and the cap."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Jurnal bağlıdır (dərc olunub) — midterm balı yazıla bilməz. RİM-ə müraciət edin."
+msgstr "The journal is closed (published) — the midterm score cannot be written. Contact RİM."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Kağız midterm (İmtahan Mərkəzi)"
+msgstr "Paper midterm (Exam Centre)"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Midterm balı"
+msgstr "Midterm score"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Midterm balı elektron jurnalın «Midterm» xanasına yazılır — müəllim onu jurnalda dəyişə bilmir."
+msgstr "The midterm score is written to the «Midterm» cell of the e-journal — the teacher cannot change it there."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "MİDTERM (maks %(cap)s)"
+msgstr "MIDTERM (max %(cap)s)"
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Nəticə tələbə kabinetində təsdiqdən %(h)s saat sonra görünür."
+msgstr "The result appears in the student cabinet %(h)s hours after confirmation."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Nəticə tələbə kabinetində təsdiqdən dərhal sonra görünür."
+msgstr "The result appears in the student cabinet right after confirmation."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Qal"
+msgstr "Stay"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Qaralama saxlanıldı"
+msgstr "Draft saved"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Qaralamanı sil"
+msgstr "Discard draft"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Rejimdən çıx"
+msgstr "Exit mode"
+
+msgctxt "registrar.exam_score_entry"
+msgid "RİM təqdimatı ilə düzəliş"
+msgstr "Correction by RİM submission"
+
+msgctxt "registrar.exam_score_entry"
+msgid "RİM təqdimatı ilə düzəliş — səbəb, qeyd və skan edilmiş sənəd üçü də məcburidir və audit olunur."
+msgstr "Correction by RİM submission — reason, note and a scanned document are all required and audited."
+
+msgctxt "registrar.exam_score_entry"
+msgid "RİM təqdimatı rejimi: «Yekun» ballar açıldı. Yadda saxlayanda səbəb, qeyd və sənəd məcburidir."
+msgstr "RİM submission mode: «Final» scores are unlocked. Reason, note and document are required when saving."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "S%(n)s sütununun maksimumu 1 ilə %(max)s arasında olmalıdır."
+msgstr "The maximum of column S%(n)s must be between 1 and %(max)s."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Sistem semestr təqviminə görə «%(name)s» seçdi — lazım olsa dəyişin."
+msgstr "The system chose «%(name)s» from the semester calendar — change it if needed."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Skan edilmiş sənəd (təqdimat / apellyasiya)"
+msgstr "Scanned document (submission / appeal)"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Suallar"
+msgstr "Questions"
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Sütun sayı %(max)s-dən çox ola bilməz."
+msgstr "There cannot be more than %(max)s columns."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sütun sayı 10-dan çox ola bilməz."
+msgstr "There cannot be more than 10 columns."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sütun əlavə et"
+msgstr "Add column"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sütunlar (suallar) və maksimum balları"
+msgstr "Columns (questions) and their maximum scores"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sütunların cəmi tavana bərabər deyil — əvvəlcə sütunları düzəldin."
+msgstr "The columns do not add up to the cap — fix the columns first."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Sütunların maksimum cəmi %(cap)s olmalıdır (indi %(total)s)."
+msgstr "The column maximums must add up to %(cap)s (now %(total)s)."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Sütunların maksimum cəmi həmişə %(cap)s olmalıdır — uyğun gəlmirsə ballar yadda saxlanmır. «Bərabər böl» balı tam ədədlərlə bölür, qalıq sonuncu sütuna düşür."
+msgstr "The column maximums must always add up to %(cap)s — otherwise the scores are not saved. «Split equally» divides the points in whole numbers; the remainder goes to the last column."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sütunların maksimum cəmi tavana bərabər olmalıdır — indi"
+msgstr "The column maximums must equal the cap — now"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sütunu sil"
+msgstr "Remove column"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sütunun maksimum balı"
+msgstr "Column maximum"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sütunun maksimum balı tam ədəd olmalıdır."
+msgstr "The column maximum must be a whole number."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Tələbə nəticəni %(h)s saat sonra görəcək."
+msgstr "The student will see the result in %(h)s hours."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Təqdimat əsasında düzəliş yalnız RİM rəhbəri tərəfindən edilir — apellyasiya seçin."
+msgstr "A correction based on a submission is made only by the head of RİM — choose appeal."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Təqvimə görə defolt: «%(name)s». Siz başqa imtahanı seçmisiniz."
+msgstr "Calendar default: «%(name)s». You have chosen another exam."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Təsdiqdən %(w)s keçib — bal yalnız apellyasiya (sənəd məcburi) və ya RİM rəhbərinin təqdimat əsasında düzəlişi ilə dəyişdirilə bilər."
+msgstr "More than %(w)s have passed since confirmation — the score can only be changed by appeal (document required) or a correction by the head of RİM based on a submission."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Təsdiqdən sonra %(w)s ərzində balı dəyişə bilərsiniz; sonra yalnız apellyasiya (sənəd məcburi) və ya RİM rəhbərinin təqdimatı ilə."
+msgstr "You can change the score for %(w)s after confirmation; afterwards only by appeal (document required) or a submission to the head of RİM."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Təsdiqdən sonra %(w)s ərzində bu balları dəyişə bilərsiniz; sonra yalnız təqdimat əsasında RİM tərəfindən və ya apellyasiya ilə."
+msgstr "You can change these scores for %(w)s after confirmation; afterwards only by RİM based on a submission or by appeal."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Vərəqin və bütün sətirlərinin növü."
+msgstr "The type of the sheet and all its rows."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yadda saxlamamısınız"
+msgstr "You have not saved"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yadda saxlanmamış qaralama bərpa olundu"
+msgstr "An unsaved draft was restored"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yazılı / praktiki"
+msgstr "Written / practical"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yekun təsdiq: yoxlayın, yoxlanma tarixini seçin və təsdiq edin — ballar sistemə (jurnala) yazılır."
+msgstr "Final confirmation: review, pick the checking date and confirm — the scores are recorded in the system (journal)."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yoxlanma tarixi gələcək tarix ola bilməz."
+msgstr "The checking date cannot be in the future."
+
+msgctxt "registrar.exam_score_entry"
+msgid "avtomatik"
+msgstr "automatic"
+
+msgctxt "registrar.exam_score_entry"
+msgid "bu semestrdə yoxdur"
+msgstr "not in this semester"
+
+msgctxt "registrar.exam_score_entry"
+msgid "dəyişmək olar"
+msgstr "editable"
+
+msgctxt "registrar.exam_score_entry"
+msgid "dəyişmək üçün qalıb"
+msgstr "left to edit"
+
+msgctxt "registrar.exam_score_entry"
+msgid "təqvimə görə"
+msgstr "per calendar"
+
+msgctxt "registrar.exam_score_entry"
+msgid "yoxlanıb"
+msgstr "checked"
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "«Yekun» bal: %(n)s tələbə."
+msgstr "«Final» scores: %(n)s students."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Çıx"
+msgstr "Leave"
+
+msgctxt "registrar.exam_score_entry"
+msgid "İlk daxiletmədə opsionaldır; apellyasiya və ya RİM təqdimatı ilə dəyişiklikdə MƏCBURİDİR (təsdiq dialoqunda da seçmək olar)."
+msgstr "Optional on first entry; REQUIRED for a change by appeal or RİM submission (can also be chosen in the confirmation dialog)."
+
+msgctxt "registrar.exam_score_entry"
+msgid "İmtahan növü midterm və ya final olmalıdır."
+msgstr "The exam type must be midterm or final."
+
+msgctxt "registrar.exam_score_entry"
+msgid "İmtahanın yoxlanma tarixi"
+msgstr "Date the exam was checked"
+
+msgctxt "registrar.exam_score_entry"
+msgid "İmtahanın yoxlanma tarixini seçin (gələcək tarix olmaz)."
+msgstr "Choose the date the exam was checked (not in the future)."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Ən azı bir sütun (sual) olmalıdır."
+msgstr "There must be at least one column (question)."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Ən azı bir sütun qalmalıdır."
+msgstr "At least one column must remain."

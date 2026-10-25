@@ -110049,3 +110049,348 @@ msgstr "Testbenachrichtigung"
 msgctxt "notifications.push"
 msgid "Push bildirişləri bu cihazda işləyir."
 msgstr "Push-Benachrichtigungen funktionieren auf diesem Gerät."
+
+msgctxt "core.runtime_settings"
+msgid "Kağız imtahan nəticəsinin tələbəyə görünmə gecikməsi"
+msgstr "Verzögerung, bis das Ergebnis einer Papierprüfung dem Studierenden angezeigt wird"
+
+msgctxt "core.runtime_settings"
+msgid "Yazılı / praktiki (kağız) midterm və final nəticəsi təsdiqdən bu qədər saat sonra tələbə kabinetində görünür. 0 — dərhal."
+msgstr "Ein schriftliches / praktisches (Papier-)Midterm- oder Final-Ergebnis erscheint so viele Stunden nach der Bestätigung im Studierendenbereich. 0 — sofort."
+
+msgctxt "core.runtime_settings"
+msgid "«İmtahan balının daxil edilməsi» ekranında balı daxil edən təsdiqdən sonra bu qədər dəqiqə ərzində onu sənədsiz dəyişə bilər. Müddət bitəndən sonra bal yalnız apellyasiya (sənəd məcburi) və ya RİM rəhbərinin təqdimat əsasında düzəlişi ilə dəyişir."
+msgstr "Auf der Seite «Eingabe der Prüfungspunkte» kann die eingebende Person die Punktzahl so viele Minuten nach der Bestätigung ohne Dokument ändern. Danach ändert sie sich nur per Einspruch (Dokument erforderlich) oder durch eine Korrektur der RİM-Leitung auf Antrag."
+
+msgctxt "core.runtime_settings"
+msgid "İmtahan balını təsdiqdən sonra dəyişmə müddəti"
+msgstr "Zeitraum zum Ändern der Prüfungspunkte nach der Bestätigung"
+
+msgctxt "registrar.exam_assessment"
+msgid "Final"
+msgstr "Final"
+
+msgctxt "registrar.exam_assessment"
+msgid "Midterm"
+msgstr "Midterm"
+
+msgctxt "registrar.exam_score_entry_kind"
+msgid "Edit within 15 minutes"
+msgstr "Korrektur innerhalb von 15 Minuten"
+
+msgctxt "registrar.exam_score_entry.state"
+msgid "Yekun"
+msgstr "Endgültig"
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "nəticə %(when)s-də görünəcək"
+msgstr "Ergebnis sichtbar ab %(when)s"
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "%(t)s-dək"
+msgstr "bis %(t)s"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya ilə dəyiş"
+msgstr "Per Einspruch ändern"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya ilə dəyişiklik üçün apellyasiya sənədi yüklənməlidir."
+msgstr "Für eine Änderung per Einspruch muss das Einspruchsdokument hochgeladen werden."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya ilə dəyişiklik üçün apellyasiya sənədini seçin."
+msgstr "Wählen Sie das Einspruchsdokument für die Änderung per Einspruch."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya ilə dəyişiklik — apellyasiya sənədi (qərar / ərizə) MƏCBURİDİR. Dəyişiklik «apellyasiya» kimi işarələnir: kim, köhnə → yeni bal, nə vaxt — tarixçədə görünür."
+msgstr "Änderung per Einspruch — das Einspruchsdokument (Entscheidung / Antrag) ist PFLICHT. Die Änderung wird als «Einspruch» markiert: wer, alte → neue Punktzahl, wann — im Verlauf sichtbar."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya rejimi: «Yekun» ballar açıldı. Yadda saxlayanda apellyasiya sənədi məcburidir."
+msgstr "Einspruchsmodus: «endgültige» Punkte sind entsperrt. Beim Speichern ist das Einspruchsdokument Pflicht."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Balı daxil edən"
+msgstr "Eingegeben von"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Balın daxil edilmə tarixi"
+msgstr "Eingabedatum"
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Boş buraxılan sahə toxunulmur. Təsdiqdən sonra %(w)s ərzində dəyişə bilərsiniz; sonra yalnız apellyasiya və ya RİM təqdimatı ilə."
+msgstr "Leere Felder bleiben unverändert. Nach der Bestätigung können Sie %(w)s lang ändern; danach nur per Einspruch oder RİM-Antrag."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bu semestrdə midterm yoxdur (kollokvium rejimi) — yalnız final."
+msgstr "In diesem Semester gibt es kein Midterm (Kolloquiumsmodus) — nur Final."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bərabər böl"
+msgstr "Gleichmäßig aufteilen"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Cəm"
+msgstr "Summe"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Daxil etdiyiniz ballar hələ sistemə yazılmayıb (qaralama saxlanılıb). Səhifədən çıxmaq istəyirsiniz?"
+msgstr "Die eingegebenen Punkte sind noch nicht gespeichert (Entwurf gesichert). Seite verlassen?"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Dəyişiklik rejimi"
+msgstr "Änderungsmodus"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Dəyişmək üçün rejim seçin:"
+msgstr "Wählen Sie zum Ändern einen Modus:"
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "FİNAL (maks %(cap)s)"
+msgstr "FINAL (max. %(cap)s)"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Hər sütunun maksimum balı yazılmalıdır."
+msgstr "Geben Sie die Höchstpunktzahl jeder Spalte an."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Hər sütunun maksimumu 1 ilə tavan arasında tam ədəd olmalıdır."
+msgstr "Das Maximum jeder Spalte muss eine ganze Zahl zwischen 1 und der Obergrenze sein."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Jurnal bağlıdır (dərc olunub) — midterm balı yazıla bilməz. RİM-ə müraciət edin."
+msgstr "Das Journal ist geschlossen (veröffentlicht) — die Midterm-Punktzahl kann nicht eingetragen werden. Wenden Sie sich an RİM."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Kağız midterm (İmtahan Mərkəzi)"
+msgstr "Papier-Midterm (Prüfungszentrum)"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Midterm balı"
+msgstr "Midterm-Punktzahl"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Midterm balı elektron jurnalın «Midterm» xanasına yazılır — müəllim onu jurnalda dəyişə bilmir."
+msgstr "Die Midterm-Punktzahl wird in die Zelle «Midterm» des E-Journals geschrieben — die Lehrkraft kann sie dort nicht ändern."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "MİDTERM (maks %(cap)s)"
+msgstr "MIDTERM (max. %(cap)s)"
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Nəticə tələbə kabinetində təsdiqdən %(h)s saat sonra görünür."
+msgstr "Das Ergebnis erscheint %(h)s Stunden nach der Bestätigung im Studierendenbereich."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Nəticə tələbə kabinetində təsdiqdən dərhal sonra görünür."
+msgstr "Das Ergebnis erscheint direkt nach der Bestätigung im Studierendenbereich."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Qal"
+msgstr "Bleiben"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Qaralama saxlanıldı"
+msgstr "Entwurf gespeichert"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Qaralamanı sil"
+msgstr "Entwurf verwerfen"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Rejimdən çıx"
+msgstr "Modus beenden"
+
+msgctxt "registrar.exam_score_entry"
+msgid "RİM təqdimatı ilə düzəliş"
+msgstr "Korrektur per RİM-Antrag"
+
+msgctxt "registrar.exam_score_entry"
+msgid "RİM təqdimatı ilə düzəliş — səbəb, qeyd və skan edilmiş sənəd üçü də məcburidir və audit olunur."
+msgstr "Korrektur per RİM-Antrag — Grund, Notiz und gescanntes Dokument sind Pflicht und werden protokolliert."
+
+msgctxt "registrar.exam_score_entry"
+msgid "RİM təqdimatı rejimi: «Yekun» ballar açıldı. Yadda saxlayanda səbəb, qeyd və sənəd məcburidir."
+msgstr "RİM-Antragsmodus: «endgültige» Punkte sind entsperrt. Beim Speichern sind Grund, Notiz und Dokument Pflicht."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "S%(n)s sütununun maksimumu 1 ilə %(max)s arasında olmalıdır."
+msgstr "Das Maximum der Spalte S%(n)s muss zwischen 1 und %(max)s liegen."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Sistem semestr təqviminə görə «%(name)s» seçdi — lazım olsa dəyişin."
+msgstr "Das System hat anhand des Semesterkalenders «%(name)s» gewählt — bei Bedarf ändern."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Skan edilmiş sənəd (təqdimat / apellyasiya)"
+msgstr "Gescanntes Dokument (Antrag / Einspruch)"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Suallar"
+msgstr "Fragen"
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Sütun sayı %(max)s-dən çox ola bilməz."
+msgstr "Es darf nicht mehr als %(max)s Spalten geben."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sütun sayı 10-dan çox ola bilməz."
+msgstr "Es darf nicht mehr als 10 Spalten geben."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sütun əlavə et"
+msgstr "Spalte hinzufügen"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sütunlar (suallar) və maksimum balları"
+msgstr "Spalten (Fragen) und ihre Höchstpunktzahlen"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sütunların cəmi tavana bərabər deyil — əvvəlcə sütunları düzəldin."
+msgstr "Die Spalten ergeben nicht die Obergrenze — korrigieren Sie zuerst die Spalten."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Sütunların maksimum cəmi %(cap)s olmalıdır (indi %(total)s)."
+msgstr "Die Spaltenmaxima müssen %(cap)s ergeben (derzeit %(total)s)."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Sütunların maksimum cəmi həmişə %(cap)s olmalıdır — uyğun gəlmirsə ballar yadda saxlanmır. «Bərabər böl» balı tam ədədlərlə bölür, qalıq sonuncu sütuna düşür."
+msgstr "Die Spaltenmaxima müssen immer %(cap)s ergeben — sonst werden die Punkte nicht gespeichert. «Gleichmäßig aufteilen» teilt in ganzen Zahlen auf, der Rest geht in die letzte Spalte."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sütunların maksimum cəmi tavana bərabər olmalıdır — indi"
+msgstr "Die Spaltenmaxima müssen der Obergrenze entsprechen — derzeit"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sütunu sil"
+msgstr "Spalte entfernen"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sütunun maksimum balı"
+msgstr "Spaltenmaximum"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sütunun maksimum balı tam ədəd olmalıdır."
+msgstr "Das Spaltenmaximum muss eine ganze Zahl sein."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Tələbə nəticəni %(h)s saat sonra görəcək."
+msgstr "Der Studierende sieht das Ergebnis in %(h)s Stunden."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Təqdimat əsasında düzəliş yalnız RİM rəhbəri tərəfindən edilir — apellyasiya seçin."
+msgstr "Eine Korrektur auf Antrag nimmt nur die RİM-Leitung vor — wählen Sie Einspruch."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Təqvimə görə defolt: «%(name)s». Siz başqa imtahanı seçmisiniz."
+msgstr "Kalender-Standard: «%(name)s». Sie haben eine andere Prüfung gewählt."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Təsdiqdən %(w)s keçib — bal yalnız apellyasiya (sənəd məcburi) və ya RİM rəhbərinin təqdimat əsasında düzəlişi ilə dəyişdirilə bilər."
+msgstr "Seit der Bestätigung sind mehr als %(w)s vergangen — die Punktzahl kann nur per Einspruch (Dokument erforderlich) oder durch eine Korrektur der RİM-Leitung auf Antrag geändert werden."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Təsdiqdən sonra %(w)s ərzində balı dəyişə bilərsiniz; sonra yalnız apellyasiya (sənəd məcburi) və ya RİM rəhbərinin təqdimatı ilə."
+msgstr "Nach der Bestätigung können Sie die Punktzahl %(w)s lang ändern; danach nur per Einspruch (Dokument erforderlich) oder Antrag an die RİM-Leitung."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Təsdiqdən sonra %(w)s ərzində bu balları dəyişə bilərsiniz; sonra yalnız təqdimat əsasında RİM tərəfindən və ya apellyasiya ilə."
+msgstr "Nach der Bestätigung können Sie diese Punkte %(w)s lang ändern; danach nur durch RİM auf Antrag oder per Einspruch."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Vərəqin və bütün sətirlərinin növü."
+msgstr "Art des Blatts und aller seiner Zeilen."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yadda saxlamamısınız"
+msgstr "Nicht gespeichert"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yadda saxlanmamış qaralama bərpa olundu"
+msgstr "Ein ungespeicherter Entwurf wurde wiederhergestellt"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yazılı / praktiki"
+msgstr "Schriftlich / praktisch"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yekun təsdiq: yoxlayın, yoxlanma tarixini seçin və təsdiq edin — ballar sistemə (jurnala) yazılır."
+msgstr "Endgültige Bestätigung: prüfen, Korrekturdatum wählen und bestätigen — die Punkte werden ins System (Journal) übernommen."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yoxlanma tarixi gələcək tarix ola bilməz."
+msgstr "Das Korrekturdatum darf nicht in der Zukunft liegen."
+
+msgctxt "registrar.exam_score_entry"
+msgid "avtomatik"
+msgstr "automatisch"
+
+msgctxt "registrar.exam_score_entry"
+msgid "bu semestrdə yoxdur"
+msgstr "nicht in diesem Semester"
+
+msgctxt "registrar.exam_score_entry"
+msgid "dəyişmək olar"
+msgstr "änderbar"
+
+msgctxt "registrar.exam_score_entry"
+msgid "dəyişmək üçün qalıb"
+msgstr "verbleibend zum Ändern"
+
+msgctxt "registrar.exam_score_entry"
+msgid "təqvimə görə"
+msgstr "laut Kalender"
+
+msgctxt "registrar.exam_score_entry"
+msgid "yoxlanıb"
+msgstr "korrigiert"
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "«Yekun» bal: %(n)s tələbə."
+msgstr "«Endgültige» Punkte: %(n)s Studierende."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Çıx"
+msgstr "Verlassen"
+
+msgctxt "registrar.exam_score_entry"
+msgid "İlk daxiletmədə opsionaldır; apellyasiya və ya RİM təqdimatı ilə dəyişiklikdə MƏCBURİDİR (təsdiq dialoqunda da seçmək olar)."
+msgstr "Bei der Ersteingabe optional; PFLICHT bei Änderung per Einspruch oder RİM-Antrag (auch im Bestätigungsdialog wählbar)."
+
+msgctxt "registrar.exam_score_entry"
+msgid "İmtahan növü midterm və ya final olmalıdır."
+msgstr "Die Prüfungsart muss Midterm oder Final sein."
+
+msgctxt "registrar.exam_score_entry"
+msgid "İmtahanın yoxlanma tarixi"
+msgstr "Korrekturdatum der Prüfung"
+
+msgctxt "registrar.exam_score_entry"
+msgid "İmtahanın yoxlanma tarixini seçin (gələcək tarix olmaz)."
+msgstr "Wählen Sie das Korrekturdatum (nicht in der Zukunft)."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Ən azı bir sütun (sual) olmalıdır."
+msgstr "Es muss mindestens eine Spalte (Frage) geben."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Ən azı bir sütun qalmalıdır."
+msgstr "Mindestens eine Spalte muss bleiben."

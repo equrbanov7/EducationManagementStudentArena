@@ -7,12 +7,15 @@ dəyişikliyin keçməsi.
 
 import datetime
 import tempfile
+from datetime import timedelta
 from decimal import Decimal
+from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import gradebook, services
@@ -197,9 +200,12 @@ class ExamScoreEntrySectionTest(TestCase):
 
     # ── sonrakı dəyişiklik = təqdimatlı ──────────────────────────────────
     def test_change_without_document_is_rejected(self):
+        # 2026-10-25 (sahib): 15 dəqiqə ərzində daxil edən sənədsiz dəyişə bilər — burada pəncərə BİTİB.
         client = self._client(self.center)
         self._post(client)
-        resp = self._post(client, **{f"score__{self.enrollment.id}": "30"})
+        later = timezone.now() + timedelta(minutes=16)
+        with mock.patch("django.utils.timezone.now", return_value=later):
+            resp = self._post(client, **{f"score__{self.enrollment.id}": "30"})
         self.assertEqual(resp.status_code, 302)
         with bypass_rls():
             self.assertEqual(FinalGrade.objects.get(enrollment=self.enrollment).exam_score, Decimal("45"))

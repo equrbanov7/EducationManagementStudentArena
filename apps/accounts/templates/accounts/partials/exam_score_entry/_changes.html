@@ -54,7 +54,7 @@ kim · sənəd / vərəq skanı · «tarixçə» çekmecəsi (sətrin `<template
                 <span class="ese-student">{% if row.subject_code %}{{ row.subject_code }} — {% endif %}{{ row.subject_name }}</span>
                 <span class="ese-username">{{ row.group }}{% if row.instructor %} · {{ row.instructor }}{% endif %}</span>
               </td>
-              <td><span class="ems-badge {% if row.is_practical %}ems-badge--primary{% else %}ems-badge--neutral{% endif %}">{{ row.exam_kind_label }}</span></td>
+              <td><span class="ems-badge {% if row.is_practical %}ems-badge--primary{% else %}ems-badge--neutral{% endif %}">{{ row.exam_kind_label }}</span> <span class="ems-badge ems-badge--muted">{{ row.assessment_label }}</span></td>
               <td class="ems-table__num ese-td--num"><span class="ese-history__delta">{{ row.old }} → <b>{{ row.new }}</b></span>{% if row.question_scores %} <span class="ese-history__q">({{ row.question_scores|join:" + " }})</span>{% endif %}</td>
               <td><span class="ems-badge {% if row.is_appeal %}ems-badge--info{% else %}ems-badge--warning{% endif %}">{{ row.kind_label }}</span></td>
               <td>{{ row.reason|default:"—" }}</td>

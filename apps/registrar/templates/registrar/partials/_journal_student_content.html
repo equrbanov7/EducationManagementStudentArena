@@ -143,7 +143,7 @@ Bu günün qeydləri də DƏRHAL görünür (sahib 2026-10-15). Azad fənlər (F
         <div class="ems-kpi ems-kpi--accent-primary">
             <div class="ems-kpi__label">{% trans "MIDTERM" context "registrar.journal" %}</div>
             <div class="ems-kpi__value">{% if mt and mt.score is not None %}{{ mt.score|floatformat:'-1' }}{% else %}—{% endif %}<span class="ems-kpi__unit">/ {% if mt %}{{ mt.component.max_score }}{% else %}{{ d.interim.max_score }}{% endif %}</span></div>
-            <div class="ems-kpi__note">{% if mt and mt.score is not None %}{% if mt.auto %}{% trans "imtahandan avtomatik" context "registrar.journal" %}{% else %}{% trans "aralıq imtahan balı" context "registrar.journal" %}{% endif %}{% else %}{% trans "hələ yazılmayıb" context "registrar.journal" %}{% endif %}</div>
+            <div class="ems-kpi__note">{% if mt and mt.score is not None %}{% if mt.auto %}{% trans "imtahandan avtomatik" context "registrar.journal" %}{% else %}{% trans "aralıq imtahan balı" context "registrar.journal" %}{% endif %}{% elif mt and mt.release_at %}{% blocktrans with when=mt.release_at|date:"d.m.Y H:i" context "registrar.journal" %}nəticə {{ when }}-də görünəcək{% endblocktrans %}{% else %}{% trans "hələ yazılmayıb" context "registrar.journal" %}{% endif %}</div>
         </div>
         {% endwith %}
         {% else %}

@@ -32,11 +32,12 @@ from django.utils.translation import pgettext
 from core.audit import log_action
 from core.constants import AuditAction
 
+from . import exam_score_assessment as assessment_rules
 from . import exam_score_period_lock
 from . import exam_score_questions as questions
 from .corrections import correction_author_name
 from .models import CourseOffering, ExamScoreSheet, ExamScoreSheetSource
-from .models.exam_score_entry import ExamScoreSheetKind
+from .models.exam_score_entry import ExamAssessment, ExamScoreSheetKind
 
 _CTX = "registrar.exam_score_entry"
 
@@ -158,9 +159,15 @@ def sheet_metadata_from_post(post, files, *, offering):
 
     2026-09-14 (W2 `w2paper`): ``question_count`` / ``question_max`` — vərəqin
     sual şəbəkəsi (boş → defolt 5 × 10; yanlış → ``ValidationError``).
+
+    2026-10-25: ``assessment`` (midterm / final), ``question_maxes`` (sütun-sütun maksimumlar,
+    ``"10,10,10"``) və ``checked_on`` (yoxlanma tarixi, defolt bu gün). Sütunların cəmi HƏMİŞƏ
+    imtahanın tavanına bərabərdir (midterm 30 / final 50) — köhnə bərabər şəbəkə də eyni qaydaya tabedir.
     """
     examiner_name = (post.get("examiner_name") or "").strip()
-    question_count, question_max = questions.clean_question_grid(post.get("question_count"), post.get("question_max"))
+    assessment = assessment_rules.clean_assessment(post.get("assessment"))
+    assessment_rules.assert_assessment_allowed(offering, assessment)
+    question_count, question_max, question_maxes = _column_grid(post, offering=offering, assessment=assessment)
     # 2026-09-14 (sahibin rəyi): yoxlayan / nəzarətçi SEÇİLİR (istifadəçi id-si);
     # boş yoxlayan = açılışın müəllimi; köhnə sərbəst-mətn sahələri fallback kimi oxunur.
     examiner = resolve_staff_user(post.get("examiner"), offering=offering) or getattr(offering, "instructor", None)
@@ -168,8 +175,11 @@ def sheet_metadata_from_post(post, files, *, offering):
     return {
         "exam_date": parse_exam_date(post.get("exam_date")),
         "exam_kind": clean_exam_kind(post.get("exam_kind")),
+        "assessment": assessment,
+        "checked_on": parse_checked_on(post.get("checked_on")),
         "question_count": question_count,
         "question_max": question_max,
+        "question_maxes": question_maxes,
         "examiner": examiner,
         "examiner_name": _person_label(examiner) or examiner_name or instructor_label(offering),
         "invigilator": invigilator,
@@ -180,6 +190,33 @@ def sheet_metadata_from_post(post, files, *, offering):
         # üstündür; yoxdursa vərəq kartındakı ``sheet_evidence`` (bax period_lock).
         "evidence": exam_score_period_lock.submission_evidence(files),
     }
+
+
+def _column_grid(post, *, offering, assessment):
+    """``(question_count, question_max, question_maxes)`` — sütun redaktoru və ya köhnə bərabər şəbəkə.
+
+    ``question_maxes`` gəlibsə o əsasdır; yoxdursa ``question_count × question_max`` (köhnə forma / idxal).
+    Sual sayı 0 (tək yekun bal rejimi) sütunsuzdur. Hər iki halda cəm = tavan (fail-closed).
+    """
+    cap = assessment_rules.cap_for(offering, assessment)
+    raw_maxes = post.get("question_maxes")
+    if raw_maxes not in (None, ""):
+        maxes = assessment_rules.clean_column_maxes(raw_maxes, cap)
+        return len(maxes), max(maxes), maxes
+    count, per_question = questions.clean_question_grid(post.get("question_count"), post.get("question_max"))
+    if not count:
+        return 0, per_question, None
+    return count, per_question, assessment_rules.clean_column_maxes([per_question] * count, cap)
+
+
+def parse_checked_on(raw):
+    """«İmtahanın yoxlanma tarixi» — boş → bu gün; gələcək tarix olmaz."""
+    from django.utils import timezone
+
+    value = parse_exam_date(raw) or timezone.localdate()
+    if value > timezone.localdate():
+        raise ValidationError(pgettext(_CTX, "Yoxlanma tarixi gələcək tarix ola bilməz."))
+    return value
 
 
 def _person_label(user) -> str:
@@ -247,6 +284,9 @@ def create_sheet(
     question_count=None,
     question_max=None,
     exam_kind=ExamScoreSheetKind.WRITTEN,
+    assessment=ExamAssessment.FINAL,
+    question_maxes=None,
+    checked_on=None,
 ):
     """Yeni köçürmə partiyası yarat (bal yazılmazdan ƏVVƏL — sətirlər ona bağlanır).
 
@@ -266,10 +306,15 @@ def create_sheet(
         grid["question_count"] = int(question_count)
     if question_max is not None:
         grid["question_max"] = int(question_max)
+    if question_maxes:
+        grid = {"question_count": len(question_maxes), "question_max": max(int(v) for v in question_maxes)}
     sheet = ExamScoreSheet(
         organization=offering.organization,
         offering=offering,
         source=source,
+        assessment=assessment_rules.clean_assessment(assessment),
+        question_maxes=[int(v) for v in question_maxes] if question_maxes else None,
+        checked_on=checked_on,
         exam_kind=clean_exam_kind(exam_kind),
         exam_date=exam_date,
         examiner=examiner,
@@ -285,7 +330,7 @@ def create_sheet(
         created_by=by_user,
         created_by_name=correction_author_name(by_user, request),
     )
-    sheet.full_clean(exclude=["created_by", "examiner", "invigilator"])
+    sheet.full_clean(exclude=["created_by", "examiner", "invigilator"], validate_constraints=False)
     sheet.save()
     return sheet
 
@@ -364,31 +409,43 @@ def sheet_row(sheet) -> dict:
         "rows_failed": sheet.rows_failed,
         "question_count": sheet.question_count,
         "question_max": sheet.question_max,
+        "question_maxes": list(sheet.question_maxes) if sheet.question_maxes else [],
+        "assessment": sheet.assessment,
+        "assessment_label": str(sheet.get_assessment_display()),
+        "checked_on": sheet.checked_on.strftime("%d.%m.%Y") if sheet.checked_on else "",
         "by": sheet.created_by_name,
         "evidence_url": _file_url(sheet.evidence),
     }
 
 
-def sheets_for_offering(*, offering, limit=SHEET_HISTORY_LIMIT, exam_kind=""):
+def sheets_for_offering(*, offering, limit=SHEET_HISTORY_LIMIT, exam_kind="", assessment=""):
     """Açılışın son partiyaları (ən yenidən köhnəyə) — tarixçə paneli, TƏK sorğu.
 
-    ``exam_kind`` — ``written`` / ``practical`` çipi (boş → hamısı; addendum 2026-09-14).
+    ``exam_kind`` — ``written`` / ``practical`` çipi (boş → hamısı; addendum 2026-09-14);
+    ``assessment`` — midterm / final (2026-10-25; boş → hamısı).
     """
     queryset = ExamScoreSheet.objects.filter(offering=offering)
+    if assessment in ExamAssessment.values:
+        queryset = queryset.filter(assessment=assessment)
     if exam_kind in ExamScoreSheetKind.values:
         queryset = queryset.filter(exam_kind=exam_kind)
     return [sheet_row(sheet) for sheet in queryset.order_by("-created_at")[:limit]]
 
 
-def latest_sheet_defaults(sheets) -> dict:
+def latest_sheet_defaults(sheets, *, assessment=ExamAssessment.FINAL, cap=None) -> dict:
     """Formanın ilkin dəyərləri — sonuncu partiyadan (tarix/nəzarətçi/protokol).
 
     İmtahan mərkəzi bir vərəqi bir neçə oturuşda köçürəndə eyni metadatanı
     təkrar yazmasın; ``sheets`` ``sheets_for_offering`` nəticəsidir (əlavə sorğu yox).
+
+    2026-10-25: ``question_maxes`` — eyni imtahanın sonuncu vərəqinin sütunları (cəmi ``cap``-a
+    bərabərdirsə), yoxsa defolt (midterm 3 × 10, final 5 × 10 — ``exam_score_assessment.default_columns``).
     """
     grid = questions.question_defaults()
+    columns = _default_columns(sheets, assessment, cap)
     if not sheets:
         return {
+            "question_maxes": columns,
             "exam_date": "",
             "exam_kind": ExamScoreSheetKind.WRITTEN,
             "examiner_id": "",
@@ -400,6 +457,7 @@ def latest_sheet_defaults(sheets) -> dict:
         }
     last = sheets[0]
     return {
+        "question_maxes": columns,
         "exam_date": last["exam_date_iso"],
         "exam_kind": last.get("exam_kind", ExamScoreSheetKind.WRITTEN),
         "examiner_id": last.get("examiner_id", ""),
@@ -415,8 +473,19 @@ def latest_sheet_defaults(sheets) -> dict:
     }
 
 
+def _default_columns(sheets, assessment, cap) -> list:
+    if cap is None:
+        return []
+    for row in sheets or ():
+        maxes = row.get("question_maxes") or []
+        if row.get("assessment", ExamAssessment.FINAL) == assessment and maxes and sum(maxes) == int(cap):
+            return list(maxes)
+    return assessment_rules.default_columns(assessment, int(cap))
+
+
 __all__ = [
     "SHEET_HISTORY_LIMIT",
+    "parse_checked_on",
     "clean_exam_kind",
     "create_sheet",
     "finalize_sheet",

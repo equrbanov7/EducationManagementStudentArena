@@ -120,7 +120,8 @@ def build_student_transcript_context(request, *, organization) -> dict:
 
     from apps.registrar import transcript as transcript_service
 
-    data = transcript_service.build_student_transcript(student=request.user, organization=organization, program=program)
+    own_transcript = transcript_service.build_student_own_transcript  # kağız nəticə gecikməsi ilə (2026-10-25)
+    data = own_transcript(student=request.user, organization=organization, program=program)
     data["record"] = record
     # Transkript siyasəti (README §10.1) — bax `cabinet_policy.transcript_policy`.
     data.update(transcript_policy(self_service=STUDENT_TRANSCRIPT_SELF_SERVICE))
@@ -146,7 +147,7 @@ def build_student_overall_academic_context(request, *, organization) -> dict:
 
     from apps.registrar import transcript as transcript_service
 
-    data = transcript_service.build_student_overall_record(student=request.user, organization=organization)
+    data = transcript_service.build_student_own_record(student=request.user, organization=organization)
     return {"overall_academic_section": data}
 
 
@@ -167,7 +168,7 @@ def student_academic_record_rows(request, *, organization) -> dict:
     # ``legacy_grade_read.attach_legacy_provenance`` həm nişanı, həm
     # ``legacy_grade_facts`` / ``legacy_grade_review_required`` açarlarını EYNİ
     # oxumadan qoyur.  Əvvəl burada eyni sorğu ikinci dəfə işlədilirdi.
-    return transcript_service.build_student_overall_record(student=request.user, organization=organization)
+    return transcript_service.build_student_own_record(student=request.user, organization=organization)
 
 
 def count_student_academic_record_rows(request, *, organization) -> int:
@@ -347,6 +348,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     # Aralıq qiymətləndirmə: keçmiş dövrlərdə K1–K3, 2026/2027-dən tək Midterm (0–30; sərbəst iş açıqdırsa 0–20).
     interim, kcomps = journal_extras.display_components(offering)
     kollokviums = student_interim_rows(interim, kcomps, enrollment)  # ``auto`` — test midterm (2026-10-21)
+    kollokviums, unreleased = exam_score_entry.exam_score_release.student_interim_view(enrollment, kollokviums)
 
     # Rəsmi düzəliş almış xanalar (tələbə tərəfdə sarı + tarixçə üçün, sənədsiz).
     from apps.registrar import corrections as _corrections
@@ -403,7 +405,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     if entry_rule.midterm:
         exempt = bool(record.national_athlete_exemption)
         entry_rule = entry_standard.EntryRule(True, dav_lesson_hours, dav_limit_percent, exempt)
-    standard = gradebook_components.entry_parts_for(enrollment, cap, rule=entry_rule)
+    standard = gradebook_components.entry_parts_for(enrollment, cap, rule=entry_rule, **unreleased)
     entry = standard.total if standard is not None else gradebook.entry_score_for(enrollment, cap, rule=entry_rule)
     # Sərbəst iş (sahib 2026-10-10): söndürülmüş Midterm dövründə nə bala düşür, nə görünür — lövhə oxunmur.
     # Tələbə görünüşü sillabusu OXUMUR (struktur yalnız qurulmuş mövzulardan) — sorğu büdcəsi sabit.

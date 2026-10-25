@@ -227,6 +227,15 @@ def _handle_save(request, organization, next_url):
         )
         sheet = sheets_service.finalize_sheet(sheet, result, by_user=request.user, request=request)
 
+    if not result["errors"]:  # 2026-10-25: hər şey yazıldı — qaralama artıq lazım deyil
+        from .exam_score_draft import clear_draft
+
+        clear_draft(
+            organization_id=offering.organization_id,
+            user_id=request.user.pk,
+            offering_id=offering.pk,
+            assessment=metadata["assessment"],
+        )
     if result["written"]:
         messages.success(request, _written_message(result["written"], result["skipped"]))
     elif not result["errors"]:
@@ -238,6 +247,8 @@ def _handle_save(request, organization, next_url):
     return _append_query_params(
         next_url,
         ese_offering="" if f"ese_offering={offering.pk}" in next_url else str(offering.pk),
+        # 2026-10-25: səhifə yazılan imtahanda (midterm / final) qalsın.
+        ese_assessment="" if "ese_assessment=" in next_url else metadata["assessment"],
         ese_saved="1" if result["written"] else "",
     )
 

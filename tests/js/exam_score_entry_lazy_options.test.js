@@ -59,7 +59,8 @@ async function makeWindow() {
     const html =
         '<!doctype html><html><body><section data-profile-section-panel="exam-score-entry">' +
         '<div class="ese" data-ese-root data-max-score="50" data-question-count="5" data-question-max="10">' +
-        '<input type="number" data-ese-question-max value="10">' +
+        // 2026-10-25: sütun-sütun maksimumlar (sütun redaktoru gizli sahəni yeniləyir).
+        '<input type="hidden" data-ese-question-maxes value="10,10,10,10,10">' +
         '<table><tbody>' +
         row("e1", ["7", "5"], { score: "12" }) +
         row("e2", []) +
@@ -115,14 +116,29 @@ test("digit key writes the value, reset restores the server value", async () => 
     window.close();
 });
 
-test("changing the per-question maximum rebuilds the options", async () => {
+test("changing a column maximum rebuilds only that column's options", async () => {
     const window = await makeWindow();
-    const input = window.document.querySelector("[data-ese-question-max]");
-    input.value = "6";
-    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    const input = window.document.querySelector("[data-ese-question-maxes]");
+    input.value = "6,14,10,10,10"; // cəm 50 — S1 maks 6, S2 maks 14
+    const host = window.document.querySelector("[data-ese-root]");
+    window.EMSExamScoreEntry.applyQuestionGrid(host);
     const s1 = q(window, "e1", 1);
     assert.deepEqual(optionValues(s1), ["", "0", "1", "2", "3", "4", "5", "6"]);
     assert.equal(s1.value, ""); // 7 > 6 — boşalır (əvvəlki davranış)
     assert.equal(q(window, "e1", 2).value, "5");
+    assert.equal(q(window, "e1", 2).options.length, 16); // «—» + 0..14
+    window.close();
+});
+
+test("final (locked) row opens only in a change mode", async () => {
+    const window = await makeWindow();
+    const host = window.document.querySelector("[data-ese-root]");
+    const row = window.document.querySelector('[data-ese-row][data-enrollment="e1"]');
+    row.setAttribute("data-final", "1");
+    window.EMSExamScoreEntry.applyQuestionGrid(host);
+    assert.equal(q(window, "e1", 1).disabled, true);
+    host.setAttribute("data-change-mode", "appeal");
+    window.EMSExamScoreEntry.applyQuestionGrid(host);
+    assert.equal(q(window, "e1", 1).disabled, false);
     window.close();
 });
