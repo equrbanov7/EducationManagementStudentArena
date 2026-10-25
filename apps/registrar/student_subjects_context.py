@@ -195,6 +195,10 @@ def enrich_subject_rows(*, organization, record, rows, journal_by_enrollment, pe
             midterm=_is_midterm_row(enrollment, period, organization),
             selfwork_slots=selfwork_slots,
         )
+        if (row["final"] or {}).get("entry_parts"):
+            # Giriş balı hissələri «Midterm …/30»-u onsuz da göstərir — ikinci (çox vaxt «—») çip təkrar idi (2026-10-26).
+            midterm_name = interim_assessment.MIDTERM_COMPONENT_NAME.lower()
+            row["components"] = [c for c in row["components"] if c["name"].strip().lower() != midterm_name]
         row["attempts"] = attempts_by_subject.get(offering.subject_id, [])
         row["release_pending"] = release_pending.get(enrollment.id, {})
         row["ui"] = {"status": eligibility_status(row.get("eligibility"))}
