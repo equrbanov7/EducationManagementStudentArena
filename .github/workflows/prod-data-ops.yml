@@ -198,6 +198,10 @@
 #       → teachers.json.enc; yalnız istifadəçi id-ləri + saylar). Yalnız «Forma 7» bloku + işi olan jurnal; əl ilə
 #       qoyulan bloklar açılmır; `create_missing` → boş köhnə jurnalı olan da açılır. Rəsmi unblock_account (audit).
 #       Loga YALNIZ saylar.
+#   fix_master_groups — magistr qrupu (sahib 2026-10-26: «dərslər 18:40/20:00 varsa magistr say»): ŞİFRƏLİ release asset
+#       (`roster_tag` = `master-groups-…` → plan.json.enc; yalnız id-lər). Qrupa degree_level=master, magistr ixtisasına
+#       keçid, bakalavr proqramındakı qeyd → magistr proqramı + plan (hərəkət deyil, köçürmə xətasının düzəlişi; audit).
+#       Loga YALNIZ saylar.
 #   diagnose_journal_access — YALNIZ OXU (sahib 2026-10-26: «müəllimdə yeni dərs yeri görünmür»): `batch` = jurnalın
 #       (açılışın) UUID-i, `teacher` = yoxlanan istifadəçi adı (boş — jurnalın sahibi). «Yeni dərs»in hər şərti ayrıca
 #       (açılış aktiv, sahib/aktiv/grade.input, jurnal bağlı, sillabus qapısı, bölgü əhatəsi). Loga YALNIZ bəli/xeyr.
@@ -281,6 +285,7 @@ on:
           - apply_journal_shares
           - unblock_legacy_journal_teachers
           - diagnose_journal_access
+          - fix_master_groups
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -295,7 +300,7 @@ on:
         required: false
         default: "2026/2027"
       roster_tag:
-        description: "seed_staff_roster / reconcile_teacher_roster / audit_staff_placement (staff-placement-…) / import_teaching_* / *timetable* / backfill_teacher_lessons (lesson-slots-…) / legacy_delta_apply (legacy-delta-…) / fill_vacant_from_journals (legacy-journals-…) / apply_journal_shares (journal-shares-…) / unblock_legacy_journal_teachers (legacy-teachers-…): şifrəli faylın release tag-ı"
+        description: "seed_staff_roster / reconcile_teacher_roster / audit_staff_placement (staff-placement-…) / import_teaching_* / *timetable* / backfill_teacher_lessons (lesson-slots-…) / legacy_delta_apply (legacy-delta-…) / fill_vacant_from_journals (legacy-journals-…) / apply_journal_shares (journal-shares-…) / unblock_legacy_journal_teachers (legacy-teachers-…) / fix_master_groups (master-groups-…): şifrəli faylın release tag-ı"
         required: false
         default: ""
       hygiene_category:
@@ -450,7 +455,7 @@ jobs:
         with:
           persist-credentials: false
       - name: 🔐 Şifrəli heyət siyahısı / yük sənədi
-        if: github.event.inputs.command == 'seed_staff_roster' || (github.event.inputs.command == 'reconcile_teacher_roster' && github.event.inputs.batch == '') || (github.event.inputs.command == 'audit_staff_placement' && github.event.inputs.batch == '') || startsWith(github.event.inputs.command, 'import_teaching_') || (github.event.inputs.command == 'issue_staff_credentials' && github.event.inputs.roster_tag != '') || (github.event.inputs.command == 'fill_vacant_from_journals' && github.event.inputs.batch == '' && github.event.inputs.roster_tag != '') || (github.event.inputs.command == 'apply_journal_shares' && github.event.inputs.batch == '') || github.event.inputs.command == 'unblock_legacy_journal_teachers'
+        if: github.event.inputs.command == 'seed_staff_roster' || (github.event.inputs.command == 'reconcile_teacher_roster' && github.event.inputs.batch == '') || (github.event.inputs.command == 'audit_staff_placement' && github.event.inputs.batch == '') || startsWith(github.event.inputs.command, 'import_teaching_') || (github.event.inputs.command == 'issue_staff_credentials' && github.event.inputs.roster_tag != '') || (github.event.inputs.command == 'fill_vacant_from_journals' && github.event.inputs.batch == '' && github.event.inputs.roster_tag != '') || (github.event.inputs.command == 'apply_journal_shares' && github.event.inputs.batch == '') || github.event.inputs.command == 'unblock_legacy_journal_teachers' || github.event.inputs.command == 'fix_master_groups'
         env:
           GH_TOKEN: ${{ github.token }}
           STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
@@ -483,6 +488,9 @@ jobs:
             unblock_legacy_journal_teachers)
               match "$ROSTER_TAG" '^legacy-teachers-[0-9a-z-]+$' || { echo "roster_tag formatı: legacy-teachers-…" >&2; exit 1; }
               asset=teachers.json.enc; target="/tmp/legacy_teachers_${GITHUB_RUN_ID}.json" ;;
+            fix_master_groups)
+              match "$ROSTER_TAG" '^master-groups-[0-9a-z-]+$' || { echo "roster_tag formatı: master-groups-…" >&2; exit 1; }
+              asset=plan.json.enc; target="/tmp/master_groups_${GITHUB_RUN_ID}.json" ;;
             *)
               match "$ROSTER_TAG" '^(staff|teacher)-roster-[0-9a-z-]+$' || { echo "roster_tag formatı: staff-roster-… / teacher-roster-…" >&2; exit 1; }
               asset=roster.xlsx.enc; target="/tmp/staff_roster_${GITHUB_RUN_ID}.xlsx" ;;
@@ -884,6 +892,12 @@ jobs:
                 args=(--org "$ORG" --actor "$actor" --file "/tmp/journal_shares_${GITHUB_RUN_ID}.json")
               fi
               ;;
+            fix_master_groups)
+              # Sahib 2026-10-26: magistr qrupu düzəlişi (plan faylı). Loga yalnız saylar.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor" --file "/tmp/master_groups_${GITHUB_RUN_ID}.json")
+              ;;
             diagnose_journal_access)
               # Sahib 2026-10-26: «Yeni dərs» niyə görünmür — yalnız oxu; `batch` = açılışın UUID-i, `teacher` = istifadəçi.
               match "$BATCH" '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' \
@@ -1049,6 +1063,16 @@ jobs:
               exit "$status"
             fi
             rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "fix_master_groups" ]; then
+            # Loga YALNIZ «master_groups: açar=say …» sətirləri və rədd kodu.
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^master_groups: [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" || true
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
           elif [ "$COMMAND" = "diagnose_journal_access" ]; then
             # Loga YALNIZ «journal_access: açar=yes|no …» sətri və rədd kodu.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
@@ -1177,10 +1201,10 @@ jobs:
           path: ${{ runner.temp }}/staff-out/
           retention-days: 1
       - name: 🧹 Konteynerdə müvəqqəti faylları sil
-        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'reconcile_teacher_roster' || github.event.inputs.command == 'audit_staff_placement' || startsWith(github.event.inputs.command, 'import_teaching_') || github.event.inputs.command == 'issue_staff_credentials' || github.event.inputs.command == 'infer_timetable_from_lessons' || github.event.inputs.command == 'fix_workload_overcount' || github.event.inputs.command == 'fill_vacant_from_journals' || github.event.inputs.command == 'apply_journal_shares' || github.event.inputs.command == 'unblock_legacy_journal_teachers')
+        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'reconcile_teacher_roster' || github.event.inputs.command == 'audit_staff_placement' || startsWith(github.event.inputs.command, 'import_teaching_') || github.event.inputs.command == 'issue_staff_credentials' || github.event.inputs.command == 'infer_timetable_from_lessons' || github.event.inputs.command == 'fix_workload_overcount' || github.event.inputs.command == 'fill_vacant_from_journals' || github.event.inputs.command == 'apply_journal_shares' || github.event.inputs.command == 'unblock_legacy_journal_teachers' || github.event.inputs.command == 'fix_master_groups')
         run: |
           # root kimi: fərqli UID-li qalıqlar (sticky /tmp) app istifadəçisi ilə silinmir.
-          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/staff_roster*.xlsx /tmp/staff_known_*.txt /tmp/staff_creds*.csv /tmp/org_structure.json /tmp/roster_report_*.md /tmp/roster_details_*.csv /tmp/teaching_task_*.xlsx /tmp/teaching_load_*.docx /tmp/timetable_infer_*.csv /tmp/staff_placement_*.zip /tmp/placement_report_*.md /tmp/placement_details_*.csv /tmp/overcount_report_*.md /tmp/vacant_fill_report_*.md /tmp/legacy_journals_*.json /tmp/journal_shares_*.json /tmp/legacy_teachers_*.json; rm -rf /tmp/teaching_report_*' || true
+          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/staff_roster*.xlsx /tmp/staff_known_*.txt /tmp/staff_creds*.csv /tmp/org_structure.json /tmp/roster_report_*.md /tmp/roster_details_*.csv /tmp/teaching_task_*.xlsx /tmp/teaching_load_*.docx /tmp/timetable_infer_*.csv /tmp/staff_placement_*.zip /tmp/placement_report_*.md /tmp/placement_details_*.csv /tmp/overcount_report_*.md /tmp/vacant_fill_report_*.md /tmp/legacy_journals_*.json /tmp/journal_shares_*.json /tmp/legacy_teachers_*.json /tmp/master_groups_*.json; rm -rf /tmp/teaching_report_*' || true
           rm -rf "$RUNNER_TEMP/staff-out" "$RUNNER_TEMP/out.log" || true
       # ── import_timetable_docx / assign_task_rows_from_timetable (dərs cədvəli; öz addımları — digər əmrlərin
       #    axınına toxunmur). Hər ikisi eyni şifrəli timetable.docx.enc faylını oxuyur. ──────────────────────
