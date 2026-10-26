@@ -109496,3 +109496,11 @@ msgstr "All midterm and final exams of the organisation, regardless of who creat
 msgctxt "profile.my_exams.center"
 msgid "Yaradan"
 msgstr "Created by"
+
+msgctxt "profile.info"
+msgid "Ata adı"
+msgstr "Patronymic"
+
+msgctxt "exams.pin_lookup"
+msgid "Ad, soyad, ata adı və ya istifadəçi adı…"
+msgstr "First name, last name, patronymic or username…"

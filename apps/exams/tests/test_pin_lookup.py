@@ -152,3 +152,45 @@ class PinLookupTests(TestCase):
         self.assertEqual(
             self._client(self.teacher).get(reverse("exams:exam_center_pin_search"), {"q": "pl"}).status_code, 403
         )
+
+    def test_search_and_detail_show_and_match_patronymic(self):
+        """Sahib 2026-10-26: siyahı + detal «Ad Soyad Ata adı»; axtarış ata adını da tapır."""
+        from apps.accounts.models import UserProfile
+
+        User.objects.filter(pk=self.student.pk).update(first_name="Aynur", last_name="Məmmədova")
+        UserProfile.objects.filter(user=self.student).update(patronymic="Şahin")
+        client = self._client(self.center)
+
+        response = client.get(reverse("exams:exam_center_pin_search"), {"q": "Aynur Sahin"})
+        self.assertEqual(response.status_code, 200)
+        rows = {r["id"]: r for r in response.json()["results"]}
+        self.assertIn(self.student.id, rows)
+        self.assertEqual(rows[self.student.id]["name"], "Aynur Məmmədova Şahin")
+        self.assertEqual(rows[self.student.id]["patronymic"], "Şahin")
+
+        miss = client.get(reverse("exams:exam_center_pin_search"), {"q": "Aynur Nizami"}).json()["results"]
+        self.assertNotIn(self.student.id, [r["id"] for r in miss])
+
+        url = reverse("exams:exam_center_student_pins", kwargs={"student_id": self.student.id})
+        student = client.get(url).json()["student"]
+        self.assertEqual(student["name"], "Aynur Məmmədova Şahin")
+        self.assertEqual(student["patronymic"], "Şahin")
+
+    def test_search_list_has_no_per_row_profile_queries(self):
+        """Ata adı ``select_related("profile")`` ilə gəlir — sətir sayı sorğu sayını artırmır."""
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        client = self._client(self.center)
+        url = reverse("exams:exam_center_pin_search")
+        client.get(url)  # isinmə (sessiya/kesh)
+        with CaptureQueriesContext(connection) as ctx:
+            data = client.get(url).json()
+        self.assertGreaterEqual(len(data["results"]), 2)
+        per_row = [
+            q["sql"]
+            for q in ctx.captured_queries
+            for student_id in (self.student.id, self.pin_student.id)
+            if 'FROM "accounts_userprofile"' in q["sql"] and f'"user_id" = {student_id}' in q["sql"]
+        ]
+        self.assertEqual(per_row, [])

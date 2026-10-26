@@ -20,4 +20,19 @@ def clean_name_part(value) -> str:
     return text
 
 
-__all__ = ["clean_name_part"]
+def user_display_name_with_patronymic(user) -> str:
+    """«Ad Soyad Ata adı» — istifadəçi obyekti üçün (sahib 2026-10-26: ata adı axtarış/PIN siyahılarında da görünsün).
+
+    Profil (``user.profile``) yoxdursa və ya ata adı boşdursa «Ad Soyad»; ad da boşdursa username.
+    Sorğu açmamaq üçün çağıran ``select_related("profile")`` etməlidir.
+    """
+    profile = getattr(user, "profile", None)  # RelatedObjectDoesNotExist ⊂ AttributeError
+    parts = (
+        (getattr(user, "first_name", "") or "").strip(),
+        (getattr(user, "last_name", "") or "").strip(),
+        clean_name_part(getattr(profile, "patronymic", "") if profile is not None else ""),
+    )
+    return " ".join(part for part in parts if part) or getattr(user, "username", "") or ""
+
+
+__all__ = ["clean_name_part", "user_display_name_with_patronymic"]

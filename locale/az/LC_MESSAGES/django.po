@@ -109006,3 +109006,11 @@ msgstr "Təşkilatın bütün midterm və final imtahanları — kim yaratmasın
 msgctxt "profile.my_exams.center"
 msgid "Yaradan"
 msgstr "Yaradan"
+
+msgctxt "profile.info"
+msgid "Ata adı"
+msgstr "Ata adı"
+
+msgctxt "exams.pin_lookup"
+msgid "Ad, soyad, ata adı və ya istifadəçi adı…"
+msgstr "Ad, soyad, ata adı və ya istifadəçi adı…"

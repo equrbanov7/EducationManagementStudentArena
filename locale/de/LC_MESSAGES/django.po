@@ -110522,3 +110522,11 @@ msgstr "Alle Zwischen- und Abschlussprüfungen der Organisation – unabhängig 
 msgctxt "profile.my_exams.center"
 msgid "Yaradan"
 msgstr "Erstellt von"
+
+msgctxt "profile.info"
+msgid "Ata adı"
+msgstr "Vatersname"
+
+msgctxt "exams.pin_lookup"
+msgid "Ad, soyad, ata adı və ya istifadəçi adı…"
+msgstr "Vorname, Nachname, Vatersname oder Benutzername…"

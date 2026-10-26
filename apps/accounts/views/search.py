@@ -23,6 +23,7 @@ from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 from django.utils.translation import pgettext
 
+from core.person_names import user_display_name_with_patronymic
 from core.program_codes import PROGRAM_CODE_SEARCH_FIELDS
 from core.search_text import tolerant_match, tolerant_q
 
@@ -293,7 +294,14 @@ def _student_group(organization, query, *, scope_q=None, search_email=True):
         qs = qs.filter(scope_q)
     # Tokenləşmiş + az/ing dözümlü («Ad Soyad», «Aliyev» → «Əliyev», «Shahzad» →
     # «Şahzad»); şifrlər kod rejimində — bax core/search_text.py.
-    fields = ("student__first_name", "student__last_name", "student__username", "program__name")
+    # Sahib 2026-10-26: ata adı başlıqda görünür → axtarışda da tapılır (eyni adlı tələbələri ayırmaq üçün).
+    fields = (
+        "student__first_name",
+        "student__last_name",
+        "student__profile__patronymic",
+        "student__username",
+        "program__name",
+    )
     search = tolerant_q(
         query,
         fields + (("student__email",) if search_email else ()),
@@ -301,10 +309,10 @@ def _student_group(organization, query, *, scope_q=None, search_email=True):
     )
     if search is not None:
         qs = qs.filter(search)
-    qs = qs.select_related("student", "program", "group")[:MAX_PER_GROUP]
+    qs = qs.select_related("student", "student__profile", "program", "group")[:MAX_PER_GROUP]
     items = []
     for r in qs:
-        name = r.student.get_full_name() or r.student.username
+        name = user_display_name_with_patronymic(r.student)
         parts = [p for p in (r.program.display_label if r.program_id else "", r.group.name if r.group_id else "") if p]
         items.append(
             {

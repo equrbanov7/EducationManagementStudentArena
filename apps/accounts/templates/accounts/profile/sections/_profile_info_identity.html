@@ -59,7 +59,8 @@ forması serverdə qalır (geri uyğunluq), şablon artıq onu göndərmir.
     </div>
 
     <div class="pfx-hero__id">
-        <h2 class="pfx-hero__name">{{ user.get_full_name|default:user.username }}</h2>
+        {# Sahib 2026-10-26: rəsmi üçlük «Ad Soyad Ata adı» (ata adı yoxdursa «Ad Soyad»). #}
+        <h2 class="pfx-hero__name">{{ profile.full_name_with_patronymic|default:user.get_full_name|default:user.username }}</h2>
         {% if profile.academic_title_display %}
         <p class="pfx-hero__role">{{ profile.academic_title_display }}</p>
         {% endif %}
@@ -106,6 +107,9 @@ forması serverdə qalır (geri uyğunluq), şablon artıq onu göndərmir.
             <dl class="pfx-facts">
                 <div class="pfx-fact"><dt>{% trans "first_name" context "profile.info" %}</dt><dd>{{ user.first_name|default:profile_not_set }}</dd></div>
                 <div class="pfx-fact"><dt>{% trans "last_name" context "profile.info" %}</dt><dd>{{ user.last_name|default:profile_not_set }}</dd></div>
+                {% if profile.patronymic_display %}
+                <div class="pfx-fact"><dt>{% trans "Ata adı" context "profile.info" %}</dt><dd>{{ profile.patronymic_display }}</dd></div>
+                {% endif %}
                 <div class="pfx-fact"><dt>{% trans "email" context "profile.info" %}</dt><dd>{{ user.email }}</dd></div>
                 <div class="pfx-fact"><dt>{% trans "phone" context "profile.info" %}</dt><dd>{{ profile.phone|default:profile_not_set }}</dd></div>
                 {% if profile.phone_secondary %}

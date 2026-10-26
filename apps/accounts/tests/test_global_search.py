@@ -161,3 +161,23 @@ class GlobalSearchTest(TestCase):
         titles = [i["title"] for i in groups.get("nav", {"items": []})["items"]]
         self.assertIn("Dərs cədvəli", titles)
         self.assertNotIn("Profil", titles)
+
+    def test_student_title_includes_patronymic_and_is_searchable(self):
+        """Sahib 2026-10-26: tələbə nəticəsi «Ad Soyad Ata adı»; ata adı ilə də tapılır."""
+        from apps.accounts.models import UserProfile
+
+        UserProfile.objects.filter(user=self.student).update(patronymic="Rauf")
+        groups = self._search(self.dean, "Məmmədov")
+        self.assertEqual(groups["students"]["items"][0]["title"], "Elvin Məmmədov Rauf")
+
+        by_patronymic = self._search(self.dean, "Elvin Rauf")
+        self.assertIn("students", by_patronymic)
+        self.assertEqual(by_patronymic["students"]["items"][0]["title"], "Elvin Məmmədov Rauf")
+        self.assertNotIn("students", self._search(self.dean, "Elvin Nizami"))
+
+    def test_placeholder_patronymic_not_shown(self):
+        from apps.accounts.models import UserProfile
+
+        UserProfile.objects.filter(user=self.student).update(patronymic="-")
+        groups = self._search(self.dean, "Məmmədov")
+        self.assertEqual(groups["students"]["items"][0]["title"], "Elvin Məmmədov")
