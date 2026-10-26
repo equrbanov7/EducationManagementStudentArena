@@ -52,7 +52,12 @@ def current_period_ids(organization) -> list:
 
 
 def teaching_user_ids(organization, academic_year: str, period_ids) -> set:
-    """Tədris ilində dərs yükü bölgüsü (``TeacherAssignment``) və ya cari semestrdə aktiv jurnalı olan istifadəçilər."""
+    """Tədris ilində dərs yükü bölgüsü (``TeacherAssignment``) və ya cari semestrdə aktiv jurnalı olan istifadəçilər.
+
+    Jurnal = açılışın sahibi (``instructor``), açılışda dərs keçən (``Lesson.instructor``) və ya bölünmüş jurnalın
+    PAY sahibi (``JournalShare``) — sahib 2026-10-26: köhnə sistemdə jurnalı birləşmiş müəllim «Forma 7» ilə
+    bloklanmasın.
+    """
     loaded = set(
         _model("workload", "TeacherAssignment")
         .objects.filter(
@@ -71,7 +76,23 @@ def teaching_user_ids(organization, academic_year: str, period_ids) -> set:
         .values_list("instructor_id", flat=True)
         .distinct()
     )
-    return loaded | journals
+    periods = list(period_ids or [])
+    lessons = set(
+        _model("registrar", "Lesson")
+        .objects.filter(organization=organization, offering__is_active=True, offering__period_id__in=periods)
+        .exclude(instructor_id=None)
+        .values_list("instructor_id", flat=True)
+        .distinct()
+    )
+    shares = set(
+        _model("registrar", "JournalShare")
+        .objects.filter(
+            organization=organization, is_active=True, offering__is_active=True, offering__period_id__in=periods
+        )
+        .values_list("teacher_id", flat=True)
+        .distinct()
+    )
+    return loaded | journals | lessons | shares
 
 
 def collect(organization, user_ids, *, academic_year: str, period_ids) -> Facts:
