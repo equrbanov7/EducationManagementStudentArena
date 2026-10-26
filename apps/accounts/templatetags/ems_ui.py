@@ -178,3 +178,22 @@ def ems_datetime_input(
         attrs["aria-describedby"] = describedby
     # Sinif: Bootstrap formaları «form-control», kabinet (ems_ui) formaları «ems-input».
     return DayFirstDateTimeInput(attrs={"class": css_class}).render(name, value, attrs=attrs)
+
+
+@register.simple_tag(name="ems_filter_datetime_input")
+def ems_filter_datetime_input(field):
+    """Filtr panelinin tarix-saat sahəsi (``field.kind == "datetime"``, 2026-10-27).
+
+    Eyni ``DayFirstDateTimeInput`` vidceti («gg.aa.iiii ss:dd» + təqvim seçicisi) — üstəlik
+    ``data-ems-filter`` (filter_bar.js draft/applied) və ``range_select`` verilibsə
+    ``data-ems-range-select`` / ``data-ems-range-custom`` (dəyişəndə «Dövr» → «Seçilmiş aralıq»).
+    Seçici skripti (``static/js/ems_datetime*.js``) bölmənin asset siyahısındadır.
+    """
+    from core.datetime_input import DayFirstDateTimeInput
+
+    name = field.get("name") or ""
+    attrs = {"id": f"f-{name}", "data-ems-filter": ""}
+    if field.get("range_select"):
+        attrs["data-ems-range-select"] = field["range_select"]
+        attrs["data-ems-range-custom"] = field.get("range_custom") or "custom"
+    return DayFirstDateTimeInput(attrs={"class": "ems-input"}).render(name, field.get("value") or "", attrs=attrs)

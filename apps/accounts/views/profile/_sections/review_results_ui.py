@@ -18,7 +18,7 @@ from datetime import timedelta
 from django.utils import timezone
 from django.utils.translation import pgettext
 
-from apps.accounts.views._dashboard_helpers.evaluated_review import PERIOD_FILTERS
+from apps.accounts.views._dashboard_helpers.evaluated_review_filters import PERIOD_CUSTOM, PERIOD_FILTERS
 from apps.accounts.views._helpers.task_kind_visibility import hidden_task_filters
 
 CTX = "accounts.review_results"
@@ -39,7 +39,9 @@ _OPEN_APPEAL_TONE = "warning"
 
 def _type_label(item):
     if item["type"] == "exam":
-        return item.get("exam_kind_label") or pgettext("profile.pending_review", "type_exam")
+        kind = item.get("exam_kind_label") or pgettext("profile.pending_review", "type_exam")
+        # 2026-10-27: kateqoriya (Midterm / Final / Quiz) növün yanında — «Növ» süzgəci ilə eyni dil.
+        return f"{kind} · {item['exam_category_label']}" if item.get("exam_category_label") else kind
     return {
         "assignment": pgettext("profile.pending_review", "type_assignment"),
         "project": pgettext("profile.pending_review", "type_project"),
@@ -119,6 +121,10 @@ def _type_options():
         {"value": "exams", "label": pgettext(CTX, "İmtahanlar (hamısı)")},
         {"value": "exam_test", "label": pgettext(CTX, "İmtahan — test")},
         {"value": "exam_written", "label": pgettext(CTX, "İmtahan — yazılı")},
+        # 2026-10-27 (sahib): imtahan kateqoriyası — Midterm / Final / Quiz.
+        {"value": "exam_midterm", "label": pgettext(CTX, "İmtahan — Midterm")},
+        {"value": "exam_final", "label": pgettext(CTX, "İmtahan — Final")},
+        {"value": "exam_quiz", "label": pgettext(CTX, "İmtahan — Quiz")},
     ]
     if "assignments" not in hidden:
         options.append({"value": "assignments", "label": pgettext("profile.pending_review", "type_assignment")})
@@ -128,12 +134,16 @@ def _type_options():
     return options
 
 
-def build_filter_fields(*, search, filter_type, group, groups, period, order):
+def build_filter_fields(
+    *, search, filter_type, group, groups, period, order, subject="", subjects=(), date_from="", date_to=""
+):
     period_labels = {
         "7": pgettext(CTX, "Son 7 gün"),
         "30": pgettext(CTX, "Son 30 gün"),
         "90": pgettext(CTX, "Son 90 gün"),
     }
+    # Aralıq sahəsi dəyişəndə «Dövr» özü «Seçilmiş aralıq»a keçir (filter_bar.js, `range_select`).
+    range_link = {"range_select": "evaluated_period", "range_custom": PERIOD_CUSTOM}
     return [
         {
             "name": "evaluated_search",
@@ -156,9 +166,19 @@ def build_filter_fields(*, search, filter_type, group, groups, period, order):
             "label": pgettext(CTX, "Qrup"),
             "kind": "select",
             "value": group,
-            "searchable": len(groups) > 8,
+            # Sahib 2026-10-27: qrup siyahısı uzundur — menyu daxilində axtarış HƏMİŞƏ.
+            "searchable": True,
             "options": [{"value": "", "label": pgettext(CTX, "Bütün qruplar")}]
             + [{"value": name, "label": name} for name in groups],
+        },
+        {
+            "name": "evaluated_subject",
+            "label": pgettext(CTX, "Fənn"),
+            "kind": "select",
+            "value": subject,
+            "searchable": True,
+            "options": [{"value": "", "label": pgettext(CTX, "Bütün fənlər")}]
+            + [{"value": name, "label": name} for name in subjects],
         },
         {
             "name": "evaluated_period",
@@ -166,7 +186,22 @@ def build_filter_fields(*, search, filter_type, group, groups, period, order):
             "kind": "select",
             "value": period,
             "options": [{"value": "", "label": pgettext(CTX, "Bütün vaxtlar")}]
-            + [{"value": key, "label": period_labels[key]} for key in PERIOD_FILTERS],
+            + [{"value": key, "label": period_labels[key]} for key in PERIOD_FILTERS]
+            + [{"value": PERIOD_CUSTOM, "label": pgettext(CTX, "Seçilmiş aralıq")}],
+        },
+        {
+            "name": "evaluated_from",
+            "label": pgettext(CTX, "Başlanğıc (tarix, saat)"),
+            "kind": "datetime",
+            "value": date_from,
+            **range_link,
+        },
+        {
+            "name": "evaluated_to",
+            "label": pgettext(CTX, "Son (tarix, saat)"),
+            "kind": "datetime",
+            "value": date_to,
+            **range_link,
         },
         {
             "name": "evaluated_submitted_order",

@@ -11,7 +11,7 @@ Desktopda cədvəl, ≤768 px-də hər sətir kartdır (CSS, `data-label`). CSS:
 {% trans "Yoxlama pəncərəsi bağlanmış imtahan, lab və tapşırıq nəticələri. «Bax» cavabları sual-sual açır." context "accounts.review_results" as rr_subtitle %}
 {% with ui=evaluated_review_ui %}
 <div class="rr">
-    {% include "partials/ems_ui/_content_header.html" with header_subtitle=rr_subtitle %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=rr_subtitle header_actions_include="accounts/partials/_review_results_actions.html" %}
 
     {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=ui.kpi_tiles kpi_variant="4" %}
 

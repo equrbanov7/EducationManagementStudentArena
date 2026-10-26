@@ -24,13 +24,14 @@ KONTEKST MÜQAVİLƏSİ
   filter_bootstrap   — opsional; select sahələri Bootstrap tərzli açılan menyu ilə
                        göstərilir (`bootstrap_select.js`); `field.searchable` olan
                        sahədə menyunun içində axtarış sətri də olur.
+  field.kind="datetime" — tarix-saat sahəsi (EMSDateTime vidceti; bölmə ems_datetime*.js yükləməlidir).
   field.kind="date"  — tarix sahəsi; `range_select` (+ `range_custom`) verilsə,
                        dəyişəndə həmin select «seçilmiş aralıq» dəyərinə keçir.
   Avto rejimdə «Sıfırla» formanın ÖZ sahələrini (+ səhifə) URL-dən ATIB
   bölməni SERVER DEFOLTLARI ilə yükləyir (boş dəyər = default qaydası);
   aktiv tab / görünüş yerində qalır.
 {% endcomment %}
-{% load i18n %}
+{% load i18n ems_ui %}
 <form class="ems-filters{% if filter_auto %} ems-filters--auto{% endif %}" data-ems-filters
       data-section="{{ filter_section }}"
       data-param-prefix="{{ filter_prefix }}"
@@ -61,6 +62,10 @@ KONTEKST MÜQAVİLƏSİ
                        value="{{ field.value|default_if_none:'' }}"
                        {% if field.min %}min="{{ field.min }}"{% endif %} {% if field.max %}max="{{ field.max }}"{% endif %}
                        data-ems-filter{% if field.range_select %} data-ems-range-select="{{ field.range_select }}" data-ems-range-custom="{{ field.range_custom|default:'custom' }}"{% endif %}>
+            {% elif field.kind == "datetime" %}
+                {% comment %}Tarix-SAAT sahəsi (2026-10-27): layihənin «gg.aa.iiii ss:dd» vidceti + təqvim
+                seçicisi (`ems_datetime*.js`); `range_select` «date» sahəsindəki kimi işləyir.{% endcomment %}
+                {% ems_filter_datetime_input field %}
             {% else %}
                 <input class="ems-input" type="search" id="f-{{ field.name }}" name="{{ field.name }}"
                        value="{{ field.value|default_if_none:'' }}"

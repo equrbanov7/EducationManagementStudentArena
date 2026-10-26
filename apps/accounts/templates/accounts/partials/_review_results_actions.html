@@ -1,0 +1,15 @@
+{% load i18n %}
+{% comment %}«Dəyərləndirilmiş nəticələr» — Excel ixracı (sahib 2026-10-27). Link ekrandakı TƏTBİQ OLUNMUŞ
+süzgəclərlə qurulur (`evaluated_review_ui.export_url`; bölmə hər süzgəc dəyişəndə yenidən render olunur),
+sütunlar imtahanın öz nəticə səhifəsinin ixracı ilə eynidir. Nəticə yoxdursa düymə söndürülür.{% endcomment %}
+{% if evaluated_review_items %}
+<a href="{{ evaluated_review_ui.export_url }}" class="ems-btn" download data-no-route-loading>
+    <i class="fas fa-file-excel" aria-hidden="true"></i>{% trans "Excel-ə yüklə" context "accounts.review_results" %}
+</a>
+{% else %}
+<span class="ems-btn" role="button" aria-disabled="true" tabindex="0" aria-describedby="rrExportHint"
+      title="{% trans 'Yükləmək üçün nəticə yoxdur.' context 'accounts.review_results' %}">
+    <i class="fas fa-file-excel" aria-hidden="true"></i>{% trans "Excel-ə yüklə" context "accounts.review_results" %}
+    <span class="visually-hidden" id="rrExportHint">{% trans "Yükləmək üçün nəticə yoxdur." context "accounts.review_results" %}</span>
+</span>
+{% endif %}

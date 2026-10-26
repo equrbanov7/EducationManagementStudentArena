@@ -40,6 +40,11 @@ from .services.manual_grading import answer_max_points  # noqa: F401
 from .services.question_chair_review import chair_queue_queryset  # noqa: F401
 from .services.question_chair_review import pending_chair_review_count  # noqa: F401
 from .services.question_snapshot import delivered_question_render  # noqa: F401
+from .services.results_export import build_results_xlsx  # noqa: F401
+from .services.results_export import exam_attempt_rows as results_export_attempt_rows  # noqa: F401
+from .services.results_export import patronymic_map as results_export_patronymic_map  # noqa: F401
+from .services.results_export_meta import auto_checker_label  # noqa: F401
+from .services.results_export_meta import checked_by_map as attempt_checked_by_map  # noqa: F401
 from .services.student_pins import student_visible_pin  # noqa: F401
 from .views.exam_center._shared import supervisor_org_or_403  # noqa: F401
 from .views.student._final_device import hall_computer_blocked_response  # noqa: F401
@@ -67,6 +72,11 @@ __all__ = [
     "SECURE_EXAM_CATEGORIES",
     "allowed_units_prefetch",
     "answer_max_points",
+    "attempt_checked_by_map",
+    "auto_checker_label",
+    "build_results_xlsx",
+    "results_export_attempt_rows",
+    "results_export_patronymic_map",
     "allowed_units_q",
     "allowed_units_under_q",
     "append_query_params",
