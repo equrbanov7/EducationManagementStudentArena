@@ -10,7 +10,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import pgettext
 
-from ..constants import MIN_NOTE_LENGTH, ApplicationStatus, EventKind
+from ..constants import MIN_NOTE_LENGTH, RESPONDER_UNIT_CODE, ApplicationStatus, EventKind
 from ..models import ApplicationEvent, ApplicationWatch
 from ..sla import add_working_days, calendar_for
 from ..state_machine import ACTOR_HANDLER, Action, TransitionDenied, ensure_allowed, rule_for
@@ -54,6 +54,24 @@ def _authorize(user, application, rule):
         raise TransitionDenied("permission.not_sender", pgettext(_CTX, "Bu əməli yalnız müraciət sahibi edə bilər."))
 
 
+def _take_into_review(user, application, rule):
+    """«Yeni» müraciətə BİRBAŞA qərar → əvvəlcə «Baxılır» (SEEN hadisəsi ilə) — 2026-10-26.
+
+    Cari şöbənin emalçısı üçün bu keçidi detalın açılışı edir; RİM isə başqa şöbənin
+    müraciətini açanda keçid QƏSDƏN baş vermir (şöbənin «Yeni» nişanı itməsin). RİM cavab
+    verəndə isə müraciət «Yeni»dən birbaşa həll/yönləndirmə ala bilməlidir — status maşını
+    ``submitted``-dən qərar qəbul etmir, ona görə zaman xəttinə əvvəlcə «Baxışa götürüldü» yazılır.
+    """
+    if rule.actor != ACTOR_HANDLER or application.status != ApplicationStatus.SUBMITTED.value:
+        return
+    if ApplicationStatus.SUBMITTED.value in rule.sources:
+        return
+    old = application.status
+    application.status = ApplicationStatus.IN_REVIEW.value
+    _touch(application, ["status"])
+    _write_event(application, kind=EventKind.SEEN, actor=user, old=old)
+
+
 def _guard(user, application, action, text=""):
     """İCAZƏ əvvəl, STATUS sonra — qəsdən bu sıra ilə.
 
@@ -61,8 +79,46 @@ def _guard(user, application, action, text=""):
     qəbul etmir» cavabından müraciətin harada olduğunu öyrənərdi. Ona görə
     aktor yoxlanışı hər zaman birincidir.
     """
-    _authorize(user, application, rule_for(action))
+    rule = rule_for(action)
+    _authorize(user, application, rule)
+    # Yararsız mətnli cəhd ``ensure_allowed``-da dayanır — çağıranların hamısı ``atomic``-dir,
+    # ona görə yuxarıdakı «Baxılır» yazısı da geri qaytarılır.
+    _take_into_review(user, application, rule)
     return ensure_allowed(action=action, status=application.status, text=text)
+
+
+class _ResponderAct:
+    """RİM BAŞQA şöbənin müraciətinə qərar verir (``active``) + həmin şöbənin emalçıları (``recipients``).
+
+    Cari şöbənin öz emalçısı (və ya RİM olmayan superuser) əməl edirsə ``active=False``, siyahı boş.
+    İcazədən SONRA, şöbə dəyişməzdən ƏVVƏL qurulur: yönləndirmə cari şöbəni dəyişir, bildiriş isə
+    müraciəti saxlayan şöbəyə getməlidir. ``audit_changes`` audit sətrinə «RİM cavab verdi» izini qoyur.
+    """
+
+    def __init__(self, user, application):
+        self.active = not access.is_current_handler(user, application) and access.is_universal_responder(
+            user, application.organization
+        )
+        self.recipients = (
+            [person for person in notify.handler_recipients(application) if person.pk != getattr(user, "pk", None)]
+            if self.active
+            else []
+        )
+
+    def audit_changes(self) -> dict:
+        return {"responder_unit": RESPONDER_UNIT_CODE} if self.active else {}
+
+
+def _notify_responder_watchers(application, responder, *, text=""):
+    recipients = responder.recipients
+    if not recipients:
+        return
+    notify.notify_users(
+        application,
+        recipients,
+        title=pgettext("applications", "%(number)s — RİM cavab verdi") % {"number": application.number},
+        message=(text or "").strip()[:200] or application.subject,
+    )
 
 
 def _write_event(application, *, kind, actor, text="", is_internal=False, from_unit=None, to_unit=None, old=None):
@@ -114,16 +170,25 @@ def add_comment(*, application, user, text: str, is_internal: bool = False, file
         # Sahibin qeydi HEÇ VAXT daxili ola bilməz — daxili qeyd emalçı sirridir.
         is_internal = False
     ensure_allowed(action=Action.ADD_COMMENT, status=application.status, text=text)
+    responder = _ResponderAct(user, application) if is_handler else None
     event = _write_event(application, kind=EventKind.COMMENT, actor=user, text=text, is_internal=is_internal)
     attach_files(application, files, event=event, uploaded_by=user)
     _touch(application, [])
-    notify.audit(application, action=notify.AUDIT_UPDATE, actor=user, event_kind=EventKind.COMMENT, request=request)
+    notify.audit(
+        application,
+        action=notify.AUDIT_UPDATE,
+        actor=user,
+        event_kind=EventKind.COMMENT,
+        changes=responder.audit_changes() if responder else None,
+        request=request,
+    )
     if is_handler and not is_internal:
         notify.notify_sender(
             application,
             title=f"{application.number} — yeni qeyd",
             message=text.strip()[:200],
         )
+        _notify_responder_watchers(application, responder, text=text)
     elif not is_handler:
         notify.notify_current_unit(
             application,
@@ -172,6 +237,7 @@ def assign(*, application, user, assignee, note: str = "", request=None):
 def forward(*, application, user, target_unit, note: str, keep_watching: bool = True, request=None):
     """Müraciəti BAŞQA şöbəyə ötürür; müraciət İTMİR, məsul şöbə dəyişir."""
     rule = _guard(user, application, Action.FORWARD, note)
+    responder = _ResponderAct(user, application)
     if target_unit is None or not target_unit.is_active:
         raise TransitionDenied("unit.unknown", pgettext(_CTX, "Hədəf şöbə tapılmadı."))
     if target_unit.pk == application.current_unit_id:
@@ -210,9 +276,14 @@ def forward(*, application, user, target_unit, note: str, keep_watching: bool = 
         actor=user,
         event_kind=EventKind.FORWARDED,
         reason=note,
-        changes={"from_unit": source_unit.code, "to_unit": target_unit.code},
+        changes={
+            "from_unit": source_unit.code,
+            "to_unit": target_unit.code,
+            **responder.audit_changes(),
+        },
         request=request,
     )
+    _notify_responder_watchers(application, responder, text=note)
     notify.notify_current_unit(
         application,
         title=f"{application.number} — {source_unit.name} şöbəsindən yönləndirildi",
@@ -232,6 +303,7 @@ def _handler_status_change(*, application, user, action, text, event_kind, reque
     yazışmada mətnin ALTINDA görünsün (bağlanmayan fayl yalnız ümumi sənəd
     siyahısına düşür)."""
     rule = _guard(user, application, action, text)
+    responder = _ResponderAct(user, application)
     old = application.status
     application.status = rule.target
     fields = ["status"]
@@ -250,10 +322,14 @@ def _handler_status_change(*, application, user, action, text, event_kind, reque
         actor=user,
         event_kind=event_kind,
         reason=text,
-        changes={"status": [old, application.status]},
+        changes={
+            "status": [old, application.status],
+            **responder.audit_changes(),
+        },
         request=request,
     )
     notify.notify_sender(application, title=sender_title, message=(text or "").strip()[:400])
+    _notify_responder_watchers(application, responder, text=text)
     return application, event
 
 

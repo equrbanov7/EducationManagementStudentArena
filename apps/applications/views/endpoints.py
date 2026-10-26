@@ -81,7 +81,9 @@ def application_detail(request, application_id, *, organization):
     # Status yoxlaması ilə eyni şərt təkrar (idempotent) açılışlarda `mark_seen`-i
     # heç çağırmır — `workflow.mark_seen`-in öz daxili yoxlaması ilə üst-üstə
     # düşür, amma burada AÇIQ və şərtsiz istisna-tutma OLMADAN yoxlanır.
-    if application.status == ApplicationStatus.SUBMITTED.value and access.can_act(request.user, application):
+    # 2026-10-26: RİM (hər müraciəti cavablandıran) başqa şöbənin müraciətini AÇANDA keçid olmur —
+    # şöbənin «Yeni» nişanı itməsin; RİM-in ilk QƏRARI «Baxılır»ı özü yazır (`workflow._take_into_review`).
+    if application.status == ApplicationStatus.SUBMITTED.value and access.is_current_handler(request.user, application):
         workflow.mark_seen(application=application, user=request.user, request=request)
     # 2026-10-19: «Arayış sorğusu» emalçısına «Arayışı hazırla» bloku (views.documents).
     return ok({"application": detail_with_tools(application, request=request)})

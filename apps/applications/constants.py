@@ -32,6 +32,13 @@ PERM_MANAGE = "application.manage"
 #: əməl (cavab/yönləndirmə) və daxili qeydlər VERMİR (bax ``services.access.can_oversee``).
 PERM_VIEW_ALL = "application.view_all"
 
+#: «Hər müraciəti cavablandıran» şöbənin kodu (sahib 2026-10-26: «RİM hər müraciəti cavablandıra
+#: bilsin»). Bu şöbənin emalçı ROLLARI (``ApplicationUnit.handler_role_names`` — default
+#: ``ikt_rehber`` + ``rim_staff``) təşkilatın HƏR AÇIQ müraciətinə cavab verə, həll edə,
+#: yönləndirə bilir — müraciət hansı şöbədə olursa olsun (``services.access.is_universal_responder``).
+#: Kataloq redaktəsi ilə idarə olunur: tenant rolu şöbədən çıxarsa səlahiyyət də gedir.
+RESPONDER_UNIT_CODE = "rim"
+
 
 class SenderFamily(models.TextChoices):
     """Göndərənin ailəsi — hansı növləri yarada biləcəyini müəyyən edir."""
@@ -246,7 +253,9 @@ DEFAULT_UNIT_SEED = (
         "code": "rim",
         "name": "RİM (Rəqəmsal İnkişaf Mərkəzi)",
         "note": "sistem girişi, texniki nasazlıq",
-        "handler_role_names": ["ikt_rehber"],
+        # 2026-10-26 (sahib): RİM əməkdaşı da RİM şöbəsinin emalçısıdır — əvvəl yalnız rəhbər
+        # cavab verə bilirdi, əməkdaş «Bütün müraciətlər»i yalnız OXUYURDU (mövcud: applications 0007).
+        "handler_role_names": ["ikt_rehber", "rim_staff"],
         "resolve_by": ResolveBy.ORGANIZATION.value,
         "default_sla_days": 2,
     },
@@ -435,6 +444,7 @@ __all__ = [
     "PERM_MANAGE",
     "PERM_VIEW_ALL",
     "RESOLVE_BY_FALLBACK_UNIT_TYPES",
+    "RESPONDER_UNIT_CODE",
     "RESOLVE_BY_UNIT_TYPE",
     "ResolveBy",
     "STATUS_PALETTE",

@@ -173,6 +173,18 @@ def row_payload(application, *, viewer_is_handler: bool) -> dict:
     }
 
 
+def _action_status(application, is_handler: bool) -> str:
+    """Düymələrin hesablandığı status: «Yeni» müraciətdə emalçıya «Baxılır» düymələri.
+
+    Cari şöbənin emalçısı üçün detalın açılışı onsuz da «Baxılır»a keçirir; RİM başqa
+    şöbənin «Yeni» müraciətini açanda keçid QƏSDƏN olmur, amma cavab verə bilməlidir —
+    ilk qərar ``workflow._take_into_review`` ilə «Baxılır» hadisəsini özü yazır.
+    """
+    if is_handler and application.status == ApplicationStatus.SUBMITTED.value:
+        return ApplicationStatus.IN_REVIEW.value
+    return application.status
+
+
 def detail_payload(application, *, user) -> dict:
     """Detal paneli (dizayn §4.7) — icazəyə görə süzülmüş zaman xətti."""
     is_handler = access.can_act(user, application)
@@ -214,7 +226,9 @@ def detail_payload(application, *, user) -> dict:
             "is_watcher": (not is_handler) and (not is_sender),
         },
         "allowed_actions": list(
-            available_actions(status=application.status, is_handler=is_handler, is_sender=is_sender)
+            available_actions(
+                status=_action_status(application, is_handler), is_handler=is_handler, is_sender=is_sender
+            )
         ),
     }
 

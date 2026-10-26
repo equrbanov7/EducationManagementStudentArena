@@ -11,7 +11,7 @@ import pytest
 
 from apps.applications.services import access, submit, workflow
 from apps.applications.state_machine import TransitionDenied
-from apps.applications.tests.factories import kind_of, make_world, unit_of
+from apps.applications.tests.factories import MANAGE, add_member, kind_of, make_user, make_world, unit_of
 
 pytestmark = pytest.mark.django_db
 
@@ -62,10 +62,20 @@ def test_a_user_without_any_role_sees_nothing(world, application):
     assert not access.can_view(world["outsider"], application)
 
 
-def test_rim_manage_reads_every_application(world, application):
-    """RİM `application.manage` ilə bütün təşkilatı oxuyur — amma bu ƏMƏL deyil."""
+def test_rim_reads_and_answers_every_application(world, application):
+    """RİM bütün təşkilatı oxuyur və 2026-10-26-dan (sahib) HƏR açıq müraciətə cavab verə bilər.
+
+    Hüquq `application.manage`-dən DEYİL, RİM şöbəsinin emalçısı olmaqdan gəlir: `manage`
+    daşıyan, amma RİM şöbəsində olmayan rol (prorektor) yenə yalnız oxuyur.
+    """
     assert access.can_view(world["rim"], application)
-    assert not access.can_act(world["rim"], application)
+    assert access.can_act(world["rim"], application)
+    assert not access.is_current_handler(world["rim"], application)
+
+    vice_rector = make_user("bounds-vice-rector")
+    add_member(world["organization"], vice_rector, "vice_rector", permissions=MANAGE, level=90)
+    assert access.can_view(vice_rector, application)
+    assert not access.can_act(vice_rector, application)
 
 
 def test_a_watcher_reads_but_never_acts(world, application):

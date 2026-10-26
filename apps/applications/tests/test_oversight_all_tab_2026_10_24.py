@@ -1,8 +1,10 @@
 """«Bütün müraciətlər» tabı — RİM təşkilatın HƏR müraciətini görür (sahib 2026-10-24).
 
 Qapı: ``access.can_oversee`` = ``application.view_all`` (RİM əməkdaşı) və ya ``application.manage``
-(RİM rəhbəri / rektorat), superuser, təşkilat sahibi. Bu YALNIZ OXUDUR — əməl, daxili qeyd və
-«Yeni → Baxılır» yan-təsiri yoxdur. Digərləri tabı görmür, URL-i əl ilə yazsa 403 alır.
+(RİM rəhbəri / rektorat), superuser, təşkilat sahibi. `view_all` özü YALNIZ OXUDUR (qəyyum) — əməl,
+daxili qeyd və «Yeni → Baxılır» yan-təsiri yoxdur. 2026-10-26 (sahib): RİM şöbəsinin emalçıları
+(rəhbər + əməkdaş) hər müraciətə CAVAB da verir — bax ``test_rim_answers_every_application_2026_10_26``.
+Digərləri tabı görmür, URL-i əl ilə yazsa 403 alır.
 """
 
 from __future__ import annotations
@@ -58,6 +60,8 @@ def world():
     organization = world["organization"]
     rim_staff = make_user("ovs-rim-staff")
     add_member(organization, rim_staff, "rim_staff", permissions=VIEW_ALL, level=60)
+    trustee = make_user("ovs-trustee")
+    add_member(organization, trustee, "trustee", permissions=VIEW_ALL, level=78)
     student_b = make_user("ovs-student-b")
     add_member(
         organization,
@@ -67,7 +71,7 @@ def world():
         permissions=["application.create"],
         level=10,
     )
-    world.update({"rim_staff": rim_staff, "student_b": student_b})
+    world.update({"rim_staff": rim_staff, "trustee": trustee, "student_b": student_b})
     world["apps"] = {
         # tələbə (a ağacı) → koordinator (ixtisas a)
         "koordinator": _submit(world, world["student"], "diger", "Seçmə fənn bloku"),
@@ -91,7 +95,7 @@ def _list(world, actor, **params):
 
 
 # ── Görünüş: RİM hər şöbənin müraciətini görür ─────────────────────────────
-@pytest.mark.parametrize("actor", ["rim_staff", "rim"])
+@pytest.mark.parametrize("actor", ["rim_staff", "rim", "trustee"])
 def test_overseer_sees_every_application_across_departments(world, actor):
     response = _list(world, actor)
     assert response.status_code == 200
@@ -181,10 +185,10 @@ def test_filters_never_widen_an_ordinary_tab(world):
     assert payload["results"] == []
 
 
-# ── Detal: yalnız oxu ──────────────────────────────────────────────────────
+# ── Detal: `view_all` yalnız oxudur (qəyyum) ───────────────────────────────
 def test_overseer_opens_any_application_read_only(world):
     application = world["apps"]["dekan"]
-    client = client_for(world["rim_staff"], world["organization"])
+    client = client_for(world["trustee"], world["organization"])
     response = client.get(reverse("applications:detail", kwargs={"application_id": application.pk}))
     assert response.status_code == 200
     detail = body(response)["application"]
@@ -219,8 +223,10 @@ def test_view_all_does_not_reveal_internal_notes(world):
         detail = body(client.get(reverse("applications:detail", kwargs={"application_id": application.pk})))
         return [event for event in detail["application"]["events"] if event["is_internal"]]
 
-    assert internal_events("rim_staff") == []
+    assert internal_events("trustee") == []
     assert internal_events("rim")  # `application.manage` daxili qeydləri görür (mövcud qayda)
+    # 2026-10-26: RİM əməkdaşı hər müraciətə cavab verir — yazışmanın daxili qeydlərini də görür.
+    assert internal_events("rim_staff")
 
 
 # ── Kataloq + kabinet bölməsi ──────────────────────────────────────────────

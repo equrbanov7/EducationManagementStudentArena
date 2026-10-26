@@ -85,7 +85,7 @@ def add_member(organization, user, role_name, *, scope_unit=None, permissions=No
 
 
 def _clear_cache(user):
-    for attribute in ("_applications_memberships", "_active_org_memberships"):
+    for attribute in ("_applications_memberships", "_applications_responder", "_active_org_memberships"):
         if hasattr(user, attribute):
             delattr(user, attribute)
 

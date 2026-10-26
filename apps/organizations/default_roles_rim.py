@@ -54,10 +54,13 @@ _RIM_STAFF_PERMISSIONS = [
     # Şəxs kataloqu — YALNIZ OXU (əməl açarları `people.manage_*` qəsdən yoxdur).
     *PEOPLE_DIRECTORY_READ,
     # «Müraciətlərim → Bütün müraciətlər» (sahib 2026-10-24: RİM sistemə gələn BÜTÜN
-    # müraciətləri görməlidir) — YALNIZ OXU: cavab/yönləndirmə (`application.handle` +
-    # şöbə rolu) və daxili qeydlər (`application.manage`) VERİLMİR. Mövcud tenantlar:
-    # `applications 0006`.
+    # müraciətləri görməlidir). Mövcud tenantlar: `applications 0006`.
     "application.view_all",
+    # 2026-10-26 (sahib): «RİM hər müraciəti cavablandıra bilsin» — əməkdaş RİM şöbəsinin
+    # emalçısıdır (`ApplicationUnit.handler_role_names`) və şöbənin ümumi cavab hüququ ilə
+    # HƏR açıq müraciətə cavab verir (`applications.services.access.is_universal_responder`).
+    # Kataloq açarı (`application.manage`) VERİLMİR. Mövcud tenantlar: `applications 0007`.
+    "application.handle",
 ]
 
 RIM_STAFF_ROLES = [

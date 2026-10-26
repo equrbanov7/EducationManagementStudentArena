@@ -110603,3 +110603,8 @@ msgstr "Auf anderem Computer fortsetzen"
 msgctxt "exams.final_center.monitor_pin"
 msgid "Kompüter xarab olubsa: tələbə başqa qeydli kompüterdən /exams/final/ (və ya /exams/midterm/) səhifəsində istifadəçi adı + bu PIN ilə daxil olur."
 msgstr "Falls der Computer ausgefallen ist: Der Studierende meldet sich an einem anderen registrierten Computer unter /exams/final/ (oder /exams/midterm/) mit Benutzername + dieser PIN an."
+
+#, python-format
+msgctxt "applications"
+msgid "%(number)s — RİM cavab verdi"
+msgstr "%(number)s — das Zentrum für digitale Entwicklung hat geantwortet"
