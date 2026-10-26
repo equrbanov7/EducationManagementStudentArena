@@ -92,12 +92,18 @@ class DedupeNotificationsCommandTest(TestCase):
         self.assertIn("groups=0 · duplicates_marked_read=0 · users=0", self._run("--apply"))  # idempotent
 
     def test_window_and_until_bound_the_scan(self):
-        self._note(self.alice, minutes_ago=200)
-        self._note(self.alice, minutes_ago=10)
-        self.assertIn("duplicates_marked_read=0", self._run("--window-minutes", "120"))
-        self.assertIn("duplicates_marked_read=1", self._run("--window-minutes", "240"))
-        until = (timezone.localdate() - timedelta(days=1)).isoformat()
-        self.assertIn("duplicates_marked_read=0", self._run("--window-minutes", "240", "--until", until))
+        # Gecə yarısından sonrakı ilk saatlarda «200 dəq əvvəl» dünənə düşürdü (CI 2026-10-27 00:13) — saat günortaya sabitlənir.
+        from unittest import mock
+
+        noon = timezone.localtime().replace(hour=12, minute=0, second=0, microsecond=0)
+        with mock.patch("django.utils.timezone.now", return_value=noon):
+            self.now = noon
+            self._note(self.alice, minutes_ago=200)
+            self._note(self.alice, minutes_ago=10)
+            self.assertIn("duplicates_marked_read=0", self._run("--window-minutes", "120"))
+            self.assertIn("duplicates_marked_read=1", self._run("--window-minutes", "240"))
+            until = (timezone.localdate() - timedelta(days=1)).isoformat()
+            self.assertIn("duplicates_marked_read=0", self._run("--window-minutes", "240", "--until", until))
 
     def test_bad_arguments_raise(self):
         with self.assertRaises(CommandError):
