@@ -206,6 +206,9 @@
 #       `master-students-…` → plan.json.enc; yalnız id-lər). Bakalavr qeydi məzun/qeyri-aktiv (hərəkətsiz), magistr
 #       qrupunda yeni qeyd, arxiv hesabın girişi rəsmi bərpa səthi ilə; səhv qrupdakı magistr qeydi rəsmi köçürmə ilə.
 #       Loga YALNIZ saylar.
+#   grant_temporary_superuser — sahibin öz hesabına MÜVƏQQƏTİ tam superadmin girişi (sahib 2026-10-27: «sonra geri
+#       alarıq»): `teacher` = istifadəçi adı, `batch` = gün sayı (1–14) və ya `revoke` (yalnız bu əmrin verdiyini geri
+#       alır). Audit sətri yazılır; loga YALNIZ vəziyyət sətri.
 #   diagnose_journal_access — YALNIZ OXU (sahib 2026-10-26: «müəllimdə yeni dərs yeri görünmür»): `batch` = jurnalın
 #       (açılışın) UUID-i, `teacher` = yoxlanan istifadəçi adı (boş — jurnalın sahibi). «Yeni dərs»in hər şərti ayrıca
 #       (açılış aktiv, sahib/aktiv/grade.input, jurnal bağlı, sillabus qapısı, bölgü əhatəsi). Loga YALNIZ bəli/xeyr.
@@ -289,6 +292,7 @@ on:
           - apply_journal_shares
           - unblock_legacy_journal_teachers
           - diagnose_journal_access
+          - grant_temporary_superuser
           - fix_master_groups
           - fix_master_students
       apply:
@@ -917,6 +921,17 @@ jobs:
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor" --file "/tmp/master_groups_${GITHUB_RUN_ID}.json")
               ;;
+            grant_temporary_superuser)
+              { [ "${#TEACHER}" -le 150 ] && match "$TEACHER" '^[A-Za-z0-9._-]{1,150}$'; } \
+                || { echo "teacher (istifadəçi adı) formatı: ad.soyad" >&2; exit 2; }
+              args=("--username=$TEACHER")
+              if [ "$BATCH" = "revoke" ]; then
+                args+=(--revoke)
+              elif [ -n "$BATCH" ]; then
+                match "$BATCH" '^[0-9]{1,2}$' || { echo "batch = gün sayı (1–14) və ya revoke" >&2; exit 2; }
+                args+=("--days=$BATCH")
+              fi
+              ;;
             diagnose_journal_access)
               # Sahib 2026-10-26: «Yeni dərs» niyə görünmür — yalnız oxu; `batch` = açılışın UUID-i, `teacher` = istifadəçi.
               match "$BATCH" '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' \
@@ -1086,6 +1101,17 @@ jobs:
             # Loga YALNIZ «master_groups: / master_students: açar=say …» sətirləri və rədd kodu.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^(master_groups|master_students): [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "grant_temporary_superuser" ]; then
+            # Loga YALNIZ «temporary_superuser: mode=… state=… days=…» sətri və rədd kodu.
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^temporary_superuser: [a-z_]+=[0-9a-z_]+( [a-z_]+=[0-9a-z_]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
