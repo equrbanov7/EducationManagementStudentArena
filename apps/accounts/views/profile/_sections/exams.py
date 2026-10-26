@@ -74,11 +74,27 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
     from apps.exams.models import ExamLanguageVariant
     from apps.exams.public import build_teacher_exam_dashboard, is_exam_center_user
 
+    from .my_exams_center import (
+        CENTER_SCOPE_PARAM,
+        CENTER_SCOPE_VALUE,
+        build_center_tab_context,
+        center_exams_queryset,
+        is_center_scope,
+    )
     from .my_exams_trash import build_my_exams_trash_context, is_trash_view
+
+    # Sahib 2026-10-26: imtahan mərkəzi üzvü üçün «Midterm / Final» tabı — org-un bütün
+    # midterm/final-ı (yaradandan asılı deyil); axtarış yaradanın adına da baxır.
+    center_scope = is_center_scope(request)
+    search_fields = ("title",)
+    own_exams_qs = my_exams_qs
+    if center_scope:
+        my_exams_qs = center_exams_queryset(request)
+        search_fields = ("title", "author__first_name", "author__last_name", "author__username")
 
     # --- Search ---
     search_query = (request.GET.get("exam_q", "") or "").strip()
-    exams_q = tolerant_q(search_query, ("title",))
+    exams_q = tolerant_q(search_query, search_fields)
     if exams_q is not None:
         my_exams_qs = my_exams_qs.filter(exams_q)
 
@@ -112,25 +128,29 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
     # «Qruplara açıq» nişanına daxildir — ayrı korrelyasiyalı sayğac (sorğu sayı dəyişmir).
     allowed_units_through = Exam.allowed_units.through
 
-    display_qs = my_exams_qs.annotate(
-        card_question_count=_related_count(
-            ExamQuestion.objects.filter(exam=OuterRef("pk"), is_active=True), group_by="exam"
-        ),
-        card_appeal_count=_related_count(Appeal.objects.filter(exam=OuterRef("pk")), group_by="exam"),
-        card_allowed_group_count=_related_count(
-            allowed_groups_through.objects.filter(exam=OuterRef("pk")), group_by="exam"
-        ),
-        card_allowed_unit_count=_related_count(
-            allowed_units_through.objects.filter(exam=OuterRef("pk")), group_by="exam"
-        ),
-        card_allowed_user_count=_related_count(
-            allowed_users_through.objects.filter(exam=OuterRef("pk")), group_by="exam"
-        ),
-    ).prefetch_related(
-        Prefetch(
-            "language_variants",
-            queryset=ExamLanguageVariant.objects.filter(is_active=True).order_by("language"),
-            to_attr="active_language_variants",
+    display_qs = (
+        my_exams_qs.annotate(
+            card_question_count=_related_count(
+                ExamQuestion.objects.filter(exam=OuterRef("pk"), is_active=True), group_by="exam"
+            ),
+            card_appeal_count=_related_count(Appeal.objects.filter(exam=OuterRef("pk")), group_by="exam"),
+            card_allowed_group_count=_related_count(
+                allowed_groups_through.objects.filter(exam=OuterRef("pk")), group_by="exam"
+            ),
+            card_allowed_unit_count=_related_count(
+                allowed_units_through.objects.filter(exam=OuterRef("pk")), group_by="exam"
+            ),
+            card_allowed_user_count=_related_count(
+                allowed_users_through.objects.filter(exam=OuterRef("pk")), group_by="exam"
+            ),
+        )
+        .select_related("author")
+        .prefetch_related(
+            Prefetch(
+                "language_variants",
+                queryset=ExamLanguageVariant.objects.filter(is_active=True).order_by("language"),
+                to_attr="active_language_variants",
+            )
         )
     )
     # KPI/çip sayğacları — BÜTÜN filtrlənmiş dəst üzrə, iki aqreqat sorğusu ilə.
@@ -161,6 +181,8 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
         pagination_params["exam_type"] = filter_type
     if filter_status:
         pagination_params["exam_status"] = filter_status
+    if center_scope:
+        pagination_params[CENTER_SCOPE_PARAM] = CENTER_SCOPE_VALUE
     pagination_params["section"] = "my-exams"
 
     dashboard = build_teacher_exam_dashboard(
@@ -176,6 +198,11 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
     # dashboard-a `trash` alt-dict-i qoşulur ki, paylaşılan builder faylları
     # dəyişməsin.
     dashboard["trash"] = build_my_exams_trash_context(request, is_open=is_trash_view(request))
+    dashboard["center"] = build_center_tab_context(
+        request, is_open=center_scope, count=status_counts["all"] if center_scope else None
+    )
+    # «İmtahanlarım» tabının sayğacı həmişə ÖZ imtahanlarıdır (mərkəz tabı açıq olsa da).
+    dashboard["own_count"] = own_exams_qs.count() if center_scope else status_counts["all"]
 
     return {
         "my_exams_count": status_counts["all"],

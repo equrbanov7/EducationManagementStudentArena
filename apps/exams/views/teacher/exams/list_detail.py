@@ -17,7 +17,7 @@ from apps.exams.forms import ExamForm
 from apps.exams.services import exam_journal_coverage as _journal_coverage
 from apps.exams.services import exam_journal_link as _journal_link
 from apps.exams.services import exam_subject_change as _exam_subject_change
-from apps.exams.services.access_policy import _ensure_teacher, can_manage_exam_questions
+from apps.exams.services.access_policy import _ensure_teacher, can_manage_exam_questions, is_exam_center_member
 from apps.exams.views.shared.breadcrumbs import exam_breadcrumbs
 from apps.exams.views.shared.tenant import get_active_organization, get_teacher_exam_or_404
 from core.permissions import is_superadmin_user
@@ -423,6 +423,8 @@ def teacher_exam_detail(request, slug):
             "active_live_continue_url": active_live_continue_url,
             "active_live_new_url": active_live_new_url,
             "can_manage_exam_questions": can_manage_exam_questions(request.user, exam),
+            # Sahib 2026-10-26: yaradan imtahan mərkəzinə HƏR imtahanda, digərlərinə başqasınınkında görünür.
+            "show_exam_creator": exam.author_id != request.user.id or is_exam_center_member(request.user, organization),
             # R2 (W4 `w4wizard`): təyin olunmuş reyestr qrupları — tək sorğu, ad siyahısı.
             "assigned_unit_names": list(exam.allowed_units.order_by("name").values_list("name", flat=True)),
             # 2026-10-25: təsdiqlənmiş fənn dəyişiklikləri (kim, nə vaxt, köhnə → yeni, səbəb, köçən nəticələr).

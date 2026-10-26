@@ -108892,3 +108892,15 @@ msgstr "dergi payı"
 msgctxt "registrar.model.journal_share.meta"
 msgid "jurnal payları"
 msgstr "dergi payları"
+
+msgctxt "profile.my_exams.center"
+msgid "Midterm / Final"
+msgstr "Ara sınav / Final"
+
+msgctxt "profile.my_exams.center"
+msgid "Təşkilatın bütün midterm və final imtahanları — kim yaratmasından asılı olmayaraq"
+msgstr "Kurumun tüm ara sınav ve final sınavları — kimin oluşturduğundan bağımsız olarak"
+
+msgctxt "profile.my_exams.center"
+msgid "Yaradan"
+msgstr "Oluşturan"

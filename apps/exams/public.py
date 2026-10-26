@@ -33,9 +33,12 @@ from apps.exams.services.access_policy import (  # noqa: F401
     can_manage_exam_questions,
     can_manage_exam_rooms,
     can_manage_final_exam_content,
+    center_overseen_exams_q,
     ensure_can_manage_exam_rooms,
+    is_exam_center_member,
     is_exam_center_user,
     is_teacher_user,
+    manageable_exams_q,
 )
 from apps.exams.services.ai_json import generate_ai_json  # noqa: F401
 from apps.exams.services.ai_summary import _get_rate_limit as get_ai_rate_limit  # noqa: F401
@@ -135,6 +138,9 @@ __all__ = [
     "secure_answer_key_hidden",
     "user_has_open_exam_attempt",
     "is_exam_center_user",
+    "is_exam_center_member",
+    "center_overseen_exams_q",
+    "manageable_exams_q",
     "calculate_test_attempt_result",
     "generate_exam_statistics_summary",
     "generate_people_analytics_summary",

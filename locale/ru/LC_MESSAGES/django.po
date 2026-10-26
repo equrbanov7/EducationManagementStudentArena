@@ -109678,3 +109678,15 @@ msgstr "часть журнала"
 msgctxt "registrar.model.journal_share.meta"
 msgid "jurnal payları"
 msgstr "части журнала"
+
+msgctxt "profile.my_exams.center"
+msgid "Midterm / Final"
+msgstr "Промежуточные / Итоговые"
+
+msgctxt "profile.my_exams.center"
+msgid "Təşkilatın bütün midterm və final imtahanları — kim yaratmasından asılı olmayaraq"
+msgstr "Все промежуточные и итоговые экзамены организации — независимо от того, кто их создал"
+
+msgctxt "profile.my_exams.center"
+msgid "Yaradan"
+msgstr "Создатель"

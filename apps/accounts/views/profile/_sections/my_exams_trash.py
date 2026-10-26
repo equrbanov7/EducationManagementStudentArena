@@ -39,12 +39,15 @@ def trash_view_url() -> str:
 
 def _deleted_exams_queryset(request):
     from apps.exams.models import Exam
+    from apps.exams.public import manageable_exams_q
 
     # `include_deleted=True` MƏCBURİDİR: tenant keçidi default olaraq yumşaq
-    # silinmişləri çıxarır — məhz onlar lazımdır (yalnız müəllifin özününkülər).
+    # silinmişləri çıxarır — məhz onlar lazımdır (müəllifin özününkülər + sahib 2026-10-26:
+    # imtahan mərkəzi üzvü üçün org-un silinmiş midterm/final-ı — bərpa edə bilsin).
+    organization = getattr(request.user, "active_organization", None)
     return _tenant_scoped_exams(
         request,
-        Exam.objects.filter(author=request.user, is_deleted=True),
+        Exam.objects.filter(manageable_exams_q(request.user, organization), is_deleted=True),
         include_deleted=True,
     )
 

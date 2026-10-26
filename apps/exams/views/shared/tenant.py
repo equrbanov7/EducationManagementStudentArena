@@ -50,9 +50,17 @@ def ensure_teacher_exam_tenant_context(request):
 
 
 def get_teacher_exam_or_404(request, *, include_deleted=False, **filters):
+    """Müəllim paneli səthi üçün imtahan: öz imtahanı və ya (imtahan mərkəzi üzvü üçün)
+    təşkilatın istənilən midterm/final-ı — sahib 2026-10-26, bax ``manageable_exams_q``."""
+    from apps.exams.services.access_policy import manageable_exams_q
+
     ensure_teacher_exam_tenant_context(request)
     teacher_queryset = tenant_scoped_exams(
-        request, Exam.objects.filter(author=request.user), include_deleted=include_deleted
+        request,
+        Exam.objects.filter(manageable_exams_q(request.user, get_active_organization(request))).select_related(
+            "author"
+        ),
+        include_deleted=include_deleted,
     )
     return get_object_or_404(teacher_queryset, **filters)
 

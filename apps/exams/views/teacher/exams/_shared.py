@@ -208,9 +208,7 @@ def _get_editable_exam_or_404(request, slug):
     if exam is None:
         raise Http404
 
-    if exam.author_id != request.user.id and not _is_superadmin(request.user):
-        raise PermissionDenied(pgettext("exams.view.exams.permission", "not_exam_owner"))
-
+    _ensure_exam_owner_or_overseer(request, exam)
     return exam
 
 
@@ -225,10 +223,21 @@ def _get_deleted_exam_or_404(request, slug):
     if exam is None:
         raise Http404
 
-    if exam.author_id != request.user.id and not _is_superadmin(request.user):
-        raise PermissionDenied(pgettext("exams.view.exams.permission", "not_exam_owner"))
-
+    _ensure_exam_owner_or_overseer(request, exam)
     return exam
+
+
+def _ensure_exam_owner_or_overseer(request, exam):
+    """Müəllif, superadmin və ya (sahib 2026-10-26) org-un midterm/final-ında imtahan mərkəzi
+    üzvü. Müəllif olmayan üçün əməlin öz icazə açarı (``exam.edit`` / ``exam.delete``) çağıranda
+    ayrıca yoxlanır."""
+    from apps.exams.services.access_policy import can_center_oversee_exam
+
+    if exam.author_id == request.user.id or _is_superadmin(request.user):
+        return
+    if can_center_oversee_exam(request.user, exam):
+        return
+    raise PermissionDenied(pgettext("exams.view.exams.permission", "not_exam_owner"))
 
 
 def _selected_access_entities(form):

@@ -110510,3 +110510,15 @@ msgstr "Journalanteil"
 msgctxt "registrar.model.journal_share.meta"
 msgid "jurnal payları"
 msgstr "Journalanteile"
+
+msgctxt "profile.my_exams.center"
+msgid "Midterm / Final"
+msgstr "Zwischen- / Abschlussprüfungen"
+
+msgctxt "profile.my_exams.center"
+msgid "Təşkilatın bütün midterm və final imtahanları — kim yaratmasından asılı olmayaraq"
+msgstr "Alle Zwischen- und Abschlussprüfungen der Organisation – unabhängig davon, wer sie erstellt hat"
+
+msgctxt "profile.my_exams.center"
+msgid "Yaradan"
+msgstr "Erstellt von"

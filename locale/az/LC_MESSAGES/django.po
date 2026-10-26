@@ -108994,3 +108994,15 @@ msgstr "jurnal payı"
 msgctxt "registrar.model.journal_share.meta"
 msgid "jurnal payları"
 msgstr "jurnal payları"
+
+msgctxt "profile.my_exams.center"
+msgid "Midterm / Final"
+msgstr "Midterm / Final"
+
+msgctxt "profile.my_exams.center"
+msgid "Təşkilatın bütün midterm və final imtahanları — kim yaratmasından asılı olmayaraq"
+msgstr "Təşkilatın bütün midterm və final imtahanları — kim yaratmasından asılı olmayaraq"
+
+msgctxt "profile.my_exams.center"
+msgid "Yaradan"
+msgstr "Yaradan"

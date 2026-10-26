@@ -109484,3 +109484,15 @@ msgstr "journal share"
 msgctxt "registrar.model.journal_share.meta"
 msgid "jurnal payları"
 msgstr "journal shares"
+
+msgctxt "profile.my_exams.center"
+msgid "Midterm / Final"
+msgstr "Midterms / Finals"
+
+msgctxt "profile.my_exams.center"
+msgid "Təşkilatın bütün midterm və final imtahanları — kim yaratmasından asılı olmayaraq"
+msgstr "All midterm and final exams of the organisation, regardless of who created them"
+
+msgctxt "profile.my_exams.center"
+msgid "Yaradan"
+msgstr "Created by"

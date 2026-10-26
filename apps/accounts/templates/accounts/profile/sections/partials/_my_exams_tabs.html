@@ -6,14 +6,28 @@
   qabığı (profile/ajax.js) AJAX ilə yükləyir və URL-i yeniləyir — deep-link,
   «geri» düyməsi və JS-siz düşmə işləyir. Aktiv tab `aria-current="page"`.
 {% endcomment %}
-{% with trash=my_exams_dashboard.trash %}
+{% comment %}
+  2026-10-26 (sahib): imtahan mərkəzi üzvü üçün «Midterm / Final» tabı — təşkilatın bütün
+  midterm/final imtahanları, yaradandan asılı olmayaraq (`?exam_scope=center`, bax
+  `_sections/my_exams_center.py`). Digər istifadəçilərdə tab görünmür.
+{% endcomment %}
+{% with trash=my_exams_dashboard.trash center=my_exams_dashboard.center %}
 <nav class="ems-tabs tx-tabs" data-tx-tabs aria-label="{% trans 'my_exams' context 'profile.section' %}">
   <a class="ems-tabs__btn" href="{{ profile_base_url }}?section=my-exams"
-     {% if not trash.is_open %}aria-current="page"{% endif %}>
+     {% if not trash.is_open and not center.is_open %}aria-current="page"{% endif %}>
     <i class="fas fa-file-lines" aria-hidden="true"></i>
     {% trans "my_exams" context "profile.section" %}
-    <span class="ems-tabs__count">{{ my_exams_count }}</span>
+    <span class="ems-tabs__count">{{ my_exams_dashboard.own_count|default:my_exams_count }}</span>
   </a>
+  {% if center.enabled %}
+  <a class="ems-tabs__btn" href="{{ center.url }}"
+     title="{% trans 'Təşkilatın bütün midterm və final imtahanları — kim yaratmasından asılı olmayaraq' context 'profile.my_exams.center' %}"
+     {% if center.is_open and not trash.is_open %}aria-current="page"{% endif %}>
+    <i class="fas fa-building-columns" aria-hidden="true"></i>
+    {% trans "Midterm / Final" context "profile.my_exams.center" %}
+    <span class="ems-tabs__count">{{ center.count }}</span>
+  </a>
+  {% endif %}
   <a class="ems-tabs__btn" href="{{ trash.url }}"
      {% if trash.is_open %}aria-current="page"{% endif %}>
     <i class="fas fa-trash-can" aria-hidden="true"></i>

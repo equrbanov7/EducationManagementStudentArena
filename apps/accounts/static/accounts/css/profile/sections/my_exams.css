@@ -306,6 +306,8 @@
 }
 .profile-section--my-exams .tx-tag--type { background: var(--type-soft, var(--ems-neutral-100)); color: var(--type-deep, var(--ems-neutral-700)); }
 .profile-section--my-exams .tx-tag--lang { background: var(--ems-violet-100); color: var(--ems-violet-800); letter-spacing: .04em; }
+/* 2026-10-26: «Midterm / Final» (imtahan mərkəzi) tabında başqasının imtahanı — yaradanın adı. */
+.profile-section--my-exams .tx-tag--author { background: var(--ems-neutral-100); color: var(--ems-neutral-700); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .profile-section--my-exams .tx-card-meta { display: flex; flex-wrap: wrap; gap: var(--ems-sp-4) var(--ems-sp-5); margin-top: var(--ems-sp-5); font-size: var(--ems-fs-sm); color: var(--tx-muted); }
 .profile-section--my-exams .tx-m { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
