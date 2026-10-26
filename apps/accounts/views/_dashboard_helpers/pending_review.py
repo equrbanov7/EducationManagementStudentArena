@@ -36,6 +36,7 @@ from .formatters import (
     _standard_item_type_meta,
     _user_display_name,
 )
+from .review_scope import review_exams_q
 
 User = get_user_model()
 
@@ -74,7 +75,8 @@ def _collect_pending_review_items(
     )
 
     teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
-    teacher_exams = _tenant_scoped_exams(request, Exam.objects.filter(author=request.user))
+    # Sahib 2026-10-26: imtahan mərkəzi org-un bütün midterm/final-ını görür (``review_scope``).
+    teacher_exams = _tenant_scoped_exams(request, Exam.objects.filter(review_exams_q(request.user)))
     current_time = timezone.now()
     review_cutoff = current_time - REVIEW_EDIT_WINDOW
 

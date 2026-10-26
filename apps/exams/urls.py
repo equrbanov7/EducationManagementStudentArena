@@ -110,6 +110,22 @@ urlpatterns = [
         views.exam_center_ticket_reentry,
         name="exam_center_ticket_reentry",
     ),
+    # Sahib 2026-10-26: zal monitoru modalı — PIN göstər / yeni PIN / başqa kompüterdə davam (imtahan mərkəzi).
+    path(
+        "center/sessions/<int:session_id>/tickets/<int:ticket_id>/pin/reveal/",
+        views.exam_center_ticket_pin_reveal,
+        name="exam_center_ticket_pin_reveal",
+    ),
+    path(
+        "center/sessions/<int:session_id>/tickets/<int:ticket_id>/pin/reissue/",
+        views.exam_center_ticket_pin_reissue,
+        name="exam_center_ticket_pin_reissue",
+    ),
+    path(
+        "center/sessions/<int:session_id>/tickets/<int:ticket_id>/device-release/",
+        views.exam_center_ticket_device_release,
+        name="exam_center_ticket_device_release",
+    ),
     # Təhlükəsizlik dizaynı 2026-10-08: final cəhdinin «cihaz dəyişikliyi» təsdiqi (audit).
     path(
         "center/attempts/<int:attempt_id>/device-change/",

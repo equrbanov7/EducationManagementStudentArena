@@ -118,6 +118,33 @@ def ensure_student_pin(exam, user) -> bool:
     return True
 
 
+def _students_mid_exam(exam, student_ids) -> set[int]:
+    """``student_ids``-dən bu imtahanı hazırda verənlər: açıq (bitməmiş, sınaq olmayan) cəhd və ya
+    zalda canlı (gözləyən / hazır / aktiv) bilet. İki kiçik sorğu, yalnız silinəcək namizədlər üzrə."""
+    from apps.exams.domain.final_center import (
+        TICKET_STATUS_ACTIVE,
+        TICKET_STATUS_READY,
+        TICKET_STATUS_WAITING,
+        FinalExamTicket,
+    )
+    from apps.exams.models import ExamAttempt
+
+    ids = list(student_ids)
+    busy = set(
+        ExamAttempt.objects.filter(
+            exam=exam, user_id__in=ids, status__in=("draft", "in_progress"), is_trial=False
+        ).values_list("user_id", flat=True)
+    )
+    busy |= set(
+        FinalExamTicket.objects.filter(
+            exam=exam,
+            student_id__in=ids,
+            status__in=(TICKET_STATUS_WAITING, TICKET_STATUS_READY, TICKET_STATUS_ACTIVE),
+        ).values_list("student_id", flat=True)
+    )
+    return busy
+
+
 def provision_exam_student_pins(exam) -> int:
     """Təyin olunmuş hər tələbəyə PIN təmin et (idempotent).
 
@@ -177,6 +204,11 @@ def provision_exam_student_pins(exam) -> int:
         pending += len(stale_cipher)
 
     stale_ids = existing_ids - assigned_ids
+    if stale_ids:
+        # 2026-10-26 (canlı imtahan, sahib): təyinatı itmiş (məs. bu gün başqa qrupa köçürülmüş) tələbənin
+        # imtahanı ARTIQ GEDİRSƏ (açıq cəhd / zalda canlı bilet) PIN-i silinmir — kompüter xarab olanda o,
+        # həmin PIN-lə başqa kompüterdən davam edə bilməlidir. Sinx hər qrup köçürməsində işləyir.
+        stale_ids -= _students_mid_exam(exam, stale_ids)
     if stale_ids:
         ExamStudentPin.objects.filter(exam=exam, student_id__in=stale_ids).delete()
 

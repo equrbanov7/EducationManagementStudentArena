@@ -32,6 +32,7 @@ from .formatters import (
     _normalize_submission_date_order,
     _user_display_name,
 )
+from .review_scope import review_exams_q
 
 User = get_user_model()
 
@@ -118,7 +119,9 @@ def _collect_evaluated_review_items(
     )
 
     teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
-    teacher_exams = _tenant_scoped_exams(request, Exam.objects.filter(author=request.user))
+    # Sahib 2026-10-26: imtahan mərkəzi (işçi + rəhbər) org-un BÜTÜN midterm/final nəticələrini görür
+    # (yaradandan asılı deyil); quiz/kateqoriyasız yalnız müəllifindir — ``manageable_exams_q``.
+    teacher_exams = _tenant_scoped_exams(request, Exam.objects.filter(review_exams_q(request.user)))
     review_cutoff = timezone.now() - REVIEW_EDIT_WINDOW
     # Review 2026-10-18: «Dövr» süzgəci BAZADA da (Python süzgəci aşağıda eyni qaydanı saxlayır — nəticə dəyişmir).
     since = timezone.now() - timedelta(days=PERIOD_FILTERS[selected_period]) if selected_period else None
@@ -211,6 +214,10 @@ def _collect_evaluated_review_items(
                     "score_display": score_display,
                     "score_percent_display": score_percent_display,
                     "evaluator_display": _user_display_name(attempt.exam.author),
+                    # Başqasının imtahanı (mərkəz görünüşü) — «Yaradan» sətirdə ayrıca göstərilir.
+                    "creator_display": (
+                        _user_display_name(attempt.exam.author) if attempt.exam.author_id != request.user.id else ""
+                    ),
                     "submitted_at": submitted_at,
                     "reviewed_at": attempt.teacher_checked_at,
                     "action_url": _append_query_params(

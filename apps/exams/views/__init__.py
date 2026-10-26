@@ -34,6 +34,9 @@ from .exam_center import (
     exam_center_stats_export,
     exam_center_stats_filters,
     exam_center_student_pins,
+    exam_center_ticket_device_release,
+    exam_center_ticket_pin_reissue,
+    exam_center_ticket_pin_reveal,
     exam_center_ticket_readmit,
     exam_center_ticket_reentry,
     exam_center_ticket_remove,
@@ -317,4 +320,7 @@ __all__ = [
     "exam_center_ticket_resume",
     "exam_center_ticket_seat",
     "exam_center_ticket_snapshot",
+    "exam_center_ticket_device_release",
+    "exam_center_ticket_pin_reissue",
+    "exam_center_ticket_pin_reveal",
 ]

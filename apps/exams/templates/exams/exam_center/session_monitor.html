@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{% static 'exams/css/final_center/stats.css' %}?v=20261017-pkgd">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor.css' %}?v=20261018-pkgd2">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/proctor_identity.css' %}?v=20261017-pkgd">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/snapshot_pin.css' %}?v=20261026-pin">
 {% endblock %}
 
 {% block content %}
@@ -251,6 +252,7 @@
 
 {% block extraJs %}
     <script src="{% static 'exams/js/final_center/proctor_identity.js' %}?v=20261013-note" defer></script>
-    <script src="{% static 'exams/js/final_center/snapshot_modal.js' %}?v=20261001-proc" defer></script>
+    <script src="{% static 'exams/js/final_center/snapshot_modal.js' %}?v=20261026-pin" defer></script>
+    <script src="{% static 'exams/js/final_center/snapshot_pin_actions.js' %}?v=20261026-pin" defer></script>
     <script src="{% static 'exams/js/final_center/room_monitor.js' %}?v=20261001-proc" defer></script>
 {% endblock %}

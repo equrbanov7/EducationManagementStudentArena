@@ -110522,3 +110522,76 @@ msgstr "Alle Zwischen- und Abschlussprüfungen der Organisation – unabhängig 
 msgctxt "profile.my_exams.center"
 msgid "Yaradan"
 msgstr "Erstellt von"
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Çox tez-tez sorğu — bir az sonra yenidən cəhd edin."
+msgstr "Zu viele Anfragen – bitte versuchen Sie es gleich noch einmal."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Tələbə bu imtahana artıq təyin olunmayıb (qrupu dəyişdirilib və ya imtahandan çıxarılıb) — PIN ilə girsə də imtahana başlaya bilməyəcək. İmtahan mərkəzində təyinatı yoxlayın."
+msgstr "Der Studierende ist dieser Prüfung nicht mehr zugeordnet (Gruppe gewechselt oder von der Prüfung ausgeschlossen) – auch mit der PIN kann er nicht beginnen. Prüfen Sie die Zuordnung im Prüfungszentrum."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Bu tələbə üçün PIN göstərilə bilməz (imtahan bitib və ya oturum bağlıdır)."
+msgstr "Die PIN kann für diesen Studierenden nicht angezeigt werden (Prüfung beendet oder Sitzung geschlossen)."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "PIN tapılmadı — «Yeni PIN ver» ilə tələbəyə təzə PIN verin."
+msgstr "Keine PIN gefunden – geben Sie mit „Neue PIN ausgeben“ eine neue PIN aus."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Yeni PIN yalnız imtahana hələ başlamamış tələbəyə verilir. İmtahanda olan tələbə üçün «Yenidən giriş ver» və ya «Başqa kompüterdə davam et» düyməsindən istifadə edin."
+msgstr "Eine neue PIN wird nur an Studierende ausgegeben, die die Prüfung noch nicht begonnen haben. Für Studierende in der Prüfung verwenden Sie „Wiedereintritt gewähren“ oder „Auf anderem Computer fortsetzen“."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Tələbənin davam edən imtahan cəhdi yoxdur."
+msgstr "Der Studierende hat keinen laufenden Prüfungsversuch."
+
+#, python-format
+msgctxt "exams.final_center.monitor_pin"
+msgid "Hazırdır — tələbə %(minutes)d dəqiqə ərzində başqa qeydli kompüterdən öz PIN-i ilə daxil olub imtahanı qaldığı yerdən davam etdirə bilər (vaxt dayanmır, cavablar qorunur)."
+msgstr "Fertig – innerhalb von %(minutes)d Minuten kann sich der Studierende an einem anderen registrierten Computer mit seiner eigenen PIN anmelden und die Prüfung dort fortsetzen, wo er aufgehört hat (die Zeit läuft weiter, Antworten bleiben erhalten)."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Cəhd hələ heç bir kompüterə bağlanmayıb — tələbə öz PIN-i ilə istənilən qeydli kompüterdən davam edə bilər."
+msgstr "Der Versuch ist noch an keinen Computer gebunden – der Studierende kann mit seiner eigenen PIN an jedem registrierten Computer fortfahren."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Tələbəyə yeni PIN verilsin? Köhnə PIN dərhal etibarsız olacaq."
+msgstr "Dem Studierenden eine neue PIN ausgeben? Die alte PIN wird sofort ungültig."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Tələbə başqa kompüterdən davam etsin? Köhnə kompüterdəki sessiya dayanacaq; vaxt və cavablar qorunur."
+msgstr "Soll der Studierende auf einem anderen Computer fortfahren? Die Sitzung auf dem alten Computer wird beendet; Zeit und Antworten bleiben erhalten."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Əməliyyat mümkün olmadı."
+msgstr "Die Aktion konnte nicht ausgeführt werden."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "PIN-i göstər"
+msgstr "PIN anzeigen"
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Gizlət"
+msgstr "Ausblenden"
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Yeni PIN verildi — tələbəyə deyin."
+msgstr "Neue PIN ausgegeben – teilen Sie sie dem Studierenden mit."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Giriş PIN-i:"
+msgstr "Zugangs-PIN:"
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Yeni PIN ver"
+msgstr "Neue PIN ausgeben"
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Başqa kompüterdə davam et"
+msgstr "Auf anderem Computer fortsetzen"
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Kompüter xarab olubsa: tələbə başqa qeydli kompüterdən /exams/final/ (və ya /exams/midterm/) səhifəsində istifadəçi adı + bu PIN ilə daxil olur."
+msgstr "Falls der Computer ausgefallen ist: Der Studierende meldet sich an einem anderen registrierten Computer unter /exams/final/ (oder /exams/midterm/) mit Benutzername + dieser PIN an."
