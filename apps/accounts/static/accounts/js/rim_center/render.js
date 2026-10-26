@@ -227,6 +227,8 @@
 
     function editForm(user) {
         var fields = [
+            // Sahib 2026-10-26: istifadəçi adı da buradan dəyişir (parol / OTP toxunulmur).
+            ["username", user.username],
             ["first_name", user.first_name],
             ["last_name", user.last_name],
             ["patronymic", user.patronymic],

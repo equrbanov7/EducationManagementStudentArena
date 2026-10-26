@@ -1,7 +1,7 @@
 """«İstifadəçi adını dəyiş» — operator başqasının adını PAROLU BİLMƏDƏN dəyişir (sahib 2026-10-26).
 
 * icazə: `account.password_reset` daşımayan (müəllim, adi əməkdaş) → 403; RİM rəhbəri və superadmin → 200;
-* səbəb məcburidir (≥ ``MIN_REASON_LENGTH``) — qısa səbəbdə ad toxunulmur, audit yazılmır;
+* səbəb istəyə bağlıdır (sahib 2026-10-26 axşam), yazılsa audit-ə düşür;
 * ad qaydası: kanonik (kiçik hərf), simvol/uzunluq/rezerv, cari addan fərqli, böyük-kiçik hərfə həssas
   olmayan unikallıq;
 * superuser hədəf və eyni rütbəli RİM rəhbəri rədd edilir, yad tenant «tapılmadı»;
@@ -20,7 +20,6 @@ from django.contrib.auth import authenticate, get_user
 from django.http import HttpRequest
 from django.urls import reverse
 
-from apps.accounts.services.password_reset_admin import MIN_REASON_LENGTH
 from apps.audit.models import AuditLog
 from apps.organizations.models import Membership
 
@@ -94,13 +93,11 @@ class RenameValidationTest(_Base):
         super().setUp()
         self.login(self.operator)
 
-    def test_reason_required(self):
-        for reason in ("", "   ", "x" * (MIN_REASON_LENGTH - 1)):
-            response = self.rename(self.student, "aysel.yeni", reason=reason)
-            self.assertEqual(response.status_code, 400, reason)
-            self.assertEqual(response.json()["error"], "reason_required")
-        self.assertEqual(self.username_of(self.student), "aysel.quliyeva")
-        self.assertFalse(AuditLog.objects.filter(changes__operation=OPERATION).exists())
+    def test_reason_is_optional(self):
+        """Sahib 2026-10-26 axşam: səbəb istəyə bağlıdır (RİM rahat işləsin)."""
+        response = self.rename(self.student, "aysel.yeni", reason="")
+        self.assertEqual(response.status_code, 200, response.content[:300])
+        self.assertEqual(self.username_of(self.student), "aysel.yeni")
 
     def test_uniqueness_is_case_insensitive(self):
         response = self.rename(self.student, "ELVIN.Aliyev")

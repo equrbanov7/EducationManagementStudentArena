@@ -42,7 +42,8 @@ User = get_user_model()
 # jurnal, imtahan nəticəsi) buraya ƏLAVƏ EDİLMİR — onun sahibi dekanlıq/kafedradır
 # və düzəlişi sənədli jurnal korreksiya axınından keçir.
 #: User modelindəki sahələr.
-USER_FIELDS = ("first_name", "last_name", "email")
+#: Sahib 2026-10-26: «adını dəyişə bildiyim kimi username də dəyişə bilim» — parol / sessiya / OTP toxunulmur.
+USER_FIELDS = ("username", "first_name", "last_name", "email")
 #: UserProfile-dakı sahələr.
 #: Sahib 2026-10-11: «Vəzifə» (profil kartındakı sərbəst mətn — heyət siyahısı idxalından gəlirdi, ekranda
 #: dəyişmək mümkün deyildi). Rol/üzvlük DEYİL — yalnız görünən vəzifə adıdır.
@@ -50,6 +51,7 @@ PROFILE_FIELDS = ("patronymic", "phone", "fin", "staff_position")
 EDITABLE_FIELDS = USER_FIELDS + PROFILE_FIELDS
 
 FIELD_LABELS = {
+    "username": "İstifadəçi adı",
     "first_name": "Ad",
     "last_name": "Soyad",
     "patronymic": "Ata adı",
@@ -88,6 +90,24 @@ def _validate(field_name: str, value: str) -> str:
         return value.lower()
     if field_name == "fin" and value and not _FIN_PATTERN.match(value):
         raise RimAccessError("invalid_fin", "FİN 7 simvol olmalıdır (yalnız hərf və rəqəm).", status=400)
+    return value
+
+
+def _validate_username(raw_value, target_user) -> str:
+    """Yeni istifadəçi adı — istifadəçinin öz ad dəyişikliyi ilə EYNİ format / rezerv / unikallıq qaydası."""
+    from ..username_change import UsernameChangeError, normalize_username, username_taken, validate_username
+
+    value = normalize_username(raw_value)
+    if value == normalize_username(target_user.username):
+        return target_user.username  # dəyişməyib (böyük/kiçik hərf fərqi daxil)
+    try:
+        validate_username(value)
+    except UsernameChangeError as exc:
+        raise RimAccessError("invalid_username", exc.message, status=400) from exc
+    if username_taken(value, exclude_pk=target_user.pk) or (
+        User._default_manager.exclude(pk=target_user.pk).filter(email__iexact=value).exists()
+    ):
+        raise RimAccessError("username_taken", "Bu istifadəçi adı artıq istifadə olunur.", status=409)
     return value
 
 
@@ -190,6 +210,8 @@ def update_user_fields(actor: RimActor, target_user, *, data, request=None, reas
             continue
         if field_name == "phone":
             new_value = _resolve_phone(data, profile)
+        elif field_name == "username":
+            new_value = _validate_username(data[field_name], target_user)
         else:
             new_value = _validate(field_name, _clean_value(field_name, data[field_name]))
         owner = target_user if field_name in USER_FIELDS else profile
@@ -245,6 +267,11 @@ def update_user_fields(actor: RimActor, target_user, *, data, request=None, reas
             resource_id=str(target_user.pk),
             resource_repr=target_user.username,
         )
+        if "username" in changes:
+            # İstifadəçiyə «adınız dəyişdirildi, parolunuz eynidir» (sistem + e-poçt) — RİM bölməsi ilə eyni.
+            from ..username_change_notify import notify_username_changed
+
+            notify_username_changed(target_user, profile, old_username=changes["username"]["old"], by_operator=True)
 
     logger.info(
         "RİM: profile fields %s updated by actor=%s for target=%s",

@@ -630,6 +630,32 @@ class RimProfileEditTests(RimCenterTestBase):
         response = self.act("edit", self.teacher, email="bu-email-deyil", reason="test")
         self.assertEqual(response.status_code, 400)
 
+    def test_edit_changes_username_without_touching_password(self):
+        """Sahib 2026-10-26: ad kimi istifadəçi adı da RİM redaktəsindən dəyişir; parol / OTP toxunulmur."""
+        self.teacher.set_password("KöhnəParol-2026")
+        self.teacher.save(update_fields=["password"])
+        type(self.teacher.profile).objects.filter(pk=self.teacher.profile.pk).update(email_verified=True)
+        self.login_operator()
+        response = self.act("edit", self.teacher, username="Yeni.Ad", reason="username düzəlişi")
+        self.assertEqual(response.status_code, 200, response.content[:300])
+        self.teacher.refresh_from_db()
+        self.teacher.profile.refresh_from_db()
+        self.assertEqual(self.teacher.username, "yeni.ad")
+        self.assertTrue(self.teacher.check_password("KöhnəParol-2026"))
+        self.assertTrue(self.teacher.profile.email_verified)
+        entry = AuditLog.objects.filter(resource_id=str(self.teacher.pk)).order_by("-created_at").first()
+        self.assertEqual(entry.new_values["username"], "yeni.ad")
+
+    def test_edit_rejects_taken_or_invalid_username(self):
+        self.login_operator()
+        get_user_model().objects.create_user("tutulmus.ad", "tutulmus.ad@example.com", "x-Parol-2026")
+        taken = self.act("edit", self.teacher, username="Tutulmus.Ad", reason="test")
+        self.assertEqual(taken.status_code, 409)
+        self.assertEqual(taken.json()["error"], "username_taken")
+        invalid = self.act("edit", self.teacher, username="ad soyad", reason="test")
+        self.assertEqual(invalid.status_code, 400)
+        self.assertEqual(invalid.json()["error"], "invalid_username")
+
     def test_edit_cannot_touch_academic_content(self):
         """Əsasnamə X hüdudu: RİM qiymət/jurnal MƏZMUNUNA toxunmur."""
         from apps.accounts.services.rim.profile_edit import EDITABLE_FIELDS

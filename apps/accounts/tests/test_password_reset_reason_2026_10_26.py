@@ -48,15 +48,13 @@ class ResetReasonTest(PasswordResetTestBase):
         super().setUp()
         self.login(self.operator)
 
-    def test_missing_or_short_reason_is_rejected_without_touching_target(self):
-        for reason in ("", "   ", "x" * (MIN_REASON_LENGTH - 1)):
-            response = self.reset(self.student, reason=reason)
-            self.assertEqual(response.status_code, 400, reason)
-            self.assertEqual(response.json()["error"], "reason_required")
-        self.assert_unchanged(self.student)
-        self.student.profile.refresh_from_db()
-        self.assertFalse(self.student.profile.password_change_required)
-        self.assertFalse(AuditLog.objects.filter(changes__operation="admin_password_reset").exists())
+    def test_reason_is_optional(self):
+        """Sahib 2026-10-26 axşam: «RİM necə rahat edirdisə elə etsin» — səbəbsiz də sıfırlanır."""
+        response = self.reset(self.student, reason="")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(
+            self.student.__class__.objects.get(pk=self.student.pk).check_password(response.json()["password"])
+        )
 
     def test_success_sets_flags_and_audits_reason_without_password(self):
         profile = self.student.profile
@@ -74,12 +72,12 @@ class ResetReasonTest(PasswordResetTestBase):
         profile.refresh_from_db()
         self.assertTrue(self.student.check_password(password))
         self.assertTrue(profile.password_change_required)
-        self.assertFalse(profile.email_verified)
+        # Sahib 2026-10-26 axşam: e-poçt təsdiqi TOXUNULMUR (əlavə OTP yükü yoxdur).
+        self.assertTrue(profile.email_verified)
 
         row = AuditLog.objects.get(changes__operation="admin_password_reset", action="update")
         self.assertEqual(row.user, self.operator)
         self.assertEqual(row.changes["reason_text"], "Parolunu unudub, vəsiqə yoxlanıldı")
-        self.assertTrue(row.changes["email_verified_reset"])
         self.assertIn("Parolunu unudub", row.reason)
         dump = json.dumps([row.changes, row.old_values, row.new_values, row.reason, row.resource_repr], default=str)
         self.assertNotIn(password, dump)
@@ -95,8 +93,8 @@ class ResetReasonTest(PasswordResetTestBase):
         self.student.refresh_from_db()
         self.assertFalse(self.student.check_password(password))
 
-    def test_first_login_requires_otp_after_reset(self):
-        """`email_verified=False` → ilk girişdə OTP addımı (köhnə «təsdiqli e-poçt OTP-ni keçir» yolu bağlıdır)."""
+    def test_verified_email_skips_otp_after_reset(self):
+        """Təsdiqli e-poçtlu hesab sıfırlamadan sonra OTP-dən keçmir (2026-09-30 qaydası qaldı)."""
         from apps.accounts.views.auth.first_login import _email_already_verified
 
         profile = self.student.profile
@@ -104,7 +102,7 @@ class ResetReasonTest(PasswordResetTestBase):
         profile.save(update_fields=["email_verified"])
         self.reset(self.student)
         self.student.refresh_from_db()
-        self.assertFalse(_email_already_verified(self.student))
+        self.assertTrue(_email_already_verified(self.student))
 
 
 class AlphabetTest(PasswordResetTestBase):

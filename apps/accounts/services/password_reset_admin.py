@@ -29,11 +29,9 @@ TƏHLÜKƏSİZLİK (pozulmaz):
   unudub bir neçə dəfə səhv yazan istifadəçi yeni parolla dərhal girə bilsin.
 * Audit: operator, hədəf, təşkilat, İP, user-agent, vaxt, SƏBƏB — parolsuz.
 
-2026-10-26 (sahib: «parol yazmadan resetləyə bilim»): əlifba və axın
-``issue_staff_credentials`` / ``provision_student_credentials`` əmrləri ilə
-EYNİDİR — parolla yanaşı ``email_verified=False`` qoyulur, yəni ilk girişdə tam
-axın (e-poçt + OTP + öz parolu) məcburidir; təsdiq dialoqunda səbəb
-(``MIN_REASON_LENGTH``) MƏCBURİDİR və audit sətrinə yazılır.
+2026-10-26 (sahib: «parol yazmadan resetləyə bilim»; axşam: «RİM necə rahat edirdisə elə etsin, bu artıq
+yükdür»): əlifba kredensial əmrləri ilə eynidir; ``email_verified`` TOXUNULMUR (təsdiqli e-poçtlu hesab ilk
+girişdə yalnız öz parolunu qurur — 2026-09-30 qaydası); təsdiq dialoqunda səbəb istəyə bağlıdır.
 """
 
 from __future__ import annotations
@@ -89,8 +87,9 @@ _DIGITS = "23456789"
 TEMP_PASSWORD_LENGTH = 12
 _MAX_GENERATION_ATTEMPTS = 12
 
-#: Təsdiq dialoqundakı səbəbin hədləri (sahib 2026-10-26: «kim, niyə» audit-də qalsın).
-MIN_REASON_LENGTH = 10
+#: Təsdiq dialoqundakı səbəb İSTƏYƏ BAĞLIDIR (sahib 2026-10-26 axşam: «RİM necə rahat edirdisə elə etsin» —
+#: yazılsa audit-ə düşür); 0 = məcburi deyil.
+MIN_REASON_LENGTH = 0
 MAX_REASON_LENGTH = 300
 
 #: `RimAccessError.reason_code` → bu modulun kodu (tenantdan kənar → «tapılmadı», mövcudluq sızmır).
@@ -361,14 +360,9 @@ def reset_password(actor: RimActor, target_id, *, request, reason=""):
         if profile is not None:
             # İlk girişdə `FirstLoginPasswordMiddleware` öz parolunu qurmağa məcbur edir.
             profile.password_change_required = True
-            # Sahib 2026-10-26: kredensial əmrləri kimi e-poçt təsdiqi də sıfırlanır — ilk girişdə
-            # tam axın (e-poçt + OTP + öz parolu); bax `views/auth/first_login.py::_email_already_verified`.
-            profile.email_verified = False
             # Sahib 2026-10-02: parol bərpasından sonra ilk girişdə köçürülmüş ballar barədə xəbərdarlıq.
             profile.grades_notice_pending = True
-            profile.save(
-                update_fields=["password_change_required", "email_verified", "grades_notice_pending", "updated_at"]
-            )
+            profile.save(update_fields=["password_change_required", "grades_notice_pending", "updated_at"])
         # DİQQƏT: audit sətrində parol YOXDUR və olmamalıdır.
         log_action(
             action=AuditAction.UPDATE,
@@ -381,7 +375,6 @@ def reset_password(actor: RimActor, target_id, *, request, reason=""):
                 "target_user_id": str(target.pk),
                 "target_username": target.username,
                 "password_change_required": True,
-                "email_verified_reset": True,
                 "sessions_invalidated": True,
                 "reason_text": reason,
             },
