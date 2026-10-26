@@ -58,6 +58,10 @@ regexes = [
 
     # provision_student_credentials._PASSWORD_ALPHABET — readable (no-lookalike)
     # character set for random password generation, NOT a credential. The
+    # 2026-10-26 test_fix_master_students: `…update(access_state=…ARCHIVED, organization=cls.org)` — «access»
+    # açar sözü generic-api-key-i tetikləyir, tutulan dəyər Django ORM arqumentidir (sirr deyil); commit tarixçədədir.
+    '''^organization=cls\.org$''',
+
     # generic-api-key rule matches on its length/entropy; explicitly allowlisted.
     '''^abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789$''',
 

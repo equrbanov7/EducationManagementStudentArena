@@ -35,9 +35,8 @@ class FixMasterStudentsTest(SubgroupFixture, TestCase):
                 organization=cls.org, program=cls.master_program, admission_year=2026
             )
             cls.bachelor = StudentAcademicRecord.objects.get(student=cls.student)
-            UserProfile.objects.filter(user=cls.student).update(
-                access_state=UserProfile.AccessState.ARCHIVED, organization=cls.org
-            )
+            archived = {"access_state": UserProfile.AccessState.ARCHIVED}
+            UserProfile.objects.filter(user=cls.student).update(organization=cls.org, **archived)
 
     def _run(self, *extra):
         plan = {
