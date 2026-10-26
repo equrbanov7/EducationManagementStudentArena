@@ -3,7 +3,7 @@
 * Səhifə qabığı kabinet bölməsidir (``?section=exam-center-pins``,
   ``_pin_lookup_body.html``); müstəqil ``center/pin-lookup/`` səhifəsi URL auditi
   A12 (2026-10-10) ilə silindi.
-* ``exam_center_pin_search``  — AJAX: ada/istifadəçi adına görə tələbələr (PIN YOX).
+* ``exam_center_pin_search``  — AJAX: ad/soyad/ata adı/istifadəçi adına görə tələbələr (PIN YOX).
 * ``exam_center_student_pins``— AJAX: seçilmiş tələbənin final biletləri + PIN-ləri
   (modal üçün). PIN yalnız icazəli imtahan mərkəzinə açılır; hər açılış audit-ə
   yazılır. Xam PIN URL/log-a düşmür.
@@ -27,6 +27,7 @@ from apps.exams.services.student_pins import decrypt_student_pin_row
 from apps.organizations.public import organization_role_user_queryset
 from core.audit import log_action
 from core.constants import AuditAction
+from core.person_names import user_display_name_with_patronymic
 from core.roles import ProfileRole
 from core.search_text import tolerant_q
 
@@ -65,6 +66,12 @@ def _pin_holder_student_queryset(organization):
     )
 
 
+def _patronymic(user) -> str:
+    """Profildəki ata adı (yer tutucular «-» boş sayılır); profil yoxdursa ``""``."""
+    profile = getattr(user, "profile", None)
+    return getattr(profile, "patronymic_display", "") if profile is not None else ""
+
+
 @login_required
 @require_GET
 def exam_center_pin_search(request):
@@ -87,9 +94,11 @@ def exam_center_pin_search(request):
     limit = max(1, min(limit, _SEARCH_LIMIT_MAX))
 
     qs = _pin_holder_student_queryset(organization).annotate(kafedra=Subquery(_kafedra_subquery(organization)))
-    search_q = tolerant_q(query, ("username", "first_name", "last_name", "email"))
+    # Sahib 2026-10-26: ata adı siyahıda görünür və axtarılır (eyni adlı tələbələr ayrılsın).
+    search_q = tolerant_q(query, ("username", "first_name", "last_name", "profile__patronymic", "email"))
     if search_q is not None:
         qs = qs.filter(search_q)
+    qs = qs.select_related("profile")
     window = list(qs.order_by("first_name", "last_name", "username")[offset : offset + limit + 1])
     has_more = len(window) > limit
     students = window[:limit]
@@ -107,7 +116,8 @@ def exam_center_pin_search(request):
     results = [
         {
             "id": u.id,
-            "name": (u.get_full_name() or u.username),
+            "name": user_display_name_with_patronymic(u),
+            "patronymic": _patronymic(u),
             "username": u.username,
             "kafedra": getattr(u, "kafedra", "") or "",
             "ticket_count": len(exam_ids_by_student.get(u.id, set())),
@@ -175,7 +185,7 @@ def _device_change_urls(organization, student) -> dict:
 def exam_center_student_pins(request, student_id):
     """Seçilmiş tələbənin final biletləri + PIN-ləri (modal). Açılış audit-ə yazılır."""
     organization = center_org_or_403(request)
-    student = _pin_holder_student_queryset(organization).filter(id=student_id).first()
+    student = _pin_holder_student_queryset(organization).select_related("profile").filter(id=student_id).first()
     if student is None:
         return JsonResponse({"error": "not_found"}, status=404)
     device_changes = _device_change_urls(organization, student)
@@ -267,7 +277,11 @@ def exam_center_student_pins(request, student_id):
 
     return JsonResponse(
         {
-            "student": {"name": (student.get_full_name() or student.username), "username": student.username},
+            "student": {
+                "name": user_display_name_with_patronymic(student),
+                "patronymic": _patronymic(student),
+                "username": student.username,
+            },
             "tickets": items,
         }
     )

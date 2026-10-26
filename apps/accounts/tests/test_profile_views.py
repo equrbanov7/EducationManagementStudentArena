@@ -341,6 +341,33 @@ class ProfileViewTest(TestCase):
         self.assertNotContains(response, 'data-bs-target="#deleteAccountConfirmModal"', html=False)
         self.assertNotContains(response, 'data-bs-target="#studentLeaveOrgConfirmModal"', html=False)
 
+    def test_profile_info_shows_patronymic_row_and_full_name(self):
+        """Sahib 2026-10-26: «Şəxsi məlumatlar»da Soyaddan sonra «Ata adı»; başlıq «Ad Soyad Ata adı»."""
+        from apps.accounts.models import UserProfile
+
+        User.objects.filter(pk=self.user.pk).update(first_name="Aynur", last_name="Məmmədova")
+        UserProfile.objects.get_or_create(user=self.user)
+        UserProfile.objects.filter(user=self.user).update(patronymic="Şahin")
+        self.client.login(username="testuser", password="testpass123")
+
+        response = self.client.get(reverse("accounts:profile") + "?section=profile-info")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "<dt>Ata adı</dt><dd>Şahin</dd>", html=False)
+        self.assertContains(response, "Aynur Məmmədova Şahin")
+
+    def test_profile_info_hides_empty_or_placeholder_patronymic(self):
+        from apps.accounts.models import UserProfile
+
+        UserProfile.objects.get_or_create(user=self.user)
+        UserProfile.objects.filter(user=self.user).update(patronymic="-")
+        self.client.login(username="testuser", password="testpass123")
+
+        response = self.client.get(reverse("accounts:profile") + "?section=profile-info")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "<dt>Ata adı</dt>", html=False)
+
     def test_delete_account_section_falls_back_to_profile_info(self):
         self.client.login(username="testuser", password="testpass123")
 

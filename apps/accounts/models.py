@@ -489,6 +489,11 @@ class UserProfile(models.Model):
         return " · ".join(parts)
 
     @property
+    def patronymic_display(self):
+        """Göstərmə üçün ata adı — idxal yer tutucuları («-», «yoxdur») boş sayılır."""
+        return clean_name_part(self.patronymic)
+
+    @property
     def full_name_with_patronymic(self):
         """«Ad Soyad Ata adı» — RİM siyahılarında rəsmi göstərim."""
         parts = [

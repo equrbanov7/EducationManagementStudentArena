@@ -108904,3 +108904,11 @@ msgstr "Kurumun tüm ara sınav ve final sınavları — kimin oluşturduğundan
 msgctxt "profile.my_exams.center"
 msgid "Yaradan"
 msgstr "Oluşturan"
+
+msgctxt "profile.info"
+msgid "Ata adı"
+msgstr "Baba adı"
+
+msgctxt "exams.pin_lookup"
+msgid "Ad, soyad, ata adı və ya istifadəçi adı…"
+msgstr "Ad, soyad, baba adı veya kullanıcı adı…"

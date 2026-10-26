@@ -109690,3 +109690,11 @@ msgstr "Все промежуточные и итоговые экзамены �
 msgctxt "profile.my_exams.center"
 msgid "Yaradan"
 msgstr "Создатель"
+
+msgctxt "profile.info"
+msgid "Ata adı"
+msgstr "Отчество"
+
+msgctxt "exams.pin_lookup"
+msgid "Ad, soyad, ata adı və ya istifadəçi adı…"
+msgstr "Имя, фамилия, отчество или имя пользователя…"
