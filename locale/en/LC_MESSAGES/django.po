@@ -109675,3 +109675,49 @@ msgstr "This absence or score was entered more than %(m)s minutes ago and cannot
 msgctxt "registrar.journal_timing"
 msgid "Bu dərsin yazma müddəti bitib — i/e qeydi artıq dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
 msgstr "The entry period for this lesson has ended — the “present” mark can no longer be changed. To change it, submit a request to the Registrar's Office (RİM) with a written statement."
+
+msgctxt "applications.transcript"
+msgid "Akademik transkript"
+msgstr "Academic transcript"
+
+msgctxt "applications.transcript"
+msgid "Transkript QR və yoxlama kodu ilə möhürlənir və müraciətə açıq qeyd kimi əlavə olunur — sahib onu müraciətdən endirir."
+msgstr "The transcript is sealed with a QR and verification code and attached to the application as a public note — the applicant downloads it from the application."
+
+msgctxt "applications.transcript"
+msgid "Transkripti hazırla və əlavə et"
+msgstr "Prepare and attach the transcript"
+
+msgctxt "applications.transcript"
+msgid "Transkript əlavə olunub"
+msgstr "Transcript attached"
+
+msgctxt "applications.transcript"
+msgid "Transkripti aç"
+msgstr "Open transcript"
+
+msgctxt "applications.transcript"
+msgid "Transkripti yenidən hazırla"
+msgstr "Prepare the transcript again"
+
+msgctxt "applications.transcript"
+msgid "Nəticələr dəyişməyibsə, bu gün artıq əlavə olunmuş transkript qaytarılır — ikinci fayl yaranmır."
+msgstr "If the results have not changed, the transcript already attached today is returned — no second file is created."
+
+msgctxt "applications.transcript"
+msgid "Bu müraciətə transkript hazırlamaq mümkün deyil."
+msgstr "A transcript cannot be prepared for this application."
+
+#, python-format
+msgctxt "applications.transcript"
+msgid "Akademik transkript hazırlandı və əlavə olundu. Yoxlama kodu: %(code)s."
+msgstr "The academic transcript has been prepared and attached. Verification code: %(code)s."
+
+#, python-format
+msgctxt "applications.transcript"
+msgid "hazırlanıb: %(date)s"
+msgstr "prepared: %(date)s"
+
+msgctxt "registrar.documents"
+msgid "Tələbənin transkriptə düşəcək akademik qeydi hələ yoxdur."
+msgstr "The student has no academic results for a transcript yet."

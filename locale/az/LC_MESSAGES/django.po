@@ -109185,3 +109185,49 @@ msgstr "Bu q/b və ya bal %(m)s dəqiqədən çox əvvəl yazılıb və dəyişd
 msgctxt "registrar.journal_timing"
 msgid "Bu dərsin yazma müddəti bitib — i/e qeydi artıq dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
 msgstr "Bu dərsin yazma müddəti bitib — i/e qeydi artıq dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+
+msgctxt "applications.transcript"
+msgid "Akademik transkript"
+msgstr "Akademik transkript"
+
+msgctxt "applications.transcript"
+msgid "Transkript QR və yoxlama kodu ilə möhürlənir və müraciətə açıq qeyd kimi əlavə olunur — sahib onu müraciətdən endirir."
+msgstr "Transkript QR və yoxlama kodu ilə möhürlənir və müraciətə açıq qeyd kimi əlavə olunur — sahib onu müraciətdən endirir."
+
+msgctxt "applications.transcript"
+msgid "Transkripti hazırla və əlavə et"
+msgstr "Transkripti hazırla və əlavə et"
+
+msgctxt "applications.transcript"
+msgid "Transkript əlavə olunub"
+msgstr "Transkript əlavə olunub"
+
+msgctxt "applications.transcript"
+msgid "Transkripti aç"
+msgstr "Transkripti aç"
+
+msgctxt "applications.transcript"
+msgid "Transkripti yenidən hazırla"
+msgstr "Transkripti yenidən hazırla"
+
+msgctxt "applications.transcript"
+msgid "Nəticələr dəyişməyibsə, bu gün artıq əlavə olunmuş transkript qaytarılır — ikinci fayl yaranmır."
+msgstr "Nəticələr dəyişməyibsə, bu gün artıq əlavə olunmuş transkript qaytarılır — ikinci fayl yaranmır."
+
+msgctxt "applications.transcript"
+msgid "Bu müraciətə transkript hazırlamaq mümkün deyil."
+msgstr "Bu müraciətə transkript hazırlamaq mümkün deyil."
+
+#, python-format
+msgctxt "applications.transcript"
+msgid "Akademik transkript hazırlandı və əlavə olundu. Yoxlama kodu: %(code)s."
+msgstr "Akademik transkript hazırlandı və əlavə olundu. Yoxlama kodu: %(code)s."
+
+#, python-format
+msgctxt "applications.transcript"
+msgid "hazırlanıb: %(date)s"
+msgstr "hazırlanıb: %(date)s"
+
+msgctxt "registrar.documents"
+msgid "Tələbənin transkriptə düşəcək akademik qeydi hələ yoxdur."
+msgstr "Tələbənin transkriptə düşəcək akademik qeydi hələ yoxdur."

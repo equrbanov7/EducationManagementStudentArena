@@ -109083,3 +109083,49 @@ msgstr "Bu devamsızlık veya puan %(m)s dakikadan daha önce yazıldı ve deği
 msgctxt "registrar.journal_timing"
 msgid "Bu dərsin yazma müddəti bitib — i/e qeydi artıq dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
 msgstr "Bu dersin giriş süresi doldu — «katıldı» kaydı artık değiştirilemez. Değişiklik için RİM'e başvurup dilekçe yazın."
+
+msgctxt "applications.transcript"
+msgid "Akademik transkript"
+msgstr "Akademik not dökümü"
+
+msgctxt "applications.transcript"
+msgid "Transkript QR və yoxlama kodu ilə möhürlənir və müraciətə açıq qeyd kimi əlavə olunur — sahib onu müraciətdən endirir."
+msgstr "Transkript QR ve doğrulama koduyla mühürlenir ve başvuruya açık not olarak eklenir — başvuru sahibi onu başvurudan indirir."
+
+msgctxt "applications.transcript"
+msgid "Transkripti hazırla və əlavə et"
+msgstr "Transkripti hazırla ve ekle"
+
+msgctxt "applications.transcript"
+msgid "Transkript əlavə olunub"
+msgstr "Transkript eklendi"
+
+msgctxt "applications.transcript"
+msgid "Transkripti aç"
+msgstr "Transkripti görüntüle"
+
+msgctxt "applications.transcript"
+msgid "Transkripti yenidən hazırla"
+msgstr "Transkripti yeniden hazırla"
+
+msgctxt "applications.transcript"
+msgid "Nəticələr dəyişməyibsə, bu gün artıq əlavə olunmuş transkript qaytarılır — ikinci fayl yaranmır."
+msgstr "Sonuçlar değişmediyse bugün zaten eklenmiş transkript döndürülür — ikinci dosya oluşmaz."
+
+msgctxt "applications.transcript"
+msgid "Bu müraciətə transkript hazırlamaq mümkün deyil."
+msgstr "Bu başvuru için transkript hazırlanamaz."
+
+#, python-format
+msgctxt "applications.transcript"
+msgid "Akademik transkript hazırlandı və əlavə olundu. Yoxlama kodu: %(code)s."
+msgstr "Akademik transkript hazırlandı ve eklendi. Doğrulama kodu: %(code)s."
+
+#, python-format
+msgctxt "applications.transcript"
+msgid "hazırlanıb: %(date)s"
+msgstr "hazırlandı: %(date)s"
+
+msgctxt "registrar.documents"
+msgid "Tələbənin transkriptə düşəcək akademik qeydi hələ yoxdur."
+msgstr "Öğrencinin transkripte girecek akademik kaydı henüz yok."

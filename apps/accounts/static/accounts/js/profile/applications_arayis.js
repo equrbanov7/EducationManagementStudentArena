@@ -1,6 +1,8 @@
-/* «Müraciətlərim» detalı → «Arayış sorğusu» emalçısına «Arayışı hazırla və əlavə et» (sahib 2026-10-19).
+/* «Müraciətlərim» detalı → rəsmi sənədi «hazırla və əlavə et» bloku: «Arayış sorğusu» (sahib 2026-10-19) və
+ * «Transkript sorğusu» (sahib 2026-10-26, «Transkripti hazırla və əlavə et»).
  *
- * Blok YALNIZ server `app.arayis_tool` verəndə qurulur. `attached` (siyahı) doludursa «Arayış əlavə olunub»
+ * Blok YALNIZ server `app.document_tool` verəndə qurulur (növ `tool.kind`; `tool.has_place` yalnız arayışda —
+ * transkriptdə «Təqdim ediləcəyi yer» sahəsi yoxdur). `attached` (siyahı) doludursa «Arayış əlavə olunub»
  * + hər arayış üçün «kod · təqdim yeri · Arayışı aç» göstərilir, forma isə GİZLİDİR — «Yeni arayış hazırla
  * (başqa yer üçün)» onu açır. Başqa yer → yeni möhür + fayl; eyni yer → server mövcud faylı qaytarır (kilid +
  * yoxlama kodu, ikinci qeyd yazılmır). Blok emalçı +
@@ -28,7 +30,7 @@
         return node;
     }
 
-    /* Əlavə olunmuş arayışların siyahısı: «KOD · təqdim yeri · Arayışı aç». */
+    /* Əlavə olunmuş sənədlərin siyahısı: «KOD · ikinci sətir (arayış: təqdim yeri; transkript: tarix) · Aç». */
     function attachedList(tool) {
         var wrap = el("div", "apx-arayis__done");
         wrap.setAttribute("data-apx-arayis-done", "");
@@ -39,7 +41,10 @@
             var item = el("li", "apx-arayis__item");
             item.setAttribute("data-apx-arayis-item", row.code || "");
             item.appendChild(el("span", "apx-arayis__code", (tool.code_label ? tool.code_label + ": " : "") + row.code));
-            item.appendChild(el("span", "apx-arayis__place", row.place));
+            var note = row.note || row.place || "";
+            if (note) {
+                item.appendChild(el("span", "apx-arayis__place", note));
+            }
             var link = el("a", "apx-arayis__link", tool.open_label);
             link.href = row.download_url;
             link.target = "_blank";
@@ -60,17 +65,19 @@
         errors.setAttribute("data-apx-arayis-errors", "");
         errors.hidden = true;
         wrap.appendChild(errors);
-        var label = el("label", "apx-act__label", tool.place_label);
-        label.setAttribute("for", "apx-arayis-place");
-        wrap.appendChild(label);
-        var input = el("input", "apx-act__input");
-        input.type = "text";
-        input.id = "apx-arayis-place";
-        input.maxLength = Number(tool.place_max) || 200;
-        input.placeholder = tool.place_placeholder || "";
-        input.autocomplete = "off";
-        input.setAttribute("data-apx-arayis-place", "");
-        wrap.appendChild(input);
+        if (tool.has_place !== false) {
+            var label = el("label", "apx-act__label", tool.place_label);
+            label.setAttribute("for", "apx-arayis-place");
+            wrap.appendChild(label);
+            var input = el("input", "apx-act__input");
+            input.type = "text";
+            input.id = "apx-arayis-place";
+            input.maxLength = Number(tool.place_max) || 200;
+            input.placeholder = tool.place_placeholder || "";
+            input.autocomplete = "off";
+            input.setAttribute("data-apx-arayis-place", "");
+            wrap.appendChild(input);
+        }
         var buttons = el("div", "apx-act__buttons");
         var button = el("button", "ems-btn ems-btn--sm ems-btn--primary", tool.button);
         button.type = "button";
@@ -84,7 +91,7 @@
     }
 
     function decorate(body, app) {
-        var tool = app && app.arayis_tool;
+        var tool = app && (app.document_tool || app.arayis_tool);
         if (!body || !tool || body.querySelector("[data-apx-arayis]")) {
             return;
         }
@@ -131,7 +138,7 @@
         wrap.hidden = false;
         button.hidden = true;
         button.setAttribute("aria-expanded", "true");
-        var input = wrap.querySelector("[data-apx-arayis-place]");
+        var input = wrap.querySelector("[data-apx-arayis-place]") || wrap.querySelector("[data-apx-arayis-submit]");
         if (input) {
             try {
                 input.focus();

@@ -19,6 +19,8 @@ urlpatterns = [
     path("api/<uuid:application_id>/action/", views.application_action, name="action"),
     # «Arayış sorğusu» → arayışı hazırla və müraciətə əlavə et (2026-10-19).
     path("api/<uuid:application_id>/arayis/", views.application_issue_arayis, name="issue_arayis"),
+    # «Transkript sorğusu» → transkripti hazırla və müraciətə əlavə et (sahib 2026-10-26).
+    path("api/<uuid:application_id>/transkript/", views.application_issue_transcript, name="issue_transcript"),
     path(
         "api/<uuid:application_id>/attachments/<uuid:attachment_id>/download/",
         views.attachment_download,

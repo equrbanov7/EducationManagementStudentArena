@@ -1,4 +1,4 @@
-from .documents import application_issue_arayis
+from .documents import application_issue_arayis, application_issue_transcript
 from .downloads import attachment_download
 from .endpoints import (
     application_action,
@@ -15,6 +15,7 @@ __all__ = [
     "application_create",
     "application_detail",
     "application_issue_arayis",
+    "application_issue_transcript",
     "application_kpis",
     "application_list",
     "attachment_download",
