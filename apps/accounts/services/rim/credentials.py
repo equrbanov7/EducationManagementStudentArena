@@ -143,9 +143,12 @@ def set_temporary_password(actor: RimActor, target_user, *, request=None, reason
         target_user.save(update_fields=["password"])
 
         if profile is not None:
-            # İstifadəçi ilk girişdə OTP + öz parolunu qurmağa məcburdur.
+            # İstifadəçi ilk girişdə OTP + öz parolunu qurmağa məcburdur. Sahib 2026-10-26: «Parolu sıfırla»
+            # bölməsi ilə EYNİ — e-poçt təsdiqi də sıfırlanır (tam axın: e-poçt + OTP + öz parolu). Yalnız YENİ
+            # təyinata aiddir; artıq sıfırlanmış hesablara toxunulmur.
             profile.password_change_required = True
-            profile.save(update_fields=["password_change_required", "updated_at"])
+            profile.email_verified = False
+            profile.save(update_fields=["password_change_required", "email_verified", "updated_at"])
 
         # DİQQƏT: `changes` içində parol dəyəri YOXDUR və olmamalıdır.
         log_action(
@@ -159,6 +162,7 @@ def set_temporary_password(actor: RimActor, target_user, *, request=None, reason
                 "target_user_id": str(target_user.pk),
                 "operation": "set_temporary_password",
                 "password_change_required": True,
+                "email_verified_reset": True,
                 "reason_text": str(reason or "")[:300],
             },
             request=request,
