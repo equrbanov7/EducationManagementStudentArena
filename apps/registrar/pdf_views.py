@@ -19,7 +19,6 @@ the audit log (official-document trail).
 
 from __future__ import annotations
 
-import re
 from urllib.parse import quote
 
 from django.contrib.auth.decorators import login_required
@@ -29,31 +28,14 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
-from apps.registrar import document_access, enrollment_certificate
-from apps.registrar import transcript as transcript_service
-from apps.registrar import transcript_seal
+from apps.registrar import document_access, enrollment_certificate, transcript_issue
 from apps.registrar.audit_write import create_audit_row
 from apps.registrar.models import StudentAcademicRecord
 
 
 def _audit_issue(organization, record, by_user, seal=None):
-    """Best-effort audit entry for an issued transcript (never blocks the download).
-
-    Audit 2026-09-28 DB-01: SAVEPOINT-li yazı (audit_write) — ATOMIC_REQUESTS
-    rejimində udulmuş xəta sorğu tranzaksiyasını zəhərləmir."""
-    from core.constants import AuditAction
-
-    student = record.student if record else by_user
-    create_audit_row(
-        user=by_user if getattr(by_user, "pk", None) else None,
-        organization=organization,
-        action=AuditAction.UPDATE,
-        resource_type="registrar.transcript_pdf",
-        resource_id=str(record.pk) if record else "",
-        resource_repr=f"Transkript PDF — {student.get_full_name() or student.username}",
-        reason="Akademik transkript PDF olaraq yükləndi."
-        + (f" Yoxlama kodu: {seal.code}." if seal is not None else ""),
-    )
+    """Best-effort audit entry for an issued transcript — ``transcript_issue.audit_transcript_issue``."""
+    transcript_issue.audit_transcript_issue(organization, record, by_user, seal)
 
 
 #: AZ hərflərinin ASCII qarşılığı — `Content-Disposition`-un ASCII geri dönüşü
@@ -80,15 +62,8 @@ _ASCII_FOLD = str.maketrans(
 
 
 def _transcript_filename(student) -> str:
-    """`Transkript_Ad_Soyad_2026-09-10.pdf` — arxivə düşəndə oxunan ad.
-
-    Rəsmi sənəddir: fayl adı da tələbənin adını daşımalıdır ki, onlarla
-    yüklənmiş transkript bir qovluqda qarışmasın."""
-    from django.utils import timezone
-
-    full_name = (student.get_full_name() or student.username).strip()
-    safe_name = re.sub(r"[^\w\-]+", "_", full_name, flags=re.U).strip("_") or str(student.username)
-    return f"Transkript_{safe_name}_{timezone.localdate():%Y-%m-%d}.pdf"
+    """`Transkript_Ad_Soyad_2026-09-10.pdf` — ``transcript_issue.transcript_filename`` (müraciət yolu ilə ortaq)."""
+    return transcript_issue.transcript_filename(student)
 
 
 def _attachment(payload: bytes, filename: str) -> HttpResponse:
@@ -101,18 +76,16 @@ def _attachment(payload: bytes, filename: str) -> HttpResponse:
 
 def _render_response(*, organization, student, record, request):
     """``(HttpResponse, seal)`` — hər buraxılış QR + yoxlama kodu ilə möhürlənir (``transcript_seal``)."""
-    program = record.program if record and record.program_id else None
-    data = transcript_service.build_student_transcript(student=student, organization=organization, program=program)
-    if not data["has_record"]:
-        raise Http404  # nothing to certify yet
-    payload, seal = transcript_seal.render_sealed_transcript(
-        organization=organization,
-        student=student,
-        record=record,
-        data=data,
-        issued_by=getattr(request, "real_user", None) or request.user,
-        request=request,
-    )
+    try:
+        payload, seal = transcript_issue.issue_student_transcript(
+            organization=organization,
+            student=student,
+            record=record,
+            issued_by=getattr(request, "real_user", None) or request.user,
+            request=request,
+        )
+    except enrollment_certificate.CertificateRefused as refusal:
+        raise Http404 from refusal  # nothing to certify yet
     return _attachment(payload, _transcript_filename(student)), seal
 
 

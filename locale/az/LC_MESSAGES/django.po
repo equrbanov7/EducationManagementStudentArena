@@ -109087,3 +109087,49 @@ msgstr "Başqa kompüterdə davam et"
 msgctxt "exams.final_center.monitor_pin"
 msgid "Kompüter xarab olubsa: tələbə başqa qeydli kompüterdən /exams/final/ (və ya /exams/midterm/) səhifəsində istifadəçi adı + bu PIN ilə daxil olur."
 msgstr "Kompüter xarab olubsa: tələbə başqa qeydli kompüterdən /exams/final/ (və ya /exams/midterm/) səhifəsində istifadəçi adı + bu PIN ilə daxil olur."
+
+msgctxt "applications.transcript"
+msgid "Akademik transkript"
+msgstr "Akademik transkript"
+
+msgctxt "applications.transcript"
+msgid "Transkript QR və yoxlama kodu ilə möhürlənir və müraciətə açıq qeyd kimi əlavə olunur — sahib onu müraciətdən endirir."
+msgstr "Transkript QR və yoxlama kodu ilə möhürlənir və müraciətə açıq qeyd kimi əlavə olunur — sahib onu müraciətdən endirir."
+
+msgctxt "applications.transcript"
+msgid "Transkripti hazırla və əlavə et"
+msgstr "Transkripti hazırla və əlavə et"
+
+msgctxt "applications.transcript"
+msgid "Transkript əlavə olunub"
+msgstr "Transkript əlavə olunub"
+
+msgctxt "applications.transcript"
+msgid "Transkripti aç"
+msgstr "Transkripti aç"
+
+msgctxt "applications.transcript"
+msgid "Transkripti yenidən hazırla"
+msgstr "Transkripti yenidən hazırla"
+
+msgctxt "applications.transcript"
+msgid "Nəticələr dəyişməyibsə, bu gün artıq əlavə olunmuş transkript qaytarılır — ikinci fayl yaranmır."
+msgstr "Nəticələr dəyişməyibsə, bu gün artıq əlavə olunmuş transkript qaytarılır — ikinci fayl yaranmır."
+
+msgctxt "applications.transcript"
+msgid "Bu müraciətə transkript hazırlamaq mümkün deyil."
+msgstr "Bu müraciətə transkript hazırlamaq mümkün deyil."
+
+#, python-format
+msgctxt "applications.transcript"
+msgid "Akademik transkript hazırlandı və əlavə olundu. Yoxlama kodu: %(code)s."
+msgstr "Akademik transkript hazırlandı və əlavə olundu. Yoxlama kodu: %(code)s."
+
+#, python-format
+msgctxt "applications.transcript"
+msgid "hazırlanıb: %(date)s"
+msgstr "hazırlanıb: %(date)s"
+
+msgctxt "registrar.documents"
+msgid "Tələbənin transkriptə düşəcək akademik qeydi hələ yoxdur."
+msgstr "Tələbənin transkriptə düşəcək akademik qeydi hələ yoxdur."

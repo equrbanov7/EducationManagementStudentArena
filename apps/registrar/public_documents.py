@@ -9,7 +9,10 @@ Kənar modullar (accounts «Tələbə reyestri», applications «Müraciətlər�
 * ``issuable_record_for_student(user, organization, student, request=None)`` — aktorun əhatəsindəki aktiv
   akademik qeyd (yoxdursa ``None``);
 * ``issue_enrollment_certificate(...)`` → ``(pdf_bytes, seal)``; :class:`CertificateRefused` (``code``,
-  ``message``) — tələbə aktiv deyil.
+  ``message``) — tələbə aktiv deyil;
+* ``issue_student_transcript(...)`` → ``(pdf_bytes, seal)`` — əməkdaş yükləməsi ilə EYNİ möhürlü transkript
+  (sahib 2026-10-26, «Transkript sorğusu»); qiymətləndiriləcək nəticə yoxdursa :class:`CertificateRefused`
+  (``no_record``); ``transcript_filename`` + ``audit_transcript_issue`` — fayl adı və rəsmi sənəd izi.
 """
 
 from __future__ import annotations
@@ -38,6 +41,24 @@ def enrollment_certificate_places(organization, codes) -> dict:
     return {code: str(payload.get("place") or "") for code, payload in payloads.items()}
 
 
+def issue_student_transcript(*, organization, student, record, issued_by, request=None):
+    from .transcript_issue import issue_student_transcript as _issue
+
+    return _issue(organization=organization, student=student, record=record, issued_by=issued_by, request=request)
+
+
+def transcript_filename(student, code: str = "") -> str:
+    from .transcript_issue import transcript_filename as _filename
+
+    return _filename(student, code)
+
+
+def audit_transcript_issue(organization, record, by_user, seal=None, *, reason: str):
+    from .transcript_issue import audit_transcript_issue as _audit
+
+    _audit(organization, record, by_user, seal, reason=reason)
+
+
 def issuable_record_for_student(user, organization, student, request=None):
     """Aktorun sənəd verə bildiyi qeyd (bir tələbənin bir neçə qeydi varsa aktiv ``enrolled`` üstündür)."""
     if student is None or organization is None:
@@ -58,6 +79,7 @@ def issuable_record_for_student(user, organization, student, request=None):
 __all__ = [
     "ENROLLMENT_CERTIFICATE_PLACE_MAX",
     "TRANSCRIPT_ISSUE_PERMISSION",
+    "audit_transcript_issue",
     "CertificateRefused",
     "can_issue_documents",
     "certificate_filename",
@@ -66,4 +88,6 @@ __all__ = [
     "enrollment_certificate_refusal",
     "issuable_record_for_student",
     "issue_enrollment_certificate",
+    "issue_student_transcript",
+    "transcript_filename",
 ]

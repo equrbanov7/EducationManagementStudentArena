@@ -109771,3 +109771,49 @@ msgstr "Продолжить на другом компьютере"
 msgctxt "exams.final_center.monitor_pin"
 msgid "Kompüter xarab olubsa: tələbə başqa qeydli kompüterdən /exams/final/ (və ya /exams/midterm/) səhifəsində istifadəçi adı + bu PIN ilə daxil olur."
 msgstr "Если компьютер вышел из строя: студент входит на другом зарегистрированном компьютере на странице /exams/final/ (или /exams/midterm/) с логином и этим PIN."
+
+msgctxt "applications.transcript"
+msgid "Akademik transkript"
+msgstr "Академическая выписка"
+
+msgctxt "applications.transcript"
+msgid "Transkript QR və yoxlama kodu ilə möhürlənir və müraciətə açıq qeyd kimi əlavə olunur — sahib onu müraciətdən endirir."
+msgstr "Выписка заверяется QR-кодом и кодом проверки и прикрепляется к обращению открытой заметкой — заявитель скачивает её из обращения."
+
+msgctxt "applications.transcript"
+msgid "Transkripti hazırla və əlavə et"
+msgstr "Подготовить и прикрепить выписку"
+
+msgctxt "applications.transcript"
+msgid "Transkript əlavə olunub"
+msgstr "Выписка прикреплена"
+
+msgctxt "applications.transcript"
+msgid "Transkripti aç"
+msgstr "Открыть выписку"
+
+msgctxt "applications.transcript"
+msgid "Transkripti yenidən hazırla"
+msgstr "Подготовить выписку заново"
+
+msgctxt "applications.transcript"
+msgid "Nəticələr dəyişməyibsə, bu gün artıq əlavə olunmuş transkript qaytarılır — ikinci fayl yaranmır."
+msgstr "Если результаты не изменились, возвращается уже прикреплённая сегодня выписка — второй файл не создаётся."
+
+msgctxt "applications.transcript"
+msgid "Bu müraciətə transkript hazırlamaq mümkün deyil."
+msgstr "Для этого обращения нельзя подготовить выписку."
+
+#, python-format
+msgctxt "applications.transcript"
+msgid "Akademik transkript hazırlandı və əlavə olundu. Yoxlama kodu: %(code)s."
+msgstr "Академическая выписка подготовлена и прикреплена. Код проверки: %(code)s."
+
+#, python-format
+msgctxt "applications.transcript"
+msgid "hazırlanıb: %(date)s"
+msgstr "подготовлено: %(date)s"
+
+msgctxt "registrar.documents"
+msgid "Tələbənin transkriptə düşəcək akademik qeydi hələ yoxdur."
+msgstr "У студента пока нет академических результатов для выписки."

@@ -110603,3 +110603,49 @@ msgstr "Auf anderem Computer fortsetzen"
 msgctxt "exams.final_center.monitor_pin"
 msgid "Kompüter xarab olubsa: tələbə başqa qeydli kompüterdən /exams/final/ (və ya /exams/midterm/) səhifəsində istifadəçi adı + bu PIN ilə daxil olur."
 msgstr "Falls der Computer ausgefallen ist: Der Studierende meldet sich an einem anderen registrierten Computer unter /exams/final/ (oder /exams/midterm/) mit Benutzername + dieser PIN an."
+
+msgctxt "applications.transcript"
+msgid "Akademik transkript"
+msgstr "Leistungsnachweis"
+
+msgctxt "applications.transcript"
+msgid "Transkript QR və yoxlama kodu ilə möhürlənir və müraciətə açıq qeyd kimi əlavə olunur — sahib onu müraciətdən endirir."
+msgstr "Der Leistungsnachweis wird mit QR- und Prüfcode versiegelt und dem Antrag als öffentliche Notiz angehängt — die antragstellende Person lädt ihn aus dem Antrag herunter."
+
+msgctxt "applications.transcript"
+msgid "Transkripti hazırla və əlavə et"
+msgstr "Leistungsnachweis erstellen und anhängen"
+
+msgctxt "applications.transcript"
+msgid "Transkript əlavə olunub"
+msgstr "Leistungsnachweis angehängt"
+
+msgctxt "applications.transcript"
+msgid "Transkripti aç"
+msgstr "Leistungsnachweis öffnen"
+
+msgctxt "applications.transcript"
+msgid "Transkripti yenidən hazırla"
+msgstr "Leistungsnachweis erneut erstellen"
+
+msgctxt "applications.transcript"
+msgid "Nəticələr dəyişməyibsə, bu gün artıq əlavə olunmuş transkript qaytarılır — ikinci fayl yaranmır."
+msgstr "Haben sich die Ergebnisse nicht geändert, wird der heute bereits angehängte Leistungsnachweis zurückgegeben — es entsteht keine zweite Datei."
+
+msgctxt "applications.transcript"
+msgid "Bu müraciətə transkript hazırlamaq mümkün deyil."
+msgstr "Für diesen Antrag kann kein Leistungsnachweis erstellt werden."
+
+#, python-format
+msgctxt "applications.transcript"
+msgid "Akademik transkript hazırlandı və əlavə olundu. Yoxlama kodu: %(code)s."
+msgstr "Der Leistungsnachweis wurde erstellt und angehängt. Prüfcode: %(code)s."
+
+#, python-format
+msgctxt "applications.transcript"
+msgid "hazırlanıb: %(date)s"
+msgstr "erstellt: %(date)s"
+
+msgctxt "registrar.documents"
+msgid "Tələbənin transkriptə düşəcək akademik qeydi hələ yoxdur."
+msgstr "Für die/den Studierende(n) liegen noch keine Ergebnisse für einen Leistungsnachweis vor."
