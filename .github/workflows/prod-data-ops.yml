@@ -198,6 +198,9 @@
 #       → teachers.json.enc; yalnız istifadəçi id-ləri + saylar). Yalnız «Forma 7» bloku + işi olan jurnal; əl ilə
 #       qoyulan bloklar açılmır; `create_missing` → boş köhnə jurnalı olan da açılır. Rəsmi unblock_account (audit).
 #       Loga YALNIZ saylar.
+#   diagnose_journal_access — YALNIZ OXU (sahib 2026-10-26: «müəllimdə yeni dərs yeri görünmür»): `batch` = jurnalın
+#       (açılışın) UUID-i, `teacher` = yoxlanan istifadəçi adı (boş — jurnalın sahibi). «Yeni dərs»in hər şərti ayrıca
+#       (açılış aktiv, sahib/aktiv/grade.input, jurnal bağlı, sillabus qapısı, bölgü əhatəsi). Loga YALNIZ bəli/xeyr.
 #   apply_journal_shares — bölünmüş jurnal (sahib 2026-10-26: «fənn 2 müəllim arasında bölünübsə mühazirəçi mühazirəni,
 #       seminarçı yalnız öz ballarını görsün»; səviyyə jurnalında müəllim yalnız öz tələbələrini). Köhnə sistemin jurnal
 #       bölgüsü — ŞİFRƏLİ release asset (`roster_tag` = `journal-shares-…` → shares.json.enc, lokal qurulmuş
@@ -277,6 +280,7 @@ on:
           - fill_group_settings_gaps
           - apply_journal_shares
           - unblock_legacy_journal_teachers
+          - diagnose_journal_access
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -880,6 +884,18 @@ jobs:
                 args=(--org "$ORG" --actor "$actor" --file "/tmp/journal_shares_${GITHUB_RUN_ID}.json")
               fi
               ;;
+            diagnose_journal_access)
+              # Sahib 2026-10-26: «Yeni dərs» niyə görünmür — yalnız oxu; `batch` = açılışın UUID-i, `teacher` = istifadəçi.
+              match "$BATCH" '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' \
+                || { echo "batch = jurnalın (açılışın) UUID-i" >&2; exit 2; }
+              args=(--org "$ORG" "--offering=$BATCH")
+              if [ -n "$TEACHER" ]; then
+                { [ "${#TEACHER}" -le 150 ] && match "$TEACHER" '^[A-Za-z0-9._-]{1,150}$'; } \
+                  || { echo "teacher (istifadəçi adı) formatı: ad.soyad" >&2; exit 2; }
+                args+=("--user=$TEACHER")
+              fi
+              test "$APPLY" != "true" || { echo "diagnose_journal_access yalnız oxuyur — apply verməyin" >&2; exit 2; }
+              ;;
             unblock_legacy_journal_teachers)
               # Sahib 2026-10-26: köhnə jurnalı olan müəllim bloklanmasın («Forma 7» bloku). Loga yalnız saylar.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -1027,6 +1043,16 @@ jobs:
             grep -E '^vacantfill: [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             docker exec "$APP_CONTAINER" cat "/tmp/vacant_fill_report_${GITHUB_RUN_ID}.md" > "$RUNNER_TEMP/report.md" 2>/dev/null || true
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "diagnose_journal_access" ]; then
+            # Loga YALNIZ «journal_access: açar=yes|no …» sətri və rədd kodu.
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^journal_access: [a-z_]+=[a-z]+( [a-z_]+=[a-z]+)*$' "$RUNNER_TEMP/out.log" || true
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
               rm -f "$RUNNER_TEMP/out.log"
