@@ -109861,3 +109861,11 @@ msgstr "Браузер / устройство"
 msgctxt "accounts.view_as"
 msgid "Bu hesabla sistemə giriş qeydə alınmayıb."
 msgstr "Входы в систему с этой учётной записью не зарегистрированы."
+
+msgctxt "registrar.journal_timing"
+msgid "Bu q/b və ya bal %(m)s dəqiqədən çox əvvəl yazılıb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Эта отметка «н/б» или балл внесены более %(m)s минут назад и не могут быть изменены. Для изменения обратитесь в РИМ с письменным представлением."
+
+msgctxt "registrar.journal_timing"
+msgid "Bu dərsin yazma müddəti bitib — i/e qeydi artıq dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Срок внесения записей по этому занятию истёк — отметку «присутствовал» больше нельзя изменить. Для изменения обратитесь в РИМ с письменным представлением."

@@ -58,8 +58,8 @@ class DefaultsTest(TestCase):
     def test_lock_message_matches_owner_wording(self):
         self.assertEqual(
             journal_edit_windows.lock_message(journal_edit_windows.LOCK_TIME, window=timedelta(minutes=15)),
-            "Bu qiymət 15 dəqiqədən çox əvvəl yazılıb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib "
-            "təqdimat yazın.",
+            "Bu q/b və ya bal 15 dəqiqədən çox əvvəl yazılıb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət "
+            "edib təqdimat yazın.",
         )
 
 
@@ -249,9 +249,16 @@ class AutosaveLockTest(TestCase):
         with bypass_rls():
             gradebook.save_marks(
                 offering=self.offering,
-                entries=[{"lesson_id": self.lesson.id, "enrollment_id": self.enrollment.id, "status": "present"}],
+                entries=[
+                    {
+                        "lesson_id": self.lesson.id,
+                        "enrollment_id": self.enrollment.id,
+                        "status": "present",
+                        "score": "7",
+                    }
+                ],
                 by_user=self.teacher,
-            )
+            )  # ballı xana (balsız i/e 2026-10-26-dan pəncərədən sonra da dəyişir)
             _age(LessonMark.objects.get(lesson=self.lesson), 16)
         client = self._client()
         resp = self._post(client, autosave="1")

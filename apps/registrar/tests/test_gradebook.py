@@ -229,7 +229,7 @@ class JournalServiceTest(TestCase):
             gradebook.save_marks(
                 enforce_day=False,
                 offering=self.offering,
-                entries=[{"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "present"}],
+                entries=[{"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "absent"}],
                 by_user=self.teacher,
             )
             mark = LessonMark.objects.get(lesson=lesson, enrollment=self.enrollment)
@@ -240,11 +240,12 @@ class JournalServiceTest(TestCase):
             gradebook.save_marks(
                 enforce_day=False,
                 offering=self.offering,
-                entries=[{"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "absent"}],
+                entries=[{"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "present"}],
                 by_user=self.teacher,
             )
             mark.refresh_from_db()
-            self.assertEqual(mark.status, AttendanceStatus.PRESENT)  # unchanged — locked
+            # q/b kilidli qalır (balsız i/e isə pəncərədən sonra da dəyişir — sahib 2026-10-26).
+            self.assertEqual(mark.status, AttendanceStatus.ABSENT)  # unchanged — locked
 
     def test_lesson_date_edit_window(self):
         with bypass_rls():

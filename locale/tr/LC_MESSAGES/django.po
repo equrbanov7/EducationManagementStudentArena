@@ -109075,3 +109075,11 @@ msgstr "Tarayıcı / cihaz"
 msgctxt "accounts.view_as"
 msgid "Bu hesabla sistemə giriş qeydə alınmayıb."
 msgstr "Bu hesapla sisteme giriş kaydedilmemiş."
+
+msgctxt "registrar.journal_timing"
+msgid "Bu q/b və ya bal %(m)s dəqiqədən çox əvvəl yazılıb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Bu devamsızlık veya puan %(m)s dakikadan daha önce yazıldı ve değiştirilemez. Değişiklik için RİM'e başvurup dilekçe yazın."
+
+msgctxt "registrar.journal_timing"
+msgid "Bu dərsin yazma müddəti bitib — i/e qeydi artıq dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Bu dersin giriş süresi doldu — «katıldı» kaydı artık değiştirilemez. Değişiklik için RİM'e başvurup dilekçe yazın."

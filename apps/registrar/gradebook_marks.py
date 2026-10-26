@@ -26,6 +26,9 @@ yazılmır), audit sətri, bildirişlər (``on_commit``), qayıb həddi keçidl�
 
 XANA KİLİDİ (sahib 2026-10-25): müəllimin yazdığı xana İLK yazılışdan ``journal.mark_edit_minutes`` (defolt 15)
 sonra, köçürülmüş xana (``entered_by`` boş) isə həmişə kilidlidir (:func:`journal_edit_windows.mark_lock_reason`).
+SAHİB 2026-10-26: kilid yalnız q/b və bala düşür — balsız i/e xanası pəncərədən sonra (köçürülmüş olsa da) YENİ
+qeyd kimi dəyişir (:class:`~journal_edit_windows.EntryRule`; müddət bitibsə ``LOCK_ENTRY``), kilid saatı yenidən
+başlayır (``created_at`` = dəyişiklik anı).
 Kilidli xanaya FƏRQLİ dəyər gəlsə yazılmır və ``report=True`` cavabında ``locked`` (say) + ``locked_reason``
 («RİM-ə müraciət edib təqdimat yazın» mətni) qayıdır — view avtomatik yadda saxlamada 409 verir. Grid-in geri
 göndərdiyi DƏYİŞMƏYƏN dəyər kilid sayılmır. Toplu doldurma kilidli xanaya toxunmur (o, yalnız-oxu render olunur).
@@ -152,6 +155,7 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
     notify_events = []
     to_create = []
     to_update = []
+    to_reopen = []
     now = timezone.now()
     # Yeni qeyd qaydası (dərs günü + gecikmiş yazı günləri + aktivləşdirmə pəncərəsi) — bir dəfə qurulur.
     entry_rule = journal_edit_windows.EntryRule.current(now=now) if enforce_day else None
@@ -168,10 +172,13 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
             continue
         mark = existing.get((lesson.id, enrollment.id))
         lock = ""
+        reopened = False  # pəncərədən kənar balsız i/e — dəyişikliyi YENİ qeyd kimi yazılır (sahib 2026-10-26)
         if mark is not None and mark.pk in corrected_ids:
             lock = journal_edit_windows.LOCK_CORRECTED  # rəsmi düzəlişli xana — müəllim üçün kilidli
         elif mark is not None:
-            lock = journal_edit_windows.mark_lock_reason(mark, now=now, window=lock_window)
+            reopened = journal_edit_windows.reopens_presence(mark, now=now, window=lock_window)
+            entry_open = entry_rule.allows(lesson) if (reopened and entry_rule is not None) else True
+            lock = journal_edit_windows.mark_lock_reason(mark, now=now, window=lock_window, entry_open=entry_open)
         if lock:
             # Kilidli xana yazılmır. Grid-in geri göndərdiyi EYNİ dəyər səssiz keçir; fərqli dəyər — kilid cavabı.
             if _differs(mark, entry, lesson):
@@ -218,13 +225,20 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
                     entered_by=by_user,
                 )
             )
-        elif mark.status != status or mark.score != score or mark.entered_by_id != by_user_id:
-            # Dəyişməyən xana (grid hər yazıla bilən xananı geri göndərir) yenidən yazılmır.
+        elif mark.status != status or mark.score != score or (mark.entered_by_id != by_user_id and not reopened):
+            # Dəyişməyən xana (grid hər yazıla bilən xananı geri göndərir) yenidən yazılmır. Açıq i/e xanasının
+            # eyni dəyəri «sahib» dəyişmək üçün də yazılmır (köçürülmüş i/e toxunulmadan köçürülmüş qalır).
             mark.status = status
             mark.score = score
             mark.entered_by = by_user
             mark.updated_at = now  # bulk_update `auto_now`-u özü yeniləmir
-            to_update.append(mark)
+            if reopened:
+                # Pəncərədən sonra dəyişən i/e YENİ qeyddir — kilid saatı bu andan başlayır (yeni q/b/bal da
+                # yazılışından 15 dəqiqə sonra donur). DB trigger-i köhnə dəyəri i/e olan sətri buraxır (0106).
+                mark.created_at = now
+                to_reopen.append(mark)
+            else:
+                to_update.append(mark)
         if old != new:
             audit_changes.append(
                 {
@@ -248,6 +262,8 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
         LessonMark.objects.bulk_create(to_create, batch_size=_BULK_BATCH)
     if to_update:
         LessonMark.objects.bulk_update(to_update, _MARK_UPDATE_FIELDS, batch_size=_BULK_BATCH)
+    if to_reopen:
+        LessonMark.objects.bulk_update(to_reopen, [*_MARK_UPDATE_FIELDS, "created_at"], batch_size=_BULK_BATCH)
 
     # Keep the denormalised Enrollment.absence_hours (used by the "Fənlərim"
     # exam-eligibility badge) in sync with the journal — the single source of truth.
