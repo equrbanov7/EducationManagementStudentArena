@@ -22,6 +22,7 @@ from datetime import datetime
 from django.core.exceptions import ValidationError
 from django.utils.translation import pgettext
 
+from core import superadmin_waiver
 from core.audit import log_action
 from core.constants import AuditAction
 
@@ -336,6 +337,13 @@ def create_movement(
 
     period = record.organization.academic_periods.filter(is_current=True, is_active=True).first()
     previous_status = record.status
+    # Sahib 2026-10-27: superadmin əmr №/tarixi/səbəbi yazmadan keçir — avtomatik «SA-…» əmri + qeyd.
+    waived = superadmin_waiver.waives(actor.user) and not str(order_number or "").strip()
+    if waived:
+        order_number = superadmin_waiver.order_number()
+        reason = superadmin_waiver.stamp(reason, actor.user)
+    if superadmin_waiver.waives(actor.user) and not str(order_date or "").strip():
+        order_date = superadmin_waiver.order_date().isoformat()
     previous_group = str(getattr(record.group, "name", "") or "")
 
     try:
@@ -380,6 +388,7 @@ def create_movement(
             "kind_label": str(movement.kind_label),
             "order_number": movement.order_number,
             "order_date": str(movement.order_date),
+            superadmin_waiver.AUDIT_FLAG: waived,
         },
     )
     _notify(record, movement, organization=actor.organization)

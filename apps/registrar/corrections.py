@@ -18,6 +18,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import pgettext
 
+from core import superadmin_waiver
 from core.audit import log_action
 from core.constants import AuditAction
 from core.permissions import request_has_permission
@@ -103,6 +104,26 @@ def correction_author_name(by_user, request=None) -> str:
     return f"{base} ({actor_name})"[:200]
 
 
+def _require_basis(*, reason, note, document, by_user):
+    """Səbəb + qeyd + PDF sənəd MƏCBURİDİR — superadmin istisna (sahib 2026-10-27).
+
+    Superadmin boş buraxdıqda: səbəb → «Digər», qeyd → «Superadmin düzəlişi — sənədsiz (ad, tarix)», sənəd →
+    eyni qeydli PDF (model sahəsi məcburidir; tarixçədə «sənəd» linki bu qeydi açır).
+    """
+    if superadmin_waiver.waives(by_user):
+        reason = reason if reason in CorrectionReason.values else CorrectionReason.OTHER
+        note = superadmin_waiver.fill_text(note, by_user) if document else superadmin_waiver.stamp(note, by_user)
+        document = superadmin_waiver.document_or_waiver(document, by_user)
+    if reason not in CorrectionReason.values:
+        raise ValidationError(pgettext("registrar.correction", "Choose a correction reason."))
+    note = (note or "").strip()
+    if not note:
+        raise ValidationError(pgettext("registrar.correction", "A note explaining the correction is required."))
+    if not document:
+        raise ValidationError(pgettext("registrar.correction", "A justification document (PDF) is required."))
+    return reason, note, document
+
+
 @transaction.atomic
 def apply_correction(
     *,
@@ -122,13 +143,7 @@ def apply_correction(
     ``was_empty`` — xana boş idi (mark təzə yaradıldı) → köhnə dəyər "—" (yoxdur)."""
     if field not in CorrectionField.values:
         raise ValidationError(pgettext("registrar.correction", "Choose what to correct: attendance or score."))
-    if reason not in CorrectionReason.values:
-        raise ValidationError(pgettext("registrar.correction", "Choose a correction reason."))
-    note = (note or "").strip()
-    if not note:
-        raise ValidationError(pgettext("registrar.correction", "A note explaining the correction is required."))
-    if not document:
-        raise ValidationError(pgettext("registrar.correction", "A justification document (PDF) is required."))
+    reason, note, document = _require_basis(reason=reason, note=note, document=document, by_user=by_user)
 
     from .correction_target_locks import lock_grade_for_apply
 
@@ -266,13 +281,7 @@ def apply_lesson_correction(
     sahə dəyişməlidir (əks halda ``ValidationError``)."""
     from .gradebook import LessonRuleError, update_lesson
 
-    if reason not in CorrectionReason.values:
-        raise ValidationError(pgettext("registrar.correction", "Choose a correction reason."))
-    note = (note or "").strip()
-    if not note:
-        raise ValidationError(pgettext("registrar.correction", "A note explaining the correction is required."))
-    if not document:
-        raise ValidationError(pgettext("registrar.correction", "A justification document (PDF) is required."))
+    reason, note, document = _require_basis(reason=reason, note=note, document=document, by_user=by_user)
 
     from .correction_target_locks import lock_lesson
 
@@ -420,13 +429,7 @@ def apply_lesson_deletion(*, lesson, reason, note, document, by_user, request=No
     qeyd + PDF qalır), sonra dərs (və bütün işarələri) silinir; audit yazılır."""
     from .gradebook import delete_lesson
 
-    if reason not in CorrectionReason.values:
-        raise ValidationError(pgettext("registrar.correction", "Choose a correction reason."))
-    note = (note or "").strip()
-    if not note:
-        raise ValidationError(pgettext("registrar.correction", "A note explaining the correction is required."))
-    if not document:
-        raise ValidationError(pgettext("registrar.correction", "A justification document (PDF) is required."))
+    reason, note, document = _require_basis(reason=reason, note=note, document=document, by_user=by_user)
 
     from .correction_target_locks import lock_lesson
 

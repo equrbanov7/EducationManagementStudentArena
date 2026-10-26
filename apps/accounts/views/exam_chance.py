@@ -114,6 +114,7 @@ def exam_chance(request):
                 note=request.POST.get("note"),
                 # 2026-10-24 (sahib): əsas sənəd məcburidir (server yoxlayır — UI `required` yalnız köməkçidir).
                 document=request.FILES.get("document"),
+                actor=request.user,  # superadmin: sənəd istəyə bağlıdır (sahib 2026-10-27)
             )
             # Şans + rəsmi qeyd (səbəb, əsas, müraciət keçidi) BİR tranzaksiyada — biri alınmasa heç biri yazılmır.
             with transaction.atomic():

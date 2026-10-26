@@ -24,6 +24,8 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import pgettext
 
+from core import superadmin_waiver
+
 from . import retake_decisions, retake_files
 from .models import ExamChanceGrant, ExamChanceReason, Subject
 from .retake_services import actor_label, clean_upload
@@ -76,10 +78,23 @@ def _clean_document(document):
 
 
 def validate(
-    *, organization, exam, students, reason, reference_number="", reference_date=None, note="", document=None
+    *,
+    organization,
+    exam,
+    students,
+    reason,
+    reference_number="",
+    reference_date=None,
+    note="",
+    document=None,
+    actor=None,
 ) -> dict:
     """Səbəbin tələblərini yoxla; ``{"reason", "reference_number", "reference_date", "note", "document",
-    "applications"}``."""
+    "applications"}``.
+
+    ``actor`` superadmindirsə (sahib 2026-10-27) sənəd / əmr / qeyd İSTƏYƏ BAĞLIDIR: boş qeyd avtomatik
+    «Superadmin düzəlişi — sənədsiz» mətni, boş əmr — «SA-…» nömrəsi + bu gün ilə dolur (25% müraciəti qaydası qalır).
+    """
     if reason not in ExamChanceReason.values:
         raise ValidationError(pgettext(_CTX, "Cəhdin əsasını seçin."))
     students = [s for s in students if getattr(s, "pk", None)]
@@ -89,11 +104,16 @@ def validate(
     number = str(reference_number or "").strip()[:80]
     date = _clean_date(reference_date)
     text = str(note or "").strip()[:2000]
+    waived = superadmin_waiver.waives(actor) and not (document and getattr(document, "name", ""))
+    if waived:
+        text = superadmin_waiver.stamp(text, actor)[:2000]
+        if needs_reference:
+            number, date = number or superadmin_waiver.order_number(), date or superadmin_waiver.order_date()
     if needs_reference and (not number or date is None):
         raise ValidationError(pgettext(_CTX, "Universitet güzəşti üçün əmr / sərəncam nömrəsi və tarixi məcburidir."))
     if needs_note and len(text) < NOTE_MIN:
         raise ValidationError(pgettext(_CTX, "Bu səbəb üçün qeyd məcburidir (ən azı {n} simvol).").format(n=NOTE_MIN))
-    document = _clean_document(document)
+    document = None if waived else _clean_document(document)
     applications: dict = {}
     if reason == ExamChanceReason.RETAKE_25:
         if exam.get("category") != "final":

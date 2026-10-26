@@ -48,6 +48,7 @@ from django.utils.translation import pgettext
 from apps.registrar.models import CourseOffering, ExamScoreSheetSource
 from apps.registrar.public import exam_score_entry as service
 from apps.registrar.public import exam_score_sheets as sheets_service
+from core import superadmin_waiver
 
 from ._helpers import (
     _append_query_params,
@@ -267,11 +268,12 @@ def _past_period_precheck(request, organization, offering) -> bool:
     policy = lock.write_policy(
         user=request.user, organization=organization, offering=offering, correction_mode=correction_mode
     )
-    if policy.every_write_needs_submission:
-        lock.require_submission(
+    evidence = lock.submission_evidence(request.FILES)
+    if policy.every_write_needs_submission and (evidence or not superadmin_waiver.waives(request.user)):
+        lock.require_submission(  # superadmin sənədsiz keçir (sahib 2026-10-27)
             reason=(request.POST.get("reason") or "").strip(),
             note=(request.POST.get("note") or "").strip(),
-            evidence=lock.submission_evidence(request.FILES),
+            evidence=evidence,
         )
     return correction_mode
 

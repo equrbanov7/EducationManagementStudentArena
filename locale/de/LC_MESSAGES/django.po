@@ -110856,3 +110856,11 @@ msgstr "Passwort & Benutzername"
 msgctxt "accounts.people.page"
 msgid "İstifadəçi adını dəyiş"
 msgstr "Benutzernamen ändern"
+
+msgctxt "core.superadmin_waiver"
+msgid "Superadmin: sənəd / əmr istəyə bağlıdır — boş qalsa avtomatik «Superadmin düzəlişi — sənədsiz» qeydi yazılır."
+msgstr "Superadmin: Dokument / Anordnung ist optional — bleibt das Feld leer, wird automatisch der Vermerk «Superadmin-Korrektur — ohne Dokument» gespeichert."
+
+msgctxt "registrar.guest_roster"
+msgid "SƏNƏD — TƏQDİMAT / SƏRƏNCAM (İSTƏYƏ BAĞLI)"
+msgstr "DOKUMENT — ANTRAG / ANORDNUNG (OPTIONAL)"

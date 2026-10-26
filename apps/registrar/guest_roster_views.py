@@ -18,6 +18,7 @@ from django.http import Http404, JsonResponse
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET, require_POST
 
+from core import superadmin_waiver
 from core.search_text import tolerant_q
 
 from . import guest_merge, guest_roster, subgroup_placement
@@ -236,9 +237,12 @@ def guest_add(request, offering_id):
 
     # SAHİBİN QƏRARI (2026-09-07): alt qrupdan əlavə SƏNƏDSİZ olmur — təqdimat /
     # sərəncam yüklənməlidir və qeydiyyatla birlikdə tarixçədə qalır.
+    # 2026-10-27 (sahib): superadmin sənədsiz keçir — səbəbə avtomatik «Superadmin düzəlişi — sənədsiz» qeydi.
     document = request.FILES.get("document")
-    if document is None:
+    waived = document is None and superadmin_waiver.waives(request.user)
+    if document is None and not waived:
         return _error(pgettext(_CTX, "Sənəd (təqdimat / sərəncam) yüklənməlidir — alt qrupdan əlavə sənədsiz edilmir."))
+    reason = superadmin_waiver.stamp(_field(data, "reason"), request.user) if waived else _field(data, "reason")
     from django.db import transaction
 
     from .models import GuestRosterDocument
@@ -253,24 +257,26 @@ def guest_add(request, offering_id):
                 student=student,
                 by_user=request.user,
                 source_group=group,
-                reason=_field(data, "reason"),
+                reason=reason,
                 release_source=release,
             )
-            record = GuestRosterDocument(
-                organization=offering.organization,
-                enrollment=enrollment,
-                document=document,
-                note=_field(data, "reason")[:255],
-                uploaded_by=request.user,
-            )
-            record.full_clean(exclude=["uploaded_by_name"])
-            record.save()
+            record = None
+            if document is not None:
+                record = GuestRosterDocument(
+                    organization=offering.organization,
+                    enrollment=enrollment,
+                    document=document,
+                    note=reason[:255],
+                    uploaded_by=request.user,
+                )
+                record.full_clean(exclude=["uploaded_by_name"])
+                record.save()
             subgroup_placement.record_journal_placement(
                 plan=plan,
                 enrollment=enrollment,
                 document=record,
                 actor=request.user,
-                reason=_field(data, "reason"),
+                reason=reason,
                 request=request,
             )
     except subgroup_placement.SubgroupPlacementError as exc:

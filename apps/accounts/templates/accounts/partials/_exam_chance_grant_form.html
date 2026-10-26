@@ -84,12 +84,12 @@ Server HƏR qaydanı yenidən yoxlayır (`registrar.retake_chance.validate`). Ko
       <div class="exch-grid">
         {% if s.selected_reason == "university" %}
         <div class="ems-field">
-          <label class="ems-field__label" for="exchRefNo">{% trans "Əmr / sərəncam №" context "accounts.exam_chance" %} <span class="ems-field__req">*</span></label>
-          <input type="text" id="exchRefNo" name="reference_number" class="ems-input" maxlength="80" required autocomplete="off">
+          <label class="ems-field__label" for="exchRefNo">{% trans "Əmr / sərəncam №" context "accounts.exam_chance" %}{% if not superadmin_doc_waiver %} <span class="ems-field__req">*</span>{% endif %}</label>
+          <input type="text" id="exchRefNo" name="reference_number" class="ems-input" maxlength="80"{% if not superadmin_doc_waiver %} required{% endif %} autocomplete="off">
         </div>
         <div class="ems-field">
-          <label class="ems-field__label" for="exchRefDate">{% trans "Əmr tarixi" context "accounts.exam_chance" %} <span class="ems-field__req">*</span></label>
-          <input type="date" id="exchRefDate" name="reference_date" class="ems-input ems-input--date" required>
+          <label class="ems-field__label" for="exchRefDate">{% trans "Əmr tarixi" context "accounts.exam_chance" %}{% if not superadmin_doc_waiver %} <span class="ems-field__req">*</span>{% endif %}</label>
+          <input type="date" id="exchRefDate" name="reference_date" class="ems-input ems-input--date"{% if not superadmin_doc_waiver %} required{% endif %}>
         </div>
         {% elif s.selected_reason == "appeal" %}
         <div class="ems-field">
@@ -103,15 +103,16 @@ Server HƏR qaydanı yenidən yoxlayır (`registrar.retake_chance.validate`). Ko
         </div>
       </div>
       <div class="ems-field">
-        <label class="ems-field__label" for="exchDocument">{% trans "Sənəd" context "accounts.exam_chance" %} <span class="ems-field__req">*</span></label>
-        <input type="file" id="exchDocument" name="document" class="ems-input exch-file" required accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" aria-describedby="exchDocumentHint">
+        <label class="ems-field__label" for="exchDocument">{% trans "Sənəd" context "accounts.exam_chance" %}{% if not superadmin_doc_waiver %} <span class="ems-field__req">*</span>{% endif %}</label>
+        <input type="file" id="exchDocument" name="document" class="ems-input exch-file"{% if not superadmin_doc_waiver %} required{% endif %} accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" aria-describedby="exchDocumentHint">
         <span class="ems-field__hint" id="exchDocumentHint">{% trans "Əmr / sərəncam, ərizə və ya qərarın surəti — PDF, JPG və ya PNG, ən çox 10 MB. Sənədsiz cəhd hüququ verilmir." context "accounts.exam_chance" %}</span>
+        {% include "partials/ems_ui/_superadmin_waiver_hint.html" %}
       </div>
       <div class="ems-field">
         <label class="ems-field__label" for="exchNote">{% trans "Qeyd" context "accounts.exam_chance" %}
-          {% if s.selected_reason == "retake_25" %}<span class="ems-field__opt">{% trans "(istəyə bağlı)" context "ui.dialog" %}</span>{% else %}<span class="ems-field__req">*</span>{% endif %}
+          {% if s.selected_reason == "retake_25" or superadmin_doc_waiver %}<span class="ems-field__opt">{% trans "(istəyə bağlı)" context "ui.dialog" %}</span>{% else %}<span class="ems-field__req">*</span>{% endif %}
         </label>
-        <textarea id="exchNote" name="note" class="ems-textarea exch-textarea" rows="3" maxlength="2000"{% if s.selected_reason != "retake_25" %} required minlength="10"{% endif %}
+        <textarea id="exchNote" name="note" class="ems-textarea exch-textarea" rows="3" maxlength="2000"{% if s.selected_reason != "retake_25" and not superadmin_doc_waiver %} required minlength="10"{% endif %}
                   placeholder="{% trans 'Nə baş verib, kim qərar verib…' context 'accounts.exam_chance' %}"></textarea>
       </div>
     </fieldset>

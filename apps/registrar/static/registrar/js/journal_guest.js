@@ -323,7 +323,8 @@
         var ready = !!(group.value() && student.value());
         // SƏNƏD MƏCBURİDİR (sahib, 2026-09-07) — fayl seçilməyibsə düymə bağlı qalır.
         var docEl = modal.querySelector("[data-jgs-document]");
-        if (ready && docEl && !(docEl.files && docEl.files.length)) {
+        var docOptional = attr(modal, "data-document-optional") === "1"; // superadmin (sahib 2026-10-27)
+        if (ready && docEl && !docOptional && !(docEl.files && docEl.files.length)) {
             ready = false;
         }
         // Münaqişə varsa təsdiq YALNIZ «azad et» işarələnəndən + səbəb
@@ -446,7 +447,8 @@
         show(skeleton);
         setError(modal, "");
         var docEl = modal.querySelector("[data-jgs-document]");
-        if (docEl && !(docEl.files && docEl.files.length)) {
+        var hasDoc = !!(docEl && docEl.files && docEl.files.length);
+        if (!hasDoc && attr(modal, "data-document-optional") !== "1") {
             hide(skeleton);
             button.disabled = false;
             setError(modal, attr(modal, "data-document-required"));
@@ -458,7 +460,7 @@
         body.append("student", pickers.student.value());
         body.append("reason", reason ? reason.value : "");
         body.append("release_source", releaseChecked(modal) ? "1" : "0");
-        if (docEl) body.append("document", docEl.files[0]);
+        if (hasDoc) body.append("document", docEl.files[0]);
         window.EMSCore.fetchJSON(attr(modal, "data-add-url"), { method: "POST", body: body })
             .then(function (payload) {
                 hide(skeleton);

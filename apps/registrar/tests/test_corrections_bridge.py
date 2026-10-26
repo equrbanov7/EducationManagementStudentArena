@@ -181,7 +181,7 @@ class CorrectionServiceTest(_BaseJournalSetup):
                     reason=CorrectionReason.TECHNICAL,
                     note="",
                     document=_pdf(),
-                    by_user=self.admin,
+                    by_user=self.teacher,  # superadmin sənədsiz keçir (2026-10-27) — qayda adi korrektorda yoxlanır
                 )
             with self.assertRaises(ValidationError):
                 corrections.apply_correction(
@@ -191,7 +191,7 @@ class CorrectionServiceTest(_BaseJournalSetup):
                     reason=CorrectionReason.TECHNICAL,
                     note="düzəliş",
                     document=None,
-                    by_user=self.admin,
+                    by_user=self.teacher,
                 )
 
     def test_score_correction_is_whole_number_and_recorded(self):
@@ -659,7 +659,7 @@ class LessonCorrectionServiceTest(_BaseJournalSetup):
                     reason=CorrectionReason.TECHNICAL,
                     note="Səhv tarix",
                     document=None,
-                    by_user=self.admin,
+                    by_user=self.teacher,  # superadmin sənədsiz keçir (2026-10-27) — qayda adi korrektorda yoxlanır
                 )
 
     def test_changes_date_and_kind_and_records_snapshot(self):
@@ -733,8 +733,8 @@ class LessonCorrectionServiceTest(_BaseJournalSetup):
         with bypass_rls():
             with self.assertRaises(ValidationError):
                 corrections.apply_lesson_deletion(
-                    lesson=lesson, reason=CorrectionReason.TECHNICAL, note="x", document=None, by_user=self.admin
-                )
+                    lesson=lesson, reason=CorrectionReason.TECHNICAL, note="x", document=None, by_user=self.teacher
+                )  # adi korrektor (superadmin 2026-10-27-dən sənədsiz keçir)
             self.assertTrue(Lesson.objects.filter(id=lesson_id).exists())  # sənədsiz silinmədi
             corr = corrections.apply_lesson_deletion(
                 lesson=lesson,
@@ -769,7 +769,7 @@ class ItemCorrectionTest(_BaseJournalSetup):
                     reason=CorrectionReason.TECHNICAL,
                     note="x",
                     document=None,
-                    by_user=self.admin,
+                    by_user=self.teacher,  # superadmin sənədsiz keçir (2026-10-27) — qayda adi korrektorda yoxlanır
                 )
             corr = item_corrections.apply_selfwork_correction(
                 offering=self.offering,
@@ -861,7 +861,7 @@ class ItemCorrectionTest(_BaseJournalSetup):
                     reason=CorrectionReason.TECHNICAL,
                     note="x",
                     document=None,
-                    by_user=self.admin,
+                    by_user=self.teacher,  # superadmin sənədsiz keçir (2026-10-27) — qayda adi korrektorda yoxlanır
                 )
             # Geri al → köhnə (yox) dəyər → ComponentScore silinir, sarı gedir.
             self.assertTrue(

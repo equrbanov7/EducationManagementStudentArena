@@ -206,6 +206,7 @@ class _BulkSave:
                     kind=row.get("kind") or "",
                     rules=self.rules,
                     enrollment_id=enrollment.pk,
+                    by_user=self.by_user,
                 )
                 if entry_kind is None:
                     slot["state"] = _SKIPPED  # eyni bal → nə dublikat sətir, nə audit

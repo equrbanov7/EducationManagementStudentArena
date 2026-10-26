@@ -18,6 +18,8 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import pgettext
 
+from core import superadmin_waiver
+
 from ...models import AppealDecisionRecord
 from ...services.documents import can_download_document, document_required, validate_decision_document
 from ...services.teachers import decision_teacher_options, resolve_decision_teacher, subject_teachers
@@ -39,7 +41,9 @@ def parse_decision_extras(request, appeal):
     teacher = resolve_decision_teacher(appeal, raw)
     if teacher is None:
         raise ValidationError(pgettext("appeals.view.message", "Qərarı verən müəllimi seçin."))
-    document = validate_decision_document(request.FILES.get(DOCUMENT_FIELD))
+    # Superadmin sənədsiz qərar verə bilir (sahib 2026-10-27) — tənzimləmə yandırılıbsa belə; audit qeyd edir.
+    required = False if superadmin_waiver.waives(request.user) else None
+    document = validate_decision_document(request.FILES.get(DOCUMENT_FIELD), required=required)
     return teacher, document
 
 
@@ -80,7 +84,11 @@ def _audit_decision(request, appeal, record):
                 user=request.user,
                 organization=appeal.organization,
                 obj=record,
-                reason="Appeal decisions saved",
+                reason=(
+                    "Appeal decisions saved"
+                    if record.document or not document_required()
+                    else f"Appeal decisions saved · {superadmin_waiver.note(request.user)}"
+                ),
                 request=request,
                 resource_type="appeals.decision_record",
                 resource_id=str(record.pk),
@@ -116,7 +124,7 @@ def review_teacher_context(request, appeal, items):
         "review_subject_teachers": subject_teachers(appeal),
         "review_teacher_options": options,
         "review_teacher_selected": current or options["default_id"],
-        "review_document_required": document_required(),
+        "review_document_required": document_required() and not superadmin_waiver.waives(request.user),
         "review_teacher_field": TEACHER_FIELD,
         "review_document_field": DOCUMENT_FIELD,
     }

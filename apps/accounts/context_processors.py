@@ -49,6 +49,9 @@ def view_as_context(request):
         target_name = (f"{target.first_name} {target.last_name}").strip() or target.username
 
     return {
+        # Sahib 2026-10-27: superadmin sənəd / əmr yükləmədən dəyişir — şablonlar «*» və client `required`-i gizlədir
+        # (server qaydası `core.superadmin_waiver`; view-as zamanı `request.user` hədəfdir → yenə məcburi).
+        "superadmin_doc_waiver": _is_superadmin(user),
         "view_as": {
             "active": is_active,
             "mode": mode,
@@ -58,5 +61,5 @@ def view_as_context(request):
             "can_use": can_use,
             "can_view_archived": can_view_archived,
             "is_superadmin": _is_superadmin(real_user),
-        }
+        },
     }

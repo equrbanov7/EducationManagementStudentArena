@@ -109238,3 +109238,11 @@ msgstr "Parola ve kullanıcı adı"
 msgctxt "accounts.people.page"
 msgid "İstifadəçi adını dəyiş"
 msgstr "Kullanıcı adını değiştir"
+
+msgctxt "core.superadmin_waiver"
+msgid "Superadmin: sənəd / əmr istəyə bağlıdır — boş qalsa avtomatik «Superadmin düzəlişi — sənədsiz» qeydi yazılır."
+msgstr "Süper yönetici: belge / emir isteğe bağlıdır — boş bırakılırsa otomatik olarak «Süper yönetici düzeltmesi — belgesiz» notu yazılır."
+
+msgctxt "registrar.guest_roster"
+msgid "SƏNƏD — TƏQDİMAT / SƏRƏNCAM (İSTƏYƏ BAĞLI)"
+msgstr "BELGE — TEKLİF / EMİR (İSTEĞE BAĞLI)"

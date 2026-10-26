@@ -63,9 +63,10 @@
     </div>
 </div>
 <div class="ems-field">
-    <label class="ems-field__label" for="crDocument">{% trans "Əsas sənəd (transkript, Learning Agreement və ya əmr)" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-    <input class="ems-input" type="file" id="crDocument" name="document" accept=".pdf,.jpg,.jpeg,.png" required>
+    <label class="ems-field__label" for="crDocument">{% trans "Əsas sənəd (transkript, Learning Agreement və ya əmr)" context "registrar.recognition" %}{% if not superadmin_doc_waiver %} <span class="ems-field__req" aria-hidden="true">*</span>{% endif %}</label>
+    <input class="ems-input" type="file" id="crDocument" name="document" accept=".pdf,.jpg,.jpeg,.png"{% if not superadmin_doc_waiver %} required{% endif %}>
     <span class="ems-field__hint">{% trans "PDF, JPG və ya PNG · ən çox 10 MB" context "registrar.recognition" %}</span>
+    {% include "partials/ems_ui/_superadmin_waiver_hint.html" %}
 </div>
 <div class="ems-field">
     <label class="ems-field__label" for="crNote">{% trans "Qeyd" context "registrar.recognition" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "registrar.recognition" %}</span></label>

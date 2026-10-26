@@ -54,6 +54,7 @@ def create(request, student_id):
             student_id=student_id,
             data=request.POST,
             document=request.FILES.get("document"),
+            actor=request.user,
         )
         result = credit_recognition.create(
             organization=organization, student_id=student_id, cleaned=cleaned, actor=request.user, request=request

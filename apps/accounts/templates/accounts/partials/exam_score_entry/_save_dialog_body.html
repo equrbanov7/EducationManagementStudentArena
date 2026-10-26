@@ -91,7 +91,7 @@ Skan DİALOQUN öz fayl sahəsində (`justification_evidence`) və ya vərəq ka
   </p>
   <div class="ese-just__grid" data-ese-just-reason-wrap>
     <div class="ems-field">
-      <label class="ems-field__label" for="ese-reason">{% trans "Səbəb" context "registrar.exam_score_entry" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+      <label class="ems-field__label" for="ese-reason">{% trans "Səbəb" context "registrar.exam_score_entry" %}{% if not superadmin_doc_waiver %} <span class="ems-field__req" aria-hidden="true">*</span>{% endif %}</label>
       <div class="bootstrap-single-select bootstrap-single-select--ems ese-selectwrap">
         <select id="ese-reason" name="reason" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-ese-reason>
           <option value="">—</option>
@@ -103,13 +103,13 @@ Skan DİALOQUN öz fayl sahəsində (`justification_evidence`) və ya vərəq ka
     </div>
   </div>
   <div class="ems-field">
-    <label class="ems-field__label" for="ese-note">{% trans "Qeyd" context "registrar.exam_score_entry" %} <span class="ems-field__req" aria-hidden="true" data-ese-note-req>*</span></label>
+    <label class="ems-field__label" for="ese-note">{% trans "Qeyd" context "registrar.exam_score_entry" %}{% if not superadmin_doc_waiver %} <span class="ems-field__req" aria-hidden="true" data-ese-note-req>*</span>{% endif %}</label>
     <textarea id="ese-note" name="note" class="ems-textarea" rows="3" maxlength="500" data-ese-note></textarea>
   </div>
   {# 2026-09-26 (sahib: «file yükləmə yeri də olsun, məcburi»): skan DİALOQUN İÇİNDƏ seçilir; #}
   {# vərəq kartında seçilmiş fayl da qəbul olunur (server: dialoq faylı üstündür). #}
   <div class="ems-field">
-    <span class="ems-field__label" id="ese-just-file-label">{% trans "Skan edilmiş sənəd (təqdimat / apellyasiya)" context "registrar.exam_score_entry" %} <span class="ems-field__req" aria-hidden="true">*</span></span>
+    <span class="ems-field__label" id="ese-just-file-label">{% trans "Skan edilmiş sənəd (təqdimat / apellyasiya)" context "registrar.exam_score_entry" %}{% if not superadmin_doc_waiver %} <span class="ems-field__req" aria-hidden="true">*</span>{% endif %}</span>
     <label class="ese-drop ese-drop--compact" data-ese-just-drop>
       <input type="file" class="ese-drop__input" name="{{ s.justification_file_field }}"
              accept="{{ s.evidence_accept }}" aria-labelledby="ese-just-file-label" data-ese-just-file>
@@ -117,6 +117,7 @@ Skan DİALOQUN öz fayl sahəsində (`justification_evidence`) və ya vərəq ka
       <span class="ese-drop__title" data-ese-just-file-name data-empty="{% trans 'Faylı seçmək üçün klikləyin və ya bura sürüşdürün' context 'registrar.exam_score_entry' %}">{% trans "Faylı seçmək üçün klikləyin və ya bura sürüşdürün" context "registrar.exam_score_entry" %}</span>
       <span class="ese-drop__hint">{{ s.evidence_accept }} · {% blocktrans context "registrar.exam_score_entry" with size=s.evidence_max_mb %}ən çox {{ size }} MB{% endblocktrans %}</span>
     </label>
+    {% include "partials/ems_ui/_superadmin_waiver_hint.html" %}
   </div>
   <p class="ese-just__scan" data-ese-scan-status></p>
 </div>

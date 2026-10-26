@@ -41,6 +41,7 @@ from apps.registrar.models import CorrectionReason, ExamScoreSheetSource
 from apps.registrar.public import exam_score_entry as service
 from apps.registrar.public import exam_score_import as importer
 from apps.registrar.public import exam_score_sheets as sheets_service
+from core import superadmin_waiver
 from core.write_rate_limit import score_write_rate_limited
 
 from ._helpers import _is_superadmin_user
@@ -283,6 +284,8 @@ def _justification_error(plan, request, policy):
     reason = (request.POST.get("reason") or "").strip()
     note = (request.POST.get("note") or "").strip()
     evidence = service.exam_score_period_lock.submission_evidence(request.FILES)
+    if evidence is None and superadmin_waiver.waives(request.user):
+        return None  # superadmin sənədsiz keçir — sətirlərə avtomatik qeyd düşür (sahib 2026-10-27)
     if reason not in CorrectionReason.values or not note or evidence is None:
         if policy.every_write_needs_submission:
             return _bad(

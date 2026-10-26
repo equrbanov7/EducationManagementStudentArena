@@ -32,6 +32,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.utils.translation import pgettext
 
+from core import superadmin_waiver
 from core.audit import log_action
 from core.constants import AuditAction
 
@@ -172,7 +173,8 @@ def apply_correction(*, organization, fact_id, score, reason, note, evidence, ac
                 "Bu fakt qeydiyyata bağlanmayıb — düzəliş üçün əvvəlcə sahibi müəyyənləşdirilməlidir.",
             )
         )
-    note = _clean_note(note, required=True)
+    # Superadmin qeydsiz / sənədsiz düzəldə bilir (sahib 2026-10-27) — bal yazısı sətrə avtomatik qeyd düşürür.
+    note = _clean_note(superadmin_waiver.fill_text(note, actor, min_length=MIN_NOTE_LENGTH), required=True)
     # Kateqoriya möhürü BAL YAZILMAZDAN ƏVVƏL çıxarılır: `live_exam_mismatch`
     # şərti məhz bu düzəlişlə pozulacaq, sonra soruşsaq möhür boş qayıdardı.
     category_codes = encode_category_codes(matched_category_codes(organization=organization, fact_id=fact.pk))

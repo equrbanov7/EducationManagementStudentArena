@@ -32,7 +32,7 @@ from __future__ import annotations
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from core import runtime_settings
+from core import runtime_settings, superadmin_waiver
 from core.audit import log_action
 from core.constants import AuditAction
 
@@ -214,10 +214,17 @@ def place_in_subgroup(*, student, offering, document, actor, reason, request=Non
         raise SubgroupPlacementError(errors.FORBIDDEN)
     if not access.has_placement_key(actor, offering.organization):
         raise SubgroupPlacementError(errors.FORBIDDEN)
+    # Sahib 2026-10-27: superadmin səbəb / sənəd yazmadan keçir — avtomatik qeyd + «SA-…» sərəncamı.
+    doc = documents.coerce(document)
+    waived = documents.apply_waiver(doc, actor)
     reason = _clean_reason(reason)
+    if waived is not doc:
+        reason, doc = superadmin_waiver.stamp(reason, actor)[:MAX_REASON_LENGTH], waived
+    elif superadmin_waiver.waives(actor):
+        reason = superadmin_waiver.fill_text(reason, actor, min_length=MIN_REASON_LENGTH)[:MAX_REASON_LENGTH]
     if len(reason) < MIN_REASON_LENGTH:
         raise SubgroupPlacementError(errors.REASON_REQUIRED)
-    doc = documents.validate(documents.coerce(document))
+    doc = documents.validate(doc)
     stored_files: list = []
     try:
         return _place(
@@ -306,7 +313,7 @@ def undo_placement(*, event_id, actor, reason, organization, request=None) -> di
     """Yerləşdirməni RƏSMİ yolla geri götürür (``remove_guest_student``) — tarixçə qalır, ``undo`` sətri yazılır."""
     if not access.has_placement_key(actor, organization):
         raise SubgroupPlacementError(errors.FORBIDDEN)
-    reason = _clean_reason(reason)
+    reason = superadmin_waiver.fill_text(_clean_reason(reason), actor, min_length=MIN_REASON_LENGTH)
     if len(reason) < MIN_REASON_LENGTH:
         raise SubgroupPlacementError(errors.REASON_REQUIRED)
     with transaction.atomic():

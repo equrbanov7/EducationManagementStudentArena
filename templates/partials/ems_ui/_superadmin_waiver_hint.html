@@ -1,0 +1,4 @@
+{% load i18n %}
+{% comment %}Superadmin sənədsiz düzəliş (sahib 2026-10-27) — sənəd / əmr sahəsinin yanında qısa izah.
+Yalnız `superadmin_doc_waiver` (context processor) doğrudursa göstərilir; server qaydası `core.superadmin_waiver`.{% endcomment %}
+{% if superadmin_doc_waiver %}<p class="ems-field__hint" data-superadmin-waiver-hint>{% trans "Superadmin: sənəd / əmr istəyə bağlıdır — boş qalsa avtomatik «Superadmin düzəlişi — sənədsiz» qeydi yazılır." context "core.superadmin_waiver" %}</p>{% endif %}

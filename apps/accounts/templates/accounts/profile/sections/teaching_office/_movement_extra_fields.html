@@ -10,15 +10,16 @@ qalsa ledger/audit sətrinə əmrdən qurulan mətn yazılır. Kim və nə vaxt 
 audit + `StudentMovement` sətrində qalır (silinmir).{% endcomment %}
 <div class="ems-grid ems-grid--2 tof-movement-fields">
     <div class="ems-field">
-        <label class="ems-field__label" for="{{ reason_id }}-order-number">{% trans "Əmr nömrəsi" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-        <input type="text" class="ems-input" id="{{ reason_id }}-order-number" name="order_number" maxlength="64" autocomplete="off" data-ems-required
+        <label class="ems-field__label" for="{{ reason_id }}-order-number">{% trans "Əmr nömrəsi" context "accounts.groups" %}{% if not superadmin_doc_waiver %} <span class="ems-field__req" aria-hidden="true">*</span>{% endif %}</label>
+        <input type="text" class="ems-input" id="{{ reason_id }}-order-number" name="order_number" maxlength="64" autocomplete="off"{% if not superadmin_doc_waiver %} data-ems-required{% endif %}
                placeholder="{% trans 'Məs.: 12/T' context 'accounts.groups' %}">
     </div>
     <div class="ems-field">
-        <label class="ems-field__label" for="{{ reason_id }}-order-date">{% trans "Əmr tarixi" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-        <input type="date" class="ems-input" id="{{ reason_id }}-order-date" name="order_date" data-ems-required>
+        <label class="ems-field__label" for="{{ reason_id }}-order-date">{% trans "Əmr tarixi" context "accounts.groups" %}{% if not superadmin_doc_waiver %} <span class="ems-field__req" aria-hidden="true">*</span>{% endif %}</label>
+        <input type="date" class="ems-input" id="{{ reason_id }}-order-date" name="order_date"{% if not superadmin_doc_waiver %} data-ems-required{% endif %}>
     </div>
 </div>
+{% include "partials/ems_ui/_superadmin_waiver_hint.html" %}
 {% if movement_target_group %}
 <div class="ems-field">
     <label class="ems-field__label" for="{{ reason_id }}-target">{% trans "Hədəf qrup" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
