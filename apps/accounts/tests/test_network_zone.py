@@ -205,6 +205,22 @@ class TemporarySuperuserAnywhereTest(ViewAsTestBase):
         self.assertEqual(self.client.get(profile, REMOTE_ADDR=self.EXT).status_code, 200)
 
     @override_settings(**ZONE)
+    def test_password_login_from_outside_keeps_session(self):
+        """Giriş sorğusunun özündə də istisna yoxlanır (əvvəl login() dərhal ləğv olunurdu — 403 «yalnız daxili şəbəkə»)."""
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        call_command("grant_temporary_superuser", "--username", self.admin.username, "--apply", stdout=StringIO())
+        self.client.post(
+            reverse("accounts:staff_login"),
+            {"username": self.admin.username, "password": PASSWORD},
+            REMOTE_ADDR=self.EXT,
+        )
+        self.assertIn("_auth_user_id", self.client.session)
+        self.assertEqual(self.client.get(reverse("accounts:profile"), REMOTE_ADDR=self.EXT).status_code, 200)
+
+    @override_settings(**ZONE)
     def test_permanent_superadmin_still_internal_only(self):
         self._login(self.superadmin)
         self.assertEqual(self.client.get(reverse("accounts:profile"), REMOTE_ADDR=self.EXT).status_code, 403)

@@ -350,7 +350,14 @@ class NetworkZoneMiddleware:
         # Sahib 2026-10-05: superadmin YALNIZ universitet şəbəkəsindən. Giriş formaları
         # (və OTP addımları) açıq yoldur — bu sorğuda login() superadmin sessiyası
         # açıbsa, kənar zonada həmin sessiya dərhal ləğv edilir.
-        if _superadmin_gate_enabled() and _is_superadmin(request) and not _is_logout_path(path):
+        if (
+            _superadmin_gate_enabled()
+            and _is_superadmin(request)
+            and not _is_logout_path(path)
+            # Sahib 2026-10-27: login() bu sorğuda sessiyanı açıbsa, müvəqqəti girişi YENİDƏN yoxla (sorğunun
+            # əvvəlində istifadəçi hələ anonim idi — istisna görünmürdü və giriş dərhal ləğv olunurdu).
+            and not temporary_superuser_exempt(request)
+        ):
             return self._deny_superadmin(request)
         return response
 
