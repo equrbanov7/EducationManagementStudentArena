@@ -8,8 +8,17 @@ yazmaq olur; gələcək tarix olmaz — :func:`lesson_date_error` / :class:`Entr
 = 15 (XANA KİLİDİ: ilk yazılışdan — ``LessonMark.created_at`` — 15 dəqiqə sonra xana donur; köçürülmüş xana,
 ``entered_by`` boş, həmişə kilidlidir — :func:`mark_lock_reason`). Kilidli xananın mesajı :func:`lock_message`.
 
+SAHİB 2026-10-26: «15 dəqiqə sonra i/e-ni dəyişmək olmur — onu dəyişmək olsun; qb-ni və balı dəyişmək olmasın.»
+Ona görə kilid YALNIZ q/b (və üzrlü qayıb) və BAL daşıyan xanaya düşür. Balsız i/e xanası (``status=present``,
+``score`` boş — :func:`is_open_presence`) pəncərədən sonra da, köçürülmüş olsa da dəyişir, amma YENİ qeyd kimi:
+dərsə yeni qeyd yazmaq olursa (:class:`EntryRule` — 7 günlük yazma pəncərəsi, aktivləşdirmə pəncərəsi). Müddəti
+bitmiş dərsin i/e xanası ``LOCK_ENTRY`` ilə kilidlidir. Pəncərədən sonra dəyişdirilən i/e xanasının kilid saatı
+YENİDƏN başlayır (``created_at`` = dəyişiklik anı): yeni q/b/bal da yazılışından 15 dəqiqə sonra donur.
+DB trigger-i (registrar 0106) eyni istisnanı edir — ``registrar_lessonmark``-da köhnə dəyəri balsız i/e olan
+sətrin UPDATE-i pəncərədən asılı deyil (yazma pəncərəsi isə yalnız servis qatındadır).
+
 * dərs sətri (tarix/növ/mövzu/saat/silmə) — yaranışdan sonra ``lesson_edit_window()``;
-* q/b, i/e və bal — yazılışdan sonra ``mark_edit_window()``; Postgres trigger-i eyni açarları oxuyur
+* q/b və bal — yazılışdan sonra ``mark_edit_window()`` (balsız i/e — yazma pəncərəsi); Postgres trigger-i eyni açarları oxuyur
   (registrar 0089: əvvəl ``journal.mark_edit_minutes``, sonra köhnə ``journal.mark_edit_hours``), ona görə
   servis və DB qaydası üst-üstə düşür;
 * gecikmiş yazı — ``journal.late_entry_days`` (defolt 7; 0 = yalnız dərs günü): müəllim dərs tarixindən ən çox
@@ -33,6 +42,8 @@ from datetime import timedelta
 from django.utils import timezone
 from django.utils.translation import pgettext
 
+from apps.registrar.models import AttendanceStatus
+
 _CTX = "registrar.journal_timing"
 DEFAULT_WINDOW_MINUTES = 120
 DEFAULT_MARK_LOCK_MINUTES = 15  # sahib 2026-10-25: xana ilk yazılışdan 15 dəqiqə sonra donur
@@ -44,6 +55,7 @@ MARK_EDIT_WINDOW = timedelta(minutes=DEFAULT_MARK_LOCK_MINUTES)  # iştirak/bal 
 LOCK_TIME = "time"  # müəllim yazıb, pəncərə bitib
 LOCK_LEGACY = "legacy"  # köhnə sistemdən köçürülüb (``entered_by`` boş)
 LOCK_CORRECTED = "corrected"  # RİM-in rəsmi (sənədli) düzəlişi var
+LOCK_ENTRY = "entry"  # balsız i/e xanası, amma dərsin yazma müddəti bitib (sahib 2026-10-26)
 
 #: «RİM-ə müraciət edib təqdimat yazın» keçidinin müraciət növü — müəllimin göndərə bildiyi və RİM-ə gedən
 #: YEGANƏ növ «Texniki problem»dir (qeydi: «Sistemə giriş, jurnal, e-poçt»). Ayrıca «Jurnal düzəlişi» növü
@@ -127,21 +139,44 @@ def lesson_date_error(parsed, *, today=None) -> str:
 past_date_error = lesson_date_error
 
 
-def mark_lock_reason(mark, *, now=None, window=None) -> str:
-    """Müəllim bu xananı DƏYİŞƏ bilmirsə səbəb (``LOCK_TIME`` / ``LOCK_LEGACY``), bilirsə «».
+def is_open_presence(mark) -> bool:
+    """Balsız i/e xanası (``status=present``, ``score`` boş) — pəncərədən sonra da dəyişə bilən YEGANƏ dəyər."""
+    return mark is not None and mark.status == AttendanceStatus.PRESENT and mark.score is None
+
+
+def _within_window(mark, *, now, window) -> bool:
+    """Müəllimin yazdığı xana İLK yazılışından pəncərə ərzindədir (köçürülmüş xana heç vaxt)."""
+    if getattr(mark, "entered_by_id", None) is None:
+        return False
+    return (now - mark.created_at) <= (window if window is not None else mark_edit_window())
+
+
+def reopens_presence(mark, *, now=None, window=None) -> bool:
+    """Pəncərədən kənar (və ya köçürülmüş) balsız i/e xanası — dəyişikliyi YENİ qeyd kimi yazılır
+    (:class:`EntryRule`-a tabedir, kilid saatı yenidən başlayır; sahib 2026-10-26)."""
+    return is_open_presence(mark) and not _within_window(mark, now=now or timezone.now(), window=window)
+
+
+def mark_lock_reason(mark, *, now=None, window=None, entry_open=True) -> str:
+    """Müəllim bu xananı DƏYİŞƏ bilmirsə səbəb (``LOCK_TIME`` / ``LOCK_LEGACY`` / ``LOCK_ENTRY``), bilirsə «».
 
     Boş xana (``None``) kilidli deyil (yeni qeyd :class:`EntryRule`-a tabedir). Kilid İLK yazılışdan
-    (``created_at``) sayılır — sonrakı düzəliş saatı uzatmır. Rəsmi düzəliş kilidi ayrıca yoxlanır
-    (sorğu tələb edir). Sistem yazıları (midterm/imtahan sinxronu, rəsmi düzəliş) bu qaydaya tabe deyil.
+    (``created_at``) sayılır — sonrakı düzəliş saatı uzatmır. Kilid YALNIZ q/b və bal daşıyan xanaya düşür
+    (sahib 2026-10-26): balsız i/e xanası pəncərədən sonra da dəyişir, bu dərsə yeni qeyd yazmaq olursa
+    (``entry_open`` — çağıran ``EntryRule.allows(lesson)`` ötürür), olmursa ``LOCK_ENTRY``. Rəsmi düzəliş
+    kilidi ayrıca yoxlanır (sorğu tələb edir). Sistem yazıları (midterm/imtahan sinxronu, rəsmi düzəliş) bu
+    qaydaya tabe deyil.
     """
     if mark is None:
         return ""
+    now = now or timezone.now()
+    if _within_window(mark, now=now, window=window):
+        return ""
+    if is_open_presence(mark):
+        return "" if entry_open else LOCK_ENTRY
     if getattr(mark, "entered_by_id", None) is None:
         return LOCK_LEGACY
-    now = now or timezone.now()
-    if (now - mark.created_at) > (window if window is not None else mark_edit_window()):
-        return LOCK_TIME
-    return ""
+    return LOCK_TIME
 
 
 def lock_message(reason: str, *, window=None) -> str:
@@ -158,11 +193,17 @@ def lock_message(reason: str, *, window=None) -> str:
             "Bu xanaya rəsmi düzəliş edilib və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib "
             "təqdimat yazın.",
         )
+    if reason == LOCK_ENTRY:
+        return pgettext(
+            _CTX,
+            "Bu dərsin yazma müddəti bitib — i/e qeydi artıq dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət "
+            "edib təqdimat yazın.",
+        )
     minutes = max(1, int((window if window is not None else mark_edit_window()).total_seconds() // 60))
     return pgettext(
         _CTX,
-        "Bu qiymət %(m)s dəqiqədən çox əvvəl yazılıb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib "
-        "təqdimat yazın.",
+        "Bu q/b və ya bal %(m)s dəqiqədən çox əvvəl yazılıb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə "
+        "müraciət edib təqdimat yazın.",
     ) % {"m": minutes}
 
 
@@ -244,6 +285,7 @@ def template_context(today=None) -> dict:
         "mark_lock_messages": {
             LOCK_TIME: lock_message(LOCK_TIME, window=mark_window),
             LOCK_LEGACY: lock_message(LOCK_LEGACY),
+            LOCK_ENTRY: lock_message(LOCK_ENTRY),
         },
         "mark_lock_request_url": fix_request_url(),
     }
@@ -257,6 +299,7 @@ __all__ = [
     "FIX_APPLICATION_KIND",
     "LESSON_EDIT_WINDOW",
     "LOCK_CORRECTED",
+    "LOCK_ENTRY",
     "LOCK_LEGACY",
     "LOCK_TIME",
     "MARK_EDIT_WINDOW",
@@ -265,6 +308,7 @@ __all__ = [
     "duration_text",
     "earliest_entry_date",
     "fix_request_url",
+    "is_open_presence",
     "late_entry_days",
     "lesson_date_error",
     "lesson_edit_window",
@@ -272,5 +316,6 @@ __all__ = [
     "mark_edit_window",
     "mark_lock_reason",
     "past_date_error",
+    "reopens_presence",
     "template_context",
 ]

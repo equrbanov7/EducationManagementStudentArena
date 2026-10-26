@@ -108985,3 +108985,12 @@ msgstr "Başka bilgisayarda devam et"
 msgctxt "exams.final_center.monitor_pin"
 msgid "Kompüter xarab olubsa: tələbə başqa qeydli kompüterdən /exams/final/ (və ya /exams/midterm/) səhifəsində istifadəçi adı + bu PIN ilə daxil olur."
 msgstr "Bilgisayar arızalandıysa: öğrenci kayıtlı başka bir bilgisayardan /exams/final/ (veya /exams/midterm/) sayfasında kullanıcı adı + bu PIN ile giriş yapar."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Bu q/b və ya bal %(m)s dəqiqədən çox əvvəl yazılıb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Bu devamsızlık veya puan %(m)s dakikadan daha önce yazıldı ve değiştirilemez. Değişiklik için RİM'e başvurup dilekçe yazın."
+
+msgctxt "registrar.journal_timing"
+msgid "Bu dərsin yazma müddəti bitib — i/e qeydi artıq dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Bu dersin giriş süresi doldu — «katıldı» kaydı artık değiştirilemez. Değişiklik için RİM'e başvurup dilekçe yazın."

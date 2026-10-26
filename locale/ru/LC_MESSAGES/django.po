@@ -109771,3 +109771,12 @@ msgstr "Продолжить на другом компьютере"
 msgctxt "exams.final_center.monitor_pin"
 msgid "Kompüter xarab olubsa: tələbə başqa qeydli kompüterdən /exams/final/ (və ya /exams/midterm/) səhifəsində istifadəçi adı + bu PIN ilə daxil olur."
 msgstr "Если компьютер вышел из строя: студент входит на другом зарегистрированном компьютере на странице /exams/final/ (или /exams/midterm/) с логином и этим PIN."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Bu q/b və ya bal %(m)s dəqiqədən çox əvvəl yazılıb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Эта отметка «н/б» или балл внесены более %(m)s минут назад и не могут быть изменены. Для изменения обратитесь в РИМ с письменным представлением."
+
+msgctxt "registrar.journal_timing"
+msgid "Bu dərsin yazma müddəti bitib — i/e qeydi artıq dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Срок внесения записей по этому занятию истёк — отметку «присутствовал» больше нельзя изменить. Для изменения обратитесь в РИМ с письменным представлением."

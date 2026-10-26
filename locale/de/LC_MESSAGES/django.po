@@ -110603,3 +110603,12 @@ msgstr "Auf anderem Computer fortsetzen"
 msgctxt "exams.final_center.monitor_pin"
 msgid "Kompüter xarab olubsa: tələbə başqa qeydli kompüterdən /exams/final/ (və ya /exams/midterm/) səhifəsində istifadəçi adı + bu PIN ilə daxil olur."
 msgstr "Falls der Computer ausgefallen ist: Der Studierende meldet sich an einem anderen registrierten Computer unter /exams/final/ (oder /exams/midterm/) mit Benutzername + dieser PIN an."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Bu q/b və ya bal %(m)s dəqiqədən çox əvvəl yazılıb və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Diese Abwesenheit oder Punktzahl wurde vor mehr als %(m)s Minuten eingetragen und kann nicht geändert werden. Für eine Änderung reichen Sie beim RİM einen schriftlichen Antrag ein."
+
+msgctxt "registrar.journal_timing"
+msgid "Bu dərsin yazma müddəti bitib — i/e qeydi artıq dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
+msgstr "Die Eintragungsfrist für diese Lehrveranstaltung ist abgelaufen — die Markierung „anwesend“ kann nicht mehr geändert werden. Für eine Änderung reichen Sie beim RİM einen schriftlichen Antrag ein."

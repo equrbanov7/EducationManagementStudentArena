@@ -114,10 +114,11 @@ def can_edit_lesson(lesson, *, now=None) -> bool:
 can_edit_lesson_date = can_edit_lesson
 
 
-def can_edit_mark(mark, *, now=None, window=None) -> bool:
-    """Boş xana həmişə yazılır; mövcud xana yalnız müəllimin İLK yazılışından pəncərə (defolt 15 dəqiqə)
-    ərzində dəyişir. Köçürülmüş xana (``entered_by`` boş) həmişə kilidlidir (sahib 2026-10-25)."""
-    return not journal_edit_windows.mark_lock_reason(mark, now=now, window=window)
+def can_edit_mark(mark, *, now=None, window=None, entry_open=True) -> bool:
+    """Boş xana həmişə yazılır; q/b və ballı xana yalnız müəllimin İLK yazılışından pəncərə (defolt 15 dəqiqə)
+    ərzində dəyişir, köçürülmüş q/b/bal həmişə kilidlidir (sahib 2026-10-25). Balsız i/e xanası pəncərədən
+    sonra da dəyişir (sahib 2026-10-26) — dərsin yazma müddəti (``entry_open``) bitməyibsə."""
+    return not journal_edit_windows.mark_lock_reason(mark, now=now, window=window, entry_open=entry_open)
 
 
 # Hədd resolver-ləri TƏK mənbədədir (:mod:`apps.registrar.absence_limit`, F-06 / 2026-09-14);
@@ -283,7 +284,10 @@ def get_offering_journal(
         for lesson in lessons:
             mark = mark_map.get((enrollment.id, lesson.id))
             corrected = mark is not None and mark.id in corrected_mark_ids
-            lock_reason = journal_edit_windows.mark_lock_reason(mark, now=now, window=lock_window)
+            # Balsız i/e xanası pəncərədən sonra da dəyişir — dərsə yeni qeyd yazmaq olursa (sahib 2026-10-26).
+            lock_reason = journal_edit_windows.mark_lock_reason(
+                mark, now=now, window=lock_window, entry_open=markable[lesson.id]
+            )
             locked = corrected or bool(lock_reason)
             cells.append(
                 {
@@ -291,7 +295,8 @@ def get_offering_journal(
                     "mark": mark,
                     "allows_score": lesson_allows_score(lesson),
                     "locked": locked,
-                    # «time» (15 dəq. keçib) / «legacy» (köçürülüb) — kilidli xana dialoqu (journal_mark_lock.js).
+                    # «time» (15 dəq. keçib) / «legacy» (köçürülüb) / «entry» (i/e, yazma müddəti bitib) — kilidli
+                    # xana dialoqu (journal_mark_lock.js).
                     "lock_reason": "" if corrected else lock_reason,
                     # Rəsmi düzəlişli xana müəllim üçün kilidli (yalnız admin düzəlişi dəyişir).
                     "corrected": corrected,
