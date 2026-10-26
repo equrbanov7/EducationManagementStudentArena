@@ -15,6 +15,7 @@ from apps.exams.views.shared.tenant import get_active_organization, tenant_scope
 from apps.organizations.models import Organization
 from core.helpers import _tenant_scoped_courses
 from core.permissions import request_has_permission
+from core.person_names import user_display_name_with_patronymic
 from core.tenancy import request_has_active_organization_context, restore_request_organization_from_profile
 
 from .constants import (
@@ -269,13 +270,31 @@ def _selected_access_entities(form):
             excluded_user_ids = list(form.instance.excluded_users.values_list("id", flat=True))
 
     groups = list(groups_field.queryset.filter(id__in=group_ids)) if group_ids else []
-    users = list(users_field.queryset.filter(id__in=user_ids)) if user_ids else []
+    users = list(users_field.queryset.select_related("profile").filter(id__in=user_ids)) if user_ids else []
     excluded_users = (
-        list(excluded_users_field.queryset.filter(id__in=excluded_user_ids))
+        list(excluded_users_field.queryset.select_related("profile").filter(id__in=excluded_user_ids))
         if excluded_users_field and excluded_user_ids
         else []
     )
+    _attach_access_labels([*users, *excluded_users])
     return groups, users, excluded_users
+
+
+def student_access_label(user, group_name: str = "") -> str:
+    """«Ad Soyad Ata adı · qrup» — eyni adlı tələbələri ayırmaq üçün (sahib 2026-10-26)."""
+    name = user_display_name_with_patronymic(user)
+    return f"{name} · {group_name}" if group_name else name
+
+
+def _attach_access_labels(users) -> None:
+    """Seçili tələbələrin server render-i də axtarışdakı kimi ata adı + qrupla (redaktədə qrup itməsin)."""
+    if not users:
+        return
+    from apps.registrar.public import student_group_names
+
+    groups = student_group_names.current_group_names(u.id for u in users)
+    for user in users:
+        user.access_label = student_access_label(user, groups.get(user.id, ""))
 
 
 def _build_group_student_map(form):

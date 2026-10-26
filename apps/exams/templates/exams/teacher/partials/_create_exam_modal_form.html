@@ -348,12 +348,12 @@
                                     <div class="d-none">
                                         <select name="allowed_users" multiple>
                                             {% for u in selected_allowed_users %}
-                                                <option value="{{ u.pk }}" selected>{{ u.get_full_name|default:u.username }}</option>
+                                                <option value="{{ u.pk }}" selected>{{ u.access_label|default:u.username }}</option>
                                             {% endfor %}
                                         </select>
                                         <select name="excluded_users" multiple>
                                             {% for u in selected_excluded_users %}
-                                                <option value="{{ u.pk }}" selected>{{ u.get_full_name|default:u.username }}</option>
+                                                <option value="{{ u.pk }}" selected>{{ u.access_label|default:u.username }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>

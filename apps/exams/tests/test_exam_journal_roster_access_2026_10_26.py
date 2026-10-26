@@ -86,3 +86,16 @@ class JournalRosterAccessTest(_SubgroupFixture):
         self.assertIn(str(self.sub_student.pk), texts)
         self.assertIn("Rabil", texts[str(self.sub_student.pk)])
         self.assertIn("234 K-1", texts[str(self.sub_student.pk)])
+
+    def test_selected_individual_keeps_patronymic_and_group_on_edit(self):
+        """Redaktədə (server render) fərdi seçilən tələbə də «Ad Soyad Ata adı · qrup» — qrup itmir (sahib 2026-10-26)."""
+        from django.contrib.auth import get_user_model
+
+        from apps.exams.views.teacher.exams._shared import _attach_access_labels
+
+        with bypass_rls():
+            UserProfile.objects.update_or_create(user=self.sub_student, defaults={"patronymic": "Rabil"})
+            user = get_user_model().objects.select_related("profile").get(pk=self.sub_student.pk)
+            _attach_access_labels([user])
+        self.assertIn("Rabil", user.access_label)
+        self.assertTrue(user.access_label.endswith("· 234 K-1"))

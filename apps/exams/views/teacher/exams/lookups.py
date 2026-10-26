@@ -20,7 +20,7 @@ from core.roles import ProfileRole
 from core.search_text import starts_with_q, tolerant_q, word_prefix_q
 
 from . import unit_assignment as _units
-from ._shared import _resolve_required_organization
+from ._shared import _resolve_required_organization, student_access_label
 
 User = get_user_model()
 
@@ -263,14 +263,6 @@ def group_search(request):
     return JsonResponse({"results": results, "has_more": has_more})
 
 
-def _student_label(user, group_name: str = "") -> str:
-    """«Ad Soyad Ata adı · qrup» — eyni adlı tələbələri ayırmaq üçün (sahib 2026-10-26)."""
-    profile = getattr(user, "profile", None)
-    name = (getattr(profile, "full_name_with_patronymic", "") if profile is not None else "") or user.get_full_name()
-    name = name or user.username
-    return f"{name} · {group_name}" if group_name else name
-
-
 @login_required
 @require_GET
 def user_search(request):
@@ -333,7 +325,11 @@ def user_search(request):
 
     groups = student_group_names.current_group_names(u.id for u in window)
     results = [
-        {"id": str(u.id), "text": _student_label(u, groups.get(u.id, "")), "group_member": u.id in group_member_ids}
+        {
+            "id": str(u.id),
+            "text": student_access_label(u, groups.get(u.id, "")),
+            "group_member": u.id in group_member_ids,
+        }
         for u in window
     ]
     has_more = has_more and offset + len(results) < USER_SEARCH_MAX_OFFSET
