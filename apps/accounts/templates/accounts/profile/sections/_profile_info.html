@@ -8,6 +8,8 @@ qonşu bölmələrdəki eyni siniflərə toxunmur.{% endcomment %}
         {% if not university_mode or not role_capabilities.is_student %}
         {% include "accounts/profile/sections/_profile_info_stats.html" %}
         {% endif %}
+        {# Sahib 2026-10-26: view-as (RİM / superadmin) — hədəfin giriş/çıxış izi; başqa halda boşdur. #}
+        {% include "accounts/profile/sections/_view_as_login_history.html" %}
     </div>
 </section>
  

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n password_reset_admin %}
 {% comment %}Şəxs səhifəsi — müəllim / tələbə «Ətraflı» (yeni tab). Kontekst
 `apps/accounts/services/people/page.py::build_person_page`. Komponentlər ems_ui
 qatındandır; CSS xarici fayldadır (CSP). Əlaqə/demoqrafiya sahələri yalnız
@@ -53,6 +53,14 @@ icazə varsa gəlir (`page.capabilities`).{% endcomment %}
         </div>
         <div class="pp-hero__actions">
             <a class="ems-btn" href="{{ person.profile_url }}">{% trans "Açıq profil" context "accounts.people.page" %}</a>
+            {# Sahib 2026-10-26: parolu yazmadan sıfırlama — yalnız `account.password_reset` daşıyana görünür. #}
+            {% account_password_reset_link person.username as pwr_link %}
+            {% if pwr_link %}
+                <a class="ems-btn" href="{{ pwr_link }}">
+                    <i class="fas fa-key" aria-hidden="true"></i>
+                    {% trans "Parolu sıfırla" context "accounts.people.page" %}
+                </a>
+            {% endif %}
             <a class="ems-btn ems-btn--primary" href="{{ page.catalog_url }}">
                 <i class="fas fa-arrow-left" aria-hidden="true"></i>
                 {% trans "Kataloqa qayıt" context "accounts.people.page" %}

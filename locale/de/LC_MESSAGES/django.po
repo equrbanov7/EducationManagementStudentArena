@@ -110603,3 +110603,88 @@ msgstr "Auf anderem Computer fortsetzen"
 msgctxt "exams.final_center.monitor_pin"
 msgid "Kompüter xarab olubsa: tələbə başqa qeydli kompüterdən /exams/final/ (və ya /exams/midterm/) səhifəsində istifadəçi adı + bu PIN ilə daxil olur."
 msgstr "Falls der Computer ausgefallen ist: Der Studierende meldet sich an einem anderen registrierten Computer unter /exams/final/ (oder /exams/midterm/) mit Benutzername + dieser PIN an."
+
+msgctxt "accounts.password_reset"
+msgid "Səbəb yazılmalıdır (ən azı 10 simvol)."
+msgstr "Eine Begründung ist erforderlich (mindestens 10 Zeichen)."
+
+msgctxt "accounts.password_reset"
+msgid "Müvəqqəti parol yaradıldı. İstifadəçi ilk girişdə e-poçtunu təsdiqləyib öz parolunu qurmağa məcbur olacaq."
+msgstr "Ein temporäres Passwort wurde erstellt. Bei der ersten Anmeldung muss der Benutzer seine E-Mail bestätigen und ein eigenes Passwort festlegen."
+
+msgctxt "accounts.password_reset"
+msgid "{name} ({username}) üçün yeni müvəqqəti parol yaradılacaq. Köhnə parol dərhal etibarsız olacaq, bütün açıq sessiyalar bağlanacaq; ilk girişdə istifadəçi e-poçtunu təsdiqləyib öz parolunu quracaq."
+msgstr "Für {name} ({username}) wird ein neues temporäres Passwort erstellt. Das alte Passwort wird sofort ungültig und alle offenen Sitzungen werden beendet; bei der ersten Anmeldung bestätigt der Benutzer seine E-Mail und legt ein eigenes Passwort fest."
+
+msgctxt "accounts.password_reset"
+msgid "Parolu yazmadan sıfırlayın: sistem müvəqqəti parol yaradır və onu bir dəfə göstərir. İstifadəçi ilk girişdə e-poçtunu təsdiqləyib öz parolunu quracaq. Hər sıfırlama səbəbi ilə audit jurnalına yazılır."
+msgstr "Passwort zurücksetzen, ohne eines einzugeben: Das System erzeugt ein temporäres Passwort und zeigt es einmal an. Bei der ersten Anmeldung bestätigt der Benutzer seine E-Mail und legt ein eigenes Passwort fest. Jedes Zurücksetzen wird mit Begründung im Audit-Protokoll erfasst."
+
+msgctxt "accounts.password_reset"
+msgid "Səbəb"
+msgstr "Begründung"
+
+msgctxt "accounts.password_reset"
+msgid "məs. Tələbə parolunu unudub, şəxsiyyət vəsiqəsi ilə yoxlanıldı"
+msgstr "z. B. Studierende/r hat das Passwort vergessen, Identität per Ausweis geprüft"
+
+msgctxt "accounts.password_reset"
+msgid "Səbəb audit jurnalına yazılır (parol yazılmır)."
+msgstr "Die Begründung wird im Audit-Protokoll erfasst (das Passwort nicht)."
+
+msgctxt "accounts.password_reset"
+msgid "Səbəb ən azı 10 simvol olmalıdır."
+msgstr "Die Begründung muss mindestens 10 Zeichen lang sein."
+
+msgctxt "accounts.people.page"
+msgid "Parolu sıfırla"
+msgstr "Passwort zurücksetzen"
+
+msgctxt "accounts.view_as"
+msgid "Məzun / arxiv"
+msgstr "Absolvent / Archiv"
+
+msgctxt "accounts.view_as"
+msgid "Arxiv · yalnız baxış"
+msgstr "Archiv · nur Ansicht"
+
+msgctxt "accounts.view_as"
+msgid "Giriş"
+msgstr "Anmeldung"
+
+msgctxt "accounts.view_as"
+msgid "Çıxış"
+msgstr "Abmeldung"
+
+msgctxt "accounts.view_as"
+msgid "Giriş tarixçəsi"
+msgstr "Anmeldeverlauf"
+
+#, python-format
+msgctxt "accounts.view_as"
+msgid "Hesabın son %(limit)s giriş və çıxışı (vaxt, İP ünvanı, brauzer). Yalnız siz görürsünüz — istifadəçinin öz kabinetində bu panel yoxdur."
+msgstr "Die letzten %(limit)s An- und Abmeldungen des Kontos (Zeit, IP-Adresse, Browser). Nur Sie sehen dies — im eigenen Bereich des Benutzers gibt es dieses Panel nicht."
+
+msgctxt "accounts.view_as"
+msgid "Son giriş:"
+msgstr "Letzte Anmeldung:"
+
+msgctxt "accounts.view_as"
+msgid "Vaxt"
+msgstr "Zeit"
+
+msgctxt "accounts.view_as"
+msgid "Hadisə"
+msgstr "Ereignis"
+
+msgctxt "accounts.view_as"
+msgid "İP ünvanı"
+msgstr "IP-Adresse"
+
+msgctxt "accounts.view_as"
+msgid "Brauzer / cihaz"
+msgstr "Browser / Gerät"
+
+msgctxt "accounts.view_as"
+msgid "Bu hesabla sistemə giriş qeydə alınmayıb."
+msgstr "Für dieses Konto wurden keine Anmeldungen erfasst."

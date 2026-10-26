@@ -27,7 +27,13 @@ TƏHLÜKƏSİZLİK (pozulmaz):
   sessiyalarını etibarsız edir (növbəti sorğuda çıxış).
 * Hədəfin hesab-səviyyəli login rate-limit vedrələri təmizlənir — parolu
   unudub bir neçə dəfə səhv yazan istifadəçi yeni parolla dərhal girə bilsin.
-* Audit: operator, hədəf, təşkilat, İP, user-agent, vaxt — parolsuz.
+* Audit: operator, hədəf, təşkilat, İP, user-agent, vaxt, SƏBƏB — parolsuz.
+
+2026-10-26 (sahib: «parol yazmadan resetləyə bilim»): əlifba və axın
+``issue_staff_credentials`` / ``provision_student_credentials`` əmrləri ilə
+EYNİDİR — parolla yanaşı ``email_verified=False`` qoyulur, yəni ilk girişdə tam
+axın (e-poçt + OTP + öz parolu) məcburidir; təsdiq dialoqunda səbəb
+(``MIN_REASON_LENGTH``) MƏCBURİDİR və audit sətrinə yazılır.
 """
 
 from __future__ import annotations
@@ -73,14 +79,19 @@ DEFAULT_RESET_RATE = "30/1h"
 DEFAULT_LOOKUP_RATE = "120/10m"
 DEFAULT_SUGGEST_RATE = "600/10m"
 
-#: Oxunaqlı əlifba — qarışan simvollar (0/O/o, 1/l/I/i) YOXDUR: parol kağıza
+#: Oxunaqlı əlifba — qarışan simvollar (0/O/o, 1/l/L/I/i) YOXDUR: parol kağıza
 #: yazılır və ya diktə olunur. 12 simvol × 54 hərf ≈ 69 bit — müvəqqəti parol
-#: üçün kifayətdir (ilk girişdə dəyişdirilir).
-_UPPER = "ABCDEFGHJKLMNPQRSTUVWXYZ"
+#: üçün kifayətdir (ilk girişdə dəyişdirilir). 2026-10-26: kredensial əmrlərinin
+#: (``issue_staff_credentials._PASSWORD_ALPHABET``) əlifbası ilə EYNİ.
+_UPPER = "ABCDEFGHJKMNPQRSTUVWXYZ"
 _LOWER = "abcdefghjkmnpqrstuvwxyz"
 _DIGITS = "23456789"
 TEMP_PASSWORD_LENGTH = 12
 _MAX_GENERATION_ATTEMPTS = 12
+
+#: Təsdiq dialoqundakı səbəbin hədləri (sahib 2026-10-26: «kim, niyə» audit-də qalsın).
+MIN_REASON_LENGTH = 10
+MAX_REASON_LENGTH = 300
 
 #: `RimAccessError.reason_code` → bu modulun kodu (tenantdan kənar → «tapılmadı», mövcudluq sızmır).
 _RIM_CODE_MAP = {
@@ -120,6 +131,7 @@ def error_message(code: str) -> str:
             _CTX, "Bu hesabla sistemə giriş bağlıdır (məzun/xaric arxivi və ya tamamlanmamış idxal)."
         ),
         "rate_limited": pgettext(_CTX, "Çox sayda sorğu göndərildi. Bir az sonra yenidən cəhd edin."),
+        "reason_required": pgettext(_CTX, "Səbəb yazılmalıdır (ən azı 10 simvol)."),
         "query_too_short": pgettext(_CTX, "Ən azı 2 simvol daxil edin."),
         "password_generation_failed": pgettext(_CTX, "Parol yaradıla bilmədi. Yenidən cəhd edin."),
     }
@@ -312,15 +324,25 @@ def _clear_login_limits(request, target) -> None:
         clear_rate_limit(LOGIN_LIMIT_SCOPE_IDENTITY, ip_key, normalized)
 
 
-def reset_password(actor: RimActor, target_id, *, request):
+def normalize_reason(raw) -> str:
+    """Səbəb mətni (boşluqlar sıxılır); qısadırsa ``PasswordResetError('reason_required')``."""
+    reason = " ".join(str(raw or "").strip().split())[:MAX_REASON_LENGTH]
+    if len(reason) < MIN_REASON_LENGTH:
+        raise PasswordResetError("reason_required", status=400)
+    return reason
+
+
+def reset_password(actor: RimActor, target_id, *, request, reason=""):
     """Hədəfə müvəqqəti parol verir. Qaytarır: ``(target, raw_password)``.
 
     Xam parol YALNIZ bu qaytarışdadır — çağıran onu cavabda bir dəfə göstərməli,
     heç yerdə saxlamamalı və loglamamalıdır. Rate-limit çağıranın işidir
-    (`enforce_reset_rate`, icazə yoxlamasından ƏVVƏL).
+    (`enforce_reset_rate`, icazə yoxlamasından ƏVVƏL). ``reason`` məcburidir
+    (``MIN_REASON_LENGTH``) — hədəfə toxunmazdan ƏVVƏL yoxlanılır.
     """
     if target_id in (None, ""):
         raise PasswordResetError("target_required", status=400)
+    reason = normalize_reason(reason)
 
     User = get_user_model()
     try:
@@ -339,22 +361,29 @@ def reset_password(actor: RimActor, target_id, *, request):
         if profile is not None:
             # İlk girişdə `FirstLoginPasswordMiddleware` öz parolunu qurmağa məcbur edir.
             profile.password_change_required = True
+            # Sahib 2026-10-26: kredensial əmrləri kimi e-poçt təsdiqi də sıfırlanır — ilk girişdə
+            # tam axın (e-poçt + OTP + öz parolu); bax `views/auth/first_login.py::_email_already_verified`.
+            profile.email_verified = False
             # Sahib 2026-10-02: parol bərpasından sonra ilk girişdə köçürülmüş ballar barədə xəbərdarlıq.
             profile.grades_notice_pending = True
-            profile.save(update_fields=["password_change_required", "grades_notice_pending", "updated_at"])
+            profile.save(
+                update_fields=["password_change_required", "email_verified", "grades_notice_pending", "updated_at"]
+            )
         # DİQQƏT: audit sətrində parol YOXDUR və olmamalıdır.
         log_action(
             action=AuditAction.UPDATE,
             user=actor.user,
             organization=actor.organization,
             obj=target,
-            reason="Parol sıfırlama: müvəqqəti parol verildi (ilk girişdə dəyişmək məcburidir)",
+            reason=f"Parol sıfırlama: müvəqqəti parol verildi (ilk girişdə dəyişmək məcburidir). Səbəb: {reason}",
             changes={
                 "operation": "admin_password_reset",
                 "target_user_id": str(target.pk),
                 "target_username": target.username,
                 "password_change_required": True,
+                "email_verified_reset": True,
                 "sessions_invalidated": True,
+                "reason_text": reason,
             },
             request=request,
             resource_type="User",
@@ -373,7 +402,7 @@ def reset_password(actor: RimActor, target_id, *, request):
 
 def audit_denied(actor: RimActor | None, request, target_id, code: str) -> None:
     """Rədd edilmiş SIFIRLAMA cəhdi (icazə/iyerarxiya) — pozuntu siqnalı üçün iz."""
-    if code in {"rate_limited", "target_required"}:
+    if code in {"rate_limited", "target_required", "reason_required"}:
         return
     try:
         log_action(
@@ -394,6 +423,8 @@ __all__ = [
     "DEFAULT_LOOKUP_RATE",
     "DEFAULT_RESET_RATE",
     "LOOKUP_RATE_SCOPE",
+    "MAX_REASON_LENGTH",
+    "MIN_REASON_LENGTH",
     "PERM_PASSWORD_RESET",
     "PasswordResetError",
     "RESET_RATE_SCOPE",
@@ -405,6 +436,7 @@ __all__ = [
     "error_message",
     "explain_unavailable",
     "generate_temporary_password",
+    "normalize_reason",
     "operator_for",
     "reset_password",
     "reset_scope_queryset",

@@ -91,7 +91,12 @@
         if (!box) return;
 
         var html = "";
+        var archivedText = launcher.getAttribute("data-text-archived") || "";
         items.forEach(function (item) {
+            // Sahib 2026-10-26: məzun/xaric (arxiv) hədəfi — baxış yalnız-oxu rejimində açılır.
+            var archived = item.archived
+                ? '<span class="view-as-result__role view-as-result__role--archived">' + escapeHtml(archivedText) + "</span>"
+                : "";
             var roles = (item.roles || [])
                 .map(function (role) {
                     return '<span class="view-as-result__role">' + escapeHtml(role) + "</span>";
@@ -105,7 +110,7 @@
                 '<span class="view-as-result__body">' +
                 '<span class="view-as-result__top">' +
                 '<span class="view-as-result__name">' + escapeHtml(item.name) + "</span>" +
-                '<span class="view-as-result__roles">' + roles + "</span>" +
+                '<span class="view-as-result__roles">' + roles + archived + "</span>" +
                 "</span>" +
                 '<span class="view-as-result__meta">@' + escapeHtml(item.username) +
                 (item.email ? '<span class="view-as-result__email"> · ' + escapeHtml(item.email) + "</span>" : "") +

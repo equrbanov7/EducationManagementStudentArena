@@ -436,6 +436,11 @@
     text-transform: uppercase;
     letter-spacing: 0.3px;
 }
+/* Sahib 2026-10-26: məzun/xaric (arxiv) hədəfi — yalnız-oxu baxış nişanı. */
+.view-as-result__role--archived {
+    background: #fef3c7;
+    color: #92400e;
+}
 .view-as-result__go { color: var(--ems-neutral-300); font-size: 0.7rem; flex-shrink: 0; transition: color 0.12s ease, transform 0.12s ease; }
 .view-as-result:hover .view-as-result__go { color: #4338ca; transform: translateX(2px); }
 

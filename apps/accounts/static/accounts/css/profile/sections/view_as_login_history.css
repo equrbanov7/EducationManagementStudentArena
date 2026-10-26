@@ -1,0 +1,27 @@
+/* «Giriş tarixçəsi» — view-as panelində hədəfin giriş/çıxış izi (sahib 2026-10-26). */
+.vlh {
+    margin-top: var(--ems-sp-6, 1.5rem);
+}
+
+.vlh__last {
+    display: inline-block;
+    margin-left: var(--ems-sp-3, 0.5rem);
+    white-space: nowrap;
+}
+
+.vlh__table th[scope="row"] {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.vlh__empty {
+    margin: 0;
+    color: var(--ems-text-muted, #64748b);
+}
+
+@media (max-width: 575.98px) {
+    .vlh__last {
+        display: block;
+        margin-left: 0;
+    }
+}

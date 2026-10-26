@@ -7,6 +7,7 @@ Bütün icazə məntiqi ``services.view_as``-dadır; burada yalnız HTTP qatı v
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -19,6 +20,7 @@ from core.search_text import tolerant_q
 from ...models import ProfileRole
 from ...services.view_as import (
     SEARCH_PAGE_SIZE,
+    actor_can_view_archived,
     build_target_queryset,
     resolve_actor_access,
     start_view_as,
@@ -77,9 +79,12 @@ def _serialize_users(page_users, organization):
         )
         for membership in memberships:
             normalized = ProfileRole.normalize_membership_role_name(getattr(membership.role, "name", "") or "")
-            label = PROFILE_ROLE_LABELS.get(
-                normalized, (getattr(membership.role, "name", "") or "").replace("_", " ").title()
-            )
+            if normalized == "alumni":
+                label = pgettext("accounts.view_as", "Məzun / arxiv")
+            else:
+                label = PROFILE_ROLE_LABELS.get(
+                    normalized, (getattr(membership.role, "name", "") or "").replace("_", " ").title()
+                )
             role_map.setdefault(membership.user_id, [])
             if label not in role_map[membership.user_id]:
                 role_map[membership.user_id].append(label)
@@ -98,6 +103,8 @@ def _serialize_users(page_users, organization):
                 "username": user.username,
                 "email": user.email,
                 "roles": role_map.get(user.pk, [])[:2],
+                # Sahib 2026-10-26: məzun/xaric (arxiv) hədəfi — panel «Arxiv · yalnız baxış» nişanı göstərir.
+                "archived": getattr(user, "_ems_access_state", "") == "archived",
                 "avatar_url": (
                     reverse("accounts:profile_avatar", args=[user.pk]) if user.pk in users_with_avatar else None
                 ),
@@ -155,7 +162,8 @@ def view_as_search(request):
         memberships=memberships,
         q=q,
         role_filter=request.GET.get("role") or "",
-    )
+        include_archived=actor_can_view_archived(request.user, memberships),
+    ).annotate(_ems_access_state=F("profile__access_state"))
 
     def _fetch():
         # +1 → has_more üçün; COUNT(*) sorğusuna ehtiyac qalmır.

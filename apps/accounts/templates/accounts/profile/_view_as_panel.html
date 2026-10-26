@@ -13,7 +13,8 @@ Superadmin əvvəlcə təşkilat seçir; org admin/sahibi/tyutor və s. birbaşa
      data-text-no-results="{% trans 'no_results' context 'accounts.view_as' %}"
      data-text-loading="{% trans 'loading' context 'accounts.view_as' %}"
      data-text-load-more="{% trans 'load_more' context 'accounts.view_as' %}"
-     data-text-error="{% trans 'search_error' context 'accounts.view_as' %}">
+     data-text-error="{% trans 'search_error' context 'accounts.view_as' %}"
+     data-text-archived="{% trans 'Arxiv · yalnız baxış' context 'accounts.view_as' %}">
 
     <button type="button" class="btn view-as-launcher__toggle" id="viewAsToggle"
             aria-expanded="false" aria-controls="viewAsDropdown">
@@ -69,6 +70,10 @@ Superadmin əvvəlcə təşkilat seçir; org admin/sahibi/tyutor və s. birbaşa
                     <option value="student">{% trans 'role_filter_student' context 'accounts.view_as' %}</option>
                     <option value="admin">{% trans 'role_filter_admin' context 'accounts.view_as' %}</option>
                     <option value="staff">{% trans 'role_filter_staff' context 'accounts.view_as' %}</option>
+                    {% if view_as.can_view_archived %}
+                    {# Sahib 2026-10-26: məzun/xaric hesablara (arxiv) yalnız-oxu baxış — RİM / superadmin. #}
+                    <option value="alumni">{% trans "Məzun / arxiv" context "accounts.view_as" %}</option>
+                    {% endif %}
                 </select>
             </div>
         </div>

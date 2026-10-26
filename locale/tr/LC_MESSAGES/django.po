@@ -108985,3 +108985,88 @@ msgstr "Başka bilgisayarda devam et"
 msgctxt "exams.final_center.monitor_pin"
 msgid "Kompüter xarab olubsa: tələbə başqa qeydli kompüterdən /exams/final/ (və ya /exams/midterm/) səhifəsində istifadəçi adı + bu PIN ilə daxil olur."
 msgstr "Bilgisayar arızalandıysa: öğrenci kayıtlı başka bir bilgisayardan /exams/final/ (veya /exams/midterm/) sayfasında kullanıcı adı + bu PIN ile giriş yapar."
+
+msgctxt "accounts.password_reset"
+msgid "Səbəb yazılmalıdır (ən azı 10 simvol)."
+msgstr "Bir neden yazılmalıdır (en az 10 karakter)."
+
+msgctxt "accounts.password_reset"
+msgid "Müvəqqəti parol yaradıldı. İstifadəçi ilk girişdə e-poçtunu təsdiqləyib öz parolunu qurmağa məcbur olacaq."
+msgstr "Geçici parola oluşturuldu. Kullanıcı ilk girişte e-postasını doğrulayıp kendi parolasını belirlemek zorunda olacak."
+
+msgctxt "accounts.password_reset"
+msgid "{name} ({username}) üçün yeni müvəqqəti parol yaradılacaq. Köhnə parol dərhal etibarsız olacaq, bütün açıq sessiyalar bağlanacaq; ilk girişdə istifadəçi e-poçtunu təsdiqləyib öz parolunu quracaq."
+msgstr "{name} ({username}) için yeni bir geçici parola oluşturulacak. Eski parola hemen geçersiz olacak, tüm açık oturumlar kapanacak; kullanıcı ilk girişte e-postasını doğrulayıp kendi parolasını belirleyecek."
+
+msgctxt "accounts.password_reset"
+msgid "Parolu yazmadan sıfırlayın: sistem müvəqqəti parol yaradır və onu bir dəfə göstərir. İstifadəçi ilk girişdə e-poçtunu təsdiqləyib öz parolunu quracaq. Hər sıfırlama səbəbi ilə audit jurnalına yazılır."
+msgstr "Parola yazmadan sıfırlayın: sistem geçici bir parola oluşturur ve onu bir kez gösterir. Kullanıcı ilk girişte e-postasını doğrulayıp kendi parolasını belirler. Her sıfırlama nedeniyle birlikte denetim günlüğüne yazılır."
+
+msgctxt "accounts.password_reset"
+msgid "Səbəb"
+msgstr "Neden"
+
+msgctxt "accounts.password_reset"
+msgid "məs. Tələbə parolunu unudub, şəxsiyyət vəsiqəsi ilə yoxlanıldı"
+msgstr "örn. Öğrenci parolasını unuttu, kimlik kartıyla doğrulandı"
+
+msgctxt "accounts.password_reset"
+msgid "Səbəb audit jurnalına yazılır (parol yazılmır)."
+msgstr "Neden denetim günlüğüne yazılır (parola yazılmaz)."
+
+msgctxt "accounts.password_reset"
+msgid "Səbəb ən azı 10 simvol olmalıdır."
+msgstr "Neden en az 10 karakter olmalıdır."
+
+msgctxt "accounts.people.page"
+msgid "Parolu sıfırla"
+msgstr "Parolayı sıfırla"
+
+msgctxt "accounts.view_as"
+msgid "Məzun / arxiv"
+msgstr "Mezun / arşiv"
+
+msgctxt "accounts.view_as"
+msgid "Arxiv · yalnız baxış"
+msgstr "Arşiv · yalnızca görüntüleme"
+
+msgctxt "accounts.view_as"
+msgid "Giriş"
+msgstr "Oturum açma"
+
+msgctxt "accounts.view_as"
+msgid "Çıxış"
+msgstr "Çıkış"
+
+msgctxt "accounts.view_as"
+msgid "Giriş tarixçəsi"
+msgstr "Giriş geçmişi"
+
+#, python-format
+msgctxt "accounts.view_as"
+msgid "Hesabın son %(limit)s giriş və çıxışı (vaxt, İP ünvanı, brauzer). Yalnız siz görürsünüz — istifadəçinin öz kabinetində bu panel yoxdur."
+msgstr "Hesabın son %(limit)s giriş ve çıkışı (zaman, IP adresi, tarayıcı). Yalnızca siz görürsünüz — kullanıcının kendi panelinde bu bölüm yoktur."
+
+msgctxt "accounts.view_as"
+msgid "Son giriş:"
+msgstr "Son oturum açma:"
+
+msgctxt "accounts.view_as"
+msgid "Vaxt"
+msgstr "Zaman"
+
+msgctxt "accounts.view_as"
+msgid "Hadisə"
+msgstr "Olay"
+
+msgctxt "accounts.view_as"
+msgid "İP ünvanı"
+msgstr "IP adresi"
+
+msgctxt "accounts.view_as"
+msgid "Brauzer / cihaz"
+msgstr "Tarayıcı / cihaz"
+
+msgctxt "accounts.view_as"
+msgid "Bu hesabla sistemə giriş qeydə alınmayıb."
+msgstr "Bu hesapla sisteme giriş kaydedilmemiş."
