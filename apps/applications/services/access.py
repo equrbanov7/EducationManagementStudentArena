@@ -6,8 +6,10 @@
                 emalçısı, İZLƏYƏN şöbənin əhatəli emalçısı, təşkilat üzrə nəzarətçi
                 (``can_oversee``: ``application.view_all`` / ``application.manage`` —
                 RİM/rektor/prorektor), superuser və təşkilat sahibi.
-``can_act``   — «bu müraciətə QƏRAR verə bilərmi?» YALNIZ CARİ şöbənin əhatəli
-                emalçısı və müraciət AÇIQ olduqda. İzləyən şöbə OXUYUR, ƏMƏL ETMİR.
+``can_act``   — «bu müraciətə QƏRAR verə bilərmi?» CARİ şöbənin əhatəli emalçısı
+                və ya «hər müraciəti cavablandıran» RİM şöbəsinin emalçısı
+                (``is_universal_responder``, sahib 2026-10-26), müraciət AÇIQ olduqda.
+                İzləyən şöbə OXUYUR, ƏMƏL ETMİR.
 
 «Əhatə» ölçüsü: şöbənin ``resolve_by``-ı ``organization``-dursa rol adı
 kifayətdir; əks halda üzvlüyün ``scope_unit``-i müraciətin
@@ -22,7 +24,7 @@ from apps.organizations.public import ancestor_unit_ids, request_active_membersh
 from core.constants import RoleScopeType
 from core.permissions import has_permission
 
-from ..constants import PERM_MANAGE, PERM_VIEW_ALL, ResolveBy
+from ..constants import PERM_MANAGE, PERM_VIEW_ALL, RESPONDER_UNIT_CODE, ResolveBy
 from ..models import ApplicationUnit
 
 
@@ -114,7 +116,10 @@ def can_oversee(user, organization) -> bool:
     if _is_privileged(user, organization):
         return True
     permissions = user_permissions(user, organization)
-    return has_permission(permissions, PERM_VIEW_ALL) or has_permission(permissions, PERM_MANAGE)
+    if has_permission(permissions, PERM_VIEW_ALL) or has_permission(permissions, PERM_MANAGE):
+        return True
+    # Hər müraciətə cavab verən (RİM) onları tapmaq üçün «Bütün müraciətlər» tabını da görməlidir.
+    return is_universal_responder(user, organization)
 
 
 def _covers(membership, scope_unit_id, scope_unit_path) -> bool:
@@ -168,6 +173,41 @@ def handled_unit_ids(user, organization) -> set:
     return {unit.pk for unit in active_units(organization) if role_names & set(unit.role_names)}
 
 
+def responder_unit(organization):
+    """«Hər müraciəti cavablandıran» şöbə (``RESPONDER_UNIT_CODE``) — aktiv deyilsə ``None``."""
+    return next((unit for unit in active_units(organization) if unit.code == RESPONDER_UNIT_CODE), None)
+
+
+def is_universal_responder(user, organization) -> bool:
+    """RİM şöbəsinin emalçısı — təşkilatın HƏR açıq müraciətinə cavab verə bilər (sahib 2026-10-26).
+
+    Rol adı ŞÖBƏNİN kataloq sətrindən gəlir (``handler_role_names``), sərt kodlaşdırılmır:
+    rektorun ``*`` açarı bu hüququ VERMİR — o, «Bütün müraciətlər»i oxuyur, amma RİM deyil.
+    Request daxilində istifadəçi obyektində keşlənir (siyahı/detal bir neçə dəfə soruşur).
+    """
+    if user is None or organization is None or not getattr(user, "is_authenticated", False):
+        return False
+    cached = getattr(user, "_applications_responder", None)
+    if cached is not None and cached[0] == organization.pk:
+        return cached[1]
+    unit = responder_unit(organization)
+    result = bool(unit is not None and handles_unit(user, organization, unit, None))
+    try:
+        user._applications_responder = (organization.pk, result)
+    except Exception:  # noqa: BLE001 — dəyişməz obyektlər üçün (nadir)
+        pass
+    return result
+
+
+def is_current_handler(user, application) -> bool:
+    """CARİ şöbənin öz emalçısı (RİM-in ümumi cavab hüququ DAXİL DEYİL).
+
+    «Yeni → Baxılır» avtomatik keçidi və şöbəyə «RİM cavab verdi» bildirişi bu fərqə söykənir:
+    RİM başqa şöbənin müraciətini sadəcə AÇANDA şöbənin «Yeni» nişanı itməməlidir.
+    """
+    return handles_unit(user, application.organization, application.current_unit, application.current_scope_unit)
+
+
 def is_handler_anywhere(user, organization) -> bool:
     return bool(handled_unit_ids(user, organization))
 
@@ -195,13 +235,16 @@ def can_act(user, application) -> bool:
 
     İzləyən şöbə DAXİL DEYİL (dizayn §6: «only if request.current_unit ==
     user.unit»). Superuser istisna olaraq daxildir — platforma səviyyəli
-    dəstək/bərpa əməlləri üçün.
+    dəstək/bərpa əməlləri üçün. RİM şöbəsinin emalçısı da daxildir
+    (``is_universal_responder`` — sahib 2026-10-26: «RİM hər müraciəti cavablandıra bilsin»).
     """
     if not application.is_open:
         return False
     if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
         return True
-    return handles_unit(user, application.organization, application.current_unit, application.current_scope_unit)
+    if is_current_handler(user, application):
+        return True
+    return is_universal_responder(user, application.organization)
 
 
 def can_see_internal(user, application) -> bool:
@@ -217,6 +260,9 @@ def can_see_internal(user, application) -> bool:
     if has_app_permission(user, organization, PERM_MANAGE):
         return True
     if handles_unit(user, organization, application.current_unit, application.current_scope_unit):
+        return True
+    # RİM cavab verəndə yazışmanın daxili qeydlərini də görməlidir (özü də daxili qeyd yaza bilir).
+    if is_universal_responder(user, organization):
         return True
     for watch in application.watches.select_related("unit", "scope_unit"):
         if handles_unit(user, organization, watch.unit, watch.scope_unit):
@@ -295,8 +341,11 @@ __all__ = [
     "handles_unit",
     "has_app_permission",
     "inbox_q",
+    "is_current_handler",
     "is_handler_anywhere",
     "is_sender",
+    "is_universal_responder",
+    "responder_unit",
     "user_permissions",
     "visible_q",
     "watching_q",

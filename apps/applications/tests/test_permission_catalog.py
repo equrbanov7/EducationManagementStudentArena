@@ -94,11 +94,12 @@ def test_prefix_isolation_from_unrelated_wildcards():
     assert not has_permission(["exam.*", "grade.*", "course.*", "syllabus.*"], PERM_HANDLE)
 
 
-def test_rim_staff_reads_every_application_but_never_decides():
-    """2026-10-24: RİM əməkdaşı «Bütün müraciətlər»i görür — YALNIZ OXU (qərar/kataloq açarı yox)."""
+def test_rim_staff_reads_and_answers_every_application_but_never_manages():
+    """2026-10-24: RİM əməkdaşı «Bütün müraciətlər»i görür; 2026-10-26 (sahib): RİM şöbəsinin
+    emalçısıdır və hər müraciətə cavab verir — `handle` var, kataloq açarı (`manage`) yox."""
     permissions = _role("rim_staff")["permissions"]
     assert has_permission(permissions, PERM_VIEW_ALL)
-    assert not has_permission(permissions, PERM_HANDLE)
+    assert has_permission(permissions, PERM_HANDLE)
     assert not has_permission(permissions, PERM_MANAGE)
 
 

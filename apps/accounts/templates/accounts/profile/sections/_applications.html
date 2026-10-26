@@ -153,7 +153,7 @@ sonra da işləsin (docs/frontend/AJAX_SAFE_JS_PATTERN.md). Dinamik dəyərlər
     </button>
     {% endif %}
     {% if applications_section.can_oversee %}
-    {# RİM nəzarəti: təşkilatın BÜTÜN müraciətləri — yalnız oxu (server `access.can_oversee`). #}
+    {# RİM nəzarəti: təşkilatın BÜTÜN müraciətləri (server `access.can_oversee`); cavab düymələri server-in `allowed_actions`-ından — RİM şöbəsinin emalçısı hər müraciətə cavab verir (2026-10-26). #}
     <button type="button" class="apx-tab" role="tab" data-apx-tab="all" aria-current="false">
       {% trans "Bütün müraciətlər" context "applications" %}
       <span class="apx-tab__count" data-apx-tab-count hidden></span>

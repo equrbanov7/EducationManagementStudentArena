@@ -109771,3 +109771,8 @@ msgstr "Продолжить на другом компьютере"
 msgctxt "exams.final_center.monitor_pin"
 msgid "Kompüter xarab olubsa: tələbə başqa qeydli kompüterdən /exams/final/ (və ya /exams/midterm/) səhifəsində istifadəçi adı + bu PIN ilə daxil olur."
 msgstr "Если компьютер вышел из строя: студент входит на другом зарегистрированном компьютере на странице /exams/final/ (или /exams/midterm/) с логином и этим PIN."
+
+#, python-format
+msgctxt "applications"
+msgid "%(number)s — RİM cavab verdi"
+msgstr "%(number)s — ответил Центр цифрового развития"
