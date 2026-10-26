@@ -110701,3 +110701,112 @@ msgstr "Diese Abwesenheit oder Punktzahl wurde vor mehr als %(m)s Minuten einget
 msgctxt "registrar.journal_timing"
 msgid "Bu dərsin yazma müddəti bitib — i/e qeydi artıq dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
 msgstr "Die Eintragungsfrist für diese Lehrveranstaltung ist abgelaufen — die Markierung „anwesend“ kann nicht mehr geändert werden. Für eine Änderung reichen Sie beim RİM einen schriftlichen Antrag ein."
+
+msgctxt "accounts.username_change_admin"
+msgid "İstifadəçi adını dəyişmək üçün icazəniz yoxdur."
+msgstr "Sie haben keine Berechtigung, Benutzernamen zu ändern."
+
+msgctxt "accounts.username_change_admin"
+msgid "Başqasının adından baxış rejimində istifadəçi adını dəyişmək olmaz. Əvvəlcə baxış rejimindən çıxın."
+msgstr "Im Modus „Als anderer Benutzer ansehen“ können keine Benutzernamen geändert werden. Verlassen Sie zuerst diesen Modus."
+
+msgctxt "accounts.username_change_admin"
+msgid "Təşkilatınız hələ təsdiqlənməyib — istifadəçi adını dəyişmək olmaz."
+msgstr "Ihre Organisation ist noch nicht bestätigt — Benutzernamen können nicht geändert werden."
+
+msgctxt "accounts.username_change_admin"
+msgid "Superadmin hesabının istifadəçi adı bu bölmədən dəyişdirilə bilməz."
+msgstr "Der Benutzername eines Superadmin-Kontos kann in diesem Bereich nicht geändert werden."
+
+msgctxt "accounts.username_change_admin"
+msgid "Öz istifadəçi adınızı bu bölmədən dəyişə bilməzsiniz — «Profil redaktə» bölməsindən istifadə edin."
+msgstr "Ihren eigenen Benutzernamen können Sie hier nicht ändern — nutzen Sie „Profil bearbeiten“."
+
+msgctxt "accounts.username_change_admin"
+msgid "Təşkilat sahibinin istifadəçi adını yalnız superadmin dəyişə bilər."
+msgstr "Nur ein Superadmin kann den Benutzernamen des Organisationsinhabers ändern."
+
+msgctxt "accounts.username_change_admin"
+msgid "Özünüzlə eyni və ya daha yüksək səlahiyyətli istifadəçinin adını dəyişə bilməzsiniz."
+msgstr "Sie können den Benutzernamen eines Benutzers mit gleicher oder höherer Berechtigung nicht ändern."
+
+msgctxt "accounts.username_change_admin"
+msgid "Səbəb yazılmalıdır (ən azı 10 simvol)."
+msgstr "Eine Begründung ist erforderlich (mindestens 10 Zeichen)."
+
+msgctxt "accounts.username_change_admin"
+msgid "Yeni istifadəçi adı cari addan fərqli olmalıdır."
+msgstr "Der neue Benutzername muss sich vom aktuellen unterscheiden."
+
+msgctxt "accounts.username_change_admin"
+msgid "Bu istifadəçi adı artıq istifadə olunur."
+msgstr "Dieser Benutzername ist bereits vergeben."
+
+msgctxt "accounts.username_change_admin"
+msgid "Ad və soyaddan standart istifadəçi adı qurmaq alınmadı — adı əl ilə yazın."
+msgstr "Aus Vor- und Nachname konnte kein Standard-Benutzername gebildet werden — bitte manuell eingeben."
+
+#, python-format
+msgctxt "accounts.username_change_admin"
+msgid "İstifadəçi adı «%(old)s» → «%(new)s» olaraq dəyişdirildi. Parol dəyişmədi; istifadəçi bundan sonra yeni adla daxil olur."
+msgstr "Benutzername geändert: „%(old)s“ → „%(new)s“. Das Passwort wurde nicht geändert; der Benutzer meldet sich ab jetzt mit dem neuen Namen an."
+
+msgctxt "accounts.username_change_admin"
+msgid "İstifadəçi adını dəyiş"
+msgstr "Benutzernamen ändern"
+
+msgctxt "accounts.username_change_admin"
+msgid "Dəyişdirilir…"
+msgstr "Wird geändert…"
+
+msgctxt "accounts.username_change_admin"
+msgid "{name} — cari istifadəçi adı: {username}. Parol, açıq sessiyalar və e-poçt təsdiqi dəyişmir; köhnə adla giriş dərhal işləməz olur."
+msgstr "{name} — aktueller Benutzername: {username}. Passwort, offene Sitzungen und E-Mail-Bestätigung bleiben unverändert; die Anmeldung mit dem alten Namen funktioniert sofort nicht mehr."
+
+msgctxt "accounts.username_change_admin"
+msgid "Cari ad artıq standart formadadır: {username}."
+msgstr "Der aktuelle Name hat bereits die Standardform: {username}."
+
+msgctxt "accounts.username_change_admin"
+msgid "İstifadəçi adı dəyişdirilsin?"
+msgstr "Benutzernamen ändern?"
+
+msgctxt "accounts.username_change_admin"
+msgid "məs. Soyad sənəddə fərqli yazılıb, düzəliş tələbənin müraciəti ilə"
+msgstr "z. B. Nachname im Ausweis anders geschrieben, auf Antrag des Studierenden korrigiert"
+
+msgctxt "accounts.username_change_admin"
+msgid "Səbəb audit jurnalına köhnə və yeni adla birlikdə yazılır."
+msgstr "Die Begründung wird zusammen mit altem und neuem Namen ins Audit-Protokoll geschrieben."
+
+msgctxt "accounts.username_change_admin"
+msgid "Bəli, dəyiş"
+msgstr "Ja, ändern"
+
+msgctxt "accounts.username_change_admin"
+msgid "Yeni istifadəçi adı"
+msgstr "Neuer Benutzername"
+
+msgctxt "accounts.username_change_admin"
+msgid "məs. ad.soyad"
+msgstr "z. B. vorname.nachname"
+
+msgctxt "accounts.username_change_admin"
+msgid "Avtomatik təklif"
+msgstr "Automatisch vorschlagen"
+
+msgctxt "accounts.username_change_admin"
+msgid "3–30 simvol: latın hərfləri (a–z), rəqəmlər, nöqtə, alt xətt, defis. Böyük hərflər kiçiyə çevrilir."
+msgstr "3–30 Zeichen: lateinische Buchstaben (a–z), Ziffern, Punkt, Unterstrich, Bindestrich. Großbuchstaben werden kleingeschrieben."
+
+msgctxt "accounts.username_change"
+msgid "Dəyişikliyi RİM əməkdaşı etdi; parolunuz dəyişməyib. Sualınız varsa, RİM-ə müraciət edin."
+msgstr "Die Änderung wurde von RİM-Mitarbeitenden vorgenommen; Ihr Passwort ist unverändert. Bei Fragen wenden Sie sich an RİM."
+
+msgctxt "profile.sidebar"
+msgid "Parol və istifadəçi adı"
+msgstr "Passwort & Benutzername"
+
+msgctxt "accounts.people.page"
+msgid "İstifadəçi adını dəyiş"
+msgstr "Benutzernamen ändern"

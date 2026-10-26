@@ -109869,3 +109869,112 @@ msgstr "Эта отметка «н/б» или балл внесены боле�
 msgctxt "registrar.journal_timing"
 msgid "Bu dərsin yazma müddəti bitib — i/e qeydi artıq dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın."
 msgstr "Срок внесения записей по этому занятию истёк — отметку «присутствовал» больше нельзя изменить. Для изменения обратитесь в РИМ с письменным представлением."
+
+msgctxt "accounts.username_change_admin"
+msgid "İstifadəçi adını dəyişmək üçün icazəniz yoxdur."
+msgstr "У вас нет прав на изменение имени пользователя."
+
+msgctxt "accounts.username_change_admin"
+msgid "Başqasının adından baxış rejimində istifadəçi adını dəyişmək olmaz. Əvvəlcə baxış rejimindən çıxın."
+msgstr "Нельзя менять имя пользователя в режиме просмотра от чужого имени. Сначала выйдите из этого режима."
+
+msgctxt "accounts.username_change_admin"
+msgid "Təşkilatınız hələ təsdiqlənməyib — istifadəçi adını dəyişmək olmaz."
+msgstr "Ваша организация ещё не подтверждена — менять имя пользователя нельзя."
+
+msgctxt "accounts.username_change_admin"
+msgid "Superadmin hesabının istifadəçi adı bu bölmədən dəyişdirilə bilməz."
+msgstr "Имя пользователя суперадминистратора нельзя изменить в этом разделе."
+
+msgctxt "accounts.username_change_admin"
+msgid "Öz istifadəçi adınızı bu bölmədən dəyişə bilməzsiniz — «Profil redaktə» bölməsindən istifadə edin."
+msgstr "Свое имя пользователя здесь изменить нельзя — используйте раздел «Редактировать профиль»."
+
+msgctxt "accounts.username_change_admin"
+msgid "Təşkilat sahibinin istifadəçi adını yalnız superadmin dəyişə bilər."
+msgstr "Имя пользователя владельца организации может изменить только суперадминистратор."
+
+msgctxt "accounts.username_change_admin"
+msgid "Özünüzlə eyni və ya daha yüksək səlahiyyətli istifadəçinin adını dəyişə bilməzsiniz."
+msgstr "Нельзя изменить имя пользователя с такими же или более высокими полномочиями, чем у вас."
+
+msgctxt "accounts.username_change_admin"
+msgid "Səbəb yazılmalıdır (ən azı 10 simvol)."
+msgstr "Укажите причину (не менее 10 символов)."
+
+msgctxt "accounts.username_change_admin"
+msgid "Yeni istifadəçi adı cari addan fərqli olmalıdır."
+msgstr "Новое имя пользователя должно отличаться от текущего."
+
+msgctxt "accounts.username_change_admin"
+msgid "Bu istifadəçi adı artıq istifadə olunur."
+msgstr "Это имя пользователя уже занято."
+
+msgctxt "accounts.username_change_admin"
+msgid "Ad və soyaddan standart istifadəçi adı qurmaq alınmadı — adı əl ilə yazın."
+msgstr "Не удалось составить стандартное имя пользователя из имени и фамилии — введите его вручную."
+
+#, python-format
+msgctxt "accounts.username_change_admin"
+msgid "İstifadəçi adı «%(old)s» → «%(new)s» olaraq dəyişdirildi. Parol dəyişmədi; istifadəçi bundan sonra yeni adla daxil olur."
+msgstr "Имя пользователя изменено: «%(old)s» → «%(new)s». Пароль не изменён; теперь пользователь входит под новым именем."
+
+msgctxt "accounts.username_change_admin"
+msgid "İstifadəçi adını dəyiş"
+msgstr "Изменить имя пользователя"
+
+msgctxt "accounts.username_change_admin"
+msgid "Dəyişdirilir…"
+msgstr "Изменение…"
+
+msgctxt "accounts.username_change_admin"
+msgid "{name} — cari istifadəçi adı: {username}. Parol, açıq sessiyalar və e-poçt təsdiqi dəyişmir; köhnə adla giriş dərhal işləməz olur."
+msgstr "{name} — текущее имя пользователя: {username}. Пароль, открытые сеансы и подтверждение e-mail не меняются; вход со старым именем сразу перестанет работать."
+
+msgctxt "accounts.username_change_admin"
+msgid "Cari ad artıq standart formadadır: {username}."
+msgstr "Текущее имя уже в стандартной форме: {username}."
+
+msgctxt "accounts.username_change_admin"
+msgid "İstifadəçi adı dəyişdirilsin?"
+msgstr "Изменить имя пользователя?"
+
+msgctxt "accounts.username_change_admin"
+msgid "məs. Soyad sənəddə fərqli yazılıb, düzəliş tələbənin müraciəti ilə"
+msgstr "напр. Фамилия в документе написана иначе, исправлено по заявлению студента"
+
+msgctxt "accounts.username_change_admin"
+msgid "Səbəb audit jurnalına köhnə və yeni adla birlikdə yazılır."
+msgstr "Причина записывается в журнал аудита вместе со старым и новым именем."
+
+msgctxt "accounts.username_change_admin"
+msgid "Bəli, dəyiş"
+msgstr "Да, изменить"
+
+msgctxt "accounts.username_change_admin"
+msgid "Yeni istifadəçi adı"
+msgstr "Новое имя пользователя"
+
+msgctxt "accounts.username_change_admin"
+msgid "məs. ad.soyad"
+msgstr "напр. ad.soyad"
+
+msgctxt "accounts.username_change_admin"
+msgid "Avtomatik təklif"
+msgstr "Предложить автоматически"
+
+msgctxt "accounts.username_change_admin"
+msgid "3–30 simvol: latın hərfləri (a–z), rəqəmlər, nöqtə, alt xətt, defis. Böyük hərflər kiçiyə çevrilir."
+msgstr "3–30 символов: латинские буквы (a–z), цифры, точка, подчёркивание, дефис. Заглавные буквы переводятся в строчные."
+
+msgctxt "accounts.username_change"
+msgid "Dəyişikliyi RİM əməkdaşı etdi; parolunuz dəyişməyib. Sualınız varsa, RİM-ə müraciət edin."
+msgstr "Изменение внёс сотрудник RİM; ваш пароль не изменился. Если есть вопросы, обратитесь в RİM."
+
+msgctxt "profile.sidebar"
+msgid "Parol və istifadəçi adı"
+msgstr "Пароль и имя пользователя"
+
+msgctxt "accounts.people.page"
+msgid "İstifadəçi adını dəyiş"
+msgstr "Изменить имя пользователя"

@@ -38,7 +38,7 @@ _NAV_SKIP = frozenset({"syllabus-editor", "curriculum-editor", "create-post", "c
 #: İnsanların yazdığı sinonimlər (başlıqda olmayan): «parol» ↔ «şifrə», «anket» ↔ «sorğu» …
 _NAV_KEYWORDS = {
     "change-password": "parol şifrə password dəyiş",
-    "account-password-reset": "parol şifrə sıfırla reset unutdu",
+    "account-password-reset": "parol şifrə sıfırla reset unutdu istifadəçi adı username login dəyiş",
     "edit-profile": "profil redaktə email e-poçt poçt telefon şəkil istifadəçi adı username login",
     "surveys-inbox": "sorğu anket survey",
     "announcements": "elan elanlar xəbər bildiriş announcement",

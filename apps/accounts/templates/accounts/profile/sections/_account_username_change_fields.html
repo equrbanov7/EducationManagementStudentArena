@@ -1,0 +1,25 @@
+{% load i18n %}
+{% comment %}«İstifadəçi adını dəyiş» dialoqunun əlavə sahələri (səbəbdən ƏVVƏL; sahib 2026-10-26). Mətni və gizli
+`user_id`-ni JS (`account_username_change.js`) hədəfə görə yazır. Yeni ad `data-ems-required`-dir — boş olanda
+təsdiq düyməsi disabled qalır; «Avtomatik təklif» serverdən boş `ad.soyad` gətirir.{% endcomment %}
+<p class="pwr-confirm__body" data-pwr-rename-body></p>
+<input type="hidden" name="user_id" value="" data-pwr-rename-user>
+<div class="ems-field">
+    <label class="ems-field__label" for="pwr-rename-input">
+        {% trans "Yeni istifadəçi adı" context "accounts.username_change_admin" %} <span class="ems-field__req" aria-hidden="true">*</span>
+    </label>
+    <div class="pwr-rename__row">
+        <input id="pwr-rename-input" name="new_username" type="text" class="ems-input ems-mono pwr-rename__input"
+               data-pwr-rename-input data-ems-required
+               autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="30"
+               aria-describedby="pwr-rename-help"
+               placeholder="{% trans 'məs. ad.soyad' context 'accounts.username_change_admin' %}">
+        <button type="button" class="ems-btn" data-pwr-rename-suggest>
+            <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+            {% trans "Avtomatik təklif" context "accounts.username_change_admin" %}
+        </button>
+    </div>
+    <p class="ems-field__hint" id="pwr-rename-help">
+        {% trans "3–30 simvol: latın hərfləri (a–z), rəqəmlər, nöqtə, alt xətt, defis. Böyük hərflər kiçiyə çevrilir." context "accounts.username_change_admin" %}
+    </p>
+</div>

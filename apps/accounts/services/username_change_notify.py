@@ -21,19 +21,25 @@ CTX = "accounts.username_change"
 EMAIL_TEMPLATE = "accounts/emails/username_changed.html"
 
 
-def _texts(*, old_username: str, new_username: str) -> dict:
+def _texts(*, old_username: str, new_username: str, by_operator: bool = False) -> dict:
     title = pgettext(CTX, "İstifadəçi adınız dəyişdirildi")
     changed = pgettext(CTX, "İstifadəçi adınız dəyişdirildi: %(old)s → %(new)s.") % {
         "old": old_username,
         "new": new_username,
     }
     login = pgettext(CTX, "Bundan sonra sistemə yeni adla və ya e-poçtunuzla daxil olun; köhnə ad artıq işləmir.")
-    warning = pgettext(CTX, "Bu dəyişikliyi siz etməmisinizsə, dərhal RİM-ə müraciət edin.")
+    if by_operator:
+        # Sahib 2026-10-26: adı RİM operatoru dəyişdi («İstifadəçi adını dəyiş», parol toxunulmur).
+        warning = pgettext(
+            CTX, "Dəyişikliyi RİM əməkdaşı etdi; parolunuz dəyişməyib. Sualınız varsa, RİM-ə müraciət edin."
+        )
+    else:
+        warning = pgettext(CTX, "Bu dəyişikliyi siz etməmisinizsə, dərhal RİM-ə müraciət edin.")
     return {"title": title, "lines": [changed, login, warning]}
 
 
-def notify_username_changed(user, profile, *, old_username: str) -> None:
-    texts = _texts(old_username=old_username, new_username=user.username)
+def notify_username_changed(user, profile, *, old_username: str, by_operator: bool = False) -> None:
+    texts = _texts(old_username=old_username, new_username=user.username, by_operator=by_operator)
     link = f"{reverse('accounts:profile')}?section=edit-profile"
     organization = getattr(profile, "organization", None)
     address = (user.email or "").strip()

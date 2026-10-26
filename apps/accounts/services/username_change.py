@@ -167,7 +167,8 @@ def _hit_rate_limit(user) -> None:
         )
 
 
-def _taken(value: str, *, exclude_pk) -> bool:
+def username_taken(value: str, *, exclude_pk) -> bool:
+    """Ad (kanonik formada) ``exclude_pk``-dan BAŞQA hesabda varmı — operator dəyişikliyi də bunu işlədir."""
     users = get_user_model()._default_manager.exclude(pk=exclude_pk)
     return canonical_identity_queryset(users, "username", value, alias="_new_username_key").exists()
 
@@ -225,7 +226,7 @@ def change_own_username(*, user, new_username, password, request=None) -> Userna
         allowed_at = next_change_at(locked_profile)
         if allowed_at is not None:  # paralel ikinci sorğu
             raise _cooldown_error(allowed_at)
-        if _taken(value, exclude_pk=user.pk):
+        if username_taken(value, exclude_pk=user.pk):
             raise _taken_error()
         old_username = locked.username
         locked.username = value
@@ -286,5 +287,6 @@ __all__ = [
     "next_change_at",
     "normalize_username",
     "success_message",
+    "username_taken",
     "validate_username",
 ]
