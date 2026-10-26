@@ -706,6 +706,11 @@ jobs:
               test -z "$TASK_CHAIR" || args+=(--faculty "$TASK_CHAIR")
               test -z "$TEACHER" || args+=(--find-name "$TEACHER")
               test -z "$ROSTER_TAG" || args+=(--known-usernames "/tmp/staff_known_${GITHUB_RUN_ID}.txt")
+              # Sahib 2026-10-26: `batch` = qəbul ili (məs. 2026 = 1-ci kurs) — yalnız tələbə rejimində.
+              if [ -n "$BATCH" ]; then
+                test "$students" = 1 && match "$BATCH" '^20[0-9]{2}$' || { echo "batch (qəbul ili) yalnız tələbə rejimində, 4 rəqəm" >&2; exit 2; }
+                args+=(--admission-year "$BATCH")
+              fi
               if [ "$APPLY" = "true" ]; then
                 test "$students" = 1 || test -n "$TASK_CHAIR" || { echo "apply üçün task_chair (fakültə) məcburidir" >&2; exit 2; }
                 test -n "$ROSTER_TAG" || { echo "apply üçün roster_tag (staff-known-…) məcburidir" >&2; exit 2; }

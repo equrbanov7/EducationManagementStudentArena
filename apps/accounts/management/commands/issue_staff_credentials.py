@@ -114,6 +114,12 @@ class Command(BaseCommand):
         )
         parser.add_argument("--audience", choices=("staff", "students"), default="staff")
         parser.add_argument("--find-name", default="", help="Ad hissələri ilə üzv axtarışı (rol + fakültə hesabata)")
+        parser.add_argument(
+            "--admission-year",
+            type=int,
+            default=None,
+            help="--audience students: yalnız bu qəbul ilinin tələbələri (məs. 2026 = 1-ci kurs; sahib 2026-10-26)",
+        )
         parser.add_argument("--report-out", default="", help="Hesabat CSV (parolsuz)")
         parser.add_argument("--apply", action="store_true")
         parser.add_argument("--credentials-out", default="", help="--apply: yeni parolların CSV-si")
@@ -287,7 +293,7 @@ class Command(BaseCommand):
     # ── tələbələr ────────────────────────────────────────────────────────────
     def _run_students(self, organization, known, opts):
         faculty = self._faculty(organization, opts["faculty"]) if opts["faculty"].strip() else None
-        rows = self._students(organization, faculty)
+        rows = self._students(organization, faculty, admission_year=opts.get("admission_year"))
         pending = [r for r in rows if r["state"] == STATE_PENDING and known.get(r["username"].casefold())]
         verdicts = _parallel(lambda r: check_password(known[r["username"].casefold()], r["user"].password), pending)
         valid_ids = {r["user_id"] for r, ok in zip(pending, verdicts) if ok}
@@ -345,7 +351,7 @@ class Command(BaseCommand):
         subgroup = group.name if top_group.pk != group.pk else ""
         return faculty, top_group.name, subgroup, specialty
 
-    def _students(self, organization, faculty):
+    def _students(self, organization, faculty, *, admission_year=None):
         Membership = django_apps.get_model("organizations", "Membership")
         Record = django_apps.get_model("registrar", "StudentAcademicRecord")
         student_ids = Membership.objects.filter(
@@ -363,6 +369,8 @@ class Command(BaseCommand):
             .select_related("student__profile", "program", "group__parent__parent__parent__parent__parent")
             .order_by("student_id", "-created_at")
         )
+        if admission_year:
+            records = records.filter(admission_year=admission_year)
         rows, seen = [], set()
         for record in records:
             if record.student_id in seen:

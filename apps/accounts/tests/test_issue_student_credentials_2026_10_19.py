@@ -125,3 +125,11 @@ class IssueStudentCredentialsTest(TestCase):
             untouched.refresh_from_db()
             self.assertTrue(untouched.check_password("list-pass"), untouched.username)
         self.assertIn("issued=2", out)
+
+    def test_admission_year_limits_to_that_intake(self):
+        """Sahib 2026-10-26: yalnız 1-ci kurs (qəbul ili 2026) — başqa qəbul ilinin tələbəsinə toxunulmur."""
+        with bypass_rls():
+            StudentAcademicRecord.objects.filter(student=self.missing).update(admission_year=2026)
+        out, rows = self._run(admission_year=2026)
+        self.assertEqual(set(rows), {"isc2.missing"})
+        self.assertIn("new_targets=1", out)
