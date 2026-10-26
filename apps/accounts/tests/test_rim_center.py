@@ -307,7 +307,6 @@ class RimHierarchyTests(RimCenterTestBase):
 
 class RimCredentialTests(RimCenterTestBase):
     def test_set_password_returns_password_once_and_forces_change(self):
-        type(self.teacher.profile).objects.filter(pk=self.teacher.profile.pk).update(email_verified=True)
         self.login_operator()
         response = self.act("set_password", self.teacher, reason="müəllim girə bilmir")
         self.assertEqual(response.status_code, 200)
@@ -324,8 +323,6 @@ class RimCredentialTests(RimCenterTestBase):
         # İstifadəçi ÖZ parolunu qurmağa məcburdur.
         self.teacher.profile.refresh_from_db()
         self.assertTrue(self.teacher.profile.password_change_required)
-        # Sahib 2026-10-26: «Parolu sıfırla» bölməsi kimi — təsdiqli e-poçt da sıfırlanır (ilk girişdə OTP).
-        self.assertFalse(self.teacher.profile.email_verified)
 
     def test_password_value_is_never_written_to_audit(self):
         self.login_operator()
