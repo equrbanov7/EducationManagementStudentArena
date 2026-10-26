@@ -102,7 +102,10 @@ def _attachment(payload: bytes, filename: str) -> HttpResponse:
 def _render_response(*, organization, student, record, request):
     """``(HttpResponse, seal)`` — hər buraxılış QR + yoxlama kodu ilə möhürlənir (``transcript_seal``)."""
     program = record.program if record and record.program_id else None
-    data = transcript_service.build_student_transcript(student=student, organization=organization, program=program)
+    # Sahib 2026-10-26: rəsmi (möhürlü) transkriptdə hələ başlamamış semestr yoxdur.
+    data = transcript_service.build_student_transcript(
+        student=student, organization=organization, program=program, started_only=True
+    )
     if not data["has_record"]:
         raise Http404  # nothing to certify yet
     payload, seal = transcript_seal.render_sealed_transcript(

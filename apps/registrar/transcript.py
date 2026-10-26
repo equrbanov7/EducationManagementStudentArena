@@ -188,7 +188,15 @@ def count_student_record_rows(*, student, organization) -> int:
     return sum(1 for pair in pairs if pair not in overridden) + len(recognitions)
 
 
-def build_student_transcript(*, student, organization, program=None, student_view=False):
+def _period_started(period, today) -> bool:
+    """Semestr başlayıbmı — başlama tarixi yoxdursa başlamış sayılır (köhnə dövrlər)."""
+    start = getattr(period, "start_date", None)
+    return start is None or start <= today
+
+
+def build_student_transcript(
+    *, student, organization, program=None, student_view=False, started_only=False, today=None
+):
     """Full transcript for one student: chronological semesters + cumulative GPA.
 
     Only the requesting student's own enrollments are read; tenant isolation is
@@ -211,6 +219,11 @@ def build_student_transcript(*, student, organization, program=None, student_vie
     recognitions = credit_recognition_read.active_for_student(organization, getattr(student, "pk", None))
     overridden = credit_recognition_read.override_keys(recognitions)
     enrollments = [e for e in enrollments if (e.offering.subject_id, e.offering.period_id) not in overridden]
+    if started_only:
+        # Sahib 2026-10-26: rəsmi transkriptdə hələ BAŞLAMAMIŞ semestr (məs. payızda «Yaz 2026/2027») göstərilmir.
+        today = today or timezone.localdate()
+        enrollments = [e for e in enrollments if _period_started(e.offering.period, today)]
+        recognitions = [item for item in recognitions if _period_started(item.period, today)]
     if not enrollments and not recognitions:
         return {
             "has_record": False,
