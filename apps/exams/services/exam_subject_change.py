@@ -151,8 +151,10 @@ def decide(snapshot, exam, *, unit_ids):
     if not subject_changed and not inputs_changed:
         return None
     new_link_ids = _prospective_link_ids(exam, unit_ids=unit_ids)
-    if not subject_changed and new_link_ids == snapshot.link_ids:
-        return None  # qrup / müəllim dəyişsə də bağlı jurnallar eynidir — nəticə yerindən tərpənmir
+    if not subject_changed and snapshot.link_ids <= new_link_ids:
+        # Qrup / müəllim dəyişsə də köhnə jurnalların HEÇ BİRİ ayrılmır (eyni və ya yalnız əlavə — məs. sahib
+        # 2026-10-26: qrupun yeni alt qrup jurnalları) — nəticə heç yerdən silinmir, təsdiq lazım deyil.
+        return None
     students = result_students(exam)
     if not students:
         return None

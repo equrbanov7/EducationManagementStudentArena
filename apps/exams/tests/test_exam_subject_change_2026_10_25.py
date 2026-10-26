@@ -172,3 +172,30 @@ class ConfirmationValidatorTests(_GuardSetup):
         )
         self.assertIsNone(reason)
         self.assertTrue(err)
+
+
+class SameSubjectAddedJournalsTests(_GuardSetup):
+    """Sahib 2026-10-26: «eyni bir şeydə niyə bu gəlir?» — fənn eyni, qrupa yeni (alt qrup) jurnalı əlavə olunub."""
+
+    def _decide(self, exam, *, old_links, new_links):
+        from unittest import mock
+
+        snapshot = exam_subject_change.take_snapshot(exam)
+        snapshot = exam_subject_change.Snapshot(
+            subject_id=snapshot.subject_id,
+            subject_label=snapshot.subject_label,
+            teacher_id=snapshot.teacher_id,
+            unit_ids=snapshot.unit_ids,
+            link_ids=frozenset(old_links),
+            category=snapshot.category,
+        )
+        with mock.patch.object(exam_subject_change, "_prospective_link_ids", return_value=frozenset(new_links)):
+            return exam_subject_change.decide(snapshot, exam, unit_ids=[*snapshot.unit_ids, self.other_group.pk])
+
+    def test_only_added_journals_need_no_confirmation(self):
+        exam = self._exam_on_wrong_subject()
+        self.assertIsNone(self._decide(exam, old_links={"a"}, new_links={"a", "b"}))
+
+    def test_removed_journal_still_needs_confirmation(self):
+        exam = self._exam_on_wrong_subject()
+        self.assertIsNotNone(self._decide(exam, old_links={"a", "b"}, new_links={"a"}))
