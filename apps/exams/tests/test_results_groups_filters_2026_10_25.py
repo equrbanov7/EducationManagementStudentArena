@@ -249,8 +249,11 @@ class ExportFollowsFiltersTests(ResultsGroupFixture):
         rows = list(load_workbook(BytesIO(response.content)).active.iter_rows(values_only=True))
         header = rows[0]
         self.assertEqual(header[1:4], ("Qruplar", "Ana qrup", "Ad Soyad"))
-        self.assertEqual(header[-2:], ("Zal", "Apellyasiya"))
+        # 2026-10-27: vahid ixrac formatı («Dəyərləndirilmiş nəticələr» ilə eyni) — Zal + Kompüter, sonda Apellyasiya.
+        self.assertEqual(header[-1], "Apellyasiya")
+        hall_col = header.index("Zal")
+        self.assertEqual(header[hall_col + 1], "Kompüter")
         body = rows[1:]
         self.assertEqual([row[4] for row in body], ["rg_s3", "rg_s1", "rg_s6", "rg_s2"])
         self.assertEqual(body[1][1:3], ("234 K-1", "234 K az"))
-        self.assertEqual(body[1][-2], "Zal 101")
+        self.assertEqual(body[1][hall_col], "Zal 101")

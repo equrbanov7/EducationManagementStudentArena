@@ -43,6 +43,7 @@ from .dashboard import (
     pending_review_detail,
     review_result_detail,
     review_results,
+    review_results_export,
     staff_cabinet_entry,
     student_cabinet_entry,
     student_dashboard,
@@ -219,6 +220,7 @@ __all__ = [
     "pending_review",
     "pending_review_detail",
     "review_results",
+    "review_results_export",
     "review_result_detail",
     # Roles
     "manage_roles",

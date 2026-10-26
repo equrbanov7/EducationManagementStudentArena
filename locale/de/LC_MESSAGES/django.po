@@ -110856,3 +110856,47 @@ msgstr "Passwort & Benutzername"
 msgctxt "accounts.people.page"
 msgid "İstifadəçi adını dəyiş"
 msgstr "Benutzernamen ändern"
+
+msgctxt "accounts.review_results"
+msgid "İmtahan — Midterm"
+msgstr "Prüfung — Zwischenprüfung"
+
+msgctxt "accounts.review_results"
+msgid "İmtahan — Final"
+msgstr "Prüfung — Abschlussprüfung"
+
+msgctxt "accounts.review_results"
+msgid "İmtahan — Quiz"
+msgstr "Prüfung — Quiz"
+
+msgctxt "accounts.review_results"
+msgid "Fənn"
+msgstr "Fach"
+
+msgctxt "accounts.review_results"
+msgid "Bütün fənlər"
+msgstr "Alle Fächer"
+
+msgctxt "accounts.review_results"
+msgid "Seçilmiş aralıq"
+msgstr "Benutzerdefinierter Zeitraum"
+
+msgctxt "accounts.review_results"
+msgid "Başlanğıc (tarix, saat)"
+msgstr "Von (Datum, Uhrzeit)"
+
+msgctxt "accounts.review_results"
+msgid "Son (tarix, saat)"
+msgstr "Bis (Datum, Uhrzeit)"
+
+msgctxt "accounts.review_results"
+msgid "Excel-ə yüklə"
+msgstr "Als Excel herunterladen"
+
+msgctxt "accounts.review_results"
+msgid "Yükləmək üçün nəticə yoxdur."
+msgstr "Keine Ergebnisse zum Herunterladen."
+
+msgctxt "exams.results_export"
+msgid "Avtomatik (sistem)"
+msgstr "Automatisch (System)"

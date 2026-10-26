@@ -180,6 +180,7 @@ urlpatterns = [
         name="pending_review_detail",
     ),
     path("review-results/", views.review_results, name="review_results"),
+    path("review-results/export.xlsx", views.review_results_export, name="review_results_export"),
     path(
         "review-results/<str:item_type>/<int:item_id>/",
         views.review_result_detail,

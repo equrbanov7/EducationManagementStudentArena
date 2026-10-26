@@ -154,7 +154,7 @@ YENİ BÖLMƏNİN ASSET-İ (qısa qayda):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/dashboard.css' %}?v=20260925-cards">
     {% comment %}«Dəyərləndirilmiş nəticələr» (2026-10-17) — `responsive.css`-dən SONRA: manifest prefiksi (`profile.css` @import sırası) dəyişmir.{% endcomment %}
     {% if 'review-results' in asset_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/review_results.css' %}?v=20261017-rr2">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/review_results.css' %}?v=20261027-rrx">
     {% endif %}
     {% comment %}`.blog-card` + qlobal `.card-body` / `.card-title` — yalnız post və kateqoriya bölmələri.{% endcomment %}
     {% if 'posts' in asset_sections or 'category-management' in asset_sections or 'create-category' in asset_sections %}
@@ -197,7 +197,12 @@ YENİ BÖLMƏNİN ASSET-İ (qısa qayda):
     {% if 'my-exams' in asset_sections %}
     <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20261025-subjguard">
     <link rel="stylesheet" href="{% static 'exams/css/exam_wizard.css' %}?v=20261026-cov">
+    {% endif %}
+    {% comment %}EMSDateTime sahəsi — imtahan sehrbazı və «Dəyərləndirilmiş nəticələr» «Dövr» aralığı (2026-10-27).{% endcomment %}
+    {% if 'my-exams' in asset_sections or 'review-results' in asset_sections %}
     <link rel="stylesheet" href="{% static 'css/ems_datetime.css' %}?v=20261008-1">
+    {% endif %}
+    {% if 'my-exams' in asset_sections %}
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part1.css' %}?v=20261017-pkgc">
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part2.css' %}?v=20261017-pkgc">
     {% endif %}

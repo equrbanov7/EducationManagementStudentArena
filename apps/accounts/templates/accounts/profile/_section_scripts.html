@@ -217,8 +217,14 @@ istifadəçidə forma JS-siz qalırdı (asset auditi 2026-10-21).{% endcomment %
 <script src="{% static 'exams/js/exam_create_edit_modal/toggles.js' %}?v=20260911-1"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/form.js' %}?v=20261026-cov"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/entry.js' %}?v=20260914-1"></script>
+{% endif %}
+{% comment %}EMSDateTime — imtahan sehrbazı və «Dəyərləndirilmiş nəticələr» «Dövr» aralığı (2026-10-27; document
+delegasiyası, tənbəl yüklənə bilər). Sıra əvvəlki kimidir: sehrbaz skriptlərindən ƏVVƏL.{% endcomment %}
+{% if 'my-exams' in asset_sections or 'review-results' in asset_sections %}
 <script src="{% static 'js/ems_datetime.js' %}?v=20261008-1"></script>
 <script src="{% static 'js/ems_datetime_picker.js' %}?v=20261008-1"></script>
+{% endif %}
+{% if 'my-exams' in asset_sections %}
 <script src="{% static 'exams/js/exam_wizard.js' %}?v=20261014-uifix"></script>
 <script src="{% static 'exams/js/exam_wizard_viewport.js' %}?v=20261014-modalux"></script>
 <script src="{% static 'accounts/js/my_exams_dashboard.js' %}?v=20261014-searchux"></script>

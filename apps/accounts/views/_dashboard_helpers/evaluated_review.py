@@ -2,8 +2,6 @@
 Evaluated-review collector for the teacher review-results section.
 """
 
-from datetime import timedelta
-
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.urls import reverse
@@ -24,6 +22,16 @@ from .._helpers import (
     _tenant_scoped_exams,
 )
 from .._helpers.task_kind_visibility import hidden_task_filters, visible_task_filter
+from .evaluated_review_filters import (
+    EXAM_CATEGORY_FILTERS,
+    EXAM_KIND_FILTERS,
+    PERIOD_FILTERS,
+    attempt_window_q,
+    graded_window_q,
+    item_in_window,
+    resolve_date_window,
+    subject_options,
+)
 from .formatters import (
     _attach_registry_groups,
     _build_student_group_map_and_available,
@@ -87,31 +95,64 @@ def fill_evaluated_test_scores(items):
     return items
 
 
-#: «Növ» seçicisində imtahanın alt növü (2026-10-17): ``exam_test`` / ``exam_written`` → «exams» + növ süzgəci.
-EXAM_KIND_FILTERS = {"exam_test": "test", "exam_written": "written"}
-#: «Dövr» süzgəci — qiymətləndirmə (yoxsa göndərilmə) tarixi son N gün daxilində.
-PERIOD_FILTERS = {"7": 7, "30": 30, "90": 90}
+def fill_evaluated_checkers(items):
+    """«Yoxlayan» — imtahan sətirləri üçün YALNIZ verilən (səhifənin) sətirlərində (2 sorğu, 2026-10-27).
+
+    Bal qoyan / dəyişən insan varsa onun adı; yoxdursa test / kodlaşdırma cəhdində «Avtomatik (sistem)».
+    Əvvəl imtahanın MÜƏLLİFİ yazılırdı — avtomatik yoxlanan testdə yanlış təəssürat yaradırdı."""
+    from apps.exams.public import attempt_checked_by_map
+
+    exam_items = [item for item in items if item.get("attempt") is not None]
+    if exam_items:
+        labels = attempt_checked_by_map([item["attempt"] for item in exam_items])
+        for item in exam_items:
+            item["evaluator_display"] = labels.get(item["attempt_id"], "")
+    return items
 
 
-def _item_date(item):
-    return item.get("reviewed_at") or item.get("submitted_at")
+__all__ = [
+    "EXAM_CATEGORY_FILTERS",
+    "EXAM_KIND_FILTERS",
+    "PERIOD_FILTERS",
+    "_collect_evaluated_review_items",
+    "fill_evaluated_checkers",
+    "fill_evaluated_test_scores",
+]
+
+
+def _param(request, name, override=None):
+    return (override if override is not None else request.GET.get(name, "")).strip()
 
 
 def _collect_evaluated_review_items(
     request, search=None, filter_type=None, filter_group=None, submitted_order=None, period=None
 ):
+    """Süzülmüş sətirlər + seçici vəziyyəti.
+
+    Qaytarır: ``(items, search, type, group, groups, order, period, extras)`` — ``extras``:
+    ``subject`` / ``subjects`` (fənn süzgəci), ``date_from`` / ``date_to`` (aralığın kanonik mətni).
+    İmtahan sətirlərində ``attempt`` obyekti saxlanılır (ixrac + «Yoxlayan» görünən səhifə üçün);
+    «Yoxlayan» imtahan sətirlərində səhifələmədən SONRA doldurulur (``fill_evaluated_checkers``).
+    """
     search_query = (search if search is not None else request.GET.get("evaluated_search", "")).strip()
     # 2026-10-13 (rol auditi B12): söndürülmüş «Sərbəst iş» / «Kurs işi» tabı seçilə bilməz, sətirləri yığılmır.
     hidden_types = hidden_task_filters("review-results")
     raw_type = (filter_type if filter_type is not None else request.GET.get("evaluated_type", "all")) or "all"
     exam_kind = EXAM_KIND_FILTERS.get(raw_type.lower(), "")
+    exam_category = EXAM_CATEGORY_FILTERS.get(raw_type.lower(), "")
     normalized_type = (
-        "exams" if exam_kind else visible_task_filter("review-results", _normalize_pending_review_type(raw_type))
+        "exams"
+        if exam_kind or exam_category
+        else visible_task_filter("review-results", _normalize_pending_review_type(raw_type))
     )
-    selected_type = raw_type.lower() if exam_kind else normalized_type
-    selected_period = (period if period is not None else request.GET.get("evaluated_period", "")).strip()
-    if selected_period not in PERIOD_FILTERS:
-        selected_period = ""
+    selected_type = raw_type.lower() if exam_kind or exam_category else normalized_type
+    window = resolve_date_window(
+        _param(request, "evaluated_period", period),
+        _param(request, "evaluated_from"),
+        _param(request, "evaluated_to"),
+    )
+    selected_period = window.period
+    selected_subject = _param(request, "evaluated_subject")[:255]
     selected_group = (filter_group if filter_group is not None else request.GET.get("evaluated_group", "")).strip()
     normalized_submitted_order = _normalize_submission_date_order(
         submitted_order if submitted_order is not None else request.GET.get("evaluated_submitted_order", "newest"),
@@ -124,12 +165,10 @@ def _collect_evaluated_review_items(
     teacher_exams = _tenant_scoped_exams(request, Exam.objects.filter(review_exams_q(request.user)))
     review_cutoff = timezone.now() - REVIEW_EDIT_WINDOW
     # Review 2026-10-18: «Dövr» süzgəci BAZADA da (Python süzgəci aşağıda eyni qaydanı saxlayır — nəticə dəyişmir).
-    since = timezone.now() - timedelta(days=PERIOD_FILTERS[selected_period]) if selected_period else None
+    # 2026-10-27: hazır dövrə əlavə olaraq istənilən tarix-saat aralığı (``evaluated_from`` / ``evaluated_to``).
 
     def _graded_since(qs):
-        if since is None:
-            return qs
-        return qs.filter(Q(graded_at__gte=since) | Q(graded_at__isnull=True, submitted_at__gte=since))
+        return qs.filter(graded_window_q(window)) if window.active else qs
 
     # Qrup seçimi sətirlər yığılandan SONRA yoxlanılır — qrup reyestrdən gəlir (``_attach_registry_groups``).
     student_group_map, legacy_groups = _build_student_group_map_and_available(request.user)
@@ -141,6 +180,9 @@ def _collect_evaluated_review_items(
         evaluated_type=selected_type,
         evaluated_group=selected_group,
         evaluated_period=selected_period,
+        evaluated_from=window.from_text,
+        evaluated_to=window.to_text,
+        evaluated_subject=selected_subject,
         evaluated_submitted_order=normalized_submitted_order,
         er_page=(request.GET.get("er_page") or "").strip(),
     )
@@ -158,7 +200,7 @@ def _collect_evaluated_review_items(
                 | Q(checked_by_teacher=True, teacher_checked_at__isnull=True)
                 | Q(checked_by_teacher=True, teacher_checked_at__lte=review_cutoff)
             )
-            .select_related("exam", "user", "exam__author", "exam__course")
+            .select_related("exam", "user", "exam__author", "exam__course", "exam__subject")
             # Cavablar burada prefetch OLUNMUR: test balı yalnız görünən səhifənin
             # sətirləri üçün hesablanır (``fill_evaluated_test_scores``). Əvvəl
             # müəllimin BÜTÜN test tarixçəsinin cavab + variant sətirləri hər
@@ -166,12 +208,10 @@ def _collect_evaluated_review_items(
         )
         if exam_kind:
             attempts = attempts.filter(exam__exam_type=exam_kind)
-        if since is not None:
-            attempts = attempts.filter(
-                Q(teacher_checked_at__gte=since)
-                | Q(teacher_checked_at__isnull=True, finished_at__gte=since)
-                | Q(teacher_checked_at__isnull=True, finished_at__isnull=True, started_at__gte=since)
-            )
+        if exam_category:
+            attempts = attempts.filter(exam__exam_type_extended=exam_category)
+        if window.active:
+            attempts = attempts.filter(attempt_window_q(window))
         search_q = tolerant_q(
             search_query,
             ("user__username", "user__first_name", "user__last_name", "exam__title", "exam__course__title"),
@@ -206,14 +246,24 @@ def _collect_evaluated_review_items(
                     "type": "exam",
                     "exam_kind": attempt.exam.exam_type,
                     "exam_kind_label": attempt.exam.get_exam_type_display(),
+                    "exam_category": attempt.exam.exam_type_extended or "",
+                    "exam_category_label": (
+                        attempt.exam.get_exam_type_extended_display() if attempt.exam.exam_type_extended else ""
+                    ),
                     "attempt_id": attempt.id,
+                    "attempt": attempt,
                     "student": attempt.user,
                     "title": attempt.exam.title,
                     "course_title": course.title if course else "-",
+                    "subject_title": (
+                        attempt.exam.subject.name if attempt.exam.subject_id else (course.title if course else "")
+                    ),
                     "group_name": student_group_map.get(attempt.user_id, ""),
                     "score_display": score_display,
                     "score_percent_display": score_percent_display,
-                    "evaluator_display": _user_display_name(attempt.exam.author),
+                    # 2026-10-27: «Yoxlayan» = bal qoyan İNSAN, yoxdursa «Avtomatik (sistem)» — müəllif DEYİL
+                    # (``fill_evaluated_checkers``, yalnız görünən səhifə; ixrac eyni qaydanı işlədir).
+                    "evaluator_display": "",
                     # Başqasının imtahanı (mərkəz görünüşü) — «Yaradan» sətirdə ayrıca göstərilir.
                     "creator_display": (
                         _user_display_name(attempt.exam.author) if attempt.exam.author_id != request.user.id else ""
@@ -258,6 +308,8 @@ def _collect_evaluated_review_items(
                     "student": submission.user,
                     "title": submission.assignment.title,
                     "course_title": course.title if course else "-",
+                    "subject_title": course.title if course else "",
+                    "status_display": submission.get_status_display(),
                     "group_name": student_group_map.get(submission.user_id, ""),
                     "score_display": _format_score_display(submission.grade),
                     "evaluator_display": _user_display_name(submission.graded_by) if submission.graded_by_id else "-",
@@ -304,6 +356,8 @@ def _collect_evaluated_review_items(
                     "student": submission.student,
                     "title": submission.project.title,
                     "course_title": course.title if course else "-",
+                    "subject_title": course.title if course else "",
+                    "status_display": submission.get_status_display(),
                     "group_name": student_group_map.get(submission.student_id, ""),
                     "score_display": _format_score_display(submission.grade),
                     "evaluator_display": _user_display_name(submission.graded_by) if submission.graded_by_id else "-",
@@ -357,6 +411,8 @@ def _collect_evaluated_review_items(
                     "student": student,
                     "title": submission.assignment.lab.title,
                     "course_title": course.title if course else "-",
+                    "subject_title": course.title if course else "",
+                    "status_display": submission.get_status_display(),
                     "group_name": student_group_map.get(student.id, ""),
                     "score_display": _format_score_display(submission.score),
                     "evaluator_display": _user_display_name(submission.graded_by) if submission.graded_by_id else "-",
@@ -374,12 +430,17 @@ def _collect_evaluated_review_items(
             )
 
     available_groups = _attach_registry_groups(items, legacy_groups)
+    available_subjects = subject_options(items)
     if selected_group and selected_group not in available_groups:
         selected_group = ""
+    if selected_subject and selected_subject not in available_subjects:
+        selected_subject = ""
     if selected_group:
         items = [item for item in items if item.get("group_name") == selected_group]
-    if since is not None:
-        items = [item for item in items if _item_date(item) and _item_date(item) >= since]
+    if selected_subject:
+        items = [item for item in items if item.get("subject_title") == selected_subject]
+    if window.active:
+        items = [item for item in items if item_in_window(item, window)]
 
     items.sort(
         key=lambda item: (
@@ -396,4 +457,10 @@ def _collect_evaluated_review_items(
         available_groups,
         normalized_submitted_order,
         selected_period,
+        {
+            "subject": selected_subject,
+            "subjects": available_subjects,
+            "date_from": window.from_text,
+            "date_to": window.to_text,
+        },
     )

@@ -96,6 +96,7 @@ class _Stage2Mixin:
                 "count_label": self._er["evaluated_review_count_label"],
                 "empty": self._er["evaluated_review_empty"],
                 "period": self._er["evaluated_review_period"],
+                "export_url": self._er["evaluated_review_export_url"],
             }
         self.role_assignment_section = {
             "organization": None,

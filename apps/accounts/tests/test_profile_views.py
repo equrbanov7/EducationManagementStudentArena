@@ -5393,8 +5393,9 @@ class ReviewResultsViewTest(TestCase):
         self.assertEqual(exam_items[0]["score_percent_display"], "88%")
         self.assertEqual(exam_items[1]["score_display"], "91")
         self.assertEqual(exam_items[1]["score_percent_display"], "")
-        self.assertEqual(exam_items[0]["evaluator_display"], "Review Teacher")
-        self.assertContains(response, "Review Teacher")
+        # 2026-10-27 (sahib): avtomatik yoxlanan testdə «Yoxlayan» müəllif DEYİL — «Avtomatik (sistem)».
+        self.assertEqual(exam_items[0]["evaluator_display"], "Avtomatik (sistem)")
+        self.assertContains(response, "Avtomatik (sistem)")
         self.assertEqual(exam_items[0]["submitted_at"], older_attempt.finished_at)
         self.assertEqual(exam_items[1]["submitted_at"], newer_attempt.finished_at)
 

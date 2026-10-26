@@ -14,6 +14,7 @@ Modules:
 * ``results``  — ``my_result_detail``
 * ``review``   — ``pending_review``, ``pending_review_detail``,
   ``review_results``, ``review_result_detail``
+* ``review_export`` — ``review_results_export`` (Excel, 2026-10-27)
 """
 
 from .dispatch import cabinet_entry, dashboard, resolve_cabinet_url, staff_cabinet_entry, student_cabinet_entry
@@ -24,6 +25,7 @@ from .review import (
     review_result_detail,
     review_results,
 )
+from .review_export import review_results_export
 from .student import (
     assigned_courses,
     assigned_exams,
@@ -49,5 +51,6 @@ __all__ = [
     "pending_review",
     "pending_review_detail",
     "review_results",
+    "review_results_export",
     "review_result_detail",
 ]

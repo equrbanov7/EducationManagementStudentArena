@@ -337,3 +337,22 @@
         padding: 12px 16px;
     }
 }
+
+/* 2026-10-27: «Dövr» aralığının tarix-saat sahələri (EMSDateTime, `field.kind = "datetime"`).
+   Filtr panelində `.ems-input` sinfi işlənir — təqvim düyməsi mətnin üstünə düşməsin; format ipucu
+   ekran oxuyucusu üçün qalır (aria-describedby), vizual olaraq placeholder kifayətdir. */
+.rr .ems-filters .ems-dt input.ems-input.ems-dt__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-right: 44px;
+    font-variant-numeric: tabular-nums;
+}
+
+.rr .ems-filters .ems-dt__hint {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
