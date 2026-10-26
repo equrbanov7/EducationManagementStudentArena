@@ -25,13 +25,13 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 
 from django.db import transaction
-from django.db.models import Count
+from django.db.models import Count, Exists, OuterRef
 
 from . import journal_hygiene as hygiene
 from . import journal_hygiene_actions as hygiene_actions
 from . import subgroup_rollup
 from .language_levels import is_level_subject
-from .models import CourseOffering, Enrollment, LessonMark, StudentAcademicRecord
+from .models import CourseOffering, Enrollment, Lesson, LessonMark, StudentAcademicRecord
 
 #: Xanaların bu payı bir alt qrupdadırsa hədəf sayılır.
 MAJORITY = 0.75
@@ -139,12 +139,110 @@ def plan(organization, period, *, names=()) -> list[Placement]:
     return out
 
 
-def _orphan_empty_enrollments(organization, period, record, target):
+def phantom_offerings(organization, period, target_id, parent_id) -> list:
+    """Hədəf alt qrupun ƏVVƏLKİ köçürmənin açdığı «fantom» jurnalları: dərsi yoxdur və içindəki HƏR aktiv qeydiyyat
+    ana qrupun jurnalından köçürmə ilə gəlib (``superseded_by``). Məs. reyestrdən əl ilə köçürülən tələbə üçün
+    alt qrupda ana qrupun fənninin ikinci, boş jurnalı. Bunlar «fənn alt qrupda var» sayılmır və ləğv olunur."""
+    out = []
+    candidates = CourseOffering.objects.filter(
+        organization=organization, period=period, group_id=target_id, is_active=True
+    ).exclude(pk__in=Lesson.objects.filter(organization=organization).values("offering_id"))
+    for offering in candidates:
+        active = set(offering.enrollments.filter(status=Enrollment.Status.ENROLLED).values_list("pk", flat=True))
+        if not active:
+            continue
+        inherited = set(
+            Enrollment.objects.filter(
+                organization=organization, superseded_by_id__in=active, offering__group_id=parent_id
+            ).values_list("superseded_by_id", flat=True)
+        )
+        if inherited == active:
+            out.append(offering)
+    return out
+
+
+def cancel_phantom(offering, *, actor, reason: str) -> int:
+    """Fantom jurnalı semestr idarəsinin «ləğv et»i kimi bağlayır: ``is_active=False`` + audit + BOŞ qeydiyyatlar
+    «Jurnal təmizliyi» ilə düşür (datalı sətir qalır). Düşən qeydiyyat sayını qaytarır."""
+    from core.audit import log_action
+    from core.constants import AuditAction
+
+    from . import journal_hygiene_guard
+
+    offering.is_active = False
+    offering.save(update_fields=["is_active", "updated_at"])
+    log_action(
+        action=AuditAction.UPDATE,
+        user=actor,
+        organization=offering.organization,
+        obj=offering,
+        reason=f"semester: offering cancelled — {reason}",
+        old_values={"is_active": True},
+        new_values={"is_active": False, "reason": reason},
+    )
+    dropped = journal_hygiene_guard.drop_cancelled_offering(offering, reason=reason, actor=actor)
+    # Köçürmə xələfi «sələfi var» deyə boş sayılmır — fantomda sələf də BOŞDURSA (ana qrupun boş jurnalı) düşür.
+    successors = list(
+        offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
+        .filter(*_no_evidence_except_predecessors())
+        .exclude(
+            pk__in=Enrollment.objects.filter(superseded_by_id=OuterRef("pk"))
+            .exclude(pk__in=Enrollment.objects.filter(*hygiene.no_evidence_filters()).values("pk"))
+            .values("superseded_by_id")
+        )
+    )
+    if successors:
+        _record_drops(
+            offering.organization, successors, actor=actor, reason=reason, extra={"phantom": str(offering.pk)}
+        )
+    return dropped + len(successors)
+
+
+def _no_evidence_except_predecessors() -> list:
+    return [
+        ~Exists(
+            model.objects.filter(**{field: OuterRef("pk")}).filter(extra)
+            if extra is not None
+            else model.objects.filter(**{field: OuterRef("pk")})
+        )
+        for key, model, field, extra in hygiene.evidence_sources()
+        if key != "predecessors"
+    ]
+
+
+def _record_drops(organization, enrollments, *, actor, reason, extra) -> None:
+    rows = [
+        {
+            "id": enrollment.pk,
+            "status": enrollment.status,
+            "reason": REASON_CODE,
+            "evidence": {
+                "enrollment": str(enrollment.pk),
+                "category": CATEGORY,
+                "status": enrollment.status,
+                "reason": REASON_CODE,
+                "counts": {},
+                **extra,
+            },
+        }
+        for enrollment in enrollments
+    ]
+    hygiene_actions.record_decisions(
+        organization=organization,
+        category=CATEGORY,
+        rows=rows,
+        to_status=Enrollment.Status.DROPPED,
+        reason=reason,
+        actor=actor,
+    )
+
+
+def _orphan_empty_enrollments(organization, period, record, target, skip_offering_ids=()):
     """Ana qrupun BOŞ qeydiyyatları ki, hədəf alt qrupda həmin fənnin açılışı yoxdur (köçürmə yeni jurnal açardı)."""
     target_subjects = set(
-        CourseOffering.objects.filter(organization=organization, period=period, group=target).values_list(
-            "subject_id", flat=True
-        )
+        CourseOffering.objects.filter(organization=organization, period=period, group=target)
+        .exclude(pk__in=list(skip_offering_ids))
+        .values_list("subject_id", flat=True)
     )
     return list(
         Enrollment.objects.filter(
@@ -159,7 +257,7 @@ def _orphan_empty_enrollments(organization, period, record, target):
     )
 
 
-def apply_placement(organization, period, item: Placement, *, actor, reason: str) -> dict:
+def apply_placement(organization, period, item: Placement, *, actor, reason: str, skip_offering_ids=()) -> dict:
     """Bir tələbəni köçürür (çağıranın tranzaksiyasında). ``{"dropped": n, "moved": n, "created": n}``."""
     from django.apps import apps as django_apps
 
@@ -168,32 +266,9 @@ def apply_placement(organization, period, item: Placement, *, actor, reason: str
     OrgUnit = django_apps.get_model("organizations", "OrgUnit")
     record = StudentAcademicRecord.objects.select_related("organization", "student", "group").get(pk=item.record_id)
     target = OrgUnit.objects.get(pk=item.target_id)
-    orphans = _orphan_empty_enrollments(organization, period, record, target)
+    orphans = _orphan_empty_enrollments(organization, period, record, target, skip_offering_ids)
     if orphans:
-        rows = [
-            {
-                "id": enrollment.pk,
-                "status": enrollment.status,
-                "reason": REASON_CODE,
-                "evidence": {
-                    "enrollment": str(enrollment.pk),
-                    "category": CATEGORY,
-                    "status": enrollment.status,
-                    "reason": REASON_CODE,
-                    "target_group": str(target.pk),
-                    "counts": {},
-                },
-            }
-            for enrollment in orphans
-        ]
-        hygiene_actions.record_decisions(
-            organization=organization,
-            category=CATEGORY,
-            rows=rows,
-            to_status=Enrollment.Status.DROPPED,
-            reason=reason,
-            actor=actor,
-        )
+        _record_drops(organization, orphans, actor=actor, reason=reason, extra={"target_group": str(target.pk)})
     result = transfer_student_group(record=record, new_group=target, period=period, by_user=actor, reason=reason)
     return {"dropped": len(orphans), "moved": result["moved"], "created": result["created"]}
 
@@ -204,12 +279,21 @@ def run(organization, period, *, actor, reason: str, names=(), apply: bool = Fal
     counts = Counter({"students": len(items)})
     offerings_before = CourseOffering.objects.filter(organization=organization, period=period).count()
     with transaction.atomic():
+        phantoms: dict = {}
+        for item in items:
+            key = (item.target_id, item.parent_id)
+            if item.status == "place" and key not in phantoms:
+                phantoms[key] = phantom_offerings(organization, period, *key)
+                for offering in phantoms[key]:
+                    counts["phantom_offerings_cancelled"] += 1
+                    counts["phantom_enrollments_dropped"] += cancel_phantom(offering, actor=actor, reason=reason)
         for item in items:
             counts[item.status] += 1
             if item.status != "place":
                 continue
+            skip = [offering.pk for offering in phantoms.get((item.target_id, item.parent_id), [])]
             with transaction.atomic():
-                result = apply_placement(organization, period, item, actor=actor, reason=reason)
+                result = apply_placement(organization, period, item, actor=actor, reason=reason, skip_offering_ids=skip)
             counts["enrollments_dropped_empty"] += result["dropped"]
             counts["enrollments_moved"] += result["moved"]
             counts["enrollments_created"] += result["created"]
@@ -221,4 +305,4 @@ def run(organization, period, *, actor, reason: str, names=(), apply: bool = Fal
     return counts, items
 
 
-__all__ = ["MAJORITY", "Placement", "apply_placement", "plan", "run"]
+__all__ = ["MAJORITY", "Placement", "apply_placement", "cancel_phantom", "phantom_offerings", "plan", "run"]

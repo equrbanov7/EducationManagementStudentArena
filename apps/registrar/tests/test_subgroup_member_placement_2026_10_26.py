@@ -142,3 +142,31 @@ class SubgroupMemberPlacementTest(SubgroupFixture, TestCase):
         self.assertIn("mode=dry_run", text)
         self.assertIn("place=1", text)
         self.assertNotIn("smp_mover", text)
+
+
+class PhantomOfferingTest(SubgroupMemberPlacementTest):
+    """Reyestrdən əl ilə köçürülən tələbə alt qrupda ana qrupun fənninin boş jurnalını açıb (prod 2026-10-26):
+    əmr onu «fənn var» saymır, ləğv edir və növbəti tələbəni ora köçürmür."""
+
+    PREFIX = "smq"
+
+    def test_phantom_from_manual_move_is_cancelled(self):
+        from apps.registrar.transfer import transfer_student_group
+
+        self._mark(self.mover, self.history_g1)
+        with bypass_rls():
+            first = StudentAcademicRecord.objects.select_related("organization", "student", "group").get(
+                student=self.idle
+            )
+            transfer_student_group(
+                record=first, new_group=self.group1, period=self.period, by_user=self.owner, reason="əl ilə"
+            )
+            phantom = CourseOffering.objects.get(organization=self.org, subject=self.ikt, group=self.group1)
+            counts, _items = run(self.org, self.period, actor=self.owner, reason="sınaq köçürmə", apply=True)
+            phantom.refresh_from_db()
+            self.assertFalse(phantom.is_active)
+            self.assertFalse(phantom.enrollments.filter(status=Enrollment.Status.ENROLLED).exists())
+            mover_ikt = Enrollment.objects.get(student=self.mover, offering=self.ikt_parent)
+            self.assertEqual(mover_ikt.status, Enrollment.Status.DROPPED)
+        self.assertEqual(counts["phantom_offerings_cancelled"], 1)
+        self.assertEqual(counts["offerings_created"], 0)
