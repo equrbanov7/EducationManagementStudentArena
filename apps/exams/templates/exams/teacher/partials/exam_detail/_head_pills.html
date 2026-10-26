@@ -11,3 +11,8 @@
 {% else %}
 <span class="ems-badge ems-badge--info"><i class="fas fa-eye" aria-hidden="true"></i>{% trans "status_results_visible" context "exams.template.teacher_exam_detail" %}</span>
 {% endif %}
+{% comment %}2026-10-26 (sahib): «Kim tərəfindən yaradıldığı da görünsün» — imtahan mərkəzinə HƏR imtahanda,
+digərlərinə başqasının imtahanında (`show_exam_creator`, view-dan).{% endcomment %}
+{% if show_exam_creator and exam.author_id %}
+<span class="ems-badge ems-badge--neutral" data-exam-creator><i class="fas fa-user-pen" aria-hidden="true"></i>{% trans "Yaradan" context "profile.my_exams.center" %}: {{ exam.author.get_full_name|default:exam.author.username }}</span>
+{% endif %}

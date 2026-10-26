@@ -288,6 +288,8 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                     )
                 )
                 .annotate(questions_total=Count("questions", distinct=True))
+                # Sahib 2026-10-26: başqasının imtahanında «Yaradan» göstərilir — N+1-siz.
+                .select_related("author")
                 .order_by("-created_at")
             )
 

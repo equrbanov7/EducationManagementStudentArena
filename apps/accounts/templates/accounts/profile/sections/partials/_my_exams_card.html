@@ -34,6 +34,13 @@ palitrası = EXAM_TYPE_META / EXAM_STATUS_META); `exam_type_meta` yalnız ikon �
     {% for variant in exam.active_language_variants %}
       <span class="tx-tag tx-tag--lang">{{ variant.language|upper }}</span>
     {% endfor %}
+    {% comment %}2026-10-26 (sahib): «Kim tərəfindən yaradıldığı da görünsün» — «Midterm / Final» (mərkəz)
+    tabında HƏR kartda, digər tablarda başqasının imtahanında. `author` select_related ilə (N+1 yox).{% endcomment %}
+    {% if exam.author_id and my_exams_dashboard.center.is_open or exam.author_id and exam.author_id != request.user.id %}
+      <span class="tx-tag tx-tag--author" data-exam-creator>
+        <i class="fas fa-user-pen" aria-hidden="true"></i> {% trans "Yaradan" context "profile.my_exams.center" %}: {{ exam.author.get_full_name|default:exam.author.username }}
+      </span>
+    {% endif %}
   </div>
 
   <div class="tx-card-meta">

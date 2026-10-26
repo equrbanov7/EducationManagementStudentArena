@@ -1,4 +1,5 @@
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 from django.utils.translation import pgettext
 
 from core.roles import ProfileRole
@@ -93,6 +94,55 @@ def is_exam_center_user(user):
     return bool(getattr(user, "is_exam_center", False))
 
 
+def is_exam_center_member(user, organization=None):
+    """İmtahan mərkəzi RƏHBƏRİ və ya İŞÇİSİ — aktiv org üzvlüyü ilə (sahib 2026-10-26).
+
+    ``is_exam_center_user``-dən fərqi: superadmin bayrağı SAYILMIR — yalnız real rol
+    üzvlüyü (``exam_center_head`` / ``exam_center_staff``; köhnə ``exam_center``, RİM
+    rəhbəri və RİM əməkdaşı alias ilə eyni bayrağı alır — bax ``core.roles``).
+    ``organization`` verilibsə, istifadəçinin AKTİV təşkilatı məhz o olmalıdır —
+    başqa tenant-ın imtahanı heç vaxt bu yolla açılmır.
+    """
+    if not getattr(user, "is_authenticated", False):
+        return False
+    if organization is not None:
+        active_organization = getattr(user, "active_organization", None)
+        if active_organization is None or active_organization.pk != organization.pk:
+            return False
+    return bool(getattr(user, "is_exam_center", False))
+
+
+def center_overseen_exams_q(organization=None):
+    """İmtahan mərkəzinin müəllifdən asılı olmayaraq gördüyü imtahanlar: org-un midterm/final-ı."""
+    q = Q(exam_type_extended__in=sorted(SECURE_EXAM_CATEGORIES))
+    if organization is not None:
+        q &= Q(organization=organization)
+    return q
+
+
+def manageable_exams_q(user, organization=None):
+    """Müəllim paneli səthlərinin (detal, redaktə, nəticə, suallar) imtahan filtri.
+
+    Sahib (2026-10-26): «Midterm ya da final imtahanı yaradılıbsa onu imtahan mərkəzi işçisi
+    də, rəhbəri də görsün — profildən asılı olmasın.» Əvvəl bu səthlər yalnız müəllifə
+    açıq idi və mərkəz imtahanı yaradan hesabı axtarırdı. İndi: öz imtahanları HƏMİŞƏ +
+    mərkəz üzvü üçün təşkilatın BÜTÜN midterm/final imtahanları (yaradandan asılı deyil).
+    Quiz / kateqoriyasız imtahanlar əvvəlki kimi yalnız müəllifindir. Tenant sərhədi
+    çağıranın ``tenant_scoped_exams``-ında da qorunur.
+    """
+    q = Q(author=user)
+    if is_exam_center_member(user, organization):
+        q |= center_overseen_exams_q(organization)
+    return q
+
+
+def can_center_oversee_exam(user, exam):
+    """Obyekt səviyyəsi: mərkəz üzvü bu (başqasının yaratdığı) midterm/final-ı idarə edə bilərmi."""
+    if exam is None or getattr(exam, "exam_type_extended", None) not in SECURE_EXAM_CATEGORIES:
+        return False
+    return is_exam_center_member(user, getattr(exam, "organization", None))
+
+
 def can_manage_exam_rooms(user):
     """İmtahan zalı və zaldakı kompüter/MAC qeydlərini kim idarə edə bilər?
 
@@ -169,14 +219,18 @@ __all__ = [
     "FINAL_EXAM_CATEGORY",
     "_ensure_teacher",
     "can_assign_invigilators",
+    "can_center_oversee_exam",
     "can_create_question_bank",
     "can_manage_exam_questions",
     "can_manage_exam_rooms",
     "can_manage_final_exam_content",
     "can_user_access_exam",
+    "center_overseen_exams_q",
     "ensure_can_create_question_bank",
     "ensure_can_manage_exam_questions",
     "ensure_can_manage_exam_rooms",
+    "is_exam_center_member",
     "is_exam_center_user",
     "is_teacher_user",
+    "manageable_exams_q",
 ]

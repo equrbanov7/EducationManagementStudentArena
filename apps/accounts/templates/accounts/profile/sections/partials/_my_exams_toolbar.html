@@ -17,6 +17,8 @@
   <input type="hidden" name="section" value="my-exams">
   {# Status filtri KPI kartına klikdən gəlir; formda saxlanılır ki, axtarış onu sıfırlamasın. #}
   <input type="hidden" name="exam_status" value="{{ my_exams_filter_status|default:'' }}" data-tx-status-field>
+  {# «Midterm / Final» (imtahan mərkəzi) tabında axtarış/filtr tabdan çıxarmasın. #}
+  {% if my_exams_dashboard.center.is_open %}<input type="hidden" name="exam_scope" value="center">{% endif %}
 
   <div class="tx-search">
     <i class="fas fa-search tx-search-ic" aria-hidden="true"></i>

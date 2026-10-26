@@ -44,6 +44,10 @@ imtahan) `course_dashboard.html`-dədir (əvvəl JS ilə bu bölmədən köçür
                 {% if exam.start_datetime %}
                 <li class="cd-chip"><i class="fas fa-calendar-alt" aria-hidden="true"></i> {{ exam.start_datetime|date:"d.m.Y H:i" }}</li>
                 {% endif %}
+                {% comment %}Sahib 2026-10-26: «Kim tərəfindən yaradıldığı da görünsün» — başqasının imtahanında.{% endcomment %}
+                {% if exam.author_id and exam.author_id != request.user.id %}
+                <li class="cd-chip"><i class="fas fa-user-pen" aria-hidden="true"></i> {% trans "Yaradan" context "profile.my_exams.center" %}: {{ exam.author.get_full_name|default:exam.author.username }}</li>
+                {% endif %}
             </ul>
 
             <div class="cd-task__actions">
