@@ -196,7 +196,8 @@
 #   unblock_legacy_journal_teachers — köhnə sistemdə bu semestr jurnal aparan müəllimin «Forma 7» bloku açılır
 #       (sahib 2026-10-26: «adına nə isə aparıbsa bloklama»). ŞİFRƏLİ release asset (`roster_tag` = `legacy-teachers-…`
 #       → teachers.json.enc; yalnız istifadəçi id-ləri + saylar). Yalnız «Forma 7» bloku + işi olan jurnal; əl ilə
-#       qoyulan bloklar açılmır. Rəsmi unblock_account (audit). Loga YALNIZ saylar.
+#       qoyulan bloklar açılmır; `create_missing` → boş köhnə jurnalı olan da açılır. Rəsmi unblock_account (audit).
+#       Loga YALNIZ saylar.
 #   apply_journal_shares — bölünmüş jurnal (sahib 2026-10-26: «fənn 2 müəllim arasında bölünübsə mühazirəçi mühazirəni,
 #       seminarçı yalnız öz ballarını görsün»; səviyyə jurnalında müəllim yalnız öz tələbələrini). Köhnə sistemin jurnal
 #       bölgüsü — ŞİFRƏLİ release asset (`roster_tag` = `journal-shares-…` → shares.json.enc, lokal qurulmuş
@@ -312,7 +313,7 @@ on:
         required: false
         default: ""
       create_missing:
-        description: "reconcile_teacher_roster: «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı yarat · audit_staff_placement (apply ilə): aktiv olmayanları blokla (--block-inactive) · blocked_accounts_report (apply ilə): yükü olan bloklanmış müəllimlərin blokunu aç · assign_task_rows_from_timetable: dərs yükündə olmayan dərsə yeni tapşırıq sətri (--create-missing-rows) · fix_syllabus_plan_hours: plan saatı BOŞ olan təsdiqlənmiş versiyaları da doldur (--fill-empty) · fill_vacant_from_journals: bildiriş GÖNDƏRMƏ (--no-notify)"
+        description: "reconcile_teacher_roster: «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı yarat · audit_staff_placement (apply ilə): aktiv olmayanları blokla (--block-inactive) · blocked_accounts_report (apply ilə): yükü olan bloklanmış müəllimlərin blokunu aç · assign_task_rows_from_timetable: dərs yükündə olmayan dərsə yeni tapşırıq sətri (--create-missing-rows) · fix_syllabus_plan_hours: plan saatı BOŞ olan təsdiqlənmiş versiyaları da doldur (--fill-empty) · fill_vacant_from_journals: bildiriş GÖNDƏRMƏ (--no-notify) · unblock_legacy_journal_teachers: boş köhnə jurnalı olanı da aç (--include-empty)"
         required: false
         type: boolean
         default: false
@@ -884,6 +885,10 @@ jobs:
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor" --file "/tmp/legacy_teachers_${GITHUB_RUN_ID}.json")
+              # create_missing=true → köhnə jurnalı BOŞ olan müəllim də açılır (sahib 2026-10-26: «13 boş olanı da aktiv et»).
+              if [ "$CREATE_MISSING" = "true" ]; then
+                args+=(--include-empty)
+              fi
               ;;
             *)
               echo "icazəsiz əmr: $COMMAND" >&2; exit 2
