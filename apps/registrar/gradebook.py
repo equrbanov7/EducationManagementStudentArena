@@ -150,7 +150,9 @@ def _lesson_parity(offering, lesson) -> str:
 # ── Jurnal görünüşü (müəllim grid) ───────────────────────────────────────────
 
 
-def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, lesson_offset=0, lesson_kind=""):
+def get_offering_journal(
+    *, offering, newest_first=False, lesson_limit=None, lesson_offset=0, lesson_kind="", scope=None
+):
     """Full journal grid: lessons (columns) × enrolled students (rows) + summary.
 
     One pass over the marks (no per-cell query). Each row carries the running
@@ -166,6 +168,9 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
     ``lesson_limit=None`` → bütün dərslər (export, düzəliş rejimi, «hamısını göstər»).
 
     ``lesson_kind`` — dərs tipi süzgəci: pəncərə kimi YALNIZ SÜTUNLARA aiddir.
+
+    ``scope`` — bölünmüş jurnalın əhatəsi (:func:`apps.registrar.journal_shares.journal_scope`): YALNIZ
+    göstərilən sütun/sətirləri daraldır; qayıb, giriş balı, buraxılış bütün dərs/sətirlər üzrə qalır.
     """
     scheme = ensure_assessment_scheme(offering=offering)
     all_lessons = list(offering.lessons.order_by("date", "created_at"))
@@ -174,6 +179,13 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
 
     attach_syllabus_topics(all_lessons, offering=offering)
     lessons = [lesson for lesson in all_lessons if lesson.kind == lesson_kind] if lesson_kind else list(all_lessons)
+    # Dərs növü eyni sorğuda (JOIN artıq var) — giriş balının 5 + 5 aktivliyi üçün (``activity_kinds``).
+    marks = activity_kinds.annotate_kind(LessonMark.objects.filter(lesson__offering=offering))
+    mark_map = {(m.enrollment_id, m.lesson_id): m for m in marks}
+    if scope is not None and not scope.full:  # bölünmüş jurnal: öz növləri + başqa payın dərsləri gizlənir
+        from apps.registrar.journal_shares import visible_lessons
+
+        lessons = visible_lessons(scope, lessons, mark_map)
     if newest_first:
         lessons.reverse()
     total_lessons = len(lessons)
@@ -182,9 +194,6 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
         lessons = lessons[window_offset : window_offset + window_size]
     # `source_group` — «alt qrupdan əlavə olunub» çipi üçün (bax guest_roster.py).
     enrollments = read_memo.enrolled_roster(offering)  # GET-də tablar arasında bir sorğu (PERF-1 F-06)
-    # Dərs növü eyni sorğuda (JOIN artıq var) — giriş balının 5 + 5 aktivliyi üçün (``activity_kinds``).
-    marks = activity_kinds.annotate_kind(LessonMark.objects.filter(lesson__offering=offering))
-    mark_map = {(m.enrollment_id, m.lesson_id): m for m in marks}
     # Giriş balının komponent/bal/sərbəst-iş oxumaları BİR dəfə (sətir-sətir
     # 4 sorğu idi; 555 tələbəli açılışda 2 220 — bax finals_batch).
     from apps.registrar import finals_batch
@@ -235,6 +244,9 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
     )
     entry_batch.provide_attendance(hours_map={offering.id: total_hours}, limits=row_limits, exempt_ids=exempt_ids)
 
+    # Bölünmüş jurnal: yalnız əhatədəki sətirlər GÖSTƏRİLİR (giriş balı/buraxılış yuxarıda bütün sətirlər üçün).
+    if scope is not None and not scope.full:
+        enrollments = [enrollment for enrollment in enrollments if scope.allows_enrollment(enrollment.id)]
     # Per-lesson özət (sütun başlığındakı gün özəti) — `journal_window`-dadır.
     total_students = len(enrollments)
     lesson_summary = journal_window.lesson_summaries(lessons, enrollments, mark_map, total_students)

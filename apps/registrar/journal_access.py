@@ -111,7 +111,12 @@ def can_edit_journal(user, offering) -> bool:
         return True
     if _is_live_assigned_instructor(user, offering):
         return True
-    return offering.organization.owner_id == user.id
+    if offering.organization.owner_id == user.id:
+        return True
+    # Bölünmüş jurnalın pay sahibi (sahib 2026-10-26) — əhatəsi ``journal_shares.journal_scope``-dadır.
+    from .journal_shares import has_writable_share
+
+    return has_writable_share(user, offering)
 
 
 #: Əhatəli YALNIZ-OXU jurnal girişi (audit 2026-09-13 `access` F-06, 2026-09-14).
@@ -179,4 +184,9 @@ def is_direct_editor(user, offering) -> bool:
         return True
     if _is_live_assigned_instructor(user, offering):
         return True
-    return offering.organization.owner_id == user.id
+    if offering.organization.owner_id == user.id:
+        return True
+    # Pay sahibi yalnız ÖZ sətir/sütunlarına yazır — POST qapıları ``journal_share_guard``-dadır.
+    from .journal_shares import has_writable_share
+
+    return has_writable_share(user, offering)

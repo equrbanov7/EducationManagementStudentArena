@@ -109654,3 +109654,27 @@ msgstr "журналов: %(count)s"
 msgctxt "exams.subject_picker"
 msgid "jurnal yoxdur"
 msgstr "нет журнала"
+
+msgctxt "registrar.journal_share"
+msgid "Bölünmüş jurnal: yalnız sizin tələbələriniz / dərs növləriniz göstərilir"
+msgstr "Разделённый журнал: показаны только ваши студенты / виды занятий"
+
+msgctxt "registrar.journal_share"
+msgid "Bu xana bölünmüş jurnalda sizin payınıza aid deyil."
+msgstr "Эта ячейка не относится к вашей части разделённого журнала."
+
+msgctxt "registrar.journal_share"
+msgid "Köhnə sistem"
+msgstr "Старая система"
+
+msgctxt "registrar.journal_share"
+msgid "Əl ilə"
+msgstr "Вручную"
+
+msgctxt "registrar.model.journal_share.meta"
+msgid "jurnal payı"
+msgstr "часть журнала"
+
+msgctxt "registrar.model.journal_share.meta"
+msgid "jurnal payları"
+msgstr "части журнала"

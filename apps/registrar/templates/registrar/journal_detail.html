@@ -28,6 +28,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal_layout.css' %}?v=20261019-head">
     {# Dərs modalı: korpus/otaq cütünün sarınması + mövzu seçicisinin «keçirilib / növbəti» görünüşü (2026-10-25). #}
     <link rel="stylesheet" href="{% static 'registrar/css/journal_lesson_modal.css' %}?v=20261025-1">
+    {% if journal_share_chip %}<link rel="stylesheet" href="{% static 'registrar/css/journal_share.css' %}?v=20261026-share">{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -98,6 +99,7 @@
                 <span class="jd2-wintitle">{% trans "Jurnal" context "registrar.journal" %}</span>
                 {% if offering.group %}<span class="jd2-wincode">{{ offering.group.name }}</span>{% endif %}
                 {% if offering.is_intensive %}<span class="jd2-wincode jd2-intensive" title="{{ offering.format_note }}">{% trans "İntensiv" context "registrar.intensive" %} · {{ offering.starts_on|date:"d.m" }}–{{ offering.ends_on|date:"d.m.Y" }}</span>{% endif %}
+                {% if journal_share_chip %}<span class="jd2-share-chip" data-share-kinds="{{ journal_share_chip.kinds|join:', ' }}" title="{{ journal_share_chip.kinds|join:', ' }}"><i class="fas fa-user-group" aria-hidden="true"></i> {{ journal_share_chip.text }}</span>{% endif %}
                 <span class="jd2-winsub">{{ offering.subject.name }} · {{ journal.rows|length }} {% trans "tələbə" context "registrar.journal" %}</span>
                 {% if journal.scheme.is_published %}<span class="jd2-winlock"><i class="fas fa-lock"></i> {% trans "Yekunlaşdırılıb" context "registrar.journal" %}</span>{% endif %}
             </div>

@@ -1,0 +1,10 @@
+/* ═══ Bölünmüş jurnal çipi (jd2-share-chip, sahib 2026-10-26) ═════════════════
+   Pay sahibinə jurnal başlığında: «yalnız sizin tələbələriniz / dərs növləriniz göstərilir».
+   Navy başlıq zolağında oxunaqlı açıq çip; rənglər mövcud `--ems-*` tokenlərindəndir. */
+.jd2-share-chip {
+    display: inline-flex; align-items: center; gap: 6px; max-width: 100%;
+    padding: 3px 10px; border-radius: 999px;
+    background: var(--ems-neutral-0); color: var(--ems-neutral-700);
+    font-size: 12px; font-weight: 600; line-height: 1.4; white-space: normal;
+}
+.jd2-share-chip i { font-size: 11px; opacity: 0.75; }

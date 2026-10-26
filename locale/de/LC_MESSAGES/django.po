@@ -110486,3 +110486,27 @@ msgstr "%(count)s Journal(e)"
 msgctxt "exams.subject_picker"
 msgid "jurnal yoxdur"
 msgstr "kein Journal"
+
+msgctxt "registrar.journal_share"
+msgid "Bölünmüş jurnal: yalnız sizin tələbələriniz / dərs növləriniz göstərilir"
+msgstr "Geteiltes Journal: Nur Ihre Studierenden / Lehrveranstaltungsarten werden angezeigt"
+
+msgctxt "registrar.journal_share"
+msgid "Bu xana bölünmüş jurnalda sizin payınıza aid deyil."
+msgstr "Diese Zelle gehört nicht zu Ihrem Anteil am geteilten Journal."
+
+msgctxt "registrar.journal_share"
+msgid "Köhnə sistem"
+msgstr "Altsystem"
+
+msgctxt "registrar.journal_share"
+msgid "Əl ilə"
+msgstr "Manuell"
+
+msgctxt "registrar.model.journal_share.meta"
+msgid "jurnal payı"
+msgstr "Journalanteil"
+
+msgctxt "registrar.model.journal_share.meta"
+msgid "jurnal payları"
+msgstr "Journalanteile"

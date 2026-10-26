@@ -96,9 +96,22 @@ def lesson_instructor_offering_ids(user):
     return lesson_model().objects.filter(instructor_id=_pk(user)).values("offering_id")
 
 
+def share_offering_ids(user):
+    """Aktorun bölünmüş jurnalda AKTİV payı olan açılışların id subquery-si (registrar ``JournalShare``)."""
+    return (
+        django_apps.get_model("registrar", "JournalShare")
+        .objects.filter(teacher_id=_pk(user), is_active=True)
+        .values("offering_id")
+    )
+
+
 def taught_offerings_q(user, *, prefix: str = "") -> Q:
-    """``CourseOffering`` (və ya ``<prefix>`` ilə əlaqəli) Q — aktorun müəllimi olduğu açılışlar."""
-    return Q(**{f"{prefix}instructor_id": _pk(user)}) | Q(**{f"{prefix}pk__in": lesson_instructor_offering_ids(user)})
+    """``CourseOffering`` (və ya ``<prefix>`` ilə əlaqəli) Q — aktorun müəllimi olduğu açılışlar (pay daxil)."""
+    return (
+        Q(**{f"{prefix}instructor_id": _pk(user)})
+        | Q(**{f"{prefix}pk__in": lesson_instructor_offering_ids(user)})
+        | Q(**{f"{prefix}pk__in": share_offering_ids(user)})
+    )
 
 
 def teaches_offering(user, offering) -> bool:
@@ -116,6 +129,8 @@ def teaches_offering(user, offering) -> bool:
     is_named = offering.instructor_id == user.pk
     if not is_named:
         is_named = lesson_model().objects.filter(offering_id=offering.pk, instructor_id=user.pk).exists()
+    if not is_named:
+        is_named = share_offering_ids(user).filter(offering_id=offering.pk).exists()
     return is_named and has_instructor_authority(user, organization)
 
 

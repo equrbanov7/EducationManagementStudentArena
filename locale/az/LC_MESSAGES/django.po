@@ -108970,3 +108970,27 @@ msgstr "%(count)s jurnal"
 msgctxt "exams.subject_picker"
 msgid "jurnal yoxdur"
 msgstr "jurnal yoxdur"
+
+msgctxt "registrar.journal_share"
+msgid "Bölünmüş jurnal: yalnız sizin tələbələriniz / dərs növləriniz göstərilir"
+msgstr "Bölünmüş jurnal: yalnız sizin tələbələriniz / dərs növləriniz göstərilir"
+
+msgctxt "registrar.journal_share"
+msgid "Bu xana bölünmüş jurnalda sizin payınıza aid deyil."
+msgstr "Bu xana bölünmüş jurnalda sizin payınıza aid deyil."
+
+msgctxt "registrar.journal_share"
+msgid "Köhnə sistem"
+msgstr "Köhnə sistem"
+
+msgctxt "registrar.journal_share"
+msgid "Əl ilə"
+msgstr "Əl ilə"
+
+msgctxt "registrar.model.journal_share.meta"
+msgid "jurnal payı"
+msgstr "jurnal payı"
+
+msgctxt "registrar.model.journal_share.meta"
+msgid "jurnal payları"
+msgstr "jurnal payları"
