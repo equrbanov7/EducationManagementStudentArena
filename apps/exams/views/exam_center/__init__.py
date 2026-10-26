@@ -43,6 +43,7 @@ from .statistics import (
     stats_teacher_search,
 )
 from .statistics_charts import exam_center_stats_ai, exam_center_stats_charts
+from .ticket_pin import exam_center_ticket_device_release, exam_center_ticket_pin_reissue, exam_center_ticket_pin_reveal
 
 __all__ = [
     "exam_center_attempt_note",
@@ -84,4 +85,7 @@ __all__ = [
     "exam_center_ticket_resume",
     "exam_center_ticket_seat",
     "exam_center_ticket_snapshot",
+    "exam_center_ticket_device_release",
+    "exam_center_ticket_pin_reissue",
+    "exam_center_ticket_pin_reveal",
 ]

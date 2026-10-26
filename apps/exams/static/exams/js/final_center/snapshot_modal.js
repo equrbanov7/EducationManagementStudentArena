@@ -52,6 +52,14 @@
         if (el) el.hidden = true;
     }
 
+    // 2026-10-26 (sahib): imtahan mərkəzinin PIN / «başqa kompüterdə davam et» bloku ayrıca
+    // modulda (snapshot_pin_actions.js) — modal həyat dövrünü hadisə ilə ona ötürür.
+    function emit(name, detail) {
+        try {
+            modal.dispatchEvent(new CustomEvent(name, { bubbles: true, detail: detail }));
+        } catch (err) { /* köhnə brauzer — PIN bloku sadəcə görünməz */ }
+    }
+
     function open(sessionId, ticketId) {
         current.sessionId = sessionId;
         current.ticketId = ticketId;
@@ -62,6 +70,7 @@
         document.body.style.overflow = "hidden";
         setError("");
         hideReentryPin(); // əvvəlki tələbənin PIN-i qalmasın
+        emit("fxc:snapshot-open", { sessionId: sessionId, ticketId: ticketId });
         load(false);
         startPolling();
     }
@@ -71,6 +80,7 @@
         document.documentElement.style.overflow = "";
         document.body.style.overflow = "";
         stopPolling();
+        emit("fxc:snapshot-close", {});
     }
 
     function startPolling() {
@@ -128,6 +138,7 @@
         var body = document.getElementById("fxc-snapshot-body");
 
         if (nameEl) nameEl.textContent = d.student_name || "—";
+        emit("fxc:snapshot-render", { data: d, sessionId: current.sessionId, ticketId: current.ticketId });
         if (subjectEl) subjectEl.textContent = d.exam_title ? ("📘 " + d.exam_title) : "";
         renderProctor(d);
 

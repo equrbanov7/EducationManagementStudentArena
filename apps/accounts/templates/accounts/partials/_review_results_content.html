@@ -47,6 +47,7 @@ Desktopda cədvəl, ≤768 px-də hər sətir kartdır (CSS, `data-label`). CSS:
                         <td class="rr-cell rr-cell--task" data-label="{% trans 'Tapşırıq' context 'accounts.review_results' %}">
                             <span class="rr-task__title">{{ item.title }}</span>
                             {% if item.course_title and item.course_title != "-" %}<span class="rr-task__course">{{ item.course_title }}</span>{% endif %}
+                            {% if item.creator_display %}<span class="rr-task__course">{% trans "Yaradan" context "profile.my_exams.center" %}: {{ item.creator_display }}</span>{% endif %}
                         </td>
                         <td class="rr-cell" data-label="{% trans 'Növ' context 'accounts.review_results' %}">
                             <span class="rr-type rr-type--{{ item.type_modifier }}">

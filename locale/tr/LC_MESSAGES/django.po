@@ -108912,3 +108912,76 @@ msgstr "Baba adı"
 msgctxt "exams.pin_lookup"
 msgid "Ad, soyad, ata adı və ya istifadəçi adı…"
 msgstr "Ad, soyad, baba adı veya kullanıcı adı…"
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Çox tez-tez sorğu — bir az sonra yenidən cəhd edin."
+msgstr "Çok sık istek — lütfen biraz sonra yeniden deneyin."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Tələbə bu imtahana artıq təyin olunmayıb (qrupu dəyişdirilib və ya imtahandan çıxarılıb) — PIN ilə girsə də imtahana başlaya bilməyəcək. İmtahan mərkəzində təyinatı yoxlayın."
+msgstr "Öğrenci artık bu sınava atanmamış (grubu değişmiş veya sınavdan çıkarılmış) — PIN ile girse bile sınava başlayamaz. Sınav merkezinde atamayı kontrol edin."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Bu tələbə üçün PIN göstərilə bilməz (imtahan bitib və ya oturum bağlıdır)."
+msgstr "Bu öğrenci için PIN gösterilemez (sınav bitti veya oturum kapalı)."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "PIN tapılmadı — «Yeni PIN ver» ilə tələbəyə təzə PIN verin."
+msgstr "PIN bulunamadı — «Yeni PIN ver» ile öğrenciye yeni PIN verin."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Yeni PIN yalnız imtahana hələ başlamamış tələbəyə verilir. İmtahanda olan tələbə üçün «Yenidən giriş ver» və ya «Başqa kompüterdə davam et» düyməsindən istifadə edin."
+msgstr "Yeni PIN yalnızca sınava henüz başlamamış öğrenciye verilir. Sınavdaki öğrenci için «Yeniden giriş ver» veya «Başka bilgisayarda devam et» düğmesini kullanın."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Tələbənin davam edən imtahan cəhdi yoxdur."
+msgstr "Öğrencinin devam eden sınav denemesi yok."
+
+#, python-format
+msgctxt "exams.final_center.monitor_pin"
+msgid "Hazırdır — tələbə %(minutes)d dəqiqə ərzində başqa qeydli kompüterdən öz PIN-i ilə daxil olub imtahanı qaldığı yerdən davam etdirə bilər (vaxt dayanmır, cavablar qorunur)."
+msgstr "Hazır — öğrenci %(minutes)d dakika içinde kayıtlı başka bir bilgisayardan kendi PIN'i ile girip sınava kaldığı yerden devam edebilir (süre durmaz, cevaplar korunur)."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Cəhd hələ heç bir kompüterə bağlanmayıb — tələbə öz PIN-i ilə istənilən qeydli kompüterdən davam edə bilər."
+msgstr "Deneme henüz hiçbir bilgisayara bağlanmadı — öğrenci kendi PIN'i ile kayıtlı herhangi bir bilgisayardan devam edebilir."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Tələbəyə yeni PIN verilsin? Köhnə PIN dərhal etibarsız olacaq."
+msgstr "Öğrenciye yeni PIN verilsin mi? Eski PIN hemen geçersiz olacak."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Tələbə başqa kompüterdən davam etsin? Köhnə kompüterdəki sessiya dayanacaq; vaxt və cavablar qorunur."
+msgstr "Öğrenci başka bir bilgisayardan devam etsin mi? Eski bilgisayardaki oturum duracak; süre ve cevaplar korunur."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Əməliyyat mümkün olmadı."
+msgstr "İşlem gerçekleştirilemedi."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "PIN-i göstər"
+msgstr "PIN'i göster"
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Gizlət"
+msgstr "Gizle"
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Yeni PIN verildi — tələbəyə deyin."
+msgstr "Yeni PIN verildi — öğrenciye söyleyin."
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Giriş PIN-i:"
+msgstr "Giriş PIN'i:"
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Yeni PIN ver"
+msgstr "Yeni PIN tanımla"
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Başqa kompüterdə davam et"
+msgstr "Başka bilgisayarda devam et"
+
+msgctxt "exams.final_center.monitor_pin"
+msgid "Kompüter xarab olubsa: tələbə başqa qeydli kompüterdən /exams/final/ (və ya /exams/midterm/) səhifəsində istifadəçi adı + bu PIN ilə daxil olur."
+msgstr "Bilgisayar arızalandıysa: öğrenci kayıtlı başka bir bilgisayardan /exams/final/ (veya /exams/midterm/) sayfasında kullanıcı adı + bu PIN ile giriş yapar."

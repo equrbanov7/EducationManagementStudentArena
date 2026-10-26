@@ -1,0 +1,52 @@
+/* Zal monitoru — tələbə modalında imtahan mərkəzinin PIN / kompüter bloku (sahib 2026-10-26).
+   Markup: exams/exam_center/_snapshot_modal.html (#fxc-pin-tools); JS: snapshot_pin_actions.js. */
+
+.fxc-pin-tools {
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-primary-200);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin: 0 0 12px;
+}
+
+.fxc-pin-tools[hidden],
+.fxc-pin-tools [hidden] { display: none; }
+
+.fxc-pin-tools__head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: .9rem;
+    color: var(--ems-primary-800);
+}
+
+.fxc-pin-tools__head > i { color: var(--ems-primary-600); }
+
+.fxc-pin-tools__value {
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: var(--ems-neutral-900);
+    font-variant-numeric: tabular-nums;
+    user-select: all;
+}
+
+.fxc-pin-tools__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.fxc-pin-tools__hint,
+.fxc-pin-tools__note,
+.fxc-pin-tools__warn {
+    margin: 8px 0 0;
+    font-size: .8rem;
+    line-height: 1.45;
+}
+
+.fxc-pin-tools__hint { color: var(--ems-neutral-500); }
+.fxc-pin-tools__note { color: var(--ems-success-700); font-weight: 600; }
+.fxc-pin-tools__warn { color: var(--ems-danger-strong); font-weight: 600; }

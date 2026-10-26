@@ -45,6 +45,43 @@ monitorların HƏR İKİSİ istifadə edir. Render + əməliyyatlar snapshot_mod
         {% trans "Bu PIN-i tələbəyə deyin — /exams/final/ səhifəsindən daxil olub imtahana OLDUĞU YERDƏN davam edəcək. Yalnız bir dəfə göstərilir." %}
       </p>
     </div>
+    {% if can_manage %}
+    {% comment %}
+      Sahib 2026-10-26: imtahan mərkəzi tələbəyə PIN-i göstərə / yeni PIN verə və kompüteri xarab olan
+      tələbəni başqa kompüterə buraxa bilir. Düymələrin görünməsi snapshot-un `pin_actions`-ındandır
+      (server hər əməldə yenidən yoxlayır); render + sorğular snapshot_pin_actions.js-dədir.
+    {% endcomment %}
+    <div class="fxc-pin-tools" id="fxc-pin-tools" hidden
+         data-reveal-url-template="{% url 'exams:exam_center_ticket_pin_reveal' session_id=0 ticket_id=0 %}"
+         data-reissue-url-template="{% url 'exams:exam_center_ticket_pin_reissue' session_id=0 ticket_id=0 %}"
+         data-device-url-template="{% url 'exams:exam_center_ticket_device_release' session_id=0 ticket_id=0 %}"
+         data-i18n-confirm-reissue="{% trans 'Tələbəyə yeni PIN verilsin? Köhnə PIN dərhal etibarsız olacaq.' context 'exams.final_center.monitor_pin' %}"
+         data-i18n-confirm-device="{% trans 'Tələbə başqa kompüterdən davam etsin? Köhnə kompüterdəki sessiya dayanacaq; vaxt və cavablar qorunur.' context 'exams.final_center.monitor_pin' %}"
+         data-i18n-failed="{% trans 'Əməliyyat mümkün olmadı.' context 'exams.final_center.monitor_pin' %}"
+         data-i18n-show="{% trans 'PIN-i göstər' context 'exams.final_center.monitor_pin' %}"
+         data-i18n-hide="{% trans 'Gizlət' context 'exams.final_center.monitor_pin' %}"
+         data-i18n-new-pin="{% trans 'Yeni PIN verildi — tələbəyə deyin.' context 'exams.final_center.monitor_pin' %}">
+      <div class="fxc-pin-tools__head">
+        <i class="fas fa-key" aria-hidden="true"></i>
+        <span class="fxc-pin-tools__label">{% trans "Giriş PIN-i:" context "exams.final_center.monitor_pin" %}</span>
+        <strong class="fxc-pin-tools__value" data-pin-value aria-live="polite">••••••••</strong>
+        <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-ghost" data-pin-action="reveal" aria-pressed="false" hidden>
+          <i class="fas fa-eye" aria-hidden="true"></i> <span data-pin-reveal-label>{% trans "PIN-i göstər" context "exams.final_center.monitor_pin" %}</span>
+        </button>
+      </div>
+      <div class="fxc-pin-tools__actions">
+        <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-primary" data-pin-action="reissue" hidden>
+          <i class="fas fa-rotate" aria-hidden="true"></i> {% trans "Yeni PIN ver" context "exams.final_center.monitor_pin" %}
+        </button>
+        <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-primary" data-pin-action="device" hidden>
+          <i class="fas fa-right-left" aria-hidden="true"></i> {% trans "Başqa kompüterdə davam et" context "exams.final_center.monitor_pin" %}
+        </button>
+      </div>
+      <p class="fxc-pin-tools__hint">{% trans "Kompüter xarab olubsa: tələbə başqa qeydli kompüterdən /exams/final/ (və ya /exams/midterm/) səhifəsində istifadəçi adı + bu PIN ilə daxil olur." context "exams.final_center.monitor_pin" %}</p>
+      <p class="fxc-pin-tools__note" data-pin-note hidden></p>
+      <p class="fxc-pin-tools__warn" data-pin-warning role="alert" hidden></p>
+    </div>
+    {% endif %}
     <p class="fxc-modal-error" id="fxc-snapshot-error" hidden></p>
     <div class="fxc-snapshot-body" id="fxc-snapshot-body">
       <div class="fxc-snapshot-answers" aria-hidden="true">

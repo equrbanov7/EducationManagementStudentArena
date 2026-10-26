@@ -402,6 +402,9 @@ def _role_capabilities(user, profile):
                     "appeal-stats",
                     "kollokvium-windows",
                     "exam-chance",
+                    # Sahib 2026-10-26: «Dəyərləndirilmiş nəticələr» — org-un bütün midterm/final nəticələri
+                    # (yaradandan asılı deyil; bax ``_dashboard_helpers/review_scope.py``). Yalnız baxış.
+                    "review-results",
                     # «academic-records» — 2026-10-13 B2: rol adı ilə yox, `student.records_view` (rbac_sections).
                 }
             )
