@@ -48,6 +48,7 @@ from . import services  # noqa: F401
 from . import status  # noqa: F401
 from . import student_group_names  # noqa: F401 — tələbənin cari reyestr qrupunun adı (süzgəclər, 2026-10-25)
 from . import subgroup_rollup  # noqa: F401
+from . import subject_merge_apply  # noqa: F401 — açılışın fənn düzəlişi icazəsi (legacy kod toqquşması, 2026-10-26)
 from . import transcript  # noqa: F401
 from . import transfer  # noqa: F401
 from . import exam_eligibility as eligibility_rules  # noqa: F401
@@ -151,6 +152,7 @@ __all__ = [
     "status",
     "student_group_names",
     "subgroup_rollup",
+    "subject_merge_apply",
     "transcript",
     "transcript_policy",
     "transfer",

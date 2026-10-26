@@ -8,7 +8,8 @@ yekun/təkrar imtahan → sillabus → dərs yükü (rəsmi «Dərs yükü fayl�
 birləşməsi» ilə tarixçəyə → legacy alt qrup tələbələrinə rəsmi işarə (ana qrup izi + «Alt qrupa
 yerləşdirildi» sətri, ``subgroups``) → tələbə profilində boş sahələr → (yalnız açıq seçiləndə) aktiv reyestrin
 köhnə sistemlə rəsmi köçürmə/xaric əmrləri ilə nizamlanması (``registry_sync``) → (yalnız açıq seçiləndə) cari
-semestr jurnallarında olmayan, proqram müddəti bitmiş tələbələrin rəsmi «Məzun etmə» əmri (``graduation``). Sonda bir audit sətri (manifest:
+semestr jurnallarında olmayan, proqram müddəti bitmiş tələbələrin rəsmi «Məzun etmə» əmri (``graduation``); (yalnız açıq seçiləndə,
+HAMISINDAN ƏVVƏL) fənn kodu toqquşması ilə yanlış karta düşmüş delta açılışlarının düzəlişi (``subject_collisions``). Sonda bir audit sətri (manifest:
 saylar + yaradılmış kiçik obyektlərin id-ləri) — ``resource_type=legacy_import.delta_batch``.
 """
 
@@ -21,6 +22,7 @@ from django.apps import apps as django_apps
 from django.db import transaction
 from django.utils import timezone
 
+from .collisions import fix_subject_collisions
 from .dedupe import dedupe_enrollments
 from .finals import apply_finals
 from .graduation import sync_graduation
@@ -65,10 +67,12 @@ PHASES = (
     "graduation",
     "history",
     "history_topics",
+    "subject_collisions",
 )
 #: Yalnız AÇIQ seçiləndə (``--phase`` və ya paketin ``snapshot.phases``-i) işləyən fazalar — reyestr əmrləri yazır
-#: (``registry_sync``, ``graduation``); ``history*`` tarixi (bağlı) jurnallara əlavə edir (``delta/history.py``).
-OPT_IN_PHASES = ("registry_sync", "graduation", "history", "history_topics")
+#: (``registry_sync``, ``graduation``); ``history*`` tarixi (bağlı) jurnallara əlavə edir (``delta/history.py``);
+#: ``subject_collisions`` yanlış fənn kartına düşmüş açılışları düzgün karta keçirir (``delta/collisions.py``).
+OPT_IN_PHASES = ("registry_sync", "graduation", "history", "history_topics", "subject_collisions")
 DEFAULT_PHASES = tuple(phase for phase in PHASES if phase not in OPT_IN_PHASES)
 
 
@@ -172,6 +176,9 @@ class DeltaRun:
 
     # ── fazalar ───────────────────────────────────────────────────────────
     def run(self, phases=DEFAULT_PHASES) -> None:
+        if "subject_collisions" in phases:
+            # Əvvəl: düzəliş xəritəsi yazılır, eyni qaçışdakı sonrakı fazalar onu görür.
+            fix_subject_collisions(self)
         if "enrollments" in phases or "students" in phases:
             self.students.prepare()
         slices = build_offerings(self) if "offerings" in phases else {}

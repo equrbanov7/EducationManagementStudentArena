@@ -37,6 +37,11 @@ class Form1HelperTests(SimpleTestCase):
         self.assertEqual(group_key("234 BİO AZ"), group_key("234 BİO"))
         self.assertEqual(group_key("235BİO İNG"), group_key("235 BİO ing"))
         self.assertEqual(group_tokens("233BİO SBİO İNG"), ["233 BİO İNG", "233 SBİO İNG"])
+        # Sahib 2026-10-26: magistr qrupu «403/5 MN ing» bir qrupdur («403 /5» + «403 MN» deyil).
+        self.assertEqual(group_tokens("403/5 MN, 403/5 MN ing"), ["403/5 MN", "403/5 MN ing"])
+        self.assertEqual(group_tokens("209/5 KP (ing)"), ["209/5 KP (ing)"])
+        self.assertEqual(group_tokens("409/6MBA"), ["409/6MBA"])
+        self.assertEqual(group_tokens("3/336 F"), ["3/336 F"])
         self.assertEqual(
             name_words(
                 "1.Kafedra müdiri, P.ü.f.d., dos.\nHacıyeva Rəna Cavadxan q.\n(yarımştat)\n1997-ci ildən işləyir"
