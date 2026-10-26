@@ -31,6 +31,7 @@ from .password_reset_admin import (
     reset_scope_queryset,
     status_code_of,
 )
+from .username_change_admin import UsernameAdminError, check_renamable
 
 _CTX = "accounts.password_reset"
 
@@ -128,6 +129,14 @@ def serialize_candidates(actor, users) -> list:
             check_resettable(actor, user)
         except PasswordResetError as exc:
             can_reset, reason = False, exc.message
+        # Sahib 2026-10-26: «İstifadəçi adını dəyiş» — eyni iyerarxiya, amma bloklanmış/arxiv hesaba da olar
+        # (sıfırlana bilən hər hesabın adı da dəyişə bilər — təkrar sorğu yalnız sıfırlana bilməyənə).
+        can_rename, rename_reason = True, ""
+        if not can_reset:
+            try:
+                check_renamable(actor, user)
+            except UsernameAdminError as exc:
+                can_rename, rename_reason = False, exc.message
         status = status_code_of(user)
         full_name = profile.full_name_with_patronymic if profile is not None else user.get_full_name()
         rows.append(
@@ -143,6 +152,8 @@ def serialize_candidates(actor, users) -> list:
                 "password_change_required": bool(getattr(profile, "password_change_required", False)),
                 "can_reset": can_reset,
                 "reason": reason,
+                "can_rename": can_rename,
+                "rename_reason": rename_reason,
             }
         )
     return rows

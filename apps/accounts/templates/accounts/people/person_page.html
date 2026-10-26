@@ -60,6 +60,11 @@ icazə varsa gəlir (`page.capabilities`).{% endcomment %}
                     <i class="fas fa-key" aria-hidden="true"></i>
                     {% trans "Parolu sıfırla" context "accounts.people.page" %}
                 </a>
+                {# Sahib 2026-10-26: eyni bölmədə «İstifadəçi adını dəyiş» (parolu bilmədən). #}
+                <a class="ems-btn" href="{{ pwr_link }}">
+                    <i class="fas fa-user-pen" aria-hidden="true"></i>
+                    {% trans "İstifadəçi adını dəyiş" context "accounts.people.page" %}
+                </a>
             {% endif %}
             <a class="ems-btn ems-btn--primary" href="{{ page.catalog_url }}">
                 <i class="fas fa-arrow-left" aria-hidden="true"></i>

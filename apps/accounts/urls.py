@@ -8,6 +8,7 @@ from django.urls import include, path
 from . import views
 from .views import academic_records as academic_records_views
 from .views import account_password_reset as password_reset_views
+from .views import account_username_change as username_change_views
 from .views import accounting as accounting_views
 from .views import accounting_rates as accounting_rates_views
 from .views import exam_score_draft as exam_score_draft_views
@@ -264,6 +265,17 @@ urlpatterns = [
         "password-reset-admin/reset/",
         password_reset_views.account_password_reset_perform,
         name="account_password_reset_perform",
+    ),
+    # «İstifadəçi adını dəyiş» (sahib 2026-10-26) — eyni bölmə və icazə; parol toxunulmur. YALNIZ POST + CSRF.
+    path(
+        "password-reset-admin/username/",
+        username_change_views.account_username_change_perform,
+        name="account_username_change_perform",
+    ),
+    path(
+        "password-reset-admin/username/suggest/",
+        username_change_views.account_username_change_suggest,
+        name="account_username_change_suggest",
     ),
     # «Müəllimlər» / «Tələbələr» kataloqu — icazə-qapılı (`people.*`) VƏ struktur
     # scope-una tabe. RİM-dən FƏRQİ: burada dekan/kafedra müdiri yalnız öz

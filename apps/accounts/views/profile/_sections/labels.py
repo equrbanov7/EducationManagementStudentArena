@@ -120,7 +120,7 @@ def build_section_titles() -> dict:
         "superadmin-organizations": pgettext_lazy("profile.section", "superadmin_control"),
         "superadmin-users": pgettext_lazy("superadmin.users", "user_management_title"),
         "rim-center": pgettext_lazy("profile.section", "rim_center"),
-        "account-password-reset": pgettext_lazy("profile.sidebar", "Parol sıfırlama"),
+        "account-password-reset": pgettext_lazy("profile.sidebar", "Parol və istifadəçi adı"),
         "superadmin-ai": pgettext_lazy("superadmin.ai_settings", "title"),
         "superadmin-exam-rooms": pgettext_lazy("profile.section", "İmtahan zalları"),
         "exam-center-pins": pgettext_lazy("profile.section", "PIN axtarışı"),

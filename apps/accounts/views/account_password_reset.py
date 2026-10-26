@@ -32,6 +32,7 @@ from ..services.password_reset_admin import (
 from ..services.password_reset_lookup import lookup, normalize_query, serialize_candidates, suggest
 
 _CTX = "accounts.password_reset"
+_UCTX = "accounts.username_change_admin"
 
 
 def _read_payload(request) -> dict:
@@ -133,6 +134,15 @@ def _js_strings() -> dict:
         "copied": pgettext(_CTX, "Parol kopyalandı."),
         "copyFailed": pgettext(_CTX, "Kopyalamaq alınmadı — parolu əl ilə yazın."),
         "genericError": pgettext(_CTX, "Xəta baş verdi. Yenidən cəhd edin."),
+        # «İstifadəçi adını dəyiş» (sahib 2026-10-26) — `account_username_change.js`.
+        "rename": pgettext(_UCTX, "İstifadəçi adını dəyiş"),
+        "renaming": pgettext(_UCTX, "Dəyişdirilir…"),
+        "renameBody": pgettext(
+            _UCTX,
+            "{name} — cari istifadəçi adı: {username}. Parol, açıq sessiyalar və e-poçt təsdiqi dəyişmir; köhnə "
+            "adla giriş dərhal işləməz olur.",
+        ),
+        "suggestCurrent": pgettext(_UCTX, "Cari ad artıq standart formadadır: {username}."),
     }
 
 
@@ -167,6 +177,9 @@ def build_panel_context(request) -> dict:
         "lookup_url": reverse("accounts:account_password_reset_lookup"),
         "suggest_url": reverse("accounts:account_password_reset_suggest"),
         "reset_url": reverse("accounts:account_password_reset_perform"),
+        "rename_url": reverse("accounts:account_username_change_perform"),
+        "rename_suggest_url": reverse("accounts:account_username_change_suggest"),
+        "rename_form_data": {"data-pwr-rename-form": "1"},
         "js_strings": _js_strings(),
     }
 

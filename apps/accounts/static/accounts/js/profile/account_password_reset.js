@@ -106,8 +106,19 @@
         list.appendChild(row);
     }
 
+    function actionButton(className, iconClass, attribute, id, label) {
+        var button = el("button", className);
+        button.type = "button";
+        button.setAttribute(attribute, String(id));
+        var icon = el("i", iconClass);
+        icon.setAttribute("aria-hidden", "true");
+        button.appendChild(icon);
+        button.appendChild(document.createTextNode(" " + (label || "")));
+        return button;
+    }
+
     function renderPerson(person, t) {
-        var item = el("li", "pwr-person" + (person.can_reset ? "" : " is-disabled"));
+        var item = el("li", "pwr-person" + (person.can_reset || person.can_rename ? "" : " is-disabled"));
         item.setAttribute("data-user-id", String(person.id));
 
         var main = el("div", "pwr-person__main");
@@ -134,16 +145,15 @@
         }
         item.appendChild(main);
 
+        var actions = el("div", "pwr-person__actions");
         if (person.can_reset) {
-            var actions = el("div", "pwr-person__actions");
-            var button = el("button", "ems-btn ems-btn--danger");
-            button.type = "button";
-            button.setAttribute("data-pwr-reset", String(person.id));
-            var icon = el("i", "fas fa-key");
-            icon.setAttribute("aria-hidden", "true");
-            button.appendChild(icon);
-            button.appendChild(document.createTextNode(" " + (t.reset || "")));
-            actions.appendChild(button);
+            actions.appendChild(actionButton("ems-btn ems-btn--danger", "fas fa-key", "data-pwr-reset", person.id, t.reset));
+        }
+        // Sahib 2026-10-26: «İstifadəçi adını dəyiş» — parolu bilmədən (`account_username_change.js`).
+        if (person.can_rename) {
+            actions.appendChild(actionButton("ems-btn", "fas fa-user-pen", "data-pwr-rename", person.id, t.rename));
+        }
+        if (actions.childNodes.length) {
             item.appendChild(actions);
         }
         return item;
