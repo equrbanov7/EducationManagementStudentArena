@@ -79,6 +79,7 @@ from .journal_close_notice import (
     JournalCloseScope,
 )
 from .journal_hygiene import HYGIENE_REASON_MIN_LENGTH, HygieneCategory, JournalHygieneDecision
+from .journal_share import JournalShare, JournalShareSource
 from .kollokvium_window import (
     KOLLOKVIUM_WINDOW_COUNT,
     KollokviumExtraGrant,
@@ -224,6 +225,8 @@ __all__ = [
     "HYGIENE_REASON_MIN_LENGTH",
     "HygieneCategory",
     "JournalHygieneDecision",
+    "JournalShare",
+    "JournalShareSource",
     "SlotKind",
     "StudentAcademicRecord",
     "StudentMovement",

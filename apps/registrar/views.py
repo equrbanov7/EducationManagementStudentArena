@@ -34,6 +34,7 @@ def _current_period(organization):
     )
 
 
+from . import journal_share_guard as _share_guard  # noqa: E402  (bölünmüş jurnal, sahib 2026-10-26)
 from .handover import is_handover_observer as _is_handover_observer  # noqa: E402
 
 # Redaktə/giriş hüquq köməkçiləri ayrıca modulda (modul-ölçü limiti). Köhnə `_can_edit_journal` /
@@ -105,6 +106,8 @@ def journal_detail(request, offering_id):
         # sənədli) ilə edir. Beləcə düzəliş rejimi aktiv olmadan heç nə dəyişmir.
         if not is_direct_editor:
             raise Http404
+        if (denied := _share_guard.detail_post_guard(request, offering)) is not None:
+            return denied
         if action == "add_lesson":
             return _handle_add_lesson(request, offering)
         if action == "save_finals":
@@ -149,6 +152,7 @@ def journal_detail(request, offering_id):
     # Laboratoriya» pilləsi jurnalın İÇİNDƏ də davam edir — müəllim seminar
     # seçəndə mühazirə sütunları qarışmır. Naməlum dəyər səssizcə «hamısı».
     lesson_kind = _jw.resolve_request_kind(request, offering)
+    share_scope = _share_guard.scope(request.user, offering)  # bölünmüş jurnal: öz sətir/sütunları
     journal = gradebook.get_offering_journal(
         offering=offering,
         newest_first=True,
@@ -157,6 +161,7 @@ def journal_detail(request, offering_id):
         lesson_limit=(window_size or None) if active_tab == "grid" else 1,
         lesson_offset=window_offset if active_tab == "grid" else 0,
         lesson_kind=lesson_kind if active_tab == "grid" else "",
+        scope=share_scope,
     )
     corrections_map = corrections_service.corrections_map_for_offering(offering)
     legacy_excuse.attach_to_offering_journal(offering, journal, corrections_map)  # sarı üq sənədi
@@ -278,6 +283,7 @@ def journal_detail(request, offering_id):
     from apps.registrar.journal_lesson_prefill import modal_context as lesson_prefill  # «Yeni dərs» dolu (2026-10-10)
 
     context.update(lesson_prefill(offering, context))
+    _share_guard.restrict_detail_context(context, share_scope)
     return render(request, "registrar/journal_detail.html", context)
 
 
@@ -314,7 +320,7 @@ def rubric_grade_view(request, offering_id, component_id):
         raise Http404
     offering = _offering_for_detail(request, offering_id)
     # Rubrik kriteriya balları ComponentScore yazır → yalnız birbaşa redaktor (İKT yox).
-    if not _is_direct_editor(request.user, offering):
+    if not _is_direct_editor(request.user, offering) or not _share_guard.scope(request.user, offering).full:
         raise Http404
     component = get_object_or_404(AssessmentComponent, pk=component_id, offering=offering)
     grid = rubrics_service.get_rubric_grid(component)

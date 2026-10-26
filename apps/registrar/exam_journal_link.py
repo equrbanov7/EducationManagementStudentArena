@@ -75,8 +75,11 @@ def teacher_offerings(organization, teacher, *, group_ids=None, period=None):
     if organization is None or teacher is None or period is None:
         return CourseOffering.objects.none()
     teacher_id = getattr(teacher, "pk", teacher)
+    from .journal_shares import shared_offering_ids
+
+    # Bölünmüş jurnalın pay sahibi də (səviyyə müəllimi öz jurnalına Midterm yaradır — sahib 2026-10-26).
     offerings = _period_offerings(organization, period).filter(
-        Q(instructor_id=teacher_id) | Q(lessons__instructor_id=teacher_id)
+        Q(instructor_id=teacher_id) | Q(lessons__instructor_id=teacher_id) | Q(pk__in=shared_offering_ids(teacher_id))
     )
     if group_ids is not None:
         offerings = offerings.filter(group_id__in=expand_group_ids(organization, group_ids))

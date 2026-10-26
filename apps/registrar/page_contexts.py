@@ -83,6 +83,7 @@ def journal_list_context(user, request=None) -> dict:
     from apps.registrar import corrections as corrections_service
     from apps.registrar import journal_list_query as jlq
     from apps.registrar import journal_list_schedule as jls
+    from apps.registrar import journal_shares
     from apps.registrar.models import SlotKind
 
     # Korrektorlar (İKT rəhbəri / admin / superadmin — journal.correct icazəsi) BÜTÜN
@@ -100,6 +101,7 @@ def journal_list_context(user, request=None) -> dict:
     )
     # `journal.view` (audit F-06, 2026-09-14): əhatəli YALNIZ-OXU jurnallar siyahıya da düşür.
     view_q = journal_scope.journal_view_q(user, organization) if organization is not None else None
+    own_q = journal_shares.own_or_shared_q(user)  # öz jurnalı + bölünmüş jurnalın payı (sahib 2026-10-26)
     if can_correct and organization is not None:
         base_qs = base_qs.filter(organization=organization)
         is_broad = True
@@ -110,7 +112,7 @@ def journal_list_context(user, request=None) -> dict:
         # assert_roster_open). Müəllimin ÖZ jurnalları toxunulmaz qalır: onun
         # tarixçəsi dövr süzgəcindən keçmir.
         scoped_groups = guest_roster.scoped_group_queryset(user, organization) if can_roster else []
-        visible = Q(group__in=scoped_groups, period__is_current=True, period__is_active=True) | Q(instructor=user)
+        visible = Q(group__in=scoped_groups, period__is_current=True, period__is_active=True) | own_q
         base_qs = base_qs.filter(organization=organization).filter(visible | (view_q or Q(pk__in=[])))
         is_broad = True
     else:
@@ -120,9 +122,7 @@ def journal_list_context(user, request=None) -> dict:
         from apps.registrar.handover import observer_offering_ids
 
         observed = observer_offering_ids(user, organization) if organization is not None else set()
-        base_qs = (
-            base_qs.filter(Q(instructor=user) | Q(pk__in=observed)) if observed else base_qs.filter(instructor=user)
-        )
+        base_qs = base_qs.filter(own_q | Q(pk__in=observed)) if observed else base_qs.filter(own_q)
         is_broad = False
 
     # `group__parent*` zənciri artıq lazım DEYİL — fakültə/kafedra ata-axtarışı
@@ -257,7 +257,7 @@ def journal_list_context(user, request=None) -> dict:
     page_obj = paginator.get_page(request.GET.get("page") if request is not None else None)
     row_offset = page_obj.start_index() - 1 if page_obj else 0
     page_offerings = page_obj.object_list = list(page_obj.object_list)  # F-14: say yalnız səhifə üçün
-    counts_map = _offering_student_counts(page_offerings)
+    counts_map = journal_shares.scoped_student_counts(user, page_offerings, _offering_student_counts(page_offerings))
     for offering in page_offerings:
         offering.student_count = counts_map.get(offering.pk, 0)
     # Dərs tipi etiketləri (kind_label/is_evening) YALNIZ görünən səhifə üçün —

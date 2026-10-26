@@ -336,8 +336,12 @@ def teacher_offerings(*, organization, teacher, period, today=None) -> dict:
     if organization is None or teacher is None or period is None:
         return result
     today = today or timezone.localdate()
+    from .journal_shares import own_or_shared_q, scoped_student_counts
+
+    # Öz jurnalları + bölünmüş jurnalın payı (sahib 2026-10-26); payda tələbə sayı yalnız öz tələbələri.
     offerings = list(
-        CourseOffering.objects.filter(organization=organization, instructor=teacher, period=period, is_active=True)
+        CourseOffering.objects.filter(organization=organization, period=period, is_active=True)
+        .filter(own_or_shared_q(teacher))
         .select_related("subject", "group")
         .annotate(
             dash_students=_per_offering(Enrollment.objects.filter(status=Enrollment.Status.ENROLLED), Count("id")),
@@ -346,12 +350,13 @@ def teacher_offerings(*, organization, teacher, period, today=None) -> dict:
         )
         .order_by("subject__name", "group__name", "pk")
     )
+    students = scoped_student_counts(teacher, offerings, {o.pk: int(o.dash_students or 0) for o in offerings})
     rows = [
         {
             "offering_id": offering.id,
             "subject_name": getattr(offering.subject, "name", "") or "—",
             "group_name": getattr(getattr(offering, "group", None), "name", "") or "",
-            "students": int(offering.dash_students or 0),
+            "students": students.get(offering.pk, 0),
             "held_hours": int(offering.dash_held_hours or 0),
             "lessons_held": int(offering.dash_lessons or 0),
             "plan_hours": int(offering.lesson_hours or 0),

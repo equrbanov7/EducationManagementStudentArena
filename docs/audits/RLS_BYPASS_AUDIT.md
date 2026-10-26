@@ -131,6 +131,7 @@ ki, gələcəkdə hər biri qəsdən və əsaslandırılmış qalsın.
 | `apps/organizations/management/commands/seed_ci_e2e_scenario.py` | 1 | C — təşkilat idarəetməsi |
 | `apps/organizations/management/commands/seed_ci_e2e_user.py` | 1 | C — təşkilat idarəetməsi |
 | `apps/organizations/services.py` | 1 | C — təşkilat idarəetməsi |
+| `apps/registrar/management/commands/apply_journal_shares.py` | 1 | C — idarə əmri (bölünmüş jurnal payları; --actor superadmin, dry-run defolt, 2026-10-26) |
 | `apps/registrar/management/commands/archive_junk_groups.py` | 1 | C — idarə əmrləri |
 | `apps/registrar/management/commands/archive_non_program_rows.py` | 1 | C — idarə əmrləri |
 | `apps/registrar/management/commands/backfill_teacher_lessons.py` | 1 | C — idarə əmrləri |

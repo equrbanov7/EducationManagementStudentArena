@@ -441,6 +441,11 @@ def activate_slot(request, offering_id, slot_id):
     )
     if slot is None:
         raise Http404
+    from .journal_share_guard import slot_activation
+
+    slot_allowed, share_teacher = slot_activation(request.user, offering, slot)  # bölünmüş jurnal (2026-10-26)
+    if not slot_allowed:
+        raise Http404
     back = reverse("registrar:journal_detail", args=[offering.pk])
 
     from . import gradebook, journal_policy, journal_topics
@@ -473,7 +478,7 @@ def activate_slot(request, offering_id, slot_id):
             slot=slot,
             topic=topic,
             created_by=request.user,
-            instructor=slot_teacher(offering, slot, last_instructor),
+            instructor=share_teacher or slot_teacher(offering, slot, last_instructor),
         )
     except gradebook.LessonRuleError as exc:
         messages.error(request, str(exc))

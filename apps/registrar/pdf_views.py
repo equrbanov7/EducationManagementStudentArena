@@ -158,10 +158,14 @@ def journal_xlsx(request, offering_id):
     if not _can_edit_journal(request.user, offering):
         raise Http404
 
+    # Bölünmüş jurnal (sahib 2026-10-26): pay sahibinin faylında yalnız öz sətir/sütunları.
+    from apps.registrar import journal_share_guard
+
+    scope = journal_share_guard.scope(request.user, offering)
     payload = journal_export.build_journal_workbook(
         offering=offering,
-        journal=gradebook.get_offering_journal(offering=offering),
-        finals=finals.get_offering_results(offering=offering),
+        journal=gradebook.get_offering_journal(offering=offering, scope=scope),
+        finals=journal_share_guard.restrict_export(finals.get_offering_results(offering=offering), scope),
     )
     filename = f"jurnal-{offering.subject.code}.xlsx"
     response = HttpResponse(payload, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")

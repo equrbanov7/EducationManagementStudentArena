@@ -21,7 +21,7 @@ from django.views.decorators.http import require_POST
 
 from core.http_ids import parse_uuid
 
-from . import gradebook, journal_extras
+from . import gradebook, journal_extras, journal_share_guard
 from .journal_access import offering_or_404 as scoped_offering_or_404
 from .journal_access import writable_offering_or_404
 from .journal_topics import posted_topic
@@ -115,6 +115,10 @@ def lesson_action(request, offering_id, lesson_id):
     """Dərs sütunu: redaktə və ya silmə — yalnız yaranışdan 2 saat içində."""
     offering = _offering_or_404(request, offering_id)
     lesson = get_object_or_404(Lesson, pk=lesson_id, offering=offering)
+    # Bölünmüş jurnal (sahib 2026-10-26): pay sahibi yalnız öz növündəki / öz adına olan dərsə toxunur.
+    denied = journal_share_guard.lesson_post_guard(request, offering, lesson)
+    if denied is not None:
+        return denied
     action = request.POST.get("action")
     # Silmə düyməsi redaktə formasının içindədir (eyni MƏCBURİ PDF-i paylaşır) →
     # do_delete=1 gələndə action-i silməyə çevir.
@@ -273,6 +277,9 @@ def kollokvium_save(request, offering_id):
     blocked = _corrector_direct_write_blocked(request, offering, "kollokvium")
     if blocked:
         return blocked
+    denied = journal_share_guard.rows_post_guard(request, offering)  # bölünmüş jurnal: yalnız öz sətirləri
+    if denied is not None:
+        return denied
     components = list(journal_extras.ensure_kollokviums(offering))
     idx_by_id = {str(c.id): idx for idx, c in enumerate(components)}
     today = timezone.localdate()
@@ -346,6 +353,10 @@ def selfwork_action(request, offering_id):
     if blocked:
         return blocked
     action = request.POST.get("action")
+    structural = action in ("ensure_structure", "add_topic", "delete_topic")
+    denied = journal_share_guard.rows_post_guard(request, offering, structural=structural)
+    if denied is not None:
+        return denied
     # 2026-08 auditi: burada əvvəl `allow_locked = is_superuser or is_ikt_rehber`
     # vardı — yəni RİM/İKT rəhbəri (və superuser) 2 saatlıq geri-alma pəncərəsini
     # SƏNƏDSİZ keçirdi. Artıq keçmir: pəncərə bağlananda dəyişiklik yalnız
@@ -444,6 +455,9 @@ def coursework_save(request, offering_id):
     blocked = _corrector_direct_write_blocked(request, offering, "kurs-isi")
     if blocked:
         return blocked
+    denied = journal_share_guard.rows_post_guard(request, offering)  # bölünmüş jurnal: yalnız öz sətirləri
+    if denied is not None:
+        return denied
     enrollments = {str(e.id): e for e in offering.enrollments.all()}
     saved = 0
     frozen = 0

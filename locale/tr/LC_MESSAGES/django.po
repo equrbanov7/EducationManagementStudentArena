@@ -108868,3 +108868,27 @@ msgstr "%(count)s defter"
 msgctxt "exams.subject_picker"
 msgid "jurnal yoxdur"
 msgstr "defter yok"
+
+msgctxt "registrar.journal_share"
+msgid "Bölünmüş jurnal: yalnız sizin tələbələriniz / dərs növləriniz göstərilir"
+msgstr "Paylaşılan dergi: yalnızca sizin öğrencileriniz / ders türleriniz gösterilir"
+
+msgctxt "registrar.journal_share"
+msgid "Bu xana bölünmüş jurnalda sizin payınıza aid deyil."
+msgstr "Bu hücre paylaşılan dergideki payınıza ait değil."
+
+msgctxt "registrar.journal_share"
+msgid "Köhnə sistem"
+msgstr "Eski sistem"
+
+msgctxt "registrar.journal_share"
+msgid "Əl ilə"
+msgstr "Elle"
+
+msgctxt "registrar.model.journal_share.meta"
+msgid "jurnal payı"
+msgstr "dergi payı"
+
+msgctxt "registrar.model.journal_share.meta"
+msgid "jurnal payları"
+msgstr "dergi payları"
