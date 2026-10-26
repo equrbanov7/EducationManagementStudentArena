@@ -7,6 +7,13 @@ Ardıcıllıq hər növdə eynidir — ən güclü sübut birinci:
    tələbənin ``institutional_identifier``-ı = legacy id) — təkrar qaçışda əvvəlki delta-nın
    yaratdığını tapır;
 3. ad tutuşdurması — YALNIZ tək namizəd olduqda (çox namizəd = «ambiqü», heç vaxt təxmin edilmir).
+
+FƏNN KODU TOQQUŞMASI (magistr auditi, sahib 2026-10-26): tapşırıq idxalı 2026-09-19-dan yeni fənlərə ardıcıl
+``QKU-<n>`` kodları verib, köhnə sistemdə payızda açılan fənlərin ``lessons.id``-si (2668+) isə HƏMİN ədədlərdir —
+``QKU-2672`` «Quru ərazilərin bioresursları» kartı legacy «Tədqiqat analitikası» (2672) fənni kimi tapılırdı və
+jurnal başqa fənnin adı ilə açılırdı. İndi kod yalnız ADI da tutanda qəbul olunur; tutmursa fənn
+``code_collision``-dır — yalnız ``subject_collisions`` fazasının yazdığı xəritə (audit, ``COLLISION_RESOURCE``)
+ilə həll olunur, əks halda jurnal ötürülür (təxmin yoxdur: eyni adlı rəsmi açılışa ikinci nüsxə yazılmasın).
 """
 
 from __future__ import annotations
@@ -23,6 +30,10 @@ from ..rehearsal_contracts import SOURCE_SYSTEM
 
 GROUP_SLUG_PREFIX = "myedu-grp-"
 SUBJECT_CODE_PREFIX = "QKU-"
+#: Kodu toqquşan legacy fənn üçün YENİ kartın kodu (``QKU-L<lessons.id>``) — ardıcıl ``QKU-<n>`` ilə üst-üstə düşmür.
+SUBJECT_ALT_CODE_PREFIX = "QKU-L"
+#: ``subject_collisions`` fazasının xəritəsi: ``resource_id`` = legacy ``lessons.id``, ``new_values.subject`` = fənn.
+COLLISION_RESOURCE = "legacy_import.subject_collision"
 SEASON_BY_TYPE = {"autumn": "Payız", "spring": "Yaz", "summer": "Yay"}
 _FOLD = str.maketrans({"ı": "i", "ə": "e", "ö": "o", "ü": "u", "ş": "s", "ç": "c", "ğ": "g"})
 _NOISE = re.compile(r"[\s\-_./]+")
@@ -86,6 +97,22 @@ def ledger_map(organization, entity_type: str, legacy_pks=None) -> dict:
     return found
 
 
+def collision_map(organization) -> dict:
+    """``legacy lessons.id`` (str) → düzgün fənnin pk-si (str) — ``subject_collisions`` fazasının audit xəritəsi."""
+
+    AuditLog = django_apps.get_model("audit", "AuditLog")
+    found: dict = {}
+    for resource_id, values in (
+        AuditLog.objects.filter(organization=organization, resource_type=COLLISION_RESOURCE)
+        .order_by("created_at")
+        .values_list("resource_id", "new_values")
+    ):
+        subject = (values or {}).get("subject") if isinstance(values, dict) else None
+        if resource_id and subject:
+            found[str(resource_id)] = str(subject)
+    return found
+
+
 class Catalog:
     """Hədəf təşkilatın tutuşdurma indeksləri (bir dəfə qurulur, yazılarla yenilənir)."""
 
@@ -109,6 +136,7 @@ class Catalog:
         self.led_speciality = ledger_map(organization, "speciality_unit")
         self.led_department = ledger_map(organization, "department_unit")
         self.led_period = ledger_map(organization, "academic_period")
+        self.collision_map = collision_map(organization)
 
     def index_group(self, unit) -> None:
         self.units[unit.pk] = unit
@@ -155,6 +183,9 @@ class Catalog:
         target = self.led_subject.get(str(legacy["id"]))
         if target and _uuid(target) in self.subjects:
             return self.subjects[_uuid(target)], "ledger"
+        if self.code_collision(legacy) is not None:
+            fixed = self.subjects.get(_uuid(self.collision_map.get(str(legacy["id"]), "")))
+            return (fixed, "collision_fixed") if fixed is not None else (None, "code_collision")
         subject = self.subject_by_code.get(f"{SUBJECT_CODE_PREFIX}{legacy['id']}")
         if subject is not None:
             return subject, "code"
@@ -163,6 +194,32 @@ class Catalog:
         if len(active) == 1:
             return active[0], "name"
         return None, "ambiguous" if active else "missing"
+
+    def code_collision(self, legacy: dict):
+        """``QKU-<legacy id>`` kartı BAŞQA adlı fəndirsə həmin kart (toqquşma), yoxsa ``None``.
+
+        Ledger-i olan fənn (cutover) toqquşma sayılmır — orada kod ledger-dən gəlir."""
+
+        if self.led_subject.get(str(legacy["id"])):
+            return None
+        subject = self.subject_by_code.get(f"{SUBJECT_CODE_PREFIX}{legacy['id']}")
+        if subject is None or subject_key(subject.name) == subject_key(legacy.get("name")):
+            return None
+        return subject
+
+    def collision_target(self, legacy: dict):
+        """Toqquşan legacy fənnin DÜZGÜN kartı: faza xəritəsi → ``QKU-L<id>`` → tək aktiv eyni adlı fənn."""
+
+        mapped = self.subjects.get(_uuid(self.collision_map.get(str(legacy["id"]), "")))
+        if mapped is not None:
+            return mapped
+        alt = self.subject_by_code.get(f"{SUBJECT_ALT_CODE_PREFIX}{legacy['id']}")
+        if alt is not None:
+            return alt
+        same = [
+            subject for subject in self.subjects_by_key.get(subject_key(legacy.get("name")), []) if subject.is_active
+        ]
+        return same[0] if len(same) == 1 else None
 
     # ── dövr ──────────────────────────────────────────────────────────────
     def period_for(self, legacy: dict):
@@ -209,9 +266,12 @@ def lesson_date(period, month: int, day: int):
 
 
 __all__ = [
+    "COLLISION_RESOURCE",
     "GROUP_SLUG_PREFIX",
+    "SUBJECT_ALT_CODE_PREFIX",
     "SUBJECT_CODE_PREFIX",
     "Catalog",
+    "collision_map",
     "group_key",
     "group_key_variants",
     "ledger_map",

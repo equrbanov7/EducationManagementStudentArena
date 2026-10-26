@@ -70,12 +70,15 @@ def group_key(token: str) -> str:
 
 
 def group_tokens(text: str) -> list[str]:
-    """Forma 1 qrup xanası → qrup adları; «233BİO SBİO İNG» → «233 BİO İNG», «233 SBİO İNG»."""
+    """Forma 1 qrup xanası → qrup adları; «233BİO SBİO İNG» → «233 BİO İNG», «233 SBİO İNG».
+
+    Magistr qrupu «403/5 MN ing» bir qrupdur (sahib 2026-10-26): nömrə «403/5» (kurs rəqəmi «/» ilə) — əvvəl
+    «403 /5» və «403 MN» kimi iki saxta qrupa bölünürdü və sətir tapılmırdı."""
     result = []
     for part in re.split(r"[\n,;]+", str(text or "")):
         for token in split_tokens(part.strip()):
             words = token.split()
-            match = re.match(r"^((?:\d+/)?\d{2,4})\s*(\S*)$", words[0]) if words else None
+            match = re.match(r"^((?:\d+/)?\d{2,4}(?:/\d{1,2}(?!\d))?)\s*(\S*)$", words[0]) if words else None
             if not match or len(words) == 1:
                 result.append(token)
                 continue

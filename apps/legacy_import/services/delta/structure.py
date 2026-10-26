@@ -134,6 +134,11 @@ def ensure_subject(run, legacy: dict):
         run.count("subject.ambiguous")
         run.names("subject_ambiguous", text(legacy.get("name")), str(legacy["id"]))
         return None
+    if how == "code_collision":
+        # ``QKU-<id>`` başqa fənnin kartıdır — jurnal ötürülür; düzəliş ``subject_collisions`` fazasındadır.
+        run.count("subject.code_collision")
+        run.names("subject_code_collision", text(legacy.get("name")), str(legacy["id"]))
+        return None
     name = text(legacy.get("name"))
     if not name:
         run.count("subject.unreadable")

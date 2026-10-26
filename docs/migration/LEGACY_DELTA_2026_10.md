@@ -352,3 +352,66 @@ gh release create legacy-delta-hist-a-20261025 delta.json.gz.enc --draft --title
 
 ⚠️ Bu fazalar `legacy_repair_empty_lessons --include-locked`-dən ƏVVƏL işləməlidir (audit §2.6: tarixi «boş»
 sütunların çoxu bərpa olunacaq xanaların dərsləridir).
+
+## 10. Magistr auditi — fənn KODU toqquşması (`subject_collisions`) və magistr qrup adları (2026-10-26)
+
+Sahib 2026-10-26: «Sillabus və s. — magistrda köçməyənlər var, onlara da bax; dərs cədvəli və s.». Ölçü prod nüsxəsində
+(2026-10-26 səhər) və delta5 paketində (cari semestr 14, `bak_or_mag=mag` qrupları) aparılıb; adlı siyahı yalnız lokaldır.
+
+### 10.1 Kök səbəblər
+
+1. **Fənn kodu toqquşması.** Delta ledger-i olmayan legacy fənni `QKU-<lessons.id>` kodu ilə tapırdı; tapşırıq idxalı isə
+   2026-09-19-dan yeni fənlərə ardıcıl `QKU-<n>` kodları verib. Köhnə sistemdə payızda açılan fənlər (id 2668+) beləcə
+   BAŞQA fənnin kartına düşüb (məs. «Tədqiqat analitikası» jurnalı «Quru ərazilərin bioresursları» adı ilə). Cəmi
+   **29 legacy fənn (14-ü magistr), 50 açılış** — hamısı delta-nın yaratdığı açılışlar; **25-i «əkiz»**: eyni qrupda
+   düzgün fənn üzrə rəsmi (tapşırıq) açılış da var — cədvəl slotu və dərs yükü orada, legacy dərs/xana isə yanlış adlı
+   açılışda (20-si magistr). Delta-nın dərs yükü fazası yanlış adla 14 sətir açıb (2-si magistr; 9-u düzəlir, 5 bakalavr
+   sətri əkizdir).
+2. **Magistr qrup adı dərs yükü axınında bölünürdü.** «Forma 1» qrup ayırıcısı `403/5 MN` adını `403 /5` + `403 MN`
+   kimi iki saxta qrupa bölürdü (`group_tokens`) — legacy jurnalın dərs yükü sətri «qrup başqa yerə düşür» deyə ötürülürdü
+   (magistr: 40 yazı). Eyni xəta tədris şöbəsinin «Dərs yükü faylı» / Forma 1 yükləməsində magistr qruplarına da təsir edirdi.
+3. Kataloqda dublikat «Tədqiqat metodları» (iki kart) — 9 yazı «fənn başqa karta düşür» deyə ötürülür (sahib/RİM:
+   `merge_subjects`).
+4. Legacy-də müəllim jurnala BAŞQA fənnin sillabusunu bağlayıb (19 magistr jurnalı) — qayda üzrə köçürülmür; 10 jurnalın
+   legacy sillabusu yoxdur.
+5. Bütün magistr proqramlarının təsdiqlənmiş planları BOŞDUR (0 sətir; 2026 planları qaralama, 0 sətir) — plan məzmunu
+   köhnə sistemdə yox idi, tədris şöbəsi yükləməlidir.
+
+### 10.2 Düzəliş (kod)
+
+* `Catalog.subject_for` kodu yalnız ADI da tutanda qəbul edir; tutmursa `code_collision` — jurnal ötürülür (təxmin yox),
+  `subject_collisions` fazasının xəritəsi (audit `legacy_import.subject_collision`) varsa həmin karta bağlanır.
+* Yeni opt-in faza **`subject_collisions`** (`delta/collisions.py`): delta-nın yaratdığı yanlış açılışı düzgün karta
+  keçirir (eyni adlı tək aktiv fənn, yoxdursa yeni `QKU-L<id>` kartı) — fənn birləşdirməsinin rəsmi DB icazəsi ilə; açılışın
+  sillabusu və həmin qrupların delta dərs yükü sətri də keçir; əkiz, delta-ya aid olmayan, başqa modulda istinadı olan və
+  bağlı jurnala toxunulmur (sayılır). Bütün qrupları həll olunan fənn üçün xəritə yazılır; əkiz qalan fənn növbəti delta
+  qaçışlarında ötürülür (ikinci nüsxə yaranmır). İdempotent.
+* `group_tokens`: `403/5 MN ing` bir qrupdur.
+
+Prod nüsxəsində (iş nüsxəsi): faza 25 açılış (12 magistr) + 18 sillabus + 9 yük sətri keçirdi, 16 yeni kart, 17 xəritə;
+ikinci qaçış 0 yazı. Sonra magistr dərs yükü paketi (`offerings` + `workload` + `dedupe`): 8 kafedra, 20 yeni sətir
+(rəsmi axın); magistr açılışlarında yük sətri olmayan 69 → 45, müəllim bölgüsü olmayan 80 → 56.
+
+### 10.3 Prod addımları (hər biri sahibin «hə»sı ilə; workflow dəyişmir — mövcud `legacy_delta_apply` addımı)
+
+1. Kodu prod-a çatdır.
+2. Paket A — toqquşma (şəxsi data YOXDUR: yalnız jurnal → fənn/qrup; `snapshot.phases = ["subject_collisions"]`);
+   paket B — magistr dərs yükü (magistr jurnalları + müəllim adları + sillabus/dərs tarixləri, tələbə/xana yoxdur;
+   `snapshot.phases = ["offerings", "workload", "dedupe"]`). Hər biri şifrələnib ayrıca draft release-ə (`legacy-delta-…`).
+3. `prod-data-ops` → `legacy_delta_apply`, `roster_tag` = A-nın tag-ı, `batch` = sha256 — dry-run, saylar §10.2 ilə
+   müqayisə; sonra `apply=true`, `confirm=APPLY` (addım backup alır); yoxlama dry-run-u: `written.*` olmamalıdır.
+4. Eyni addım B paketi ilə (A-dan SONRA — B toqquşan jurnalları A-nın xəritəsi ilə görür).
+5. `infer_timetable_from_lessons` (period «Payız 2026/2027») — dry-run, sonra apply (yeni açılış/ad üçün slot).
+6. Release asset-ləri və artifaktları sil.
+
+### 10.4 Sahib qərarı gözləyən
+
+* **25 əkiz jurnal** (20 magistr): legacy dərs/xana yanlış adlı açılışda, rəsmi açılış (cədvəl, yük) boş. Unikal açar
+  (fənn, dövr, qrup) birinin fənnini dəyişməyə imkan vermir. Tövsiyə: rəsmi açılışa dərs + xananı köçürən «jurnal
+  birləşdirmə» əməli (ayrıca iş), sonra yanlış açılışın ləğvi; 5 bakalavr əkizinin yanlış yük sətri (saat ikiqat) silinsin.
+* 19 jurnalın başqa fənn sillabusu (2-si eyni fənnin yazılış fərqidir — onlar köçürülə bilər), 10 sillabussuz jurnal.
+* «Tədqiqat metodları» dublikat kartı; adı fərqli eyni fənn əkizləri (məs. «İnternet proqramlaşdırma» / «İnternetdə
+  proqramlaşdırma») — `merge_subjects` əkiz qrupda bloklanır.
+* Boş magistr planları (40 proqram).
+* Cədvəl: əkiz olmayan 11 magistr açılışında dərs var, slot yox (axşam dərsləri seyrək: tək dərs, müəllim toqquşması,
+  qarışıq axın) — cədvəl redaktorunda əl ilə.
