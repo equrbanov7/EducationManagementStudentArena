@@ -1,0 +1,78 @@
+name: 📤 Prod backup export (bir dəfəlik, şifrəli)
+
+# 2026-10-27 sahib: «proddakı backup lazımdır, kompa götür». Ən yeni daily dump şifrələnib
+# artifakt kimi yüklənir; açar (RSA private) yalnız sahibin Mac-indədir. Bu fayl yalnız
+# ops/prod-backup-export-* budağında yaşayır, main-ə birləşdirilmir.
+
+on:
+  push:
+    branches:
+      - "ops/prod-backup-export-*"
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: [self-hosted]
+    timeout-minutes: 60
+    env:
+      APP_DIR: /home/wcu/EducationManagementStudentArena
+      HOST_IMAGE: postgres:16-alpine
+    steps:
+      - name: 🔎 Backup faylları
+        run: |
+          set -euo pipefail
+          host() { docker run --rm -i --privileged --pid=host --net=host "$HOST_IMAGE" nsenter -t 1 -m -u -i -n -p -- "$@"; }
+          host sh -c "ls -la $APP_DIR/backups/postgres/ $APP_DIR/backups/postgres/daily 2>&1 | tail -n 40; ls -la /var/backups/emsarena/postgres 2>&1 | tail -n 10; df -h $APP_DIR | tail -n1" | tee -a "$GITHUB_STEP_SUMMARY"
+          latest=$(host sh -c "ls -1t $APP_DIR/backups/postgres/daily/* 2>/dev/null | grep -v -- '-latest' | head -n1")
+          echo "latest=$latest" | tee -a "$GITHUB_STEP_SUMMARY"
+          test -n "$latest"
+          mkdir -p "$RUNNER_TEMP/exp"
+          host cat "$latest" > "$RUNNER_TEMP/exp/$(basename "$latest")"
+          host sh -c "sha256sum '$latest'" | tee -a "$GITHUB_STEP_SUMMARY"
+          sha256sum "$RUNNER_TEMP/exp/"* | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "NAME=$(basename "$latest")" >> "$GITHUB_ENV"
+
+      - name: 🔐 Şifrələ (AES-256 + RSA açarı)
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/exp"
+          cat > pub.pem <<'PEM'
+          -----BEGIN PUBLIC KEY-----
+          MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAoKawYcQgIENNgq3mZ8bo
+          qjtkFUQ4w1lZcU1egztELAU/l+uD6VmL563NfVPQPSabUWVYKnrX3zpmVtpFkVWj
+          QvvYYzVqywTo2siyUJ/NpFxz2lnxUhSBJvtRJiWRSZM/4RbjYmVLCmCso8UOoI3U
+          uKmFcdpOQDvMw7wu2r/OL9nCvJdKbfAjPVGSTjPEc1hkKh9mYXrjbuDK6DxoDQVp
+          twxL/AsuCvwbvEpwEAO59CZkjpmbVFJ2d9OHtFntEya+i1n/NM5hH9w2efAzTd4C
+          W4yvuwlg35+Jh0HoA0r5Qzc/IyHTUg4E5bHWDuuYp3aFgPBw8bwgOTXZefGUELZo
+          h/UTYSvME+DoAtkUpTKk4dFNPFbGVDS3BBkrJjbiLfYmYTPMp8siET0RsxRXpeUA
+          +I0kPb3Esh/H0oyuLJJVXE1Sau9Bgm5zFD/ipZYeHQA7eIVpVQGQPrA7czlytFC0
+          Se/7aN2V3KcbEmD+JPGMNVdAwNAWihB97oxrUxhyOBkPKWW0iTW1VTd7pPpw7x6E
+          8PdyxhWj+UQWuoYzeZp9Q3iOiJYZ5Kbx2MvKCYdjSdBxum0giu840G8soYNK+2YF
+          QnYiuhFDCIDa34Czpp/Ng7z83kTosOlxWsHqi/Qp+Qa3estwLWBhon8hq/2SxHIa
+          5NuPwg89MYfved60OOQZvHUCAwEAAQ==
+          -----END PUBLIC KEY-----
+          PEM
+          sed -i 's/^ *//' pub.pem
+          openssl rand -hex 32 > key.txt
+          openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -in "$NAME" -out "$NAME.enc" -pass file:key.txt
+          openssl pkeyutl -encrypt -pubin -inkey pub.pem -pkeyopt rsa_padding_mode:oaep -in key.txt -out key.bin
+          sha256sum "$NAME" > SHA256SUMS
+          rm -f "$NAME" key.txt
+          ls -la
+
+      - name: 📦 Artifakt
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-backup-export
+          path: |
+            ${{ runner.temp }}/exp/*.enc
+            ${{ runner.temp }}/exp/key.bin
+            ${{ runner.temp }}/exp/SHA256SUMS
+          retention-days: 1
+          compression-level: 0
+
+      - name: 🧹 Təmizlə
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/exp"
