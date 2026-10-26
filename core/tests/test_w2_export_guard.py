@@ -59,7 +59,8 @@ MUST_USE_HELPER = (
     "apps/accounts/views/student_registry.py",
     "apps/accounts/views/profile/statistics_export.py",
     "apps/accounts/views/profile/statistics_export_metrics.py",
-    "apps/exams/views/teacher/results/_export_builder.py",
+    # 2026-10-27: imtahan nəticə ixracı ortaq formata köçdü — helper `results_export`-dədir.
+    "apps/exams/services/results_export.py",
     "apps/exams/views/teacher/question_bank/_reports.py",
     "apps/exams/views/exam_center/statistics.py",
     "apps/workload/views/teacher_api.py",
