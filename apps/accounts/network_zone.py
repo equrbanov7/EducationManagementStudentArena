@@ -195,6 +195,55 @@ REASON_SUPERADMIN = "superadmin_internal_only"
 REASON_STAFF = "staff_internal_only"
 
 
+#: Sessiyada müvəqqəti superadmin istisnasının bitmə anı (epoch saniyə) — WS qapısı DB-siz oxuyur.
+TEMP_SUPERUSER_SESSION_KEY = "nz_temp_superuser_until"
+
+
+def _temporary_superuser_until(user):
+    """``grant_temporary_superuser`` ilə verilmiş, müddəti bitməmiş girişin sonu (datetime) və ya ``None``.
+
+    Sahib 2026-10-27: «superadmin kimi iş görə bilim, amma hər yerdən daxil ola bilim — evdəyəm». Yalnız
+    MÜVƏQQƏTİ verilmiş giriş (audit sətri ``temporary_superuser`` / ``grant`` + ``expires_at``) şəbəkə zonası
+    qaydasından azaddır; müddət bitəndə və ya ``--revoke`` ilə qayda avtomatik geri qayıdır. Daimi superadminə aid deyil.
+    """
+    if user is None or not getattr(user, "is_superuser", False) or not getattr(user, "pk", None):
+        return None
+    from datetime import datetime
+
+    from django.apps import apps as django_apps
+    from django.utils import timezone
+
+    AuditLog = django_apps.get_model("audit", "AuditLog")
+    row = (
+        AuditLog.objects.filter(resource_type="temporary_superuser", resource_id=str(user.pk))
+        .order_by("-created_at")
+        .values_list("changes", flat=True)
+        .first()
+    )
+    if not isinstance(row, dict) or row.get("operation") != "grant" or not row.get("expires_at"):
+        return None
+    try:
+        until = datetime.fromisoformat(str(row["expires_at"]))
+    except ValueError:
+        return None
+    return until if until > timezone.now() else None
+
+
+def temporary_superuser_exempt(request) -> bool:
+    """HTTP: müvəqqəti superadmin girişi aktivdirsə ``True`` (nəticə sessiyada saxlanır — WS qapısı üçün)."""
+    user = gate_actor(request)  # view-as altında ƏSL hesab
+    if user is None or not getattr(user, "is_authenticated", False) or not getattr(user, "is_superuser", False):
+        return False
+    until = _temporary_superuser_until(user)
+    session = getattr(request, "session", None)
+    if session is not None:
+        if until is None:
+            session.pop(TEMP_SUPERUSER_SESSION_KEY, None)
+        else:
+            session[TEMP_SUPERUSER_SESSION_KEY] = until.timestamp()
+    return until is not None
+
+
 def _superadmin_gate_enabled() -> bool:
     return bool(getattr(settings, "NETWORK_ZONE_SUPERADMIN_INTERNAL_ONLY", True))
 
@@ -281,6 +330,8 @@ class NetworkZoneMiddleware:
         if not getattr(settings, "NETWORK_ZONE_ENFORCED", False) or zone == ZONE_INTERNAL:
             return self.get_response(request)
 
+        if temporary_superuser_exempt(request):
+            return self.get_response(request)
         path = request.path_info
         facts = _HttpGateFacts(request)
         denial = zone_policy_denial(

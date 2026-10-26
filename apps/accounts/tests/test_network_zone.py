@@ -180,3 +180,31 @@ class SuperadminInternalOnlyTest(ViewAsTestBase):
             REMOTE_ADDR=self.EXT,
         )
         self.assertEqual(self.client.session.get("_auth_user_id"), str(self.superadmin.pk))
+
+
+class TemporarySuperuserAnywhereTest(ViewAsTestBase):
+    """Sahib 2026-10-27: müvəqqəti superadmin girişi (``grant_temporary_superuser``) hər yerdən işləyir; geri alınanda
+    (və ya müddəti bitəndə) daimi superadmin qaydası — yalnız daxili şəbəkə — geri qayıdır."""
+
+    EXT = "85.132.1.1"
+
+    @override_settings(**ZONE)
+    def test_grant_allows_outside_and_revoke_restores_rule(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        call_command("grant_temporary_superuser", "--username", self.admin.username, "--apply", stdout=StringIO())
+        profile = reverse("accounts:profile")
+        self._login(self.admin)
+        self.assertEqual(self.client.get(profile, REMOTE_ADDR=self.EXT).status_code, 200)
+        call_command(
+            "grant_temporary_superuser", "--username", self.admin.username, "--revoke", "--apply", stdout=StringIO()
+        )
+        # Geri alındı — artıq superadmin deyil, adi inzibati qayda (kənardan açıq) qalır.
+        self.assertEqual(self.client.get(profile, REMOTE_ADDR=self.EXT).status_code, 200)
+
+    @override_settings(**ZONE)
+    def test_permanent_superadmin_still_internal_only(self):
+        self._login(self.superadmin)
+        self.assertEqual(self.client.get(reverse("accounts:profile"), REMOTE_ADDR=self.EXT).status_code, 403)

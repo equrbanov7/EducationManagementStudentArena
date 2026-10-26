@@ -125,6 +125,21 @@ class _ScopeGateFacts:
         return network_zone.account_kind(self.request)
 
 
+def _temporary_superuser_exempt(request) -> bool:
+    """Müvəqqəti superadmin girişi (HTTP qapısının sessiyaya yazdığı bitmə anı hələ gəlməyib) — DB-siz."""
+    import time
+
+    user = getattr(request, "user", None)
+    if not getattr(user, "is_superuser", False):
+        return False
+    session = getattr(request, "session", None)
+    try:
+        until = float(session.get(network_zone.TEMP_SUPERUSER_SESSION_KEY) or 0) if session is not None else 0
+    except (TypeError, ValueError):
+        return False
+    return until > time.time()
+
+
 def evaluate_ws_access(request: ScopeRequest, *, allow_db: bool):
     """``(close_code, reason, account_kind)`` rədd üçün, keçidə ``None``.
 
@@ -140,6 +155,8 @@ def evaluate_ws_access(request: ScopeRequest, *, allow_db: bool):
     ):
         return WS_CLOSE_ADMIN_2FA, REASON_ADMIN_2FA, "staff"
     zone = network_zone.resolve_zone(request)
+    if _temporary_superuser_exempt(request):
+        return None
     denial = network_zone.zone_policy_denial(
         zone=zone, path=request.path_info, is_superadmin=facts.superadmin, account_kind_of=facts.kind
     )
