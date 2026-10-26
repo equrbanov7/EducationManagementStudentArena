@@ -150,3 +150,55 @@ MUTATING_GET_URL_NAMES = frozenset(
 )
 
 #: İcazənin tam yenidən yoxlanma intervalı (saniyə). Aralıq sorğularda yalnız
+
+
+#: Axtarış panelinin rol süzgəci (``?role=``) → normallaşdırılmış rol adları.
+ROLE_FILTER_MAP = {
+    "teacher": {
+        ProfileRole.TEACHER,
+        ProfileRole.ASSISTANT_TEACHER,
+        "instructor",
+        "professor",
+        "associate_professor",
+        "assistant",
+        "lab_assistant",
+    },
+    "student": {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT},
+    # Sahib 2026-10-26: məzun / xaric (arxiv üzvlüyü). Süzgəc YALNIZ arxiv hədəfləri görən
+    # aktora (``ARCHIVE_VIEWER_ROLE_NAMES`` + superadmin) mənalıdır — başqasında boş siyahıdır.
+    "alumni": {"alumni"},
+    "admin": {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN, "board_chair", "rector", "vice_rector"},
+    # «Əməkdaşlar» = inzibati vəzifəlilər də daxil (sahib 2026-09-21): tədris
+    # şöbəsi, RİM, imtahan mərkəzi, inzibati şöbə, tələbə xidmətləri, dekanlıq,
+    # kafedra müdiri, koordinator, qəyyum, HR, tyutor, adi üzv.
+    "staff": {
+        ProfileRole.HR,
+        ProfileRole.MEMBER,
+        ProfileRole.IKT_REHBER,
+        ProfileRole.RIM_STAFF,
+        ProfileRole.EXAM_CENTER,
+        ProfileRole.EXAM_CENTER_HEAD,
+        ProfileRole.EXAM_CENTER_STAFF,
+        "tutor",
+        "dean",
+        "vice_dean",
+        "department_head",
+        "chair_head",
+        "teaching_office_head",
+        "teaching_office_staff",
+        "admin_unit_head",
+        "student_services",
+        "program_coordinator",
+        "trustee",
+        "quality_control_head",
+        "quality_control_staff",
+    },
+}
+
+
+#: ARXİV hədəfi (məzun / xaric — ``access_state='archived'``, `alumni` üzvlüyü) görə bilən
+#: rollar — sahib 2026-10-26: «məzun olsa da nəticələrinə, giriş-çıxışına profilə bax-dan
+#: baxa bilim». RİM rəhbəri (`ikt_rehber`) və RİM əməkdaşı; superadmin həmişə (kodda).
+#: Arxiv hədəfinə baxış rejimdən ASILI OLMAYARAQ YALNIZ-OXUDUR (READONLY) — bax
+#: ``view_as.validate_target``; hesabın öz girişi isə bağlı qalır (``identity``).
+ARCHIVE_VIEWER_ROLE_NAMES = frozenset({ProfileRole.IKT_REHBER, ProfileRole.RIM_STAFF})

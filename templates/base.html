@@ -84,7 +84,7 @@
 
     {# "View as" UI yalnız səlahiyyətli/aktiv hallarda yüklənir (perf) #}
     {% if view_as.active or view_as.can_use %}
-    <link rel="stylesheet" href="{% static 'css/view_as.css' %}?v=20261019-mob">
+    <link rel="stylesheet" href="{% static 'css/view_as.css' %}?v=20261026-arch">
     {% endif %}
 
     {# 2026-10-21: imtahan zalı sessiyasının minimal çərçivəsi (apps/exams/context_processors.py → `hall_chrome`) #}
@@ -224,7 +224,7 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
         {% endif %}
     {% endblock %}
     {% if view_as.can_use and not view_as.active %}
-    <script src="{% static 'js/view_as.js' %}?v=20261019-mob"></script>
+    <script src="{% static 'js/view_as.js' %}?v=20261026-arch"></script>
     {% endif %}
 
    

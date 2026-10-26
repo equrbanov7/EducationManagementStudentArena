@@ -28,12 +28,12 @@ from datetime import datetime
 from datetime import timezone as dt_timezone
 
 from django.contrib.auth import get_user_model
-from django.db.models import Max, Q
+from django.db.models import F, Max, Q
 
 from core.rls import bypass_rls
 from core.search_text import tolerant_q
 
-from ..identity import request_user_login_blocked, user_access_is_login_blocked
+from ..identity import request_user_login_blocked, user_access_is_login_blocked, user_access_is_staged
 from ..models import ProfileRole
 
 # Siyasət datası ayrıca moduldadır (ölçü büdcəsi + oxunaqlıq: siyahılar tez-tez
@@ -41,11 +41,13 @@ from ..models import ProfileRole
 # Re-export — mövcud `from .view_as import EXAM_OPERATION_URL_NAMES` işləyir.
 from .view_as_policy import (  # noqa: F401
     ADMIN_ALIAS_LEVEL,
+    ARCHIVE_VIEWER_ROLE_NAMES,
     EXAM_OPERATION_URL_NAMES,
     IKT_TECHNICAL_URL_NAMES,
     LIMITED_FORBIDDEN_TARGET_ROLES,
     LIMITED_WRITE_ALLOWLIST,
     MUTATING_GET_URL_NAMES,
+    ROLE_FILTER_MAP,
 )
 
 logger = logging.getLogger(__name__)
@@ -121,45 +123,6 @@ MODE_PRIORITY = {MODE_FULL: 3, MODE_LIMITED: 2, MODE_READONLY: 1}
 #: hədəf istifadəçi yüklənir — performans üçün hər sorğuda 3-4 əlavə sorğu yoxdur.
 PERMISSION_RECHECK_SECONDS = 60
 
-ROLE_FILTER_MAP = {
-    "teacher": {
-        ProfileRole.TEACHER,
-        ProfileRole.ASSISTANT_TEACHER,
-        "instructor",
-        "professor",
-        "associate_professor",
-        "assistant",
-        "lab_assistant",
-    },
-    "student": {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT},
-    "admin": {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN, "board_chair", "rector", "vice_rector"},
-    # «Əməkdaşlar» = inzibati vəzifəlilər də daxil (sahib 2026-09-21): tədris
-    # şöbəsi, RİM, imtahan mərkəzi, inzibati şöbə, tələbə xidmətləri, dekanlıq,
-    # kafedra müdiri, koordinator, qəyyum, HR, tyutor, adi üzv.
-    "staff": {
-        ProfileRole.HR,
-        ProfileRole.MEMBER,
-        ProfileRole.IKT_REHBER,
-        ProfileRole.RIM_STAFF,
-        ProfileRole.EXAM_CENTER,
-        ProfileRole.EXAM_CENTER_HEAD,
-        ProfileRole.EXAM_CENTER_STAFF,
-        "tutor",
-        "dean",
-        "vice_dean",
-        "department_head",
-        "chair_head",
-        "teaching_office_head",
-        "teaching_office_staff",
-        "admin_unit_head",
-        "student_services",
-        "program_coordinator",
-        "trustee",
-        "quality_control_head",
-        "quality_control_staff",
-    },
-}
-
 SEARCH_PAGE_SIZE = 20
 
 
@@ -208,6 +171,22 @@ def _normalized_role_names(memberships):
         raw = getattr(membership.role, "name", "") or ""
         names.add(ProfileRole.normalize_membership_role_name(raw))
     return names
+
+
+#: Hədəfin ``access_state`` dəyərləri: adi aktor yalnız aktivi, arxiv baxıcısı arxivi də görür.
+_ACTIVE_STATES = ("active",)
+_ARCHIVE_STATES = ("active", "archived")
+
+
+def actor_can_view_archived(user, memberships) -> bool:
+    """Aktor məzun/xaric (arxiv) hesabın kabinetinə baxa bilərmi (sahib 2026-10-26).
+
+    Superadmin və ``ARCHIVE_VIEWER_ROLE_NAMES`` (RİM rəhbəri / əməkdaşı) — başqa heç kim.
+    Baxış həmişə YALNIZ-OXUDUR (``validate_target``), arxiv hesabın öz girişi bağlı qalır.
+    """
+    if _is_superadmin(user):
+        return True
+    return bool(_normalized_role_names(memberships or []) & ARCHIVE_VIEWER_ROLE_NAMES)
 
 
 def resolve_actor_access(user, organization, *, memberships=None):
@@ -329,7 +308,9 @@ def _admin_equivalent_user_ids(organization):
     )
 
 
-def build_target_queryset(actor, organization, *, mode, actor_level, memberships, q="", role_filter=""):
+def build_target_queryset(
+    actor, organization, *, mode, actor_level, memberships, q="", role_filter="", include_archived=False
+):
     """
     Aktorun baxa biləcəyi hədəf istifadəçilərin queryset-i.
 
@@ -344,7 +325,9 @@ def build_target_queryset(actor, organization, *, mode, actor_level, memberships
       idxal hesablarının hamısı məhz bu vəziyyətdədir);
     - qeyri-superadmin üçün ciddi iyerarxiya: hədəfin maksimum rol səviyyəsi
       aktorunkundan AŞAĞI olmalıdır;
-    - unit-scoped rollar (tyutor/dekan/kafedra müdürü) yalnız öz alt-ağacını görür.
+    - unit-scoped rollar (tyutor/dekan/kafedra müdürü) yalnız öz alt-ağacını görür;
+    - ``include_archived`` (YALNIZ ``actor_can_view_archived`` aktoru) — məzun/xaric
+      (``access_state='archived'``) hesablar da siyahıdadır (sahib 2026-10-26).
     """
     is_superadmin = actor_level >= 999
 
@@ -352,7 +335,7 @@ def build_target_queryset(actor, organization, *, mode, actor_level, memberships
         _exclude_superadmin_targets(
             User.objects.filter(
                 is_active=True,
-                profile__access_state="active",
+                profile__access_state__in=_ARCHIVE_STATES if include_archived else _ACTIVE_STATES,
                 memberships__organization=organization,
                 memberships__is_active=True,
             )
@@ -385,7 +368,9 @@ def build_target_queryset(actor, organization, *, mode, actor_level, memberships
     # kod rejimində («234king» → «234 K ing»); bax `core/search_text.py`.
     q = (q or "").strip()[:120]
     search = tolerant_q(
-        q, ("username", "first_name", "last_name", "email"), compact_fields=("profile__student_group_number",)
+        q,
+        ("username", "first_name", "last_name", "profile__patronymic", "email"),
+        compact_fields=("profile__student_group_number",),
     )
     if search is not None:
         users = users.filter(search)
@@ -426,6 +411,7 @@ def validate_target(actor, organization, target_user_id):
     if target_user_id in (None, "") or str(target_user_id) == str(getattr(actor, "pk", None)):
         return None, None
 
+    include_archived = actor_can_view_archived(actor, memberships)
     try:
         # Bütün hədəf sorğusu `organization` ilə açıq süzülür (üzvlük, səviyyə,
         # unit-scope, admin-ekvivalent istisnası) — ona görə RLS bypass-ı kirayəçi
@@ -438,14 +424,18 @@ def validate_target(actor, organization, target_user_id):
                 mode=mode,
                 actor_level=actor_level,
                 memberships=memberships,
+                include_archived=include_archived,
             ).filter(pk=target_user_id)
-            target = qs.first()
+            target = qs.annotate(_ems_access_state=F("profile__access_state")).first()
     except (TypeError, ValueError):
         # Yanlış formatlı pk (məs. int pk üçün qeyri-rəqəm) → icazə yoxdur.
         return None, None
 
     if target is None:
         return None, None
+    # Arxiv hədəfi (məzun/xaric) — aktorun rejimindən ASILI OLMAYARAQ yalnız baxış.
+    if getattr(target, "_ems_access_state", "") == "archived":
+        return target, MODE_READONLY
     return target, mode
 
 
@@ -464,8 +454,12 @@ def start_view_as(request, target_user, organization, mode):
     from apps.audit.public import log_action
     from core.constants import AuditAction
 
-    if user_access_is_login_blocked(request.user) or user_access_is_login_blocked(target_user):
+    if user_access_is_login_blocked(request.user) or user_access_is_staged(target_user):
         raise PermissionError("view_as_staged_account_denied")
+    # Arxiv (məzun/xaric) hədəfi yalnız READONLY ilə (``validate_target`` onu məhz belə qaytarır).
+    archived = user_access_is_login_blocked(target_user)
+    if archived and mode != MODE_READONLY:
+        raise PermissionError("view_as_archived_requires_readonly")
 
     # QEYD: pk-lar str kimi saxlanılır — Organization UUID pk istifadə edir və
     # sessiya JSON serializer-i UUID obyektini qəbul etmir.
@@ -479,6 +473,7 @@ def start_view_as(request, target_user, organization, mode):
         "prev_org_slug": request.session.get("active_organization") or "",
         "started_at": now_iso,
         "checked_at": now_iso,
+        "archived": bool(archived),
     }
     request.session["active_organization"] = organization.slug
 
@@ -488,7 +483,7 @@ def start_view_as(request, target_user, organization, mode):
         organization=organization,
         obj=target_user,
         reason="view_as_start",
-        changes={"mode": mode, "target_username": target_user.username},
+        changes={"mode": mode, "target_username": target_user.username, "archived": bool(archived)},
         request=request,
     )
     logger.info(
@@ -590,7 +585,10 @@ def resolve_view_as_request(request):
                 User.objects.filter(
                     pk=state.get("target_id"),
                     is_active=True,
-                    profile__access_state="active",
+                    # Arxiv hədəfi yalnız READONLY sessiyada (tam yoxlama 60 san-dən bir təkrarlanır).
+                    profile__access_state__in=(
+                        _ARCHIVE_STATES if state.get("archived") and mode == MODE_READONLY else _ACTIVE_STATES
+                    ),
                 )
             ).first()
         if target is None:

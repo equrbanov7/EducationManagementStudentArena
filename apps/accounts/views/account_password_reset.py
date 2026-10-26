@@ -20,6 +20,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
 from ..services.password_reset_admin import (
+    MIN_REASON_LENGTH,
     PasswordResetError,
     audit_denied,
     enforce_lookup_rate,
@@ -28,7 +29,7 @@ from ..services.password_reset_admin import (
     operator_for,
     reset_password,
 )
-from ..services.password_reset_lookup import lookup, serialize_candidates, suggest
+from ..services.password_reset_lookup import lookup, normalize_query, serialize_candidates, suggest
 
 _CTX = "accounts.password_reset"
 
@@ -81,12 +82,13 @@ def account_password_reset_suggest(request):
 @require_POST
 def account_password_reset_perform(request):
     """Seçilmiş hədəfə müvəqqəti parol verir — parol cavabda BİR DƏFƏ qayıdır."""
-    target_id = _read_payload(request).get("user_id")
+    payload = _read_payload(request)
+    target_id = payload.get("user_id")
     actor = None
     try:
         enforce_reset_rate(request)
         actor = operator_for(request, for_write=True)
-        target, raw_password = reset_password(actor, target_id, request=request)
+        target, raw_password = reset_password(actor, target_id, request=request, reason=payload.get("reason"))
     except PasswordResetError as exc:
         audit_denied(actor, request, target_id, exc.code)
         return _error(exc)
@@ -97,7 +99,9 @@ def account_password_reset_perform(request):
             "password": raw_password,
             "user": serialize_candidates(actor, [target])[0],
             "message": pgettext(
-                _CTX, "Müvəqqəti parol yaradıldı. İstifadəçi ilk girişdə öz parolunu qurmağa məcbur olacaq."
+                _CTX,
+                "Müvəqqəti parol yaradıldı. İstifadəçi ilk girişdə e-poçtunu təsdiqləyib öz parolunu qurmağa "
+                "məcbur olacaq.",
             ),
         }
     )
@@ -119,19 +123,25 @@ def _js_strings() -> dict:
         "pendingChange": pgettext(_CTX, "Əvvəlki müvəqqəti parol hələ dəyişdirilməyib"),
         "reset": pgettext(_CTX, "Parolu sıfırla"),
         "resetting": pgettext(_CTX, "Sıfırlanır…"),
-        "confirmTitle": pgettext(_CTX, "Parol sıfırlansın?"),
         "confirmBody": pgettext(
             _CTX,
-            "{name} ({username}) üçün yeni müvəqqəti parol yaradılacaq.\n"
-            "Köhnə parol dərhal etibarsız olacaq, istifadəçinin bütün açıq sessiyaları bağlanacaq.\n"
-            "İstifadəçinin şəxsiyyətini yoxladınız?",
+            "{name} ({username}) üçün yeni müvəqqəti parol yaradılacaq. Köhnə parol dərhal etibarsız olacaq, "
+            "bütün açıq sessiyalar bağlanacaq; ilk girişdə istifadəçi e-poçtunu təsdiqləyib öz parolunu quracaq.",
         ),
-        "confirmOk": pgettext(_CTX, "Bəli, sıfırla"),
         "resultFor": pgettext(_CTX, "{name} ({username}) üçün müvəqqəti parol:"),
+        "reasonRequired": pgettext(_CTX, "Səbəb yazılmalıdır (ən azı 10 simvol)."),
         "copied": pgettext(_CTX, "Parol kopyalandı."),
         "copyFailed": pgettext(_CTX, "Kopyalamaq alınmadı — parolu əl ilə yazın."),
         "genericError": pgettext(_CTX, "Xəta baş verdi. Yenidən cəhd edin."),
     }
+
+
+def _initial_query(request) -> str:
+    """Başqa səthdən (şəxs səhifəsi) gələn ``?pwr_q=`` — axtarış sahəsini əvvəlcədən doldurur.
+
+    YALNIZ istifadəçi adıdır (PII deyil); JS onu sahəyə yazıb axtarışı POST ilə edir.
+    """
+    return normalize_query(request.GET.get("pwr_q"))
 
 
 def build_panel_context(request) -> dict:
@@ -150,6 +160,10 @@ def build_panel_context(request) -> dict:
         "has_access": True,
         "denied_message": "",
         "organization_name": getattr(actor.organization, "name", "") or "",
+        "initial_query": _initial_query(request),
+        "reason_min": MIN_REASON_LENGTH,
+        # `_reason_dialog.html`-in forma atributları — JS formanı məhz bununla tanıyır (adlar serverdən).
+        "reason_form_data": {"data-pwr-reason-form": "1"},
         "lookup_url": reverse("accounts:account_password_reset_lookup"),
         "suggest_url": reverse("accounts:account_password_reset_suggest"),
         "reset_url": reverse("accounts:account_password_reset_perform"),

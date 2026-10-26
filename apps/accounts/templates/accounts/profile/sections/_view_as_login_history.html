@@ -1,0 +1,57 @@
+{% load static i18n view_as_history %}
+{% comment %}
+«Giriş tarixçəsi» (sahib 2026-10-26) — «İstifadəçi profilinə bax» rejimində hədəfin son
+giriş/çıxışları. Kontekst `view_as_login_history` tag-ından gəlir; qapı serverdədir
+(`services/view_as_login_history.py`: yalnız view-as + ƏSL istifadəçi superadmin / RİM).
+Tag `None` qaytarırsa panel ümumiyyətlə render olunmur. CSS xarici fayldadır (CSP).
+{% endcomment %}
+{% view_as_login_history as lh %}
+{% if lh %}
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/view_as_login_history.css' %}?v=20261026-1">
+<div class="ems-card vlh" data-view-as-login-history>
+    <div class="ems-card__head">
+        <div>
+            <h2 class="ems-card__title">
+                <i class="fas fa-right-to-bracket" aria-hidden="true"></i>
+                {% trans "Giriş tarixçəsi" context "accounts.view_as" %}
+            </h2>
+            <p class="ems-card__sub">
+                {% blocktrans trimmed context "accounts.view_as" with limit=lh.limit %}Hesabın son {{ limit }} giriş və çıxışı (vaxt, İP ünvanı, brauzer). Yalnız siz görürsünüz — istifadəçinin öz kabinetində bu panel yoxdur.{% endblocktrans %}
+                {% if lh.last_login %}
+                    <span class="vlh__last">{% trans "Son giriş:" context "accounts.view_as" %} <strong>{{ lh.last_login }}</strong></span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    <div class="ems-card__body">
+        {% if lh.rows %}
+        <div class="ems-tablewrap">
+            <div class="ems-tablescroll">
+                <table class="ems-table ems-table--zebra vlh__table">
+                    <thead>
+                        <tr>
+                            <th scope="col">{% trans "Vaxt" context "accounts.view_as" %}</th>
+                            <th scope="col">{% trans "Hadisə" context "accounts.view_as" %}</th>
+                            <th scope="col">{% trans "İP ünvanı" context "accounts.view_as" %}</th>
+                            <th scope="col">{% trans "Brauzer / cihaz" context "accounts.view_as" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in lh.rows %}
+                        <tr>
+                            <th scope="row" class="ems-mono">{{ row.when }}</th>
+                            <td><span class="ems-badge {% if row.kind == 'login' %}ems-badge--success{% else %}ems-badge--muted{% endif %}">{{ row.kind_label }}</span></td>
+                            <td class="ems-mono">{{ row.ip|default:"—" }}</td>
+                            <td>{{ row.device|default:"—" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+            <p class="vlh__empty">{% trans "Bu hesabla sistemə giriş qeydə alınmayıb." context "accounts.view_as" %}</p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}

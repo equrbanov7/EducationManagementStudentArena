@@ -25,6 +25,8 @@ from core.roles import ProfileRole
 User = get_user_model()
 PASSWORD = "PwdResetPass123!"
 PERM = "account.password_reset"
+#: 2026-10-26: təsdiq dialoqunun səbəbi məcburidir (≥ `MIN_REASON_LENGTH`).
+RESET_REASON = "Parolunu unudub, vəsiqə ilə yoxlanıldı"
 _MIGRATION = import_module("apps.organizations.migrations.0055_account_password_reset_permission")
 
 
@@ -104,10 +106,10 @@ class PasswordResetTestBase(TestCase):
             reverse("accounts:account_password_reset_lookup"), {"q": query}, content_type="application/json"
         )
 
-    def reset(self, target, client=None, **extra):
+    def reset(self, target, client=None, reason=RESET_REASON, **extra):
         return (client or self.client).post(
             reverse("accounts:account_password_reset_perform"),
-            {"user_id": getattr(target, "pk", target)},
+            {"user_id": getattr(target, "pk", target), "reason": reason},
             content_type="application/json",
             **extra,
         )
