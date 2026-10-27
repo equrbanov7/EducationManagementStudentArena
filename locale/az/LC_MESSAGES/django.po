@@ -110355,3 +110355,96 @@ msgstr "Ən azı bir qrup seçin."
 msgctxt "exams.assignees"
 msgid "Ən azı bir tələbə seçin."
 msgstr "Ən azı bir tələbə seçin."
+
+msgctxt "core.runtime_settings"
+msgid "Müəllimlər keçmiş tarixli jurnalı tam redaktə edə bilər (data bərpası)"
+msgstr "Müəllimlər keçmiş tarixli jurnalı tam redaktə edə bilər (data bərpası)"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılanda müəllim öz jurnalında (bölünmüş jurnalda yalnız öz payında) istənilən keçmiş tarixə (semestr daxilində) dərs əlavə edə, dərsi və mövzusunu redaktə edə, dərsi qeydləri ilə birlikdə silə, q/b, i/e və balı dəyişib təmizləyə bilər — bağlanmış jurnalda da. Təqdimat və sənəd tələb olunmur, yalnız qısa səbəb yazılır; hər dəyişiklik köhnə və yeni dəyərlə audit jurnalına düşür. İmtahandan gələn ballar (midterm, yekun) və RİM-in sənədli düzəlişi olan xana bu rejimə tabe deyil. Söndürüləndə bütün adi qaydalar (yazma müddəti, xana kilidi, bağlı jurnal) qayıdır."
+msgstr "Yandırılanda müəllim öz jurnalında (bölünmüş jurnalda yalnız öz payında) istənilən keçmiş tarixə (semestr daxilində) dərs əlavə edə, dərsi və mövzusunu redaktə edə, dərsi qeydləri ilə birlikdə silə, q/b, i/e və balı dəyişib təmizləyə bilər — bağlanmış jurnalda da. Təqdimat və sənəd tələb olunmur, yalnız qısa səbəb yazılır; hər dəyişiklik köhnə və yeni dəyərlə audit jurnalına düşür. İmtahandan gələn ballar (midterm, yekun) və RİM-in sənədli düzəlişi olan xana bu rejimə tabe deyil. Söndürüləndə bütün adi qaydalar (yazma müddəti, xana kilidi, bağlı jurnal) qayıdır."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Keçmiş tarixli və ya bağlanmış jurnaldakı dəyişiklik üçün səbəbi yazın (ən azı %(n)s simvol)."
+msgstr "Keçmiş tarixli və ya bağlanmış jurnaldakı dəyişiklik üçün səbəbi yazın (ən azı %(n)s simvol)."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Gələcək tarixə dərs əlavə etmək olmaz."
+msgstr "Gələcək tarixə dərs əlavə etmək olmaz."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Dərs tarixi semestrin başlanğıcından (%(date)s) əvvəl ola bilməz."
+msgstr "Dərs tarixi semestrin başlanğıcından (%(date)s) əvvəl ola bilməz."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Dərs tarixi semestrin sonundan (%(date)s) sonra ola bilməz."
+msgstr "Dərs tarixi semestrin sonundan (%(date)s) sonra ola bilməz."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Dərs %(n)s qeydi ilə birlikdə silindi."
+msgstr "Dərs %(n)s qeydi ilə birlikdə silindi."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Data bərpası rejimi: keçmiş tarixli dəyişikliklər səbəb ilə açıqdır"
+msgstr "Data bərpası rejimi: keçmiş tarixli dəyişikliklər səbəb ilə açıqdır"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Keçmiş tarixə dərs əlavə edə, dərsi və mövzusunu dəyişə, dərsi qeydləri ilə birlikdə silə, q/b, i/e və balı dəyişib təmizləyə bilərsiniz. Hər belə dəyişiklik üçün yalnız qısa səbəb soruşulur və köhnə/yeni dəyərlə audit jurnalına yazılır."
+msgstr "Keçmiş tarixə dərs əlavə edə, dərsi və mövzusunu dəyişə, dərsi qeydləri ilə birlikdə silə, q/b, i/e və balı dəyişib təmizləyə bilərsiniz. Hər belə dəyişiklik üçün yalnız qısa səbəb soruşulur və köhnə/yeni dəyərlə audit jurnalına yazılır."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Jurnal bağlanıb — bu rejimdə dəyişiklik yenə səbəb ilə mümkündür."
+msgstr "Jurnal bağlanıb — bu rejimdə dəyişiklik yenə səbəb ilə mümkündür."
+
+msgctxt "registrar.journal_full_edit"
+msgid "İmtahandan gələn ballar (Midterm, yekun) və RİM-in sənədli düzəlişi olan xanalar bu rejimdə dəyişmir."
+msgstr "İmtahandan gələn ballar (Midterm, yekun) və RİM-in sənədli düzəlişi olan xanalar bu rejimdə dəyişmir."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Dəyişikliyin səbəbi"
+msgstr "Dəyişikliyin səbəbi"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Bu dəyişiklik keçmiş tarixli, kilidlənmiş və ya bağlanmış jurnaldakı xanaya aiddir. Qısa səbəb yazın — təqdimat və sənəd tələb olunmur. Səbəb bu səhifədəki sonrakı dəyişikliklər üçün də yadda qalır."
+msgstr "Bu dəyişiklik keçmiş tarixli, kilidlənmiş və ya bağlanmış jurnaldakı xanaya aiddir. Qısa səbəb yazın — təqdimat və sənəd tələb olunmur. Səbəb bu səhifədəki sonrakı dəyişikliklər üçün də yadda qalır."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Məs.: köhnə sistemdən köçməyən davamiyyətin bərpası"
+msgstr "Məs.: köhnə sistemdən köçməyən davamiyyətin bərpası"
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Səbəb ən azı %(n)s simvol olmalıdır."
+msgstr "Səbəb ən azı %(n)s simvol olmalıdır."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Səbəblə yadda saxla"
+msgstr "Səbəblə yadda saxla"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Bu dərs sütunu və ona aid {n} qeyd (q/b, i/e, bal) birlikdə silinəcək. Səbəb audit jurnalına yazılır."
+msgstr "Bu dərs sütunu və ona aid {n} qeyd (q/b, i/e, bal) birlikdə silinəcək. Səbəb audit jurnalına yazılır."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Data bərpası rejimi: semestr ərzində istənilən keçmiş tarix seçilə bilər — yazma müddətindən köhnə tarix üçün səbəb yazılır."
+msgstr "Data bərpası rejimi: semestr ərzində istənilən keçmiş tarix seçilə bilər — yazma müddətindən köhnə tarix üçün səbəb yazılır."
+
+msgctxt "registrar.journal_full_edit"
+msgid "DƏYİŞİKLİYİN SƏBƏBİ (DATA BƏRPASI)"
+msgstr "DƏYİŞİKLİYİN SƏBƏBİ (DATA BƏRPASI)"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Məs.: köhnə sistemdən köçməyən dərsin bərpası"
+msgstr "Məs.: köhnə sistemdən köçməyən dərsin bərpası"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Keçmiş tarixli, redaktə vaxtı bitmiş və ya bağlanmış jurnaldakı dərs üçün məcburidir — təqdimat və sənəd tələb olunmur. Səbəb audit jurnalına yazılır."
+msgstr "Keçmiş tarixli, redaktə vaxtı bitmiş və ya bağlanmış jurnaldakı dərs üçün məcburidir — təqdimat və sənəd tələb olunmur. Səbəb audit jurnalına yazılır."
+
+msgctxt "registrar.journal_history"
+msgid "Data bərpası (səbəb ilə)"
+msgstr "Data bərpası (səbəb ilə)"

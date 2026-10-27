@@ -110845,3 +110845,96 @@ msgstr "Select at least one group."
 msgctxt "exams.assignees"
 msgid "Ən azı bir tələbə seçin."
 msgstr "Select at least one student."
+
+msgctxt "core.runtime_settings"
+msgid "Müəllimlər keçmiş tarixli jurnalı tam redaktə edə bilər (data bərpası)"
+msgstr "Teachers may fully edit past-dated journals (data recovery)"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılanda müəllim öz jurnalında (bölünmüş jurnalda yalnız öz payında) istənilən keçmiş tarixə (semestr daxilində) dərs əlavə edə, dərsi və mövzusunu redaktə edə, dərsi qeydləri ilə birlikdə silə, q/b, i/e və balı dəyişib təmizləyə bilər — bağlanmış jurnalda da. Təqdimat və sənəd tələb olunmur, yalnız qısa səbəb yazılır; hər dəyişiklik köhnə və yeni dəyərlə audit jurnalına düşür. İmtahandan gələn ballar (midterm, yekun) və RİM-in sənədli düzəlişi olan xana bu rejimə tabe deyil. Söndürüləndə bütün adi qaydalar (yazma müddəti, xana kilidi, bağlı jurnal) qayıdır."
+msgstr "When on, a teacher can, in their own journal (in a split journal only within their share), add a lesson on any past date (within the semester), edit a lesson and its topic, delete a lesson together with its records, and change or clear absences, attendance and scores — even in a closed journal. No submission or document is required, only a short reason; every change is written to the audit log with its old and new value. Scores coming from exams (midterm, final) and cells with a documented Registrar correction are not affected by this mode. When off, all the usual rules (entry period, cell lock, closed journal) apply again."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Keçmiş tarixli və ya bağlanmış jurnaldakı dəyişiklik üçün səbəbi yazın (ən azı %(n)s simvol)."
+msgstr "Enter a reason for a change to a past-dated or closed journal (at least %(n)s characters)."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Gələcək tarixə dərs əlavə etmək olmaz."
+msgstr "A lesson cannot be added for a future date."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Dərs tarixi semestrin başlanğıcından (%(date)s) əvvəl ola bilməz."
+msgstr "The lesson date cannot be before the start of the semester (%(date)s)."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Dərs tarixi semestrin sonundan (%(date)s) sonra ola bilməz."
+msgstr "The lesson date cannot be after the end of the semester (%(date)s)."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Dərs %(n)s qeydi ilə birlikdə silindi."
+msgstr "The lesson was deleted together with its %(n)s records."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Data bərpası rejimi: keçmiş tarixli dəyişikliklər səbəb ilə açıqdır"
+msgstr "Data recovery mode: past-dated changes are open with a reason"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Keçmiş tarixə dərs əlavə edə, dərsi və mövzusunu dəyişə, dərsi qeydləri ilə birlikdə silə, q/b, i/e və balı dəyişib təmizləyə bilərsiniz. Hər belə dəyişiklik üçün yalnız qısa səbəb soruşulur və köhnə/yeni dəyərlə audit jurnalına yazılır."
+msgstr "You can add a lesson on a past date, change a lesson and its topic, delete a lesson together with its records, and change or clear absences, attendance and scores. Each such change only asks for a short reason and is written to the audit log with its old/new value."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Jurnal bağlanıb — bu rejimdə dəyişiklik yenə səbəb ilə mümkündür."
+msgstr "The journal is closed — in this mode changes are still possible with a reason."
+
+msgctxt "registrar.journal_full_edit"
+msgid "İmtahandan gələn ballar (Midterm, yekun) və RİM-in sənədli düzəlişi olan xanalar bu rejimdə dəyişmir."
+msgstr "Scores coming from exams (Midterm, final) and cells with a documented Registrar correction do not change in this mode."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Dəyişikliyin səbəbi"
+msgstr "Reason for the change"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Bu dəyişiklik keçmiş tarixli, kilidlənmiş və ya bağlanmış jurnaldakı xanaya aiddir. Qısa səbəb yazın — təqdimat və sənəd tələb olunmur. Səbəb bu səhifədəki sonrakı dəyişikliklər üçün də yadda qalır."
+msgstr "This change concerns a cell that is past-dated, locked or in a closed journal. Enter a short reason — no submission or document is required. The reason is also remembered for further changes on this page."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Məs.: köhnə sistemdən köçməyən davamiyyətin bərpası"
+msgstr "E.g.: restoring attendance that was not migrated from the old system"
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Səbəb ən azı %(n)s simvol olmalıdır."
+msgstr "The reason must be at least %(n)s characters long."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Səbəblə yadda saxla"
+msgstr "Save with reason"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Bu dərs sütunu və ona aid {n} qeyd (q/b, i/e, bal) birlikdə silinəcək. Səbəb audit jurnalına yazılır."
+msgstr "This lesson column and its {n} records (absences, attendance, scores) will be deleted together. The reason is written to the audit log."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Data bərpası rejimi: semestr ərzində istənilən keçmiş tarix seçilə bilər — yazma müddətindən köhnə tarix üçün səbəb yazılır."
+msgstr "Data recovery mode: any past date within the semester can be chosen — a date older than the entry period needs a reason."
+
+msgctxt "registrar.journal_full_edit"
+msgid "DƏYİŞİKLİYİN SƏBƏBİ (DATA BƏRPASI)"
+msgstr "REASON FOR THE CHANGE (DATA RECOVERY)"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Məs.: köhnə sistemdən köçməyən dərsin bərpası"
+msgstr "E.g.: restoring a lesson that was not migrated from the old system"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Keçmiş tarixli, redaktə vaxtı bitmiş və ya bağlanmış jurnaldakı dərs üçün məcburidir — təqdimat və sənəd tələb olunmur. Səbəb audit jurnalına yazılır."
+msgstr "Required for a past-dated lesson, a lesson whose edit time has expired or one in a closed journal — no submission or document is required. The reason is written to the audit log."
+
+msgctxt "registrar.journal_history"
+msgid "Data bərpası (səbəb ilə)"
+msgstr "Data recovery (with reason)"

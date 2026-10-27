@@ -12,7 +12,8 @@ varsa dərs tipi kilidlidir.
 <div class="jd-modal" data-jd-lesson-modal data-period-start="{% if offering.period %}{{ offering.period.start_date|date:'Y-m-d' }}{% endif %}"
      data-period-end="{% if offering.period %}{{ offering.period.end_date|date:'Y-m-d' }}{% endif %}"
      data-rooms-url="{% url 'registrar:journal_lesson_rooms' offering.id %}"
-     data-default-building="{{ lesson_default_building }}" hidden>
+     data-default-building="{{ lesson_default_building }}"
+     {% if full_edit_active %}data-fe-normal-min="{{ full_edit_normal_min|date:'Y-m-d' }}" data-fe-journal-locked="{% if journal_locked %}1{% endif %}" data-fe-delete-body="{% trans 'Bu dərs sütunu və ona aid {n} qeyd (q/b, i/e, bal) birlikdə silinəcək. Səbəb audit jurnalına yazılır.' context 'registrar.journal_full_edit' %}"{% endif %} hidden>
     <div class="jd-modal-backdrop" data-jd-modal-close></div>
     {% comment %}2026-09-20 (sahib): başlıq (✕ ilə) və alt panel («Tətbiq et») modal
     scroll olanda da GÖRÜNÜR — kart flex sütundur, yalnız gövdə sürüşür
@@ -61,7 +62,9 @@ varsa dərs tipi kilidlidir.
                                value="{{ journal.today|date:'Y-m-d' }}" data-jd-lesson-date>
                         <span class="jd2-parity-badge" data-jd-parity-badge hidden></span>
                     </span>
-                    {% if not request.user.is_ikt_rehber %}
+                    {% if full_edit_active %}
+                    <small class="jd-field-hint">{% trans "Data bərpası rejimi: semestr ərzində istənilən keçmiş tarix seçilə bilər — yazma müddətindən köhnə tarix üçün səbəb yazılır." context "registrar.journal_full_edit" %}</small>
+                    {% elif not request.user.is_ikt_rehber %}
                     {% if late_entry_days %}
                     <small class="jd-field-hint">{% blocktrans with d=late_entry_days context "registrar.journal" %}Keçmiş tarixə dərs ən çox {{ d }} gün geriyə açmaq olar.{% endblocktrans %}</small>
                     {% else %}
@@ -219,6 +222,17 @@ varsa dərs tipi kilidlidir.
                     {% trans "müəllim axtar…" as jdt_teacher_ph %}
                     {% include "accounts/profile/sections/_searchable_picker.html" with prefix="jdt" hook="jdt-teacher" placeholder=jdt_teacher_ph %}
                     <small class="jd-field-hint">{% trans "Fənn 2 müəllim arasında bölünübsə (məs. mühazirə bir, seminar başqa) bu dərsin müəllimini seçin." context "registrar.journal" %}</small>
+                </div>
+                {% endif %}
+                {% if full_edit_active %}
+                {% comment %}«Data bərpası» (sahib 2026-10-27): yalnız SƏBƏB — təqdimat/sənəd yoxdur. Sahə adi qayda ilə
+                bağlı olan əməldə məcburi olur (journal_full_edit.js); server də yoxlayır.{% endcomment %}
+                <div class="jd2-field jd2-fe-field" data-jd-fe-field>
+                    <span class="jd2-field-label">{% trans "DƏYİŞİKLİYİN SƏBƏBİ (DATA BƏRPASI)" context "registrar.journal_full_edit" %}</span>
+                    <textarea name="full_edit_reason" rows="2" minlength="{{ full_edit_reason_min }}" maxlength="{{ full_edit_reason_max }}" data-jd-fe-lesson-reason
+                              placeholder="{% trans 'Məs.: köhnə sistemdən köçməyən dərsin bərpası' context 'registrar.journal_full_edit' %}"
+                              aria-label="{% trans 'Dəyişikliyin səbəbi' context 'registrar.journal_full_edit' %}"></textarea>
+                    <small class="jd-field-hint">{% trans "Keçmiş tarixli, redaktə vaxtı bitmiş və ya bağlanmış jurnaldakı dərs üçün məcburidir — təqdimat və sənəd tələb olunmur. Səbəb audit jurnalına yazılır." context "registrar.journal_full_edit" %}</small>
                 </div>
                 {% endif %}
                 {% if is_corrector_only %}

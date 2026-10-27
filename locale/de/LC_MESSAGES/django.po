@@ -111870,3 +111870,96 @@ msgstr "Wählen Sie mindestens eine Gruppe."
 msgctxt "exams.assignees"
 msgid "Ən azı bir tələbə seçin."
 msgstr "Wählen Sie mindestens eine Person."
+
+msgctxt "core.runtime_settings"
+msgid "Müəllimlər keçmiş tarixli jurnalı tam redaktə edə bilər (data bərpası)"
+msgstr "Lehrkräfte dürfen das Journal für vergangene Daten vollständig bearbeiten (Datenwiederherstellung)"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılanda müəllim öz jurnalında (bölünmüş jurnalda yalnız öz payında) istənilən keçmiş tarixə (semestr daxilində) dərs əlavə edə, dərsi və mövzusunu redaktə edə, dərsi qeydləri ilə birlikdə silə, q/b, i/e və balı dəyişib təmizləyə bilər — bağlanmış jurnalda da. Təqdimat və sənəd tələb olunmur, yalnız qısa səbəb yazılır; hər dəyişiklik köhnə və yeni dəyərlə audit jurnalına düşür. İmtahandan gələn ballar (midterm, yekun) və RİM-in sənədli düzəlişi olan xana bu rejimə tabe deyil. Söndürüləndə bütün adi qaydalar (yazma müddəti, xana kilidi, bağlı jurnal) qayıdır."
+msgstr "Wenn aktiviert, kann eine Lehrkraft in ihrem eigenen Journal (in einem geteilten Journal nur in ihrem Anteil) an jedem vergangenen Datum (innerhalb des Semesters) eine Stunde anlegen, eine Stunde und ihr Thema bearbeiten, eine Stunde samt Einträgen löschen sowie Fehlzeiten, Anwesenheit und Punkte ändern und leeren — auch in einem geschlossenen Journal. Es ist weder ein Antrag noch ein Dokument nötig, nur eine kurze Begründung; jede Änderung wird mit altem und neuem Wert im Audit-Protokoll erfasst. Punkte aus Prüfungen (Midterm, Abschluss) und Zellen mit einer dokumentierten Korrektur des Studierendensekretariats sind von diesem Modus ausgenommen. Wenn deaktiviert, gelten wieder alle üblichen Regeln (Eintragungsfrist, Zellsperre, geschlossenes Journal)."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Keçmiş tarixli və ya bağlanmış jurnaldakı dəyişiklik üçün səbəbi yazın (ən azı %(n)s simvol)."
+msgstr "Geben Sie eine Begründung für die Änderung in einem vergangenen oder geschlossenen Journal ein (mindestens %(n)s Zeichen)."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Gələcək tarixə dərs əlavə etmək olmaz."
+msgstr "Für ein zukünftiges Datum kann keine Stunde angelegt werden."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Dərs tarixi semestrin başlanğıcından (%(date)s) əvvəl ola bilməz."
+msgstr "Das Stundendatum darf nicht vor dem Semesterbeginn (%(date)s) liegen."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Dərs tarixi semestrin sonundan (%(date)s) sonra ola bilməz."
+msgstr "Das Stundendatum darf nicht nach dem Semesterende (%(date)s) liegen."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Dərs %(n)s qeydi ilə birlikdə silindi."
+msgstr "Die Stunde wurde zusammen mit ihren %(n)s Einträgen gelöscht."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Data bərpası rejimi: keçmiş tarixli dəyişikliklər səbəb ilə açıqdır"
+msgstr "Datenwiederherstellungsmodus: Änderungen an vergangenen Daten sind mit Begründung möglich"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Keçmiş tarixə dərs əlavə edə, dərsi və mövzusunu dəyişə, dərsi qeydləri ilə birlikdə silə, q/b, i/e və balı dəyişib təmizləyə bilərsiniz. Hər belə dəyişiklik üçün yalnız qısa səbəb soruşulur və köhnə/yeni dəyərlə audit jurnalına yazılır."
+msgstr "Sie können an einem vergangenen Datum eine Stunde anlegen, eine Stunde und ihr Thema ändern, eine Stunde samt Einträgen löschen sowie Fehlzeiten, Anwesenheit und Punkte ändern und leeren. Für jede solche Änderung wird nur eine kurze Begründung abgefragt; sie wird mit altem/neuem Wert im Audit-Protokoll erfasst."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Jurnal bağlanıb — bu rejimdə dəyişiklik yenə səbəb ilə mümkündür."
+msgstr "Das Journal ist geschlossen — in diesem Modus sind Änderungen mit Begründung dennoch möglich."
+
+msgctxt "registrar.journal_full_edit"
+msgid "İmtahandan gələn ballar (Midterm, yekun) və RİM-in sənədli düzəlişi olan xanalar bu rejimdə dəyişmir."
+msgstr "Punkte aus Prüfungen (Midterm, Abschluss) und Zellen mit dokumentierter Korrektur des Studierendensekretariats ändern sich in diesem Modus nicht."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Dəyişikliyin səbəbi"
+msgstr "Grund der Änderung"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Bu dəyişiklik keçmiş tarixli, kilidlənmiş və ya bağlanmış jurnaldakı xanaya aiddir. Qısa səbəb yazın — təqdimat və sənəd tələb olunmur. Səbəb bu səhifədəki sonrakı dəyişikliklər üçün də yadda qalır."
+msgstr "Diese Änderung betrifft eine Zelle mit vergangenem Datum, eine gesperrte Zelle oder ein geschlossenes Journal. Geben Sie eine kurze Begründung ein — kein Antrag und kein Dokument nötig. Die Begründung wird auch für weitere Änderungen auf dieser Seite gemerkt."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Məs.: köhnə sistemdən köçməyən davamiyyətin bərpası"
+msgstr "Z. B.: Wiederherstellung der Anwesenheit, die nicht aus dem alten System übernommen wurde"
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Səbəb ən azı %(n)s simvol olmalıdır."
+msgstr "Die Begründung muss mindestens %(n)s Zeichen lang sein."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Səbəblə yadda saxla"
+msgstr "Mit Begründung speichern"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Bu dərs sütunu və ona aid {n} qeyd (q/b, i/e, bal) birlikdə silinəcək. Səbəb audit jurnalına yazılır."
+msgstr "Diese Stundenspalte und ihre {n} Einträge (Fehlzeiten, Anwesenheit, Punkte) werden zusammen gelöscht. Die Begründung wird im Audit-Protokoll erfasst."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Data bərpası rejimi: semestr ərzində istənilən keçmiş tarix seçilə bilər — yazma müddətindən köhnə tarix üçün səbəb yazılır."
+msgstr "Datenwiederherstellungsmodus: Jedes vergangene Datum innerhalb des Semesters ist wählbar — für ein Datum vor der Eintragungsfrist ist eine Begründung nötig."
+
+msgctxt "registrar.journal_full_edit"
+msgid "DƏYİŞİKLİYİN SƏBƏBİ (DATA BƏRPASI)"
+msgstr "GRUND DER ÄNDERUNG (DATENWIEDERHERSTELLUNG)"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Məs.: köhnə sistemdən köçməyən dərsin bərpası"
+msgstr "Z. B.: Wiederherstellung einer Stunde, die nicht aus dem alten System übernommen wurde"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Keçmiş tarixli, redaktə vaxtı bitmiş və ya bağlanmış jurnaldakı dərs üçün məcburidir — təqdimat və sənəd tələb olunmur. Səbəb audit jurnalına yazılır."
+msgstr "Pflicht für eine Stunde mit vergangenem Datum, mit abgelaufener Bearbeitungszeit oder in einem geschlossenen Journal — kein Antrag und kein Dokument nötig. Die Begründung wird im Audit-Protokoll erfasst."
+
+msgctxt "registrar.journal_history"
+msgid "Data bərpası (səbəb ilə)"
+msgstr "Datenwiederherstellung (mit Begründung)"

@@ -122,6 +122,14 @@ def ensure_date_within_period(offering, parsed) -> None:
         raise LessonRuleError("Dərs tarixi bir ildən artıq irəlidə ola bilməz.")
 
 
+def _ensure_full_edit_date(offering, parsed) -> None:
+    from apps.registrar.journal_full_edit import date_error
+
+    error = date_error(offering, parsed)
+    if error:
+        raise LessonRuleError(error)
+
+
 @transaction.atomic
 def create_lesson(
     *,
@@ -138,6 +146,7 @@ def create_lesson(
     allow_past=False,
     slot=None,
     off_schedule_reason="",
+    full_edit=False,
 ):
     """Add a held session. ``instructor`` bu dərsin müəllimi (boşdursa açılışınkı);
     ``room`` dərsin otağı (opsional — köhnə dərslərdə yoxdur);
@@ -148,8 +157,10 @@ def create_lesson(
     növ HƏMİŞƏ slotdan, otaq / müəllim / akademik saat açıq verilməyibsə slotdan köçürülür;
     slot bu açılışın olmalı və həmin TARİXDƏ keçirilməlidir. Qalan bütün qaydalar (kilid,
     sillabus qapısı, keçmiş tarix, dövr sərhədi, dublikat) dəyişmədən tətbiq olunur.
-    ``off_schedule_reason`` — cədvəldən kənar dərsin səbəbi; yazılırsa audit izinə də düşür."""
-    if journal_is_locked(offering):
+    ``off_schedule_reason`` — cədvəldən kənar dərsin səbəbi; yazılırsa audit izinə də düşür.
+    ``full_edit`` — «Data bərpası» rejimi (``journal_full_edit``; çağıran səbəbi yoxlayıb auditə yazır): bağlı
+    jurnal və yazma pəncərəsi keçilir, tarix yalnız semestr aralığında və gələcəkdə olmayaraq yoxlanır."""
+    if journal_is_locked(offering) and not full_edit:
         raise LessonRuleError("Jurnal kilidlidir — dərs əlavə etmək olmaz.")
     # README §8/2 — «jurnal təsdiqlənmiş sillabus olmadan bloklanır».  Qayda
     # ORG SİYASƏTİDİR və default SÖNDÜRÜLÜDÜR (köçürülmüş data qorunur);
@@ -160,7 +171,9 @@ def create_lesson(
     parsed = _coerce_date(date)
     if parsed is None:
         raise LessonRuleError("Dərs tarixi düzgün deyil.")
-    if not allow_past:
+    if full_edit:
+        _ensure_full_edit_date(offering, parsed)
+    elif not allow_past:
         # Yazma pəncərəsi (``journal.late_entry_days``, defolt 7 gün geriyə; gələcək tarix olmaz).
         error = journal_edit_windows.lesson_date_error(parsed)
         if error:
@@ -235,6 +248,7 @@ def update_lesson(
     allow_locked=False,
     by_user=None,
     audit=True,
+    full_edit=False,
 ) -> bool:
     """Səhv açılmış dərsi düzəlt (``lesson_edit_window`` içində, defolt 120 dəqiqə). ``allow_locked``/``allow_past``
     pəncərəni + keçmiş-tarixi keçir (İKT/superuser); yayımlanmış jurnal yenə kilidli.
@@ -245,8 +259,8 @@ def update_lesson(
     izinə yazılır (``by_user``; öz auditini yazan sənədli düzəliş yolları ``audit=False``
     ötürür). Əvvəl ``hours=0`` qayıb saatını silir, dublikat slot
     yaranır və heç bir iz qalmırdı."""
-    if journal_is_locked(lesson.offering) or (not can_edit_lesson(lesson) and not allow_locked):
-        return False
+    if not full_edit and (journal_is_locked(lesson.offering) or (not can_edit_lesson(lesson) and not allow_locked)):
+        return False  # ``full_edit`` — «Data bərpası»: bağlı jurnal + pəncərə keçilir, tarix semestr aralığında
     offering = lesson.offering
     # «yoxla → yaz» yarışı: create_lesson ilə eyni kilid (açılış sətri) — dublikat yoxlaması seriyalaşır.
     CourseOffering.objects.select_for_update().filter(pk=offering.pk).values_list("pk", flat=True).first()
@@ -256,7 +270,9 @@ def update_lesson(
         parsed = _coerce_date(date)
         if parsed is None:
             raise LessonRuleError("Dərs tarixi düzgün deyil.")
-        if not allow_past:
+        if full_edit:
+            _ensure_full_edit_date(lesson.offering, parsed)
+        elif not allow_past:
             error = journal_edit_windows.lesson_date_error(parsed)
             if error:
                 raise LessonRuleError(error)
@@ -345,11 +361,11 @@ def _audit_lesson_update(offering, lesson, before, by_user):
 
 
 @transaction.atomic
-def delete_lesson(*, lesson, by_user=None, allow_locked=False) -> bool:
+def delete_lesson(*, lesson, by_user=None, allow_locked=False, full_edit=False) -> bool:
     """Səhv açılmış dərsi sil (``lesson_edit_window`` içində; ``allow_locked`` İKT/superuser üçün keçir).
     İşarələr kaskadla silinir; əməliyyat audit tarixçəsinə düşür."""
-    if journal_is_locked(lesson.offering) or (not can_edit_lesson(lesson) and not allow_locked):
-        return False
+    if not full_edit and (journal_is_locked(lesson.offering) or (not can_edit_lesson(lesson) and not allow_locked)):
+        return False  # ``full_edit`` — «Data bərpası» (səbəb + xanaların köhnə dəyəri: journal_full_edit.delete_lesson)
     offering = lesson.offering
     label = f"{lesson.date} · {lesson.get_kind_display()}"
     touched = [m.enrollment for m in LessonMark.objects.filter(lesson=lesson).select_related("enrollment")]

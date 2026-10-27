@@ -30,6 +30,7 @@
     {# Dərs modalı: korpus/otaq cütünün sarınması + mövzu seçicisinin «keçirilib / növbəti» görünüşü (2026-10-25). #}
     <link rel="stylesheet" href="{% static 'registrar/css/journal_lesson_modal.css' %}?v=20261025-1">
     {% if journal_share_chip %}<link rel="stylesheet" href="{% static 'registrar/css/journal_share.css' %}?v=20261026-share">{% endif %}
+    {% if full_edit_active %}<link rel="stylesheet" href="{% static 'registrar/css/journal_full_edit.css' %}?v=20261027-fe">{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -71,7 +72,7 @@
 
     {% comment %}Jurnal bağlıdırsa (RİM semestr sonunda bağlayıb) müəllimə səbəbi
     izah edən qısa lövhə. Təsdiq zənciri YOXDUR — sahibin qərarı (2026-08).{% endcomment %}
-    {% if journal_locked %}
+    {% if journal_locked and not full_edit_active %}
     <div class="jd2-closedbar">
         <i class="fas fa-lock"></i>
         {% trans "Jurnal bağlanıb — semestr yekunlaşıb, redaktə mümkün deyil. Düzəliş lazımdırsa RİM-ə (sənədli düzəliş) müraciət edin." context "registrar.journal_close" %}
@@ -87,6 +88,9 @@
         {% trans "Bu fənn başqa müəllimə təhvil verilib — jurnal sizin üçün yalnız-oxu rejimindədir. Yazdığınız bal və davamiyyət olduğu kimi qalır." context "registrar.handover" %}
     </div>
     {% endif %}
+
+    {# «Data bərpası» rejimi (RİM «Sistem tənzimləmələri», sahib 2026-10-27): banner + səbəb dialoqu. #}
+    {% if full_edit_active %}{% include "registrar/partials/_jd_full_edit.html" %}{% endif %}
 
     {% include "registrar/partials/_jd_syllabus_notice.html" %}
 
@@ -345,7 +349,8 @@
     {# Yapışqan başlıq sətri — daxili şaquli scroll olmadan (journal_layout.css §8, 2026-10-19). #}
     <script src="{% static 'registrar/js/journal_sticky_head.js' %}?v=20261019-1"></script>
     {# Avtomatik yadda saxlama — journal_grid.js-dən SONRA (qaralama bərpası + `EMSJournalGrid.clearDraft`), sahib 2026-10-14. #}
-    <script src="{% static 'registrar/js/journal_grid_autosave.js' %}?v=20261027-idle"></script>
+    <script src="{% static 'registrar/js/journal_grid_autosave.js' %}?v=20261027-fe"></script>
+    {% if full_edit_active %}<script src="{% static 'registrar/js/journal_full_edit.js' %}?v=20261027-fe"></script>{% endif %}
     {# İkiqat göndəriş qapısı — ayrı fayl (QA P3-11). #}
     <script src="{% static 'registrar/js/journal_submit_guard.js' %}?v=20260906-1"></script>
     <script src="{% static 'registrar/js/correction_history.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>

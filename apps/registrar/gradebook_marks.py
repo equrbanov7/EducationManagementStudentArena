@@ -37,6 +37,7 @@ göndərdiyi DƏYİŞMƏYƏN dəyər kilid sayılmır. Toplu doldurma kilidli xa
 from __future__ import annotations
 
 import uuid
+from contextlib import nullcontext
 from decimal import Decimal
 
 from django.db import transaction
@@ -45,6 +46,7 @@ from django.utils import timezone
 
 from apps.registrar import grade_audit, journal_edit_windows
 from apps.registrar.models import AttendanceStatus, Enrollment, Lesson, LessonMark
+from core.rls import journal_unlock
 
 #: Toplu INSERT/UPDATE partiyası — 555 tələbəli açılışda «hamısını göstər»
 #: rejimində bir neçə min xana da bir neçə sorğuda gedir.
@@ -117,7 +119,9 @@ def _corrected_mark_ids(existing) -> set:
 
 
 @transaction.atomic
-def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=False, request=None):
+def save_marks(
+    *, offering, entries, by_user=None, enforce_day=True, report=False, request=None, full_edit=False, full_reason=""
+):
     """Persist attendance/score cells for an offering (bulk, from the grid).
 
     ``entries``: iterable of ``{"lesson_id", "enrollment_id", "status", "score"}``.
@@ -130,12 +134,20 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
     ``report=True`` → ``{"written", "rejected"}`` (yazılmayan xanaların sayı ilə;
     çağıran istifadəçiyə xəbərdarlıq göstərir — bax P3-10); vaxt qaydası xananı saxlayıbsa
     əlavə ``blocked`` (say) + ``blocked_reason`` (istifadəçi mətni).
+
+    ``full_edit`` — «Data bərpası» rejimi (``journal_full_edit``; çağıran aktorun hüququnu yoxlayıb): bağlı jurnal,
+    xana kilidi (15 dəq. / köçürülmüş / yazma müddəti) və yeni qeyd qaydası keçilir, ``status="clear"`` xananı
+    silir. Qapını keçən hər xana ``full_reason`` (təmizlənmiş səbəb) tələb edir — yoxdursa yazılmır və nəticədə
+    ``reason_required`` (say) qayıdır; yazılanlar səbəblə ayrıca audit sətrinə düşür. Sənədli düzəlişli və üzrlü
+    xana bu rejimdə də kilidlidir.
     """
     from apps.registrar import gradebook
     from apps.registrar import journal_notifications as jn
     from apps.registrar.gradebook_lessons import parse_lesson_score
+    from apps.registrar.journal_full_edit import CLEAR
 
-    if gradebook.journal_is_locked(offering):
+    journal_locked = gradebook.journal_is_locked(offering)
+    if journal_locked and not full_edit:
         return {"written": 0, "rejected": 0} if report else 0
 
     # Codex audit §14 (2026-09-13): «oxu → yaz» naxışı. Açılış sətri `FOR UPDATE`
@@ -165,33 +177,56 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
     locked_reason = ""
     lock_window = journal_edit_windows.mark_edit_window()
     by_user_id = getattr(by_user, "pk", None)
+    reason_required = 0  # «Data bərpası»: qapını keçməli, amma səbəbsiz gələn xanalar
+    full_changes, to_clear, unlock_db = [], [], False
     for (lesson_id, enrollment_id), entry in cells.items():
         lesson = lessons.get(lesson_id)
         enrollment = enrollments.get(enrollment_id)
         if lesson is None or enrollment is None:
             continue
         mark = existing.get((lesson.id, enrollment.id))
+        clearing = entry.get("status") == CLEAR
+        if clearing and (mark is None or not full_edit):
+            continue  # «təmizlə» yalnız data bərpası rejimində və yalnız mövcud xanada
         lock = ""
         reopened = False  # pəncərədən kənar balsız i/e — dəyişikliyi YENİ qeyd kimi yazılır (sahib 2026-10-26)
-        if mark is not None and mark.pk in corrected_ids:
-            lock = journal_edit_windows.LOCK_CORRECTED  # rəsmi düzəlişli xana — müəllim üçün kilidli
+        if mark is not None and (mark.pk in corrected_ids or (full_edit and mark.status == AttendanceStatus.EXCUSED)):
+            lock = journal_edit_windows.LOCK_CORRECTED  # rəsmi düzəlişli / üzrlü xana — müəllim üçün kilidli
         elif mark is not None:
             reopened = journal_edit_windows.reopens_presence(mark, now=now, window=lock_window)
             entry_open = entry_rule.allows(lesson) if (reopened and entry_rule is not None) else True
             lock = journal_edit_windows.mark_lock_reason(mark, now=now, window=lock_window, entry_open=entry_open)
+        bypass = journal_locked  # bağlı jurnalda hər yazı data bərpasıdır
         if lock:
             # Kilidli xana yazılmır. Grid-in geri göndərdiyi EYNİ dəyər səssiz keçir; fərqli dəyər — kilid cavabı.
-            if _differs(mark, entry, lesson):
+            if not (clearing or _differs(mark, entry, lesson)):
+                continue
+            if not full_edit or lock == journal_edit_windows.LOCK_CORRECTED:
                 locked += 1
                 locked_reason = locked_reason or journal_edit_windows.lock_message(lock, window=lock_window)
-            continue
+                continue
+            bypass = True
         if entry_rule is not None and mark is None:
             reason = entry_rule.block_reason(lesson)
-            if reason:
+            if reason and not full_edit:
                 # YENİ işarə yalnız dərs günü (+ ``late_entry_days``) və aktivləşdirmə pəncərəsində yazılır.
                 blocked += 1
                 blocked_reason = blocked_reason or reason
                 continue
+            bypass = bypass or bool(reason)
+        bypass = bypass or clearing
+        if bypass and not clearing and mark is not None and not _differs(mark, entry, lesson):
+            continue  # dəyişməyən (geri göndərilən) xana — səbəb tələb olunmur
+        if bypass and not full_reason:
+            reason_required += 1
+            continue
+        if clearing:
+            to_clear.append(mark)
+            full_changes.append(_change(enrollment, lesson, grade_audit.mark_repr(mark.status, mark.score), "—"))
+            touched.setdefault(enrollment.id, enrollment)
+            prior_hours.setdefault(enrollment.id, enrollment.absence_hours)
+            written += 1
+            continue
 
         status = entry.get("status")
         if status not in (AttendanceStatus.PRESENT, AttendanceStatus.ABSENT):
@@ -239,15 +274,10 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
                 to_reopen.append(mark)
             else:
                 to_update.append(mark)
+            unlock_db = unlock_db or bypass
         if old != new:
-            audit_changes.append(
-                {
-                    "student": grade_audit.student_label(enrollment),
-                    "item": f"{lesson.date} · {lesson.get_kind_display()}",
-                    "old": old or "—",
-                    "new": new,
-                }
-            )
+            # Data bərpası ilə yazılan xana səbəbli ayrıca audit sətrinə düşür (adi yazı — əvvəlki sətrə).
+            (full_changes if bypass else audit_changes).append(_change(enrollment, lesson, old or "—", new))
             # Tələbə bildirişləri: q/b qeydi və yeni/dəyişmiş bal.
             if status == AttendanceStatus.ABSENT and old_status != AttendanceStatus.ABSENT:
                 notify_events.append({"enrollment": enrollment, "kind": jn.EVENT_ABSENT, "lesson": lesson})
@@ -260,10 +290,14 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
 
     if to_create:
         LessonMark.objects.bulk_create(to_create, batch_size=_BULK_BATCH)
-    if to_update:
-        LessonMark.objects.bulk_update(to_update, _MARK_UPDATE_FIELDS, batch_size=_BULK_BATCH)
-    if to_reopen:
-        LessonMark.objects.bulk_update(to_reopen, [*_MARK_UPDATE_FIELDS, "created_at"], batch_size=_BULK_BATCH)
+    # Data bərpası köhnə xananı dəyişirsə DB trigger-i (15 dəq.) rəsmi yolla keçilir — sənədli düzəliş kimi.
+    with journal_unlock() if unlock_db else nullcontext():
+        if to_update:
+            LessonMark.objects.bulk_update(to_update, _MARK_UPDATE_FIELDS, batch_size=_BULK_BATCH)
+        if to_reopen:
+            LessonMark.objects.bulk_update(to_reopen, [*_MARK_UPDATE_FIELDS, "created_at"], batch_size=_BULK_BATCH)
+    if to_clear:
+        LessonMark.objects.filter(pk__in=[mark.pk for mark in to_clear]).delete()
 
     # Keep the denormalised Enrollment.absence_hours (used by the "Fənlərim"
     # exam-eligibility badge) in sync with the journal — the single source of truth.
@@ -291,6 +325,17 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
     grade_audit.log_grade_changes(
         offering=offering, by_user=by_user, kind="mark", changes=audit_changes, request=request
     )
+    if full_changes:
+        from apps.registrar import journal_full_edit
+
+        journal_full_edit.log(
+            offering=offering,
+            by_user=by_user,
+            reason=full_reason,
+            action="marks",
+            changes=full_changes,
+            request=request,
+        )
 
     if notify_events:
         transaction.on_commit(lambda: jn.send_journal_events(offering=offering, events=notify_events))
@@ -302,7 +347,18 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
         result.update(blocked=blocked, blocked_reason=blocked_reason)
     if locked:
         result.update(locked=locked, locked_reason=locked_reason)
+    if reason_required:
+        result["reason_required"] = reason_required
     return result
+
+
+def _change(enrollment, lesson, old, new) -> dict:
+    return {
+        "student": grade_audit.student_label(enrollment),
+        "item": f"{lesson.date} · {lesson.get_kind_display()}",
+        "old": old,
+        "new": new,
+    }
 
 
 def _differs(mark, entry, lesson) -> bool:
