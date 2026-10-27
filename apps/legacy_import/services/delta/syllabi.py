@@ -1,9 +1,12 @@
 """Sillabuslar — TƏSDİQLƏNMİŞ (``approval_source=migration``) kimi; müəllimə iş yaranmır.
 
 1. **Açılışa bağlı**: tam semestr jurnalının ``sillabus_id``-si (fənni jurnalın fənni ilə EYNİ olmalıdır)
-   → hər dilim açılışına ``import_migrated_version(offering=…, period=…, status=approved)``. Açılışın
-   artıq sillabusu varsa (açılış və ya fənn+semestr pilləsi — müəllim yeni sistemdə yazıb / bağlayıb)
+   → ilk dilim açılışına ``import_migrated_version(offering=…, period=…, status=approved)``. Açılışın
+   artıq sillabusu varsa (açılış, paylaşım və ya fənn+semestr pilləsi — müəllim yeni sistemdə yazıb / bağlayıb)
    TOXUNULMUR. Jurnal banneri «Təsdiqlənib» görünür, müəllimdən heç nə tələb olunmur.
+   **Bir sillabus** (sahib 2026-10-27): eyni köhnə sillabusu işlədən DİGƏR dilim/jurnal açılışları (eyni müəllim)
+   surət almır — həmin dosyeyə ``SyllabusShare(source=legacy)`` ilə bağlanır (potok dərsi: təsdiq və plan birdir).
+   Başqa müəllimin açılışı öz surətini alır (müəllim yalnız öz sillabusunu görür).
 2. **Baza sillabus** (semestrsiz, fənn + müəllim): baseline-dan sonra yaranan, açılışa bağlanmayan aktiv
    sillabus — həmin (fənn, müəllim) üçün baza dosye YOXDURSA (cutover qaydası, spec §2).
 
@@ -77,11 +80,13 @@ def _same_subject(run, syllabus_lesson_id, journal_lesson_id) -> bool:
 
 
 def import_syllabi(run, slices: dict) -> None:
-    from apps.syllabus.public import import_migrated_version, syllabus_for_offering
+    from apps.syllabus.public import import_migrated_version, link_legacy_share, syllabus_for_offering
 
     Syllabus = django_apps.get_model("syllabus", "Syllabus")
     by_id = {row["id"]: row for row in run.bundle["syllabi"]}
     used: set = set()
+    #: ``(legacy sillabus id, müəllim)`` → bu qaçışda köçmüş dosye — eyni cütün növbəti açılışı ona paylaşılır.
+    imported: dict = {}
     stamp = timezone.now()
     note = NOTE.format(tag=run.tag)
     for entry in slices.values():
@@ -103,11 +108,19 @@ def import_syllabi(run, slices: dict) -> None:
                 offering_id=offering.pk,
                 subject_id=offering.subject_id,
                 period_id=offering.period_id,
+                instructor_id=offering.instructor_id,
             ):
                 run.count("syllabus.offering_has_syllabus")
                 continue
             author = offering.instructor
-            _syllabus, version = import_migrated_version(
+            anchor = imported.get((legacy["id"], offering.instructor_id)) if offering.instructor_id else None
+            if anchor is not None:
+                outcome = link_legacy_share(syllabus=anchor, offering=offering, user=run.actor)
+                run.count(f"syllabus.offering_shared_{outcome}")
+                if outcome == "linked":
+                    run.created("syllabus_shares", offering.pk)
+                    continue
+            syllabus, version = import_migrated_version(
                 organization=run.organization,
                 subject=offering.subject,
                 approved_at=stamp,
@@ -118,6 +131,8 @@ def import_syllabi(run, slices: dict) -> None:
                 section_data=section_data,
                 note=note,
             )
+            if offering.instructor_id:
+                imported.setdefault((legacy["id"], offering.instructor_id), syllabus)
             run.created("syllabus_versions", version.pk)
             run.count("syllabus.offering_imported")
     for legacy in run.bundle["syllabi"]:

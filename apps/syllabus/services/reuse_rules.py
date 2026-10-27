@@ -41,7 +41,7 @@ from django.db.models import Case, Count, F, IntegerField, Q, Value, When
 
 from ..constants import LESSON_HOUR_KINDS, OPEN_STATUSES, PERM_EDIT, SyllabusStatus
 from ..models import ApprovalSource, Syllabus
-from .queries import _scope_filter, own_q
+from .queries import _scope_filter, current_year_source_q, in_current_year, own_q
 from .scoping import is_author
 
 # ── Səbəb kodları (UI mətni ``accounts/views/syllabus/labels.py``-dadır) ─────────
@@ -63,6 +63,8 @@ CODE_NOT_LINKED = "reuse.not_linked"
 CODE_UP_TO_DATE = "reuse.up_to_date"
 CODE_LINKED_UNLINK_FIRST = "reuse.linked_unlink_first"
 CODE_BASE_MISSING = "version.base_missing"
+#: Sahib 2026-10-27: müəllim keçmiş tədris illərinin sillabusunu mənbə kimi görmür / işlədə bilmir.
+CODE_OLD_YEAR = "reuse.source_old_year"
 
 REASON_CODES = (
     CODE_NOT_OWN,
@@ -79,6 +81,7 @@ REASON_CODES = (
     CODE_NOT_LINKED,
     CODE_UP_TO_DATE,
     CODE_LINKED_UNLINK_FIRST,
+    CODE_OLD_YEAR,
 )
 
 
@@ -294,11 +297,26 @@ def _copyable_annotation(actor):
     return Case(When(condition, then=Value(1)), default=Value(0), output_field=IntegerField())
 
 
+def _year_gate(queryset, *, organization, actor):
+    """Müəllimdə yalnız cari tədris ili + semestrsiz baza (``queries.current_year_source_q``, sahib 2026-10-27)."""
+    year_q = current_year_source_q(organization, actor)
+    return queryset if year_q is None else queryset.filter(year_q)
+
+
+def source_year_code(source, actor) -> str:
+    """Tək mənbə üçün il qapısı (POST yolu): keçmiş ilin dosyesi müəllimə ``CODE_OLD_YEAR``."""
+    return "" if in_current_year(source, actor) else CODE_OLD_YEAR
+
+
 def _copyable_roots(*, organization, actor, subject_ids):
-    """Aktorun KOPYALAYA bildiyi kök dosyelər (``copy_from_previous`` qapısı, SQL-də)."""
+    """Aktorun KOPYALAYA bildiyi kök dosyelər (``copy_from_previous`` qapısı, SQL-də).
+
+    Müəllim üçün yalnız CARİ tədris ili + semestrsiz baza dosye (sahib 2026-10-27).
+    """
     queryset = Syllabus.objects.filter(
         organization=organization, is_active=True, subject_id__in=list(subject_ids), reused_from__isnull=True
     ).filter(Q(current_version__isnull=False) | Q(approved_version__isnull=False))
+    queryset = _year_gate(queryset, organization=organization, actor=actor)
     return _scope_filter(queryset, actor).annotate(_copyable=_copyable_annotation(actor)).filter(_copyable=1)
 
 
@@ -369,7 +387,7 @@ def sibling_queryset(*, organization, actor, subject_id, period_id, exclude_syll
         queryset = queryset.exclude(pk=exclude_syllabus_id)
     if exclude_offering_id is not None:
         queryset = queryset.exclude(offering_id=exclude_offering_id)
-    queryset = _scope_filter(queryset, actor)
+    queryset = _scope_filter(_year_gate(queryset, organization=organization, actor=actor), actor)
     own = Case(When(_own_q(actor), then=Value(1)), default=Value(0), output_field=IntegerField())
     approved_rank = Case(
         When(approved_version__status=SyllabusStatus.APPROVED.value, then=Value(0)),
@@ -408,6 +426,7 @@ __all__ = [
     "CODE_NOT_OWN",
     "CODE_NOT_PREVIOUS",
     "CODE_NOT_SIBLING",
+    "CODE_OLD_YEAR",
     "CODE_SOURCE_NOT_APPROVED",
     "CODE_SOURCE_NOT_HUMAN",
     "CODE_TARGET_LINKED",
@@ -430,5 +449,6 @@ __all__ = [
     "reuse_root",
     "same_slot",
     "sibling_queryset",
+    "source_year_code",
     "target_state_code",
 ]

@@ -20,6 +20,10 @@ fazalarla birgə RƏDD olunur). Hər (köhnə müəllim, fənn) cütü üçün �
 
 Məzmun ``syllabi`` fazasının ÖZ çeviricisi ilədir (``document_for`` + ``build_section_data``). İdempotentdir:
 ikinci qaçış ``skipped_existing`` verir, 0 yazı.
+
+Sahib 2026-10-27 («bir sillabus — bir neçə jurnal»): ``skipped_existing`` müəllimin bir qrupunda köhnə sillabus
+artıq varsa, eyni köhnə sillabusu işlədən DİGƏR qrupları sillabussuz qoyurdu. Bu faza ilə birgə həmişə
+``syllabi_share`` da işləyir (``apply.DeltaRun.run``): həmin qruplar mövcud dosyeyə SURƏTSİZ bağlanır.
 """
 
 from __future__ import annotations
@@ -55,7 +59,8 @@ class TeacherSyllabiPhaseMismatch(HistoryPhaseMismatch):
 
 
 def check_phases(bundle: dict, phases) -> None:
-    if (bundle.get("snapshot") or {}).get("teacher_syllabi") and set(phases) - {PHASE}:
+    # ``syllabi_share`` (sahib 2026-10-27) eyni paketin jurnal + sillabus bölmələrini oxuyur, başqa heç nə yazmır.
+    if (bundle.get("snapshot") or {}).get("teacher_syllabi") and set(phases) - {PHASE, "syllabi_share"}:
         raise TeacherSyllabiPhaseMismatch("legacy_delta_teacher_syllabi_bundle_phase_mismatch")
 
 

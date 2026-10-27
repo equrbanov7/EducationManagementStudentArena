@@ -10,7 +10,7 @@ PROBLEMLƏR (``ISSUES``):
 * ``no_teacher``  — açılışa müəllim təyin olunmayıb (kafedra «Dərs yükü»ndən təyin edir);
 * ``no_syllabus`` — açılışın sillabusu yoxdur və ya təsdiqlənməyib. Qayda jurnaldakı ilə EYNİDİR
   (``journal_policy.offering_has_approved_syllabus``): üç pilləli axtarışda ilk tapılan dosye
-  (açılışın öz → fənn+dövr → fənn+müəllif) və onun ``approved_version``-u;
+  (açılışın öz → paylaşım → fənn+dövr → fənn+müəllif) və onun ``approved_version``-u;
 * ``no_schedule`` — cədvəldə (park edilməmiş) slotu yoxdur;
 * ``no_journal``  — semestr başlayandan ``JOURNAL_GRACE_DAYS`` gün keçib, amma jurnalda dərs yoxdur və ya
   son dərs ``JOURNAL_STALE_DAYS`` gündən köhnədir. Semestr bitibsə və ya başlamayıbsa sayılmır.
@@ -43,11 +43,16 @@ def approved_syllabus_offering_ids(organization, period, offerings) -> set:
     candidates = (
         Syllabus.objects.filter(organization=organization, is_active=True, subject_id__in=subject_ids)
         .order_by("subject__code", "pk")
-        .values_list("offering_id", "subject_id", "period_id", "author_id", "approved_version_id")
+        .values_list("pk", "offering_id", "subject_id", "period_id", "author_id", "approved_version_id")
     )
-    by_offering, by_period, by_author = {}, {}, {}
-    for offering_id, subject_id, period_id, author_id, approved_id in candidates:
+    # Paylaşım (sahib 2026-10-27): açılış başqa qrupun sillabusunu ÖZ YERİNDƏ istifadə edir — jurnal ilə eyni pillə.
+    from apps.syllabus.public import shared_syllabus_ids
+
+    shared = shared_syllabus_ids([row["id"] for row in offerings])
+    by_offering, by_period, by_author, by_pk = {}, {}, {}, {}
+    for pk, offering_id, subject_id, period_id, author_id, approved_id in candidates:
         approved = approved_id is not None
+        by_pk[pk] = approved
         if offering_id is not None:
             by_offering.setdefault(offering_id, approved)
         elif period_id is not None:
@@ -60,6 +65,8 @@ def approved_syllabus_offering_ids(organization, period, offerings) -> set:
     for row in offerings:
         if row["id"] in by_offering:
             ok = by_offering[row["id"]]
+        elif shared.get(row["id"]) in by_pk:
+            ok = by_pk[shared[row["id"]]]
         elif row["subject_id"] in by_period:
             ok = by_period[row["subject_id"]]
         elif row["instructor_id"] is not None:

@@ -150,6 +150,8 @@ def _missing_rows(*, organization, user, syllabi, academic_year: str, semester: 
         if reused_from_id is None and period_id is not None and user.pk in (author_id, instructor_id):
             sibling_pairs[(subject_id, period_id)] += 1
 
+    # Paylaşım (sahib 2026-10-27): başqa qrupun sillabusunu öz yerində istifadə edən jurnal «sillabussuz» deyil.
+    covered_offerings |= set(services.shared_syllabus_ids([offering.pk for offering in offerings]))
     pending = [
         offering
         for offering in offerings

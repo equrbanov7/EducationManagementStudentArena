@@ -2,9 +2,9 @@
 
 Jurnalın mövzu göstərişi (``Lesson.syllabus_week`` → sətrin mövzusu) bir neçə açılışın dərslərini eyni
 anda göstərən səthlərdə («Keçilmiş dərslər», CSV ixracı, backfill əmri) lazımdır. ``syllabus_for_offering``
-hər açılış üçün ayrıca sorğudur; burada eyni ÜÇ pilləli seçim (açılış → fənn+semestr → fənn+müəllim
-«baza») bir sorğu ilə namizədlərdən Python-da həll olunur, sonra təsdiqlənmiş versiyalar və onların
-``week`` bölmələri toplu oxunur — açılış sayından asılı olmayaraq ≤ 3 sorğu.
+hər açılış üçün ayrıca sorğudur; burada eyni pilləli seçim (açılış → paylaşım (sahib 2026-10-27) →
+fənn+semestr → fənn+müəllim «baza») namizədlərdən Python-da həll olunur, sonra təsdiqlənmiş versiyalar və
+onların ``week`` bölmələri toplu oxunur — açılış sayından asılı olmayaraq ≤ 4 sorğu.
 
 Sətir nömrəsi (``week``) ``week.rows`` siyahısındakı lüğət sətirlərinin 1-dən sırasıdır — boş mövzulu
 sətirlər də sayılır (sənəddəki «1. Mövzu …» nömrəsi ilə eyni, bax ``document._week_line``).
@@ -27,26 +27,28 @@ def plan_rows(data) -> list[dict]:
     return [row for row in (rows or []) if isinstance(row, dict)]
 
 
-def _pick(offering, candidates) -> int | None:
-    """``syllabus_for_offering`` pillə sırası: açılış → fənn+semestr → fənn+müəllim (baza)."""
-    tiers = ([], [], [])
+def _pick(offering, candidates, shared=None) -> int | None:
+    """``syllabus_for_offering`` pillə sırası: açılış → paylaşım → fənn+semestr → fənn+müəllim (baza)."""
+    tiers = ([], [], [], [])
     for row in candidates:
         if row["organization_id"] != offering.organization_id:
             continue
         if row["offering_id"] is not None:
             if row["offering_id"] == offering.id:
                 tiers[0].append(row)
+            elif shared is not None and row["id"] == shared:
+                tiers[1].append(row)
             continue
         if row["subject_id"] != offering.subject_id:
             continue
         if offering.period_id is not None and row["period_id"] == offering.period_id:
-            tiers[1].append(row)
+            tiers[2].append(row)
         elif (
             row["period_id"] is None
             and offering.instructor_id is not None
             and row["author_id"] == offering.instructor_id
         ):
-            tiers[2].append(row)
+            tiers[3].append(row)
     for tier in tiers:
         if tier:
             return tier[0]["id"]  # namizədlər artıq (fənn kodu, pk) sırası ilə gəlir
@@ -58,12 +60,17 @@ def approved_week_rows_for_offerings(offerings) -> dict:
     offerings = [item for item in offerings if item is not None and getattr(item, "id", None) is not None]
     if not offerings:
         return {}
+    from .sharing import shared_syllabus_ids
+
     org_ids = {item.organization_id for item in offerings}
     subject_ids = {item.subject_id for item in offerings if item.subject_id is not None}
+    shared = shared_syllabus_ids([item.id for item in offerings])
     candidates = list(
         Syllabus.objects.filter(organization_id__in=org_ids, is_active=True)
         .filter(
-            Q(offering_id__in=[item.id for item in offerings]) | Q(offering__isnull=True, subject_id__in=subject_ids)
+            Q(offering_id__in=[item.id for item in offerings])
+            | Q(offering__isnull=True, subject_id__in=subject_ids)
+            | Q(pk__in=set(shared.values()))
         )
         .order_by("subject__code", "pk")
         .values(
@@ -78,7 +85,7 @@ def approved_week_rows_for_offerings(offerings) -> dict:
         )
     )
     by_id = {row["id"]: row for row in candidates}
-    chosen = {item.id: _pick(item, candidates) for item in offerings}
+    chosen = {item.id: _pick(item, candidates, shared.get(item.id)) for item in offerings}
     version_of: dict = {}
     stale = set()
     for syllabus_id in {value for value in chosen.values() if value is not None}:

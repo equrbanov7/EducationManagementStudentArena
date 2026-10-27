@@ -9,7 +9,10 @@
 * ``bulk``      — «Hamısına tətbiq et» (``offerings``: açılış id-ləri);
 * ``unlink``    — «Ayır» (``syllabus``: bağlı dosye);
 * ``sync``      — «Mənbədən yenilə» (``syllabus``: bağlı dosye);
-* ``propagate`` — «Bağlı sillabuslara tətbiq et» (``syllabus``: mənbə dosye).
+* ``propagate`` — «Bağlı sillabuslara tətbiq et» (``syllabus``: mənbə dosye);
+* ``share``     — «Eyni sillabusu bu qrupda da istifadə et» (sahib 2026-10-27, bir sillabus — bir neçə jurnal;
+  ``source`` + ``offering``);
+* ``unshare``   — paylaşımı ayır (``syllabus`` + ``offering``).
 
 Bütün qərarlar ``apps.syllabus.services.reuse``-dadır; burada yalnız giriş yoxlaması,
 registrar məlumatının toplanması və xəta kodunun mətnə çevrilməsi var.  Oxuya
@@ -53,6 +56,12 @@ _UNLINKED = pgettext_lazy(
 )
 _SYNCED = pgettext_lazy(_CTX, "Mənbənin son təsdiqlənmiş versiyası bu sillabusa tətbiq olundu.")
 _PROPAGATED = pgettext_lazy(_CTX, "Yeniləndi: %(synced)s · artıq son versiyada: %(already)s · ötürüldü: %(skipped)s.")
+_SHARED = pgettext_lazy(
+    _CTX,
+    "Bu qrup da %(group)s qrupunun sillabusunu istifadə edir — bir sillabus: təsdiq və dəyişikliklər hər iki jurnal "
+    "üçün ortaqdır.",
+)
+_UNSHARED = pgettext_lazy(_CTX, "Paylaşım ayrıldı — bu qrupun jurnalı üçün ayrıca sillabus yaradın.")
 
 
 def _guard(request):
@@ -137,6 +146,26 @@ def _single(request, organization, actor, payload, action):
     return _version_payload(version, message, syllabus=str(syllabus.pk), mode=action)
 
 
+def _share(request, organization, actor, payload, action):
+    """«Bir sillabus — bir neçə jurnal»: paylaş / ayır (qaydalar ``services.sharing``-dədir)."""
+    from apps.registrar.public import instructor_offering
+
+    offering_id = safe_uuid(payload.get("offering"))
+    if action == "unshare":
+        syllabus = _own_syllabus(organization, actor, payload.get("syllabus"))
+        if syllabus is None or offering_id is None:
+            return _fail(_NOT_FOUND, status=404)
+        services.sharing.unshare(syllabus=syllabus, offering_id=offering_id, actor=actor, request=request)
+        return _version_payload(None, _UNSHARED, syllabus=str(syllabus.pk))
+    source = _readable_source(organization, actor, payload.get("source"))
+    offering = instructor_offering(organization=organization, user=actor.user, offering_id=offering_id)
+    if source is None or offering is None:
+        return _fail(_NOT_FOUND, status=404)
+    services.sharing.share(source=source, offering=offering, actor=actor, request=request)
+    message = str(_SHARED) % {"group": reuse_context.group_label(source)}
+    return _version_payload(None, message, syllabus=str(source.pk), mode=action)
+
+
 def _bulk(request, organization, actor, payload):
     source = _readable_source(organization, actor, payload.get("source"))
     if source is None:
@@ -213,6 +242,8 @@ def syllabus_reuse_action(request):
             return _bulk(request, organization, actor, payload)
         if action in {"unlink", "sync", "propagate"}:
             return _link_maintenance(request, organization, actor, payload, action)
+        if action in {"share", "unshare"}:
+            return _share(request, organization, actor, payload, action)
     except IntegrityError:
         # İkiqat klik / köhnə tab: açılışa paralel dosye yarandı — 500 əvəzinə 409.
         logger.info("syllabus reuse race on %s", action)
