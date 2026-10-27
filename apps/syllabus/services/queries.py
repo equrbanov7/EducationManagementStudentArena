@@ -82,11 +82,15 @@ def list_syllabi(
     search: str = "",
     sort: str = "recent",
     mine: bool = False,
+    include_periodless: bool = False,
 ):
     """Müəllim/kafedra siyahısı — filtr + sıralama tətbiq olunmuş queryset.
 
     ``mine`` — rəhbərin «Mənim fənlərim» süzgəci: əhatə daxilində yalnız
     ``own_q`` (öz yazdığı / apardığı açılışın dosyesi).
+
+    ``include_periodless`` — il süzgəci SEMESTRSİZ «baza sillabus»u (köçürmə,
+    açılışsız) da saxlayır: müəllimin cari il görünüşü (sahib 2026-10-27).
     """
     queryset = Syllabus.objects.filter(organization=organization, is_active=True).select_related(
         "subject", "period", "program", "offering", "current_version", "approved_version"
@@ -98,7 +102,10 @@ def list_syllabi(
     if period is not None:
         queryset = queryset.filter(period=period)
     if academic_year:
-        queryset = queryset.filter(period__academic_year=academic_year)
+        year_q = Q(period__academic_year=academic_year)
+        if include_periodless:
+            year_q |= Q(period__isnull=True, offering__isnull=True)
+        queryset = queryset.filter(year_q)
     if chair_unit is not None:
         queryset = queryset.filter(chair_unit=chair_unit)
     if statuses:

@@ -169,6 +169,7 @@ def build_syllabus_list_context(
     search: str = "",
     sort: str = "recent",
     mine: bool = False,
+    include_periodless: bool = False,
 ) -> dict:
     """«Müəllim — Sillabuslar» bölməsinin context-i.
 
@@ -189,6 +190,7 @@ def build_syllabus_list_context(
         search=search,
         sort=sort,
         mine=mine,
+        include_periodless=include_periodless,
     )
     return {
         "syllabi": queryset,

@@ -34,11 +34,15 @@ def worker_display(row: dict) -> str:
 
 
 class TeacherMapper:
-    """legacy ``workers.id`` → ``User`` (keşlə). ``outcome`` sayları hesabata düşür."""
+    """legacy ``workers.id`` → ``User`` (keşlə). ``outcome`` sayları hesabata düşür.
 
-    def __init__(self, run, workers: dict):
+    ``create=False`` — hesab YARADILMIR (``syllabi_backfill``): tapılmayan müəllim ``(None, "not_created_<status>")``.
+    """
+
+    def __init__(self, run, workers: dict, *, create: bool = True):
         self.run = run
         self.workers = workers
+        self.create = create
         self.ledger = ledger_map(run.organization, "worker", workers)
         self._users: dict = {}
         self._resolvers: dict = {}
@@ -56,7 +60,7 @@ class TeacherMapper:
         key = getattr(chair, "pk", None)
         if key not in self._resolvers:
             self._resolvers[key] = legacy_accounts.chair_teacher_resolver(
-                self.run.organization, chair, actor_user=self.run.actor, apply=True, tag=self.run.tag
+                self.run.organization, chair, actor_user=self.run.actor, apply=self.create, tag=self.run.tag
             )
         return self._resolvers[key]
 
@@ -87,6 +91,10 @@ class TeacherMapper:
             return None, "unreadable"
         chair = self.run.catalog.unit_for_department(row.get("department_id"))
         result = self._resolver(chair).resolve(display)
+        if result.status in created and not self.create:
+            # ``apply=False`` resolver yalnız YADDAŞDA önizləmə hesabı qaytarır — istifadə olunmur.
+            self.run.names("teacher_not_created", display, ", ".join(result.candidates or []))
+            return None, f"not_created_{result.status}"
         if result.status in created and result.user is not None:
             self.created.append((legacy_id, result.user.pk))
             self.run.names("teacher_created", display, result.user.username)

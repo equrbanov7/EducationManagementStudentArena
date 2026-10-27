@@ -61,7 +61,7 @@ class Command(BaseCommand):
             action="append",
             choices=PHASES,
             default=[],
-            help="Yalnız bu faza(lar) (default: paketin snapshot.phases-i, yoxdursa opt-in fazalardan — registry_sync, graduation, history* — başqa hamısı)",
+            help="Yalnız bu faza(lar) (default: paketin snapshot.phases-i, yoxdursa opt-in fazalardan — registry_sync, graduation, history*, subject_collisions, syllabi_backfill — başqa hamısı)",
         )
         parser.add_argument("--report-out", default="", help="Saylar (JSON, adsız)")
         parser.add_argument("--names-out", default="", help="Adlı siyahı (CSV, 0600) — yaradılan/ambiqü hesablar")

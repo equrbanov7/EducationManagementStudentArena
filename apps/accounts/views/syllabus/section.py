@@ -404,6 +404,8 @@ def build_syllabus_list_section(request, *, organization) -> dict:
         organization=organization,
         mine=scope == SCOPE_MINE,
         academic_year=academic_year or None,
+        # Semestrsiz baza sillabus (köçürmə, sahib 2026-10-27) müəllimin cari il görünüşündə də qalır.
+        include_periodless=current_year_only,
         # «sla»/«missing» REAL status deyil — sorğuya ötürülsə heç nə uyğun
         # gəlməzdi; süzgəc aşağıda tətbiq olunur. Audit 2026-09-13 (perf F-12
         # yan tapıntısı): «missing» ötürüləndə dəst boşalır və sillabusu OLAN
