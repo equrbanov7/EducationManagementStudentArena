@@ -90,8 +90,7 @@ def syllabus_reuse_options(request):
 def _readable_source(organization, actor, raw_id):
     """Mənbə dosye — aktor OXUYA bilmirsə ``None`` (404; mövcudluq sızmır)."""
     source = reuse_context.load_syllabus(organization, safe_uuid(raw_id))
-    # Qüvvədə olan (təsdiqlənmiş) sillabusu həmkar da kopyalaya bilər (sahib 2026-10-27).
-    if source is None or not (services.can_view(actor, source) or services.reuse_rules.shared_copy_ok(source)):
+    if source is None or not services.can_view(actor, source):
         return None
     return services.reuse_rules.reuse_root(source)
 

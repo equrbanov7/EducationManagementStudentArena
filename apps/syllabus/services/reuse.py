@@ -372,7 +372,7 @@ def copy_adjust(*, source, target, actor, request=None, previous=False):
     code = rules.copy_code(source, actor=actor, target=target.syllabus)
     if code:
         raise _denied(code)
-    base = rules.copy_base(source, actor=actor)
+    base = rules.copy_base(source)
     if base is None:
         raise _denied(rules.CODE_BASE_MISSING)
     hours = rules.normalize_hours(target.plan_hours)
@@ -403,12 +403,6 @@ def copy_adjust(*, source, target, actor, request=None, previous=False):
         section_id: _inherited_data(section_id, base_map, syllabus.organization, selfwork=selfwork)
         for section_id in SECTION_ORDER
     }
-    if not is_author(actor, source):
-        # Həmkarın sillabusu (sahib 2026-10-27): onun şəxsi sahələri köçmür, müəllim adı kopyalayanındır.
-        info = dict(data_map.get(SectionKey.INFO.value) or {})
-        info.update({key: "" for key in rules.PERSONAL_INFO_KEYS})
-        info["teacher"] = (actor.user.get_full_name() or "").strip()
-        data_map[SectionKey.INFO.value] = info
     week = dict(data_map.get(SectionKey.WEEK.value) or {})
     rows, adjusted = fit_rows_to_hours(week.get("rows") or [], hours)
     if adjusted:

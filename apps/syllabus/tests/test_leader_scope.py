@@ -221,11 +221,8 @@ def test_switch_costs_a_bounded_number_of_queries(world):
     assert len(large.captured_queries) == len(small.captured_queries)
 
 
-def test_reuse_is_offered_to_a_leader_from_a_colleagues_approved_syllabus(world):
-    """Sahib 2026-10-27: həmkarın TƏSDİQLƏNMİŞ sillabusu kopyalana bilər — «Mövcud sillabusdan istifadə et» çıxır.
-
-    (Əvvəl təklif yalnız öz dosyesindən idi; həmkarın qaralaması bu gün də sayılmır — bax ``world``-dakı o5.)
-    """
+def test_reuse_is_not_offered_to_a_leader_from_someone_elses_syllabus(world):
+    """Rəhbər başqa müəllimin sillabusunu GÖRÜR, amma ona bağlana bilmir — təklif çıxmamalıdır."""
     idle = world["idle"]
     activate_member(
         world["org"],
@@ -240,4 +237,4 @@ def test_reuse_is_offered_to_a_leader_from_a_colleagues_approved_syllabus(world)
     assert section["scope_switch"] is not None  # indi dərs deyir
     missing = next(row for row in section["rows"] if row["id"] == str(offering.pk))
     keys = [action["key"] for action in missing["actions"]]
-    assert keys[0] == "reuse" and "create" in keys
+    assert "reuse" not in keys and keys[0] == "create"

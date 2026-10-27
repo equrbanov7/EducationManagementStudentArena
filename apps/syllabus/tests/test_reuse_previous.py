@@ -27,11 +27,9 @@ from apps.syllabus.tests.factories import PLAN_HOURS
 from apps.syllabus.tests.reuse_fixtures import (
     TEACHER_PERMS,
     actor,
-    approve_version,
     approved_syllabus,
     build_world,
     draft_for,
-    fill,
     target,
 )
 from core.constants import AcademicPeriodType
@@ -131,23 +129,11 @@ def test_copy_previous_adjusts_hours_and_refuses_same_period_sources(world):
 
 
 def test_copy_previous_scope_matches_copy_from_previous(world):
-    # Həmkarın QARALAMASI kopyalanmır; təsdiqlənmiş sillabusu isə kopyalanır (sahib 2026-10-27).
-    foreign, foreign_version = draft_for(world, "o5", user_key="teacher2")
-    old_period = _previous_period(world, year="2023/2024", start="2023-09-01", end="2024-01-31")
+    foreign, _version = approved_syllabus(world, "o5", user_key="teacher2")
+    foreign = _move_to(foreign, _previous_period(world, year="2023/2024", start="2023-09-01", end="2024-01-31"))
     with pytest.raises(TransitionDenied) as denied:
-        services.reuse.copy_adjust(
-            source=_move_to(foreign, old_period),
-            target=target(world, "o2"),
-            actor=actor(world),
-            previous=True,
-        )
+        services.reuse.copy_adjust(source=foreign, target=target(world, "o2"), actor=actor(world), previous=True)
     assert denied.value.code == rules.CODE_COPY_OUT_OF_SCOPE
-    Syllabus.objects.filter(pk=foreign.pk).update(period=world["period"], offering=world["offerings"]["o5"])
-    approve_version(world, fill(foreign_version, actor(world, "teacher2")), actor(world, "teacher2"))
-    _syllabus, version = services.reuse.copy_adjust(
-        source=_move_to(foreign, old_period), target=target(world, "o3"), actor=actor(world), previous=True
-    )
-    assert version.status == SyllabusStatus.DRAFT
     with pytest.raises(TransitionDenied) as denied:
         services.reuse.copy_adjust(
             source=world["source"], target=target(world, "o5"), actor=actor(world), previous=True
@@ -173,8 +159,8 @@ def test_offering_row_copy_previous_end_to_end(world):
     assert response.status_code == 200, response.content
     assert response.json()["status"] == SyllabusStatus.DRAFT
     assert Syllabus.objects.filter(offering=offering).count() == 1
-    # Oxuya bilmədiyi mənbə (həmkarın qaralaması) və başqasının açılışı — 404.
-    foreign, _version = draft_for(world, "o5", user_key="teacher2")
+    # Oxuya bilmədiyi mənbə və başqasının açılışı — 404.
+    foreign, _version = approved_syllabus(world, "o5", user_key="teacher2")
     foreign = _move_to(foreign, _previous_period(world, year="2023/2024", start="2023-09-01", end="2024-01-31"))
     assert (
         _post(client, {"action": "copy_previous", "source": str(foreign.pk), "offering": str(offering.pk)}).status_code

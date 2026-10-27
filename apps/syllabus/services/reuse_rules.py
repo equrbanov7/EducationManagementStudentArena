@@ -33,18 +33,13 @@ Bağlamanın şərtləri (hamısı ödənməlidir, əks halda səbəb kodu qayta
 
 Kopyalamanın şərti ``copy_from_previous`` ilə EYNİ əhatə qapısıdır: mənbənin
 müəllifi və ya mənbənin kafedrasını ``syllabus.edit`` ilə əhatə edən aktor.
-**Sahib 2026-10-27** («eyni fənni başqa qrupa da eyni dərsi deyirəm, ordan olmur»):
-eyni fənnin QÜVVƏDƏ OLAN (təsdiqlənmiş) sillabusunu həmkar da KOPYALAYA bilər —
-yalnız təsdiqlənmiş nüsxə (qaralama şəxsi işdir, görünmür), yalnız kopyalama (bağlama
-müəllifindir), nəticə QARALAMADIR və adi təsdiqdən keçir; ``info`` bölməsinin şəxsi
-sahələri (müəllim, qəbul saatı, …) köçmür — bax ``PERSONAL_INFO_KEYS``.
 """
 
 from __future__ import annotations
 
 from django.db.models import Case, Count, F, IntegerField, Q, Value, When
 
-from ..constants import LESSON_HOUR_KINDS, OPEN_STATUSES, PERM_EDIT, PERM_VIEW, SyllabusStatus
+from ..constants import LESSON_HOUR_KINDS, OPEN_STATUSES, PERM_EDIT, SyllabusStatus
 from ..models import ApprovalSource, Syllabus
 from .queries import _scope_filter, own_q
 from .scoping import is_author
@@ -68,8 +63,6 @@ CODE_NOT_LINKED = "reuse.not_linked"
 CODE_UP_TO_DATE = "reuse.up_to_date"
 CODE_LINKED_UNLINK_FIRST = "reuse.linked_unlink_first"
 CODE_BASE_MISSING = "version.base_missing"
-#: Həmkarın sillabusundan kopyalananda TƏMİZLƏNƏN ``info`` sahələri — onun şəxsi məlumatıdır.
-PERSONAL_INFO_KEYS = ("teacher", "office_hours", "welcome", "research_interests", "certificates")
 
 REASON_CODES = (
     CODE_NOT_OWN,
@@ -140,31 +133,11 @@ def link_base(source):
     return version
 
 
-def shared_copy_ok(source) -> bool:
-    """Mənbənin QÜVVƏDƏ OLAN nüsxəsi var — onu həmkar da kopyalaya bilər (sahib 2026-10-27)."""
+def copy_base(source):
+    """Kopyalama mənbəyi — təsdiqlənmiş nüsxə, yoxdursa ən son versiya."""
     approved = getattr(source, "approved_version", None)
-    return approved is not None and approved.status == SyllabusStatus.APPROVED.value
-
-
-def _shared_copy_q() -> Q:
-    return Q(approved_version__status=SyllabusStatus.APPROVED.value)
-
-
-def own_copy_scope(actor, source) -> bool:
-    """Aktor mənbənin İSTƏNİLƏN versiyasını kopyalaya bilərmi (müəllif / kafedra əhatəsi)."""
-    return is_author(actor, source) or actor.covers_unit(source.chair_unit_id, PERM_EDIT)
-
-
-def copy_base(source, *, actor=None):
-    """Kopyalama mənbəyi — təsdiqlənmiş nüsxə, yoxdursa ən son versiya.
-
-    ``actor`` verilib və o, mənbənin müəllifi/kafedrası deyilsə YALNIZ təsdiqlənmiş
-    nüsxə (həmkarın qaralaması kopyalanmır).
-    """
-    if shared_copy_ok(source):
-        return source.approved_version
-    if actor is not None and not own_copy_scope(actor, source):
-        return None
+    if approved is not None and approved.status == SyllabusStatus.APPROVED.value:
+        return approved
     return source.current_version or source.versions.order_by("-major", "-minor").first()
 
 
@@ -271,7 +244,7 @@ def link_code(
 def copy_code(source, *, actor, target=None, target_code=None, copyable=None) -> str:
     """Kopyalamanın qadağa səbəbi (``""`` — kopyalamaq olar)."""
     if copyable is None:
-        copyable = own_copy_scope(actor, source) or shared_copy_ok(source)
+        copyable = is_author(actor, source) or actor.covers_unit(source.chair_unit_id, PERM_EDIT)
     if not (actor.has(PERM_EDIT) and copyable):
         return CODE_COPY_OUT_OF_SCOPE
     if source.current_version_id is None and source.approved_version_id is None:
@@ -315,17 +288,10 @@ def _copyable_annotation(actor):
     scope = actor.scope_for(PERM_EDIT)
     if scope.is_org_wide:
         return Value(1, output_field=IntegerField())
-    condition = own | _shared_copy_q()
+    condition = own
     if scope.is_unit_scoped:
         condition = own | scope.unit_subtree_q(path_field="chair_unit__path", id_field="chair_unit__id")
     return Case(When(condition, then=Value(1)), default=Value(0), output_field=IntegerField())
-
-
-def _reuse_visible(queryset, actor):
-    """Təkrar istifadə dialoqunun GÖRDÜYÜ dosyelər: adi oxu əhatəsi + qüvvədə olan (təsdiqlənmiş) sillabuslar."""
-    if actor.is_superadmin or (actor.has(PERM_VIEW) and actor.scope_for(PERM_VIEW).is_org_wide):
-        return queryset
-    return queryset.filter(Q(pk__in=_scope_filter(queryset, actor).values("pk")) | _shared_copy_q())
 
 
 def _copyable_roots(*, organization, actor, subject_ids):
@@ -333,7 +299,7 @@ def _copyable_roots(*, organization, actor, subject_ids):
     queryset = Syllabus.objects.filter(
         organization=organization, is_active=True, subject_id__in=list(subject_ids), reused_from__isnull=True
     ).filter(Q(current_version__isnull=False) | Q(approved_version__isnull=False))
-    return _reuse_visible(queryset, actor).annotate(_copyable=_copyable_annotation(actor)).filter(_copyable=1)
+    return _scope_filter(queryset, actor).annotate(_copyable=_copyable_annotation(actor)).filter(_copyable=1)
 
 
 def previous_source_pairs(*, organization, actor, subject_ids) -> set:
@@ -345,24 +311,6 @@ def previous_source_pairs(*, organization, actor, subject_ids) -> set:
         return set()
     rows = _copyable_roots(organization=organization, actor=actor, subject_ids=subject_ids)
     return set(rows.order_by().values_list("subject_id", "period_id").distinct())
-
-
-def shared_sibling_pairs(*, organization, actor, subject_ids, period_ids) -> dict:
-    """``{(fənn_id, semestr_id): say}`` — HƏMKARLARIN kopyalana bilən (təsdiqlənmiş) qonşu dosyeləri.
-
-    Aktorun öz dosyeləri sayılmır (onları çağıran tərəf öz dəstindən sayır). TƏK sorğu.
-    """
-    if organization is None or not subject_ids or not period_ids or not actor.has(PERM_EDIT):
-        return {}
-    rows = (
-        _copyable_roots(organization=organization, actor=actor, subject_ids=subject_ids)
-        .filter(period_id__in=list(period_ids))
-        .exclude(_own_q(actor))
-        .order_by()
-        .values("subject_id", "period_id")
-        .annotate(n=Count("pk"))
-    )
-    return {(row["subject_id"], row["period_id"]): row["n"] for row in rows}
 
 
 def has_previous(pairs, *, subject_id, period_id) -> bool:
@@ -421,7 +369,7 @@ def sibling_queryset(*, organization, actor, subject_id, period_id, exclude_syll
         queryset = queryset.exclude(pk=exclude_syllabus_id)
     if exclude_offering_id is not None:
         queryset = queryset.exclude(offering_id=exclude_offering_id)
-    queryset = _reuse_visible(queryset, actor)
+    queryset = _scope_filter(queryset, actor)
     own = Case(When(_own_q(actor), then=Value(1)), default=Value(0), output_field=IntegerField())
     approved_rank = Case(
         When(approved_version__status=SyllabusStatus.APPROVED.value, then=Value(0)),
@@ -465,7 +413,6 @@ __all__ = [
     "CODE_TARGET_LINKED",
     "CODE_TARGET_LOCKED",
     "CODE_UP_TO_DATE",
-    "PERSONAL_INFO_KEYS",
     "REASON_CODES",
     "copy_base",
     "copy_code",
@@ -476,15 +423,12 @@ __all__ = [
     "link_base",
     "link_code",
     "normalize_hours",
-    "own_copy_scope",
     "previous_queryset",
     "previous_slot",
     "previous_source_pairs",
     "reuse_origin",
     "reuse_root",
     "same_slot",
-    "shared_copy_ok",
-    "shared_sibling_pairs",
     "sibling_queryset",
     "target_state_code",
 ]

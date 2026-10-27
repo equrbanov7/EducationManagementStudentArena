@@ -148,21 +148,18 @@ def test_unapproved_source_can_only_be_copied(world):
 
 def test_permission_denials(world):
     source, _version = approved_syllabus(world, "o1")
-    foreign, foreign_version = draft_for(world, "o5", user_key="teacher2")
-    # Həmkarın QARALAMASINI kopyalamaq olmaz (sahib 2026-10-27: yalnız təsdiqlənmiş nüsxə paylaşılır).
-    with pytest.raises(TransitionDenied) as denied:
-        services.reuse.copy_adjust(source=foreign, target=target(world, "o2"), actor=actor(world))
-    assert denied.value.code == rules.CODE_COPY_OUT_OF_SCOPE
-    approve_version(world, fill(foreign_version, actor(world, "teacher2")), actor(world, "teacher2"))
-    foreign.refresh_from_db()
+    foreign, _foreign_version = approved_syllabus(world, "o5", user_key="teacher2")
     # Başqasının açılışına yazmaq olmaz.
     with pytest.raises(TransitionDenied) as denied:
         services.reuse.link(source=source, target=target(world, "o5"), actor=actor(world))
     assert denied.value.code == "transition.author_only"
-    # Başqa müəllimin (təsdiqlənmiş) sillabusuna BAĞLANMAQ olmaz — kopyalamaq olar (bax test_reuse_api).
+    # Başqa müəllimin sillabusuna bağlanmaq və onu kopyalamaq olmaz.
     with pytest.raises(TransitionDenied) as denied:
         services.reuse.link(source=foreign, target=target(world, "o2"), actor=actor(world))
     assert denied.value.code == rules.CODE_NOT_OWN
+    with pytest.raises(TransitionDenied) as denied:
+        services.reuse.copy_adjust(source=foreign, target=target(world, "o2"), actor=actor(world))
+    assert denied.value.code == rules.CODE_COPY_OUT_OF_SCOPE
     # `syllabus.edit` açarı olmayan (kafedra müdiri) heç nə yaza bilmir.
     with pytest.raises(TransitionDenied) as denied:
         services.reuse.copy_adjust(source=source, target=target(world, "o2"), actor=actor(world, "head"))
