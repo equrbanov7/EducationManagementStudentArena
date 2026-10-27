@@ -111272,3 +111272,64 @@ msgstr "Aktion"
 msgctxt "appeals.teaching"
 msgid "Fayl ilk %(n)s sətirlə məhdudlaşdırılıb — süzgəcləri daraldıb yenidən yükləyin."
 msgstr "Die Datei ist auf die ersten %(n)s Zeilen begrenzt — Filter eingrenzen und erneut herunterladen."
+
+msgctxt "subject_folder.ui"
+msgid "Kafedra materialları"
+msgstr "Lehrstuhlmaterialien"
+
+msgctxt "subject_folder.ui"
+msgid "Struktur əhatəniz təyin edilməyib"
+msgstr "Ihr struktureller Bereich ist nicht festgelegt"
+
+msgctxt "subject_folder.ui"
+msgid "Kafedra materialları üzvlüyünüzün bölməsinə (kafedra / fakültə) görə göstərilir — administratora müraciət edin."
+msgstr "Lehrstuhlmaterialien werden nach der Einheit Ihrer Mitgliedschaft (Lehrstuhl / Fakultät) angezeigt — wenden Sie sich an den Administrator."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq əhatənizdə deyil və ya hələ qaralamadır."
+msgstr "Der Ordner liegt außerhalb Ihres Bereichs oder ist noch ein Entwurf."
+
+msgctxt "subject_folder.ui"
+msgid "Kafedranızın müəllimlərinin fənn qovluqlarında dərc etdiyi tədris materialları — yalnız baxış və endirmə."
+msgstr "Von den Lehrkräften Ihres Lehrstuhls in den Fachordnern veröffentlichte Lehrmaterialien — nur Ansicht und Download."
+
+#, python-format
+msgctxt "subject_folder.ui"
+msgid "İlk %(n)s qovluq göstərilir — süzgəc və ya axtarışla daraldın."
+msgstr "Die ersten %(n)s Ordner werden angezeigt — mit Filtern oder Suche eingrenzen."
+
+msgctxt "subject_folder.ui"
+msgid "Hələ dərc edilmiş fənn qovluğu yoxdur"
+msgstr "Noch keine veröffentlichten Fachordner"
+
+msgctxt "subject_folder.ui"
+msgid "Kafedranın müəllimləri fənn qovluğunu qruplara təyin edəndə materiallar burada görünəcək."
+msgstr "Die Materialien erscheinen hier, sobald die Lehrkräfte des Lehrstuhls Fachordner Gruppen zuweisen."
+
+msgctxt "subject_folder.ui"
+msgid "Yalnız baxış"
+msgstr "Nur Ansicht"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluqda hələ dərc edilmiş material yoxdur"
+msgstr "Im Ordner gibt es noch keine veröffentlichten Materialien"
+
+msgctxt "subject_folder.ui"
+msgid "Fənn, qovluq və ya müəllim…"
+msgstr "Fach, Ordner oder Lehrkraft…"
+
+msgctxt "subject_folder.ui"
+msgid "MATERİAL"
+msgstr "MATERIALIEN"
+
+msgctxt "subject_folder.ui"
+msgid "dərc edilmiş"
+msgstr "veröffentlicht"
+
+msgctxt "profile.sidebar"
+msgid "Kafedra materialları"
+msgstr "Lehrstuhlmaterialien"
+
+msgctxt "organizations.permission.label"
+msgid "Kafedranın fənn qovluqlarına (dərs materiallarına) baxmaq"
+msgstr "Fachordner des Lehrstuhls (Lehrmaterialien) ansehen"

@@ -110440,3 +110440,64 @@ msgstr "Действие"
 msgctxt "appeals.teaching"
 msgid "Fayl ilk %(n)s sətirlə məhdudlaşdırılıb — süzgəcləri daraldıb yenidən yükləyin."
 msgstr "Файл ограничен первыми %(n)s строками — сузьте фильтры и скачайте снова."
+
+msgctxt "subject_folder.ui"
+msgid "Kafedra materialları"
+msgstr "Материалы кафедры"
+
+msgctxt "subject_folder.ui"
+msgid "Struktur əhatəniz təyin edilməyib"
+msgstr "Ваша структурная область не задана"
+
+msgctxt "subject_folder.ui"
+msgid "Kafedra materialları üzvlüyünüzün bölməsinə (kafedra / fakültə) görə göstərilir — administratora müraciət edin."
+msgstr "Материалы кафедры показываются по подразделению вашего членства (кафедра / факультет) — обратитесь к администратору."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq əhatənizdə deyil və ya hələ qaralamadır."
+msgstr "Папка вне вашей области или ещё является черновиком."
+
+msgctxt "subject_folder.ui"
+msgid "Kafedranızın müəllimlərinin fənn qovluqlarında dərc etdiyi tədris materialları — yalnız baxış və endirmə."
+msgstr "Учебные материалы, опубликованные преподавателями вашей кафедры в папках дисциплин, — только просмотр и скачивание."
+
+#, python-format
+msgctxt "subject_folder.ui"
+msgid "İlk %(n)s qovluq göstərilir — süzgəc və ya axtarışla daraldın."
+msgstr "Показаны первые %(n)s папок — сузьте фильтром или поиском."
+
+msgctxt "subject_folder.ui"
+msgid "Hələ dərc edilmiş fənn qovluğu yoxdur"
+msgstr "Опубликованных папок дисциплин пока нет"
+
+msgctxt "subject_folder.ui"
+msgid "Kafedranın müəllimləri fənn qovluğunu qruplara təyin edəndə materiallar burada görünəcək."
+msgstr "Материалы появятся здесь, когда преподаватели кафедры назначат папки дисциплин группам."
+
+msgctxt "subject_folder.ui"
+msgid "Yalnız baxış"
+msgstr "Только просмотр"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluqda hələ dərc edilmiş material yoxdur"
+msgstr "В папке пока нет опубликованных материалов"
+
+msgctxt "subject_folder.ui"
+msgid "Fənn, qovluq və ya müəllim…"
+msgstr "Дисциплина, папка или преподаватель…"
+
+msgctxt "subject_folder.ui"
+msgid "MATERİAL"
+msgstr "МАТЕРИАЛЫ"
+
+msgctxt "subject_folder.ui"
+msgid "dərc edilmiş"
+msgstr "опубликовано"
+
+msgctxt "profile.sidebar"
+msgid "Kafedra materialları"
+msgstr "Материалы кафедры"
+
+msgctxt "organizations.permission.label"
+msgid "Kafedranın fənn qovluqlarına (dərs materiallarına) baxmaq"
+msgstr "Просмотр папок дисциплин кафедры (учебных материалов)"

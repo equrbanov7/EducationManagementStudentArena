@@ -86,6 +86,8 @@ _TRUSTEE_PERMISSIONS = [
     "accounting.view",
     # 2026-10-24: «Müraciətlərim → Bütün müraciətlər» — YALNIZ OXU (əməl/daxili qeyd yox; applications 0006).
     "application.view_all",
+    # 2026-10-27: «Kafedra materialları» — fənn qovluqlarının dərc edilmiş materialları (YALNIZ OXU; miqrasiya 0074).
+    "subject_folder.view_unit",
 ]
 
 #: İnzibati şöbə müdiri: öz vahidi + kataloq oxusu.

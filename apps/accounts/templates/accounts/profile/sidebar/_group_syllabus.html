@@ -6,13 +6,14 @@ kafedra təsdiqi).
 Əvvəllər sillabuslar «Universitet», sual bankı isə «Tədris işi» qrupunda idi —
 eyni iş axını iki yerə düşürdü. 2026-09-10-da bir qrupa yığıldı; icazə şərtləri
 DƏYİŞMƏYİB. 2026-09-25: müəllimin də gördüyü üç bənd `sidebar/items/`-dədir.{% endcomment %}
-{% if "syllabus-list" in allowed_sections or "syllabus-review" in allowed_sections or "question-bank" in allowed_sections or "question-submissions" in allowed_sections or "question-chair-review" in allowed_sections %}
+{% if "syllabus-list" in allowed_sections or "unit-subject-folders" in allowed_sections or "syllabus-review" in allowed_sections or "question-bank" in allowed_sections or "question-submissions" in allowed_sections or "question-chair-review" in allowed_sections %}
 <li class="sidebar-menu-group" data-sidebar-group="syllabus">
-    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|syllabus-list|syllabus-editor|syllabus-review|question-bank|question-submissions|question-chair-review|" %} open{% endif %}>
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|syllabus-list|syllabus-editor|unit-subject-folders|syllabus-review|question-bank|question-submissions|question-chair-review|" %} open{% endif %}>
         {% trans "Sillabus və sual" context "profile.sidebar" as group_label %}
         {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="file-text" %}
         <ul class="sidebar-menu-group-items">
             {% include "accounts/profile/sidebar/items/_syllabus_list.html" %}
+            {% include "accounts/profile/sidebar/items/_unit_subject_folders.html" %}
             {% comment %}Sillabus təsdiqi — AYRI icazə açarı (`syllabus.review`): kafedra
             müdiri, dekan, RİM. Müəllim bu sətri görmür.{% endcomment %}
             {% if "syllabus-review" in allowed_sections %}

@@ -15,7 +15,7 @@ from django.views.decorators.http import require_GET
 from core.tenancy import get_request_organization, request_has_active_organization_context
 
 from .models import FolderMaterial, SubmissionFile, TaskAttachment
-from .services import access
+from .services import access, unit_view
 from .services.media import file_response
 
 
@@ -35,7 +35,10 @@ def material_download(request, material_id):
         .select_related("folder", "folder__organization", "topic")
         .first()
     )
-    if material is None or not material.file or not access.can_view_material(request.user, material):
+    if material is None or not material.file:
+        raise Http404
+    # Kafedranın YALNIZ-OXU baxışı (``subject_folder.view_unit``, sahib 2026-10-27) — yalnız dərc edilmiş material.
+    if not (access.can_view_material(request.user, material) or unit_view.can_view_material(request.user, material)):
         raise Http404
     return file_response(material.file, filename=material.original_name, content_type=material.content_type)
 

@@ -33,6 +33,7 @@ from .permissions_stage2 import merge_stage2
 from .permissions_stage3 import merge_stage3
 from .permissions_system import merge_system_permissions
 from .permissions_transcript import merge_transcript_permissions
+from .permissions_unit_view import merge_unit_view_permissions
 from .permissions_workload_load import merge_workload_load_permissions
 
 # Permission definitions by category
@@ -472,12 +473,11 @@ merge_hr_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSI
 merge_role_audit_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
 # «Mühasibatlıq» + 25% təkrar imtahan (2026-10-18) — `accounting.view`, `retake.payment_verify`, `retake.manage`.
 merge_accounting_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
-# «Sənəd yoxlaması» (2026-10-18) — `document_seal.manage`.
-merge_document_seal_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
-# «Əmək müqavilələri» (2026-10-19) — `hr.contracts_view` / `hr.contracts_manage` (apps.hr_contracts).
-merge_hr_contract_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
+merge_document_seal_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)  # 2026-10-18
+merge_hr_contract_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)  # 2026-10-19
 merge_transcript_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)  # 2026-10-19
 merge_workload_load_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)  # 2026-10-23
+merge_unit_view_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)  # 2026-10-27
 
 
 def get_permission_label(permission: str) -> str:

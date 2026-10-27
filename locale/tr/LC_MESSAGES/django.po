@@ -109654,3 +109654,64 @@ msgstr "İşlem"
 msgctxt "appeals.teaching"
 msgid "Fayl ilk %(n)s sətirlə məhdudlaşdırılıb — süzgəcləri daraldıb yenidən yükləyin."
 msgstr "Dosya ilk %(n)s satırla sınırlandı — filtreleri daraltıp yeniden indirin."
+
+msgctxt "subject_folder.ui"
+msgid "Kafedra materialları"
+msgstr "Bölüm materyalleri"
+
+msgctxt "subject_folder.ui"
+msgid "Struktur əhatəniz təyin edilməyib"
+msgstr "Yapısal kapsamınız tanımlanmamış"
+
+msgctxt "subject_folder.ui"
+msgid "Kafedra materialları üzvlüyünüzün bölməsinə (kafedra / fakültə) görə göstərilir — administratora müraciət edin."
+msgstr "Bölüm materyalleri üyeliğinizin birimine (bölüm / fakülte) göre gösterilir — yöneticiye başvurun."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq əhatənizdə deyil və ya hələ qaralamadır."
+msgstr "Klasör kapsamınızın dışında veya hâlâ taslak."
+
+msgctxt "subject_folder.ui"
+msgid "Kafedranızın müəllimlərinin fənn qovluqlarında dərc etdiyi tədris materialları — yalnız baxış və endirmə."
+msgstr "Bölümünüzün öğretmenlerinin ders klasörlerinde yayımladığı öğretim materyalleri — yalnızca görüntüleme ve indirme."
+
+#, python-format
+msgctxt "subject_folder.ui"
+msgid "İlk %(n)s qovluq göstərilir — süzgəc və ya axtarışla daraldın."
+msgstr "İlk %(n)s klasör gösteriliyor — filtre veya aramayla daraltın."
+
+msgctxt "subject_folder.ui"
+msgid "Hələ dərc edilmiş fənn qovluğu yoxdur"
+msgstr "Henüz yayımlanmış ders klasörü yok"
+
+msgctxt "subject_folder.ui"
+msgid "Kafedranın müəllimləri fənn qovluğunu qruplara təyin edəndə materiallar burada görünəcək."
+msgstr "Bölüm öğretmenleri ders klasörlerini gruplara atadığında materyaller burada görünecek."
+
+msgctxt "subject_folder.ui"
+msgid "Yalnız baxış"
+msgstr "Yalnızca görüntüleme"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluqda hələ dərc edilmiş material yoxdur"
+msgstr "Klasörde henüz yayımlanmış materyal yok"
+
+msgctxt "subject_folder.ui"
+msgid "Fənn, qovluq və ya müəllim…"
+msgstr "Ders, klasör veya öğretmen…"
+
+msgctxt "subject_folder.ui"
+msgid "MATERİAL"
+msgstr "MATERYAL"
+
+msgctxt "subject_folder.ui"
+msgid "dərc edilmiş"
+msgstr "yayımlanmış"
+
+msgctxt "profile.sidebar"
+msgid "Kafedra materialları"
+msgstr "Bölüm materyalleri"
+
+msgctxt "organizations.permission.label"
+msgid "Kafedranın fənn qovluqlarına (dərs materiallarına) baxmaq"
+msgstr "Bölümün ders klasörlerini (öğretim materyallerini) görüntüleme"

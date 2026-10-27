@@ -1,0 +1,37 @@
+{% load i18n %}
+<nav class="ems-crumbs sfc-crumbs" aria-label="{% trans 'Naviqasiya' context 'subject_folder.ui' %}">
+    <a class="ems-crumbs__link" href="{{ up.urls.list }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Kafedra materialları" context "subject_folder.ui" %}</a>
+</nav>
+<header class="sfc-head">
+    <div class="sfc-head__main">
+        <p class="sfc-eyebrow">{{ up.folder.subject.name }} · {{ up.period_label }}</p>
+        <h2 class="sfc-head__title">{{ up.folder.title }}</h2>
+        <p class="sfc-head__meta"><span>{{ up.teacher }}</span><span class="ems-badge ems-badge--info">{% trans "Yalnız baxış" context "subject_folder.ui" %}</span></p>
+        {% if up.folder.description %}<p class="sfc-head__desc">{{ up.folder.description|linebreaksbr }}</p>{% endif %}
+    </div>
+</header>
+
+{% if not up.topics and not up.general %}
+    {% trans "Qovluqda hələ dərc edilmiş material yoxdur" context "subject_folder.ui" as st_title %}
+    {% include "partials/ems_ui/_empty.html" with state_title=st_title state_icon="fa-folder-open" %}
+{% endif %}
+
+<ol class="sfc-topics" role="list">
+    {% for row in up.topics %}
+    <li class="sfc-topic">
+        <div class="sfc-topic__head">
+            <div class="sfc-topic__title">
+                {% if row.topic.week_no %}<span class="sfc-topic__week">{% blocktrans trimmed with n=row.topic.week_no context "subject_folder.ui" %}Həftə {{ n }}{% endblocktrans %}</span>{% endif %}
+                <h3 class="sfc-topic__name">{{ row.topic.title }}</h3>
+            </div>
+        </div>
+        {% include "subject_folder/cabinet/student/_items.html" with materials=row.materials tasks=None %}
+    </li>
+    {% endfor %}
+    {% if up.general %}
+    <li class="sfc-topic sfc-topic--general">
+        <div class="sfc-topic__head"><div class="sfc-topic__title"><h3 class="sfc-topic__name">{% trans "Ümumi" context "subject_folder.ui" %}</h3></div></div>
+        {% include "subject_folder/cabinet/student/_items.html" with materials=up.general tasks=None %}
+    </li>
+    {% endif %}
+</ol>

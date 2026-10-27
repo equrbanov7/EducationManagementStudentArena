@@ -51,17 +51,10 @@ def _scope_q(user, organization, *, supervisor):
     """Slot sorğusunun əhatə şərti; ``None`` → əhatə yoxdur (boş nəticə)."""
     if not supervisor:
         return Q(offering__instructor=user)
-    from apps.registrar.lessons_log import _supervision_scopes
+    from apps.registrar.lessons_log import supervision_q
 
-    scopes = _supervision_scopes(user, organization)
-    if not scopes:
-        return None
-    if any(scope.is_org_wide for scope in scopes):
-        return Q()
-    combined = Q()
-    for scope in scopes:
-        combined |= scope.unit_subtree_q(path_field="offering__group__path", id_field="offering__group__id")
-    return combined
+    # Dərs siyahısı ilə EYNİ əhatə (kafedra kökü → kafedraya aid açılışlar; sahib 2026-10-27).
+    return supervision_q(user, organization)
 
 
 def apply_slot_filters(slots, filters, *, supervisor):

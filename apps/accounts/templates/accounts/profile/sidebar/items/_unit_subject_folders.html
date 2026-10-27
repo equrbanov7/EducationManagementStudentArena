@@ -1,0 +1,14 @@
+{% load i18n nav_icons %}
+{# «Kafedra materialları» — tyutor / laborant: kafedranın fənn qovluqlarına YALNIZ-OXU baxış (2026-10-27). #}
+{% if "unit-subject-folders" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=unit-subject-folders"
+       data-section="unit-subject-folders"
+       data-title="{% trans 'Kafedra materialları' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'unit-subject-folders' %}active{% endif %}">
+        {% nav_icon "folders" "sidebar-menu-icon" %}
+        <span class="sidebar-menu-text">{% trans "Kafedra materialları" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}

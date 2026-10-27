@@ -21,12 +21,24 @@ TEACHING_APPEALS_SECTION_PARTIALS: dict[str, str] = {
     "teaching-appeals": "accounts/profile/sections/_teaching_appeals.html",
 }
 
+#: «Kafedra materialları» (apps.subject_folder, sahib 2026-10-27) — tyutor / laborant üçün YALNIZ-OXU panel (data
+#: ``{% sf_unit_panel %}`` tag-ı ilə, açar + əhatə render vaxtı yenidən yoxlanır); süzgəc / qovluq linkləri yerində.
+UNIT_MATERIALS_SECTION_PARTIALS: dict[str, str] = {
+    "unit-subject-folders": "accounts/profile/sections/_unit_subject_folders.html",
+}
+
 #: ``sections_api``-a birləşən əlavə bölmələr (Əmək müqavilələri + Xarici nəticələrin tanınması).
 EXTRA_SECTION_PARTIALS: dict[str, str] = (
-    HR_CONTRACT_SECTION_PARTIALS | RECOGNITION_SECTION_PARTIALS | TEACHING_APPEALS_SECTION_PARTIALS
+    HR_CONTRACT_SECTION_PARTIALS
+    | RECOGNITION_SECTION_PARTIALS
+    | TEACHING_APPEALS_SECTION_PARTIALS
+    | UNIT_MATERIALS_SECTION_PARTIALS
 )
 EXTRA_AJAX_SECTIONS: frozenset[str] = (
-    HR_CONTRACT_AJAX_SECTIONS | RECOGNITION_AJAX_SECTIONS | frozenset(TEACHING_APPEALS_SECTION_PARTIALS)
+    HR_CONTRACT_AJAX_SECTIONS
+    | RECOGNITION_AJAX_SECTIONS
+    | frozenset(TEACHING_APPEALS_SECTION_PARTIALS)
+    | frozenset(UNIT_MATERIALS_SECTION_PARTIALS)
 )
 
 __all__ = [
@@ -35,4 +47,5 @@ __all__ = [
     "RECOGNITION_AJAX_SECTIONS",
     "RECOGNITION_SECTION_PARTIALS",
     "TEACHING_APPEALS_SECTION_PARTIALS",
+    "UNIT_MATERIALS_SECTION_PARTIALS",
 ]

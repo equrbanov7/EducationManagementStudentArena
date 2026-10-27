@@ -300,3 +300,9 @@ STAFF_VIEW_PERMISSIONS = ("journal.view",)
 ORG_VIEW_PERMISSIONS = ("journal.correct",)
 #: Müəllim səlahiyyəti (canlı müəllim yoxlaması, registrar ``integrity`` ilə eyni açar).
 INSTRUCTOR_PERMISSION = "grade.input"
+
+# ── Kafedranın dərs materiallarına YALNIZ-OXU baxış (tyutor / laborant, sahib 2026-10-27) ──
+#: Əhatədəki qovluqların DƏRC EDİLMİŞ materiallarını göstərir; göndərişləri AÇMIR (``services.unit_view``).
+UNIT_VIEW_PERMISSION = "subject_folder.view_unit"
+#: Profil bölməsi — «Kafedra materialları».
+SECTION_UNIT = "unit-subject-folders"

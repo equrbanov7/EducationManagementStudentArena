@@ -19,6 +19,7 @@ from .permissions_document_seal import apply_document_seal_grants
 from .permissions_hr import apply_hr_grants
 from .permissions_hr_contracts import apply_hr_contract_grants
 from .permissions_transcript import apply_transcript_grants
+from .permissions_unit_view import apply_unit_view_grants
 from .permissions_workload_load import apply_workload_load_grants
 
 #: Akademik kurasiya açarları — `program_coordinator` VƏ `tutor` üçün ORTAQ.
@@ -576,6 +577,9 @@ apply_workload_load_grants(UNIVERSITY_ROLES)
 apply_hr_contract_grants(UNIVERSITY_ROLES)
 # «Transkript və arayış vermək» (2026-10-19): `transcript.issue`. Mövcud: verification/0004.
 apply_transcript_grants(UNIVERSITY_ROLES)
+
+# Tyutor + laborant (2026-10-27): kafedranın sillabus / dərs materialına OXU. Mövcud: organizations/0074.
+apply_unit_view_grants(UNIVERSITY_ROLES)
 
 # Rol auditi (2026-10-13, sahib «tövsiyə olunan variantlarla»): açar verilişi/alınması + ölü açarlar.
 # Mövcud tenantlar: organizations/0061. SONUNCU olmalıdır — əvvəlki addımların əlavələrini də süzür.
