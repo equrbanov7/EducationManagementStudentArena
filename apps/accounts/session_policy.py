@@ -138,8 +138,9 @@ def exam_in_progress(request, user) -> bool:
     live_model = django_apps.get_model("live_exam", "LiveSession")
     live_states = (live_model.STATE_LOBBY, live_model.STATE_QUESTION, live_model.STATE_REVEAL)
     with bypass_rls():
+        # «Qaralama saxla» cəhdi `draft` statusuna keçirir — o da gedən imtahandır (2026-10-27).
         if attempt_model.objects.filter(
-            user=user, status="in_progress", started_at__gte=now - _EXAM_ATTEMPT_WINDOW
+            user=user, status__in=("in_progress", "draft"), started_at__gte=now - _EXAM_ATTEMPT_WINDOW
         ).exists():
             return True
         return live_model.objects.filter(

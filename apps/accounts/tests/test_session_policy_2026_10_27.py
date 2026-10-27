@@ -171,6 +171,19 @@ class PresenceTimeoutTest(_Base):
         response = client.get(reverse("home"))
         self.assertTrue(response.wsgi_request.user.is_authenticated)
 
+    @override_settings(SESSION_BROWSER_CLOSE_SCOPE="all")
+    def test_draft_saved_exam_attempt_is_never_ended(self):
+        """«Qaralama saxla» cəhdi `draft` edir — imtahan hələ gedir, sessiya bitirilmir."""
+        from apps.exams.models import Exam, ExamAttempt
+
+        exam = Exam.objects.create(title="SP draft exam", author=self.teacher, organization=self.org, is_active=True)
+        ExamAttempt.objects.create(user=self.student, exam=exam, attempt_number=1, status="draft")
+        client = self._client(self.student)
+        client.get(reverse("home"))
+        self._age(client, session_policy.SEEN_KEY, 120)
+        response = client.get(reverse("home"))
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+
     def test_ajax_request_gets_localized_401_instead_of_raw_error(self):
         client = self._client(self.teacher)
         client.get(reverse("home"))
