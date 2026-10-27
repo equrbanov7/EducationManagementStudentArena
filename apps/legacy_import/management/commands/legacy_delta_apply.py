@@ -1,6 +1,8 @@
 """``legacy_delta_apply`` — köhnə sistemin DELTA paketini hədəfə tətbiq edir (dry-run DEFAULT).
 
     manage.py legacy_delta_apply --bundle delta.json.gz --organization qku               # dry-run (geri qaytarılır)
+    manage.py legacy_delta_apply --bundle təzə.json.gz --organization qku --lessons-since 2026-10-21 \
+        --phase offerings --phase enrollments --phase lessons --phase topics           # yalnız 21.10+ dərslər
     manage.py legacy_delta_apply --bundle delta.json.gz --organization qku --apply \\
         --i-know-this-is-production --report-out /tmp/delta_report.json --names-out /tmp/delta_names.csv
 
@@ -20,6 +22,7 @@ from django.core.management.base import BaseCommand, CommandError
 from apps.legacy_import.services.delta.apply import DEFAULT_PHASES, PHASES, execute
 from apps.legacy_import.services.delta.bundle import BundleError, file_sha256, read_bundle
 from apps.legacy_import.services.delta.history import HistoryPhaseMismatch
+from apps.legacy_import.services.delta.since import restrict_to_since
 from apps.legacy_import.services.repair_support import (
     add_repair_arguments,
     assert_writable_target,
@@ -49,6 +52,11 @@ class Command(BaseCommand):
             help="Bu tarixdən (YYYY-MM-DD) SONRAKI dərs/xanalar atılır (default: bu gün)",
         )
         parser.add_argument(
+            "--lessons-since",
+            default="",
+            help="Yalnız bu tarixdən (YYYY-MM-DD, daxil) SONRAKI dərs/xana/mövzu sətirləri (təzə dump-ın təkrar deltası)",
+        )
+        parser.add_argument(
             "--phase",
             action="append",
             choices=PHASES,
@@ -74,11 +82,22 @@ class Command(BaseCommand):
                 until = datetime.date.fromisoformat(options["lessons_until"])
             except ValueError:
                 raise CommandError("legacy_delta_until_invalid") from None
+        since = None
+        if options["lessons_since"]:
+            try:
+                since = datetime.date.fromisoformat(options["lessons_since"])
+            except ValueError:
+                raise CommandError("legacy_delta_since_invalid") from None
+            if since > until:
+                raise CommandError("legacy_delta_since_after_until")
+        since_counts = {}
         with rls_worker_atomic():
             if options["apply"]:
                 assert_writable_target(allow_production=bool(options["i_know_this_is_production"]))
             organization = resolve_organization(options["organization"])
             actor = resolve_actor(organization, options["actor"])
+            if since is not None:
+                bundle, since_counts = restrict_to_since(bundle, organization, since)
             try:
                 run = execute(
                     organization=organization,
@@ -95,9 +114,11 @@ class Command(BaseCommand):
             mode="APPLY" if options["apply"] else "DRY-RUN (geri qaytarıldı)",
             organization=organization.slug,
             lessons_until=until.isoformat(),
+            lessons_since=since.isoformat() if since else "",
             snapshot=bundle.get("snapshot", {}),
         )
         self.stdout.write(f"=== legacy_delta_apply — {summary['mode']} — {run.tag} ===")
+        summary["counters"] = {**summary["counters"], **dict(sorted(since_counts.items()))}
         for key, value in summary["counters"].items():
             self.stdout.write(f"  {key:52s} {value}")
         self.stdout.write("  yaradılan: " + ", ".join(f"{k}={v}" for k, v in summary["created"].items()))

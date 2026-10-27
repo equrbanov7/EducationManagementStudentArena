@@ -131,7 +131,8 @@ class ScopeRulesTest(_ShareBase):
         self._share(self.seminarist, kinds=["seminar"], enrollments=[self.e2])
         scope = self._scope(self.teacher)
         self.assertFalse(scope.full)
-        self.assertEqual(scope.kinds, frozenset({"lecture", "lab"}))  # laboratoriyanı heç kim iddia etmir
+        # Seminarçının payı yalnız e2-ni örtür → seminar sahibdən ALINMIR (RİM MR-000010, 2026-10-27).
+        self.assertIsNone(scope.kinds)
         self.assertEqual(scope.enrollment_ids, frozenset({str(self.e1.pk), str(e3.pk)}))  # e3 heç kimin deyil
         self.assertTrue(scope.can_manage_scores)
 

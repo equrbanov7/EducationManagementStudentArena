@@ -10,7 +10,13 @@ Qaydalar:
 * tələbələr açılışa aid və ``enrolled`` olmalıdır (etibarlı alt çoxluq saxlanılır; heç biri qalmırsa pay atlanır);
   açılışın BÜTÜN aktiv tələbələri → boş (hamısı) saxlanılır;
 * növlər ``LessonKind`` dəyərlərinə çevrilir; açılışın dərslərindəki bütün növləri örtürsə → boş (hamısı);
-* (açılış, müəllim) üzrə upsert, ``source=legacy``; ƏL İLƏ yaradılmış pay HEÇ VAXT üzərinə yazılmır;
+* (açılış, müəllim) üzrə upsert, ``source=legacy``; ƏL İLƏ yaradılmış pay HEÇ VAXT üzərinə yazılmır; mövcud köhnə
+  sistem payının növləri/tələbələri yerində yenilənir (əvvəlki vəziyyət paketin audit manifestindədir);
+* sətirdə ``"active": false`` — həmin (açılış, müəllim) üzrə aktiv köhnə sistem payı SÖNDÜRÜLÜR (RİM MR-000017,
+  2026-10-27: təhvildən sonra əvvəlki müəllimin payı); əl ilə pay toxunulmur;
+* hər ``--apply`` paketi BİR audit sətri yazır (``registrar.journal_shares_batch``: yaradılan / yenilənən (əvvəlki
+  növ + tələbələr) / söndürülən pay id-ləri) — ``--undo`` onunla dəqiq geri qaytarır (yaradılanı söndürür,
+  yeniləneni əvvəlki vəziyyətə, söndürüləni yenidən aktiv edir);
 * ``drop_enrollments`` — hələ ``enrolled`` və heç bir datası olmayan qeydiyyat «Jurnal təmizliyi» qərarı ilə
   ``dropped`` olur (kateqoriya ``empty_subject``, səbəb kodu ``language_level`` — tarixçədən geri qaytarılır);
   datası olan saxlanılır (``drop_kept_has_data``).
@@ -31,6 +37,7 @@ from core.http_ids import parse_uuid
 from .models import CourseOffering, Enrollment, JournalShare, JournalShareSource, Lesson, LessonKind
 
 FORMAT = "journal-shares/1"
+BATCH_RESOURCE = "registrar.journal_shares_batch"
 DROP_REASON_CODE = "language_level"
 DROP_REASON = (
     "Xarici dil səviyyə jurnalı: köhnə sistemdə tələbə bu səviyyənin jurnalında olmayıb, "
@@ -48,6 +55,8 @@ SHOWN = (
     "shares_created",
     "shares_updated",
     "shares_unchanged",
+    "shares_deactivated",
+    "deactivate_missing",
     "manual_kept",
     "owner_shares",
     "teacher_shares",
@@ -104,9 +113,11 @@ def _ids(values) -> list:
 
 
 class _Context:
-    """Fayldakı açılışların bir dəfəlik oxunuşu (açılış, aktiv tələbələr, dərs növləri, mövcud paylar)."""
+    """Fayldakı açılışların bir dəfəlik oxunuşu (açılış, aktiv tələbələr, dərs növləri, mövcud paylar) + paketin
+    manifesti (``created`` / ``updated`` (əvvəlki vəziyyət) / ``deactivated`` pay id-ləri)."""
 
     def __init__(self, organization, period, offering_ids):
+        self.manifest = {"created": [], "updated": {}, "deactivated": []}
         self.offerings = {
             str(offering.pk): offering
             for offering in CourseOffering.objects.filter(
@@ -192,17 +203,37 @@ def _upsert(offering, teacher, kinds, enrollment_ids, *, organization, actor, ba
         )
         share.enrollments.set(enrollment_ids)
         context.existing[(str(offering.pk), teacher.pk)] = share
+        context.manifest["created"].append(str(share.pk))
         counts["shares_created"] += 1
         return
     current = {str(pk) for pk in share.enrollments.values_list("pk", flat=True)}
     if sorted(share.kinds or []) == kinds and current == set(enrollment_ids):
         counts["shares_unchanged"] += 1
         return
+    context.manifest["updated"].setdefault(
+        str(share.pk), {"kinds": list(share.kinds or []), "enrollments": sorted(current), "batch": share.batch}
+    )
     share.kinds = kinds
     share.batch = batch
     share.save(update_fields=["kinds", "batch", "updated_at"])
     share.enrollments.set(enrollment_ids)
     counts["shares_updated"] += 1
+
+
+def _deactivate(offering, teacher_id, *, context, counts) -> None:
+    """Sətirdə ``"active": false`` — aktiv köhnə sistem payını söndür (əl ilə pay toxunulmur)."""
+    share = context.existing.get((str(offering.pk), teacher_id))
+    if share is None:
+        counts["deactivate_missing"] += 1
+        return
+    if share.source != JournalShareSource.LEGACY:
+        counts["manual_kept"] += 1
+        return
+    share.is_active = False
+    share.save(update_fields=["is_active", "updated_at"])
+    del context.existing[(str(offering.pk), teacher_id)]
+    context.manifest["deactivated"].append(str(share.pk))
+    counts["shares_deactivated"] += 1
 
 
 def apply_shares(organization, data, *, actor, batch) -> Counter:
@@ -220,6 +251,10 @@ def apply_shares(organization, data, *, actor, batch) -> Counter:
         offering = context.offerings.get(str(item.get("offering")))
         if offering is None or not offering.is_active:
             counts["offering_missing"] += 1
+            continue
+        if item.get("active", True) is False:
+            # Söndürmə müəllimin vəziyyətindən asılı deyil (bloklanmış müəllimin payı da söndürülür).
+            _deactivate(offering, item.get("teacher"), context=context, counts=counts)
             continue
         verdict = verdicts.get(item.get("teacher"), "teacher_missing")
         if verdict != "ok":
@@ -246,7 +281,26 @@ def apply_shares(organization, data, *, actor, batch) -> Counter:
             context=context,
             counts=counts,
         )
+    _audit_batch(organization, actor, batch, context.manifest, counts)
     return counts
+
+
+def _audit_batch(organization, actor, batch, manifest, counts) -> None:
+    if not (manifest["created"] or manifest["updated"] or manifest["deactivated"]):
+        return
+    from core.audit import log_action
+    from core.constants import AuditAction
+
+    log_action(
+        AuditAction.UPDATE,
+        user=actor,
+        organization=organization,
+        new_values={"counts": {key: counts.get(key, 0) for key in SHOWN}, **manifest},
+        reason=f"apply_journal_shares {batch}",
+        resource_type=BATCH_RESOURCE,
+        resource_id=batch,
+        resource_repr=batch,
+    )
 
 
 def apply_drops(organization, period, enrollment_ids, *, actor) -> Counter:
@@ -299,8 +353,48 @@ def apply_drops(organization, period, enrollment_ids, *, actor) -> Counter:
 
 
 def undo_batch(organization, batch: str) -> Counter:
-    """Paketin aktiv paylarını söndür (qeydiyyat çıxarışları «Jurnal təmizliyi» tarixçəsindən geri qaytarılır)."""
-    changed = JournalShare.objects.filter(organization=organization, batch=batch, is_active=True).update(
-        is_active=False, updated_at=timezone.now()
+    """Paketi geri qaytar: yaradılan paylar söndürülür, yenilənənlər əvvəlki növ/tələbələrə, söndürülənlər yenidən aktiv
+    (həmin açılış × müəllim üzrə başqa aktiv pay yoxdursa). Manifesti olmayan köhnə paket — paketin payları söndürülür
+    (qeydiyyat çıxarışları «Jurnal təmizliyi» tarixçəsindən geri qaytarılır)."""
+    audit_model = django_apps.get_model("audit", "AuditLog")
+    entry = (
+        audit_model.objects.filter(organization=organization, resource_type=BATCH_RESOURCE, resource_id=batch)
+        .order_by("-created_at")
+        .first()
     )
-    return Counter({"shares_deactivated": changed})
+    manifest = (entry.new_values or {}) if entry is not None else {}
+    counts: Counter = Counter()
+    restored = _restore_updated(organization, batch, manifest.get("updated") or {}, counts)
+    changed = (
+        JournalShare.objects.filter(organization=organization, batch=batch, is_active=True)
+        .exclude(pk__in=restored)
+        .update(is_active=False, updated_at=timezone.now())
+    )
+    counts["shares_deactivated"] = changed
+    for share in JournalShare.objects.filter(
+        organization=organization, pk__in=manifest.get("deactivated") or [], is_active=False
+    ):
+        if JournalShare.objects.filter(
+            offering_id=share.offering_id, teacher_id=share.teacher_id, is_active=True
+        ).exists():
+            counts["reactivate_conflict"] += 1
+            continue
+        share.is_active = True
+        share.save(update_fields=["is_active", "updated_at"])
+        counts["shares_reactivated"] += 1
+    return counts
+
+
+def _restore_updated(organization, batch, updated: dict, counts: Counter) -> set:
+    restored = set()
+    for share in JournalShare.objects.filter(
+        organization=organization, pk__in=list(updated), batch=batch, is_active=True
+    ):
+        previous = updated[str(share.pk)]
+        share.kinds = list(previous.get("kinds") or [])
+        share.batch = str(previous.get("batch") or "")
+        share.save(update_fields=["kinds", "batch", "updated_at"])
+        share.enrollments.set(list(previous.get("enrollments") or []))
+        restored.add(share.pk)
+        counts["shares_restored"] += 1
+    return restored
