@@ -71,7 +71,7 @@
                                         placeholder="{% trans 'placeholder_search_primary_teacher' context 'exams.template.create_student_group' %}"
                                      aria-label="{% trans 'placeholder_search_primary_teacher' context 'exams.template.create_student_group' %}">
                                 </div>
-                                {{ form.primary_teacher }}
+                                <div class="bootstrap-single-select bootstrap-single-select--ems">{{ form.primary_teacher }}</div>
                                 <div class="form-text mt-1">
                                     {% trans "primary_teacher_help" context "exams.template.create_student_group" %}: <strong>{{ teacher_count }}</strong>
                                 </div>
@@ -85,7 +85,7 @@
                                 <div class="form-text">
                                     {% trans "single_primary_teacher_only" context "exams.template.create_student_group" %}
                                 </div>
-                                {{ form.primary_teacher }}
+                                <div class="bootstrap-single-select bootstrap-single-select--ems">{{ form.primary_teacher }}</div>
                             {% endif %}
                             {% for error in form.primary_teacher.errors %}
                                 <div class="invalid-feedback d-block">{{ error }}</div>
@@ -143,7 +143,7 @@
 
                         <div class="mb-3">
                             {{ form.org_unit.label_tag }}
-                            {{ form.org_unit }}
+                            <div class="bootstrap-single-select bootstrap-single-select--ems">{{ form.org_unit }}</div>
                             {% if form.org_unit.help_text %}
                                 <div class="form-text">{{ form.org_unit.help_text }}</div>
                             {% endif %}
@@ -219,5 +219,5 @@
   "studentRegisteredGroupNumber": "{% filter escapejs %}{% trans 'student_registered_group_number' context 'profile.groups' %}{% endfilter %}"
 }
 </script>
-<script src="{% static 'exams/js/create_student_group.js' %}?v=20260926-search"></script>
+<script src="{% static 'exams/js/create_student_group.js' %}?v=20261027-ssel"></script>
 {% endblock %}

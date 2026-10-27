@@ -149,8 +149,13 @@
             td.textContent = "—";
             return td;
         }
+        // Layihənin stilli seçicisi (native görünüş YOX, menyu-daxili axtarış) —
+        // `bootstrap_select.js` DOM-a düşən kimi (MutationObserver) qoşur.
+        var wrap = document.createElement("div");
+        wrap.className = "bootstrap-single-select bootstrap-single-select--ems";
         var select = document.createElement("select");
-        select.className = "ems-select";
+        select.className = "ems-select bootstrap-single-select__native";
+        select.setAttribute("data-bootstrap-select", "");
         select.setAttribute("data-six-group", String(row.row || ""));
         select.setAttribute("aria-label", t.tNogroup || "");
         var blank = document.createElement("option");
@@ -170,7 +175,8 @@
         if (!row.group_options || !row.group_options.length) {
             blank.textContent = row.group || t.tNogroup || "—";
         }
-        td.appendChild(select);
+        wrap.appendChild(select);
+        td.appendChild(wrap);
         if (host.getAttribute("data-can-create-group") === "1" && row.specialty_id) {
             var btn = document.createElement("button");
             btn.type = "button";
@@ -542,6 +548,9 @@
                     selects[i].appendChild(option);
                     if (selects[i].getAttribute("data-six-group") === form.getAttribute("data-sa-row")) {
                         selects[i].value = result.payload.id;
+                    }
+                    if (window.EMSBootstrapSelect) {
+                        window.EMSBootstrapSelect.refresh(selects[i]);
                     }
                 }
                 if (window.EMSOverlay) {

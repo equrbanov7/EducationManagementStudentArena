@@ -115,7 +115,7 @@
 
                     <div class="form-group">
                         {{ comment_form.rating.label_tag }}
-                        {{ comment_form.rating }}
+                        <div class="bootstrap-single-select bootstrap-single-select--ems">{{ comment_form.rating }}</div>
                         {% if comment_form.rating.errors %}
                             <div class="form-error">
                                 {{ comment_form.rating.errors.0 }}

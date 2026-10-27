@@ -95,9 +95,11 @@ class StudentGroupForm(forms.ModelForm):
         queryset=User.objects.none(),
         required=False,
         label=pgettext_lazy("exams.form.group.label", "primary_teacher"),
+        # Layihənin stilli seçicisi (menyu-daxili axtarışla) — sahib 2026-10-27.
         widget=forms.Select(
             attrs={
-                "class": "form-select",
+                "class": "form-select bootstrap-single-select__native js-bootstrap-single-select",
+                "data-bootstrap-select": "",
             }
         ),
     )
@@ -131,11 +133,13 @@ class StudentGroupForm(forms.ModelForm):
             "subjects": forms.SelectMultiple(
                 attrs={
                     "class": "form-select",
+                    "data-ems-multi-select": "",
                 }
             ),
             "org_unit": forms.Select(
                 attrs={
-                    "class": "form-select",
+                    "class": "form-select bootstrap-single-select__native js-bootstrap-single-select",
+                    "data-bootstrap-select": "",
                 }
             ),
         }

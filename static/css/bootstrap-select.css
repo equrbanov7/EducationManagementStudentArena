@@ -227,7 +227,7 @@
 
 /* ── Daxili axtarış (`data-live-search="true"`) ─────────────────────────────
    Uzun siyahılarda (ixtisas, qrup) menyunun başında yapışqan axtarış sahəsi.
-   Yalnız bu bayrağı daşıyan select-lərdə görünür — qalanlarda dəyişiklik yoxdur. */
+   2026-10-27: DEFAULT açıqdır (≥ 6 variant), `data-live-search` true/false məcbur edir. */
 .bootstrap-single-select__search {
     position: sticky;
     top: -0.5rem;

@@ -179,6 +179,7 @@
       Array.from(primaryTeacherSelect.options).forEach((option) => {
         option.hidden = !match(option.text || "");
       });
+      refreshStyled(primaryTeacherSelect);
     });
   }
 
@@ -218,10 +219,16 @@
     }
     if (primaryTeacherSelect) {
       Array.from(primaryTeacherSelect.options).forEach((option) => { option.hidden = false; });
+      refreshStyled(primaryTeacherSelect);
     }
   }
 
   let candidatesPromise = null;
+
+  // Stilli seçici (bootstrap_select / ems_multi_select) proqramla dəyişən native-i görsün.
+  function refreshStyled(select) {
+    if (select && window.EMSBootstrapSelect) window.EMSBootstrapSelect.refresh(select);
+  }
 
   function injectOptions(select, markup) {
     if (!select || !markup) return;
@@ -230,6 +237,7 @@
     const parsed = holder.querySelector("select");
     if (parsed) {
       select.innerHTML = parsed.innerHTML;
+      refreshStyled(select);
     }
   }
 
@@ -290,6 +298,7 @@
       if (!canMultiAssignTeachers) {
         primaryTeacherSelect.setAttribute("readonly", "readonly");
       }
+      refreshStyled(primaryTeacherSelect);
     }
 
     if (hiddenStudentsSelect) {
@@ -309,11 +318,13 @@
       Array.from(subjectsSelect.options).forEach((option) => {
         option.selected = (subjectIds || []).map(String).includes(String(option.value));
       });
+      refreshStyled(subjectsSelect);
     }
 
     const orgUnitSelect = groupForm.querySelector('[name="org_unit"]');
     if (orgUnitSelect) {
       orgUnitSelect.value = orgUnitId ? String(orgUnitId) : "";
+      refreshStyled(orgUnitSelect);
     }
 
     studentsChecklist?.build();
