@@ -110,15 +110,7 @@ NOTE_EMPTY = "empty"
 
 def _supervision_scopes(user, organization) -> list:
     """Nəzarət açarlarının struktur əhatələri (yalnız əhatəsi olanlar)."""
-    from django.apps import apps as django_apps
-
-    org_unit_model = django_apps.get_model("organizations", "OrgUnit")
-    scopes = []
-    for permission in SUPERVISOR_PERMISSIONS:
-        scope = org_unit_model.user_permission_scope(user, organization, permission)
-        if scope.has_structure_access:
-            scopes.append(scope)
-    return scopes
+    return [scope for _permission, scope in _permission_scopes(user, organization)]
 
 
 def is_supervisor(user, organization) -> bool:
@@ -126,26 +118,69 @@ def is_supervisor(user, organization) -> bool:
     return bool(_supervision_scopes(user, organization))
 
 
+def has_kafedra_root(user, organization) -> bool:
+    """Nəzarət əhatələrindən birinin ÖZ kökü kafedradırmı (sorğusuz — memoizasiya olunmuş üzvlüklər)."""
+    from apps.registrar.journal_scope import kafedra_scope_roots
+
+    for permission, scope in _permission_scopes(user, organization):
+        if not scope.is_org_wide and kafedra_scope_roots(user, organization, scope, permission):
+            return True
+    return False
+
+
+def _permission_scopes(user, organization) -> list:
+    """``[(açar, UnitScope)]`` — yalnız struktur əhatəsi olan nəzarət açarları."""
+    from django.apps import apps as django_apps
+
+    org_unit_model = django_apps.get_model("organizations", "OrgUnit")
+    found = []
+    for permission in SUPERVISOR_PERMISSIONS:
+        scope = org_unit_model.user_permission_scope(user, organization, permission)
+        if scope.has_structure_access:
+            found.append((permission, scope))
+    return found
+
+
+def supervision_q(user, organization, *, prefix: str = "offering__"):
+    """Nəzarət əhatəsinin ``Q``-su (dərs / slot — açılışa ``prefix`` yolu); əhatə yoxdursa ``None``, org-wide → ``Q()``.
+
+    Qrup alt-ağacı (``prefix + group``) VƏ — əhatənin kökü KAFEDRA olanda — kafedraya aid açılışlar
+    (``lessons_log_units.kafedra_offering_q``; tərif ``offering_chairs``-dədir, jurnal siyahısının
+    ``journal_view_q`` qaydası ilə eyni). Sahib 2026-10-27: köçürülmüş strukturda qrup fakültə → ixtisas →
+    qrup altındadır, kafedra fakültənin AYRICA uşağıdır — kafedra əhatəli laborant / tyutor öz kafedrasının
+    müəllimlərinin dərslərini görmürdü. Fakültə / ixtisas / org-wide əhatə DƏYİŞMİR.
+    """
+    from apps.registrar.journal_scope import kafedra_scope_roots
+
+    scopes = _permission_scopes(user, organization)
+    if not scopes:
+        return None
+    if any(scope.is_org_wide for _permission, scope in scopes):
+        return Q()
+    combined = Q()
+    for permission, scope in scopes:
+        combined |= scope.unit_subtree_q(path_field=f"{prefix}group__path", id_field=f"{prefix}group__id")
+        for unit in kafedra_scope_roots(user, organization, scope, permission):
+            combined |= lessons_log_units.kafedra_offering_q(unit, offering=prefix)
+    return combined
+
+
 def scoped_lessons(user, organization, *, supervisor: bool):
     """Aktorun görə biləcəyi dərslərin queryset-i (fail-closed).
 
     Müəllim: ``instructor=user`` VƏ YA açılışın müəllimi özüdür (dərsin öz
     ``instructor``-u boş ola bilər — o zaman açılışınkı sayılır).
-    Nəzarətçi: nəzarət açarlarının alt-ağaclarının BİRLƏŞMƏSİ; org-genişli
-    əhatə varsa bütün təşkilat. Əhatəsiz nəzarətçi BOŞ nəticə alır.
+    Nəzarətçi: nəzarət açarlarının alt-ağaclarının BİRLƏŞMƏSİ (kafedra kökü üçün
+    kafedraya aid açılışlar da — :func:`supervision_q`); org-genişli əhatə varsa
+    bütün təşkilat. Əhatəsiz nəzarətçi BOŞ nəticə alır.
     """
     queryset = Lesson.objects.filter(organization=organization)
     if not supervisor:
         return queryset.filter(Q(instructor=user) | Q(instructor__isnull=True, offering__instructor=user))
-    scopes = _supervision_scopes(user, organization)
-    if not scopes:
+    scope_q = supervision_q(user, organization)
+    if scope_q is None:
         return queryset.none()
-    if any(scope.is_org_wide for scope in scopes):
-        return queryset
-    combined = Q()
-    for scope in scopes:
-        combined |= scope.unit_subtree_q(path_field="offering__group__path", id_field="offering__group__id")
-    return queryset.filter(combined)
+    return queryset.filter(scope_q)
 
 
 def education_form_options() -> list:
@@ -459,6 +494,7 @@ __all__ = [
     "coverage_for_offering",
     "csv_rows",
     "education_form_options",
+    "has_kafedra_root",
     "is_supervisor",
     "marks_by_lesson",
     "note_state",
@@ -470,6 +506,7 @@ __all__ = [
     "scoped_lessons",
     "season_of",
     "select_periods",
+    "supervision_q",
     "unit_filter_state",
     "unrecorded_slots",
     "window_for_periods",

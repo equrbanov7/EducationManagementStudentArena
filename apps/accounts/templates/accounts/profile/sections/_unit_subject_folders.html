@@ -1,0 +1,10 @@
+{% if 'unit-subject-folders' in allowed_sections %}
+{% comment %}«Kafedra materialları» (sahib 2026-10-27) — tyutor / laborant kafedrasının fənn qovluqlarındakı DƏRC EDİLMİŞ
+materiallara YALNIZ-OXU baxır (`subject_folder.view_unit`). AJAX-SAFE: süzgəc və qovluq linkləri (`sf_folder`) paneli
+yerində yeniləyir; yazı əməli yoxdur, endirmə `subject_folder:material_download` GET-idir.{% endcomment %}
+<section class="profile-section-panel profile-section--unit-subject-folders {% if active_section == 'unit-subject-folders' %}is-active{% endif %}"
+         data-profile-section-panel="unit-subject-folders"
+         data-source-url="{{ profile_base_url }}?section=unit-subject-folders">
+    {% include "subject_folder/cabinet/unit/_panel.html" %}
+</section>
+{% endif %}

@@ -110246,3 +110246,64 @@ msgstr "Action"
 msgctxt "appeals.teaching"
 msgid "Fayl ilk %(n)s sətirlə məhdudlaşdırılıb — süzgəcləri daraldıb yenidən yükləyin."
 msgstr "The file is limited to the first %(n)s rows — narrow the filters and download again."
+
+msgctxt "subject_folder.ui"
+msgid "Kafedra materialları"
+msgstr "Department materials"
+
+msgctxt "subject_folder.ui"
+msgid "Struktur əhatəniz təyin edilməyib"
+msgstr "Your structural scope is not set"
+
+msgctxt "subject_folder.ui"
+msgid "Kafedra materialları üzvlüyünüzün bölməsinə (kafedra / fakültə) görə göstərilir — administratora müraciət edin."
+msgstr "Department materials are shown for the unit of your membership (department / faculty) — contact the administrator."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq əhatənizdə deyil və ya hələ qaralamadır."
+msgstr "The folder is outside your scope or is still a draft."
+
+msgctxt "subject_folder.ui"
+msgid "Kafedranızın müəllimlərinin fənn qovluqlarında dərc etdiyi tədris materialları — yalnız baxış və endirmə."
+msgstr "Teaching materials published by your department's teachers in their subject folders — view and download only."
+
+#, python-format
+msgctxt "subject_folder.ui"
+msgid "İlk %(n)s qovluq göstərilir — süzgəc və ya axtarışla daraldın."
+msgstr "The first %(n)s folders are shown — narrow down with filters or search."
+
+msgctxt "subject_folder.ui"
+msgid "Hələ dərc edilmiş fənn qovluğu yoxdur"
+msgstr "No published subject folders yet"
+
+msgctxt "subject_folder.ui"
+msgid "Kafedranın müəllimləri fənn qovluğunu qruplara təyin edəndə materiallar burada görünəcək."
+msgstr "Materials will appear here once the department's teachers assign subject folders to groups."
+
+msgctxt "subject_folder.ui"
+msgid "Yalnız baxış"
+msgstr "View only"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluqda hələ dərc edilmiş material yoxdur"
+msgstr "No published materials in the folder yet"
+
+msgctxt "subject_folder.ui"
+msgid "Fənn, qovluq və ya müəllim…"
+msgstr "Subject, folder or teacher…"
+
+msgctxt "subject_folder.ui"
+msgid "MATERİAL"
+msgstr "MATERIALS"
+
+msgctxt "subject_folder.ui"
+msgid "dərc edilmiş"
+msgstr "published"
+
+msgctxt "profile.sidebar"
+msgid "Kafedra materialları"
+msgstr "Department materials"
+
+msgctxt "organizations.permission.label"
+msgid "Kafedranın fənn qovluqlarına (dərs materiallarına) baxmaq"
+msgstr "View the department's subject folders (teaching materials)"

@@ -30,6 +30,8 @@ from core.roles import ProfileRole
 User = get_user_model()
 
 MIGRATION = importlib.import_module("apps.organizations.migrations.0064_tutor_coordinator_parity")
+#: Sonrakı addım (2026-10-27): tyutor + koordinator + laborant — kafedranın sillabus / material OXUSU.
+UNIT_VIEW_MIGRATION = importlib.import_module("apps.organizations.migrations.0074_tutor_laborant_unit_view")
 
 
 def _seed(name):
@@ -134,7 +136,11 @@ class MigrationParityTest(TestCase):
         second = list(self._role("tutor").permissions)
         self.assertEqual(first, second)
         self.assertEqual(len(second), len(set(second)))
-        self.assertEqual(set(second), set(self._role("program_coordinator").permissions))
+        # Şablon 0064-dən sonrakı paritet addımlarını da daşıyır — mövcud tenant onları 0074 ilə alır.
+        with bypass_rls():
+            UNIT_VIEW_MIGRATION.forward(django_apps, None)
+        migrated = set(self._role("tutor").permissions)
+        self.assertEqual(migrated, set(self._role("program_coordinator").permissions))
         tutor = self._role("tutor")
         self.assertEqual((tutor.level, tutor.display_name, tutor.scope_type), (40, "Tutor", RoleScopeType.UNIT))
         with bypass_rls():

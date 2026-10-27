@@ -19,7 +19,7 @@ from django.http import FileResponse
 from core.download_types import attachment_file_response
 
 from ..models import FolderMaterial, SubmissionFile, TaskAttachment
-from . import access
+from . import access, unit_view
 
 
 def _single(queryset, **lookup):
@@ -32,7 +32,8 @@ def _single(queryset, **lookup):
 def check_material_media_access(user, path: str) -> bool:
     material = _single(FolderMaterial.objects.select_related("folder", "folder__organization", "topic"), file=path)
     if material is not None:
-        return access.can_view_material(user, material)
+        # Kafedranın yalnız-oxu baxışı (``subject_folder.view_unit``, 2026-10-27) — endirmə view-u ilə EYNİ qayda.
+        return access.can_view_material(user, material) or unit_view.can_view_material(user, material)
     attachment = _single(
         TaskAttachment.objects.select_related("task", "task__folder", "task__folder__organization", "task__topic"),
         file=path,

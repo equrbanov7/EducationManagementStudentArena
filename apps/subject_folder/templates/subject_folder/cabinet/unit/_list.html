@@ -1,0 +1,39 @@
+{% load i18n %}
+{% trans "Kafedranızın müəllimlərinin fənn qovluqlarında dərc etdiyi tədris materialları — yalnız baxış və endirmə." context "subject_folder.ui" as sf_subtitle %}
+{% include "partials/ems_ui/_content_header.html" with header_subtitle=sf_subtitle %}
+{% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=up.kpi_tiles %}
+{% include "partials/ems_ui/_filter_bar.html" with filter_section="unit-subject-folders" filter_prefix="sf_" filter_fields=up.filter_fields filter_count_label=up.filter_count_label filter_auto=True filter_bootstrap=True %}
+<div class="sfc-listwrap" data-ems-filter-target>
+{% if up.folders %}
+    <ul class="sfc-grid" role="list">
+        {% for row in up.folders %}
+        <li class="ems-card sfc-card">
+            <div class="ems-card__head sfc-card__head">
+                <div class="sfc-card__titles">
+                    <p class="sfc-eyebrow">{{ row.folder.subject.name }}</p>
+                    <h2 class="ems-card__title sfc-card__title"><a href="{{ row.url }}">{{ row.folder.title }}</a></h2>
+                    <p class="ems-card__sub">{{ row.teacher }} · {{ row.period_label }}</p>
+                </div>
+            </div>
+            <div class="ems-card__body">
+                <dl class="sfc-stats">
+                    <div class="sfc-stats__item"><dt>{% trans "Material" context "subject_folder.ui" %}</dt><dd>{{ row.materials }}</dd></div>
+                </dl>
+                <div class="sfc-card__foot">
+                    <a class="ems-btn ems-btn--sm sfc-card__open" href="{{ row.url }}">{% trans "Aç" context "subject_folder.ui" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% if up.has_more %}<p class="sfc-muted">{% blocktrans trimmed with n=up.list_cap context "subject_folder.ui" %}İlk {{ n }} qovluq göstərilir — süzgəc və ya axtarışla daraldın.{% endblocktrans %}</p>{% endif %}
+{% elif up.is_filtered %}
+    {% trans "Süzgəcə uyğun qovluq yoxdur" context "subject_folder.ui" as st_title %}
+    {% trans "Süzgəcləri dəyişin və ya axtarış sözünü qısaldın." context "subject_folder.ui" as st_body %}
+    {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-magnifying-glass" %}
+{% else %}
+    {% trans "Hələ dərc edilmiş fənn qovluğu yoxdur" context "subject_folder.ui" as st_title %}
+    {% trans "Kafedranın müəllimləri fənn qovluğunu qruplara təyin edəndə materiallar burada görünəcək." context "subject_folder.ui" as st_body %}
+    {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-folder-open" %}
+{% endif %}
+</div>

@@ -1,0 +1,26 @@
+{% load i18n static subject_folder_cabinet %}
+{% comment %}«Kafedra materialları» (`unit-subject-folders`, sahib 2026-10-27) — tyutor / laborant kafedrasının fənn
+qovluqlarının DƏRC EDİLMİŞ materiallarına YALNIZ-OXU baxır. Kontekst `sf_unit_panel` tag-ından
+(`apps/subject_folder/cabinet/unit.py`, əhatə `services/unit_view.py`); vəziyyət URL-dədir (`sf_folder`, süzgəclər).
+Yazı əməli / forma YOXDUR. CSP: inline stil/skript yoxdur — CSS xarici fayldır, panelin İÇİNDƏ yüklənir.{% endcomment %}
+{% sf_unit_panel as up %}
+<link rel="stylesheet" href="{% static 'subject_folder/css/cabinet.css' %}?v=20260925-1">
+<div class="sfc" data-sf-root data-sf-section="unit-subject-folders">
+{% if up.state == "no_org" %}
+    {% trans "Aktiv təşkilat seçilməyib" context "subject_folder.ui" as st_title %}
+    {% include "partials/ems_ui/_empty.html" with state_title=st_title state_icon="fa-building" %}
+{% elif up.state == "noscope" %}
+    {% trans "Struktur əhatəniz təyin edilməyib" context "subject_folder.ui" as st_title %}
+    {% trans "Kafedra materialları üzvlüyünüzün bölməsinə (kafedra / fakültə) görə göstərilir — administratora müraciət edin." context "subject_folder.ui" as st_body %}
+    {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-sitemap" %}
+{% elif up.state == "missing" %}
+    {% trans "Qovluq tapılmadı" context "subject_folder.ui" as st_title %}
+    {% trans "Qovluq əhatənizdə deyil və ya hələ qaralamadır." context "subject_folder.ui" as st_body %}
+    {% trans "Qovluqlara qayıt" context "subject_folder.ui" as st_action %}
+    {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-folder-minus" state_action_label=st_action state_action_url=up.urls.list %}
+{% elif up.state == "folder" %}
+    {% include "subject_folder/cabinet/unit/_folder.html" %}
+{% else %}
+    {% include "subject_folder/cabinet/unit/_list.html" %}
+{% endif %}
+</div>

@@ -61,11 +61,12 @@ def offering_in_actor_scope(user, organization, offering, *, permission=JOURNAL_
 JOURNAL_VIEW_PERMISSION = "journal.view"
 
 
-def _kafedra_roots(user, organization, scope) -> list:
-    """``journal.view`` əhatəsinin KAFEDRA tipli kökləri (sorğusuz — memoizasiya olunmuş üzvlüklərdən).
+def kafedra_scope_roots(user, organization, scope, permission) -> list:
+    """``permission`` əhatəsinin KAFEDRA tipli kökləri (sorğusuz — memoizasiya olunmuş üzvlüklərdən).
 
     Yalnız əhatənin ÖZ kökü kafedradırsa (``CHAIR``/``DEPARTMENT``); fakültə kökünün altındakı kafedralar
-    QƏSDƏN sayılmır — fakültə əhatəsi qrup alt-ağacı ilə qalır (davranışı dəyişmir).
+    QƏSDƏN sayılmır — fakültə əhatəsi qrup alt-ağacı ilə qalır (davranışı dəyişmir). «Keçilmiş dərslər»
+    (``lessons_log.supervision_q``, sahib 2026-10-27) eyni qaydanı öz nəzarət açarları ilə işlədir.
     """
     from apps.organizations.public import permission_scope_units
 
@@ -73,9 +74,14 @@ def _kafedra_roots(user, organization, scope) -> list:
 
     return [
         unit
-        for unit in permission_scope_units(user, organization, JOURNAL_VIEW_PERMISSION)
+        for unit in permission_scope_units(user, organization, permission)
         if unit.unit_type in CHAIR_TYPES and unit.pk in scope.unit_ids
     ]
+
+
+def _kafedra_roots(user, organization, scope) -> list:
+    """``journal.view`` əhatəsinin KAFEDRA tipli kökləri (bax :func:`kafedra_scope_roots`)."""
+    return kafedra_scope_roots(user, organization, scope, JOURNAL_VIEW_PERMISSION)
 
 
 def _unit_view_q(organization, scope, kafedras, within=None):

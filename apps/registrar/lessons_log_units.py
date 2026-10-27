@@ -189,12 +189,16 @@ def filter_state(user, organization, option_source, *, supervisor, faculty_raw="
     kafedra_types = _kafedra_types(organization)
     kafedra = resolve_unit(organization, kafedra_raw, kafedra_types) if kafedra_raw else None
     scopes = None
+    faculty_scopes = None
     if supervisor:
-        from apps.registrar.lessons_log import _supervision_scopes
+        from apps.registrar.lessons_log import _supervision_scopes, has_kafedra_root
 
         scopes = _supervision_scopes(user, organization)
         if any(scope.is_org_wide for scope in scopes):
             scopes = None
+        # Kafedra kökü (laborant / tyutor, 2026-10-27): dərslər bir neçə fakültənin qruplarındadır — fakültə
+        # seçimləri əhatə ilə YOX, görünən dərslərlə daralır (dərslər onsuz da əhatəlidir).
+        faculty_scopes = None if scopes is None or has_kafedra_root(user, organization) else scopes
     scoped = not supervisor or scopes is not None
     faculty_options: list = []
     kafedra_options: list = []
@@ -203,7 +207,7 @@ def filter_state(user, organization, option_source, *, supervisor, faculty_raw="
     kafedra_invalid = bool(kafedra_raw and kafedra is None)
     candidates = _unit_candidates(option_source, organization) if (with_options or scoped) else None
     if candidates is not None:
-        faculty_options = _options(candidates[0], scopes=scopes)
+        faculty_options = _options(candidates[0], scopes=faculty_scopes)
         faculty, faculty_locked, faculty_invalid = _settle(
             organization, faculty, faculty_raw, faculty_options, FACULTY_TYPES, scoped=scoped
         )

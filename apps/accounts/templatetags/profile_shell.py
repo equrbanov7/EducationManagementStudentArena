@@ -85,6 +85,7 @@ COMPACT_SIDEBAR_TREES = {
             "my-workload",
             "academic-calendar",
             "syllabus-list",
+            "unit-subject-folders",  # «Kafedra materialları» — laborant (2026-10-27)
             "question-bank",
             "question-submissions",
             "my-exams",

@@ -25,11 +25,12 @@ göstərilir. «İmtahan Nəzarət Sistemi» nəzarətçi təyin olunmuş müəl
 </li>
 {% endif %}
 
-{% if "syllabus-list" in allowed_sections or "question-bank" in allowed_sections or "question-submissions" in allowed_sections %}
+{% if "syllabus-list" in allowed_sections or "unit-subject-folders" in allowed_sections or "question-bank" in allowed_sections or "question-submissions" in allowed_sections %}
 <li class="sidebar-section" data-sidebar-section="syllabus">
     <div class="sidebar-section-label sidebar-menu-group-label" id="sidebarSectionSyllabus"><span class="sidebar-menu-group-title">{% trans "Sillabus və sual" context "profile.sidebar" %}</span></div>
     <ul class="sidebar-section-items" aria-labelledby="sidebarSectionSyllabus">
         {% include "accounts/profile/sidebar/items/_syllabus_list.html" %}
+        {% include "accounts/profile/sidebar/items/_unit_subject_folders.html" %}
         {% include "accounts/profile/sidebar/items/_question_bank.html" %}
         {% include "accounts/profile/sidebar/items/_question_submissions.html" %}
     </ul>

@@ -98,7 +98,8 @@ def test_rector_wildcard_covers_syllabus():
 
 def test_unrelated_roles_get_nothing_by_default():
     # `assistant` 2026-10-13-dən müəllim kimi sillabus yazır (rol auditi B4) — bax aşağıdakı test.
-    for name in ("student", "tutor", "hr", "exam_center_head"):
+    # Tyutor 2026-10-27-dən kafedranın sillabusunu OXUYUR (yalnız `syllabus.view`) — bax aşağıdakı test.
+    for name in ("student", "hr", "exam_center_head"):
         permissions = _role(name)["permissions"]
         for permission in ALL_SYLLABUS_PERMS:
             assert not has_permission(permissions, permission), f"{name} → {permission}"
@@ -110,6 +111,16 @@ def test_assistant_authors_like_a_teacher():
         assert has_permission(permissions, permission), permission
     for permission in ("syllabus.review", "syllabus.approve"):
         assert not has_permission(permissions, permission), permission
+
+
+def test_tutor_and_laborant_only_read_syllabi():
+    """Sahib 2026-10-27: tyutor / koordinator / laborant kafedranın sillabusunu OXUYUR, yazmır və qərar vermir."""
+    for name in ("tutor", "program_coordinator", "lab_assistant"):
+        permissions = _role(name)["permissions"]
+        assert has_permission(permissions, PERM_VIEW), name
+        for permission in ALL_SYLLABUS_PERMS:
+            if permission != PERM_VIEW:
+                assert not has_permission(permissions, permission), f"{name} → {permission}"
 
 
 def test_final_score_style_prefix_isolation():

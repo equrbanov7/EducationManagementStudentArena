@@ -109756,3 +109756,64 @@ msgstr "Əməliyyat"
 msgctxt "appeals.teaching"
 msgid "Fayl ilk %(n)s sətirlə məhdudlaşdırılıb — süzgəcləri daraldıb yenidən yükləyin."
 msgstr "Fayl ilk %(n)s sətirlə məhdudlaşdırılıb — süzgəcləri daraldıb yenidən yükləyin."
+
+msgctxt "subject_folder.ui"
+msgid "Kafedra materialları"
+msgstr "Kafedra materialları"
+
+msgctxt "subject_folder.ui"
+msgid "Struktur əhatəniz təyin edilməyib"
+msgstr "Struktur əhatəniz təyin edilməyib"
+
+msgctxt "subject_folder.ui"
+msgid "Kafedra materialları üzvlüyünüzün bölməsinə (kafedra / fakültə) görə göstərilir — administratora müraciət edin."
+msgstr "Kafedra materialları üzvlüyünüzün bölməsinə (kafedra / fakültə) görə göstərilir — administratora müraciət edin."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq əhatənizdə deyil və ya hələ qaralamadır."
+msgstr "Qovluq əhatənizdə deyil və ya hələ qaralamadır."
+
+msgctxt "subject_folder.ui"
+msgid "Kafedranızın müəllimlərinin fənn qovluqlarında dərc etdiyi tədris materialları — yalnız baxış və endirmə."
+msgstr "Kafedranızın müəllimlərinin fənn qovluqlarında dərc etdiyi tədris materialları — yalnız baxış və endirmə."
+
+#, python-format
+msgctxt "subject_folder.ui"
+msgid "İlk %(n)s qovluq göstərilir — süzgəc və ya axtarışla daraldın."
+msgstr "İlk %(n)s qovluq göstərilir — süzgəc və ya axtarışla daraldın."
+
+msgctxt "subject_folder.ui"
+msgid "Hələ dərc edilmiş fənn qovluğu yoxdur"
+msgstr "Hələ dərc edilmiş fənn qovluğu yoxdur"
+
+msgctxt "subject_folder.ui"
+msgid "Kafedranın müəllimləri fənn qovluğunu qruplara təyin edəndə materiallar burada görünəcək."
+msgstr "Kafedranın müəllimləri fənn qovluğunu qruplara təyin edəndə materiallar burada görünəcək."
+
+msgctxt "subject_folder.ui"
+msgid "Yalnız baxış"
+msgstr "Yalnız baxış"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluqda hələ dərc edilmiş material yoxdur"
+msgstr "Qovluqda hələ dərc edilmiş material yoxdur"
+
+msgctxt "subject_folder.ui"
+msgid "Fənn, qovluq və ya müəllim…"
+msgstr "Fənn, qovluq və ya müəllim…"
+
+msgctxt "subject_folder.ui"
+msgid "MATERİAL"
+msgstr "MATERİAL"
+
+msgctxt "subject_folder.ui"
+msgid "dərc edilmiş"
+msgstr "dərc edilmiş"
+
+msgctxt "profile.sidebar"
+msgid "Kafedra materialları"
+msgstr "Kafedra materialları"
+
+msgctxt "organizations.permission.label"
+msgid "Kafedranın fənn qovluqlarına (dərs materiallarına) baxmaq"
+msgstr "Kafedranın fənn qovluqlarına (dərs materiallarına) baxmaq"

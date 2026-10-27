@@ -197,4 +197,5 @@ def build_section_titles() -> dict:
         "subject-folders": pgettext_lazy("profile.sidebar", "Fənn qovluqları"),
         "subject-folder-review": pgettext_lazy("profile.sidebar", "Tapşırıq yoxlaması"),
         "my-subject-folders": pgettext_lazy("profile.sidebar", "Fənn qovluqlarım"),
+        "unit-subject-folders": pgettext_lazy("profile.sidebar", "Kafedra materialları"),
     }
