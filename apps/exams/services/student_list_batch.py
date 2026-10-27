@@ -42,6 +42,8 @@ from apps.exams.services.language_variants import (
 # Model tərəfi ilə eyni dəstlər (ExamAccessPolicyMixin).
 ACTIVE_ATTEMPT_STATUSES = ("draft", "in_progress")
 OFFICIAL_EXAM_CATEGORIES = frozenset({"final", "midterm"})
+#: Gün qaydası (bir gündə bir rəsmi imtahan) — sahib 2026-10-27: yalnız final (``access_policy`` ilə eyni).
+SAME_DAY_LIMITED_CATEGORIES = frozenset({"final"})
 
 
 class StudentExamListBatch:
@@ -142,7 +144,7 @@ class StudentExamListBatch:
     def _load_same_day_official_ids(self):
         """Bu gün bitmiş rəsmi (final/midterm) imtahanların id dəsti — yalnız səhifədə
         rəsmi imtahan varsa (qayda yalnız onlara tətbiq olunur)."""
-        if not any(getattr(exam, "exam_type_extended", None) in OFFICIAL_EXAM_CATEGORIES for exam in self.exams):
+        if not any(getattr(exam, "exam_type_extended", None) in SAME_DAY_LIMITED_CATEGORIES for exam in self.exams):
             return frozenset()
         return frozenset(
             ExamAttempt.objects.filter(
@@ -150,7 +152,7 @@ class StudentExamListBatch:
                 is_trial=False,
                 status__in=ATTEMPT_FINISHED_STATUSES,
                 finished_at__date=timezone.localdate(),
-                exam__exam_type_extended__in=OFFICIAL_EXAM_CATEGORIES,
+                exam__exam_type_extended__in=SAME_DAY_LIMITED_CATEGORIES,
             ).values_list("exam_id", flat=True)
         )
 
@@ -196,7 +198,7 @@ class StudentExamListBatch:
         for attempt in self._newly_expired:
             if attempt.is_trial or not attempt.finished_at:
                 continue
-            if getattr(attempt.exam, "exam_type_extended", None) not in OFFICIAL_EXAM_CATEGORIES:
+            if getattr(attempt.exam, "exam_type_extended", None) not in SAME_DAY_LIMITED_CATEGORIES:
                 continue
             if timezone.localdate(attempt.finished_at) == today:
                 exam_ids.add(attempt.exam_id)
@@ -211,7 +213,7 @@ class StudentExamListBatch:
             if not self._expire(attempt):
                 return True, pgettext("exams.model.access", "other_exam_in_progress")
 
-        if getattr(exam, "exam_type_extended", None) in OFFICIAL_EXAM_CATEGORIES:
+        if getattr(exam, "exam_type_extended", None) in SAME_DAY_LIMITED_CATEGORIES:
             has_retake_grant = exam.pk in self._grants
             if not has_retake_grant and self._same_day_official_blocks(exam):
                 return True, pgettext("exams.model.access", "already_examined_today")

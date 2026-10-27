@@ -462,14 +462,26 @@ class ExamSchedulingRulesTests(_Base):
         stale.refresh_from_db()
         self.assertEqual(stale.status, "expired")
 
-    def test_second_official_exam_same_day_blocked(self):
+    def test_second_final_same_day_blocked(self):
         exam_a = self._make_exam("final", title="Səhər finalı")
-        exam_b = self._make_exam("midterm", title="Günorta kollokviumu")
+        exam_b = self._make_exam("final", title="Günorta finalı")
         self._finished_attempt(exam_a, day_offset=0)
 
         blocked, reason = exam_b._concurrent_or_same_day_block(self.student)
         self.assertTrue(blocked)
-        self.assertIn("bir rəsmi imtahan", reason)
+        self.assertIn("bir final imtahanı", reason)
+
+    def test_midterms_are_not_limited_to_one_per_day(self):
+        # Sahib 2026-10-27: «bir gündə birdən çox midterm vermək olsun» — gün qaydası yalnız finaldır.
+        final = self._make_exam("final", title="Səhər finalı")
+        midterm_a = self._make_exam("midterm", title="Midterm A")
+        midterm_b = self._make_exam("midterm", title="Midterm B")
+        self._finished_attempt(final, day_offset=0)
+        self._finished_attempt(midterm_a, day_offset=0)
+
+        self.assertEqual(midterm_b._concurrent_or_same_day_block(self.student), (False, None))
+        final_b = self._make_exam("final", title="Axşam finalı")
+        self.assertTrue(final_b._concurrent_or_same_day_block(self.student)[0])
 
     def test_same_day_allowed_with_retake_grant(self):
         exam_a = self._make_exam("final", title="A")

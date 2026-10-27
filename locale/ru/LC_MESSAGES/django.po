@@ -16068,9 +16068,7 @@ msgstr ""
 #: apps/exams/domain/access_policy.py:187
 msgctxt "exams.model.access"
 msgid "already_examined_today"
-msgstr ""
-"Сегодня вы уже сдавали один официальный экзамен. Второй финал/мидтерм в тот "
-"же день возможен, только если экзаменационный центр разрешил пересдачу."
+msgstr "Сегодня вы уже сдавали один финальный экзамен. Второй финал в тот же день возможен, только если экзаменационный центр разрешил пересдачу."
 
 #: apps/accounts/views/_dashboard_helpers/evaluated_review.py:139
 msgctxt "profile.pending_review.action"

@@ -15770,10 +15770,7 @@ msgstr ""
 #: apps/exams/domain/access_policy.py:187
 msgctxt "exams.model.access"
 msgid "already_examined_today"
-msgstr ""
-"Sie haben heute bereits eine offizielle Prüfung abgelegt. Eine zweite "
-"Abschluss- oder Zwischenprüfung am selben Tag ist nur möglich, wenn das "
-"Prüfungszentrum eine Wiederholungsprüfung (Retake) genehmigt hat."
+msgstr "Sie haben heute bereits eine Abschlussprüfung abgelegt. Eine zweite Abschlussprüfung am selben Tag ist nur möglich, wenn das Prüfungszentrum eine Wiederholung genehmigt hat."
 
 #: apps/accounts/views/_dashboard_helpers/evaluated_review.py:139
 msgctxt "profile.pending_review.action"

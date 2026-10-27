@@ -6,6 +6,9 @@ from django.utils.translation import pgettext, pgettext_lazy
 from apps.organizations.public import organization_user_queryset, user_has_org_role
 from core.roles import ProfileRole
 
+#: «Bir gündə bir rəsmi imtahan» qaydasının aid olduğu kateqoriyalar (sahib 2026-10-27: yalnız final).
+SAME_DAY_LIMITED_CATEGORIES = frozenset({"final"})
+
 User = get_user_model()
 
 
@@ -231,7 +234,9 @@ class ExamAccessPolicyMixin:
             if not attempt.expire_if_time_limit_reached():
                 return True, pgettext("exams.model.access", "other_exam_in_progress")
 
-        if getattr(self, "exam_type_extended", None) in {"final", "midterm"}:
+        # Sahib 2026-10-27: «bir gündə birdən çox midterm vermək olsun» — gün qaydası YALNIZ final üçündür
+        # (əvvəlki tələb də «final imtahanında gündə 1 fənn» idi); midterm nə bloklanır, nə də bloklayır.
+        if getattr(self, "exam_type_extended", None) in SAME_DAY_LIMITED_CATEGORIES:
             has_retake_grant = self.attempt_grants.filter(student=user).exists()
             if not has_retake_grant:
                 from django.utils import timezone
@@ -243,7 +248,7 @@ class ExamAccessPolicyMixin:
                         is_trial=False,
                         status__in=ATTEMPT_FINISHED_STATUSES,
                         finished_at__date=today,
-                        exam__exam_type_extended__in=("final", "midterm"),
+                        exam__exam_type_extended__in=tuple(SAME_DAY_LIMITED_CATEGORIES),
                     )
                     .exclude(exam_id=self.pk)
                     .exists()

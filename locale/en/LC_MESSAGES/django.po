@@ -16027,9 +16027,7 @@ msgstr ""
 #: apps/exams/domain/access_policy.py:187
 msgctxt "exams.model.access"
 msgid "already_examined_today"
-msgstr ""
-"You have already sat one official exam today. A second final/midterm on the "
-"same day is only possible if the exam centre granted a retake."
+msgstr "You have already sat one final exam today. A second final on the same day is only possible if the exam centre granted a retake."
 
 #: apps/accounts/views/_dashboard_helpers/evaluated_review.py:139
 msgctxt "profile.pending_review.action"

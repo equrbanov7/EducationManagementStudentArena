@@ -15986,9 +15986,7 @@ msgstr ""
 #: apps/exams/domain/access_policy.py:187
 msgctxt "exams.model.access"
 msgid "already_examined_today"
-msgstr ""
-"Bugün zaten bir resmi sınava girdiniz. Aynı gün ikinci final/vize yalnızca "
-"sınav merkezi telafi (retake) izni verdiyse mümkündür."
+msgstr "Bugün zaten bir final sınavına girdiniz. Aynı gün ikinci final yalnızca sınav merkezi telafi (retake) izni verdiyse mümkündür."
 
 #: apps/accounts/views/_dashboard_helpers/evaluated_review.py:139
 msgctxt "profile.pending_review.action"

@@ -184,7 +184,7 @@ təhlili → digər cəhdlər (desktopda cədvəl, telefonda kart). Bütün aça
     <section class="xr-card journal-result-card" role="group" aria-label="{% trans 'label_journal_result' context 'exams.template.student_exam_result' %}">
         <div class="xr-card__head">
             <h2 class="xr-card__title"><i class="fas fa-book" aria-hidden="true"></i> {% trans "label_journal_result" context "exams.template.student_exam_result" %}</h2>
-            <span class="jr-letter jr-letter--{{ journal_result.letter|lower }}{% if journal_result.failed %} jr-letter--fail{% endif %}">{{ journal_result.letter }}</span>
+            {% if show_journal_letter %}<span class="jr-letter jr-letter--{{ journal_result.letter|lower }}{% if journal_result.failed %} jr-letter--fail{% endif %}">{{ journal_result.letter }}</span>{% endif %}
         </div>
         {% if journal_result.entry_parts %}
             {% include "partials/ems_ui/_entry_breakdown.html" with parts=journal_result.entry_parts final_score=journal_result.exam_score final_max=50 total=journal_result.total total_max=100 %}

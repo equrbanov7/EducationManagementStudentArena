@@ -493,9 +493,10 @@ class OfficialDayRuleTests(TestCase):
         locks = [q["sql"] for q in ctx.captured_queries if "FOR UPDATE" in q["sql"] and "auth_user" in q["sql"]]
         self.assertEqual(len(locks), 1, locks)
 
-        # Midterm də «rəsmi» sayılır (2026-07 qaydası: gündə bir final/midterm).
-        with self.assertRaises(OfficialStartBlocked):
-            _create_attempt_or_get_active(self.midterm, self.student)
+        # Sahib 2026-10-27: gün qaydası yalnız finaldır — eyni gün midterm başlaya bilir.
+        attempt, created = _create_attempt_or_get_active(self.midterm, self.student)
+        self.assertTrue(created)
+        attempt.delete()
 
         # Quiz və sınaq cəhdi toxunulmur — kilid də alınmır.
         with CaptureQueriesContext(connection) as quiz_ctx:

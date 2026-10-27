@@ -438,6 +438,8 @@ def exam_result(request, slug, attempt_id):
             "exam": exam,
             "attempt": attempt,
             "journal_result": journal_result,
+            # Sahib 2026-10-27: hərf qiymət (A–F) yalnız Final imtahanının nəticəsində — midtermdə semestr hələ bitməyib.
+            "show_journal_letter": getattr(exam, "exam_type_extended", None) == "final",
             "written_max_score": written_max_score,
             "written_score_pct": written_score_pct,
             "written_ring_sub": f"/ {written_max_score}" if written_max_score else "",

@@ -16010,9 +16010,7 @@ msgstr ""
 #: apps/exams/domain/access_policy.py:187
 msgctxt "exams.model.access"
 msgid "already_examined_today"
-msgstr ""
-"Bu gün artıq bir rəsmi imtahan vermisiniz. Eyni gündə ikinci final/midterm "
-"yalnız imtahan mərkəzi təkrar imtahan (retake) icazəsi veribsə mümkündür."
+msgstr "Bu gün artıq bir final imtahanı vermisiniz. Eyni gündə ikinci final yalnız imtahan mərkəzi təkrar imtahan (retake) icazəsi veribsə mümkündür."
 
 #: apps/accounts/views/_dashboard_helpers/evaluated_review.py:139
 msgctxt "profile.pending_review.action"

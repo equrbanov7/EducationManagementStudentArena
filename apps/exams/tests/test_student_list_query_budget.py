@@ -445,10 +445,8 @@ class StudentListBatchParityTests(_StudentListFixture):
         )
         self.assertFalse(snapshot["P13 Qeyri-aktiv"]["see"])
         self.assertFalse(snapshot["P13 Təyinatsız qapalı"]["see"])
-        self.assertEqual(
-            snapshot["P13 Kollokvium (gün qaydası)"]["start"],
-            (False, pgettext("exams.model.access", "already_examined_today")),
-        )
+        # Sahib 2026-10-27: gün qaydası yalnız finaldır — eyni gün midterm bloklanmır (kod tələb olunur).
+        self.assertEqual(snapshot["P13 Kollokvium (gün qaydası)"]["start"], (False, code_required))
         self.assertEqual(snapshot["P13 Kollokvium (qrantlı)"]["start"], (False, code_required))
         self.assertEqual(snapshot["P13 Final (təyinatlı)"]["start"], (False, code_required))
         self.assertTrue(snapshot["P13 Qrup (allowed_groups)"]["see"])
