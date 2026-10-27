@@ -130,7 +130,7 @@
                                 <label for="{{ form.subject.id_for_label }}" class="ems-contact__label">
                                     {% trans "Mövzu" %} <span class="ems-contact__required">*</span>
                                 </label>
-                                {{ form.subject }}
+                                <div class="bootstrap-single-select bootstrap-single-select--ems">{{ form.subject }}</div>
                                 {% if form.subject.errors %}<small class="ems-contact__error">{{ form.subject.errors.0 }}</small>{% endif %}
                             </div>
                         </div>

@@ -69,7 +69,12 @@ class ContactForm(forms.ModelForm):
                     "maxlength": "24",
                 }
             ),
-            "subject": forms.Select(attrs={"class": "ems-contact__input ems-contact__select"}),
+            "subject": forms.Select(
+                attrs={
+                    "class": "ems-contact__input ems-contact__select bootstrap-single-select__native",
+                    "data-bootstrap-select": "",
+                }
+            ),
             "message": forms.Textarea(
                 attrs={
                     "class": "ems-contact__input ems-contact__textarea",

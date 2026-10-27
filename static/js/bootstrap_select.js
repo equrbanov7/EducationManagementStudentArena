@@ -11,8 +11,24 @@
  * `<select>`-in o anki vəziyyətindən (gizli option-lar daxil) yenidən qurulur.
  * Native `<select>`, `change` hadisəsi, `data-*` atributları və `refresh/sync/init`
  * API-si dəyişməyib; `api.build()` menyunu dərhal qurmaq üçündür (testlər, köməkçilər).
+ *
+ * MENYU-DAXİLİ AXTARIŞ HƏR YERDƏ (sahib 2026-10-27: «seçilmiş hər yerdə, filterdə search
+ * etmək olsun»): əvvəl yalnız `data-live-search="true"` daşıyan select-lərdə idi. İndi
+ * DEFAULT açıqdır — menyu qurulanda görünən variant (boş «Seçilməyib» xaric) sayı
+ * `SEARCH_MIN_OPTIONS`-dan azdırsa (≤ 5, kiçik sabit siyahı) axtarış göstərilmir.
+ * `data-live-search="true"` → həmişə, `"false"` → heç vaxt. Variantlar sonradan JS ilə
+ * doldurulsa da (məs. dərs yükü dialoqu) qərar hər menyu qurulanda yenidən verilir.
+ * Süzgəc EMSSearch (ə/e, ı/i, ö/o, ü/u, ş/s, ç/c, ğ/g, registr) ilə; menyu açılanda fokus
+ * axtarışa keçir, bağlananda sorğu təmizlənir; variant üzərində hərf yazmaq axtarışa keçir.
+ * Sonradan DOM-a əlavə olunan select-lər (dialoq, AJAX partial) MutationObserver ilə qoşulur.
  */
 (function () {
+    var SEARCH_MIN_OPTIONS = 6;
+
+    function gettext(text) {
+        return typeof window.gettext === "function" ? window.gettext(text) : text;
+    }
+
     function normalizeValue(value) {
         return value === null || value === undefined ? "" : String(value);
     }
@@ -97,6 +113,15 @@
         }
 
         var wrapper = select.closest(".bootstrap-single-select");
+        if (!wrapper && select.parentNode) {
+            // Django form widget-i (`{{ form.field }}`) sarğısız render olunur — sarğını
+            // burada qururuq ki, `data-bootstrap-select` atributu tək başına kifayət etsin.
+            wrapper = document.createElement("div");
+            wrapper.className = "bootstrap-single-select bootstrap-single-select--ems";
+            select.parentNode.insertBefore(wrapper, select);
+            wrapper.appendChild(select);
+            select.classList.add("bootstrap-single-select__native");
+        }
         if (!wrapper) {
             return null;
         }
@@ -126,29 +151,56 @@
         var menu = document.createElement("div");
         menu.className = "dropdown-menu bootstrap-single-select__menu";
 
-        // Daxili axtarış (`data-live-search="true"`): uzun siyahılarda (məs.
-        // 500 ixtisas) menyunun başında yapışqan axtarış sahəsi görünür və
-        // variantlar müştəri tərəfində süzülür — seçim yenə native `<select>`-ə
-        // yazılır, yəni forma/filtr müqaviləsi dəyişmir.
-        var liveSearch = select.getAttribute("data-live-search") === "true";
+        // Daxili axtarış: menyunun başında yapışqan axtarış sahəsi, variantlar
+        // müştəri tərəfində süzülür — seçim yenə native `<select>`-ə yazılır, yəni
+        // forma/filtr müqaviləsi dəyişmir. Elementlər TƏNBƏL yaradılır (ilk lazım
+        // olanda), göstərilib-göstərilməməsi isə hər `buildMenu()`-da qərarlaşır.
         var searchWrap = null;
         var searchInput = null;
         var searchEmpty = null;
-        if (liveSearch) {
+
+        function wantsSearch() {
+            var mode = select.getAttribute("data-live-search");
+            if (mode === "true") {
+                return true;
+            }
+            if (mode === "false") {
+                return false;
+            }
+            var count = 0;
+            Array.prototype.forEach.call(select.options, function (option, index) {
+                if (!option.hidden && !(index === 0 && !option.value)) {
+                    count += 1;
+                }
+            });
+            return count >= SEARCH_MIN_OPTIONS;
+        }
+
+        function ensureSearch() {
+            if (searchWrap) {
+                return;
+            }
+            var placeholder = select.getAttribute("data-live-search-placeholder") || gettext("Axtar…");
             searchWrap = document.createElement("div");
             searchWrap.className = "bootstrap-single-select__search";
             searchInput = document.createElement("input");
             searchInput.type = "search";
             searchInput.className = "form-control form-control-sm bootstrap-single-select__search-input";
             searchInput.autocomplete = "off";
-            searchInput.setAttribute("aria-label", select.getAttribute("data-live-search-placeholder") || "Axtar");
-            searchInput.placeholder = select.getAttribute("data-live-search-placeholder") || "Axtar…";
+            searchInput.setAttribute("aria-label", placeholder);
+            searchInput.placeholder = placeholder;
             searchWrap.appendChild(searchInput);
             searchEmpty = document.createElement("div");
             searchEmpty.className = "bootstrap-single-select__search-empty";
-            searchEmpty.textContent = select.getAttribute("data-live-search-empty") || "Uyğun nəticə yoxdur";
+            searchEmpty.setAttribute("role", "status");
+            searchEmpty.textContent = select.getAttribute("data-live-search-empty") || gettext("Uyğun nəticə yoxdur");
             searchEmpty.hidden = true;
-            menu.classList.add("bootstrap-single-select__menu--searchable");
+            searchInput.addEventListener("input", applyLiveSearch);
+            searchInput.addEventListener("keydown", onSearchKeydown);
+        }
+
+        function searchActive() {
+            return Boolean(searchWrap && searchWrap.parentNode === menu);
         }
 
         dropdown.appendChild(toggle);
@@ -156,7 +208,7 @@
         select.insertAdjacentElement("afterend", dropdown);
 
         function applyLiveSearch() {
-            if (!searchInput) {
+            if (!searchActive()) {
                 return;
             }
             var needle = String(searchInput.value || "").trim();
@@ -182,25 +234,43 @@
             }
         }
 
-        if (searchInput) {
-            searchInput.addEventListener("input", applyLiveSearch);
-            searchInput.addEventListener("keydown", function (event) {
-                if (event.key === "Enter") {
-                    // Enter — ilk görünən variantı seç (klaviatura ilə sürətli seçim).
-                    event.preventDefault();
-                    var first = menu.querySelector(".bootstrap-single-select__option:not([hidden])");
-                    if (first) {
-                        first.click();
-                    }
-                } else if (event.key === "ArrowDown") {
-                    event.preventDefault();
-                    var next = menu.querySelector(".bootstrap-single-select__option:not([hidden])");
-                    if (next) {
-                        next.focus();
-                    }
-                }
-            });
+        function firstVisibleOption() {
+            return menu.querySelector(".bootstrap-single-select__option:not([hidden]):not(:disabled)");
         }
+
+        function onSearchKeydown(event) {
+            if (event.key === "Enter") {
+                // Enter — ilk görünən variantı seç (klaviatura ilə sürətli seçim).
+                event.preventDefault();
+                var first = firstVisibleOption();
+                if (first) {
+                    first.click();
+                }
+            } else if (event.key === "ArrowDown") {
+                event.preventDefault();
+                var next = firstVisibleOption();
+                if (next) {
+                    next.focus();
+                }
+            }
+        }
+
+        // Variant üzərində (ArrowDown ilə gəlinib) hərf yazmaq → axtarışa qayıt,
+        // hərf ora düşsün; ilk variantda ArrowUp → yenə axtarışa.
+        menu.addEventListener("keydown", function (event) {
+            if (!searchActive() || event.target === searchInput) {
+                return;
+            }
+            var printable = event.key && event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey;
+            var upFromFirst = event.key === "ArrowUp" && event.target === firstVisibleOption();
+            if (printable || event.key === "Backspace" || upFromFirst) {
+                if (upFromFirst) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                searchInput.focus();
+            }
+        });
 
         function syncToggleState() {
             var selectedOption = select.options[select.selectedIndex] || select.options[0];
@@ -236,14 +306,18 @@
 
         function buildMenu() {
             menuDirty = false;
+            // Açıq menyu yenidən qurulanda (variantlar gəldi) yazılan sorğu və fokus itməsin.
+            var keepQuery = isMenuOpen() && searchActive() ? searchInput.value : "";
+            var hadFocus = searchActive() && document.activeElement === searchInput;
             menu.innerHTML = "";
-            if (searchWrap) {
-                searchInput.value = "";
+            var withSearch = wantsSearch();
+            menu.classList.toggle("bootstrap-single-select__menu--searchable", withSearch);
+            if (withSearch) {
+                ensureSearch();
+                searchInput.value = keepQuery;
+                searchEmpty.hidden = true;
                 menu.appendChild(searchWrap);
-                if (searchEmpty) {
-                    searchEmpty.hidden = true;
-                    menu.appendChild(searchEmpty);
-                }
+                menu.appendChild(searchEmpty);
             }
 
             Array.prototype.forEach.call(select.options, function (option, index) {
@@ -296,6 +370,12 @@
 
             syncSelectedState();
             syncToggleState();
+            if (keepQuery) {
+                applyLiveSearch();
+            }
+            if (hadFocus && withSearch) {
+                searchInput.focus();
+            }
         }
 
         function ensureMenu() {
@@ -370,25 +450,32 @@
             window.addEventListener("resize", closeDropdown);
         });
 
-        if (searchInput) {
-            toggle.addEventListener("shown.bs.dropdown", function () {
+        toggle.addEventListener("shown.bs.dropdown", function () {
+            if (searchActive()) {
                 searchInput.value = "";
                 applyLiveSearch();
                 // Menyu açılan kimi axtarış sahəsi fokusda olsun — yazmağa hazır.
                 window.setTimeout(function () {
-                    searchInput.focus();
+                    if (isMenuOpen()) {
+                        searchInput.focus();
+                    }
                 }, 0);
-                var selectedButton = menu.querySelector(".bootstrap-single-select__option.is-selected");
-                if (selectedButton && typeof selectedButton.scrollIntoView === "function") {
-                    selectedButton.scrollIntoView({ block: "nearest" });
-                }
-            });
-        }
+            }
+            var selectedButton = menu.querySelector(".bootstrap-single-select__option.is-selected");
+            if (selectedButton && typeof selectedButton.scrollIntoView === "function") {
+                selectedButton.scrollIntoView({ block: "nearest" });
+            }
+        });
 
         toggle.addEventListener("hidden.bs.dropdown", function () {
             window.removeEventListener("scroll", onScrollWhileOpen, true);
             window.removeEventListener("resize", closeDropdown);
             resetMenuPosition(menu);
+            // Bağlananda sorğu təmizlənir — növbəti açılışda tam siyahı görünsün.
+            if (searchActive() && searchInput.value) {
+                searchInput.value = "";
+                applyLiveSearch();
+            }
         });
 
         select._refreshBootstrapSelect = refresh;
@@ -424,9 +511,44 @@
         }
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
+    // Sonradan əlavə olunan select-lər (dialoq/partial `innerHTML`, JS ilə qurulan sətirlər):
+    // `profile:section:loaded` göndərməyən swap-larda da avtomatik qoşulur. Yalnız ƏLAVƏ
+    // olunan element düyünlərinə baxılır; artıq qoşulmuş select-lər təkrar işlənmir.
+    var WATCH = "[data-bootstrap-select], [data-ems-multi-select]";
+
+    function onMutations(records) {
+        for (var i = 0; i < records.length; i += 1) {
+            var added = records[i].addedNodes;
+            for (var j = 0; j < added.length; j += 1) {
+                var node = added[j];
+                if (node.nodeType !== 1 || node.classList.contains("bootstrap-single-select__option")) {
+                    continue;
+                }
+                if ((node.matches && node.matches(WATCH)) || node.querySelector(WATCH)) {
+                    initBootstrapSelects(node.matches && node.matches(WATCH) ? node.parentNode || node : node);
+                }
+            }
+        }
+    }
+
+    function watchInsertedSelects() {
+        if (typeof window.MutationObserver !== "function" || !document.body || window.__emsSelectObserver) {
+            return;
+        }
+        window.__emsSelectObserver = new window.MutationObserver(onMutations);
+        window.__emsSelectObserver.observe(document.body, { childList: true, subtree: true });
+    }
+
+    function boot() {
         initBootstrapSelects(document);
-    });
+        watchInsertedSelects();
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", boot);
+    } else {
+        boot();
+    }
 
     // AJAX section swap-dan sonra avtomatik re-init.
     document.addEventListener("profile:section:loaded", function (event) {

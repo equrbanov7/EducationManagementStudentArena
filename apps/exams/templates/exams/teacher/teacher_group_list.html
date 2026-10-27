@@ -173,7 +173,7 @@
           {% else %}
             <div class="form-text mb-2">{% trans "help_only_one_primary_teacher" context "exams.template.teacher_group_list" %}</div>
           {% endif %}
-          {{ form.primary_teacher }}
+          <div class="bootstrap-single-select bootstrap-single-select--ems">{{ form.primary_teacher }}</div>
           {% for error in form.primary_teacher.errors %}
             <div class="invalid-feedback d-block">{{ error }}</div>
           {% endfor %}
@@ -214,7 +214,7 @@
 
         <div class="mb-3">
           <label class="form-label-custom" for="{{ form.org_unit.id_for_label }}">{{ form.org_unit.label }}</label>
-          {{ form.org_unit }}
+          <div class="bootstrap-single-select bootstrap-single-select--ems">{{ form.org_unit }}</div>
           {% if form.org_unit.help_text %}<div class="form-text">{{ form.org_unit.help_text }}</div>{% endif %}
           {% for error in form.org_unit.errors %}
             <div class="invalid-feedback d-block">{{ error }}</div>
@@ -298,5 +298,5 @@
   "studentRegisteredGroupNumber": "{% filter escapejs %}{% trans 'student_registered_group_number' context 'profile.groups' %}{% endfilter %}"
 }
 </script>
-<script src="{% static 'exams/js/teacher_group_list.js' %}?v=20260926-search"></script>
+<script src="{% static 'exams/js/teacher_group_list.js' %}?v=20261027-ssel"></script>
 {% endblock %}

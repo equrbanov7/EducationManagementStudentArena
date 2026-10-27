@@ -139,6 +139,12 @@
     holder.innerHTML = markup;
     var parsed = holder.querySelector("select");
     if (parsed) select.innerHTML = parsed.innerHTML;
+    refreshStyled(select);
+  }
+
+  // Stilli seçici (bootstrap_select / ems_multi_select) proqramla dəyişən native-i görsün.
+  function refreshStyled(select) {
+    if (select && window.EMSBootstrapSelect) window.EMSBootstrapSelect.refresh(select);
   }
 
   function buildAll() {
@@ -198,6 +204,7 @@
         });
         if (firstVisible) firstVisible.selected = true;
       }
+      refreshStyled(teacherSelect);
     });
   }
 

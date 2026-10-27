@@ -303,7 +303,8 @@ class CommentForm(forms.ModelForm):
             ),
             "rating": forms.Select(
                 attrs={
-                    "class": "form-control",
+                    "class": "form-control bootstrap-single-select__native",
+                    "data-bootstrap-select": "",
                 }
             ),
         }
