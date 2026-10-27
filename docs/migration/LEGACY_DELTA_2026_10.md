@@ -466,3 +466,48 @@ növbələşmədir).
    `relocate_twin_enrollment` → `merge_twin_offerings` → `fix_slot_week_parity` (`period`). Hər birindən sonra eyni
    girişlə yoxlama dry-run-u (yazı sayğacları olmamalıdır).
 4. Release asset-lərini və lokal planları sil.
+
+## 12. Müəllimin köhnə sillabusu — `syllabi_backfill` fazası (2026-10-27)
+
+Sahib: «Köhnə sistemdə jurnalı olan müəllimlərin sillabusu burda görünmür — mövcud olanlara dəymədən köhnələri gətir.»
+Səbəb: `syllabi` fazası sillabusu açılışa bağlayıb müəllifi **açılışın müəllimi** edir (birləşmiş jurnalların digər
+müəllimləri öz sillabusunu itirib); cutover-in `syllabus_migration` fazası prod-da işləməyib. Ölçü: ~114 müəllim /
+~194 (fənn, müəllim) cütü.
+
+* **Paket** (`legacy_delta_extract --teacher-syllabi`, LOKAL, yalnız MariaDB oxunur, Django bazasına toxunmur): cari
+  semestrin (`semestr_jurnal.is_current`, və ya bir `--full-semester`) saxta olmayan jurnal başlıqları (tələbə/qrup
+  siyahısı boş) + hər (müəllim, fənn) cütü üçün müəllimin bütün köhnə sillabusları (eyni adlı dublikat fənn daxil) +
+  jurnalların öz `sillabus_id`-si. `snapshot.phases = ["syllabi_backfill"]` — paket adi fazalarla RƏDD olunur
+  (`legacy_delta_teacher_syllabi_bundle_phase_mismatch`); workflow-a yeni giriş lazım deyil.
+* **Tətbiq** (`services/delta/syllabi_backfill.py`): müəllim — delta `TeacherMapper`, **hesab yaradılmır**
+  (`teacher_unresolved`); fənn — `Catalog.subject_for` (`subject_unresolved`); müəllimin bu fəndə istənilən aktiv
+  sillabusu varsa (müəllif və ya açılış müəllimi kimi) — **toxunulmur** (`skipped_existing`), eyni açarlı passiv baza
+  dosye də (`skipped_inactive_base`); mənbə — jurnalın öz sillabusu (eyni fənn, boş deyil), yoxsa müəllim + fənnin ən
+  yeni aktiv boş olmayan sillabusu (`empty` / `no_syllabus`); hədəf — semestrsiz **baza sillabus**
+  (`import_migrated_version`, `approval_source=migration`, müəllif = köhnə müəllim, məzmun `syllabi` fazasının
+  çeviricisi ilə). Jurnal onu `syllabus_for_offering`-in 3-cü pilləsi (fənn + açılışın müəllimi) ilə tapır; müəllimin
+  «Sillabuslar» siyahısının cari il görünüşü semestrsiz baza dosyeni də göstərir. İdempotent (ikinci qaçış
+  `created 0`). Stdout: `syllabi_backfill.<açar> <say>` sətirləri (pairs, created, skipped_existing,
+  skipped_inactive_base, teacher_unresolved, subject_unresolved, empty, no_syllabus, duplicate_pair).
+
+### 12.1 Prod addımları (hər biri sahibin «hə»sı ilə; canlı imtahan günü deyil)
+
+```bash
+# 1) LOKAL paket (MariaDB nüsxəsi — köhnə sistemin TƏZƏ dump-ı myedu_new-da)
+python manage.py legacy_delta_extract --port 50330 --password-file <fayl> --source myedu_new --teacher-syllabi \
+  --snapshot-file "<dump>" --out ~/EMSArena-backups/legacy-delta-2026-10/delta-syllabi-20261027.json.gz
+# (ixtiyari) prod NÜSXƏSİNDƏ dry-run: python manage.py legacy_delta_apply --bundle <paket> --organization qku
+# 2) şifrələ → draft release (asset adı MƏHZ delta.json.gz.enc)
+openssl enc -aes-256-cbc -md sha256 -pbkdf2 -iter 200000 -salt -pass env:STAFF_PLAN_KEY \
+  -in delta-syllabi-20261027.json.gz -out delta.json.gz.enc
+gh release create legacy-delta-syllabi-20261027 delta.json.gz.enc --draft --title legacy-delta-syllabi-20261027
+```
+
+3. `prod-data-ops` → `command=legacy_delta_apply`, `roster_tag=legacy-delta-syllabi-20261027`, `batch=<paketin
+   sha256-sı>`, `date_to`/`date_from` boş, `apply` işarəsiz → **dry-run**; xülasədə `syllabi_backfill.created` ≈ ölçü
+   (~194 cüt), `written.*` / `teacher.created` sətri olmamalıdır.
+4. Sahibin «hə»sından sonra eyni girişlərlə `apply=true`, `confirm=APPLY` (addım əvvəlcə backup alır).
+5. Yoxlama: eyni girişlərlə dry-run → `syllabi_backfill.created 0`. Release asset-ini sil.
+
+Geri qaytarma: audit sətrinin (`legacy_import.delta_batch`, `resource_id` = tag) `created.syllabus_versions`
+id-ləri — həmin versiyaların baza dosyeləri (yalnız bu qaçışda yaranıb) silinə bilər.

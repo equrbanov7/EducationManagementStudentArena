@@ -62,3 +62,30 @@ def test_leader_keeps_all_years(world):
     permissions = services.resolve_actor(world["head"], world["org"]).permissions
     section = _section(world, "head", permissions)
     assert {str(world["current"].pk), str(world["old"].pk)} <= _ids(section)
+
+
+def test_teacher_current_year_keeps_periodless_base_syllabus(world):
+    """Semestrsiz baza sillabus (köçürmə, ``syllabi_backfill``) müəllimin cari il görünüşündə də var."""
+    from django.utils import timezone
+
+    from apps.syllabus.services.drafts import import_migrated_version
+
+    base, _version = import_migrated_version(
+        organization=world["org"],
+        subject=world["subject"],
+        approved_at=timezone.now(),
+        chair_unit=world["chair"],
+        author=world["teacher"],
+    )
+    other, _other_version = import_migrated_version(
+        organization=world["org"],
+        subject=world["subject"],
+        approved_at=timezone.now(),
+        chair_unit=world["chair"],
+        author=world["teacher2"],
+    )
+    section = _section(world, "teacher", TEACHER_PERMS)
+    assert str(base.pk) in _ids(section)
+    assert str(world["current"].pk) in _ids(section)
+    assert str(world["old"].pk) not in _ids(section)
+    assert str(other.pk) not in _ids(section), "başqa müəllimin baza sillabusu görünmür"

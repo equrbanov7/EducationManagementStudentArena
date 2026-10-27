@@ -17,6 +17,12 @@ Yaddaş üçün (əmr app konteynerində işləyir, limit 2 GB) paketlər ayrıd
 (``1-6``, ``7-13``; ``--phases history``), tarixi mövzu/otaq ayrıca (``--history-semester 1-13 --phases
 history_topics``). Hesab qərarının sübutu bütün jurnallardan qurulur — bölgü nəticəni dəyişmir.
 
+MÜƏLLİM SİLLABUSLARI paketi (sahib 2026-10-27, ``services/delta/syllabi_backfill.py``) — cari semestr jurnalları +
+hər (müəllim, fənn) cütünün köhnə sillabusları; yalnız ``syllabi_backfill`` fazası (Django bazasına toxunmur)::
+
+    manage.py legacy_delta_extract --port 50330 --password-file <fayl> --source myedu_new --teacher-syllabi \\
+        --out ~/EMSArena-backups/legacy-delta-2026-10/delta-syllabi-20261027.json.gz
+
 Çıxış 0600 rejimli JSON.gz-dir (şəxsi məlumat var) — serverə yalnız ŞİFRƏLİ release asset kimi
 gedir (bax ``docs/migration/LEGACY_DELTA_2026_10.md``). Ekrana yalnız SAYLAR çıxır.
 """
@@ -32,6 +38,9 @@ from apps.legacy_import.services.delta.bundle import file_sha256, write_bundle
 from apps.legacy_import.services.delta.extract import DeltaExtractor, build_bundle
 from apps.legacy_import.services.delta.history import HISTORY_PHASES
 from apps.legacy_import.services.delta.history_extract import build_history_bundle, ledger_sets, parse_semesters
+from apps.legacy_import.services.delta.journal_teachers import current_semester
+from apps.legacy_import.services.delta.syllabi_backfill import PHASE as SYLLABI_BACKFILL
+from apps.legacy_import.services.delta.teacher_syllabi_extract import build_teacher_syllabi_bundle
 from apps.legacy_import.services.repair_support import resolve_organization
 from core.rls_pooling import rls_worker_atomic
 
@@ -74,6 +83,12 @@ class Command(BaseCommand):
         )
         parser.add_argument("--organization", default="", help="--history-semester: ledger-in təşkilatı (slug)")
         parser.add_argument(
+            "--teacher-syllabi",
+            action="store_true",
+            help="MÜƏLLİM SİLLABUSLARI paketi (sahib 2026-10-27): cari semestr (və ya --full-semester) jurnalları + hər "
+            "(müəllim, fənn) cütünün köhnə sillabusları; yalnız syllabi_backfill fazası",
+        )
+        parser.add_argument(
             "--phases",
             nargs="+",
             choices=PHASES,
@@ -104,6 +119,7 @@ class Command(BaseCommand):
         except pymysql.MySQLError as error:
             raise CommandError(f"legacy_delta_source_unavailable: {error.__class__.__name__}") from None
         history = self._history_options(options)
+        teacher_syllabi = self._teacher_syllabi_options(options)
         # Adi delta Django bazasına toxunmur; tarixi paket yalnız ledger-i OXUYUR (rls_worker_atomic + tenant konteksti).
         with rls_worker_atomic(), connection.cursor() as cursor:
             cursor.execute("SET SESSION TRANSACTION READ ONLY")
@@ -116,6 +132,14 @@ class Command(BaseCommand):
             )
             if history:
                 bundle = self._history_bundle(extractor, snapshot, history, options)
+            elif teacher_syllabi:
+                semester = (options["full_semester"] or [0])[0] or int(
+                    current_semester(cursor, options["source"]).get("id") or 0
+                )
+                if not semester:
+                    cursor.execute("ROLLBACK")
+                    raise CommandError("legacy_current_semester_unknown: --full-semester verin")
+                bundle = build_teacher_syllabi_bundle(extractor, snapshot=snapshot, semester=semester)
             else:
                 bundle = build_bundle(extractor, snapshot=snapshot, since=options["since"])
             if options["phases"]:
@@ -147,7 +171,9 @@ class Command(BaseCommand):
                 self.stdout.write(f"  history.{name:22s}: {len(rows)}")
         for name, value in sorted(((bundle.get("history") or {}).get("stats") or {}).items()):
             self.stdout.write(f"  history.stats.{name:30s}: {value}")
-        if history:
+        for name, value in sorted((bundle["snapshot"].get("teacher_syllabi") or {}).items()):
+            self.stdout.write(f"  teacher_syllabi.{name:15s}: {value}")
+        if history or teacher_syllabi:
             self.stdout.write(f"Fazalar: {bundle['snapshot'].get('phases')}")
         self.stdout.write(f"Paket: sha256={digest} (0600; şəxsi məlumat — yalnız şifrəli ötürün)")
 
@@ -171,6 +197,20 @@ class Command(BaseCommand):
             raise CommandError("legacy_delta_history_bundle_phase_mismatch: yalnız history / history_topics")
         options["phases"] = phases
         return semesters
+
+    @staticmethod
+    def _teacher_syllabi_options(options) -> bool:
+        if not options["teacher_syllabi"]:
+            return False
+        if options["history_semester"] or options["baseline"] or len(options["full_semester"]) > 1:
+            raise CommandError(
+                "legacy_delta_teacher_syllabi_exclusive: --teacher-syllabi --history-semester/--baseline ilə birgə "
+                "verilmir, --full-semester ən çox bir dəfə"
+            )
+        if set(options["phases"]) - {SYLLABI_BACKFILL}:
+            raise CommandError("legacy_delta_teacher_syllabi_bundle_phase_mismatch: yalnız syllabi_backfill")
+        options["phases"] = [SYLLABI_BACKFILL]
+        return True
 
     @staticmethod
     def _history_bundle(extractor, snapshot, semesters, options):

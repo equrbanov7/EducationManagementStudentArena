@@ -9,7 +9,8 @@ birləşməsi» ilə tarixçəyə → legacy alt qrup tələbələrinə rəsmi i
 yerləşdirildi» sətri, ``subgroups``) → tələbə profilində boş sahələr → (yalnız açıq seçiləndə) aktiv reyestrin
 köhnə sistemlə rəsmi köçürmə/xaric əmrləri ilə nizamlanması (``registry_sync``) → (yalnız açıq seçiləndə) cari
 semestr jurnallarında olmayan, proqram müddəti bitmiş tələbələrin rəsmi «Məzun etmə» əmri (``graduation``); (yalnız açıq seçiləndə,
-HAMISINDAN ƏVVƏL) fənn kodu toqquşması ilə yanlış karta düşmüş delta açılışlarının düzəlişi (``subject_collisions``). Sonda bir audit sətri (manifest:
+HAMISINDAN ƏVVƏL) fənn kodu toqquşması ilə yanlış karta düşmüş delta açılışlarının düzəlişi (``subject_collisions``); (yalnız
+açıq seçiləndə) cari semestr jurnalı olan müəllimin köhnə sillabusu semestrsiz baza dosye kimi (``syllabi_backfill``). Sonda bir audit sətri (manifest:
 saylar + yaradılmış kiçik obyektlərin id-ləri) — ``resource_type=legacy_import.delta_batch``.
 """
 
@@ -34,6 +35,7 @@ from .registry_sync import sync_registry
 from .resolve import Catalog, lesson_date, text
 from .subgroups import mark_subgroups
 from .syllabi import import_syllabi
+from .syllabi_backfill import backfill_teacher_syllabi, check_phases
 from .topics import apply_topics
 from .workload import build_workload
 
@@ -68,11 +70,14 @@ PHASES = (
     "history",
     "history_topics",
     "subject_collisions",
+    "syllabi_backfill",
 )
 #: Yalnız AÇIQ seçiləndə (``--phase`` və ya paketin ``snapshot.phases``-i) işləyən fazalar — reyestr əmrləri yazır
 #: (``registry_sync``, ``graduation``); ``history*`` tarixi (bağlı) jurnallara əlavə edir (``delta/history.py``);
-#: ``subject_collisions`` yanlış fənn kartına düşmüş açılışları düzgün karta keçirir (``delta/collisions.py``).
-OPT_IN_PHASES = ("registry_sync", "graduation", "history", "history_topics", "subject_collisions")
+#: ``subject_collisions`` yanlış fənn kartına düşmüş açılışları düzgün karta keçirir (``delta/collisions.py``);
+#: ``syllabi_backfill`` cari semestr jurnalı olan müəllimə köhnə sillabusunu baza dosye kimi gətirir
+#: (``delta/syllabi_backfill.py``, paket ``legacy_delta_extract --teacher-syllabi``).
+OPT_IN_PHASES = ("registry_sync", "graduation", "history", "history_topics", "subject_collisions", "syllabi_backfill")
 DEFAULT_PHASES = tuple(phase for phase in PHASES if phase not in OPT_IN_PHASES)
 
 
@@ -208,6 +213,8 @@ class DeltaRun:
             apply_history(self)
         if "history_topics" in phases:
             apply_history_topics(self)
+        if "syllabi_backfill" in phases:
+            backfill_teacher_syllabi(self)
         for _legacy_id, user_pk in self.teachers.created:
             self.created("teachers", user_pk)
         for _legacy_id, user_pk in self.students.created:
@@ -294,6 +301,7 @@ def execute(*, organization, actor, bundle: dict, apply: bool, until, tag: str =
     if bundle.get("history") and set(phases) - set(HISTORY_PHASES):
         # Tarixi paketin tələbə bölməsi boşluq tələbələridir — adi fazalar onlar üçün hesab YARADARDI.
         raise HistoryPhaseMismatch("legacy_delta_history_bundle_phase_mismatch")
+    check_phases(bundle, phases)
     with transaction.atomic():
         apply_rls_request_context(user_id=actor.pk, org_id=organization.pk)
         disable_parallel_query(local=True)
