@@ -19,6 +19,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET, require_POST
 
+from core import superadmin_waiver
 from core.tenancy import get_request_organization, request_has_active_organization_context
 
 from . import retake_access, retake_decisions, retake_rules, retake_services
@@ -244,7 +245,7 @@ def decision(request, application_id):
         )
     if action == "approve_subgroup":
         document = request.FILES.get("document")
-        if document is None:
+        if document is None and not superadmin_waiver.waives(request.user):  # superadmin: sənədsiz (2026-10-27)
             return _error(pgettext(_CTX, "Sənəd (təqdimat / sərəncam) yüklənməlidir — alt qrup sənədsiz olmur."))
         return _run(
             lambda: retake_decisions.approve_subgroup(
@@ -258,7 +259,7 @@ def decision(request, application_id):
         )
     if action == "place":
         document = request.FILES.get("document")
-        if document is None:
+        if document is None and not superadmin_waiver.waives(request.user):  # superadmin: sənədsiz (2026-10-27)
             return _error(pgettext(_CTX, "Sənəd (təqdimat / sərəncam) yüklənməlidir — alt qrup sənədsiz olmur."))
         return _run(
             lambda: retake_decisions.place_subgroup(

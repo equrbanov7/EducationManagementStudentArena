@@ -110068,3 +110068,11 @@ msgstr "Нет результатов для скачивания."
 msgctxt "exams.results_export"
 msgid "Avtomatik (sistem)"
 msgstr "Автоматически (система)"
+
+msgctxt "core.superadmin_waiver"
+msgid "Superadmin: sənəd / əmr istəyə bağlıdır — boş qalsa avtomatik «Superadmin düzəlişi — sənədsiz» qeydi yazılır."
+msgstr "Суперадмин: документ / приказ необязателен — если поле пустое, автоматически записывается отметка «Исправление суперадмина — без документа»."
+
+msgctxt "registrar.guest_roster"
+msgid "SƏNƏD — TƏQDİMAT / SƏRƏNCAM (İSTƏYƏ BAĞLI)"
+msgstr "ДОКУМЕНТ — ПРЕДСТАВЛЕНИЕ / РАСПОРЯЖЕНИЕ (НЕОБЯЗАТЕЛЬНО)"

@@ -109282,3 +109282,11 @@ msgstr "İndirilecek sonuç yok."
 msgctxt "exams.results_export"
 msgid "Avtomatik (sistem)"
 msgstr "Otomatik (sistem)"
+
+msgctxt "core.superadmin_waiver"
+msgid "Superadmin: sənəd / əmr istəyə bağlıdır — boş qalsa avtomatik «Superadmin düzəlişi — sənədsiz» qeydi yazılır."
+msgstr "Süper yönetici: belge / emir isteğe bağlıdır — boş bırakılırsa otomatik olarak «Süper yönetici düzeltmesi — belgesiz» notu yazılır."
+
+msgctxt "registrar.guest_roster"
+msgid "SƏNƏD — TƏQDİMAT / SƏRƏNCAM (İSTƏYƏ BAĞLI)"
+msgstr "BELGE — TEKLİF / EMİR (İSTEĞE BAĞLI)"

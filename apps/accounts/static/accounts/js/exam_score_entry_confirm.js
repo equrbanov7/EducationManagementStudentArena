@@ -98,6 +98,10 @@
     }
 
     function justificationComplete(host, need) {
+        // Superadmin (sahib 2026-10-27): səbəb / qeyd / skan istəyə bağlıdır — server avtomatik qeyd yazır.
+        if (host.getAttribute("data-doc-optional") === "1") {
+            return true;
+        }
         if (need === "appeal") {
             return scanSelected(host);
         }

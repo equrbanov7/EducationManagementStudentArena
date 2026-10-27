@@ -30,6 +30,8 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.translation import pgettext
 
+from core import superadmin_waiver
+
 from .models.exam_score_entry import QUESTION_COUNT_MAX, ExamAssessment, ExamScoreEntry, ExamScoreEntryKind
 
 _CTX = "registrar.exam_score_entry"
@@ -317,7 +319,9 @@ def appeal_document_error() -> ValidationError:
     return ValidationError(pgettext(_CTX, "Apellyasiya ilə dəyişiklik üçün apellyasiya sənədi yüklənməlidir."))
 
 
-def decide_after_window(*, rules, enrollment_id, kind, reason, note, evidence, sheet, require_justification):
+def decide_after_window(
+    *, rules, enrollment_id, kind, reason, note, evidence, sheet, require_justification, by_user=None
+):
     """Yazılmış balın dəyişdirilməsi (cari dövr) → yazılacaq sətrin növü; qadağandırsa ``ValidationError``.
 
     * ``kind=appeal`` — APELLYASİYA: yalnız İmtahan Mərkəzinin rəhbəri / RİM rəhbəri / superadmin, sənəd (sətrin
@@ -328,13 +332,13 @@ def decide_after_window(*, rules, enrollment_id, kind, reason, note, evidence, s
     if kind == ExamScoreEntryKind.APPEAL:
         if not rules.can_appeal:
             raise appeal_head_only_error()
-        if not evidence and not (sheet is not None and sheet.evidence):
-            raise appeal_document_error()
+        if not evidence and not (sheet is not None and sheet.evidence) and not superadmin_waiver.waives(by_user):
+            raise appeal_document_error()  # superadmin sənədsiz keçir (sahib 2026-10-27)
         return ExamScoreEntryKind.APPEAL
     if kind == ExamScoreEntryKind.CORRECTION:
         if not rules.can_rim_correct:
             raise rim_only_error()
-        require_justification(reason=reason, note=note, evidence=evidence, sheet=sheet)
+        require_justification(reason=reason, note=note, evidence=evidence, sheet=sheet, by_user=by_user)
         return ExamScoreEntryKind.CORRECTION
     if rules.window_open(enrollment_id):
         return ExamScoreEntryKind.WINDOW_EDIT

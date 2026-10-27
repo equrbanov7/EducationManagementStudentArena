@@ -26,26 +26,19 @@ from .correction_reversals import (  # noqa: F401 — public compatibility facad
     revert_last_component_correction,
     revert_last_coursework_correction,
 )
-from .corrections import correction_author_name
+from .corrections import _require_basis, correction_author_name
 from .models import (
     ComponentScore,
     ComponentScoreCorrection,
-    CorrectionReason,
     CourseWork,
     CourseWorkCorrection,
     SelfWorkCorrection,
 )
 
 
-def _validate(reason, note, document):
-    if reason not in CorrectionReason.values:
-        raise ValidationError(pgettext("registrar.correction", "Choose a correction reason."))
-    note = (note or "").strip()
-    if not note:
-        raise ValidationError(pgettext("registrar.correction", "A note explaining the correction is required."))
-    if not document:
-        raise ValidationError(pgettext("registrar.correction", "A justification document (PDF) is required."))
-    return note
+def _validate(reason, note, document, by_user):
+    """Səbəb + qeyd + PDF — :func:`corrections._require_basis` ilə eyni qayda (superadmin sənədsiz keçir, 2026-10-27)."""
+    return _require_basis(reason=reason, note=note, document=document, by_user=by_user)
 
 
 def _audit(offering, by_user, kind, changes, correction, request):
@@ -109,7 +102,7 @@ def apply_selfwork_correction(
       (``new_points``; boş = «—», qiymət silinir) — 2 saat pəncərəsi və fənn qovluğu
       balının oxu-only qorumasını YALNIZ bu sənədli yol keçir."""
     ensure_selfwork_active(offering)
-    note = _validate(reason, note, document)
+    reason, note, document = _validate(reason, note, document, by_user)
     from .correction_target_locks import lock_selfwork
 
     topic, enrollment, mark = lock_selfwork(topic, enrollment)
@@ -258,7 +251,7 @@ def apply_coursework_correction(
 ):
     """Kurs işi xanasına (tələbə) sənədli düzəliş: bal / mövzu / tarix."""
     ensure_coursework_active(enrollment.offering)
-    note = _validate(reason, note, document)
+    reason, note, document = _validate(reason, note, document, by_user)
     from .correction_target_locks import lock_coursework
 
     enrollment, existing = lock_coursework(enrollment)
@@ -320,7 +313,7 @@ def apply_coursework_correction(
 @transaction.atomic
 def apply_component_correction(*, component, enrollment, new_score, reason, note, document, by_user, request=None):
     """Komponent balına (Kollokvium K1/K2/K3 və ya Midterm) sənədli düzəliş — 2 saat + pəncərə keçilir."""
-    note = _validate(reason, note, document)
+    reason, note, document = _validate(reason, note, document, by_user)
     from .correction_target_locks import lock_component
 
     component, enrollment, existing = lock_component(component, enrollment)

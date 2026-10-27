@@ -54,6 +54,9 @@ from . import exam_score_questions  # noqa: F401 — eyni səbəb (accounts `ser
 from . import exam_score_questions as questions
 from . import finals, gradebook
 from .corrections import correction_author_name
+from .exam_score_justification import fill as fill_justification
+from .exam_score_justification import require_justification as _require_justification
+from .exam_score_justification import waived as justification_waived
 from .exam_score_roster import (  # noqa: F401 — re-eksport (public fasad `exam_score_entry` üzərindən)
     STATUS_ALL,
     STATUS_CHANGED,
@@ -197,21 +200,6 @@ def _same_score(old, new) -> bool:
     return Decimal(old) == Decimal(new)
 
 
-def _require_justification(*, reason, note, evidence, sheet=None):
-    """Sonrakı dəyişiklik = TƏQDİMAT: səbəb + qeyd + sənəd (üçü də məcburi).
-
-    2026-09-12: sənəd sətrin öz faylı VƏ YA partiyanın (vərəqin) skanı ola
-    bilər — toplu köçürmədə bir protokol bütün dəyişiklikləri əsaslandırır,
-    hər sətir üçün eyni faylı təkrar saxlamağa ehtiyac yoxdur.
-    """
-    if reason not in CorrectionReason.values:
-        raise ValidationError(pgettext(_CTX, "Balı dəyişmək üçün səbəb seçilməlidir."))
-    if not (note or "").strip():
-        raise ValidationError(pgettext(_CTX, "Balı dəyişmək üçün izahat qeydi məcburidir."))
-    if not evidence and not (sheet is not None and sheet.evidence):
-        raise ValidationError(pgettext(_CTX, "Balı dəyişmək üçün təsdiqedici sənəd əlavə olunmalıdır."))
-
-
 def assert_sheet_matches(sheet, *, organization_id, offering_id):
     """Partiya bu tenanta VƏ açılışa aiddirmi — deyilsə fail-closed ``ValidationError``.
 
@@ -329,6 +317,7 @@ def record_exam_score(
         kind=kind,
         rules=rules,
         enrollment_id=enrollment.pk,
+        by_user=by_user,
     )
     if entry_kind is None:
         return None  # eyni bal → nə dublikat sətir, nə audit
@@ -412,6 +401,7 @@ def change_decision(
     kind="",
     rules=None,
     enrollment_id=None,
+    by_user=None,
 ):
     """Yazı lazımdırmı: ``None`` — eyni bal (toxunma); əks halda yazılacaq sətrin NÖVÜ (``ExamScoreEntryKind``).
 
@@ -429,13 +419,13 @@ def change_decision(
     if old_score is not None and policy.changes_blocked:
         raise period_lock.change_blocked_error()
     if old_score is None and not policy.correction_mode:
-        if policy.every_write_needs_submission:  # «çox köhnə» dövrə ilk köçürmə — sənədlə
-            period_lock.require_submission(
+        if policy.every_write_needs_submission and not justification_waived(by_user, evidence=evidence, sheet=sheet):
+            period_lock.require_submission(  # «çox köhnə» dövrə ilk köçürmə — sənədlə (superadmin sənədsiz)
                 reason=reason, note=note, evidence=evidence or (sheet.evidence if sheet is not None else None)
             )
         return ExamScoreEntryKind.INITIAL
     if old_score is None or policy.correction_mode or rules is None:
-        _require_justification(reason=reason, note=note, evidence=evidence, sheet=sheet)
+        _require_justification(reason=reason, note=note, evidence=evidence, sheet=sheet, by_user=by_user)
         return _change_kind(kind)
     return assessment_rules.decide_after_window(
         rules=rules,
@@ -446,6 +436,7 @@ def change_decision(
         evidence=evidence,
         sheet=sheet,
         require_justification=_require_justification,
+        by_user=by_user,
     )
 
 
@@ -466,6 +457,9 @@ def new_entry(
     assessment=ExamAssessment.FINAL,
 ):
     """Yazılacaq (hələ saxlanmamış) ``ExamScoreEntry`` sətri (``entry_kind`` — ``change_decision`` nəticəsi)."""
+    reason, note = fill_justification(
+        by_user, entry_kind=entry_kind, reason=reason, note=note, evidence=evidence, sheet=sheet
+    )
     if reason not in CorrectionReason.values:
         reason = CorrectionReason.APPEAL if entry_kind == ExamScoreEntryKind.APPEAL else ""
     return ExamScoreEntry(

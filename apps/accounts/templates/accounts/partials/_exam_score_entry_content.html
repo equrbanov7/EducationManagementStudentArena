@@ -48,6 +48,7 @@ tavan), «Yekun» sətirlər + apellyasiya / RİM rejimi (`_modebar.html`), qara
      data-changes-locked="{% if s.changes_locked %}1{% else %}0{% endif %}"
      data-correction-mode="{% if s.correction_mode %}1{% else %}0{% endif %}"
      data-submission-required="{% if s.submission_required %}1{% else %}0{% endif %}"
+     data-doc-optional="{% if superadmin_doc_waiver %}1{% else %}0{% endif %}"
      data-assessment="{{ s.assessment|default:'' }}"
      data-offering="{% if s.offering %}{{ s.offering.id }}{% endif %}"
      data-draft-url="{{ s.draft_url|default:'' }}"

@@ -160,8 +160,10 @@
             corrFields.hidden = !needCorr;
             var doc = corrFields.querySelector("[data-jd-corr-doc]");
             var note = corrFields.querySelector("[data-jd-corr-note]");
-            if (doc) doc.required = needCorr;
-            if (note) note.required = needCorr;
+            // Superadmin (sahib 2026-10-27): qeyd + PDF istəyə bağlıdır — server avtomatik qeyd + PDF yazır.
+            var optional = corrFields.getAttribute("data-doc-optional") === "1";
+            if (doc) doc.required = needCorr && !optional;
+            if (note) note.required = needCorr && !optional;
         }
         refreshParityBadge();
         setStep(3); // stepper: Yeni dərs addımı

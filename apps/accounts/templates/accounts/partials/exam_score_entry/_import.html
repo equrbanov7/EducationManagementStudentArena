@@ -19,6 +19,7 @@ sorğu parametri kimi daşıyır — endirilən fayl kartdakı şəbəkə ilə g
          data-org-id="{% if s.is_superadmin and s.selected_org %}{{ s.selected_org.id }}{% endif %}"
          data-correction-mode="{% if s.correction_mode %}1{% endif %}"
          data-submission-required="{% if s.submission_required %}1{% endif %}"
+         data-doc-optional="{% if superadmin_doc_waiver %}1{% endif %}"
          data-correction-field="{{ s.correction_mode_field }}">
   <div class="ems-card__head">
     <div>
@@ -94,7 +95,7 @@ sorğu parametri kimi daşıyır — endirilən fayl kartdakı şəbəkə ilə g
           </p>
           <div class="ese-import__justgrid">
             <div class="ems-field">
-              <label class="ems-field__label" for="esi-reason">{% trans "Səbəb" context "registrar.exam_score_entry" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+              <label class="ems-field__label" for="esi-reason">{% trans "Səbəb" context "registrar.exam_score_entry" %}{% if not superadmin_doc_waiver %} <span class="ems-field__req" aria-hidden="true">*</span>{% endif %}</label>
               <div class="bootstrap-single-select bootstrap-single-select--ems ese-selectwrap">
                 <select id="esi-reason" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-esi-reason>
                   <option value="">—</option>
@@ -105,13 +106,14 @@ sorğu parametri kimi daşıyır — endirilən fayl kartdakı şəbəkə ilə g
               </div>
             </div>
             <div class="ems-field ems-field--wide">
-              <label class="ems-field__label" for="esi-note">{% trans "Qeyd" context "registrar.exam_score_entry" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+              <label class="ems-field__label" for="esi-note">{% trans "Qeyd" context "registrar.exam_score_entry" %}{% if not superadmin_doc_waiver %} <span class="ems-field__req" aria-hidden="true">*</span>{% endif %}</label>
               <input type="text" id="esi-note" class="ems-input" maxlength="500" data-esi-note>
             </div>
             <div class="ems-field ems-field--wide">
-              <label class="ems-field__label" for="esi-evidence">{% trans "Skan edilmiş sənəd (təqdimat)" context "registrar.exam_score_entry" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+              <label class="ems-field__label" for="esi-evidence">{% trans "Skan edilmiş sənəd (təqdimat)" context "registrar.exam_score_entry" %}{% if not superadmin_doc_waiver %} <span class="ems-field__req" aria-hidden="true">*</span>{% endif %}</label>
               <input type="file" id="esi-evidence" class="ese-file" name="{{ s.justification_file_field }}" accept="{{ s.evidence_accept }}" data-esi-evidence>
               <span class="ems-field__hint">{% trans "Vərəq kartında skan seçilibsə, bu sahə boş qala bilər." context "registrar.exam_score_entry" %}</span>
+              {% include "partials/ems_ui/_superadmin_waiver_hint.html" %}
             </div>
           </div>
         </div>

@@ -15,6 +15,7 @@
      data-undo-url="{{ sp.urls.undo }}"
      data-recent-url="{{ sp.urls.recent }}"
      data-can-write="{% if sp.can_write %}1{% else %}0{% endif %}"
+     data-doc-optional="{% if superadmin_doc_waiver %}1{% else %}0{% endif %}"
      data-initial-student="{{ sp.initial_student.id|default:'' }}"
      data-initial-student-text="{{ sp.initial_student.text|default:'' }}">
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=sgp_subtitle %}
@@ -101,9 +102,10 @@
                             <label class="ems-field__label" for="sgp-order-date">{% trans "Tarixi" context "accounts.subgroup_placement" %}</label>
                             <input type="date" id="sgp-order-date" name="order_date" class="ems-input ems-input--date">
                         </div>
+                        {% if superadmin_doc_waiver %}<div class="ems-field ems-field--wide">{% include "partials/ems_ui/_superadmin_waiver_hint.html" %}</div>{% endif %}
                         <div class="ems-field ems-field--wide">
-                            <label class="ems-field__label" for="sgp-reason">{% trans "Səbəb" context "accounts.subgroup_placement" %} <span class="ems-field__req">*</span></label>
-                            <textarea id="sgp-reason" name="reason" class="ems-textarea" rows="3" maxlength="2000" required
+                            <label class="ems-field__label" for="sgp-reason">{% trans "Səbəb" context "accounts.subgroup_placement" %}{% if not superadmin_doc_waiver %} <span class="ems-field__req">*</span>{% endif %}</label>
+                            <textarea id="sgp-reason" name="reason" class="ems-textarea" rows="3" maxlength="2000"{% if not superadmin_doc_waiver %} required{% endif %}
                                       placeholder="{% trans 'Məs.: 2024/2025 Yaz semestrində kəsilmiş fənn — dekanlığın 12.09.2025 tarixli təqdimatı' context 'accounts.subgroup_placement' %}"></textarea>
                             <span class="ems-field__hint">{% trans "Ən azı 10 simvol. Tələbənin izində və audit jurnalında görünür." context "accounts.subgroup_placement" %}</span>
                         </div>

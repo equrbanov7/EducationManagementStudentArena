@@ -16,5 +16,6 @@
     <label class="ems-field__label" for="rtCloseDoc">{% trans "və ya qərar sənədi" context "registrar.retake" %}</label>
     <input class="ems-input" type="file" id="rtCloseDoc" name="document" accept=".pdf,.jpg,.jpeg,.png">
     <span class="ems-field__hint">{% trans "PDF, JPG və ya PNG · ən çox 10 MB" context "registrar.retake" %}</span>
+    {% include "partials/ems_ui/_superadmin_waiver_hint.html" %}
 </div>
 <p class="ems-msg ems-msg--info">{% trans "Defolt qaytarılma yoxdur. Qaytarılma lazımdırsa, bağlanışdan sonra «Ödənişin qaytarılması qərarı» ilə ayrıca rəsmi qərar verilir (Tədris şöbəsi / RİM)." context "registrar.retake" %}</p>

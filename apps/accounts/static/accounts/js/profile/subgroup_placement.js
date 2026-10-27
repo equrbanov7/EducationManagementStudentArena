@@ -246,10 +246,12 @@
         var number = (q(root, "#sgp-order-number") || {}).value || "";
         var date = (q(root, "#sgp-order-date") || {}).value || "";
         var reason = ((q(root, "#sgp-reason") || {}).value || "").trim();
-        if (!(file && file.files && file.files.length) && !(number.trim() && date)) {
+        // Superadmin (sahib 2026-10-27): sənəd və səbəb istəyə bağlıdır — server avtomatik qeyd yazır.
+        var docOptional = root.getAttribute("data-doc-optional") === "1";
+        if (!docOptional && !(file && file.files && file.files.length) && !(number.trim() && date)) {
             return s.doc_required;
         }
-        if (reason.length < MIN_REASON) {
+        if (!docOptional && reason.length < MIN_REASON) {
             return s.reason_required;
         }
         var clash = q(root, "[data-sgp-clash-accept]");

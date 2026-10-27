@@ -26,6 +26,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 
 from core import audit as audit_service
+from core import superadmin_waiver
 from core.constants import AuditAction
 
 from . import credit_recognition_read as read
@@ -117,8 +118,12 @@ def _document(document):
     return document
 
 
-def validate(*, organization, student_id, data, document) -> dict:
-    """Formanın bütün sahələri — xəta :class:`RecognitionError` (400 / 404 / 409)."""
+def validate(*, organization, student_id, data, document, actor=None) -> dict:
+    """Formanın bütün sahələri — xəta :class:`RecognitionError` (400 / 404 / 409).
+
+    ``actor`` superadmindirsə (sahib 2026-10-27) sənəd istəyə bağlıdır: fayl sahəsi modeldə məcburi olduğu üçün
+    «Superadmin düzəlişi — sənədsiz» qeydli PDF (:func:`core.superadmin_waiver.waiver_pdf`) saxlanılır.
+    """
     program = str(data.get("program") or "").strip()
     if program not in RecognitionProgram.values:
         raise RecognitionError("program", pgettext(_CTX, "Proqramı seçin."))
@@ -155,6 +160,10 @@ def validate(*, organization, student_id, data, document) -> dict:
             status=409,
         )
     cleaned["enrollment"] = enrollment
+    if not (document and getattr(document, "name", "")) and superadmin_waiver.waives(actor):
+        cleaned["document"] = superadmin_waiver.waiver_pdf(actor, subject=enrollment.offering.subject.name)
+        cleaned["note"] = superadmin_waiver.stamp(cleaned["note"], actor)[:2000]
+        return cleaned
     cleaned["document"] = _document(document)
     return cleaned
 

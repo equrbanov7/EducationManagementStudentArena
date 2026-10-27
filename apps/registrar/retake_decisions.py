@@ -23,6 +23,8 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import pgettext
 
+from core import superadmin_waiver
+
 from . import retake_fees, retake_files, retake_notify, retake_rules
 from .models import (
     Enrollment,
@@ -286,6 +288,13 @@ def _offering_for(application, offering_id):
     return offering
 
 
+def _waiver_reason(reason, actor, document):
+    """Superadmin sənədsiz qərar verirsə səbəbə avtomatik «Superadmin düzəlişi — sənədsiz» qeydi düşür."""
+    if document is not None:
+        return reason
+    return superadmin_waiver.stamp(reason, actor)
+
+
 @transaction.atomic
 def approve_subgroup(*, actor, organization, application_id, document, reason, offering_id=None, request=None):
     """Alt qrup: SƏNƏD məcburi (sahibin 2026-09-07 qaydası); hədəf jurnal verilibsə dərhal yerləşdirmə."""
@@ -293,11 +302,12 @@ def approve_subgroup(*, actor, organization, application_id, document, reason, o
         application = lock(application_id, organization)
         if application.kind != RetakeKind.SUBGROUP or application.status != RetakeStatus.SUBMITTED:
             raise ValidationError(pgettext(_CTX, "Bu müraciət alt qrup qərarı gözləmir."))
-        text = retake_rules.clean_reason(reason)
-        clean_upload(document)
+        text = retake_rules.clean_reason(_waiver_reason(reason, actor, document))
         offering = _offering_for(application, offering_id)
-        application.decision_document.save(getattr(document, "name", "") or "document", document, save=False)
-        retake_files.track(application.decision_document)
+        if document is not None or not superadmin_waiver.waives(actor):  # superadmin: sənədsiz (2026-10-27)
+            clean_upload(document)
+            application.decision_document.save(getattr(document, "name", "") or "document", document, save=False)
+            retake_files.track(application.decision_document)
         application.decided_by = actor
         application.decided_at = timezone.now()
         application.decision_note = text
@@ -308,7 +318,7 @@ def approve_subgroup(*, actor, organization, application_id, document, reason, o
             actor=actor,
             role=RetakeActorRole.DEANERY,
             note=text,
-            metadata={"document": application.decision_document.name},
+            metadata={"document": application.decision_document.name or None},
             fields=("decision_document", "decided_by", "decided_at", "decision_note"),
             request=request,
         )
@@ -319,7 +329,8 @@ def approve_subgroup(*, actor, organization, application_id, document, reason, o
                 # Paralel agentin servisi hələ yoxdur — qərar və sənəd qalır, yerləşdirmə «gözləyir».
                 logger.info("retake: subgroup placement service unavailable; %s stays admitted", application.pk)
                 return application
-            document.seek(0)
+            if document is not None:
+                document.seek(0)
             _place(application, actor=actor, offering=offering, document=document, reason=text, request=request)
         return application
 
@@ -330,8 +341,9 @@ def place_subgroup(*, actor, organization, application_id, offering_id, document
     application = lock(application_id, organization)
     if application.kind != RetakeKind.SUBGROUP or application.status != RetakeStatus.ADMITTED:
         raise ValidationError(pgettext(_CTX, "Bu müraciət yerləşdirmə gözləmir."))
-    text = retake_rules.clean_reason(reason)
-    clean_upload(document)
+    text = retake_rules.clean_reason(_waiver_reason(reason, actor, document))
+    if document is not None or not superadmin_waiver.waives(actor):
+        clean_upload(document)
     offering = _offering_for(application, offering_id)
     if offering is None:
         raise ValidationError(pgettext(_CTX, "Hədəf jurnal seçilməlidir."))

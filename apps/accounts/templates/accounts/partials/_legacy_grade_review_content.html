@@ -26,6 +26,7 @@ yaranmır. Bütün input-lar eyni hündürlükdədir (--ems-* token, CSS-də).
      data-action-url="{{ s.action_url }}"
      data-page-size="{{ s.default_page_size }}"
      data-min-note="{{ s.min_note_length }}"
+     data-doc-optional="{% if superadmin_doc_waiver %}1{% else %}0{% endif %}"
      data-max-note="{{ s.max_note_length }}"
      data-can-review="{% if s.can_review %}1{% else %}0{% endif %}">
 
@@ -183,7 +184,7 @@ yaranmır. Bütün input-lar eyni hündürlükdədir (--ems-* token, CSS-də).
       {% comment %}Native select işlədilmir (sahib qaydası, 2026-09-09) — layihənin
       öz Bootstrap tərzli seçicisi; siyahı qısadır, daxili axtarış lazım deyil.{% endcomment %}
       <div class="bootstrap-single-select bootstrap-single-select--ems">
-        <select id="lgr-correct-reason" class="ems-select bootstrap-single-select__native" data-bootstrap-select required>
+        <select id="lgr-correct-reason" class="ems-select bootstrap-single-select__native" data-bootstrap-select{% if not superadmin_doc_waiver %} required{% endif %}>
           <option value="">—</option>
           {% for reason in s.reasons %}
           <option value="{{ reason.value }}">{{ reason.label }}</option>
@@ -193,11 +194,12 @@ yaranmır. Bütün input-lar eyni hündürlükdədir (--ems-* token, CSS-də).
 
       <label class="lgr-dialog__label" for="lgr-correct-note">{% trans "Qeyd" context "accounts.legacy_review" %}</label>
       <textarea id="lgr-correct-note" class="ems-textarea lgr-textarea" rows="3"
-                maxlength="{{ s.max_note_length }}" required></textarea>
+                maxlength="{{ s.max_note_length }}"{% if not superadmin_doc_waiver %} required{% endif %}></textarea>
 
       <label class="lgr-dialog__label" for="lgr-correct-evidence">{% trans "Təsdiqedici sənəd (PDF / şəkil)" context "accounts.legacy_review" %}</label>
       <input type="file" id="lgr-correct-evidence" class="ems-input lgr-file"
-             accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif" required>
+             accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif"{% if not superadmin_doc_waiver %} required{% endif %}>
+      {% include "partials/ems_ui/_superadmin_waiver_hint.html" %}
 
       <p class="lgr-dialog__error" data-lgr-correct-error role="alert"></p>
       <div class="lgr-dialog__actions">

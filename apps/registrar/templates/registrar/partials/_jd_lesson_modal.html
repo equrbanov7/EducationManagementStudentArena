@@ -225,7 +225,7 @@ varsa dərs tipi kilidlidir.
                 {% comment %}Korrektor (İKT) dərsi dəyişəndə/siləndə HƏR halda (kilidli
                 və ya kilidsiz) bal düzəlişi kimi sənədli düzəliş tələb olunur — bu blok
                 yalnız korrektor-only üçün render olunur, JS redaktədə göstərir.{% endcomment %}
-                <div class="jd2-corr-fields" data-jd-corr-fields hidden>
+                <div class="jd2-corr-fields" data-jd-corr-fields data-doc-optional="{% if superadmin_doc_waiver %}1{% else %}0{% endif %}" hidden>
                     <p class="jd2-corr-banner">
                         <i class="fas fa-lock"></i>
                         {% blocktrans with w=lesson_edit_window_label context "registrar.journal" %}Bu dərs kilidlənib ({{ w }} keçib). Tarix/tip/saat/mövzu/müəllim dəyişikliyi VƏ YA dərsin silinməsi rəsmi sənədlə (təqdimat) audit olunur.{% endblocktrans %}
@@ -246,6 +246,7 @@ varsa dərs tipi kilidlidir.
                     <div class="jd2-field">
                         <span class="jd2-field-label">{% trans "SƏNƏD — PDF (məcburi)" context "registrar.journal" %}</span>
                         <input type="file" name="correction_document" accept="application/pdf" data-jd-corr-doc>
+                        {% include "partials/ems_ui/_superadmin_waiver_hint.html" %}
                     </div>
                 </div>
                 {% endif %}

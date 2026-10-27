@@ -32,6 +32,8 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import pgettext
 
+from core import superadmin_waiver
+
 from . import retake_files, retake_rules
 from .models import ExamChanceGrant, ExamChanceReason, RetakeActorRole, RetakeEventAction, RetakeKind, RetakeStatus
 from .retake_services import clean_upload, lock, transition
@@ -109,11 +111,15 @@ def _clean_date(raw):
         raise ValidationError(pgettext(_CTX, "Əmr tarixi düzgün deyil.")) from None
 
 
-def clean_decision(*, order_number="", order_date=None, document=None, missing_message=None) -> dict:
+def clean_decision(*, order_number="", order_date=None, document=None, missing_message=None, actor=None) -> dict:
+    """Əmr № + tarix VƏ YA sənəd. ``actor`` superadmindirsə (2026-10-27) boşluq avtomatik «SA-…» əmri ilə dolur."""
     number = str(order_number or "").strip()[:80]
     date = _clean_date(order_date)
     if document is not None:
         clean_upload(document)
+    elif superadmin_waiver.waives(actor) and not (number and date):
+        number = number or superadmin_waiver.order_number()
+        date = date or superadmin_waiver.order_date()
     if not ((number and date) or document is not None):
         raise ValidationError(
             missing_message
@@ -146,8 +152,12 @@ def close(
         application = lock(application_id, organization)
         if application.kind != RetakeKind.RETAKE_25 or application.status not in allowed:
             raise ValidationError(pgettext(_CTX, "Bu mərhələdə bu bağlanış mümkün deyil."))
+        if document is None and not (str(order_number or "").strip() and order_date):
+            reason = superadmin_waiver.stamp(reason, actor)  # superadmin: sənədsiz / əmrsiz (2026-10-27)
+        elif superadmin_waiver.waives(actor):
+            reason = superadmin_waiver.fill_text(reason, actor, min_length=retake_rules.REASON_MIN)
         text = retake_rules.clean_reason(reason)
-        decision = clean_decision(order_number=order_number, order_date=order_date, document=document)
+        decision = clean_decision(order_number=order_number, order_date=order_date, document=document, actor=actor)
         revoked = (
             _revoke_exam_access(application, actor=actor, action=action, request=request)
             if application.status == RetakeStatus.EXAM_GRANTED

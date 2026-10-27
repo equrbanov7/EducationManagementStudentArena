@@ -101,9 +101,9 @@ correction_reasons.
             </label>
 
             <label class="corr-field">
-                <span class="corr-field-label">{% trans "Səbəb" context "registrar.correction" %} <b class="corr-req">*</b></span>
+                <span class="corr-field-label">{% trans "Səbəb" context "registrar.correction" %}{% if not superadmin_doc_waiver %} <b class="corr-req">*</b>{% endif %}</span>
                 <div class="bootstrap-single-select">
-                    <select name="reason" class="corr-input form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select required>
+                    <select name="reason" class="corr-input form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select{% if not superadmin_doc_waiver %} required{% endif %}>
                         <option value="">—</option>
                         {% for value, label in correction_reasons %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
                     </select>
@@ -111,14 +111,15 @@ correction_reasons.
             </label>
 
             <label class="corr-field">
-                <span class="corr-field-label">{% trans "Qeyd" context "registrar.correction" %} <b class="corr-req">*</b></span>
-                <textarea name="note" rows="2" class="corr-input" required
+                <span class="corr-field-label">{% trans "Qeyd" context "registrar.correction" %}{% if not superadmin_doc_waiver %} <b class="corr-req">*</b>{% endif %}</span>
+                <textarea name="note" rows="2" class="corr-input"{% if not superadmin_doc_waiver %} required{% endif %}
                           placeholder="{% trans 'Düzəlişin izahı (tələbə və müəllim görür)' context 'registrar.correction' %}"></textarea>
             </label>
 
             <label class="corr-field">
-                <span class="corr-field-label">{% trans "Sənəd (PDF)" context "registrar.correction" %} <b class="corr-req">*</b></span>
-                <input type="file" name="document" accept="application/pdf,.pdf" class="corr-input" required>
+                <span class="corr-field-label">{% trans "Sənəd (PDF)" context "registrar.correction" %}{% if not superadmin_doc_waiver %} <b class="corr-req">*</b>{% endif %}</span>
+                <input type="file" name="document" accept="application/pdf,.pdf" class="corr-input"{% if not superadmin_doc_waiver %} required{% endif %}>
+                {% include "partials/ems_ui/_superadmin_waiver_hint.html" %}
             </label>
 
             <label class="corr-field">

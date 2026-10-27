@@ -189,7 +189,8 @@
                 var note = root.querySelector("#lgr-correct-note");
                 var evidence = root.querySelector("#lgr-correct-evidence");
                 var noteText = note && note.value ? note.value.trim() : "";
-                if (noteText.length < minNote) {
+                // Superadmin (sahib 2026-10-27): qeyd / sənəd istəyə bağlıdır — server avtomatik qeyd yazır.
+                if (noteText.length < minNote && root.dataset.docOptional !== "1") {
                     if (errorNode) {
                         errorNode.textContent = ctx.i18n.noteShort || "";
                     }

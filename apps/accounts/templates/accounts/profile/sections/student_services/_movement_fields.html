@@ -31,18 +31,19 @@ məcburiyyət serverdə (`registrar.movements.validate`) yoxlanılır.
     <div class="ems-field">
         <label class="ems-field__label" for="srOrderNumber">
             {% trans "Əmr nömrəsi" context "accounts.student_registry" %}
-            <span class="ems-field__req" aria-hidden="true">*</span>
+            {% if not superadmin_doc_waiver %}<span class="ems-field__req" aria-hidden="true">*</span>{% endif %}
         </label>
-        <input class="ems-input" type="text" id="srOrderNumber" name="order_number" maxlength="64" required data-ems-required>
+        <input class="ems-input" type="text" id="srOrderNumber" name="order_number" maxlength="64"{% if not superadmin_doc_waiver %} required data-ems-required{% endif %}>
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="srOrderDate">
             {% trans "Əmrin tarixi" context "accounts.student_registry" %}
-            <span class="ems-field__req" aria-hidden="true">*</span>
+            {% if not superadmin_doc_waiver %}<span class="ems-field__req" aria-hidden="true">*</span>{% endif %}
         </label>
-        <input class="ems-input" type="date" id="srOrderDate" name="order_date" required data-ems-required>
+        <input class="ems-input" type="date" id="srOrderDate" name="order_date"{% if not superadmin_doc_waiver %} required data-ems-required{% endif %}>
     </div>
 </div>
+{% include "partials/ems_ui/_superadmin_waiver_hint.html" %}
 
 <div class="ems-field" data-sr-need="group" hidden>
     <label class="ems-field__label" for="srTargetGroup">{% trans "Yeni qrup" context "accounts.student_registry" %}</label>

@@ -93,7 +93,8 @@
         if (root.dataset.busy === "1") return;
         if (apply && previews.get(root) !== file) return error(root, t("import-preview-title"));
         var form = payload(root, file);
-        if (apply && !root.querySelector("[data-esi-just]").hidden &&
+        // Superadmin (`data-doc-optional`, sahib 2026-10-27) — təqdimat istəyə bağlıdır.
+        if (apply && !root.querySelector("[data-esi-just]").hidden && root.dataset.docOptional !== "1" &&
                 (!form.get("reason") || !form.get("note").trim() || !hasScan(form))) {
             return error(root, t(root.dataset.submissionRequired === "1" ? "need-submission" : "need-justification"));
         }

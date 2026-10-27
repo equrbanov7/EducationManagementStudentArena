@@ -109874,3 +109874,11 @@ msgstr "There are no results to download."
 msgctxt "exams.results_export"
 msgid "Avtomatik (sistem)"
 msgstr "Automatic (system)"
+
+msgctxt "core.superadmin_waiver"
+msgid "Superadmin: sənəd / əmr istəyə bağlıdır — boş qalsa avtomatik «Superadmin düzəlişi — sənədsiz» qeydi yazılır."
+msgstr "Superadmin: the document / order is optional — if left empty, an automatic «Superadmin correction — no document» note is recorded."
+
+msgctxt "registrar.guest_roster"
+msgid "SƏNƏD — TƏQDİMAT / SƏRƏNCAM (İSTƏYƏ BAĞLI)"
+msgstr "DOCUMENT — SUBMISSION / ORDER (OPTIONAL)"

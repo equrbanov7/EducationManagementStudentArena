@@ -106,6 +106,23 @@ def coerce(document) -> PlacementDocument:
     raise errors.SubgroupPlacementError(errors.DOCUMENT_INVALID)
 
 
+def apply_waiver(document: PlacementDocument, actor) -> PlacementDocument:
+    """Superadmin sənədsiz keçir (sahib 2026-10-27): heç nə verilməyibsə avtomatik «SA-…» sərəncamı + bu gün.
+
+    Yarımçıq sərəncam (yalnız nömrə və ya yalnız tarix) da tamamlanır. Fayl / tam sərəncam varsa toxunulmur;
+    qeyri-superadmin üçün sənəd olduğu kimi qaytarılır (qayda dəyişmir).
+    """
+    from core import superadmin_waiver
+
+    if document.has_file or document.has_order or not superadmin_waiver.waives(actor):
+        return document
+    return PlacementDocument(
+        file=None,
+        number=document.number or superadmin_waiver.order_number(),
+        date=document.date or superadmin_waiver.order_date(),
+    )
+
+
 def validate(document: PlacementDocument) -> PlacementDocument:
     """Sənəd qaydası: fayl VƏ YA (nömrə + tarix). Fayl məzmunca yoxlanılır, adı təsadüfiləşdirilir."""
     number_only = bool(document.number) and document.date is None
@@ -161,4 +178,12 @@ def store(*, document: PlacementDocument, enrollment, actor, note: str = ""):
     return record
 
 
-__all__ = ["ALLOWED_EXTENSIONS", "MAX_DOCUMENT_MB", "PlacementDocument", "coerce", "store", "validate"]
+__all__ = [
+    "ALLOWED_EXTENSIONS",
+    "MAX_DOCUMENT_MB",
+    "PlacementDocument",
+    "apply_waiver",
+    "coerce",
+    "store",
+    "validate",
+]

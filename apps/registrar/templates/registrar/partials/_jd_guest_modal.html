@@ -28,6 +28,7 @@ render olunmur. Bütün URL-lər data-atributla ötürülür (CSP: inline JS yox
      data-merge-label-entry="{% trans 'Giriş balı' context 'registrar.guest_roster' %}"
      data-merge-unit-hours="{% trans 'saat' context 'registrar.guest_roster' %}"
      data-document-required="{% trans 'Sənəd (təqdimat / sərəncam) yüklənməlidir.' context 'registrar.guest_roster' %}"
+     data-document-optional="{% if superadmin_doc_waiver %}1{% else %}0{% endif %}"
      data-merge-reason-required="{% trans 'Birləşmə üçün səbəb yazılmalıdır (məs.: dekanlıq sərəncamı nömrəsi).' context 'registrar.guest_roster' %}"
      data-refresh-failed="{% trans 'Əməliyyat alındı, amma cədvəl yenilənmədi — səhifəni yeniləyin.' context 'registrar.guest_roster' %}">
     <div class="jd-modal-backdrop" data-jgs-close></div>
@@ -129,11 +130,12 @@ render olunmur. Bütün URL-lər data-atributla ötürülür (CSP: inline JS yox
             <div class="jd2-field jgs-field jgs-field--doc">
                 <span class="jd2-field-label">
                     <span class="jgs-step-dot">3</span>
-                    {% trans "SƏNƏD — TƏQDİMAT / SƏRƏNCAM (MƏCBURİ)" context "registrar.guest_roster" %}
+                    {% if superadmin_doc_waiver %}{% trans "SƏNƏD — TƏQDİMAT / SƏRƏNCAM (İSTƏYƏ BAĞLI)" context "registrar.guest_roster" %}{% else %}{% trans "SƏNƏD — TƏQDİMAT / SƏRƏNCAM (MƏCBURİ)" context "registrar.guest_roster" %}{% endif %}
                 </span>
                 <input type="file" data-jgs-document accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif"
                        aria-label="{% trans 'Təqdimat və ya sərəncamın skanı (PDF/şəkil, 10 MB-dək)' context 'registrar.guest_roster' %}">
                 <small class="jd-field-hint">{% trans "PDF və ya şəkil, 10 MB-dək. Sənəd əlavə qeydiyyatı ilə birlikdə saxlanılır və silinmir." context "registrar.guest_roster" %}</small>
+                {% include "partials/ems_ui/_superadmin_waiver_hint.html" %}
             </div>
 
             <div class="jd2-field jgs-field">

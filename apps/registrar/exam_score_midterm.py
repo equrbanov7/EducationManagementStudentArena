@@ -185,6 +185,7 @@ class _MidtermSave:
             kind=row.get("kind") or "",
             rules=self.rules,
             enrollment_id=enrollment.pk,
+            by_user=self.by_user,
         )
         if entry_kind is None or (teacher_written and old_score == new_score and cleaned is None):
             return None

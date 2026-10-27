@@ -358,11 +358,27 @@ class CorrectionBridgeTests(_ReviewSetup):
         self.assertEqual(FinalGrade.objects.get(enrollment=self.enrollment).exam_score, Decimal("17.00"))
 
     def test_correction_without_a_document_is_rejected_and_writes_nothing(self):
-        """Sənəd tələbi servis qatındadır; qərar sətri də YAZILMAMALIDIR."""
+        """Sənəd tələbi servis qatındadır; qərar sətri də YAZILMAMALIDIR.
+
+        2026-10-27: superadmin sənədsiz keçir — qayda ``final_score.entry`` açarlı ADİ aktorda yoxlanır.
+        """
+        from apps.organizations.models import Membership, Role
+        from core.constants import RoleScopeType
+
         self._seed_live_score("10")
         fact = self._fact(exam_score_text="17", exam_score=Decimal("17"))
 
         with bypass_rls():
+            role = Role.objects.create(
+                organization=self.org,
+                name="lgr_entry",
+                level=80,
+                scope_type=RoleScopeType.ORGANIZATION,
+                permissions=["final_score.entry"],
+                is_active=True,
+            )
+            entry_user = type(self.admin).objects.create_user("lgr_entry", "lgr-entry@example.test", "pw")
+            Membership.objects.create(user=entry_user, organization=self.org, role=role, is_active=True)
             with self.assertRaises(ValidationError):
                 review_write.apply_correction(
                     organization=self.org,
@@ -371,7 +387,7 @@ class CorrectionBridgeTests(_ReviewSetup):
                     reason=CorrectionReason.TECHNICAL,
                     note="Sənədsiz cəhd.",
                     evidence=None,
-                    actor=self.admin,
+                    actor=entry_user,
                 )
 
         self.assertEqual(LegacyGradeReview.objects.filter(fact=fact).count(), 0)
