@@ -273,6 +273,19 @@ def _scope_switch(context, visible, *, scope: str, organization, user):
     }
 
 
+def _current_academic_year(organization) -> str:
+    """Cari semestrin tədris ili (``is_current``); tapılmasa boş."""
+    from apps.organizations.models import AcademicPeriod
+
+    return (
+        AcademicPeriod.objects.filter(organization=organization, is_current=True)
+        .order_by("-start_date")
+        .values_list("academic_year", flat=True)
+        .first()
+        or ""
+    )
+
+
 def academic_filter_options(organization):
     """(illər, semestrlər) — siyahı və təsdiq ekranı EYNİ açılışı işlədir."""
     from apps.organizations.models import AcademicPeriod
@@ -378,6 +391,13 @@ def build_syllabus_list_section(request, *, organization) -> dict:
     scope = SCOPE_MINE if _text(request, "scope") == SCOPE_MINE else ""
 
     unit = _text(request, "unit")
+    # Sahib 2026-10-27: müəllim (yalnız öz əhatəsi) siyahıda YALNIZ cari tədris ilini görür — köhnə illərin
+    # sillabusları burada göstərilmir («Keçən ildən köçür» öz köhnə sillabusunu yenə tapır).
+    current_year_only = not services.has_broad_view_scope(
+        services.resolve_actor(request.user, organization, request=request)
+    )
+    if current_year_only:
+        academic_year = _current_academic_year(organization) or academic_year
 
     context = build_syllabus_list_context(
         request,
@@ -446,6 +466,8 @@ def build_syllabus_list_section(request, *, organization) -> dict:
     paginator = Paginator(sequence, PAGE_SIZE)
     page = paginator.get_page(request.GET.get("page") or 1)
     years, seasons = academic_filter_options(organization)
+    if current_year_only:
+        years = [year for year in years if year["key"] == academic_year]
 
     return {
         "syllabus_list_section": {

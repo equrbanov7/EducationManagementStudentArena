@@ -195,8 +195,9 @@ def test_list_offers_copy_previous_on_missing_and_blank_draft_rows(world):
     # Bu semestrdə də qonşu var — «Mövcud sillabusdan istifadə et» birinci, «Keçən ildən köçür» yanında.
     assert _keys(rows, world["offerings"]["o2"].pk) == ["reuse", "copy", "create"]
     assert _keys(rows, draft.pk) == ["resume", "copy"]
-    # Keçmiş semestr dosyesinin öz sətrində («Keçən ildən köçür» özünə) — təklif yoxdur.
-    assert "copy" not in [action["key"] for action in rows[str(world["source"].pk)]["actions"]]
+    # Keçmiş ilin dosyesi müəllim siyahısında görünmür (sahib 2026-10-27: yalnız cari tədris ili),
+    # amma «Keçən ildən köçür» onu mənbə kimi tapır (yuxarıdakı «copy» əməli).
+    assert str(world["source"].pk) not in rows
 
 
 def test_list_hides_copy_previous_without_a_source(world):
