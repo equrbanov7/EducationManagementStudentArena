@@ -246,6 +246,12 @@ class AdminOTPGateMiddleware:
             value = getattr(settings, "STATIC_URL", "") or ""
             if value.startswith("/"):
                 prefixes.append(value)
+            # 2026-10-27: şəbəkə zonası izah səhifəsi (nginx kənar `/manage/`-i bura yönəldir) OTP-yə
+            # yönləndirməsin — əks halda verify-otp ↔ izah səhifəsi arasında sonsuz yönləndirmə dövrü yaranır.
+            try:
+                prefixes.append(reverse("accounts:network_zone_denied", kwargs={"area": "x"})[: -len("x/")])
+            except NoReverseMatch:
+                pass
             self._exempt_cache = tuple(p for p in prefixes if p)
         return self._exempt_cache
 

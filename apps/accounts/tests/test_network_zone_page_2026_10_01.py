@@ -34,3 +34,36 @@ class NetworkZonePageTest(TestCase):
         self.assertIn("rewrite ^ /accounts/sebeke/jurnal/? last;", conf)
         self.assertIn("rewrite ^ /accounts/sebeke/idareetme/? last;", conf)
         self.assertNotIn('"^external:/(jurnal|manage)/") { return 403; }', conf)
+
+
+class AdminOtpExternalLoopTest(TestCase):
+    """Sahib 2026-10-27: superadmin kənardan girəndə ``/manage/verify-otp/`` ERR_TOO_MANY_REDIRECTS verirdi.
+
+    nginx kənar ``/manage/``-i izah səhifəsinə yönləndirirdi, OTP qapısı isə izah səhifəsini yenə verify-otp-yə
+    göndərirdi. İndi OTP addımları kənardan açıqdır, izah səhifəsi də OTP-yə yönləndirmir.
+    """
+
+    def test_nginx_keeps_admin_otp_steps_open_before_manage_rewrite(self):
+        for name in ("docker/nginx/nginx.conf", "docker/nginx/nginx.ci.conf"):
+            with open(name, encoding="utf-8") as handle:
+                conf = handle.read()
+            rule = 'if ($ems_zone_path ~ "^external:/manage/(verify-otp|resend-otp|logout)/$") { set $ems_zone_path "open"; }'
+            self.assertIn(rule, conf, name)
+            block = conf.index("^external:/manage/") if '^external:/manage/")' in conf else conf.index("|manage|")
+            self.assertLess(conf.index(rule), block, name)
+
+    def test_zone_page_does_not_redirect_unverified_admin_to_otp(self):
+        from django.contrib.auth import get_user_model
+        from django.test import override_settings
+
+        admin = get_user_model().objects.create_user(
+            username="otp.loop.admin", password="x-Strong-pass-1", is_staff=True
+        )
+        self.client.force_login(admin)
+        with override_settings(ADMIN_2FA_REQUIRED=True):
+            page = self.client.get(reverse("accounts:network_zone_denied", args=["idareetme"]))
+            other = self.client.get(reverse("accounts:profile"))
+
+        self.assertEqual(page.status_code, 403)
+        self.assertEqual(other.status_code, 302)
+        self.assertEqual(other["Location"], reverse("admin:verify-otp"))
