@@ -55,6 +55,10 @@ INTENTIONAL_EXEMPTIONS = {
     # MariaDB mənbəyinə qoşulur; Django DB-yə heç bir sorğu yoxdur.
     "apps/legacy_import/management/commands/legacy_import_source_attest.py",
     "apps/legacy_import/management/commands/legacy_import_source_pk_inventory.py",
+    # 2026-10-27 RİM əkiz düzəlişləri: bütün DB işi `relocate_twin_enrollment.run_plan`-dadır
+    # (`rls_worker_atomic()` + `bypass_rls()` + RLS konteksti); bu fayllar yalnız plan faylını oxuyub runner verir.
+    "apps/registrar/management/commands/fix_legacy_lesson_kinds.py",
+    "apps/registrar/management/commands/merge_twin_offerings.py",
     # rehearse öz RLS kontekstini (set_rls_tenant, session-scoped, bypass-sız)
     # və öz transaction sərhədlərini (ledger advisory-lock atomic-ləri, batch
     # checkpoint/resume) idarə edir — tək böyük rls_worker_atomic() sarğısı
