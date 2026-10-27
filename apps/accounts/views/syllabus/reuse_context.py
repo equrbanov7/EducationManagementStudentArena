@@ -372,6 +372,16 @@ def page_flags(page_syllabi, visible, *, user_id=None, actor=None) -> dict:
             .values_list("subject_id", "period_id")
         ):
             pairs[(subject_id, period_id)] += 1
+    if open_drafts and actor is not None:
+        # Həmkarların təsdiqlənmiş qonşu sillabusları da kopyalana bilər (sahib 2026-10-27).
+        shared = services.reuse_rules.shared_sibling_pairs(
+            organization=open_drafts[0].organization_id,
+            actor=actor,
+            subject_ids={row.subject_id for row in open_drafts},
+            period_ids={row.period_id for row in open_drafts},
+        )
+        for pair, count in shared.items():
+            pairs[pair] += count
     previous = _previous_flags(page, actor)
     flags = {}
     for row in page:
@@ -457,7 +467,8 @@ def editor_reuse_state(request, organization, *, syllabus, version, is_author: b
                 exclude_syllabus_id=syllabus.pk,
                 exclude_offering_id=syllabus.offering_id,
             )
-            .filter(services.own_q(actor))  # mənbə yalnız öz dosyesi ola bilər (rəhbər də)
+            # mənbə: öz dosyesi və ya həmkarın təsdiqlənmiş sillabusu (yalnız kopyalama; sahib 2026-10-27)
+            .filter(services.own_q(actor) | Q(approved_version__status=SyllabusStatus.APPROVED.value))
             .order_by()
             .values("pk")
             .count()

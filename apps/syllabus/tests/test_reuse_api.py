@@ -14,7 +14,7 @@ import pytest
 from apps.organizations.models import OrgUnit
 from apps.registrar.models import CourseOffering, Enrollment
 from apps.syllabus import services
-from apps.syllabus.constants import SyllabusStatus
+from apps.syllabus.constants import SectionKey, SyllabusStatus
 from apps.syllabus.models import ApprovalSource, ChangeKind, Syllabus
 from apps.syllabus.tests.factories import activate_member, make_academic_stack, make_offering, make_org
 from apps.syllabus.tests.reuse_fixtures import (
@@ -24,6 +24,7 @@ from apps.syllabus.tests.reuse_fixtures import (
     approved_syllabus,
     build_world,
     draft_for,
+    fill,
     target,
 )
 from core.constants import OrgUnitType
@@ -96,10 +97,15 @@ def test_options_are_fail_closed(world):
     assert _options(client, offering="yanlış").status_code == 404
     # `syllabus.edit` açarı olmayan kafedra müdiri — 403.
     assert _options(_client(world, "head"), offering=world["offerings"]["o2"].pk).status_code == 403
-    # Oxuya bilmədiyi qonşu dialoqa düşmür.
-    approved_syllabus(world, "o5", user_key="teacher2")
+    # Həmkarın QARALAMASI dialoqa düşmür (şəxsi iş).
+    _foreign, foreign_version = draft_for(world, "o5", user_key="teacher2")
     siblings = _options(client, offering=world["offerings"]["o2"].pk).json()["siblings"]
     assert [row["group"] for row in siblings] == [world["groups"]["g1"].name]
+    # Sahib 2026-10-27: həmkarın TƏSDİQLƏNMİŞ sillabusu görünür — yalnız kopyalama (bağlama müəllifindir).
+    approve_version(world, fill(foreign_version, actor(world, "teacher2")), actor(world, "teacher2"))
+    siblings = _options(client, offering=world["offerings"]["o2"].pk).json()["siblings"]
+    foreign_row = next(row for row in siblings if row["group"] == world["groups"]["g5"].name)
+    assert foreign_row["can_copy"] and not foreign_row["can_link"]
 
 
 def test_options_query_count_does_not_grow_with_siblings(world):
@@ -171,10 +177,29 @@ def test_link_endpoint_and_the_student_sees_the_linked_content(world):
 
 
 def test_link_with_an_unreadable_source_is_404(world):
-    foreign, _version = approved_syllabus(world, "o5", user_key="teacher2")
+    foreign, _version = draft_for(world, "o5", user_key="teacher2")
     response = _post(_client(world), {"action": "link", "source": foreign.pk, "offering": world["offerings"]["o2"].pk})
     assert response.status_code == 404
     assert not Syllabus.objects.filter(offering=world["offerings"]["o2"]).exists()
+
+
+def test_colleagues_approved_syllabus_is_copied_not_linked(world):
+    """Sahib 2026-10-27: həmkarın təsdiqlənmiş sillabusu KOPYALANIR (qaralama), bağlanmır; şəxsi sahələri köçmür."""
+    foreign, _version = approved_syllabus(world, "o5", user_key="teacher2")
+    client = _client(world)
+    offering = world["offerings"]["o2"]
+    linked = _post(client, {"action": "link", "source": foreign.pk, "offering": offering.pk})
+    assert linked.status_code == 409
+    assert not Syllabus.objects.filter(offering=offering).exists()
+    copied = _post(client, {"action": "copy", "source": foreign.pk, "offering": offering.pk})
+    assert copied.status_code == 200 and copied.json()["status"] == SyllabusStatus.DRAFT
+    syllabus = Syllabus.objects.get(offering=offering)
+    assert syllabus.author_id == world["teacher"].pk
+    info = syllabus.current_version.sections.get(section_id=SectionKey.INFO.value).data
+    assert info["office_hours"] == ""
+    assert info["teacher"] == world["teacher"].get_full_name().strip()
+    week = syllabus.current_version.sections.get(section_id=SectionKey.WEEK.value).data
+    assert any(row.get("topic") for row in week["rows"])
 
 
 def test_copy_endpoint_returns_a_draft_and_refuses_double_submit(world):

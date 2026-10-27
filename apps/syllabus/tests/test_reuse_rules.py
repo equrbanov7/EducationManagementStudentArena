@@ -13,9 +13,11 @@ from apps.syllabus.tests.reuse_fixtures import (
     OTHER_HOURS,
     TEACHER_PERMS,
     actor,
+    approve_version,
     approved_syllabus,
     build_world,
     draft_for,
+    fill,
 )
 from apps.syllabus.week_plan import fit_rows_to_hours
 
@@ -128,8 +130,14 @@ def test_linked_targets_are_not_offered_as_sources(world):
 
 
 def test_other_teachers_syllabi_are_hidden_from_a_course_scoped_teacher(world):
-    foreign, _version = approved_syllabus(world, "o5", user_key="teacher2")
+    foreign, foreign_version = draft_for(world, "o5", user_key="teacher2")
+    # Həmkarın QARALAMASI görünmür (şəxsi iş).
     assert _siblings(world) == []
+    # Sahib 2026-10-27: TƏSDİQLƏNMİŞ sillabusu görünür və kopyalana bilər (öz deyil → bağlanmır).
+    approve_version(world, fill(foreign_version, actor(world, "teacher2")), actor(world, "teacher2"))
+    rows = _siblings(world)
+    assert [row.pk for row in rows] == [foreign.pk]
+    assert rows[0]._own == 0 and rows[0]._copyable == 1
     # Kafedra müdiri (syllabus.view + kafedra əhatəsi) oxuyur, amma kopyalaya bilmir (edit yoxdur).
     rows = _siblings(world, user_key="head")
     assert [row.pk for row in rows] == [foreign.pk]

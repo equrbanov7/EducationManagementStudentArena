@@ -145,8 +145,8 @@ def _missing_rows(*, organization, user, syllabi, academic_year: str, semester: 
             # 2026-10-08: əvvəl BAŞQA qrupun açılışlı dosyesi də bu dəstə düşürdü
             # və həmin qrupun jurnalı «sillabus yoxdur» deyərkən siyahı onu gizlədirdi.
             covered_pairs.add((subject_id, period_id))
-        # Təklif yalnız İSTİFADƏ EDİLƏ BİLƏN mənbə üçün: aktorun öz dosyesi (bağlama və
-        # kopyalama qapısı). Rəhbərin gördüyü başqa müəllimin sillabusu sayılmır.
+        # Təklif yalnız İSTİFADƏ EDİLƏ BİLƏN mənbə üçün: burada aktorun öz dosyesi; həmkarların
+        # təsdiqlənmiş sillabusları aşağıda `shared_sibling_pairs` ilə əlavə olunur.
         if reused_from_id is None and period_id is not None and user.pk in (author_id, instructor_id):
             sibling_pairs[(subject_id, period_id)] += 1
 
@@ -164,6 +164,19 @@ def _missing_rows(*, organization, user, syllabi, academic_year: str, semester: 
         if pending
         else set()
     )
+    # Həmkarların təsdiqlənmiş qonşu sillabusları da kopyalana bilər (sahib 2026-10-27).
+    shared = (
+        services.reuse_rules.shared_sibling_pairs(
+            organization=organization,
+            actor=actor,
+            subject_ids={offering.subject_id for offering in pending},
+            period_ids={offering.period_id for offering in pending},
+        )
+        if pending
+        else {}
+    )
+    for pair, count in shared.items():
+        sibling_pairs[pair] += count
     rows = []
     for offering in pending:
         rows.append(
