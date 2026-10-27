@@ -34,8 +34,14 @@ Canlı mənbə ölçüləri (rehearsal DB, 2026-08-27) — semantika BUNLARLA t�
   tərcümə", "Şifahi tərcümə") — yəni mühazirə/seminar bölgüsü olmayan
   **məşğələ** formatı.  Hədəf enumunda məşğələnin qarşılığı SEMINAR-dır
   (``SlotKind.kind`` help_text: "mühazirə/məşğələ/laboratoriya").
-* ``sem_muh=2`` ən yüksək ballanma nisbətinə malikdir (70.7 %) → praktiki,
-  yenə SEMINAR.
+* ``sem_muh=2`` ən yüksək ballanma nisbətinə malikdir (70.7 %). 2026-08-də bu
+  «praktiki → SEMINAR» kimi fərz edilmişdi — **SƏHV idi** (RİM 2026-10-27, MR-8/9/29):
+  2026/2027 payızında ``2`` kodlu BÜTÜN jurnalların (16 + 13 + 10) aktiv
+  sillabusunda ``lab_saat`` var (16/16, 13/13, 10/10), ``praktiki_saat`` isə
+  ``3`` kodlu jurnallardadır (213/217). Semestr 14-də xananın ``lab`` bayrağı
+  heç işlənməyib — laboratoriya yalnız ``sem_muh=2`` ilə yazılıb. Deməli
+  ``2`` = **LABORATORİYA**. ``3`` = praktiki məşğələ QƏSDƏN SEMINAR qalır
+  (hədəfdə ayrıca «praktiki» növü yoxdur).
 * ``lab`` MÜSTƏQİL bayraqdır (0/1) və laboratoriyanı işarələyir.
 
 Niyə dərs cədvəlinin öz ``sem_muh``-u yox, XANALAR mənbədir: slot səviyyəsində
@@ -70,7 +76,8 @@ LAB = "lab"
 
 # Xana ``sem_muh`` kodları (yuxarıdakı ölçülərə əsasən).
 _MUHAZIRE_CODE = 1
-_SEMINAR_CODES = frozenset({0, 2, 3})
+_LAB_CODE = 2
+_SEMINAR_CODES = frozenset({0, 3})
 
 # Bərabər səs halında sabit üstünlük: bal xanasını BAĞLAYAN növ (lecture) ən
 # sonda gəlir — mənbədə yazılmış bal heç vaxt görünməz qalmasın.
@@ -100,6 +107,8 @@ def cell_kind(*, lab: int, sem_muh: int) -> str:
         return ""
     if sem_muh == _MUHAZIRE_CODE:
         return LECTURE
+    if sem_muh == _LAB_CODE:
+        return LAB
     if sem_muh in _SEMINAR_CODES:
         return SEMINAR
     return ""

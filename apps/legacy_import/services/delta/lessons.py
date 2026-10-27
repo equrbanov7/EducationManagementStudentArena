@@ -3,7 +3,7 @@
 Dərs
     Legacy dərs tarixi (``journals_dates_added_by_teacher``: ay, gün, saat) + jurnalın semestri → tarix.
     Növ cutover J3 qaydası ilə: eyni slotdakı xanaların ``lab``/``sem_muh`` səsverməsi (lab → laboratoriya,
-    1 → mühazirə, 0/2/3 → seminar); xana yoxdursa dərs sətrinin ``sem_muh``-u. Saat 2 (1 dərs = 2 saat).
+    1 → mühazirə, 2 → laboratoriya, 0/3 → seminar); xana yoxdursa dərs sətrinin ``sem_muh``-u. Saat 2 (1 dərs = 2 saat).
     Açılışda eyni tarix + saatda dərs VARSA o istifadə olunur; yeni sistemdə əvvəlcədən açılmış eyni gün +
     eyni növ dərs (başqa saatda) bir legacy slotunu udur — ikiqat qayıb saatının qarşısı alınır.
     ``--lessons-until``-dan SONRAKI tarixlər (gələcək) atılır. Xanası olub dərs sətri olmayan slot cutover
@@ -127,6 +127,11 @@ class LessonBook:
         self.pending.append(lesson)
         return lesson
 
+    def existing(self, offering_id, date, start):
+        """Yalnız dəqiq slotdakı dərs (mövcud və ya bu qaçışda növbəyə qoyulmuş); yeni dərs yaradılmır."""
+
+        return self.by_slot.get((offering_id, date, start))
+
     def _claim(self, lesson) -> None:
         bucket = self.unclaimed.get((lesson.offering_id, lesson.date, lesson.kind))
         if bucket and lesson in bucket:
@@ -209,6 +214,7 @@ def build_lessons_and_marks(run, slices: dict, enrollments: dict, *, until: date
         ).values_list("lesson_id", "enrollment_id", "status", "score")
     }
     excuse = run.excuse_index()
+    cross = getattr(run, "cross_journal", set())
     pending, touched = [], {}
     for row in cells:
         month = row["month_id"]
@@ -237,7 +243,17 @@ def build_lessons_and_marks(run, slices: dict, enrollments: dict, *, until: date
             run.count("cell.future_skipped")
             continue
         slot = (uniqid, int(month), _int(row["day_number"]), str(row["time"])[:5])
-        lesson = book.ensure(enrollment.offering_id, date, start, slot_kind(slot), synthesised=slot not in dated_slots)
+        if (uniqid, legacy_sid) in cross:
+            # Əkiz / passiv jurnalın xanası (``home_journal``): ev açılışında yeni («fantom») dərs AÇILMIR.
+            lesson = book.existing(enrollment.offering_id, date, start)
+            if lesson is None:
+                run.count("cell.cross_journal_skipped")
+                continue
+            run.count("cell.cross_journal_existing_lesson")
+        else:
+            lesson = book.ensure(
+                enrollment.offering_id, date, start, slot_kind(slot), synthesised=slot not in dated_slots
+            )
         if status == "absent" and (_int(row.get("excusable")) == 1 or excuse(legacy_sid, date)):
             status = "excused"
         key = (lesson.pk, enrollment.pk)

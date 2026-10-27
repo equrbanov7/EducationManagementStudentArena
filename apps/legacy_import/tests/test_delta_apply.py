@@ -156,9 +156,9 @@ def _bundle(**overrides):
             },
         ],
         "lesson_dates": [
-            {"id": 21, "journal_id": 11, "month": 10, "day": 6, "time": "09:00", "sem_muh": 2},
-            {"id": 22, "journal_id": 11, "month": 10, "day": 6, "time": "10:30", "sem_muh": 2},
-            {"id": 23, "journal_id": 11, "month": 11, "day": 10, "time": "09:00", "sem_muh": 2},
+            {"id": 21, "journal_id": 11, "month": 10, "day": 6, "time": "09:00", "sem_muh": 0},
+            {"id": 22, "journal_id": 11, "month": 10, "day": 6, "time": "10:30", "sem_muh": 0},
+            {"id": 23, "journal_id": 11, "month": 11, "day": 10, "time": "09:00", "sem_muh": 0},
         ],
         "points": [
             _point(1, "1", "06", "09:00", "8"),
@@ -211,7 +211,7 @@ def _point(pk, student, day, time, point, *, month="10", counter=1, uniqid="abcD
         "point": point,
         "time": time,
         "excusable": 0,
-        "sem_muh": 2,
+        "sem_muh": 0,
         "lab": 0,
         "update_counter": counter,
         "updated_at": None,
@@ -351,7 +351,7 @@ class DeltaApplyTests(TestCase):
         """Köhnə sistemdə əlavə olunub heç nə yazılmayan gün jurnalda TAM BOŞ sütun yaratmır."""
         bundle = _bundle()
         bundle["lesson_dates"].append(
-            {"id": 24, "journal_id": 11, "month": 10, "day": 8, "time": "09:00", "sem_muh": 2}
+            {"id": 24, "journal_id": 11, "month": 10, "day": 8, "time": "09:00", "sem_muh": 0}
         )
         run = self._run(apply=True, bundle=bundle)
         with bypass_rls():

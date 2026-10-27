@@ -365,6 +365,22 @@ class ParityRuleTest(TestCase):
         self.assertEqual(decide(1, 3, 0.2), WeekType.ALL)
         self.assertEqual(decide(0, 0), "")
 
+    def test_consecutive_weeks_make_weekly_slot(self):
+        """RİM 2026-10-27 (MR-8): 4 tarixdən 3-ü ARDICIL həftədədir (bir həftə buraxılıb) — hər həftə, alt deyil."""
+        decide, pairs = timetable_inference.decide_week_type, timetable_inference.consecutive_week_pairs
+        days = [datetime.date(2026, 9, 22), datetime.date(2026, 9, 29), datetime.date(2026, 10, 6)]
+        days.append(datetime.date(2026, 10, 20))
+        self.assertEqual(pairs(days), 2)
+        self.assertEqual(decide(1, 3, consecutive_pairs=pairs(days)), WeekType.ALL)
+        # Əsl üst/alt həftə: heç vaxt ardıcıl iki həftə yoxdur; bir kompensasiya bir cüt verir.
+        alternate = [datetime.date(2026, 9, 15) + datetime.timedelta(days=14 * week) for week in range(4)]
+        self.assertEqual(pairs(alternate), 0)
+        alternate.append(alternate[-1] + datetime.timedelta(days=7))
+        self.assertEqual(pairs(alternate), 1)
+        self.assertEqual(decide(4, 1, consecutive_pairs=pairs(alternate)), WeekType.ODD)
+        # Eyni həftənin iki dərsi bir həftə sayılır.
+        self.assertEqual(pairs([datetime.date(2026, 9, 15), datetime.date(2026, 9, 17)]), 0)
+
 
 class InferTimetableWorkflowTest(TestCase):
     def test_workflow_whitelists_command_and_filters_counts(self):
