@@ -100,6 +100,12 @@ CATEGORY_RULES = (
         "C",
         "idarə əmri (yalnız oxu; id-li plan faylı)",
     ),
+    # 2026-10-27: səhv arxivlənmiş konkret tələbənin girişi — auditli restore_archived_account, dry-run defolt.
+    (
+        "apps/legacy_import/management/commands/restore_archived_students.py",
+        "C",
+        "idarə əmri (adla verilən hesablar; auditli bərpa, dry-run defolt)",
+    ),
     # 2026-10-27: səviyyə jurnalı payları/birləşmə planı + kafedra jurnal sağlamlığı — yalnız oxu, yalnız id-lər.
     (
         "apps/legacy_import/management/commands/build_journal_share_plans.py",
