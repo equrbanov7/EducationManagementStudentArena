@@ -109901,3 +109901,96 @@ msgstr "örn. 2023"
 msgctxt "accounts.archive_restore"
 msgid "Köçürmədə qəbul ili tapılmayıb (1950 yer-tutucusu). Bilirsinizsə yazın — boş qalsa dəyişmir."
 msgstr "Aktarımda kabul yılı bulunamadı (1950 yer tutucusu). Biliyorsanız yazın — boş kalırsa değişmez."
+
+msgctxt "core.runtime_settings"
+msgid "Müəllimlər keçmiş tarixli jurnalı tam redaktə edə bilər (data bərpası)"
+msgstr "Öğretmenler geçmiş tarihli yoklama defterini tamamen düzenleyebilir (veri kurtarma)"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılanda müəllim öz jurnalında (bölünmüş jurnalda yalnız öz payında) istənilən keçmiş tarixə (semestr daxilində) dərs əlavə edə, dərsi və mövzusunu redaktə edə, dərsi qeydləri ilə birlikdə silə, q/b, i/e və balı dəyişib təmizləyə bilər — bağlanmış jurnalda da. Təqdimat və sənəd tələb olunmur, yalnız qısa səbəb yazılır; hər dəyişiklik köhnə və yeni dəyərlə audit jurnalına düşür. İmtahandan gələn ballar (midterm, yekun) və RİM-in sənədli düzəlişi olan xana bu rejimə tabe deyil. Söndürüləndə bütün adi qaydalar (yazma müddəti, xana kilidi, bağlı jurnal) qayıdır."
+msgstr "Açıkken öğretmen kendi yoklama defterinde (bölünmüş defterde yalnızca kendi payında) herhangi bir geçmiş tarihe (dönem içinde) ders ekleyebilir, dersi ve konusunu düzenleyebilir, dersi kayıtlarıyla birlikte silebilir, devamsızlık, katılım ve puanları değiştirip temizleyebilir — kapatılmış defterde de. Dilekçe ve belge gerekmez, yalnızca kısa bir gerekçe yazılır; her değişiklik eski ve yeni değeriyle denetim günlüğüne düşer. Sınavlardan gelen puanlar (ara sınav, final) ve Öğrenci İşlerinin belgeli düzeltmesi olan hücreler bu moda tabi değildir. Kapatıldığında tüm olağan kurallar (yazma süresi, hücre kilidi, kapalı defter) geri gelir."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Keçmiş tarixli və ya bağlanmış jurnaldakı dəyişiklik üçün səbəbi yazın (ən azı %(n)s simvol)."
+msgstr "Geçmiş tarihli veya kapatılmış defterdeki değişiklik için gerekçe yazın (en az %(n)s karakter)."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Gələcək tarixə dərs əlavə etmək olmaz."
+msgstr "Gelecek bir tarihe ders eklenemez."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Dərs tarixi semestrin başlanğıcından (%(date)s) əvvəl ola bilməz."
+msgstr "Ders tarihi dönem başlangıcından (%(date)s) önce olamaz."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Dərs tarixi semestrin sonundan (%(date)s) sonra ola bilməz."
+msgstr "Ders tarihi dönem sonundan (%(date)s) sonra olamaz."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Dərs %(n)s qeydi ilə birlikdə silindi."
+msgstr "Ders, %(n)s kaydıyla birlikte silindi."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Data bərpası rejimi: keçmiş tarixli dəyişikliklər səbəb ilə açıqdır"
+msgstr "Veri kurtarma modu: geçmiş tarihli değişiklikler gerekçeyle açık"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Keçmiş tarixə dərs əlavə edə, dərsi və mövzusunu dəyişə, dərsi qeydləri ilə birlikdə silə, q/b, i/e və balı dəyişib təmizləyə bilərsiniz. Hər belə dəyişiklik üçün yalnız qısa səbəb soruşulur və köhnə/yeni dəyərlə audit jurnalına yazılır."
+msgstr "Geçmiş bir tarihe ders ekleyebilir, dersi ve konusunu değiştirebilir, dersi kayıtlarıyla birlikte silebilir, devamsızlık, katılım ve puanları değiştirip temizleyebilirsiniz. Her değişiklik için yalnızca kısa bir gerekçe sorulur ve eski/yeni değeriyle denetim günlüğüne yazılır."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Jurnal bağlanıb — bu rejimdə dəyişiklik yenə səbəb ilə mümkündür."
+msgstr "Defter kapatıldı — bu modda değişiklik yine gerekçeyle mümkündür."
+
+msgctxt "registrar.journal_full_edit"
+msgid "İmtahandan gələn ballar (Midterm, yekun) və RİM-in sənədli düzəlişi olan xanalar bu rejimdə dəyişmir."
+msgstr "Sınavlardan gelen puanlar (ara sınav, final) ve Öğrenci İşlerinin belgeli düzeltmesi olan hücreler bu modda değişmez."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Dəyişikliyin səbəbi"
+msgstr "Değişikliğin gerekçesi"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Bu dəyişiklik keçmiş tarixli, kilidlənmiş və ya bağlanmış jurnaldakı xanaya aiddir. Qısa səbəb yazın — təqdimat və sənəd tələb olunmur. Səbəb bu səhifədəki sonrakı dəyişikliklər üçün də yadda qalır."
+msgstr "Bu değişiklik geçmiş tarihli, kilitli veya kapatılmış defterdeki bir hücreye aittir. Kısa bir gerekçe yazın — dilekçe ve belge gerekmez. Gerekçe bu sayfadaki sonraki değişiklikler için de hatırlanır."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Məs.: köhnə sistemdən köçməyən davamiyyətin bərpası"
+msgstr "Örn.: eski sistemden aktarılmayan devamsızlığın geri yüklenmesi"
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Səbəb ən azı %(n)s simvol olmalıdır."
+msgstr "Gerekçe en az %(n)s karakter olmalıdır."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Səbəblə yadda saxla"
+msgstr "Gerekçeyle kaydet"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Bu dərs sütunu və ona aid {n} qeyd (q/b, i/e, bal) birlikdə silinəcək. Səbəb audit jurnalına yazılır."
+msgstr "Bu ders sütunu ve ona ait {n} kayıt (devamsızlık, katılım, puan) birlikte silinecek. Gerekçe denetim günlüğüne yazılır."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Data bərpası rejimi: semestr ərzində istənilən keçmiş tarix seçilə bilər — yazma müddətindən köhnə tarix üçün səbəb yazılır."
+msgstr "Veri kurtarma modu: dönem içinde herhangi bir geçmiş tarih seçilebilir — yazma süresinden eski tarih için gerekçe yazılır."
+
+msgctxt "registrar.journal_full_edit"
+msgid "DƏYİŞİKLİYİN SƏBƏBİ (DATA BƏRPASI)"
+msgstr "DEĞİŞİKLİĞİN GEREKÇESİ (VERİ KURTARMA)"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Məs.: köhnə sistemdən köçməyən dərsin bərpası"
+msgstr "Örn.: eski sistemden aktarılmayan dersin geri yüklenmesi"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Keçmiş tarixli, redaktə vaxtı bitmiş və ya bağlanmış jurnaldakı dərs üçün məcburidir — təqdimat və sənəd tələb olunmur. Səbəb audit jurnalına yazılır."
+msgstr "Geçmiş tarihli, düzenleme süresi dolmuş veya kapatılmış defterdeki ders için zorunludur — dilekçe ve belge gerekmez. Gerekçe denetim günlüğüne yazılır."
+
+msgctxt "registrar.journal_history"
+msgid "Data bərpası (səbəb ilə)"
+msgstr "Veri kurtarma (gerekçeli)"

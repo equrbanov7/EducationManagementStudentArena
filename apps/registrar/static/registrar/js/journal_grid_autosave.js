@@ -67,6 +67,10 @@
         if (token) body.append("csrfmiddlewaretoken", token.value);
         if (action) body.append("action", action.value);
         body.append("autosave", "1");
+        // Formanın əlavə sahələri (məs. «Data bərpası» səbəbi — journal_full_edit.js) hər göndərişə qoşulur.
+        form.querySelectorAll("input[data-jd-autosave-extra]").forEach(function (field) {
+            if (field.name && field.value) body.append(field.name, field.value);
+        });
         controls.forEach(function (select) {
             var cell = select.closest("td") || select.parentElement;
             cell.querySelectorAll("input[name], select[name]").forEach(function (field) {
@@ -158,6 +162,11 @@
                     // Sessiya bitib (2026-10-27): xam xəta yox — «yenidən daxil olun, qaralama brauzerdə qalır».
                     if (code === 401 && err.payload && err.payload.session_expired) text = message(form, "session");
                     status(form, "error", text || message(form, "failed"));
+                    // Başqa modullar (məs. «Data bərpası» səbəb dialoqu) rədd koduna reaksiya verə bilsin.
+                    var refusedCode = err.payload && typeof err.payload === "object" ? err.payload.code : "";
+                    form.dispatchEvent(
+                        new CustomEvent("jd:autosave-refused", { bubbles: true, detail: { code: refusedCode || "", status: code } })
+                    );
                     return;
                 }
                 st.attempts += 1;

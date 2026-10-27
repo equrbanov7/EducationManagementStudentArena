@@ -1,0 +1,34 @@
+{% load i18n %}
+{% comment %}«Data bərpası» rejimi (RİM «Sistem tənzimləmələri» → journal.teacher_full_edit, sahib 2026-10-27).
+Banner + xanalar üçün SƏBƏB dialoqu. Dialoqu avtomatik yadda saxlamanın 409 «reason_required» cavabı açır
+(journal_full_edit.js); yazılan səbəb grid formasının gizli `full_edit_reason` sahəsinə düşür və təkrar göndərilir.
+Dərs modalında səbəb ayrıca sahədədir (_jd_lesson_modal.html). Server həlledicidir — klientə etibar edilmir.{% endcomment %}
+<div class="jd2-fe-banner" role="status" data-jd-fe-banner>
+    <i class="fas fa-screwdriver-wrench" aria-hidden="true"></i>
+    <div class="jd2-fe-banner__text">
+        <b>{% trans "Data bərpası rejimi: keçmiş tarixli dəyişikliklər səbəb ilə açıqdır" context "registrar.journal_full_edit" %}</b>
+        <span>{% trans "Keçmiş tarixə dərs əlavə edə, dərsi və mövzusunu dəyişə, dərsi qeydləri ilə birlikdə silə, q/b, i/e və balı dəyişib təmizləyə bilərsiniz. Hər belə dəyişiklik üçün yalnız qısa səbəb soruşulur və köhnə/yeni dəyərlə audit jurnalına yazılır." context "registrar.journal_full_edit" %}</span>
+        {% if journal_locked %}<span>{% trans "Jurnal bağlanıb — bu rejimdə dəyişiklik yenə səbəb ilə mümkündür." context "registrar.journal_full_edit" %}</span>{% endif %}
+        <span>{% trans "İmtahandan gələn ballar (Midterm, yekun) və RİM-in sənədli düzəlişi olan xanalar bu rejimdə dəyişmir." context "registrar.journal_full_edit" %}</span>
+    </div>
+</div>
+<div class="jd-modal" data-jd-fe-dialog hidden>
+    <div class="jd-modal-backdrop" data-jd-fe-cancel></div>
+    <div class="jd-modal-card jd2-fe-dialog" role="dialog" aria-modal="true" aria-labelledby="jd-fe-dialog-title">
+        <div class="jd-modal-head jd2-modal-head">
+            <h3 id="jd-fe-dialog-title">{% trans "Dəyişikliyin səbəbi" context "registrar.journal_full_edit" %}</h3>
+            <button type="button" class="jd-modal-close jd2-modal-close" data-jd-fe-cancel aria-label="{% trans 'Bağla' context 'registrar.journal' %}"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+        </div>
+        <div class="jd-modal-body">
+            <p class="jd-modal-note">{% trans "Bu dəyişiklik keçmiş tarixli, kilidlənmiş və ya bağlanmış jurnaldakı xanaya aiddir. Qısa səbəb yazın — təqdimat və sənəd tələb olunmur. Səbəb bu səhifədəki sonrakı dəyişikliklər üçün də yadda qalır." context "registrar.journal_full_edit" %}</p>
+            <textarea class="jd2-fe-dialog__input" rows="3" maxlength="{{ full_edit_reason_max }}" data-jd-fe-dialog-input data-min="{{ full_edit_reason_min }}"
+                      placeholder="{% trans 'Məs.: köhnə sistemdən köçməyən davamiyyətin bərpası' context 'registrar.journal_full_edit' %}"
+                      aria-label="{% trans 'Dəyişikliyin səbəbi' context 'registrar.journal_full_edit' %}"></textarea>
+            <small class="jd-field-error" data-jd-fe-dialog-error hidden><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> {% blocktrans with n=full_edit_reason_min context "registrar.journal_full_edit" %}Səbəb ən azı {{ n }} simvol olmalıdır.{% endblocktrans %}</small>
+        </div>
+        <div class="jd-modal-foot">
+            <button type="button" class="jd2-cancel-btn" data-jd-fe-cancel>{% trans "İmtina et" context "registrar.journal" %}</button>
+            <button type="button" class="jd2-apply-btn" data-jd-fe-confirm><i class="fas fa-check" aria-hidden="true"></i> {% trans "Səbəblə yadda saxla" context "registrar.journal_full_edit" %}</button>
+        </div>
+    </div>
+</div>

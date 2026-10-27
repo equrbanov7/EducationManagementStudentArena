@@ -7,10 +7,11 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
 {% comment %}AVTOMATİK YADDA SAXLAMA (sahib 2026-10-14): `data-jd-autosave` — dəyişən xanalar ~0.8 san.
 sonra eyni ünvana (`action=save_marks`, `autosave=1` → JSON) gedir; «Yadda saxla» düyməsi ehtiyat
 yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.py.{% endcomment %}
-<form method="post" class="journal-form" data-jd-marks-form data-jd-draft="grid"{% if can_edit and journal.lessons and not correction_mode %} data-jd-autosave data-jd-autosave-url="{% url 'registrar:journal_detail' offering.id %}"{% endif %}
+<form method="post" class="journal-form" data-jd-marks-form data-jd-draft="grid"{% if full_edit_active %} data-jd-full-edit{% endif %}{% if can_edit and journal.lessons and not correction_mode %} data-jd-autosave data-jd-autosave-url="{% url 'registrar:journal_detail' offering.id %}"{% endif %}
       {% if can_edit and not correction_mode %}data-jd-lock-msg-time="{{ mark_lock_messages.time }}" data-jd-lock-msg-legacy="{{ mark_lock_messages.legacy }}" data-jd-lock-msg-entry="{{ mark_lock_messages.entry }}" data-jd-lock-url="{{ mark_lock_request_url }}" data-jd-lock-title="{% trans 'Xana kilidlidir' context 'registrar.journal_timing' %}" data-jd-lock-confirm="{% trans 'RİM-ə müraciət yaz' context 'registrar.journal_timing' %}" data-jd-lock-cancel="{% trans 'Bağla' context 'registrar.journal_timing' %}"{% endif %}>
     {% csrf_token %}
     <input type="hidden" name="action" value="save_marks">
+    {% if full_edit_active %}{# «Data bərpası»: səbəb dialoqundan (journal_full_edit.js) — hər avtomatik göndərişə qoşulur #}<input type="hidden" name="full_edit_reason" value="" data-jd-autosave-extra data-jd-fe-reason>{% endif %}
 
     <div class="jd2-split">
         {# ── Sol: təqvim planı — mövzular + keçirilib/tarix ───────────────── #}
@@ -112,6 +113,7 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                                         data-lesson-topic="{{ lm.lesson.display_topic }}"
                                         data-lesson-hours="{{ lm.lesson.hours }}"
                                         data-lesson-locked="{% if not lm.editable %}1{% endif %}"
+                                        {% if full_edit_active %}data-lesson-fe="{% if lm.full_edit_needed %}1{% endif %}" data-lesson-marks="{{ lm.full_edit_marks|default:0 }}"{% endif %}
                                         data-lesson-instructor="{{ lm.lesson.instructor_id|default:'' }}"
                                         data-lesson-room="{{ lm.lesson.room_id|default:'' }}"
                                         data-lesson-start="{% if lm.lesson.start_time %}{{ lm.lesson.start_time|time:'H:i' }}{% endif %}"

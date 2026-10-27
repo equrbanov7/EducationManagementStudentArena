@@ -110687,3 +110687,96 @@ msgstr "напр. 2023"
 msgctxt "accounts.archive_restore"
 msgid "Köçürmədə qəbul ili tapılmayıb (1950 yer-tutucusu). Bilirsinizsə yazın — boş qalsa dəyişmir."
 msgstr "Год поступления не найден при переносе (заполнитель 1950). Укажите его, если знаете, — пустое поле ничего не меняет."
+
+msgctxt "core.runtime_settings"
+msgid "Müəllimlər keçmiş tarixli jurnalı tam redaktə edə bilər (data bərpası)"
+msgstr "Преподаватели могут полностью редактировать журнал за прошлые даты (восстановление данных)"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılanda müəllim öz jurnalında (bölünmüş jurnalda yalnız öz payında) istənilən keçmiş tarixə (semestr daxilində) dərs əlavə edə, dərsi və mövzusunu redaktə edə, dərsi qeydləri ilə birlikdə silə, q/b, i/e və balı dəyişib təmizləyə bilər — bağlanmış jurnalda da. Təqdimat və sənəd tələb olunmur, yalnız qısa səbəb yazılır; hər dəyişiklik köhnə və yeni dəyərlə audit jurnalına düşür. İmtahandan gələn ballar (midterm, yekun) və RİM-in sənədli düzəlişi olan xana bu rejimə tabe deyil. Söndürüləndə bütün adi qaydalar (yazma müddəti, xana kilidi, bağlı jurnal) qayıdır."
+msgstr "Когда включено, преподаватель в своём журнале (в разделённом журнале — только в своей доле) может добавить занятие на любую прошедшую дату (в пределах семестра), редактировать занятие и его тему, удалить занятие вместе с записями, изменить и очистить пропуски, посещаемость и баллы — даже в закрытом журнале. Представление и документ не требуются, пишется только краткая причина; каждое изменение со старым и новым значением попадает в журнал аудита. Баллы из экзаменов (мидтерм, итог) и ячейки с документальным исправлением Регистратуры этому режиму не подчиняются. При выключении возвращаются все обычные правила (срок записи, блокировка ячейки, закрытый журнал)."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Keçmiş tarixli və ya bağlanmış jurnaldakı dəyişiklik üçün səbəbi yazın (ən azı %(n)s simvol)."
+msgstr "Укажите причину изменения в журнале за прошлую дату или в закрытом журнале (не менее %(n)s символов)."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Gələcək tarixə dərs əlavə etmək olmaz."
+msgstr "Нельзя добавить занятие на будущую дату."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Dərs tarixi semestrin başlanğıcından (%(date)s) əvvəl ola bilməz."
+msgstr "Дата занятия не может быть раньше начала семестра (%(date)s)."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Dərs tarixi semestrin sonundan (%(date)s) sonra ola bilməz."
+msgstr "Дата занятия не может быть позже конца семестра (%(date)s)."
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Dərs %(n)s qeydi ilə birlikdə silindi."
+msgstr "Занятие удалено вместе с записями (%(n)s)."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Data bərpası rejimi: keçmiş tarixli dəyişikliklər səbəb ilə açıqdır"
+msgstr "Режим восстановления данных: изменения за прошлые даты открыты с указанием причины"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Keçmiş tarixə dərs əlavə edə, dərsi və mövzusunu dəyişə, dərsi qeydləri ilə birlikdə silə, q/b, i/e və balı dəyişib təmizləyə bilərsiniz. Hər belə dəyişiklik üçün yalnız qısa səbəb soruşulur və köhnə/yeni dəyərlə audit jurnalına yazılır."
+msgstr "Вы можете добавить занятие на прошедшую дату, изменить занятие и его тему, удалить занятие вместе с записями, изменить и очистить пропуски, посещаемость и баллы. Для каждого такого изменения запрашивается только краткая причина, и оно записывается в журнал аудита со старым/новым значением."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Jurnal bağlanıb — bu rejimdə dəyişiklik yenə səbəb ilə mümkündür."
+msgstr "Журнал закрыт — в этом режиме изменения всё равно возможны с указанием причины."
+
+msgctxt "registrar.journal_full_edit"
+msgid "İmtahandan gələn ballar (Midterm, yekun) və RİM-in sənədli düzəlişi olan xanalar bu rejimdə dəyişmir."
+msgstr "Баллы из экзаменов (мидтерм, итог) и ячейки с документальным исправлением Регистратуры в этом режиме не изменяются."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Dəyişikliyin səbəbi"
+msgstr "Причина изменения"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Bu dəyişiklik keçmiş tarixli, kilidlənmiş və ya bağlanmış jurnaldakı xanaya aiddir. Qısa səbəb yazın — təqdimat və sənəd tələb olunmur. Səbəb bu səhifədəki sonrakı dəyişikliklər üçün də yadda qalır."
+msgstr "Это изменение касается ячейки за прошлую дату, заблокированной или в закрытом журнале. Укажите краткую причину — представление и документ не требуются. Причина запоминается и для следующих изменений на этой странице."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Məs.: köhnə sistemdən köçməyən davamiyyətin bərpası"
+msgstr "Напр.: восстановление посещаемости, не перенесённой из старой системы"
+
+#, python-format
+msgctxt "registrar.journal_full_edit"
+msgid "Səbəb ən azı %(n)s simvol olmalıdır."
+msgstr "Причина должна содержать не менее %(n)s символов."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Səbəblə yadda saxla"
+msgstr "Сохранить с причиной"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Bu dərs sütunu və ona aid {n} qeyd (q/b, i/e, bal) birlikdə silinəcək. Səbəb audit jurnalına yazılır."
+msgstr "Этот столбец занятия и связанные с ним записи ({n}: пропуски, посещаемость, баллы) будут удалены вместе. Причина записывается в журнал аудита."
+
+msgctxt "registrar.journal_full_edit"
+msgid "Data bərpası rejimi: semestr ərzində istənilən keçmiş tarix seçilə bilər — yazma müddətindən köhnə tarix üçün səbəb yazılır."
+msgstr "Режим восстановления данных: можно выбрать любую прошедшую дату в пределах семестра — для даты старше срока записи указывается причина."
+
+msgctxt "registrar.journal_full_edit"
+msgid "DƏYİŞİKLİYİN SƏBƏBİ (DATA BƏRPASI)"
+msgstr "ПРИЧИНА ИЗМЕНЕНИЯ (ВОССТАНОВЛЕНИЕ ДАННЫХ)"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Məs.: köhnə sistemdən köçməyən dərsin bərpası"
+msgstr "Напр.: восстановление занятия, не перенесённого из старой системы"
+
+msgctxt "registrar.journal_full_edit"
+msgid "Keçmiş tarixli, redaktə vaxtı bitmiş və ya bağlanmış jurnaldakı dərs üçün məcburidir — təqdimat və sənəd tələb olunmur. Səbəb audit jurnalına yazılır."
+msgstr "Обязательно для занятия за прошлую дату, занятия с истёкшим сроком редактирования или в закрытом журнале — представление и документ не требуются. Причина записывается в журнал аудита."
+
+msgctxt "registrar.journal_history"
+msgid "Data bərpası (səbəb ilə)"
+msgstr "Восстановление данных (с причиной)"

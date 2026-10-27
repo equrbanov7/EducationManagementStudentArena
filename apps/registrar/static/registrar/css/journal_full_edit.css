@@ -1,0 +1,68 @@
+/* «Data bərpası» rejimi (journal.teacher_full_edit, sahib 2026-10-27) — banner, səbəb dialoqu, dərs modalı sahəsi.
+   Yalnız rejim açıq olanda yüklənir (journal_detail.html). Rənglər yerli tokenlərdədir (açıq / qaranlıq tema). */
+.jd-page {
+    --jd-fe-bg: #eff6ff;
+    --jd-fe-border: #bfdbfe;
+    --jd-fe-text: #1e3a8a;
+    --jd-fe-icon: #2563eb;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .jd-page {
+        --jd-fe-bg: #172554;
+        --jd-fe-border: #1e40af;
+        --jd-fe-text: #dbeafe;
+        --jd-fe-icon: #93c5fd;
+    }
+}
+
+:root[data-theme="dark"] .jd-page {
+    --jd-fe-bg: #172554;
+    --jd-fe-border: #1e40af;
+    --jd-fe-text: #dbeafe;
+    --jd-fe-icon: #93c5fd;
+}
+
+.jd-page .jd2-fe-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    margin: 0 0 12px;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    font-size: 0.86rem;
+    background: var(--jd-fe-bg);
+    color: var(--jd-fe-text);
+    border: 1px solid var(--jd-fe-border);
+}
+
+.jd2-fe-banner > i {
+    margin-top: 2px;
+    color: var(--jd-fe-icon);
+}
+
+.jd2-fe-banner__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.jd2-fe-banner__text b {
+    font-weight: 800;
+}
+
+.jd2-fe-dialog {
+    max-width: 520px;
+}
+
+.jd2-fe-dialog__input,
+.jd2-fe-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+.jd2-fe-field textarea:required {
+    border-color: var(--jd-fe-icon, #2563eb);
+}

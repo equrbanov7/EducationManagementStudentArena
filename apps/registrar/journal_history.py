@@ -109,6 +109,8 @@ _KIND_LABELS = {
     "selfwork-correction": pgettext_lazy(_CTX, "Sənədli düzəliş — sərbəst iş"),
     "coursework-correction": pgettext_lazy(_CTX, "Sənədli düzəliş — kurs işi"),
     "component-correction": pgettext_lazy(_CTX, "Sənədli düzəliş — komponent"),
+    # «Data bərpası» rejimi (sahib 2026-10-27) — səbəb sətrin başlığında göstərilir (``_serialize_entry``).
+    "full-edit": pgettext_lazy(_CTX, "Data bərpası (səbəb ilə)"),
 }
 _REVERT_LABEL = pgettext_lazy(_CTX, "Düzəlişin geri alınması")
 
@@ -236,12 +238,20 @@ def _serialize_entry(row, names, impersonation_key) -> dict:
         "user": _user_label(row.user),
         "kind": kind,
         "group": kind_group(kind),
-        "kind_label": kind_label(kind),
+        "kind_label": _label_with_reason(kind, row),
         "count": len(real_rows),
         "rows_total": len(real_rows),
         "rows": rows,
         "impersonated_by": impersonated_by,
     }
+
+
+def _label_with_reason(kind, row) -> str:
+    """Data bərpası sətrində səbəb də görünsün: «Data bərpası (səbəb ilə) — <səbəb>»."""
+    label = kind_label(kind)
+    values = row.new_values if isinstance(row.new_values, dict) else {}
+    reason = str(values.get("reason") or "") if kind == "full-edit" else ""
+    return f"{label} — {reason}" if reason else label
 
 
 def _lesson_dates(offering) -> list:

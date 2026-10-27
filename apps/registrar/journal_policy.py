@@ -143,6 +143,17 @@ def syllabus_gate(offering) -> dict:
     }
 
 
+def teacher_full_edit_enabled(organization=None) -> bool:
+    """«Data bərpası» rejimi (``journal.teacher_full_edit``, sahib 2026-10-27) — keçmiş tarixli tam redaktə.
+
+    Bütün vaxt / kilid / sənəd qapılarının TƏK yoxlama nöqtəsi (``apps.registrar.journal_full_edit`` çağırır).
+    Açar RİM-in «Sistem tənzimləmələri»ndədir (sistem səviyyəli); ``organization`` gələcəkdə təşkilat üzrə
+    ayırmaq üçün imzada saxlanılır. Server tərəfində yoxlanır — klientin göndərdiyi heç nəyə etibar edilmir."""
+    from core.runtime_settings_journal_full_edit import enabled
+
+    return enabled()
+
+
 def ensure_lesson_allowed(offering) -> None:
     """Servis qapısı — icazə yoxdursa :class:`SyllabusGateError` atır."""
     gate = syllabus_gate(offering)
@@ -163,4 +174,5 @@ __all__ = [
     "offering_has_approved_syllabus",
     "require_approved_syllabus",
     "syllabus_gate",
+    "teacher_full_edit_enabled",
 ]

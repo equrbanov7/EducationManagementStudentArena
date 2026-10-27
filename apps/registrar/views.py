@@ -12,14 +12,14 @@ from __future__ import annotations
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpResponseForbidden
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from . import campus, finals, grade_audit, gradebook, journal_edit_windows, legacy_excuse, lesson_rooms, schedule
-from .models import AttendanceStatus, CorrectionReason, LessonKind
+from . import campus, finals, gradebook, journal_edit_windows, legacy_excuse, lesson_rooms, schedule
+from .models import CorrectionReason, LessonKind
 from .read_memo import scoped_get as _read_memo_get
 
 
@@ -42,6 +42,10 @@ from .handover import is_handover_observer as _is_handover_observer  # noqa: E40
 from .journal_access import can_edit_journal as _can_edit_journal  # noqa: E402
 from .journal_access import can_observe_journal as _can_observe_journal  # noqa: E402
 from .journal_access import is_direct_editor as _is_direct_editor  # noqa: E402
+
+# POST işləyiciləri («Yeni dərs», davamiyyət/bal) ayrıca modulda — «Data bərpası» rejimi ilə (2026-10-27).
+from .journal_detail_posts import handle_add_lesson as _handle_add_lesson  # noqa: E402
+from .journal_detail_posts import handle_save_marks as _handle_save_marks  # noqa: E402
 from .journal_read_memo import offering_for_detail as _offering_for_detail  # noqa: E402
 
 
@@ -283,6 +287,9 @@ def journal_detail(request, offering_id):
     from apps.registrar.journal_lesson_prefill import modal_context as lesson_prefill  # «Yeni dərs» dolu (2026-10-10)
 
     context.update(lesson_prefill(offering, context))
+    from apps.registrar import journal_full_edit  # «Data bərpası» rejimi — səbəb ilə tam redaktə (sahib 2026-10-27)
+
+    context.update(journal_full_edit.page_context(request, offering, context))
     _share_guard.restrict_detail_context(context, share_scope)
     return render(request, "registrar/journal_detail.html", context)
 
@@ -399,195 +406,6 @@ def _handle_save_component_scores(request, offering):
     result = gradebook.save_component_scores(offering=offering, entries=entries, by_user=request.user, report=True)
     warn_rejected_scores(request, result["rejected"])  # J-03: rəqəm olmayan xana 0-a çevrilmir
     messages.success(request, _("Komponent balları yadda saxlanıldı (%(n)s xana).") % {"n": result["written"]})
-    return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
-
-
-def _handle_add_lesson(request, offering):
-    """Create a new lesson column (date + type + topic + standart dərs saatı)."""
-    # README §8/2 — siyasət açıqdırsa təsdiqlənmiş sillabussuz dərs açılmır:
-    # 403 + SƏBƏB KODU (mesaj/redirect deyil, çünki qayda acceptance şərtidir).
-    from apps.registrar import journal_activation, journal_lesson_prefill, journal_policy
-
-    gate = journal_policy.syllabus_gate(offering)
-    if gate["locked"]:
-        return HttpResponseForbidden(gate["reason_code"], content_type="text/plain; charset=utf-8")
-    if getattr(offering, "assessment_scheme", None) and offering.assessment_scheme.is_published:
-        messages.warning(request, _("Jurnal yekunlaşdırılıb — dərs əlavə etmək olmaz."))
-        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
-
-    date = request.POST.get("lesson_date") or None
-    # Dərs tipi kilidi: cədvəldə tək növ slot varsa POST nə deyirsə desin o növ.
-    from apps.registrar import journal_extras as _je
-
-    locked_kind = _je.locked_lesson_kind(offering)
-    kind = locked_kind or request.POST.get("lesson_kind")
-    if kind not in dict(LessonKind.choices):
-        # QA 2026-09-05 (P3-9): naməlum dərs tipi səssizcə «mühazirə»yə çevrilirdi —
-        # müəllim yanlış tipdə dərs açdığını görmürdü. Kilidli tipdə (cədvəl tək
-        # növ verir) POST-a baxılmır, orada susmaq düzgündür.
-        if locked_kind:
-            kind = locked_kind
-        else:
-            messages.error(request, _("Dərs tipi düzgün seçilməyib."))
-            return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
-    if not date:
-        messages.error(request, _("Dərs tarixi tələb olunur."))
-        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
-
-    hours_raw = (request.POST.get("lesson_hours") or "").strip()
-    # QA 2026-09-05 (P3-9): «-5» / «abc» səssizcə standart saata çevrilirdi.
-    # Boş dəyər normaldır (standart saat), amma YAZILMIŞ yanlış dəyər rədd olunur.
-    if hours_raw and not (hours_raw.isdigit() and int(hours_raw) > 0):
-        messages.error(request, _("Dərs saatı müsbət tam ədəd olmalıdır."))
-        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
-    hours = int(hours_raw) if hours_raw.isdigit() and int(hours_raw) > 0 else None
-    start_time, end_time = schedule.parse_time_slot(request.POST.get("lesson_time"))
-    # Modal bu günün cədvəl slotundan doldurulubsa (gizli slot_id, sahib 2026-10-10) saat slotdandır — təşkilatın
-    # öz zəng saatı da keçir, səbəb tələb olunmur; yad / başqa günün slotu rədd olunur (journal_lesson_prefill).
-    try:
-        slot = journal_lesson_prefill.posted_slot(offering, request.POST, date=date, kind=kind)
-    except gradebook.LessonRuleError as exc:
-        messages.error(request, str(exc))
-        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
-    if slot is not None:
-        start_time, end_time = slot.start_time, slot.end_time
-    # Dərs saatı MƏCBURİDİR — standart saat seçilmədən dərs açılmasın.
-    if not start_time or not end_time:
-        messages.error(request, _("Dərs saatı seçilməlidir — standart dərs saatlarından birini seçin."))
-        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
-
-    # #6 saat həddi + cədvəldən kənar dərsin SƏBƏBİ (UNEC P1-1) — «Aktivləşdir» yolu ilə ORTAQ qayda.
-    off_reason, rule_error = journal_activation.check_manual_lesson(
-        offering, date=date, start_time=start_time, hours=hours, raw_reason=request.POST.get("off_schedule_reason")
-    )
-    if rule_error:
-        messages.error(request, rule_error)
-        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
-
-    # #9 — bu dərsin müəllimi (fənn 2 müəllim arasında bölünübsə); boşdursa açılışınkı.
-    instructor = None
-    _inst_id = (request.POST.get("lesson_instructor") or "").strip()
-    if _inst_id:
-        # Yeniləmə yolu ilə EYNİ həlledici: tip + təşkilat/rol yoxlaması (etibarsız
-        # id və ya tələbə id-si əvvəl 500 ValueError/IntegrityError verirdi —
-        # QA 2026-09-05 JOURNAL-TEACHER-02). Call-time import: journal_actions
-        # views-dən idxal edir.
-        from .journal_actions import _resolve_instructor
-
-        try:
-            instructor = _resolve_instructor(offering, _inst_id)
-        except Http404:
-            messages.error(request, _("Seçilmiş müəllim bu təşkilatın tədris heyətində deyil."))
-            return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
-
-    # Dərsin otağı (opsional; korpus yalnız UI süzgəcidir) — təşkilat daxilində həll olunur, boşdursa
-    # həmin tarix/saatın cədvəl slotunun otağı (sahib 2026-10-17, journal_lesson_prefill.posted_room).
-    room = journal_lesson_prefill.posted_room(
-        offering, request.POST, date=date, start_time=start_time, kind=kind, slot=slot
-    )
-
-    # İKT/RİM Rəhbəri / superuser keçmiş tarixə də dərs aça bilər (tam override).
-    allow_past = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False))
-    try:
-        lesson = gradebook.create_lesson(
-            offering=offering,
-            date=date,
-            kind=kind,
-            topic=(_je.posted_topic(request.POST) or "").strip(),  # plan seçimi və ya sərbəst mətn
-            hours=hours,
-            start_time=start_time,
-            end_time=end_time,
-            created_by=request.user,
-            instructor=instructor,
-            room=room,
-            allow_past=allow_past,
-            slot=slot,
-            off_schedule_reason=off_reason,
-        )
-        if allow_past:  # geriyə-dönük sütun audit izinə düşür (2026-08 auditi)
-            grade_audit.log_backdated_lesson(offering=offering, lesson=lesson, by_user=request.user)
-        messages.success(request, _("Dərs əlavə edildi."))
-    except gradebook.LessonRuleError as exc:
-        messages.error(request, str(exc))
-    return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
-
-
-def _handle_save_marks(request, offering):
-    """Parse editable grid cells → save_marks.
-
-    Yeni format (üç-vəziyyətli çip): ``att__L__E`` = '' | present | absent —
-    boş dəyər GÖNDƏRİLMİR/yazılmır (müəllim toxunmadığı xana işarə almır).
-    Köhnə format (cell__/absent__) geriyə-uyğunluq üçün saxlanır."""
-    entries = []
-    tri_state = any(key.startswith("att__") for key in request.POST)
-    if tri_state:
-        for key, raw in request.POST.items():
-            if not key.startswith("att__"):
-                continue
-            parts = key.split("__", 2)
-            if len(parts) != 3:
-                continue
-            _prefix, lesson_id, enrollment_id = parts
-            score = request.POST.get(f"score__{lesson_id}__{enrollment_id}")
-            if raw not in (AttendanceStatus.PRESENT, AttendanceStatus.ABSENT):
-                # Bal yazılıbsa iştirak öz-özünə bəllidir (i/e) — ayrıca işarə lazım deyil.
-                if (score or "").strip():
-                    raw = AttendanceStatus.PRESENT
-                else:
-                    continue  # boş xana — işarə yazılmır
-            entries.append({"lesson_id": lesson_id, "enrollment_id": enrollment_id, "status": raw, "score": score})
-    else:
-        for key in request.POST:
-            if not key.startswith("cell__"):
-                continue
-            parts = key.split("__", 2)
-            if len(parts) != 3:
-                continue
-            _prefix, lesson_id, enrollment_id = parts
-            absent = f"absent__{lesson_id}__{enrollment_id}" in request.POST
-            entries.append(
-                {
-                    "lesson_id": lesson_id,
-                    "enrollment_id": enrollment_id,
-                    "status": AttendanceStatus.ABSENT if absent else AttendanceStatus.PRESENT,
-                    "score": request.POST.get(f"score__{lesson_id}__{enrollment_id}"),
-                }
-            )
-
-    from apps.registrar import journal_autosave  # sahib 2026-10-14: eyni yazı yolu, JSON cavab
-
-    autosave = journal_autosave.requested(request)
-    if gradebook.journal_is_locked(offering):
-        # Əvvəl «Jurnal yadda saxlanıldı (0 xana)» UĞUR mesajı gedirdi (QA 2026-09-05
-        # JOURNAL-TEACHER-04) — kilidli jurnala yazı səssiz atılmamalıdır.
-        if autosave:
-            return journal_autosave.refused(_("Jurnal bağlıdır — dəyişikliklər yazılmadı."), code="locked")
-        messages.error(request, _("Jurnal bağlıdır — dəyişikliklər yazılmadı."))
-        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
-    result = gradebook.save_marks(
-        offering=offering, entries=entries, by_user=request.user, report=True, request=request
-    )
-    written, rejected = result["written"], result["rejected"]
-    if autosave:  # kilidli xanaya dəyişiklik → 409 + «RİM-ə müraciət» mətni (sahib 2026-10-25)
-        return journal_autosave.marks_response(result, sent=len(entries))
-    # dərs günü / yazma pəncərəsi / aktivləşdirmə pəncərəsi; kilidli xana (15 dəq. / köçürülmüş / düzəliş)
-    blocked_reason = " ".join(filter(None, (result.get("blocked_reason"), result.get("locked_reason"))))
-    if entries and not written:
-        messages.warning(
-            request,
-            blocked_reason or _("Heç bir xana yazılmadı — dərs günü qaydası və ya xana kilidi buna imkan vermədi."),
-        )
-    else:
-        messages.success(request, _("Jurnal yadda saxlanıldı (%(n)s xana).") % {"n": written})
-        if blocked_reason:
-            messages.warning(request, blocked_reason)
-    if rejected:
-        # QA 2026-09-05 (P3-10): səhv bal SƏSSİZ 0-a çevrilmirdi; xana yazılmır və
-        # müəllim bunu görməlidir.
-        messages.warning(
-            request,
-            _("%(n)s xana yazılmadı — bal 0–10 aralığında TAM ədəd olmalıdır.") % {"n": rejected},
-        )
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
 

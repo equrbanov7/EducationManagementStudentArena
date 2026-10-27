@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -21,12 +22,15 @@ from django.views.decorators.http import require_POST
 
 from core.http_ids import parse_uuid
 
-from . import gradebook, journal_extras, journal_share_guard
+from . import gradebook, journal_extras, journal_full_edit, journal_share_guard
+from .audit_write import AuditWriteFailed, audit_failure_message
 from .journal_access import offering_or_404 as scoped_offering_or_404
 from .journal_access import writable_offering_or_404
 from .journal_topics import posted_topic
 from .models import Lesson, SelfWorkTopic
 from .views import _can_edit_journal, _is_direct_editor
+
+_FE_CTX = "registrar.journal_full_edit"
 
 
 def _offering_or_404(request, offering_id):
@@ -127,6 +131,16 @@ def lesson_action(request, offering_id, lesson_id):
     # İKT Rəhbəri / superuser: 2 saatlıq pəncərə DAXİLİNDƏ keçmiş-tarix qadağasını
     # keçir (səhv açılmış dərsin tarixini/növünü düzəltmək üçün).
     override = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False))
+    # «Data bərpası» (sahib 2026-10-27): rejim açıqdırsa pəncərəsi bitmiş / bağlı jurnaldakı / köhnə tarixə keçən dərs
+    # sənədsiz, YALNIZ SƏBƏB ilə redaktə olunur və ya silinir (birbaşa redaktor; pay əhatəsi yuxarıda yoxlanıb).
+    posted_date = request.POST.get("lesson_date") if action == "update_lesson" else None
+    full_bypass = journal_full_edit.active_for(request.user, offering) and journal_full_edit.lesson_edit_needs_bypass(
+        offering, lesson, posted_date, allow_past=override
+    )
+    full_reason = journal_full_edit.posted_reason(request) if full_bypass else ""
+    if full_bypass and not full_reason:
+        messages.error(request, journal_full_edit.reason_required_message())
+        return _back(offering)
     # Sənədli (PDF) yol MƏCBURİDİR, iki haldan biri varsa:
     #   * aktor birbaşa redaktor DEYİL (korrektor/İKT — normal görünüş read-only), VƏ YA
     #   * 2 saatlıq redaktə pəncərəsi bağlanıb / jurnal kilidlidir.
@@ -137,11 +151,22 @@ def lesson_action(request, offering_id, lesson_id):
     # istifadəçi «birbaşa redaktor» sayılırdı). İndi pəncərə bağlananda dəyişiklik
     # yalnız səbəb + qeyd + PDF ilə — audited correction yolundan — keçir.
     window_open = gradebook.can_edit_lesson(lesson) and not gradebook.journal_is_locked(offering)
-    corrector_only = (not _is_direct_editor(request.user, offering)) or (not window_open)
+    corrector_only = ((not _is_direct_editor(request.user, offering)) or (not window_open)) and not full_bypass
     if corrector_only and not _can_write_documented_correction(request):
         # Pəncərə bitib, sənədli düzəliş icazəsi (journal.correct) da yoxdur →
         # mövcud davranışla eyni rədd mesajı.
         messages.error(request, _("Dərs dəyişdirilmədi — 2 saatlıq düzəliş pəncərəsi bitib."))
+        return _back(offering)
+
+    if action == "delete_lesson" and full_bypass:
+        try:
+            count = journal_full_edit.delete_lesson(
+                offering=offering, lesson=lesson, by_user=request.user, reason=full_reason, request=request
+            )
+        except AuditWriteFailed:
+            messages.error(request, audit_failure_message())
+            return _back(offering)
+        messages.success(request, pgettext(_FE_CTX, "Dərs %(n)s qeydi ilə birlikdə silindi.") % {"n": count})
         return _back(offering)
 
     if action == "delete_lesson":
@@ -231,24 +256,40 @@ def lesson_action(request, offering_id, lesson_id):
 
             room = resolve_lesson_room(offering.organization, request.POST.get("lesson_room"))
 
+        before = journal_full_edit.lesson_snapshot(lesson) if full_bypass else None
         try:
-            ok = gradebook.update_lesson(
-                lesson=lesson,
-                date=request.POST.get("lesson_date") or None,
-                kind=kind,
-                topic=posted_topic(request.POST),
-                hours=hours,
-                start_time=start_time or "",
-                end_time=end_time or "",
-                instructor=instructor,
-                room=room,
-                allow_past=override,
-                # Pəncərə açıqdır (yuxarıda yoxlanıb) — kilid keçidi lazım deyil.
-                allow_locked=False,
-                by_user=request.user,
-            )
+            with transaction.atomic():  # data bərpasında dərs + səbəbli audit sətri birlikdə
+                ok = gradebook.update_lesson(
+                    lesson=lesson,
+                    date=request.POST.get("lesson_date") or None,
+                    kind=kind,
+                    topic=posted_topic(request.POST),
+                    hours=hours,
+                    start_time=start_time or "",
+                    end_time=end_time or "",
+                    instructor=instructor,
+                    room=room,
+                    allow_past=override,
+                    # Pəncərə açıqdır (yuxarıda yoxlanıb) — kilid keçidi lazım deyil; data bərpası öz yolu ilə.
+                    allow_locked=False,
+                    by_user=request.user,
+                    audit=not full_bypass,
+                    full_edit=full_bypass,
+                )
+                if ok and full_bypass:
+                    journal_full_edit.log(
+                        offering=offering,
+                        by_user=request.user,
+                        reason=full_reason,
+                        action="lesson-edit",
+                        changes=journal_full_edit.lesson_changes(lesson, before),
+                        request=request,
+                    )
         except gradebook.LessonRuleError as exc:
             messages.error(request, str(exc))
+            return _back(offering)
+        except AuditWriteFailed:
+            messages.error(request, audit_failure_message())
             return _back(offering)
         if ok:
             messages.success(request, _("Dərs yeniləndi."))
