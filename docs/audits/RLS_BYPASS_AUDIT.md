@@ -108,6 +108,7 @@ ki, gələcəkdə hər biri qəsdən və əsaslandırılmış qalsın.
 | `apps/exams/management/commands/seed_stress_exam_journal.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
 | `apps/exams/management/commands/seed_stress_test.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
 | `apps/exams/management/commands/sync_midterm_scores.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
+| `apps/exams/management/commands/fix_exam_journal_gaps.py` | 1 | C — idarə əmri (--org + superadmin --actor; yalnız əlavə, dry-run defolt, idempotent) |
 | `apps/exams/services/attempts.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
 | `apps/exams/services/exam_network.py` | 1 | C — imtahan mərkəzi / müəllim cross-org əməli |
 | `apps/exams/services/final_center/reminders.py` | 1 | B — final mərkəzi PIN axını |

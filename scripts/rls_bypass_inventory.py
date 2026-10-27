@@ -59,6 +59,13 @@ CATEGORY_RULES = (
         "C",
         "idarə əmri (--org + dəqiq --username + cəhd + --expect-exam-slug; dry-run defolt, prod kill-switch-li)",
     ),
+    # 2026-10-27: imtahan qrupunun jurnal boşluğu — --org + superadmin --actor, YALNIZ əlavə (qrupa sonra gəlmiş tələbə
+    # jurnala), dry-run defolt, idempotent; çıxış yalnız id / kod / say.
+    (
+        "apps/exams/management/commands/fix_exam_journal_gaps.py",
+        "C",
+        "idarə əmri (--org + superadmin --actor; yalnız əlavə, dry-run defolt, idempotent)",
+    ),
     ("apps/exams/", "C", "imtahan mərkəzi / müəllim cross-org əməli"),
     # 2026-10-23: aktivləşdirmə bildirişi — alıcılar sabit RİM rolları + aktivləşdirənin ÖZ təşkilatı, sətir qayıtmır.
     ("apps/accounts/services/rim/activation.py", "A", "recipient-scoped bildiriş (RİM rolları, öz təşkilat)"),
