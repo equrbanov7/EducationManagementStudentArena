@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import logging
 from collections import Counter
+from contextlib import nullcontext
 
 logger = logging.getLogger(__name__)
 
@@ -85,12 +86,13 @@ def clear_stale(exam, *, by_user=None) -> Counter:
     )
 
 
-def resync_exam_journal(exam, *, notify=True, by_user=None) -> Counter:
+def resync_exam_journal(exam, *, notify=True, by_user=None, scope=None) -> Counter:
     """Rəsmi midterm cəhdlərini bağlı jurnala yaz + köhnə bağlantının avtomatik xanalarını sil → saylar."""
     from apps.exams.services import midterm_journal_sync
 
-    counts: Counter = Counter(midterm_journal_sync.resync_exam(exam, notify=notify))
-    counts.update(clear_stale(exam, by_user=by_user))
+    counts: Counter = Counter(midterm_journal_sync.resync_exam(exam, notify=notify, scope=scope))
+    with (scope or nullcontext)():
+        counts.update(clear_stale(exam, by_user=by_user))
     return counts
 
 
@@ -115,21 +117,64 @@ def after_exam_saved(exam, *, previous_subject_id=None, previous_link_ids=(), by
     if not changed or not _has_finished_attempts(exam):
         return False
 
+    schedule_resync(exam, by_user=by_user, change_log_id=change_log_id)
+    return True
+
+
+def run_resync(exam_id, *, by_user_id=None, change_log_id=None, relink=True, scope=None) -> dict:
+    """Planlaşdırılmış yenidən sinxron (Celery task-ı və ya növbə əlçatmazdırsa request-in on_commit-i).
+
+    ``relink`` — imtahanın saxlanması (fənn / jurnal bağlantısı dəyişib): yaz + köhnə xanaları sil + təsdiqli
+    dəyişikliyin faktiki saylarını audit et. ``relink=False`` — nəticə açılışı: yalnız yaz. Best-effort."""
+    from django.contrib.auth import get_user_model
+
+    from apps.exams.models import Exam
+    from apps.exams.services import midterm_journal_sync
+
+    scope = scope or nullcontext
+    try:
+        with scope():
+            exam = Exam.objects.select_related("organization").filter(pk=exam_id).first()
+            by_user = get_user_model().objects.filter(pk=by_user_id).first() if by_user_id else None
+        if exam is None:
+            return {}
+        if not relink:
+            return dict(midterm_journal_sync.resync_exam(exam, scope=scope))
+        counts = resync_exam_journal(exam, by_user=by_user, scope=scope)
+        logger.info("exam_journal_link: exam %s re-linked, resync %s", exam.pk, dict(counts))
+        if change_log_id is not None:
+            from apps.exams.services import exam_subject_change
+
+            with scope():
+                exam_subject_change.record_resync(exam, counts, decision_log_id=change_log_id, user=by_user)
+        return {str(key): int(value) for key, value in counts.items()}
+    except Exception:  # noqa: BLE001 — imtahanın saxlanmasını / nəticə açılışını sındırmır
+        logger.exception("exam_journal_link: resync failed for exam %s", exam_id)
+        return {}
+
+
+def schedule_resync(exam, *, by_user=None, change_log_id=None, relink=True) -> None:
+    """Tranzaksiya təsdiqindən SONRA :func:`run_resync`-i Celery-yə ver (sahib 2026-10-27).
+
+    Cəhd başına ~30 sorğu (bal, kilid, audit, bildiriş) — 10 qrupluq midtermdə «Saxlanılır…» saniyələrlə
+    ilişirdi (``ATOMIC_REQUESTS``-də on_commit request-in içindədir). Növbə əlçatmazdırsa əvvəlki kimi yerində."""
     from django.db import transaction
 
-    def _run():
+    exam_id, by_user_id = exam.pk, getattr(by_user, "pk", None)
+    # Celery JSON: AuditLog pk UUID-dir — sətir kimi (``record_resync`` onsuz da ``str(...)`` yazır).
+    log_id = None if change_log_id is None else str(change_log_id)
+    options = {"by_user_id": by_user_id, "change_log_id": log_id, "relink": relink}
+
+    def _enqueue():
+        from apps.exams.tasks import resync_exam_journal as resync_task
+
         try:
-            counts = resync_exam_journal(exam, by_user=by_user)
-            logger.info("exam_journal_link: exam %s re-linked, resync %s", exam.pk, dict(counts))
-            if change_log_id is not None:
-                from apps.exams.services import exam_subject_change
+            resync_task.delay(exam_id, **options)
+        except Exception:  # noqa: BLE001 — broker düşübsə bal köçürməsi itməsin
+            logger.warning("exam_journal_link: resync task not queued (exam=%s) — inline", exam_id, exc_info=True)
+            run_resync(exam_id, **options)
 
-                exam_subject_change.record_resync(exam, counts, decision_log_id=change_log_id, user=by_user)
-        except Exception:  # noqa: BLE001
-            logger.exception("exam_journal_link: resync failed for exam %s", getattr(exam, "pk", "?"))
-
-    transaction.on_commit(_run)
-    return True
+    transaction.on_commit(_enqueue)
 
 
 __all__ = [
@@ -140,4 +185,6 @@ __all__ = [
     "linked_offering_ids",
     "refresh_links",
     "resync_exam_journal",
+    "run_resync",
+    "schedule_resync",
 ]

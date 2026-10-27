@@ -94,6 +94,25 @@ def hash_pending_student_pins(exam_id, organization_id):
     return hashed
 
 
+@shared_task(name="exams.resync_exam_journal", time_limit=900, soft_time_limit=840)
+def resync_exam_journal(exam_id, by_user_id=None, change_log_id=None, relink=True):
+    """Midterm cəhdlərinin jurnala yenidən yazılması request-dən kənarda (sahib 2026-10-27).
+
+    İmtahanın fənni / bağlı jurnalları dəyişəndə (sehrbazın «Saxla»sı) və ya nəticə açılanda bütün rəsmi
+    cəhdlər yenidən yazılır — cəhd başına ~30 sorğu. Hər addım öz qısa ``rls_worker_atomic() + bypass_rls()``
+    scope-unda (cəhdin bitməsi sweep-i kimi — jurnal yazısı eyni yoldur); kilidlər bütün imtahan boyu saxlanılmır.
+    """
+    from apps.exams.services.exam_journal_link import run_resync
+
+    return run_resync(
+        exam_id,
+        by_user_id=by_user_id,
+        change_log_id=change_log_id,
+        relink=relink,
+        scope=_worker_bypass_scope,
+    )
+
+
 @shared_task(name="exams.expire_stale_resumed_attempts")
 def expire_stale_resumed_attempts():
     """

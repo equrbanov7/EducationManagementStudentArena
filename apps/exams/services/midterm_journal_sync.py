@@ -235,30 +235,38 @@ def official_attempts(queryset):
         yield attempt
 
 
-def resync_exam(exam, *, notify=True) -> dict:
-    """İmtahanın bütün rəsmi midterm cəhdlərini yenidən yaz (nəticə tələbəyə AÇILANDA). → status sayları."""
+def resync_exam(exam, *, notify=True, scope=None) -> dict:
+    """İmtahanın bütün rəsmi midterm cəhdlərini yenidən yaz (nəticə tələbəyə AÇILANDA). → status sayları.
+
+    ``scope`` — worker-də hər DB addımının konteksti (öz tranzaksiyası + RLS, bax ``exams.tasks``): namizəd
+    siyahısı bir addımda, hər cəhd ayrıca — kilidlər bütün imtahan boyu saxlanılmır."""
     from apps.exams.models import ExamAttempt
 
     counts: dict = {}
     if not is_auto_midterm_exam(exam) or not getattr(exam, "subject_id", None):
         return counts
-    for attempt in official_attempts(ExamAttempt.objects.filter(exam=exam)):
-        status, _row = sync_midterm_attempt(attempt, notify=notify)
+    if scope is None:
+        attempts = official_attempts(ExamAttempt.objects.filter(exam=exam))
+    else:
+        with scope():
+            attempts = list(official_attempts(ExamAttempt.objects.filter(exam=exam)))
+    for attempt in attempts:
+        if scope is None:
+            status, _row = sync_midterm_attempt(attempt, notify=notify)
+        else:
+            with scope():
+                status, _row = sync_midterm_attempt(attempt, notify=notify)
         counts[status] = counts.get(status, 0) + 1
     return counts
 
 
 def schedule_resync_exam(exam) -> None:
-    """``resync_exam``-ı tranzaksiya təsdiqindən SONRA işlət (görünürlük keçidi geri qayıdarsa yazı olmasın)."""
-    from django.db import transaction
+    """``resync_exam``-ı tranzaksiya təsdiqindən SONRA işlət (görünürlük keçidi geri qayıdarsa yazı olmasın).
 
-    def _run():
-        try:
-            resync_exam(exam)
-        except Exception:  # noqa: BLE001 — nəticə açılışını sındırmır
-            logger.exception("midterm_journal_sync: resync failed for exam %s", getattr(exam, "id", "?"))
+    2026-10-27: cəhd başına ~30 sorğu request-dən çıxarıldı — Celery task-ı (``exams.resync_exam_journal``)."""
+    from apps.exams.services.exam_journal_link import schedule_resync
 
-    transaction.on_commit(_run)
+    schedule_resync(exam, relink=False)
 
 
 __all__ = [
