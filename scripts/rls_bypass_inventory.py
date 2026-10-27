@@ -94,6 +94,12 @@ CATEGORY_RULES = (
         "C",
         "idarə əmri (yalnız oxu; sübut faylı)",
     ),
+    # 2026-10-27: RİM əkiz jurnal planları — yalnız oxu (lokal prod surəti), plan faylında yalnız id-lər.
+    (
+        "apps/legacy_import/management/commands/build_twin_repair_plans.py",
+        "C",
+        "idarə əmri (yalnız oxu; id-li plan faylı)",
+    ),
     # 2026-10-08: WS qapısı — tenant GUC-suz ASGI scope; yalnız qoşulan istifadəçinin öz
     # profil/üzvlük oxusu (pk süzgəcli) + rədd audit sətri.
     ("apps/accounts/ws_gate.py", "D", "WebSocket giriş qapısı (istifadəçinin öz sətirləri + audit)"),

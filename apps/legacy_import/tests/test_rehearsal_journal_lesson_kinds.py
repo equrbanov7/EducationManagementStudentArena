@@ -28,10 +28,10 @@ _OTHER = slot_key(uniqid="rooBx39tsK", month=12, day=30, time_text="15:00")
     [
         # ``sem_muh=1`` = mühazirə: canlı mənbədə slotların yalnız 0.1 %-i ballanır.
         (0, 1, LECTURE),
-        # 0 = seminar (41.2 % ballanır), 2/3 = praktiki/məşğələ (70.7 % / 26.6 %)
-        # — hədəf enumunda hər üçü bal xanası AÇIQ olan SEMINAR-a düşür.
+        # 0 = seminar, 3 = praktiki (hədəfdə praktiki növü yoxdur → SEMINAR).
+        # 2026-10-27 (RİM MR-8/9): 2 = LABORATORİYA — sillabusda lab_saat 16/16, 13/13, 10/10 jurnalda.
         (0, 0, SEMINAR),
-        (0, 2, SEMINAR),
+        (0, 2, LAB),
         (0, 3, SEMINAR),
         # ``lab`` MÜSTƏQİL bayraqdır və ``sem_muh``-dan asılı olmayaraq udur.
         (1, 0, LAB),
