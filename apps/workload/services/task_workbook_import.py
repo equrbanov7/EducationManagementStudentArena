@@ -21,7 +21,7 @@ from django.db import IntegrityError, transaction
 
 from apps.organizations.models import AcademicPeriod, OrgUnit
 from apps.registrar.models import CourseOffering, StudentAcademicRecord, Subject
-from apps.registrar.public import enroll_student_in_subject
+from apps.registrar.public import enroll_student_in_subject, language_levels
 from apps.workload.constants import ACTIVITY_TOTAL_FIELD, TEACHING_ACTIVITIES, RowKind, TaskStatus
 from apps.workload.models import TeacherAssignment, TeachingTask, TeachingTaskRow
 from apps.workload.services.assignments import assign_teacher, remaining_hours
@@ -561,7 +561,15 @@ class Importer(TeacherResolverMixin):
         self.counters["offering_created"] += result["sync"]["created"]
         self.counters["offering_updated"] += result["sync"]["updated"]
         self.counters["offering_instructor_blocked"] += result["sync"]["instructor_blocked"]
-        for offering in CourseOffering.objects.filter(pk__in=result["sync"]["offering_ids"]).select_related("group"):
+        offerings = CourseOffering.objects.filter(pk__in=result["sync"]["offering_ids"]).select_related(
+            "group", "subject"
+        )
+        for offering in offerings:
+            if language_levels.is_level_subject(offering.subject.name):
+                # Xarici dil SƏVİYYƏ jurnalı (sahib 2026-10-26/27): qrupun HAMISI yazılmır — yalnız o səviyyənin
+                # tələbələri (paylar / səviyyə yerləşdirməsi). Yeni / boş açılışın ilk doldurulması offering_sync-dədir.
+                self.counters["enrollment_level_skipped"] += 1
+                continue
             records = StudentAcademicRecord.objects.filter(
                 organization=self.org, group=offering.group, is_active=True, status="enrolled"
             ).select_related("student")

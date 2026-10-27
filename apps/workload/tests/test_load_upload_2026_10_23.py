@@ -229,3 +229,27 @@ class LoadUploadFlowTests(TestCase):
         self.assertIn("Önizləmə", html)
         self.assertIn("load_apply", html)
         self.assertIn("Quliyev", html)
+
+    def test_reupload_does_not_refill_language_level_journal(self):
+        """2026-10-27 (İngilis dili kafedrası): yenidən yükləmə səviyyə jurnalına qrupun HAMISINI yazmır."""
+        level = "Xarici dildə işgüzar və akademik kommunikasiya-1(elementary)"
+        other = User.objects.create_user("tel.eko2", "t2@x.test", "pw")
+        activate_member(self.org, other, "student", permissions=["course.view"], level=10)
+        record = StudentAcademicRecord.objects.get(student=self.student)
+        StudentAcademicRecord.objects.create(
+            organization=self.org, student=other, program=record.program, curriculum=record.curriculum,
+            group=self.group, admission_year=2025,
+        )  # fmt: skip
+        first = [["Həsənova Səkinə Ramiz", "235 EKO", level, 5, 20, "", "", 60, "", "", "", ""]]
+        self._upload(_xlsx(first))
+        self._apply()
+        offering = CourseOffering.objects.get(subject__name=level, group=self.group)
+        # Səviyyə yerləşdirməsi: tələbə başqa səviyyədədir — bu jurnaldan çıxarılıb, qrup yoldaşı qalır.
+        Enrollment.objects.filter(offering=offering, student=self.student).delete()
+        second = first + [["Həsənova Səkinə Ramiz", "235 EKO", "Veb texnologiyalar", 5, 20, "", 30, "", "", "", "", ""]]
+        response = self._upload(_xlsx(second))
+        self.assertEqual(response.status_code, 200, response.content)
+        self._apply()
+        self.assertTrue(CourseOffering.objects.filter(subject__name="Veb texnologiyalar", group=self.group).exists())
+        self.assertFalse(Enrollment.objects.filter(offering=offering, student=self.student).exists())
+        self.assertTrue(Enrollment.objects.filter(offering=offering, student=other).exists())
