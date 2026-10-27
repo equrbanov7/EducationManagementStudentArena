@@ -137,6 +137,18 @@ class PinLookupTests(TestCase):
         detail_response = self._client(self.center).get(url)
         self.assertEqual(detail_response.status_code, 404)
 
+    def test_ticketed_exam_shows_cabinet_pin_when_ticket_has_none(self):
+        # Sahib 2026-10-27: zal biletində öz PIN yoxdur, tələbə kabinet PIN-i ilə girir — səhifə «PIN yoxdur» deyirdi.
+        FinalExamTicket.objects.create(
+            organization=self.org, session=self.session, exam=self.pin_exam, student=self.pin_student
+        )
+        url = reverse("exams:exam_center_student_pins", kwargs={"student_id": self.pin_student.id})
+        data = self._client(self.center).get(url).json()
+        rows = [t for t in data["tickets"] if t["exam_title"] == "Wizard Final"]
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["pin"], self.raw_student_pin)
+        self.assertTrue(rows[0]["pin_available"])
+
     def test_revoked_pin_not_revealed(self):
         from apps.exams.services.final_center import revoke_ticket_pin
 

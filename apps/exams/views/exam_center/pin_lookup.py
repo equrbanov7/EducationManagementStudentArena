@@ -198,9 +198,17 @@ def exam_center_student_pins(request, student_id):
     items = []
     revealed = 0
     ticket_exam_ids = set()
+    # Sahib 2026-10-27: zal biletli imtahanda tələbə KABİNET PIN-i (``ExamStudentPin``) ilə girir — zal monitoru da
+    # onu göstərir. Biletin köhnə öz PIN-i boşdursa səhifə «PIN yoxdur» deyirdi, halbuki tələbənin PIN-i var idi.
+    cabinet_pins = {
+        row.exam_id: row
+        for row in ExamStudentPin.objects.filter(exam__organization=organization, student=student).only(
+            "exam_id", "pin_cipher"
+        )
+    }
     for ticket in tickets:
         ticket_exam_ids.add(ticket.exam_id)
-        pin = decrypt_ticket_pin(ticket)
+        pin = decrypt_student_pin_row(cabinet_pins.get(ticket.exam_id)) or decrypt_ticket_pin(ticket)
         if pin:
             revealed += 1
         session = ticket.session
