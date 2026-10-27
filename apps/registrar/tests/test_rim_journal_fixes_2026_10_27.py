@@ -197,8 +197,11 @@ class RelocateSupersededMarksTest(_ShareBase):
         with bypass_rls():
             self.assertEqual(LessonMark.objects.get(pk=self.moving.pk).lesson_id, self.phantom.pk)
         counts = self._run("--apply")
-        self.assertEqual((counts["moved"], counts["lessons_emptied"]), ("1", "1"))
+        self.assertEqual((counts["moved"], counts["lessons_emptied"], counts["lessons_deleted"]), ("1", "1", "1"))
         with bypass_rls():
+            # Boşalan fantom sütun eyni paketdə silinir (MR-000010); xanası qalan sütun yerindədir.
+            self.assertFalse(Lesson.objects.filter(pk=self.phantom.pk).exists())
+            self.assertTrue(Lesson.objects.filter(pk=self.phantom2.pk).exists())
             moved = LessonMark.objects.get(pk=self.moving.pk)  # eyni id
             self.assertEqual(
                 (moved.lesson_id, moved.enrollment_id, moved.status), (self.target.pk, self.successor.pk, "absent")
@@ -211,8 +214,13 @@ class RelocateSupersededMarksTest(_ShareBase):
             self.assertTrue(AuditLog.objects.filter(resource_type=BATCH_RESOURCE, resource_id=counts["batch"]).exists())
         self.assertEqual(self._run("--apply")["moved"], "0")
         undo = self._run("--undo", counts["batch"], "--apply")
-        self.assertEqual(undo["undo_restored"], "1")
+        self.assertEqual((undo["undo_restored"], undo["undo_lessons_restored"]), ("1", "1"))
         with bypass_rls():
+            restored = Lesson.objects.get(pk=self.phantom.pk)  # eyni id, eyni sahələr
+            self.assertEqual(
+                (restored.offering_id, restored.date, restored.start_time, restored.kind),
+                (self.offering.pk, self.phantom.date, self.phantom.start_time, LessonKind.LECTURE),
+            )
             back = LessonMark.objects.get(pk=self.moving.pk)
             self.assertEqual((back.lesson_id, back.enrollment_id), (self.phantom.pk, self.e1.pk))
 

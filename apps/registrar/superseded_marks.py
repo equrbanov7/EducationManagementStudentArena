@@ -17,8 +17,13 @@ Namizəd xana (cari dövr):
 Qərar: hədəf xana BOŞDUR → xana daşınır (eyni id, status, bal, ``entered_by``, ``created_at``; köhnə sətir silinir —
 ``LessonMark`` dərs/qeydiyyatı dəyişməzdir); hədəfdə EYNİ dəyər var → mənbə sətri silinir (``target_same``); hədəfdə
 FƏRQLİ dəyər → heç nə yazılmır (``conflict_kept``). Hər iki qeydiyyatın qayıb saatı yenidən hesablanır. Paketin
-manifesti BİR audit sətrindədir (``registrar.superseded_marks_batch``) — ``undo`` mənbə dərsi hələ varsa xananı geri
-qaytarır. Boşalan fantom sütunları sonra ``legacy_repair_empty_lessons --since 2026-09-15`` silir.
+manifesti BİR audit sətrindədir (``registrar.superseded_marks_batch``) — ``undo`` xananı geri qaytarır.
+
+Boşalan fantom sütun (RİM 2026-10-27, MR-000010 «15.10 / 16.10 dərs olmayıb»): bu paketdə SON xanası daşınan,
+köçürmənin yaratdığı (``created_by`` boş), rəsmi düzəlişsiz dərs ELƏ BURADA silinir (``lessons_deleted``) — əvvəl
+qlobal ``legacy_repair_empty_lessons`` lazım idi, o isə müəllimlərin özlərinin açdığı boş/«qb» sütunlarına da
+toxunurdu. Silinən dərsin bütün sahələri manifestdədir (``deleted_lessons``) — ``undo`` əvvəlcə dərsi eyni id ilə
+bərpa edir, sonra xananı.
 
 Plan (``superseded-marks/1``) yalnız id-lərdir: ``{"mark", "lesson", "enrollment"}`` — tətbiqdə hər sətir canlı
 hesablama ilə yenidən yoxlanılır (fərq → ``plan_mismatch``, yazılmır).
@@ -58,6 +63,8 @@ SHOWN = (
     "plan_mismatch",
     "plan_missing",
     "lessons_emptied",
+    "lessons_deleted",
+    "lessons_kept_corrected",
     "enrollments_recomputed",
 )
 
@@ -255,12 +262,63 @@ def apply_moves(organization, period, *, actor, batch, plan=None, write: bool = 
     recompute_absence_hours_many(list(Enrollment.objects.filter(pk__in=touched)))
     counts["enrollments_recomputed"] = len(touched)
     source_lessons = {mark.lesson_id for mark, *_rest in todo}
-    counts["lessons_emptied"] = len(
-        source_lessons
-        - set(LessonMark.objects.filter(lesson_id__in=source_lessons).values_list("lesson_id", flat=True))
+    emptied = source_lessons - set(
+        LessonMark.objects.filter(lesson_id__in=source_lessons).values_list("lesson_id", flat=True)
     )
-    _audit(organization, actor, batch, manifest, counts)
+    counts["lessons_emptied"] = len(emptied)
+    deleted = _delete_emptied(emptied, counts)
+    _audit(organization, actor, batch, manifest, counts, deleted)
     return counts
+
+
+def _lesson_snapshot(lesson) -> dict:
+    """Dərsin bütün sütunları JSON-a (``undo`` eyni id ilə bərpa edir)."""
+    data = {}
+    for field in Lesson._meta.concrete_fields:
+        value = getattr(lesson, field.attname)
+        if value is not None and not isinstance(value, (bool, int, float, str)):
+            value = value.isoformat() if hasattr(value, "isoformat") else str(value)
+        data[field.attname] = value
+    return data
+
+
+def _delete_emptied(lesson_ids, counts) -> list:
+    """Bu paketdə boşalan köçürmə dərslərini (``created_by`` boş, xanasız, düzəlişsiz) sil → snapshot-lar."""
+    from .twin_relocate import corrected_lesson_ids
+
+    if not lesson_ids:
+        return []
+    corrected = corrected_lesson_ids(lesson_ids)
+    counts["lessons_kept_corrected"] += len(corrected)
+    doomed = [
+        lesson
+        for lesson in Lesson.objects.select_for_update(of=("self",)).filter(
+            pk__in=list(lesson_ids), created_by__isnull=True, marks__isnull=True
+        )
+        if str(lesson.pk) not in corrected
+    ]
+    snapshots = [_lesson_snapshot(lesson) for lesson in doomed]
+    if doomed:
+        Lesson.objects.filter(pk__in=[lesson.pk for lesson in doomed]).delete()
+    counts["lessons_deleted"] = len(doomed)
+    return snapshots
+
+
+def _restore_lessons(snapshots, counts) -> None:
+    """``undo``: manifestdəki silinmiş dərsləri (hələ yoxdursa) eyni id ilə yenidən yarat."""
+    if not snapshots:
+        return
+    existing = {
+        str(pk) for pk in Lesson.objects.filter(pk__in=[row["id"] for row in snapshots]).values_list("pk", flat=True)
+    }
+    fields = {field.attname: field for field in Lesson._meta.concrete_fields}
+    fresh = [
+        Lesson(**{name: fields[name].to_python(value) for name, value in row.items() if name in fields})
+        for row in snapshots
+        if str(row["id"]) not in existing
+    ]
+    Lesson.objects.bulk_create(fresh)
+    counts["undo_lessons_restored"] = len(fresh)
 
 
 def _write(todo) -> list:
@@ -319,7 +377,7 @@ def _restore_created_at(pairs) -> None:
             )
 
 
-def _audit(organization, actor, batch, manifest, counts) -> None:
+def _audit(organization, actor, batch, manifest, counts, deleted_lessons=()) -> None:
     from core.audit import log_action
     from core.constants import AuditAction
 
@@ -327,7 +385,11 @@ def _audit(organization, actor, batch, manifest, counts) -> None:
         AuditAction.UPDATE,
         user=actor,
         organization=organization,
-        new_values={"counts": {key: counts.get(key, 0) for key in SHOWN}, "moves": manifest},
+        new_values={
+            "counts": {key: counts.get(key, 0) for key in SHOWN},
+            "moves": manifest,
+            "deleted_lessons": list(deleted_lessons),
+        },
         reason=f"relocate_superseded_marks {batch}",
         resource_type=BATCH_RESOURCE,
         resource_id=batch,
@@ -347,6 +409,7 @@ def undo_batch(organization, batch: str) -> Counter:
         raise PlanError("batch_not_found")
     counts: Counter = Counter()
     rows = list((entry.new_values or {}).get("moves") or [])
+    _restore_lessons(list((entry.new_values or {}).get("deleted_lessons") or []), counts)
     lessons = set(Lesson.objects.filter(pk__in={row["from_lesson"] for row in rows}).values_list("pk", flat=True))
     current = {
         str(mark.pk): mark

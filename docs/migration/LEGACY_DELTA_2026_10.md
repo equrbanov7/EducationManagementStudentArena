@@ -511,3 +511,50 @@ gh release create legacy-delta-syllabi-20261027 delta.json.gz.enc --draft --titl
 
 Geri qaytarma: audit sətrinin (`legacy_import.delta_batch`, `resource_id` = tag) `created.syllabus_versions`
 id-ləri — həmin versiyaların baza dosyeləri (yalnız bu qaçışda yaranıb) silinə bilər.
+
+## 13. RİM müraciətləri, ikinci dalğa — növ kilidi, pay növləri, ay səhvi, «fake» jurnallar (2026-10-27 axşam)
+
+35 açıq müraciətin (jurnal) diaqnozu `ems_prod_1027` (01:10 nüsxəsi) + köhnə sistemin 10-21 dump-ı ilə; adlı cədvəl
+yalnız lokaldır (0600). Sistemli səbəblər və düzəliş:
+
+### 13.1 Kod
+
+* **Dərs növü kilidi** (`registrar/lesson_kind_lock.py`): cədvəldə tək növ slot varsa yeni dərs həmin növə kilidlənirdi —
+  köçürmədən sonra cədvəl natamam olduğundan müəllim seminarı yaza bilmirdi, seminar payı olan müəllim isə 403 alırdı.
+  İndi kilid yalnız açılışda başqa növə sübut (başqa növ dərs, aktiv pay növü, qrupun dərs yükü saatı) yoxdursa qoyulur.
+  Cari dövrün tək-növ cədvəlli 200 açılışından 168-nin kilidi açılır.
+* **`relocate_superseded_marks`** boşalan fantom sütunu eyni paketdə silir (`lessons_deleted`, manifestdə dərsin bütün
+  sütunları; `--undo` dərsi eyni id ilə bərpa edir). Qlobal `legacy_repair_empty_lessons` təkrarı LAZIM DEYİL (o,
+  müəllimin özünün açdığı boş / «qb» sütunlarına da toxunur).
+
+### 13.2 Data (kod dəyişmədən, mövcud əmrlərlə)
+
+* **Pay növləri.** 2026-10-26 pay paketi (`shares-20261026-…`) sessiya skripti ilə qurulmuşdu — növü
+  `journals_dates_added_by_teacher.sem_muh`-dan götürürdü (orada 0 = «seminar» sətirlərin 78 %-i): 203 pay
+  `["seminar"]` idi, mühazirə keçən müəllim mühazirə sütununu görmürdü (handover / bölünmüş fənn). Repodakı
+  `build_journal_share_plans` növü yeni sistemin eyni tarix + saat dərsindən götürür — düzəlişdən SONRAKI nüsxədə
+  yenidən qurulub, üstünə müraciət sətirləri (söndürmə / növ) əlavə olunub, `drop_enrollments` YOXDUR (səviyyə
+  çıxarışları ayrıca işdir).
+* **Ay səhvi ilə yazılmış köhnə dərslər.** Müəllim tarixi bir ay irəli seçib (məs. 09-28-də yazılan xanalar
+  «10-28» dərsində) — delta onları «gələcək» sayıb atıb (`lesson.future_skipped`). Lokal çevirici
+  (`~/EMSArena-backups/legacy-delta-2026-10/redate_bundle.py`): yalnız tarixi yazılma günündən DƏQİQ bir ay sonra olan
+  (eyni gün) sətirlər yazılma tarixinə çəkilir; hədəf açılışda eyni saatda başqa növ dərs varsa sətir atılır.
+  `snapshot.phases = offerings, enrollments, lessons, topics` (hamısı fill-only).
+* **`fake=1` köhnə jurnallar.** Delta `fake` jurnalları atır; semestr 14-də datası olan 18 belə jurnal (əsasən
+  magistrın fərdi jurnalı, bir tələbə) var, eyni fənn + qrupun adi jurnalı yoxdur. Çevirici
+  (`unfake_bundle.py`) yalnız onları bayraqsız paketə qoyur — 14 açılış + qeydiyyat + dərs + xana (4-ü fənn kodu
+  toqquşması ilə ötürülür).
+
+### 13.3 Prod nüsxəsinin təmiz klonunda ardıcıllıq (dry-run = apply, yoxlama dry-run-u 0 yazı)
+
+| Addım | Tətbiq |
+|---|---|
+| `fix_legacy_lesson_kinds` / `--include-mixed` | 70 + 37 dərs → lab, 9 slot |
+| `relocate_twin_enrollment` | 117 xana, 57 fantom dərs silindi, 22 qeydiyyat |
+| `merge_twin_offerings` | 29 cüt, 204 dərs, 2 186 xana, 27 sillabus |
+| `fix_slot_week_parity` | 46 slot hər həftəyə |
+| `relocate_superseded_marks` (canlı) | 1 074 xana, 206 boşalan fantom dərs silindi |
+| `apply_journal_shares` (yenidən qurulmuş) | 19 yeni, 151 yenilənən, 4 söndürülən pay |
+| `legacy_delta_apply` (ay səhvi paketi) | 16 dərs, 480 xana |
+| `legacy_delta_apply` («fake» paketi) | 14 açılış, 14 qeydiyyat, 37 dərs, 37 xana |
+| `merge_duplicate_student` (1 cüt) | 33 xana, dublikat dayandırıldı |

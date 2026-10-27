@@ -298,18 +298,14 @@ def get_final_breakdown(offering):
 # ── Yeni-dərs modalının köməkçiləri (views-dən köçürülüb — modul büdcəsi) ────
 
 
-def _schedule_slot_model():
-    from apps.registrar.models import ScheduleSlot
-
-    return ScheduleSlot
-
-
 def locked_lesson_kind(offering):
     """Jurnalın dərs tipi kilidi: qrupun cədvəlində YALNIZ BİR növ slot varsa
     (məs. bu jurnal mühazirə jurnalıdır) yeni dərsin növü seçilə bilmir —
-    avtomatik həmin növə düşür (istifadəçi tələbi)."""
-    kinds = list(_schedule_slot_model().objects.filter(offering=offering).values_list("kind", flat=True).distinct())
-    return kinds[0] if len(kinds) == 1 else None
+    avtomatik həmin növə düşür (istifadəçi tələbi). RİM 2026-10-27: açılışın başqa
+    növə sübutu (dərs, pay, dərs yükü saatı) varsa kilid yoxdur — bax ``lesson_kind_lock``."""
+    from .lesson_kind_lock import locked_lesson_kind as _locked
+
+    return _locked(offering)
 
 
 # Mövzu mənbəyi (təsdiqlənmiş sillabus → LMS kursu) ayrıca modula köçürülüb ki,
