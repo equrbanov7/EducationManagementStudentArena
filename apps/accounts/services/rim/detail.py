@@ -165,6 +165,15 @@ def serialize_detail(user, actor: RimActor):
         "restore": manageable and actor.has(PERM_SOFT_DELETE) and status == "deleted",
         "edit": manageable and actor.has(PERM_EDIT) and status != "deleted",
     }
+    # Sahib 2026-10-27: səhv arxivlənmiş CARİ tələbə — «Arxivdən çıxar» (`member.edit`, services/archive_restore.py).
+    row["archive_restore"] = None
+    if status == "archived":
+        from .archive import archive_restore_card
+
+        row["archive_restore"] = archive_restore_card(user, actor)
+    row["actions"]["archive_restore"] = bool(
+        manageable and row["archive_restore"] and row["archive_restore"]["can_restore"]
+    )
     # Rol təyinatı RİM-də TƏKRAR YARADILMIR — kanonik bölməyə dərin link.
     row["role_assignment_url"] = f"{reverse('accounts:profile')}?section=role-assignment"
     return row

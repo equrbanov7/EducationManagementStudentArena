@@ -249,6 +249,8 @@ urlpatterns = [
     path("rim/search/", views.rim_user_search, name="rim_user_search"),
     path("rim/user/<int:user_id>/", views.rim_user_detail, name="rim_user_detail"),
     path("rim/action/", views.rim_action, name="rim_action"),
+    # «Arxivdən çıxar» (sahib 2026-10-27) — səhv arxivlənmiş cari tələbə; `member.edit`, YALNIZ POST + CSRF.
+    path("rim/archive-restore/", views.rim_archive_restore, name="rim_archive_restore"),
     # «Yeni hesab» — tək-tək tələbə/müəllim yaratma. QAPI toplu idxalla EYNİDİR
     # (`user.import`), ona görə bir universitet birini verib digərini unutmur.
     path("rim/create/", views.rim_create_account, name="rim_create_account"),

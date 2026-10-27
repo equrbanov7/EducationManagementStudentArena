@@ -153,6 +153,17 @@
         if (person.can_rename) {
             actions.appendChild(actionButton("ems-btn", "fas fa-user-pen", "data-pwr-rename", person.id, t.rename));
         }
+        // Sahib 2026-10-27: arxivdə, amma oxuyan tələbə — dalan yox, «Arxivdən çıxar» (`archive_restore.js`).
+        var archive = person.archive_restore;
+        if (archive && archive.can_restore && root() && root().querySelector("[data-archive-restore]")) {
+            var restore = actionButton("ems-btn ems-btn--primary", "fas fa-box-open", "data-user-id", person.id, t.archiveRestore);
+            restore.setAttribute("data-archive-restore-open", "");
+            restore.setAttribute("data-source", "pwr");
+            restore.setAttribute("data-name", person.full_name || "");
+            restore.setAttribute("data-username", person.username || "");
+            restore.setAttribute("data-needs-year", archive.needs_admission_year ? "1" : "0");
+            actions.appendChild(restore);
+        }
         if (actions.childNodes.length) {
             item.appendChild(actions);
         }
@@ -452,6 +463,22 @@
             var scope = root();
             if (scope && !(event.target && event.target.closest && event.target.closest("[data-pwr-combo]"))) {
                 closeSuggest(scope);
+            }
+        });
+    });
+
+    // «Arxivdən çıxar» uğurlu oldu — kart yenidən çəkilir (indi parol sıfırlana bilər).
+    window.EMSReady.once("pwr-archive-restore-done", function () {
+        document.addEventListener("ems:archive-restore:done", function (event) {
+            var scope = root();
+            var form = scope && scope.querySelector("[data-pwr-search-form]");
+            if (!form || !event.detail || event.detail.source !== "pwr") {
+                return;
+            }
+            if (typeof form.requestSubmit === "function") {
+                form.requestSubmit();
+            } else {
+                form.dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true }));
             }
         });
     });

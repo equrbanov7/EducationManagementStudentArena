@@ -24,6 +24,7 @@ from apps.accounts.services.rim import (
 )
 from apps.accounts.services.rim.activation import QUERY_PARAM as ACTIVATION_QUERY_PARAM
 from apps.accounts.services.rim.activation import activation_counts
+from apps.accounts.services.rim.archive import archive_restore_dialog_context
 from apps.accounts.services.rim.create import MAX_NOTE_LENGTH, creatable_kinds
 from apps.accounts.services.rim.create_unit import admin_unit_type_choices, can_create_unit
 from apps.accounts.services.rim.lifecycle import MAX_REASON_LENGTH, MIN_REASON_LENGTH
@@ -176,6 +177,8 @@ def build_rim_center_section(request) -> dict:
         # Bildirişdən keçid (`?rim_q=<istifadəçi adı>`): axtarış sahəsi dolu açılır, JS ilk sorğunu onunla edir.
         "initial_query": normalize_query(request.GET.get(ACTIVATION_QUERY_PARAM, "")),
         "activation_tiles": _activation_tiles(actor),
+        # Sahib 2026-10-27: «Arxivdən çıxar» dialoqu (yalnız `member.edit` / superadmin; düymə detal kartındadır).
+        "archive_restore": archive_restore_dialog_context(actor),
         **_create_context(actor),
         **_unit_context(actor),
     }

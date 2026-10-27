@@ -30,6 +30,7 @@ from ..services.password_reset_admin import (
     reset_password,
 )
 from ..services.password_reset_lookup import lookup, normalize_query, serialize_candidates, suggest
+from ..services.rim.archive import archive_restore_dialog_context
 
 _CTX = "accounts.password_reset"
 _UCTX = "accounts.username_change_admin"
@@ -143,6 +144,7 @@ def _js_strings() -> dict:
             "adla giriş dərhal işləməz olur.",
         ),
         "suggestCurrent": pgettext(_UCTX, "Cari ad artıq standart formadadır: {username}."),
+        "archiveRestore": pgettext("accounts.archive_restore", "Arxivdən çıxar"),
     }
 
 
@@ -181,6 +183,8 @@ def build_panel_context(request) -> dict:
         "rename_suggest_url": reverse("accounts:account_username_change_suggest"),
         "rename_form_data": {"data-pwr-rename-form": "1"},
         "js_strings": _js_strings(),
+        # Sahib 2026-10-27: arxivdə, amma oxuyan tələbə — kartda «Arxivdən çıxar» (`member.edit`).
+        "archive_restore": archive_restore_dialog_context(actor),
     }
 
 

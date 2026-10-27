@@ -268,6 +268,11 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
       </div>
     </div>
 
+    {% comment %}Sahib 2026-10-27: «Arxivdən çıxar» — səhv arxivlənmiş cari tələbə (yalnız `member.edit`; düymə detal kartında).{% endcomment %}
+    {% if rim_center_section.archive_restore %}
+    {% include "accounts/profile/sections/partials/_archive_restore_dialog.html" with ar_dialog_id="rim-archive-restore-dialog" ar_url=rim_center_section.archive_restore.url ar_form_data=rim_center_section.archive_restore.form_data ar_min_year=rim_center_section.archive_restore.min_year ar_max_year=rim_center_section.archive_restore.max_year %}
+    {% endif %}
+
     <script type="application/json" data-rim-i18n>{
       "loading": "{% trans 'Yüklənir…'|escapejs context 'profile.rim' %}",
       "empty": "{% trans 'Nəticə tapılmadı.'|escapejs context 'profile.rim' %}",
@@ -294,6 +299,7 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
       "unblock": "{% trans 'Blokdan çıxar'|escapejs context 'profile.rim' %}",
       "soft_delete": "{% trans 'Sil'|escapejs context 'profile.rim' %}",
       "restore": "{% trans 'Bərpa et'|escapejs context 'profile.rim' %}",
+      "archive_restore": "{% trans 'Arxivdən çıxar'|escapejs context 'accounts.archive_restore' %}",
       "edit": "{% trans 'Məlumatları redaktə et'|escapejs context 'profile.rim' %}",
       "save": "{% trans 'Yadda saxla'|escapejs context 'profile.rim' %}",
       "manage_roles": "{% trans 'Rol təyinatı bölməsində idarə et'|escapejs context 'profile.rim' %}",

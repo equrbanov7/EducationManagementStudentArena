@@ -110379,3 +110379,117 @@ msgstr "Reason"
 msgctxt "exams.unit_coverage"
 msgid "Fənnin jurnalında olmayan tələbə: %(uncovered)s / %(students)s"
 msgstr "Students not in the subject journal: %(uncovered)s / %(students)s"
+
+msgctxt "accounts.archive_restore"
+msgid "Hesabı arxivdən çıxarmaq üçün icazəniz yoxdur."
+msgstr "You do not have permission to restore this account from the archive."
+
+msgctxt "accounts.archive_restore"
+msgid "Başqasının adından baxış rejimində hesabı arxivdən çıxarmaq olmaz."
+msgstr "An account cannot be restored from the archive while viewing as another user."
+
+msgctxt "accounts.archive_restore"
+msgid "İstifadəçi seçilməyib."
+msgstr "No user selected."
+
+msgctxt "accounts.archive_restore"
+msgid "İstifadəçi tapılmadı."
+msgstr "User not found."
+
+msgctxt "accounts.archive_restore"
+msgid "Hesab arxivdə deyil."
+msgstr "The account is not archived."
+
+msgctxt "accounts.archive_restore"
+msgid "Hesab bloklanıb — əvvəlcə blokdan çıxarılmalıdır."
+msgstr "The account is blocked — unblock it first."
+
+msgctxt "accounts.archive_restore"
+msgid "Tələbənin aktiv akademik qeydi yoxdur — arxiv düzgündür."
+msgstr "The student has no active academic record — the archive status is correct."
+
+msgctxt "accounts.archive_restore"
+msgid "Tələbə «Xaric» qrupundadır — arxiv düzgündür."
+msgstr "The student is in an “Expelled” group — the archive status is correct."
+
+msgctxt "accounts.archive_restore"
+msgid "Hesabın bu təşkilatda bir neçə üzvlüyü var — arxivdən çıxarmaq üçün RİM ilə yoxlanmalıdır."
+msgstr "The account has several memberships in this organization — check it with the Digital Development Centre before restoring."
+
+msgctxt "accounts.archive_restore"
+msgid "Təşkilatda aktiv «Tələbə» rolu yoxdur."
+msgstr "The organization has no active “Student” role."
+
+msgctxt "accounts.archive_restore"
+msgid "Səbəb yazılmalıdır (ən azı 3 simvol)."
+msgstr "Enter a reason (at least 3 characters)."
+
+msgctxt "accounts.archive_restore"
+msgid "Qəbul ili 2000–2100 aralığında olmalıdır."
+msgstr "The admission year must be between 2000 and 2100."
+
+msgctxt "accounts.archive_restore"
+msgid "Hesabı arxivdən çıxarmaq alınmadı. Yenidən cəhd edin."
+msgstr "The account could not be restored from the archive. Please try again."
+
+#, python-format
+msgctxt "accounts.archive_restore"
+msgid "Tələbə hələ oxuyur (aktiv akademik qeyd, qrup: %(group)s), amma hesab arxivdədir — giriş və parol bərpası bağlıdır. Səhv arxivdirsə «Arxivdən çıxar»."
+msgstr "The student is still studying (active academic record, group: %(group)s), but the account is archived — sign-in and password reset are closed. If this is a mistake, use “Restore from archive”."
+
+msgctxt "accounts.archive_restore"
+msgid "Bunun üçün «member.edit» icazəsi lazımdır — RİM rəhbərinə müraciət edin."
+msgstr "This requires the “member.edit” permission — contact the head of the Digital Development Centre."
+
+msgctxt "accounts.archive_restore"
+msgid "Hesab arxivdən çıxarıldı — tələbə yenidən daxil ola bilər. Lazım olsa parolu sıfırlayın."
+msgstr "The account has been restored from the archive — the student can sign in again. Reset the password if needed."
+
+#, python-format
+msgctxt "accounts.archive_restore"
+msgid "Qəbul ili düzəldildi: %(year)s."
+msgstr "Admission year corrected: %(year)s."
+
+msgctxt "accounts.archive_restore"
+msgid "Arxivdən çıxar"
+msgstr "Restore from archive"
+
+msgctxt "accounts.archive_restore"
+msgid "{name} ({username}) hesabı yenidən aktiv olacaq: giriş və parol sıfırlama açılır. Akademik qeyd və qrup dəyişmir."
+msgstr "The account of {name} ({username}) will become active again: sign-in and password reset are reopened. The academic record and group do not change."
+
+msgctxt "accounts.archive_restore"
+msgid "Hesab arxivdən çıxarılsın?"
+msgstr "Restore the account from the archive?"
+
+msgctxt "accounts.archive_restore"
+msgid "Səbəb"
+msgstr "Reason"
+
+msgctxt "accounts.archive_restore"
+msgid "məs. Tələbə 131 T qrupunda oxuyur, köçürmədə səhvən məzun sayılıb"
+msgstr "e.g. The student studies in group 131 T and was marked as a graduate by mistake during migration"
+
+msgctxt "accounts.archive_restore"
+msgid "Səbəb audit jurnalına yazılır."
+msgstr "The reason is saved to the audit log."
+
+msgctxt "accounts.archive_restore"
+msgid "Səbəb ən azı 3 simvol olmalıdır."
+msgstr "The reason must be at least 3 characters."
+
+msgctxt "accounts.archive_restore"
+msgid "Qəbul ili"
+msgstr "Admission year"
+
+msgctxt "accounts.archive_restore"
+msgid "(istəyə bağlı)"
+msgstr "(optional)"
+
+msgctxt "accounts.archive_restore"
+msgid "məs. 2023"
+msgstr "e.g. 2023"
+
+msgctxt "accounts.archive_restore"
+msgid "Köçürmədə qəbul ili tapılmayıb (1950 yer-tutucusu). Bilirsinizsə yazın — boş qalsa dəyişmir."
+msgstr "The admission year was not found during migration (placeholder 1950). Enter it if you know it — left empty, it stays unchanged."

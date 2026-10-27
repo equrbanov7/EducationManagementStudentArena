@@ -17,6 +17,11 @@ from apps.accounts.services import (  # noqa: F401
     stage_imported_account,
     verify_otp_code,
 )
+from apps.accounts.services.archive_restore import (  # noqa: F401
+    ArchiveRestoreError,
+    restore_eligibility,
+    restore_wrongly_archived_student,
+)
 from core.roles import (  # noqa: F401
     ProfileRole,
     get_user_role_level,
@@ -27,6 +32,7 @@ from core.roles import (  # noqa: F401
 
 __all__ = [
     "ARCHIVE_ROLE_NAME",
+    "ArchiveRestoreError",
     "ProfileRole",
     "activate_staged_account",
     "archive_staged_account",
@@ -38,6 +44,8 @@ __all__ = [
     "purge_stale_pending_registration",
     "reinstate_student_access",
     "restore_archived_account",
+    "restore_eligibility",
+    "restore_wrongly_archived_student",
     "stage_imported_account",
     "user_has_any_role",
     "verify_otp_code",

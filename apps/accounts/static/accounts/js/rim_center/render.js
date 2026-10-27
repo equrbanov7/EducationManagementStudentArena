@@ -320,7 +320,34 @@
                     "</button>"
             );
         }
+        // Sahib 2026-10-27: səhv arxivlənmiş cari tələbə — «Arxivdən çıxar» (dialoq: archive_restore.js).
+        if (actions.archive_restore && document.querySelector("[data-rim-root] [data-archive-restore]")) {
+            var archive = user.archive_restore || {};
+            buttons.push(
+                '<button type="button" class="rim-btn rim-btn--primary" data-archive-restore-open data-source="rim"' +
+                    ' data-user-id="' + esc(user.id) + '" data-name="' + esc(user.full_name || "") +
+                    '" data-username="' + esc(user.username) + '" data-needs-year="' +
+                    (archive.needs_admission_year ? "1" : "0") + '">' +
+                    '<i class="fas fa-box-open"></i> ' +
+                    esc(ns.t("archive_restore")) +
+                    "</button>"
+            );
+        }
         return '<div class="rim-actions-row">' + buttons.join("") + "</div>";
+    }
+
+    /** Arxiv hesabın izahı — səhv arxivdirsə (tələbə oxuyur) və ya arxiv düzgündürsə səbəb (serverdən). */
+    function archiveNote(user) {
+        var archive = user.archive_restore;
+        if (!archive || !archive.note) {
+            return "";
+        }
+        return (
+            '<p class="' + (archive.eligible ? "rim-warning" : "rim-note") + '" data-rim-archive-note>' +
+            '<i class="fas fa-box-archive"></i> ' +
+            esc(archive.note) +
+            "</p>"
+        );
     }
 
     /** Detal modalının məzmunu. */
@@ -353,6 +380,7 @@
             '">' +
             esc(ns.t("manage_roles")) +
             "</a></div>" +
+            archiveNote(user) +
             actionButtons(user);
 
         if (user.actions && user.actions.edit) {
