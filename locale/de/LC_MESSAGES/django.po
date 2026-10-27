@@ -111272,3 +111272,77 @@ msgstr "Aktion"
 msgctxt "appeals.teaching"
 msgid "Fayl ilk %(n)s sətirlə məhdudlaşdırılıb — süzgəcləri daraldıb yenidən yükləyin."
 msgstr "Die Datei ist auf die ersten %(n)s Zeilen begrenzt — Filter eingrenzen und erneut herunterladen."
+
+msgctxt "exams.unit_coverage"
+msgid "Bu qrupun bu fənni yoxdur"
+msgstr "Diese Gruppe hat dieses Fach nicht"
+
+msgctxt "exams.unit_coverage"
+msgid "Bu qrupda {n} tələbə bu fənnin jurnalında yoxdur"
+msgstr "{n} Studierende dieser Gruppe stehen nicht im Journal dieses Fachs"
+
+msgctxt "exams.unit_coverage"
+msgid "Seçilmiş qrupların tələbələri bu fənnin jurnalında yoxdur"
+msgstr "Studierende der ausgewählten Gruppen stehen nicht im Journal dieses Fachs"
+
+msgctxt "exams.unit_coverage"
+msgid "Fənn: {subject}. Bu tələbələrin imtahan nəticəsi fənnin jurnalına düşməyəcək."
+msgstr "Fach: {subject}. Die Prüfungsergebnisse dieser Studierenden gelangen nicht ins Fachjournal."
+
+msgctxt "exams.unit_coverage"
+msgid "{n} / {total} tələbə fənnin cari semestr jurnalında yoxdur"
+msgstr "{n} / {total} Studierende stehen nicht im Journal des laufenden Semesters"
+
+msgctxt "exams.unit_coverage"
+msgid "Bu qrupun bu fəndən cari semestr jurnalı yoxdur."
+msgstr "Diese Gruppe hat für dieses Fach kein Journal im laufenden Semester."
+
+msgctxt "exams.unit_coverage"
+msgid "və daha {n} nəfər"
+msgstr "und {n} weitere"
+
+msgctxt "exams.unit_coverage"
+msgid "Qrupu çıxar"
+msgstr "Gruppe entfernen"
+
+msgctxt "exams.unit_coverage"
+msgid "Yenə də əlavə et"
+msgstr "Trotzdem hinzufügen"
+
+msgctxt "exams.unit_coverage"
+msgid "Məcburi əlavənin səbəbi"
+msgstr "Grund für das Hinzufügen trotz Warnung"
+
+msgctxt "exams.unit_coverage"
+msgid "Məsələn: tələbələr bu fəndən akademik borcu verir"
+msgstr "Z. B.: Die Studierenden holen dieses Fach als offene Leistung nach"
+
+msgctxt "exams.unit_coverage"
+msgid "Ən azı {n} simvol. Səbəb imtahan tarixçəsinə yazılır."
+msgstr "Mindestens {n} Zeichen. Der Grund wird im Prüfungsverlauf gespeichert."
+
+msgctxt "exams.unit_coverage"
+msgid "Məcburi əlavə"
+msgstr "Trotz Warnung hinzugefügt"
+
+#, python-format
+msgctxt "exams.unit_coverage"
+msgid "Səbəb ən azı %(min)d simvol olmalıdır."
+msgstr "Der Grund muss mindestens %(min)d Zeichen lang sein."
+
+msgctxt "exams.unit_coverage"
+msgid "Seçilmiş qrupların bəzi tələbələri bu fənnin cari semestr jurnalında yoxdur. Qrupu çıxarın və ya səbəb yazaraq məcburi əlavə edin."
+msgstr "Einige Studierende der ausgewählten Gruppen stehen nicht im Journal dieses Fachs für das laufende Semester. Entfernen Sie die Gruppe oder fügen Sie sie mit Begründung trotzdem hinzu."
+
+msgctxt "exams.unit_coverage"
+msgid "Məcburi əlavə olunmuş qruplar"
+msgstr "Trotz Warnung hinzugefügte Gruppen"
+
+msgctxt "exams.unit_coverage"
+msgid "Səbəb"
+msgstr "Grund"
+
+#, python-format
+msgctxt "exams.unit_coverage"
+msgid "Fənnin jurnalında olmayan tələbə: %(uncovered)s / %(students)s"
+msgstr "Studierende nicht im Fachjournal: %(uncovered)s / %(students)s"

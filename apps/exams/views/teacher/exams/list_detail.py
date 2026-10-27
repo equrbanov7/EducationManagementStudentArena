@@ -17,6 +17,7 @@ from apps.exams.forms import ExamForm
 from apps.exams.services import exam_journal_coverage as _journal_coverage
 from apps.exams.services import exam_journal_link as _journal_link
 from apps.exams.services import exam_subject_change as _exam_subject_change
+from apps.exams.services import exam_unit_coverage as _exam_unit_coverage
 from apps.exams.services.access_policy import _ensure_teacher, can_manage_exam_questions, is_exam_center_member
 from apps.exams.views.shared.breadcrumbs import exam_breadcrumbs
 from apps.exams.views.shared.tenant import get_active_organization, get_teacher_exam_or_404
@@ -25,6 +26,7 @@ from core.tenancy import get_request_organization, request_has_active_organizati
 
 from . import subject_change_guard as _subject_guard
 from . import unit_assignment as _units
+from . import unit_coverage as _unit_coverage
 from ._shared import (
     _bind_selected_organization,
     _ensure_exam_permission,
@@ -172,12 +174,17 @@ def createAndEditExamView(request, slug=None):
             )
 
         subject_decision, subject_reason, subject_blocked = None, "", False
+        # 2026-10-27: YENİ əlavə olunan qrupun tələbələri fənnin jurnalında deyilsə — məcburi əlavə + səbəb.
+        previous_unit_ids = subject_snapshot.unit_ids if subject_snapshot is not None else ()
+        unit_check = None
         if form.is_valid() and not allowed_units_error:
             subject_decision, subject_reason, subject_blocked = _subject_guard.check(
                 request, organization, subject_snapshot, form, allowed_units, permission=required_permission
             )
+            unit_check = _unit_coverage.check(request, organization, form.instance, previous_unit_ids, allowed_units)
+        units_blocked = unit_check is not None and unit_check.is_blocked
 
-        if form.is_valid() and not allowed_units_error and not subject_blocked:
+        if form.is_valid() and not allowed_units_error and not subject_blocked and not units_blocked:
             if not is_editing and linked_course is None:
                 linked_course = _get_requested_course_for_exam(request)
 
@@ -200,6 +207,7 @@ def createAndEditExamView(request, slug=None):
                 change_log = _exam_subject_change.record_decision(
                     exam_instance, subject_decision, reason=subject_reason, user=request.user, request=request
                 )
+            _unit_coverage.record(exam_instance, unit_check, user=request.user, request=request)
             # Fənn + qruplar (+ müəllim) → hər qrupun jurnal açılışı; fənn dəyişibsə bitmiş cəhdlər yeni jurnala.
             _journal_link.after_exam_saved(
                 exam_instance,
@@ -303,6 +311,8 @@ def createAndEditExamView(request, slug=None):
         error_step, error_field = _units.first_error_target(form, allowed_units_error=allowed_units_error)
         if subject_blocked:
             error_step, error_field = _subject_guard.ERROR_STEP, _subject_guard.ERROR_FIELD
+        elif units_blocked:
+            error_step, error_field = _unit_coverage.ERROR_STEP, _unit_coverage.ERROR_FIELD
         html = render_to_string(
             "exams/teacher/partials/_create_exam_modal_form.html",
             {
@@ -321,12 +331,15 @@ def createAndEditExamView(request, slug=None):
                 "wizard_error_step": error_step,
                 "wizard_error_field": error_field,
                 "supervision_config": supervision_config,
+                **_unit_coverage.form_context(previous_unit_ids, unit_check, request.POST),
             },
             request=request,
         )
         payload = {"success": False, "html": html, "step": error_step, "field": error_field}
         if subject_blocked:  # 409: dəyişiklik yalnız açıq təsdiq + səbəb ilə (API birbaşa çağırılsa da)
             payload["subject_change_required"] = form.subject_change_info()
+        if units_blocked:  # 400: əhatəsiz yeni qrup yalnız məcburi əlavə + səbəb ilə
+            payload["unit_coverage_required"] = [row.as_json() for row in unit_check.blocked]
         return JsonResponse(payload, status=409 if subject_blocked else 400)
     else:
         # GET request
@@ -335,6 +348,9 @@ def createAndEditExamView(request, slug=None):
         else:
             form = ExamForm(**form_kwargs)
     selected_groups, selected_users, selected_excluded_users = _selected_access_entities(form)
+    selected_units = _units.selected_units_for_form(
+        request, form_organization, form, exam, permission=required_permission
+    )
 
     return render(
         request,
@@ -348,10 +364,9 @@ def createAndEditExamView(request, slug=None):
             "legacy_groups_available": _units.legacy_groups_available(form, selected_groups),
             "selected_allowed_users": selected_users,
             "selected_excluded_users": selected_excluded_users,
-            "selected_allowed_units": _units.selected_units_for_form(
-                request, form_organization, form, exam, permission=required_permission
-            ),
+            "selected_allowed_units": selected_units,
             "supervision_config": supervision_config,
+            **_unit_coverage.form_context([unit.pk for unit in selected_units] if is_editing else ()),
         },
     )
 
@@ -399,6 +414,14 @@ def teacher_exam_detail(request, slug):
             auto_modal_url = reverse("exams:edit_exam_question", kwargs={"slug": exam.slug, "question_id": question_id})
     if auto_modal_url and nav_query:
         auto_modal_url = f"{auto_modal_url}?{nav_query}"
+    history_rows = _exam_subject_change.audit_rows(
+        exam,
+        (
+            _exam_subject_change.AUDIT_RESOURCE,
+            _exam_subject_change.AUDIT_RESOURCE_RESYNC,
+            _exam_unit_coverage.AUDIT_RESOURCE,
+        ),
+    )
 
     return render(
         request,
@@ -428,7 +451,9 @@ def teacher_exam_detail(request, slug):
             # R2 (W4 `w4wizard`): təyin olunmuş reyestr qrupları — tək sorğu, ad siyahısı.
             "assigned_unit_names": list(exam.allowed_units.order_by("name").values_list("name", flat=True)),
             # 2026-10-25: təsdiqlənmiş fənn dəyişiklikləri (kim, nə vaxt, köhnə → yeni, səbəb, köçən nəticələr).
-            "subject_change_history": _exam_subject_change.history(exam),
+            "subject_change_history": _exam_subject_change.history(exam, rows=history_rows),
+            # 2026-10-27: fənnin jurnalında olmayan qrupun məcburi əlavəsi (kim, nə vaxt, qrup, səbəb).
+            "unit_forced_history": _exam_unit_coverage.history(exam, rows=history_rows),
         },
     )
 

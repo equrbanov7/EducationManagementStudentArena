@@ -25,6 +25,7 @@ from .lookups import (  # noqa: F401
     user_search,
 )
 from .lookups_journal import journal_teacher_subjects  # noqa: F401
+from .unit_coverage import unit_journal_coverage  # noqa: F401
 
 __all__ = [
     "assigned_student_count",
@@ -46,5 +47,6 @@ __all__ = [
     "toggle_exam_active",
     "toggle_exam_archive",
     "toggle_exam_results_visibility",
+    "unit_journal_coverage",
     "user_search",
 ]

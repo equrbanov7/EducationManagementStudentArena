@@ -227,18 +227,29 @@ def record_resync(exam, counts, *, decision_log_id, user=None) -> None:
         logger.exception("exam_subject_change: resync audit failed for exam %s", getattr(exam, "pk", "?"))
 
 
-def history(exam) -> list:
-    """İmtahan səhifəsi üçün fənn dəyişikliyi tarixçəsi (yenidən köhnəyə) — siyahı dict-lər."""
+def audit_rows(exam, resource_types) -> list:
+    """İmtahanın verilmiş tipli audit sətirləri (yenidən köhnəyə, BİR sorğu) — tarixçə kartları paylaşır."""
     if not getattr(exam, "pk", None):
         return []
     from django.apps import apps as django_apps
 
     AuditLog = django_apps.get_model("audit", "AuditLog")
-    rows = list(
-        AuditLog.objects.filter(resource_type__in=(AUDIT_RESOURCE, AUDIT_RESOURCE_RESYNC), resource_id=str(exam.pk))
+    return list(
+        AuditLog.objects.filter(resource_type__in=tuple(resource_types), resource_id=str(exam.pk))
         .select_related("user")
-        .order_by("-created_at")[:100]
+        .order_by("-created_at")[:200]
     )
+
+
+def history(exam, rows=None) -> list:
+    """İmtahan səhifəsi üçün fənn dəyişikliyi tarixçəsi (yenidən köhnəyə) — siyahı dict-lər.
+
+    ``rows`` — əvvəlcədən çəkilmiş :func:`audit_rows` (səhifə bir sorğu ilə bütün tarixçə kartlarını alır)."""
+    if not getattr(exam, "pk", None):
+        return []
+    if rows is None:
+        rows = audit_rows(exam, (AUDIT_RESOURCE, AUDIT_RESOURCE_RESYNC))
+    rows = [row for row in rows if row.resource_type in (AUDIT_RESOURCE, AUDIT_RESOURCE_RESYNC)]
     resync = {}
     for row in rows:
         if row.resource_type == AUDIT_RESOURCE_RESYNC and isinstance(row.changes, dict):
@@ -273,6 +284,7 @@ __all__ = [
     "REASON_MIN_LENGTH",
     "Decision",
     "Snapshot",
+    "audit_rows",
     "decide",
     "history",
     "record_decision",

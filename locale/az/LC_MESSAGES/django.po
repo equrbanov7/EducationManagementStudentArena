@@ -109756,3 +109756,77 @@ msgstr "Əməliyyat"
 msgctxt "appeals.teaching"
 msgid "Fayl ilk %(n)s sətirlə məhdudlaşdırılıb — süzgəcləri daraldıb yenidən yükləyin."
 msgstr "Fayl ilk %(n)s sətirlə məhdudlaşdırılıb — süzgəcləri daraldıb yenidən yükləyin."
+
+msgctxt "exams.unit_coverage"
+msgid "Bu qrupun bu fənni yoxdur"
+msgstr "Bu qrupun bu fənni yoxdur"
+
+msgctxt "exams.unit_coverage"
+msgid "Bu qrupda {n} tələbə bu fənnin jurnalında yoxdur"
+msgstr "Bu qrupda {n} tələbə bu fənnin jurnalında yoxdur"
+
+msgctxt "exams.unit_coverage"
+msgid "Seçilmiş qrupların tələbələri bu fənnin jurnalında yoxdur"
+msgstr "Seçilmiş qrupların tələbələri bu fənnin jurnalında yoxdur"
+
+msgctxt "exams.unit_coverage"
+msgid "Fənn: {subject}. Bu tələbələrin imtahan nəticəsi fənnin jurnalına düşməyəcək."
+msgstr "Fənn: {subject}. Bu tələbələrin imtahan nəticəsi fənnin jurnalına düşməyəcək."
+
+msgctxt "exams.unit_coverage"
+msgid "{n} / {total} tələbə fənnin cari semestr jurnalında yoxdur"
+msgstr "{n} / {total} tələbə fənnin cari semestr jurnalında yoxdur"
+
+msgctxt "exams.unit_coverage"
+msgid "Bu qrupun bu fəndən cari semestr jurnalı yoxdur."
+msgstr "Bu qrupun bu fəndən cari semestr jurnalı yoxdur."
+
+msgctxt "exams.unit_coverage"
+msgid "və daha {n} nəfər"
+msgstr "və daha {n} nəfər"
+
+msgctxt "exams.unit_coverage"
+msgid "Qrupu çıxar"
+msgstr "Qrupu çıxar"
+
+msgctxt "exams.unit_coverage"
+msgid "Yenə də əlavə et"
+msgstr "Yenə də əlavə et"
+
+msgctxt "exams.unit_coverage"
+msgid "Məcburi əlavənin səbəbi"
+msgstr "Məcburi əlavənin səbəbi"
+
+msgctxt "exams.unit_coverage"
+msgid "Məsələn: tələbələr bu fəndən akademik borcu verir"
+msgstr "Məsələn: tələbələr bu fəndən akademik borcu verir"
+
+msgctxt "exams.unit_coverage"
+msgid "Ən azı {n} simvol. Səbəb imtahan tarixçəsinə yazılır."
+msgstr "Ən azı {n} simvol. Səbəb imtahan tarixçəsinə yazılır."
+
+msgctxt "exams.unit_coverage"
+msgid "Məcburi əlavə"
+msgstr "Məcburi əlavə"
+
+#, python-format
+msgctxt "exams.unit_coverage"
+msgid "Səbəb ən azı %(min)d simvol olmalıdır."
+msgstr "Səbəb ən azı %(min)d simvol olmalıdır."
+
+msgctxt "exams.unit_coverage"
+msgid "Seçilmiş qrupların bəzi tələbələri bu fənnin cari semestr jurnalında yoxdur. Qrupu çıxarın və ya səbəb yazaraq məcburi əlavə edin."
+msgstr "Seçilmiş qrupların bəzi tələbələri bu fənnin cari semestr jurnalında yoxdur. Qrupu çıxarın və ya səbəb yazaraq məcburi əlavə edin."
+
+msgctxt "exams.unit_coverage"
+msgid "Məcburi əlavə olunmuş qruplar"
+msgstr "Məcburi əlavə olunmuş qruplar"
+
+msgctxt "exams.unit_coverage"
+msgid "Səbəb"
+msgstr "Səbəb"
+
+#, python-format
+msgctxt "exams.unit_coverage"
+msgid "Fənnin jurnalında olmayan tələbə: %(uncovered)s / %(students)s"
+msgstr "Fənnin jurnalında olmayan tələbə: %(uncovered)s / %(students)s"

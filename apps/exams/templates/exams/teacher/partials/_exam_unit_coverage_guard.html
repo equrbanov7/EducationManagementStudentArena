@@ -1,0 +1,34 @@
+{% load i18n %}
+{% comment %}
+  Sehrbazın «Giriş» addımı — qrup imtahanın fənnini keçmir: xəbərdarlıq + məcburi əlavə (sahib 2026-10-27).
+
+  * Qrup seçiləndə (və fənn / kateqoriya dəyişəndə) exam_create_edit_modal/unit_coverage.js
+    `exams:unit_journal_coverage`-i çağırır; qrupun ən azı bir tələbəsi fənnin cari semestr jurnalında yoxdursa
+    sehrbazın içində modal açılır: «Qrupu çıxar» və ya səbəb yazaraq «Yenə də əlavə et».
+  * Məcburi əlavələr gizli `forced_units` sahəsindədir (JSON {qrup_id: səbəb}); server avtoritetdir
+    (services/exam_unit_coverage.py) — səbəbsiz yeni əhatəsiz qrup 400 ilə qayıdır, `data-blocked` modalı yenidən açır.
+  * İmtahanın mövcud qrupları (`data-existing`) yoxlanmır. Mətnlər data-atributlardadır; inline JS/CSS yoxdur
+    (stil exam_wizard.css `.ew-unit-coverage`, `.ew-unit-cov`).
+{% endcomment %}
+<div class="ew-unit-coverage" data-ew-unit-coverage
+     data-url="{% url 'exams:unit_journal_coverage' %}"
+     data-min-length="10"
+     data-existing="{{ unit_coverage_existing_json|default:'[]' }}"
+     data-blocked="{{ unit_coverage_blocked_json|default:'' }}"
+     data-t-title-none="{% trans 'Bu qrupun bu fənni yoxdur' context 'exams.unit_coverage' %}"
+     data-t-title-some="{% trans 'Bu qrupda {n} tələbə bu fənnin jurnalında yoxdur' context 'exams.unit_coverage' %}"
+     data-t-title-many="{% trans 'Seçilmiş qrupların tələbələri bu fənnin jurnalında yoxdur' context 'exams.unit_coverage' %}"
+     data-t-intro="{% trans 'Fənn: {subject}. Bu tələbələrin imtahan nəticəsi fənnin jurnalına düşməyəcək.' context 'exams.unit_coverage' %}"
+     data-t-counts="{% trans '{n} / {total} tələbə fənnin cari semestr jurnalında yoxdur' context 'exams.unit_coverage' %}"
+     data-t-no-journal="{% trans 'Bu qrupun bu fəndən cari semestr jurnalı yoxdur.' context 'exams.unit_coverage' %}"
+     data-t-more="{% trans 'və daha {n} nəfər' context 'exams.unit_coverage' %}"
+     data-t-remove="{% trans 'Qrupu çıxar' context 'exams.unit_coverage' %}"
+     data-t-force="{% trans 'Yenə də əlavə et' context 'exams.unit_coverage' %}"
+     data-t-reason="{% trans 'Məcburi əlavənin səbəbi' context 'exams.unit_coverage' %}"
+     data-t-placeholder="{% trans 'Məsələn: tələbələr bu fəndən akademik borcu verir' context 'exams.unit_coverage' %}"
+     data-t-hint="{% trans 'Ən azı {n} simvol. Səbəb imtahan tarixçəsinə yazılır.' context 'exams.unit_coverage' %}"
+     data-t-forced="{% trans 'Məcburi əlavə' context 'exams.unit_coverage' %}">
+    <input type="hidden" name="forced_units" value="{{ unit_coverage_forced_json|default:'{}' }}" data-ew-unit-forced>
+    <ul class="ew-unit-coverage__forced" data-ew-unit-forced-list hidden></ul>
+    {% if unit_coverage_error %}<div class="field-error" role="alert">{{ unit_coverage_error }}</div>{% endif %}
+</div>

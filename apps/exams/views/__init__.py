@@ -87,6 +87,7 @@ from .teacher.exams import (
     toggle_exam_active,
     toggle_exam_archive,
     toggle_exam_results_visibility,
+    unit_journal_coverage,
     user_search,
 )
 from .teacher.extract_jobs import (
@@ -203,6 +204,7 @@ __all__ = [
     "invigilator_search",
     "bank_teacher_search",
     "journal_teacher_subjects",
+    "unit_journal_coverage",
     "subject_search",
     "user_search",
     # Teacher - Questions

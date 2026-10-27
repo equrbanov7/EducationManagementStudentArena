@@ -1,0 +1,35 @@
+{% load i18n %}
+{% comment %}
+  İmtahan tarixçəsi — fənnin jurnalında olmayan qrupun MƏCBURİ əlavəsi (sahib 2026-10-27). Mənbə: AuditLog
+  (`exam_unit_forced`), bax services/exam_unit_coverage.history. Stil fənn tarixçəsi kartı ilə ortaqdır:
+  exams/css/teacher_exam_detail/subject_history.css (inline CSS yoxdur).
+{% endcomment %}
+<section class="ems-card ted-subject-history ted-unit-forced-history" aria-labelledby="ted-unit-forced-history-title">
+    <h2 class="ted-subject-history__title" id="ted-unit-forced-history-title">
+        <i class="fas fa-user-shield" aria-hidden="true"></i>
+        {% trans "Məcburi əlavə olunmuş qruplar" context "exams.unit_coverage" %}
+    </h2>
+    <ol class="ted-subject-history__list">
+        {% for row in unit_forced_history %}
+        <li class="ted-subject-history__item">
+            <div class="ted-subject-history__meta">
+                <time datetime="{{ row.at|date:'c' }}">{{ row.at|date:"d.m.Y H:i" }}</time>
+                <span class="ted-subject-history__user"><i class="fas fa-user" aria-hidden="true"></i> {{ row.user }}</span>
+            </div>
+            <p class="ted-subject-history__move">
+                <span class="ted-subject-history__subject">{{ row.unit }}</span>
+                <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                <span class="ted-subject-history__subject ted-subject-history__subject--new">{{ row.subject }}</span>
+            </p>
+            <p class="ted-subject-history__reason">
+                <strong>{% trans "Səbəb" context "exams.unit_coverage" %}:</strong> {{ row.reason }}
+            </p>
+            <p class="ted-subject-history__counts">
+                {% blocktrans trimmed with uncovered=row.uncovered students=row.students context "exams.unit_coverage" %}
+                    Fənnin jurnalında olmayan tələbə: {{ uncovered }} / {{ students }}
+                {% endblocktrans %}
+            </p>
+        </li>
+        {% endfor %}
+    </ol>
+</section>

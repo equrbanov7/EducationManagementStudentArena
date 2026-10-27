@@ -110246,3 +110246,77 @@ msgstr "Action"
 msgctxt "appeals.teaching"
 msgid "Fayl ilk %(n)s sətirlə məhdudlaşdırılıb — süzgəcləri daraldıb yenidən yükləyin."
 msgstr "The file is limited to the first %(n)s rows — narrow the filters and download again."
+
+msgctxt "exams.unit_coverage"
+msgid "Bu qrupun bu fənni yoxdur"
+msgstr "This group does not take this subject"
+
+msgctxt "exams.unit_coverage"
+msgid "Bu qrupda {n} tələbə bu fənnin jurnalında yoxdur"
+msgstr "{n} student(s) of this group are not in this subject's journal"
+
+msgctxt "exams.unit_coverage"
+msgid "Seçilmiş qrupların tələbələri bu fənnin jurnalında yoxdur"
+msgstr "Students of the selected groups are not in this subject's journal"
+
+msgctxt "exams.unit_coverage"
+msgid "Fənn: {subject}. Bu tələbələrin imtahan nəticəsi fənnin jurnalına düşməyəcək."
+msgstr "Subject: {subject}. These students' exam results will not reach the subject journal."
+
+msgctxt "exams.unit_coverage"
+msgid "{n} / {total} tələbə fənnin cari semestr jurnalında yoxdur"
+msgstr "{n} / {total} students are not in the subject's current-semester journal"
+
+msgctxt "exams.unit_coverage"
+msgid "Bu qrupun bu fəndən cari semestr jurnalı yoxdur."
+msgstr "This group has no current-semester journal for this subject."
+
+msgctxt "exams.unit_coverage"
+msgid "və daha {n} nəfər"
+msgstr "and {n} more"
+
+msgctxt "exams.unit_coverage"
+msgid "Qrupu çıxar"
+msgstr "Remove the group"
+
+msgctxt "exams.unit_coverage"
+msgid "Yenə də əlavə et"
+msgstr "Add anyway"
+
+msgctxt "exams.unit_coverage"
+msgid "Məcburi əlavənin səbəbi"
+msgstr "Reason for adding anyway"
+
+msgctxt "exams.unit_coverage"
+msgid "Məsələn: tələbələr bu fəndən akademik borcu verir"
+msgstr "E.g. the students are retaking this subject as an academic debt"
+
+msgctxt "exams.unit_coverage"
+msgid "Ən azı {n} simvol. Səbəb imtahan tarixçəsinə yazılır."
+msgstr "At least {n} characters. The reason is saved to the exam history."
+
+msgctxt "exams.unit_coverage"
+msgid "Məcburi əlavə"
+msgstr "Added anyway"
+
+#, python-format
+msgctxt "exams.unit_coverage"
+msgid "Səbəb ən azı %(min)d simvol olmalıdır."
+msgstr "The reason must be at least %(min)d characters."
+
+msgctxt "exams.unit_coverage"
+msgid "Seçilmiş qrupların bəzi tələbələri bu fənnin cari semestr jurnalında yoxdur. Qrupu çıxarın və ya səbəb yazaraq məcburi əlavə edin."
+msgstr "Some students of the selected groups are not in this subject's current-semester journal. Remove the group or add it anyway with a reason."
+
+msgctxt "exams.unit_coverage"
+msgid "Məcburi əlavə olunmuş qruplar"
+msgstr "Groups added anyway"
+
+msgctxt "exams.unit_coverage"
+msgid "Səbəb"
+msgstr "Reason"
+
+#, python-format
+msgctxt "exams.unit_coverage"
+msgid "Fənnin jurnalında olmayan tələbə: %(uncovered)s / %(students)s"
+msgstr "Students not in the subject journal: %(uncovered)s / %(students)s"

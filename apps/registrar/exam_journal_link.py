@@ -5,13 +5,15 @@ halı («JS Loop»): imtahan əvvəl YANLIŞ fənnə bağlanmış, tələbələr
 «Mobil proqramlaşdırma»ya dəyişdirilmişdi — cəhdlər bitəndə körpü yanlış fənn üzrə qeydiyyat tapmadı
 (``no_enrollment``), fənn dəyişəndə isə heç nə yenidən sinxronlaşmadı → jurnalda «Midterm» 0 qaldı.
 
-Bu modul exams tərəfinə (``apps.registrar.public`` fasadı ilə) üç şey verir:
+Bu modul exams tərəfinə (``apps.registrar.public`` fasadı ilə) bunları verir:
 
 * **Müəllimin fənləri** — :func:`teacher_offerings` / :func:`teacher_subject_ids`: cari dövrdə müəllimin
   TƏDRİS ETDİYİ açılışlar (jurnal sahibi ``CourseOffering.instructor`` və ya həmin jurnalda dərs aparmış
   ``Lesson.instructor``), istəyə görə imtahanın qruplarına (alt / ana qrup daxil) görə süzülmüş.
 * **Bağlantı** — :func:`link_offering_ids`: imtahanın fənni + qrupları (+ müəllim) → hər qrupun ÖZ
   açılışı (açılış ``(fənn, dövr, qrup)`` üzrə unikaldır, yəni qrup başına ən çox bir jurnal).
+* **Qrupun jurnal əhatəsi** — :func:`group_subject_coverage`: seçilən reyestr qrupunun neçə tələbəsi fənnin
+  cari dövr jurnalında YOXDUR (sehrbaz xəbərdarlığı + məcburi əlavə səbəbi, sahib 2026-10-27).
 * **Köhnə bağlantının təmizlənməsi** — :func:`clear_stale_midterm_scores`: bu imtahanın
   (``exam_source.exam_id``) yazdığı, amma artıq imtahanın fənninə / bağlı jurnalına aid olmayan
   avtomatik xanalar silinir (yalnız BU imtahanın yazdıqları; əl ilə yazılmış xanaya toxunulmur).
@@ -31,7 +33,15 @@ from django.db.models import Q
 from apps.registrar import exam_bridge, grade_audit, midterm_bridge, subgroup_rollup
 from apps.registrar.audit_write import AuditWriteFailed
 from apps.registrar.gradebook import journal_is_locked
-from apps.registrar.models import ComponentScore, ComponentScoreCorrection, CourseOffering, Enrollment, Subject
+from apps.registrar.models import (
+    AcademicStatus,
+    ComponentScore,
+    ComponentScoreCorrection,
+    CourseOffering,
+    Enrollment,
+    StudentAcademicRecord,
+    Subject,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -155,6 +165,68 @@ def enrollment_coverage(organization, subject_id, student_ids, period=None) -> d
     }
 
 
+def organization_subject(organization, subject_id):
+    """Təşkilatın fənni (``Subject``) və ya ``None`` — exams JSON endpoint-ləri tenant yoxlaması üçün."""
+    if organization is None or not subject_id:
+        return None
+    return Subject.objects.filter(organization=organization, pk=subject_id).first()
+
+
+def group_subject_coverage(organization, subject_id, group_ids, *, period=None) -> dict:
+    """Reyestr qrupları → fənnin CARİ dövr jurnalında OLMAYAN tələbələr (sahib 2026-10-27, «236 QM» halı).
+
+    → ``{qrup_pk: {"students": [id], "uncovered": [id], "has_journal": bool}}`` (qrup sayından asılı olmayaraq
+    ≤ 6 sorğu). Qrupun tələbələri — aktiv ``enrolled`` akademik qeydi qrupun özündə və ya ALT qruplarında
+    olanlar (giriş siyasəti ``unit_assigned_student_ids`` ilə eyni); ``uncovered`` — :func:`enrollment_coverage`
+    ``none`` (fənnin cari dövr jurnalında ``enrolled`` qeydiyyatı yoxdur); ``has_journal`` — fənnin cari dövrdə
+    qrupun (alt / ana qrup daxil, :func:`link_offering_ids` kimi) aktiv açılışı var."""
+    group_ids = {str(value) for value in group_ids or () if value}
+    if organization is None or not subject_id or not group_ids:
+        return {}
+    OrgUnit = django_apps.get_model("organizations", "OrgUnit")
+    units = list(
+        OrgUnit.objects.filter(organization=organization, pk__in=group_ids, unit_type="group").only(
+            "id", "name", "parent_id", "settings"
+        )
+    )
+    if not units:
+        return {}
+    family = subgroup_rollup.group_family(organization, units)
+    own, linked = {}, {}
+    for unit in units:
+        subs, parents = family.get(unit.pk, ((), ()))
+        own[unit.pk] = {unit.pk} | {sub.pk for sub in subs}
+        linked[unit.pk] = own[unit.pk] | {parent.pk for parent in parents}
+    by_group: dict = {}
+    for student_id, group_id in StudentAcademicRecord.objects.filter(
+        organization=organization,
+        group_id__in=set().union(*own.values()),
+        is_active=True,
+        status=AcademicStatus.ENROLLED,
+    ).values_list("student_id", "group_id"):
+        by_group.setdefault(group_id, set()).add(student_id)
+    students = {unit.pk: set().union(*(by_group.get(gid, set()) for gid in own[unit.pk])) for unit in units}
+    period = period or current_period(organization)
+    uncovered = set(
+        enrollment_coverage(organization, subject_id, set().union(*students.values()), period=period)["none"]
+    )
+    journal_groups = set()
+    if period is not None:
+        journal_groups = set(
+            _period_offerings(organization, period)
+            .filter(subject_id=subject_id, group_id__in=set().union(*linked.values()))
+            .values_list("group_id", flat=True)
+        )
+    return {
+        unit.pk: {
+            "students": sorted(students[unit.pk]),
+            "uncovered": sorted(students[unit.pk] & uncovered),
+            "has_journal": bool(linked[unit.pk] & journal_groups),
+        }
+        for unit in units
+    }
+
+
 def subject_journal_hints(organization, subject_ids, *, teacher=None, period=None) -> dict:
     """Fənn seçicisinin ayırd edici işarəsi → ``{subject_id: {"teacher_groups": [ad], "count": n}}`` (≤ 3 sorğu).
 
@@ -265,7 +337,9 @@ __all__ = [
     "current_period",
     "enrollment_coverage",
     "expand_group_ids",
+    "group_subject_coverage",
     "link_offering_ids",
+    "organization_subject",
     "stale_midterm_rows",
     "subject_journal_hints",
     "teacher_offerings",
