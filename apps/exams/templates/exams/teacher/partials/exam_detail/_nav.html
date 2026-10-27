@@ -14,6 +14,11 @@ naviqasiya parametrlərini (from_section/return_to) daşıyır ki, «Geri» düz
         <span class="ted-nav__icon ted-nav__icon--success"><i class="fas fa-database" aria-hidden="true"></i></span>
         <span class="ted-nav__text"><span class="ted-nav__title">{% trans "action_questions_bank" context "exams.template.teacher_exam_detail" %}</span><span class="ted-nav__desc">{% trans "desc_questions_bank" context "exams.template.teacher_exam_detail" %}</span></span>
     </a>
+    {% comment %}Sahib 2026-10-27: imtahanı verə bilənlər (qrup + fərdi − istisna) — siyahı, süzgəc, qrup/tələbə əlavə et.{% endcomment %}
+    <a class="ted-nav__link" href="{% url 'exams:teacher_exam_assignees' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}">
+        <span class="ted-nav__icon ted-nav__icon--primary"><i class="fas fa-user-check" aria-hidden="true"></i></span>
+        <span class="ted-nav__text"><span class="ted-nav__title">{% trans "Tapşırıq təyin olunmuşlar" context "exams.assignees" %} <span class="ems-badge ems-badge--neutral etp-num">{{ assignee_count }}</span></span><span class="ted-nav__desc">{% trans "Qruplar, tələbələr, PIN və cəhd statusu" context "exams.assignees" %}</span></span>
+    </a>
     {% comment %}Canlı nəticələr — yalnız canlı sessiya ilə keçirilən testlər; final/midterm İmtahan Mərkəzindədir.{% endcomment %}
     {% if exam.exam_type == "test" and exam.exam_type_extended != "final" and exam.exam_type_extended != "midterm" %}
     <a class="ted-nav__link" href="{% url 'liveExam:teacher_live_results' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}">

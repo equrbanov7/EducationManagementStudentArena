@@ -1,0 +1,60 @@
+{% load i18n %}
+{# Süzgəclər — dəyişəndə dərhal tətbiq olunur (results_filter_ui.js); axtarış hərf-dözümlüdür (ə/e, ı/i, …). #}
+<section class="ems-card eas-filters" aria-label="{% trans 'Filtrlər' context 'exams.assignees' %}">
+    <form method="get" class="etp-toolbar js-results-filters-form" role="search" novalidate>
+        {% if request.GET.from_section %}<input type="hidden" name="from_section" value="{{ request.GET.from_section }}">{% endif %}
+        {% if request.GET.return_to %}<input type="hidden" name="return_to" value="{{ request.GET.return_to }}">{% endif %}
+        <div class="etp-toolbar__field etp-toolbar__field--grow">
+            <label class="etp-label" for="easSearchInput">{% trans "Axtarış" context "exams.assignees" %}</label>
+            <div class="etp-search">
+                <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                <input type="search" id="easSearchInput" name="q" value="{{ filters.q }}"
+                       class="ems-input js-filter-resettable js-auto-filter-search" autocomplete="off"
+                       placeholder="{% trans 'Ad, ata adı, istifadəçi adı və ya tələbə kodu' context 'exams.assignees' %}">
+            </div>
+        </div>
+        <div class="etp-toolbar__field">
+            <label class="etp-label" for="easGroupSelect">{% trans "Qrup" context "exams.assignees" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select name="group" id="easGroupSelect" class="ems-select bootstrap-single-select__native js-auto-filter js-filter-resettable"
+                        data-bootstrap-select data-live-search="true" data-reset-value=""
+                        data-live-search-placeholder="{% trans 'Qrup axtar…' context 'exams.assignees' %}"
+                        data-live-search-empty="{% trans 'Uyğun qrup yoxdur' context 'exams.assignees' %}">
+                    <option value="">{% trans "Bütün qruplar" context "exams.assignees" %}</option>
+                    {% for name, count in group_summary %}{% if name %}
+                    <option value="{{ name }}"{% if filters.group == name %} selected{% endif %}>{{ name }} ({{ count }})</option>
+                    {% endif %}{% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="etp-toolbar__field">
+            <label class="etp-label" for="easSourceSelect">{% trans "Mənbə" context "exams.assignees" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select name="source" id="easSourceSelect" class="ems-select bootstrap-single-select__native js-auto-filter js-filter-resettable" data-bootstrap-select data-reset-value="">
+                    {% for value, label in source_choices %}<option value="{{ value }}"{% if filters.source == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="etp-toolbar__field">
+            <label class="etp-label" for="easStatusSelect">{% trans "Cəhd statusu" context "exams.assignees" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select name="status" id="easStatusSelect" class="ems-select bootstrap-single-select__native js-auto-filter js-filter-resettable" data-bootstrap-select data-reset-value="">
+                    {% for value, label in status_choices %}<option value="{{ value }}"{% if filters.status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="etp-toolbar__field">
+            <label class="etp-label" for="easOrderSelect">{% trans "Sıralama" context "exams.assignees" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select name="order" id="easOrderSelect" class="ems-select bootstrap-single-select__native js-auto-filter js-filter-resettable" data-bootstrap-select data-reset-value="">
+                    {% for value, label in order_choices %}<option value="{{ value }}"{% if current_order == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="etp-toolbar__actions">
+            <button type="button" class="ems-btn ems-btn--ghost js-clear-results-filters">
+                <i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Filtrləri sıfırla" context "exams.assignees" %}
+            </button>
+        </div>
+    </form>
+</section>

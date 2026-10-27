@@ -454,8 +454,16 @@ def teacher_exam_detail(request, slug):
             "subject_change_history": _exam_subject_change.history(exam, rows=history_rows),
             # 2026-10-27: fənnin jurnalında olmayan qrupun məcburi əlavəsi (kim, nə vaxt, qrup, səbəb).
             "unit_forced_history": _exam_unit_coverage.history(exam, rows=history_rows),
+            # Sahib 2026-10-27: «Tapşırıq təyin olunmuşlar» kartı — imtahanı verə bilənlərin sayı (PIN çoxluğu ilə eyni).
+            "assignee_count": _assignee_count(exam),
         },
     )
+
+
+def _assignee_count(exam) -> int:
+    from apps.exams.services.exam_assignees import assignee_count
+
+    return assignee_count(exam)
 
 
 @login_required

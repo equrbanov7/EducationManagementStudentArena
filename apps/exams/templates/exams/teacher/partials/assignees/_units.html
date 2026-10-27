@@ -1,0 +1,41 @@
+{% load i18n %}
+{% comment %}Təyin olunmuş reyestr qrupları (çıxar düyməsi — yalnız redaktə əhatəsində olanlara) + tələbələrin cari
+qrupları üzrə say çipləri (kliklə süzgəc).{% endcomment %}
+<section class="ems-card eas-units" aria-labelledby="easUnitsTitle">
+    <h2 class="eas-card__title" id="easUnitsTitle"><i class="fas fa-layer-group" aria-hidden="true"></i> {% trans "Təyin olunmuş qruplar" context "exams.assignees" %}</h2>
+    {% if assigned_units %}
+    <ul class="eas-unitlist">
+        {% for unit in assigned_units %}
+        <li class="eas-unit">
+            <span class="eas-unit__label">{{ unit.label }}</span>
+            {% if unit.removable %}
+            <button type="button" class="eas-unit__remove js-eas-remove-unit" data-unit="{{ unit.id }}" data-label="{{ unit.label }}"
+                    aria-label="{% blocktrans trimmed with name=unit.label context 'exams.assignees' %}«{{ name }}» qrupunu çıxar{% endblocktrans %}">
+                <i class="fas fa-xmark" aria-hidden="true"></i>
+            </button>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="etp-hint">{% trans "Reyestr qrupu təyin olunmayıb." context "exams.assignees" %}</p>
+    {% endif %}
+
+    {% if group_summary %}
+    <h3 class="eas-card__subtitle">{% trans "Tələbələrin qrupları" context "exams.assignees" %}</h3>
+    <div class="eas-chips" role="list">
+        <a role="listitem" class="ems-chip" href="?{{ chip_base_query }}" aria-pressed="{% if not filters.group %}true{% else %}false{% endif %}">
+            {% trans "Hamısı" context "exams.assignees" %} <span class="etp-num">{{ stats.eligible }}</span>
+        </a>
+        {% for name, count in group_summary %}
+        {% if name %}
+        <a role="listitem" class="ems-chip" href="?{% if chip_base_query %}{{ chip_base_query }}&amp;{% endif %}group={{ name|urlencode }}" aria-pressed="{% if filters.group == name %}true{% else %}false{% endif %}">
+            {{ name }} <span class="etp-num">{{ count }}</span>
+        </a>
+        {% else %}
+        <span role="listitem" class="ems-chip eas-chip--muted">{% trans "Qrupsuz" context "exams.assignees" %} <span class="etp-num">{{ count }}</span></span>
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>

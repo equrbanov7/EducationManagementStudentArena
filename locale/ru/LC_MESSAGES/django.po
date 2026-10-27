@@ -110687,3 +110687,355 @@ msgstr "напр. 2023"
 msgctxt "accounts.archive_restore"
 msgid "Köçürmədə qəbul ili tapılmayıb (1950 yer-tutucusu). Bilirsinizsə yazın — boş qalsa dəyişmir."
 msgstr "Год поступления не найден при переносе (заполнитель 1950). Укажите его, если знаете, — пустое поле ничего не меняет."
+
+#, python-format
+msgctxt "exams.assignees"
+msgid "%(n)s cəhd"
+msgstr "Попыток: %(n)s"
+
+#, python-format
+msgctxt "exams.assignees"
+msgid "%(n)s davam edir"
+msgstr "в процессе: %(n)s"
+
+msgctxt "exams.assignees"
+msgid "Ad (A → Z)"
+msgstr "Имя (А → Я)"
+
+msgctxt "exams.assignees"
+msgid "Ad (Z → A)"
+msgstr "Имя (Я → А)"
+
+msgctxt "exams.assignees"
+msgid "Ad Soyad (ata adı)"
+msgstr "ФИО (отчество)"
+
+msgctxt "exams.assignees"
+msgid "Ad, ata adı, istifadəçi adı və ya tələbə kodu"
+msgstr "Имя, отчество, логин или код студента"
+
+msgctxt "exams.assignees"
+msgid "Ad, soyad və ya istifadəçi adı…"
+msgstr "Имя, фамилия или логин…"
+
+msgctxt "exams.assignees"
+msgid "Axtarış"
+msgstr "Поиск"
+
+msgctxt "exams.assignees"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "exams.assignees"
+msgid "Başlamayıb"
+msgstr "Не начинал"
+
+#, python-format
+msgctxt "exams.assignees"
+msgid "Bir dəfəyə ən çox %(max)d tələbə əlavə etmək olar."
+msgstr "За один раз можно добавить не более %(max)d студентов."
+
+msgctxt "exams.assignees"
+msgid "Bitib"
+msgstr "Завершено"
+
+msgctxt "exams.assignees"
+msgid "Bitirib"
+msgstr "Завершили"
+
+msgctxt "exams.assignees"
+msgid "Bu imtahana hələ heç kim təyin olunmayıb"
+msgstr "На этот экзамен пока никто не назначен"
+
+msgctxt "exams.assignees"
+msgid "Bu tələbə imtahana fərdi təyin olunmayıb."
+msgstr "Этот студент не назначен на экзамен индивидуально."
+
+msgctxt "exams.assignees"
+msgid "Bu tələbə istisna siyahısında deyil."
+msgstr "Этого студента нет в списке исключённых."
+
+msgctxt "exams.assignees"
+msgid "Bu tələbənin fərdi icazəsi çıxarılsın? Qrupla təyin olunubsa imtahanı yenə görəcək."
+msgstr "Убрать индивидуальный доступ студента? Если он назначен через группу, экзамен останется доступен."
+
+msgctxt "exams.assignees"
+msgid "Bütün mənbələr"
+msgstr "Все источники"
+
+msgctxt "exams.assignees"
+msgid "Bütün qruplar"
+msgstr "Все группы"
+
+msgctxt "exams.assignees"
+msgid "Bütün statuslar"
+msgstr "Все статусы"
+
+msgctxt "exams.assignees"
+msgid "Bərpa et"
+msgstr "Восстановить"
+
+msgctxt "exams.assignees"
+msgid "Cəhd statusu"
+msgstr "Статус попытки"
+
+msgctxt "exams.assignees"
+msgid "Davam edir"
+msgstr "В процессе"
+
+msgctxt "exams.assignees"
+msgid "Dəyişiklik imtahan redaktəsi ilə eyni yoxlamalardan keçir: fənnin jurnalında olmayan qrup üçün səbəb, final/midterm üçün PIN avtomatik verilir."
+msgstr "Изменения проходят те же проверки, что и редактирование экзамена: для группы вне журнала предмета нужна причина, PIN для финала/мидтерма выдаётся автоматически."
+
+msgctxt "exams.assignees"
+msgid "Filtrlər"
+msgstr "Фильтры"
+
+msgctxt "exams.assignees"
+msgid "Filtrləri sıfırla"
+msgstr "Сбросить фильтры"
+
+msgctxt "exams.assignees"
+msgid "Fərdi"
+msgstr "Индивидуально"
+
+msgctxt "exams.assignees"
+msgid "Fərdi icazə çıxarıldı."
+msgstr "Индивидуальный доступ удалён."
+
+msgctxt "exams.assignees"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "exams.assignees"
+msgid "Kursla"
+msgstr "Через курс"
+
+msgctxt "exams.assignees"
+msgid "Ləğv et"
+msgstr "Отмена"
+
+msgctxt "exams.assignees"
+msgid "Mənbə"
+msgstr "Источник"
+
+msgctxt "exams.assignees"
+msgid "Naməlum əməliyyat."
+msgstr "Неизвестное действие."
+
+msgctxt "exams.assignees"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "exams.assignees"
+msgid "Qrup axtar…"
+msgstr "Найти группу…"
+
+msgctxt "exams.assignees"
+msgid "Qrup imtahana əlavə olundu."
+msgstr "Группа добавлена на экзамен."
+
+msgctxt "exams.assignees"
+msgid "Qrup imtahandan çıxarıldı."
+msgstr "Группа удалена с экзамена."
+
+msgctxt "exams.assignees"
+msgid "Qrup imtahandan çıxarılsın? Qrupun tələbələri (fərdi icazəsi olmayanlar) imtahanı görməyəcək."
+msgstr "Убрать группу с экзамена? Её студенты (без индивидуального доступа) не будут видеть экзамен."
+
+msgctxt "exams.assignees"
+msgid "Qrup tapılmadı və ya onu çıxarmaq icazəniz yoxdur."
+msgstr "Группа не найдена или у вас нет права её убрать."
+
+msgctxt "exams.assignees"
+msgid "Qrup əlavə et"
+msgstr "Добавить группу"
+
+msgctxt "exams.assignees"
+msgid "Qrupla"
+msgstr "Через группу"
+
+msgctxt "exams.assignees"
+msgid "Qrupla / fərdi"
+msgstr "Группа / индивидуально"
+
+msgctxt "exams.assignees"
+msgid "Qruplar, tələbələr, PIN və cəhd statusu"
+msgstr "Группы, студенты, PIN и статус попыток"
+
+msgctxt "exams.assignees"
+msgid "Qrupsuz"
+msgstr "Без группы"
+
+msgctxt "exams.assignees"
+msgid "Qrupu əlavə et"
+msgstr "Добавить группу"
+
+msgctxt "exams.assignees"
+msgid "Reyestr qrupu təyin olunmayıb."
+msgstr "Группа из реестра не назначена."
+
+msgctxt "exams.assignees"
+msgid "Seçilmiş qruplar artıq bu imtahana təyin olunub."
+msgstr "Выбранные группы уже назначены на этот экзамен."
+
+msgctxt "exams.assignees"
+msgid "Süzgəcə uyğun tələbə yoxdur"
+msgstr "Нет студентов по фильтру"
+
+msgctxt "exams.assignees"
+msgid "Sıralama"
+msgstr "Сортировка"
+
+msgctxt "exams.assignees"
+msgid "Səbəb (ən azı 10 simvol)"
+msgstr "Причина (не менее 10 символов)"
+
+msgctxt "exams.assignees"
+msgid "Səbəblə davam et"
+msgstr "Продолжить с причиной"
+
+msgctxt "exams.assignees"
+msgid "Tapşırıq təyin olunmuşlar"
+msgstr "Назначенные студенты"
+
+msgctxt "exams.assignees"
+msgid "Tələbə axtar"
+msgstr "Найти студента"
+
+msgctxt "exams.assignees"
+msgid "Tələbə bu imtahandan istisna edilsin? İmtahanı görməyəcək və başlaya bilməyəcək."
+msgstr "Исключить студента из экзамена? Он не увидит и не сможет начать экзамен."
+
+msgctxt "exams.assignees"
+msgid "Tələbə imtahana əlavə olundu."
+msgstr "Студент добавлен на экзамен."
+
+msgctxt "exams.assignees"
+msgid "Tələbə imtahandan istisna edildi."
+msgstr "Студент исключён из экзамена."
+
+msgctxt "exams.assignees"
+msgid "Tələbə kodu"
+msgstr "Код студента"
+
+msgctxt "exams.assignees"
+msgid "Tələbə tapılmadı."
+msgstr "Студент не найден."
+
+msgctxt "exams.assignees"
+msgid "Tələbə yenidən imtahana daxil edildi."
+msgstr "Студент снова допущен к экзамену."
+
+msgctxt "exams.assignees"
+msgid "Tələbə yenidən imtahana daxil edilsin?"
+msgstr "Снова допустить студента к экзамену?"
+
+msgctxt "exams.assignees"
+msgid "Tələbə əlavə et"
+msgstr "Добавить студента"
+
+msgctxt "exams.assignees"
+msgid "Tələbələr"
+msgstr "Студенты"
+
+msgctxt "exams.assignees"
+msgid "Tələbələrin qrupları"
+msgstr "Группы студентов"
+
+msgctxt "exams.assignees"
+msgid "Tələbəni əlavə et"
+msgstr "Добавить студента"
+
+msgctxt "exams.assignees"
+msgid "Təsdiq edirəm"
+msgstr "Подтверждаю"
+
+msgctxt "exams.assignees"
+msgid "Təsdiq və səbəb tələb olunur"
+msgstr "Требуются подтверждение и причина"
+
+msgctxt "exams.assignees"
+msgid "Təyin olunmuş qruplar"
+msgstr "Назначенные группы"
+
+msgctxt "exams.assignees"
+msgid "Təyinat əlavə et"
+msgstr "Добавить назначение"
+
+msgctxt "exams.assignees"
+msgid "Uyğun qrup yoxdur"
+msgstr "Нет подходящей группы"
+
+msgctxt "exams.assignees"
+msgid "Var"
+msgstr "Есть"
+
+msgctxt "exams.assignees"
+msgid "Xülasə"
+msgstr "Сводка"
+
+msgctxt "exams.assignees"
+msgid "Yalnız baxış: təyinatı dəyişmək üçün imtahanı redaktə etmək icazəniz yoxdur."
+msgstr "Только просмотр: у вас нет права редактировать назначение экзамена."
+
+msgctxt "exams.assignees"
+msgid "Yalnız qrupla təyin olunmuş tələbəni istisna etmək olar."
+msgstr "Исключить можно только студента, назначенного через группу."
+
+msgctxt "exams.assignees"
+msgid "Yoxdur"
+msgstr "Нет"
+
+msgctxt "exams.assignees"
+msgid "Yuxarıdan qrup və ya tələbə əlavə edin (və ya imtahanı redaktə edin)."
+msgstr "Добавьте группу или студента выше (или отредактируйте экзамен)."
+
+msgctxt "exams.assignees"
+msgid "və daha {n} nəfər"
+msgstr "и ещё {n}"
+
+msgctxt "exams.assignees"
+msgid "{n} / {total} tələbə fənnin cari semestr jurnalında yoxdur"
+msgstr "{n} / {total} студентов нет в журнале предмета текущего семестра"
+
+#, python-format
+msgctxt "exams.assignees"
+msgid "«%(name)s» qrupunu çıxar"
+msgstr "Убрать группу «%(name)s»"
+
+msgctxt "exams.assignees"
+msgid "Çıxar"
+msgstr "Убрать"
+
+msgctxt "exams.assignees"
+msgid "İmtahan hamı üçün açıqdır — təşkilatın istənilən tələbəsi (istisna edilənlərdən başqa) onu görə bilər. Aşağıda yalnız ayrıca təyin olunanlar göstərilir."
+msgstr "Экзамен открыт для всех — его видит любой студент организации (кроме исключённых). Ниже показаны только явно назначенные."
+
+msgctxt "exams.assignees"
+msgid "İmtahanı verə bilər"
+msgstr "Могут сдавать"
+
+msgctxt "exams.assignees"
+msgid "İstisna edilib"
+msgstr "Исключён"
+
+msgctxt "exams.assignees"
+msgid "İstisna et"
+msgstr "Исключить"
+
+msgctxt "exams.assignees"
+msgid "Əməliyyat"
+msgstr "Действие"
+
+msgctxt "exams.assignees"
+msgid "Əməliyyat alınmadı. Yenidən cəhd edin."
+msgstr "Не удалось выполнить действие. Попробуйте ещё раз."
+
+msgctxt "exams.assignees"
+msgid "Ən azı bir qrup seçin."
+msgstr "Выберите хотя бы одну группу."
+
+msgctxt "exams.assignees"
+msgid "Ən azı bir tələbə seçin."
+msgstr "Выберите хотя бы одного студента."

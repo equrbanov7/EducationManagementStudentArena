@@ -1,0 +1,90 @@
+{% load i18n %}
+<section class="ems-tablewrap eas-results" aria-labelledby="easResultsTitle">
+    <div class="eas-results__head">
+        <h2 class="eas-card__title" id="easResultsTitle">{% trans "Tələbələr" context "exams.assignees" %}</h2>
+        <span class="ems-badge ems-badge--neutral etp-num">{{ filtered_count }}</span>
+    </div>
+    <div data-results-skeleton-target>
+    {% if rows %}
+        {% trans "Ad Soyad (ata adı)" context "exams.assignees" as l_name %}
+        {% trans "Qrup" context "exams.assignees" as l_group %}
+        {% trans "Tələbə kodu" context "exams.assignees" as l_code %}
+        {% trans "Cəhd statusu" context "exams.assignees" as l_status %}
+        {% trans "Mənbə" context "exams.assignees" as l_source %}
+        <div class="etp-tablescroll">
+            <table class="ems-table ems-table--stack eas-table">
+                <thead>
+                    <tr>
+                        <th scope="col">№</th>
+                        {% include "exams/teacher/partials/results/_sort_th.html" with sort_key="name" sort_label=l_name sort_title="" %}
+                        {% include "exams/teacher/partials/results/_sort_th.html" with sort_key="group" sort_label=l_group sort_title="" %}
+                        {% include "exams/teacher/partials/results/_sort_th.html" with sort_key="code" sort_label=l_code sort_title="" %}
+                        <th scope="col">{{ l_source }}</th>
+                        {% if requires_pins %}<th scope="col">PIN</th>{% endif %}
+                        {% include "exams/teacher/partials/results/_sort_th.html" with sort_key="status" sort_label=l_status sort_title="" %}
+                        {% if can_edit %}<th scope="col" class="eas-col-actions"><span class="visually-hidden">{% trans "Əməliyyat" context "exams.assignees" %}</span></th>{% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr class="{% if row.is_excluded %}eas-row--excluded{% endif %}">
+                        <td class="etp-num" data-label="№">{{ forloop.counter|add:row_offset }}</td>
+                        <td data-label="{{ l_name }}">
+                            <span class="eas-name">{{ row.name }}</span>
+                            <span class="eas-username ems-mono">@{{ row.user.username }}</span>
+                        </td>
+                        <td data-label="{{ l_group }}">{{ row.group_name|default:"—" }}</td>
+                        <td data-label="{{ l_code }}"><span class="ems-mono">{{ row.code|default:"—" }}</span></td>
+                        <td data-label="{{ l_source }}">
+                            {% if row.is_group %}<span class="ems-badge ems-badge--info">{% trans "Qrupla" context "exams.assignees" %}</span>{% endif %}
+                            {% if row.is_individual %}<span class="ems-badge ems-badge--primary">{% trans "Fərdi" context "exams.assignees" %}</span>{% endif %}
+                            {% if row.is_course %}<span class="ems-badge ems-badge--neutral">{% trans "Kursla" context "exams.assignees" %}</span>{% endif %}
+                        </td>
+                        {% if requires_pins %}
+                        <td data-label="PIN">
+                            {% if row.is_excluded %}—{% elif row.has_pin %}<span class="ems-badge ems-badge--success">{% trans "Var" context "exams.assignees" %}</span>{% else %}<span class="ems-badge ems-badge--warning">{% trans "Yoxdur" context "exams.assignees" %}</span>{% endif %}
+                        </td>
+                        {% endif %}
+                        <td data-label="{{ l_status }}">
+                            {% if row.is_excluded %}
+                                <span class="ems-badge ems-badge--danger">{% trans "İstisna edilib" context "exams.assignees" %}</span>
+                            {% elif row.status == "in_progress" %}
+                                <span class="ems-badge ems-badge--warning">{% trans "Davam edir" context "exams.assignees" %}</span>
+                            {% elif row.status == "finished" %}
+                                <span class="ems-badge ems-badge--success">{% trans "Bitib" context "exams.assignees" %}</span>
+                                {% if row.score_text %}<span class="eas-score etp-num">{{ row.score_text }}</span>{% endif %}
+                            {% else %}
+                                <span class="ems-badge ems-badge--muted">{% trans "Başlamayıb" context "exams.assignees" %}</span>
+                            {% endif %}
+                            {% if row.attempts_count > 1 %}<span class="etp-hint eas-attempts">{% blocktrans trimmed with n=row.attempts_count context "exams.assignees" %}{{ n }} cəhd{% endblocktrans %}</span>{% endif %}
+                        </td>
+                        {% if can_edit %}
+                        <td class="eas-col-actions" data-label="">
+                            {% if row.is_excluded %}
+                                <button type="button" class="ems-btn ems-btn--ghost js-eas-user-action" data-action="include_user" data-user="{{ row.user_id }}" data-name="{{ row.name }}"><i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Bərpa et" context "exams.assignees" %}</button>
+                            {% else %}
+                                {% if row.is_individual %}
+                                <button type="button" class="ems-btn ems-btn--ghost js-eas-user-action" data-action="remove_user" data-user="{{ row.user_id }}" data-name="{{ row.name }}"><i class="fas fa-user-minus" aria-hidden="true"></i>{% trans "Çıxar" context "exams.assignees" %}</button>
+                                {% endif %}
+                                {% if row.is_group %}
+                                <button type="button" class="ems-btn etp-btn--danger-soft js-eas-user-action" data-action="exclude_user" data-user="{{ row.user_id }}" data-name="{{ row.name }}"><i class="fas fa-user-slash" aria-hidden="true"></i>{% trans "İstisna et" context "exams.assignees" %}</button>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include "partials/_pagination.html" with page_obj=page_obj extra_query=pagination_query %}
+    {% elif has_filters %}
+        {% trans "Süzgəcə uyğun tələbə yoxdur" context "exams.assignees" as empty_title %}
+        {% include "partials/ems_ui/_empty.html" with state_icon="fa-filter-circle-xmark" state_title=empty_title %}
+    {% else %}
+        {% trans "Bu imtahana hələ heç kim təyin olunmayıb" context "exams.assignees" as empty_title %}
+        {% trans "Yuxarıdan qrup və ya tələbə əlavə edin (və ya imtahanı redaktə edin)." context "exams.assignees" as empty_body %}
+        {% include "partials/ems_ui/_empty.html" with state_icon="fa-user-group" state_title=empty_title state_body=empty_body %}
+    {% endif %}
+    </div>
+</section>

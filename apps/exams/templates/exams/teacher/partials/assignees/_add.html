@@ -1,0 +1,16 @@
+{% load i18n %}
+{% comment %}«Qrup əlavə et» / «Tələbə əlavə et» — server axtarışlı seçicilər (EMSSearchableSelect; sehrbazın eyni
+lookup endpoint-ləri: group_search?kind=units, user_search). Əməl sehrbazın saxlama qapılarından keçir.{% endcomment %}
+<section class="ems-card eas-add" aria-label="{% trans 'Təyinat əlavə et' context 'exams.assignees' %}">
+    <div class="eas-add__col">
+        <h2 class="eas-card__title"><i class="fas fa-users-rectangle" aria-hidden="true"></i> {% trans "Qrup əlavə et" context "exams.assignees" %}</h2>
+        <div class="ems-ss eas-ms js-eas-unit-picker"><div class="ems-ss__chips eas-ms__chips"><input type="text" class="ems-ss__search eas-ms__search" placeholder="{% trans 'Qrup axtar…' context 'exams.assignees' %}" autocomplete="off" aria-label="{% trans 'Qrup axtar…' context 'exams.assignees' %}"></div><div class="ems-ss__menu eas-ms__menu"></div></div>
+        <button type="button" class="ems-btn ems-btn--primary js-eas-add-units"><i class="fas fa-plus" aria-hidden="true"></i>{% trans "Qrupu əlavə et" context "exams.assignees" %}</button>
+    </div>
+    <div class="eas-add__col">
+        <h2 class="eas-card__title"><i class="fas fa-user-plus" aria-hidden="true"></i> {% trans "Tələbə əlavə et" context "exams.assignees" %}</h2>
+        <div class="ems-ss eas-ms js-eas-user-picker"><div class="ems-ss__chips eas-ms__chips"><input type="text" class="ems-ss__search eas-ms__search" placeholder="{% trans 'Ad, soyad və ya istifadəçi adı…' context 'exams.assignees' %}" autocomplete="off" aria-label="{% trans 'Tələbə axtar' context 'exams.assignees' %}"></div><div class="ems-ss__menu eas-ms__menu"></div></div>
+        <button type="button" class="ems-btn ems-btn--primary js-eas-add-users"><i class="fas fa-plus" aria-hidden="true"></i>{% trans "Tələbəni əlavə et" context "exams.assignees" %}</button>
+    </div>
+    <p class="etp-hint eas-add__hint">{% trans "Dəyişiklik imtahan redaktəsi ilə eyni yoxlamalardan keçir: fənnin jurnalında olmayan qrup üçün səbəb, final/midterm üçün PIN avtomatik verilir." context "exams.assignees" %}</p>
+</section>

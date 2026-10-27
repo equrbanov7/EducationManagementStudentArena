@@ -1,0 +1,27 @@
+{% load i18n %}
+{% comment %}Səbəb dialoqu — server 400 (fənnin jurnalında olmayan qrup → məcburi əlavə + səbəb) və ya 409 (nəticəli
+midtermin jurnal bağlantısı azalır → təsdiq + səbəb) qaytaranda açılır; əməl səbəblə təkrar göndərilir.{% endcomment %}
+<div class="ems-overlay ems-overlay--dialog" id="easReasonDialog" hidden>
+    <div class="ems-dialog eas-dialog" role="alertdialog" aria-modal="true" aria-labelledby="easReasonTitle" aria-describedby="easReasonMessage">
+        <form class="js-eas-reason-form" novalidate>
+            <div class="ems-dialog__head">
+                <h2 class="ems-dialog__title" id="easReasonTitle"><i class="fas fa-triangle-exclamation eas-dialog__warn" aria-hidden="true"></i> {% trans "Təsdiq və səbəb tələb olunur" context "exams.assignees" %}</h2>
+                <button type="button" class="ems-dialog__x" data-ems-overlay-close aria-label="{% trans 'Bağla' context 'exams.assignees' %}">×</button>
+            </div>
+            <div class="ems-dialog__body">
+                <p class="eas-dialog__text" id="easReasonMessage" data-eas-reason-message></p>
+                <ul class="eas-dialog__list" data-eas-reason-list></ul>
+                <label class="eas-dialog__confirm" data-eas-reason-confirm-wrap hidden>
+                    <input type="checkbox" data-eas-reason-confirm>
+                    <span>{% trans "Təsdiq edirəm" context "exams.assignees" %}</span>
+                </label>
+                <label class="etp-label" for="easReasonText">{% trans "Səbəb (ən azı 10 simvol)" context "exams.assignees" %}</label>
+                <textarea id="easReasonText" class="ems-input eas-dialog__reason" rows="3" maxlength="1000" data-eas-reason-text required></textarea>
+            </div>
+            <div class="ems-dialog__foot">
+                <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Ləğv et" context "exams.assignees" %}</button>
+                <button type="submit" class="ems-btn ems-btn--warning">{% trans "Səbəblə davam et" context "exams.assignees" %}</button>
+            </div>
+        </form>
+    </div>
+</div>

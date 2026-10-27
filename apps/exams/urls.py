@@ -422,6 +422,9 @@ urlpatterns = [
     # ==========================
     # SLUG - Teacher Exam Ops
     # ==========================
+    # Sahib 2026-10-27: «Tapşırıq təyin olunmuşlar» — imtahanı verə bilənlər + qrup / tələbə əlavə et.
+    path("<slug:slug>/assignees/", views.teacher_exam_assignees, name="teacher_exam_assignees"),
+    path("<slug:slug>/assignees/update/", views.exam_assignees_update, name="teacher_exam_assignees_update"),
     path("<slug:slug>/results/", views.teacher_exam_results, name="teacher_exam_results"),
     path("<slug:slug>/statistics/", views.teacher_exam_statistics, name="teacher_exam_statistics"),
     # Çoxdilli imtahan — dil variantlarının idarəsi

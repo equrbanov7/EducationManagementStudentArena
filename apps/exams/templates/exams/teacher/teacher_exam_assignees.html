@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ exam.title }} - {{ page_title }}{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20261015-opt">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/header.css' %}?v=20260903-3">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/badge.css' %}?v=20260903-3">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/table.css' %}?v=20261018-pkga">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/overlay.css' %}?v=20261019-mob">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_assignees.css' %}?v=20261027-assignees">
+{% endblock %}
+
+{% block content %}
+{% comment %}
+Sahib 2026-10-27: «Tapşırıq təyin olunmuşlar» — imtahanı verə bilən hər kəs (giriş siyasəti ilə eyni çoxluq).
+Süzgəclər GET formasıdır (dəyişəndə dərhal tətbiq — results_filter_ui.js). Redaktə əməlləri (qrup / tələbə əlavə et,
+çıxar, istisna et) POST → `update_url` (sehrbazın saxlama qapıları; JS: teacher_exam_assignees.js).
+{% endcomment %}
+<div class="etp-page eas-page" data-eas-root
+     data-update-url="{{ update_url }}"
+     data-can-edit="{% if can_edit %}1{% endif %}"
+     data-group-search-url="{{ group_search_url }}"
+     data-user-search-url="{{ user_search_url }}"
+     data-msg-error="{% trans 'Əməliyyat alınmadı. Yenidən cəhd edin.' context 'exams.assignees' %}"
+     data-msg-remove-unit="{% trans 'Qrup imtahandan çıxarılsın? Qrupun tələbələri (fərdi icazəsi olmayanlar) imtahanı görməyəcək.' context 'exams.assignees' %}"
+     data-msg-remove-user="{% trans 'Bu tələbənin fərdi icazəsi çıxarılsın? Qrupla təyin olunubsa imtahanı yenə görəcək.' context 'exams.assignees' %}"
+     data-msg-exclude-user="{% trans 'Tələbə bu imtahandan istisna edilsin? İmtahanı görməyəcək və başlaya bilməyəcək.' context 'exams.assignees' %}"
+     data-msg-include-user="{% trans 'Tələbə yenidən imtahana daxil edilsin?' context 'exams.assignees' %}"
+     data-msg-confirm="{% trans 'Təsdiq edirəm' context 'exams.assignees' %}"
+     data-msg-pick-groups="{% trans 'Ən azı bir qrup seçin.' context 'exams.assignees' %}"
+     data-msg-pick-users="{% trans 'Ən azı bir tələbə seçin.' context 'exams.assignees' %}"
+     data-msg-more="{% trans 'və daha {n} nəfər' context 'exams.assignees' %}"
+     data-msg-uncovered="{% trans '{n} / {total} tələbə fənnin cari semestr jurnalında yoxdur' context 'exams.assignees' %}">
+    {% include "exams/teacher/partials/_page_head.html" with head_title=page_title head_subtitle=exam.title head_back_url=detail_url head_back_label=back_label %}
+
+    <div class="etp-stack">
+        {% if exam.is_public %}
+        <div class="etp-note" role="note">
+            <i class="fas fa-globe" aria-hidden="true"></i>
+            <span>{% trans "İmtahan hamı üçün açıqdır — təşkilatın istənilən tələbəsi (istisna edilənlərdən başqa) onu görə bilər. Aşağıda yalnız ayrıca təyin olunanlar göstərilir." context "exams.assignees" %}</span>
+        </div>
+        {% endif %}
+        {% if not can_edit %}
+        <div class="etp-note" role="note">
+            <i class="fas fa-eye" aria-hidden="true"></i>
+            <span>{% trans "Yalnız baxış: təyinatı dəyişmək üçün imtahanı redaktə etmək icazəniz yoxdur." context "exams.assignees" %}</span>
+        </div>
+        {% endif %}
+
+        <section class="etp-kpis" aria-label="{% trans 'Xülasə' context 'exams.assignees' %}">
+            <div class="etp-kpi etp-kpi--primary">
+                <span class="etp-kpi__icon"><i class="fas fa-user-check" aria-hidden="true"></i></span>
+                <span class="etp-kpi__body"><span class="etp-kpi__value">{{ stats.eligible }}</span><span class="etp-kpi__label">{% trans "İmtahanı verə bilər" context "exams.assignees" %}</span></span>
+            </div>
+            <div class="etp-kpi etp-kpi--violet">
+                <span class="etp-kpi__icon"><i class="fas fa-users" aria-hidden="true"></i></span>
+                <span class="etp-kpi__body"><span class="etp-kpi__value">{{ stats.group }} / {{ stats.individual }}</span><span class="etp-kpi__label">{% trans "Qrupla / fərdi" context "exams.assignees" %}</span></span>
+            </div>
+            <div class="etp-kpi etp-kpi--success">
+                <span class="etp-kpi__icon"><i class="fas fa-flag-checkered" aria-hidden="true"></i></span>
+                <span class="etp-kpi__body"><span class="etp-kpi__value">{{ stats.finished }}</span><span class="etp-kpi__label">{% trans "Bitirib" context "exams.assignees" %}{% if stats.in_progress %} · {% blocktrans trimmed with n=stats.in_progress context "exams.assignees" %}{{ n }} davam edir{% endblocktrans %}{% endif %}</span></span>
+            </div>
+            <div class="etp-kpi etp-kpi--danger">
+                <span class="etp-kpi__icon"><i class="fas fa-user-slash" aria-hidden="true"></i></span>
+                <span class="etp-kpi__body"><span class="etp-kpi__value">{{ stats.excluded }}</span><span class="etp-kpi__label">{% trans "İstisna edilib" context "exams.assignees" %}</span></span>
+            </div>
+        </section>
+
+        {% include "exams/teacher/partials/assignees/_units.html" %}
+        {% if can_edit %}{% include "exams/teacher/partials/assignees/_add.html" %}{% endif %}
+        {% include "exams/teacher/partials/assignees/_filters.html" %}
+        {% include "exams/teacher/partials/assignees/_table.html" %}
+    </div>
+</div>
+{% if can_edit %}{% include "exams/teacher/partials/assignees/_dialogs.html" %}{% endif %}
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'js/ems_ui/overlay.js' %}?v=20261015-reqfields"></script>
+<script src="{% static 'js/results_filter_ui.js' %}?v=20261014-searchux"></script>
+{% if can_edit %}<script src="{% static 'exams/js/teacher_exam_assignees.js' %}?v=20261027-assignees"></script>{% endif %}
+{% endblock %}
