@@ -71,7 +71,9 @@ def find_duplicates(queryset, window: timedelta) -> tuple[list, int, int]:
 
 
 class Command(BaseCommand):
-    help = "Eyni tip/başlıq/mətn/keçidli təkrar oxunmamış bildirişləri oxunmuş edir (silmir). Defolt dry-run."
+    help = (
+        "Eyni tip/başlıq/mətn/keçidli təkrar bildirişləri oxunmuş edir və ya (--delete) yumşaq silir. Defolt dry-run."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument("--org", required=True, help="Təşkilatın slug-ı (məs. qku).")
@@ -80,6 +82,11 @@ class Command(BaseCommand):
         parser.add_argument("--until", default="", help="Son gün (YYYY-MM-DD, daxil; boş = bu gün).")
         parser.add_argument("--window-minutes", type=int, default=120, help="Təkrar pəncərəsi (dəqiqə, defolt 120).")
         parser.add_argument("--apply", action="store_true", help="Faktiki yaz (verilməsə dry-run).")
+        parser.add_argument(
+            "--delete",
+            action="store_true",
+            help="Təkrarları oxunmuş etmək əvəzinə yumşaq sil (deleted_at); oxunmuşlar da nəzərə alınır, ən erkəni qalır.",
+        )
 
     def handle(self, *args, **options):
         since = _parse_day(options["since"], "--since")
@@ -96,24 +103,30 @@ class Command(BaseCommand):
             organization = Organization.objects.filter(slug=options["org"]).first()
             if organization is None:
                 raise CommandError(f"organization_not_found: {options['org']}")
-            unread = InAppNotification.objects.filter(
+            delete = bool(options["delete"])
+            candidates = InAppNotification.objects.filter(
                 organization=organization,
                 notification_type=options["notification_type"],
-                is_read=False,
                 deleted_at__isnull=True,
                 created_at__gte=_day_start(since),
                 created_at__lt=_day_start(until + timedelta(days=1)),
             )
-            duplicate_ids, groups, users = find_duplicates(unread, timedelta(minutes=minutes))
-            marked = 0
+            # Sahib 2026-10-27: «Bildiriş göndər» təkrarı ~3 saat sonra gedib — silmə rejimində oxunmuş nüsxə də
+            # dəstəyə daxildir (əks halda oxunmuş birincinin yanında oxunmamış ikinci qalırdı).
+            if not delete:
+                candidates = candidates.filter(is_read=False)
+            duplicate_ids, groups, users = find_duplicates(candidates, timedelta(minutes=minutes))
+            changed = 0
             if apply:
                 now = timezone.now()
                 for start in range(0, len(duplicate_ids), _BATCH):
-                    batch = duplicate_ids[start : start + _BATCH]
-                    marked += InAppNotification.objects.filter(pk__in=batch, is_read=False).update(
-                        is_read=True, read_at=now
-                    )
+                    batch = InAppNotification.objects.filter(pk__in=duplicate_ids[start : start + _BATCH])
+                    if delete:
+                        changed += batch.filter(deleted_at__isnull=True).update(deleted_at=now)
+                    else:
+                        changed += batch.filter(is_read=False).update(is_read=True, read_at=now)
 
         mode = "APPLY" if apply else "DRY-RUN (heç nə yazılmadı)"
-        count = marked if apply else len(duplicate_ids)
-        self.stdout.write(f"{mode}: groups={groups} · duplicates_marked_read={count} · users={users}")
+        count = changed if apply else len(duplicate_ids)
+        label = "duplicates_deleted" if delete else "duplicates_marked_read"
+        self.stdout.write(f"{mode}: groups={groups} · {label}={count} · users={users}")

@@ -112,3 +112,34 @@ class DedupeNotificationsCommandTest(TestCase):
             self._run("--until", "2020-01-01")
         with self.assertRaises(CommandError):
             call_command("dedupe_notifications", "--org", self.org.slug, "--type", "assignment", "--since", "17.10")
+
+
+class DedupeDeleteModeTest(DedupeNotificationsCommandTest):
+    """Sahib 2026-10-27: «Bildiriş göndər» təkrarı (~3 saat sonra) — `--delete` təkrarı yumşaq silir, birincini saxlayır."""
+
+    def test_delete_mode_soft_deletes_later_copy_even_when_first_was_read(self):
+        from unittest import mock
+
+        noon = timezone.localtime().replace(hour=12, minute=0, second=0, microsecond=0)
+        with mock.patch("django.utils.timezone.now", return_value=noon):
+            self.now = noon
+            kw = {"kind": NotificationType.SYSTEM, "metadata": {}}
+            first = self._note(self.alice, minutes_ago=200, is_read=True, read_at=noon, **kw)
+            second = self._note(self.alice, minutes_ago=5, **kw)
+            bob_only = self._note(self.bob, minutes_ago=5, **kw)
+            since = (timezone.localdate() - timedelta(days=1)).isoformat()
+            args = ("dedupe_notifications", "--org", self.org.slug, "--type", "system", "--since", since)
+            out = StringIO()
+            call_command(*args, "--window-minutes", "600", "--delete", stdout=out)
+            self.assertIn("groups=1 · duplicates_deleted=1 · users=1", out.getvalue())
+            self.assertIn("DRY-RUN", out.getvalue())
+            out = StringIO()
+            call_command(*args, "--window-minutes", "600", "--delete", "--apply", stdout=out)
+            self.assertIn("APPLY: groups=1 · duplicates_deleted=1 · users=1", out.getvalue())
+
+        for note in (first, second, bob_only):
+            note.refresh_from_db()
+        self.assertIsNone(first.deleted_at)
+        self.assertIsNotNone(second.deleted_at)
+        self.assertIsNone(bob_only.deleted_at)
+        self.assertEqual(InAppNotification.objects.count(), 3)  # yumşaq silmə — sətir qalır
