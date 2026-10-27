@@ -133,7 +133,7 @@ packaging==25.0
 # serializasiyası). ujson/cbor2/py-ubjson silindi — yalnız autobahn-ın
 # istifadə olunmayan WAMP extras-ları idi (Faza 3, audit 2026-07-02).
 # ═══════════════════════════════════════════════════════════════════════════
-msgpack==1.2.1
+msgpack==1.2.3
 # autobahn 26.x-in MƏCBURİ asılılıqları (WAMP serializer-ləri; biz istifadə etmirik, amma import zamanı tələb olunur)
 cbor2==6.1.4
 ujson==6.0.0

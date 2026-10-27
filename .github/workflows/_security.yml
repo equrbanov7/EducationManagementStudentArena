@@ -84,8 +84,12 @@ jobs:
             # conch telnet — bizdə heç biri işlədilmir) və CVE-2026-115877 (twisted.web başlıq dəyərində çılpaq CR/LF;
             # daphne nginx-in ARXASINDADIR, nginx başlıqları yenidən qurub ötürür — smuggling çərçivəsi yaranmır).
             # Düzəliş yalnız 26.10.0rc1-dədir (sabit buraxılış yox); 26.10.0 çıxan kimi istisnaları silib qaldırın.
+            # İstisna (2026-10-27): CVE-2026-83813 — twisted.names.dns.DNSDatagramProtocol (twisted-in DNS client-i).
+            # Bizdə twisted.names işlədilmir (repo-da import yoxdur); daphne reaktorun standart (thread) resolverini
+            # işlədir. Düzəliş yalnız 26.10.0rc1-dədir — 26.10.0 çıxan kimi bütün twisted istisnalarını silib qaldırın.
             ignores=(--ignore-vuln CVE-2026-106454 --ignore-vuln CVE-2026-115774 --ignore-vuln CVE-2026-115775
-                     --ignore-vuln CVE-2026-115776 --ignore-vuln CVE-2026-115778 --ignore-vuln CVE-2026-115877)
+                     --ignore-vuln CVE-2026-115776 --ignore-vuln CVE-2026-115778 --ignore-vuln CVE-2026-115877
+                     --ignore-vuln CVE-2026-83813)
             pip-audit -r "$lock" --require-hashes --disable-pip --desc on "${ignores[@]}" || {
               echo "::error::❌ pip-audit found vulnerable dependencies in ${lock}! Fix them before merging."
               exit 1
