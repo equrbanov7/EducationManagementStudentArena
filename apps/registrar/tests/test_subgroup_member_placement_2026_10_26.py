@@ -39,6 +39,9 @@ class LanguageLevelTest(TestCase):
         self.assertTrue(is_level_subject(name))
         self.assertEqual(level_of(name), "elementary")
         self.assertEqual(level_of("X (Pre-Intermediate)"), "pre-intermediate")
+        # Kataloqdakı yazı xətası (2026-10-27): «(pre-intermadiate)» də səviyyədir, eyni ailəyə düşür.
+        self.assertEqual(level_of("Xarici dil-1(pre-intermadiate)"), "pre-intermediate")
+        self.assertEqual(level_family("Xarici dil-1(pre-intermadiate)"), level_family("Xarici dil-1(elementary)"))
         self.assertEqual(level_family(name), level_family(name.replace("elementary", "intermediate")))
         self.assertFalse(is_level_subject("Azərbaycan tarixi"))
 
