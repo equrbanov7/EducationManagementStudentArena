@@ -1,0 +1,32 @@
+{% load static i18n session_keepalive_tags %}{% comment %}
+Sessiya pingi + «sessiya başa çatdı» pəncərəsi (sahib 2026-10-27). Yalnız daxil olmuş istifadəçiyə render olunur.
+
+* `static/js/core/session_keepalive.js` hər `data-heartbeat` saniyədən bir `accounts:session_ping`-ə müraciət edir
+  (son pingdən bəri klik/yazı olubsa `active=1` — fəaliyyətsizlik limiti uzanır), cavabdakı TƏZƏ CSRF tokeni ilə
+  səhifədəki köhnə `csrfmiddlewaretoken` sahələrini yeniləyir (uzun açıq qalan səhifə «Səhifə köhnəlib» vermir).
+* Sessiya bitibsə (fəaliyyətsizlik, brauzer bağlanıb / kompüter sönüb — `data-presence`) aşağıdakı pəncərə açılır:
+  lokallaşdırılmış izah + «Yenidən daxil ol» (giriş səhifəsi, `next` = cari səhifə). Xam xəta göstərilmir.
+* Mətnlər data-atributlardadır (xarici JS şablondan keçmir; CSP — inline yoxdur).
+{% endcomment %}{% session_keepalive_config as sk %}{% if sk.enabled %}
+<div class="ems-session" id="ems-session" hidden
+     data-ems-session
+     data-ping-url="{% url 'accounts:session_ping' %}"
+     data-login-url="{% url 'accounts:login' %}"
+     data-heartbeat="{{ sk.heartbeat }}"
+     data-presence="{{ sk.presence }}"
+     data-msg-expired="{% trans 'Uzun müddət heç bir əməliyyat edilmədiyi üçün sessiyanız başa çatdı. Davam etmək üçün yenidən daxil olun.' context 'accounts.session' %}">
+    <div class="ems-session__dialog" role="alertdialog" aria-modal="true" aria-labelledby="ems-session-title" aria-describedby="ems-session-text">
+        <span class="ems-session__icon" aria-hidden="true"><i class="fas fa-user-clock"></i></span>
+        <h2 class="ems-session__title" id="ems-session-title">{% trans "Sessiyanız başa çatdı" context "accounts.session" %}</h2>
+        <p class="ems-session__text" id="ems-session-text" data-ems-session-text></p>
+        <p class="ems-session__note">{% trans "Yadda saxlanmamış dəyişiklik varsa, yenidən daxil olduqdan sonra yoxlayın — jurnal xanaları bu brauzerdə qaralama kimi saxlanılır və bərpa olunur." context "accounts.session" %}</p>
+        <div class="ems-session__actions">
+            <a class="btn btn-primary ems-session__btn ems-session__btn--primary" href="{% url 'accounts:login' %}" data-ems-session-login>
+                <i class="fas fa-right-to-bracket" aria-hidden="true"></i> {% trans "Yenidən daxil ol" context "accounts.session" %}
+            </a>
+            <button type="button" class="btn btn-outline-secondary ems-session__btn" data-ems-session-stay>{% trans "Bu səhifədə qal" context "accounts.session" %}</button>
+        </div>
+    </div>
+</div>
+<script src="{% static 'js/core/session_keepalive.js' %}?v=20261027-1"></script>
+{% endif %}

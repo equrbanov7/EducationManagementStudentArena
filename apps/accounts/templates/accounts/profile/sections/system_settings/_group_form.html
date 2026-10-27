@@ -14,7 +14,7 @@ Sətir markup-ı əvvəlki tək səhifəlik formanın eynisidir (badge, defolt, 
                 {% if f.help %}<p class="sysset__help">{{ f.help }}</p>{% endif %}
                 <p class="sysset__default">
                     {% trans "Standart" context "accounts.runtime_settings" %}:
-                    {% if f.kind == "rate" %}{{ f.default_count }} / {{ f.default_window }} {% trans "dəq." context "accounts.runtime_settings" %}{% elif f.kind == "bool" %}{% if f.default %}{% trans "Yanılı" context "accounts.runtime_settings" %}{% else %}{% trans "Söndürülü" context "accounts.runtime_settings" %}{% endif %}{% elif f.kind == "choice" %}{% if f.default %}{{ f.default }}{% else %}{% trans "Avtomatik" context "accounts.runtime_settings" %}{% endif %}{% else %}{{ f.default }} {{ f.unit }}{% endif %}
+                    {% if f.kind == "rate" %}{{ f.default_count }} / {{ f.default_window }} {% trans "dəq." context "accounts.runtime_settings" %}{% elif f.kind == "bool" %}{% if f.default %}{% trans "Yanılı" context "accounts.runtime_settings" %}{% else %}{% trans "Söndürülü" context "accounts.runtime_settings" %}{% endif %}{% elif f.kind == "choice" %}{% if f.default_label %}{{ f.default_label }}{% elif f.default %}{{ f.default }}{% else %}{% trans "Avtomatik" context "accounts.runtime_settings" %}{% endif %}{% else %}{{ f.default }} {{ f.unit }}{% endif %}
                     {% if f.overridden %}<span class="sysset__badge" title="{{ f.updated_at|date:'d.m.Y H:i' }}">{% trans "Dəyişdirilib" context "accounts.runtime_settings" %}{% if f.updated_by %} · {{ f.updated_by }}{% endif %}{% if f.updated_at %} · {{ f.updated_at|date:"d.m.Y H:i" }}{% endif %}</span>{% endif %}
                 </p>
                 <p class="sysset__error" data-ss-error hidden></p>

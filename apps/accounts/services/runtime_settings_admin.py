@@ -64,6 +64,8 @@ def _field(spec, stored: dict, meta: dict) -> dict:
         item.update(count=parts[0], window=parts[1], default_count=default_parts[0], default_window=default_parts[1])
     if spec.kind == "choice":
         item["choices"] = [{"value": code, "label": str(label)} for code, label in spec.choices()]
+        # «Standart: …» kod yox, seçimin adı ilə (2026-10-27, «Sessiya» → brauzer bağlananda çıxış).
+        item["default_label"] = next((c["label"] for c in item["choices"] if c["value"] == default and default), "")
     return item
 
 

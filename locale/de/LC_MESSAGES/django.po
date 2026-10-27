@@ -110856,3 +110856,96 @@ msgstr "Passwort & Benutzername"
 msgctxt "accounts.people.page"
 msgid "İstifadəçi adını dəyiş"
 msgstr "Benutzernamen ändern"
+
+msgctxt "core.runtime_settings"
+msgid "Söndürülü (sessiya brauzer bağlandıqdan sonra da qalır)"
+msgstr "Aus (die Sitzung bleibt nach dem Schließen des Browsers bestehen)"
+
+msgctxt "core.runtime_settings"
+msgid "Müəllim və əməkdaşlar (tələbələr xaric)"
+msgstr "Lehrkräfte und Mitarbeitende (ohne Studierende)"
+
+msgctxt "core.runtime_settings"
+msgid "Hamı (imtahan gedişində olan tələbə çıxarılmır)"
+msgstr "Alle (Studierende in einer laufenden Prüfung werden nie abgemeldet)"
+
+msgctxt "core.runtime_settings"
+msgid "Brauzer bağlananda və ya kompüter sönəndə çıxış"
+msgstr "Abmelden, wenn der Browser geschlossen oder der Computer ausgeschaltet wird"
+
+msgctxt "core.runtime_settings"
+msgid "Seçilmiş istifadəçilərin sessiyası brauzer bağlananda bitir; brauzer «qaldığım yerdən davam et» ilə açılsa belə, aşağıdakı «brauzer açıq deyil» limiti keçibsə yenidən giriş tələb olunur. Tələbələr daxil edilsə də, imtahan gedişində (zal bileti, başlanmış cəhd, canlı imtahan) heç kim çıxarılmır."
+msgstr "Die Sitzung der ausgewählten Benutzer endet beim Schließen des Browsers; selbst wenn der Browser mit „Dort weitermachen, wo ich aufgehört habe“ wieder öffnet, ist nach Ablauf des unten stehenden Limits „Browser nicht geöffnet“ eine neue Anmeldung nötig. Auch wenn Studierende einbezogen sind, wird während einer Prüfung (Saalticket, begonnener Versuch, Live-Prüfung) niemand abgemeldet."
+
+msgctxt "core.runtime_settings"
+msgid "Brauzer açıq deyilsə çıxış"
+msgstr "Abmelden, wenn der Browser nicht geöffnet ist"
+
+msgctxt "core.runtime_settings"
+msgid "Açıq səhifə serverə mütəmadi «buradayam» siqnalı göndərir. Bu qədər dəqiqə heç bir siqnal gəlməsə (brauzer bağlanıb, kompüter sönüb və ya yuxu rejimindədir) sessiya bitir. Yalnız yuxarıda seçilmiş istifadəçilərə aiddir. 0 — söndürülü."
+msgstr "Eine geöffnete Seite sendet regelmäßig ein „Ich bin da“-Signal an den Server. Kommt so viele Minuten lang kein Signal (Browser geschlossen, Computer ausgeschaltet oder im Ruhezustand), endet die Sitzung. Gilt nur für die oben ausgewählten Benutzer. 0 — aus."
+
+msgctxt "core.runtime_settings"
+msgid "Hərəkətsiz jurnalın bağlanması"
+msgstr "Schließen eines inaktiven Journals"
+
+msgctxt "core.runtime_settings"
+msgid "Açıq jurnalda bu qədər dəqiqə heç bir hərəkət (klik, yazı, sürüşdürmə) olmasa, yadda saxlanmamış xanalar əvvəlcə yadda saxlanılır, sonra jurnal bağlanır; «Davam et» onu təzə məlumatla açır. 0 — söndürülü."
+msgstr "Gibt es in einem geöffneten Journal so viele Minuten lang keine Aktivität (Klick, Eingabe, Scrollen), werden ungespeicherte Zellen zuerst gespeichert und dann wird das Journal geschlossen; „Weiter“ öffnet es mit aktuellen Daten. 0 — aus."
+
+msgctxt "accounts.session"
+msgid "Brauzer bağlandığı və ya kompüter söndüyü üçün sessiyanız təhlükəsizlik məqsədilə başa çatdı. Davam etmək üçün yenidən daxil olun."
+msgstr "Ihre Sitzung wurde aus Sicherheitsgründen beendet, weil der Browser geschlossen oder der Computer ausgeschaltet wurde. Melden Sie sich erneut an, um fortzufahren."
+
+msgctxt "accounts.session"
+msgid "Uzun müddət heç bir əməliyyat edilmədiyi üçün sessiyanız başa çatdı. Davam etmək üçün yenidən daxil olun."
+msgstr "Ihre Sitzung wurde beendet, weil längere Zeit keine Aktivität stattfand. Melden Sie sich erneut an, um fortzufahren."
+
+msgctxt "accounts.session"
+msgid "Sessiyanız başa çatdı"
+msgstr "Ihre Sitzung ist beendet"
+
+msgctxt "accounts.session"
+msgid "Yadda saxlanmamış dəyişiklik varsa, yenidən daxil olduqdan sonra yoxlayın — jurnal xanaları bu brauzerdə qaralama kimi saxlanılır və bərpa olunur."
+msgstr "Falls es ungespeicherte Änderungen gab, prüfen Sie sie nach der erneuten Anmeldung — Journalzellen werden in diesem Browser als Entwurf gespeichert und wiederhergestellt."
+
+msgctxt "accounts.session"
+msgid "Yenidən daxil ol"
+msgstr "Erneut anmelden"
+
+msgctxt "accounts.session"
+msgid "Bu səhifədə qal"
+msgstr "Auf dieser Seite bleiben"
+
+msgctxt "registrar.journal_autosave"
+msgid "Sessiya başa çatıb — yenidən daxil olun. Yazılmamış xanalar bu brauzerdə qaralama kimi saxlanılıb və girişdən sonra jurnalda bərpa olunacaq."
+msgstr "Die Sitzung ist beendet — melden Sie sich erneut an. Ungespeicherte Zellen sind in diesem Browser als Entwurf gesichert und werden nach der Anmeldung im Journal wiederhergestellt."
+
+msgctxt "registrar.journal_idle"
+msgid "Dəyişikliklər yadda saxlanılır…"
+msgstr "Änderungen werden gespeichert…"
+
+msgctxt "registrar.journal_idle"
+msgid "Bütün dəyişikliklər yadda saxlanılıb."
+msgstr "Alle Änderungen wurden gespeichert."
+
+msgctxt "registrar.journal_idle"
+msgid "Bəzi xanalar yadda saxlanılmadı — onlar bu brauzerdə qaralama kimi qalıb və «Davam et» basanda bərpa olunacaq."
+msgstr "Einige Zellen wurden nicht gespeichert — sie bleiben als Entwurf in diesem Browser und werden wiederhergestellt, wenn Sie „Weiter“ drücken."
+
+msgctxt "registrar.journal_idle"
+msgid "Jurnal bağlandı"
+msgstr "Journal geschlossen"
+
+#, python-format
+msgctxt "registrar.journal_idle"
+msgid "%(minutes)s dəqiqə heç bir əməliyyat edilmədiyi üçün jurnal təhlükəsizlik məqsədilə bağlandı."
+msgstr "Das Journal wurde aus Sicherheitsgründen geschlossen, da %(minutes)s Minuten lang keine Aktivität stattfand."
+
+msgctxt "registrar.journal_idle"
+msgid "Davam et"
+msgstr "Weiter"
+
+msgctxt "registrar.journal_idle"
+msgid "Jurnallar siyahısı"
+msgstr "Journalliste"

@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal_cell_hint.css' %}?v=20261014-notip">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_autosave.css' %}?v=20261014-auto">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_mark_lock.css' %}?v=20261025-lock">
+    {% if not correction_mode %}<link rel="stylesheet" href="{% static 'registrar/css/journal_idle_close.css' %}?v=20261027-2">{% endif %}
     {% comment %}Sakit düzüm qatı — HƏMİŞƏ SONUNCU yüklənir ki, yuxarıdakı
     fayllardakı düzüm fərqlərini üstələsin; rəng palitrasına toxunmur.{% endcomment %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal_layout.css' %}?v=20261019-head">
@@ -319,6 +320,8 @@
     {% include "registrar/partials/_jd_history_drawer.html" %}
 </div>
 {% if syllabus_notice.can_open %}{% include "registrar/partials/_syllabus_drawer.html" %}{% endif %}
+{# Hərəkətsiz jurnal N dəqiqədən sonra bağlanır — əvvəl avtomatik yadda saxlanılır (sahib 2026-10-27). Düzəliş rejimində yox. #}
+{% if not correction_mode %}{% include "registrar/partials/_jd_idle_close.html" %}{% endif %}
 {% endblock %}
 
 {% block extraJs %}
@@ -342,7 +345,7 @@
     {# Yapışqan başlıq sətri — daxili şaquli scroll olmadan (journal_layout.css §8, 2026-10-19). #}
     <script src="{% static 'registrar/js/journal_sticky_head.js' %}?v=20261019-1"></script>
     {# Avtomatik yadda saxlama — journal_grid.js-dən SONRA (qaralama bərpası + `EMSJournalGrid.clearDraft`), sahib 2026-10-14. #}
-    <script src="{% static 'registrar/js/journal_grid_autosave.js' %}?v=20261014-auto"></script>
+    <script src="{% static 'registrar/js/journal_grid_autosave.js' %}?v=20261027-idle"></script>
     {# İkiqat göndəriş qapısı — ayrı fayl (QA P3-11). #}
     <script src="{% static 'registrar/js/journal_submit_guard.js' %}?v=20260906-1"></script>
     <script src="{% static 'registrar/js/correction_history.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>

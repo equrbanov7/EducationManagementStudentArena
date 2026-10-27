@@ -59,6 +59,7 @@ from .base import (
     HEALTH_CHECK_CACHE_SECONDS,
     INSTALLED_APPS,
     LANGUAGE_CODE,
+    LANGUAGE_COOKIE_AGE,
     LANGUAGE_COOKIE_HTTPONLY,
     LANGUAGE_COOKIE_SAMESITE,
     LANGUAGES,
@@ -221,6 +222,9 @@ CACHES = {
 # «Sistem tənzimləmələri» (core.runtime_settings): testlərdə bazaya baxılmır — defoltlar işləyir, sorğu büdcəsi
 # testləri pozulmur. Xüsusiyyətin öz testləri `override_settings(RUNTIME_SETTINGS_ENABLED=True)` ilə açır.
 RUNTIME_SETTINGS_ENABLED = False
+# «Brauzer açıq deyil» limiti (sahib 2026-10-27, prod defoltu 30 dəq.): saatı irəli çəkən köhnə testlərdə heyət
+# sessiyası gözlənilmədən bitməsin — testlərdə SÖNÜLÜ; öz testləri (`*_2026_10_27.py`) `override_settings` ilə açır.
+SESSION_PRESENCE_MINUTES = 0
 # Sillabus kafedra təsdiqi (sahib 2026-10-25: prod defoltu SÖNÜLÜ = avtomatik təsdiq). Testlərdə mövcud kafedra
 # iş axını qalır; avtomatik yolu testlər `override_settings(SYLLABUS_APPROVAL_REQUIRED=False)` ilə yoxlayır.
 SYLLABUS_APPROVAL_REQUIRED = True

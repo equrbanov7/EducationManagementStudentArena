@@ -5,7 +5,7 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}?v=20260909-focus">
-    <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}?v=20261019-mob">
+    <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}?v=20261027-sess">
     <link rel="stylesheet" href="{% static 'accounts/css/login_first_login.css' %}?v=20260707-auth2">
 {% endblock %}
 
@@ -39,6 +39,7 @@
         </a>
         <h1 class="auth-heading">{% trans "Daxil ol" context "accounts.login.portal" %}</h1>
         <p class="auth-subheading">{% trans "Kabinetə daxil olmaq üçün rolunuzu seçin." context "accounts.login.portal" %}</p>
+        {% if session_ended_notice %}<p class="auth-session-ended" role="status">{{ session_ended_notice }}</p>{% endif %}
 
         <div class="auth-portal-options">
             <a href="{{ staff_login_url }}" class="auth-portal-option auth-portal-option--staff">

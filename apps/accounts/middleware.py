@@ -3,87 +3,21 @@ Custom middleware for session management and auto-logout.
 """
 
 import logging
-from datetime import datetime
 
-from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import SESSION_KEY, logout
+from django.contrib.auth import logout
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
-from django.utils import timezone
 
 from apps.accounts.middleware_center_exam import is_center_exam_path
+from apps.accounts.middleware_session import (  # noqa: F401 — settings istinadı (2026-10-27 bölgüsü)
+    SessionTimeoutMiddleware,
+)
 
 logger = logging.getLogger(__name__)
 
 POST_LOGIN_REDIRECT_GUARD_SESSION_KEY = "post_login_redirect_guard"
-
-
-class SessionTimeoutMiddleware:
-    """
-    Automatically log users out after a period of inactivity.
-
-    Performance note: the ``last_activity`` timestamp is only written back to
-    the session at most once every ``SESSION_ACTIVITY_WRITE_INTERVAL`` seconds.
-    Writing it on every request marked the session dirty on every authenticated
-    hit, forcing a session save (a DB write under db/cached_db backends) for
-    each request and serialising authenticated traffic under load. Throttling
-    the write keeps inactivity enforcement accurate (the stored value is at most
-    one interval stale against a multi-hour timeout) while removing that
-    per-request write.
-    """
-
-    def __init__(self, get_response):
-        self.get_response = get_response
-        self.timeout_seconds = settings.SESSION_INACTIVITY_TIMEOUT
-        self.write_interval = getattr(settings, "SESSION_ACTIVITY_WRITE_INTERVAL", 300)
-
-    def _timeout_seconds(self):
-        """2026-10-03: «Sistem tənzimləmələri»ndə RİM rəhbərinin dəyəri (saat) varsa o, yoxdursa mühitin ayarı."""
-        from core import runtime_settings
-
-        hours = runtime_settings.override("session.idle_hours")
-        return int(hours) * 3600 if hours else self.timeout_seconds
-
-    def __call__(self, request):
-        # Backend siyahısından çıxarılmış köhnə/bypass backend sessiyası Django
-        # tərəfindən anonymous kimi yüklənir, amma auth açarları sessiyada qala
-        # bilər. Onları request view-a çatmamış tam sil.
-        if not request.user.is_authenticated and SESSION_KEY in request.session:
-            logout(request)
-            return self.get_response(request)
-        if request.user.is_authenticated:
-            from .identity import request_user_login_blocked
-
-            if request_user_login_blocked(request.user):
-                logout(request)
-                return self.get_response(request)
-            now = timezone.now()
-            last_activity = request.session.get("last_activity")
-
-            if last_activity:
-                if isinstance(last_activity, str):
-                    try:
-                        last_activity = datetime.fromisoformat(last_activity)
-                    except ValueError:
-                        last_activity = None
-
-            if last_activity:
-                seconds_since_activity = (now - last_activity).total_seconds()
-                if seconds_since_activity > self._timeout_seconds():
-                    # Session expired through inactivity → log the user out.
-                    logout(request)
-                elif seconds_since_activity >= self.write_interval:
-                    # Refresh the timestamp only once per interval to avoid a
-                    # session write on every request.
-                    request.session["last_activity"] = now.isoformat()
-            else:
-                # First authenticated request (or unparseable value): seed it.
-                request.session["last_activity"] = now.isoformat()
-
-        response = self.get_response(request)
-        return response
 
 
 class PostLoginRedirectGuardMiddleware:

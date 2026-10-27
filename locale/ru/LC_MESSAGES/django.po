@@ -110024,3 +110024,96 @@ msgstr "Пароль и имя пользователя"
 msgctxt "accounts.people.page"
 msgid "İstifadəçi adını dəyiş"
 msgstr "Изменить имя пользователя"
+
+msgctxt "core.runtime_settings"
+msgid "Söndürülü (sessiya brauzer bağlandıqdan sonra da qalır)"
+msgstr "Выключено (сессия сохраняется после закрытия браузера)"
+
+msgctxt "core.runtime_settings"
+msgid "Müəllim və əməkdaşlar (tələbələr xaric)"
+msgstr "Преподаватели и сотрудники (кроме студентов)"
+
+msgctxt "core.runtime_settings"
+msgid "Hamı (imtahan gedişində olan tələbə çıxarılmır)"
+msgstr "Все (студент во время экзамена не выводится из системы)"
+
+msgctxt "core.runtime_settings"
+msgid "Brauzer bağlananda və ya kompüter sönəndə çıxış"
+msgstr "Выход при закрытии браузера или выключении компьютера"
+
+msgctxt "core.runtime_settings"
+msgid "Seçilmiş istifadəçilərin sessiyası brauzer bağlananda bitir; brauzer «qaldığım yerdən davam et» ilə açılsa belə, aşağıdakı «brauzer açıq deyil» limiti keçibsə yenidən giriş tələb olunur. Tələbələr daxil edilsə də, imtahan gedişində (zal bileti, başlanmış cəhd, canlı imtahan) heç kim çıxarılmır."
+msgstr "Сессия выбранных пользователей завершается при закрытии браузера; даже если браузер откроется с функцией «продолжить с того же места», после истечения указанного ниже лимита «браузер не открыт» потребуется повторный вход. Даже если студенты включены, во время экзамена (билет зала, начатая попытка, живой экзамен) никто не выводится из системы."
+
+msgctxt "core.runtime_settings"
+msgid "Brauzer açıq deyilsə çıxış"
+msgstr "Выход, если браузер не открыт"
+
+msgctxt "core.runtime_settings"
+msgid "Açıq səhifə serverə mütəmadi «buradayam» siqnalı göndərir. Bu qədər dəqiqə heç bir siqnal gəlməsə (brauzer bağlanıb, kompüter sönüb və ya yuxu rejimindədir) sessiya bitir. Yalnız yuxarıda seçilmiş istifadəçilərə aiddir. 0 — söndürülü."
+msgstr "Открытая страница регулярно отправляет серверу сигнал «я здесь». Если сигнал не поступает столько минут (браузер закрыт, компьютер выключен или в спящем режиме), сессия завершается. Относится только к выбранным выше пользователям. 0 — выключено."
+
+msgctxt "core.runtime_settings"
+msgid "Hərəkətsiz jurnalın bağlanması"
+msgstr "Закрытие неактивного журнала"
+
+msgctxt "core.runtime_settings"
+msgid "Açıq jurnalda bu qədər dəqiqə heç bir hərəkət (klik, yazı, sürüşdürmə) olmasa, yadda saxlanmamış xanalar əvvəlcə yadda saxlanılır, sonra jurnal bağlanır; «Davam et» onu təzə məlumatla açır. 0 — söndürülü."
+msgstr "Если в открытом журнале столько минут нет никаких действий (клик, ввод, прокрутка), несохранённые ячейки сначала сохраняются, затем журнал закрывается; «Продолжить» открывает его со свежими данными. 0 — выключено."
+
+msgctxt "accounts.session"
+msgid "Brauzer bağlandığı və ya kompüter söndüyü üçün sessiyanız təhlükəsizlik məqsədilə başa çatdı. Davam etmək üçün yenidən daxil olun."
+msgstr "Ваша сессия завершена в целях безопасности, так как браузер был закрыт или компьютер выключен. Чтобы продолжить, войдите снова."
+
+msgctxt "accounts.session"
+msgid "Uzun müddət heç bir əməliyyat edilmədiyi üçün sessiyanız başa çatdı. Davam etmək üçün yenidən daxil olun."
+msgstr "Ваша сессия завершена из-за длительного отсутствия активности. Чтобы продолжить, войдите снова."
+
+msgctxt "accounts.session"
+msgid "Sessiyanız başa çatdı"
+msgstr "Ваша сессия завершена"
+
+msgctxt "accounts.session"
+msgid "Yadda saxlanmamış dəyişiklik varsa, yenidən daxil olduqdan sonra yoxlayın — jurnal xanaları bu brauzerdə qaralama kimi saxlanılır və bərpa olunur."
+msgstr "Если были несохранённые изменения, проверьте их после повторного входа — ячейки журнала хранятся в этом браузере как черновик и восстанавливаются."
+
+msgctxt "accounts.session"
+msgid "Yenidən daxil ol"
+msgstr "Войти снова"
+
+msgctxt "accounts.session"
+msgid "Bu səhifədə qal"
+msgstr "Остаться на странице"
+
+msgctxt "registrar.journal_autosave"
+msgid "Sessiya başa çatıb — yenidən daxil olun. Yazılmamış xanalar bu brauzerdə qaralama kimi saxlanılıb və girişdən sonra jurnalda bərpa olunacaq."
+msgstr "Сессия завершена — войдите снова. Несохранённые ячейки сохранены в этом браузере как черновик и будут восстановлены в журнале после входа."
+
+msgctxt "registrar.journal_idle"
+msgid "Dəyişikliklər yadda saxlanılır…"
+msgstr "Изменения сохраняются…"
+
+msgctxt "registrar.journal_idle"
+msgid "Bütün dəyişikliklər yadda saxlanılıb."
+msgstr "Все изменения сохранены."
+
+msgctxt "registrar.journal_idle"
+msgid "Bəzi xanalar yadda saxlanılmadı — onlar bu brauzerdə qaralama kimi qalıb və «Davam et» basanda bərpa olunacaq."
+msgstr "Некоторые ячейки не сохранены — они остались в этом браузере как черновик и будут восстановлены при нажатии «Продолжить»."
+
+msgctxt "registrar.journal_idle"
+msgid "Jurnal bağlandı"
+msgstr "Журнал закрыт"
+
+#, python-format
+msgctxt "registrar.journal_idle"
+msgid "%(minutes)s dəqiqə heç bir əməliyyat edilmədiyi üçün jurnal təhlükəsizlik məqsədilə bağlandı."
+msgstr "Журнал закрыт в целях безопасности, так как %(minutes)s мин. не было никаких действий."
+
+msgctxt "registrar.journal_idle"
+msgid "Davam et"
+msgstr "Продолжить"
+
+msgctxt "registrar.journal_idle"
+msgid "Jurnallar siyahısı"
+msgstr "Список журналов"

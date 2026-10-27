@@ -7,6 +7,8 @@
     <title>{% trans "title" context "live_exam.host_lobby" %} | {{ session.pin }}</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
     {% include "liveExam/partials/_host_head_assets.html" %}
+    {# Sessiya pingi: dərs boyu yalnız WebSocket işləyir — «brauzer açıqdır» siqnalı HTTP ilə gəlsin (2026-10-27). #}
+    <link rel="stylesheet" href="{% static 'css/session_keepalive.css' %}?v=20261027-1">
 </head>
 <body class="host-live-page host-presentation-page{% if presentation_controls %} has-controls{% endif %}" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}" data-lx-style="{{ session_settings.presentation_style|default:'playful' }}" data-session-state="lobby">
     <div class="hx-backdrop" aria-hidden="true">
@@ -122,5 +124,6 @@
     }</script>
     {% include "liveExam/partials/_host_i18n.html" %}
     {% include "liveExam/partials/_host_scripts.html" with with_shell=presentation_controls %}
+    {% include "partials/_session_keepalive.html" %}
 </body>
 </html>

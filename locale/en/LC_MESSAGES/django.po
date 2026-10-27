@@ -109830,3 +109830,96 @@ msgstr "Password & username"
 msgctxt "accounts.people.page"
 msgid "İstifadəçi adını dəyiş"
 msgstr "Change username"
+
+msgctxt "core.runtime_settings"
+msgid "Söndürülü (sessiya brauzer bağlandıqdan sonra da qalır)"
+msgstr "Off (the session survives closing the browser)"
+
+msgctxt "core.runtime_settings"
+msgid "Müəllim və əməkdaşlar (tələbələr xaric)"
+msgstr "Teachers and staff (students excluded)"
+
+msgctxt "core.runtime_settings"
+msgid "Hamı (imtahan gedişində olan tələbə çıxarılmır)"
+msgstr "Everyone (a student in the middle of an exam is never signed out)"
+
+msgctxt "core.runtime_settings"
+msgid "Brauzer bağlananda və ya kompüter sönəndə çıxış"
+msgstr "Sign out when the browser is closed or the computer is turned off"
+
+msgctxt "core.runtime_settings"
+msgid "Seçilmiş istifadəçilərin sessiyası brauzer bağlananda bitir; brauzer «qaldığım yerdən davam et» ilə açılsa belə, aşağıdakı «brauzer açıq deyil» limiti keçibsə yenidən giriş tələb olunur. Tələbələr daxil edilsə də, imtahan gedişində (zal bileti, başlanmış cəhd, canlı imtahan) heç kim çıxarılmır."
+msgstr "The session of the selected users ends when the browser is closed; even if the browser reopens with “continue where you left off”, a new sign-in is required once the “browser not open” limit below has passed. Even when students are included, nobody is signed out during an exam (hall ticket, started attempt, live exam)."
+
+msgctxt "core.runtime_settings"
+msgid "Brauzer açıq deyilsə çıxış"
+msgstr "Sign out when the browser is not open"
+
+msgctxt "core.runtime_settings"
+msgid "Açıq səhifə serverə mütəmadi «buradayam» siqnalı göndərir. Bu qədər dəqiqə heç bir siqnal gəlməsə (brauzer bağlanıb, kompüter sönüb və ya yuxu rejimindədir) sessiya bitir. Yalnız yuxarıda seçilmiş istifadəçilərə aiddir. 0 — söndürülü."
+msgstr "An open page regularly sends an “I am here” signal to the server. If no signal arrives for this many minutes (the browser was closed, the computer was turned off or is asleep), the session ends. Applies only to the users selected above. 0 — off."
+
+msgctxt "core.runtime_settings"
+msgid "Hərəkətsiz jurnalın bağlanması"
+msgstr "Closing an idle journal"
+
+msgctxt "core.runtime_settings"
+msgid "Açıq jurnalda bu qədər dəqiqə heç bir hərəkət (klik, yazı, sürüşdürmə) olmasa, yadda saxlanmamış xanalar əvvəlcə yadda saxlanılır, sonra jurnal bağlanır; «Davam et» onu təzə məlumatla açır. 0 — söndürülü."
+msgstr "If there is no activity (click, typing, scrolling) in an open journal for this many minutes, unsaved cells are saved first and then the journal is closed; “Continue” reopens it with fresh data. 0 — off."
+
+msgctxt "accounts.session"
+msgid "Brauzer bağlandığı və ya kompüter söndüyü üçün sessiyanız təhlükəsizlik məqsədilə başa çatdı. Davam etmək üçün yenidən daxil olun."
+msgstr "Your session ended for security reasons because the browser was closed or the computer was turned off. Sign in again to continue."
+
+msgctxt "accounts.session"
+msgid "Uzun müddət heç bir əməliyyat edilmədiyi üçün sessiyanız başa çatdı. Davam etmək üçün yenidən daxil olun."
+msgstr "Your session ended because there was no activity for a long time. Sign in again to continue."
+
+msgctxt "accounts.session"
+msgid "Sessiyanız başa çatdı"
+msgstr "Your session has ended"
+
+msgctxt "accounts.session"
+msgid "Yadda saxlanmamış dəyişiklik varsa, yenidən daxil olduqdan sonra yoxlayın — jurnal xanaları bu brauzerdə qaralama kimi saxlanılır və bərpa olunur."
+msgstr "If there were unsaved changes, check them after signing in again — journal cells are kept as a draft in this browser and restored."
+
+msgctxt "accounts.session"
+msgid "Yenidən daxil ol"
+msgstr "Sign in again"
+
+msgctxt "accounts.session"
+msgid "Bu səhifədə qal"
+msgstr "Stay on this page"
+
+msgctxt "registrar.journal_autosave"
+msgid "Sessiya başa çatıb — yenidən daxil olun. Yazılmamış xanalar bu brauzerdə qaralama kimi saxlanılıb və girişdən sonra jurnalda bərpa olunacaq."
+msgstr "The session has ended — sign in again. Unsaved cells are kept as a draft in this browser and will be restored in the journal after you sign in."
+
+msgctxt "registrar.journal_idle"
+msgid "Dəyişikliklər yadda saxlanılır…"
+msgstr "Saving changes…"
+
+msgctxt "registrar.journal_idle"
+msgid "Bütün dəyişikliklər yadda saxlanılıb."
+msgstr "All changes have been saved."
+
+msgctxt "registrar.journal_idle"
+msgid "Bəzi xanalar yadda saxlanılmadı — onlar bu brauzerdə qaralama kimi qalıb və «Davam et» basanda bərpa olunacaq."
+msgstr "Some cells were not saved — they remain as a draft in this browser and will be restored when you press “Continue”."
+
+msgctxt "registrar.journal_idle"
+msgid "Jurnal bağlandı"
+msgstr "Journal closed"
+
+#, python-format
+msgctxt "registrar.journal_idle"
+msgid "%(minutes)s dəqiqə heç bir əməliyyat edilmədiyi üçün jurnal təhlükəsizlik məqsədilə bağlandı."
+msgstr "The journal was closed for security reasons because there was no activity for %(minutes)s minutes."
+
+msgctxt "registrar.journal_idle"
+msgid "Davam et"
+msgstr "Continue"
+
+msgctxt "registrar.journal_idle"
+msgid "Jurnallar siyahısı"
+msgstr "Journal list"

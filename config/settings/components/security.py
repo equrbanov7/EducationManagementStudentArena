@@ -65,6 +65,15 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 # elapsed.  Default: 3 days.
 SESSION_INACTIVITY_TIMEOUT = int(os.getenv("SESSION_INACTIVITY_TIMEOUT", str(3 * 24 * 60 * 60)))
 
+# Sahib 2026-10-27 (bax apps/accounts/session_policy.py; RİM «Sistem tənzimləmələri → Sessiya» bunları üstələyir):
+# * kimin sessiya kukisi brauzer bağlananda silinir — "off" | "staff" (müəllim + əməkdaş) | "all";
+# * açıq səhifədən bu qədər dəqiqə HEÇ BİR sorğu (fon pingi daxil) gəlməsə sessiya bitir (brauzer bağlanıb /
+#   kompüter sönüb / yuxu rejimi). 0 — söndürülü. Yalnız yuxarıdakı əhatəyə aiddir; imtahan gedişində tətbiq olunmur.
+SESSION_BROWSER_CLOSE_SCOPE = os.getenv("SESSION_BROWSER_CLOSE_SCOPE", "staff")
+SESSION_PRESENCE_MINUTES = int(os.getenv("SESSION_PRESENCE_MINUTES", "30"))
+# Açıq jurnalda bu qədər dəqiqə hərəkət olmasa — avtomatik yadda saxla, sonra bağla. 0 — söndürülü.
+JOURNAL_IDLE_CLOSE_MINUTES = int(os.getenv("JOURNAL_IDLE_CLOSE_MINUTES", "30"))
+
 # ---------------------------------------------------------------------------
 # Session storage backend (performance)
 # ---------------------------------------------------------------------------
@@ -107,6 +116,11 @@ CSRF_FAILURE_VIEW = "core.views.csrf_failure"
 # set by /i18n/setlang/.
 LANGUAGE_COOKIE_HTTPONLY = True
 LANGUAGE_COOKIE_SAMESITE = "Lax"
+# Sahib 2026-10-27: seçilmiş dil brauzer bağlananda itməsin. Django defoltu ``None`` — dil kukisi brauzer
+# sessiyası ilə silinir və növbəti açılışda dil brauzerin ``Accept-Language``-inə düşür (ingilis dilli Chrome-da
+# «Səhifə köhnəlib» / giriş səhifəsi ingiliscə çıxırdı). Sessiya kukisi indi müəllim/əməkdaş üçün brauzer
+# bağlananda silindiyindən dil kukisi ondan ayrı, 1 il yaşayır (şəxsi məlumat deyil — yalnız dil kodu).
+LANGUAGE_COOKIE_AGE = int(os.getenv("LANGUAGE_COOKIE_AGE", str(365 * 24 * 60 * 60)))
 
 # ---------------------------------------------------------------------------
 # Security headers (apply to all environments; stricter values in production)

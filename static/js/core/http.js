@@ -31,6 +31,21 @@
         if (window.console && window.console.warn) { window.console.warn(text); }
     }
 
+    function retryWithFreshToken(url, options) {
+        var session = window.EMSSession;
+        if (!session || typeof session.refreshToken !== "function") return null;
+        return session.refreshToken().then(function (token) {
+            token = token || EMSCore.getCsrfToken() || "";
+            var body = options.body;
+            // Gövdədəki `csrfmiddlewaretoken` başlıqdan ÜSTÜNDÜR (Django əvvəl POST sahəsinə baxır) — onu da yenilə.
+            if (body && typeof body.set === "function" && typeof body.has === "function" && body.has("csrfmiddlewaretoken")) {
+                body.set("csrfmiddlewaretoken", token);
+            }
+            var headers = Object.assign({}, options.headers || {}, { "X-CSRFToken": token });
+            return EMSCore.fetchJSON(url, Object.assign({}, options, { headers: headers, body: body, _csrfRetried: true }));
+        });
+    }
+
     EMSCore.fetchJSON = function fetchJSON(url, options) {
         options = options || {};
         var method = (options.method || "GET").toUpperCase();
@@ -76,6 +91,16 @@
                         // 2026-09-06) — səbəbi MƏRKƏZDƏ bir dəfə göstəririk.
                         if (response.status === 403 && payload && payload.view_as_blocked) {
                             notifyViewAsBlocked(payload.detail);
+                        }
+                        // Sahib 2026-10-27: köhnəlmiş CSRF tokeni — təzə tokenlə BİR dəfə avtomatik təkrar
+                        // (istifadəçi «səhifəni yeniləyin» görmür). Bitmiş sessiya — lokallaşdırılmış pəncərə
+                        // (core/session_keepalive.js). Hər iki halda çağıran yenə xətanı alır.
+                        if (response.status === 403 && payload && payload.csrf_failed && !options._csrfRetried) {
+                            var retry = retryWithFreshToken(url, options);
+                            if (retry) return retry;
+                        }
+                        if (response.status === 401 && payload && payload.session_expired && window.EMSSession) {
+                            window.EMSSession.expired(payload.message);
                         }
                         throw error;
                     }
