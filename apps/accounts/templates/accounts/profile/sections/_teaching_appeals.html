@@ -1,0 +1,10 @@
+{% comment %}«Fənnimə aid apellyasiyalar» (`teaching-appeals`, sahib 2026-10-27) — müəllimin öz fənləri üzrə tələbə
+apellyasiyaları (superadmin / RİM rəhbəri: bütün təşkilat), YALNIZ BAXIŞ. Data qapısı appeals tag-ındadır
+(`{% teaching_appeals_panel %}` əhatəni render vaxtı YENİDƏN hesablayır). CSS/JS panelin içində (AJAX swap).{% endcomment %}
+{% if 'teaching-appeals' in allowed_sections %}
+<section class="profile-section-panel profile-section--teaching-appeals {% if active_section == 'teaching-appeals' %}is-active{% endif %}"
+         data-profile-section-panel="teaching-appeals"
+         data-source-url="{{ profile_base_url }}?section=teaching-appeals">
+    {% include "appeals/teaching/_panel.html" %}
+</section>
+{% endif %}

@@ -15,8 +15,24 @@ RECOGNITION_SECTION_PARTIALS: dict[str, str] = {
 
 RECOGNITION_AJAX_SECTIONS: frozenset[str] = frozenset(RECOGNITION_SECTION_PARTIALS)
 
-#: ``sections_api``-a birləşən əlavə bölmələr (Əmək müqavilələri + Xarici nəticələrin tanınması).
-EXTRA_SECTION_PARTIALS: dict[str, str] = HR_CONTRACT_SECTION_PARTIALS | RECOGNITION_SECTION_PARTIALS
-EXTRA_AJAX_SECTIONS: frozenset[str] = HR_CONTRACT_AJAX_SECTIONS | RECOGNITION_AJAX_SECTIONS
+#: «Fənnimə aid apellyasiyalar» (apps.appeals, sahib 2026-10-27) — panel server-render olunur (data
+#: ``{% teaching_appeals_panel %}`` tag-ı ilə, əhatə render vaxtı yenidən yoxlanır); çekməcə və Excel ayrıca GET-dir.
+TEACHING_APPEALS_SECTION_PARTIALS: dict[str, str] = {
+    "teaching-appeals": "accounts/profile/sections/_teaching_appeals.html",
+}
 
-__all__ = ["EXTRA_AJAX_SECTIONS", "EXTRA_SECTION_PARTIALS", "RECOGNITION_AJAX_SECTIONS", "RECOGNITION_SECTION_PARTIALS"]
+#: ``sections_api``-a birləşən əlavə bölmələr (Əmək müqavilələri + Xarici nəticələrin tanınması).
+EXTRA_SECTION_PARTIALS: dict[str, str] = (
+    HR_CONTRACT_SECTION_PARTIALS | RECOGNITION_SECTION_PARTIALS | TEACHING_APPEALS_SECTION_PARTIALS
+)
+EXTRA_AJAX_SECTIONS: frozenset[str] = (
+    HR_CONTRACT_AJAX_SECTIONS | RECOGNITION_AJAX_SECTIONS | frozenset(TEACHING_APPEALS_SECTION_PARTIALS)
+)
+
+__all__ = [
+    "EXTRA_AJAX_SECTIONS",
+    "EXTRA_SECTION_PARTIALS",
+    "RECOGNITION_AJAX_SECTIONS",
+    "RECOGNITION_SECTION_PARTIALS",
+    "TEACHING_APPEALS_SECTION_PARTIALS",
+]

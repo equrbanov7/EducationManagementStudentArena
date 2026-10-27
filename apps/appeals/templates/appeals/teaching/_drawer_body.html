@@ -1,0 +1,110 @@
+{% load i18n exam_filters %}
+{% comment %}Çekməcə gövdəsi — `teaching_appeal_detail` JSON-unun `html`-i (yalnız-oxu). Sənəd endirmə yalnız sənədə
+icazəsi olanda (imtahan mərkəzi / superadmin — `services.documents.can_download_document`); müəllim adı görür.{% endcomment %}
+<div class="ta-detail" data-ta-detail="{{ row.id }}">
+    <div class="ta-detail__badges">
+        {% include "appeals/partials/_status_badge.html" with status=row.status label=row.status_label %}
+        {% include "appeals/partials/_mode_badge.html" %}
+        {% if row.category_label %}<span class="ta-cat ta-cat--{{ row.category }}">{{ row.category_label }}</span>{% endif %}
+    </div>
+
+    <div class="ta-detail__summary">
+        <div class="ta-stat">
+            <span class="ta-stat__label">{% trans "İlkin bal" context "appeals.teaching" %}</span>
+            <span class="ta-stat__value">{{ row.score_before|default:"—" }}</span>
+        </div>
+        <div class="ta-stat">
+            <span class="ta-stat__label">{% trans "Yeni bal" context "appeals.teaching" %}</span>
+            <span class="ta-stat__value">{{ row.score_after|default:"—" }}</span>
+        </div>
+        <div class="ta-stat">
+            <span class="ta-stat__label">{% trans "Dəyişmə" context "appeals.teaching" %}</span>
+            <span class="ta-stat__value">{% if row.delta_display %}<span class="ems-badge ems-badge--{{ row.delta_tone }} ems-badge--nowrap">{{ row.delta_display }}</span>{% else %}—{% endif %}</span>
+        </div>
+        <div class="ta-stat">
+            <span class="ta-stat__label">{% trans "Suallar" context "appeals.teaching" %}</span>
+            <span class="ta-stat__value">{{ row.item_count }}<small class="ta-stat__note">{% blocktrans trimmed with a=row.accepted r=row.rejected context "appeals.teaching" %}{{ a }} qəbul, {{ r }} rədd{% endblocktrans %}</small></span>
+        </div>
+    </div>
+
+    <dl class="ta-facts">
+        <div><dt>{% trans "Qrup" context "appeals.teaching" %}</dt><dd>{{ row.group|default:"—" }}</dd></div>
+        <div><dt>{% trans "Fənn" context "appeals.teaching" %}</dt><dd>{{ row.subject|default:"—" }}</dd></div>
+        <div><dt>{% trans "Fənni tədris edən" context "appeals.template" %}</dt><dd>{{ subject_teachers|default:"—" }}</dd></div>
+        <div><dt>{% trans "Qərarı verən müəllim" context "appeals.template" %}</dt><dd>{{ row.decided_by|default:"—" }}</dd></div>
+        <div><dt>{% trans "Göndərilib" context "appeals.teaching" %}</dt><dd>{{ row.created_at|date:"d.m.Y H:i" }}</dd></div>
+        <div><dt>{% trans "Qərar tarixi" context "appeals.teaching" %}</dt><dd>{% if row.decided_at %}{{ row.decided_at|date:"d.m.Y H:i" }}{% else %}{% trans "Gözlənilir" context "appeals.teaching" %}{% endif %}</dd></div>
+    </dl>
+
+    {% if appeal.reviewer_note %}
+    <section class="ta-block ta-block--note" aria-labelledby="taNoteTitle">
+        <h3 class="ta-block__title" id="taNoteTitle"><i class="fas fa-building-columns" aria-hidden="true"></i>{% trans "İmtahan mərkəzinin qeydi" context "appeals.teaching" %}</h3>
+        <p class="ta-block__text">{{ appeal.reviewer_note|linebreaksbr }}</p>
+    </section>
+    {% endif %}
+
+    <section class="ta-block" aria-labelledby="taItemsTitle">
+        <h3 class="ta-block__title" id="taItemsTitle"><i class="fas fa-list-check" aria-hidden="true"></i>{% trans "Etiraz olunan suallar" context "appeals.teaching" %}</h3>
+        <ol class="ta-items">
+        {% for item in items %}
+            <li class="ta-item">
+                <div class="ta-item__head">
+                    <span class="ta-item__no">{{ forloop.counter }}</span>
+                    <span class="ta-item__q">{{ item.question.text|striptags|truncatechars:320 }}</span>
+                    {% include "appeals/partials/_status_badge.html" with status=item.status label=item.get_status_display family="appeal_item" %}
+                </div>
+                <span class="ta-chip">{{ item.get_appeal_type_display }}</span>
+                <div class="ta-quote">
+                    <span class="ta-quote__label">{% trans "Tələbənin səbəbi" context "appeals.teaching" %}</span>
+                    <p class="ta-quote__text">{{ item.comment|linebreaksbr }}</p>
+                </div>
+                {% if item.reviewer_response %}
+                <div class="ta-quote ta-quote--answer">
+                    <span class="ta-quote__label">{% trans "İmtahan mərkəzinin cavabı" context "appeals.teaching" %}</span>
+                    <p class="ta-quote__text">{{ item.reviewer_response|linebreaksbr }}</p>
+                </div>
+                {% endif %}
+                {% with adj=item.score_adjustment %}{% if adj and adj.delta_points %}
+                <p class="ta-item__adj{% if adj.reverted %} is-reverted{% endif %}">
+                    <i class="fas {% if adj.reverted %}fa-rotate-left{% else %}fa-plus{% endif %}" aria-hidden="true"></i>
+                    {% if adj.reverted %}{% trans "Bal düzəlişi geri alınıb" context "appeals.teaching" %}{% else %}{% blocktrans trimmed with delta=adj.delta_points|floatformat:"-2" context "appeals.teaching" %}+{{ delta }} bal əlavə olunub{% endblocktrans %}{% endif %}
+                </p>
+                {% endif %}{% endwith %}
+                {% if item.decided_by_teacher %}
+                <p class="ta-item__by">{% trans "Qərarı verən müəllim" context "appeals.template" %}: <strong>{{ item.decided_by_teacher.get_full_name|default:item.decided_by_teacher.username }}</strong></p>
+                {% endif %}
+            </li>
+        {% endfor %}
+        </ol>
+    </section>
+
+    <section class="ta-block" aria-labelledby="taDocsTitle">
+        <h3 class="ta-block__title" id="taDocsTitle"><i class="fas fa-paperclip" aria-hidden="true"></i>{% trans "Əlavə olunmuş sənədlər" context "appeals.teaching" %}</h3>
+        {% if documents %}
+        <ul class="ta-docs">
+            {% for doc in documents %}
+            <li class="ta-doc">
+                <i class="fas fa-file-lines" aria-hidden="true"></i>
+                {% if doc.can_download %}
+                <a href="{{ doc.record.document|protected_media_url }}" target="_blank" rel="noopener">{{ doc.name }}</a>
+                {% else %}
+                <span>{{ doc.name }}</span>
+                <span class="ta-muted"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "yalnız imtahan mərkəzi endirə bilər" context "appeals.teaching" %}</span>
+                {% endif %}
+                <span class="ta-muted">{{ doc.record.created_at|date:"d.m.Y H:i" }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="ta-muted">{% trans "Qərara əsaslandırıcı sənəd əlavə olunmayıb." context "appeals.teaching" %}</p>
+        {% endif %}
+    </section>
+
+    <section class="ta-block" aria-labelledby="taTimelineTitle">
+        <h3 class="ta-block__title" id="taTimelineTitle"><i class="fas fa-clock-rotate-left" aria-hidden="true"></i>{% trans "Tarixçə" context "appeals.teaching" %}</h3>
+        {% trans "Apellyasiyanın tarixçəsi" context "appeals.teaching" as timeline_label %}
+        {% include "partials/ems_ui/_timeline.html" with timeline=timeline timeline_label=timeline_label %}
+    </section>
+
+    <p class="ta-readonly"><i class="fas fa-eye" aria-hidden="true"></i>{% trans "Yalnız baxış: qərarı imtahan mərkəzi verir." context "appeals.teaching" %}</p>
+</div>

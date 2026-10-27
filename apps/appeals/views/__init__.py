@@ -20,7 +20,9 @@ from .teacher import (
     key_correction_revoke,
     manage_appeals,
     review_appeal,
+    teaching_appeal_detail,
     teaching_appeals,
+    teaching_appeals_export,
 )
 from .teacher.teaching import build_teaching_appeals_context
 
@@ -32,6 +34,8 @@ __all__ = [
     "manage_appeals",
     "review_appeal",
     "teaching_appeals",
+    "teaching_appeal_detail",
+    "teaching_appeals_export",
     "build_teaching_appeals_context",
     "key_correction_apply",
     "key_correction_revoke",

@@ -1,0 +1,14 @@
+{% load i18n nav_icons %}
+{# «Fənnimə aid apellyasiyalar» (2026-10-27) — kabinet bölməsi, yalnız baxış. #}
+{% if 'teaching-appeals' in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=teaching-appeals"
+       data-section="teaching-appeals"
+       data-title="{% trans 'Fənnimə aid apellyasiyalar' context 'appeals.template.teaching' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'teaching-appeals' %}active{% endif %}">
+        {% nav_icon "scale" "sidebar-menu-icon" %}
+        <span class="sidebar-menu-text">{% trans "Fənnimə aid apellyasiyalar" context "appeals.template.teaching" %}</span>
+    </a>
+</li>
+{% endif %}

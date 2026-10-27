@@ -24,7 +24,6 @@ from __future__ import annotations
 
 from django.apps import apps as django_apps
 from django.contrib.auth import get_user_model
-from django.db.models import Q
 
 _DROPPED = "dropped"
 
@@ -173,47 +172,17 @@ def resolve_decision_teacher(appeal, raw_value):
 
 
 def taught_offering_ids(user, organization) -> list:
-    """Bu müəllimin tədris etdiyi açılışlar (jurnal sahibi və ya cədvəl slotunun müəllimi)."""
-    if organization is None or not getattr(user, "is_authenticated", False):
-        return []
-    try:
-        offering_model = django_apps.get_model("registrar", "CourseOffering")
-        slot_model = django_apps.get_model("registrar", "ScheduleSlot")
-    except LookupError:
-        return []
-    slot_offerings = slot_model.objects.filter(instructor_id=user.pk, organization_id=organization.pk)
-    if hasattr(slot_model, "deleted_at"):
-        slot_offerings = slot_offerings.filter(deleted_at__isnull=True)
-    return list(
-        offering_model.objects.filter(organization_id=organization.pk)
-        .filter(Q(instructor_id=user.pk) | Q(pk__in=slot_offerings.values("offering_id")))
-        .values_list("pk", flat=True)
-    )
+    """Bu müəllimin tədris etdiyi açılışlar (jurnal sahibi və ya cədvəl slotunun müəllimi) — ``teaching_scope``."""
+    from .teaching_scope import taught_offering_ids as _taught
+
+    return _taught(user, organization)
 
 
 def teaching_appeals_queryset(user, organization):
-    """Müəllimin tədris etdiyi açılışların tələbələrinin həmin fənn üzrə apellyasiyaları (yalnız-oxu)."""
-    from apps.appeals.models import Appeal
+    """Müəllimin tələbələrinin həmin fənn üzrə apellyasiyaları (bölünmüş jurnal payı daxil) — ``teaching_scope``."""
+    from .teaching_scope import teaching_appeals_queryset as _queryset
 
-    offering_ids = taught_offering_ids(user, organization)
-    enrollment_model = _enrollment_model()
-    if not offering_ids or enrollment_model is None:
-        return Appeal.objects.none()
-    pairs = enrollment_model.objects.filter(offering_id__in=offering_ids).exclude(status=_DROPPED)
-    subject_ids = set(pairs.values_list("offering__subject_id", flat=True))
-    student_ids = set(pairs.values_list("student_id", flat=True))
-    if not subject_ids or not student_ids:
-        return Appeal.objects.none()
-    candidates = Appeal.objects.filter(
-        organization_id=organization.pk, exam__subject_id__in=subject_ids, student_id__in=student_ids
-    )
-    allowed_pairs = set(pairs.values_list("student_id", "offering__subject_id"))
-    keep = [
-        pk
-        for pk, sid, subj in candidates.values_list("pk", "student_id", "exam__subject_id")
-        if (sid, subj) in allowed_pairs
-    ]
-    return Appeal.objects.filter(pk__in=keep)
+    return _queryset(user, organization)
 
 
 def teaches_appeal(user, appeal) -> bool:

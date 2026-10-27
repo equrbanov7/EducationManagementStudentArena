@@ -122,7 +122,9 @@ class RbacPermissionScopeQueryCacheTest(TestCase):
         # queries for the same build. 2026-09-13 (Codex audit §14/§21):
         # `_collect_actor_permissions` artıq `user`-ə bağlanmış aktiv-org üzvlük
         # siyahısını (roles.py / middleware) təzədən SELECT etmir → 4 → 3.
-        with self.assertNumQueries(3):
+        # 2026-10-27 (sahib): +1 — «Fənnimə aid apellyasiyalar» dərs deyən dekanda da görünür; müəllim rolu
+        # olmayan heyət üçün TƏK ``EXISTS`` (açılış sahibi / slot / jurnal payı) — 3 → 4.
+        with self.assertNumQueries(4):
             capabilities = _role_capabilities(user, profile)
         # `can_manage_registrar` requires ORG-WIDE scope specifically (`is_org_wide`);
         # this actor is UNIT-scoped, so it stays False — the other gates below only

@@ -109975,3 +109975,274 @@ msgstr "Continue"
 msgctxt "registrar.journal_idle"
 msgid "Jurnallar siyahısı"
 msgstr "Journal list"
+
+#, python-format
+msgctxt "appeals.teaching"
+msgid "%(a)s qəbul, %(r)s rədd"
+msgstr "%(a)s accepted, %(r)s rejected"
+
+#, python-format
+msgctxt "appeals.teaching"
+msgid "%(n)s sual"
+msgstr "%(n)s question(s)"
+
+#, python-format
+msgctxt "appeals.teaching"
+msgid "+%(delta)s bal əlavə olunub"
+msgstr "+%(delta)s points added"
+
+msgctxt "appeals.teaching"
+msgid "Ad, soyad, ata adı, istifadəçi adı…"
+msgstr "First name, last name, patronymic, username…"
+
+msgctxt "appeals.teaching"
+msgid "Aktiv təşkilat seçilməyib"
+msgstr "No active organisation selected"
+
+msgctxt "appeals.teaching"
+msgid "Apellyasiya"
+msgstr "Appeal"
+
+msgctxt "appeals.teaching"
+msgid "Apellyasiya tapılmadı və ya baxmaq icazəniz yoxdur."
+msgstr "The appeal was not found or you are not allowed to view it."
+
+msgctxt "appeals.teaching"
+msgid "Apellyasiyanın tarixçəsi"
+msgstr "Appeal history"
+
+msgctxt "appeals.teaching"
+msgid "Ata adı"
+msgstr "Patronymic"
+
+msgctxt "appeals.teaching"
+msgid "Bal"
+msgstr "Score"
+
+msgctxt "appeals.teaching"
+msgid "Bal düzəlişi geri alınıb"
+msgstr "Score adjustment reverted"
+
+msgctxt "appeals.teaching"
+msgid "Bax"
+msgstr "View"
+
+#, python-format
+msgctxt "appeals.teaching"
+msgid "Bax: %(student)s — %(exam)s"
+msgstr "View: %(student)s — %(exam)s"
+
+msgctxt "appeals.teaching"
+msgid "Cəmi"
+msgstr "Total"
+
+msgctxt "appeals.teaching"
+msgid "Dəyişmə"
+msgstr "Change"
+
+msgctxt "appeals.teaching"
+msgid "Etiraz olunan suallar"
+msgstr "Disputed questions"
+
+msgctxt "appeals.teaching"
+msgid "Excel-ə yüklə"
+msgstr "Download Excel"
+
+msgctxt "appeals.teaching"
+msgid "Fənn"
+msgstr "Subject"
+
+msgctxt "appeals.teaching"
+msgid "Göndərilib"
+msgstr "Submitted"
+
+msgctxt "appeals.teaching"
+msgid "Gözlənilir"
+msgstr "Pending"
+
+msgctxt "appeals.teaching"
+msgid "Hamısı"
+msgstr "All"
+
+msgctxt "appeals.teaching"
+msgid "Kateqoriya"
+msgstr "Category"
+
+#, python-format
+msgctxt "appeals.teaching"
+msgid "Nəticə: %(n)s müraciət"
+msgstr "Result: %(n)s appeal(s)"
+
+msgctxt "appeals.teaching"
+msgid "Orta bal dəyişməsi"
+msgstr "Average score change"
+
+msgctxt "appeals.teaching"
+msgid "Qrup"
+msgstr "Group"
+
+msgctxt "appeals.teaching"
+msgid "Qəbul"
+msgstr "Accepted"
+
+msgctxt "appeals.teaching"
+msgid "Qəbul / qismən"
+msgstr "Accepted / partly"
+
+msgctxt "appeals.teaching"
+msgid "Qəbul edildi (tam və ya qismən)"
+msgstr "Accepted (fully or partly)"
+
+msgctxt "appeals.teaching"
+msgid "Qərar"
+msgstr "Decision"
+
+msgctxt "appeals.teaching"
+msgid "Qərar tarixi"
+msgstr "Decision date"
+
+msgctxt "appeals.teaching"
+msgid "Qərara əsaslandırıcı sənəd əlavə olunmayıb."
+msgstr "No supporting document was attached to the decision."
+
+msgctxt "appeals.teaching"
+msgid "Qərarı verən müəllim"
+msgstr "Deciding teacher"
+
+msgctxt "appeals.teaching"
+msgid "Rədd"
+msgstr "Rejected"
+
+msgctxt "appeals.teaching"
+msgid "Status"
+msgstr "Appeal status"
+
+msgctxt "appeals.teaching"
+msgid "Sual sayı"
+msgstr "Questions"
+
+msgctxt "appeals.teaching"
+msgid "Suallar"
+msgstr "Questions"
+
+msgctxt "appeals.teaching"
+msgid "Süzgəcləri dəyişin və ya «Sıfırla» ilə hamısını göstərin."
+msgstr "Change the filters or use “Reset” to show everything."
+
+msgctxt "appeals.teaching"
+msgid "Süzgəcə uyğun apellyasiya yoxdur"
+msgstr "No appeals match the filters"
+
+msgctxt "appeals.teaching"
+msgid "Tarixdən"
+msgstr "From"
+
+msgctxt "appeals.teaching"
+msgid "Tarixçə"
+msgstr "History"
+
+msgctxt "appeals.teaching"
+msgid "Tarixədək"
+msgstr "To"
+
+msgctxt "appeals.teaching"
+msgid "Tədris etdiyiniz fənlər üzrə tələbələrinizin apellyasiyaları. Qərarı imtahan mərkəzi verir — burada yalnız baxış var."
+msgstr "Appeals of your students in the subjects you teach. The exam centre decides — this is a read-only view."
+
+msgctxt "appeals.teaching"
+msgid "Tələbə"
+msgstr "Student"
+
+msgctxt "appeals.teaching"
+msgid "Tələbə və ya imtahan"
+msgstr "Student or exam"
+
+msgctxt "appeals.teaching"
+msgid "Tələbənin səbəbi"
+msgstr "Student's reason"
+
+msgctxt "appeals.teaching"
+msgid "Təşkilatın bütün apellyasiyaları — nəzarət görünüşü. Qərarı imtahan mərkəzi verir, burada yalnız baxış var."
+msgstr "All appeals of the organisation — oversight view. The exam centre decides; this is a read-only view."
+
+msgctxt "appeals.teaching"
+msgid "Yadda saxlayan"
+msgstr "Saved by"
+
+msgctxt "appeals.teaching"
+msgid "Yalnız baxış: qərarı imtahan mərkəzi verir."
+msgstr "Read-only: the exam centre makes the decision."
+
+msgctxt "appeals.teaching"
+msgid "Yeni bal"
+msgstr "New score"
+
+msgctxt "appeals.teaching"
+msgid "Yükləmək üçün apellyasiya yoxdur."
+msgstr "There are no appeals to download."
+
+msgctxt "appeals.teaching"
+msgid "Yüklənir…"
+msgstr "Loading…"
+
+msgctxt "appeals.teaching"
+msgid "Yüklənmə alınmadı, yenidən cəhd edin."
+msgstr "Loading failed, please try again."
+
+#, python-format
+msgctxt "appeals.teaching"
+msgid "qismən: %(n)s"
+msgstr "partly: %(n)s"
+
+msgctxt "appeals.teaching"
+msgid "qərarlı müraciət başına"
+msgstr "per decided appeal"
+
+msgctxt "appeals.teaching"
+msgid "süzgəcə uyğun müraciət"
+msgstr "appeals matching the filters"
+
+msgctxt "appeals.teaching"
+msgid "yalnız imtahan mərkəzi endirə bilər"
+msgstr "only the exam centre can download"
+
+msgctxt "appeals.teaching"
+msgid "yeni bal"
+msgstr "new score"
+
+msgctxt "appeals.teaching"
+msgid "İlkin bal"
+msgstr "Original score"
+
+msgctxt "appeals.teaching"
+msgid "İmtahan"
+msgstr "Exam"
+
+msgctxt "appeals.teaching"
+msgid "İmtahan / fənn"
+msgstr "Exam / subject"
+
+msgctxt "appeals.teaching"
+msgid "İmtahan mərkəzinin cavabı"
+msgstr "Exam centre's response"
+
+msgctxt "appeals.teaching"
+msgid "İmtahan mərkəzinin qeydi"
+msgstr "Exam centre's note"
+
+msgctxt "appeals.teaching"
+msgid "İstifadəçi adı"
+msgstr "Username"
+
+msgctxt "appeals.teaching"
+msgid "Əlavə olunmuş sənədlər"
+msgstr "Attached documents"
+
+msgctxt "appeals.teaching"
+msgid "Əməliyyat"
+msgstr "Action"
+
+#, python-format
+msgctxt "appeals.teaching"
+msgid "Fayl ilk %(n)s sətirlə məhdudlaşdırılıb — süzgəcləri daraldıb yenidən yükləyin."
+msgstr "The file is limited to the first %(n)s rows — narrow the filters and download again."

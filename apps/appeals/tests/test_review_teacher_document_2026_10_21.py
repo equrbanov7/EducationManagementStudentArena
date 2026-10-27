@@ -232,13 +232,14 @@ class TeacherVisibilityTests(_ReviewSetup):
     def test_subject_teacher_sees_own_offering_appeals_only(self):
         self.assertIn(self.appeal, list(teaching_appeals_queryset(self.subject_teacher, self.org)))
         self.assertFalse(teaching_appeals_queryset(self.other_teacher, self.org).exists())
-        page = self._client(self.subject_teacher).get(reverse("appeals:teaching_appeals") + f"?open={self.appeal.id}")
+        # 2026-10-27: siyahı kabinet bölməsidir (``?section=teaching-appeals``) — köhnə URL ora yönləndirir.
+        section = reverse("accounts:profile") + f"?section=teaching-appeals&ta_open={self.appeal.id}"
+        page = self._client(self.subject_teacher).get(section)
         self.assertEqual(page.status_code, 200)
         self.assertContains(page, self.exam.title)
-        self.assertContains(page, f'id="appeal-{self.appeal.id}"', html=False)
-        self.assertContains(page, " open>", html=False)
+        self.assertContains(page, f'data-ta-open="{self.appeal.id}"', html=False)
         self.assertNotContains(page, "data-appeals-review-form", html=False)  # qərar hüququ yoxdur
-        other = self._client(self.other_teacher).get(reverse("appeals:teaching_appeals"))
+        other = self._client(self.other_teacher).get(reverse("accounts:profile") + "?section=teaching-appeals")
         self.assertNotContains(other, self.exam.title)
 
     def test_teacher_still_cannot_decide(self):
@@ -284,7 +285,7 @@ class NotificationTests(_ReviewSetup):
         self.assertEqual(teacher_notes.count(), 1)
         self.assertIn("Qərarı verən müəllim: Səbinə Fənnova", teacher_notes.get().message)
         self.assertIn("→", teacher_notes.get().message)
-        self.assertIn(reverse("appeals:teaching_appeals"), unquote(teacher_notes.get().link))
+        self.assertIn("section=teaching-appeals", unquote(teacher_notes.get().link))
         center_notes = InAppNotification.objects.filter(recipient=superhead, **marker)
         self.assertEqual(center_notes.count(), 1)
         self.assertIn(reverse("appeals:review_appeal", args=[self.appeal.id]), unquote(center_notes.get().link))

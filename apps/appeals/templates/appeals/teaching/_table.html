@@ -1,0 +1,70 @@
+{% load i18n %}
+{% comment %}Sətirlər `teaching_rows.build_row`-dandır. Desktopda cədvəl, ≤768 px-də kart (CSS, `data-label`).{% endcomment %}
+<div class="ems-tablescroll">
+    <table class="ems-table ta-table">
+        <caption class="sr-only">{% trans "Fənnimə aid apellyasiyalar" context "appeals.template.teaching" %}</caption>
+        <thead>
+            <tr>
+                <th scope="col">{% trans "Tələbə" context "appeals.teaching" %}</th>
+                <th scope="col">{% trans "İmtahan / fənn" context "appeals.teaching" %}</th>
+                <th scope="col">{% trans "Bal" context "appeals.teaching" %}</th>
+                <th scope="col">{% trans "Status" context "appeals.teaching" %}</th>
+                <th scope="col">{% trans "Göndərilib" context "appeals.teaching" %}</th>
+                <th scope="col">{% trans "Qərar" context "appeals.teaching" %}</th>
+                <th scope="col"><span class="sr-only">{% trans "Əməliyyat" context "appeals.teaching" %}</span></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for row in tp.rows %}
+            <tr class="ta-row" data-ta-row="{{ row.id }}">
+                <th scope="row" class="ta-cell ta-cell--student">
+                    <span class="ta-avatar" aria-hidden="true">{{ row.initials }}</span>
+                    <span class="ta-student">
+                        <span class="ta-student__name">{{ row.student_name }}</span>
+                        <span class="ta-student__meta">{% if row.group %}<span class="ta-group">{{ row.group }}</span>{% endif %}{{ row.student_username }}</span>
+                    </span>
+                </th>
+                <td class="ta-cell ta-cell--exam" data-label="{% trans 'İmtahan / fənn' context 'appeals.teaching' %}"><span class="ta-stack">
+                    <span class="ta-exam__title">{{ row.exam_title }}</span>
+                    <span class="ta-exam__meta">
+                        {% if row.category_label %}<span class="ta-cat ta-cat--{{ row.category }}">{{ row.category_label }}</span>{% endif %}
+                        {% if row.subject %}<span>{{ row.subject }}</span>{% endif %}
+                    </span>
+                    <span class="ta-exam__items">{% blocktrans trimmed with n=row.item_count context "appeals.teaching" %}{{ n }} sual{% endblocktrans %}{% if row.accepted or row.rejected %} · {% blocktrans trimmed with a=row.accepted r=row.rejected context "appeals.teaching" %}{{ a }} qəbul, {{ r }} rədd{% endblocktrans %}{% endif %}</span>
+                </span></td>
+                <td class="ta-cell ta-cell--score" data-label="{% trans 'Bal' context 'appeals.teaching' %}"><span class="ta-scorebox">
+                    {% if row.score_before or row.score_after %}
+                    <span class="ta-score">
+                        <span class="ta-score__old">{{ row.score_before|default:"—" }}</span>
+                        <i class="fas fa-arrow-right ta-score__arrow" aria-hidden="true"></i>
+                        <span class="sr-only">{% trans "yeni bal" context "appeals.teaching" %}</span>
+                        <span class="ta-score__new">{{ row.score_after|default:"—" }}</span>
+                    </span>
+                    {% endif %}
+                    {% if row.delta_display %}
+                    <span class="ems-badge ems-badge--{{ row.delta_tone }} ems-badge--nowrap ta-delta">{{ row.delta_display }}</span>
+                    {% elif not row.score_before and not row.score_after %}<span class="ta-muted">—</span>{% endif %}
+                </span></td>
+                <td class="ta-cell" data-label="{% trans 'Status' context 'appeals.teaching' %}">
+                    {% include "appeals/partials/_status_badge.html" with status=row.status label=row.status_label %}
+                </td>
+                <td class="ta-cell ta-cell--date" data-label="{% trans 'Göndərilib' context 'appeals.teaching' %}">
+                    <time datetime="{{ row.created_at|date:'c' }}"><span class="ta-date__day">{{ row.created_at|date:"d.m.Y" }}</span><span class="ta-date__time">{{ row.created_at|date:"H:i" }}</span></time>
+                </td>
+                <td class="ta-cell ta-cell--decision" data-label="{% trans 'Qərar' context 'appeals.teaching' %}"><span class="ta-stack">
+                    {% if row.decided_at %}
+                    <time datetime="{{ row.decided_at|date:'c' }}"><span class="ta-date__day">{{ row.decided_at|date:"d.m.Y" }}</span><span class="ta-date__time">{{ row.decided_at|date:"H:i" }}</span></time>
+                    {% if row.decided_by %}<span class="ta-decider">{{ row.decided_by }}</span>{% endif %}
+                    {% else %}<span class="ta-muted">{% trans "Gözlənilir" context "appeals.teaching" %}</span>{% endif %}
+                </span></td>
+                <td class="ta-cell ta-cell--action">
+                    <button type="button" class="ems-btn ems-btn--sm ta-view" data-ta-open-appeal="{{ row.id }}"
+                            aria-label="{% blocktrans with student=row.student_short exam=row.exam_title context 'appeals.teaching' %}Bax: {{ student }} — {{ exam }}{% endblocktrans %}">
+                        <i class="fas fa-eye" aria-hidden="true"></i><span>{% trans "Bax" context "appeals.teaching" %}</span>
+                    </button>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

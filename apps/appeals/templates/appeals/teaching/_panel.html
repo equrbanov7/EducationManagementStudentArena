@@ -1,0 +1,48 @@
+{% load i18n static appeals_teaching %}
+{% comment %}«Fənnimə aid apellyasiyalar» — kabinet bölməsi (`teaching-appeals`, sahib 2026-10-27). Kontekst
+`teaching_appeals_panel` tag-ından (`apps/appeals/views/teacher/teaching_panel.py`): əhatə render vaxtı yenidən
+hesablanır (müəllim — öz fənn × tələbə cütləri; superadmin / RİM rəhbəri — bütün təşkilat). YALNIZ BAXIŞ — qərarı
+imtahan mərkəzi verir. Sətrin «Bax» düyməsi çekməcəni `appeals:teaching_appeal_detail` JSON fraqmenti ilə doldurur
+(`teaching_appeals.js`); `?ta_open=<id>` (bildiriş keçidi) çekməcəni özü açır. CSP: inline kod yoxdur.{% endcomment %}
+{% teaching_appeals_panel as tp %}
+<link rel="stylesheet" href="{% static 'appeals/css/appeals/teaching.css' %}?v=20261027-ta4">
+<div class="ta" data-ta-root data-ta-section="teaching-appeals"
+     data-ta-detail-base="{{ tp.detail_base_url }}"
+     {% if tp.open_id %}data-ta-open="{{ tp.open_id }}"{% endif %}
+     data-i18n-loading="{% trans 'Yüklənir…' context 'appeals.teaching' %}"
+     data-i18n-error="{% trans 'Yüklənmə alınmadı, yenidən cəhd edin.' context 'appeals.teaching' %}">
+{% if tp.state == "no_org" %}
+    {% trans "Aktiv təşkilat seçilməyib" context "appeals.teaching" as st_title %}
+    {% include "partials/ems_ui/_empty.html" with state_title=st_title state_icon="fa-building" %}
+{% else %}
+    {% if tp.org_wide %}
+    {% trans "Təşkilatın bütün apellyasiyaları — nəzarət görünüşü. Qərarı imtahan mərkəzi verir, burada yalnız baxış var." context "appeals.teaching" as ta_subtitle %}
+    {% else %}
+    {% trans "Tədris etdiyiniz fənlər üzrə tələbələrinizin apellyasiyaları. Qərarı imtahan mərkəzi verir — burada yalnız baxış var." context "appeals.teaching" as ta_subtitle %}
+    {% endif %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=ta_subtitle header_actions_include="appeals/teaching/_actions.html" %}
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=tp.kpi_tiles %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="teaching-appeals" filter_prefix="ta_" filter_fields=tp.filter_fields filter_count_label=tp.count_label filter_auto=True filter_bootstrap=True %}
+    <div class="ems-tablewrap ta-tablewrap" data-ems-filter-target>
+    {% if tp.rows %}
+        {% include "appeals/teaching/_table.html" %}
+    {% elif tp.has_any %}
+        {% trans "Süzgəcə uyğun apellyasiya yoxdur" context "appeals.teaching" as st_title %}
+        {% trans "Süzgəcləri dəyişin və ya «Sıfırla» ilə hamısını göstərin." context "appeals.teaching" as st_body %}
+        {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-filter-circle-xmark" %}
+    {% else %}
+        {% trans "Apellyasiya yoxdur" context "appeals.template.teaching" as st_title %}
+        {% trans "Tədris etdiyiniz fənlər üzrə tələbələrinizin apellyasiyası olanda burada görünəcək." context "appeals.template.teaching" as st_body %}
+        {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-scale-balanced" %}
+    {% endif %}
+    </div>
+    {% if tp.rows %}
+    <div class="ta-pagination">
+        {% include "partials/_pagination.html" with page_obj=tp.page_obj page_param="ta_page" extra_query=tp.pagination_query %}
+    </div>
+    {% endif %}
+    {% trans "Apellyasiya" context "appeals.teaching" as dr_title %}
+    {% include "partials/ems_ui/_drawer.html" with drawer_id="taAppealDrawer" drawer_title=dr_title drawer_xl=True drawer_body_include="appeals/teaching/_drawer_shell.html" %}
+{% endif %}
+</div>
+<script defer src="{% static 'appeals/js/teaching_appeals.js' %}?v=20261027-ta4"></script>

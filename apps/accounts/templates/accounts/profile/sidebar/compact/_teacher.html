@@ -36,7 +36,7 @@ göstərilir. «İmtahan Nəzarət Sistemi» nəzarətçi təyin olunmuş müəl
 </li>
 {% endif %}
 
-{% if "my-exams" in allowed_sections or "my-courses" in allowed_sections or "pending-review" in allowed_sections or "subject-folder-review" in allowed_sections or "review-results" in allowed_sections or role_capabilities.can_access_final_center %}
+{% if "my-exams" in allowed_sections or "my-courses" in allowed_sections or "pending-review" in allowed_sections or "subject-folder-review" in allowed_sections or "review-results" in allowed_sections or "teaching-appeals" in allowed_sections or role_capabilities.can_access_final_center %}
 <li class="sidebar-section" data-sidebar-section="assessment">
     <div class="sidebar-section-label sidebar-menu-group-label" id="sidebarSectionAssessment"><span class="sidebar-menu-group-title">{% trans "İmtahan və qiymətləndirmə" context "profile.sidebar" %}</span></div>
     <ul class="sidebar-section-items" aria-labelledby="sidebarSectionAssessment">
@@ -45,6 +45,7 @@ göstərilir. «İmtahan Nəzarət Sistemi» nəzarətçi təyin olunmuş müəl
         {% include "accounts/profile/sidebar/items/_pending_review.html" %}
         {% include "accounts/profile/sidebar/items/_subject_folder_review.html" %}
         {% include "accounts/profile/sidebar/items/_review_results.html" %}
+        {% include "accounts/profile/sidebar/items/_teaching_appeals.html" %}
         {% include "accounts/profile/sidebar/items/_final_center.html" %}
     </ul>
 </li>

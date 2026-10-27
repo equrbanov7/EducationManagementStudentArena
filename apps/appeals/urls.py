@@ -12,7 +12,10 @@ urlpatterns = [
     path("hall-done/", views.hall_appeal_done, name="hall_appeal_done"),
     # ── Teacher / reviewer ───────────────────────────────────────────────
     # 2026-10-21: müəllimin «Fənnimə aid apellyasiyalar» (yalnız-oxu).
+    # 2026-10-27: siyahı kabinet bölməsidir (``?section=teaching-appeals``); köhnə URL ora yönləndirir.
     path("teaching/", views.teaching_appeals, name="teaching_appeals"),
+    path("teaching/export.xlsx", views.teaching_appeals_export, name="teaching_appeals_export"),
+    path("teaching/<int:appeal_id>/", views.teaching_appeal_detail, name="teaching_appeal_detail"),
     path("manage/", views.manage_appeals, name="manage_appeals"),
     path("manage/<int:appeal_id>/", views.review_appeal, name="review_appeal"),
     # 2026-10-13 (gecə): cavab açarı düzəlişi — sualı cavablayan BÜTÜN tələbələr üçün (audit olunur).
