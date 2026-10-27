@@ -511,3 +511,54 @@ gh release create legacy-delta-syllabi-20261027 delta.json.gz.enc --draft --titl
 
 Geri qaytarma: audit sətrinin (`legacy_import.delta_batch`, `resource_id` = tag) `created.syllabus_versions`
 id-ləri — həmin versiyaların baza dosyeləri (yalnız bu qaçışda yaranıb) silinə bilər.
+
+## 13. Bir sillabus — bir neçə jurnal (`syllabi_share`, `SyllabusShare`, 2026-10-27)
+
+Sahib: «müəllim köhnə jurnalda o sillabusu 2 qrup üçün istifadə edib; jurnalı aktivləşdirərkən indi o bir qrup üçün
+görünür, 2-ci üçün yox … köhnədən gələndə elə olsun — bir sillabus» + «müəllim istəsə eynisini istifadə etsin eyni
+qrupa öz yerində» + «müəllimin köhnə illərdəki sillabusları görünməsin».
+
+* **Model** — `syllabus.SyllabusShare` (migrasiya `syllabus.0008`, RLS + eyni-təşkilat triggerləri): dosye öz açılışında
+  qalır, əlavə açılış ona SURƏTSİZ bağlanır. Bir açılış ən çox bir paylaşıma; açılışın öz dosyesi üstündür (öz dosye
+  yaradılanda paylaşım silinir). Paylaşım yalnız açılışın CARİ müəllimi dosyenin müəllifi / öz açılışının müəllimi
+  olanda tətbiq olunur (təhvildən sonra yeni müəllim köhnə müəllimin sillabusunu görmür).
+* **Həll** — `syllabus_for_offering` (öz → paylaşım → fənn+semestr → baza), `student_syllabus_map`,
+  `approved_week_rows_for_offerings` (`link_lesson_syllabus_weeks`), `semester_readiness` eyni pilləni görür. Təsdiq,
+  versiya, tamamlanma faizi BİRDİR.
+* **UI** — təkrar istifadə dialoqunda «Eyni sillabusu bu qrupda da istifadə et (bir sillabus)» (yalnız öz sillabusu,
+  eyni fənn + semestr, sillabussuz qrup); redaktorda «Bir sillabus — bir neçə jurnal» bloku: paylaşılan qruplar
+  («Ayır») + sillabussuz öz qruplarınız (seçim komponenti, «Bu qrupda da istifadə et»); siyahıda «Həmçinin bu
+  qruplarda istifadə olunur». Müəllim (geniş baxış əhatəsi YOX) mənbə kimi yalnız CARİ tədris ilinin və semestrsiz
+  baza dosyenin sillabusunu görür / işlədir (`reuse.source_old_year`).
+* **Delta** — `syllabi` fazası eyni köhnə sillabusu eyni müəllimin qruplarına BİR dəfə köçürür, qalanlarını paylaşır;
+  `syllabi_backfill` fazası ilə birgə həmişə `syllabi_share` də işləyir; `--teacher-syllabi` paketi indi jurnalların
+  `groups_id`-sini və `groups` bölməsini saxlayır.
+* **Təmir** — `share_legacy_syllabi --bundle <paket> --organization qku [--teacher ad.soyad] [--expected-sha256 …]`
+  (defolt dry-run; `--apply`). Eyni köhnə sillabusu işlədən qruplardan birinin köçmüş dosyesi (məzmun izi: həftəlik
+  mövzular + təsvir + nəticələr) lövbərdir; sillabusu OLMAYAN qruplar ona bağlanır. FILL-ONLY, idempotent.
+  Stdout: bir `syllabi_share: açar=say …` sətri.
+
+### 13.1 Prod nüsxəsində (`ems_prod_1027`, klon, `delta5-graduation-owner-20261025` paketi)
+
+* 869 köhnə sillabus; 252-si eyni müəllimin 2+ qrupunda (665 açılış); 223-ünün lövbəri var, qalan **372 qrupun ÖZ
+  surəti artıq var** (`own_copy` — fill-only qaydası ilə toxunulmur), 26 dəstdə heç bir qrupa köçməyib (`no_anchor`).
+  Nəticə: `linked=0` — bu paketlə cari prod-da paylaşılacaq boş qrup YOXDUR.
+* Prod-un «sillabussuz» 51 açılışı (eyni müəllimin eyni fəndə başqa qrupunda sillabus var) köhnə sistemdə həmin
+  sillabusu işlədən jurnala bağlı deyil (əkiz fənn kartı, tapşırıq idxalı ilə açılan qrup və s.) — onları müəllim
+  dialoqda «Eyni sillabusu bu qrupda da istifadə et» ilə özü bağlayır.
+* Simulyasiya (klonda 341 toxunulmamış surət passiv edildi — «köhnə idxal bir dəfə köçürsəydi» vəziyyəti):
+  dry-run `linked=314` → apply `linked=314` → dry-run `linked=0, covered=340`; sillabussuz açılış 731 → 417;
+  314 paylaşılan açılışın hamısında jurnal, tələbə, həftəlik plan və «Semestr hazırlığı» lövbəri görür.
+
+### 13.2 Prod addımları (hər biri sahibin «hə»sı ilə; canlı imtahan günü deyil)
+
+1. Deploy (`syllabus.0008` migrasiyası).
+2. TƏZƏ paket: `legacy_delta_extract … --teacher-syllabi` (indi qruplarla) → şifrələ → draft release
+   `legacy-delta-syllabi-<tarix>` (asset `delta.json.gz.enc`), §12.1 ilə eyni.
+3. `prod-data-ops` → `command=share_legacy_syllabi`, `roster_tag=legacy-delta-syllabi-<tarix>`, `batch=<sha256>`,
+   `teacher` boş, `apply` işarəsiz → dry-run; `syllabi_share: … linked=N` sətrinə bax.
+4. «Hə»dan sonra eyni girişlər + `apply=true`, `confirm=APPLY` (əvvəl backup). Yoxlama: təkrar dry-run → `linked=0`.
+5. (§12) `legacy_delta_apply` eyni paketlə `syllabi_backfill` — artıq `syllabi_share` də daxildir.
+
+Geri qaytarma: audit sətri (`legacy_import.delta_batch`, tag) `created.syllabus_shares` = bağlanan açılışların id-ləri
+→ həmin açılışların `SyllabusShare` sətirləri silinir (və ya müəllim redaktorda «Ayır»).

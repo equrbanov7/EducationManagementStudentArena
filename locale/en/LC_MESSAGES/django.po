@@ -110845,3 +110845,105 @@ msgstr "Select at least one group."
 msgctxt "exams.assignees"
 msgid "Ən azı bir tələbə seçin."
 msgstr "Select at least one student."
+
+msgctxt "syllabus.model"
+msgid "Müəllimin seçimi"
+msgstr "Teacher's choice"
+
+msgctxt "syllabus.model"
+msgid "Köhnə sistem (bir sillabus bir neçə jurnalda)"
+msgstr "Legacy system (one syllabus in several journals)"
+
+msgctxt "syllabus.model"
+msgid "paylaşılan sillabus"
+msgstr "shared syllabus"
+
+msgctxt "syllabus.model"
+msgid "paylaşılan sillabuslar"
+msgstr "shared syllabi"
+
+msgctxt "accounts.syllabus"
+msgid "eyni sillabusu istifadə edir"
+msgstr "uses the same syllabus"
+
+msgctxt "accounts.syllabus"
+msgid "köhnə sistemdən"
+msgstr "from the legacy system"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Bu qrup da %(group)s qrupunun sillabusunu istifadə edir — bir sillabus: təsdiq və dəyişikliklər hər iki jurnal üçün ortaqdır."
+msgstr "This group now uses the syllabus of group %(group)s — one syllabus: approval and changes are shared by both journals."
+
+msgctxt "accounts.syllabus"
+msgid "Paylaşım ayrıldı — bu qrupun jurnalı üçün ayrıca sillabus yaradın."
+msgstr "Sharing removed — create a separate syllabus for this group's journal."
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Həmçinin bu qruplarda istifadə olunur: %(groups)s"
+msgstr "Also used in these groups: %(groups)s"
+
+msgctxt "accounts.syllabus"
+msgid "Keçmiş tədris illərinin sillabusu mənbə kimi istifadə olunmur — cari ilin sillabusunu seçin."
+msgstr "Syllabi from past academic years cannot be used as a source — choose a syllabus of the current year."
+
+msgctxt "accounts.syllabus"
+msgid "Bu qrupun öz sillabusu var — eyni sillabusu yalnız sillabusu olmayan qrupda istifadə etmək olar."
+msgstr "This group already has its own syllabus — the same syllabus can only be used in a group without one."
+
+msgctxt "accounts.syllabus"
+msgid "Bu qrup artıq başqa sillabusu istifadə edir."
+msgstr "This group already uses another syllabus."
+
+msgctxt "accounts.syllabus"
+msgid "Bu qrup artıq bu sillabusu istifadə edir."
+msgstr "This group already uses this syllabus."
+
+msgctxt "accounts.syllabus"
+msgid "Bu qrup bu sillabusu istifadə etmir."
+msgstr "This group does not use this syllabus."
+
+msgctxt "accounts.syllabus"
+msgid "Bir sillabus — bir neçə jurnal"
+msgstr "One syllabus — several journals"
+
+msgctxt "accounts.syllabus"
+msgid "Bu sillabus aşağıdakı qrupların jurnalında da öz yerində istifadə olunur. Təsdiq, dəyişikliklər və həftəlik plan hamısı üçün ortaqdır."
+msgstr "This syllabus is also used as is in the journals of the groups below. Approval, changes and the weekly plan are shared by all of them."
+
+msgctxt "accounts.syllabus"
+msgid "Bu fənn üzrə başqa qrupunuzun jurnalında da eyni sillabusu öz yerində istifadə edə bilərsiniz (məsələn, potok dərsi) — yeni sillabus yaradılmır."
+msgstr "You can use the same syllabus as is in the journal of another of your groups for this subject (for example, a stream lecture) — no new syllabus is created."
+
+msgctxt "accounts.syllabus"
+msgid "Qrup seçin"
+msgstr "Choose a group"
+
+msgctxt "accounts.syllabus"
+msgid "Qrup axtar…"
+msgstr "Search group…"
+
+msgctxt "accounts.syllabus"
+msgid "Uyğun qrup yoxdur"
+msgstr "No matching group"
+
+msgctxt "accounts.syllabus"
+msgid "Bu qrupda da istifadə et"
+msgstr "Use in this group too"
+
+msgctxt "accounts.syllabus"
+msgid "Eyni sillabusu bu qrupda da istifadə et (bir sillabus)"
+msgstr "Use the same syllabus in this group too (one syllabus)"
+
+msgctxt "accounts.syllabus"
+msgid "Yeni sillabus yaradılmır — bu qrupun jurnalı eyni sillabusu öz yerində istifadə edir. Təsdiq, dəyişikliklər və həftəlik plan hər iki qrup üçün ortaqdır."
+msgstr "No new syllabus is created — this group's journal uses the same syllabus as is. Approval, changes and the weekly plan are shared by both groups."
+
+msgctxt "accounts.syllabus"
+msgid "Paylaşım ayrılsın?"
+msgstr "Remove sharing?"
+
+msgctxt "accounts.syllabus"
+msgid "Bu qrupun jurnalı artıq bu sillabusu göstərməyəcək və «Sillabus yoxdur» vəziyyətinə qayıdacaq. Sillabusun özü və digər qruplar dəyişmir."
+msgstr "This group's journal will no longer show this syllabus and returns to «No syllabus». The syllabus itself and the other groups do not change."

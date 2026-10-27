@@ -111870,3 +111870,105 @@ msgstr "Wählen Sie mindestens eine Gruppe."
 msgctxt "exams.assignees"
 msgid "Ən azı bir tələbə seçin."
 msgstr "Wählen Sie mindestens eine Person."
+
+msgctxt "syllabus.model"
+msgid "Müəllimin seçimi"
+msgstr "Wahl der Lehrkraft"
+
+msgctxt "syllabus.model"
+msgid "Köhnə sistem (bir sillabus bir neçə jurnalda)"
+msgstr "Altsystem (ein Syllabus in mehreren Kursbüchern)"
+
+msgctxt "syllabus.model"
+msgid "paylaşılan sillabus"
+msgstr "geteilter Syllabus"
+
+msgctxt "syllabus.model"
+msgid "paylaşılan sillabuslar"
+msgstr "geteilte Syllabi"
+
+msgctxt "accounts.syllabus"
+msgid "eyni sillabusu istifadə edir"
+msgstr "nutzt denselben Syllabus"
+
+msgctxt "accounts.syllabus"
+msgid "köhnə sistemdən"
+msgstr "aus dem Altsystem"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Bu qrup da %(group)s qrupunun sillabusunu istifadə edir — bir sillabus: təsdiq və dəyişikliklər hər iki jurnal üçün ortaqdır."
+msgstr "Diese Gruppe nutzt jetzt den Syllabus der Gruppe %(group)s — ein Syllabus: Freigabe und Änderungen gelten für beide Kursbücher."
+
+msgctxt "accounts.syllabus"
+msgid "Paylaşım ayrıldı — bu qrupun jurnalı üçün ayrıca sillabus yaradın."
+msgstr "Freigabe entfernt — legen Sie für das Kursbuch dieser Gruppe einen eigenen Syllabus an."
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Həmçinin bu qruplarda istifadə olunur: %(groups)s"
+msgstr "Wird auch in diesen Gruppen genutzt: %(groups)s"
+
+msgctxt "accounts.syllabus"
+msgid "Keçmiş tədris illərinin sillabusu mənbə kimi istifadə olunmur — cari ilin sillabusunu seçin."
+msgstr "Syllabi früherer Studienjahre können nicht als Quelle dienen — wählen Sie einen Syllabus des laufenden Jahres."
+
+msgctxt "accounts.syllabus"
+msgid "Bu qrupun öz sillabusu var — eyni sillabusu yalnız sillabusu olmayan qrupda istifadə etmək olar."
+msgstr "Diese Gruppe hat bereits einen eigenen Syllabus — derselbe Syllabus kann nur in einer Gruppe ohne Syllabus genutzt werden."
+
+msgctxt "accounts.syllabus"
+msgid "Bu qrup artıq başqa sillabusu istifadə edir."
+msgstr "Diese Gruppe nutzt bereits einen anderen Syllabus."
+
+msgctxt "accounts.syllabus"
+msgid "Bu qrup artıq bu sillabusu istifadə edir."
+msgstr "Diese Gruppe nutzt diesen Syllabus bereits."
+
+msgctxt "accounts.syllabus"
+msgid "Bu qrup bu sillabusu istifadə etmir."
+msgstr "Diese Gruppe nutzt diesen Syllabus nicht."
+
+msgctxt "accounts.syllabus"
+msgid "Bir sillabus — bir neçə jurnal"
+msgstr "Ein Syllabus — mehrere Kursbücher"
+
+msgctxt "accounts.syllabus"
+msgid "Bu sillabus aşağıdakı qrupların jurnalında da öz yerində istifadə olunur. Təsdiq, dəyişikliklər və həftəlik plan hamısı üçün ortaqdır."
+msgstr "Dieser Syllabus wird auch in den Kursbüchern der folgenden Gruppen genutzt. Freigabe, Änderungen und Wochenplan gelten für alle."
+
+msgctxt "accounts.syllabus"
+msgid "Bu fənn üzrə başqa qrupunuzun jurnalında da eyni sillabusu öz yerində istifadə edə bilərsiniz (məsələn, potok dərsi) — yeni sillabus yaradılmır."
+msgstr "Sie können denselben Syllabus auch im Kursbuch einer anderen Ihrer Gruppen in diesem Fach nutzen (z. B. gemeinsame Vorlesung) — es wird kein neuer Syllabus angelegt."
+
+msgctxt "accounts.syllabus"
+msgid "Qrup seçin"
+msgstr "Gruppe wählen"
+
+msgctxt "accounts.syllabus"
+msgid "Qrup axtar…"
+msgstr "Gruppe suchen…"
+
+msgctxt "accounts.syllabus"
+msgid "Uyğun qrup yoxdur"
+msgstr "Keine passende Gruppe"
+
+msgctxt "accounts.syllabus"
+msgid "Bu qrupda da istifadə et"
+msgstr "Auch in dieser Gruppe nutzen"
+
+msgctxt "accounts.syllabus"
+msgid "Eyni sillabusu bu qrupda da istifadə et (bir sillabus)"
+msgstr "Denselben Syllabus auch in dieser Gruppe nutzen (ein Syllabus)"
+
+msgctxt "accounts.syllabus"
+msgid "Yeni sillabus yaradılmır — bu qrupun jurnalı eyni sillabusu öz yerində istifadə edir. Təsdiq, dəyişikliklər və həftəlik plan hər iki qrup üçün ortaqdır."
+msgstr "Es wird kein neuer Syllabus angelegt — das Kursbuch dieser Gruppe nutzt denselben Syllabus. Freigabe, Änderungen und Wochenplan gelten für beide Gruppen."
+
+msgctxt "accounts.syllabus"
+msgid "Paylaşım ayrılsın?"
+msgstr "Freigabe entfernen?"
+
+msgctxt "accounts.syllabus"
+msgid "Bu qrupun jurnalı artıq bu sillabusu göstərməyəcək və «Sillabus yoxdur» vəziyyətinə qayıdacaq. Sillabusun özü və digər qruplar dəyişmir."
+msgstr "Das Kursbuch dieser Gruppe zeigt diesen Syllabus nicht mehr und kehrt zu «Kein Syllabus» zurück. Der Syllabus selbst und die anderen Gruppen bleiben unverändert."

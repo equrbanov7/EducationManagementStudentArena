@@ -37,10 +37,12 @@ from core.constants import AcademicPeriodType
 pytestmark = pytest.mark.django_db
 
 
-def _previous_period(world, *, year="2024/2025", start="2024-09-01", end="2025-01-31"):
+def _previous_period(world, *, year="2025/2026", start="2026-02-01", end="2026-06-30", name="Yaz"):
+    """Mənbə semestri. Sahib 2026-10-27: müəllim yalnız CARİ tədris ilinin (və semestrsiz bazanın) sillabusunu
+    görür / köçürür — ona görə «başqa semestr» defolt olaraq cari ilin digər semestridir."""
     return AcademicPeriod.objects.create(
         organization=world["org"],
-        name="Payız",
+        name=name,
         period_type=AcademicPeriodType.SEMESTER,
         academic_year=year,
         start_date=start,
@@ -130,7 +132,7 @@ def test_copy_previous_adjusts_hours_and_refuses_same_period_sources(world):
 
 def test_copy_previous_scope_matches_copy_from_previous(world):
     foreign, _version = approved_syllabus(world, "o5", user_key="teacher2")
-    foreign = _move_to(foreign, _previous_period(world, year="2023/2024", start="2023-09-01", end="2024-01-31"))
+    foreign = _move_to(foreign, _previous_period(world, start="2026-07-01", end="2026-08-31", name="Yay"))
     with pytest.raises(TransitionDenied) as denied:
         services.reuse.copy_adjust(source=foreign, target=target(world, "o2"), actor=actor(world), previous=True)
     assert denied.value.code == rules.CODE_COPY_OUT_OF_SCOPE
@@ -153,7 +155,7 @@ def test_offering_row_copy_previous_end_to_end(world):
     [row] = options["siblings"]
     assert row["id"] == str(world["source"].pk)
     assert (row["can_copy"], row["can_link"]) == (True, False)
-    assert row["group"] == f"{world['last_year'].year_display} · Payız"
+    assert row["group"] == f"{world['last_year'].year_display} · Yaz"
 
     response = _post(client, {"action": "copy_previous", "source": row["id"], "offering": str(offering.pk)})
     assert response.status_code == 200, response.content
@@ -161,7 +163,7 @@ def test_offering_row_copy_previous_end_to_end(world):
     assert Syllabus.objects.filter(offering=offering).count() == 1
     # Oxuya bilmədiyi mənbə və başqasının açılışı — 404.
     foreign, _version = approved_syllabus(world, "o5", user_key="teacher2")
-    foreign = _move_to(foreign, _previous_period(world, year="2023/2024", start="2023-09-01", end="2024-01-31"))
+    foreign = _move_to(foreign, _previous_period(world, start="2026-07-01", end="2026-08-31", name="Yay"))
     assert (
         _post(client, {"action": "copy_previous", "source": str(foreign.pk), "offering": str(offering.pk)}).status_code
         == 404
@@ -195,9 +197,9 @@ def test_list_offers_copy_previous_on_missing_and_blank_draft_rows(world):
     # Bu semestrdə də qonşu var — «Mövcud sillabusdan istifadə et» birinci, «Keçən ildən köçür» yanında.
     assert _keys(rows, world["offerings"]["o2"].pk) == ["reuse", "copy", "create"]
     assert _keys(rows, draft.pk) == ["resume", "copy"]
-    # Keçmiş ilin dosyesi müəllim siyahısında görünmür (sahib 2026-10-27: yalnız cari tədris ili),
-    # amma «Keçən ildən köçür» onu mənbə kimi tapır (yuxarıdakı «copy» əməli).
-    assert str(world["source"].pk) not in rows
+    # Cari ilin digər semestrinin dosyesi siyahıdadır və «Keçən ildən köçür» onu mənbə kimi tapır;
+    # keçmiş tədris illərinin dosyesi isə nə siyahıda, nə mənbələrdədir (bax test_reuse_year_gate_2026_10_27).
+    assert str(world["source"].pk) in rows
 
 
 def test_list_hides_copy_previous_without_a_source(world):

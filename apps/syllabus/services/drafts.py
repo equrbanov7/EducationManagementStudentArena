@@ -235,6 +235,11 @@ def create_draft(
         chair_unit=chair_unit,
         author=author or actor.user,
     )
+    if offering is not None:
+        # Açılışın ÖZ dosyesi paylaşımdan üstündür (sahib 2026-10-27) — köhnə paylaşım bağı silinir (audit).
+        from .sharing import release_offering
+
+        release_offering(organization=organization, offering=offering, user=actor.user, request=request)
     version = SyllabusVersion.objects.create(
         organization=organization,
         syllabus=syllabus,

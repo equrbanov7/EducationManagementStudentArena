@@ -55,6 +55,47 @@ def has_broad_view_scope(actor) -> bool:
     return bool(scope.is_org_wide or scope.is_unit_scoped)
 
 
+def current_academic_year(organization) -> str:
+    """Cari semestrin (``is_current``) tədris ili, tapılmasa ``""`` — modul ``organizations``-ı idxal etmir."""
+    if organization is None:
+        return ""
+    period_model = Syllabus._meta.get_field("period").related_model
+    organization_id = getattr(organization, "pk", organization)
+    return (
+        period_model.objects.filter(organization_id=organization_id, is_current=True)
+        .order_by("-start_date")
+        .values_list("academic_year", flat=True)
+        .first()
+        or ""
+    )
+
+
+def current_year_source_q(organization, actor):
+    """Müəllimin (geniş baxış əhatəsi YOX) mənbə qapısı — yalnız CARİ tədris ili + semestrsiz baza dosye.
+
+    Sahib 2026-10-27: «müəllimin köhnə illərdəki yazdığı sillabuslar görünməsin — sistemdə 2025/2026-cı illərdən
+    əvvələ aiddir». Siyahı (``accounts`` ``current_year_only``) ilə eyni qayda; köçürmənin baza dosyesi
+    (semestrsiz, açılışsız — cari jurnallar üçün gətirilib) görünür qalır. Rəhbər üçün ``None`` (məhdudiyyət yox);
+    cari semestr təyin olunmayıbsa da ``None``.
+    """
+    if actor is None or has_broad_view_scope(actor):
+        return None
+    year = current_academic_year(organization)
+    if not year:
+        return None
+    return Q(period__academic_year=year) | Q(period__isnull=True, offering__isnull=True)
+
+
+def in_current_year(syllabus, actor) -> bool:
+    """Tək dosye üçün :func:`current_year_source_q` — POST-la göndərilən köhnə il mənbəyi rədd olunur."""
+    if syllabus is None or actor is None or has_broad_view_scope(actor):
+        return True
+    if syllabus.period_id is None:
+        return syllabus.offering_id is None
+    year = current_academic_year(syllabus.organization_id)
+    return not year or syllabus.period.academic_year == year
+
+
 def _scope_filter(queryset, actor):
     """Aktorun görə bildiyi sillabuslar (fail-closed)."""
     if actor.is_superadmin:
@@ -287,6 +328,9 @@ def audit_entries(syllabus, *, limit: int = 100):
 
 __all__ = [
     "QUEUE_SORT_KEYS",
+    "current_academic_year",
+    "current_year_source_q",
+    "in_current_year",
     "SORT_KEYS",
     "audit_entries",
     "has_broad_view_scope",

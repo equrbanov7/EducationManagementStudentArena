@@ -94,6 +94,10 @@ def _validate_target(source, target, actor, *, previous=False):
         raise _denied("transition.permission_denied", permission=PERM_EDIT)
     if target.syllabus is None and target.offering is None:
         raise _denied(rules.CODE_NOT_SIBLING)
+    year_code = rules.source_year_code(source, actor)
+    if year_code:
+        # Sahib 2026-10-27: keçmiş tədris ilinin sillabusu müəllimə mənbə ola bilməz (siyahıda da görünmür).
+        raise _denied(year_code)
     organization_id, subject_id, period_id = _slot(target)
     slot_ok = rules.previous_slot if previous else rules.same_slot
     if not slot_ok(source, organization_id=organization_id, subject_id=subject_id, period_id=period_id):

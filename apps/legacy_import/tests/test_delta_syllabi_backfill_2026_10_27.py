@@ -334,6 +334,7 @@ class _FakeExtractor:
             "lessons": {pk: {"id": pk, "name": name, "department_id": 3} for pk, name in lessons},
             "workers": {77: {"id": 77, "department_id": 3}, 88: {"id": 88, "department_id": 3}},
             "departments": {3: {"id": 3}},
+            "groups": {900: {"id": 900, "name": "101A"}},
         }
         self.sillabus = [(500, 5, 77), (501, 8, 77), (502, 6, 77), (503, 6, 88), (504, 9, 99)]
 
@@ -376,7 +377,10 @@ def test_teacher_syllabi_bundle_shape(tmp_path):
     assert bundle["snapshot"]["phases"] == ["syllabi_backfill"]
     assert bundle["snapshot"]["teacher_syllabi"]["pairs"] == 2
     assert {row["id"] for row in bundle["journals"]} == {11, 12}, "saxta jurnal atılır"
-    assert all(row["students_id"] == "[]" and row["groups_id"] == "[]" for row in bundle["journals"])
+    assert all(row["students_id"] == "[]" for row in bundle["journals"])
+    # Sahib 2026-10-27 (syllabi_share): qrup siyahısı və qrup sətirləri paketdə QALIR.
+    assert {row["id"]: row["groups_id"] for row in bundle["journals"]}[11] == '["900"]'
+    assert bundle["groups"] == [{"id": 900, "name": "101A"}]
     # 77: Riyaziyyat (5) + eyni adlı dublikat (8); Fizika (502) cütə düşmür. 88: jurnalın öz sillabusu (504).
     assert {row["id"] for row in bundle["syllabi"]} == {500, 501, 504}
     assert bundle["students"] == [] and bundle["points"] == []
@@ -384,5 +388,6 @@ def test_teacher_syllabi_bundle_shape(tmp_path):
     write_bundle(str(path), bundle)
     assert read_bundle(str(path))["snapshot"]["teacher_syllabi"]["semester"] == 14
     check_phases(bundle, ("syllabi_backfill",))
+    check_phases(bundle, ("syllabi_share",))
     with pytest.raises(TeacherSyllabiPhaseMismatch):
         check_phases(bundle, ("syllabi", "syllabi_backfill"))

@@ -297,3 +297,63 @@
         flex: 1 1 auto;
     }
 }
+
+/* ── Bir sillabus — bir neçə jurnal (sahib 2026-10-27) ─────────────────────
+   Dialoqda «Eyni sillabusu bu qrupda da istifadə et» seçimi bütün sətri tutur
+   (əsas seçim); redaktorun paylaşım bloku (`_share_banner.html`). */
+.syl-reuse__option--share {
+    grid-column: 1 / -1;
+}
+
+.syl-share-banner {
+    align-items: flex-start;
+}
+
+.syl-share-banner__body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.syl-share-banner__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.syl-share-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 4px 3px 10px;
+    border-radius: 999px;
+    background: var(--ems-bg);
+    border: 1px solid var(--ems-primary-100);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.syl-share-banner__add {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.syl-share-banner__select {
+    flex: 0 1 260px;
+    min-width: 180px;
+}
+
+@media (max-width: 640px) {
+    .syl-share-banner__select,
+    .syl-share-banner__add .syl-btn {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+}

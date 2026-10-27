@@ -3,7 +3,8 @@
 Paketə düşən (Django bazasına toxunulmur):
 
 * cari semestrin (``semestr_jurnal.is_current`` və ya ``--full-semester``) saxta / «sonra sil» olmayan jurnalları —
-  yalnız başlıq (tələbə / qrup siyahısı BOŞALDILIR, xana / dərs tarixi YOXDUR);
+  yalnız başlıq (tələbə siyahısı BOŞALDILIR, xana / dərs tarixi YOXDUR); qrup siyahısı (``groups_id``) və həmin
+  qrupların sətirləri QALIR — ``syllabi_share`` (sahib 2026-10-27) eyni köhnə sillabusu işlədən qrupları tapır;
 * həmin jurnallardakı hər (müəllim, fənn) cütü üçün müəllimin BÜTÜN köhnə sillabusları (eyni fənn və ya kataloqdakı
   eyni adlı dublikat fənn) + jurnalların öz ``sillabus_id``-si — həftəlik mövzu və peyk bölmələri ilə;
 * bunların müəllim / fənn / kafedra sətirləri.
@@ -14,14 +15,13 @@ bilməz (``syllabi_backfill.check_phases``).
 
 from __future__ import annotations
 
-from .extract import WORKER_COLUMNS, DeltaExtractor
+from .extract import GROUP_COLUMNS, WORKER_COLUMNS, DeltaExtractor, parse_id_list
 from .resolve import subject_key
 from .syllabi_backfill import PHASE, journal_pairs
 
 #: ``bundle.SECTIONS`` + əmrin çap etdiyi bölmələr — bu paketdə boş qalanlar.
 _EMPTY_SECTIONS = (
     "specialities",
-    "groups",
     "students",
     "expelled_students",
     "lesson_dates",
@@ -36,7 +36,7 @@ def build_teacher_syllabi_bundle(extractor: DeltaExtractor, *, snapshot: dict, s
     x.full_semesters = [int(semester)]
     journals = []
     for row in x.journals():
-        row["students_id"], row["groups_id"] = "[]", "[]"
+        row["students_id"] = "[]"
         journals.append(row)
     pairs = journal_pairs(journals)
     journals = [row for rows in pairs.values() for row in rows]
@@ -66,6 +66,8 @@ def build_teacher_syllabi_bundle(extractor: DeltaExtractor, *, snapshot: dict, s
     used_lessons = {lesson_id for _teacher_id, lesson_id in pairs} | {row["lesson_id"] for row in syllabi}
     subjects = [lessons[lesson_id] for lesson_id in sorted(used_lessons) if lesson_id in lessons]
     workers = x._by_ids("workers", WORKER_COLUMNS, teacher_ids)
+    group_ids = {group_id for row in journals for group_id in parse_id_list(row.get("groups_id"))}
+    groups = x._by_ids("groups", GROUP_COLUMNS, group_ids)
     department_ids = {row["department_id"] for row in workers} | {row["department_id"] for row in subjects}
     departments = x._by_ids("departments", ("id", "name", "department_id", "kollec_or_uni"), department_ids)
     periods = x._rows(f"SELECT id, name, type, is_current FROM {x.src}.semestr_jurnal ORDER BY id")
@@ -83,6 +85,7 @@ def build_teacher_syllabi_bundle(extractor: DeltaExtractor, *, snapshot: dict, s
         "departments": departments,
         "subjects": subjects,
         "workers": workers,
+        "groups": groups,
         "journals": journals,
         "syllabi": syllabi,
     }

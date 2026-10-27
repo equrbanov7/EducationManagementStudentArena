@@ -110355,3 +110355,105 @@ msgstr "Ən azı bir qrup seçin."
 msgctxt "exams.assignees"
 msgid "Ən azı bir tələbə seçin."
 msgstr "Ən azı bir tələbə seçin."
+
+msgctxt "syllabus.model"
+msgid "Müəllimin seçimi"
+msgstr "Müəllimin seçimi"
+
+msgctxt "syllabus.model"
+msgid "Köhnə sistem (bir sillabus bir neçə jurnalda)"
+msgstr "Köhnə sistem (bir sillabus bir neçə jurnalda)"
+
+msgctxt "syllabus.model"
+msgid "paylaşılan sillabus"
+msgstr "paylaşılan sillabus"
+
+msgctxt "syllabus.model"
+msgid "paylaşılan sillabuslar"
+msgstr "paylaşılan sillabuslar"
+
+msgctxt "accounts.syllabus"
+msgid "eyni sillabusu istifadə edir"
+msgstr "eyni sillabusu istifadə edir"
+
+msgctxt "accounts.syllabus"
+msgid "köhnə sistemdən"
+msgstr "köhnə sistemdən"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Bu qrup da %(group)s qrupunun sillabusunu istifadə edir — bir sillabus: təsdiq və dəyişikliklər hər iki jurnal üçün ortaqdır."
+msgstr "Bu qrup da %(group)s qrupunun sillabusunu istifadə edir — bir sillabus: təsdiq və dəyişikliklər hər iki jurnal üçün ortaqdır."
+
+msgctxt "accounts.syllabus"
+msgid "Paylaşım ayrıldı — bu qrupun jurnalı üçün ayrıca sillabus yaradın."
+msgstr "Paylaşım ayrıldı — bu qrupun jurnalı üçün ayrıca sillabus yaradın."
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Həmçinin bu qruplarda istifadə olunur: %(groups)s"
+msgstr "Həmçinin bu qruplarda istifadə olunur: %(groups)s"
+
+msgctxt "accounts.syllabus"
+msgid "Keçmiş tədris illərinin sillabusu mənbə kimi istifadə olunmur — cari ilin sillabusunu seçin."
+msgstr "Keçmiş tədris illərinin sillabusu mənbə kimi istifadə olunmur — cari ilin sillabusunu seçin."
+
+msgctxt "accounts.syllabus"
+msgid "Bu qrupun öz sillabusu var — eyni sillabusu yalnız sillabusu olmayan qrupda istifadə etmək olar."
+msgstr "Bu qrupun öz sillabusu var — eyni sillabusu yalnız sillabusu olmayan qrupda istifadə etmək olar."
+
+msgctxt "accounts.syllabus"
+msgid "Bu qrup artıq başqa sillabusu istifadə edir."
+msgstr "Bu qrup artıq başqa sillabusu istifadə edir."
+
+msgctxt "accounts.syllabus"
+msgid "Bu qrup artıq bu sillabusu istifadə edir."
+msgstr "Bu qrup artıq bu sillabusu istifadə edir."
+
+msgctxt "accounts.syllabus"
+msgid "Bu qrup bu sillabusu istifadə etmir."
+msgstr "Bu qrup bu sillabusu istifadə etmir."
+
+msgctxt "accounts.syllabus"
+msgid "Bir sillabus — bir neçə jurnal"
+msgstr "Bir sillabus — bir neçə jurnal"
+
+msgctxt "accounts.syllabus"
+msgid "Bu sillabus aşağıdakı qrupların jurnalında da öz yerində istifadə olunur. Təsdiq, dəyişikliklər və həftəlik plan hamısı üçün ortaqdır."
+msgstr "Bu sillabus aşağıdakı qrupların jurnalında da öz yerində istifadə olunur. Təsdiq, dəyişikliklər və həftəlik plan hamısı üçün ortaqdır."
+
+msgctxt "accounts.syllabus"
+msgid "Bu fənn üzrə başqa qrupunuzun jurnalında da eyni sillabusu öz yerində istifadə edə bilərsiniz (məsələn, potok dərsi) — yeni sillabus yaradılmır."
+msgstr "Bu fənn üzrə başqa qrupunuzun jurnalında da eyni sillabusu öz yerində istifadə edə bilərsiniz (məsələn, potok dərsi) — yeni sillabus yaradılmır."
+
+msgctxt "accounts.syllabus"
+msgid "Qrup seçin"
+msgstr "Qrup seçin"
+
+msgctxt "accounts.syllabus"
+msgid "Qrup axtar…"
+msgstr "Qrup axtar…"
+
+msgctxt "accounts.syllabus"
+msgid "Uyğun qrup yoxdur"
+msgstr "Uyğun qrup yoxdur"
+
+msgctxt "accounts.syllabus"
+msgid "Bu qrupda da istifadə et"
+msgstr "Bu qrupda da istifadə et"
+
+msgctxt "accounts.syllabus"
+msgid "Eyni sillabusu bu qrupda da istifadə et (bir sillabus)"
+msgstr "Eyni sillabusu bu qrupda da istifadə et (bir sillabus)"
+
+msgctxt "accounts.syllabus"
+msgid "Yeni sillabus yaradılmır — bu qrupun jurnalı eyni sillabusu öz yerində istifadə edir. Təsdiq, dəyişikliklər və həftəlik plan hər iki qrup üçün ortaqdır."
+msgstr "Yeni sillabus yaradılmır — bu qrupun jurnalı eyni sillabusu öz yerində istifadə edir. Təsdiq, dəyişikliklər və həftəlik plan hər iki qrup üçün ortaqdır."
+
+msgctxt "accounts.syllabus"
+msgid "Paylaşım ayrılsın?"
+msgstr "Paylaşım ayrılsın?"
+
+msgctxt "accounts.syllabus"
+msgid "Bu qrupun jurnalı artıq bu sillabusu göstərməyəcək və «Sillabus yoxdur» vəziyyətinə qayıdacaq. Sillabusun özü və digər qruplar dəyişmir."
+msgstr "Bu qrupun jurnalı artıq bu sillabusu göstərməyəcək və «Sillabus yoxdur» vəziyyətinə qayıdacaq. Sillabusun özü və digər qruplar dəyişmir."

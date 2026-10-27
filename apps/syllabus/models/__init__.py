@@ -2,6 +2,7 @@
 
 from .review import REASON_REQUIRED_DECISIONS, ReviewDecision, SyllabusReview
 from .sections import SyllabusSection
+from .sharing import ShareSource, SyllabusShare
 from .syllabus import ApprovalSource, ChangeKind, Syllabus, SyllabusVersion
 
 __all__ = [
@@ -9,8 +10,10 @@ __all__ = [
     "ApprovalSource",
     "ChangeKind",
     "ReviewDecision",
+    "ShareSource",
     "Syllabus",
     "SyllabusReview",
     "SyllabusSection",
+    "SyllabusShare",
     "SyllabusVersion",
 ]
