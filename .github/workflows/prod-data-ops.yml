@@ -227,6 +227,12 @@
 #       `journal-shares/1`; ad/FİN yoxdur, açarlar prod-un id-ləridir). Açılış × müəllim payı (növlər + tələbələr),
 #       əl ilə yaradılan pay üzərinə yazılmır; datası olmayan səviyyə-artığı qeydiyyat «Jurnal təmizliyi» qərarı ilə
 #       çıxır (tarixçədən geri qaytarılır). `batch` = `shares-…` + apply → paketin payları söndürülür. Loga YALNIZ saylar.
+#   merge_level_journals — səviyyə jurnalı birləşməsi (sahib 2026-10-27): köhnə sistemin BİR səviyyə jurnalı («Xarici
+#       dildə … (intermediate)») yeni sistemdə qruplar üzrə bir neçə jurnala bölünübsə, tələbələr müəllimin ev jurnalına
+#       qonaq kimi (alt qrup birləşməsi mexanizmi: xanalar evin eyni tarix + saat dərsinə, mənbə qeydiyyat dropped +
+#       superseded_by; münaqişəli tələbə qalır və sayılır). ŞİFRƏLİ asset (`roster_tag` = `level-merge-…` →
+#       levelmerge.json.enc, lokal `build_journal_share_plans`, YALNIZ id-lər). `apply_journal_shares`-dan SONRA.
+#       `batch` = `lvlmerge-…` + apply → geri qaytarma. Loga YALNIZ saylar.
 #   relocate_superseded_marks — köçürülmüş tələbənin köhnə (əvəzlənmiş) qeydiyyatında qalmış fantom sütun xanaları
 #       varis jurnalın EYNİ tarix + saat dərsinə (RİM 2026-10-27, MR-000010/030.1): hədəf xana doluysa YAZILMIR
 #       (conflict_kept). `roster_tag` = `superseded-marks-…` → plan.json.enc (lokal qurulmuş, YALNIZ id-lər; boş =
@@ -319,6 +325,7 @@ on:
           - merge_twin_offerings
           - fix_legacy_lesson_kinds
           - fix_slot_week_parity
+          - merge_level_journals
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -333,7 +340,7 @@ on:
         required: false
         default: "2026/2027"
       roster_tag:
-        description: "seed_staff_roster / reconcile_teacher_roster / audit_staff_placement (staff-placement-…) / import_teaching_* / *timetable* / backfill_teacher_lessons (lesson-slots-…) / legacy_delta_apply (legacy-delta-…) / fill_vacant_from_journals (legacy-journals-…) / apply_journal_shares (journal-shares-…) / unblock_legacy_journal_teachers (legacy-teachers-…) / fix_master_groups (master-groups-…) / fix_master_students (master-students-…) / relocate_superseded_marks (superseded-marks-…, boş = canlı) / merge_duplicate_student (student-merge-…) / relocate_twin_enrollment, merge_twin_offerings, fix_legacy_lesson_kinds (rim-fix-…): şifrəli faylın release tag-ı"
+        description: "seed_staff_roster / reconcile_teacher_roster / audit_staff_placement (staff-placement-…) / import_teaching_* / *timetable* / backfill_teacher_lessons (lesson-slots-…) / legacy_delta_apply (legacy-delta-…) / fill_vacant_from_journals (legacy-journals-…) / apply_journal_shares (journal-shares-…) / unblock_legacy_journal_teachers (legacy-teachers-…) / fix_master_groups (master-groups-…) / fix_master_students (master-students-…) / relocate_superseded_marks (superseded-marks-…, boş = canlı) / merge_duplicate_student (student-merge-…) / relocate_twin_enrollment, merge_twin_offerings, fix_legacy_lesson_kinds (rim-fix-…) / merge_level_journals (level-merge-…): şifrəli faylın release tag-ı"
         required: false
         default: ""
       hygiene_category:
@@ -351,7 +358,7 @@ on:
         required: false
         default: ""
       batch:
-        description: "reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…): geri qaytarılacaq paket id-si (undo) · legacy_delta_apply: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd)"
+        description: "reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…) / merge_level_journals (lvlmerge-…): geri qaytarılacaq paket id-si (undo) · legacy_delta_apply: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd)"
         required: false
         default: ""
       create_missing:
@@ -488,7 +495,7 @@ jobs:
         with:
           persist-credentials: false
       - name: 🔐 Şifrəli heyət siyahısı / yük sənədi
-        if: github.event.inputs.command == 'seed_staff_roster' || (github.event.inputs.command == 'reconcile_teacher_roster' && github.event.inputs.batch == '') || (github.event.inputs.command == 'audit_staff_placement' && github.event.inputs.batch == '') || startsWith(github.event.inputs.command, 'import_teaching_') || (github.event.inputs.command == 'issue_staff_credentials' && github.event.inputs.roster_tag != '') || (github.event.inputs.command == 'fill_vacant_from_journals' && github.event.inputs.batch == '' && github.event.inputs.roster_tag != '') || (github.event.inputs.command == 'apply_journal_shares' && github.event.inputs.batch == '') || github.event.inputs.command == 'unblock_legacy_journal_teachers' || github.event.inputs.command == 'fix_master_groups' || github.event.inputs.command == 'fix_master_students' || (github.event.inputs.command == 'relocate_superseded_marks' && github.event.inputs.batch == '' && github.event.inputs.roster_tag != '') || (github.event.inputs.command == 'merge_duplicate_student' && github.event.inputs.batch == '') || github.event.inputs.command == 'relocate_twin_enrollment' || github.event.inputs.command == 'merge_twin_offerings' || github.event.inputs.command == 'fix_legacy_lesson_kinds'
+        if: github.event.inputs.command == 'seed_staff_roster' || (github.event.inputs.command == 'reconcile_teacher_roster' && github.event.inputs.batch == '') || (github.event.inputs.command == 'audit_staff_placement' && github.event.inputs.batch == '') || startsWith(github.event.inputs.command, 'import_teaching_') || (github.event.inputs.command == 'issue_staff_credentials' && github.event.inputs.roster_tag != '') || (github.event.inputs.command == 'fill_vacant_from_journals' && github.event.inputs.batch == '' && github.event.inputs.roster_tag != '') || (github.event.inputs.command == 'apply_journal_shares' && github.event.inputs.batch == '') || github.event.inputs.command == 'unblock_legacy_journal_teachers' || github.event.inputs.command == 'fix_master_groups' || github.event.inputs.command == 'fix_master_students' || (github.event.inputs.command == 'relocate_superseded_marks' && github.event.inputs.batch == '' && github.event.inputs.roster_tag != '') || (github.event.inputs.command == 'merge_duplicate_student' && github.event.inputs.batch == '') || github.event.inputs.command == 'relocate_twin_enrollment' || github.event.inputs.command == 'merge_twin_offerings' || github.event.inputs.command == 'fix_legacy_lesson_kinds' || (github.event.inputs.command == 'merge_level_journals' && github.event.inputs.batch == '')
         env:
           GH_TOKEN: ${{ github.token }}
           STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
@@ -542,6 +549,9 @@ jobs:
             fix_legacy_lesson_kinds)
               match "$ROSTER_TAG" '^rim-fix-[0-9a-z-]+$' || { echo "roster_tag formatı: rim-fix-…" >&2; exit 1; }
               asset=lessonkinds.json.enc; target="/tmp/rim_lessonkinds_${GITHUB_RUN_ID}.json" ;;
+            merge_level_journals)
+              match "$ROSTER_TAG" '^level-merge-[0-9a-z-]+$' || { echo "roster_tag formatı: level-merge-…" >&2; exit 1; }
+              asset=levelmerge.json.enc; target="/tmp/level_merge_${GITHUB_RUN_ID}.json" ;;
             *)
               match "$ROSTER_TAG" '^(staff|teacher)-roster-[0-9a-z-]+$' || { echo "roster_tag formatı: staff-roster-… / teacher-roster-…" >&2; exit 1; }
               asset=roster.xlsx.enc; target="/tmp/staff_roster_${GITHUB_RUN_ID}.xlsx" ;;
@@ -989,6 +999,18 @@ jobs:
                 args=(--org "$ORG" --actor "$actor" --file "/tmp/student_merge_${GITHUB_RUN_ID}.json")
               fi
               ;;
+            merge_level_journals)
+              # Sahib 2026-10-27: bölünmüş səviyyə jurnalı → müəllimin ev jurnalı (plan faylı, yalnız id-lər). Loga yalnız saylar.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^lvlmerge-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch formatı: lvlmerge-…" >&2; exit 2; }
+                test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
+                args=(--org "$ORG" --actor "$actor" --undo "$BATCH")
+              else
+                args=(--org "$ORG" --actor "$actor" --file "/tmp/level_merge_${GITHUB_RUN_ID}.json")
+              fi
+              ;;
             relocate_twin_enrollment|merge_twin_offerings|fix_legacy_lesson_kinds)
               # RİM 2026-10-27: plan faylı (yalnız id-lər). Loga yalnız saylar.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -1263,6 +1285,17 @@ jobs:
               exit "$status"
             fi
             rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "merge_level_journals" ]; then
+            # Loga YALNIZ «level_merge: açar=say …» sətirləri və rədd kodu (əmr ad çap etmir; yenə də süzülür).
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^level_merge: [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
           elif [ "$COMMAND" = "infer_timetable_from_lessons" ]; then
             # Loga YALNIZ «timetable_infer: açar=say …» sətirləri (əmr ad çap etmir; yenə də süzülür) və rədd kodu;
             # sətir-sətir CSV (müəllim adları) şifrəli artifakta gedir (aşağıdakı addım).
@@ -1359,10 +1392,10 @@ jobs:
           path: ${{ runner.temp }}/staff-out/
           retention-days: 1
       - name: 🧹 Konteynerdə müvəqqəti faylları sil
-        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'reconcile_teacher_roster' || github.event.inputs.command == 'audit_staff_placement' || startsWith(github.event.inputs.command, 'import_teaching_') || github.event.inputs.command == 'issue_staff_credentials' || github.event.inputs.command == 'infer_timetable_from_lessons' || github.event.inputs.command == 'fix_workload_overcount' || github.event.inputs.command == 'fill_vacant_from_journals' || github.event.inputs.command == 'apply_journal_shares' || github.event.inputs.command == 'unblock_legacy_journal_teachers' || github.event.inputs.command == 'fix_master_groups' || github.event.inputs.command == 'fix_master_students' || github.event.inputs.command == 'relocate_superseded_marks' || github.event.inputs.command == 'merge_duplicate_student' || github.event.inputs.command == 'relocate_twin_enrollment' || github.event.inputs.command == 'merge_twin_offerings' || github.event.inputs.command == 'fix_legacy_lesson_kinds')
+        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'reconcile_teacher_roster' || github.event.inputs.command == 'audit_staff_placement' || startsWith(github.event.inputs.command, 'import_teaching_') || github.event.inputs.command == 'issue_staff_credentials' || github.event.inputs.command == 'infer_timetable_from_lessons' || github.event.inputs.command == 'fix_workload_overcount' || github.event.inputs.command == 'fill_vacant_from_journals' || github.event.inputs.command == 'apply_journal_shares' || github.event.inputs.command == 'unblock_legacy_journal_teachers' || github.event.inputs.command == 'fix_master_groups' || github.event.inputs.command == 'fix_master_students' || github.event.inputs.command == 'relocate_superseded_marks' || github.event.inputs.command == 'merge_duplicate_student' || github.event.inputs.command == 'relocate_twin_enrollment' || github.event.inputs.command == 'merge_twin_offerings' || github.event.inputs.command == 'fix_legacy_lesson_kinds' || github.event.inputs.command == 'merge_level_journals')
         run: |
           # root kimi: fərqli UID-li qalıqlar (sticky /tmp) app istifadəçisi ilə silinmir.
-          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/staff_roster*.xlsx /tmp/staff_known_*.txt /tmp/staff_creds*.csv /tmp/org_structure.json /tmp/roster_report_*.md /tmp/roster_details_*.csv /tmp/teaching_task_*.xlsx /tmp/teaching_load_*.docx /tmp/timetable_infer_*.csv /tmp/staff_placement_*.zip /tmp/placement_report_*.md /tmp/placement_details_*.csv /tmp/overcount_report_*.md /tmp/vacant_fill_report_*.md /tmp/legacy_journals_*.json /tmp/journal_shares_*.json /tmp/legacy_teachers_*.json /tmp/master_groups_*.json /tmp/master_students_*.json /tmp/superseded_marks_*.json /tmp/student_merge_*.json /tmp/rim_relocate_*.json /tmp/rim_merge_*.json /tmp/rim_lessonkinds_*.json; rm -rf /tmp/teaching_report_*' || true
+          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/staff_roster*.xlsx /tmp/staff_known_*.txt /tmp/staff_creds*.csv /tmp/org_structure.json /tmp/roster_report_*.md /tmp/roster_details_*.csv /tmp/teaching_task_*.xlsx /tmp/teaching_load_*.docx /tmp/timetable_infer_*.csv /tmp/staff_placement_*.zip /tmp/placement_report_*.md /tmp/placement_details_*.csv /tmp/overcount_report_*.md /tmp/vacant_fill_report_*.md /tmp/legacy_journals_*.json /tmp/journal_shares_*.json /tmp/legacy_teachers_*.json /tmp/master_groups_*.json /tmp/master_students_*.json /tmp/superseded_marks_*.json /tmp/student_merge_*.json /tmp/rim_relocate_*.json /tmp/rim_merge_*.json /tmp/rim_lessonkinds_*.json /tmp/level_merge_*.json; rm -rf /tmp/teaching_report_*' || true
           rm -rf "$RUNNER_TEMP/staff-out" "$RUNNER_TEMP/out.log" || true
       # ── import_timetable_docx / assign_task_rows_from_timetable (dərs cədvəli; öz addımları — digər əmrlərin
       #    axınına toxunmur). Hər ikisi eyni şifrəli timetable.docx.enc faylını oxuyur. ──────────────────────

@@ -21,12 +21,14 @@ from . import journal_hygiene_rows  # noqa: F401
 from . import journal_scope  # noqa: F401
 from . import kollokvium_notifications  # noqa: F401
 from . import kollokvium_windows  # noqa: F401
+from . import language_levels  # noqa: F401 — xarici dil səviyyə fənləri (paylar / səviyyə birləşməsi, 2026-10-27)
 from . import legacy_grade_review  # noqa: F401
 from . import legacy_grade_review_actions  # noqa: F401
 from . import legacy_grade_review_counts  # noqa: F401
 from . import legacy_grade_review_rows  # noqa: F401
 from . import lessons_log  # noqa: F401
 from . import movements  # noqa: F401
+from . import offering_chairs  # noqa: F401 — açılışın kafedrası (kafedra jurnal sağlamlığı hesabatı, 2026-10-27)
 from . import retake_access  # noqa: F401 — 25% / alt qrup müraciəti: açar + əhatə (2026-10-18)
 from . import retake_chance  # noqa: F401 — «İmtahan şansı ver» rəsmi qeydi (2026-10-18)
 from . import retake_fees  # noqa: F401 — 25% təxmini məbləği + təhsil haqqı cədvəli (2026-10-19)
@@ -114,12 +116,14 @@ __all__ = [
     "journal_scope",
     "kollokvium_notifications",
     "kollokvium_windows",
+    "language_levels",
     "legacy_grade_review",
     "legacy_grade_review_actions",
     "legacy_grade_review_counts",
     "legacy_grade_review_rows",
     "lessons_log",
     "movements",
+    "offering_chairs",
     "offering_counts_by_chair",
     "plan_hours_by_offering",
     "plan_hours_for_offering",
