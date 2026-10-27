@@ -211,6 +211,7 @@ def restore_archived_account(
     email_authority_evidence_digest,
     email_authority_reason_code,
     request=None,
+    note="",
 ):
     """``archived`` hesabı yenidən AKTİV et — səhv arxiv qərarının geri alınması.
 
@@ -226,6 +227,8 @@ def restore_archived_account(
 
     İdempotentdir: onsuz da ``active`` olan hesab üçün ``restored=False`` qaytarır.
     Heç bir sətir SİLİNMİR — arxiv sübutu da, bərpa sübutu da qalır.
+
+    ``note`` (2026-10-27, «Arxivdən çıxar» UI-ı) — operatorun səbəb mətni audit sətrinə yazılır.
     """
 
     actor = _real_actor(actor, request)
@@ -283,8 +286,8 @@ def restore_archived_account(
         obj=locked_user,
         old_values={"access_state": "archived"},
         new_values={"access_state": "active"},
-        reason="legacy_repair:archive_status",
-        changes={"role_id": str(expected_role.pk)},
+        reason=f"archive_restore: {note}" if note else "legacy_repair:archive_status",
+        changes={"role_id": str(expected_role.pk), **({"reason_text": note} if note else {})},
         request=request,
     )
     return ArchiveRestoreResult(user=locked_user, restored=True)

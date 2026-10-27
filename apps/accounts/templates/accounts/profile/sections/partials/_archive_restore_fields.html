@@ -1,0 +1,18 @@
+{% load i18n %}
+{% comment %}«Arxivdən çıxar» dialoqunun əlavə sahələri (səbəbdən ƏVVƏL). Mətni, gizli `user_id`-ni və qəbul ili
+sahəsinin görünməsini JS (`archive_restore.js`) hədəfə görə yazır. Qəbul ili İSTƏYƏ BAĞLIDIR və yalnız akademik
+qeyd yer-tutucu (1950) ildə olanda göstərilir — server də yalnız bu halda düzəldir.{% endcomment %}
+<p class="ems-msg ems-msg--info" data-archive-restore-body></p>
+<input type="hidden" name="user_id" value="" data-archive-restore-user>
+<div class="ems-field" data-archive-restore-year-field hidden>
+    <label class="ems-field__label" for="{{ reason_id }}-year">
+        {% trans "Qəbul ili" context "accounts.archive_restore" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "accounts.archive_restore" %}</span>
+    </label>
+    <input id="{{ reason_id }}-year" name="admission_year" type="number" class="ems-input" inputmode="numeric"
+           min="2000" max="2100" step="1" autocomplete="off" data-archive-restore-year
+           aria-describedby="{{ reason_id }}-year-hint"
+           placeholder="{% trans 'məs. 2023' context 'accounts.archive_restore' %}">
+    <p class="ems-field__hint" id="{{ reason_id }}-year-hint">
+        {% trans "Köçürmədə qəbul ili tapılmayıb (1950 yer-tutucusu). Bilirsinizsə yazın — boş qalsa dəyişmir." context "accounts.archive_restore" %}
+    </p>
+</div>

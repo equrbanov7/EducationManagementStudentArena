@@ -75,6 +75,28 @@
             ns.modals.copyPassword(btn);
         });
 
+        // Sahib 2026-10-27: «Arxivdən çıxar» dialoqu (archive_restore.js, `EMSOverlay`) detal modalının ALTINDA
+        // qalmasın — açılanda detal gizlənir, bağlananda (yenilənmiş kartla) geri açılır; siyahı da yenilənir.
+        document.addEventListener("ems:archive-restore:open", function (event) {
+            if (event.detail && event.detail.source === "rim") {
+                ns.modals.close("[data-rim-detail-modal]");
+            }
+        });
+        document.addEventListener("ems:archive-restore:done", function (event) {
+            var payload = event.detail && event.detail.payload;
+            if (!event.detail || event.detail.source !== "rim" || !payload || !payload.user) {
+                return;
+            }
+            ns.state.selectedUser = payload.user;
+            ns.render.detail(payload.user);
+            ns.actions.search();
+        });
+        document.addEventListener("ems:archive-restore:closed", function (event) {
+            if (event.detail && event.detail.source === "rim" && ns.state.selectedUser && ns.root()) {
+                ns.modals.open("[data-rim-detail-modal]");
+            }
+        });
+
         D.on("click", "[data-rim-status]", function (event, btn) {
             event.preventDefault();
             var tabs = document.querySelectorAll("[data-rim-status]");

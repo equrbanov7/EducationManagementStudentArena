@@ -109889,3 +109889,117 @@ msgstr "Səbəb"
 msgctxt "exams.unit_coverage"
 msgid "Fənnin jurnalında olmayan tələbə: %(uncovered)s / %(students)s"
 msgstr "Fənnin jurnalında olmayan tələbə: %(uncovered)s / %(students)s"
+
+msgctxt "accounts.archive_restore"
+msgid "Hesabı arxivdən çıxarmaq üçün icazəniz yoxdur."
+msgstr "Hesabı arxivdən çıxarmaq üçün icazəniz yoxdur."
+
+msgctxt "accounts.archive_restore"
+msgid "Başqasının adından baxış rejimində hesabı arxivdən çıxarmaq olmaz."
+msgstr "Başqasının adından baxış rejimində hesabı arxivdən çıxarmaq olmaz."
+
+msgctxt "accounts.archive_restore"
+msgid "İstifadəçi seçilməyib."
+msgstr "İstifadəçi seçilməyib."
+
+msgctxt "accounts.archive_restore"
+msgid "İstifadəçi tapılmadı."
+msgstr "İstifadəçi tapılmadı."
+
+msgctxt "accounts.archive_restore"
+msgid "Hesab arxivdə deyil."
+msgstr "Hesab arxivdə deyil."
+
+msgctxt "accounts.archive_restore"
+msgid "Hesab bloklanıb — əvvəlcə blokdan çıxarılmalıdır."
+msgstr "Hesab bloklanıb — əvvəlcə blokdan çıxarılmalıdır."
+
+msgctxt "accounts.archive_restore"
+msgid "Tələbənin aktiv akademik qeydi yoxdur — arxiv düzgündür."
+msgstr "Tələbənin aktiv akademik qeydi yoxdur — arxiv düzgündür."
+
+msgctxt "accounts.archive_restore"
+msgid "Tələbə «Xaric» qrupundadır — arxiv düzgündür."
+msgstr "Tələbə «Xaric» qrupundadır — arxiv düzgündür."
+
+msgctxt "accounts.archive_restore"
+msgid "Hesabın bu təşkilatda bir neçə üzvlüyü var — arxivdən çıxarmaq üçün RİM ilə yoxlanmalıdır."
+msgstr "Hesabın bu təşkilatda bir neçə üzvlüyü var — arxivdən çıxarmaq üçün RİM ilə yoxlanmalıdır."
+
+msgctxt "accounts.archive_restore"
+msgid "Təşkilatda aktiv «Tələbə» rolu yoxdur."
+msgstr "Təşkilatda aktiv «Tələbə» rolu yoxdur."
+
+msgctxt "accounts.archive_restore"
+msgid "Səbəb yazılmalıdır (ən azı 3 simvol)."
+msgstr "Səbəb yazılmalıdır (ən azı 3 simvol)."
+
+msgctxt "accounts.archive_restore"
+msgid "Qəbul ili 2000–2100 aralığında olmalıdır."
+msgstr "Qəbul ili 2000–2100 aralığında olmalıdır."
+
+msgctxt "accounts.archive_restore"
+msgid "Hesabı arxivdən çıxarmaq alınmadı. Yenidən cəhd edin."
+msgstr "Hesabı arxivdən çıxarmaq alınmadı. Yenidən cəhd edin."
+
+#, python-format
+msgctxt "accounts.archive_restore"
+msgid "Tələbə hələ oxuyur (aktiv akademik qeyd, qrup: %(group)s), amma hesab arxivdədir — giriş və parol bərpası bağlıdır. Səhv arxivdirsə «Arxivdən çıxar»."
+msgstr "Tələbə hələ oxuyur (aktiv akademik qeyd, qrup: %(group)s), amma hesab arxivdədir — giriş və parol bərpası bağlıdır. Səhv arxivdirsə «Arxivdən çıxar»."
+
+msgctxt "accounts.archive_restore"
+msgid "Bunun üçün «member.edit» icazəsi lazımdır — RİM rəhbərinə müraciət edin."
+msgstr "Bunun üçün «member.edit» icazəsi lazımdır — RİM rəhbərinə müraciət edin."
+
+msgctxt "accounts.archive_restore"
+msgid "Hesab arxivdən çıxarıldı — tələbə yenidən daxil ola bilər. Lazım olsa parolu sıfırlayın."
+msgstr "Hesab arxivdən çıxarıldı — tələbə yenidən daxil ola bilər. Lazım olsa parolu sıfırlayın."
+
+#, python-format
+msgctxt "accounts.archive_restore"
+msgid "Qəbul ili düzəldildi: %(year)s."
+msgstr "Qəbul ili düzəldildi: %(year)s."
+
+msgctxt "accounts.archive_restore"
+msgid "Arxivdən çıxar"
+msgstr "Arxivdən çıxar"
+
+msgctxt "accounts.archive_restore"
+msgid "{name} ({username}) hesabı yenidən aktiv olacaq: giriş və parol sıfırlama açılır. Akademik qeyd və qrup dəyişmir."
+msgstr "{name} ({username}) hesabı yenidən aktiv olacaq: giriş və parol sıfırlama açılır. Akademik qeyd və qrup dəyişmir."
+
+msgctxt "accounts.archive_restore"
+msgid "Hesab arxivdən çıxarılsın?"
+msgstr "Hesab arxivdən çıxarılsın?"
+
+msgctxt "accounts.archive_restore"
+msgid "Səbəb"
+msgstr "Səbəb"
+
+msgctxt "accounts.archive_restore"
+msgid "məs. Tələbə 131 T qrupunda oxuyur, köçürmədə səhvən məzun sayılıb"
+msgstr "məs. Tələbə 131 T qrupunda oxuyur, köçürmədə səhvən məzun sayılıb"
+
+msgctxt "accounts.archive_restore"
+msgid "Səbəb audit jurnalına yazılır."
+msgstr "Səbəb audit jurnalına yazılır."
+
+msgctxt "accounts.archive_restore"
+msgid "Səbəb ən azı 3 simvol olmalıdır."
+msgstr "Səbəb ən azı 3 simvol olmalıdır."
+
+msgctxt "accounts.archive_restore"
+msgid "Qəbul ili"
+msgstr "Qəbul ili"
+
+msgctxt "accounts.archive_restore"
+msgid "(istəyə bağlı)"
+msgstr "(istəyə bağlı)"
+
+msgctxt "accounts.archive_restore"
+msgid "məs. 2023"
+msgstr "məs. 2023"
+
+msgctxt "accounts.archive_restore"
+msgid "Köçürmədə qəbul ili tapılmayıb (1950 yer-tutucusu). Bilirsinizsə yazın — boş qalsa dəyişmir."
+msgstr "Köçürmədə qəbul ili tapılmayıb (1950 yer-tutucusu). Bilirsinizsə yazın — boş qalsa dəyişmir."

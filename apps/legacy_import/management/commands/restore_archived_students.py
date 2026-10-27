@@ -5,9 +5,10 @@ qəbul ili həll olunmayan (``1950`` yer-tutucusu) bəzi CARİ tələbələri ar
 qrupda aktiv qalıb, giriş və parol bərpası isə ``access_state='archived'`` ilə bağlıdır.
 
 Yalnız ADI ilə verilən hesablar (``--usernames``) və yalnız bu şərtlərlə: profil ``archived``, hesab aktiv, aktiv
-``enrolled`` akademik qeydi var və qrupu «Xaric …» psevdo-qrupu DEYİL. Keçid mövcud, auditli
-``restore_archived_account`` ilə (0018 funksiyası + bərpa sübutu; sübut = təşkilat + istifadəçi + sahib qərarı
-sha256). ``--admission-year`` verilsə yer-tutucu qəbul ili (1950) də düzəlir. DEFOLT DRY-RUN; stdout-a yalnız saylar.
+``enrolled`` akademik qeydi var və qrupu «Xaric …» psevdo-qrupu DEYİL. Qayda və keçid accounts tərəfindədir
+(``apps.accounts.public.restore_wrongly_archived_student`` — RİM-in «Arxivdən çıxar» düyməsi ilə EYNİ; auditli
+``restore_archived_account``, 0018 funksiyası + bərpa sübutu; sübut = təşkilat + istifadəçi + sahib qərarı sha256).
+``--admission-year`` verilsə yer-tutucu qəbul ili (1950) də düzəlir. DEFOLT DRY-RUN; stdout-a yalnız saylar.
 """
 
 from __future__ import annotations
@@ -20,14 +21,20 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from apps.legacy_import.services.repair_archive import student_role
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 
 PREFIX = "restore_archived:"
-SENTINEL_YEAR = 1950
-EVIDENCE_REASON = "manual_registry_verification"
 _EVIDENCE_PREFIX = b"owner-restore-archived-student-v1\x00"
+_AUDIT_REASON = "restore_archived_students (sahib 2026-10-27)"
+#: Ortaq qaydanın rədd kodu → bu əmrin (prod-data-ops logunda görünən) sayğac açarı.
+_SKIP_KEYS = {
+    "not_archived": "skip_not_archived",
+    "account_inactive": "skip_no_active_record",
+    "no_active_record": "skip_no_active_record",
+    "expelled_group": "skip_expelled_group",
+    "membership_mismatch": "skip_membership_mismatch",
+}
 
 
 class _DryRun(Exception):
@@ -49,7 +56,7 @@ class Command(BaseCommand):
         parser.add_argument("--apply", action="store_true")
 
     def handle(self, *args, **options):
-        from apps.accounts.public import restore_archived_account
+        from apps.accounts.public import ArchiveRestoreError, restore_wrongly_archived_student
 
         usernames = [name.strip() for name in str(options["usernames"]).split(",") if name.strip()]
         if not usernames or len(usernames) > 50:
@@ -60,45 +67,31 @@ class Command(BaseCommand):
         counts = Counter()
         User = get_user_model()
         Organization = django_apps.get_model("organizations", "Organization")
-        Record = django_apps.get_model("registrar", "StudentAcademicRecord")
         try:
             with rls_worker_atomic(), bypass_rls(), transaction.atomic():
                 organization = Organization.objects.get(slug=options["org"])
                 actor = User.objects.get(username=options["actor"], is_active=True)
-                role = student_role(organization)
                 for username in usernames:
                     user = User.objects.filter(username=username).select_related("profile").first()
-                    profile = getattr(user, "profile", None)
-                    if user is None or profile is None:
+                    if user is None or getattr(user, "profile", None) is None:
                         counts["skip_unknown"] += 1
                         continue
-                    if profile.access_state != "archived":
-                        counts["skip_not_archived"] += 1
-                        continue
-                    record = (
-                        Record.objects.filter(
-                            organization=organization, student=user, is_active=True, status="enrolled"
+                    try:
+                        outcome = restore_wrongly_archived_student(
+                            user=user,
+                            organization=organization,
+                            actor=actor,
+                            reason=_AUDIT_REASON,
+                            admission_year=year or None,
+                            digest=_digest(organization.pk, user.pk),
                         )
-                        .select_related("group")
-                        .first()
-                    )
-                    if record is None or not user.is_active:
-                        counts["skip_no_active_record"] += 1
+                    except ArchiveRestoreError as exc:
+                        if exc.code not in _SKIP_KEYS:
+                            raise CommandError(f"restore_archived_{exc.code}") from exc
+                        counts[_SKIP_KEYS[exc.code]] += 1
                         continue
-                    if record.group is not None and record.group.name.strip().lower().startswith("xaric"):
-                        counts["skip_expelled_group"] += 1
-                        continue
-                    result = restore_archived_account(
-                        user=user,
-                        organization=organization,
-                        expected_role=role,
-                        actor=actor,
-                        email_authority_evidence_digest=_digest(organization.pk, user.pk),
-                        email_authority_reason_code=EVIDENCE_REASON,
-                    )
-                    counts["restored" if getattr(result, "restored", False) else "already_active"] += 1
-                    if year and record.admission_year == SENTINEL_YEAR:
-                        Record.objects.filter(pk=record.pk).update(admission_year=year)
+                    counts["restored" if outcome.restored else "already_active"] += 1
+                    if outcome.admission_year_fixed:
                         counts["admission_year_fixed"] += 1
                 if not options["apply"]:
                     raise _DryRun

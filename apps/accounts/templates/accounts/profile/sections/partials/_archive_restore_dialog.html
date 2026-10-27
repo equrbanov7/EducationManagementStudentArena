@@ -1,0 +1,26 @@
+{% load static i18n %}
+{% comment %}«Arxivdən çıxar» dialoqu (sahib 2026-10-27: «Mən özüm də arxivdən çıxara bilim») — RİM mərkəzinin
+detal kartında və «Parol sıfırlama» nəticəsində EYNİ komponent. Səhvən arxivlənmiş, hələ oxuyan tələbənin
+hesabını aktiv edir; səbəb məcburidir (audit sətrinə yazılır), qəbul ili sahəsi yalnız qeyd yer-tutucu
+(1950) ildə olanda görünür.
+
+KONTEKST: ``ar_dialog_id`` (panelə görə unikal id), ``ar_url`` (POST endpoint), ``ar_form_data`` (forma
+atributları — serverdən), ``ar_min_year`` / ``ar_max_year``. Mətnlər `data-*`-dadır (xarici JS tərcümə
+tag-larından keçmir). Dialoq və skript PANELİN İÇİNDƏDİR — AJAX-safe qayda; JS bayraqla bir dəfə qeydiyyat olur.{% endcomment %}
+<div class="archive-restore" data-archive-restore
+     data-url="{{ ar_url }}"
+     data-min-year="{{ ar_min_year }}"
+     data-max-year="{{ ar_max_year }}"
+     data-text-body="{% trans '{name} ({username}) hesabı yenidən aktiv olacaq: giriş və parol sıfırlama açılır. Akademik qeyd və qrup dəyişmir.' context 'accounts.archive_restore' %}"
+     data-text-reason-required="{% trans 'Səbəb yazılmalıdır (ən azı 3 simvol).' context 'accounts.archive_restore' %}"
+     data-text-year-invalid="{% trans 'Qəbul ili 2000–2100 aralığında olmalıdır.' context 'accounts.archive_restore' %}"
+     data-text-error="{% trans 'Hesabı arxivdən çıxarmaq alınmadı. Yenidən cəhd edin.' context 'accounts.archive_restore' %}">
+    {% trans "Hesab arxivdən çıxarılsın?" context "accounts.archive_restore" as ar_title %}
+    {% trans "Səbəb" context "accounts.archive_restore" as ar_reason_label %}
+    {% trans "məs. Tələbə 131 T qrupunda oxuyur, köçürmədə səhvən məzun sayılıb" context "accounts.archive_restore" as ar_reason_placeholder %}
+    {% trans "Səbəb audit jurnalına yazılır." context "accounts.archive_restore" as ar_reason_hint %}
+    {% trans "Səbəb ən azı 3 simvol olmalıdır." context "accounts.archive_restore" as ar_reason_hint_invalid %}
+    {% trans "Arxivdən çıxar" context "accounts.archive_restore" as ar_submit %}
+    {% include "partials/ems_ui/_reason_dialog.html" with reason_id=ar_dialog_id reason_title=ar_title reason_label=ar_reason_label reason_placeholder=ar_reason_placeholder reason_hint=ar_reason_hint reason_hint_invalid=ar_reason_hint_invalid reason_min=3 reason_submit_label=ar_submit reason_submit_tone="primary" reason_form_data=ar_form_data reason_extra_include="accounts/profile/sections/partials/_archive_restore_fields.html" %}
+    <script defer src="{% static 'accounts/js/profile/archive_restore.js' %}?v=20261027-arx"></script>
+</div>

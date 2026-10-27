@@ -127,7 +127,14 @@ from .profile import (
 
 # Cədvəl idarəetməsi (`schedule.manage`) JSON səthi
 from .registrar_catalog import registrar_catalog_action
-from .rim import rim_action, rim_create_account, rim_create_catalog, rim_user_detail, rim_user_search
+from .rim import (
+    rim_action,
+    rim_archive_restore,
+    rim_create_account,
+    rim_create_catalog,
+    rim_user_detail,
+    rim_user_search,
+)
 
 # Role management views
 from .roles import (
@@ -278,6 +285,7 @@ __all__ = [
     "rim_user_search",
     "rim_user_detail",
     "rim_action",
+    "rim_archive_restore",
     "rim_create_account",
     "rim_create_catalog",
     # Sillabus — müəllim səthi (autosave / əməllər / baxış paneli)

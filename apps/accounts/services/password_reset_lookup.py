@@ -31,6 +31,7 @@ from .password_reset_admin import (
     reset_scope_queryset,
     status_code_of,
 )
+from .rim.archive import archive_restore_card
 from .username_change_admin import UsernameAdminError, check_renamable
 
 _CTX = "accounts.password_reset"
@@ -139,6 +140,11 @@ def serialize_candidates(actor, users) -> list:
                 can_rename, rename_reason = False, exc.message
         status = status_code_of(user)
         full_name = profile.full_name_with_patronymic if profile is not None else user.get_full_name()
+        # Sahib 2026-10-27: arxivdə, amma hələ oxuyan tələbə — dalan yox, «Arxivdən çıxar» ipucu / düyməsi.
+        archive = None
+        if status == "login_closed" and getattr(profile, "access_state", "") == "archived":
+            archive = archive_restore_card(user, actor)
+            reason = archive["note"] if archive["eligible"] else reason
         rows.append(
             {
                 "id": user.pk,
@@ -154,6 +160,7 @@ def serialize_candidates(actor, users) -> list:
                 "reason": reason,
                 "can_rename": can_rename,
                 "rename_reason": rename_reason,
+                "archive_restore": archive,
             }
         )
     return rows
