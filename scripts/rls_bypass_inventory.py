@@ -100,6 +100,17 @@ CATEGORY_RULES = (
         "C",
         "idarə əmri (yalnız oxu; id-li plan faylı)",
     ),
+    # 2026-10-27: səviyyə jurnalı payları/birləşmə planı + kafedra jurnal sağlamlığı — yalnız oxu, yalnız id-lər.
+    (
+        "apps/legacy_import/management/commands/build_journal_share_plans.py",
+        "C",
+        "idarə əmri (yalnız oxu; id-li plan faylı)",
+    ),
+    (
+        "apps/legacy_import/management/commands/chair_journal_health.py",
+        "C",
+        "idarə əmri (yalnız oxu; müəllim id-ləri)",
+    ),
     # 2026-10-08: WS qapısı — tenant GUC-suz ASGI scope; yalnız qoşulan istifadəçinin öz
     # profil/üzvlük oxusu (pk süzgəcli) + rədd audit sətri.
     ("apps/accounts/ws_gate.py", "D", "WebSocket giriş qapısı (istifadəçinin öz sətirləri + audit)"),

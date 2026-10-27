@@ -72,6 +72,8 @@ ki, gələcəkdə hər biri qəsdən və əsaslandırılmış qalsın.
 | `apps/accounts/management/commands/import_students_atis.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
 | `apps/legacy_import/management/commands/legacy_journal_teachers_extract.py` | 1 | C — idarə əmri (yalnız oxu; sübut faylı) |
 | `apps/legacy_import/management/commands/build_twin_repair_plans.py` | 1 | C — idarə əmri (yalnız oxu, lokal prod surəti; plan faylında yalnız id-lər) |
+| `apps/legacy_import/management/commands/build_journal_share_plans.py` | 1 | C — idarə əmri (yalnız oxu, lokal prod surəti; plan faylında yalnız id-lər) |
+| `apps/legacy_import/management/commands/chair_journal_health.py` | 1 | C — idarə əmri (yalnız oxu; müəllim id-ləri, adlı Excel yalnız repodan kənar lokal yola) |
 | `apps/accounts/management/commands/import_users_from_excel.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
 | `apps/accounts/management/commands/issue_staff_credentials.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
 | `apps/accounts/management/commands/profile_completion_report.py` | 1 | C — idarə əmrləri (prod kill-switch-li) |
