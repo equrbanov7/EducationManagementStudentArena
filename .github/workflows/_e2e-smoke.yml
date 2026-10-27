@@ -59,10 +59,39 @@ jobs:
       NGINX_CPU_LIMIT: "1.0"
       REDIS_CPU_LIMIT: "1.0"
       PISTON_CPU_LIMIT: "1.0"
+      # Fon E2E asılılıq quraşdırılmasının log/nəticə faylları.
+      E2E_DEPS_LOG: /tmp/e2e-deps-install.log
+      E2E_DEPS_RC: /tmp/e2e-deps-install.rc
 
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: 🐍 Setup Python ${{ inputs.python-version }}
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      # 2026-10-27: pip + `playwright install chromium --with-deps` (apt) adətən ~50 s, amma apt
+      # güzgüsü yavaş olanda 653 s çəkdi (run 40378480540 → e2e 25.8-ci dəqiqədə bitdi, demək
+      # olar kritik yol). İndi FONDA başlayır və image yüklənməsi + yığının qalxması (~5 dəq)
+      # ilə üst-üstə düşür; «📥 … hazırdır?» addımı testlərdən əvvəl gözləyir, uğursuzsa yıxılır.
+      - name: 📥 Install E2E test dependencies (fonda)
+        run: |
+          rm -f "$E2E_DEPS_RC" "$E2E_DEPS_LOG"
+          cat > "$RUNNER_TEMP/e2e-deps.sh" <<'SH'
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          pip install --require-hashes -r requirements/test.lock
+          pip install pytest-playwright playwright
+          playwright install chromium --with-deps
+          SH
+          # shellcheck disable=SC2016  # tək dırnaq qəsdəndir: dəyişənlər fon bash-da açılır
+          nohup bash -c '
+            bash "$RUNNER_TEMP/e2e-deps.sh" >"$E2E_DEPS_LOG" 2>&1
+            echo $? >"$E2E_DEPS_RC.tmp" && mv "$E2E_DEPS_RC.tmp" "$E2E_DEPS_RC"
+          ' >/dev/null 2>&1 &
+          echo "E2E asılılıqları fonda quraşdırılır (pid $!)"
 
       - name: 🔧 Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
@@ -156,20 +185,27 @@ jobs:
             python manage.py seed_ci_e2e_scenario \
             --password "$E2E_ROLE_PASSWORD"
 
-      # Install Python + Playwright for the E2E test runner.
-      # Only the Chromium browser is installed to keep install time short.
-      - name: 🐍 Setup Python ${{ inputs.python-version }}
-        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
-        with:
-          python-version: ${{ inputs.python-version }}
-
-      - name: 📥 Install E2E test dependencies
+      # Python + Playwright (yalnız Chromium) yuxarıda fonda quraşdırılır — burada gözlənilir.
+      - name: 📥 E2E asılılıqları hazırdır? (fon quraşdırılmasını gözlə)
+        timeout-minutes: 15
         run: |
-          python -m pip install --upgrade pip
-          # Audit 2026-09-28 AD-06: tam, hash-li lock (giriş: requirements/test.txt).
-          pip install --require-hashes -r requirements/test.lock
-          pip install pytest-playwright playwright
-          playwright install chromium --with-deps
+          waited=0
+          until [ -s "$E2E_DEPS_RC" ] || [ "$waited" -ge 840 ]; do sleep 2; waited=$((waited + 2)); done
+          echo "Gözləmə: ${waited} s"
+          echo "::group::📥 E2E asılılıq quraşdırılması logu"
+          cat "$E2E_DEPS_LOG" 2>/dev/null || true
+          echo "::endgroup::"
+          if [ ! -s "$E2E_DEPS_RC" ]; then
+            echo "::error::E2E asılılıqlarının quraşdırılması 840 s ərzində bitmədi."
+            exit 1
+          fi
+          rc="$(cat "$E2E_DEPS_RC")"
+          if [ "$rc" != "0" ]; then
+            echo "::error::E2E asılılıqlarının quraşdırılması uğursuz oldu (rc=$rc)."
+            exit 1
+          fi
+          pytest --version
+          python -c "import playwright, pytest_playwright; print('playwright OK')"
 
       - name: 🎭 Run E2E smoke tests
         env:

@@ -8,16 +8,26 @@
 #
 # Dependency graph:
 #
-#   lint ──┬──► unit-tests (3.11 + 3.12) ──► coverage-combine (main/Staging push)
+#   lint ──┬──► unit-tests-311 (PR/dispatch)
 #          ├──► js-tests (Node + jsdom)
 #          ├──► build
 #          ├──► security
 #          ├──► secret-scan
-#          └──► docker-build ──┬──► container-scan
-#                              ├──► prod-smoke
-#                              └──► e2e-smoke
+#          └──(failure)──► lint-failed-cancel (bütün run-ı dayandırır)
 #
-#   ci-success (waits for all of the above)
+#   unit-tests-312 (8 shard) ──► coverage-combine (main/Staging push)
+#                            └─► test-durations (main push; QEYRİ-bloklayıcı artefakt)
+#   rls-txn-pool (2 shard)
+#   docker-build ──┬──► container-scan
+#                  ├──► prod-smoke
+#                  └──► e2e-smoke
+#
+#   ci-success (waits for all gates above, lint included) ──► deploy-production
+#
+# 2026-10-27 (sahib: «CI bir az tez getsin»): uzun job-lar (test shard-ları, RLS,
+# Docker zənciri) artıq lint-i GÖZLƏMİR — t=0-da başlayır (kritik yoldan ~2.5 dəq çıxır).
+# Təhlükəsizlik dəyişmir: ci-success lint-in `success` olmasını tələb edir, deploy isə
+# ci-success-i. Lint yıxılarsa `lint-failed-cancel` run-ı ləğv edir (boşa dəqiqə yanmasın).
 # ═══════════════════════════════════════════════════════════════════════════
 
 name: 🚀 CI Pipeline
@@ -70,6 +80,26 @@ jobs:
     with:
       python-version: "3.11"
 
+  # ── 1b. Lint yıxılarsa run-ı dayandır ───────────────────────────────────
+  # 2026-10-27: test shard-ları / RLS / Docker artıq lint-i gözləmir; lint yıxılanda
+  # onlar boşuna 20+ dəq runner yandırmasın deyə run ləğv olunur. Gate məntiqi bundan
+  # asılı DEYİL (ci-success lint=success tələb edir) — ləğv alınmasa belə deploy olmur.
+  lint-failed-cancel:
+    name: 🛑 Lint yıxıldı → run-ı dayandır
+    needs: lint
+    if: failure()
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      actions: write
+    steps:
+      - name: Cancel this workflow run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run cancel "${{ github.run_id }}" --repo "${{ github.repository }}" \
+            || echo "::warning::Run ləğv edilə bilmədi (məs. fork PR-da token yalnız oxumadır) — ci-success onsuz da yıxılacaq."
+
   # ── 2a. Unit Tests (Python 3.11) ───────────────────────────────────────
   # Sahib 2026-09-21: push-larda (Develop/Staging/main) 3.11 job-u kritik yolda deyildi,
   # amma 30 dəq runner vaxtı yeyirdi; prod image 3.12-dir. PR/dispatch-da tam dəst + coverage.
@@ -87,8 +117,8 @@ jobs:
   # 8 paralel shard (hər biri öz Postgres/Redis-i ilə; .test_durations ilə balanslı).
   # Audit 2026-09-28 AD-07: release yolunda (main/Staging push) shard-lar xam
   # coverage datasını yükləyir → `coverage-combine` qapısı; PR/Develop-da yox.
+  # 2026-10-27: `needs: lint` yoxdur — t=0-da başlayır (bax yuxarıdakı qeyd).
   unit-tests-312:
-    needs: lint
     strategy:
       fail-fast: false
       matrix:
@@ -100,6 +130,7 @@ jobs:
       shards: "8"
       coverage: false
       coverage-data: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/Staging') }}
+      durations-data: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
   # ── 2b'. Coverage gate on the release path (Audit 2026-09-28 AD-07) ────
   # Əvvəl coverage qapısı (--fail-under=68) yalnız PR-dakı 3.11 job-unda idi;
@@ -150,6 +181,50 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  # ── 2b''. Fresh pytest-split durations (main push; NOT a gate) ─────────
+  # 2026-10-27: köhnə `.test_durations` (2026-09-20) 15.6k testin 6.4k-sını tanımırdı
+  # (bölgü onlara orta müddət verirdi) və 4 vCPU runner-lərdə ölçülmüşdü. Hər main push-da
+  # shard-ların 2 vCPU-da ölçdüyü müddətlər birləşdirilib `test-durations` artefaktı kimi
+  # saxlanır (pytest-split bölgü balansı üçün). Təzələmək:
+  #   gh run download <run-id> -n test-durations && mv test_durations.json .test_durations
+  # ci-success bu job-u GÖZLƏMİR — deploy-u ləngitmir/bloklamır.
+  test-durations:
+    name: ⏱️ Test durations (pytest-split balansı)
+    needs: unit-tests-312
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 📥 Download shard durations
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: test-durations-shard-*
+          path: durations
+          merge-multiple: true
+
+      - name: 🔗 Merge
+        run: |
+          python3 - <<'PY'
+          import glob, json
+          files = sorted(glob.glob("durations/test_durations.shard-*.json"))
+          assert len(files) == 8, files
+          merged = {}
+          for path in files:
+              with open(path) as fh:
+                  merged.update(json.load(fh))
+          with open("test_durations.json", "w") as fh:
+              json.dump(merged, fh, sort_keys=True, indent=4)
+          print(f"{len(merged)} test, cəmi {sum(merged.values()):.0f} s (8 shard faylından)")
+          PY
+
+      - name: 📤 Upload merged durations
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: test-durations
+          path: test_durations.json
+          if-no-files-found: error
+          retention-days: 14
+
   # ── 2d. Shipped JS tests (Node + jsdom) — Audit 2026-09-28 FQ-TEST-1 ────
   js-tests:
     needs: lint
@@ -161,8 +236,8 @@ jobs:
   # `pytest -m postgres` yalnız `RLS_TRANSACTION_SCOPED=True` altında —
   # tenant izolyasiyasının transaction-pooling rejimində qorunmasını yoxlayır.
   # 2026-09-21: 2 shard (8–11 dəq → ~5 dəq); 3.12 — prod image ilə eyni.
+  # 2026-10-27: `needs: lint` yoxdur — t=0-da başlayır.
   rls-txn-pool:
-    needs: lint
     strategy:
       fail-fast: false
       matrix:
@@ -198,8 +273,8 @@ jobs:
   # ── 6. Docker Production Build ─────────────────────────────────────────
   # Sahib 2026-09-21: Docker build → Trivy → prod-smoke → e2e zənciri (~10 dəq) yalnız
   # main push-larında və PR-larda; Develop/Staging push-ları onu gözləmir.
+  # 2026-10-27: `needs: lint` yoxdur — Docker→Trivy/prod-smoke/e2e zənciri t=0-da başlayır.
   docker-build:
-    needs: lint
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     uses: ./.github/workflows/_docker-build.yml
 

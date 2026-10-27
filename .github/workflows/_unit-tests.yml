@@ -37,6 +37,13 @@ on:
         description: "Shard-ın xam coverage datasını artefakt kimi yüklə (birləşdirmə ci.yml-dədir)"
         type: boolean
         default: false
+      # 2026-10-27 (sahib: «CI tez getsin»): shard öz testlərinin müddətlərini yazır
+      # (`--store-durations --clean-durations`, bölgüyə təsir etmir) → ci.yml-in
+      # `test-durations` job-u onları birləşdirib `.test_durations` artefaktı verir.
+      durations-data:
+        description: "Shard-ın test müddətlərini artefakt kimi yüklə (.test_durations təzələmək üçün)"
+        type: boolean
+        default: false
 
 jobs:
   unit-tests:
@@ -51,6 +58,9 @@ jobs:
       PYTHONUNBUFFERED: "1"
       PIP_NO_CACHE_DIR: "1"
       PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      # Fon Tesseract quraşdırılmasının log/nəticə faylları (bax «🔤 … (fonda)» addımı).
+      TESS_LOG: /tmp/tesseract-install.log
+      TESS_RC: /tmp/tesseract-install.rc
 
     services:
       postgres:
@@ -78,53 +88,62 @@ jobs:
           --health-retries 5
 
     steps:
+      # 2026-10-27: tam tarix (fetch-depth: 0) testlərə lazım deyil (yalnız `git rev-parse HEAD`
+      # istifadə olunur) — shard başına ~20 s qənaət. Lint/secret-scan tam tarixi saxlayır.
       - name: 📥 Checkout code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with:
-          fetch-depth: 0
-
-      - name: 🐍 Setup Python ${{ inputs.python-version }}
-        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
-        with:
-          python-version: ${{ inputs.python-version }}
 
       # Audit 2026-09-13 F-T6 (düzəliş 2026-09-14): 3 OCR testi
       # (`exams/tests/test_services.py::test_ocr_extracts_questions_from_scanned_pdf`,
       # `test_pdf_layout.py::test_image_only_pdf_*`) tesseract olmadığı üçün HEÇ BİR
-      # mühitdə işləmirdi (`parsing/extraction/ocr.py` 37 %). apt ~20-30 s çəkir;
-      # PyMuPDF (`fitz`) OCR-ı yalnız tessdata qovluğuna ehtiyac duyur —
-      # `ocr.py._ensure_tessdata_prefix` onu özü tapır, amma dəqiqlik üçün
-      # `TESSDATA_PREFIX` də ixrac olunur. `aze` + `eng` dilləri testlərin tələbidir.
-      - name: 🔤 Install Tesseract OCR (aze + eng)
+      # mühitdə işləmirdi (`parsing/extraction/ocr.py` 37 %). PyMuPDF (`fitz`) OCR-ı yalnız
+      # tessdata qovluğuna ehtiyac duyur — `ocr.py._ensure_tessdata_prefix` onu özü tapır,
+      # amma dəqiqlik üçün `TESSDATA_PREFIX` də ixrac olunur. `aze` + `eng` testlərin tələbidir.
+      # 2026-10-27: apt adətən 7–10 s, amma güzgü yavaş olanda 112–329 s çəkirdi (2026-10-26
+      # run 40378480540: shard 3-də 295 s → ən yavaş shard o oldu). İndi FONDA başlayır və
+      # pip/miqrasiya ilə üst-üstə düşür; «🔤 … hazırdır?» addımı testlərdən ƏVVƏL gözləyir
+      # və eyni yoxlamaları edir (quraşdırılmasa job yıxılır — OCR testləri ötürülmür).
+      - name: 🔤 Tesseract OCR quraşdırılması (fonda — aze + eng)
         run: |
-          echo "::group::🔤 Tesseract OCR"
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends tesseract-ocr tesseract-ocr-aze tesseract-ocr-eng
-          # Pipe-da `head`/`grep -q` yox: GH Actions `bash -eo pipefail` — erkən
-          # bağlanan pipe SIGPIPE ilə addımı sındıra bilər; əvvəl dəyişənə oxu.
-          tesseract --version 2>&1 | sed -n 1p
-          langs="$(tesseract --list-langs 2>&1)"
-          grep -qx aze <<<"$langs" && grep -qx eng <<<"$langs"
-          eng_data="$(find /usr/share/tesseract-ocr -name eng.traineddata -print -quit)"
-          test -n "$eng_data"
-          echo "TESSDATA_PREFIX=$(dirname "$eng_data")" >> "$GITHUB_ENV"
-          echo "TESSDATA_PREFIX=$(dirname "$eng_data")"
-          echo "::endgroup::"
+          rm -f "$TESS_RC" "$TESS_LOG"
+          # shellcheck disable=SC2016  # tək dırnaq qəsdəndir: dəyişənlər fon bash-da açılır
+          nohup bash -c '
+            { sudo apt-get update -qq \
+              && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
+                   tesseract-ocr tesseract-ocr-aze tesseract-ocr-eng; } >"$TESS_LOG" 2>&1
+            echo $? >"$TESS_RC.tmp" && mv "$TESS_RC.tmp" "$TESS_RC"
+          ' >/dev/null 2>&1 &
+          echo "Tesseract quraşdırılması fonda başladı (pid $!)"
 
-      - name: 📦 Cache pip dependencies
+      - name: 🐍 Setup Python ${{ inputs.python-version }}
+        id: setup-python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      # 2026-10-27: əvvəl ~/.cache/pip keşlənirdi, amma `PIP_NO_CACHE_DIR=1` pip-in keşi
+      # oxumasını/yazmasını söndürür — hər shard 20–35 s quraşdırırdı. İndi hazır venv
+      # keşlənir: açar = dəqiq Python versiyası + hash-li lock (restore-keys YOXDUR — lock
+      # dəyişəndə venv sıfırdan, `--require-hashes` ilə qurulur; köhnə paket qalmır).
+      - name: 📦 Cache test venv
+        id: venv-cache
         uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ inputs.python-version }}-${{ hashFiles('requirements/test.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-${{ inputs.python-version }}-
-            ${{ runner.os }}-pip-
+          path: ~/.venv-ci
+          key: ${{ runner.os }}-venv-test-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('requirements/test.lock') }}
 
       - name: 📥 Install dependencies
         run: |
-          python -m pip install --upgrade pip wheel setuptools
-          # Audit 2026-09-28 AD-06: tam, hash-li lock (giriş: requirements/test.txt).
-          pip install --require-hashes -r requirements/test.lock
+          if [ "${{ steps.venv-cache.outputs.cache-hit }}" != "true" ]; then
+            python -m venv ~/.venv-ci
+            ~/.venv-ci/bin/python -m pip install --upgrade pip wheel setuptools
+            # Audit 2026-09-28 AD-06: tam, hash-li lock (giriş: requirements/test.txt).
+            ~/.venv-ci/bin/pip install --require-hashes -r requirements/test.lock
+          else
+            echo "venv keşdən bərpa olundu (lock hash dəyişməyib)."
+          fi
+          echo "$HOME/.venv-ci/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$HOME/.venv-ci" >> "$GITHUB_ENV"
 
       - name: ✅ Django system check
         env:
@@ -160,7 +179,13 @@ jobs:
               cur.execute("""DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='rls_app_role') THEN
                              CREATE ROLE rls_app_role NOSUPERUSER NOLOGIN; END IF;
                              EXCEPTION WHEN duplicate_object OR unique_violation THEN NULL; END $$;""")
-          print("rls_app_role hazırdır")
+              # 2026-10-27: atılan CI konteyneri — davamlılıq (fsync/WAL) lazım deyil; service
+              # konteynerinə `command` verilmir, ona görə ALTER SYSTEM + reload (hər üçü sighup).
+              # Yalnız bu CI bazasıdır; prod compose-da bunlar QADAĞANDIR (test_infra_power_outage_selfheal).
+              for setting in ("fsync", "synchronous_commit", "full_page_writes"):
+                  cur.execute(f"ALTER SYSTEM SET {setting} = off")
+              cur.execute("SELECT pg_reload_conf()")
+          print("rls_app_role hazırdır; CI Postgres: fsync/synchronous_commit/full_page_writes=off")
           PY
       - name: 🧱 Şablon test bazası — miqrasiya BİR dəfə (worker-lər klonlayır)
         env:
@@ -185,6 +210,34 @@ jobs:
           python manage.py migrate --noinput
           echo "EMS_TEST_DB_TEMPLATE=ems_test_template" >> "$GITHUB_ENV"
 
+      - name: 🔤 Tesseract OCR hazırdır? (fon quraşdırılmasını gözlə + yoxla)
+        timeout-minutes: 12
+        run: |
+          echo "::group::🔤 Tesseract OCR"
+          waited=0
+          until [ -s "$TESS_RC" ] || [ "$waited" -ge 600 ]; do sleep 2; waited=$((waited + 2)); done
+          echo "Gözləmə: ${waited} s"
+          cat "$TESS_LOG" 2>/dev/null || true
+          if [ ! -s "$TESS_RC" ]; then
+            echo "::error::Tesseract quraşdırılması 600 s ərzində bitmədi."
+            exit 1
+          fi
+          rc="$(cat "$TESS_RC")"
+          if [ "$rc" != "0" ]; then
+            echo "::error::Tesseract quraşdırılması uğursuz oldu (rc=$rc)."
+            exit 1
+          fi
+          # Pipe-da `head`/`grep -q` yox: GH Actions `bash -eo pipefail` — erkən
+          # bağlanan pipe SIGPIPE ilə addımı sındıra bilər; əvvəl dəyişənə oxu.
+          tesseract --version 2>&1 | sed -n 1p
+          langs="$(tesseract --list-langs 2>&1)"
+          grep -qx aze <<<"$langs" && grep -qx eng <<<"$langs"
+          eng_data="$(find /usr/share/tesseract-ocr -name eng.traineddata -print -quit)"
+          test -n "$eng_data"
+          echo "TESSDATA_PREFIX=$(dirname "$eng_data")" >> "$GITHUB_ENV"
+          echo "TESSDATA_PREFIX=$(dirname "$eng_data")"
+          echo "::endgroup::"
+
       - name: 🧪 Run tests with coverage
         env:
           DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
@@ -196,6 +249,7 @@ jobs:
           SHARDS: ${{ inputs.shards }}
           COVERAGE: ${{ inputs.coverage }}
           COVERAGE_DATA: ${{ inputs.coverage-data }}
+          DURATIONS_DATA: ${{ inputs.durations-data }}
         run: |
           echo "::group::🧪 Running Tests (shard $SHARD/$SHARDS, coverage=$COVERAGE)"
           extra=()
@@ -203,12 +257,26 @@ jobs:
             # .test_durations varsa least_duration ilə balanslı, yoxdursa sayca bərabər bölgü.
             extra+=(--splits "$SHARDS" --group "$SHARD" --splitting-algorithm least_duration)
           fi
+          if [ "$DURATIONS_DATA" = "true" ]; then
+            # pytest-split `--durations-path`-ı HƏM bölgü üçün oxuyur, HƏM yazır: eyni məzmunlu
+            # surət verilir (bölgü dəyişmir), `--clean-durations` faylı yalnız BU shard-ın
+            # ölçülmüş testləri ilə əvəz edir (ci.yml `test-durations` birləşdirir).
+            durations_file="$RUNNER_TEMP/test_durations.shard-${SHARD}.json"
+            cp .test_durations "$durations_file"
+            extra+=(--durations-path "$durations_file" --store-durations --clean-durations)
+          fi
           if [ "$COVERAGE" = "true" ]; then
             extra+=(--cov=apps --cov=core --cov=config --cov-report=xml:coverage.xml --cov-report=html:htmlcov --cov-report=term-missing --cov-fail-under=68)
           elif [ "$COVERAGE_DATA" = "true" ]; then
             # Yalnız xam data (hesabat/qapı yox) — qapı birləşdirilmiş datada tətbiq olunur.
             extra+=(--cov=apps --cov=core --cov=config --cov-report=)
           fi
+          # QEYD (2026-10-27): shard-ın quyruğu = xdist faylları test SAYINA görə düzür, ağır
+          # miqrasiya round-trip testləri (shard-da 1 test) SONA düşür və tək worker-də 4–12 dəq
+          # gedir. «Ağır fayl əvvəl» sırası (--no-loadscope-reorder + LPT) lokal 389→229 s verdi,
+          # AMMA miqrasiya testinin TransactionTestCase flush-u sonrakı testlərin seed datasını
+          # silir (blog/test_models.py:241 səssiz SKIP oldu) — tətbiq EDİLMƏDİ. Əvvəl həmin
+          # testlər seed-i bərpa etməli (serialized_rollback) və ya ayrıca job-a çıxmalıdır.
           pytest \
             -n 4 --dist loadfile \
             --ds=config.settings.test \
@@ -245,6 +313,15 @@ jobs:
           path: .coverage.shard-${{ inputs.shard }}
           # `.coverage.*` gizli fayldır — upload-artifact v4.4+ onları default atır.
           include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: ⏱️ Upload shard test durations
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: inputs.durations-data
+        with:
+          name: test-durations-shard-${{ inputs.shard }}
+          path: ${{ runner.temp }}/test_durations.shard-${{ inputs.shard }}.json
           if-no-files-found: error
           retention-days: 3
 
