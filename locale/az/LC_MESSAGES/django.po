@@ -109384,3 +109384,274 @@ msgstr "Yükləmək üçün nəticə yoxdur."
 msgctxt "exams.results_export"
 msgid "Avtomatik (sistem)"
 msgstr "Avtomatik (sistem)"
+
+#, python-format
+msgctxt "appeals.teaching"
+msgid "%(a)s qəbul, %(r)s rədd"
+msgstr "%(a)s qəbul, %(r)s rədd"
+
+#, python-format
+msgctxt "appeals.teaching"
+msgid "%(n)s sual"
+msgstr "%(n)s sual"
+
+#, python-format
+msgctxt "appeals.teaching"
+msgid "+%(delta)s bal əlavə olunub"
+msgstr "+%(delta)s bal əlavə olunub"
+
+msgctxt "appeals.teaching"
+msgid "Ad, soyad, ata adı, istifadəçi adı…"
+msgstr "Ad, soyad, ata adı, istifadəçi adı…"
+
+msgctxt "appeals.teaching"
+msgid "Aktiv təşkilat seçilməyib"
+msgstr "Aktiv təşkilat seçilməyib"
+
+msgctxt "appeals.teaching"
+msgid "Apellyasiya"
+msgstr "Apellyasiya"
+
+msgctxt "appeals.teaching"
+msgid "Apellyasiya tapılmadı və ya baxmaq icazəniz yoxdur."
+msgstr "Apellyasiya tapılmadı və ya baxmaq icazəniz yoxdur."
+
+msgctxt "appeals.teaching"
+msgid "Apellyasiyanın tarixçəsi"
+msgstr "Apellyasiyanın tarixçəsi"
+
+msgctxt "appeals.teaching"
+msgid "Ata adı"
+msgstr "Ata adı"
+
+msgctxt "appeals.teaching"
+msgid "Bal"
+msgstr "Bal"
+
+msgctxt "appeals.teaching"
+msgid "Bal düzəlişi geri alınıb"
+msgstr "Bal düzəlişi geri alınıb"
+
+msgctxt "appeals.teaching"
+msgid "Bax"
+msgstr "Bax"
+
+#, python-format
+msgctxt "appeals.teaching"
+msgid "Bax: %(student)s — %(exam)s"
+msgstr "Bax: %(student)s — %(exam)s"
+
+msgctxt "appeals.teaching"
+msgid "Cəmi"
+msgstr "Cəmi"
+
+msgctxt "appeals.teaching"
+msgid "Dəyişmə"
+msgstr "Dəyişmə"
+
+msgctxt "appeals.teaching"
+msgid "Etiraz olunan suallar"
+msgstr "Etiraz olunan suallar"
+
+msgctxt "appeals.teaching"
+msgid "Excel-ə yüklə"
+msgstr "Excel-ə yüklə"
+
+msgctxt "appeals.teaching"
+msgid "Fənn"
+msgstr "Fənn"
+
+msgctxt "appeals.teaching"
+msgid "Göndərilib"
+msgstr "Göndərilib"
+
+msgctxt "appeals.teaching"
+msgid "Gözlənilir"
+msgstr "Gözlənilir"
+
+msgctxt "appeals.teaching"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "appeals.teaching"
+msgid "Kateqoriya"
+msgstr "Kateqoriya"
+
+#, python-format
+msgctxt "appeals.teaching"
+msgid "Nəticə: %(n)s müraciət"
+msgstr "Nəticə: %(n)s müraciət"
+
+msgctxt "appeals.teaching"
+msgid "Orta bal dəyişməsi"
+msgstr "Orta bal dəyişməsi"
+
+msgctxt "appeals.teaching"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "appeals.teaching"
+msgid "Qəbul"
+msgstr "Qəbul"
+
+msgctxt "appeals.teaching"
+msgid "Qəbul / qismən"
+msgstr "Qəbul / qismən"
+
+msgctxt "appeals.teaching"
+msgid "Qəbul edildi (tam və ya qismən)"
+msgstr "Qəbul edildi (tam və ya qismən)"
+
+msgctxt "appeals.teaching"
+msgid "Qərar"
+msgstr "Qərar"
+
+msgctxt "appeals.teaching"
+msgid "Qərar tarixi"
+msgstr "Qərar tarixi"
+
+msgctxt "appeals.teaching"
+msgid "Qərara əsaslandırıcı sənəd əlavə olunmayıb."
+msgstr "Qərara əsaslandırıcı sənəd əlavə olunmayıb."
+
+msgctxt "appeals.teaching"
+msgid "Qərarı verən müəllim"
+msgstr "Qərarı verən müəllim"
+
+msgctxt "appeals.teaching"
+msgid "Rədd"
+msgstr "Rədd"
+
+msgctxt "appeals.teaching"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "appeals.teaching"
+msgid "Sual sayı"
+msgstr "Sual sayı"
+
+msgctxt "appeals.teaching"
+msgid "Suallar"
+msgstr "Suallar"
+
+msgctxt "appeals.teaching"
+msgid "Süzgəcləri dəyişin və ya «Sıfırla» ilə hamısını göstərin."
+msgstr "Süzgəcləri dəyişin və ya «Sıfırla» ilə hamısını göstərin."
+
+msgctxt "appeals.teaching"
+msgid "Süzgəcə uyğun apellyasiya yoxdur"
+msgstr "Süzgəcə uyğun apellyasiya yoxdur"
+
+msgctxt "appeals.teaching"
+msgid "Tarixdən"
+msgstr "Tarixdən"
+
+msgctxt "appeals.teaching"
+msgid "Tarixçə"
+msgstr "Tarixçə"
+
+msgctxt "appeals.teaching"
+msgid "Tarixədək"
+msgstr "Tarixədək"
+
+msgctxt "appeals.teaching"
+msgid "Tədris etdiyiniz fənlər üzrə tələbələrinizin apellyasiyaları. Qərarı imtahan mərkəzi verir — burada yalnız baxış var."
+msgstr "Tədris etdiyiniz fənlər üzrə tələbələrinizin apellyasiyaları. Qərarı imtahan mərkəzi verir — burada yalnız baxış var."
+
+msgctxt "appeals.teaching"
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgctxt "appeals.teaching"
+msgid "Tələbə və ya imtahan"
+msgstr "Tələbə və ya imtahan"
+
+msgctxt "appeals.teaching"
+msgid "Tələbənin səbəbi"
+msgstr "Tələbənin səbəbi"
+
+msgctxt "appeals.teaching"
+msgid "Təşkilatın bütün apellyasiyaları — nəzarət görünüşü. Qərarı imtahan mərkəzi verir, burada yalnız baxış var."
+msgstr "Təşkilatın bütün apellyasiyaları — nəzarət görünüşü. Qərarı imtahan mərkəzi verir, burada yalnız baxış var."
+
+msgctxt "appeals.teaching"
+msgid "Yadda saxlayan"
+msgstr "Yadda saxlayan"
+
+msgctxt "appeals.teaching"
+msgid "Yalnız baxış: qərarı imtahan mərkəzi verir."
+msgstr "Yalnız baxış: qərarı imtahan mərkəzi verir."
+
+msgctxt "appeals.teaching"
+msgid "Yeni bal"
+msgstr "Yeni bal"
+
+msgctxt "appeals.teaching"
+msgid "Yükləmək üçün apellyasiya yoxdur."
+msgstr "Yükləmək üçün apellyasiya yoxdur."
+
+msgctxt "appeals.teaching"
+msgid "Yüklənir…"
+msgstr "Yüklənir…"
+
+msgctxt "appeals.teaching"
+msgid "Yüklənmə alınmadı, yenidən cəhd edin."
+msgstr "Yüklənmə alınmadı, yenidən cəhd edin."
+
+#, python-format
+msgctxt "appeals.teaching"
+msgid "qismən: %(n)s"
+msgstr "qismən: %(n)s"
+
+msgctxt "appeals.teaching"
+msgid "qərarlı müraciət başına"
+msgstr "qərarlı müraciət başına"
+
+msgctxt "appeals.teaching"
+msgid "süzgəcə uyğun müraciət"
+msgstr "süzgəcə uyğun müraciət"
+
+msgctxt "appeals.teaching"
+msgid "yalnız imtahan mərkəzi endirə bilər"
+msgstr "yalnız imtahan mərkəzi endirə bilər"
+
+msgctxt "appeals.teaching"
+msgid "yeni bal"
+msgstr "yeni bal"
+
+msgctxt "appeals.teaching"
+msgid "İlkin bal"
+msgstr "İlkin bal"
+
+msgctxt "appeals.teaching"
+msgid "İmtahan"
+msgstr "İmtahan"
+
+msgctxt "appeals.teaching"
+msgid "İmtahan / fənn"
+msgstr "İmtahan / fənn"
+
+msgctxt "appeals.teaching"
+msgid "İmtahan mərkəzinin cavabı"
+msgstr "İmtahan mərkəzinin cavabı"
+
+msgctxt "appeals.teaching"
+msgid "İmtahan mərkəzinin qeydi"
+msgstr "İmtahan mərkəzinin qeydi"
+
+msgctxt "appeals.teaching"
+msgid "İstifadəçi adı"
+msgstr "İstifadəçi adı"
+
+msgctxt "appeals.teaching"
+msgid "Əlavə olunmuş sənədlər"
+msgstr "Əlavə olunmuş sənədlər"
+
+msgctxt "appeals.teaching"
+msgid "Əməliyyat"
+msgstr "Əməliyyat"
+
+#, python-format
+msgctxt "appeals.teaching"
+msgid "Fayl ilk %(n)s sətirlə məhdudlaşdırılıb — süzgəcləri daraldıb yenidən yükləyin."
+msgstr "Fayl ilk %(n)s sətirlə məhdudlaşdırılıb — süzgəcləri daraldıb yenidən yükləyin."

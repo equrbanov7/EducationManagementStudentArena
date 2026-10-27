@@ -228,7 +228,8 @@ def _review_link(appeal):
 
 
 def _teaching_link(appeal):
-    return reverse("appeals:teaching_appeals") + f"?open={appeal.id}#appeal-{appeal.id}"
+    # 2026-10-27: kabinet bölməsi — çekməcə həmin apellyasiya ilə özü açılır (``ta_open``).
+    return reverse("accounts:profile") + f"?section=teaching-appeals&ta_open={appeal.id}"
 
 
 def _split_recipients(appeal, *, exclude_ids=()):

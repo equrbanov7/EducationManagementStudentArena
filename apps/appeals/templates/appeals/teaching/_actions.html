@@ -1,0 +1,12 @@
+{% load i18n %}
+{% comment %}Excel ixracı — link TƏTBİQ OLUNMUŞ süzgəclərlə qurulur (bölmə hər süzgəc dəyişəndə yenidən render olunur).{% endcomment %}
+{% if tp.rows %}
+<a href="{{ tp.export_url }}" class="ems-btn" download data-no-route-loading data-ta-export>
+    <i class="fas fa-file-excel" aria-hidden="true"></i>{% trans "Excel-ə yüklə" context "appeals.teaching" %}
+</a>
+{% else %}
+<span class="ems-btn" role="button" aria-disabled="true" tabindex="0" aria-describedby="taExportHint">
+    <i class="fas fa-file-excel" aria-hidden="true"></i>{% trans "Excel-ə yüklə" context "appeals.teaching" %}
+    <span class="visually-hidden" id="taExportHint">{% trans "Yükləmək üçün apellyasiya yoxdur." context "appeals.teaching" %}</span>
+</span>
+{% endif %}

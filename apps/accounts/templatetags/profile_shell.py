@@ -92,6 +92,7 @@ COMPACT_SIDEBAR_TREES = {
             "pending-review",
             "subject-folder-review",
             "review-results",
+            "teaching-appeals",  # «Fənnimə aid apellyasiyalar» (2026-10-27)
             "notifications",
             "publish-notification",
             "applications",

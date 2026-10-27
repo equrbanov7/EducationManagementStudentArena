@@ -141,6 +141,7 @@ def build_section_titles() -> dict:
         "question-bank": pgettext_lazy("profile.sidebar", "Sual Bankı"),
         "my-appeals": pgettext_lazy("appeals.template", "Apellyasiyalarım"),
         "manage-appeals": pgettext_lazy("appeals.template", "Apellyasiyalar"),
+        "teaching-appeals": pgettext_lazy("appeals.template.teaching", "Fənnimə aid apellyasiyalar"),
         "unit-exams": pgettext_lazy("profile.sidebar", "Bölmə imtahanları"),
         "org-structure": pgettext_lazy("profile.sidebar", "Fakültə və kafedralar"),
         "org-faculties": pgettext_lazy("profile.sidebar", "Fakültələr"),

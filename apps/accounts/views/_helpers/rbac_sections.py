@@ -332,6 +332,9 @@ def apply_permission_section_gates(
         (_retake_windows_visible(user, organization), "retake-windows"),
         # «Xarici nəticələrin tanınması» (sahib 2026-10-25) — `student.credit_recognition` struktur əhatəsi.
         (_credit_recognition_visible(user, organization), "credit-recognition"),
+        # «Fənnimə aid apellyasiyalar» (sahib 2026-10-27) — dərs deyən HƏR hesab (müəllim rolu / açılış / slot /
+        # bölünmüş jurnal payı; inzibati rol mane olmur) + superadmin / RİM rəhbəri (təşkilat üzrə, yalnız baxış).
+        (_teaching_appeals_visible(user, organization), "teaching-appeals"),
         # «Alt qrupa tələbə əlavə et» (sahib 2026-10-18) — `retake.manage`; əhatə hər endpoint-də registrar-da.
         (privileged or has_permission(permissions, "retake.manage"), "subgroup-placement"),
         (can_view_syllabus, "syllabus-list"),
@@ -479,3 +482,10 @@ def _credit_recognition_visible(user, organization) -> bool:
     from apps.registrar.public import credit_recognition_read
 
     return credit_recognition_read.can_manage(user, organization)
+
+
+def _teaching_appeals_visible(user, organization) -> bool:
+    """Dərs deyən hesab və ya nəzarət rolu (qayda ``apps.appeals.services.teaching_scope``-dadır)."""
+    from apps.appeals.public import teaching_section_visible
+
+    return teaching_section_visible(user, organization)

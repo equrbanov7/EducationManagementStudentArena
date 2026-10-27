@@ -6,9 +6,9 @@ dəyərləndirilmiş nəticələr və apellyasiya idarəetməsi.
 Sual bankı/göndərişləri buradan «Sillabus və sual» qrupuna köçdü (2026-09-10) —
 onlar məzmun hazırlığıdır, qiymətləndirmə deyil. İcazə şərtləri DƏYİŞMƏYİB.
 2026-09-25: müəllimin də gördüyü dörd bənd `sidebar/items/`-dədir.{% endcomment %}
-{% if 'my-exams' in allowed_sections or 'my-courses' in allowed_sections or 'pending-review' in allowed_sections or 'subject-folder-review' in allowed_sections or 'review-results' in allowed_sections or role_capabilities.can_manage_appeals or 'courses' in allowed_sections and not university_mode %}
+{% if 'my-exams' in allowed_sections or 'my-courses' in allowed_sections or 'pending-review' in allowed_sections or 'subject-folder-review' in allowed_sections or 'review-results' in allowed_sections or 'teaching-appeals' in allowed_sections or role_capabilities.can_manage_appeals or 'courses' in allowed_sections and not university_mode %}
 <li class="sidebar-menu-group" data-sidebar-group="assessment">
-    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|my-exams|my-courses|courses|pending-review|subject-folder-review|review-results|manage-appeals|" %} open{% endif %}>
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|my-exams|my-courses|courses|pending-review|subject-folder-review|review-results|manage-appeals|teaching-appeals|" %} open{% endif %}>
         {% trans "İmtahan və qiymətləndirmə" context "profile.sidebar" as group_label %}
         {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="clipboard-check" %}
         <ul class="sidebar-menu-group-items">
@@ -52,16 +52,9 @@ onlar məzmun hazırlığıdır, qiymətləndirmə deyil. İcazə şərtləri D�
                 </a>
             </li>
             {% endif %}
-            {% comment %}2026-10-21: müəllimin öz fənninə aid apellyasiyaları (yalnız-oxu, /appeals/teaching/) — qərar
-            hüququ olanlar «Apellyasiyalar» bölməsindən hamısını görür.{% endcomment %}
-            {% if not role_capabilities.can_manage_appeals and 'my-exams' in allowed_sections %}
-            <li class="sidebar-menu-item">
-                <a href="{% url 'appeals:teaching_appeals' %}" class="sidebar-menu-link">
-                    {% nav_icon "scale" "sidebar-menu-icon" %}
-                    <span class="sidebar-menu-text">{% trans "Fənnimə aid apellyasiyalar" context "appeals.template.teaching" %}</span>
-                </a>
-            </li>
-            {% endif %}
+            {% comment %}2026-10-27: «Fənnimə aid apellyasiyalar» — kabinet bölməsi; dərs deyən HƏR hesab (inzibati rolu
+            olsa da) və superadmin / RİM rəhbəri (təşkilat üzrə, yalnız baxış). Qapı: rbac_sections.{% endcomment %}
+            {% include "accounts/profile/sidebar/items/_teaching_appeals.html" %}
         </ul>
     </details>
 </li>
