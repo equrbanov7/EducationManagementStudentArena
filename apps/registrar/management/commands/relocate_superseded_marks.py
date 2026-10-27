@@ -1,13 +1,14 @@
 """``relocate_superseded_marks`` — köçürülmüş tələbənin fantom sütunlardakı xanalarını varis jurnala daşıyır (RİM 2026-10-27).
 
 Qaydalar :mod:`apps.registrar.superseded_marks`-dadır (MR-000010, MR-000030.1). Hədəf xana doludursa HEÇ VAXT üzərinə
-yazılmır (``conflict_kept``). Sonra boşalan fantom sütunları ``legacy_repair_empty_lessons --since 2026-09-15`` silir.
+yazılmır (``conflict_kept``). Boşalan fantom sütun (köçürmə dərsi, düzəlişsiz) eyni paketdə silinir,
+``--undo`` onu eyni id ilə bərpa edir.
 
 * DEFOLT DRY-RUN — eyni kod bir tranzaksiyada işləyir, sonda geri alınır (saylar dəqiqdir).
 * ``--plan-out FAYL`` — (yalnız oxu) daşınacaq xanaların id planı (``superseded-marks/1``, 0600) — lokal qurulur.
 * ``--file FAYL`` — yalnız plandakı xanalar; hər sətir canlı hesablama ilə yoxlanılır (fərq → ``plan_mismatch``).
 * ``--apply`` — yazır; paket ``supmarks-YYYYMMDD-HHMMSS-xxxx`` (stdout-da ``batch=``), manifest audit sətrindədir.
-* ``--undo <paket> --apply`` — daşınmış xanaları geri qaytarır (mənbə dərsi hələ silinməyibsə).
+* ``--undo <paket> --apply`` — daşınmış xanaları (və silinmiş fantom dərsi) geri qaytarır.
 * İdempotent: ikinci ``--apply`` → ``moved=0``. Stdout-a YALNIZ saylar: ``superseded_marks: açar=dəyər …``.
 
     manage.py relocate_superseded_marks --org qku --actor <superadmin> [--file plan.json] [--apply]
