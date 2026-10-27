@@ -133,7 +133,8 @@ class InferTimetableRulesTest(TestCase):
             lessons("chem3", 2, T(8, 30), seminar, (2,))
             lessons("phys3", 3, T(11, 30), lecture, (1, 2, 3))
             lessons("phys3", 3, T(11, 50), lecture, (4, 5, 6))
-            lessons("phys3", 4, T(10, 10), seminar, (1, 2, 3, 5))
+            # 2026-10-27: 1, 3, 5 (üst) + 6 (alt) — bir cüt ardıcıl həftə; 1–2–3 olsaydı hər həftə olardı (MR-8).
+            lessons("phys3", 4, T(10, 10), seminar, (1, 3, 5, 6))
             lessons("hist4", 1, T(13, 35), seminar, range(1, 7))
             lessons("hist4", 5, T(15, 15), seminar, (2, 3))
             lessons("bio5", 2, T(15, 15), lecture, (6,))

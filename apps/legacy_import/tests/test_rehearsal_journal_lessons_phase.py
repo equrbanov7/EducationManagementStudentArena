@@ -571,11 +571,11 @@ def test_the_happy_path_creates_the_lesson_with_the_derived_year(lesson_actor, d
 @pytest.mark.parametrize(
     "cell_overrides, expected_kind",
     [
-        # Ölçülmüş semantika: 1 = mühazirə (bal xanası bağlı), 0/2/3 ballanan,
+        # Ölçülmüş semantika: 1 = mühazirə (bal xanası bağlı), 0/3 seminar, 2 laboratoriya (2026-10-27),
         # ``lab`` isə müstəqil laboratoriya bayrağıdır.
         ({"sem_muh": 1}, "lecture"),
         ({"sem_muh": 0}, "seminar"),
-        ({"sem_muh": 2}, "seminar"),
+        ({"sem_muh": 2}, "lab"),
         ({"sem_muh": 3}, "seminar"),
         ({"sem_muh": 0, "lab": 1}, "lab"),
         ({"sem_muh": 1, "lab": 1}, "lab"),

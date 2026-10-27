@@ -28,7 +28,9 @@ QAYDALAR
 * HƏFTƏ (çoxluq qaydası): hər tarixin üst/alt pariteti ``schedule.week_parity`` ilə (dövrün ilk həftəsi =
   üst/odd — jurnalın «Aktivləşdir»i və ``backfill_teacher_lessons`` ilə EYNİ). Azlıq paritetin payı
   ``parity_tolerance``-dən (defolt 0.25) çox deyilsə çoxluq qalib — azlıq kompensasiya sayılır (3 üst + 1 alt →
-  üst); əks halda hər həftə (``all``).
+  üst); əks halda hər həftə (``all``). RİM 2026-10-27 (MR-8): dərslər ən azı İKİ cüt ARDICIL həftədə keçirilibsə
+  (:func:`consecutive_week_pairs` ≥ ``MIN_CONSECUTIVE_WEEK_PAIRS``) dərs HƏR HƏFTƏdir — üst/alt dərs heç vaxt ardıcıl
+  iki həftədə olmur; 4 tarixdən birinin buraxılması (bayram, xəstəlik) onu «alt həftə» etmir.
 * BİTMƏ SAATI: ən çox rast gələn; yoxdursa standart zəngin sonu; standartdan kənar başlamada ən yaxın zəngin
   müddəti.
 * KÖÇÜRÜLMÜŞ DƏRS («sonuncu qalib»): eyni qrup dəsti (qrup / axın) × eyni növ üçün iki yararlı vahidin tarix
@@ -60,6 +62,8 @@ DEFAULT_MIN_OCCURRENCES = 2
 DEFAULT_PARITY_TOLERANCE = 0.25
 DEFAULT_SNAP_MINUTES = 25
 DEFAULT_RECENT_DAYS = 14
+#: Bu qədər (və çox) cüt ardıcıl həftədə dərs varsa slot hər həftədir (üst/alt deyil) — RİM 2026-10-27.
+MIN_CONSECUTIVE_WEEK_PAIRS = 2
 MAX_ROOM_CANDIDATES = 8  # əsas + 7 növbəti otaq (tutulubsa)
 #: Cədvəl şəbəkəsinin günləri (B.e. … Şənbə — ``schedule_grid.TEACHING_WEEKDAYS``); bazar günü çəkilmir.
 GRID_WEEKDAYS = frozenset(range(1, 7))
@@ -307,11 +311,22 @@ def parity_counts(period, days) -> tuple[int, int]:
     return odd, even
 
 
-def decide_week_type(odd: int, even: int, tolerance: float = DEFAULT_PARITY_TOLERANCE) -> str:
-    """Çoxluq qaydası: azlıq paritetin payı ``tolerance``-dən çox deyilsə çoxluq qalib, əks halda hər həftə."""
+def consecutive_week_pairs(days) -> int:
+    """Dərs olan həftələrdən neçə cütü ARDICILDIR (həftə = bazar ertəsi; eyni həftənin iki dərsi bir sayılır)."""
+    mondays = sorted({day - dt.timedelta(days=day.weekday()) for day in days})
+    return sum(1 for left, right in zip(mondays, mondays[1:]) if (right - left).days == 7)
+
+
+def decide_week_type(
+    odd: int, even: int, tolerance: float = DEFAULT_PARITY_TOLERANCE, *, consecutive_pairs: int = 0
+) -> str:
+    """Hər həftə sübutu (≥ ``MIN_CONSECUTIVE_WEEK_PAIRS`` cüt ardıcıl həftə) → ``all``; yoxdursa çoxluq qaydası:
+    azlıq paritetin payı ``tolerance``-dən çox deyilsə çoxluq qalib, əks halda hər həftə."""
     total = odd + even
     if not total:
         return ""
+    if consecutive_pairs >= MIN_CONSECUTIVE_WEEK_PAIRS:
+        return WeekType.ALL
     if min(odd, even) <= total * tolerance:
         return WeekType.ODD if odd > even else WeekType.EVEN
     return WeekType.ALL
@@ -390,7 +405,9 @@ def _classify(unit: Unit, *, period, min_occurrences: int, parity_tolerance: flo
         unit.status, unit.reason = AMBIGUOUS, "stream_mixed_subjects"
         return
     unit.odd, unit.even = parity_counts(period, unit.dates)
-    unit.week_type = decide_week_type(unit.odd, unit.even, parity_tolerance)
+    unit.week_type = decide_week_type(
+        unit.odd, unit.even, parity_tolerance, consecutive_pairs=consecutive_week_pairs(unit.dates)
+    )
     unit.end = _decide_end(unit)
     if unit.end is None or unit.end <= unit.start:
         unit.status, unit.reason = AMBIGUOUS, "no_end_time"
@@ -545,6 +562,7 @@ __all__ = [
     "DEFAULT_SNAP_MINUTES",
     "FACT_KEYS",
     "GRID_WEEKDAYS",
+    "MIN_CONSECUTIVE_WEEK_PAIRS",
     "READY",
     "ROOM_FROM_LESSONS",
     "ROOM_FROM_TEACHER",
@@ -556,6 +574,7 @@ __all__ = [
     "apply_weekly_budget",
     "assign_rooms",
     "build_units",
+    "consecutive_week_pairs",
     "decide_week_type",
     "fallback_end",
     "load_facts",

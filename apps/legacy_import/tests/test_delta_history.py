@@ -49,7 +49,7 @@ def _point(pk, student, day, point, *, month="10", uniqid=UQ, time="09:00", excu
         "point": point,
         "time": time,
         "excusable": excusable,
-        "sem_muh": 2,
+        "sem_muh": 0,
         "lab": 0,
         "update_counter": 1,
         "updated_at": None,
@@ -149,7 +149,7 @@ def _bundle():
                 # Yalnız «qb»: yeni yazılış açmır, amma eyni qaçışda açılan yazılışa (eyni açılış) düşür.
                 _point(9, 2, "28", "qb", uniqid=UQ_MERGED),
             ],
-            "lesson_dates": [{"id": 1, "journal_id": 32, "month": 10, "day": 21, "time": "09:00", "sem_muh": 2}],
+            "lesson_dates": [{"id": 1, "journal_id": 32, "month": 10, "day": 21, "time": "09:00", "sem_muh": 0}],
             "excuse_windows": [],
             "fin_counts": {},
             "lesson_topics": [
@@ -159,7 +159,7 @@ def _bundle():
                     "month": 10,
                     "day": 7,
                     "times": "09:00",
-                    "sem_muh": 2,
+                    "sem_muh": 0,
                     "room": 0,
                     "movzu": "Kinematika",
                     "semestr": 8,

@@ -415,3 +415,54 @@ ikinci qaçış 0 yazı. Sonra magistr dərs yükü paketi (`offerings` + `workl
 * Boş magistr planları (40 proqram).
 * Cədvəl: əkiz olmayan 11 magistr açılışında dərs var, slot yox (axşam dərsləri seyrək: tək dərs, müəllim toqquşması,
   qarışıq axın) — cədvəl redaktorunda əl ilə.
+
+## 11. RİM müraciətləri — əkiz jurnal, lab kodu, alt həftə (2026-10-27)
+
+### 11.1 Kod düzəlişləri
+
+* **Qeydiyyat seçimi** (`delta/home_journal.py`, `journals.py`, `lessons.py`): tələbənin fənn üzrə «ev» jurnalı — aktiv
+  (`active != 0`), siyahıda, xanası/tarixi çox olan; passiv jurnal seçilmir; `JournalSlices.pick` reyestr qrupu tutmayanda
+  legacy qrupuna baxır. Ev açılışı ilə eyni ailədən (eyni açılış, ana ↔ alt qrup — mühazirə + lab alt qrupu) olan
+  jurnallar əvvəlki kimi birləşir; paralel qrupun («əkiz») və passiv jurnalın xanası ev açılışında YALNIZ mövcud dərsə
+  düşür (`cell.cross_journal_skipped`), yeni «fantom dərs» açılmır.
+* **Legacy `sem_muh=2` = laboratoriya** (`rehearsal_journal_lesson_kinds.cell_kind`); `3` (praktiki) qəsdən seminar.
+* **Alt həftə** (`timetable_inference.decide_week_type`): ≥ 2 cüt ardıcıl həftədə dərs → hər həftə (bir buraxılmış
+  həftə slotu «alt həftə» etmir).
+
+### 11.2 Data əmrləri (hamısı defolt dry-run, `--apply`, idempotent, audit, stdout yalnız saylar)
+
+| Əmr | Nə edir | Giriş |
+|---|---|---|
+| `build_twin_repair_plans` (legacy_import, LOKAL) | köhnə sistem (MariaDB və ya paket) + prod nüsxəsi → 3 plan, yalnız id-lər | `--legacy-source myedu_new --full-semester 14 --out-dir …` |
+| `fix_legacy_lesson_kinds` | kod-2 «seminar» dərsləri → lab (+ lab-only planda seminar slotları) | `lessonkinds.json` |
+| `relocate_twin_enrollment` | fantom xanalar → tələbənin ev açılışı; boşalan fantom dərs silinir; W qeydiyyatı `dropped` (qayıb daşınmır) | `relocate.json` |
+| `merge_twin_offerings` | yanlış fənn adlı əkiz açılış → rəsmi açılış (dərs, xana, sillabus; T cədvəli/yükü qalır), W ləğv | `merge.json` |
+| `fix_slot_week_parity` | çıxarılmış üst/alt slot → hər həftə (ardıcıl həftə sübutu; toqquşma yoxdursa) | `period` |
+
+### 11.3 Prod nüsxəsində (`ems_prod_1027`, təmiz nüsxə: dry-run → apply → dry-run)
+
+| Əmr | Tətbiq | Yoxlama dry-run |
+|---|---|---|
+| Planlar | relocate 22 bənd / 16 tələbə / 15 mənbə açılış / 117 xana / 4 bərpa; merge 31 cüt; kinds 115 dərs | — |
+| `fix_legacy_lesson_kinds` | 13 açılış / 70 dərs / 9 slot (lab-only); `--include-mixed` ilə +16 açılış / 37 dərs | 0 yazı |
+| `relocate_twin_enrollment` | 117 xana, 4 qayıb bərpası, 57 fantom dərs silindi, 22 qeydiyyat yaradıldı / 22 düşürüldü | 0 yazı |
+| `merge_twin_offerings` | 29 cüt birləşdi (204 dərs, 2 186 xana, 27 sillabus, 9 slot köçdü), 2 cüt «hər iki tərəfdə xana» — toxunulmadı; W adına 6 yük sətri qalır (hesabat) | 0 yazı |
+| `fix_slot_week_parity` | 46 slot hər həftəyə; 13 toqquşma (qalır) | 0 yazı |
+
+Diaqnozun 653 «fantom dərs» detektoru legacy sübutu olmadan sayırdı; legacy sübutlu əkiz (paralel qrup) halı 117 xanadır —
+qalanı eyni ailədir (ana ↔ alt qrup), birgə dərs və ya bütöv jurnalın yanlış qrupda olmasıdır (məs. 635 «Mülki müdafiə»
+ortaq jurnalı — sahib qərarı). Alt həftə: 673 çıxarılmış üst/alt slotdan yalnız 58-in ÖZ dərs tarixçəsində ≥2 ardıcıl
+həftə var (diaqnozun 255-i başqa növ/saatdakı dərsləri də sayırdı — «üst həftə mühazirə, alt həftə seminar» əsl
+növbələşmədir).
+
+### 11.4 Prod addımları (hər biri sahibin «hə»sı ilə; canlı imtahan günü deyil)
+
+1. Kodu prod-a çatdır.
+2. Lokal: TƏZƏ prod nüsxəsi üzərində `build_twin_repair_plans` (köhnə sistemin cari dump-ı ilə) → `relocate.json`,
+   `merge.json`, `lessonkinds.json` → hər birini `STAFF_PLAN_KEY` ilə şifrələ (`*.json.enc`) → bir draft release
+   (`rim-fix-YYYYMMDD-…`).
+3. `prod-data-ops`, ARDICIL (sıra vacibdir — birləşmə dərsləri yenidən yaradır):
+   `fix_legacy_lesson_kinds` (`roster_tag`, dry-run → apply; `create_missing=true` ilə ikinci qaçış — qarışıq plan) →
+   `relocate_twin_enrollment` → `merge_twin_offerings` → `fix_slot_week_parity` (`period`). Hər birindən sonra eyni
+   girişlə yoxlama dry-run-u (yazı sayğacları olmamalıdır).
+4. Release asset-lərini və lokal planları sil.

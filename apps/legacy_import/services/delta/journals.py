@@ -12,6 +12,11 @@ Qeydiyyat
     açılışda artıq qeydiyyatdadırsa ikinci sətir AÇILMIR (mövcud sətir istifadə olunur). Tələbənin
     qrupu açılışın qrupu deyilsə — alt qrupdan / başqa qrupdan əlavə: ``source_group`` + ``added_by``
     (``guest_roster.add_guest_student``-in yazdığı forma ilə eyni).
+
+    Bir neçə legacy jurnal (RİM 2026-10-27, MR-11/15): qeydiyyat tələbənin «ev» jurnalının açılışındadır
+    (:mod:`.home_journal` — aktiv, siyahıda, xanası/tarixi çox olan; passiv jurnal SEÇİLMİR), emal sırası
+    deyil. Ev ailəsindən olmayan («əkiz») jurnalın və passiv jurnalın xanası ev qeydiyyatına yalnız MÖVCUD
+    dərsə düşür (``run.cross_journal`` — :func:`.lessons.build_lessons_and_marks`), qeydiyyat yaratmır.
 """
 
 from __future__ import annotations
@@ -21,6 +26,7 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from .extract import parse_id_list
+from .home_journal import build_home_index, journal_is_active, legacy_unit_id, offerings_related
 from .resolve import subject_key
 from .structure import ensure_group, ensure_subject
 
@@ -35,18 +41,24 @@ class JournalSlices:
         self.offerings: list = []
         self.writable: set = set()
 
-    def pick(self, group_id, catalog):
-        """Tələbənin qrupuna uyğun açılış: öz qrupu → alt/ana qrup → tək dilim → birinci dilim."""
+    def pick(self, group_id, catalog, legacy_group_id=None):
+        """Tələbənin qrupuna uyğun açılış: öz (reyestr) qrupu → legacy qrupu → alt/ana qrup → birinci dilim.
+
+        Legacy qrupu (2026-10-27): reyestr qrupu jurnalın qruplarından heç biri deyilsə (məs. reyestr «635 1»,
+        jurnal «635İnteryer + 635Qrafik») tələbənin köhnə sistemdəki qrupu seçir — «birinci dilim» təsadüfi idi."""
 
         from apps.registrar.public import subgroup_rollup
 
         if not self.offerings:
             return None
-        for offering in self.offerings:
-            if offering.group_id == group_id:
-                return offering
-        unit = catalog.units.get(group_id)
-        if unit is not None:
+        for wanted in (group_id, legacy_group_id):
+            for offering in self.offerings:
+                if wanted is not None and offering.group_id == wanted:
+                    return offering
+        for wanted in (group_id, legacy_group_id):
+            unit = catalog.units.get(wanted) if wanted is not None else None
+            if unit is None:
+                continue
             for offering in self.offerings:
                 other = catalog.units.get(offering.group_id)
                 if other is not None and (
@@ -219,15 +231,17 @@ def _restore_role(run, teacher) -> bool:
     return True
 
 
-def _pick(candidates, journal_offering_ids):
+def _pick(candidates, journal_offering_ids, home_family=None):
     """Eyni fənn+dövr üzrə bir neçə qeydiyyat varsa DETERMİNİSTİK seçim: aktiv olan, legacy jurnalın öz
-    açılışındakı, ən erkən yaradılmış (sıra qaçışdan-qaçışa dəyişmir)."""
+    açılışındakı, ev ailəsindəki (``home_family(offering) -> bool``), ən erkən yaradılmış (sıra qaçışdan-qaçışa
+    dəyişmir)."""
 
     if not candidates:
         return None
     enrolled = [e for e in candidates if e.status == "enrolled"]
     for pool in (
         [e for e in enrolled if e.offering_id in journal_offering_ids],
+        [e for e in enrolled if home_family is not None and home_family(e.offering)],
         enrolled,
         list(candidates),
     ):
@@ -237,7 +251,10 @@ def _pick(candidates, journal_offering_ids):
 
 
 def build_enrollments(run, slices: dict) -> dict:
-    """``(uniqid, legacy_student_id) → Enrollment`` — mövcudu tapır, çatışmayanı yaradır."""
+    """``(uniqid, legacy_student_id) → Enrollment`` — mövcudu tapır, çatışmayanı yaradır.
+
+    İki keçid: (1) ev ailəsindən olan aktiv jurnallar qeydiyyatı tapır/yaradır; (2) əkiz və passiv jurnalların
+    tələbələri ev qeydiyyatına bağlanır və ``run.cross_journal``-a düşür (xanası yalnız mövcud dərsə yazılır)."""
 
     Enrollment = django_apps.get_model("registrar", "Enrollment")
     offerings = {offering.pk: offering for entry in slices.values() for offering in entry.offerings}
@@ -257,10 +274,14 @@ def build_enrollments(run, slices: dict) -> dict:
     points_by_journal: dict = {}
     for point in run.bundle["points"]:
         points_by_journal.setdefault(point["journal_uniqid"], set()).add(point["student_id"])
+    homes = build_home_index(run, slices)
+    cross = run.__dict__.setdefault("cross_journal", set())
     result: dict = {}
     pending: list = []
+    deferred: list = []
     now = timezone.now()
     for uniqid, entry in slices.items():
+        active = journal_is_active(entry.journal)
         legacy_ids = list(dict.fromkeys(parse_id_list(entry.journal["students_id"])))
         legacy_ids += [sid for sid in sorted(points_by_journal.get(uniqid, ())) if sid not in legacy_ids]
         for legacy_id in legacy_ids:
@@ -269,11 +290,19 @@ def build_enrollments(run, slices: dict) -> dict:
                 run.count("enrollment.student_unresolved")
                 continue
             group_id = run.students.group_of.get(user_id)
-            offering = entry.pick(group_id, run.catalog)
+            offering = entry.pick(group_id, run.catalog, legacy_unit_id(run, legacy_id))
             if offering is None:
                 continue
             key = (user_id, offering.subject_id, offering.period_id)
-            found = _pick(existing.get(key), {o.pk for o in entry.offerings})
+            if not active or homes.is_twin(key, offering):
+                deferred.append((uniqid, legacy_id, key, offering, active))
+                continue
+            home = homes.home(key)
+            found = _pick(
+                existing.get(key),
+                {o.pk for o in entry.offerings},
+                (lambda other, home=home: offerings_related(run.catalog, home, other)) if home is not None else None,
+            )
             if found is not None:
                 result[(uniqid, legacy_id)] = found
                 run.count("enrollment.existing" if found.status == "enrolled" else "enrollment.existing_not_enrolled")
@@ -299,6 +328,20 @@ def build_enrollments(run, slices: dict) -> dict:
             result[(uniqid, legacy_id)] = enrollment
             pending.append(enrollment)
             run.count("enrollment.created_guest" if guest else "enrollment.created")
+    for uniqid, legacy_id, key, offering, active in deferred:
+        home = homes.home(key)
+        found = _pick(
+            existing.get(key),
+            set(),
+            (lambda other, home=home: offerings_related(run.catalog, home, other)) if home is not None else None,
+        )
+        if found is None or found.status != "enrolled":
+            run.count("enrollment.inactive_journal_only" if not active else "enrollment.twin_journal_no_home")
+            continue
+        result[(uniqid, legacy_id)] = found
+        if not offerings_related(run.catalog, found.offering, offering):
+            cross.add((uniqid, legacy_id))
+        run.count("enrollment.twin_journal_to_home" if active else "enrollment.inactive_journal_to_home")
     run.bulk_create(Enrollment, pending, "enrollments")
     return result
 
