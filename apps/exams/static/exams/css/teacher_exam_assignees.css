@@ -1,0 +1,193 @@
+/* «Tapşırıq təyin olunmuşlar» (sahib 2026-10-27) — ortaq qabıq: teacher_page_shell.css + ems_ui. */
+
+.eas-card__title {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.eas-card__subtitle {
+    margin: var(--ems-sp-5) 0 var(--ems-sp-2);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-text-muted);
+}
+
+/* ── Təyin olunmuş qruplar + say çipləri ─────────────────────────────── */
+.eas-units,
+.eas-add,
+.eas-filters {
+    padding: var(--ems-sp-6) 18px;
+}
+
+.eas-unitlist {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+    margin: var(--ems-sp-5) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.eas-unit {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: var(--ems-h-xs);
+    padding: 0 6px 0 12px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-bg-subtle);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+}
+
+.eas-unit__remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: 0;
+    border-radius: var(--ems-r-pill);
+    background: transparent;
+    color: var(--ems-neutral-500);
+    cursor: pointer;
+}
+
+.eas-unit__remove:hover,
+.eas-unit__remove:focus-visible {
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+.eas-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+}
+
+.eas-chips .ems-chip {
+    text-decoration: none;
+}
+
+.eas-chip--muted {
+    cursor: default;
+    color: var(--ems-neutral-500);
+}
+
+/* ── Əlavə et ─────────────────────────────────────────────────────────── */
+.eas-add {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ems-sp-6);
+}
+
+.eas-add__col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+    min-width: 0;
+}
+
+.eas-add__col .ems-btn {
+    align-self: flex-start;
+}
+
+.eas-add__hint {
+    grid-column: 1 / -1;
+    margin: 0;
+}
+
+/* ── Cədvəl ───────────────────────────────────────────────────────────── */
+.eas-results__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--ems-border);
+}
+
+.eas-name {
+    display: block;
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.eas-username {
+    font-size: var(--ems-fs-xs);
+}
+
+.eas-score {
+    margin-left: 6px;
+    font-weight: 700;
+}
+
+.eas-attempts {
+    display: block;
+}
+
+.eas-row--excluded td {
+    background: var(--ems-danger-bg);
+}
+
+.eas-col-actions {
+    white-space: nowrap;
+    text-align: right;
+}
+
+.eas-col-actions .ems-btn + .ems-btn {
+    margin-left: 6px;
+}
+
+/* ── Səbəb dialoqu ────────────────────────────────────────────────────── */
+.eas-dialog__warn {
+    color: var(--ems-warning-700);
+}
+
+.eas-dialog__text {
+    margin: 0 0 var(--ems-sp-2);
+    color: var(--ems-text);
+}
+
+.eas-dialog__list {
+    margin: 0 0 var(--ems-sp-5);
+    padding-left: 18px;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-700);
+}
+
+.eas-dialog__confirm {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    margin-bottom: var(--ems-sp-5);
+    font-weight: 700;
+}
+
+.eas-dialog__confirm[hidden] {
+    display: none;
+}
+
+.eas-dialog__reason {
+    width: 100%;
+    min-height: 84px;
+    resize: vertical;
+}
+
+@media (max-width: 768px) {
+    .eas-add {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .eas-col-actions {
+        text-align: left;
+        white-space: normal;
+    }
+}

@@ -28,7 +28,8 @@ from core.constants import OrganizationType
 User = get_user_model()
 
 #: Ölçülmüş (2026-10-17, sandbox): detal 22, statistika 20/21, yoxlama 27 — +3 ehtiyat.
-DETAIL_BUDGET = 25
+#: 2026-10-27: detal +5 — «Tapşırıq təyin olunmuşlar» kartının sayı (PIN çoxluğu, sabit sorğu sayı) → 27 + 3.
+DETAIL_BUDGET = 30
 STATS_BUDGET = 24
 
 
