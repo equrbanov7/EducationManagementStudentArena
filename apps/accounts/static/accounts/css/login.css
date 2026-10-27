@@ -107,6 +107,20 @@ body.auth-body {
     text-align: left;
 }
 
+/* Sessiya fəaliyyətsizlik / bağlı brauzer qaydası ilə bitib (sahib 2026-10-27) — giriş səhifəsində bir dəfə. */
+.auth-session-ended {
+    margin: -6px 0 18px;
+    padding: 10px 12px;
+    border: 1px solid var(--ems-warning-bd);
+    border-left: 3px solid var(--ems-warning-600);
+    border-radius: 8px;
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+    font-size: 0.88rem;
+    line-height: 1.45;
+    text-align: left;
+}
+
 .auth-language-control .bootstrap-single-select__option {
     padding: 0.55rem 0.68rem;
     border-radius: 9px;

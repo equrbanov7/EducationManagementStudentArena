@@ -5,7 +5,7 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}?v=20260909-focus">
-    <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}?v=20261019-mob">
+    <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}?v=20261027-sess">
     <link rel="stylesheet" href="{% static 'accounts/css/login_first_login.css' %}?v=20261001-lockout">
 {% endblock %}
 
@@ -43,6 +43,7 @@
         {% if login_portal_message %}
             <p class="auth-route-note auth-route-note--{{ login_audience }}">{{ login_portal_message }}</p>
         {% endif %}
+        {% if session_ended_notice %}<p class="auth-session-ended" role="status">{{ session_ended_notice }}</p>{% endif %}
 
         {% comment %}2026-09-14 (audit FE-F15, WCAG 4.1.3): giriş xətası ekran oxuyucuya
         `role="alert"` ilə elan olunur; sahə xətaları Django 5.2-nin özünün widget-ə

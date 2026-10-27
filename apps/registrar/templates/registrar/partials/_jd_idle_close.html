@@ -1,0 +1,27 @@
+{% load static i18n registrar_journal_idle %}{% comment %}
+Hərəkətsiz jurnalın bağlanması (sahib 2026-10-27): açıq jurnalda `data-minutes` dəqiqə heç bir hərəkət olmasa,
+`registrar/js/journal_idle_close.js` əvvəlcə gözləyən xanaları avtomatik yadda saxlayır (journal_grid_autosave.js),
+sonra jurnalı bu pəncərə ilə bağlayır (cədvəl gizlənir). «Davam et» səhifəni TƏZƏ məlumatla açır; yazılmamış xana
+qalıbsa brauzer qaralamasından bərpa olunur. Dəqiqə — «Sistem tənzimləmələri → Elektron jurnal»; 0 → render yoxdur.
+Mətnlər data-atributlardadır (CSP — inline yoxdur).
+{% endcomment %}{% journal_idle_close_minutes as idle_minutes %}{% if idle_minutes %}
+<div class="jd-idle" data-jd-idle hidden
+     data-minutes="{{ idle_minutes }}"
+     data-msg-saving="{% trans 'Dəyişikliklər yadda saxlanılır…' context 'registrar.journal_idle' %}"
+     data-msg-saved="{% trans 'Bütün dəyişikliklər yadda saxlanılıb.' context 'registrar.journal_idle' %}"
+     data-msg-unsaved="{% trans 'Bəzi xanalar yadda saxlanılmadı — onlar bu brauzerdə qaralama kimi qalıb və «Davam et» basanda bərpa olunacaq.' context 'registrar.journal_idle' %}">
+    <div class="jd-idle__dialog" role="dialog" aria-modal="true" aria-labelledby="jd-idle-title" aria-describedby="jd-idle-text">
+        <span class="jd-idle__icon" aria-hidden="true"><i class="fas fa-lock"></i></span>
+        <h2 class="jd-idle__title" id="jd-idle-title">{% trans "Jurnal bağlandı" context "registrar.journal_idle" %}</h2>
+        <p class="jd-idle__text" id="jd-idle-text">{% blocktrans with minutes=idle_minutes context "registrar.journal_idle" %}{{ minutes }} dəqiqə heç bir əməliyyat edilmədiyi üçün jurnal təhlükəsizlik məqsədilə bağlandı.{% endblocktrans %}</p>
+        <p class="jd-idle__status" data-jd-idle-status role="status" aria-live="polite"></p>
+        <div class="jd-idle__actions">
+            <button type="button" class="btn btn-primary" data-jd-idle-resume>
+                <i class="fas fa-rotate-right" aria-hidden="true"></i> {% trans "Davam et" context "registrar.journal_idle" %}
+            </button>
+            <a class="btn btn-outline-secondary" href="{% url 'registrar:journal_list' %}">{% trans "Jurnallar siyahısı" context "registrar.journal_idle" %}</a>
+        </div>
+    </div>
+</div>
+<script src="{% static 'registrar/js/journal_idle_close.js' %}?v=20261027-1"></script>
+{% endif %}

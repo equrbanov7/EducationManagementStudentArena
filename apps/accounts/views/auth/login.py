@@ -18,6 +18,7 @@ from ...forms import CustomLoginForm, CustomPasswordResetForm, OTPPasswordResetC
 from ...middleware import POST_LOGIN_REDIRECT_GUARD_SESSION_KEY
 from ...services import get_otp_timer_context
 from ...services.account_block_notice import blocked_login_notice
+from ...session_policy import pop_ended_notice
 from ...tokens import password_reset_token_generator
 from ._shared import (
     _clear_login_rate_limits_after_password_reset,
@@ -169,6 +170,8 @@ class CustomLoginView(LoginView):
             {
                 "login_audience": audience,
                 "login_portal_message": self._audience_message(audience),
+                # Sahib 2026-10-27: sessiya fəaliyyətsizlik / bağlı brauzer qaydası ilə bitibsə — səbəb bir dəfə.
+                "session_ended_notice": pop_ended_notice(self.request) if self.request.method == "GET" else "",
             }
         )
         # Sahib 2026-10-01: blok zamanı geri sayım. POST-da ``post()`` hesablayır; GET-də (səhifə
@@ -351,6 +354,7 @@ def login_portal(request):
     next_url = _sanitize_auth_redirect_target(request, request.GET.get("next")) or ""
     context = {
         "next": next_url,
+        "session_ended_notice": pop_ended_notice(request),
         "staff_login_url": _login_url_with_next("accounts:staff_login", next_url),
         "student_login_url": _login_url_with_next("accounts:student_login", next_url),
     }

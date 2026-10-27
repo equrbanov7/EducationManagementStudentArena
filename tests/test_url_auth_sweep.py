@@ -32,6 +32,7 @@ PUBLIC_ALLOWLIST = {
     "accounts:staff_login",  # /accounts/login/muellim/
     "accounts:student_login",  # /accounts/login/telebe/
     "accounts:logout",
+    "accounts:session_ping",  # 2026-10-27: anonimə yalnız {"authenticated": false} + CSRF tokeni (məlumat yoxdur)
     "accounts:password_reset",
     "accounts:password_reset_done",
     "accounts:password_reset_complete",

@@ -86,6 +86,8 @@
     {% if view_as.active or view_as.can_use %}
     <link rel="stylesheet" href="{% static 'css/view_as.css' %}?v=20261026-arch">
     {% endif %}
+    {# «Sessiyanız başa çatdı» pəncərəsi (partials/_session_keepalive.html, 2026-10-27) #}
+    {% if request.user.is_authenticated %}<link rel="stylesheet" href="{% static 'css/session_keepalive.css' %}?v=20261027-1">{% endif %}
 
     {# 2026-10-21: imtahan zalı sessiyasının minimal çərçivəsi (apps/exams/context_processors.py → `hall_chrome`) #}
     {% if hall_chrome.active %}<link rel="stylesheet" href="{% static 'exams/css/hall/hall_frame.css' %}?v=20261021-hall">{% endif %}
@@ -201,7 +203,9 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
          Section script-lərindən ƏVVƏL yüklənməlidir ki, global mövcud olsun. -->
     {# Faza 6.3: EMSCore (getCookie/fetchJSON) — bütün custom JS-dən əvvəl. #}
     <script src="{% static 'js/core/csrf.js' %}?v=20260702-1"></script>
-    <script src="{% static 'js/core/http.js' %}?v=20260702-1"></script>
+    <script src="{% static 'js/core/http.js' %}?v=20261027-sess"></script>
+    {# Sessiya pingi + təzə CSRF tokeni + «sessiya başa çatdı» pəncərəsi (sahib 2026-10-27) — yalnız daxil olmuşa #}
+    {% include "partials/_session_keepalive.html" %}
     <script src="{% static 'js/ems_ajax_init.js' %}?v=20260905-earlyq"></script>
     <script src="{% static 'js/modal_scroll_lock.js' %}?v=20260926-3"></script>
     <script src="{% static 'js/burgerMenu.js' %}?v=20260911-1"></script>

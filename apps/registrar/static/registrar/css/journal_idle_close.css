@@ -1,0 +1,85 @@
+/* Hərəkətsiz jurnalın bağlanması (registrar/partials/_jd_idle_close.html, sahib 2026-10-27).
+   Bağlananda cədvəl görünmür (yanından keçən tələbələrin qiymətləri görməsin), pəncərə hər şeyin üstündədir;
+   «Sessiyanız başa çatdı» pəncərəsi (2100) ondan da yuxarıdadır. */
+.jd-idle {
+    position: fixed;
+    inset: 0;
+    z-index: 2050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(15, 23, 42, 0.6);
+}
+
+.jd-idle[hidden] {
+    display: none;
+}
+
+html.jd-idle-locked body {
+    overflow: hidden;
+}
+
+/* Bütün məzmun (cədvəl, stepper, yapışqan başlıq) gizlənir; pəncərənin özü `visibility: visible` ilə görünür. */
+html.jd-idle-locked #main-content {
+    visibility: hidden;
+}
+
+html.jd-idle-locked .jd-idle {
+    visibility: visible;
+}
+
+.jd-idle__dialog {
+    width: 100%;
+    max-width: 460px;
+    padding: 24px 22px 20px;
+    border-radius: 14px;
+    background: var(--ems-bg, #fff);
+    color: var(--ems-neutral-800, #1f2937);
+    box-shadow: 0 24px 48px rgba(15, 23, 42, 0.28);
+    text-align: center;
+}
+
+.jd-idle__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+    border-radius: 50%;
+    background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-600, #2563eb);
+    font-size: 1.2rem;
+}
+
+.jd-idle__title {
+    margin: 0 0 8px;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.jd-idle__text {
+    margin: 0 0 8px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.jd-idle__status {
+    min-height: 1.4em;
+    margin: 0 0 18px;
+    color: var(--ems-neutral-600, #475569);
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+
+.jd-idle__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.jd-idle__actions .btn {
+    min-width: 150px;
+}

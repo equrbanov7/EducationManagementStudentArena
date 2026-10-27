@@ -4,6 +4,7 @@ Handles automatic profile creation.
 """
 
 from django.conf import settings
+from django.contrib.auth.signals import user_logged_in
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -36,3 +37,11 @@ def ensure_user_profile(sender, instance, created, update_fields=None, **kwargs)
 
     with rls_worker_atomic():
         UserProfile.objects.get_or_create(user=instance)
+
+
+@receiver(user_logged_in)
+def remember_session_policy(sender, request, user, **kwargs):
+    """Sessiya siyasəti (2026-10-27): hesab növü + brauzer-bağlanma rejimi giriş anında — ilk sorğu əlavə sorğusuz."""
+    from apps.accounts.session_policy import remember_at_login
+
+    remember_at_login(request, user)

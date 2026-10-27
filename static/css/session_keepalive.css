@@ -1,0 +1,94 @@
+/* «Sessiyanız başa çatdı» pəncərəsi (templates/partials/_session_keepalive.html, sahib 2026-10-27).
+   Bootstrap modallarının (1055) və toast-ların üstündə; telefonda kənarlardan 16px boşluq. */
+.ems-session {
+    position: fixed;
+    inset: 0;
+    z-index: 2100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(15, 23, 42, 0.55);
+}
+
+.ems-session[hidden] {
+    display: none;
+}
+
+.ems-session__dialog {
+    width: 100%;
+    max-width: 440px;
+    padding: 24px 22px 20px;
+    border-radius: 14px;
+    background: var(--ems-bg, #fff);
+    color: var(--ems-neutral-800, #1f2937);
+    box-shadow: 0 24px 48px rgba(15, 23, 42, 0.28);
+    text-align: center;
+}
+
+.ems-session__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+    border-radius: 50%;
+    background: var(--ems-warning-bg, #fef3c7);
+    color: var(--ems-warning-700, #b45309);
+    font-size: 1.25rem;
+}
+
+.ems-session__title {
+    margin: 0 0 8px;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.ems-session__text {
+    margin: 0 0 8px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.ems-session__note {
+    margin: 0 0 18px;
+    color: var(--ems-neutral-600, #4b5563);
+    font-size: 0.83rem;
+    line-height: 1.45;
+}
+
+.ems-session__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+/* Bootstrap-sız səhifələrdə də (canlı imtahan aparıcısı) düymə görünüşü olsun. */
+.ems-session__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 150px;
+    padding: 8px 14px;
+    border: 1px solid var(--ems-neutral-300, #cbd5e1);
+    border-radius: 8px;
+    background: var(--ems-bg, #fff);
+    color: var(--ems-neutral-800, #1f2937);
+    font: inherit;
+    font-size: 0.92rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.ems-session__btn--primary {
+    border-color: var(--ems-primary-600, #2563eb);
+    background: var(--ems-primary-600, #2563eb);
+    color: #fff;
+}
+
+html.ems-session-locked body {
+    overflow: hidden;
+}

@@ -206,6 +206,18 @@ def csrf_failure(request, reason=""):
     # tabs).  Send the user to a freshly rendered GET form with a new CSRF
     # token. (Sahib 2026-10-10: açıq qeydiyyat silindi — register / verify-code
     # budaqları da getdi.)
+    # Sahib 2026-10-27: AJAX/JSON sorğusu HTML səhifə yox, JSON alır — `EMSCore.fetchJSON` təzə tokenlə BİR dəfə
+    # avtomatik təkrar edir (istifadəçi «səhifəni yeniləyin» görmür); mətn istifadəçinin dilindədir.
+    accept = (request.headers.get("Accept") or "").lower()
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest" or (
+        "application/json" in accept and "text/html" not in accept
+    ):
+        message = pgettext("core.errors.csrf", "Stale security token — the page needs to be refreshed.")
+        return JsonResponse(
+            {"ok": False, "error": "csrf_failed", "csrf_failed": True, "message": message, "detail": message},
+            status=403,
+        )
+
     normalized_path = request.path.rstrip("/")
     login_path = settings.LOGIN_URL.rstrip("/")
 

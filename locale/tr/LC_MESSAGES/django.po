@@ -109290,3 +109290,96 @@ msgstr "Süper yönetici: belge / emir isteğe bağlıdır — boş bırakılır
 msgctxt "registrar.guest_roster"
 msgid "SƏNƏD — TƏQDİMAT / SƏRƏNCAM (İSTƏYƏ BAĞLI)"
 msgstr "BELGE — TEKLİF / EMİR (İSTEĞE BAĞLI)"
+
+msgctxt "core.runtime_settings"
+msgid "Söndürülü (sessiya brauzer bağlandıqdan sonra da qalır)"
+msgstr "Kapalı (oturum tarayıcı kapatıldıktan sonra da sürer)"
+
+msgctxt "core.runtime_settings"
+msgid "Müəllim və əməkdaşlar (tələbələr xaric)"
+msgstr "Öğretmenler ve personel (öğrenciler hariç)"
+
+msgctxt "core.runtime_settings"
+msgid "Hamı (imtahan gedişində olan tələbə çıxarılmır)"
+msgstr "Herkes (sınavdaki öğrencinin oturumu kapatılmaz)"
+
+msgctxt "core.runtime_settings"
+msgid "Brauzer bağlananda və ya kompüter sönəndə çıxış"
+msgstr "Tarayıcı kapatılınca veya bilgisayar kapanınca oturumu kapat"
+
+msgctxt "core.runtime_settings"
+msgid "Seçilmiş istifadəçilərin sessiyası brauzer bağlananda bitir; brauzer «qaldığım yerdən davam et» ilə açılsa belə, aşağıdakı «brauzer açıq deyil» limiti keçibsə yenidən giriş tələb olunur. Tələbələr daxil edilsə də, imtahan gedişində (zal bileti, başlanmış cəhd, canlı imtahan) heç kim çıxarılmır."
+msgstr "Seçilen kullanıcıların oturumu tarayıcı kapatılınca sona erer; tarayıcı «kaldığım yerden devam et» ile açılsa bile aşağıdaki «tarayıcı açık değil» sınırı geçtiyse yeniden giriş gerekir. Öğrenciler dahil edilse de sınav sırasında (salon bileti, başlamış deneme, canlı sınav) kimsenin oturumu kapatılmaz."
+
+msgctxt "core.runtime_settings"
+msgid "Brauzer açıq deyilsə çıxış"
+msgstr "Tarayıcı açık değilse oturumu kapat"
+
+msgctxt "core.runtime_settings"
+msgid "Açıq səhifə serverə mütəmadi «buradayam» siqnalı göndərir. Bu qədər dəqiqə heç bir siqnal gəlməsə (brauzer bağlanıb, kompüter sönüb və ya yuxu rejimindədir) sessiya bitir. Yalnız yuxarıda seçilmiş istifadəçilərə aiddir. 0 — söndürülü."
+msgstr "Açık sayfa sunucuya düzenli olarak «buradayım» sinyali gönderir. Bu kadar dakika hiç sinyal gelmezse (tarayıcı kapatıldı, bilgisayar kapandı veya uyku modunda) oturum sona erer. Yalnızca yukarıda seçilen kullanıcılar için geçerlidir. 0 — kapalı."
+
+msgctxt "core.runtime_settings"
+msgid "Hərəkətsiz jurnalın bağlanması"
+msgstr "Hareketsiz yoklama defterinin kapatılması"
+
+msgctxt "core.runtime_settings"
+msgid "Açıq jurnalda bu qədər dəqiqə heç bir hərəkət (klik, yazı, sürüşdürmə) olmasa, yadda saxlanmamış xanalar əvvəlcə yadda saxlanılır, sonra jurnal bağlanır; «Davam et» onu təzə məlumatla açır. 0 — söndürülü."
+msgstr "Açık yoklama defterinde bu kadar dakika hiçbir hareket (tıklama, yazma, kaydırma) olmazsa, kaydedilmemiş hücreler önce kaydedilir, ardından yoklama defteri kapanır; «Devam et» onu güncel verilerle açar. 0 — kapalı."
+
+msgctxt "accounts.session"
+msgid "Brauzer bağlandığı və ya kompüter söndüyü üçün sessiyanız təhlükəsizlik məqsədilə başa çatdı. Davam etmək üçün yenidən daxil olun."
+msgstr "Tarayıcı kapatıldığı veya bilgisayar kapandığı için oturumunuz güvenlik amacıyla sona erdi. Devam etmek için yeniden giriş yapın."
+
+msgctxt "accounts.session"
+msgid "Uzun müddət heç bir əməliyyat edilmədiyi üçün sessiyanız başa çatdı. Davam etmək üçün yenidən daxil olun."
+msgstr "Uzun süre hiçbir işlem yapılmadığı için oturumunuz sona erdi. Devam etmek için yeniden giriş yapın."
+
+msgctxt "accounts.session"
+msgid "Sessiyanız başa çatdı"
+msgstr "Oturumunuz sona erdi"
+
+msgctxt "accounts.session"
+msgid "Yadda saxlanmamış dəyişiklik varsa, yenidən daxil olduqdan sonra yoxlayın — jurnal xanaları bu brauzerdə qaralama kimi saxlanılır və bərpa olunur."
+msgstr "Kaydedilmemiş değişiklik varsa yeniden giriş yaptıktan sonra kontrol edin — yoklama defteri hücreleri bu tarayıcıda taslak olarak saklanır ve geri yüklenir."
+
+msgctxt "accounts.session"
+msgid "Yenidən daxil ol"
+msgstr "Yeniden giriş yap"
+
+msgctxt "accounts.session"
+msgid "Bu səhifədə qal"
+msgstr "Bu sayfada kal"
+
+msgctxt "registrar.journal_autosave"
+msgid "Sessiya başa çatıb — yenidən daxil olun. Yazılmamış xanalar bu brauzerdə qaralama kimi saxlanılıb və girişdən sonra jurnalda bərpa olunacaq."
+msgstr "Oturum sona erdi — yeniden giriş yapın. Kaydedilmemiş hücreler bu tarayıcıda taslak olarak saklandı ve girişten sonra yoklama defterinde geri yüklenecek."
+
+msgctxt "registrar.journal_idle"
+msgid "Dəyişikliklər yadda saxlanılır…"
+msgstr "Değişiklikler kaydediliyor…"
+
+msgctxt "registrar.journal_idle"
+msgid "Bütün dəyişikliklər yadda saxlanılıb."
+msgstr "Tüm değişiklikler kaydedildi."
+
+msgctxt "registrar.journal_idle"
+msgid "Bəzi xanalar yadda saxlanılmadı — onlar bu brauzerdə qaralama kimi qalıb və «Davam et» basanda bərpa olunacaq."
+msgstr "Bazı hücreler kaydedilmedi — bu tarayıcıda taslak olarak kaldılar ve «Devam et»e basınca geri yüklenecek."
+
+msgctxt "registrar.journal_idle"
+msgid "Jurnal bağlandı"
+msgstr "Yoklama defteri kapatıldı"
+
+#, python-format
+msgctxt "registrar.journal_idle"
+msgid "%(minutes)s dəqiqə heç bir əməliyyat edilmədiyi üçün jurnal təhlükəsizlik məqsədilə bağlandı."
+msgstr "%(minutes)s dakika hiçbir işlem yapılmadığı için yoklama defteri güvenlik amacıyla kapatıldı."
+
+msgctxt "registrar.journal_idle"
+msgid "Davam et"
+msgstr "Devam et"
+
+msgctxt "registrar.journal_idle"
+msgid "Jurnallar siyahısı"
+msgstr "Yoklama defterleri listesi"

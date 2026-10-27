@@ -8,7 +8,8 @@ Mətnlər JS-ə data-atributla ötürülür (xarici .js şablondan keçmir; CSP 
       data-msg-saved="{% trans 'Yadda saxlanıldı' context 'registrar.journal_autosave' %}"
       data-msg-partial="{% trans 'Yadda saxlanıldı — {n} xana yazılmadı (kilid, dərs günü və ya bal qaydası).' context 'registrar.journal_autosave' %}"
       data-msg-retrying="{% trans 'Xəta — yenidən cəhd edilir…' context 'registrar.journal_autosave' %}"
-      data-msg-failed="{% trans 'Yadda saxlanılmadı — səhifəni yeniləyin. Dəyişikliklər brauzerdə qaralama kimi qalır.' context 'registrar.journal_autosave' %}">{% trans "Dəyişikliklər avtomatik yadda saxlanılır." context "registrar.journal_autosave" %}</span>
+      data-msg-failed="{% trans 'Yadda saxlanılmadı — səhifəni yeniləyin. Dəyişikliklər brauzerdə qaralama kimi qalır.' context 'registrar.journal_autosave' %}"
+      data-msg-session="{% trans 'Sessiya başa çatıb — yenidən daxil olun. Yazılmamış xanalar bu brauzerdə qaralama kimi saxlanılıb və girişdən sonra jurnalda bərpa olunacaq.' context 'registrar.journal_autosave' %}">{% trans "Dəyişikliklər avtomatik yadda saxlanılır." context "registrar.journal_autosave" %}</span>
 <button type="button" class="jd2-autosave-retry" data-jd-autosave-retry hidden>
     <i class="fas fa-rotate-right" aria-hidden="true"></i> {% trans "Yenidən cəhd et" context "registrar.journal_autosave" %}
 </button>

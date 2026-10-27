@@ -18,6 +18,7 @@ from .views import group_lead as group_lead_views
 from .views import hr_analytics as hr_analytics_views
 from .views import journal_hygiene as journal_hygiene_views
 from .views import network_zone_page
+from .views import session_ping as session_ping_views
 from .views.profile import statistics_export_metrics as statistics_export_metrics_views
 
 app_name = "accounts"
@@ -53,6 +54,8 @@ urlpatterns = [
         name="student_login",
     ),
     path("logout/", views.logout_view, name="logout"),
+    # Açıq səhifənin «buradayam» pingi + təzə CSRF tokeni (sahib 2026-10-27; static/js/core/session_keepalive.js).
+    path("session/ping/", session_ping_views.session_ping, name="session_ping"),
     # Password reset
     path(
         "password-reset/",

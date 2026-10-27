@@ -155,6 +155,8 @@
                     // Kilid / bağlı pəncərə / icazə / sessiya — təkrar kömək etməz; qaralama brauzerdə qalır.
                     st.stopped = true;
                     var text = err.payload && typeof err.payload === "object" ? err.payload.message : "";
+                    // Sessiya bitib (2026-10-27): xam xəta yox — «yenidən daxil olun, qaralama brauzerdə qalır».
+                    if (code === 401 && err.payload && err.payload.session_expired) text = message(form, "session");
                     status(form, "error", text || message(form, "failed"));
                     return;
                 }
@@ -263,5 +265,11 @@
         else wire();
     }
 
-    window.EMSJournalAutosave = { flush: flush, changed: changed, state: state };
+    // Jurnalın hərəkətsizlikdə bağlanması (journal_idle_close.js) üçün: uçuşda sorğu varmı.
+    function busy(form) {
+        var st = state(form);
+        return !!(st.inflight || st.timer);
+    }
+
+    window.EMSJournalAutosave = { flush: flush, changed: changed, state: state, busy: busy };
 })();
