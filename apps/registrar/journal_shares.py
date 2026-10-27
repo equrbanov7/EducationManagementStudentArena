@@ -8,7 +8,8 @@ Model :class:`apps.registrar.models.JournalShare`-dədir. Qaydalar (:func:`journ
 * superuser / İKT (RİM) rəhbəri / təşkilat sahibi — TAM;
 * payı OLMAYAN istifadəçi (açılışın sahibi, korrektor, müşahidəçi) — TAM (köhnə davranış dəyişmir);
 * açılışın SAHİBİ payla — öz payının tələbələri (boş = hamısı) ∪ başqa heç bir payın örtmədiyi tələbələr;
-  dərs növləri: öz növləri (boş = hamısı) ∪ başqa heç bir payın iddia etmədiyi növlər;
+  dərs növləri: öz növləri (boş = hamısı) ∪ başqa payların iddia etmədiyi növlər — növü yalnız açılışın BÜTÜN
+  tələbələrini (birlikdə) əhatə edən paylar iddia edir; qonaq / səviyyə payı sahibin sütunlarını gizlətmir;
 * PAY SAHİBİ (sahib deyil) — yalnız öz payı: tələbələr (boş = hamısı), növlər (boş = hamısı).
 
 ``Lesson.instructor`` istifadəçinin özüdürsə həmin dərs sütunu HƏMİŞƏ görünür. Bal idarəsi (Midterm, komponent,
@@ -113,6 +114,34 @@ def _is_full_actor(user, offering) -> bool:
     return offering.organization.owner_id == user.pk
 
 
+def _claimed_kinds(offering, others) -> set:
+    """Başqa payların sahibdən «aldığı» dərs növləri (RİM MR-000010, 2026-10-27).
+
+    Növ yalnız açılışın BÜTÜN aktiv tələbələrini əhatə edən pay(lar) tərəfindən iddia olunur: bütün sətirli pay
+    (``enrollment_id_set`` boş) dərhal; sətir-məhdud paylar (qonaq / səviyyə / yarım qrupun seminarçısı) isə yalnız
+    həmin növü daşıyan payların sətirləri BİRLİKDƏ bütün siyahını örtəndə. Bir qonaq tələbəli ``kinds=[]`` payı
+    sahibin öz seminar/lab sütunlarını gizlətmir. Sətir-məhdud pay varsa — bir sorğu (aktiv siyahı)."""
+    claimed: set = set()
+    partial: dict = defaultdict(set)
+    for share in others:
+        share_kinds = set(share.kinds) & ALL_KINDS if share.kinds else set(ALL_KINDS)
+        if not share.enrollment_id_set:
+            claimed |= share_kinds
+            continue
+        for kind in share_kinds:
+            partial[kind] |= share.enrollment_id_set
+    pending = {kind: rows for kind, rows in partial.items() if kind not in claimed}
+    if pending:
+        roster = {
+            str(pk)
+            for pk in Enrollment.objects.filter(offering_id=offering.pk, status=Enrollment.Status.ENROLLED).values_list(
+                "pk", flat=True
+            )
+        }
+        claimed |= {kind for kind, rows in pending.items() if roster and roster <= rows}
+    return claimed
+
+
 def journal_scope(user, offering) -> Scope:
     """İstifadəçinin bu açılışdakı əhatəsi (modul şərhindəki qaydalar)."""
     if not getattr(user, "is_authenticated", False) or _is_full_actor(user, offering):
@@ -127,10 +156,7 @@ def journal_scope(user, offering) -> Scope:
     rows = own.enrollment_id_set or None
     if is_owner:
         if kinds is not None:
-            claimed = set()
-            for share in others:
-                claimed |= set(share.kinds) if share.kinds else ALL_KINDS
-            kinds = kinds | (ALL_KINDS - claimed)
+            kinds = kinds | (ALL_KINDS - _claimed_kinds(offering, others))
         if rows is not None and all(share.enrollment_id_set for share in others):
             claimed_rows = set().union(*(share.enrollment_id_set for share in others))
             offering_rows = {

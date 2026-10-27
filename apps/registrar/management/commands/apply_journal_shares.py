@@ -6,7 +6,10 @@ götür». Qaydalar :mod:`apps.registrar.journal_share_import`, əhatə :mod:`ap
 
 * DEFOLT DRY-RUN — eyni kod bir tranzaksiyada işləyir, sonda geri alınır (saylar dəqiqdir).
 * ``--apply`` — yazır; paket ``shares-YYYYMMDD-HHMMSS-xxxx`` (stdout-da ``batch=``).
-* ``--undo <paket>`` — paketin paylarını söndürür (qeydiyyat çıxarışları «Jurnal təmizliyi» tarixçəsindən qayıdır).
+* ``--undo <paket>`` — paketi audit manifestinə görə geri qaytarır: yaradılan paylar söndürülür, növü/tələbələri
+  yenilənən paylar əvvəlki vəziyyətə, ``"active": false`` ilə söndürülən paylar yenidən aktiv olur (qeydiyyat
+  çıxarışları «Jurnal təmizliyi» tarixçəsindən qayıdır).
+* Fayl sətrində ``"active": false`` — həmin açılış × müəllim üzrə köhnə sistem payı söndürülür (RİM MR-000017).
 * İdempotent: ikinci ``--apply`` → ``shares_created=0``.
 * Stdout-a YALNIZ saylar: ``journal_shares: açar=dəyər …``.
 
@@ -79,5 +82,6 @@ class Command(BaseCommand):
             raise CommandError(str(exc)) from None
         keys = sorted(counts) if undo else SHOWN
         self.stdout.write(f"journal_shares: mode={mode} " + " ".join(f"{key}={counts.get(key, 0)}" for key in keys))
-        if mode == "apply" and not undo and (counts.get("shares_created") or counts.get("shares_updated")):
+        changed = ("shares_created", "shares_updated", "shares_deactivated")
+        if mode == "apply" and not undo and any(counts.get(key) for key in changed):
             self.stdout.write(f"journal_shares: batch={batch}")
