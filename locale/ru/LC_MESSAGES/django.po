@@ -110501,3 +110501,77 @@ msgstr "Материалы кафедры"
 msgctxt "organizations.permission.label"
 msgid "Kafedranın fənn qovluqlarına (dərs materiallarına) baxmaq"
 msgstr "Просмотр папок дисциплин кафедры (учебных материалов)"
+
+msgctxt "exams.unit_coverage"
+msgid "Bu qrupun bu fənni yoxdur"
+msgstr "У этой группы нет этого предмета"
+
+msgctxt "exams.unit_coverage"
+msgid "Bu qrupda {n} tələbə bu fənnin jurnalında yoxdur"
+msgstr "В этой группе студентов, которых нет в журнале этого предмета: {n}"
+
+msgctxt "exams.unit_coverage"
+msgid "Seçilmiş qrupların tələbələri bu fənnin jurnalında yoxdur"
+msgstr "Студентов выбранных групп нет в журнале этого предмета"
+
+msgctxt "exams.unit_coverage"
+msgid "Fənn: {subject}. Bu tələbələrin imtahan nəticəsi fənnin jurnalına düşməyəcək."
+msgstr "Предмет: {subject}. Результаты экзамена этих студентов не попадут в журнал предмета."
+
+msgctxt "exams.unit_coverage"
+msgid "{n} / {total} tələbə fənnin cari semestr jurnalında yoxdur"
+msgstr "{n} / {total} студентов нет в журнале предмета текущего семестра"
+
+msgctxt "exams.unit_coverage"
+msgid "Bu qrupun bu fəndən cari semestr jurnalı yoxdur."
+msgstr "У этой группы нет журнала по этому предмету в текущем семестре."
+
+msgctxt "exams.unit_coverage"
+msgid "və daha {n} nəfər"
+msgstr "и ещё {n}"
+
+msgctxt "exams.unit_coverage"
+msgid "Qrupu çıxar"
+msgstr "Убрать группу"
+
+msgctxt "exams.unit_coverage"
+msgid "Yenə də əlavə et"
+msgstr "Всё равно добавить"
+
+msgctxt "exams.unit_coverage"
+msgid "Məcburi əlavənin səbəbi"
+msgstr "Причина принудительного добавления"
+
+msgctxt "exams.unit_coverage"
+msgid "Məsələn: tələbələr bu fəndən akademik borcu verir"
+msgstr "Например: студенты сдают академическую задолженность по этому предмету"
+
+msgctxt "exams.unit_coverage"
+msgid "Ən azı {n} simvol. Səbəb imtahan tarixçəsinə yazılır."
+msgstr "Не менее {n} символов. Причина записывается в историю экзамена."
+
+msgctxt "exams.unit_coverage"
+msgid "Məcburi əlavə"
+msgstr "Добавлено принудительно"
+
+#, python-format
+msgctxt "exams.unit_coverage"
+msgid "Səbəb ən azı %(min)d simvol olmalıdır."
+msgstr "Причина должна содержать не менее %(min)d символов."
+
+msgctxt "exams.unit_coverage"
+msgid "Seçilmiş qrupların bəzi tələbələri bu fənnin cari semestr jurnalında yoxdur. Qrupu çıxarın və ya səbəb yazaraq məcburi əlavə edin."
+msgstr "Некоторых студентов выбранных групп нет в журнале этого предмета текущего семестра. Уберите группу или добавьте её принудительно, указав причину."
+
+msgctxt "exams.unit_coverage"
+msgid "Məcburi əlavə olunmuş qruplar"
+msgstr "Принудительно добавленные группы"
+
+msgctxt "exams.unit_coverage"
+msgid "Səbəb"
+msgstr "Причина"
+
+#, python-format
+msgctxt "exams.unit_coverage"
+msgid "Fənnin jurnalında olmayan tələbə: %(uncovered)s / %(students)s"
+msgstr "Студентов нет в журнале предмета: %(uncovered)s / %(students)s"

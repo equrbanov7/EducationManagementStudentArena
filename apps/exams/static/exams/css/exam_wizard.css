@@ -439,6 +439,21 @@ html.exam-modal-open, html.exam-modal-open body { overflow: hidden !important; }
 .ew-confirm-box .ew-confirm-warn__item { margin: 0; color: inherit; font-size: inherit; line-height: 1.45; }
 .ew-confirm-box .ew-confirm-warn__item + .ew-confirm-warn__item { margin-top: 6px; }
 
+/* Sahib 2026-10-27: qrup imtahanın fənnini keçmir — modal (unit_coverage.js) + seçicinin altındakı məcburi əlavələr. */
+.ew-unit-cov__groups { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 0 0 14px; padding: 0; list-style: none; text-align: left; }
+.ew-unit-cov__group { display: grid; gap: 3px; padding: 10px 12px; border: 1px solid var(--ems-warning-bd); border-radius: var(--ems-r-xl); background: var(--ems-warning-bg); }
+.ew-unit-cov__group + .ew-unit-cov__group { margin-top: 8px; }
+.ew-unit-cov__name { color: var(--ems-text); font-weight: 800; }
+.ew-unit-cov__count, .ew-unit-cov__nojournal { color: var(--ems-warning-700); font-size: var(--ems-fs-sm); font-weight: 600; }
+.ew-unit-cov__names { color: var(--ems-text-muted); font-size: var(--ems-fs-sm); line-height: 1.45; overflow-wrap: anywhere; }
+.ew-unit-cov__reason { flex: none; display: grid; gap: 6px; margin: 0 0 16px; text-align: left; }
+.ew-unit-cov__textarea { resize: vertical; min-height: 72px; }
+.ew-unit-coverage__forced { display: grid; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; }
+.ew-unit-coverage__forced[hidden] { display: none; }
+.ew-unit-coverage__forced-item { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; padding: 8px 10px; border: 1px solid var(--ems-warning-bd); border-radius: var(--ems-r-xl); background: var(--ems-warning-bg); font-size: var(--ems-fs-sm); }
+.ew-unit-coverage__forced-badge { padding: 1px 8px; border-radius: 999px; background: var(--ems-warning-700); color: var(--ems-neutral-0); font-weight: 700; }
+.ew-unit-coverage__forced-reason { flex-basis: 100%; color: var(--ems-text-muted); overflow-wrap: anywhere; }
+
 /* ── Responsiv: rel → üst proqres zolağı; telefonda tam ekran ───────────
    «Qısa landşaft» (telefon yan: hündürlük ≤ 520px) də eyni sxemdədir — əks halda
    86vh-lik dialoq yuxarıdan kəsilir və sahə üçün ~120px qalırdı (2026-10-14). */

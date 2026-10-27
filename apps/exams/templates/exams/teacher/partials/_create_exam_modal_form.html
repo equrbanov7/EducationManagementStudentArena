@@ -331,6 +331,7 @@
                                         </select>
                                     </div>
                                     {% if allowed_units_error %}<div class="field-error">{{ allowed_units_error }}</div>{% endif %}
+                                    {% include "exams/teacher/partials/_exam_unit_coverage_guard.html" %}
                                 </div>
 
                                 <div class="create-exam-searchable-select" data-target-select-name="allowed_users"

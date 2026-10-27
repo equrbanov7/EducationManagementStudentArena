@@ -150,6 +150,28 @@ def parent_group_candidates(organization, group) -> list:
     return out
 
 
+def group_family(organization, groups) -> dict:
+    """``{qrup_pk: (alt qruplar, ana qrup namizədləri)}`` — :func:`subgroup_map` + :func:`parent_group_candidates`
+    ilə EYNİ qayda, amma bütün qruplar üçün BİR sorğu (imtahan qrupunun jurnal əhatəsi, sahib 2026-10-27)."""
+    groups = [g for g in groups if getattr(g, "parent_id", None)]
+    if not groups:
+        return {}
+    siblings = _sibling_groups(organization, {g.parent_id for g in groups})
+    out: dict = {}
+    for group in groups:
+        trail = _trail_parent(group)
+        subs, parents = [], []
+        for sibling in siblings:
+            if sibling.pk == group.pk or sibling.parent_id != group.parent_id:
+                continue
+            if _trail_parent(sibling) == str(group.pk) or is_subgroup_of(group.name, sibling.name):
+                subs.append(sibling)
+            elif trail == str(sibling.pk) or is_subgroup_of(sibling.name, group.name):
+                parents.append(sibling)
+        out[group.pk] = (subs, parents)
+    return out
+
+
 @dataclass
 class Candidate:
     offering: CourseOffering

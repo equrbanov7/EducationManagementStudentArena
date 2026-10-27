@@ -72,6 +72,17 @@
         // ID-ləri) və seçim dəyişəndə çağırılan callback (qrup→tələbə sinxronu).
         var extraParamsProvider = null;
         var selectionChangeHandler = null;
+        // 2026-10-27: əlavə dinləyicilər (qrup → fənn jurnalı əhatəsi, unit_coverage.js) — əsas handler-i əvəz etmir.
+        var selectionListeners = [];
+
+        function notifySelectionChange() {
+            if (typeof selectionChangeHandler === "function") {
+                selectionChangeHandler();
+            }
+            selectionListeners.forEach(function (fn) {
+                fn();
+            });
+        }
 
         function updateCounter() {
             if (counter) {
@@ -141,9 +152,7 @@
                     row.classList.toggle("is-group-excluded", !next);
                     updateCounter();
                     renderSelected();
-                    if (typeof selectionChangeHandler === "function") {
-                        selectionChangeHandler();
-                    }
+                    notifySelectionChange();
                 }
                 checkbox.addEventListener("change", function () {
                     toggleGroupMember(checkbox.checked);
@@ -207,9 +216,7 @@
                 } else {
                     resultsWrap.appendChild(makeRow(v, text, false));
                 }
-                if (typeof selectionChangeHandler === "function") {
-                    selectionChangeHandler();
-                }
+                notifySelectionChange();
             }
             checkbox.addEventListener("change", function () {
                 toggle(checkbox.checked);
@@ -401,6 +408,41 @@
             // Seçim dəyişəndə (əlavə/çıxarma) çağırılan callback.
             setOnSelectionChange: function (fn) {
                 selectionChangeHandler = fn;
+            },
+            // Əlavə dinləyici (əsas callback-dən sonra çağırılır).
+            addSelectionListener: function (fn) {
+                if (typeof fn === "function") {
+                    selectionListeners.push(fn);
+                }
+            },
+            // Elementləri seçimdən çıxar (alt qruplar da) + dinləyiciləri xəbərdar et; nəticə siyahısına qaytarır.
+            deselect: function (values) {
+                var changed = false;
+                (values || []).forEach(function (value) {
+                    var v = String(value);
+                    if (!selected[v]) {
+                        return;
+                    }
+                    var text = selected[v];
+                    delete selected[v];
+                    syncHiddenOption(v, text, false);
+                    (subgroupsOf[v] || []).forEach(function (sub) {
+                        var sid = String(sub.id);
+                        if (selected[sid]) {
+                            delete selected[sid];
+                            syncHiddenOption(sid, sub.text, false);
+                        }
+                    });
+                    if (!resultsWrap.querySelector('[data-value="' + v.replace(/"/g, '\\"') + '"]')) {
+                        resultsWrap.appendChild(makeRow(v, text, false));
+                    }
+                    changed = true;
+                });
+                if (changed) {
+                    updateCounter();
+                    renderSelected();
+                    notifySelectionChange();
+                }
             }
         };
     }

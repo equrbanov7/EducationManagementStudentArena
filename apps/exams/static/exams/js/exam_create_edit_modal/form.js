@@ -57,6 +57,12 @@
             ns.searchableSelect.initGroupUserSync(form, groupSelector, userSelector, unitSelector);
         }
 
+        // Sahib 2026-10-27: seçilən qrupun tələbələri imtahanın fənninin jurnalında deyilsə — modal
+        // («Qrupu çıxar» / səbəb yazaraq «Yenə də əlavə et»); server saxlamada yenə yoxlayır.
+        if (unitSelector && ns.unitCoverage && typeof ns.unitCoverage.init === "function") {
+            ns.unitCoverage.init(form, unitSelector);
+        }
+
         // 4-addımlı sehrbaz: naviqasiya + addım validasiyası + (server 400-dan
         // sonra) aydın xəta xülasəsi və ilk xətalı addıma keçid.
         if (window.EMSExamWizard && typeof window.EMSExamWizard.init === "function") {

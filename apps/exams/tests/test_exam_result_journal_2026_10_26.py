@@ -8,6 +8,7 @@ xəbərdarlıq ala bilərik.»
 from __future__ import annotations
 
 import datetime
+import json
 from decimal import Decimal
 from io import StringIO
 from types import SimpleNamespace
@@ -267,7 +268,9 @@ class CoverageTests(_FinalSetup):
 
     def test_saving_an_exam_flashes_a_non_blocking_coverage_warning(self):
         self._student("cv_lonely", group=self.group)
-        texts = self._create(exam_type_extended="final")
+        # 2026-10-27: jurnalsız tələbəsi olan YENİ qrup yalnız məcburi əlavə + səbəb ilə saxlanır (exam_unit_coverage).
+        forced = json.dumps({str(self.group.pk): "Tələbə bu fəndən akademik borcu verir"})
+        texts = self._create(exam_type_extended="final", forced_units=forced)
         with bypass_rls():
             self.assertTrue(Exam.objects.filter(title="JS Loop").exists())
         warnings = [text for level, text in texts if level == "warning"]

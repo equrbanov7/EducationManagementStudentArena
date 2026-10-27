@@ -190,6 +190,8 @@ urlpatterns = [
     path("lookups/users/", views.user_search, name="user_search"),
     path("lookups/invigilators/", views.invigilator_search, name="invigilator_search"),
     path("lookups/assigned-count/", views.assigned_student_count, name="assigned_student_count"),
+    # 2026-10-27: seçilən qrupun tələbələri imtahanın fənninin jurnalındadırmı (məcburi əlavə + səbəb).
+    path("lookups/unit-coverage/", views.unit_journal_coverage, name="unit_journal_coverage"),
     path(
         "<slug:slug>/grant-extra-attempt/",
         views.grant_extra_attempt,
