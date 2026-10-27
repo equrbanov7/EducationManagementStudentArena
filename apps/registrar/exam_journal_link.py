@@ -30,7 +30,7 @@ from django.apps import apps as django_apps
 from django.db import transaction
 from django.db.models import Q
 
-from apps.registrar import exam_bridge, grade_audit, midterm_bridge, subgroup_rollup
+from apps.registrar import exam_bridge, exam_journal_scope, grade_audit, midterm_bridge, subgroup_rollup
 from apps.registrar.audit_write import AuditWriteFailed
 from apps.registrar.gradebook import journal_is_locked
 from apps.registrar.models import (
@@ -118,30 +118,34 @@ def teacher_subjects(organization, teacher, *, group_ids=None, period=None):
 def link_offering_ids(organization, *, subject_id, group_ids=(), teacher=None, period=None) -> list:
     """İmtahanın bağlanacağı jurnal açılışları (pk siyahısı).
 
-    * qruplar seçilibsə — fənnin cari dövrdə HƏR qrupun (alt / ana qrup daxil) öz açılışı;
+    * qruplar seçilibsə — fənnin cari dövrdə HƏR qrupun (alt / ana qrup daxil) öz açılışı; ailədə fənnin öz
+      açılışı yoxdursa dublikat fənn kartının (əkiz) açılışı (``exam_journal_scope``, sahib 2026-10-27);
     * qrup yoxdur, müəllim var — müəllimin həmin fənn üzrə açılışları;
     * heç biri yoxdur — boş (körpü tələbənin fənn üzrə qeydiyyatına düşür, əvvəlki kimi)."""
     period = period or current_period(organization)
     if organization is None or not subject_id or period is None:
         return []
-    offerings = _period_offerings(organization, period).filter(subject_id=subject_id)
-    expanded = expand_group_ids(organization, group_ids)
-    if expanded:
-        offerings = offerings.filter(group_id__in=expanded)
-    elif teacher is not None:
-        offerings = teacher_offerings(organization, teacher, period=period).filter(subject_id=subject_id)
-    else:
+    _units, _own, linked = exam_journal_scope.unit_families(organization, group_ids)
+    if linked:
+        found = exam_journal_scope.journal_offerings_by_unit(organization, period, subject_id, linked)
+        ids = {pk for row in found.values() for kind in ("exact", "twin") for pk, _gid in row[kind]}
+        return sorted(ids, key=str)
+    if teacher is None:
         return []
+    offerings = teacher_offerings(organization, teacher, period=period).filter(subject_id=subject_id)
     return sorted(offerings.values_list("pk", flat=True).distinct(), key=str)
 
 
-def enrollment_coverage(organization, subject_id, student_ids, period=None) -> dict:
+def enrollment_coverage(organization, subject_id, student_ids, period=None, *, offering_ids=()) -> dict:
     """Tələbələrin fənn üzrə CARİ dövr jurnalı → ``{"ok": n, "none": [id], "multiple": [id]}`` (≤ 2 sorğu).
 
     Sahib 2026-10-26: «tələbənin imtahan nəticəsi sistemə düşəcəkmi?» — imtahan yaradılanda / saxlananda /
     aktivləşdiriləndə müəllimə bloklamayan xəbərdarlıq: ``none`` — bu fənn üzrə cari semestr jurnalında
     ``enrolled`` qeydiyyatı yoxdur (nəticə jurnala düşməyəcək); ``multiple`` — iki (və daha çox) jurnalda
-    (körpü ``exam_bridge.pick_enrollment`` qaydası ilə birini seçir: bağlı jurnal → öz qrup → ən son)."""
+    (körpü ``exam_bridge.pick_enrollment`` qaydası ilə birini seçir: bağlı jurnal → öz qrup → ən son).
+
+    ``offering_ids`` — imtahanın bağlı jurnalları: əkiz fənn kartının bağlı açılışındakı qeydiyyat da sayılır
+    (körpü ``linked_enrollment`` onu fəndən asılı olmayaraq seçir)."""
     student_ids = sorted({int(value) for value in student_ids or () if value is not None})
     empty = {"ok": 0, "none": [], "multiple": []}
     if organization is None or not subject_id or not student_ids:
@@ -149,12 +153,15 @@ def enrollment_coverage(organization, subject_id, student_ids, period=None) -> d
     period = period or current_period(organization)
     if period is None:
         return {**empty, "none": student_ids}
+    scope = Q(offering__subject_id=subject_id, offering__period=period)
+    offering_ids = [value for value in offering_ids or () if value]
+    if offering_ids:
+        scope |= Q(offering_id__in=offering_ids) & ~Q(offering__subject_id=subject_id)
     counts = Counter(
         Enrollment.objects.filter(
+            scope,
             organization=organization,
             student_id__in=student_ids,
-            offering__subject_id=subject_id,
-            offering__period=period,
             status=Enrollment.Status.ENROLLED,
         ).values_list("student_id", flat=True)
     )
@@ -179,24 +186,13 @@ def group_subject_coverage(organization, subject_id, group_ids, *, period=None) 
     ≤ 6 sorğu). Qrupun tələbələri — aktiv ``enrolled`` akademik qeydi qrupun özündə və ya ALT qruplarında
     olanlar (giriş siyasəti ``unit_assigned_student_ids`` ilə eyni); ``uncovered`` — :func:`enrollment_coverage`
     ``none`` (fənnin cari dövr jurnalında ``enrolled`` qeydiyyatı yoxdur); ``has_journal`` — fənnin cari dövrdə
-    qrupun (alt / ana qrup daxil, :func:`link_offering_ids` kimi) aktiv açılışı var."""
-    group_ids = {str(value) for value in group_ids or () if value}
-    if organization is None or not subject_id or not group_ids:
+    qrupun (alt / ana qrup daxil, :func:`link_offering_ids` kimi) aktiv açılışı var — ailədə fənnin öz açılışı
+    yoxdursa dublikat fənn kartının (əkiz) açılışı və ondakı qeydiyyat da sayılır (``exam_journal_scope``)."""
+    if organization is None or not subject_id:
         return {}
-    OrgUnit = django_apps.get_model("organizations", "OrgUnit")
-    units = list(
-        OrgUnit.objects.filter(organization=organization, pk__in=group_ids, unit_type="group").only(
-            "id", "name", "parent_id", "settings"
-        )
-    )
+    units, own, linked = exam_journal_scope.unit_families(organization, group_ids)
     if not units:
         return {}
-    family = subgroup_rollup.group_family(organization, units)
-    own, linked = {}, {}
-    for unit in units:
-        subs, parents = family.get(unit.pk, ((), ()))
-        own[unit.pk] = {unit.pk} | {sub.pk for sub in subs}
-        linked[unit.pk] = own[unit.pk] | {parent.pk for parent in parents}
     by_group: dict = {}
     for student_id, group_id in StudentAcademicRecord.objects.filter(
         organization=organization,
@@ -207,21 +203,18 @@ def group_subject_coverage(organization, subject_id, group_ids, *, period=None) 
         by_group.setdefault(group_id, set()).add(student_id)
     students = {unit.pk: set().union(*(by_group.get(gid, set()) for gid in own[unit.pk])) for unit in units}
     period = period or current_period(organization)
+    journals = exam_journal_scope.journal_offerings_by_unit(organization, period, subject_id, linked)
+    twin_ids = {pk for row in journals.values() for pk, _gid in row["twin"]}
     uncovered = set(
-        enrollment_coverage(organization, subject_id, set().union(*students.values()), period=period)["none"]
+        enrollment_coverage(
+            organization, subject_id, set().union(*students.values()), period=period, offering_ids=twin_ids
+        )["none"]
     )
-    journal_groups = set()
-    if period is not None:
-        journal_groups = set(
-            _period_offerings(organization, period)
-            .filter(subject_id=subject_id, group_id__in=set().union(*linked.values()))
-            .values_list("group_id", flat=True)
-        )
     return {
         unit.pk: {
             "students": sorted(students[unit.pk]),
             "uncovered": sorted(students[unit.pk] & uncovered),
-            "has_journal": bool(linked[unit.pk] & journal_groups),
+            "has_journal": bool(journals[unit.pk]["exact"] or journals[unit.pk]["twin"]),
         }
         for unit in units
     }
@@ -262,9 +255,11 @@ def subject_journal_hints(organization, subject_ids, *, teacher=None, period=Non
 
 def _is_stale(row, *, subject_id, offering_ids) -> bool:
     offering = row.enrollment.offering
+    if subject_id and offering.pk in offering_ids:
+        return False  # bağlı jurnal (əkiz fənn kartı da — ``exam_journal_scope``)
     if not subject_id or offering.subject_id != subject_id:
         return True  # imtahanın fənni dəyişib — bal köhnə fənnin jurnalındadır
-    if not offering_ids or offering.pk in offering_ids:
+    if not offering_ids:
         return False
     # Eyni fənnin BAŞQA jurnalı: tələbə bağlı jurnalda qeydiyyatdadırsa bal oraya köçür.
     return Enrollment.objects.filter(

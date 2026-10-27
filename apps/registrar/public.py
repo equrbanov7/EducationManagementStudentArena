@@ -13,6 +13,7 @@ from django.apps import apps as django_apps
 from apps.registrar import (
     absence_limit,
     analytics,
+    exam_journal_gaps,
     exam_journal_link,
     exam_result_trace,
     exam_score_entry,
@@ -39,6 +40,7 @@ __all__ = [
     "eligible_instructor_user_ids",
     "enroll_student_in_subject",
     "analytics",
+    "exam_journal_gaps",
     "exam_journal_link",
     "exam_result_trace",
     "exam_score_entry",

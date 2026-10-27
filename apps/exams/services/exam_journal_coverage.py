@@ -26,11 +26,15 @@ def writes_to_journal(category) -> bool:
     return str(category or "").strip() in JOURNAL_CATEGORIES
 
 
-def coverage_counts(organization, subject_id, student_ids) -> dict:
-    """→ ``{"no_journal": n, "multiple_journals": m}`` (registrar ``enrollment_coverage``, cari dövr)."""
+def coverage_counts(organization, subject_id, student_ids, *, offering_ids=()) -> dict:
+    """→ ``{"no_journal": n, "multiple_journals": m}`` (registrar ``enrollment_coverage``, cari dövr).
+
+    ``offering_ids`` — imtahanın bağlı jurnalları (dublikat fənn kartının açılışı da, sahib 2026-10-27)."""
     from apps.registrar.public import exam_journal_link
 
-    coverage = exam_journal_link.enrollment_coverage(organization, subject_id, student_ids)
+    coverage = exam_journal_link.enrollment_coverage(
+        organization, subject_id, student_ids, offering_ids=list(offering_ids or ())
+    )
     return {"no_journal": len(coverage["none"]), "multiple_journals": len(coverage["multiple"])}
 
 
@@ -73,14 +77,15 @@ def confirm_payload(organization, subject_id, student_ids, *, category, unit_ids
     if not subject_id or not writes_to_journal(category):
         return payload
     try:
-        counts = coverage_counts(organization, subject_id, student_ids)
-        links_missing = False
+        links_missing, link_ids = False, []
         if unit_ids:
             from apps.registrar.public import exam_journal_link
 
-            links_missing = not exam_journal_link.link_offering_ids(
+            link_ids = exam_journal_link.link_offering_ids(
                 organization, subject_id=subject_id, group_ids=list(unit_ids)
             )
+            links_missing = not link_ids
+        counts = coverage_counts(organization, subject_id, student_ids, offering_ids=link_ids)
     except Exception:  # noqa: BLE001 — xəbərdarlıq köməkçidir, təsdiqi sındırmır
         logger.exception("exam_journal_coverage: confirm coverage failed")
         return payload
@@ -116,9 +121,14 @@ def exam_coverage_warnings(exam) -> list:
             return []
         from apps.exams.services.exam_journal_link import exam_group_ids, linked_offering_ids
 
-        links_missing = bool(exam_group_ids(exam)) and not linked_offering_ids(exam)
+        link_ids = linked_offering_ids(exam)
+        links_missing = bool(exam_group_ids(exam)) and not link_ids
         student_ids = exam_student_ids(exam)
-        counts = coverage_counts(exam.organization, exam.subject_id, student_ids) if student_ids else {}
+        counts = (
+            coverage_counts(exam.organization, exam.subject_id, student_ids, offering_ids=link_ids)
+            if student_ids
+            else {}
+        )
     except Exception:  # noqa: BLE001 — saxlamanı / aktivləşdirməni sındırmır
         logger.exception("exam_journal_coverage: coverage failed for exam %s", getattr(exam, "pk", "?"))
         return []
