@@ -155,7 +155,12 @@ def decide(snapshot, exam, *, unit_ids):
         # Qrup / müəllim dəyişsə də köhnə jurnalların HEÇ BİRİ ayrılmır (eyni və ya yalnız əlavə — məs. sahib
         # 2026-10-26: qrupun yeni alt qrup jurnalları) — nəticə heç yerdən silinmir, təsdiq lazım deyil.
         return None
-    students = result_students(exam)
+    if subject_changed:
+        students = result_students(exam)
+    else:
+        # Sahib 2026-10-27: fənn eynidir, yalnız qrup çıxarılır — nəticə yalnız jurnalı DƏYİŞƏN xanalar üçün təsdiq
+        # istəyir (çıxarılan qrupun jurnalındakı bal, tələbə qalan jurnallardan birində deyilsə, yerində qalır).
+        students = _moved_students(exam, new_link_ids)
     if not students:
         return None
     return Decision(
@@ -167,6 +172,18 @@ def decide(snapshot, exam, *, unit_ids):
         old_link_ids=snapshot.link_ids,
         new_link_ids=new_link_ids,
     )
+
+
+def _moved_students(exam, new_link_ids) -> int:
+    """Eyni fənndə bağlı jurnallar azalanda bu imtahanın jurnal xanası köçəcək/silinəcək tələbələrin sayı."""
+    if not getattr(exam, "pk", None) or exam.organization_id is None:
+        return 0
+    from apps.registrar.public import exam_journal_link as registrar_link
+
+    rows = registrar_link.stale_midterm_rows(
+        organization=exam.organization, exam_id=exam.pk, subject_id=exam.subject_id, offering_ids=new_link_ids
+    )
+    return len({row.enrollment.student_id for row in rows})
 
 
 def validate_confirmation(data):

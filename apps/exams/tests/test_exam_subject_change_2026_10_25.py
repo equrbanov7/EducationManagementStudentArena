@@ -146,11 +146,29 @@ class ResultsRequireConfirmationTests(_GuardSetup):
         self.assertEqual(self._decisions(exam), [])
         self.assertEqual(self._score_in(self.wrong_offering, self.wrong_enrollment).score, Decimal("20"))
 
-    def test_group_change_that_moves_journal_link_needs_reason(self):
+    def test_group_change_that_moves_no_score_needs_no_reason(self):
         exam = self._exam_on_wrong_subject()
-        # Qrup dəyişir → yanlış fənnin bu qrupdakı jurnalı artıq bağlı deyil (başqa qrupun açılışı yoxdur).
+        # Qrup dəyişir, yeni qrupda bu fənnin jurnalı yoxdur → bal köhnə jurnalda QALIR (heç nə köçmür/silinmir),
+        # ona görə təsdiq istənmir (sahib 2026-10-27: «qrupu çıxardım, fənn dəyişikliyi soruşur»).
         response = self._post(exam, subject=str(self.wrong_subject.pk), allowed_units=[str(self.other_group.pk)])
-        self.assertEqual(response.status_code, 409, response.content[:400])
+        self.assertEqual(response.status_code, 200, response.content[:400])
+        self.assertEqual(self._decisions(exam), [])
+        self.assertEqual(self._score_in(self.wrong_offering, self.wrong_enrollment).score, Decimal("20"))
+
+    def test_group_removal_with_confirmation_is_saved(self):
+        # Sahib 2026-10-27: qrup çıxarılır (fənn eyni) → təsdiq + səbəb verildikdə saxlanmalıdır.
+        exam = self._exam_on_wrong_subject()
+        response = self._post(
+            exam,
+            subject=str(self.wrong_subject.pk),
+            allowed_units=[str(self.other_group.pk)],
+            subject_change_confirm="1",
+            subject_change_reason="236 QM sehven imtahan icazesi verilib",
+        )
+        self.assertEqual(response.status_code, 200, response.content[:600])
+        with bypass_rls():
+            units = set(Exam.objects.get(pk=exam.pk).allowed_units.values_list("pk", flat=True))
+        self.assertEqual(units, {self.other_group.pk})
 
     def test_edit_form_renders_hidden_guard_with_original_subject(self):
         exam = self._exam_on_wrong_subject()
@@ -196,6 +214,13 @@ class SameSubjectAddedJournalsTests(_GuardSetup):
         exam = self._exam_on_wrong_subject()
         self.assertIsNone(self._decide(exam, old_links={"a"}, new_links={"a", "b"}))
 
-    def test_removed_journal_still_needs_confirmation(self):
+    def test_removed_journal_needs_confirmation_only_when_scores_move(self):
+        from unittest import mock
+
         exam = self._exam_on_wrong_subject()
-        self.assertIsNotNone(self._decide(exam, old_links={"a", "b"}, new_links={"a"}))
+        with mock.patch.object(exam_subject_change, "_moved_students", return_value=3):
+            decision = self._decide(exam, old_links={"a", "b"}, new_links={"a"})
+        self.assertIsNotNone(decision)
+        self.assertEqual(decision.students, 3)
+        with mock.patch.object(exam_subject_change, "_moved_students", return_value=0):
+            self.assertIsNone(self._decide(exam, old_links={"a", "b"}, new_links={"a"}))
