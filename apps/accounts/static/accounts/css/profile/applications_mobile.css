@@ -3,6 +3,8 @@
 [data-apx-recipient-field] { display: grid; gap: .5rem; margin-block: 1rem; }
 [data-apx-recipient] { width: 100%; min-width: 0; min-height: 44px; padding: .6rem; }
 @media (max-width: 640px) {
+ .apx-modal__close { min-width: 44px; min-height: 44px; justify-content: center; flex-shrink: 0; }
+ .apx-modal__closeglyph { font-size: 24px; line-height: 1; }
  .apx-modal__panel, .apx-dlg__panel { width: 100%; max-width: 100%; max-height: calc(100dvh - 16px); margin: 8px 0; }
  .apx-modal__head, .apx-modal__body, .apx-modal__foot { padding: 12px; }
  .apx-modal__top, .apx-modal__from, .apx-act__buttons, .apx-msg__head { flex-wrap: wrap; }

@@ -343,7 +343,7 @@
             '<span class="apx-pill" data-bg="' + NS.esc(app.status.bg) + '" data-fg="' + NS.esc(app.status.fg) + '">' +
             NS.esc(app.status.label) + "</span>" +
             '<button type="button" class="apx-modal__close" data-apx-detail-close aria-label="' +
-            NS.esc(NS.t("closeDetail")) + '"><i class="fas fa-xmark" aria-hidden="true"></i>' +
+            NS.esc(NS.t("closeDetail")) + '"><span class="apx-modal__closeglyph" aria-hidden="true">×</span>' +
             '<span class="apx-modal__closetext">' + NS.esc(NS.t("closeDetail")) + "</span></button></div>" +
             '<h2 class="apx-modal__title">' + NS.esc(app.subject) + "</h2>" +
             (app.current_unit.requires_recipient && app.assigned_to ? '<p class="apx-modal__from">Ünvanlanan prorektor: ' + NS.esc(app.assigned_to.name) + "</p>" : "") +
