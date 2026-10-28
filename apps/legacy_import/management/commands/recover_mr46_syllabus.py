@@ -13,6 +13,10 @@ from core.rls_pooling import rls_worker_atomic
 
 
 class Command(BaseCommand):
+    output_prefix = "mr46_syllabus"
+    recovery = restore
+    undo_pattern = r"mr46-\d{8}-\d{6}-[a-f0-9]{4}"
+
     help = "MR46: legacy8891 sillabusunu yalnız müəllimin QKU1500 jurnalına bərpa et."
 
     def add_arguments(self, parser):
@@ -25,12 +29,13 @@ class Command(BaseCommand):
 
     @rls_worker_atomic()
     def handle(self, *args, **options):
+        restore = self.recovery
         actor = get_user_model().objects.filter(username=options["actor"], is_superuser=True, is_active=True).first()
         if actor is None:
             raise CommandError("actor_must_be_active_superuser")
         org = resolve_organization(options["org"])
         batch = options["undo"]
-        if batch and (not re.fullmatch(r"mr46-\d{8}-\d{6}-[a-f0-9]{4}", batch) or options["file"]):
+        if batch and (not re.fullmatch(self.undo_pattern, batch) or options["file"]):
             raise CommandError("undo_arguments")
         try:
             data = restore.load(options["file"], options["sha256"]) if not batch else None
@@ -51,6 +56,8 @@ class Command(BaseCommand):
         except DatabaseError:
             raise CommandError("restore_database_conflict") from None
         mode = "apply" if options["apply"] else "dry_run"
-        self.stdout.write(f"mr46_syllabus: mode={mode} " + " ".join(f"{k}={v}" for k, v in sorted(counts.items())))
+        self.stdout.write(
+            f"{self.output_prefix}: mode={mode} " + " ".join(f"{k}={v}" for k, v in sorted(counts.items()))
+        )
         if options["apply"] and not options["undo"] and counts.get("syllabi_created"):
-            self.stdout.write(f"mr46_syllabus: batch={batch}")
+            self.stdout.write(f"{self.output_prefix}: batch={batch}")
