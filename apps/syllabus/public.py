@@ -105,6 +105,7 @@ from .constants import (
     SyllabusStatus,
 )
 from .document import build_document  # noqa: F401
+from .editing import approved_edits_enabled
 from .policy import assessment_weights, standard_midterm, standard_project, standard_splits  # noqa: F401
 from .rules import for_version as rule_for_version
 from .services import (  # noqa: F401
@@ -247,13 +248,17 @@ def build_syllabus_editor_context(request, *, organization, version) -> dict:
         }
         for section_id in rule.section_order
     ]
-    view_state = "normal" if version.status in EDITABLE_STATUSES else "readonly"
+    editable = not version.is_locked and (version.status != SyllabusStatus.APPROVED.value or is_author(actor, syllabus))
+    view_state = "normal" if editable else "readonly"
+    from core.runtime_settings_syllabus import approval_required
+
     return {
         "syllabus": syllabus,
         "version": version,
         "sections": sections,
         "completion": report.as_dict(),
         "view_state": view_state,
+        "approval_required": approval_required(),
         "actions": available_actions(version=version, actor=actor),
         # Audit 2026-09-28 SYL-7: GET zamanı yalnız MÜƏLLİFİN sessiyası plan
         # saatını/həftəlik bölgünü yazır — kafedranın baxışı heç nə dəyişmir.
@@ -349,6 +354,8 @@ def build_review_queue_context(
 
 
 __all__ = [
+    "EDITABLE_STATUSES",
+    "approved_edits_enabled",
     "build_document",
     "assessment_weights",
     "standard_midterm",

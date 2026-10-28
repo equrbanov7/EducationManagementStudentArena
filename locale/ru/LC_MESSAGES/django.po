@@ -111318,3 +111318,42 @@ msgstr "Часы без указанного преподавателя не в�
 msgctxt "workload.recorded"
 msgid "Bu seçim üzrə jurnal saatı qeydə alınmayıb."
 msgstr "По этому выбору часы в журнале не записаны."
+msgctxt "accounts.syllabus"
+msgid "Dəyişiklikləri saxla"
+msgstr "Сохранить изменения"
+
+msgctxt "accounts.syllabus"
+msgid "Məsləhət saatı (istəyə bağlı)"
+msgstr "Часы консультаций (необязательно)"
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər avtomatik saxlanılır və təsdiqlənmiş qalır. Təkrar təsdiqə göndərmək lazım deyil."
+msgstr "Изменения сохраняются автоматически и остаются утверждёнными. Повторное согласование не требуется."
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər saxlandıqda sillabus təsdiqlənmiş qalır. Təkrar göndərmə tələb olunmur."
+msgstr "После сохранения изменений силлабус остаётся утверждённым. Повторная отправка не требуется."
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus avtomatik təsdiqlənəcək. Sonrakı düzəlişlər də təsdiqlənmiş qalacaq."
+msgstr "Силлабус будет утверждён автоматически. Последующие изменения также останутся утверждёнными."
+
+msgctxt "accounts.syllabus"
+msgid "Sillabusu təsdiqlə"
+msgstr "Утвердить силлабус"
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlədikdə sillabus avtomatik təsdiqlənir və dərhal istifadə olunur."
+msgstr "После подтверждения силлабус автоматически утверждается и сразу становится доступным."
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlədikdə sillabus dərhal avtomatik təsdiqlənir. Kafedra növbəsində gözləmir."
+msgstr "После подтверждения силлабус сразу утверждается автоматически, без ожидания согласования кафедрой."
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər avtomatik təsdiqlənir"
+msgstr "Изменения утверждаются автоматически"
+
+msgctxt "accounts.syllabus"
+msgid "Redaktə et"
+msgstr "Редактировать"
