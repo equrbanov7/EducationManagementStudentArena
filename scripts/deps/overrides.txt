@@ -1,7 +1,7 @@
 # scripts/deps/lock.sh üçün uv override-ları (Audit 2026-09-28 AD-06).
 #
 # Universal lock bütün platforma/implementasiya split-lərini həll etməyə çalışır.
-# autobahn 26.x YALNIZ PyPy+Windows üçün `cbor2<6` tələb edir; biz CPython
+# autobahn 26.10.1 PyPy üçün `cbor2==5.9.0` tələb edir; biz CPython
 # (Linux/macOS) işlədirik və base.txt-də cbor2==6.1.4 (təhlükəsizlik pini) var.
 # Override həmin split-dəki uyğunsuzluğu aradan qaldırır; bizim mühitlərdə
 # həll olunan versiya dəyişmir. base.txt-dəki pin dəyişəndə buranı da yeniləyin.

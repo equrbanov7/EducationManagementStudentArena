@@ -27,6 +27,8 @@
         var assignedExamModalIsFinal = false;
         var assignedExamModalFinalEntryUrl = "";
         var assignedExamCodeSubmitInFlight = false;
+        var assignedExamTrigger = null;
+        var previousBodyOverflow = "";
 
         function setAssignedExamCodeError(message) {
             if (assignedExamAccessCodeInput) {
@@ -115,6 +117,8 @@
                 return;
             }
 
+            assignedExamTrigger = trigger;
+            previousBodyOverflow = document.body.style.overflow;
             assignedExamModalStartUrl = trigger.getAttribute("data-start-url") || "";
             assignedExamModalRequiresCode = trigger.getAttribute("data-requires-code") === "1";
             assignedExamModalIsFinal = trigger.getAttribute("data-is-final") === "1";
@@ -212,11 +216,13 @@
             assignedExamInfoBackdrop.setAttribute("aria-hidden", "false");
             document.body.style.overflow = "hidden";
 
-            if (assignedExamModalRequiresCode && assignedExamAccessCodeInput) {
-                window.setTimeout(function () {
-                    assignedExamAccessCodeInput.focus();
-                }, 40);
-            }
+            var panel = assignedExamInfoBackdrop.querySelector(".assigned-exam-info-modal");
+            if (panel) panel.scrollTop = 0;
+            // Final PIN is information only: focus the visible close button,
+            // never its hidden code input (which also opens the phone keyboard).
+            var focusTarget = !assignedExamModalIsFinal && assignedExamModalRequiresCode && !blockReason
+                ? assignedExamAccessCodeInput : document.getElementById("assignedExamInfoClose");
+            if (focusTarget) focusTarget.focus({ preventScroll: true });
         }
 
         function closeAssignedExamInfoModal() {
@@ -226,10 +232,31 @@
             }
             assignedExamInfoBackdrop.classList.remove("is-open");
             assignedExamInfoBackdrop.setAttribute("aria-hidden", "true");
+            if (assignedExamTrigger && assignedExamTrigger.isConnected) assignedExamTrigger.focus({ preventScroll: true });
             if (!ctx.createExamModal || !ctx.createExamModal.classList.contains("active")) {
-                document.body.style.overflow = "";
+                document.body.style.overflow = previousBodyOverflow;
             }
         }
+
+        document.addEventListener("keydown", function (event) {
+            if (!ctx.isAssignedExamInfoOpen || !ctx.isAssignedExamInfoOpen()) return;
+            if (event.key === "Escape") {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                closeAssignedExamInfoModal();
+                return;
+            }
+            if (event.key !== "Tab") return;
+            var controls = Array.from(assignedExamInfoBackdrop.querySelectorAll(
+                "button:not([disabled]), input:not([disabled]):not([type=hidden]), a[href], select:not([disabled])"
+            )).filter(function (el) { return !el.hidden && !el.closest("[hidden], .is-hidden"); });
+            var first = controls[0], last = controls[controls.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault(); last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault(); first.focus();
+            }
+        });
 
         async function submitAssignedExamCodeForm() {
             if (!assignedExamCodeForm || !assignedExamAccessCodeInput) {
