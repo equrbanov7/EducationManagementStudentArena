@@ -111266,3 +111266,43 @@ msgstr "Практическое занятие — семинарские за�
 msgctxt "accounts.handover"
 msgid "Jurnal payları təhvildən sonra dəyişib — əvvəlcə payları yoxlayın."
 msgstr "Права на журнал изменились после передачи — сначала проверьте их."
+
+msgctxt "registrar.journal_history"
+msgid "Jurnalın müəllim tarixçəsi"
+msgstr "История преподавателей журнала"
+
+msgctxt "registrar.journal_history"
+msgid "Cari jurnal sahibi"
+msgstr "Текущий владелец журнала"
+
+msgctxt "registrar.journal_history"
+msgid "Təhvillər"
+msgstr "Передачи"
+
+msgctxt "registrar.journal_history"
+msgid "Geri qaytarılıb"
+msgstr "Отменено"
+
+msgctxt "registrar.journal_history"
+msgid "Bu səhifədə göstərilən dərslər"
+msgstr "Занятия на этой странице"
+
+msgctxt "registrar.journal_history"
+msgid "Dərs müəllimi"
+msgstr "Преподаватель занятия"
+
+msgctxt "registrar.journal_history"
+msgid "Dərsi yaradan"
+msgstr "Занятие создано"
+
+msgctxt "registrar.journal_history"
+msgid "Qeyd müəllifi"
+msgstr "Автор записи"
+
+msgctxt "registrar.journal_history"
+msgid "Məlum deyil"
+msgstr "Неизвестно"
+
+msgctxt "registrar.journal_history"
+msgid "Tarixi müəllim məlum deyilsə, cari sahib onun yerinə göstərilmir."
+msgstr "Если прежний преподаватель неизвестен, текущий владелец не указывается вместо него."

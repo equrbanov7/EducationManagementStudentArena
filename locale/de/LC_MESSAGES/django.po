@@ -112097,3 +112097,43 @@ msgstr "Praktische Übung — Seminarstunden heißen im Journal und im Stundenpl
 msgctxt "accounts.handover"
 msgid "Jurnal payları təhvildən sonra dəyişib — əvvəlcə payları yoxlayın."
 msgstr "Die Journalfreigaben wurden nach der Übergabe geändert — prüfen Sie zuerst die Freigaben."
+
+msgctxt "registrar.journal_history"
+msgid "Jurnalın müəllim tarixçəsi"
+msgstr "Lehrkräfteverlauf des Journals"
+
+msgctxt "registrar.journal_history"
+msgid "Cari jurnal sahibi"
+msgstr "Aktuell zuständige Lehrkraft"
+
+msgctxt "registrar.journal_history"
+msgid "Təhvillər"
+msgstr "Übergaben"
+
+msgctxt "registrar.journal_history"
+msgid "Geri qaytarılıb"
+msgstr "Rückgängig gemacht"
+
+msgctxt "registrar.journal_history"
+msgid "Bu səhifədə göstərilən dərslər"
+msgstr "Auf dieser Seite angezeigte Stunden"
+
+msgctxt "registrar.journal_history"
+msgid "Dərs müəllimi"
+msgstr "Lehrkraft der Stunde"
+
+msgctxt "registrar.journal_history"
+msgid "Dərsi yaradan"
+msgstr "Stunde erstellt von"
+
+msgctxt "registrar.journal_history"
+msgid "Qeyd müəllifi"
+msgstr "Eintrag erstellt von"
+
+msgctxt "registrar.journal_history"
+msgid "Məlum deyil"
+msgstr "Unbekannt"
+
+msgctxt "registrar.journal_history"
+msgid "Tarixi müəllim məlum deyilsə, cari sahib onun yerinə göstərilmir."
+msgstr "Ist die frühere Lehrkraft unbekannt, wird die aktuell zuständige Lehrkraft nicht an ihrer Stelle angegeben."

@@ -294,6 +294,9 @@ def journal_detail(request, offering_id):
 
     context.update(journal_full_edit.page_context(request, offering, context))
     _share_guard.restrict_detail_context(context, share_scope)
+    from .journal_provenance import history_context
+
+    context["journal_history"] = history_context(offering, context["journal"])
     return render(request, "registrar/journal_detail.html", context)
 
 

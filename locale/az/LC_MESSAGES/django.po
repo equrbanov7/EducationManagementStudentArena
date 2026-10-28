@@ -110582,3 +110582,43 @@ msgstr "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «
 msgctxt "accounts.handover"
 msgid "Jurnal payları təhvildən sonra dəyişib — əvvəlcə payları yoxlayın."
 msgstr "Jurnal payları təhvildən sonra dəyişib — əvvəlcə payları yoxlayın."
+
+msgctxt "registrar.journal_history"
+msgid "Jurnalın müəllim tarixçəsi"
+msgstr "Jurnalın müəllim tarixçəsi"
+
+msgctxt "registrar.journal_history"
+msgid "Cari jurnal sahibi"
+msgstr "Cari jurnal sahibi"
+
+msgctxt "registrar.journal_history"
+msgid "Təhvillər"
+msgstr "Təhvillər"
+
+msgctxt "registrar.journal_history"
+msgid "Geri qaytarılıb"
+msgstr "Geri qaytarılıb"
+
+msgctxt "registrar.journal_history"
+msgid "Bu səhifədə göstərilən dərslər"
+msgstr "Bu səhifədə göstərilən dərslər"
+
+msgctxt "registrar.journal_history"
+msgid "Dərs müəllimi"
+msgstr "Dərs müəllimi"
+
+msgctxt "registrar.journal_history"
+msgid "Dərsi yaradan"
+msgstr "Dərsi yaradan"
+
+msgctxt "registrar.journal_history"
+msgid "Qeyd müəllifi"
+msgstr "Qeyd müəllifi"
+
+msgctxt "registrar.journal_history"
+msgid "Məlum deyil"
+msgstr "Məlum deyil"
+
+msgctxt "registrar.journal_history"
+msgid "Tarixi müəllim məlum deyilsə, cari sahib onun yerinə göstərilmir."
+msgstr "Tarixi müəllim məlum deyilsə, cari sahib onun yerinə göstərilmir."

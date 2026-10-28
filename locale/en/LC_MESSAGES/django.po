@@ -111072,3 +111072,43 @@ msgstr "Practical session — seminar lessons are called «Practical session» i
 msgctxt "accounts.handover"
 msgid "Jurnal payları təhvildən sonra dəyişib — əvvəlcə payları yoxlayın."
 msgstr "Journal shares have changed since the handover — review the shares first."
+
+msgctxt "registrar.journal_history"
+msgid "Jurnalın müəllim tarixçəsi"
+msgstr "Journal teacher history"
+
+msgctxt "registrar.journal_history"
+msgid "Cari jurnal sahibi"
+msgstr "Current journal owner"
+
+msgctxt "registrar.journal_history"
+msgid "Təhvillər"
+msgstr "Handovers"
+
+msgctxt "registrar.journal_history"
+msgid "Geri qaytarılıb"
+msgstr "Reverted"
+
+msgctxt "registrar.journal_history"
+msgid "Bu səhifədə göstərilən dərslər"
+msgstr "Lessons shown on this page"
+
+msgctxt "registrar.journal_history"
+msgid "Dərs müəllimi"
+msgstr "Lesson teacher"
+
+msgctxt "registrar.journal_history"
+msgid "Dərsi yaradan"
+msgstr "Lesson created by"
+
+msgctxt "registrar.journal_history"
+msgid "Qeyd müəllifi"
+msgstr "Entry author"
+
+msgctxt "registrar.journal_history"
+msgid "Məlum deyil"
+msgstr "Unknown"
+
+msgctxt "registrar.journal_history"
+msgid "Tarixi müəllim məlum deyilsə, cari sahib onun yerinə göstərilmir."
+msgstr "If the historical teacher is unknown, the current owner is not shown in their place."
