@@ -112179,3 +112179,7 @@ msgstr "Abbrechen"
 msgctxt "applications.content"
 msgid "Yadda saxla"
 msgstr "Speichern"
+
+msgctxt "applications.content"
+msgid "Məktəbə aid kafedranı seçin"
+msgstr "Fachbereich der Schule auswählen"

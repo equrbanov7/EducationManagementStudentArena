@@ -304,6 +304,7 @@
         NS.submitAction(box.__app.id, "forward", {
             target_unit: box.__unit,
             recipient: (box.querySelector("[data-apx-recipient]") || {}).value || "",
+            scope: (box.querySelector("[data-apx-scope]") || {}).value || "",
             text: note,
             keep_watching: keep ? "true" : "false",
         })

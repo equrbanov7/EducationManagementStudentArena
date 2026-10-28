@@ -27,7 +27,11 @@ def seed_units(organization, *, unit_model=None) -> dict:
             default_sla_days=spec["default_sla_days"],
             **{
                 key: spec.get(key, default)
-                for key, default in (("accepts_students", True), ("requires_recipient", False))
+                for key, default in (
+                    ("accepts_students", True),
+                    ("requires_recipient", False),
+                    ("requires_scope", False),
+                )
                 if key in {field.name for field in model._meta.fields}
             },
             order=order,

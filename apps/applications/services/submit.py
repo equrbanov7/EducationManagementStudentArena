@@ -175,6 +175,7 @@ def submit_application(
     coverage_fallback = False
     if (
         scope_unit is not None
+        and not unit.requires_scope
         and not members_covering_unit(organization, scope_unit, role_names=unit.role_names).exists()
     ):
         logger.warning(

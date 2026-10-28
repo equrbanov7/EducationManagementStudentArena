@@ -74,12 +74,7 @@ def _take_into_review(user, application, rule):
 
 
 def _guard(user, application, action, text="", *, refresh=True):
-    """İCAZƏ əvvəl, STATUS sonra — qəsdən bu sıra ilə.
-
-    Əks sıra vəziyyət sızdırardı: səlahiyyətsiz istifadəçi «bu status bu əməli
-    qəbul etmir» cavabından müraciətin harada olduğunu öyrənərdi. Ona görə
-    aktor yoxlanışı hər zaman birincidir.
-    """
+    """Təzə sətirdə İCAZƏ əvvəl yoxlanır, STATUS məlumatı sonra açılır."""
     if refresh:
         refresh_for_action(application)
     rule = rule_for(action)
@@ -239,7 +234,17 @@ def assign(*, application, user, assignee, note: str = "", request=None):
 
 
 @transaction.atomic
-def forward(*, application, user, target_unit, note: str, keep_watching: bool = True, request=None, recipient_id=None):
+def forward(
+    *,
+    application,
+    user,
+    target_unit,
+    note: str,
+    keep_watching: bool = True,
+    request=None,
+    recipient_id=None,
+    scope_id=None,
+):
     """Müraciəti BAŞQA şöbəyə ötürür; müraciət İTMİR, məsul şöbə dəyişir."""
     rule = _guard(user, application, Action.FORWARD, note)
     responder = _ResponderAct(user, application)
@@ -248,7 +253,7 @@ def forward(*, application, user, target_unit, note: str, keep_watching: bool = 
     if target_unit.pk == application.current_unit_id:
         raise TransitionDenied("unit.same", pgettext(_CTX, "Hədəf şöbə cari şöbə ilə eyni ola bilməz."))
 
-    from .routing import resolve_scope_unit
+    from .academic_scope import forward_scope
 
     source_unit = application.current_unit
     source_scope = application.current_scope_unit
@@ -256,7 +261,7 @@ def forward(*, application, user, target_unit, note: str, keep_watching: bool = 
     old = application.status
     application.status = rule.target
     application.current_unit = target_unit
-    application.current_scope_unit = resolve_scope_unit(target_unit, application.sender_scope_unit)
+    application.current_scope_unit = forward_scope(application, target_unit, scope_id)
     from .recipients import validate_destination
 
     application.assigned_to = validate_destination(target_unit, user, application.organization, "staff", recipient_id)

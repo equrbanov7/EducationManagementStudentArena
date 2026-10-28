@@ -185,7 +185,7 @@ def test_assign_requires_a_handler_of_the_current_unit(world, application):
 
     workflow.mark_seen(application=application, user=world["coordinator"])
     with pytest.raises(TransitionDenied) as excinfo:
-        workflow.assign(application=application, user=world["coordinator"], assignee=world["dean"])
+        workflow.assign(application=application, user=world["coordinator"], assignee=world["chair_head"])
     assert excinfo.value.code == "assignee.not_handler"
 
     workflow.assign(application=application, user=world["coordinator"], assignee=world["coordinator"])

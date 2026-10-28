@@ -171,6 +171,7 @@ def _action_kwargs(request, organization, action):
         return {
             "target_unit": target,
             "recipient_id": request.POST.get("recipient"),
+            "scope_id": request.POST.get("scope"),
             "note": text,
             "keep_watching": (request.POST.get("keep_watching") or "true").lower() not in {"false", "0", "off"},
         }

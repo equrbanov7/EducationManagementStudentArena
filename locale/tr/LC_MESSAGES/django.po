@@ -110557,3 +110557,7 @@ msgstr "İptal"
 msgctxt "applications.content"
 msgid "Yadda saxla"
 msgstr "Kaydet"
+
+msgctxt "applications.content"
+msgid "Məktəbə aid kafedranı seçin"
+msgstr "Okula bağlı bölümü seçin"

@@ -111149,3 +111149,7 @@ msgstr "Cancel"
 msgctxt "applications.content"
 msgid "Yadda saxla"
 msgstr "Save"
+
+msgctxt "applications.content"
+msgid "Məktəbə aid kafedranı seçin"
+msgstr "Select a department in the school"

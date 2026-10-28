@@ -6,6 +6,13 @@ import polib
 
 CONTEXT = "applications.content"
 ROWS = [
+    (
+        "Məktəbə aid kafedranı seçin",
+        "Select a department in the school",
+        "Выберите кафедру школы",
+        "Okula bağlı bölümü seçin",
+        "Fachbereich der Schule auswählen",
+    ),
     ("Müraciəti redaktə et", "Edit request", "Изменить обращение", "Başvuruyu düzenle", "Anfrage bearbeiten"),
     ("Müraciəti sil", "Delete request", "Удалить обращение", "Başvuruyu sil", "Anfrage löschen"),
     (

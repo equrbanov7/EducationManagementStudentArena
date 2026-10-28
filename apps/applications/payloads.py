@@ -202,6 +202,8 @@ def _action_status(application, is_handler: bool) -> str:
 
 def detail_payload(application, *, user) -> dict:
     """Detal paneli (dizayn §4.7) — icazəyə görə süzülmüş zaman xətti."""
+    from .services.academic_scope import chair_choices
+
     is_handler = access.can_act(user, application)
     is_sender = access.is_sender(user, application)
     sees_internal = is_handler or access.can_see_internal(user, application)
@@ -246,6 +248,9 @@ def detail_payload(application, *, user) -> dict:
         },
         "assigned_to": person(application.assigned_to) if application.assigned_to_id else None,
         "current_scope_unit": (application.current_scope_unit.name if application.current_scope_unit_id else ""),
+        "forward_scopes": (
+            [{"id": str(unit.pk), "name": unit.name} for unit in chair_choices(application)] if is_handler else []
+        ),
         "sla": sla_banner(
             due_on=application.sla_due_on,
             sla_days=application.kind.sla_days,

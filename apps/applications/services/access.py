@@ -141,6 +141,8 @@ def handles_unit(user, organization, unit: ApplicationUnit, scope_unit) -> bool:
     """İstifadəçi verilmiş şöbəni (verilmiş aidiyyətlə) emal edirmi."""
     if unit is None:
         return False
+    if unit.requires_scope and scope_unit is None:
+        return False
     role_names = set(unit.role_names)
     if not role_names:
         return False
@@ -348,11 +350,13 @@ def _unit_scope_q(user, organization, *, unit_field, scope_field) -> Q:
                 unit.resolve_by != ResolveBy.ORGANIZATION.value
                 and membership.role.scope_type != RoleScopeType.ORGANIZATION
             ):
-                scope = Q(**{f"{scope_field}__isnull": True})
+                scope = Q(pk__in=[]) if unit.requires_scope else Q(**{f"{scope_field}__isnull": True})
                 if membership.scope_unit_id:
                     scope |= Q(**{f"{scope_field}_id": membership.scope_unit_id}) | Q(
                         **{f"{scope_field}__path__startswith": f"{membership.scope_unit.path}/"}
                     )
+            if unit.requires_scope:
+                scope &= Q(**{f"{scope_field}__isnull": False})
             permitted |= Q(**{f"{unit_field}_id": unit.pk}) & scope
     return permitted
 

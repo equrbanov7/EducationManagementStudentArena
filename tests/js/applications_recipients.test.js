@@ -27,3 +27,20 @@ test("konkret prorektor seçimi tələb olunur və şöbə dəyişdikdə köhnə
     assert.equal(box.querySelector("select"), null);
     dom.window.close();
 });
+
+test("chair forwarding uses only server-scoped choices and clears old scope on destination change", () => {
+    const dom = new JSDOM('<div id="box"><div data-apx-unit-list></div></div>', { runScripts: "outside-only" });
+    dom.window.EMSApplications = { t: key => key };
+    dom.window.eval(script);
+    const box = dom.window.document.getElementById("box");
+    box.__app = { forward_scopes: [{ id: "school-chair", name: "Matching chair" }] };
+    const pick = dom.window.EMSApplications.recipientPicker;
+    pick(box, { resolve_by: "chair", requires_recipient: false });
+    const select = box.querySelector("[data-apx-scope]");
+    assert.equal(select.options.length, 2);
+    assert.equal(select.options[1].value, "school-chair");
+    select.value = "school-chair";
+    pick(box, { resolve_by: "organization", requires_recipient: false });
+    assert.equal(box.querySelector("[data-apx-scope]"), null);
+    dom.window.close();
+});

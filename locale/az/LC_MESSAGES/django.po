@@ -110660,3 +110660,7 @@ msgstr "Ləğv et"
 msgctxt "applications.content"
 msgid "Yadda saxla"
 msgstr "Yadda saxla"
+
+msgctxt "applications.content"
+msgid "Məktəbə aid kafedranı seçin"
+msgstr "Məktəbə aid kafedranı seçin"

@@ -111342,3 +111342,7 @@ msgstr "Отмена"
 msgctxt "applications.content"
 msgid "Yadda saxla"
 msgstr "Сохранить"
+
+msgctxt "applications.content"
+msgid "Məktəbə aid kafedranı seçin"
+msgstr "Выберите кафедру школы"

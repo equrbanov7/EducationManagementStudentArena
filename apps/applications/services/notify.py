@@ -51,6 +51,8 @@ def handler_recipients(application):
     daşıyıcılar da (koordinator/dekan) bildiriş alır — əvvəl yalnız org-səviyyəli
     rollar seçilirdi və heç kim xəbər tutmurdu.
     """
+    if application.current_unit.requires_scope and application.current_scope_unit_id is None:
+        return []
     role_names = [name for name in (application.current_unit.role_names or []) if name]
     if application.current_scope_unit_id is None:
         from apps.organizations.models import Membership

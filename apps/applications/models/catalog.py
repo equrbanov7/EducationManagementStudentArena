@@ -49,6 +49,7 @@ class ApplicationUnit(UUIDModel, TimeStampedModel, OrderedModel):
     )
     accepts_students = models.BooleanField(default=True)
     requires_recipient = models.BooleanField(default=False)
+    requires_scope = models.BooleanField(default=False)
     default_sla_days = models.PositiveSmallIntegerField(default=5)
     is_active = models.BooleanField(default=True, db_index=True)
 
