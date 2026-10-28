@@ -87,9 +87,9 @@ def target_teacher_options(organization, *, blank_label=None) -> list:
     Əhatə ilə daraldılMIR (kafedra müdiri fənni başqa kafedranın müəlliminə də
     verə bilər) — `handover.target_queryset` ilə eyni qayda.
     """
-    rows = handover_read.target_queryset(organization).values_list("pk", "first_name", "last_name", "username")[
-        :OPTION_CAP
-    ]
+    # Menyunun daxili axtarışı yalnız yüklənmiş seçimlərdə işləyir. Süzgəc
+    # tavanı burada uyğun müəllimləri (məsələn, Ə ilə başlayan soyadları) gizlətməməlidir.
+    rows = handover_read.target_queryset(organization).values_list("pk", "first_name", "last_name", "username")
     options = [_option("", blank_label or pgettext(_CTX, "Müəllim seçin…"))]
     options += [_option(str(pk), _person_label(first, last, username)) for pk, first, last, username in rows]
     return options
