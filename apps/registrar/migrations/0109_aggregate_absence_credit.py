@@ -84,7 +84,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("organizations", "0075_vice_rector_journal_view"),
-        ("registrar", "0107_offering_seminar_is_practical"),
+        ("registrar", "0108_teaching_handover_deactivated_shares"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
