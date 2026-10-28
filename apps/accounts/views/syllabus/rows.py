@@ -16,7 +16,7 @@ from __future__ import annotations
 from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
-from apps.syllabus.public import STATUS_NEXT_STEP, SyllabusStatus, reuse_approval_note
+from apps.syllabus.public import STATUS_NEXT_STEP, SyllabusStatus, approved_edits_enabled, reuse_approval_note
 
 from .labels import NEXT_STEP_TONES, STATUS_TONES
 
@@ -45,6 +45,7 @@ _SIBLINGS_NEXT = pgettext_lazy(
 
 #: Əməl açarı → (etiket, düymə növü). JS açara görə davranır (`data-action`).
 ACTION_LABELS = {
+    "edit": (pgettext_lazy(_CTX, "Redaktə et"), "primary"),
     "create": (pgettext_lazy(_CTX, "Sillabus yarat"), "primary"),
     "resume": (pgettext_lazy(_CTX, "Davam et"), "primary"),
     "fix": (pgettext_lazy(_CTX, "Düzəlişə davam et"), "primary"),
@@ -198,9 +199,9 @@ def _period_labels(period):
 
 #: Yalnız MÜƏLLİFİN edə bildiyi əməllər (servis `author_only` qapısı) — rəhbər
 #: başqasının sətrində bunları görmür, əvəzində oxu paneli («Bax») açılır.
-AUTHOR_ONLY_ACTIONS = frozenset({"resume", "fix", "withdraw", "copy"})
+AUTHOR_ONLY_ACTIONS = frozenset({"resume", "fix", "withdraw", "copy", "edit"})
 #: `syllabus.edit` açarı tələb edən əməllər (əhatə yoxlamasını servis edir).
-EDIT_ACTIONS = frozenset({"copy", "new_version"})
+EDIT_ACTIONS = frozenset({"copy", "new_version", "edit"})
 
 
 def _is_own(syllabus, viewer) -> bool:
@@ -240,6 +241,8 @@ def build_row(syllabus, *, now=None, can_copy: bool = False, reuse=None, viewer=
     percent = version.completion_percent if version is not None else 0
     year, semester = _period_labels(syllabus.period)
     keys = list(ACTIONS_BY_STATUS.get(status, ()))
+    if approved_edits_enabled(version) and not (reuse or {}).get("linked"):
+        keys = ["edit"] + [key for key in keys if key != "new_version"]
     if reuse is not None:
         # «Keçən ildən köçür» yalnız BAŞQA semestrdə kopyalana bilən mənbə olanda (page_flags).
         can_copy = bool(reuse.get("previous"))
@@ -271,7 +274,11 @@ def build_row(syllabus, *, now=None, can_copy: bool = False, reuse=None, viewer=
         "status_label": SyllabusStatus(status).label,
         "status_tone": STATUS_TONES.get(status, "neutral"),
         "approver": approver_text(syllabus, version, now=now),
-        "next_step": STATUS_NEXT_STEP.get(status, ""),
+        "next_step": (
+            pgettext_lazy(_CTX, "Düzəlişlər avtomatik təsdiqlənir")
+            if "edit" in keys
+            else STATUS_NEXT_STEP.get(status, "")
+        ),
         "next_tone": NEXT_STEP_TONES.get(status, "default"),
         "touched": version.updated_at if version is not None else syllabus.updated_at,
         "reuse_note": reuse_note,

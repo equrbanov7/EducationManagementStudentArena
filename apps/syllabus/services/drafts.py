@@ -15,7 +15,6 @@ from core.constants import AuditAction
 
 from .. import completion as completion_rules
 from ..constants import (
-    EDITABLE_STATUSES,
     LESSON_HOUR_KINDS,
     OPEN_STATUSES,
     PERM_EDIT,
@@ -113,6 +112,11 @@ def _create_sections(version, *, source=None, actor_user=None):
     source_map = {}
     if source is not None:
         source_map = {row.section_id: row.data for row in source.sections.all()}
+    info = {**BLANK_SECTION_DATA[SectionKey.INFO.value], **(source_map.get(SectionKey.INFO.value) or {})}
+    author = version.syllabus.author or actor_user
+    if author is not None and not info.get("teacher"):
+        info["teacher"] = author.get_full_name().strip() or author.username
+    source_map[SectionKey.INFO.value] = info
     organization = version.organization
     selfwork = rule_for_version(version, organization).selfwork
     rows = [
@@ -401,7 +405,7 @@ def save_section(*, version, section_id: str, data: dict, actor, expected_revisi
     caller, syllabus = version, version.syllabus
     version = SyllabusVersion.objects.select_for_update(of=("self",)).get(pk=version.pk)
     version.syllabus = syllabus
-    if version.status not in EDITABLE_STATUSES:
+    if version.is_locked:
         raise TransitionDenied("version.locked", params={"status": version.status})
     if not actor.has(PERM_EDIT):
         raise TransitionDenied("transition.permission_denied", params={"permission": PERM_EDIT})
@@ -443,6 +447,11 @@ def save_section(*, version, section_id: str, data: dict, actor, expected_revisi
     row.revision += 1
     row.updated_by = actor.user
     row.save(update_fields=["data", "revision", "updated_by", "updated_at"])
+
+    if version.status == SyllabusStatus.APPROVED.value and old_data != row.data:
+        from ..editing import record_approved_edit
+
+        record_approved_edit(version=version, row=row, old_data=old_data, actor=actor, request=request)
 
     report = recompute_completion(version)
     caller.completion_percent = version.completion_percent

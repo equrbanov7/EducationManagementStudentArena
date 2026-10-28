@@ -15,8 +15,12 @@
 
     <ul class="syl-modal__lines" data-syl-lines="submit" hidden>
       <li>{% trans "Həftəlik mövzular və qiymətləndirmə strukturu təsdiqdən sonra jurnalın mənbəyi olur" context "accounts.syllabus" %}</li>
+      {% if se.approval_required %}
       <li>{% trans "Təsdiq gözlənilən müddətdə cari təsdiqlənmiş versiya tələbələr üçün aktiv qalır" context "accounts.syllabus" %}</li>
       <li>{% trans "Kafedra müdirinə bildiriş göndərilir" context "accounts.syllabus" %}</li>
+      {% else %}
+      <li>{% trans "Təsdiqlədikdə sillabus dərhal avtomatik təsdiqlənir. Kafedra növbəsində gözləmir." context "accounts.syllabus" %}</li>
+      {% endif %}
     </ul>
 
     <ul class="syl-modal__lines" data-syl-lines="archive" hidden>
@@ -36,9 +40,9 @@
 {% comment %}Dialoq mətnləri — JS onları `data-*`-dan oxuyur (xarici .js faylı
 Django template engine-dən keçmir, ona görə tərcümə burada qalır).{% endcomment %}
 <span class="syl-i18n" data-syl-i18n hidden
-      data-t-submit-title="{% trans 'Sillabus kafedra təsdiqinə göndərilsin?' context 'accounts.syllabus' %}"
-      data-t-submit-body="{% trans 'Göndərildikdən sonra versiya kilidlənir və yalnız «düzəliş tələbi» gəldikdə yenidən açılır.' context 'accounts.syllabus' %}"
-      data-t-submit-ok="{% trans 'Göndər' context 'accounts.syllabus' %}"
+      data-t-submit-title="{% if se.approval_required %}{% trans 'Sillabus kafedra təsdiqinə göndərilsin?' context 'accounts.syllabus' %}{% else %}{% trans 'Sillabus təsdiqlənsin?' context 'accounts.syllabus' %}{% endif %}"
+      data-t-submit-body="{% if se.approval_required %}{% trans 'Göndərildikdən sonra versiya kilidlənir və yalnız «düzəliş tələbi» gəldikdə yenidən açılır.' context 'accounts.syllabus' %}{% else %}{% trans 'Sillabus avtomatik təsdiqlənəcək. Sonrakı düzəlişlər də təsdiqlənmiş qalacaq.' context 'accounts.syllabus' %}{% endif %}"
+      data-t-submit-ok="{% if se.approval_required %}{% trans 'Göndər' context 'accounts.syllabus' %}{% else %}{% trans 'Təsdiqlə' context 'accounts.syllabus' %}{% endif %}"
       data-t-submit-cancel="{% trans 'Geri qayıt' context 'accounts.syllabus' %}"
       data-t-archive-title="{% trans 'Mövzunu arxivləşdirmək istəyirsiniz?' context 'accounts.syllabus' %}"
       data-t-archive-body="{% trans 'Bu sərbəst iş tapşırığı üzrə tələbə qiymətləri mövcuddur. Silinmə mümkün deyil — mövzu arxivə köçürülür.' context 'accounts.syllabus' %}"

@@ -1,0 +1,22 @@
+# Python 3.11 uyğunluğu deploy-u gözlətmir; prod Python 3.12 tam dəsti ci.yml-dədir.
+name: 🧪 Python 3.11 compatibility
+
+on:
+  schedule:
+    # 05:30 Asia/Baku; gündə bir dəfə, PR runner-lərini saatlarla tutmasın.
+    - cron: "30 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: python-311-compat-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compatibility:
+    uses: ./.github/workflows/_unit-tests.yml
+    with:
+      python-version: "3.11"
+      coverage: true
