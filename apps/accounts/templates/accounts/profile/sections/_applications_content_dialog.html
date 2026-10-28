@@ -1,0 +1,20 @@
+{% load i18n %}
+<div class="apx-dlg" data-apx-dialog="content-edit" hidden>
+  <div class="apx-dlg__panel" role="dialog" aria-modal="true" aria-labelledby="apx-content-title" tabindex="-1">
+    <div class="apx-dlg__head"><h3 id="apx-content-title" data-apx-content-title>{% trans "Redaktə et" context "applications.content" %}</h3></div>
+    <div class="apx-dlg__body">
+      <ul class="apx-errors" data-apx-errors hidden></ul>
+      <label class="apx-field" data-apx-content-subject-field>{% trans "Mövzu" context "applications.content" %}
+        <input class="apx-input" data-apx-content-subject maxlength="255">
+      </label>
+      <label class="apx-field">{% trans "Mətn" context "applications.content" %}
+        <textarea class="apx-textarea" data-apx-content-text rows="7" maxlength="20000"></textarea>
+      </label>
+      <p class="apx-info">{% trans "Əvvəlki mətn tarixçədə saxlanılır. Müraciətin ünvanı və qərarı dəyişmir." context "applications.content" %}</p>
+    </div>
+    <div class="apx-dlg__foot">
+      <button type="button" class="apx-btn" data-apx-dialog-close>{% trans "Ləğv et" context "applications.content" %}</button>
+      <button type="button" class="apx-btn apx-btn--primary" data-apx-content-save>{% trans "Yadda saxla" context "applications.content" %}</button>
+    </div>
+  </div>
+</div>

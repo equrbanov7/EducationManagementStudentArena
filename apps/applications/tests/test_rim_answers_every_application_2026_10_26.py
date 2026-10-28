@@ -96,7 +96,7 @@ def test_rim_can_act_on_another_departments_application(world, dean_application,
     assert not access.is_current_handler(user, dean_application)
 
 
-@pytest.mark.parametrize("actor", ["trustee", "vice_rector", "coordinator", "teacher", "outsider"])
+@pytest.mark.parametrize("actor", ["trustee", "vice_rector", "other_coordinator", "teacher", "outsider"])
 def test_non_rim_roles_do_not_get_the_answer_right(world, dean_application, actor):
     user = world[actor]
     assert not access.is_universal_responder(user, world["organization"])

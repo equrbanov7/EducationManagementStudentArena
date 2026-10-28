@@ -112094,6 +112094,95 @@ msgctxt "registrar.catalog"
 msgid "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
 msgstr "Praktische Übung — Seminarstunden heißen im Journal und im Stundenplan «Praktische Übung» (Punkte und Stunden ändern sich nicht)"
 
+msgctxt "applications.content"
+msgid "Müraciəti redaktə et"
+msgstr "Anfrage bearbeiten"
+
+msgctxt "applications.content"
+msgid "Müraciəti sil"
+msgstr "Anfrage löschen"
+
+msgctxt "applications.content"
+msgid "Müraciəti bərpa et"
+msgstr "Anfrage wiederherstellen"
+
+msgctxt "applications.content"
+msgid "Cavabı redaktə et"
+msgstr "Antwort bearbeiten"
+
+msgctxt "applications.content"
+msgid "Cavabı sil"
+msgstr "Antwort löschen"
+
+msgctxt "applications.content"
+msgid "Cavabı bərpa et"
+msgstr "Antwort wiederherstellen"
+
+msgctxt "applications.content"
+msgid "Redaktə edilib"
+msgstr "Bearbeitet"
+
+msgctxt "applications.content"
+msgid "Bu müraciət silinib. Bərpa olunduqda əvvəlki vəziyyəti saxlanılacaq."
+msgstr ""
+"Diese Anfrage wurde gelöscht. Bei der Wiederherstellung bleibt der vorherige"
+" Status erhalten."
+
+msgctxt "applications.content"
+msgid "Müraciət əvvəlki qərarı və yazışması ilə bərpa edilsin?"
+msgstr ""
+"Anfrage mit bisheriger Entscheidung und Unterhaltung wiederherstellen?"
+
+msgctxt "applications.content"
+msgid ""
+"Müraciət siyahıdan çıxarılsın? Onu «Silinənlər» bölməsindən bərpa edə "
+"bilərsiniz."
+msgstr ""
+"Anfrage aus der Liste entfernen? Sie können sie unter Gelöscht "
+"wiederherstellen."
+
+msgctxt "applications.content"
+msgid "Əməliyyatı təsdiqləyin. Cavab audit tarixçəsində saxlanılır."
+msgstr "Aktion bestätigen. Die Antwort bleibt im Prüfverlauf erhalten."
+
+msgctxt "applications.content"
+msgid "Prorektoru seçin"
+msgstr "Prorektor auswählen"
+
+msgctxt "applications.content"
+msgid "Silinənlər"
+msgstr "Gelöscht"
+
+msgctxt "applications.content"
+msgid "Redaktə et"
+msgstr "Bearbeiten"
+
+msgctxt "applications.content"
+msgid "Mövzu"
+msgstr "Betreff"
+
+msgctxt "applications.content"
+msgid "Mətn"
+msgstr "Text"
+
+msgctxt "applications.content"
+msgid ""
+"Əvvəlki mətn tarixçədə saxlanılır. Müraciətin ünvanı və qərarı dəyişmir."
+msgstr ""
+"Der vorherige Text bleibt im Verlauf. Empfänger und Entscheidung bleiben "
+"unverändert."
+
+msgctxt "applications.content"
+msgid "Ləğv et"
+msgstr "Abbrechen"
+
+msgctxt "applications.content"
+msgid "Yadda saxla"
+msgstr "Speichern"
+
+msgctxt "applications.content"
+msgid "Məktəbə aid kafedranı seçin"
+msgstr "Fachbereich der Schule auswählen"
 msgctxt "accounts.grades_notice"
 msgid "Ballarınız haqqında məlumat"
 msgstr "Informationen zu Ihren Noten"

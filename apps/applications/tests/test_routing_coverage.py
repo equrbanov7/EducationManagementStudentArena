@@ -34,7 +34,7 @@ def test_covered_specialty_keeps_its_scope(world):
     assert notify.handler_recipients(application), "koordinator inbox-u boş olmamalıdır"
 
 
-def test_uncovered_specialty_falls_back_to_unscoped_route(world):
+def test_uncovered_specialty_keeps_scope_and_never_widens_to_other_faculties(world):
     org = world["organization"]
     orphan_tree = make_tree(org, tag="c")  # koordinatoru OLMAYAN ixtisas
     student = make_user("app-cov-orphan")
@@ -48,6 +48,6 @@ def test_uncovered_specialty_falls_back_to_unscoped_route(world):
         body="Koordinatoru olmayan ixtisasdan göndərilən müraciət mətni.",
     )
 
-    assert application.current_scope_unit_id is None
+    assert application.current_scope_unit_id == orphan_tree["specialty"].pk
     recipients = notify.handler_recipients(application)
-    assert recipients, "əhatə açılandan sonra şöbənin rol daşıyıcıları görməlidir"
+    assert not recipients, "başqa məktəbin koordinatoruna müraciət açılmamalıdır"
