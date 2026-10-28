@@ -93,6 +93,8 @@ UNIVERSITY_ROLES = [
             # Tələbə idarəetməsi (qrup köçürməsi + akademik status) — prorektor
             # org-scope-ludur, yəni bütün fakültələr üzrə səlahiyyətlidir.
             "people.manage_academic",
+            # Prorektor digər müəllimlərin jurnallarını öz əhatəsində yalnız oxuyur.
+            "journal.view",
             # Fənnin başqa müəllimə TƏHVİLİ (`journal.reassign`) — «müəllim işdən
             # çıxdı, jurnal artıq başqasının olsun». Əhatə struktur scope-una
             # tabedir; müəllimin özündə bu açar YOXDUR (öz jurnalını ata bilməz).

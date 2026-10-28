@@ -110484,3 +110484,42 @@ msgstr "Notlarınız hakkında bilgi"
 msgctxt "accounts.grades_notice"
 msgid "Köçürülmüş ballarda mümkün uyğunsuzluqlar İmtahan Mərkəzi ilə dəqiqləşdirilir və təsdiqlənən səhvlər düzəldilir. Fərq görsəniz, narahat olmayın: fənni və semestri qeyd edərək İmtahan Mərkəzinə müraciət edin."
 msgstr "Aktarılan notlardaki olası tutarsızlıklar Sınav Merkezi ile kontrol edilmekte ve doğrulanan hatalar düzeltilmektedir. Bir fark görürseniz endişelenmeyin: dersi ve dönemi belirterek Sınav Merkezine başvurun."
+msgctxt "accounts.syllabus"
+msgid "Dəyişiklikləri saxla"
+msgstr "Değişiklikleri kaydet"
+
+msgctxt "accounts.syllabus"
+msgid "Məsləhət saatı (istəyə bağlı)"
+msgstr "Danışmanlık saatleri (isteğe bağlı)"
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər avtomatik saxlanılır və təsdiqlənmiş qalır. Təkrar təsdiqə göndərmək lazım deyil."
+msgstr "Değişiklikler otomatik kaydedilir ve onaylı kalır. Yeniden onaya göndermek gerekmez."
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər saxlandıqda sillabus təsdiqlənmiş qalır. Təkrar göndərmə tələb olunmur."
+msgstr "Değişiklikler kaydedildiğinde izlence onaylı kalır. Yeniden göndermek gerekmez."
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus avtomatik təsdiqlənəcək. Sonrakı düzəlişlər də təsdiqlənmiş qalacaq."
+msgstr "İzlence otomatik onaylanacaktır. Sonraki değişiklikler de onaylı kalacaktır."
+
+msgctxt "accounts.syllabus"
+msgid "Sillabusu təsdiqlə"
+msgstr "İzlenceyi onayla"
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlədikdə sillabus avtomatik təsdiqlənir və dərhal istifadə olunur."
+msgstr "Onayladığınızda izlence otomatik onaylanır ve hemen kullanıma açılır."
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlədikdə sillabus dərhal avtomatik təsdiqlənir. Kafedra növbəsində gözləmir."
+msgstr "Onayladığınızda izlence hemen otomatik onaylanır. Bölüm onayı beklemez."
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər avtomatik təsdiqlənir"
+msgstr "Değişiklikler otomatik onaylanır"
+
+msgctxt "accounts.syllabus"
+msgid "Redaktə et"
+msgstr "Düzenle"

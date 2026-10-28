@@ -112101,3 +112101,42 @@ msgstr "Informationen zu Ihren Noten"
 msgctxt "accounts.grades_notice"
 msgid "Köçürülmüş ballarda mümkün uyğunsuzluqlar İmtahan Mərkəzi ilə dəqiqləşdirilir və təsdiqlənən səhvlər düzəldilir. Fərq görsəniz, narahat olmayın: fənni və semestri qeyd edərək İmtahan Mərkəzinə müraciət edin."
 msgstr "Mögliche Unstimmigkeiten bei übertragenen Noten werden mit dem Prüfungszentrum geklärt, und bestätigte Fehler werden korrigiert. Falls Sie eine Abweichung bemerken, bleiben Sie unbesorgt: Wenden Sie sich unter Angabe des Fachs und Semesters an das Prüfungszentrum."
+msgctxt "accounts.syllabus"
+msgid "Dəyişiklikləri saxla"
+msgstr "Änderungen speichern"
+
+msgctxt "accounts.syllabus"
+msgid "Məsləhət saatı (istəyə bağlı)"
+msgstr "Sprechstunden (optional)"
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər avtomatik saxlanılır və təsdiqlənmiş qalır. Təkrar təsdiqə göndərmək lazım deyil."
+msgstr "Änderungen werden automatisch gespeichert und bleiben genehmigt. Eine erneute Freigabe ist nicht nötig."
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər saxlandıqda sillabus təsdiqlənmiş qalır. Təkrar göndərmə tələb olunmur."
+msgstr "Der Lehrplan bleibt nach dem Speichern genehmigt. Eine erneute Einreichung ist nicht erforderlich."
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus avtomatik təsdiqlənəcək. Sonrakı düzəlişlər də təsdiqlənmiş qalacaq."
+msgstr "Der Lehrplan wird automatisch genehmigt. Spätere Änderungen bleiben ebenfalls genehmigt."
+
+msgctxt "accounts.syllabus"
+msgid "Sillabusu təsdiqlə"
+msgstr "Lehrplan genehmigen"
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlədikdə sillabus avtomatik təsdiqlənir və dərhal istifadə olunur."
+msgstr "Nach der Bestätigung wird der Lehrplan automatisch genehmigt und ist sofort verfügbar."
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlədikdə sillabus dərhal avtomatik təsdiqlənir. Kafedra növbəsində gözləmir."
+msgstr "Nach der Bestätigung wird der Lehrplan sofort genehmigt, ohne auf die Freigabe der Abteilung zu warten."
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər avtomatik təsdiqlənir"
+msgstr "Änderungen werden automatisch genehmigt"
+
+msgctxt "accounts.syllabus"
+msgid "Redaktə et"
+msgstr "Bearbeiten"

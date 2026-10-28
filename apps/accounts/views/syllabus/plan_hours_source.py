@@ -19,7 +19,7 @@ from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_POST
 
 from apps.syllabus.models import SyllabusVersion
-from apps.syllabus.public import TransitionDenied, services
+from apps.syllabus.public import SyllabusStatus, TransitionDenied, services
 
 from .._helpers import _get_active_organization
 from .labels import HOUR_KIND_LABELS, transition_text
@@ -57,7 +57,10 @@ def ensure_plan_hours(syllabus, context, *, write) -> tuple[dict, bool]:
     sahib 2026-10-12: rəsmi saat dəyişibsə müəllifin açıq qaralaması uyğunlaşır (təsdiqlənmişə yazılmır).
     """
     plan_hours = dict(context.get("plan_hours") or {})
-    if context.get("view_state") != "normal":
+    if (
+        context.get("view_state") != "normal"
+        or getattr(context.get("version"), "status", "") == SyllabusStatus.APPROVED
+    ):
         return plan_hours, False
     author = bool(context.get("is_author"))
     found = official_plan_hours(syllabus)

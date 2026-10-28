@@ -17,6 +17,11 @@ dördü autosave nəticəsindən asılıdır, ona görə gizli qalır və JS aç
   </div>
 </div>
 {% endif %}
+{% if not se.readonly and se.header.status_key == 'approved' %}
+<div class="syl-banner syl-banner--neutral" role="status">
+  <p>{% trans "Düzəlişlər avtomatik saxlanılır və təsdiqlənmiş qalır. Təkrar təsdiqə göndərmək lazım deyil." context "accounts.syllabus" %}</p>
+</div>
+{% endif %}
 
 <div class="syl-banner syl-banner--danger" data-syl-banner="failed" role="alert" hidden>
   <i class="fas fa-triangle-exclamation syl-banner__icon" aria-hidden="true"></i>
