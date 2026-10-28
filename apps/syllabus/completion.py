@@ -22,7 +22,6 @@ from .constants import (
     MIN_FILLED_WEEKS,
     MIN_GOAL_CHARS,
     MIN_METHODS,
-    MIN_OFFICE_HOURS_CHARS,
     MIN_OUTCOME_CHARS,
     MIN_OUTCOMES,
     MIN_PRIMARY_SOURCES,
@@ -91,12 +90,9 @@ def _lines(value) -> list:
 
 def _check_info(data, issues) -> bool:
     teacher = _text(data.get("teacher"))
-    office = _text(data.get("office_hours"))
     if not teacher:
         issues.append(Issue(SectionKey.INFO.value, "info.teacher_missing"))
-    if len(office) < MIN_OFFICE_HOURS_CHARS:
-        issues.append(Issue(SectionKey.INFO.value, "info.office_hours_missing", {"min": MIN_OFFICE_HOURS_CHARS}))
-    return bool(teacher) and len(office) >= MIN_OFFICE_HOURS_CHARS
+    return bool(teacher)
 
 
 def _check_desc(data, issues) -> bool:

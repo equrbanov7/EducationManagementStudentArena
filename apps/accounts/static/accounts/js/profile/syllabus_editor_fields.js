@@ -571,7 +571,7 @@
             }
         });
 
-        var canSubmit = percent >= 100 && !readonly;
+        var canSubmit = percent >= 100 && !readonly && el.getAttribute("data-status") !== "approved";
         el.querySelectorAll("[data-syl-submit]").forEach(function (button) {
             button.disabled = !canSubmit;
         });

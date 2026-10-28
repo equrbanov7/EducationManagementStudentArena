@@ -131,17 +131,20 @@ def home_chairs(organization, user_ids) -> dict:
 
 
 def teacher_pool(
-    organization, chair, *, search: str = "", limit: int = 50, include_outside: bool = False
+    organization, chair, *, search: str = "", limit: int | None = 50, include_outside: bool = False
 ) -> list[dict]:
     """Bölgü modalının müəllim siyahısı — ad, istifadəçi adı, bağlantı bayrağı.
 
-    ``include_outside`` — sonda başqa kafedraların müəllimləri (``is_outside``, ``home_chair`` — ştat kafedrası)."""
+    ``include_outside`` — sonda başqa kafedraların müəllimləri (``is_outside``, ``home_chair`` — ştat kafedrası).
+    ``limit=None`` — lokal axtarışlı modal üçün kafedranın tam hovuzu; səhifələnən seçici öz limitini verir.
+    """
     memberships = chair_teacher_memberships(organization, chair)
     search_q = tolerant_q(search, ("user__username", "user__first_name", "user__last_name"))
     if search_q is not None:
         memberships = memberships.filter(search_q)
     seen: dict = {}
-    for membership in memberships[: max(limit * 3, limit)]:
+    candidates = memberships if limit is None else memberships[: max(limit * 3, limit)]
+    for membership in candidates:
         user = membership.user
         if user is None or user.pk in seen:
             continue
