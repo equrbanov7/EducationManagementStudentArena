@@ -111262,3 +111262,11 @@ msgstr "Семинар = «Практическое занятие»"
 msgctxt "registrar.catalog"
 msgid "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
 msgstr "Практическое занятие — семинарские занятия называются «Практическое занятие» в журнале и расписании (баллы и часы не меняются)"
+
+msgctxt "accounts.grades_notice"
+msgid "Ballarınız haqqında məlumat"
+msgstr "Информация о ваших баллах"
+
+msgctxt "accounts.grades_notice"
+msgid "Köçürülmüş ballarda mümkün uyğunsuzluqlar İmtahan Mərkəzi ilə dəqiqləşdirilir və təsdiqlənən səhvlər düzəldilir. Fərq görsəniz, narahat olmayın: fənni və semestri qeyd edərək İmtahan Mərkəzinə müraciət edin."
+msgstr "Возможные расхождения в перенесённых баллах уточняются с Экзаменационным центром, а подтверждённые ошибки исправляются. Если заметите различие, не беспокойтесь: обратитесь в Экзаменационный центр, указав предмет и семестр."

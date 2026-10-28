@@ -110476,3 +110476,11 @@ msgstr "Seminer = «Uygulama dersi»"
 msgctxt "registrar.catalog"
 msgid "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
 msgstr "Uygulama dersi — seminer dersleri defterde ve ders programında «Uygulama dersi» olarak adlandırılır (puan ve saat değişmez)"
+
+msgctxt "accounts.grades_notice"
+msgid "Ballarınız haqqında məlumat"
+msgstr "Notlarınız hakkında bilgi"
+
+msgctxt "accounts.grades_notice"
+msgid "Köçürülmüş ballarda mümkün uyğunsuzluqlar İmtahan Mərkəzi ilə dəqiqləşdirilir və təsdiqlənən səhvlər düzəldilir. Fərq görsəniz, narahat olmayın: fənni və semestri qeyd edərək İmtahan Mərkəzinə müraciət edin."
+msgstr "Aktarılan notlardaki olası tutarsızlıklar Sınav Merkezi ile kontrol edilmekte ve doğrulanan hatalar düzeltilmektedir. Bir fark görürseniz endişelenmeyin: dersi ve dönemi belirterek Sınav Merkezine başvurun."
