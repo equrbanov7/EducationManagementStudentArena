@@ -31,6 +31,9 @@ yerləşdirməsi dəyişmir)
 
 Kənar qat (nginx) eyni iki qaydanı IP-yə görə TƏKRAR tətbiq edir (defense in depth):
 `/jurnal/` və admin prefiksi (`/manage/`) external zonadan 403.
+2026-10-28: ``JOURNAL_REMOTE_USER_IDS`` ilə açıq seçilmiş aktiv hesablar üçün yalnız
+``/jurnal/`` istisnası var; nginx server sessiyasını auth_request ilə yoxlayır.
+Digər istifadəçilərin şəbəkə qapısı, tenant/RBAC və admin 2FA dəyişmir.
 """
 
 from __future__ import annotations
@@ -333,6 +336,11 @@ class NetworkZoneMiddleware:
         if temporary_superuser_exempt(request):
             return self.get_response(request)
         path = request.path_info
+        if path.startswith("/jurnal/"):
+            from .journal_remote_access import journal_remote_access_allowed
+
+            if journal_remote_access_allowed(request):
+                return self.get_response(request)
         facts = _HttpGateFacts(request)
         denial = zone_policy_denial(
             zone=zone,

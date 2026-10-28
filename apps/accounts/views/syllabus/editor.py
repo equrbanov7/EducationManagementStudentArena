@@ -484,6 +484,7 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
             "view_state": context["view_state"],
             "access_denied_message": "",
             "readonly": readonly,
+            "approval_required": context["approval_required"],
             "syllabus_id": str(syllabus.pk),
             "version_id": str(version_row.pk),
             "header": {
@@ -548,7 +549,9 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
                 "outcomes": MIN_OUTCOMES,
                 "weeks": hours["expected_rows"] or WEEK_ROWS,
             },
-            "can_submit": (not readonly) and completion["percent"] >= 100,
+            "can_submit": (not readonly)
+            and version_row.status != SyllabusStatus.APPROVED
+            and completion["percent"] >= 100,
             "actions": list(context["actions"]),
             # Təkrar istifadə banneri (bağlı / mənbə / «artıq sillabusu var») — bax `reuse_context`.
             "reuse": editor_reuse_state(

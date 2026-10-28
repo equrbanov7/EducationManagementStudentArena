@@ -184,10 +184,14 @@ paneli render olunmur — bölmənin datası DB-də qalır, tənzimləmə yandı
     {% endfor %}
   </ul>
 
-  <p class="syl-hintbox">{% trans "Marşrut: kafedra müdiri → təsdiq. Göndərildikdən sonra versiya kilidlənir və yalnız «düzəliş tələbi» gəldikdə yenidən açılır." context "accounts.syllabus" %}</p>
+  {% if se.header.status_key == 'approved' and not se.readonly %}
+  <p class="syl-hintbox">{% trans "Düzəlişlər saxlandıqda sillabus təsdiqlənmiş qalır. Təkrar göndərmə tələb olunmur." context "accounts.syllabus" %}</p>
+  {% else %}
+  <p class="syl-hintbox">{% if se.approval_required %}{% trans "Marşrut: kafedra müdiri → təsdiq. Göndərildikdən sonra versiya kilidlənir və yalnız «düzəliş tələbi» gəldikdə yenidən açılır." context "accounts.syllabus" %}{% else %}{% trans "Təsdiqlədikdə sillabus avtomatik təsdiqlənir və dərhal istifadə olunur." context "accounts.syllabus" %}{% endif %}</p>
 
   <button type="button" class="syl-btn syl-btn--primary syl-btn--lg" data-syl-submit {% if not se.can_submit %}disabled{% endif %}>
-    {% trans "Kafedraya təsdiqə göndər" context "accounts.syllabus" %}
+    {% if se.approval_required %}{% trans "Kafedraya təsdiqə göndər" context "accounts.syllabus" %}{% else %}{% trans "Sillabusu təsdiqlə" context "accounts.syllabus" %}{% endif %}
   </button>
+  {% endif %}
 </article>
 {% endwith %}

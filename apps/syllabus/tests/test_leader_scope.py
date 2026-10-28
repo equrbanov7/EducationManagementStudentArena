@@ -13,6 +13,7 @@ deyir — öz sillabuslarına daralmaq üçün açar lazımdır.  Yoxlanılır:
 from __future__ import annotations
 
 import json
+import uuid
 
 from django.db import connection
 from django.test import Client, RequestFactory
@@ -143,6 +144,33 @@ def test_plain_teacher_list_is_unchanged_by_the_scope_param(world):
     assert forced["filters"]["scope"] == ""
     assert [row["id"] for row in forced["rows"]] == [row["id"] for row in plain["rows"]]
     assert forced["kpis"] == plain["kpis"]
+
+
+def test_missing_rows_with_same_subject_have_stable_id_tiebreaker(world):
+    # Eyni fənnin qrupları SQL planı dəyişəndə səhifələr arasında yer dəyişməsin.
+    for name, identifier in (
+        ("StableHigh", "ffffffff-ffff-4fff-afff-ffffffffffff"),
+        ("StableLow", "00000000-0000-4000-a000-000000000001"),
+    ):
+        group = OrgUnit.objects.create(
+            organization=world["org"],
+            name=name,
+            slug=name.lower(),
+            unit_type=OrgUnitType.GROUP,
+            parent=world["groups"]["g1"].parent,
+        )
+        CourseOffering.objects.create(
+            id=uuid.UUID(identifier),
+            organization=world["org"],
+            subject=world["subject"],
+            period=world["period"],
+            group=group,
+            instructor=world["teacher"],
+            lesson_hours=60,
+        )
+    section = _section(world, "teacher")
+    missing = [row["id"] for row in section["rows"] if row["kind"] == "missing"]
+    assert missing == sorted(missing)
 
 
 def test_leader_rows_only_offer_actions_the_leader_may_run(world):
