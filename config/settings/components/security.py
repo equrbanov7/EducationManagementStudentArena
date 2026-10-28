@@ -176,6 +176,11 @@ INTERNAL_NETWORKS = [
     item.strip() for item in os.getenv("INTERNAL_NETWORKS", "10.0.0.0/8,127.0.0.0/8,::1/128").split(",") if item.strip()
 ]
 NETWORK_ZONE_ENFORCED = os.getenv("NETWORK_ZONE_ENFORCED", "False").strip().lower() in ("1", "true", "yes")
+# Sahib 2026-10-28: yalnız açıq seçilmiş hesablar öz Wi-Fi bağlantısından jurnala girə bilər.
+# Sabit user ID-ləri; boş siyahı = heç kim. RBAC/tenant/2FA qapıları qüvvədə qalır.
+JOURNAL_REMOTE_USER_IDS = tuple(
+    item.strip() for item in os.getenv("JOURNAL_REMOTE_USER_IDS", "").split(",") if item.strip().isdigit()
+)
 # nginx-in qoyduğu X-EMS-Zone başlığına inanılsın? Yalnız nginx müştəri başlığını əzəndə (prod).
 NETWORK_ZONE_TRUST_HEADER = os.getenv("NETWORK_ZONE_TRUST_HEADER", "False").strip().lower() in ("1", "true", "yes")
 # Sahib 2026-09-29: kənardan YALNIZ elektron jurnal (/jurnal/) bağlıdır; inzibati hesablar da internetdən
