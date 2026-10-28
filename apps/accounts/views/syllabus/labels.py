@@ -147,6 +147,17 @@ TRANSITION_MESSAGES = {
     "reuse.linked_unlink_first": pgettext_lazy(
         _CTX, "Bu sillabus başqa qrupun sillabusuna bağlıdır — dəyişiklik üçün əvvəlcə «Ayır» düyməsini basın."
     ),
+    # Sahib 2026-10-27: keçmiş tədris illərinin sillabusu müəllimə mənbə deyil.
+    "reuse.source_old_year": pgettext_lazy(
+        _CTX, "Keçmiş tədris illərinin sillabusu mənbə kimi istifadə olunmur — cari ilin sillabusunu seçin."
+    ),
+    # Bir sillabus — bir neçə jurnal (sahib 2026-10-27) — `apps/syllabus/services/sharing.py` kodları.
+    "share.target_has_own": pgettext_lazy(
+        _CTX, "Bu qrupun öz sillabusu var — eyni sillabusu yalnız sillabusu olmayan qrupda istifadə etmək olar."
+    ),
+    "share.target_taken": pgettext_lazy(_CTX, "Bu qrup artıq başqa sillabusu istifadə edir."),
+    "share.already": pgettext_lazy(_CTX, "Bu qrup artıq bu sillabusu istifadə edir."),
+    "share.not_shared": pgettext_lazy(_CTX, "Bu qrup bu sillabusu istifadə etmir."),
 }
 
 _FALLBACK = pgettext_lazy(_CTX, "Əməliyyat yerinə yetirilmədi.")

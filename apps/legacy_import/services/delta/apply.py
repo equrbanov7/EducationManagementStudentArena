@@ -36,6 +36,7 @@ from .resolve import Catalog, lesson_date, text
 from .subgroups import mark_subgroups
 from .syllabi import import_syllabi
 from .syllabi_backfill import backfill_teacher_syllabi, check_phases
+from .syllabi_share import share_legacy_syllabi
 from .topics import apply_topics
 from .workload import build_workload
 
@@ -49,6 +50,7 @@ MANIFEST_KINDS = (
     "teachers",
     "students",
     "syllabus_versions",
+    "syllabus_shares",
     "workload_chairs",
     "history_enrollments",
     "history_offerings",
@@ -71,13 +73,23 @@ PHASES = (
     "history_topics",
     "subject_collisions",
     "syllabi_backfill",
+    "syllabi_share",
 )
 #: Yalnız AÇIQ seçiləndə (``--phase`` və ya paketin ``snapshot.phases``-i) işləyən fazalar — reyestr əmrləri yazır
 #: (``registry_sync``, ``graduation``); ``history*`` tarixi (bağlı) jurnallara əlavə edir (``delta/history.py``);
 #: ``subject_collisions`` yanlış fənn kartına düşmüş açılışları düzgün karta keçirir (``delta/collisions.py``);
 #: ``syllabi_backfill`` cari semestr jurnalı olan müəllimə köhnə sillabusunu baza dosye kimi gətirir
-#: (``delta/syllabi_backfill.py``, paket ``legacy_delta_extract --teacher-syllabi``).
-OPT_IN_PHASES = ("registry_sync", "graduation", "history", "history_topics", "subject_collisions", "syllabi_backfill")
+#: (``delta/syllabi_backfill.py``, paket ``legacy_delta_extract --teacher-syllabi``); ``syllabi_share`` köhnə sistemdə
+#: bir neçə jurnalın işlətdiyi BİR sillabusu sillabussuz qalan jurnallara paylaşır (``delta/syllabi_share.py``).
+OPT_IN_PHASES = (
+    "registry_sync",
+    "graduation",
+    "history",
+    "history_topics",
+    "subject_collisions",
+    "syllabi_backfill",
+    "syllabi_share",
+)
 DEFAULT_PHASES = tuple(phase for phase in PHASES if phase not in OPT_IN_PHASES)
 
 
@@ -215,6 +227,9 @@ class DeltaRun:
             apply_history_topics(self)
         if "syllabi_backfill" in phases:
             backfill_teacher_syllabi(self)
+        if "syllabi_backfill" in phases or "syllabi_share" in phases:
+            # Sahib 2026-10-27: köhnə sistemdə bir neçə jurnalın işlətdiyi BİR sillabus — bir sillabus olaraq qalır.
+            share_legacy_syllabi(self)
         for _legacy_id, user_pk in self.teachers.created:
             self.created("teachers", user_pk)
         for _legacy_id, user_pk in self.students.created:
@@ -291,8 +306,13 @@ class DeltaRun:
         }
 
 
-def execute(*, organization, actor, bundle: dict, apply: bool, until, tag: str = "", phases=DEFAULT_PHASES) -> DeltaRun:
-    """Bir tranzaksiyada bütün fazalar; ``apply=False`` → sonda geri qaytarılır."""
+def execute(
+    *, organization, actor, bundle: dict, apply: bool, until, tag: str = "", phases=DEFAULT_PHASES, setup=None
+) -> DeltaRun:
+    """Bir tranzaksiyada bütün fazalar; ``apply=False`` → sonda geri qaytarılır.
+
+    ``setup(run)`` — fazalardan ƏVVƏL qaçışa əlavə açar qoymaq üçün (məs. ``share_legacy_syllabi --teacher``).
+    """
 
     from core.rls import apply_rls_request_context
 
@@ -306,6 +326,8 @@ def execute(*, organization, actor, bundle: dict, apply: bool, until, tag: str =
         apply_rls_request_context(user_id=actor.pk, org_id=organization.pk)
         disable_parallel_query(local=True)
         run = DeltaRun(organization=organization, actor=actor, bundle=bundle, tag=tag or new_tag(), until=until)
+        if setup is not None:
+            setup(run)
         run.run(phases)
         if apply:
             run.audit()

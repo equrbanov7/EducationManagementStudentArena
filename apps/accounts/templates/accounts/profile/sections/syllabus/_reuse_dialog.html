@@ -35,8 +35,16 @@ Context: `urls.reuse_options`, `urls.reuse_action`, `urls.action` (boş qaralama
       </div>
 
       <div class="syl-reuse__choice" data-syl-reuse-choice hidden>
+        {% comment %}Sahib 2026-10-27: BİR sillabus — bu qrupun jurnalı mənbənin ÖZÜNÜ istifadə edir (surət yox).{% endcomment %}
+        <div class="syl-reuse__option syl-reuse__option--share" data-syl-reuse-share-option>
+          <button type="button" class="syl-btn syl-btn--primary" data-syl-reuse-do="share">
+            <i class="fas fa-share-nodes" aria-hidden="true"></i>
+            {% trans "Eyni sillabusu bu qrupda da istifadə et (bir sillabus)" context "accounts.syllabus" %}
+          </button>
+          <p class="syl-reuse__hint" data-syl-reuse-hint="share"></p>
+        </div>
         <div class="syl-reuse__option" data-syl-reuse-link-option>
-          <button type="button" class="syl-btn syl-btn--primary" data-syl-reuse-do="link">
+          <button type="button" class="syl-btn syl-btn--secondary" data-syl-reuse-do="link">
             <i class="fas fa-link" aria-hidden="true"></i>
             {% trans "Eyni sillabusu istifadə et (bağla)" context "accounts.syllabus" %}
           </button>
@@ -103,6 +111,10 @@ Context: `urls.reuse_options`, `urls.reuse_action`, `urls.action` (boş qaralama
       data-t-linked-count="{% trans 'bağlı qrup: {count}' context 'accounts.syllabus' %}"
       data-t-hours-same="{% trans 'Saatlar eynidir' context 'accounts.syllabus' %}"
       data-t-hours-diff="{% trans 'Saatlar fərqlidir' context 'accounts.syllabus' %}"
+      data-t-share-ok="{% trans 'Yeni sillabus yaradılmır — bu qrupun jurnalı eyni sillabusu öz yerində istifadə edir. Təsdiq, dəyişikliklər və həftəlik plan hər iki qrup üçün ortaqdır.' context 'accounts.syllabus' %}"
+      data-t-unshare-title="{% trans 'Paylaşım ayrılsın?' context 'accounts.syllabus' %}"
+      data-t-unshare-body="{% trans 'Bu qrupun jurnalı artıq bu sillabusu göstərməyəcək və «Sillabus yoxdur» vəziyyətinə qayıdacaq. Sillabusun özü və digər qruplar dəyişmir.' context 'accounts.syllabus' %}"
+      data-t-unshare-ok="{% trans 'Ayır' context 'accounts.syllabus' %}"
       data-t-link-ok="{% trans 'Saatlar eynidir — eyni təsdiqlənmiş məzmun bu qrup üçün də qüvvəyə minir, ayrıca təsdiq lazım deyil.' context 'accounts.syllabus' %}"
       data-t-copy-ok="{% trans 'Məzmun qaralama kimi kopyalanır, həftəlik plan bu qrupun saatına uyğunlaşdırılır, sonra adi qaydada təsdiqə göndərilir.' context 'accounts.syllabus' %}"
       data-t-mode-link="{% trans 'bağlanacaq' context 'accounts.syllabus' %}"

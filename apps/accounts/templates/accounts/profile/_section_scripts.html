@@ -117,7 +117,9 @@ xülasə və çekmecə məntiqi qalır. Göndəriş ortaq `teaching_office.js`-d
 {% endif %}
 {% if 'syllabus-list' in asset_sections %}
 <script src="{% static 'accounts/js/profile/syllabus_list.js' %}?v=20261014-searchux"></script>
-<script src="{% static 'accounts/js/profile/syllabus_reuse.js' %}?v=20261008-prev"></script>
+<script src="{% static 'accounts/js/profile/syllabus_reuse.js' %}?v=20261027-share"></script>
+{# Sahib 2026-10-27: bir sillabus — bir neçə jurnal (redaktorun paylaşım bloku). #}
+<script src="{% static 'accounts/js/profile/syllabus_share.js' %}?v=20261027-share"></script>
 {% comment %}Sahə toplayıcıları redaktor mühərrikindən ƏVVƏL yüklənməlidir —
 mühərrik `window.EMSSyllabusFields`-i init anında oxuyur.{% endcomment %}
 <script src="{% static 'accounts/js/profile/syllabus_editor_fields.js' %}?v=20260831-carry"></script>

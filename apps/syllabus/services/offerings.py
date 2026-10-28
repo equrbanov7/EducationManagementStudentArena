@@ -5,6 +5,8 @@ modelin ÜÇ qismən UNIQUE məhdudiyyətinin güzgüsüdür və eyni ardıcıll
 axtarılır (bax :class:`apps.syllabus.models.Syllabus` docstring-i):
 
 1. ``offering`` üzrə — normal axın (qrup + müəllim konkretdir);
+1a. PAYLAŞIM (sahib 2026-10-27, ``SyllabusShare``) — açılış başqa qrupun sillabusunu ÖZ YERİNDƏ istifadə edir
+   (bir sillabus — bir neçə jurnal; yalnız eyni müəllim, bax ``services/sharing.py``);
 2. ``(subject, period)`` üzrə — semestr səviyyəli dosye, açılış hələ
    bağlanmayıb;
 3. ``(subject, author)`` üzrə — köhnə sistemdən köçürülmüş SEMESTRSİZ «baza
@@ -59,11 +61,23 @@ _RELATED = (
 )
 
 
-def syllabus_for_offering(*, organization, offering_id=None, subject_id=None, period_id=None, instructor_id=None):
-    """Açılışa uyğun sillabus dosyesi və ya ``None`` (üç pilləli axtarış).
+def _share_applies(syllabus, offering_id, instructor_id) -> bool:
+    """Paylaşım pilləsindən gəlibsə, tətbiq qapısı (``sharing`` qayda 4) — açılışın müəllimi dosyenin sahibidir."""
+    if syllabus.offering_id is None or syllabus.offering_id == offering_id:
+        return True  # öz / fənn+semestr / baza pilləsi — paylaşım deyil
+    owner_ids = {syllabus.author_id, getattr(syllabus.offering, "instructor_id", None)}
+    return instructor_id is not None and instructor_id in owner_ids
+
+
+def syllabus_for_offering(
+    *, organization, offering_id=None, subject_id=None, period_id=None, instructor_id=None, _with_share=True
+):
+    """Açılışa uyğun sillabus dosyesi və ya ``None`` (pilləli axtarış).
 
     Hər pillə AKTİV dosyelərlə məhdudlaşır; təşkilat filtri həmişə tətbiq
-    olunur (RLS ikinci qatdır, birincisi bu filtrdir).
+    olunur (RLS ikinci qatdır, birincisi bu filtrdir).  Paylaşım pilləsi (sahib 2026-10-27) alt-sorğuda
+    JOIN-suzdur (PERF-1 forması qorunur); müəllim qapısı nəticədə yoxlanır — keçmirsə (fənn başqa müəllimə
+    keçib) axtarış paylaşımsız təkrarlanır (nadir hal, +1 sorğu).
     """
     if organization is None:
         return None
@@ -73,9 +87,14 @@ def syllabus_for_offering(*, organization, offering_id=None, subject_id=None, pe
     # 3 = 12 eyni SELECT, hər biri 9 cədvəllik JOIN). İndi pillələr TƏK sorğuda
     # OR-lanır, `_tier` rütbəsi eyni prioriteti saxlayır (0 → 1 → 2), hər pillə
     # daxilində əvvəlki kimi `Meta.ordering` (`subject__code`) + `pk`.
+    from ..models import SyllabusShare
+
     tiers = []
     if offering_id is not None:
         tiers.append(Q(offering_id=offering_id))
+        if _with_share:
+            shared = SyllabusShare.objects.filter(offering_id=offering_id).order_by().values("syllabus_id")
+            tiers.append(Q(pk__in=Subquery(shared)))
     if subject_id is not None and period_id is not None:
         tiers.append(Q(subject_id=subject_id, period_id=period_id, offering__isnull=True))
     if subject_id is not None and instructor_id is not None:
@@ -103,7 +122,17 @@ def syllabus_for_offering(*, organization, offering_id=None, subject_id=None, pe
         .order_by("_tier", "subject__code", "pk")
         .values("pk")[:1]
     )
-    return Syllabus.objects.select_related(*_RELATED).filter(pk=Subquery(tier_pick)).first()
+    found = Syllabus.objects.select_related(*_RELATED).filter(pk=Subquery(tier_pick)).first()
+    if found is not None and _with_share and not _share_applies(found, offering_id, instructor_id):
+        return syllabus_for_offering(
+            organization=organization,
+            offering_id=offering_id,
+            subject_id=subject_id,
+            period_id=period_id,
+            instructor_id=instructor_id,
+            _with_share=False,
+        )
+    return found
 
 
 _SYLLABUS_MEMO_ATTR = "_syllabus_memo"

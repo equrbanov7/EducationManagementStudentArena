@@ -23,6 +23,7 @@ from django.utils.translation import pgettext_lazy
 from apps.syllabus.models import ChangeKind, Syllabus
 from apps.syllabus.public import SyllabusStatus, services
 
+from . import share_context
 from .labels import HOUR_KIND_LABELS, STATUS_TONES, transition_text
 
 _CTX = "accounts.syllabus"
@@ -160,6 +161,9 @@ def candidate_targets(organization, actor, *, subject_id, period_id, exclude_off
         row.offering_id: row
         for row in Syllabus.objects.filter(organization=organization, offering_id__in=[row.pk for row in offerings])
     }
+    # Paylaşımla (sahib 2026-10-27) artıq sillabusu olan qrup «boş» deyil — toplu əməl onu əzmir.
+    for offering_id, shared in share_context.shared_targets(organization, [row.pk for row in offerings]).items():
+        existing.setdefault(offering_id, shared)
     chair_memo: dict = {}
     result = []
     for offering in offerings:
@@ -185,7 +189,10 @@ def _override_or(syllabus, hours) -> dict:
 
 def _candidate_public(target) -> dict:
     syllabus = target.syllabus
-    if syllabus is None:
+    shared = share_context.candidate_shared(target)
+    if shared is not None:
+        state, label = shared["state"], shared["state_label"]
+    elif syllabus is None:
         state, label = "none", _STATE_NONE
     elif syllabus.reused_from_id:
         state, label = "linked", _STATE_LINKED
@@ -207,7 +214,7 @@ def _status(row):
     return status, version
 
 
-def _sibling_row(row, *, actor, target, chair_id, target_code, candidates, chair_memo=None) -> dict:
+def _sibling_row(row, *, actor, target, chair_id, target_code, candidates, chair_memo=None, share_state="") -> dict:
     from .rows import approver_text
 
     rules = services.reuse_rules
@@ -262,6 +269,7 @@ def _sibling_row(row, *, actor, target, chair_id, target_code, candidates, chair
         "link_reason": transition_text(link_code) if link_code else "",
         "can_copy": not copy_code,
         "copy_reason": transition_text(copy_code) if copy_code else "",
+        **share_context.sibling_share(row, actor=actor, target=target, state_code=share_state),
         "modes": modes,
     }
 
@@ -301,6 +309,7 @@ def build_options(organization, actor, target) -> dict:
         )
     )
     target_code = services.reuse_rules.target_state_code(target_syllabus)
+    share_state = share_context.target_state(target) if siblings else ""
     chair_memo: dict = {}
     chair_id = services.reuse.target_chair_unit_id(target, actor)
     candidates = (
@@ -326,6 +335,7 @@ def build_options(organization, actor, target) -> dict:
                 target_code=target_code,
                 candidates=candidates,
                 chair_memo=chair_memo,
+                share_state=share_state,
             )
             for row in siblings
         ],
@@ -373,6 +383,7 @@ def page_flags(page_syllabi, visible, *, user_id=None, actor=None) -> dict:
         ):
             pairs[(subject_id, period_id)] += 1
     previous = _previous_flags(page, actor)
+    shared_groups = share_context.page_shared_groups(page)
     flags = {}
     for row in page:
         entry = summary.get(row.pk, {})
@@ -385,6 +396,7 @@ def page_flags(page_syllabi, visible, *, user_id=None, actor=None) -> dict:
             "behind_count": entry.get("behind", 0),
             "siblings": max(siblings, 0),
             "previous": row.pk in previous,
+            "shared_groups": shared_groups.get(row.pk, []),
         }
     return flags
 

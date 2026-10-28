@@ -5,6 +5,7 @@ View, API və management əmrləri buradan istifadə edir; modelə birbaşa
 :mod:`apps.syllabus.state_machine`-dədir).
 """
 
+from . import sharing  # noqa: F401 — bir sillabus, bir neçə jurnal (sahib 2026-10-27)
 from . import reuse, reuse_rules, reuse_sync  # noqa: F401 — təkrar istifadə (bağla/kopyala/sinxron), 2026-10-08
 from .coverage import (  # noqa: F401
     GROUP_CHAIR,
@@ -75,6 +76,8 @@ from .scoping import (  # noqa: F401
     resolve_actor,
 )
 from .section_shape import SectionShapeError, normalize_section_data  # noqa: F401
+from .sharing import link_legacy as link_legacy_share  # noqa: F401
+from .sharing import shared_syllabus_ids  # noqa: F401
 from .student_lookup import student_syllabus_for_offering, student_syllabus_map  # noqa: F401
 from .versioning import (  # noqa: F401
     ESCALATION_CODE,
@@ -155,6 +158,9 @@ __all__ = [
     "reuse_origin",
     "reuse_rules",
     "reuse_sync",
+    "sharing",
+    "shared_syllabus_ids",
+    "link_legacy_share",
     "review_queue",
     "review_scope_queryset",
     "save_section",

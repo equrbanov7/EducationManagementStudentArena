@@ -52,6 +52,7 @@ from .labels import HOUR_KIND_LABELS, STATUS_TONES, issue_text
 from .plan_hours_source import ensure_plan_hours, override_state
 from .preview import build_preview_blocks
 from .reuse_context import editor_reuse_state
+from .share_context import editor_share_state
 
 _CTX = "accounts.syllabus"
 
@@ -552,6 +553,10 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
             # Təkrar istifadə banneri (bağlı / mənbə / «artıq sillabusu var») — bax `reuse_context`.
             "reuse": editor_reuse_state(
                 request, organization, syllabus=syllabus, version=version_row, is_author=bool(context["is_author"])
+            ),
+            # Bir sillabus — bir neçə jurnal (sahib 2026-10-27) — bax `share_context`.
+            "shares": editor_share_state(
+                request, organization, syllabus=syllabus, is_author=bool(context["is_author"])
             ),
             "urls": {
                 "save": reverse("accounts:syllabus_section_save", kwargs={"version_id": str(version_row.pk)}),

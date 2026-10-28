@@ -36,6 +36,8 @@ _LINKED_TO = pgettext_lazy(_CTX, "Bağlıdır: %(group)s sillabusu")
 _LINKED_BEHIND = pgettext_lazy(_CTX, "Mənbədə yeni təsdiqlənmiş versiya var")
 _SOURCE_OF = pgettext_lazy(_CTX, "%(count)s qrup bu sillabusa bağlıdır")
 _SOURCE_BEHIND = pgettext_lazy(_CTX, "%(count)s bağlı sillabus köhnə versiyadadır")
+#: Sahib 2026-10-27: bir sillabus — bir neçə jurnal (``SyllabusShare``).
+_SHARED_WITH = pgettext_lazy(_CTX, "Həmçinin bu qruplarda istifadə olunur: %(groups)s")
 _SIBLINGS = pgettext_lazy(_CTX, "Bu fənnin bu semestr üçün artıq sillabusu var")
 _SIBLINGS_NEXT = pgettext_lazy(
     _CTX, "Bu fənnin bu semestr üçün artıq sillabusu var — bağlaya və ya kopyalaya bilərsiniz"
@@ -245,6 +247,10 @@ def build_row(syllabus, *, now=None, can_copy: bool = False, reuse=None, viewer=
         keys = [key for key in keys if key != "copy"]
     keys, own = _viewer_keys(keys, syllabus, viewer)
     keys, reuse_note = _reuse_keys(keys, status, reuse, own=own)
+    shared = (reuse or {}).get("shared_groups") or []
+    if shared:
+        shared_note = str(_SHARED_WITH) % {"groups": ", ".join(shared)}
+        reuse_note = f"{reuse_note} · {shared_note}" if reuse_note else shared_note
     urls = detail_urls(syllabus.pk)
     return {
         "kind": "syllabus",

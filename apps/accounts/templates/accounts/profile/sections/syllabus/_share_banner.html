@@ -1,0 +1,59 @@
+{% load i18n %}
+{% comment %}
+Redaktorun «Bir sillabus — bir neçə jurnal» bloku (sahib 2026-10-27) — `se.shares`
+(bax views/syllabus/share_context.py::editor_share_state):
+
+* `shares` — bu sillabusu ÖZ YERİNDƏ istifadə edən qruplar («Ayır» → `syllabus_reuse.js`-in
+  `data-syl-action="unshare"` təsdiq pəncərəsi, `data-offering` ilə);
+* `free`   — müəllimin bu fənn + semestr üzrə sillabusu OLMAYAN qrupları: layihənin seçim
+  komponenti + «Bu qrupda da istifadə et» (`syllabus_share.js`).
+
+Surət yaradılmır: təsdiq, dəyişiklik və həftəlik plan bütün qruplar üçün BİRDİR.
+{% endcomment %}
+{% with share=se.shares %}
+{% if share.mode == 'share' %}
+<div class="syl-banner syl-banner--info syl-share-banner" role="region"
+     aria-label="{% trans 'Bir sillabus — bir neçə jurnal' context 'accounts.syllabus' %}"
+     data-syl-share data-action-url="{{ se.urls.reuse_action }}">
+  <i class="fas fa-share-nodes syl-banner__icon" aria-hidden="true"></i>
+  <div class="syl-share-banner__body">
+    <p class="syl-banner__title">{% trans "Bir sillabus — bir neçə jurnal" context "accounts.syllabus" %}</p>
+    {% if share.shares %}
+    <p class="syl-banner__body">{% trans "Bu sillabus aşağıdakı qrupların jurnalında da öz yerində istifadə olunur. Təsdiq, dəyişikliklər və həftəlik plan hamısı üçün ortaqdır." context "accounts.syllabus" %}</p>
+    <ul class="syl-share-banner__list">
+      {% for row in share.shares %}
+      <li class="syl-share-chip">
+        <span class="syl-share-chip__name">{{ row.group }}</span>
+        {% if row.legacy %}<span class="syl-meta">{{ row.legacy_label }}</span>{% endif %}
+        {% if share.can_act %}
+        <button type="button" class="syl-btn syl-btn--ghost syl-btn--sm" data-syl-action="unshare"
+                data-row-kind="syllabus" data-id="{{ share.syllabus }}" data-offering="{{ row.offering }}">{% trans "Ayır" context "accounts.syllabus" %}</button>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="syl-banner__body">{% trans "Bu fənn üzrə başqa qrupunuzun jurnalında da eyni sillabusu öz yerində istifadə edə bilərsiniz (məsələn, potok dərsi) — yeni sillabus yaradılmır." context "accounts.syllabus" %}</p>
+    {% endif %}
+    {% if share.can_act and share.free %}
+    <div class="syl-share-banner__add">
+      <div class="bootstrap-single-select bootstrap-single-select--ems syl-share-banner__select">
+        <select class="ems-select bootstrap-single-select__native" data-bootstrap-select data-syl-share-select
+                aria-label="{% trans 'Qrup seçin' context 'accounts.syllabus' %}"
+                data-live-search-placeholder="{% trans 'Qrup axtar…' context 'accounts.syllabus' %}"
+                data-live-search-empty="{% trans 'Uyğun qrup yoxdur' context 'accounts.syllabus' %}">
+          {% for row in share.free %}
+          <option value="{{ row.offering }}">{{ row.group }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="button" class="syl-btn syl-btn--primary syl-btn--sm" data-syl-share-add data-id="{{ share.syllabus }}">
+        <i class="fas fa-share-nodes" aria-hidden="true"></i>
+        {% trans "Bu qrupda da istifadə et" context "accounts.syllabus" %}
+      </button>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+{% endwith %}

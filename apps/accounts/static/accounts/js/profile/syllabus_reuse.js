@@ -17,7 +17,8 @@
     "use strict";
 
     /* `copy` — «Keçən ildən köçür» (2026-10-08): eyni dialoq `mode=previous` ilə, yalnız kopyalama. */
-    var ACTIONS = ["reuse", "copy", "unlink", "sync", "propagate"];
+    /* `share` / `unshare` — bir sillabus, bir neçə jurnal (sahib 2026-10-27). */
+    var ACTIONS = ["reuse", "copy", "unlink", "sync", "propagate", "unshare"];
     var state = null;
     var confirmState = null;
     var toastTimer = null;
@@ -255,10 +256,13 @@
         });
         var source = selected();
         var blocked = state.data.target.blocked;
-        ["link", "copy"].forEach(function (kind) {
+        ["share", "link", "copy"].forEach(function (kind) {
             var button = state.modal.querySelector("[data-syl-reuse-do='" + kind + "']");
             var hint = state.modal.querySelector("[data-syl-reuse-hint='" + kind + "']");
             var allowed = Boolean(source && !blocked && source["can_" + kind]);
+            if (!button || !hint) {
+                return; /* köhnə qabıqda «share» seçimi olmaya bilər (null-safe) */
+            }
             button.disabled = !allowed;
             var okKey = kind + (state.mode === "previous" && kind === "copy" ? "-previous" : "") + "-ok";
             hint.textContent = !source ? "" : allowed ? t(panel, okKey) : source[kind + "_reason"] || "";
@@ -296,7 +300,7 @@
         show(modal.querySelector("[data-syl-reuse-blank]"), Boolean(data.can_create_blank));
         if (siblings.length) {
             var preferred = siblings.filter(function (row) {
-                return row.can_link;
+                return row.can_share || row.can_link;
             })[0] || siblings[0];
             selectSource(panel, preferred.id);
         } else {
@@ -317,6 +321,7 @@
             title.textContent = t(panel, "title-" + mode);
         }
         show(modal.querySelector("[data-syl-reuse-link-option]"), mode !== "previous");
+        show(modal.querySelector("[data-syl-reuse-share-option]"), mode !== "previous");
         ["[data-syl-reuse-sources-wrap]", "[data-syl-reuse-choice]", "[data-syl-reuse-bulk]", "[data-syl-reuse-blocked]",
             "[data-syl-reuse-results]", "[data-syl-reuse-blank]"].forEach(function (selector) {
             show(modal.querySelector(selector), false);
@@ -469,7 +474,8 @@
         if (!modal) {
             return;
         }
-        confirmState = { panel: panel, modal: modal, action: action, id: trigger.getAttribute("data-id"), trigger: trigger };
+        confirmState = { panel: panel, modal: modal, action: action, id: trigger.getAttribute("data-id"), trigger: trigger,
+            offering: trigger.getAttribute("data-offering") || "" };
         var title = t(panel, action + "-title");
         modal.querySelector("[data-syl-reuse-confirm-title]").textContent = title;
         modal.querySelector("[data-syl-reuse-confirm-body]").textContent = t(panel, action + "-body");
@@ -503,7 +509,11 @@
         var current = confirmState;
         var ok = current.modal.querySelector("[data-syl-reuse-confirm-ok]");
         ok.disabled = true;
-        http(current.modal.getAttribute("data-action-url"), { action: current.action, syllabus: current.id })
+        var body = { action: current.action, syllabus: current.id };
+        if (current.offering) {
+            body.offering = current.offering;
+        }
+        http(current.modal.getAttribute("data-action-url"), body)
             .then(function (data) {
                 confirmState = null;
                 current.modal.hidden = true;
