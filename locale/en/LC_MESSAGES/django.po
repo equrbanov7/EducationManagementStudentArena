@@ -111091,7 +111091,7 @@ msgstr "Lecture"
 
 msgctxt "workload.recorded"
 msgid "Seminar"
-msgstr "Seminar"
+msgstr "Seminar hours"
 
 msgctxt "workload.recorded"
 msgid "Laboratoriya"

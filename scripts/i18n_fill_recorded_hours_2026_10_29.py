@@ -24,7 +24,7 @@ ENTRIES = {
     "Fənn / kafedra": ("Subject / department", "Предмет / кафедра", "Ders / bölüm", "Fach / Fachbereich"),
     "Qrup / semestr": ("Group / semester", "Группа / семестр", "Grup / dönem", "Gruppe / Semester"),
     "Mühazirə": ("Lecture", "Лекция", "Ders anlatımı", "Vorlesung"),
-    "Seminar": ("Seminar", "Семинар", "Seminer", "Seminar"),
+    "Seminar": ("Seminar hours", "Семинар", "Seminer", "Seminarstunden"),
     "Laboratoriya": ("Laboratory", "Лаборатория", "Laboratuvar", "Labor"),
     "Qeydə alınmış saatım": ("My recorded hours", "Мои учтённые часы", "Kayıtlı saatlerim", "Meine erfassten Stunden"),
     "Müəllifi dəqiqləşdirilməmiş saat": (
