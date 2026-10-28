@@ -15,11 +15,13 @@ from __future__ import annotations
 
 import datetime
 from decimal import Decimal
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from django.apps import apps as django_apps
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import IntegrityError, connection, transaction
-from django.test import override_settings
+from django.test import SimpleTestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -33,7 +35,11 @@ from .retake_fixture import RetakeBase, pdf
 
 PROFILE = "/accounts/profile/"
 REASON = "Tələbə xəstəlik səbəbindən imtahana gələ bilmədi, rektorun əmri ilə ödəniş qaytarılır."
-TODAY = datetime.date.today().isoformat()
+
+
+def today():
+    """Use the university-local day at execution, even after midnight during a long suite."""
+    return timezone.localdate().isoformat()
 
 
 @override_settings(UNIVERSITY_MODE=True)
@@ -80,20 +86,20 @@ class RefundTest(RetakeBase):
                 action=action,
                 reason="Rəsmi qərarla müraciət bağlanır — test fiksturu.",
                 order_number="77/D",
-                order_date=TODAY,
+                order_date=today(),
             )
             app.refresh_from_db()
         return app
 
     def _decide(self, app, actor=None, **extra):
-        data = {"reason": REASON, "order_number": "15/Q", "order_date": TODAY, **extra}
+        data = {"reason": REASON, "order_number": "15/Q", "order_date": today(), **extra}
         with bypass_rls():
             retake_refund.decide(actor=actor or self.office, organization=self.org, application_id=app.id, **data)
             app.refresh_from_db()
         return app
 
     def _mark(self, app, actor=None, **extra):
-        data = {"refunded_on": TODAY, "reference": "BANK-2026-001", **extra}
+        data = {"refunded_on": today(), "reference": "BANK-2026-001", **extra}
         with bypass_rls():
             retake_refund.mark_refunded(
                 actor=actor or self.accountant, organization=self.org, application_id=app.id, **data
@@ -105,11 +111,11 @@ class RefundTest(RetakeBase):
     def test_permission_matrix_over_http(self):
         app = self._closed()
         url = reverse("retake:refund", args=[app.id])
-        decide = {"action": "decide", "reason": REASON, "order_number": "15/Q", "order_date": TODAY}
+        decide = {"action": "decide", "reason": REASON, "order_number": "15/Q", "order_date": today()}
         for user in (self.accountant, self.dean, self.coordinator, self.student, self.teacher):
             with self.subTest(user=user.username):
                 self.assertEqual(self.client_for(user).post(url, decide).status_code, 403)
-        mark = {"action": "mark", "refunded_on": TODAY, "reference": "BANK-1"}
+        mark = {"action": "mark", "refunded_on": today(), "reference": "BANK-1"}
         self.assertEqual(self.client_for(self.accountant).post(url, mark).status_code, 400)  # qərar hələ yoxdur
         ok = self.client_for(self.office).post(url, decide)
         self.assertEqual(ok.status_code, 200, ok.content)
@@ -134,7 +140,7 @@ class RefundTest(RetakeBase):
                         application_id=app.id,
                         reason=REASON,
                         order_number="1",
-                        order_date=TODAY,
+                        order_date=today(),
                     )
             app.refresh_from_db()
         self.assertEqual(app.refund_state, "")
@@ -165,7 +171,7 @@ class RefundTest(RetakeBase):
                 application_id=verified.id,
                 reason=REASON,
                 order_number="1",
-                order_date=TODAY,
+                order_date=today(),
             )
 
     def test_withdrawn_before_payment_is_not_refundable(self):
@@ -184,7 +190,7 @@ class RefundTest(RetakeBase):
                 application_id=app.id,
                 reason=REASON,
                 order_number="1",
-                order_date=TODAY,
+                order_date=today(),
             )
 
     def test_reject_after_payment_is_refundable(self):
@@ -429,7 +435,7 @@ class RefundTest(RetakeBase):
             "action": "decide",
             "reason": REASON,
             "order_number": "15/Q",
-            "order_date": TODAY,
+            "order_date": today(),
             "restores_attempt": ["0"],  # checkbox işarələnməyib — yalnız gizli «0»
         }
         self.assertEqual(self.client_for(self.office).post(url, data).status_code, 200)
@@ -443,7 +449,7 @@ class RefundTest(RetakeBase):
 
     def test_checkbox_checked_posts_one(self):
         app = self._closed("no_show")
-        data = {"action": "decide", "reason": REASON, "order_number": "1", "order_date": TODAY}
+        data = {"action": "decide", "reason": REASON, "order_number": "1", "order_date": today()}
         data["restores_attempt"] = ["0", "1"]  # gizli «0» + işarələnmiş checkbox «1»
         self.assertEqual(
             self.client_for(self.office).post(reverse("retake:refund", args=[app.id]), data).status_code, 200
@@ -476,3 +482,23 @@ class RefundTest(RetakeBase):
             with self.subTest(statement=statement), bypass_rls():
                 with self.assertRaises(IntegrityError), transaction.atomic(), connection.cursor() as cursor:
                     cursor.execute(statement, [decided.pk])
+
+
+class RefundLocalDateTest(SimpleTestCase):
+    def test_fixture_advances_at_university_midnight_and_preserves_chronology_guard(self):
+        before = datetime.datetime(2026, 10, 28, 19, 59, tzinfo=datetime.timezone.utc)
+        after = datetime.datetime(2026, 10, 28, 20, 1, tzinfo=datetime.timezone.utc)
+        with timezone.override("Asia/Baku"):
+            with patch.object(timezone, "now", return_value=before):
+                collected_day = today()
+                self.assertEqual(collected_day, "2026-10-28")
+            with patch.object(timezone, "now", return_value=after):
+                executed_day = today()
+                self.assertEqual(executed_day, "2026-10-29")
+                application = SimpleNamespace(refund_decided_at=after)
+                self.assertEqual(
+                    retake_refund._clean_refund_date(executed_day, application),
+                    datetime.date(2026, 10, 29),
+                )
+                with self.assertRaisesMessage(ValidationError, "qərar tarixindən əvvəl"):
+                    retake_refund._clean_refund_date(collected_day, application)

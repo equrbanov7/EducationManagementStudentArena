@@ -127,7 +127,7 @@ RESOLVE_BY_UNIT_TYPE = {
 RESOLVE_BY_FALLBACK_UNIT_TYPES = {
     ResolveBy.CHAIR.value: (OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT),
     ResolveBy.FACULTY.value: (OrgUnitType.FACULTY,),
-    ResolveBy.SPECIALTY.value: (OrgUnitType.SPECIALTY,),
+    ResolveBy.SPECIALTY.value: (OrgUnitType.SPECIALTY, OrgUnitType.FACULTY),
 }
 
 #: Nişan palitraları (dizayn §3.2 «badge bg / fg» sütunu) — UI onları belə oxuyur.
@@ -202,6 +202,8 @@ DEFAULT_UNIT_SEED = (
     },
     {
         "code": "tedris",
+        "accepts_students": False,
+        "requires_recipient": True,
         "name": "Tədris Şöbəsi",
         "note": "plan, cədvəl, fənn, semestr açılışı",
         "handler_role_names": ["vice_rector"],
@@ -212,8 +214,9 @@ DEFAULT_UNIT_SEED = (
         "code": "dekan",
         "name": "Dekanlıq",
         "note": "tələbə hərəkəti, akademik məsələlər",
-        "handler_role_names": ["dean"],
-        "resolve_by": ResolveBy.FACULTY.value,
+        "handler_role_names": ["dean", "vice_dean", "program_coordinator", "tutor"],
+        "resolve_by": ResolveBy.SPECIALTY.value,
+        "requires_scope": True,
         "default_sla_days": 5,
     },
     {
@@ -221,6 +224,7 @@ DEFAULT_UNIT_SEED = (
         "name": "Kafedra müdirliyi",
         "note": "müəllim, fənn tədrisi, sillabus",
         "handler_role_names": ["chair_head"],
+        "requires_scope": True,
         "resolve_by": ResolveBy.CHAIR.value,
         "default_sla_days": 5,
     },
@@ -229,7 +233,8 @@ DEFAULT_UNIT_SEED = (
         "name": "Proqram koordinatoru",
         "note": "ixtisas, qrup, fərdi tədris planı",
         # 2026-10-14 (sahib): tyutor = proqram koordinatoru — eyni şöbənin emalçısıdır (mövcud: organizations/0064).
-        "handler_role_names": ["program_coordinator", "tutor"],
+        "handler_role_names": ["program_coordinator", "tutor", "dean", "vice_dean"],
+        "requires_scope": True,
         "resolve_by": ResolveBy.SPECIALTY.value,
         "default_sla_days": 3,
     },
@@ -278,6 +283,15 @@ GRADE_APPEAL_HINT = (
 
 #: (code, label, note, allowed_sender_families, unit_code, sla_days, palette, route_overrides)
 DEFAULT_KIND_SEED = (
+    {
+        "code": "prorektor",
+        "label": "Prorektora müraciət",
+        "note": "Konkret prorektoru seçərək müraciət göndərin",
+        "allowed_sender_families": ["teacher"],
+        "unit_code": "tedris",
+        "sla_days": 5,
+        "badge_palette": "primary",
+    },
     {
         "code": "transkript",
         "label": "Transkript sorğusu",

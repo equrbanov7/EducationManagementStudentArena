@@ -328,6 +328,8 @@ on:
           - purge_trial_exam
           - purge_exam_attempt
           - legacy_delta_apply
+          - recover_mr46_syllabus
+          - recover_workload_syllabi
           - legacy_repair_empty_lessons
           - sync_midterm_scores
           - fix_exam_journal_gaps
@@ -374,7 +376,7 @@ on:
         required: false
         default: "2026/2027"
       roster_tag:
-        description: "seed_staff_roster / reconcile_teacher_roster / audit_staff_placement (staff-placement-…) / import_teaching_* / *timetable* / backfill_teacher_lessons (lesson-slots-…) / legacy_delta_apply (legacy-delta-…) / fill_vacant_from_journals (legacy-journals-…) / apply_journal_shares (journal-shares-…) / unblock_legacy_journal_teachers (legacy-teachers-…) / fix_master_groups (master-groups-…) / fix_master_students (master-students-…) / relocate_superseded_marks (superseded-marks-…, boş = canlı) / merge_duplicate_student (student-merge-…) / relocate_twin_enrollment, merge_twin_offerings, fix_legacy_lesson_kinds (rim-fix-…) / set_practical_offerings (practical-flag-…) / assign_first_year_student_codes (student-codes-… / legacy-delta-…) / fill_first_year_atis_data (atis-fill-…) / merge_level_journals (level-merge-…) / share_legacy_syllabi (legacy-delta-…): şifrəli faylın release tag-ı"
+        description: "recover_workload_syllabi (Bilal legacy8430; workload-syllabi-…) · recover_mr46_syllabus (mr46-syllabus-…): şifrəli sillabus planı · seed_staff_roster / reconcile_teacher_roster / audit_staff_placement (staff-placement-…) / import_teaching_* / *timetable* / backfill_teacher_lessons (lesson-slots-…) / legacy_delta_apply (legacy-delta-…) / fill_vacant_from_journals (legacy-journals-…) / apply_journal_shares (journal-shares-…) / unblock_legacy_journal_teachers (legacy-teachers-…) / fix_master_groups (master-groups-…) / fix_master_students (master-students-…) / relocate_superseded_marks (superseded-marks-…, boş = canlı) / merge_duplicate_student (student-merge-…) / relocate_twin_enrollment, merge_twin_offerings, fix_legacy_lesson_kinds (rim-fix-…) / set_practical_offerings (practical-flag-…) / assign_first_year_student_codes (student-codes-… / legacy-delta-…) / fill_first_year_atis_data (atis-fill-…) / merge_level_journals (level-merge-…) / share_legacy_syllabi (legacy-delta-…): şifrəli faylın release tag-ı"
         required: false
         default: ""
       hygiene_category:
@@ -392,7 +394,7 @@ on:
         required: false
         default: ""
       batch:
-        description: "reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…) / merge_level_journals (lvlmerge-…): geri qaytarılacaq paket id-si (undo) · legacy_delta_apply / share_legacy_syllabi: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd)"
+        description: "recover_workload_syllabi (Bilal legacy8430; workload-syllabi-…) · recover_mr46_syllabus: plaintext SHA256 və ya mr46-… undo paketi · reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…) / merge_level_journals (lvlmerge-…): geri qaytarılacaq paket id-si (undo) · legacy_delta_apply / share_legacy_syllabi: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd)"
         required: false
         default: ""
       create_missing:
@@ -529,7 +531,7 @@ jobs:
         with:
           persist-credentials: false
       - name: 🔐 Şifrəli heyət siyahısı / yük sənədi
-        if: github.event.inputs.command == 'seed_staff_roster' || (github.event.inputs.command == 'reconcile_teacher_roster' && github.event.inputs.batch == '') || (github.event.inputs.command == 'audit_staff_placement' && github.event.inputs.batch == '') || startsWith(github.event.inputs.command, 'import_teaching_') || (github.event.inputs.command == 'issue_staff_credentials' && github.event.inputs.roster_tag != '') || (github.event.inputs.command == 'fill_vacant_from_journals' && github.event.inputs.batch == '' && github.event.inputs.roster_tag != '') || (github.event.inputs.command == 'apply_journal_shares' && github.event.inputs.batch == '') || github.event.inputs.command == 'unblock_legacy_journal_teachers' || github.event.inputs.command == 'fix_master_groups' || github.event.inputs.command == 'fix_master_students' || (github.event.inputs.command == 'relocate_superseded_marks' && github.event.inputs.batch == '' && github.event.inputs.roster_tag != '') || (github.event.inputs.command == 'merge_duplicate_student' && github.event.inputs.batch == '') || github.event.inputs.command == 'relocate_twin_enrollment' || github.event.inputs.command == 'merge_twin_offerings' || github.event.inputs.command == 'fix_legacy_lesson_kinds' || github.event.inputs.command == 'set_practical_offerings' || github.event.inputs.command == 'assign_first_year_student_codes' || github.event.inputs.command == 'fill_first_year_atis_data' || (github.event.inputs.command == 'merge_level_journals' && github.event.inputs.batch == '') || github.event.inputs.command == 'share_legacy_syllabi'
+        if: github.event.inputs.command == 'seed_staff_roster' || (github.event.inputs.command == 'reconcile_teacher_roster' && github.event.inputs.batch == '') || (github.event.inputs.command == 'audit_staff_placement' && github.event.inputs.batch == '') || startsWith(github.event.inputs.command, 'import_teaching_') || (github.event.inputs.command == 'issue_staff_credentials' && github.event.inputs.roster_tag != '') || (github.event.inputs.command == 'fill_vacant_from_journals' && github.event.inputs.batch == '' && github.event.inputs.roster_tag != '') || (github.event.inputs.command == 'apply_journal_shares' && github.event.inputs.batch == '') || github.event.inputs.command == 'unblock_legacy_journal_teachers' || github.event.inputs.command == 'fix_master_groups' || github.event.inputs.command == 'fix_master_students' || (github.event.inputs.command == 'relocate_superseded_marks' && github.event.inputs.batch == '' && github.event.inputs.roster_tag != '') || (github.event.inputs.command == 'merge_duplicate_student' && github.event.inputs.batch == '') || github.event.inputs.command == 'relocate_twin_enrollment' || github.event.inputs.command == 'merge_twin_offerings' || github.event.inputs.command == 'fix_legacy_lesson_kinds' || github.event.inputs.command == 'set_practical_offerings' || github.event.inputs.command == 'assign_first_year_student_codes' || github.event.inputs.command == 'fill_first_year_atis_data' || (github.event.inputs.command == 'merge_level_journals' && github.event.inputs.batch == '') || github.event.inputs.command == 'share_legacy_syllabi' || (github.event.inputs.command == 'recover_mr46_syllabus' && !startsWith(github.event.inputs.batch, 'mr46-')) || (github.event.inputs.command == 'recover_workload_syllabi' && !startsWith(github.event.inputs.batch, 'wksyl-'))
         env:
           GH_TOKEN: ${{ github.token }}
           STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
@@ -541,6 +543,14 @@ jobs:
           test -n "$STAFF_PLAN_KEY" || { echo "STAFF_PLAN_KEY sirri yoxdur" >&2; exit 1; }
           # Asset adı və konteynerdəki fayl əmrdən asılıdır (tag prefiksi ilə birlikdə yoxlanılır).
           case "$COMMAND" in
+            recover_mr46_syllabus)
+              match "$ROSTER_TAG" '^mr46-syllabus-[0-9a-z-]+$' || { echo "roster_tag formatı: mr46-syllabus-…" >&2; exit 2; }
+              match "$BATCH" '^[0-9a-f]{64}$' || { echo "batch = plaintext faylın sha256-sı (64 hex)" >&2; exit 2; }
+              asset=mr46-syllabus.json.enc; target="/tmp/mr46_syllabus_${GITHUB_RUN_ID}.json" ;;
+            recover_workload_syllabi)
+              match "$ROSTER_TAG" '^workload-syllabi-[0-9a-z-]+$' || { echo "roster_tag formatı: workload-syllabi-…" >&2; exit 2; }
+              match "$BATCH" '^[0-9a-f]{64}$' || { echo "batch = plaintext faylın sha256-sı (64 hex)" >&2; exit 2; }
+              asset=workload-syllabi.json.enc; target="/tmp/workload_syllabi_${GITHUB_RUN_ID}.json" ;;
             assign_first_year_student_codes)
               match "$ROSTER_TAG" '^(student-codes|legacy-delta)-[0-9a-z-]+$' || { echo "roster_tag formatı: student-codes-… / legacy-delta-…" >&2; exit 1; }
               asset=delta.json.gz.enc; target="/tmp/student_codes_${GITHUB_RUN_ID}.json.gz" ;;
@@ -629,6 +639,34 @@ jobs:
               "from django.contrib.auth import get_user_model as g; u=g().objects.filter(is_superuser=True, is_active=True).order_by('date_joined').first(); print(u.username if u else '')" | tail -n1
           }
           case "$COMMAND" in
+            recover_mr46_syllabus)
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [[ "$BATCH" == mr46-* ]]; then
+                match "$BATCH" '^mr46-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch formatı: mr46-YYYYMMDD-HHMMSS-xxxx" >&2; exit 2; }
+                test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
+                test -z "$ROSTER_TAG" || { echo "undo üçün roster_tag boş olmalıdır" >&2; exit 2; }
+                args+=(--undo "$BATCH")
+              else
+                match "$BATCH" '^[0-9a-f]{64}$' || { echo "batch = plaintext faylın sha256-sı (64 hex)" >&2; exit 2; }
+                args+=(--file "/tmp/mr46_syllabus_${GITHUB_RUN_ID}.json" --sha256 "$BATCH")
+              fi
+              ;;
+            recover_workload_syllabi)
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [[ "$BATCH" == wksyl-* ]]; then
+                match "$BATCH" '^wksyl-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch formatı: wksyl-YYYYMMDD-HHMMSS-xxxx" >&2; exit 2; }
+                test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
+                test -z "$ROSTER_TAG" || { echo "undo üçün roster_tag boş olmalıdır" >&2; exit 2; }
+                args+=(--undo "$BATCH")
+              else
+                match "$BATCH" '^[0-9a-f]{64}$' || { echo "batch = plaintext faylın sha256-sı (64 hex)" >&2; exit 2; }
+                args+=(--file "/tmp/workload_syllabi_${GITHUB_RUN_ID}.json" --sha256 "$BATCH")
+              fi
+              ;;
             normalize_interim_components)
               args=(--organization "$ORG")
               ;;
@@ -1190,7 +1228,27 @@ jobs:
           flags=()
           for arg in "${args[@]}"; do case "$arg" in (--[a-z]*) flags+=("${arg%%=*}") ;; esac; done
           echo "::group::▶ $COMMAND (${#args[@]} arqument; bayraqlar: ${flags[*]:-—})"
-          if [ "$COMMAND" = "issue_staff_credentials" ]; then
+          if [ "$COMMAND" = "recover_workload_syllabi" ]; then
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^workload_syllabi: (mode=(dry-run|dry_run|apply|undo)|batch=wksyl-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}|[a-z_]+=[0-9]+)( (mode=(dry-run|dry_run|apply|undo)|batch=wksyl-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}|[a-z_]+=[0-9]+))*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "recover_mr46_syllabus" ]; then
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^mr46_syllabus: (mode=(dry-run|dry_run|apply|undo)|batch=mr46-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}|[a-z_]+=[0-9]+)( (mode=(dry-run|dry_run|apply|undo)|batch=mr46-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}|[a-z_]+=[0-9]+))*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "issue_staff_credentials" ]; then
             # Hesabatda şəxs adları var → loga YALNIZ sayların sətri; CSV şifrəli artifaktdadır.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             docker exec "$APP_CONTAINER" cat "/tmp/roster_details_${GITHUB_RUN_ID}.csv" > "$RUNNER_TEMP/details.csv" 2>/dev/null || true
@@ -1509,7 +1567,7 @@ jobs:
           rm -f "$RUNNER_TEMP/summary.log"
       - name: 🔑 Hesabat + parollar (serverdə saxla, şifrəli artifakt)
         id: creds
-        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'reconcile_teacher_roster' || github.event.inputs.command == 'audit_staff_placement' || startsWith(github.event.inputs.command, 'import_teaching_') || github.event.inputs.command == 'issue_staff_credentials' || github.event.inputs.command == 'infer_timetable_from_lessons' || github.event.inputs.command == 'fix_workload_overcount' || github.event.inputs.command == 'fill_vacant_from_journals')
+        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'reconcile_teacher_roster' || github.event.inputs.command == 'audit_staff_placement' || startsWith(github.event.inputs.command, 'import_teaching_') || github.event.inputs.command == 'issue_staff_credentials' || github.event.inputs.command == 'infer_timetable_from_lessons' || github.event.inputs.command == 'fix_workload_overcount' || github.event.inputs.command == 'fill_vacant_from_journals' || github.event.inputs.command == 'recover_mr46_syllabus' || github.event.inputs.command == 'recover_workload_syllabi')
         env:
           STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
         run: |
@@ -1543,10 +1601,10 @@ jobs:
           path: ${{ runner.temp }}/staff-out/
           retention-days: 1
       - name: 🧹 Konteynerdə müvəqqəti faylları sil
-        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'reconcile_teacher_roster' || github.event.inputs.command == 'audit_staff_placement' || startsWith(github.event.inputs.command, 'import_teaching_') || github.event.inputs.command == 'issue_staff_credentials' || github.event.inputs.command == 'infer_timetable_from_lessons' || github.event.inputs.command == 'fix_workload_overcount' || github.event.inputs.command == 'fill_vacant_from_journals' || github.event.inputs.command == 'apply_journal_shares' || github.event.inputs.command == 'unblock_legacy_journal_teachers' || github.event.inputs.command == 'fix_master_groups' || github.event.inputs.command == 'fix_master_students' || github.event.inputs.command == 'relocate_superseded_marks' || github.event.inputs.command == 'merge_duplicate_student' || github.event.inputs.command == 'relocate_twin_enrollment' || github.event.inputs.command == 'merge_twin_offerings' || github.event.inputs.command == 'fix_legacy_lesson_kinds' || github.event.inputs.command == 'set_practical_offerings' || github.event.inputs.command == 'assign_first_year_student_codes' || github.event.inputs.command == 'fill_first_year_atis_data' || github.event.inputs.command == 'merge_level_journals' || github.event.inputs.command == 'share_legacy_syllabi')
+        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'reconcile_teacher_roster' || github.event.inputs.command == 'audit_staff_placement' || startsWith(github.event.inputs.command, 'import_teaching_') || github.event.inputs.command == 'issue_staff_credentials' || github.event.inputs.command == 'infer_timetable_from_lessons' || github.event.inputs.command == 'fix_workload_overcount' || github.event.inputs.command == 'fill_vacant_from_journals' || github.event.inputs.command == 'apply_journal_shares' || github.event.inputs.command == 'unblock_legacy_journal_teachers' || github.event.inputs.command == 'fix_master_groups' || github.event.inputs.command == 'fix_master_students' || github.event.inputs.command == 'relocate_superseded_marks' || github.event.inputs.command == 'merge_duplicate_student' || github.event.inputs.command == 'relocate_twin_enrollment' || github.event.inputs.command == 'merge_twin_offerings' || github.event.inputs.command == 'fix_legacy_lesson_kinds' || github.event.inputs.command == 'set_practical_offerings' || github.event.inputs.command == 'assign_first_year_student_codes' || github.event.inputs.command == 'fill_first_year_atis_data' || github.event.inputs.command == 'merge_level_journals' || github.event.inputs.command == 'share_legacy_syllabi' || github.event.inputs.command == 'recover_mr46_syllabus' || github.event.inputs.command == 'recover_workload_syllabi')
         run: |
           # root kimi: fərqli UID-li qalıqlar (sticky /tmp) app istifadəçisi ilə silinmir.
-          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/staff_roster*.xlsx /tmp/staff_known_*.txt /tmp/staff_creds*.csv /tmp/org_structure.json /tmp/roster_report_*.md /tmp/roster_details_*.csv /tmp/teaching_task_*.xlsx /tmp/teaching_load_*.docx /tmp/timetable_infer_*.csv /tmp/staff_placement_*.zip /tmp/placement_report_*.md /tmp/placement_details_*.csv /tmp/overcount_report_*.md /tmp/vacant_fill_report_*.md /tmp/legacy_journals_*.json /tmp/journal_shares_*.json /tmp/legacy_teachers_*.json /tmp/master_groups_*.json /tmp/master_students_*.json /tmp/superseded_marks_*.json /tmp/student_merge_*.json /tmp/rim_relocate_*.json /tmp/rim_merge_*.json /tmp/rim_lessonkinds_*.json /tmp/practical_flag_*.json /tmp/student_codes_*.json.gz /tmp/atis_fill_*.xlsx /tmp/level_merge_*.json /tmp/legacy_share_*.json.gz; rm -rf /tmp/teaching_report_*' || true
+          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/staff_roster*.xlsx /tmp/staff_known_*.txt /tmp/staff_creds*.csv /tmp/org_structure.json /tmp/roster_report_*.md /tmp/roster_details_*.csv /tmp/teaching_task_*.xlsx /tmp/teaching_load_*.docx /tmp/timetable_infer_*.csv /tmp/staff_placement_*.zip /tmp/placement_report_*.md /tmp/placement_details_*.csv /tmp/overcount_report_*.md /tmp/vacant_fill_report_*.md /tmp/legacy_journals_*.json /tmp/journal_shares_*.json /tmp/legacy_teachers_*.json /tmp/master_groups_*.json /tmp/master_students_*.json /tmp/superseded_marks_*.json /tmp/student_merge_*.json /tmp/rim_relocate_*.json /tmp/rim_merge_*.json /tmp/rim_lessonkinds_*.json /tmp/practical_flag_*.json /tmp/student_codes_*.json.gz /tmp/atis_fill_*.xlsx /tmp/level_merge_*.json /tmp/legacy_share_*.json.gz /tmp/mr46_syllabus_*.json /tmp/workload_syllabi_*.json; rm -rf /tmp/teaching_report_*' || true
           rm -rf "$RUNNER_TEMP/staff-out" "$RUNNER_TEMP/out.log" || true
       # ── import_timetable_docx / assign_task_rows_from_timetable (dərs cədvəli; öz addımları — digər əmrlərin
       #    axınına toxunmur). Hər ikisi eyni şifrəli timetable.docx.enc faylını oxuyur. ──────────────────────

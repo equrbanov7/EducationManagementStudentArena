@@ -110520,6 +110520,90 @@ msgstr "Bilinmiyor"
 msgctxt "registrar.journal_history"
 msgid "Tarixi müəllim məlum deyilsə, cari sahib onun yerinə göstərilmir."
 msgstr "Geçmişteki öğretmen bilinmiyorsa yerine güncel sahip gösterilmez."
+msgctxt "applications.content"
+msgid "Müraciəti redaktə et"
+msgstr "Başvuruyu düzenle"
+
+msgctxt "applications.content"
+msgid "Müraciəti sil"
+msgstr "Başvuruyu sil"
+
+msgctxt "applications.content"
+msgid "Müraciəti bərpa et"
+msgstr "Başvuruyu geri yükle"
+
+msgctxt "applications.content"
+msgid "Cavabı redaktə et"
+msgstr "Yanıtı düzenle"
+
+msgctxt "applications.content"
+msgid "Cavabı sil"
+msgstr "Yanıtı sil"
+
+msgctxt "applications.content"
+msgid "Cavabı bərpa et"
+msgstr "Yanıtı geri yükle"
+
+msgctxt "applications.content"
+msgid "Redaktə edilib"
+msgstr "Düzenlendi"
+
+msgctxt "applications.content"
+msgid "Bu müraciət silinib. Bərpa olunduqda əvvəlki vəziyyəti saxlanılacaq."
+msgstr "Bu başvuru silindi. Geri yüklendiğinde önceki durumu korunur."
+
+msgctxt "applications.content"
+msgid "Müraciət əvvəlki qərarı və yazışması ilə bərpa edilsin?"
+msgstr "Başvuru önceki kararı ve yazışmalarıyla geri yüklensin mi?"
+
+msgctxt "applications.content"
+msgid ""
+"Müraciət siyahıdan çıxarılsın? Onu «Silinənlər» bölməsindən bərpa edə "
+"bilərsiniz."
+msgstr ""
+"Başvuru listeden kaldırılsın mı? Silinenler bölümünden geri "
+"yükleyebilirsiniz."
+
+msgctxt "applications.content"
+msgid "Əməliyyatı təsdiqləyin. Cavab audit tarixçəsində saxlanılır."
+msgstr "İşlemi onaylayın. Yanıt denetim geçmişinde saklanır."
+
+msgctxt "applications.content"
+msgid "Prorektoru seçin"
+msgstr "Rektör yardımcısını seçin"
+
+msgctxt "applications.content"
+msgid "Silinənlər"
+msgstr "Silinenler"
+
+msgctxt "applications.content"
+msgid "Redaktə et"
+msgstr "Düzenle"
+
+msgctxt "applications.content"
+msgid "Mövzu"
+msgstr "Konu"
+
+msgctxt "applications.content"
+msgid "Mətn"
+msgstr "Metin"
+
+msgctxt "applications.content"
+msgid ""
+"Əvvəlki mətn tarixçədə saxlanılır. Müraciətin ünvanı və qərarı dəyişmir."
+msgstr "Önceki metin geçmişte saklanır. Alıcı ve karar değişmez."
+
+msgctxt "applications.content"
+msgid "Ləğv et"
+msgstr "İptal"
+
+msgctxt "applications.content"
+msgid "Yadda saxla"
+msgstr "Kaydet"
+
+msgctxt "applications.content"
+msgid "Məktəbə aid kafedranı seçin"
+msgstr "Okula bağlı bölümü seçin"
 msgctxt "accounts.grades_notice"
 msgid "Ballarınız haqqında məlumat"
 msgstr "Notlarınız hakkında bilgi"

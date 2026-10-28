@@ -20,6 +20,7 @@ from __future__ import annotations
 import io
 import re
 from dataclasses import asdict, dataclass
+from datetime import date, time, timedelta
 
 from .task_form1_parsing import Form1Entry, group_key, group_tokens, hours_value, is_hourly_teacher, name_words
 from .task_workbook_choice import CHOSEN_NONE
@@ -50,10 +51,11 @@ _YES = {"beli", "he", "yes", "1", "x", "+", "sh", "saathesabi"}
 
 
 class LoadFileError(Exception):
-    def __init__(self, code: str, message: str):
-        super().__init__(code, message)
+    def __init__(self, code: str, message: str, line: int | None = None):
+        super().__init__(code, message, line)
         self.code = code
         self.message = message
+        self.line = line
 
 
 @dataclass
@@ -193,8 +195,44 @@ def _text(value) -> str:
 
 
 def _is_total(*texts) -> bool:
-    slugs = [slug_name(text) for text in texts if text]
-    return any(s.startswith("cemi") or s.endswith("cemi") or "universitetuzre" in s for s in slugs)
+    for text in texts:
+        words = [slug_name(word) for word in re.findall(r"\w+", str(text or ""))]
+        if words and (words[0] == "cemi" or words[-1] == "cemi" or "universitetuzre" in "".join(words)):
+            return True
+    return False
+
+
+_DATE_OR_TIME = re.compile(
+    r"^\s*(?:\d{4}[-/.]\d{1,2}[-/.]\d{1,2}|\d{1,2}[-/.]\d{1,2}[-/.]\d{2}(?:\d{2})?)(?:\D|$)|\b\d{1,2}:\d{1,2}(?::\d{1,2})?"
+)
+
+
+def _technical_header(row) -> bool:
+    """Excel's repeated Column1…Column12 labels are never a teacher/course."""
+    return (
+        len(row) >= len(TEMPLATE_HEADERS)
+        and all(
+            _text(value).casefold() == f"column{index}"
+            for index, value in enumerate(row[: len(TEMPLATE_HEADERS)], start=1)
+        )
+        and not any(_text(value) for value in row[len(TEMPLATE_HEADERS) :])
+    )
+
+
+def _row_hours(raw_row, columns, line):
+    result = {}
+    for key, col in columns["activities"].items():
+        if col >= len(raw_row):
+            continue
+        value = raw_row[col]
+        if isinstance(value, (date, time, timedelta)) or (isinstance(value, str) and _DATE_OR_TIME.search(value)):
+            raise LoadFileError(
+                "invalid_hours",
+                f"Sətir {line}: saat xanasında tarix və ya vaxt var. Saatı rəqəm kimi düzəldib faylı yenidən yükləyin.",
+                line=line,
+            )
+        result[key] = hours_value(value)
+    return result
 
 
 def parse_workbook(stream) -> tuple[list[LoadEntry], list[dict]]:
@@ -206,7 +244,8 @@ def parse_workbook(stream) -> tuple[list[LoadEntry], list[dict]]:
     except Exception as exc:  # noqa: BLE001 — korlanmış / Excel olmayan fayl
         raise LoadFileError("file_unreadable", "Fayl Excel (.xlsx) kimi oxunmadı.") from exc
     sheet = book[SHEET_TITLE] if SHEET_TITLE in book.sheetnames else book.worksheets[0]
-    rows = [[_text(value) for value in row] for row in sheet.iter_rows(values_only=True)]
+    raw_rows = list(sheet.iter_rows(values_only=True))
+    rows = [[_text(value) for value in row] for row in raw_rows]
     book.close()
     header, cols = _columns(rows)
     if len(rows) - header - 1 > MAX_ROWS:
@@ -221,6 +260,10 @@ def parse_workbook(stream) -> tuple[list[LoadEntry], list[dict]]:
 
         if not any(row):
             continue
+        if _technical_header(raw_rows[offset - 1]):
+            skipped.append({"line": offset, "reason": "technical_header", "subject": ""})
+            continue
+        row_hours = _row_hours(raw_rows[offset - 1], cols, offset)
         teacher_text = cell("teacher") or teacher_text
         groups_text, subject_text = cell("groups"), cell("subject")
         if _is_total(groups_text, subject_text):
@@ -248,11 +291,7 @@ def parse_workbook(stream) -> tuple[list[LoadEntry], list[dict]]:
         }
         produced = False
         for season in ("fall", "spring"):
-            hours = {
-                activity: hours_value(row[col])
-                for (sem, activity), col in cols["activities"].items()
-                if sem == season and col < len(row) and hours_value(row[col])
-            }
+            hours = {activity: value for (sem, activity), value in row_hours.items() if sem == season and value}
             if hours:
                 entries.append(LoadEntry(season=season, hours=hours, **base))
                 produced = True
