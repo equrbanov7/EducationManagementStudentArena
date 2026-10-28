@@ -229,3 +229,20 @@ class MR46SyllabusTests(TestCase):
         syllabus.refresh_from_db()
         self.assertTrue(syllabus.is_active)
         self.assertEqual(syllabus.current_version.status, "approved")
+
+    def test_undo_refuses_later_plan_metadata_change_without_partial_archive(self):
+        batch = self.run_command().split("batch=")[1].strip()
+        syllabus = Syllabus.objects.get(offering=self.offering)
+        version = syllabus.current_version
+        original = syllabus.plan_hours_override
+        Syllabus.objects.filter(pk=syllabus.pk).update(plan_hours_override={"lecture": 14, "seminar": 16})
+        with self.assertRaisesMessage(Exception, "undo_content_or_usage_changed"):
+            self.run_command(undo=batch)
+        Syllabus.objects.filter(pk=syllabus.pk).update(plan_hours_override=original)
+        SyllabusVersion.objects.filter(pk=version.pk).update(plan_hours={"lecture": 14, "seminar": 16})
+        with self.assertRaisesMessage(Exception, "undo_content_or_usage_changed"):
+            self.run_command(undo=batch)
+        syllabus.refresh_from_db()
+        version.refresh_from_db()
+        self.assertTrue(syllabus.is_active)
+        self.assertEqual(version.status, "approved")

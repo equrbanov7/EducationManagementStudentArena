@@ -39,6 +39,11 @@ def digest(data):
     return hashlib.sha256(json.dumps(data, sort_keys=True, ensure_ascii=True, default=str).encode()).hexdigest()
 
 
+def metadata_digest(obj):
+    """Auditdə yalnız hash: saatlar, göstəricilər və status metadatası da qorunur."""
+    return digest({field.attname: getattr(obj, field.attname) for field in obj._meta.concrete_fields})
+
+
 def model(label):
     return apps.get_model(label)
 
@@ -196,11 +201,15 @@ def apply(org, actor, loaded):
     actual = section_data_map(version)
     if actual != sections:
         raise RestoreError("import_content_mismatch")
+    syllabus.refresh_from_db()
+    version.refresh_from_db()
     manifest = {
         "sha256": sha,
         "syllabus": str(syllabus.pk),
         "version": str(version.pk),
         "content_hash": digest(actual),
+        "syllabus_metadata_hash": metadata_digest(syllabus),
+        "version_metadata_hash": metadata_digest(version),
         "source_syllabus": 8891,
         "source_uniqid": UNIQID,
         "source_author": 442,
@@ -246,7 +255,9 @@ def undo(org, actor, batch):
         .get(pk=values["version"], organization=org, syllabus=syllabus)
     )
     if (
-        version.status != "approved"
+        values.get("syllabus_metadata_hash") != metadata_digest(syllabus)
+        or values.get("version_metadata_hash") != metadata_digest(version)
+        or version.status != "approved"
         or version.approval_source != "migration"
         or syllabus.subject_id != offering.subject_id
         or syllabus.period_id != offering.period_id
