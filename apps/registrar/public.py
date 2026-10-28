@@ -1,10 +1,4 @@
-"""Public read-facing helpers the accounts profile reuses for the student cabinet.
-
-Mirrors the ``apps.appeals.public`` pattern: the accounts profile context
-builder calls :func:`build_student_subjects_context` for the "Fənlərim" section
-without importing registrar internals. Tenant/RLS scoping is inherited from the
-active request; the helper only reads the requesting student's own record.
-"""
+"""Registrar modulunun public fasadı: tenant daxilində kabinet və auditli bərpa inteqrasiyaları."""
 
 from __future__ import annotations
 
@@ -28,6 +22,7 @@ from apps.registrar.exam_bridge import (
     record_exam_result,
     record_final_result,
 )
+from apps.registrar.gradebook_marks import recompute_absence_hours_many
 from apps.registrar.integrity import eligible_instructor_user_ids
 from apps.registrar.midterm_bridge import record_midterm_result, student_interim_rows
 from apps.registrar.models import StudentAcademicRecord
@@ -39,6 +34,7 @@ from apps.registrar.signals import student_group_changed
 __all__ = [
     "eligible_instructor_user_ids",
     "enroll_student_in_subject",
+    "recompute_absence_hours_many",
     "analytics",
     "exam_journal_gaps",
     "exam_journal_link",

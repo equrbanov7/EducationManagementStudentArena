@@ -363,3 +363,72 @@ class RimFixWorkflowTest(TestCase):
         ):
             self.assertRegex(line, pattern)
         self.assertNotRegex("twin_relocate: name=Əli Vəli", pattern)
+
+    def test_mr27_workflow_builds_sealed_plan_and_explicit_undo_arguments(self):
+        import os
+        import subprocess
+
+        text = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("          - recover_mr27_journal\n", text)
+        self.assertIn("asset=mr27-recovery.json.enc", text)
+        self.assertIn("'^mr27-recovery-[0-9a-z-]+$'", text)
+        self.assertIn("!startsWith(github.event.inputs.batch, 'mr27-')", text)
+        self.assertIn("/tmp/mr27_recovery_*.json", text)
+        block = re.findall(
+            r"            recover_mr27_journal\)\n(              actor=.*?)              ;;", text, re.S
+        )[0]
+        script = (
+            "set -euo pipefail\n"
+            "match() { case \"$1\" in (*$'\\n'*|*$'\\r'*) return 1 ;; esac; "
+            'printf \'%s\' "$1" | grep -Eq -- "$2"; }\n'
+            "superadmin_actor() { printf 'fixture-actor'; }\n" + block + '\nprintf "ARG:%s\\n" "${args[@]}"\n'
+        )
+
+        def run(batch, apply="false", tag="", teacher_assertion="false"):
+            return subprocess.run(
+                ["bash", "-c", script],
+                env={
+                    **os.environ,
+                    "BATCH": batch,
+                    "APPLY": apply,
+                    "ROSTER_TAG": tag,
+                    "CREATE_MISSING": teacher_assertion,
+                    "ORG": "qku",
+                    "GITHUB_RUN_ID": "123",
+                },
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+        plan = run("a" * 64, tag="mr27-recovery-fixture")
+        self.assertEqual(plan.returncode, 0, plan.stderr)
+        self.assertIn("ARG:--file\nARG:/tmp/mr27_recovery_123.json\nARG:--sha256\nARG:" + "a" * 64, plan.stdout)
+        self.assertNotIn("ARG:--apply", plan.stdout, "dry-run is the default")
+        self.assertNotIn("ARG:--include-teacher-assertion", plan.stdout)
+        teacher_plan = run("a" * 64, tag="mr27-recovery-fixture", teacher_assertion="true")
+        self.assertEqual(teacher_plan.returncode, 0, teacher_plan.stderr)
+        self.assertIn("ARG:--include-teacher-assertion", teacher_plan.stdout)
+        undo = run("mr27-20261028-235959-abcd", "true")
+        self.assertEqual(undo.returncode, 0, undo.stderr)
+        self.assertIn("ARG:--undo\nARG:mr27-20261028-235959-abcd", undo.stdout)
+        self.assertNotIn("ARG:--file", undo.stdout)
+        undo_with_toggle = run("mr27-20261028-235959-abcd", "true", teacher_assertion="true")
+        self.assertNotIn("ARG:--include-teacher-assertion", undo_with_toggle.stdout)
+        for batch, apply, tag in [
+            ("", "false", ""),
+            ("a" * 64 + "\ninjected", "false", ""),
+            ("mr27-20261028-235959-abcd", "false", ""),
+            ("mr27-20261028-235959-abcd", "true", "mr27-recovery-fixture"),
+            ("mr27-invalid", "true", ""),
+        ]:
+            self.assertNotEqual(run(batch, apply, tag).returncode, 0)
+
+    def test_mr27_workflow_filters_private_output(self):
+        text = WORKFLOW.read_text(encoding="utf-8")
+        pattern = re.search(r"grep -E '(\^mr27_recovery:[^']+)'", text).group(1)
+        self.assertRegex(
+            "mr27_recovery: mode=apply students_created=2 marks_created=15 batch=mr27-20261028-235959-abcd", pattern
+        )
+        self.assertNotRegex("mr27_recovery: username=private.name password=Secret!", pattern)
+        self.assertNotRegex("mr27_recovery: name=Real Person", pattern)
