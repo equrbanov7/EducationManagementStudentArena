@@ -334,6 +334,7 @@ on:
           - infer_timetable_from_lessons
           - audit_cross_chair_loads
           - fix_workload_overcount
+          - repair_sbio235_workload
           - fill_vacant_from_journals
           - audit_staff_placement
           - merge_chair_units
@@ -392,7 +393,7 @@ on:
         required: false
         default: ""
       batch:
-        description: "reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…) / merge_level_journals (lvlmerge-…): geri qaytarılacaq paket id-si (undo) · legacy_delta_apply / share_legacy_syllabi: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd)"
+        description: "repair_sbio235_workload: baselineSHA, undoID(dry) və ya undoID:baselineSHA(apply) · reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…) / merge_level_journals (lvlmerge-…): geri qaytarılacaq paket id-si (undo) · legacy_delta_apply / share_legacy_syllabi: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd)"
         required: false
         default: ""
       create_missing:
@@ -933,6 +934,30 @@ jobs:
               echo "::add-mask::$actor"
               args=(--org "$ORG" --year "$YEAR" --actor "$actor")
               ;;
+            repair_sbio235_workload)
+              # Sabit source/tenant/2row/2offering; fayl yüklənmir, əvvəlki dry-run baseline tələb olunur.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor" --source-sha256 7630be3cbe9bfe7050e2f308fae8c4959c35bd298967f5e3f2b77a0ab4a9cb09)
+              test -z "$ROSTER_TAG" || { echo "sabit scope üçün roster_tag boş olmalıdır" >&2; exit 2; }
+              if [[ "$BATCH" == sbio235-* ]]; then
+                undo_batch="${BATCH%%:*}"
+                match "$undo_batch" '^sbio235-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || exit 2
+                args+=(--undo "$undo_batch")
+                if [[ "$BATCH" == *:* ]]; then
+                  baseline="${BATCH#*:}"
+                  match "$baseline" '^[0-9a-f]{64}$' || exit 2
+                  args+=(--expected-baseline "$baseline")
+                else
+                  test "$APPLY" != "true" || { echo "undo apply üçün batch=undoID:baselineSHA verin" >&2; exit 2; }
+                fi
+              elif [ -n "$BATCH" ]; then
+                match "$BATCH" '^[0-9a-f]{64}$' || exit 2
+                args+=(--expected-baseline "$BATCH")
+              else
+                test "$APPLY" != "true" || { echo "apply üçün batch=dry-run baselineSHA verin" >&2; exit 2; }
+              fi
+              ;;
             fix_workload_overcount)
               # Sahib 2026-10-25: artıq sayılan yük (dublikat + sübutlu birgə dərs). Adlı hesabat şifrəli artifakta.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -1283,6 +1308,16 @@ jobs:
             # Loga YALNIZ «cross_chair: açar=say …» sətri (əmr ad çap etmir; yenə də süzülür) və rədd kodu.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^cross_chair: [a-z_]+=[0-9a-z_]+( [a-z_]+=[0-9a-z_]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "repair_sbio235_workload" ]; then
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^sbio_repair: mode=(dry_run|apply|undo)( (baseline=[0-9a-f]{64}|batch=sbio235-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}|[a-z_]+=[0-9]+))+$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
