@@ -336,7 +336,14 @@ def _ensure_totals_cover_assigned(row) -> None:
 
 @transaction.atomic
 def save_row(
-    *, task: TeachingTask, actor, data: dict, row=None, request=None, new_row_in_amendment: bool = False
+    *,
+    task: TeachingTask,
+    actor,
+    data: dict,
+    row=None,
+    request=None,
+    new_row_in_amendment: bool = False,
+    sync_offerings: bool = True,
 ) -> TeachingTaskRow:
     """Sətir yaradır və ya redaktə edir (draft/returned; amended — yalnız düzəlişin hədəf sətri)."""
     ensure_can_manage(actor, task.chair_id)
@@ -423,7 +430,7 @@ def save_row(
             "Eyni fənn, ixtisas, semestr və qrup dəsti ilə sətir artıq var — mövcud sətri redaktə edin.",
         )
 
-    offerings = _sync_row_offerings(row, task=task, actor=actor, request=request)
+    offerings = _sync_row_offerings(row, task=task, actor=actor, request=request) if sync_offerings else {}
     log_action(
         AuditAction.UPDATE if old_values else AuditAction.CREATE,
         user=getattr(actor, "user", None),
