@@ -69,7 +69,7 @@ from apps.registrar.lessons_log_totals import (  # noqa: F401 — geri-uyğun re
 )
 from apps.registrar.lessons_log_units import filter_state as unit_filter_state  # noqa: F401 — Fakültə/Kafedra
 from apps.registrar.lessons_log_unrecorded import unrecorded_slots  # noqa: F401 — «Cədvəldə var, qeydə alınmayıb»
-from apps.registrar.models import AttendanceStatus, Lesson, LessonKind, LessonMark
+from apps.registrar.models import AttendanceStatus, Lesson, LessonMark
 from apps.registrar.models.catalog_meta import EducationForm
 from core.search_text import tolerant_q
 
@@ -368,7 +368,6 @@ def build_rows(lessons_qs, *, limit=ROW_CAP) -> list:
     from apps.registrar.journal_topics import attach_syllabus_topics
 
     attach_syllabus_topics(lessons)
-    kind_labels = dict(LessonKind.choices)
     rows = []
     for lesson in lessons:
         bucket = stats.get(lesson.id, {})
@@ -382,7 +381,7 @@ def build_rows(lessons_qs, *, limit=ROW_CAP) -> list:
                 "start_time": lesson.start_time,
                 "end_time": lesson.end_time,
                 "kind": lesson.kind,
-                "kind_label": kind_labels.get(lesson.kind, lesson.kind),
+                "kind_label": lesson.get_kind_display(),  # «praktiki» açılış: «Praktiki məşğələ» (açılış JOIN-dədir)
                 "topic": lesson.display_topic,
                 "has_topic": bool(lesson.display_topic),
                 "hours": int(lesson.hours or 0),

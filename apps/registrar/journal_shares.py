@@ -240,11 +240,13 @@ def scoped_student_counts(user, offerings, counts: dict) -> dict:
     return {**counts, **{row["offering_id"]: row["n"] for row in rows}}
 
 
-def chip(scope: Scope) -> dict | None:
+def chip(scope: Scope, offering=None) -> dict | None:
     """Jurnal başlığındakı «Bölünmüş jurnal» çipi (məhdud əhatədə); tam əhatədə None."""
     if scope.full:
         return None
-    labels = dict(LessonKind.choices)
+    from .practical_label import kind_choices
+
+    labels = dict(kind_choices(offering))  # «praktiki» açılış: seminar → «Praktiki məşğələ»
     kinds = [str(labels[value]) for value in LessonKind.values if scope.kinds is None or value in scope.kinds]
     return {
         "text": pgettext(

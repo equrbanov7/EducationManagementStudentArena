@@ -186,7 +186,7 @@ def restrict_detail_context(context, scope_) -> None:
     context["lesson_kinds"] = [
         (value, label) for value, label in context.get("lesson_kinds") or [] if scope_.allows_kind(value)
     ]
-    context["journal_share_chip"] = chip(scope_)
+    context["journal_share_chip"] = chip(scope_, context.get("offering"))
 
 
 def restrict_export(finals_data, scope_):

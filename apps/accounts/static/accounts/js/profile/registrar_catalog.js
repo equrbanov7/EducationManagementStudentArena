@@ -131,7 +131,7 @@
         fillSelects();
         fields().forEach(function (el) {
             if (el.type === "checkbox") {
-                el.checked = true;
+                el.checked = el.getAttribute("data-rcat-default") !== "off";
             } else {
                 el.value = "";
             }

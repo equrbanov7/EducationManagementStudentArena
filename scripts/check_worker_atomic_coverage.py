@@ -59,6 +59,8 @@ INTENTIONAL_EXEMPTIONS = {
     # (`rls_worker_atomic()` + `bypass_rls()` + RLS konteksti); bu fayllar yalnız plan faylını oxuyub runner verir.
     "apps/registrar/management/commands/fix_legacy_lesson_kinds.py",
     "apps/registrar/management/commands/merge_twin_offerings.py",
+    # 2026-10-28 «Praktiki məşğələ» bayrağı: eyni `relocate_twin_enrollment.run_plan` gövdəsi (plan faylı → runner).
+    "apps/registrar/management/commands/set_practical_offerings.py",
     # rehearse öz RLS kontekstini (set_rls_tenant, session-scoped, bypass-sız)
     # və öz transaction sərhədlərini (ledger advisory-lock atomic-ləri, batch
     # checkpoint/resume) idarə edir — tək böyük rls_worker_atomic() sarğısı

@@ -184,6 +184,11 @@ class Lesson(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
 
     objects = models.Manager()
 
+    def get_kind_display(self):  # açılış «praktiki»dirsə seminar → «Praktiki məşğələ» (yalnız görünüş)
+        from apps.registrar.practical_label import kind_display
+
+        return kind_display(self)
+
     class Meta:
         ordering = ["date", "created_at"]
         verbose_name = pgettext_lazy("registrar.model.lesson.meta", "lesson")

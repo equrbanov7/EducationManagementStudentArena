@@ -18,8 +18,9 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from . import campus, finals, gradebook, journal_edit_windows, legacy_excuse, lesson_rooms, schedule
-from .models import CorrectionReason, LessonKind
+from . import campus, finals, gradebook, journal_edit_windows, legacy_excuse, lesson_rooms, practical_label, schedule
+from . import practical_toggle as _practical_toggle
+from .models import CorrectionReason
 from .read_memo import scoped_get as _read_memo_get
 
 
@@ -234,7 +235,8 @@ def journal_detail(request, offering_id):
         # təsdiqlənmiş sillabusu olmayan jurnal YALNIZ-OXU olur (`can_edit`
         # yuxarıda söndürülür) və panel kilid + CTA göstərir.
         "syllabus_gate": syllabus_gate,
-        "lesson_kinds": LessonKind.choices,
+        "lesson_kinds": practical_label.kind_choices(offering),  # «praktiki» açılışda seminar → «Praktiki məşğələ»
+        "practical_toggle": _practical_toggle.context(request.user, offering),
         "locked_lesson_kind": journal_extras.locked_lesson_kind(offering),
         "topic_choices": journal_extras.lesson_topic_choices(offering),
         "topic_choices_meta": journal_extras.lesson_topic_meta(offering, journal["lessons"]),

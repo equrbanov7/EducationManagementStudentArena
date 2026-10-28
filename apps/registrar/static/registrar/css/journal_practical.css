@@ -1,0 +1,18 @@
+/* ═══ «Praktiki məşğələ» keçidi (jd2-practical, sahib 2026-10-28) ════════════
+   Jurnal başlığında kafedra müdiri / RİM üçün kiçik açar: seminarın YALNIZ adını dəyişir.
+   Share çipi ilə eyni ölçü; rənglər mövcud `--ems-*` tokenlərindəndir. */
+.jd2-practical { display: inline-flex; margin: 0; }
+.jd2-practical__btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    min-height: var(--ems-h-chip, 24px); padding: 0 10px; border-radius: 999px;
+    border: 1px dashed var(--ems-neutral-300, #cbd5e1);
+    background: var(--ems-neutral-0, #fff); color: var(--ems-neutral-700, #334155);
+    font: inherit; font-size: 12px; font-weight: 600; line-height: 1.4; cursor: pointer;
+}
+.jd2-practical__btn:hover { border-color: var(--ems-primary-400, #60a5fa); }
+.jd2-practical__btn:focus-visible { outline: 2px solid var(--ems-primary-500, #3b82f6); outline-offset: 2px; }
+.jd2-practical__btn.is-on {
+    border-style: solid; border-color: var(--ems-success-300, #86efac);
+    background: var(--ems-success-bg, #f0fdf4); color: var(--ems-success-800, #166534);
+}
+.jd2-practical__btn i { font-size: 12px; }

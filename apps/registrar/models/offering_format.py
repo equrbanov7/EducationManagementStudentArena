@@ -13,6 +13,9 @@ YENİ MODEL YOXDUR — intensiv kurs adi :class:`CourseOffering`-dir, yalnız:
 * ``lesson_hours`` — kursun ümumi saatı (məs. 10): saat həddi (#6) və «Kurs tamamlandı» göstəricisi ondan;
 * ``format_note`` — açılışın səbəbi (sərbəst mətn: yenidən tədris, akademik fərq …).
 
+``seminar_is_practical`` (sahib 2026-10-28) — YALNIZ görünüş: bu açılışda «Seminar» etiketi «Praktiki məşğələ»
+göstərilir, saxlanan növ ``seminar`` qalır (bax :mod:`apps.registrar.practical_label`).
+
 NİYƏ AYRI MODUL? ``models/academic.py`` modul ölçüsü qapısına yaxındır — sahələr burada abstrakt bazada
 tərif olunur (``admission_meta`` naxışı). ``db_default`` QƏSDƏNDİR: cədvələ xam SQL INSERT-lər də var
 (köçürmə / RLS testləri) — onlar yeni NOT NULL sütunu tanımır.
@@ -44,6 +47,12 @@ class OfferingFormatFields(models.Model):
     ends_on = models.DateField(null=True, blank=True, help_text="İntensiv kursun bitmə tarixi.")
     format_note = models.CharField(
         max_length=255, blank=True, db_default="", help_text="İntensiv kursun açılma səbəbi (sərbəst mətn)."
+    )
+
+    seminar_is_practical = models.BooleanField(
+        default=False,
+        db_default=False,
+        help_text="Görünüş: seminar dərsləri «Praktiki məşğələ» adlanır (növ seminar qalır).",
     )
 
     class Meta:

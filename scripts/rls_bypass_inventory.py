@@ -107,6 +107,12 @@ CATEGORY_RULES = (
         "C",
         "idarə əmri (yalnız oxu; id-li plan faylı)",
     ),
+    # 2026-10-28: «Praktiki məşğələ» bayrağının planı — yalnız oxu (lokal prod surəti), plan faylında yalnız id-lər.
+    (
+        "apps/legacy_import/management/commands/build_practical_flag_plan.py",
+        "C",
+        "idarə əmri (yalnız oxu; id-li plan faylı)",
+    ),
     # 2026-10-27: səhv arxivlənmiş konkret tələbənin girişi — auditli restore_archived_account, dry-run defolt.
     (
         "apps/legacy_import/management/commands/restore_archived_students.py",

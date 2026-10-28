@@ -407,7 +407,9 @@ def journal_teaching_summary(offering):
         inst = lesson.instructor or fallback
         if inst is not None:
             row["teachers"][inst.id] = (inst.get_full_name() or "").strip() or inst.username
-    labels = dict(LessonKind.choices)
+    from .practical_label import kind_choices
+
+    labels = dict(kind_choices(offering))  # «praktiki» açılış: seminar → «Praktiki məşğələ»
     order = {"lecture": 0, "seminar": 1, "lab": 2}
     kinds = [
         {

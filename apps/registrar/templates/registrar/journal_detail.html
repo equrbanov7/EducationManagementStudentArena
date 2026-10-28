@@ -31,6 +31,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal_lesson_modal.css' %}?v=20261025-1">
     {% if journal_share_chip %}<link rel="stylesheet" href="{% static 'registrar/css/journal_share.css' %}?v=20261026-share">{% endif %}
     {% if full_edit_active %}<link rel="stylesheet" href="{% static 'registrar/css/journal_full_edit.css' %}?v=20261027-fe">{% endif %}
+    {% if practical_toggle %}<link rel="stylesheet" href="{% static 'registrar/css/journal_practical.css' %}?v=20261028-pm">{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -106,6 +107,7 @@
                 {% if offering.is_intensive %}<span class="jd2-wincode jd2-intensive" title="{{ offering.format_note }}">{% trans "İntensiv" context "registrar.intensive" %} · {{ offering.starts_on|date:"d.m" }}–{{ offering.ends_on|date:"d.m.Y" }}</span>{% endif %}
                 {% if journal_share_chip %}<span class="jd2-share-chip" data-share-kinds="{{ journal_share_chip.kinds|join:', ' }}" title="{{ journal_share_chip.kinds|join:', ' }}"><i class="fas fa-user-group" aria-hidden="true"></i> {{ journal_share_chip.text }}</span>{% endif %}
                 <span class="jd2-winsub">{{ offering.subject.name }} · {{ journal.rows|length }} {% trans "tələbə" context "registrar.journal" %}</span>
+                {% include "registrar/partials/_jd_practical_toggle.html" %}
                 {% if journal.scheme.is_published %}<span class="jd2-winlock"><i class="fas fa-lock"></i> {% trans "Yekunlaşdırılıb" context "registrar.journal" %}</span>{% endif %}
             </div>
             <div class="jd2-winhead-right">

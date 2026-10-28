@@ -210,13 +210,14 @@ class OfferingForm(_OrgScopedModelForm):
 
     class Meta:
         model = CourseOffering
-        fields = ["subject", "period", "group", "instructor", "lesson_hours", "is_active"]
+        fields = ["subject", "period", "group", "instructor", "lesson_hours", "seminar_is_practical", "is_active"]
         labels = {
             "subject": pgettext_lazy("registrar.console", "Fənn"),
             "period": pgettext_lazy("registrar.console", "Semestr (dövr)"),
             "group": pgettext_lazy("registrar.console", "Qrup (opsional)"),
             "instructor": pgettext_lazy("registrar.console", "Müəllim (opsional)"),
             "lesson_hours": pgettext_lazy("registrar.console", "Kontakt saatı"),
+            "seminar_is_practical": pgettext_lazy("registrar.console", "Seminar = «Praktiki məşğələ»"),
             "is_active": pgettext_lazy("registrar.console", "Aktiv"),
         }
 

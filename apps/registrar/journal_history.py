@@ -69,16 +69,21 @@ def display_mark(text: str) -> str:
 _LESSON_ITEM_RE = re.compile(r"^(\d{4}-\d{2}-\d{2}) · (.+)$")
 
 
+_PRACTICAL = "practical"  # yalnız indeks açarı — saxlanan növ deyil (bax practical_label)
+
+
 @lru_cache(maxsize=1)
 def _lesson_kind_index() -> dict:
     """Bütün dillərdəki dərs növü etiketi (casefold) → ``LessonKind`` dəyəri."""
     from .models import LessonKind
+    from .practical_label import PRACTICAL_LABEL
 
     index: dict = {}
     for code, _name in settings.LANGUAGES:
         with translation.override(code):
             for value, label in LessonKind.choices:
                 index.setdefault(str(label).casefold(), value)
+            index.setdefault(str(PRACTICAL_LABEL).casefold(), _PRACTICAL)  # «praktiki» açılışın seminarı
     return index
 
 
@@ -91,8 +96,10 @@ def localize_lesson_item(text: str) -> str:
     if value is None:
         return text
     from .models import LessonKind
+    from .practical_label import PRACTICAL_LABEL
 
-    return f"{match.group(1)} · {dict(LessonKind.choices)[value]}"
+    label = PRACTICAL_LABEL if value == _PRACTICAL else dict(LessonKind.choices)[value]
+    return f"{match.group(1)} · {label}"
 
 
 #: Audit «kind» → UI qrupu (müştəri tərəfindəki növ çipləri bununla süzür).
@@ -256,9 +263,9 @@ def _label_with_reason(kind, row) -> str:
 
 def _lesson_dates(offering) -> list:
     """Süzgəc seçimləri — açılışın dərs tarixləri (yenidən köhnəyə), növləri ilə birlikdə. TƏK sorğu."""
-    from .models import LessonKind
+    from .practical_label import kind_choices
 
-    labels = dict(LessonKind.choices)
+    labels = dict(kind_choices(offering))  # «praktiki» açılış: seminar → «Praktiki məşğələ»
     by_date: dict = {}
     for date, kind in offering.lessons.order_by("-date").values_list("date", "kind"):
         kinds = by_date.setdefault(date.isoformat(), [])

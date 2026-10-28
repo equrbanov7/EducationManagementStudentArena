@@ -153,8 +153,9 @@ def grid_nav_context(request, offering, *, selected_kind: str, active_tab: str) 
 def kind_tabs(offering, selected_kind: str) -> list:
     """Jurnal başlığındakı tip pillələri — YALNIZ mövcud tiplər göstərilir."""
     from apps.registrar.models import Lesson, SlotKind
+    from apps.registrar.practical_label import kind_choices
 
-    labels = dict(SlotKind.choices)
+    labels = dict(kind_choices(offering, dict(SlotKind.choices)))  # «praktiki» açılış: seminar → «Praktiki məşğələ»
     present = set(Lesson.objects.filter(offering=offering).values_list("kind", flat=True).distinct())
     tabs = [{"value": "", "label": pgettext("registrar.journal", "Hamısı"), "active": not selected_kind}]
     for value, _label in SlotKind.choices:

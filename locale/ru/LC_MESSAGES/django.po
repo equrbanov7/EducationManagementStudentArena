@@ -111132,3 +111132,31 @@ msgstr "Обязательно для занятия за прошлую дат�
 msgctxt "registrar.journal_history"
 msgid "Data bərpası (səbəb ilə)"
 msgstr "Восстановление данных (с причиной)"
+
+msgctxt "registrar.lesson_kind"
+msgid "Practical session"
+msgstr "Практическое занятие"
+
+msgctxt "registrar.practical"
+msgid "Praktiki məşğələ"
+msgstr "Практическое занятие"
+
+msgctxt "registrar.practical"
+msgid "Yalnız ad: seminar dərsləri bu jurnalda «Praktiki məşğələ» kimi göstərilir. Bal, saat və cədvəl dəyişmir."
+msgstr "Только название: семинарские занятия в этом журнале показываются как «Практическое занятие». Баллы, часы и расписание не меняются."
+
+msgctxt "registrar.practical"
+msgid "Seminar dərsləri bu jurnalda «Praktiki məşğələ» adlanır."
+msgstr "Семинарские занятия в этом журнале теперь называются «Практическое занятие»."
+
+msgctxt "registrar.practical"
+msgid "Seminar dərsləri yenidən «Seminar» adlanır."
+msgstr "Семинарские занятия снова называются «Семинар»."
+
+msgctxt "registrar.console"
+msgid "Seminar = «Praktiki məşğələ»"
+msgstr "Семинар = «Практическое занятие»"
+
+msgctxt "registrar.catalog"
+msgid "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
+msgstr "Практическое занятие — семинарские занятия называются «Практическое занятие» в журнале и расписании (баллы и часы не меняются)"

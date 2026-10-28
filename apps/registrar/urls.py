@@ -20,6 +20,7 @@ from . import (
     journal_lesson_lookup,
     lessons_log_views,
     pdf_views,
+    practical_toggle,
     schedule_views,
     semester_actions,
     subject_exempt_views,
@@ -143,6 +144,8 @@ urlpatterns = [
         journal_activation.activate_slot,
         name="journal_activate_slot",
     ),
+    # «Praktiki məşğələ» görünüşü (sahib 2026-10-28) — kafedra müdiri / RİM, POST.
+    path("<uuid:offering_id>/praktiki/", practical_toggle.toggle, name="journal_practical_toggle"),
     path("<uuid:offering_id>/ders/<uuid:lesson_id>/", journal_actions.lesson_action, name="journal_lesson_action"),
     path("<uuid:offering_id>/kollokvium/", journal_actions.kollokvium_save, name="journal_kollokvium_save"),
     path("<uuid:offering_id>/serbest/", journal_actions.selfwork_action, name="journal_selfwork_action"),

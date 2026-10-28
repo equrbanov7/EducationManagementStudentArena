@@ -1,0 +1,16 @@
+{% load i18n %}
+{% comment %}«Praktiki məşğələ» görünüşü (sahib 2026-10-28) — YALNIZ kafedra müdiri / RİM görür
+(`practical_toggle.context`). Yalnız ad dəyişir: saxlanan növ «seminar» qalır, bal / saat / cədvəl dəyişmir.
+Adi POST formu — JS yoxdur (CSP: xarici CSS `journal_practical.css`).{% endcomment %}
+{% if practical_toggle %}
+<form class="jd2-practical" method="post" action="{{ practical_toggle.url }}">
+    {% csrf_token %}
+    <input type="hidden" name="on" value="{% if practical_toggle.on %}0{% else %}1{% endif %}">
+    <button type="submit" class="jd2-practical__btn{% if practical_toggle.on %} is-on{% endif %}"
+            aria-pressed="{% if practical_toggle.on %}true{% else %}false{% endif %}"
+            title="{% trans 'Yalnız ad: seminar dərsləri bu jurnalda «Praktiki məşğələ» kimi göstərilir. Bal, saat və cədvəl dəyişmir.' context 'registrar.practical' %}">
+        <i class="fas {% if practical_toggle.on %}fa-square-check{% else %}fa-square{% endif %}" aria-hidden="true"></i>
+        {% trans "Praktiki məşğələ" context "registrar.practical" %}
+    </button>
+</form>
+{% endif %}

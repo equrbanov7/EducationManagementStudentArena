@@ -110448,3 +110448,31 @@ msgstr "Keçmiş tarixli, redaktə vaxtı bitmiş və ya bağlanmış jurnaldak�
 msgctxt "registrar.journal_history"
 msgid "Data bərpası (səbəb ilə)"
 msgstr "Data bərpası (səbəb ilə)"
+
+msgctxt "registrar.lesson_kind"
+msgid "Practical session"
+msgstr "Praktiki məşğələ"
+
+msgctxt "registrar.practical"
+msgid "Praktiki məşğələ"
+msgstr "Praktiki məşğələ"
+
+msgctxt "registrar.practical"
+msgid "Yalnız ad: seminar dərsləri bu jurnalda «Praktiki məşğələ» kimi göstərilir. Bal, saat və cədvəl dəyişmir."
+msgstr "Yalnız ad: seminar dərsləri bu jurnalda «Praktiki məşğələ» kimi göstərilir. Bal, saat və cədvəl dəyişmir."
+
+msgctxt "registrar.practical"
+msgid "Seminar dərsləri bu jurnalda «Praktiki məşğələ» adlanır."
+msgstr "Seminar dərsləri bu jurnalda «Praktiki məşğələ» adlanır."
+
+msgctxt "registrar.practical"
+msgid "Seminar dərsləri yenidən «Seminar» adlanır."
+msgstr "Seminar dərsləri yenidən «Seminar» adlanır."
+
+msgctxt "registrar.console"
+msgid "Seminar = «Praktiki məşğələ»"
+msgstr "Seminar = «Praktiki məşğələ»"
+
+msgctxt "registrar.catalog"
+msgid "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
+msgstr "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"

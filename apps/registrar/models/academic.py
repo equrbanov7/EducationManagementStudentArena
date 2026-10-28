@@ -563,3 +563,8 @@ class ScheduleSlot(ReferenceIdentityValidationMixin, SoftDeleteModel, UUIDModel,
 
     def __str__(self):
         return f"{self.offering_id} · gün {self.weekday} {self.start_time}-{self.end_time}"
+
+    def get_kind_display(self):  # açılış «praktiki»dirsə seminar → «Praktiki məşğələ» (yalnız görünüş)
+        from apps.registrar.practical_label import kind_display
+
+        return kind_display(self)

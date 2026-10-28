@@ -77,6 +77,8 @@ def offering_slots(offering) -> list:
             .select_related("instructor")
             .order_by("weekday", "start_time")
         )
+        for slot in cached:  # «Praktiki məşğələ» etiketi açılışın bayrağını sorğusuz oxusun (practical_label)
+            ScheduleSlot.offering.field.set_cached_value(slot, offering)
         setattr(offering, _SLOTS_ATTR, cached)
     return cached
 

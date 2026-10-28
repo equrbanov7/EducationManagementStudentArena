@@ -110938,3 +110938,31 @@ msgstr "Required for a past-dated lesson, a lesson whose edit time has expired o
 msgctxt "registrar.journal_history"
 msgid "Data bərpası (səbəb ilə)"
 msgstr "Data recovery (with reason)"
+
+msgctxt "registrar.lesson_kind"
+msgid "Practical session"
+msgstr "Practical session"
+
+msgctxt "registrar.practical"
+msgid "Praktiki məşğələ"
+msgstr "Practical session"
+
+msgctxt "registrar.practical"
+msgid "Yalnız ad: seminar dərsləri bu jurnalda «Praktiki məşğələ» kimi göstərilir. Bal, saat və cədvəl dəyişmir."
+msgstr "Label only: seminar lessons in this journal are shown as «Practical session». Scores, hours and the timetable do not change."
+
+msgctxt "registrar.practical"
+msgid "Seminar dərsləri bu jurnalda «Praktiki məşğələ» adlanır."
+msgstr "Seminar lessons in this journal are now called «Practical session»."
+
+msgctxt "registrar.practical"
+msgid "Seminar dərsləri yenidən «Seminar» adlanır."
+msgstr "Seminar lessons are called «Seminar» again."
+
+msgctxt "registrar.console"
+msgid "Seminar = «Praktiki məşğələ»"
+msgstr "Seminar = «Practical session»"
+
+msgctxt "registrar.catalog"
+msgid "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
+msgstr "Practical session — seminar lessons are called «Practical session» in the journal and the timetable (scores and hours do not change)"

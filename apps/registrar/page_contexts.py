@@ -37,6 +37,7 @@ def attach_kind_labels(offerings, selected_kind: str = "") -> None:
     jurnalın içindəki tip seçicisi bütün mövcud tipləri göstərməlidir.
     """
     from apps.registrar.models import Lesson, ScheduleSlot, SlotKind
+    from apps.registrar.practical_label import kind_choices
     from apps.registrar.schedule import EVENING_START
 
     offerings = list(offerings)
@@ -62,7 +63,8 @@ def attach_kind_labels(offerings, selected_kind: str = "") -> None:
         kinds = sorted(kinds_by_offering.get(offering.id, ()), key=lambda k: kind_order.get(k, len(kind_order)))
         offering.slot_kinds = kinds
         shown = [k for k in kinds if k == selected_kind] if selected_kind else kinds
-        offering.kind_label = " · ".join(str(kind_labels[k]) for k in shown) if shown else ""
+        labels = dict(kind_choices(offering, kind_labels))  # «praktiki» açılış: seminar → «Praktiki məşğələ»
+        offering.kind_label = " · ".join(str(labels[k]) for k in shown) if shown else ""
         offering.is_evening = offering.id in evening_offerings
 
 

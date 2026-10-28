@@ -130,6 +130,11 @@ sarğısındadır, uzun siyahılarda menyu daxili axtarışla.{% endcomment %}
       <input class="ems-input" id="rcat-hours" type="number" min="0" step="1" data-rcat-field="lesson_hours">
     </div>
   </div>
+  {# Sahib 2026-10-28: YALNIZ görünüş — seminar dərsləri «Praktiki məşğələ» adlanır; növ seminar qalır. #}
+  <label class="rcat-check">
+    <input type="checkbox" data-rcat-field="seminar_is_practical" data-rcat-default="off">
+    <span>{% trans "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)" context "registrar.catalog" %}</span>
+  </label>
 
 {% elif sec.tab == "rubrics" %}
   <div class="ems-field">
