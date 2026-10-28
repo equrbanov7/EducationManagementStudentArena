@@ -1,5 +1,9 @@
 """Tələbə bal məlumatı və nəticə kartında eyni sakit izah görünür."""
 
+from pathlib import Path
+
+from django.conf import settings
+from django.template import Context, Template
 from django.template.loader import render_to_string
 from django.test import SimpleTestCase
 
@@ -30,3 +34,14 @@ class ResultReconciliationNoticeTest(SimpleTestCase):
                 self.assertEqual(html.count("result-reconciliation-notice"), 1)
                 self.assertIn("təsdiqlənən səhvlər düzəldilir", html)
                 self.assertLess(html.index("result-reconciliation-notice"), html.index("</article>"))
+
+    def test_pin_close_button_has_a_visible_glyph_without_icon_font(self):
+        source = (
+            Path(settings.BASE_DIR) / "apps/accounts/templates/accounts/profile/sections/_assigned_exams.html"
+        ).read_text()
+        start = source.index('<button type="button" class="assigned-exam-info-close"')
+        button = source[start : source.index("</button>", start) + len("</button>")]
+        html = Template("{% load i18n %}" + button).render(Context({}))
+        self.assertIn('<span aria-hidden="true">×</span>', html)
+        self.assertIn('aria-label="Bağla"', html)
+        self.assertNotIn("fa-times", html)
