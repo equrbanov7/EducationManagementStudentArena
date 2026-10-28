@@ -193,8 +193,11 @@ def _text(value) -> str:
 
 
 def _is_total(*texts) -> bool:
-    slugs = [slug_name(text) for text in texts if text]
-    return any(s.startswith("cemi") or s.endswith("cemi") or "universitetuzre" in s for s in slugs)
+    for text in texts:
+        words = [slug_name(word) for word in re.findall(r"\w+", str(text or ""))]
+        if words and (words[0] == "cemi" or words[-1] == "cemi" or "universitetuzre" in "".join(words)):
+            return True
+    return False
 
 
 def parse_workbook(stream) -> tuple[list[LoadEntry], list[dict]]:
