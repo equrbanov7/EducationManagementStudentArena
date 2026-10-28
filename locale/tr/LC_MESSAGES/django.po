@@ -110476,3 +110476,7 @@ msgstr "Seminer = «Uygulama dersi»"
 msgctxt "registrar.catalog"
 msgid "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
 msgstr "Uygulama dersi — seminer dersleri defterde ve ders programında «Uygulama dersi» olarak adlandırılır (puan ve saat değişmez)"
+
+msgctxt "accounts.handover"
+msgid "Jurnal payları təhvildən sonra dəyişib — əvvəlcə payları yoxlayın."
+msgstr "Devirden sonra günlük payları değişti — önce payları kontrol edin."

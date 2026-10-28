@@ -144,6 +144,9 @@ def _apply_one(*, offering, target, actor, organization, reason, request, closed
         )
     offering.instructor = target
 
+    from .handover_shares import deactivate_for_handover
+
+    deactivated_share_ids = deactivate_for_handover(offering, previous, target)
     record = TeachingHandover.objects.create(
         organization=organization,
         offering=offering,
@@ -153,6 +156,7 @@ def _apply_one(*, offering, target, actor, organization, reason, request, closed
         to_instructor_name=_display_name(target),
         reason=reason,
         performed_by=actor,
+        deactivated_share_ids=deactivated_share_ids,
     )
     _audit(
         record=record,
@@ -295,6 +299,15 @@ def revert(*, actor, organization, handover_id, reason, request=None) -> dict:
         if codes:
             raise HandoverError("blocked", blocker_message(codes), status=409, codes=codes)
 
+        from .handover_shares import HandoverShareConflict, restore_for_revert
+
+        try:
+            restore_for_revert(record, offering)
+        except HandoverShareConflict:
+            raise HandoverError(
+                "share_state_changed", "Jurnal payları təhvildən sonra dəyişib — əvvəlcə payları yoxlayın."
+            ) from None
+
         CourseOffering.objects.filter(pk=offering.pk, instructor_id=record.to_instructor_id).update(
             instructor_id=record.from_instructor_id
         )
@@ -356,6 +369,7 @@ def _audit(*, record, actor, organization, request, action, reason):
         new_values={"instructor": current_name},
         changes={
             "action": action,
+            "deactivated_share_ids": list(record.deactivated_share_ids or []),
             "offering_id": str(offering.pk),
             "subject": getattr(offering.subject, "code", ""),
             "group": getattr(offering.group, "name", "") or "",

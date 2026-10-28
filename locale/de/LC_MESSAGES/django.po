@@ -112093,3 +112093,7 @@ msgstr "Seminar = «Praktische Übung»"
 msgctxt "registrar.catalog"
 msgid "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
 msgstr "Praktische Übung — Seminarstunden heißen im Journal und im Stundenplan «Praktische Übung» (Punkte und Stunden ändern sich nicht)"
+
+msgctxt "accounts.handover"
+msgid "Jurnal payları təhvildən sonra dəyişib — əvvəlcə payları yoxlayın."
+msgstr "Die Journalfreigaben wurden nach der Übergabe geändert — prüfen Sie zuerst die Freigaben."

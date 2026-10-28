@@ -111262,3 +111262,7 @@ msgstr "Семинар = «Практическое занятие»"
 msgctxt "registrar.catalog"
 msgid "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
 msgstr "Практическое занятие — семинарские занятия называются «Практическое занятие» в журнале и расписании (баллы и часы не меняются)"
+
+msgctxt "accounts.handover"
+msgid "Jurnal payları təhvildən sonra dəyişib — əvvəlcə payları yoxlayın."
+msgstr "Права на журнал изменились после передачи — сначала проверьте их."
