@@ -24,6 +24,7 @@ from .constants import (
     EventKind,
 )
 from .services import access
+from .services.reply_visibility import can_moderate
 from .sla import calendar_for, sla_banner
 from .state_machine import available_actions
 
@@ -62,6 +63,7 @@ def unit_payload(unit) -> dict:
         "name": unit.name,
         "note": unit.note,
         "resolve_by": unit.resolve_by,
+        "requires_recipient": unit.requires_recipient,
     }
 
 
@@ -99,13 +101,13 @@ def _visible_attachment_count(application, viewer_is_handler) -> int:
     bayrağı ilə prefetch edir — onda SIFIR əlavə sorğu; prefetch yoxdursa DB-dən sayılır."""
     cached = getattr(application, "_prefetched_objects_cache", {}).get("attachments")
     if cached is not None:
-        items = list(cached)
+        items = [item for item in cached if not getattr(item, "_hidden_reply", False)]
         if viewer_is_handler:
             return len(items)
         return sum(1 for item in items if not getattr(item, "_internal_note", False))
     if viewer_is_handler:
-        return application.attachments.count()
-    return application.attachments.exclude(event__is_internal=True).count()
+        return application.attachments.filter(event__hidden_at__isnull=True).count()
+    return application.attachments.filter(event__hidden_at__isnull=True).exclude(event__is_internal=True).count()
 
 
 def attachment_payload(attachment) -> dict:
@@ -121,7 +123,7 @@ def attachment_payload(attachment) -> dict:
     }
 
 
-def event_payload(event, *, sender_id=None) -> dict:
+def event_payload(event, *, sender_id=None, viewer=None) -> dict:
     """Zaman xəttinin bir sətri.
 
     ``sender_id`` verilirsə hadisə YAZIŞMA tərəfi ilə işarələnir
@@ -139,10 +141,12 @@ def event_payload(event, *, sender_id=None) -> dict:
         "to_unit": event.to_unit.name if event.to_unit_id else "",
         "old_status": event.old_status,
         "new_status": event.new_status,
-        "text": event.text,
+        "text": "Cavab silinib." if event.hidden_at else event.text,
+        "is_hidden": bool(event.hidden_at),
+        "can_moderate": bool(viewer and can_moderate(viewer, event.application, event)),
         "is_internal": event.is_internal,
         "created_at": event.created_at.isoformat(),
-        "attachments": [attachment_payload(item) for item in event.attachments.all()],
+        "attachments": [] if event.hidden_at else [attachment_payload(item) for item in event.attachments.all()],
     }
 
 
@@ -191,14 +195,17 @@ def detail_payload(application, *, user) -> dict:
     is_sender = access.is_sender(user, application)
     sees_internal = is_handler or access.can_see_internal(user, application)
     events = application.events.select_related("actor", "from_unit", "to_unit").prefetch_related("attachments")
+    event_list = list(events)
+    for event in event_list:
+        event.application = application
     timeline = [
-        event_payload(event, sender_id=application.created_by_id)
-        for event in events
+        event_payload(event, sender_id=application.created_by_id, viewer=user)
+        for event in event_list
         if sees_internal or not event.is_internal
     ]
     # SEC-04 (2026-10-07): daxili qeydə qoşulan sənəd də daxili qeyd kimi gizlidir — əvvəl
     # ümumi siyahıya düşürdü və sahib onun adını görüb endirə bilirdi.
-    attachments = application.attachments.order_by("created_at")
+    attachments = application.attachments.filter(event__hidden_at__isnull=True).order_by("created_at")
     if not sees_internal:
         attachments = attachments.exclude(event__is_internal=True)
     attachments = [attachment_payload(item) for item in attachments]

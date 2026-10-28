@@ -1,0 +1,14 @@
+.apx-msg__text, .apx-step__note, .apx-modal__title { overflow-wrap: anywhere; white-space: pre-wrap; }
+.apx-msg__main, .apx-step__text { min-width: 0; }
+[data-apx-recipient-field] { display: grid; gap: .5rem; margin-block: 1rem; }
+[data-apx-recipient] { width: 100%; min-width: 0; min-height: 44px; padding: .6rem; }
+@media (max-width: 640px) {
+ .apx-modal__panel, .apx-dlg__panel { width: 100%; max-width: 100%; max-height: calc(100dvh - 16px); margin: 8px 0; }
+ .apx-modal__head, .apx-modal__body, .apx-modal__foot { padding: 12px; }
+ .apx-modal__top, .apx-modal__from, .apx-act__buttons, .apx-msg__head { flex-wrap: wrap; }
+ .apx-act__buttons > button { flex: 1 1 45%; min-height: 44px; }
+ .apx-modal__foot { max-height: 46dvh; overflow-y: auto; }
+ .apx-step { flex-wrap: wrap; }
+ .apx-step__note { display: block; font-size: .9rem; color: var(--text-primary, #17213b); }
+ .apx-msg__text { font-size: 1rem; line-height: 1.55; }
+}

@@ -71,6 +71,8 @@ def handler_recipients(application):
             application.current_scope_unit,
             role_names=role_names,
         )
+    if application.current_unit.requires_recipient:
+        memberships = memberships.filter(user_id=application.assigned_to_id)
     seen = {}
     for membership in memberships:
         seen.setdefault(membership.user_id, membership.user)

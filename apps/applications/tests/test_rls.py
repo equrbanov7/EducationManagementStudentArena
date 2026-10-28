@@ -92,7 +92,7 @@ def test_catalog_events_and_watches_are_tenant_isolated(two_tenants):
     _world_a, world_b = two_tenants
     _enable_rls_for_tenant(world_b["organization"].pk)
     assert ApplicationUnit.objects.count() == 9
-    assert ApplicationKind.objects.count() == 15
+    assert ApplicationKind.objects.count() == 16
     assert ApplicationWatch.objects.count() == 1
     assert ApplicationEvent.objects.count() == 3
     assert set(ApplicationEvent.objects.values_list("organization_id", flat=True)) == {world_b["organization"].pk}

@@ -142,6 +142,7 @@
             (tags ? '<div class="apx-msg__tags">' + tags + "</div>" : "") +
             '<div class="apx-msg__text">' + NS.esc(message.text) + "</div>" +
             filesHtml(message.files, "apx-files--msg") +
+            (message.event && message.event.can_moderate ? '<button type="button" class="apx-btn" data-apx-reply-visibility="' + NS.esc(message.event.id) + '" data-hidden="' + (message.event.is_hidden ? "true" : "false") + '">' + (message.event.is_hidden ? "Cavabı bərpa et" : "Cavabı sil") + "</button>" : "") +
             "</div></article>"
         );
     }
@@ -149,6 +150,7 @@
     function stepHtml(event) {
         var mark = MARKS[event.kind] || MARKS.comment;
         var text = String(event.text || "").trim();
+        if (event.kind === "forwarded" && text) { text = "Yönləndirmə səbəbi: " + text; }
         var line = event.kind_label + (event.actor ? " · " + event.actor : "");
         if (event.kind === "forwarded" && event.to_unit) {
             line += " → " + event.to_unit;
@@ -211,11 +213,12 @@
                 return;
             }
             var message = {
+                event: event,
                 side: event.actor_is_sender ? "sender" : "staff",
                 who: event.actor,
                 role: event.actor_role,
                 when: event.created_at,
-                text: event.text,
+                text: event.kind === "forwarded" ? "Yönləndirmə səbəbi: " + event.text : event.text,
                 files: event.attachments,
                 tags: eventTags(event),
             };
@@ -341,6 +344,7 @@
             NS.esc(NS.t("closeDetail")) + '"><i class="fas fa-xmark" aria-hidden="true"></i>' +
             '<span class="apx-modal__closetext">' + NS.esc(NS.t("closeDetail")) + "</span></button></div>" +
             '<h2 class="apx-modal__title">' + NS.esc(app.subject) + "</h2>" +
+            (app.current_unit.requires_recipient && app.assigned_to ? '<p class="apx-modal__from">Ünvanlanan prorektor: ' + NS.esc(app.assigned_to.name) + "</p>" : "") +
             '<div class="apx-modal__from"><span>' + fromLine + "</span>" +
             '<span class="apx-ctx__dot" aria-hidden="true">·</span>' +
             "<span>" + NS.esc(NS.dateTime(app.submitted_at)) + "</span></div>" +

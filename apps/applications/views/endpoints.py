@@ -10,6 +10,7 @@ from ..constants import PAGE_SIZE, PERM_CREATE, PERM_MANAGE, ApplicationStatus
 from ..models import ApplicationKind, ApplicationUnit
 from ..payloads import STATUS_CATALOG, detail_payload, kind_payload, row_payload, rules_payload, unit_payload
 from ..services import access, queries, routing, submit, workflow
+from ..services.recipients import destination_payload, selectable_units
 from ..state_machine import Action
 from ._base import error, json_endpoint, load_application, ok
 from .documents import detail_with_tools
@@ -52,11 +53,10 @@ def application_list(request, *, organization):
     )
     paginator = Paginator(queryset, PAGE_SIZE)
     page = paginator.get_page(request.GET.get("page") or 1)
-    handled = access.handled_unit_ids(user, organization)
     return ok(
         {
             "results": [
-                row_payload(application, viewer_is_handler=application.current_unit_id in handled)
+                row_payload(application, viewer_is_handler=access.is_current_handler(user, application))
                 for application in page.object_list
             ],
             "page": page.number,
@@ -106,7 +106,11 @@ def application_catalog(request, *, organization):
             destination, _scope, _family, _unit = routing.route_for(
                 kind, user, organization=organization, family=family, sender_unit=sender_unit
             )
-            kinds.append(kind_payload(kind, destination=destination))
+            if family == "student" and not destination.accepts_students:
+                continue
+            item = kind_payload(kind, destination=destination)
+            item["recipients"] = destination_payload(destination)
+            kinds.append(item)
 
     # ``access.active_units`` təşkilat üzrə keşlənib (bax P2-26/P2-6) — yuxarıdakı
     # dövr də daxil olmaqla eyni kataloqu artıq təkrar sorğulamır.
@@ -119,7 +123,9 @@ def application_catalog(request, *, organization):
         "can_manage": access.has_app_permission(user, organization, PERM_MANAGE),
         "can_oversee": can_oversee,
         "kinds": kinds,
-        "units": [unit_payload(unit) for unit in units],
+        "units": [
+            {**unit_payload(unit), "recipients": destination_payload(unit)} for unit in selectable_units(units, family)
+        ],
         "statuses": list(STATUS_CATALOG),
         "rules": rules_payload(),
     }
@@ -143,6 +149,7 @@ def application_create(request, *, organization):
         kind=kind,
         subject=request.POST.get("subject", ""),
         body=request.POST.get("body", ""),
+        recipient_id=request.POST.get("recipient"),
         files=request.FILES.getlist("files"),
         request=request,
     )
@@ -159,6 +166,7 @@ def _action_kwargs(request, organization, action):
         ).first()
         return {
             "target_unit": target,
+            "recipient_id": request.POST.get("recipient"),
             "note": text,
             "keep_watching": (request.POST.get("keep_watching") or "true").lower() not in {"false", "0", "off"},
         }
@@ -201,6 +209,17 @@ def application_action(request, application_id, *, organization):
     if application is None:
         return error("Müraciət tapılmadı.", status=404)
     action = (request.POST.get("action") or "").strip()
+    from ..services.reply_visibility import set_reply_visibility
+
+    if action in {"hide_reply", "restore_reply"}:
+        set_reply_visibility(
+            application=application,
+            user=request.user,
+            event_id=request.POST.get("event"),
+            hidden=action == "hide_reply",
+            request=request,
+        )
+        return ok({"application": detail_with_tools(application, request=request)})
     handler = workflow.ACTION_DISPATCH.get(action)
     if handler is None:
         return error({"action": ["Naməlum əməl."]})

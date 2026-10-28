@@ -181,6 +181,7 @@
             })
             .join("");
         NS.paintSwatches(host);
+        if (NS.recipientPicker) { NS.recipientPicker(box, kinds.filter(function (kind) { return kind.code === box.__kind; })[0]); }
         var hint = box.querySelector("[data-apx-route-text]");
         if (hint) {
             var chosen = kinds.filter(function (kind) {
@@ -238,6 +239,8 @@
         }
         var form = new FormData();
         form.append("kind", box.__kind);
+        var recipient = box.querySelector("[data-apx-recipient]");
+        if (recipient) { form.append("recipient", recipient.value); }
         form.append("subject", subject.value.trim());
         form.append("body", body.value.trim());
         (box.__files || []).forEach(function (file) {
@@ -269,6 +272,7 @@
             return;
         }
         box.__unit = "";
+        if (NS.recipientPicker) { NS.recipientPicker(box, null); }
         box.__app = app;
         box.querySelector("[data-apx-forward-sub]").textContent = app.number + " · " + app.subject;
         box.querySelector("[data-apx-note]").value = "";
@@ -299,6 +303,7 @@
         var keep = box.querySelector("[data-apx-keep]").checked;
         NS.submitAction(box.__app.id, "forward", {
             target_unit: box.__unit,
+            recipient: (box.querySelector("[data-apx-recipient]") || {}).value || "",
             text: note,
             keep_watching: keep ? "true" : "false",
         })
@@ -471,6 +476,7 @@
         window.EMSDelegate.on("click", "[data-apx-pick-unit]", function (event, node) {
             var box = node.closest("[data-apx-dialog]");
             box.__unit = node.getAttribute("data-apx-pick-unit");
+            if (NS.recipientPicker) { NS.recipientPicker(box, (NS.catalog.units || []).filter(function (unit) { return unit.code === box.__unit; })[0]); }
             box.querySelectorAll("[data-apx-pick-unit]").forEach(function (option) {
                 option.setAttribute("aria-selected", option === node ? "true" : "false");
             });

@@ -205,7 +205,9 @@ def is_current_handler(user, application) -> bool:
     «Yeni → Baxılır» avtomatik keçidi və şöbəyə «RİM cavab verdi» bildirişi bu fərqə söykənir:
     RİM başqa şöbənin müraciətini sadəcə AÇANDA şöbənin «Yeni» nişanı itməməlidir.
     """
-    return handles_unit(user, application.organization, application.current_unit, application.current_scope_unit)
+    return (not application.current_unit.requires_recipient or application.assigned_to_id == user.pk) and handles_unit(
+        user, application.organization, application.current_unit, application.current_scope_unit
+    )
 
 
 def is_handler_anywhere(user, organization) -> bool:
@@ -222,7 +224,7 @@ def can_view(user, application) -> bool:
         return True
     if can_oversee(user, organization):
         return True
-    if handles_unit(user, organization, application.current_unit, application.current_scope_unit):
+    if is_current_handler(user, application):
         return True
     for watch in application.watches.select_related("unit", "scope_unit"):
         if handles_unit(user, organization, watch.unit, watch.scope_unit):
@@ -259,7 +261,7 @@ def can_see_internal(user, application) -> bool:
     organization = application.organization
     if has_app_permission(user, organization, PERM_MANAGE):
         return True
-    if handles_unit(user, organization, application.current_unit, application.current_scope_unit):
+    if is_current_handler(user, application):
         return True
     # RİM cavab verəndə yazışmanın daxili qeydlərini də görməlidir (özü də daxili qeyd yaza bilir).
     if is_universal_responder(user, organization):
@@ -278,6 +280,8 @@ def can_view_attachment(user, attachment) -> bool:
     sahibinə açıq idi. Endirmə, media siyasəti və detal siyahısı EYNİ qaydanı işlədir.
     """
     application = attachment.application
+    if attachment.event_id and attachment.event.hidden_at:
+        return False
     if not can_view(user, application):
         return False
     if attachment.event_id is not None and attachment.event.is_internal:
@@ -300,9 +304,10 @@ def inbox_q(user, organization) -> Q:
     if not unit_ids:
         return Q(pk__in=[])
 
+    recipient_q = Q(current_unit__requires_recipient=False) | Q(assigned_to=user)
     memberships = active_memberships(user, organization)
     if any(membership.role.scope_type == RoleScopeType.ORGANIZATION for membership in memberships):
-        return Q(current_unit_id__in=unit_ids)
+        return Q(current_unit_id__in=unit_ids) & recipient_q
 
     scope_q = Q(current_scope_unit__isnull=True)
     for membership in memberships:
@@ -312,7 +317,7 @@ def inbox_q(user, organization) -> Q:
         scope_q |= Q(current_scope_unit_id=scope_unit.pk) | Q(
             current_scope_unit__path__startswith=f"{scope_unit.path}/"
         )
-    return Q(current_unit_id__in=unit_ids) & scope_q
+    return Q(current_unit_id__in=unit_ids) & scope_q & recipient_q
 
 
 def watching_q(user, organization) -> Q:

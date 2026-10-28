@@ -202,6 +202,8 @@ DEFAULT_UNIT_SEED = (
     },
     {
         "code": "tedris",
+        "accepts_students": False,
+        "requires_recipient": True,
         "name": "Tədris Şöbəsi",
         "note": "plan, cədvəl, fənn, semestr açılışı",
         "handler_role_names": ["vice_rector"],
@@ -278,6 +280,15 @@ GRADE_APPEAL_HINT = (
 
 #: (code, label, note, allowed_sender_families, unit_code, sla_days, palette, route_overrides)
 DEFAULT_KIND_SEED = (
+    {
+        "code": "prorektor",
+        "label": "Prorektora müraciət",
+        "note": "Konkret prorektoru seçərək müraciət göndərin",
+        "allowed_sender_families": ["teacher"],
+        "unit_code": "tedris",
+        "sla_days": 5,
+        "badge_palette": "primary",
+    },
     {
         "code": "transkript",
         "label": "Transkript sorğusu",

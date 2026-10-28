@@ -200,6 +200,13 @@
         }
         NS.__detailWired = true;
 
+        window.EMSDelegate.on("click", "[data-apx-reply-visibility]", function (event, node) {
+            var restoring = node.getAttribute("data-hidden") === "true";
+            NS.dialogs.confirm(restoring ? "Cavabı bərpa et" : "Cavabı sil", "Əməliyyatı təsdiqləyin. Cavab audit tarixçəsində saxlanılır.", function () {
+                NS.submitAction(NS.current.id, restoring ? "restore_reply" : "hide_reply", { event: node.getAttribute("data-apx-reply-visibility") }).then(function () { NS.dialogs.close("confirm"); }).catch(function (error) { errors(NS.errorList(error)); });
+            });
+        });
+
         window.EMSDelegate.on("input", "[data-apx-reply]", function (event, node) {
             syncGates(node.closest(".apx-act"));
         });

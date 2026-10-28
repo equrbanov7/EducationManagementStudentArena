@@ -19,7 +19,7 @@ STATS = ("open", "overdue", "closed", "all")
 
 def base_queryset(organization):
     return Application.objects.filter(organization=organization).select_related(
-        "kind", "current_unit", "current_scope_unit", "created_by", "assigned_to"
+        "kind", "current_unit", "current_scope_unit", "created_by", "assigned_to", "organization"
     )
 
 
@@ -116,7 +116,7 @@ def list_applications(
                 # SEC-04: daxili qeydin sənədi emalçı olmayana sayılmır — bayraq prefetch-də gəlir
                 # ki, sətir başına `.exclude().count()` sorğusu olmasın.
                 queryset=ApplicationAttachment.objects.only("id", "application_id", "event_id").annotate(
-                    _internal_note=F("event__is_internal")
+                    _internal_note=F("event__is_internal"), _hidden_reply=F("event__hidden_at")
                 ),
             )
         )

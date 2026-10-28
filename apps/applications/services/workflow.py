@@ -234,11 +234,11 @@ def assign(*, application, user, assignee, note: str = "", request=None):
 
 
 @transaction.atomic
-def forward(*, application, user, target_unit, note: str, keep_watching: bool = True, request=None):
+def forward(*, application, user, target_unit, note: str, keep_watching: bool = True, request=None, recipient_id=None):
     """Müraciəti BAŞQA şöbəyə ötürür; müraciət İTMİR, məsul şöbə dəyişir."""
     rule = _guard(user, application, Action.FORWARD, note)
     responder = _ResponderAct(user, application)
-    if target_unit is None or not target_unit.is_active:
+    if target_unit is None or not target_unit.is_active or target_unit.organization_id != application.organization_id:
         raise TransitionDenied("unit.unknown", pgettext(_CTX, "Hədəf şöbə tapılmadı."))
     if target_unit.pk == application.current_unit_id:
         raise TransitionDenied("unit.same", pgettext(_CTX, "Hədəf şöbə cari şöbə ilə eyni ola bilməz."))
@@ -251,7 +251,9 @@ def forward(*, application, user, target_unit, note: str, keep_watching: bool = 
     application.status = rule.target
     application.current_unit = target_unit
     application.current_scope_unit = resolve_scope_unit(target_unit, application.sender_scope_unit)
-    application.assigned_to = None
+    from .recipients import validate_destination
+
+    application.assigned_to = validate_destination(target_unit, user, application.organization, "staff", recipient_id)
     _touch(application, ["status", "current_unit", "current_scope_unit", "assigned_to"])
 
     if keep_watching:

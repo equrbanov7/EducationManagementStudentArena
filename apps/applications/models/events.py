@@ -81,6 +81,15 @@ class ApplicationEvent(UUIDModel, TimeStampedModel):
         help_text="Yalnız emalçılar görür — müraciət sahibinə göstərilmir.",
     )
 
+    hidden_at = models.DateTimeField(null=True, blank=True, editable=False)
+    hidden_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="hidden_application_events",
+    )
+
     objects = models.Manager()
 
     class Meta:

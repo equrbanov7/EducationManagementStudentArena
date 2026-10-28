@@ -107,7 +107,16 @@ DUPLICATE_WINDOW = timedelta(minutes=2)
 
 @transaction.atomic
 def submit_application(
-    *, organization, user, kind, subject: str, body: str, files=None, request=None, unit_override=None
+    *,
+    organization,
+    user,
+    kind,
+    subject: str,
+    body: str,
+    files=None,
+    request=None,
+    unit_override=None,
+    recipient_id=None,
 ) -> Application:
     """Yeni müraciət yaradır və aidiyyəti şöbəyə göndərir.
 
@@ -155,6 +164,9 @@ def submit_application(
         if unit_override.organization_id != organization.pk or not unit_override.is_active:
             raise TransitionDenied("unit.invalid", pgettext(_CTX, "Seçilmiş şöbə bu təşkilatda aktiv deyil."))
         unit, scope_unit = unit_override, resolve_scope_unit(unit_override, sender_unit)
+    from .recipients import validate_destination
+
+    recipient = validate_destination(unit, user, organization, family, recipient_id)
     # QA 2026-09-05 APPLICATIONS-01: aidiyyət bölməsini ÖRTƏN emalçı yoxdursa (məs. ixtisasın
     # koordinatoru təyin edilməyib) müraciət heç kimin inbox-una düşmür və bildiriş getmirdi.
     # Belə halda əhatə açılır — şöbənin rolunu daşıyan HƏR KƏS görür (fail-open görünüş,
@@ -183,6 +195,7 @@ def submit_application(
         sender_scope_unit=sender_unit,
         status=ApplicationStatus.SUBMITTED,
         current_unit=unit,
+        assigned_to=recipient,
         current_scope_unit=scope_unit,
         submitted_at=now,
         last_activity_at=now,
