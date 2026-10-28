@@ -6,6 +6,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import include, path
 
 from . import views
+from .journal_remote_access import journal_remote_auth
 from .views import academic_records as academic_records_views
 from .views import account_password_reset as password_reset_views
 from .views import account_username_change as username_change_views
@@ -24,6 +25,7 @@ from .views.profile import statistics_export_metrics as statistics_export_metric
 app_name = "accounts"
 
 urlpatterns = [
+    path("sebeke/jurnal-auth/", journal_remote_auth, name="journal_remote_auth"),
     # Authentication
     # Şəbəkə zonası izah səhifəsi — nginx kənardan /jurnal/ və /manage/ sorğularını bura yönləndirir.
     path("sebeke/<slug:area>/", network_zone_page.network_zone_denied, name="network_zone_denied"),
