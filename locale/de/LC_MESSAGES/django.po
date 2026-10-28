@@ -112094,6 +112094,99 @@ msgctxt "registrar.catalog"
 msgid "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
 msgstr "Praktische Übung — Seminarstunden heißen im Journal und im Stundenplan «Praktische Übung» (Punkte und Stunden ändern sich nicht)"
 
+msgctxt "registrar.absence_credit"
+msgid "Qeydiyyat dəyişib. Səhifəni yeniləyib təkrar edin."
+msgstr ""
+"Die Einschreibung wurde geändert. Seite aktualisieren und erneut versuchen."
+
+msgctxt "registrar.absence_credit"
+msgid "Üzrlü qayıb (ümumi saat)"
+msgstr "Entschuldigte Fehlzeit (Stunden)"
+
+msgctxt "registrar.absence_credit"
+msgid ""
+"Seçilmiş fənn üzrə qayıb saatına güzəşt verilir. Dərs tarixləri və iştirak "
+"xanaları dəyişmir."
+msgstr ""
+"Die Gutschrift gilt für das gewählte Fach. Unterrichtsdaten und "
+"Anwesenheitseinträge bleiben unverändert."
+
+msgctxt "registrar.absence_credit"
+msgid "Tələbə"
+msgstr "Studierende Person"
+
+msgctxt "registrar.absence_credit"
+msgid "Tələbəni seçin"
+msgstr "Person auswählen"
+
+msgctxt "registrar.absence_credit"
+msgid "saat"
+msgstr "Stunden"
+
+msgctxt "registrar.absence_credit"
+msgid "Üzrlü sayılan saat"
+msgstr "Entschuldigte Stunden"
+
+msgctxt "registrar.absence_credit"
+msgid "Səbəb"
+msgstr "Grund"
+
+msgctxt "registrar.absence_credit"
+msgid "Tətbiq et"
+msgstr "Anwenden"
+
+msgctxt "registrar.absence_credit"
+msgid "Geri alma səbəbi"
+msgstr "Grund der Rücknahme"
+
+msgctxt "registrar.absence_credit"
+msgid "Geri al"
+msgstr "Zurücknehmen"
+
+msgctxt "registrar.absence_credit"
+msgid "Ümumi üzrlü: %(hours)s saat"
+msgstr "Entschuldigt: %(hours)s Stunden"
+
+msgctxt "registrar.absence_credit"
+msgid "Sorğu açarı düzgün deyil."
+msgstr "Ungültiger Anfrageschlüssel."
+
+msgctxt "registrar.absence_credit"
+msgid "Səbəb 10–1000 simvol olmalıdır."
+msgstr "Der Grund muss 10–1000 Zeichen enthalten."
+
+msgctxt "registrar.absence_credit"
+msgid "Bu fənnin tələbə qeydiyyatı tapılmadı."
+msgstr "Die Einschreibung für dieses Fach wurde nicht gefunden."
+
+msgctxt "registrar.absence_credit"
+msgid "Geri alınacaq düzəliş tapılmadı."
+msgstr "Die zurückzunehmende Korrektur wurde nicht gefunden."
+
+msgctxt "registrar.absence_credit"
+msgid "Saat müsbət tam ədəd olmalıdır."
+msgstr "Stunden müssen eine positive ganze Zahl sein."
+
+msgctxt "registrar.absence_credit"
+msgid "Bu sorğu açarı başqa düzəlişdə istifadə olunub."
+msgstr "Dieser Anfrageschlüssel wurde für eine andere Korrektur verwendet."
+
+msgctxt "registrar.absence_credit"
+msgid "Bu düzəliş artıq geri alınıb."
+msgstr "Diese Korrektur wurde bereits zurückgenommen."
+
+msgctxt "registrar.absence_credit"
+msgid "Güzəşt mövcud üzrsüz qayıb saatından çox ola bilməz."
+msgstr ""
+"Die Gutschrift darf die unentschuldigten Fehlstunden nicht überschreiten."
+
+msgctxt "registrar.absence_credit"
+msgid "Düzəlişə icazə yoxdur."
+msgstr "Diese Korrektur ist nicht erlaubt."
+
+msgctxt "registrar.absence_credit"
+msgid "Ümumi üzrlü qayıb saatı yadda saxlanıldı."
+msgstr "Die entschuldigten Fehlstunden wurden gespeichert."
 msgctxt "accounts.handover"
 msgid "Jurnal payları təhvildən sonra dəyişib — əvvəlcə payları yoxlayın."
 msgstr "Die Journalfreigaben wurden nach der Übergabe geändert — prüfen Sie zuerst die Freigaben."

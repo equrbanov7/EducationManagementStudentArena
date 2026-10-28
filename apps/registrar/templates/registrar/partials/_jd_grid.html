@@ -267,7 +267,7 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                             {% endfor %}
                             <td class="jd2-td-qayib">
                                 <span class="jd2-qchip {% if row.barred %}is-barred{% elif row.warning %}is-warning{% endif %}"
-                                      title="{{ row.absence_hours }} {% trans 'saat' context 'registrar.journal' %}">{{ row.absence_count }} q/b</span>
+                                      title="{{ row.absence_hours }} {% trans 'saat' context 'registrar.journal' %}">{{ row.absence_count }} q/b</span>{% if row.absence_credit_hours %}<small>{% blocktrans with hours=row.absence_credit_hours context "registrar.absence_credit" %}Ümumi üzrlü: {{ hours }} saat{% endblocktrans %}</small>{% endif %}
                             </td>
                         </tr>
                         {% endfor %}

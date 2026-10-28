@@ -110477,6 +110477,97 @@ msgctxt "registrar.catalog"
 msgid "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
 msgstr "Uygulama dersi — seminer dersleri defterde ve ders programında «Uygulama dersi» olarak adlandırılır (puan ve saat değişmez)"
 
+msgctxt "registrar.absence_credit"
+msgid "Qeydiyyat dəyişib. Səhifəni yeniləyib təkrar edin."
+msgstr "Kayıt değişti. Sayfayı yenileyip tekrar deneyin."
+
+msgctxt "registrar.absence_credit"
+msgid "Üzrlü qayıb (ümumi saat)"
+msgstr "Mazeretli devamsızlık (toplam saat)"
+
+msgctxt "registrar.absence_credit"
+msgid ""
+"Seçilmiş fənn üzrə qayıb saatına güzəşt verilir. Dərs tarixləri və iştirak "
+"xanaları dəyişmir."
+msgstr ""
+"Devamsızlık indirimi seçilen derse uygulanır. Ders tarihleri ve yoklama "
+"hücreleri değişmez."
+
+msgctxt "registrar.absence_credit"
+msgid "Tələbə"
+msgstr "Öğrenci"
+
+msgctxt "registrar.absence_credit"
+msgid "Tələbəni seçin"
+msgstr "Öğrenci seçin"
+
+msgctxt "registrar.absence_credit"
+msgid "saat"
+msgstr "ders saati"
+
+msgctxt "registrar.absence_credit"
+msgid "Üzrlü sayılan saat"
+msgstr "Mazeretli saatler"
+
+msgctxt "registrar.absence_credit"
+msgid "Səbəb"
+msgstr "Neden"
+
+msgctxt "registrar.absence_credit"
+msgid "Tətbiq et"
+msgstr "Uygula"
+
+msgctxt "registrar.absence_credit"
+msgid "Geri alma səbəbi"
+msgstr "Geri alma nedeni"
+
+msgctxt "registrar.absence_credit"
+msgid "Geri al"
+msgstr "Değişikliği geri al"
+
+msgctxt "registrar.absence_credit"
+msgid "Ümumi üzrlü: %(hours)s saat"
+msgstr "Toplam mazeretli: %(hours)s saat"
+
+msgctxt "registrar.absence_credit"
+msgid "Sorğu açarı düzgün deyil."
+msgstr "Geçersiz istek anahtarı."
+
+msgctxt "registrar.absence_credit"
+msgid "Səbəb 10–1000 simvol olmalıdır."
+msgstr "Neden 10–1000 karakter içermelidir."
+
+msgctxt "registrar.absence_credit"
+msgid "Bu fənnin tələbə qeydiyyatı tapılmadı."
+msgstr "Bu ders için öğrenci kaydı bulunamadı."
+
+msgctxt "registrar.absence_credit"
+msgid "Geri alınacaq düzəliş tapılmadı."
+msgstr "Geri alınacak düzeltme bulunamadı."
+
+msgctxt "registrar.absence_credit"
+msgid "Saat müsbət tam ədəd olmalıdır."
+msgstr "Saat pozitif bir tam sayı olmalıdır."
+
+msgctxt "registrar.absence_credit"
+msgid "Bu sorğu açarı başqa düzəlişdə istifadə olunub."
+msgstr "Bu istek anahtarı başka bir düzeltmede kullanılmıştır."
+
+msgctxt "registrar.absence_credit"
+msgid "Bu düzəliş artıq geri alınıb."
+msgstr "Bu düzeltme zaten geri alınmış."
+
+msgctxt "registrar.absence_credit"
+msgid "Güzəşt mövcud üzrsüz qayıb saatından çox ola bilməz."
+msgstr "İndirim mevcut mazeretsiz devamsızlık saatini aşamaz."
+
+msgctxt "registrar.absence_credit"
+msgid "Düzəlişə icazə yoxdur."
+msgstr "Bu düzeltmeye izin verilmiyor."
+
+msgctxt "registrar.absence_credit"
+msgid "Ümumi üzrlü qayıb saatı yadda saxlanıldı."
+msgstr "Toplam mazeretli devamsızlık saati kaydedildi."
 msgctxt "accounts.handover"
 msgid "Jurnal payları təhvildən sonra dəyişib — əvvəlcə payları yoxlayın."
 msgstr "Devirden sonra günlük payları değişti — önce payları kontrol edin."

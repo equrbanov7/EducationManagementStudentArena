@@ -25,7 +25,7 @@ Qorunan invariantlar (servis qatı ilə eyni):
   mövcud xana ``legacy_journal_mark_target_conflict`` ilə hesabata düşür;
 * ``entered_by=None`` — import heç kimin adından yazmır;
 * ``Enrollment.absence_hours`` faza sonunda TOPLU şəkildə yenidən hesablanır
-  (``gradebook.recompute_absence_hours`` güzgüsü, sətir-sətir sorğu olmadan).
+  (``registrar.public.gradebook`` kanonik hesablaması, güzəştlər qorunur).
 """
 
 from __future__ import annotations
@@ -36,7 +36,6 @@ from types import MappingProxyType
 
 from django.apps import apps as django_apps
 from django.db import transaction
-from django.db.models import Sum
 
 from apps.legacy_import.models import LegacyMigrationIssue
 
@@ -239,33 +238,21 @@ def _same_score(stored, incoming) -> bool:
 
 
 def recompute_absence_hours(context, enrollment_pks) -> int:
-    """``gradebook.recompute_absence_hours`` güzgüsü — toplu, sətir-sətir yox.
-
-    Qayıb saatı YALNIZ ``absent`` sətirlərdən yığılır: ``excused`` (J-V3)
-    qayıb limitinə daxil deyil, elə modelin öz qaydasıdır.
-    """
+    """Canonical counter preserves excused credits and merged journal history."""
+    from apps.registrar.public import gradebook
 
     enrollment_model = django_apps.get_model("registrar", "Enrollment")
-    mark_model = django_apps.get_model("registrar", "LessonMark")
     keys = sorted(enrollment_pks)
     updated = 0
     for start in range(0, len(keys), _ABSENCE_CHUNK):
-        chunk = keys[start : start + _ABSENCE_CHUNK]
-        hours = {
-            str(row["enrollment_id"]): int(row["total"] or 0)
-            for row in mark_model.objects.filter(enrollment_id__in=chunk, status=ABSENT_STATUS)
-            .values("enrollment_id")
-            .annotate(total=Sum("lesson__hours"))
-        }
-        pending = []
-        for enrollment in enrollment_model.objects.filter(pk__in=chunk).only("id", "absence_hours"):
-            target = hours.get(str(enrollment.pk), 0)
-            if enrollment.absence_hours != target:
-                enrollment.absence_hours = target
-                pending.append(enrollment)
-        if pending:
-            enrollment_model.objects.bulk_update(pending, ["absence_hours"])
-            updated += len(pending)
+        rows = list(
+            enrollment_model.objects.filter(
+                pk__in=keys[start : start + _ABSENCE_CHUNK], organization=context.organization
+            )
+        )
+        before = {row.pk: row.absence_hours for row in rows}
+        after = gradebook.recompute_absence_hours_many(rows)
+        updated += sum(before[row.pk] != after[row.pk] for row in rows)
     return updated
 
 

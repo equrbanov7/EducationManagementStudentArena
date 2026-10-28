@@ -111069,6 +111069,97 @@ msgctxt "registrar.catalog"
 msgid "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
 msgstr "Practical session — seminar lessons are called «Practical session» in the journal and the timetable (scores and hours do not change)"
 
+msgctxt "registrar.absence_credit"
+msgid "Qeydiyyat dəyişib. Səhifəni yeniləyib təkrar edin."
+msgstr "The enrolment changed. Refresh the page and try again."
+
+msgctxt "registrar.absence_credit"
+msgid "Üzrlü qayıb (ümumi saat)"
+msgstr "Excused absence (total hours)"
+
+msgctxt "registrar.absence_credit"
+msgid ""
+"Seçilmiş fənn üzrə qayıb saatına güzəşt verilir. Dərs tarixləri və iştirak "
+"xanaları dəyişmir."
+msgstr ""
+"The absence allowance applies to the selected subject. Lesson dates and "
+"attendance cells remain unchanged."
+
+msgctxt "registrar.absence_credit"
+msgid "Tələbə"
+msgstr "Student"
+
+msgctxt "registrar.absence_credit"
+msgid "Tələbəni seçin"
+msgstr "Select a student"
+
+msgctxt "registrar.absence_credit"
+msgid "saat"
+msgstr "hours"
+
+msgctxt "registrar.absence_credit"
+msgid "Üzrlü sayılan saat"
+msgstr "Excused hours"
+
+msgctxt "registrar.absence_credit"
+msgid "Səbəb"
+msgstr "Reason"
+
+msgctxt "registrar.absence_credit"
+msgid "Tətbiq et"
+msgstr "Apply"
+
+msgctxt "registrar.absence_credit"
+msgid "Geri alma səbəbi"
+msgstr "Reversal reason"
+
+msgctxt "registrar.absence_credit"
+msgid "Geri al"
+msgstr "Reverse"
+
+msgctxt "registrar.absence_credit"
+msgid "Ümumi üzrlü: %(hours)s saat"
+msgstr "Total excused: %(hours)s hours"
+
+msgctxt "registrar.absence_credit"
+msgid "Sorğu açarı düzgün deyil."
+msgstr "Invalid request key."
+
+msgctxt "registrar.absence_credit"
+msgid "Səbəb 10–1000 simvol olmalıdır."
+msgstr "The reason must contain 10–1000 characters."
+
+msgctxt "registrar.absence_credit"
+msgid "Bu fənnin tələbə qeydiyyatı tapılmadı."
+msgstr "The student's enrolment for this subject was not found."
+
+msgctxt "registrar.absence_credit"
+msgid "Geri alınacaq düzəliş tapılmadı."
+msgstr "The adjustment to reverse was not found."
+
+msgctxt "registrar.absence_credit"
+msgid "Saat müsbət tam ədəd olmalıdır."
+msgstr "Hours must be a positive whole number."
+
+msgctxt "registrar.absence_credit"
+msgid "Bu sorğu açarı başqa düzəlişdə istifadə olunub."
+msgstr "This request key was used for another adjustment."
+
+msgctxt "registrar.absence_credit"
+msgid "Bu düzəliş artıq geri alınıb."
+msgstr "This adjustment has already been reversed."
+
+msgctxt "registrar.absence_credit"
+msgid "Güzəşt mövcud üzrsüz qayıb saatından çox ola bilməz."
+msgstr "The allowance cannot exceed current unexcused absence hours."
+
+msgctxt "registrar.absence_credit"
+msgid "Düzəlişə icazə yoxdur."
+msgstr "This adjustment is not permitted."
+
+msgctxt "registrar.absence_credit"
+msgid "Ümumi üzrlü qayıb saatı yadda saxlanıldı."
+msgstr "Total excused absence hours saved."
 msgctxt "accounts.handover"
 msgid "Jurnal payları təhvildən sonra dəyişib — əvvəlcə payları yoxlayın."
 msgstr "Journal shares have changed since the handover — review the shares first."
