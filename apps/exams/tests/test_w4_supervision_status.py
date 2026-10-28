@@ -147,6 +147,9 @@ function load(name) {
     .replace(/^export \{.*$/mg, "");
   return src;
 }
+// Taymerlər və Retry-After eyni virtual saatdan istifadə edir; real icra vaxtı nəticəni dəyişmir.
+let nowMs = 1761696000000;
+Date.now = () => nowMs;
 // --- saxta taymerlər: gecikmələr qeyd olunur, `flush()` növbədəkini icra edir
 const timers = [];
 let timerId = 0;
@@ -155,7 +158,10 @@ global.setTimeout = function (fn, ms) { timerId += 1; timers.push({ id: timerId,
 global.clearTimeout = function (id) { const i = timers.findIndex((t) => t.id === id); if (i >= 0) timers.splice(i, 1); };
 global.setInterval = function () { return 0; };
 global.clearInterval = function () {};
-function flush() { const t = timers.shift(); if (t) t.fn(); }
+function flush() {
+  const t = timers.shift();
+  if (t) { nowMs += t.ms; t.fn(); }
+}
 // --- saxta DOM
 const listeners = {};
 global.document = {
