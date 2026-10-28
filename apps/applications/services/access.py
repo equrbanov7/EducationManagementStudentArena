@@ -19,14 +19,14 @@ kifayətdir; əks halda üzvlüyün ``scope_unit``-i müraciətin
 
 from __future__ import annotations
 
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
 
 from apps.organizations.public import ancestor_unit_ids, request_active_memberships
 from core.constants import RoleScopeType
 from core.permissions import has_permission
 
 from ..constants import PERM_MANAGE, PERM_VIEW_ALL, RESPONDER_UNIT_CODE, ResolveBy
-from ..models import ApplicationUnit
+from ..models import ApplicationUnit, ApplicationWatch
 
 
 def _is_privileged(user, organization) -> bool:
@@ -310,41 +310,50 @@ def is_sender(user, application) -> bool:
     return bool(user and getattr(user, "is_authenticated", False) and application.created_by_id == user.pk)
 
 
-def inbox_q(user, organization) -> Q:
-    """«Mənə gələnlər» filtri — emal etdiyi şöbə + əhatəli aidiyyət.
+def _unit_scope_q(user, organization, *, unit_field, scope_field) -> Q:
+    """``handles_unit`` ilə eyni rol + struktur əhatəsi, list/count üçün.
 
-    Org-scope üzvlük üçün aidiyyət məhdudiyyəti yoxdur; unit-scope üzvlük üçün
-    ``current_scope_unit`` üzvlüyün alt-ağacında olmalıdır (``path`` prefiksi)
-    və ya ümumiyyətlə təyin olunmamalıdır.
+    Hər rol yalnız öz şöbəsi və öz scope-u ilə cütləşdirilir; başqa rolun
+    organization əhatəsi dar ixtisas üzvlüyünü genişləndirə bilməz.
     """
-    unit_ids = handled_unit_ids(user, organization)
-    if not unit_ids:
-        return Q(pk__in=[])
-
-    recipient_q = Q(current_unit__requires_recipient=False) | Q(assigned_to=user)
     memberships = active_memberships(user, organization)
-    if any(membership.role.scope_type == RoleScopeType.ORGANIZATION for membership in memberships):
-        return Q(current_unit_id__in=unit_ids) & recipient_q
+    permitted = Q(pk__in=[])
+    for unit in active_units(organization):
+        for membership in memberships:
+            if membership.role.name not in unit.role_names:
+                continue
+            scope = Q()
+            if (
+                unit.resolve_by != ResolveBy.ORGANIZATION.value
+                and membership.role.scope_type != RoleScopeType.ORGANIZATION
+            ):
+                scope = Q(**{f"{scope_field}__isnull": True})
+                if membership.scope_unit_id:
+                    scope |= Q(**{f"{scope_field}_id": membership.scope_unit_id}) | Q(
+                        **{f"{scope_field}__path__startswith": f"{membership.scope_unit.path}/"}
+                    )
+            permitted |= Q(**{f"{unit_field}_id": unit.pk}) & scope
+    return permitted
 
-    scope_q = Q(current_scope_unit__isnull=True)
-    for membership in memberships:
-        scope_unit = membership.scope_unit
-        if scope_unit is None:
-            continue
-        scope_q |= Q(current_scope_unit_id=scope_unit.pk) | Q(
-            current_scope_unit__path__startswith=f"{scope_unit.path}/"
-        )
-    return Q(current_unit_id__in=unit_ids) & scope_q & recipient_q
+
+def inbox_q(user, organization) -> Q:
+    """«Mənə gələnlər» — eyni şöbənin roluna aid əhatə + konkret ünvan."""
+    if not handled_unit_ids(user, organization):
+        return Q(pk__in=[])
+    recipient_q = Q(current_unit__requires_recipient=False) | Q(assigned_to=user)
+    return _unit_scope_q(user, organization, unit_field="current_unit", scope_field="current_scope_unit") & recipient_q
 
 
 def watching_q(user, organization) -> Q:
-    unit_ids = handled_unit_ids(user, organization)
-    if not unit_ids:
+    if not handled_unit_ids(user, organization):
         return Q(pk__in=[])
-    audience = Q(watches__unit__requires_recipient=False, watches__recipient_ids=[]) | Q(
-        watches__recipient_ids__contains=[user.pk]
+    audience = Q(unit__requires_recipient=False, recipient_ids=[]) | Q(recipient_ids__contains=[user.pk])
+    watches = ApplicationWatch.objects.filter(application_id=OuterRef("pk"), organization=organization).filter(
+        _unit_scope_q(user, organization, unit_field="unit", scope_field="scope_unit") & audience
     )
-    return Q(watches__unit_id__in=unit_ids) & audience & ~inbox_q(user, organization)
+    # EXISTS bütün şərtləri eyni watch sətrinə bağlayır; başqa şöbənin scope-u
+    # və ya recipient siyahısı ilə yanlış JOIN uyğunluğu yarana bilməz.
+    return Q(Exists(watches)) & ~inbox_q(user, organization)
 
 
 def visible_q(user, organization) -> Q:

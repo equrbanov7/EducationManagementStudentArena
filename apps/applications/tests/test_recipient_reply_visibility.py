@@ -234,3 +234,83 @@ def test_migration_restricts_existing_named_history_without_guessing_watch_audie
     assert watch.recipient_ids == []
     assert not access.watch_is_visible(world["vice_a"], application, watch)
     assert not access.watch_is_visible(world["vice_b"], application, watch)
+
+
+@pytest.mark.parametrize("extra_org_role", [False, True])
+def test_scoped_watch_list_and_counts_match_detail_visibility_after_named_forward(world, extra_org_role):
+    # Eyni koordinator rolunun başqa ixtisasdakı daşıyıcısı ümumi manage açarı
+    # ilə də şəxsi müraciətin watch sətirindən özünə görünüş uydura bilməz.
+    add_member(
+        world["organization"],
+        world["other_coordinator"],
+        "program_coordinator",
+        scope_unit=world["other_tree"]["specialty"],
+        permissions=MANAGE,
+    )
+    if extra_org_role:
+        add_member(world["organization"], world["other_coordinator"], "observer", permissions=MANAGE)
+    application = submit.submit_application(
+        organization=world["organization"],
+        user=world["student"],
+        kind=world["kinds"]["diger"],
+        subject="Şəxsi əhatəli müraciət",
+        body="Bu müraciət yalnız aidiyyəti ixtisasdan izlənilməlidir.",
+    )
+    workflow.forward(
+        application=application,
+        user=world["coordinator"],
+        target_unit=world["units"]["tedris"],
+        recipient_id=world["vice_a"].pk,
+        note="Şəxsən araşdırmaq üçün prorektora yönləndirilir.",
+        keep_watching=True,
+    )
+    application.refresh_from_db()
+    assert application.recipient_restricted
+    for viewer_key, expected in (("coordinator", True), ("other_coordinator", False)):
+        viewer = world[viewer_key]
+        assert access.can_view(viewer, application) is expected
+        assert (
+            queries.list_applications(organization=world["organization"], user=viewer, tab="watching", stat="all")
+            .filter(pk=application.pk)
+            .exists()
+            is expected
+        )
+        assert queries.tab_counts(organization=world["organization"], user=viewer)["watching"] == int(expected)
+        assert queries.handler_kpis(organization=world["organization"], user=viewer)["watching"] == int(expected)
+    assert (
+        not queries.list_applications(
+            organization=world["organization"], user=world["other_coordinator"], tab="all", stat="all"
+        )
+        .filter(pk=application.pk)
+        .exists()
+    )
+
+    # Sonra müraciət scoped şöbəyə qayıdır: əlaqəsiz org-wide rol
+    # yanlış koordinatora inbox/all görünüşünü də genişləndirməməlidir.
+    workflow.forward(
+        application=application,
+        user=world["vice_a"],
+        target_unit=world["units"]["koordinator"],
+        note="Aidiyyəti ixtisas üzrə araşdırmanı davam etdirin.",
+        keep_watching=False,
+    )
+    application.refresh_from_db()
+    for viewer_key, expected in (("coordinator", True), ("other_coordinator", False)):
+        viewer = world[viewer_key]
+        assert access.can_view(viewer, application) is expected
+        assert (
+            queries.list_applications(organization=world["organization"], user=viewer, tab="inbox", stat="all")
+            .filter(pk=application.pk)
+            .exists()
+            is expected
+        )
+        assert queries.handler_inbox_counts(organization=world["organization"], user=viewer)["inbox_open"] == int(
+            expected
+        )
+    assert (
+        not queries.list_applications(
+            organization=world["organization"], user=world["other_coordinator"], tab="all", stat="all"
+        )
+        .filter(pk=application.pk)
+        .exists()
+    )
