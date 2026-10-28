@@ -169,6 +169,10 @@ CSS/JS XARİCİ fayllardadır və `profile.html`-dən yüklənir.
     </table>
   </div>
 
+  <div data-wlm-recorded-hours>
+    {% include "accounts/profile/sections/workload/_recorded_hours.html" with recorded_hours=my_workload_section.recorded_hours %}
+  </div>
+
   {% if my_workload_section.objections %}
   <h3 class="wlm__subtitle">{% trans "Etirazlarım" context "accounts.workload" %}</h3>
   <p class="wlm__intro">{% trans "Kafedra müdiri 3 iş günü ərzində cavab verir." context "accounts.workload" %}</p>

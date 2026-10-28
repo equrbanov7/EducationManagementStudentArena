@@ -269,10 +269,14 @@ def build_my_workload_context(request, *, organization, academic_year: str = "")
     if not payload["has_access"]:
         return payload
 
-    years = teacher_years(organization=organization, teacher=user)
+    from .services.recorded_hours import teacher_recorded_hours
+
+    history = teacher_recorded_hours(actor)
+    years = sorted(set(teacher_years(organization=organization, teacher=user)) | set(history["years"]), reverse=True)
     payload["years"] = years
     year = academic_year or (years[0] if years else "")
     payload["academic_year"] = year
+    payload["recorded_hours"] = teacher_recorded_hours(actor, academic_year=year)
     payload["summary"] = teacher_workload_summary(organization=organization, teacher=user, academic_year=year)
     payload["rows"] = teacher_workload_rows(organization=organization, teacher=user, academic_year=year)
     # 2026-10-15: cədvəl fənn + qrup üzrə birləşmiş xətləri göstərir; «Redaktə et» — yalnız aktorun
