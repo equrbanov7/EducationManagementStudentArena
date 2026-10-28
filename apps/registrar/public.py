@@ -24,6 +24,7 @@ from apps.registrar.exam_bridge import (
 )
 from apps.registrar.gradebook_marks import recompute_absence_hours_many
 from apps.registrar.integrity import eligible_instructor_user_ids
+from apps.registrar.journal_access_diagnostics import journal_access_diagnostics
 from apps.registrar.midterm_bridge import record_midterm_result, student_interim_rows
 from apps.registrar.models import StudentAcademicRecord
 from apps.registrar.services import enroll_student_in_subject
@@ -35,6 +36,7 @@ from apps.registrar.teaching_hours import recorded_teaching_hours
 __all__ = [
     "recorded_teaching_hours",
     "eligible_instructor_user_ids",
+    "journal_access_diagnostics",
     "enroll_student_in_subject",
     "recompute_absence_hours_many",
     "analytics",

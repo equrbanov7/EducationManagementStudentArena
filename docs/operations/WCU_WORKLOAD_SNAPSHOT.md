@@ -63,3 +63,22 @@ ana/1/2 legitim ayrılması məlumatın üzərində dəyişiklik etmir; ing ayr�
 Command üçün worker-atomic gate-də yalnız onun dəqiq yolu istisnadır: capture
 öz fresh read-only repeatable-read transaction və fixed RLS kontekstini yaradır;
 outer transaction SET TRANSACTION ardıcıllığını pozar. Bu, ümumi gate istisnası deyil.
+
+### Read-only structural journal diagnostics
+
+`journal_access_diagnostics` contains exact workload-assignment, offering-owner,
+and active-share teacher/offering slots. Canonical registrar authority/share
+checks and syllabus tier/share/semesterless approved-version fallback are used.
+Only teacher/offering/syllabus identifiers and scalar reason flags are exported;
+no authentication secrets, student rows, or cell contents are added.
+
+An existing assessment scheme uses the same pure lock predicate as the normal
+journal path. A missing scheme yields `journal_locked=null` and structural
+readiness UNKNOWN: no get-or-create helper runs. Metadata-only syllabus lookup
+keeps the normal resolver default unchanged and avoids auth-user related joins.
+
+`structural_write_candidate` is not a write authorization or UI guarantee.
+Network rules, request/browser context, lesson/cell time windows and individual
+POST guards remain explicitly unverified. Share row/kind restrictions are
+reported as flags without exposing student/enrollment IDs. The outer database
+transaction remains enforced READ ONLY / REPEATABLE READ with tenant RLS active.

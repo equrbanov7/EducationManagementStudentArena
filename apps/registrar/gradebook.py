@@ -96,6 +96,11 @@ _CLOSED_STATUSES = exam_eligibility._LOCKED_STATUSES
 def journal_is_locked(offering) -> bool:
     """Jurnal bağlıdırmı — RİM semestr sonunda bağlayıb (yaxud legacy import)."""
     scheme = ensure_assessment_scheme(offering=offering)
+    return assessment_scheme_is_locked(scheme)
+
+
+def assessment_scheme_is_locked(scheme) -> bool:
+    """Pure predicate shared by normal writes and strictly read-only diagnostics."""
     return scheme.is_published or scheme.approval_status in _CLOSED_STATUSES
 
 

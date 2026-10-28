@@ -70,7 +70,14 @@ def _share_applies(syllabus, offering_id, instructor_id) -> bool:
 
 
 def syllabus_for_offering(
-    *, organization, offering_id=None, subject_id=None, period_id=None, instructor_id=None, _with_share=True
+    *,
+    organization,
+    offering_id=None,
+    subject_id=None,
+    period_id=None,
+    instructor_id=None,
+    _with_share=True,
+    _metadata_only=False,
 ):
     """Açılışa uyğun sillabus dosyesi və ya ``None`` (pilləli axtarış).
 
@@ -122,7 +129,8 @@ def syllabus_for_offering(
         .order_by("_tier", "subject__code", "pk")
         .values("pk")[:1]
     )
-    found = Syllabus.objects.select_related(*_RELATED).filter(pk=Subquery(tier_pick)).first()
+    related = ("offering", "approved_version") if _metadata_only else _RELATED
+    found = Syllabus.objects.select_related(*related).filter(pk=Subquery(tier_pick)).first()
     if found is not None and _with_share and not _share_applies(found, offering_id, instructor_id):
         return syllabus_for_offering(
             organization=organization,
@@ -131,6 +139,7 @@ def syllabus_for_offering(
             period_id=period_id,
             instructor_id=instructor_id,
             _with_share=False,
+            _metadata_only=_metadata_only,
         )
     return found
 
@@ -163,7 +172,7 @@ def preload_syllabus_for_offering(offering):
     setattr(offering, _SYLLABUS_MEMO_ATTR, syllabus_for_offering_obj(offering))
 
 
-def approved_version_for(syllabus):
+def approved_version_for(syllabus, *, metadata_only=False):
     """Tələbənin GÖRDÜYÜ versiya — qüvvədə olan təsdiqlənmiş nüsxə.
 
     ⚠️ Yeni versiya təsdiqlənməyibsə ƏVVƏLKİ təsdiqlənmiş versiya görünməyə
@@ -176,7 +185,8 @@ def approved_version_for(syllabus):
     if version is not None and version.status == SyllabusStatus.APPROVED.value:
         return version
     # Dosyedəki göstərici köhnəlibsə (məsələn əl ilə düzəliş) statusa görə tap.
-    return syllabus.versions.filter(status=SyllabusStatus.APPROVED.value).select_related("approved_by").first()
+    versions = syllabus.versions.filter(status=SyllabusStatus.APPROVED.value)
+    return versions.first() if metadata_only else versions.select_related("approved_by").first()
 
 
 def offering_syllabus_state(syllabus) -> dict:
