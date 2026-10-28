@@ -8,8 +8,7 @@
 #
 # Dependency graph:
 #
-#   lint ──┬──► unit-tests-311 (PR/dispatch)
-#          ├──► js-tests (Node + jsdom)
+#   lint ──┬──► js-tests (Node + jsdom)
 #          ├──► build
 #          ├──► security
 #          ├──► secret-scan
@@ -28,6 +27,9 @@
 # Docker zənciri) artıq lint-i GÖZLƏMİR — t=0-da başlayır (kritik yoldan ~2.5 dəq çıxır).
 # Təhlükəsizlik dəyişmir: ci-success lint-in `success` olmasını tələb edir, deploy isə
 # ci-success-i. Lint yıxılarsa `lint-failed-cancel` run-ı ləğv edir (boşa dəqiqə yanmasın).
+# 2026-10-29: Python 3.11 tam uyğunluq dəsti ayrıca nightly/manual axındadır
+# (python-311-compat.yml). Prod Python 3.12-dir; onun bütün 8 shard-ı, coverage,
+# RLS və smoke qapıları saxlanır. PR artıq əlavə ~65 dəqiqəlik 3.11 dəstini gözləmir.
 # ═══════════════════════════════════════════════════════════════════════════
 
 name: 🚀 CI Pipeline
@@ -64,8 +66,8 @@ concurrency:
 # Təhlükəsizlik auditi 2026-10-07: əvvəl top-level `permissions` yox idi — açıq
 # icazə verməyən hər job (o cümlədən prod serverdəki self-hosted `deploy-production`)
 # repo defoltu olan GITHUB_TOKEN-i alırdı (köhnə repolarda read/write-all). İndi
-# defolt yalnız oxumadır; əlavə icazə lazım olan job-lar (unit-tests-311 PR şərhi,
-# container-scan SARIF, secret-scan) onu job səviyyəsində açıq istəyir.
+# defolt yalnız oxumadır; əlavə icazə lazım olan job-lar (container-scan SARIF,
+# secret-scan) onu job səviyyəsində açıq istəyir.
 permissions:
   contents: read
 
@@ -100,19 +102,6 @@ jobs:
           gh run cancel "${{ github.run_id }}" --repo "${{ github.repository }}" \
             || echo "::warning::Run ləğv edilə bilmədi (məs. fork PR-da token yalnız oxumadır) — ci-success onsuz da yıxılacaq."
 
-  # ── 2a. Unit Tests (Python 3.11) ───────────────────────────────────────
-  # Sahib 2026-09-21: push-larda (Develop/Staging/main) 3.11 job-u kritik yolda deyildi,
-  # amma 30 dəq runner vaxtı yeyirdi; prod image 3.12-dir. PR/dispatch-da tam dəst + coverage.
-  unit-tests-311:
-    needs: lint
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
-    permissions:
-      contents: read
-      pull-requests: write
-    uses: ./.github/workflows/_unit-tests.yml
-    with:
-      python-version: "3.11"
-
   # ── 2b. Unit Tests (Python 3.12) ───────────────────────────────────────
   # 8 paralel shard (hər biri öz Postgres/Redis-i ilə; .test_durations ilə balanslı).
   # Audit 2026-09-28 AD-07: release yolunda (main/Staging push) shard-lar xam
@@ -129,17 +118,16 @@ jobs:
       shard: ${{ matrix.shard }}
       shards: "8"
       coverage: false
-      coverage-data: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/Staging') }}
+      coverage-data: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/Staging')) }}
       durations-data: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
   # ── 2b'. Coverage gate on the release path (Audit 2026-09-28 AD-07) ────
-  # Əvvəl coverage qapısı (--fail-under=68) yalnız PR-dakı 3.11 job-unda idi;
-  # prod deploy-u (main push) və Staging promosiyası qapısız keçirdi. İndi 8
-  # shard-ın datası birləşdirilir və EYNİ hədd tətbiq olunur.
+  # PR və release yolunda 8 prod-Python shard-ının datası birləşdirilir və
+  # eyni --fail-under=68 həddi tətbiq olunur; ayrıca 3.11 job-u tələb olunmur.
   coverage-combine:
     name: 📊 Coverage gate (combined shards)
     needs: unit-tests-312
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/Staging')
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/Staging'))
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Checkout code
@@ -305,7 +293,6 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - lint
-      - unit-tests-311
       - unit-tests-312
       - coverage-combine
       - js-tests
@@ -324,12 +311,11 @@ jobs:
         env:
           # Develop/Staging push-larında Docker zənciri qəsdən ötürülür (bax docker-build.if).
           DOCKER_CHAIN_OPTIONAL: ${{ (github.event_name == 'push' && github.ref != 'refs/heads/main') && '1' || '0' }}
-          # Audit 2026-09-28 AD-07: coverage qapısı main/Staging push-larında MƏCBURİDİR.
-          COVERAGE_GATE_REQUIRED: ${{ (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/Staging')) && '1' || '0' }}
+          # Coverage PR və main/Staging release yolunda məcburidir.
+          COVERAGE_GATE_REQUIRED: ${{ (github.event_name == 'pull_request' || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/Staging'))) && '1' || '0' }}
         run: |
           echo "=== CI Pipeline Summary ==="
           echo "Lint:             ${{ needs.lint.result }}"
-          echo "Unit Tests 3.11:  ${{ needs.unit-tests-311.result }}"
           echo "Unit Tests 3.12:  ${{ needs.unit-tests-312.result }}"
           echo "Coverage gate:    ${{ needs.coverage-combine.result }}"
           echo "JS Tests:         ${{ needs.js-tests.result }}"
@@ -349,18 +335,13 @@ jobs:
             exit 1
           fi
 
-          # 3.12 (shard-lı) həmişə məcburidir; 3.11 push-larda qəsdən ötürülür (skipped).
+          # Prod Python 3.12-nin bütün shard-ları həmişə məcburidir.
           if [[ "${{ needs.unit-tests-312.result }}" != "success" ]]; then
             echo "❌ Unit Tests (3.12) did not succeed: ${{ needs.unit-tests-312.result }}"
             exit 1
           fi
-          if [[ "${{ needs.unit-tests-311.result }}" != "success" && "${{ needs.unit-tests-311.result }}" != "skipped" ]]; then
-            echo "❌ Unit Tests (3.11) failed: ${{ needs.unit-tests-311.result }}"
-            exit 1
-          fi
-
-          # Release yolunda (main/Staging push) birləşdirilmiş coverage qapısı məcburidir;
-          # PR/Develop-da job qəsdən ötürülür (PR-da 3.11 job-u öz --fail-under-i ilə gedir).
+          # PR və release yolunda birləşdirilmiş coverage qapısı məcburidir;
+          # Develop push/manual axınında job qəsdən ötürülür.
           if [[ "$COVERAGE_GATE_REQUIRED" == "1" && "${{ needs.coverage-combine.result }}" != "success" ]]; then
             echo "❌ Coverage gate did not succeed: ${{ needs.coverage-combine.result }}"
             exit 1

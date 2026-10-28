@@ -363,12 +363,13 @@ class SyllabusVersion(UUIDModel, TimeStampedModel):
 
     @property
     def is_locked(self) -> bool:
-        """Redaktəyə bağlıdırmı (APPROVED daxil bütün qeyri-qaralama statuslar)."""
+        """Redaktə kilidi — avtomatik rejimdə adi təsdiqlənmiş sillabus da açıqdır."""
         from ..constants import EDITABLE_STATUSES
+        from ..editing import approved_edits_enabled
 
-        return self.status not in EDITABLE_STATUSES
+        return self.status not in EDITABLE_STATUSES and not approved_edits_enabled(self)
 
     @property
     def is_approved_lock(self) -> bool:
-        """Təsdiqlənmiş = əbədi kilid; yalnız yeni versiya yaradıla bilər."""
-        return self.status == SyllabusStatus.APPROVED
+        """Təsdiqlənmiş versiyanın cari təsdiq siyasətinə görə kilidi."""
+        return self.status == SyllabusStatus.APPROVED and self.is_locked

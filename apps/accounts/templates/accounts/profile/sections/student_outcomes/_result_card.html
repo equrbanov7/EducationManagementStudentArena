@@ -87,6 +87,8 @@ test balı + `appeal` səhifə üçün `fill_my_results_scores`-dan). Mobil-önc
         {% endif %}
     </div>
 
+    {% include "partials/_result_reconciliation_notice.html" %}
+
     {% if item.detail_url %}
     <footer class="mr-card__foot">
         <a href="{{ item.detail_url }}" class="ems-btn ems-btn--primary ems-btn--sm mr-card__cta">

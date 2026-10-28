@@ -114,7 +114,7 @@ def _missing_rows(*, organization, user, syllabi, academic_year: str, semester: 
     queryset = (
         CourseOffering.objects.filter(organization=organization, is_active=True, instructor=user)
         .select_related("subject", "period")
-        .order_by("subject__code")
+        .order_by("subject__code", "pk")
     )
     if academic_year:
         queryset = queryset.filter(period__academic_year=academic_year)

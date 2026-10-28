@@ -226,7 +226,7 @@
     z-index: 1200;
     align-items: center;
     justify-content: center;
-    padding: 1rem;
+    padding: max(.5rem, env(safe-area-inset-top)) max(.5rem, env(safe-area-inset-right)) max(.5rem, env(safe-area-inset-bottom)) max(.5rem, env(safe-area-inset-left));
 }
 
 .assigned-exam-info-backdrop.is-open {
@@ -234,7 +234,13 @@
 }
 
 .assigned-exam-info-modal {
-    width: min(640px, 96vw);
+    width: min(640px, 100%);
+    box-sizing: border-box;
+    max-height: calc(100vh - 2rem);
+    max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    overflow-wrap: anywhere;
     background: var(--ems-neutral-0);
     border-radius: 14px;
     border: 1px solid #dbe3ef;
@@ -244,11 +250,15 @@
 }
 
 .assigned-exam-info-close {
-    position: absolute;
-    top: 0.8rem;
-    right: 0.85rem;
-    width: 34px;
-    height: 34px;
+    position: sticky;
+    top: 0;
+    float: right;
+    z-index: 2;
+    margin: -.25rem -.25rem .5rem .5rem;
+    width: 44px;
+    height: 44px;
+    font-size: 1.5rem;
+    line-height: 1;
     border-radius: 10px;
     border: 1px solid #d7deea;
     background: var(--ems-neutral-50);
