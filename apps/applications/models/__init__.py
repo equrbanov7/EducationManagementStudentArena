@@ -1,5 +1,6 @@
 from .application import Application
 from .catalog import ApplicationCounter, ApplicationKind, ApplicationUnit
+from .content import ApplicationContentRevision
 from .events import (
     ApplicationAttachment,
     ApplicationEvent,
@@ -11,6 +12,7 @@ __all__ = [
     "Application",
     "ApplicationAttachment",
     "ApplicationCounter",
+    "ApplicationContentRevision",
     "ApplicationEvent",
     "ApplicationKind",
     "ApplicationUnit",

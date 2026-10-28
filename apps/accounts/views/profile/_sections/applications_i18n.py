@@ -10,6 +10,8 @@ Ayrı modul saxlanılır ki, `applications.py` bölmə qurucusu kiçik qalsın.
 
 from django.utils.translation import pgettext
 
+from .applications_content_i18n import content_i18n
+
 _CTX = "applications"
 
 
@@ -144,7 +146,7 @@ def _toasts() -> dict:
 def build_applications_i18n() -> dict:
     """JS-in oxuduğu bütün mətnlər (şablonda ``json_script`` ilə verilir)."""
     catalog = {}
-    for part in (_rows(), _detail(), _actions(), _dialogs(), _toasts()):
+    for part in (_rows(), _detail(), _actions(), _dialogs(), _toasts(), content_i18n()):
         catalog.update(part)
     return catalog
 

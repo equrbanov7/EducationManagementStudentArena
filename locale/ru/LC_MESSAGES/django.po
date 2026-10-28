@@ -111263,6 +111263,89 @@ msgctxt "registrar.catalog"
 msgid "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
 msgstr "Практическое занятие — семинарские занятия называются «Практическое занятие» в журнале и расписании (баллы и часы не меняются)"
 
+msgctxt "applications.content"
+msgid "Müraciəti redaktə et"
+msgstr "Изменить обращение"
+
+msgctxt "applications.content"
+msgid "Müraciəti sil"
+msgstr "Удалить обращение"
+
+msgctxt "applications.content"
+msgid "Müraciəti bərpa et"
+msgstr "Восстановить обращение"
+
+msgctxt "applications.content"
+msgid "Cavabı redaktə et"
+msgstr "Изменить ответ"
+
+msgctxt "applications.content"
+msgid "Cavabı sil"
+msgstr "Удалить ответ"
+
+msgctxt "applications.content"
+msgid "Cavabı bərpa et"
+msgstr "Восстановить ответ"
+
+msgctxt "applications.content"
+msgid "Redaktə edilib"
+msgstr "Изменено"
+
+msgctxt "applications.content"
+msgid "Bu müraciət silinib. Bərpa olunduqda əvvəlki vəziyyəti saxlanılacaq."
+msgstr "Обращение удалено. При восстановлении сохранится прежний статус."
+
+msgctxt "applications.content"
+msgid "Müraciət əvvəlki qərarı və yazışması ilə bərpa edilsin?"
+msgstr "Восстановить обращение с прежним решением и перепиской?"
+
+msgctxt "applications.content"
+msgid ""
+"Müraciət siyahıdan çıxarılsın? Onu «Silinənlər» bölməsindən bərpa edə "
+"bilərsiniz."
+msgstr ""
+"Убрать обращение из списка? Его можно восстановить в разделе «Удалённые»."
+
+msgctxt "applications.content"
+msgid "Əməliyyatı təsdiqləyin. Cavab audit tarixçəsində saxlanılır."
+msgstr "Подтвердите действие. Ответ сохранится в истории аудита."
+
+msgctxt "applications.content"
+msgid "Prorektoru seçin"
+msgstr "Выберите проректора"
+
+msgctxt "applications.content"
+msgid "Silinənlər"
+msgstr "Удалённые"
+
+msgctxt "applications.content"
+msgid "Redaktə et"
+msgstr "Изменить"
+
+msgctxt "applications.content"
+msgid "Mövzu"
+msgstr "Тема"
+
+msgctxt "applications.content"
+msgid "Mətn"
+msgstr "Текст"
+
+msgctxt "applications.content"
+msgid ""
+"Əvvəlki mətn tarixçədə saxlanılır. Müraciətin ünvanı və qərarı dəyişmir."
+msgstr "Прежний текст сохраняется в истории. Адресат и решение не изменяются."
+
+msgctxt "applications.content"
+msgid "Ləğv et"
+msgstr "Отмена"
+
+msgctxt "applications.content"
+msgid "Yadda saxla"
+msgstr "Сохранить"
+
+msgctxt "applications.content"
+msgid "Məktəbə aid kafedranı seçin"
+msgstr "Выберите кафедру школы"
 msgctxt "accounts.grades_notice"
 msgid "Ballarınız haqqında məlumat"
 msgstr "Информация о ваших баллах"

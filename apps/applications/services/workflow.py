@@ -15,6 +15,7 @@ from ..models import ApplicationEvent, ApplicationWatch
 from ..sla import add_working_days, calendar_for
 from ..state_machine import ACTOR_HANDLER, Action, TransitionDenied, ensure_allowed, rule_for
 from . import access, notify
+from .action_lock import refresh_for_action
 from .submit import attach_files
 
 #: ``TransitionDenied`` mətnlərinin konteksti (``state_machine._CTX`` ilə eyni).
@@ -72,13 +73,10 @@ def _take_into_review(user, application, rule):
     _write_event(application, kind=EventKind.SEEN, actor=user, old=old)
 
 
-def _guard(user, application, action, text=""):
-    """İCAZƏ əvvəl, STATUS sonra — qəsdən bu sıra ilə.
-
-    Əks sıra vəziyyət sızdırardı: səlahiyyətsiz istifadəçi «bu status bu əməli
-    qəbul etmir» cavabından müraciətin harada olduğunu öyrənərdi. Ona görə
-    aktor yoxlanışı hər zaman birincidir.
-    """
+def _guard(user, application, action, text="", *, refresh=True):
+    """Təzə sətirdə İCAZƏ əvvəl yoxlanır, STATUS məlumatı sonra açılır."""
+    if refresh:
+        refresh_for_action(application)
     rule = rule_for(action)
     _authorize(user, application, rule)
     # Yararsız mətnli cəhd ``ensure_allowed``-da dayanır — çağıranların hamısı ``atomic``-dir,
@@ -149,9 +147,10 @@ def _touch(application, fields):
 @transaction.atomic
 def mark_seen(*, application, user, request=None) -> bool:
     """Emalçı müraciəti İLK dəfə açanda ``Yeni → Baxılır``. İdempotentdir."""
+    refresh_for_action(application)
     if application.status != ApplicationStatus.SUBMITTED.value:
         return False
-    rule = _guard(user, application, Action.MARK_SEEN)
+    rule = _guard(user, application, Action.MARK_SEEN, refresh=False)
     old = application.status
     application.status = rule.target
     _touch(application, ["status"])
@@ -163,6 +162,7 @@ def mark_seen(*, application, user, request=None) -> bool:
 @transaction.atomic
 def add_comment(*, application, user, text: str, is_internal: bool = False, files=None, request=None):
     """Statusu dəyişməyən qeyd. Daxili qeydi yalnız emalçı yaza bilər."""
+    refresh_for_action(application)
     is_handler = access.can_act(user, application)
     if not is_handler:
         if not access.is_sender(user, application):
@@ -234,32 +234,53 @@ def assign(*, application, user, assignee, note: str = "", request=None):
 
 
 @transaction.atomic
-def forward(*, application, user, target_unit, note: str, keep_watching: bool = True, request=None):
+def forward(
+    *,
+    application,
+    user,
+    target_unit,
+    note: str,
+    keep_watching: bool = True,
+    request=None,
+    recipient_id=None,
+    scope_id=None,
+):
     """Müraciəti BAŞQA şöbəyə ötürür; müraciət İTMİR, məsul şöbə dəyişir."""
     rule = _guard(user, application, Action.FORWARD, note)
     responder = _ResponderAct(user, application)
-    if target_unit is None or not target_unit.is_active:
+    if target_unit is None or not target_unit.is_active or target_unit.organization_id != application.organization_id:
         raise TransitionDenied("unit.unknown", pgettext(_CTX, "Hədəf şöbə tapılmadı."))
     if target_unit.pk == application.current_unit_id:
         raise TransitionDenied("unit.same", pgettext(_CTX, "Hədəf şöbə cari şöbə ilə eyni ola bilməz."))
 
-    from .routing import resolve_scope_unit
+    from .academic_scope import forward_scope
 
     source_unit = application.current_unit
     source_scope = application.current_scope_unit
+    source_recipient = application.assigned_to_id
     old = application.status
     application.status = rule.target
     application.current_unit = target_unit
-    application.current_scope_unit = resolve_scope_unit(target_unit, application.sender_scope_unit)
-    application.assigned_to = None
-    _touch(application, ["status", "current_unit", "current_scope_unit", "assigned_to"])
+    application.current_scope_unit = forward_scope(application, target_unit, scope_id)
+    from .recipients import validate_destination
+
+    application.assigned_to = validate_destination(target_unit, user, application.organization, "staff", recipient_id)
+    application.recipient_restricted = (
+        application.recipient_restricted or source_unit.requires_recipient or target_unit.requires_recipient
+    )
+    _touch(application, ["status", "current_unit", "current_scope_unit", "assigned_to", "recipient_restricted"])
 
     if keep_watching:
-        ApplicationWatch.objects.get_or_create(
+        watch, _created = ApplicationWatch.objects.select_for_update().get_or_create(
             application=application,
             unit=source_unit,
             defaults={"organization": application.organization, "scope_unit": source_scope},
         )
+        if source_unit.requires_recipient and source_recipient is not None:
+            audience = set(watch.recipient_ids or [])
+            audience.add(source_recipient)
+            watch.recipient_ids = sorted(audience)
+            watch.save(update_fields=["recipient_ids", "updated_at"])
 
     _write_event(
         application,

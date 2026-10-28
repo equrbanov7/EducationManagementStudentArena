@@ -64,7 +64,7 @@ def test_student_complaint_resolves_to_the_faculty_dean(world):
         kind_of(world, "sikayet"), world["student"], organization=world["organization"]
     )
     assert unit.code == "dekan"
-    assert scope == world["tree"]["faculty"]
+    assert scope == world["tree"]["specialty"]
 
 
 def test_central_units_never_carry_a_scope_unit(world):

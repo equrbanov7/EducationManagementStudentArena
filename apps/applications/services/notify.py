@@ -51,6 +51,8 @@ def handler_recipients(application):
     daşıyıcılar da (koordinator/dekan) bildiriş alır — əvvəl yalnız org-səviyyəli
     rollar seçilirdi və heç kim xəbər tutmurdu.
     """
+    if application.current_unit.requires_scope and application.current_scope_unit_id is None:
+        return []
     role_names = [name for name in (application.current_unit.role_names or []) if name]
     if application.current_scope_unit_id is None:
         from apps.organizations.models import Membership
@@ -71,6 +73,8 @@ def handler_recipients(application):
             application.current_scope_unit,
             role_names=role_names,
         )
+    if application.current_unit.requires_recipient:
+        memberships = memberships.filter(user_id=application.assigned_to_id)
     seen = {}
     for membership in memberships:
         seen.setdefault(membership.user_id, membership.user)
@@ -78,12 +82,15 @@ def handler_recipients(application):
 
 
 def watcher_recipients(application):
+    from . import access
+
     users = {}
     for watch in application.watches.select_related("unit", "scope_unit"):
         for membership in members_covering_unit(
             application.organization, watch.scope_unit, role_names=watch.unit.role_names
         ):
-            users.setdefault(membership.user_id, membership.user)
+            if access.watch_is_visible(membership.user, application, watch):
+                users.setdefault(membership.user_id, membership.user)
     users.pop(application.created_by_id, None)
     return list(users.values())
 

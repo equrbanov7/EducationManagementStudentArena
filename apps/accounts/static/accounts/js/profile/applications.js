@@ -467,7 +467,7 @@
 
         window.EMSDelegate.on("click", "[data-apx-tab]", function (event, node) {
             NS.state.tab = node.getAttribute("data-apx-tab");
-            if (NS.state.tab === "archive") {
+            if (NS.state.tab === "archive" || NS.state.tab === "deleted") {
                 NS.state.stat = "all";
             }
             NS.state.page = 1;

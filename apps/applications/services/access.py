@@ -5,7 +5,8 @@
 ``can_view``  — «bu müraciəti OXUYA bilərmi?» Sahib, cari şöbənin əhatəli
                 emalçısı, İZLƏYƏN şöbənin əhatəli emalçısı, təşkilat üzrə nəzarətçi
                 (``can_oversee``: ``application.view_all`` / ``application.manage`` —
-                RİM/rektor/prorektor), superuser və təşkilat sahibi.
+                RİM/rektor/prorektor), superuser və təşkilat sahibi. Konkret ünvanlanan
+                müraciətin tarixçəsini ümumi manage/view_all açarı genişləndirmir.
 ``can_act``   — «bu müraciətə QƏRAR verə bilərmi?» CARİ şöbənin əhatəli emalçısı
                 və ya «hər müraciəti cavablandıran» RİM şöbəsinin emalçısı
                 (``is_universal_responder``, sahib 2026-10-26), müraciət AÇIQ olduqda.
@@ -18,14 +19,14 @@ kifayətdir; əks halda üzvlüyün ``scope_unit``-i müraciətin
 
 from __future__ import annotations
 
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
 
 from apps.organizations.public import ancestor_unit_ids, request_active_memberships
 from core.constants import RoleScopeType
 from core.permissions import has_permission
 
 from ..constants import PERM_MANAGE, PERM_VIEW_ALL, RESPONDER_UNIT_CODE, ResolveBy
-from ..models import ApplicationUnit
+from ..models import ApplicationUnit, ApplicationWatch
 
 
 def _is_privileged(user, organization) -> bool:
@@ -140,6 +141,8 @@ def handles_unit(user, organization, unit: ApplicationUnit, scope_unit) -> bool:
     """İstifadəçi verilmiş şöbəni (verilmiş aidiyyətlə) emal edirmi."""
     if unit is None:
         return False
+    if unit.requires_scope and scope_unit is None:
+        return False
     role_names = set(unit.role_names)
     if not role_names:
         return False
@@ -205,14 +208,28 @@ def is_current_handler(user, application) -> bool:
     «Yeni → Baxılır» avtomatik keçidi və şöbəyə «RİM cavab verdi» bildirişi bu fərqə söykənir:
     RİM başqa şöbənin müraciətini sadəcə AÇANDA şöbənin «Yeni» nişanı itməməlidir.
     """
-    return handles_unit(user, application.organization, application.current_unit, application.current_scope_unit)
+    return (not application.current_unit.requires_recipient or application.assigned_to_id == user.pk) and handles_unit(
+        user, application.organization, application.current_unit, application.current_scope_unit
+    )
 
 
 def is_handler_anywhere(user, organization) -> bool:
     return bool(handled_unit_ids(user, organization))
 
 
-def can_view(user, application) -> bool:
+def recipient_restricted(application) -> bool:
+    return application.recipient_restricted or application.current_unit.requires_recipient
+
+
+def watch_is_visible(user, application, watch) -> bool:
+    if user is None or not getattr(user, "is_authenticated", False):
+        return False
+    if (watch.unit.requires_recipient or watch.recipient_ids) and user.pk not in (watch.recipient_ids or []):
+        return False
+    return handles_unit(user, application.organization, watch.unit, watch.scope_unit)
+
+
+def _can_view_application(user, application) -> bool:
     organization = application.organization
     if _is_privileged(user, organization):
         return True
@@ -220,14 +237,33 @@ def can_view(user, application) -> bool:
         return False
     if application.created_by_id == user.pk:
         return True
-    if can_oversee(user, organization):
+    if is_universal_responder(user, organization):
         return True
-    if handles_unit(user, organization, application.current_unit, application.current_scope_unit):
+    if not recipient_restricted(application) and can_oversee(user, organization):
+        return True
+    if is_current_handler(user, application):
         return True
     for watch in application.watches.select_related("unit", "scope_unit"):
-        if handles_unit(user, organization, watch.unit, watch.scope_unit):
+        if watch_is_visible(user, application, watch):
             return True
     return False
+
+
+def can_manage_application(user, application) -> bool:
+    """Bütün müraciəti yalnız göndərən, universal RİM və sahib silib bərpa edir."""
+    if not _can_view_application(user, application):
+        return False
+    return bool(
+        is_sender(user, application)
+        or _is_privileged(user, application.organization)
+        or is_universal_responder(user, application.organization)
+    )
+
+
+def can_view(user, application) -> bool:
+    if application.deleted_at is not None:
+        return can_manage_application(user, application)
+    return _can_view_application(user, application)
 
 
 def can_act(user, application) -> bool:
@@ -238,7 +274,7 @@ def can_act(user, application) -> bool:
     dəstək/bərpa əməlləri üçün. RİM şöbəsinin emalçısı da daxildir
     (``is_universal_responder`` — sahib 2026-10-26: «RİM hər müraciəti cavablandıra bilsin»).
     """
-    if not application.is_open:
+    if application.deleted_at is not None or not application.is_open:
         return False
     if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
         return True
@@ -254,18 +290,22 @@ def can_see_internal(user, application) -> bool:
     emalçı ÖZ yazdığı daxili qeydi də görmürdü. Görmə: superuser, `application.manage`
     daşıyıcısı, cari şöbənin emalçısı və ya izləyən (watch) şöbənin emalçısı.
     """
+    if application.deleted_at is not None and not can_manage_application(user, application):
+        return False
     if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
         return True
     organization = application.organization
-    if has_app_permission(user, organization, PERM_MANAGE):
+    if _is_privileged(user, organization):
         return True
-    if handles_unit(user, organization, application.current_unit, application.current_scope_unit):
+    if not recipient_restricted(application) and has_app_permission(user, organization, PERM_MANAGE):
+        return True
+    if is_current_handler(user, application):
         return True
     # RİM cavab verəndə yazışmanın daxili qeydlərini də görməlidir (özü də daxili qeyd yaza bilir).
     if is_universal_responder(user, organization):
         return True
     for watch in application.watches.select_related("unit", "scope_unit"):
-        if handles_unit(user, organization, watch.unit, watch.scope_unit):
+        if watch_is_visible(user, application, watch):
             return True
     return False
 
@@ -278,6 +318,10 @@ def can_view_attachment(user, attachment) -> bool:
     sahibinə açıq idi. Endirmə, media siyasəti və detal siyahısı EYNİ qaydanı işlədir.
     """
     application = attachment.application
+    if application.deleted_at is not None:
+        return False
+    if attachment.event_id and attachment.event.hidden_at:
+        return False
     if not can_view(user, application):
         return False
     if attachment.event_id is not None and attachment.event.is_internal:
@@ -289,50 +333,70 @@ def is_sender(user, application) -> bool:
     return bool(user and getattr(user, "is_authenticated", False) and application.created_by_id == user.pk)
 
 
-def inbox_q(user, organization) -> Q:
-    """«Mənə gələnlər» filtri — emal etdiyi şöbə + əhatəli aidiyyət.
+def _unit_scope_q(user, organization, *, unit_field, scope_field) -> Q:
+    """``handles_unit`` ilə eyni rol + struktur əhatəsi, list/count üçün.
 
-    Org-scope üzvlük üçün aidiyyət məhdudiyyəti yoxdur; unit-scope üzvlük üçün
-    ``current_scope_unit`` üzvlüyün alt-ağacında olmalıdır (``path`` prefiksi)
-    və ya ümumiyyətlə təyin olunmamalıdır.
+    Hər rol yalnız öz şöbəsi və öz scope-u ilə cütləşdirilir; başqa rolun
+    organization əhatəsi dar ixtisas üzvlüyünü genişləndirə bilməz.
     """
-    unit_ids = handled_unit_ids(user, organization)
-    if not unit_ids:
-        return Q(pk__in=[])
-
     memberships = active_memberships(user, organization)
-    if any(membership.role.scope_type == RoleScopeType.ORGANIZATION for membership in memberships):
-        return Q(current_unit_id__in=unit_ids)
+    permitted = Q(pk__in=[])
+    for unit in active_units(organization):
+        for membership in memberships:
+            if membership.role.name not in unit.role_names:
+                continue
+            scope = Q()
+            if (
+                unit.resolve_by != ResolveBy.ORGANIZATION.value
+                and membership.role.scope_type != RoleScopeType.ORGANIZATION
+            ):
+                scope = Q(pk__in=[]) if unit.requires_scope else Q(**{f"{scope_field}__isnull": True})
+                if membership.scope_unit_id:
+                    scope |= Q(**{f"{scope_field}_id": membership.scope_unit_id}) | Q(
+                        **{f"{scope_field}__path__startswith": f"{membership.scope_unit.path}/"}
+                    )
+            if unit.requires_scope:
+                scope &= Q(**{f"{scope_field}__isnull": False})
+            permitted |= Q(**{f"{unit_field}_id": unit.pk}) & scope
+    return permitted
 
-    scope_q = Q(current_scope_unit__isnull=True)
-    for membership in memberships:
-        scope_unit = membership.scope_unit
-        if scope_unit is None:
-            continue
-        scope_q |= Q(current_scope_unit_id=scope_unit.pk) | Q(
-            current_scope_unit__path__startswith=f"{scope_unit.path}/"
-        )
-    return Q(current_unit_id__in=unit_ids) & scope_q
+
+def inbox_q(user, organization) -> Q:
+    """«Mənə gələnlər» — eyni şöbənin roluna aid əhatə + konkret ünvan."""
+    if not handled_unit_ids(user, organization):
+        return Q(pk__in=[])
+    recipient_q = Q(current_unit__requires_recipient=False) | Q(assigned_to=user)
+    return _unit_scope_q(user, organization, unit_field="current_unit", scope_field="current_scope_unit") & recipient_q
 
 
 def watching_q(user, organization) -> Q:
-    unit_ids = handled_unit_ids(user, organization)
-    if not unit_ids:
+    if not handled_unit_ids(user, organization):
         return Q(pk__in=[])
-    return Q(watches__unit_id__in=unit_ids) & ~Q(current_unit_id__in=unit_ids)
+    audience = Q(unit__requires_recipient=False, recipient_ids=[]) | Q(recipient_ids__contains=[user.pk])
+    watches = ApplicationWatch.objects.filter(application_id=OuterRef("pk"), organization=organization).filter(
+        _unit_scope_q(user, organization, unit_field="unit", scope_field="scope_unit") & audience
+    )
+    # EXISTS bütün şərtləri eyni watch sətrinə bağlayır; başqa şöbənin scope-u
+    # və ya recipient siyahısı ilə yanlış JOIN uyğunluğu yarana bilməz.
+    return Q(Exists(watches)) & ~inbox_q(user, organization)
 
 
 def visible_q(user, organization) -> Q:
     """İstifadəçinin ÜMUMİYYƏTLƏ görə bildiyi müraciətlər (bütün tablar)."""
-    if can_oversee(user, organization):
+    own_access = Q(created_by=user) | inbox_q(user, organization) | watching_q(user, organization)
+    if _is_privileged(user, organization) or is_universal_responder(user, organization):
         return Q()
-    return Q(created_by=user) | inbox_q(user, organization) | watching_q(user, organization)
+    if can_oversee(user, organization):
+        public = Q(recipient_restricted=False, current_unit__requires_recipient=False)
+        return public | own_access
+    return own_access
 
 
 __all__ = [
     "active_memberships",
     "active_units",
     "can_act",
+    "can_manage_application",
     "can_oversee",
     "can_view",
     "can_view_attachment",

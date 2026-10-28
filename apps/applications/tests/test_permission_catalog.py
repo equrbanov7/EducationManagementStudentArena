@@ -55,6 +55,7 @@ def test_member_office_staff_may_send():
 def test_handler_roles_hold_the_handle_key():
     for name in (
         "dean",
+        "vice_dean",
         "chair_head",
         "program_coordinator",
         # 2026-10-14 (sahib): tyutor = proqram koordinatoru — eyni şöbənin emalçısı.

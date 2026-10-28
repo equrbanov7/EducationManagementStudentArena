@@ -81,6 +81,15 @@ class ApplicationEvent(UUIDModel, TimeStampedModel):
         help_text="Yalnız emalçılar görür — müraciət sahibinə göstərilmir.",
     )
 
+    hidden_at = models.DateTimeField(null=True, blank=True, editable=False)
+    hidden_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="hidden_application_events",
+    )
+
     objects = models.Manager()
 
     class Meta:
@@ -108,6 +117,7 @@ class ApplicationWatch(UUIDModel, TimeStampedModel):
 
     Şöbə + aidiyyət bölməsi cütü saxlanır (müraciətin özü artıq başqa şöbədədir),
     yəni izləmə hüququ yönləndirmə ANINDAKI əhatəyə görə qiymətləndirilir.
+    Konkret ünvanlanan şöbədə recipient_ids yalnız həqiqi ünvanlanan şəxsləri saxlayır.
     """
 
     organization = models.ForeignKey(
@@ -132,6 +142,8 @@ class ApplicationWatch(UUIDModel, TimeStampedModel):
         on_delete=models.SET_NULL,
         related_name="application_watches",
     )
+
+    recipient_ids = models.JSONField(default=list, blank=True, editable=False)
 
     objects = models.Manager()
 

@@ -23,7 +23,9 @@ logger = logging.getLogger(__name__)
 
 def stale_resolved(*, organization=None, today=None, working_days=AUTO_CLOSE_WORKING_DAYS):
     today = today or timezone.localdate()
-    queryset = Application.objects.filter(status=ApplicationStatus.RESOLVED, resolved_at__isnull=False)
+    queryset = Application.objects.filter(
+        status=ApplicationStatus.RESOLVED, resolved_at__isnull=False, deleted_at__isnull=True
+    )
     if organization is not None:
         queryset = queryset.filter(organization=organization)
     calendars: dict = {}  # təşkilat başına bir təqvim (il başına bir oxu)
@@ -46,7 +48,7 @@ def close_stale_resolved(*, organization=None, today=None, working_days=AUTO_CLO
     for application in stale_resolved(organization=organization, today=today, working_days=working_days):
         with transaction.atomic():
             fresh = Application.objects.select_for_update().get(pk=application.pk)
-            if fresh.status != ApplicationStatus.RESOLVED.value:
+            if fresh.deleted_at is not None or fresh.status != ApplicationStatus.RESOLVED.value:
                 continue
             old = fresh.status
             fresh.status = ApplicationStatus.CLOSED
