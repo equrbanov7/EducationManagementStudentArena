@@ -548,7 +548,9 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
                 "outcomes": MIN_OUTCOMES,
                 "weeks": hours["expected_rows"] or WEEK_ROWS,
             },
-            "can_submit": (not readonly) and completion["percent"] >= 100,
+            "can_submit": (not readonly)
+            and version_row.status != SyllabusStatus.APPROVED
+            and completion["percent"] >= 100,
             "actions": list(context["actions"]),
             # Təkrar istifadə banneri (bağlı / mənbə / «artıq sillabusu var») — bax `reuse_context`.
             "reuse": editor_reuse_state(

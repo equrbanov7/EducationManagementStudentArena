@@ -105,6 +105,7 @@ from .constants import (
     SyllabusStatus,
 )
 from .document import build_document  # noqa: F401
+from .editing import approved_edits_enabled
 from .policy import assessment_weights, standard_midterm, standard_project, standard_splits  # noqa: F401
 from .rules import for_version as rule_for_version
 from .services import (  # noqa: F401
@@ -247,7 +248,8 @@ def build_syllabus_editor_context(request, *, organization, version) -> dict:
         }
         for section_id in rule.section_order
     ]
-    view_state = "normal" if version.status in EDITABLE_STATUSES else "readonly"
+    editable = not version.is_locked and (version.status != SyllabusStatus.APPROVED.value or is_author(actor, syllabus))
+    view_state = "normal" if editable else "readonly"
     return {
         "syllabus": syllabus,
         "version": version,
@@ -349,6 +351,8 @@ def build_review_queue_context(
 
 
 __all__ = [
+    "EDITABLE_STATUSES",
+    "approved_edits_enabled",
     "build_document",
     "assessment_weights",
     "standard_midterm",
