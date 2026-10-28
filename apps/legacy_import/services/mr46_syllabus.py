@@ -1,7 +1,7 @@
 """MR46 sabit bərpa müqaviləsi; əvvəlki public çağırış səthi saxlanır."""
 
 from . import exact_syllabus_recovery as core
-from .exact_syllabus_recovery import RestoreError, digest, model  # noqa: F401
+from .exact_syllabus_recovery import RestoreError, digest, metadata_digest, model  # noqa: F401
 
 ORG = "526cfa63-4f80-4bba-a7a7-61c8fbb3d918"
 PERIOD = "a4f88744-8d49-4772-84ef-c28a96c3b372"
