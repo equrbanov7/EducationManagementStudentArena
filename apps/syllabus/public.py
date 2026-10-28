@@ -250,12 +250,15 @@ def build_syllabus_editor_context(request, *, organization, version) -> dict:
     ]
     editable = not version.is_locked and (version.status != SyllabusStatus.APPROVED.value or is_author(actor, syllabus))
     view_state = "normal" if editable else "readonly"
+    from core.runtime_settings_syllabus import approval_required
+
     return {
         "syllabus": syllabus,
         "version": version,
         "sections": sections,
         "completion": report.as_dict(),
         "view_state": view_state,
+        "approval_required": approval_required(),
         "actions": available_actions(version=version, actor=actor),
         # Audit 2026-09-28 SYL-7: GET zamanı yalnız MÜƏLLİFİN sessiyası plan
         # saatını/həftəlik bölgünü yazır — kafedranın baxışı heç nə dəyişmir.

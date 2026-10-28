@@ -112,6 +112,11 @@ def _create_sections(version, *, source=None, actor_user=None):
     source_map = {}
     if source is not None:
         source_map = {row.section_id: row.data for row in source.sections.all()}
+    info = {**BLANK_SECTION_DATA[SectionKey.INFO.value], **(source_map.get(SectionKey.INFO.value) or {})}
+    author = version.syllabus.author or actor_user
+    if author is not None and not info.get("teacher"):
+        info["teacher"] = author.get_full_name().strip() or author.username
+    source_map[SectionKey.INFO.value] = info
     organization = version.organization
     selfwork = rule_for_version(version, organization).selfwork
     rows = [

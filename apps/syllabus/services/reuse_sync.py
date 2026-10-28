@@ -12,11 +12,26 @@ from core.audit import log_action
 from core.constants import AuditAction
 
 from ..constants import OPEN_STATUSES, PERM_EDIT
-from ..models import ChangeKind, Syllabus
+from ..models import ChangeKind, Syllabus, SyllabusVersion
 from ..state_machine import TransitionDenied
 from . import reuse_rules as rules
 from .reuse import _approve_as_reuse, _denied, _new_draft
 from .scoping import is_author
+
+
+def _snapshot_is_behind(base, mirrored_version_id, copied_at) -> bool:
+    """PK eyni qalsa da, mənbənin son təsdiqi hədəfin nüsxəsindən yeni ola bilər.
+
+    Tarixi damğası çatışmayan sətirdə aktuallıq sübut olunmur: onu aktual
+    saymırıq. Məzmun heç vaxt oxu/yoxlama zamanı dəyişdirilmir.
+    """
+    if base is None:
+        return False
+    if mirrored_version_id != base.pk:
+        return True
+    if base.approved_at is None or copied_at is None:
+        return True
+    return base.approved_at > copied_at
 
 
 def is_behind(target) -> bool:
@@ -25,7 +40,7 @@ def is_behind(target) -> bool:
         return False
     base = rules.link_base(target.reused_from)
     current = target.approved_version
-    return base is not None and (current is None or current.source_version_id != base.pk)
+    return _snapshot_is_behind(base, getattr(current, "source_version_id", None), getattr(current, "approved_at", None))
 
 
 def linked_summary(sources) -> dict:
@@ -35,13 +50,13 @@ def linked_summary(sources) -> dict:
         return {}
     summary: dict = {}
     pairs = Syllabus.objects.filter(reused_from_id__in=list(by_id), is_active=True).values_list(
-        "reused_from_id", "approved_version__source_version_id"
+        "reused_from_id", "approved_version__source_version_id", "approved_version__approved_at"
     )
-    for source_id, mirrored in pairs:
+    for source_id, mirrored, copied_at in pairs:
         entry = summary.setdefault(source_id, {"linked": 0, "behind": 0})
         entry["linked"] += 1
         base = rules.link_base(by_id[source_id])
-        if base is not None and mirrored != base.pk:
+        if _snapshot_is_behind(base, mirrored, copied_at):
             entry["behind"] += 1
     return summary
 
@@ -74,7 +89,13 @@ def sync_from_source(*, target_syllabus, actor, plan_hours=None, request=None):
     if code:
         raise _denied(code)
     base = rules.link_base(source)
-    if current is not None and current.source_version_id == base.pk:
+    # Mənbə autosave-i də bu sətirdə kilid alır: nüsxənin məzmunu ilə onun
+    # təsdiq damğası eyni reviziyadan gəlməlidir.
+    base = SyllabusVersion.objects.select_for_update(of=("self",)).get(pk=base.pk)
+    source.approved_version = base
+    if not _snapshot_is_behind(
+        base, getattr(current, "source_version_id", None), getattr(current, "approved_at", None)
+    ):
         raise _denied(rules.CODE_UP_TO_DATE)
     previous = current.source_version if current is not None and current.source_version_id else None
     draft = _new_draft(

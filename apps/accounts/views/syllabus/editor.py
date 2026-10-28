@@ -484,6 +484,7 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
             "view_state": context["view_state"],
             "access_denied_message": "",
             "readonly": readonly,
+            "approval_required": context["approval_required"],
             "syllabus_id": str(syllabus.pk),
             "version_id": str(version_row.pk),
             "header": {

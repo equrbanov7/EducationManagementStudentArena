@@ -33,7 +33,7 @@ naviqasiya, həm də autosave üçün açardır.
              placeholder="{% trans 'Ad, soyad və vəzifə' context 'accounts.syllabus' %}">
     </div>
     <div class="syl-field">
-      <label for="syl-office">{% trans "Məsləhət saatı" context "accounts.syllabus" %} <span class="syl-req" aria-hidden="true">*</span></label>
+      <label for="syl-office">{% trans "Məsləhət saatı (istəyə bağlı)" context "accounts.syllabus" %}</label>
       <input id="syl-office" type="text" class="syl-input" data-field="office_hours"
              value="{{ p.data.office_hours|default:'' }}" {% if se.readonly %}disabled{% endif %}
              placeholder="{% trans 'Çərşənbə 14:00–16:00, otaq A-312' context 'accounts.syllabus' %}">
