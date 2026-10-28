@@ -227,6 +227,7 @@ def teachers(request) -> JsonResponse:
         organization,
         chair,
         search=(request.GET.get("q") or "").strip(),
+        limit=None,  # Modal lokal axtarır: kafedranın ilk 50-dən sonrakı müəllimləri də yüklə.
         include_outside=request.GET.get("outside") == "1",
     )
     year = request.GET.get("year") or ""
