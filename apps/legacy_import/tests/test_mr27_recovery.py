@@ -8,7 +8,7 @@ import tempfile
 
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from apps.accounts.models import UserProfile
 from apps.legacy_import.models import LegacyEntityMap
@@ -152,6 +152,7 @@ class MR27RecoveryTests(TestCase):
             call_command("recover_mr27_journal", **kwargs)
         return out.getvalue()
 
+    @override_settings(RLS_TRANSACTION_SCOPED=True)
     def test_dry_run_rolls_back_then_apply_restores_three_and_repeat_is_empty(self):
         out = self.run_command(apply=False)
         self.assertIn("created_lessonmark=15", out)

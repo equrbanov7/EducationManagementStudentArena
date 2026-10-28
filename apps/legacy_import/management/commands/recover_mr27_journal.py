@@ -11,6 +11,7 @@ from apps.legacy_import.services.mr27_plan import RecoveryError, load
 from apps.legacy_import.services.mr27_recovery import Recovery
 from apps.legacy_import.services.mr27_undo import undo
 from apps.legacy_import.services.repair_support import RepairContext, establish_rls_scope, resolve_organization
+from core.rls_pooling import rls_worker_atomic
 
 
 class Command(BaseCommand):
@@ -25,6 +26,7 @@ class Command(BaseCommand):
         parser.add_argument("--include-teacher-assertion", action="store_true")
         parser.add_argument("--undo", default="")
 
+    @rls_worker_atomic()
     def handle(self, *args, **options):
         actor = get_user_model().objects.filter(username=options["actor"], is_active=True, is_superuser=True).first()
         if actor is None:
