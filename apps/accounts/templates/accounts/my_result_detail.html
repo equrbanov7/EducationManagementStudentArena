@@ -3,6 +3,7 @@
 {% block title %}{% trans "title" context "accounts.my_result_detail_page" %} - {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/ems_ui/validation.css' %}">
 <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">
 <link rel="stylesheet" href="{% static 'accounts/css/my_result_detail_page.css' %}">
 {% if item_type == "labs" %}
@@ -231,6 +232,7 @@
                 {% endif %}
             </div>
         </div>
+        {% include "partials/_result_reconciliation_notice.html" %}
     </div>
 </div>
 {% endblock %}
