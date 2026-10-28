@@ -32,12 +32,12 @@ ROWS = [
     ),
     ("Tələbə", "Student", "Студент", "Öğrenci", "Studierende Person"),
     ("Tələbəni seçin", "Select a student", "Выберите студента", "Öğrenci seçin", "Person auswählen"),
-    ("saat", "hours", "часов", "saat", "Stunden"),
+    ("saat", "hours", "часов", "ders saati", "Stunden"),
     ("Üzrlü sayılan saat", "Excused hours", "Зачтённые часы", "Mazeretli saatler", "Entschuldigte Stunden"),
     ("Səbəb", "Reason", "Причина", "Neden", "Grund"),
     ("Tətbiq et", "Apply", "Применить", "Uygula", "Anwenden"),
     ("Geri alma səbəbi", "Reversal reason", "Причина отмены", "Geri alma nedeni", "Grund der Rücknahme"),
-    ("Geri al", "Reverse", "Отменить", "Geri al", "Zurücknehmen"),
+    ("Geri al", "Reverse", "Отменить", "Değişikliği geri al", "Zurücknehmen"),
     (
         "Ümumi üzrlü: %(hours)s saat",
         "Total excused: %(hours)s hours",
@@ -128,12 +128,24 @@ def main():
             if catalog.find(row[0], msgctxt=CTX) is None
         ]
         added = len(additions)
-        if added:
-            # Preserve all existing comments, wrapping and ordering verbatim.
-            with path.open("a", encoding="utf-8") as output:
-                output.write("\n" + "\n".join(str(entry) for entry in additions))
+        updated = 0
+        text = path.read_text(encoding="utf-8")
+        for row in ROWS:
+            entry = catalog.find(row[0], msgctxt=CTX)
+            if entry is not None and entry.msgstr != row[index]:
+                previous = str(entry)
+                entry.msgstr = row[index]
+                if previous not in text:
+                    raise ValueError("Context entry formatting changed; review before updating")
+                text = text.replace(previous, str(entry), 1)
+                updated += 1
+        if added or updated:
+            # Preserve unrelated comments, wrapping and ordering verbatim.
+            path.write_text(
+                text + ("\n" + "\n".join(str(entry) for entry in additions) if added else ""), encoding="utf-8"
+            )
             subprocess.run(["msgfmt", "-o", str(path.with_suffix(".mo")), str(path)], check=True)
-        print(f"{language}: +{added}")
+        print(f"{language}: +{added}, updated={updated}")
 
 
 if __name__ == "__main__":

@@ -110503,7 +110503,7 @@ msgstr "Öğrenci seçin"
 
 msgctxt "registrar.absence_credit"
 msgid "saat"
-msgstr "saat"
+msgstr "ders saati"
 
 msgctxt "registrar.absence_credit"
 msgid "Üzrlü sayılan saat"
@@ -110523,7 +110523,7 @@ msgstr "Geri alma nedeni"
 
 msgctxt "registrar.absence_credit"
 msgid "Geri al"
-msgstr "Geri al"
+msgstr "Değişikliği geri al"
 
 msgctxt "registrar.absence_credit"
 msgid "Ümumi üzrlü: %(hours)s saat"
