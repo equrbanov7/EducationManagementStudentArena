@@ -131,6 +131,10 @@
         )
             .then(function (payload) {
                 renderRows(payload.rows || [], payload.lines);
+                var recorded = q("[data-wlm-recorded-hours]");
+                if (recorded && typeof payload.recorded_hours_html === "string") {
+                    recorded.innerHTML = payload.recorded_hours_html;
+                }
                 renderSummary(payload.summary);
                 renderTotal(payload.summary, payload.rows || []);
                 var exportLink = q("[data-wlm-export]");

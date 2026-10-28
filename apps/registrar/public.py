@@ -1,10 +1,4 @@
-"""Public read-facing helpers the accounts profile reuses for the student cabinet.
-
-Mirrors the ``apps.appeals.public`` pattern: the accounts profile context
-builder calls :func:`build_student_subjects_context` for the "Fənlərim" section
-without importing registrar internals. Tenant/RLS scoping is inherited from the
-active request; the helper only reads the requesting student's own record.
-"""
+"""Registrar fasadı: kabinet, dərs yükü, imtahan və tenant daxilində bərpa inteqrasiyaları."""
 
 from __future__ import annotations
 
@@ -28,17 +22,21 @@ from apps.registrar.exam_bridge import (
     record_exam_result,
     record_final_result,
 )
+from apps.registrar.gradebook_marks import recompute_absence_hours_many
 from apps.registrar.integrity import eligible_instructor_user_ids
 from apps.registrar.midterm_bridge import record_midterm_result, student_interim_rows
 from apps.registrar.models import StudentAcademicRecord
 from apps.registrar.services import enroll_student_in_subject
 from apps.registrar.signals import student_group_changed
+from apps.registrar.teaching_hours import recorded_teaching_hours
 
 # İmtahan mərkəzi ↔ jurnal körpüsü — exams tərəfindən bu fasad üzərindən çağırılır
 # (apps/registrar/exam_bridge.py). Re-eksport, boundary-safe.
 __all__ = [
+    "recorded_teaching_hours",
     "eligible_instructor_user_ids",
     "enroll_student_in_subject",
+    "recompute_absence_hours_many",
     "analytics",
     "exam_journal_gaps",
     "exam_journal_link",
@@ -56,7 +54,6 @@ __all__ = [
     "record_midterm_result",
     "student_group_changed",
 ]
-
 #: Tələbənin kabinetdən ÖZ transkriptini görməsi/yükləməsi.
 #: 2026-08 qərarı (sahib): transkript tələbəyə birbaşa verilmir — rəsmi sənəd
 #: kimi MÜRACİƏT (ərizə) pəncərəsindən keçməlidir. Müraciət axını hələ

@@ -6,7 +6,8 @@ Yazma qatı ayrıdır: :mod:`apps.registrar.handover_actions`.
 QƏRARLAR (sahibin sualları ilə eyni sırada)
 ──────────────────────────────────────────────────────────────────────────────
 
-**1. Nə köçür?** YALNIZ ``CourseOffering.instructor``. Jurnal sahibliyi bu
+**1. Nə köçür?** ``CourseOffering.instructor``; iki tərəfin aktiv jurnal payları
+undo üçün təhvil qeydində saxlanılaraq söndürülür. Jurnal sahibliyi bu
 sahədən oxunur (``journal_access._is_live_assigned_instructor``), ona görə bir
 sahə kifayətdir. KöçürülMƏYƏNlər və səbəbləri :mod:`apps.registrar.models.handover`
 başlığında sənədlidir (bal, davamiyyət, ``Lesson.instructor``, sillabus).

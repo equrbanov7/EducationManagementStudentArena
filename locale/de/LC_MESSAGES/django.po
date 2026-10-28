@@ -112187,3 +112187,236 @@ msgstr "Diese Korrektur ist nicht erlaubt."
 msgctxt "registrar.absence_credit"
 msgid "Ümumi üzrlü qayıb saatı yadda saxlanıldı."
 msgstr "Die entschuldigten Fehlstunden wurden gespeichert."
+msgctxt "accounts.handover"
+msgid "Jurnal payları təhvildən sonra dəyişib — əvvəlcə payları yoxlayın."
+msgstr "Die Journalfreigaben wurden nach der Übergabe geändert — prüfen Sie zuerst die Freigaben."
+
+msgctxt "registrar.journal_history"
+msgid "Jurnalın müəllim tarixçəsi"
+msgstr "Lehrkräfteverlauf des Journals"
+
+msgctxt "registrar.journal_history"
+msgid "Cari jurnal sahibi"
+msgstr "Aktuell zuständige Lehrkraft"
+
+msgctxt "registrar.journal_history"
+msgid "Təhvillər"
+msgstr "Übergaben"
+
+msgctxt "registrar.journal_history"
+msgid "Geri qaytarılıb"
+msgstr "Rückgängig gemacht"
+
+msgctxt "registrar.journal_history"
+msgid "Bu səhifədə göstərilən dərslər"
+msgstr "Auf dieser Seite angezeigte Stunden"
+
+msgctxt "registrar.journal_history"
+msgid "Dərs müəllimi"
+msgstr "Lehrkraft der Stunde"
+
+msgctxt "registrar.journal_history"
+msgid "Dərsi yaradan"
+msgstr "Stunde erstellt von"
+
+msgctxt "registrar.journal_history"
+msgid "Qeyd müəllifi"
+msgstr "Eintrag erstellt von"
+
+msgctxt "registrar.journal_history"
+msgid "Məlum deyil"
+msgstr "Unbekannt"
+
+msgctxt "registrar.journal_history"
+msgid "Tarixi müəllim məlum deyilsə, cari sahib onun yerinə göstərilmir."
+msgstr "Ist die frühere Lehrkraft unbekannt, wird die aktuell zuständige Lehrkraft nicht an ihrer Stelle angegeben."
+msgctxt "applications.content"
+msgid "Müraciəti redaktə et"
+msgstr "Anfrage bearbeiten"
+
+msgctxt "applications.content"
+msgid "Müraciəti sil"
+msgstr "Anfrage löschen"
+
+msgctxt "applications.content"
+msgid "Müraciəti bərpa et"
+msgstr "Anfrage wiederherstellen"
+
+msgctxt "applications.content"
+msgid "Cavabı redaktə et"
+msgstr "Antwort bearbeiten"
+
+msgctxt "applications.content"
+msgid "Cavabı sil"
+msgstr "Antwort löschen"
+
+msgctxt "applications.content"
+msgid "Cavabı bərpa et"
+msgstr "Antwort wiederherstellen"
+
+msgctxt "applications.content"
+msgid "Redaktə edilib"
+msgstr "Bearbeitet"
+
+msgctxt "applications.content"
+msgid "Bu müraciət silinib. Bərpa olunduqda əvvəlki vəziyyəti saxlanılacaq."
+msgstr ""
+"Diese Anfrage wurde gelöscht. Bei der Wiederherstellung bleibt der vorherige"
+" Status erhalten."
+
+msgctxt "applications.content"
+msgid "Müraciət əvvəlki qərarı və yazışması ilə bərpa edilsin?"
+msgstr ""
+"Anfrage mit bisheriger Entscheidung und Unterhaltung wiederherstellen?"
+
+msgctxt "applications.content"
+msgid ""
+"Müraciət siyahıdan çıxarılsın? Onu «Silinənlər» bölməsindən bərpa edə "
+"bilərsiniz."
+msgstr ""
+"Anfrage aus der Liste entfernen? Sie können sie unter Gelöscht "
+"wiederherstellen."
+
+msgctxt "applications.content"
+msgid "Əməliyyatı təsdiqləyin. Cavab audit tarixçəsində saxlanılır."
+msgstr "Aktion bestätigen. Die Antwort bleibt im Prüfverlauf erhalten."
+
+msgctxt "applications.content"
+msgid "Prorektoru seçin"
+msgstr "Prorektor auswählen"
+
+msgctxt "applications.content"
+msgid "Silinənlər"
+msgstr "Gelöscht"
+
+msgctxt "applications.content"
+msgid "Redaktə et"
+msgstr "Bearbeiten"
+
+msgctxt "applications.content"
+msgid "Mövzu"
+msgstr "Betreff"
+
+msgctxt "applications.content"
+msgid "Mətn"
+msgstr "Text"
+
+msgctxt "applications.content"
+msgid ""
+"Əvvəlki mətn tarixçədə saxlanılır. Müraciətin ünvanı və qərarı dəyişmir."
+msgstr ""
+"Der vorherige Text bleibt im Verlauf. Empfänger und Entscheidung bleiben "
+"unverändert."
+
+msgctxt "applications.content"
+msgid "Ləğv et"
+msgstr "Abbrechen"
+
+msgctxt "applications.content"
+msgid "Yadda saxla"
+msgstr "Speichern"
+
+msgctxt "applications.content"
+msgid "Məktəbə aid kafedranı seçin"
+msgstr "Fachbereich der Schule auswählen"
+msgctxt "workload.recorded"
+msgid "Jurnalda qeydə alınmış dərs saatlarım"
+msgstr "Meine erfassten Unterrichtsstunden"
+
+msgctxt "workload.recorded"
+msgid "Dərsin müəllimi kimi adınız yazılmış saatlar göstərilir. Təhvil tarixçəsi saxlanılır; bu rəqəmlər rəsmi yük bölgüsünü dəyişmir. Gələcək tarixli dərslər daxil deyil."
+msgstr "Angezeigt werden Stunden, in denen Sie ausdrücklich als Lehrkraft erfasst sind. Die Übergabehistorie bleibt erhalten; diese Zahlen ändern die offizielle Lehrverteilung nicht. Zukünftige Termine sind ausgeschlossen."
+
+msgctxt "workload.recorded"
+msgid "Fənn / kafedra"
+msgstr "Fach / Fachbereich"
+
+msgctxt "workload.recorded"
+msgid "Qrup / semestr"
+msgstr "Gruppe / Semester"
+
+msgctxt "workload.recorded"
+msgid "Mühazirə"
+msgstr "Vorlesung"
+
+msgctxt "workload.recorded"
+msgid "Seminar"
+msgstr "Seminarstunden"
+
+msgctxt "workload.recorded"
+msgid "Laboratoriya"
+msgstr "Labor"
+
+msgctxt "workload.recorded"
+msgid "Qeydə alınmış saatım"
+msgstr "Meine erfassten Stunden"
+
+msgctxt "workload.recorded"
+msgid "Müəllifi dəqiqləşdirilməmiş saat"
+msgstr "Stunden ohne zugeordnete Lehrkraft"
+
+msgctxt "workload.recorded"
+msgid "Cari müəllim / təhvil tarixçəsi"
+msgstr "Aktuelle Lehrkraft / Übergabehistorie"
+
+msgctxt "workload.recorded"
+msgid "geri qaytarılıb"
+msgstr "rückgängig gemacht"
+
+msgctxt "workload.recorded"
+msgid "Cəmi"
+msgstr "Gesamt"
+
+msgctxt "workload.recorded"
+msgid "Müəllifi göstərilməyən saatlar sizin cəminizə əlavə edilmir. Dərsi yazan şəxs və cari jurnal sahibi əsasında müəllim təxmin edilmir."
+msgstr "Stunden ohne erfasste Lehrkraft werden Ihrer Summe nicht hinzugefügt. Die Lehrkraft wird weder aus der eintragenden Person noch dem aktuellen Journalinhaber abgeleitet."
+
+msgctxt "workload.recorded"
+msgid "Bu seçim üzrə jurnal saatı qeydə alınmayıb."
+msgstr "Für diese Auswahl sind keine Journalstunden erfasst."
+msgctxt "accounts.grades_notice"
+msgid "Ballarınız haqqında məlumat"
+msgstr "Informationen zu Ihren Noten"
+
+msgctxt "accounts.grades_notice"
+msgid "Köçürülmüş ballarda mümkün uyğunsuzluqlar İmtahan Mərkəzi ilə dəqiqləşdirilir və təsdiqlənən səhvlər düzəldilir. Fərq görsəniz, narahat olmayın: fənni və semestri qeyd edərək İmtahan Mərkəzinə müraciət edin."
+msgstr "Mögliche Unstimmigkeiten bei übertragenen Noten werden mit dem Prüfungszentrum geklärt, und bestätigte Fehler werden korrigiert. Falls Sie eine Abweichung bemerken, bleiben Sie unbesorgt: Wenden Sie sich unter Angabe des Fachs und Semesters an das Prüfungszentrum."
+msgctxt "accounts.syllabus"
+msgid "Dəyişiklikləri saxla"
+msgstr "Änderungen speichern"
+
+msgctxt "accounts.syllabus"
+msgid "Məsləhət saatı (istəyə bağlı)"
+msgstr "Sprechstunden (optional)"
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər avtomatik saxlanılır və təsdiqlənmiş qalır. Təkrar təsdiqə göndərmək lazım deyil."
+msgstr "Änderungen werden automatisch gespeichert und bleiben genehmigt. Eine erneute Freigabe ist nicht nötig."
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər saxlandıqda sillabus təsdiqlənmiş qalır. Təkrar göndərmə tələb olunmur."
+msgstr "Der Lehrplan bleibt nach dem Speichern genehmigt. Eine erneute Einreichung ist nicht erforderlich."
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus avtomatik təsdiqlənəcək. Sonrakı düzəlişlər də təsdiqlənmiş qalacaq."
+msgstr "Der Lehrplan wird automatisch genehmigt. Spätere Änderungen bleiben ebenfalls genehmigt."
+
+msgctxt "accounts.syllabus"
+msgid "Sillabusu təsdiqlə"
+msgstr "Lehrplan genehmigen"
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlədikdə sillabus avtomatik təsdiqlənir və dərhal istifadə olunur."
+msgstr "Nach der Bestätigung wird der Lehrplan automatisch genehmigt und ist sofort verfügbar."
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlədikdə sillabus dərhal avtomatik təsdiqlənir. Kafedra növbəsində gözləmir."
+msgstr "Nach der Bestätigung wird der Lehrplan sofort genehmigt, ohne auf die Freigabe der Abteilung zu warten."
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər avtomatik təsdiqlənir"
+msgstr "Änderungen werden automatisch genehmigt"
+
+msgctxt "accounts.syllabus"
+msgid "Redaktə et"
+msgstr "Bearbeiten"

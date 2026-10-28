@@ -492,6 +492,7 @@ _APPLICATION_CREATE_EXEMPT = {"alumni", "rector"}
 #: asılıdır (apps/applications/services/access.py).
 _APPLICATION_HANDLER_ROLES = {
     "dean",
+    "vice_dean",
     "chair_head",
     "program_coordinator",
     "hr",

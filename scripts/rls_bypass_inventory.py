@@ -95,6 +95,13 @@ CATEGORY_RULES = (
     ("apps/hr_contracts/services/notify.py", "D", "bildiriş alıcıları (açıq təşkilat süzgəcli üzvlük oxusu)"),
     ("apps/hr_contracts/services/files.py", "D", "commit-dən sonra yetim fayl təmizliyi (yol üzrə EXISTS)"),
     ("apps/workload/management/", "C", "idarə əmrləri (--org ilə)"),
+    # MR27 undo: global AuthUser üçün ən çox 2 manifest hesabında yalnız Boolean EXISTS.
+    # Aktiv superadmin qapısı; bypass bütün domain yazılarından əvvəl bağlanır.
+    (
+        "apps/legacy_import/services/mr27_undo.py",
+        "C",
+        "MR27 superadmin undo (ən çox 2 yeni hesab; yalnız foreign-usage EXISTS, yazısız)",
+    ),
     # 2026-10-25: köhnə jurnal müəllim sübutu — yalnız oxu (lokal prod kopyası), çıxış şifrəli sübut faylıdır.
     (
         "apps/legacy_import/management/commands/legacy_journal_teachers_extract.py",

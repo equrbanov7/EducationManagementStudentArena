@@ -31,6 +31,8 @@ swap-da da gəlsin).  Inline üslub/skript YOXDUR (CLAUDE.md / CSP).
          data-source-url="{{ profile_base_url }}?section=dashboard">
   <link rel="stylesheet" href="{% static 'accounts/css/profile/dashboard_cards.css' %}?v=20260925-1">
 
+  {% if role_capabilities.is_student %}{% include "partials/_result_reconciliation_notice.html" with introductory=True %}{% endif %}
+
   <div class="dash-top">
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=sec.greeting %}
     {% if sec.role_label or sec.period_label or sec.today_label %}

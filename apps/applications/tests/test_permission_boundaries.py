@@ -51,11 +51,11 @@ def test_a_coordinator_of_another_specialty_sees_nothing(world, application):
     assert not access.can_act(world["other_coordinator"], application)
 
 
-def test_a_handler_of_another_unit_cannot_act(world, application):
-    """Dekan müraciəti görmür və qərar verə bilmir — o, koordinatorun işidir."""
-    assert not access.can_act(world["dean"], application)
+def test_unrelated_handler_cannot_act_but_matching_school_dean_can(world, application):
+    """Məktəbin dekanı ortaq akademik növbədədir, kafedra müdiri deyil."""
+    assert access.can_act(world["dean"], application)
     with pytest.raises(TransitionDenied):
-        workflow.reject(application=application, user=world["dean"], reason="Bizim səlahiyyətimizdə deyil.")
+        workflow.reject(application=application, user=world["chair_head"], reason="Bizim səlahiyyətimizdə deyil.")
 
 
 def test_a_user_without_any_role_sees_nothing(world, application):

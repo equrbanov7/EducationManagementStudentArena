@@ -1,0 +1,32 @@
+{% load i18n %}
+<h3 class="wlm__subtitle">{% trans "Jurnalda qeydə alınmış dərs saatlarım" context "workload.recorded" %}</h3>
+<p class="wlm__intro">{% trans "Dərsin müəllimi kimi adınız yazılmış saatlar göstərilir. Təhvil tarixçəsi saxlanılır; bu rəqəmlər rəsmi yük bölgüsünü dəyişmir. Gələcək tarixli dərslər daxil deyil." context "workload.recorded" %}</p>
+{% if recorded_hours.rows %}
+<div class="wlm-table-wrap">
+  <table class="wlm-table">
+    <thead><tr>
+      <th scope="col">{% trans "Fənn / kafedra" context "workload.recorded" %}</th>
+      <th scope="col">{% trans "Qrup / semestr" context "workload.recorded" %}</th>
+      <th scope="col">{% trans "Mühazirə" context "workload.recorded" %}</th>
+      <th scope="col">{% trans "Seminar" context "workload.recorded" %}</th>
+      <th scope="col">{% trans "Laboratoriya" context "workload.recorded" %}</th>
+      <th scope="col">{% trans "Qeydə alınmış saatım" context "workload.recorded" %}</th>
+      <th scope="col">{% trans "Müəllifi dəqiqləşdirilməmiş saat" context "workload.recorded" %}</th>
+      <th scope="col">{% trans "Cari müəllim / təhvil tarixçəsi" context "workload.recorded" %}</th>
+    </tr></thead>
+    <tbody>{% for row in recorded_hours.rows %}<tr>
+      <td>{{ row.subject }}<div class="wlm-table__chair">{{ row.chair }}</div></td>
+      <td>{{ row.group }}<div>{{ row.period }}</div></td>
+      <td>{{ row.lecture_hours }}</td><td>{{ row.seminar_hours }}</td><td>{{ row.lab_hours }}</td>
+      <td>{{ row.total_hours }}</td><td>{{ row.unknown_hours }}</td>
+      <td>{{ row.current_teacher|default:"—" }}
+        {% for move in row.history %}<div>{{ move.from_name|default:"—" }} → {{ move.to_name|default:"—" }}{% if move.reverted %} ({% trans "geri qaytarılıb" context "workload.recorded" %}){% endif %}</div>{% endfor %}
+      </td>
+    </tr>{% endfor %}</tbody>
+    <tfoot><tr><th scope="row" colspan="5">{% trans "Cəmi" context "workload.recorded" %}</th><td>{{ recorded_hours.total_hours }}</td><td>{{ recorded_hours.unknown_hours }}</td><td></td></tr></tfoot>
+  </table>
+</div>
+<p class="wlm__intro">{% trans "Müəllifi göstərilməyən saatlar sizin cəminizə əlavə edilmir. Dərsi yazan şəxs və cari jurnal sahibi əsasında müəllim təxmin edilmir." context "workload.recorded" %}</p>
+{% else %}
+<p class="wlm__intro">{% trans "Bu seçim üzrə jurnal saatı qeydə alınmayıb." context "workload.recorded" %}</p>
+{% endif %}

@@ -111160,3 +111160,231 @@ msgstr "This adjustment is not permitted."
 msgctxt "registrar.absence_credit"
 msgid "Ümumi üzrlü qayıb saatı yadda saxlanıldı."
 msgstr "Total excused absence hours saved."
+msgctxt "accounts.handover"
+msgid "Jurnal payları təhvildən sonra dəyişib — əvvəlcə payları yoxlayın."
+msgstr "Journal shares have changed since the handover — review the shares first."
+
+msgctxt "registrar.journal_history"
+msgid "Jurnalın müəllim tarixçəsi"
+msgstr "Journal teacher history"
+
+msgctxt "registrar.journal_history"
+msgid "Cari jurnal sahibi"
+msgstr "Current journal owner"
+
+msgctxt "registrar.journal_history"
+msgid "Təhvillər"
+msgstr "Handovers"
+
+msgctxt "registrar.journal_history"
+msgid "Geri qaytarılıb"
+msgstr "Reverted"
+
+msgctxt "registrar.journal_history"
+msgid "Bu səhifədə göstərilən dərslər"
+msgstr "Lessons shown on this page"
+
+msgctxt "registrar.journal_history"
+msgid "Dərs müəllimi"
+msgstr "Lesson teacher"
+
+msgctxt "registrar.journal_history"
+msgid "Dərsi yaradan"
+msgstr "Lesson created by"
+
+msgctxt "registrar.journal_history"
+msgid "Qeyd müəllifi"
+msgstr "Entry author"
+
+msgctxt "registrar.journal_history"
+msgid "Məlum deyil"
+msgstr "Unknown"
+
+msgctxt "registrar.journal_history"
+msgid "Tarixi müəllim məlum deyilsə, cari sahib onun yerinə göstərilmir."
+msgstr "If the historical teacher is unknown, the current owner is not shown in their place."
+msgctxt "applications.content"
+msgid "Müraciəti redaktə et"
+msgstr "Edit request"
+
+msgctxt "applications.content"
+msgid "Müraciəti sil"
+msgstr "Delete request"
+
+msgctxt "applications.content"
+msgid "Müraciəti bərpa et"
+msgstr "Restore request"
+
+msgctxt "applications.content"
+msgid "Cavabı redaktə et"
+msgstr "Edit reply"
+
+msgctxt "applications.content"
+msgid "Cavabı sil"
+msgstr "Delete reply"
+
+msgctxt "applications.content"
+msgid "Cavabı bərpa et"
+msgstr "Restore reply"
+
+msgctxt "applications.content"
+msgid "Redaktə edilib"
+msgstr "Edited"
+
+msgctxt "applications.content"
+msgid "Bu müraciət silinib. Bərpa olunduqda əvvəlki vəziyyəti saxlanılacaq."
+msgstr "This request was deleted. Restoring it preserves its previous status."
+
+msgctxt "applications.content"
+msgid "Müraciət əvvəlki qərarı və yazışması ilə bərpa edilsin?"
+msgstr "Restore the request with its previous decision and conversation?"
+
+msgctxt "applications.content"
+msgid ""
+"Müraciət siyahıdan çıxarılsın? Onu «Silinənlər» bölməsindən bərpa edə "
+"bilərsiniz."
+msgstr "Remove the request from the list? You can restore it from Deleted."
+
+msgctxt "applications.content"
+msgid "Əməliyyatı təsdiqləyin. Cavab audit tarixçəsində saxlanılır."
+msgstr "Confirm this action. The reply remains in the audit history."
+
+msgctxt "applications.content"
+msgid "Prorektoru seçin"
+msgstr "Select a vice rector"
+
+msgctxt "applications.content"
+msgid "Silinənlər"
+msgstr "Deleted"
+
+msgctxt "applications.content"
+msgid "Redaktə et"
+msgstr "Edit"
+
+msgctxt "applications.content"
+msgid "Mövzu"
+msgstr "Subject"
+
+msgctxt "applications.content"
+msgid "Mətn"
+msgstr "Text"
+
+msgctxt "applications.content"
+msgid ""
+"Əvvəlki mətn tarixçədə saxlanılır. Müraciətin ünvanı və qərarı dəyişmir."
+msgstr ""
+"Previous text is kept in history. The recipient and decision remain "
+"unchanged."
+
+msgctxt "applications.content"
+msgid "Ləğv et"
+msgstr "Cancel"
+
+msgctxt "applications.content"
+msgid "Yadda saxla"
+msgstr "Save"
+
+msgctxt "applications.content"
+msgid "Məktəbə aid kafedranı seçin"
+msgstr "Select a department in the school"
+msgctxt "workload.recorded"
+msgid "Jurnalda qeydə alınmış dərs saatlarım"
+msgstr "My recorded teaching hours"
+
+msgctxt "workload.recorded"
+msgid "Dərsin müəllimi kimi adınız yazılmış saatlar göstərilir. Təhvil tarixçəsi saxlanılır; bu rəqəmlər rəsmi yük bölgüsünü dəyişmir. Gələcək tarixli dərslər daxil deyil."
+msgstr "Hours explicitly recorded with you as the teacher are shown. Handover history is retained; these figures do not change the official workload allocation. Future lessons are excluded."
+
+msgctxt "workload.recorded"
+msgid "Fənn / kafedra"
+msgstr "Subject / department"
+
+msgctxt "workload.recorded"
+msgid "Qrup / semestr"
+msgstr "Group / semester"
+
+msgctxt "workload.recorded"
+msgid "Mühazirə"
+msgstr "Lecture"
+
+msgctxt "workload.recorded"
+msgid "Seminar"
+msgstr "Seminar hours"
+
+msgctxt "workload.recorded"
+msgid "Laboratoriya"
+msgstr "Laboratory"
+
+msgctxt "workload.recorded"
+msgid "Qeydə alınmış saatım"
+msgstr "My recorded hours"
+
+msgctxt "workload.recorded"
+msgid "Müəllifi dəqiqləşdirilməmiş saat"
+msgstr "Hours with unidentified teacher"
+
+msgctxt "workload.recorded"
+msgid "Cari müəllim / təhvil tarixçəsi"
+msgstr "Current teacher / handover history"
+
+msgctxt "workload.recorded"
+msgid "geri qaytarılıb"
+msgstr "reverted"
+
+msgctxt "workload.recorded"
+msgid "Cəmi"
+msgstr "Total"
+
+msgctxt "workload.recorded"
+msgid "Müəllifi göstərilməyən saatlar sizin cəminizə əlavə edilmir. Dərsi yazan şəxs və cari jurnal sahibi əsasında müəllim təxmin edilmir."
+msgstr "Hours without a recorded teacher are not added to your total. The teacher is not inferred from the recorder or the current journal owner."
+
+msgctxt "workload.recorded"
+msgid "Bu seçim üzrə jurnal saatı qeydə alınmayıb."
+msgstr "No journal hours recorded for this selection."
+msgctxt "accounts.grades_notice"
+msgid "Ballarınız haqqında məlumat"
+msgstr "Information about your grades"
+
+msgctxt "accounts.grades_notice"
+msgid "Köçürülmüş ballarda mümkün uyğunsuzluqlar İmtahan Mərkəzi ilə dəqiqləşdirilir və təsdiqlənən səhvlər düzəldilir. Fərq görsəniz, narahat olmayın: fənni və semestri qeyd edərək İmtahan Mərkəzinə müraciət edin."
+msgstr "Possible discrepancies in transferred grades are being checked with the Examination Centre, and confirmed errors are being corrected. If you notice a difference, do not worry: contact the Examination Centre and specify the subject and semester."
+msgctxt "accounts.syllabus"
+msgid "Dəyişiklikləri saxla"
+msgstr "Save changes"
+
+msgctxt "accounts.syllabus"
+msgid "Məsləhət saatı (istəyə bağlı)"
+msgstr "Consultation hours (optional)"
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər avtomatik saxlanılır və təsdiqlənmiş qalır. Təkrar təsdiqə göndərmək lazım deyil."
+msgstr "Changes are saved automatically and remain approved. No further approval submission is needed."
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər saxlandıqda sillabus təsdiqlənmiş qalır. Təkrar göndərmə tələb olunmur."
+msgstr "The syllabus remains approved when changes are saved. No resubmission is required."
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus avtomatik təsdiqlənəcək. Sonrakı düzəlişlər də təsdiqlənmiş qalacaq."
+msgstr "The syllabus will be approved automatically. Later changes will also remain approved."
+
+msgctxt "accounts.syllabus"
+msgid "Sillabusu təsdiqlə"
+msgstr "Approve syllabus"
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlədikdə sillabus avtomatik təsdiqlənir və dərhal istifadə olunur."
+msgstr "Confirming automatically approves the syllabus and makes it available immediately."
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlədikdə sillabus dərhal avtomatik təsdiqlənir. Kafedra növbəsində gözləmir."
+msgstr "Confirming approves the syllabus immediately. It does not wait for department approval."
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər avtomatik təsdiqlənir"
+msgstr "Changes are approved automatically"
+
+msgctxt "accounts.syllabus"
+msgid "Redaktə et"
+msgstr "Edit"

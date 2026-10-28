@@ -36,6 +36,7 @@ __all__ = [
     "ProfileRole",
     "activate_staged_account",
     "archive_staged_account",
+    "block_account",
     "get_user_role_level",
     "is_superadmin_user",
     "issue_email_otp",
@@ -57,3 +58,7 @@ from .public_exports import *  # noqa: E402,F401,F403
 from .public_exports import __all__ as _api_exports  # noqa: E402
 
 __all__ += [name for name in _api_exports if name not in __all__]
+
+
+# Audited compensating undo for source-backed account imports.
+from .services.account_deletion import block_account  # noqa: E402,F401

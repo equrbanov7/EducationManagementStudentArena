@@ -100,6 +100,7 @@ def error_message(code: str, fallback: str = "", *, codes=(), action: str = "rea
         "chain_moved": pgettext(
             _CTX, "Fənn təhvildən sonra yenidən başqasına verilib — əvvəlcə sonuncu təhvili geri qaytarın."
         ),
+        "share_state_changed": pgettext(_CTX, "Jurnal payları təhvildən sonra dəyişib — əvvəlcə payları yoxlayın."),
         "concurrent_change": pgettext(_CTX, "Bu fənnin müəllimi az öncə dəyişdirilib — səhifəni yeniləyin."),
         "target_not_eligible": pgettext(_CTX, "Seçilmiş müəllim bal yazma səlahiyyətinə malik deyil."),
         "journal_closed": pgettext(_CTX, "Jurnal bağlanıb — əvvəlcə RİM jurnalı açmalıdır."),

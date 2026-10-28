@@ -378,7 +378,7 @@
 
     /* ── Əməllər ──────────────────────────────────────────────────────── */
     var DRAWER_ACTIONS = ["view", "notes", "reason", "submitted_view", "history"];
-    var EDIT_ACTIONS = ["resume", "fix"];
+    var EDIT_ACTIONS = ["resume", "fix", "edit"];
 
     function handleAction(el, button) {
         var action = button.getAttribute("data-syl-action");

@@ -92,7 +92,7 @@ def test_catalog_events_and_watches_are_tenant_isolated(two_tenants):
     _world_a, world_b = two_tenants
     _enable_rls_for_tenant(world_b["organization"].pk)
     assert ApplicationUnit.objects.count() == 9
-    assert ApplicationKind.objects.count() == 15
+    assert ApplicationKind.objects.count() == 16
     assert ApplicationWatch.objects.count() == 1
     assert ApplicationEvent.objects.count() == 3
     assert set(ApplicationEvent.objects.values_list("organization_id", flat=True)) == {world_b["organization"].pk}
@@ -115,3 +115,24 @@ def test_cross_tenant_read_is_rejected_at_the_table(two_tenants):
             [str(world_b["organization"].pk)],
         )
         assert cur.fetchone()[0] == 0
+
+
+def test_content_revision_history_is_tenant_isolated(two_tenants):
+    from apps.applications.models import ApplicationContentRevision
+    from apps.applications.services.content import edit_application
+
+    world_a, world_b = two_tenants
+    for world in (world_a, world_b):
+        application = Application.objects.get(organization=world["organization"])
+        edit_application(
+            application=application,
+            user=world["student"],
+            subject="Düzəldilmiş şəxsi müraciət",
+            body="Bu məzmun yalnız öz təşkilatında görünməlidir.",
+            expected_updated_at=application.updated_at.isoformat(),
+        )
+    _enable_rls_for_tenant(world_a["organization"].pk)
+    assert ApplicationContentRevision.objects.count() == 1
+    assert not ApplicationContentRevision.objects.filter(organization=world_b["organization"]).exists()
+    _enable_rls_for_tenant("")
+    assert ApplicationContentRevision.objects.count() == 0
