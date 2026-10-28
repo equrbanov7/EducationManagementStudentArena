@@ -111262,3 +111262,43 @@ msgstr "Семинар = «Практическое занятие»"
 msgctxt "registrar.catalog"
 msgid "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
 msgstr "Практическое занятие — семинарские занятия называются «Практическое занятие» в журнале и расписании (баллы и часы не меняются)"
+
+msgctxt "accounts.syllabus"
+msgid "Dəyişiklikləri saxla"
+msgstr "Сохранить изменения"
+
+msgctxt "accounts.syllabus"
+msgid "Məsləhət saatı (istəyə bağlı)"
+msgstr "Часы консультаций (необязательно)"
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər avtomatik saxlanılır və təsdiqlənmiş qalır. Təkrar təsdiqə göndərmək lazım deyil."
+msgstr "Изменения сохраняются автоматически и остаются утверждёнными. Повторное согласование не требуется."
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər saxlandıqda sillabus təsdiqlənmiş qalır. Təkrar göndərmə tələb olunmur."
+msgstr "После сохранения изменений силлабус остаётся утверждённым. Повторная отправка не требуется."
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus avtomatik təsdiqlənəcək. Sonrakı düzəlişlər də təsdiqlənmiş qalacaq."
+msgstr "Силлабус будет утверждён автоматически. Последующие изменения также останутся утверждёнными."
+
+msgctxt "accounts.syllabus"
+msgid "Sillabusu təsdiqlə"
+msgstr "Утвердить силлабус"
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlədikdə sillabus avtomatik təsdiqlənir və dərhal istifadə olunur."
+msgstr "После подтверждения силлабус автоматически утверждается и сразу становится доступным."
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlədikdə sillabus dərhal avtomatik təsdiqlənir. Kafedra növbəsində gözləmir."
+msgstr "После подтверждения силлабус сразу утверждается автоматически, без ожидания согласования кафедрой."
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər avtomatik təsdiqlənir"
+msgstr "Изменения утверждаются автоматически"
+
+msgctxt "accounts.syllabus"
+msgid "Redaktə et"
+msgstr "Редактировать"
