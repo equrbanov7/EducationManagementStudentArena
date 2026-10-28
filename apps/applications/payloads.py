@@ -7,6 +7,7 @@ məhz həmin istifadəçi üçün hesablanır.
 
 from __future__ import annotations
 
+from django.db.models import Prefetch
 from django.urls import reverse
 from django.utils import timezone
 
@@ -23,7 +24,9 @@ from .constants import (
     ApplicationStatus,
     EventKind,
 )
+from .models import ApplicationContentRevision
 from .services import access
+from .services.content import can_edit_application, current_reply
 from .services.reply_visibility import can_moderate
 from .sla import calendar_for, sla_banner
 from .state_machine import available_actions
@@ -99,6 +102,8 @@ def _appeals_link() -> dict:
 def _visible_attachment_count(application, viewer_is_handler) -> int:
     """Siyahı sətrinin sənəd sayı (SEC-04 qaydası). Siyahı sorğusu sənədləri `_internal_note`
     bayrağı ilə prefetch edir — onda SIFIR əlavə sorğu; prefetch yoxdursa DB-dən sayılır."""
+    if application.deleted_at is not None:
+        return 0
     cached = getattr(application, "_prefetched_objects_cache", {}).get("attachments")
     if cached is not None:
         items = [item for item in cached if not getattr(item, "_hidden_reply", False)]
@@ -130,6 +135,8 @@ def event_payload(event, *, sender_id=None, viewer=None) -> dict:
     (``actor_is_sender``): UI müraciət sahibinin sözünü şöbənin cavabından
     vizual olaraq ayırır. Ad müqayisəsi kifayət deyil (adaşlar) — id verilir.
     """
+    text, revision = current_reply(event)
+    deleted = event.application.deleted_at is not None
     return {
         "id": str(event.pk),
         "kind": event.kind,
@@ -141,12 +148,16 @@ def event_payload(event, *, sender_id=None, viewer=None) -> dict:
         "to_unit": event.to_unit.name if event.to_unit_id else "",
         "old_status": event.old_status,
         "new_status": event.new_status,
-        "text": "Cavab silinib." if event.hidden_at else event.text,
+        "text": "Cavab silinib." if event.hidden_at else text,
+        "revision": str(revision.pk) if revision else "",
+        "edited_at": revision.created_at.isoformat() if revision else None,
         "is_hidden": bool(event.hidden_at),
-        "can_moderate": bool(viewer and can_moderate(viewer, event.application, event)),
+        "can_moderate": bool(not deleted and viewer and can_moderate(viewer, event.application, event)),
         "is_internal": event.is_internal,
         "created_at": event.created_at.isoformat(),
-        "attachments": [] if event.hidden_at else [attachment_payload(item) for item in event.attachments.all()],
+        "attachments": (
+            [] if event.hidden_at or deleted else [attachment_payload(item) for item in event.attachments.all()]
+        ),
     }
 
 
@@ -194,7 +205,13 @@ def detail_payload(application, *, user) -> dict:
     is_handler = access.can_act(user, application)
     is_sender = access.is_sender(user, application)
     sees_internal = is_handler or access.can_see_internal(user, application)
-    events = application.events.select_related("actor", "from_unit", "to_unit").prefetch_related("attachments")
+    events = application.events.select_related("actor", "from_unit", "to_unit").prefetch_related(
+        "attachments",
+        Prefetch(
+            "content_revisions",
+            queryset=ApplicationContentRevision.objects.only("id", "event_id", "new_text", "created_at"),
+        ),
+    )
     event_list = list(events)
     for event in event_list:
         event.application = application
@@ -208,11 +225,25 @@ def detail_payload(application, *, user) -> dict:
     attachments = application.attachments.filter(event__hidden_at__isnull=True).order_by("created_at")
     if not sees_internal:
         attachments = attachments.exclude(event__is_internal=True)
-    attachments = [attachment_payload(item) for item in attachments]
+    attachments = [] if application.deleted_at else [attachment_payload(item) for item in attachments]
+    latest_edit = (
+        application.content_revisions.filter(event__isnull=True)
+        .only("id", "created_at")
+        .order_by("-created_at", "-id")
+        .first()
+    )
     return {
         **row_payload(application, viewer_is_handler=is_handler),
         "attachment_count": len(attachments),
         "body": application.body,
+        "updated_at": application.updated_at.isoformat(),
+        "deleted_at": application.deleted_at.isoformat() if application.deleted_at else None,
+        "edited_at": latest_edit.created_at.isoformat() if latest_edit else None,
+        "content_actions": {
+            "can_edit": can_edit_application(user, application),
+            "can_delete": access.can_manage_application(user, application) and not application.deleted_at,
+            "can_restore": access.can_manage_application(user, application) and bool(application.deleted_at),
+        },
         "assigned_to": person(application.assigned_to) if application.assigned_to_id else None,
         "current_scope_unit": (application.current_scope_unit.name if application.current_scope_unit_id else ""),
         "sla": sla_banner(
@@ -232,9 +263,13 @@ def detail_payload(application, *, user) -> dict:
             "is_sender": is_sender,
             "is_watcher": (not is_handler) and (not is_sender),
         },
-        "allowed_actions": list(
-            available_actions(
-                status=_action_status(application, is_handler), is_handler=is_handler, is_sender=is_sender
+        "allowed_actions": (
+            []
+            if application.deleted_at
+            else list(
+                available_actions(
+                    status=_action_status(application, is_handler), is_handler=is_handler, is_sender=is_sender
+                )
             )
         ),
     }

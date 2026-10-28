@@ -151,6 +151,7 @@ def submit_application(
         subject=subject.strip()[:255],
         body=body.strip(),
         created_at__gte=timezone.now() - DUPLICATE_WINDOW,
+        deleted_at__isnull=True,
     ).first()
     if duplicate is not None:
         raise TransitionDenied(

@@ -227,7 +227,7 @@ def watch_is_visible(user, application, watch) -> bool:
     return handles_unit(user, application.organization, watch.unit, watch.scope_unit)
 
 
-def can_view(user, application) -> bool:
+def _can_view_application(user, application) -> bool:
     organization = application.organization
     if _is_privileged(user, organization):
         return True
@@ -247,6 +247,23 @@ def can_view(user, application) -> bool:
     return False
 
 
+def can_manage_application(user, application) -> bool:
+    """Bütün müraciəti yalnız göndərən, universal RİM və sahib silib bərpa edir."""
+    if not _can_view_application(user, application):
+        return False
+    return bool(
+        is_sender(user, application)
+        or _is_privileged(user, application.organization)
+        or is_universal_responder(user, application.organization)
+    )
+
+
+def can_view(user, application) -> bool:
+    if application.deleted_at is not None:
+        return can_manage_application(user, application)
+    return _can_view_application(user, application)
+
+
 def can_act(user, application) -> bool:
     """QƏRAR hüququ — yalnız CARİ şöbənin emalçısı, müraciət açıq ikən.
 
@@ -255,7 +272,7 @@ def can_act(user, application) -> bool:
     dəstək/bərpa əməlləri üçün. RİM şöbəsinin emalçısı da daxildir
     (``is_universal_responder`` — sahib 2026-10-26: «RİM hər müraciəti cavablandıra bilsin»).
     """
-    if not application.is_open:
+    if application.deleted_at is not None or not application.is_open:
         return False
     if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
         return True
@@ -271,6 +288,8 @@ def can_see_internal(user, application) -> bool:
     emalçı ÖZ yazdığı daxili qeydi də görmürdü. Görmə: superuser, `application.manage`
     daşıyıcısı, cari şöbənin emalçısı və ya izləyən (watch) şöbənin emalçısı.
     """
+    if application.deleted_at is not None and not can_manage_application(user, application):
+        return False
     if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
         return True
     organization = application.organization
@@ -297,6 +316,8 @@ def can_view_attachment(user, attachment) -> bool:
     sahibinə açıq idi. Endirmə, media siyasəti və detal siyahısı EYNİ qaydanı işlədir.
     """
     application = attachment.application
+    if application.deleted_at is not None:
+        return False
     if attachment.event_id and attachment.event.hidden_at:
         return False
     if not can_view(user, application):
@@ -371,6 +392,7 @@ __all__ = [
     "active_memberships",
     "active_units",
     "can_act",
+    "can_manage_application",
     "can_oversee",
     "can_view",
     "can_view_attachment",

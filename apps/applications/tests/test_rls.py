@@ -115,3 +115,24 @@ def test_cross_tenant_read_is_rejected_at_the_table(two_tenants):
             [str(world_b["organization"].pk)],
         )
         assert cur.fetchone()[0] == 0
+
+
+def test_content_revision_history_is_tenant_isolated(two_tenants):
+    from apps.applications.models import ApplicationContentRevision
+    from apps.applications.services.content import edit_application
+
+    world_a, world_b = two_tenants
+    for world in (world_a, world_b):
+        application = Application.objects.get(organization=world["organization"])
+        edit_application(
+            application=application,
+            user=world["student"],
+            subject="Düzəldilmiş şəxsi müraciət",
+            body="Bu məzmun yalnız öz təşkilatında görünməlidir.",
+            expected_updated_at=application.updated_at.isoformat(),
+        )
+    _enable_rls_for_tenant(world_a["organization"].pk)
+    assert ApplicationContentRevision.objects.count() == 1
+    assert not ApplicationContentRevision.objects.filter(organization=world_b["organization"]).exists()
+    _enable_rls_for_tenant("")
+    assert ApplicationContentRevision.objects.count() == 0

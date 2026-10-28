@@ -127,7 +127,7 @@
         if (!text || STEP_KINDS[event.kind]) {
             return false;
         }
-        return text !== String(app.subject || "").trim();
+        return event.kind !== "resubmitted" || text !== String(app.subject || "").trim();
     }
 
     function messageHtml(message) {
@@ -142,7 +142,9 @@
             (tags ? '<div class="apx-msg__tags">' + tags + "</div>" : "") +
             '<div class="apx-msg__text">' + NS.esc(message.text) + "</div>" +
             filesHtml(message.files, "apx-files--msg") +
-            (message.event && message.event.can_moderate ? '<button type="button" class="apx-btn" data-apx-reply-visibility="' + NS.esc(message.event.id) + '" data-hidden="' + (message.event.is_hidden ? "true" : "false") + '">' + (message.event.is_hidden ? "Cavabı bərpa et" : "Cavabı sil") + "</button>" : "") +
+            (message.event && message.event.edited_at ? '<small class="apx-msg__when">' + NS.esc(NS.t("edited")) + ' · ' + NS.esc(NS.dateTime(message.event.edited_at)) + "</small>" : "") +
+            (message.event && message.event.can_moderate && !message.event.is_hidden ? '<button type="button" class="apx-btn" data-apx-edit-reply="' + NS.esc(message.event.id) + '">' + NS.esc(NS.t("editReply")) + '</button>' : "") +
+            (message.event && message.event.can_moderate ? '<button type="button" class="apx-btn" data-apx-reply-visibility="' + NS.esc(message.event.id) + '" data-hidden="' + (message.event.is_hidden ? "true" : "false") + '">' + (message.event.is_hidden ? NS.esc(NS.t("restoreReply")) : NS.esc(NS.t("deleteReply"))) + "</button>" : "") +
             "</div></article>"
         );
     }
@@ -357,6 +359,7 @@
         var files = app.attachments || [];
         return (
             headHtml(app) +
+            (NS.contentButtons ? NS.contentButtons(app) : "") +
             '<div class="apx-modal__body" data-apx-modal-body>' +
             threadHtml(app) +
             (files.length

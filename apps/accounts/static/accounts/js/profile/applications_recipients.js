@@ -14,7 +14,7 @@
         select.setAttribute("data-apx-recipient", "");
         select.className = "apx-input";
         select.required = true;
-        select.add(new Option("Prorektoru seçin", ""));
+        select.add(new Option(NS.t("selectRecipient"), ""));
         (item.recipients || []).forEach(function (person) { select.add(new Option(person.name, person.id)); });
         label.appendChild(select);
         var anchor = box.querySelector("[data-apx-route]") || box.querySelector("[data-apx-unit-list]");

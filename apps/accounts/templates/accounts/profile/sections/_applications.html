@@ -159,6 +159,7 @@ sonra da işləsin (docs/frontend/AJAX_SAFE_JS_PATTERN.md). Dinamik dəyərlər
       <span class="apx-tab__count" data-apx-tab-count hidden></span>
     </button>
     {% endif %}
+    <button type="button" class="apx-tab" role="tab" data-apx-tab="deleted" aria-current="false">{% trans "Silinənlər" context "applications.content" %}</button>
     <button type="button" class="apx-tab" role="tab" data-apx-tab="archive" aria-current="false">
       {% trans "Arxiv" context "applications" %}
       <span class="apx-tab__count" data-apx-tab-count hidden></span>
@@ -225,6 +226,7 @@ sonra da işləsin (docs/frontend/AJAX_SAFE_JS_PATTERN.md). Dinamik dəyərlər
 
   {# ── Dialoqlar — panelin İÇİNDƏ (AJAX swap-da itməsin) ────────────────── #}
   {% include "accounts/profile/sections/_applications_dialogs.html" %}
+  {% include "accounts/profile/sections/_applications_content_dialog.html" %}
 
   {{ applications_section.i18n|json_script:"apx-i18n" }}
 </div>
@@ -235,20 +237,21 @@ da uçmur. Script-lər panelin İÇİNDƏDİR — `section_loader.executeInlineS
 onları swap-dan sonra yenidən icra edir (init idempotentdir).{% endcomment %}
 <script defer src="{% static 'accounts/js/profile/applications_core.js' %}?v=20261024-oversight"></script>
 
-<script defer src="{% static 'accounts/js/profile/applications_recipients.js' %}?v=20261028-routing"></script>
-<link rel="stylesheet" href="{% static 'accounts/css/profile/applications_mobile.css' %}?v=20261028-routing">
-<script defer src="{% static 'accounts/js/profile/applications_dialogs.js' %}?v=20261028-routing"></script>
+<script defer src="{% static 'accounts/js/profile/applications_recipients.js' %}?v=20261028-content"></script>
+<link rel="stylesheet" href="{% static 'accounts/css/profile/applications_mobile.css' %}?v=20261028-content">
+<script defer src="{% static 'accounts/js/profile/applications_dialogs.js' %}?v=20261028-content"></script>
 <script defer src="{% static 'accounts/js/profile/applications_filters.js' %}?v=20261024-oversight"></script>
 {% if applications_section.can_oversee %}
 <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_oversight.css' %}?v=20261024-oversight">
 <script defer src="{% static 'accounts/js/profile/applications_oversight.js' %}?v=20261024-oversight"></script>
 {% endif %}
-<script defer src="{% static 'accounts/js/profile/applications_thread.js' %}?v=20261028-routing"></script>
-<script defer src="{% static 'accounts/js/profile/applications_detail.js' %}?v=20261028-routing"></script>
+<script defer src="{% static 'accounts/js/profile/applications_content.js' %}?v=20261028-content"></script>
+<script defer src="{% static 'accounts/js/profile/applications_thread.js' %}?v=20261028-content"></script>
+<script defer src="{% static 'accounts/js/profile/applications_detail.js' %}?v=20261028-content"></script>
 {# 2026-10-19 / 2026-10-26: «Arayış sorğusu» + «Transkript sorğusu» → «… hazırla və əlavə et» (emalçı + `transcript.issue`). #}
 <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_arayis.css' %}?v=20261019-arayis3">
 <script defer src="{% static 'accounts/js/profile/applications_arayis.js' %}?v=20261026-transcript1"></script>
-<script defer src="{% static 'accounts/js/profile/applications.js' %}?v=20261024-oversight"></script>
+<script defer src="{% static 'accounts/js/profile/applications.js' %}?v=20261028-content"></script>
 {% endif %}
 </section>
 {% endif %}

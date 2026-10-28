@@ -202,7 +202,7 @@
 
         window.EMSDelegate.on("click", "[data-apx-reply-visibility]", function (event, node) {
             var restoring = node.getAttribute("data-hidden") === "true";
-            NS.dialogs.confirm(restoring ? "Cavabı bərpa et" : "Cavabı sil", "Əməliyyatı təsdiqləyin. Cavab audit tarixçəsində saxlanılır.", function () {
+            NS.dialogs.confirm(restoring ? NS.t("restoreReply") : NS.t("deleteReply"), NS.t("replyVisibilityPrompt"), function () {
                 NS.submitAction(NS.current.id, restoring ? "restore_reply" : "hide_reply", { event: node.getAttribute("data-apx-reply-visibility") }).then(function () { NS.dialogs.close("confirm"); }).catch(function (error) { errors(NS.errorList(error)); });
             });
         });
@@ -279,7 +279,8 @@
         return NS.api.action(id, form).then(function (payload) {
             var app = payload.application;
             NS.applyDetail(app);
-            NS.toast(NS.t("toastDone", { no: app.number, status: app.status.label }));
+            var contentAction = ["edit_reply", "edit_application", "delete_application", "restore_application", "hide_reply", "restore_reply"].indexOf(action) !== -1;
+            NS.toast(NS.t(contentAction ? "toastSaved" : "toastDone", { no: app.number, status: app.status.label }));
             return app;
         });
     };

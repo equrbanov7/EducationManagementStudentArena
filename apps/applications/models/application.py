@@ -79,6 +79,16 @@ class Application(UUIDModel, TimeStampedModel):
         related_name="applications_assigned",
     )
 
+    deleted_at = models.DateTimeField(null=True, blank=True, editable=False)
+    deleted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="soft_deleted_applications",
+        editable=False,
+    )
+
     sla_due_on = models.DateField(null=True, blank=True, db_index=True)
     submitted_at = models.DateTimeField(default=timezone.now, db_index=True)
     resolved_at = models.DateTimeField(null=True, blank=True)

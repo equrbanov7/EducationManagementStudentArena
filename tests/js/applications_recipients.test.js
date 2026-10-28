@@ -8,6 +8,7 @@ const script = fs.readFileSync(path.resolve(__dirname, "../../apps/accounts/stat
 
 test("konkret prorektor seçimi tələb olunur və şöbə dəyişdikdə köhnə seçim qalmır", () => {
     const dom = new JSDOM('<div id="box"><div data-apx-unit-list></div></div>', { runScripts: "outside-only" });
+    dom.window.EMSApplications = { t: key => key };
     dom.window.eval(script);
     const box = dom.window.document.getElementById("box");
     const pick = dom.window.EMSApplications.recipientPicker;

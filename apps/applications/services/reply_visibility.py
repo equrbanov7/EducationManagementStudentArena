@@ -8,6 +8,7 @@ from ..constants import EventKind
 from ..models import ApplicationEvent
 from ..state_machine import TransitionDenied
 from . import access, notify
+from .action_lock import refresh_for_action
 
 REPLY_KINDS = {EventKind.COMMENT, EventKind.RESOLVED, EventKind.INFO_REQUESTED, EventKind.RETURNED, EventKind.REJECTED}
 
@@ -26,6 +27,7 @@ def can_moderate(user, application, event):
 
 @transaction.atomic
 def set_reply_visibility(*, application, user, event_id, hidden, request=None):
+    refresh_for_action(application)
     try:
         event = (
             ApplicationEvent.objects.select_for_update()

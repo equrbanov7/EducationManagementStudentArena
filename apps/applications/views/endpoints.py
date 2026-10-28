@@ -83,7 +83,11 @@ def application_detail(request, application_id, *, organization):
     # düşür, amma burada AÇIQ və şərtsiz istisna-tutma OLMADAN yoxlanır.
     # 2026-10-26: RİM (hər müraciəti cavablandıran) başqa şöbənin müraciətini AÇANDA keçid olmur —
     # şöbənin «Yeni» nişanı itməsin; RİM-in ilk QƏRARI «Baxılır»ı özü yazır (`workflow._take_into_review`).
-    if application.status == ApplicationStatus.SUBMITTED.value and access.is_current_handler(request.user, application):
+    if (
+        application.deleted_at is None
+        and application.status == ApplicationStatus.SUBMITTED.value
+        and access.is_current_handler(request.user, application)
+    ):
         workflow.mark_seen(application=application, user=request.user, request=request)
     # 2026-10-19: «Arayış sorğusu» emalçısına «Arayışı hazırla» bloku (views.documents).
     return ok({"application": detail_with_tools(application, request=request)})
@@ -209,7 +213,38 @@ def application_action(request, application_id, *, organization):
     if application is None:
         return error("Müraciət tapılmadı.", status=404)
     action = (request.POST.get("action") or "").strip()
+    from ..services.content import edit_application, edit_reply, set_application_deleted
     from ..services.reply_visibility import set_reply_visibility
+
+    if action == "edit_reply":
+        edit_reply(
+            application=application,
+            user=request.user,
+            event_id=request.POST.get("event"),
+            text=request.POST.get("text", ""),
+            expected_revision=request.POST.get("revision"),
+            request=request,
+        )
+        return ok({"application": detail_with_tools(application, request=request)})
+    if action == "edit_application":
+        edit_application(
+            application=application,
+            user=request.user,
+            subject=request.POST.get("subject", ""),
+            body=request.POST.get("body", ""),
+            expected_updated_at=request.POST.get("updated_at"),
+            request=request,
+        )
+        return ok({"application": detail_with_tools(application, request=request)})
+    if action in {"delete_application", "restore_application"}:
+        set_application_deleted(
+            application=application,
+            user=request.user,
+            deleted=action == "delete_application",
+            expected_updated_at=request.POST.get("updated_at"),
+            request=request,
+        )
+        return ok({"application": detail_with_tools(application, request=request)})
 
     if action in {"hide_reply", "restore_reply"}:
         set_reply_visibility(

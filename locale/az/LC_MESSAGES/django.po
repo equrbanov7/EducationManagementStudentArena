@@ -110578,3 +110578,85 @@ msgstr "Seminar = «Praktiki məşğələ»"
 msgctxt "registrar.catalog"
 msgid "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
 msgstr "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
+
+msgctxt "applications.content"
+msgid "Müraciəti redaktə et"
+msgstr "Müraciəti redaktə et"
+
+msgctxt "applications.content"
+msgid "Müraciəti sil"
+msgstr "Müraciəti sil"
+
+msgctxt "applications.content"
+msgid "Müraciəti bərpa et"
+msgstr "Müraciəti bərpa et"
+
+msgctxt "applications.content"
+msgid "Cavabı redaktə et"
+msgstr "Cavabı redaktə et"
+
+msgctxt "applications.content"
+msgid "Cavabı sil"
+msgstr "Cavabı sil"
+
+msgctxt "applications.content"
+msgid "Cavabı bərpa et"
+msgstr "Cavabı bərpa et"
+
+msgctxt "applications.content"
+msgid "Redaktə edilib"
+msgstr "Redaktə edilib"
+
+msgctxt "applications.content"
+msgid "Bu müraciət silinib. Bərpa olunduqda əvvəlki vəziyyəti saxlanılacaq."
+msgstr "Bu müraciət silinib. Bərpa olunduqda əvvəlki vəziyyəti saxlanılacaq."
+
+msgctxt "applications.content"
+msgid "Müraciət əvvəlki qərarı və yazışması ilə bərpa edilsin?"
+msgstr "Müraciət əvvəlki qərarı və yazışması ilə bərpa edilsin?"
+
+msgctxt "applications.content"
+msgid ""
+"Müraciət siyahıdan çıxarılsın? Onu «Silinənlər» bölməsindən bərpa edə "
+"bilərsiniz."
+msgstr ""
+"Müraciət siyahıdan çıxarılsın? Onu «Silinənlər» bölməsindən bərpa edə "
+"bilərsiniz."
+
+msgctxt "applications.content"
+msgid "Əməliyyatı təsdiqləyin. Cavab audit tarixçəsində saxlanılır."
+msgstr "Əməliyyatı təsdiqləyin. Cavab audit tarixçəsində saxlanılır."
+
+msgctxt "applications.content"
+msgid "Prorektoru seçin"
+msgstr "Prorektoru seçin"
+
+msgctxt "applications.content"
+msgid "Silinənlər"
+msgstr "Silinənlər"
+
+msgctxt "applications.content"
+msgid "Redaktə et"
+msgstr "Redaktə et"
+
+msgctxt "applications.content"
+msgid "Mövzu"
+msgstr "Mövzu"
+
+msgctxt "applications.content"
+msgid "Mətn"
+msgstr "Mətn"
+
+msgctxt "applications.content"
+msgid ""
+"Əvvəlki mətn tarixçədə saxlanılır. Müraciətin ünvanı və qərarı dəyişmir."
+msgstr ""
+"Əvvəlki mətn tarixçədə saxlanılır. Müraciətin ünvanı və qərarı dəyişmir."
+
+msgctxt "applications.content"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "applications.content"
+msgid "Yadda saxla"
+msgstr "Yadda saxla"

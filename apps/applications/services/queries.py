@@ -13,17 +13,24 @@ from ..sla import calendar_for, working_days_between
 from . import access, oversight
 
 #: ``all`` — «Bütün müraciətlər» (RİM nəzarəti): təşkilatın hamısı, YALNIZ ``access.can_oversee``-ə.
-TABS = ("mine", "inbox", "watching", "archive", "all")
+TABS = ("mine", "inbox", "watching", "archive", "all", "deleted")
 STATS = ("open", "overdue", "closed", "all")
 
 
-def base_queryset(organization):
-    return Application.objects.filter(organization=organization).select_related(
+def base_queryset(organization, *, include_deleted=False):
+    queryset = Application.objects.filter(organization=organization)
+    if not include_deleted:
+        queryset = queryset.filter(deleted_at__isnull=True)
+    return queryset.select_related(
         "kind", "current_unit", "current_scope_unit", "created_by", "assigned_to", "organization"
     )
 
 
 def _tab_q(user, organization, tab: str) -> Q:
+    if tab == "deleted":
+        if access._is_privileged(user, organization) or access.is_universal_responder(user, organization):
+            return Q(deleted_at__isnull=False)
+        return Q(deleted_at__isnull=False, created_by=user)
     if tab == "mine":
         return Q(created_by=user)
     if tab == "inbox":
@@ -97,8 +104,8 @@ def list_applications(
     """
     tab = tab if tab in TABS else "mine"
     stat = stat if stat in STATS else "open"
-    queryset = base_queryset(organization).filter(_tab_q(user, organization, tab))
-    if tab != "archive":
+    queryset = base_queryset(organization, include_deleted=tab == "deleted").filter(_tab_q(user, organization, tab))
+    if tab not in {"archive", "deleted"}:
         queryset = queryset.filter(_stat_q(stat))
     if kind_code:
         queryset = queryset.filter(kind__code=kind_code)
@@ -148,7 +155,7 @@ def sender_counts(*, organization, user) -> dict:
     say əvvəlki ilə eynidir.
     """
     return _aggregate_counts(
-        Application.objects.filter(organization=organization, created_by=user),
+        Application.objects.filter(organization=organization, created_by=user, deleted_at__isnull=True),
         open=Q(status__in=OPEN_STATUSES),
         waiting_info=Q(status=ApplicationStatus.WAITING_INFO),
         resolved=Q(status__in=_RESOLVED_STATUSES),
@@ -180,7 +187,9 @@ def handler_inbox_counts(*, organization, user) -> dict:
     """
     open_q = Q(status__in=OPEN_STATUSES)
     return _aggregate_counts(
-        Application.objects.filter(organization=organization).filter(access.inbox_q(user, organization)),
+        Application.objects.filter(organization=organization, deleted_at__isnull=True).filter(
+            access.inbox_q(user, organization)
+        ),
         inbox_open=open_q,
         new_unseen=Q(status=ApplicationStatus.SUBMITTED),
         overdue=open_q & Q(sla_due_on__lt=timezone.localdate()),

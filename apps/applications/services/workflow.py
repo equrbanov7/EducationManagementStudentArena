@@ -15,6 +15,7 @@ from ..models import ApplicationEvent, ApplicationWatch
 from ..sla import add_working_days, calendar_for
 from ..state_machine import ACTOR_HANDLER, Action, TransitionDenied, ensure_allowed, rule_for
 from . import access, notify
+from .action_lock import refresh_for_action
 from .submit import attach_files
 
 #: ``TransitionDenied`` mətnlərinin konteksti (``state_machine._CTX`` ilə eyni).
@@ -72,13 +73,15 @@ def _take_into_review(user, application, rule):
     _write_event(application, kind=EventKind.SEEN, actor=user, old=old)
 
 
-def _guard(user, application, action, text=""):
+def _guard(user, application, action, text="", *, refresh=True):
     """İCAZƏ əvvəl, STATUS sonra — qəsdən bu sıra ilə.
 
     Əks sıra vəziyyət sızdırardı: səlahiyyətsiz istifadəçi «bu status bu əməli
     qəbul etmir» cavabından müraciətin harada olduğunu öyrənərdi. Ona görə
     aktor yoxlanışı hər zaman birincidir.
     """
+    if refresh:
+        refresh_for_action(application)
     rule = rule_for(action)
     _authorize(user, application, rule)
     # Yararsız mətnli cəhd ``ensure_allowed``-da dayanır — çağıranların hamısı ``atomic``-dir,
@@ -149,9 +152,10 @@ def _touch(application, fields):
 @transaction.atomic
 def mark_seen(*, application, user, request=None) -> bool:
     """Emalçı müraciəti İLK dəfə açanda ``Yeni → Baxılır``. İdempotentdir."""
+    refresh_for_action(application)
     if application.status != ApplicationStatus.SUBMITTED.value:
         return False
-    rule = _guard(user, application, Action.MARK_SEEN)
+    rule = _guard(user, application, Action.MARK_SEEN, refresh=False)
     old = application.status
     application.status = rule.target
     _touch(application, ["status"])
@@ -163,6 +167,7 @@ def mark_seen(*, application, user, request=None) -> bool:
 @transaction.atomic
 def add_comment(*, application, user, text: str, is_internal: bool = False, files=None, request=None):
     """Statusu dəyişməyən qeyd. Daxili qeydi yalnız emalçı yaza bilər."""
+    refresh_for_action(application)
     is_handler = access.can_act(user, application)
     if not is_handler:
         if not access.is_sender(user, application):

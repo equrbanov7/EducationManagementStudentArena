@@ -12,3 +12,5 @@
  .apx-step__note { display: block; font-size: .9rem; color: var(--text-primary, #17213b); }
  .apx-msg__text { font-size: 1rem; line-height: 1.55; }
 }
+.apx-content-tools { padding: 10px 20px; border-bottom: 1px solid var(--ems-neutral-200); }
+@media (max-width: 640px) { .apx-content-tools { padding: 10px 12px; } }
