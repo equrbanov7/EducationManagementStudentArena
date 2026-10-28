@@ -25,6 +25,10 @@ description = "Known CI placeholder values and test/documentation examples"
 # Regex patterns that match the *entire* secret value captured by a rule.
 # These are the dummy keys used in CI workflow steps and documented examples.
 regexes = [
+    # SHA-256 of scripts/data/wcu_workload_export_public.pem, verified from its
+    # public SubjectPublicKeyInfo DER. This is an integrity pin, not a credential.
+    '''^f21b002d94fdd65fb346e557e6eb85109f60bda3afa8d8c5a2a14e4b9fc922bf$''',
+
     # Django SECRET_KEY placeholders used in CI jobs
     '''^ci-build-placeholder-not-for-production$''',
     '''^ci-smoke-secret-key-not-for-production-use$''',
