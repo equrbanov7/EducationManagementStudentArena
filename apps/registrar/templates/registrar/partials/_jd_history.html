@@ -1,0 +1,26 @@
+{% load i18n %}
+<details class="jd2-card" data-journal-history>
+  <summary class="jd2-section-title">{% trans "Jurnalın müəllim tarixçəsi" context "registrar.journal_history" %} · {% trans "Cari jurnal sahibi" context "registrar.journal_history" %}: {% if journal_history.current_owner %}{{ journal_history.current_owner }}{% else %}{% trans "Məlum deyil" context "registrar.journal_history" %}{% endif %}{% with latest=journal_history.handovers.0 %}{% if latest %} · {{ latest.from_instructor_name|default:"—" }} → {{ latest.to_instructor_name|default:"—" }} · {{ latest.created_at|date:"d.m.Y H:i" }}{% if latest.reverted_at %} · {% trans "Geri qaytarılıb" context "registrar.journal_history" %}{% endif %}{% endif %}{% endwith %}</summary>
+  {% if journal_history.handovers %}
+  <h3>{% trans "Təhvillər" context "registrar.journal_history" %}</h3>
+  <ul>
+    {% for transfer in journal_history.handovers %}
+    <li>{{ transfer.from_instructor_name|default:"—" }} → {{ transfer.to_instructor_name|default:"—" }} · <time>{{ transfer.created_at|date:"d.m.Y H:i" }}</time>{% if transfer.reverted_at %} · {% trans "Geri qaytarılıb" context "registrar.journal_history" %}: {{ transfer.reverted_at|date:"d.m.Y H:i" }}{% endif %}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% if journal_history.lessons %}
+  <h3>{% trans "Bu səhifədə göstərilən dərslər" context "registrar.journal_history" %}</h3>
+  <ul>
+    {% for item in journal_history.lessons %}
+    <li data-history-lesson="{{ item.lesson.pk }}">
+      <strong>{{ item.lesson.date|date:"d.m.Y" }}{% if item.lesson.start_time %} · {{ item.lesson.start_time|time:"H:i" }}{% endif %} · {{ item.lesson.get_kind_display }}</strong><br>
+      {% trans "Dərs müəllimi" context "registrar.journal_history" %}: {% if item.instructor %}{{ item.instructor }}{% else %}{% trans "Məlum deyil" context "registrar.journal_history" %}{% endif %} ·
+      {% trans "Dərsi yaradan" context "registrar.journal_history" %}: {% if item.created_by %}{{ item.created_by }}{% else %}{% trans "Məlum deyil" context "registrar.journal_history" %}{% endif %}<br>
+      {% trans "Qeyd müəllifi" context "registrar.journal_history" %}: {% for name in item.authors %}{{ name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if item.unknown_author %}{% if item.authors %}, {% endif %}{% trans "Məlum deyil" context "registrar.journal_history" %}{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  <p>{% trans "Tarixi müəllim məlum deyilsə, cari sahib onun yerinə göstərilmir." context "registrar.journal_history" %}</p>
+</details>

@@ -110477,6 +110477,49 @@ msgctxt "registrar.catalog"
 msgid "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
 msgstr "Uygulama dersi — seminer dersleri defterde ve ders programında «Uygulama dersi» olarak adlandırılır (puan ve saat değişmez)"
 
+msgctxt "accounts.handover"
+msgid "Jurnal payları təhvildən sonra dəyişib — əvvəlcə payları yoxlayın."
+msgstr "Devirden sonra günlük payları değişti — önce payları kontrol edin."
+
+msgctxt "registrar.journal_history"
+msgid "Jurnalın müəllim tarixçəsi"
+msgstr "Günlüğün öğretmen geçmişi"
+
+msgctxt "registrar.journal_history"
+msgid "Cari jurnal sahibi"
+msgstr "Güncel günlük sahibi"
+
+msgctxt "registrar.journal_history"
+msgid "Təhvillər"
+msgstr "Devirler"
+
+msgctxt "registrar.journal_history"
+msgid "Geri qaytarılıb"
+msgstr "Geri alındı"
+
+msgctxt "registrar.journal_history"
+msgid "Bu səhifədə göstərilən dərslər"
+msgstr "Bu sayfada gösterilen dersler"
+
+msgctxt "registrar.journal_history"
+msgid "Dərs müəllimi"
+msgstr "Dersin öğretmeni"
+
+msgctxt "registrar.journal_history"
+msgid "Dərsi yaradan"
+msgstr "Dersi oluşturan"
+
+msgctxt "registrar.journal_history"
+msgid "Qeyd müəllifi"
+msgstr "Kaydı giren"
+
+msgctxt "registrar.journal_history"
+msgid "Məlum deyil"
+msgstr "Bilinmiyor"
+
+msgctxt "registrar.journal_history"
+msgid "Tarixi müəllim məlum deyilsə, cari sahib onun yerinə göstərilmir."
+msgstr "Geçmişteki öğretmen bilinmiyorsa yerine güncel sahip gösterilmez."
 msgctxt "applications.content"
 msgid "Müraciəti redaktə et"
 msgstr "Başvuruyu düzenle"
@@ -110561,6 +110604,61 @@ msgstr "Kaydet"
 msgctxt "applications.content"
 msgid "Məktəbə aid kafedranı seçin"
 msgstr "Okula bağlı bölümü seçin"
+msgctxt "workload.recorded"
+msgid "Jurnalda qeydə alınmış dərs saatlarım"
+msgstr "Günlüğe kaydedilen ders saatlerim"
+
+msgctxt "workload.recorded"
+msgid "Dərsin müəllimi kimi adınız yazılmış saatlar göstərilir. Təhvil tarixçəsi saxlanılır; bu rəqəmlər rəsmi yük bölgüsünü dəyişmir. Gələcək tarixli dərslər daxil deyil."
+msgstr "Öğretmen olarak adınızın açıkça yazıldığı saatler gösterilir. Devir geçmişi korunur; bu sayılar resmi ders yükü dağılımını değiştirmez. Gelecek dersler dahil değildir."
+
+msgctxt "workload.recorded"
+msgid "Fənn / kafedra"
+msgstr "Ders / bölüm"
+
+msgctxt "workload.recorded"
+msgid "Qrup / semestr"
+msgstr "Grup / dönem"
+
+msgctxt "workload.recorded"
+msgid "Mühazirə"
+msgstr "Ders anlatımı"
+
+msgctxt "workload.recorded"
+msgid "Seminar"
+msgstr "Seminer"
+
+msgctxt "workload.recorded"
+msgid "Laboratoriya"
+msgstr "Laboratuvar"
+
+msgctxt "workload.recorded"
+msgid "Qeydə alınmış saatım"
+msgstr "Kayıtlı saatlerim"
+
+msgctxt "workload.recorded"
+msgid "Müəllifi dəqiqləşdirilməmiş saat"
+msgstr "Öğretmeni belirlenmemiş saatler"
+
+msgctxt "workload.recorded"
+msgid "Cari müəllim / təhvil tarixçəsi"
+msgstr "Mevcut öğretmen / devir geçmişi"
+
+msgctxt "workload.recorded"
+msgid "geri qaytarılıb"
+msgstr "geri alındı"
+
+msgctxt "workload.recorded"
+msgid "Cəmi"
+msgstr "Toplam"
+
+msgctxt "workload.recorded"
+msgid "Müəllifi göstərilməyən saatlar sizin cəminizə əlavə edilmir. Dərsi yazan şəxs və cari jurnal sahibi əsasında müəllim təxmin edilmir."
+msgstr "Öğretmeni belirtilmeyen saatler toplamınıza eklenmez. Kaydı yapan kişiden veya günlüğün mevcut sahibinden öğretmen tahmin edilmez."
+
+msgctxt "workload.recorded"
+msgid "Bu seçim üzrə jurnal saatı qeydə alınmayıb."
+msgstr "Bu seçim için günlük saati kaydedilmemiş."
 msgctxt "accounts.grades_notice"
 msgid "Ballarınız haqqında məlumat"
 msgstr "Notlarınız hakkında bilgi"

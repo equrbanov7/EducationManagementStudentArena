@@ -5,7 +5,8 @@ SAHİBİN TƏLƏBİ (2026-08): «tarix fənnini Elvin keçir, Elvin işdən çı
 
 NƏ KÖÇÜR VƏ NƏ KÖÇMÜR
 ---------------------
-Köçən YEGANƏ şey ``CourseOffering.instructor``-dur. Jurnal sahibliyi bu sahədən
+Sahiblik ``CourseOffering.instructor`` ilə köçür; əvvəlki/yeni sahibin aktiv
+``JournalShare`` payları söndürülüb bu qeyddə saxlanır (undo üçün). Jurnal sahibliyi bu sahədən
 oxunur (:mod:`apps.registrar.journal_access`), ona görə sahəni dəyişmək jurnalı
 bütövlükdə yeni müəllimə verir — əlavə köçürməyə ehtiyac yoxdur.
 
@@ -88,6 +89,9 @@ class TeachingHandover(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedM
         related_name="teaching_handovers_performed",
         help_text="Təhvili aparan aktor (RİM / dekan / kafedra müdiri).",
     )
+
+    # Təhvil zamanı yalnız əvvəlki və yeni sahibin payları söndürülür; undo dəqiq bunları qaytarır.
+    deactivated_share_ids = models.JSONField(default=list, blank=True)
 
     # ── Geri qaytarma (səhv təyinatın düzəlişi) ──────────────────────────────
     reverted_at = models.DateTimeField(null=True, blank=True, db_index=True)

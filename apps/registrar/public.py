@@ -1,4 +1,4 @@
-"""Registrar modulunun public fasadı: tenant daxilində kabinet və auditli bərpa inteqrasiyaları."""
+"""Registrar fasadı: kabinet, dərs yükü, imtahan və tenant daxilində bərpa inteqrasiyaları."""
 
 from __future__ import annotations
 
@@ -28,10 +28,12 @@ from apps.registrar.midterm_bridge import record_midterm_result, student_interim
 from apps.registrar.models import StudentAcademicRecord
 from apps.registrar.services import enroll_student_in_subject
 from apps.registrar.signals import student_group_changed
+from apps.registrar.teaching_hours import recorded_teaching_hours
 
 # İmtahan mərkəzi ↔ jurnal körpüsü — exams tərəfindən bu fasad üzərindən çağırılır
 # (apps/registrar/exam_bridge.py). Re-eksport, boundary-safe.
 __all__ = [
+    "recorded_teaching_hours",
     "eligible_instructor_user_ids",
     "enroll_student_in_subject",
     "recompute_absence_hours_many",
@@ -52,7 +54,6 @@ __all__ = [
     "record_midterm_result",
     "student_group_changed",
 ]
-
 #: Tələbənin kabinetdən ÖZ transkriptini görməsi/yükləməsi.
 #: 2026-08 qərarı (sahib): transkript tələbəyə birbaşa verilmir — rəsmi sənəd
 #: kimi MÜRACİƏT (ərizə) pəncərəsindən keçməlidir. Müraciət axını hələ
