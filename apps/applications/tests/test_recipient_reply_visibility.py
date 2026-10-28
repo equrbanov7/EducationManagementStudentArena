@@ -117,3 +117,120 @@ def test_hidden_reply_attachment_is_not_downloadable(world):
     attachment = event.attachments.select_related("event").get()
     assert not access.can_view_attachment(world["teacher"], attachment)
     assert not detail_payload(application, user=world["teacher"])["attachments"]
+
+
+def test_other_manager_cannot_read_named_request_or_its_internal_attachments(world):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    application = create(world, recipient_id=world["vice_a"].pk)
+    assert not access.can_view(world["vice_b"], application)
+    assert not access.can_see_internal(world["vice_b"], application)
+    assert (
+        not queries.list_applications(organization=world["organization"], user=world["vice_b"], tab="all", stat="all")
+        .filter(pk=application.pk)
+        .exists()
+    )
+    event = workflow.add_comment(
+        application=application,
+        user=world["vice_a"],
+        text="Private internal reply",
+        is_internal=True,
+        files=[SimpleUploadedFile("private.pdf", b"%PDF-1.4\n%%EOF", content_type="application/pdf")],
+    )
+    assert not access.can_view_attachment(world["vice_b"], event.attachments.select_related("event").get())
+    assert access.can_view(world["rim"], application)
+    assert access.can_see_internal(world["organization"].owner, application)
+
+
+def test_named_watch_stays_personal_after_forward_and_notifies_only_its_recipient(world):
+    from apps.applications.services.notify import watcher_recipients
+
+    application = create(world, recipient_id=world["vice_a"].pk)
+    workflow.forward(
+        application=application,
+        user=world["vice_a"],
+        target_unit=world["units"]["rim"],
+        note="This department should complete the investigation.",
+        keep_watching=True,
+    )
+    application.refresh_from_db()
+    assert application.recipient_restricted
+    assert application.watches.get().recipient_ids == [world["vice_a"].pk]
+    assert access.can_view(world["vice_a"], application)
+    assert access.can_see_internal(world["vice_a"], application)
+    assert not access.can_act(world["vice_a"], application)
+    assert not access.can_view(world["vice_b"], application)
+    assert not access.can_see_internal(world["vice_b"], application)
+    assert (
+        not queries.list_applications(
+            organization=world["organization"], user=world["vice_b"], tab="watching", stat="all"
+        )
+        .filter(pk=application.pk)
+        .exists()
+    )
+    assert [user.pk for user in watcher_recipients(application)] == [world["vice_a"].pk]
+
+
+def test_forward_without_watch_does_not_reopen_named_history_to_generic_managers(world):
+    application = create(world, recipient_id=world["vice_a"].pk)
+    workflow.forward(
+        application=application,
+        user=world["vice_a"],
+        target_unit=world["units"]["rim"],
+        note="Investigate this request without keeping a watch.",
+        keep_watching=False,
+    )
+    assert not application.watches.exists()
+    assert not access.can_view(world["vice_b"], application)
+    assert not access.can_view(world["vice_a"], application)
+    assert access.can_view(world["teacher"], application)
+    assert access.can_act(world["rim"], application)
+
+
+def test_named_watch_can_keep_multiple_actual_recipients_without_broadcast(world):
+    from apps.applications.services.notify import watcher_recipients
+
+    application = create(world, recipient_id=world["vice_a"].pk)
+    for recipient in ("vice_a", "vice_b"):
+        if recipient == "vice_b":
+            workflow.forward(
+                application=application,
+                user=world["rim"],
+                target_unit=world["units"]["tedris"],
+                note="This named person should investigate the next stage.",
+                recipient_id=world[recipient].pk,
+                keep_watching=False,
+            )
+        workflow.forward(
+            application=application,
+            user=world[recipient],
+            target_unit=world["units"]["rim"],
+            note="The request returns to this department for follow-up.",
+            keep_watching=True,
+        )
+    watch = application.watches.get()
+    assert set(watch.recipient_ids) == {world["vice_a"].pk, world["vice_b"].pk}
+    assert {user.pk for user in watcher_recipients(application)} == set(watch.recipient_ids)
+
+
+def test_migration_restricts_existing_named_history_without_guessing_watch_audience(world):
+    from importlib import import_module
+
+    from django.apps import apps
+
+    from apps.applications.models import Application, ApplicationWatch
+
+    application = create(world, recipient_id=world["vice_a"].pk)
+    Application.objects.filter(pk=application.pk).update(recipient_restricted=False)
+    ApplicationWatch.objects.create(
+        application=application, organization=world["organization"], unit=world["units"]["tedris"]
+    )
+    migration = import_module("apps.applications.migrations.0009_named_recipient_audience")
+    migration.restrict_existing(apps, None)
+    migration.restrict_existing(apps, None)
+    application.refresh_from_db()
+    assert application.recipient_restricted
+    watch = application.watches.get()
+    assert watch.recipient_ids == []
+    assert not access.watch_is_visible(world["vice_a"], application, watch)
+    assert not access.watch_is_visible(world["vice_b"], application, watch)

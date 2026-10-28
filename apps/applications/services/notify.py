@@ -80,12 +80,15 @@ def handler_recipients(application):
 
 
 def watcher_recipients(application):
+    from . import access
+
     users = {}
     for watch in application.watches.select_related("unit", "scope_unit"):
         for membership in members_covering_unit(
             application.organization, watch.scope_unit, role_names=watch.unit.role_names
         ):
-            users.setdefault(membership.user_id, membership.user)
+            if access.watch_is_visible(membership.user, application, watch):
+                users.setdefault(membership.user_id, membership.user)
     users.pop(application.created_by_id, None)
     return list(users.values())
 

@@ -70,6 +70,7 @@ class Application(UUIDModel, TimeStampedModel):
         related_name="applications_at_unit",
         help_text="Cari şöbənin aidiyyət bölməsi; mərkəzi şöbədə NULL.",
     )
+    recipient_restricted = models.BooleanField(default=False, editable=False)
     assigned_to = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,

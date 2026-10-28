@@ -32,7 +32,7 @@ def _tab_q(user, organization, tab: str) -> Q:
         return access.watching_q(user, organization)
     if tab == "all":
         # Fail-closed: nəzarətçi olmayana BOŞ dəst (endpoint onsuz da 403 verir).
-        return Q() if access.can_oversee(user, organization) else Q(pk__in=[])
+        return access.visible_q(user, organization) if access.can_oversee(user, organization) else Q(pk__in=[])
     # archive = görünən hər şey, yalnız bağlı statuslar
     return access.visible_q(user, organization) & Q(status__in=CLOSED_STATUSES)
 
@@ -203,8 +203,10 @@ def tab_counts(*, organization, user) -> dict:
         counts[tab] = _count(queryset.filter(status__in=OPEN_STATUSES))
     counts["archive"] = _count(base_queryset(organization).filter(_tab_q(user, organization, "archive")))
     if access.can_oversee(user, organization):
-        # «Bütün müraciətlər» — təşkilatın AÇIQ müraciətləri (JOIN-siz tək COUNT).
-        counts["all"] = Application.objects.filter(organization=organization, status__in=OPEN_STATUSES).count()
+        # Named-recipient history stays private even for generic overseers.
+        counts["all"] = _count(
+            base_queryset(organization).filter(_tab_q(user, organization, "all"), status__in=OPEN_STATUSES)
+        )
     return counts
 
 

@@ -196,6 +196,7 @@ def submit_application(
         status=ApplicationStatus.SUBMITTED,
         current_unit=unit,
         assigned_to=recipient,
+        recipient_restricted=unit.requires_recipient,
         current_scope_unit=scope_unit,
         submitted_at=now,
         last_activity_at=now,

@@ -247,6 +247,7 @@ def forward(*, application, user, target_unit, note: str, keep_watching: bool = 
 
     source_unit = application.current_unit
     source_scope = application.current_scope_unit
+    source_recipient = application.assigned_to_id
     old = application.status
     application.status = rule.target
     application.current_unit = target_unit
@@ -254,14 +255,22 @@ def forward(*, application, user, target_unit, note: str, keep_watching: bool = 
     from .recipients import validate_destination
 
     application.assigned_to = validate_destination(target_unit, user, application.organization, "staff", recipient_id)
-    _touch(application, ["status", "current_unit", "current_scope_unit", "assigned_to"])
+    application.recipient_restricted = (
+        application.recipient_restricted or source_unit.requires_recipient or target_unit.requires_recipient
+    )
+    _touch(application, ["status", "current_unit", "current_scope_unit", "assigned_to", "recipient_restricted"])
 
     if keep_watching:
-        ApplicationWatch.objects.get_or_create(
+        watch, _created = ApplicationWatch.objects.select_for_update().get_or_create(
             application=application,
             unit=source_unit,
             defaults={"organization": application.organization, "scope_unit": source_scope},
         )
+        if source_unit.requires_recipient and source_recipient is not None:
+            audience = set(watch.recipient_ids or [])
+            audience.add(source_recipient)
+            watch.recipient_ids = sorted(audience)
+            watch.save(update_fields=["recipient_ids", "updated_at"])
 
     _write_event(
         application,

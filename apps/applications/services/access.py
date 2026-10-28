@@ -5,7 +5,8 @@
 ``can_view``  — «bu müraciəti OXUYA bilərmi?» Sahib, cari şöbənin əhatəli
                 emalçısı, İZLƏYƏN şöbənin əhatəli emalçısı, təşkilat üzrə nəzarətçi
                 (``can_oversee``: ``application.view_all`` / ``application.manage`` —
-                RİM/rektor/prorektor), superuser və təşkilat sahibi.
+                RİM/rektor/prorektor), superuser və təşkilat sahibi. Konkret ünvanlanan
+                müraciətin tarixçəsini ümumi manage/view_all açarı genişləndirmir.
 ``can_act``   — «bu müraciətə QƏRAR verə bilərmi?» CARİ şöbənin əhatəli emalçısı
                 və ya «hər müraciəti cavablandıran» RİM şöbəsinin emalçısı
                 (``is_universal_responder``, sahib 2026-10-26), müraciət AÇIQ olduqda.
@@ -214,6 +215,18 @@ def is_handler_anywhere(user, organization) -> bool:
     return bool(handled_unit_ids(user, organization))
 
 
+def recipient_restricted(application) -> bool:
+    return application.recipient_restricted or application.current_unit.requires_recipient
+
+
+def watch_is_visible(user, application, watch) -> bool:
+    if user is None or not getattr(user, "is_authenticated", False):
+        return False
+    if (watch.unit.requires_recipient or watch.recipient_ids) and user.pk not in (watch.recipient_ids or []):
+        return False
+    return handles_unit(user, application.organization, watch.unit, watch.scope_unit)
+
+
 def can_view(user, application) -> bool:
     organization = application.organization
     if _is_privileged(user, organization):
@@ -222,12 +235,14 @@ def can_view(user, application) -> bool:
         return False
     if application.created_by_id == user.pk:
         return True
-    if can_oversee(user, organization):
+    if is_universal_responder(user, organization):
+        return True
+    if not recipient_restricted(application) and can_oversee(user, organization):
         return True
     if is_current_handler(user, application):
         return True
     for watch in application.watches.select_related("unit", "scope_unit"):
-        if handles_unit(user, organization, watch.unit, watch.scope_unit):
+        if watch_is_visible(user, application, watch):
             return True
     return False
 
@@ -259,7 +274,9 @@ def can_see_internal(user, application) -> bool:
     if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
         return True
     organization = application.organization
-    if has_app_permission(user, organization, PERM_MANAGE):
+    if _is_privileged(user, organization):
+        return True
+    if not recipient_restricted(application) and has_app_permission(user, organization, PERM_MANAGE):
         return True
     if is_current_handler(user, application):
         return True
@@ -267,7 +284,7 @@ def can_see_internal(user, application) -> bool:
     if is_universal_responder(user, organization):
         return True
     for watch in application.watches.select_related("unit", "scope_unit"):
-        if handles_unit(user, organization, watch.unit, watch.scope_unit):
+        if watch_is_visible(user, application, watch):
             return True
     return False
 
@@ -324,14 +341,21 @@ def watching_q(user, organization) -> Q:
     unit_ids = handled_unit_ids(user, organization)
     if not unit_ids:
         return Q(pk__in=[])
-    return Q(watches__unit_id__in=unit_ids) & ~Q(current_unit_id__in=unit_ids)
+    audience = Q(watches__unit__requires_recipient=False, watches__recipient_ids=[]) | Q(
+        watches__recipient_ids__contains=[user.pk]
+    )
+    return Q(watches__unit_id__in=unit_ids) & audience & ~inbox_q(user, organization)
 
 
 def visible_q(user, organization) -> Q:
     """İstifadəçinin ÜMUMİYYƏTLƏ görə bildiyi müraciətlər (bütün tablar)."""
-    if can_oversee(user, organization):
+    own_access = Q(created_by=user) | inbox_q(user, organization) | watching_q(user, organization)
+    if _is_privileged(user, organization) or is_universal_responder(user, organization):
         return Q()
-    return Q(created_by=user) | inbox_q(user, organization) | watching_q(user, organization)
+    if can_oversee(user, organization):
+        public = Q(recipient_restricted=False, current_unit__requires_recipient=False)
+        return public | own_access
+    return own_access
 
 
 __all__ = [

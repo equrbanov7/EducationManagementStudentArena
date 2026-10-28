@@ -117,6 +117,7 @@ class ApplicationWatch(UUIDModel, TimeStampedModel):
 
     Şöbə + aidiyyət bölməsi cütü saxlanır (müraciətin özü artıq başqa şöbədədir),
     yəni izləmə hüququ yönləndirmə ANINDAKI əhatəyə görə qiymətləndirilir.
+    Konkret ünvanlanan şöbədə recipient_ids yalnız həqiqi ünvanlanan şəxsləri saxlayır.
     """
 
     organization = models.ForeignKey(
@@ -141,6 +142,8 @@ class ApplicationWatch(UUIDModel, TimeStampedModel):
         on_delete=models.SET_NULL,
         related_name="application_watches",
     )
+
+    recipient_ids = models.JSONField(default=list, blank=True, editable=False)
 
     objects = models.Manager()
 
