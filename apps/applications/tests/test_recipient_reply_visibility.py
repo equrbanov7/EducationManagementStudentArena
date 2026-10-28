@@ -8,7 +8,7 @@ from apps.applications.services.notify import handler_recipients
 from apps.applications.services.reply_visibility import set_reply_visibility
 from apps.applications.state_machine import TransitionDenied
 
-from .factories import HANDLE, add_member, make_user, make_world
+from .factories import MANAGE, add_member, make_user, make_world
 
 pytestmark = pytest.mark.django_db
 
@@ -18,7 +18,7 @@ def world():
     world = make_world("recipient-reply")
     for key in ("vice_a", "vice_b"):
         world[key] = make_user(key)
-        add_member(world["organization"], world[key], "vice_rector", permissions=HANDLE)
+        add_member(world["organization"], world[key], "vice_rector", permissions=MANAGE)
     return world
 
 
