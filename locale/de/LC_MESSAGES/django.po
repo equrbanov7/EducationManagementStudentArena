@@ -112093,3 +112093,43 @@ msgstr "Seminar = «Praktische Übung»"
 msgctxt "registrar.catalog"
 msgid "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
 msgstr "Praktische Übung — Seminarstunden heißen im Journal und im Stundenplan «Praktische Übung» (Punkte und Stunden ändern sich nicht)"
+
+msgctxt "accounts.syllabus"
+msgid "Dəyişiklikləri saxla"
+msgstr "Änderungen speichern"
+
+msgctxt "accounts.syllabus"
+msgid "Məsləhət saatı (istəyə bağlı)"
+msgstr "Sprechstunden (optional)"
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər avtomatik saxlanılır və təsdiqlənmiş qalır. Təkrar təsdiqə göndərmək lazım deyil."
+msgstr "Änderungen werden automatisch gespeichert und bleiben genehmigt. Eine erneute Freigabe ist nicht nötig."
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər saxlandıqda sillabus təsdiqlənmiş qalır. Təkrar göndərmə tələb olunmur."
+msgstr "Der Lehrplan bleibt nach dem Speichern genehmigt. Eine erneute Einreichung ist nicht erforderlich."
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus avtomatik təsdiqlənəcək. Sonrakı düzəlişlər də təsdiqlənmiş qalacaq."
+msgstr "Der Lehrplan wird automatisch genehmigt. Spätere Änderungen bleiben ebenfalls genehmigt."
+
+msgctxt "accounts.syllabus"
+msgid "Sillabusu təsdiqlə"
+msgstr "Lehrplan genehmigen"
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlədikdə sillabus avtomatik təsdiqlənir və dərhal istifadə olunur."
+msgstr "Nach der Bestätigung wird der Lehrplan automatisch genehmigt und ist sofort verfügbar."
+
+msgctxt "accounts.syllabus"
+msgid "Təsdiqlədikdə sillabus dərhal avtomatik təsdiqlənir. Kafedra növbəsində gözləmir."
+msgstr "Nach der Bestätigung wird der Lehrplan sofort genehmigt, ohne auf die Freigabe der Abteilung zu warten."
+
+msgctxt "accounts.syllabus"
+msgid "Düzəlişlər avtomatik təsdiqlənir"
+msgstr "Änderungen werden automatisch genehmigt"
+
+msgctxt "accounts.syllabus"
+msgid "Redaktə et"
+msgstr "Bearbeiten"
