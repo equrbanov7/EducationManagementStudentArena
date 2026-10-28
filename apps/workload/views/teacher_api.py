@@ -6,6 +6,7 @@ from io import BytesIO
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
+from django.template.loader import render_to_string
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
@@ -14,6 +15,7 @@ from core.export_safety import sheet_append
 from ..constants import PERM_VIEW
 from ..services import distributable_chair_ids, teacher_workload_rows, teacher_workload_summary, teacher_years
 from ..services.my_workload_lines import group_workload_lines
+from ..services.recorded_hours import teacher_recorded_hours
 from ._base import active_organization, actor_for, error, no_org
 
 _EXPORT_HEADERS = (
@@ -43,10 +45,20 @@ def my_rows(request) -> JsonResponse:
     year = request.GET.get("year") or ""
     season = request.GET.get("season") or ""
     rows = teacher_workload_rows(organization=organization, teacher=request.user, academic_year=year, season=season)
+    recorded = teacher_recorded_hours(actor, academic_year=year, season=season)
     return JsonResponse(
         {
             "ok": True,
-            "years": teacher_years(organization=organization, teacher=request.user),
+            "recorded_hours": recorded,
+            "recorded_hours_html": render_to_string(
+                "accounts/profile/sections/workload/_recorded_hours.html",
+                {"recorded_hours": recorded},
+                request=request,
+            ),
+            "years": sorted(
+                set(teacher_years(organization=organization, teacher=request.user)) | set(recorded["years"]),
+                reverse=True,
+            ),
             "academic_year": year,
             "rows": rows,
             # 2026-10-15: cədvəl xətləri — fənn + qrup üzrə birləşmiş (redaktə keçidi əhatəyə görə).

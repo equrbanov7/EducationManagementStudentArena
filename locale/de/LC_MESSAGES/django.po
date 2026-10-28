@@ -112093,3 +112093,59 @@ msgstr "Seminar = «Praktische Übung»"
 msgctxt "registrar.catalog"
 msgid "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
 msgstr "Praktische Übung — Seminarstunden heißen im Journal und im Stundenplan «Praktische Übung» (Punkte und Stunden ändern sich nicht)"
+
+msgctxt "workload.recorded"
+msgid "Jurnalda qeydə alınmış dərs saatlarım"
+msgstr "Meine erfassten Unterrichtsstunden"
+
+msgctxt "workload.recorded"
+msgid "Dərsin müəllimi kimi adınız yazılmış saatlar göstərilir. Təhvil tarixçəsi saxlanılır; bu rəqəmlər rəsmi yük bölgüsünü dəyişmir. Gələcək tarixli dərslər daxil deyil."
+msgstr "Angezeigt werden Stunden, in denen Sie ausdrücklich als Lehrkraft erfasst sind. Die Übergabehistorie bleibt erhalten; diese Zahlen ändern die offizielle Lehrverteilung nicht. Zukünftige Termine sind ausgeschlossen."
+
+msgctxt "workload.recorded"
+msgid "Fənn / kafedra"
+msgstr "Fach / Fachbereich"
+
+msgctxt "workload.recorded"
+msgid "Qrup / semestr"
+msgstr "Gruppe / Semester"
+
+msgctxt "workload.recorded"
+msgid "Mühazirə"
+msgstr "Vorlesung"
+
+msgctxt "workload.recorded"
+msgid "Seminar"
+msgstr "Seminar"
+
+msgctxt "workload.recorded"
+msgid "Laboratoriya"
+msgstr "Labor"
+
+msgctxt "workload.recorded"
+msgid "Qeydə alınmış saatım"
+msgstr "Meine erfassten Stunden"
+
+msgctxt "workload.recorded"
+msgid "Müəllifi dəqiqləşdirilməmiş saat"
+msgstr "Stunden ohne zugeordnete Lehrkraft"
+
+msgctxt "workload.recorded"
+msgid "Cari müəllim / təhvil tarixçəsi"
+msgstr "Aktuelle Lehrkraft / Übergabehistorie"
+
+msgctxt "workload.recorded"
+msgid "geri qaytarılıb"
+msgstr "rückgängig gemacht"
+
+msgctxt "workload.recorded"
+msgid "Cəmi"
+msgstr "Gesamt"
+
+msgctxt "workload.recorded"
+msgid "Müəllifi göstərilməyən saatlar sizin cəminizə əlavə edilmir. Dərsi yazan şəxs və cari jurnal sahibi əsasında müəllim təxmin edilmir."
+msgstr "Stunden ohne erfasste Lehrkraft werden Ihrer Summe nicht hinzugefügt. Die Lehrkraft wird weder aus der eintragenden Person noch dem aktuellen Journalinhaber abgeleitet."
+
+msgctxt "workload.recorded"
+msgid "Bu seçim üzrə jurnal saatı qeydə alınmayıb."
+msgstr "Für diese Auswahl sind keine Journalstunden erfasst."
