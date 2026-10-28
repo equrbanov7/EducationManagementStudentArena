@@ -7,6 +7,8 @@ from django.db.models import Count, Q, Sum
 
 from core.permissions import has_permission
 
+from .roster_tokens import tokenize
+
 ORG = "526cfa63-4f80-4bba-a7a7-61c8fbb3d918"
 YEAR = "2026/2027"
 
@@ -16,7 +18,7 @@ def rows(label, fields, **filters):
     return list(apps.get_model(label).objects.filter(organization_id=ORG, **filters).order_by("pk").values(*fields))
 
 
-def collect():
+def collect(*, student_secret):
     tasks = rows("workload.TeachingTask", ("id", "chair_id", "academic_year", "status", "revision"), academic_year=YEAR)
     task_ids = [r["id"] for r in tasks]
     plans = rows(
@@ -175,6 +177,7 @@ def collect():
         "lesson_teacher_hours": lesson_teacher_hours,
         "enrollment_status_counts": enrollment_status_counts,
         "syllabus_versions": syllabus_versions,
+        **student_sets(period_ids, student_secret),
     }
 
 
@@ -211,3 +214,39 @@ def offering_counts(offering_ids):
             "mark_state_md5",
         )
         return [dict(zip(fields, row)) for row in cursor.fetchall()]
+
+
+def student_sets(period_ids, secret):
+    """Read only own-tenant membership sets; raw student IDs never enter payload."""
+    sar = (
+        apps.get_model("registrar.StudentAcademicRecord")
+        .objects.filter(organization_id=ORG, group__organization_id=ORG)
+        .values("group_id", "status", "student_id")
+        .iterator(chunk_size=5000)
+    )
+    enrollments = (
+        apps.get_model("registrar.Enrollment")
+        .objects.filter(
+            organization_id=ORG,
+            offering__organization_id=ORG,
+            offering__group__organization_id=ORG,
+            offering__period_id__in=period_ids,
+        )
+        .values("offering__group_id", "offering__period_id", "status", "student_id")
+        .iterator(chunk_size=5000)
+    )
+    normalized = (
+        {
+            "group_id": r["offering__group_id"],
+            "period_id": r["offering__period_id"],
+            "status": r["status"],
+            "student_id": r["student_id"],
+        }
+        for r in enrollments
+    )
+    return {
+        "group_sar_students": tokenize(sar, secret=secret, organization=ORG, group_fields=("group_id", "status")),
+        "group_enrollment_students": tokenize(
+            normalized, secret=secret, organization=ORG, group_fields=("group_id", "period_id", "status")
+        ),
+    }

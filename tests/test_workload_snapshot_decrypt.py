@@ -99,3 +99,36 @@ class ExportWorkflowTests(unittest.TestCase):
         self.assertTrue(upload["with"]["path"].endswith("/snapshot.enc.json"))
         self.assertNotIn("pg_dump", json.dumps(workflow))
         self.assertNotIn("bypass_rls", json.dumps(workflow))
+
+
+class StudentSetTokenTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        path = PATH.parents[2] / "apps/workload/services/scoped_snapshot/roster_tokens.py"
+        spec = importlib.util.spec_from_file_location("snapshot_roster_tokens", path)
+        cls.tokens = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.tokens)
+
+    def convert(self, records, secret=b"x" * 32):
+        return self.tokens.tokenize(
+            records, secret=secret, organization=decoder.ORG, group_fields=("group_id", "status")
+        )
+
+    def test_overlap_stable_only_within_one_snapshot_and_deduplicated(self):
+        rows = [
+            {"group_id": g, "status": "enrolled", "student_id": i}
+            for g, i in [("233KE", 101), ("233KEaz", 101), ("233KEaz", 101), ("233KEaz", 102)]
+        ]
+        converted = self.convert(rows)
+        self.assertEqual(len(set(converted[0]["student_tokens"]) & set(converted[1]["student_tokens"])), 1)
+        self.assertEqual([r["count"] for r in converted], [1, 2])
+        self.assertNotEqual(converted, self.convert(rows, secret=b"y" * 32))
+        self.assertNotIn("student_id", json.dumps(converted))
+
+    def test_parent_children_and_english_sector_remain_distinct(self):
+        groups = ["234K", "234K1", "234K2", "234King"]
+        rows = [{"group_id": group, "status": "enrolled", "student_id": 101} for group in groups]
+        converted = self.convert(rows)
+        self.assertEqual({r["group_id"] for r in converted}, set(groups))
+        self.assertEqual(len({r["student_tokens"][0] for r in converted}), 1)
+        self.assertEqual(len(converted), 4)

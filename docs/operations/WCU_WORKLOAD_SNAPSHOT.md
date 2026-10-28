@@ -47,3 +47,19 @@ Manifest `schema_fields` real exported column adlarını göstərir.
 canlı bütün sətirlərin, müəllim hüquqlarının və ya sillabusların uyğunluğu demək
  deyil. Cari distinct chair/task sayları ayrıca hesablanır. Snapshot vaxtı
 `captured_at` ilə qeyd edilir; köhnə27Oct snapshot yalnız ayrıca sübutdur.
+
+## Tələbə-tərkibi müqayisəsi (ad və identifikatorsuz)
+
+`group_sar_students` hər dəqiq groupUUID/status üçün student token set-i verir.
+`group_enrollment_students` cari ilin offering-lərindən dəqiq groupUUID/period/status
+üzrə unikal set verir. Sorğuların hər biri tenant və group/offering tenantını filter edir.
+Hər capture üçün yeni təsadüfi256bit secret yaradılır; secret ixrac edilmir.
+Token=HMAC-SHA256(tenant+studentID). Bir tələbə həmin snapshot-un SAR və enrollment,
+ana/alt qruplarında eyni opaque token alır. Snapshotlar arasında linklənmir.
+Student ID, ad, FIN və tələbə membership-ləri əlavə edilmir. Token sayı sətir
+sayını deyil, unikal tələbə sayını göstərir.233KE/233KEaz alias qərarı və234K
+ana/1/2 legitim ayrılması məlumatın üzərində dəyişiklik etmir; ing ayrıca qalır.
+
+Command üçün worker-atomic gate-də yalnız onun dəqiq yolu istisnadır: capture
+öz fresh read-only repeatable-read transaction və fixed RLS kontekstini yaradır;
+outer transaction SET TRANSACTION ardıcıllığını pozar. Bu, ümumi gate istisnası deyil.

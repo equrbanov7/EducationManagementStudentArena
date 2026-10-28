@@ -42,6 +42,12 @@ WRAP_PATTERN = re.compile(r"rls_worker_atomic")
 # Bilərəkdən istisnalar — DB-yə toxunmayan komponentlər.
 # Yeni istisna əlavə edərkən komment ilə səbəbini yaz.
 INTENTIONAL_EXEMPTIONS = {
+    # Fixed WCU snapshot delegates every DB read to scoped_snapshot.capture(), which
+    # requires a FRESH transaction before SET TRANSACTION REPEATABLE READ READ ONLY,
+    # sets fixed tenant + bypass=False locally, and cannot be wrapped outside.
+    # DB-enforced write rejection and non-bypass FORCE-RLS are regression-tested in
+    # apps/workload/tests/test_scoped_snapshot.py; see docs/operations/WCU_WORKLOAD_SNAPSHOT.md.
+    "apps/workload/management/commands/export_wcu_workload_snapshot.py",
     # ExamSupervisionConsumer yalnız channel-layer group send/discard edir;
     # `scope["user"]` və feature-flag settings oxuyur; DB sorğusu yoxdur.
     "apps/exams/consumers.py",

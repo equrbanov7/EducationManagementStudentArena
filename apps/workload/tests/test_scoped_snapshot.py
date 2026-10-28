@@ -87,7 +87,7 @@ class ScopedSnapshotTests(TransactionTestCase):
             capture(self.actor.username)
 
     def test_database_rejects_accidental_write_inside_collector(self):
-        def bad_collect():
+        def bad_collect(**_kwargs):
             self.task.rows.update(lecture_total=999)
 
         with patch("apps.workload.services.scoped_snapshot.collect", side_effect=bad_collect):
@@ -190,7 +190,7 @@ class ScopedSnapshotTests(TransactionTestCase):
     def test_collector_under_real_nonbypass_rls_role(self):
         from apps.workload.services.scoped_snapshot import collect as original
 
-        def role_collect():
+        def role_collect(**kwargs):
             with connection.cursor() as cursor:
                 cursor.execute("SET LOCAL ROLE rls_app_role")
                 cursor.execute("SELECT rolbypassrls,rolsuper FROM pg_roles WHERE rolname=current_user")
@@ -199,8 +199,92 @@ class ScopedSnapshotTests(TransactionTestCase):
                     "SELECT count(*) FROM workload_teachingtask WHERE organization_id=%s", [str(self.foreign.pk)]
                 )
                 self.assertEqual(cursor.fetchone()[0], 0)
-            return original()
+            return original(**kwargs)
 
         with patch("apps.workload.services.scoped_snapshot.collect", side_effect=role_collect):
             snapshot = capture(self.actor.username)
         self.assertEqual(len(snapshot["data"]["tasks"]), 1)
+
+    def test_student_sets_cross_group_overlap_and_foreign_exclusion(self):
+        from apps.organizations.models import OrgUnit
+        from apps.registrar.models import CourseOffering, Curriculum, Enrollment, StudentAcademicRecord
+        from apps.workload.services.scoped_snapshot.roster_tokens import tokenize
+
+        group = self.stack["group"]
+        group.name = "233 KE"
+        group.save(update_fields=["name"])
+        alias = OrgUnit.objects.create(
+            organization=self.org,
+            parent=self.stack["specialty"],
+            name="233 KE az",
+            slug="snapshot-alias",
+            unit_type="group",
+        )
+        english = OrgUnit.objects.create(
+            organization=self.org,
+            parent=self.stack["specialty"],
+            name="233 KE ing",
+            slug="snapshot-english",
+            unit_type="group",
+        )
+        student = User.objects.create_user("SET_STUDENT_PRIVATE")
+        activate_member(self.org, student, "set_student", permissions=["course.view"])
+        student.profile.organization = self.org
+        student.profile.save()
+        curriculum = Curriculum.objects.create(
+            organization=self.org, program=self.stack["program"], admission_year=2024
+        )
+        StudentAcademicRecord.objects.create(
+            organization=self.org,
+            student=student,
+            program=self.stack["program"],
+            curriculum=curriculum,
+            group=group,
+            admission_year=2024,
+        )
+        for target in [alias, english]:
+            offering = CourseOffering.objects.create(
+                organization=self.org, subject=self.stack["subject"], period=self.stack["period"], group=target
+            )
+            Enrollment.objects.create(organization=self.org, student=student, offering=offering)
+        foreign_student = User.objects.create_user("FOREIGN_SET_PRIVATE")
+        activate_member(self.foreign, foreign_student, "foreign_set_student", permissions=["course.view"])
+        foreign_student.profile.organization = self.foreign
+        foreign_student.profile.save()
+        foreign_stack = make_structure(self.foreign, code="FOREIGNSET")
+        foreign_curriculum = Curriculum.objects.create(
+            organization=self.foreign, program=foreign_stack["program"], admission_year=2024
+        )
+        StudentAcademicRecord.objects.create(
+            organization=self.foreign,
+            student=foreign_student,
+            program=foreign_stack["program"],
+            curriculum=foreign_curriculum,
+            group=foreign_stack["group"],
+            admission_year=2024,
+        )
+        foreign_offering = CourseOffering.objects.create(
+            organization=self.foreign,
+            subject=foreign_stack["subject"],
+            period=foreign_stack["period"],
+            group=foreign_stack["group"],
+        )
+        Enrollment.objects.create(organization=self.foreign, student=foreign_student, offering=foreign_offering)
+        secret = b"z" * 32
+        with patch("apps.workload.services.scoped_snapshot.os.urandom", return_value=secret):
+            snapshot = capture(self.actor.username)
+        sar = snapshot["data"]["group_sar_students"]
+        enrolled = snapshot["data"]["group_enrollment_students"]
+        self.assertEqual(len(sar), 1)
+        self.assertEqual({r["group_id"] for r in enrolled}, {alias.pk, english.pk})
+        self.assertTrue(all(r["student_tokens"] == sar[0]["student_tokens"] for r in enrolled))
+        foreign_token = tokenize(
+            [{"group_id": group.pk, "status": "enrolled", "student_id": foreign_student.pk}],
+            secret=secret,
+            organization=ORG,
+            group_fields=("group_id", "status"),
+        )[0]["student_tokens"][0]
+        encoded = json.dumps(snapshot, default=str)
+        for forbidden in [student.username, foreign_student.username, foreign_token, '"student_id"']:
+            self.assertNotIn(forbidden, encoded)
+        self.assertNotIn(secret.decode(), encoded)

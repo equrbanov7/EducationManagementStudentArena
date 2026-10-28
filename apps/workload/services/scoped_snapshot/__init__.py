@@ -45,7 +45,7 @@ def capture(username):
         if actor is None:
             raise SnapshotError("active_superuser_required")
         apply_rls_request_context(user_id=actor, org_id=ORG, bypass=False, local=True)
-        data = collect()
+        data = collect(student_secret=os.urandom(32))
         if not data["tasks"]:
             raise SnapshotError("fixed_org_tasks_missing")
         with connection.cursor() as cursor:
@@ -66,6 +66,7 @@ def capture(username):
             },
             "schema_fields": {key: sorted({field for row in values for field in row}) for key, values in data.items()},
             "fingerprints": "MD5 opaque change detectors, not cryptographic integrity; AES-GCM authenticates export",
+            "student_set_tokens": "HMAC-SHA256 with random per-snapshot secret, never exported; same student stable only within this snapshot; exact group IDs preserved, no aliases or parent/child/sector merge",
             "data": data,
         }
 
