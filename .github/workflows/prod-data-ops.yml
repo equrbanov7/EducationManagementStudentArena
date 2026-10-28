@@ -338,6 +338,7 @@ on:
           - audit_cross_chair_loads
           - fix_workload_overcount
           - repair_sbio235_workload
+          - repair_balanced_workload_pairs
           - fill_vacant_from_journals
           - audit_staff_placement
           - merge_chair_units
@@ -396,7 +397,7 @@ on:
         required: false
         default: ""
       batch:
-        description: "recover_workload_syllabi (Bilal legacy8430; workload-syllabi-…) · recover_mr46_syllabus: plaintext SHA256 və ya mr46-… undo paketi · repair_sbio235_workload: baselineSHA, undoID(dry) və ya undoID:baselineSHA(apply) · reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…) / merge_level_journals (lvlmerge-…): geri qaytarılacaq paket id-si (undo) · recover_mr27_journal: fayl üçün məcburi plaintext sha256 və ya undo üçün mr27-YYYYMMDD-HHMMSS-xxxx · legacy_delta_apply / share_legacy_syllabi: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd)"
+        description: "recover_workload_syllabi (Bilal legacy8430; workload-syllabi-…) · recover_mr46_syllabus: plaintext SHA256 və ya mr46-… undo paketi · repair_balanced_workload_pairs / repair_sbio235_workload: baselineSHA, undoID(dry) və ya undoID:baselineSHA(apply) · reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…) / merge_level_journals (lvlmerge-…): geri qaytarılacaq paket id-si (undo) · recover_mr27_journal: fayl üçün məcburi plaintext sha256 və ya undo üçün mr27-YYYYMMDD-HHMMSS-xxxx · legacy_delta_apply / share_legacy_syllabi: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd)"
         required: false
         default: ""
       create_missing:
@@ -1016,6 +1017,30 @@ jobs:
                 test "$APPLY" != "true" || { echo "apply üçün batch=dry-run baselineSHA verin" >&2; exit 2; }
               fi
               ;;
+            repair_balanced_workload_pairs)
+              # Sabit source/tenant/12row; fayl yüklənmir, əvvəlki dry-run baseline tələb olunur.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor" --source-sha256 a7544b268440d7836ad45f9fe538dac765aa428eb33b5791a3d6f2285941288a)
+              test -z "$ROSTER_TAG" || { echo "sabit scope üçün roster_tag boş olmalıdır" >&2; exit 2; }
+              if [[ "$BATCH" == balanced12-* ]]; then
+                undo_batch="${BATCH%%:*}"
+                match "$undo_batch" '^balanced12-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || exit 2
+                args+=(--undo "$undo_batch")
+                if [[ "$BATCH" == *:* ]]; then
+                  baseline="${BATCH#*:}"
+                  match "$baseline" '^[0-9a-f]{64}$' || exit 2
+                  args+=(--expected-baseline "$baseline")
+                else
+                  test "$APPLY" != "true" || { echo "undo apply üçün batch=undoID:baselineSHA verin" >&2; exit 2; }
+                fi
+              elif [ -n "$BATCH" ]; then
+                match "$BATCH" '^[0-9a-f]{64}$' || exit 2
+                args+=(--expected-baseline "$BATCH")
+              else
+                test "$APPLY" != "true" || { echo "apply üçün batch=dry-run baselineSHA verin" >&2; exit 2; }
+              fi
+              ;;
             fix_workload_overcount)
               # Sahib 2026-10-25: artıq sayılan yük (dublikat + sübutlu birgə dərs). Adlı hesabat şifrəli artifakta.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -1409,6 +1434,16 @@ jobs:
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "repair_balanced_workload_pairs" ]; then
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^balanced_pairs: mode=(dry_run|apply|undo)( (baseline=[0-9a-f]{64}|batch=balanced12-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}|[a-z_]+=[0-9]+))+$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -E '^CommandError: [a-z0-9,:_=.-]+$' "$RUNNER_TEMP/out.log" | head -n 1 || true
               rm -f "$RUNNER_TEMP/out.log"
               exit "$status"
             fi

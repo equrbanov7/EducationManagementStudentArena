@@ -130,6 +130,7 @@ def assign_teacher(
     note: str = "",
     assignment=None,
     request=None,
+    sync_offerings: bool = True,
 ) -> TeacherAssignment:
     """Bir fəaliyyət üzrə saatı müəllimə (və ya «Vakant»a) bağlayır."""
     task = row.task
@@ -193,7 +194,11 @@ def assign_teacher(
         task.save(update_fields=["status", "updated_at"])
 
     # Jurnal sahibi DƏRHAL — hesabat çağırana (`assignment.offering_sync`) və audit-ə düşür.
-    assignment.offering_sync = _sync_row(locked, actor=actor, request=request, previous=before, create=create_offerings)
+    assignment.offering_sync = (
+        _sync_row(locked, actor=actor, request=request, previous=before, create=create_offerings)
+        if sync_offerings
+        else {}
+    )
     log_action(
         AuditAction.UPDATE if old_values else AuditAction.CREATE,
         user=getattr(actor, "user", None),
