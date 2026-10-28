@@ -110532,6 +110532,13 @@ msgstr "Öğretmeni belirtilmeyen saatler toplamınıza eklenmez. Kaydı yapan k
 msgctxt "workload.recorded"
 msgid "Bu seçim üzrə jurnal saatı qeydə alınmayıb."
 msgstr "Bu seçim için günlük saati kaydedilmemiş."
+msgctxt "accounts.grades_notice"
+msgid "Ballarınız haqqında məlumat"
+msgstr "Notlarınız hakkında bilgi"
+
+msgctxt "accounts.grades_notice"
+msgid "Köçürülmüş ballarda mümkün uyğunsuzluqlar İmtahan Mərkəzi ilə dəqiqləşdirilir və təsdiqlənən səhvlər düzəldilir. Fərq görsəniz, narahat olmayın: fənni və semestri qeyd edərək İmtahan Mərkəzinə müraciət edin."
+msgstr "Aktarılan notlardaki olası tutarsızlıklar Sınav Merkezi ile kontrol edilmekte ve doğrulanan hatalar düzeltilmektedir. Bir fark görürseniz endişelenmeyin: dersi ve dönemi belirterek Sınav Merkezine başvurun."
 msgctxt "accounts.syllabus"
 msgid "Dəyişiklikləri saxla"
 msgstr "Değişiklikleri kaydet"

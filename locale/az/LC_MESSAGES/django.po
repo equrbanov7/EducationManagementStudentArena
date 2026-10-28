@@ -110634,6 +110634,13 @@ msgstr "Müəllifi göstərilməyən saatlar sizin cəminizə əlavə edilmir. D
 msgctxt "workload.recorded"
 msgid "Bu seçim üzrə jurnal saatı qeydə alınmayıb."
 msgstr "Bu seçim üzrə jurnal saatı qeydə alınmayıb."
+msgctxt "accounts.grades_notice"
+msgid "Ballarınız haqqında məlumat"
+msgstr "Ballarınız haqqında məlumat"
+
+msgctxt "accounts.grades_notice"
+msgid "Köçürülmüş ballarda mümkün uyğunsuzluqlar İmtahan Mərkəzi ilə dəqiqləşdirilir və təsdiqlənən səhvlər düzəldilir. Fərq görsəniz, narahat olmayın: fənni və semestri qeyd edərək İmtahan Mərkəzinə müraciət edin."
+msgstr "Köçürülmüş ballarda mümkün uyğunsuzluqlar İmtahan Mərkəzi ilə dəqiqləşdirilir və təsdiqlənən səhvlər düzəldilir. Fərq görsəniz, narahat olmayın: fənni və semestri qeyd edərək İmtahan Mərkəzinə müraciət edin."
 msgctxt "accounts.syllabus"
 msgid "Dəyişiklikləri saxla"
 msgstr "Dəyişiklikləri saxla"
