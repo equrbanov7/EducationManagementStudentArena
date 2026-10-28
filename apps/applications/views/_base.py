@@ -44,7 +44,7 @@ def json_endpoint(view):
         try:
             return view(request, *args, organization=organization, **kwargs)
         except TransitionDenied as exc:
-            status = 403 if exc.code.startswith("permission.") else 400
+            status = 409 if exc.code.endswith(".conflict") else 403 if exc.code.startswith("permission.") else 400
             return error({GLOBAL_ERROR_KEY: [str(exc)], "code": [exc.code]}, status=status)
         except ValidationError as exc:
             payload = exc.message_dict if hasattr(exc, "message_dict") else {GLOBAL_ERROR_KEY: exc.messages}

@@ -70,12 +70,23 @@ class Application(UUIDModel, TimeStampedModel):
         related_name="applications_at_unit",
         help_text="Cari şöbənin aidiyyət bölməsi; mərkəzi şöbədə NULL.",
     )
+    recipient_restricted = models.BooleanField(default=False, editable=False)
     assigned_to = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
         related_name="applications_assigned",
+    )
+
+    deleted_at = models.DateTimeField(null=True, blank=True, editable=False)
+    deleted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="soft_deleted_applications",
+        editable=False,
     )
 
     sla_due_on = models.DateField(null=True, blank=True, db_index=True)

@@ -208,7 +208,7 @@ def test_action_endpoint_refuses_a_short_reason(world, application):
 
 
 def test_action_endpoint_refuses_a_non_handler(world, application):
-    client = client_for(world["dean"], world["organization"])
+    client = client_for(world["chair_head"], world["organization"])
     response = client.post(
         reverse("applications:action", kwargs={"application_id": application.pk}),
         {"action": "resolve", "text": "Bu mənim işim deyil amma sınayıram."},

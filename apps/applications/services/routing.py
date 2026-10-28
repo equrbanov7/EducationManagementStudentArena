@@ -144,7 +144,12 @@ def route_for(kind, user, *, organization=None, family=None, sender_unit=_UNRESO
     unit = unit_by_code(organization, kind.unit_code_for(family))
     if unit is None:
         unit = kind.target_unit
-    return unit, resolve_scope_unit(unit, sender_unit), family, sender_unit
+    route_sender_unit = sender_unit
+    if family == SenderFamily.STUDENT.value and unit.resolve_by == ResolveBy.SPECIALTY.value:
+        from .academic_scope import program_unit_for
+
+        route_sender_unit = program_unit_for(user, organization) or sender_unit
+    return unit, resolve_scope_unit(unit, route_sender_unit), family, sender_unit
 
 
 def allowed_kinds_for(organization, family: str):
