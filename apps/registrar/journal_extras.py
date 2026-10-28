@@ -385,7 +385,7 @@ def journal_teaching_summary(offering):
     """
     from django.utils import timezone
 
-    from apps.registrar.models import Lesson, LessonKind
+    from apps.registrar.models import Lesson
 
     lessons = list(
         Lesson.objects.filter(offering=offering)

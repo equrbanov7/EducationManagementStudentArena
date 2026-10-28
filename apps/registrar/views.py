@@ -18,8 +18,9 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from . import campus, finals, gradebook, journal_edit_windows, legacy_excuse, lesson_rooms, practical_label, schedule
+from . import campus, finals, gradebook, journal_edit_windows, legacy_excuse, lesson_rooms, practical_label
 from . import practical_toggle as _practical_toggle
+from . import schedule
 from .models import CorrectionReason
 from .read_memo import scoped_get as _read_memo_get
 
