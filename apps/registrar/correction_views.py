@@ -95,7 +95,10 @@ def build_correction_context(offering, request) -> dict:
     # Düzəliş rejimində də köhnə üzrlü-qayıb sənədi görünür (normal görünüşlə
     # eyni payload) — korrektor nəyin əsasında üq yazıldığını görsün deyə.
     legacy_excuse.attach_to_offering_journal(offering, journal, corrections_map)
+    from .absence_credit_views import context as credit_context
+
     return {
+        **credit_context(offering),
         "journal": journal,
         "corrections_map": corrections_map,
         # Sərbəst iş / kurs işi / kollokvium düzəliş rejimi: annotasiyalı board + sarı/tarixçə map-ları.

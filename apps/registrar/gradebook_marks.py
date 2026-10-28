@@ -385,13 +385,34 @@ def recompute_absence_hours_many(enrollments) -> dict:
     Sorğular: 1 aqreqat (öz q/b xanaları) + yalnız «alt qrupdan əlavə» sətir varsa
     birləşmə köçürməsi (:func:`guest_merge.carry_over_map`, 2 toplu) + dəyişən
     sayğaclar üçün 1 toplu ``UPDATE``. Qayda :func:`recompute_absence_hours` ilə
-    birə-birdir (o, bunu tək sətirlə çağırır).
+    birə-birdir (o, bunu tək sətirlə çağırır). Üzrlü güzəştlər bir toplu
+    sorğuda çıxılır; tarixi mənbənin hədəf sayğacı da yenilənir.
     """
     from apps.registrar import guest_merge
 
     enrollments = [enrollment for enrollment in enrollments if enrollment is not None]
     if not enrollments:
         return {}
+    # Historical source-cell changes also refresh their active target counter.
+    # Use raw cells + credits below, never a predecessor's cached counter.
+    by_id = {row.pk: row for row in enrollments}
+    pending = list(enrollments)
+    while pending:
+        successor_ids = {
+            row.superseded_by_id for row in pending if row.superseded_by_id and row.superseded_by_id not in by_id
+        }
+        pending = (
+            list(
+                Enrollment.objects.filter(
+                    pk__in=successor_ids,
+                    organization_id__in={row.organization_id for row in pending},
+                )
+            )
+            if successor_ids
+            else []
+        )
+        by_id.update((row.pk, row) for row in pending)
+    enrollments = list(by_id.values())
     own = dict(
         LessonMark.objects.filter(
             enrollment_id__in=[enrollment.pk for enrollment in enrollments], status=AttendanceStatus.ABSENT
@@ -404,11 +425,15 @@ def recompute_absence_hours_many(enrollments) -> dict:
     guest_ids = [enrollment.pk for enrollment in enrollments if getattr(enrollment, "source_group_id", None)]
     carried = guest_merge.carry_over_map(guest_ids, with_entry_score=False) if guest_ids else {}
 
+    from .absence_credit_read import credit_hours_map, effective_hours
+
+    credits = credit_hours_map([row.pk for row in enrollments])
     result: dict = {}
     changed = []
     for enrollment in enrollments:
         summary = carried.get(enrollment.pk)
         hours = int(own.get(enrollment.pk) or 0) + (int(summary["absence_hours"]) if summary else 0)
+        hours = effective_hours(hours, credits.get(enrollment.pk))
         result[enrollment.pk] = hours
         if enrollment.absence_hours != hours:
             enrollment.absence_hours = hours

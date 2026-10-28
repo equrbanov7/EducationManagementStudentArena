@@ -7,6 +7,7 @@ onun yerini kabinet bölməsi tutdu (`accounts:profile?section=registrar-catalog
 from django.urls import path
 
 from . import (
+    absence_credit_views,
     catalog_actions,
     correction_views,
     credit_recognition_views,
@@ -32,6 +33,7 @@ from . import (
 app_name = "registrar"
 
 urlpatterns = [
+    path("duzelis/<uuid:offering_id>/umumi-uzrlu/", absence_credit_views.apply, name="absence_credit_apply"),
     path("", views.journal_list, name="journal_list"),
     # Admin jurnal düzəlişi (üzrlü qayıb / sənədli korreksiya) — literal prefiks,
     # uuid catch-all-dan əvvəl.

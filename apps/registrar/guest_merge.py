@@ -125,12 +125,15 @@ def work_summary(enrollment) -> dict:
 
     marks = list(LessonMark.objects.filter(enrollment=enrollment).select_related("lesson"))
     absent = [mark for mark in marks if mark.status == AttendanceStatus.ABSENT]
+    from .absence_credit_read import credit_hours_map, effective_hours
+
+    credited = credit_hours_map([enrollment.pk]).get(enrollment.pk)
     scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
     return {
         "marks": len(marks),
         "scored": sum(1 for mark in marks if mark.score is not None),
         "absence_count": len(absent),
-        "absence_hours": sum(mark.lesson.hours for mark in absent),
+        "absence_hours": effective_hours(sum(mark.lesson.hours for mark in absent), credited),
         "components": ComponentScore.objects.filter(enrollment=enrollment).count(),
         "selfwork": SelfWorkMark.objects.filter(enrollment=enrollment).count(),
         "entry_score": int(gradebook.entry_score_for(enrollment, scheme.entry_score_max)),
@@ -324,16 +327,28 @@ def carry_over_map(target_ids, *, with_entry_score: bool = True) -> dict:
             bucket["count"] += 1
             bucket["hours"] += mark.lesson.hours
 
+    from .absence_credit_read import credit_hours_map, effective_hours
+
+    credits = credit_hours_map([row.pk for row in predecessors])
     entry_scores, caps = _source_entry_scores(predecessors, marks_by_enrollment) if with_entry_score else ({}, {})
 
     result: dict = {}
     for source in predecessors:
         bucket = per_enrollment.get(source.pk, {"marks": 0, "scored": 0, "count": 0, "hours": 0})
-        blank = {"absence_hours": 0, "absence_count": 0, "marks": 0, "scored": 0, "groups": [], "enrollment_ids": []}
+        blank = {
+            "absence_hours": 0,
+            "absence_count": 0,
+            "marks": 0,
+            "scored": 0,
+            "groups": [],
+            "enrollment_ids": [],
+            "absence_credit_hours": 0,
+        }
         if with_entry_score:
             blank.update({"entry_score": 0, "entry_score_max": 0})
         entry = result.setdefault(source.superseded_by_id, blank)
-        entry["absence_hours"] += bucket["hours"]
+        entry["absence_hours"] += effective_hours(bucket["hours"], credits.get(source.pk))
+        entry["absence_credit_hours"] += min(bucket["hours"], credits.get(source.pk, 0))
         entry["absence_count"] += bucket["count"]
         entry["marks"] += bucket["marks"]
         entry["scored"] += bucket["scored"]

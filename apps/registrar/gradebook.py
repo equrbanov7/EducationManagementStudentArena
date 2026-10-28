@@ -270,6 +270,9 @@ def get_offering_journal(
         for idx, lesson in enumerate(lessons)
     ]
 
+    from .absence_credit_read import credit_hours_map, effective_hours
+
+    absence_credits = credit_hours_map([row.pk for row in enrollments])
     rows = []
     for enrollment in enrollments:
         cells = []
@@ -312,6 +315,8 @@ def get_offering_journal(
         if carry:
             absence_hours += carry["absence_hours"]
             absence_count += carry["absence_count"]
+        credit_hours = absence_credits.get(enrollment.pk, 0)
+        absence_hours = effective_hours(absence_hours, credit_hours)
         # Canonical entry score (component-weighted when defined, else lesson sum).
         entry_score = entry_score_for(enrollment, scheme.entry_score_max, **entry_batch.entry_kwargs(enrollment))
         row_limit = row_limits[enrollment.student_id]
@@ -353,6 +358,7 @@ def get_offering_journal(
                 # Birləşmədən gələn əvvəlki jurnal işi (yoxdursa None).
                 "carry_over": carry,
                 "own_absence_hours": own_absence_hours,
+                "absence_credit_hours": credit_hours + ((carry or {}).get("absence_credit_hours", 0)),
             }
         )
 

@@ -5,6 +5,7 @@ re-eksport olunur, ona görə ``from apps.registrar.models import X`` toxunulmaz
 işləyir (migrasiyalar da dəyişməz qalır).
 """
 
+from .absence_credit import AbsenceCredit
 from .academic import (
     AcademicStatus,
     CourseOffering,
@@ -123,6 +124,7 @@ from .subgroup_placement import SubgroupPlacementEvent, SubgroupPlacementKind
 from .transfer_evidence import GroupTransferEvidence
 
 __all__ = [
+    "AbsenceCredit",
     "CourseFormat",
     "AcademicStatus",
     "ApprovalStatus",

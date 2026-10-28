@@ -111262,3 +111262,95 @@ msgstr "Семинар = «Практическое занятие»"
 msgctxt "registrar.catalog"
 msgid "Praktiki məşğələ — seminar dərsləri jurnalda və cədvəldə «Praktiki məşğələ» adlanır (bal və saat dəyişmir)"
 msgstr "Практическое занятие — семинарские занятия называются «Практическое занятие» в журнале и расписании (баллы и часы не меняются)"
+
+msgctxt "registrar.absence_credit"
+msgid "Qeydiyyat dəyişib. Səhifəni yeniləyib təkrar edin."
+msgstr "Запись изменилась. Обновите страницу и повторите попытку."
+
+msgctxt "registrar.absence_credit"
+msgid "Üzrlü qayıb (ümumi saat)"
+msgstr "Уважительные пропуски (часы)"
+
+msgctxt "registrar.absence_credit"
+msgid ""
+"Seçilmiş fənn üzrə qayıb saatına güzəşt verilir. Dərs tarixləri və iştirak "
+"xanaları dəyişmir."
+msgstr ""
+"Зачёт уважительных пропусков применяется к выбранному предмету. Даты занятий"
+" и ячейки посещаемости не меняются."
+
+msgctxt "registrar.absence_credit"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "registrar.absence_credit"
+msgid "Tələbəni seçin"
+msgstr "Выберите студента"
+
+msgctxt "registrar.absence_credit"
+msgid "saat"
+msgstr "часов"
+
+msgctxt "registrar.absence_credit"
+msgid "Üzrlü sayılan saat"
+msgstr "Зачтённые часы"
+
+msgctxt "registrar.absence_credit"
+msgid "Səbəb"
+msgstr "Причина"
+
+msgctxt "registrar.absence_credit"
+msgid "Tətbiq et"
+msgstr "Применить"
+
+msgctxt "registrar.absence_credit"
+msgid "Geri alma səbəbi"
+msgstr "Причина отмены"
+
+msgctxt "registrar.absence_credit"
+msgid "Geri al"
+msgstr "Отменить"
+
+msgctxt "registrar.absence_credit"
+msgid "Ümumi üzrlü: %(hours)s saat"
+msgstr "Всего зачтено: %(hours)s часов"
+
+msgctxt "registrar.absence_credit"
+msgid "Sorğu açarı düzgün deyil."
+msgstr "Неверный ключ запроса."
+
+msgctxt "registrar.absence_credit"
+msgid "Səbəb 10–1000 simvol olmalıdır."
+msgstr "Причина должна содержать 10–1000 символов."
+
+msgctxt "registrar.absence_credit"
+msgid "Bu fənnin tələbə qeydiyyatı tapılmadı."
+msgstr "Запись студента на этот предмет не найдена."
+
+msgctxt "registrar.absence_credit"
+msgid "Geri alınacaq düzəliş tapılmadı."
+msgstr "Корректировка для отмены не найдена."
+
+msgctxt "registrar.absence_credit"
+msgid "Saat müsbət tam ədəd olmalıdır."
+msgstr "Часы должны быть положительным целым числом."
+
+msgctxt "registrar.absence_credit"
+msgid "Bu sorğu açarı başqa düzəlişdə istifadə olunub."
+msgstr "Этот ключ запроса использован для другой корректировки."
+
+msgctxt "registrar.absence_credit"
+msgid "Bu düzəliş artıq geri alınıb."
+msgstr "Эта корректировка уже отменена."
+
+msgctxt "registrar.absence_credit"
+msgid "Güzəşt mövcud üzrsüz qayıb saatından çox ola bilməz."
+msgstr "Зачёт не может превышать текущие часы неуважительных пропусков."
+
+msgctxt "registrar.absence_credit"
+msgid "Düzəlişə icazə yoxdur."
+msgstr "Эта корректировка не разрешена."
+
+msgctxt "registrar.absence_credit"
+msgid "Ümumi üzrlü qayıb saatı yadda saxlanıldı."
+msgstr "Общее число уважительных пропусков сохранено."
