@@ -97,6 +97,23 @@ class LoadParsingTests(SimpleTestCase):
         entries, skipped = parse_workbook(io.BytesIO(_xlsx(rows)))
         self.assertEqual(skipped[0]["reason"], "no_choice_marker")
 
+    def test_subject_starting_with_cemi_is_not_a_total(self):
+        rows = [
+            ["Mirzəzadə Aydın Böyükkişi", "935 BM", "Cəmiyyət", 5, 20, "", "", "", "", 30, 30, ""],
+            ["", "935 BM", "Cəmiyyət fəlsəfəsi", 5, 20, "", 15, 15, "", "", "", ""],
+        ]
+        entries, skipped = parse_workbook(io.BytesIO(_xlsx(rows)))
+        self.assertEqual(skipped, [])
+        self.assertEqual([entry.subject_text for entry in entries], ["Cəmiyyət", "Cəmiyyət fəlsəfəsi"])
+        self.assertEqual(entries[0].season, "spring")
+        self.assertEqual(entries[0].hours, {"lecture": 30, "seminar": 30})
+
+    def test_total_labels_keep_word_boundaries_and_punctuation(self):
+        for label in ("CƏMİ:", "Yekun cəmi", "Cəmi (payız)", "Universitet üzrə cəmi"):
+            with self.subTest(label=label):
+                rows = [["Müəllim Adı", "", label, "", "", "", 30, 30, "", "", "", ""]]
+                self.assertEqual(parse_workbook(io.BytesIO(_xlsx(rows))), ([], []))
+
 
 class LoadUploadFlowTests(TestCase):
     def setUp(self):
