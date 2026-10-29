@@ -58,3 +58,15 @@ def test_pr_keeps_coverage_when_compatibility_suite_moves_out():
     gate = jobs["ci-success"]["steps"][0]
     assert "github.event_name == 'pull_request'" in gate["env"]["COVERAGE_GATE_REQUIRED"]
     assert "coverage report --fail-under=68" in str(jobs["coverage-combine"])
+
+
+def test_duration_cache_stays_inside_checkout_to_preserve_nodeid_namespace():
+    steps = _workflow("_unit-tests.yml")["jobs"]["unit-tests"]["steps"]
+    run = next(step["run"] for step in steps if "durations_file=" in step.get("run", ""))
+    assert 'durations_file="$PWD/test_durations.shard-${SHARD}.json"' in run
+    assert 'durations_file="$RUNNER_TEMP/' not in run
+    assert '--durations-path "$durations_file" --store-durations --clean-durations' in run
+    upload = next(step for step in steps if step.get("name") == "⏱️ Upload shard test durations")
+    assert upload["with"]["path"] == "${{ github.workspace }}/test_durations.shard-${{ inputs.shard }}.json"
+    assert '--splits "$SHARDS" --group "$SHARD" --splitting-algorithm least_duration' in run
+    assert "--ignore=tests/e2e" in run

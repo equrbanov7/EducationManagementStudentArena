@@ -261,7 +261,9 @@ jobs:
             # pytest-split `--durations-path`-ı HƏM bölgü üçün oxuyur, HƏM yazır: eyni məzmunlu
             # surət verilir (bölgü dəyişmir), `--clean-durations` faylı yalnız BU shard-ın
             # ölçülmüş testləri ilə əvəz edir (ci.yml `test-durations` birləşdirir).
-            durations_file="$RUNNER_TEMP/test_durations.shard-${SHARD}.json"
+            # Repo xaricində mövcud --durations-path pytest rootdir-i yuxarı çəkir,
+            # nodeID prefix-ləri cache ilə uyuşmur. Surət checkout daxilində qalır.
+            durations_file="$PWD/test_durations.shard-${SHARD}.json"
             cp .test_durations "$durations_file"
             extra+=(--durations-path "$durations_file" --store-durations --clean-durations)
           fi
@@ -321,7 +323,7 @@ jobs:
         if: inputs.durations-data
         with:
           name: test-durations-shard-${{ inputs.shard }}
-          path: ${{ runner.temp }}/test_durations.shard-${{ inputs.shard }}.json
+          path: ${{ github.workspace }}/test_durations.shard-${{ inputs.shard }}.json
           if-no-files-found: error
           retention-days: 3
 
