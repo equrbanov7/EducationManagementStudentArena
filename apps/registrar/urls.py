@@ -19,6 +19,7 @@ from . import (
     journal_activation,
     journal_history,
     journal_lesson_lookup,
+    journal_list_lookup,
     lessons_log_views,
     pdf_views,
     practical_toggle,
@@ -35,6 +36,8 @@ app_name = "registrar"
 urlpatterns = [
     path("duzelis/<uuid:offering_id>/umumi-uzrlu/", absence_credit_views.apply, name="absence_credit_apply"),
     path("", views.journal_list, name="journal_list"),
+    # Siyahının «MÜƏLLİM» axtarışlı seçicisi — siyahı ilə EYNİ əhatə (journal_list_scope, 2026-10-29).
+    path("axtaris/muellim/", journal_list_lookup.teacher_search, name="journal_list_teachers"),
     # Admin jurnal düzəlişi (üzrlü qayıb / sənədli korreksiya) — literal prefiks,
     # uuid catch-all-dan əvvəl.
     # URL auditi A11 (2026-10-10): köhnə `duzelis/` və `duzelis/<uuid>/` yönləndirmə şimləri
