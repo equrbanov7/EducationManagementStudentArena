@@ -221,7 +221,7 @@ def assign_teacher(
 
 
 @transaction.atomic
-def unassign(*, assignment: TeacherAssignment, actor, request=None) -> dict:
+def unassign(*, assignment: TeacherAssignment, actor, request=None, sync_offerings: bool = True) -> dict:
     """Bölgü sətrini silir; sətrin açılışlarının jurnal sahibi DƏRHAL yenilənir.
 
     Qaytarır: açılış sinxronunun hesabatı (``offering_sync.compact`` — ``assign_teacher``-in
@@ -243,7 +243,9 @@ def unassign(*, assignment: TeacherAssignment, actor, request=None) -> dict:
     before = _owner_snapshot(row)
     assignment.delete()
     # Mühazirəçi silinibsə jurnal növbəti yük sahibinə və ya BOŞ qalır (vakant).
-    offerings = _sync_row(row, actor=actor, request=request, previous=before, create=create_offerings)
+    offerings = (
+        _sync_row(row, actor=actor, request=request, previous=before, create=create_offerings) if sync_offerings else {}
+    )
     log_action(
         AuditAction.DELETE,
         user=getattr(actor, "user", None),

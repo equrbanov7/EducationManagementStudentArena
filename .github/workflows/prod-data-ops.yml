@@ -340,6 +340,7 @@ on:
           - repair_sbio235_workload
           - repair_balanced_workload_pairs
           - repair_repeated_sections_workload
+          - repair_owner_activity_batch
           - fill_vacant_from_journals
           - audit_staff_placement
           - merge_chair_units
@@ -398,7 +399,7 @@ on:
         required: false
         default: ""
       batch:
-        description: "recover_workload_syllabi (Bilal legacy8430; workload-syllabi-…) · recover_mr46_syllabus: plaintext SHA256 və ya mr46-… undo paketi · repair_repeated_sections_workload / repair_balanced_workload_pairs / repair_sbio235_workload: baselineSHA, undoID(dry) və ya undoID:baselineSHA(apply) · reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…) / merge_level_journals (lvlmerge-…): geri qaytarılacaq paket id-si (undo) · recover_mr27_journal: fayl üçün məcburi plaintext sha256 və ya undo üçün mr27-YYYYMMDD-HHMMSS-xxxx · legacy_delta_apply / share_legacy_syllabi: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd)"
+        description: "recover_workload_syllabi (Bilal legacy8430; workload-syllabi-…) · recover_mr46_syllabus: plaintext SHA256 və ya mr46-… undo paketi · repair_repeated_sections_workload / repair_owner_activity_batch / repair_balanced_workload_pairs / repair_sbio235_workload: baselineSHA, undoID(dry) və ya undoID:baselineSHA(apply) · reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…) / merge_level_journals (lvlmerge-…): geri qaytarılacaq paket id-si (undo) · recover_mr27_journal: fayl üçün məcburi plaintext sha256 və ya undo üçün mr27-YYYYMMDD-HHMMSS-xxxx · legacy_delta_apply / share_legacy_syllabi: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd)"
         required: false
         default: ""
       create_missing:
@@ -411,7 +412,7 @@ on:
         required: false
         default: "Proqramlaşdırma"
       task_chair:
-        description: "import_teaching_load_form1 / fix_task_row_hours: kafedra adı · resync_task_offerings: boş = bütün kafedralar · purge_trial_exam: imtahanın adı (təsdiq) · purge_exam_attempt: imtahanın slug-ı (təsdiq)"
+        description: "repair_owner_activity_batch: rows:UUID,... və ya chairs:UUID,... (yalnız 22 sabit sətir) · import_teaching_load_form1 / fix_task_row_hours: kafedra adı · resync_task_offerings: boş = bütün kafedralar · purge_trial_exam: imtahanın adı (təsdiq) · purge_exam_attempt: imtahanın slug-ı (təsdiq)"
         required: false
         default: ""
       row_group:
@@ -1079,6 +1080,33 @@ jobs:
                 test "$APPLY" != "true" || { echo "apply üçün batch=dry-run baselineSHA verin" >&2; exit 2; }
               fi
               ;;
+            repair_owner_activity_batch)
+              # Sabit source/tenant/22row; fayl yüklənmir, əvvəlki dry-run baseline tələb olunur.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor" --source-sha256 7b06236d033bd909ac9c3983af884e0329ad1a046d1a45923b1149991bbb887f)
+              activity_selection="$TASK_CHAIR"
+              match "$activity_selection" '^(rows|chairs):[0-9a-f-]{36}(,[0-9a-f-]{36}){0,21}$' || { echo "task_chair üçün rows:UUIDs və ya chairs:UUIDs verin" >&2; exit 2; }
+              if [[ "$activity_selection" == rows:* ]]; then args+=(--rows "${activity_selection#rows:}"); else args+=(--chairs "${activity_selection#chairs:}"); fi
+              test -z "$ROSTER_TAG" || { echo "sabit scope üçün roster_tag boş olmalıdır" >&2; exit 2; }
+              if [[ "$BATCH" == owneract-* ]]; then
+                undo_batch="${BATCH%%:*}"
+                match "$undo_batch" '^owneract-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || exit 2
+                args+=(--undo "$undo_batch")
+                if [[ "$BATCH" == *:* ]]; then
+                  baseline="${BATCH#*:}"
+                  match "$baseline" '^[0-9a-f]{64}$' || exit 2
+                  args+=(--expected-baseline "$baseline")
+                else
+                  test "$APPLY" != "true" || { echo "undo apply üçün batch=undoID:baselineSHA verin" >&2; exit 2; }
+                fi
+              elif [ -n "$BATCH" ]; then
+                match "$BATCH" '^[0-9a-f]{64}$' || exit 2
+                args+=(--expected-baseline "$BATCH")
+              else
+                test "$APPLY" != "true" || { echo "apply üçün batch=dry-run baselineSHA verin" >&2; exit 2; }
+              fi
+              ;;
             fix_workload_overcount)
               # Sahib 2026-10-25: artıq sayılan yük (dublikat + sübutlu birgə dərs). Adlı hesabat şifrəli artifakta.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -1489,6 +1517,16 @@ jobs:
           elif [ "$COMMAND" = "repair_repeated_sections_workload" ]; then
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^repeated_sections: mode=(dry_run|apply|undo)( (baseline=[0-9a-f]{64}|batch=sections2-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}|[a-z_]+=[0-9]+))+$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -E '^CommandError: [a-z0-9,:_=.-]+$' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "repair_owner_activity_batch" ]; then
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^owner_activity: mode=(dry_run|apply|undo)( (baseline=[0-9a-f]{64}|selection=[0-9a-f]{64}|batch=owneract-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}|[a-z_]+=[0-9]+))+$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -E '^CommandError: [a-z0-9,:_=.-]+$' "$RUNNER_TEMP/out.log" | head -n 1 || true
