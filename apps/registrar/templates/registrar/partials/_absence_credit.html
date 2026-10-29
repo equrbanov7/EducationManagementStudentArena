@@ -6,9 +6,15 @@
   <form method="post" action="{% url 'registrar:absence_credit_apply' offering.id %}">
     {% csrf_token %}
     <input type="hidden" name="request_token" value="{{ absence_credit_token }}">
-    <p><label>{% trans "Tələbə" context "registrar.absence_credit" %}
-      <select name="enrollment" required><option value="">{% trans "Tələbəni seçin" context "registrar.absence_credit" %}</option>{% for row in journal.rows %}<option value="{{ row.enrollment.id }}">{{ row.student.get_full_name }} — {{ row.absence_hours }} {% trans "saat" context "registrar.absence_credit" %}</option>{% endfor %}</select>
-    </label></p>
+    <div>
+      <label for="absence-credit-enrollment">{% trans "Tələbə" context "registrar.absence_credit" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="absence-credit-enrollment" name="enrollment" class="bootstrap-single-select__native" data-bootstrap-select required>
+          <option value="">{% trans "Tələbəni seçin" context "registrar.absence_credit" %}</option>
+          {% for row in journal.rows %}<option value="{{ row.enrollment.id }}">{{ row.student.get_full_name }} — {{ row.absence_hours }} {% trans "saat" context "registrar.absence_credit" %}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
     <p><label>{% trans "Üzrlü sayılan saat" context "registrar.absence_credit" %} <input type="number" name="hours" min="1" max="32767" required></label></p>
     <p><label>{% trans "Səbəb" context "registrar.absence_credit" %} <textarea name="reason" minlength="10" maxlength="1000" required></textarea></label></p>
     <button type="submit">{% trans "Tətbiq et" context "registrar.absence_credit" %}</button>

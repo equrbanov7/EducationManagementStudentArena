@@ -928,8 +928,11 @@ class MergedGuestSurfacesAgree(TestCase):
         with CaptureQueriesContext(connection) as ctx:
             hours = guest_merge.carried_absence_hours(target)
         self.assertEqual(hours, ABSENCE_HOURS)
-        # Yalnız iki sorğu: əvəzlənmiş qeydiyyatlar + onların işarələri.
-        self.assertEqual(len(ctx.captured_queries), 2, [q["sql"] for q in ctx.captured_queries])
+        # Üç toplu sorğu: əvəzlənmiş qeydiyyatlar, işarələr və üzrlü saat güzəştləri.
+        queries = [q["sql"] for q in ctx.captured_queries]
+        self.assertEqual(len(queries), 3, queries)
+        self.assertTrue(any('FROM "registrar_absencecredit"' in sql for sql in queries))
+        self.assertFalse(any('"registrar_assessment' in sql for sql in queries))
 
     _assert_agree = CallSitesAgree._assert_agree
 
