@@ -19,6 +19,7 @@ from .permissions_document_seal import apply_document_seal_grants
 from .permissions_hr import apply_hr_grants
 from .permissions_hr_contracts import apply_hr_contract_grants
 from .permissions_transcript import apply_transcript_grants
+from .permissions_lab_workload import apply_lab_workload_grants
 from .permissions_unit_view import apply_unit_view_grants
 from .permissions_workload_load import apply_workload_load_grants
 
@@ -583,6 +584,8 @@ apply_transcript_grants(UNIVERSITY_ROLES)
 
 # Tyutor + laborant (2026-10-27): kafedranın sillabus / dərs materialına OXU. Mövcud: organizations/0074.
 apply_unit_view_grants(UNIVERSITY_ROLES)
+# Laborant (2026-10-29): öz kafedrasının «Yük bölgüsü» — baxış + redaktə. Mövcud: organizations/0077.
+apply_lab_workload_grants(UNIVERSITY_ROLES)
 
 # Rol auditi (2026-10-13, sahib «tövsiyə olunan variantlarla»): açar verilişi/alınması + ölü açarlar.
 # Mövcud tenantlar: organizations/0061. SONUNCU olmalıdır — əvvəlki addımların əlavələrini də süzür.

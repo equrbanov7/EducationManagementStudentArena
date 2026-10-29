@@ -222,7 +222,10 @@ def test_laborant_and_tutor_see_the_read_only_sections(world):
         sections = _sections(world, world[key])
         assert {"lessons-log", "syllabus-list", UNIT_SECTION} <= sections, key
         # Qərar səthləri açılmır (laborantın müəllim bayrağı ilə gələn öz qovluq bölmələri əvvəlki kimidir).
-        assert not {"syllabus-review", "question-chair-review", "workload-distribution"} & sections, key
+        assert not {"syllabus-review", "question-chair-review"} & sections, key
+    # Sahib 2026-10-29: laborant öz kafedrasının «Yük bölgüsü»nü görür və redaktə edir; tyutor yox.
+    assert "workload-distribution" in _sections(world, world["laborant"])
+    assert "workload-distribution" not in _sections(world, world["tutor"])
 
 
 def test_teacher_and_student_menus_do_not_change(world):
