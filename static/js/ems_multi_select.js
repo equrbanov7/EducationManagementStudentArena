@@ -39,6 +39,19 @@
         return typeof window.gettext === "function" ? window.gettext(text) : text;
     }
 
+    // Sorğu və variant eyni qaydada (bootstrap_select.js ilə eyni): NFC, görünməz simvollar, kiril «ә/Ә» → «ə/Ə».
+    function searchable(text) {
+        var value = String(text == null ? "" : text);
+        value = value.normalize ? value.normalize("NFC") : value;
+        return value.replace(/[\u00AD\u200B-\u200F\u2060\uFEFF]/g, "").replace(/\u04D9/g, "ə").replace(/\u04D8/g, "Ə");
+    }
+
+    // Toxunma ekranı: axtarış fokusda ikən virtual klaviatura səhifəni sürüşdürür — menyu bağlanmasın.
+    function keepOpenOnViewportChange(input) {
+        var coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+        return Boolean(coarse && input && document.activeElement === input);
+    }
+
     function matcherFor(needle) {
         if (window.EMSSearch && typeof window.EMSSearch.matcher === "function") {
             return window.EMSSearch.matcher(needle);
@@ -197,11 +210,11 @@
         }
 
         function applySearch() {
-            var needle = String(search.value || "").trim();
+            var needle = searchable(search.value).trim();
             var hit = needle ? matcherFor(needle) : null;
             var shown = 0;
             optionButtons().forEach(function (button) {
-                var match = !hit || hit(button.textContent || "");
+                var match = !hit || hit(searchable(button.textContent));
                 button.hidden = !match;
                 if (match) shown += 1;
             });
@@ -303,12 +316,9 @@
         }
 
         function onScroll(event) {
-            if (event.target instanceof window.Node && menu.contains(event.target)) return;
-            close(false);
-        }
-
-        function onResize() {
-            close(false);
+            if (event && event.target instanceof window.Node && menu.contains(event.target)) return;
+            if (keepOpenOnViewportChange(search)) position();
+            else close(false);
         }
 
         function open(focusLast) {
@@ -322,7 +332,7 @@
             document.addEventListener("pointerdown", onOutside, true);
             document.addEventListener("mousedown", onOutside, true);
             window.addEventListener("scroll", onScroll, true);
-            window.addEventListener("resize", onResize);
+            window.addEventListener("resize", onScroll);
             var items = visibleButtons();
             if (focusLast && items.length) items[items.length - 1].focus();
             else if (!search.hidden) search.focus();
@@ -341,11 +351,16 @@
             document.removeEventListener("pointerdown", onOutside, true);
             document.removeEventListener("mousedown", onOutside, true);
             window.removeEventListener("scroll", onScroll, true);
-            window.removeEventListener("resize", onResize);
+            window.removeEventListener("resize", onScroll);
             if (restoreFocus) toggle.focus();
             // 2026-10-25: «seçim bitdi» siqnalı — səhifə (məs. nəticə süzgəci) hər klikdə yox,
             // menyu bağlananda tətbiq etsin.
             select.dispatchEvent(new CustomEvent("ems-multi-select:close", { bubbles: true }));
+        }
+
+        function isPrintable(event) {
+            var key = event.key || "";
+            return key.length === 1 && key !== " " && !event.ctrlKey && !event.metaKey && !event.altKey;
         }
 
         function move(from, delta) {
@@ -377,6 +392,10 @@
                 event.preventDefault();
                 event.stopPropagation(); // modalı bağlamasın
                 close(true);
+            } else if (isPrintable(event) && !search.hidden) {
+                // Toggle-da yazılan hərf itməsin: menyu açılır, fokus axtarışa keçir, hərf ora yazılır.
+                open(false);
+                search.focus();
             }
         });
 
@@ -406,6 +425,8 @@
                 event.preventDefault();
                 var items = visibleButtons();
                 if (items.length) items[event.key === "Home" ? 0 : items.length - 1].focus();
+            } else if (isPrintable(event) && !search.hidden) {
+                search.focus(); // variant üzərində yazılan hərf axtarışa düşsün (tək seçici ilə eyni)
             }
             // Space/Enter — düymənin native aktivləşməsi `click` verir (aşağıda), ekran oxuyucuları da.
         });
@@ -422,7 +443,10 @@
             if (button) toggleOption(button);
         });
 
-        search.addEventListener("input", applySearch);
+        search.addEventListener("input", function () {
+            applySearch();
+            menu.scrollTop = 0; // uyğunluqlar başdan görünsün (köhnə sürüşmə yerində qalmasın)
+        });
 
         root.addEventListener("focusout", function (event) {
             if (isOpen() && event.relatedTarget && !root.contains(event.relatedTarget)) close(false);

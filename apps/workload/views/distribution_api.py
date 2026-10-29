@@ -245,6 +245,11 @@ def teachers(request) -> JsonResponse:
     return JsonResponse({"ok": True, "results": pool})
 
 
+#: «Fənn (kataloq)» seçicisi klientdə axtarılır — əvvəlki 200 (sırasız) hədd kataloqun qalanını axtarışda
+#: tapılmaz edirdi (sahib 2026-10-29). Ada görə sıralı, qrup siyahısı ilə eyni tavan.
+SUBJECT_OPTIONS_LIMIT = 2000
+
+
 @never_cache
 @login_required
 @require_GET
@@ -310,7 +315,7 @@ def options(request) -> JsonResponse:
             ],
             "subjects": [
                 {"id": str(item["id"]), "code": item["code"], "name": item["name"]}
-                for item in subjects.values("id", "code", "name")[:200]
+                for item in subjects.order_by("name").values("id", "code", "name")[:SUBJECT_OPTIONS_LIMIT]
             ],
         }
     )

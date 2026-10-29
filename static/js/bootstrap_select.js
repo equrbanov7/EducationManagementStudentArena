@@ -1,27 +1,20 @@
 /*
  * static/js/bootstrap_select.js — stilli tək seçim (`[data-bootstrap-select]`).
  *
- * TƏNBƏL MENYU (PERF-2 H3, 2026-10-17): əvvəl hər select üçün bütün variant düymələri
- * (düymə + 2 span + ikon + ayrıca click dinləyicisi) səhifə yüklənəndə qurulurdu —
- * jurnal xanası 25–81 DOM düyünü, qruplar reyestri 4,4k → 12k element. İndi init
- * yalnız toggle-u (etiket seçilmiş variantdan) qurur; variant düymələri menyu İLK
- * açılanda (`show.bs.dropdown` — klaviatura ilə açılış da bu hadisədən keçir) və ya
- * toggle fokus alanda qurulur. Kliklər menyuda BİR delegə dinləyici ilə tutulur.
- * `refresh()` bağlı menyunu «köhnəlmiş» kimi işarələyir — növbəti açılışda native
- * `<select>`-in o anki vəziyyətindən (gizli option-lar daxil) yenidən qurulur.
- * Native `<select>`, `change` hadisəsi, `data-*` atributları və `refresh/sync/init`
- * API-si dəyişməyib; `api.build()` menyunu dərhal qurmaq üçündür (testlər, köməkçilər).
+ * TƏNBƏL MENYU (PERF-2 H3, 2026-10-17): init yalnız toggle-u qurur; variant düymələri menyu İLK açılanda
+ * (`show.bs.dropdown`, klaviatura ilə açılış da) və ya toggle fokus alanda qurulur, kliklər BİR delegə
+ * dinləyici ilə tutulur. `refresh()` bağlı menyunu «köhnəlmiş» işarələyir (növbəti açılışda native
+ * `<select>`-dən yenidən qurulur), açıq menyunu sorğu saxlanaraq dərhal yeniləyir. Native `<select>`,
+ * `change`, `data-*` və `refresh/sync/init` API-si dəyişməyib; `api.build()` menyunu dərhal qurur.
  *
- * MENYU-DAXİLİ AXTARIŞ HƏR YERDƏ (sahib 2026-10-27: «seçilmiş hər yerdə, filterdə search
- * etmək olsun»): əvvəl yalnız `data-live-search="true"` daşıyan select-lərdə idi. İndi
- * DEFAULT açıqdır — menyu qurulanda görünən variant (boş «Seçilməyib» xaric) sayı
- * `SEARCH_MIN_OPTIONS`-dan azdırsa (≤ 5, kiçik sabit siyahı) axtarış göstərilmir.
- * `data-live-search="true"` → həmişə, `"false"` → heç vaxt. Variantlar sonradan JS ilə
- * doldurulsa da (məs. dərs yükü dialoqu) qərar hər menyu qurulanda yenidən verilir.
- * Süzgəc EMSSearch (ə/e, ı/i, ö/o, ü/u, ş/s, ç/c, ğ/g, registr) ilə; menyu açılanda fokus
- * axtarışa keçir, bağlananda sorğu təmizlənir; variant üzərində hərf yazmaq axtarışa keçir.
- * Sonradan DOM-a əlavə olunan select-lər (dialoq, AJAX partial) MutationObserver ilə qoşulur.
- */
+ * MENYU-DAXİLİ AXTARIŞ (sahib 2026-10-27): DEFAULT açıqdır — görünən variant (boş «Seçilməyib» xaric)
+ * `SEARCH_MIN_OPTIONS`-dan azdırsa göstərilmir; `data-live-search="true"` → həmişə, `"false"` → heç vaxt.
+ * Qərar hər menyu qurulanda verilir. Süzgəc EMSSearch (ə/e, ı/i, ö/o, ü/u, ş/s, ç/c, ğ/g, registr) ilə;
+ * açılanda fokus DƏRHAL axtarışa keçir, bağlananda sorğu təmizlənir; toggle və ya variant üzərində
+ * yazılan hərf axtarışa düşür; hər süzgəcdən sonra siyahı başa sürüşür.
+ *
+ * 2026-10-29 («Yük bölgüsü»: «yazıram gəlmir, scroll edəndə görürəm»): variantlar `refresh()`-siz dəyişsə də
+ * native select MutationObserver ilə izlənir; sonradan DOM-a düşən select-lər də belə qoşulur. */
 (function () {
     var SEARCH_MIN_OPTIONS = 6;
 
@@ -33,20 +26,17 @@
         return value === null || value === undefined ? "" : String(value);
     }
 
-    // Menü "position:absolute" ilə overflow:hidden/auto konteynerin (məs. modal
-    // body) içində kəsilir. Belə ancestor varsa menyunu fixed strategiya ilə
-    // viewport-a görə yerləşdiririk (aşağıda yer yoxdursa yuxarı açılır).
-    function hasClippingAncestor(element) {
-        var node = element.parentElement;
-        while (node && node !== document.body) {
-            var style = window.getComputedStyle(node);
-            var overflow = style.overflow + style.overflowY + style.overflowX;
-            if (/(auto|scroll|hidden|clip)/.test(overflow)) {
-                return true;
-            }
-            node = node.parentElement;
-        }
-        return false;
+    // Sorğu və variant eyni qaydada: NFC («g+˘» → «ğ»), görünməz simvollar atılır, kiril «ә/Ә» → «ə/Ə».
+    function searchable(text) {
+        var value = String(text == null ? "" : text);
+        value = value.normalize ? value.normalize("NFC") : value;
+        return value.replace(/[\u00AD\u200B-\u200F\u2060\uFEFF]/g, "").replace(/\u04D9/g, "ə").replace(/\u04D8/g, "Ə");
+    }
+
+    // Toxunma ekranı: axtarış fokusda ikən virtual klaviatura səhifəni sürüşdürür — menyu bağlanmasın.
+    function keepOpenOnViewportChange(input) {
+        var coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+        return Boolean(coarse && input && document.activeElement === input);
     }
 
     function positionMenuFixed(toggle, menu) {
@@ -211,7 +201,7 @@
             if (!searchActive()) {
                 return;
             }
-            var needle = String(searchInput.value || "").trim();
+            var needle = searchable(searchInput.value).trim();
             // Kanonik az/ing qatlama + kod rejimi («234king» → «234 K ing», «Aliyev» → «Əliyev»):
             // static/js/search_fold.js (EMSSearch); yoxdursa sadə registrsiz «contains».
             var lowered = needle.toLowerCase();
@@ -223,7 +213,7 @@
             var visible = 0;
             menu.querySelectorAll(".bootstrap-single-select__option").forEach(function (button) {
                 // `data-search` (ixtiyari): variantın əlavə axtarış mətni (məs. diakritiksiz / ingiliscə ölkə adı).
-                var match = !needle || hitTest((button.textContent || "") + " " + (button.dataset.search || ""));
+                var match = !needle || hitTest(searchable(button.textContent + " " + (button.dataset.search || "")));
                 button.hidden = !match;
                 if (match) {
                     visible += 1;
@@ -231,6 +221,13 @@
             });
             if (searchEmpty) {
                 searchEmpty.hidden = visible > 0;
+            }
+            menu.scrollTop = 0; // uyğunluqlar başdan görünsün (köhnə sürüşmə yerində qalmasın)
+        }
+
+        function focusSearch() {
+            if (isMenuOpen() && searchActive() && document.activeElement !== searchInput) {
+                searchInput.focus({ preventScroll: true });
             }
         }
 
@@ -395,10 +392,7 @@
 
             select.value = optionButton.dataset.value;
             select.dispatchEvent(new Event("change", { bubbles: true }));
-
-            if (window.bootstrap && window.bootstrap.Dropdown) {
-                window.bootstrap.Dropdown.getOrCreateInstance(toggle).hide();
-            }
+            closeDropdown();
         });
 
         function refresh() {
@@ -417,12 +411,8 @@
 
         select.addEventListener("change", sync);
 
-        // Kəsilmə fix-i: menyunu HƏMİŞƏ viewport-a görə (fixed) yerləşdiririk —
-        // aşağıda yer yoxdursa yuxarı açılır, sağ/aşağı kənardan çıxmır. Bootstrap
-        // `data-bs-display="static"` Popper flip-i söndürdüyü üçün əks halda uzun
-        // seçim mətnləri və ya səhifə dibindəki select-lər ekrandan kənara çıxırdı.
-        var useFixedStrategy = true;
-
+        // Kəsilmə fix-i: menyu HƏMİŞƏ viewport-a görə (fixed) yerləşir — yer yoxdursa yuxarı açılır, kənardan
+        // çıxmır (`data-bs-display="static"` Popper flip-i söndürür; uzun mətnlər/dibdəki select-lər çıxırdı).
         function closeDropdown() {
             if (window.bootstrap && window.bootstrap.Dropdown) {
                 window.bootstrap.Dropdown.getOrCreateInstance(toggle).hide();
@@ -430,36 +420,47 @@
         }
 
         function onScrollWhileOpen(event) {
-            // Menyu daxili scroll-a icazə ver, kənardakı scroll-da bağla.
-            if (event.target instanceof Node && menu.contains(event.target)) {
+            // Menyu daxili scroll-a icazə ver, kənardakı scroll-da (və ölçü dəyişəndə) bağla.
+            if (event && event.target instanceof Node && menu.contains(event.target)) {
                 return;
             }
-            closeDropdown();
+            if (keepOpenOnViewportChange(searchInput)) {
+                positionMenuFixed(toggle, menu);
+            } else {
+                closeDropdown();
+            }
         }
+
+        // Toggle-da yazılan hərf itməsin (əvvəl fokus axtarışa yalnız taymerlə keçirdi): menyu açılır, hərf axtarışa.
+        toggle.addEventListener("keydown", function (event) {
+            var key = event.key || "";
+            if (key.length !== 1 || key === " " || event.ctrlKey || event.metaKey || event.altKey || toggle.disabled) {
+                return;
+            }
+            ensureMenu();
+            if (searchActive() && !isMenuOpen() && window.bootstrap && window.bootstrap.Dropdown) {
+                window.bootstrap.Dropdown.getOrCreateInstance(toggle).show();
+            }
+            focusSearch();
+        });
 
         // Fokusda əvvəlcədən qur — klaviatura istifadəçisi üçün ilk açılış gecikməsin.
         toggle.addEventListener("focus", ensureMenu);
 
         toggle.addEventListener("show.bs.dropdown", function () {
             ensureMenu(); // menyu göstərilməzdən və yerləşdirilməzdən ƏVVƏL qurulur
-            if (!useFixedStrategy) {
-                return;
-            }
             positionMenuFixed(toggle, menu);
             window.addEventListener("scroll", onScrollWhileOpen, true);
-            window.addEventListener("resize", closeDropdown);
+            window.addEventListener("resize", onScrollWhileOpen);
         });
 
         toggle.addEventListener("shown.bs.dropdown", function () {
             if (searchActive()) {
                 searchInput.value = "";
                 applyLiveSearch();
-                // Menyu açılan kimi axtarış sahəsi fokusda olsun — yazmağa hazır.
-                window.setTimeout(function () {
-                    if (isMenuOpen()) {
-                        searchInput.focus();
-                    }
-                }, 0);
+                // Fokus DƏRHAL axtarışda (ilk hərf itməsin); taymer — Bootstrap fokusu variantə aparsa.
+                focusSearch();
+                window.setTimeout(focusSearch, 0);
             }
             var selectedButton = menu.querySelector(".bootstrap-single-select__option.is-selected");
             if (selectedButton && typeof selectedButton.scrollIntoView === "function") {
@@ -469,7 +470,7 @@
 
         toggle.addEventListener("hidden.bs.dropdown", function () {
             window.removeEventListener("scroll", onScrollWhileOpen, true);
-            window.removeEventListener("resize", closeDropdown);
+            window.removeEventListener("resize", onScrollWhileOpen);
             resetMenuPosition(menu);
             // Bağlananda sorğu təmizlənir — növbəti açılışda tam siyahı görünsün.
             if (searchActive() && searchInput.value) {
@@ -489,6 +490,14 @@
 
         select._bootstrapSelectApi = api;
         refresh();
+        // Variantlar `refresh()`-siz dəyişsə də (innerHTML, appendChild, `hidden`) axtarış köhnə siyahıda qalmasın.
+        if (typeof window.MutationObserver === "function") {
+            var watch = { childList: true, subtree: true, characterData: true, attributes: true };
+            watch.attributeFilter = ["hidden", "disabled", "label", "selected", "data-search", "data-subtext"];
+            new window.MutationObserver(function () {
+                return window.document ? refresh() : null; // bağlanmış pəncərə (jsdom teardown) — yox
+            }).observe(select, watch);
+        }
 
         return api;
     }
@@ -563,19 +572,16 @@
             if (!select) {
                 return;
             }
-
             if (select.multiple) {
                 if (multiApi()) {
                     multiApi().refresh(select);
                 }
                 return;
             }
-
             if (typeof select._refreshBootstrapSelect === "function") {
                 select._refreshBootstrapSelect();
                 return;
             }
-
             enhanceBootstrapSelect(select);
         },
         sync: function (select) {
