@@ -339,6 +339,7 @@ on:
           - fix_workload_overcount
           - repair_sbio235_workload
           - repair_balanced_workload_pairs
+          - repair_repeated_sections_workload
           - fill_vacant_from_journals
           - audit_staff_placement
           - merge_chair_units
@@ -397,7 +398,7 @@ on:
         required: false
         default: ""
       batch:
-        description: "recover_workload_syllabi (Bilal legacy8430; workload-syllabi-…) · recover_mr46_syllabus: plaintext SHA256 və ya mr46-… undo paketi · repair_balanced_workload_pairs / repair_sbio235_workload: baselineSHA, undoID(dry) və ya undoID:baselineSHA(apply) · reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…) / merge_level_journals (lvlmerge-…): geri qaytarılacaq paket id-si (undo) · recover_mr27_journal: fayl üçün məcburi plaintext sha256 və ya undo üçün mr27-YYYYMMDD-HHMMSS-xxxx · legacy_delta_apply / share_legacy_syllabi: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd)"
+        description: "recover_workload_syllabi (Bilal legacy8430; workload-syllabi-…) · recover_mr46_syllabus: plaintext SHA256 və ya mr46-… undo paketi · repair_repeated_sections_workload / repair_balanced_workload_pairs / repair_sbio235_workload: baselineSHA, undoID(dry) və ya undoID:baselineSHA(apply) · reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…) / merge_level_journals (lvlmerge-…): geri qaytarılacaq paket id-si (undo) · recover_mr27_journal: fayl üçün məcburi plaintext sha256 və ya undo üçün mr27-YYYYMMDD-HHMMSS-xxxx · legacy_delta_apply / share_legacy_syllabi: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd)"
         required: false
         default: ""
       create_missing:
@@ -414,7 +415,7 @@ on:
         required: false
         default: ""
       row_group:
-        description: "fix_task_row_hours: qrup işarə(lər)i, vergüllə (məs. 631/5K,631/5K ing)"
+        description: "repair_repeated_sections_workload: boş=iki sabit sətir, yaxud row UUID-ləri · fix_task_row_hours: qrup işarə(lər)i, vergüllə (məs. 631/5K,631/5K ing)"
         required: false
         default: ""
       row_subject:
@@ -1044,6 +1045,40 @@ jobs:
                 test "$APPLY" != "true" || { echo "apply üçün batch=dry-run baselineSHA verin" >&2; exit 2; }
               fi
               ;;
+            repair_repeated_sections_workload)
+              # Two fixed rows, optionally one; every selection has its own pinned manifest.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              case "$ROW_GROUP" in
+                ""|"52debb1c-189f-4e93-b34c-56e313c3d457,be8e8251-977c-468d-b7d8-23a5e2196bf5"|"be8e8251-977c-468d-b7d8-23a5e2196bf5,52debb1c-189f-4e93-b34c-56e313c3d457") section_source=7078850b11728920dc74eb6e545e7860f74e14dd0adcb6ad833f09c68d9b7653 ;;
+                "52debb1c-189f-4e93-b34c-56e313c3d457") section_source=6393ce36fd241f895006cf3bc7fcaf62903f513218245a71d0cd5ef010734398 ;;
+                "be8e8251-977c-468d-b7d8-23a5e2196bf5") section_source=a7aabb32fa8f5f3b0b887627500664228e5f43497d5fae837705d543b4ce3daa ;;
+                *) echo "row_group yalnız iki sabit UUID-dən seçilməlidir" >&2; exit 2 ;;
+              esac
+              args=(--org "$ORG" --actor "$actor" --source-sha256 "$section_source")
+              if [ -n "$ROW_GROUP" ]; then
+                IFS=',' read -r -a section_rows <<< "$ROW_GROUP"
+                for section_row in "${section_rows[@]}"; do args+=(--row-id "$section_row"); done
+              fi
+              test -z "$ROSTER_TAG" || { echo "sabit scope üçün roster_tag boş olmalıdır" >&2; exit 2; }
+              if [[ "$BATCH" == sections2-* ]]; then
+                undo_batch="${BATCH%%:*}"
+                match "$undo_batch" '^sections2-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || exit 2
+                args+=(--undo "$undo_batch")
+                if [[ "$BATCH" == *:* ]]; then
+                  baseline="${BATCH#*:}"
+                  match "$baseline" '^[0-9a-f]{64}$' || exit 2
+                  args+=(--expected-baseline "$baseline")
+                else
+                  test "$APPLY" != "true" || { echo "undo apply üçün batch=undoID:baselineSHA verin" >&2; exit 2; }
+                fi
+              elif [ -n "$BATCH" ]; then
+                match "$BATCH" '^[0-9a-f]{64}$' || exit 2
+                args+=(--expected-baseline "$BATCH")
+              else
+                test "$APPLY" != "true" || { echo "apply üçün batch=dry-run baselineSHA verin" >&2; exit 2; }
+              fi
+              ;;
             fix_workload_overcount)
               # Sahib 2026-10-25: artıq sayılan yük (dublikat + sübutlu birgə dərs). Adlı hesabat şifrəli artifakta.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -1444,6 +1479,16 @@ jobs:
           elif [ "$COMMAND" = "repair_balanced_workload_pairs" ]; then
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^balanced_pairs: mode=(dry_run|apply|undo)( (baseline=[0-9a-f]{64}|batch=balanced12-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}|[a-z_]+=[0-9]+))+$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -E '^CommandError: [a-z0-9,:_=.-]+$' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "repair_repeated_sections_workload" ]; then
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^repeated_sections: mode=(dry_run|apply|undo)( (baseline=[0-9a-f]{64}|batch=sections2-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}|[a-z_]+=[0-9]+))+$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -E '^CommandError: [a-z0-9,:_=.-]+$' "$RUNNER_TEMP/out.log" | head -n 1 || true
