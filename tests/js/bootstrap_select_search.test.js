@@ -220,3 +220,55 @@ test("selects inserted later (dialogs, partials) are enhanced automatically", as
     assert.ok(h.input());
     window.close();
 });
+
+/* ── 2026-10-29 (sahib, «Yük bölgüsü»: «adi yazıram gəlmir, ancaq aşağı scroll edəndə görürəm») ── */
+
+test("options injected WITHOUT refresh() are searchable (no stale menu / false «no results»)", async () => {
+    const window = setup(single('data-live-search="true"', ["Aida Əliyeva"]));
+    const select = window.document.querySelector("select");
+    const h = handle(window, select);
+    h.open(); // menyu qurulur (köhnə siyahı)
+    h.close();
+    const late = window.document.createElement("option");
+    late.value = "99";
+    late.textContent = "Firəngiz Azadəliyeva";
+    select.appendChild(late); // refresh() çağırılmır
+    await tick(); // MutationObserver
+    h.open();
+    h.type("fir");
+    assert.deepEqual(h.visible(), ["Firəngiz Azadəliyeva"]);
+    assert.equal(h.empty().hidden, true, "«nəticə yoxdur» göstərilmir");
+    const more = window.document.createElement("option");
+    more.value = "100";
+    more.textContent = "Firuzə Kərimova";
+    select.appendChild(more); // açıq menyu: sorğu saxlanır, yeni variant süzgəcə düşür
+    await tick();
+    assert.equal(h.input().value, "fir");
+    assert.deepEqual(h.visible(), ["Firəngiz Azadəliyeva", "Firuzə Kərimova"]);
+    window.close();
+});
+
+test("the search is focused synchronously and a letter typed on the toggle goes to it", () => {
+    const window = setup(single("", CITIES));
+    const h = handle(window, window.document.querySelector("select"));
+    h.open();
+    assert.equal(window.document.activeElement, h.input(), "taymer gözlənmir — ilk hərf itmir");
+    h.toggle.focus();
+    h.toggle.dispatchEvent(new window.KeyboardEvent("keydown", { key: "q", bubbles: true }));
+    assert.equal(window.document.activeElement, h.input());
+    window.close();
+});
+
+test("decomposed letters, invisible characters and Cyrillic schwa in labels still match", () => {
+    const labels = ["Ağayev Rəşad", "Fir­əngiz Azadəliyeva", "Әliyeva Nərmin", ...CITIES];
+    const window = setup(single("", labels));
+    const h = handle(window, window.document.querySelector("select"));
+    h.open();
+    h.type("ağay");
+    assert.equal(h.visible().length, 1);
+    h.type("firəng");
+    assert.equal(h.visible().length, 1);
+    h.type("əliyeva nərmin");
+    assert.equal(h.visible().length, 1);
+    window.close();
+});

@@ -196,3 +196,18 @@ test("xarici klik menyunu bağlayır; az variantda axtarış gizlidir", () => {
     assert.equal(p.menu.hidden, true);
     assert.equal(p.toggle.getAttribute("aria-expanded"), "false");
 });
+
+test("2026-10-29: toggle-da yazılan hərf menyunu açır və axtarışa düşür; variantda hərf → axtarış", () => {
+    const p = page(GROUPS.replace("data-ems-multi-select", 'data-ems-multi-select data-ms-search="true"'));
+    p.toggle.focus();
+    key(p.win, p.toggle, "6");
+    assert.equal(p.menu.hidden, false);
+    assert.equal(p.doc.activeElement, p.search);
+    key(p.win, p.search, "ArrowDown");
+    assert.ok(p.doc.activeElement.classList.contains("ems-multi-select__option"));
+    key(p.win, p.doc.activeElement, "k");
+    assert.equal(p.doc.activeElement, p.search);
+    p.search.value = "Aliyev";
+    p.search.dispatchEvent(new p.win.Event("input", { bubbles: true }));
+    assert.deepEqual(p.visible().map((b) => b.dataset.value), ["3"]);
+});
