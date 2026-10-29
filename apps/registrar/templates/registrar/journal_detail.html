@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal_guest.css' %}?v=20260926-close">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_subject_exempt.css' %}?v=20261015-exempt">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_history.css' %}?v=20261019-mob">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_history_card.css' %}?v=20261029-card">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_activation.css' %}?v=20261017-room">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_cell_hint.css' %}?v=20261014-notip">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_autosave.css' %}?v=20261014-auto">
@@ -124,7 +125,7 @@
         <div class="jd2-teach-summary">
             {% for k in teaching_summary.kinds %}
             <span class="jd2-teach-kind jd2-teach-kind--{{ k.kind }}">
-                <b>{{ k.label }}</b> · {{ k.held }} {% trans "saat" context "registrar.journal" %}{% if k.teachers %} · {{ k.teachers|join:", " }}{% endif %}
+                <b>{{ k.label }}</b> · {{ k.held }}{% if k.planned %} / {{ k.planned }}{% endif %} {% trans "saat" context "registrar.journal" %}{% if k.teachers %} · {{ k.teachers|join:", " }}{% endif %}
             </span>
             {% endfor %}
             <span class="jd2-teach-total{% if teaching_summary.over %} is-over{% endif %}">

@@ -1,0 +1,148 @@
+/* Jurnal səhifəsi — «Jurnalın müəllim tarixçəsi» kartı (_jd_history.html, 2026-10-29).
+ *
+ * Əvvəl `<details class="jd2-card">` üçün heç bir stil yox idi: brauzerin xam
+ * üçbucağı, nəhəng h3 və uzun nöqtəli siyahı jurnalı aşağı itələyirdi. İndi —
+ * susmaya görə BAĞLI, tək sətirlik kart (ikon + ad + cari sahib çipi + son
+ * təhvil); açılanda kiçik təhvil siyahısı və öz daxilində sürüşən yığcam dərs
+ * cədvəli. Vizual dil «Dəyişiklik tarixçəsi» paneli (journal_history.css) ilə
+ * eynidir; yalnız `--ems-*` tokenləri, tək (işıqlı) tema.
+ */
+
+.jd-own {
+    margin: 0 0 12px; border: 1px solid var(--ems-border); border-radius: var(--ems-r-xl);
+    background: var(--ems-neutral-0); box-shadow: var(--ems-sh-card); overflow: hidden;
+}
+
+/* ── Başlıq sətri (summary) ────────────────────────────────────────────── */
+.jd-own__sum {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px;
+    padding: 9px 14px; cursor: pointer; list-style: none; user-select: none;
+    font-size: 0.8rem; color: var(--ems-text);
+}
+.jd-own__sum::-webkit-details-marker { display: none; }
+.jd-own__sum::marker { content: ""; }
+.jd-own__sum:hover { background: var(--ems-bg-subtle); }
+.jd-own__sum:focus-visible { outline: 2px solid var(--ems-primary-300); outline-offset: -2px; }
+.jd-own[open] > .jd-own__sum { border-bottom: 1px solid var(--ems-border); background: var(--ems-bg-subtle); }
+
+.jd-own__icon {
+    flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: var(--ems-r-lg);
+    background: var(--ems-primary-100); color: var(--ems-primary-700); font-size: 13px;
+}
+.jd-own__title { font-size: 0.86rem; font-weight: 800; color: var(--ems-text); }
+.jd-own__chip,
+.jd-own__latest,
+.jd-own__count {
+    display: inline-flex; align-items: center; gap: 5px; min-height: 24px; padding: 0 10px;
+    border-radius: var(--ems-r-pill); font-size: 0.74rem; font-weight: 700; white-space: nowrap;
+    max-width: 100%;
+}
+.jd-own__chip { background: var(--ems-primary-50); color: var(--ems-primary-800); border: 1px solid var(--ems-primary-200); }
+.jd-own__chip-lbl { font-weight: 600; color: var(--ems-primary-700); }
+.jd-own__chip b { font-weight: 800; overflow: hidden; text-overflow: ellipsis; }
+.jd-own__latest { background: var(--ems-neutral-100); color: var(--ems-neutral-700); }
+.jd-own__latest .fa-right-left { color: var(--ems-neutral-500); font-size: 0.7rem; }
+.jd-own__count { background: var(--ems-neutral-0); color: var(--ems-neutral-600); border: 1px solid var(--ems-neutral-200); }
+.jd-own__count i { color: var(--ems-neutral-400); font-size: 0.7rem; }
+.jd-own__caret {
+    margin-left: auto; color: var(--ems-neutral-400); font-size: 0.75rem; transition: transform 0.15s ease;
+}
+.jd-own[open] .jd-own__caret { transform: rotate(180deg); }
+
+.jd-own__time {
+    font-family: var(--ems-ff-mono, ui-monospace, monospace); font-size: 0.72rem; font-weight: 700;
+    color: var(--ems-text-muted);
+}
+.jd-own__tag {
+    display: inline-flex; align-items: center; min-height: 20px; padding: 0 8px; border-radius: var(--ems-r-pill);
+    background: var(--ems-warning-bg); color: var(--ems-warning-800); font-size: 0.68rem; font-weight: 800;
+}
+.jd-own__unknown { color: var(--ems-text-muted); font-style: italic; font-weight: 600; }
+
+/* ── Gövdə ─────────────────────────────────────────────────────────────── */
+.jd-own__body { padding: 10px 14px 12px; background: var(--ems-neutral-0); }
+.jd-own__sec + .jd-own__sec { margin-top: 12px; }
+.jd-own__h {
+    display: flex; align-items: center; gap: 6px; margin: 0 0 6px;
+    font-size: 0.66rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+.jd-own__h-count {
+    display: inline-flex; align-items: center; min-height: 18px; padding: 0 7px; border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100); color: var(--ems-neutral-700); letter-spacing: 0;
+}
+
+/* Təhvillər */
+.jd-own__handovers { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.jd-own__handover {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 6px 10px;
+    border: 1px solid var(--ems-border); border-left: 3px solid var(--ems-primary-500);
+    border-radius: var(--ems-r-md); font-size: 0.78rem; color: var(--ems-text);
+}
+.jd-own__handover.is-reverted { border-left-color: var(--ems-warning-500); }
+.jd-own__handover .fa-right-left { color: var(--ems-primary-600); font-size: 0.72rem; }
+.jd-own__who { font-weight: 700; overflow-wrap: anywhere; }
+
+/* Dərslər — yığcam cədvəl, öz daxilində sürüşür (jurnal aşağı itələnmir) */
+.jd-own__table {
+    max-height: 300px; overflow: auto; border: 1px solid var(--ems-border); border-radius: var(--ems-r-lg);
+    overscroll-behavior: contain;
+}
+.jd-own__lessons { margin: 0; padding: 0; list-style: none; }
+.jd-own__row {
+    display: grid; grid-template-columns: minmax(170px, 1.1fr) repeat(3, minmax(120px, 1fr));
+    gap: 10px; align-items: baseline; padding: 6px 12px; font-size: 0.78rem; color: var(--ems-text);
+}
+.jd-own__lessons .jd-own__row { border-top: 1px solid var(--ems-border); }
+.jd-own__lessons .jd-own__row:first-child { border-top: 0; }
+.jd-own__lessons .jd-own__row:nth-child(even) { background: var(--ems-neutral-50); }
+.jd-own__row--head {
+    position: sticky; top: 0; z-index: 1; padding-top: 6px; padding-bottom: 6px;
+    background: var(--ems-bg-subtle); border-bottom: 1px solid var(--ems-border);
+    font-size: 0.62rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+.jd-own__when { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+.jd-own__date { font-weight: 800; font-variant-numeric: tabular-nums; }
+.jd-own__clock {
+    font-family: var(--ems-ff-mono, ui-monospace, monospace); font-size: 0.72rem; color: var(--ems-text-muted);
+}
+.jd-own__kind {
+    display: inline-flex; align-items: center; min-height: 18px; padding: 0 7px; border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-100); color: var(--ems-primary-800); font-size: 0.66rem; font-weight: 800;
+}
+.jd-own__cell { min-width: 0; overflow-wrap: anywhere; }
+/* Sütun başlığı enli ekranda başlıq sətrindədir — hücrə etiketi yalnız ekran oxuyucusu üçün. */
+.jd-own__lbl {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.jd-own__note {
+    display: flex; align-items: center; gap: 6px; margin: 10px 0 0;
+    font-size: 0.72rem; color: var(--ems-text-muted);
+}
+.jd-own__note i { color: var(--ems-neutral-400); }
+
+/* ── Dar ekran: cədvəl sətri → yığcam blok (etiketlər görünür) ──────────── */
+@media (max-width: 760px) {
+    .jd-own__sum { padding: 9px 12px; }
+    /* Ox başlıqla eyni sətirdə qalsın; çiplər alt sətrə düşür. */
+    .jd-own__title { flex: 1 1 auto; min-width: 0; }
+    .jd-own__caret { order: 1; }
+    .jd-own__chip,
+    .jd-own__latest,
+    .jd-own__count { order: 2; }
+    .jd-own__chip,
+    .jd-own__latest { white-space: normal; }
+    .jd-own__latest { flex-wrap: wrap; padding: 3px 10px; border-radius: var(--ems-r-md); }
+    .jd-own__time { white-space: nowrap; }
+    .jd-own__row--head { display: none; }
+    .jd-own__row { grid-template-columns: 1fr; gap: 2px; padding: 8px 12px; }
+    .jd-own__lbl {
+        position: static; width: auto; height: auto; margin: 0 4px 0 0; overflow: visible; clip: auto;
+        white-space: normal; color: var(--ems-text-muted); font-weight: 600;
+    }
+    .jd-own__table { max-height: 360px; }
+}

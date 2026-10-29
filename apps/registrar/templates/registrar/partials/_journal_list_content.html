@@ -28,7 +28,8 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
           data-faculty-url="{% url 'accounts:records_faculty_search' %}"
           data-department-url="{% url 'accounts:records_department_search' %}"
           data-group-url="{% url 'accounts:records_group_search' %}"
-          data-teacher-url="{% url 'accounts:journal_teacher_search' %}">
+          data-teacher-url="{% url 'registrar:journal_list_teachers' %}"
+          data-empty-text="{% trans 'Nəticə tapılmadı' %}">
         <label class="jl-f jl-f--xs {% if journal_selected_year %}is-set{% endif %}">
             <span class="jl-f__label">{% trans "TƏDRİS İLİ" context "registrar.journal" %}</span>
             <div class="bootstrap-single-select bootstrap-single-select--ems">
@@ -220,5 +221,5 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
 
 <script src="{% static 'registrar/js/journal_list.js' %}?v=20261014-searchux"></script>
 {% if journal_is_broad %}
-<script src="{% static 'registrar/js/journal_list_pickers.js' %}?v=20260920-redesign"></script>
+<script src="{% static 'registrar/js/journal_list_pickers.js' %}?v=20261029-teacher"></script>
 {% endif %}

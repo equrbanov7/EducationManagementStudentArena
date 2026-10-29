@@ -1,26 +1,88 @@
 {% load i18n %}
-<details class="jd2-card" data-journal-history>
-  <summary class="jd2-section-title">{% trans "Jurnalın müəllim tarixçəsi" context "registrar.journal_history" %} · {% trans "Cari jurnal sahibi" context "registrar.journal_history" %}: {% if journal_history.current_owner %}{{ journal_history.current_owner }}{% else %}{% trans "Məlum deyil" context "registrar.journal_history" %}{% endif %}{% with latest=journal_history.handovers.0 %}{% if latest %} · {{ latest.from_instructor_name|default:"—" }} → {{ latest.to_instructor_name|default:"—" }} · {{ latest.created_at|date:"d.m.Y H:i" }}{% if latest.reverted_at %} · {% trans "Geri qaytarılıb" context "registrar.journal_history" %}{% endif %}{% endif %}{% endwith %}</summary>
-  {% if journal_history.handovers %}
-  <h3>{% trans "Təhvillər" context "registrar.journal_history" %}</h3>
-  <ul>
-    {% for transfer in journal_history.handovers %}
-    <li>{{ transfer.from_instructor_name|default:"—" }} → {{ transfer.to_instructor_name|default:"—" }} · <time>{{ transfer.created_at|date:"d.m.Y H:i" }}</time>{% if transfer.reverted_at %} · {% trans "Geri qaytarılıb" context "registrar.journal_history" %}: {{ transfer.reverted_at|date:"d.m.Y H:i" }}{% endif %}</li>
-    {% endfor %}
-  </ul>
-  {% endif %}
-  {% if journal_history.lessons %}
-  <h3>{% trans "Bu səhifədə göstərilən dərslər" context "registrar.journal_history" %}</h3>
-  <ul>
-    {% for item in journal_history.lessons %}
-    <li data-history-lesson="{{ item.lesson.pk }}">
-      <strong>{{ item.lesson.date|date:"d.m.Y" }}{% if item.lesson.start_time %} · {{ item.lesson.start_time|time:"H:i" }}{% endif %} · {{ item.lesson.get_kind_display }}</strong><br>
-      {% trans "Dərs müəllimi" context "registrar.journal_history" %}: {% if item.instructor %}{{ item.instructor }}{% else %}{% trans "Məlum deyil" context "registrar.journal_history" %}{% endif %} ·
-      {% trans "Dərsi yaradan" context "registrar.journal_history" %}: {% if item.created_by %}{{ item.created_by }}{% else %}{% trans "Məlum deyil" context "registrar.journal_history" %}{% endif %}<br>
-      {% trans "Qeyd müəllifi" context "registrar.journal_history" %}: {% for name in item.authors %}{{ name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if item.unknown_author %}{% if item.authors %}, {% endif %}{% trans "Məlum deyil" context "registrar.journal_history" %}{% endif %}
-    </li>
-    {% endfor %}
-  </ul>
-  {% endif %}
-  <p>{% trans "Tarixi müəllim məlum deyilsə, cari sahib onun yerinə göstərilmir." context "registrar.journal_history" %}</p>
+{% comment %}«Jurnalın müəllim tarixçəsi» — kompakt, susmaya görə BAĞLI kart (acb112d, dizayn 2026-10-29).
+
+Kontekst: `journal_history` — apps/registrar/journal_provenance.history_context.
+Başlıq sətri: ikon + ad + cari sahib çipi + son təhvil; açılanda kiçik təhvil
+siyahısı və dərslərin yığcam cədvəli (tarix · saat · növ | dərs müəllimi | dərsi
+yaradan | qeyd müəllifi), öz daxilində sürüşən. Görünüş: journal_history_card.css
+(«Dəyişiklik tarixçəsi» paneli ilə eyni vizual dil). CSP: inline CSS/JS yoxdur.
+Dərs sətirləri `<li data-history-lesson>` olaraq qalır (test_journal_provenance).{% endcomment %}
+{% with latest=journal_history.handovers.0 %}
+<details class="jd-own" data-journal-history>
+  <summary class="jd-own__sum">
+    <span class="jd-own__icon" aria-hidden="true"><i class="fas fa-user-clock"></i></span>
+    <span class="jd-own__title">{% trans "Jurnalın müəllim tarixçəsi" context "registrar.journal_history" %}</span>
+    <span class="jd-own__chip">
+      <span class="jd-own__chip-lbl">{% trans "Cari jurnal sahibi" context "registrar.journal_history" %}:</span>
+      {% if journal_history.current_owner %}<b>{{ journal_history.current_owner }}</b>{% else %}<b class="jd-own__unknown">{% trans "Məlum deyil" context "registrar.journal_history" %}</b>{% endif %}
+    </span>
+    {% if latest %}
+    <span class="jd-own__latest">
+      <i class="fas fa-right-left" aria-hidden="true"></i>
+      <span>{{ latest.from_instructor_name|default:"—" }} → {{ latest.to_instructor_name|default:"—" }}</span>
+      <time class="jd-own__time">{{ latest.created_at|date:"d.m.Y H:i" }}</time>
+      {% if latest.reverted_at %}<span class="jd-own__tag">{% trans "Geri qaytarılıb" context "registrar.journal_history" %}</span>{% endif %}
+    </span>
+    {% endif %}
+    {% if journal_history.lessons %}<span class="jd-own__count"><i class="fas fa-calendar-day" aria-hidden="true"></i> {{ journal_history.lessons|length }}</span>{% endif %}
+    <i class="fas fa-chevron-down jd-own__caret" aria-hidden="true"></i>
+  </summary>
+
+  <div class="jd-own__body">
+    {% if journal_history.handovers %}
+    <section class="jd-own__sec">
+      <h3 class="jd-own__h">{% trans "Təhvillər" context "registrar.journal_history" %}</h3>
+      <ul class="jd-own__handovers">
+        {% for transfer in journal_history.handovers %}
+        <li class="jd-own__handover{% if transfer.reverted_at %} is-reverted{% endif %}">
+          <i class="fas fa-right-left" aria-hidden="true"></i>
+          <span class="jd-own__who">{{ transfer.from_instructor_name|default:"—" }} → {{ transfer.to_instructor_name|default:"—" }}</span>
+          <time class="jd-own__time">{{ transfer.created_at|date:"d.m.Y H:i" }}</time>
+          {% if transfer.reverted_at %}<span class="jd-own__tag">{% trans "Geri qaytarılıb" context "registrar.journal_history" %}: {{ transfer.reverted_at|date:"d.m.Y H:i" }}</span>{% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+    {% if journal_history.lessons %}
+    <section class="jd-own__sec">
+      <h3 class="jd-own__h">{% trans "Bu səhifədə göstərilən dərslər" context "registrar.journal_history" %} <span class="jd-own__h-count">{{ journal_history.lessons|length }}</span></h3>
+      <div class="jd-own__table">
+        <div class="jd-own__row jd-own__row--head" aria-hidden="true">
+          <span>{% trans "DƏRS TARİXİ" context "registrar.journal_history" %}</span>
+          <span>{% trans "Dərs müəllimi" context "registrar.journal_history" %}</span>
+          <span>{% trans "Dərsi yaradan" context "registrar.journal_history" %}</span>
+          <span>{% trans "Qeyd müəllifi" context "registrar.journal_history" %}</span>
+        </div>
+        <ul class="jd-own__lessons">
+          {% for item in journal_history.lessons %}
+          <li class="jd-own__row" data-history-lesson="{{ item.lesson.pk }}">
+            <span class="jd-own__when">
+              <b class="jd-own__date">{{ item.lesson.date|date:"d.m.Y" }}</b>
+              {% if item.lesson.start_time %}<span class="jd-own__clock">{{ item.lesson.start_time|time:"H:i" }}</span>{% endif %}
+              <span class="jd-own__kind">{{ item.lesson.get_kind_display }}</span>
+            </span>
+            <span class="jd-own__cell">
+              <span class="jd-own__lbl">{% trans "Dərs müəllimi" context "registrar.journal_history" %}:</span>
+              {% if item.instructor %}{{ item.instructor }}{% else %}<span class="jd-own__unknown">{% trans "Məlum deyil" context "registrar.journal_history" %}</span>{% endif %}
+            </span>
+            <span class="jd-own__cell">
+              <span class="jd-own__lbl">{% trans "Dərsi yaradan" context "registrar.journal_history" %}:</span>
+              {% if item.created_by %}{{ item.created_by }}{% else %}<span class="jd-own__unknown">{% trans "Məlum deyil" context "registrar.journal_history" %}</span>{% endif %}
+            </span>
+            <span class="jd-own__cell">
+              <span class="jd-own__lbl">{% trans "Qeyd müəllifi" context "registrar.journal_history" %}:</span>
+              {% for name in item.authors %}{{ name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if item.unknown_author %}{% if item.authors %}, {% endif %}<span class="jd-own__unknown">{% trans "Məlum deyil" context "registrar.journal_history" %}</span>{% endif %}{% if not item.authors and not item.unknown_author %}<span class="jd-own__unknown">—</span>{% endif %}
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+    {% endif %}
+
+    <p class="jd-own__note"><i class="fas fa-circle-info" aria-hidden="true"></i> {% trans "Tarixi müəllim məlum deyilsə, cari sahib onun yerinə göstərilmir." context "registrar.journal_history" %}</p>
+  </div>
 </details>
+{% endwith %}
