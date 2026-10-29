@@ -13,11 +13,7 @@ from apps.workload.services.sbio235_state import digest
 class RepeatedSectionsWorkflowTests(SimpleTestCase):
     def run_args(self, *, rows="", batch="", apply="false", tag=""):
         text = (Path(__file__).resolve().parents[3] / ".github/workflows/prod-data-ops.yml").read_text()
-        script = (
-            text.split("            repair_repeated_sections_workload)\n", 1)[1]
-            .split("            fix_workload_overcount)", 1)[0]
-            .rsplit("              ;;", 1)[0]
-        )
+        script = text.split("            repair_repeated_sections_workload)\n", 1)[1].split("\n              ;;", 1)[0]
         prefix = """set -e
 match() { case "$1" in (*$'\\n'*|*$'\\r'*) return 1 ;; esac; printf '%s' "$1" | grep -Eq -- "$2"; }
 superadmin_actor() { echo admin; }
