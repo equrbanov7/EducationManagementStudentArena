@@ -31,8 +31,10 @@ class TeacherJournalVisibilityTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.org = make_org("teacher-visible")
+        cls.org.owner.is_superuser = True
+        cls.org.owner.save(update_fields=["is_superuser"])
         cls.stack = make_structure(cls.org, code="TV")
-        cls.task = make_task(cls.org, cls.stack["chair"], status=TaskStatus.DISTRIBUTED)
+        cls.task = make_task(cls.org, cls.stack["chair"], status=TaskStatus.AMENDED)
         cls.row = make_row(cls.task, cls.stack, lecture_total=30, seminar_total=30, lab_total=15)
         cls.teacher = User.objects.create_user("visible-teacher")
         cls.other = User.objects.create_user("visible-other")
