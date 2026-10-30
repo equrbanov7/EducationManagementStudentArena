@@ -465,3 +465,5 @@ __all__ += [name for name in _api_exports if name not in __all__]
 
 
 from .services.mr123_subject_repair import MR123Error, repair_mr123_subject  # noqa: E402,F401
+
+from .services.mr118_journal_binding import MR118Error, repair_mr118_journal_binding  # noqa: E402,F401

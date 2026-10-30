@@ -334,6 +334,7 @@ on:
           - repair_mr112_hours
           - repair_mr123_subject
           - repair_request_schedule_labels
+          - repair_mr118_journal_binding
           - repair_mr83_syllabus
           - repair_mr77_schedule
           - legacy_repair_empty_lessons
@@ -750,6 +751,18 @@ jobs:
               fi
               ;;
             repair_mr123_subject)
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "active_superadmin_required" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              [ "$ROSTER_TAG" != "undo" ] || args+=(--undo)
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^[0-9a-f]{64}$' || { echo "baseline_sha256_required" >&2; exit 2; }
+                args+=(--expected-baseline "$BATCH")
+              elif [ "$APPLY" = "true" ]; then
+                echo "fresh_live_baseline_required" >&2; exit 2
+              fi
+              ;;
+            repair_mr118_journal_binding)
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "active_superadmin_required" >&2; exit 1; }
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor")
@@ -1496,6 +1509,16 @@ jobs:
           elif [ "$COMMAND" = "repair_mr123_subject" ]; then
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^mr123_subject: ([a-z_]+=[0-9]+|baseline=[a-f0-9]{64})( ([a-z_]+=[0-9]+|baseline=[a-f0-9]{64}))*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "repair_mr118_journal_binding" ]; then
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^mr118_subject: ([a-z_]+=[0-9]+|baseline=[a-f0-9]{64})( ([a-z_]+=[0-9]+|baseline=[a-f0-9]{64}))*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
