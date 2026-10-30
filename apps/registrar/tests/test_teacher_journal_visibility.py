@@ -164,6 +164,20 @@ class TeacherJournalVisibilityTests(TestCase):
             detail(self.request(), offering)
         other_org = make_org("visible-foreign")
         self.assertFalse(eligible(self.teacher, other_org))
+        activate_member(other_org, self.teacher, "teacher", permissions=TEACHER_PERMS)
+        other_stack = make_structure(other_org, code="TV-OTHER")
+        foreign = CourseOffering.objects.create(
+            organization=other_org,
+            subject=other_stack["subject"],
+            period=other_stack["period"],
+            group=other_stack["group"],
+        )
+        Lesson.objects.create(
+            organization=other_org, offering=foreign, instructor=self.teacher, date=timezone.localdate()
+        )
+        self.assertTrue(eligible(self.teacher, other_org))
+        with self.assertRaises(Http404):
+            detail(self.request(), foreign)
 
     def test_draft_cancelled_vacant_and_wrong_group_do_not_supply_current_visibility(self):
         self.assignment()

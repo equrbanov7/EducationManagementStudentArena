@@ -42,7 +42,13 @@ def offering_ids(user, organization):
 
 def detail(request, offering):
     """The detail access gate delegates here only when normal journal access failed."""
-    if request.method != "GET" or not eligible(request.user, offering.organization):
+    request_org = getattr(request, "organization", None)
+    if (
+        request.method != "GET"
+        or request_org is None
+        or request_org.pk != offering.organization_id
+        or not eligible(request.user, offering.organization)
+    ):
         raise Http404
     lessons = recorded_lessons(request.user).filter(organization=offering.organization, offering=offering)
     if not lessons.exists():
