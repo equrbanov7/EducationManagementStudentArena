@@ -382,6 +382,7 @@ def build_target_queryset(
             memberships__organization=organization,
             memberships__is_active=True,
             memberships__role__name__in=_expand_role_aliases(role_names),
+            **({"memberships__role__is_active": True} if role_filter == "staff" else {}),
         )
 
     # Perf: siyahı üçün yalnız lazım olan sütunlar (serializer başqa heç nəyə

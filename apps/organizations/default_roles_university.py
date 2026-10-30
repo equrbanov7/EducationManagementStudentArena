@@ -387,6 +387,7 @@ UNIVERSITY_ROLES = [
             "exam.view",
             "analytics.view_own",
             "journal.lessons_unit",
+            "journal.view",
         ],
         "description": "Laboratory assistant supporting lab work and grading within their course",
     },

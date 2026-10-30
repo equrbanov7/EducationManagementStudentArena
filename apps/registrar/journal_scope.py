@@ -85,18 +85,10 @@ def _kafedra_roots(user, organization, scope) -> list:
 
 
 def _unit_view_q(organization, scope, kafedras, within=None):
-    """UNIT əhatəsinin açılış Q-su: qrup alt-ağacı VƏ YA (kafedra kökü üçün) kafedraya aid açılış."""
-    from django.apps import apps as django_apps
-    from django.db.models import Q
+    """Siyahı və detal üçün eyni struktur/faktiki kafedra əhatəsi."""
+    from .journal_unit_visibility import unit_journal_q
 
-    from .lessons_log_units import kafedra_offering_q
-
-    org_unit_model = django_apps.get_model("organizations", "OrgUnit")
-    units = org_unit_model.objects.filter(organization=organization).filter(scope.unit_subtree_q()).values("pk")
-    query = Q(group__in=units)
-    for unit in kafedras:
-        query |= kafedra_offering_q(unit, within=within)
-    return query
+    return unit_journal_q(organization, scope, kafedras, within=within)
 
 
 def journal_view_q(user, organization):

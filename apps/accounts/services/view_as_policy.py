@@ -172,6 +172,7 @@ ROLE_FILTER_MAP = {
     # şöbəsi, RİM, imtahan mərkəzi, inzibati şöbə, tələbə xidmətləri, dekanlıq,
     # kafedra müdiri, koordinator, qəyyum, HR, tyutor, adi üzv.
     "staff": {
+        "lab_assistant",
         ProfileRole.HR,
         ProfileRole.MEMBER,
         ProfileRole.IKT_REHBER,
