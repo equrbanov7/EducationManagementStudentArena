@@ -120,7 +120,8 @@ def parse(entry, item, *, version):
             if set(syllabus) != {"id", "author_id", "current_version_id", "approved_version_id"}:
                 raise RepairError("legacy_syllabus_identity_invalid")
             uid(syllabus["id"])
-            integer(syllabus["author_id"], positive=True)
+            if syllabus["author_id"] is not None:
+                integer(syllabus["author_id"], positive=True)
             for field in ("current_version_id", "approved_version_id"):
                 if syllabus[field] is not None:
                     uid(syllabus[field])

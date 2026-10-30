@@ -176,6 +176,37 @@ class ReviewedV2Tests(TestCase):
         self.assertTrue(self.a.lessons.filter(instructor__isnull=True, kind="seminar").exists())
         self.assertEqual(result["created_journals"], 0)
 
+    def test_legacy_null_syllabus_author_is_preserved_and_idempotent(self):
+        syllabus = self.a.syllabi.get()
+        syllabus.author_id = None
+        syllabus.save(update_fields=["author"])
+        versions = (syllabus.current_version_id, syllabus.approved_version_id)
+        entry = self.handover(restore=True, legacy=True, retain=True)
+        self.assertIsNone(entry["reviewed_policy"]["legacy_history"][0]["syllabi"][0]["author_id"])
+        plan = self.plan(entry)
+        self.apply(plan)
+        syllabus.refresh_from_db()
+        self.assertIsNone(syllabus.author_id)
+        self.assertEqual((syllabus.current_version_id, syllabus.approved_version_id), versions)
+        self.assertEqual(self.execute(plan)["already_done"], 1)
+
+    def test_reviewed_null_syllabus_author_cannot_hide_an_existing_real_author(self):
+        entry = self.handover(restore=True, legacy=True, retain=True)
+        entry["reviewed_policy"]["legacy_history"][0]["syllabi"][0]["author_id"] = None
+        plan = self.plan(entry)
+        before = state.snapshot(plan)
+        with self.assertRaisesMessage(RepairError, "legacy_syllabus_author_version_changed"):
+            self.execute(plan)
+        self.assertEqual(state.snapshot(plan), before)
+
+    def test_reviewed_non_null_syllabus_author_still_requires_positive_integer(self):
+        entry = self.handover(restore=True, legacy=True, retain=True)
+        for invalid in (0, -1, True, "1"):
+            with self.subTest(author=invalid):
+                entry["reviewed_policy"]["legacy_history"][0]["syllabi"][0]["author_id"] = invalid
+                with self.assertRaisesMessage(RepairError, "manifest_integer_invalid"):
+                    self.plan(entry)
+
     def test_removed_old_seminar_assignment_and_author_history_are_reversible(self):
         self.rb.seminar_plan = self.rb.seminar_total = 10
         self.rb.save(update_fields=["seminar_plan", "seminar_total"])
