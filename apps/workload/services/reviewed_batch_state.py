@@ -28,6 +28,24 @@ def offerings(plan):
     return model("registrar.CourseOffering").objects.filter(organization_id=ORG).filter(keys_q(plan))
 
 
+def row_degree_level(item):
+    """Resolve missing source metadata without mutating the reviewed payload."""
+    explicit = item["row_data"].get("degree_level")
+    if explicit is not None:
+        return explicit
+    parents = (
+        model("organizations.OrgUnit").objects.filter(organization_id=ORG, pk__in=item["group_ids"]).values("parent_id")
+    )
+    degrees = set(
+        model("registrar.Program")
+        .objects.filter(organization_id=ORG, specialty_unit_id__in=parents, is_active=True)
+        .values_list("degree_level", flat=True)
+    )
+    if len(degrees) != 1 or not degrees <= {"bachelor", "master", "phd"}:
+        raise RepairError("new_row_degree_program_context_not_unique")
+    return next(iter(degrees))
+
+
 def task_rows(plan):
     return model("workload.TeachingTaskRow").objects.filter(organization_id=ORG, task_id__in=plan.task_ids)
 
@@ -336,20 +354,8 @@ def validate(plan, *, actor):
             raise RepairError("reviewed_journal_allowlist_changed")
         if item["mode"] == "restore" and len(found) != len(item["group_ids"]):
             raise RepairError("existing_owner_journal_missing")
-        if item["mode"] != "patch" and item["row_data"].get("degree_level") is None:
-            parents = (
-                model("organizations.OrgUnit")
-                .objects.filter(organization_id=ORG, pk__in=item["group_ids"])
-                .values("parent_id")
-            )
-            degrees = set(
-                model("registrar.Program")
-                .objects.filter(organization_id=ORG, specialty_unit_id__in=parents, is_active=True)
-                .values_list("degree_level", flat=True)
-            )
-            if len(degrees) != 1 or not degrees <= {"bachelor", "master", "phd"}:
-                raise RepairError("new_row_degree_program_context_not_unique")
-            item["row_data"]["degree_level"] = next(iter(degrees))
+        if item["mode"] != "patch":
+            row_degree_level(item)
         owner = item["assignments"][0]["teacher_id"]
         for offering in found:
             expected_owner = extensions.policy(item, "handover", {}).get("from_instructor_id", owner)

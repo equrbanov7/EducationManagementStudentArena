@@ -37,6 +37,8 @@ def assign(row, value, *, actor, old=None):
 
 
 def _row_data(item):
+    from .reviewed_batch_state import row_degree_level
+
     value = item["row_data"]
     data = {
         "subject_id": item["subject_id"],
@@ -47,7 +49,7 @@ def _row_data(item):
         "specialty_id": value.get("specialty_id"),
         "season": item["season"],
         "row_kind": "teaching",
-        "degree_level": value["degree_level"],
+        "degree_level": row_degree_level(item),
         "education_form": FORMS[value["education_form"]],
         "credits": "" if value.get("credits") is None else str(value["credits"]),
         "student_count_text": "" if value.get("student_count") is None else str(value["student_count"]),

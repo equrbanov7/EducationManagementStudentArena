@@ -400,9 +400,38 @@ class ReviewedBatchTests(TestCase):
         )
         self.manifest["source_entries"][2]["desired_row"]["degree_level"] = None
         self.plan = select_manifest(self.manifest, sha256="b" * 64, lines=[7])
-        self.apply()
+        source_before = copy.deepcopy(self.manifest)
+        selection_before = self.plan.selection_sha
+        preview = self.run_batch()
+        self.assertEqual(self.manifest, source_before)
+        self.assertIsNone(self.plan.items[0]["row_data"]["degree_level"])
+        self.plan = select_manifest(self.manifest, sha256="b" * 64, lines=[7])
+        result = self.run_batch(apply=True, expected_baseline=preview["baseline"])
         row = TeachingTaskRow.objects.get(subject=self.new_subject)
         self.assertEqual(row.degree_level, "bachelor")
+        self.plan = select_manifest(self.manifest, sha256="b" * 64, lines=[7])
+        self.assertEqual(self.run_batch(apply=True, expected_baseline=result["baseline"])["already_done"], 1)
+        self.assertEqual(self.manifest, source_before)
+        self.assertEqual(self.plan.selection_sha, selection_before)
+
+    def test_ambiguous_missing_degree_remains_fail_closed_without_input_mutation(self):
+        Program = state.model("registrar.Program")
+        for degree in ("bachelor", "master"):
+            Program.objects.create(
+                organization=self.org,
+                specialty_unit=self.specialty,
+                code="SOURCE-" + degree,
+                name="Program " + degree,
+                degree_level=degree,
+            )
+        self.manifest["source_entries"][2]["desired_row"]["degree_level"] = None
+        self.plan = select_manifest(self.manifest, sha256="b" * 64, lines=[7])
+        source_before = copy.deepcopy(self.manifest)
+        before = state.snapshot(self.plan)
+        with self.assertRaisesMessage(RepairError, "new_row_degree_program_context_not_unique"):
+            self.run_batch()
+        self.assertEqual(state.snapshot(self.plan), before)
+        self.assertEqual(self.manifest, source_before)
 
     def test_new_journal_only_enrolls_current_own_group_students(self):
         Program, Curriculum, Record = (
