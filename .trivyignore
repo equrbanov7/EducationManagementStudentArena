@@ -67,3 +67,11 @@ CVE-2026-115775
 CVE-2026-115776
 CVE-2026-115778
 CVE-2026-115877
+
+# 2026-10-30: Twisted HTTP/2 Rapid Reset; only 26.10.0rc1 is currently patched.
+# Public HTTP/2 terminates at nginx; app has no published/host-network port,
+# and every upstream, including journal auth, explicitly uses HTTP/1.1.
+# Boundary regression gate: tests/test_twisted_h2_boundary.py.
+# Remove with the stable Twisted fix; review by 2026-11-15.
+# https://github.com/twisted/twisted/security/advisories/GHSA-vpp8-g58w-m8mp
+GHSA-vpp8-g58w-m8mp
