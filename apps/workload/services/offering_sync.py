@@ -359,7 +359,10 @@ class _Sync(ElectiveFlow):
         to_enroll, to_enroll_elective = [], []
         for key, entry in targets.items():
             offering = existing.get(key)
-            is_elective = key not in self._reviewed_empty and (entry["group"].parent_id, key[0]) in electives
+            is_elective = (
+                key not in (self._reviewed_empty | self._reviewed_direct)
+                and (entry["group"].parent_id, key[0]) in electives
+            )
             lesson_hours = sum(merge_hours(entry["rows"] + foreign_rows.get(key, [])).values())
             desired_id = getattr(owners[key], "pk", None)
             decision = {"desired_id": desired_id, "eligible": desired_id in eligible}
@@ -376,10 +379,13 @@ class _Sync(ElectiveFlow):
                     self.counters["not_created"] += 1
                 else:
                     created = self._create(key, lesson_hours=lesson_hours, **decision)
-                    to_enroll += [created] if created is not None and key not in self._reviewed_empty else []
+                    if key in self._reviewed_direct:
+                        to_enroll_elective += [created] if created is not None else []
+                    else:
+                        to_enroll += [created] if created is not None and key not in self._reviewed_empty else []
                     self.counters["elective_from_task"] += int(created is not None and key in official)
                     if key not in self._reviewed_empty:
-                        self._own(created, "mandatory")
+                        self._own(created, "elective" if key in self._reviewed_direct else "mandatory")
                 continue
             if not offering.is_active:
                 self.counters["inactive_skipped"] += 1

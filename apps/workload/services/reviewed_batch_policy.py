@@ -17,6 +17,7 @@ def parse(entry, item, *, version):
         "join_chair",
         "elective_choices",
         "empty_group_journals",
+        "direct_elective_courses",
     }:
         raise RepairError("reviewed_v2_policy_required")
     result = {}
@@ -32,6 +33,17 @@ def parse(entry, item, *, version):
             v["group_id"] for v in result.get("elective_choices", [])
         }:
             raise RepairError("reviewed_elective_and_empty_group_overlap")
+    if "direct_elective_courses" in policy:
+        from .reviewed_batch_electives import parse as parse_electives
+
+        result["direct_elective_courses"] = parse_electives(entry, item, policy["direct_elective_courses"], direct=True)
+    selected_groups = [
+        v["group_id"]
+        for name in ("elective_choices", "empty_group_journals", "direct_elective_courses")
+        for v in result.get(name, [])
+    ]
+    if len(selected_groups) != len(set(selected_groups)):
+        raise RepairError("reviewed_elective_policy_group_overlap")
     if "subject_create" in policy:
         value = policy["subject_create"]
         expected = {"id", "name", "code", "chair_unit_id", "ects", "kind"}

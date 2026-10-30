@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 
 def reviewed_options(sync, targets):
     sync._reviewed_empty = set()
+    sync._reviewed_direct = set()
     supplied = sync._reviewed_choices
     if not supplied:
         return {}
@@ -30,6 +31,9 @@ def reviewed_options(sync, targets):
         apps.get_model("organizations.OrgUnit").objects.select_for_update().get(
             pk=group_id, organization_id=sync.org_id, is_active=True
         )
+        period = rows[0].period
+        if period.organization_id != sync.org_id or not period.is_active or period.locked_at is not None:
+            raise ValidationError("Reviewed course period is inactive or locked.")
         if value.get("empty_group_journal_only"):
             from .offering_empty_reviewed import ensure_empty
 
@@ -57,6 +61,12 @@ def reviewed_options(sync, targets):
         )
         if any(not op.is_elective for op in options):
             raise ValidationError("Reviewed elective is not an elective-only plan pair.")
+        if value.get("source_course_without_curriculum_decision"):
+            from .offering_direct_reviewed import validate_options
+
+            validate_options(sync, key, value, options)
+            sync._reviewed_direct.add(key)
+            continue
         actual = set(
             Record.objects.filter(
                 organization_id=sync.org_id, group_id=group_id, is_active=True, curriculum_id__isnull=False
