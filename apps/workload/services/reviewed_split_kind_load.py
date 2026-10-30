@@ -35,6 +35,48 @@ SOURCES = [
 ]
 
 
+RECLAIM_FORMAT = "reviewed-owner-kind-reclaim/1"
+RECLAIM_SPEC = {
+    "FORMAT": RECLAIM_FORMAT,
+    "RESOURCE": "workload.reviewed_owner_kind_reclaim",
+    "ROW": "59eb3a37-cb58-4333-837c-5a7ee5513205",
+    "JOURNAL": "3aacb27e-4a73-45fa-9c8d-2e78f9bbe67d",
+    "GROUP": "42c5ba37-58fc-41b2-8cbd-d61419a4cca0",
+    "SUBJECT": "4a50ddc0-b88e-418e-875b-f916e9ca486b",
+    "PERIOD": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+    "TASK": TASK,
+    "CHAIR": CHAIR,
+    "OWNER": 7761,
+    "TEACHER": 8372,
+    "SOURCES": [
+        {"line": 7, "teacher_id": 7761, "activity": "lecture", "hours": 30},
+        {"line": 7, "teacher_id": 7761, "activity": "seminar", "hours": 30},
+    ],
+    "selection": 2000,
+    "reclaim": True,
+}
+
+
+def _spec(manifest):
+    if manifest.get("format") == RECLAIM_FORMAT:
+        return dict(RECLAIM_SPEC)
+    names = (
+        "FORMAT",
+        "RESOURCE",
+        "ROW",
+        "JOURNAL",
+        "GROUP",
+        "SUBJECT",
+        "PERIOD",
+        "TASK",
+        "CHAIR",
+        "OWNER",
+        "TEACHER",
+        "SOURCES",
+    )
+    return {**{k: globals()[k] for k in names}, "selection": 1900, "reclaim": False}
+
+
 def _state(row, offering):
     result = load_state(row, offering)
     result["academic"] = academic_database_fingerprint(
@@ -49,7 +91,11 @@ def _protected(before, after):
             raise RepairError("split_kind_protected_state_changed:" + key)
 
 
-def _validate(row, offering):
+def _validate(row, offering, spec):
+    TASK, SUBJECT, PERIOD, GROUP, OWNER, TEACHER = (
+        spec[k] for k in ("TASK", "SUBJECT", "PERIOD", "GROUP", "OWNER", "TEACHER")
+    )
+    old_seminar = TEACHER if spec["reclaim"] else OWNER
     if (str(row.task_id), str(row.subject_id), str(row.period_id), sorted(str(g.pk) for g in row.groups.all())) != (
         TASK,
         SUBJECT,
@@ -80,10 +126,20 @@ def _validate(row, offering):
     assignments = list(row.assignments.all())
     if len(assignments) != 2 or {(a.teacher_id, a.activity, a.hours, a.is_hourly_paid) for a in assignments} != {
         (OWNER, "lecture", 30, False),
-        (OWNER, "seminar", 30, False),
+        (old_seminar, "seminar", 30, False),
     }:
         raise RepairError("split_kind_old_contributions_changed")
-    if offering.shares.exists():
+    shares = list(offering.shares.all())
+    if spec["reclaim"]:
+        if len(shares) > 2 or any(
+            s.source != "workload"
+            or s.teacher_id not in [OWNER, TEACHER]
+            or s.enrollments.exists()
+            or s.kinds != (["lecture"] if s.teacher_id == OWNER else ["seminar"])
+            for s in shares
+        ):
+            raise RepairError("reclaim_existing_share_needs_review")
+    elif shares:
         raise RepairError("split_kind_existing_share_needs_review")
     teacher = model("auth.User").objects.get(pk=TEACHER, is_active=True)
     if not is_assignable_teacher(row.task.organization, row.task.chair, teacher):
@@ -92,12 +148,18 @@ def _validate(row, offering):
 
 @transaction.atomic
 def run(*, manifest, manifest_sha, lines, organization, user, expected_baseline="", apply=False, undo=""):
+    spec = _spec(manifest)
+    FORMAT, RESOURCE, ROW, JOURNAL, TASK, CHAIR, OWNER, TEACHER, SOURCES = (
+        spec[k] for k in ("FORMAT", "RESOURCE", "ROW", "JOURNAL", "TASK", "CHAIR", "OWNER", "TEACHER", "SOURCES")
+    )
+    reclaim = spec["reclaim"]
+    old_teacher, new_teacher = (TEACHER, OWNER) if reclaim else (OWNER, TEACHER)
     if (
         manifest.get("format") != FORMAT
         or manifest.get("organization_id") != ORG
         or manifest.get("source_sha256") != SOURCE_SHA
         or manifest.get("sources") != SOURCES
-        or lines != [1900]
+        or lines != [spec["selection"]]
     ):
         raise RepairError("split_kind_exact_sources_required")
     if apply and not re.fullmatch(r"[a-f0-9]{64}", expected_baseline):
@@ -137,65 +199,89 @@ def run(*, manifest, manifest_sha, lines, organization, user, expected_baseline=
         ):
             raise RepairError("split_kind_undo_requires_unchanged_receipt")
         assignment = row.assignments.get(
-            pk=values["seminar_assignment_id"], teacher_id=TEACHER, activity="seminar", hours=30
+            pk=values["seminar_assignment_id"], teacher_id=new_teacher, activity="seminar", hours=30
         )
         old = next(a for a in values["before"]["assignments"] if a["id"] == str(assignment.pk))
         assign_amended(
             row=row,
             actor=actor,
-            amend={"reason": "correction", "note": f"Rəsmi Təbiət31/76 müəllim növ bölgüsü [batch:{batch}]"},
+            amend={"reason": "correction", "note": f"Rəsmi Təbiət mənbəsi üzrə müəllim növ bölgüsü [batch:{batch}]"},
             assignment=assignment,
             activity="seminar",
-            teacher_id=OWNER,
+            teacher_id=old_teacher,
             hours=30,
             is_hourly_paid=old["is_hourly_paid"],
             groups_note=old["groups_note"],
             note=old["note"],
             sync_offerings=False,
         )
-        shares = offering.shares.filter(
-            pk__in=values["created_share_ids"], source="workload", teacher_id__in=[OWNER, TEACHER]
-        )
-        if shares.count() != 2 or shares.filter(enrollments__isnull=False).exists():
-            raise RepairError("split_kind_undo_share_changed")
-        shares.delete()
+        if reclaim:
+            for old_share in values["before"]["shares"]:
+                offering.shares.filter(pk=old_share["id"]).update(
+                    is_active=old_share["is_active"], updated_at=old_share["updated_at"]
+                )
+        else:
+            shares = offering.shares.filter(
+                pk__in=values["created_share_ids"], source="workload", teacher_id__in=[OWNER, TEACHER]
+            )
+            if shares.count() != 2 or shares.filter(enrollments__isnull=False).exists():
+                raise RepairError("split_kind_undo_share_changed")
+            shares.delete()
         share_ids = []
     else:
-        _validate(row, offering)
+        _validate(row, offering, spec)
         assignment = row.assignments.get(activity="seminar")
         assign_amended(
             row=row,
             actor=actor,
-            amend={"reason": "correction", "note": f"Rəsmi Təbiət31/76 müəllim növ bölgüsü [batch:{batch}]"},
+            amend={"reason": "correction", "note": f"Rəsmi Təbiət mənbəsi üzrə müəllim növ bölgüsü [batch:{batch}]"},
             assignment=assignment,
             activity="seminar",
-            teacher_id=TEACHER,
+            teacher_id=new_teacher,
             hours=30,
             is_hourly_paid=False,
             groups_note=assignment.groups_note,
             note=assignment.note,
             sync_offerings=False,
         )
-        plan = {"owner_id": OWNER, "teachers": {OWNER: {"lecture"}, TEACHER: {"seminar"}}, "ambiguous": False}
+        plan = {
+            "owner_id": OWNER,
+            "teachers": {OWNER: {"lecture", "seminar"}} if reclaim else {OWNER: {"lecture"}, TEACHER: {"seminar"}},
+            "ambiguous": False,
+        }
         counts = sync_workload_journal_shares(
             organization_id=ORG,
             offering_ids=[offering.pk],
             plans={(offering.subject_id, offering.period_id, offering.group_id): plan},
             by_user=user,
         )
-        if counts["created"] != 2 or counts["skipped"] or counts["ambiguous"]:
+        if counts["created"] != (0 if reclaim else 2) or counts["skipped"] or counts["ambiguous"]:
             raise RepairError("split_kind_share_creation_incomplete")
         shares = list(offering.shares.all())
-        if len(shares) != 2 or {(s.teacher_id, tuple(s.kinds), s.source, s.is_active) for s in shares} != {
-            (OWNER, ("lecture",), "workload", True),
-            (TEACHER, ("seminar",), "workload", True),
-        }:
-            raise RepairError("split_kind_share_scope_changed")
-        share_ids = [str(s.pk) for s in shares]
+        if reclaim:
+            if any(s.is_active for s in shares):
+                raise RepairError("reclaim_automatic_share_still_active")
+            share_ids = []
+        else:
+            if len(shares) != 2 or {(s.teacher_id, tuple(s.kinds), s.source, s.is_active) for s in shares} != {
+                (OWNER, ("lecture",), "workload", True),
+                (TEACHER, ("seminar",), "workload", True),
+            }:
+                raise RepairError("split_kind_share_scope_changed")
+            share_ids = [str(s.pk) for s in shares]
     row.refresh_from_db()
     offering.refresh_from_db()
     after = _state(row, offering)
     _protected(before, after)
+    if reclaim:
+        if before["share_enrollments"] != after["share_enrollments"]:
+            raise RepairError("reclaim_share_roster_changed")
+
+        def stable(shares):
+            return [{k: v for k, v in share.items() if k not in ("is_active", "updated_at")} for share in shares]
+
+        if stable(before["shares"]) != stable(after["shares"]):
+            raise RepairError("reclaim_share_identity_changed")
     before_lecture = [a for a in before["assignments"] if a["activity"] == "lecture"]
     if before_lecture != [a for a in after["assignments"] if a["activity"] == "lecture"]:
         raise RepairError("split_kind_primary_contribution_changed")

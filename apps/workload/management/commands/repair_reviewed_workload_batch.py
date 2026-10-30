@@ -43,6 +43,7 @@ class Command(BaseCommand):
                 civil_source_partition.FORMAT: civil_source_partition.run,
                 reviewed_language_level_load.FORMAT: reviewed_language_level_load.run,
                 reviewed_split_kind_load.FORMAT: reviewed_split_kind_load.run,
+                reviewed_split_kind_load.RECLAIM_FORMAT: reviewed_split_kind_load.run,
             }
             partition = manifest.get("format") in special
             plan = (
