@@ -1,5 +1,7 @@
 """WCU workload reconciliation: explicit field allowlists, no student-level data."""
 
+import uuid
+
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.db import connection
@@ -57,13 +59,21 @@ def collect(*, student_secret):
     )
     plan_ids = [r["id"] for r in plans]
     groups = rows("organizations.OrgUnit", ("id", "name", "code", "parent_id", "unit_type", "is_active", "settings"))
+    tenant_group_ids = {group["id"] for group in groups if group["unit_type"] == "group"}
     for group in groups:
+        canonical = (group["settings"] or {}).get("canonical_group")
         group["settings"] = {
             k: v
             for k, v in (group["settings"] or {}).items()
             if k in {"parent_group", "degree_level", "education_form", "language", "sector"}
             and isinstance(v, (str, int, bool))
         }
+        try:
+            canonical_id = uuid.UUID(str(canonical))
+        except (ValueError, TypeError, AttributeError):
+            continue
+        if canonical_id in tenant_group_ids:
+            group["settings"]["canonical_group"] = str(canonical_id)
     links = list(
         apps.get_model("workload.TeachingTaskRow")
         .objects.filter(organization_id=ORG, id__in=plan_ids, groups__organization_id=ORG)

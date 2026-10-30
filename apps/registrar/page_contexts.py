@@ -1,9 +1,7 @@
 """Paylaşılan səhifə kontekstləri (U12) — standalone səhifə + profil bölməsi.
 
-Registrar səhifələrinin (jurnal siyahısı, dərs cədvəli, akademik təqvim,
-qiymət təsdiqləri, analitika) kontekst-qurucuları burada yaşayır ki, eyni data
-HƏM `/jurnal/...` standalone görünüşlərində, HƏM DƏ profil kabinetinin sağ
-panelində (``?section=...``) istifadə olunsun — kod dublikasiyası yoxdur.
+Registrar kontekstləri həm `/jurnal/...` standalone səhifələrində,
+həm profil kabinetində (``?section=...``) eyni data ilə istifadə olunur.
 
 ``embedded=True`` rejimində naviqasiya linkləri profil shell-inin içində qalır
 (``/accounts/profile/?section=X&...``) — istifadəçi sidebar-ı itirmir.
@@ -17,6 +15,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.registrar import analytics_cache, analytics_display, journal_scope, schedule
+from apps.registrar.journal_group_identity import attach_labels, filter_group
 from apps.registrar.models import CourseOffering, StudentAcademicRecord
 
 
@@ -171,7 +170,7 @@ def journal_list_context(user, request=None) -> dict:
         qs = qs.filter(instructor_id=teacher_pk) if teacher_pk is not None else qs.none()
     if selected_group:
         group_pk = jlq.uuid_or_none(selected_group)
-        qs = qs.filter(group_id=group_pk) if group_pk is not None else qs.none()
+        qs, selected_group = filter_group(qs, group_pk, within=base_qs)
     # Fakültə = qrupun alt-ağacı; kafedra = müəllim/fənn/qrup (bax `jlq.apply_unit_filters`).
     qs, selected_faculty, selected_dept = jlq.apply_unit_filters(qs, organization, selected_faculty, selected_dept)
     if query:
@@ -227,6 +226,7 @@ def journal_list_context(user, request=None) -> dict:
     # `kind` süzgəci artıq yuxarıda DB tərəfdə tətbiq olunur, tam dəst üçün
     # daha lazım deyil (əvvəlki 0.39 s-lik DISTINCT sorğusu tamamilə itdi).
     attach_kind_labels(page_offerings, selected_kind)
+    attach_labels(page_offerings, within=base_qs)
     jls.attach(page_offerings, occurrences)
     querystring = ""
     if request is not None:

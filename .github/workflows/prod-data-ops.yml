@@ -338,6 +338,7 @@ on:
           - audit_cross_chair_loads
           - fix_workload_overcount
           - repair_sbio235_workload
+          - repair_233ke_group_alias
           - repair_balanced_workload_pairs
           - repair_repeated_sections_workload
           - repair_owner_activity_batch
@@ -532,7 +533,7 @@ jobs:
       REPLACE_TEACHER_SLOTS: ${{ github.event.inputs.replace_teacher_slots }}
     steps:
       - name: 📥 Checkout (struktur planı)
-        if: github.event.inputs.command == 'apply_org_structure'
+        if: github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'repair_233ke_group_alias' || github.event.inputs.command == 'repair_sbio235_workload'
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
@@ -1003,6 +1004,11 @@ jobs:
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
               args=(--org "$ORG" --year "$YEAR" --actor "$actor")
+              ;;
+            repair_233ke_group_alias)
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              source scripts/ops/ke233_alias_args.sh
               ;;
             repair_sbio235_workload)
               # Sabit source/tenant/2row/2offering; fayl yüklənmir, əvvəlki dry-run baseline tələb olunur.
@@ -1512,16 +1518,8 @@ jobs:
               exit "$status"
             fi
             rm -f "$RUNNER_TEMP/out.log"
-          elif [ "$COMMAND" = "repair_sbio235_workload" ]; then
-            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
-            grep -E '^sbio_repair: mode=(dry_run|apply|undo)( (baseline=[0-9a-f]{64}|batch=sbio235-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}|[a-z_]+=[0-9]+))+$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
-            cat "$RUNNER_TEMP/summary.log"
-            if [ "${status:-0}" != 0 ]; then
-              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
-              rm -f "$RUNNER_TEMP/out.log"
-              exit "$status"
-            fi
-            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "repair_sbio235_workload" ] || [ "$COMMAND" = "repair_233ke_group_alias" ]; then
+            bash scripts/ops/run_fixed_repair.sh "${args[@]}"
           elif [ "$COMMAND" = "repair_balanced_workload_pairs" ]; then
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^balanced_pairs: mode=(dry_run|apply|undo)( (baseline=[0-9a-f]{64}|batch=balanced12-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}|[a-z_]+=[0-9]+))+$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true

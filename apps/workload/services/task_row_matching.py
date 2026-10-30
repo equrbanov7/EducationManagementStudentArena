@@ -18,6 +18,7 @@ yaradılmır, mövcud sətir toxunulmaz qalır, hesabatda əl ilə düzəliş ü
 
 from __future__ import annotations
 
+from .group_aliases import verified_aliases
 from .task_workbook_parsing import _key, slug_name, split_tokens
 
 NEW = "new"
@@ -41,8 +42,11 @@ class RowMatcher:
         self.rows = list(rows)
         self.used: set = set()
         self.index: dict = {}
+        row_groups = {row.pk: list(row.groups.all()) for row in self.rows}
+        aliases = verified_aliases(g for groups in row_groups.values() for g in groups)
         for row in self.rows:
-            unit_ids = frozenset(row.groups.values_list("pk", flat=True))
+            groups = row_groups[row.pk]
+            unit_ids = frozenset(group.pk for group in groups)
             gkey = groups_key(row.groups_text)
             self._add(("raw", row.season, row.subject_text, row.groups_text), row)
             self._add(("text", row.season, slug_name(row.subject_text), gkey), row)
@@ -50,6 +54,9 @@ class RowMatcher:
                 self._add(("subject", row.season, row.subject_id, gkey), row)
                 if unit_ids:
                     self._add(("units", row.season, row.subject_id, unit_ids), row)
+                    canonical = frozenset(aliases.get(group.pk, group).pk for group in groups)
+                    if canonical != unit_ids:
+                        self._add(("units", row.season, row.subject_id, canonical), row)
 
     def _add(self, key, row):
         self.index.setdefault(key, []).append(row)

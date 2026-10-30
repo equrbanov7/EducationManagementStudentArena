@@ -161,12 +161,9 @@ def teacher_choices_for(base_qs) -> list[dict]:
 
 def group_choices_for(base_qs) -> list[dict]:
     """Qrup dropdown-u — offering-lərin təkrarsız qrupları (yüngül sorğu)."""
-    rows = base_qs.exclude(group_id=None).values_list("group_id", "group__name").distinct()
-    choices = [{"value": str(gid), "label": name} for gid, name in rows]
-    # Eyni adlı qruplar (məs. "." kimi generic test adları) üçün DETERMİNİST
-    # ikinci açar — bax `teacher_choices_for` şərhi.
-    choices.sort(key=lambda c: (c["label"].lower(), c["value"]))
-    return choices
+    from .journal_group_identity import choices_for_scope
+
+    return choices_for_scope(base_qs)
 
 
 def faculty_department_choices_for(base_qs) -> tuple[list[dict], list[dict]]:

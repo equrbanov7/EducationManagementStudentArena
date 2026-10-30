@@ -167,9 +167,11 @@ def rows_page(
 
 
 def _serialize(task, rows: list) -> tuple[list[dict], list, dict]:
+    from .group_aliases import verified_aliases
     from .tasks import _amendment_target_row_ids
 
     balance = balance_for_rows(rows)
+    aliases = verified_aliases(group for row in rows for group in row.groups.all())
     amend_targets = _amendment_target_row_ids(task) if task.status == TaskStatus.AMENDED else set()
     payload = []
     for row in rows:
@@ -189,7 +191,9 @@ def _serialize(task, rows: list) -> tuple[list[dict], list, dict]:
                 # etiket sahələrdən birbaşa yığılır.
                 "period_label": (f"{row.period.name} · {row.period.academic_year}" if row.period_id else ""),
                 "specialty": row.specialty.name if row.specialty_id else row.specialty_text,
-                "groups": [{"id": str(g.pk), "name": g.name} for g in row.groups.all()],
+                "groups": [
+                    {"id": str(aliases.get(g.pk, g).pk), "name": aliases.get(g.pk, g).name} for g in row.groups.all()
+                ],
                 "groups_text": row.groups_text,
                 "education_form": row.education_form,
                 "degree_level": row.degree_level,

@@ -419,6 +419,9 @@ def save_row(
         groups = list(
             OrgUnit.objects.filter(organization=task.organization, pk__in=group_ids, unit_type=OrgUnitType.GROUP)
         )
+        from .group_aliases import preserve_historical_bindings
+
+        groups = preserve_historical_bindings(row, groups)
         row.groups.set(groups)
         if not row.groups_text:
             row.groups_text = " / ".join(group.name for group in groups)
