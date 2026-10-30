@@ -251,6 +251,16 @@ class ReviewedBatchTests(TestCase):
                 self.run_batch()
         self.assertEqual(state.snapshot(self.plan), before)
 
+    def test_outside_failure_reports_only_fixed_model_keys_and_rolls_back(self):
+        before = state.snapshot(self.plan)
+        outside = state.outside(self.plan)
+        changed = copy.deepcopy(outside)
+        changed["AssessmentScheme"]["count"] += 1
+        with patch.object(state, "outside", side_effect=[outside, changed]):
+            with self.assertRaisesMessage(RepairError, "outside_academic_work_or_access_changed:AssessmentScheme"):
+                self.run_batch()
+        self.assertEqual(state.snapshot(self.plan), before)
+
     def test_stale_baseline_refuses_without_mutation(self):
         before = state.snapshot(self.plan)
         with self.assertRaisesMessage(RepairError, "baseline_conflict"):

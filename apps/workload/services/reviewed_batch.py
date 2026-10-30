@@ -183,8 +183,12 @@ def run(*, plan, organization, user, expected_baseline="", undo="", apply=False)
             "created_journals": len(details["created_offering_ids"]),
             "metadata_groups": len(details["metadata_group_ids"]),
         }
-    if state.outside(plan) != outside:
-        raise RepairError("outside_academic_work_or_access_changed")
+    after_outside = state.outside(plan)
+    changed = sorted(key for key in outside.keys() | after_outside.keys() if outside.get(key) != after_outside.get(key))
+    if changed:
+        # Only fixed model labels leave this guard; row IDs, hashes and values
+        # remain private. The same full-state equality still rejects changes.
+        raise RepairError("outside_academic_work_or_access_changed:" + ",".join(changed))
     if not apply:
         transaction.set_rollback(True)
     return result
