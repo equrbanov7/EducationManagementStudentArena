@@ -20,6 +20,7 @@ from core.rls import apply_rls_request_context
 from .data import ORG, YEAR, collect
 from .journal_diagnostics import collect_journal_diagnostics
 from .request_content import collect_request_content
+from .request_syllabus import collect_request_syllabus
 
 KEY_FINGERPRINT = "f21b002d94fdd65fb346e557e6eb85109f60bda3afa8d8c5a2a14e4b9fc922bf"
 FORMAT = "wcu-workload-snapshot/1"
@@ -50,6 +51,7 @@ def capture(username):
         data = collect(student_secret=os.urandom(32))
         data["journal_access_diagnostics"] = collect_journal_diagnostics(data)
         data.update(collect_request_content())
+        data.update(collect_request_syllabus())
         if not data["tasks"]:
             raise SnapshotError("fixed_org_tasks_missing")
         with connection.cursor() as cursor:
