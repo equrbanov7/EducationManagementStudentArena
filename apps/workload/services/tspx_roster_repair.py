@@ -94,7 +94,7 @@ def run(*, plan, organization, user, expected_baseline="", undo="", apply=False)
         raise RepairError("baseline_invalid")
     if apply and not expected_baseline:
         raise RepairError("fresh_expected_baseline_required")
-    if undo and not re.fullmatch(rf"{re.escape(plan.family.batch_prefix)}-\d{8}-\d{6}-[a-f0-9]{8}", undo):
+    if undo and not re.fullmatch(re.escape(plan.family.batch_prefix) + r"-\d{8}-\d{6}-[a-f0-9]{8}", undo):
         raise RepairError("tspx_undo_batch_invalid")
     before = state.capture(plan, lock=True)
     baseline = state.baseline(before)
