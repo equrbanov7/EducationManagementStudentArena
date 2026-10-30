@@ -1,4 +1,4 @@
-"""Exact source-backed corrections for eight reviewed named workload rows.
+"""Exact source-backed corrections for twelve reviewed named workload rows.
 
 These pins cannot confer arbitrary ownership: normal tenant, source identity,
 assignment and complete academic-fingerprint guards still run before writes.
@@ -85,6 +85,46 @@ PINS = {
         "groups": ["ab21a8e2-beab-4bd8-9700-531c602a0556"],
         "journals": ["0b4c29b4-6a3d-491f-951d-32f589eda37d"],
         "old_owners": [9548],
+        "unowned": False,
+    },
+    "8207e13d-d046-4bd4-bfc2-6889ba4637e1": {
+        "source_sha": "57f0fdb5babaa7ab693c5623426982ac268a84691702fac6b68610f567bd3f9d",
+        "source_line": 47,
+        "teacher": 7885,
+        "totals": {"lecture": 60, "seminar": 0, "lab": 0},
+        "groups": ["4e5ad122-f2a9-4685-9fcb-45f4f9e05d4c"],
+        "journals": ["86236c69-0011-46e3-88a4-0e5124290d0f"],
+        "old_owners": [7885],
+        "unowned": False,
+    },
+    "ced79a5a-d4d7-48d0-93b5-57df9825c200": {
+        "source_sha": "38c3ed762cc25426e8966006432928525a9e66f58605c6d506ed93557e9f60da",
+        "source_line": 19,
+        "teacher": 7942,
+        "totals": {"lecture": 0, "seminar": 30, "lab": 0},
+        "groups": ["2b5f29de-6fc3-40d4-866f-e177fb5cf070"],
+        "journals": ["aea5d4cf-1f7c-4cd9-a2a6-ca839abeac43"],
+        "old_owners": [7942],
+        "unowned": False,
+    },
+    "7df5f2ce-a280-4c4c-bb41-362777006a19": {
+        "source_sha": "38c3ed762cc25426e8966006432928525a9e66f58605c6d506ed93557e9f60da",
+        "source_line": 27,
+        "teacher": 7942,
+        "totals": {"lecture": 0, "seminar": 30, "lab": 0},
+        "groups": ["9d1b56cf-0a24-4fb2-9be0-4eed5b979d61"],
+        "journals": ["41ff13ba-694d-4601-be6c-b12a5959a422"],
+        "old_owners": [7942],
+        "unowned": False,
+    },
+    "b4deca53-3d82-492f-b4e3-0160ed865960": {
+        "source_sha": "1c6df8cae8632609e5b13e791afd207095258fdafe28925393770019f226f92d",
+        "source_line": 79,
+        "teacher": 7850,
+        "totals": {"lecture": 45, "seminar": 0, "lab": 0},
+        "groups": ["390c5966-36d1-4032-bb97-7e1de0acc397", "cd3fe4ff-c3dc-44be-a5a1-7d43dc37325c"],
+        "journals": ["5c2881b0-568d-4889-81db-bcbf01bf8f27", "b9ca698e-0eed-44a3-afc9-722682826973"],
+        "old_owners": [7850],
         "unowned": False,
     },
 }
