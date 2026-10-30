@@ -14,7 +14,9 @@ class MR46WorkflowTests(SimpleTestCase):
     def test_whitelisted_encrypted_file_and_explicit_undo(self):
         text = WORKFLOW.read_text()
         self.assertIn("          - recover_mr46_syllabus\n", text)
-        self.assertIn("asset=mr46-syllabus.json.enc", text)
+        asset_helper = (WORKFLOW.parents[2] / "scripts/ops/reviewed_source_asset.sh").read_text()
+        self.assertIn("source scripts/ops/reviewed_source_asset.sh", text)
+        self.assertIn("asset=mr46-syllabus.json.enc", asset_helper)
         self.assertIn("!startsWith(github.event.inputs.batch, 'mr46-')", text)
         self.assertIn("/tmp/mr46_syllabus_*.json", text)
         block = re.search(

@@ -14,7 +14,9 @@ class WorkloadWorkflowTests(SimpleTestCase):
     def test_whitelisted_encrypted_file_and_explicit_undo(self):
         text = WORKFLOW.read_text()
         self.assertIn("          - recover_workload_syllabi\n", text)
-        self.assertIn("asset=workload-syllabi.json.enc", text)
+        asset_helper = (WORKFLOW.parents[2] / "scripts/ops/reviewed_source_asset.sh").read_text()
+        self.assertIn("source scripts/ops/reviewed_source_asset.sh", text)
+        self.assertIn("asset=workload-syllabi.json.enc", asset_helper)
         self.assertIn("!startsWith(github.event.inputs.batch, 'wksyl-')", text)
         self.assertIn("/tmp/workload_syllabi_*.json", text)
         block = re.search(

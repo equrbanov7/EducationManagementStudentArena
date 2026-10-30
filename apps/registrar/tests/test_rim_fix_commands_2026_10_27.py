@@ -370,8 +370,11 @@ class RimFixWorkflowTest(TestCase):
 
         text = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("          - recover_mr27_journal\n", text)
-        self.assertIn("asset=mr27-recovery.json.enc", text)
-        self.assertIn("'^mr27-recovery-[0-9a-z-]+$'", text)
+        asset_helper = (WORKFLOW.parents[2] / "scripts/ops/reviewed_source_asset.sh").read_text(encoding="utf-8")
+        self.assertIn("source scripts/ops/reviewed_source_asset.sh", text)
+        self.assertIn("asset=mr27-recovery.json.enc", asset_helper)
+        self.assertIn("tag_prefix=mr27-recovery", asset_helper)
+        self.assertIn('match "$ROSTER_TAG" "^${tag_prefix}-[0-9a-z-]+$"', asset_helper)
         self.assertIn("!startsWith(github.event.inputs.batch, 'mr27-')", text)
         self.assertIn("/tmp/mr27_recovery_*.json", text)
         block = re.findall(
