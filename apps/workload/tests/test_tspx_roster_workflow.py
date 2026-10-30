@@ -47,3 +47,9 @@ class Si135RosterWorkflowTests(TspxRosterWorkflowTests):
     command = "repair_si135_legacy_roster"
     prefix = "si135-roster"
     filename = "si135_roster"
+
+
+class BiMu536RosterWorkflowTests(TspxRosterWorkflowTests):
+    command = "repair_bi_mu536_legacy_roster"
+    prefix = "bimu536-roster"
+    filename = "bi_mu536_roster"

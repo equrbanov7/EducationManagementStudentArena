@@ -5,10 +5,11 @@ if [ "${COMMAND:-}" = repair_reviewed_journal_content ]; then
   source scripts/ops/reviewed_content_args.sh
   return
 fi
-if [[ "$COMMAND" = repair_tspx_legacy_roster || "$COMMAND" = repair_si135_legacy_roster ]]; then
+if [[ "$COMMAND" = repair_tspx_legacy_roster || "$COMMAND" = repair_si135_legacy_roster || "$COMMAND" = repair_bi_mu536_legacy_roster ]]; then
   case "$COMMAND" in
     repair_tspx_legacy_roster) roster_prefix=tspx-roster; roster_file=tspx_roster ;;
     repair_si135_legacy_roster) roster_prefix=si135-roster; roster_file=si135_roster ;;
+    repair_bi_mu536_legacy_roster) roster_prefix=bimu536-roster; roster_file=bi_mu536_roster ;;
   esac
   match "$ROSTER_TAG" "^${roster_prefix}-[0-9a-z-]+$" || exit 2
   match "$BATCH" '^[0-9a-f]{64}$' || exit 2

@@ -9,6 +9,8 @@ case "$COMMAND" in
     tag_prefix=mr27-recovery; asset=mr27-recovery.json.enc; target="/tmp/mr27_recovery_${GITHUB_RUN_ID}.json" ;;
   recover_workload_syllabi)
     tag_prefix=workload-syllabi; asset=workload-syllabi.json.enc; target="/tmp/workload_syllabi_${GITHUB_RUN_ID}.json" ;;
+  repair_bi_mu536_legacy_roster)
+    tag_prefix=bimu536-roster; asset=bimu536-roster.json.enc; target="/tmp/bi_mu536_roster_${GITHUB_RUN_ID}.json" ;;
   repair_si135_legacy_roster)
     tag_prefix=si135-roster; asset=si135-roster.json.enc; target="/tmp/si135_roster_${GITHUB_RUN_ID}.json" ;;
   repair_tspx_legacy_roster)

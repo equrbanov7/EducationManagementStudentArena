@@ -12,6 +12,7 @@ COMMANDS = {
     "repair_233ke_group_alias",
     "repair_cavid_source_batch",
     "repair_si135_legacy_roster",
+    "repair_bi_mu536_legacy_roster",
     "repair_tspx_legacy_roster",
     "repair_reviewed_workload_batch",
     "repair_reviewed_journal_content",
