@@ -1,5 +1,6 @@
 """Locked scope, live baseline and protected state for reviewed source batches."""
 
+from django.core.exceptions import EmptyResultSet
 from django.db import connection
 from django.db.models import Q, Sum
 
@@ -33,7 +34,10 @@ def db_fingerprint(query):
     """All field values stay inside PostgreSQL; only count/hash leaves the DB."""
     if connection.vendor != "postgresql":
         raise RepairError("postgresql_required")
-    sql, params = query.order_by().query.sql_with_params()
+    try:
+        sql, params = query.order_by().query.sql_with_params()
+    except EmptyResultSet:
+        return {"count": 0, "md5": "d41d8cd98f00b204e9800998ecf8427e"}
     with connection.cursor() as cursor:
         cursor.execute(
             "SELECT count(*), md5(coalesce(string_agg(md5(row_to_json(state)::text), '' ORDER BY id), '')) FROM ("
@@ -85,6 +89,12 @@ def outside(plan):
         result[name] = db_fingerprint(
             model("registrar." + name).objects.filter(organization_id=ORG).exclude(**{path + "__in": ids})
         )
+    result["outside_workload_rows"] = db_fingerprint(
+        model("workload.TeachingTaskRow").objects.filter(organization_id=ORG).exclude(task_id__in=plan.task_ids)
+    )
+    result["outside_workload_assignments"] = db_fingerprint(
+        model("workload.TeacherAssignment").objects.filter(organization_id=ORG).exclude(row__task_id__in=plan.task_ids)
+    )
     return result
 
 
@@ -142,6 +152,15 @@ def snapshot(plan, *, lock=False):
             .order_by("user_id")
             .values("user_id", "patronymic")
         ),
+        "history": {
+            name: records(model("workload." + name).objects.filter(organization_id=ORG, **where))
+            for name, where in {
+                "WorkloadAmendment": {"task_id__in": plan.task_ids},
+                "TaskFacultySlice": {"task_id__in": plan.task_ids},
+                "TaskRowReview": {"row__task_id__in": plan.task_ids},
+                "LoadObjection": {"row__task_id__in": plan.task_ids},
+            }.items()
+        },
         "academic": academic_database_fingerprint(organization_id=ORG, offerings=current),
     }
 

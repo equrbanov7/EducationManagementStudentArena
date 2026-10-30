@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Sourced API: actor and workflow inputs are initialized by the caller.
+# shellcheck disable=SC2154
 # Pinned file SHA, exact source line IDs, then fresh baseline/receipt selection.
 match "$ROSTER_TAG" '^reviewed-workload-[0-9a-z-]+$' || exit 2
 match "$BATCH" '^[0-9a-f]{64}$' || exit 2

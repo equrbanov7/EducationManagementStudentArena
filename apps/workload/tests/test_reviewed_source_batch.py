@@ -45,6 +45,32 @@ class ReviewedManifestTests(SimpleTestCase):
             with self.assertRaisesMessage(RepairError, "private_regular"):
                 read_manifest(path, sha)
 
+    def test_optional_source_metadata_never_becomes_literal_none_text(self):
+        from apps.workload.services.reviewed_batch_actions import _row_data
+
+        item = {
+            "row_data": {
+                "groups_text": "G",
+                "degree_level": "bachelor",
+                "education_form": "full_time",
+                "credits": None,
+                "student_count": None,
+            },
+            "subject_id": "subject",
+            "subject": {"name": "Fənn"},
+            "period_id": "period",
+            "group_ids": ["group"],
+            "season": "fall",
+            "union_count": 1,
+            "subgroup_count": 1,
+            "plan": {"lecture": 30, "seminar": 0, "lab": 0},
+            "totals": {"lecture": 30, "seminar": 0, "lab": 0},
+        }
+        result = _row_data(item)
+        self.assertEqual(result["credits"], "")
+        self.assertEqual(result["student_count_text"], "")
+        self.assertNotIn("student_count", result)
+
     def test_large_or_symbolic_manifest_is_not_read(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "source.json"
@@ -310,3 +336,155 @@ class ReviewedBatchTests(TestCase):
         self.manifest["source_entries"].append(duplicated)
         with self.assertRaisesMessage(RepairError, "one_logical_row"):
             select_manifest(self.manifest, sha256="b" * 64, lines=[7, 8])
+
+    def test_explicit_english_metadata_fix_preserves_uuid_parent_and_undo_settings(self):
+        self.ga.name = "533 MU ing"
+        self.ga.settings = {"sector": "ru", "legacy": {"keep": "unchanged"}}
+        self.ga.save(update_fields=["name", "settings"])
+        entry = self.manifest["source_entries"][0]
+        entry["physical_source_groups"][0]["name"] = self.ga.name
+        self.manifest["metadata_fixes"] = [
+            {
+                "group_id": str(self.ga.pk),
+                "group_name": self.ga.name,
+                "old_known_settings": {"sector": "ru"},
+                "new_values": {"sector": "en", "language_sector": "EN"},
+            }
+        ]
+        self.plan = select_manifest(self.manifest, sha256="b" * 64, lines=[50])
+        parent = self.ga.parent_id
+        result = self.apply()
+        self.ga.refresh_from_db()
+        self.assertEqual(self.ga.settings, {"sector": "en", "language_sector": "EN", "legacy": {"keep": "unchanged"}})
+        self.assertEqual(str(self.ga.parent_id), str(parent))
+        preview = self.run_batch(undo=result["batch"])
+        self.run_batch(undo=result["batch"], apply=True, expected_baseline=preview["baseline"])
+        self.ga.refresh_from_db()
+        self.assertEqual(self.ga.settings, {"sector": "ru", "legacy": {"keep": "unchanged"}})
+
+    def test_missing_degree_uses_unique_current_program_context(self):
+        Program = state.model("registrar.Program")
+        Program.objects.create(
+            organization=self.org,
+            specialty_unit=self.specialty,
+            code="BATCH-P",
+            name="Finance",
+            degree_level="bachelor",
+        )
+        self.manifest["source_entries"][2]["desired_row"]["degree_level"] = None
+        self.plan = select_manifest(self.manifest, sha256="b" * 64, lines=[7])
+        self.apply()
+        row = TeachingTaskRow.objects.get(subject=self.new_subject)
+        self.assertEqual(row.degree_level, "bachelor")
+
+    def test_new_journal_only_enrolls_current_own_group_students(self):
+        Program, Curriculum, Record = (
+            state.model("registrar." + name) for name in ("Program", "Curriculum", "StudentAcademicRecord")
+        )
+        program = Program.objects.create(
+            organization=self.org, specialty_unit=self.specialty, code="BATCH-P", name="Finance"
+        )
+        curriculum = Curriculum.objects.create(
+            organization=self.org, program=program, admission_year=2026, status="approved"
+        )
+        student = self.a.enrollments.first().student
+        record = Record.objects.create(
+            organization=self.org,
+            student=student,
+            program=program,
+            curriculum=curriculum,
+            group=self.ga,
+            admission_year=2026,
+        )
+        self.plan = select_manifest(self.manifest, sha256="b" * 64, lines=[7])
+        self.apply()
+        offering = CourseOffering.objects.get(subject=self.new_subject)
+        self.assertEqual(list(offering.enrollments.values_list("student_id", flat=True)), [student.pk])
+        self.assertEqual(self.a.enrollments.count(), 7)
+        record.refresh_from_db()
+        self.assertEqual(str(record.group_id), str(self.ga.pk))
+
+    def test_parent_label_preserves_existing_child_journal_identities(self):
+        Unit = state.model("organizations.OrgUnit")
+        parent = Unit.objects.create(
+            organization=self.org, parent=self.specialty, name="135 TSPX", slug="source-parent", unit_type="group"
+        )
+        children = [
+            Unit.objects.create(
+                organization=self.org,
+                parent=self.specialty,
+                name=f"135TSPX-{i}",
+                slug=f"source-child{i}",
+                unit_type="group",
+                settings={"parent_group": str(parent.pk)},
+            )
+            for i in (1, 2)
+        ]
+        journals = [
+            CourseOffering.objects.create(
+                organization=self.org,
+                subject=self.sb,
+                period=self.period,
+                group=child,
+                instructor=self.previous,
+                lesson_hours=45,
+            )
+            for child in children
+        ]
+        self.rb.groups.set(children)
+        entry = source_entry(
+            line=3,
+            subject=self.sb,
+            group=parent,
+            task=self.tb,
+            teacher=self.previous,
+            hours={"lecture": 30, "seminar": 15},
+            mode="existing_course_patch_owner_preserved",
+            offering=self.b,
+            row=self.rb,
+        )
+        entry["desired_row"]["group_ids"] = sorted(str(child.pk) for child in children)
+        entry["physical_source_groups"][0]["children"] = [
+            {"id": str(child.pk), "name": child.name} for child in children
+        ]
+        entry["existing_journals"] = [{"id": str(journal.pk), "lesson_hours": 45} for journal in journals]
+        self.manifest["source_entries"] = [entry]
+        self.plan = select_manifest(self.manifest, sha256="b" * 64, lines=[3])
+        self.apply()
+        self.assertEqual(set(self.rb.groups.values_list("pk", flat=True)), {child.pk for child in children})
+        self.assertEqual(
+            set(
+                CourseOffering.objects.filter(pk__in=[journal.pk for journal in journals]).values_list("pk", flat=True)
+            ),
+            {journal.pk for journal in journals},
+        )
+        self.assertFalse(CourseOffering.objects.filter(subject=self.sb, group=parent).exists())
+
+    def test_undo_preserves_original_manual_row_total_and_rejects_new_history(self):
+        TeachingTaskRow.objects.filter(pk=self.rb.pk).update(total_hours=99)
+        self.rb.refresh_from_db()
+        entry = source_entry(
+            line=3,
+            subject=self.sb,
+            group=self.gb,
+            task=self.tb,
+            teacher=self.previous,
+            hours={"lecture": 30, "seminar": 15},
+            mode="existing_course_patch_owner_preserved",
+            offering=self.b,
+            row=self.rb,
+        )
+        self.manifest["source_entries"] = [entry]
+        self.plan = select_manifest(self.manifest, sha256="b" * 64, lines=[3])
+        result = self.apply()
+        preview = self.run_batch(undo=result["batch"])
+        self.run_batch(undo=result["batch"], apply=True, expected_baseline=preview["baseline"])
+        self.rb.refresh_from_db()
+        self.assertEqual(self.rb.total_hours, 99)
+
+    def test_source_selection_id_disambiguates_same_excel_row_between_semesters(self):
+        entry = copy.deepcopy(self.manifest["source_entries"][2])
+        entry["source_reference"]["selection_id"] = 1007
+        self.manifest["source_entries"].append(entry)
+        plan = select_manifest(self.manifest, sha256="b" * 64, lines=[1007])
+        self.assertEqual((plan.items[0]["line"], plan.items[0]["source_line"]), (1007, 7))

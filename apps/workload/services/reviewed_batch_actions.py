@@ -36,7 +36,7 @@ def assign(row, value, *, actor, old=None):
 
 def _row_data(item):
     value = item["row_data"]
-    return {
+    data = {
         "subject_id": item["subject_id"],
         "period_id": item["period_id"],
         "group_ids": item["group_ids"],
@@ -47,13 +47,19 @@ def _row_data(item):
         "row_kind": "teaching",
         "degree_level": value["degree_level"],
         "education_form": FORMS[value["education_form"]],
-        "credits": str(value["credits"]),
-        "student_count": value["student_count"],
+        "credits": "" if value.get("credits") is None else str(value["credits"]),
+        "student_count_text": "" if value.get("student_count") is None else str(value["student_count"]),
         "union_count": item["union_count"],
         "subgroup_count": item["subgroup_count"],
         **{kind + "_plan": item["plan"][kind] for kind in ACTIVITIES},
         **{kind + "_total": item["totals"][kind] for kind in ACTIVITIES},
     }
+    raw_count = value.get("student_count")
+    if isinstance(raw_count, int) and not isinstance(raw_count, bool) and raw_count >= 0:
+        data["student_count"] = raw_count
+    elif isinstance(raw_count, str) and raw_count.strip().isdigit():
+        data["student_count"] = int(raw_count.strip())
+    return data
 
 
 def edit(row, item, *, actor, batch):
@@ -74,6 +80,8 @@ def edit(row, item, *, actor, batch):
         "union_count": item["union_count"],
         "subgroup_count": item["subgroup_count"],
     }
+    if "manual_total_hours" in item:
+        data["total_hours"] = item["manual_total_hours"]
     row = save_row_amended(task=row.task, actor=actor, row=row, data=data, amend=amendment(batch), sync_offerings=False)
     for key, desired in expected.items():
         old = current.get(key)
@@ -196,6 +204,7 @@ def undo_rows(plan, *, before, details, actor, batch):
             ],
             "plan": {kind: old[kind + "_plan"] for kind in ACTIVITIES},
             "totals": {kind: old[kind + "_total"] for kind in ACTIVITIES},
+            "manual_total_hours": old["total_hours"],
             "union_count": old["union_count"],
             "subgroup_count": old["subgroup_count"],
         }

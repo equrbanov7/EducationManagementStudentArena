@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Sourced API: asset and target are returned to the download step.
+# shellcheck disable=SC2034
 # Sourced inside the encrypted download step; emits no plaintext or secret.
 case "$COMMAND" in
   recover_mr46_syllabus)

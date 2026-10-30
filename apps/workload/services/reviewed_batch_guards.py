@@ -66,6 +66,13 @@ def preserved(plan, before, after, details):
                 {"hours", "assigned_by_id", "updated_at"},
                 "existing_assignment_identity_or_note_changed",
             )
+    for name, previous in before["history"].items():
+        current_history = {record["id"]: record for record in after["history"][name]}
+        for record in previous:
+            if record != current_history.get(record["id"]):
+                raise RepairError("existing_workload_history_changed")
+        if name != "WorkloadAmendment" and len(current_history) != len(previous):
+            raise RepairError("unreviewed_workload_history_created")
     old_offerings = {value["id"]: value for value in before["offerings"]}
     current = {value["id"]: value for value in after["offerings"]}
     for pk, old in old_offerings.items():
