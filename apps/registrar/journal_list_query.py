@@ -142,11 +142,9 @@ def apply_text_query(qs, query: str):
 
 def teacher_choices_for(base_qs) -> list[dict]:
     """Müəllim dropdown-u — offering-lərin təkrarsız müəllimləri (yüngül sorğu)."""
-    rows = (
-        base_qs.exclude(instructor_id=None)
-        .values_list("instructor_id", "instructor__first_name", "instructor__last_name", "instructor__username")
-        .distinct()
-    )
+    from .journal_teacher_filters import teachers_for
+
+    rows = teachers_for(base_qs).values_list("pk", "first_name", "last_name", "username")
     choices = []
     for uid, first, last, username in rows:
         full = f"{first or ''} {last or ''}".strip()

@@ -174,7 +174,9 @@ def journal_list_context(user, request=None) -> dict:
         )
     if selected_teacher:
         teacher_pk = jlq.int_or_none(selected_teacher)
-        qs = qs.filter(instructor_id=teacher_pk) if teacher_pk is not None else qs.none()
+        from .journal_teacher_filters import filter_teacher
+
+        qs = filter_teacher(qs, teacher_pk) if teacher_pk is not None else qs.none()
     if selected_group:
         group_pk = jlq.uuid_or_none(selected_group)
         qs, selected_group = filter_group(qs, group_pk, within=base_qs)

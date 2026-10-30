@@ -18,7 +18,6 @@ istifadəçi adında (registrsiz, az/ing hərf qatlaması: ``i/ı/İ/I``, ``ə/e
 
 from __future__ import annotations
 
-from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.cache import never_cache
@@ -56,8 +55,9 @@ def teacher_search(request):
     base_qs, is_broad = journal_list_base(request.user, request)
     if not is_broad:
         return empty  # adi müəllimin seçicisi yoxdur — öz adı statik göstərilir
-    instructor_ids = base_qs.exclude(instructor_id=None).order_by().values("instructor_id")
-    users = get_user_model().objects.filter(pk__in=instructor_ids)
+    from .journal_teacher_filters import teachers_for
+
+    users = teachers_for(base_qs)
     search = tolerant_q(request.GET.get("q") or "", _NAME_FIELDS)
     if search is not None:
         users = users.filter(search)
