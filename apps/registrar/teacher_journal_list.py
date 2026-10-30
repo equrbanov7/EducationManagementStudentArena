@@ -11,6 +11,7 @@ from core.group_identity import canonical_aliases
 from .journal_assignment_sources import teacher_journal_assignments
 from .journal_own_history import recorded_lessons
 from .models import JournalShare, Lesson, SlotKind
+from .practical_label import kind_choices
 
 KINDS = ("lecture", "seminar", "lab")
 GROUP_FIELDS = ("id", "name", "organization_id", "parent_id", "is_active", "settings", "unit_type")
@@ -103,7 +104,8 @@ def attach(user, offerings, *, selected_kind=""):
         kinds = [kind for kind in KINDS if getattr(offering, f"{prefix}{kind}", False)]
         offering.slot_kinds = kinds
         shown = [kind for kind in kinds if kind == selected_kind] if selected_kind else kinds
-        offering.kind_label = " · ".join(str(labels[kind]) for kind in shown)
+        offering_labels = dict(kind_choices(offering, labels))
+        offering.kind_label = " · ".join(str(offering_labels[kind]) for kind in shown)
         offering.journal_own_lessons = taught.get(offering.pk, {}).get("count", 0)
         offering.journal_own_hours = taught.get(offering.pk, {}).get("hours", 0)
         offering.journal_contributed_lessons = contributions.get(offering.pk, 0)

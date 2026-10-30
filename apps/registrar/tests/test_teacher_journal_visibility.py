@@ -193,6 +193,11 @@ class TeacherJournalVisibilityTests(TestCase):
         share.save(update_fields=["kinds"])
         self.assertEqual(len(self.context(kind="seminar")["offerings"]), 1)
         self.assertEqual(self.context(kind="lab")["offerings"], [])
+        offering.seminar_is_practical = True
+        offering.save(update_fields=["seminar_is_practical"])
+        from apps.registrar.practical_label import PRACTICAL_LABEL
+
+        self.assertEqual(self.context(kind="seminar")["offerings"][0].kind_label, str(PRACTICAL_LABEL))
 
     def test_handover_observer_without_workload_remains_in_history(self):
         offering = self.offering(instructor=self.other)
