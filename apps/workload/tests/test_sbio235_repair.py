@@ -16,6 +16,7 @@ from apps.workload.constants import TaskStatus
 from apps.workload.models import TeacherAssignment, TeachingTask, TeachingTaskRow
 from apps.workload.services import sbio235_repair as repair
 from apps.workload.services import sbio235_state as state
+from apps.workload.services.scoping import WorkloadDenied
 from core.constants import OrgUnitType
 from core.rls import apply_rls_request_context, reset_rls_context
 
@@ -206,6 +207,53 @@ class Sbio235RepairTests(TestCase):
         for kw in [{"expected_baseline": "0" * 64, "apply": True}, {"source_sha256": "0" * 64}, {"apply": True}]:
             with self.assertRaises(state.RepairError):
                 self.run_repair(**kw)
+        self.assertTrue(TeachingTaskRow.objects.filter(pk=state.DUPLICATE).exists())
+
+    def test_distributed_task_opens_amendment_preserving_distribution_header(self):
+        from django.utils import timezone
+
+        stamped = timezone.now()
+        TeachingTask.objects.filter(pk=self.task.pk).update(
+            status=TaskStatus.DISTRIBUTED, distributed_at=stamped, distributed_by=self.admin, revision=3
+        )
+        self.task.refresh_from_db()
+        initial = repair.baseline(self.task)
+        academic = state.footprint()
+        self.run_repair()
+        self.task.refresh_from_db()
+        self.assertEqual(self.task.status, TaskStatus.DISTRIBUTED)
+        self.assertEqual(repair.baseline(self.task), initial)
+        result = self.run_repair(apply=True, expected_baseline=initial)
+        self.task.refresh_from_db()
+        self.assertEqual(self.task.status, TaskStatus.AMENDED)
+        self.assertEqual(self.task.distributed_at, stamped)
+        self.assertEqual(self.task.distributed_by_id, self.admin.pk)
+        self.assertEqual(self.task.revision, 3)
+        self.assertEqual(state.footprint(), academic)
+        self.assertEqual(self.run_repair()["already_applied"], 1)
+        self.run_repair(apply=True, undo=result["batch"], expected_baseline=repair.baseline(self.task))
+        self.assertEqual(state.footprint(), academic)
+        self.task.refresh_from_db()
+        self.assertEqual(self.task.distributed_at, stamped)
+        self.assertEqual(self.task.distributed_by_id, self.admin.pk)
+        self.assertEqual(self.task.revision, 3)
+
+    def test_draft_task_is_not_accepted_as_distribution_repair(self):
+        TeachingTask.objects.filter(pk=self.task.pk).update(status=TaskStatus.DRAFT)
+        with self.assertRaises(WorkloadDenied):
+            self.run_repair()
+        self.assertTrue(TeachingTaskRow.objects.filter(pk=state.DUPLICATE).exists())
+
+    def test_status_regression_during_sync_rolls_back(self):
+        real = repair._sync
+
+        def change_status(*args, **kwargs):
+            real(*args, **kwargs)
+            TeachingTask.objects.filter(pk=self.task.pk).update(status=TaskStatus.DISTRIBUTED)
+
+        with patch.object(repair, "_sync", side_effect=change_status):
+            with self.assertRaisesMessage(state.RepairError, "task_status_mismatch"):
+                self.apply()
         self.assertTrue(TeachingTaskRow.objects.filter(pk=state.DUPLICATE).exists())
 
     def test_wrong_owner_and_child_parent_fail(self):

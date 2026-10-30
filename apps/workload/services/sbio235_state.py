@@ -109,8 +109,9 @@ def other_offerings():
 
 
 def validate_scope(task, *, after=False):
-    if task.status != "amended":
-        raise RepairError("task_not_amended")
+    allowed_statuses = ("amended",) if after else ("distributed", "amended")
+    if task.status not in allowed_statuses:
+        raise RepairError("task_status_mismatch")
     if str(task.pk) != TASK or str(task.organization_id) != ORG or task.academic_year != YEAR:
         raise RepairError("scope_mismatch")
     period = model("organizations.AcademicPeriod").objects.get(pk=PERIOD, organization_id=ORG)
@@ -163,10 +164,16 @@ def validate_scope(task, *, after=False):
     return rows
 
 
-def task_header():
+def task_header(*, after=False):
     qs = model("workload.TeachingTask").objects.filter(pk=TASK, organization_id=ORG, academic_year=YEAR)
     data = records(qs)[0]
+    if after and data["status"] != "amended":
+        raise RepairError("task_status_mismatch")
     data.pop("updated_at")  # canonical amendment opens update this routine timestamp only.
+    # A confirmed task enters the canonical amendment flow; all other header
+    # fields (including distributed actor/date and revision) must remain exact.
+    if data["status"] == "distributed":
+        data["status"] = "amended"
     return digest(data)
 
 

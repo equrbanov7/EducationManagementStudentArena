@@ -77,7 +77,7 @@ def _restore_row(task, snapshot, *, existing=None):
 
 def _check_protected(academic, others, rows, history, task_header):
     state.check_workflow_history(history)
-    if state.task_header() != task_header:
+    if state.task_header(after=True) != task_header:
         raise state.RepairError("task_metadata_changed")
     if state.footprint() != academic:
         raise state.RepairError("academic_fingerprint_changed")
