@@ -17,11 +17,15 @@ if [[ "$COMMAND" = repair_reviewed_workload_batch || "$COMMAND" = repair_reviewe
 output="$RUNNER_TEMP/out.log"
 summary="$RUNNER_TEMP/summary.log"
 status=0
-docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "$@" > "$output" 2>&1 || status=$?
+# The Python wrapper configures only this invocation and verifies its actual
+# transaction view before dispatch, including through PgBouncer.
+docker exec -i "$APP_CONTAINER" python - "$COMMAND" "$@" < scripts/ops/run_guarded_repair.py > "$output" 2>&1 || status=$?
+grep -E '^fixed_repair: transaction_isolation=repeatable_read$' "$output" || true
 grep -E "^${prefix}: mode=(dry_run|apply|undo)( (baseline=[0-9a-f]{64}|batch=${batch_prefix}-[0-9]{8}-[0-9]{6}-[0-9a-f]{${batch_length}}|[a-z_]+=[0-9]+))+$" "$output" > "$summary" || true
 cat "$summary"
 if [ "$status" != 0 ]; then
-  grep -E '^CommandError: [a-z_]+$' "$output" | head -n 1 || true
+  model='registrar[.](CourseOffering|Lesson|Enrollment|LessonMark|JournalShare|TeachingHandover|StudentAcademicRecord)|organizations[.](Membership|Role)|syllabus[.](Syllabus|SyllabusVersion|SyllabusSection|SyllabusReview)|SelfWorkTopic|SelfWorkMark|ComponentScore|CriterionScore|CourseWork|FinalGrade|ResitRecord|AssessmentScheme|AssessmentComponent|ScheduleSlot|outside_subjects|outside_workload_rows|outside_workload_assignments'
+  grep -E "^CommandError: ([a-z_]+|outside_academic_work_or_access_changed:($model)(,($model))*)$" "$output" | head -n 1 || true
 fi
 rm -f "$output"
 exit "$status"
