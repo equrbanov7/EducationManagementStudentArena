@@ -60,6 +60,7 @@ def _create_context(actor) -> dict:
         "can_create": allowed,
         "can_create_student": "student" in kinds,
         "can_create_teacher": "teacher" in kinds,
+        "can_create_staff": "staff" in kinds,
         "create_url": reverse("accounts:rim_create_account"),
         "create_catalog_url": reverse("accounts:rim_create_catalog"),
         "intake_template_url": reverse("accounts:student_intake_template"),

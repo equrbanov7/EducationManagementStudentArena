@@ -45,6 +45,7 @@ from core.rate_limit import is_rate_limited, record_rate_limit_hit
 from ..intake import create as intake_create
 from ..intake.policy import PERM_IMPORT, PERM_IMPORT_STAFF, can_import
 from .create_form import build_draft
+from .create_staff import can_assign_staff, validate_staff_assignment
 from .policy import RimAccessError, RimActor
 
 logger = logging.getLogger(__name__)
@@ -55,7 +56,11 @@ _CTX = "profile.rim"
 PERM_CREATE = PERM_IMPORT
 PERM_CREATE_STAFF = PERM_IMPORT_STAFF
 #: Hesab növü → açar (B3, 2026-10-13). Naməlum növ — açar yoxdur → fail-closed.
-KIND_PERMISSIONS = {intake_create.KIND_STUDENT: PERM_CREATE, intake_create.KIND_TEACHER: PERM_CREATE_STAFF}
+KIND_PERMISSIONS = {
+    intake_create.KIND_STUDENT: PERM_CREATE,
+    intake_create.KIND_TEACHER: PERM_CREATE_STAFF,
+    intake_create.KIND_STAFF: PERM_CREATE_STAFF,
+}
 
 #: Rate-limit: bir aktor saatda neçə hesab yarada bilər (tək-tək səth üçün).
 #: Toplu idxal bundan KƏNARDIR — o, öz faylını bir əməliyyatda tətbiq edir.
@@ -99,7 +104,9 @@ def creatable_kinds(actor: RimActor) -> tuple:
     return tuple(
         kind
         for kind in intake_create.ACCOUNT_KINDS
-        if actor.has(KIND_PERMISSIONS[kind]) and can_import(actor.user, actor.organization, KIND_PERMISSIONS[kind])
+        if actor.has(KIND_PERMISSIONS[kind])
+        and can_import(actor.user, actor.organization, KIND_PERMISSIONS[kind])
+        and (kind != intake_create.KIND_STAFF or can_assign_staff(actor))
     )
 
 
@@ -192,12 +199,13 @@ def create_account(actor: RimActor, *, kind: str, data: dict, request=None, note
     organization = actor.organization
 
     draft = build_draft(organization, kind, data)
+    staff_role = validate_staff_assignment(actor, data, draft) if kind == intake_create.KIND_STAFF else None
     if not draft.ok:
         raise field_error(pgettext(_CTX, "Formda düzəliş tələb olunan sahələr var."), draft.errors)
     _screen_draft_names(request, draft, organization, user=actor.user)
 
     try:
-        role = intake_create.account_role(organization, kind)
+        role = staff_role if kind == intake_create.KIND_STAFF else intake_create.account_role(organization, kind)
     except intake_create.IntakeApplyError as exc:
         # Rol kataloqu natamamdır — bu, sahə xətası deyil, KONFİQURASİYA xətasıdır.
         raise RimCreateError(exc.code, exc.message, status=409) from exc
@@ -215,8 +223,8 @@ def create_account(actor: RimActor, *, kind: str, data: dict, request=None, note
             specialization=draft.specialization,
             scope_unit=draft.scope_unit,
             audit_reason=_audit_reason(kind, note),
-            membership_title=draft.values.get("title", "") if kind == intake_create.KIND_TEACHER else "",
-            employee_id=draft.values.get("student_code", "") if kind == intake_create.KIND_TEACHER else "",
+            membership_title=draft.values.get("title", "") if kind != intake_create.KIND_STUDENT else "",
+            employee_id=draft.values.get("student_code", "") if kind != intake_create.KIND_STUDENT else "",
         )
 
     record_rate_limit_hit(RATE_LIMIT_SCOPE, rate, *key_parts)

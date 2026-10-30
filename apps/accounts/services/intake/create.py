@@ -49,7 +49,8 @@ _PASSWORD_LENGTH = 10
 #: Hesab növləri — kataloqdakı rol adı ilə eyni olmalıdır.
 KIND_STUDENT = "student"
 KIND_TEACHER = "teacher"
-ACCOUNT_KINDS = (KIND_STUDENT, KIND_TEACHER)
+KIND_STAFF = "staff"
+ACCOUNT_KINDS = (KIND_STUDENT, KIND_TEACHER, KIND_STAFF)
 
 STUDENT_ROLE_NAME = KIND_STUDENT
 TEACHER_ROLE_NAME = KIND_TEACHER
@@ -65,6 +66,7 @@ _ROLE_NAME_BY_KIND = {
 _PROFILE_ROLE_BY_KIND = {
     KIND_STUDENT: ProfileRole.STUDENT,
     KIND_TEACHER: ProfileRole.TEACHER,
+    KIND_STAFF: ProfileRole.MEMBER,
 }
 
 #: İstifadəçi adı prefiksi (köçürülmüş `myedu.student.<id>` / `myedu.worker.<id>`
@@ -72,6 +74,7 @@ _PROFILE_ROLE_BY_KIND = {
 USERNAME_PREFIXES = {
     KIND_STUDENT: "st",
     KIND_TEACHER: "mu",
+    KIND_STAFF: "staff",
 }
 
 #: `username` sahəsinin təhlükəsiz uzunluq həddi (əlavə `.2` şəkilçisi üçün pay).
@@ -143,6 +146,8 @@ class IntakeApplyError(Exception):
 def account_role(organization, kind: str = KIND_STUDENT):
     """Təşkilatın ``student`` / ``teacher`` rolu; yoxdursa ``IntakeApplyError``."""
 
+    if kind == KIND_STAFF:
+        raise IntakeApplyError("staff_role_required", pgettext(_CTX, "Əməkdaş üçün vəzifə / rol seçilməlidir."))
     name = _ROLE_NAME_BY_KIND.get(kind)
     if name is None:
         raise IntakeApplyError("account_kind_unknown", pgettext(_CTX, "Naməlum hesab növü."))
@@ -220,7 +225,7 @@ def _write_profile(user, *, organization, kind, values, group_name, specializati
     profile.citizenship = str(values.get("citizenship") or "")[:64]
     profile.id_document_series = str(values.get("id_series") or "")[:8]
     profile.id_document_number = str(values.get("id_number") or "")[:32]
-    if kind == KIND_TEACHER:
+    if kind in (KIND_TEACHER, KIND_STAFF):
         profile.staff_position = str(values.get("title") or "")[:150]
         profile.academic_degree = str(values.get("academic_degree") or "")[:150]
         profile.academic_title = str(values.get("academic_title") or "")[:150]
@@ -313,7 +318,7 @@ def _audit_changes(user, *, kind, values, targets, group_name, scope_unit):
             }
         )
     else:
-        changes["kind"] = KIND_TEACHER
+        changes["kind"] = kind
         changes["scope_unit"] = str(getattr(scope_unit, "pk", "") or "")
     changes["email_placeholder"] = values["email"].endswith(".invalid")
     return changes
@@ -369,7 +374,7 @@ def create_account(
         user=user,
         organization=organization,
         role=role,
-        scope_unit=scope_unit if kind == KIND_TEACHER else None,
+        scope_unit=scope_unit if kind != KIND_STUDENT else None,
         assigned_by=actor,
         is_primary=True,
         is_active=True,
@@ -379,6 +384,10 @@ def create_account(
 
     if kind == KIND_STUDENT:
         _write_academic_record(user, organization=organization, values=values, targets=student_targets or {})
+    elif kind == KIND_STAFF:
+        from ..role_catalog import sync_profile_primary_role
+
+        sync_profile_primary_role(user, organization)
 
     log_action(
         action=AuditAction.CREATE,
@@ -408,6 +417,7 @@ __all__ = [
     "ACCOUNT_KINDS",
     "KIND_STUDENT",
     "KIND_TEACHER",
+    "KIND_STAFF",
     "STUDENT_ROLE_NAME",
     "TEACHER_ROLE_NAME",
     "IntakeApplyError",

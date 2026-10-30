@@ -109,7 +109,10 @@ class RimCreatePerKindTest(_Base):
     """B3 — RİM-in tək hesab yaratması növə görə: tələbə `user.import`, müəllim `user.import_staff`."""
 
     def test_kind_keys(self):
-        self.assertEqual(rim_create.KIND_PERMISSIONS, {"student": "user.import", "teacher": "user.import_staff"})
+        self.assertEqual(
+            rim_create.KIND_PERMISSIONS,
+            {"student": "user.import", "teacher": "user.import_staff", "staff": "user.import_staff"},
+        )
 
     def test_student_import_key_cannot_create_a_teacher(self):
         actor = self.actor_for(self.services)

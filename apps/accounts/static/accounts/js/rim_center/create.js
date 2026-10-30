@@ -24,7 +24,8 @@
      * qapısı istəyir. Server qaydası: services/rim/create_form.py. */
     var REQUIRED = {
         student: ["fin", "first_name", "last_name", "birth_date", "group", "admission_year"],
-        teacher: ["first_name", "last_name"]
+        teacher: ["first_name", "last_name"],
+        staff: ["first_name", "last_name", "role"]
     };
 
     var state = { kind: "student", busy: false };
@@ -180,7 +181,7 @@
         });
         var blocks = document.querySelectorAll("[data-rimc-only]");
         Array.prototype.forEach.call(blocks, function (block) {
-            var visible = block.getAttribute("data-rimc-only") === kind;
+            var visible = block.getAttribute("data-rimc-only").split(" ").indexOf(kind) !== -1;
             block.hidden = !visible;
             // Gizli sahə formanın validasiyasına qarışmasın.
             var inputs = block.querySelectorAll("input, select, textarea");
@@ -365,7 +366,8 @@
             window.EMSOverlay.open("rimc-bulk");
             return;
         }
-        state.kind = kind === "teacher" ? "teacher" : "student";
+        state.kind = ["teacher", "staff"].indexOf(kind) !== -1 ? kind : "student";
+        document.querySelector("[data-rimc-form]").dataset.rimcKind = state.kind;
         toggleKindFields(state.kind);
         resetForm();
         var title = document.querySelector("[data-rimc-title]");

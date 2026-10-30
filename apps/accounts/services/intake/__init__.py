@@ -34,6 +34,7 @@ TƏHLÜKƏSİZLİK QEYDLƏRİ
 from .apply import apply_plans
 from .create import (
     ACCOUNT_KINDS,
+    KIND_STAFF,
     KIND_STUDENT,
     KIND_TEACHER,
     IntakeApplyError,
@@ -50,6 +51,7 @@ from .validate import PLACEHOLDER_DOMAIN, RowPlan, build_plans, summarize
 
 __all__ = [
     "ACCOUNT_KINDS",
+    "KIND_STAFF",
     "KIND_STUDENT",
     "KIND_TEACHER",
     "MAX_ROWS",

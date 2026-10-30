@@ -69,6 +69,16 @@ Django şablon mühərrikindən keçmir).
             <i class="fas fa-chevron-right rimc-choice__go" aria-hidden="true"></i>
           </button>
           {% endif %}
+          {% if rim_center_section.can_create_staff %}
+          <button type="button" class="rimc-choice" data-rimc-open="staff">
+            <span class="rimc-choice__icon rimc-choice__icon--teacher" aria-hidden="true"><i class="fas fa-user-tie"></i></span>
+            <span class="rimc-choice__text">
+              <span class="rimc-choice__title">{% trans "İnzibati heyət" context "profile.rim" %}</span>
+              <span class="rimc-choice__note">{% trans "Vəzifə və kafedra/bölmə seçimi ilə yeni əməkdaş hesabı." context "profile.rim" %}</span>
+            </span>
+            <i class="fas fa-chevron-right rimc-choice__go" aria-hidden="true"></i>
+          </button>
+          {% endif %}
           {% if rim_center_section.can_create_student %}
           <button type="button" class="rimc-choice" data-rimc-open="bulk">
             <span class="rimc-choice__icon rimc-choice__icon--bulk" aria-hidden="true"><i class="fas fa-file-arrow-up"></i></span>
@@ -132,7 +142,7 @@ Django şablon mühərrikindən keçmir).
                        data-rimc-field="fin" aria-describedby="rimc-fin-hint">
                 <p class="ems-field__hint" id="rimc-fin-hint">{% trans "7 simvol, yalnız A–Z və 0–9." context "profile.rim" %}</p>
                 {% comment %}Sahib 2026-10-23: müəllim/əməkdaş hesabı FİN-siz açıla bilər — FİN-i ilk girişdə «Məcburi profil məlumatları» qapısı istəyir.{% endcomment %}
-                <p class="ems-field__hint" data-rimc-only="teacher" hidden>{% trans "Müəllim hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq." context "profile.rim" %}</p>
+                <p class="ems-field__hint" data-rimc-only="teacher staff" hidden>{% trans "Əməkdaş hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq." context "profile.rim" %}</p>
                 <p class="ems-msg ems-msg--error" data-rimc-error="fin" role="alert" hidden></p>
               </div>
 
@@ -325,8 +335,9 @@ Django şablon mühərrikindən keçmir).
                 <input class="ems-input rimc-mono" id="rimc-id-number" type="text" name="id_number" maxlength="32" data-rimc-field="id_number">
               </div>
 
-              <div class="ems-field rimc-combo" data-rimc-only="teacher" data-rimc-combo="unit">
-                <label class="ems-field__label" for="rimc-unit">{% trans "Kafedra" context "profile.rim" %}</label>
+              {% include "accounts/profile/sections/partials/_rim_create_staff_role.html" %}
+              <div class="ems-field rimc-combo" data-rimc-only="teacher staff" data-rimc-combo="unit" data-rimc-staff-catalog="staff_unit">
+                <label class="ems-field__label" for="rimc-unit">{% trans "Kafedra / bölmə" context "profile.rim" %}</label>
                 <input class="ems-input" id="rimc-unit" type="text" role="combobox" autocomplete="off"
                        aria-expanded="false" aria-autocomplete="list" aria-controls="rimc-unit-list"
                        placeholder="{% trans 'Kafedranın adını yazın' context 'profile.rim' %}"
@@ -515,10 +526,13 @@ Django şablon mühərrikindən keçmir).
   <script type="application/json" data-rimc-i18n>{
     "title_student": "{% trans 'Yeni tələbə hesabı'|escapejs context 'profile.rim' %}",
     "title_teacher": "{% trans 'Yeni müəllim hesabı'|escapejs context 'profile.rim' %}",
+    "title_staff": "{% trans 'Yeni inzibati heyət hesabı'|escapejs context 'profile.rim' %}",
     "code_student": "{% trans 'Tələbə kodu'|escapejs context 'profile.rim' %}",
     "code_teacher": "{% trans 'İşçi kodu'|escapejs context 'profile.rim' %}",
+    "code_staff": "{% trans 'İşçi kodu'|escapejs context 'profile.rim' %}",
     "done_student": "{% trans 'Tələbə hesabı yaradıldı.'|escapejs context 'profile.rim' %}",
     "done_teacher": "{% trans 'Müəllim hesabı yaradıldı.'|escapejs context 'profile.rim' %}",
+    "done_staff": "{% trans 'Əməkdaş hesabı yaradıldı.'|escapejs context 'profile.rim' %}",
     "failed": "{% trans 'Əməliyyat alınmadı. Yenidən cəhd edin.'|escapejs context 'profile.rim' %}",
     "busy": "{% trans 'Yaradılır…'|escapejs context 'profile.rim' %}",
     "copied": "{% trans 'Kopyalandı'|escapejs context 'profile.rim' %}",

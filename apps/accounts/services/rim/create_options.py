@@ -102,6 +102,11 @@ def _base_queryset(actor, catalog: str, request=None):
 def search_catalog(actor, *, catalog: str, query: str = "", limit=DEFAULT_LIMIT, offset=0, request=None) -> dict:
     """Aktorun təşkilatındakı qrup / kafedra / valideyn siyahısı — axtarışlı, səhifəli."""
 
+    if catalog in ("staff_role", "staff_unit"):
+        from .create_staff import search_staff_catalog
+
+        return search_staff_catalog(actor, catalog=catalog, query=query, limit=limit, offset=offset)
+
     # Qapı KATALOQA GÖRƏ (yuxarıdakı «QAPI» izahı) — naməlum kataloq köhnə
     # davranışı saxlayır: yaratma açarı olmayan aktor 403, olan isə boş nəticə.
     if catalog == CATALOG_ADMIN_PARENT:

@@ -74,7 +74,7 @@ STUDENT_FIELDS = (
     "id_series",
     "id_number",
 )
-TEACHER_FIELDS = ("unit", "title", "academic_degree", "academic_title")
+TEACHER_FIELDS = ("unit", "title", "academic_degree", "academic_title", "role")
 
 #: Müəllim üzvlüyünün scope bölməsi kimi qəbul edilən tiplər.
 CHAIR_UNIT_TYPES = (OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT)
@@ -410,7 +410,7 @@ def build_draft(organization, kind: str, data: dict) -> AccountDraft:
     _validate_person(draft, data)
     if kind == intake_create.KIND_STUDENT:
         _validate_student_structure(draft, data, context)
-    else:
+    elif kind == intake_create.KIND_TEACHER:
         _validate_teacher_structure(draft, data, context)
     _validate_credentials(draft, data, context)
     return draft

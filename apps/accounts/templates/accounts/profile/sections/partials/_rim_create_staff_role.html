@@ -1,0 +1,15 @@
+{% load i18n %}
+{% if rim_center_section.can_create_staff %}
+<div class="ems-field rimc-combo" data-rimc-only="staff" data-rimc-combo="role" data-rimc-catalog="staff_role" hidden>
+  <label class="ems-field__label" for="rimc-role">{% trans "Vəzifə / rol" context "profile.rim" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+  <input class="ems-input" id="rimc-role" type="text" role="combobox" autocomplete="off"
+         aria-expanded="false" aria-autocomplete="list" aria-controls="rimc-role-list"
+         placeholder="{% trans 'Məs.: Laborant, Kafedra müdiri' context 'profile.rim' %}"
+         data-rimc-combo-input aria-describedby="rimc-role-hint">
+  <input type="hidden" name="role" data-rimc-field="role" data-rimc-combo-value>
+  <ul class="rimc-combo__list" id="rimc-role-list" role="listbox"
+      aria-label="{% trans 'Vəzifə nəticələri' context 'profile.rim' %}" hidden data-rimc-combo-list></ul>
+  <p class="ems-field__hint" id="rimc-role-hint" data-rimc-combo-hint>{% trans "Vəzifəni axtarıb siyahıdan seçin. Kafedra vəzifələrində bölmə də seçilməlidir." context "profile.rim" %}</p>
+  <p class="ems-msg ems-msg--error" data-rimc-error="role" role="alert" hidden></p>
+</div>
+{% endif %}

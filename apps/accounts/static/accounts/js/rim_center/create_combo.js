@@ -42,6 +42,7 @@
         return {
             box: node,
             name: node.getAttribute("data-rimc-combo") || "",
+            catalog: node.getAttribute("data-rimc-catalog") || node.getAttribute("data-rimc-combo") || "",
             input: node.querySelector("[data-rimc-combo-input]"),
             value: node.querySelector("[data-rimc-combo-value]"),
             list: node.querySelector("[data-rimc-combo-list]"),
@@ -205,10 +206,13 @@
             return;
         }
         message(node, t("searching"));
+        var form = node.closest("[data-rimc-form]");
+        var catalog = form && form.dataset.rimcKind === "staff"
+            ? (node.getAttribute("data-rimc-staff-catalog") || p.catalog) : p.catalog;
         var url =
             host.getAttribute("data-catalog-url") +
             "?catalog=" +
-            encodeURIComponent(p.name) +
+            encodeURIComponent(catalog) +
             "&q=" +
             encodeURIComponent(query);
         fetchJSON(url)
