@@ -20,6 +20,8 @@ from apps.registrar.models import CourseOffering, Lesson, LessonKind, ScheduleSl
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
+from .journal_load_fixtures import seed_current_journal_load
+
 User = get_user_model()
 
 # 2024-10-02 — Çərşənbə (isoweekday 3), 10:30.
@@ -71,6 +73,7 @@ class _Base(TestCase):
                 )
                 offering.instructor = cls.teacher
                 offering.save(update_fields=["instructor"])
+                seed_current_journal_load(offering, kinds=("lecture", "seminar"))
                 cls.offerings[code] = offering
 
     @classmethod

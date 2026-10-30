@@ -16,6 +16,8 @@ from apps.registrar.page_contexts import journal_list_context
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
+from .journal_load_fixtures import seed_current_journal_load
+
 User = get_user_model()
 
 
@@ -72,6 +74,7 @@ class JournalListAutoSelectTest(TestCase):
                 )
                 offering.instructor = cls.teacher
                 offering.save(update_fields=["instructor"])
+                seed_current_journal_load(offering)
 
     def _ctx(self, user, query=""):
         request = RequestFactory().get("/jurnal/" + query)

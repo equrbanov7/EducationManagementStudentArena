@@ -36,6 +36,8 @@ from apps.registrar.models import (
 from apps.registrar.tests.test_journal_rules import _setup_offering
 from core.rls import bypass_rls
 
+from .journal_load_fixtures import seed_current_journal_load
+
 User = get_user_model()
 COUNTS_RE = re.compile(r"^journal_shares: [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$")
 
@@ -316,6 +318,8 @@ class PostGuardTest(_ShareBase):
 class ListsTest(_ShareBase):
     def test_journal_list_includes_share_offering_with_scoped_count(self):
         self._share(self.seminarist, kinds=["seminar"], enrollments=[self.e2])
+        with bypass_rls():
+            seed_current_journal_load(self.offering, teacher=self.seminarist, kinds=("seminar",))
         response = self._client(self.seminarist).get(reverse("registrar:journal_list"), {"year": ""})
         self.assertEqual(response.status_code, 200)
         (offering,) = list(response.context["offerings"])

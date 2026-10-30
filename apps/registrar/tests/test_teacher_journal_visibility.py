@@ -314,11 +314,12 @@ class TeacherJournalVisibilityTests(TestCase):
 
         offering = self.offering(instructor=self.other)
         self.lesson(offering, instructor=self.teacher)
-        request = self.request()
         # Canonical tenant-loader behavior is covered by its existing route tests.
-        with patch("apps.registrar.journal_access.offering_or_404", return_value=offering):
-            response = journal_detail(request, offering.pk)
-        self.assertEqual(response.status_code, 200)
+        for params in ({}, {"own_history": "1"}):
+            request = self.request(**params)
+            with patch("apps.registrar.journal_access.offering_or_404", return_value=offering):
+                response = journal_detail(request, offering.pk)
+            self.assertEqual(response.status_code, 200)
         self.assertFalse(AssessmentScheme.objects.filter(offering=offering).exists())
         request.method = "POST"
         request.POST = {}

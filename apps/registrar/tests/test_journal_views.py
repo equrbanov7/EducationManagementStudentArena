@@ -13,6 +13,8 @@ from apps.registrar.models import AttendanceStatus, Enrollment, Lesson, LessonKi
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
+from .journal_load_fixtures import seed_current_journal_load
+
 User = get_user_model()
 
 
@@ -66,6 +68,7 @@ class JournalViewTest(TestCase):
             cls.offering.instructor = cls.teacher
             cls.offering.lesson_hours = 60
             cls.offering.save(update_fields=["instructor", "lesson_hours"])
+            seed_current_journal_load(cls.offering, kinds=("lecture", "seminar"))
             cls.enrollment = Enrollment.objects.create(organization=cls.org, student=cls.student, offering=cls.offering)
 
     def _client(self, user):

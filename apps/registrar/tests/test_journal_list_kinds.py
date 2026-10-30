@@ -17,6 +17,8 @@ from apps.registrar.models import Lesson, LessonKind, ScheduleSlot, SlotKind, Su
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
+from .journal_load_fixtures import seed_current_journal_load
+
 User = get_user_model()
 
 
@@ -89,6 +91,9 @@ class JournalListKindTest(TestCase):
                     date=datetime.date(2024, 10, day),
                     kind=kind,
                 )
+            # These are current teaching journals, including their migrated columns.
+            for offering in (cls.off_lessons, cls.off_mixed):
+                seed_current_journal_load(offering, kinds=("lecture", "seminar"))
 
     def _get(self, params=None):
         client = Client()
