@@ -29,7 +29,7 @@ from django.urls import reverse
 
 from apps.organizations.models import AcademicPeriod, Membership
 from apps.registrar import guest_roster, journal_close, page_contexts, transcript
-from apps.registrar.models import CourseOffering, Enrollment, EnrollmentKind
+from apps.registrar.models import CourseOffering, Enrollment, EnrollmentKind, Lesson
 from core.constants import AcademicPeriodType
 from core.rls import bypass_rls
 
@@ -230,6 +230,32 @@ class FrozenRosterSurfaceTest(_FrozenRosterBase):
         response = client.get(reverse("registrar:journal_list"), {"year": "2019/2020"})
         ids = {str(offering.id) for offering in response.context["offerings"]}
         self.assertIn(str(self.past_offering.id), ids)
+
+    def test_owned_past_roster_does_not_attribute_anonymous_legacy_lessons(self):
+        with bypass_rls():
+            Lesson.objects.create(
+                organization=self.org,
+                offering=self.past_offering,
+                date="2019-10-01",
+                kind="seminar",
+                hours=3,
+                instructor=None,
+                created_by=None,
+            )
+        response = self._client(self.teacher).get(reverse("registrar:journal_list"), {"year": "2019/2020"})
+        row = next(o for o in response.context["offerings"] if o.pk == self.past_offering.pk)
+        self.assertFalse(row.journal_is_current_load)
+        self.assertTrue(row.journal_is_owned_past_history)
+        self.assertEqual(row.journal_own_hours, 0)
+        self.assertEqual(row.journal_own_lessons, 0)
+        self.assertEqual(row.journal_contributed_lessons, 0)
+        self.assertEqual(response.context["journal_teaching_view"], "history")
+
+    def test_empty_owned_past_offering_is_not_history_evidence(self):
+        with bypass_rls():
+            Enrollment.objects.filter(offering=self.past_offering).delete()
+        response = self._client(self.teacher).get(reverse("registrar:journal_list"), {"year": "2019/2020"})
+        self.assertNotIn(self.past_offering.pk, {o.pk for o in response.context["offerings"]})
 
     def test_coordinator_cannot_reach_past_journal_even_with_explicit_year(self):
         """Süzgəc GET parametri ilə açıla bilməz — queryset səviyyəsindədir."""

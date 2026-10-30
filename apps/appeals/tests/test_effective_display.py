@@ -42,8 +42,8 @@ class EffectiveDisplayTests(TestCase):
         self.org = Organization.objects.create(
             name="ED Org", org_type=OrganizationType.UNIVERSITY, owner=self.teacher, status="active", is_active=True
         )
-        # An exam author is the subject teacher only with live same-tenant
-        # grading authority; ownership by itself is not a teaching assignment.
+        # Authorship is not a teaching assignment: the fixture explicitly links
+        # this active grading teacher through the exam journal-teacher field.
         Membership.objects.create(
             user=self.teacher,
             organization=self.org,
@@ -66,6 +66,7 @@ class EffectiveDisplayTests(TestCase):
         self.exam = Exam.objects.create(
             title="ED Test",
             author=self.teacher,
+            journal_teacher=self.teacher,
             organization=self.org,
             exam_type="test",
             exam_type_extended="midterm",  # Audit 2026-09-28 EXA-07: apellyasiya yalnız midterm/final

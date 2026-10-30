@@ -10,7 +10,7 @@ from core.group_identity import canonical_aliases
 
 from .journal_assignment_sources import teacher_journal_assignments
 from .journal_own_history import recorded_lessons
-from .models import JournalShare, Lesson, SlotKind
+from .models import Enrollment, JournalShare, Lesson, SlotKind
 from .practical_label import kind_choices
 
 KINDS = ("lecture", "seminar", "lab")
@@ -45,12 +45,25 @@ def _workload_filters(queryset, user, organization):
 def project(queryset, user, organization, *, observed=()):
     """Do not add a single offering to the already-authorized own/share/observer set."""
     if queryset.query.is_empty():
-        flags = {"journal_is_current_load", "journal_has_records"}
+        flags = {"journal_is_current_load", "journal_has_records", "journal_is_owned_past_history"}
         flags.update(f"journal_{prefix}_{kind}" for prefix in ("current", "recorded") for kind in KINDS)
         return queryset.annotate(**{name: Value(False) for name in flags})
     filters = _workload_filters(queryset, user, organization)
     recorded = recorded_lessons(user).filter(organization_id=OuterRef("organization_id"), offering_id=OuterRef("pk"))
     annotations = {"journal_has_records": Exists(recorded)}
+    registered = Enrollment.objects.filter(organization_id=OuterRef("organization_id"), offering_id=OuterRef("pk"))
+    # Existing ownership is canonical read authority. A populated past journal
+    # remains discoverable, without attributing anonymous legacy lessons/hours.
+    annotations["journal_is_owned_past_history"] = Case(
+        When(
+            instructor=user,
+            period__is_current=False,
+            period__end_date__lt=timezone.localdate(),
+            then=Exists(registered),
+        ),
+        default=Value(False),
+        output_field=BooleanField(),
+    )
     current = Q(pk__in=[])
     for kind, condition in filters.items():
         shares = JournalShare.objects.filter(teacher=user, is_active=True).filter(
@@ -66,12 +79,19 @@ def project(queryset, user, organization, *, observed=()):
         When(current, then=Value(True)), default=Value(False), output_field=BooleanField()
     )
     return queryset.annotate(**annotations).filter(
-        Q(journal_is_current_load=True) | Q(journal_has_records=True) | Q(pk__in=observed)
+        Q(journal_is_current_load=True)
+        | Q(journal_has_records=True)
+        | Q(journal_is_owned_past_history=True)
+        | Q(pk__in=observed)
     )
 
 
 def select_view(queryset, request):
     history = request is not None and request.GET.get("teaching") == "history"
+    if request is not None and not request.GET.get("teaching") and request.GET.get("year"):
+        history = queryset.filter(
+            period__academic_year=request.GET["year"], journal_is_owned_past_history=True
+        ).exists()
     return queryset.filter(journal_is_current_load=not history), "history" if history else "current"
 
 
