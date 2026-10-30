@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 
 from apps.accounts.models import UserProfile
 from apps.audit.models import AuditLog
@@ -204,17 +204,6 @@ class TspxRosterTests(TestCase):
             self.assertEqual(enrolled.status, "enrolled")
             self.assertEqual(mark.score, 8)
 
-    def test_direct_inverse_without_preexisting_child_roster_preserves_old_grade(self):
-        result = self.applied()
-        dry = self.execute(undo=result["batch"])
-        self.execute(undo=result["batch"], apply=True, expected_baseline=dry["baseline"])
-        with bypass_rls():
-            self.assertEqual(StudentAcademicRecord.objects.filter(group=self.parent).count(), 50)
-            self.mark.refresh_from_db()
-            self.mark.enrollment.refresh_from_db()
-            self.assertEqual(self.mark.enrollment.status, "enrolled")
-            self.assertEqual(self.mark.score, 9)
-
     def test_later_child_grade_blocks_undo_before_any_mutation(self):
         result = self.applied()
         with bypass_rls():
@@ -303,3 +292,23 @@ class TspxRosterTests(TestCase):
         with bypass_rls():
             data = AuditLog.objects.filter(resource_type=contract.RESOURCE).get().new_values
             self.assertNotIn('"password"', json.dumps(data))
+
+
+class TspxRosterInverseTests(TransactionTestCase):
+    execute = TspxRosterTests.execute
+    snapshot = TspxRosterTests.snapshot
+    applied = TspxRosterTests.applied
+
+    def setUp(self):
+        TspxRosterTests.setUpTestData.__func__(type(self))
+
+    def test_direct_inverse_without_preexisting_child_roster_preserves_old_grade(self):
+        result = self.applied()
+        dry = self.execute(undo=result["batch"])
+        self.execute(undo=result["batch"], apply=True, expected_baseline=dry["baseline"])
+        with bypass_rls():
+            self.assertEqual(StudentAcademicRecord.objects.filter(group=self.parent).count(), 50)
+            self.mark.refresh_from_db()
+            self.mark.enrollment.refresh_from_db()
+            self.assertEqual(self.mark.enrollment.status, "enrolled")
+            self.assertEqual(self.mark.score, 9)
