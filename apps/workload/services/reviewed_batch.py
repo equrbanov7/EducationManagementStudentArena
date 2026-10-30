@@ -13,6 +13,7 @@ from . import reviewed_batch_actions as actions
 from . import reviewed_batch_extensions as extensions
 from . import reviewed_batch_guards as guards
 from . import reviewed_batch_state as state
+from . import reviewed_batch_undo_guards as undo_guards
 from .reviewed_batch_manifest import ORG, RESOURCE
 from .sbio235_state import RepairError, model
 from .scoping import resolve_actor
@@ -42,6 +43,7 @@ def _undo(plan, *, receipt, current, actor, user, batch):
     if values.get("kind") != "apply" or values.get("after_baseline") != state.baseline(current):
         raise RepairError("undo_requires_unchanged_receipt_state")
     details = values["details"]
+    undo_guards.ensure_created_reference_ownership(details)
     old_journals = list(
         model("registrar.CourseOffering").objects.filter(
             organization_id=ORG, pk__in=[o["id"] for o in values["before"]["offerings"]]
