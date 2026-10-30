@@ -331,6 +331,7 @@ on:
           - recover_mr46_syllabus
           - recover_workload_syllabi
           - recover_six_workload_syllabi
+          - repair_mr112_hours
           - legacy_repair_empty_lessons
           - sync_midterm_scores
           - fix_exam_journal_gaps
@@ -646,6 +647,18 @@ jobs:
               "from django.contrib.auth import get_user_model as g; u=g().objects.filter(is_superuser=True, is_active=True).order_by('date_joined').first(); print(u.username if u else '')" | tail -n1
           }
           case "$COMMAND" in
+            repair_mr112_hours)
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--actor "$actor")
+              if [ -n "$ROW_SUBJECT" ]; then
+                match "$ROW_SUBJECT" '^[0-9a-f]{64}$' || { echo "baseline_sha_required" >&2; exit 2; }
+                args+=(--expected-baseline "$ROW_SUBJECT")
+              fi
+              if [ "$APPLY" = "true" ] && [ -z "$ROW_SUBJECT" ]; then
+                echo "baseline_sha_required" >&2; exit 2
+              fi
+              ;;
             recover_mr46_syllabus)
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
@@ -1550,6 +1563,16 @@ jobs:
             rm -f "$RUNNER_TEMP/out.log"
           elif [ "$COMMAND" = "repair_sbio235_workload" ] || [ "$COMMAND" = "repair_233ke_group_alias" ] || [ "$COMMAND" = "repair_si135_legacy_roster" ] || [ "$COMMAND" = "repair_bi_mu536_legacy_roster" ] || [ "$COMMAND" = "repair_tspx_legacy_roster" ] || [ "$COMMAND" = "repair_reviewed_workload_batch" ] || [ "$COMMAND" = "repair_reviewed_journal_content" ] || [ "$COMMAND" = "repair_cavid_source_batch" ]; then
             bash scripts/ops/run_fixed_repair.sh "${args[@]}"
+          elif [ "$COMMAND" = "repair_mr112_hours" ]; then
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^mr112_hours: mode=(dry_run|apply)( (baseline=[0-9a-f]{64}|topics=[0-9]+|already_present=1|applied=1))*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -E '^CommandError: [a-z_]+$' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
           elif [ "$COMMAND" = "repair_balanced_workload_pairs" ]; then
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^balanced_pairs: mode=(dry_run|apply|undo)( (baseline=[0-9a-f]{64}|batch=balanced12-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}|[a-z_]+=[0-9]+))+$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true

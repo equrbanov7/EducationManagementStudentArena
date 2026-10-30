@@ -1,7 +1,5 @@
 """Exact MR112 official-hour correction; no arbitrary syllabus IDs accepted."""
 
-import json
-
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 
@@ -38,4 +36,9 @@ class Command(BaseCommand):
             )
         except RepairError as exc:
             raise CommandError(str(exc)) from exc
-        self.stdout.write(json.dumps(result, sort_keys=True))
+        mode = "apply" if options["apply"] else "dry_run"
+        fields = [f"mode={mode}"]
+        for key in ("baseline", "topics", "already_present", "applied"):
+            if key in result:
+                fields.append(f"{key}={result[key]}")
+        self.stdout.write("mr112_hours: " + " ".join(fields))
