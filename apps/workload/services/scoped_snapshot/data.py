@@ -10,6 +10,7 @@ from django.db.models import Count, Q, Sum
 from core.permissions import has_permission
 
 from .roster_tokens import tokenize
+from .worker_identity import collect_worker1068
 
 ORG = "526cfa63-4f80-4bba-a7a7-61c8fbb3d918"
 YEAR = "2026/2027"
@@ -188,6 +189,7 @@ def collect(*, student_secret):
         "enrollment_status_counts": enrollment_status_counts,
         "syllabus_versions": syllabus_versions,
         **student_sets(period_ids, student_secret),
+        **collect_worker1068(),
     }
 
 

@@ -27,6 +27,10 @@ ALLOWED_CLASSES = {
     "existing_owner_no_load": "restore",
     "literal_or_spelling_unique_existing_membership_newrow": "create",
     "older_catalogue_fk_current_preflight_needed": "create",
+    "reviewed_catalogue_alias": "create",
+    "reviewed_catalogue_new_exact": "create",
+    "reviewed_handover_existing_row": "patch",
+    "reviewed_handover_missing_row": "restore",
 }
 FORMS = {"full_time": "eyani", "part_time": "qiyabi", "eyani": "eyani", "qiyabi": "qiyabi"}
 
@@ -121,7 +125,9 @@ class Plan:
         }
 
 
-def _item(entry):
+def _item(entry, *, version="reviewed-workload-source/1"):
+    from .reviewed_batch_policy import parse
+
     mode = ALLOWED_CLASSES.get(entry.get("ready_class"))
     if mode is None or entry.get("delegated_existing_repair"):
         raise RepairError("source_line_outside_reviewed_operation_classes")
@@ -207,6 +213,9 @@ def _item(entry):
         or desired.get("degree_level") not in (None, "bachelor", "master", "phd")
     ):
         raise RepairError("new_row_degree_or_education_form_not_reviewed")
+    item["policy"] = parse(entry, item, version=version)
+    if mode == "patch" and entry["ready_class"].startswith("reviewed_handover") and "handover" not in item["policy"]:
+        raise RepairError("explicit_handover_policy_required")
     return item
 
 
@@ -218,7 +227,8 @@ def _unique_physical_course_keys(items):
 
 def select_manifest(value, *, sha256, lines):
     if (
-        value.get("format") not in ("maliyye-full-source-verdict/1", "reviewed-workload-source/1")
+        value.get("format")
+        not in ("maliyye-full-source-verdict/1", "reviewed-workload-source/1", "reviewed-workload-source/2")
         or value.get("organization_id") != ORG
         or value.get("academic_year") != YEAR
     ):
@@ -233,7 +243,7 @@ def select_manifest(value, *, sha256, lines):
     ]
     if len(matches) != len(wanted):
         raise RepairError("source_line_missing_or_duplicate")
-    items = sorted((_item(entry) for entry in matches), key=lambda item: item["line"])
+    items = sorted((_item(entry, version=value["format"]) for entry in matches), key=lambda item: item["line"])
     keys = [(item["subject_id"], item["period_id"], tuple(item["group_ids"])) for item in items]
     if len(keys) != len(set(keys)):
         raise RepairError("shared_course_contributions_must_be_reviewed_as_one_logical_row")

@@ -10,6 +10,7 @@ from core.audit import log_action
 from core.constants import AuditAction
 
 from . import reviewed_batch_actions as actions
+from . import reviewed_batch_extensions as extensions
 from . import reviewed_batch_guards as guards
 from . import reviewed_batch_state as state
 from .reviewed_batch_manifest import ORG, RESOURCE
@@ -46,7 +47,7 @@ def _undo(plan, *, receipt, current, actor, user, batch):
             organization_id=ORG, pk__in=[o["id"] for o in values["before"]["offerings"]]
         )
     )
-    academic, manual = guards.protected_academic(old_journals), guards.manual_shares(old_journals)
+    academic, manual = guards.protected_academic(old_journals, plan=plan), guards.manual_shares(old_journals, plan=plan)
     # Only the exact batch-created journals and their unchanged, new roster
     # rows are removed. Receipt baseline rejects any subsequent lesson/score.
     new_ids = details["created_offering_ids"]
@@ -65,8 +66,18 @@ def _undo(plan, *, receipt, current, actor, user, batch):
     model("registrar.JournalShare").objects.filter(
         organization_id=ORG, pk__in=details["created_share_ids"], source="workload"
     ).delete()
-    if guards.protected_academic(old_journals) != academic or guards.manual_shares(old_journals) != manual:
+    if (
+        guards.protected_academic(old_journals, plan=plan) != academic
+        or guards.manual_shares(old_journals, plan=plan) != manual
+    ):
         raise RepairError("undo_existing_academic_or_manual_access_changed")
+    extensions.undo(
+        plan,
+        details=details,
+        user=user,
+        organization=model("organizations.Organization").objects.get(pk=ORG),
+        batch=batch,
+    )
     after = state.snapshot(plan)
     _audit(
         plan,
@@ -117,19 +128,26 @@ def run(*, plan, organization, user, expected_baseline="", undo="", apply=False)
     if undo:
         result = _undo(plan, receipt=receipt, current=before, actor=actor, user=user, batch=batch)
     else:
+        extra = extensions.prepare(plan, organization=organization, user=user, actor=actor, batch=batch)
         tasks, rows = state.validate(plan, actor=actor)
         old_journals = list(state.offerings(plan))
-        academic, manual = guards.protected_academic(old_journals), guards.manual_shares(old_journals)
+        academic, manual = guards.protected_academic(old_journals, plan=plan), guards.manual_shares(
+            old_journals, plan=plan
+        )
         old_shares = set(
             model("registrar.JournalShare")
             .objects.filter(organization_id=ORG, offering_id__in=[o.pk for o in old_journals])
             .values_list("pk", flat=True)
         )
-        details = actions.forward(plan, tasks=tasks, rows=rows, actor=actor, user=user, batch=batch)
+        extensions.forward_handovers(plan, organization=organization, user=user, batch=batch, details=extra)
+        details = {**actions.forward(plan, tasks=tasks, rows=rows, actor=actor, user=user, batch=batch), **extra}
         guards.verify_after(plan)
         after = state.snapshot(plan)
         guards.preserved(plan, before, after, details)
-        if guards.protected_academic(old_journals) != academic or guards.manual_shares(old_journals) != manual:
+        if (
+            guards.protected_academic(old_journals, plan=plan) != academic
+            or guards.manual_shares(old_journals, plan=plan) != manual
+        ):
             raise RepairError("existing_academic_content_roster_or_manual_access_changed")
         old_ids = {o["id"] for o in before["offerings"]}
         details["created_offering_ids"] = [o["id"] for o in after["offerings"] if o["id"] not in old_ids]

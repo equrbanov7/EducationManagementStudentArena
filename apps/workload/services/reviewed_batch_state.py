@@ -6,6 +6,7 @@ from django.db.models import Q, Sum
 
 from apps.registrar.public import handover
 
+from . import reviewed_batch_extensions as extensions
 from .owner_activity_state import workload_records
 from .people import is_assignable_teacher
 from .repair_fingerprints import academic_database_fingerprint
@@ -67,7 +68,10 @@ def outside(plan):
         "registrar.StudentAcademicRecord",
         "syllabus.Syllabus",
     ):
-        result[label] = db_fingerprint(model(label).objects.filter(organization_id=ORG))
+        query = model(label).objects.filter(organization_id=ORG)
+        if label == "organizations.Membership":
+            query = query.exclude(extensions.membership_q(plan))
+        result[label] = db_fingerprint(query)
     for name, scope in (
         ("syllabus.SyllabusVersion", "syllabus__organization_id"),
         ("syllabus.SyllabusSection", "version__syllabus__organization_id"),
@@ -89,6 +93,11 @@ def outside(plan):
         result[name] = db_fingerprint(
             model("registrar." + name).objects.filter(organization_id=ORG).exclude(**{path + "__in": ids})
         )
+    result["outside_subjects"] = db_fingerprint(
+        model("registrar.Subject")
+        .objects.filter(organization_id=ORG)
+        .exclude(pk__in={i["subject_id"] for i in plan.items})
+    )
     result["outside_workload_rows"] = db_fingerprint(
         model("workload.TeachingTaskRow").objects.filter(organization_id=ORG).exclude(task_id__in=plan.task_ids)
     )
@@ -108,6 +117,7 @@ def snapshot(plan, *, lock=False):
     selected_groups = plan.group_ids | {group["id"] for item in plan.items for group in item["source_groups"]}
     return {
         "selection": plan.selection_sha,
+        "extensions": extensions.snapshot(plan),
         "tasks": task_state,
         "rows": row_state,
         "offerings": offering_state,
@@ -337,13 +347,15 @@ def validate(plan, *, actor):
             item["row_data"]["degree_level"] = next(iter(degrees))
         owner = item["assignments"][0]["teacher_id"]
         for offering in found:
-            if not offering.is_active or offering.instructor_id != owner:
+            expected_owner = extensions.policy(item, "handover", {}).get("from_instructor_id", owner)
+            if not offering.is_active or offering.instructor_id != expected_owner:
                 raise RepairError("existing_owner_must_be_preserved")
             if offering.lesson_hours != expected_offerings[str(offering.pk)]["lesson_hours"]:
                 raise RepairError("reviewed_journal_hours_changed")
             if offering.lesson_hours != item["contacts"] and offering.pk in closed:
                 raise RepairError("journal_hours_locked_source_patch_requires_separate_review")
+            reviewed_history = extensions.validate_history(item, offering)
             taught = dict(offering.lessons.values("kind").annotate(hours=Sum("hours")).values_list("kind", "hours"))
-            if any(int(taught.get(kind, 0) or 0) > item["plan"][kind] for kind in ACTIVITIES):
+            if not reviewed_history and any(int(taught.get(kind, 0) or 0) > item["plan"][kind] for kind in ACTIVITIES):
                 raise RepairError("source_plan_below_recorded_teaching_hours")
     return tasks, rows

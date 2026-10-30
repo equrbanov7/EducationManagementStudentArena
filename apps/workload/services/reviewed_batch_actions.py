@@ -8,6 +8,7 @@ from core.audit import log_action
 from core.constants import AuditAction
 
 from ..constants import AmendmentReason
+from . import reviewed_batch_extensions as extensions
 from .assignments import assign_teacher, unassign
 from .offering_sync import sync_task_offerings
 from .reviewed_batch_manifest import ACTIVITIES, FORMS, ORG
@@ -70,6 +71,8 @@ def edit(row, item, *, actor, batch):
     # Open the normal row amendment without interim sync before reducing any
     # assignment; save_row still enforces totals >= already assigned hours.
     row = save_row_amended(task=row.task, actor=actor, row=row, data={}, amend=amendment(batch), sync_offerings=False)
+    if extensions.policy(item, "handover"):
+        _handover_assignments(row, item, actor=actor)
     current = {(a.teacher_id, a.activity): a for a in row.assignments.filter(activity__in=ACTIVITIES)}
     expected = {(a["teacher_id"], a["activity"]): a for a in item["assignments"]}
     if set(current) - set(expected):
@@ -92,6 +95,20 @@ def edit(row, item, *, actor, batch):
         if old is None or (old.hours, old.is_hourly_paid) != (desired["hours"], desired["is_hourly_paid"]):
             assign(row, desired, actor=actor, old=old)
     return row
+
+
+def _handover_assignments(row, item, *, actor):
+    """Keep surviving contribution IDs, audit superseded activity removal."""
+    value = extensions.policy(item, "handover")
+    expected = {a["activity"]: a for a in item["assignments"]}
+    for old in list(row.assignments.filter(activity__in=ACTIVITIES)):
+        if old.teacher_id != value["from_instructor_id"]:
+            raise RepairError("reviewed_handover_assignment_teacher_changed")
+        desired = expected.get(old.activity)
+        if desired is None:
+            unassign(assignment=old, actor=actor, sync_offerings=False)
+        else:
+            assign(row, {**desired, "hours": min(desired["hours"], old.hours)}, actor=actor, old=old)
 
 
 def apply_metadata(plan, *, user, batch):
@@ -145,6 +162,7 @@ def forward(plan, *, tasks, rows, actor, user, batch):
         row.task = tasks[item["task_id"]]
         selected.append(row)
     sync(plan, tasks=tasks, rows=selected, actor=actor)
+    extensions.retain_capacities(plan)
     return result
 
 
@@ -200,6 +218,28 @@ def undo_rows(plan, *, before, details, actor, batch):
         for pk, assignment in current.items():
             if pk not in old_ids:
                 unassign(assignment=assignment, actor=actor, sync_offerings=False)
+        if any(i["row_id"] == rid and extensions.policy(i, "handover") for i in plan.items):
+            for assignment in list(row.assignments.filter(activity__in=ACTIVITIES)):
+                unassign(assignment=assignment, actor=actor, sync_offerings=False)
+            row = save_row_amended(
+                task=row.task,
+                actor=actor,
+                row=row,
+                data={kind + suffix: old[kind + suffix] for kind in ACTIVITIES for suffix in ("_plan", "_total")},
+                amend=amendment(batch),
+                sync_offerings=False,
+            )
+            for saved_assignment in old["assignments"]:
+                if saved_assignment["activity"] not in ACTIVITIES:
+                    continue
+                restored = model("workload.TeacherAssignment")(
+                    pk=saved_assignment["id"],
+                    row=row,
+                    organization_id=ORG,
+                    groups_note=saved_assignment["groups_note"],
+                    note=saved_assignment["note"],
+                )
+                assign(row, saved_assignment, actor=actor, old=restored)
         item = {
             "assignments": [
                 {k: a[k] for k in ("teacher_id", "activity", "hours", "is_hourly_paid")}

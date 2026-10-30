@@ -1,23 +1,38 @@
 """Postconditions: source changes never rewrite academic content or manual access."""
 
+from . import reviewed_batch_extensions as extensions
 from .repair_fingerprints import academic_database_fingerprint
 from .reviewed_batch_manifest import ACTIVITIES, ORG
 from .reviewed_batch_state import offerings
 from .sbio235_state import RepairError, digest, model
 
 
-def protected_academic(journals):
-    return academic_database_fingerprint(organization_id=ORG, offerings=journals, exclude=("offering",))
+def protected_academic(journals, *, plan=None):
+    exclude = ("offering", "handover", "journal_share") if plan and extensions.has_handovers(plan) else ("offering",)
+    return academic_database_fingerprint(organization_id=ORG, offerings=journals, exclude=exclude)
 
 
-def manual_shares(journals):
+def manual_shares(journals, *, plan=None):
     from .reviewed_batch_state import db_fingerprint
 
-    return db_fingerprint(
+    query = (
         model("registrar.JournalShare")
         .objects.filter(organization_id=ORG, offering_id__in=[o.pk for o in journals])
         .exclude(source="workload")
     )
+    if plan:
+        from django.db.models import Q
+
+        excluded = Q(pk__in=[])
+        for item in plan.items:
+            value = extensions.policy(item, "handover")
+            if value:
+                excluded |= Q(
+                    offering_id__in=value["offering_ids"],
+                    teacher_id__in=[value["from_instructor_id"], value["to_instructor_id"]],
+                )
+        query = query.exclude(excluded)
+    return db_fingerprint(query)
 
 
 def _same_except(old, new, allowed, code):
@@ -28,7 +43,8 @@ def _same_except(old, new, allowed, code):
 
 
 def preserved(plan, before, after, details):
-    for name in ("memberships", "roles", "teachers", "profiles", "subjects", "periods", "programs"):
+    extensions.preserved(plan, before, after, details)
+    for name in ("roles", "teachers", "profiles", "periods", "programs"):
         if digest(before[name]) != digest(after[name]):
             raise RepairError(name + "_changed")
     groups = {row["id"]: row for row in after["groups"]}
@@ -56,14 +72,22 @@ def preserved(plan, before, after, details):
                 raise RepairError("unselected_workload_row_changed")
             continue
         _same_except(old, new, fields, "existing_row_reference_or_noncontact_changed")
+        handover_item = next(
+            (i for i in plan.items if i["row_id"] == old["id"] and extensions.policy(i, "handover")), None
+        )
         assignments = {value["id"]: value for value in new["assignments"]}
         for assignment in old["assignments"]:
             if assignment["id"] not in assignments:
+                if handover_item and assignment["activity"] not in {
+                    a["activity"] for a in handover_item["assignments"]
+                }:
+                    continue
                 raise RepairError("existing_assignment_deleted")
             _same_except(
                 assignment,
                 assignments[assignment["id"]],
-                {"hours", "assigned_by_id", "updated_at"},
+                {"hours", "assigned_by_id", "updated_at", "is_hourly_paid"}
+                | ({"teacher_id"} if handover_item else set()),
                 "existing_assignment_identity_or_note_changed",
             )
     for name, previous in before["history"].items():
@@ -78,7 +102,15 @@ def preserved(plan, before, after, details):
     for pk, old in old_offerings.items():
         if pk not in current:
             raise RepairError("existing_journal_deleted")
-        _same_except(old, current[pk], {"lesson_hours", "updated_at"}, "existing_journal_owner_or_identity_changed")
+        owners = extensions.handover_targets(plan)
+        _same_except(
+            old,
+            current[pk],
+            {"lesson_hours", "updated_at"} | ({"instructor_id"} if pk in owners else set()),
+            "existing_journal_owner_or_identity_changed",
+        )
+        if pk in owners and current[pk]["instructor_id"] != owners[pk]:
+            raise RepairError("unreviewed_handover_target")
     allowed_new = {
         (item["subject_id"], item["period_id"], group)
         for item in plan.items
@@ -127,6 +159,6 @@ def verify_after(plan):
                 journal is None
                 or not journal.is_active
                 or journal.instructor_id != item["assignments"][0]["teacher_id"]
-                or journal.lesson_hours != item["contacts"]
+                or journal.lesson_hours != extensions.journal_hours(item, journal.pk)
             ):
                 raise RepairError("after_journal_owner_hours_or_presence_mismatch")

@@ -1,7 +1,7 @@
 """One data-driven chair selection; no broad workbook import or task confirm."""
 
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError
 
@@ -51,7 +51,7 @@ class Command(BaseCommand):
             raise CommandError(getattr(exc, "code", str(exc))) from exc
         except (KeyError, TypeError, ValueError, OSError) as exc:
             raise CommandError("reviewed_manifest_shape_or_private_file_invalid") from exc
-        except (ObjectDoesNotExist, IntegrityError, ValidationError) as exc:
+        except (ObjectDoesNotExist, PermissionDenied, IntegrityError, ValidationError) as exc:
             raise CommandError("canonical_source_batch_rejected") from exc
         finally:
             reset_rls_context()

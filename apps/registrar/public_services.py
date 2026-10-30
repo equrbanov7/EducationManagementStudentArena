@@ -84,6 +84,8 @@ from .syllabus_reuse_targets import programs_by_offering  # noqa: F401
 from .teaching_activity import instructor_activity  # noqa: F401 — «Kadr analitikası» (2026-10-11)
 
 __all__ = [
+    "create_reviewed_subject",
+    "exact_title_candidates",
     "register_teacher_journal_assignments",
     "add_guest_student",
     "CORRECT_PERMISSION",
@@ -167,3 +169,5 @@ __all__ = [
     "transcript_policy",
     "transfer",
 ]
+
+from .reviewed_catalog import create_reviewed_subject, exact_title_candidates  # noqa: E402,F401
