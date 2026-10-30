@@ -109,9 +109,8 @@
             var norm = NS.kindSlaDays(row.kind.code);
             ownerLabel = !row.is_open ? NS.t("rowClosed") : norm ? NS.t("rowSla", { n: norm }) : row.owner_label;
         }
-        var fromLine = NS.isHandler || NS.state.tab === "all"
-            ? NS.esc(row.requester.name) + (row.requester_scope ? " · " + NS.esc(row.requester_scope) : "")
-            : NS.esc(row.current_unit.name);
+        var fromLine = NS.requesterHTML ? NS.requesterHTML(row.requester, row.requester_scope)
+            : NS.esc(row.requester.name);
         return (
             '<button type="button" class="' +
             classes.join(" ") +

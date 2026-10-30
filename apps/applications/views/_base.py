@@ -7,8 +7,8 @@ import functools
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 
-from ..models import Application
 from ..services import access
+from ..services.queries import base_queryset
 from ..state_machine import TransitionDenied
 
 #: Xəta cavabı: ``{"ok": false, "errors": {"<sahə>": ["mətn", …]}}``
@@ -59,11 +59,7 @@ def load_application(request, organization, application_id):
     Tapılmayan və görünməyən sətir EYNİ cavabı verir (404) — mövcudluq faktı
     sızmasın deyə.
     """
-    application = (
-        Application.objects.filter(organization=organization, pk=application_id)
-        .select_related("kind", "current_unit", "current_scope_unit", "created_by", "assigned_to", "organization")
-        .first()
-    )
+    application = base_queryset(organization, include_deleted=True).filter(pk=application_id).first()
     if application is None or not access.can_view(request.user, application):
         return None
     return application

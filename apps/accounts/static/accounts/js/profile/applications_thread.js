@@ -198,7 +198,7 @@
             {
                 side: "sender",
                 who: app.requester.name,
-                role: app.requester_scope,
+                role: NS.requesterMeta ? NS.requesterMeta(app.requester, app.requester_scope) : app.requester_scope,
                 when: app.submitted_at,
                 text: app.body,
                 files: opening ? opening.attachments : [],
@@ -334,7 +334,7 @@
     function headHtml(app) {
         var sla = app.sla || {};
         var tone = sla.tone === "overdue" ? "apx-sla--overdue" : sla.tone === "closed" ? "apx-sla--closed" : "";
-        var fromLine = NS.esc(app.requester.name) + (app.requester_scope ? " · " + NS.esc(app.requester_scope) : "");
+        var fromLine = NS.requesterHTML ? NS.requesterHTML(app.requester, app.requester_scope) : NS.esc(app.requester.name);
         return (
             '<div class="apx-modal__head"><div class="apx-modal__top">' +
             '<span class="apx-no">' + NS.esc(app.number) + "</span>" +

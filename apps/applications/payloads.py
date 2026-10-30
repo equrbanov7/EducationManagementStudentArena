@@ -28,6 +28,7 @@ from .models import ApplicationContentRevision
 from .services import access
 from .services.content import can_edit_application, current_reply
 from .services.reply_visibility import can_moderate
+from .services.sender_identity import sender_person
 from .sla import calendar_for, sla_banner
 from .state_machine import available_actions
 
@@ -175,8 +176,13 @@ def row_payload(application, *, viewer_is_handler: bool) -> dict:
         },
         "status": status_payload(application.status),
         "current_unit": unit_payload(application.current_unit),
-        "requester": person(application.created_by),
-        "requester_scope": application.sender_scope_unit.name if application.sender_scope_unit_id else "",
+        "requester": sender_person(application),
+        "requester_scope": (
+            application.sender_scope_unit.name
+            if application.sender_scope_unit_id
+            and application.sender_scope_unit.organization_id == application.organization_id
+            else ""
+        ),
         "submitted_at": application.submitted_at.isoformat(),
         "last_activity_at": application.last_activity_at.isoformat(),
         "sla_due_on": application.sla_due_on.isoformat() if application.sla_due_on else None,

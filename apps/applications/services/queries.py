@@ -11,6 +11,7 @@ from ..constants import CLOSED_STATUSES, OPEN_STATUSES, ApplicationStatus
 from ..models import Application, ApplicationAttachment
 from ..sla import calendar_for, working_days_between
 from . import access, oversight
+from .sender_identity import sender_queryset
 
 #: ``all`` — «Bütün müraciətlər» (RİM nəzarəti): təşkilatın hamısı, YALNIZ ``access.can_oversee``-ə.
 TABS = ("mine", "inbox", "watching", "archive", "all", "deleted")
@@ -21,8 +22,11 @@ def base_queryset(organization, *, include_deleted=False):
     queryset = Application.objects.filter(organization=organization)
     if not include_deleted:
         queryset = queryset.filter(deleted_at__isnull=True)
-    return queryset.select_related(
-        "kind", "current_unit", "current_scope_unit", "created_by", "assigned_to", "organization"
+    return sender_queryset(
+        queryset.select_related(
+            "kind", "current_unit", "current_scope_unit", "created_by", "assigned_to", "organization"
+        ),
+        organization,
     )
 
 
