@@ -194,6 +194,29 @@ def invalidate_permission_scope_cache(user) -> None:
     drop_request_memberships(user)
 
 
+def has_active_membership_permission(user, organization, permission: str) -> bool:
+    """Check a membership grant using the same request snapshot as unit scopes.
+
+    COURSE grants intentionally qualify even though they grant no structural
+    scope. Owners/superadmins receive no implicit grant here: instructor
+    eligibility requires a real active same-tenant membership and role.
+    """
+    if not permission:
+        raise ValueError("membership permission key is required")
+    if (
+        user is None
+        or not getattr(user, "is_authenticated", False)
+        or not getattr(user, "is_active", False)
+        or organization is None
+        or not organization.is_active
+    ):
+        return False
+    return any(
+        has_permission(list(membership.role.permissions or []), permission)
+        for membership in _permission_scope_memberships(user, organization)
+    )
+
+
 def get_permission_scope(user, organization, permission: str, request=None) -> UnitScope:
     """Resolve structural scope only from memberships granting ``permission``.
 

@@ -4,7 +4,7 @@ from collections import defaultdict
 
 from django.apps import apps as django_apps
 
-from apps.organizations.public import get_permission_scope
+from apps.organizations.public import get_permission_scope, has_active_membership_permission
 from apps.registrar.public import offering_chairs
 
 PERMISSION = "appeal.view_subject"
@@ -128,15 +128,12 @@ def scoped_queryset(user, organization, *, within=None):
 
 def exam_teacher_queryset(user, organization):
     """Only the explicit exam journal teacher gets this additional read path."""
-    from apps.registrar.public import eligible_instructor_user_ids
-
     Appeal = django_apps.get_model("appeals", "Appeal")
-    if organization is None or not user.is_authenticated:
+    if not has_active_membership_permission(user, organization, "grade.input"):
         return Appeal.objects.none()
-    candidates = Appeal.objects.filter(organization=organization, exam__journal_teacher=user)
-    if not candidates.exists() or user.pk not in eligible_instructor_user_ids(organization=organization):
-        return Appeal.objects.none()
-    return candidates
+    # Avoid an eager EXISTS followed by a tenant-wide role/member scan. The
+    # caller evaluates this scoped queryset once; sidebar non-graders use none.
+    return Appeal.objects.filter(organization=organization, exam__journal_teacher=user)
 
 
 def notification_readers(appeal):

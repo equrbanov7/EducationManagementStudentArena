@@ -319,6 +319,28 @@ class SubjectChairAppealTests(_ReviewSetup):
         other_org = make_org("appeal-foreign-map")
         self.assertEqual(appeal_chair_map(Appeal.objects.filter(pk=self.appeal.pk), other_org), {})
 
+    def test_explicit_teacher_read_path_reuses_memberships_and_evaluates_once(self):
+        from apps.appeals.services.subject_scope import exam_teacher_queryset
+        from apps.organizations.public import get_permission_scope
+
+        self.exam.journal_teacher = self.other_teacher
+        self.exam.save(update_fields=["journal_teacher"])
+        get_permission_scope(self.other_teacher, self.org, "course.view")
+        with self.assertNumQueries(1):
+            self.assertTrue(exam_teacher_queryset(self.other_teacher, self.org).filter(pk=self.appeal.pk).exists())
+
+    def test_explicit_teacher_without_live_grading_grant_returns_none_without_appeal_query(self):
+        from apps.appeals.services.subject_scope import exam_teacher_queryset
+        from apps.organizations.public import get_permission_scope, invalidate_permission_scope_cache
+
+        self.exam.journal_teacher = self.other_teacher
+        self.exam.save(update_fields=["journal_teacher"])
+        Membership.objects.filter(user=self.other_teacher, organization=self.org).update(is_active=False)
+        invalidate_permission_scope_cache(self.other_teacher)
+        get_permission_scope(self.other_teacher, self.org, "course.view")
+        with self.assertNumQueries(0):
+            self.assertFalse(exam_teacher_queryset(self.other_teacher, self.org).exists())
+
     def test_current_student_gets_no_new_onsite_call_even_when_they_have_staff_role(self):
         Membership.objects.create(
             organization=self.org,

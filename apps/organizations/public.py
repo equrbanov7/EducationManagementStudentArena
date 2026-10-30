@@ -22,6 +22,7 @@ from apps.organizations.permissions import (  # noqa: F401
 )
 from apps.organizations.scoping import (  # noqa: F401
     get_permission_scope,
+    has_active_membership_permission,
     invalidate_permission_scope_cache,
     scope_memberships_by_unit,
 )
@@ -84,6 +85,7 @@ __all__ = [
     "get_all_permissions",
     "get_permission_label",
     "get_permission_scope",
+    "has_active_membership_permission",
     "get_user_org_role_level",
     "invalidate_permission_scope_cache",
     "is_grant_entry",

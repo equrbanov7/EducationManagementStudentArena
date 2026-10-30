@@ -159,6 +159,37 @@ class RbacPermissionScopeQueryCacheTest(TestCase):
                 scope = get_permission_scope(user, self.org, permission)
                 self.assertTrue(scope.has_structure_access, permission)
 
+    def test_membership_permission_reuses_scope_snapshot_without_structure_lookup(self):
+        from apps.organizations.public import get_permission_scope, has_active_membership_permission
+
+        user = self._fresh_dean()
+        get_permission_scope(user, self.org, "course.edit")
+        with self.assertNumQueries(0):
+            self.assertTrue(has_active_membership_permission(user, self.org, "course.edit"))
+            self.assertFalse(has_active_membership_permission(user, self.org, "grade.input"))
+
+    def test_course_grading_permission_is_not_mistaken_for_structural_scope(self):
+        from apps.organizations.public import get_permission_scope, has_active_membership_permission
+
+        self.role.scope_type = RoleScopeType.COURSE
+        self.role.permissions = ["grade.input"]
+        self.role.save(update_fields=["scope_type", "permissions"])
+        user = self._fresh_dean()
+        self.assertFalse(get_permission_scope(user, self.org, "grade.input").has_structure_access)
+        with self.assertNumQueries(0):
+            self.assertTrue(has_active_membership_permission(user, self.org, "grade.input"))
+
+    def test_membership_grant_does_not_implicitly_authorize_owner_or_inactive_actor(self):
+        from apps.organizations.public import has_active_membership_permission, invalidate_permission_scope_cache
+
+        Membership.objects.filter(user=self.owner, organization=self.org).delete()
+        invalidate_permission_scope_cache(self.owner)
+        self.assertFalse(has_active_membership_permission(self.owner, self.org, "grade.input"))
+        user = self._fresh_dean()
+        user.is_active = False
+        with self.assertNumQueries(0):
+            self.assertFalse(has_active_membership_permission(user, self.org, "course.edit"))
+
 
 class RbacPermissionCacheInvalidationTest(TestCase):
     """A membership write must never leave a stale read behind in the same request."""
