@@ -7,6 +7,8 @@ case "$COMMAND" in
     tag_prefix=mr46-syllabus; asset=mr46-syllabus.json.enc; target="/tmp/mr46_syllabus_${GITHUB_RUN_ID}.json" ;;
   recover_mr27_journal)
     tag_prefix=mr27-recovery; asset=mr27-recovery.json.enc; target="/tmp/mr27_recovery_${GITHUB_RUN_ID}.json" ;;
+  recover_six_workload_syllabi)
+    tag_prefix=six-workload-syllabi; asset=six-workload-syllabi.json.enc; target="/tmp/six_workload_syllabi_${GITHUB_RUN_ID}.json" ;;
   recover_workload_syllabi)
     tag_prefix=workload-syllabi; asset=workload-syllabi.json.enc; target="/tmp/workload_syllabi_${GITHUB_RUN_ID}.json" ;;
   repair_bi_mu536_legacy_roster)
