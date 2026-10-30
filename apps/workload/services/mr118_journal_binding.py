@@ -116,6 +116,17 @@ def repair_mr118_journal_binding(*, organization, user, apply=False, expected_ba
             45,
         ):
             raise MR118Error("offering_identity_changed")
+    if (offerings[FILLED].subject.code, offerings[EMPTY].subject.code) != ("QKU-2499", "QKU-2717"):
+        raise MR118Error("reviewed_catalogue_equivalence_changed")
+    if (
+        model("workload.TeachingTaskRow")
+        .objects.filter(
+            organization_id=ORG, period_id=PERIOD, subject_id__in=(FILLED_SUBJECT, OFFICIAL_SUBJECT), groups__pk=GROUP
+        )
+        .exclude(pk=ROW)
+        .exists()
+    ):
+        raise MR118Error("alternate_workload_requires_review")
     if not offerings[FILLED].is_active:
         raise MR118Error("historical_offering_inactive")
     if model("registrar.Lesson").objects.filter(offering_id=EMPTY).exists():
@@ -191,6 +202,8 @@ def repair_mr118_journal_binding(*, organization, user, apply=False, expected_ba
             "old_subject": OFFICIAL_SUBJECT,
             "filled_subject": FILLED_SUBJECT,
             "source_journal": 14676,
+            "source_subject": 2499,
+            "official_catalogue_subject": 2717,
             "source_cells_sha256": SOURCE_CELLS,
         },
     )

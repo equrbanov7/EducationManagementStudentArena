@@ -18,6 +18,8 @@ class MR118BindingTests(TestCase):
     setUp = fixtures.ScopedSnapshotTests.setUp
 
     def prepare(self):
+        self.stack["subject"].code = "QKU-2717"
+        self.stack["subject"].save()
         self.task.status = "distributed"
         self.task.save()
         self.row.subject_text = "Official subject title"
@@ -27,7 +29,7 @@ class MR118BindingTests(TestCase):
         TeacherAssignment.objects.create(
             organization=self.org, row=self.row, teacher=self.teacher, activity="lecture", hours=45
         )
-        alternate = Subject.objects.create(organization=self.org, code="HIST", name="Historical same subject")
+        alternate = Subject.objects.create(organization=self.org, code="QKU-2499", name="Historical same subject")
         values = {
             "ROW": str(self.row.pk),
             "TASK": str(self.task.pk),
