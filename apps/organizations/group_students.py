@@ -33,6 +33,7 @@ from .groups_registry import (
     student_record_scope_q,
 )
 from .models import Organization
+from .subgroup_targets import eligible_records_q, reusable_children, subgroup_number
 
 _CTX = "accounts.groups"
 
@@ -70,8 +71,9 @@ def _candidate_row(record, *, group_specialty_id) -> dict:
         meta.append(code)
     if getattr(program, "name", ""):
         meta.append(program.name)
-    if record.group_id and record.group is not None and not record.group.is_active:
-        meta.append(pgettext(_CTX, "arxiv qrup: %s") % record.group.name)
+    if record.group_id and record.group is not None:
+        label = pgettext(_CTX, "ana qrup: %s") if record.group.is_active else pgettext(_CTX, "arxiv qrup: %s")
+        meta.append(label % record.group.name)
     return {
         "id": str(record.pk),
         "text": f"{name} · {' · '.join(meta)}",
@@ -125,6 +127,14 @@ def group_students(request, slug, unit_id):
             # edilmiş tələbələr qrupun FK-sını saxlayır (status dəyişir, qrup yox); çekmecədə ayrıca
             # görünür və «Bərpa et» (reinstatement əmri) ilə bu qrupa qaytarılır.
             "removed_rows": removed,
+            "subgroups": (
+                [
+                    {"id": str(child.pk), "name": child.name, "number": subgroup_number(unit, child)}
+                    for child in reusable_children(unit)
+                ]
+                if can_manage
+                else []
+            ),
             "can_manage": can_manage,
             "can_move_students": can_move_students(request),
         }
@@ -181,11 +191,10 @@ MAX_QUERY_LENGTH = 80
 @login_required
 @require_GET
 def group_student_candidates(request, slug, unit_id):
-    """«Tələbə əlavə et» seçicisinin namizədləri — QRUPSUZ, qeydiyyatlı tələbələr.
+    """Qrupsuzlar və alt qrupun doğrulanmış ana qrupundakı qeydiyyatlı tələbələr.
 
-    Sahib (2026-09-07): başqa qrupda olan tələbə ümumi siyahıda görünməsin;
-    axtarış ad / istifadəçi adı / ixtisas şifri / ixtisas adı üzrə. Qrupun öz
-    ixtisasındakı tələbələr siyahıda ƏVVƏL gəlir.
+    Əlaqəsiz aktiv qrupdan tələbə göstərilmir. Axtarış ad, istifadəçi adı və
+    ixtisas üzrədir; qrupun öz ixtisası əvvəl gəlir.
     """
     organization = get_object_or_404(Organization, slug=slug, is_active=True)
     if not can_view_groups(request) or not can_manage_groups(request):
@@ -203,10 +212,13 @@ def group_student_candidates(request, slug, unit_id):
     from core.program_codes import PROGRAM_CODE_SEARCH_FIELDS
     from core.search_text import tolerant_q
 
+    eligible, parent = eligible_records_q(unit)
+    if parent is not None and _visible_group(organization, scope, str(parent.pk)) is None:
+        eligible = Q(group__isnull=True) | Q(group__is_active=False)
     StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
     records = (
         StudentAcademicRecord.objects.filter(organization=organization, is_active=True, status="enrolled")
-        .filter(Q(group__isnull=True) | Q(group__is_active=False))
+        .filter(eligible)
         # Audit 2026-09-28 S3: başqa fakültənin qrupsuz tələbələri görünmür.
         .filter(student_record_scope_q(scope))
         .select_related("student", "program", "group")

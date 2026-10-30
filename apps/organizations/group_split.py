@@ -37,6 +37,7 @@ from core.constants import AuditAction, OrgUnitType
 from .group_actions import _error, _visible_group
 from .groups_registry import SETTING_KEYS
 from .models import OrgUnit
+from .subgroup_targets import bind_parent, name_key, resolve_split_targets
 from .views.shared._helpers import _unique_unit_slug
 
 _CTX = "accounts.groups"
@@ -66,7 +67,7 @@ def parse_subgroups(raw) -> list[dict]:
         name = " ".join(str(item.get("name") or "").split())[:MAX_NAME_LENGTH]
         if not name:
             raise ValueError("name_required")
-        key = name.casefold()
+        key = name_key(name)
         if key in seen_names:
             raise ValueError("name_duplicate")
         seen_names.add(key)
@@ -111,6 +112,7 @@ def split_group(request, organization, scope):
     source = _visible_group(organization, scope, request.POST.get("id"))
     if source is None:
         return _error(pgettext(_CTX, "Qrup tapılmadı."), status=404, code="not_found", field="id")
+    source = OrgUnit.objects.select_for_update().get(pk=source.pk, organization=organization)
     if not source.is_active:
         return _error(pgettext(_CTX, "Arxivlənmiş qrup bölünmür."), code="archived", field="id")
 
@@ -124,25 +126,10 @@ def split_group(request, organization, scope):
         code = str(exc)
         return _error(_MESSAGES.get(code, _MESSAGES["subgroups_invalid"]), code=code, field="subgroups")
 
-    from django.db.models import Q
-
-    wanted_names = [item["name"] for item in subgroups]
-    name_q = Q()
-    for name in wanted_names:
-        name_q |= Q(name__iexact=name)
-    taken_fold = {
-        name.casefold()
-        for name in OrgUnit.objects.filter(organization=organization, unit_type=OrgUnitType.GROUP)
-        .filter(name_q)
-        .values_list("name", flat=True)
-    }
-    for name in wanted_names:
-        if name.casefold() in taken_fold:
-            return _error(
-                pgettext(_CTX, "«%(name)s» adlı qrup artıq var — başqa ad seçin.") % {"name": name},
-                code="name_taken",
-                field="subgroups",
-            )
+    try:
+        targets = resolve_split_targets(source, [item["name"] for item in subgroups])
+    except ValidationError as exc:
+        return _error(" ".join(exc.messages), code="name_taken", field="subgroups")
 
     StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
     all_ids = [rid for item in subgroups for rid in item["record_ids"]]
@@ -152,9 +139,9 @@ def split_group(request, organization, scope):
         )
     records = {
         str(record.pk): record
-        for record in StudentAcademicRecord.objects.filter(
-            organization=organization, group=source, is_active=True, status="enrolled", pk__in=all_ids
-        ).select_related("student", "program", "organization", "group")
+        for record in StudentAcademicRecord.objects.select_for_update(of=("self",))
+        .filter(organization=organization, group=source, is_active=True, status="enrolled", pk__in=all_ids)
+        .select_related("student", "program", "organization", "group")
     }
     missing = [rid for rid in all_ids if rid not in records]
     if missing:
@@ -171,17 +158,20 @@ def split_group(request, organization, scope):
     created = []
     moved_total = 0
     try:
-        for item in subgroups:
-            unit = OrgUnit.objects.create(
-                organization=organization,
-                parent=source.parent,
-                unit_type=OrgUnitType.GROUP,
-                name=item["name"],
-                slug=_unique_unit_slug(organization, item["name"], "group"),
-                code="",
-                settings=dict(settings_blob),
-                is_active=True,
-            )
+        for item, unit in zip(subgroups, targets):
+            reused = unit is not None
+            if unit is None:
+                unit = OrgUnit.objects.create(
+                    organization=organization,
+                    parent=source.parent,
+                    unit_type=OrgUnitType.GROUP,
+                    name=item["name"],
+                    slug=_unique_unit_slug(organization, item["name"], "group"),
+                    code="",
+                    settings=dict(settings_blob),
+                    is_active=True,
+                )
+            bind_parent(unit, source)
             moved = 0
             for rid in item["record_ids"]:
                 result = group_transfer.transfer_student_group(
@@ -189,14 +179,14 @@ def split_group(request, organization, scope):
                 )
                 moved += 1 if result.get("record") is not None else 0
             moved_total += moved
-            created.append({"id": str(unit.pk), "name": unit.name, "students": moved})
+            created.append({"id": str(unit.pk), "name": unit.name, "students": moved, "reused": reused})
             log_action(
-                action=AuditAction.CREATE,
+                action=AuditAction.UPDATE if reused else AuditAction.CREATE,
                 user=request.user,
                 organization=organization,
                 obj=unit,
                 request=request,
-                reason=f"groups: subgroup created by splitting {source.name} — {reason}",
+                reason=f"groups: subgroup {'reused' if reused else 'created'} by splitting {source.name} — {reason}",
                 new_values={
                     "parent_group": str(source.pk),
                     "parent_group_name": source.name,

@@ -15,7 +15,7 @@
     if (!window.EMSDelegate) return;
 
     var DIALOG_ID = "tofGroupSplitDialog";
-    var state = { groupId: "", groupName: "", students: [], columns: [], count: 2 };
+    var state = { groupId: "", groupName: "", students: [], columns: [], existing: [], count: 2 };
 
     function dialog() { return document.getElementById(DIALOG_ID); }
     function rootEl() { var d = dialog(); return d ? d.querySelector("[data-tof-split]") : null; }
@@ -28,7 +28,11 @@
     function byName(a, b) { return String(a.name || "").localeCompare(String(b.name || ""), "az"); }
 
     /* ── Bölgü modeli ──────────────────────────────────────────────────────── */
-    function defaultName(index) { return state.groupName + "-" + (index + 1); }
+    function defaultName(index) {
+        var existing = state.existing.filter(function (item) { return item.number === index + 1; })[0];
+        if (!existing && state.existing[index] && !state.existing[index].number) existing = state.existing[index];
+        return existing ? existing.name : state.groupName + "-" + (index + 1);
+    }
     function equalSplit() {
         var sorted = state.students.slice().sort(byName);
         var n = state.count;
@@ -148,7 +152,7 @@
         var d = dialog();
         var r = rootEl();
         if (!d || !r) return;
-        state = { groupId: btn.getAttribute("data-group-id") || "", groupName: btn.getAttribute("data-group-name") || "", students: [], columns: [], count: 2 };
+        state = { groupId: btn.getAttribute("data-group-id") || "", groupName: btn.getAttribute("data-group-name") || "", students: [], columns: [], existing: [], count: 2 };
         var form = d.querySelector("form");
         if (form) {
             var idField = form.querySelector('input[name="id"]');
@@ -165,6 +169,12 @@
         var url = btn.getAttribute("data-students-url") || "";
         window.EMSCore.fetchJSON(url)
             .then(function (payload) {
+                state.existing = (payload && payload.subgroups) || [];
+                if (state.existing.length >= 2 && state.existing.length <= 6) {
+                    state.count = state.existing.length;
+                    var selector = d.querySelector("[data-tof-subsplit-count]");
+                    if (selector) { selector.value = String(state.count); if (window.EMSBootstrapSelect) window.EMSBootstrapSelect.sync(selector); }
+                }
                 var rows = (payload && payload.rows) || [];
                 state.students = rows
                     .filter(function (row) { return row && row.status === "enrolled"; })

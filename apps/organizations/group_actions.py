@@ -50,6 +50,7 @@ from .groups_registry import (
 from .groups_registry import visible_group as _visible_group
 from .models import Organization, OrgUnit
 from .scoping import scope_org_units
+from .subgroup_targets import bind_parent, eligible_records_q
 from .views.shared._helpers import _unique_unit_slug
 
 _CTX = "accounts.groups"
@@ -316,13 +317,14 @@ def _add_students(request, organization, scope):
     Qrup dəyişikliyi DB qapısı ilə yalnız `transfer_student_group`-a buraxılır
     (bax apps/registrar/reference_identity.py); ona görə burada sadə FK yazısı
     YOXDUR — hər tələbə üçün köçürmə çağırılır (audit + jurnal tarixçəsi qorunur).
-    Namizədlər YALNIZ hazırda aktiv qrupu olmayan (`group` boş və ya qrupu
-    arxivlənmiş) qeydiyyatlı tələbələrdir — başqa qrupda olan tələbə buradan
-    köçürülmür (onun üçün çekmecədəki əmrli «Qrupdan çıxar» axını var).
+    Namizədlər qrupsuz/arxiv qruplu tələbələr və hədəf alt qrupun doğrulanmış
+    ana qrupundakı tələbələrdir. Əlaqəsiz aktiv qrupdan bu yolla köçürülmür.
     """
     unit = _visible_group(organization, scope, request.POST.get("id"))
     if unit is None:
         return _error(pgettext(_CTX, "Qrup tapılmadı."), status=404, code="not_found")
+
+    unit = OrgUnit.objects.select_for_update().get(pk=unit.pk, organization=organization)
 
     # Sahib (2026-09-08): əlavə üçün səbəb yazmaq TƏLƏB OLUNMUR — audit sətri
     # aktor + vaxt + qrup ilə onsuz da düşür; yazılıbsa auditə əlavə olunur.
@@ -332,10 +334,14 @@ def _add_students(request, organization, scope):
     if not ids:
         return _error(pgettext(_CTX, "Tələbə seçilməyib."), code="students_required", field="record_ids")
 
+    eligible, parent = eligible_records_q(unit)
+    if parent is not None and _visible_group(organization, scope, str(parent.pk)) is None:
+        eligible, parent = Q(group__isnull=True) | Q(group__is_active=False), None
     StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
     records = list(
-        StudentAcademicRecord.objects.filter(organization=organization, is_active=True, status="enrolled", pk__in=ids)
-        .filter(Q(group__isnull=True) | Q(group__is_active=False))
+        StudentAcademicRecord.objects.select_for_update(of=("self",))
+        .filter(organization=organization, is_active=True, status="enrolled", pk__in=ids)
+        .filter(eligible)
         # Audit 2026-09-28 S3: yalnız aktorun idarə əhatəsindəki tələbələr.
         .filter(student_record_scope_q(scope))
         .select_related("student", "program", "organization", "group")
@@ -354,12 +360,15 @@ def _add_students(request, organization, scope):
     period = organization.academic_periods.filter(is_current=True, is_active=True).first()
     added = []
     try:
+        if parent is not None and any(record.group_id == parent.pk for record in records):
+            bind_parent(unit, parent)
         for record in records:
             group_transfer.transfer_student_group(
                 record=record, new_group=unit, period=period, by_user=request.user, reason=reason
             )
             added.append(record)
     except ValidationError as exc:
+        transaction.set_rollback(True)
         messages = getattr(exc, "messages", None) or [str(exc)]
         return _error(" ".join(str(message) for message in messages), status=409, code="transfer_rejected")
 
