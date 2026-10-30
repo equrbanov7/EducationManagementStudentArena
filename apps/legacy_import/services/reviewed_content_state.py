@@ -12,6 +12,7 @@ from django.db import connection
 from apps.registrar.public import handover
 from apps.workload.public import journal_academic_fingerprint, queryset_database_fingerprint
 
+from .reviewed_content_catalog_bridge import BRIDGES, reviewed_catalog_bridge
 from .reviewed_content_contract import ContentError
 from .reviewed_content_spec import ORG, TARGETS, YEAR
 
@@ -122,9 +123,11 @@ class CurrentState:
                 or period.start_date.month != 9
             ):
                 raise ContentError("reviewed_current_period_or_activity_changed")
-            if self.group_maps[str(spec["legacy_group_id"])] != {spec["group_id"]} or subjects[
-                str(spec["legacy_subject_id"])
-            ] != {spec["subject_id"]}:
+            subject_maps = subjects[str(spec["legacy_subject_id"])]
+            subject_matches = subject_maps == {spec["subject_id"]}
+            if pk in BRIDGES or not subject_matches:
+                subject_matches = reviewed_catalog_bridge(offering, spec, subject_maps)
+            if self.group_maps[str(spec["legacy_group_id"])] != {spec["group_id"]} or not subject_matches:
                 raise ContentError("source_subject_or_group_identity_bridge_changed")
             source = workers[spec["legacy_teacher_id"]]
             user, profile = teachers.get(spec["teacher_id"]), teacher_profiles.get(spec["teacher_id"])

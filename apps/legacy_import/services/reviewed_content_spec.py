@@ -289,3 +289,36 @@ JOURNAL_GROUPS = {
     15406: (723,),
     15516: (830,),
 }
+
+# Exact official-source catalogue additions; bridge requires original apply receipt.
+TARGETS.update(
+    {
+        "2bcf2c6e-817e-4ac0-a54b-9c78820f60b2": {
+            "group_id": "72cde476-07d1-4917-aed9-6b5c29afe2e2",
+            "journal_id": 14088,
+            "journal_uniqid": "brePeUkNMj",
+            "legacy_group_id": 835,
+            "legacy_subject_id": 2671,
+            "legacy_teacher_id": 268,
+            "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+            "selection_id": 22,
+            "special": False,
+            "subject_id": "7cda6d6a-9089-563d-a58f-c6a390c8eec5",
+            "teacher_id": 7810,
+        },
+        "1206a0f5-1483-4b67-b820-9f976f335231": {
+            "group_id": "12c1ba2a-b7ee-4e2f-a31c-64bccaeb71bf",
+            "journal_id": 15287,
+            "journal_uniqid": "2yFI96TOSQ",
+            "legacy_group_id": 829,
+            "legacy_subject_id": 2669,
+            "legacy_teacher_id": 1047,
+            "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+            "selection_id": 51,
+            "special": False,
+            "subject_id": "dd392764-9e62-5284-89e6-86169a2b510e",
+            "teacher_id": 9531,
+        },
+    }
+)
+JOURNAL_GROUPS.update({14088: (835, 843), 15287: (829,)})
