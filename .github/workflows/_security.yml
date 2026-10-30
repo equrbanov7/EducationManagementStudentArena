@@ -87,7 +87,11 @@ jobs:
             # İstisna (2026-10-27): CVE-2026-83813 — twisted.names.dns.DNSDatagramProtocol (twisted-in DNS client-i).
             # Bizdə twisted.names işlədilmir (repo-da import yoxdur); daphne reaktorun standart (thread) resolverini
             # işlədir. Düzəliş yalnız 26.10.0rc1-dədir — 26.10.0 çıxan kimi bütün twisted istisnalarını silib qaldırın.
-            ignores=(--ignore-vuln CVE-2026-106454 --ignore-vuln CVE-2026-115774 --ignore-vuln CVE-2026-115775
+            # 2026-10-30: GHSA-vpp8-g58w-m8mp affects Twisted's HTTP/2 server only.
+            # nginx terminates public h2; every app upstream uses HTTP/1.1, and app has no published port.
+            # tests/test_twisted_h2_boundary.py guards this boundary. Remove with the next stable Twisted fix
+            # (currently only 26.10.0rc1 is patched): https://github.com/twisted/twisted/security/advisories/GHSA-vpp8-g58w-m8mp
+            ignores=(--ignore-vuln GHSA-vpp8-g58w-m8mp --ignore-vuln CVE-2026-106454 --ignore-vuln CVE-2026-115774 --ignore-vuln CVE-2026-115775
                      --ignore-vuln CVE-2026-115776 --ignore-vuln CVE-2026-115778 --ignore-vuln CVE-2026-115877
                      --ignore-vuln CVE-2026-83813)
             pip-audit -r "$lock" --require-hashes --disable-pip --desc on "${ignores[@]}" || {
