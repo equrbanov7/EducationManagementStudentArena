@@ -42,6 +42,15 @@ class EffectiveDisplayTests(TestCase):
         self.org = Organization.objects.create(
             name="ED Org", org_type=OrganizationType.UNIVERSITY, owner=self.teacher, status="active", is_active=True
         )
+        # An exam author is the subject teacher only with live same-tenant
+        # grading authority; ownership by itself is not a teaching assignment.
+        Membership.objects.create(
+            user=self.teacher,
+            organization=self.org,
+            role=self.org.roles.get(name="teacher"),
+            is_primary=True,
+            is_active=True,
+        )
         profile = self.exam_center.profile
         profile.organization = self.org
         profile.organization_type = self.org.org_type

@@ -111657,3 +111657,23 @@ msgstr "Причина переноса"
 msgctxt "accounts.workload"
 msgid "Sətir müəllim bölgüsü və saatları ilə köçürülür. Jurnal və qiymətlər saxlanılır. Digər redaktələri əvvəlcə yadda saxlayın."
 msgstr "Строка переносится вместе с распределением преподавателей и часами. Журнал и оценки сохраняются. Сначала сохраните остальные изменения."
+
+msgctxt "organizations.permission.label"
+msgid "Öz kafedrasının fənn apellyasiyalarına baxmaq"
+msgstr "Просмотр апелляций по предметам своей кафедры"
+
+msgctxt "appeals.notification"
+msgid "Tələbə: {student} ({username}); qrup: {group}; fənn: {subject}; imtahan: {exam}; sual sayı: {count}."
+msgstr "Студент: {student} ({username}); группа: {group}; предмет: {subject}; экзамен: {exam}; вопросов: {count}."
+
+msgctxt "appeals.notification"
+msgid "Müəllim: {teachers}. Apellyasiya ilə bağlı İmtahan Mərkəzinə yaxınlaşın. {details}"
+msgstr "Преподаватель: {teachers}. Подойдите в Экзаменационный центр по поводу апелляции. {details}"
+
+msgctxt "appeals.notification"
+msgid "Fənni tədris edən müəllim: {teachers}. Müəllim apellyasiya ilə bağlı İmtahan Mərkəzinə dəvət olunur. {details}"
+msgstr "Преподаватель предмета: {teachers}. Преподаватель приглашён в Экзаменационный центр по поводу апелляции. {details}"
+
+msgctxt "appeals.notification"
+msgid "Fənn üzrə yeni apellyasiya"
+msgstr "Новая апелляция по предмету"

@@ -30,6 +30,7 @@ from ...constants import (
     APPEAL_STATUS_VALUES,
 )
 from ...models import AppealDecisionRecord, ScoreAdjustment
+from ...services.student_identity import student_group_map
 
 CTX = "appeals.teaching"
 PREFIX = "ta_"
@@ -69,28 +70,6 @@ def _valid_date(text) -> bool:
         return bool(text) and parse_date(text) is not None
     except ValueError:
         return False
-
-
-def student_group_map(queryset) -> dict:
-    """``{tələbə_id: cari reyestr qrupu}`` — dəstdəki tələbələr üçün TƏK sorğu."""
-    from django.apps import apps as django_apps
-
-    try:  # registrar import edilmir (modul asılılığı) — model adla alınır, ``current_group_names`` ilə eyni qayda
-        record_model = django_apps.get_model("registrar", "StudentAcademicRecord")
-    except LookupError:  # pragma: no cover
-        return {}
-    rows = (
-        record_model.objects.filter(
-            student_id__in=queryset.order_by().values("student_id"), is_active=True, group__isnull=False
-        )
-        .order_by("student_id", "-created_at")
-        .values_list("student_id", "group__name")
-    )
-    result: dict = {}
-    for student_id, name in rows:
-        if name:
-            result.setdefault(student_id, name)
-    return result
 
 
 def apply_filters(queryset, filters, *, group_map=None, with_status=True):

@@ -111464,3 +111464,23 @@ msgstr "Reason for transfer"
 msgctxt "accounts.workload"
 msgid "Sətir müəllim bölgüsü və saatları ilə köçürülür. Jurnal və qiymətlər saxlanılır. Digər redaktələri əvvəlcə yadda saxlayın."
 msgstr "The row is transferred with its teaching assignments and hours. The journal and grades are preserved. Save other changes first."
+
+msgctxt "organizations.permission.label"
+msgid "Öz kafedrasının fənn apellyasiyalarına baxmaq"
+msgstr "View subject appeals for the assigned department"
+
+msgctxt "appeals.notification"
+msgid "Tələbə: {student} ({username}); qrup: {group}; fənn: {subject}; imtahan: {exam}; sual sayı: {count}."
+msgstr "Student: {student} ({username}); group: {group}; subject: {subject}; exam: {exam}; questions: {count}."
+
+msgctxt "appeals.notification"
+msgid "Müəllim: {teachers}. Apellyasiya ilə bağlı İmtahan Mərkəzinə yaxınlaşın. {details}"
+msgstr "Teacher: {teachers}. Please visit the Exam Center regarding the appeal. {details}"
+
+msgctxt "appeals.notification"
+msgid "Fənni tədris edən müəllim: {teachers}. Müəllim apellyasiya ilə bağlı İmtahan Mərkəzinə dəvət olunur. {details}"
+msgstr "Subject teacher: {teachers}. The teacher is invited to the Exam Center regarding the appeal. {details}"
+
+msgctxt "appeals.notification"
+msgid "Fənn üzrə yeni apellyasiya"
+msgstr "New subject appeal"

@@ -28,6 +28,7 @@ icazəsi olanda (imtahan mərkəzi / superadmin — `services.documents.can_down
     </div>
 
     <dl class="ta-facts">
+        <div><dt>{% trans "Tələbə" context "appeals.teaching" %}</dt><dd>{{ row.student_name }} · {{ row.student_username }}</dd></div>
         <div><dt>{% trans "Qrup" context "appeals.teaching" %}</dt><dd>{{ row.group|default:"—" }}</dd></div>
         <div><dt>{% trans "Fənn" context "appeals.teaching" %}</dt><dd>{{ row.subject|default:"—" }}</dd></div>
         <div><dt>{% trans "Fənni tədris edən" context "appeals.template" %}</dt><dd>{{ subject_teachers|default:"—" }}</dd></div>

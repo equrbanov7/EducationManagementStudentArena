@@ -152,7 +152,13 @@ def can_view_appeal(request, appeal):
         return True
     if not _same_tenant(request, appeal):
         return False
-    return oversight_covers_student(getattr(request, "user", None), appeal.organization, appeal.student_id)
+    user = getattr(request, "user", None)
+    if oversight_covers_student(user, appeal.organization, appeal.student_id):
+        return True
+    from ..models import Appeal
+    from .subject_scope import scoped_queryset
+
+    return scoped_queryset(user, appeal.organization, within=Appeal.objects.filter(pk=appeal.pk)).exists()
 
 
 __all__ = [

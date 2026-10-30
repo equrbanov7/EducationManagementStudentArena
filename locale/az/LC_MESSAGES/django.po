@@ -110975,3 +110975,23 @@ msgstr "Köçürmə səbəbi"
 msgctxt "accounts.workload"
 msgid "Sətir müəllim bölgüsü və saatları ilə köçürülür. Jurnal və qiymətlər saxlanılır. Digər redaktələri əvvəlcə yadda saxlayın."
 msgstr "Sətir müəllim bölgüsü və saatları ilə köçürülür. Jurnal və qiymətlər saxlanılır. Digər redaktələri əvvəlcə yadda saxlayın."
+
+msgctxt "organizations.permission.label"
+msgid "Öz kafedrasının fənn apellyasiyalarına baxmaq"
+msgstr "Öz kafedrasının fənn apellyasiyalarına baxmaq"
+
+msgctxt "appeals.notification"
+msgid "Tələbə: {student} ({username}); qrup: {group}; fənn: {subject}; imtahan: {exam}; sual sayı: {count}."
+msgstr "Tələbə: {student} ({username}); qrup: {group}; fənn: {subject}; imtahan: {exam}; sual sayı: {count}."
+
+msgctxt "appeals.notification"
+msgid "Müəllim: {teachers}. Apellyasiya ilə bağlı İmtahan Mərkəzinə yaxınlaşın. {details}"
+msgstr "Müəllim: {teachers}. Apellyasiya ilə bağlı İmtahan Mərkəzinə yaxınlaşın. {details}"
+
+msgctxt "appeals.notification"
+msgid "Fənni tədris edən müəllim: {teachers}. Müəllim apellyasiya ilə bağlı İmtahan Mərkəzinə dəvət olunur. {details}"
+msgstr "Fənni tədris edən müəllim: {teachers}. Müəllim apellyasiya ilə bağlı İmtahan Mərkəzinə dəvət olunur. {details}"
+
+msgctxt "appeals.notification"
+msgid "Fənn üzrə yeni apellyasiya"
+msgstr "Fənn üzrə yeni apellyasiya"

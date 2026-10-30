@@ -15,6 +15,7 @@ from .default_roles_student_services import STUDENT_SERVICES_ROLES, apply_studen
 from .default_roles_teaching_office import TEACHING_OFFICE_ROLES, apply_teaching_office_grants
 from .default_roles_vice_dean import VICE_DEAN_ROLES
 from .permissions_announcements import apply_announcement_grants
+from .permissions_appeal_subject import apply_subject_appeal_grants
 from .permissions_document_seal import apply_document_seal_grants
 from .permissions_hr import apply_hr_grants
 from .permissions_hr_contracts import apply_hr_contract_grants
@@ -587,6 +588,7 @@ apply_transcript_grants(UNIVERSITY_ROLES)
 apply_unit_view_grants(UNIVERSITY_ROLES)
 # Laborant (2026-10-29): öz kafedrasının «Yük bölgüsü» — baxış + redaktə. Mövcud: organizations/0077.
 apply_lab_workload_grants(UNIVERSITY_ROLES)
+apply_subject_appeal_grants(UNIVERSITY_ROLES)
 
 # Rol auditi (2026-10-13, sahib «tövsiyə olunan variantlarla»): açar verilişi/alınması + ölü açarlar.
 # Mövcud tenantlar: organizations/0061. SONUNCU olmalıdır — əvvəlki addımların əlavələrini də süzür.

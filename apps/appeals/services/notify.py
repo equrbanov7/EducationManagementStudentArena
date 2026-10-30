@@ -250,23 +250,19 @@ def _split_recipients(appeal, *, exclude_ids=()):
 def notify_appeal_filed_teachers(appeal, *, item_count):
     """Yeni apellyasiya → fənni tədris edən müəllim(lər)ə bildiriş (mərkəzə ayrıca ``creation`` göndərir)."""
     try:
-        from apps.notifications.public import create_notification_for_users
+        from django.db import transaction
 
-        _center, teachers = _split_recipients(appeal)
-        if not teachers:
-            return
-        create_notification_for_users(
-            recipients=teachers,
-            title=pgettext("appeals.notification", "Tələbəniz apellyasiya verdi"),
-            message=pgettext(
-                "appeals.notification",
-                '{student} "{exam}" imtahanı üzrə {count} sual üçün apellyasiya verdi. Qərarı imtahan mərkəzi verir.',
-            ).format(student=_display(appeal.student), exam=appeal.exam.title, count=item_count),
-            link=_teaching_link(appeal),
-            notification_type="exam",
-            metadata={"appeal_id": appeal.id, "attempt_id": appeal.attempt_id, "exam_id": appeal.exam_id},
-            organization=appeal.organization,
-        )
+        from .filing_notice import actual_teachers, notify
+
+        with transaction.atomic():
+            center = exam_center_recipients(appeal)
+            notify(
+                appeal,
+                teachers=actual_teachers(appeal),
+                exclude_ids=[user.pk for user in center],
+                item_count=item_count,
+                link=_teaching_link(appeal),
+            )
     except Exception:
         logger.warning("Appeal filed teacher notification failed.", exc_info=True)
 

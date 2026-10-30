@@ -112496,3 +112496,23 @@ msgstr "Grund der Übertragung"
 msgctxt "accounts.workload"
 msgid "Sətir müəllim bölgüsü və saatları ilə köçürülür. Jurnal və qiymətlər saxlanılır. Digər redaktələri əvvəlcə yadda saxlayın."
 msgstr "Die Zeile wird mit der Lehrkräftezuordnung und den Stunden übertragen. Das Journal und die Noten bleiben erhalten. Speichern Sie zuerst andere Änderungen."
+
+msgctxt "organizations.permission.label"
+msgid "Öz kafedrasının fənn apellyasiyalarına baxmaq"
+msgstr "Einsprüche zu Fächern des eigenen Fachbereichs anzeigen"
+
+msgctxt "appeals.notification"
+msgid "Tələbə: {student} ({username}); qrup: {group}; fənn: {subject}; imtahan: {exam}; sual sayı: {count}."
+msgstr "Studierende Person: {student} ({username}); Gruppe: {group}; Fach: {subject}; Prüfung: {exam}; Fragen: {count}."
+
+msgctxt "appeals.notification"
+msgid "Müəllim: {teachers}. Apellyasiya ilə bağlı İmtahan Mərkəzinə yaxınlaşın. {details}"
+msgstr "Lehrkraft: {teachers}. Bitte kommen Sie wegen des Einspruchs zum Prüfungszentrum. {details}"
+
+msgctxt "appeals.notification"
+msgid "Fənni tədris edən müəllim: {teachers}. Müəllim apellyasiya ilə bağlı İmtahan Mərkəzinə dəvət olunur. {details}"
+msgstr "Lehrkraft des Fachs: {teachers}. Die Lehrkraft wird wegen des Einspruchs ins Prüfungszentrum gebeten. {details}"
+
+msgctxt "appeals.notification"
+msgid "Fənn üzrə yeni apellyasiya"
+msgstr "Neuer Einspruch zum Fach"

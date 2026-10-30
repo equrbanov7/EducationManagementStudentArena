@@ -230,6 +230,7 @@ PERMISSION_CATEGORIES = {
     ],
     "appeal": [
         "appeal.create",
+        "appeal.view_subject",
         "appeal.respond",
         "appeal.decide",
     ],
@@ -427,6 +428,7 @@ PERMISSION_LABELS = {
     "final_score.entry": pgettext_lazy(_PERM_CTX, "İmtahan balını sistemə daxil etmək"),
     # appeal
     "appeal.create": pgettext_lazy(_PERM_CTX, "Apellyasiya yaratmaq"),
+    "appeal.view_subject": pgettext_lazy(_PERM_CTX, "Öz kafedrasının fənn apellyasiyalarına baxmaq"),
     "appeal.respond": pgettext_lazy(_PERM_CTX, "Apellyasiyaya cavab vermək"),
     "appeal.decide": pgettext_lazy(_PERM_CTX, "Apellyasiya qərarı vermək"),
     # analytics
@@ -544,11 +546,9 @@ def validate_permissions(permissions: List[str]) -> bool:
     if "*" in permissions:
         return True
 
-    # Delegasiya girişlərinin suffix-ini adi icazə kimi yoxla.
     permissions = [strip_grant_prefix(perm) for perm in permissions]
 
     all_valid_perms = set(get_all_permissions())
-
     for perm in permissions:
         if perm.endswith(".*"):
             prefix = perm[:-2]

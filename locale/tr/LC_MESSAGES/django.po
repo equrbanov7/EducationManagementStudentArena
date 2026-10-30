@@ -110872,3 +110872,23 @@ msgstr "Aktarma gerekçesi"
 msgctxt "accounts.workload"
 msgid "Sətir müəllim bölgüsü və saatları ilə köçürülür. Jurnal və qiymətlər saxlanılır. Digər redaktələri əvvəlcə yadda saxlayın."
 msgstr "Satır, öğretim elemanı dağılımı ve ders saatleriyle birlikte aktarılır. Defter ve notlar korunur. Önce diğer değişiklikleri kaydedin."
+
+msgctxt "organizations.permission.label"
+msgid "Öz kafedrasının fənn apellyasiyalarına baxmaq"
+msgstr "Kendi bölümünün ders itirazlarını görüntüleme"
+
+msgctxt "appeals.notification"
+msgid "Tələbə: {student} ({username}); qrup: {group}; fənn: {subject}; imtahan: {exam}; sual sayı: {count}."
+msgstr "Öğrenci: {student} ({username}); grup: {group}; ders: {subject}; sınav: {exam}; soru sayısı: {count}."
+
+msgctxt "appeals.notification"
+msgid "Müəllim: {teachers}. Apellyasiya ilə bağlı İmtahan Mərkəzinə yaxınlaşın. {details}"
+msgstr "Öğretmen: {teachers}. İtirazla ilgili Sınav Merkezine başvurun. {details}"
+
+msgctxt "appeals.notification"
+msgid "Fənni tədris edən müəllim: {teachers}. Müəllim apellyasiya ilə bağlı İmtahan Mərkəzinə dəvət olunur. {details}"
+msgstr "Dersi veren öğretmen: {teachers}. Öğretmen, itirazla ilgili Sınav Merkezine davet edilmiştir. {details}"
+
+msgctxt "appeals.notification"
+msgid "Fənn üzrə yeni apellyasiya"
+msgstr "Dersle ilgili yeni itiraz"

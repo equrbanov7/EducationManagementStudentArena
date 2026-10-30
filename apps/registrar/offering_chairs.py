@@ -159,6 +159,38 @@ def offering_chairs(offerings, organization_id) -> dict:
     return result
 
 
+def official_offering_chairs(offerings, organization_id) -> dict:
+    """Exact workload or explicit subject chair only; no employment/student-group inference.
+
+    For appeal PII access an unknown owner fails closed. Historical workload in
+    another period, staff membership and the student's faculty are not evidence.
+    """
+    offerings = offerings.filter(organization_id=organization_id).order_by()
+    row_model = _model("workload", "TeachingTaskRow")
+    released = Q(teachingtaskrow__task__status__in=("approved", "distributed", "amended")) | Q(
+        teachingtaskrow__task__status="distributing", teachingtaskrow__task__submitted_at__isnull=False
+    )
+    exact = defaultdict(set)
+    for subject_id, period_id, group_id, chair_id in (
+        row_model.groups.through.objects.filter(
+            teachingtaskrow__organization_id=organization_id,
+            teachingtaskrow__task__organization_id=organization_id,
+            teachingtaskrow__subject_id__in=offerings.values("subject_id"),
+        )
+        .filter(released)
+        .values_list(
+            "teachingtaskrow__subject_id", "teachingtaskrow__period_id", "orgunit_id", "teachingtaskrow__task__chair_id"
+        )
+    ):
+        exact[(subject_id, period_id, group_id)].add(str(chair_id))
+    return {
+        pk: frozenset(exact.get((subject_id, period_id, group_id)) or ({str(chair)} if chair else set()))
+        for pk, subject_id, period_id, group_id, chair in offerings.values_list(
+            "pk", "subject_id", "period_id", "group_id", "subject__chair_unit_id"
+        )
+    }
+
+
 def chair_paths(organization_id, chair_ids) -> dict:
     """``{kafedra_id: (ad, path)}`` — seçim siyahısı və alt-ağac yoxlaması üçün (bir sorğu)."""
     if not chair_ids:
@@ -218,5 +250,6 @@ __all__ = [
     "chair_paths",
     "kafedra_q",
     "offering_chairs",
+    "official_offering_chairs",
     "offering_ids_in_unit",
 ]

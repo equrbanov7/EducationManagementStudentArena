@@ -118,9 +118,17 @@ def teaching_section_visible(user, organization) -> bool:
     # Rol yoxlaması üzvlük keşindəndir (kabinet qabığı sorğu büdcəlidir); RİM rəhbəri ``ikt_rehber`` aliası ilə.
     if user_has_any_role(user, _TEACHER_ROLES | {ProfileRole.IKT_REHBER}):
         return True
+    from .subject_scope import scope_for
+
+    if scope_for(user, organization) is not None:
+        return True
     if user_has_any_role(user, _STUDENT_ROLES):
         return False  # tələbə (müəllim rolu yoxdur) — sorğusuz
-    return teaches_any(user, organization)
+    if teaches_any(user, organization):
+        return True
+    from .subject_scope import exam_teacher_queryset
+
+    return exam_teacher_queryset(user, organization).exists()
 
 
 def allowed_pairs(user, organization) -> set:
@@ -177,7 +185,13 @@ def scoped_appeals(user, organization):
         return Appeal.objects.none(), False
     if has_oversight(user, organization):
         return Appeal.objects.filter(organization_id=organization.pk), True
-    return teaching_appeals_queryset(user, organization), False
+    from .subject_scope import exam_teacher_queryset, scoped_queryset
+
+    return (
+        teaching_appeals_queryset(user, organization)
+        | scoped_queryset(user, organization)
+        | exam_teacher_queryset(user, organization)
+    ).distinct(), False
 
 
 __all__ = [
