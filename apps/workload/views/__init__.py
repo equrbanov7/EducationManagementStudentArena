@@ -14,6 +14,7 @@ from .distribution_api import (
     unassign_view,
 )
 from .intensive_api import intensive_lookup
+from .row_transfer_api import row_transfer, row_transfer_destinations
 from .teacher_api import my_export, my_rows
 
 __all__ = [
@@ -27,6 +28,8 @@ __all__ = [
     "options",
     "row_delete",
     "row_save",
+    "row_transfer",
+    "row_transfer_destinations",
     "rows",
     "task",
     "teachers",

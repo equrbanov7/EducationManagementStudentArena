@@ -1,0 +1,24 @@
+{% load i18n %}
+<fieldset class="wl-form__field wl-form__field--wide" data-wl-transfer hidden
+          data-url="{% url 'workload:row_transfer' %}"
+          data-options-url="{% url 'workload:row_transfer_destinations' %}">
+  <legend>{% trans "Başqa kafedraya köçür" context "accounts.workload" %}</legend>
+  <p>{% trans "Sətir müəllim bölgüsü və saatları ilə köçürülür. Jurnal və qiymətlər saxlanılır. Digər redaktələri əvvəlcə yadda saxlayın." context "accounts.workload" %}</p>
+  <label class="wl-form__field">
+    <span>{% trans "Hədəf kafedra" context "accounts.workload" %}</span>
+    <div class="bootstrap-single-select">
+      <select class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+              data-bootstrap-select data-live-search="true" data-wl-transfer-chair>
+        <option value="">{% trans "Kafedra seçin" context "accounts.workload" %}</option>
+      </select>
+    </div>
+  </label>
+  <label class="wl-form__field">
+    <span>{% trans "Köçürmə səbəbi" context "accounts.workload" %}</span>
+    <textarea rows="2" maxlength="2000" data-wl-transfer-note></textarea>
+  </label>
+  <button type="button" class="wl-btn wl-btn--ghost" data-wl-transfer-submit disabled>
+    {% trans "Kafedraya köçür" context "accounts.workload" %}
+  </button>
+  <p role="status" data-wl-transfer-status></p>
+</fieldset>

@@ -83,6 +83,7 @@
     Forms.fillRow = function fillRow(form, row) {
         if (!form) return;
         reset(form);
+        if (window.EMSWorkloadTransfer) window.EMSWorkloadTransfer.fill(form, row);
         if (!row) {
             // Boş forma da stilli seçicilərə yansısın (əvvəlki sətrin etiketi/qrupları qalmasın).
             Array.prototype.forEach.call(form.querySelectorAll("select"), refresh);
