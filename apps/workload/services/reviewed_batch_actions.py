@@ -8,6 +8,7 @@ from core.audit import log_action
 from core.constants import AuditAction
 
 from ..constants import AmendmentReason
+from . import reviewed_batch_electives as electives
 from . import reviewed_batch_extensions as extensions
 from .assignments import assign_teacher, unassign
 from .offering_sync import sync_task_offerings
@@ -188,7 +189,13 @@ def sync(plan, *, tasks, rows, actor):
         for subset, create in ((existing, False), (new, True)):
             if not subset:
                 continue
-            report = sync_task_offerings(tasks[task_id], actor=actor, rows=subset, create=create)
+            report = sync_task_offerings(
+                tasks[task_id],
+                actor=actor,
+                rows=subset,
+                create=create,
+                _reviewed_choices=electives.for_rows(plan, subset) if create else None,
+            )
             blocked = (
                 "blocked",
                 "inactive_skipped",

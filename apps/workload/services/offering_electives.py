@@ -105,7 +105,7 @@ class BlockIndex:
         return self.choices.get((group_id, period_id, elective_group))
 
 
-def record_group_choice(*, organization, group, period, option, subject, decided_by) -> int:
+def record_group_choice(*, organization, group, period, option, subject, decided_by, preserve_existing=False) -> int:
     """Rəsmi qeydiyyat yolu: ``choose_group_elective`` (qərar + qrupun ``elective`` qeydiyyatı).
 
     Qeydiyyat pəncərəsi tətbiq olunmur — tapşırıq rəsmi sənəddir (staff override)."""
@@ -120,6 +120,7 @@ def record_group_choice(*, organization, group, period, option, subject, decided
         subject=subject,
         decided_by=decided_by,
         enforce_window=False,
+        preserve_existing=preserve_existing,
     )
     return int(enrolled or 0)
 

@@ -1,5 +1,6 @@
 """Postconditions: source changes never rewrite academic content or manual access."""
 
+from . import reviewed_batch_electives as electives
 from . import reviewed_batch_extensions as extensions
 from .repair_fingerprints import academic_database_fingerprint
 from .reviewed_batch_manifest import ACTIVITIES, ORG
@@ -44,6 +45,7 @@ def _same_except(old, new, allowed, code):
 
 def preserved(plan, before, after, details):
     extensions.preserved(plan, before, after, details)
+    electives.preserved(plan, before["electives"], after["electives"], details)
     for name in ("roles", "teachers", "profiles", "periods", "programs"):
         if digest(before[name]) != digest(after[name]):
             raise RepairError(name + "_changed")

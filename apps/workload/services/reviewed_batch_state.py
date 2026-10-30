@@ -6,6 +6,7 @@ from django.db.models import Q, Sum
 
 from apps.registrar.public import handover
 
+from . import reviewed_batch_electives as electives
 from . import reviewed_batch_extensions as extensions
 from .owner_activity_state import workload_records
 from .people import is_assignable_teacher
@@ -93,6 +94,9 @@ def outside(plan):
         result[name] = db_fingerprint(
             model("registrar." + name).objects.filter(organization_id=ORG).exclude(**{path + "__in": ids})
         )
+    result["outside_elective_choices"] = db_fingerprint(
+        model("registrar.GroupElectiveChoice").objects.filter(organization_id=ORG).exclude(electives.choice_q(plan))
+    )
     result["outside_subjects"] = db_fingerprint(
         model("registrar.Subject")
         .objects.filter(organization_id=ORG)
@@ -118,6 +122,7 @@ def snapshot(plan, *, lock=False):
     return {
         "selection": plan.selection_sha,
         "extensions": extensions.snapshot(plan),
+        "electives": electives.snapshot(plan, lock=lock),
         "tasks": task_state,
         "rows": row_state,
         "offerings": offering_state,

@@ -15,9 +15,23 @@ def parse(entry, item, *, version):
         "legacy_history",
         "subject_create",
         "join_chair",
+        "elective_choices",
+        "empty_group_journals",
     }:
         raise RepairError("reviewed_v2_policy_required")
     result = {}
+    if "elective_choices" in policy:
+        from .reviewed_batch_electives import parse as parse_electives
+
+        result["elective_choices"] = parse_electives(entry, item, policy["elective_choices"])
+    if "empty_group_journals" in policy:
+        from .reviewed_batch_electives import parse as parse_electives
+
+        result["empty_group_journals"] = parse_electives(entry, item, policy["empty_group_journals"], empty=True)
+        if {v["group_id"] for v in result["empty_group_journals"]} & {
+            v["group_id"] for v in result.get("elective_choices", [])
+        }:
+            raise RepairError("reviewed_elective_and_empty_group_overlap")
     if "subject_create" in policy:
         value = policy["subject_create"]
         expected = {"id", "name", "code", "chair_unit_id", "ects", "kind"}

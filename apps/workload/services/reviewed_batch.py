@@ -10,6 +10,7 @@ from core.audit import log_action
 from core.constants import AuditAction
 
 from . import reviewed_batch_actions as actions
+from . import reviewed_batch_electives as electives
 from . import reviewed_batch_extensions as extensions
 from . import reviewed_batch_guards as guards
 from . import reviewed_batch_state as state
@@ -57,6 +58,7 @@ def _undo(plan, *, receipt, current, actor, user, batch):
     if new.count() != len(new_ids):
         raise RepairError("undo_created_journal_missing")
     new.delete()
+    electives.undo(details)
     actions.undo_rows(plan, before=values["before"], details=details, actor=actor, batch=batch)
     for saved in values["before"]["offerings"]:
         offering = model("registrar.CourseOffering").objects.get(organization_id=ORG, pk=saved["id"])

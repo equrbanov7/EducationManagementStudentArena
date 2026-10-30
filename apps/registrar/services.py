@@ -117,7 +117,16 @@ class RegistrationWindowClosed(Exception):
 
 @transaction.atomic
 def choose_group_elective(
-    *, organization, group, curriculum, period, elective_group, subject, decided_by=None, enforce_window=True
+    *,
+    organization,
+    group,
+    curriculum,
+    period,
+    elective_group,
+    subject,
+    decided_by=None,
+    enforce_window=True,
+    preserve_existing=False,
 ):
     """Record a group's elective-block decision and enroll EVERY group member.
 
@@ -147,10 +156,15 @@ def choose_group_elective(
             )
 
     block = dict(organization=organization, group=group, period=period, elective_group=elective_group)
-    previous = GroupElectiveChoice.objects.filter(**block).values_list("chosen_subject_id", flat=True).first()
-    choice, _ = GroupElectiveChoice.objects.update_or_create(
-        **block, defaults={"chosen_subject": subject, "decided_by": decided_by}
-    )
+    if preserve_existing:
+        from .strict_elective_choice import preserve_choice
+
+        choice, previous = preserve_choice(**block, subject=subject, decided_by=decided_by, curriculum=curriculum)
+    else:
+        previous = GroupElectiveChoice.objects.filter(**block).values_list("chosen_subject_id", flat=True).first()
+        choice, _ = GroupElectiveChoice.objects.update_or_create(
+            **block, defaults={"chosen_subject": subject, "decided_by": decided_by}
+        )
     offering = get_or_create_offering(organization=organization, subject=subject, period=period, group=group)
     records = list(
         journal_hygiene_guard.enrollable_records(

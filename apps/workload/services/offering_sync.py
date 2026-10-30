@@ -33,7 +33,6 @@ from __future__ import annotations
 import logging
 
 from django.apps import apps as django_apps
-from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.db.models import Prefetch
 
@@ -41,7 +40,9 @@ from core.audit import log_action
 from core.constants import AuditAction
 
 from ..models import TeacherAssignment, TeachingTaskRow
-from .offering_electives import BlockIndex, is_official_choice, record_group_choice
+from .offering_elective_flow import ElectiveFlow
+from .offering_electives import BlockIndex, is_official_choice
+from .offering_reviewed_electives import reviewed_options
 from .offering_rules import (
     OUTCOME_COUNTERS,
     UNKNOWN,
@@ -205,16 +206,18 @@ def owner_snapshot(row) -> dict:
     return {key: getattr(owner_for_rows(entry["rows"]), "pk", None) for key, entry in targets.items()}
 
 
-class _Sync:
+class _Sync(ElectiveFlow):
     """Bir keçid: sətirlər → hədəflər → açılış yaz/yenilə → qeydiyyat → hesabat."""
 
-    def __init__(self, task, *, actor, request, create, previous):
+    def __init__(self, task, *, actor, request, create, previous, reviewed_choices=None):
         self.task = task
         self.org_id = task.organization_id
         self.actor_user = getattr(actor, "user", None)
         self.request = request
         self.create = create
         self.previous = previous
+        self._reviewed_choices = reviewed_choices or {}
+        self._reviewed_options = {}
         self.counters = dict.fromkeys(COUNTER_KEYS, 0)
         self.offering_ids: list[str] = []
         # Qrupun «öz» açılışları (qeydiyyat növü üzrə) — ``resync_task_offerings`` tam qeydiyyat keçidi üçün.
@@ -331,6 +334,7 @@ class _Sync:
 
     # ── yazı ──────────────────────────────────────────────────────────────
     def _apply(self, targets) -> None:
+        self._reviewed_options = reviewed_options(self, targets)
         existing = self._existing(list(targets))
         foreign_rows = self._foreign_rows(list(targets))
         electives = self._elective_pairs(targets)
@@ -345,7 +349,9 @@ class _Sync:
         ]
         handover_pairs = self._handover_pairs(differing)
         populated = self._populated([offering for key, offering in existing.items() if key in targets])
-        official = {key for key, entry in targets.items() if is_official_choice(entry["rows"])}
+        official = {key for key, entry in targets.items() if is_official_choice(entry["rows"])} | set(
+            self._reviewed_options
+        )
         official_electives = {key for key in official if (targets[key]["group"].parent_id, key[0]) in electives}
         blocks = (
             BlockIndex(self.org_id, {key: targets[key] for key in official_electives}) if official_electives else None
@@ -353,7 +359,7 @@ class _Sync:
         to_enroll, to_enroll_elective = [], []
         for key, entry in targets.items():
             offering = existing.get(key)
-            is_elective = (entry["group"].parent_id, key[0]) in electives
+            is_elective = key not in self._reviewed_empty and (entry["group"].parent_id, key[0]) in electives
             lesson_hours = sum(merge_hours(entry["rows"] + foreign_rows.get(key, [])).values())
             desired_id = getattr(owners[key], "pk", None)
             decision = {"desired_id": desired_id, "eligible": desired_id in eligible}
@@ -370,9 +376,10 @@ class _Sync:
                     self.counters["not_created"] += 1
                 else:
                     created = self._create(key, lesson_hours=lesson_hours, **decision)
-                    to_enroll += [created] if created is not None else []
+                    to_enroll += [created] if created is not None and key not in self._reviewed_empty else []
                     self.counters["elective_from_task"] += int(created is not None and key in official)
-                    self._own(created, "mandatory")
+                    if key not in self._reviewed_empty:
+                        self._own(created, "mandatory")
                 continue
             if not offering.is_active:
                 self.counters["inactive_skipped"] += 1
@@ -415,41 +422,6 @@ class _Sync:
     def _own(self, offering, kind) -> None:
         if offering is not None:
             self.group_offering_ids[kind].append(str(offering.pk))
-
-    def _official_elective(self, key, entry, offering, blocks, *, lesson_hours, desired_id, eligible):
-        """Rəsmi blok seçimi → qrupun qərarı (+ yoxdursa açılış). Qaytarır: qeydiyyata düşən açılış və ya ``None``."""
-        group, period = entry["group"], entry["rows"][0].period
-        option = blocks.block_for(group, key[0])
-        chosen = blocks.existing_choice(group.pk, key[1], option.elective_group)
-        if chosen is not None and chosen != key[0]:
-            self.counters["elective_choice_conflict"] += 1
-            return None
-        snapshot = (dict(self.counters), len(self.offering_ids))
-        try:
-            with transaction.atomic():
-                if offering is None:
-                    offering = self._create(key, lesson_hours=lesson_hours, desired_id=desired_id, eligible=eligible)
-                    if offering is None:
-                        return None
-                    self.counters["elective_from_task"] += 1
-                if chosen is None:
-                    self.counters["enrolled"] += record_group_choice(
-                        organization=self.task.organization,
-                        group=group,
-                        period=period,
-                        option=option,
-                        subject=blocks.subjects[key[0]],
-                        decided_by=self.actor_user,
-                    )
-                    self.counters["elective_choice_recorded"] += 1
-                    blocks.choices[(group.pk, key[1], option.elective_group)] = key[0]
-        except (ValidationError, IntegrityError):
-            logger.warning("workload: official elective choice rejected %s", key, exc_info=True)
-            self.counters = snapshot[0]
-            del self.offering_ids[snapshot[1] :]
-            self.counters["elective_choice_failed"] += 1
-            return None
-        return offering
 
     def _count(self, outcome) -> None:
         for counter in OUTCOME_COUNTERS[outcome]:
@@ -555,10 +527,14 @@ class _Sync:
             self.counters[_ENROLL_KEYS[key]] += int(value)
 
 
-def sync_task_offerings(task, *, actor=None, request=None, create=True, previous=UNKNOWN, rows=None) -> dict:
+def sync_task_offerings(
+    task, *, actor=None, request=None, create=True, previous=UNKNOWN, rows=None, _reviewed_choices=None
+) -> dict:
     """Sənədin bütün sətirləri → qrup açılışları (idempotent). Hesabat: :data:`COUNTER_KEYS` + id-lər."""
     rows = rows_queryset(task) if rows is None else rows
-    return _Sync(task, actor=actor, request=request, create=create, previous=previous).run(rows)
+    return _Sync(
+        task, actor=actor, request=request, create=create, previous=previous, reviewed_choices=_reviewed_choices
+    ).run(rows)
 
 
 def sync_row_offerings(row, *, actor=None, request=None, previous=UNKNOWN, create=None) -> dict:
