@@ -82,3 +82,60 @@ def test_lab_assistant_sees_distribution_section_with_own_chair(world):
     section = response.context["workload_distribution_section"]
     assert section["has_access"] is True
     assert [str(chair["id"]) for chair in section["chairs"]] == [str(world["chair"].pk)]
+
+
+def test_lab_assistant_without_chair_cannot_manage_any_chair(world):
+    with bypass_rls():
+        Membership.objects.filter(user=world["laborant"], organization=world["org"]).update(scope_unit=None)
+    actor = resolve_actor(world["laborant"], world["org"])
+    assert not can_manage_chair(actor, world["chair"].pk)
+    assert not can_distribute_chair(actor, world["chair"].pk)
+
+
+def test_lab_assistant_foreign_chair_write_is_denied(world):
+    client = Client()
+    client.force_login(world["laborant"])
+    response = client.post(
+        reverse("workload:action"),
+        {"action": "create_task", "chair": str(world["other_chair"].pk), "academic_year": "2027/2028"},
+    )
+    assert response.status_code == 403
+
+
+def test_full_catalogue_is_searchable_beyond_old_two_thousand_cap(world):
+    from apps.registrar.models import Subject
+
+    with bypass_rls():
+        Subject.objects.bulk_create(
+            [Subject(organization=world["org"], code=f"LW{i:04}", name=f"Kataloq {i:04}") for i in range(2001)]
+        )
+        last = Subject.objects.create(organization=world["org"], code="LW_LAST", name="Sonuncu fənn")
+    client = Client()
+    client.force_login(world["laborant"])
+    response = client.get(reverse("workload:options"), {"chair": str(world["chair"].pk)})
+    assert response.status_code == 200
+    subjects = response.json()["subjects"]
+    assert len(subjects) == 2002
+    assert subjects[-1]["id"] == str(last.pk)
+
+
+def test_migration_grants_once_preserving_other_permissions(world):
+    import importlib
+
+    from django.apps import apps
+
+    migration = importlib.import_module("apps.organizations.migrations.0077_lab_assistant_workload_distribution")
+    with bypass_rls():
+        role = world["org"].roles.get(name="lab_assistant")
+        role.permissions = ["workload.view", "custom.keep"]
+        role.save(update_fields=["permissions"])
+        migration.forward(apps, None)
+        role.refresh_from_db()
+        once = list(role.permissions)
+        assert {"workload.manage", "workload.distribute", "custom.keep"} <= set(once)
+        migration.forward(apps, None)
+        role.refresh_from_db()
+        assert role.permissions == once
+        migration.backward(apps, None)
+        role.refresh_from_db()
+        assert role.permissions == ["workload.view", "custom.keep"]

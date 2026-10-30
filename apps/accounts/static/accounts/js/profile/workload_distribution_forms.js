@@ -4,7 +4,7 @@
  * 2026-10-15: sətir redaktə modalı əvvəl saatları, ixtisası və qrupları DOLDURMURDU, fənn/semestr
  * açılışları isə doldurmadan SONRA yüklənib dəyəri silirdi — «Redaktə» → «Yadda saxla» saatları 0,
  * qrupları və ixtisası boş göndərirdi. İndi əsas modul açılışları yükləyib BUNU çağırır; sətrin öz
- * dəyəri siyahıda yoxdursa (fənn həddi — `SUBJECT_OPTIONS_LIMIT`, başqa kafedranın qrupu) seçim kimi əlavə olunur.
+ * dəyəri siyahıda yoxdursa (artıq aktiv olmayan fənn, başqa kafedranın qrupu) seçim kimi əlavə olunur.
  *
  * Saf köməkçidir: listener, fetch, qlobal vəziyyət YOXDUR (AJAX-safe).
  */

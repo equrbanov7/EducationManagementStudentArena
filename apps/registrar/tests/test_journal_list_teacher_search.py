@@ -159,6 +159,12 @@ class JournalListTeacherSearchTest(TestCase):
         # Adi müəllimin geniş görünüşü yoxdur → seçici də boşdur (başqa müəllimləri sızdırmır).
         self.assertEqual(self._search(self.teachers["jlt_firuze"], "aida")["results"], [])
 
+    def test_lookup_is_not_browser_cacheable(self):
+        self.client.force_login(self.corrector)
+        response = self.client.get(reverse("registrar:journal_list_teachers"))
+        self.assertIn("no-store", response["Cache-Control"])
+        self.assertIn("private", response["Cache-Control"])
+
     def test_anonymous_is_redirected(self):
         response = self.client.get(reverse("registrar:journal_list_teachers"), {"q": "fir"})
         self.assertEqual(response.status_code, 302)

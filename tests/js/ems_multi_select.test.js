@@ -203,10 +203,13 @@ test("2026-10-29: toggle-da yazılan hərf menyunu açır və axtarışa düşü
     key(p.win, p.toggle, "6");
     assert.equal(p.menu.hidden, false);
     assert.equal(p.doc.activeElement, p.search);
+    assert.equal(p.search.value, "6", "ilk hərf sorğuya köçürülür");
+    assert.deepEqual(p.visible().map((b) => b.dataset.value), ["1", "2", "4"]);
     key(p.win, p.search, "ArrowDown");
     assert.ok(p.doc.activeElement.classList.contains("ems-multi-select__option"));
     key(p.win, p.doc.activeElement, "k");
     assert.equal(p.doc.activeElement, p.search);
+    assert.equal(p.search.value, "6k", "variant düyməsində yazılan hərf də köçürülür");
     p.search.value = "Aliyev";
     p.search.dispatchEvent(new p.win.Event("input", { bubbles: true }));
     assert.deepEqual(p.visible().map((b) => b.dataset.value), ["3"]);

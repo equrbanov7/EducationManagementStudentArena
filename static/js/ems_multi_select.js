@@ -360,7 +360,16 @@
 
         function isPrintable(event) {
             var key = event.key || "";
-            return key.length === 1 && key !== " " && !event.ctrlKey && !event.metaKey && !event.altKey;
+            return key.length === 1 && key !== " " && !event.ctrlKey && !event.metaKey && !event.altKey && !event.isComposing;
+        }
+
+        function forwardSearchKey(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            search.focus();
+            search.value += event.key;
+            applySearch();
+            menu.scrollTop = 0;
         }
 
         function move(from, delta) {
@@ -394,8 +403,9 @@
                 close(true);
             } else if (isPrintable(event) && !search.hidden) {
                 // Toggle-da yazılan hərf itməsin: menyu açılır, fokus axtarışa keçir, hərf ora yazılır.
+                if (toggle.disabled) return;
                 open(false);
-                search.focus();
+                forwardSearchKey(event);
             }
         });
 
@@ -426,7 +436,7 @@
                 var items = visibleButtons();
                 if (items.length) items[event.key === "Home" ? 0 : items.length - 1].focus();
             } else if (isPrintable(event) && !search.hidden) {
-                search.focus(); // variant üzərində yazılan hərf axtarışa düşsün (tək seçici ilə eyni)
+                forwardSearchKey(event);
             }
             // Space/Enter — düymənin native aktivləşməsi `click` verir (aşağıda), ekran oxuyucuları da.
         });

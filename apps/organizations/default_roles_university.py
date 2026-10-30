@@ -18,8 +18,8 @@ from .permissions_announcements import apply_announcement_grants
 from .permissions_document_seal import apply_document_seal_grants
 from .permissions_hr import apply_hr_grants
 from .permissions_hr_contracts import apply_hr_contract_grants
-from .permissions_transcript import apply_transcript_grants
 from .permissions_lab_workload import apply_lab_workload_grants
+from .permissions_transcript import apply_transcript_grants
 from .permissions_unit_view import apply_unit_view_grants
 from .permissions_workload_load import apply_workload_load_grants
 

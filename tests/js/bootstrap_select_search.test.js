@@ -180,12 +180,13 @@ test("Enter picks the first match; typing on an option jumps back to the search"
     const select = window.document.querySelector("select");
     const h = handle(window, select);
     h.open();
-    h.type("ucar");
+    h.type("uca");
     h.input().dispatchEvent(new window.KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
     const focused = window.document.activeElement;
     assert.ok(focused.classList.contains("bootstrap-single-select__option"));
-    focused.dispatchEvent(new window.KeyboardEvent("keydown", { key: "b", bubbles: true }));
+    focused.dispatchEvent(new window.KeyboardEvent("keydown", { key: "r", bubbles: true }));
     assert.equal(window.document.activeElement, h.input());
+    assert.equal(h.input().value, "ucar");
     h.input().dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     assert.equal(select.value, String(CITIES.indexOf("Ucar") + 1));
     window.close();
@@ -251,11 +252,17 @@ test("options injected WITHOUT refresh() are searchable (no stale menu / false �
 test("the search is focused synchronously and a letter typed on the toggle goes to it", () => {
     const window = setup(single("", CITIES));
     const h = handle(window, window.document.querySelector("select"));
-    h.open();
-    assert.equal(window.document.activeElement, h.input(), "taymer gözlənmir — ilk hərf itmir");
+    window.bootstrap = { Dropdown: { getOrCreateInstance: () => ({ show: () => h.open(), hide: () => h.close() }) } };
     h.toggle.focus();
-    h.toggle.dispatchEvent(new window.KeyboardEvent("keydown", { key: "q", bubbles: true }));
+    h.toggle.dispatchEvent(new window.KeyboardEvent("keydown", { key: "q", bubbles: true, cancelable: true }));
+    assert.equal(h.menu.classList.contains("show"), true, "bağlı menyu ilk hərflə açılır");
     assert.equal(window.document.activeElement, h.input());
+    assert.equal(h.input().value, "q", "düymədə yazılan ilk hərf sorğuya köçürülür");
+    assert.deepEqual(h.visible(), ["Sumqayıt", "Quba"]);
+    h.input().dispatchEvent(new window.KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    window.document.activeElement.dispatchEvent(new window.KeyboardEvent("keydown", { key: "u", bubbles: true }));
+    assert.equal(h.input().value, "qu");
+    assert.deepEqual(h.visible(), ["Quba"]);
     window.close();
 });
 

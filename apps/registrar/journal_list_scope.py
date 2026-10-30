@@ -35,6 +35,8 @@ def journal_list_base(user, request=None):
     can_correct = bool(request is not None and corrections_service.can_correct_journal(request))
     organization = getattr(request, "organization", None) if request is not None else None
     base_qs = CourseOffering.objects.filter(is_active=True)
+    if organization is not None:
+        base_qs = base_qs.filter(organization=organization)
     # Jurnal siyahısını idarə edən (koordinator/dekanlıq — `journal.roster`) öz
     # ALT-AĞACININ jurnallarını görür ki, «alt qrupdan tələbə əlavə et»
     # düyməsinə çata bilsin. Korrektordan fərqi: əhatə org-wide DEYİL.

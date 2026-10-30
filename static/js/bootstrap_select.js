@@ -1,20 +1,5 @@
-/*
- * static/js/bootstrap_select.js — stilli tək seçim (`[data-bootstrap-select]`).
- *
- * TƏNBƏL MENYU (PERF-2 H3, 2026-10-17): init yalnız toggle-u qurur; variant düymələri menyu İLK açılanda
- * (`show.bs.dropdown`, klaviatura ilə açılış da) və ya toggle fokus alanda qurulur, kliklər BİR delegə
- * dinləyici ilə tutulur. `refresh()` bağlı menyunu «köhnəlmiş» işarələyir (növbəti açılışda native
- * `<select>`-dən yenidən qurulur), açıq menyunu sorğu saxlanaraq dərhal yeniləyir. Native `<select>`,
- * `change`, `data-*` və `refresh/sync/init` API-si dəyişməyib; `api.build()` menyunu dərhal qurur.
- *
- * MENYU-DAXİLİ AXTARIŞ (sahib 2026-10-27): DEFAULT açıqdır — görünən variant (boş «Seçilməyib» xaric)
- * `SEARCH_MIN_OPTIONS`-dan azdırsa göstərilmir; `data-live-search="true"` → həmişə, `"false"` → heç vaxt.
- * Qərar hər menyu qurulanda verilir. Süzgəc EMSSearch (ə/e, ı/i, ö/o, ü/u, ş/s, ç/c, ğ/g, registr) ilə;
- * açılanda fokus DƏRHAL axtarışa keçir, bağlananda sorğu təmizlənir; toggle və ya variant üzərində
- * yazılan hərf axtarışa düşür; hər süzgəcdən sonra siyahı başa sürüşür.
- *
- * 2026-10-29 («Yük bölgüsü»: «yazıram gəlmir, scroll edəndə görürəm»): variantlar `refresh()`-siz dəyişsə də
- * native select MutationObserver ilə izlənir; sonradan DOM-a düşən select-lər də belə qoşulur. */
+/* Tək seçim üçün tənbəl, axtarışlı Bootstrap menyusu. Native select/change və
+ * refresh/sync/init müqaviləsi saxlanır; sonradan əlavə olunan variantlar da izlənir. */
 (function () {
     var SEARCH_MIN_OPTIONS = 6;
 
@@ -225,9 +210,15 @@
             menu.scrollTop = 0; // uyğunluqlar başdan görünsün (köhnə sürüşmə yerində qalmasın)
         }
 
-        function focusSearch() {
-            if (isMenuOpen() && searchActive() && document.activeElement !== searchInput) {
-                searchInput.focus({ preventScroll: true });
+        function focusSearch(event) {
+            if (!isMenuOpen() || !searchActive()) return;
+            searchInput.focus({ preventScroll: true });
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                searchInput.value = event.key === "Backspace"
+                    ? Array.from(searchInput.value).slice(0, -1).join("") : searchInput.value + event.key;
+                applyLiveSearch();
             }
         }
 
@@ -258,14 +249,15 @@
             if (!searchActive() || event.target === searchInput) {
                 return;
             }
-            var printable = event.key && event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey;
+            var printable = event.key && event.key.length === 1 && event.key !== " " &&
+                !event.ctrlKey && !event.metaKey && !event.altKey && !event.isComposing;
             var upFromFirst = event.key === "ArrowUp" && event.target === firstVisibleOption();
             if (printable || event.key === "Backspace" || upFromFirst) {
                 if (upFromFirst) {
                     event.preventDefault();
                     event.stopPropagation();
                 }
-                searchInput.focus();
+                focusSearch(upFromFirst ? null : event);
             }
         });
 
@@ -434,14 +426,14 @@
         // Toggle-da yazılan hərf itməsin (əvvəl fokus axtarışa yalnız taymerlə keçirdi): menyu açılır, hərf axtarışa.
         toggle.addEventListener("keydown", function (event) {
             var key = event.key || "";
-            if (key.length !== 1 || key === " " || event.ctrlKey || event.metaKey || event.altKey || toggle.disabled) {
+            if (key.length !== 1 || key === " " || event.ctrlKey || event.metaKey || event.altKey || event.isComposing || toggle.disabled) {
                 return;
             }
             ensureMenu();
             if (searchActive() && !isMenuOpen() && window.bootstrap && window.bootstrap.Dropdown) {
                 window.bootstrap.Dropdown.getOrCreateInstance(toggle).show();
             }
-            focusSearch();
+            focusSearch(event);
         });
 
         // Fokusda əvvəlcədən qur — klaviatura istifadəçisi üçün ilk açılış gecikməsin.
@@ -460,7 +452,7 @@
                 applyLiveSearch();
                 // Fokus DƏRHAL axtarışda (ilk hərf itməsin); taymer — Bootstrap fokusu variantə aparsa.
                 focusSearch();
-                window.setTimeout(focusSearch, 0);
+                window.setTimeout(function () { focusSearch(); }, 0);
             }
             var selectedButton = menu.querySelector(".bootstrap-single-select__option.is-selected");
             if (selectedButton && typeof selectedButton.scrollIntoView === "function") {
