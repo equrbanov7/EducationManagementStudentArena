@@ -112516,3 +112516,63 @@ msgstr "Lehrkraft des Fachs: {teachers}. Die Lehrkraft wird wegen des Einspruchs
 msgctxt "appeals.notification"
 msgid "Fənn üzrə yeni apellyasiya"
 msgstr "Neuer Einspruch zum Fach"
+
+msgctxt "profile.rim"
+msgid "Bu rol təşkilatı bütövlükdə əhatə edir; bölmə sahəsini boş saxlayın."
+msgstr "Diese Rolle gilt für die gesamte Organisation; lassen Sie das Abteilungsfeld leer."
+
+msgctxt "profile.rim"
+msgid "Bu vəzifə üçün kafedra və ya bölmə seçin."
+msgstr "Wählen Sie für diese Position einen Fachbereich oder eine Organisationseinheit."
+
+msgctxt "profile.rim"
+msgid "Bölmə tapılmadı və ya icazə əhatənizdən kənardadır."
+msgstr "Die Organisationseinheit wurde nicht gefunden oder liegt außerhalb Ihres Berechtigungsbereichs."
+
+msgctxt "profile.rim"
+msgid "Vəzifə seçilməyib və ya bu rolu təyin etmək üçün icazəniz yoxdur."
+msgstr "Es wurde keine Position ausgewählt oder Sie dürfen diese Rolle nicht zuweisen."
+
+msgctxt "profile.rim"
+msgid "Kafedra / bölmə"
+msgstr "Fachbereich / Organisationseinheit"
+
+msgctxt "profile.rim"
+msgid "Vəzifə və kafedra/bölmə seçimi ilə yeni əməkdaş hesabı."
+msgstr "Ein neues Mitarbeiterkonto mit ausgewählter Position und Organisationseinheit."
+
+msgctxt "profile.rim"
+msgid "Yeni inzibati heyət hesabı"
+msgstr "Neues Konto für Verwaltungspersonal"
+
+msgctxt "profile.rim"
+msgid "İnzibati heyət"
+msgstr "Verwaltungspersonal"
+
+msgctxt "profile.rim"
+msgid "Əməkdaş hesabı yaradıldı."
+msgstr "Das Mitarbeiterkonto wurde erstellt."
+
+msgctxt "profile.rim"
+msgid "Əməkdaş hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq."
+msgstr "Für Mitarbeiterkonten optional; der Benutzer ergänzt dies bei der ersten Anmeldung."
+
+msgctxt "profile.rim"
+msgid "Məs.: Laborant, Kafedra müdiri"
+msgstr "Z. B. Laborassistenz, Fachbereichsleitung"
+
+msgctxt "profile.rim"
+msgid "Vəzifə / rol"
+msgstr "Position / Rolle"
+
+msgctxt "profile.rim"
+msgid "Vəzifə nəticələri"
+msgstr "Positionsergebnisse"
+
+msgctxt "profile.rim"
+msgid "Vəzifəni axtarıb siyahıdan seçin. Kafedra vəzifələrində bölmə də seçilməlidir."
+msgstr "Suchen Sie eine Position und wählen Sie sie aus der Liste. Fachbereichspositionen erfordern auch eine Einheit."
+
+msgctxt "student_intake"
+msgid "Əməkdaş üçün vəzifə / rol seçilməlidir."
+msgstr "Für den Mitarbeiter muss eine Position oder Rolle ausgewählt werden."

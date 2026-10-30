@@ -111677,3 +111677,63 @@ msgstr "Преподаватель предмета: {teachers}. Препода�
 msgctxt "appeals.notification"
 msgid "Fənn üzrə yeni apellyasiya"
 msgstr "Новая апелляция по предмету"
+
+msgctxt "profile.rim"
+msgid "Bu rol təşkilatı bütövlükdə əhatə edir; bölmə sahəsini boş saxlayın."
+msgstr "Эта роль охватывает всю организацию; оставьте поле подразделения пустым."
+
+msgctxt "profile.rim"
+msgid "Bu vəzifə üçün kafedra və ya bölmə seçin."
+msgstr "Выберите кафедру или подразделение для этой должности."
+
+msgctxt "profile.rim"
+msgid "Bölmə tapılmadı və ya icazə əhatənizdən kənardadır."
+msgstr "Подразделение не найдено или находится вне ваших полномочий."
+
+msgctxt "profile.rim"
+msgid "Vəzifə seçilməyib və ya bu rolu təyin etmək üçün icazəniz yoxdur."
+msgstr "Должность не выбрана или у вас нет права назначать эту роль."
+
+msgctxt "profile.rim"
+msgid "Kafedra / bölmə"
+msgstr "Кафедра / подразделение"
+
+msgctxt "profile.rim"
+msgid "Vəzifə və kafedra/bölmə seçimi ilə yeni əməkdaş hesabı."
+msgstr "Новая учётная запись сотрудника с выбором должности и кафедры или подразделения."
+
+msgctxt "profile.rim"
+msgid "Yeni inzibati heyət hesabı"
+msgstr "Новая учётная запись административного сотрудника"
+
+msgctxt "profile.rim"
+msgid "İnzibati heyət"
+msgstr "Административный персонал"
+
+msgctxt "profile.rim"
+msgid "Əməkdaş hesabı yaradıldı."
+msgstr "Учётная запись сотрудника создана."
+
+msgctxt "profile.rim"
+msgid "Əməkdaş hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq."
+msgstr "Для учётных записей сотрудников можно оставить пустым; пользователь заполнит при первом входе."
+
+msgctxt "profile.rim"
+msgid "Məs.: Laborant, Kafedra müdiri"
+msgstr "Например: лаборант, заведующий кафедрой"
+
+msgctxt "profile.rim"
+msgid "Vəzifə / rol"
+msgstr "Должность / роль"
+
+msgctxt "profile.rim"
+msgid "Vəzifə nəticələri"
+msgstr "Результаты поиска должностей"
+
+msgctxt "profile.rim"
+msgid "Vəzifəni axtarıb siyahıdan seçin. Kafedra vəzifələrində bölmə də seçilməlidir."
+msgstr "Найдите должность и выберите её из списка. Для кафедральных должностей также выберите подразделение."
+
+msgctxt "student_intake"
+msgid "Əməkdaş üçün vəzifə / rol seçilməlidir."
+msgstr "Для сотрудника необходимо выбрать должность или роль."

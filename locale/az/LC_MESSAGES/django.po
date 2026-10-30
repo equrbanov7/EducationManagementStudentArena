@@ -110995,3 +110995,63 @@ msgstr "Fənni tədris edən müəllim: {teachers}. Müəllim apellyasiya ilə b
 msgctxt "appeals.notification"
 msgid "Fənn üzrə yeni apellyasiya"
 msgstr "Fənn üzrə yeni apellyasiya"
+
+msgctxt "profile.rim"
+msgid "Bu rol təşkilatı bütövlükdə əhatə edir; bölmə sahəsini boş saxlayın."
+msgstr "Bu rol təşkilatı bütövlükdə əhatə edir; bölmə sahəsini boş saxlayın."
+
+msgctxt "profile.rim"
+msgid "Bu vəzifə üçün kafedra və ya bölmə seçin."
+msgstr "Bu vəzifə üçün kafedra və ya bölmə seçin."
+
+msgctxt "profile.rim"
+msgid "Bölmə tapılmadı və ya icazə əhatənizdən kənardadır."
+msgstr "Bölmə tapılmadı və ya icazə əhatənizdən kənardadır."
+
+msgctxt "profile.rim"
+msgid "Vəzifə seçilməyib və ya bu rolu təyin etmək üçün icazəniz yoxdur."
+msgstr "Vəzifə seçilməyib və ya bu rolu təyin etmək üçün icazəniz yoxdur."
+
+msgctxt "profile.rim"
+msgid "Kafedra / bölmə"
+msgstr "Kafedra / bölmə"
+
+msgctxt "profile.rim"
+msgid "Vəzifə və kafedra/bölmə seçimi ilə yeni əməkdaş hesabı."
+msgstr "Vəzifə və kafedra/bölmə seçimi ilə yeni əməkdaş hesabı."
+
+msgctxt "profile.rim"
+msgid "Yeni inzibati heyət hesabı"
+msgstr "Yeni inzibati heyət hesabı"
+
+msgctxt "profile.rim"
+msgid "İnzibati heyət"
+msgstr "İnzibati heyət"
+
+msgctxt "profile.rim"
+msgid "Əməkdaş hesabı yaradıldı."
+msgstr "Əməkdaş hesabı yaradıldı."
+
+msgctxt "profile.rim"
+msgid "Əməkdaş hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq."
+msgstr "Əməkdaş hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq."
+
+msgctxt "profile.rim"
+msgid "Məs.: Laborant, Kafedra müdiri"
+msgstr "Məs.: Laborant, Kafedra müdiri"
+
+msgctxt "profile.rim"
+msgid "Vəzifə / rol"
+msgstr "Vəzifə / rol"
+
+msgctxt "profile.rim"
+msgid "Vəzifə nəticələri"
+msgstr "Vəzifə nəticələri"
+
+msgctxt "profile.rim"
+msgid "Vəzifəni axtarıb siyahıdan seçin. Kafedra vəzifələrində bölmə də seçilməlidir."
+msgstr "Vəzifəni axtarıb siyahıdan seçin. Kafedra vəzifələrində bölmə də seçilməlidir."
+
+msgctxt "student_intake"
+msgid "Əməkdaş üçün vəzifə / rol seçilməlidir."
+msgstr "Əməkdaş üçün vəzifə / rol seçilməlidir."

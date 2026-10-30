@@ -111484,3 +111484,63 @@ msgstr "Subject teacher: {teachers}. The teacher is invited to the Exam Center r
 msgctxt "appeals.notification"
 msgid "Fənn üzrə yeni apellyasiya"
 msgstr "New subject appeal"
+
+msgctxt "profile.rim"
+msgid "Bu rol təşkilatı bütövlükdə əhatə edir; bölmə sahəsini boş saxlayın."
+msgstr "This role covers the whole organization; leave the department field empty."
+
+msgctxt "profile.rim"
+msgid "Bu vəzifə üçün kafedra və ya bölmə seçin."
+msgstr "Select a department or unit for this position."
+
+msgctxt "profile.rim"
+msgid "Bölmə tapılmadı və ya icazə əhatənizdən kənardadır."
+msgstr "The unit was not found or is outside your permission scope."
+
+msgctxt "profile.rim"
+msgid "Vəzifə seçilməyib və ya bu rolu təyin etmək üçün icazəniz yoxdur."
+msgstr "No position was selected, or you do not have permission to assign this role."
+
+msgctxt "profile.rim"
+msgid "Kafedra / bölmə"
+msgstr "Department / unit"
+
+msgctxt "profile.rim"
+msgid "Vəzifə və kafedra/bölmə seçimi ilə yeni əməkdaş hesabı."
+msgstr "A new staff account with a selected position and department or unit."
+
+msgctxt "profile.rim"
+msgid "Yeni inzibati heyət hesabı"
+msgstr "New administrative staff account"
+
+msgctxt "profile.rim"
+msgid "İnzibati heyət"
+msgstr "Administrative staff"
+
+msgctxt "profile.rim"
+msgid "Əməkdaş hesabı yaradıldı."
+msgstr "The staff account was created."
+
+msgctxt "profile.rim"
+msgid "Əməkdaş hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq."
+msgstr "Optional for staff accounts; the user will enter it at first login."
+
+msgctxt "profile.rim"
+msgid "Məs.: Laborant, Kafedra müdiri"
+msgstr "E.g. laboratory assistant, department head"
+
+msgctxt "profile.rim"
+msgid "Vəzifə / rol"
+msgstr "Position / role"
+
+msgctxt "profile.rim"
+msgid "Vəzifə nəticələri"
+msgstr "Position results"
+
+msgctxt "profile.rim"
+msgid "Vəzifəni axtarıb siyahıdan seçin. Kafedra vəzifələrində bölmə də seçilməlidir."
+msgstr "Search for a position and select it from the list. Department positions also require a unit."
+
+msgctxt "student_intake"
+msgid "Əməkdaş üçün vəzifə / rol seçilməlidir."
+msgstr "A position or role must be selected for the staff member."

@@ -110892,3 +110892,63 @@ msgstr "Dersi veren öğretmen: {teachers}. Öğretmen, itirazla ilgili Sınav M
 msgctxt "appeals.notification"
 msgid "Fənn üzrə yeni apellyasiya"
 msgstr "Dersle ilgili yeni itiraz"
+
+msgctxt "profile.rim"
+msgid "Bu rol təşkilatı bütövlükdə əhatə edir; bölmə sahəsini boş saxlayın."
+msgstr "Bu rol tüm kurumu kapsar; bölüm alanını boş bırakın."
+
+msgctxt "profile.rim"
+msgid "Bu vəzifə üçün kafedra və ya bölmə seçin."
+msgstr "Bu görev için bir bölüm veya birim seçin."
+
+msgctxt "profile.rim"
+msgid "Bölmə tapılmadı və ya icazə əhatənizdən kənardadır."
+msgstr "Birim bulunamadı veya yetki alanınızın dışında."
+
+msgctxt "profile.rim"
+msgid "Vəzifə seçilməyib və ya bu rolu təyin etmək üçün icazəniz yoxdur."
+msgstr "Görev seçilmedi veya bu rolü atama yetkiniz yok."
+
+msgctxt "profile.rim"
+msgid "Kafedra / bölmə"
+msgstr "Bölüm / birim"
+
+msgctxt "profile.rim"
+msgid "Vəzifə və kafedra/bölmə seçimi ilə yeni əməkdaş hesabı."
+msgstr "Görev ve bölüm veya birim seçimiyle yeni personel hesabı."
+
+msgctxt "profile.rim"
+msgid "Yeni inzibati heyət hesabı"
+msgstr "Yeni idari personel hesabı"
+
+msgctxt "profile.rim"
+msgid "İnzibati heyət"
+msgstr "İdari personel"
+
+msgctxt "profile.rim"
+msgid "Əməkdaş hesabı yaradıldı."
+msgstr "Personel hesabı oluşturuldu."
+
+msgctxt "profile.rim"
+msgid "Əməkdaş hesabında boş qala bilər — istifadəçi ilk girişdə özü yazacaq."
+msgstr "Personel hesaplarında boş bırakılabilir; kullanıcı ilk girişte kendisi doldurur."
+
+msgctxt "profile.rim"
+msgid "Məs.: Laborant, Kafedra müdiri"
+msgstr "Örn.: laboratuvar görevlisi, bölüm başkanı"
+
+msgctxt "profile.rim"
+msgid "Vəzifə / rol"
+msgstr "Görev / rol"
+
+msgctxt "profile.rim"
+msgid "Vəzifə nəticələri"
+msgstr "Görev sonuçları"
+
+msgctxt "profile.rim"
+msgid "Vəzifəni axtarıb siyahıdan seçin. Kafedra vəzifələrində bölmə də seçilməlidir."
+msgstr "Görevi arayıp listeden seçin. Bölüm görevleri için birim de seçilmelidir."
+
+msgctxt "student_intake"
+msgid "Əməkdaş üçün vəzifə / rol seçilməlidir."
+msgstr "Personel için bir görev veya rol seçilmelidir."
