@@ -97,3 +97,7 @@ __all__ = [
     "version_diff",
     "version_timeline",
 ]
+
+from .services.mr83_repair import MR83Error, repair_mr83_syllabus  # noqa: E402,F401
+
+__all__ += ["MR83Error", "repair_mr83_syllabus"]
