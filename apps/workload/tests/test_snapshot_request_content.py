@@ -8,6 +8,7 @@ from django.test import TransactionTestCase
 from apps.registrar.models import CourseOffering, Enrollment, Lesson, LessonMark
 from apps.workload.services.scoped_snapshot.request_content import collect_request_content
 from apps.workload.tests import test_scoped_snapshot as fixtures
+from apps.workload.tests.factories import activate_member
 
 
 class RequestContentTests(TransactionTestCase):
@@ -28,6 +29,7 @@ class RequestContentTests(TransactionTestCase):
     def test_exact_allowlist_and_original_cells(self):
         target = self.opening()
         other = self.opening(group=None)
+        activate_member(self.org, self.actor, "snapshot_student")
         enrollment = Enrollment.objects.create(organization=self.org, offering=target, student=self.actor)
         Lesson.objects.create(organization=self.org, offering=other, date=date(2026, 10, 22))
         lesson = Lesson.objects.create(organization=self.org, offering=target, date=date(2026, 10, 22), kind="seminar")
