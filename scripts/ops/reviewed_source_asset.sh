@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Sourced inside the encrypted download step; emits no plaintext or secret.
+case "$COMMAND" in
+  recover_mr46_syllabus)
+    tag_prefix=mr46-syllabus; asset=mr46-syllabus.json.enc; target="/tmp/mr46_syllabus_${GITHUB_RUN_ID}.json" ;;
+  recover_mr27_journal)
+    tag_prefix=mr27-recovery; asset=mr27-recovery.json.enc; target="/tmp/mr27_recovery_${GITHUB_RUN_ID}.json" ;;
+  recover_workload_syllabi)
+    tag_prefix=workload-syllabi; asset=workload-syllabi.json.enc; target="/tmp/workload_syllabi_${GITHUB_RUN_ID}.json" ;;
+  repair_reviewed_workload_batch)
+    tag_prefix=reviewed-workload; asset=reviewed-workload.json.enc; target="/tmp/reviewed_source_${GITHUB_RUN_ID}.json" ;;
+  *) echo "encrypted_source_command_not_allowed" >&2; exit 2 ;;
+esac
+match "$ROSTER_TAG" "^${tag_prefix}-[0-9a-z-]+$" || { echo "encrypted_source_tag_invalid" >&2; exit 2; }
+match "$BATCH" '^[0-9a-f]{64}$' || { echo "plaintext_manifest_sha256_required" >&2; exit 2; }

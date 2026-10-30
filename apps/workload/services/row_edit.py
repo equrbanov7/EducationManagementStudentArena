@@ -105,7 +105,7 @@ def _expand_activity_remove(data: dict) -> bool:
     return True
 
 
-def _shrink_activity(row, activity: str, total: int, *, actor, request) -> int:
+def _shrink_activity(row, activity: str, total: int, *, actor, request, sync_offerings=True) -> int:
     """Fəaliyyətin bölgüsünü yeni cəmə sığdırır — ƏN SON təyinatdan başlayaraq azaldır/silir."""
     assignments = list(TeacherAssignment.objects.filter(row=row, activity=activity).order_by("-created_at"))
     excess = sum(int(item.hours or 0) for item in assignments) - int(total)
@@ -116,7 +116,7 @@ def _shrink_activity(row, activity: str, total: int, *, actor, request) -> int:
         assignment.row = row  # ``row.task`` — düzəlişdən sonrakı (``amended``) eyni obyekt
         if assignment.hours <= excess:
             excess -= assignment.hours
-            unassign(assignment=assignment, actor=actor, request=request)
+            unassign(assignment=assignment, actor=actor, request=request, sync_offerings=sync_offerings)
         else:
             assign_teacher(
                 row=row,
@@ -129,6 +129,7 @@ def _shrink_activity(row, activity: str, total: int, *, actor, request) -> int:
                 note=assignment.note,
                 assignment=assignment,
                 request=request,
+                sync_offerings=sync_offerings,
             )
             excess = 0
         changed += 1
@@ -136,7 +137,9 @@ def _shrink_activity(row, activity: str, total: int, *, actor, request) -> int:
 
 
 @transaction.atomic
-def save_row_amended(*, task, actor, data: dict, row=None, amend=None, shrink: bool = False, request=None):
+def save_row_amended(
+    *, task, actor, data: dict, row=None, amend=None, shrink: bool = False, request=None, sync_offerings: bool = True
+):
     """Sətir yarat/redaktə et; təsdiqlənmiş sənəddə əvvəlcə düzəliş açır.
 
     ``data`` ``tasks.save_row`` ilə eynidir (yalnız GÖNDƏRİLƏN sahələr yazılır) + ``activity_remove``.
@@ -146,11 +149,18 @@ def save_row_amended(*, task, actor, data: dict, row=None, amend=None, shrink: b
     shrink = _expand_activity_remove(data) or shrink
     if row is None:
         if task.status not in AMENDABLE_STATUSES:
-            return save_row(task=task, actor=actor, data=data, request=request)
+            return save_row(task=task, actor=actor, data=data, request=request, sync_offerings=sync_offerings)
         ensure_can_manage(actor, task.chair_id)
         ensure_can_distribute(actor, task.chair_id)
         _require_amend(amend)
-        saved = save_row(task=task, actor=actor, data=data, request=request, new_row_in_amendment=True)
+        saved = save_row(
+            task=task,
+            actor=actor,
+            data=data,
+            request=request,
+            new_row_in_amendment=True,
+            sync_offerings=sync_offerings,
+        )
         _open_for_row(task, actor, saved, amend, "row_added", {"subject": saved.subject_label}, request)
         return saved
 
@@ -166,8 +176,15 @@ def save_row_amended(*, task, actor, data: dict, row=None, amend=None, shrink: b
         ensure_can_distribute(actor, task.chair_id)
         for activity, field in ACTIVITY_TOTAL_FIELD.items():
             if field in data:
-                _shrink_activity(row, str(activity), _coerce(field, data[field]), actor=actor, request=request)
-    return save_row(task=task, actor=actor, data=data, row=row, request=request)
+                _shrink_activity(
+                    row,
+                    str(activity),
+                    _coerce(field, data[field]),
+                    actor=actor,
+                    request=request,
+                    sync_offerings=sync_offerings,
+                )
+    return save_row(task=task, actor=actor, data=data, row=row, request=request, sync_offerings=sync_offerings)
 
 
 @transaction.atomic
