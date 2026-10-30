@@ -70,6 +70,13 @@ class ReviewedManifestTests(SimpleTestCase):
         self.assertEqual(result["credits"], "")
         self.assertEqual(result["student_count_text"], "")
         self.assertNotIn("student_count", result)
+        self.assertNotIn("credits_value", result)
+        for raw, numeric in ((6, 6), ("5", 5), (0, 0)):
+            item["row_data"]["credits"] = raw
+            self.assertEqual(_row_data(item)["credits_value"], numeric)
+        for raw in (None, "3+3", "5 kredit", "61", True):
+            item["row_data"]["credits"] = raw
+            self.assertNotIn("credits_value", _row_data(item))
 
     def test_large_or_symbolic_manifest_is_not_read(self):
         with tempfile.TemporaryDirectory() as folder:

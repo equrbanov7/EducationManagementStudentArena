@@ -54,6 +54,10 @@ def _row_data(item):
         **{kind + "_plan": item["plan"][kind] for kind in ACTIVITIES},
         **{kind + "_total": item["totals"][kind] for kind in ACTIVITIES},
     }
+    raw_credits = value.get("credits")
+    credit_text = "" if raw_credits is None else str(raw_credits).strip()
+    if not isinstance(raw_credits, bool) and credit_text.isdigit() and 0 <= int(credit_text) <= 60:
+        data["credits_value"] = int(credit_text)
     raw_count = value.get("student_count")
     if isinstance(raw_count, int) and not isinstance(raw_count, bool) and raw_count >= 0:
         data["student_count"] = raw_count
