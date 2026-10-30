@@ -11,6 +11,33 @@ from .tspx_roster_plan import ORG, PARENT, PERIOD, TARGETS
 GROUP_IDS = (PARENT, *TARGETS.values())
 
 
+def _identity_record_mismatches(record, profile, item, parent):
+    """Keep the exact guard; diagnostics contain field codes, never identity values."""
+
+    def clean(value):
+        return " ".join(str(value or "").split()).casefold()
+
+    target = item.get("target_group_id", parent)
+    checks = {
+        "user_active": record.student.is_active,
+        "record_status": record.status == "enrolled",
+        "record_group": str(record.group_id) in {parent, target},
+        "admission_year": record.admission_year == item["keep_admission_year"],
+        "program": str(record.program_id) == item["keep_program_id"],
+        "curriculum": str(record.curriculum_id) == item["keep_curriculum_id"],
+        "first_name": clean(record.student.first_name) == clean(item["source_identity"]["first_name"]),
+        "last_name": clean(record.student.last_name) == clean(item["source_identity"]["last_name"]),
+        "patronymic": clean(profile.patronymic) == clean(item["source_identity"]["patronymic"]),
+    }
+    return tuple(key for key, matches in checks.items() if not matches)
+
+
+def _identity_error(slot, mismatches):
+    # Source slot is its one-based position in the sealed reviewed manifest;
+    # operators can map it locally without exporting student IDs or names.
+    return f"tspx_live_student_identity_or_record_changed:source_slot={slot}:fields={','.join(mismatches)}"
+
+
 def offerings(plan):
     enrolled = model("registrar.Enrollment").objects.filter(organization_id=ORG, student_id__in=plan.user_ids)
     return (
@@ -91,7 +118,7 @@ def validate(plan, organization):
     if set(active.values_list("student_id", flat=True)) != plan.user_ids or active.count() != plan.family.moves + 1:
         raise RepairError("tspx_live_family_student_set_changed")
     people = {}
-    for item in plan.people:
+    for slot, item in enumerate(plan.people, 1):
         record = (
             model("registrar.StudentAcademicRecord")
             .objects.select_related("student")
@@ -99,22 +126,9 @@ def validate(plan, organization):
         )
         profile = model("accounts.UserProfile").objects.get(organization=organization, user=record.student)
 
-        def clean(value):
-            return " ".join(str(value or "").split()).casefold()
-
-        actual = (record.student.first_name, record.student.last_name, profile.patronymic)
-        wanted = tuple(item["source_identity"][key] for key in ("first_name", "last_name", "patronymic"))
-        target = item.get("target_group_id", plan.family.parent)
-        if (
-            not record.student.is_active
-            or record.status != "enrolled"
-            or str(record.group_id) not in {plan.family.parent, target}
-            or record.admission_year != item["keep_admission_year"]
-            or str(record.program_id) != item["keep_program_id"]
-            or str(record.curriculum_id) != item["keep_curriculum_id"]
-            or tuple(map(clean, actual)) != tuple(map(clean, wanted))
-        ):
-            raise RepairError("tspx_live_student_identity_or_record_changed")
+        mismatches = _identity_record_mismatches(record, profile, item, plan.family.parent)
+        if mismatches:
+            raise RepairError(_identity_error(slot, mismatches))
         validate_active_student_member(organization=organization, user=record.student)
         for kind, label, pk in (
             ("student", "auth.user", record.student_id),

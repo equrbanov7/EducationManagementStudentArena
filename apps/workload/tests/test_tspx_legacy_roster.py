@@ -258,7 +258,9 @@ class TspxRosterTests(TestCase):
         with bypass_rls():
             User.objects.filter(pk=self.plan.candidates[-1]["target_user_id"]).update(last_name="Changed")
         before = self.snapshot()
-        with self.assertRaisesMessage(RepairError, "identity_or_record"):
+        with self.assertRaisesMessage(
+            RepairError, f"identity_or_record_changed:source_slot={self.family.moves}:fields=last_name"
+        ):
             self.execute()
         self.assertEqual(self.snapshot(), before)
 
