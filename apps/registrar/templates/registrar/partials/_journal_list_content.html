@@ -25,9 +25,9 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
     {% include "registrar/partials/_jd_stepper.html" with stepper_step=1 stepper_detail=False %}
 
     <form method="get" class="jl-filters" data-jd-filterform
-          data-faculty-url="{% url 'accounts:records_faculty_search' %}"
-          data-department-url="{% url 'accounts:records_department_search' %}"
-          data-group-url="{% url 'accounts:records_group_search' %}"
+          data-faculty-url="{% url 'registrar:journal_list_faculties' %}"
+          data-department-url="{% url 'registrar:journal_list_departments' %}"
+          data-group-url="{% url 'registrar:journal_list_groups' %}"
           data-teacher-url="{% url 'registrar:journal_list_teachers' %}"
           data-empty-text="{% trans 'Nəticə tapılmadı' %}">
         {% include "registrar/partials/_journal_teacher_view.html" %}
