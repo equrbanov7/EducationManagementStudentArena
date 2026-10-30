@@ -421,7 +421,7 @@ on:
         required: false
         default: ""
       row_subject:
-        description: "fix_task_row_hours: fənn adı (məs. Müasir proqramlaşdırma dilləri)"
+        description: "recover_workload_syllabi: boş/bilal=8430, robotics=7715 · fix_task_row_hours: fənn adı"
         required: false
         default: ""
       row_activity:
