@@ -332,6 +332,7 @@ on:
           - recover_workload_syllabi
           - recover_six_workload_syllabi
           - repair_mr112_hours
+          - repair_mr123_subject
           - legacy_repair_empty_lessons
           - sync_midterm_scores
           - fix_exam_journal_gaps
@@ -719,6 +720,17 @@ jobs:
               else
                 match "$BATCH" '^[0-9a-f]{64}$' || { echo "batch = plaintext faylın sha256-sı (64 hex)" >&2; exit 2; }
                 args+=(--file "/tmp/six_workload_syllabi_${GITHUB_RUN_ID}.json" --sha256 "$BATCH")
+              fi
+              ;;
+            repair_mr123_subject)
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "active_superadmin_required" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^[0-9a-f]{64}$' || { echo "baseline_sha256_required" >&2; exit 2; }
+                args+=(--expected-baseline "$BATCH")
+              elif [ "$APPLY" = "true" ]; then
+                echo "fresh_live_baseline_required" >&2; exit 2
               fi
               ;;
             normalize_interim_components)
@@ -1434,6 +1446,16 @@ jobs:
           elif [ "$COMMAND" = "recover_six_workload_syllabi" ]; then
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^six_syllabi: (mode=(dry-run|dry_run|apply|undo)|batch=sixsyl-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}|[a-z_]+=[0-9]+)( (mode=(dry-run|dry_run|apply|undo)|batch=sixsyl-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}|[a-z_]+=[0-9]+))*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "repair_mr123_subject" ]; then
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^mr123_subject: ([a-z_]+=[0-9]+|baseline=[a-f0-9]{64})( ([a-z_]+=[0-9]+|baseline=[a-f0-9]{64}))*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
