@@ -79,6 +79,9 @@ class CurrentState:
         old_workers = mappings("worker", {s["legacy_teacher_id"] for s in self.selected.values()}, "auth.user")
         source_students = {row["id"] for row in data["students"]}
         self.student_maps = mappings("student", source_students, "auth.user")
+        from .reviewed_content_student_bridge import reviewed_student_bridge
+
+        reviewed_student_bridge(data, self.student_maps, lock=lock)
         teacher_ids = {s["teacher_id"] for s in self.selected.values()}
         teachers = {
             row["id"]: row
