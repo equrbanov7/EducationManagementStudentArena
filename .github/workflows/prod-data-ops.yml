@@ -726,6 +726,7 @@ jobs:
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "active_superadmin_required" >&2; exit 1; }
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor")
+              [ "$ROSTER_TAG" != "undo" ] || args+=(--undo)
               if [ -n "$BATCH" ]; then
                 match "$BATCH" '^[0-9a-f]{64}$' || { echo "baseline_sha256_required" >&2; exit 2; }
                 args+=(--expected-baseline "$BATCH")

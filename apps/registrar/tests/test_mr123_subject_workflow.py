@@ -23,7 +23,7 @@ class MR123WorkflowTests(SimpleTestCase):
         def run(batch, apply):
             return subprocess.run(
                 ["bash", "-c", script],
-                env={**os.environ, "BATCH": batch, "APPLY": apply, "ORG": "qku"},
+                env={**os.environ, "BATCH": batch, "APPLY": apply, "ORG": "qku", "ROSTER_TAG": ""},
                 capture_output=True,
                 text=True,
             )

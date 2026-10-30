@@ -174,6 +174,3 @@ __all__ = [
 
 from .reviewed_catalog import create_reviewed_subject, exact_title_candidates  # noqa: E402,F401
 
-from .mr123_repair import MR123Error, repair_mr123_subject  # noqa: E402,F401
-
-__all__ += ["MR123Error", "repair_mr123_subject"]

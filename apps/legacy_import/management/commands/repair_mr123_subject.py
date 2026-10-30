@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from django.db import DatabaseError
 
-from apps.registrar.public import MR123Error, repair_mr123_subject
+from apps.workload.public import MR123Error, repair_mr123_subject
 from core.rls_pooling import rls_worker_atomic
 
 from ...services.repair_support import RepairContext, establish_rls_scope, resolve_organization
@@ -16,6 +16,7 @@ class Command(BaseCommand):
         parser.add_argument("--org", default="qku")
         parser.add_argument("--actor", required=True)
         parser.add_argument("--expected-baseline", default="")
+        parser.add_argument("--undo", action="store_true")
         parser.add_argument("--apply", action="store_true")
 
     @rls_worker_atomic()
@@ -27,7 +28,11 @@ class Command(BaseCommand):
         establish_rls_scope(RepairContext(org, user, options["apply"], 0))
         try:
             result = repair_mr123_subject(
-                organization=org, user=user, apply=options["apply"], expected_baseline=options["expected_baseline"]
+                organization=org,
+                user=user,
+                apply=options["apply"],
+                expected_baseline=options["expected_baseline"],
+                undo=options["undo"],
             )
         except MR123Error as exc:
             raise CommandError(str(exc)) from None

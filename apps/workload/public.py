@@ -462,3 +462,6 @@ from .public_exports import *  # noqa: E402,F401,F403
 from .public_exports import __all__ as _api_exports  # noqa: E402
 
 __all__ += [name for name in _api_exports if name not in __all__]
+
+
+from .services.mr123_subject_repair import MR123Error, repair_mr123_subject  # noqa: E402,F401

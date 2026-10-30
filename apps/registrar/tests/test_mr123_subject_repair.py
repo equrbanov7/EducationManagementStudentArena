@@ -6,9 +6,9 @@ from unittest.mock import patch
 from django.test import TestCase
 from django.utils import timezone
 
-from apps.registrar import mr123_repair as service
 from apps.registrar.models import CourseOffering, Enrollment, Lesson, LessonMark
 from apps.syllabus.public import import_migrated_version
+from apps.workload.services import mr123_subject_repair as service
 from apps.workload.tests import test_scoped_snapshot as fixtures
 
 
@@ -17,6 +17,11 @@ class MR123SubjectRepairTests(TestCase):
 
     def prepare(self):
         self.row.groups.clear()
+        fixtures.activate_member(
+            self.org, self.teacher, "teacher", permissions=fixtures.TEACHER_PERMS, scope_unit=self.stack["chair"]
+        )
+        self.task.status = "distributed"
+        self.task.save(update_fields=["status"])
         self.subject = self.stack["subject"]
         self.offering = CourseOffering.objects.create(
             organization=self.org,
@@ -43,6 +48,7 @@ class MR123SubjectRepairTests(TestCase):
             approved_at=timezone.now(),
             section_data={"desc": {"description": "Teacher content retained"}},
         )
+        fixtures.activate_member(self.org, self.actor, "student")
         enrollment = Enrollment.objects.create(organization=self.org, offering=self.offering, student=self.actor)
         lesson = Lesson.objects.create(organization=self.org, offering=self.offering, date="2026-10-22", kind="seminar")
         LessonMark.objects.create(
@@ -96,3 +102,35 @@ class MR123SubjectRepairTests(TestCase):
             service.repair_mr123_subject(organization=self.org, user=self.actor)
         self.offering.refresh_from_db()
         self.assertEqual(self.offering.subject, self.subject)
+
+    def test_compensating_undo_preserves_evidence(self):
+        self.prepare()
+        before = service.digest(service.protected())
+        dry = service.repair_mr123_subject(organization=self.org, user=self.actor)
+        service.repair_mr123_subject(
+            organization=self.org, user=self.actor, apply=True, expected_baseline=dry["baseline"]
+        )
+        undo = service.repair_mr123_subject(organization=self.org, user=self.actor, undo=True)
+        service.repair_mr123_subject(
+            organization=self.org, user=self.actor, undo=True, apply=True, expected_baseline=undo["baseline"]
+        )
+        self.offering.refresh_from_db()
+        self.assertEqual(self.offering.subject, self.subject)
+        self.assertEqual(before, service.digest(service.protected()))
+
+    def test_failure_rolls_back_links_and_trigger_authorization(self):
+        self.prepare()
+        from django.db import connection
+
+        dry = service.repair_mr123_subject(organization=self.org, user=self.actor)
+        with patch.object(service, "assign_teacher", side_effect=service.MR123Error("injected")):
+            with self.assertRaisesMessage(service.MR123Error, "injected"):
+                service.repair_mr123_subject(
+                    organization=self.org, user=self.actor, apply=True, expected_baseline=dry["baseline"]
+                )
+        self.offering.refresh_from_db()
+        self.assertEqual(self.offering.subject, self.subject)
+        self.assertFalse(service.model("registrar.Subject").objects.filter(pk=service.NEW).exists())
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT current_setting('app.registrar_subject_merge_from', true)")
+            self.assertIn(cursor.fetchone()[0], (None, "", "[]"))
