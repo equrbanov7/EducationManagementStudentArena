@@ -62,6 +62,11 @@ def _undo(plan, *, receipt, current, actor, user, batch):
     actions.undo_rows(plan, before=values["before"], details=details, actor=actor, batch=batch)
     for saved in values["before"]["offerings"]:
         offering = model("registrar.CourseOffering").objects.get(organization_id=ORG, pk=saved["id"])
+        from .reviewed_named_transitions import owner_targets
+
+        if saved["id"] in owner_targets(plan):
+            offering.instructor_id = saved["instructor_id"]
+            offering.save(update_fields=["instructor", "updated_at"])
         if offering.lesson_hours != saved["lesson_hours"]:
             offering.lesson_hours = saved["lesson_hours"]
             offering.save(update_fields=["lesson_hours", "updated_at"])

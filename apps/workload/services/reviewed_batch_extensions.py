@@ -194,11 +194,16 @@ def undo(plan, *, details, user, organization, batch):
 
 
 def handover_targets(plan):
+    from .reviewed_named_transitions import owner_targets
+
     return {
-        pk: value["to_instructor_id"]
-        for item in plan.items
-        if (value := policy(item, "handover"))
-        for pk in value["offering_ids"]
+        **owner_targets(plan),
+        **{
+            pk: value["to_instructor_id"]
+            for item in plan.items
+            if (value := policy(item, "handover"))
+            for pk in value["offering_ids"]
+        },
     }
 
 

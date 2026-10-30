@@ -76,6 +76,10 @@ def edit(row, item, *, actor, batch):
     row = save_row_amended(task=row.task, actor=actor, row=row, data={}, amend=amendment(batch), sync_offerings=False)
     if extensions.policy(item, "handover"):
         _handover_assignments(row, item, actor=actor)
+    from . import reviewed_named_transitions as named
+
+    if named.policy(item):
+        named.prepare_assignments(row, item, actor=actor)
     current = {(a.teacher_id, a.activity): a for a in row.assignments.filter(activity__in=ACTIVITIES)}
     expected = {(a["teacher_id"], a["activity"]): a for a in item["assignments"]}
     if set(current) - set(expected):
@@ -227,7 +231,10 @@ def undo_rows(plan, *, before, details, actor, batch):
         for pk, assignment in current.items():
             if pk not in old_ids:
                 unassign(assignment=assignment, actor=actor, sync_offerings=False)
-        if any(i["row_id"] == rid and extensions.policy(i, "handover") for i in plan.items):
+        if any(
+            i["row_id"] == rid and (extensions.policy(i, "handover") or extensions.policy(i, "named_transition"))
+            for i in plan.items
+        ):
             for assignment in list(row.assignments.filter(activity__in=ACTIVITIES)):
                 unassign(assignment=assignment, actor=actor, sync_offerings=False)
             row = save_row_amended(

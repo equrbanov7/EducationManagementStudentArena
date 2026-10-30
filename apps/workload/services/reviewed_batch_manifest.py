@@ -218,6 +218,9 @@ def _item(entry, *, version="reviewed-workload-source/1"):
     item["policy"] = parse(entry, item, version=version)
     if mode == "patch" and entry["ready_class"].startswith("reviewed_handover") and "handover" not in item["policy"]:
         raise RepairError("explicit_handover_policy_required")
+    from .reviewed_named_transitions import attach
+
+    attach(item)
     return item
 
 

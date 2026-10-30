@@ -75,7 +75,13 @@ def preserved(plan, before, after, details):
             continue
         _same_except(old, new, fields, "existing_row_reference_or_noncontact_changed")
         handover_item = next(
-            (i for i in plan.items if i["row_id"] == old["id"] and extensions.policy(i, "handover")), None
+            (
+                i
+                for i in plan.items
+                if i["row_id"] == old["id"]
+                and (extensions.policy(i, "handover") or extensions.policy(i, "named_transition"))
+            ),
+            None,
         )
         assignments = {value["id"]: value for value in new["assignments"]}
         for assignment in old["assignments"]:

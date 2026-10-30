@@ -360,6 +360,8 @@ def validate(plan, *, actor):
         owner = item["assignments"][0]["teacher_id"]
         for offering in found:
             expected_owner = extensions.policy(item, "handover", {}).get("from_instructor_id", owner)
+            if extensions.policy(item, "named_transition", {}).get("unowned"):
+                expected_owner = None
             if not offering.is_active or offering.instructor_id != expected_owner:
                 raise RepairError("existing_owner_must_be_preserved")
             if offering.lesson_hours != expected_offerings[str(offering.pk)]["lesson_hours"]:
