@@ -1,4 +1,4 @@
-"""Exact, encrypted-only evidence for five source-verified journal targets."""
+"""Exact, encrypted-only evidence for source-verified journal targets."""
 
 from django.apps import apps
 
@@ -11,6 +11,16 @@ OFFERINGS = (
     "0858f3cf-76eb-47b3-8842-4098e32c17a2",
     "2bcf2c6e-817e-4ac0-a54b-9c78820f60b2",
     "1206a0f5-1483-4b67-b820-9f976f335231",
+    # MR113: exact teacher, subject and group in the authorized snapshot.
+    "a083cf1a-a7d0-452f-9c7e-597fb52dd490",
+    "3df416e9-68e1-45c4-87c6-ba327f77b3e8",
+    "bf4e4637-e084-4801-aae0-0b9829ce8117",
+    "56e3ef8e-94f8-4b09-9d58-8523752f5281",
+    # MR78, MR87, MR103 and MR105 respectively.
+    "6b4fc624-06f3-4358-b24f-e420138c66ad",
+    "7ed9430b-0c40-452f-b771-8bb3e4f31a03",
+    "ca1bcf85-5d38-4c02-a2e5-b1ece0f5b6b9",
+    "1f9b5a6a-e6d2-422d-bc5e-4c006af8ad1d",
 )
 
 
