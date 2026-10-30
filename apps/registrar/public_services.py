@@ -66,6 +66,7 @@ from .gradebook import recompute_absence_hours  # noqa: F401
 from .grading_scale import bands_text  # noqa: F401
 from .grading_scale import is_custom  # noqa: F401
 from .handover_actions import REVERT_BLOCKER_CODES  # noqa: F401
+from .journal_workload_shares import sync_workload_journal_shares  # noqa: F401
 from .movements import RULES  # noqa: F401
 from .page_contexts import _season_label as season_label  # noqa: F401
 from .plan_hours import plan_hours_for_offering  # noqa: F401
@@ -114,6 +115,7 @@ __all__ = [
     "journal_hygiene_actions",
     "journal_hygiene_rows",
     "journal_scope",
+    "sync_workload_journal_shares",
     "kollokvium_notifications",
     "kollokvium_windows",
     "language_levels",

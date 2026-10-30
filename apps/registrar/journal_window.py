@@ -109,15 +109,15 @@ def resolve_request_kind(request, offering) -> str:
     """`?kind=` — jurnalın içindəki dərs tipi süzgəci (sahib tələbi 2026-09-06).
 
     Siyahıdakı «Mühazirə / Seminar / Laboratoriya» pilləsi jurnala da keçir.
-    Fail-soft: naməlum tip və ya bu açılışda HEÇ BİR dərsi olmayan tip «hamısı»
-    kimi oxunur — boş cədvəl göstərmək istifadəçini çaşdırardı.
+    Hələ yazılmamış, amma yükdə/cədvəldə planlaşdırılmış növ də saxlanır.
     """
-    from apps.registrar.models import Lesson, SlotKind
+    from apps.registrar.journal_planned_kinds import available_kinds
+    from apps.registrar.models import SlotKind
 
     kind = (request.GET.get("kind") or "").strip()
     if kind not in dict(SlotKind.choices):
         return ""
-    if not Lesson.objects.filter(offering=offering, kind=kind).exists():
+    if kind not in available_kinds(offering):
         return ""
     return kind
 
@@ -151,12 +151,13 @@ def grid_nav_context(request, offering, *, selected_kind: str, active_tab: str) 
 
 
 def kind_tabs(offering, selected_kind: str) -> list:
-    """Jurnal başlığındakı tip pillələri — YALNIZ mövcud tiplər göstərilir."""
-    from apps.registrar.models import Lesson, SlotKind
+    """Jurnal başlığındakı tip pillələri — mövcud və planlaşdırılmış növlər."""
+    from apps.registrar.journal_planned_kinds import available_kinds
+    from apps.registrar.models import SlotKind
     from apps.registrar.practical_label import kind_choices
 
     labels = dict(kind_choices(offering, dict(SlotKind.choices)))  # «praktiki» açılış: seminar → «Praktiki məşğələ»
-    present = set(Lesson.objects.filter(offering=offering).values_list("kind", flat=True).distinct())
+    present = available_kinds(offering)
     tabs = [{"value": "", "label": pgettext("registrar.journal", "Hamısı"), "active": not selected_kind}]
     for value, _label in SlotKind.choices:
         if value in present:

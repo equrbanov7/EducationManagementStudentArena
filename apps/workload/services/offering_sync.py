@@ -23,7 +23,7 @@ Burada əlavə olaraq:
   bağlı jurnalın saatı dəyişmir.
 * QEYDİYYAT: yeni və ya hələ BOŞ açılışa qrupun aktiv tələbələri
   ``registrar.services.enroll_group_students`` ilə (tarixçə/alt qrup qaydaları orada).
-* HEÇ NƏ SİLİNMİR: sətir silinsə/dəyişsə köhnə açılış qalır (jurnal tarixçəsi).
+* Köhnə jurnalın tarixçəsi saxlanır; current təyinatların növ payları ``offering_shares``-dədir.
 
 Sorğu sayı sətir sayından asılı DEYİL: toplu SELECT-lər + yalnız dəyişən açılışa YAZI.
 """
@@ -50,6 +50,7 @@ from .offering_rules import (
     owner_for_rows,
     plan_reached_chair,
 )
+from .offering_shares import SHARE_COUNTER_KEYS, sync_target_shares
 from .plan_calendar import PeriodResolver, ensure_row_periods
 
 logger = logging.getLogger(__name__)
@@ -58,6 +59,7 @@ logger = logging.getLogger(__name__)
 INSTRUCTOR_PERMISSION = "grade.input"
 
 COUNTER_KEYS = (
+    *SHARE_COUNTER_KEYS,
     "rows",
     "rows_skipped",
     "period_set",
@@ -93,7 +95,6 @@ COUNTER_KEYS = (
     "schedule_conflicts",
 )
 
-#: ``registrar.services.enroll_group_students`` hesabatı → bu modulun sayğacları.
 _ENROLL_KEYS = {
     "created": "enrolled",
     "existing": "enroll_existing",
@@ -117,7 +118,7 @@ def assignments_prefetch() -> Prefetch:
 def rows_queryset(task):
     return (
         TeachingTaskRow.objects.filter(task=task)
-        .select_related("period")
+        .select_related("period", "task")
         .prefetch_related("groups", assignments_prefetch())
         .order_by("season", "order", "created_at")
     )
@@ -261,7 +262,7 @@ class _Sync:
         return {(o.subject_id, o.period_id, o.group_id): o for o in found}
 
     def _foreign_rows(self, keys) -> dict:
-        """Eyni açılışları əhatə edən BAŞQA sənədlərin sətirləri — yalnız saat üçün (bir sorğu)."""
+        """Başqa sənədlərin eyni açılışı əhatə edən sətirləri — saat və cari növ payları."""
         found: dict = {}
         rows = (
             TeachingTaskRow.objects.filter(
@@ -271,7 +272,8 @@ class _Sync:
             )
             .exclude(task_id=self.task.pk)
             .exclude(task__status="cancelled")
-            .prefetch_related("groups")
+            .select_related("task")
+            .prefetch_related("groups", assignments_prefetch())
         )
         wanted = set(keys)
         for row in rows:
@@ -400,6 +402,15 @@ class _Sync:
         if to_enroll_elective:
             # Qrupun qərarı = qrupun HƏR aktiv üzvü (başqa plan versiyasında olanlar da) — idempotent.
             self._enroll(to_enroll_elective, kind="elective")
+        sync_target_shares(
+            organization_id=self.org_id,
+            targets=targets,
+            foreign_rows=foreign_rows,
+            offering_ids=self.offering_ids,
+            by_user=self.actor_user,
+            request=self.request,
+            counters=self.counters,
+        )
 
     def _own(self, offering, kind) -> None:
         if offering is not None:

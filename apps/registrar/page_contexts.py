@@ -25,17 +25,16 @@ def _profile_section_prefix(section: str) -> str:
 
 
 def attach_kind_labels(offerings, selected_kind: str = "") -> None:
-    """Açılışlara dərs tipi etiketi + axşam bayrağı bağlayır (iki toplu sorğu).
+    """Açılışlara dərs tipi etiketi + axşam bayrağı bağlayır (toplu sorğular).
 
-    Ayrıca funksiyadır ki, jurnal siyahısı onu YALNIZ lazım olan dəst üçün
-    çağıra bilsin (səhifə dilimi, ya da `kind` süzgəci seçiləndə tam dəst) —
-    QA 2026-09-05 P2-18.
+    Yalnız səhifə dilimi üçün çağırılır (QA 2026-09-05 P2-18).
 
     ``selected_kind`` verilibsə etiket YALNIZ həmin tipi göstərir (sahib tələbi
     2026-09-06): «Seminar» pilləsi seçiləndə sətirdə «Mühazirə · Seminar»
     yazılırdı, yəni süzgəcin nə etdiyi görünmürdü. ``slot_kinds`` isə TAM qalır —
     jurnalın içindəki tip seçicisi bütün mövcud tipləri göstərməlidir.
     """
+    from apps.registrar.journal_planned_kinds import planned_kinds_by_offering
     from apps.registrar.models import Lesson, ScheduleSlot, SlotKind
     from apps.registrar.practical_label import kind_choices
     from apps.registrar.schedule import EVENING_START
@@ -45,7 +44,7 @@ def attach_kind_labels(offerings, selected_kind: str = "") -> None:
         return
     kind_labels = dict(SlotKind.choices)
     kind_order = {value: index for index, (value, _) in enumerate(SlotKind.choices)}
-    kinds_by_offering: dict = {}
+    kinds_by_offering: dict = planned_kinds_by_offering(offerings)
     evening_offerings: set = set()
     for offering_id, kind, start_time in ScheduleSlot.objects.filter(offering__in=offerings).values_list(
         "offering_id", "kind", "start_time"

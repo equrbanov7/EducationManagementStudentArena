@@ -109,7 +109,7 @@ def workload_hours_for_offering(offering) -> dict:
         return {}
     rows = TaskRow.objects.filter(
         organization_id=offering.organization_id, subject_id=offering.subject_id, period_id=offering.period_id
-    )
+    ).exclude(task__status="cancelled")
     if offering.group_id:
         rows = rows.filter(groups=offering.group_id)
     shares = [row_group_hours(row, group_count=row.groups.count) for row in rows.order_by("-updated_at")]
@@ -122,11 +122,15 @@ def workload_hours_by_offering(offerings) -> dict:
     TaskRow = _task_row_model()
     if not offerings or TaskRow is None:
         return {}
-    queryset = TaskRow.objects.filter(
-        organization_id=offerings[0].organization_id,
-        subject_id__in={offering.subject_id for offering in offerings},
-        period_id__in={offering.period_id for offering in offerings},
-    ).prefetch_related("groups")
+    queryset = (
+        TaskRow.objects.filter(
+            organization_id=offerings[0].organization_id,
+            subject_id__in={offering.subject_id for offering in offerings},
+            period_id__in={offering.period_id for offering in offerings},
+        )
+        .exclude(task__status="cancelled")
+        .prefetch_related("groups")
+    )
     rows = []
     for row in queryset:
         group_ids = {group.pk for group in row.groups.all()}

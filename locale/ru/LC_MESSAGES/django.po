@@ -111581,3 +111581,8 @@ msgstr "Изменения утверждаются автоматически"
 msgctxt "accounts.syllabus"
 msgid "Redaktə et"
 msgstr "Редактировать"
+
+#: apps/registrar/models/journal_share.py
+msgctxt "registrar.journal_share"
+msgid "Dərs yükü"
+msgstr "Учебная нагрузка"

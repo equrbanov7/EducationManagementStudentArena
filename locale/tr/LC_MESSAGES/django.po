@@ -110796,3 +110796,8 @@ msgstr "Değişiklikler otomatik onaylanır"
 msgctxt "accounts.syllabus"
 msgid "Redaktə et"
 msgstr "Düzenle"
+
+#: apps/registrar/models/journal_share.py
+msgctxt "registrar.journal_share"
+msgid "Dərs yükü"
+msgstr "Ders yükü"

@@ -13,7 +13,6 @@ from __future__ import annotations
 
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
-from django.db.models import Q
 
 from core.search_text import tolerant_q
 
@@ -108,18 +107,10 @@ def label_for_selection(kind: str, value: str) -> str:
 
 
 def apply_kind_filter(qs, kind: str):
-    """Dərs tipi süzgəci — offering-in HƏR HANSI slotu/dərsi bu tipdədirmi.
+    """Keçirilmiş və planlaşdırılmış növlər üzrə SQL süzgəci; səhifələmə qorunur."""
+    from .journal_planned_kinds import apply_kind_filter as apply
 
-    Əvvəllər `attach_kind_labels` tam dəst üçün hesablanıb Python-da
-    `selected_kind in o.slot_kinds` yoxlanılırdı; indi iki subquery ilə eyni
-    məntiq DB tərəfdə (join fan-out YOXDUR — `pk__in`, `Count` annotasiyasını
-    təhrif etmir)."""
-    from apps.registrar.models import Lesson, ScheduleSlot
-
-    return qs.filter(
-        Q(pk__in=ScheduleSlot.objects.filter(kind=kind).values_list("offering_id", flat=True))
-        | Q(pk__in=Lesson.objects.filter(kind=kind).values_list("offering_id", flat=True))
-    )
+    return apply(qs, kind)
 
 
 def apply_text_query(qs, query: str):

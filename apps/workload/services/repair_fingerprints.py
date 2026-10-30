@@ -1,12 +1,14 @@
 """Sərhədli yük bərpaları üçün akademik məzmunun tam-sahə müqayisəsi."""
 
+from django.core.exceptions import EmptyResultSet
+from django.db import connection
 from django.db.models import Q
 
 from .sbio235_state import digest, model, records
 
 
-def academic_fingerprint(*, organization_id, offerings, lock=False):
-    """Hər bütün-sahə məzmununun yalnız count+SHA-sı auditə gedir."""
+def academic_queries(*, organization_id, offerings):
+    """Eyni bounded məzmun xəritəsi Python və DB-də hesablanan fingerprintlər üçün."""
     offering_ids = [o.pk for o in offerings]
     syllabus_scope = Q(pk__in=[])
     for offering in offerings:
@@ -57,8 +59,35 @@ def academic_fingerprint(*, organization_id, offerings, lock=False):
         version_id__in=queries["version"].values("pk")
     )
     queries["review"] = model("syllabus.SyllabusReview").objects.filter(version_id__in=queries["version"].values("pk"))
+    return queries
+
+
+def academic_fingerprint(*, organization_id, offerings, lock=False):
+    """Hər bütün-sahə məzmununun yalnız count+SHA-sı auditə gedir."""
     result = {}
-    for key, qs in queries.items():
+    for key, qs in academic_queries(organization_id=organization_id, offerings=offerings).items():
         data = records(qs, lock=lock)
         result[key] = {"count": len(data), "sha256": digest(data)}
+    return result
+
+
+def academic_database_fingerprint(*, organization_id, offerings, exclude=()):
+    """Tam row JSON hashı DB-də qalır; bütün kafedraların markları Python-a yüklənmir."""
+    result = {}
+    for key, qs in academic_queries(organization_id=organization_id, offerings=offerings).items():
+        if key in exclude:
+            continue
+        try:
+            sql, params = qs.order_by().query.sql_with_params()
+        except EmptyResultSet:
+            result[key] = {"count": 0, "md5": ""}
+            continue
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT count(*), md5(coalesce(string_agg(md5(row_to_json(state)::text), '' ORDER BY id), '')) "
+                "FROM (" + sql + ") state",
+                params,
+            )
+            count, md5 = cursor.fetchone()
+        result[key] = {"count": count, "md5": md5}
     return result

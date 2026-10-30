@@ -111388,3 +111388,8 @@ msgstr "Changes are approved automatically"
 msgctxt "accounts.syllabus"
 msgid "Redaktə et"
 msgstr "Edit"
+
+#: apps/registrar/models/journal_share.py
+msgctxt "registrar.journal_share"
+msgid "Dərs yükü"
+msgstr "Teaching workload"

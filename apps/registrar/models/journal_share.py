@@ -27,6 +27,7 @@ from core.models import TimeStampedModel, UUIDModel
 class JournalShareSource(models.TextChoices):
     LEGACY = "legacy", pgettext_lazy("registrar.journal_share", "Köhnə sistem")
     MANUAL = "manual", pgettext_lazy("registrar.journal_share", "Əl ilə")
+    WORKLOAD = "workload", pgettext_lazy("registrar.journal_share", "Dərs yükü")
 
 
 class JournalShare(UUIDModel, TimeStampedModel):

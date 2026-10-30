@@ -341,6 +341,7 @@ on:
           - repair_balanced_workload_pairs
           - repair_repeated_sections_workload
           - repair_owner_activity_batch
+          - sync_workload_journal_shares
           - fill_vacant_from_journals
           - audit_staff_placement
           - merge_chair_units
@@ -1107,6 +1108,18 @@ jobs:
                 test "$APPLY" != "true" || { echo "apply üçün batch=dry-run baselineSHA verin" >&2; exit 2; }
               fi
               ;;
+            sync_workload_journal_shares)
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --year "$YEAR" --actor "$actor")
+              test -z "$ROSTER_TAG" || { echo "roster_tag boş olmalıdır" >&2; exit 2; }
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^[0-9a-f]{64}$' || exit 2
+                args+=(--expected-baseline "$BATCH")
+              else
+                test "$APPLY" != "true" || { echo "apply üçün batch=dry-run baselineSHA verin" >&2; exit 2; }
+              fi
+              ;;
             fix_workload_overcount)
               # Sahib 2026-10-25: artıq sayılan yük (dublikat + sübutlu birgə dərs). Adlı hesabat şifrəli artifakta.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -1530,6 +1543,16 @@ jobs:
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -E '^CommandError: [a-z0-9,:_=.-]+$' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "sync_workload_journal_shares" ]; then
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^workload_shares: mode=(dry_run|apply)( (baseline=[0-9a-f]{64}|[a-z_]+=[0-9]+))+$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -E '^CommandError: [a-z_]+$' "$RUNNER_TEMP/out.log" | head -n 1 || true
               rm -f "$RUNNER_TEMP/out.log"
               exit "$status"
             fi

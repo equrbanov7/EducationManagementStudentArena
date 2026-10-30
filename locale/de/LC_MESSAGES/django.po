@@ -112420,3 +112420,8 @@ msgstr "Änderungen werden automatisch genehmigt"
 msgctxt "accounts.syllabus"
 msgid "Redaktə et"
 msgstr "Bearbeiten"
+
+#: apps/registrar/models/journal_share.py
+msgctxt "registrar.journal_share"
+msgid "Dərs yükü"
+msgstr "Lehrdeputat"

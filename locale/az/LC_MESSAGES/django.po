@@ -110899,3 +110899,8 @@ msgstr "Düzəlişlər avtomatik təsdiqlənir"
 msgctxt "accounts.syllabus"
 msgid "Redaktə et"
 msgstr "Redaktə et"
+
+#: apps/registrar/models/journal_share.py
+msgctxt "registrar.journal_share"
+msgid "Dərs yükü"
+msgstr "Dərs yükü"
