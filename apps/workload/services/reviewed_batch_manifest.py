@@ -127,6 +127,7 @@ class Plan:
 
 def _item(entry, *, version="reviewed-workload-source/1"):
     from .reviewed_batch_policy import parse
+    from .reviewed_source_geometry import geometry_for_entry
 
     mode = ALLOWED_CLASSES.get(entry.get("ready_class"))
     if mode is None or entry.get("delegated_existing_repair"):
@@ -141,6 +142,7 @@ def _item(entry, *, version="reviewed-workload-source/1"):
         raise RepairError("source_season_invalid")
     cells = source["values"]
     hours = {kind: geometry(cells[season + "_" + kind]) for kind in ACTIVITIES}
+    hours = geometry_for_entry(entry, hours, version=version)
     if {kind: value["total"] for kind, value in hours.items()} != entry["desired_contacts"]:
         raise RepairError("source_contact_total_mismatch")
     if not sum(value["total"] for value in hours.values()):

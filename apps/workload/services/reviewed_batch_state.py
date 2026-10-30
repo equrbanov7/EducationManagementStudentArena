@@ -8,6 +8,7 @@ from apps.registrar.public import handover
 
 from . import reviewed_batch_electives as electives
 from . import reviewed_batch_extensions as extensions
+from . import reviewed_source_geometry as source_geometry
 from .owner_activity_state import workload_records
 from .people import is_assignable_teacher
 from .repair_fingerprints import academic_database_fingerprint
@@ -365,6 +366,7 @@ def validate(plan, *, actor):
                 raise RepairError("reviewed_journal_hours_changed")
             if offering.lesson_hours != item["contacts"] and offering.pk in closed:
                 raise RepairError("journal_hours_locked_source_patch_requires_separate_review")
+            source_geometry.validate_current(item, offering)
             reviewed_history = extensions.validate_history(item, offering)
             taught = dict(offering.lessons.values("kind").annotate(hours=Sum("hours")).values_list("kind", "hours"))
             if not reviewed_history and any(int(taught.get(kind, 0) or 0) > item["plan"][kind] for kind in ACTIVITIES):

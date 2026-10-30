@@ -18,9 +18,14 @@ def parse(entry, item, *, version):
         "elective_choices",
         "empty_group_journals",
         "direct_elective_courses",
+        "source_contact_geometry",
     }:
         raise RepairError("reviewed_v2_policy_required")
     result = {}
+    if "source_contact_geometry" in policy:
+        from .reviewed_source_geometry import parsed_policy
+
+        result["source_contact_geometry"] = parsed_policy(entry, item, version=version)
     if "elective_choices" in policy:
         from .reviewed_batch_electives import parse as parse_electives
 
