@@ -317,12 +317,12 @@ class Recovery:
         )
 
     def teacher_marks(self):
-        """Mənbə dump-dan AYRI: müəllim balları + istifadəçinin rutinsaat qərarı."""
+        """Mənbə dump-dan ayrı müəllim balları; məlum olmayan saat uydurulmur."""
         Lesson, Mark = model("registrar.Lesson"), model("registrar.LessonMark")
         found = list(
             Lesson.objects.select_for_update().filter(organization=self.org, offering=self.offering, date="2026-10-22")
         )
-        if len(found) > 1 or (found and (found[0].kind != "seminar" or found[0].start_time != dt.time(20, 10))):
+        if len(found) > 1 or (found and found[0].kind != "seminar"):
             raise RecoveryError("teacher_lesson_conflict")
         if found:
             lesson = found[0]
@@ -333,14 +333,24 @@ class Recovery:
                     offering=self.offering,
                     date="2026-10-22",
                     kind="seminar",
-                    start_time=dt.time(20, 10),
+                    start_time=None,
                     hours=2,
                     created_by=self.actor,
                     instructor_id=TEACHER,
-                    off_schedule_reason="MR-000027: 22.10 balları müəllimin 28.10 12:14 cavabından; 20:10 rutin saatı sistem sahibi təsdiqləyib.",
+                    off_schedule_reason="MR-000027: 22.10 balları müəllimin 28.10 12:14 cavabından; saat məlum deyil. 2 akademik saat sistemin standart qaydasıdır, mənbə vaxt sübutu deyil.",
                 ),
                 "delete",
             )
+        self.teacher_lesson_evidence = {
+            "start_time": lesson.start_time.isoformat() if lesson.start_time else None,
+            "time_evidence": "existing lesson time retained" if found else "unknown; no time inferred",
+            "hours": lesson.hours,
+            "hours_policy": (
+                "existing lesson hours retained"
+                if found
+                else "canonical default 2 academic hours; not source-proven duration"
+            ),
+        }
         for legacy, score in ((10127, 10), (10128, 10), (10129, 9)):
             enrollment = self.enrollments[legacy]
             mark = (
@@ -382,8 +392,7 @@ class Recovery:
                     "date": "2026-10-22",
                     "scores": {"10127": 10, "10128": 10, "10129": 9},
                     "grade_evidence": "MR27 teacher reply 2026-10-28 12:14",
-                    "time_evidence": "System owner explicitly authorizes existing journal routine20:10",
-                    "hours_policy": "Lesson canonical default2 academic hours",
+                    **self.teacher_lesson_evidence,
                     "kind_policy": "numeric scores: seminar; this offering source lists lecture/seminar, no lab",
                     "entered_by": "actual administrative actor",
                 }

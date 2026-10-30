@@ -236,11 +236,49 @@ class MR27RecoveryTests(TestCase):
             self.run_command(undo=batch)
         self.assertEqual(LessonMark.objects.filter(lesson__offering=self.offering).count(), 21)
 
+    def test_teacher_assertion_dry_run_does_not_create_unproven_time(self):
+        self.run_command(assertion=True, apply=False)
+        self.assertFalse(Lesson.objects.filter(offering=self.offering, date="2026-10-22").exists())
+        self.assertEqual(LessonMark.objects.filter(lesson__offering=self.offering).count(), 6)
+
+    def test_teacher_assertion_preserves_existing_slot_time_and_hours(self):
+        lesson = Lesson.objects.create(
+            organization=self.org,
+            offering=self.offering,
+            date="2026-10-22",
+            kind="seminar",
+            start_time=dt.time(18, 40),
+            hours=1,
+        )
+        self.run_command(assertion=True)
+        lesson.refresh_from_db()
+        self.assertEqual(lesson.start_time, dt.time(18, 40))
+        self.assertEqual(lesson.hours, 1)
+        self.assertIn("teacher_marks_already_present=3", self.run_command(assertion=True))
+
+    def test_teacher_assertion_conflicting_kind_rolls_back(self):
+        Lesson.objects.create(organization=self.org, offering=self.offering, date="2026-10-22", kind="lecture")
+        with self.assertRaisesMessage(Exception, "teacher_lesson_conflict"):
+            self.run_command(assertion=True)
+        self.assertEqual(LessonMark.objects.filter(lesson__offering=self.offering).count(), 6)
+
+    def test_teacher_assertion_conflicting_score_is_not_overwritten(self):
+        self.run_command(assertion=True)
+        mark = LessonMark.objects.get(
+            lesson__offering=self.offering, lesson__date="2026-10-22", enrollment__student=self.existing
+        )
+        mark.score = 8
+        mark.save(update_fields=["score"])
+        with self.assertRaisesMessage(Exception, "teacher_mark_conflict"):
+            self.run_command(assertion=True)
+        mark.refresh_from_db()
+        self.assertEqual(mark.score, 8)
+
     def test_teacher_assertion_has_separate_evidence_actual_actor_and_undo(self):
         batch = self.run_command(assertion=True).split("batch=")[1].strip()
         lesson = Lesson.objects.get(offering=self.offering, date="2026-10-22")
         self.assertEqual(lesson.kind, "seminar")
-        self.assertEqual(lesson.start_time, dt.time(20, 10))
+        self.assertIsNone(lesson.start_time)
         self.assertEqual(lesson.hours, 2)
         scores = dict(
             LessonMark.objects.filter(lesson=lesson).values_list(
