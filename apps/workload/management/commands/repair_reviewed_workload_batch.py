@@ -37,11 +37,12 @@ class Command(BaseCommand):
         apply_rls_request_context(user_id=user.pk, org_id=ORG, bypass=False)
         try:
             manifest = read_manifest(options["manifest"], options["manifest_sha256"])
-            from ...services import civil_source_partition, reviewed_language_level_load
+            from ...services import civil_source_partition, reviewed_language_level_load, reviewed_split_kind_load
 
             special = {
                 civil_source_partition.FORMAT: civil_source_partition.run,
                 reviewed_language_level_load.FORMAT: reviewed_language_level_load.run,
+                reviewed_split_kind_load.FORMAT: reviewed_split_kind_load.run,
             }
             partition = manifest.get("format") in special
             plan = (

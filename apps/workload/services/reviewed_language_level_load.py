@@ -62,10 +62,10 @@ def _state(row, offering):
         "share_enrollments": {str(s.pk): sorted(str(e.pk) for e in s.enrollments.all()) for s in shares},
         "academic": academic_database_fingerprint(organization_id=ORG, offerings=[offering]),
         "outside_rows": digest(
-            records(model("workload.TeachingTaskRow").objects.filter(organization_id=ORG).exclude(pk=ROW))
+            records(model("workload.TeachingTaskRow").objects.filter(organization_id=ORG).exclude(pk=row.pk))
         ),
         "outside_assignments": digest(
-            records(model("workload.TeacherAssignment").objects.filter(organization_id=ORG).exclude(row_id=ROW))
+            records(model("workload.TeacherAssignment").objects.filter(organization_id=ORG).exclude(row_id=row.pk))
         ),
     }
 
