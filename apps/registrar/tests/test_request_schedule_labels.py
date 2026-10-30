@@ -6,7 +6,7 @@ from django.test import TestCase
 
 from apps.registrar import request_schedule_labels as service
 from apps.registrar.models import Lesson
-from apps.syllabus.tests.factories import make_academic_stack, make_offering, make_org
+from apps.syllabus.tests.factories import activate_member, make_academic_stack, make_offering, make_org
 from core.rls import bypass_rls
 
 
@@ -18,6 +18,7 @@ class RequestScheduleLabelsTest(TestCase):
         self.org = make_org("schedule-labels")
         self.user = get_user_model().objects.create_user("schedule-label-admin", is_superuser=True)
         teacher = get_user_model().objects.create_user(service.TEACHER)
+        activate_member(self.org, teacher, "teacher", permissions=["course.view", "grade.input"])
         self.offering = make_offering(self.org, make_academic_stack(self.org), teacher)
         self.binding = patch.object(service, "OFFERING", str(self.offering.pk))
         self.binding.start()

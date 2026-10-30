@@ -6,7 +6,7 @@ from django.test import TestCase
 
 from apps.registrar import mr77_schedule as service
 from apps.registrar.models import Lesson, ScheduleSlot
-from apps.syllabus.tests.factories import make_academic_stack, make_offering, make_org
+from apps.syllabus.tests.factories import activate_member, make_academic_stack, make_offering, make_org
 from core.rls import bypass_rls
 
 
@@ -18,6 +18,7 @@ class MR77ScheduleTest(TestCase):
         self.org = make_org("mr77-test")
         self.user = get_user_model().objects.create_user("mr77-admin", is_superuser=True)
         teacher = get_user_model().objects.create_user("mr77-teacher")
+        activate_member(self.org, teacher, "teacher", permissions=["course.view", "grade.input"])
         stack = make_academic_stack(self.org)
         stack["period"].end_date = dt.date(2035, 1, 1)
         stack["period"].save(update_fields=["end_date"])
