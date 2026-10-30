@@ -1,4 +1,4 @@
-"""Exact source-backed corrections for six reviewed named workload rows.
+"""Exact source-backed corrections for eight reviewed named workload rows.
 
 These pins cannot confer arbitrary ownership: normal tenant, source identity,
 assignment and complete academic-fingerprint guards still run before writes.
@@ -66,6 +66,26 @@ PINS = {
         "teacher": 8391,
         "totals": {"lab": 0, "lecture": 30, "seminar": 15},
         "unowned": True,
+    },
+    "cd201de8-46a8-4f1d-bd78-cf07d7ea8f86": {
+        "source_sha": "99f45965b5bf00579e0a84e9845131393452666a2ecb0f2e6723baafb6d1418c",
+        "source_line": 41,
+        "teacher": 8348,
+        "totals": {"lecture": 30, "seminar": 15, "lab": 0},
+        "groups": ["2618b6dc-1ebf-49c0-8e26-337421d7550f"],
+        "journals": ["95e6a7d0-5c91-4a96-8b7a-cbd1e43a8510"],
+        "old_owners": [8348],
+        "unowned": False,
+    },
+    "a0b27e4d-ca93-4101-bd1f-22c923bd47d4": {
+        "source_sha": "99f45965b5bf00579e0a84e9845131393452666a2ecb0f2e6723baafb6d1418c",
+        "source_line": 89,
+        "teacher": 9548,
+        "totals": {"lecture": 30, "seminar": 30, "lab": 0},
+        "groups": ["ab21a8e2-beab-4bd8-9700-531c602a0556"],
+        "journals": ["0b4c29b4-6a3d-491f-951d-32f589eda37d"],
+        "old_owners": [9548],
+        "unowned": False,
     },
 }
 
