@@ -6,7 +6,7 @@ from unittest.mock import patch
 from django.test import TransactionTestCase
 
 from apps.registrar.models import CourseOffering, Enrollment, Lesson, LessonMark
-from apps.workload.services.scoped_snapshot.request_content import collect_request_content
+from apps.workload.services.scoped_snapshot.request_content import MR127_OFFERINGS, OFFERINGS, collect_request_content
 from apps.workload.tests import test_scoped_snapshot as fixtures
 from apps.workload.tests.factories import activate_member
 
@@ -52,3 +52,8 @@ class RequestContentTests(TransactionTestCase):
         ):
             result = collect_request_content()
         self.assertTrue(all(not rows for rows in result.values()))
+
+    def test_mr127_only_five_reviewed_offerings(self):
+        self.assertEqual(len(MR127_OFFERINGS), 5)
+        self.assertEqual(len(set(OFFERINGS)), len(OFFERINGS))
+        self.assertTrue(set(MR127_OFFERINGS) <= set(OFFERINGS))

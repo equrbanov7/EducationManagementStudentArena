@@ -24,6 +24,17 @@ OFFERINGS = (
 )
 
 
+# MR127: Aruz Mikayılov's five named subject/group journals only.
+MR127_OFFERINGS = (
+    "1fcdbfff-c3dc-4262-b936-4fc035b60c07",  # Hidrologiya,235EKO
+    "484e0ebd-e9d5-4211-8c9e-419a534942c3",  # Hidrologiya,235EM
+    "7c3a6803-362e-418f-a18b-34fe80aa468e",  # Coğrafi ekologiya,235EKO
+    "41ff13ba-694d-4601-be6c-b12a5959a422",  # Meteorologiya,234SBIO
+    "acc97b99-90bc-4fb3-b01b-b56ff630b7d2",  # Kartoqrafiya/GİS,233EKO
+)
+OFFERINGS += MR127_OFFERINGS
+
+
 def collect_request_content():
     """Called only inside the parent repeatable-read read-only RLS transaction.
 
