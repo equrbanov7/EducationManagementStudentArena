@@ -7,7 +7,7 @@ from django.db.models import Prefetch, Q
 
 from core.group_identity import canonical_aliases
 
-from ..constants import TaskStatus
+from ..constants import RowKind, TaskStatus
 from ..models import TeacherAssignment, TeachingTaskRow
 from .offering_shares import KINDS, _assignment_group
 
@@ -35,7 +35,7 @@ def _registered_children(organization, groups):
 
 
 def teacher_journal_assignments(*, organization, teacher_id):
-    """Canonical (subject, period, group) → assigned kinds; never grants journal access.
+    """Canonical (subject, period, group) → kinds; (None, None, id) is an exact intensive offering.
 
     Draft/cancelled/vacant/zero-hour entries and ambiguous free-text subgroup notes
     supply no current journal. Physical subgroup IDs remain distinct. Explicit
@@ -49,12 +49,17 @@ def teacher_journal_assignments(*, organization, teacher_id):
     released = Q(task__status__in=(TaskStatus.APPROVED, TaskStatus.DISTRIBUTED, TaskStatus.AMENDED)) | Q(
         task__status=TaskStatus.DISTRIBUTING, task__submitted_at__isnull=False
     )
+    # Authorized intensive creation opens its own explicit journal immediately,
+    # independently of the ordinary chair-plan approval lifecycle.
+    intensive = Q(row_kind=RowKind.INTENSIVE, intensive_offering__is_active=True) & ~Q(
+        task__status=TaskStatus.CANCELLED
+    )
     rows = list(
         TeachingTaskRow.objects.filter(
             organization=organization, task__organization=organization, assignments__in=assignments
         )
-        .filter(released)
-        .select_related("task")
+        .filter(released | intensive)
+        .select_related("task", "intensive_offering")
         .prefetch_related("groups", Prefetch("assignments", queryset=assignments, to_attr="journal_assignments"))
         .distinct()
     )
@@ -63,6 +68,18 @@ def teacher_journal_assignments(*, organization, teacher_id):
     aliases = canonical_aliases(groups)
     result = defaultdict(set)
     for row in rows:
+        if row.row_kind == RowKind.INTENSIVE:
+            offering = row.intensive_offering
+            if (
+                offering is not None
+                and offering.is_active
+                and offering.is_intensive
+                and offering.organization_id == organization.pk
+                and offering.subject_id == row.subject_id
+                and offering.period_id == row.period_id
+            ):
+                result[(None, None, offering.pk)].update(a.activity for a in row.journal_assignments)
+            continue
         row_groups = list(row.groups.all())
         known = row_groups + [child for group in row_groups for child in children.get(group.pk, ())]
         for parent in row_groups:

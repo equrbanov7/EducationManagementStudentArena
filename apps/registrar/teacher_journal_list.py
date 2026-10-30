@@ -29,10 +29,13 @@ def _workload_filters(queryset, user, organization):
         families[aliases.get(group.pk, group).pk].add(group.pk)
     filters = {kind: Q(pk__in=[]) for kind in KINDS}
     for (subject_id, period_id, group_id), kinds in assignments.items():
-        family = families.get(group_id)
-        if not family:
-            continue
-        match = Q(subject_id=subject_id, period_id=period_id, group_id__in=family)
+        if subject_id is None and period_id is None:
+            match = Q(pk=group_id)
+        else:
+            family = families.get(group_id)
+            if not family:
+                continue
+            match = Q(subject_id=subject_id, period_id=period_id, group_id__in=family)
         for kind in kinds:
             filters[kind] |= match
     return filters

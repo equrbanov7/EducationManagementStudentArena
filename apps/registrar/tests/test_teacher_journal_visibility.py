@@ -324,3 +324,22 @@ class TeacherJournalVisibilityTests(TestCase):
         request.POST = {}
         with patch("apps.registrar.journal_access.offering_or_404", return_value=offering), self.assertRaises(Http404):
             journal_detail(request, offering.pk)
+
+    def test_explicit_authorized_intensive_assignment_keeps_its_exact_groupless_journal(self):
+        offering = self.offering(instructor=self.teacher)
+        offering.group = None
+        offering.course_format = "intensive"
+        offering.starts_on = timezone.localdate()
+        offering.ends_on = timezone.localdate()
+        offering.save()
+        self.row.groups.clear()
+        self.row.row_kind = "intensive"
+        self.row.intensive_offering = offering
+        self.row.save(update_fields=["row_kind", "intensive_offering"])
+        self.task.status = TaskStatus.DRAFT
+        self.task.save(update_fields=["status"])
+        self.assignment()
+        self.assertEqual([o.pk for o in self.context()["offerings"]], [offering.pk])
+        self.task.status = TaskStatus.CANCELLED
+        self.task.save(update_fields=["status"])
+        self.assertEqual(self.context()["offerings"], [])
