@@ -210,6 +210,12 @@ def _item(entry):
     return item
 
 
+def _unique_physical_course_keys(items):
+    physical = [(item["subject_id"], item["period_id"], gid) for item in items for gid in item["group_ids"]]
+    if len(physical) != len(set(physical)):
+        raise RepairError("overlapping_physical_course_targets_need_merged_review")
+
+
 def select_manifest(value, *, sha256, lines):
     if (
         value.get("format") not in ("maliyye-full-source-verdict/1", "reviewed-workload-source/1")
@@ -231,6 +237,7 @@ def select_manifest(value, *, sha256, lines):
     keys = [(item["subject_id"], item["period_id"], tuple(item["group_ids"])) for item in items]
     if len(keys) != len(set(keys)):
         raise RepairError("shared_course_contributions_must_be_reviewed_as_one_logical_row")
+    _unique_physical_course_keys(items)
     used_groups = {uid(group["id"]) for entry in matches for group in entry["physical_source_groups"]}
     fixes = [fix for fix in value.get("metadata_fixes", []) if uid(fix["group_id"]) in used_groups]
     for fix in fixes:

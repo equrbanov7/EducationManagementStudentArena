@@ -78,6 +78,16 @@ class ReviewedManifestTests(SimpleTestCase):
             item["row_data"]["credits"] = raw
             self.assertNotIn("credits_value", _row_data(item))
 
+    def test_different_stream_sets_cannot_double_target_one_physical_course(self):
+        from apps.workload.services.reviewed_batch_manifest import _unique_physical_course_keys
+
+        first = {"subject_id": "subject", "period_id": "spring", "group_ids": ["CM", "MRM", "YDK"]}
+        second = {"subject_id": "subject", "period_id": "spring", "group_ids": ["M", "SBIO", "MRM"]}
+        with self.assertRaisesMessage(RepairError, "overlapping_physical_course_targets"):
+            _unique_physical_course_keys([first, second])
+        second["period_id"] = "fall"
+        _unique_physical_course_keys([first, second])
+
     def test_large_or_symbolic_manifest_is_not_read(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "source.json"
