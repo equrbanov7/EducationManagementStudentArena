@@ -13,7 +13,7 @@ SHARE_COUNTER_KEYS = tuple(
 )
 
 
-def _assignment_group(assignment, row, group):
+def _assignment_group(assignment, row, group, *, known_groups=None):
     """True/False=exact fiziki qrup qeydi; None=strukturlaşdırılmamış yarımqrup mətni."""
     note = (assignment.groups_note or "").strip()
     if not note:
@@ -23,7 +23,7 @@ def _assignment_group(assignment, row, group):
         return re.sub(r"\s+", "", str(value or "")).casefold()
 
     known = {}
-    for candidate in row.groups.all():
+    for candidate in row.groups.all() if known_groups is None else known_groups:
         for label in (candidate.name, candidate.code):
             if label:
                 known.setdefault(normalize(label), set()).add(candidate.pk)

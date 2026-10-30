@@ -1,0 +1,9 @@
+{% load i18n %}
+{% if not journal_is_broad %}
+<div class="jl-subject-sub">
+    {% if offering.journal_is_current_load %}<span>{% trans "Cari dərs yükü" %}</span>
+    {% else %}<span>{% trans "Tarixçə: cari yük təyinatı yoxdur" %}</span>{% endif %}
+    <span>· {% trans "Adınıza keçirilmiş" %}: {{ offering.journal_own_lessons }} {% trans "dərs" %} / {{ offering.journal_own_hours }} {% trans "saat" %}</span>
+    <span>· {% trans "Qeyd daxil etdiyiniz" %}: {{ offering.journal_contributed_lessons }} {% trans "dərs" %}</span>
+</div>
+{% endif %}

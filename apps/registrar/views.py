@@ -79,11 +79,16 @@ def journal_detail(request, offering_id):
     TƏSDİQ ZƏNCİRİ YOXDUR (sahibin qərarı, 2026-08): müəllim balı yazır və bitir.
     Jurnalı semestr sonunda RİM toplu BAĞLAYIR — bax
     :mod:`apps.registrar.journal_close`."""
-    offering = _offering_for_detail(request, offering_id)
+    from .journal_access import offering_or_404
+
+    offering = offering_or_404(request, offering_id)
+    if request.method == "GET" and request.GET.get("own_history") == "1":
+        from .journal_own_history import detail
+
+        return detail(request, offering)
     from apps.registrar import corrections as corrections_service
     from apps.registrar import guest_roster
 
-    journal_locked = gradebook.journal_is_locked(offering)
     can_edit_perm = _can_edit_journal(request.user, offering)
     # Birbaşa redaktə (müəllim/sahib/superuser/RİM rəhbəri — sahibin qərarı 2026-09-14).
     is_direct_editor = _is_direct_editor(request.user, offering)
@@ -98,7 +103,14 @@ def journal_detail(request, offering_id):
     # daşıyıcısı (bax journal_access) — səhifəni AÇIR, yazmır.
     observer = _can_observe_journal(request.user, offering)
     if not can_edit_perm and not can_correct and not roster_scope and not observer:
-        raise Http404
+        from .journal_own_history import detail
+
+        return detail(request, offering)
+    if request.method == "GET":
+        from .journal_read_memo import preload
+
+        preload(offering)
+    journal_locked = gradebook.journal_is_locked(offering)
     # «Təhvil verilib» bannerı YALNIZ köhnə müəllimə (2026-09-14: `journal.view`
     # daşıyıcısına — məs. RİM `*` — bu mətn yanlış çıxırdı).
     handover_observer = observer and not is_direct_editor and _is_handover_observer(request.user, offering)

@@ -63,7 +63,13 @@ def journal_list_base(user, request=None):
     from apps.registrar.handover import observer_offering_ids
 
     observed = observer_offering_ids(user, organization) if organization is not None else set()
-    return (base_qs.filter(own_q | Q(pk__in=observed)) if observed else base_qs.filter(own_q)), False
+    from apps.registrar.journal_own_history import eligible, offering_ids
+    from apps.registrar.teacher_journal_list import project
+
+    if not eligible(user, organization):
+        return base_qs.none(), False
+    authorized = base_qs.filter(own_q | Q(pk__in=observed) | Q(pk__in=offering_ids(user, organization)))
+    return project(authorized, user, organization, observed=observed), False
 
 
 __all__ = ["journal_list_base"]

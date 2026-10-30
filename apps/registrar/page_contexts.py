@@ -80,7 +80,7 @@ def journal_list_context(user, request=None) -> dict:
     Python-da süzülürdü (İKT rəhbəri görünüşündə 1.96 s / 32 sorğu)."""
     from apps.registrar import journal_list_query as jlq
     from apps.registrar import journal_list_schedule as jls
-    from apps.registrar import journal_shares
+    from apps.registrar import journal_shares, teacher_journal_list
     from apps.registrar.journal_list_scope import journal_list_base
     from apps.registrar.models import SlotKind
 
@@ -157,6 +157,9 @@ def journal_list_context(user, request=None) -> dict:
 
     # ── Süzgəclər ORM səviyyəsində (P2-18) — eyni nəticə, DB tərəfdə. ─────────
     qs = base_qs
+    teaching_view = ""
+    if not is_broad:
+        qs, teaching_view = teacher_journal_list.select_view(qs, request)
     if selected_year:
         qs = qs.filter(period__academic_year=selected_year)
     if selected_season:
@@ -164,7 +167,11 @@ def journal_list_context(user, request=None) -> dict:
         if months:
             qs = qs.filter(period__start_date__month__in=months)
     if selected_kind:
-        qs = jlq.apply_kind_filter(qs, selected_kind)
+        qs = (
+            jlq.apply_kind_filter(qs, selected_kind)
+            if is_broad
+            else teacher_journal_list.filter_kind(qs, selected_kind)
+        )
     if selected_teacher:
         teacher_pk = jlq.int_or_none(selected_teacher)
         qs = qs.filter(instructor_id=teacher_pk) if teacher_pk is not None else qs.none()
@@ -226,6 +233,8 @@ def journal_list_context(user, request=None) -> dict:
     # `kind` süzgəci artıq yuxarıda DB tərəfdə tətbiq olunur, tam dəst üçün
     # daha lazım deyil (əvvəlki 0.39 s-lik DISTINCT sorğusu tamamilə itdi).
     attach_kind_labels(page_offerings, selected_kind)
+    if not is_broad:
+        teacher_journal_list.attach(user, page_offerings, selected_kind=selected_kind)
     attach_labels(page_offerings, within=base_qs)
     jls.attach(page_offerings, occurrences)
     querystring = ""
@@ -250,6 +259,7 @@ def journal_list_context(user, request=None) -> dict:
         "teacher_label": user.get_full_name() or user.username,
         # Korrektor (İKT rəhbəri/admin) geniş görünüşü + əlavə filtrlər.
         "journal_is_broad": is_broad,
+        "journal_teaching_view": teaching_view,
         "journal_teachers": teacher_choices,
         "journal_selected_teacher": selected_teacher,
         "journal_groups": group_choices,

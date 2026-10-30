@@ -334,7 +334,11 @@ class JournalOwnershipTest(HandoverBase):
 
         with bypass_rls():
             self._reassign()
-            request = self._login(self.old_teacher).get(reverse("registrar:journal_list")).wsgi_request
+            request = (
+                self._login(self.old_teacher)
+                .get(reverse("registrar:journal_list"), {"teaching": "history"})
+                .wsgi_request
+            )
             context = page_contexts.journal_list_context(self.old_teacher, request=request)
         ids = {str(row["offering"].id) for row in context["rows"]} if "rows" in context else set()
         if not ids:  # kontekst açarı fərqlidirsə offering siyahısını birbaşa yoxla

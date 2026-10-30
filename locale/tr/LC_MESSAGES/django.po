@@ -110801,3 +110801,45 @@ msgstr "Düzenle"
 msgctxt "registrar.journal_share"
 msgid "Dərs yükü"
 msgstr "Ders yükü"
+
+msgid "Öz jurnal qeydlərim"
+msgstr "Kendi günlük kayıtlarım"
+
+msgid "Bu fənn üzrə cari dərs yükü təyinatınız yoxdur. Yalnız əvvəl adınıza keçirilmiş və ya sizin yazdığınız dərslər və daxil etdiyiniz xanalar göstərilir. Tarixçə yalnız oxunur."
+msgstr "Bu ders için güncel yük atamanız yok. Yalnızca daha önce adınıza işlenen veya oluşturduğunuz dersler ve girdiğiniz hücreler gösterilir. Geçmiş salt okunurdur."
+
+msgid "Bu dərsdə şəxsən daxil etdiyiniz bal/davamiyyət xanası yoxdur."
+msgstr "Bu derste şahsen girdiğiniz not veya devam hücresi yok."
+
+msgid "Jurnal tarixçəsinə qayıt"
+msgstr "Günlük geçmişine dön"
+
+msgid "Cari dərs yükü"
+msgstr "Güncel ders yükü"
+
+msgid "Tarixçə: cari yük təyinatı yoxdur"
+msgstr "Geçmiş: güncel yük ataması yok"
+
+msgid "Adınıza keçirilmiş"
+msgstr "Adınıza işlenen dersler"
+
+msgid "Qeyd daxil etdiyiniz"
+msgstr "Kayıt girdiğiniz dersler"
+
+msgid "GÖRÜNÜŞ"
+msgstr "GÖRÜNÜM"
+
+msgid "Cari dərs yüküm"
+msgstr "Güncel ders yüküm"
+
+msgid "Əvvəlki jurnal qeydlərim"
+msgstr "Önceki günlük kayıtlarım"
+
+msgid "Davamiyyət"
+msgstr "Devam durumu"
+
+msgid "dərs"
+msgstr "ders"
+
+msgid "saat"
+msgstr "ders saati"

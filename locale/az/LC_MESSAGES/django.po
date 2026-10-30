@@ -110904,3 +110904,45 @@ msgstr "Redaktə et"
 msgctxt "registrar.journal_share"
 msgid "Dərs yükü"
 msgstr "Dərs yükü"
+
+msgid "Öz jurnal qeydlərim"
+msgstr "Öz jurnal qeydlərim"
+
+msgid "Bu fənn üzrə cari dərs yükü təyinatınız yoxdur. Yalnız əvvəl adınıza keçirilmiş və ya sizin yazdığınız dərslər və daxil etdiyiniz xanalar göstərilir. Tarixçə yalnız oxunur."
+msgstr "Bu fənn üzrə cari dərs yükü təyinatınız yoxdur. Yalnız əvvəl adınıza keçirilmiş və ya sizin yazdığınız dərslər və daxil etdiyiniz xanalar göstərilir. Tarixçə yalnız oxunur."
+
+msgid "Bu dərsdə şəxsən daxil etdiyiniz bal/davamiyyət xanası yoxdur."
+msgstr "Bu dərsdə şəxsən daxil etdiyiniz bal/davamiyyət xanası yoxdur."
+
+msgid "Jurnal tarixçəsinə qayıt"
+msgstr "Jurnal tarixçəsinə qayıt"
+
+msgid "Cari dərs yükü"
+msgstr "Cari dərs yükü"
+
+msgid "Tarixçə: cari yük təyinatı yoxdur"
+msgstr "Tarixçə: cari yük təyinatı yoxdur"
+
+msgid "Adınıza keçirilmiş"
+msgstr "Adınıza keçirilmiş"
+
+msgid "Qeyd daxil etdiyiniz"
+msgstr "Qeyd daxil etdiyiniz"
+
+msgid "GÖRÜNÜŞ"
+msgstr "GÖRÜNÜŞ"
+
+msgid "Cari dərs yüküm"
+msgstr "Cari dərs yüküm"
+
+msgid "Əvvəlki jurnal qeydlərim"
+msgstr "Əvvəlki jurnal qeydlərim"
+
+msgid "Davamiyyət"
+msgstr "Davamiyyət"
+
+msgid "dərs"
+msgstr "dərs"
+
+msgid "saat"
+msgstr "saat"

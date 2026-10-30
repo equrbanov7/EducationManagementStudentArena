@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Öz jurnal qeydlərim" %} — {{ offering.subject.name }}{% endblock %}
+{% block content %}
+<main class="container py-4">
+    <h1>{% trans "Öz jurnal qeydlərim" %}</h1>
+    <p>{{ offering.subject.name }} · {{ offering.group.name }} · {{ offering.period.name }}</p>
+    <p class="alert alert-info">{% trans "Bu fənn üzrə cari dərs yükü təyinatınız yoxdur. Yalnız əvvəl adınıza keçirilmiş və ya sizin yazdığınız dərslər və daxil etdiyiniz xanalar göstərilir. Tarixçə yalnız oxunur." %}</p>
+    {% for lesson in page_obj %}
+    <section class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5">{{ lesson.date }} · {{ lesson.get_kind_display }} · {{ lesson.hours }} {% trans "saat" %}</h2>
+            <p>{{ lesson.topic }}</p>
+            {% if lesson.author_marks %}
+            <div class="table-responsive"><table class="table">
+                <thead><tr><th>{% trans "Tələbə" %}</th><th>{% trans "Davamiyyət" %}</th><th>{% trans "Bal" %}</th></tr></thead>
+                <tbody>{% for mark in lesson.author_marks %}
+                    <tr><td>{{ mark.enrollment.student.get_full_name|default:mark.enrollment.student.username }}</td><td>{{ mark.get_status_display }}</td><td>{{ mark.score|default_if_none:"—" }}</td></tr>
+                {% endfor %}</tbody>
+            </table></div>
+            {% else %}<p>{% trans "Bu dərsdə şəxsən daxil etdiyiniz bal/davamiyyət xanası yoxdur." %}</p>{% endif %}
+        </div>
+    </section>
+    {% endfor %}
+    {% include "partials/_pagination.html" with page_obj=page_obj %}
+    <a href="{% url 'registrar:journal_list' %}?teaching=history">{% trans "Jurnal tarixçəsinə qayıt" %}</a>
+</main>
+{% endblock %}

@@ -13,6 +13,7 @@ from .services import (  # noqa: F401
     save_row,
     unassign,
 )
+from .services.journal_assignments import teacher_journal_assignments  # noqa: F401
 from .services.load_upload_parsing import parse_workbook as parse_load_workbook  # noqa: F401
 from .services.norms import (  # noqa: F401
     StaffRateError,
@@ -36,6 +37,7 @@ __all__ = [
     "save_row",
     "unassign",
     "sync_task_offerings",
+    "teacher_journal_assignments",
     "StaffRateError",
     "admin_teacher_ids",
     "build_approval",

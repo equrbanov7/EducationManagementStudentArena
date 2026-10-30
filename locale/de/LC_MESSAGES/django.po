@@ -112425,3 +112425,45 @@ msgstr "Bearbeiten"
 msgctxt "registrar.journal_share"
 msgid "Dərs yükü"
 msgstr "Lehrdeputat"
+
+msgid "Öz jurnal qeydlərim"
+msgstr "Meine Journaleinträge"
+
+msgid "Bu fənn üzrə cari dərs yükü təyinatınız yoxdur. Yalnız əvvəl adınıza keçirilmiş və ya sizin yazdığınız dərslər və daxil etdiyiniz xanalar göstərilir. Tarixçə yalnız oxunur."
+msgstr "Für dieses Fach haben Sie keinen aktuellen Lehrauftrag. Angezeigt werden nur Ihnen zugeordnete oder von Ihnen erstellte Stunden und Ihre Zelleinträge. Der Verlauf ist schreibgeschützt."
+
+msgid "Bu dərsdə şəxsən daxil etdiyiniz bal/davamiyyət xanası yoxdur."
+msgstr "Für diese Stunde haben Sie keine Noten- oder Anwesenheitszellen eingegeben."
+
+msgid "Jurnal tarixçəsinə qayıt"
+msgstr "Zum Journalverlauf zurück"
+
+msgid "Cari dərs yükü"
+msgstr "Aktuelle Lehrbelastung"
+
+msgid "Tarixçə: cari yük təyinatı yoxdur"
+msgstr "Verlauf: kein aktueller Lehrauftrag"
+
+msgid "Adınıza keçirilmiş"
+msgstr "Ihnen zugeordnete Stunden"
+
+msgid "Qeyd daxil etdiyiniz"
+msgstr "Stunden mit Ihren Einträgen"
+
+msgid "GÖRÜNÜŞ"
+msgstr "ANSICHT"
+
+msgid "Cari dərs yüküm"
+msgstr "Meine aktuelle Lehrbelastung"
+
+msgid "Əvvəlki jurnal qeydlərim"
+msgstr "Meine früheren Journaleinträge"
+
+msgid "Davamiyyət"
+msgstr "Anwesenheit"
+
+msgid "dərs"
+msgstr "Stunden"
+
+msgid "saat"
+msgstr "Lehrstunden"

@@ -1,0 +1,10 @@
+{% load i18n %}
+{% if not journal_is_broad %}
+<label class="jl-f">
+    <span class="jl-f__label">{% trans "GÖRÜNÜŞ" %}</span>
+    <select name="teaching" class="ems-select" data-jl-autosubmit>
+        <option value="current" {% if journal_teaching_view == 'current' %}selected{% endif %}>{% trans "Cari dərs yüküm" %}</option>
+        <option value="history" {% if journal_teaching_view == 'history' %}selected{% endif %}>{% trans "Əvvəlki jurnal qeydlərim" %}</option>
+    </select>
+</label>
+{% endif %}

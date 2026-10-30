@@ -30,6 +30,7 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
           data-group-url="{% url 'accounts:records_group_search' %}"
           data-teacher-url="{% url 'registrar:journal_list_teachers' %}"
           data-empty-text="{% trans 'Nəticə tapılmadı' %}">
+        {% include "registrar/partials/_journal_teacher_view.html" %}
         <label class="jl-f jl-f--xs {% if journal_selected_year %}is-set{% endif %}">
             <span class="jl-f__label">{% trans "TƏDRİS İLİ" context "registrar.journal" %}</span>
             <div class="bootstrap-single-select bootstrap-single-select--ems">
@@ -169,7 +170,7 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
                 {% for offering in offerings %}
                 {% comment %}Seçilmiş dərs tipi jurnalın İÇİNƏ də keçir (sahib tələbi
                 2026-09-06).{% endcomment %}
-                <tr class="jl-row{% if offering.next_lesson.state == 'now' %} jl-row--now{% endif %}" data-jl-href="{% url 'registrar:journal_detail' offering.id %}{% if journal_selected_kind %}?kind={{ journal_selected_kind }}{% endif %}">
+                <tr class="jl-row{% if offering.next_lesson.state == 'now' %} jl-row--now{% endif %}" data-jl-href="{% url 'registrar:journal_detail' offering.id %}{% if offering.journal_own_history_link %}?own_history=1{% elif journal_selected_kind %}?kind={{ journal_selected_kind }}{% endif %}">
                     <td class="jl-col-no">{{ row_offset|add:forloop.counter }}</td>
                     <td>
                         <div class="jl-group-line">
@@ -191,11 +192,12 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
                             <span class="jl-teacher">{% if offering.instructor %}{{ offering.instructor.get_full_name|default:offering.instructor.username }}{% else %}{% trans "Vakant" context "registrar.journal" %}{% endif %}</span>{% endif %}
                             {% if offering.is_evening %}<span aria-hidden="true">·</span> <span>{% trans "axşam (21:30-dək)" context "registrar.journal" %}</span>{% endif %}
                         </div>
+                        {% include "registrar/partials/_journal_teacher_record.html" %}
                     </td>
                     <td class="jl-col-kind" data-label="{% trans "DƏRS TİPİ" context "registrar.journal" %}">{% if offering.kind_label %}<span class="jl-kind">{{ offering.kind_label }}</span>{% else %}<span class="jl-kind jl-kind--none">—</span>{% endif %}</td>
                     <td class="jl-col-count" data-label="{% trans "TƏLƏBƏ SAYI" context "registrar.journal" %}"><span class="jl-students {% if not offering.student_count %}jl-students--zero{% endif %}"><i class="fas fa-user-group" aria-hidden="true"></i>{{ offering.student_count }}</span></td>
                     <td class="jl-col-action">
-                        <a class="jl-open-btn" href="{% url 'registrar:journal_detail' offering.id %}{% if journal_selected_kind %}?kind={{ journal_selected_kind }}{% endif %}">
+                        <a class="jl-open-btn" href="{% url 'registrar:journal_detail' offering.id %}{% if offering.journal_own_history_link %}?own_history=1{% elif journal_selected_kind %}?kind={{ journal_selected_kind }}{% endif %}">
                             {% trans "Jurnalı aç" context "registrar.journal" %} <i class="fas fa-arrow-right" aria-hidden="true"></i>
                         </a>
                     </td>

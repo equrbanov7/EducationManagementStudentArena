@@ -111586,3 +111586,45 @@ msgstr "Редактировать"
 msgctxt "registrar.journal_share"
 msgid "Dərs yükü"
 msgstr "Учебная нагрузка"
+
+msgid "Öz jurnal qeydlərim"
+msgstr "Мои записи журнала"
+
+msgid "Bu fənn üzrə cari dərs yükü təyinatınız yoxdur. Yalnız əvvəl adınıza keçirilmiş və ya sizin yazdığınız dərslər və daxil etdiyiniz xanalar göstərilir. Tarixçə yalnız oxunur."
+msgstr "По этому предмету у вас нет текущего назначения нагрузки. Показаны только занятия, проведённые или созданные вами, и введённые вами ячейки. История доступна только для чтения."
+
+msgid "Bu dərsdə şəxsən daxil etdiyiniz bal/davamiyyət xanası yoxdur."
+msgstr "В этом занятии нет ячеек оценок или посещаемости, введённых лично вами."
+
+msgid "Jurnal tarixçəsinə qayıt"
+msgstr "Вернуться к истории журнала"
+
+msgid "Cari dərs yükü"
+msgstr "Текущая учебная нагрузка"
+
+msgid "Tarixçə: cari yük təyinatı yoxdur"
+msgstr "История: текущего назначения нагрузки нет"
+
+msgid "Adınıza keçirilmiş"
+msgstr "Занятия, проведённые вами"
+
+msgid "Qeyd daxil etdiyiniz"
+msgstr "Занятия с вашими записями"
+
+msgid "GÖRÜNÜŞ"
+msgstr "ВИД"
+
+msgid "Cari dərs yüküm"
+msgstr "Моя текущая нагрузка"
+
+msgid "Əvvəlki jurnal qeydlərim"
+msgstr "Мои прежние записи журнала"
+
+msgid "Davamiyyət"
+msgstr "Посещаемость"
+
+msgid "dərs"
+msgstr "занятий"
+
+msgid "saat"
+msgstr "часов"

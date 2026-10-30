@@ -67,6 +67,7 @@ from .grading_scale import bands_text  # noqa: F401
 from .grading_scale import is_custom  # noqa: F401
 from .guest_roster import add_guest_student  # noqa: F401
 from .handover_actions import REVERT_BLOCKER_CODES  # noqa: F401
+from .journal_assignment_sources import register_teacher_journal_assignments  # noqa: F401
 from .journal_workload_shares import sync_workload_journal_shares  # noqa: F401
 from .movements import RULES  # noqa: F401
 from .page_contexts import _season_label as season_label  # noqa: F401
@@ -83,6 +84,7 @@ from .syllabus_reuse_targets import programs_by_offering  # noqa: F401
 from .teaching_activity import instructor_activity  # noqa: F401 — «Kadr analitikası» (2026-10-11)
 
 __all__ = [
+    "register_teacher_journal_assignments",
     "add_guest_student",
     "CORRECT_PERMISSION",
     "DEFAULT_ABSENCE_LIMIT_PERCENT",

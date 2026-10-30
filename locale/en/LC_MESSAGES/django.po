@@ -111393,3 +111393,45 @@ msgstr "Edit"
 msgctxt "registrar.journal_share"
 msgid "Dərs yükü"
 msgstr "Teaching workload"
+
+msgid "Öz jurnal qeydlərim"
+msgstr "My journal entries"
+
+msgid "Bu fənn üzrə cari dərs yükü təyinatınız yoxdur. Yalnız əvvəl adınıza keçirilmiş və ya sizin yazdığınız dərslər və daxil etdiyiniz xanalar göstərilir. Tarixçə yalnız oxunur."
+msgstr "You have no current workload assignment for this subject. Only lessons previously attributed to or created by you and cells you entered are shown. History is read-only."
+
+msgid "Bu dərsdə şəxsən daxil etdiyiniz bal/davamiyyət xanası yoxdur."
+msgstr "You have not personally entered any grade or attendance cells in this lesson."
+
+msgid "Jurnal tarixçəsinə qayıt"
+msgstr "Return to journal history"
+
+msgid "Cari dərs yükü"
+msgstr "Current teaching workload"
+
+msgid "Tarixçə: cari yük təyinatı yoxdur"
+msgstr "History: no current workload assignment"
+
+msgid "Adınıza keçirilmiş"
+msgstr "Lessons attributed to you"
+
+msgid "Qeyd daxil etdiyiniz"
+msgstr "Lessons with your entries"
+
+msgid "GÖRÜNÜŞ"
+msgstr "VIEW"
+
+msgid "Cari dərs yüküm"
+msgstr "My current workload"
+
+msgid "Əvvəlki jurnal qeydlərim"
+msgstr "My previous journal entries"
+
+msgid "Davamiyyət"
+msgstr "Attendance"
+
+msgid "dərs"
+msgstr "lessons"
+
+msgid "saat"
+msgstr "hours"
