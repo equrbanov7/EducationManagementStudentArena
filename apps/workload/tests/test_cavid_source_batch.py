@@ -151,6 +151,14 @@ class CavidSourceBatchTests(TestCase):
         enrollments = []
         for i in range(7):
             student = User.objects.create_user(f"cv_student_{i}")
+            Membership.objects.create(
+                organization=cls.org,
+                user=student,
+                role=cls.org.roles.get(name="student"),
+                scope_unit=cls.ga,
+                is_active=True,
+                is_primary=True,
+            )
             enrollments.append(Enrollment.objects.create(organization=cls.org, offering=cls.a, student=student))
             if i < 2:
                 Enrollment.objects.create(organization=cls.org, offering=cls.b, student=student)
@@ -352,6 +360,65 @@ class CavidSourceBatchTests(TestCase):
         state.target_membership().update(is_primary=True)
         with self.assertRaisesMessage(state.RepairError, "undo_workload_or_access_changed"):
             self.run_repair(undo=result["batch"])
+
+    def test_inactive_secondary_membership_is_reused_and_restored(self):
+        membership = Membership.objects.create(
+            organization=self.org,
+            user=self.teacher,
+            role=self.primary.role,
+            scope_unit=self.nature,
+            is_active=False,
+            is_primary=False,
+            assigned_by=self.previous,
+        )
+        result = self.apply()
+        self.assertEqual(state.target_membership().get().pk, membership.pk)
+        self.run_repair(undo=result["batch"], apply=True, expected_baseline=state.baseline(state.snapshot()))
+        membership.refresh_from_db()
+        self.assertEqual(
+            (membership.is_active, membership.is_primary, membership.assigned_by_id), (False, False, spec.PREVIOUS)
+        )
+
+    def test_an_unrelated_row_mutation_rolls_back_the_batch(self):
+        original = handover_actions.reassign
+
+        def bad(**kwargs):
+            result = original(**kwargs)
+            TeachingTaskRow.objects.filter(pk=self.other_row.pk).update(note="unauthorized mutation")
+            return result
+
+        with patch.object(handover_actions, "reassign", side_effect=bad):
+            with self.assertRaisesMessage(state.RepairError, "outside_target_row_changed"):
+                self.apply()
+        self.other_row.refresh_from_db()
+        self.assertEqual(self.other_row.note, "")
+
+    def test_an_unrelated_journal_mark_is_protected_by_full_tenant_fingerprint(self):
+        other = CourseOffering.objects.create(
+            organization=self.org,
+            subject=self.sa,
+            period=self.period,
+            group=self.gb,
+            instructor=self.previous,
+        )
+        student = self.a.enrollments.first().student
+        enrollment = Enrollment.objects.create(organization=self.org, offering=other, student=student)
+        lesson = Lesson.objects.create(organization=self.org, offering=other, date="2026-10-20", kind="seminar")
+        mark = LessonMark.objects.create(
+            organization=self.org, lesson=lesson, enrollment=enrollment, score=8, status="present"
+        )
+        original = handover_actions.reassign
+
+        def bad(**kwargs):
+            result = original(**kwargs)
+            LessonMark.objects.filter(pk=mark.pk).update(score=1)
+            return result
+
+        with patch.object(handover_actions, "reassign", side_effect=bad):
+            with self.assertRaisesMessage(state.RepairError, "outside_academics_or_manual_access_changed"):
+                self.apply()
+        mark.refresh_from_db()
+        self.assertEqual(mark.score, 8)
 
     def test_outside_academic_mutation_is_caught_and_rolled_back(self):
         original = handover_actions.reassign
