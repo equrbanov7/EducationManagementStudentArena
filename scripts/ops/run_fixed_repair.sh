@@ -6,11 +6,12 @@ case "$COMMAND" in
   repair_sbio235_workload) prefix=sbio_repair; batch_prefix=sbio235 ;;
   repair_233ke_group_alias) prefix=ke233_alias; batch_prefix=ke233 ;;
   repair_cavid_source_batch) prefix=cavid3536; batch_prefix=cavid3536 ;;
+  repair_tspx_legacy_roster) prefix=tspx_roster; batch_prefix=tspx-roster ;;
   repair_reviewed_workload_batch) prefix=reviewed_source; batch_prefix=source ;;
   *) echo "fixed_repair_command_not_allowed" >&2; exit 2 ;;
 esac
 batch_length=4
-if [ "$COMMAND" = "repair_reviewed_workload_batch" ]; then batch_length=8; fi
+if [[ "$COMMAND" = repair_reviewed_workload_batch || "$COMMAND" = repair_tspx_legacy_roster ]]; then batch_length=8; fi
 output="$RUNNER_TEMP/out.log"
 summary="$RUNNER_TEMP/summary.log"
 status=0

@@ -9,6 +9,8 @@ case "$COMMAND" in
     tag_prefix=mr27-recovery; asset=mr27-recovery.json.enc; target="/tmp/mr27_recovery_${GITHUB_RUN_ID}.json" ;;
   recover_workload_syllabi)
     tag_prefix=workload-syllabi; asset=workload-syllabi.json.enc; target="/tmp/workload_syllabi_${GITHUB_RUN_ID}.json" ;;
+  repair_tspx_legacy_roster)
+    tag_prefix=tspx-roster; asset=tspx-roster.json.enc; target="/tmp/tspx_roster_${GITHUB_RUN_ID}.json" ;;
   repair_reviewed_workload_batch)
     tag_prefix=reviewed-workload; asset=reviewed-workload.json.enc; target="/tmp/reviewed_source_${GITHUB_RUN_ID}.json" ;;
   *) echo "encrypted_source_command_not_allowed" >&2; exit 2 ;;
