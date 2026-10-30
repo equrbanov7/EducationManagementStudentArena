@@ -5,6 +5,7 @@ import json
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.db import connection
 from django.test import TestCase
 
 from apps.organizations.models import Organization
@@ -31,8 +32,14 @@ class WorkerIdentityProbeTests(TestCase):
     def tearDown(self):
         reset_rls_context()
 
+    def collect(self):
+        from .test_snapshot_journal_diagnostics import SnapshotJournalDiagnosticsTests
+
+        with connection.execute_wrapper(SnapshotJournalDiagnosticsTests.guard):
+            return collect_worker1068()
+
     def test_whole_account_candidate_without_teacher_role_is_found_without_contact_export(self):
-        data = collect_worker1068()
+        data = self.collect()
         self.assertEqual([u["id"] for u in data["worker1068_identity_candidates"]], [self.user.pk])
         encoded = json.dumps(data, default=str)
         self.assertNotIn("PRIVATE_ADDRESS", encoded)
@@ -46,7 +53,7 @@ class WorkerIdentityProbeTests(TestCase):
         self.user.save(update_fields=["first_name", "last_name", "username"])
         sha = hashlib.sha256(self.user.email.strip().casefold().encode()).hexdigest()
         with patch("apps.workload.services.scoped_snapshot.worker_identity.SOURCE_EMAIL_SHA256", sha):
-            data = collect_worker1068()
+            data = self.collect()
         self.assertEqual([u["id"] for u in data["worker1068_identity_candidates"]], [self.user.pk])
         self.assertTrue(data["worker1068_identity_candidates"][0]["email_matches_source"])
         self.assertNotIn(self.user.email, json.dumps(data, default=str))
@@ -55,7 +62,7 @@ class WorkerIdentityProbeTests(TestCase):
         other = get_user_model().objects.create_user(
             username="FOREIGN_PRIVATE", first_name="Rasoul", last_name="Rezvanian"
         )
-        data = collect_worker1068()
+        data = self.collect()
         summary = data["worker1068_identity_summary"][0]
         self.assertEqual(
             (

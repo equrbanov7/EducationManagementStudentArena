@@ -27,23 +27,24 @@ def collect_worker1068():
     mapped = [int(row["target_pk"]) for row in ledger if row["target_pk"].isdigit()]
     surname = tolerant_q("Rezvanian", ("first_name", "last_name", "username"))
     surname |= tolerant_q("Rezvaniyan", ("first_name", "last_name", "username"))
-    query = (
+    # Hash comparison belongs only in WHERE; auth contact columns must never
+    # enter a SELECT projection, including transformed/hashed annotations.
+    email_ids = set(
         get_user_model()
-        .objects.annotate(
+        .objects.alias(
             source_email_sha=Func(
                 Lower(Trim("email")),
                 template="encode(sha256(convert_to(%(expressions)s, 'UTF8')), 'hex')",
                 output_field=CharField(),
             )
         )
-        .filter(Q(source_email_sha=SOURCE_EMAIL_SHA256) | surname | Q(pk__in=mapped))
-        .distinct()
+        .filter(source_email_sha=SOURCE_EMAIL_SHA256)
+        .values_list("pk", flat=True)
     )
+    query = get_user_model().objects.filter(surname | Q(pk__in=set(mapped) | email_ids)).distinct()
     global_count = query.values("id").count()
     scoped = query.filter(Q(profile__organization_id=ORG) | Q(memberships__organization_id=ORG)).distinct()
-    users = list(
-        scoped.order_by("pk").values("id", "username", "first_name", "last_name", "is_active", "source_email_sha")
-    )
+    users = list(scoped.order_by("pk").values("id", "username", "first_name", "last_name", "is_active"))
     profiles = {
         row["user_id"]: row
         for row in apps.get_model("accounts", "UserProfile")
@@ -52,7 +53,7 @@ def collect_worker1068():
     }
     for user in users:
         user.update({key: value for key, value in profiles.get(user["id"], {}).items() if key != "user_id"})
-        user["email_matches_source"] = user.pop("source_email_sha") == SOURCE_EMAIL_SHA256
+        user["email_matches_source"] = user["id"] in email_ids
         user["legacy_worker_id"] = 1068
     return {
         "worker1068_identity_candidates": users,
