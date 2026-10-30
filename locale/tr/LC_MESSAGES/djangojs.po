@@ -3176,3 +3176,21 @@ msgstr "%(total)s satırdan %(shown)s tanesi gösteriliyor"
 
 msgid "Seçilmiş müəllim"
 msgstr "Seçilen öğretmen"
+
+msgid "Hədəf kafedranı və köçürmə səbəbini yazın."
+msgstr "Hedef bölümü seçin ve aktarma gerekçesini yazın."
+
+msgid "Kafedra seçin"
+msgstr "Bölüm seçin"
+
+msgid "Kafedralar yüklənir…"
+msgstr "Bölümler yükleniyor…"
+
+msgid "Köçürülür…"
+msgstr "Aktarılıyor…"
+
+msgid "Səlahiyyətiniz daxilində uyğun təsdiqlənmiş kafedra tapşırığı yoxdur."
+msgstr "Yetki alanınızda uygun, onaylanmış bir bölüm görevlendirmesi yok."
+
+msgid "Yük sətri köçürüldü."
+msgstr "Ders yükü satırı aktarıldı."

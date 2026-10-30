@@ -112467,3 +112467,32 @@ msgstr "Stunden"
 
 msgid "saat"
 msgstr "Lehrstunden"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "ana qrup: %s"
+msgstr "übergeordnete Gruppe: %s"
+
+msgctxt "accounts.workload"
+msgid "Başqa kafedraya köçür"
+msgstr "An einen anderen Fachbereich übertragen"
+
+msgctxt "accounts.workload"
+msgid "Hədəf kafedra"
+msgstr "Zielabteilung"
+
+msgctxt "accounts.workload"
+msgid "Kafedra seçin"
+msgstr "Fachbereich auswählen"
+
+msgctxt "accounts.workload"
+msgid "Kafedraya köçür"
+msgstr "An den Fachbereich übertragen"
+
+msgctxt "accounts.workload"
+msgid "Köçürmə səbəbi"
+msgstr "Grund der Übertragung"
+
+msgctxt "accounts.workload"
+msgid "Sətir müəllim bölgüsü və saatları ilə köçürülür. Jurnal və qiymətlər saxlanılır. Digər redaktələri əvvəlcə yadda saxlayın."
+msgstr "Die Zeile wird mit der Lehrkräftezuordnung und den Stunden übertragen. Das Journal und die Noten bleiben erhalten. Speichern Sie zuerst andere Änderungen."

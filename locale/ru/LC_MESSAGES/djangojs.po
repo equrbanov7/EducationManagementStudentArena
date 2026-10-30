@@ -3187,3 +3187,21 @@ msgstr "Показано %(shown)s из %(total)s строк"
 
 msgid "Seçilmiş müəllim"
 msgstr "Выбранный преподаватель"
+
+msgid "Hədəf kafedranı və köçürmə səbəbini yazın."
+msgstr "Выберите целевую кафедру и укажите причину переноса."
+
+msgid "Kafedra seçin"
+msgstr "Выберите кафедру"
+
+msgid "Kafedralar yüklənir…"
+msgstr "Загрузка кафедр…"
+
+msgid "Köçürülür…"
+msgstr "Перенос…"
+
+msgid "Səlahiyyətiniz daxilində uyğun təsdiqlənmiş kafedra tapşırığı yoxdur."
+msgstr "В пределах ваших полномочий нет подходящего утверждённого задания кафедры."
+
+msgid "Yük sətri köçürüldü."
+msgstr "Строка учебной нагрузки перенесена."

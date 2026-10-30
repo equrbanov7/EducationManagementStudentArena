@@ -110946,3 +110946,32 @@ msgstr "dərs"
 
 msgid "saat"
 msgstr "saat"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "ana qrup: %s"
+msgstr "ana qrup: %s"
+
+msgctxt "accounts.workload"
+msgid "Başqa kafedraya köçür"
+msgstr "Başqa kafedraya köçür"
+
+msgctxt "accounts.workload"
+msgid "Hədəf kafedra"
+msgstr "Hədəf kafedra"
+
+msgctxt "accounts.workload"
+msgid "Kafedra seçin"
+msgstr "Kafedra seçin"
+
+msgctxt "accounts.workload"
+msgid "Kafedraya köçür"
+msgstr "Kafedraya köçür"
+
+msgctxt "accounts.workload"
+msgid "Köçürmə səbəbi"
+msgstr "Köçürmə səbəbi"
+
+msgctxt "accounts.workload"
+msgid "Sətir müəllim bölgüsü və saatları ilə köçürülür. Jurnal və qiymətlər saxlanılır. Digər redaktələri əvvəlcə yadda saxlayın."
+msgstr "Sətir müəllim bölgüsü və saatları ilə köçürülür. Jurnal və qiymətlər saxlanılır. Digər redaktələri əvvəlcə yadda saxlayın."

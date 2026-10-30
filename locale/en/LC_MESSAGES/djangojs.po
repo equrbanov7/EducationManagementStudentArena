@@ -3187,3 +3187,21 @@ msgstr "Showing %(shown)s of %(total)s rows"
 
 msgid "Seçilmiş müəllim"
 msgstr "Selected teacher"
+
+msgid "Hədəf kafedranı və köçürmə səbəbini yazın."
+msgstr "Select the destination department and enter the reason for transfer."
+
+msgid "Kafedra seçin"
+msgstr "Select a department"
+
+msgid "Kafedralar yüklənir…"
+msgstr "Loading departments…"
+
+msgid "Köçürülür…"
+msgstr "Transferring…"
+
+msgid "Səlahiyyətiniz daxilində uyğun təsdiqlənmiş kafedra tapşırığı yoxdur."
+msgstr "There is no suitable confirmed department task within your access scope."
+
+msgid "Yük sətri köçürüldü."
+msgstr "The teaching load row was transferred."

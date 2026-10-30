@@ -110843,3 +110843,32 @@ msgstr "ders"
 
 msgid "saat"
 msgstr "ders saati"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "ana qrup: %s"
+msgstr "ana grup: %s"
+
+msgctxt "accounts.workload"
+msgid "Başqa kafedraya köçür"
+msgstr "Başka bir bölüme aktar"
+
+msgctxt "accounts.workload"
+msgid "Hədəf kafedra"
+msgstr "Hedef bölüm"
+
+msgctxt "accounts.workload"
+msgid "Kafedra seçin"
+msgstr "Bölüm seçin"
+
+msgctxt "accounts.workload"
+msgid "Kafedraya köçür"
+msgstr "Bölüme aktar"
+
+msgctxt "accounts.workload"
+msgid "Köçürmə səbəbi"
+msgstr "Aktarma gerekçesi"
+
+msgctxt "accounts.workload"
+msgid "Sətir müəllim bölgüsü və saatları ilə köçürülür. Jurnal və qiymətlər saxlanılır. Digər redaktələri əvvəlcə yadda saxlayın."
+msgstr "Satır, öğretim elemanı dağılımı ve ders saatleriyle birlikte aktarılır. Defter ve notlar korunur. Önce diğer değişiklikleri kaydedin."

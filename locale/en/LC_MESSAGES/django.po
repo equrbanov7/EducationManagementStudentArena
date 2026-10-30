@@ -111435,3 +111435,32 @@ msgstr "lessons"
 
 msgid "saat"
 msgstr "hours"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "ana qrup: %s"
+msgstr "parent group: %s"
+
+msgctxt "accounts.workload"
+msgid "Başqa kafedraya köçür"
+msgstr "Transfer to another department"
+
+msgctxt "accounts.workload"
+msgid "Hədəf kafedra"
+msgstr "Destination department"
+
+msgctxt "accounts.workload"
+msgid "Kafedra seçin"
+msgstr "Select a department"
+
+msgctxt "accounts.workload"
+msgid "Kafedraya köçür"
+msgstr "Transfer to department"
+
+msgctxt "accounts.workload"
+msgid "Köçürmə səbəbi"
+msgstr "Reason for transfer"
+
+msgctxt "accounts.workload"
+msgid "Sətir müəllim bölgüsü və saatları ilə köçürülür. Jurnal və qiymətlər saxlanılır. Digər redaktələri əvvəlcə yadda saxlayın."
+msgstr "The row is transferred with its teaching assignments and hours. The journal and grades are preserved. Save other changes first."

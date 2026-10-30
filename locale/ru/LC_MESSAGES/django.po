@@ -111628,3 +111628,32 @@ msgstr "занятий"
 
 msgid "saat"
 msgstr "часов"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "ana qrup: %s"
+msgstr "основная группа: %s"
+
+msgctxt "accounts.workload"
+msgid "Başqa kafedraya köçür"
+msgstr "Перенести на другую кафедру"
+
+msgctxt "accounts.workload"
+msgid "Hədəf kafedra"
+msgstr "Целевая кафедра"
+
+msgctxt "accounts.workload"
+msgid "Kafedra seçin"
+msgstr "Выберите кафедру"
+
+msgctxt "accounts.workload"
+msgid "Kafedraya köçür"
+msgstr "Перенести на кафедру"
+
+msgctxt "accounts.workload"
+msgid "Köçürmə səbəbi"
+msgstr "Причина переноса"
+
+msgctxt "accounts.workload"
+msgid "Sətir müəllim bölgüsü və saatları ilə köçürülür. Jurnal və qiymətlər saxlanılır. Digər redaktələri əvvəlcə yadda saxlayın."
+msgstr "Строка переносится вместе с распределением преподавателей и часами. Журнал и оценки сохраняются. Сначала сохраните остальные изменения."

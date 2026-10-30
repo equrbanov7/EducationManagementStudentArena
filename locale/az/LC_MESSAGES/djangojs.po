@@ -3172,3 +3172,21 @@ msgstr "Göstərilir: %(shown)s / %(total)s sətir"
 
 msgid "Seçilmiş müəllim"
 msgstr "Seçilmiş müəllim"
+
+msgid "Hədəf kafedranı və köçürmə səbəbini yazın."
+msgstr "Hədəf kafedranı və köçürmə səbəbini yazın."
+
+msgid "Kafedra seçin"
+msgstr "Kafedra seçin"
+
+msgid "Kafedralar yüklənir…"
+msgstr "Kafedralar yüklənir…"
+
+msgid "Köçürülür…"
+msgstr "Köçürülür…"
+
+msgid "Səlahiyyətiniz daxilində uyğun təsdiqlənmiş kafedra tapşırığı yoxdur."
+msgstr "Səlahiyyətiniz daxilində uyğun təsdiqlənmiş kafedra tapşırığı yoxdur."
+
+msgid "Yük sətri köçürüldü."
+msgstr "Yük sətri köçürüldü."

@@ -3240,3 +3240,21 @@ msgstr "%(shown)s von %(total)s Zeilen angezeigt"
 
 msgid "Seçilmiş müəllim"
 msgstr "Ausgewählte Lehrkraft"
+
+msgid "Hədəf kafedranı və köçürmə səbəbini yazın."
+msgstr "Wählen Sie die Zielabteilung und geben Sie den Grund der Übertragung an."
+
+msgid "Kafedra seçin"
+msgstr "Fachbereich auswählen"
+
+msgid "Kafedralar yüklənir…"
+msgstr "Fachbereiche werden geladen…"
+
+msgid "Köçürülür…"
+msgstr "Wird übertragen…"
+
+msgid "Səlahiyyətiniz daxilində uyğun təsdiqlənmiş kafedra tapşırığı yoxdur."
+msgstr "In Ihrem Berechtigungsbereich gibt es keinen geeigneten bestätigten Fachbereichsauftrag."
+
+msgid "Yük sətri köçürüldü."
+msgstr "Die Lehrlastzeile wurde übertragen."
