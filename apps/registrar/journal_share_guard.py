@@ -107,7 +107,7 @@ def detail_post_guard(request, offering):
 
         if not scope_.allows_kind(locked_lesson_kind(offering) or request.POST.get("lesson_kind")):
             return deny(request)
-        if not scope_.is_owner:
+        if not scope_.is_owner or scope_.enrollment_ids is not None:
             _assign_self(request)
         return None
     if not _rows_ok(scope_, request.POST) or not _lessons_ok(scope_, offering, posted_lesson_ids(request.POST)):
@@ -150,7 +150,7 @@ def slot_activation(user, offering, slot):
         return True, None
     if not scope_.allows_kind(slot.kind):
         return False, None
-    return True, (None if scope_.is_owner else user)
+    return True, (None if scope_.is_owner and scope_.enrollment_ids is None else user)
 
 
 def _keep_rows(data, scope_):

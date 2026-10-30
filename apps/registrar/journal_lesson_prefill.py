@@ -40,28 +40,29 @@ from django.utils import timezone
 
 from . import dashboard_data, journal_activation, journal_topics, lesson_rooms, schedule
 from .journal_list_schedule import GRACE
+from .lesson_share_scope import scoped_lessons
 
 #: Jurnal dərs tipləri (``LessonKind``) — modalın tip seçimi ilə eyni sıra.
 KINDS = ("lecture", "seminar", "lab")
 
 
-def modal_context(offering, context, *, now=None) -> dict:
+def modal_context(offering, context, *, now=None, scope=None) -> dict:
     """``journal_detail`` kontekstinə ``lesson_prefill`` və BÜTÜN dərslərə görə «keçirilib» işarəli mövzular."""
     if not context.get("can_edit"):
         return {}
-    lessons = journal_activation.lesson_rows(offering, memo=True)
-    extra = {"lesson_prefill": build(offering, context, now=now)}
+    lessons = scoped_lessons(offering, journal_activation.lesson_rows(offering, memo=True), scope)
+    extra = {"lesson_prefill": build(offering, context, now=now, scope=scope)}
     if context.get("topic_choices_meta"):
         extra["topic_choices_meta"] = topics_covered_by(context["topic_choices_meta"], lessons)
     return extra
 
 
-def build(offering, context, *, now=None) -> dict:
+def build(offering, context, *, now=None, scope=None) -> dict:
     """Modalın defoltları (bax modul sənədi). ``now`` — test üçün (defolt: indiki yerli vaxt)."""
     now = timezone.localtime(now) if now is not None else timezone.localtime()
     today = now.date()
-    lessons = journal_activation.lesson_rows(offering, memo=True)
-    covered, last_instructor, todays = journal_activation.lesson_facts(offering, today, memo=True)
+    lessons = scoped_lessons(offering, journal_activation.lesson_rows(offering, memo=True), scope)
+    covered, last_instructor, todays = journal_activation.lesson_facts(offering, today, memo=True, lessons=lessons)
     topic_rows = context.get("topic_choices_meta") or []
     memory = context.get("lesson_room_memory") or {}
     # «Son dərs» — bu günə qədər keçirilənlərdən (irəli tarixli planlanmış dərs defolt olmasın).
@@ -75,6 +76,8 @@ def build(offering, context, *, now=None) -> dict:
     labels: dict = {}
 
     def teacher_id(user) -> str:
+        if scope is not None and scope.enrollment_ids is not None:
+            return str(scope.teacher_id)
         if user is None:
             return owner
         if str(user.pk) != owner:

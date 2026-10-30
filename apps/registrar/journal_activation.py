@@ -229,12 +229,12 @@ def lesson_rows(offering, *, memo: bool = False) -> list:
     return rows
 
 
-def lesson_facts(offering, today, *, memo: bool = False):
+def lesson_facts(offering, today, *, memo: bool = False, lessons=None):
     """Mövzu əhatəsi (növ üzrə), növ üzrə SON müəllim və bu günün dərsləri — bir sorğudan."""
     covered: dict = {}
     last_instructor: dict = {}
     todays = []
-    for lesson in lesson_rows(offering, memo=memo):
+    for lesson in lesson_rows(offering, memo=memo) if lessons is None else lessons:
         if lesson.display_topic:
             covered.setdefault(lesson.display_topic, set()).add(lesson.kind)
         if lesson.instructor_id and lesson.kind not in last_instructor:

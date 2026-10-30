@@ -301,7 +301,7 @@ def journal_detail(request, offering_id):
     context.update(subject_exempt.page_context(request.user, offering))
     from apps.registrar.journal_lesson_prefill import modal_context as lesson_prefill  # «Yeni dərs» dolu (2026-10-10)
 
-    context.update(lesson_prefill(offering, context))
+    context.update(lesson_prefill(offering, context, scope=share_scope))
     from apps.registrar import journal_full_edit  # «Data bərpası» rejimi — səbəb ilə tam redaktə (sahib 2026-10-27)
 
     context.update(journal_full_edit.page_context(request, offering, context))

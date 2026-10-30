@@ -194,7 +194,15 @@ def create_lesson(
     # aktivləşdirəndə dublikat sütun yaranırdı. Açılış sətri kilidlənir: EYNİ açılışa dərs yaratma
     # seriyalaşır, dublikat yoxlaması kilid altında gedir (başqa açılışlar gözləmir).
     CourseOffering.objects.select_for_update().filter(pk=offering.pk).values_list("pk", flat=True).first()
-    if start_time and Lesson.objects.filter(offering=offering, date=parsed, start_time=start_time).exists():
+    from .lesson_share_scope import has_slot_collision
+
+    if start_time and has_slot_collision(
+        offering=offering,
+        date=parsed,
+        start_time=start_time,
+        instructor_id=getattr(instructor, "pk", None) or offering.instructor_id,
+        kind=kind,
+    ):
         raise LessonRuleError("Eyni gündə eyni dərs saatına artıq dərs var — üst-üstə düşür.")
     ensure_assessment_scheme(offering=offering)
     topic = clean_topic(topic)
@@ -308,9 +316,18 @@ def update_lesson(
     if room is not UNSET:
         lesson.room = room
         fields.append("room")
-    if lesson.start_time and ({"date", "start_time"} & set(fields)):
-        clash = Lesson.objects.filter(offering=offering, date=lesson.date, start_time=lesson.start_time)
-        if clash.exclude(pk=lesson.pk).exists():
+    if lesson.start_time and ({"date", "start_time", "instructor", "kind"} & set(fields)):
+        from .lesson_share_scope import has_slot_collision
+
+        CourseOffering.objects.select_for_update().get(pk=offering.pk)
+        if has_slot_collision(
+            offering=offering,
+            date=lesson.date,
+            start_time=lesson.start_time,
+            instructor_id=lesson.instructor_id,
+            kind=lesson.kind,
+            exclude=lesson.pk,
+        ):
             raise LessonRuleError("Eyni gündə eyni dərs saatına artıq dərs var — üst-üstə düşür.")
     if fields:
         lesson.save(update_fields=fields)
