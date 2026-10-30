@@ -240,6 +240,8 @@ class TeacherJournalVisibilityTests(TestCase):
     def test_author_history_query_count_is_constant_with_mark_volume(self):
         offering = self.offering(instructor=self.other)
         self.lesson(offering, instructor=self.teacher)
+        # Process-level permission/content-type caches must be warm in both samples.
+        journal_list_base(self.teacher, self.request())[0].count()
         with CaptureQueriesContext(connection) as first:
             journal_list_base(self.teacher, self.request())[0].count()
         for _index in range(12):

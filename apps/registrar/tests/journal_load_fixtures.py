@@ -39,6 +39,9 @@ def seed_current_journal_load(offering, *, teacher=None, kinds=("lecture",)):
     for kind in kinds:
         setattr(row, f"{kind}_plan", 30)
         setattr(row, f"{kind}_total", 30)
+    row.total_hours = row.computed_total_hours
+    row.save()
+    for kind in kinds:
         TeacherAssignment.objects.get_or_create(
             organization=offering.organization,
             row=row,
@@ -46,6 +49,4 @@ def seed_current_journal_load(offering, *, teacher=None, kinds=("lecture",)):
             activity=kind,
             defaults={"hours": 30},
         )
-    row.total_hours = row.computed_total_hours
-    row.save()
     return row

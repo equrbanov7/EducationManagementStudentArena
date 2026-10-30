@@ -44,6 +44,10 @@ def _workload_filters(queryset, user, organization):
 
 def project(queryset, user, organization, *, observed=()):
     """Do not add a single offering to the already-authorized own/share/observer set."""
+    if queryset.query.is_empty():
+        flags = {"journal_is_current_load", "journal_has_records"}
+        flags.update(f"journal_{prefix}_{kind}" for prefix in ("current", "recorded") for kind in KINDS)
+        return queryset.annotate(**{name: Value(False) for name in flags})
     filters = _workload_filters(queryset, user, organization)
     recorded = recorded_lessons(user).filter(organization_id=OuterRef("organization_id"), offering_id=OuterRef("pk"))
     annotations = {"journal_has_records": Exists(recorded)}

@@ -67,7 +67,7 @@ def journal_list_base(user, request=None):
     from apps.registrar.teacher_journal_list import project
 
     if not eligible(user, organization):
-        return base_qs.none(), False
+        return project(base_qs.none(), user, organization), False
     authorized = base_qs.filter(own_q | Q(pk__in=observed) | Q(pk__in=offering_ids(user, organization)))
     return project(authorized, user, organization, observed=observed), False
 
