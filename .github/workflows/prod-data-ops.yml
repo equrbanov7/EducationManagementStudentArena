@@ -682,6 +682,11 @@ jobs:
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor")
+              case "$ROW_SUBJECT" in
+                ""|bilal) args+=(--case bilal) ;;
+                robotics) args+=(--case robotics) ;;
+                *) echo "row_subject yalnız bilal və ya robotics olmalıdır" >&2; exit 2 ;;
+              esac
               if [[ "$BATCH" == wksyl-* ]]; then
                 match "$BATCH" '^wksyl-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch formatı: wksyl-YYYYMMDD-HHMMSS-xxxx" >&2; exit 2; }
                 test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }

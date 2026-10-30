@@ -51,6 +51,7 @@ class RecoverySpec:
     group_id: str = ""
     contact_hours: tuple = ()
     selfwork_topics: int | None = None
+    optional_empty_sections: tuple = ()
 
     @property
     def restore_reason(self):
@@ -110,8 +111,11 @@ def load(path, expected, spec):
             or any((r["uniqid"] != spec.uniqid for r in week))
         ):
             raise RestoreError("week_source_scope")
+        expected_tables = set(SYLLABUS_SECTION_CONTRACTS)
+        source_tables = set(source["sections"])
         if (
-            set(source["sections"]) != set(SYLLABUS_SECTION_CONTRACTS)
+            not expected_tables.difference(spec.optional_empty_sections).issubset(source_tables)
+            or not source_tables.issubset(expected_tables)
             or len(source["sections"]["sillabus_serbest_is"]) != spec.selfwork
         ):
             raise RestoreError("section_source_scope")
