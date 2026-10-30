@@ -14,7 +14,12 @@ from ...services.tspx_roster_plan import ORG, read_plan
 
 
 class Command(BaseCommand):
-    help = "MyEdu dəqiq23/26+1 bölgüsünə135TSPX reyestr bərpası; defolt atomik dry-run."
+    help = "MyEdu üzrə 135 TSPX reyestrini dəqiq 23/26+1 bölgüsü ilə bərpa edir; defolt atomik dry-run."
+
+    output_prefix = "tspx_roster"
+
+    def load_plan(self, options):
+        return read_plan(options["manifest"], options["manifest_sha256"])
 
     def add_arguments(self, parser):
         parser.add_argument("--org", default="qku")
@@ -34,7 +39,7 @@ class Command(BaseCommand):
             raise CommandError("active_superadmin_required")
         apply_rls_request_context(user_id=user.pk, org_id=ORG, bypass=False)
         try:
-            plan = read_plan(options["manifest"], options["manifest_sha256"])
+            plan = self.load_plan(options)
             organization = model("organizations.Organization").objects.get(pk=ORG, slug="qku", is_active=True)
             result = tspx_roster_repair.run(
                 plan=plan,
@@ -54,5 +59,9 @@ class Command(BaseCommand):
             reset_rls_context()
         mode = "undo" if options["undo"] and options["apply"] else "apply" if options["apply"] else "dry_run"
         self.stdout.write(
-            "tspx_roster: mode=" + mode + " " + " ".join(f"{key}={value}" for key, value in sorted(result.items()))
+            self.output_prefix
+            + ": mode="
+            + mode
+            + " "
+            + " ".join(f"{key}={value}" for key, value in sorted(result.items()))
         )

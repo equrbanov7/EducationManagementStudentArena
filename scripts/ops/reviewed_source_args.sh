@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 # Sourced API for guarded encrypted source manifests.
-if [ "$COMMAND" = "repair_tspx_legacy_roster" ]; then
-  match "$ROSTER_TAG" '^tspx-roster-[0-9a-z-]+$' || exit 2
+if [[ "$COMMAND" = repair_tspx_legacy_roster || "$COMMAND" = repair_si135_legacy_roster ]]; then
+  case "$COMMAND" in
+    repair_tspx_legacy_roster) roster_prefix=tspx-roster; roster_file=tspx_roster ;;
+    repair_si135_legacy_roster) roster_prefix=si135-roster; roster_file=si135_roster ;;
+  esac
+  match "$ROSTER_TAG" "^${roster_prefix}-[0-9a-z-]+$" || exit 2
   match "$BATCH" '^[0-9a-f]{64}$' || exit 2
-  args=(--org "$ORG" --actor "$actor" --manifest "/tmp/tspx_roster_${GITHUB_RUN_ID}.json" --manifest-sha256 "$BATCH")
-  undo_prefix=tspx-roster
+  args=(--org "$ORG" --actor "$actor" --manifest "/tmp/${roster_file}_${GITHUB_RUN_ID}.json" --manifest-sha256 "$BATCH")
+  undo_prefix="$roster_prefix"
 else
 match "$ROSTER_TAG" '^reviewed-workload-[0-9a-z-]+$' || exit 2
 match "$BATCH" '^[0-9a-f]{64}$' || exit 2

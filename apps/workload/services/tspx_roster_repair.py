@@ -11,12 +11,13 @@ from core.audit import log_action
 from core.constants import AuditAction
 
 from . import tspx_roster_state as state
+from .legacy_roster_contracts import SI135, TSPX
 from .sbio235_state import RepairError, model
-from .tspx_roster_plan import ORG, PARENT, PERIOD, RESOURCE, TARGETS
+from .tspx_roster_plan import ORG, PERIOD
 
 
 def receipt(plan, undo):
-    query = model("audit.AuditLog").objects.filter(organization_id=ORG, resource_type=RESOURCE)
+    query = model("audit.AuditLog").objects.filter(organization_id=ORG, resource_type=plan.family.resource)
     query = query.filter(resource_id=undo) if undo else query.filter(new_values__manifest_sha256=plan.sha256)
     return query.order_by("-created_at", "-pk").first()
 
@@ -26,9 +27,9 @@ def _write(plan, user, organization, batch, values):
         AuditAction.UPDATE,
         user=user,
         organization=organization,
-        resource_type=RESOURCE,
+        resource_type=plan.family.resource,
         resource_id=batch,
-        reason="Legacy MyEdu exact135TSPX home-group restoration",
+        reason=f"Legacy MyEdu exact {plan.family.display_name} home-group restoration",
         new_values={"manifest_sha256": plan.sha256, **values},
     )
 
@@ -47,7 +48,7 @@ def _undo(plan, prior, before, organization, user, batch):
     if any(
         e["student_id"] in moved_users
         and e["status"] == "enrolled"
-        and old_offerings[e["offering_id"]]["group_id"] in TARGETS.values()
+        and old_offerings[e["offering_id"]]["group_id"] in plan.family.targets.values()
         and old_offerings[e["offering_id"]]["period_id"] == PERIOD
         for e in original["enrollments"]
     ):
@@ -56,7 +57,7 @@ def _undo(plan, prior, before, organization, user, batch):
     for pk in sorted(moved):
         transfer.transfer_student_group(
             record=people_by_record[pk],
-            new_group=groups[PARENT],
+            new_group=groups[plan.family.parent],
             period=period,
             by_user=user,
             reason=f"{batch}: guarded direct inverse",
@@ -64,7 +65,7 @@ def _undo(plan, prior, before, organization, user, batch):
     after = state.capture(plan)
     # Existing academic objects remain; new empty successor history is retained.
     changed = {e["id"] for e in before["enrollments"] if e["student_id"] in moved_users}
-    state.preserved(before, after, moved, changed)
+    state.preserved(plan, before, after, moved, changed)
     old_records = {r["id"]: r for r in original["records"]}
     if any(r["group_id"] != old_records[r["id"]]["group_id"] for r in after["records"]):
         raise RepairError("tspx_undo_group_partition_mismatch")
@@ -85,13 +86,15 @@ def _undo(plan, prior, before, organization, user, batch):
 
 @transaction.atomic
 def run(*, plan, organization, user, expected_baseline="", undo="", apply=False):
+    if plan.family not in (TSPX, SI135) or plan.sha256 != plan.family.manifest_sha:
+        raise RepairError("fixed_reviewed_roster_contract_required")
     if str(organization.pk) != ORG or not organization.is_active or not user.is_active or not user.is_superuser:
         raise RepairError("fixed_tenant_active_superadmin_required")
     if expected_baseline and not re.fullmatch(r"[a-f0-9]{64}", expected_baseline):
         raise RepairError("baseline_invalid")
     if apply and not expected_baseline:
         raise RepairError("fresh_expected_baseline_required")
-    if undo and not re.fullmatch(r"tspx-roster-\d{8}-\d{6}-[a-f0-9]{8}", undo):
+    if undo and not re.fullmatch(rf"{re.escape(plan.family.batch_prefix)}-\d{8}-\d{6}-[a-f0-9]{8}", undo):
         raise RepairError("tspx_undo_batch_invalid")
     before = state.capture(plan, lock=True)
     baseline = state.baseline(before)
@@ -106,7 +109,7 @@ def run(*, plan, organization, user, expected_baseline="", undo="", apply=False)
         return {"baseline": baseline, "batch": prior.resource_id, "already_done": 1}
     if expected_baseline and expected_baseline != baseline:
         raise RepairError("baseline_conflict")
-    batch = undo or f"tspx-roster-{timezone.now():%Y%m%d-%H%M%S}-{uuid.uuid4().hex[:8]}"
+    batch = undo or f"{plan.family.batch_prefix}-{timezone.now():%Y%m%d-%H%M%S}-{uuid.uuid4().hex[:8]}"
     if undo:
         result = _undo(plan, prior, before, organization, user, batch)
     else:
@@ -123,7 +126,7 @@ def run(*, plan, organization, user, expected_baseline="", undo="", apply=False)
                 for e in before["enrollments"]
                 if e["student_id"] == record.student_id
                 and e["status"] == "enrolled"
-                and old_offerings[e["offering_id"]]["group_id"] == PARENT
+                and old_offerings[e["offering_id"]]["group_id"] == plan.family.parent
                 and old_offerings[e["offering_id"]]["period_id"] == PERIOD
             )
             transfer.transfer_student_group(
@@ -136,10 +139,10 @@ def run(*, plan, organization, user, expected_baseline="", undo="", apply=False)
             moved.add(str(record.pk))
         state.validate(plan, organization)
         after = state.capture(plan)
-        state.preserved(before, after, moved, source_enrollments)
+        state.preserved(plan, before, after, moved, source_enrollments)
         current_records = {r["id"]: r for r in after["records"]}
         if any(
-            current_records[p["expected_record_id"]]["group_id"] != p.get("target_group_id", PARENT)
+            current_records[p["expected_record_id"]]["group_id"] != p.get("target_group_id", plan.family.parent)
             for p in plan.people
         ):
             raise RepairError("tspx_after_source_partition_mismatch")
@@ -173,8 +176,8 @@ def run(*, plan, organization, user, expected_baseline="", undo="", apply=False)
             "batch": batch,
             "moved_students": len(moved),
             "retained_parent": 1,
-            "child_one": 23,
-            "child_two": 26,
+            "child_one": plan.family.children[0][2],
+            "child_two": plan.family.children[1][2],
         }
     if not apply:
         transaction.set_rollback(True)

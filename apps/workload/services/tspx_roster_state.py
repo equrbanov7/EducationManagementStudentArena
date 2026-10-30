@@ -16,7 +16,7 @@ def offerings(plan):
     return (
         model("registrar.CourseOffering")
         .objects.filter(organization_id=ORG)
-        .filter(Q(group_id__in=GROUP_IDS, period_id=PERIOD) | Q(pk__in=enrolled.values("offering_id")))
+        .filter(Q(group_id__in=plan.family.group_ids, period_id=PERIOD) | Q(pk__in=enrolled.values("offering_id")))
     )
 
 
@@ -26,14 +26,14 @@ def capture(plan, *, lock=False):
         for qs in academic_queries(organization_id=ORG, offerings=journals).values():
             list(qs.select_for_update().order_by("pk").values_list("pk", flat=True))
     source_ids = [str(p["legacy_student_id"]) for p in plan.people]
-    rows = model("workload.TeachingTaskRow").objects.filter(organization_id=ORG, groups__pk__in=GROUP_IDS)
+    rows = model("workload.TeachingTaskRow").objects.filter(organization_id=ORG, groups__pk__in=plan.family.group_ids)
     rows = model("workload.TeachingTaskRow").objects.filter(pk__in=rows.values("pk"))
     queries = {
-        "groups": model("organizations.OrgUnit").objects.filter(organization_id=ORG, pk__in=GROUP_IDS),
+        "groups": model("organizations.OrgUnit").objects.filter(organization_id=ORG, pk__in=plan.family.group_ids),
         "period": model("organizations.AcademicPeriod").objects.filter(organization_id=ORG, pk=PERIOD),
         "records": model("registrar.StudentAcademicRecord")
         .objects.filter(organization_id=ORG)
-        .filter(Q(pk__in=plan.record_ids) | Q(group_id__in=GROUP_IDS)),
+        .filter(Q(pk__in=plan.record_ids) | Q(group_id__in=plan.family.group_ids)),
         "memberships": model("organizations.Membership").objects.filter(organization_id=ORG, user_id__in=plan.user_ids),
         "roles": model("organizations.Role").objects.filter(organization_id=ORG),
         "maps": model("legacy_import.LegacyEntityMap").objects.filter(
@@ -64,18 +64,18 @@ def validate(plan, organization):
     groups = {
         str(g.pk): g
         for g in model("organizations.OrgUnit").objects.filter(
-            organization=organization, pk__in=GROUP_IDS, is_active=True, unit_type="group"
+            organization=organization, pk__in=plan.family.group_ids, is_active=True, unit_type="group"
         )
     }
     if len(groups) != 3:
         raise RepairError("tspx_active_family_missing")
-    parent = groups[PARENT]
-    for legacy, gid in TARGETS.items():
+    parent = groups[plan.family.parent]
+    for number, (_legacy, gid) in enumerate(plan.family.targets.items(), 1):
         child = groups[gid]
         if (
-            str((child.settings or {}).get("parent_group")) != PARENT
+            str((child.settings or {}).get("parent_group")) != plan.family.parent
             or child.parent_id != parent.parent_id
-            or "".join(child.name.lower().split()) != f"135tspx-{1 if legacy == 927 else 2}"
+            or "".join(child.name.lower().split()) != f"{plan.family.label_prefix}-{number}"
             or any(
                 (child.settings or {}).get(k) != (parent.settings or {}).get(k)
                 for k in ("sector", "education_form", "degree_level")
@@ -86,9 +86,9 @@ def validate(plan, organization):
     if not period.is_current or not period.is_active or period.academic_year != "2026/2027":
         raise RepairError("tspx_active_current_period_required")
     active = model("registrar.StudentAcademicRecord").objects.filter(
-        organization=organization, group_id__in=GROUP_IDS, status="enrolled"
+        organization=organization, group_id__in=plan.family.group_ids, status="enrolled"
     )
-    if set(active.values_list("student_id", flat=True)) != plan.user_ids or active.count() != 50:
+    if set(active.values_list("student_id", flat=True)) != plan.user_ids or active.count() != plan.family.moves + 1:
         raise RepairError("tspx_live_family_student_set_changed")
     people = {}
     for item in plan.people:
@@ -104,11 +104,11 @@ def validate(plan, organization):
 
         actual = (record.student.first_name, record.student.last_name, profile.patronymic)
         wanted = tuple(item["source_identity"][key] for key in ("first_name", "last_name", "patronymic"))
-        target = item.get("target_group_id", PARENT)
+        target = item.get("target_group_id", plan.family.parent)
         if (
             not record.student.is_active
             or record.status != "enrolled"
-            or str(record.group_id) not in {PARENT, target}
+            or str(record.group_id) not in {plan.family.parent, target}
             or record.admission_year != item["keep_admission_year"]
             or str(record.program_id) != item["keep_program_id"]
             or str(record.curriculum_id) != item["keep_curriculum_id"]
@@ -141,7 +141,7 @@ def _same(old, new, excluded=()):
     return {k: v for k, v in old.items() if k not in excluded} == {k: v for k, v in new.items() if k not in excluded}
 
 
-def preserved(before, after, moved, changed_enrollments=()):
+def preserved(plan, before, after, moved, changed_enrollments=()):
     old_offerings = model("registrar.CourseOffering").objects.filter(
         organization_id=ORG, pk__in=[o["id"] for o in before["offerings"]]
     )
@@ -175,9 +175,9 @@ def preserved(before, after, moved, changed_enrollments=()):
         for key in ("instructor_id", "lesson_hours", "course_id"):
             if old_offer[key] != current[key] and (
                 old_offer[key]
-                or old_offer["group_id"] not in TARGETS.values()
+                or old_offer["group_id"] not in plan.family.targets.values()
                 or not any(
-                    o["group_id"] == PARENT
+                    o["group_id"] == plan.family.parent
                     and o["subject_id"] == old_offer["subject_id"]
                     and o["period_id"] == old_offer["period_id"]
                     and o[key] == current[key]

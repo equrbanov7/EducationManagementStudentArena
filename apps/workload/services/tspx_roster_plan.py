@@ -1,7 +1,9 @@
 """Frozen, reviewed MyEdu home-group identities; no name-based student discovery."""
 
+from collections import Counter
 from dataclasses import dataclass
 
+from .legacy_roster_contracts import SI135, TSPX, Family
 from .reviewed_batch_manifest import read_manifest
 from .sbio235_state import RepairError
 
@@ -14,6 +16,7 @@ TARGETS = {
 }
 SOURCE_SHA = "c64affd5268a60e987b23749770db5d841002e5645c02b1461d6098a833db888"
 MANIFEST_SHA = "c6eb79792406c3ddc51d842cae767f88a9035a26a3c29eb3696870f560af23bb"
+SI135_MANIFEST_SHA = SI135.manifest_sha
 RESOURCE = "workload.tspx_legacy_roster"
 
 
@@ -22,6 +25,7 @@ class Plan:
     sha256: str
     candidates: list
     retain: list
+    family: Family = TSPX
 
     @property
     def people(self):
@@ -37,7 +41,15 @@ class Plan:
 
 
 def read_plan(path, sha256):
-    if sha256 != MANIFEST_SHA:
+    return _read_family(path, sha256, TSPX, MANIFEST_SHA)
+
+
+def read_si135_plan(path, sha256):
+    return _read_family(path, sha256, SI135, SI135_MANIFEST_SHA)
+
+
+def _read_family(path, sha256, family, expected_sha):
+    if family not in (TSPX, SI135) or sha256 != expected_sha:
         raise RepairError("fixed_reviewed_tspx_manifest_sha_required")
     value = read_manifest(path, sha256)
     if (
@@ -46,34 +58,34 @@ def read_plan(path, sha256):
         or value.get("academic_year") != "2026/2027"
         or value.get("period_id") != PERIOD
         or value.get("source_sql_sha256") != SOURCE_SHA
-        or value.get("source_parent_current_group_id") != PARENT
-        or value.get("source_target_groups") != {str(k): v for k, v in TARGETS.items()}
+        or value.get("source_parent_current_group_id") != family.parent
+        or value.get("source_parent_legacy_group_id") != family.legacy_parent
+        or value.get("source_target_groups") != {str(k): v for k, v in family.targets.items()}
     ):
         raise RepairError("fixed_tspx_source_scope_required")
     candidates, retain = value["candidates"], value["retain_parent"]
-    plan = Plan(sha256, candidates, retain)
+    plan = Plan(sha256, candidates, retain, family)
     if (
-        len(candidates) != 49
+        len(candidates) != family.moves
         or len(retain) != 1
-        or len(plan.user_ids) != 50
-        or len(plan.record_ids) != 50
-        or len({p["legacy_student_id"] for p in plan.people}) != 50
-        or sum(p["source_home_group_id"] == 927 for p in candidates) != 23
-        or sum(p["source_home_group_id"] == 929 for p in candidates) != 26
+        or len(plan.user_ids) != family.moves + 1
+        or len(plan.record_ids) != family.moves + 1
+        or len({p["legacy_student_id"] for p in plan.people}) != family.moves + 1
+        or Counter(p["source_home_group_id"] for p in candidates) != family.counts
     ):
         raise RepairError("fixed_tspx_source_partition_required")
     for person in plan.people:
         if (
             person["source_system"] != "myedu_mariadb"
-            or person["clone_record_source_group_id"] != PARENT
+            or person["clone_record_source_group_id"] != family.parent
             or person["keep_admission_year"] != 2025
             or not isinstance(person["target_user_id"], int)
             or isinstance(person["target_user_id"], bool)
             or person["target_user_id"] <= 0
         ):
             raise RepairError("fixed_tspx_student_identity_required")
-    if retain[0]["source_home_group_id"] != 798 or any(
-        p["target_group_id"] != TARGETS.get(p["source_home_group_id"]) for p in candidates
+    if retain[0]["source_home_group_id"] != family.legacy_parent or any(
+        p["target_group_id"] != family.targets.get(p["source_home_group_id"]) for p in candidates
     ):
         raise RepairError("fixed_tspx_child_membership_required")
     return plan

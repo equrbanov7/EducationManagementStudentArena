@@ -3,6 +3,7 @@
 import hashlib
 import json
 import tempfile
+from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
@@ -34,6 +35,8 @@ User = get_user_model()
 
 
 class TspxRosterTests(TestCase):
+    family = contract.TSPX
+
     @classmethod
     def setUpTestData(cls):
         with bypass_rls():
@@ -58,23 +61,23 @@ class TspxRosterTests(TestCase):
                 is_current=True,
             )
             cls.parent = OrgUnit.objects.create(
-                id=contract.PARENT,
+                id=cls.family.parent,
                 organization=cls.org,
-                name="135 TSPX",
+                name=cls.family.label_prefix,
                 slug="tspx-parent",
                 unit_type="group",
                 settings={"degree_level": "bachelor", "sector": "az", "education_form": "full_time"},
             )
             cls.children = []
-            for number, gid in enumerate(contract.TARGETS.values(), 1):
+            for number, gid in enumerate(cls.family.targets.values(), 1):
                 cls.children.append(
                     OrgUnit.objects.create(
                         id=gid,
                         organization=cls.org,
-                        name=f"135TSPX-{number}",
+                        name=f"{cls.family.label_prefix}-{number}",
                         slug=f"tspx-{number}",
                         unit_type="group",
-                        settings={**cls.parent.settings, "parent_group": contract.PARENT},
+                        settings={**cls.parent.settings, "parent_group": cls.family.parent},
                     )
                 )
             cls.program = Program.objects.create(organization=cls.org, code="TSPX", name="TSPX")
@@ -93,7 +96,7 @@ class TspxRosterTests(TestCase):
             run = _make_run(cls.org)
             people = []
             cls.records = []
-            for n in range(50):
+            for n in range(cls.family.moves + 1):
                 user = User.objects.create_user(f"tspx_student{n}", first_name=f"Ad{n}", last_name=f"Soyad{n}")
                 Membership.objects.create(organization=cls.org, user=user, role=cls.org.roles.get(name="student"))
                 UserProfile.objects.filter(user=user).update(organization=cls.org, patronymic=f"Ata{n}")
@@ -115,14 +118,18 @@ class TspxRosterTests(TestCase):
                     target_model_label="registrar.studentacademicrecord",
                     target_pk=str(record.pk),
                 )
-                source_group = 927 if n < 23 else 929 if n < 49 else 798
+                source_group = (
+                    cls.family.children[0][0]
+                    if n < cls.family.children[0][2]
+                    else cls.family.children[1][0] if n < cls.family.moves else cls.family.legacy_parent
+                )
                 item = {
                     "legacy_student_id": 1000 + n,
                     "source_system": "myedu_mariadb",
                     "ledger_source_row_hash": "b" * 64,
                     "target_user_id": user.pk,
                     "expected_record_id": str(record.pk),
-                    "clone_record_source_group_id": contract.PARENT,
+                    "clone_record_source_group_id": cls.family.parent,
                     "source_identity": {
                         "first_name": user.first_name,
                         "last_name": user.last_name,
@@ -133,10 +140,12 @@ class TspxRosterTests(TestCase):
                     "keep_curriculum_id": str(cls.curriculum.pk),
                     "source_home_group_id": source_group,
                 }
-                if n < 49:
-                    item["target_group_id"] = contract.TARGETS[source_group]
+                if n < cls.family.moves:
+                    item["target_group_id"] = cls.family.targets[source_group]
                 people.append(item)
-            cls.plan = contract.Plan("a" * 64, people[:49], people[49:])
+            cls.plan = contract.Plan(
+                cls.family.manifest_sha, people[: cls.family.moves], people[cls.family.moves :], cls.family
+            )
             lesson = Lesson.objects.create(
                 organization=cls.org, offering=cls.journal, date="2026-10-01", kind="seminar"
             )
@@ -160,9 +169,13 @@ class TspxRosterTests(TestCase):
         dry = self.execute()
         self.assertEqual(self.snapshot(), before)
         applied = self.execute(apply=True, expected_baseline=dry["baseline"])
-        self.assertEqual(applied["moved_students"], 49)
+        self.assertEqual(applied["moved_students"], self.family.moves)
         with bypass_rls():
-            for gid, count in [(contract.PARENT, 1), (str(self.children[0].pk), 23), (str(self.children[1].pk), 26)]:
+            for gid, count in [
+                (self.family.parent, 1),
+                (str(self.children[0].pk), self.family.children[0][2]),
+                (str(self.children[1].pk), self.family.children[1][2]),
+            ]:
                 self.assertEqual(StudentAcademicRecord.objects.filter(group_id=gid).count(), count)
             self.mark.refresh_from_db()
             self.assertEqual(self.mark.score, 9)
@@ -177,6 +190,15 @@ class TspxRosterTests(TestCase):
             with self.assertRaises(RepairError):
                 self.execute(apply=True, expected_baseline=baseline)
             self.assertEqual(self.snapshot(), before)
+
+    def test_other_frozen_family_cannot_use_this_manifest_or_receipt(self):
+        other = contract.SI135 if self.family == contract.TSPX else contract.TSPX
+        with self.assertRaisesMessage(RepairError, "fixed_reviewed_roster_contract"):
+            with bypass_rls():
+                repair.run(plan=replace(self.plan, family=other), organization=self.org, user=self.actor)
+        reader = contract.read_si135_plan if self.family == contract.TSPX else contract.read_plan
+        with self.assertRaisesMessage(RepairError, "manifest_sha"):
+            reader("/unread-other-family", self.family.manifest_sha)
 
     def test_reused_child_grade_roster_survives_forward_and_undo_is_explicitly_blocked(self):
         with bypass_rls():
@@ -257,7 +279,7 @@ class TspxRosterTests(TestCase):
                 self.execute(apply=True, expected_baseline=state.baseline(before))
         self.assertEqual(self.snapshot(), before)
         with bypass_rls():
-            self.assertFalse(AuditLog.objects.filter(resource_type=contract.RESOURCE).exists())
+            self.assertFalse(AuditLog.objects.filter(resource_type=self.family.resource).exists())
 
     def test_inactive_or_non_superadmin_actor_cannot_change_roster(self):
         self.actor.is_superuser = False
@@ -273,8 +295,9 @@ class TspxRosterTests(TestCase):
             "academic_year": "2026/2027",
             "period_id": contract.PERIOD,
             "source_sql_sha256": contract.SOURCE_SHA,
-            "source_parent_current_group_id": contract.PARENT,
-            "source_target_groups": {str(k): v for k, v in contract.TARGETS.items()},
+            "source_parent_current_group_id": self.family.parent,
+            "source_parent_legacy_group_id": self.family.legacy_parent,
+            "source_target_groups": {str(k): v for k, v in self.family.targets.items()},
             "candidates": self.plan.candidates,
             "retain_parent": self.plan.retain,
         }
@@ -283,18 +306,20 @@ class TspxRosterTests(TestCase):
             path.write_text(json.dumps(value))
             path.chmod(0o600)
             sha = hashlib.sha256(path.read_bytes()).hexdigest()
-            with patch.object(contract, "MANIFEST_SHA", sha):
-                self.assertEqual(len(contract.read_plan(path, sha).candidates), 49)
+            with patch.object(contract, "MANIFEST_SHA" if self.family == contract.TSPX else "SI135_MANIFEST_SHA", sha):
+                reader = contract.read_plan if self.family == contract.TSPX else contract.read_si135_plan
+                self.assertEqual(len(reader(path, sha).candidates), self.family.moves)
                 path.chmod(0o644)
                 with self.assertRaises(RepairError):
-                    contract.read_plan(path, sha)
+                    reader(path, sha)
         self.applied()
         with bypass_rls():
-            data = AuditLog.objects.filter(resource_type=contract.RESOURCE).get().new_values
+            data = AuditLog.objects.filter(resource_type=self.family.resource).get().new_values
             self.assertNotIn('"password"', json.dumps(data))
 
 
 class TspxRosterInverseTests(TransactionTestCase):
+    family = contract.TSPX
     execute = TspxRosterTests.execute
     snapshot = TspxRosterTests.snapshot
     applied = TspxRosterTests.applied
@@ -307,8 +332,16 @@ class TspxRosterInverseTests(TransactionTestCase):
         dry = self.execute(undo=result["batch"])
         self.execute(undo=result["batch"], apply=True, expected_baseline=dry["baseline"])
         with bypass_rls():
-            self.assertEqual(StudentAcademicRecord.objects.filter(group=self.parent).count(), 50)
+            self.assertEqual(StudentAcademicRecord.objects.filter(group=self.parent).count(), self.family.moves + 1)
             self.mark.refresh_from_db()
             self.mark.enrollment.refresh_from_db()
             self.assertEqual(self.mark.enrollment.status, "enrolled")
             self.assertEqual(self.mark.score, 9)
+
+
+class Si135RosterTests(TspxRosterTests):
+    family = contract.SI135
+
+
+class Si135RosterInverseTests(TspxRosterInverseTests):
+    family = contract.SI135
