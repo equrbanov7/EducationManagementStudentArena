@@ -52,6 +52,8 @@ class RecoverySpec:
     contact_hours: tuple = ()
     selfwork_topics: int | None = None
     optional_empty_sections: tuple = ()
+    subject_id: str = ""
+    require_current_period: bool = True
 
     @property
     def restore_reason(self):
@@ -157,7 +159,8 @@ def scope(org, actor, spec):
         or offering.instructor_id not in spec.allowed_owners
         or offering.subject.code != spec.subject_code
         or (not offering.is_active)
-        or (not offering.period.is_current)
+        or (spec.require_current_period and not offering.period.is_current)
+        or (spec.subject_id and str(offering.subject_id) != spec.subject_id)
         or (not offering.instructor.is_active)
         or (spec.group_id and str(offering.group_id) != spec.group_id)
     ):
