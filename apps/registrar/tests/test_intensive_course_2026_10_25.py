@@ -178,7 +178,41 @@ class JournalPageTest(_IntensiveBase):
     def test_journal_detail_and_list_show_intensive_badge(self):
         from django.urls import reverse
 
-        offering = self._open([self.guest], release_source=True)["offering"]
+        from apps.workload.models import TeacherAssignment, TeachingTaskRow
+        from apps.workload.services.intensive import create_intensive
+        from apps.workload.services.scoping import resolve_actor
+
+        # The UI opens an intensive journal through the one-step workload
+        # workflow. Calling only the lower registrar primitive omits the real
+        # positive allocation that is now authoritative for the teacher list.
+        with bypass_rls():
+            self.owner.is_superuser = True
+            self.owner.save(update_fields=["is_superuser"])
+            opened = create_intensive(
+                organization=self.org,
+                actor=resolve_actor(self.owner, self.org),
+                chair_id=self.chair.pk,
+                subject_id=self.history.pk,
+                teacher_id=self.teacher.pk,
+                student_ids=[self.guest.pk],
+                lecture_hours=4,
+                seminar_hours=6,
+                starts_on="2025-10-01",
+                ends_on="2025-10-10",
+                note=NOTE,
+                release_source=True,
+            )
+            offering = CourseOffering.objects.get(pk=opened["offering_id"])
+            row = TeachingTaskRow.objects.get(pk=opened["row_id"])
+            self.assertEqual(row.intensive_offering_id, offering.pk)
+            self.assertEqual(
+                list(
+                    TeacherAssignment.objects.filter(row=row, teacher=self.teacher)
+                    .order_by("activity")
+                    .values_list("activity", "hours")
+                ),
+                [("lecture", 4), ("seminar", 6)],
+            )
         client = self._client(self.teacher)
         detail = client.get(reverse("registrar:journal_detail", args=[offering.pk]))
         self.assertEqual(detail.status_code, 200)
