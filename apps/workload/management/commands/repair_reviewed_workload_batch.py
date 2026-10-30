@@ -37,10 +37,23 @@ class Command(BaseCommand):
         apply_rls_request_context(user_id=user.pk, org_id=ORG, bypass=False)
         try:
             manifest = read_manifest(options["manifest"], options["manifest_sha256"])
-            plan = select_manifest(manifest, sha256=options["manifest_sha256"], lines=options["lines"])
+            from ...services import civil_source_partition
+
+            partition = manifest.get("format") == civil_source_partition.FORMAT
+            plan = (
+                None
+                if partition
+                else select_manifest(manifest, sha256=options["manifest_sha256"], lines=options["lines"])
+            )
             organization = model("organizations.Organization").objects.get(pk=ORG, slug=options["org"], is_active=True)
-            result = reviewed_batch.run(
-                plan=plan,
+            runner = civil_source_partition.run if partition else reviewed_batch.run
+            selection = (
+                {"manifest": manifest, "manifest_sha": options["manifest_sha256"], "lines": options["lines"]}
+                if partition
+                else {"plan": plan}
+            )
+            result = runner(
+                **selection,
                 organization=organization,
                 user=user,
                 expected_baseline=options["expected_baseline"],
