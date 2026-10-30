@@ -20,7 +20,14 @@ from apps.appeals.services.teaching_scope import scoped_appeals, teaching_sectio
 from apps.appeals.tests.test_review_teacher_document_2026_10_21 import _ReviewSetup
 from apps.notifications.models import InAppNotification
 from apps.organizations.models import Membership, OrgUnit
-from apps.registrar.models import Curriculum, StudentAcademicRecord
+from apps.registrar.models import (
+    CourseOffering,
+    Curriculum,
+    Enrollment,
+    JournalShare,
+    ScheduleSlot,
+    StudentAcademicRecord,
+)
 from apps.workload.models import TeachingTask, TeachingTaskRow
 from apps.workload.tests.factories import make_org, make_structure
 from core.rls import bypass_rls
@@ -165,6 +172,90 @@ class SubjectChairAppealTests(_ReviewSetup):
                 self.assertIn(f"ta_open={self.appeal.pk}", unquote(note.link))
             for user in (self.student, self.other_manager, self.other_laborant, self.unitless):
                 self.assertFalse(self.notice(user).exists())
+
+    def test_split_share_teacher_receives_invitation_for_their_student_only(self):
+        with bypass_rls():
+            share = JournalShare.objects.create(
+                organization=self.org,
+                offering=self.offering,
+                teacher=self.other_teacher,
+                kinds=["seminar"],
+            )
+            own = Enrollment.objects.get(offering=self.offering, student=self.student)
+            share.enrollments.add(own)
+            self.clean_notices()
+            notify_appeal_filed_teachers(self.appeal, item_count=1)
+            self.assertIn("İmtahan Mərkəzinə yaxınlaşın", self.notice(self.other_teacher).get().message)
+            self.assertTrue(self.visible(self.other_teacher))
+            other_student = self.member("appeal-share-other-student", "student", None)
+            other = Enrollment.objects.create(
+                organization=self.org,
+                offering=self.offering,
+                student=other_student,
+            )
+            share.enrollments.set([other])
+            self.clean_notices()
+            notify_appeal_filed_teachers(self.appeal, item_count=1)
+            self.assertFalse(self.notice(self.other_teacher).exists())
+            share.enrollments.clear()
+            share.is_active = False
+            share.save(update_fields=["is_active"])
+            self.clean_notices()
+            notify_appeal_filed_teachers(self.appeal, item_count=1)
+            self.assertFalse(self.notice(self.other_teacher).exists())
+
+    def test_exam_linked_offering_takes_precedence_over_same_subject_other_teacher(self):
+        with bypass_rls():
+            stack = make_structure(self.org, code="AP-LINK")
+            linked = CourseOffering.objects.create(
+                organization=self.org,
+                subject=self.subject,
+                period=stack["period"],
+                group=stack["group"],
+                instructor=self.other_teacher,
+            )
+            Enrollment.objects.create(organization=self.org, offering=linked, student=self.student)
+            self.exam.journal_offerings.add(linked)
+            self.clean_notices()
+            notify_appeal_filed_teachers(self.appeal, item_count=1)
+            self.assertEqual(self.notice(self.other_teacher).count(), 1)
+            self.assertFalse(self.notice(self.subject_teacher).exists())
+
+    def test_author_with_grading_role_is_never_actual_teacher_fallback(self):
+        from apps.appeals.services.filing_notice import actual_teachers
+
+        with bypass_rls():
+            Membership.objects.get_or_create(
+                organization=self.org, user=self.teacher, role=self.org.roles.get(name="teacher")
+            )
+            CourseOffering.objects.filter(pk=self.offering.pk).update(instructor=None)
+            ScheduleSlot.objects.filter(offering=self.offering).delete()
+            self.appeal.exam.author = self.teacher
+            self.appeal.exam.author_id = self.teacher.pk
+            self.assertEqual(actual_teachers(self.appeal), [])
+
+    def test_explicit_teacher_excludes_im_author_from_staff_names(self):
+        with bypass_rls():
+            self.head.first_name = "IM admin author"
+            self.head.save(update_fields=["first_name"])
+            Membership.objects.get_or_create(
+                organization=self.org, user=self.head, role=self.org.roles.get(name="teacher")
+            )
+            self.exam.author = self.head
+            self.exam.journal_teacher = self.other_teacher
+            self.exam.save(update_fields=["author", "journal_teacher"])
+            self.appeal.exam = self.exam
+            self.clean_notices()
+            notify_appeal_filed_teachers(self.appeal, item_count=1)
+            self.assertEqual(self.notice(self.other_teacher).count(), 1)
+            for user in (self.chair_manager, self.laborant):
+                self.assertNotIn("IM admin author", self.notice(user).get().message)
+            # Even an explicitly linked center recipient is not named as an invited teacher.
+            self.exam.journal_teacher = self.head
+            self.exam.save(update_fields=["journal_teacher"])
+            self.clean_notices()
+            notify_appeal_filed_teachers(self.appeal, item_count=1)
+            self.assertNotIn("IM admin author", self.notice(self.chair_manager).get().message)
 
     def test_inactive_membership_or_role_revokes_read_and_new_notification(self):
         Membership.objects.filter(user=self.laborant, organization=self.org).update(is_active=False)

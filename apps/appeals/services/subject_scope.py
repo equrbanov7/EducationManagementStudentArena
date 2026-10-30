@@ -23,14 +23,8 @@ def scope_for(user, organization):
     return scope if scope.has_structure_access else None
 
 
-def appeal_chair_map(queryset, organization):
-    """Batch exact enrollment/offering period matching, then canonical official chair.
-
-    Explicit exam journal links take precedence when the student's registration
-    matches them. Otherwise use the period covering the attempt, then the latest
-    enrollment period, like the existing subject-teacher resolver. No student
-    group tree or teacher home-chair fallback can grant access.
-    """
+def selected_offerings(queryset, organization):
+    """Exact student/subject enrollment selection shared by scope and notifications."""
     rows = list(
         queryset.filter(organization=organization).values(
             "pk",
@@ -43,9 +37,8 @@ def appeal_chair_map(queryset, organization):
         )
     )
     if not rows:
-        return {}
+        return [], {}
     Enrollment = django_apps.get_model("registrar", "Enrollment")
-    Offering = django_apps.get_model("registrar", "CourseOffering")
     Exam = django_apps.get_model("exams", "Exam")
     pairs = defaultdict(list)
     for student_id, subject_id, offering_id, start, end in (
@@ -70,7 +63,7 @@ def appeal_chair_map(queryset, organization):
         exam_id__in={r["exam_id"] for r in rows}, courseoffering__organization=organization
     ).values_list("exam_id", "courseoffering_id"):
         links[exam_id].add(offering_id)
-    selected, all_ids = {}, set()
+    selected = {}
     for row in rows:
         candidates = pairs[(row["student_id"], row["exam__subject_id"])]
         linked = [pk for pk, _start, _end in candidates if pk in links[row["exam_id"]]]
@@ -80,7 +73,16 @@ def appeal_chair_map(queryset, organization):
         latest = max((start for _pk, start, _end in candidates if start), default=None)
         picked = linked or covering or [pk for pk, start, _end in candidates if start == latest]
         selected[row["pk"]] = picked
-        all_ids.update(picked)
+    return rows, selected
+
+
+def appeal_chair_map(queryset, organization):
+    """Resolve official subject chairs for the same selected physical offerings."""
+    rows, selected = selected_offerings(queryset, organization)
+    if not rows:
+        return {}
+    Offering = django_apps.get_model("registrar", "CourseOffering")
+    all_ids = set().union(*selected.values())
     official = offering_chairs.official_offering_chairs(Offering.objects.filter(pk__in=all_ids), organization.pk)
     result = {}
     for row in rows:

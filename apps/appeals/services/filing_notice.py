@@ -9,24 +9,54 @@ from .subject_scope import notification_readers
 
 
 def actual_teachers(appeal):
-    """Existing offering teacher resolver, plus the explicit exam journal teacher.
+    """Live teachers of exam-linked student offerings, never an author fallback."""
+    from django.apps import apps as django_apps
+    from django.contrib.auth import get_user_model
 
-    Only live same-tenant grading teachers qualify. Exam-center authors are not
-    mistaken for the subject teacher merely because they created the exam.
-    """
     from apps.registrar.public import eligible_instructor_user_ids
 
-    from .teachers import subject_teachers
+    from .subject_scope import selected_offerings
 
-    allowed = eligible_instructor_user_ids(organization=appeal.organization)
-    candidates = list(subject_teachers(appeal))
+    organization = appeal.organization
+    Appeal = django_apps.get_model("appeals", "Appeal")
+    Offering = django_apps.get_model("registrar", "CourseOffering")
+    Enrollment = django_apps.get_model("registrar", "Enrollment")
+    Slot = django_apps.get_model("registrar", "ScheduleSlot")
+    Share = django_apps.get_model("registrar", "JournalShare")
+    _rows, selected = selected_offerings(Appeal.objects.filter(pk=appeal.pk), organization)
+    offering_ids = selected.get(appeal.pk, [])
+    ids = set(
+        Offering.objects.filter(organization=organization, pk__in=offering_ids).values_list("instructor_id", flat=True)
+    )
+    slots = Slot.objects.filter(organization=organization, offering_id__in=offering_ids)
+    if hasattr(Slot, "deleted_at"):
+        slots = slots.filter(deleted_at__isnull=True)
+    ids.update(slots.values_list("instructor_id", flat=True))
+    enrollment_ids = set(
+        Enrollment.objects.filter(
+            organization=organization,
+            student_id=appeal.student_id,
+            offering__organization=organization,
+            offering_id__in=offering_ids,
+        )
+        .exclude(status="dropped")
+        .values_list("pk", flat=True)
+    )
+    shares = Share.objects.filter(
+        organization=organization,
+        offering__organization=organization,
+        offering_id__in=offering_ids,
+        is_active=True,
+    ).prefetch_related("enrollments")
+    for share in shares:
+        picked = {row.pk for row in share.enrollments.all()}
+        if not picked or picked & enrollment_ids:
+            ids.add(share.teacher_id)
     if appeal.exam.journal_teacher_id:
-        candidates.insert(0, appeal.exam.journal_teacher)
-    result = {}
-    for user in candidates:
-        if user.pk in allowed and user.pk != appeal.student_id:
-            result.setdefault(user.pk, user)
-    return list(result.values())
+        ids.add(appeal.exam.journal_teacher_id)
+    allowed = eligible_instructor_user_ids(organization=organization)
+    ids = (ids & allowed) - {appeal.student_id}
+    return list(get_user_model().objects.filter(pk__in=ids, is_active=True).order_by("pk"))
 
 
 def notify(appeal, *, teachers, exclude_ids=(), item_count, link):
@@ -34,8 +64,8 @@ def notify(appeal, *, teachers, exclude_ids=(), item_count, link):
     from apps.notifications.public import create_notification_for_users
 
     excluded = {appeal.student_id, *exclude_ids}
-    names = ", ".join(user_display_name_with_patronymic(user) for user in teachers)
     teachers = [user for user in teachers if user.pk not in excluded]
+    names = ", ".join(user_display_name_with_patronymic(user) for user in teachers)
     teacher_ids = {user.pk for user in teachers}
     readers = [user for user in notification_readers(appeal) if user.pk not in excluded | teacher_ids]
     groups = student_group_map(Appeal.objects.filter(organization=appeal.organization, pk=appeal.pk))
