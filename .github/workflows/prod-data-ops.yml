@@ -339,6 +339,7 @@ on:
           - fix_workload_overcount
           - repair_sbio235_workload
           - repair_233ke_group_alias
+          - repair_cavid_source_batch
           - repair_balanced_workload_pairs
           - repair_repeated_sections_workload
           - repair_owner_activity_batch
@@ -533,7 +534,7 @@ jobs:
       REPLACE_TEACHER_SLOTS: ${{ github.event.inputs.replace_teacher_slots }}
     steps:
       - name: 📥 Checkout (struktur planı)
-        if: github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'repair_233ke_group_alias' || github.event.inputs.command == 'repair_sbio235_workload'
+        if: github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'repair_233ke_group_alias' || github.event.inputs.command == 'repair_sbio235_workload' || github.event.inputs.command == 'repair_cavid_source_batch'
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
@@ -683,7 +684,7 @@ jobs:
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor")
-              case "$ROW_SUBJECT" in
+              case "${ROW_SUBJECT:-}" in
                 ""|bilal) args+=(--case bilal) ;;
                 robotics) args+=(--case robotics) ;;
                 *) echo "row_subject yalnız bilal və ya robotics olmalıdır" >&2; exit 2 ;;
@@ -1009,6 +1010,12 @@ jobs:
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
               source scripts/ops/ke233_alias_args.sh
+              ;;
+            repair_cavid_source_batch)
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              source scripts/ops/cavid_source_batch_args.sh
+              cavid_source_batch_args "$ORG" "$actor" "$BATCH" "$APPLY" "$ROSTER_TAG"
               ;;
             repair_sbio235_workload)
               # Sabit source/tenant/2row/2offering; fayl yüklənmir, əvvəlki dry-run baseline tələb olunur.
@@ -1518,7 +1525,7 @@ jobs:
               exit "$status"
             fi
             rm -f "$RUNNER_TEMP/out.log"
-          elif [ "$COMMAND" = "repair_sbio235_workload" ] || [ "$COMMAND" = "repair_233ke_group_alias" ]; then
+          elif [ "$COMMAND" = "repair_sbio235_workload" ] || [ "$COMMAND" = "repair_233ke_group_alias" ] || [ "$COMMAND" = "repair_cavid_source_batch" ]; then
             bash scripts/ops/run_fixed_repair.sh "${args[@]}"
           elif [ "$COMMAND" = "repair_balanced_workload_pairs" ]; then
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?

@@ -131,6 +131,10 @@ class RoboticsSyllabusTests(TestCase):
                 lesson_hours=60,
             )
             student = User.objects.create_user(username="robot.student")
+            UserProfile.objects.filter(user=student).update(organization=cls.org)
+            Membership.objects.create(
+                user=student, organization=cls.org, role=cls.org.roles.get(name="student"), scope_unit=group
+            )
             enrollment = Enrollment.objects.create(organization=cls.org, offering=cls.offering, student=student)
             lesson = Lesson.objects.create(
                 organization=cls.org,

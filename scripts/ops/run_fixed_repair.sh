@@ -5,6 +5,7 @@ umask 077
 case "$COMMAND" in
   repair_sbio235_workload) prefix=sbio_repair; batch_prefix=sbio235 ;;
   repair_233ke_group_alias) prefix=ke233_alias; batch_prefix=ke233 ;;
+  repair_cavid_source_batch) prefix=cavid3536; batch_prefix=cavid3536 ;;
   *) echo "fixed_repair_command_not_allowed" >&2; exit 2 ;;
 esac
 output="$RUNNER_TEMP/out.log"
