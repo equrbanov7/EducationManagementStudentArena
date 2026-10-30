@@ -71,23 +71,26 @@ def academic_fingerprint(*, organization_id, offerings, lock=False):
     return result
 
 
+def queryset_database_fingerprint(query):
+    """Full-field opaque hash, without moving source rows into application memory."""
+    try:
+        sql, params = query.order_by().query.sql_with_params()
+    except EmptyResultSet:
+        return {"count": 0, "md5": ""}
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT count(*), md5(coalesce(string_agg(md5(row_to_json(state)::text), '' ORDER BY id), '')) "
+            "FROM (" + sql + ") state",
+            params,
+        )
+        count, md5 = cursor.fetchone()
+    return {"count": count, "md5": md5}
+
+
 def academic_database_fingerprint(*, organization_id, offerings, exclude=()):
     """Tam row JSON hashı DB-də qalır; bütün kafedraların markları Python-a yüklənmir."""
-    result = {}
-    for key, qs in academic_queries(organization_id=organization_id, offerings=offerings).items():
-        if key in exclude:
-            continue
-        try:
-            sql, params = qs.order_by().query.sql_with_params()
-        except EmptyResultSet:
-            result[key] = {"count": 0, "md5": ""}
-            continue
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT count(*), md5(coalesce(string_agg(md5(row_to_json(state)::text), '' ORDER BY id), '')) "
-                "FROM (" + sql + ") state",
-                params,
-            )
-            count, md5 = cursor.fetchone()
-        result[key] = {"count": count, "md5": md5}
-    return result
+    return {
+        key: queryset_database_fingerprint(query)
+        for key, query in academic_queries(organization_id=organization_id, offerings=offerings).items()
+        if key not in exclude
+    }

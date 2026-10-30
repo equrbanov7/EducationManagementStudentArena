@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 # Sourced API for guarded encrypted source manifests.
+# shellcheck disable=SC2154
+if [ "${COMMAND:-}" = repair_reviewed_journal_content ]; then
+  source scripts/ops/reviewed_content_args.sh
+  return
+fi
 if [[ "$COMMAND" = repair_tspx_legacy_roster || "$COMMAND" = repair_si135_legacy_roster ]]; then
   case "$COMMAND" in
     repair_tspx_legacy_roster) roster_prefix=tspx-roster; roster_file=tspx_roster ;;

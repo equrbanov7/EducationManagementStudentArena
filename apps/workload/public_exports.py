@@ -25,10 +25,14 @@ from .services.norms import (  # noqa: F401
 )
 from .services.offering_sync import sync_task_offerings  # noqa: F401
 from .services.people import home_chair_rank, home_chairs, is_assignable_teacher, join_chair_as_teacher  # noqa: F401
+from .services.repair_fingerprints import academic_database_fingerprint as journal_academic_fingerprint  # noqa: F401
+from .services.repair_fingerprints import queryset_database_fingerprint
 from .services.roster_profile import restore_roster_profile, sync_roster_profile  # noqa: F401
 from .teacher_hooks import register_chair_teacher_resolver  # noqa: F401
 
 __all__ = [
+    "journal_academic_fingerprint",
+    "queryset_database_fingerprint",
     "assign_teacher",
     "is_assignable_teacher",
     "ensure_can_distribute",
