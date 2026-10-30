@@ -20,7 +20,7 @@ class ReviewedRepairRunnerTests(SimpleTestCase):
                 'printf "%s\\0" "$@" > "$RUNNER_TEMP/argv"\n'
                 'cat > "$RUNNER_TEMP/piped.py"\n'
                 "echo 'fixed_repair: transaction_isolation=repeatable_read'\n"
-                "echo 'CommandError: outside_academic_work_or_access_changed:AssessmentScheme,outside_subjects'\n"
+                "echo 'CommandError: outside_academic_work_or_access_changed:AssessmentScheme,outside_subjects,outside_elective_choices'\n"
                 "echo 'CommandError: outside_academic_work_or_access_changed:private_person_name'\n"
                 "echo 'private staff and raw source score 9'\nexit 7\n"
             )
@@ -56,7 +56,7 @@ class ReviewedRepairRunnerTests(SimpleTestCase):
                 (base / "piped.py").read_bytes(), (ROOT / "scripts/ops/run_guarded_repair.py").read_bytes()
             )
             self.assertIn("transaction_isolation=repeatable_read", result.stdout)
-            self.assertIn("changed:AssessmentScheme,outside_subjects", result.stdout)
+            self.assertIn("changed:AssessmentScheme,outside_subjects,outside_elective_choices", result.stdout)
             self.assertNotIn("private", result.stdout + result.stderr)
             self.assertFalse((base / "out.log").exists())
 
