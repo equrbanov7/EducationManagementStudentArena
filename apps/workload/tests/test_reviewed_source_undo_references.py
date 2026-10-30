@@ -123,4 +123,4 @@ class ReviewedUndoReferenceTests(TestCase):
         self.assertFalse(Subject.objects.filter(pk=subject.pk).exists())
         self.assertTrue(exam.journal_offerings.filter(pk=self.a.pk).exists())
         exam.refresh_from_db()
-        self.assertEqual(exam.subject_id, self.sa.pk)
+        self.assertEqual(str(exam.subject_id), str(self.sa.pk))
