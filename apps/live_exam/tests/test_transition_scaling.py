@@ -23,6 +23,7 @@ import os
 import threading
 import time
 from collections import Counter
+from contextlib import suppress
 from unittest import mock
 
 from django.core.cache.backends.locmem import LocMemCache
@@ -49,6 +50,7 @@ from .lx_be_support import (
     player_cookie_header,
     reset_rate_limits,
 )
+from .transition_socket_setup import connected_sockets
 
 SCALING_N = max(10, int(os.environ.get("LIVE_SCALING_N", "120") or 120))
 LOCMEM = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache", "LOCATION": "lx-scaling"}}
@@ -129,9 +131,11 @@ class _Socket:
         self.reply_seen = reply_seen
         self.messages: list[tuple[float, dict]] = []
         self.reader: asyncio.Task | None = None
+        self.started = False
 
-    async def connect(self):
-        connected, _code = await self.communicator.connect()
+    async def connect(self, *, timeout=None):
+        self.started = True
+        connected, _code = await self.communicator.connect(timeout=timeout)
         assert connected
         self.reader = asyncio.ensure_future(self._read())
 
@@ -157,9 +161,16 @@ class _Socket:
         return Counter(message.get("type") for at, message in self.messages if at >= since)
 
     async def close(self):
-        if self.reader is not None:
-            self.reader.cancel()
-        await self.communicator.disconnect()
+        if not self.started:
+            return
+        try:
+            if self.reader is not None:
+                self.reader.cancel()
+                with suppress(asyncio.CancelledError):
+                    await self.reader
+        finally:
+            if not self.communicator.future.cancelled():
+                await self.communicator.disconnect()
 
 
 @override_settings(
@@ -204,52 +215,49 @@ class LiveTransitionScalingTest(TransactionTestCase):
         lobby = [_Socket(self._communicator("lobby", p), reply_seen=False) for p in self.players]
         play = [_Socket(self._communicator("play", p), reply_seen=True) for p in self.players]
         host = _Socket(self._communicator("play"), reply_seen=False)
-        for socket in [host, *lobby, *play]:
-            await socket.connect()
-        await asyncio.sleep(0.5)
-        post = sync_to_async(self._post, thread_sensitive=False)
-        results: dict[str, dict] = {}
+        async with connected_sockets([host, *lobby, *play]):
+            await asyncio.sleep(0.5)
+            post = sync_to_async(self._post, thread_sensitive=False)
+            results: dict[str, dict] = {}
 
-        async def window(name, action, event_type, match=None):
-            before = counters.snapshot()
-            started = time.monotonic()
-            if action is not None:
-                await post(action)
-            http_ms = (time.monotonic() - started) * 1000
-            deadline = started + 20
-            while time.monotonic() < deadline:
-                arrivals = [socket.first_at(event_type, started, **(match or {})) for socket in play]
-                if all(arrivals):
-                    break
-                await asyncio.sleep(0.02)
-            arrivals = [at for at in arrivals if at]
-            await asyncio.sleep(SETTLE_SECONDS)
-            delta = counters.snapshot() - before
-            results[name] = {
-                "http_ms": round(http_ms, 1) if action else None,
-                "delivered": f"{len(arrivals)}/{len(play)}",
-                "fanout_ms": round((max(arrivals) - started) * 1000, 1) if arrivals else None,
-                "db_queries": delta["db"],
-                "db_for_update": delta["db_for_update"],
-                "cache_ops": delta["cache"],
-                "cache_auto_reveal": delta["cache_auto_reveal"],
-                "auto_reveal_attempts": delta["auto_reveal_attempts"],
-                "group_send": delta["group_send"],
-                "group_send_host": delta["group_send_host"],
-                "host_messages": sum(host.count(started).values()),
-            }
-            return started
+            async def window(name, action, event_type, match=None):
+                before = counters.snapshot()
+                started = time.monotonic()
+                if action is not None:
+                    await post(action)
+                http_ms = (time.monotonic() - started) * 1000
+                deadline = started + 20
+                while time.monotonic() < deadline:
+                    arrivals = [socket.first_at(event_type, started, **(match or {})) for socket in play]
+                    if all(arrivals):
+                        break
+                    await asyncio.sleep(0.02)
+                arrivals = [at for at in arrivals if at]
+                await asyncio.sleep(SETTLE_SECONDS)
+                delta = counters.snapshot() - before
+                results[name] = {
+                    "http_ms": round(http_ms, 1) if action else None,
+                    "delivered": f"{len(arrivals)}/{len(play)}",
+                    "fanout_ms": round((max(arrivals) - started) * 1000, 1) if arrivals else None,
+                    "db_queries": delta["db"],
+                    "db_for_update": delta["db_for_update"],
+                    "cache_ops": delta["cache"],
+                    "cache_auto_reveal": delta["cache_auto_reveal"],
+                    "auto_reveal_attempts": delta["auto_reveal_attempts"],
+                    "group_send": delta["group_send"],
+                    "group_send_host": delta["group_send_host"],
+                    "host_messages": sum(host.count(started).values()),
+                }
+                return started
 
-        await window("start", "start_game", "question_published")
-        reveal_started = await window("skip_intro+auto_reveal", "host_skip_question_intro", "reveal")
-        results["skip_intro+auto_reveal"]["reveal_events_per_player"] = max(
-            socket.count(reveal_started)["reveal"] for socket in play
-        )
-        await window("next", "next_question", "question_published")
-        await window("finish", "finish_game", "finished")
-        for socket in [host, *lobby, *play]:
-            await socket.close()
-        return results
+            await window("start", "start_game", "question_published")
+            reveal_started = await window("skip_intro+auto_reveal", "host_skip_question_intro", "reveal")
+            results["skip_intro+auto_reveal"]["reveal_events_per_player"] = max(
+                socket.count(reveal_started)["reveal"] for socket in play
+            )
+            await window("next", "next_question", "question_published")
+            await window("finish", "finish_game", "finished")
+            return results
 
     def test_host_transitions_do_not_scale_with_player_count(self):
         counters = _Counters()
