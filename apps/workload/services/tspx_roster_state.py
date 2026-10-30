@@ -1,5 +1,7 @@
 """Live identity/family guards and full academic preservation for the fixed roster."""
 
+from html import unescape
+
 from django.db.models import Q
 
 from apps.registrar.public import validate_active_student_member
@@ -15,7 +17,10 @@ def _identity_record_mismatches(record, profile, item, parent):
     """Keep the exact guard; diagnostics contain field codes, never identity values."""
 
     def clean(value):
-        return " ".join(str(value or "").split()).casefold()
+        # MyEdu names contain literal HTML entities (e.g. G&uuml;nel), while
+        # the immutable mapped account stores the decoded Unicode name.
+        # Decode one standards-defined layer; do not transliterate or fuzzy-match.
+        return " ".join(unescape(str(value or "")).split()).casefold()
 
     target = item.get("target_group_id", parent)
     checks = {

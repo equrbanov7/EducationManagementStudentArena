@@ -73,8 +73,24 @@ class RosterIdentityDiagnosticsTests(SimpleTestCase):
         for private in ("Private", "parent-fk", "program-fk", "curriculum-fk", "Exact"):
             self.assertNotIn(private, error)
 
-    def test_diagnostics_do_not_normalize_father_suffix_or_html(self):
+    def test_diagnostics_do_not_normalize_father_suffix_or_real_name_difference(self):
         for value in ("Exact father oğlu", "Exact &amp; father"):
             with self.subTest(value=value):
                 self.profile.patronymic = value
                 self.assertEqual(self.mismatch(), ("patronymic",))
+
+    def test_named_and_numeric_html_entities_match_same_literal_unicode_person(self):
+        self.record.student.first_name = "Günel"
+        self.profile.patronymic = "İsa"
+        for encoded in ("G&uuml;nel", "G&#252;nel", "G&#xFC;nel"):
+            with self.subTest(encoded=encoded):
+                self.item["source_identity"]["first_name"] = encoded
+                self.item["source_identity"]["patronymic"] = "&#304;sa"
+                self.assertEqual(self.mismatch(), ())
+
+    def test_html_decode_does_not_fold_accents_spelling_or_multiple_encoding_layers(self):
+        self.record.student.first_name = "Günel"
+        for different in ("Gunel", "Günay", "G&amp;uuml;nel"):
+            with self.subTest(different=different):
+                self.item["source_identity"]["first_name"] = different
+                self.assertEqual(self.mismatch(), ("first_name",))

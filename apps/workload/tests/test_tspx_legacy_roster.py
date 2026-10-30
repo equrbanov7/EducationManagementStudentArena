@@ -3,6 +3,7 @@
 import hashlib
 import json
 import tempfile
+from copy import deepcopy
 from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
@@ -263,6 +264,18 @@ class TspxRosterTests(TestCase):
         ):
             self.execute()
         self.assertEqual(self.snapshot(), before)
+
+    def test_html_encoded_source_name_keeps_exact_immutable_live_identity(self):
+        candidates = deepcopy(self.plan.candidates)
+        candidates[0]["source_identity"]["first_name"] = "G&uuml;nel"
+        plan = replace(self.plan, candidates=candidates)
+        with bypass_rls():
+            User.objects.filter(pk=candidates[0]["target_user_id"]).update(first_name="Günel")
+            groups, period, people = state.validate(plan, self.org)
+        self.assertEqual(len(groups), 3)
+        self.assertEqual(str(period.pk), str(self.period.pk))
+        self.assertEqual(len(people), self.family.moves + 1)
+        self.assertEqual(people[candidates[0]["expected_record_id"]].student.first_name, "Günel")
 
     def test_failure_after_real_transfers_rolls_back_all_records_enrollments_and_audits(self):
         before = self.snapshot()
