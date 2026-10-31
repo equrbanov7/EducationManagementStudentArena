@@ -63,6 +63,20 @@ OFFERINGS += (
 OFFERINGS += ("81f0635b-63bc-43cb-9ceb-7af91febdc42", "f79fc953-a8c7-4342-a6b6-a8be70cf2784")
 
 
+# Exact own-source empty journals: encrypted numeric-roster comparison only.
+OFFERINGS += (
+    "f418c305-2d54-445f-8007-3e3476230a7f",
+    "d16d484e-85ef-40af-8429-04183268116d",
+    "6fa5ede4-9ba3-4660-a620-c71d2835a91b",
+    "0156cf86-feb7-4c22-b26e-7a57324aebf4",
+    "ea2966dd-ecc1-4d55-9368-dd7874032324",
+    "2052ed8b-7f35-44e6-b1e9-f8707d6fba08",
+    "6a4ffa61-dbb9-464f-80d0-4b99745a081c",
+    "cf149729-86ec-4837-b22e-0ad9335253fd",
+    "9dd82130-8baa-4f4b-8dcb-540efb5cbc05",
+)
+
+
 def collect_request_content():
     """Called only inside the parent repeatable-read read-only RLS transaction.
 
