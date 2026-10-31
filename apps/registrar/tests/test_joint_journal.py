@@ -98,6 +98,47 @@ class JointJournalTests(TestCase):
         ScheduleSlot.objects.filter(kind="seminar").update(start_time="10:30", end_time="12:00")
         self.assertEqual({item.kind for item in self.select()}, {"lecture", "seminar"})
 
+    def test_official_15_times_two_seminars_stay_separate_even_with_identical_schedule(self):
+        ScheduleSlot.objects.filter(kind="seminar").update(start_time="10:30", end_time="12:00")
+        self.row.seminar_plan = 15
+        self.row.subgroup_count = 2
+        self.row.save(update_fields=["seminar_plan", "subgroup_count"])
+        self.assertEqual({item.kind for item in self.select()}, {"lecture"})
+        self.assertEqual(len(self.context()["offerings"]), 3)
+        seminars = self.context(kind="seminar")["offerings"]
+        self.assertEqual({entry.pk for entry in seminars}, {offering.pk for offering in self.offerings})
+        self.assertTrue(all(getattr(entry, "joint_selection", None) is None for entry in seminars))
+        with self.assertRaises(PermissionDenied):
+            joint_journal.resolve(**self.args("seminar"))
+        self.assertEqual(Enrollment.objects.count(), 2)
+
+    def test_one_full_15_hour_contact_per_kind_can_join(self):
+        ScheduleSlot.objects.filter(kind="seminar").update(start_time="10:30", end_time="12:00")
+        TeacherAssignment.objects.filter(row=self.row, activity="seminar").update(hours=15)
+        self.row.seminar_plan = self.row.seminar_total = 15
+        self.row.total_hours = 45
+        self.row.save(update_fields=["seminar_plan", "seminar_total", "total_hours"])
+        self.assertEqual({item.kind for item in self.select()}, {"lecture", "seminar"})
+        self.assertEqual(len(self.context(kind="seminar")["offerings"]), 1)
+
+    def test_inconsistent_kind_multiplier_total_or_missing_explicit_plan_does_not_join(self):
+        self.row.union_count = 2
+        self.row.save(update_fields=["union_count"])
+        self.assertEqual(self.select(), [])
+        self.row.union_count = 1
+        self.row.lecture_plan = 15  # total remains 30: two contacts, despite multiplier=1
+        self.row.save(update_fields=["union_count", "lecture_plan"])
+        self.assertEqual(self.select(), [])
+        self.row.lecture_plan = 0  # per_group_hours fallback is not explicit joint proof
+        self.row.save(update_fields=["lecture_plan"])
+        self.assertEqual(self.select(), [])
+
+    def test_partial_kind_allocation_never_creates_joint_whole_roster(self):
+        TeacherAssignment.objects.filter(row=self.row, activity="lecture").update(hours=15)
+        self.assertEqual(self.select(), [])
+        with self.assertRaises(PermissionDenied):
+            joint_journal.resolve(**self.args())
+
     def test_full_roster_preserves_both_physical_enrollment_ids(self):
         rows = joint_journal.roster(**self.args())
         self.assertEqual({row.pk for row in rows}, {enrollment.pk for enrollment in self.enrollments})
