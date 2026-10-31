@@ -34,7 +34,10 @@ def collect_request_syllabus():
             for row in (section.data or {}).get("rows", [])
             if isinstance(row, dict)
         )
+    from .repair_evidence import collect_repair_evidence
+
     return {
+        **collect_repair_evidence(),
         "request_syllabus_topic_counts": topic_counts,
         "request_syllabus_offerings": list(
             offerings.order_by("pk").values("id", "subject_id", "period_id", "instructor_id", "group_id", "is_active")
