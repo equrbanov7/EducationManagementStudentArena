@@ -112,6 +112,8 @@ class ReviewedBatchIsolationTests(TransactionTestCase):
 
     def test_fresh_django_process_checks_invocation_only_option(self):
         # Run the exact same wrapper used by the workflow in a fresh process.
+        # Only connection bootstrap is under test; app ready hooks are covered
+        # by Django/system tests and make a cold subprocess flaky under CI load.
         # The parent worker's connection settings remain unchanged.
         self.assertNotIn("isolation_level", settings.DATABASES["default"].get("OPTIONS", {}))
         import json
@@ -121,6 +123,7 @@ class ReviewedBatchIsolationTests(TransactionTestCase):
         code = (
             "import os,json;from django.conf import settings;"
             "settings.DATABASES['default']=json.loads(os.environ['REPAIR_TEST_DB']);"
+            "settings.INSTALLED_APPS=[];"
             "import runpy;probe=runpy.run_path('scripts/ops/run_guarded_repair.py',run_name='probe');"
             "print(probe['prepare_connection']());"
             "from django.db import connections;connections.close_all()"
