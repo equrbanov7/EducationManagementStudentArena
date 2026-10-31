@@ -193,8 +193,9 @@ def validate(*, after=False):
         source_refs = references("registrar.CourseOffering", [item["source"]])
         # Sillabus və boş qiymətləndirmə sxemi qalır; başqa tarixçə/əlaqə gizlədilmir.
         allowed = {"syllabus.Syllabus.offering", "registrar.AssessmentScheme.offering"}
-        if any(values for key, values in source_refs.items() if key not in allowed):
-            raise RepairError("collision_source_has_content")
+        for key, values in source_refs.items():
+            if values and key not in allowed:
+                raise RepairError("collision_source_has_content_" + key.replace(".", "_").lower())
     if (
         not model("registrar.StudentAcademicRecord")
         .objects.filter(organization_id=spec.ORG, group_id=spec.TARGET, is_active=True, status="enrolled")
