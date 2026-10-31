@@ -44,8 +44,9 @@ html.apx-modal-open body {
     display: flex;
     flex-direction: column;
     width: 100%;
-    max-width: 780px;
-    max-height: min(88vh, 900px);
+    max-width: 1120px;
+    height: min(92dvh, 1000px);
+    max-height: 92dvh;
     overflow: hidden;
     background: var(--ems-neutral-0);
     border-radius: 18px;
@@ -107,7 +108,7 @@ html.apx-modal-open body {
 }
 
 .apx-modal__body {
-    flex: 1;
+    flex: 1 1 320px;
     min-height: 0;
     overflow: auto;
     padding: 18px 20px;
@@ -137,6 +138,7 @@ html.apx-modal-open body {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    flex-shrink: 0;
 }
 
 .apx-msg {

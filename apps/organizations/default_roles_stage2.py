@@ -53,6 +53,7 @@ STAGE2_ROLE_GRANTS: dict[str, tuple[str, ...]] = {
         "semester.view",
     ),
     "dean": (
+        "unit.group_manage",
         "plan.view",
         "plan.approve_council",
         "semester.view",
