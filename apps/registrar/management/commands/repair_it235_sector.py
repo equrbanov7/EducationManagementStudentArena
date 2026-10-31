@@ -3,10 +3,9 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
 from django.core.management.base import BaseCommand, CommandError
-from django.db import DatabaseError
+from django.db import DatabaseError, transaction
 
 from core.rls import apply_rls_request_context
-from core.rls_pooling import rls_worker_atomic
 
 from ...it235_sector_repair import RepairError, run
 
@@ -19,7 +18,7 @@ class Command(BaseCommand):
         parser.add_argument("--expected-baseline", default="")
         parser.add_argument("--apply", action="store_true")
 
-    @rls_worker_atomic()
+    @transaction.atomic
     def handle(self, *args, **options):
         # This exact dossier is WCU-scoped; never enable a tenant bypass.
         from django.apps import apps

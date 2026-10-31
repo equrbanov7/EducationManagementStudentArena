@@ -47,6 +47,7 @@ OFFERINGS += (
     "4a94b82c-a6f9-4e29-9b07-cbbc4a56fb63",
     "6d46e94a-2471-4ea4-8c45-995106102dd6",
     "96ad224d-9e9b-4a2c-9561-658a126e5dd9",
+    "9e06bdee-4f53-4dca-bd8c-e86d7794f9c7",  # reviewed631/5K shared journal, exact missing-cell comparison
     "9d5fd8c9-551e-485e-9186-d94a2f5210ef",
     "b49f7692-f462-4420-9ce3-6243b7219b18",
     "b9978e86-9ccf-4009-9f15-e0570f3b0c6a",
