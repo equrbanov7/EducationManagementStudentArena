@@ -5,7 +5,9 @@ no deployed application setting, database default, or other worker is changed.
 """
 
 import os
+import re
 import sys
+import traceback
 
 COMMANDS = {
     "repair_sbio235_workload",
@@ -60,6 +62,24 @@ def main():
 
     try:
         execute_from_command_line(["manage.py", *sys.argv[1:]])
+    except Exception as exc:  # noqa: BLE001 — expose code locations, never exception values.
+        kind = type(exc).__name__.lower()
+        if not re.fullmatch(r"[a-z_]+", kind):
+            kind = "exception"
+        print("CommandError: fixed_repair_unexpected_" + kind, file=sys.stderr)
+        # Frame filenames/functions are code metadata, not local values or SQL.
+        # Prefer the deepest application frame over a database driver frame.
+        frames = traceback.extract_tb(exc.__traceback__)
+        local = [frame for frame in frames if "/apps/" in frame.filename or "/core/" in frame.filename]
+        if local:
+            frame = local[-1]
+            module = os.path.basename(frame.filename).removesuffix(".py")
+            if re.fullmatch(r"[a-zA-Z0-9_]+", module) and re.fullmatch(r"[a-zA-Z0-9_]+", frame.name):
+                print(
+                    f"fixed_repair_exception: class={kind} module={module} function={frame.name} line={frame.lineno}",
+                    file=sys.stderr,
+                )
+        return 1
     finally:
         connections.close_all()
     return 0

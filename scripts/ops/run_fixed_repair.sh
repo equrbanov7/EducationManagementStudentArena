@@ -25,6 +25,7 @@ grep -E '^fixed_repair: transaction_isolation=repeatable_read$' "$output" || tru
 grep -E "^${prefix}: mode=(dry_run|apply|undo)( (baseline=[0-9a-f]{64}|batch=${batch_prefix}-[0-9]{8}-[0-9]{6}-[0-9a-f]{${batch_length}}|[a-z_]+=[0-9]+))+$" "$output" > "$summary" || true
 cat "$summary"
 if [ "$status" != 0 ]; then
+  grep -E '^fixed_repair_exception: class=[a-z_]+ module=[a-zA-Z0-9_]+ function=[a-zA-Z0-9_]+ line=[0-9]+$' "$output" | tail -n 1 || true
   model='registrar[.](CourseOffering|Lesson|Enrollment|LessonMark|JournalShare|TeachingHandover|StudentAcademicRecord)|organizations[.](Membership|Role)|syllabus[.](Syllabus|SyllabusVersion|SyllabusSection|SyllabusReview)|SelfWorkTopic|SelfWorkMark|ComponentScore|CriterionScore|CourseWork|FinalGrade|ResitRecord|AssessmentScheme|AssessmentComponent|ScheduleSlot|outside_subjects|outside_workload_rows|outside_workload_assignments|outside_elective_choices'
   grep -E "^CommandError: ([a-z_]+|tspx_live_student_identity_or_record_changed:source_slot=[0-9]+:fields=(user_active|record_status|record_group|admission_year|program|curriculum|first_name|last_name|patronymic)(,(user_active|record_status|record_group|admission_year|program|curriculum|first_name|last_name|patronymic))*|outside_academic_work_or_access_changed:($model)(,($model))*)$" "$output" | head -n 1 || true
 fi
