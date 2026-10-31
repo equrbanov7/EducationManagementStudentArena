@@ -243,16 +243,15 @@ class StructureTreeScopeTest(TestCase):
         )
         self.assertEqual(response.status_code, 404)
 
-    def test_dean_sees_students_with_contacts_but_cannot_assign(self):
+    def test_dean_can_manage_own_groups_and_view_contacts(self):
         response, section = self.tree(self.dean, st_unit=str(self.group_a.pk))
         panel = section["detail"]["group_panel"]
-        self.assertFalse(panel["can_assign_lead"])
-        self.assertEqual(panel["lead_options"], [])
+        self.assertTrue(panel["can_assign_lead"])
         self.assertTrue(panel["can_view_students"])
         self.assertTrue(panel["show_contacts"])
         self.assertEqual(panel["student_total"], 3)
         self.assertContains(response, "sts_ali@qku.edu.az")
-        self.assertNotContains(response, 'id="tofTreeLeadDialog"')
+        self.assertContains(response, 'id="tofTreeLeadDialog"')
 
     def test_tutor_sees_students_without_contacts(self):
         response, section = self.tree(self.tutor, st_unit=str(self.group_a.pk))

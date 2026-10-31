@@ -102,7 +102,7 @@ def preserved(plan, before, after, details):
         current_history = {record["id"]: record for record in after["history"][name]}
         for record in previous:
             if record != current_history.get(record["id"]):
-                raise RepairError("existing_workload_history_changed")
+                raise RepairError("existing_workload_history_changed_" + name.lower())
         if name != "WorkloadAmendment" and len(current_history) != len(previous):
             raise RepairError("unreviewed_workload_history_created")
     old_offerings = {value["id"]: value for value in before["offerings"]}
