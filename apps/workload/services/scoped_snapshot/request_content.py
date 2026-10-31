@@ -35,6 +35,29 @@ MR127_OFFERINGS = (
 OFFERINGS += MR127_OFFERINGS
 
 
+# Exact teacher7851 journal identities reviewed in the encrypted31Octsnapshot.
+OFFERINGS += (
+    "04ccea06-2104-45dd-9c1b-0e5bbdcd26f1",
+    "14909f88-ad8d-4a3c-b356-659765f9f2eb",
+    "15eca465-2a0d-486d-a09e-8abf58682b79",
+    "286abe77-c3ed-4bfb-95ca-1e021f181b86",
+    "31c196bb-32c2-470d-9e6f-06a332c64ac1",
+    "4582af04-cb96-4fa9-871f-971b8a02cde5",
+    "47a7b785-3148-4bd2-9440-52caaac1b797",
+    "4a94b82c-a6f9-4e29-9b07-cbbc4a56fb63",
+    "6d46e94a-2471-4ea4-8c45-995106102dd6",
+    "96ad224d-9e9b-4a2c-9561-658a126e5dd9",
+    "9d5fd8c9-551e-485e-9186-d94a2f5210ef",
+    "b49f7692-f462-4420-9ce3-6243b7219b18",
+    "b9978e86-9ccf-4009-9f15-e0570f3b0c6a",
+    "c159cc10-0d85-4dcd-ad7f-846d3bc822b7",
+    "c406ea18-8cdd-4512-843d-91e4abe597e9",
+    "c6699552-e833-4c20-9cb0-78ae4be4352b",
+    "cf4831c2-7bfb-48a7-8853-4a23f3732d71",
+    "d9a31f8c-3c9d-4906-b8d7-b74226fbd0d4",
+)
+
+
 def collect_request_content():
     """Called only inside the parent repeatable-read read-only RLS transaction.
 
