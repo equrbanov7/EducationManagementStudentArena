@@ -15,7 +15,10 @@ boşluq zəmanəti deyil: command bütün FK/one-to-one və gizli M2M through mo
 
 Command məlumat köçürmür/silmir. Yalnız mənbənin `is_active=False` və
 `settings.canonical_group=<target>` sahələrini dəyişir. Hədəfə və tarixi tələbələrə
-toxunmur. KE233 alias resolution registry-si dəyişmir; bu boş source üçün tarixi
+toxunmur. Tam raw `settings` daxilində legacy provenance, admission year, language
+sector və əlaqəsiz nested metadata saxlanılır; export-un üç-sahəli proyeksiyası
+raw settings əvəzinə yazılmır. Mənbə/hədəfin reviewed legacy ID/cohort metadata-sı
+yenidən yoxlanır. KE233 alias resolution registry-si dəyişmir; bu boş source üçün tarixi
 jurnal əlaqəsinin canonical həllinə ehtiyac yoxdur.
 
 Əvvəl uyğun environment və active superadmin ilə dry-run icra edin, tam JSON

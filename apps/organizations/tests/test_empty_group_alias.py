@@ -1,5 +1,6 @@
 """Exact boş alias: historical data, gizli M2M, baseline və undo qorunması."""
 
+from copy import deepcopy
 from io import StringIO
 from unittest.mock import patch
 
@@ -11,6 +12,26 @@ from django.utils import timezone
 
 from apps.organizations import empty_group_alias as repair
 from apps.organizations.models import Organization, OrgUnit
+
+
+def full_legacy_settings(legacy):
+    # Actual source/target metadata from the read-only clone, not the export projection.
+    return {
+        "legacy": {
+            "id": legacy,
+            "table": "groups",
+            "curricula_id": 117,
+            "department_id": 11,
+            "kollec_or_uni": "University",
+            "source_system": "myedu_mariadb",
+            "speciality_id": 21,
+        },
+        "sector": "az",
+        "degree_level": "bachelor",
+        "admission_year": 2022,
+        "education_form": "full_time",
+        "language_sector": "az",
+    }
 
 
 class EmptyGroupAliasTests(TestCase):
@@ -29,7 +50,7 @@ class EmptyGroupAliasTests(TestCase):
             name="132 F",
             slug="source",
             unit_type="group",
-            settings=repair.SETTINGS,
+            settings=full_legacy_settings(388),
         )
         self.target = OrgUnit.objects.create(
             pk=repair.TARGET,
@@ -38,7 +59,7 @@ class EmptyGroupAliasTests(TestCase):
             name="132F",
             slug="target",
             unit_type="group",
-            settings=repair.SETTINGS,
+            settings=full_legacy_settings(367),
         )
         run = apps.get_model("legacy_import", "LegacyMigrationRun").objects.create(
             organization=self.org,
@@ -118,6 +139,34 @@ class EmptyGroupAliasTests(TestCase):
             self.assertFalse(applied["snapshot"]["source"]["is_active"])
             undone = self.run_repair(apply=True, expected_baseline=applied["baseline"], undo=applied["batch"])
         self.assertEqual(undone["snapshot"], before["snapshot"])
+
+    def test_apply_preserves_unrelated_nested_metadata_and_only_changes_two_fields(self):
+        source_settings = full_legacy_settings(388)
+        source_settings["unrelated"] = {"retain": [1, {"nested": "source"}], "enabled": False}
+        source_settings["legacy"]["extra_provenance"] = {"preserve": True}
+        target_settings = full_legacy_settings(367)
+        target_settings["unrelated"] = {"retain": ["target"], "note": None}
+        OrgUnit.objects.filter(pk=self.source.pk).update(settings=source_settings)
+        OrgUnit.objects.filter(pk=self.target.pk).update(settings=target_settings)
+        before = self.run_repair()
+        applied = self.run_repair(apply=True, expected_baseline=before["baseline"])
+        expected_source = deepcopy(before["snapshot"]["source"])
+        expected_source["is_active"] = False
+        expected_source["settings"]["canonical_group"] = repair.TARGET
+        self.assertEqual(applied["snapshot"]["source"], expected_source)
+        self.assertEqual(applied["snapshot"]["target"], before["snapshot"]["target"])
+        undone = self.run_repair(apply=True, expected_baseline=applied["baseline"], undo=applied["batch"])
+        self.assertEqual(undone["snapshot"], before["snapshot"])
+
+    def test_projected_settings_and_wrong_source_provenance_are_rejected(self):
+        OrgUnit.objects.filter(pk=self.source.pk).update(settings=repair.SETTINGS)
+        with self.assertRaisesMessage(repair.RepairError, "source_settings_changed"):
+            self.run_repair()
+        wrong = full_legacy_settings(388)
+        wrong["legacy"]["curricula_id"] = 999
+        OrgUnit.objects.filter(pk=self.source.pk).update(settings=wrong)
+        with self.assertRaisesMessage(repair.RepairError, "source_settings_changed"):
+            self.run_repair()
 
     def test_stale_baseline_and_invalid_metadata_fail_closed(self):
         result = self.run_repair()

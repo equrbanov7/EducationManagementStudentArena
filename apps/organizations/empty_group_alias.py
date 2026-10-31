@@ -55,6 +55,28 @@ def _snapshot(unit):
     return _json({field.attname: getattr(unit, field.attname) for field in unit._meta.concrete_fields})
 
 
+def _settings_identity(settings, legacy):
+    """Pin reviewed identity fields; unrelated metadata stays in the full snapshot."""
+    if not isinstance(settings, dict) or settings.get("parent_group"):
+        return False
+    expected = {**SETTINGS, "admission_year": 2022, "language_sector": "az"}
+    embedded = settings.get("legacy")
+    legacy_expected = {
+        "id": int(legacy),
+        "table": "groups",
+        "curricula_id": 117,
+        "department_id": 11,
+        "kollec_or_uni": "University",
+        "source_system": "myedu_mariadb",
+        "speciality_id": 21,
+    }
+    return (
+        all(settings.get(key) == value for key, value in expected.items())
+        and isinstance(embedded, dict)
+        and all(embedded.get(key) == value for key, value in legacy_expected.items())
+    )
+
+
 def _identity(source, target):
     for unit, name, legacy in ((source, "132 F", "388"), (target, "132F", "367")):
         if (
@@ -76,11 +98,15 @@ def _identity(source, target):
             (ORG, "myedu_mariadb", "group_unit", legacy)
         ]:
             raise RepairError("legacy_identity_changed")
-    if target.settings != SETTINGS or not target.is_active:
+    if (
+        not _settings_identity(target.settings, "367")
+        or not target.is_active
+        or target.settings.get("canonical_group") is not None
+    ):
         raise RepairError("target_changed")
-    if source.settings not in (SETTINGS, {**SETTINGS, "canonical_group": TARGET}):
+    if not _settings_identity(source.settings, "388") or source.settings.get("canonical_group") not in (None, TARGET):
         raise RepairError("source_settings_changed")
-    if source.is_active != (source.settings == SETTINGS):
+    if source.is_active != (source.settings.get("canonical_group") is None):
         raise RepairError("source_state_changed")
 
 
@@ -120,13 +146,20 @@ def run(*, user, organization, apply=False, expected_baseline="", undo=""):
         if (receipt.new_values or {}).get("snapshot") != before:
             raise RepairError("undo_state_changed")
         prior = (receipt.old_values or {}).get("source", {})
-        if prior.get("settings") != SETTINGS or prior.get("is_active") is not True:
+        prior_settings = prior.get("settings")
+        if (
+            not _settings_identity(prior_settings, "388")
+            or prior_settings.get("canonical_group") is not None
+            or prior.get("is_active") is not True
+            or {**prior, "is_active": False, "settings": {**prior_settings, "canonical_group": TARGET}}
+            != before["source"]
+        ):
             raise RepairError("undo_snapshot_invalid")
         settings, active = prior["settings"], True
     else:
         if not source.is_active:
             raise RepairError("already_applied")
-        settings, active = {**SETTINGS, "canonical_group": TARGET}, False
+        settings, active = {**source.settings, "canonical_group": TARGET}, False
     unit_model._base_manager.filter(pk=source.pk).update(settings=settings, is_active=active)
     source.refresh_from_db()
     after = {"source": _snapshot(source), "target": _snapshot(target), "references": references(source)}
