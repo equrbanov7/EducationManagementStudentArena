@@ -1,5 +1,8 @@
 """Exact19 legacy journals→20 reviewed197 workload target slices. No discovery."""
 
+from .reviewed_content_336_spec import SPEC as _SPEC_336
+from .reviewed_content_336_spec import TARGET as _TARGET_336
+
 ORG = "526cfa63-4f80-4bba-a7a7-61c8fbb3d918"
 YEAR = "2026/2027"
 SEMESTER = 14
@@ -322,3 +325,8 @@ TARGETS.update(
     }
 )
 JOURNAL_GROUPS.update({14088: (835, 843), 15287: (829,)})
+
+# Fixed one-journal historical content recovery; no general source discovery.
+
+TARGETS[_TARGET_336] = _SPEC_336
+JOURNAL_GROUPS[14917] = (936, 937)

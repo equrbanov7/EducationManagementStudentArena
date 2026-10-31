@@ -94,6 +94,9 @@ def execute(*, data, source_sha256, user, organization, apply=False, expected_ba
     )
     if data["until_date"] > timezone.localdate():
         raise ContentError("source_until_cannot_be_in_future")
+    from .reviewed_content_336_bridge import source_guard
+
+    source_guard(data, source_sha256)
     state = CurrentState(data, actor=user, lock=apply)
     before = state.fingerprint()
     baseline = digest({"source": source_sha256, "targets": targets, "current": before})
@@ -130,6 +133,7 @@ def execute(*, data, source_sha256, user, organization, apply=False, expected_ba
         reason="Baxılmış köhnə jurnal mənbəsindən yalnız çatışmayan xanaların bərpası",
         new_values={
             "source_sha256": source_sha256,
+            "reviewed_identity_evidence": state.reviewed_identity_evidence,
             "target_ids": targets,
             "before_baseline": baseline,
             "after_fingerprint": digest(after_state.fingerprint()),

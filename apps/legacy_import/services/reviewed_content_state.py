@@ -82,6 +82,9 @@ class CurrentState:
         from .reviewed_content_student_bridge import reviewed_student_bridge
 
         reviewed_student_bridge(data, self.student_maps, lock=lock)
+        from .reviewed_content_336_bridge import bridge as reviewed_336_bridge
+
+        self.reviewed_identity_evidence = reviewed_336_bridge(data, self.student_maps, lock=lock)
         teacher_ids = {s["teacher_id"] for s in self.selected.values()}
         teachers = {
             row["id"]: row
@@ -194,6 +197,7 @@ class CurrentState:
         teacher_ids = {s["teacher_id"] for s in self.selected.values()}
         relevant_users = teacher_ids | {int(pk) for ids in self.student_maps.values() for pk in ids}
         result = {
+            "reviewed_identity_evidence": self.reviewed_identity_evidence,
             "academic": journal_academic_fingerprint(organization_id=ORG, offerings=self.offerings),
             "groups": queryset_database_fingerprint(
                 model("organizations.OrgUnit").objects.filter(
