@@ -25,11 +25,10 @@ class Command(BaseCommand):
         from django.apps import apps
 
         org_id = "526cfa63-4f80-4bba-a7a7-61c8fbb3d918"
-        apply_rls_request_context(user_id=None, org_id=org_id, bypass=False, local=True)
-        org = apps.get_model("organizations.Organization").objects.get(pk=org_id)
-        user = get_user_model().objects.get(username=options["actor"], is_active=True, is_superuser=True)
-        apply_rls_request_context(user_id=user.pk, org_id=org.pk, bypass=False, local=True)
         try:
+            user = get_user_model().objects.get(username=options["actor"], is_active=True, is_superuser=True)
+            apply_rls_request_context(user_id=user.pk, org_id=org_id, bypass=False, local=True)
+            org = apps.get_model("organizations.Organization").objects.get(pk=org_id)
             result = run(
                 organization=org, user=user, apply=options["apply"], expected_baseline=options["expected_baseline"]
             )
