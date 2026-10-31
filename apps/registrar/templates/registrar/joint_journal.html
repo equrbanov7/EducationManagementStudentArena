@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% block title %}{{ joint.group_label }} — {{ kind_label }} — Jurnal{% endblock %}
+{% block extraCss %}<link rel="stylesheet" href="{% static 'registrar/css/joint_journal.css' %}">{% endblock %}
+{% block content %}
+<main class="joint-journal">
+    <a href="{% url 'registrar:journal_list' %}">← Elektron jurnal</a>
+    <h1>{{ joint.group_label }} · {{ kind_label }}</h1>
+    <p>{{ offering.subject.name }} · {{ offering.period.name }}</p>
+    <p>Birgə dərsin davamiyyət və ballarını bütün qruplar üçün burada yazın. Son 12 dərs göstərilir.</p>
+    {% if joint_locked %}<p role="status">Birgə jurnalın açılışlarından biri kilidlidir. Jurnal yalnız oxunur.</p>{% else %}
+    <details class="joint-create">
+        <summary>Yeni birgə dərs</summary>
+        <form method="post">
+            {% csrf_token %}<input type="hidden" name="action" value="add_lesson">
+            <label>Tarix <input type="date" name="date" value="{{ today|date:'Y-m-d' }}" max="{{ today|date:'Y-m-d' }}" required></label>
+            <label>Cədvəl dərsi
+                <select name="slot_id" required>
+                    {% for slot in slots %}<option value="{{ slot.pk }}">{{ slot.weekday_label }} · {{ slot.start_time|time:'H:i' }}–{{ slot.end_time|time:'H:i' }} · {{ slot.get_week_type_display }}{% if slot.room %} · {{ slot.room }}{% endif %}</option>{% endfor %}
+                </select>
+            </label>
+            <label>Mövzu <input type="text" name="topic" maxlength="255" required></label>
+            <button type="submit">Bütün qruplara dərs əlavə et</button>
+        </form>
+    </details>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}<input type="hidden" name="action" value="save_marks">
+        <div class="joint-grid-scroll">
+            <table class="joint-grid">
+                <caption>{{ joint.group_label }} — {{ kind_label }} · {{ rows|length }} tələbə</caption>
+                <thead><tr><th scope="col">Qrup</th><th scope="col">Tələbə</th>
+                    {% for lesson in columns %}<th scope="col">{{ lesson.date|date:'d.m.Y' }}<br>{{ lesson.start_time|time:'H:i' }}<br>{{ lesson.topic|default:'Mövzu yoxdur' }}<br>{{ lesson.hours }} saat</th>{% endfor %}
+                </tr></thead>
+                <tbody>
+                {% for row in rows %}<tr><td>{{ row.group.name }}</td><th scope="row">{{ row.student.get_full_name|default:row.student.username }}</th>
+                    {% for cell in row.cells %}<td>
+                    {% if cell %}
+                        {% if cell.writable %}
+                        <label class="joint-sr">{{ row.student.get_full_name }} · {{ cell.lesson.date|date:'d.m.Y' }} · davamiyyət</label>
+                        <select name="att__{{ cell.lesson.pk }}__{{ row.enrollment.pk }}" aria-label="Davamiyyət: {{ row.student.get_full_name }} — {{ cell.lesson.date|date:'d.m.Y' }}">
+                            <option value="" {% if not cell.mark %}selected{% endif %}>—</option>
+                            <option value="present" {% if cell.mark.status == 'present' %}selected{% endif %}>i/e</option>
+                            <option value="absent" {% if cell.mark.status == 'absent' %}selected{% endif %}>q/b</option>
+                        </select>
+                        {% if cell.allows_score %}<input aria-label="Bal: {{ row.student.get_full_name }} — {{ cell.lesson.date|date:'d.m.Y' }}" type="number" min="0" max="10" step="1" name="score__{{ cell.lesson.pk }}__{{ row.enrollment.pk }}" value="{{ cell.mark.score|default_if_none:'' }}">{% endif %}
+                        {% else %}<span title="Xana kilidlidir">{{ cell.mark.get_status_display|default:'—' }}{% if cell.mark.score != None %} · {{ cell.mark.score }}{% endif %} 🔒</span>{% endif %}
+                    {% else %}<span title="Bu qrup üçün həmin tarixdə ayrıca dərs qeydi yoxdur">—</span>{% endif %}
+                    </td>{% endfor %}
+                </tr>{% empty %}<tr><td colspan="2">Aktiv tələbə yoxdur.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if columns %}{% if not joint_locked %}<button type="submit">Bütün qruplar üçün yadda saxla</button>{% endif %}{% else %}<p>Bu dərs növündə hələ dərs qeydi yoxdur.</p>{% endif %}
+    </form>
+    <details><summary>Qrup jurnalları və tam tarixçə</summary><ul>
+        {% for member in joint.offerings %}<li><a href="{% url 'registrar:journal_detail' member.pk %}?kind={{ joint.kind }}">{{ member.group.name }} — tam jurnal və əvvəlki qeydlər</a></li>{% endfor %}
+    </ul></details>
+</main>
+{% endblock %}

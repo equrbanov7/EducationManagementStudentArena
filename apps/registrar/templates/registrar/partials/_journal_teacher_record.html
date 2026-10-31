@@ -1,5 +1,7 @@
 {% load i18n %}
-{% if not journal_is_broad %}
+{% if offering.journal_entry_kind %}
+<div class="jl-subject-sub">{% if offering.joint_selection %}{% trans "Birgə dərs: bütün qrupların tələbələri" %}{% else %}{% trans "Cari dərs yükü" %}{% endif %}</div>
+{% elif not journal_is_broad %}
 <div class="jl-subject-sub">
     {% if offering.journal_is_current_load %}<span>{% trans "Cari dərs yükü" %}</span>
     {% else %}<span>{% trans "Tarixçə: cari yük təyinatı yoxdur" %}</span>{% endif %}

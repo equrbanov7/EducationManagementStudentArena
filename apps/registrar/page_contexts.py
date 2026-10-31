@@ -224,6 +224,10 @@ def journal_list_context(user, request=None) -> dict:
     # qorunur (page istisna) ki, keçidlər filtri saxlasın.
     from django.core.paginator import Paginator
 
+    from . import joint_journal_list
+
+    if not is_broad and teaching_view == "current":
+        qs = joint_journal_list.project(qs, organization=organization, user=user, selected_kind=selected_kind)
     paginator = Paginator(qs, 20)
     page_obj = paginator.get_page(request.GET.get("page") if request is not None else None)
     row_offset = page_obj.start_index() - 1 if page_obj else 0
@@ -239,6 +243,7 @@ def journal_list_context(user, request=None) -> dict:
         teacher_journal_list.attach(user, page_offerings, selected_kind=selected_kind)
     attach_labels(page_offerings, within=base_qs)
     jls.attach(page_offerings, occurrences)
+    joint_journal_list.attach(page_offerings)
     querystring = ""
     if request is not None:
         params = request.GET.copy()

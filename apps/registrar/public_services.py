@@ -69,6 +69,7 @@ from .grading_scale import is_custom  # noqa: F401
 from .guest_roster import add_guest_student  # noqa: F401
 from .handover_actions import REVERT_BLOCKER_CODES  # noqa: F401
 from .integrity import validate_active_member as validate_active_student_member  # noqa: F401
+from .journal_assignment_sources import register_joint_journal_candidates  # noqa: F401
 from .journal_assignment_sources import register_teacher_journal_assignments  # noqa: F401
 from .journal_workload_shares import sync_workload_journal_shares  # noqa: F401
 from .movements import RULES  # noqa: F401
@@ -90,6 +91,7 @@ __all__ = [
     "create_reviewed_subject",
     "exact_title_candidates",
     "register_teacher_journal_assignments",
+    "register_joint_journal_candidates",
     "add_guest_student",
     "CORRECT_PERMISSION",
     "DEFAULT_ABSENCE_LIMIT_PERCENT",

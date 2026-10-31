@@ -1,0 +1,17 @@
+.joint-journal { max-width: 1440px; margin: 24px auto; padding: 24px; color: var(--text-primary, #172238); }
+.joint-journal h1 { font-size: 1.5rem; margin-top: 20px; }
+.joint-journal p { line-height: 1.6; }
+.joint-journal details { margin: 24px 0; padding: 16px; border: 1px solid #cbd5e1; border-radius: 10px; }
+.joint-journal summary { cursor: pointer; font-weight: 600; }
+.joint-create form { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; align-items: end; }
+.joint-create label { display: flex; flex-direction: column; gap: 6px; }
+.joint-journal input, .joint-journal select { border: 1px solid #94a3b8; border-radius: 6px; padding: 8px; background: var(--surface, white); color: inherit; }
+.joint-journal button { margin: 16px 0; padding: 10px 18px; border: 0; border-radius: 7px; background: #1455b0; color: white; cursor: pointer; }
+.joint-grid-scroll { overflow: auto; max-height: 70vh; border: 1px solid #cbd5e1; border-radius: 10px; }
+.joint-grid { border-collapse: separate; border-spacing: 0; width: 100%; }
+.joint-grid caption { padding: 12px; text-align: left; font-weight: 600; }
+.joint-grid th, .joint-grid td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; }
+.joint-grid thead th { position: sticky; top: 0; background: var(--surface, #f1f5f9); z-index: 1; min-width: 150px; font-size: .85rem; }
+.joint-grid tbody th { min-width: 180px; }
+.joint-grid td input { width: 70px; margin-top: 6px; }
+.joint-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }

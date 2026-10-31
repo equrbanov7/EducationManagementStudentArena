@@ -15,6 +15,7 @@ from . import (
     guest_roster_views,
     holiday_actions,
     individual_plan_views,
+    joint_journal_views,
     journal_actions,
     journal_activation,
     journal_history,
@@ -37,6 +38,7 @@ app_name = "registrar"
 urlpatterns = [
     path("duzelis/<uuid:offering_id>/umumi-uzrlu/", absence_credit_views.apply, name="absence_credit_apply"),
     path("", views.journal_list, name="journal_list"),
+    path("birge/<uuid:source_row_id>/<str:kind>/", joint_journal_views.detail, name="joint_journal"),
     # Siyahının «MÜƏLLİM» axtarışlı seçicisi — siyahı ilə EYNİ əhatə (journal_list_scope, 2026-10-29).
     path("axtaris/muellim/", journal_list_lookup.teacher_search, name="journal_list_teachers"),
     path("axtaris/fakulte/", journal_list_unit_lookup.faculty_search, name="journal_list_faculties"),

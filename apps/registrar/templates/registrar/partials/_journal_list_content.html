@@ -170,7 +170,7 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
                 {% for offering in offerings %}
                 {% comment %}Seçilmiş dərs tipi jurnalın İÇİNƏ də keçir (sahib tələbi
                 2026-09-06).{% endcomment %}
-                <tr class="jl-row{% if offering.next_lesson.state == 'now' %} jl-row--now{% endif %}" data-jl-href="{% url 'registrar:journal_detail' offering.id %}{% if offering.journal_own_history_link %}?own_history=1{% elif journal_selected_kind %}?kind={{ journal_selected_kind }}{% endif %}">
+                <tr class="jl-row{% if offering.next_lesson.state == 'now' %} jl-row--now{% endif %}" data-jl-href="{% if offering.journal_entry_url %}{{ offering.journal_entry_url }}{% else %}{% url 'registrar:journal_detail' offering.id %}{% if offering.journal_own_history_link %}?own_history=1{% elif journal_selected_kind %}?kind={{ journal_selected_kind }}{% endif %}{% endif %}">
                     <td class="jl-col-no">{{ row_offset|add:forloop.counter }}</td>
                     <td>
                         <div class="jl-group-line">
@@ -197,7 +197,7 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
                     <td class="jl-col-kind" data-label="{% trans "DƏRS TİPİ" context "registrar.journal" %}">{% if offering.kind_label %}<span class="jl-kind">{{ offering.kind_label }}</span>{% else %}<span class="jl-kind jl-kind--none">—</span>{% endif %}</td>
                     <td class="jl-col-count" data-label="{% trans "TƏLƏBƏ SAYI" context "registrar.journal" %}"><span class="jl-students {% if not offering.student_count %}jl-students--zero{% endif %}"><i class="fas fa-user-group" aria-hidden="true"></i>{{ offering.student_count }}</span></td>
                     <td class="jl-col-action">
-                        <a class="jl-open-btn" href="{% url 'registrar:journal_detail' offering.id %}{% if offering.journal_own_history_link %}?own_history=1{% elif journal_selected_kind %}?kind={{ journal_selected_kind }}{% endif %}">
+                        <a class="jl-open-btn" href="{% if offering.journal_entry_url %}{{ offering.journal_entry_url }}{% else %}{% url 'registrar:journal_detail' offering.id %}{% if offering.journal_own_history_link %}?own_history=1{% elif journal_selected_kind %}?kind={{ journal_selected_kind }}{% endif %}{% endif %}">
                             {% trans "Jurnalı aç" context "registrar.journal" %} <i class="fas fa-arrow-right" aria-hidden="true"></i>
                         </a>
                     </td>

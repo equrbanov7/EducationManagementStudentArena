@@ -1,6 +1,7 @@
 """Optional canonical assignment source; absent workload integration grants nothing."""
 
 _provider = None
+_joint_provider = None
 
 
 def register_teacher_journal_assignments(provider):
@@ -10,3 +11,15 @@ def register_teacher_journal_assignments(provider):
 
 def teacher_journal_assignments(*, organization, teacher_id):
     return _provider(organization=organization, teacher_id=teacher_id) if _provider is not None else {}
+
+
+def register_joint_journal_candidates(provider):
+    global _joint_provider
+    _joint_provider = provider
+
+
+def joint_journal_candidates(*, organization, teacher_id):
+    """Official row identities only; registrar must independently check access and timetable."""
+    if _joint_provider is None:
+        return []
+    return _joint_provider(organization=organization, teacher_id=teacher_id)
