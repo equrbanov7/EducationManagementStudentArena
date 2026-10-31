@@ -9,6 +9,7 @@ from apps.registrar.models import CourseOffering, Enrollment, Lesson, LessonMark
 from apps.workload.models import TeacherAssignment
 from apps.workload.services import qosqar_duplicate_repair as repair
 from apps.workload.services import qosqar_duplicate_state as state
+from apps.workload.services import qosqar_schedule
 from apps.workload.tests import test_scoped_snapshot as fixtures
 
 
@@ -71,6 +72,9 @@ class QosqarDuplicateTests(TestCase):
         self.addCleanup(self.patches.close)
         for key, value in values.items():
             self.patches.enter_context(patch.object(state, key, value))
+        self.patches.enter_context(patch.object(qosqar_schedule, "PAIRS", {str(self.empty.pk): str(self.filled.pk)}))
+        self.patches.enter_context(patch.object(qosqar_schedule, "TEACHER", self.teacher.pk))
+        self.patches.enter_context(patch.object(qosqar_schedule, "CANONICAL_SUBJECT", str(self.filled.subject_id)))
 
     def call(self, **kwargs):
         return repair.repair_qosqar_duplicate(organization=self.org, user=self.actor, **kwargs)

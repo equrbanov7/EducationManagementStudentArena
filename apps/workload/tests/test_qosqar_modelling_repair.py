@@ -11,6 +11,7 @@ from apps.registrar.models import CourseOffering, Enrollment, Lesson, LessonMark
 from apps.syllabus.public import import_migrated_version, section_data_map, syllabus_for_offering
 from apps.workload.models import TeacherAssignment
 from apps.workload.services import qosqar_modelling_repair as service
+from apps.workload.services import qosqar_schedule
 from apps.workload.tests import test_scoped_snapshot as fixtures
 
 
@@ -99,6 +100,9 @@ class QosqarModellingTests(TestCase):
             self.patches.enter_context(patch.object(service, key, value))
         self.patches.enter_context(patch.object(service.common, "ORG", str(self.org.pk)))
         self.patches.enter_context(patch.object(service.common, "GROUP", str(anchor.group_id)))
+        self.patches.enter_context(patch.object(qosqar_schedule, "PAIRS", {str(empty.pk): str(target.pk)}))
+        self.patches.enter_context(patch.object(qosqar_schedule, "TEACHER", self.teacher.pk))
+        self.patches.enter_context(patch.object(qosqar_schedule, "CANONICAL_SUBJECT", str(anchor.subject_id)))
 
     def call(self, **kwargs):
         return service.repair_qosqar_modelling(

@@ -41,6 +41,7 @@ from . import schedule_docx_parse  # noqa: F401
 from . import schedule_editor  # noqa: F401
 from . import schedule_editor_actions  # noqa: F401
 from . import schedule_grid  # noqa: F401
+from . import schedule_lock  # noqa: F401
 from . import schedule_manage  # noqa: F401
 from . import schedule_manage_actions  # noqa: F401
 from . import schedule_publish  # noqa: F401
@@ -159,6 +160,7 @@ __all__ = [
     "schedule_editor",
     "schedule_editor_actions",
     "schedule_grid",
+    "schedule_lock",
     "schedule_manage",
     "schedule_manage_actions",
     "schedule_publish",

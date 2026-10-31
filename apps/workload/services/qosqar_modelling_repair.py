@@ -11,6 +11,7 @@ from core.constants import AuditAction
 
 from ..constants import AmendmentReason, TaskStatus
 from . import qosqar_duplicate_state as common
+from . import qosqar_schedule
 from .row_edit import save_row_amended
 from .scoping import resolve_actor
 
@@ -40,6 +41,7 @@ def capture():
     rows = model("workload.TeachingTaskRow").objects.filter(task_id=TASK, organization_id=ORG)
     return {
         "academic": common.graph((OFFERING, EMPTY, ANCHOR)),
+        "schedule": qosqar_schedule.slot_rows(EMPTY, OFFERING),
         "rows": records(rows),
         "groups": sorted((str(r.pk), str(g)) for r in rows for g in r.groups.values_list("pk", flat=True)),
         "assignments": records(model("workload.TeacherAssignment").objects.filter(row__in=rows)),
@@ -50,6 +52,8 @@ def capture():
 
 def protected(value):
     result = {**value, "academic": dict(value["academic"])}
+    result.pop("schedule", None)
+    result["academic"].pop("registrar.ScheduleSlot", None)
     result["academic"]["registrar.CourseOffering"] = [
         {
             k: v
@@ -117,7 +121,7 @@ def validate(offerings, row, *, corrected, sections):
             raise ModellingError("fixed_offering_identity_changed")
     if not model("registrar.Subject").objects.filter(pk=NEW, organization_id=ORG, code="QKU-868").exists():
         raise ModellingError("canonical_catalogue_changed")
-    common.reject_empty_content(EMPTY)
+    qosqar_schedule.validate_empty(EMPTY, OFFERING)
     if (
         model("registrar.CourseOffering")
         .objects.filter(organization_id=ORG, subject_id=NEW, period_id=PERIOD, group_id=GROUP)
@@ -186,6 +190,7 @@ def repair_qosqar_modelling(
         raise ModellingError("fixed_source_tenant_active_superadmin_required")
     if digest(sections) != SOURCE_CONTENT_SHA:
         raise ModellingError("pinned_source6591_sections_changed")
+    qosqar_schedule.schedule_lock.lock_schedule(organization.pk, PERIOD)
     task = model("workload.TeachingTask").objects.select_for_update().get(pk=TASK, organization_id=ORG)
     if task.status not in (TaskStatus.DISTRIBUTED, TaskStatus.AMENDED):
         raise ModellingError("released_task_required")
@@ -220,6 +225,12 @@ def repair_qosqar_modelling(
         original = receipt.new_values["before"]
         if digest(original) != receipt.new_values["before_hash"] or receipt.new_values["source_sha256"] != SOURCE_SHA:
             raise ModellingError("undo_receipt_source_or_snapshot_changed")
+        qosqar_schedule.check_undo(
+            source_id=EMPTY,
+            target_id=OFFERING,
+            before=original["schedule"],
+            pairs=receipt.new_values.get("schedule_pairs", []),
+        )
         share = model("syllabus.SyllabusShare").objects.get(pk=receipt.new_values["share_id"], offering_id=OFFERING)
         share.delete()
         _subject(offerings[OFFERING], NEW, OLD)
@@ -236,21 +247,43 @@ def repair_qosqar_modelling(
             },
         )
         model("registrar.CourseOffering").objects.filter(pk=EMPTY).update(is_active=True)
+        qosqar_schedule.undo(
+            source_id=EMPTY,
+            target_id=OFFERING,
+            before=original["schedule"],
+            pairs=receipt.new_values.get("schedule_pairs", []),
+            organization=organization,
+            user=user,
+        )
         after = capture()
         if digest(protected(before)) != digest(protected(after)):
             raise ModellingError("undo_academic_content_changed")
-        _log(organization, user, "Qoşqar modelling undo", {"receipt": str(receipt.pk), "after_hash": digest(after)})
+        _log(
+            organization,
+            user,
+            "Qoşqar modelling undo",
+            {
+                "receipt": str(receipt.pk),
+                "after_hash": digest(after),
+                "schedule_before": before["schedule"],
+                "schedule_after": after["schedule"],
+                "schedule_pairs": receipt.new_values.get("schedule_pairs", []),
+            },
+        )
         return {"subject_links_restored": 2, "shares_removed": 1, "baseline": baseline}
     if corrected:
         if not receipt or receipt.new_values["after_hash"] != baseline:
             raise ModellingError("unverified_previous_correction")
         return {"already_present": 1, "baseline": baseline}
     if not apply:
+        schedule_pairs = qosqar_schedule.plan(EMPTY, OFFERING)
         return {
             "baseline": baseline,
             "subject_links_to_correct": 2,
             "own_syllabus_shares_to_restore": 1,
             "empty_offerings_to_retire": 1,
+            "schedule_slots_to_park": len(schedule_pairs),
+            "schedule_slots_to_create": sum(pair["created"] for pair in schedule_pairs),
         }
     _subject(offerings[OFFERING], OLD, NEW)
     save_row_amended(
@@ -268,11 +301,18 @@ def repair_qosqar_modelling(
     if link_legacy_share(syllabus=syllabus, offering=offerings[OFFERING], user=user) != "linked":
         raise ModellingError("own_syllabus_fill_only_share_failed")
     share = model("syllabus.SyllabusShare").objects.get(offering_id=OFFERING, syllabus=syllabus)
+    schedule_pairs = qosqar_schedule.apply(
+        source_id=EMPTY,
+        target_id=OFFERING,
+        organization=organization,
+        user=user,
+    )
     model("registrar.CourseOffering").objects.filter(pk=EMPTY).update(is_active=False)
     offerings[EMPTY].refresh_from_db()
     row.refresh_from_db()
     validate(offerings, row, corrected=True, sections=sections)
     after = capture()
+    qosqar_schedule.preserved(before=before["schedule"], after=after["schedule"], pairs=schedule_pairs)
     if digest(protected(before)) != digest(protected(after)):
         raise ModellingError("academic_or_unrelated_workload_content_changed")
     _log(
@@ -291,11 +331,14 @@ def repair_qosqar_modelling(
             "old_subject": OLD,
             "new_subject": NEW,
             "source_content_hash": digest(sections),
+            "schedule_pairs": schedule_pairs,
+            "schedule_after": after["schedule"],
         },
     )
     return {
         "subject_links_corrected": 2,
         "own_syllabus_shares_restored": 1,
         "empty_offerings_retired": 1,
+        "schedule_slots_parked": len(schedule_pairs),
         "baseline": baseline,
     }

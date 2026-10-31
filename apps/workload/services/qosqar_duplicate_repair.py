@@ -9,6 +9,7 @@ from core.constants import AuditAction
 
 from ..constants import AmendmentReason, TaskStatus
 from . import qosqar_duplicate_state as state
+from . import qosqar_schedule
 from .row_edit import delete_row_amended
 from .scoping import resolve_actor
 
@@ -56,6 +57,7 @@ def _log(organization, user, reason, values):
 def repair_qosqar_duplicate(*, organization, user, apply=False, expected_baseline="", undo=False):
     if str(organization.pk) != state.ORG or not user.is_active or not user.is_superuser:
         raise DuplicateError("fixed_tenant_active_superadmin_required")
+    qosqar_schedule.schedule_lock.lock_schedule(organization.pk, state.PERIOD)
     task = (
         state.model("workload.TeachingTask").objects.select_for_update().get(pk=state.TASK, organization=organization)
     )
@@ -76,6 +78,7 @@ def repair_qosqar_duplicate(*, organization, user, apply=False, expected_baselin
         .objects.select_for_update()
         .filter(pk__in=(state.KEEP_ROW, state.REMOVE_ROW))
     )
+    qosqar_schedule.validate_empty(state.EMPTY, state.FILLED)
     before = state.capture()
     baseline = state.digest(before)
     if expected_baseline and expected_baseline != baseline:
@@ -96,6 +99,12 @@ def repair_qosqar_duplicate(*, organization, user, apply=False, expected_baselin
             or receipt.new_values["source_proof_sha256"] != state.SOURCE_PROOF
         ):
             raise DuplicateError("undo_receipt_source_or_snapshot_changed")
+        qosqar_schedule.check_undo(
+            source_id=state.EMPTY,
+            target_id=state.FILLED,
+            before=original["schedule"],
+            pairs=receipt.new_values.get("schedule_pairs", []),
+        )
         if not apply:
             return {"baseline": baseline, "rows_to_restore": 1, "assignments_to_restore": 2}
         _restore_records("workload.TeachingTaskRow", [r for r in original["rows"] if r["id"] == state.REMOVE_ROW])
@@ -105,6 +114,14 @@ def repair_qosqar_duplicate(*, organization, user, apply=False, expected_baselin
             "workload.TeacherAssignment", [r for r in original["assignments"] if r["row_id"] == state.REMOVE_ROW]
         )
         state.model("registrar.CourseOffering").objects.filter(pk=state.EMPTY).update(is_active=True)
+        qosqar_schedule.undo(
+            source_id=state.EMPTY,
+            target_id=state.FILLED,
+            before=original["schedule"],
+            pairs=receipt.new_values.get("schedule_pairs", []),
+            organization=organization,
+            user=user,
+        )
         # The amendment and audit stay immutable; task lifecycle remains amended.
         after = state.capture()
         if state.digest(state.protected(before)) != state.digest(state.protected(after)):
@@ -113,7 +130,16 @@ def repair_qosqar_duplicate(*, organization, user, apply=False, expected_baselin
             if state.digest(after[key]) != state.digest(original[key]):
                 raise DuplicateError("undo_original_rows_not_exact")
         _log(
-            organization, user, "Qoşqar duplicate undo", {"receipt": str(receipt.pk), "after_hash": state.digest(after)}
+            organization,
+            user,
+            "Qoşqar duplicate undo",
+            {
+                "receipt": str(receipt.pk),
+                "after_hash": state.digest(after),
+                "schedule_before": before["schedule"],
+                "schedule_after": after["schedule"],
+                "schedule_pairs": receipt.new_values.get("schedule_pairs", []),
+            },
         )
         return {"rows_restored": 1, "assignments_restored": 2, "baseline": baseline}
     if retired:
@@ -123,7 +149,14 @@ def repair_qosqar_duplicate(*, organization, user, apply=False, expected_baselin
         return {"already_present": 1, "baseline": baseline}
     rows = state.validate(offerings)
     if not apply:
-        return {"baseline": baseline, "duplicate_rows_to_remove": 1, "empty_offerings_to_retire": 1}
+        pairs = qosqar_schedule.plan(state.EMPTY, state.FILLED)
+        return {
+            "baseline": baseline,
+            "duplicate_rows_to_remove": 1,
+            "empty_offerings_to_retire": 1,
+            "schedule_slots_to_park": len(pairs),
+            "schedule_slots_to_create": sum(p["created"] for p in pairs),
+        }
     row = rows[state.REMOVE_ROW]
     delete_row_amended(
         task=task,
@@ -134,8 +167,15 @@ def repair_qosqar_duplicate(*, organization, user, apply=False, expected_baselin
             "note": "Qoşqar, 233 K az: mənbə 14873/868/6591 saxlanır; boş 1487 dublikatı auditli çıxarılır.",
         },
     )
+    schedule_pairs = qosqar_schedule.apply(
+        source_id=state.EMPTY,
+        target_id=state.FILLED,
+        organization=organization,
+        user=user,
+    )
     state.model("registrar.CourseOffering").objects.filter(pk=state.EMPTY).update(is_active=False)
     after = state.capture()
+    qosqar_schedule.preserved(before=before["schedule"], after=after["schedule"], pairs=schedule_pairs)
     state.validate(
         {**offerings, state.EMPTY: state.model("registrar.CourseOffering").objects.get(pk=state.EMPTY)}, retired=True
     )
@@ -155,6 +195,13 @@ def repair_qosqar_duplicate(*, organization, user, apply=False, expected_baselin
             "canonical_offering": state.FILLED,
             "retired_offering": state.EMPTY,
             "alias_scope": {"group": state.GROUP, "period": state.PERIOD, "teacher": state.TEACHER},
+            "schedule_pairs": schedule_pairs,
+            "schedule_after": after["schedule"],
         },
     )
-    return {"duplicate_rows_removed": 1, "empty_offerings_retired": 1, "baseline": baseline}
+    return {
+        "duplicate_rows_removed": 1,
+        "empty_offerings_retired": 1,
+        "baseline": baseline,
+        "schedule_slots_parked": len(schedule_pairs),
+    }

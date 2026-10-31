@@ -72,9 +72,12 @@ def graph(offering_ids=None):
 
 
 def capture():
+    from . import qosqar_schedule
+
     rows = model("workload.TeachingTaskRow").objects.filter(pk__in=(KEEP_ROW, REMOVE_ROW), organization_id=ORG)
     return {
         "academic": graph(),
+        "schedule": qosqar_schedule.slot_rows(EMPTY, FILLED),
         "rows": records(rows),
         "groups": sorted(
             (str(row.pk), str(group)) for row in rows for group in row.groups.values_list("pk", flat=True)
@@ -86,6 +89,7 @@ def capture():
 
 def protected(value):
     result = dict(value["academic"])
+    result.pop("registrar.ScheduleSlot", None)  # full rows are checked separately, never ignored by the repair
     result["registrar.CourseOffering"] = [
         {k: v for k, v in row.items() if not (str(row["id"]) == EMPTY and k == "is_active")}
         for row in result["registrar.CourseOffering"]
@@ -166,7 +170,9 @@ def validate(offerings, *, retired=False):
             code,
         ) or o.is_active != (oid != EMPTY or not retired):
             raise DuplicateError("fixed_offering_identity_or_activity_changed")
-    reject_empty_content(EMPTY)
+    from . import qosqar_schedule
+
+    qosqar_schedule.validate_empty(EMPTY, FILLED)
     if not model("registrar.Lesson").objects.filter(offering_id=FILLED).exists():
         raise DuplicateError("canonical_historical_journal_missing")
     if (
