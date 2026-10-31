@@ -149,10 +149,6 @@ def _apply(rows, offerings, *, user, actor, batch):
             else " / ".join(names[uuid.UUID(gid)] for gid in gids)
         )
         _save_groups(rows[item["id"]], gids, text, actor=actor, batch=batch)
-    for item in spec.MOVES:
-        offering = offerings[item["id"]]
-        offering.group_id = uuid.UUID(spec.TARGET)
-        offering.save(update_fields=["group", "updated_at"])
     for item in spec.COLLISIONS:
         offering = offerings[item["source"]]
         offering.is_active = False
@@ -160,17 +156,13 @@ def _apply(rows, offerings, *, user, actor, batch):
     created_shares = _link_syllabus(offerings, user)
     before_ids = {r["id"] for r in state.enrollment_rows()}
     # İki boş yaz dərsi canonical qrupa keçir; payızdakı tarixi FK-lər saxlanılır.
-    to_enroll = [
-        offerings[item["id"]]
-        for item in spec.MOVES
-        if offerings[item["id"]].lesson_hours and offerings[item["id"]].instructor_id
-    ]
+    to_enroll = []  # Every historical offering retains its original group FK.
     report = registrar_services.enroll_group_students(
         offerings=to_enroll, by_user=user, reason="233KE canonical alias bərpası"
     )
-    for item in state.retained_items():
+    for item in (*state.retained_items(), *spec.MOVES):
         retained = offerings[item["id"]]
-        if not retained.instructor_id or not retained.lesson_hours:
+        if not retained.period.is_current or not retained.instructor_id or not retained.lesson_hours:
             continue
         present = set(retained.enrollments.values_list("student_id", flat=True))
         for record in (
@@ -312,7 +304,7 @@ def run(*, organization, user, source_sha256, expected_baseline="", undo="", app
             "baseline": current,
             "batch": batch,
             "changed_rows": len(spec.ROWS),
-            "moved_offerings": len(spec.MOVES),
+            "moved_offerings": 0,
             "preserved_historical_offerings": len(state.retained_items()),
             "retired_empty_offerings": len(spec.COLLISIONS),
             "created_shares": len(created_shares),

@@ -135,10 +135,10 @@ def validate(*, after=False):
     allowed = {"registrar.CourseOffering.group", "workload.TeachingTaskRow.groups"}
     if any(rows for key, rows in refs.items() if key not in allowed):
         raise RepairError("outside_group_reference_in_use")
-    expected_old = {item["id"] for item in retained_items()} | (
-        {r["source"] for r in spec.COLLISIONS}
-        if after
-        else {r["id"] for r in spec.MOVES} | {r["source"] for r in spec.COLLISIONS}
+    expected_old = (
+        {item["id"] for item in retained_items()}
+        | {r["id"] for r in spec.MOVES}
+        | {r["source"] for r in spec.COLLISIONS}
     )
     if {r["id"] for r in refs.get("registrar.CourseOffering.group", [])} != expected_old:
         raise RepairError("outside_alias_offering")
@@ -176,19 +176,8 @@ def validate(*, after=False):
     if len(offerings) != len(offering_ids()):
         raise RepairError("offering_missing")
     for item in spec.MOVES:
-        _offering(offerings[item["id"]], item, group=spec.TARGET if after else spec.SOURCE, active=True)
-        guarded = {
-            "registrar.Enrollment.offering",
-            "registrar.Lesson.offering",
-            "registrar.AssessmentScheme.offering",
-            "registrar.ScheduleSlot.offering",
-            "registrar.AssessmentComponent.offering",
-            "registrar.SelfWorkTopic.offering",
-        }
-        if not after and any(
-            values for key, values in references("registrar.CourseOffering", [item["id"]]).items() if key in guarded
-        ):
-            raise RepairError("move_identity_now_has_evidence")
+        # Historical identity stays fixed; canonical_group routes the UI/import.
+        _offering(offerings[item["id"]], item, group=spec.SOURCE, active=True)
     for item in retained_items():
         _offering(offerings[item["id"]], item, group=spec.SOURCE, active=True)
         if offerings[item["id"]].instructor_id and offerings[item["id"]].lesson_hours:
