@@ -1,6 +1,7 @@
 """A shared teacher appears in broad pickers without widening journal scope."""
 
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.urls import reverse
 
@@ -39,15 +40,12 @@ class SharedTeacherFilterTest(TestCase):
         response = self.client.get(reverse("registrar:journal_list"), {"teacher": self.shared.pk})
         self.assertEqual(list(response.context["offerings"]), [])
 
-    def test_mismatched_tenant_share_is_ignored(self):
+    def test_mismatched_tenant_share_is_rejected(self):
         from apps.organizations.models import Organization
 
         with bypass_rls():
             other = Organization.objects.create(name="Other", slug="shared-other", owner=self.owner)
-            JournalShare.objects.filter(pk=self.share.pk).update(organization=other)
-        self.client.force_login(self.corrector)
-        self.assertEqual(
-            self.client.get(reverse("registrar:journal_list_teachers"), {"q": "Shared"}).json()["results"], []
-        )
-        response = self.client.get(reverse("registrar:journal_list"), {"teacher": self.shared.pk})
-        self.assertEqual(list(response.context["offerings"]), [])
+            with self.assertRaises(IntegrityError), transaction.atomic():
+                JournalShare.objects.filter(pk=self.share.pk).update(organization=other)
+            self.share.refresh_from_db()
+            self.assertEqual(self.share.organization_id, self.org.pk)
