@@ -13,7 +13,7 @@ from django.db import transaction
 
 from . import gradebook, journal_access, journal_shares, schedule
 from .journal_assignment_sources import joint_journal_candidates
-from .models import CourseOffering, Enrollment, Lesson, ScheduleSlot
+from .models import CourseOffering, Enrollment, Lesson, LessonMark, ScheduleSlot
 
 
 class JointJournalError(gradebook.LessonRuleError):
@@ -215,6 +215,17 @@ def save_marks(*, organization, user, source_row_id, kind, entries, request=None
             raise JointJournalError("Xana birgə jurnalın dərs və tələbə əhatəsinə aid deyil.")
         seen.add(pair)
         batches[offering_id].append(entry)
+    protected = (
+        LessonMark.objects.filter(
+            organization=organization,
+            lesson_id__in=[pair[0] for pair in seen],
+            enrollment_id__in=[pair[1] for pair in seen],
+        )
+        .exclude(status__in=("present", "absent"))
+        .values_list("lesson_id", "enrollment_id")
+    )
+    if any((str(lesson_id), str(enrollment_id)) in seen for lesson_id, enrollment_id in protected):
+        raise JointJournalError("Üzrlü və digər qorunan davamiyyət qeydləri burada dəyişdirilə bilməz.")
     written = 0
     for offering in joint.offerings:
         if not batches[offering.pk]:

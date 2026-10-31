@@ -1,10 +1,10 @@
 """Teacher's single contact-kind journal over source-proven physical groups."""
 
 import uuid
-from collections import defaultdict
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -13,7 +13,7 @@ from django.utils import timezone
 from . import gradebook, joint_journal, schedule
 from .audit_write import AuditWriteFailed, audit_failure_message
 from .journal_shares import journal_scope
-from .models import ScheduleSlot
+from .models import Lesson, ScheduleSlot
 from .practical_label import kind_choices
 
 
@@ -25,6 +25,16 @@ def _session_key(lesson):
 
 def _grid(joint, user):
     locked = any(gradebook.journal_is_locked(offering) for offering in joint.offerings)
+    fields = ("date", "start_time", "end_time", "topic", "hours", "instructor_id")
+    # Determine ambiguity over ALL historical lessons, before either member or
+    # combined windows. An ordinal among truncated duplicates is not identity.
+    ambiguous = {
+        tuple(row[field] for field in fields)
+        for row in Lesson.objects.filter(offering_id__in=joint.offering_ids, kind=joint.kind)
+        .values("offering_id", *fields)
+        .annotate(count=Count("pk"))
+        .filter(count__gt=1)
+    }
     journals = [
         (
             offering,
@@ -41,20 +51,17 @@ def _grid(joint, user):
     columns = {}
     lesson_keys = {}
     for _offering, journal in journals:
-        occurrences = defaultdict(int)
         for lesson in journal["lessons"]:
             signature = _session_key(lesson)
-            index = occurrences[signature]
-            occurrences[signature] += 1
-            key = (*signature, index)
+            key = (*signature, str(lesson.pk) if signature in ambiguous else "")
             lesson_keys[lesson.pk] = key
             columns.setdefault(key, lesson)
     keys = sorted(columns, key=lambda key: (key[0], str(key[1]), str(key[2]), str(key[3])), reverse=True)[:12]
     rows = []
     for offering, journal in journals:
         for row in journal["rows"]:
-            if locked:
-                for cell in row["cells"]:
+            for cell in row["cells"]:
+                if locked or (cell["mark"] and cell["mark"].status not in ("present", "absent")):
                     cell["writable"] = False
             own = {lesson_keys[cell["lesson"].pk]: cell for cell in row["cells"]}
             rows.append({**row, "group": offering.group, "cells": [own.get(key) for key in keys]})

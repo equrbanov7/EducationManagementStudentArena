@@ -310,7 +310,7 @@ class JointJournalTests(TestCase):
         first = self.lessons()
         duplicate = self.lessons()
         columns, rows = _grid(joint_journal.resolve(**self.args()), self.teacher)
-        self.assertEqual(len(columns), 2)
+        self.assertEqual(len(columns), 4)
         cell_ids = {cell["lesson"].pk for row in rows for cell in row["cells"] if cell}
         self.assertEqual(cell_ids, {lesson.pk for lesson in first + duplicate})
 
@@ -329,3 +329,48 @@ class JointJournalTests(TestCase):
         self.assertEqual(len(self.select()), 1)  # another member's blank room is compatible
         ScheduleSlot.objects.filter(offering=self.offerings[1], kind="lecture").update(room="102")
         self.assertEqual(self.select(), [])
+
+    def test_excused_status_is_read_only_and_unchanged_full_save_preserves_it(self):
+        ScheduleSlot.objects.filter(kind="seminar").update(start_time="10:30", end_time="12:00")
+        lessons = self.lessons("seminar")
+        excused = LessonMark.objects.create(
+            organization=self.org,
+            lesson=lessons[0],
+            enrollment=self.enrollments[0],
+            status="excused",
+            score=7,
+            entered_by=self.teacher,
+        )
+        client = self._client()
+        url = reverse("registrar:joint_journal", args=[self.row.pk, "seminar"])
+        response = client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, f'name="att__{lessons[0].pk}__{self.enrollments[0].pk}"')
+        self.assertNotContains(response, f'name="score__{lessons[0].pk}__{self.enrollments[0].pk}"')
+        response = client.post(
+            url,
+            {
+                "action": "save_marks",
+                f"att__{lessons[1].pk}__{self.enrollments[1].pk}": "present",
+                f"score__{lessons[1].pk}__{self.enrollments[1].pk}": "8",
+            },
+        )
+        self.assertRedirects(response, url)
+        excused.refresh_from_db()
+        self.assertEqual((excused.status, excused.score), ("excused", Decimal(7)))
+        with self.assertRaises(joint_journal.JointJournalError):
+            joint_journal.save_marks(**self.args("seminar"), entries=self.entries(lessons, score="8"))
+        excused.refresh_from_db()
+        self.assertEqual((excused.status, excused.score), ("excused", Decimal(7)))
+
+    def test_more_than_window_duplicate_sessions_never_align_by_member_ordinal(self):
+        from apps.registrar.joint_journal_views import _grid
+
+        for _ in range(14):
+            self.lessons()
+        columns, rows = _grid(joint_journal.resolve(**self.args()), self.teacher)
+        self.assertEqual(len(columns), 12)
+        # Every duplicate is its own real Lesson column; no physical member's
+        # nth historical lesson is silently paired with another member's nth.
+        for index in range(len(columns)):
+            self.assertEqual(sum(row["cells"][index] is not None for row in rows), 1)
