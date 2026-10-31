@@ -17,7 +17,22 @@ def collect_repair_evidence():
     Profile = apps.get_model("accounts", "UserProfile")
     Record = apps.get_model("registrar", "StudentAcademicRecord")
     profiles = Profile.objects.filter(organization_id=ORG, institutional_identifier__in=("9049", "9086"))
+    from ..ke233_alias_spec import COLLISIONS as PAIRS
+
+    offering_ids = [pk for pair in PAIRS for pk in (pair["source"], pair["target"])]
+    Component = apps.get_model("registrar", "AssessmentComponent")
+    Scheme = apps.get_model("registrar", "AssessmentScheme")
+    Period = apps.get_model("organizations", "AcademicPeriod")
     return {
+        "repair_current_periods": list(
+            Period.objects.filter(organization_id=ORG, academic_year="2026/2027").order_by("pk").values()
+        ),
+        "repair_ke233_components": list(
+            Component.objects.filter(organization_id=ORG, offering_id__in=offering_ids).order_by("pk").values()
+        ),
+        "repair_ke233_schemes": list(
+            Scheme.objects.filter(organization_id=ORG, offering_id__in=offering_ids).order_by("pk").values()
+        ),
         "repair_ke233_slots": list(
             Slot.objects.filter(organization_id=ORG, offering_id__in=COLLISIONS).order_by("pk").values()
         ),

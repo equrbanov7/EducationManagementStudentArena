@@ -34,7 +34,10 @@ class Command(BaseCommand):
             )
         except RepairError as exc:
             raise CommandError(str(exc)) from exc
-        except (ObjectDoesNotExist, MultipleObjectsReturned, ValidationError, DatabaseError) as exc:
+        except ObjectDoesNotExist as exc:
+            model_name = type(exc).__qualname__.split(".")[0].lower()
+            raise CommandError("it_sector_missing_" + model_name) from None
+        except (MultipleObjectsReturned, ValidationError, DatabaseError) as exc:
             raise CommandError("it_sector_" + type(exc).__name__.lower()) from None
         mode = "apply" if options["apply"] else "dry_run"
         fields = [f"mode={mode}"]
