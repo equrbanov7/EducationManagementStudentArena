@@ -111737,3 +111737,7 @@ msgstr "Найдите должность и выберите её из спис
 msgctxt "student_intake"
 msgid "Əməkdaş üçün vəzifə / rol seçilməlidir."
 msgstr "Для сотрудника необходимо выбрать должность или роль."
+
+#: apps/registrar/templates/registrar/partials/_journal_teacher_record.html:3
+msgid "Birgə dərs: bütün qrupların tələbələri"
+msgstr "Совместное занятие: студенты всех групп"

@@ -7,6 +7,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from core.rls import apply_rls_request_context, reset_rls_context
+from core.rls_pooling import rls_worker_atomic
 
 from ... import empty_group_alias as repair
 from ...models import Organization
@@ -23,6 +24,7 @@ class Command(BaseCommand):
         parser.add_argument("--apply", action="store_true")
         parser.add_argument("--summary", action="store_true")
 
+    @rls_worker_atomic()
     @transaction.atomic
     def handle(self, *args, **options):
         user = get_user_model().objects.filter(username=options["actor"], is_active=True, is_superuser=True).first()

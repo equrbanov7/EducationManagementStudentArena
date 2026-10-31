@@ -77,6 +77,10 @@ OFFERINGS += (
 )
 
 
+# Existing canonical language-level journals: compare before any duplicate import.
+OFFERINGS += ("e70d2eab-b4ea-428d-97e3-3d94bb2501d6", "b2559db4-9d18-4f4c-bdab-eac80d2d391d")
+
+
 def collect_request_content():
     """Called only inside the parent repeatable-read read-only RLS transaction.
 
