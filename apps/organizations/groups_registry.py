@@ -26,7 +26,7 @@ from __future__ import annotations
 
 from django.apps import apps as django_apps
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext
@@ -363,11 +363,9 @@ def build_groups_registry(request, organization) -> dict:
         .values_list("specialty_unit_id", flat=True)
         .distinct()
     )
-    student_counts = dict(
-        StudentAcademicRecord.objects.filter(organization=organization, is_active=True, group_id__in=page_ids)
-        .values_list("group_id")
-        .annotate(total=Count("id"))
-    )
+    from .group_roster_union import roster_counts
+
+    student_counts = roster_counts(organization, page_units)
 
     form_labels = {option["value"]: option["label"] for option in education_form_choices()}
     # PERF-1 F-08: qrup `settings` JSON-ları (dil / qəbul ili seçimləri) bir dəfə oxunur — əvvəl 3 dəfə idi.

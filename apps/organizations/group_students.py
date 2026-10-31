@@ -23,6 +23,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET
 
 from .group_actions import _error, _visible_group
+from .group_roster_union import roster_group_ids
 from .groups_registry import (
     can_manage_groups,
     can_move_students,
@@ -107,7 +108,9 @@ def group_students(request, slug, unit_id):
     # `select_related`-də olmayanda hər tələbə üçün ayrıca `orgunit` SELECT-i
     # atılırdı (25 tələbə → 16→39 sorğu). Qrup sətri ilə birlikdə JOIN-lənir.
     records = (
-        StudentAcademicRecord.objects.filter(organization=organization, group=unit, is_active=True)
+        StudentAcademicRecord.objects.filter(
+            organization=organization, group_id__in=roster_group_ids(organization, [unit])[str(unit.pk)], is_active=True
+        )
         .select_related("student", "program", "group")
         .order_by("student__last_name", "student__first_name", "student__username")
     )
