@@ -72,6 +72,8 @@ def _audit(organization, user, batch, values):
 def _preserved(before, outside, enrollment_sha, share_sha, *, new_enrollments=(), new_shares=()):
     if state.academic() != before["academic"]:
         raise state.RepairError("academic_content_changed")
+    if state.component_history() != before["component_references"]:
+        raise state.RepairError("component_history_changed")
     if state.outside() != outside:
         raise state.RepairError("outside_scope_changed")
     if state.digest(state.enrollment_rows(exclude_ids=new_enrollments)) != enrollment_sha:
@@ -238,6 +240,8 @@ def _undo(receipt, *, organization, user, actor, batch, current):
         batch=batch,
     )
     state.validate()
+    if state.component_history() != protected["component_references"]:
+        raise state.RepairError("undo_component_history_changed")
     if state.academic() != protected["academic"] or state.outside() != outside:
         raise state.RepairError("undo_protected_state_changed")
     if (

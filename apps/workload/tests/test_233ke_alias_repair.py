@@ -9,7 +9,10 @@ from django.utils import timezone
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar.journal_group_identity import choices_for_scope, filter_group
 from apps.registrar.models import (
+    AssessmentComponent,
     AssessmentScheme,
+    ComponentScore,
+    ComponentScoreCorrection,
     CourseOffering,
     Curriculum,
     Enrollment,
@@ -565,6 +568,121 @@ class Ke233AliasRepairTests(TestCase):
         target = ScheduleSlot.objects.filter(offering_id=spec.COLLISIONS[0]["target"], is_parked=False).first()
         target.room = "changed"
         target.save(update_fields=["room", "updated_at"])
+        before = state.state()
+        with self.assertRaisesRegex(state.RepairError, "undo_state_changed"):
+            self.run_repair(undo=result["batch"])
+        self.assertEqual(state.state(), before)
+
+    def make_collision_components(self):
+        item = spec.COLLISIONS[0]
+        target = self.offerings[item["target"]]
+        AssessmentScheme.objects.get_or_create(organization=self.org, offering=target)
+        source = AssessmentComponent.objects.create(
+            organization=self.org,
+            offering=self.offerings[item["source"]],
+            name="Legacy konfiqurasiya",
+            kind="generic",
+            max_score=13,
+            order=7,
+            held_on="2026-10-01",
+        )
+        target_component = AssessmentComponent.objects.create(
+            organization=self.org,
+            offering=target,
+            name="Canonical qiymətləndirmə",
+            kind="generic",
+            max_score=50,
+            order=2,
+        )
+        score = ComponentScore.objects.create(
+            organization=self.org,
+            component=target_component,
+            enrollment=Enrollment.objects.get(offering=target, student=self.student),
+            score=27,
+            entered_by=self.admin,
+        )
+        return source, target_component, score
+
+    def test_empty_legacy_components_preserved_with_target_scores_through_apply_repeat_undo(self):
+        self.make_collision_slots()
+        source, target, score = self.make_collision_components()
+        components = state.records(AssessmentComponent.objects.filter(pk__in=[source.pk, target.pk]))
+        schemes = state.records(AssessmentScheme.objects.filter(organization=self.org))
+        scores = state.records(ComponentScore.objects.filter(pk=score.pk))
+        before = state.state()
+        self.run_repair()
+        self.assertEqual(state.state(), before)
+        result = self.apply()
+        self.assertEqual(self.run_repair()["already_applied"], 1)
+        self.assertEqual(state.academic(), before["academic"])
+        self.run_repair(undo=result["batch"], apply=True, expected_baseline=state.digest(state.state()))
+        self.assertEqual(self.run_repair(undo=result["batch"])["already_undone"], 1)
+        self.assertEqual(state.records(AssessmentComponent.objects.filter(pk__in=[source.pk, target.pk])), components)
+        self.assertEqual(state.records(AssessmentScheme.objects.filter(organization=self.org)), schemes)
+        self.assertEqual(state.records(ComponentScore.objects.filter(pk=score.pk)), scores)
+        self.assertEqual(state.academic(), before["academic"])
+
+    def test_legacy_component_score_blocks_entire_batch_including_slots(self):
+        self.make_collision_slots()
+        source, _target, _score = self.make_collision_components()
+        enrollment = Enrollment.objects.create(
+            organization=self.org,
+            student=self.student,
+            offering=source.offering,
+        )
+        ComponentScore.objects.create(
+            organization=self.org,
+            component=source,
+            enrollment=enrollment,
+            score=0,
+            entered_by=self.admin,
+        )
+        before = state.state()
+        with self.assertRaisesRegex(
+            state.RepairError, "collision_component_has_history_registrar_componentscore_component"
+        ):
+            self.apply()
+        self.assertEqual(state.state(), before)
+
+    def test_legacy_component_correction_without_live_score_blocks_retirement(self):
+        source, _target, _score = self.make_collision_components()
+        enrollment = Enrollment.objects.create(
+            organization=self.org,
+            student=self.student,
+            offering=source.offering,
+        )
+        ComponentScoreCorrection.objects.create(
+            organization=self.org,
+            component=source,
+            enrollment=enrollment,
+            old_score=None,
+            new_score=0,
+            reason="other",
+            note="Qorunan tarixçə",
+            document="corrections/evidence.pdf",
+            corrected_by=self.admin,
+            corrected_by_name="Admin",
+        )
+        before = state.state()
+        with self.assertRaisesRegex(
+            state.RepairError, "collision_component_has_history_registrar_componentscorecorrection_component"
+        ):
+            self.apply()
+        self.assertEqual(state.state(), before)
+
+    def test_empty_legacy_component_requires_existing_valid_target_scheme(self):
+        source, target, _score = self.make_collision_components()
+        AssessmentScheme.objects.filter(offering=target.offering).delete()
+        before = state.state()
+        with self.assertRaisesRegex(state.RepairError, "collision_component_target_scheme_missing"):
+            self.apply()
+        self.assertEqual(state.state(), before)
+
+    def test_component_metadata_change_after_repair_blocks_undo(self):
+        source, _target, _score = self.make_collision_components()
+        result = self.apply()
+        source.max_score = 12
+        source.save(update_fields=["max_score", "updated_at"])
         before = state.state()
         with self.assertRaisesRegex(state.RepairError, "undo_state_changed"):
             self.run_repair(undo=result["batch"])

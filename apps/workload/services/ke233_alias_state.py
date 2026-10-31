@@ -80,6 +80,7 @@ def state(*, lock=False):
             model("registrar.CourseOffering").objects.filter(organization_id=spec.ORG, pk__in=offering_ids()), lock=lock
         ),
         "academic": academic(lock=lock),
+        "component_references": component_history(lock=lock),
         "slots": slot_rows(lock=lock),
         "offering_references": fingerprint(references("registrar.CourseOffering", offering_ids(), lock=lock)),
         "source_references": fingerprint(references("organizations.OrgUnit", [spec.SOURCE], lock=lock)),
@@ -188,14 +189,18 @@ def validate(*, after=False):
                 .exists()
             ):
                 raise RepairError("retained_scheme_missing")
+    from . import ke233_alias_components as components
+
     for item in spec.COLLISIONS:
         _offering(offerings[item["source"]], item, group=spec.SOURCE, active=not after)
         _offering(offerings[item["target"]], item, group=spec.TARGET, active=True)
+        components.validate_collision(item)
         source_refs = references("registrar.CourseOffering", [item["source"]])
         # Sillabus və boş qiymətləndirmə sxemi qalır; başqa tarixçə/əlaqə gizlədilmir.
         allowed = {
             "syllabus.Syllabus.offering",
             "registrar.AssessmentScheme.offering",
+            "registrar.AssessmentComponent.offering",
             "registrar.ScheduleSlot.offering",
         }
         if after and any(not slot["is_parked"] for slot in source_refs.get("registrar.ScheduleSlot.offering", [])):
@@ -267,3 +272,9 @@ def slot_rows(*, lock=False):
         model("registrar.ScheduleSlot").all_objects.filter(organization_id=spec.ORG, offering_id__in=offering_ids()),
         lock=lock,
     )
+
+
+def component_history(*, lock=False):
+    from . import ke233_alias_components as components
+
+    return fingerprint(components.references(components.component_ids(), lock=lock))
