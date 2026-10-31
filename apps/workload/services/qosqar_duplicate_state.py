@@ -36,13 +36,13 @@ def records(query):
     return list(query.order_by("pk").values())
 
 
-def graph():
+def graph(offering_ids=None):
     """Reverse academic graph, including grades/corrections and syllabus versions.
 
     Generic traversal includes newly introduced dependent academic records in the
     before/after invariant. It never follows a forward FK into an unrelated course.
     """
-    pending = {"registrar.CourseOffering": {FILLED, EMPTY}}
+    pending = {"registrar.CourseOffering": set(offering_ids or (FILLED, EMPTY))}
     seen, result = {}, {}
     while pending:
         label, ids = pending.popitem()
@@ -122,6 +122,36 @@ def reject_row_history(row):
         raise DuplicateError("duplicate_row_has_prior_amendment")
 
 
+def reject_empty_content(offering_id):
+    for label in ("registrar.Lesson", "syllabus.Syllabus", "syllabus.SyllabusShare", "registrar.ScheduleSlot"):
+        if model(label).objects.filter(offering_id=offering_id).exists():
+            raise DuplicateError("empty_offering_has_content_or_schedule_" + label.lower().replace(".", "_"))
+    metadata = {
+        "registrar.Enrollment",
+        "registrar.AssessmentScheme",
+        "registrar.AssessmentComponent",
+        "registrar.JournalShare",
+    }
+    for relation in model("registrar.CourseOffering")._meta.get_fields(include_hidden=True):
+        child = relation.related_model
+        if not relation.auto_created or relation.concrete or not child or child._meta.label in metadata:
+            continue
+        field = relation.field
+        lookup = field.name if relation.many_to_many else field.attname
+        if child._base_manager.filter(**{lookup: offering_id}).exists():
+            raise DuplicateError("empty_offering_has_dependent_history_" + child._meta.model_name)
+    # Any non-configuration descendants under source enrollments prevent retirement.
+    enrollments = model("registrar.Enrollment").objects.filter(offering_id=offering_id)
+    for relation in model("registrar.Enrollment")._meta.get_fields(include_hidden=True):
+        child = relation.related_model
+        if not relation.auto_created or relation.concrete or not child:
+            continue
+        field = relation.field
+        lookup = field.name if relation.many_to_many else field.attname
+        if child._base_manager.filter(**{f"{lookup}__in": enrollments}).exists():
+            raise DuplicateError("empty_enrollment_has_history_" + child._meta.model_name)
+
+
 def validate(offerings, *, retired=False):
     if set(offerings) != {FILLED, EMPTY}:
         raise DuplicateError("fixed_offerings_missing")
@@ -136,33 +166,7 @@ def validate(offerings, *, retired=False):
             code,
         ) or o.is_active != (oid != EMPTY or not retired):
             raise DuplicateError("fixed_offering_identity_or_activity_changed")
-    for label in ("registrar.Lesson", "syllabus.Syllabus", "syllabus.SyllabusShare", "registrar.ScheduleSlot"):
-        if model(label).objects.filter(offering_id=EMPTY).exists():
-            raise DuplicateError("empty_offering_has_content_or_schedule_" + label.lower().replace(".", "_"))
-    metadata = {
-        "registrar.Enrollment",
-        "registrar.AssessmentScheme",
-        "registrar.AssessmentComponent",
-        "registrar.JournalShare",
-    }
-    for relation in model("registrar.CourseOffering")._meta.get_fields(include_hidden=True):
-        child = relation.related_model
-        if not relation.auto_created or relation.concrete or not child or child._meta.label in metadata:
-            continue
-        field = relation.field
-        lookup = field.name if relation.many_to_many else field.attname
-        if child._base_manager.filter(**{lookup: EMPTY}).exists():
-            raise DuplicateError("empty_offering_has_dependent_history_" + child._meta.model_name)
-    # Any non-configuration descendants under source enrollments prevent retirement.
-    enrollments = model("registrar.Enrollment").objects.filter(offering_id=EMPTY)
-    for relation in model("registrar.Enrollment")._meta.get_fields(include_hidden=True):
-        child = relation.related_model
-        if not relation.auto_created or relation.concrete or not child:
-            continue
-        field = relation.field
-        lookup = field.name if relation.many_to_many else field.attname
-        if child._base_manager.filter(**{f"{lookup}__in": enrollments}).exists():
-            raise DuplicateError("empty_enrollment_has_history_" + child._meta.model_name)
+    reject_empty_content(EMPTY)
     if not model("registrar.Lesson").objects.filter(offering_id=FILLED).exists():
         raise DuplicateError("canonical_historical_journal_missing")
     if (
