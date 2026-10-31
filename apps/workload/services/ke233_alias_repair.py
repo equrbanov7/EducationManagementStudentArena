@@ -14,6 +14,7 @@ from core.audit import log_action
 from core.constants import AuditAction
 
 from ..constants import AmendmentReason, AmendmentTarget
+from . import ke233_alias_schedule as schedule_repair
 from . import ke233_alias_spec as spec
 from . import ke233_alias_state as state
 from .amendments import open_amendment
@@ -78,10 +79,13 @@ def _preserved(before, outside, enrollment_sha, share_sha, *, new_enrollments=()
     if state.digest(state.share_rows(exclude_ids=new_shares)) != share_sha:
         raise state.RepairError("existing_syllabus_share_changed")
     excluded = {"registrar.Enrollment.offering": new_enrollments, "syllabus.SyllabusShare.offering": new_shares}
-    if (
-        state.fingerprint(state.references("registrar.CourseOffering", state.offering_ids(), exclude=excluded))
-        != before["offering_references"]
-    ):
+    if {
+        k: v
+        for k, v in state.fingerprint(
+            state.references("registrar.CourseOffering", state.offering_ids(), exclude=excluded)
+        ).items()
+        if k != "registrar.ScheduleSlot.offering"
+    } != {k: v for k, v in before["offering_references"].items() if k != "registrar.ScheduleSlot.offering"}:
         raise state.RepairError("other_offering_reference_changed")
     if state.fingerprint(state.references("workload.TeachingTaskRow", state.row_ids())) != before["row_references"]:
         raise state.RepairError("row_history_changed")
@@ -149,6 +153,9 @@ def _apply(rows, offerings, *, user, actor, batch):
             else " / ".join(names[uuid.UUID(gid)] for gid in gids)
         )
         _save_groups(rows[item["id"]], gids, text, actor=actor, batch=batch)
+    slot_pairs = schedule_repair.apply(
+        user=user, organization=next(iter(offerings.values())).organization, offerings=offerings, batch=batch
+    )
     for item in spec.COLLISIONS:
         offering = offerings[item["source"]]
         offering.is_active = False
@@ -189,7 +196,7 @@ def _apply(rows, offerings, *, user, actor, batch):
     source.is_active = False
     source.settings = {**source.settings, "canonical_group": spec.TARGET}
     source.save(update_fields=["is_active", "settings", "updated_at"])
-    return created_enrollments, created_shares, report
+    return created_enrollments, created_shares, report, slot_pairs
 
 
 def _undo(receipt, *, organization, user, actor, batch, current):
@@ -223,6 +230,13 @@ def _undo(receipt, *, organization, user, actor, batch, current):
         offering.group_id = uuid.UUID(saved["group_id"]) if saved["group_id"] else None
         offering.is_active = saved["is_active"]
         offering.save(update_fields=["group", "is_active", "updated_at"])
+    schedule_repair.undo(
+        pairs=values.get("slot_pairs", []),
+        before=before.get("slots", []),
+        organization=organization,
+        user=user,
+        batch=batch,
+    )
     state.validate()
     if state.academic() != protected["academic"] or state.outside() != outside:
         raise state.RepairError("undo_protected_state_changed")
@@ -251,6 +265,8 @@ def run(*, organization, user, source_sha256, expected_baseline="", undo="", app
         raise state.RepairError("active_superadmin_required")
     if str(organization.pk) != spec.ORG or source_sha256 != spec.SOURCE_SHA:
         raise state.RepairError("source_or_tenant_mismatch")
+    # ORM-dən yüklənmiş UUID identity-ni canonical cədvəl permission qapıları üçün saxla.
+    organization = state.model("organizations.Organization").objects.get(pk=organization.pk)
     if expected_baseline and not re.fullmatch(r"[0-9a-f]{64}", expected_baseline):
         raise state.RepairError("baseline_invalid")
     if apply and not expected_baseline:
@@ -276,11 +292,14 @@ def run(*, organization, user, source_sha256, expected_baseline="", undo="", app
         outside = state.outside()
         enrollment_sha, share_sha = state.digest(state.enrollment_rows()), state.digest(state.share_rows())
         batch = f"ke233-{timezone.now():%Y%m%d-%H%M%S}-{uuid.uuid4().hex[:4]}"
-        created_enrollments, created_shares, report = _apply(rows, offerings, user=user, actor=actor, batch=batch)
+        created_enrollments, created_shares, report, slot_pairs = _apply(
+            rows, offerings, user=user, actor=actor, batch=batch
+        )
         state.validate(after=True)
         _preserved(
             before, outside, enrollment_sha, share_sha, new_enrollments=created_enrollments, new_shares=created_shares
         )
+        schedule_repair.preserved(before["slots"], slot_pairs)
         after = state.state()
         _audit(
             organization,
@@ -291,11 +310,12 @@ def run(*, organization, user, source_sha256, expected_baseline="", undo="", app
                 "source_sha256": spec.SOURCE_SHA,
                 "before_baseline": current,
                 "after_state_sha256": state.digest(after),
-                "before": {k: before[k] for k in ("groups", "rows", "offerings")},
+                "before": {k: before[k] for k in ("groups", "rows", "offerings", "slots")},
                 "before_enrollments_sha256": enrollment_sha,
                 "before_shares_sha256": share_sha,
                 "new_enrollment_ids": created_enrollments,
                 "new_share_ids": created_shares,
+                "slot_pairs": slot_pairs,
                 "academic_before_after": before["academic"],
                 "outside_before_after": outside,
             },
@@ -308,6 +328,8 @@ def run(*, organization, user, source_sha256, expected_baseline="", undo="", app
             "preserved_historical_offerings": len(state.retained_items()),
             "retired_empty_offerings": len(spec.COLLISIONS),
             "created_shares": len(created_shares),
+            "replaced_schedule_slots": len(slot_pairs),
+            "created_schedule_slots": sum(pair["created"] for pair in slot_pairs),
             **{"enroll_" + k: v for k, v in report.items()},
         }
     if not apply:

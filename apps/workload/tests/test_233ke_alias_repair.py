@@ -14,6 +14,7 @@ from apps.registrar.models import (
     Curriculum,
     Enrollment,
     Lesson,
+    ScheduleSlot,
     StudentAcademicRecord,
     Subject,
 )
@@ -443,3 +444,128 @@ class Ke233AliasRepairTests(TestCase):
         self.assertEqual(selected, spec.TARGET)
         self.assertEqual([str(pk) for pk in found.values_list("id", flat=True)], [str(self.lesson.offering_id)])
         self.assertFalse(found.filter(instructor_id=8349).exists())
+
+    def make_collision_slots(self):
+        layout = (
+            (0, 2, "15:15", "16:45", "all", "seminar", "33"),
+            (0, 2, "16:55", "18:25", "odd", "lecture", "33"),
+            (0, 3, "13:35", "15:05", "all", "lecture", "23"),
+            (1, 2, "13:35", "15:05", "even", "seminar", "55"),
+            (1, 4, "13:35", "15:05", "all", "lecture", "36"),
+            (2, 1, "13:35", "15:05", "all", "lecture", "34"),
+            (2, 3, "16:55", "18:25", "all", "seminar", "36"),
+            (3, 3, "15:15", "16:45", "all", "lecture", "22"),
+            (3, 4, "15:15", "16:45", "odd", "seminar", "44"),
+        )
+        return [
+            ScheduleSlot.objects.create(
+                organization=self.org,
+                offering=self.offerings[spec.COLLISIONS[index]["source"]],
+                weekday=day,
+                start_time=start,
+                end_time=end,
+                week_type=week,
+                kind=kind,
+                room=room,
+                created_by=self.admin,
+            )
+            for index, day, start, end, week, kind, room in layout
+        ]
+
+    def test_nine_live_slots_dry_run_apply_and_undo_keep_original_identities(self):
+        slots = self.make_collision_slots()
+        before = state.state()
+        preview = self.run_repair()
+        self.assertEqual(preview["replaced_schedule_slots"], 9)
+        self.assertEqual(preview["created_schedule_slots"], 9)
+        self.assertEqual(state.state(), before)
+        result = self.apply()
+        self.assertEqual(result["created_schedule_slots"], 9)
+        mapping = {item["source"]: item["target"] for item in spec.COLLISIONS}
+        for slot in slots:
+            slot.refresh_from_db()
+            self.assertTrue(slot.is_parked)
+            self.assertFalse(slot.is_deleted)
+            equivalent = ScheduleSlot.objects.get(
+                organization=self.org,
+                offering_id=mapping[str(slot.offering_id)],
+                weekday=slot.weekday,
+                start_time=slot.start_time,
+                end_time=slot.end_time,
+                week_type=slot.week_type,
+                kind=slot.kind,
+                room=slot.room,
+                instructor_id=slot.instructor_id,
+                is_parked=False,
+            )
+            self.assertNotEqual(slot.pk, equivalent.pk)
+        self.assertEqual(self.run_repair()["already_applied"], 1)
+        undo_baseline = state.digest(state.state())
+        self.run_repair(undo=result["batch"])
+        self.assertEqual(state.digest(state.state()), undo_baseline)
+        self.run_repair(undo=result["batch"], apply=True, expected_baseline=undo_baseline)
+        self.assertEqual(ScheduleSlot.all_objects.filter(organization=self.org).count(), 18)
+        self.assertEqual(ScheduleSlot.objects.filter(organization=self.org, is_parked=False).count(), 9)
+        old = {row["id"]: row for row in before["slots"]}
+        for row in state.slot_rows():
+            if row["id"] in old:
+                self.assertEqual(
+                    {k: v for k, v in row.items() if k != "updated_at"},
+                    {k: v for k, v in old[row["id"]].items() if k != "updated_at"},
+                )
+        self.assertEqual(state.academic(), before["academic"])
+
+    def test_exact_target_slot_reused_and_not_parked_on_undo(self):
+        source = self.make_collision_slots()[0]
+        target = ScheduleSlot.objects.create(
+            organization=self.org,
+            offering=self.offerings[spec.COLLISIONS[0]["target"]],
+            **{
+                field: getattr(source, field)
+                for field in ("weekday", "start_time", "end_time", "week_type", "kind", "room", "instructor_id")
+            },
+        )
+        original = state.records(ScheduleSlot.objects.filter(pk=target.pk))
+        result = self.apply()
+        self.assertEqual(result["created_schedule_slots"], 8)
+        self.assertEqual(state.records(ScheduleSlot.objects.filter(pk=target.pk)), original)
+        self.run_repair(undo=result["batch"], apply=True, expected_baseline=state.digest(state.state()))
+        self.assertEqual(state.records(ScheduleSlot.objects.filter(pk=target.pk)), original)
+
+    def test_nonexact_target_conflict_rolls_back_every_slot_and_workload_write(self):
+        source = self.make_collision_slots()[0]
+        ScheduleSlot.objects.create(
+            organization=self.org,
+            offering=self.offerings[spec.COLLISIONS[0]["target"]],
+            weekday=source.weekday,
+            start_time=source.start_time,
+            end_time=source.end_time,
+            week_type=source.week_type,
+            kind=source.kind,
+            room="different",
+        )
+        before = state.state()
+        from apps.registrar.public import schedule
+
+        with self.assertRaises(schedule.ScheduleConflict):
+            self.apply()
+        self.assertEqual(state.state(), before)
+
+    def test_slot_repair_then_syllabus_failure_rolls_back_every_write(self):
+        self.make_collision_slots()
+        before = state.state()
+        with patch.object(repair, "link_legacy_share", return_value="other_teacher"):
+            with self.assertRaisesRegex(state.RepairError, "syllabus_link_other_teacher"):
+                self.apply()
+        self.assertEqual(state.state(), before)
+
+    def test_undo_after_target_schedule_edit_rejects_without_writes(self):
+        self.make_collision_slots()
+        result = self.apply()
+        target = ScheduleSlot.objects.filter(offering_id=spec.COLLISIONS[0]["target"], is_parked=False).first()
+        target.room = "changed"
+        target.save(update_fields=["room", "updated_at"])
+        before = state.state()
+        with self.assertRaisesRegex(state.RepairError, "undo_state_changed"):
+            self.run_repair(undo=result["batch"])
+        self.assertEqual(state.state(), before)

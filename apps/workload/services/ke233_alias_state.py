@@ -47,7 +47,7 @@ def academic(*, lock=False):
 
     offerings = list(model("registrar.CourseOffering").objects.filter(organization_id=spec.ORG, pk__in=offering_ids()))
     result = academic_fingerprint(organization_id=spec.ORG, offerings=offerings, lock=lock)
-    for key in ("offering", "enrollment", "syllabus_share"):
+    for key in ("offering", "enrollment", "syllabus_share", "scheduleslot"):
         result.pop(key)
     return result
 
@@ -80,6 +80,7 @@ def state(*, lock=False):
             model("registrar.CourseOffering").objects.filter(organization_id=spec.ORG, pk__in=offering_ids()), lock=lock
         ),
         "academic": academic(lock=lock),
+        "slots": slot_rows(lock=lock),
         "offering_references": fingerprint(references("registrar.CourseOffering", offering_ids(), lock=lock)),
         "source_references": fingerprint(references("organizations.OrgUnit", [spec.SOURCE], lock=lock)),
         "row_references": fingerprint(references("workload.TeachingTaskRow", row_ids(), lock=lock)),
@@ -192,7 +193,13 @@ def validate(*, after=False):
         _offering(offerings[item["target"]], item, group=spec.TARGET, active=True)
         source_refs = references("registrar.CourseOffering", [item["source"]])
         # Sillabus və boş qiymətləndirmə sxemi qalır; başqa tarixçə/əlaqə gizlədilmir.
-        allowed = {"syllabus.Syllabus.offering", "registrar.AssessmentScheme.offering"}
+        allowed = {
+            "syllabus.Syllabus.offering",
+            "registrar.AssessmentScheme.offering",
+            "registrar.ScheduleSlot.offering",
+        }
+        if after and any(not slot["is_parked"] for slot in source_refs.get("registrar.ScheduleSlot.offering", [])):
+            raise RepairError("collision_source_slot_still_active")
         for key, values in source_refs.items():
             if values and key not in allowed:
                 raise RepairError("collision_source_has_content_" + key.replace(".", "_").lower())
@@ -227,6 +234,13 @@ def outside():
             )
         ),
         "memberships": digest(records(model("organizations.Membership").objects.filter(organization_id=spec.ORG))),
+        "slots": digest(
+            records(
+                model("registrar.ScheduleSlot")
+                .all_objects.filter(organization_id=spec.ORG)
+                .exclude(offering_id__in=offering_ids())
+            )
+        ),
     }
 
 
@@ -245,4 +259,11 @@ def share_rows(*, exclude_ids=()):
             Q(offering_id__in=offering_ids()) | Q(syllabus_id=spec.SHARE_SYLLABUS), organization_id=spec.ORG
         )
         .exclude(pk__in=exclude_ids)
+    )
+
+
+def slot_rows(*, lock=False):
+    return records(
+        model("registrar.ScheduleSlot").all_objects.filter(organization_id=spec.ORG, offering_id__in=offering_ids()),
+        lock=lock,
     )

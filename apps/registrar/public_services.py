@@ -34,6 +34,7 @@ from . import retake_chance  # noqa: F401 — «İmtahan şansı ver» rəsmi qe
 from . import retake_fees  # noqa: F401 — 25% təxmini məbləği + təhsil haqqı cədvəli (2026-10-19)
 from . import retake_window  # noqa: F401 — 25% müraciət pəncərəsi (İmtahan mərkəzi, 2026-10-19)
 from . import schedule  # noqa: F401
+from . import schedule_alias  # noqa: F401
 from . import schedule_conflicts  # noqa: F401
 from . import schedule_docx_match  # noqa: F401 — cədvəl → tapşırıq sətri (workload, 2026-10-15)
 from . import schedule_docx_parse  # noqa: F401
@@ -149,6 +150,7 @@ __all__ = [
     "retake_fees",
     "retake_window",
     "schedule",
+    "schedule_alias",
     "schedule_conflicts",
     "schedule_docx_match",
     "schedule_docx_parse",
