@@ -25,6 +25,10 @@ snapshot-ı saxlayın:
 python manage.py repair_empty_132f_alias --org qku --actor USER > before.json
 ```
 
+CI/workflow logları üçün `--summary` əlavə edin: snapshot çıxarılmır, yalnız
+`empty132f: mode=... baseline=... blocked=0|1 applied=0|1 receipt=none|UUID` yazılır.
+Tam snapshot yalnız ayrıca private faylda saxlanılmalıdır.
+
 `blocked=false` olmalıdır. Sonra dry-run-dakı exact `baseline` istifadə edilir:
 
 ```sh

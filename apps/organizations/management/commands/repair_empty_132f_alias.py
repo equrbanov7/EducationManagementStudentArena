@@ -21,6 +21,7 @@ class Command(BaseCommand):
         parser.add_argument("--expected-baseline", default="")
         parser.add_argument("--undo", default="")
         parser.add_argument("--apply", action="store_true")
+        parser.add_argument("--summary", action="store_true")
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -41,4 +42,12 @@ class Command(BaseCommand):
             raise CommandError(str(exc)) from exc
         finally:
             reset_rls_context()
-        self.stdout.write(json.dumps(result, ensure_ascii=False, sort_keys=True))
+        if options["summary"]:
+            mode = "apply" if options["apply"] else "dry_run"
+            receipt = result.get("batch", "none")
+            self.stdout.write(
+                f"empty132f: mode={mode} baseline={result['baseline']} "
+                f"blocked={int(result['blocked'])} applied={int(options['apply'])} receipt={receipt}"
+            )
+        else:
+            self.stdout.write(json.dumps(result, ensure_ascii=False, sort_keys=True))

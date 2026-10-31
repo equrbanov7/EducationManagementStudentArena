@@ -1,9 +1,11 @@
 """Exact boş alias: historical data, gizli M2M, baseline və undo qorunması."""
 
+from io import StringIO
 from unittest.mock import patch
 
 from django.apps import apps
 from django.contrib.auth import get_user_model
+from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
@@ -73,6 +75,16 @@ class EmptyGroupAliasTests(TestCase):
         self.assertEqual(result["snapshot"]["source"]["id"], repair.SOURCE)
         self.source.refresh_from_db()
         self.assertTrue(self.source.is_active)
+
+    def test_command_summary_contains_only_safe_tokens(self):
+        output = StringIO()
+        call_command("repair_empty_132f_alias", actor=self.admin.username, summary=True, stdout=output)
+        self.assertRegex(
+            output.getvalue(),
+            r"^empty132f: mode=dry_run baseline=[0-9a-f]{64} blocked=0 applied=0 receipt=none\n$",
+        )
+        self.assertNotIn("snapshot", output.getvalue())
+        self.assertNotIn(repair.SOURCE, output.getvalue())
 
     def test_child_reference_blocks_and_is_reported(self):
         child = OrgUnit.objects.create(
