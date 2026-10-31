@@ -1,11 +1,11 @@
 """The evidence slice excludes unrelated offerings and tenant-invalid relations."""
 
-from datetime import date
+from datetime import date, time
 from unittest.mock import patch
 
 from django.test import TransactionTestCase
 
-from apps.registrar.models import CourseOffering, Enrollment, Lesson, LessonMark
+from apps.registrar.models import CourseOffering, Enrollment, Lesson, LessonMark, ScheduleSlot
 from apps.workload.services.scoped_snapshot.request_content import MR127_OFFERINGS, OFFERINGS, collect_request_content
 from apps.workload.tests import test_scoped_snapshot as fixtures
 from apps.workload.tests.factories import activate_member
@@ -57,3 +57,16 @@ class RequestContentTests(TransactionTestCase):
         self.assertEqual(len(MR127_OFFERINGS), 5)
         self.assertEqual(len(set(OFFERINGS)), len(OFFERINGS))
         self.assertTrue(set(MR127_OFFERINGS) <= set(OFFERINGS))
+
+    def test_schedule_evidence_keeps_parked_rows_and_all_fields_in_exact_scope(self):
+        target = self.opening()
+        other = self.opening(group=None)
+        args = dict(organization=self.org, weekday=1, start_time=time(10), end_time=time(11), kind="lecture")
+        slot = ScheduleSlot.objects.create(offering=target, is_parked=True, **args)
+        ScheduleSlot.objects.create(offering=other, **args)
+        with patch("apps.workload.services.scoped_snapshot.request_content.OFFERINGS", (str(target.pk),)):
+            rows = collect_request_content()["request_content_slots"]
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["id"], slot.pk)
+        self.assertTrue(rows[0]["is_parked"])
+        self.assertEqual(set(rows[0]), {f.attname for f in ScheduleSlot._meta.concrete_fields})

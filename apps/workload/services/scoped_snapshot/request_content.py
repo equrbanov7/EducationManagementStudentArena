@@ -95,7 +95,11 @@ def collect_request_content():
         enrollment__organization_id=ORG,
         enrollment__offering_id__in=ids,
     )
+    slots = apps.get_model("registrar", "ScheduleSlot")._base_manager.filter(
+        organization_id=ORG, offering__organization_id=ORG, offering_id__in=ids
+    )
     return {
+        "request_content_slots": list(slots.order_by("id").values()),
         "request_content_offerings": list(
             offerings.order_by("id").values("id", "subject_id", "group_id", "period_id", "instructor_id", "is_active")
         ),
