@@ -37,6 +37,7 @@ class SectorRepairTest(GroupTransferTest):
                     defaults={"organization": self.org, "institutional_identifier": old_id, "patronymic": patronymic},
                 )
             for key, value in {
+                "PERIOD": str(self.period.pk),
                 "ORG": str(self.org.pk),
                 "SOURCE": str(self.group1.pk),
                 "TARGET": str(self.group2.pk),

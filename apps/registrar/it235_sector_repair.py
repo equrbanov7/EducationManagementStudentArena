@@ -12,6 +12,7 @@ from .transfer import transfer_student_group
 ORG = "526cfa63-4f80-4bba-a7a7-61c8fbb3d918"
 SOURCE = "2b471dec-7783-49f1-b17e-cb9acae77f31"
 TARGET = "eee00e67-ca42-48b9-8217-dd03027855aa"
+PERIOD = "a4f88744-8d49-4772-84ef-c28a96c3b372"
 PEOPLE = {6794: ("9049", "Ramin"), 6831: ("9086", "Anar")}
 
 
@@ -32,7 +33,7 @@ def run(*, organization, user, apply=False, expected_baseline=""):
     target = Group.objects.get(pk=TARGET, organization=organization, is_active=True)
     if (target.settings or {}).get("sector") != "en":
         raise RepairError("target_sector_changed")
-    period = organization.academic_periods.get(is_current=True, is_active=True)
+    period = organization.academic_periods.get(pk=PERIOD, is_current=True, is_active=True)
     records = list(
         StudentAcademicRecord.objects.select_for_update()
         .filter(organization=organization, student_id__in=PEOPLE, is_active=True, status="enrolled")

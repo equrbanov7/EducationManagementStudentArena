@@ -1,7 +1,9 @@
 """Exact source-evidenced IT235 sector repair."""
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
 from django.core.management.base import BaseCommand, CommandError
+from django.db import DatabaseError
 
 from core.rls import apply_rls_request_context
 from core.rls_pooling import rls_worker_atomic
@@ -33,6 +35,8 @@ class Command(BaseCommand):
             )
         except RepairError as exc:
             raise CommandError(str(exc)) from exc
+        except (ObjectDoesNotExist, MultipleObjectsReturned, ValidationError, DatabaseError) as exc:
+            raise CommandError("it_sector_" + type(exc).__name__.lower()) from None
         mode = "apply" if options["apply"] else "dry_run"
         fields = [f"mode={mode}"]
         for key in ("baseline", "pending", "already_present", "applied"):
