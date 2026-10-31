@@ -2,6 +2,7 @@
 
 from . import reviewed_batch_electives as electives
 from . import reviewed_batch_extensions as extensions
+from . import reviewed_batch_objections as objections
 from .repair_fingerprints import academic_database_fingerprint
 from .reviewed_batch_manifest import ACTIVITIES, ORG
 from .reviewed_batch_state import offerings
@@ -98,9 +99,12 @@ def preserved(plan, before, after, details):
                 | ({"teacher_id"} if handover_item else set()),
                 "existing_assignment_identity_or_note_changed",
             )
+    detached_objections = objections.preserved(plan, before, after, details)
     for name, previous in before["history"].items():
         current_history = {record["id"]: record for record in after["history"][name]}
         for record in previous:
+            if name == "LoadObjection" and record["id"] in detached_objections:
+                continue
             if record != current_history.get(record["id"]):
                 raise RepairError("existing_workload_history_changed_" + name.lower())
         if name != "WorkloadAmendment" and len(current_history) != len(previous):

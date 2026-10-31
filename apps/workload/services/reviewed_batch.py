@@ -13,6 +13,7 @@ from . import reviewed_batch_actions as actions
 from . import reviewed_batch_electives as electives
 from . import reviewed_batch_extensions as extensions
 from . import reviewed_batch_guards as guards
+from . import reviewed_batch_objections as objections
 from . import reviewed_batch_state as state
 from . import reviewed_batch_undo_guards as undo_guards
 from .reviewed_batch_manifest import ORG, RESOURCE
@@ -60,6 +61,7 @@ def _undo(plan, *, receipt, current, actor, user, batch):
     new.delete()
     electives.undo(details)
     actions.undo_rows(plan, before=values["before"], details=details, actor=actor, batch=batch)
+    objections.restore(plan, values["before"])
     for saved in values["before"]["offerings"]:
         offering = model("registrar.CourseOffering").objects.get(organization_id=ORG, pk=saved["id"])
         from .reviewed_named_transitions import owner_targets
@@ -150,6 +152,7 @@ def run(*, plan, organization, user, expected_baseline="", undo="", apply=False)
         )
         extensions.forward_handovers(plan, organization=organization, user=user, batch=batch, details=extra)
         details = {**actions.forward(plan, tasks=tasks, rows=rows, actor=actor, user=user, batch=batch), **extra}
+        details["detached_objection_provenance"] = objections.provenance(plan, before)
         guards.verify_after(plan)
         after = state.snapshot(plan)
         guards.preserved(plan, before, after, details)
