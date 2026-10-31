@@ -58,6 +58,10 @@ OFFERINGS += (
 )
 
 
+# Exact cloud-computing joint class: teacher8425, sibling groups only.
+OFFERINGS += ("81f0635b-63bc-43cb-9ceb-7af91febdc42", "f79fc953-a8c7-4342-a6b6-a8be70cf2784")
+
+
 def collect_request_content():
     """Called only inside the parent repeatable-read read-only RLS transaction.
 
@@ -85,7 +89,17 @@ def collect_request_content():
         ),
         "request_content_lessons": list(
             lessons.order_by("id").values(
-                "id", "offering_id", "date", "start_time", "end_time", "kind", "hours", "instructor_id"
+                "id",
+                "offering_id",
+                "date",
+                "start_time",
+                "end_time",
+                "kind",
+                "hours",
+                "instructor_id",
+                "topic",
+                "is_legacy_synthesised",
+                "created_by_id",
             )
         ),
         "request_content_marks": list(
