@@ -25,7 +25,17 @@ def collect_request_syllabus():
         .objects.filter(organization_id=ORG)
         .filter(Q(pk__in=SYLLABI) | Q(offering__in=offerings) | Q(pk__in=shares.values("syllabus_id")))
     )
+    versions = syllabi.values("current_version_id")
+    sections = apps.get_model("syllabus.SyllabusSection").objects.filter(organization_id=ORG, version_id__in=versions)
+    topic_counts = {}
+    for section in sections.filter(section_id="week"):
+        topic_counts[str(section.version_id)] = sum(
+            bool(str(row.get("topic") or "").strip())
+            for row in (section.data or {}).get("rows", [])
+            if isinstance(row, dict)
+        )
     return {
+        "request_syllabus_topic_counts": topic_counts,
         "request_syllabus_offerings": list(
             offerings.order_by("pk").values("id", "subject_id", "period_id", "instructor_id", "group_id", "is_active")
         ),
