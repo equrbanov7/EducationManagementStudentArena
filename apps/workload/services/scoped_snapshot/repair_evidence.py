@@ -12,7 +12,9 @@ COLLISIONS = (
 )
 
 
-def collect_repair_evidence():
+def collect_repair_evidence(*, organization_id=ORG):
+    if str(organization_id) != str(ORG):
+        return {}
     Slot = apps.get_model("registrar", "ScheduleSlot")
     Profile = apps.get_model("accounts", "UserProfile")
     Record = apps.get_model("registrar", "StudentAcademicRecord")
