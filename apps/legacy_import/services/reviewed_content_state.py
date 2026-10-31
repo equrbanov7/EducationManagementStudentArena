@@ -192,6 +192,7 @@ class CurrentState:
 
     def fingerprint(self):
         teacher_ids = {s["teacher_id"] for s in self.selected.values()}
+        relevant_users = teacher_ids | {int(pk) for ids in self.student_maps.values() for pk in ids}
         result = {
             "academic": journal_academic_fingerprint(organization_id=ORG, offerings=self.offerings),
             "groups": queryset_database_fingerprint(
@@ -216,7 +217,16 @@ class CurrentState:
             ),
         }
         for label in ("organizations.Membership", "accounts.UserProfile", "registrar.StudentAcademicRecord"):
-            result[label] = queryset_database_fingerprint(model(label).objects.filter(organization_id=ORG))
+            result[label] = queryset_database_fingerprint(
+                model(label).objects.filter(
+                    organization_id=ORG,
+                    **{
+                        (
+                            "student_id__in" if label == "registrar.StudentAcademicRecord" else "user_id__in"
+                        ): relevant_users
+                    },
+                )
+            )
         return result
 
 
