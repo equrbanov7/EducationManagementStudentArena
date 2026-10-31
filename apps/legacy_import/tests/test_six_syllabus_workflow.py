@@ -19,9 +19,8 @@ class SixWorkloadWorkflowTests(SimpleTestCase):
         self.assertIn("asset=six-workload-syllabi.json.enc", asset_helper)
         self.assertIn("!startsWith(github.event.inputs.batch, 'sixsyl-')", text)
         self.assertIn("/tmp/six_workload_syllabi_*.json", text)
-        block = re.search(
-            r"            recover_six_workload_syllabi\)\n(              actor=.*?)              ;;", text, re.S
-        ).group(1)
+        self.assertIn("source scripts/ops/six_syllabus_args.sh", text)
+        block = (WORKFLOW.parents[2] / "scripts/ops/six_syllabus_args.sh").read_text()
         script = (
             "set -euo pipefail\nmatch() { printf '%s' \"$1\" | grep -Eq -- \"$2\"; }\nsuperadmin_actor() { printf 'fixture-actor'; }\n"
             + block
