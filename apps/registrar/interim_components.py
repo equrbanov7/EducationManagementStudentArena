@@ -177,6 +177,10 @@ def score_options(offering) -> list[int]:
     (0–30; endirmə bloklanıbsa saxlanılmış tavan) — seçim yazılmış balı həmişə əhatə etməlidir (yoxsa select
     boş görünər və saxlama balı silərdi). Tavan ``ensure_kollokviums``-un memo-sundan, yoxdursa bir sorğu."""
     spec = interim_assessment.spec_for_offering(offering)
+    from .language_level_grading import MIDTERM_MAX, is_level
+
+    if is_level(offering):
+        return list(range(MIDTERM_MAX + 1))
     top = spec.max_score
     if spec.is_midterm:
         top = getattr(offering, _PRIMARY_MAX_ATTR, None)
@@ -235,6 +239,9 @@ def get_kollokvium_grid(offering):
         score_map[(cs.enrollment_id, cs.component_id)] = cs.score
         if cs.exam_source:
             auto_map[(cs.enrollment_id, cs.component_id)] = cs.exam_source
+    from .language_level_grading import MIDTERM_MAX, is_level
+
+    level_policy = is_level(offering)
     rows = [
         {
             "enrollment": e,
@@ -243,7 +250,10 @@ def get_kollokvium_grid(offering):
                 {
                     "component": c,
                     "score": score_map.get((e.id, c.id)),
-                    "editable": open_by_comp[c.id] and (e.id, c.id) not in auto_map,
+                    "editable": open_by_comp[c.id]
+                    and (e.id, c.id) not in auto_map
+                    and not (level_policy and (score_map.get((e.id, c.id)) or 0) > MIDTERM_MAX),
+                    "level_raw_over_cap": level_policy and (score_map.get((e.id, c.id)) or 0) > MIDTERM_MAX,
                     "auto": auto_map.get((e.id, c.id)),
                 }
                 for c in components

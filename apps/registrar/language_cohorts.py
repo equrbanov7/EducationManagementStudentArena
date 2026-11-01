@@ -164,6 +164,7 @@ def create_cohort(
 
     configure(
         offering=offering,
+        actor=actor,
         source_offering=source_offering,
         entry_score_max=entry_score_max,
         pass_threshold=pass_threshold,

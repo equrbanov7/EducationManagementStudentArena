@@ -5,6 +5,7 @@
 <main class="lc-page">
   <a href="{% url 'registrar:language_cohorts' %}">{% trans "← Səviyyə qrupları" context "registrar.language_cohort" %}</a>
   <h1>{{ cohort.name }} · {{ cohort.level|title }}</h1>
+  <p>{% trans "Səviyyə qaydası: davamiyyət 10, seminar 10, midterm 10, imtahan 70 bal. Qayıb limiti 10 q/b-dir; 11 q/b olduqda imtahana buraxılmır." context "registrar.language_cohort" %}</p>
   <form method="get" action="{% url 'registrar:language_cohorts' %}" class="lc-search"><label>{% trans "Səviyyə qrupunu seç" context "registrar.language_cohort" %}
     <select name="cohort">{% for option in level_choices %}<option value="{{ option.pk }}"{% if option.pk == cohort.pk %} selected{% endif %}>{{ option.level|title }} · {{ option.name }}</option>{% endfor %}</select>
   </label><button type="submit">{% trans "Qrupu aç" context "registrar.language_cohort" %}</button></form>

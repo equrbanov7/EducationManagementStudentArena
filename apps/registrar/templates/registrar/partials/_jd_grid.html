@@ -130,7 +130,7 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                                 {% endif %}
                             </th>
                             {% endfor %}
-                            <th class="jd2-th-qayib">{% trans "QAYIB" context "registrar.journal" %}<div class="jd2-th-sub" title="{% trans 'Dərs saatına görə icazə verilən maksimum q/b (25% həddi)' context 'registrar.journal' %}">{% trans "limit" context "registrar.journal" %} {{ journal.limit_qb }} q/b</div></th>
+                            <th class="jd2-th-qayib">{% trans "QAYIB" context "registrar.journal" %}<div class="jd2-th-sub" title="{% if journal.level_policy %}{% trans 'Qayıb limiti 10 q/b-dir; 11 q/b imtahana buraxılmır.' context 'registrar.language_cohort' %}{% else %}{% trans 'Dərs saatına görə icazə verilən maksimum q/b (25% həddi)' context 'registrar.journal' %}{% endif %}">{% trans "limit" context "registrar.journal" %} {{ journal.limit_qb }} q/b</div></th>
                         </tr>
                     </thead>
                     {% comment %}`data-jgs-tbody` — «alt qrupdan əlavə» əməlindən sonra

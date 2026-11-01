@@ -5,6 +5,7 @@
 <main class="lc-page">
   <a href="{% url 'registrar:journal_list' %}">{% trans "← Elektron jurnal" context "registrar.language_cohort" %}</a>
   <h1>{% trans "Xarici dil səviyyə qrupları" context "registrar.language_cohort" %}</h1>
+  <p>{% trans "Səviyyə qaydası: davamiyyət 10, seminar 10, midterm 10, imtahan 70 bal. Qayıb limiti 10 q/b-dir; 11 q/b olduqda imtahana buraxılmır." context "registrar.language_cohort" %}</p>
   <p>{% trans "Səviyyə qrupu müxtəlif əsas qruplardan tələbələri bir jurnalda birləşdirir. Tələbələrin akademik qrupları dəyişmir." context "registrar.language_cohort" %}</p>
   {% include "accounts/profile/_messages.html" %}
   {% if form %}<details class="lc-card"><summary>{% trans "Yeni səviyyə qrupu yarat" context "registrar.language_cohort" %}</summary>

@@ -112,8 +112,8 @@ def _kollokvium_spec() -> InterimSpec:
     )
 
 
-def _midterm_spec() -> InterimSpec:
-    max_score = midterm_max()
+def _midterm_spec(max_score=None) -> InterimSpec:
+    max_score = midterm_max() if max_score is None else max_score
     return InterimSpec(
         mode=MODE_MIDTERM,
         count=MIDTERM_COUNT,
@@ -146,6 +146,10 @@ def spec_for_period(period, organization=None) -> InterimSpec:
 
 
 def spec_for_offering(offering) -> InterimSpec:
+    from .language_level_grading import MIDTERM_MAX, is_level
+
+    if is_level(offering):
+        return _midterm_spec(MIDTERM_MAX)
     return spec_for_mode(mode_for_offering(offering))
 
 

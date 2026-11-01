@@ -15,7 +15,7 @@ from django.db import transaction
 from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 
-from apps.registrar import entry_standard, grade_audit
+from apps.registrar import entry_standard, grade_audit, language_level_grading
 from apps.registrar import selfwork_points as selfwork_points_rules
 from apps.registrar.models import (
     AssessmentComponent,
@@ -54,6 +54,8 @@ def entry_score_for(
     selfwork_points=None,
     selfwork_done=None,
     rule=None,
+    absence_count=None,
+    absence_hours=None,
 ):
     """Canonical semester entry score, capped at ``cap`` (≈ entry_score_max).
 
@@ -88,6 +90,17 @@ def entry_score_for(
     uyğunluq üçün saxlanılır və ``selfwork_points`` kimi (BAL) qəbul olunur:
     köhnə çeklist datasında say == bal olduğu üçün köhnə çağıranların rəqəmi
     dəyişmir. Yeni kod ``selfwork_points`` işlətməlidir."""
+    if language_level_grading.is_level(enrollment.offering):
+        parts = language_level_grading.parts_for(
+            enrollment,
+            components=components,
+            component_scores=component_scores,
+            marks=marks,
+            rule=rule,
+            absence_count=absence_count,
+            absence_hours=absence_hours,
+        )
+        return parts.total
     cap = Decimal(cap)
     if components is None:
         components = list(AssessmentComponent.objects.filter(offering=enrollment.offering))
@@ -162,10 +175,23 @@ def entry_parts_for(
     selfwork_points=None,
     selfwork_done=None,
     rule=None,
+    absence_count=None,
+    absence_hours=None,
 ):
     """Midterm rejimində giriş balının dörd hissəsi (:class:`entry_standard.EntryParts`);
     keçmiş (kollokvium) dövrdə ``None``.  Arqumentlər :func:`entry_score_for` ilə eynidir və
     ``parts.total == entry_score_for(...)`` — UI bölgüsü ilə kanonik bal ayrıla bilməz."""
+    if language_level_grading.is_level(enrollment.offering):
+        parts = language_level_grading.parts_for(
+            enrollment,
+            components=components,
+            component_scores=component_scores,
+            marks=marks,
+            rule=rule,
+            absence_count=absence_count,
+            absence_hours=absence_hours,
+        )
+        return parts
     if rule is None:
         rule = entry_standard.rule_for(enrollment)
     if not rule.midterm:
@@ -410,6 +436,15 @@ def save_component_scores(
                 continue  # komponent balı da 2 saatdan sonra toxunulmazdır (kollokvium istisna — pəncərə)
             old_score = existing.score if existing else None
             raw = entry.get("score")
+            policy_input = language_level_grading.component_input_state(
+                component, offering, raw, existing, require_all=require_all
+            )
+            if policy_input == "unchanged":
+                processed += 1
+                continue
+            if policy_input == "rejected":
+                rejected += 1
+                continue
             if raw in (None, ""):
                 if existing is not None:
                     if target in fresh:

@@ -324,7 +324,9 @@ def apply_component_correction(*, component, enrollment, new_score, reason, note
     if new_score in (None, ""):
         new_val = None
     else:
-        new_val = max(Decimal("0"), min(_to_decimal(new_score), Decimal(component.max_score)))
+        from .language_level_grading import component_cap
+
+        new_val = max(Decimal("0"), min(_to_decimal(new_score), Decimal(component_cap(component))))
     if old_score == new_val:
         raise ValidationError(pgettext("registrar.correction", "Nothing changed — adjust a field before saving."))
     with journal_unlock():  # ComponentScore-da da 2 saat DB trigger var — rəsmi yolda keçilir.

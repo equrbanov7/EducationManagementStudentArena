@@ -10,7 +10,7 @@ from django.db import IntegrityError
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_http_methods
 
 from . import guest_roster, language_cohort_placement, language_cohort_query, language_cohorts
@@ -58,17 +58,34 @@ class CohortForm(forms.Form):
 
     def __init__(self, *args, actor, organization, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["entry_score_max"].initial = 30
+        self.fields["entry_score_max"].disabled = True
+        self.fields["pass_threshold"].initial = 51
+        self.fields["min_final_exam_score"].initial = 17
         self.fields["department"].queryset = language_cohorts.department_choices(actor, organization)
         self.fields["period"].queryset = apps.get_model("organizations", "AcademicPeriod").objects.filter(
             organization=organization, is_active=True, is_current=True
         )
         subjects = Subject.objects.filter(organization=organization, is_active=True).order_by("name")
         self.fields["subject"].queryset = subjects.filter(pk__in=[row.pk for row in subjects if level_of(row.name)])
+        from types import SimpleNamespace
+
+        from .journal_access import can_edit_journal, can_observe_journal
+        from .journal_list_scope import journal_list_base
         from .models import CourseOffering
 
+        source_scope, _broad = journal_list_base(actor, SimpleNamespace(organization=organization))
+        source_ids = [
+            source.pk
+            for source in source_scope.filter(assessment_scheme__isnull=False).select_related(
+                "organization", "group", "period", "subject", "instructor"
+            )
+            if can_edit_journal(actor, source) or can_observe_journal(actor, source)
+        ]
         self.fields["source_offering"].queryset = (
             CourseOffering.objects.filter(
                 organization=organization,
+                pk__in=source_ids,
                 is_active=True,
                 period__is_current=True,
                 period__is_active=True,

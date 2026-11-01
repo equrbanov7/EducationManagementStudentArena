@@ -338,6 +338,8 @@ def save_criterion_scores(*, component, entries, by_user=None):
         touched.add(enrollment)
         written += 1
 
+    from .language_level_grading import component_cap
+
     # Toxunulan tələbələrin komponent balını meyar cəmindən yenilə (audit daxil).
     score_entries = []
     for enrollment in touched:
@@ -348,7 +350,7 @@ def save_criterion_scores(*, component, entries, by_user=None):
             {
                 "component_id": str(component.id),
                 "enrollment_id": str(enrollment.id),
-                "score": "" if total is None else str(min(total, Decimal(component.max_score))),
+                "score": "" if total is None else str(min(total, Decimal(component_cap(component)))),
             }
         )
     if score_entries:

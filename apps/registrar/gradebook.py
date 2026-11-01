@@ -74,10 +74,17 @@ def ensure_assessment_scheme(*, offering):
     qoyulubsa təkrar ``get_or_create`` getmir — jurnal səhifəsi bunu 4 dəfə
     çağırırdı (journal_is_locked, roster_block_reason, get_offering_journal…)."""
     memo = getattr(offering, _SCHEME_MEMO_ATTR, None)
+    from .language_level_grading import normalized_scheme
+
     if memo is not None:
-        return memo
-    scheme, _created = AssessmentScheme.objects.get_or_create(organization=offering.organization, offering=offering)
-    return scheme
+        return normalized_scheme(memo, offering=offering)
+    scheme, _created = AssessmentScheme.objects.select_related("offering__subject").get_or_create(
+        organization=offering.organization, offering=offering
+    )
+    related = scheme._state.fields_cache.get("offering")
+    if related is not None and "subject" in related._state.fields_cache:
+        offering._state.fields_cache["subject"] = related._state.fields_cache["subject"]
+    return normalized_scheme(scheme, offering=offering)
 
 
 def preload_assessment_scheme(offering):
@@ -179,6 +186,9 @@ def get_offering_journal(
     göstərilən sütun/sətirləri daraldır; qayıb, giriş balı, buraxılış bütün dərs/sətirlər üzrə qalır.
     """
     scheme = ensure_assessment_scheme(offering=offering)
+    from . import language_level_grading
+
+    level_policy = language_level_grading.is_level(offering)
     all_lessons = list(offering.lessons.order_by("date", "created_at"))
     # Mövzusuz, sillabus sətrinə bağlı dərsin başlığı sətrin mövzusudur (``display_topic``, 2026-10-25).
     from apps.registrar.journal_topics import attach_syllabus_topics
@@ -215,7 +225,8 @@ def get_offering_journal(
         student_ids=[e.student_id for e in enrollments if e.source_group_id],
     )
     # Birləşmə ilə gələn əvvəlki jurnal işi (yalnız qonaq sətirlər üçün, tək sorğu).
-    carry_map = guest_merge.carry_over_map(guest_ids)
+    carry_ids = [e.pk for e in enrollments] if level_policy else guest_ids
+    carry_map = guest_merge.carry_over_map(carry_ids)
     guest_docs = guest_roster.guest_document_map(guest_ids)  # alt-qrup sənədi (təqdimat)
     # «Alt qrup» çipi yalnız sənədli yerləşdirməyə (sahib 2026-10-25: köçürmənin sənədsiz sətirlərini göstərmə).
     from .subgroup_evidence import documented_subgroup_ids
@@ -324,7 +335,10 @@ def get_offering_journal(
         credit_hours = absence_credits.get(enrollment.pk, 0)
         absence_hours = effective_hours(absence_hours, credit_hours)
         # Canonical entry score (component-weighted when defined, else lesson sum).
-        entry_score = entry_score_for(enrollment, scheme.entry_score_max, **entry_batch.entry_kwargs(enrollment))
+        entry_kwargs = entry_batch.entry_kwargs(enrollment)
+        if level_policy:
+            entry_kwargs.update(absence_count=absence_count, absence_hours=absence_hours)
+        entry_score = entry_score_for(enrollment, scheme.entry_score_max, **entry_kwargs)
         row_limit = row_limits[enrollment.student_id]
         eligibility = exam_eligibility.resolve(
             absence_hours=absence_hours,
@@ -334,10 +348,22 @@ def get_offering_journal(
             exempt=enrollment.student_id in exempt_ids,
             frozen=frozen,
         )
+        if level_policy:
+            eligibility = language_level_grading.eligibility(
+                enrollment,
+                absence_count=absence_count,
+                absence_hours=absence_hours,
+                lesson_hours=total_hours,
+                exempt=enrollment.student_id in exempt_ids,
+            )
         barred = eligibility["barred"]
         # Xəbərdarlıq zolağı da donmuş dilimdə susur: «həddə yaxınlaşır» xəbəri
         # yalnız hələ qərar verilə bilən semestrdə mənalıdır.
-        warning = absence_limit.near_limit(absence_hours, row_limit, frozen=frozen, barred=barred)
+        warning = (
+            (not barred and absence_count >= 8)
+            if level_policy
+            else absence_limit.near_limit(absence_hours, row_limit, frozen=frozen, barred=barred)
+        )
         rows.append(
             {
                 "enrollment": enrollment,
@@ -381,7 +407,12 @@ def get_offering_journal(
         "limit_percent": limit_percent,
         "allowed_absence": allowed_absence,
         # İcazə verilən maksimum q/b sayı (1 q/b=2 saat; 25% həddi) — UI "limit N q/b".
-        "limit_qb": int(allowed_absence // DEFAULT_LESSON_HOURS) if allowed_absence else 0,
+        "limit_qb": (
+            language_level_grading.ABSENCE_LIMIT
+            if level_policy
+            else (int(allowed_absence // DEFAULT_LESSON_HOURS) if allowed_absence else 0)
+        ),
+        "level_policy": level_policy,
         "entry_score_max": scheme.entry_score_max,
         # Dərs pəncərəsi (P1-8) — şablondakı naviqasiya zolağı üçün.
         "lesson_window": journal_window.window_meta(
@@ -455,7 +486,11 @@ def get_student_journal_summary(
         # TƏK MƏNBƏ: birləşmə ilə köçürülən saat da buradadır (bax yuxarıdakı şərh).
         absence_hours = enrollment.absence_hours or 0
         scheme = getattr(offering, "assessment_scheme", None)
-        cap = scheme.entry_score_max if scheme else 50
+        from . import language_level_grading
+
+        cap = language_level_grading.entry_cap(offering.subject.name, scheme.entry_score_max if scheme else 50)
+        if language_level_grading.is_level(offering):
+            absence_hours = (entry_batch.level_absence_hours or {}).get(enrollment.pk, absence_hours)
         entry_score = entry_score_for(enrollment, cap, **entry_batch.entry_kwargs(enrollment))
         lessons_held = lesson_counts.get(offering.id, 0)
         total_hours = exam_eligibility.lesson_hours_for(offering, hours_map=hours_map)
@@ -469,6 +504,14 @@ def get_student_journal_summary(
             exempt=bool(record and record.national_athlete_exemption),
             frozen=offering.id in frozen_ids,
         )
+        if language_level_grading.is_level(offering):
+            eligibility = language_level_grading.eligibility(
+                enrollment,
+                absence_count=(entry_batch.level_absence_counts or {}).get(enrollment.pk),
+                absence_hours=absence_hours,
+                lesson_hours=total_hours,
+                exempt=bool(record and record.national_athlete_exemption),
+            )
         barred = eligibility["barred"]
         subjects.append(
             {
@@ -479,7 +522,10 @@ def get_student_journal_summary(
                 "journal": {
                     "lessons_held": lessons_held,
                     "absence_hours": absence_hours,
-                    "allowed_absence": allowed,
+                    "allowed_absence": (
+                        eligibility["allowed_hours"] if language_level_grading.is_level(offering) else allowed
+                    ),
+                    "absence_count": eligibility.get("absence_count"),
                     "entry_score": entry_score,
                     "entry_score_max": cap,
                     "barred": barred,

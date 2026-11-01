@@ -28,6 +28,16 @@ class LanguageCohortTests(_GuestRosterBase):
     def setUpTestData(cls):
         super().setUpTestData()
         with bypass_rls():
+            from apps.workload.tests.factories import activate_member
+
+            activate_member(
+                cls.org,
+                cls.coordinator,
+                "lc_source_reader",
+                permissions=["journal.view"],
+                scope_unit=cls.chair,
+                scope_type="unit",
+            )
             cls.history.name = "Xarici dil-1 (Elementary)"
             cls.history.save(update_fields=["name"])
             cls.intermediate = Subject.objects.create(
@@ -465,9 +475,17 @@ class LanguageCohortTests(_GuestRosterBase):
     def test_explicit_scheme_or_exact_level_source_required_and_no_scores_copied(self):
         from apps.registrar.models import AssessmentComponent, AssessmentScheme
 
-        with self.assertRaises(ValidationError):
-            self.create(entry_score_max=None, pass_threshold=None, min_final_exam_score=None)
-        first = self.create(entry_score_max=60, pass_threshold=65, min_final_exam_score=20)
+        default = self.create(
+            name="Authoritative level defaults", entry_score_max=None, pass_threshold=None, min_final_exam_score=None
+        )
+        self.assertEqual(default.offering.assessment_scheme.entry_score_max, 30)
+        first = self.create(
+            name="Configured same-level source",
+            entry_score_max=60,
+            pass_threshold=65,
+            min_final_exam_score=20,
+            confirm_separate=True,
+        )
         AssessmentComponent.objects.create(
             organization=self.org, offering=first.offering, name="Speaking", max_score=12
         )
@@ -480,9 +498,9 @@ class LanguageCohortTests(_GuestRosterBase):
             min_final_exam_score=None,
         )
         scheme = AssessmentScheme.objects.get(offering=second.offering)
-        self.assertEqual((scheme.entry_score_max, scheme.pass_threshold, scheme.min_final_exam_score), (60, 65, 20))
+        self.assertEqual((scheme.entry_score_max, scheme.pass_threshold, scheme.min_final_exam_score), (30, 65, 20))
         self.assertFalse(scheme.is_published)
-        self.assertEqual(AssessmentComponent.objects.get(offering=second.offering).name, "Speaking")
+        self.assertEqual(AssessmentComponent.objects.get(offering=second.offering).max_score, 10)
         with self.assertRaises(ValidationError):
             self.create(name="Wrong-level config", source_offering=self.offering, confirm_separate=True)
 
@@ -623,3 +641,32 @@ class LanguageCohortTests(_GuestRosterBase):
         restored = self.move(cohort, actor=self.teacher)
         self.assertEqual(restored.pk, target.pk)
         self.assertEqual(cohort.placements.count(), 3)
+
+    def test_creation_form_labels_follow_request_language(self):
+        from django.utils.translation import override
+
+        from apps.registrar.language_cohort_views import CohortForm
+
+        with override("en"):
+            form = CohortForm(actor=self.coordinator, organization=self.org)
+            self.assertEqual(str(form.fields["name"].label), "Group name")
+            self.assertEqual(str(form.fields["lecture_hours"].label), "Lecture hours")
+
+    def test_source_scheme_lookup_and_direct_clone_cannot_cross_actor_chair_scope(self):
+        from apps.registrar.language_cohort_views import CohortForm
+        from apps.registrar.models import AssessmentScheme
+
+        foreign_source = CourseOffering.objects.create(
+            organization=self.org,
+            subject=self.intermediate,
+            period=self.period,
+            group=self.far_group,
+            instructor=self.teacher,
+        )
+        AssessmentScheme.objects.create(organization=self.org, offering=foreign_source)
+        form = CohortForm(actor=self.coordinator, organization=self.org)
+        self.assertFalse(form.fields["source_offering"].queryset.filter(pk=foreign_source.pk).exists())
+        before = LanguageLevelCohort.objects.count()
+        with self.assertRaises(PermissionDenied):
+            self.create(source_offering=foreign_source, confirm_separate=True)
+        self.assertEqual(LanguageLevelCohort.objects.count(), before)
