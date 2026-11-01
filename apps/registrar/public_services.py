@@ -78,6 +78,11 @@ from .page_contexts import _season_label as season_label  # noqa: F401
 from .plan_hours import plan_hours_for_offering  # noqa: F401
 from .plan_hours import program_for_offering  # noqa: F401
 from .plan_hours import workload_hours_for_offering  # noqa: F401
+from .reviewed_workload_share import (  # noqa: F401
+    create_reviewed_workload_share,
+    reviewed_share_preserves_owner,
+    undo_reviewed_workload_share,
+)
 from .semester_open import build_semester_opening  # noqa: F401
 from .semester_open import offering_counts_by_chair  # noqa: F401
 from .syllabus_pdf import render_syllabus_pdf  # noqa: F401
@@ -128,6 +133,9 @@ __all__ = [
     "journal_hygiene_rows",
     "journal_scope",
     "sync_workload_journal_shares",
+    "create_reviewed_workload_share",
+    "reviewed_share_preserves_owner",
+    "undo_reviewed_workload_share",
     "kollokvium_notifications",
     "kollokvium_windows",
     "language_levels",
