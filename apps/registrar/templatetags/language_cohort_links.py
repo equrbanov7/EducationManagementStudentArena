@@ -51,7 +51,10 @@ def _compute_nav(request, capabilities=None):
             and _own_level_offering_exists(user, organization)
         )
     else:
-        staff = bool(caps.get("can_manage_journal_roster")) and department_choices(user, organization).exists()
+        # `can_manage_journal_roster` = eyni `journal.roster` struktur əhatəsi (rbac-da hesablanıb);
+        # kafedra/şöbə vahidinin mövcudluğu burada sorğu ilə yoxlanmır — səhifənin öz qapısı
+        # (`language_cohort_views.index`) yenə `department_choices` ilə qərar verir.
+        staff = bool(caps.get("can_manage_journal_roster"))
         teacher = not staff and bool(caps.get("is_teacher")) and _own_level_offering_exists(user, organization)
     return {
         "staff": staff,
