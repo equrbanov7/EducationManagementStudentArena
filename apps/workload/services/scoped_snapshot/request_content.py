@@ -147,6 +147,6 @@ def collect_request_content():
             )
         ),
         "request_content_marks": list(
-            marks.order_by("id").values("id", "lesson_id", "enrollment_id", "status", "score")
+            marks.order_by("id").values("id", "lesson_id", "enrollment_id", "status", "score", "entered_by_id")
         ),
     }
