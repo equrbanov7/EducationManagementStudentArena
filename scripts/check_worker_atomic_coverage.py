@@ -50,6 +50,9 @@ INTENTIONAL_EXEMPTIONS = {
     "apps/workload/management/commands/export_wcu_workload_snapshot.py",
     # Same fresh READ ONLY transaction requirement; explicit export schema and RLS tests.
     "apps/workload/management/commands/export_wcu_journal_cells.py",
+    # Reviewed fixed additive parts own a fresh repeatable-read READ ONLY transaction;
+    # old collector/query budget unchanged, both RLS modes and DB write rejection tested.
+    "apps/workload/management/commands/export_wcu_journal_cells_part.py",
     # Independent text-free syllabus capture also owns a fresh tenant-scoped READ ONLY
     # transaction; no outer worker wrapper is possible. Both RLS modes and DB-level
     # write rejection: apps/workload/tests/test_syllabus_content_export.py.

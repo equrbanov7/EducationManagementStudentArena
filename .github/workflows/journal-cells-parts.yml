@@ -1,0 +1,60 @@
+name: WCU supplementary journal parts (encrypted, read-only)
+on:
+  workflow_dispatch:
+    inputs:
+      actor:
+        description: "Active fixed-tenant superadmin username"
+        type: string
+        required: true
+      journal_parent:
+        description: "One reviewed held parent:040,043,053,064,065,066,067,068,069,070 (chair-cells-NNN)"
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  export:
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 15
+    env:
+      APP_CONTAINER: educationmanagementstudentarena-app-1
+      EXPORT_DIR: /tmp/wcu-journal-parts-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Mask operator and validate fixed parent from event JSON
+        run: python3 scripts/ops/journal_part_inputs.py
+      - name: Capture two independent bounded encrypted parts sequentially
+        id: capture
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -m 700 "$RUNNER_TEMP/wcu-journal-parts"
+          docker exec "$APP_CONTAINER" mkdir -m 700 "$EXPORT_DIR"
+          docker cp scripts/data/wcu_workload_export_public.pem "$APP_CONTAINER:$EXPORT_DIR/public.pem"
+          python3 scripts/ops/journal_part_export.py
+      - name: Validate approved ciphertext allowlist before upload
+        id: finalize
+        if: always()
+        run: python3 scripts/ops/journal_part_export.py --finalize
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always() && steps.finalize.outputs.parts_artifact_ready == 'true'
+        with:
+          name: wcu-journal-parts-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/wcu-journal-parts/*.enc.json
+            ${{ runner.temp }}/wcu-journal-parts/part-manifest.json
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+      - name: Remove temporary ciphertext, quarantine and public key
+        if: always()
+        run: |
+          set -euo pipefail
+          docker exec "$APP_CONTAINER" rm -rf -- "$EXPORT_DIR" || true
+          rm -rf -- "$RUNNER_TEMP/wcu-journal-parts" "$RUNNER_TEMP/wcu-journal-parts-quarantine"
