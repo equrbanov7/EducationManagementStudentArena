@@ -127,7 +127,16 @@ class ReviewedAnarAuthorshipTests(TestCase):
             )
         fields = next(iter(state.PINS["lessons"].values()))["fields"].keys()
         self.pins["lessons"] = {r["id"]: {"fields": {k: r[k] for k in fields}} for r in lesson_rows}
-        self.pins.update(marks_count=len(marks), marks_sha256=state.digest(marks))
+        self.pins.update(marks_count=len(marks))
+        with transaction.atomic():
+            self.pins["marks_sha256"] = state.digest(
+                state.raw_projection(LessonMark.objects.filter(lesson__in=self.lessons), self.pins["mark_fields"])
+            )
+            self.pins["lessons_sha256"] = state.digest(
+                state.raw_projection(
+                    Lesson.objects.filter(pk__in=[r.pk for r in self.lessons]), self.pins["lesson_fields"]
+                )
+            )
         patcher = patch.object(state, "PINS", self.pins)
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -277,3 +286,30 @@ class ReviewedAnarAuthorshipTests(TestCase):
         self.pins["bridge"][0]["source_row_hash"] = "c" * 64
         with self.assertRaisesRegex(state.RepairError, "source_group_bridge_changed"), transaction.atomic():
             self.execute()
+
+    def test_raw_codec_is_explicit_but_native_graph_keeps_microseconds(self):
+        lesson = self.lessons[0]
+        instant = datetime.datetime(2026, 10, 1, 8, 0, 0, 123456, tzinfo=datetime.timezone.utc)
+        LessonMark.objects.filter(lesson=lesson).update(created_at=instant, updated_at=instant)
+        with transaction.atomic():
+            raw = state.raw_projection(LessonMark.objects.filter(lesson=lesson), self.pins["mark_fields"])[0]
+            full = state.rows(LessonMark.objects.filter(lesson=lesson))[0]
+        self.assertEqual(raw["updated_at"], "2026-10-01T08:00:00.123Z")
+        self.assertEqual(full["updated_at"], "2026-10-01T08:00:00.123456+00:00")
+        zero = LessonMark.objects.filter(score=0).first()
+        with transaction.atomic():
+            raw_zero = state.raw_projection(LessonMark.objects.filter(pk=zero.pk), self.pins["mark_fields"])[0]
+        self.assertEqual(raw_zero["score"], "0.00")
+
+    def test_submillisecond_change_still_invalidates_native_fresh_baseline(self):
+        marker = LessonMark.objects.filter(lesson=self.lessons[0]).first()
+        first = datetime.datetime(2026, 10, 1, 8, 0, 0, 123456, tzinfo=datetime.timezone.utc)
+        LessonMark.objects.filter(pk=marker.pk).update(updated_at=first)
+        with transaction.atomic():
+            self.pins["marks_sha256"] = state.digest(
+                state.raw_projection(LessonMark.objects.filter(lesson__in=self.lessons), self.pins["mark_fields"])
+            )
+        baseline = self.execute()["baseline"]
+        LessonMark.objects.filter(pk=marker.pk).update(updated_at=first.replace(microsecond=123457))
+        with self.assertRaisesRegex(state.RepairError, "fresh_baseline"), transaction.atomic():
+            self.execute(apply=True, expected_baseline=baseline)

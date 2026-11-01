@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from django.apps import apps
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import connection
 from django.db.models import Q
 
@@ -53,6 +54,17 @@ def rows(query):
             [list(map(str, ids))],
         )
         return [json.loads(r[0]) if isinstance(r[0], str) else r[0] for r in cursor.fetchall()]
+
+
+def raw_projection(query, fields):
+    """Exactly the authenticated RAW codec; never used for native full-row preservation.
+
+    DjangoJSONEncoder floors datetimes to milliseconds and encodes Decimal as a
+    string. Full SQL graph/baseline retains all microseconds and database columns.
+    """
+    values = list(query.order_by("pk").values(*fields)[: LIMIT + 1])
+    require(len(values) <= LIMIT, "row_budget")
+    return json.loads(json.dumps(values, cls=DjangoJSONEncoder))
 
 
 def graph(roots):
@@ -233,8 +245,22 @@ def snapshot():
         require(row["instructor_id"] in (None, TEACHER), "other_lesson_instructor")
     authors = {r["instructor_id"] for r in lessons}
     require(len(authors) == 1, "partial_authorship_requires_review")
+    projected_lessons = raw_projection(
+        model("registrar.Lesson")._base_manager.filter(pk__in=PINS["lessons"]), PINS["lesson_fields"]
+    )
+    for row in projected_lessons:
+        row["instructor_id"] = None
+    require(
+        digest(projected_lessons) == PINS["lessons_sha256"],
+        "reviewed_raw_lessons_changed",
+    )
     marks = data.get("registrar.LessonMark", [])
-    require(len(marks) == PINS["marks_count"] and digest(marks) == PINS["marks_sha256"], "reviewed_cells_changed")
+    projected_marks = raw_projection(
+        model("registrar.LessonMark")._base_manager.filter(lesson_id__in=PINS["lessons"]), PINS["mark_fields"]
+    )
+    require(
+        len(marks) == PINS["marks_count"] and digest(projected_marks) == PINS["marks_sha256"], "reviewed_cells_changed"
+    )
     require(all(r["entered_by_id"] in (None, TEACHER) for r in marks), "other_mark_author")
     return {
         "graph": data,

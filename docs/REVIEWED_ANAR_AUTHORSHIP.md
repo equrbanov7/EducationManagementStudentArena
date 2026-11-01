@@ -17,10 +17,10 @@ Yalnız 28 sabit dərsin `instructor=NULL` sahəsini 9490 edir. `created_by`,
   `3a56acc0-cb00-43ba-976a-6eae2afbe666` /535MRK.
 - Hər jurnal14 real dərs:8mühazirə+6seminar,16+12=28saat.
   Mövcud28dərsdə instructor/created_byNULL-dır.
-- Yerli immutable1027 müqayisəsi: cari809xana (MRK442,BI2367), mənbə823.
+- Yerli immutable1027 müqayisəsi: köhnə immutable1027-də809xana (MRK442,BI2367), mənbə823.
   Dəqiq birləşən795xanada status/bal fərqi0dır. Qalan transfer/materialisation
-  xanaları uyğunlaşdırılmır və dəyişdirilmir; bütün809tam xana sətrinin
-  sabit hash-i tələb edilir. Source-only28 və current-only14 xana saxlanılır.
+  xanaları uyğunlaşdırılmır və dəyişdirilmir; bütün xanalar toxunulmaz qalır. Köhnə source-only28 və current-only14
+  xananın uyğunlaşdırılması aparılmır.
 - Mənbə journal inventory SHA:
   `757203ba98db56d9ad675ef8428b229354acfcf44bb9317eab66117eea3c8020`.
   Özəl mənbə/immutable graph sübut SHA:
@@ -45,7 +45,7 @@ strict input/summary/count/error whitelist-i saxlayır. Default dry-dir.
 NativeCLI: `repair_reviewed_anar_authorship --actor <aktiv-superadmin>`.
 
 Native xidmət PostgreSQL, aktiv tenant/superadmin, dəqiq müəllim, iki course,
-28dəqiq dərs və809tam xana hash-i tələb edir. Başqa müsbət müəllim yükü,
+28dəqiq dərs və817xananın exact RAW projection hash-i tələb edir. Başqa müsbət müəllim yükü,
 aktiv başqa müəllim share-i, handover, named creator, qismən instructor bərpası,
 köhnə sıfır bal daxil istənilən xana dəyişikliyi və source slot dəyişikliyi HOLDdur.
 Tam reversegraph və cari əlaqəli workload rows tranzaksiyada kilidlənir.
@@ -61,3 +61,23 @@ Prod əməliyyatından əvvəl operator təzə iki RAW scope və standard metada
 sübutunu, sonra native dry→singleapply→repeat0→postRAW/standard tam müqayisəsini
 etməlidir. Mövcud mark/source/roster istisnaları toxunulmaz qalır. Bu paket
 hazırlanarkən production dispatch/apply edilməyib.
+
+## 817 xananın yenilənmiş, etibarlı sübutu
+
+1 noyabr RAW049/run41277551140 MRK442, RAW083/run41278064463 Bİ2375
+xana göstərir. RAW024/run41277079398 ayrıca Bİ2375 nəticəsini təsdiqləyir.
+Bütün28mənbə dərsi və köhnə809xana ixracın codec-i ilə tam eynidir;
+əlavə8xanada `entered_by=NULL`dır. Onların insan tərəfindən yazıldığını
+iddia etmirik. Heç biri silinmir, müəllifi dəyişmir və yenidən yaradılmır.
+İki RAW payload SHA-sı compiled pinlərdədir. Özəl refresh proof SHA:
+`7e6afe2ea3cdc5e91654805d7af9f5ba11c2271a26150cc670039290329973bb`.
+
+Bu iki etibarlı RAW snapshot `DjangoJSONEncoder` istifadə edir: datetime
+microseconds millisaniyəyə floor edilir (123456→123), UTC `Z` olur;
+Decimal bal stringdir (`0.00`). Yalnız sabit817xananın və28dərsin RAW pin
+müqayisəsi eyni codec ilə aparılır. Source dərslərinin sabit məzmunu və
+köhnə dəqiq timestamps ayrıca yoxlanır. Native tam SQL reversegraph,
+baseline, before/after preservation və undo digest bu codec-i işlətmir:
+bütün database sütunları və tam microseconds qalır. Millisaniyə daxilində
+123456→123457 dəyişmə belə native freshbaseline-i köhnəldir və apply dayanır.
+Təzə PRE ixracı yenə məcburidir; bu817pin sonrakı dəyişikliyi qəbul etmir.
