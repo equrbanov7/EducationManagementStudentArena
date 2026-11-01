@@ -1,0 +1,134 @@
+{
+  "format": "wcu-journal-export-packs/1",
+  "batch_registry_sha256": "1783da2b28d6a669266d09f7c313ea8a4d1b59a80e76b730f2dcda20a0cc7b87",
+  "packs": {
+    "journal-pack-001": [
+      "chair-cells-001",
+      "chair-cells-002"
+    ],
+    "journal-pack-002": [
+      "chair-cells-089",
+      "chair-cells-043",
+      "chair-cells-076",
+      "chair-cells-077",
+      "chair-cells-082"
+    ],
+    "journal-pack-003": [
+      "chair-cells-055",
+      "chair-cells-003",
+      "chair-cells-004",
+      "chair-cells-005",
+      "chair-cells-006"
+    ],
+    "journal-pack-004": [
+      "chair-cells-007",
+      "chair-cells-008",
+      "chair-cells-009",
+      "chair-cells-010",
+      "chair-cells-011"
+    ],
+    "journal-pack-005": [
+      "chair-cells-012",
+      "chair-cells-013",
+      "chair-cells-014",
+      "chair-cells-015",
+      "chair-cells-016"
+    ],
+    "journal-pack-006": [
+      "chair-cells-017",
+      "chair-cells-018",
+      "chair-cells-019",
+      "chair-cells-020",
+      "chair-cells-021"
+    ],
+    "journal-pack-007": [
+      "chair-cells-022",
+      "chair-cells-023",
+      "chair-cells-024",
+      "chair-cells-025",
+      "chair-cells-026"
+    ],
+    "journal-pack-008": [
+      "chair-cells-027",
+      "chair-cells-028",
+      "chair-cells-029",
+      "chair-cells-030",
+      "chair-cells-031"
+    ],
+    "journal-pack-009": [
+      "chair-cells-032",
+      "chair-cells-033",
+      "chair-cells-034",
+      "chair-cells-035",
+      "chair-cells-036"
+    ],
+    "journal-pack-010": [
+      "chair-cells-037",
+      "chair-cells-038",
+      "chair-cells-039",
+      "chair-cells-040",
+      "chair-cells-041"
+    ],
+    "journal-pack-011": [
+      "chair-cells-042",
+      "chair-cells-044",
+      "chair-cells-045",
+      "chair-cells-046",
+      "chair-cells-047"
+    ],
+    "journal-pack-012": [
+      "chair-cells-048",
+      "chair-cells-049",
+      "chair-cells-050",
+      "chair-cells-051",
+      "chair-cells-052"
+    ],
+    "journal-pack-013": [
+      "chair-cells-053",
+      "chair-cells-054",
+      "chair-cells-056",
+      "chair-cells-057",
+      "chair-cells-058"
+    ],
+    "journal-pack-014": [
+      "chair-cells-059",
+      "chair-cells-060",
+      "chair-cells-061",
+      "chair-cells-062",
+      "chair-cells-063"
+    ],
+    "journal-pack-015": [
+      "chair-cells-064",
+      "chair-cells-065",
+      "chair-cells-066",
+      "chair-cells-067",
+      "chair-cells-068"
+    ],
+    "journal-pack-016": [
+      "chair-cells-069",
+      "chair-cells-070",
+      "chair-cells-071",
+      "chair-cells-072",
+      "chair-cells-073"
+    ],
+    "journal-pack-017": [
+      "chair-cells-074",
+      "chair-cells-075",
+      "chair-cells-078",
+      "chair-cells-079",
+      "chair-cells-080"
+    ],
+    "journal-pack-018": [
+      "chair-cells-081",
+      "chair-cells-083",
+      "chair-cells-084",
+      "chair-cells-085",
+      "chair-cells-086"
+    ],
+    "journal-pack-019": [
+      "chair-cells-087",
+      "chair-cells-088",
+      "chair-cells-090"
+    ]
+  }
+}

@@ -174,12 +174,12 @@ class ExportWorkflowTests(unittest.TestCase):
         workflow = yaml.safe_load(path.read_text())
         triggers = workflow.get("on", workflow.get(True))
         self.assertEqual(set(triggers), {"workflow_dispatch"})
-        self.assertEqual(set(triggers["workflow_dispatch"]["inputs"]), {"actor", "journal_batch"})
+        self.assertEqual(set(triggers["workflow_dispatch"]["inputs"]), {"actor", "journal_batch", "journal_pack"})
         self.assertEqual(triggers["workflow_dispatch"]["inputs"]["journal_batch"]["default"], "")
         self.assertEqual(workflow["permissions"], {"contents": "read"})
         self.assertEqual(workflow["concurrency"]["group"], "production-deploy")
         steps = workflow["jobs"]["export"]["steps"]
-        upload = next(x for x in steps if str(x.get("uses", "")).startswith("actions/upload-artifact@"))
+        upload = next(x for x in steps if x.get("with", {}).get("name", "").startswith("wcu-workload-snapshot-"))
         self.assertEqual(upload["with"]["retention-days"], 1)
         self.assertTrue(upload["with"]["path"].endswith("/snapshot.enc.json"))
         self.assertNotIn("pg_dump", json.dumps(workflow))
@@ -216,6 +216,7 @@ class ExportWorkflowTests(unittest.TestCase):
                         "ACTOR": "audit-admin",
                         "EXPORT_DIR": "/tmp/fixed-audit",
                         "JOURNAL_BATCH": batch,
+                        "JOURNAL_PACK": "",
                         "ARG_LOG": str(log),
                     },
                     capture_output=True,
