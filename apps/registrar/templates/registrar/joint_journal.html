@@ -1,67 +1,59 @@
 {% extends "base.html" %}
 {% load static i18n %}
-{% block title %}{{ joint.group_label }} — {{ kind_label }} — Jurnal{% endblock %}
-{% block extraCss %}<link rel="stylesheet" href="{% static 'registrar/css/joint_journal.css' %}">{% endblock %}
-{% block content %}
-<main class="joint-journal">
-    <a href="{% url 'registrar:journal_list' %}">← Elektron jurnal</a>
-    <h1>{{ joint.group_label }} · {{ kind_label }}</h1>
-    <p>{{ offering.subject.name }} · {{ offering.period.name }}</p>
-    {% include "registrar/partials/_joint_record_summary.html" with own_lessons=joint_record.own_lessons own_hours=joint_record.own_hours history=joint_record.history record_teacher=joint_observed_teacher %}
-    <p>Birgə dərsin davamiyyət və ballarını bütün qruplar üçün burada yazın. Son 12 dərs göstərilir.</p>
-    {% if joint_read_only %}<p role="status">{% trans "Yalnız oxu" %}</p>{% elif joint_locked %}<p role="status">Birgə jurnalın açılışlarından biri kilidlidir. Jurnal yalnız oxunur.</p>{% else %}
-    <details class="joint-create">
-        <summary>Yeni birgə dərs</summary>
-        <form method="post">
-            {% csrf_token %}<input type="hidden" name="action" value="add_lesson">
-            <label>Tarix <input type="date" name="date" value="{{ today|date:'Y-m-d' }}" max="{{ today|date:'Y-m-d' }}" required></label>
-            <div class="joint-slot-field">
-                <label for="joint-slot">Cədvəl dərsi</label>
-                <div class="bootstrap-single-select bootstrap-single-select--ems">
-                    <select id="joint-slot" name="slot_id" required class="bootstrap-single-select__native" data-bootstrap-select>
-                        {% for slot in slots %}<option value="{{ slot.pk }}">{{ slot.weekday_label }} · {{ slot.start_time|time:'H:i' }}–{{ slot.end_time|time:'H:i' }} · {{ slot.get_week_type_display }}{% if slot.room %} · {{ slot.room }}{% endif %}</option>{% endfor %}
-                    </select>
-                </div>
-            </div>
-            <label>Mövzu <input type="text" name="topic" maxlength="255" required></label>
-            <button type="submit">Bütün qruplara dərs əlavə et</button>
-        </form>
-    </details>
-    {% endif %}
-    {% if not joint_read_only %}<form method="post">
-        {% csrf_token %}<input type="hidden" name="action" value="save_marks">
-    {% endif %}
-        <div class="joint-grid-scroll">
-            <table class="joint-grid">
-                <caption>{{ joint.group_label }} — {{ kind_label }} · {{ rows|length }} tələbə</caption>
-                <thead><tr><th scope="col">Qrup</th><th scope="col">Tələbə</th>
-                    {% for lesson in columns %}<th scope="col">{{ lesson.date|date:'d.m.Y' }}<br>{{ lesson.start_time|time:'H:i' }}<br>{{ lesson.topic|default:'Mövzu yoxdur' }}<br>{{ lesson.hours }} saat</th>{% endfor %}
-                </tr></thead>
-                <tbody>
-                {% for row in rows %}<tr><td>{{ row.home_group.name|default:"—" }}</td><th scope="row">{{ row.student.get_full_name|default:row.student.username }}</th>
-                    {% for cell in row.cells %}<td>
-                    {% if cell %}
-                        {% if cell.writable %}
-                        <label class="joint-sr">{{ row.student.get_full_name }} · {{ cell.lesson.date|date:'d.m.Y' }} · davamiyyət</label>
-                        <div class="bootstrap-single-select bootstrap-single-select--ems">
-                        <select class="bootstrap-single-select__native" data-bootstrap-select name="att__{{ cell.lesson.pk }}__{{ row.enrollment.pk }}" aria-label="Davamiyyət: {{ row.student.get_full_name }} — {{ cell.lesson.date|date:'d.m.Y' }}">
-                            <option value="" {% if not cell.mark %}selected{% endif %}>—</option>
-                            <option value="present" {% if cell.mark.status == 'present' %}selected{% endif %}>i/e</option>
-                            <option value="absent" {% if cell.mark.status == 'absent' %}selected{% endif %}>q/b</option>
-                        </select>
-                        </div>
-                        {% if cell.allows_score %}<input aria-label="Bal: {{ row.student.get_full_name }} — {{ cell.lesson.date|date:'d.m.Y' }}" type="number" min="0" max="10" step="1" name="score__{{ cell.lesson.pk }}__{{ row.enrollment.pk }}" value="{{ cell.mark.score|default_if_none:'' }}">{% endif %}
-                        {% else %}<span title="Xana kilidlidir">{{ cell.mark.get_status_display|default:'—' }}{% if cell.mark.score != None %} · {{ cell.mark.score }}{% endif %} 🔒</span>{% endif %}
-                    {% else %}<span title="Bu qrup üçün həmin tarixdə ayrıca dərs qeydi yoxdur">—</span>{% endif %}
-                    </td>{% endfor %}
-                </tr>{% empty %}<tr><td colspan="2">Aktiv tələbə yoxdur.</td></tr>{% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% if columns %}{% if not joint_locked and not joint_read_only %}<button type="submit">Bütün qruplar üçün yadda saxla</button>{% endif %}{% else %}<p>Bu dərs növündə hələ dərs qeydi yoxdur.</p>{% endif %}
-    {% if not joint_read_only %}</form>{% endif %}
-    <details><summary>Qrup jurnalları və tam tarixçə</summary><ul>
-        {% for member in joint.offerings %}<li><a href="{% url 'registrar:journal_detail' member.pk %}?kind={{ joint.kind }}">{{ member.group.name }} — tam jurnal və əvvəlki qeydlər</a></li>{% endfor %}
-    </ul></details>
-</main>
+{% block title %}{{ offering.subject.name }} — {% trans "Jurnal" context "registrar.journal" %} - {{ site_brand_name }}{% endblock %}
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
+<link rel="stylesheet" href="{% static 'registrar/css/journal_detail.css' %}?v=20260928-1">
+<link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20261025-topic">
+<link rel="stylesheet" href="{% static 'registrar/css/jd2_theme.css' %}?v=20260926-close">
+<link rel="stylesheet" href="{% static 'registrar/css/journal_layout.css' %}?v=20261019-head">
+<link rel="stylesheet" href="{% static 'registrar/css/joint_journal.css' %}?v=20261101-layout1">
 {% endblock %}
+{% block content %}
+<div class="journal-page jd-page jd2 joint-journal" data-joint-journal>
+    <a class="journal-back" href="{% url 'registrar:journal_list' %}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Elektron jurnal" context "registrar.journal" %}</a>
+    <div class="jd2-pagehead">
+        <div class="jd2-mark" aria-hidden="true">EU</div>
+        <div class="joint-page-title">
+            <h1 class="jd2-pagetitle">{% trans "Elektron jurnal" context "registrar.journal" %}</h1>
+            <div class="jd2-pagesub">{{ offering.period.year_display }} · {{ offering.period.name }}</div>
+        </div>
+    </div>
+    {% include "accounts/profile/_messages.html" %}
+    {% if joint_read_only %}<div class="jd2-closedbar" role="status"><i class="fas fa-eye" aria-hidden="true"></i> {% trans "Yalnız oxu" %}</div>{% elif joint_locked %}
+    <div class="jd2-closedbar" role="status"><i class="fas fa-lock" aria-hidden="true"></i> Birgə jurnalın açılışlarından biri kilidlidir. Jurnal yalnız oxunur.</div>
+    {% endif %}
+    <section class="jd2-window" aria-labelledby="joint-subject-title">
+        <header class="jd2-winhead">
+            <div class="jd2-winhead-left">
+                <span class="jd2-wincode">{{ joint.group_label }}</span>
+                <h2 class="jd2-wintitle joint-subject-title" id="joint-subject-title">{{ offering.subject.name }}</h2>
+                <span class="jd2-winsub">{{ offering.subject.code }} · {{ kind_label }} · {{ rows|length }} {% trans "tələbə" context "registrar.journal" %}</span>
+            </div>
+            <div class="jd2-winhead-right"><span class="jd2-windate">{{ today|date:'d.m.Y' }}</span></div>
+        </header>
+        <div class="jd2-tabsbar joint-toolbar">
+            <span class="jd2-tab is-active" aria-current="page">{{ kind_label }}</span>
+            <span class="joint-lesson-count">{% blocktrans context "registrar.journal" with total=columns|length %}Bütün {{ total }} dərs göstərilir{% endblocktrans %}</span>
+            <div class="jd2-tabsbar-actions">
+                {% if not joint_read_only and not joint_locked %}
+                <button type="button" class="jd2-newlesson-btn" data-joint-open-lesson><i class="fas fa-plus" aria-hidden="true"></i> {% trans "Yeni dərs" context "registrar.journal" %}</button>
+                {% if columns %}<button type="submit" class="jd2-save-btn joint-toolbar-save" form="joint-marks-form"><i class="fas fa-check" aria-hidden="true"></i> {% trans "Yadda saxla" context "registrar.journal" %}</button>{% endif %}
+                {% endif %}
+            </div>
+        </div>
+        <div class="joint-record-summary">
+            {% include "registrar/partials/_joint_record_summary.html" with own_lessons=joint_record.own_lessons own_hours=joint_record.own_hours history=joint_record.history record_teacher=joint_observed_teacher %}
+        </div>
+        {% include "registrar/partials/_joint_journal_grid.html" %}
+    </section>
+    <section class="joint-member-journals" aria-labelledby="joint-member-title">
+        <h2 id="joint-member-title">Qrup jurnalları və tam tarixçə</h2>
+        <div class="joint-member-links">{% for member in joint.offerings %}
+            <a class="jd2-export-btn" href="{% url 'registrar:journal_detail' member.pk %}?kind={{ joint.kind }}"><i class="fas fa-book-open" aria-hidden="true"></i> {{ member.group.name }} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+        {% endfor %}</div>
+    </section>
+    {% if not joint_read_only and not joint_locked %}{% include "registrar/partials/_joint_journal_lesson.html" %}{% endif %}
+</div>
+{% endblock %}
+{% block extraJs %}<script src="{% static 'registrar/js/joint_journal.js' %}?v=20261101-layout1" defer></script>{% endblock %}

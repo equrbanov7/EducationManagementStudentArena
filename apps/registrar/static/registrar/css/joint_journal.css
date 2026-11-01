@@ -1,17 +1,75 @@
-.joint-journal { max-width: 1440px; margin: 24px auto; padding: 24px; color: var(--text-primary, #172238); }
-.joint-journal h1 { font-size: 1.5rem; margin-top: 20px; }
-.joint-journal p { line-height: 1.6; }
-.joint-journal details { margin: 24px 0; padding: 16px; border: 1px solid #cbd5e1; border-radius: 10px; }
-.joint-journal summary { cursor: pointer; font-weight: 600; }
-.joint-create form { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; align-items: end; }
-.joint-create label, .joint-slot-field { display: flex; flex-direction: column; gap: 6px; }
-.joint-journal input, .joint-journal select { border: 1px solid #94a3b8; border-radius: 6px; padding: 8px; background: var(--surface, white); color: inherit; }
-.joint-journal button[type="submit"] { margin: 16px 0; padding: 10px 18px; border: 0; border-radius: 7px; background: #1455b0; color: white; cursor: pointer; }
-.joint-grid-scroll { overflow: auto; max-height: 70vh; border: 1px solid #cbd5e1; border-radius: 10px; }
+/* The joint view shares the standard journal window and its horizontal grid. */
+.joint-journal { max-width: 1440px; min-width: 0; }
+.joint-journal .joint-page-title { min-width: 0; }
+.joint-journal .joint-subject-title { margin: 0; font-size: 17px; overflow-wrap: anywhere; }
+.joint-journal .jd2-wincode { white-space: normal; overflow-wrap: anywhere; }
+.joint-journal .joint-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.joint-journal .joint-toolbar .jd2-tab { display: inline-flex; align-items: center; cursor: default; }
+.joint-lesson-count { color: var(--ems-text-muted, #64748b); font-size: 12px; }
+.joint-journal .joint-toolbar-save { margin: 0; min-height: 38px; }
+.joint-record-summary { padding: 12px 16px; border-bottom: 1px solid var(--j-line); font-size: 13px; color: var(--j-mid); }
+.joint-record-summary .jl-subject-sub { margin: 0; }
+.joint-record-summary details { margin: 8px 0 0; }
+.joint-record-summary summary { cursor: pointer; font-weight: 600; }
+.joint-record-summary ul { margin: 8px 0; padding-left: 20px; }
+.joint-record-summary p { margin: 6px 0 0; }
+.joint-grid-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); }
+.joint-lesson-list { border-right: 1px solid var(--j-line); background: #f7faff; }
+.joint-record-groups { display: block; margin-top: 5px; font-size: 10px; line-height: 1.5; color: var(--j-muted); font-weight: 500; overflow-wrap: anywhere; }
+.joint-grid-scroll { max-width: 100%; overflow-x: auto; height: auto; max-height: none; }
 .joint-grid { border-collapse: separate; border-spacing: 0; width: 100%; }
-.joint-grid caption { padding: 12px; text-align: left; font-weight: 600; }
-.joint-grid th, .joint-grid td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; }
-.joint-grid thead th { position: sticky; top: 0; background: var(--surface, #f1f5f9); z-index: 1; min-width: 150px; font-size: .85rem; }
-.joint-grid tbody th { min-width: 180px; }
-.joint-grid td input { width: 70px; margin-top: 6px; }
+.joint-grid .joint-student-col { box-sizing: border-box; width: 210px; min-width: 210px; max-width: 210px; }
+.joint-grid tbody .joint-student-col { border-bottom: 1px solid #eef3fb; }
+.joint-student-identity { min-width: 0; }
+.joint-student-identity .jd2-stu-name { display: block; overflow-wrap: anywhere; }
+.joint-student-group { display: inline-block; margin-top: 5px; font-size: 10px; line-height: 1.4; color: var(--ems-primary-700, #1d4ed8); font-weight: 700; }
+.joint-home-group { display: block; margin-top: 2px; font-size: 10px; color: var(--j-muted); }
+.joint-grid .joint-lesson-col { min-width: 108px; max-width: 140px; vertical-align: top; }
+.joint-lesson-date { display: block; font-size: 11px; color: var(--j-ink); white-space: nowrap; }
+.joint-grid .jd2-th-sub { display: block; margin-top: 3px; }
+.joint-column-topic { display: block; margin-top: 6px; font-weight: 600; line-height: 1.4; max-width: 140px; overflow-wrap: anywhere; }
+.joint-cell { min-width: 108px; border-right: 1px solid var(--j-cell); }
+.joint-cell-editor { display: flex; flex-direction: column; align-items: stretch; gap: 4px; min-width: 76px; max-width: 100px; margin: auto; }
+.joint-cell-editor .bootstrap-single-select { width: 100%; min-width: 0; }
+.joint-cell-editor input { width: 100%; min-width: 0; border: 1px solid var(--ems-border, #cbd5e1); border-radius: 6px; padding: 6px; text-align: center; background: var(--ems-bg, white); color: var(--ems-text, #172238); }
+.joint-cell.is-absent { color: var(--ems-danger-700, #b91c1c); }
+.joint-locked-mark { display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px; font-size: 11px; }
+.joint-locked-mark .fa-lock { color: var(--j-soft); font-size: 8px; }
+.joint-unavailable { color: var(--ems-text-muted, #64748b); }
+.joint-footbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+.joint-grid-legend { display: flex; flex-wrap: wrap; gap: 6px; color: var(--j-muted); font-size: 11px; }
+.joint-empty { margin: 0; padding: 20px; color: var(--j-muted); font-size: 13px; }
+.joint-member-journals { margin-top: 20px; }
+.joint-member-journals h2 { margin: 0 0 10px; font-size: 14px; color: var(--j-ink); }
+.joint-member-links { display: flex; flex-wrap: wrap; gap: 10px; }
+.joint-member-links a { text-decoration: none; }
+.joint-lesson-dialog { width: min(640px, calc(100% - 28px)); max-height: calc(100dvh - 32px); padding: 0; border: 1px solid var(--ems-border, #dce6f7); border-radius: 18px; color: var(--ems-text, #172238); background: var(--ems-bg, white); box-shadow: 0 24px 70px #0f172a33; }
+.joint-lesson-dialog::backdrop { background: #0f172a66; }
+body:has(.joint-lesson-dialog[open]) { overflow: hidden; }
+.joint-lesson-dialog .jd-modal-head { display: flex; justify-content: space-between; gap: 12px; }
+.joint-lesson-dialog .jd-modal-body { display: grid; gap: 16px; padding: 20px; }
+.joint-lesson-dialog .jd2-field { display: flex; flex-direction: column; gap: 7px; }
+.joint-lesson-dialog input { width: 100%; min-width: 0; }
+.joint-dialog-foot { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--j-line); }
 .joint-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+@media (max-width: 1100px) {
+    .joint-grid-layout { grid-template-columns: minmax(0, 1fr); }
+    .joint-lesson-list { order: 2; border-right: 0; border-top: 1px solid var(--j-line); }
+    .joint-grid-layout > .jd2-gridcol { order: 1; }
+}
+@media (max-width: 640px) {
+    .joint-journal { padding: 16px 8px 28px; }
+    .joint-journal .joint-subject-title { font-size: 15px; }
+    .joint-journal .jd2-winhead { gap: 6px; }
+    .joint-journal .jd2-winhead-right { display: none; }
+    .joint-journal .joint-toolbar .jd2-tabsbar-actions { display: flex; width: 100%; gap: 8px; }
+    .joint-journal .joint-toolbar .jd2-tabsbar-actions > button { flex: 1; justify-content: center; }
+    .joint-grid .joint-student-col { width: 124px; min-width: 124px; max-width: 124px; }
+    .joint-student-identity .jd2-stu-name { font-size: 11px; line-height: 1.45; }
+    .joint-grid .joint-lesson-col, .joint-cell { min-width: 100px; }
+    .joint-column-topic { display: none; }
+    .joint-record-summary { padding: 10px 12px; font-size: 12px; }
+    .joint-journal .joint-footbar { padding: 12px; }
+    .joint-journal .joint-footbar .jd2-save-btn { width: 100%; }
+    .joint-member-links a { flex: 1 1 100%; justify-content: space-between; }
+}

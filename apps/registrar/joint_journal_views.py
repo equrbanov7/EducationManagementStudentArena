@@ -21,12 +21,20 @@ from .practical_label import kind_choices
 def _session_key(lesson):
     # Different historical topics/hours/authors remain separate columns. Never
     # reinterpret an imported lesson or manufacture marks for another group.
-    return (lesson.date, lesson.start_time, lesson.end_time, lesson.topic, lesson.hours, lesson.instructor_id)
+    return (
+        lesson.date,
+        lesson.start_time,
+        lesson.end_time,
+        lesson.topic,
+        lesson.hours,
+        lesson.instructor_id,
+        lesson.room_id,
+    )
 
 
 def _grid(joint, user, *, read_only=False):
     locked = read_only or any(gradebook.journal_is_locked(offering) for offering in joint.offerings)
-    fields = ("date", "start_time", "end_time", "topic", "hours", "instructor_id")
+    fields = ("date", "start_time", "end_time", "topic", "hours", "instructor_id", "room_id")
     # Determine ambiguity over ALL historical lessons, before either member or
     # combined windows. An ordinal among truncated duplicates is not identity.
     ambiguous = {
@@ -42,7 +50,7 @@ def _grid(joint, user, *, read_only=False):
             gradebook.get_offering_journal(
                 offering=offering,
                 newest_first=True,
-                lesson_limit=12,
+                lesson_limit=None,
                 lesson_kind=joint.kind,
                 scope=journal_scope(user, offering),
             ),
@@ -50,6 +58,7 @@ def _grid(joint, user, *, read_only=False):
         for offering in joint.offerings
     ]
     columns = {}
+    recorded_groups = {}
     lesson_keys = {}
     for _offering, journal in journals:
         for lesson in journal["lessons"]:
@@ -57,7 +66,10 @@ def _grid(joint, user, *, read_only=False):
             key = (*signature, str(lesson.pk) if signature in ambiguous else "")
             lesson_keys[lesson.pk] = key
             columns.setdefault(key, lesson)
-    keys = sorted(columns, key=lambda key: (key[0], str(key[1]), str(key[2]), str(key[3])), reverse=True)[:12]
+            recorded_groups.setdefault(key, set()).add(_offering.group.name)
+    for key, lesson in columns.items():
+        lesson.joint_recorded_groups = sorted(recorded_groups[key])
+    keys = sorted(columns, key=lambda key: (key[0], str(key[1]), str(key[2]), str(key[3])), reverse=True)
     rows = []
     for offering, journal in journals:
         for row in journal["rows"]:

@@ -411,7 +411,7 @@ class JointJournalTests(TestCase):
         for _ in range(14):
             self.lessons()
         columns, rows = _grid(joint_journal.resolve(**self.args()), self.teacher)
-        self.assertEqual(len(columns), 12)
+        self.assertEqual(len(columns), 28)
         # Every duplicate is its own real Lesson column; no physical member's
         # nth historical lesson is silently paired with another member's nth.
         for index in range(len(columns)):

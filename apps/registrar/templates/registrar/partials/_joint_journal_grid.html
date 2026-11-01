@@ -1,0 +1,55 @@
+{% load i18n journal_names %}
+{% if not joint_read_only and not joint_locked %}<form method="post" class="journal-form" id="joint-marks-form" data-joint-marks-form>
+    {% csrf_token %}<input type="hidden" name="action" value="save_marks">
+{% endif %}
+    <div class="joint-grid-layout">
+        <aside class="jd2-topics joint-lesson-list" aria-label="{% trans 'Keçirilmiş dərslər' %}">
+            <div class="jd2-panel-label">{% trans "Keçirilmiş dərslər" %}</div>
+            {% for lesson in columns %}<div class="jd2-topic-row">
+                <span class="jd2-topic-date">{{ lesson.date|date:'d.m' }}</span>
+                <span class="jd2-topic-title">{{ lesson.display_topic|default:lesson.topic|default:'Mövzu yoxdur' }}<small class="joint-record-groups">{{ lesson.joint_recorded_groups|join:' · ' }} · {{ lesson.hours }} {% trans "saat" context "registrar.journal" %}</small></span>
+            </div>{% empty %}<p class="joint-empty">Bu dərs növündə hələ dərs qeydi yoxdur.</p>{% endfor %}
+        </aside>
+        <div class="jd2-gridcol">
+            <div class="journal-grid-wrap jd2-grid-wrap joint-grid-scroll" tabindex="0" role="region" aria-label="{% trans 'Qiymətləndirmə' context 'registrar.journal' %}">
+                <table class="jd2-table joint-grid">
+                    <caption class="joint-sr">{{ joint.group_label }} — {{ kind_label }} · {{ rows|length }} {% trans "tələbə" context "registrar.journal" %}</caption>
+                    <thead><tr>
+                        <th scope="col" class="jd2-th-student joint-student-col">{% trans "№ · SOYAD AD ATA ADI" context "registrar.journal" %}</th>
+                        {% for lesson in columns %}<th scope="col" class="jd2-th-lesson joint-lesson-col">
+                            <span class="joint-lesson-date">{{ lesson.date|date:'d.m.Y' }}</span>
+                            {% if lesson.start_time %}<span class="jd2-th-sub">{{ lesson.start_time|time:'H:i' }}{% if lesson.end_time %}–{{ lesson.end_time|time:'H:i' }}{% endif %}</span>{% endif %}
+                            {% if not lesson.instructor_id %}<span class="joint-record-groups">Müəllif qeydi yoxdur</span>{% endif %}
+                            <span class="joint-column-topic" title="{{ lesson.display_topic|default:lesson.topic }}">{{ lesson.display_topic|default:lesson.topic|default:'Mövzu yoxdur' }}</span>
+                            <span class="joint-record-groups">{{ lesson.joint_recorded_groups|join:' · ' }} · {{ lesson.hours }} {% trans "saat" context "registrar.journal" %}</span>
+                        </th>{% endfor %}
+                    </tr></thead>
+                    <tbody>{% for row in rows %}<tr class="jd2-row">
+                        <th scope="row" class="jd2-td-student joint-student-col">
+                            <div class="jd2-stu-inner"><span class="jd2-stu-no">{{ forloop.counter }}</span><div class="joint-student-identity"><span class="jd2-stu-name">{{ row.student|journal_name }}</span><span class="joint-student-group">{{ row.group.name }}</span>{% if row.home_group and row.home_group.pk != row.group.pk %}<span class="joint-home-group">{{ row.home_group.name }}</span>{% endif %}</div></div>
+                        </th>
+                        {% for cell in row.cells %}<td class="joint-cell{% if cell.mark.status == 'absent' %} is-absent{% endif %}"{% if not cell %} aria-label="Bu qrup üçün həmin tarixdə ayrıca dərs qeydi yoxdur"{% endif %}>
+                            {% if cell %}{% if cell.writable %}
+                            <div class="joint-cell-editor" data-joint-cell>
+                                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                                    <select class="bootstrap-single-select__native" data-bootstrap-select data-joint-attendance name="att__{{ cell.lesson.pk }}__{{ row.enrollment.pk }}" aria-label="Davamiyyət: {{ row.student|journal_name }} — {{ cell.lesson.date|date:'d.m.Y' }}">
+                                        <option value="" {% if not cell.mark %}selected{% endif %}>—</option>
+                                        <option value="present" {% if cell.mark.status == 'present' %}selected{% endif %}>i/e</option>
+                                        <option value="absent" {% if cell.mark.status == 'absent' %}selected{% endif %}>q/b</option>
+                                    </select>
+                                </div>
+                                {% if cell.allows_score %}<input data-joint-score aria-label="Bal: {{ row.student|journal_name }} — {{ cell.lesson.date|date:'d.m.Y' }}" type="number" min="0" max="10" step="1" name="score__{{ cell.lesson.pk }}__{{ row.enrollment.pk }}" value="{{ cell.mark.score|default_if_none:'' }}">{% endif %}
+                            </div>
+                            {% else %}<span class="joint-locked-mark" title="{% trans 'Xana kilidlidir' context 'registrar.journal_timing' %}">{% if cell.mark %}{{ cell.mark.get_status_display }}{% if cell.mark.score != None %} · <b>{{ cell.mark.score }}</b>{% endif %}{% else %}—{% endif %}<i class="fas fa-lock" aria-hidden="true"></i></span>{% endif %}
+                            {% else %}<span class="joint-unavailable" title="Bu qrup üçün həmin tarixdə ayrıca dərs qeydi yoxdur">—</span>{% endif %}
+                        </td>{% endfor %}
+                    </tr>{% empty %}<tr><td class="joint-empty">Aktiv tələbə yoxdur.</td></tr>{% endfor %}</tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="jd2-footbar joint-footbar">
+        <span class="joint-grid-legend"><b>i/e</b> · iştirak edir <b>q/b</b> · qayıb <span>— · qeyd yoxdur</span></span>
+        {% if columns and not joint_read_only and not joint_locked %}<button class="jd2-save-btn" type="submit"><i class="fas fa-check" aria-hidden="true"></i> {% trans "Yadda saxla" context "registrar.journal" %}</button>{% endif %}
+    </div>
+{% if not joint_read_only and not joint_locked %}</form>{% endif %}
