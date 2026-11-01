@@ -9,6 +9,8 @@ case "$COMMAND" in
     tag_prefix=mr27-recovery; asset=mr27-recovery.json.enc; target="/tmp/mr27_recovery_${GITHUB_RUN_ID}.json" ;;
   repair_qosqar_modelling|repair_qosqar_journals)
     tag_prefix=qosqar-modelling; asset=source-evidence.json.enc; target="/tmp/qosqar_modelling_${GITHUB_RUN_ID}.json" ;;
+  repair_biostat_seminar_share)
+    tag_prefix=biostat-kind-share; asset=biostat.xlsx.enc; target="/tmp/biostat_source_${GITHUB_RUN_ID}.xlsx" ;;
   repair_it8179_load)
     tag_prefix=it8179-source; asset=official-source.docx.enc; target="/tmp/it8179_source_${GITHUB_RUN_ID}.docx" ;;
   repair_applied_math_journal)
@@ -37,3 +39,7 @@ case "$COMMAND" in
 esac
 match "$ROSTER_TAG" "^${tag_prefix}-[0-9a-z-]+$" || { echo "encrypted_source_tag_invalid" >&2; exit 2; }
 match "$BATCH" '^[0-9a-f]{64}$' || { echo "plaintext_manifest_sha256_required" >&2; exit 2; }
+
+if [ "$COMMAND" = "repair_biostat_seminar_share" ]; then
+  test "$BATCH" = "209dfa543720f11421a5aab910318e193e49799b2cf98b8fc27f5ed885fb5b16" || { echo "pinned_source_sha_required" >&2; exit 2; }
+fi
