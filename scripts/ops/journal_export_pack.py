@@ -210,11 +210,11 @@ def run_pack(*, name, actor, container, export_dir, folder, head, run_id, attemp
         ],
     }
     save_manifest(manifest, folder)
-    if os.environ.get("GITHUB_OUTPUT"):
-        with open(os.environ["GITHUB_OUTPUT"], "a") as stream:
-            stream.write("pack_artifact_ready=true\n")
+    quarantine = folder.with_name(folder.name + "-quarantine")
+    quarantine.mkdir(mode=0o700)
     for row in manifest["batches"]:
-        path = folder / (row["batch"] + ".enc.json")
+        approved = folder / (row["batch"] + ".enc.json")
+        path = quarantine / approved.name
         try:
             output = export_dir + "/" + path.name
             result = _command(
@@ -253,7 +253,10 @@ def run_pack(*, name, actor, container, export_dir, folder, head, run_id, attemp
             path.chmod(0o600)
             if envelope_digest(path) != expected:
                 raise PackError("ciphertext_invalid")
-            row.update(status="complete", file=path.name, sha256=expected, offerings=int(offerings), marks=int(marks))
+            os.replace(path, approved)
+            row.update(
+                status="complete", file=approved.name, sha256=expected, offerings=int(offerings), marks=int(marks)
+            )
         except Exception as exc:
             if path.exists() or path.is_symlink():
                 try:
@@ -288,17 +291,48 @@ def run_pack(*, name, actor, container, export_dir, folder, head, run_id, attemp
     return 0 if manifest["complete"] else 2
 
 
+def finalize(*, name, folder, head, run_id, attempt):
+    """Always-step gate: approve only manifest-listed, verified ciphertext files."""
+    folder = Path(folder)
+    if folder.is_symlink() or not folder.is_dir():
+        raise PackError("ciphertext_invalid")
+    path = folder / "pack-manifest.json"
+    if path.is_symlink() or not path.is_file() or path.stat().st_size > 65536:
+        raise PackError("ciphertext_invalid")
+    manifest = validate_manifest(json.loads(path.read_bytes()), expected_pack=name, expected_head=head)
+    if manifest["run_id"] != run_id or manifest["run_attempt"] != attempt:
+        raise PackError("pack_manifest_run_invalid")
+    completed = [row for row in manifest["batches"] if row["status"] == "complete"]
+    allowed = {"pack-manifest.json"} | {row["file"] for row in completed}
+    if {path.name for path in folder.iterdir()} != allowed:
+        raise PackError("ciphertext_invalid")
+    for row in completed:
+        if envelope_digest(folder / row["file"]) != row["sha256"]:
+            raise PackError("ciphertext_invalid")
+    return manifest
+
+
 def main():
     try:
-        return run_pack(
+        arguments = dict(
             name=os.environ["JOURNAL_PACK"],
-            actor=os.environ["ACTOR"],
-            container=os.environ["APP_CONTAINER"],
-            export_dir=os.environ["EXPORT_DIR"],
             folder=Path(os.environ["RUNNER_TEMP"]) / "wcu-workload-export",
             head=os.environ["GITHUB_SHA"],
             run_id=int(os.environ["GITHUB_RUN_ID"]),
             attempt=int(os.environ["GITHUB_RUN_ATTEMPT"]),
+        )
+        if sys.argv[1:] == ["--finalize"]:
+            finalize(**arguments)
+            with open(os.environ["GITHUB_OUTPUT"], "a") as stream:
+                stream.write("pack_artifact_ready=true\n")
+            return 0
+        if sys.argv[1:]:
+            raise PackError("fixed_pack_scope_invalid")
+        return run_pack(
+            **arguments,
+            actor=os.environ["ACTOR"],
+            container=os.environ["APP_CONTAINER"],
+            export_dir=os.environ["EXPORT_DIR"],
         )
     except Exception:
         print("journal_pack_export_refused", file=sys.stderr)

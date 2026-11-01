@@ -147,6 +147,82 @@ class PackTests(unittest.TestCase):
             with self.assertRaises(pack.PackError):
                 pack.validate_manifest(value, expected_pack="journal-pack-001", expected_head=HEAD)
 
+    def test_interrupted_copy_never_enters_upload_directory(self):
+        for partial in (True, False):
+            with self.subTest(partial=partial), tempfile.TemporaryDirectory() as directory:
+                folder = Path(directory) / "approved"
+                folder.mkdir()
+                encoded = envelope()
+                calls = []
+
+                def command(argv, encoded=encoded, calls=calls, partial=partial):
+                    if argv[1] == "exec":
+                        return SimpleNamespace(
+                            returncode=0,
+                            stdout=f"encrypted_sha256={pack.sha(encoded)} offerings=20 marks=30\n",
+                            stderr="",
+                        )
+                    target = Path(argv[-1])
+                    calls.append(target)
+                    if len(calls) == 2:
+                        target.write_bytes(b"PRIVATE_SENTINEL" if partial else encoded)
+                        raise SystemExit("simulated abrupt stop")
+                    target.write_bytes(encoded)
+                    return SimpleNamespace(returncode=0)
+
+                with patch.object(pack, "_command", side_effect=command):
+                    with self.assertRaises(SystemExit):
+                        pack.run_pack(
+                            name="journal-pack-001",
+                            actor="audit_operator",
+                            container="app",
+                            export_dir="/tmp/export",
+                            folder=folder,
+                            head=HEAD,
+                            run_id=12,
+                            attempt=1,
+                        )
+                value = pack.finalize(name="journal-pack-001", folder=folder, head=HEAD, run_id=12, attempt=1)
+                self.assertFalse(value["complete"])
+                self.assertEqual([r["status"] for r in value["batches"]], ["complete", "not_attempted"])
+                self.assertTrue(all(p.parent != folder for p in calls))
+                self.assertNotIn(b"PRIVATE_SENTINEL", b"".join(p.read_bytes() for p in folder.glob("*.enc.json")))
+                self.assertEqual(len(list(folder.glob("*.enc.json"))), 1)
+
+    def test_interruption_after_approve_before_manifest_refuses_upload(self):
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory) / "approved"
+            folder.mkdir()
+            original = pack.save_manifest
+            counter = []
+
+            def save(value, target):
+                counter.append(True)
+                if len(counter) == 2:
+                    raise SystemExit("before manifest commit")
+                return original(value, target)
+
+            with patch.object(pack, "save_manifest", side_effect=save):
+                with self.assertRaises(SystemExit):
+                    self.capture(folder)
+            with self.assertRaises(pack.PackError):
+                pack.finalize(name="journal-pack-001", folder=folder, head=HEAD, run_id=12, attempt=1)
+
+    def test_finalizer_rejects_changed_ciphertext_and_symlinks(self):
+        for symlink in (False, True):
+            with self.subTest(symlink=symlink), tempfile.TemporaryDirectory() as directory:
+                folder = Path(directory) / "approved"
+                folder.mkdir()
+                self.capture(folder)
+                target = next(folder.glob("*.enc.json"))
+                if symlink:
+                    target.unlink()
+                    target.symlink_to(folder / "pack-manifest.json")
+                else:
+                    target.write_text("PRIVATE_SENTINEL")
+                with self.assertRaises(pack.PackError):
+                    pack.finalize(name="journal-pack-001", folder=folder, head=HEAD, run_id=12, attempt=1)
+
 
 class WorkflowTests(unittest.TestCase):
     def test_event_mask_and_strict_selectors_before_environment_export(self):
@@ -192,6 +268,10 @@ class WorkflowTests(unittest.TestCase):
         uploads = [s for s in steps if "upload-artifact@" in s.get("uses", "")]
         self.assertEqual(len(uploads), 2)
         self.assertIn("always()", uploads[0]["if"])
+        self.assertIn("steps.pack_finalize.outputs.pack_artifact_ready", uploads[0]["if"])
+        finalizer = next(s for s in steps if s.get("id") == "pack_finalize")
+        self.assertIn("always()", finalizer["if"])
+        self.assertIn("--finalize", finalizer["run"])
         self.assertEqual(
             uploads[0]["with"]["path"].splitlines(),
             [
@@ -250,6 +330,33 @@ class WorkflowTests(unittest.TestCase):
                 self.assertNotIn("PRIVATE_SENTINEL", result.stdout + result.stderr)
                 target = folder / "wcu-workload-export"
                 if name:
+                    github_output = folder / "output"
+                    self.assertFalse(github_output.exists())
+                    final_env = {
+                        **os.environ,
+                        "RUNNER_TEMP": directory,
+                        "JOURNAL_PACK": name,
+                        "GITHUB_SHA": HEAD,
+                        "GITHUB_RUN_ID": "12",
+                        "GITHUB_RUN_ATTEMPT": "1",
+                        "GITHUB_OUTPUT": str(github_output),
+                    }
+                    finalized = subprocess.run(
+                        ["bash", "-c", finalizer["run"]], cwd=ROOT, env=final_env, capture_output=True, text=True
+                    )
+                    self.assertEqual(finalized.returncode, 0, finalized.stderr)
+                    self.assertEqual(github_output.read_text(), "pack_artifact_ready=true\n")
+                    github_output.unlink()
+                    approved = next(target.glob("*.enc.json"))
+                    saved = approved.read_bytes()
+                    approved.write_text("PRIVATE_SENTINEL")
+                    refused = subprocess.run(
+                        ["bash", "-c", finalizer["run"]], cwd=ROOT, env=final_env, capture_output=True, text=True
+                    )
+                    self.assertNotEqual(refused.returncode, 0)
+                    self.assertFalse(github_output.exists())
+                    self.assertNotIn("PRIVATE_SENTINEL", refused.stdout + refused.stderr)
+                    approved.write_bytes(saved)
                     value = json.loads((target / "pack-manifest.json").read_text())
                     self.assertEqual(value["complete"], not bool(fail))
                     self.assertEqual(

@@ -18,8 +18,11 @@ not one globally simultaneous database snapshot.
 
 Each successful batch yields its own `<batch>.enc.json`. A strict safe manifest
 records only fixed labels, commit/run identifiers, hashes, counts and allowlisted
-failure codes. Only structurally validated encrypted envelopes and that manifest
-are uploaded. A failed batch does not prevent later batches in its pack from
+failure codes. Copies first enter a separate private quarantine outside the artifact directory.
+Only after envelope/hash validation are they atomically approved. An always-run
+finalizer verifies the exact manifest allowlist and every approved ciphertext/hash
+before enabling upload. Abrupt stops cannot expose an unvalidated copy. Only
+validated encrypted envelopes and that manifest are uploaded. A failed batch does not prevent later batches in its pack from
 running; the final job fails with a partial manifest. Unknown files suppress the
 artifact upload. Container and runner temporary files are always removed.
 The final safe summary includes the manifest SHA256, and the validated input step
