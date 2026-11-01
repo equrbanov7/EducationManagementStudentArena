@@ -209,6 +209,12 @@ def get_offering_journal(
     # üzvüdürsə provenans qalsa da çip yalan danışmamalıdır (bax guest_roster).
     from apps.registrar import guest_merge, guest_roster
 
+    from .journal_home_groups import home_group_map
+
+    home_groups = home_group_map(
+        organization_id=offering.organization_id, student_ids=[e.student_id for e in enrollments]
+    )
+
     guest_ids = [e.id for e in enrollments if e.source_group_id]
     current_groups = guest_roster.current_group_map(
         organization_id=offering.organization_id,
@@ -341,6 +347,7 @@ def get_offering_journal(
             {
                 "enrollment": enrollment,
                 "student": enrollment.student,
+                "home_group": home_groups.get(enrollment.student_id),
                 "cells": cells,
                 "absence_hours": absence_hours,
                 # q/b (qayıb) SAYı — UI saat əvəzinə bunu göstərir (barred saat-limitinə görə).

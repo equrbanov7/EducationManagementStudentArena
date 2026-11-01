@@ -36,7 +36,7 @@
                     {% for lesson in columns %}<th scope="col">{{ lesson.date|date:'d.m.Y' }}<br>{{ lesson.start_time|time:'H:i' }}<br>{{ lesson.topic|default:'Mövzu yoxdur' }}<br>{{ lesson.hours }} saat</th>{% endfor %}
                 </tr></thead>
                 <tbody>
-                {% for row in rows %}<tr><td>{{ row.group.name }}</td><th scope="row">{{ row.student.get_full_name|default:row.student.username }}</th>
+                {% for row in rows %}<tr><td>{{ row.home_group.name|default:"—" }}</td><th scope="row">{{ row.student.get_full_name|default:row.student.username }}</th>
                     {% for cell in row.cells %}<td>
                     {% if cell %}
                         {% if cell.writable %}
