@@ -48,6 +48,7 @@ SAFE_GUARDS = frozenset(
         "two_catalog_fixed_courses_missing",
         "two_catalog_fixed_source_packet_changed",
         "two_catalog_fresh_baseline_required",
+        "two_catalog_fixed_scope_required",
         "two_catalog_full_graph_preservation_failed",
         "two_catalog_group_budget",
         "two_catalog_group_identity_changed",

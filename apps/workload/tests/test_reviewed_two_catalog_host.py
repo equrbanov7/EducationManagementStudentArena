@@ -92,3 +92,27 @@ class TwoCatalogHostTests(TestCase):
             self.host.safe_failure("CommandError: password=PRIVATE\n"), "reviewed_two_catalog_command_refused"
         )
         self.assertEqual(self.host.safe_failure("SELECT * FROM auth_user"), "reviewed_two_catalog_command_refused")
+
+    def test_single_vefa_host_context_never_dispatches_the_two_case_command(self):
+        line = self.line.replace("reviewed_two_catalog:", "reviewed_vefa_catalog:").replace("rows=2", "rows=1")
+        with (
+            patch.object(self.host, "verify_head"),
+            patch.object(
+                self.host.subprocess, "run", return_value=SimpleNamespace(returncode=0, stdout=line, stderr="")
+            ) as docker,
+            contextlib.redirect_stdout(StringIO()),
+        ):
+            with self.assertRaises(ValueError):
+                self.host.execute(self.inputs, self.env, command="repair_reviewed_vefa_catalog")
+            docker.assert_not_called()
+            result = self.host.execute(
+                self.inputs,
+                self.env,
+                command="repair_reviewed_vefa_catalog",
+                prefix="reviewed_vefa_catalog: ",
+                expected_rows=1,
+            )
+        self.assertEqual(result, line)
+        self.assertEqual(docker.call_count, 1)
+        self.assertIn("repair_reviewed_vefa_catalog", docker.call_args.args[0])
+        self.assertNotIn("repair_reviewed_two_catalog", docker.call_args.args[0])

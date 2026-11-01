@@ -13,6 +13,10 @@ from ...services.reviewed_leyla_catalog_graph import RepairError, model
 
 
 class Command(BaseCommand):
+    contract = spec
+    resource = repair.RESOURCE
+    prefix = "reviewed_two_catalog"
+
     help = "Only two reviewed Nigar/Aruz workload subject FKs; credits and every academic record remain in place."
 
     def add_arguments(self, parser):
@@ -32,15 +36,17 @@ class Command(BaseCommand):
         )
         if actor is None:
             raise CommandError("two_catalog_tenant_superadmin_required")
-        apply_rls_request_context(user_id=actor.pk, org_id=spec.ORG, bypass=False, local=True)
+        apply_rls_request_context(user_id=actor.pk, org_id=self.contract.ORG, bypass=False, local=True)
         try:
-            org = model("organizations.Organization").objects.get(pk=spec.ORG)
+            org = model("organizations.Organization").objects.get(pk=self.contract.ORG)
             result = repair.run(
                 organization=org,
                 actor=actor,
                 apply=options["apply"],
                 expected_baseline=options["expected_baseline"],
                 undo=options["undo"],
+                contract=self.contract,
+                resource=self.resource,
             )
         except RepairError as exc:
             code = (
@@ -54,7 +60,7 @@ class Command(BaseCommand):
         finally:
             reset_rls_context(local=True)
         self.stdout.write(
-            f"reviewed_two_catalog: status={result['status']} rows={result['rows']} applied={int(result['applied'])} "
+            f"{self.prefix}: status={result['status']} rows={result['rows']} applied={int(result['applied'])} "
             f"baseline={result['baseline']} receipt={result['receipt'] or 'none'} graph={result['graph']} "
             f"models={result['models']} protected_rows={result['protected_rows']}"
         )

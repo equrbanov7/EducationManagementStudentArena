@@ -21,12 +21,12 @@ def protected(value):
 
 
 @transaction.atomic
-def run(*, organization, actor, apply=False, expected_baseline="", undo=""):
+def run(*, organization, actor, apply=False, expected_baseline="", undo="", contract=spec, resource=RESOURCE):
     require(connection.vendor == "postgresql", "two_catalog_postgresql_required")
-    state.actor_scope(organization, actor)
-    before = state.snapshot(organization)
+    state.actor_scope(organization, actor, contract=contract)
+    before = state.snapshot(organization, contract=contract)
     baseline = digest(before)
-    receipts = model("audit.AuditLog")._base_manager.filter(organization=organization, resource_type=RESOURCE)
+    receipts = model("audit.AuditLog")._base_manager.filter(organization=organization, resource_type=resource)
     previous = receipts.filter(new_values__operation="apply").order_by("-created_at", "pk").first()
     desired = None
     if undo:
@@ -67,7 +67,7 @@ def run(*, organization, actor, apply=False, expected_baseline="", undo=""):
     require(expected_baseline == baseline, "two_catalog_fresh_baseline_required")
     for case in before["cases"]:
         row = case["row"]
-        pin = next(p for p in spec.CASES if p["row_id"] == row["id"])
+        pin = next(p for p in contract.CASES if p["row_id"] == row["id"])
         target = pin["before_subject"] if undo else pin["after_subject"]
         changed = (
             model("workload.TeachingTaskRow")
@@ -86,7 +86,7 @@ def run(*, organization, actor, apply=False, expected_baseline="", undo=""):
             old_values={"subject_id": row["subject_id"]},
             new_values={"subject_id": target, "source": before["source"]},
         )
-    after = state.snapshot(organization)
+    after = state.snapshot(organization, contract=contract)
     require(protected(before) == protected(after), "two_catalog_full_graph_preservation_failed")
     if undo:
         require(after == desired, "two_catalog_exact_undo_restore_failed")
@@ -95,11 +95,11 @@ def run(*, organization, actor, apply=False, expected_baseline="", undo=""):
         AuditAction.UPDATE,
         user=actor,
         organization=organization,
-        resource_type=RESOURCE,
+        resource_type=resource,
         resource_id=undo or receipt,
         old_values=before,
         new_values={"operation": "undo" if undo else "apply", "undo_of": undo or None, "after": after},
-        reason="Source-bound Nigar/Aruz load FKs only. No grade, syllabus, timetable, owner or credit mutation.",
+        reason="Source-bound fixed load FKs only. No grade, syllabus, timetable, owner or credit mutation.",
     )
     return _result("undone" if undo else "applied", before, baseline, undo or receipt)
 
@@ -108,7 +108,7 @@ def _result(status, snapshot, baseline, receipt):
     protected_graph = snapshot["protected"]
     return {
         "status": status,
-        "rows": 0 if status.startswith("already_") else 2,
+        "rows": 0 if status.startswith("already_") else len(snapshot["cases"]),
         "applied": status in ("applied", "undone"),
         "baseline": baseline,
         "receipt": receipt,

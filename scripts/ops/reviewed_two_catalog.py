@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 HEX = r"[a-f0-9]{64}"
 UUID = r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
 PREFIX = "reviewed_two_catalog: "
+CONTEXTS = {"repair_reviewed_two_catalog": (PREFIX, 2), "repair_reviewed_vefa_catalog": ("reviewed_vefa_catalog: ", 1)}
 
 
 class Refused(ValueError):
@@ -46,11 +47,15 @@ def inputs(value):
     return actor, args, apply, undo
 
 
-def summary(raw, *, apply, undo, baseline=""):
+def summary(raw, *, apply, undo, baseline="", prefix=PREFIX, expected_rows=2):
+    if (prefix, expected_rows) not in CONTEXTS.values():
+        raise ValueError("fixed_catalog_context_required")
     pattern = (
-        re.escape(PREFIX)
+        re.escape(prefix)
         + r"status=(dry_run|applied|undone|already_applied|already_undone) "
-        + r"rows=(0|2) applied=([01]) baseline=("
+        + r"rows=(0|"
+        + str(expected_rows)
+        + r") applied=([01]) baseline=("
         + HEX
         + r") receipt=(none|"
         + UUID
@@ -72,7 +77,7 @@ def summary(raw, *, apply, undo, baseline=""):
     if (
         status not in allowed
         or changed != str(int(status in {"applied", "undone"}))
-        or rows != ("0" if repeated else "2")
+        or rows != ("0" if repeated else str(expected_rows))
         or int(models) > 115
         or int(protected_rows) > 20000
     ):
@@ -102,7 +107,9 @@ def safe_failure(stderr):
     return "reviewed_two_catalog_command_refused"
 
 
-def execute(value, env):
+def execute(value, env, *, command="repair_reviewed_two_catalog", prefix=PREFIX, expected_rows=2):
+    if CONTEXTS.get(command) != (prefix, expected_rows):
+        raise ValueError("fixed_catalog_context_required")
     actor, args, apply, undo = inputs(value)
     if any(
         not isinstance(env.get(key), str) or not re.fullmatch(r"[1-9][0-9]*", env[key])
@@ -112,7 +119,7 @@ def execute(value, env):
     print("::add-mask::" + actor, flush=True)
     verify_head(env.get("GITHUB_SHA", ""))
     result = subprocess.run(
-        ["docker", "exec", CONTAINER, "python", "manage.py", "repair_reviewed_two_catalog", *args],
+        ["docker", "exec", CONTAINER, "python", "manage.py", command, *args],
         capture_output=True,
         text=True,
         timeout=180,
@@ -123,7 +130,14 @@ def execute(value, env):
         raise Refused(safe_failure(result.stderr))
     if result.stderr:
         raise ValueError("two_catalog_unexpected_stderr")
-    parsed = summary(result.stdout, apply=apply, undo=undo, baseline=value.get("baseline", ""))
+    parsed = summary(
+        result.stdout,
+        apply=apply,
+        undo=undo,
+        baseline=value.get("baseline", ""),
+        prefix=prefix,
+        expected_rows=expected_rows,
+    )
     print(parsed)
     return parsed
 

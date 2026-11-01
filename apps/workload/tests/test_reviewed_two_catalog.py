@@ -273,9 +273,9 @@ class TwoCatalogTests(TestCase):
         original = state.snapshot
         calls = []
 
-        def failing(org):
+        def failing(org, **kwargs):
             calls.append(org.pk)
-            value = original(org)
+            value = original(org, **kwargs)
             if len(calls) == 2:
                 raise RepairError("two_catalog_full_graph_preservation_failed")
             return value

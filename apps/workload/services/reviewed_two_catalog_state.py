@@ -13,9 +13,9 @@ from .reviewed_leyla_catalog_graph import bounded, digest, graph, model, normal,
 from .scoped_snapshot import data as snapshots
 
 
-def actor_scope(org, actor):
+def actor_scope(org, actor, *, contract=spec):
     require(
-        str(org.pk) == spec.ORG and actor.is_active and actor.is_superuser, "two_catalog_tenant_superadmin_required"
+        str(org.pk) == contract.ORG and actor.is_active and actor.is_superuser, "two_catalog_tenant_superadmin_required"
     )
     tenant = (
         model("organizations.Organization")
@@ -41,7 +41,7 @@ def actor_scope(org, actor):
     require(
         str(tenant.owner_id) == str(actor.pk)
         or any(m["is_active"] for m in memberships)
-        or any(p["organization_id"] == spec.ORG for p in profiles),
+        or any(p["organization_id"] == contract.ORG for p in profiles),
         "two_catalog_actor_tenant_required",
     )
     require(
@@ -56,13 +56,13 @@ def actor_scope(org, actor):
     )
 
 
-def _identity(org, pin):
+def _identity(org, pin, contract=spec):
     Offering = model("registrar.CourseOffering")
     objects = list(Offering._base_manager.select_for_update().filter(pk__in=pin["offerings"]).order_by("pk"))
     require({str(o.pk) for o in objects} == set(pin["offerings"]), "two_catalog_fixed_courses_missing")
     for obj in objects:
         require(
-            str(obj.organization_id) == spec.ORG
+            str(obj.organization_id) == contract.ORG
             and not obj.is_intensive
             and all(normal(getattr(obj, k)) == v for k, v in pin["offerings"][str(obj.pk)].items()),
             "two_catalog_course_identity_changed",
@@ -194,11 +194,11 @@ def _donor(org, objects, pin):
     )
 
 
-def _rivals(org, pin):
+def _rivals(org, pin, contract=spec):
     rivals = bounded(
         model("workload.TeachingTaskRow")
         .objects.filter(
-            organization=org, subject_id=pin["after_subject"], period_id=spec.PERIOD, groups__id=pin["group"]["id"]
+            organization=org, subject_id=pin["after_subject"], period_id=contract.PERIOD, groups__id=pin["group"]["id"]
         )
         .exclude(pk=pin["row_id"]),
         cap=20,
@@ -214,7 +214,7 @@ def _rivals(org, pin):
     return {"rows": rivals, "assignments": assignments}
 
 
-def _schedule(org, objects, pin):
+def _schedule(org, objects, pin, contract=spec):
     # No slot is parked, copied, created or changed. Existing target conflicts hold.
     target = next(o for o in objects if str(o.pk) == pin["filled"])
     slots = list(
@@ -228,7 +228,7 @@ def _schedule(org, objects, pin):
         require(
             not schedule_conflicts.detect(
                 organization=org,
-                period_id=spec.PERIOD,
+                period_id=contract.PERIOD,
                 group_id=target.group_id,
                 subject_id=target.subject_id,
                 offering_id=target.pk,
@@ -240,13 +240,14 @@ def _schedule(org, objects, pin):
         )
 
 
-def snapshot(org):
-    require(schema.fingerprints() == spec.SCHEMA, "two_catalog_unreviewed_relation_schema")
-    schedule_lock.lock_schedule(org.pk, spec.PERIOD)
-    periods = bounded(model("organizations.AcademicPeriod").objects.filter(pk=spec.PERIOD, organization=org), cap=1)
+def snapshot(org, *, contract=spec):
+    require(len(contract.CASES) in (1, 2), "two_catalog_fixed_scope_required")
+    require(schema.fingerprints() == contract.SCHEMA, "two_catalog_unreviewed_relation_schema")
+    schedule_lock.lock_schedule(org.pk, contract.PERIOD)
+    periods = bounded(model("organizations.AcademicPeriod").objects.filter(pk=contract.PERIOD, organization=org), cap=1)
     require(
         len(periods) == 1
-        and periods[0]["academic_year"] == spec.YEAR
+        and periods[0]["academic_year"] == contract.YEAR
         and periods[0]["is_active"]
         and periods[0]["locked_at"] is None,
         "two_catalog_period_locked_or_changed",
@@ -254,13 +255,13 @@ def snapshot(org):
     result = {"periods": periods, "cases": []}
     all_offerings, all_rows, syllabus_query = [], [], Q(pk__in=[])
     corrected = []
-    for pin in spec.CASES:
+    for pin in contract.CASES:
         task = bounded(
             model("workload.TeachingTask").objects.filter(pk=pin["row_fields"]["task_id"], organization=org), cap=1
         )
         require(
             len(task) == 1
-            and task[0]["academic_year"] == spec.YEAR
+            and task[0]["academic_year"] == contract.YEAR
             and task[0]["chair_id"] == pin["source"]["chair_id"]
             and task[0]["status"] in ("approved", "distributed", "amended"),
             "two_catalog_released_task_changed",
@@ -271,7 +272,7 @@ def snapshot(org):
             .exists(),
             "two_catalog_official_chair_changed",
         )
-        objects = _identity(org, pin)
+        objects = _identity(org, pin, contract)
         all_offerings.extend(objects)
         rows = bounded(model("workload.TeachingTaskRow").objects.filter(pk=pin["row_id"], organization=org), cap=1)
         require(
@@ -295,7 +296,7 @@ def snapshot(org):
         )
         _rosters(org, objects, pin)
         _donor(org, objects, pin)
-        _schedule(org, objects, pin)
+        _schedule(org, objects, pin, contract)
         result["cases"].append(
             {
                 "row": rows[0],
@@ -303,20 +304,20 @@ def snapshot(org):
                 "assignments": assignments,
                 "bridge": _bridge(org, pin),
                 "authority": _authority(org, pin),
-                "rivals": _rivals(org, pin),
+                "rivals": _rivals(org, pin, contract),
             }
         )
         corrected.append(rows[0]["subject_id"] == pin["after_subject"])
         all_rows.append(pin["row_id"])
         syllabus_query |= (
             Q(offering_id__in=pin["offerings"])
-            | Q(author_id=pin["teacher"], subject_id__in=pin["subjects"], period_id__in=[spec.PERIOD])
+            | Q(author_id=pin["teacher"], subject_id__in=pin["subjects"], period_id__in=[contract.PERIOD])
             | Q(author_id=pin["teacher"], subject_id__in=pin["subjects"], period_id__isnull=True)
         )
     require(len(set(corrected)) == 1, "two_catalog_partial_relink_state")
     syllabi = bounded(model("syllabus.Syllabus")._base_manager.filter(syllabus_query, organization=org), cap=40)
     academic = graph(
-        spec.ORG,
+        contract.ORG,
         {
             "registrar.CourseOffering": {str(o.pk) for o in all_offerings},
             "workload.TeachingTaskRow": set(all_rows),
@@ -327,18 +328,18 @@ def snapshot(org):
         {r["id"] for r in academic["workload.TeachingTaskRow"]} == set(all_rows),
         "two_catalog_unreviewed_workload_graph",
     )
-    for pin in spec.CASES:
+    for pin in contract.CASES:
         require(
             not any(r["offering_id"] == pin["empty"] for r in academic.get("registrar.Lesson", [])),
             "two_catalog_named_journal_not_empty",
         )
     counts = normal(snapshots.offering_counts([o.pk for o in all_offerings]))
-    expected = {oid: value for pin in spec.CASES for oid, value in pin["counts"].items()}
+    expected = {oid: value for pin in contract.CASES for oid, value in pin["counts"].items()}
     require({r["offering_id"]: r for r in counts} == expected, "two_catalog_source_content_fingerprint_changed")
     result.update(
         corrected=corrected[0],
         protected=protected(academic),
-        schema=digest(spec.SCHEMA),
-        source=digest([p["source"] for p in spec.CASES]),
+        schema=digest(contract.SCHEMA),
+        source=digest([p["source"] for p in contract.CASES]),
     )
     return result

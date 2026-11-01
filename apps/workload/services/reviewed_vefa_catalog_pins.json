@@ -1,0 +1,202 @@
+{
+  "academic_year": "2026/2027",
+  "case_proof_sha256": "4eb25258399a51936e9cc1e979cd72918a4f21c95439c0f4e9168cfbdae01040",
+  "cases": [
+    {
+      "after_subject": "1c6d0916-c680-45a2-aa8a-fe2720be032f",
+      "assignments": [
+        {
+          "activity": "lecture",
+          "hours": 30,
+          "id": "4c0bcdc8-8385-4aed-9fd8-5c4605905634",
+          "is_hourly_paid": false,
+          "row_id": "0f0d1c08-5cfc-43f1-80e7-0300d92e9275",
+          "teacher_id": 8268
+        },
+        {
+          "activity": "seminar",
+          "hours": 30,
+          "id": "da9d788f-f1f8-47b8-9109-a054e80d5c17",
+          "is_hourly_paid": false,
+          "row_id": "0f0d1c08-5cfc-43f1-80e7-0300d92e9275",
+          "teacher_id": 8268
+        }
+      ],
+      "before_subject": "4034f137-1081-4336-ad63-5a56705075d2",
+      "bridge": [
+        {
+          "entity_type": "worker_materialisation",
+          "legacy_pk": "829",
+          "source_row_hash": "066261b9afdce6f221eb5b146c7293898aefb7029ebd995a7e188a143bcddcd0",
+          "state": "migrated",
+          "target_model_label": "auth.user",
+          "target_pk": "8268"
+        },
+        {
+          "entity_type": "group_unit",
+          "legacy_pk": "646",
+          "source_row_hash": "87ebc788dc3f1dd334c8911033ce1eb0bf2cee158ab27ca8069fdd9daa284d72",
+          "state": "migrated",
+          "target_model_label": "organizations.orgunit",
+          "target_pk": "258e1908-92cf-41ad-aad0-de0c70d0e61b"
+        },
+        {
+          "entity_type": "worker",
+          "legacy_pk": "829",
+          "source_row_hash": "19ab57d077d78749746e0e01f32004e46fcf6dab0a2b5dd2e843057806a60622",
+          "state": "migrated",
+          "target_model_label": "auth.user",
+          "target_pk": "8268"
+        },
+        {
+          "entity_type": "lesson_subject",
+          "legacy_pk": "267",
+          "source_row_hash": "27965bd104659367a7f8bc0d76499dbcf986687639b58f50fa4362064ae9f564",
+          "state": "migrated",
+          "target_model_label": "registrar.subject",
+          "target_pk": "1c6d0916-c680-45a2-aa8a-fe2720be032f"
+        }
+      ],
+      "counts": {
+        "2ec2ada3-ab0c-4e0b-a66c-293aaa087f55": {
+          "enrollment_state_md5": "be49f722a8f30161c3ed350e1c8e54ed",
+          "enrollments": 30,
+          "lesson_state_md5": "d41d8cd98f00b204e9800998ecf8427e",
+          "lessons": 0,
+          "mark_state_md5": "d41d8cd98f00b204e9800998ecf8427e",
+          "marks": 0,
+          "offering_id": "2ec2ada3-ab0c-4e0b-a66c-293aaa087f55"
+        },
+        "4e32c5a9-d065-4da8-9000-d91747939620": {
+          "enrollment_state_md5": "47e932193a1148d9c01e63ae57fa9f26",
+          "enrollments": 30,
+          "lesson_state_md5": "b0cf4a64b8c684c691794f6aeeb2d4dc",
+          "lessons": 11,
+          "mark_state_md5": "1e54b5d461306f574f1fb95731f43ea2",
+          "marks": 325,
+          "offering_id": "4e32c5a9-d065-4da8-9000-d91747939620"
+        }
+      },
+      "donor": {
+        "approved_version_id": "0b35ecb3-753c-41fa-948e-9ddc51c132e5",
+        "author_id": 8268,
+        "body_sha256": "e66bc1305130d0bcc48365192ca993cd8f436e5b4d1d31b9f0eba160ca4b04c3",
+        "current_version_id": "0b35ecb3-753c-41fa-948e-9ddc51c132e5",
+        "id": "d49562c3-1094-416e-b005-707ec08f609f",
+        "is_active": true,
+        "offering_id": "4e32c5a9-d065-4da8-9000-d91747939620",
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "reused_from_id": null,
+        "subject_id": "1c6d0916-c680-45a2-aa8a-fe2720be032f"
+      },
+      "empty": "2ec2ada3-ab0c-4e0b-a66c-293aaa087f55",
+      "filled": "4e32c5a9-d065-4da8-9000-d91747939620",
+      "group": {
+        "code": "",
+        "id": "258e1908-92cf-41ad-aad0-de0c70d0e61b",
+        "is_active": true,
+        "name": "234 KE az",
+        "parent_id": "75e2c1f1-77ed-4f1c-95a3-c27dbe4b8050",
+        "settings": {
+          "degree_level": "bachelor",
+          "education_form": "full_time",
+          "sector": "az"
+        },
+        "unit_type": "group"
+      },
+      "offerings": {
+        "2ec2ada3-ab0c-4e0b-a66c-293aaa087f55": {
+          "group_id": "258e1908-92cf-41ad-aad0-de0c70d0e61b",
+          "id": "2ec2ada3-ab0c-4e0b-a66c-293aaa087f55",
+          "instructor_id": 8268,
+          "is_active": true,
+          "lesson_hours": 60,
+          "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+          "subject_id": "4034f137-1081-4336-ad63-5a56705075d2"
+        },
+        "4e32c5a9-d065-4da8-9000-d91747939620": {
+          "group_id": "258e1908-92cf-41ad-aad0-de0c70d0e61b",
+          "id": "4e32c5a9-d065-4da8-9000-d91747939620",
+          "instructor_id": 8268,
+          "is_active": true,
+          "lesson_hours": 60,
+          "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+          "subject_id": "1c6d0916-c680-45a2-aa8a-fe2720be032f"
+        }
+      },
+      "roster": {
+        "count": 30,
+        "sha256": "cd203fc16bc01513a31da8bb25befd0111c90abc66956ee6c62abd9114b5054e"
+      },
+      "row_fields": {
+        "consult_hours": 0,
+        "credits": "",
+        "degree_level": "bachelor",
+        "education_form": "eyani",
+        "exam_hours": 0,
+        "groups_text": "234 KE",
+        "lab_plan": 0,
+        "lab_total": 0,
+        "lecture_plan": 0,
+        "lecture_total": 30,
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "postgrad_hours": 0,
+        "practice_production_hours": 0,
+        "practice_research_hours": 0,
+        "row_kind": "teaching",
+        "season": "fall",
+        "seminar_plan": 0,
+        "seminar_total": 30,
+        "specialty_id": "75e2c1f1-77ed-4f1c-95a3-c27dbe4b8050",
+        "student_count": 30,
+        "subgroup_count": 1,
+        "subject_text": "Verilənlər bazası sistemləri",
+        "task_id": "b27fed69-e18d-4f33-b183-f46810c13d29",
+        "thesis_hours": 0,
+        "total_hours": 60,
+        "union_count": 1
+      },
+      "row_id": "0f0d1c08-5cfc-43f1-80e7-0300d92e9275",
+      "source": {
+        "authority": "explicit_user_legacy_db_fallback_for_case_without_supplied_official_row",
+        "body_sha256": "e66bc1305130d0bcc48365192ca993cd8f436e5b4d1d31b9f0eba160ca4b04c3",
+        "chair_id": "141fb422-d679-439b-96cb-fde5324c644a",
+        "contrary_supplied_official_case_count": 0,
+        "counterevidence_proof_sha256": "c579aa02eff950548f0d23858189919f8c2f3b8bfe1f8ede3eaae925eb88e6f1",
+        "journal": {
+          "active": 1,
+          "fake": 0,
+          "fenn_saati": 60,
+          "groups_id": "[\"646\"]",
+          "id": 14733,
+          "lesson_id": 267,
+          "name": "verilənlər bazası sistemləri - (2026/2027 Payız)",
+          "semestr": 14,
+          "sillabus_id": 6138,
+          "sonra_sil": 0,
+          "teacher_id": 829,
+          "uniqid": "rqF45rhF5U"
+        },
+        "official": [],
+        "validation_only_no_copy": true
+      },
+      "subjects": {
+        "1c6d0916-c680-45a2-aa8a-fe2720be032f": {
+          "chair_unit_id": null,
+          "code": "QKU-267",
+          "id": "1c6d0916-c680-45a2-aa8a-fe2720be032f",
+          "name": "Verilənlərin bazası sistemləri"
+        },
+        "4034f137-1081-4336-ad63-5a56705075d2": {
+          "chair_unit_id": null,
+          "code": "SAYT-0014",
+          "id": "4034f137-1081-4336-ad63-5a56705075d2",
+          "name": "Verilənlər bazası sistemləri"
+        }
+      },
+      "teacher": 8268
+    }
+  ],
+  "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+  "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372"
+}
