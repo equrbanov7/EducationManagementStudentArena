@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def run_args(**changes):
+def run_args(script="master_degree_args.sh", **changes):
     env = {
         **os.environ,
         "BATCH": "",
@@ -24,7 +24,7 @@ def run_args(**changes):
             "set -euo pipefail\n"
             "superadmin_actor() { printf admin; }\n"
             "match() { [[ $1 != *$'\\n'* && $1 != *$'\\r'* ]] && printf '%s' \"$1\" | grep -Eq -- \"$2\"; }\n"
-            "source scripts/ops/master_degree_args.sh\n"
+            f"source scripts/ops/{script}\n"
             "printf '%s\\n' \"${args[@]}\"",
         ],
         cwd=ROOT,
@@ -93,3 +93,22 @@ def test_it8179_source_dispatch_requires_source_and_fresh_baseline():
     assert run(APPLY="true", ROW_SUBJECT="b" * 64).returncode == 0
     assert run(BATCH="a" * 64 + "\n").returncode != 0
     assert run(ROW_GROUP="unreviewed").returncode != 0
+
+
+def test_chair_case_selection_and_undo_remain_bounded():
+    dry = run_args("chair_contacts_args.sh", ROW_GROUP="az_morphology,tarix_europe")
+    assert dry.returncode == 0, dry.stderr
+    assert "--selection\naz_morphology,tarix_europe" in dry.stdout
+    assert run_args("chair_contacts_args.sh", APPLY="true").returncode != 0
+    assert run_args("chair_contacts_args.sh", ROW_GROUP="other_chair").returncode != 0
+    assert run_args("chair_contacts_args.sh", ROW_GROUP="tarix_region\n").returncode != 0
+    assert (
+        run_args(
+            "chair_contacts_args.sh",
+            APPLY="true",
+            BATCH="b" * 64,
+            ROW_SUBJECT="11111111-2222-3333-4444-555555555555",
+            ROW_GROUP="tarix_region",
+        ).returncode
+        == 0
+    )
