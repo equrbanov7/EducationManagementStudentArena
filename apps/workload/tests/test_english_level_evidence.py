@@ -257,6 +257,13 @@ class EnglishEvidenceBase(TransactionTestCase):
         get_user_model().objects.filter(pk=self.actor.pk).update(is_active=False)
         with self.assertRaisesRegex(SnapshotError, "active_fixed_tenant_superuser_required"):
             self.capture()
+        get_user_model().objects.filter(pk=self.actor.pk).update(is_active=True)
+        for field in ("blocked_at", "deleted_at"):
+            UserProfile.objects.filter(user=self.actor).update(**{field: timezone.now()})
+            with patch.object(export, "collect", side_effect=AssertionError("inactive_actor_must_not_collect")):
+                with self.assertRaisesRegex(SnapshotError, "active_fixed_tenant_superuser_required"):
+                    self.capture()
+            UserProfile.objects.filter(user=self.actor).update(**{field: None})
 
     def test_caps_and_changed_source_fail_without_truncation(self):
         for field in ["MAX_COURSES", "MAX_ENROLLMENTS", "MAX_PLACEMENTS"]:

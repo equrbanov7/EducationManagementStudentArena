@@ -49,6 +49,8 @@ def capture(username, path, expected):
                     is_superuser=True,
                     profile__access_state="active",
                     profile__is_deleted=False,
+                    profile__blocked_at__isnull=True,
+                    profile__deleted_at__isnull=True,
                 )
                 .values_list("pk", flat=True)
                 .first()
