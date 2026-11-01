@@ -123,7 +123,7 @@ def linked_enrollment(student, organization, offering_ids):
         offering_id__in=list(offering_ids),
         offering__organization=organization,
         status=Enrollment.Status.ENROLLED,
-    ).select_related("offering", "offering__period")
+    ).select_related("offering", "offering__period", "offering__subject")
     return pick_enrollment(candidates, offering_ids)
 
 
@@ -146,7 +146,7 @@ def resolve_enrollment(*, student, subject_id, organization, offering_ids=()):
         offering__subject_id=subject_id,
         offering__organization=organization,
         status=Enrollment.Status.ENROLLED,
-    ).select_related("offering", "offering__period")
+    ).select_related("offering", "offering__period", "offering__subject")
     return choose_enrollment(candidates, _current_period(organization), offering_ids)
 
 
@@ -183,7 +183,12 @@ def _eligibility_payload(elig):
     from django.utils.translation import pgettext
 
     reason = ""
-    if elig["barred"]:
+    if elig["barred"] and elig.get("limit_unit") == "qb_count":
+        reason = pgettext(
+            "registrar.exam_bridge",
+            "You are not admitted to the exam: %(count)s unexcused absences exceed this level's limit of %(limit)s.",
+        ) % {"count": elig["absence_count"], "limit": elig["limit_count"]}
+    elif elig["barred"]:
         reason = pgettext(
             "registrar.exam_bridge",
             "You are not admitted to the exam: %(hours)s absence hours exceed the %(limit)s%% limit for this subject.",
@@ -219,7 +224,7 @@ def _resolve_enrollments_batch(*, student, subject_ids, organization):
             offering__subject_id__in=list(subject_ids),
             offering__organization=organization,
             status=Enrollment.Status.ENROLLED,
-        ).select_related("offering", "offering__period")
+        ).select_related("offering", "offering__period", "offering__subject")
     )
     by_subject: dict = {}
     for enrollment in rows:
@@ -296,6 +301,10 @@ def exam_eligibility_batch(*, student, subject_ids, organization) -> dict:
         [oid for oid, offering in offerings.items() if not (getattr(offering, "lesson_hours", 0) or 0)]
     )
     frozen_ids = eligibility_gate.frozen_offering_ids(list(offerings))
+    from . import language_level_grading
+
+    levels = [e for e in enrollments.values() if language_level_grading.is_level(e.offering)]
+    level_metrics = language_level_grading.absence_metrics(levels) if levels else {}
     for subject_id, enrollment in enrollments.items():
         elig = services.get_exam_eligibility(
             enrollment=enrollment,
@@ -303,6 +312,8 @@ def exam_eligibility_batch(*, student, subject_ids, organization) -> dict:
             exempt=exempt_by_key.get((enrollment.organization_id, enrollment.student_id), False),
             frozen=enrollment.offering_id in frozen_ids,
             hours_map=hours_map,
+            absence_count=level_metrics.get(enrollment.pk, {}).get("count"),
+            absence_hours=level_metrics.get(enrollment.pk, {}).get("hours"),
         )
         result[subject_id] = _eligibility_payload(elig)
     return result
