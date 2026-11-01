@@ -21,8 +21,3 @@ def predecessors():
 
 def annotate_predecessor(queryset):
     return queryset.annotate(has_exact_predecessor=Exists(predecessors().filter(superseded_by_id=OuterRef("pk"))))
-
-
-def has_predecessor(enrollment):
-    cached = getattr(enrollment, "has_exact_predecessor", None)
-    return cached if cached is not None else predecessors().filter(superseded_by_id=enrollment.pk).exists()

@@ -430,9 +430,9 @@ def carried_absence_hours(enrollment) -> int:
     HƏR işarə yazılışında (``recompute_absence_hours``) çağırılır, bal isə
     yalnız görünüş üçündür.
     """
-    from .enrollment_history import has_predecessor
-
-    if not has_predecessor(enrollment):
+    # A known empty roster annotation is free; otherwise the strict carry
+    # query validates and loads predecessors without a redundant EXISTS probe.
+    if getattr(enrollment, "has_exact_predecessor", None) is False:
         return 0
     summary = carry_over_map([enrollment.pk], with_entry_score=False).get(enrollment.pk)
     return int(summary["absence_hours"]) if summary else 0
