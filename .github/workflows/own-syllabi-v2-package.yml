@@ -1,0 +1,55 @@
+name: Fixed own-source syllabi V2 department evidence package
+on:
+  workflow_dispatch:
+    inputs:
+      actor:
+        description: "Aktiv təşkilat superadmini; sabit iki sillabus"
+        type: string
+        required: true
+      apply:
+        description: "Təzə daxili dry-run-dan sonra sabit iki mənbəni tətbiq et"
+        type: boolean
+        default: false
+      confirm:
+        description: "Yazı üçün APPLY; nəticə ayrıca offline yoxlama gözləyir"
+        type: string
+        default: ""
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  package:
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Capture prechecks, fixed dry/apply/repeat and postchecks under one lock
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
+        run: python3 scripts/ops/own_syllabi_package.py
+      - name: Approve only chained manifests and verified encrypted capsules
+        id: finalize
+        if: always()
+        run: python3 scripts/ops/own_syllabi_package.py --finalize
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always() && steps.finalize.outputs.artifact_ready == 'true'
+        with:
+          name: own-syllabi-v2-package-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/own-syllabi-package-${{ github.run_id }}-${{ github.run_attempt }}/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+      - name: Remove all private source and temporary encrypted files
+        if: always()
+        run: |
+          set -euo pipefail
+          docker exec educationmanagementstudentarena-app-1 rm -rf -- "/tmp/wcu-blank-draft-syllabus-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" || true
+          rm -rf -- "$RUNNER_TEMP/own-syllabi-package-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            "$RUNNER_TEMP/own-syllabi-package-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-private" \
+            "$RUNNER_TEMP/own-syllabi-package-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-quarantine"
