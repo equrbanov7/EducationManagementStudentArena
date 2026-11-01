@@ -123,6 +123,33 @@ class BlankDraftWorkflowTests(unittest.TestCase):
             self.assertNotIn("--file", call)
             self.assertNotIn("--sha256", call)
 
+    def test_release_download_failure_cleans_private_folder_before_any_source_command(self):
+        with tempfile.TemporaryDirectory() as folder:
+            env = {
+                "GITHUB_RUN_ID": "1",
+                "GITHUB_RUN_ATTEMPT": "1",
+                "GITHUB_SHA": "a" * 40,
+                "RUNNER_TEMP": folder,
+                "GH_TOKEN": "synthetic_token",
+            }
+            with patch.object(runner, "verify_head"), patch.object(runner, "command") as command:
+                with (
+                    patch.object(runner, "source_command") as source,
+                    patch.object(runner, "download", side_effect=ValueError("release_access_denied")) as download,
+                ):
+                    with self.assertRaisesRegex(ValueError, "^release_access_denied$"):
+                        runner.execute({"actor": "x"}, env)
+                    source.assert_not_called()
+                    kwargs = download.call_args.kwargs
+                    self.assertEqual(
+                        (kwargs["repo"], kwargs["tag"], kwargs["asset"], kwargs["sha256"]),
+                        (runner.REPO, runner.TAG, runner.ASSET, runner.CIPHER_SHA),
+                    )
+                    self.assertEqual(kwargs["token"], "synthetic_token")
+            self.assertFalse((Path(folder) / "blank-draft-syllabus-1-1").exists())
+            self.assertEqual(command.call_count, 1)
+            self.assertEqual(command.call_args.args[0][-2:], ["--", "/tmp/wcu-blank-draft-syllabus-1-1"])
+
     def test_workflow_has_no_arbitrary_source_or_scope_and_always_cleans(self):
         value = yaml.safe_load((ROOT / ".github/workflows/reviewed-blank-draft-syllabus.yml").read_bytes())
         event = value.get("on", value.get(True))

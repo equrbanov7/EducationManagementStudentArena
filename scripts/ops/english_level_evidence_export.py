@@ -10,6 +10,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from english_level_evidence_scope import contract
+from fixed_release_asset import download
 from four_cell_history_export import diagnostics
 from journal_export_pack import envelope_digest, sha
 from reviewed_followup import CONTAINER, PUBLIC_PEM_SHA, ROOT, command, verify_head
@@ -79,8 +80,15 @@ def private_regular(path, cap):
 
 
 def decrypt_source(folder, env):
-    command(["gh", "release", "download", TAG, "--repo", REPO, "--pattern", ASSET, "--dir", str(folder)])
-    cipher = folder / ASSET
+    cipher = download(
+        repo=REPO,
+        tag=TAG,
+        asset=ASSET,
+        target=folder / ASSET,
+        sha256=CIPHER_SHA,
+        max_bytes=MAX_SOURCE,
+        token=env.get("GH_TOKEN"),
+    )
     private_regular(cipher, MAX_SOURCE)
     if sha(cipher.read_bytes()) != CIPHER_SHA:
         raise ValueError("fixed_english_cipher_changed")

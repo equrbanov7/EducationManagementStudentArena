@@ -8,6 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from fixed_release_asset import download
 from four_cell_history_export import diagnostics
 from journal_export_pack import sha
 from reviewed_followup import CONTAINER, command, verify_head
@@ -100,8 +101,15 @@ def summary(raw, *, apply, undo):
 
 
 def source(folder, env):
-    command(["gh", "release", "download", TAG, "--repo", REPO, "--pattern", ASSET, "--dir", str(folder)])
-    cipher = folder / ASSET
+    cipher = download(
+        repo=REPO,
+        tag=TAG,
+        asset=ASSET,
+        target=folder / ASSET,
+        sha256=CIPHER_SHA,
+        max_bytes=MAX_SOURCE,
+        token=env.get("GH_TOKEN"),
+    )
     if cipher.is_symlink() or not cipher.is_file() or not 0 < cipher.stat().st_size <= MAX_SOURCE:
         raise ValueError("fixed_syllabus_cipher_required")
     if sha(cipher.read_bytes()) != CIPHER_SHA or not env.get("STAFF_PLAN_KEY"):

@@ -37,7 +37,10 @@ class FixedEnglishTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             target = Path(folder)
             (target / runner.ASSET).write_bytes(b"not the reviewed ciphertext")
-            with patch.object(runner, "command"), patch.object(runner.subprocess, "run") as decrypt:
+            with (
+                patch.object(runner, "download", return_value=target / runner.ASSET),
+                patch.object(runner.subprocess, "run") as decrypt,
+            ):
                 with self.assertRaisesRegex(ValueError, "cipher_changed"):
                     runner.decrypt_source(target, {"STAFF_PLAN_KEY": "not-real"})
                 decrypt.assert_not_called()
@@ -55,7 +58,10 @@ class FixedEnglishTests(unittest.TestCase):
                 Path(argv[argv.index("-out") + 1]).write_bytes(b"changed source")
                 return SimpleNamespace(returncode=0)
 
-            with patch.object(runner, "command"), patch.object(runner, "CIPHER_SHA", runner.sha(cipher)):
+            with (
+                patch.object(runner, "download", return_value=target / runner.ASSET),
+                patch.object(runner, "CIPHER_SHA", runner.sha(cipher)),
+            ):
                 with patch.object(runner.subprocess, "run", side_effect=openssl):
                     with self.assertRaisesRegex(ValueError, "plaintext_changed"):
                         runner.decrypt_source(target, {"STAFF_PLAN_KEY": "not-real-secret"})

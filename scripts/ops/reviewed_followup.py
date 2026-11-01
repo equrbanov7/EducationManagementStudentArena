@@ -72,6 +72,8 @@ def _syllabus_diagnostic(exc, output=""):
 def command(argv, timeout=180):
     try:
         result = subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
+    except FileNotFoundError:
+        raise ValueError("followup_executable_missing") from None
     except Exception as exc:
         if argv[:6] == ["docker", "exec", CONTAINER, "python", "manage.py", "export_wcu_syllabus_content"]:
             _syllabus_diagnostic(exc)
