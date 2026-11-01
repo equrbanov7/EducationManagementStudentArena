@@ -26,7 +26,7 @@
                     </tr></thead>
                     <tbody>{% for row in rows %}<tr class="jd2-row">
                         <th scope="row" class="jd2-td-student joint-student-col">
-                            <div class="jd2-stu-inner"><span class="jd2-stu-no">{{ forloop.counter }}</span><div class="joint-student-identity"><span class="jd2-stu-name">{{ row.student|journal_name }}</span><span class="joint-student-group">{{ row.group.name }}</span>{% if row.home_group and row.home_group.pk != row.group.pk %}<span class="joint-home-group">{{ row.home_group.name }}</span>{% endif %}</div></div>
+                            <div class="jd2-stu-inner"><span class="jd2-stu-no">{{ forloop.counter }}</span><div class="joint-student-identity"><span class="jd2-stu-name">{{ row.student|journal_name }}</span><span class="joint-student-group" title="{% trans 'Əsas qrup' context 'registrar.language_cohort' %}">{{ row.home_group.name|default:"—" }}</span>{% if row.home_group.pk != row.group.pk %}<span class="joint-home-group">{% trans "Jurnal qrupu" context "registrar.language_cohort" %}: {{ row.group.name }}</span>{% endif %}</div></div>
                         </th>
                         {% for cell in row.cells %}<td class="joint-cell{% if cell.mark.status == 'absent' %} is-absent{% endif %}"{% if not cell %} aria-label="Bu qrup üçün həmin tarixdə ayrıca dərs qeydi yoxdur"{% endif %}>
                             {% if cell %}{% if cell.writable %}

@@ -62,5 +62,15 @@ class JournalHomeGroupTests(_GuestRosterBase):
                 "columns": [],
             },
         )
-        self.assertIn(f"<td>{self.group2.name}</td>", html)
-        self.assertNotIn(f"<td>{self.group1.name}</td>", html)
+        self.assertInHTML(f'<span class="joint-student-group" title="Əsas qrup">{self.group2.name}</span>', html)
+        self.assertNotInHTML(f'<span class="joint-student-group" title="Əsas qrup">{self.group1.name}</span>', html)
+        self.assertInHTML(f'<span class="joint-home-group">Jurnal qrupu: {self.group1.name}</span>', html)
+
+    def test_joint_template_unknown_home_never_claims_physical_cohort_as_home(self):
+        html = render_to_string(
+            "registrar/joint_journal.html",
+            {"rows": [{"group": self.group1, "home_group": None, "student": self.guest, "cells": []}], "columns": []},
+        )
+        self.assertInHTML('<span class="joint-student-group" title="Əsas qrup">—</span>', html)
+        self.assertNotInHTML(f'<span class="joint-student-group" title="Əsas qrup">{self.group1.name}</span>', html)
+        self.assertInHTML(f'<span class="joint-home-group">Jurnal qrupu: {self.group1.name}</span>', html)
