@@ -3,6 +3,7 @@
 from unittest.mock import patch
 
 from django.apps import apps
+from django.db import connection
 from django.test import TestCase
 
 from apps.workload.services import reviewed_leyla_catalog_repair as repair
@@ -30,6 +31,7 @@ class RetainedExamTests(TestCase):
         Through = self.exam.journal_offerings.through
         for pk, offering in zip((64, 65), self.empty[1:]):
             Through.objects.create(pk=pk, exam=self.exam, courseoffering=offering)
+        self._advance_sequences_past_pinned_ids(self.exam._meta.db_table, Through._meta.db_table)
         student = apps.get_model("registrar", "Enrollment").objects.filter(offering=self.filled[1]).first().student
         self.attempt = apps.get_model("exams", "ExamAttempt").objects.create(
             exam=self.exam,
@@ -53,6 +55,19 @@ class RetainedExamTests(TestCase):
             pairs={str(a.pk): str(b.pk) for a, b in zip(self.empty[1:], self.filled[1:])},
         )
         self.patches.enter_context(patch.object(retained, "PIN", pin))
+
+    @staticmethod
+    def _advance_sequences_past_pinned_ids(*tables):
+        """Sabit ID-lər (92, 64, 65) serial ardıcıllığı irəli çəkmir: eyni DB-də əvvəlki testlər
+        91 imtahan yaradıbsa, növbəti avtomatik ID 92 olur və `exams_exam_pkey` toqquşur
+        (CI shard tərkibinə görə təsadüfi düşürdü, 2026-11-01). Ardıcıllığı MAX(id)-ə qaldırırıq."""
+        with connection.cursor() as cursor:
+            for table in tables:
+                quoted = connection.ops.quote_name(table)
+                cursor.execute(
+                    f"SELECT setval(pg_get_serial_sequence(%s, 'id'), GREATEST((SELECT MAX(id) FROM {quoted}), 1))",
+                    [table],
+                )
 
     def test_retained_exact_exam_graph_apply_repeat_and_undo_are_load_only(self):
         before = state.snapshot(self.org)
