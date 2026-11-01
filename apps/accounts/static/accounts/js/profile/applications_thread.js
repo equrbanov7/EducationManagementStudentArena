@@ -327,7 +327,9 @@
                 '<div class="apx-act__hint" data-apx-reply-hint>' +
                 NS.esc(NS.t("replyHint", { n: (NS.rules && NS.rules.note) || 10 })) + "</div>";
         }
-        return html + "</div>";
+        html += "</div>";
+        return inline.length ? '<details class="apx-composer"><summary>' +
+            NS.esc(NS.t("replyLabel")) + '</summary>' + html + '</details>' : html;
     }
 
     /* ── Modalın tam markup-u ───────────────────────────────────────────── */
@@ -359,8 +361,8 @@
         var files = app.attachments || [];
         return (
             headHtml(app) +
-            (NS.contentButtons ? NS.contentButtons(app) : "") +
             '<div class="apx-modal__body" data-apx-modal-body>' +
+            (NS.contentButtons ? NS.contentButtons(app) : "") +
             threadHtml(app) +
             (files.length
                 ? '<div class="apx-modal__files"><div class="apx-label">' + NS.esc(NS.t("secFiles")) + "</div>" +

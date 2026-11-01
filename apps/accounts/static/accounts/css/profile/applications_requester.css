@@ -1,8 +1,10 @@
-.apx-person { display: inline-grid; gap: .2rem; min-width: 0; max-width: 100%; text-align: start; line-height: 1.45; }
+.apx-person { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: .15rem .55rem; min-width: 0; max-width: 100%; text-align: start; line-height: 1.4; }
 .apx-person__name, .apx-person__line { overflow-wrap: anywhere; white-space: normal; }
 .apx-person__name { color: var(--text-primary, #17213b); font-weight: 650; }
 .apx-person__line { color: var(--text-secondary, #52627c); font-size: .85rem; }
-.apx-row__meta > span:first-child, .apx-modal__from > span:first-child { min-width: 0; flex: 1 1 100%; }
+.apx-person__units { flex-basis: 100%; }
+.apx-row__meta > span:first-child { min-width: 0; flex: 1 1 100%; }
+.apx-modal__from > span:first-child { min-width: 0; flex: 1 1 24rem; }
 .apx-msg__role { overflow-wrap: anywhere; white-space: normal; }
 @media (max-width: 640px) {
  .apx-row__meta { flex-wrap: wrap; gap: .4rem; }

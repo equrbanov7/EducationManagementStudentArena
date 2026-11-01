@@ -8,6 +8,7 @@
         if (actions.can_edit) { buttons.push('<button type="button" class="apx-btn" data-apx-edit-application>' + NS.esc(NS.t("editApplication")) + '</button>'); }
         if (actions.can_delete) { buttons.push('<button type="button" class="apx-btn apx-btn--danger" data-apx-delete-application>' + NS.esc(NS.t("deleteApplication")) + '</button>'); }
         if (actions.can_restore) { buttons.push('<button type="button" class="apx-btn apx-btn--primary" data-apx-restore-application>' + NS.esc(NS.t("restoreApplication")) + '</button>'); }
+        if (!buttons.length && !app.deleted_at && !app.edited_at) { return ""; }
         return '<div class="apx-content-tools">' +
             (app.deleted_at ? '<p role="status">' + NS.esc(NS.t("deletedBanner")) + '</p>' : '') +
             (app.edited_at ? '<small>' + NS.esc(NS.t("edited")) + ' · ' + NS.esc(NS.dateTime(app.edited_at)) + '</small>' : '') +
