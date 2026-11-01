@@ -111,7 +111,7 @@ def _target_index(offering_ids) -> dict:
 
 
 def _pick_target(day_lessons, source):
-    exact = [lesson for lesson in day_lessons if lesson.start_time == source.start_time]
+    exact = [lesson for lesson in day_lessons if lesson.start_time == source.start_time and lesson.kind == source.kind]
     if len(exact) == 1:
         return exact[0], ""
     if exact:
