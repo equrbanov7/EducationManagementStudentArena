@@ -366,12 +366,19 @@ def carry_over_map(target_ids, *, with_entry_score: bool = True) -> dict:
 
 def _level_source_inputs(predecessors):
     """Prepared level inputs keep carry-over summaries independent of roster size."""
-    from . import language_level_grading
+    from . import entry_standard, exam_bridge, exam_eligibility, language_level_grading
 
     levels = [source for source in predecessors if language_level_grading.is_level(source.offering)]
     if not levels:
         return {}
     metrics = language_level_grading.absence_metrics(levels)
+    # Below the count limit athlete status cannot affect the derived score.
+    # Above it preserve the canonical first-SAR exemption in one batch.
+    above_limit = [source for source in levels if metrics[source.pk]["count"] > language_level_grading.ABSENCE_LIMIT]
+    exempt = exam_bridge._athlete_exemption_map(above_limit)
+    hours = exam_eligibility.lesson_hours_map(
+        [source.offering_id for source in levels if not source.offering.lesson_hours]
+    )
     scores = {}
     for row in ComponentScore.objects.filter(enrollment_id__in=[source.pk for source in levels]):
         scores.setdefault(row.enrollment_id, []).append(row)
@@ -380,6 +387,11 @@ def _level_source_inputs(predecessors):
             "absence_count": metrics[source.pk]["count"],
             "absence_hours": metrics[source.pk]["hours"],
             "component_scores": scores.get(source.pk, []),
+            "rule": entry_standard.EntryRule(
+                midterm=False,
+                lesson_hours=source.offering.lesson_hours or hours.get(source.offering_id, 0),
+                exempt=exempt.get((source.organization_id, source.student_id), False),
+            ),
         }
         for source in levels
     }
