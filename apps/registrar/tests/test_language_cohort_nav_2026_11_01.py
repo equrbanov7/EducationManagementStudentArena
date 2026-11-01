@@ -130,7 +130,8 @@ class LanguageCohortNavTests(_GuestRosterBase):
 
     def _add_plain_journals(self, count):
         with bypass_rls():
-            for index in range(count):
+            for _ in range(count):
+                index = Subject.objects.filter(organization=self.org, code__startswith="PLN").count()
                 subject = Subject.objects.create(
                     organization=self.org, code=f"PLN{index:03d}", name=f"Adi fənn {index}"
                 )
@@ -146,6 +147,8 @@ class LanguageCohortNavTests(_GuestRosterBase):
         client = self._client(self.coordinator)
         url = reverse("registrar:language_cohorts")
         self._add_plain_journals(3)
+        # İlk sorğu birdəfəlik işləri (sessiya, ContentType keşi) görür — ölçmədən əvvəl isinmə.
+        self.assertEqual(client.get(url).status_code, 200)
         with CaptureQueriesContext(connection) as small:
             self.assertEqual(client.get(url).status_code, 200)
         self._add_plain_journals(20)
