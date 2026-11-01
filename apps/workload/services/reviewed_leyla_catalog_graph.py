@@ -42,7 +42,7 @@ def bounded(query, *, cap=LIMIT, lock=True):
     return rows
 
 
-def graph(organization_id, roots):
+def graph(organization_id, roots, *, lock=True):
     pending = {label: set(map(str, ids)) for label, ids in roots.items()}
     seen, result = {}, {}
     while pending:
@@ -51,7 +51,7 @@ def graph(organization_id, roots):
         if not ids:
             continue
         cls = model(label)
-        rows = bounded(cls._base_manager.filter(pk__in=ids))
+        rows = bounded(cls._base_manager.filter(pk__in=ids), lock=lock)
         require(
             all(str(r.get("organization_id", organization_id)) == organization_id for r in rows),
             "leyla_reverse_graph_tenant_changed",

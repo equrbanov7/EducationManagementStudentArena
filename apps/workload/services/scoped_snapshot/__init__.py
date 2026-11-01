@@ -19,6 +19,7 @@ from core.rls import apply_rls_request_context
 
 from .data import ORG, YEAR, collect
 from .journal_diagnostics import collect_journal_diagnostics
+from .leyla_references import collect_leyla_references
 from .request_content import collect_request_content
 from .request_syllabus import collect_request_syllabus
 
@@ -52,6 +53,7 @@ def capture(username):
         data["journal_access_diagnostics"] = collect_journal_diagnostics(data)
         data.update(collect_request_content())
         data.update(collect_request_syllabus())
+        data.update(collect_leyla_references())
         if not data["tasks"]:
             raise SnapshotError("fixed_org_tasks_missing")
         with connection.cursor() as cursor:

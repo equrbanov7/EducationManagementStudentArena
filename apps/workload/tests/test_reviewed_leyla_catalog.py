@@ -493,6 +493,77 @@ class ReviewedLeylaCatalogTests(TestCase):
         with self.assertRaisesRegex(RepairError, "named_enrollment_content"):
             self.run_repair()
 
+    def test_readonly_diagnostics_expose_exact_zero_content_hold_without_values(self):
+        from apps.workload.services.scoped_snapshot.leyla_references import collect_leyla_references
+
+        component = AssessmentComponent.objects.create(organization=self.org, offering=self.empty[0], name="New exam")
+        score = ComponentScore.objects.create(
+            organization=self.org,
+            component=component,
+            enrollment=Enrollment.objects.filter(offering=self.empty[0]).first(),
+            score=0,
+        )
+        before = self.rows[0].subject_id
+        result = collect_leyla_references()
+        models = {item["model"]: item for item in result["leyla_reference_graph"]}
+        scores = models["registrar.ComponentScore"]
+        exported = next(row for row in scores["rows"] if row["pk"] == str(score.pk))
+        self.assertTrue(exported["named_enrollment_content_hold"])
+        self.assertNotIn("score", exported)
+        self.assertEqual(
+            exported["row_sha256"], digest(normal(ComponentScore.objects.filter(pk=score.pk).values().get()))
+        )
+        self.rows[0].refresh_from_db()
+        self.assertEqual(before, self.rows[0].subject_id)
+        with self.assertRaisesRegex(RepairError, "named_enrollment_content"):
+            self.run_repair()
+
+    def test_readonly_diagnostics_keep_human_draft_text_private_and_all_versions_visible(self):
+        from apps.workload.services.scoped_snapshot.leyla_references import collect_leyla_references
+
+        syl, approved = import_migrated_version(
+            organization=self.org,
+            subject=self.empty[0].subject,
+            offering=self.empty[0],
+            period=self.period,
+            author=self.teacher,
+            approved_at=timezone.now(),
+            section_data={"desc": {"description": "PRIVATE_APPROVED_TEXT"}},
+        )
+        Version = apps.get_model("syllabus.SyllabusVersion")
+        draft = Version.objects.create(
+            organization=self.org, syllabus=syl, major=1, minor=1, status="draft", created_by=self.teacher
+        )
+        apps.get_model("syllabus.SyllabusSection").objects.create(
+            organization=self.org, version=draft, section_id="desc", data={"description": "PRIVATE_HUMAN_DRAFT"}
+        )
+        result = collect_leyla_references()
+        models = {item["model"]: item for item in result["leyla_reference_graph"]}
+        named = next(row for row in models["syllabus.Syllabus"]["rows"] if row["pk"] == str(syl.pk))
+        self.assertTrue(named["named_reference_hold"])
+        versions = {row["pk"]: row for row in models["syllabus.SyllabusVersion"]["rows"]}
+        self.assertIn(str(approved.pk), versions)
+        self.assertEqual(versions[str(draft.pk)]["lifecycle"]["status"], "draft")
+        self.assertNotIn("PRIVATE_HUMAN_DRAFT", str(result))
+        self.assertNotIn("PRIVATE_APPROVED_TEXT", str(result))
+        self.assertTrue(Version.objects.filter(pk=draft.pk, status="draft").exists())
+
+    def test_readonly_diagnostics_declare_hidden_relations_without_for_update(self):
+        from apps.workload.services.scoped_snapshot.leyla_references import collect_leyla_references
+
+        with connection.execute_wrapper(
+            lambda execute, sql, params, many, context: (
+                self.assertNotIn("FOR UPDATE", sql.upper()),
+                execute(sql, params, many, context),
+            )[1]
+        ):
+            result = collect_leyla_references()
+        offering = next(item for item in result["leyla_reference_graph"] if item["model"] == "registrar.CourseOffering")
+        relations = offering["reverse_relations"]
+        self.assertTrue(any(item["hidden"] and item["child"] == "exams.Exam_journal_offerings" for item in relations))
+        self.assertEqual(offering["count"], 6)
+        self.assertEqual(len(result["leyla_subject_cohorts"]), 6)
+
     def test_new_canonical_teacher_workload_authority_is_not_overwritten(self):
         row = make_row(self.task, self.stacks[0])
         row.subject = self.old_subjects[0]

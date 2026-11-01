@@ -35,6 +35,17 @@ Mənalı/qaralama və ya təsdiqlənmiş Named sillabus, Named imtahan/qiymət0,
 başqa cari tədris yükü və fərqli canonical cədvəl explicit-review HOLD yaradır.
 Hazırkı versiya belə Named məzmunu qəbul etmir və təsdiqləmir.
 
+Standart `export_wcu_workload_snapshot` şifrəli, `REPEATABLE READ READ ONLY`
+ixracında `leyla_reference_graph` altı sabit jurnalın, iki yük sətrinin və
+dəqiq müəllim/fənn/semestr sillabuslarının tam reverse closure-unu verir.
+Hidden M2M cədvəlləri və modelin bütün elan edilmiş reverse əlaqələri daxildir.
+Hər model üçün say və tam-sətir SHA256, hər sətir üçün PK, FK-lər, lifecycle
+statusu və SHA256 çıxır; qiymət və sillabus mətni çıxmır. `named_reference_hold`
+və `named_enrollment_content_hold` bütün uyğun sətirlərdə birlikdə göstərilir.
+`leyla_subject_cohorts` eyni müəllim/semestrin dörd dəqiq fənn üzrə cari jurnal
+bağlarını verir. Bu diaqnostika writer qoruyucularını keçmir və yeni tətbiq
+icazəsi sayılmır; məlum olmayan əlaqə ayrıca məzmun baxışı tələb edir.
+
 Canlı dry əməliyyat bütün `_base_manager` və hidden M2M reverse əlaqələrini
 sərhədli şəkildə kilidləyib hash edir. User/tenant, silinmə/bloklama bayraqları,
 mövcud mərkəzi müəllim icazəsi, immutable worker863/source fənn/qrup xəritələri,
