@@ -48,6 +48,8 @@ INTENTIONAL_EXEMPTIONS = {
     # DB-enforced write rejection and non-bypass FORCE-RLS are regression-tested in
     # apps/workload/tests/test_scoped_snapshot.py; see docs/operations/WCU_WORKLOAD_SNAPSHOT.md.
     "apps/workload/management/commands/export_wcu_workload_snapshot.py",
+    # Same fresh READ ONLY transaction requirement; explicit export schema and RLS tests.
+    "apps/workload/management/commands/export_wcu_journal_cells.py",
     # ExamSupervisionConsumer yalnız channel-layer group send/discard edir;
     # `scope["user"]` və feature-flag settings oxuyur; DB sorğusu yoxdur.
     "apps/exams/consumers.py",

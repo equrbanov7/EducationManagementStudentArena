@@ -49,11 +49,21 @@ def decrypt_snapshot(encoded, private_key_bytes):
     )
     payload = json.loads(plaintext)
     if (
-        payload.get("format") != "wcu-workload-snapshot/1"
+        payload.get("format") not in {"wcu-workload-snapshot/1", "wcu-journal-cells/1"}
         or payload.get("organization_id") != ORG
         or payload.get("academic_year") != "2026/2027"
     ):
         raise ValueError("snapshot_scope_invalid")
+    if payload["format"] == "wcu-journal-cells/1":
+        # Script invocation and importlib-based local consumers both remain supported.
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location(
+            "journal_cells_scope", Path(__file__).with_name("journal_cells_scope.py")
+        )
+        validator = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(validator)
+        validator.validate(payload)
     return payload
 
 
@@ -62,7 +72,8 @@ def write_new_snapshot(payload, directory):
     if not directory.is_dir():
         raise ValueError("existing_private_output_directory_required")
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    output = directory / f"wcu-workload-{stamp}-{uuid.uuid4().hex[:12]}.json"
+    prefix = "wcu-journal-cells" if payload.get("format") == "wcu-journal-cells/1" else "wcu-workload"
+    output = directory / f"{prefix}-{stamp}-{uuid.uuid4().hex[:12]}.json"
     with os.fdopen(os.open(output, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "w") as stream:
         json.dump(payload, stream, ensure_ascii=False, indent=2)
     return output
