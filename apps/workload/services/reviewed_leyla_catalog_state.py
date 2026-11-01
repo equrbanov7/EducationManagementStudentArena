@@ -276,8 +276,13 @@ def _academic(org, offerings):
             if f.is_relation and f.related_model == model("registrar.CourseOffering")
         ]
         if label not in allowed:
+            from .reviewed_leyla_retained_exam import allowed_reference
+
             require(
-                not any(any(r.get(f) in spec.EMPTY for f in offering_fields) for r in values),
+                all(
+                    not any(r.get(f) in spec.EMPTY for f in offering_fields) or allowed_reference(label, r, result)
+                    for r in values
+                ),
                 "leyla_named_reference_requires_review",
             )
         require(
