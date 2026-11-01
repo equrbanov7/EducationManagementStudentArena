@@ -246,7 +246,7 @@ def _load_enrollments(organization, enrollment_qs):
     """Enrollment-ləri YÜNGÜL çəkir — obyekt sayı ~4× azalır.
 
     ``_evaluate`` enrollment-dən yalnız ``id``, ``student_id``, ``absence_hours``
-    və açılışın ``id`` / ``lesson_hours`` / ``subject.ects`` sahələrini oxuyur.
+    və açılışın ``id`` / ``lesson_hours`` / ``subject.ects/name`` sahələrini oxuyur.
     Ona görə enrollment-lər ``.only(...)`` ilə çəkilir, açılışlar isə bir dəfə
     lüğətə yığılıb FK-ya mənimsədilir: ``e.offering = obj`` FK keşini doldurur,
     yəni ``e.offering.subject.ects`` sonradan ƏLAVƏ SORĞU vermir. Obyektlər real
@@ -255,7 +255,7 @@ def _load_enrollments(organization, enrollment_qs):
         o.id: o
         for o in CourseOffering.objects.filter(id__in=enrollment_qs.order_by().values("offering_id"))
         .select_related("subject")
-        .only("id", "lesson_hours", "subject__ects", "period")
+        .only("id", "lesson_hours", "subject__ects", "subject__name", "period")
     }
     enrollments = list(enrollment_qs.only("id", "student_id", "offering_id", "absence_hours"))
     for enrollment in enrollments:
