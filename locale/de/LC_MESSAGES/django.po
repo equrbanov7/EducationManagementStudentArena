@@ -113145,3 +113145,12 @@ msgid "Əvvəlki xam bal saxlanılır; hesablamada ən çox 10 bal nəzərə al�
 msgstr ""
 "Die ursprünglich eingegebene Punktzahl bleibt erhalten; bei der Berechnung "
 "zählen höchstens 10 Punkte."
+
+#: apps/registrar/exam_bridge.py:190
+msgctxt "registrar.exam_bridge"
+msgid ""
+"You are not admitted to the exam: %(count)s unexcused absences exceed this "
+"level's limit of %(limit)s."
+msgstr ""
+"Sie sind nicht zur Prüfung zugelassen: %(count)s unentschuldigte Fehltermine"
+" überschreiten die Grenze von %(limit)s für diese Stufe."

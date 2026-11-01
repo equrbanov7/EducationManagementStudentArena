@@ -111474,3 +111474,12 @@ msgid "Əvvəlki xam bal saxlanılır; hesablamada ən çox 10 bal nəzərə al�
 msgstr ""
 "Önceden girilmiş asıl puan saklanır; hesaplamada en fazla 10 puan dikkate "
 "alınır."
+
+#: apps/registrar/exam_bridge.py:190
+msgctxt "registrar.exam_bridge"
+msgid ""
+"You are not admitted to the exam: %(count)s unexcused absences exceed this "
+"level's limit of %(limit)s."
+msgstr ""
+"Sınava kabul edilmiyorsunuz: %(count)s mazeretsiz devamsızlık, bu seviyenin "
+"%(limit)s devamsızlık sınırını aşıyor."

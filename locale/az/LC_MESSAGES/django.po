@@ -111574,3 +111574,12 @@ msgstr ""
 msgctxt "registrar.language_cohort"
 msgid "Əvvəlki xam bal saxlanılır; hesablamada ən çox 10 bal nəzərə alınır."
 msgstr "Əvvəlki xam bal saxlanılır; hesablamada ən çox 10 bal nəzərə alınır."
+
+#: apps/registrar/exam_bridge.py:190
+msgctxt "registrar.exam_bridge"
+msgid ""
+"You are not admitted to the exam: %(count)s unexcused absences exceed this "
+"level's limit of %(limit)s."
+msgstr ""
+"İmtahana buraxılmırsınız: %(count)s üzrsüz qayıb bu səviyyənin %(limit)s q/b"
+" həddini keçir."

@@ -112283,3 +112283,12 @@ msgid "Əvvəlki xam bal saxlanılır; hesablamada ən çox 10 bal nəzərə al�
 msgstr ""
 "Сохраняется исходный введённый балл; в расчёте учитывается не более 10 "
 "баллов."
+
+#: apps/registrar/exam_bridge.py:190
+msgctxt "registrar.exam_bridge"
+msgid ""
+"You are not admitted to the exam: %(count)s unexcused absences exceed this "
+"level's limit of %(limit)s."
+msgstr ""
+"Вы не допущены к экзамену: число пропусков без уважительной причины "
+"(%(count)s) превышает предел для этого уровня (%(limit)s)."
