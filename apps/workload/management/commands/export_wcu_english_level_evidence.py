@@ -1,7 +1,5 @@
 """Fixed English-level metadata/identity evidence, read-only and ciphertext-only."""
 
-import re
-
 from django.core.management.base import BaseCommand, CommandError
 
 from apps.workload.services.english_level_evidence import capture, save_encrypted
@@ -22,8 +20,7 @@ class Command(BaseCommand):
             sha = save_encrypted(snapshot, options["public_key"], options["output"])
         except SnapshotError as exc:
             self.stderr.write("english_level_diagnostic: " + render(describe(exc, stage)))
-            code = str(exc)
-            raise CommandError(code if re.fullmatch(r"[a-z_]+", code) else "english_level_evidence_refused") from None
+            raise CommandError("english_level_evidence_refused") from None
         except Exception as exc:
             self.stderr.write("english_level_diagnostic: " + render(describe(exc, stage)))
             raise CommandError("english_level_evidence_refused") from None
