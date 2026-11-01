@@ -216,6 +216,7 @@ GUARDS |= {
 PREFIXES = {
     "four_cell_history_diagnostic",
     "syllabus_content_diagnostic",
+    "syllabus_lineage_diagnostic",
     "reviewed_source28_diagnostic",
     "english_level_diagnostic",
     "blank_draft_syllabus_diagnostic",
