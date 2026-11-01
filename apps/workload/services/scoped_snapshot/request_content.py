@@ -81,6 +81,20 @@ OFFERINGS += (
 OFFERINGS += ("e70d2eab-b4ea-428d-97e3-3d94bb2501d6", "b2559db4-9d18-4f4c-bdab-eac80d2d391d")
 
 
+# Four reviewed own-source syllabus identities and exact raw-subject counterparts.
+# Read-only evidence before any course correction; preserve the other teacher's new records.
+OFFERINGS += (
+    "1911c5cc-dae5-4e13-ba7d-9784fcc28dd0",
+    "2778bb99-6c4a-4ca3-968b-69591771f417",
+    "61eca9fe-1a06-47f9-b8a1-f3f1d1494720",
+    "77c72001-183b-4874-b6d4-333cbb4b3230",
+    "892571e3-7270-4ee3-b580-831731901e9c",
+    "9aa8baec-2e45-4aa8-b453-38981b1f0a1d",
+    "e8df0411-fc94-4e0f-a945-73b983d949c9",
+    "f4380572-e795-46c2-b6d9-3af6a1160999",
+)
+
+
 def collect_request_content():
     """Called only inside the parent repeatable-read read-only RLS transaction.
 
